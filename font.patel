@@ -1,0 +1,650 @@
+define font [require './empty.json']
+define bezierCubic2Q2 [require 'node-sfnt/lib/math/bezierCubic2Q2']
+define glyphList font.glyf
+define glyphs (.'.notdef' glyphList.0)
+define Bezier [require 'bezier-js']
+define Smooth [require './smooth.js'].Smooth
+define intersection [require './intersection.js'].intersection
+
+define para (
+	.width 500
+	.stroke 85
+	.sb 50
+	.cap 771
+	.xheight 572
+	.hook 135
+	.smooth 192
+	.smallsmooth 242
+	.o [-8]
+	.descender [-178]
+)
+
+define TINY 0.0001
+define LITTLE 0.01
+
+define DESCENDER para.descender
+define O para.o
+define WIDTH para.width
+define STROKE para.stroke
+define HALFSTROKE : STROKE / 2
+define SB para.sb
+define CAP para.cap
+define XH para.xheight
+define XO : XH - O
+define HOOK para.hook
+define SMOOTH para.smooth
+define SMALLSMOOTH para.smallsmooth
+define RIGHTSB : WIDTH - SB
+define CAP_SMOOTH : CAP - SMOOTH
+define MIDDLE : WIDTH / 2
+define KAPPA 0.51
+define COKAPPA : 1 - KAPPA
+define COBKAPPA : COKAPPA - 0.1
+define BKAPPA : KAPPA + 0.1
+define CAPMIDDLE : CAP / 2
+define CAPO : CAP - O
+define ESS : STROKE * 0.5
+define SAMPLES 4
+define KAPPA_HOOK 0.7
+
+define [Glyph name] : begin {
+	set this.name name
+	set this.unicode ()
+	set this.contours ()
+	set this.advanceWidth 500
+	return nothing
+}
+define [Glyph.prototype.set-width w] : begin {
+	this.advanceWidth = w
+	return this
+}
+define [Glyph.prototype.assign-unicode u] : begin {
+	this.unicode.push [u.charCodeAt 0]
+	return this
+}
+
+define [Glyph.prototype.start-from x y] : begin {
+	this.contours.push ((.x x .y y .onCurve true))
+	return this
+}
+define [Glyph.prototype.line-to x y] : begin {
+	this.contours`[this.contours.length - 1].push (.x x .y y .onCurve true)
+	return this
+}
+define [Glyph.prototype.curve-to xc yc x y] : begin {
+	this.contours`[this.contours.length - 1].push (.x xc .y yc .onCurve false) (.x x .y y .onCurve true)
+	return this
+}
+define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
+	local lastContour this.contours`[this.contours.length - 1]
+	local lastPoint lastContour`[lastContour.length - 1]
+	local segments [bezierCubic2Q2 lastPoint (.x x1 .y y1) (.x x2 .y y2) (.x x .y y)]
+	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : this.curve-to xc yc xf yf
+	return this
+}
+define [Glyph.prototype.reverse-last] : begin {
+	this.contours.[this.contours.length - 1] = [this.contours.[this.contours.length - 1].reverse]
+}
+define [Glyph.prototype.put-shapes contours] : begin {
+	foreach contour [items-of contours] : begin {
+		this.start-from contour.0.x contour.0.y
+		for [local j 1] [j < contour.length] [inc j] : begin {
+			local point contour`j
+			if point.cubic [begin {
+				local p2 contour`[j + 1]
+				local p3 contour`[j + 2]
+				this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
+				j = j + 2
+			}] [if point.onCurve [this.line-to point.x point.y] [begin {
+				local p2 contour`[j + 1]
+				this.curve-to point.x point.y p2.x p2.y
+				j = j + 1
+			}]]
+		}
+	}
+	return this
+}
+
+define [Stroke] : begin {
+	this.points = ()
+	return this
+}
+define [Stroke.prototype.set-width d1 d2] : begin {
+	local point this.points`[this.points.length - 1]
+	point.d1 = d1
+	point.d2 = d2
+	return this
+}
+define [Stroke.prototype.start-from x y] : begin {
+	this.points = ((.x x .y y .onCurve true))
+	return this
+}
+define [Stroke.prototype.line-to x y] : begin {
+	this.points.push (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.curve-to xc yc x y] : begin {
+	this.points.push (.x xc .y yc .onCurve false) (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
+	this.points.push (.x x1 .y y1 .onCurve false .cubic true) (.x x2 .y y2 .onCurve false .cubic true) (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.arc-vh-to x y] : begin {
+	local last this.points`[this.points.length - 1]
+	this.cubic-to last.x [last.y + BKAPPA * [y - last.y]] [x + BKAPPA * [last.x - x]] y x y
+	return this
+}
+define [Stroke.prototype.arc-hv-to x y] : begin {
+	local last this.points`[this.points.length - 1]
+	this.cubic-to [last.x + BKAPPA * [x - last.x]] last.y x [y + BKAPPA * [last.y - y]] x y
+	return this
+}
+define [dforward p0 p1 p2 p3] (
+	.x [p0.x + [[-11] / 6 * p0.x + 3 * p1.x - 3 / 2 * p2.x + p3.x / 3] / TINY * LITTLE]
+	.y [p0.y + [[-11] / 6 * p0.y + 3 * p1.y - 3 / 2 * p2.y + p3.y / 3] / TINY * LITTLE]
+)
+define [dbackward p0 p1 p2 p3] (
+	.x [p0.x + [11 / 6 * p0.x - 3 * p1.x + 3 / 2 * p2.x - p3.x / 3] / TINY * LITTLE]
+	.y [p0.y + [11 / 6 * p0.y - 3 * p1.y + 3 / 2 * p2.y - p3.y / 3] / TINY * LITTLE]
+)
+define [nonlinear a b c] : [Math.abs [[c.y - a.y] * [b.x - a.x] - [c.x - a.x] * [b.y - a.y]]] > TINY
+
+define [Stroke.prototype.form-stroke d1 d2] : begin {
+	local d1s ([set d1 [if [this.points.0.d1 >= 0] this.points.0.d1 d1]])
+	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 d2]])
+	local subSegments ()
+	local p0 this.points.0
+	for [local j 1] [j < this.points.length] [inc j] : begin {
+		local p1 this.points`j
+		piecewise {
+			p1.onCurve : begin {
+				subSegments.push (p0 (.x [[p0.x + p1.x] / 2] .y [[p0.y + p1.y] / 2]) p1)
+				d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
+				d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
+				p0 = p1
+			}
+			p1.cubic : begin {
+				local p2 this.points`[j + 1]
+				local p3 this.points`[j + 2]
+				d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
+				d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
+				subSegments.push (p0 p1 p2 p3)
+				p0 = p3
+				j = j + 2
+			}
+			true : begin {
+				local p2 this.points`[j + 1]
+				d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
+				d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
+				subSegments.push (p0 p1 p2)
+				p0 = p2
+				j = j + 1
+			}
+		}
+	}
+	local f1 : Smooth d1s (.method 'cubic')
+	local f2 : Smooth d2s (.method 'cubic')
+	local left ()
+	local right ()
+	for [local j 0] [j < subSegments.length] [inc j] : begin {
+		local seg subSegments`j
+		local curve : if [seg.length > 3] [new Bezier seg.0.x seg.0.y seg.1.x seg.1.y seg.2.x seg.2.y seg.3.x seg.3.y] [new Bezier seg.0.x seg.0.y seg.1.x seg.1.y seg.2.x seg.2.y]
+		foreach sample [range 0 SAMPLES] : begin {
+			local t : j + sample / SAMPLES
+			local tn : j + [sample + 1] / SAMPLES
+			
+			local lthis : curve.offset [sample / SAMPLES] [f1 t]
+			local rthis : curve.offset [sample / SAMPLES] [-[f2 t]]
+			
+			local lnext : curve.offset [[sample + 1] / SAMPLES] [f1 tn]
+			local rnext : curve.offset [[sample + 1] / SAMPLES] [-[f2 tn]]
+			
+			local lnthis1 : curve.offset [sample / SAMPLES + TINY] [f1 [t + TINY]]
+			local rnthis1 : curve.offset [sample / SAMPLES + TINY] [-[f2 [t + TINY]]]
+			local lnnext1 : curve.offset [[sample + 1] / SAMPLES - TINY] [f1 [tn - TINY]]
+			local rnnext1 : curve.offset [[sample + 1] / SAMPLES - TINY] [-[f2 [tn - TINY]]]
+			local lnthis2 : curve.offset [sample / SAMPLES + [TINY * 2]] [f1 [t + [TINY * 2]]]
+			local rnthis2 : curve.offset [sample / SAMPLES + [TINY * 2]] [-[f2 [t + [TINY * 2]]]]
+			local lnnext2 : curve.offset [[sample + 1] / SAMPLES - [TINY * 2]] [f1 [tn - [TINY * 2]]]
+			local rnnext2 : curve.offset [[sample + 1] / SAMPLES - [TINY * 2]] [-[f2 [tn - [TINY * 2]]]]
+			local lnthis3 : curve.offset [sample / SAMPLES + [TINY * 3]] [f1 [t + [TINY * 3]]]
+			local rnthis3 : curve.offset [sample / SAMPLES + [TINY * 3]] [-[f2 [t + [TINY * 3]]]]
+			local lnnext3 : curve.offset [[sample + 1] / SAMPLES - [TINY * 3]] [f1 [tn - [TINY * 3]]]
+			local rnnext3 : curve.offset [[sample + 1] / SAMPLES - [TINY * 3]] [-[f2 [tn - [TINY * 3]]]]
+			
+			local dlthis [dforward lthis lnthis1 lnthis2 lnthis3]
+			local drthis [dforward rthis rnthis1 rnthis2 rnthis3]
+			local dlnext [dbackward lnext lnnext1 lnnext2 lnnext3]
+			local drnext [dbackward rnext rnnext2 rnnext2 rnnext3]
+			
+			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
+			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
+			
+			if [[il.x != null] && [il.y != null] && [nonlinear lthis il lnext]] [then {
+				left.push (.x lthis.x .y lthis.y .onCurve true) (.x il.x .y il.y .onCurve false)
+			}] [else {
+				left.push (.x lthis.x .y lthis.y .onCurve true)
+			}]
+			
+			if [[ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext]] [then {
+				right.push (.x rthis.x .y rthis.y .onCurve true) (.x ir.x .y ir.y .onCurve false)
+			}] [else {
+				right.push (.x rthis.x .y rthis.y .onCurve true)
+			}]
+		}
+	}
+	left.push [begin [local last [curve.offset 1 [f1 t]]] (.x last.x .y last.y .onCurve true)]
+	right.push [begin [local last [curve.offset 1 [-[f2 t]]]] (.x last.x .y last.y .onCurve true)]
+	
+	local shape : left.concat [right.reverse] :.map [[p] -> (.x p.x .y p.y .onCurve p.onCurve)]
+	return (shape)
+}
+
+define [Ring u d l r] : begin {
+	local my [[u + d] / 2]
+	local mx [[l + r] / 2]
+	local s : new Stroke
+	:.start-from mx d
+	:.cubic-to [mx + [l - mx] * BKAPPA] d l [my + [d - my] * BKAPPA] l my
+	:.cubic-to l [my + [u - my] * BKAPPA] [mx + [l - mx] * BKAPPA] u mx u
+	:.cubic-to [mx + [r - mx] * BKAPPA] u r [my + [u - my] * BKAPPA] r my
+	:.cubic-to r [my + [d - my] * BKAPPA] [mx + [r - mx] * BKAPPA] d mx d
+	return s.points
+}
+define [ORing u d l r smooth] : begin {
+	local myu [u - smooth]
+	local myd [d + smooth]
+	local mx [[l + r] / 2]
+	local s : new Stroke
+	:.start-from mx d
+	:.cubic-to [mx + [l - mx] * BKAPPA] d l [myd + [d - myd] * BKAPPA] l myd
+	:.line-to l myu
+	:.cubic-to l [myu + [u - myu] * BKAPPA] [mx + [l - mx] * BKAPPA] u mx u
+	:.cubic-to [mx + [r - mx] * BKAPPA] u r [myu + [u - myu] * BKAPPA] r myu
+	:.line-to r myd
+	:.cubic-to r [myd + [d - myd] * BKAPPA] [mx + [r - mx] * BKAPPA] d mx d
+	return s.points
+}
+
+define-macro glyph-construction : syntax-rules {
+	@`[glyph-construction @::steps] ('.syntactic-closure' @`[lambda [] [begin {
+		local set-width : this.set-width.bind this
+		local assign-unicode : this.assign-unicode.bind this
+		local start-from : this.start-from.bind this
+		local line-to : this.line-to.bind this
+		local curve-to : this.curve-to.bind this
+		local cubic-to : this.cubic-to.bind this
+		local put-shapes : this.put-shapes.bind this
+		local reverse-last : this.reverse-last.bind this
+		begin @::[steps.map formOf]
+		return nothing
+	}]] env)
+}
+
+define [create-glyph name actions] : begin {
+	define glyphObject [new Glyph name]
+	glyphList.push glyphObject
+	glyphs`name = glyphObject
+	actions.call glyphObject
+	return glyphObject
+}
+
+
+### GLYPHS
+create-glyph 'space' : glyph-construction {
+	set-width WIDTH
+	assign-unicode ' '
+}
+create-glyph 'bar' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '|'
+	put-shapes : new Stroke :.start-from MIDDLE [DESCENDER / 2]
+	:.set-width [STROKE / 2] [STROKE / 2]
+	:.line-to MIDDLE [CAP - DESCENDER / 2]
+	:.form-stroke
+}
+
+create-glyph 'A' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'A'
+	
+	local TURN [XH * 0.1]
+	
+	local leftbar : new Stroke
+	leftbar.start-from SB 0
+	:.line-to SB TURN
+	:.curve-to SB [TURN + 0.27 * [CAP - TURN]] [MIDDLE - STROKE / 2] CAP
+	
+	local rightbar : new Stroke
+	rightbar.start-from RIGHTSB 0
+	:.line-to RIGHTSB TURN
+	:.curve-to RIGHTSB [TURN + 0.27 * [CAP - TURN]] [MIDDLE + STROKE / 2] CAP
+	
+	local hbar : new Stroke
+	hbar.start-from [SB + STROKE] [XH / 2] :.line-to [RIGHTSB - STROKE] [XH / 2]
+	
+	put-shapes : leftbar.form-stroke 0 STROKE
+	put-shapes : hbar.form-stroke 0 STROKE
+	put-shapes : rightbar.form-stroke STROKE 0
+	
+	#top cap
+	start-from [MIDDLE - STROKE / 2] CAP
+	line-to [MIDDLE + STROKE / 2] CAP
+	line-to MIDDLE [CAP - STROKE]
+}
+create-glyph 'X' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'X'
+	
+	local TURN [XH * 0.05]
+	local straight 0.6
+	local strench  0.125
+	
+	local barone : new Stroke
+	:.start-from [SB + HALFSTROKE] 0
+	:.set-width HALFSTROKE HALFSTROKE
+	:.line-to [SB + HALFSTROKE] TURN
+	:.curve-to [SB + HALFSTROKE] [TURN + strench * [CAP - TURN]] [MIDDLE + straight * [SB + HALFSTROKE - MIDDLE]] [CAPMIDDLE + straight * [TURN + strench * [CAP - TURN] - CAPMIDDLE]]
+	:.line-to  [MIDDLE + straight * [RIGHTSB - HALFSTROKE - MIDDLE]] [CAPMIDDLE + straight * [CAP - TURN - strench * [CAP - TURN] - CAPMIDDLE]]
+	:.curve-to [RIGHTSB - HALFSTROKE] [CAP - TURN - strench * [CAP - TURN]] [RIGHTSB - HALFSTROKE] [CAP - TURN]
+	:.line-to [RIGHTSB - HALFSTROKE] CAP
+	:.form-stroke
+	
+	local bartwo : list : barone.0.map [[pt] -> (.x [WIDTH - pt.x] .y pt.y .onCurve pt.onCurve .cubic pt.cubic)] :.reverse
+
+	put-shapes barone
+	put-shapes bartwo
+}
+create-glyph 'Y' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'Y'
+	
+	local TURN [XH * 0.05]
+	local straight 0.6
+	local strench  0.15
+	local cross    [CAP * 0.4]
+	
+	local barone : new Stroke
+	:.start-from MIDDLE cross
+	:.set-width HALFSTROKE HALFSTROKE
+	:.line-to  [MIDDLE + straight * [RIGHTSB - HALFSTROKE - MIDDLE]] [cross + straight * [CAP - TURN - strench * [CAP - TURN] - cross]]
+	:.curve-to [RIGHTSB - HALFSTROKE] [CAP - TURN - strench * [CAP - TURN]] [RIGHTSB - HALFSTROKE] [CAP - TURN]
+	:.line-to [RIGHTSB - HALFSTROKE] CAP
+	:.form-stroke
+	
+	local bartwo : list : barone.0.map [[pt] -> (.x [WIDTH - pt.x] .y pt.y .onCurve pt.onCurve .cubic pt.cubic)] :.reverse
+
+	put-shapes barone
+	put-shapes bartwo
+	put-shapes : new Stroke :.start-from MIDDLE 0 :.set-width HALFSTROKE HALFSTROKE :.line-to MIDDLE [cross + HALFSTROKE] :.form-stroke
+}
+create-glyph 'x' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'x'
+	
+	local TURN [XH * 0.1]
+	
+	local barone : new Stroke
+	:.start-from [SB + HALFSTROKE] 0
+	:.set-width HALFSTROKE HALFSTROKE
+	:.cubic-to [SB + HALFSTROKE] [TURN + 0.17 * [XH - TURN]] [RIGHTSB - HALFSTROKE] [XH - TURN - 0.17 * [XH - TURN]] [RIGHTSB - HALFSTROKE] XH
+	:.form-stroke
+	
+	local bartwo : list : barone.0.map [[pt] -> (.x [WIDTH - pt.x] .y pt.y .onCurve pt.onCurve .cubic pt.cubic)] :.reverse
+
+	put-shapes barone
+	put-shapes bartwo
+}
+
+create-glyph 'B' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'B'
+	
+	local bowl 451
+	local tkappa [COKAPPA - 0.22]
+	local bkappa [COKAPPA - 0.2]
+	
+	local turntop : [CAP + [bowl - STROKE]] / 2
+	local turnbottom : bowl / 2
+	
+	local topbowl : new Stroke
+	topbowl.start-from SB CAP
+	:.line-to  [RIGHTSB - SB * 0.5 - turnbottom] CAP
+	:.cubic-to [RIGHTSB - SB * 0.5 - tkappa * turnbottom] CAP [RIGHTSB - SB * 0.5] [turntop + [CAP - turntop] * KAPPA] [RIGHTSB - SB * 0.5] turntop
+	:.cubic-to [RIGHTSB - SB * 0.5] [turntop + KAPPA * [bowl - STROKE - turntop]] [RIGHTSB - SB * 0.5 - tkappa * turnbottom] [bowl - STROKE] [RIGHTSB - SB * 0.5 - turnbottom] [bowl - STROKE]
+	:.line-to SB [bowl - STROKE]
+	
+	local bottombowl : new Stroke
+	bottombowl.start-from SB 0
+	:.line-to  [RIGHTSB - turnbottom] 0
+	:.cubic-to [RIGHTSB - bkappa * turnbottom] 0 RIGHTSB [turnbottom * KAPPA] RIGHTSB turnbottom
+	:.cubic-to RIGHTSB [turnbottom + KAPPA * [bowl - turnbottom]] [RIGHTSB - bkappa * turnbottom] bowl [RIGHTSB - turnbottom] bowl
+	:.line-to SB bowl
+	
+	local leftbar : new Stroke :.start-from SB 0 :.line-to SB CAP
+	
+	put-shapes : topbowl.form-stroke 0 STROKE
+	put-shapes : bottombowl.form-stroke STROKE 0
+	put-shapes : leftbar.form-stroke 0 STROKE
+}
+
+create-glyph 'C' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'C'
+	local outline : new Stroke
+	outline.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
+	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
+	:.line-to  SB SMOOTH
+	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
+	put-shapes : outline.form-stroke STROKE 0
+}
+
+create-glyph 'D' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'D'
+	
+	local dsmooth [SMOOTH * 1.55]
+	local bsmooth [SMOOTH * 1.3]
+	local bkappa  [COKAPPA - 0.2]
+	
+	local leftbar : new Stroke :.start-from SB 0 :.line-to SB CAP
+	
+	local bowl : new Stroke
+	bowl.start-from SB 0
+	:.line-to [RIGHTSB - bsmooth] 0
+	:.cubic-to [RIGHTSB - bkappa * bsmooth] 0 RIGHTSB [COBKAPPA * dsmooth] RIGHTSB dsmooth
+	:.line-to RIGHTSB [CAP - dsmooth]
+	:.cubic-to RIGHTSB [CAP - COBKAPPA * dsmooth] [RIGHTSB - bkappa * bsmooth] CAP [RIGHTSB - bsmooth] CAP
+	:.line-to SB CAP
+	
+	put-shapes : bowl.form-stroke STROKE 0
+	put-shapes : leftbar.form-stroke 0 STROKE
+}
+
+create-glyph 'G' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'G'
+	local outline : new Stroke
+	outline.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
+	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
+	:.line-to  SB SMOOTH
+	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
+	:.cubic-to [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O RIGHTSB [COBKAPPA * SMOOTH] RIGHTSB SMOOTH
+	:.line-to  RIGHTSB [CAP / 2 + STROKE / 2]
+	put-shapes : outline.form-stroke STROKE 0
+	
+	local bar : new Stroke :.start-from MIDDLE [CAP / 2 + STROKE / 2] :.line-to RIGHTSB [CAP / 2 + STROKE / 2]
+	put-shapes : bar.form-stroke 0 STROKE
+}
+
+create-glyph 'O' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'O'
+	local outline : new Stroke
+	outline.start-from MIDDLE CAPO
+	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB [CAP - SMOOTH]
+	:.line-to  SB SMOOTH
+	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
+	:.cubic-to [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O RIGHTSB [COBKAPPA * SMOOTH] RIGHTSB SMOOTH
+	:.line-to  RIGHTSB [CAP - SMOOTH]
+	:.cubic-to RIGHTSB [CAP - COBKAPPA * SMOOTH] [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] CAPO MIDDLE CAPO
+	put-shapes : outline.form-stroke STROKE 0
+}
+create-glyph 'o' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'o'
+	put-shapes : list {
+		ORing XO O SB RIGHTSB SMALLSMOOTH
+		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
+	}
+	reverse-last
+}
+
+create-glyph 'o.left' : glyph-construction {
+	set-width WIDTH
+	# build outline manually
+	put-shapes : list {
+		ORing XO O [SB + STROKE / 2] RIGHTSB SMALLSMOOTH
+		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
+	}
+	reverse-last
+}
+create-glyph 'o.right' : glyph-construction {
+	set-width WIDTH
+	# build outline manually
+	put-shapes : list {
+		ORing XO O SB [RIGHTSB - STROKE / 2] SMALLSMOOTH
+		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
+	}
+	reverse-last
+}
+create-glyph 'p' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'p'
+	put-shapes glyphs.'o.left'.contours
+	put-shapes : new Stroke :.start-from SB XH :.set-width STROKE 0 :.line-to SB DESCENDER :.form-stroke
+}
+create-glyph 'b' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'b'
+	put-shapes glyphs.'o.left'.contours
+	put-shapes : new Stroke :.start-from SB 0 :.set-width 0 STROKE :.line-to SB CAP :.form-stroke
+}
+create-glyph 'q' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'q'
+	put-shapes glyphs.'o.right'.contours
+	put-shapes : new Stroke :.start-from RIGHTSB XH :.set-width 0 STROKE :.line-to RIGHTSB DESCENDER :.form-stroke
+}
+create-glyph 'g' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'g'
+	
+	put-shapes : list {
+		Ring XO [XH * 0.4] [SB * 1.5] [RIGHTSB - 0.5 * SB] SMALLSMOOTH
+		Ring [XO - STROKE] [[XH * 0.4] + STROKE] [SB * 1.5 + STROKE] [[RIGHTSB - 0.5 * SB] - STROKE] [SMALLSMOOTH - STROKE]
+	}
+	reverse-last
+	
+	put-shapes : new Stroke 
+	:.start-from MIDDLE [XH * 0.4]
+	:.set-width  0 [STROKE * 0.75]
+	:.arc-hv-to  [SB * 1.5 + STROKE]  [[O - DESCENDER * 0.85 + XH * 0.4] / 2]
+	:.set-width  0 STROKE
+	:.arc-vh-to  [MIDDLE + DESCENDER * 0.15] [O - DESCENDER * 0.85]
+	:.line-to    [MIDDLE - DESCENDER * 0.15] [O - DESCENDER * 0.85]
+	:.arc-hv-to  [RIGHTSB - O * 2] 0
+	:.arc-vh-to  MIDDLE [DESCENDER + O]
+	:.arc-hv-to  SB [DESCENDER * 0.1]
+	:.arc-vh-to  [MIDDLE + DESCENDER * 0.15] [O - DESCENDER * 0.85]
+	:.form-stroke
+	
+	start-from RIGHTSB XH
+	line-to    RIGHTSB [XH - STROKE]
+	line-to    MIDDLE  [XH - STROKE - O]
+	line-to    MODDLE  XH
+}
+create-glyph 'd' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'd'
+	put-shapes glyphs.'o.right'.contours
+	put-shapes : new Stroke :.start-from RIGHTSB 0 :.set-width STROKE 0 :.line-to RIGHTSB CAP :.form-stroke
+}
+
+create-glyph 'zero' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '0'
+	put-shapes glyphs.O.contours
+	
+	local bar : new Stroke :.start-from [SB + STROKE / 2] [CAP * [1 - 0.65]] :.line-to [RIGHTSB - STROKE / 2] [CAP * 0.65]
+	put-shapes : bar.form-stroke [STROKE / 2] [STROKE / 2]
+}
+
+create-glyph 'Q' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'Q'
+	
+	put-shapes glyphs.O.contours
+	start-from MIDDLE 0
+	line-to    [MIDDLE + STROKE / 2] [-CAP * 0.2]
+	line-to    [MIDDLE + STROKE / 2 + STROKE] [-CAP * 0.2]
+	line-to    [MIDDLE + STROKE] 0
+	line-to    [MIDDLE + STROKE * [1 - 0.5 / 3]] [STROKE * 0.5]
+	reverse-last
+}
+
+create-glyph 'H' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'H'
+	
+	put-shapes : new Stroke :.start-from SB 0 :.set-width 0 STROKE :.line-to SB CAP :.form-stroke
+	put-shapes : new Stroke :.start-from RIGHTSB 0 :.set-width STROKE 0 :.line-to RIGHTSB CAP :.form-stroke
+	put-shapes : new Stroke :.start-from SB [CAP / 2] :.set-width HALFSTROKE HALFSTROKE :.line-to RIGHTSB [CAP / 2] :.form-stroke
+}
+
+create-glyph 'L' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'L'
+	
+	put-shapes : new Stroke :.start-from [SB * 1.5] CAP :.line-to [SB * 1.5] 0 :.form-stroke STROKE 0
+	put-shapes : new Stroke :.start-from [SB * 1.5] 0 :.line-to RIGHTSB 0 :.form-stroke STROKE 0
+}
+create-glyph 'S' : glyph-construction {
+	set-width WIDTH; assign-unicode 'S'
+	
+	local slope 0.11
+
+	local bowltop : new Stroke
+	bowltop.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
+	:.set-width STROKE 0
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
+	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
+	
+	local strokemiddle : new Stroke
+	strokemiddle.start-from [SB + STROKE / 2] CAP_SMOOTH
+	:.set-width [STROKE / 2] [STROKE / 2]
+	:.curve-to [SB + STROKE / 2] [[0.5 + slope] * CAP + [2 * slope * CAP] / [0.4 * WIDTH] * [0.3 * WIDTH - SB - STROKE / 2]] [0.3 * WIDTH] [[0.5 + slope] * CAP]
+	:.line-to [0.7 * WIDTH] [[0.5 - slope] * CAP]
+	:.curve-to [RIGHTSB - STROKE / 2] [[0.5 - slope] * CAP - [2 * slope * CAP] / [0.4 * WIDTH] * [0.3 * WIDTH - SB - STROKE / 2]] [RIGHTSB - STROKE / 2] SMOOTH
+	
+	local bowlbottom : new Stroke
+	bowlbottom.start-from RIGHTSB SMOOTH :.set-width 0 STROKE
+	:.cubic-to RIGHTSB [COBKAPPA * SMOOTH] [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O MIDDLE O
+	:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - para.sb]] O [SB * 1.1] HOOK
+		
+	put-shapes : bowltop.form-stroke
+	put-shapes : strokemiddle.form-stroke
+	put-shapes : bowlbottom.form-stroke
+}
+create-glyph 'dollar' : glyph-construction {
+	set-width WIDTH; assign-unicode '$'
+	put-shapes glyphs.S.contours
+	put-shapes : new Stroke :.start-from MIDDLE CAP :.set-width HALFSTROKE HALFSTROKE :.line-to MIDDLE [CAP - DESCENDER / 2] :.form-stroke
+	put-shapes : new Stroke :.start-from MIDDLE [DESCENDER / 2] :.set-width HALFSTROKE HALFSTROKE :.line-to MIDDLE 0 :.form-stroke
+}
+exports.font = font
