@@ -1,6 +1,16 @@
 ﻿{
-    var r0_bezierCubic2Q2, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9;
+    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10;
     r0_bezierCubic2Q2 = require('node-sfnt/lib/math/bezierCubic2Q2');
+    r0_tp = require('./transform')['transformPoint'];
+    r0_Stroke = require('./stroke')['Stroke'];
+    r0_id = {
+        'xx': 1,
+        'yx': 0,
+        'xy': 0,
+        'yy': 1,
+        'x': 0,
+        'y': 0
+    };
     r0_Glyph = function _r0_t0(r1_name) {
         var r1_name, _r1_t0;
         _r1_t0 = this;
@@ -8,6 +18,14 @@
         _r1_t0['unicode'] = [];
         _r1_t0['contours'] = [];
         _r1_t0['advanceWidth'] = 500;
+        _r1_t0['gizmo'] = {
+            'xx': 1,
+            'yx': 0,
+            'xy': 0,
+            'yy': 1,
+            'x': 0,
+            'y': 0
+        };
         return void 0;
     };
     r0_Glyph['prototype']['set-width'] = function _r0_t1(r2_w) {
@@ -25,35 +43,35 @@
     r0_Glyph['prototype']['start-from'] = function _r0_t3(r4_x, r4_y) {
         var r4_x, r4_y, _r4_t0;
         _r4_t0 = this;
-        _r4_t0['contours']['push']([{
+        _r4_t0['contours']['push']([r0_tp(_r4_t0['gizmo'], {
                 'x': r4_x,
                 'y': r4_y,
                 'onCurve': true
-            }]);
+            })]);
         return _r4_t0;
     };
     r0_Glyph['prototype']['line-to'] = function _r0_t4(r5_x, r5_y) {
         var r5_x, r5_y, _r5_t0;
         _r5_t0 = this;
-        _r5_t0['contours'][_r5_t0['contours']['length'] - 1]['push']({
+        _r5_t0['contours'][_r5_t0['contours']['length'] - 1]['push'](r0_tp(_r5_t0['gizmo'], {
             'x': r5_x,
             'y': r5_y,
             'onCurve': true
-        });
+        }));
         return _r5_t0;
     };
     r0_Glyph['prototype']['curve-to'] = function _r0_t5(r6_xc, r6_yc, r6_x, r6_y) {
         var r6_xc, r6_yc, r6_x, r6_y, _r6_t0;
         _r6_t0 = this;
-        _r6_t0['contours'][_r6_t0['contours']['length'] - 1]['push']({
+        _r6_t0['contours'][_r6_t0['contours']['length'] - 1]['push'](r0_tp(_r6_t0['gizmo'], {
             'x': r6_xc,
             'y': r6_yc,
             'onCurve': false
-        }, {
+        }), r0_tp(_r6_t0['gizmo'], {
             'x': r6_x,
             'y': r6_y,
             'onCurve': true
-        });
+        }));
         return _r6_t0;
     };
     r0_Glyph['prototype']['cubic-to'] = function _r0_t6(r7_x1, r7_y1, r7_x2, r7_y2, r7_x, r7_y) {
@@ -93,8 +111,10 @@
         return _r9_t0['contours'][_r9_t0['contours']['length'] - 1] = _r9_t0['contours'][_r9_t0['contours']['length'] - 1]['reverse']();
     };
     r0_Glyph['prototype']['put-shapes'] = function _r0_t8(r10_contours) {
-        var r10_contours, r10_contour, r10_j, r10_point, r10_p2, r10_p3, _r10_t0, _r10_t1, _r10_t2, _r10_t3;
+        var r10_contours, r10_t, r10_contour, r10_j, r10_point, r10_p2, r10_p3, _r10_t0, _r10_t1, _r10_t2, _r10_t3;
         _r10_t3 = this;
+        r10_t = _r10_t3['gizmo'];
+        _r10_t3['gizmo'] = r0_id;
         _r10_t0 = r10_contours;
         _r10_t1 = _r10_t0['length'];
         _r10_t2 = 0;
@@ -118,12 +138,20 @@
                 }
             }
         }
+        _r10_t3['gizmo'] = r10_t;
         return _r10_t3;
     };
     r0_Glyph['prototype']['include-glyph'] = function _r0_t9(r12_glyph) {
         var r12_glyph, _r12_t0;
         _r12_t0 = this;
         return _r12_t0['put-shapes'](r12_glyph['contours']);
+    };
+    r0_Glyph['prototype']['create-stroke'] = function _r0_t10() {
+        var r13_s, _r13_t0;
+        _r13_t0 = this;
+        r13_s = new r0_Stroke();
+        r13_s['gizmo'] = Object['create'](_r13_t0['gizmo']);
+        return r13_s;
     };
     exports['Glyph'] = r0_Glyph;
 }
