@@ -1,0 +1,158 @@
+define Smooth [require './smooth'].Smooth
+define intersection [require './intersection'].intersection
+define Bezier [require 'bezier-js']
+
+define SAMPLES 4
+define TINY 0.0001
+define LITTLE 0.01
+define KAPPA 0.51
+define COKAPPA : 1 - KAPPA
+define BKAPPA : KAPPA + 0.1
+define COBKAPPA : COKAPPA - 0.1
+
+define [Stroke] : begin {
+	this.points = ()
+	return this
+}
+define [Stroke.bindParameters para] : begin {
+	KAPPA = para.kappa
+	COKAPPA = 1 - KAPPA
+	COBKAPPA = COKAPPA - 0.1
+	BKAPPA = KAPPA + 0.1
+}
+define [Stroke.prototype.set-width d1 d2] : begin {
+	local point this.points`[this.points.length - 1]
+	point.d1 = d1
+	point.d2 = d2
+	return this
+}
+define [Stroke.prototype.start-from x y] : begin {
+	this.points = ((.x x .y y .onCurve true))
+	return this
+}
+define [Stroke.prototype.line-to x y] : begin {
+	this.points.push (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.curve-to xc yc x y] : begin {
+	this.points.push (.x xc .y yc .onCurve false) (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
+	this.points.push (.x x1 .y y1 .onCurve false .cubic true) (.x x2 .y y2 .onCurve false .cubic true) (.x x .y y .onCurve true)
+	return this
+}
+define [Stroke.prototype.arc-vh-to x y] : begin {
+	local last this.points`[this.points.length - 1]
+	this.cubic-to last.x [last.y + BKAPPA * [y - last.y]] [x + BKAPPA * [last.x - x]] y x y
+	return this
+}
+define [Stroke.prototype.arc-hv-to x y] : begin {
+	local last this.points`[this.points.length - 1]
+	this.cubic-to [last.x + BKAPPA * [x - last.x]] last.y x [y + BKAPPA * [last.y - y]] x y
+	return this
+}
+
+
+define [dforward p0 p1 p2 p3] (
+	.x [p0.x + [[-11] / 6 * p0.x + 3 * p1.x - 3 / 2 * p2.x + p3.x / 3] / TINY * LITTLE]
+	.y [p0.y + [[-11] / 6 * p0.y + 3 * p1.y - 3 / 2 * p2.y + p3.y / 3] / TINY * LITTLE]
+)
+define [dbackward p0 p1 p2 p3] (
+	.x [p0.x + [11 / 6 * p0.x - 3 * p1.x + 3 / 2 * p2.x - p3.x / 3] / TINY * LITTLE]
+	.y [p0.y + [11 / 6 * p0.y - 3 * p1.y + 3 / 2 * p2.y - p3.y / 3] / TINY * LITTLE]
+)
+define [nonlinear a b c] : [Math.abs [[c.y - a.y] * [b.x - a.x] - [c.x - a.x] * [b.y - a.y]]] > TINY
+
+define [Stroke.prototype.form-stroke d1 d2] : begin {
+	local d1s ([set d1 [if [this.points.0.d1 >= 0] this.points.0.d1 d1]])
+	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 d2]])
+	local subSegments ()
+	local p0 this.points.0
+	for [local j 1] [j < this.points.length] [inc j] : begin {
+		local p1 this.points`j
+		piecewise {
+			p1.onCurve : begin {
+				subSegments.push (p0 (.x [[p0.x + p1.x] / 2] .y [[p0.y + p1.y] / 2]) p1)
+				d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
+				d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
+				p0 = p1
+			}
+			p1.cubic : begin {
+				local p2 this.points`[j + 1]
+				local p3 this.points`[j + 2]
+				d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
+				d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
+				subSegments.push (p0 p1 p2 p3)
+				p0 = p3
+				j = j + 2
+			}
+			true : begin {
+				local p2 this.points`[j + 1]
+				d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
+				d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
+				subSegments.push (p0 p1 p2)
+				p0 = p2
+				j = j + 1
+			}
+		}
+	}
+	local f1 : Smooth d1s (.method 'cubic')
+	local f2 : Smooth d2s (.method 'cubic')
+	local left ()
+	local right ()
+	for [local j 0] [j < subSegments.length] [inc j] : begin {
+		local seg subSegments`j
+		local curve : if [seg.length > 3] [new Bezier seg.0.x seg.0.y seg.1.x seg.1.y seg.2.x seg.2.y seg.3.x seg.3.y] [new Bezier seg.0.x seg.0.y seg.1.x seg.1.y seg.2.x seg.2.y]
+		foreach sample [range 0 SAMPLES] : begin {
+			local t : j + sample / SAMPLES
+			local tn : j + [sample + 1] / SAMPLES
+			
+			local lthis : curve.offset [sample / SAMPLES] [f1 t]
+			local rthis : curve.offset [sample / SAMPLES] [-[f2 t]]
+			
+			local lnext : curve.offset [[sample + 1] / SAMPLES] [f1 tn]
+			local rnext : curve.offset [[sample + 1] / SAMPLES] [-[f2 tn]]
+			
+			local lnthis1 : curve.offset [sample / SAMPLES + TINY] [f1 [t + TINY]]
+			local rnthis1 : curve.offset [sample / SAMPLES + TINY] [-[f2 [t + TINY]]]
+			local lnnext1 : curve.offset [[sample + 1] / SAMPLES - TINY] [f1 [tn - TINY]]
+			local rnnext1 : curve.offset [[sample + 1] / SAMPLES - TINY] [-[f2 [tn - TINY]]]
+			local lnthis2 : curve.offset [sample / SAMPLES + [TINY * 2]] [f1 [t + [TINY * 2]]]
+			local rnthis2 : curve.offset [sample / SAMPLES + [TINY * 2]] [-[f2 [t + [TINY * 2]]]]
+			local lnnext2 : curve.offset [[sample + 1] / SAMPLES - [TINY * 2]] [f1 [tn - [TINY * 2]]]
+			local rnnext2 : curve.offset [[sample + 1] / SAMPLES - [TINY * 2]] [-[f2 [tn - [TINY * 2]]]]
+			local lnthis3 : curve.offset [sample / SAMPLES + [TINY * 3]] [f1 [t + [TINY * 3]]]
+			local rnthis3 : curve.offset [sample / SAMPLES + [TINY * 3]] [-[f2 [t + [TINY * 3]]]]
+			local lnnext3 : curve.offset [[sample + 1] / SAMPLES - [TINY * 3]] [f1 [tn - [TINY * 3]]]
+			local rnnext3 : curve.offset [[sample + 1] / SAMPLES - [TINY * 3]] [-[f2 [tn - [TINY * 3]]]]
+			
+			local dlthis [dforward lthis lnthis1 lnthis2 lnthis3]
+			local drthis [dforward rthis rnthis1 rnthis2 rnthis3]
+			local dlnext [dbackward lnext lnnext1 lnnext2 lnnext3]
+			local drnext [dbackward rnext rnnext2 rnnext2 rnnext3]
+			
+			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
+			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
+			
+			if [[il.x != null] && [il.y != null] && [nonlinear lthis il lnext]] [then {
+				left.push (.x lthis.x .y lthis.y .onCurve true) (.x il.x .y il.y .onCurve false)
+			}] [else {
+				left.push (.x lthis.x .y lthis.y .onCurve true)
+			}]
+			
+			if [[ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext]] [then {
+				right.push (.x rthis.x .y rthis.y .onCurve true) (.x ir.x .y ir.y .onCurve false)
+			}] [else {
+				right.push (.x rthis.x .y rthis.y .onCurve true)
+			}]
+		}
+		left.push [begin [local last [curve.offset 1 [f1 [j + 1]]]] (.x last.x .y last.y .onCurve true)]
+		right.push [begin [local last [curve.offset 1 [-[f2 [j + 1]]]]] (.x last.x .y last.y .onCurve true)]
+	}
+	
+	local shape : left.concat [right.reverse] :.map [[p] -> (.x p.x .y p.y .onCurve p.onCurve)]
+	return (shape)
+}
+
+exports.Stroke = Stroke
