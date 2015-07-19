@@ -35,9 +35,20 @@
         return _r2_t0;
     };
     r0_Glyph['prototype']['assign-unicode'] = function _r0_t2(r3_u) {
-        var r3_u, _r3_t0;
+        var r3_u, _r3_t0, _r3_t1, _r3_t2, _r3_t3, _r3_t4;
         _r3_t0 = this;
-        _r3_t0['unicode']['push'](r3_u['charCodeAt'](0));
+        _r3_t1 = _r3_t0['unicode'];
+        _r3_t2 = _r3_t1['push'];
+        if (typeof r3_u === 'string')
+            _r3_t3 = r3_u['charCodeAt'](0);
+        else {
+            if (true)
+                _r3_t4 = r3_u;
+            else
+                _r3_t4 = void 0;
+            _r3_t3 = _r3_t4;
+        }
+        _r3_t2['call'](_r3_t1, _r3_t3);
         return _r3_t0;
     };
     r0_Glyph['prototype']['start-from'] = function _r0_t3(r4_x, r4_y) {
