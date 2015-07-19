@@ -128,7 +128,8 @@ define [create-glyph name actions] : begin {
 	return glyphObject
 }
 
-### GLYPHS
+###### SYMBOLS
+
 create-glyph 'space' : glyph-construction {
 	set-width WIDTH
 	assign-unicode ' '
@@ -141,6 +142,8 @@ create-glyph 'bar' : glyph-construction {
 	:.line-to MIDDLE [CAP - DESCENDER / 2]
 	:.form-stroke
 }
+
+###### UPPER CASE
 
 ### A X Y : Capital letters with curly stands
 create-glyph 'A' : glyph-construction {
@@ -332,13 +335,17 @@ create-glyph 'P' : glyph-construction {
 	local turnbottom : bowl / 2
 	
 	local topbowl : create-stroke
-	topbowl.start-from SB CAP
-	:.line-to  [RIGHTSB - turnbottom] CAP
-	:.cubic-to [RIGHTSB - bkappa * turnbottom] CAP RIGHTSB [turntop + [CAP - turntop] * KAPPA] RIGHTSB turntop
-	:.cubic-to RIGHTSB  [turntop + KAPPA * [bowl - HALFSTROKE - turntop]] [RIGHTSB - bkappa * turnbottom] [bowl - HALFSTROKE] [RIGHTSB - turnbottom] [bowl - HALFSTROKE]
-	:.line-to SB [bowl - HALFSTROKE]
+		:.start-from SB CAP
+		:.pen-direction RIGHTWARD
+		:.line-to  [RIGHTSB - turnbottom] CAP
+		:.cubic-to [RIGHTSB - bkappa * turnbottom] CAP RIGHTSB [turntop + [CAP - turntop] * KAPPA] RIGHTSB turntop
+		:.cubic-to RIGHTSB  [turntop + KAPPA * [bowl - HALFSTROKE - turntop]] [RIGHTSB - bkappa * turnbottom] [bowl - HALFSTROKE] [RIGHTSB - turnbottom] [bowl - HALFSTROKE]
+		:.line-to SB [bowl - HALFSTROKE]
+		:.pen-direction LEFTWARD
 	
-	local leftbar : create-stroke :.start-from SB 0 :.line-to SB CAP
+	local leftbar : create-stroke 
+		:.start-from SB 0 :.pen-direction UPWARD
+		:.line-to SB CAP :.pen-direction UPWARD
 	
 	put-shapes : topbowl.form-stroke 0 STROKE
 	put-shapes : leftbar.form-stroke 0 STROKE
@@ -352,6 +359,7 @@ create-glyph 'R' : glyph-construction {
 	local right [RIGHTSB + O]
 	put-shapes : create-stroke
 	:.start-from [right - HALFSTROKE] 0
+	:.pen-direction UPWARD
 	:.set-width HALFSTROKE HALFSTROKE
 	:.curve-to [right - HALFSTROKE] [TURN + 0.1 * [XH - TURN]] MIDDLE CAPMIDDLE
 	:.form-stroke
@@ -449,7 +457,24 @@ create-glyph 'Q' : glyph-construction {
 }
 
 
-### H L
+### F E H L I
+create-glyph 'F' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'F'
+	put-shapes : create-stroke :.start-from SB 0 :.pen-direction UPWARD :.set-width 0 STROKE 
+		:.line-to SB CAP :.pen-direction UPWARD :.form-stroke
+	put-shapes : create-stroke :.start-from SB CAP :.set-width 0 STROKE :.pen-direction RIGHTWARD
+		:.line-to RIGHTSB CAP :.pen-direction RIGHTWARD :.form-stroke
+	put-shapes : create-stroke :.start-from SB CAPMIDDLE :.set-width HALFSTROKE HALFSTROKE :.pen-direction RIGHTWARD
+		:.line-to [RIGHTSB - STROKE] CAPMIDDLE :.pen-direction RIGHTWARD :.form-stroke
+}
+create-glyph 'E' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'E'
+	include-glyph glyphs.F
+	put-shapes : create-stroke :.start-from SB 0 :.set-width STROKE 0 :.pen-direction RIGHTWARD
+		:.line-to RIGHTSB 0 :.pen-direction RIGHTWARD :.form-stroke
+}
 create-glyph 'H' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'H'
@@ -483,24 +508,27 @@ create-glyph 'L' : glyph-construction {
 }
 
 create-glyph 'dotlessI.straight' : glyph-construction {
-	put-shapes : create-stroke :.start-from MIDDLE 0
-	:.set-width HALFSTROKE HALFSTROKE
-	:.line-to MIDDLE CAP
-	:.form-stroke
+	put-shapes : create-stroke
+		:.start-from MIDDLE 0
+		:.pen-direction UPWARD
+		:.set-width HALFSTROKE HALFSTROKE
+		:.line-to MIDDLE CAP
+		:.pen-direction UPWARD
+		:.form-stroke
 }
 create-glyph 'dotlessI.symmetric' : glyph-construction {
 	include-glyph glyphs.'dotlessI.straight'
 	# Top serif
 	put-shapes : create-stroke
-	:.start-from [MIDDLE - WIDTH * 0.26] CAP
+	:.start-from [MIDDLE - WIDTH * 0.26 - STROKE * globalTransform.yx] CAP
 	:.set-width 0 STROKE
-	:.line-to [MIDDLE + WIDTH * 0.26] CAP
+	:.line-to [MIDDLE + WIDTH * 0.26 - STROKE * globalTransform.yx] CAP
 	:.form-stroke
 	# Bottom serif
 	put-shapes : create-stroke
-	:.start-from [MIDDLE - WIDTH * 0.26] 0
+	:.start-from [MIDDLE - WIDTH * 0.26 + STROKE * globalTransform.yx] 0
 	:.set-width STROKE 0
-	:.line-to [MIDDLE + WIDTH * 0.26] 0
+	:.line-to [MIDDLE + WIDTH * 0.26 + STROKE * globalTransform.yx] 0
 	:.form-stroke
 }
 create-glyph 'I' : glyph-construction {
@@ -547,15 +575,14 @@ create-glyph 'dollar' : glyph-construction {
 }
 
 
+###### LOWER CASE
 
 create-glyph 'o' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'o'
-	put-shapes : list {
-		ORing XO O SB RIGHTSB SMALLSMOOTH
-		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
-	}
-	reverse-last
+	local outline : create-stroke
+	set outline.points : ORing XO O SB RIGHTSB SMALLSMOOTH
+	put-shapes : outline.form-stroke 0 STROKE
 }
 create-glyph 'o.left' : glyph-construction {
 	set-width WIDTH
@@ -651,8 +678,47 @@ create-glyph 'g' : glyph-construction {
 	line-to    MIDDLE  [XH - STROKE - O]
 	line-to    MIDDLE  XH
 }
-
-
+### c e
+create-glyph 'c' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'c'
+	local outline : create-stroke
+	outline.start-from [RIGHTSB - SB * 0.1] [XH - HOOK]
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO MIDDLE XO
+	:.cubic-to [SB + [1 - BKAPPA] * [MIDDLE - SB]] XO SB [XH - COBKAPPA * SMALLSMOOTH] SB [XH - SMALLSMOOTH]
+	:.line-to  SB SMALLSMOOTH
+	:.cubic-to SB [COBKAPPA * SMALLSMOOTH] [SB + [1 - BKAPPA] * [MIDDLE - SB]] O MIDDLE O
+	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
+	put-shapes : outline.form-stroke STROKE 0
+}
+create-glyph 'e' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'e'
+	
+	local barbottom [XH * 0.44]
+	
+	local outline : create-stroke
+		:.start-from RIGHTSB barbottom
+		:.pen-direction UPWARD
+		:.set-width STROKE 0
+		:.line-to   RIGHTSB [XH - SMALLSMOOTH]
+		:.arc-vh-to MIDDLE XO
+		:.cubic-to  [SB + [1 - BKAPPA] * [MIDDLE - SB]] XO SB [XH - COBKAPPA * SMALLSMOOTH] SB [XH - SMALLSMOOTH]
+		:.line-to   SB SMALLSMOOTH
+		:.cubic-to  SB [COBKAPPA * SMALLSMOOTH] [SB + [1 - BKAPPA] * [MIDDLE - SB]] O MIDDLE O
+		:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
+	
+	local bar : create-stroke
+		:.start-from [SB + HALFSTROKE] barbottom
+		:.set-width STROKE 0
+		:.pen-direction RIGHTWARD
+		:.line-to [RIGHTSB - HALFSTROKE] barbottom
+		:.pen-direction RIGHTWARD
+	
+	put-shapes : outline.form-stroke
+	put-shapes : bar.form-stroke
+}
+### x
 create-glyph 'x' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'x'
