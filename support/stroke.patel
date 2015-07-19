@@ -11,9 +11,10 @@ define [xs-array low high] : begin {
 }
 define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
-define SAMPLES 4
+define SAMPLES 5
 define TINY 0.0001
 define LITTLE 0.01
+define CUTOFF 10000
 define KAPPA 0.51
 define COKAPPA : 1 - KAPPA
 define BKAPPA : KAPPA + 0.1
@@ -186,15 +187,14 @@ define [Stroke.prototype.form-stroke d1 d2] : begin {
 			local drnext [dbackward rnext rnnext2 rnnext2 rnnext3]
 			
 			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
-			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
-			
-			if [[il.x != null] && [il.y != null] && [nonlinear lthis il lnext]] [then {
+			if [[nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [Math.abs il.x] <= CUTOFF && [Math.abs il.y] <= CUTOFF && [nonlinear lthis il lnext]] [then {
 				left.push (.x lthis.x .y lthis.y .onCurve true) (.x il.x .y il.y .onCurve false)
 			}] [else {
 				left.push (.x lthis.x .y lthis.y .onCurve true)
 			}]
 			
-			if [[ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext]] [then {
+			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
+			if [[nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [Math.abs ir.x] <= CUTOFF && [Math.abs ir.y] <= CUTOFF && [nonlinear rthis ir rnext]] [then {
 				right.push (.x rthis.x .y rthis.y .onCurve true) (.x ir.x .y ir.y .onCurve false)
 			}] [else {
 				right.push (.x rthis.x .y rthis.y .onCurve true)

@@ -31,7 +31,7 @@ define para_regular (
 )
 
 define para_bold : Object.create para_regular
-para_bold.stroke = 120
+para_bold.stroke = 114
 para_bold.dotsize = 150
 para_bold.barpos = 0.42
 para_bold.hook = 150
@@ -46,7 +46,7 @@ para_italic.italicangle = 10
 define para_bolditalic : Object.create para_bold
 para_bolditalic.italicangle = 10
 
-para = para_italic
+para = para_bolditalic
 
 define variantSelector (
 	.zero 'slashed'
@@ -61,8 +61,10 @@ define globalTransform (
 	.y 0
 )
 
-define UPWARD (.x [-1] .y 0)
-define DOWNWARD (.x 1 .y 0)
+define ITALICCOR : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
+
+define UPWARD (.x [-ITALICCOR] .y 0)
+define DOWNWARD (.x ITALICCOR .y 0)
 define RIGHTWARD (.x globalTransform.yx .y 1)
 define LEFTWARD  (.x [- globalTransform.yx] .y [-1])
 
@@ -111,7 +113,8 @@ define COBKAPPA : 1 - BKAPPA
 define KAPPA_HOOK  : para.kappa_hook || 0.7
 define KAPPA_AHOOK : para.kappa_ahook || KAPPA_HOOK
 define TAILADJX : WIDTH * 0.2
-define TAILADJY : XH * 0.5
+define TAILADJY : XH * 0.25
+define TAILADJKAPPA 0.75
 
 Stroke.bindParameters para
 
@@ -923,7 +926,7 @@ create-glyph 'c' : glyph-construction {
 	:.line-to   [SB + O] SMALLSMOOTHB
 	:.arc-vh-to MIDDLE O
 	:.pen-direction RIGHTWARD
-	:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
+	:.curve-to  [MIDDLE + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
 	put-shapes : outline.form-stroke STROKE 0
 }
 create-glyph 'e' : glyph-construction {
@@ -943,7 +946,7 @@ create-glyph 'e' : glyph-construction {
 		:.line-to   [SB + O] SMALLSMOOTHB
 		:.arc-vh-to MIDDLE O
 		:.pen-direction RIGHTWARD
-		:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
+		:.curve-to  [MIDDLE + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
 	
 	local bar : create-stroke
 		:.start-from [SB + HALFSTROKE] barbottom
@@ -1022,7 +1025,7 @@ create-glyph 'u' : glyph-construction {
 		:.start-from MIDDLE [O + STROKE]
 		:.set-width 0 STROKE
 		:.pen-direction RIGHTWARD
-		:.arc-hv-to [RIGHTSB - STROKE] SMALLSMOOTHA
+		:.arc-hv-to [RIGHTSB - STROKE * ITALICCOR] SMALLSMOOTHA
 		:.pen-direction UPWARD
 		:.set-width 0 [STROKE * 0.4]
 		:.form-stroke
@@ -1049,7 +1052,7 @@ create-glyph 'nbowl' : glyph-construction {
 		:.start-from MIDDLE [XO - STROKE]
 		:.set-width 0 STROKE
 		:.pen-direction LEFTWARD
-		:.arc-hv-to [SB + STROKE] [XH - SMALLSMOOTHA]
+		:.arc-hv-to [SB + STROKE * ITALICCOR] [XH - SMALLSMOOTHA]
 		:.pen-direction DOWNWARD
 		:.set-width 0 [STROKE * 0.4]
 		:.form-stroke

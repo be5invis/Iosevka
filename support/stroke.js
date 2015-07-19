@@ -1,5 +1,5 @@
 ﻿{
-    var r0_smooth, r0_intersection, r0_Bezier, r0_tp, r0_utp, r0_xn$xsarray$3cah, r0_xn$ysarray$3cah, r0_SAMPLES, r0_TINY, r0_LITTLE, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_Stroke, r0_dforward, r0_dbackward, r0_nonlinear, r0_computeOffsetPoint, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17;
+    var r0_smooth, r0_intersection, r0_Bezier, r0_tp, r0_utp, r0_xn$xsarray$3cah, r0_xn$ysarray$3cah, r0_SAMPLES, r0_TINY, r0_LITTLE, r0_CUTOFF, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_Stroke, r0_dforward, r0_dbackward, r0_nonlinear, r0_computeOffsetPoint, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17;
     r0_smooth = require('./monotonic-interpolate')['createInterpolant'];
     r0_intersection = require('./intersection')['intersection'];
     r0_Bezier = require('bezier-js');
@@ -18,9 +18,10 @@
         var r2_a;
         return [r2_a[0]]['concat'](r2_a['concat']([r2_a[r2_a['length'] - 1]]));
     };
-    r0_SAMPLES = 4;
+    r0_SAMPLES = 5;
     r0_TINY = 0.0001;
     r0_LITTLE = 0.01;
+    r0_CUTOFF = 10000;
     r0_KAPPA = 0.51;
     r0_COKAPPA = 1 - r0_KAPPA;
     r0_BKAPPA = r0_KAPPA + 0.1;
@@ -347,8 +348,7 @@
                 r18_dlnext = r0_dbackward(r18_lnext, r18_lnnext1, r18_lnnext2, r18_lnnext3);
                 r18_drnext = r0_dbackward(r18_rnext, r18_rnnext2, r18_rnnext2, r18_rnnext3);
                 r18_il = r0_intersection(r18_lthis['x'], r18_lthis['y'], r18_dlthis['x'], r18_dlthis['y'], r18_lnext['x'], r18_lnext['y'], r18_dlnext['x'], r18_dlnext['y']);
-                r18_ir = r0_intersection(r18_rthis['x'], r18_rthis['y'], r18_drthis['x'], r18_drthis['y'], r18_rnext['x'], r18_rnext['y'], r18_drnext['x'], r18_drnext['y']);
-                if (r18_il['x'] !== null && r18_il['y'] !== null && r0_nonlinear(r18_lthis, r18_il, r18_lnext)) {
+                if (r0_nonlinear(r18_lthis, r18_lnext, r18_dlthis) && r0_nonlinear(r18_lthis, r18_lnext, r18_dlnext) && r18_il['x'] !== null && r18_il['y'] !== null && Math['abs'](r18_il['x']) <= r0_CUTOFF && Math['abs'](r18_il['y']) <= r0_CUTOFF && r0_nonlinear(r18_lthis, r18_il, r18_lnext)) {
                     r18_left['push']({
                         'x': r18_lthis['x'],
                         'y': r18_lthis['y'],
@@ -365,7 +365,8 @@
                         'onCurve': true
                     });
                 }
-                if (r18_ir['x'] !== null && r18_ir['y'] !== null && r0_nonlinear(r18_rthis, r18_ir, r18_rnext)) {
+                r18_ir = r0_intersection(r18_rthis['x'], r18_rthis['y'], r18_drthis['x'], r18_drthis['y'], r18_rnext['x'], r18_rnext['y'], r18_drnext['x'], r18_drnext['y']);
+                if (r0_nonlinear(r18_rthis, r18_rnext, r18_drthis) && r0_nonlinear(r18_rthis, r18_rnext, r18_drnext) && r18_ir['x'] !== null && r18_ir['y'] !== null && Math['abs'](r18_ir['x']) <= r0_CUTOFF && Math['abs'](r18_ir['y']) <= r0_CUTOFF && r0_nonlinear(r18_rthis, r18_ir, r18_rnext)) {
                     r18_right['push']({
                         'x': r18_rthis['x'],
                         'y': r18_rthis['y'],
