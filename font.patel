@@ -34,10 +34,10 @@ define para_bold : Object.create para_regular
 para_bold.stroke = 120
 para_bold.dotsize = 150
 para_bold.barpos = 0.42
-para_bold.hook = 160
+para_bold.hook = 150
 para_bold.ahook = 100
 para_bold.oxhook = 0
-para_bold.kappa_hook  = 0.85
+para_bold.kappa_hook  = 0.7
 para_bold.kappa_ahook = 0.60
 
 define para_italic : Object.create para_regular
@@ -115,6 +115,7 @@ define TAILADJY : XH * 0.5
 
 Stroke.bindParameters para
 
+### Useful shapes
 define [Ring u d l r] : begin {
 	local my [[u + d] / 2]
 	local mx [[l + r] / 2]
@@ -141,6 +142,42 @@ define [ORing u d l r smooth] : begin {
 	:.line-to r myd
 	:.cubic-to r [myd + [d - myd] * BKAPPA] [mx + [r - mx] * BKAPPA] d mx d
 	return s.points
+}
+define [leftwardTopSerif x y length] : begin {
+	return : new Stroke
+		:.set-transform globalTransform
+		:.start-from [x + HALFSTROKE] y
+		:.pen-direction LEFTWARD
+		:.set-width STROKE 0
+		:.line-to [x - length - globalTransform.yx * STROKE] y
+		:.form-stroke
+}
+define [leftwardBottomSerif x y length] : begin {
+	return : new Stroke
+		:.set-transform globalTransform
+		:.start-from [x + HALFSTROKE] y
+		:.pen-direction LEFTWARD
+		:.set-width 0 STROKE
+		:.line-to [x - length + globalTransform.yx * STROKE] y
+		:.form-stroke
+}
+define [rightwardTopSerif x y length] : begin {
+	return : new Stroke
+		:.set-transform globalTransform
+		:.start-from [x - HALFSTROKE] y
+		:.pen-direction RIGHTWARD
+		:.set-width 0 STROKE
+		:.line-to [x + length - globalTransform.yx * STROKE] y
+		:.form-stroke
+}
+define [rightwardBottomSerif x y length] : begin {
+	return : new Stroke
+		:.set-transform globalTransform
+		:.start-from [x - HALFSTROKE] y
+		:.pen-direction RIGHTWARD
+		:.set-width STROKE 0
+		:.line-to [x + length + globalTransform.yx * STROKE] y
+		:.form-stroke
 }
 
 define-macro glyph-construction : syntax-rules {
@@ -603,6 +640,30 @@ create-glyph 'I' : glyph-construction {
 	include-glyph glyphs.'dotlessI.symmetric'
 }
 
+### J
+
+create-glyph 'J.straight' : glyph-construction {
+	set-width WIDTH
+	
+	local slope [STROKE * 0.00092] 
+	local expand 0.35
+	local coexpand [[1 - expand] / 2]
+	local kappa KAPPA_HOOK
+	local smooth : HOOK + 0.75 * STROKE
+
+	put-shapes : create-stroke
+		:.start-from RIGHTSB CAP :.set-width 0 STROKE :.pen-direction DOWNWARD
+		:.line-to    RIGHTSB smooth
+		:.arc-vh-to  [MIDDLE - SB * 0.25] O :.pen-direction LEFTWARD
+		:.curve-to   [MIDDLE - kappa * [MIDDLE - SB] - SB * 0.5] O [0.5 * SB + OXHOOK] HOOK
+		:.form-stroke
+}
+create-glyph 'J.serifed' : glyph-construction {
+	set-width WIDTH; assign-unicode 'J'
+	include-glyph glyphs.'J.straight'
+	put-shapes : leftwardTopSerif [RIGHTSB - HALFSTROKE] CAP LONGSERIF
+}
+
 ### M N
 create-glyph 'N' : glyph-construction {
 	set-width WIDTH
@@ -974,7 +1035,7 @@ create-glyph 'u' : glyph-construction {
 		:.form-stroke
 }
 
-### n m
+### n h m
 create-glyph 'n' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'n'
@@ -999,6 +1060,18 @@ create-glyph 'n' : glyph-construction {
 		:.pen-direction UPWARD
 		:.set-width 0 STROKE
 		:.line-to SB XH
+		:.pen-direction UPWARD
+		:.form-stroke
+}
+create-glyph 'h' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'h'
+	include-glyph glyphs.n
+	put-shapes : create-stroke 
+		:.start-from SB 0
+		:.pen-direction UPWARD
+		:.set-width 0 STROKE
+		:.line-to SB CAP
 		:.pen-direction UPWARD
 		:.form-stroke
 }
@@ -1052,30 +1125,15 @@ create-glyph 'dotlessi.straight' : glyph-construction {
 }
 create-glyph 'dotlessi.hooky' : glyph-construction {
 	include-glyph glyphs.'dotlessi.straight'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE + HALFSTROKE] XH
-		:.pen-direction LEFTWARD
-		:.set-width STROKE 0
-		:.line-to [MIDDLE - LONGSERIF - globalTransform.yx * STROKE] XH
-		:.form-stroke
+	put-shapes : leftwardTopSerif MIDDLE XH LONGSERIF
 }
 create-glyph 'dotlessi.zshaped' : glyph-construction {
 	include-glyph glyphs.'dotlessi.hooky'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE - HALFSTROKE] 0
-		:.pen-direction RIGHTWARD
-		:.set-width STROKE 0
-		:.line-to [MIDDLE + LONGSERIF + globalTransform.yx * STROKE] 0
-		:.form-stroke
+	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'dotlessi.serifed' : glyph-construction {
 	include-glyph glyphs.'dotlessi.zshaped'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE + HALFSTROKE] 0
-		:.pen-direction LEFTWARD
-		:.set-width 0 STROKE
-		:.line-to [MIDDLE - LONGSERIF - globalTransform.yx * STROKE] 0
-		:.form-stroke
+	put-shapes : leftwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'dotlessi' : glyph-construction {
 	set-width WIDTH
@@ -1085,7 +1143,7 @@ create-glyph 'dotlessi' : glyph-construction {
 		'hooky'    'dotlessi.hooky'
 		'zshaped'  'dotlessi.zshaped'
 		'serifed'  'dotlessi.serifed'
-		otherwise  'dotlessi.zshaped'
+		otherwise  'dotlessi.serifed'
 	}]
 }
 create-glyph 'dotaccent' : glyph-construction {
@@ -1112,30 +1170,15 @@ create-glyph 'l.straight' : glyph-construction {
 }
 create-glyph 'l.hooky' : glyph-construction {
 	include-glyph glyphs.'l.straight'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE + HALFSTROKE] CAP
-		:.pen-direction LEFTWARD
-		:.set-width STROKE 0
-		:.line-to [MIDDLE - LONGSERIF - globalTransform.yx * STROKE] CAP
-		:.form-stroke
+	put-shapes : leftwardTopSerif MIDDLE CAP LONGSERIF
 }
 create-glyph 'l.zshaped' : glyph-construction {
 	include-glyph glyphs.'l.hooky'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE - HALFSTROKE] 0
-		:.pen-direction RIGHTWARD
-		:.set-width STROKE 0
-		:.line-to [MIDDLE + LONGSERIF + globalTransform.yx * STROKE] 0
-		:.form-stroke
+	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'l.serifed' : glyph-construction {
 	include-glyph glyphs.'l.zshaped'
-	put-shapes : create-stroke
-		:.start-from [MIDDLE + HALFSTROKE] 0
-		:.pen-direction LEFTWARD
-		:.set-width 0 STROKE
-		:.line-to [MIDDLE - LONGSERIF - globalTransform.yx * STROKE] 0
-		:.form-stroke
+	put-shapes : leftwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'l' : glyph-construction {
 	set-width WIDTH
@@ -1145,7 +1188,7 @@ create-glyph 'l' : glyph-construction {
 		'hooky'    'l.hooky'
 		'zshaped'  'l.zshaped'
 		'serifed'  'l.serifed'
-		otherwise  'l.zshaped'
+		otherwise  'l.serifed'
 	}]
 }
 

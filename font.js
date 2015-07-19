@@ -1,5 +1,5 @@
 ﻿{
-    var r0_font, r0_glyphList, r0_glyphs, r0_Glyph, r0_Stroke, r0_para_regular, r0_para_bold, r0_para_italic, r0_para_bolditalic, r0_variantSelector, r0_globalTransform, r0_UPWARD, r0_DOWNWARD, r0_RIGHTWARD, r0_LEFTWARD, r0_DESCENDER, r0_WIDTH, r0_CAP, r0_XH, r0_O, r0_OXHOOK, r0_SB, r0_HOOK, r0_AHOOK, r0_SHOOK, r0_SMOOTH, r0_SMALLSMOOTH, r0_STROKE, r0_DOTSIZE, r0_BARPOS, r0_GBARPOS, r0_LONGSERIF, r0_ACCENT, r0_XO, r0_CAPO, r0_HALFSTROKE, r0_RIGHTSB, r0_MIDDLE, r0_CAPMIDDLE, r0_CAP_SMOOTH, r0_DOTRADIUS, r0_SMOOTHA, r0_SMOOTHB, r0_SMALLSMOOTHA, r0_SMALLSMOOTHB, r0_ITALICCORS, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_KAPPA_HOOK, r0_KAPPA_AHOOK, r0_TAILADJX, r0_TAILADJY, r0_Ring, r0_ORing, r0_xn$createglyph$7Hrq, r0_para, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20, _r0_t21, _r0_t22, _r0_t23, _r0_t24, _r0_t25, _r0_t26, _r0_t27, _r0_t28, _r0_t29, _r0_t30, _r0_t31, _r0_t32, _r0_t33, _r0_t34, _r0_t35, _r0_t36, _r0_t37, _r0_t38, _r0_t39, _r0_t40, _r0_t41, _r0_t42, _r0_t43, _r0_t44, _r0_t45, _r0_t46, _r0_t47, _r0_t48, _r0_t49, _r0_t50, _r0_t51, _r0_t52, _r0_t53, _r0_t54, _r0_t55, _r0_t56, _r0_t57, _r0_t58, _r0_t59, _r0_t60, _r0_t61;
+    var r0_font, r0_glyphList, r0_glyphs, r0_Glyph, r0_Stroke, r0_para_regular, r0_para_bold, r0_para_italic, r0_para_bolditalic, r0_variantSelector, r0_globalTransform, r0_UPWARD, r0_DOWNWARD, r0_RIGHTWARD, r0_LEFTWARD, r0_DESCENDER, r0_WIDTH, r0_CAP, r0_XH, r0_O, r0_OXHOOK, r0_SB, r0_HOOK, r0_AHOOK, r0_SHOOK, r0_SMOOTH, r0_SMALLSMOOTH, r0_STROKE, r0_DOTSIZE, r0_BARPOS, r0_GBARPOS, r0_LONGSERIF, r0_ACCENT, r0_XO, r0_CAPO, r0_HALFSTROKE, r0_RIGHTSB, r0_MIDDLE, r0_CAPMIDDLE, r0_CAP_SMOOTH, r0_DOTRADIUS, r0_SMOOTHA, r0_SMOOTHB, r0_SMALLSMOOTHA, r0_SMALLSMOOTHB, r0_ITALICCORS, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_KAPPA_HOOK, r0_KAPPA_AHOOK, r0_TAILADJX, r0_TAILADJY, r0_Ring, r0_ORing, r0_leftwardTopSerif, r0_leftwardBottomSerif, r0_rightwardTopSerif, r0_rightwardBottomSerif, r0_xn$createglyph$7Hrq, r0_para, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20, _r0_t21, _r0_t22, _r0_t23, _r0_t24, _r0_t25, _r0_t26, _r0_t27, _r0_t28, _r0_t29, _r0_t30, _r0_t31, _r0_t32, _r0_t33, _r0_t34, _r0_t35, _r0_t36, _r0_t37, _r0_t38, _r0_t39, _r0_t40, _r0_t41, _r0_t42, _r0_t43, _r0_t44, _r0_t45, _r0_t46, _r0_t47, _r0_t48, _r0_t49, _r0_t50, _r0_t51, _r0_t52, _r0_t53, _r0_t54, _r0_t55, _r0_t56, _r0_t57, _r0_t58, _r0_t59, _r0_t60, _r0_t61, _r0_t62, _r0_t63, _r0_t64, _r0_t65, _r0_t66, _r0_t67, _r0_t68;
     r0_font = require('./empty.json');
     r0_glyphList = r0_font['glyf'];
     r0_glyphs = { '.notdef': r0_glyphList[0] };
@@ -32,10 +32,10 @@
     r0_para_bold['stroke'] = 120;
     r0_para_bold['dotsize'] = 150;
     r0_para_bold['barpos'] = 0.42;
-    r0_para_bold['hook'] = 160;
+    r0_para_bold['hook'] = 150;
     r0_para_bold['ahook'] = 100;
     r0_para_bold['oxhook'] = 0;
-    r0_para_bold['kappa_hook'] = 0.85;
+    r0_para_bold['kappa_hook'] = 0.7;
     r0_para_bold['kappa_ahook'] = 0.6;
     r0_para_italic = Object['create'](r0_para_regular);
     r0_para_italic['italicangle'] = 10;
@@ -122,55 +122,32 @@
         r2_s = new r0_Stroke()['set-transform'](r0_globalTransform)['start-from'](r2_mx, r2_d)['cubic-to'](r2_mx + (r2_l - r2_mx) * r0_BKAPPA, r2_d, r2_l, r2_myd + (r2_d - r2_myd) * r0_BKAPPA, r2_l, r2_myd)['line-to'](r2_l, r2_myu)['cubic-to'](r2_l, r2_myu + (r2_u - r2_myu) * r0_BKAPPA, r2_mx + (r2_l - r2_mx) * r0_BKAPPA, r2_u, r2_mx, r2_u)['cubic-to'](r2_mx + (r2_r - r2_mx) * r0_BKAPPA, r2_u, r2_r, r2_myu + (r2_u - r2_myu) * r0_BKAPPA, r2_r, r2_myu)['line-to'](r2_r, r2_myd)['cubic-to'](r2_r, r2_myd + (r2_d - r2_myd) * r0_BKAPPA, r2_mx + (r2_r - r2_mx) * r0_BKAPPA, r2_d, r2_mx, r2_d);
         return r2_s['points'];
     };
-    r0_xn$createglyph$7Hrq = function _r0_t2(r7_name, r7_actions) {
-        var r7_name, r7_actions, r7_glyphObject;
-        r7_glyphObject = new r0_Glyph(r7_name);
-        r0_glyphList['push'](r7_glyphObject);
-        r0_glyphs[r7_name] = r7_glyphObject;
-        r7_actions['call'](r7_glyphObject);
-        return r7_glyphObject;
+    r0_leftwardTopSerif = function _r0_t2(r3_x, r3_y, r3_length) {
+        var r3_x, r3_y, r3_length;
+        return new r0_Stroke()['set-transform'](r0_globalTransform)['start-from'](r3_x + r0_HALFSTROKE, r3_y)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['line-to'](r3_x - r3_length - r0_globalTransform['yx'] * r0_STROKE, r3_y)['form-stroke']();
     };
-    r0_xn$createglyph$7Hrq('space', function _r0_t3() {
-        var r9_xn$setwidth$9Jrj, r9_xn$assignunicode$7Hrq, r9_xn$startfrom$1aao, r9_xn$lineto$5sIl, r9_xn$curveto$1aao, r9_xn$cubicto$1aao, r9_xn$putshapes$9Jrj, r9_xn$reverselast$3qIs, r9_xn$includeglyph$3qIs, r9_xn$createstroke$7Hrq, _r9_t0;
-        _r9_t0 = this;
-        r9_xn$setwidth$9Jrj = _r9_t0['set-width']['bind'](_r9_t0);
-        r9_xn$assignunicode$7Hrq = _r9_t0['assign-unicode']['bind'](_r9_t0);
-        r9_xn$startfrom$1aao = _r9_t0['start-from']['bind'](_r9_t0);
-        r9_xn$lineto$5sIl = _r9_t0['line-to']['bind'](_r9_t0);
-        r9_xn$curveto$1aao = _r9_t0['curve-to']['bind'](_r9_t0);
-        r9_xn$cubicto$1aao = _r9_t0['cubic-to']['bind'](_r9_t0);
-        r9_xn$putshapes$9Jrj = _r9_t0['put-shapes']['bind'](_r9_t0);
-        r9_xn$reverselast$3qIs = _r9_t0['reverse-last']['bind'](_r9_t0);
-        r9_xn$includeglyph$3qIs = _r9_t0['include-glyph']['bind'](_r9_t0);
-        r9_xn$createstroke$7Hrq = _r9_t0['create-stroke']['bind'](_r9_t0);
-        _r9_t0['gizmo'] = r0_globalTransform;
-        _r9_t0['set-width'](r0_WIDTH);
-        r9_xn$setwidth$9Jrj(r0_WIDTH);
-        r9_xn$assignunicode$7Hrq(' ');
-        return void 0;
-    });
-    r0_xn$createglyph$7Hrq('bar', function _r0_t4() {
-        var r11_xn$setwidth$9Jrj, r11_xn$assignunicode$7Hrq, r11_xn$startfrom$1aao, r11_xn$lineto$5sIl, r11_xn$curveto$1aao, r11_xn$cubicto$1aao, r11_xn$putshapes$9Jrj, r11_xn$reverselast$3qIs, r11_xn$includeglyph$3qIs, r11_xn$createstroke$7Hrq, _r11_t0;
-        _r11_t0 = this;
-        r11_xn$setwidth$9Jrj = _r11_t0['set-width']['bind'](_r11_t0);
-        r11_xn$assignunicode$7Hrq = _r11_t0['assign-unicode']['bind'](_r11_t0);
-        r11_xn$startfrom$1aao = _r11_t0['start-from']['bind'](_r11_t0);
-        r11_xn$lineto$5sIl = _r11_t0['line-to']['bind'](_r11_t0);
-        r11_xn$curveto$1aao = _r11_t0['curve-to']['bind'](_r11_t0);
-        r11_xn$cubicto$1aao = _r11_t0['cubic-to']['bind'](_r11_t0);
-        r11_xn$putshapes$9Jrj = _r11_t0['put-shapes']['bind'](_r11_t0);
-        r11_xn$reverselast$3qIs = _r11_t0['reverse-last']['bind'](_r11_t0);
-        r11_xn$includeglyph$3qIs = _r11_t0['include-glyph']['bind'](_r11_t0);
-        r11_xn$createstroke$7Hrq = _r11_t0['create-stroke']['bind'](_r11_t0);
-        _r11_t0['gizmo'] = r0_globalTransform;
-        _r11_t0['set-width'](r0_WIDTH);
-        r11_xn$setwidth$9Jrj(r0_WIDTH);
-        r11_xn$assignunicode$7Hrq('|');
-        r11_xn$putshapes$9Jrj(r11_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_DESCENDER / 2)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['line-to'](r0_MIDDLE, r0_CAP - r0_DESCENDER / 2)['form-stroke']());
-        return void 0;
-    });
-    r0_xn$createglyph$7Hrq('A', function _r0_t5() {
-        var r13_xn$setwidth$9Jrj, r13_xn$assignunicode$7Hrq, r13_xn$startfrom$1aao, r13_xn$lineto$5sIl, r13_xn$curveto$1aao, r13_xn$cubicto$1aao, r13_xn$putshapes$9Jrj, r13_xn$reverselast$3qIs, r13_xn$includeglyph$3qIs, r13_xn$createstroke$7Hrq, r13_TURN, r13_leftbar, r13_rightbar, r13_hbar, _r13_t0;
+    r0_leftwardBottomSerif = function _r0_t3(r4_x, r4_y, r4_length) {
+        var r4_x, r4_y, r4_length;
+        return new r0_Stroke()['set-transform'](r0_globalTransform)['start-from'](r4_x + r0_HALFSTROKE, r4_y)['pen-direction'](r0_LEFTWARD)['set-width'](0, r0_STROKE)['line-to'](r4_x - r4_length + r0_globalTransform['yx'] * r0_STROKE, r4_y)['form-stroke']();
+    };
+    r0_rightwardTopSerif = function _r0_t4(r5_x, r5_y, r5_length) {
+        var r5_x, r5_y, r5_length;
+        return new r0_Stroke()['set-transform'](r0_globalTransform)['start-from'](r5_x - r0_HALFSTROKE, r5_y)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['line-to'](r5_x + r5_length - r0_globalTransform['yx'] * r0_STROKE, r5_y)['form-stroke']();
+    };
+    r0_rightwardBottomSerif = function _r0_t5(r6_x, r6_y, r6_length) {
+        var r6_x, r6_y, r6_length;
+        return new r0_Stroke()['set-transform'](r0_globalTransform)['start-from'](r6_x - r0_HALFSTROKE, r6_y)['pen-direction'](r0_RIGHTWARD)['set-width'](r0_STROKE, 0)['line-to'](r6_x + r6_length + r0_globalTransform['yx'] * r0_STROKE, r6_y)['form-stroke']();
+    };
+    r0_xn$createglyph$7Hrq = function _r0_t6(r11_name, r11_actions) {
+        var r11_name, r11_actions, r11_glyphObject;
+        r11_glyphObject = new r0_Glyph(r11_name);
+        r0_glyphList['push'](r11_glyphObject);
+        r0_glyphs[r11_name] = r11_glyphObject;
+        r11_actions['call'](r11_glyphObject);
+        return r11_glyphObject;
+    };
+    r0_xn$createglyph$7Hrq('space', function _r0_t7() {
+        var r13_xn$setwidth$9Jrj, r13_xn$assignunicode$7Hrq, r13_xn$startfrom$1aao, r13_xn$lineto$5sIl, r13_xn$curveto$1aao, r13_xn$cubicto$1aao, r13_xn$putshapes$9Jrj, r13_xn$reverselast$3qIs, r13_xn$includeglyph$3qIs, r13_xn$createstroke$7Hrq, _r13_t0;
         _r13_t0 = this;
         r13_xn$setwidth$9Jrj = _r13_t0['set-width']['bind'](_r13_t0);
         r13_xn$assignunicode$7Hrq = _r13_t0['assign-unicode']['bind'](_r13_t0);
@@ -185,23 +162,11 @@
         _r13_t0['gizmo'] = r0_globalTransform;
         _r13_t0['set-width'](r0_WIDTH);
         r13_xn$setwidth$9Jrj(r0_WIDTH);
-        r13_xn$assignunicode$7Hrq('A');
-        r13_TURN = r0_XH * 0.1;
-        r13_leftbar = r13_xn$createstroke$7Hrq();
-        r13_leftbar['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r13_TURN)['pen-direction'](r0_UPWARD)['curve-to'](r0_SB, r13_TURN + 0.27 * (r0_CAP - r13_TURN), r0_MIDDLE - r0_STROKE / 2, r0_CAP)['set-width'](0, r0_STROKE * 0.8);
-        r13_rightbar = r13_xn$createstroke$7Hrq();
-        r13_rightbar['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r13_TURN)['pen-direction'](r0_UPWARD)['curve-to'](r0_RIGHTSB, r13_TURN + 0.27 * (r0_CAP - r13_TURN), r0_MIDDLE + r0_STROKE / 2, r0_CAP)['set-width'](r0_STROKE * 0.8, 0);
-        r13_hbar = r13_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_STROKE, r0_XH / 2)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['line-to'](r0_RIGHTSB - r0_STROKE, r0_XH / 2)['pen-direction'](r0_RIGHTWARD);
-        r13_xn$putshapes$9Jrj(r13_leftbar['form-stroke']());
-        r13_xn$putshapes$9Jrj(r13_hbar['form-stroke']());
-        r13_xn$putshapes$9Jrj(r13_rightbar['form-stroke']());
-        r13_xn$startfrom$1aao(r0_MIDDLE - r0_STROKE / 2, r0_CAP);
-        r13_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2, r0_CAP);
-        r13_xn$lineto$5sIl(r0_MIDDLE, r0_CAP - r0_STROKE);
+        r13_xn$assignunicode$7Hrq(' ');
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('X', function _r0_t6() {
-        var r15_xn$setwidth$9Jrj, r15_xn$assignunicode$7Hrq, r15_xn$startfrom$1aao, r15_xn$lineto$5sIl, r15_xn$curveto$1aao, r15_xn$cubicto$1aao, r15_xn$putshapes$9Jrj, r15_xn$reverselast$3qIs, r15_xn$includeglyph$3qIs, r15_xn$createstroke$7Hrq, r15_TURN, r15_straight, r15_strench, r15_barone, r15_bartwo, _r15_t0;
+    r0_xn$createglyph$7Hrq('bar', function _r0_t8() {
+        var r15_xn$setwidth$9Jrj, r15_xn$assignunicode$7Hrq, r15_xn$startfrom$1aao, r15_xn$lineto$5sIl, r15_xn$curveto$1aao, r15_xn$cubicto$1aao, r15_xn$putshapes$9Jrj, r15_xn$reverselast$3qIs, r15_xn$includeglyph$3qIs, r15_xn$createstroke$7Hrq, _r15_t0;
         _r15_t0 = this;
         r15_xn$setwidth$9Jrj = _r15_t0['set-width']['bind'](_r15_t0);
         r15_xn$assignunicode$7Hrq = _r15_t0['assign-unicode']['bind'](_r15_t0);
@@ -216,18 +181,12 @@
         _r15_t0['gizmo'] = r0_globalTransform;
         _r15_t0['set-width'](r0_WIDTH);
         r15_xn$setwidth$9Jrj(r0_WIDTH);
-        r15_xn$assignunicode$7Hrq('X');
-        r15_TURN = r0_XH * 0.05;
-        r15_straight = 0.6;
-        r15_strench = 0.125;
-        r15_barone = r15_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_SB + r0_HALFSTROKE, r15_TURN)['curve-to'](r0_SB + r0_HALFSTROKE, r15_TURN + r15_strench * (r0_CAP - r15_TURN), r0_MIDDLE + r15_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r15_straight * (r15_TURN + r15_strench * (r0_CAP - r15_TURN) - r0_CAPMIDDLE))['line-to'](r0_MIDDLE + r15_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r15_straight * (r0_CAP - r15_TURN - r15_strench * (r0_CAP - r15_TURN) - r0_CAPMIDDLE))['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r15_TURN - r15_strench * (r0_CAP - r15_TURN), r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r15_TURN)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
-        r15_bartwo = r15_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_HALFSTROKE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r15_TURN)['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r15_TURN + r15_strench * (r0_CAP - r15_TURN), r0_MIDDLE + r15_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r15_straight * (r15_TURN + r15_strench * (r0_CAP - r15_TURN) - r0_CAPMIDDLE))['line-to'](r0_MIDDLE + r15_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r15_straight * (r0_CAP - r15_TURN - r15_strench * (r0_CAP - r15_TURN) - r0_CAPMIDDLE))['curve-to'](r0_SB + r0_HALFSTROKE, r0_CAP - r15_TURN - r15_strench * (r0_CAP - r15_TURN), r0_SB + r0_HALFSTROKE, r0_CAP - r15_TURN)['line-to'](r0_SB + r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
-        r15_xn$putshapes$9Jrj(r15_barone['form-stroke']());
-        r15_xn$putshapes$9Jrj(r15_bartwo['form-stroke']());
+        r15_xn$assignunicode$7Hrq('|');
+        r15_xn$putshapes$9Jrj(r15_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_DESCENDER / 2)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['line-to'](r0_MIDDLE, r0_CAP - r0_DESCENDER / 2)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('Y', function _r0_t7() {
-        var r17_xn$setwidth$9Jrj, r17_xn$assignunicode$7Hrq, r17_xn$startfrom$1aao, r17_xn$lineto$5sIl, r17_xn$curveto$1aao, r17_xn$cubicto$1aao, r17_xn$putshapes$9Jrj, r17_xn$reverselast$3qIs, r17_xn$includeglyph$3qIs, r17_xn$createstroke$7Hrq, r17_TURN, r17_straight, r17_strench, r17_cross, r17_barone, r17_bartwo, _r17_t0;
+    r0_xn$createglyph$7Hrq('A', function _r0_t9() {
+        var r17_xn$setwidth$9Jrj, r17_xn$assignunicode$7Hrq, r17_xn$startfrom$1aao, r17_xn$lineto$5sIl, r17_xn$curveto$1aao, r17_xn$cubicto$1aao, r17_xn$putshapes$9Jrj, r17_xn$reverselast$3qIs, r17_xn$includeglyph$3qIs, r17_xn$createstroke$7Hrq, r17_TURN, r17_leftbar, r17_rightbar, r17_hbar, _r17_t0;
         _r17_t0 = this;
         r17_xn$setwidth$9Jrj = _r17_t0['set-width']['bind'](_r17_t0);
         r17_xn$assignunicode$7Hrq = _r17_t0['assign-unicode']['bind'](_r17_t0);
@@ -242,20 +201,23 @@
         _r17_t0['gizmo'] = r0_globalTransform;
         _r17_t0['set-width'](r0_WIDTH);
         r17_xn$setwidth$9Jrj(r0_WIDTH);
-        r17_xn$assignunicode$7Hrq('Y');
-        r17_TURN = r0_XH * 0.05;
-        r17_straight = 0.6;
-        r17_strench = 0.15;
-        r17_cross = r0_CAP * 0.4;
-        r17_barone = r17_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r17_cross)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE + r17_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r17_cross + r17_straight * (r0_CAP - r17_TURN - r17_strench * (r0_CAP - r17_TURN) - r17_cross))['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r17_TURN - r17_strench * (r0_CAP - r17_TURN), r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r17_TURN)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
-        r17_bartwo = r17_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r17_cross)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE + r17_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r17_cross + r17_straight * (r0_CAP - r17_TURN - r17_strench * (r0_CAP - r17_TURN) - r17_cross))['curve-to'](r0_SB + r0_HALFSTROKE, r0_CAP - r17_TURN - r17_strench * (r0_CAP - r17_TURN), r0_SB + r0_HALFSTROKE, r0_CAP - r17_TURN)['line-to'](r0_SB + r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
-        r17_xn$putshapes$9Jrj(r17_barone['form-stroke']());
-        r17_xn$putshapes$9Jrj(r17_bartwo['form-stroke']());
-        r17_xn$putshapes$9Jrj(r17_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_MIDDLE, r17_cross + r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r17_xn$assignunicode$7Hrq('A');
+        r17_TURN = r0_XH * 0.1;
+        r17_leftbar = r17_xn$createstroke$7Hrq();
+        r17_leftbar['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r17_TURN)['pen-direction'](r0_UPWARD)['curve-to'](r0_SB, r17_TURN + 0.27 * (r0_CAP - r17_TURN), r0_MIDDLE - r0_STROKE / 2, r0_CAP)['set-width'](0, r0_STROKE * 0.8);
+        r17_rightbar = r17_xn$createstroke$7Hrq();
+        r17_rightbar['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r17_TURN)['pen-direction'](r0_UPWARD)['curve-to'](r0_RIGHTSB, r17_TURN + 0.27 * (r0_CAP - r17_TURN), r0_MIDDLE + r0_STROKE / 2, r0_CAP)['set-width'](r0_STROKE * 0.8, 0);
+        r17_hbar = r17_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_STROKE, r0_XH / 2)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['line-to'](r0_RIGHTSB - r0_STROKE, r0_XH / 2)['pen-direction'](r0_RIGHTWARD);
+        r17_xn$putshapes$9Jrj(r17_leftbar['form-stroke']());
+        r17_xn$putshapes$9Jrj(r17_hbar['form-stroke']());
+        r17_xn$putshapes$9Jrj(r17_rightbar['form-stroke']());
+        r17_xn$startfrom$1aao(r0_MIDDLE - r0_STROKE / 2, r0_CAP);
+        r17_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2, r0_CAP);
+        r17_xn$lineto$5sIl(r0_MIDDLE, r0_CAP - r0_STROKE);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('B', function _r0_t8() {
-        var r19_xn$setwidth$9Jrj, r19_xn$assignunicode$7Hrq, r19_xn$startfrom$1aao, r19_xn$lineto$5sIl, r19_xn$curveto$1aao, r19_xn$cubicto$1aao, r19_xn$putshapes$9Jrj, r19_xn$reverselast$3qIs, r19_xn$includeglyph$3qIs, r19_xn$createstroke$7Hrq, r19_bowl, r19_tkappa, r19_bkappa, r19_turntop, r19_turnbottom, r19_topbowl, r19_bottombowl, r19_leftbar, _r19_t0;
+    r0_xn$createglyph$7Hrq('X', function _r0_t10() {
+        var r19_xn$setwidth$9Jrj, r19_xn$assignunicode$7Hrq, r19_xn$startfrom$1aao, r19_xn$lineto$5sIl, r19_xn$curveto$1aao, r19_xn$cubicto$1aao, r19_xn$putshapes$9Jrj, r19_xn$reverselast$3qIs, r19_xn$includeglyph$3qIs, r19_xn$createstroke$7Hrq, r19_TURN, r19_straight, r19_strench, r19_barone, r19_bartwo, _r19_t0;
         _r19_t0 = this;
         r19_xn$setwidth$9Jrj = _r19_t0['set-width']['bind'](_r19_t0);
         r19_xn$assignunicode$7Hrq = _r19_t0['assign-unicode']['bind'](_r19_t0);
@@ -270,24 +232,18 @@
         _r19_t0['gizmo'] = r0_globalTransform;
         _r19_t0['set-width'](r0_WIDTH);
         r19_xn$setwidth$9Jrj(r0_WIDTH);
-        r19_xn$assignunicode$7Hrq('B');
-        r19_bowl = 451;
-        r19_tkappa = r0_COKAPPA - 0.22;
-        r19_bkappa = r0_COKAPPA - 0.2;
-        r19_turntop = (r0_CAP + (r19_bowl - r0_STROKE)) / 2;
-        r19_turnbottom = r19_bowl / 2;
-        r19_topbowl = r19_xn$createstroke$7Hrq();
-        r19_topbowl['start-from'](r0_SB, r0_CAP)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_SB * 0.5 - r19_turnbottom, r0_CAP)['cubic-to'](r0_RIGHTSB - r0_SB * 0.5 - r19_tkappa * r19_turnbottom, r0_CAP, r0_RIGHTSB - r0_SB * 0.5, r19_turntop + (r0_CAP - r19_turntop) * r0_KAPPA, r0_RIGHTSB - r0_SB * 0.5, r19_turntop)['cubic-to'](r0_RIGHTSB - r0_SB * 0.5, r19_turntop + r0_KAPPA * (r19_bowl - r0_STROKE - r19_turntop), r0_RIGHTSB - r0_SB * 0.5 - r19_tkappa * r19_turnbottom, r19_bowl - r0_STROKE, r0_RIGHTSB - r0_SB * 0.5 - r19_turnbottom, r19_bowl - r0_STROKE)['line-to'](r0_SB, r19_bowl - r0_STROKE)['pen-direction'](r0_LEFTWARD);
-        r19_bottombowl = r19_xn$createstroke$7Hrq();
-        r19_bottombowl['start-from'](r0_SB, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r19_turnbottom, 0)['cubic-to'](r0_RIGHTSB - r19_bkappa * r19_turnbottom, 0, r0_RIGHTSB, r19_turnbottom * r0_KAPPA, r0_RIGHTSB, r19_turnbottom)['cubic-to'](r0_RIGHTSB, r19_turnbottom + r0_KAPPA * (r19_bowl - r19_turnbottom), r0_RIGHTSB - r19_bkappa * r19_turnbottom, r19_bowl, r0_RIGHTSB - r19_turnbottom, r19_bowl)['line-to'](r0_SB, r19_bowl)['pen-direction'](r0_LEFTWARD);
-        r19_leftbar = r19_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD);
-        r19_xn$putshapes$9Jrj(r19_topbowl['form-stroke'](0, r0_STROKE));
-        r19_xn$putshapes$9Jrj(r19_bottombowl['form-stroke'](r0_STROKE, 0));
-        r19_xn$putshapes$9Jrj(r19_leftbar['form-stroke'](0, r0_STROKE));
+        r19_xn$assignunicode$7Hrq('X');
+        r19_TURN = r0_XH * 0.05;
+        r19_straight = 0.6;
+        r19_strench = 0.125;
+        r19_barone = r19_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_SB + r0_HALFSTROKE, r19_TURN)['curve-to'](r0_SB + r0_HALFSTROKE, r19_TURN + r19_strench * (r0_CAP - r19_TURN), r0_MIDDLE + r19_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r19_straight * (r19_TURN + r19_strench * (r0_CAP - r19_TURN) - r0_CAPMIDDLE))['line-to'](r0_MIDDLE + r19_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r19_straight * (r0_CAP - r19_TURN - r19_strench * (r0_CAP - r19_TURN) - r0_CAPMIDDLE))['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r19_TURN - r19_strench * (r0_CAP - r19_TURN), r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r19_TURN)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
+        r19_bartwo = r19_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_HALFSTROKE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r19_TURN)['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r19_TURN + r19_strench * (r0_CAP - r19_TURN), r0_MIDDLE + r19_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r19_straight * (r19_TURN + r19_strench * (r0_CAP - r19_TURN) - r0_CAPMIDDLE))['line-to'](r0_MIDDLE + r19_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r0_CAPMIDDLE + r19_straight * (r0_CAP - r19_TURN - r19_strench * (r0_CAP - r19_TURN) - r0_CAPMIDDLE))['curve-to'](r0_SB + r0_HALFSTROKE, r0_CAP - r19_TURN - r19_strench * (r0_CAP - r19_TURN), r0_SB + r0_HALFSTROKE, r0_CAP - r19_TURN)['line-to'](r0_SB + r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
+        r19_xn$putshapes$9Jrj(r19_barone['form-stroke']());
+        r19_xn$putshapes$9Jrj(r19_bartwo['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('D', function _r0_t9() {
-        var r21_xn$setwidth$9Jrj, r21_xn$assignunicode$7Hrq, r21_xn$startfrom$1aao, r21_xn$lineto$5sIl, r21_xn$curveto$1aao, r21_xn$cubicto$1aao, r21_xn$putshapes$9Jrj, r21_xn$reverselast$3qIs, r21_xn$includeglyph$3qIs, r21_xn$createstroke$7Hrq, r21_dsmooth, r21_bsmooth, r21_bkappa, r21_leftbar, r21_bowl, _r21_t0;
+    r0_xn$createglyph$7Hrq('Y', function _r0_t11() {
+        var r21_xn$setwidth$9Jrj, r21_xn$assignunicode$7Hrq, r21_xn$startfrom$1aao, r21_xn$lineto$5sIl, r21_xn$curveto$1aao, r21_xn$cubicto$1aao, r21_xn$putshapes$9Jrj, r21_xn$reverselast$3qIs, r21_xn$includeglyph$3qIs, r21_xn$createstroke$7Hrq, r21_TURN, r21_straight, r21_strench, r21_cross, r21_barone, r21_bartwo, _r21_t0;
         _r21_t0 = this;
         r21_xn$setwidth$9Jrj = _r21_t0['set-width']['bind'](_r21_t0);
         r21_xn$assignunicode$7Hrq = _r21_t0['assign-unicode']['bind'](_r21_t0);
@@ -302,19 +258,20 @@
         _r21_t0['gizmo'] = r0_globalTransform;
         _r21_t0['set-width'](r0_WIDTH);
         r21_xn$setwidth$9Jrj(r0_WIDTH);
-        r21_xn$assignunicode$7Hrq('D');
-        r21_dsmooth = r0_SMOOTH * 1.55;
-        r21_bsmooth = r0_SMOOTH * 1.3;
-        r21_bkappa = r0_COKAPPA - 0.2;
-        r21_leftbar = r21_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD);
-        r21_bowl = r21_xn$createstroke$7Hrq();
-        r21_bowl['start-from'](r0_SB, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r21_bsmooth, 0)['cubic-to'](r0_RIGHTSB - r21_bkappa * r21_bsmooth, 0, r0_RIGHTSB, r0_COBKAPPA * r21_dsmooth, r0_RIGHTSB, r21_dsmooth)['line-to'](r0_RIGHTSB, r0_CAP - r21_dsmooth)['cubic-to'](r0_RIGHTSB, r0_CAP - r0_COBKAPPA * r21_dsmooth, r0_RIGHTSB - r21_bkappa * r21_bsmooth, r0_CAP, r0_RIGHTSB - r21_bsmooth, r0_CAP)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_LEFTWARD);
-        r21_xn$putshapes$9Jrj(r21_bowl['form-stroke'](r0_STROKE, 0));
-        r21_xn$putshapes$9Jrj(r21_leftbar['form-stroke'](0, r0_STROKE));
+        r21_xn$assignunicode$7Hrq('Y');
+        r21_TURN = r0_XH * 0.05;
+        r21_straight = 0.6;
+        r21_strench = 0.15;
+        r21_cross = r0_CAP * 0.4;
+        r21_barone = r21_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r21_cross)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE + r21_straight * (r0_RIGHTSB - r0_HALFSTROKE - r0_MIDDLE), r21_cross + r21_straight * (r0_CAP - r21_TURN - r21_strench * (r0_CAP - r21_TURN) - r21_cross))['curve-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r21_TURN - r21_strench * (r0_CAP - r21_TURN), r0_RIGHTSB - r0_HALFSTROKE, r0_CAP - r21_TURN)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
+        r21_bartwo = r21_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r21_cross)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE + r21_straight * (r0_SB + r0_HALFSTROKE - r0_MIDDLE), r21_cross + r21_straight * (r0_CAP - r21_TURN - r21_strench * (r0_CAP - r21_TURN) - r21_cross))['curve-to'](r0_SB + r0_HALFSTROKE, r0_CAP - r21_TURN - r21_strench * (r0_CAP - r21_TURN), r0_SB + r0_HALFSTROKE, r0_CAP - r21_TURN)['line-to'](r0_SB + r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_UPWARD);
+        r21_xn$putshapes$9Jrj(r21_barone['form-stroke']());
+        r21_xn$putshapes$9Jrj(r21_bartwo['form-stroke']());
+        r21_xn$putshapes$9Jrj(r21_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['line-to'](r0_MIDDLE, r21_cross + r0_HALFSTROKE)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('P', function _r0_t10() {
-        var r23_xn$setwidth$9Jrj, r23_xn$assignunicode$7Hrq, r23_xn$startfrom$1aao, r23_xn$lineto$5sIl, r23_xn$curveto$1aao, r23_xn$cubicto$1aao, r23_xn$putshapes$9Jrj, r23_xn$reverselast$3qIs, r23_xn$includeglyph$3qIs, r23_xn$createstroke$7Hrq, r23_bowl, r23_bkappa, r23_turntop, r23_turnbottom, r23_topbowl, r23_leftbar, _r23_t0;
+    r0_xn$createglyph$7Hrq('B', function _r0_t12() {
+        var r23_xn$setwidth$9Jrj, r23_xn$assignunicode$7Hrq, r23_xn$startfrom$1aao, r23_xn$lineto$5sIl, r23_xn$curveto$1aao, r23_xn$cubicto$1aao, r23_xn$putshapes$9Jrj, r23_xn$reverselast$3qIs, r23_xn$includeglyph$3qIs, r23_xn$createstroke$7Hrq, r23_bowl, r23_tkappa, r23_bkappa, r23_turntop, r23_turnbottom, r23_topbowl, r23_bottombowl, r23_leftbar, _r23_t0;
         _r23_t0 = this;
         r23_xn$setwidth$9Jrj = _r23_t0['set-width']['bind'](_r23_t0);
         r23_xn$assignunicode$7Hrq = _r23_t0['assign-unicode']['bind'](_r23_t0);
@@ -329,19 +286,24 @@
         _r23_t0['gizmo'] = r0_globalTransform;
         _r23_t0['set-width'](r0_WIDTH);
         r23_xn$setwidth$9Jrj(r0_WIDTH);
-        r23_xn$assignunicode$7Hrq('P');
-        r23_bowl = r0_CAPMIDDLE;
+        r23_xn$assignunicode$7Hrq('B');
+        r23_bowl = 451;
+        r23_tkappa = r0_COKAPPA - 0.22;
         r23_bkappa = r0_COKAPPA - 0.2;
-        r23_turntop = (r0_CAP + (r23_bowl - r0_HALFSTROKE)) / 2;
+        r23_turntop = (r0_CAP + (r23_bowl - r0_STROKE)) / 2;
         r23_turnbottom = r23_bowl / 2;
-        r23_topbowl = r23_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.25, r0_CAP)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r23_turnbottom, r0_CAP)['arc-hv-to'](r0_RIGHTSB - r0_O, r23_turntop)['arc-vh-to'](r0_RIGHTSB - r23_turnbottom, r23_bowl - r0_HALFSTROKE)['line-to'](r0_SB * 1.25, r23_bowl - r0_HALFSTROKE)['pen-direction'](r0_LEFTWARD);
-        r23_leftbar = r23_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.25, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB * 1.25, r0_CAP)['pen-direction'](r0_UPWARD);
+        r23_topbowl = r23_xn$createstroke$7Hrq();
+        r23_topbowl['start-from'](r0_SB, r0_CAP)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_SB * 0.5 - r23_turnbottom, r0_CAP)['cubic-to'](r0_RIGHTSB - r0_SB * 0.5 - r23_tkappa * r23_turnbottom, r0_CAP, r0_RIGHTSB - r0_SB * 0.5, r23_turntop + (r0_CAP - r23_turntop) * r0_KAPPA, r0_RIGHTSB - r0_SB * 0.5, r23_turntop)['cubic-to'](r0_RIGHTSB - r0_SB * 0.5, r23_turntop + r0_KAPPA * (r23_bowl - r0_STROKE - r23_turntop), r0_RIGHTSB - r0_SB * 0.5 - r23_tkappa * r23_turnbottom, r23_bowl - r0_STROKE, r0_RIGHTSB - r0_SB * 0.5 - r23_turnbottom, r23_bowl - r0_STROKE)['line-to'](r0_SB, r23_bowl - r0_STROKE)['pen-direction'](r0_LEFTWARD);
+        r23_bottombowl = r23_xn$createstroke$7Hrq();
+        r23_bottombowl['start-from'](r0_SB, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r23_turnbottom, 0)['cubic-to'](r0_RIGHTSB - r23_bkappa * r23_turnbottom, 0, r0_RIGHTSB, r23_turnbottom * r0_KAPPA, r0_RIGHTSB, r23_turnbottom)['cubic-to'](r0_RIGHTSB, r23_turnbottom + r0_KAPPA * (r23_bowl - r23_turnbottom), r0_RIGHTSB - r23_bkappa * r23_turnbottom, r23_bowl, r0_RIGHTSB - r23_turnbottom, r23_bowl)['line-to'](r0_SB, r23_bowl)['pen-direction'](r0_LEFTWARD);
+        r23_leftbar = r23_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD);
         r23_xn$putshapes$9Jrj(r23_topbowl['form-stroke'](0, r0_STROKE));
+        r23_xn$putshapes$9Jrj(r23_bottombowl['form-stroke'](r0_STROKE, 0));
         r23_xn$putshapes$9Jrj(r23_leftbar['form-stroke'](0, r0_STROKE));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('R', function _r0_t11() {
-        var r25_xn$setwidth$9Jrj, r25_xn$assignunicode$7Hrq, r25_xn$startfrom$1aao, r25_xn$lineto$5sIl, r25_xn$curveto$1aao, r25_xn$cubicto$1aao, r25_xn$putshapes$9Jrj, r25_xn$reverselast$3qIs, r25_xn$includeglyph$3qIs, r25_xn$createstroke$7Hrq, r25_TURN, r25_right, _r25_t0;
+    r0_xn$createglyph$7Hrq('D', function _r0_t13() {
+        var r25_xn$setwidth$9Jrj, r25_xn$assignunicode$7Hrq, r25_xn$startfrom$1aao, r25_xn$lineto$5sIl, r25_xn$curveto$1aao, r25_xn$cubicto$1aao, r25_xn$putshapes$9Jrj, r25_xn$reverselast$3qIs, r25_xn$includeglyph$3qIs, r25_xn$createstroke$7Hrq, r25_dsmooth, r25_bsmooth, r25_bkappa, r25_leftbar, r25_bowl, _r25_t0;
         _r25_t0 = this;
         r25_xn$setwidth$9Jrj = _r25_t0['set-width']['bind'](_r25_t0);
         r25_xn$assignunicode$7Hrq = _r25_t0['assign-unicode']['bind'](_r25_t0);
@@ -356,15 +318,19 @@
         _r25_t0['gizmo'] = r0_globalTransform;
         _r25_t0['set-width'](r0_WIDTH);
         r25_xn$setwidth$9Jrj(r0_WIDTH);
-        r25_xn$assignunicode$7Hrq('R');
-        r25_xn$includeglyph$3qIs(r0_glyphs['P']);
-        r25_TURN = r0_XH * 0.1;
-        r25_right = r0_RIGHTSB - r0_O;
-        r25_xn$putshapes$9Jrj(r25_xn$createstroke$7Hrq()['start-from'](r25_right - r0_HALFSTROKE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['curve-to'](r25_right - r0_HALFSTROKE, r25_TURN + 0.2 * (r0_XH - r25_TURN), r0_MIDDLE, r0_CAPMIDDLE)['form-stroke']());
+        r25_xn$assignunicode$7Hrq('D');
+        r25_dsmooth = r0_SMOOTH * 1.55;
+        r25_bsmooth = r0_SMOOTH * 1.3;
+        r25_bkappa = r0_COKAPPA - 0.2;
+        r25_leftbar = r25_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD);
+        r25_bowl = r25_xn$createstroke$7Hrq();
+        r25_bowl['start-from'](r0_SB, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r25_bsmooth, 0)['cubic-to'](r0_RIGHTSB - r25_bkappa * r25_bsmooth, 0, r0_RIGHTSB, r0_COBKAPPA * r25_dsmooth, r0_RIGHTSB, r25_dsmooth)['line-to'](r0_RIGHTSB, r0_CAP - r25_dsmooth)['cubic-to'](r0_RIGHTSB, r0_CAP - r0_COBKAPPA * r25_dsmooth, r0_RIGHTSB - r25_bkappa * r25_bsmooth, r0_CAP, r0_RIGHTSB - r25_bsmooth, r0_CAP)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_LEFTWARD);
+        r25_xn$putshapes$9Jrj(r25_bowl['form-stroke'](r0_STROKE, 0));
+        r25_xn$putshapes$9Jrj(r25_leftbar['form-stroke'](0, r0_STROKE));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('C', function _r0_t12() {
-        var r27_xn$setwidth$9Jrj, r27_xn$assignunicode$7Hrq, r27_xn$startfrom$1aao, r27_xn$lineto$5sIl, r27_xn$curveto$1aao, r27_xn$cubicto$1aao, r27_xn$putshapes$9Jrj, r27_xn$reverselast$3qIs, r27_xn$includeglyph$3qIs, r27_xn$createstroke$7Hrq, r27_outline, _r27_t0;
+    r0_xn$createglyph$7Hrq('P', function _r0_t14() {
+        var r27_xn$setwidth$9Jrj, r27_xn$assignunicode$7Hrq, r27_xn$startfrom$1aao, r27_xn$lineto$5sIl, r27_xn$curveto$1aao, r27_xn$cubicto$1aao, r27_xn$putshapes$9Jrj, r27_xn$reverselast$3qIs, r27_xn$includeglyph$3qIs, r27_xn$createstroke$7Hrq, r27_bowl, r27_bkappa, r27_turntop, r27_turnbottom, r27_topbowl, r27_leftbar, _r27_t0;
         _r27_t0 = this;
         r27_xn$setwidth$9Jrj = _r27_t0['set-width']['bind'](_r27_t0);
         r27_xn$assignunicode$7Hrq = _r27_t0['assign-unicode']['bind'](_r27_t0);
@@ -379,14 +345,19 @@
         _r27_t0['gizmo'] = r0_globalTransform;
         _r27_t0['set-width'](r0_WIDTH);
         r27_xn$setwidth$9Jrj(r0_WIDTH);
-        r27_xn$assignunicode$7Hrq('C');
-        r27_outline = r27_xn$createstroke$7Hrq();
-        r27_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_ITALICCORS + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK, r0_HOOK);
-        r27_xn$putshapes$9Jrj(r27_outline['form-stroke'](r0_STROKE, 0));
+        r27_xn$assignunicode$7Hrq('P');
+        r27_bowl = r0_CAPMIDDLE;
+        r27_bkappa = r0_COKAPPA - 0.2;
+        r27_turntop = (r0_CAP + (r27_bowl - r0_HALFSTROKE)) / 2;
+        r27_turnbottom = r27_bowl / 2;
+        r27_topbowl = r27_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.25, r0_CAP)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r27_turnbottom, r0_CAP)['arc-hv-to'](r0_RIGHTSB - r0_O, r27_turntop)['arc-vh-to'](r0_RIGHTSB - r27_turnbottom, r27_bowl - r0_HALFSTROKE)['line-to'](r0_SB * 1.25, r27_bowl - r0_HALFSTROKE)['pen-direction'](r0_LEFTWARD);
+        r27_leftbar = r27_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.25, 0)['pen-direction'](r0_UPWARD)['line-to'](r0_SB * 1.25, r0_CAP)['pen-direction'](r0_UPWARD);
+        r27_xn$putshapes$9Jrj(r27_topbowl['form-stroke'](0, r0_STROKE));
+        r27_xn$putshapes$9Jrj(r27_leftbar['form-stroke'](0, r0_STROKE));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('G', function _r0_t13() {
-        var r29_xn$setwidth$9Jrj, r29_xn$assignunicode$7Hrq, r29_xn$startfrom$1aao, r29_xn$lineto$5sIl, r29_xn$curveto$1aao, r29_xn$cubicto$1aao, r29_xn$putshapes$9Jrj, r29_xn$reverselast$3qIs, r29_xn$includeglyph$3qIs, r29_xn$createstroke$7Hrq, r29_outline, r29_bar, _r29_t0;
+    r0_xn$createglyph$7Hrq('R', function _r0_t15() {
+        var r29_xn$setwidth$9Jrj, r29_xn$assignunicode$7Hrq, r29_xn$startfrom$1aao, r29_xn$lineto$5sIl, r29_xn$curveto$1aao, r29_xn$cubicto$1aao, r29_xn$putshapes$9Jrj, r29_xn$reverselast$3qIs, r29_xn$includeglyph$3qIs, r29_xn$createstroke$7Hrq, r29_TURN, r29_right, _r29_t0;
         _r29_t0 = this;
         r29_xn$setwidth$9Jrj = _r29_t0['set-width']['bind'](_r29_t0);
         r29_xn$assignunicode$7Hrq = _r29_t0['assign-unicode']['bind'](_r29_t0);
@@ -401,15 +372,14 @@
         _r29_t0['gizmo'] = r0_globalTransform;
         _r29_t0['set-width'](r0_WIDTH);
         r29_xn$setwidth$9Jrj(r0_WIDTH);
-        r29_xn$assignunicode$7Hrq('G');
-        r29_outline = r29_xn$createstroke$7Hrq();
-        r29_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP / 2 + r0_STROKE / 2)['pen-direction'](r0_UPWARD);
-        r29_xn$putshapes$9Jrj(r29_outline['form-stroke'](r0_STROKE, 0));
-        r29_bar = r29_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_CAP / 2 + r0_STROKE / 2)['line-to'](r0_RIGHTSB, r0_CAP / 2 + r0_STROKE / 2)['pen-direction'](r0_RIGHTWARD);
-        r29_xn$putshapes$9Jrj(r29_bar['form-stroke'](0, r0_STROKE));
+        r29_xn$assignunicode$7Hrq('R');
+        r29_xn$includeglyph$3qIs(r0_glyphs['P']);
+        r29_TURN = r0_XH * 0.1;
+        r29_right = r0_RIGHTSB - r0_O;
+        r29_xn$putshapes$9Jrj(r29_xn$createstroke$7Hrq()['start-from'](r29_right - r0_HALFSTROKE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['curve-to'](r29_right - r0_HALFSTROKE, r29_TURN + 0.2 * (r0_XH - r29_TURN), r0_MIDDLE, r0_CAPMIDDLE)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('O', function _r0_t14() {
+    r0_xn$createglyph$7Hrq('C', function _r0_t16() {
         var r31_xn$setwidth$9Jrj, r31_xn$assignunicode$7Hrq, r31_xn$startfrom$1aao, r31_xn$lineto$5sIl, r31_xn$curveto$1aao, r31_xn$cubicto$1aao, r31_xn$putshapes$9Jrj, r31_xn$reverselast$3qIs, r31_xn$includeglyph$3qIs, r31_xn$createstroke$7Hrq, r31_outline, _r31_t0;
         _r31_t0 = this;
         r31_xn$setwidth$9Jrj = _r31_t0['set-width']['bind'](_r31_t0);
@@ -425,14 +395,14 @@
         _r31_t0['gizmo'] = r0_globalTransform;
         _r31_t0['set-width'](r0_WIDTH);
         r31_xn$setwidth$9Jrj(r0_WIDTH);
-        r31_xn$assignunicode$7Hrq('O');
+        r31_xn$assignunicode$7Hrq('C');
         r31_outline = r31_xn$createstroke$7Hrq();
-        r31_outline['start-from'](r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP - r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD);
+        r31_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_ITALICCORS + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK, r0_HOOK);
         r31_xn$putshapes$9Jrj(r31_outline['form-stroke'](r0_STROKE, 0));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('zero.slashed', function _r0_t15() {
-        var r33_xn$setwidth$9Jrj, r33_xn$assignunicode$7Hrq, r33_xn$startfrom$1aao, r33_xn$lineto$5sIl, r33_xn$curveto$1aao, r33_xn$cubicto$1aao, r33_xn$putshapes$9Jrj, r33_xn$reverselast$3qIs, r33_xn$includeglyph$3qIs, r33_xn$createstroke$7Hrq, r33_bar, _r33_t0;
+    r0_xn$createglyph$7Hrq('G', function _r0_t17() {
+        var r33_xn$setwidth$9Jrj, r33_xn$assignunicode$7Hrq, r33_xn$startfrom$1aao, r33_xn$lineto$5sIl, r33_xn$curveto$1aao, r33_xn$cubicto$1aao, r33_xn$putshapes$9Jrj, r33_xn$reverselast$3qIs, r33_xn$includeglyph$3qIs, r33_xn$createstroke$7Hrq, r33_outline, r33_bar, _r33_t0;
         _r33_t0 = this;
         r33_xn$setwidth$9Jrj = _r33_t0['set-width']['bind'](_r33_t0);
         r33_xn$assignunicode$7Hrq = _r33_t0['assign-unicode']['bind'](_r33_t0);
@@ -447,13 +417,16 @@
         _r33_t0['gizmo'] = r0_globalTransform;
         _r33_t0['set-width'](r0_WIDTH);
         r33_xn$setwidth$9Jrj(r0_WIDTH);
-        r33_xn$putshapes$9Jrj(r0_glyphs['O']['contours']);
-        r33_bar = r33_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_STROKE / 2, r0_CAP * (1 - 0.65))['line-to'](r0_RIGHTSB - r0_STROKE / 2, r0_CAP * 0.65);
-        r33_xn$putshapes$9Jrj(r33_bar['form-stroke'](r0_STROKE / 2, r0_STROKE / 2));
+        r33_xn$assignunicode$7Hrq('G');
+        r33_outline = r33_xn$createstroke$7Hrq();
+        r33_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP / 2 + r0_STROKE / 2)['pen-direction'](r0_UPWARD);
+        r33_xn$putshapes$9Jrj(r33_outline['form-stroke'](r0_STROKE, 0));
+        r33_bar = r33_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_CAP / 2 + r0_STROKE / 2)['line-to'](r0_RIGHTSB, r0_CAP / 2 + r0_STROKE / 2)['pen-direction'](r0_RIGHTWARD);
+        r33_xn$putshapes$9Jrj(r33_bar['form-stroke'](0, r0_STROKE));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('zero.unslashed', function _r0_t16() {
-        var r35_xn$setwidth$9Jrj, r35_xn$assignunicode$7Hrq, r35_xn$startfrom$1aao, r35_xn$lineto$5sIl, r35_xn$curveto$1aao, r35_xn$cubicto$1aao, r35_xn$putshapes$9Jrj, r35_xn$reverselast$3qIs, r35_xn$includeglyph$3qIs, r35_xn$createstroke$7Hrq, _r35_t0;
+    r0_xn$createglyph$7Hrq('O', function _r0_t18() {
+        var r35_xn$setwidth$9Jrj, r35_xn$assignunicode$7Hrq, r35_xn$startfrom$1aao, r35_xn$lineto$5sIl, r35_xn$curveto$1aao, r35_xn$cubicto$1aao, r35_xn$putshapes$9Jrj, r35_xn$reverselast$3qIs, r35_xn$includeglyph$3qIs, r35_xn$createstroke$7Hrq, r35_outline, _r35_t0;
         _r35_t0 = this;
         r35_xn$setwidth$9Jrj = _r35_t0['set-width']['bind'](_r35_t0);
         r35_xn$assignunicode$7Hrq = _r35_t0['assign-unicode']['bind'](_r35_t0);
@@ -467,11 +440,15 @@
         r35_xn$createstroke$7Hrq = _r35_t0['create-stroke']['bind'](_r35_t0);
         _r35_t0['gizmo'] = r0_globalTransform;
         _r35_t0['set-width'](r0_WIDTH);
-        r35_xn$includeglyph$3qIs(r0_glyphs['O']);
+        r35_xn$setwidth$9Jrj(r0_WIDTH);
+        r35_xn$assignunicode$7Hrq('O');
+        r35_outline = r35_xn$createstroke$7Hrq();
+        r35_outline['start-from'](r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r0_SMOOTHA)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP - r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD);
+        r35_xn$putshapes$9Jrj(r35_outline['form-stroke'](r0_STROKE, 0));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('zero.dotted', function _r0_t17() {
-        var r37_xn$setwidth$9Jrj, r37_xn$assignunicode$7Hrq, r37_xn$startfrom$1aao, r37_xn$lineto$5sIl, r37_xn$curveto$1aao, r37_xn$cubicto$1aao, r37_xn$putshapes$9Jrj, r37_xn$reverselast$3qIs, r37_xn$includeglyph$3qIs, r37_xn$createstroke$7Hrq, _r37_t0;
+    r0_xn$createglyph$7Hrq('zero.slashed', function _r0_t19() {
+        var r37_xn$setwidth$9Jrj, r37_xn$assignunicode$7Hrq, r37_xn$startfrom$1aao, r37_xn$lineto$5sIl, r37_xn$curveto$1aao, r37_xn$cubicto$1aao, r37_xn$putshapes$9Jrj, r37_xn$reverselast$3qIs, r37_xn$includeglyph$3qIs, r37_xn$createstroke$7Hrq, r37_bar, _r37_t0;
         _r37_t0 = this;
         r37_xn$setwidth$9Jrj = _r37_t0['set-width']['bind'](_r37_t0);
         r37_xn$assignunicode$7Hrq = _r37_t0['assign-unicode']['bind'](_r37_t0);
@@ -485,51 +462,31 @@
         r37_xn$createstroke$7Hrq = _r37_t0['create-stroke']['bind'](_r37_t0);
         _r37_t0['gizmo'] = r0_globalTransform;
         _r37_t0['set-width'](r0_WIDTH);
-        r37_xn$includeglyph$3qIs(r0_glyphs['O']);
-        r37_xn$putshapes$9Jrj([r0_Ring(r0_CAPMIDDLE + r0_DOTRADIUS, r0_CAPMIDDLE - r0_DOTRADIUS, r0_MIDDLE + r0_DOTRADIUS, r0_MIDDLE - r0_DOTRADIUS)]);
+        r37_xn$setwidth$9Jrj(r0_WIDTH);
+        r37_xn$putshapes$9Jrj(r0_glyphs['O']['contours']);
+        r37_bar = r37_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_STROKE / 2, r0_CAP * (1 - 0.65))['line-to'](r0_RIGHTSB - r0_STROKE / 2, r0_CAP * 0.65);
+        r37_xn$putshapes$9Jrj(r37_bar['form-stroke'](r0_STROKE / 2, r0_STROKE / 2));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('zero', function _r0_t18() {
-        var r39_xn$setwidth$9Jrj, r39_xn$assignunicode$7Hrq, r39_xn$startfrom$1aao, r39_xn$lineto$5sIl, r39_xn$curveto$1aao, r39_xn$cubicto$1aao, r39_xn$putshapes$9Jrj, r39_xn$reverselast$3qIs, r39_xn$includeglyph$3qIs, r39_xn$createstroke$7Hrq, r39_otherwise, _r39_t0, _r39_t1, _r39_t2, _r39_t3, _r39_t4, _r39_t5, _r39_t6, _r39_t7;
-        _r39_t1 = this;
-        r39_xn$setwidth$9Jrj = _r39_t1['set-width']['bind'](_r39_t1);
-        r39_xn$assignunicode$7Hrq = _r39_t1['assign-unicode']['bind'](_r39_t1);
-        r39_xn$startfrom$1aao = _r39_t1['start-from']['bind'](_r39_t1);
-        r39_xn$lineto$5sIl = _r39_t1['line-to']['bind'](_r39_t1);
-        r39_xn$curveto$1aao = _r39_t1['curve-to']['bind'](_r39_t1);
-        r39_xn$cubicto$1aao = _r39_t1['cubic-to']['bind'](_r39_t1);
-        r39_xn$putshapes$9Jrj = _r39_t1['put-shapes']['bind'](_r39_t1);
-        r39_xn$reverselast$3qIs = _r39_t1['reverse-last']['bind'](_r39_t1);
-        r39_xn$includeglyph$3qIs = _r39_t1['include-glyph']['bind'](_r39_t1);
-        r39_xn$createstroke$7Hrq = _r39_t1['create-stroke']['bind'](_r39_t1);
-        _r39_t1['gizmo'] = r0_globalTransform;
-        _r39_t1['set-width'](r0_WIDTH);
-        r39_xn$setwidth$9Jrj(r0_WIDTH);
-        r39_xn$assignunicode$7Hrq('0');
-        _r39_t2 = r39_xn$includeglyph$3qIs;
-        _r39_t3 = r0_glyphs;
-        _r39_t0 = r0_variantSelector['zero'];
-        if ('slashed' === _r39_t0) {
-            _r39_t4 = 'zero.slashed';
-        } else {
-            if ('dotted' === _r39_t0) {
-                _r39_t5 = 'zero.dotted';
-            } else {
-                if ('unslahsed' === _r39_t0) {
-                    _r39_t6 = 'zero.unslashed';
-                } else {
-                    r39_otherwise = _r39_t0;
-                    _r39_t6 = 'zero.slashed';
-                }
-                _r39_t5 = _r39_t6;
-            }
-            _r39_t4 = _r39_t5;
-        }
-        _r39_t7 = _r39_t3[_r39_t4];
-        _r39_t2(_r39_t7);
+    r0_xn$createglyph$7Hrq('zero.unslashed', function _r0_t20() {
+        var r39_xn$setwidth$9Jrj, r39_xn$assignunicode$7Hrq, r39_xn$startfrom$1aao, r39_xn$lineto$5sIl, r39_xn$curveto$1aao, r39_xn$cubicto$1aao, r39_xn$putshapes$9Jrj, r39_xn$reverselast$3qIs, r39_xn$includeglyph$3qIs, r39_xn$createstroke$7Hrq, _r39_t0;
+        _r39_t0 = this;
+        r39_xn$setwidth$9Jrj = _r39_t0['set-width']['bind'](_r39_t0);
+        r39_xn$assignunicode$7Hrq = _r39_t0['assign-unicode']['bind'](_r39_t0);
+        r39_xn$startfrom$1aao = _r39_t0['start-from']['bind'](_r39_t0);
+        r39_xn$lineto$5sIl = _r39_t0['line-to']['bind'](_r39_t0);
+        r39_xn$curveto$1aao = _r39_t0['curve-to']['bind'](_r39_t0);
+        r39_xn$cubicto$1aao = _r39_t0['cubic-to']['bind'](_r39_t0);
+        r39_xn$putshapes$9Jrj = _r39_t0['put-shapes']['bind'](_r39_t0);
+        r39_xn$reverselast$3qIs = _r39_t0['reverse-last']['bind'](_r39_t0);
+        r39_xn$includeglyph$3qIs = _r39_t0['include-glyph']['bind'](_r39_t0);
+        r39_xn$createstroke$7Hrq = _r39_t0['create-stroke']['bind'](_r39_t0);
+        _r39_t0['gizmo'] = r0_globalTransform;
+        _r39_t0['set-width'](r0_WIDTH);
+        r39_xn$includeglyph$3qIs(r0_glyphs['O']);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('Q', function _r0_t19() {
+    r0_xn$createglyph$7Hrq('zero.dotted', function _r0_t21() {
         var r41_xn$setwidth$9Jrj, r41_xn$assignunicode$7Hrq, r41_xn$startfrom$1aao, r41_xn$lineto$5sIl, r41_xn$curveto$1aao, r41_xn$cubicto$1aao, r41_xn$putshapes$9Jrj, r41_xn$reverselast$3qIs, r41_xn$includeglyph$3qIs, r41_xn$createstroke$7Hrq, _r41_t0;
         _r41_t0 = this;
         r41_xn$setwidth$9Jrj = _r41_t0['set-width']['bind'](_r41_t0);
@@ -544,40 +501,51 @@
         r41_xn$createstroke$7Hrq = _r41_t0['create-stroke']['bind'](_r41_t0);
         _r41_t0['gizmo'] = r0_globalTransform;
         _r41_t0['set-width'](r0_WIDTH);
-        r41_xn$setwidth$9Jrj(r0_WIDTH);
-        r41_xn$assignunicode$7Hrq('Q');
-        r41_xn$putshapes$9Jrj(r0_glyphs['O']['contours']);
-        r41_xn$startfrom$1aao(r0_MIDDLE, 0);
-        r41_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2, -r0_CAP * 0.2);
-        r41_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2 + r0_STROKE, -r0_CAP * 0.2);
-        r41_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE, 0);
-        r41_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE * (1 - 0.5 / 3), r0_STROKE * 0.5);
-        r41_xn$reverselast$3qIs();
+        r41_xn$includeglyph$3qIs(r0_glyphs['O']);
+        r41_xn$putshapes$9Jrj([r0_Ring(r0_CAPMIDDLE + r0_DOTRADIUS, r0_CAPMIDDLE - r0_DOTRADIUS, r0_MIDDLE + r0_DOTRADIUS, r0_MIDDLE - r0_DOTRADIUS)]);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('U', function _r0_t20() {
-        var r43_xn$setwidth$9Jrj, r43_xn$assignunicode$7Hrq, r43_xn$startfrom$1aao, r43_xn$lineto$5sIl, r43_xn$curveto$1aao, r43_xn$cubicto$1aao, r43_xn$putshapes$9Jrj, r43_xn$reverselast$3qIs, r43_xn$includeglyph$3qIs, r43_xn$createstroke$7Hrq, r43_outline, _r43_t0;
-        _r43_t0 = this;
-        r43_xn$setwidth$9Jrj = _r43_t0['set-width']['bind'](_r43_t0);
-        r43_xn$assignunicode$7Hrq = _r43_t0['assign-unicode']['bind'](_r43_t0);
-        r43_xn$startfrom$1aao = _r43_t0['start-from']['bind'](_r43_t0);
-        r43_xn$lineto$5sIl = _r43_t0['line-to']['bind'](_r43_t0);
-        r43_xn$curveto$1aao = _r43_t0['curve-to']['bind'](_r43_t0);
-        r43_xn$cubicto$1aao = _r43_t0['cubic-to']['bind'](_r43_t0);
-        r43_xn$putshapes$9Jrj = _r43_t0['put-shapes']['bind'](_r43_t0);
-        r43_xn$reverselast$3qIs = _r43_t0['reverse-last']['bind'](_r43_t0);
-        r43_xn$includeglyph$3qIs = _r43_t0['include-glyph']['bind'](_r43_t0);
-        r43_xn$createstroke$7Hrq = _r43_t0['create-stroke']['bind'](_r43_t0);
-        _r43_t0['gizmo'] = r0_globalTransform;
-        _r43_t0['set-width'](r0_WIDTH);
+    r0_xn$createglyph$7Hrq('zero', function _r0_t22() {
+        var r43_xn$setwidth$9Jrj, r43_xn$assignunicode$7Hrq, r43_xn$startfrom$1aao, r43_xn$lineto$5sIl, r43_xn$curveto$1aao, r43_xn$cubicto$1aao, r43_xn$putshapes$9Jrj, r43_xn$reverselast$3qIs, r43_xn$includeglyph$3qIs, r43_xn$createstroke$7Hrq, r43_otherwise, _r43_t0, _r43_t1, _r43_t2, _r43_t3, _r43_t4, _r43_t5, _r43_t6, _r43_t7;
+        _r43_t1 = this;
+        r43_xn$setwidth$9Jrj = _r43_t1['set-width']['bind'](_r43_t1);
+        r43_xn$assignunicode$7Hrq = _r43_t1['assign-unicode']['bind'](_r43_t1);
+        r43_xn$startfrom$1aao = _r43_t1['start-from']['bind'](_r43_t1);
+        r43_xn$lineto$5sIl = _r43_t1['line-to']['bind'](_r43_t1);
+        r43_xn$curveto$1aao = _r43_t1['curve-to']['bind'](_r43_t1);
+        r43_xn$cubicto$1aao = _r43_t1['cubic-to']['bind'](_r43_t1);
+        r43_xn$putshapes$9Jrj = _r43_t1['put-shapes']['bind'](_r43_t1);
+        r43_xn$reverselast$3qIs = _r43_t1['reverse-last']['bind'](_r43_t1);
+        r43_xn$includeglyph$3qIs = _r43_t1['include-glyph']['bind'](_r43_t1);
+        r43_xn$createstroke$7Hrq = _r43_t1['create-stroke']['bind'](_r43_t1);
+        _r43_t1['gizmo'] = r0_globalTransform;
+        _r43_t1['set-width'](r0_WIDTH);
         r43_xn$setwidth$9Jrj(r0_WIDTH);
-        r43_xn$assignunicode$7Hrq('U');
-        r43_outline = r43_xn$createstroke$7Hrq();
-        r43_outline['start-from'](r0_SB, r0_CAP)['pen-direction'](r0_DOWNWARD)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD);
-        r43_xn$putshapes$9Jrj(r43_outline['form-stroke'](r0_STROKE, 0));
+        r43_xn$assignunicode$7Hrq('0');
+        _r43_t2 = r43_xn$includeglyph$3qIs;
+        _r43_t3 = r0_glyphs;
+        _r43_t0 = r0_variantSelector['zero'];
+        if ('slashed' === _r43_t0) {
+            _r43_t4 = 'zero.slashed';
+        } else {
+            if ('dotted' === _r43_t0) {
+                _r43_t5 = 'zero.dotted';
+            } else {
+                if ('unslahsed' === _r43_t0) {
+                    _r43_t6 = 'zero.unslashed';
+                } else {
+                    r43_otherwise = _r43_t0;
+                    _r43_t6 = 'zero.slashed';
+                }
+                _r43_t5 = _r43_t6;
+            }
+            _r43_t4 = _r43_t5;
+        }
+        _r43_t7 = _r43_t3[_r43_t4];
+        _r43_t2(_r43_t7);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('F', function _r0_t21() {
+    r0_xn$createglyph$7Hrq('Q', function _r0_t23() {
         var r45_xn$setwidth$9Jrj, r45_xn$assignunicode$7Hrq, r45_xn$startfrom$1aao, r45_xn$lineto$5sIl, r45_xn$curveto$1aao, r45_xn$cubicto$1aao, r45_xn$putshapes$9Jrj, r45_xn$reverselast$3qIs, r45_xn$includeglyph$3qIs, r45_xn$createstroke$7Hrq, _r45_t0;
         _r45_t0 = this;
         r45_xn$setwidth$9Jrj = _r45_t0['set-width']['bind'](_r45_t0);
@@ -593,14 +561,18 @@
         _r45_t0['gizmo'] = r0_globalTransform;
         _r45_t0['set-width'](r0_WIDTH);
         r45_xn$setwidth$9Jrj(r0_WIDTH);
-        r45_xn$assignunicode$7Hrq('F');
-        r45_xn$putshapes$9Jrj(r45_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB * 1.5, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
-        r45_xn$putshapes$9Jrj(r45_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAP)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
-        r45_xn$putshapes$9Jrj(r45_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAPMIDDLE)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAPMIDDLE)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r45_xn$assignunicode$7Hrq('Q');
+        r45_xn$putshapes$9Jrj(r0_glyphs['O']['contours']);
+        r45_xn$startfrom$1aao(r0_MIDDLE, 0);
+        r45_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2, -r0_CAP * 0.2);
+        r45_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE / 2 + r0_STROKE, -r0_CAP * 0.2);
+        r45_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE, 0);
+        r45_xn$lineto$5sIl(r0_MIDDLE + r0_STROKE * (1 - 0.5 / 3), r0_STROKE * 0.5);
+        r45_xn$reverselast$3qIs();
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('E', function _r0_t22() {
-        var r47_xn$setwidth$9Jrj, r47_xn$assignunicode$7Hrq, r47_xn$startfrom$1aao, r47_xn$lineto$5sIl, r47_xn$curveto$1aao, r47_xn$cubicto$1aao, r47_xn$putshapes$9Jrj, r47_xn$reverselast$3qIs, r47_xn$includeglyph$3qIs, r47_xn$createstroke$7Hrq, _r47_t0;
+    r0_xn$createglyph$7Hrq('U', function _r0_t24() {
+        var r47_xn$setwidth$9Jrj, r47_xn$assignunicode$7Hrq, r47_xn$startfrom$1aao, r47_xn$lineto$5sIl, r47_xn$curveto$1aao, r47_xn$cubicto$1aao, r47_xn$putshapes$9Jrj, r47_xn$reverselast$3qIs, r47_xn$includeglyph$3qIs, r47_xn$createstroke$7Hrq, r47_outline, _r47_t0;
         _r47_t0 = this;
         r47_xn$setwidth$9Jrj = _r47_t0['set-width']['bind'](_r47_t0);
         r47_xn$assignunicode$7Hrq = _r47_t0['assign-unicode']['bind'](_r47_t0);
@@ -615,12 +587,13 @@
         _r47_t0['gizmo'] = r0_globalTransform;
         _r47_t0['set-width'](r0_WIDTH);
         r47_xn$setwidth$9Jrj(r0_WIDTH);
-        r47_xn$assignunicode$7Hrq('E');
-        r47_xn$includeglyph$3qIs(r0_glyphs['F']);
-        r47_xn$putshapes$9Jrj(r47_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, 0)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, 0)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r47_xn$assignunicode$7Hrq('U');
+        r47_outline = r47_xn$createstroke$7Hrq();
+        r47_outline['start-from'](r0_SB, r0_CAP)['pen-direction'](r0_DOWNWARD)['line-to'](r0_SB, r0_SMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB, r0_SMOOTHA)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD);
+        r47_xn$putshapes$9Jrj(r47_outline['form-stroke'](r0_STROKE, 0));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('H', function _r0_t23() {
+    r0_xn$createglyph$7Hrq('F', function _r0_t25() {
         var r49_xn$setwidth$9Jrj, r49_xn$assignunicode$7Hrq, r49_xn$startfrom$1aao, r49_xn$lineto$5sIl, r49_xn$curveto$1aao, r49_xn$cubicto$1aao, r49_xn$putshapes$9Jrj, r49_xn$reverselast$3qIs, r49_xn$includeglyph$3qIs, r49_xn$createstroke$7Hrq, _r49_t0;
         _r49_t0 = this;
         r49_xn$setwidth$9Jrj = _r49_t0['set-width']['bind'](_r49_t0);
@@ -636,13 +609,13 @@
         _r49_t0['gizmo'] = r0_globalTransform;
         _r49_t0['set-width'](r0_WIDTH);
         r49_xn$setwidth$9Jrj(r0_WIDTH);
-        r49_xn$assignunicode$7Hrq('H');
-        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
-        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
-        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_CAP / 2)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, r0_CAP / 2)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r49_xn$assignunicode$7Hrq('F');
+        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB * 1.5, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAP)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r49_xn$putshapes$9Jrj(r49_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAPMIDDLE)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r0_CAPMIDDLE)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('L', function _r0_t24() {
+    r0_xn$createglyph$7Hrq('E', function _r0_t26() {
         var r51_xn$setwidth$9Jrj, r51_xn$assignunicode$7Hrq, r51_xn$startfrom$1aao, r51_xn$lineto$5sIl, r51_xn$curveto$1aao, r51_xn$cubicto$1aao, r51_xn$putshapes$9Jrj, r51_xn$reverselast$3qIs, r51_xn$includeglyph$3qIs, r51_xn$createstroke$7Hrq, _r51_t0;
         _r51_t0 = this;
         r51_xn$setwidth$9Jrj = _r51_t0['set-width']['bind'](_r51_t0);
@@ -658,12 +631,12 @@
         _r51_t0['gizmo'] = r0_globalTransform;
         _r51_t0['set-width'](r0_WIDTH);
         r51_xn$setwidth$9Jrj(r0_WIDTH);
-        r51_xn$assignunicode$7Hrq('L');
-        r51_xn$putshapes$9Jrj(r51_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAP)['set-width'](r0_STROKE, 0)['pen-direction'](r0_DOWNWARD)['line-to'](r0_SB * 1.5, 0)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r51_xn$assignunicode$7Hrq('E');
+        r51_xn$includeglyph$3qIs(r0_glyphs['F']);
         r51_xn$putshapes$9Jrj(r51_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, 0)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, 0)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessI.straight', function _r0_t25() {
+    r0_xn$createglyph$7Hrq('H', function _r0_t27() {
         var r53_xn$setwidth$9Jrj, r53_xn$assignunicode$7Hrq, r53_xn$startfrom$1aao, r53_xn$lineto$5sIl, r53_xn$curveto$1aao, r53_xn$cubicto$1aao, r53_xn$putshapes$9Jrj, r53_xn$reverselast$3qIs, r53_xn$includeglyph$3qIs, r53_xn$createstroke$7Hrq, _r53_t0;
         _r53_t0 = this;
         r53_xn$setwidth$9Jrj = _r53_t0['set-width']['bind'](_r53_t0);
@@ -678,10 +651,14 @@
         r53_xn$createstroke$7Hrq = _r53_t0['create-stroke']['bind'](_r53_t0);
         _r53_t0['gizmo'] = r0_globalTransform;
         _r53_t0['set-width'](r0_WIDTH);
-        r53_xn$putshapes$9Jrj(r53_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r53_xn$setwidth$9Jrj(r0_WIDTH);
+        r53_xn$assignunicode$7Hrq('H');
+        r53_xn$putshapes$9Jrj(r53_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r53_xn$putshapes$9Jrj(r53_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r53_xn$putshapes$9Jrj(r53_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_CAP / 2)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, r0_CAP / 2)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessI.symmetric', function _r0_t26() {
+    r0_xn$createglyph$7Hrq('L', function _r0_t28() {
         var r55_xn$setwidth$9Jrj, r55_xn$assignunicode$7Hrq, r55_xn$startfrom$1aao, r55_xn$lineto$5sIl, r55_xn$curveto$1aao, r55_xn$cubicto$1aao, r55_xn$putshapes$9Jrj, r55_xn$reverselast$3qIs, r55_xn$includeglyph$3qIs, r55_xn$createstroke$7Hrq, _r55_t0;
         _r55_t0 = this;
         r55_xn$setwidth$9Jrj = _r55_t0['set-width']['bind'](_r55_t0);
@@ -696,12 +673,13 @@
         r55_xn$createstroke$7Hrq = _r55_t0['create-stroke']['bind'](_r55_t0);
         _r55_t0['gizmo'] = r0_globalTransform;
         _r55_t0['set-width'](r0_WIDTH);
-        r55_xn$includeglyph$3qIs(r0_glyphs['dotlessI.straight']);
-        r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_WIDTH * 0.26 - r0_STROKE * r0_globalTransform['yx'], r0_CAP)['set-width'](0, r0_STROKE)['line-to'](r0_MIDDLE + r0_WIDTH * 0.26 - r0_STROKE * r0_globalTransform['yx'], r0_CAP)['form-stroke']());
-        r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_WIDTH * 0.26 + r0_STROKE * r0_globalTransform['yx'], 0)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE + r0_WIDTH * 0.26 + r0_STROKE * r0_globalTransform['yx'], 0)['form-stroke']());
+        r55_xn$setwidth$9Jrj(r0_WIDTH);
+        r55_xn$assignunicode$7Hrq('L');
+        r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, r0_CAP)['set-width'](r0_STROKE, 0)['pen-direction'](r0_DOWNWARD)['line-to'](r0_SB * 1.5, 0)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r0_SB * 1.5, 0)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB, 0)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('I', function _r0_t27() {
+    r0_xn$createglyph$7Hrq('dotlessI.straight', function _r0_t29() {
         var r57_xn$setwidth$9Jrj, r57_xn$assignunicode$7Hrq, r57_xn$startfrom$1aao, r57_xn$lineto$5sIl, r57_xn$curveto$1aao, r57_xn$cubicto$1aao, r57_xn$putshapes$9Jrj, r57_xn$reverselast$3qIs, r57_xn$includeglyph$3qIs, r57_xn$createstroke$7Hrq, _r57_t0;
         _r57_t0 = this;
         r57_xn$setwidth$9Jrj = _r57_t0['set-width']['bind'](_r57_t0);
@@ -716,13 +694,11 @@
         r57_xn$createstroke$7Hrq = _r57_t0['create-stroke']['bind'](_r57_t0);
         _r57_t0['gizmo'] = r0_globalTransform;
         _r57_t0['set-width'](r0_WIDTH);
-        r57_xn$setwidth$9Jrj(r0_WIDTH);
-        r57_xn$assignunicode$7Hrq('I');
-        r57_xn$includeglyph$3qIs(r0_glyphs['dotlessI.symmetric']);
+        r57_xn$putshapes$9Jrj(r57_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('N', function _r0_t28() {
-        var r59_xn$setwidth$9Jrj, r59_xn$assignunicode$7Hrq, r59_xn$startfrom$1aao, r59_xn$lineto$5sIl, r59_xn$curveto$1aao, r59_xn$cubicto$1aao, r59_xn$putshapes$9Jrj, r59_xn$reverselast$3qIs, r59_xn$includeglyph$3qIs, r59_xn$createstroke$7Hrq, r59_topstroke, r59_halftopstroke, _r59_t0;
+    r0_xn$createglyph$7Hrq('dotlessI.symmetric', function _r0_t30() {
+        var r59_xn$setwidth$9Jrj, r59_xn$assignunicode$7Hrq, r59_xn$startfrom$1aao, r59_xn$lineto$5sIl, r59_xn$curveto$1aao, r59_xn$cubicto$1aao, r59_xn$putshapes$9Jrj, r59_xn$reverselast$3qIs, r59_xn$includeglyph$3qIs, r59_xn$createstroke$7Hrq, _r59_t0;
         _r59_t0 = this;
         r59_xn$setwidth$9Jrj = _r59_t0['set-width']['bind'](_r59_t0);
         r59_xn$assignunicode$7Hrq = _r59_t0['assign-unicode']['bind'](_r59_t0);
@@ -736,17 +712,13 @@
         r59_xn$createstroke$7Hrq = _r59_t0['create-stroke']['bind'](_r59_t0);
         _r59_t0['gizmo'] = r0_globalTransform;
         _r59_t0['set-width'](r0_WIDTH);
-        r59_xn$setwidth$9Jrj(r0_WIDTH);
-        r59_xn$assignunicode$7Hrq('N');
-        r59_topstroke = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.24);
-        r59_halftopstroke = r59_topstroke / 2;
-        r59_xn$putshapes$9Jrj(r59_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP * 0.4)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](0, r59_topstroke)['form-stroke']());
-        r59_xn$putshapes$9Jrj(r59_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r59_topstroke, 0)['line-to'](r0_RIGHTSB, r0_CAP * 0.6)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
-        r59_xn$putshapes$9Jrj(r59_xn$createstroke$7Hrq()['start-from'](r0_SB + r59_halftopstroke, r0_CAP)['pen-direction'](r0_DOWNWARD)['set-width'](r59_topstroke, 0)['line-to'](r0_RIGHTSB - r59_topstroke - r59_halftopstroke, 0)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r59_xn$includeglyph$3qIs(r0_glyphs['dotlessI.straight']);
+        r59_xn$putshapes$9Jrj(r59_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_WIDTH * 0.26 - r0_STROKE * r0_globalTransform['yx'], r0_CAP)['set-width'](0, r0_STROKE)['line-to'](r0_MIDDLE + r0_WIDTH * 0.26 - r0_STROKE * r0_globalTransform['yx'], r0_CAP)['form-stroke']());
+        r59_xn$putshapes$9Jrj(r59_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_WIDTH * 0.26 + r0_STROKE * r0_globalTransform['yx'], 0)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE + r0_WIDTH * 0.26 + r0_STROKE * r0_globalTransform['yx'], 0)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('M', function _r0_t29() {
-        var r61_xn$setwidth$9Jrj, r61_xn$assignunicode$7Hrq, r61_xn$startfrom$1aao, r61_xn$lineto$5sIl, r61_xn$curveto$1aao, r61_xn$cubicto$1aao, r61_xn$putshapes$9Jrj, r61_xn$reverselast$3qIs, r61_xn$includeglyph$3qIs, r61_xn$createstroke$7Hrq, r61_topstroke, r61_halftopstroke, _r61_t0;
+    r0_xn$createglyph$7Hrq('I', function _r0_t31() {
+        var r61_xn$setwidth$9Jrj, r61_xn$assignunicode$7Hrq, r61_xn$startfrom$1aao, r61_xn$lineto$5sIl, r61_xn$curveto$1aao, r61_xn$cubicto$1aao, r61_xn$putshapes$9Jrj, r61_xn$reverselast$3qIs, r61_xn$includeglyph$3qIs, r61_xn$createstroke$7Hrq, _r61_t0;
         _r61_t0 = this;
         r61_xn$setwidth$9Jrj = _r61_t0['set-width']['bind'](_r61_t0);
         r61_xn$assignunicode$7Hrq = _r61_t0['assign-unicode']['bind'](_r61_t0);
@@ -761,17 +733,12 @@
         _r61_t0['gizmo'] = r0_globalTransform;
         _r61_t0['set-width'](r0_WIDTH);
         r61_xn$setwidth$9Jrj(r0_WIDTH);
-        r61_xn$assignunicode$7Hrq('M');
-        r61_topstroke = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.175);
-        r61_halftopstroke = r61_topstroke / 2;
-        r61_xn$putshapes$9Jrj(r61_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP * 0.2)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](0, r61_topstroke)['form-stroke']());
-        r61_xn$putshapes$9Jrj(r61_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP * 0.2)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](r61_topstroke, 0)['form-stroke']());
-        r61_xn$putshapes$9Jrj(r61_xn$createstroke$7Hrq()['start-from'](r0_SB + r61_halftopstroke, r0_CAP)['pen-direction'](r0_DOWNWARD)['set-width'](r61_topstroke, 0)['line-to'](r0_MIDDLE - r61_halftopstroke, r0_CAP * 0.3)['pen-direction'](r0_DOWNWARD)['form-stroke']());
-        r61_xn$putshapes$9Jrj(r61_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r61_halftopstroke, r0_CAP * 0.3)['pen-direction'](r0_UPWARD)['set-width'](r61_topstroke, 0)['line-to'](r0_RIGHTSB - r61_halftopstroke, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r61_xn$assignunicode$7Hrq('I');
+        r61_xn$includeglyph$3qIs(r0_glyphs['dotlessI.symmetric']);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('S', function _r0_t30() {
-        var r63_xn$setwidth$9Jrj, r63_xn$assignunicode$7Hrq, r63_xn$startfrom$1aao, r63_xn$lineto$5sIl, r63_xn$curveto$1aao, r63_xn$cubicto$1aao, r63_xn$putshapes$9Jrj, r63_xn$reverselast$3qIs, r63_xn$includeglyph$3qIs, r63_xn$createstroke$7Hrq, r63_slope, r63_expand, r63_coexpand, r63_ssmootha, r63_bowltop, r63_strokemiddle, r63_bowlbottom, _r63_t0;
+    r0_xn$createglyph$7Hrq('J.straight', function _r0_t32() {
+        var r63_xn$setwidth$9Jrj, r63_xn$assignunicode$7Hrq, r63_xn$startfrom$1aao, r63_xn$lineto$5sIl, r63_xn$curveto$1aao, r63_xn$cubicto$1aao, r63_xn$putshapes$9Jrj, r63_xn$reverselast$3qIs, r63_xn$includeglyph$3qIs, r63_xn$createstroke$7Hrq, r63_slope, r63_expand, r63_coexpand, r63_kappa, r63_smooth, _r63_t0;
         _r63_t0 = this;
         r63_xn$setwidth$9Jrj = _r63_t0['set-width']['bind'](_r63_t0);
         r63_xn$assignunicode$7Hrq = _r63_t0['assign-unicode']['bind'](_r63_t0);
@@ -786,23 +753,15 @@
         _r63_t0['gizmo'] = r0_globalTransform;
         _r63_t0['set-width'](r0_WIDTH);
         r63_xn$setwidth$9Jrj(r0_WIDTH);
-        r63_xn$assignunicode$7Hrq('S');
         r63_slope = r0_STROKE * 0.00092;
         r63_expand = 0.35;
         r63_coexpand = (1 - r63_expand) / 2;
-        r63_ssmootha = r0_SMOOTHA;
-        r63_bowltop = r63_xn$createstroke$7Hrq();
-        r63_bowltop['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['set-width'](r0_STROKE, 0)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r63_ssmootha);
-        r63_strokemiddle = r63_xn$createstroke$7Hrq();
-        r63_strokemiddle['start-from'](r0_SB + r0_STROKE / 2, r0_CAP - r63_ssmootha)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['curve-to'](r0_SB + r0_STROKE / 2, (0.5 + r63_slope) * r0_CAP + 2 * r63_slope * r0_CAP / (r63_expand * r0_WIDTH) * (r63_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r63_coexpand * r0_WIDTH, (0.5 + r63_slope) * r0_CAP)['line-to']((1 - r63_coexpand) * r0_WIDTH, (0.5 - r63_slope) * r0_CAP)['curve-to'](r0_RIGHTSB - r0_STROKE / 2, (0.5 - r63_slope) * r0_CAP - 2 * r63_slope * r0_CAP / (r63_expand * r0_WIDTH) * (r63_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r0_RIGHTSB - r0_STROKE / 2, r63_ssmootha);
-        r63_bowlbottom = r63_xn$createstroke$7Hrq();
-        r63_bowlbottom['start-from'](r0_RIGHTSB, r63_ssmootha)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_O, r0_SB + r0_OXHOOK, r0_HOOK);
-        r63_xn$putshapes$9Jrj(r63_bowltop['form-stroke']());
-        r63_xn$putshapes$9Jrj(r63_strokemiddle['form-stroke']());
-        r63_xn$putshapes$9Jrj(r63_bowlbottom['form-stroke']());
+        r63_kappa = r0_KAPPA_HOOK;
+        r63_smooth = r0_HOOK + 0.75 * r0_STROKE;
+        r63_xn$putshapes$9Jrj(r63_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, r0_CAP)['set-width'](0, r0_STROKE)['pen-direction'](r0_DOWNWARD)['line-to'](r0_RIGHTSB, r63_smooth)['arc-vh-to'](r0_MIDDLE - r0_SB * 0.25, r0_O)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r63_kappa * (r0_MIDDLE - r0_SB) - r0_SB * 0.5, r0_O, 0.5 * r0_SB + r0_OXHOOK, r0_HOOK)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dollar', function _r0_t31() {
+    r0_xn$createglyph$7Hrq('J.serifed', function _r0_t33() {
         var r65_xn$setwidth$9Jrj, r65_xn$assignunicode$7Hrq, r65_xn$startfrom$1aao, r65_xn$lineto$5sIl, r65_xn$curveto$1aao, r65_xn$cubicto$1aao, r65_xn$putshapes$9Jrj, r65_xn$reverselast$3qIs, r65_xn$includeglyph$3qIs, r65_xn$createstroke$7Hrq, _r65_t0;
         _r65_t0 = this;
         r65_xn$setwidth$9Jrj = _r65_t0['set-width']['bind'](_r65_t0);
@@ -818,14 +777,13 @@
         _r65_t0['gizmo'] = r0_globalTransform;
         _r65_t0['set-width'](r0_WIDTH);
         r65_xn$setwidth$9Jrj(r0_WIDTH);
-        r65_xn$assignunicode$7Hrq('$');
-        r65_xn$putshapes$9Jrj(r0_glyphs['S']['contours']);
-        r65_xn$putshapes$9Jrj(r65_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_CAP - r0_HALFSTROKE)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP - r0_DESCENDER / 2)['form-stroke']());
-        r65_xn$putshapes$9Jrj(r65_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_DESCENDER / 2)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_HALFSTROKE)['form-stroke']());
+        r65_xn$assignunicode$7Hrq('J');
+        r65_xn$includeglyph$3qIs(r0_glyphs['J.straight']);
+        r65_xn$putshapes$9Jrj(r0_leftwardTopSerif(r0_RIGHTSB - r0_HALFSTROKE, r0_CAP, r0_LONGSERIF));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('o', function _r0_t32() {
-        var r67_xn$setwidth$9Jrj, r67_xn$assignunicode$7Hrq, r67_xn$startfrom$1aao, r67_xn$lineto$5sIl, r67_xn$curveto$1aao, r67_xn$cubicto$1aao, r67_xn$putshapes$9Jrj, r67_xn$reverselast$3qIs, r67_xn$includeglyph$3qIs, r67_xn$createstroke$7Hrq, r67_outline, _r67_t0;
+    r0_xn$createglyph$7Hrq('N', function _r0_t34() {
+        var r67_xn$setwidth$9Jrj, r67_xn$assignunicode$7Hrq, r67_xn$startfrom$1aao, r67_xn$lineto$5sIl, r67_xn$curveto$1aao, r67_xn$cubicto$1aao, r67_xn$putshapes$9Jrj, r67_xn$reverselast$3qIs, r67_xn$includeglyph$3qIs, r67_xn$createstroke$7Hrq, r67_topstroke, r67_halftopstroke, _r67_t0;
         _r67_t0 = this;
         r67_xn$setwidth$9Jrj = _r67_t0['set-width']['bind'](_r67_t0);
         r67_xn$assignunicode$7Hrq = _r67_t0['assign-unicode']['bind'](_r67_t0);
@@ -840,13 +798,16 @@
         _r67_t0['gizmo'] = r0_globalTransform;
         _r67_t0['set-width'](r0_WIDTH);
         r67_xn$setwidth$9Jrj(r0_WIDTH);
-        r67_xn$assignunicode$7Hrq('o');
-        r67_outline = r67_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['set-width'](r0_STROKE, 0)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_O, r0_SMALLSMOOTHA)['line-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD);
-        r67_xn$putshapes$9Jrj(r67_outline['form-stroke']());
+        r67_xn$assignunicode$7Hrq('N');
+        r67_topstroke = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.24);
+        r67_halftopstroke = r67_topstroke / 2;
+        r67_xn$putshapes$9Jrj(r67_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP * 0.4)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](0, r67_topstroke)['form-stroke']());
+        r67_xn$putshapes$9Jrj(r67_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r67_topstroke, 0)['line-to'](r0_RIGHTSB, r0_CAP * 0.6)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r67_xn$putshapes$9Jrj(r67_xn$createstroke$7Hrq()['start-from'](r0_SB + r67_halftopstroke, r0_CAP)['pen-direction'](r0_DOWNWARD)['set-width'](r67_topstroke, 0)['line-to'](r0_RIGHTSB - r67_topstroke - r67_halftopstroke, 0)['pen-direction'](r0_DOWNWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('o.left', function _r0_t33() {
-        var r69_xn$setwidth$9Jrj, r69_xn$assignunicode$7Hrq, r69_xn$startfrom$1aao, r69_xn$lineto$5sIl, r69_xn$curveto$1aao, r69_xn$cubicto$1aao, r69_xn$putshapes$9Jrj, r69_xn$reverselast$3qIs, r69_xn$includeglyph$3qIs, r69_xn$createstroke$7Hrq, _r69_t0;
+    r0_xn$createglyph$7Hrq('M', function _r0_t35() {
+        var r69_xn$setwidth$9Jrj, r69_xn$assignunicode$7Hrq, r69_xn$startfrom$1aao, r69_xn$lineto$5sIl, r69_xn$curveto$1aao, r69_xn$cubicto$1aao, r69_xn$putshapes$9Jrj, r69_xn$reverselast$3qIs, r69_xn$includeglyph$3qIs, r69_xn$createstroke$7Hrq, r69_topstroke, r69_halftopstroke, _r69_t0;
         _r69_t0 = this;
         r69_xn$setwidth$9Jrj = _r69_t0['set-width']['bind'](_r69_t0);
         r69_xn$assignunicode$7Hrq = _r69_t0['assign-unicode']['bind'](_r69_t0);
@@ -861,12 +822,17 @@
         _r69_t0['gizmo'] = r0_globalTransform;
         _r69_t0['set-width'](r0_WIDTH);
         r69_xn$setwidth$9Jrj(r0_WIDTH);
-        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['arc-hv-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['line-to'](r0_RIGHTSB - r0_O, r0_SMALLSMOOTHA)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['form-stroke']());
-        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['arc-hv-to'](r0_SB + r0_STROKE, r0_SMALLSMOOTHB - r0_STROKE * 0.05)['set-width'](r0_HALFSTROKE, 0)['line-to'](r0_SB + r0_STROKE, r0_XH - r0_SMALLSMOOTHA + r0_STROKE * 0.05)['set-width'](r0_HALFSTROKE, 0)['arc-vh-to'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r69_xn$assignunicode$7Hrq('M');
+        r69_topstroke = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.175);
+        r69_halftopstroke = r69_topstroke / 2;
+        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP * 0.2)['pen-direction'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](0, r69_topstroke)['form-stroke']());
+        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP * 0.2)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['set-width'](r69_topstroke, 0)['form-stroke']());
+        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_SB + r69_halftopstroke, r0_CAP)['pen-direction'](r0_DOWNWARD)['set-width'](r69_topstroke, 0)['line-to'](r0_MIDDLE - r69_halftopstroke, r0_CAP * 0.3)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r69_xn$putshapes$9Jrj(r69_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r69_halftopstroke, r0_CAP * 0.3)['pen-direction'](r0_UPWARD)['set-width'](r69_topstroke, 0)['line-to'](r0_RIGHTSB - r69_halftopstroke, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('o.right', function _r0_t34() {
-        var r71_xn$setwidth$9Jrj, r71_xn$assignunicode$7Hrq, r71_xn$startfrom$1aao, r71_xn$lineto$5sIl, r71_xn$curveto$1aao, r71_xn$cubicto$1aao, r71_xn$putshapes$9Jrj, r71_xn$reverselast$3qIs, r71_xn$includeglyph$3qIs, r71_xn$createstroke$7Hrq, _r71_t0;
+    r0_xn$createglyph$7Hrq('S', function _r0_t36() {
+        var r71_xn$setwidth$9Jrj, r71_xn$assignunicode$7Hrq, r71_xn$startfrom$1aao, r71_xn$lineto$5sIl, r71_xn$curveto$1aao, r71_xn$cubicto$1aao, r71_xn$putshapes$9Jrj, r71_xn$reverselast$3qIs, r71_xn$includeglyph$3qIs, r71_xn$createstroke$7Hrq, r71_slope, r71_expand, r71_coexpand, r71_ssmootha, r71_bowltop, r71_strokemiddle, r71_bowlbottom, _r71_t0;
         _r71_t0 = this;
         r71_xn$setwidth$9Jrj = _r71_t0['set-width']['bind'](_r71_t0);
         r71_xn$assignunicode$7Hrq = _r71_t0['assign-unicode']['bind'](_r71_t0);
@@ -881,11 +847,23 @@
         _r71_t0['gizmo'] = r0_globalTransform;
         _r71_t0['set-width'](r0_WIDTH);
         r71_xn$setwidth$9Jrj(r0_WIDTH);
-        r71_xn$putshapes$9Jrj(r71_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
-        r71_xn$putshapes$9Jrj(r71_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA - r0_STROKE * 0.05)['set-width'](0, r0_HALFSTROKE)['line-to'](r0_RIGHTSB - r0_STROKE, r0_XH - r0_SMALLSMOOTHB + r0_STROKE * 0.05)['set-width'](0, r0_HALFSTROKE)['arc-vh-to'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['form-stroke']());
+        r71_xn$assignunicode$7Hrq('S');
+        r71_slope = r0_STROKE * 0.00092;
+        r71_expand = 0.35;
+        r71_coexpand = (1 - r71_expand) / 2;
+        r71_ssmootha = r0_SMOOTHA;
+        r71_bowltop = r71_xn$createstroke$7Hrq();
+        r71_bowltop['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_CAP - r0_HOOK)['set-width'](r0_STROKE, 0)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_CAPO, r0_MIDDLE, r0_CAPO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_CAP - r71_ssmootha);
+        r71_strokemiddle = r71_xn$createstroke$7Hrq();
+        r71_strokemiddle['start-from'](r0_SB + r0_STROKE / 2, r0_CAP - r71_ssmootha)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['curve-to'](r0_SB + r0_STROKE / 2, (0.5 + r71_slope) * r0_CAP + 2 * r71_slope * r0_CAP / (r71_expand * r0_WIDTH) * (r71_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r71_coexpand * r0_WIDTH, (0.5 + r71_slope) * r0_CAP)['line-to']((1 - r71_coexpand) * r0_WIDTH, (0.5 - r71_slope) * r0_CAP)['curve-to'](r0_RIGHTSB - r0_STROKE / 2, (0.5 - r71_slope) * r0_CAP - 2 * r71_slope * r0_CAP / (r71_expand * r0_WIDTH) * (r71_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r0_RIGHTSB - r0_STROKE / 2, r71_ssmootha);
+        r71_bowlbottom = r71_xn$createstroke$7Hrq();
+        r71_bowlbottom['start-from'](r0_RIGHTSB, r71_ssmootha)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_O, r0_SB + r0_OXHOOK, r0_HOOK);
+        r71_xn$putshapes$9Jrj(r71_bowltop['form-stroke']());
+        r71_xn$putshapes$9Jrj(r71_strokemiddle['form-stroke']());
+        r71_xn$putshapes$9Jrj(r71_bowlbottom['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('p', function _r0_t35() {
+    r0_xn$createglyph$7Hrq('dollar', function _r0_t37() {
         var r73_xn$setwidth$9Jrj, r73_xn$assignunicode$7Hrq, r73_xn$startfrom$1aao, r73_xn$lineto$5sIl, r73_xn$curveto$1aao, r73_xn$cubicto$1aao, r73_xn$putshapes$9Jrj, r73_xn$reverselast$3qIs, r73_xn$includeglyph$3qIs, r73_xn$createstroke$7Hrq, _r73_t0;
         _r73_t0 = this;
         r73_xn$setwidth$9Jrj = _r73_t0['set-width']['bind'](_r73_t0);
@@ -901,13 +879,14 @@
         _r73_t0['gizmo'] = r0_globalTransform;
         _r73_t0['set-width'](r0_WIDTH);
         r73_xn$setwidth$9Jrj(r0_WIDTH);
-        r73_xn$assignunicode$7Hrq('p');
-        r73_xn$includeglyph$3qIs(r0_glyphs['o.left']);
-        r73_xn$putshapes$9Jrj(r73_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_SB, r0_DESCENDER)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r73_xn$assignunicode$7Hrq('$');
+        r73_xn$putshapes$9Jrj(r0_glyphs['S']['contours']);
+        r73_xn$putshapes$9Jrj(r73_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_CAP - r0_HALFSTROKE)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP - r0_DESCENDER / 2)['form-stroke']());
+        r73_xn$putshapes$9Jrj(r73_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_DESCENDER / 2)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_HALFSTROKE)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('b', function _r0_t36() {
-        var r75_xn$setwidth$9Jrj, r75_xn$assignunicode$7Hrq, r75_xn$startfrom$1aao, r75_xn$lineto$5sIl, r75_xn$curveto$1aao, r75_xn$cubicto$1aao, r75_xn$putshapes$9Jrj, r75_xn$reverselast$3qIs, r75_xn$includeglyph$3qIs, r75_xn$createstroke$7Hrq, _r75_t0;
+    r0_xn$createglyph$7Hrq('o', function _r0_t38() {
+        var r75_xn$setwidth$9Jrj, r75_xn$assignunicode$7Hrq, r75_xn$startfrom$1aao, r75_xn$lineto$5sIl, r75_xn$curveto$1aao, r75_xn$cubicto$1aao, r75_xn$putshapes$9Jrj, r75_xn$reverselast$3qIs, r75_xn$includeglyph$3qIs, r75_xn$createstroke$7Hrq, r75_outline, _r75_t0;
         _r75_t0 = this;
         r75_xn$setwidth$9Jrj = _r75_t0['set-width']['bind'](_r75_t0);
         r75_xn$assignunicode$7Hrq = _r75_t0['assign-unicode']['bind'](_r75_t0);
@@ -922,12 +901,12 @@
         _r75_t0['gizmo'] = r0_globalTransform;
         _r75_t0['set-width'](r0_WIDTH);
         r75_xn$setwidth$9Jrj(r0_WIDTH);
-        r75_xn$assignunicode$7Hrq('b');
-        r75_xn$putshapes$9Jrj(r0_glyphs['o.left']['contours']);
-        r75_xn$putshapes$9Jrj(r75_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r75_xn$assignunicode$7Hrq('o');
+        r75_outline = r75_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['set-width'](r0_STROKE, 0)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_O, r0_SMALLSMOOTHA)['line-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD);
+        r75_xn$putshapes$9Jrj(r75_outline['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('q', function _r0_t37() {
+    r0_xn$createglyph$7Hrq('o.left', function _r0_t39() {
         var r77_xn$setwidth$9Jrj, r77_xn$assignunicode$7Hrq, r77_xn$startfrom$1aao, r77_xn$lineto$5sIl, r77_xn$curveto$1aao, r77_xn$cubicto$1aao, r77_xn$putshapes$9Jrj, r77_xn$reverselast$3qIs, r77_xn$includeglyph$3qIs, r77_xn$createstroke$7Hrq, _r77_t0;
         _r77_t0 = this;
         r77_xn$setwidth$9Jrj = _r77_t0['set-width']['bind'](_r77_t0);
@@ -943,12 +922,11 @@
         _r77_t0['gizmo'] = r0_globalTransform;
         _r77_t0['set-width'](r0_WIDTH);
         r77_xn$setwidth$9Jrj(r0_WIDTH);
-        r77_xn$assignunicode$7Hrq('q');
-        r77_xn$putshapes$9Jrj(r0_glyphs['o.right']['contours']);
-        r77_xn$putshapes$9Jrj(r77_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](0, r0_STROKE)['line-to'](r0_RIGHTSB, r0_DESCENDER)['pen-direction'](r0_DOWNWARD)['form-stroke']());
+        r77_xn$putshapes$9Jrj(r77_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['arc-hv-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['line-to'](r0_RIGHTSB - r0_O, r0_SMALLSMOOTHA)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['form-stroke']());
+        r77_xn$putshapes$9Jrj(r77_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['arc-hv-to'](r0_SB + r0_STROKE, r0_SMALLSMOOTHB - r0_STROKE * 0.05)['set-width'](r0_HALFSTROKE, 0)['line-to'](r0_SB + r0_STROKE, r0_XH - r0_SMALLSMOOTHA + r0_STROKE * 0.05)['set-width'](r0_HALFSTROKE, 0)['arc-vh-to'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('d', function _r0_t38() {
+    r0_xn$createglyph$7Hrq('o.right', function _r0_t40() {
         var r79_xn$setwidth$9Jrj, r79_xn$assignunicode$7Hrq, r79_xn$startfrom$1aao, r79_xn$lineto$5sIl, r79_xn$curveto$1aao, r79_xn$cubicto$1aao, r79_xn$putshapes$9Jrj, r79_xn$reverselast$3qIs, r79_xn$includeglyph$3qIs, r79_xn$createstroke$7Hrq, _r79_t0;
         _r79_t0 = this;
         r79_xn$setwidth$9Jrj = _r79_t0['set-width']['bind'](_r79_t0);
@@ -964,12 +942,11 @@
         _r79_t0['gizmo'] = r0_globalTransform;
         _r79_t0['set-width'](r0_WIDTH);
         r79_xn$setwidth$9Jrj(r0_WIDTH);
-        r79_xn$assignunicode$7Hrq('d');
-        r79_xn$putshapes$9Jrj(r0_glyphs['o.right']['contours']);
-        r79_xn$putshapes$9Jrj(r79_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r79_xn$putshapes$9Jrj(r79_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r79_xn$putshapes$9Jrj(r79_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['pen-direction'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA - r0_STROKE * 0.05)['set-width'](0, r0_HALFSTROKE)['line-to'](r0_RIGHTSB - r0_STROKE, r0_XH - r0_SMALLSMOOTHB + r0_STROKE * 0.05)['set-width'](0, r0_HALFSTROKE)['arc-vh-to'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('g', function _r0_t39() {
+    r0_xn$createglyph$7Hrq('p', function _r0_t41() {
         var r81_xn$setwidth$9Jrj, r81_xn$assignunicode$7Hrq, r81_xn$startfrom$1aao, r81_xn$lineto$5sIl, r81_xn$curveto$1aao, r81_xn$cubicto$1aao, r81_xn$putshapes$9Jrj, r81_xn$reverselast$3qIs, r81_xn$includeglyph$3qIs, r81_xn$createstroke$7Hrq, _r81_t0;
         _r81_t0 = this;
         r81_xn$setwidth$9Jrj = _r81_t0['set-width']['bind'](_r81_t0);
@@ -985,21 +962,13 @@
         _r81_t0['gizmo'] = r0_globalTransform;
         _r81_t0['set-width'](r0_WIDTH);
         r81_xn$setwidth$9Jrj(r0_WIDTH);
-        r81_xn$assignunicode$7Hrq('g');
-        r81_xn$putshapes$9Jrj([
-            r0_Ring(r0_XO, r0_XH * r0_GBARPOS, r0_SB * 1.25, r0_RIGHTSB - 0.25 * r0_SB, r0_SMALLSMOOTH),
-            r0_Ring(r0_XO - r0_STROKE, r0_XH * r0_GBARPOS + r0_STROKE, r0_SB * 1.25 + r0_STROKE, r0_RIGHTSB - 0.25 * r0_SB - r0_STROKE, r0_SMALLSMOOTH - r0_STROKE)
-        ]);
-        r81_xn$reverselast$3qIs();
-        r81_xn$putshapes$9Jrj(r81_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XH * r0_GBARPOS)['set-width'](0, r0_STROKE * 0.75)['arc-hv-to'](r0_SB * 1.5 + r0_STROKE, (r0_O - r0_DESCENDER * 0.85 + r0_XH * r0_GBARPOS) * 0.47)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE + r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['line-to'](r0_MIDDLE - r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['arc-hv-to'](r0_RIGHTSB - r0_O * 2, -r0_STROKE * r0_globalTransform['yx'] * 2)['arc-vh-to'](r0_MIDDLE, r0_DESCENDER + r0_O)['arc-hv-to'](r0_SB, r0_DESCENDER * 0.1)['arc-vh-to'](r0_MIDDLE + r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['form-stroke']());
-        r81_xn$startfrom$1aao(r0_RIGHTSB + 0.5 * r0_SB, r0_XH);
-        r81_xn$lineto$5sIl(r0_RIGHTSB + 0.5 * r0_SB, r0_XH - r0_STROKE);
-        r81_xn$lineto$5sIl(r0_MIDDLE, r0_XH - r0_STROKE - r0_O);
-        r81_xn$lineto$5sIl(r0_MIDDLE, r0_XH);
+        r81_xn$assignunicode$7Hrq('p');
+        r81_xn$includeglyph$3qIs(r0_glyphs['o.left']);
+        r81_xn$putshapes$9Jrj(r81_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_SB, r0_DESCENDER)['pen-direction'](r0_DOWNWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('c', function _r0_t40() {
-        var r83_xn$setwidth$9Jrj, r83_xn$assignunicode$7Hrq, r83_xn$startfrom$1aao, r83_xn$lineto$5sIl, r83_xn$curveto$1aao, r83_xn$cubicto$1aao, r83_xn$putshapes$9Jrj, r83_xn$reverselast$3qIs, r83_xn$includeglyph$3qIs, r83_xn$createstroke$7Hrq, r83_outline, _r83_t0;
+    r0_xn$createglyph$7Hrq('b', function _r0_t42() {
+        var r83_xn$setwidth$9Jrj, r83_xn$assignunicode$7Hrq, r83_xn$startfrom$1aao, r83_xn$lineto$5sIl, r83_xn$curveto$1aao, r83_xn$cubicto$1aao, r83_xn$putshapes$9Jrj, r83_xn$reverselast$3qIs, r83_xn$includeglyph$3qIs, r83_xn$createstroke$7Hrq, _r83_t0;
         _r83_t0 = this;
         r83_xn$setwidth$9Jrj = _r83_t0['set-width']['bind'](_r83_t0);
         r83_xn$assignunicode$7Hrq = _r83_t0['assign-unicode']['bind'](_r83_t0);
@@ -1014,14 +983,13 @@
         _r83_t0['gizmo'] = r0_globalTransform;
         _r83_t0['set-width'](r0_WIDTH);
         r83_xn$setwidth$9Jrj(r0_WIDTH);
-        r83_xn$assignunicode$7Hrq('c');
-        r83_outline = r83_xn$createstroke$7Hrq();
-        r83_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_XH - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_XO, r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'], r0_HOOK - r0_TAILADJY * r0_globalTransform['yx']);
-        r83_xn$putshapes$9Jrj(r83_outline['form-stroke'](r0_STROKE, 0));
+        r83_xn$assignunicode$7Hrq('b');
+        r83_xn$putshapes$9Jrj(r0_glyphs['o.left']['contours']);
+        r83_xn$putshapes$9Jrj(r83_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('e', function _r0_t41() {
-        var r85_xn$setwidth$9Jrj, r85_xn$assignunicode$7Hrq, r85_xn$startfrom$1aao, r85_xn$lineto$5sIl, r85_xn$curveto$1aao, r85_xn$cubicto$1aao, r85_xn$putshapes$9Jrj, r85_xn$reverselast$3qIs, r85_xn$includeglyph$3qIs, r85_xn$createstroke$7Hrq, r85_barbottom, r85_outline, r85_bar, _r85_t0;
+    r0_xn$createglyph$7Hrq('q', function _r0_t43() {
+        var r85_xn$setwidth$9Jrj, r85_xn$assignunicode$7Hrq, r85_xn$startfrom$1aao, r85_xn$lineto$5sIl, r85_xn$curveto$1aao, r85_xn$cubicto$1aao, r85_xn$putshapes$9Jrj, r85_xn$reverselast$3qIs, r85_xn$includeglyph$3qIs, r85_xn$createstroke$7Hrq, _r85_t0;
         _r85_t0 = this;
         r85_xn$setwidth$9Jrj = _r85_t0['set-width']['bind'](_r85_t0);
         r85_xn$assignunicode$7Hrq = _r85_t0['assign-unicode']['bind'](_r85_t0);
@@ -1036,16 +1004,13 @@
         _r85_t0['gizmo'] = r0_globalTransform;
         _r85_t0['set-width'](r0_WIDTH);
         r85_xn$setwidth$9Jrj(r0_WIDTH);
-        r85_xn$assignunicode$7Hrq('e');
-        r85_barbottom = r0_XH * r0_BARPOS;
-        r85_outline = r85_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_O, r85_barbottom)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'], r0_HOOK - r0_TAILADJY * r0_globalTransform['yx']);
-        r85_bar = r85_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE, r85_barbottom)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r85_barbottom)['pen-direction'](r0_RIGHTWARD);
-        r85_xn$putshapes$9Jrj(r85_outline['form-stroke']());
-        r85_xn$putshapes$9Jrj(r85_bar['form-stroke']());
+        r85_xn$assignunicode$7Hrq('q');
+        r85_xn$putshapes$9Jrj(r0_glyphs['o.right']['contours']);
+        r85_xn$putshapes$9Jrj(r85_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](0, r0_STROKE)['line-to'](r0_RIGHTSB, r0_DESCENDER)['pen-direction'](r0_DOWNWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('a.upright', function _r0_t42() {
-        var r87_xn$setwidth$9Jrj, r87_xn$assignunicode$7Hrq, r87_xn$startfrom$1aao, r87_xn$lineto$5sIl, r87_xn$curveto$1aao, r87_xn$cubicto$1aao, r87_xn$putshapes$9Jrj, r87_xn$reverselast$3qIs, r87_xn$includeglyph$3qIs, r87_xn$createstroke$7Hrq, r87_bartop, _r87_t0;
+    r0_xn$createglyph$7Hrq('d', function _r0_t44() {
+        var r87_xn$setwidth$9Jrj, r87_xn$assignunicode$7Hrq, r87_xn$startfrom$1aao, r87_xn$lineto$5sIl, r87_xn$curveto$1aao, r87_xn$cubicto$1aao, r87_xn$putshapes$9Jrj, r87_xn$reverselast$3qIs, r87_xn$includeglyph$3qIs, r87_xn$createstroke$7Hrq, _r87_t0;
         _r87_t0 = this;
         r87_xn$setwidth$9Jrj = _r87_t0['set-width']['bind'](_r87_t0);
         r87_xn$assignunicode$7Hrq = _r87_t0['assign-unicode']['bind'](_r87_t0);
@@ -1060,13 +1025,12 @@
         _r87_t0['gizmo'] = r0_globalTransform;
         _r87_t0['set-width'](r0_WIDTH);
         r87_xn$setwidth$9Jrj(r0_WIDTH);
-        r87_bartop = r0_XH * r0_BARPOS + r0_STROKE;
-        r87_xn$putshapes$9Jrj(r87_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH - r0_SMOOTHA)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_AHOOK * (r0_MIDDLE - r0_SB), r0_XO, r0_SB + r0_OXHOOK, r0_XH - r0_AHOOK)['form-stroke']());
-        r87_xn$putshapes$9Jrj(r87_xn$createstroke$7Hrq()['start-from'](r0_WIDTH * 0.47, r0_O)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r87_bartop * 0.45)['arc-vh-to'](r0_WIDTH * 0.6, r87_bartop)['line-to'](r0_RIGHTSB, r87_bartop)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
-        r87_xn$putshapes$9Jrj(r87_xn$createstroke$7Hrq()['start-from'](r0_WIDTH * 0.47, r0_O + r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA * 0.65)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
+        r87_xn$assignunicode$7Hrq('d');
+        r87_xn$putshapes$9Jrj(r0_glyphs['o.right']['contours']);
+        r87_xn$putshapes$9Jrj(r87_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('a.italic', function _r0_t43() {
+    r0_xn$createglyph$7Hrq('g', function _r0_t45() {
         var r89_xn$setwidth$9Jrj, r89_xn$assignunicode$7Hrq, r89_xn$startfrom$1aao, r89_xn$lineto$5sIl, r89_xn$curveto$1aao, r89_xn$cubicto$1aao, r89_xn$putshapes$9Jrj, r89_xn$reverselast$3qIs, r89_xn$includeglyph$3qIs, r89_xn$createstroke$7Hrq, _r89_t0;
         _r89_t0 = this;
         r89_xn$setwidth$9Jrj = _r89_t0['set-width']['bind'](_r89_t0);
@@ -1082,12 +1046,21 @@
         _r89_t0['gizmo'] = r0_globalTransform;
         _r89_t0['set-width'](r0_WIDTH);
         r89_xn$setwidth$9Jrj(r0_WIDTH);
-        r89_xn$includeglyph$3qIs(r0_glyphs['o.right']);
-        r89_xn$putshapes$9Jrj(r89_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r89_xn$assignunicode$7Hrq('g');
+        r89_xn$putshapes$9Jrj([
+            r0_Ring(r0_XO, r0_XH * r0_GBARPOS, r0_SB * 1.25, r0_RIGHTSB - 0.25 * r0_SB, r0_SMALLSMOOTH),
+            r0_Ring(r0_XO - r0_STROKE, r0_XH * r0_GBARPOS + r0_STROKE, r0_SB * 1.25 + r0_STROKE, r0_RIGHTSB - 0.25 * r0_SB - r0_STROKE, r0_SMALLSMOOTH - r0_STROKE)
+        ]);
+        r89_xn$reverselast$3qIs();
+        r89_xn$putshapes$9Jrj(r89_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XH * r0_GBARPOS)['set-width'](0, r0_STROKE * 0.75)['arc-hv-to'](r0_SB * 1.5 + r0_STROKE, (r0_O - r0_DESCENDER * 0.85 + r0_XH * r0_GBARPOS) * 0.47)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE + r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['line-to'](r0_MIDDLE - r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['arc-hv-to'](r0_RIGHTSB - r0_O * 2, -r0_STROKE * r0_globalTransform['yx'] * 2)['arc-vh-to'](r0_MIDDLE, r0_DESCENDER + r0_O)['arc-hv-to'](r0_SB, r0_DESCENDER * 0.1)['arc-vh-to'](r0_MIDDLE + r0_DESCENDER * 0.15, r0_O - r0_DESCENDER * 0.85)['form-stroke']());
+        r89_xn$startfrom$1aao(r0_RIGHTSB + 0.5 * r0_SB, r0_XH);
+        r89_xn$lineto$5sIl(r0_RIGHTSB + 0.5 * r0_SB, r0_XH - r0_STROKE);
+        r89_xn$lineto$5sIl(r0_MIDDLE, r0_XH - r0_STROKE - r0_O);
+        r89_xn$lineto$5sIl(r0_MIDDLE, r0_XH);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('a', function _r0_t44() {
-        var r91_xn$setwidth$9Jrj, r91_xn$assignunicode$7Hrq, r91_xn$startfrom$1aao, r91_xn$lineto$5sIl, r91_xn$curveto$1aao, r91_xn$cubicto$1aao, r91_xn$putshapes$9Jrj, r91_xn$reverselast$3qIs, r91_xn$includeglyph$3qIs, r91_xn$createstroke$7Hrq, _r91_t0;
+    r0_xn$createglyph$7Hrq('c', function _r0_t46() {
+        var r91_xn$setwidth$9Jrj, r91_xn$assignunicode$7Hrq, r91_xn$startfrom$1aao, r91_xn$lineto$5sIl, r91_xn$curveto$1aao, r91_xn$cubicto$1aao, r91_xn$putshapes$9Jrj, r91_xn$reverselast$3qIs, r91_xn$includeglyph$3qIs, r91_xn$createstroke$7Hrq, r91_outline, _r91_t0;
         _r91_t0 = this;
         r91_xn$setwidth$9Jrj = _r91_t0['set-width']['bind'](_r91_t0);
         r91_xn$assignunicode$7Hrq = _r91_t0['assign-unicode']['bind'](_r91_t0);
@@ -1102,16 +1075,14 @@
         _r91_t0['gizmo'] = r0_globalTransform;
         _r91_t0['set-width'](r0_WIDTH);
         r91_xn$setwidth$9Jrj(r0_WIDTH);
-        r91_xn$assignunicode$7Hrq('a');
-        if (r0_para['italicangle'] > 0) {
-            r91_xn$includeglyph$3qIs(r0_glyphs['a.italic']);
-        } else {
-            r91_xn$includeglyph$3qIs(r0_glyphs['a.upright']);
-        }
+        r91_xn$assignunicode$7Hrq('c');
+        r91_outline = r91_xn$createstroke$7Hrq();
+        r91_outline['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_XH - r0_HOOK)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_para['sb']), r0_XO, r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'], r0_HOOK - r0_TAILADJY * r0_globalTransform['yx']);
+        r91_xn$putshapes$9Jrj(r91_outline['form-stroke'](r0_STROKE, 0));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('u', function _r0_t45() {
-        var r93_xn$setwidth$9Jrj, r93_xn$assignunicode$7Hrq, r93_xn$startfrom$1aao, r93_xn$lineto$5sIl, r93_xn$curveto$1aao, r93_xn$cubicto$1aao, r93_xn$putshapes$9Jrj, r93_xn$reverselast$3qIs, r93_xn$includeglyph$3qIs, r93_xn$createstroke$7Hrq, _r93_t0;
+    r0_xn$createglyph$7Hrq('e', function _r0_t47() {
+        var r93_xn$setwidth$9Jrj, r93_xn$assignunicode$7Hrq, r93_xn$startfrom$1aao, r93_xn$lineto$5sIl, r93_xn$curveto$1aao, r93_xn$cubicto$1aao, r93_xn$putshapes$9Jrj, r93_xn$reverselast$3qIs, r93_xn$includeglyph$3qIs, r93_xn$createstroke$7Hrq, r93_barbottom, r93_outline, r93_bar, _r93_t0;
         _r93_t0 = this;
         r93_xn$setwidth$9Jrj = _r93_t0['set-width']['bind'](_r93_t0);
         r93_xn$assignunicode$7Hrq = _r93_t0['assign-unicode']['bind'](_r93_t0);
@@ -1126,14 +1097,16 @@
         _r93_t0['gizmo'] = r0_globalTransform;
         _r93_t0['set-width'](r0_WIDTH);
         r93_xn$setwidth$9Jrj(r0_WIDTH);
-        r93_xn$assignunicode$7Hrq('u');
-        r93_xn$putshapes$9Jrj(r93_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_SB, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
-        r93_xn$putshapes$9Jrj(r93_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
-        r93_xn$putshapes$9Jrj(r93_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r93_xn$assignunicode$7Hrq('e');
+        r93_barbottom = r0_XH * r0_BARPOS;
+        r93_outline = r93_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_O, r93_barbottom)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB - r0_O, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r0_XH - r0_SMALLSMOOTHA)['line-to'](r0_SB + r0_O, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['curve-to'](r0_MIDDLE + r0_KAPPA_HOOK * (r0_MIDDLE - r0_SB), r0_O, r0_RIGHTSB - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'], r0_HOOK - r0_TAILADJY * r0_globalTransform['yx']);
+        r93_bar = r93_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE, r93_barbottom)['set-width'](r0_STROKE, 0)['pen-direction'](r0_RIGHTWARD)['line-to'](r0_RIGHTSB - r0_HALFSTROKE, r93_barbottom)['pen-direction'](r0_RIGHTWARD);
+        r93_xn$putshapes$9Jrj(r93_outline['form-stroke']());
+        r93_xn$putshapes$9Jrj(r93_bar['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('n', function _r0_t46() {
-        var r95_xn$setwidth$9Jrj, r95_xn$assignunicode$7Hrq, r95_xn$startfrom$1aao, r95_xn$lineto$5sIl, r95_xn$curveto$1aao, r95_xn$cubicto$1aao, r95_xn$putshapes$9Jrj, r95_xn$reverselast$3qIs, r95_xn$includeglyph$3qIs, r95_xn$createstroke$7Hrq, _r95_t0;
+    r0_xn$createglyph$7Hrq('a.upright', function _r0_t48() {
+        var r95_xn$setwidth$9Jrj, r95_xn$assignunicode$7Hrq, r95_xn$startfrom$1aao, r95_xn$lineto$5sIl, r95_xn$curveto$1aao, r95_xn$cubicto$1aao, r95_xn$putshapes$9Jrj, r95_xn$reverselast$3qIs, r95_xn$includeglyph$3qIs, r95_xn$createstroke$7Hrq, r95_bartop, _r95_t0;
         _r95_t0 = this;
         r95_xn$setwidth$9Jrj = _r95_t0['set-width']['bind'](_r95_t0);
         r95_xn$assignunicode$7Hrq = _r95_t0['assign-unicode']['bind'](_r95_t0);
@@ -1148,14 +1121,14 @@
         _r95_t0['gizmo'] = r0_globalTransform;
         _r95_t0['set-width'](r0_WIDTH);
         r95_xn$setwidth$9Jrj(r0_WIDTH);
-        r95_xn$assignunicode$7Hrq('n');
-        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['form-stroke']());
-        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_STROKE, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
-        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r95_bartop = r0_XH * r0_BARPOS + r0_STROKE;
+        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH - r0_SMOOTHA)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_AHOOK * (r0_MIDDLE - r0_SB), r0_XO, r0_SB + r0_OXHOOK, r0_XH - r0_AHOOK)['form-stroke']());
+        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_WIDTH * 0.47, r0_O)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_O, r95_bartop * 0.45)['arc-vh-to'](r0_WIDTH * 0.6, r95_bartop)['line-to'](r0_RIGHTSB, r95_bartop)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r95_xn$putshapes$9Jrj(r95_xn$createstroke$7Hrq()['start-from'](r0_WIDTH * 0.47, r0_O + r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA * 0.65)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('m', function _r0_t47() {
-        var r97_xn$setwidth$9Jrj, r97_xn$assignunicode$7Hrq, r97_xn$startfrom$1aao, r97_xn$lineto$5sIl, r97_xn$curveto$1aao, r97_xn$cubicto$1aao, r97_xn$putshapes$9Jrj, r97_xn$reverselast$3qIs, r97_xn$includeglyph$3qIs, r97_xn$createstroke$7Hrq, r97_sw, r97_m1, r97_m2, _r97_t0;
+    r0_xn$createglyph$7Hrq('a.italic', function _r0_t49() {
+        var r97_xn$setwidth$9Jrj, r97_xn$assignunicode$7Hrq, r97_xn$startfrom$1aao, r97_xn$lineto$5sIl, r97_xn$curveto$1aao, r97_xn$cubicto$1aao, r97_xn$putshapes$9Jrj, r97_xn$reverselast$3qIs, r97_xn$includeglyph$3qIs, r97_xn$createstroke$7Hrq, _r97_t0;
         _r97_t0 = this;
         r97_xn$setwidth$9Jrj = _r97_t0['set-width']['bind'](_r97_t0);
         r97_xn$assignunicode$7Hrq = _r97_t0['assign-unicode']['bind'](_r97_t0);
@@ -1170,16 +1143,11 @@
         _r97_t0['gizmo'] = r0_globalTransform;
         _r97_t0['set-width'](r0_WIDTH);
         r97_xn$setwidth$9Jrj(r0_WIDTH);
-        r97_xn$assignunicode$7Hrq('m');
-        r97_sw = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.24);
-        r97_m1 = (r0_MIDDLE + r0_SB + r97_sw * 0.25) / 2;
-        r97_m2 = r97_m1 + (r0_MIDDLE - r97_sw / 2 - r0_SB);
-        r97_xn$putshapes$9Jrj(r97_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r97_sw / 2, 0)['set-width'](0, r97_sw)['pen-direction'](r0_UPWARD)['line-to'](r0_MIDDLE - r97_sw / 2, r0_XH - r0_SMALLSMOOTHA)['arc-vh-to'](r97_m1, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r97_sw * 0.75, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r97_sw * 0.4)['form-stroke']());
-        r97_xn$putshapes$9Jrj(r97_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r97_sw, 0)['set-width'](0, r97_sw)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB - r97_sw, r0_XH - r0_SMALLSMOOTHA)['arc-vh-to'](r97_m2, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_MIDDLE + r97_sw * 0.25, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r97_sw * 0.4)['form-stroke']());
-        r97_xn$putshapes$9Jrj(r97_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r97_sw)['line-to'](r0_SB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r97_xn$includeglyph$3qIs(r0_glyphs['o.right']);
+        r97_xn$putshapes$9Jrj(r97_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessi.straight', function _r0_t48() {
+    r0_xn$createglyph$7Hrq('a', function _r0_t50() {
         var r99_xn$setwidth$9Jrj, r99_xn$assignunicode$7Hrq, r99_xn$startfrom$1aao, r99_xn$lineto$5sIl, r99_xn$curveto$1aao, r99_xn$cubicto$1aao, r99_xn$putshapes$9Jrj, r99_xn$reverselast$3qIs, r99_xn$includeglyph$3qIs, r99_xn$createstroke$7Hrq, _r99_t0;
         _r99_t0 = this;
         r99_xn$setwidth$9Jrj = _r99_t0['set-width']['bind'](_r99_t0);
@@ -1194,10 +1162,16 @@
         r99_xn$createstroke$7Hrq = _r99_t0['create-stroke']['bind'](_r99_t0);
         _r99_t0['gizmo'] = r0_globalTransform;
         _r99_t0['set-width'](r0_WIDTH);
-        r99_xn$putshapes$9Jrj(r99_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r99_xn$setwidth$9Jrj(r0_WIDTH);
+        r99_xn$assignunicode$7Hrq('a');
+        if (r0_para['italicangle'] > 0) {
+            r99_xn$includeglyph$3qIs(r0_glyphs['a.italic']);
+        } else {
+            r99_xn$includeglyph$3qIs(r0_glyphs['a.upright']);
+        }
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessi.hooky', function _r0_t49() {
+    r0_xn$createglyph$7Hrq('u', function _r0_t51() {
         var r101_xn$setwidth$9Jrj, r101_xn$assignunicode$7Hrq, r101_xn$startfrom$1aao, r101_xn$lineto$5sIl, r101_xn$curveto$1aao, r101_xn$cubicto$1aao, r101_xn$putshapes$9Jrj, r101_xn$reverselast$3qIs, r101_xn$includeglyph$3qIs, r101_xn$createstroke$7Hrq, _r101_t0;
         _r101_t0 = this;
         r101_xn$setwidth$9Jrj = _r101_t0['set-width']['bind'](_r101_t0);
@@ -1212,11 +1186,14 @@
         r101_xn$createstroke$7Hrq = _r101_t0['create-stroke']['bind'](_r101_t0);
         _r101_t0['gizmo'] = r0_globalTransform;
         _r101_t0['set-width'](r0_WIDTH);
-        r101_xn$includeglyph$3qIs(r0_glyphs['dotlessi.straight']);
-        r101_xn$putshapes$9Jrj(r101_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_HALFSTROKE, r0_XH)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE - r0_LONGSERIF - r0_globalTransform['yx'] * r0_STROKE, r0_XH)['form-stroke']());
+        r101_xn$setwidth$9Jrj(r0_WIDTH);
+        r101_xn$assignunicode$7Hrq('u');
+        r101_xn$putshapes$9Jrj(r101_xn$createstroke$7Hrq()['start-from'](r0_SB, r0_XH)['pen-direction'](r0_DOWNWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_SB, r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_RIGHTWARD)['form-stroke']());
+        r101_xn$putshapes$9Jrj(r101_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_O + r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_RIGHTWARD)['arc-hv-to'](r0_RIGHTSB - r0_STROKE, r0_SMALLSMOOTHA)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
+        r101_xn$putshapes$9Jrj(r101_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessi.zshaped', function _r0_t50() {
+    r0_xn$createglyph$7Hrq('n', function _r0_t52() {
         var r103_xn$setwidth$9Jrj, r103_xn$assignunicode$7Hrq, r103_xn$startfrom$1aao, r103_xn$lineto$5sIl, r103_xn$curveto$1aao, r103_xn$cubicto$1aao, r103_xn$putshapes$9Jrj, r103_xn$reverselast$3qIs, r103_xn$includeglyph$3qIs, r103_xn$createstroke$7Hrq, _r103_t0;
         _r103_t0 = this;
         r103_xn$setwidth$9Jrj = _r103_t0['set-width']['bind'](_r103_t0);
@@ -1231,11 +1208,14 @@
         r103_xn$createstroke$7Hrq = _r103_t0['create-stroke']['bind'](_r103_t0);
         _r103_t0['gizmo'] = r0_globalTransform;
         _r103_t0['set-width'](r0_WIDTH);
-        r103_xn$includeglyph$3qIs(r0_glyphs['dotlessi.hooky']);
-        r103_xn$putshapes$9Jrj(r103_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_HALFSTROKE, 0)['pen-direction'](r0_RIGHTWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE + r0_LONGSERIF + r0_globalTransform['yx'] * r0_STROKE, 0)['form-stroke']());
+        r103_xn$setwidth$9Jrj(r0_WIDTH);
+        r103_xn$assignunicode$7Hrq('n');
+        r103_xn$putshapes$9Jrj(r103_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_RIGHTSB, r0_XH - r0_SMALLSMOOTHB)['arc-vh-to'](r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['form-stroke']());
+        r103_xn$putshapes$9Jrj(r103_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_STROKE, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r0_STROKE * 0.4)['form-stroke']());
+        r103_xn$putshapes$9Jrj(r103_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessi.serifed', function _r0_t51() {
+    r0_xn$createglyph$7Hrq('h', function _r0_t53() {
         var r105_xn$setwidth$9Jrj, r105_xn$assignunicode$7Hrq, r105_xn$startfrom$1aao, r105_xn$lineto$5sIl, r105_xn$curveto$1aao, r105_xn$cubicto$1aao, r105_xn$putshapes$9Jrj, r105_xn$reverselast$3qIs, r105_xn$includeglyph$3qIs, r105_xn$createstroke$7Hrq, _r105_t0;
         _r105_t0 = this;
         r105_xn$setwidth$9Jrj = _r105_t0['set-width']['bind'](_r105_t0);
@@ -1250,56 +1230,38 @@
         r105_xn$createstroke$7Hrq = _r105_t0['create-stroke']['bind'](_r105_t0);
         _r105_t0['gizmo'] = r0_globalTransform;
         _r105_t0['set-width'](r0_WIDTH);
-        r105_xn$includeglyph$3qIs(r0_glyphs['dotlessi.zshaped']);
-        r105_xn$putshapes$9Jrj(r105_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_HALFSTROKE, 0)['pen-direction'](r0_LEFTWARD)['set-width'](0, r0_STROKE)['line-to'](r0_MIDDLE - r0_LONGSERIF - r0_globalTransform['yx'] * r0_STROKE, 0)['form-stroke']());
+        r105_xn$setwidth$9Jrj(r0_WIDTH);
+        r105_xn$assignunicode$7Hrq('h');
+        r105_xn$includeglyph$3qIs(r0_glyphs['n']);
+        r105_xn$putshapes$9Jrj(r105_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotlessi', function _r0_t52() {
-        var r107_xn$setwidth$9Jrj, r107_xn$assignunicode$7Hrq, r107_xn$startfrom$1aao, r107_xn$lineto$5sIl, r107_xn$curveto$1aao, r107_xn$cubicto$1aao, r107_xn$putshapes$9Jrj, r107_xn$reverselast$3qIs, r107_xn$includeglyph$3qIs, r107_xn$createstroke$7Hrq, r107_otherwise, _r107_t0, _r107_t1, _r107_t2, _r107_t3, _r107_t4, _r107_t5, _r107_t6, _r107_t7, _r107_t8;
-        _r107_t1 = this;
-        r107_xn$setwidth$9Jrj = _r107_t1['set-width']['bind'](_r107_t1);
-        r107_xn$assignunicode$7Hrq = _r107_t1['assign-unicode']['bind'](_r107_t1);
-        r107_xn$startfrom$1aao = _r107_t1['start-from']['bind'](_r107_t1);
-        r107_xn$lineto$5sIl = _r107_t1['line-to']['bind'](_r107_t1);
-        r107_xn$curveto$1aao = _r107_t1['curve-to']['bind'](_r107_t1);
-        r107_xn$cubicto$1aao = _r107_t1['cubic-to']['bind'](_r107_t1);
-        r107_xn$putshapes$9Jrj = _r107_t1['put-shapes']['bind'](_r107_t1);
-        r107_xn$reverselast$3qIs = _r107_t1['reverse-last']['bind'](_r107_t1);
-        r107_xn$includeglyph$3qIs = _r107_t1['include-glyph']['bind'](_r107_t1);
-        r107_xn$createstroke$7Hrq = _r107_t1['create-stroke']['bind'](_r107_t1);
-        _r107_t1['gizmo'] = r0_globalTransform;
-        _r107_t1['set-width'](r0_WIDTH);
+    r0_xn$createglyph$7Hrq('m', function _r0_t54() {
+        var r107_xn$setwidth$9Jrj, r107_xn$assignunicode$7Hrq, r107_xn$startfrom$1aao, r107_xn$lineto$5sIl, r107_xn$curveto$1aao, r107_xn$cubicto$1aao, r107_xn$putshapes$9Jrj, r107_xn$reverselast$3qIs, r107_xn$includeglyph$3qIs, r107_xn$createstroke$7Hrq, r107_sw, r107_m1, r107_m2, _r107_t0;
+        _r107_t0 = this;
+        r107_xn$setwidth$9Jrj = _r107_t0['set-width']['bind'](_r107_t0);
+        r107_xn$assignunicode$7Hrq = _r107_t0['assign-unicode']['bind'](_r107_t0);
+        r107_xn$startfrom$1aao = _r107_t0['start-from']['bind'](_r107_t0);
+        r107_xn$lineto$5sIl = _r107_t0['line-to']['bind'](_r107_t0);
+        r107_xn$curveto$1aao = _r107_t0['curve-to']['bind'](_r107_t0);
+        r107_xn$cubicto$1aao = _r107_t0['cubic-to']['bind'](_r107_t0);
+        r107_xn$putshapes$9Jrj = _r107_t0['put-shapes']['bind'](_r107_t0);
+        r107_xn$reverselast$3qIs = _r107_t0['reverse-last']['bind'](_r107_t0);
+        r107_xn$includeglyph$3qIs = _r107_t0['include-glyph']['bind'](_r107_t0);
+        r107_xn$createstroke$7Hrq = _r107_t0['create-stroke']['bind'](_r107_t0);
+        _r107_t0['gizmo'] = r0_globalTransform;
+        _r107_t0['set-width'](r0_WIDTH);
         r107_xn$setwidth$9Jrj(r0_WIDTH);
-        r107_xn$assignunicode$7Hrq(305);
-        _r107_t2 = r107_xn$includeglyph$3qIs;
-        _r107_t3 = r0_glyphs;
-        _r107_t0 = r0_variantSelector['zero'];
-        if ('straight' === _r107_t0) {
-            _r107_t4 = 'dotlessi.straight';
-        } else {
-            if ('hooky' === _r107_t0) {
-                _r107_t5 = 'dotlessi.hooky';
-            } else {
-                if ('zshaped' === _r107_t0) {
-                    _r107_t6 = 'dotlessi.zshaped';
-                } else {
-                    if ('serifed' === _r107_t0) {
-                        _r107_t7 = 'dotlessi.serifed';
-                    } else {
-                        r107_otherwise = _r107_t0;
-                        _r107_t7 = 'dotlessi.zshaped';
-                    }
-                    _r107_t6 = _r107_t7;
-                }
-                _r107_t5 = _r107_t6;
-            }
-            _r107_t4 = _r107_t5;
-        }
-        _r107_t8 = _r107_t3[_r107_t4];
-        _r107_t2(_r107_t8);
+        r107_xn$assignunicode$7Hrq('m');
+        r107_sw = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.24);
+        r107_m1 = (r0_MIDDLE + r0_SB + r107_sw * 0.25) / 2;
+        r107_m2 = r107_m1 + (r0_MIDDLE - r107_sw / 2 - r0_SB);
+        r107_xn$putshapes$9Jrj(r107_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r107_sw / 2, 0)['set-width'](0, r107_sw)['pen-direction'](r0_UPWARD)['line-to'](r0_MIDDLE - r107_sw / 2, r0_XH - r0_SMALLSMOOTHA)['arc-vh-to'](r107_m1, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r107_sw * 0.75, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r107_sw * 0.4)['form-stroke']());
+        r107_xn$putshapes$9Jrj(r107_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r107_sw, 0)['set-width'](0, r107_sw)['pen-direction'](r0_UPWARD)['line-to'](r0_RIGHTSB - r107_sw, r0_XH - r0_SMALLSMOOTHA)['arc-vh-to'](r107_m2, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_MIDDLE + r107_sw * 0.25, r0_XH - r0_SMALLSMOOTHA)['pen-direction'](r0_DOWNWARD)['set-width'](0, r107_sw * 0.4)['form-stroke']());
+        r107_xn$putshapes$9Jrj(r107_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['pen-direction'](r0_UPWARD)['set-width'](0, r107_sw)['line-to'](r0_SB, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('dotaccent', function _r0_t53() {
+    r0_xn$createglyph$7Hrq('dotlessi.straight', function _r0_t55() {
         var r109_xn$setwidth$9Jrj, r109_xn$assignunicode$7Hrq, r109_xn$startfrom$1aao, r109_xn$lineto$5sIl, r109_xn$curveto$1aao, r109_xn$cubicto$1aao, r109_xn$putshapes$9Jrj, r109_xn$reverselast$3qIs, r109_xn$includeglyph$3qIs, r109_xn$createstroke$7Hrq, _r109_t0;
         _r109_t0 = this;
         r109_xn$setwidth$9Jrj = _r109_t0['set-width']['bind'](_r109_t0);
@@ -1314,11 +1276,10 @@
         r109_xn$createstroke$7Hrq = _r109_t0['create-stroke']['bind'](_r109_t0);
         _r109_t0['gizmo'] = r0_globalTransform;
         _r109_t0['set-width'](r0_WIDTH);
-        r109_xn$setwidth$9Jrj(r0_WIDTH);
-        r109_xn$putshapes$9Jrj([r0_Ring(r0_XH + r0_ACCENT + r0_DOTRADIUS, r0_XH + r0_ACCENT - r0_DOTRADIUS, r0_MIDDLE - r0_DOTRADIUS, r0_MIDDLE + r0_DOTRADIUS)]);
+        r109_xn$putshapes$9Jrj(r109_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_XH)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('i', function _r0_t54() {
+    r0_xn$createglyph$7Hrq('dotlessi.hooky', function _r0_t56() {
         var r111_xn$setwidth$9Jrj, r111_xn$assignunicode$7Hrq, r111_xn$startfrom$1aao, r111_xn$lineto$5sIl, r111_xn$curveto$1aao, r111_xn$cubicto$1aao, r111_xn$putshapes$9Jrj, r111_xn$reverselast$3qIs, r111_xn$includeglyph$3qIs, r111_xn$createstroke$7Hrq, _r111_t0;
         _r111_t0 = this;
         r111_xn$setwidth$9Jrj = _r111_t0['set-width']['bind'](_r111_t0);
@@ -1333,13 +1294,11 @@
         r111_xn$createstroke$7Hrq = _r111_t0['create-stroke']['bind'](_r111_t0);
         _r111_t0['gizmo'] = r0_globalTransform;
         _r111_t0['set-width'](r0_WIDTH);
-        r111_xn$setwidth$9Jrj(r0_WIDTH);
-        r111_xn$assignunicode$7Hrq('i');
-        r111_xn$includeglyph$3qIs(r0_glyphs['dotlessi']);
-        r111_xn$includeglyph$3qIs(r0_glyphs['dotaccent']);
+        r111_xn$includeglyph$3qIs(r0_glyphs['dotlessi.straight']);
+        r111_xn$putshapes$9Jrj(r0_leftwardTopSerif(r0_MIDDLE, r0_XH, r0_LONGSERIF));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('l.straight', function _r0_t55() {
+    r0_xn$createglyph$7Hrq('dotlessi.zshaped', function _r0_t57() {
         var r113_xn$setwidth$9Jrj, r113_xn$assignunicode$7Hrq, r113_xn$startfrom$1aao, r113_xn$lineto$5sIl, r113_xn$curveto$1aao, r113_xn$cubicto$1aao, r113_xn$putshapes$9Jrj, r113_xn$reverselast$3qIs, r113_xn$includeglyph$3qIs, r113_xn$createstroke$7Hrq, _r113_t0;
         _r113_t0 = this;
         r113_xn$setwidth$9Jrj = _r113_t0['set-width']['bind'](_r113_t0);
@@ -1354,10 +1313,11 @@
         r113_xn$createstroke$7Hrq = _r113_t0['create-stroke']['bind'](_r113_t0);
         _r113_t0['gizmo'] = r0_globalTransform;
         _r113_t0['set-width'](r0_WIDTH);
-        r113_xn$putshapes$9Jrj(r113_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
+        r113_xn$includeglyph$3qIs(r0_glyphs['dotlessi.hooky']);
+        r113_xn$putshapes$9Jrj(r0_rightwardBottomSerif(r0_MIDDLE, 0, r0_LONGSERIF));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('l.hooky', function _r0_t56() {
+    r0_xn$createglyph$7Hrq('dotlessi.serifed', function _r0_t58() {
         var r115_xn$setwidth$9Jrj, r115_xn$assignunicode$7Hrq, r115_xn$startfrom$1aao, r115_xn$lineto$5sIl, r115_xn$curveto$1aao, r115_xn$cubicto$1aao, r115_xn$putshapes$9Jrj, r115_xn$reverselast$3qIs, r115_xn$includeglyph$3qIs, r115_xn$createstroke$7Hrq, _r115_t0;
         _r115_t0 = this;
         r115_xn$setwidth$9Jrj = _r115_t0['set-width']['bind'](_r115_t0);
@@ -1372,30 +1332,56 @@
         r115_xn$createstroke$7Hrq = _r115_t0['create-stroke']['bind'](_r115_t0);
         _r115_t0['gizmo'] = r0_globalTransform;
         _r115_t0['set-width'](r0_WIDTH);
-        r115_xn$includeglyph$3qIs(r0_glyphs['l.straight']);
-        r115_xn$putshapes$9Jrj(r115_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_HALFSTROKE, r0_CAP)['pen-direction'](r0_LEFTWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE - r0_LONGSERIF - r0_globalTransform['yx'] * r0_STROKE, r0_CAP)['form-stroke']());
+        r115_xn$includeglyph$3qIs(r0_glyphs['dotlessi.zshaped']);
+        r115_xn$putshapes$9Jrj(r0_leftwardBottomSerif(r0_MIDDLE, 0, r0_LONGSERIF));
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('l.zshaped', function _r0_t57() {
-        var r117_xn$setwidth$9Jrj, r117_xn$assignunicode$7Hrq, r117_xn$startfrom$1aao, r117_xn$lineto$5sIl, r117_xn$curveto$1aao, r117_xn$cubicto$1aao, r117_xn$putshapes$9Jrj, r117_xn$reverselast$3qIs, r117_xn$includeglyph$3qIs, r117_xn$createstroke$7Hrq, _r117_t0;
-        _r117_t0 = this;
-        r117_xn$setwidth$9Jrj = _r117_t0['set-width']['bind'](_r117_t0);
-        r117_xn$assignunicode$7Hrq = _r117_t0['assign-unicode']['bind'](_r117_t0);
-        r117_xn$startfrom$1aao = _r117_t0['start-from']['bind'](_r117_t0);
-        r117_xn$lineto$5sIl = _r117_t0['line-to']['bind'](_r117_t0);
-        r117_xn$curveto$1aao = _r117_t0['curve-to']['bind'](_r117_t0);
-        r117_xn$cubicto$1aao = _r117_t0['cubic-to']['bind'](_r117_t0);
-        r117_xn$putshapes$9Jrj = _r117_t0['put-shapes']['bind'](_r117_t0);
-        r117_xn$reverselast$3qIs = _r117_t0['reverse-last']['bind'](_r117_t0);
-        r117_xn$includeglyph$3qIs = _r117_t0['include-glyph']['bind'](_r117_t0);
-        r117_xn$createstroke$7Hrq = _r117_t0['create-stroke']['bind'](_r117_t0);
-        _r117_t0['gizmo'] = r0_globalTransform;
-        _r117_t0['set-width'](r0_WIDTH);
-        r117_xn$includeglyph$3qIs(r0_glyphs['l.hooky']);
-        r117_xn$putshapes$9Jrj(r117_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE - r0_HALFSTROKE, 0)['pen-direction'](r0_RIGHTWARD)['set-width'](r0_STROKE, 0)['line-to'](r0_MIDDLE + r0_LONGSERIF + r0_globalTransform['yx'] * r0_STROKE, 0)['form-stroke']());
+    r0_xn$createglyph$7Hrq('dotlessi', function _r0_t59() {
+        var r117_xn$setwidth$9Jrj, r117_xn$assignunicode$7Hrq, r117_xn$startfrom$1aao, r117_xn$lineto$5sIl, r117_xn$curveto$1aao, r117_xn$cubicto$1aao, r117_xn$putshapes$9Jrj, r117_xn$reverselast$3qIs, r117_xn$includeglyph$3qIs, r117_xn$createstroke$7Hrq, r117_otherwise, _r117_t0, _r117_t1, _r117_t2, _r117_t3, _r117_t4, _r117_t5, _r117_t6, _r117_t7, _r117_t8;
+        _r117_t1 = this;
+        r117_xn$setwidth$9Jrj = _r117_t1['set-width']['bind'](_r117_t1);
+        r117_xn$assignunicode$7Hrq = _r117_t1['assign-unicode']['bind'](_r117_t1);
+        r117_xn$startfrom$1aao = _r117_t1['start-from']['bind'](_r117_t1);
+        r117_xn$lineto$5sIl = _r117_t1['line-to']['bind'](_r117_t1);
+        r117_xn$curveto$1aao = _r117_t1['curve-to']['bind'](_r117_t1);
+        r117_xn$cubicto$1aao = _r117_t1['cubic-to']['bind'](_r117_t1);
+        r117_xn$putshapes$9Jrj = _r117_t1['put-shapes']['bind'](_r117_t1);
+        r117_xn$reverselast$3qIs = _r117_t1['reverse-last']['bind'](_r117_t1);
+        r117_xn$includeglyph$3qIs = _r117_t1['include-glyph']['bind'](_r117_t1);
+        r117_xn$createstroke$7Hrq = _r117_t1['create-stroke']['bind'](_r117_t1);
+        _r117_t1['gizmo'] = r0_globalTransform;
+        _r117_t1['set-width'](r0_WIDTH);
+        r117_xn$setwidth$9Jrj(r0_WIDTH);
+        r117_xn$assignunicode$7Hrq(305);
+        _r117_t2 = r117_xn$includeglyph$3qIs;
+        _r117_t3 = r0_glyphs;
+        _r117_t0 = r0_variantSelector['zero'];
+        if ('straight' === _r117_t0) {
+            _r117_t4 = 'dotlessi.straight';
+        } else {
+            if ('hooky' === _r117_t0) {
+                _r117_t5 = 'dotlessi.hooky';
+            } else {
+                if ('zshaped' === _r117_t0) {
+                    _r117_t6 = 'dotlessi.zshaped';
+                } else {
+                    if ('serifed' === _r117_t0) {
+                        _r117_t7 = 'dotlessi.serifed';
+                    } else {
+                        r117_otherwise = _r117_t0;
+                        _r117_t7 = 'dotlessi.serifed';
+                    }
+                    _r117_t6 = _r117_t7;
+                }
+                _r117_t5 = _r117_t6;
+            }
+            _r117_t4 = _r117_t5;
+        }
+        _r117_t8 = _r117_t3[_r117_t4];
+        _r117_t2(_r117_t8);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('l.serifed', function _r0_t58() {
+    r0_xn$createglyph$7Hrq('dotaccent', function _r0_t60() {
         var r119_xn$setwidth$9Jrj, r119_xn$assignunicode$7Hrq, r119_xn$startfrom$1aao, r119_xn$lineto$5sIl, r119_xn$curveto$1aao, r119_xn$cubicto$1aao, r119_xn$putshapes$9Jrj, r119_xn$reverselast$3qIs, r119_xn$includeglyph$3qIs, r119_xn$createstroke$7Hrq, _r119_t0;
         _r119_t0 = this;
         r119_xn$setwidth$9Jrj = _r119_t0['set-width']['bind'](_r119_t0);
@@ -1410,57 +1396,33 @@
         r119_xn$createstroke$7Hrq = _r119_t0['create-stroke']['bind'](_r119_t0);
         _r119_t0['gizmo'] = r0_globalTransform;
         _r119_t0['set-width'](r0_WIDTH);
-        r119_xn$includeglyph$3qIs(r0_glyphs['l.zshaped']);
-        r119_xn$putshapes$9Jrj(r119_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_HALFSTROKE, 0)['pen-direction'](r0_LEFTWARD)['set-width'](0, r0_STROKE)['line-to'](r0_MIDDLE - r0_LONGSERIF - r0_globalTransform['yx'] * r0_STROKE, 0)['form-stroke']());
+        r119_xn$setwidth$9Jrj(r0_WIDTH);
+        r119_xn$putshapes$9Jrj([r0_Ring(r0_XH + r0_ACCENT + r0_DOTRADIUS, r0_XH + r0_ACCENT - r0_DOTRADIUS, r0_MIDDLE - r0_DOTRADIUS, r0_MIDDLE + r0_DOTRADIUS)]);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('l', function _r0_t59() {
-        var r121_xn$setwidth$9Jrj, r121_xn$assignunicode$7Hrq, r121_xn$startfrom$1aao, r121_xn$lineto$5sIl, r121_xn$curveto$1aao, r121_xn$cubicto$1aao, r121_xn$putshapes$9Jrj, r121_xn$reverselast$3qIs, r121_xn$includeglyph$3qIs, r121_xn$createstroke$7Hrq, r121_otherwise, _r121_t0, _r121_t1, _r121_t2, _r121_t3, _r121_t4, _r121_t5, _r121_t6, _r121_t7, _r121_t8;
-        _r121_t1 = this;
-        r121_xn$setwidth$9Jrj = _r121_t1['set-width']['bind'](_r121_t1);
-        r121_xn$assignunicode$7Hrq = _r121_t1['assign-unicode']['bind'](_r121_t1);
-        r121_xn$startfrom$1aao = _r121_t1['start-from']['bind'](_r121_t1);
-        r121_xn$lineto$5sIl = _r121_t1['line-to']['bind'](_r121_t1);
-        r121_xn$curveto$1aao = _r121_t1['curve-to']['bind'](_r121_t1);
-        r121_xn$cubicto$1aao = _r121_t1['cubic-to']['bind'](_r121_t1);
-        r121_xn$putshapes$9Jrj = _r121_t1['put-shapes']['bind'](_r121_t1);
-        r121_xn$reverselast$3qIs = _r121_t1['reverse-last']['bind'](_r121_t1);
-        r121_xn$includeglyph$3qIs = _r121_t1['include-glyph']['bind'](_r121_t1);
-        r121_xn$createstroke$7Hrq = _r121_t1['create-stroke']['bind'](_r121_t1);
-        _r121_t1['gizmo'] = r0_globalTransform;
-        _r121_t1['set-width'](r0_WIDTH);
+    r0_xn$createglyph$7Hrq('i', function _r0_t61() {
+        var r121_xn$setwidth$9Jrj, r121_xn$assignunicode$7Hrq, r121_xn$startfrom$1aao, r121_xn$lineto$5sIl, r121_xn$curveto$1aao, r121_xn$cubicto$1aao, r121_xn$putshapes$9Jrj, r121_xn$reverselast$3qIs, r121_xn$includeglyph$3qIs, r121_xn$createstroke$7Hrq, _r121_t0;
+        _r121_t0 = this;
+        r121_xn$setwidth$9Jrj = _r121_t0['set-width']['bind'](_r121_t0);
+        r121_xn$assignunicode$7Hrq = _r121_t0['assign-unicode']['bind'](_r121_t0);
+        r121_xn$startfrom$1aao = _r121_t0['start-from']['bind'](_r121_t0);
+        r121_xn$lineto$5sIl = _r121_t0['line-to']['bind'](_r121_t0);
+        r121_xn$curveto$1aao = _r121_t0['curve-to']['bind'](_r121_t0);
+        r121_xn$cubicto$1aao = _r121_t0['cubic-to']['bind'](_r121_t0);
+        r121_xn$putshapes$9Jrj = _r121_t0['put-shapes']['bind'](_r121_t0);
+        r121_xn$reverselast$3qIs = _r121_t0['reverse-last']['bind'](_r121_t0);
+        r121_xn$includeglyph$3qIs = _r121_t0['include-glyph']['bind'](_r121_t0);
+        r121_xn$createstroke$7Hrq = _r121_t0['create-stroke']['bind'](_r121_t0);
+        _r121_t0['gizmo'] = r0_globalTransform;
+        _r121_t0['set-width'](r0_WIDTH);
         r121_xn$setwidth$9Jrj(r0_WIDTH);
-        r121_xn$assignunicode$7Hrq('l');
-        _r121_t2 = r121_xn$includeglyph$3qIs;
-        _r121_t3 = r0_glyphs;
-        _r121_t0 = r0_variantSelector['zero'];
-        if ('straight' === _r121_t0) {
-            _r121_t4 = 'l.straight';
-        } else {
-            if ('hooky' === _r121_t0) {
-                _r121_t5 = 'l.hooky';
-            } else {
-                if ('zshaped' === _r121_t0) {
-                    _r121_t6 = 'l.zshaped';
-                } else {
-                    if ('serifed' === _r121_t0) {
-                        _r121_t7 = 'l.serifed';
-                    } else {
-                        r121_otherwise = _r121_t0;
-                        _r121_t7 = 'l.zshaped';
-                    }
-                    _r121_t6 = _r121_t7;
-                }
-                _r121_t5 = _r121_t6;
-            }
-            _r121_t4 = _r121_t5;
-        }
-        _r121_t8 = _r121_t3[_r121_t4];
-        _r121_t2(_r121_t8);
+        r121_xn$assignunicode$7Hrq('i');
+        r121_xn$includeglyph$3qIs(r0_glyphs['dotlessi']);
+        r121_xn$includeglyph$3qIs(r0_glyphs['dotaccent']);
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('x', function _r0_t60() {
-        var r123_xn$setwidth$9Jrj, r123_xn$assignunicode$7Hrq, r123_xn$startfrom$1aao, r123_xn$lineto$5sIl, r123_xn$curveto$1aao, r123_xn$cubicto$1aao, r123_xn$putshapes$9Jrj, r123_xn$reverselast$3qIs, r123_xn$includeglyph$3qIs, r123_xn$createstroke$7Hrq, r123_TURN, r123_barone, r123_bartwo, _r123_t0;
+    r0_xn$createglyph$7Hrq('l.straight', function _r0_t62() {
+        var r123_xn$setwidth$9Jrj, r123_xn$assignunicode$7Hrq, r123_xn$startfrom$1aao, r123_xn$lineto$5sIl, r123_xn$curveto$1aao, r123_xn$cubicto$1aao, r123_xn$putshapes$9Jrj, r123_xn$reverselast$3qIs, r123_xn$includeglyph$3qIs, r123_xn$createstroke$7Hrq, _r123_t0;
         _r123_t0 = this;
         r123_xn$setwidth$9Jrj = _r123_t0['set-width']['bind'](_r123_t0);
         r123_xn$assignunicode$7Hrq = _r123_t0['assign-unicode']['bind'](_r123_t0);
@@ -1474,17 +1436,11 @@
         r123_xn$createstroke$7Hrq = _r123_t0['create-stroke']['bind'](_r123_t0);
         _r123_t0['gizmo'] = r0_globalTransform;
         _r123_t0['set-width'](r0_WIDTH);
-        r123_xn$setwidth$9Jrj(r0_WIDTH);
-        r123_xn$assignunicode$7Hrq('x');
-        r123_TURN = r0_XH * 0.1;
-        r123_barone = r123_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE + r0_O, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r0_SB + r0_HALFSTROKE + r0_O, r123_TURN + 0.17 * (r0_XH - r123_TURN), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH - r123_TURN - 0.17 * (r0_XH - r123_TURN), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH)['pen-direction'](r0_UPWARD);
-        r123_bartwo = r123_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_HALFSTROKE - r0_O, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r0_RIGHTSB - r0_HALFSTROKE - r0_O, r123_TURN + 0.17 * (r0_XH - r123_TURN), r0_SB + r0_HALFSTROKE + r0_O, r0_XH - r123_TURN - 0.17 * (r0_XH - r123_TURN), r0_SB + r0_HALFSTROKE + r0_O, r0_XH)['pen-direction'](r0_UPWARD);
-        r123_xn$putshapes$9Jrj(r123_barone['form-stroke']());
-        r123_xn$putshapes$9Jrj(r123_bartwo['form-stroke']());
+        r123_xn$putshapes$9Jrj(r123_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['line-to'](r0_MIDDLE, r0_CAP)['pen-direction'](r0_UPWARD)['form-stroke']());
         return void 0;
     });
-    r0_xn$createglyph$7Hrq('s', function _r0_t61() {
-        var r125_xn$setwidth$9Jrj, r125_xn$assignunicode$7Hrq, r125_xn$startfrom$1aao, r125_xn$lineto$5sIl, r125_xn$curveto$1aao, r125_xn$cubicto$1aao, r125_xn$putshapes$9Jrj, r125_xn$reverselast$3qIs, r125_xn$includeglyph$3qIs, r125_xn$createstroke$7Hrq, r125_slope, r125_expand, r125_coexpand, r125_ssmootha, r125_bowltop, r125_strokemiddle, r125_bowlbottom, _r125_t0;
+    r0_xn$createglyph$7Hrq('l.hooky', function _r0_t63() {
+        var r125_xn$setwidth$9Jrj, r125_xn$assignunicode$7Hrq, r125_xn$startfrom$1aao, r125_xn$lineto$5sIl, r125_xn$curveto$1aao, r125_xn$cubicto$1aao, r125_xn$putshapes$9Jrj, r125_xn$reverselast$3qIs, r125_xn$includeglyph$3qIs, r125_xn$createstroke$7Hrq, _r125_t0;
         _r125_t0 = this;
         r125_xn$setwidth$9Jrj = _r125_t0['set-width']['bind'](_r125_t0);
         r125_xn$assignunicode$7Hrq = _r125_t0['assign-unicode']['bind'](_r125_t0);
@@ -1498,21 +1454,147 @@
         r125_xn$createstroke$7Hrq = _r125_t0['create-stroke']['bind'](_r125_t0);
         _r125_t0['gizmo'] = r0_globalTransform;
         _r125_t0['set-width'](r0_WIDTH);
-        r125_xn$setwidth$9Jrj(r0_WIDTH);
-        r125_xn$assignunicode$7Hrq('s');
-        r125_slope = 0.015;
-        r125_expand = 0.175;
-        r125_coexpand = (1 - r125_expand) / 2;
-        r125_ssmootha = r0_SMOOTHA * 0.87;
-        r125_bowltop = r125_xn$createstroke$7Hrq();
-        r125_bowltop['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_XH - r0_SHOOK)['set-width'](r0_STROKE, 0)['curve-to'](r0_MIDDLE + r0_KAPPA_AHOOK * (r0_MIDDLE - r0_para['sb']), r0_XO, r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_XH - r125_ssmootha);
-        r125_strokemiddle = r125_xn$createstroke$7Hrq();
-        r125_strokemiddle['start-from'](r0_SB + r0_STROKE / 2, r0_XH - r125_ssmootha)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['curve-to'](r0_SB + r0_STROKE / 2, (0.5 + r125_slope) * r0_XH + 2 * r125_slope * r0_XH / (r125_expand * r0_WIDTH) * (r125_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r125_coexpand * r0_WIDTH, (0.5 + r125_slope) * r0_XH)['line-to']((1 - r125_coexpand) * r0_WIDTH, (0.5 - r125_slope) * r0_XH)['curve-to'](r0_RIGHTSB - r0_STROKE / 2, (0.5 - r125_slope) * r0_XH - 2 * r125_slope * r0_XH / (r125_expand * r0_WIDTH) * (r125_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r0_RIGHTSB - r0_STROKE / 2, r125_ssmootha);
-        r125_bowlbottom = r125_xn$createstroke$7Hrq();
-        r125_bowlbottom['start-from'](r0_RIGHTSB, r125_ssmootha)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_AHOOK * (r0_MIDDLE - r0_para['sb']), r0_O, r0_SB + r0_OXHOOK, r0_SHOOK);
-        r125_xn$putshapes$9Jrj(r125_bowltop['form-stroke']());
-        r125_xn$putshapes$9Jrj(r125_strokemiddle['form-stroke']());
-        r125_xn$putshapes$9Jrj(r125_bowlbottom['form-stroke']());
+        r125_xn$includeglyph$3qIs(r0_glyphs['l.straight']);
+        r125_xn$putshapes$9Jrj(r0_leftwardTopSerif(r0_MIDDLE, r0_CAP, r0_LONGSERIF));
+        return void 0;
+    });
+    r0_xn$createglyph$7Hrq('l.zshaped', function _r0_t64() {
+        var r127_xn$setwidth$9Jrj, r127_xn$assignunicode$7Hrq, r127_xn$startfrom$1aao, r127_xn$lineto$5sIl, r127_xn$curveto$1aao, r127_xn$cubicto$1aao, r127_xn$putshapes$9Jrj, r127_xn$reverselast$3qIs, r127_xn$includeglyph$3qIs, r127_xn$createstroke$7Hrq, _r127_t0;
+        _r127_t0 = this;
+        r127_xn$setwidth$9Jrj = _r127_t0['set-width']['bind'](_r127_t0);
+        r127_xn$assignunicode$7Hrq = _r127_t0['assign-unicode']['bind'](_r127_t0);
+        r127_xn$startfrom$1aao = _r127_t0['start-from']['bind'](_r127_t0);
+        r127_xn$lineto$5sIl = _r127_t0['line-to']['bind'](_r127_t0);
+        r127_xn$curveto$1aao = _r127_t0['curve-to']['bind'](_r127_t0);
+        r127_xn$cubicto$1aao = _r127_t0['cubic-to']['bind'](_r127_t0);
+        r127_xn$putshapes$9Jrj = _r127_t0['put-shapes']['bind'](_r127_t0);
+        r127_xn$reverselast$3qIs = _r127_t0['reverse-last']['bind'](_r127_t0);
+        r127_xn$includeglyph$3qIs = _r127_t0['include-glyph']['bind'](_r127_t0);
+        r127_xn$createstroke$7Hrq = _r127_t0['create-stroke']['bind'](_r127_t0);
+        _r127_t0['gizmo'] = r0_globalTransform;
+        _r127_t0['set-width'](r0_WIDTH);
+        r127_xn$includeglyph$3qIs(r0_glyphs['l.hooky']);
+        r127_xn$putshapes$9Jrj(r0_rightwardBottomSerif(r0_MIDDLE, 0, r0_LONGSERIF));
+        return void 0;
+    });
+    r0_xn$createglyph$7Hrq('l.serifed', function _r0_t65() {
+        var r129_xn$setwidth$9Jrj, r129_xn$assignunicode$7Hrq, r129_xn$startfrom$1aao, r129_xn$lineto$5sIl, r129_xn$curveto$1aao, r129_xn$cubicto$1aao, r129_xn$putshapes$9Jrj, r129_xn$reverselast$3qIs, r129_xn$includeglyph$3qIs, r129_xn$createstroke$7Hrq, _r129_t0;
+        _r129_t0 = this;
+        r129_xn$setwidth$9Jrj = _r129_t0['set-width']['bind'](_r129_t0);
+        r129_xn$assignunicode$7Hrq = _r129_t0['assign-unicode']['bind'](_r129_t0);
+        r129_xn$startfrom$1aao = _r129_t0['start-from']['bind'](_r129_t0);
+        r129_xn$lineto$5sIl = _r129_t0['line-to']['bind'](_r129_t0);
+        r129_xn$curveto$1aao = _r129_t0['curve-to']['bind'](_r129_t0);
+        r129_xn$cubicto$1aao = _r129_t0['cubic-to']['bind'](_r129_t0);
+        r129_xn$putshapes$9Jrj = _r129_t0['put-shapes']['bind'](_r129_t0);
+        r129_xn$reverselast$3qIs = _r129_t0['reverse-last']['bind'](_r129_t0);
+        r129_xn$includeglyph$3qIs = _r129_t0['include-glyph']['bind'](_r129_t0);
+        r129_xn$createstroke$7Hrq = _r129_t0['create-stroke']['bind'](_r129_t0);
+        _r129_t0['gizmo'] = r0_globalTransform;
+        _r129_t0['set-width'](r0_WIDTH);
+        r129_xn$includeglyph$3qIs(r0_glyphs['l.zshaped']);
+        r129_xn$putshapes$9Jrj(r0_leftwardBottomSerif(r0_MIDDLE, 0, r0_LONGSERIF));
+        return void 0;
+    });
+    r0_xn$createglyph$7Hrq('l', function _r0_t66() {
+        var r131_xn$setwidth$9Jrj, r131_xn$assignunicode$7Hrq, r131_xn$startfrom$1aao, r131_xn$lineto$5sIl, r131_xn$curveto$1aao, r131_xn$cubicto$1aao, r131_xn$putshapes$9Jrj, r131_xn$reverselast$3qIs, r131_xn$includeglyph$3qIs, r131_xn$createstroke$7Hrq, r131_otherwise, _r131_t0, _r131_t1, _r131_t2, _r131_t3, _r131_t4, _r131_t5, _r131_t6, _r131_t7, _r131_t8;
+        _r131_t1 = this;
+        r131_xn$setwidth$9Jrj = _r131_t1['set-width']['bind'](_r131_t1);
+        r131_xn$assignunicode$7Hrq = _r131_t1['assign-unicode']['bind'](_r131_t1);
+        r131_xn$startfrom$1aao = _r131_t1['start-from']['bind'](_r131_t1);
+        r131_xn$lineto$5sIl = _r131_t1['line-to']['bind'](_r131_t1);
+        r131_xn$curveto$1aao = _r131_t1['curve-to']['bind'](_r131_t1);
+        r131_xn$cubicto$1aao = _r131_t1['cubic-to']['bind'](_r131_t1);
+        r131_xn$putshapes$9Jrj = _r131_t1['put-shapes']['bind'](_r131_t1);
+        r131_xn$reverselast$3qIs = _r131_t1['reverse-last']['bind'](_r131_t1);
+        r131_xn$includeglyph$3qIs = _r131_t1['include-glyph']['bind'](_r131_t1);
+        r131_xn$createstroke$7Hrq = _r131_t1['create-stroke']['bind'](_r131_t1);
+        _r131_t1['gizmo'] = r0_globalTransform;
+        _r131_t1['set-width'](r0_WIDTH);
+        r131_xn$setwidth$9Jrj(r0_WIDTH);
+        r131_xn$assignunicode$7Hrq('l');
+        _r131_t2 = r131_xn$includeglyph$3qIs;
+        _r131_t3 = r0_glyphs;
+        _r131_t0 = r0_variantSelector['zero'];
+        if ('straight' === _r131_t0) {
+            _r131_t4 = 'l.straight';
+        } else {
+            if ('hooky' === _r131_t0) {
+                _r131_t5 = 'l.hooky';
+            } else {
+                if ('zshaped' === _r131_t0) {
+                    _r131_t6 = 'l.zshaped';
+                } else {
+                    if ('serifed' === _r131_t0) {
+                        _r131_t7 = 'l.serifed';
+                    } else {
+                        r131_otherwise = _r131_t0;
+                        _r131_t7 = 'l.serifed';
+                    }
+                    _r131_t6 = _r131_t7;
+                }
+                _r131_t5 = _r131_t6;
+            }
+            _r131_t4 = _r131_t5;
+        }
+        _r131_t8 = _r131_t3[_r131_t4];
+        _r131_t2(_r131_t8);
+        return void 0;
+    });
+    r0_xn$createglyph$7Hrq('x', function _r0_t67() {
+        var r133_xn$setwidth$9Jrj, r133_xn$assignunicode$7Hrq, r133_xn$startfrom$1aao, r133_xn$lineto$5sIl, r133_xn$curveto$1aao, r133_xn$cubicto$1aao, r133_xn$putshapes$9Jrj, r133_xn$reverselast$3qIs, r133_xn$includeglyph$3qIs, r133_xn$createstroke$7Hrq, r133_TURN, r133_barone, r133_bartwo, _r133_t0;
+        _r133_t0 = this;
+        r133_xn$setwidth$9Jrj = _r133_t0['set-width']['bind'](_r133_t0);
+        r133_xn$assignunicode$7Hrq = _r133_t0['assign-unicode']['bind'](_r133_t0);
+        r133_xn$startfrom$1aao = _r133_t0['start-from']['bind'](_r133_t0);
+        r133_xn$lineto$5sIl = _r133_t0['line-to']['bind'](_r133_t0);
+        r133_xn$curveto$1aao = _r133_t0['curve-to']['bind'](_r133_t0);
+        r133_xn$cubicto$1aao = _r133_t0['cubic-to']['bind'](_r133_t0);
+        r133_xn$putshapes$9Jrj = _r133_t0['put-shapes']['bind'](_r133_t0);
+        r133_xn$reverselast$3qIs = _r133_t0['reverse-last']['bind'](_r133_t0);
+        r133_xn$includeglyph$3qIs = _r133_t0['include-glyph']['bind'](_r133_t0);
+        r133_xn$createstroke$7Hrq = _r133_t0['create-stroke']['bind'](_r133_t0);
+        _r133_t0['gizmo'] = r0_globalTransform;
+        _r133_t0['set-width'](r0_WIDTH);
+        r133_xn$setwidth$9Jrj(r0_WIDTH);
+        r133_xn$assignunicode$7Hrq('x');
+        r133_TURN = r0_XH * 0.1;
+        r133_barone = r133_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_HALFSTROKE + r0_O, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r0_SB + r0_HALFSTROKE + r0_O, r133_TURN + 0.17 * (r0_XH - r133_TURN), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH - r133_TURN - 0.17 * (r0_XH - r133_TURN), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH)['pen-direction'](r0_UPWARD);
+        r133_bartwo = r133_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_HALFSTROKE - r0_O, 0)['pen-direction'](r0_UPWARD)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r0_RIGHTSB - r0_HALFSTROKE - r0_O, r133_TURN + 0.17 * (r0_XH - r133_TURN), r0_SB + r0_HALFSTROKE + r0_O, r0_XH - r133_TURN - 0.17 * (r0_XH - r133_TURN), r0_SB + r0_HALFSTROKE + r0_O, r0_XH)['pen-direction'](r0_UPWARD);
+        r133_xn$putshapes$9Jrj(r133_barone['form-stroke']());
+        r133_xn$putshapes$9Jrj(r133_bartwo['form-stroke']());
+        return void 0;
+    });
+    r0_xn$createglyph$7Hrq('s', function _r0_t68() {
+        var r135_xn$setwidth$9Jrj, r135_xn$assignunicode$7Hrq, r135_xn$startfrom$1aao, r135_xn$lineto$5sIl, r135_xn$curveto$1aao, r135_xn$cubicto$1aao, r135_xn$putshapes$9Jrj, r135_xn$reverselast$3qIs, r135_xn$includeglyph$3qIs, r135_xn$createstroke$7Hrq, r135_slope, r135_expand, r135_coexpand, r135_ssmootha, r135_bowltop, r135_strokemiddle, r135_bowlbottom, _r135_t0;
+        _r135_t0 = this;
+        r135_xn$setwidth$9Jrj = _r135_t0['set-width']['bind'](_r135_t0);
+        r135_xn$assignunicode$7Hrq = _r135_t0['assign-unicode']['bind'](_r135_t0);
+        r135_xn$startfrom$1aao = _r135_t0['start-from']['bind'](_r135_t0);
+        r135_xn$lineto$5sIl = _r135_t0['line-to']['bind'](_r135_t0);
+        r135_xn$curveto$1aao = _r135_t0['curve-to']['bind'](_r135_t0);
+        r135_xn$cubicto$1aao = _r135_t0['cubic-to']['bind'](_r135_t0);
+        r135_xn$putshapes$9Jrj = _r135_t0['put-shapes']['bind'](_r135_t0);
+        r135_xn$reverselast$3qIs = _r135_t0['reverse-last']['bind'](_r135_t0);
+        r135_xn$includeglyph$3qIs = _r135_t0['include-glyph']['bind'](_r135_t0);
+        r135_xn$createstroke$7Hrq = _r135_t0['create-stroke']['bind'](_r135_t0);
+        _r135_t0['gizmo'] = r0_globalTransform;
+        _r135_t0['set-width'](r0_WIDTH);
+        r135_xn$setwidth$9Jrj(r0_WIDTH);
+        r135_xn$assignunicode$7Hrq('s');
+        r135_slope = 0.015;
+        r135_expand = 0.175;
+        r135_coexpand = (1 - r135_expand) / 2;
+        r135_ssmootha = r0_SMOOTHA * 0.87;
+        r135_bowltop = r135_xn$createstroke$7Hrq();
+        r135_bowltop['start-from'](r0_RIGHTSB - r0_OXHOOK, r0_XH - r0_SHOOK)['set-width'](r0_STROKE, 0)['curve-to'](r0_MIDDLE + r0_KAPPA_AHOOK * (r0_MIDDLE - r0_para['sb']), r0_XO, r0_MIDDLE, r0_XO)['pen-direction'](r0_LEFTWARD)['arc-hv-to'](r0_SB, r0_XH - r135_ssmootha);
+        r135_strokemiddle = r135_xn$createstroke$7Hrq();
+        r135_strokemiddle['start-from'](r0_SB + r0_STROKE / 2, r0_XH - r135_ssmootha)['set-width'](r0_STROKE / 2, r0_STROKE / 2)['curve-to'](r0_SB + r0_STROKE / 2, (0.5 + r135_slope) * r0_XH + 2 * r135_slope * r0_XH / (r135_expand * r0_WIDTH) * (r135_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r135_coexpand * r0_WIDTH, (0.5 + r135_slope) * r0_XH)['line-to']((1 - r135_coexpand) * r0_WIDTH, (0.5 - r135_slope) * r0_XH)['curve-to'](r0_RIGHTSB - r0_STROKE / 2, (0.5 - r135_slope) * r0_XH - 2 * r135_slope * r0_XH / (r135_expand * r0_WIDTH) * (r135_coexpand * r0_WIDTH - r0_SB - r0_STROKE / 2), r0_RIGHTSB - r0_STROKE / 2, r135_ssmootha);
+        r135_bowlbottom = r135_xn$createstroke$7Hrq();
+        r135_bowlbottom['start-from'](r0_RIGHTSB, r135_ssmootha)['set-width'](0, r0_STROKE)['arc-vh-to'](r0_MIDDLE, r0_O)['pen-direction'](r0_LEFTWARD)['curve-to'](r0_MIDDLE - r0_KAPPA_AHOOK * (r0_MIDDLE - r0_para['sb']), r0_O, r0_SB + r0_OXHOOK, r0_SHOOK);
+        r135_xn$putshapes$9Jrj(r135_bowltop['form-stroke']());
+        r135_xn$putshapes$9Jrj(r135_strokemiddle['form-stroke']());
+        r135_xn$putshapes$9Jrj(r135_bowlbottom['form-stroke']());
         return void 0;
     });
     exports['font'] = r0_font;
