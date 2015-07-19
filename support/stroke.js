@@ -18,7 +18,7 @@
         var r2_a;
         return [r2_a[0]]['concat'](r2_a['concat']([r2_a[r2_a['length'] - 1]]));
     };
-    r0_SAMPLES = 2;
+    r0_SAMPLES = 4;
     r0_TINY = 0.0001;
     r0_LITTLE = 0.01;
     r0_KAPPA = 0.51;
