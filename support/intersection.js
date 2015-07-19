@@ -7,7 +7,7 @@ exports.intersection = function (line1StartX, line1StartY, line1EndX, line1EndY,
         onLine2: false
     };
     denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
-    if (Math.abs(denominator) < 0.00000000001) {
+    if (Math.abs(denominator) <= 0.000000001) {
         return result;
     }
     a = line1StartY - line2StartY;

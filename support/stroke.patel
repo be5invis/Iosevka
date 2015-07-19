@@ -4,13 +4,14 @@ define Bezier [require 'bezier-js']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 
-define [range-array low high] : begin {
+define [xs-array low high] : begin {
 	local a ()
-	for [local j low] [j < high] [inc j] : a.push j
+	for [local j [low - 1]] [j <= high] [inc j] : a.push j
 	return a
 }
+define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
-define SAMPLES 4
+define SAMPLES 6
 define TINY 0.0001
 define LITTLE 0.01
 define KAPPA 0.51
@@ -116,7 +117,7 @@ define [Stroke.prototype.form-stroke d1 d2] : begin {
 				subSegments.push : local seg : new Bezier p0.x p0.y [[p0.x + p1.x] / 2] [[p0.y + p1.y] / 2] p1.x p1.y
 				d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
 				d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
-				local normalpt : seg.normal 0
+				local normalpt : seg.normal 1
 				pdxs.push : if [p1.pdx !== nothing] [p1.pdx - normalpt.x] 0
 				pdys.push : if [p1.pdy !== nothing] [p1.pdy - normalpt.y] 0
 				p0 = p1
@@ -127,7 +128,7 @@ define [Stroke.prototype.form-stroke d1 d2] : begin {
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y p3.x p3.y
 				d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
 				d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
-				local normalpt : seg.normal 0
+				local normalpt : seg.normal 1
 				pdxs.push : if [p3.pdx !== nothing] [p3.pdx - normalpt.x] 0
 				pdys.push : if [p3.pdy !== nothing] [p3.pdy - normalpt.y] 0
 				p0 = p3
@@ -138,7 +139,7 @@ define [Stroke.prototype.form-stroke d1 d2] : begin {
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 				d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
 				d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
-				local normalpt : seg.normal 0
+				local normalpt : seg.normal 1
 				pdxs.push : if [p2.pdx !== nothing] [p2.pdx - normalpt.x] 0
 				pdys.push : if [p2.pdy !== nothing] [p2.pdy - normalpt.y] 0
 				p0 = p2
@@ -149,10 +150,11 @@ define [Stroke.prototype.form-stroke d1 d2] : begin {
 	if [this.points.0.pdx !== nothing] : set pdxs.0 [this.points.0.pdx - [subSegments.0.normal 0].x]
 	if [this.points.0.pdy !== nothing] : set pdys.0 [this.points.0.pdy - [subSegments.0.normal 0].y]
 	
-	local f1 : smooth [range-array 0 d1s.length] d1s
-	local f2 : smooth [range-array 0 d2s.length] [d2s.map [[x] -> [-x]]]
-	local fpdx : smooth [range-array 0 d1s.length] pdxs
-	local fpdy : smooth [range-array 0 d2s.length] pdys
+	local f1 : smooth [xs-array 0 d1s.length] [ys-array d1s]
+	local f2 : smooth [xs-array 0 d2s.length] [ys-array [d2s.map [[x] -> [-x]]]]
+	local fpdx : smooth [xs-array 0 d1s.length] [ys-array pdxs]
+	local fpdy : smooth [xs-array 0 d2s.length] [ys-array pdys]
+	
 	local left ()
 	local right ()
 	for [local j 0] [j < subSegments.length] [inc j] : begin {

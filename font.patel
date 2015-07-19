@@ -8,18 +8,21 @@ define Stroke [require './support/stroke'].Stroke
 
 define para (
 	.width 500
-	.stroke 85
+	.stroke 120
 	.dotsize 100
 	.sb 50
 	.cap 771
-	.xheight 572
-	.hook 135
+	.xheight 560
+	.hook 145
+	.uhook 220
 	.smooth 192
 	.smallsmooth 242
+	.smoothadjust 100
 	.o [-8]
 	.descender [-178]
-	.kappa 0.52
+	.kappa 0.515
 	.italicangle 10
+	.barpos 0.44
 )
 
 define variantSelector (
@@ -48,10 +51,12 @@ define XH para.xheight
 define O para.o
 define SB para.sb
 define HOOK para.hook
+define UHOOK para.uhook
 define SMOOTH para.smooth
 define SMALLSMOOTH para.smallsmooth
 define STROKE para.stroke
 define DOTSIZE para.dotsize
+define BARPOS para.barpos
 
 
 # derived metrics
@@ -63,6 +68,12 @@ define MIDDLE : WIDTH / 2
 define CAPMIDDLE : CAP / 2
 define CAP_SMOOTH : CAP - SMOOTH
 define DOTRADIUS : para.dotsize / 2
+
+define SMOOTHA : SMOOTH - globalTransform.yx * para.smoothadjust
+define SMOOTHB : SMOOTH + globalTransform.yx * para.smoothadjust
+define SMALLSMOOTHA : SMALLSMOOTH - globalTransform.yx * para.smoothadjust
+define SMALLSMOOTHB : SMALLSMOOTH + globalTransform.yx * para.smoothadjust
+define ITALICCORS : STROKE * globalTransform.yx
 
 # style parameters
 define KAPPA para.kappa
@@ -133,6 +144,7 @@ create-glyph 'space' : glyph-construction {
 	set-width WIDTH
 	assign-unicode ' '
 }
+
 create-glyph 'bar' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '|'
@@ -371,11 +383,13 @@ create-glyph 'C' : glyph-construction {
 	assign-unicode 'C'
 	local outline : create-stroke
 	outline.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
-	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
-	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
-	:.line-to  SB SMOOTH
-	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
-	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
+		:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
+		:.pen-direction LEFTWARD
+		:.arc-hv-to SB [CAP - SMOOTHA]
+		:.line-to  SB SMOOTHB
+		:.arc-vh-to MIDDLE O
+		:.pen-direction RIGHTWARD
+		:.curve-to [MIDDLE + ITALICCORS + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
 	put-shapes : outline.form-stroke STROKE 0
 }
 
@@ -384,13 +398,15 @@ create-glyph 'G' : glyph-construction {
 	assign-unicode 'G'
 	local outline : create-stroke
 	outline.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
-	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
-	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
-	:.line-to  SB SMOOTH
-	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
-	:.cubic-to [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O RIGHTSB [COBKAPPA * SMOOTH] RIGHTSB SMOOTH
-	:.line-to  RIGHTSB [CAP / 2 + STROKE / 2]
-	:.pen-direction UPWARD
+		:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
+		:.pen-direction LEFTWARD
+		:.arc-hv-to SB [CAP - SMOOTHA]
+		:.line-to  SB SMOOTHB
+		:.arc-vh-to MIDDLE O
+		:.pen-direction RIGHTWARD
+		:.arc-hv-to RIGHTSB SMOOTHA
+		:.line-to  RIGHTSB [CAP / 2 + STROKE / 2]
+		:.pen-direction UPWARD
 	put-shapes : outline.form-stroke STROKE 0
 	
 	local bar : create-stroke 
@@ -405,12 +421,15 @@ create-glyph 'O' : glyph-construction {
 	assign-unicode 'O'
 	local outline : create-stroke
 	outline.start-from MIDDLE CAPO
-	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB [CAP - SMOOTH]
-	:.line-to  SB SMOOTH
-	:.cubic-to SB [COBKAPPA * SMOOTH] [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] O [WIDTH / 2] O
-	:.cubic-to [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O RIGHTSB [COBKAPPA * SMOOTH] RIGHTSB SMOOTH
-	:.line-to  RIGHTSB [CAP - SMOOTH]
-	:.cubic-to RIGHTSB [CAP - COBKAPPA * SMOOTH] [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] CAPO MIDDLE CAPO
+	:.pen-direction LEFTWARD
+	:.arc-hv-to SB [CAP - SMOOTHA]
+	:.line-to  SB SMOOTHB
+	:.arc-vh-to MIDDLE O
+	:.pen-direction RIGHTWARD
+	:.arc-hv-to RIGHTSB SMOOTHA
+	:.line-to  RIGHTSB [CAP - SMOOTHB]
+	:.arc-vh-to MIDDLE CAPO
+	:.pen-direction LEFTWARD
 	put-shapes : outline.form-stroke STROKE 0
 }
 
@@ -548,18 +567,20 @@ create-glyph 'S' : glyph-construction {
 	bowltop.start-from [RIGHTSB - SB * 0.1] [CAP - HOOK]
 	:.set-width STROKE 0
 	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
-	:.cubic-to [SB + [1 - BKAPPA] * [WIDTH / 2 - SB]] CAPO SB [CAP - COBKAPPA * SMOOTH] SB CAP_SMOOTH
+	:.pen-direction LEFTWARD
+	:.arc-hv-to SB [CAP - SMOOTHA]
 	
 	local strokemiddle : create-stroke
-	strokemiddle.start-from [SB + STROKE / 2] CAP_SMOOTH
+	strokemiddle.start-from [SB + STROKE / 2] [CAP - SMOOTHA]
 	:.set-width [STROKE / 2] [STROKE / 2]
 	:.curve-to [SB + STROKE / 2] [[0.5 + slope] * CAP + [2 * slope * CAP] / [0.4 * WIDTH] * [0.3 * WIDTH - SB - STROKE / 2]] [0.3 * WIDTH] [[0.5 + slope] * CAP]
 	:.line-to [0.7 * WIDTH] [[0.5 - slope] * CAP]
-	:.curve-to [RIGHTSB - STROKE / 2] [[0.5 - slope] * CAP - [2 * slope * CAP] / [0.4 * WIDTH] * [0.3 * WIDTH - SB - STROKE / 2]] [RIGHTSB - STROKE / 2] SMOOTH
+	:.curve-to [RIGHTSB - STROKE / 2] [[0.5 - slope] * CAP - [2 * slope * CAP] / [0.4 * WIDTH] * [0.3 * WIDTH - SB - STROKE / 2]] [RIGHTSB - STROKE / 2] SMOOTHA
 	
 	local bowlbottom : create-stroke
-	bowlbottom.start-from RIGHTSB SMOOTH :.set-width 0 STROKE
-	:.cubic-to RIGHTSB [COBKAPPA * SMOOTH] [MIDDLE + BKAPPA * [RIGHTSB - MIDDLE]] O MIDDLE O
+	bowlbottom.start-from RIGHTSB SMOOTHA :.set-width 0 STROKE
+	:.arc-vh-to MIDDLE O
+	:.pen-direction LEFTWARD
 	:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - para.sb]] O [SB * 1.1] HOOK
 		
 	put-shapes : bowltop.form-stroke
@@ -569,8 +590,16 @@ create-glyph 'S' : glyph-construction {
 create-glyph 'dollar' : glyph-construction {
 	set-width WIDTH; assign-unicode '$'
 	put-shapes glyphs.S.contours
-	put-shapes : create-stroke :.start-from MIDDLE CAP :.set-width HALFSTROKE HALFSTROKE :.line-to MIDDLE [CAP - DESCENDER / 2] :.form-stroke
-	put-shapes : create-stroke :.start-from MIDDLE [DESCENDER / 2] :.set-width HALFSTROKE HALFSTROKE :.line-to MIDDLE 0 :.form-stroke
+	put-shapes : create-stroke 
+		:.start-from MIDDLE [CAP - HALFSTROKE] 
+		:.set-width HALFSTROKE HALFSTROKE 
+		:.line-to MIDDLE [CAP - DESCENDER / 2]
+		:.form-stroke
+	put-shapes : create-stroke
+		:.start-from MIDDLE [DESCENDER / 2]
+		:.set-width HALFSTROKE HALFSTROKE
+		:.line-to MIDDLE HALFSTROKE
+		:.form-stroke
 }
 
 
@@ -580,31 +609,75 @@ create-glyph 'o' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'o'
 	local outline : create-stroke
-	set outline.points : ORing XO O SB RIGHTSB SMALLSMOOTH
-	put-shapes : outline.form-stroke 0 STROKE
+	:.start-from MIDDLE XO
+	:.set-width STROKE 0
+	:.pen-direction LEFTWARD
+	:.arc-hv-to SB [XH - SMALLSMOOTHA]
+	:.line-to  SB SMALLSMOOTHB
+	:.arc-vh-to MIDDLE O
+	:.pen-direction RIGHTWARD
+	:.arc-hv-to RIGHTSB SMALLSMOOTHA
+	:.line-to  RIGHTSB [XH - SMALLSMOOTHB]
+	:.arc-vh-to MIDDLE XO
+	:.pen-direction LEFTWARD
+	put-shapes : outline.form-stroke
 }
 create-glyph 'o.left' : glyph-construction {
 	set-width WIDTH
-	# build outline manually
-	put-shapes : list {
-		ORing XO O [SB + STROKE / 2] RIGHTSB SMALLSMOOTH
-		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
-	}
-	reverse-last
+	# right half
+	put-shapes : create-stroke
+		:.start-from MIDDLE XO
+		:.pen-direction RIGHTWARD
+		:.set-width  0 STROKE
+		:.arc-hv-to  RIGHTSB [XH - SMALLSMOOTHB]
+		:.line-to    RIGHTSB SMALLSMOOTHA
+		:.arc-vh-to  MIDDLE O
+		:.pen-direction LEFTWARD
+		:.form-stroke
+	# left half
+	put-shapes : create-stroke
+		:.start-from MIDDLE [O + STROKE]
+		:.pen-direction LEFTWARD
+		:.set-width  STROKE 0
+		:.arc-hv-to  [SB +  STROKE] [SMALLSMOOTHB - STROKE * 0.05]
+		:.set-width  HALFSTROKE 0
+		:.line-to    [SB +  STROKE] [XH - SMALLSMOOTHA + STROKE * 0.05]
+		:.set-width  HALFSTROKE 0
+		:.arc-vh-to  MIDDLE [XO - STROKE]
+		:.set-width  STROKE 0
+		:.pen-direction RIGHTWARD
+		:.form-stroke
 }
 create-glyph 'o.right' : glyph-construction {
 	set-width WIDTH
-	# build outline manually
-	put-shapes : list {
-		ORing XO O SB [RIGHTSB - STROKE / 2] SMALLSMOOTH
-		ORing [XO - STROKE] [O + STROKE] [SB + STROKE] [RIGHTSB - STROKE] [SMALLSMOOTH - STROKE]
-	}
-	reverse-last
+	# left half
+	put-shapes : create-stroke
+		:.start-from MIDDLE XO
+		:.pen-direction LEFTWARD
+		:.set-width  STROKE 0
+		:.arc-hv-to  SB [XH - SMALLSMOOTHA]
+		:.line-to    SB SMALLSMOOTHB
+		:.arc-vh-to  MIDDLE O
+		:.pen-direction RIGHTWARD
+		:.form-stroke
+	# right half
+	put-shapes : create-stroke
+		:.start-from MIDDLE [O + STROKE]
+		:.pen-direction RIGHTWARD
+		:.set-width  0 STROKE
+		:.arc-hv-to  [RIGHTSB - STROKE] [SMALLSMOOTHA - STROKE * 0.05]
+		:.set-width  0 HALFSTROKE
+		:.line-to    [RIGHTSB - STROKE] [XH - SMALLSMOOTHB + STROKE * 0.05]
+		:.set-width  0 HALFSTROKE
+		:.arc-vh-to  MIDDLE [XO - STROKE]
+		:.set-width  0 STROKE
+		:.pen-direction LEFTWARD
+		:.form-stroke
 }
 create-glyph 'p' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'p'
-	put-shapes glyphs.'o.left'.contours
+	include-glyph glyphs.'o.left'
 	put-shapes : create-stroke 
 	:.start-from SB XH
 	:.pen-direction DOWNWARD
@@ -683,28 +756,32 @@ create-glyph 'c' : glyph-construction {
 	assign-unicode 'c'
 	local outline : create-stroke
 	outline.start-from [RIGHTSB - SB * 0.1] [XH - HOOK]
-	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO MIDDLE XO
-	:.cubic-to [SB + [1 - BKAPPA] * [MIDDLE - SB]] XO SB [XH - COBKAPPA * SMALLSMOOTH] SB [XH - SMALLSMOOTH]
-	:.line-to  SB SMALLSMOOTH
-	:.cubic-to SB [COBKAPPA * SMALLSMOOTH] [SB + [1 - BKAPPA] * [MIDDLE - SB]] O MIDDLE O
-	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
+	:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO MIDDLE XO
+	:.pen-direction LEFTWARD
+	:.arc-hv-to SB [XH - SMALLSMOOTHA]
+	:.line-to   SB SMALLSMOOTHB
+	:.arc-vh-to MIDDLE O
+	:.pen-direction RIGHTWARD
+	:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
 	put-shapes : outline.form-stroke STROKE 0
 }
 create-glyph 'e' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'e'
 	
-	local barbottom [XH * 0.44]
+	local barbottom [XH * BARPOS]
 	
 	local outline : create-stroke
 		:.start-from RIGHTSB barbottom
 		:.pen-direction UPWARD
 		:.set-width STROKE 0
-		:.line-to   RIGHTSB [XH - SMALLSMOOTH]
+		:.line-to   RIGHTSB [XH - SMALLSMOOTHB]
 		:.arc-vh-to MIDDLE XO
-		:.cubic-to  [SB + [1 - BKAPPA] * [MIDDLE - SB]] XO SB [XH - COBKAPPA * SMALLSMOOTH] SB [XH - SMALLSMOOTH]
-		:.line-to   SB SMALLSMOOTH
-		:.cubic-to  SB [COBKAPPA * SMALLSMOOTH] [SB + [1 - BKAPPA] * [MIDDLE - SB]] O MIDDLE O
+		:.pen-direction LEFTWARD
+		:.arc-hv-to SB [XH - SMALLSMOOTHA]
+		:.line-to   SB SMALLSMOOTHB
+		:.arc-vh-to MIDDLE O
+		:.pen-direction RIGHTWARD
 		:.curve-to  [MIDDLE + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - SB * 0.1] HOOK
 	
 	local bar : create-stroke
@@ -717,6 +794,88 @@ create-glyph 'e' : glyph-construction {
 	put-shapes : outline.form-stroke
 	put-shapes : bar.form-stroke
 }
+
+### a
+create-glyph 'a.regular' : glyph-construction {
+	set-width WIDTH
+	local bartop [XH * BARPOS + STROKE]
+	put-shapes : create-stroke 
+		:.start-from RIGHTSB 0
+		:.pen-direction UPWARD
+		:.set-width STROKE 0
+		:.line-to RIGHTSB [XH - SMOOTHA]
+		:.arc-vh-to MIDDLE XO
+		:.pen-direction LEFTWARD
+		:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - SB]] XO [SB + SB * 0.1] [XH - HOOK]
+		:.form-stroke
+	put-shapes : create-stroke
+		:.start-from [WIDTH * 0.47] O
+		:.set-width 0 STROKE
+		:.pen-direction LEFTWARD
+		:.arc-hv-to SB [bartop * 0.45]
+		:.arc-vh-to [WIDTH * 0.6] bartop
+		:.line-to RIGHTSB bartop
+		:.pen-direction RIGHTWARD
+		:.form-stroke
+	put-shapes : create-stroke
+		:.start-from [WIDTH * 0.47] [O + STROKE]
+		:.set-width 0 STROKE
+		:.pen-direction RIGHTWARD
+		:.arc-hv-to [RIGHTSB - STROKE] [SMALLSMOOTHA * 0.65]
+		:.pen-direction UPWARD
+		:.set-width 0 [STROKE * 0.4]
+		:.form-stroke
+}
+create-glyph 'a.italic' : glyph-construction {
+	set-width WIDTH
+	include-glyph glyphs.'o.right'
+	put-shapes : create-stroke 
+		:.start-from RIGHTSB 0
+		:.pen-direction UPWARD
+		:.set-width STROKE 0
+		:.line-to RIGHTSB XH
+		:.pen-direction UPWARD
+		:.form-stroke
+}
+
+create-glyph 'a' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'a'
+	if [para.italicangle > 0] {
+		then : include-glyph glyphs.'a.italic'
+		else : include-glyph glyphs.'a.regular'
+	}
+}
+
+### u
+create-glyph 'u' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'u'
+	put-shapes : create-stroke
+		:.start-from SB XH
+		:.pen-direction DOWNWARD
+		:.set-width STROKE 0
+		:.line-to  SB SMALLSMOOTHB
+		:.arc-vh-to MIDDLE O
+		:.pen-direction RIGHTWARD
+		:.form-stroke
+	put-shapes : create-stroke
+		:.start-from MIDDLE [O + STROKE]
+		:.set-width 0 STROKE
+		:.pen-direction RIGHTWARD
+		:.arc-hv-to [RIGHTSB - STROKE] SMALLSMOOTHA
+		:.pen-direction UPWARD
+		:.set-width 0 [STROKE * 0.4]
+		:.form-stroke
+	put-shapes : create-stroke
+		:.start-from RIGHTSB 0
+		:.pen-direction UPWARD
+		:.set-width STROKE 0
+		:.line-to RIGHTSB XH
+		:.pen-direction UPWARD
+		:.form-stroke
+}
+
 ### x
 create-glyph 'x' : glyph-construction {
 	set-width WIDTH
@@ -741,7 +900,5 @@ create-glyph 'x' : glyph-construction {
 	put-shapes : barone.form-stroke
 	put-shapes : bartwo.form-stroke
 }
-
-
 
 exports.font = font
