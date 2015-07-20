@@ -1,5 +1,5 @@
 ﻿{
-    var r0_font, r0_glyphList, r0_glyphs, r0_Glyph, r0_Stroke, r0_para_regular, r0_para_bold, r0_para_italic, r0_para_bolditalic, r0_variantSelector, r0_globalTransform, r0_ITALICCOR, r0_UPWARD, r0_DOWNWARD, r0_RIGHTWARD, r0_LEFTWARD, r0_DESCENDER, r0_WIDTH, r0_CAP, r0_XH, r0_O, r0_OXHOOK, r0_SB, r0_HOOK, r0_AHOOK, r0_SHOOK, r0_RHOOK, r0_SMOOTH, r0_SMALLSMOOTH, r0_STROKE, r0_DOTSIZE, r0_BARPOS, r0_GBARPOS, r0_LONGSERIF, r0_ACCENT, r0_XO, r0_CAPO, r0_HALFSTROKE, r0_RIGHTSB, r0_MIDDLE, r0_CAPMIDDLE, r0_CAP_SMOOTH, r0_DOTRADIUS, r0_SMOOTHA, r0_SMOOTHB, r0_SMALLSMOOTHA, r0_SMALLSMOOTHB, r0_ITALICCORS, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_KAPPA_HOOK, r0_KAPPA_AHOOK, r0_TAILADJX, r0_TAILADJY, r0_TAILADJKAPPA, r0_TAILADJSX, r0_TAILADJSY, r0_TAILADJSKAPPA, r0_ILBALANCE, r0_JBALANCE, r0_TBALANCE, r0_TBALANCE2, r0_BASE, r0_MARK, r0_MARKBASE, r0_tm, r0_markAboveLower, r0_markAboveCap, r0_markBelowLower, r0_markBelowZero, r0_capitalMarks, r0_bMarks, r0_eMarks, r0_pMarks, r0_ifMarks, r0_Ring, r0_ORing, r0_leftwardTopSerif, r0_leftwardBottomSerif, r0_rightwardTopSerif, r0_rightwardBottomSerif, r0_xn$createglyph$7Hrq, r0_para, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20, _r0_t21, _r0_t22, _r0_t23, _r0_t24, _r0_t25, _r0_t26, _r0_t27, _r0_t28, _r0_t29, _r0_t30, _r0_t31, _r0_t32, _r0_t33, _r0_t34, _r0_t35, _r0_t36, _r0_t37, _r0_t38, _r0_t39, _r0_t40, _r0_t41, _r0_t42, _r0_t43, _r0_t44, _r0_t45, _r0_t46, _r0_t47, _r0_t48, _r0_t49, _r0_t50, _r0_t51, _r0_t52, _r0_t53, _r0_t54, _r0_t55, _r0_t56, _r0_t57, _r0_t58, _r0_t59, _r0_t60, _r0_t61, _r0_t62, _r0_t63, _r0_t64, _r0_t65, _r0_t66, _r0_t67, _r0_t68, _r0_t69, _r0_t70, _r0_t71, _r0_t72, _r0_t73, _r0_t74, _r0_t75, _r0_t76, _r0_t77, _r0_t78, _r0_t79, _r0_t80, _r0_t81, _r0_t82, _r0_t83, _r0_t84, _r0_t85, _r0_t86, _r0_t87, _r0_t88, _r0_t89, _r0_t90, _r0_t91, _r0_t92;
+    var r0_font, r0_glyphList, r0_glyphs, r0_Glyph, r0_Stroke, r0_para_regular, r0_para_bold, r0_para_italic, r0_para_bolditalic, r0_variantSelector, r0_globalTransform, r0_ITALICCOR, r0_UPWARD, r0_DOWNWARD, r0_RIGHTWARD, r0_LEFTWARD, r0_DESCENDER, r0_WIDTH, r0_CAP, r0_XH, r0_O, r0_OXHOOK, r0_SB, r0_HOOK, r0_AHOOK, r0_SHOOK, r0_RHOOK, r0_SMOOTH, r0_SMALLSMOOTH, r0_STROKE, r0_DOTSIZE, r0_BARPOS, r0_GBARPOS, r0_LONGSERIF, r0_ACCENT, r0_XO, r0_CAPO, r0_HALFSTROKE, r0_RIGHTSB, r0_MIDDLE, r0_CAPMIDDLE, r0_CAP_SMOOTH, r0_DOTRADIUS, r0_SMOOTHA, r0_SMOOTHB, r0_SMALLSMOOTHA, r0_SMALLSMOOTHB, r0_ITALICCORS, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_KAPPA_HOOK, r0_KAPPA_AHOOK, r0_TAILADJX, r0_TAILADJY, r0_TAILADJKAPPA, r0_TAILADJSX, r0_TAILADJSY, r0_TAILADJSKAPPA, r0_ILBALANCE, r0_JBALANCE, r0_TBALANCE, r0_TBALANCE2, r0_RBALANCE, r0_BASE, r0_MARK, r0_MARKBASE, r0_tm, r0_markAboveLower, r0_markAboveCap, r0_markBelowLower, r0_markBelowZero, r0_capitalMarks, r0_bMarks, r0_eMarks, r0_pMarks, r0_ifMarks, r0_Ring, r0_ORing, r0_leftwardTopSerif, r0_leftwardBottomSerif, r0_rightwardTopSerif, r0_rightwardBottomSerif, r0_xn$createglyph$7Hrq, r0_para, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20, _r0_t21, _r0_t22, _r0_t23, _r0_t24, _r0_t25, _r0_t26, _r0_t27, _r0_t28, _r0_t29, _r0_t30, _r0_t31, _r0_t32, _r0_t33, _r0_t34, _r0_t35, _r0_t36, _r0_t37, _r0_t38, _r0_t39, _r0_t40, _r0_t41, _r0_t42, _r0_t43, _r0_t44, _r0_t45, _r0_t46, _r0_t47, _r0_t48, _r0_t49, _r0_t50, _r0_t51, _r0_t52, _r0_t53, _r0_t54, _r0_t55, _r0_t56, _r0_t57, _r0_t58, _r0_t59, _r0_t60, _r0_t61, _r0_t62, _r0_t63, _r0_t64, _r0_t65, _r0_t66, _r0_t67, _r0_t68, _r0_t69, _r0_t70, _r0_t71, _r0_t72, _r0_t73, _r0_t74, _r0_t75, _r0_t76, _r0_t77, _r0_t78, _r0_t79, _r0_t80, _r0_t81, _r0_t82, _r0_t83, _r0_t84, _r0_t85, _r0_t86, _r0_t87, _r0_t88, _r0_t89, _r0_t90, _r0_t91, _r0_t92;
     r0_font = require('./empty.json');
     exports['font'] = r0_font;
     r0_glyphList = r0_font['glyf'];
@@ -30,7 +30,8 @@
         'longserif': 175,
         'accent': 175,
         'tbalance': 70,
-        'tbalance2': 30
+        'tbalance2': 30,
+        'rbalance': 25
     };
     r0_para_bold = Object['create'](r0_para_regular);
     r0_para_bold['stroke'] = 120;
@@ -43,13 +44,15 @@
     r0_para_bold['kappa_ahook'] = 0.6;
     r0_para_bold['jbalance'] = 60;
     r0_para_bold['tbalance'] = 60;
+    r0_para_bold['rbalance'] = 18;
     r0_para_italic = Object['create'](r0_para_regular);
     r0_para_italic['italicangle'] = 10;
     r0_para_italic['tbalance'] = 70;
+    r0_para_italic['rbalance'] = 30;
     r0_para_bolditalic = Object['create'](r0_para_bold);
     r0_para_bolditalic['italicangle'] = 10;
     r0_para_bolditalic['tbalance'] = 90;
-    r0_para = r0_para_italic;
+    r0_para = r0_para_bolditalic;
     r0_variantSelector = { 'zero': 'slashed' };
     r0_globalTransform = {
         'xx': 1,
@@ -124,6 +127,7 @@
     r0_JBALANCE = r0_para['jbalance'] || r0_HALFSTROKE + r0_ILBALANCE;
     r0_TBALANCE = r0_para['tbalance'] || r0_JBALANCE;
     r0_TBALANCE2 = r0_para['tbalance2'] || r0_TBALANCE;
+    r0_RBALANCE = r0_para['rbalance'] || r0_JBALANCE * 0.3;
     r0_BASE = 'base';
     r0_MARK = 'mark';
     r0_MARKBASE = 'markbase';
@@ -2251,7 +2255,7 @@
         r172_TURN = r0_XH * 0.99;
         r172_rturn = r0_XH * 0.1;
         r172_right = r0_RIGHTSB - r0_O;
-        r172_attach = r0_XH * 0.45;
+        r172_attach = r0_XH * 0.4;
         r172_attach2 = r0_MIDDLE - r0_WIDTH * 0.1;
         r172_fine = Math['min'](r0_STROKE, (r0_WIDTH - r0_SB * 2) * 0.25);
         r172_xn$putshapes$9Jrj(r172_xn$createstroke$7Hrq()['start-from'](r0_SB, 0)['set-width'](0, r0_STROKE)['heads-to'](r0_UPWARD)['line-to'](r0_SB, r0_CAP)['heads-to'](r0_UPWARD)['to-outline']());
@@ -2317,8 +2321,8 @@
         r176_coexpand = (1 - r176_expand) / 2;
         r176_ssmootha = r0_SMOOTHA * 0.87;
         r176_xn$putshapes$9Jrj(r176_xn$createstroke$7Hrq()['start-from'](r0_RIGHTSB - r0_OXHOOK + r0_JBALANCE / 2, r0_XH - r0_RHOOK)['set-width'](r0_STROKE, 0)['curve-to'](r0_MIDDLE + r0_BKAPPA * (r0_MIDDLE - r0_para['sb']) + r0_JBALANCE / 2, r0_XO, r0_MIDDLE + r0_JBALANCE * 0.75, r0_XO)['heads-to'](r0_LEFTWARD)['to-outline']());
-        r176_xn$putshapes$9Jrj(r176_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_JBALANCE * 0.75, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['heads-to'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_STROKE * r0_ITALICCOR + r0_JBALANCE * 0.3, r0_XH - r0_SMALLSMOOTHA)['heads-to'](r0_DOWNWARD)['set-width'](0, r0_STROKE * 0.4)['to-outline']());
-        r176_xn$putshapes$9Jrj(r176_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_JBALANCE * 0.3, 0)['heads-to'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB + r0_JBALANCE * 0.3, r0_XH)['heads-to'](r0_UPWARD)['to-outline']());
+        r176_xn$putshapes$9Jrj(r176_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE + r0_JBALANCE * 0.75, r0_XO - r0_STROKE)['set-width'](0, r0_STROKE)['heads-to'](r0_LEFTWARD)['arc-hv-to'](r0_SB + r0_STROKE * r0_ITALICCOR + r0_RBALANCE, r0_XH - r0_SMALLSMOOTHA)['heads-to'](r0_DOWNWARD)['set-width'](0, r0_STROKE * 0.4)['to-outline']());
+        r176_xn$putshapes$9Jrj(r176_xn$createstroke$7Hrq()['start-from'](r0_SB + r0_RBALANCE, 0)['heads-to'](r0_UPWARD)['set-width'](0, r0_STROKE)['line-to'](r0_SB + r0_RBALANCE, r0_XH)['heads-to'](r0_UPWARD)['to-outline']());
         return void 0;
     });
     r0_xn$createglyph$7Hrq('f.upright', function _r0_t90() {
