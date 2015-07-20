@@ -40,6 +40,7 @@
     r0_bold['barpos'] = 0.42;
     r0_bold['hook'] = 150;
     r0_bold['ahook'] = 100;
+    r0_bold['smooth'] = 200;
     r0_bold['oxhook'] = 0;
     r0_bold['kappa_hook'] = 0.7;
     r0_bold['kappa_ahook'] = 0.6;

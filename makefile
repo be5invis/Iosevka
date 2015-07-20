@@ -1,5 +1,5 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
-GLYPH_SEGMENTS = glyphs/latin-capital.patel glyphs/latin-lower.patel
+GLYPH_SEGMENTS = glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
@@ -17,10 +17,10 @@ codex-bolditalic.ttf : $(FILES)
 update : $(FILES)
 
 $(SUPPORT_FILES) :
-	patel-c $< -o $@
+	patel-c $< -o $@ --strict
 
 buildglyphs.js : buildglyphs-intro.patel $(GLYPH_SEGMENTS) buildglyphs-final.patel
-	cat $^ | patel-c -o $@
+	cat $^ | patel-c --strict -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
 parameters.js : parameters.patel

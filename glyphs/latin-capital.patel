@@ -419,34 +419,6 @@ create-glyph 'O' : glyph-construction {
 	put-shapes : outline.to-outline STROKE 0
 }
 
-create-glyph 'zero.slashed' : glyph-construction {
-	set-width WIDTH
-	
-	put-shapes glyphs.O.contours
-	
-	local bar : create-stroke :.start-from [SB + STROKE / 2] [CAP * [1 - 0.65]] :.line-to [RIGHTSB - STROKE / 2] [CAP * 0.65]
-	put-shapes : bar.to-outline [STROKE / 2] [STROKE / 2]
-}
-create-glyph 'zero.unslashed' : glyph-construction {
-	include glyphs.O
-}
-create-glyph 'zero.dotted' : glyph-construction {
-	include glyphs.O
-	put-shapes : list {
-		Ring [CAPMIDDLE + DOTRADIUS] [CAPMIDDLE - DOTRADIUS] [MIDDLE + DOTRADIUS] [MIDDLE - DOTRADIUS]
-	}
-}
-create-glyph 'zero' : glyph-construction {
-	set-width WIDTH
-	assign-unicode '0'
-	include glyphs.[match variantSelector.zero {
-		'slashed'   'zero.slashed'
-		'dotted'    'zero.dotted'
-		'unslahsed' 'zero.unslashed'
-		otherwise   'zero.slashed'
-	}]
-}
-
 create-glyph 'Q' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'Q'
@@ -673,15 +645,33 @@ create-glyph 'M' : glyph-construction {
 		:.to-outline
 }
 
+define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
+	local strand : new Stroke
+	strand.gizmo = globalTransform
+	
+	local expansion : _expansion || 0.25
+	local roundsize : [SMOOTHA * [_roundp || 0.4]] * [if [leftlimit < rightlimit] [-1] 1]
+	local roundleft   [leftlimit - roundsize]
+	local roundright  [rightlimit + roundsize]
+	local sxleft      [SB + HALFSTROKE + [RIGHTSB - SB - STROKE] * [0.5 - expansion]]
+	local sxright     [WIDTH - sxleft]
+	local syleft      [roundleft + [roundright - roundleft] * [0.5 - expansion]]
+	local syright     [roundleft + [roundright - roundleft] * [0.5 + expansion]]
+	
+	return : strand.start-from [SB + HALFSTROKE] leftlimit
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.curve-to   [SB + HALFSTROKE] roundleft sxleft syleft
+		:.line-to    sxright syright
+		:.curve-to   [RIGHTSB - HALFSTROKE] roundright [RIGHTSB - HALFSTROKE] rightlimit
+		:.to-outline
+}
+
 ### S
 create-glyph 'S' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'S'
 	include capitalMarks
 	
-	local slope [STROKE * 0.00092] 
-	local expand 0.35
-	local coexpand [[1 - expand] / 2]
 	local ssmootha SMOOTHA
 
 	local bowltop : create-stroke
@@ -690,14 +680,7 @@ create-glyph 'S' : glyph-construction {
 	:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO MIDDLE CAPO
 	:.heads-to LEFTWARD
 	:.arc-hv-to SB [CAP - ssmootha]
-	
-	local strokemiddle : create-stroke
-	strokemiddle.start-from [SB + STROKE / 2] [CAP - ssmootha]
-	:.set-width [STROKE / 2] [STROKE / 2]
-	:.curve-to [SB + STROKE / 2] [[0.5 + slope] * CAP + [2 * slope * CAP] / [expand * WIDTH] * [coexpand * WIDTH - SB - STROKE / 2]] [coexpand * WIDTH] [[0.5 + slope] * CAP]
-	:.line-to [[1 - coexpand] * WIDTH] [[0.5 - slope] * CAP]
-	:.curve-to [RIGHTSB - STROKE / 2] [[0.5 - slope] * CAP - [2 * slope * CAP] / [expand * WIDTH] * [coexpand * WIDTH - SB - STROKE / 2]] [RIGHTSB - STROKE / 2] ssmootha
-	
+
 	local bowlbottom : create-stroke
 	bowlbottom.start-from RIGHTSB ssmootha :.set-width 0 STROKE
 	:.arc-vh-to MIDDLE O
@@ -705,8 +688,8 @@ create-glyph 'S' : glyph-construction {
 	:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - para.sb]] O [SB + OXHOOK] HOOK
 		
 	put-shapes : bowltop.to-outline
-	put-shapes : strokemiddle.to-outline
 	put-shapes : bowlbottom.to-outline
+	put-shapes : sStrand [CAP - ssmootha] ssmootha
 }
 create-glyph 'dollar' : glyph-construction {
 	set-width WIDTH; assign-unicode '$'
