@@ -170,147 +170,148 @@
         };
     };
     r0_Stroke['prototype']['form-stroke'] = function _r0_t17(r18_d1, r18_d2) {
-        var r18_d1, r18_d2, r18_d1s, r18_d2s, r18_pdxs, r18_pdys, r18_subSegments, r18_p0, r18_j, r18_p1, r18_p2, r18_seg, r18_normalpt, r18_p3, r18_f1, r18_f2, r18_fpdx, r18_fpdy, r18_left, r18_right, r18_curve, r18_sample, r18_t, r18_tn, r18_lthis, r18_rthis, r18_lnext, r18_rnext, r18_lnthis1, r18_rnthis1, r18_lnnext1, r18_rnnext1, r18_lnthis2, r18_rnthis2, r18_lnnext2, r18_rnnext2, r18_lnthis3, r18_rnthis3, r18_lnnext3, r18_rnnext3, r18_dlthis, r18_drthis, r18_dlnext, r18_drnext, r18_il, r18_ir, r18_last, r18_shape, r18_k, r18_still, _r18_t0, _r18_t1, _r18_t2, _r18_t3, _r18_t4, _r18_t5, _r18_t6, _r18_t7, _r18_t8, _r18_t9, _r18_t10, _r18_t11, _r18_t12, _r18_t13, _r18_t14, _r18_t15, _r18_t16, _r18_t17, _r18_t18, _r18_t19, _r18_t20, _r18_t21, _r18_t22, _r18_t23, _r18_t24, _r18_t25, _r18_t26, _r18_t27, _r18_t28, _r18_t29, _r18_t30, _r18_t31, _r18_t32, _r18_t33, _r18_t34, _r18_t35, _r18_t36, _r18_t37, _r18_t38, _r18_t39, _r18_t40, _r18_t41, _r18_t42, _r18_t43, _r18_t44, _r18_t45, _r18_t46, _r18_t47, _r18_t48, _r18_t49, _r18_t50, _r18_t51, _r18_t52, _r18_t53, _r18_t54, _r18_t55, _r18_t56, _r18_t57, _r18_t58, _r18_t59;
-        _r18_t2 = this;
-        if (_r18_t2['points'][0]['d1'] >= 0)
-            _r18_t3 = _r18_t2['points'][0]['d1'];
+        var r18_d1, r18_d2, r18_d1s, r18_d2s, r18_pdxs, r18_pdys, r18_shapes, r18_subSegments, r18_p0, r18_j, r18_p1, r18_p2, r18_seg, r18_normalpt, r18_p3, r18_f1, r18_f2, r18_fpdx, r18_fpdy, r18_left, r18_right, r18_curve, r18_sample, r18_t, r18_tn, r18_lthis, r18_rthis, r18_lnext, r18_rnext, r18_lnthis1, r18_rnthis1, r18_lnnext1, r18_rnnext1, r18_lnthis2, r18_rnthis2, r18_lnnext2, r18_rnnext2, r18_lnthis3, r18_rnthis3, r18_lnnext3, r18_rnnext3, r18_dlthis, r18_drthis, r18_dlnext, r18_drnext, r18_il, r18_ir, r18_last, r18_shape, r18_k, r18_still, _r18_t0, _r18_t1, _r18_t2, _r18_t3, _r18_t4, _r18_t5, _r18_t6, _r18_t7, _r18_t8, _r18_t9, _r18_t10, _r18_t11, _r18_t12, _r18_t13, _r18_t14, _r18_t15, _r18_t16, _r18_t17, _r18_t18, _r18_t19, _r18_t20, _r18_t21, _r18_t22, _r18_t23, _r18_t24, _r18_t25, _r18_t26, _r18_t27, _r18_t28, _r18_t29, _r18_t30, _r18_t31, _r18_t32, _r18_t33, _r18_t34, _r18_t35, _r18_t36, _r18_t37, _r18_t38, _r18_t39, _r18_t40, _r18_t41, _r18_t42, _r18_t43, _r18_t44, _r18_t45, _r18_t46, _r18_t47, _r18_t48, _r18_t49, _r18_t50, _r18_t51, _r18_t52, _r18_t53, _r18_t54, _r18_t55, _r18_t56, _r18_t57, _r18_t58, _r18_t59, _r18_t60, _r18_t61, _r18_t62;
+        _r18_t5 = this;
+        if (_r18_t5['points'][0]['d1'] >= 0)
+            _r18_t6 = _r18_t5['points'][0]['d1'];
         else
-            _r18_t3 = r18_d1;
-        _r18_t4 = r18_d1 = _r18_t3;
-        r18_d1s = [_r18_t4];
-        if (_r18_t2['points'][0]['d2'] >= 0)
-            _r18_t5 = _r18_t2['points'][0]['d2'];
+            _r18_t6 = r18_d1;
+        _r18_t7 = r18_d1 = _r18_t6;
+        r18_d1s = [_r18_t7];
+        if (_r18_t5['points'][0]['d2'] >= 0)
+            _r18_t8 = _r18_t5['points'][0]['d2'];
         else
-            _r18_t5 = r18_d2;
-        _r18_t6 = r18_d2 = _r18_t5;
-        r18_d2s = [_r18_t6];
+            _r18_t8 = r18_d2;
+        _r18_t9 = r18_d2 = _r18_t8;
+        r18_d2s = [_r18_t9];
         r18_pdxs = [0];
         r18_pdys = [0];
+        r18_shapes = [];
         r18_subSegments = [];
-        r18_p0 = _r18_t2['points'][0];
+        r18_p0 = _r18_t5['points'][0];
         r18_j = 1;
         for (; r18_j < this['points']['length']; r18_j = r18_j + 1) {
-            r18_p1 = _r18_t2['points'][r18_j];
+            r18_p1 = _r18_t5['points'][r18_j];
             if (r18_p1['onCurve']) {
                 r18_subSegments['push'](r18_seg = new r0_Bezier(r18_p0['x'], r18_p0['y'], (r18_p0['x'] + r18_p1['x']) / 2, (r18_p0['y'] + r18_p1['y']) / 2, r18_p1['x'], r18_p1['y']));
-                _r18_t7 = r18_d1s;
-                _r18_t8 = _r18_t7['push'];
+                _r18_t10 = r18_d1s;
+                _r18_t11 = _r18_t10['push'];
                 if (r18_p1['d1'] >= 0)
-                    _r18_t9 = r18_p1['d1'];
+                    _r18_t12 = r18_p1['d1'];
                 else
-                    _r18_t9 = r18_d1;
-                _r18_t10 = r18_d1 = _r18_t9;
-                _r18_t8['call'](_r18_t7, _r18_t10);
-                _r18_t11 = r18_d2s;
-                _r18_t12 = _r18_t11['push'];
+                    _r18_t12 = r18_d1;
+                _r18_t13 = r18_d1 = _r18_t12;
+                _r18_t11['call'](_r18_t10, _r18_t13);
+                _r18_t14 = r18_d2s;
+                _r18_t15 = _r18_t14['push'];
                 if (r18_p1['d2'] >= 0)
-                    _r18_t13 = r18_p1['d2'];
+                    _r18_t16 = r18_p1['d2'];
                 else
-                    _r18_t13 = r18_d2;
-                _r18_t14 = r18_d2 = _r18_t13;
-                _r18_t12['call'](_r18_t11, _r18_t14);
+                    _r18_t16 = r18_d2;
+                _r18_t17 = r18_d2 = _r18_t16;
+                _r18_t15['call'](_r18_t14, _r18_t17);
                 r18_normalpt = r18_seg['normal'](1);
-                _r18_t15 = r18_pdxs;
-                _r18_t16 = _r18_t15['push'];
-                if (r18_p1['pdx'] !== void 0)
-                    _r18_t17 = r18_p1['pdx'] - r18_normalpt['x'];
-                else
-                    _r18_t17 = 0;
-                _r18_t16['call'](_r18_t15, _r18_t17);
-                _r18_t18 = r18_pdys;
+                _r18_t18 = r18_pdxs;
                 _r18_t19 = _r18_t18['push'];
-                if (r18_p1['pdy'] !== void 0)
-                    _r18_t20 = r18_p1['pdy'] - r18_normalpt['y'];
+                if (r18_p1['pdx'] !== void 0)
+                    _r18_t20 = r18_p1['pdx'] - r18_normalpt['x'];
                 else
                     _r18_t20 = 0;
                 _r18_t19['call'](_r18_t18, _r18_t20);
+                _r18_t21 = r18_pdys;
+                _r18_t22 = _r18_t21['push'];
+                if (r18_p1['pdy'] !== void 0)
+                    _r18_t23 = r18_p1['pdy'] - r18_normalpt['y'];
+                else
+                    _r18_t23 = 0;
+                _r18_t22['call'](_r18_t21, _r18_t23);
                 r18_p0 = r18_p1;
             } else if (r18_p1['cubic']) {
-                r18_p2 = _r18_t2['points'][r18_j + 1];
-                r18_p3 = _r18_t2['points'][r18_j + 2];
+                r18_p2 = _r18_t5['points'][r18_j + 1];
+                r18_p3 = _r18_t5['points'][r18_j + 2];
                 r18_subSegments['push'](r18_seg = new r0_Bezier(r18_p0['x'], r18_p0['y'], r18_p1['x'], r18_p1['y'], r18_p2['x'], r18_p2['y'], r18_p3['x'], r18_p3['y']));
-                _r18_t21 = r18_d1s;
-                _r18_t22 = _r18_t21['push'];
+                _r18_t24 = r18_d1s;
+                _r18_t25 = _r18_t24['push'];
                 if (r18_p3['d1'] >= 0)
-                    _r18_t23 = r18_p3['d1'];
+                    _r18_t26 = r18_p3['d1'];
                 else
-                    _r18_t23 = r18_d1;
-                _r18_t24 = r18_d1 = _r18_t23;
-                _r18_t22['call'](_r18_t21, _r18_t24);
-                _r18_t25 = r18_d2s;
-                _r18_t26 = _r18_t25['push'];
+                    _r18_t26 = r18_d1;
+                _r18_t27 = r18_d1 = _r18_t26;
+                _r18_t25['call'](_r18_t24, _r18_t27);
+                _r18_t28 = r18_d2s;
+                _r18_t29 = _r18_t28['push'];
                 if (r18_p3['d2'] >= 0)
-                    _r18_t27 = r18_p3['d2'];
+                    _r18_t30 = r18_p3['d2'];
                 else
-                    _r18_t27 = r18_d2;
-                _r18_t28 = r18_d2 = _r18_t27;
-                _r18_t26['call'](_r18_t25, _r18_t28);
+                    _r18_t30 = r18_d2;
+                _r18_t31 = r18_d2 = _r18_t30;
+                _r18_t29['call'](_r18_t28, _r18_t31);
                 r18_normalpt = r18_seg['normal'](1);
-                _r18_t29 = r18_pdxs;
-                _r18_t30 = _r18_t29['push'];
-                if (r18_p3['pdx'] !== void 0)
-                    _r18_t31 = r18_p3['pdx'] - r18_normalpt['x'];
-                else
-                    _r18_t31 = 0;
-                _r18_t30['call'](_r18_t29, _r18_t31);
-                _r18_t32 = r18_pdys;
+                _r18_t32 = r18_pdxs;
                 _r18_t33 = _r18_t32['push'];
-                if (r18_p3['pdy'] !== void 0)
-                    _r18_t34 = r18_p3['pdy'] - r18_normalpt['y'];
+                if (r18_p3['pdx'] !== void 0)
+                    _r18_t34 = r18_p3['pdx'] - r18_normalpt['x'];
                 else
                     _r18_t34 = 0;
                 _r18_t33['call'](_r18_t32, _r18_t34);
+                _r18_t35 = r18_pdys;
+                _r18_t36 = _r18_t35['push'];
+                if (r18_p3['pdy'] !== void 0)
+                    _r18_t37 = r18_p3['pdy'] - r18_normalpt['y'];
+                else
+                    _r18_t37 = 0;
+                _r18_t36['call'](_r18_t35, _r18_t37);
                 r18_p0 = r18_p3;
                 r18_j = r18_j + 2;
             } else if (true) {
-                r18_p2 = _r18_t2['points'][r18_j + 1];
+                r18_p2 = _r18_t5['points'][r18_j + 1];
                 r18_subSegments['push'](r18_seg = new r0_Bezier(r18_p0['x'], r18_p0['y'], r18_p1['x'], r18_p1['y'], r18_p2['x'], r18_p2['y']));
-                _r18_t35 = r18_d1s;
-                _r18_t36 = _r18_t35['push'];
+                _r18_t38 = r18_d1s;
+                _r18_t39 = _r18_t38['push'];
                 if (r18_p2['d1'] >= 0)
-                    _r18_t37 = r18_p2['d1'];
+                    _r18_t40 = r18_p2['d1'];
                 else
-                    _r18_t37 = r18_d1;
-                _r18_t38 = r18_d1 = _r18_t37;
-                _r18_t36['call'](_r18_t35, _r18_t38);
-                _r18_t39 = r18_d2s;
-                _r18_t40 = _r18_t39['push'];
+                    _r18_t40 = r18_d1;
+                _r18_t41 = r18_d1 = _r18_t40;
+                _r18_t39['call'](_r18_t38, _r18_t41);
+                _r18_t42 = r18_d2s;
+                _r18_t43 = _r18_t42['push'];
                 if (r18_p2['d2'] >= 0)
-                    _r18_t41 = r18_p2['d2'];
+                    _r18_t44 = r18_p2['d2'];
                 else
-                    _r18_t41 = r18_d2;
-                _r18_t42 = r18_d2 = _r18_t41;
-                _r18_t40['call'](_r18_t39, _r18_t42);
+                    _r18_t44 = r18_d2;
+                _r18_t45 = r18_d2 = _r18_t44;
+                _r18_t43['call'](_r18_t42, _r18_t45);
                 r18_normalpt = r18_seg['normal'](1);
-                _r18_t43 = r18_pdxs;
-                _r18_t44 = _r18_t43['push'];
-                if (r18_p2['pdx'] !== void 0)
-                    _r18_t45 = r18_p2['pdx'] - r18_normalpt['x'];
-                else
-                    _r18_t45 = 0;
-                _r18_t44['call'](_r18_t43, _r18_t45);
-                _r18_t46 = r18_pdys;
+                _r18_t46 = r18_pdxs;
                 _r18_t47 = _r18_t46['push'];
-                if (r18_p2['pdy'] !== void 0)
-                    _r18_t48 = r18_p2['pdy'] - r18_normalpt['y'];
+                if (r18_p2['pdx'] !== void 0)
+                    _r18_t48 = r18_p2['pdx'] - r18_normalpt['x'];
                 else
                     _r18_t48 = 0;
                 _r18_t47['call'](_r18_t46, _r18_t48);
+                _r18_t49 = r18_pdys;
+                _r18_t50 = _r18_t49['push'];
+                if (r18_p2['pdy'] !== void 0)
+                    _r18_t51 = r18_p2['pdy'] - r18_normalpt['y'];
+                else
+                    _r18_t51 = 0;
+                _r18_t50['call'](_r18_t49, _r18_t51);
                 r18_p0 = r18_p2;
                 r18_j = r18_j + 1;
             } else
                 void 0;
         }
-        if (_r18_t2['points'][0]['pdx'] !== void 0)
-            _r18_t49 = r18_pdxs[0] = _r18_t2['points'][0]['pdx'] - r18_subSegments[0]['normal'](0)['x'];
+        if (_r18_t5['points'][0]['pdx'] !== void 0)
+            _r18_t52 = r18_pdxs[0] = _r18_t5['points'][0]['pdx'] - r18_subSegments[0]['normal'](0)['x'];
         else
-            _r18_t49 = void 0;
-        if (_r18_t2['points'][0]['pdy'] !== void 0)
-            _r18_t50 = r18_pdys[0] = _r18_t2['points'][0]['pdy'] - r18_subSegments[0]['normal'](0)['y'];
+            _r18_t52 = void 0;
+        if (_r18_t5['points'][0]['pdy'] !== void 0)
+            _r18_t53 = r18_pdys[0] = _r18_t5['points'][0]['pdy'] - r18_subSegments[0]['normal'](0)['y'];
         else
-            _r18_t50 = void 0;
+            _r18_t53 = void 0;
         r18_f1 = r0_smooth(r0_xn$xsarray$3cah(0, r18_d1s['length']), r0_xn$ysarray$3cah(r18_d1s));
-        r18_f2 = r0_smooth(r0_xn$xsarray$3cah(0, r18_d2s['length']), r0_xn$ysarray$3cah(r18_d2s['map'](function _r18_t51(r19_x) {
+        r18_f2 = r0_smooth(r0_xn$xsarray$3cah(0, r18_d2s['length']), r0_xn$ysarray$3cah(r18_d2s['map'](function _r18_t54(r19_x) {
             var r19_x;
             return -r19_x;
         })));
@@ -384,53 +385,64 @@
                     });
                 }
             }
-            _r18_t52 = r18_left;
-            _r18_t53 = _r18_t52['push'];
-            r18_last = r0_computeOffsetPoint(r18_curve, r18_j + 1, r18_j, r18_f1, r18_fpdx, r18_fpdy);
-            _r18_t54 = {
-                'x': r18_last['x'],
-                'y': r18_last['y'],
-                'onCurve': true
-            };
-            _r18_t53['call'](_r18_t52, _r18_t54);
-            _r18_t55 = r18_right;
+            _r18_t55 = r18_left;
             _r18_t56 = _r18_t55['push'];
-            r18_last = r0_computeOffsetPoint(r18_curve, r18_j + 1, r18_j, r18_f2, r18_fpdx, r18_fpdy);
+            r18_last = r0_computeOffsetPoint(r18_curve, r18_j + 1, r18_j, r18_f1, r18_fpdx, r18_fpdy);
             _r18_t57 = {
                 'x': r18_last['x'],
                 'y': r18_last['y'],
                 'onCurve': true
             };
             _r18_t56['call'](_r18_t55, _r18_t57);
-        }
-        r18_shape = r18_left['concat'](r18_right['reverse']())['map'](function _r18_t58(r21_p) {
-            var r21_p;
-            return {
-                'x': r21_p['x'],
-                'y': r21_p['y'],
-                'onCurve': r21_p['onCurve']
+            _r18_t58 = r18_right;
+            _r18_t59 = _r18_t58['push'];
+            r18_last = r0_computeOffsetPoint(r18_curve, r18_j + 1, r18_j, r18_f2, r18_fpdx, r18_fpdy);
+            _r18_t60 = {
+                'x': r18_last['x'],
+                'y': r18_last['y'],
+                'onCurve': true
             };
-        });
-        r18_j = 0;
-        for (; r18_j < r18_shape['length'] - 1; r18_j = r18_j + 1) {
-            r18_p0 = r18_shape[r18_j];
-            r18_still = true;
-            r18_k = r18_j + 1;
-            for (; r18_still && r18_k < r18_shape['length'] - 1; r18_k = r18_k + 1) {
-                r18_p1 = r18_shape[r18_k];
-                r18_p2 = r18_shape[r18_k + 1];
-                if (r18_p0['onCurve'] && r18_p1['onCurve'] && r18_p2['onCurve'] && !r0_nonlinear(r18_p0, r18_p1, r18_p2)) {
-                    r18_p1['removable'] = true;
-                } else {
-                    r18_still = false;
-                }
-            }
-            r18_j = r18_k - 1;
+            _r18_t59['call'](_r18_t58, _r18_t60);
+            r18_shapes['push'](r18_left['concat'](r18_right['reverse']())['map'](function _r18_t61(r21_p) {
+                var r21_p;
+                return {
+                    'x': r21_p['x'],
+                    'y': r21_p['y'],
+                    'onCurve': r21_p['onCurve']
+                };
+            }));
+            r18_left = [];
+            r18_right = [];
         }
-        return [r18_shape['filter'](function _r18_t59(r22_x) {
-                var r22_x;
-                return r22_x && !r22_x['removable'];
-            })];
+        _r18_t2 = r18_shapes;
+        _r18_t3 = _r18_t2['length'];
+        _r18_t4 = 0;
+        for (; _r18_t4 < _r18_t3; _r18_t4 = _r18_t4 + 1) {
+            r18_shape = _r18_t2[_r18_t4];
+            r18_j = 0;
+            for (; r18_j < r18_shape['length'] - 1; r18_j = r18_j + 1) {
+                r18_p0 = r18_shape[r18_j];
+                r18_still = true;
+                r18_k = r18_j + 1;
+                for (; r18_still && r18_k < r18_shape['length'] - 1; r18_k = r18_k + 1) {
+                    r18_p1 = r18_shape[r18_k];
+                    r18_p2 = r18_shape[r18_k + 1];
+                    if (r18_p0['onCurve'] && r18_p1['onCurve'] && r18_p2['onCurve'] && !r0_nonlinear(r18_p0, r18_p1, r18_p2)) {
+                        r18_p1['removable'] = true;
+                    } else {
+                        r18_still = false;
+                    }
+                }
+                r18_j = r18_k - 1;
+            }
+        }
+        return r18_shapes['map'](function _r18_t62(r23_shape) {
+            var r23_shape, _r23_t0;
+            return r23_shape['filter'](function _r23_t0(r24_x) {
+                var r24_x;
+                return r24_x && !r24_x['removable'];
+            });
+        });
     };
     exports['Stroke'] = r0_Stroke;
 }
