@@ -39,6 +39,7 @@ para_bold.ahook = 100
 para_bold.oxhook = 0
 para_bold.kappa_hook  = 0.7
 para_bold.kappa_ahook = 0.60
+para_bold.jbalance = 60
 
 define para_italic : Object.create para_regular
 para_italic.italicangle = 10
@@ -46,7 +47,7 @@ para_italic.italicangle = 10
 define para_bolditalic : Object.create para_bold
 para_bolditalic.italicangle = 10
 
-para = para_bolditalic
+para = para_bold
 
 define variantSelector (
 	.zero 'slashed'
@@ -115,6 +116,8 @@ define KAPPA_AHOOK : para.kappa_ahook || KAPPA_HOOK
 define TAILADJX : WIDTH * 0.2
 define TAILADJY : XH * 0.25
 define TAILADJKAPPA 0.75
+define ILBALANCE : LONGSERIF * 0.04
+define JBALANCE : para.jbalance || HALFSTROKE + ILBALANCE
 
 # Anchor parameters
 define BASE 'base'
@@ -250,7 +253,7 @@ create-glyph 'bar' : glyph-construction {
 
 ###### UPPER CASE
 
-### A X Y : Capital letters with curly stands
+### A V X Y
 create-glyph 'A' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'A'
@@ -291,6 +294,40 @@ create-glyph 'A' : glyph-construction {
 	start-from [MIDDLE - STROKE / 2] CAP
 	line-to [MIDDLE + STROKE / 2] CAP
 	line-to MIDDLE [CAP - STROKE]
+}
+create-glyph 'V' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'V'
+	include capitalMarks
+	
+	local TURN [CAP * 0.9]
+	
+	local leftbar : create-stroke
+	leftbar.start-from SB CAP
+	:.heads-to DOWNWARD
+	:.set-width STROKE 0
+	:.line-to SB TURN
+	:.heads-to DOWNWARD
+	:.curve-to SB [[1 - 0.27] * TURN] [MIDDLE - STROKE / 2] 0
+	:.set-width [STROKE * 0.8] 0
+	
+	local rightbar : create-stroke
+	rightbar.start-from RIGHTSB CAP
+	:.heads-to DOWNWARD
+	:.set-width 0 STROKE
+	:.line-to RIGHTSB TURN
+	:.heads-to DOWNWARD
+	:.curve-to RIGHTSB [[1 - 0.27] * TURN] [MIDDLE + STROKE / 2] 0
+	:.set-width 0 [STROKE * 0.8]
+	
+	put-shapes : leftbar.form-stroke
+	put-shapes : rightbar.form-stroke
+	
+	#bottom cap
+	start-from [MIDDLE - STROKE / 2] 0
+	line-to [MIDDLE + STROKE / 2] 0
+	line-to MIDDLE STROKE
+	reverse-last
 }
 create-glyph 'X' : glyph-construction {
 	set-width WIDTH
@@ -599,7 +636,7 @@ create-glyph 'U' : glyph-construction {
 }
 
 
-### F E H L I
+### F E H L I T
 create-glyph 'F' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'F'
@@ -684,6 +721,16 @@ create-glyph 'I' : glyph-construction {
 	include capitalMarks
 
 	include glyphs.'dotlessI.symmetric'
+}
+create-glyph 'T' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'T'
+	include capitalMarks
+	
+	put-shapes : create-stroke :.start-from MIDDLE 0 :.heads-to UPWARD :.set-width HALFSTROKE HALFSTROKE
+		:.line-to MIDDLE CAP :.heads-to UPWARD :.form-stroke
+	put-shapes : create-stroke :.start-from SB CAP :.heads-to RIGHTWARD :.set-width 0 STROKE
+		:.line-to RIGHTSB CAP :.heads-to RIGHTWARD :.form-stroke
 }
 
 ### J
@@ -1193,6 +1240,7 @@ create-glyph 'm' : glyph-construction {
 
 ### i j l
 create-glyph 'dotlessi.straight' : glyph-construction {
+	include eMarks
 	put-shapes : create-stroke
 		:.start-from MIDDLE 0
 		:.heads-to UPWARD
@@ -1202,21 +1250,31 @@ create-glyph 'dotlessi.straight' : glyph-construction {
 		:.form-stroke
 }
 create-glyph 'dotlessi.hooky' : glyph-construction {
-	include glyphs.'dotlessi.straight'
+	include glyphs.'dotlessi.straight' true
 	put-shapes : leftwardTopSerif MIDDLE XH LONGSERIF
 }
 create-glyph 'dotlessi.zshaped' : glyph-construction {
-	include glyphs.'dotlessi.hooky'
+	include glyphs.'dotlessi.hooky' true
 	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'dotlessi.serifed' : glyph-construction {
-	include glyphs.'dotlessi.zshaped'
+	include eMarks
+	
+	local balance ILBALANCE
+	put-shapes : create-stroke
+		:.start-from [MIDDLE + balance] 0
+		:.heads-to UPWARD
+		:.set-width HALFSTROKE HALFSTROKE
+		:.line-to [MIDDLE + balance] XH
+		:.heads-to UPWARD
+		:.form-stroke
+	put-shapes : leftwardTopSerif [MIDDLE + balance] XH [LONGSERIF - balance]
+	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 	put-shapes : leftwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'dotlessi' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 0x131
-	include eMarks
 
 	include glyphs.[match variantSelector.zero {
 		'straight' 'dotlessi.straight'
@@ -1224,7 +1282,7 @@ create-glyph 'dotlessi' : glyph-construction {
 		'zshaped'  'dotlessi.zshaped'
 		'serifed'  'dotlessi.serifed'
 		otherwise  'dotlessi.serifed'
-	}]
+	}] true
 }
 create-glyph 'dotaccent' : glyph-construction {
 	set-width WIDTH
@@ -1243,21 +1301,21 @@ create-glyph 'i' : glyph-construction {
 
 create-glyph 'dotlessj.straight' : glyph-construction {
 	put-shapes : create-stroke
-		:.start-from [MIDDLE + HALFSTROKE] XH
+		:.start-from [MIDDLE + JBALANCE] XH
 		:.heads-to DOWNWARD
 		:.set-width HALFSTROKE HALFSTROKE
-		:.line-to [MIDDLE + HALFSTROKE] 0
+		:.line-to [MIDDLE + JBALANCE] 0
 		:.arc-vh-to [MIDDLE + DESCENDER] [DESCENDER + HALFSTROKE]
 		:.form-stroke
 }
 create-glyph 'dotlessj.serifed' : glyph-construction {
 	include glyphs.'dotlessj.straight'
-	put-shapes : leftwardTopSerif [MIDDLE + HALFSTROKE] XH LONGSERIF
+	put-shapes : leftwardTopSerif [MIDDLE + JBALANCE] XH LONGSERIF
 }
 
 create-glyph 'dotlessj' : glyph-construction {
 	set-width WIDTH
-	set-anchor 'above' BASE [MIDDLE + HALFSTROKE] XH
+	set-anchor 'above' BASE [MIDDLE + JBALANCE] XH
 	assign-unicode 0x237
 	include glyphs.'dotlessj.serifed'
 }
@@ -1287,7 +1345,16 @@ create-glyph 'l.zshaped' : glyph-construction {
 	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'l.serifed' : glyph-construction {
-	include glyphs.'l.zshaped'
+	local balance ILBALANCE
+	put-shapes : create-stroke
+		:.start-from [MIDDLE + balance] 0
+		:.heads-to UPWARD
+		:.set-width HALFSTROKE HALFSTROKE
+		:.line-to [MIDDLE + balance] CAP
+		:.heads-to UPWARD
+		:.form-stroke
+	put-shapes : leftwardTopSerif [MIDDLE + balance] CAP [LONGSERIF - balance]
+	put-shapes : rightwardBottomSerif MIDDLE 0 LONGSERIF
 	put-shapes : leftwardBottomSerif MIDDLE 0 LONGSERIF
 }
 create-glyph 'l' : glyph-construction {
