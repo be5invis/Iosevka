@@ -169,7 +169,7 @@
             'y': r17_onpoint['y'] + r17_foffset(r17_t) * (r17_normal['y'] + r17_fpdy(r17_t))
         };
     };
-    r0_Stroke['prototype']['form-stroke'] = function _r0_t17(r18_d1, r18_d2) {
+    r0_Stroke['prototype']['to-outline'] = function _r0_t17(r18_d1, r18_d2) {
         var r18_d1, r18_d2, r18_d1s, r18_d2s, r18_pdxs, r18_pdys, r18_shapes, r18_subSegments, r18_p0, r18_j, r18_p1, r18_p2, r18_seg, r18_normalpt, r18_p3, r18_f1, r18_f2, r18_fpdx, r18_fpdy, r18_left, r18_right, r18_curve, r18_sample, r18_t, r18_tn, r18_lthis, r18_rthis, r18_lnext, r18_rnext, r18_lnthis1, r18_rnthis1, r18_lnnext1, r18_rnnext1, r18_lnthis2, r18_rnthis2, r18_lnnext2, r18_rnnext2, r18_lnthis3, r18_rnthis3, r18_lnnext3, r18_rnnext3, r18_dlthis, r18_drthis, r18_dlnext, r18_drnext, r18_il, r18_ir, r18_last, r18_shape, r18_k, r18_still, _r18_t0, _r18_t1, _r18_t2, _r18_t3, _r18_t4, _r18_t5, _r18_t6, _r18_t7, _r18_t8, _r18_t9, _r18_t10, _r18_t11, _r18_t12, _r18_t13, _r18_t14, _r18_t15, _r18_t16, _r18_t17, _r18_t18, _r18_t19, _r18_t20, _r18_t21, _r18_t22, _r18_t23, _r18_t24, _r18_t25, _r18_t26, _r18_t27, _r18_t28, _r18_t29, _r18_t30, _r18_t31, _r18_t32, _r18_t33, _r18_t34, _r18_t35, _r18_t36, _r18_t37, _r18_t38, _r18_t39, _r18_t40, _r18_t41, _r18_t42, _r18_t43, _r18_t44, _r18_t45, _r18_t46, _r18_t47, _r18_t48, _r18_t49, _r18_t50, _r18_t51, _r18_t52, _r18_t53, _r18_t54, _r18_t55, _r18_t56, _r18_t57, _r18_t58, _r18_t59, _r18_t60, _r18_t61, _r18_t62;
         _r18_t5 = this;
         if (_r18_t5['points'][0]['d1'] >= 0)
