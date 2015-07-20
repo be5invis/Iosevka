@@ -1,5 +1,5 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
-GLYPH_SEGMENTS = glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel
+GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
