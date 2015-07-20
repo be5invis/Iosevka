@@ -61,7 +61,7 @@
         r6_point['d2'] = r6_d2;
         return _r6_t0;
     };
-    r0_Stroke['prototype']['pen-direction'] = function _r0_t6(r7_x, r7_y) {
+    r0_Stroke['prototype']['heads-to'] = function _r0_t6(r7_x, r7_y) {
         var r7_x, r7_y, r7_point, _r7_t0, _r7_t1;
         _r7_t1 = this;
         if (r7_x['x'] !== void 0 || r7_x['y'] !== void 0) {

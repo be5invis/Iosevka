@@ -16,6 +16,7 @@ define [Glyph name] : begin {
 	set this.unicode ()
 	set this.contours ()
 	set this.advanceWidth 500
+	set this.anchors (.)
 	set this.gizmo (
 		.xx 1
 		.yx 0
@@ -83,11 +84,47 @@ define [Glyph.prototype.put-shapes contours] : begin {
 	set this.gizmo t
 	return this
 }
-define [Glyph.prototype.include-glyph glyph] : this.put-shapes glyph.contours
+define [Glyph.prototype.include glyph copyAnchors] : begin {
+	local contours glyph.contours
+	local shiftx 0
+	local shifty 0
+	if [this.anchors && glyph.anchors] : foreach markid [items-of [Object.keys this.anchors]] : begin {
+		local anchorThis this.anchors`markid
+		local anchorThat glyph.anchors`markid
+		if [anchorThis && anchorThis.type === 'base' && anchorThat && anchorThat.type === 'mark'] : begin {
+			set (shiftx shifty) (
+				[anchorThis.x - anchorThat.x]
+				[anchorThis.y - anchorThat.y]
+			)
+			if [anchorThat.mbx !== nothing && anchorThat.mby !== nothing] : begin {
+				set this.anchors`markid (
+					.x [anchorThis.x + anchorThat.mbx - anchorThat.x]
+					.y [anchorThis.y + anchorThat.mby - anchorThat.y]
+					.type anchorThis.type
+					.mbx anchorThis.mbx
+					.mby anchorThis.mby
+				)
+			}
+		}
+	}
+	if contours : begin {
+		local shiftedshape : contours.map [[contour] -> [contour.map [[point] -> (.x [point.x + shiftx] .y [point.y + shifty] .onCurve point.onCurve .cubic point.cubic)]]]
+		this.put-shapes shiftedshape
+	}
+	if [[[not contours] || copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
+		foreach k [items-of keys] [set a`k anchors`k]
+		* a
+	}
+}
 define [Glyph.prototype.create-stroke] : begin {
 	local s : new Stroke
 	s.gizmo = [Object.create this.gizmo]
 	return s
+}
+define [Glyph.prototype.set-anchor id type x y mbx mby] : begin {
+	local anchorpoint [tp this.gizmo (.x x .y y)]
+	local markbasepoint : if [mbx !== nothing && mby !== nothing] [tp this.gizmo (.x mbx .y mby)] (.x nothing .y nothing)
+	this.anchors`id = (.x anchorpoint.x .y anchorpoint.y .type type .mbx markbasepoint.x .mby markbasepoint.y)
 }
 
 exports.Glyph = Glyph

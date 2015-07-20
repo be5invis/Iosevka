@@ -1,5 +1,5 @@
 ﻿{
-    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10;
+    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11;
     r0_bezierCubic2Q2 = require('node-sfnt/lib/math/bezierCubic2Q2');
     r0_tp = require('./transform')['transformPoint'];
     r0_Stroke = require('./stroke')['Stroke'];
@@ -18,6 +18,7 @@
         _r1_t0['unicode'] = [];
         _r1_t0['contours'] = [];
         _r1_t0['advanceWidth'] = 500;
+        _r1_t0['anchors'] = {};
         _r1_t0['gizmo'] = {
             'xx': 1,
             'yx': 0,
@@ -152,17 +153,112 @@
         _r10_t3['gizmo'] = r10_t;
         return _r10_t3;
     };
-    r0_Glyph['prototype']['include-glyph'] = function _r0_t9(r12_glyph) {
-        var r12_glyph, _r12_t0;
-        _r12_t0 = this;
-        return _r12_t0['put-shapes'](r12_glyph['contours']);
+    r0_Glyph['prototype']['include'] = function _r0_t9(r12_glyph, r12_copyAnchors) {
+        var r12_glyph, r12_copyAnchors, r12_contours, r12_shiftx, r12_shifty, r12_markid, r12_anchorThis, r12_anchorThat, r12_shiftedshape, _r12_t0, _r12_t1, _r12_t2, _r12_t3, _r12_t4, _r12_t5, _r12_t6, _r12_t7, _r12_t8, _r12_t9, _r12_t10, _r12_t11, _r12_t12, _r12_t13, _r12_t14, _r12_t15, _r12_t16, _r12_t17, _r12_t18, _r12_tag19;
+        _r12_t17 = arguments;
+        _r12_t4 = this;
+        r12_contours = r12_glyph['contours'];
+        r12_shiftx = 0;
+        r12_shifty = 0;
+        if (_r12_t4['anchors'] && r12_glyph['anchors']) {
+            _r12_t0 = Object['keys'](_r12_t4['anchors']);
+            _r12_t1 = _r12_t0['length'];
+            _r12_t2 = 0;
+            _r12_t6 = _r12_t2 < _r12_t1;
+            for (; _r12_t6; _r12_t6 = _r12_t2 < _r12_t1) {
+                r12_markid = _r12_t0[_r12_t2];
+                r12_anchorThis = _r12_t4['anchors'][r12_markid];
+                r12_anchorThat = r12_glyph['anchors'][r12_markid];
+                if (r12_anchorThis && r12_anchorThis['type'] === 'base' && r12_anchorThat && r12_anchorThat['type'] === 'mark') {
+                    _r12_t3 = [
+                        r12_anchorThis['x'] - r12_anchorThat['x'],
+                        r12_anchorThis['y'] - r12_anchorThat['y']
+                    ];
+                    r12_shiftx = _r12_t3[0];
+                    r12_shifty = _r12_t3[1];
+                    if (r12_anchorThat['mbx'] !== void 0 && r12_anchorThat['mby'] !== void 0)
+                        _r12_t9 = _r12_t4['anchors'][r12_markid] = {
+                            'x': r12_anchorThis['x'] + r12_anchorThat['mbx'] - r12_anchorThat['x'],
+                            'y': r12_anchorThis['y'] + r12_anchorThat['mby'] - r12_anchorThat['y'],
+                            'type': r12_anchorThis['type'],
+                            'mbx': r12_anchorThis['mbx'],
+                            'mby': r12_anchorThis['mby']
+                        };
+                    _r12_t8 = _r12_t9;
+                } else
+                    _r12_t8 = void 0;
+                _r12_t7 = _r12_t2 = _r12_t2 + 1;
+            }
+            _r12_t5 = _r12_t7;
+        } else
+            _r12_t5 = void 0;
+        if (r12_contours) {
+            r12_shiftedshape = r12_contours['map'](function _r12_t11(r14_contour) {
+                var r14_contour, _r14_t0;
+                return r14_contour['map'](function _r14_t0(r15_point) {
+                    var r15_point;
+                    return {
+                        'x': r15_point['x'] + r12_shiftx,
+                        'y': r15_point['y'] + r12_shifty,
+                        'onCurve': r15_point['onCurve'],
+                        'cubic': r15_point['cubic']
+                    };
+                });
+            });
+            _r12_t10 = _r12_t4['put-shapes'](r12_shiftedshape);
+        } else
+            _r12_t10 = void 0;
+        if ((!r12_contours || r12_copyAnchors) && r12_glyph['anchors']) {
+            _r12_t13 = 'anchors';
+            _r12_t14 = {};
+            _r12_t15 = r12_glyph['anchors'];
+            _r12_t16 = Object['keys'](r12_glyph['anchors']);
+            return _r12_t4[_r12_t13] = function (r16_a, r16_anchors, r16_keys) {
+                var r16_a, r16_anchors, r16_keys, r16_k, _r16_t0, _r16_t1, _r16_t2;
+                _r16_t0 = r16_keys;
+                _r16_t1 = _r16_t0['length'];
+                _r16_t2 = 0;
+                for (; _r16_t2 < _r16_t1; _r16_t2 = _r16_t2 + 1) {
+                    r16_k = _r16_t0[_r16_t2];
+                    r16_a[r16_k] = r16_anchors[r16_k];
+                }
+                return r16_a;
+            }(_r12_t14, _r12_t15, _r12_t16);
+        } else
+            return void 0;
     };
     r0_Glyph['prototype']['create-stroke'] = function _r0_t10() {
-        var r13_s, _r13_t0;
-        _r13_t0 = this;
-        r13_s = new r0_Stroke();
-        r13_s['gizmo'] = Object['create'](_r13_t0['gizmo']);
-        return r13_s;
+        var r18_s, _r18_t0;
+        _r18_t0 = this;
+        r18_s = new r0_Stroke();
+        r18_s['gizmo'] = Object['create'](_r18_t0['gizmo']);
+        return r18_s;
+    };
+    r0_Glyph['prototype']['set-anchor'] = function _r0_t11(r19_id, r19_type, r19_x, r19_y, r19_mbx, r19_mby) {
+        var r19_id, r19_type, r19_x, r19_y, r19_mbx, r19_mby, r19_anchorpoint, r19_markbasepoint, _r19_t0, _r19_t1;
+        _r19_t0 = this;
+        r19_anchorpoint = r0_tp(_r19_t0['gizmo'], {
+            'x': r19_x,
+            'y': r19_y
+        });
+        if (r19_mbx !== void 0 && r19_mby !== void 0)
+            _r19_t1 = r0_tp(_r19_t0['gizmo'], {
+                'x': r19_mbx,
+                'y': r19_mby
+            });
+        else
+            _r19_t1 = {
+                'x': void 0,
+                'y': void 0
+            };
+        r19_markbasepoint = _r19_t1;
+        return _r19_t0['anchors'][r19_id] = {
+            'x': r19_anchorpoint['x'],
+            'y': r19_anchorpoint['y'],
+            'type': r19_type,
+            'mbx': r19_markbasepoint['x'],
+            'mby': r19_markbasepoint['y']
+        };
     };
     exports['Glyph'] = r0_Glyph;
 }
