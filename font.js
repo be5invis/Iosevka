@@ -25,7 +25,7 @@
         'descender': -178,
         'kappa': 0.515,
         'italicangle': 0,
-        'barpos': 0.455,
+        'barpos': 0.45,
         'gbarpos': 0.37,
         'longserif': 175,
         'accent': 175,
@@ -53,7 +53,7 @@
     r0_para_bolditalic = Object['create'](r0_para_bold);
     r0_para_bolditalic['italicangle'] = 10;
     r0_para_bolditalic['tbalance'] = 90;
-    r0_para = r0_para_regular;
+    r0_para = r0_para_italic;
     r0_variantSelector = { 'zero': 'slashed' };
     r0_globalTransform = {
         'xx': 1,
@@ -1504,7 +1504,7 @@
         r112_xn$assignunicode$7Hrq('t');
         r112_include(r0_bMarks);
         r112_center = r0_MIDDLE - r0_TBALANCE - r0_HALFSTROKE;
-        r112_hookx = r112_center + r0_WIDTH * 0.65 - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'];
+        r112_hookx = r112_center + (r0_WIDTH - r0_SB * 2) * 0.82 - r0_OXHOOK + r0_TAILADJX * r0_globalTransform['yx'];
         r112_turn = r112_center + (r112_hookx - r112_center) * (0.5 + r0_globalTransform['yx'] * 0.5);
         r112_xn$putshapes$9Jrj(r112_xn$createstroke$7Hrq()['start-from'](r112_center, r0_CAP)['set-width'](r0_STROKE, 0)['heads-to'](r0_DOWNWARD)['line-to'](r112_center, r0_SMOOTHB)['arc-vh-to'](r112_turn, r0_O)['curve-to'](r112_turn + (r0_KAPPA_HOOK + r0_TAILADJKAPPA * r0_globalTransform['yx'] + 0.1) * (r112_hookx - r112_turn), r0_O, r112_hookx, r0_HOOK - r0_TAILADJY * r0_globalTransform['yx'])['to-outline']());
         r112_xn$putshapes$9Jrj(r112_xn$createstroke$7Hrq()['start-from'](r112_center + r0_HALFSTROKE - r0_LONGSERIF + r0_TBALANCE2, r0_XH)['heads-to'](r0_RIGHTWARD)['set-width'](0, r0_STROKE)['line-to'](r112_center + r0_HALFSTROKE + r0_LONGSERIF + r0_TBALANCE2, r0_XH)['heads-to'](r0_RIGHTWARD)['to-outline']());
@@ -2197,9 +2197,9 @@
         r168_include(r0_pMarks);
         r168_turn1 = r0_DESCENDER + (r0_XH - r0_DESCENDER) * 0.1;
         r168_turn2 = r0_XH * 0.1;
-        r168_cross = r0_XH * 0.1;
+        r168_cross = r0_XH * 0.15;
         r168_xbottom = r0_WIDTH * 0.4;
-        r168_barone = r168_xn$createstroke$7Hrq()['start-from'](r168_xbottom, r0_DESCENDER)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r168_xbottom, r168_turn1 + 0.17 * (r0_XH - r168_turn1), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH - r168_turn1 - 0.6 * (r0_XH - r168_turn1), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH)['heads-to'](r0_UPWARD);
+        r168_barone = r168_xn$createstroke$7Hrq()['start-from'](r168_xbottom, r0_DESCENDER)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['cubic-to'](r168_xbottom, r168_turn1 + 0.3 * (r0_XH - r168_turn1), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH - r168_turn1 - 0.65 * (r0_XH - r168_turn1), r0_RIGHTSB - r0_HALFSTROKE - r0_O, r0_XH)['heads-to'](r0_UPWARD);
         r168_bartwo = r168_xn$createstroke$7Hrq()['start-from'](r0_MIDDLE, r168_cross)['set-width'](r0_HALFSTROKE, r0_HALFSTROKE)['curve-to'](r0_SB + r0_HALFSTROKE + r0_O, r0_XH - r168_turn2 - 0.35 * (r0_XH - r168_turn2), r0_SB + r0_HALFSTROKE + r0_O, r0_XH)['heads-to'](r0_UPWARD);
         r168_xn$putshapes$9Jrj(r168_barone['to-outline']());
         r168_xn$putshapes$9Jrj(r168_bartwo['to-outline']());
