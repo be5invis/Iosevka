@@ -6,7 +6,11 @@
         'dotsize': 125,
         'sb': 60,
         'cap': 771,
+        'descender': -178,
         'xheight': 560,
+        'barpos': 0.45,
+        'gbarpos': 0.37,
+        'fivebarpos': 0.48,
         'hook': 145,
         'ahook': 135,
         'shook': 100,
@@ -16,12 +20,9 @@
         'smoothadjust': 100,
         'o': -8,
         'oxhook': 0,
-        'descender': -178,
         'kappa': 0.515,
         'italicangle': 0,
-        'barpos': 0.45,
-        'gbarpos': 0.37,
-        'longserif': 175,
+        'longjut': 175,
         'accent': 175,
         'tbalance': 70,
         'tbalance2': 30,
@@ -49,6 +50,8 @@
     r0_bold['rbalance'] = 18;
     r0_bold['style'] = 'Bold';
     r0_bold['weight'] = 600;
+    r0_bold['bkappa'] = 0.5;
+    r0_bold['ckappa'] = 0.528;
     r0_italic = Object['create'](r0_regular);
     r0_italic['italicangle'] = 10;
     r0_italic['tbalance'] = 70;

@@ -7,10 +7,10 @@ define [Ring u d l r] : begin {
 	local s : new Stroke
 	:.set-transform globalTransform
 	:.start-from mx d
-	:.cubic-to [mx + [l - mx] * BKAPPA] d l [my + [d - my] * BKAPPA] l my
-	:.cubic-to l [my + [u - my] * BKAPPA] [mx + [l - mx] * BKAPPA] u mx u
-	:.cubic-to [mx + [r - mx] * BKAPPA] u r [my + [u - my] * BKAPPA] r my
-	:.cubic-to r [my + [d - my] * BKAPPA] [mx + [r - mx] * BKAPPA] d mx d
+	:.cubic-to [mx + [l - mx] * CKAPPA] d l [my + [d - my] * CKAPPA] l my
+	:.cubic-to l [my + [u - my] * CKAPPA] [mx + [l - mx] * CKAPPA] u mx u
+	:.cubic-to [mx + [r - mx] * CKAPPA] u r [my + [u - my] * CKAPPA] r my
+	:.cubic-to r [my + [d - my] * CKAPPA] [mx + [r - mx] * CKAPPA] d mx d
 	return s.points
 }
 define [ORing u d l r smooth] : begin {
@@ -20,12 +20,12 @@ define [ORing u d l r smooth] : begin {
 	local s : new Stroke
 	:.set-transform globalTransform
 	:.start-from mx d
-	:.cubic-to [mx + [l - mx] * BKAPPA] d l [myd + [d - myd] * BKAPPA] l myd
+	:.cubic-to [mx + [l - mx] * CKAPPA] d l [myd + [d - myd] * CKAPPA] l myd
 	:.line-to l myu
-	:.cubic-to l [myu + [u - myu] * BKAPPA] [mx + [l - mx] * BKAPPA] u mx u
-	:.cubic-to [mx + [r - mx] * BKAPPA] u r [myu + [u - myu] * BKAPPA] r myu
+	:.cubic-to l [myu + [u - myu] * CKAPPA] [mx + [l - mx] * CKAPPA] u mx u
+	:.cubic-to [mx + [r - mx] * CKAPPA] u r [myu + [u - myu] * CKAPPA] r myu
 	:.line-to r myd
-	:.cubic-to r [myd + [d - myd] * BKAPPA] [mx + [r - mx] * BKAPPA] d mx d
+	:.cubic-to r [myd + [d - myd] * CKAPPA] [mx + [r - mx] * CKAPPA] d mx d
 	return s.points
 }
 define [leftwardTopSerif x y length] : begin {
@@ -67,6 +67,9 @@ define [rightwardBottomSerif x y length] : begin {
 
 define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
 	local expansion : _expansion || 0.25
+	local yItalicCorrection [globalTransform.yx * 0.98]
+	local xItalicCorrection : 1 / [Math.sqrt [1 - yItalicCorrection * yItalicCorrection]]
+
 	local roundsize : [SMOOTHA * [_roundp || 0.4]] * [if [leftlimit < rightlimit] [-1] 1]
 	local roundleft   [leftlimit - roundsize]
 	local roundright  [rightlimit + roundsize]
@@ -77,11 +80,11 @@ define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
 	
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from [SB + HALFSTROKE] leftlimit
+		:.start-from [SB + HALFSTROKE * xItalicCorrection] [leftlimit - HALFSTROKE * yItalicCorrection]
 		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [SB + HALFSTROKE] roundleft sxleft syleft
+		:.curve-to   [SB + HALFSTROKE * xItalicCorrection] roundleft sxleft syleft
 		:.line-to    sxright syright
-		:.curve-to   [RIGHTSB - HALFSTROKE] roundright [RIGHTSB - HALFSTROKE] rightlimit
+		:.curve-to   [RIGHTSB - HALFSTROKE * xItalicCorrection] roundright [RIGHTSB - HALFSTROKE * xItalicCorrection] [rightlimit + HALFSTROKE * yItalicCorrection]
 		:.to-outline
 }
 

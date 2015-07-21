@@ -1,17 +1,19 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel
+OBJDIR = build
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
-fonts : update codex-regular.ttf codex-bold.ttf codex-italic.ttf codex-bolditalic.ttf
+fonts : update $(OBJDIR)/codexHW-regular.ttf $(OBJDIR)/codexHW-bold.ttf $(OBJDIR)/codexHW-italic.ttf $(OBJDIR)/codexHW-bolditalic.ttf
+	
 
-codex-regular.ttf : $(FILES)
+$(OBJDIR)/codexHW-regular.ttf : $(FILES) $(OBJDIR)
 	node generate regular $@
-codex-bold.ttf : $(FILES)
+$(OBJDIR)/codexHW-bold.ttf : $(FILES) $(OBJDIR)
 	node generate bold $@
-codex-italic.ttf : $(FILES)
+$(OBJDIR)/codexHW-italic.ttf : $(FILES) $(OBJDIR)
 	node generate italic $@
-codex-bolditalic.ttf : $(FILES)
+$(OBJDIR)/codexHW-bolditalic.ttf : $(FILES) $(OBJDIR)
 	node generate bolditalic $@
 
 update : $(FILES)
@@ -24,3 +26,6 @@ buildglyphs.js : buildglyphs-intro.patel $(GLYPH_SEGMENTS) buildglyphs-final.pat
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
 parameters.js : parameters.patel
+
+$(OBJDIR) :
+	@- mkdir $@
