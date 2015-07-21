@@ -70,16 +70,19 @@ define [rightwardBottomSerif x y length] : begin {
 		:.to-outline
 }
 
-define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
+define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _expansion _roundp] : begin {
 	local expansion : _expansion || 0.25
+	local halfstroke0 : _halfstroke0 || HALFSTROKE
+	local halfstroke1 : _halfstroke1 || HALFSTROKE
+	local ess         : _ess || [halfstroke0 + halfstroke1] / 2
 	local yItalicCorrection [globalTransform.yx * 0.98]
 	local xItalicCorrection : 1 / [Math.sqrt [1 - yItalicCorrection * yItalicCorrection]]
 
-	local roundsize : [SMOOTHA * [_roundp || 0.4]] * [if [leftlimit < rightlimit] [-1] 1]
-	local roundleft   [leftlimit - roundsize]
-	local roundright  [rightlimit + roundsize]
-	local xleft     : SB + HALFSTROKE * xItalicCorrection
-	local xright    : RIGHTSB - HALFSTROKE * xItalicCorrection
+	local roundsize : [_roundp || SMOOTHA * 0.4] * [if [yleft < yright] [-1] 1]
+	local roundleft   [yleft - roundsize]
+	local roundright  [yright + roundsize]
+	local xleft     : _xleft + halfstroke0 * xItalicCorrection
+	local xright    : _xright - halfstroke1 * xItalicCorrection
 	local sxleft    : mix xleft xright [0.5 - expansion]
 	local sxright   : mix xleft xright [0.5 + expansion]
 	local syleft    : mix roundleft roundright [0.5 - expansion]
@@ -87,12 +90,18 @@ define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
 	
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from xleft [leftlimit - HALFSTROKE * yItalicCorrection]
-		:.set-width  HALFSTROKE HALFSTROKE
+		:.start-from xleft [yleft - halfstroke0 * yItalicCorrection]
+		:.set-width  halfstroke0 halfstroke0
 		:.curve-to   xleft roundleft sxleft syleft
+		:.set-width  ess ess
 		:.line-to    sxright syright
-		:.curve-to   xright roundright xright [rightlimit + HALFSTROKE * yItalicCorrection]
+		:.curve-to   xright roundright xright [yright + halfstroke1 * yItalicCorrection]
+		:.set-width  halfstroke1 halfstroke1
 		:.to-outline
+}
+
+define [sStrand yleft yright _expansion] : begin {
+	return : xsStrand SB yleft RIGHTSB yright HALFSTROKE HALFSTROKE HALFSTROKE _expansion [SMOOTHA * 0.4]
 }
 
 define [nBowl left middle right fine] : begin {
