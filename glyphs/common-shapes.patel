@@ -1,4 +1,9 @@
 
+### COMMON FUNCTIONS
+
+define [mix a b p] : a + [b - a] * p
+define [xgrid p] : mix SB RIGHTSB p
+
 ### COMMON SHAPES
 
 define [Ring u d l r] : begin {
@@ -73,18 +78,20 @@ define [sStrand leftlimit rightlimit _expansion _roundp] : begin {
 	local roundsize : [SMOOTHA * [_roundp || 0.4]] * [if [leftlimit < rightlimit] [-1] 1]
 	local roundleft   [leftlimit - roundsize]
 	local roundright  [rightlimit + roundsize]
-	local sxleft      [SB + HALFSTROKE + [RIGHTSB - SB - STROKE] * [0.5 - expansion]]
-	local sxright     [WIDTH - sxleft]
-	local syleft      [roundleft + [roundright - roundleft] * [0.5 - expansion]]
-	local syright     [roundleft + [roundright - roundleft] * [0.5 + expansion]]
+	local xleft     : SB + HALFSTROKE * xItalicCorrection
+	local xright    : RIGHTSB - HALFSTROKE * xItalicCorrection
+	local sxleft    : mix xleft xright [0.5 - expansion]
+	local sxright   : mix xleft xright [0.5 + expansion]
+	local syleft    : mix roundleft roundright [0.5 - expansion]
+	local syright   : mix roundleft roundright [0.5 + expansion]
 	
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from [SB + HALFSTROKE * xItalicCorrection] [leftlimit - HALFSTROKE * yItalicCorrection]
+		:.start-from xleft [leftlimit - HALFSTROKE * yItalicCorrection]
 		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [SB + HALFSTROKE * xItalicCorrection] roundleft sxleft syleft
+		:.curve-to   xleft roundleft sxleft syleft
 		:.line-to    sxright syright
-		:.curve-to   [RIGHTSB - HALFSTROKE * xItalicCorrection] roundright [RIGHTSB - HALFSTROKE * xItalicCorrection] [rightlimit + HALFSTROKE * yItalicCorrection]
+		:.curve-to   xright roundright xright [rightlimit + HALFSTROKE * yItalicCorrection]
 		:.to-outline
 }
 
@@ -110,33 +117,72 @@ define [nBowl left middle right fine] : begin {
 	return : bandLeft.concat bandRight
 }
 
-define [sHookUpper top smooth hook] : begin {
+define [sHookUpper top smooth hook _middle] : begin {
+	local middle : _middle || MIDDLE
 	return : new Stroke
 		:.set-transform globalTransform
 		:.start-from [RIGHTSB - OXHOOK] [top - hook]
 		:.set-width STROKE 0
-		:.curve-to [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] [top - O] MIDDLE [top - O]
+		:.curve-to [mix middle RIGHTSB KAPPA_HOOK] [top - O] middle [top - O]
 		:.heads-to LEFTWARD
 		:.arc-hv-to SB [top - smooth]
 		:.to-outline
 }
-define [twoHookUpper top smooth hook] : begin {
+define [twoHookUpper top smooth hook _middle] : begin {
+	local middle : _middle || MIDDLE
 	return : new Stroke
 		:.set-transform globalTransform
 		:.start-from [SB + OXHOOK] [top - hook]
 		:.set-width 0 STROKE
-		:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - para.sb]] [top - O] MIDDLE [top - O]
+		:.curve-to [mix middle SB KAPPA_HOOK] [top - O] middle [top - O]
 		:.heads-to RIGHTWARD
 		:.arc-hv-to RIGHTSB [top - smooth]
 		:.to-outline
 }
-define [sHookLower bottom smooth hook] : begin {
+define [sHookLower bottom smooth hook _middle] : begin {
+	local middle : _middle || MIDDLE
 	return : new Stroke
 		:.set-transform globalTransform
 		:.start-from RIGHTSB smooth
 		:.set-width 0 STROKE
-		:.arc-vh-to MIDDLE [bottom + O]
+		:.arc-vh-to middle [bottom + O]
 		:.heads-to LEFTWARD
-		:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - para.sb]] [bottom + O] [SB + OXHOOK] [bottom + hook]
+		:.curve-to [mix middle SB KAPPA_HOOK] [bottom + O] [SB + OXHOOK] [bottom + hook]
 		:.to-outline
+}
+
+define [smallo u d l r] : begin {
+	local middle : [l + r] / 2
+	if [u - d > SMALLSMOOTHA + SMALLSMOOTHB] {
+		then : return : new Stroke
+			:.set-transform globalTransform
+			:.start-from middle [u - O]
+			:.set-width STROKE 0
+			:.heads-to LEFTWARD
+			:.arc-hv-to [l + O] [u - SMALLSMOOTHA]
+			:.line-to  [l + O] [d + SMALLSMOOTHB]
+			:.arc-vh-to middle [d + O]
+			:.heads-to RIGHTWARD
+			:.arc-hv-to [r - O] [d + SMALLSMOOTHA]
+			:.line-to  [r - O] [u - SMALLSMOOTHB]
+			:.arc-vh-to middle [u - O]
+			:.heads-to LEFTWARD
+			:.to-outline
+		else : begin {
+			local ymiddlea : [u - SMALLSMOOTHA + d + SMALLSMOOTHB] / 2
+			local ymiddleb : [u - SMALLSMOOTHB + d + SMALLSMOOTHA] / 2
+			return : new Stroke
+				:.set-transform globalTransform
+				:.start-from middle [u - O]
+				:.set-width STROKE 0
+				:.heads-to LEFTWARD
+				:.arc-hv-to [l + O] ymiddlea
+				:.arc-vh-to middle [d + O]
+				:.heads-to RIGHTWARD
+				:.arc-hv-to [r - O] ymiddleb
+				:.arc-vh-to middle [u - O]
+				:.heads-to LEFTWARD
+				:.to-outline
+		}
+	}
 }
