@@ -48,6 +48,7 @@ define GBARPOS para.gbarpos
 define FIVEBARPOS para.fivebarpos
 define LONGJUT para.longjut
 define ACCENT para.accent
+define ACCENTX para.accentx
 
 
 # derived metrics
@@ -111,22 +112,35 @@ define ifMarks        (.anchors (.above markAboveCap.anchors.above .below markBe
 
 Stroke.bindParameters para
 
+### Font names
 set font.name.fontFamily          para.family
 set font.name.fontSubFamily       para.style
 set font.name.preferredFamily     para.family
 set font.name.preferredSubFamily  para.style
 set font.name.uniqueSubFamily     : para.family + ' ' + para.style + ' ' + para.version
 set font.name.version             para.version
-set font.name.fullName            : para.family + ' ' + para.style
+set font.name.fullName            : if [para.style != 'Regular'] [para.family + ' ' + para.style] para.family
 set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
 set font.name.copyright           para.copyright
 set font.'OS/2'.usWeightClass     para.weight
 set font.'OS/2'.bProportion       9 # Monospaced
+set font.'OS/2'.bWeight           : 1 + para.weight / 100
+set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if [[not para.isBold] && [not para.isItalic]] 64 0] + 128
+set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
 
-### Font names
+### Metric metadata
+set font.hhea.ascent              CAP
+set font.'OS/2'.usWinAscent       : CAP + CAP * 0.1
+set font.'OS/2'.sTypoAscender     CAP
+set font.hhea.descent             DESCENDER
+set font.'OS/2'.usWinDescent      : [Math.abs DESCENDER] + CAP * 0.1
+set font.'OS/2'.sTypoDescender    DESCENDER
+set font.hhea.lineGap             : CAP * 0.2
+set font.'OS/2'.sTypoLineGap      : CAP * 0.2
+set font.'OS/2'.sxHeight          XH
+set font.post.italicAnvle         : 0 - para.italicangle
 
-### Useful shapes
-
+### Necessary macros
 define-macro glyph-construction : syntax-rules {
 	@`[glyph-construction @::steps] ('.syntactic-closure' @`[lambda [] [begin {
 		local set-width : this.set-width.bind this
@@ -146,7 +160,6 @@ define-macro glyph-construction : syntax-rules {
 		return nothing
 	}]] env)
 }
-
 define [create-glyph name actions] : begin {
 	define glyphObject [new Glyph name]
 	glyphList.push glyphObject
@@ -155,9 +168,17 @@ define [create-glyph name actions] : begin {
 	return glyphObject
 }
 
-###### SYMBOLS
+define [select-variant glyphid unicode default] : begin {
+	local variant : variantSelector`glyphid || default
+	local chosenGlyph glyphs`[glyphid + '.' + variant]
+	set glyphs`glyphid chosenGlyph
+	if unicode : chosenGlyph.assign-unicode unicode
+}
+
+###### HERE WE GO!
 
 create-glyph 'space' : glyph-construction {
 	set-width WIDTH
 	assign-unicode ' '
+	include eMarks
 }

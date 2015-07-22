@@ -3,13 +3,6 @@ var buildGlyphs  = require('./buildglyphs.js');
 var parameters = require('./parameters');
 var TTFWriter = require('node-sfnt').TTFWriter;
 var TTF = require('node-sfnt').TTF;
-
-/**
- * buffer转换成ArrayBuffer
- * 
- * @param {Buffer} buffer 缓冲数组
- * @return {ArrayBuffer} 
- */
 function toArrayBuffer(buffer) {
     var length = buffer.length;
     var view = new DataView(new ArrayBuffer(length), 0, length);
@@ -18,13 +11,6 @@ function toArrayBuffer(buffer) {
     }
     return view.buffer;
 }
-
-/**
- * ArrayBuffer转换成Buffer
- * 
- * @param {ArrayBuffer} arrayBuffer 缓冲数组
- * @return {Buffer} 
- */
 function toBuffer(arrayBuffer) {
     var length = arrayBuffer.byteLength;
     var view = new DataView(arrayBuffer, 0, length);
@@ -37,19 +23,9 @@ function toBuffer(arrayBuffer) {
 
 var options = {preserveOS2Version: true}
 
-function readttf(file) {
-    var data = fs.readFileSync(file);
-    var buffer = toArrayBuffer(data);
-    var ttf = (new OTFReader(options)).read(buffer);
-    return ttf;
-}
+var variant = process.argv[2];
+var outputPath = process.argv[3];
 
-function writettf(ttf, file){
-    var buffer = new TTFWriter(options).write(ttf);
-    fs.writeFileSync(file, toBuffer(buffer));
-}
+var ttfFont = buildGlyphs.build(parameters[variant]);
 
-var variant = process.argv[2]
-var outputPath = process.argv[3]
-
-fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(buildGlyphs.build(parameters[variant]))));
+fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(ttfFont)));

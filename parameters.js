@@ -25,6 +25,7 @@
         'italicangle': 0,
         'longjut': 175,
         'accent': 175,
+        'accentx': 200,
         'tbalance': 70,
         'tbalance2': 30,
         'rbalance': 25,
@@ -51,20 +52,24 @@
     r0_bold['tbalance'] = 60;
     r0_bold['rbalance'] = 18;
     r0_bold['style'] = 'Bold';
-    r0_bold['weight'] = 600;
+    r0_bold['weight'] = 700;
     r0_bold['bkappa'] = 0.5;
     r0_bold['smoothadjust'] = 130;
+    r0_bold['isBold'] = true;
     r0_italic = Object['create'](r0_regular);
     r0_italic['italicangle'] = 10;
     r0_italic['tbalance'] = 70;
     r0_italic['rbalance'] = 30;
     r0_italic['style'] = 'Italic';
     r0_italic['ckappa'] = 0.618;
+    r0_italic['isItalic'] = true;
     r0_bolditalic = Object['create'](r0_bold);
     r0_bolditalic['italicangle'] = 10;
     r0_bolditalic['tbalance'] = 90;
-    r0_bolditalic['style'] = 'BoldItalic';
+    r0_bolditalic['style'] = 'Bold Italic';
     r0_bolditalic['ckappa'] = 0.618;
+    r0_bolditalic['isBold'] = true;
+    r0_bolditalic['isItalic'] = true;
     exports['regular'] = r0_regular;
     exports['bold'] = r0_bold;
     exports['italic'] = r0_italic;

@@ -21,7 +21,7 @@
     r0_SAMPLES = 6;
     r0_TINY = 0.0001;
     r0_LITTLE = 0.01;
-    r0_CUTOFF = 10000;
+    r0_CUTOFF = 2000;
     r0_KAPPA = 0.51;
     r0_COKAPPA = 1 - r0_KAPPA;
     r0_BKAPPA = r0_KAPPA + 0.1;

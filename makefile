@@ -1,20 +1,29 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
-GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel glyphs/ascii-symbols.patel
+GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel glyphs/ascii-symbols.patel
 OBJDIR = build
+
+TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
+STEP0   = $(subst .ttf,.0.ttf,$(TARGETS))
+STEP1   = $(subst .ttf,.1.ttf,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
-fonts : update $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
+fonts : update $(TARGETS)
 	
-
-$(OBJDIR)/iosevka-regular.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-regular.0.ttf : $(FILES) $(OBJDIR)
 	node generate regular $@
-$(OBJDIR)/iosevka-bold.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-bold.0.ttf : $(FILES) $(OBJDIR)
 	node generate bold $@
-$(OBJDIR)/iosevka-italic.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-italic.0.ttf : $(FILES) $(OBJDIR)
 	node generate italic $@
-$(OBJDIR)/iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-bolditalic.0.ttf : $(FILES) $(OBJDIR)
 	node generate bolditalic $@
+
+$(STEP1) : %.1.ttf : %.0.ttf
+	fontforge -script final.pe $< $@
+
+$(TARGETS) : %.ttf : %.1.ttf
+	ttfautohint $< $@
 
 update : $(FILES)
 
@@ -29,3 +38,7 @@ parameters.js : parameters.patel
 
 $(OBJDIR) :
 	@- mkdir $@
+
+cleartemps :
+	-rm $(STEP0)
+	-rm $(STEP1)
