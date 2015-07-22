@@ -11,7 +11,7 @@
         'xheight': 560,
         'barpos': 0.45,
         'gbarpos': 0.37,
-        'fivebarpos': 0.48,
+        'fivebarpos': 0.49,
         'hook': 145,
         'ahook': 135,
         'shook': 100,
