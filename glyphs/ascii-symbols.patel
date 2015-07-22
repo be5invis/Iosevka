@@ -309,7 +309,7 @@ create-glyph 'exclam' : glyph-construction {
 	put-shapes : list : Ring [DOTSIZE - O] O [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O]
 }
 
-### Symbols with bars: underscore, hyphen
+### Symbols with bars
 
 create-glyph 'underscore' : glyph-construction {
 	set-width WIDTH
@@ -317,4 +317,136 @@ create-glyph 'underscore' : glyph-construction {
 	
 	put-shapes : create-stroke :.start-from SB 0 :.heads-to RIGHTWARD :.set-width STROKE 0
 		:.line-to RIGHTSB 0 :.heads-to RIGHTWARD :.to-outline
+}
+
+create-glyph 'hyphen' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '-'
+	
+	put-shapes : hbar SB RIGHTSB [XH / 2]
+}
+create-glyph 'plus' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '+'
+	
+	include glyphs.hyphen
+	
+	put-shapes : vbar MIDDLE [XH / 2 - [RIGHTSB - SB] / 2] [XH / 2 + [RIGHTSB - SB] / 2]
+}
+
+create-glyph 'equal' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '='
+	
+	put-shapes : hbar SB RIGHTSB [XH * 0.33]
+	put-shapes : hbar SB RIGHTSB [XH * 0.67]
+}
+create-glyph 'bar' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '|'
+	put-shapes : create-stroke
+		:.start-from MIDDLE parenTop
+		:.heads-to DOWNWARD
+		:.set-width [STROKE / 2] [STROKE / 2]
+		:.line-to MIDDLE parenBot
+		:.heads-to DOWNWARD
+		:.to-outline
+}
+create-glyph 'slash' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '/'
+	
+	local cor : 1 / [Math.sqrt [1 - [Math.pow [[RIGHTSB - SB - STROKE] / [parenTop - parenBot]] 2]]]
+	
+	start-from SB parenBot
+	line-to [SB + STROKE * cor] parenBot
+	line-to RIGHTSB parenTop
+	line-to [RIGHTSB - STROKE * cor] parenTop
+	reverse-last
+}
+create-glyph 'backslash' : glyph-construction {
+	set-width WIDTH
+	assign-unicode "\\"
+	
+	local cor : 1 / [Math.sqrt [1 - [Math.pow [[RIGHTSB - SB - STROKE] / [parenTop - parenBot]] 2]]]
+	
+	start-from RIGHTSB parenBot
+	line-to [RIGHTSB - STROKE * cor] parenBot
+	line-to SB parenTop
+	line-to [SB + STROKE * cor] parenTop
+	reverse-last
+}
+create-glyph 'numbersign' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '#'
+	
+	local fine : Math.min STROKE [[RIGHTSB - SB] * 0.25]
+	
+	put-shapes : hbar SB RIGHTSB [mix parenTop parenBot 0.33]
+	put-shapes : hbar SB RIGHTSB [mix parenTop parenBot 0.67]
+	put-shapes : vbar [mix SB RIGHTSB 0.3] [parenBot + fine] [parenTop - fine] fine
+	put-shapes : vbar [mix SB RIGHTSB 0.7] [parenBot + fine] [parenTop - fine] fine
+}
+
+create-glyph 'less' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '<'
+	
+	local top : mix 0 CAP 0.75
+	local bot : mix 0 CAP 0.1
+	
+	put-shapes : create-stroke
+		:.start-from RIGHTSB top
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    SB [mix top bot 0.5]
+		:.heads-to   LEFTWARD
+		:.to-outline 0 0 1 true
+	
+	put-shapes : create-stroke
+		:.start-from SB [mix top bot 0.5]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   RIGHTWARD
+		:.line-to    RIGHTSB bot
+		:.to-outline 0 0 1 true
+}
+
+create-glyph 'greater' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '>'
+	
+	local top : mix 0 CAP 0.75
+	local bot : mix 0 CAP 0.1
+	
+	put-shapes : create-stroke
+		:.start-from SB top
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    RIGHTSB [mix top bot 0.5]
+		:.heads-to   RIGHTWARD
+		:.to-outline 0 0 1 true
+	
+	put-shapes : create-stroke
+		:.start-from RIGHTSB [mix top bot 0.5]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   LEFTWARD
+		:.line-to    SB bot
+		:.to-outline 0 0 1 true
+}
+
+### Asterisk
+create-glyph 'asterisk' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '*'
+	
+	local centery : parenTop - LONGJUT * 1.5
+	local fine : STROKE * 0.4
+	local final : 0.5 * [Math.min STROKE [LONGJUT * Math.PI * 2 / 10]]
+	
+	foreach j [range 0 5] : begin {
+		put-shapes : create-stroke
+			:.start-from MIDDLE centery
+			:.set-width  fine fine
+			:.line-to    [MIDDLE + LONGJUT * [Math.sin [j / 5 * Math.PI * 2]]] [centery + LONGJUT * [Math.cos [j / 5 * Math.PI * 2]]]
+			:.set-width  final final
+			:.to-outline 0 0 1 true
+	}
 }
