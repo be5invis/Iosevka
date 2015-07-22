@@ -99,9 +99,39 @@ define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _exp
 		:.set-width  halfstroke1 halfstroke1
 		:.to-outline
 }
-
 define [sStrand yleft yright _expansion] : begin {
 	return : xsStrand SB yleft RIGHTSB yright HALFSTROKE HALFSTROKE HALFSTROKE _expansion [SMOOTHA * 0.4]
+}
+
+define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : begin {
+	local leftx : _leftx + [HALFSTROKE * [if [rightx > _leftx] 1 [-1]]]
+	local fine  : [_fine || STROKE] * 0.5
+	
+	local turnyleft : mix lefty righty turn
+	local cyleft : mix turnyleft righty tension
+	
+	local straightxleft : mix leftx rightx straight
+	local straightyleft : mix cyleft righty straight
+	
+	return : new Stroke
+		:.set-transform globalTransform
+		:.start-from leftx lefty
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   [if [lefty < righty] UPWARD DOWNWARD]
+		:.line-to    leftx turnyleft
+		:.heads-to   [if [lefty < righty] UPWARD DOWNWARD]
+		:.curve-to   leftx cyleft straightxleft straightyleft
+		:.set-width  fine fine
+		:.line-to    rightx righty
+		:.to-outline
+}
+
+define [xStrand _leftx lefty _rightx righty turn straight tension] : begin {
+	local middlex : mix _leftx _rightx 0.5
+	local middley : mix lefty righty 0.5
+	
+	return : halfXStrand _leftx lefty middlex middley turn straight tension
+	       :.concat : halfXStrand _rightx righty middlex middley turn straight tension
 }
 
 define [nBowl left middle right fine] : begin {

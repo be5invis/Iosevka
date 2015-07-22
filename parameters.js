@@ -4,6 +4,7 @@
         'width': 500,
         'stroke': 80,
         'dotsize': 125,
+        'periodsize': 150,
         'sb': 60,
         'cap': 771,
         'descender': -178,
@@ -27,7 +28,7 @@
         'tbalance': 70,
         'tbalance2': 30,
         'rbalance': 25,
-        'family': 'Codex HW',
+        'family': 'Iosevka',
         'style': 'Regular',
         'weight': 400,
         'version': 'r0.0.1',
@@ -38,6 +39,7 @@
     r0_bold['sb'] = 50;
     r0_bold['stroke'] = 120;
     r0_bold['dotsize'] = 160;
+    r0_bold['periodsize'] = 180;
     r0_bold['barpos'] = 0.42;
     r0_bold['hook'] = 150;
     r0_bold['ahook'] = 100;
@@ -51,16 +53,18 @@
     r0_bold['style'] = 'Bold';
     r0_bold['weight'] = 600;
     r0_bold['bkappa'] = 0.5;
-    r0_bold['ckappa'] = 0.528;
+    r0_bold['smoothadjust'] = 130;
     r0_italic = Object['create'](r0_regular);
     r0_italic['italicangle'] = 10;
     r0_italic['tbalance'] = 70;
     r0_italic['rbalance'] = 30;
     r0_italic['style'] = 'Italic';
+    r0_italic['ckappa'] = 0.618;
     r0_bolditalic = Object['create'](r0_bold);
     r0_bolditalic['italicangle'] = 10;
     r0_bolditalic['tbalance'] = 90;
     r0_bolditalic['style'] = 'BoldItalic';
+    r0_bolditalic['ckappa'] = 0.618;
     exports['regular'] = r0_regular;
     exports['bold'] = r0_bold;
     exports['italic'] = r0_italic;

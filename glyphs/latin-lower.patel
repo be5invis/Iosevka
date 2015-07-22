@@ -249,14 +249,15 @@ create-glyph 't' : glyph-construction {
 	include bMarks
 	
 	local center [MIDDLE - TBALANCE - HALFSTROKE]
-	local hookx  [center + [WIDTH - SB * 2] * 0.82 - OXHOOK + TAILADJX * globalTransform.yx]
-	local turn   [center + [hookx - center] * [0.5 + globalTransform.yx * 0.5]]
+	local hookx  [center + [WIDTH - SB * 2] * 0.78 - OXHOOK + TAILADJX * globalTransform.yx]
+	local turn : mix center hookx [0.5 + globalTransform.yx * 0.5]
+	local smb  : turn - center
 	
 	put-shapes : create-stroke
 		:.start-from center CAP
 		:.set-width  STROKE 0
 		:.heads-to   DOWNWARD
-		:.line-to    center SMOOTHB
+		:.line-to    center smb
 		:.arc-vh-to  turn O
 		:.curve-to   [turn + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] * [hookx - turn]] O hookx [HOOK - TAILADJY * globalTransform.yx]
 		:.to-outline
@@ -677,25 +678,13 @@ create-glyph 'y.upright' : glyph-construction {
 	set-width WIDTH
 	include pMarks
 	
-	local turn1 [DESCENDER + [XH - DESCENDER] * 0.1]
-	local turn2 [XH * 0.1]
-	local cross [XH * 0.15]
-	local xbottom [WIDTH * 0.4]
+	local xbottom : mix SB RIGHTSB 0.28
+	local turnp : XH / [XH - DESCENDER]
+	local xb : mix SB RIGHTSB 0.51
+	local yb : mix 0 XH [0.1 * turnp]
 	
-	local barone : create-stroke
-	:.start-from xbottom DESCENDER
-	:.set-width HALFSTROKE HALFSTROKE
-	:.cubic-to xbottom [turn1 + 0.3 * [XH - turn1]] [RIGHTSB - HALFSTROKE - O] [XH - turn1 - 0.65 * [XH - turn1]] [RIGHTSB - HALFSTROKE - O] XH
-	:.heads-to UPWARD
-	
-	local bartwo : create-stroke
-	:.start-from MIDDLE cross
-	:.set-width HALFSTROKE HALFSTROKE
-	:.curve-to [SB + HALFSTROKE + O] [XH - turn2 - 0.35 * [XH - turn2]] [SB + HALFSTROKE + O] XH
-	:.heads-to UPWARD
-
-	put-shapes : barone.to-outline
-	put-shapes : bartwo.to-outline
+	put-shapes : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
+	put-shapes : halfXStrand SB XH xb yb [0.1 * turnp] 0.4 [0.14 * turnp]
 }
 create-glyph 'y.italic' : glyph-construction {
 	set-width WIDTH

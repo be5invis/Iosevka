@@ -1,6 +1,8 @@
 
 ###### ASCII SYMBOLS
 
+### Symbols with many strokes: $ & @
+
 create-glyph 'dollar' : glyph-construction {
 	set-width WIDTH; assign-unicode '$'
 	include glyphs.S
@@ -52,10 +54,49 @@ create-glyph 'ampersand' : glyph-construction {
 
 }
 
+create-glyph 'at' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '@'
+	
+	local top [CAP + HALFSTROKE]
+	local bot [DESCENDER + HALFSTROKE]
+	local otop : mix bot top 0.75
+	local obot : mix top bot 0.8
+
+	local sw : Math.min STROKE [[WIDTH - SB * 2] * 0.25]
+	local m1 : [mix [SB + sw] [RIGHTSB - sw] 0.47] - sw / 2
+	local m2 : mix m1 RIGHTSB 0.5
+	
+	local sma : SMOOTHA * [[RIGHTSB - m1] / [RIGHTSB - SB]]
+	local smb : SMOOTHB * [[RIGHTSB - m1] / [RIGHTSB - SB]]
+	
+	put-shapes : create-stroke
+		:.start-from RIGHTSB [otop - O]
+		:.heads-to  LEFTWARD
+		:.set-width sw 0
+		:.line-to   m2 [otop - O]
+		:.arc-hv-to m1 [otop - sma]
+		:.line-to   m1 [obot + smb]
+		:.arc-vh-to [m2 + STROKE * globalTransform.yx] [obot + O]
+		:.arc-hv-to RIGHTSB [obot + sma]
+		:.line-to   RIGHTSB [top - SMOOTHB]
+		:.arc-vh-to MIDDLE [top - O]
+		:.set-width STROKE 0
+		:.arc-hv-to SB [top - SMOOTHA]
+		:.set-width sw 0
+		:.line-to   SB [bot + SMOOTHB]
+		:.arc-vh-to MIDDLE [bot + O]
+		:.set-width STROKE 0
+		:.heads-to  RIGHTWARD
+		:.line-to   [RIGHTSB - HALFSTROKE] [bot + O]
+		:.heads-to  RIGHTWARD
+		:.to-outline
+}
+
 ### Brackets
 
 local parenTop [CAP - DESCENDER / 2]
-local parenBot [DESCENDER / 2]
+local parenBot DESCENDER
 local parenMid [mix parenTop parenBot 0.5]
 
 local parenOutside 0.15
@@ -207,41 +248,73 @@ create-glyph 'braceright' : glyph-construction {
 		:.to-outline
 }
 
-create-glyph 'at' : glyph-construction {
-	set-width WIDTH
-	assign-unicode '@'
-	
-	local top [CAP + HALFSTROKE]
-	local bot [DESCENDER + HALFSTROKE]
-	local otop : mix bot top 0.75
-	local obot : mix top bot 0.8
+### Symbols with dots: period, comma, colon, semicolon
 
-	local sw : Math.min STROKE [[WIDTH - SB * 2] * 0.25]
-	local m1 : [mix [SB + sw] [RIGHTSB - sw] 0.47] - sw / 2
-	local m2 : mix m1 RIGHTSB 0.5
+create-glyph 'period' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '.'
+
+	put-shapes : list : Ring [PERIODSIZE - O] O [MIDDLE - PERIODRADIUS + O] [MIDDLE + PERIODRADIUS - O]
+}
+
+create-glyph 'xhdot' : glyph-construction {
+	set-width WIDTH
+
+	put-shapes : list : Ring [XH - O] [XH - PERIODSIZE + O] [MIDDLE - PERIODRADIUS + O] [MIDDLE + PERIODRADIUS - O]
+}
+
+create-glyph 'comma' : glyph-construction {
+	set-width WIDTH
+	assign-unicode ','
+	include glyphs.period
 	
-	local sma : SMOOTHA * [[RIGHTSB - m1] / [RIGHTSB - SB]]
-	local smb : SMOOTHB * [[RIGHTSB - m1] / [RIGHTSB - SB]]
-	
+	local sw : PERIODSIZE * 0.5
 	put-shapes : create-stroke
-		:.start-from RIGHTSB [otop - O]
-		:.heads-to  LEFTWARD
-		:.set-width sw 0
-		:.line-to   m2 [otop - O]
-		:.arc-hv-to m1 [otop - sma]
-		:.line-to   m1 [obot + smb]
-		:.arc-vh-to m2 [obot + O]
-		:.arc-hv-to RIGHTSB [obot + sma]
-		:.line-to   RIGHTSB [top - SMOOTHB]
-		:.arc-vh-to MIDDLE [top - O]
-		:.set-width STROKE 0
-		:.arc-hv-to SB [top - SMOOTHA]
-		:.set-width sw 0
-		:.line-to   SB [bot + SMOOTHB]
-		:.arc-vh-to MIDDLE [bot + O]
-		:.set-width STROKE 0
-		:.heads-to  RIGHTWARD
-		:.line-to   [RIGHTSB - HALFSTROKE] [bot + O]
-		:.heads-to  RIGHTWARD
+		:.start-from [MIDDLE + PERIODRADIUS - O] [mix O [PERIODSIZE - O] 0.5]
+		:.set-width  0 sw
+		:.curve-to   [MIDDLE + PERIODRADIUS - O] [mix [mix O [PERIODSIZE - O] 0.5] DESCENDER 0.5] [mix MIDDLE [MIDDLE - PERIODRADIUS] 0.3] DESCENDER
 		:.to-outline
+}
+
+create-glyph 'colon' : glyph-construction {
+	set-width WIDTH
+	assign-unicode ':'
+	include glyphs.period
+	include glyphs.xhdot
+}
+create-glyph 'semicolon' : glyph-construction {
+	set-width WIDTH
+	assign-unicode ';'
+	include glyphs.comma
+	include glyphs.xhdot
+}
+
+create-glyph 'question' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '?'
+	put-shapes : xsStrand [MIDDLE - HALFSTROKE] [mix [DOTSIZE + STROKE] [XH / 2] 0.5] RIGHTSB [CAP - SMOOTHB]
+	put-shapes : twoHookUpper CAP SMOOTHB HOOK
+	put-shapes : list : Ring [DOTSIZE - O] O [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O]
+}
+create-glyph 'exclam' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '!'
+	put-shapes : create-stroke
+		:.start-from MIDDLE CAP
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   DOWNWARD
+		:.line-to    MIDDLE [mix [DOTSIZE + STROKE] [XH / 2] 0.5]
+		:.heads-to   DOWNWARD
+		:.to-outline
+	put-shapes : list : Ring [DOTSIZE - O] O [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O]
+}
+
+### Symbols with bars: underscore, hyphen
+
+create-glyph 'underscore' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '_'
+	
+	put-shapes : create-stroke :.start-from SB 0 :.heads-to RIGHTWARD :.set-width STROKE 0
+		:.line-to RIGHTSB 0 :.heads-to RIGHTWARD :.to-outline
 }
