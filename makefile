@@ -4,16 +4,16 @@ OBJDIR = build
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
-fonts : update $(OBJDIR)/codexHW-regular.ttf $(OBJDIR)/codexHW-bold.ttf $(OBJDIR)/codexHW-italic.ttf $(OBJDIR)/codexHW-bolditalic.ttf
+fonts : update $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
 	
 
-$(OBJDIR)/codexHW-regular.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-regular.ttf : $(FILES) $(OBJDIR)
 	node generate regular $@
-$(OBJDIR)/codexHW-bold.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-bold.ttf : $(FILES) $(OBJDIR)
 	node generate bold $@
-$(OBJDIR)/codexHW-italic.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-italic.ttf : $(FILES) $(OBJDIR)
 	node generate italic $@
-$(OBJDIR)/codexHW-bolditalic.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
 	node generate bolditalic $@
 
 update : $(FILES)
