@@ -1040,7 +1040,7 @@ exports.build = function(r1_para) {
         r190_xn$putshapes$9Jrj(r190_xn$createstroke$7Hrq()["start-from"](r190_center, r1_CAP)["set-width"](r1_STROKE, 0)["heads-to"](r1_DOWNWARD)["line-to"](r190_center, r190_smb)["arc-vh-to"](r190_turn, r1_O)["curve-to"](r190_turn + (r1_KAPPA_HOOK + r1_TAILADJKAPPA * r1_globalTransform.yx + .1) * (r190_hookx - r190_turn), r1_O, r190_hookx, r1_HOOK - r1_TAILADJY * r1_globalTransform.yx)["to-outline"]()), 
         void r190_xn$putshapes$9Jrj(r190_xn$createstroke$7Hrq()["start-from"](r190_center + r1_HALFSTROKE - r1_LONGJUT + r1_TBALANCE2, r1_XH)["heads-to"](r1_RIGHTWARD)["set-width"](0, r1_STROKE)["line-to"](r190_center + r1_HALFSTROKE + r1_LONGJUT + r1_TBALANCE2, r1_XH)["heads-to"](r1_RIGHTWARD)["to-outline"]());
     }), r1_xn$createglyph$7Hrq("a.upright", function() {
-        var r193_currentGlyph, r193_xn$setwidth$9Jrj, r193_xn$assignunicode$7Hrq, r193_xn$startfrom$1aao, r193_xn$lineto$5sIl, r193_xn$curveto$1aao, r193_xn$cubicto$1aao, r193_xn$putshapes$9Jrj, r193_xn$reverselast$3qIs, r193_include, r193_xn$createstroke$7Hrq, r193_xn$setanchor$9Jrj, r193_bartop, _r193_t0;
+        var r193_currentGlyph, r193_xn$setwidth$9Jrj, r193_xn$assignunicode$7Hrq, r193_xn$startfrom$1aao, r193_xn$lineto$5sIl, r193_xn$curveto$1aao, r193_xn$cubicto$1aao, r193_xn$putshapes$9Jrj, r193_xn$reverselast$3qIs, r193_include, r193_xn$createstroke$7Hrq, r193_xn$setanchor$9Jrj, r193_bartop, r193_lowmiddle, r193_barsmooth, _r193_t0;
         return _r193_t0 = this, r193_currentGlyph = _r193_t0, r193_xn$setwidth$9Jrj = _r193_t0["set-width"].bind(_r193_t0), 
         r193_xn$assignunicode$7Hrq = function(r194_code) {
             var r194_code;
@@ -1051,9 +1051,10 @@ exports.build = function(r1_para) {
         r193_include = _r193_t0.include.bind(_r193_t0), r193_xn$createstroke$7Hrq = _r193_t0["create-stroke"].bind(_r193_t0), 
         r193_xn$setanchor$9Jrj = _r193_t0["set-anchor"].bind(_r193_t0), _r193_t0.gizmo = r1_globalTransform, 
         _r193_t0["set-width"](r1_WIDTH), r193_xn$setwidth$9Jrj(r1_WIDTH), r193_bartop = r1_XH * r1_BARPOS + r1_STROKE, 
-        r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](r1_RIGHTSB, 0)["heads-to"](r1_UPWARD)["set-width"](r1_STROKE, 0)["line-to"](r1_RIGHTSB, r1_XH - r1_SMOOTHA)["arc-vh-to"](r1_MIDDLE, r1_XO)["heads-to"](r1_LEFTWARD)["curve-to"](r1_MIDDLE - r1_KAPPA_HOOK * (r1_MIDDLE - r1_SB), r1_XO, r1_SB + r1_OXHOOK, r1_XH - r1_AHOOK)["to-outline"]()), 
-        r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](.47 * r1_WIDTH, r1_O)["set-width"](0, r1_STROKE)["heads-to"](r1_LEFTWARD)["arc-hv-to"](r1_SB + r1_O, .45 * r193_bartop)["arc-vh-to"](.6 * r1_WIDTH, r193_bartop)["line-to"](r1_RIGHTSB, r193_bartop)["heads-to"](r1_RIGHTWARD)["to-outline"]()), 
-        void r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](.47 * r1_WIDTH, r1_O + r1_STROKE)["set-width"](0, r1_STROKE)["heads-to"](r1_RIGHTWARD)["arc-hv-to"](r1_RIGHTSB - r1_STROKE, .65 * r1_SMALLSMOOTHA)["heads-to"](r1_UPWARD)["set-width"](0, .4 * r1_STROKE)["to-outline"]());
+        r193_lowmiddle = r1_mix(r1_SB, r1_RIGHTSB - r1_STROKE, r1_linreg(80, .55, 120, .625, r1_STROKE)), 
+        r193_barsmooth = r1_mix(r1_SB, r1_RIGHTSB, .6), r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](r1_RIGHTSB, 0)["heads-to"](r1_UPWARD)["set-width"](r1_STROKE, 0)["line-to"](r1_RIGHTSB, r1_XH - r1_SMOOTHA)["arc-vh-to"](r1_MIDDLE, r1_XO)["heads-to"](r1_LEFTWARD)["curve-to"](r1_MIDDLE - r1_KAPPA_HOOK * (r1_MIDDLE - r1_SB), r1_XO, r1_SB + r1_OXHOOK, r1_XH - r1_AHOOK)["to-outline"]()), 
+        r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](r193_lowmiddle, r1_O)["set-width"](0, r1_STROKE)["heads-to"](r1_LEFTWARD)["arc-hv-to"](r1_SB + r1_O, .45 * r193_bartop)["arc-vh-to"](r193_barsmooth, r193_bartop)["line-to"](r1_RIGHTSB, r193_bartop)["heads-to"](r1_RIGHTWARD)["to-outline"]()), 
+        void r193_xn$putshapes$9Jrj(r193_xn$createstroke$7Hrq()["start-from"](r193_lowmiddle, r1_O + r1_STROKE)["set-width"](0, r1_STROKE)["heads-to"](r1_RIGHTWARD)["arc-hv-to"](r1_RIGHTSB - r1_STROKE, .65 * r1_SMALLSMOOTHA)["heads-to"](r1_UPWARD)["set-width"](0, .4 * r1_STROKE)["to-outline"]());
     }), r1_xn$createglyph$7Hrq("a.italic", function() {
         var r196_currentGlyph, r196_xn$setwidth$9Jrj, r196_xn$assignunicode$7Hrq, r196_xn$startfrom$1aao, r196_xn$lineto$5sIl, r196_xn$curveto$1aao, r196_xn$cubicto$1aao, r196_xn$putshapes$9Jrj, r196_xn$reverselast$3qIs, r196_include, r196_xn$createstroke$7Hrq, r196_xn$setanchor$9Jrj, _r196_t0;
         return _r196_t0 = this, r196_currentGlyph = _r196_t0, r196_xn$setwidth$9Jrj = _r196_t0["set-width"].bind(_r196_t0), 
@@ -1446,7 +1447,7 @@ exports.build = function(r1_para) {
         r274_include(r1_eMarks), r274_xn$putshapes$9Jrj(r1_sHookUpper(r1_XH, .87 * r1_SMOOTHA, r1_SHOOK)), 
         r274_xn$putshapes$9Jrj(r1_sHookLower(0, .87 * r1_SMOOTHA, r1_SHOOK)), void r274_xn$putshapes$9Jrj(r1_sStrand(r1_XH - .87 * r1_SMOOTHA, .87 * r1_SMOOTHA, .2, .45));
     }), r1_xn$createglyph$7Hrq("r", function() {
-        var r277_currentGlyph, r277_xn$setwidth$9Jrj, r277_xn$assignunicode$7Hrq, r277_xn$startfrom$1aao, r277_xn$lineto$5sIl, r277_xn$curveto$1aao, r277_xn$cubicto$1aao, r277_xn$putshapes$9Jrj, r277_xn$reverselast$3qIs, r277_include, r277_xn$createstroke$7Hrq, r277_xn$setanchor$9Jrj, r277_slope, r277_expand, r277_coexpand, r277_ssmootha, _r277_t0;
+        var r277_currentGlyph, r277_xn$setwidth$9Jrj, r277_xn$assignunicode$7Hrq, r277_xn$startfrom$1aao, r277_xn$lineto$5sIl, r277_xn$curveto$1aao, r277_xn$cubicto$1aao, r277_xn$putshapes$9Jrj, r277_xn$reverselast$3qIs, r277_include, r277_xn$createstroke$7Hrq, r277_xn$setanchor$9Jrj, r277_slope, r277_expand, r277_coexpand, r277_rhookx, r277_rmiddle, _r277_t0;
         return _r277_t0 = this, r277_currentGlyph = _r277_t0, r277_xn$setwidth$9Jrj = _r277_t0["set-width"].bind(_r277_t0), 
         r277_xn$assignunicode$7Hrq = function(r278_code) {
             var r278_code;
@@ -1458,8 +1459,9 @@ exports.build = function(r1_para) {
         r277_xn$setanchor$9Jrj = _r277_t0["set-anchor"].bind(_r277_t0), _r277_t0.gizmo = r1_globalTransform, 
         _r277_t0["set-width"](r1_WIDTH), r277_xn$setwidth$9Jrj(r1_WIDTH), r277_xn$assignunicode$7Hrq("r"), 
         r277_include(r1_eMarks), r277_slope = .015, r277_expand = .175, r277_coexpand = (1 - r277_expand) / 2, 
-        r277_ssmootha = .87 * r1_SMOOTHA, r277_xn$putshapes$9Jrj(r277_xn$createstroke$7Hrq()["start-from"](r1_RIGHTSB + r1_JBALANCE / 2, r1_XH - r1_RHOOK)["set-width"](r1_STROKE, 0)["curve-to"](r1_MIDDLE + r1_KAPPA_AHOOK * (r1_MIDDLE - r1_para.sb) + r1_JBALANCE / 2, r1_XO, r1_MIDDLE + .75 * r1_JBALANCE, r1_XO)["heads-to"](r1_LEFTWARD)["to-outline"]()), 
-        r277_xn$putshapes$9Jrj(r277_xn$createstroke$7Hrq()["start-from"](r1_MIDDLE + .75 * r1_JBALANCE, r1_XO - r1_STROKE)["set-width"](0, r1_STROKE)["heads-to"](r1_LEFTWARD)["arc-hv-to"](r1_SB + r1_STROKE * r1_ITALICCOR + r1_RBALANCE, r1_XH - r1_SMALLSMOOTHA)["heads-to"](r1_DOWNWARD)["set-width"](0, .4 * r1_STROKE)["to-outline"]()), 
+        r277_rhookx = r1_RIGHTSB + r1_JBALANCE / 2, r277_rmiddle = r1_mix(r1_SB + r1_RBALANCE + r1_STROKE, r277_rhookx - r1_HALFSTROKE, .5), 
+        r277_xn$putshapes$9Jrj(r277_xn$createstroke$7Hrq()["start-from"](r277_rhookx, r1_XH - r1_RHOOK)["set-width"](r1_STROKE, 0)["curve-to"](r1_mix(r277_rmiddle, r277_rhookx, r1_KAPPA_AHOOK), r1_XO, r277_rmiddle, r1_XO)["heads-to"](r1_LEFTWARD)["to-outline"]()), 
+        r277_xn$putshapes$9Jrj(r277_xn$createstroke$7Hrq()["start-from"](r277_rmiddle, r1_XO - r1_STROKE)["set-width"](0, r1_STROKE)["heads-to"](r1_LEFTWARD)["arc-hv-to"](r1_SB + r1_STROKE * r1_ITALICCOR + r1_RBALANCE, r1_XH - r1_SMALLSMOOTHA)["heads-to"](r1_DOWNWARD)["set-width"](0, .3 * r1_STROKE)["to-outline"]()), 
         void r277_xn$putshapes$9Jrj(r277_xn$createstroke$7Hrq()["start-from"](r1_SB + r1_RBALANCE, 0)["heads-to"](r1_UPWARD)["set-width"](0, r1_STROKE)["line-to"](r1_SB + r1_RBALANCE, r1_XH)["heads-to"](r1_UPWARD)["to-outline"]());
     }), r1_xn$createglyph$7Hrq("f.upright", function() {
         var r280_currentGlyph, r280_xn$setwidth$9Jrj, r280_xn$assignunicode$7Hrq, r280_xn$startfrom$1aao, r280_xn$lineto$5sIl, r280_xn$curveto$1aao, r280_xn$cubicto$1aao, r280_xn$putshapes$9Jrj, r280_xn$reverselast$3qIs, r280_include, r280_xn$createstroke$7Hrq, r280_xn$setanchor$9Jrj, _r280_t0;

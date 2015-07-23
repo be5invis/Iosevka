@@ -21,7 +21,8 @@
         'smoothadjust': 100,
         'o': -8,
         'oxhook': 0,
-        'kappa': 0.515,
+        'kappa': 0.518,
+        'ckappa': 0.618,
         'italicangle': 0,
         'longjut': 175,
         'accent': 170,
@@ -62,13 +63,11 @@
     r0_italic['tbalance'] = 70;
     r0_italic['rbalance'] = 30;
     r0_italic['style'] = 'Italic';
-    r0_italic['ckappa'] = 0.618;
     r0_italic['isItalic'] = true;
     r0_bolditalic = Object['create'](r0_bold);
     r0_bolditalic['italicangle'] = 10;
     r0_bolditalic['tbalance'] = 90;
     r0_bolditalic['style'] = 'Bold Italic';
-    r0_bolditalic['ckappa'] = 0.618;
     r0_bolditalic['isBold'] = true;
     r0_bolditalic['isItalic'] = true;
     exports['regular'] = r0_regular;
