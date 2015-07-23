@@ -1,5 +1,5 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
-GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel glyphs/ascii-symbols.patel
+GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-capital.patel glyphs/latin-lower.patel glyphs/numbers.patel glyphs/ascii-symbols.patel glyphs/accented-letters.patel
 OBJDIR = build
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf

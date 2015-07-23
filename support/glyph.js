@@ -1,5 +1,5 @@
 ﻿{
-    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11;
+    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_fallback, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12;
     r0_bezierCubic2Q2 = require('node-sfnt/lib/math/bezierCubic2Q2');
     r0_tp = require('./transform')['transformPoint'];
     r0_Stroke = require('./stroke')['Stroke'];
@@ -11,15 +11,29 @@
         'x': 0,
         'y': 0
     };
-    r0_Glyph = function _r0_t0(r1_name) {
-        var r1_name, _r1_t0;
-        _r1_t0 = this;
-        _r1_t0['name'] = r1_name;
-        _r1_t0['unicode'] = [];
-        _r1_t0['contours'] = [];
-        _r1_t0['advanceWidth'] = 500;
-        _r1_t0['anchors'] = {};
-        _r1_t0['gizmo'] = {
+    r0_fallback = function _r0_t0() {
+        var r1_j, _r1_t0, _r1_t1, _r1_t2, _r1_t3;
+        _r1_t0 = arguments;
+        r1_j = 0;
+        _r1_t1 = r1_j < _r1_t0['length'];
+        for (; _r1_t1; _r1_t1 = r1_j < _r1_t0['length']) {
+            if (_r1_t0[r1_j] !== void 0)
+                return _r1_t0[r1_j];
+            else
+                _r1_t3 = void 0;
+            _r1_t2 = r1_j = r1_j + 1;
+        }
+        return _r1_t2;
+    };
+    r0_Glyph = function _r0_t1(r2_name) {
+        var r2_name, _r2_t0;
+        _r2_t0 = this;
+        _r2_t0['name'] = r2_name;
+        _r2_t0['unicode'] = [];
+        _r2_t0['contours'] = [];
+        _r2_t0['advanceWidth'] = 500;
+        _r2_t0['anchors'] = {};
+        _r2_t0['gizmo'] = {
             'xx': 1,
             'yx': 0,
             'xy': 0,
@@ -29,235 +43,235 @@
         };
         return void 0;
     };
-    r0_Glyph['prototype']['set-width'] = function _r0_t1(r2_w) {
-        var r2_w, _r2_t0;
-        _r2_t0 = this;
-        _r2_t0['advanceWidth'] = r2_w;
-        return _r2_t0;
-    };
-    r0_Glyph['prototype']['assign-unicode'] = function _r0_t2(r3_u) {
-        var r3_u, _r3_t0, _r3_t1, _r3_t2, _r3_t3, _r3_t4;
+    r0_Glyph['prototype']['set-width'] = function _r0_t2(r3_w) {
+        var r3_w, _r3_t0;
         _r3_t0 = this;
-        _r3_t1 = _r3_t0['unicode'];
-        _r3_t2 = _r3_t1['push'];
-        if (typeof r3_u === 'string')
-            _r3_t3 = r3_u['charCodeAt'](0);
-        else {
-            if (true)
-                _r3_t4 = r3_u;
-            else
-                _r3_t4 = void 0;
-            _r3_t3 = _r3_t4;
-        }
-        _r3_t2['call'](_r3_t1, _r3_t3);
+        _r3_t0['advanceWidth'] = r3_w;
         return _r3_t0;
     };
-    r0_Glyph['prototype']['start-from'] = function _r0_t3(r4_x, r4_y) {
-        var r4_x, r4_y, _r4_t0;
+    r0_Glyph['prototype']['assign-unicode'] = function _r0_t3(r4_u) {
+        var r4_u, _r4_t0, _r4_t1, _r4_t2, _r4_t3, _r4_t4;
         _r4_t0 = this;
-        _r4_t0['contours']['push']([r0_tp(_r4_t0['gizmo'], {
-                'x': r4_x,
-                'y': r4_y,
-                'onCurve': true
-            })]);
+        _r4_t1 = _r4_t0['unicode'];
+        _r4_t2 = _r4_t1['push'];
+        if (typeof r4_u === 'string')
+            _r4_t3 = r4_u['charCodeAt'](0);
+        else {
+            if (true)
+                _r4_t4 = r4_u;
+            else
+                _r4_t4 = void 0;
+            _r4_t3 = _r4_t4;
+        }
+        _r4_t2['call'](_r4_t1, _r4_t3);
         return _r4_t0;
     };
-    r0_Glyph['prototype']['line-to'] = function _r0_t4(r5_x, r5_y) {
+    r0_Glyph['prototype']['start-from'] = function _r0_t4(r5_x, r5_y) {
         var r5_x, r5_y, _r5_t0;
         _r5_t0 = this;
-        _r5_t0['contours'][_r5_t0['contours']['length'] - 1]['push'](r0_tp(_r5_t0['gizmo'], {
-            'x': r5_x,
-            'y': r5_y,
-            'onCurve': true
-        }));
+        _r5_t0['contours']['push']([r0_tp(_r5_t0['gizmo'], {
+                'x': r5_x,
+                'y': r5_y,
+                'onCurve': true
+            })]);
         return _r5_t0;
     };
-    r0_Glyph['prototype']['curve-to'] = function _r0_t5(r6_xc, r6_yc, r6_x, r6_y) {
-        var r6_xc, r6_yc, r6_x, r6_y, _r6_t0;
+    r0_Glyph['prototype']['line-to'] = function _r0_t5(r6_x, r6_y) {
+        var r6_x, r6_y, _r6_t0;
         _r6_t0 = this;
         _r6_t0['contours'][_r6_t0['contours']['length'] - 1]['push'](r0_tp(_r6_t0['gizmo'], {
-            'x': r6_xc,
-            'y': r6_yc,
-            'onCurve': false
-        }), r0_tp(_r6_t0['gizmo'], {
             'x': r6_x,
             'y': r6_y,
             'onCurve': true
         }));
         return _r6_t0;
     };
-    r0_Glyph['prototype']['cubic-to'] = function _r0_t6(r7_x1, r7_y1, r7_x2, r7_y2, r7_x, r7_y) {
-        var r7_x1, r7_y1, r7_x2, r7_y2, r7_x, r7_y, r7_lastContour, r7_lastPoint, r7_segments, r7_p0, r7_xc, r7_yc, r7_xf, r7_yf, _r7_t0, _r7_t1, _r7_t2, _r7_t3, _r7_t4, _r7_t5, _r7_t6;
-        _r7_t6 = this;
-        r7_lastContour = _r7_t6['contours'][_r7_t6['contours']['length'] - 1];
-        r7_lastPoint = r7_lastContour[r7_lastContour['length'] - 1];
-        r7_segments = r0_bezierCubic2Q2(r7_lastPoint, {
-            'x': r7_x1,
-            'y': r7_y1
-        }, {
-            'x': r7_x2,
-            'y': r7_y2
-        }, {
+    r0_Glyph['prototype']['curve-to'] = function _r0_t6(r7_xc, r7_yc, r7_x, r7_y) {
+        var r7_xc, r7_yc, r7_x, r7_y, _r7_t0;
+        _r7_t0 = this;
+        _r7_t0['contours'][_r7_t0['contours']['length'] - 1]['push'](r0_tp(_r7_t0['gizmo'], {
+            'x': r7_xc,
+            'y': r7_yc,
+            'onCurve': false
+        }), r0_tp(_r7_t0['gizmo'], {
             'x': r7_x,
-            'y': r7_y
+            'y': r7_y,
+            'onCurve': true
+        }));
+        return _r7_t0;
+    };
+    r0_Glyph['prototype']['cubic-to'] = function _r0_t7(r8_x1, r8_y1, r8_x2, r8_y2, r8_x, r8_y) {
+        var r8_x1, r8_y1, r8_x2, r8_y2, r8_x, r8_y, r8_lastContour, r8_lastPoint, r8_segments, r8_p0, r8_xc, r8_yc, r8_xf, r8_yf, _r8_t0, _r8_t1, _r8_t2, _r8_t3, _r8_t4, _r8_t5, _r8_t6;
+        _r8_t6 = this;
+        r8_lastContour = _r8_t6['contours'][_r8_t6['contours']['length'] - 1];
+        r8_lastPoint = r8_lastContour[r8_lastContour['length'] - 1];
+        r8_segments = r0_bezierCubic2Q2(r8_lastPoint, {
+            'x': r8_x1,
+            'y': r8_y1
+        }, {
+            'x': r8_x2,
+            'y': r8_y2
+        }, {
+            'x': r8_x,
+            'y': r8_y
         });
-        _r7_t0 = r7_segments;
-        _r7_t1 = _r7_t0['length'];
-        _r7_t2 = 0;
-        for (; _r7_t2 < _r7_t1; _r7_t2 = _r7_t2 + 1) {
-            _r7_t3 = _r7_t0[_r7_t2];
-            r7_p0 = _r7_t3[0];
-            _r7_t4 = _r7_t3[1];
-            r7_xc = _r7_t4['x'];
-            r7_yc = _r7_t4['y'];
-            _r7_t5 = _r7_t3[2];
-            r7_xf = _r7_t5['x'];
-            r7_yf = _r7_t5['y'];
-            _r7_t6['curve-to'](r7_xc, r7_yc, r7_xf, r7_yf);
+        _r8_t0 = r8_segments;
+        _r8_t1 = _r8_t0['length'];
+        _r8_t2 = 0;
+        for (; _r8_t2 < _r8_t1; _r8_t2 = _r8_t2 + 1) {
+            _r8_t3 = _r8_t0[_r8_t2];
+            r8_p0 = _r8_t3[0];
+            _r8_t4 = _r8_t3[1];
+            r8_xc = _r8_t4['x'];
+            r8_yc = _r8_t4['y'];
+            _r8_t5 = _r8_t3[2];
+            r8_xf = _r8_t5['x'];
+            r8_yf = _r8_t5['y'];
+            _r8_t6['curve-to'](r8_xc, r8_yc, r8_xf, r8_yf);
         }
-        return _r7_t6;
+        return _r8_t6;
     };
-    r0_Glyph['prototype']['reverse-last'] = function _r0_t7() {
-        var _r9_t0;
-        _r9_t0 = this;
-        return _r9_t0['contours'][_r9_t0['contours']['length'] - 1] = _r9_t0['contours'][_r9_t0['contours']['length'] - 1]['reverse']();
+    r0_Glyph['prototype']['reverse-last'] = function _r0_t8() {
+        var _r10_t0;
+        _r10_t0 = this;
+        return _r10_t0['contours'][_r10_t0['contours']['length'] - 1] = _r10_t0['contours'][_r10_t0['contours']['length'] - 1]['reverse']();
     };
-    r0_Glyph['prototype']['put-shapes'] = function _r0_t8(r10_contours) {
-        var r10_contours, r10_t, r10_contour, r10_j, r10_point, r10_p2, r10_p3, _r10_t0, _r10_t1, _r10_t2, _r10_t3;
-        _r10_t3 = this;
-        r10_t = _r10_t3['gizmo'];
-        _r10_t3['gizmo'] = r0_id;
-        _r10_t0 = r10_contours;
-        _r10_t1 = _r10_t0['length'];
-        _r10_t2 = 0;
-        for (; _r10_t2 < _r10_t1; _r10_t2 = _r10_t2 + 1) {
-            r10_contour = _r10_t0[_r10_t2];
-            _r10_t3['start-from'](r10_contour[0]['x'], r10_contour[0]['y']);
-            r10_j = 1;
-            for (; r10_j < r10_contour['length']; r10_j = r10_j + 1) {
-                r10_point = r10_contour[r10_j];
-                if (r10_point['cubic']) {
-                    r10_p2 = r10_contour[r10_j + 1];
-                    r10_p3 = r10_contour[r10_j + 2];
-                    _r10_t3['cubic-to'](r10_point['x'], r10_point['y'], r10_p2['x'], r10_p2['y'], r10_p3['x'], r10_p3['y']);
-                    r10_j = r10_j + 2;
-                } else if (r10_point['onCurve'])
-                    _r10_t3['line-to'](r10_point['x'], r10_point['y']);
+    r0_Glyph['prototype']['put-shapes'] = function _r0_t9(r11_contours) {
+        var r11_contours, r11_t, r11_contour, r11_j, r11_point, r11_p2, r11_p3, _r11_t0, _r11_t1, _r11_t2, _r11_t3;
+        _r11_t3 = this;
+        r11_t = _r11_t3['gizmo'];
+        _r11_t3['gizmo'] = r0_id;
+        _r11_t0 = r11_contours;
+        _r11_t1 = _r11_t0['length'];
+        _r11_t2 = 0;
+        for (; _r11_t2 < _r11_t1; _r11_t2 = _r11_t2 + 1) {
+            r11_contour = _r11_t0[_r11_t2];
+            _r11_t3['start-from'](r11_contour[0]['x'], r11_contour[0]['y']);
+            r11_j = 1;
+            for (; r11_j < r11_contour['length']; r11_j = r11_j + 1) {
+                r11_point = r11_contour[r11_j];
+                if (r11_point['cubic']) {
+                    r11_p2 = r11_contour[r11_j + 1];
+                    r11_p3 = r11_contour[r11_j + 2];
+                    _r11_t3['cubic-to'](r11_point['x'], r11_point['y'], r11_p2['x'], r11_p2['y'], r11_p3['x'], r11_p3['y']);
+                    r11_j = r11_j + 2;
+                } else if (r11_point['onCurve'])
+                    _r11_t3['line-to'](r11_point['x'], r11_point['y']);
                 else {
-                    r10_p2 = r10_contour[r10_j + 1];
-                    _r10_t3['curve-to'](r10_point['x'], r10_point['y'], r10_p2['x'], r10_p2['y']);
-                    r10_j = r10_j + 1;
+                    r11_p2 = r11_contour[r11_j + 1];
+                    _r11_t3['curve-to'](r11_point['x'], r11_point['y'], r11_p2['x'], r11_p2['y']);
+                    r11_j = r11_j + 1;
                 }
             }
         }
-        _r10_t3['gizmo'] = r10_t;
-        return _r10_t3;
+        _r11_t3['gizmo'] = r11_t;
+        return _r11_t3;
     };
-    r0_Glyph['prototype']['include'] = function _r0_t9(r12_glyph, r12_copyAnchors) {
-        var r12_glyph, r12_copyAnchors, r12_contours, r12_shiftx, r12_shifty, r12_markid, r12_anchorThis, r12_anchorThat, r12_shiftedshape, _r12_t0, _r12_t1, _r12_t2, _r12_t3, _r12_t4, _r12_t5, _r12_t6, _r12_t7, _r12_t8, _r12_t9, _r12_t10, _r12_t11, _r12_t12, _r12_t13, _r12_t14, _r12_t15, _r12_t16, _r12_t17, _r12_t18, _r12_tag19;
-        _r12_t17 = arguments;
-        _r12_t4 = this;
-        r12_contours = r12_glyph['contours'];
-        r12_shiftx = 0;
-        r12_shifty = 0;
-        if (_r12_t4['anchors'] && r12_glyph['anchors']) {
-            _r12_t0 = Object['keys'](_r12_t4['anchors']);
-            _r12_t1 = _r12_t0['length'];
-            _r12_t2 = 0;
-            _r12_t6 = _r12_t2 < _r12_t1;
-            for (; _r12_t6; _r12_t6 = _r12_t2 < _r12_t1) {
-                r12_markid = _r12_t0[_r12_t2];
-                r12_anchorThis = _r12_t4['anchors'][r12_markid];
-                r12_anchorThat = r12_glyph['anchors'][r12_markid];
-                if (r12_anchorThis && r12_anchorThis['type'] === 'base' && r12_anchorThat && r12_anchorThat['type'] === 'mark') {
-                    _r12_t3 = [
-                        r12_anchorThis['x'] - r12_anchorThat['x'],
-                        r12_anchorThis['y'] - r12_anchorThat['y']
+    r0_Glyph['prototype']['include'] = function _r0_t10(r13_glyph, r13_copyAnchors) {
+        var r13_glyph, r13_copyAnchors, r13_contours, r13_shiftx, r13_shifty, r13_markid, r13_anchorThis, r13_anchorThat, r13_shiftedshape, _r13_t0, _r13_t1, _r13_t2, _r13_t3, _r13_t4, _r13_t5, _r13_t6, _r13_t7, _r13_t8, _r13_t9, _r13_t10, _r13_t11, _r13_t12, _r13_t13, _r13_t14, _r13_t15, _r13_t16, _r13_t17, _r13_t18, _r13_tag19;
+        _r13_t17 = arguments;
+        _r13_t4 = this;
+        r13_contours = r13_glyph['contours'];
+        r13_shiftx = 0;
+        r13_shifty = 0;
+        if (_r13_t4['anchors'] && r13_glyph['anchors']) {
+            _r13_t0 = Object['keys'](_r13_t4['anchors']);
+            _r13_t1 = _r13_t0['length'];
+            _r13_t2 = 0;
+            _r13_t6 = _r13_t2 < _r13_t1;
+            for (; _r13_t6; _r13_t6 = _r13_t2 < _r13_t1) {
+                r13_markid = _r13_t0[_r13_t2];
+                r13_anchorThis = _r13_t4['anchors'][r13_markid];
+                r13_anchorThat = r13_glyph['anchors'][r13_markid];
+                if (r13_anchorThis && (r13_anchorThis['type'] === 'base' || r13_anchorThis['mbx'] !== void 0 && r13_anchorThis['mby'] !== void 0) && r13_anchorThat && r13_anchorThat['type'] === 'mark') {
+                    _r13_t3 = [
+                        r0_fallback(r13_anchorThis['mbx'], r13_anchorThis['x']) - r13_anchorThat['x'],
+                        r0_fallback(r13_anchorThis['mby'], r13_anchorThis['y']) - r13_anchorThat['y']
                     ];
-                    r12_shiftx = _r12_t3[0];
-                    r12_shifty = _r12_t3[1];
-                    if (r12_anchorThat['mbx'] !== void 0 && r12_anchorThat['mby'] !== void 0)
-                        _r12_t9 = _r12_t4['anchors'][r12_markid] = {
-                            'x': r12_anchorThis['x'] + r12_anchorThat['mbx'] - r12_anchorThat['x'],
-                            'y': r12_anchorThis['y'] + r12_anchorThat['mby'] - r12_anchorThat['y'],
-                            'type': r12_anchorThis['type'],
-                            'mbx': r12_anchorThis['mbx'],
-                            'mby': r12_anchorThis['mby']
+                    r13_shiftx = _r13_t3[0];
+                    r13_shifty = _r13_t3[1];
+                    if (r13_anchorThat['mbx'] !== void 0 && r13_anchorThat['mby'] !== void 0)
+                        _r13_t9 = _r13_t4['anchors'][r13_markid] = {
+                            'x': r13_anchorThis['x'] + r13_anchorThat['mbx'] - r13_anchorThat['x'],
+                            'y': r13_anchorThis['y'] + r13_anchorThat['mby'] - r13_anchorThat['y'],
+                            'type': r13_anchorThis['type'],
+                            'mbx': r13_anchorThis['mbx'],
+                            'mby': r13_anchorThis['mby']
                         };
-                    _r12_t8 = _r12_t9;
+                    _r13_t8 = _r13_t9;
                 } else
-                    _r12_t8 = void 0;
-                _r12_t7 = _r12_t2 = _r12_t2 + 1;
+                    _r13_t8 = void 0;
+                _r13_t7 = _r13_t2 = _r13_t2 + 1;
             }
-            _r12_t5 = _r12_t7;
+            _r13_t5 = _r13_t7;
         } else
-            _r12_t5 = void 0;
-        if (r12_contours) {
-            r12_shiftedshape = r12_contours['map'](function _r12_t11(r14_contour) {
-                var r14_contour, _r14_t0;
-                return r14_contour['map'](function _r14_t0(r15_point) {
-                    var r15_point;
+            _r13_t5 = void 0;
+        if (r13_contours) {
+            r13_shiftedshape = r13_contours['map'](function _r13_t11(r15_contour) {
+                var r15_contour, _r15_t0;
+                return r15_contour['map'](function _r15_t0(r16_point) {
+                    var r16_point;
                     return {
-                        'x': r15_point['x'] + r12_shiftx,
-                        'y': r15_point['y'] + r12_shifty,
-                        'onCurve': r15_point['onCurve'],
-                        'cubic': r15_point['cubic']
+                        'x': r16_point['x'] + r13_shiftx,
+                        'y': r16_point['y'] + r13_shifty,
+                        'onCurve': r16_point['onCurve'],
+                        'cubic': r16_point['cubic']
                     };
                 });
             });
-            _r12_t10 = _r12_t4['put-shapes'](r12_shiftedshape);
+            _r13_t10 = _r13_t4['put-shapes'](r13_shiftedshape);
         } else
-            _r12_t10 = void 0;
-        if ((!r12_contours || r12_copyAnchors) && r12_glyph['anchors']) {
-            _r12_t13 = 'anchors';
-            _r12_t14 = {};
-            _r12_t15 = r12_glyph['anchors'];
-            _r12_t16 = Object['keys'](r12_glyph['anchors']);
-            return _r12_t4[_r12_t13] = function (r16_a, r16_anchors, r16_keys) {
-                var r16_a, r16_anchors, r16_keys, r16_k, _r16_t0, _r16_t1, _r16_t2;
-                _r16_t0 = r16_keys;
-                _r16_t1 = _r16_t0['length'];
-                _r16_t2 = 0;
-                for (; _r16_t2 < _r16_t1; _r16_t2 = _r16_t2 + 1) {
-                    r16_k = _r16_t0[_r16_t2];
-                    r16_a[r16_k] = r16_anchors[r16_k];
+            _r13_t10 = void 0;
+        if ((!r13_contours || r13_copyAnchors) && r13_glyph['anchors']) {
+            _r13_t13 = 'anchors';
+            _r13_t14 = {};
+            _r13_t15 = r13_glyph['anchors'];
+            _r13_t16 = Object['keys'](r13_glyph['anchors']);
+            return _r13_t4[_r13_t13] = function (r17_a, r17_anchors, r17_keys) {
+                var r17_a, r17_anchors, r17_keys, r17_k, _r17_t0, _r17_t1, _r17_t2;
+                _r17_t0 = r17_keys;
+                _r17_t1 = _r17_t0['length'];
+                _r17_t2 = 0;
+                for (; _r17_t2 < _r17_t1; _r17_t2 = _r17_t2 + 1) {
+                    r17_k = _r17_t0[_r17_t2];
+                    r17_a[r17_k] = r17_anchors[r17_k];
                 }
-                return r16_a;
-            }(_r12_t14, _r12_t15, _r12_t16);
+                return r17_a;
+            }(_r13_t14, _r13_t15, _r13_t16);
         } else
             return void 0;
     };
-    r0_Glyph['prototype']['create-stroke'] = function _r0_t10() {
-        var r18_s, _r18_t0;
-        _r18_t0 = this;
-        r18_s = new r0_Stroke();
-        r18_s['gizmo'] = Object['create'](_r18_t0['gizmo']);
-        return r18_s;
-    };
-    r0_Glyph['prototype']['set-anchor'] = function _r0_t11(r19_id, r19_type, r19_x, r19_y, r19_mbx, r19_mby) {
-        var r19_id, r19_type, r19_x, r19_y, r19_mbx, r19_mby, r19_anchorpoint, r19_markbasepoint, _r19_t0, _r19_t1;
+    r0_Glyph['prototype']['create-stroke'] = function _r0_t11() {
+        var r19_s, _r19_t0;
         _r19_t0 = this;
-        r19_anchorpoint = r0_tp(_r19_t0['gizmo'], {
-            'x': r19_x,
-            'y': r19_y
+        r19_s = new r0_Stroke();
+        r19_s['gizmo'] = Object['create'](_r19_t0['gizmo']);
+        return r19_s;
+    };
+    r0_Glyph['prototype']['set-anchor'] = function _r0_t12(r20_id, r20_type, r20_x, r20_y, r20_mbx, r20_mby) {
+        var r20_id, r20_type, r20_x, r20_y, r20_mbx, r20_mby, r20_anchorpoint, r20_markbasepoint, _r20_t0, _r20_t1;
+        _r20_t0 = this;
+        r20_anchorpoint = r0_tp(_r20_t0['gizmo'], {
+            'x': r20_x,
+            'y': r20_y
         });
-        if (r19_mbx !== void 0 && r19_mby !== void 0)
-            _r19_t1 = r0_tp(_r19_t0['gizmo'], {
-                'x': r19_mbx,
-                'y': r19_mby
+        if (r20_mbx !== void 0 && r20_mby !== void 0)
+            _r20_t1 = r0_tp(_r20_t0['gizmo'], {
+                'x': r20_mbx,
+                'y': r20_mby
             });
         else
-            _r19_t1 = {
+            _r20_t1 = {
                 'x': void 0,
                 'y': void 0
             };
-        r19_markbasepoint = _r19_t1;
-        return _r19_t0['anchors'][r19_id] = {
-            'x': r19_anchorpoint['x'],
-            'y': r19_anchorpoint['y'],
-            'type': r19_type,
-            'mbx': r19_markbasepoint['x'],
-            'mby': r19_markbasepoint['y']
+        r20_markbasepoint = _r20_t1;
+        return _r20_t0['anchors'][r20_id] = {
+            'x': r20_anchorpoint['x'],
+            'y': r20_anchorpoint['y'],
+            'type': r20_type,
+            'mbx': r20_markbasepoint['x'],
+            'mby': r20_markbasepoint['y']
         };
     };
     exports['Glyph'] = r0_Glyph;

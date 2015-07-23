@@ -1,0 +1,50 @@
+### Automatic build accented letters
+
+define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
+
+foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
+	local str : String.fromCharCode code
+	local nfd : str.normalize 'NFD'
+	if [nfd.length === 2] : begin {
+		local base unicodeGlyphs`[nfd.charCodeAt 0]
+		local mark unicodeGlyphs`[nfd.charCodeAt 1]
+		
+		if [base === glyphs.i && [isAboveMark mark]] : base = glyphs.dotlessi
+		if [base === glyphs.j && [isAboveMark mark]] : base = glyphs.dotlessj
+		
+		if [base && mark] : create-glyph [base.name + '_' + mark.name] : glyph-construction {
+			assign-unicode code
+			include base true
+			include mark
+		}
+	}
+}
+
+create-glyph 'grave' : glyph-construction {
+	assign-unicode '`'
+	include glyphs.space BASE
+	include glyphs.graveAbove
+}
+create-glyph 'acute' : glyph-construction {
+	assign-unicode 0xB4
+	include glyphs.space BASE
+	include glyphs.acuteAbove
+}
+create-glyph 'asciicircum' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0x5E
+	include glyphs.space BASE
+	include glyphs.circumflexAbove
+}
+create-glyph 'asciitilde' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '~'
+	include glyphs.space BASE
+	include glyphs.tildeAbove
+}
+create-glyph 'latin1dieresis' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xA8
+	include glyphs.space BASE
+	include glyphs.dieresisAbove
+}
