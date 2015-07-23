@@ -2037,7 +2037,7 @@
             r190_center = r4_MIDDLE - r4_TBALANCE - r4_HALFSTROKE;
             r190_hookx = r190_center + (r4_WIDTH - r4_SB * 2) * 0.78 - r4_OXHOOK + r4_TAILADJX * r4_globalTransform['yx'];
             r190_turn = r0_mix(r190_center, r190_hookx, 0.5 + r4_globalTransform['yx'] * 0.5);
-            r190_smb = r190_turn - r190_center;
+            r190_smb = (r190_turn - r190_center) * 1.1;
             r190_include(r190_xn$createstroke$7Hrq()['start-from'](r190_center, r4_CAP)['set-width'](r4_STROKE, 0)['heads-to'](r4_DOWNWARD)['line-to'](r190_center, r190_smb)['arc-vh-to'](r190_turn, r4_O)['curve-to'](r190_turn + (r4_KAPPA_HOOK + r4_TAILADJKAPPA * r4_globalTransform['yx'] + 0.1) * (r190_hookx - r190_turn), r4_O, r190_hookx, r4_HOOK - r4_TAILADJY * r4_globalTransform['yx']));
             r190_include(r190_xn$createstroke$7Hrq()['start-from'](r190_center + r4_HALFSTROKE - r4_LONGJUT + r4_TBALANCE2, r4_XH)['heads-to'](r4_RIGHTWARD)['set-width'](0, r4_STROKE)['line-to'](r190_center + r4_HALFSTROKE + r4_LONGJUT + r4_TBALANCE2, r4_XH)['heads-to'](r4_RIGHTWARD));
             return void 0;
