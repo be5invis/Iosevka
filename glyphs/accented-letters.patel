@@ -5,17 +5,24 @@ define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.a
 foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	local str : String.fromCharCode code
 	local nfd : str.normalize 'NFD'
-	if [nfd.length === 2] : begin {
-		local base unicodeGlyphs`[nfd.charCodeAt 0]
-		local mark unicodeGlyphs`[nfd.charCodeAt 1]
-		
-		if [base === glyphs.i && [isAboveMark mark]] : base = glyphs.dotlessi
-		if [base === glyphs.j && [isAboveMark mark]] : base = glyphs.dotlessj
-		
-		if [base && mark] : create-glyph [base.name + '_' + mark.name] : glyph-construction {
-			assign-unicode code
-			include base true
-			include mark
+	if [nfd.length > 1] : begin {
+		local parts ()
+		local allFound true
+		local hasMarkAbove false
+		foreach j [range 0 nfd.length] : begin {
+			set parts`j unicodeGlyphs`[nfd.charCodeAt j]
+			if [not parts`j] : set allFound false
+			if [isAboveMark parts`j] : set hasMarkAbove true
+		}
+		if allFound : begin {
+			if [parts.0 === glyphs.i && hasMarkAbove] : parts.0 = glyphs.dotlessi
+			if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
+			
+			create-glyph [parts.map [[part] -> part.name] :.join '_'] : glyph-construction {
+				assign-unicode code
+				include parts.0 BASE
+				foreach part [items-of : parts.slice 1] : include part
+			}
 		}
 	}
 }

@@ -24,7 +24,7 @@
         'kappa': 0.515,
         'italicangle': 0,
         'longjut': 175,
-        'accent': 175,
+        'accent': 160,
         'accentx': 200,
         'tbalance': 70,
         'tbalance2': 30,

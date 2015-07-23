@@ -2,13 +2,20 @@
 ### Combining marks
 
 local markExtend [ACCENTX * 0.5]
-local markHalfStroke : 0.5 * [Math.min STROKE [ACCENT * 0.6]]
-local markFine : markHalfStroke * 0.8
+local markStress : 0.5 * [Math.min STROKE [ACCENT * 0.6]]
+local markFine : markStress * 0.8
+local markHalfStroke : mix markFine markStress 0.5
 local markMiddle [-MIDDLE]
-local markDotsRadius : DOTRADIUS * markHalfStroke / HALFSTROKE
+local markDotsRadius : DOTRADIUS * markStress / HALFSTROKE
 
-local aboveMarkTop [XH + ACCENT * 1.6 - HALFSTROKE]
-local aboveMarkBot [XH + ACCENT - STROKE]
+local aboveMarkTop [XH + ACCENT * 1.375]
+local aboveMarkBot [XH + ACCENT * 0.35]
+
+local belowMarkBot [0 - ACCENT * 1.375]
+local belowMarkTop [0 - ACCENT * 0.35]
+
+
+### Above marks
 
 create-glyph 'dotAbove' : glyph-construction {
 	set-width 0
@@ -46,10 +53,10 @@ create-glyph 'graveAbove' : glyph-construction {
 	set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 	
 	put-shapes : create-stroke
-		:.start-from [markMiddle + markHalfStroke] aboveMarkBot
+		:.start-from [markMiddle + markStress] aboveMarkBot
 		:.set-width  markFine markFine
 		:.line-to    [markMiddle - markExtend] aboveMarkTop
-		:.set-width  markHalfStroke markHalfStroke
+		:.set-width  markStress markStress
 		:.to-outline
 }
 create-glyph 'acuteAbove' : glyph-construction {
@@ -58,10 +65,10 @@ create-glyph 'acuteAbove' : glyph-construction {
 	set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 	
 	put-shapes : create-stroke
-		:.start-from [markMiddle - markHalfStroke] aboveMarkBot
+		:.start-from [markMiddle - markStress] aboveMarkBot
 		:.set-width  markFine markFine
 		:.line-to    [markMiddle + markExtend] aboveMarkTop
-		:.set-width  markHalfStroke markHalfStroke
+		:.set-width  markStress markStress
 		:.to-outline
 }
 create-glyph 'circumflexAbove' : glyph-construction {
@@ -70,18 +77,37 @@ create-glyph 'circumflexAbove' : glyph-construction {
 	set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 	
 	put-shapes : create-stroke
-		:.start-from [markMiddle - markExtend - markHalfStroke] aboveMarkBot
-		:.set-width  markHalfStroke markHalfStroke
+		:.start-from [markMiddle - markExtend - markStress] [aboveMarkBot + markStress - markFine]
+		:.set-width  markStress markStress
 		:.line-to    markMiddle [aboveMarkTop + markFine * 0.7]
 		:.heads-to   UPWARD
-		:.to-outline
+		:.to-outline 0 0 1
 	
 	put-shapes : create-stroke
-		:.start-from [markMiddle + markExtend + markHalfStroke] aboveMarkBot
-		:.set-width  markHalfStroke markHalfStroke
+		:.start-from [markMiddle + markExtend + markStress] [aboveMarkBot + markStress - markFine]
+		:.set-width  markStress markStress
 		:.line-to    markMiddle [aboveMarkTop + markFine * 0.7]
 		:.heads-to   UPWARD
-		:.to-outline
+		:.to-outline 0 0 1
+}
+create-glyph 'caronAbove' : glyph-construction {
+	set-width 0
+	assign-unicode 0x30c
+	set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+	
+	put-shapes : create-stroke
+		:.start-from [markMiddle - markExtend - markStress] aboveMarkTop
+		:.set-width  markStress markStress
+		:.line-to    markMiddle [aboveMarkBot - markFine * 1.7 + markStress]
+		:.heads-to   DOWNWARD
+		:.to-outline 0 0 1
+	
+	put-shapes : create-stroke
+		:.start-from [markMiddle + markExtend + markStress] aboveMarkTop
+		:.set-width  markStress markStress
+		:.line-to    markMiddle [aboveMarkBot - markFine * 1.7 + markStress]
+		:.heads-to   DOWNWARD
+		:.to-outline 0 0 1
 }
 create-glyph 'tildeAbove' : glyph-construction {
 	set-width 0
@@ -96,13 +122,13 @@ create-glyph 'tildeAbove' : glyph-construction {
 	local top : ttop + [markFine * 2]
 	local bot : tbot - [markFine * 2]
 	
-	local tildeWave [linreg 40 1.45 52 1.33 markHalfStroke]
+	local tildeWave [linreg 40 1.52 52 1.33 markStress]
 	local tildeWaveX 0.52
 	local tildeWaveEnd 0
 	
 	put-shapes : create-stroke
 		:.start-from leftEnd [mix tbot ttop tildeWaveEnd]
-		:.set-width markHalfStroke markHalfStroke
+		:.set-width markStress markStress
 		:.cubic-to   [mix leftEnd rightEnd tildeWaveX] [mix bot top tildeWave] [mix leftEnd rightEnd [1 - tildeWaveX]] [mix bot top [1 - tildeWave]] rightEnd [mix tbot ttop [1 - tildeWaveEnd]]
 		:.to-outline 0 0 11
 }
@@ -115,10 +141,21 @@ create-glyph 'macronAbove' : glyph-construction {
 	local rightEnd [markMiddle + markExtend * 1.5]
 	
 	put-shapes : create-stroke
-		:.start-from leftEnd [mix aboveMarkTop aboveMarkBot 0.5]
+		:.start-from leftEnd [aboveMarkTop - DOTRADIUS]
 		:.set-width  markHalfStroke markHalfStroke
 		:.heads-to   RIGHTWARD
-		:.line-to    rightEnd [mix aboveMarkTop aboveMarkBot 0.5]
+		:.line-to    rightEnd [aboveMarkTop - DOTRADIUS]
 		:.heads-to   RIGHTWARD
 		:.to-outline
+}
+
+
+### Below marks
+create-glyph 'dotBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x323
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	put-shapes : list {
+		Ring [0 - ACCENT + DOTRADIUS] [0 - ACCENT - DOTRADIUS] [markMiddle - DOTRADIUS] [markMiddle + DOTRADIUS]
+	}
 }
