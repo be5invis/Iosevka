@@ -41,11 +41,12 @@
     r0_bold['stroke'] = 120;
     r0_bold['dotsize'] = 160;
     r0_bold['periodsize'] = 180;
+    r0_bold['ebarpos'] = 0.4;
     r0_bold['barpos'] = 0.42;
     r0_bold['hook'] = 150;
     r0_bold['ahook'] = 100;
     r0_bold['smooth'] = 200;
-    r0_bold['oxhook'] = -10;
+    r0_bold['oxhook'] = -8;
     r0_bold['kappa_hook'] = 0.7;
     r0_bold['kappa_ahook'] = 0.6;
     r0_bold['jbalance'] = 60;
