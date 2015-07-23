@@ -33,7 +33,7 @@ $(SUPPORT_FILES) :
 .buildglyphs.all.patel : buildglyphs-intro.patel $(GLYPH_SEGMENTS) buildglyphs-final.patel
 	cat $^ > .buildglyphs.all.patel
 buildglyphs.js : .buildglyphs.all.patel
-	patel-c --strict $^ | uglifyjs -b -c -m -o $@
+	patel-c --strict $^ -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
 parameters.js : parameters.patel
