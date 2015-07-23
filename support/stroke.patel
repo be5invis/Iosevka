@@ -4,6 +4,8 @@ define Bezier [require 'bezier-js']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 
+define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
+
 define [xs-array low high] : begin {
 	local a ()
 	for [local j [low - 1]] [j <= high] [inc j] : a.push j
@@ -22,7 +24,8 @@ define COBKAPPA : COKAPPA - 0.1
 
 define [Stroke] : begin {
 	this.points = ()
-	set this.gizmo (
+	this.samples = SAMPLES
+	this.gizmo = (
 		.xx 1
 		.yx 0
 		.xy 0
@@ -31,6 +34,9 @@ define [Stroke] : begin {
 		.y 0
 	)
 	return this
+}
+define Stroke.is : object {
+	unapply : function [obj] : if [obj <@ Stroke] (obj) null
 }
 define [Stroke.prototype.set-transform t] : begin {
 	this.gizmo = t
@@ -84,7 +90,10 @@ define [Stroke.prototype.arc-hv-to x y] : begin {
 	this.cubic-to [last.x + BKAPPA * [x - last.x]] last.y x [y + BKAPPA * [last.y - y]] x y
 	return this
 }
-
+define [Stroke.prototype.set-samples samples] : begin {
+	this.samples = samples
+	return this
+}
 
 define [dforward p0 p1 p2 p3] (
 	.x [p0.x + [[-11] / 6 * p0.x + 3 * p1.x - 3 / 2 * p2.x + p3.x / 3] / TINY * LITTLE]
@@ -108,10 +117,8 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	local pdxs (0)
 	local pdys (0)
 	
-	local samples : _samples || SAMPLES
-	
+	local samples : fallback _samples this.samples SAMPLES
 	local shapes ()
-	
 	local subSegments ()
 	
 	local p0 this.points.0

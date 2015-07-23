@@ -87,7 +87,11 @@ define [Glyph.prototype.put-shapes contours] : begin {
 	return this
 }
 define [Glyph.prototype.include glyph copyAnchors] : begin {
-	local contours glyph.contours
+	local contours : match glyph {
+		(:: contours)    contours
+		[Stroke.is it] : glyph.to-outline 0 0
+		otherwise        glyph.contours
+	}
 	local shiftx 0
 	local shifty 0
 	if [this.anchors && glyph.anchors] : foreach markid [items-of [Object.keys this.anchors]] : begin {
@@ -110,8 +114,14 @@ define [Glyph.prototype.include glyph copyAnchors] : begin {
 		}
 	}
 	if contours : begin {
-		local shiftedshape : contours.map [[contour] -> [contour.map [[point] -> (.x [point.x + shiftx] .y [point.y + shifty] .onCurve point.onCurve .cubic point.cubic)]]]
-		this.put-shapes shiftedshape
+		this.put-shapes : contours.map : function [contour] {
+			contour.map : function [point] : object {
+				x [point.x + shiftx]
+				y [point.y + shifty]
+				onCurve point.onCurve
+				cubic point.cubic
+			}
+		}
 	}
 	if [[[not contours] || copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
 		foreach k [items-of keys] [set a`k anchors`k]
