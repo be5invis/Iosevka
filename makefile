@@ -3,26 +3,26 @@ GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-
 OBJDIR = build
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
-STEP0   = $(subst .ttf,.0.ttf,$(TARGETS))
-STEP1   = $(subst .ttf,.1.ttf,$(TARGETS))
+STEP0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
+STEP1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
 fonts : update $(TARGETS)
 	
-$(OBJDIR)/iosevka-regular.0.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) $(OBJDIR)
 	node generate regular $@
-$(OBJDIR)/iosevka-bold.0.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) $(OBJDIR)
 	node generate bold $@
-$(OBJDIR)/iosevka-italic.0.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) $(OBJDIR)
 	node generate italic $@
-$(OBJDIR)/iosevka-bolditalic.0.ttf : $(FILES) $(OBJDIR)
+$(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
 	node generate bolditalic $@
 
-$(STEP1) : %.1.ttf : %.0.ttf
+$(STEP1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf
 	fontforge -script final.pe $< $@
 
-$(TARGETS) : %.ttf : %.1.ttf
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass1-%.ttf
 	ttfautohint $< $@
 
 update : $(FILES)
