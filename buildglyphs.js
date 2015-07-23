@@ -713,7 +713,7 @@
             r55_xn$setanchor$9Jrj('above', r1_MARK, r1_markMiddle, r1_XH, r1_markMiddle, r1_aboveMarkTop);
             r55_leftEnd = r1_markMiddle - r1_markExtend * 1.5;
             r55_rightEnd = r1_markMiddle + r1_markExtend * 1.5;
-            r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r55_leftEnd, r1_mix(r1_aboveMarkTop, r1_aboveMarkBot, 0.6))['set-width'](r1_markHalfStroke, r1_markHalfStroke)['heads-to'](r1_RIGHTWARD)['line-to'](r55_rightEnd, r1_mix(r1_aboveMarkTop, r1_aboveMarkBot, 0.6))['heads-to'](r1_RIGHTWARD)['to-outline']());
+            r55_xn$putshapes$9Jrj(r55_xn$createstroke$7Hrq()['start-from'](r55_leftEnd, r1_mix(r1_aboveMarkTop, r1_aboveMarkBot, 0.5))['set-width'](r1_markHalfStroke, r1_markHalfStroke)['heads-to'](r1_RIGHTWARD)['line-to'](r55_rightEnd, r1_mix(r1_aboveMarkTop, r1_aboveMarkBot, 0.5))['heads-to'](r1_RIGHTWARD)['to-outline']());
             return void 0;
         });
         r1_xn$createglyph$7Hrq('A', function _r1_t50() {

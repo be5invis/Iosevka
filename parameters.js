@@ -32,7 +32,7 @@
         'family': 'Iosevka',
         'style': 'Regular',
         'weight': 400,
-        'version': 'r0.0.1',
+        'version': 'r0.0.2',
         'variantSelector': {},
         'copyright': 'Copyright (c) 2015 Belleve Invis.'
     };
