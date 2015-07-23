@@ -1911,14 +1911,14 @@
             r175_xn$assignunicode$7Hrq('g');
             r175_include(r4_pMarks);
             r175_xn$putshapes$9Jrj([
-                r4_Ring(r4_XO, r4_XH * r4_GBARPOS, r4_SB * 1.1, r4_RIGHTSB - 0.25 * r4_SB, r4_SMALLSMOOTH),
-                r4_Ring(r4_XO - r4_STROKE, r4_XH * r4_GBARPOS + r4_STROKE, r4_SB * 1.1 + r4_STROKE, r4_RIGHTSB - 0.25 * r4_SB - r4_STROKE, r4_SMALLSMOOTH - r4_STROKE)
+                r4_Ring(r4_XO, r4_XH * r4_GBARPOS, r4_SB, r4_RIGHTSB - 0.3 * r4_SB, r4_SMALLSMOOTH),
+                r4_Ring(r4_XO - r4_STROKE, r4_XH * r4_GBARPOS + r4_STROKE, r4_SB + r4_STROKE, r4_RIGHTSB - 0.3 * r4_SB - r4_STROKE, r4_SMALLSMOOTH - r4_STROKE)
             ]);
             r175_xn$reverselast$3qIs();
-            r175_grightx = r4_RIGHTSB - r4_O * 4;
-            r175_xn$putshapes$9Jrj(r175_xn$createstroke$7Hrq()['start-from'](r4_MIDDLE, r4_XH * r4_GBARPOS)['set-width'](0, r4_STROKE * 0.75)['arc-hv-to'](r4_SB * 1.5 + r4_STROKE, (r4_O - r4_DESCENDER * 0.85 + r4_XH * r4_GBARPOS) * 0.47)['set-width'](0, r4_STROKE)['arc-vh-to'](r4_MIDDLE + r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['line-to'](r4_MIDDLE - r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['arc-hv-to'](r175_grightx, -r4_STROKE * r4_globalTransform['yx'] * 2)['arc-vh-to'](r0_mix(r4_SB, r175_grightx, 0.5), r4_DESCENDER + r4_O)['arc-hv-to'](r4_SB + r4_O, r4_DESCENDER * 0.1)['arc-vh-to'](r4_MIDDLE + r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['to-outline']());
-            r175_xn$startfrom$1aao(r4_RIGHTSB + 0.5 * r4_SB, r4_XH);
-            r175_xn$lineto$5sIl(r4_RIGHTSB + 0.5 * r4_SB, r4_XH - r4_STROKE);
+            r175_grightx = r4_RIGHTSB + r4_SB * 0.1 - r4_O;
+            r175_xn$putshapes$9Jrj(r175_xn$createstroke$7Hrq()['start-from'](r4_MIDDLE, r4_XH * r4_GBARPOS)['set-width'](0, r4_STROKE * 0.75)['arc-hv-to'](r4_SB * 1.25 + r4_STROKE, (r4_O - r4_DESCENDER * 0.85 + r4_XH * r4_GBARPOS) * 0.5)['set-width'](0, r4_STROKE)['arc-vh-to'](r4_MIDDLE + r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['line-to'](r4_MIDDLE - r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['arc-hv-to'](r175_grightx, -r4_STROKE * r4_globalTransform['yx'] * 2)['arc-vh-to'](r0_mix(r4_SB, r175_grightx, 0.5), r4_DESCENDER + r4_O)['arc-hv-to'](r4_SB * 0.8 + r4_O, r4_DESCENDER * 0.1)['arc-vh-to'](r4_MIDDLE + r4_DESCENDER * 0.15, r4_O - r4_DESCENDER * 0.85)['to-outline']());
+            r175_xn$startfrom$1aao(r4_RIGHTSB + 0.25 * r4_SB, r4_XH);
+            r175_xn$lineto$5sIl(r4_RIGHTSB + 0.25 * r4_SB, r4_XH - r4_STROKE);
             r175_xn$lineto$5sIl(r4_MIDDLE, r4_XH - r4_STROKE - r4_O);
             r175_xn$lineto$5sIl(r4_MIDDLE, r4_XH);
             return void 0;
