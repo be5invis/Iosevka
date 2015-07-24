@@ -216,23 +216,30 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	}
 
 	shapes.push : left.concat [right.reverse]
-	
-	# reduce linear oncurve points
-	foreach shape [items-of shapes] : for [local j 0] [j < shape.length - 1] [inc j] : begin {
-		local p0 shape`j
-		local still true
-		for [local k [j + 1]] [still && k < shape.length - 1] [inc k] : begin {
-			local p1 shape`k
-			local p2 shape`[k + 1]
-			if [p0.onCurve && p1.onCurve && p2.onCurve && [not [nonlinear p0 p1 p2]]] [then {
-				set p1.removable true
-			}] [else {
-				set still false
-			}]
+
+	return : shapes.map : function [shape] : begin {
+		for [local j 1] [j < shape.length - 1] [inc j] : begin {
+			local p0 shape.[j - 1]
+			local p1 shape.(j)
+			if [p0.onCurve && p1.onCurve && p0.x === p1.x && p0.y === p1.y] : set p1.removable true
 		}
-		set j [k - 1]
+		set shape : shape.filter : function [point] [point && [not point.removable]]
+		for [local j 0] [j < shape.length - 1] [inc j] : begin {
+			local p0 shape`j
+			local still true
+			for [local k [j + 1]] [still && k < shape.length - 1] [inc k] : begin {
+				local p1 shape`k
+				local p2 shape`[k + 1]
+				if [p0.onCurve && p1.onCurve && p2.onCurve && [not [nonlinear p0 p1 p2]]] [then {
+					set p1.removable true
+				}] [else {
+					set still false
+				}]
+			}
+			set j [k - 1]
+		}
+		return : shape.filter : function [point] [point && [not point.removable]]
 	}
-	return : shapes.map : lambda shape : shape.filter [[x] -> [x && [not x.removable]]]
 }
 
 exports.Stroke = Stroke
