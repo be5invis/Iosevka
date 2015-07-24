@@ -13,7 +13,7 @@ define [xs-array low high] : begin {
 }
 define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
-define SAMPLES 6
+define SAMPLES 5
 define TINY 0.0001
 define LITTLE 0.01
 define CUTOFF 2000
@@ -104,7 +104,11 @@ define [dbackward p0 p1 p2 p3] (
 	.y [p0.y + [11 / 6 * p0.y - 3 * p1.y + 3 / 2 * p2.y - p3.y / 3] / TINY * LITTLE]
 )
 define [nonlinear a b c] : [Math.abs [[c.y - a.y] * [b.x - a.x] - [c.x - a.x] * [b.y - a.y]]] > TINY
-
+define [midclose a b c] : begin {
+	local xm : [a.x + c.x] / 2
+	local ym : [a.y + c.y] / 2
+	return : [Math.abs [b.x - xm]] < 0.5 && [Math.abs [b.y - ym]] < 0.5
+}
 define [computeOffsetPoint curve t j foffset fpdx fpdy] : begin {
 	local onpoint : curve.compute [t - j]
 	local normal : curve.normal [t - j]
@@ -218,11 +222,13 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	shapes.push : left.concat [right.reverse]
 
 	return : shapes.map : function [shape] : begin {
-		for [local j 1] [j < shape.length - 1] [inc j] : begin {
-			local p0 shape.[j - 1]
-			local p1 shape.(j)
+		# Remove duplicate points
+		for [local j] [j < shape.length - 1] [inc j] : begin {
+			local p0 shape.(j)
+			local p1 shape.[j + 1]
 			if [p0.onCurve && p1.onCurve && p0.x === p1.x && p0.y === p1.y] : set p1.removable true
 		}
+		# Remove colinear oncurve points
 		set shape : shape.filter : function [point] [point && [not point.removable]]
 		for [local j 0] [j < shape.length - 1] [inc j] : begin {
 			local p0 shape`j
@@ -238,7 +244,19 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			}
 			set j [k - 1]
 		}
-		return : shape.filter : function [point] [point && [not point.removable]]
+		set shape : shape.filter : function [point] [point && [not point.removable]]
+		# Remove removable midpoints
+		for [local j 1] [j < shape.length - 2] [inc j] : begin {
+			local p0 shape`j
+			local p1 shape`[j + 1]
+			local p2 shape`[j + 2]
+			if [[not p0.onCurve] && p1.onCurve && [not p2.onCurve] && [midclose p0 p1 p2]] : begin {
+				set p1.removable true
+				set j [j + 1]
+			}
+		}
+		set shape : shape.filter : function [point] [point && [not point.removable]]
+		return shape
 	}
 }
 

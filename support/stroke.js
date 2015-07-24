@@ -1,5 +1,5 @@
 ﻿{
-    var r0_smooth, r0_intersection, r0_Bezier, r0_tp, r0_utp, r0_fallback, r0_xn$xsarray$3cah, r0_xn$ysarray$3cah, r0_SAMPLES, r0_TINY, r0_LITTLE, r0_CUTOFF, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_Stroke, r0_dforward, r0_dbackward, r0_nonlinear, r0_computeOffsetPoint, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20;
+    var r0_smooth, r0_intersection, r0_Bezier, r0_tp, r0_utp, r0_fallback, r0_xn$xsarray$3cah, r0_xn$ysarray$3cah, r0_SAMPLES, r0_TINY, r0_LITTLE, r0_CUTOFF, r0_KAPPA, r0_COKAPPA, r0_BKAPPA, r0_COBKAPPA, r0_Stroke, r0_dforward, r0_dbackward, r0_nonlinear, r0_midclose, r0_computeOffsetPoint, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16, _r0_t17, _r0_t18, _r0_t19, _r0_t20, _r0_t21;
     r0_smooth = require('./monotonic-interpolate')['createInterpolant'];
     r0_intersection = require('./intersection')['intersection'];
     r0_Bezier = require('bezier-js');
@@ -32,7 +32,7 @@
         var r3_a, _r3_t0, _r3_t1;
         return [r3_a[0]]['concat'](r3_a['concat']([r3_a[r3_a['length'] - 1]]));
     };
-    r0_SAMPLES = 6;
+    r0_SAMPLES = 5;
     r0_TINY = 0.0001;
     r0_LITTLE = 0.01;
     r0_CUTOFF = 2000;
@@ -190,287 +190,308 @@
         var r19_a, r19_b, r19_c, _r19_t0, _r19_t1;
         return Math['abs']((r19_c['y'] - r19_a['y']) * (r19_b['x'] - r19_a['x']) - (r19_c['x'] - r19_a['x']) * (r19_b['y'] - r19_a['y'])) > r0_TINY;
     };
-    r0_computeOffsetPoint = function _r0_t19(r20_curve, r20_t, r20_j, r20_foffset, r20_fpdx, r20_fpdy) {
-        var r20_curve, r20_t, r20_j, r20_foffset, r20_fpdx, r20_fpdy, r20_onpoint, r20_normal, _r20_t0, _r20_t1;
-        r20_onpoint = r20_curve['compute'](r20_t - r20_j);
-        r20_normal = r20_curve['normal'](r20_t - r20_j);
+    r0_midclose = function _r0_t19(r20_a, r20_b, r20_c) {
+        var r20_a, r20_b, r20_c, r20_xm, r20_ym, _r20_t0, _r20_t1;
+        r20_xm = (r20_a['x'] + r20_c['x']) / 2;
+        r20_ym = (r20_a['y'] + r20_c['y']) / 2;
+        return Math['abs'](r20_b['x'] - r20_xm) < 0.5 && Math['abs'](r20_b['y'] - r20_ym) < 0.5;
+    };
+    r0_computeOffsetPoint = function _r0_t20(r21_curve, r21_t, r21_j, r21_foffset, r21_fpdx, r21_fpdy) {
+        var r21_curve, r21_t, r21_j, r21_foffset, r21_fpdx, r21_fpdy, r21_onpoint, r21_normal, _r21_t0, _r21_t1;
+        r21_onpoint = r21_curve['compute'](r21_t - r21_j);
+        r21_normal = r21_curve['normal'](r21_t - r21_j);
         return {
-            'x': r20_onpoint['x'] + r20_foffset(r20_t) * (r20_normal['x'] + r20_fpdx(r20_t)),
-            'y': r20_onpoint['y'] + r20_foffset(r20_t) * (r20_normal['y'] + r20_fpdy(r20_t))
+            'x': r21_onpoint['x'] + r21_foffset(r21_t) * (r21_normal['x'] + r21_fpdx(r21_t)),
+            'y': r21_onpoint['y'] + r21_foffset(r21_t) * (r21_normal['y'] + r21_fpdy(r21_t))
         };
     };
-    r0_Stroke['prototype']['to-outline'] = function _r0_t20(r21_d1, r21_d2, r21__samples, r21_straight) {
-        var r21_d1, r21_d2, r21__samples, r21_straight, r21_d1s, r21_d2s, r21_pdxs, r21_pdys, r21_samples, r21_shapes, r21_subSegments, r21_p0, r21_j, r21_p1, r21_p2, r21_seg, r21_normalpt, r21_p3, r21_f1, r21_f2, r21_fpdx, r21_fpdy, r21_left, r21_right, r21_curve, r21_sample, r21_t, r21_tn, r21_lthis, r21_rthis, r21_lnext, r21_rnext, r21_lnthis1, r21_rnthis1, r21_lnnext1, r21_rnnext1, r21_lnthis2, r21_rnthis2, r21_lnnext2, r21_rnnext2, r21_lnthis3, r21_rnthis3, r21_lnnext3, r21_rnnext3, r21_dlthis, r21_drthis, r21_dlnext, r21_drnext, r21_il, r21_ir, r21_last, _r21_t0, _r21_t1, _r21_t2, _r21_t3, _r21_t4, _r21_t5, _r21_t6, _r21_t7, _r21_t8, _r21_t9, _r21_t10, _r21_t11, _r21_t12, _r21_t13, _r21_t14, _r21_t15, _r21_t16, _r21_t17, _r21_t18, _r21_t19, _r21_t20, _r21_t21, _r21_t22, _r21_t23, _r21_t24, _r21_t25, _r21_t26, _r21_t27, _r21_t28, _r21_t29, _r21_t30, _r21_t31, _r21_t32, _r21_t33, _r21_t34, _r21_t35, _r21_t36, _r21_t37, _r21_t38, _r21_t39, _r21_t40, _r21_t41, _r21_t42, _r21_t43, _r21_t44, _r21_t45, _r21_t46, _r21_t47, _r21_t48, _r21_t49, _r21_t50, _r21_t51, _r21_t52, _r21_t53, _r21_t54, _r21_t55, _r21_t56, _r21_t57, _r21_t58, _r21_t59;
-        _r21_t2 = this;
-        if (_r21_t2['points'][0]['d1'] >= 0)
-            _r21_t4 = _r21_t2['points'][0]['d1'];
+    r0_Stroke['prototype']['to-outline'] = function _r0_t21(r22_d1, r22_d2, r22__samples, r22_straight) {
+        var r22_d1, r22_d2, r22__samples, r22_straight, r22_d1s, r22_d2s, r22_pdxs, r22_pdys, r22_samples, r22_shapes, r22_subSegments, r22_p0, r22_j, r22_p1, r22_p2, r22_seg, r22_normalpt, r22_p3, r22_f1, r22_f2, r22_fpdx, r22_fpdy, r22_left, r22_right, r22_curve, r22_sample, r22_t, r22_tn, r22_lthis, r22_rthis, r22_lnext, r22_rnext, r22_lnthis1, r22_rnthis1, r22_lnnext1, r22_rnnext1, r22_lnthis2, r22_rnthis2, r22_lnnext2, r22_rnnext2, r22_lnthis3, r22_rnthis3, r22_lnnext3, r22_rnnext3, r22_dlthis, r22_drthis, r22_dlnext, r22_drnext, r22_il, r22_ir, r22_last, _r22_t0, _r22_t1, _r22_t2, _r22_t3, _r22_t4, _r22_t5, _r22_t6, _r22_t7, _r22_t8, _r22_t9, _r22_t10, _r22_t11, _r22_t12, _r22_t13, _r22_t14, _r22_t15, _r22_t16, _r22_t17, _r22_t18, _r22_t19, _r22_t20, _r22_t21, _r22_t22, _r22_t23, _r22_t24, _r22_t25, _r22_t26, _r22_t27, _r22_t28, _r22_t29, _r22_t30, _r22_t31, _r22_t32, _r22_t33, _r22_t34, _r22_t35, _r22_t36, _r22_t37, _r22_t38, _r22_t39, _r22_t40, _r22_t41, _r22_t42, _r22_t43, _r22_t44, _r22_t45, _r22_t46, _r22_t47, _r22_t48, _r22_t49, _r22_t50, _r22_t51, _r22_t52, _r22_t53, _r22_t54, _r22_t55, _r22_t56, _r22_t57, _r22_t58, _r22_t59;
+        _r22_t2 = this;
+        if (_r22_t2['points'][0]['d1'] >= 0)
+            _r22_t4 = _r22_t2['points'][0]['d1'];
         else
-            _r21_t4 = r21_d1;
-        _r21_t5 = r21_d1 = _r21_t4;
-        r21_d1s = [_r21_t5];
-        if (_r21_t2['points'][0]['d2'] >= 0)
-            _r21_t6 = _r21_t2['points'][0]['d2'];
+            _r22_t4 = r22_d1;
+        _r22_t5 = r22_d1 = _r22_t4;
+        r22_d1s = [_r22_t5];
+        if (_r22_t2['points'][0]['d2'] >= 0)
+            _r22_t6 = _r22_t2['points'][0]['d2'];
         else
-            _r21_t6 = r21_d2;
-        _r21_t7 = r21_d2 = _r21_t6;
-        r21_d2s = [_r21_t7];
-        r21_pdxs = [0];
-        r21_pdys = [0];
-        r21_samples = r0_fallback(r21__samples, _r21_t2['samples'], r0_SAMPLES);
-        r21_shapes = [];
-        r21_subSegments = [];
-        r21_p0 = _r21_t2['points'][0];
-        r21_j = 1;
-        for (; r21_j < this['points']['length']; r21_j = r21_j + 1) {
-            r21_p1 = _r21_t2['points'][r21_j];
-            if (r21_p1['onCurve']) {
-                r21_subSegments['push'](r21_seg = new r0_Bezier(r21_p0['x'], r21_p0['y'], (r21_p0['x'] + r21_p1['x']) / 2, (r21_p0['y'] + r21_p1['y']) / 2, r21_p1['x'], r21_p1['y']));
-                _r21_t8 = r21_d1s;
-                _r21_t9 = _r21_t8['push'];
-                if (r21_p1['d1'] >= 0)
-                    _r21_t10 = r21_p1['d1'];
+            _r22_t6 = r22_d2;
+        _r22_t7 = r22_d2 = _r22_t6;
+        r22_d2s = [_r22_t7];
+        r22_pdxs = [0];
+        r22_pdys = [0];
+        r22_samples = r0_fallback(r22__samples, _r22_t2['samples'], r0_SAMPLES);
+        r22_shapes = [];
+        r22_subSegments = [];
+        r22_p0 = _r22_t2['points'][0];
+        r22_j = 1;
+        for (; r22_j < this['points']['length']; r22_j = r22_j + 1) {
+            r22_p1 = _r22_t2['points'][r22_j];
+            if (r22_p1['onCurve']) {
+                r22_subSegments['push'](r22_seg = new r0_Bezier(r22_p0['x'], r22_p0['y'], (r22_p0['x'] + r22_p1['x']) / 2, (r22_p0['y'] + r22_p1['y']) / 2, r22_p1['x'], r22_p1['y']));
+                _r22_t8 = r22_d1s;
+                _r22_t9 = _r22_t8['push'];
+                if (r22_p1['d1'] >= 0)
+                    _r22_t10 = r22_p1['d1'];
                 else
-                    _r21_t10 = r21_d1;
-                _r21_t11 = r21_d1 = _r21_t10;
-                _r21_t9['call'](_r21_t8, _r21_t11);
-                _r21_t13 = r21_d2s;
-                _r21_t14 = _r21_t13['push'];
-                if (r21_p1['d2'] >= 0)
-                    _r21_t15 = r21_p1['d2'];
+                    _r22_t10 = r22_d1;
+                _r22_t11 = r22_d1 = _r22_t10;
+                _r22_t9['call'](_r22_t8, _r22_t11);
+                _r22_t13 = r22_d2s;
+                _r22_t14 = _r22_t13['push'];
+                if (r22_p1['d2'] >= 0)
+                    _r22_t15 = r22_p1['d2'];
                 else
-                    _r21_t15 = r21_d2;
-                _r21_t16 = r21_d2 = _r21_t15;
-                _r21_t14['call'](_r21_t13, _r21_t16);
-                r21_normalpt = r21_seg['normal'](1);
-                _r21_t30 = r21_pdxs;
-                _r21_t31 = _r21_t30['push'];
-                if (r21_p1['pdx'] !== void 0)
-                    _r21_t32 = r21_p1['pdx'] - r21_normalpt['x'];
+                    _r22_t15 = r22_d2;
+                _r22_t16 = r22_d2 = _r22_t15;
+                _r22_t14['call'](_r22_t13, _r22_t16);
+                r22_normalpt = r22_seg['normal'](1);
+                _r22_t30 = r22_pdxs;
+                _r22_t31 = _r22_t30['push'];
+                if (r22_p1['pdx'] !== void 0)
+                    _r22_t32 = r22_p1['pdx'] - r22_normalpt['x'];
                 else
-                    _r21_t32 = 0;
-                _r21_t31['call'](_r21_t30, _r21_t32);
-                _r21_t38 = r21_pdys;
-                _r21_t39 = _r21_t38['push'];
-                if (r21_p1['pdy'] !== void 0)
-                    _r21_t40 = r21_p1['pdy'] - r21_normalpt['y'];
+                    _r22_t32 = 0;
+                _r22_t31['call'](_r22_t30, _r22_t32);
+                _r22_t38 = r22_pdys;
+                _r22_t39 = _r22_t38['push'];
+                if (r22_p1['pdy'] !== void 0)
+                    _r22_t40 = r22_p1['pdy'] - r22_normalpt['y'];
                 else
-                    _r21_t40 = 0;
-                _r21_t39['call'](_r21_t38, _r21_t40);
-                r21_p0 = r21_p1;
-            } else if (r21_p1['cubic']) {
-                r21_p2 = _r21_t2['points'][r21_j + 1];
-                r21_p3 = _r21_t2['points'][r21_j + 2];
-                r21_subSegments['push'](r21_seg = new r0_Bezier(r21_p0['x'], r21_p0['y'], r21_p1['x'], r21_p1['y'], r21_p2['x'], r21_p2['y'], r21_p3['x'], r21_p3['y']));
-                _r21_t22 = r21_d1s;
-                _r21_t23 = _r21_t22['push'];
-                if (r21_p3['d1'] >= 0)
-                    _r21_t24 = r21_p3['d1'];
+                    _r22_t40 = 0;
+                _r22_t39['call'](_r22_t38, _r22_t40);
+                r22_p0 = r22_p1;
+            } else if (r22_p1['cubic']) {
+                r22_p2 = _r22_t2['points'][r22_j + 1];
+                r22_p3 = _r22_t2['points'][r22_j + 2];
+                r22_subSegments['push'](r22_seg = new r0_Bezier(r22_p0['x'], r22_p0['y'], r22_p1['x'], r22_p1['y'], r22_p2['x'], r22_p2['y'], r22_p3['x'], r22_p3['y']));
+                _r22_t22 = r22_d1s;
+                _r22_t23 = _r22_t22['push'];
+                if (r22_p3['d1'] >= 0)
+                    _r22_t24 = r22_p3['d1'];
                 else
-                    _r21_t24 = r21_d1;
-                _r21_t25 = r21_d1 = _r21_t24;
-                _r21_t23['call'](_r21_t22, _r21_t25);
-                _r21_t33 = r21_d2s;
-                _r21_t34 = _r21_t33['push'];
-                if (r21_p3['d2'] >= 0)
-                    _r21_t35 = r21_p3['d2'];
+                    _r22_t24 = r22_d1;
+                _r22_t25 = r22_d1 = _r22_t24;
+                _r22_t23['call'](_r22_t22, _r22_t25);
+                _r22_t33 = r22_d2s;
+                _r22_t34 = _r22_t33['push'];
+                if (r22_p3['d2'] >= 0)
+                    _r22_t35 = r22_p3['d2'];
                 else
-                    _r21_t35 = r21_d2;
-                _r21_t36 = r21_d2 = _r21_t35;
-                _r21_t34['call'](_r21_t33, _r21_t36);
-                r21_normalpt = r21_seg['normal'](1);
-                _r21_t44 = r21_pdxs;
-                _r21_t45 = _r21_t44['push'];
-                if (r21_p3['pdx'] !== void 0)
-                    _r21_t46 = r21_p3['pdx'] - r21_normalpt['x'];
+                    _r22_t35 = r22_d2;
+                _r22_t36 = r22_d2 = _r22_t35;
+                _r22_t34['call'](_r22_t33, _r22_t36);
+                r22_normalpt = r22_seg['normal'](1);
+                _r22_t44 = r22_pdxs;
+                _r22_t45 = _r22_t44['push'];
+                if (r22_p3['pdx'] !== void 0)
+                    _r22_t46 = r22_p3['pdx'] - r22_normalpt['x'];
                 else
-                    _r21_t46 = 0;
-                _r21_t45['call'](_r21_t44, _r21_t46);
-                _r21_t50 = r21_pdys;
-                _r21_t51 = _r21_t50['push'];
-                if (r21_p3['pdy'] !== void 0)
-                    _r21_t52 = r21_p3['pdy'] - r21_normalpt['y'];
+                    _r22_t46 = 0;
+                _r22_t45['call'](_r22_t44, _r22_t46);
+                _r22_t50 = r22_pdys;
+                _r22_t51 = _r22_t50['push'];
+                if (r22_p3['pdy'] !== void 0)
+                    _r22_t52 = r22_p3['pdy'] - r22_normalpt['y'];
                 else
-                    _r21_t52 = 0;
-                _r21_t51['call'](_r21_t50, _r21_t52);
-                r21_p0 = r21_p3;
-                r21_j = r21_j + 2;
+                    _r22_t52 = 0;
+                _r22_t51['call'](_r22_t50, _r22_t52);
+                r22_p0 = r22_p3;
+                r22_j = r22_j + 2;
             } else if (true) {
-                r21_p2 = _r21_t2['points'][r21_j + 1];
-                r21_subSegments['push'](r21_seg = new r0_Bezier(r21_p0['x'], r21_p0['y'], r21_p1['x'], r21_p1['y'], r21_p2['x'], r21_p2['y']));
-                _r21_t17 = r21_d1s;
-                _r21_t18 = _r21_t17['push'];
-                if (r21_p2['d1'] >= 0)
-                    _r21_t19 = r21_p2['d1'];
+                r22_p2 = _r22_t2['points'][r22_j + 1];
+                r22_subSegments['push'](r22_seg = new r0_Bezier(r22_p0['x'], r22_p0['y'], r22_p1['x'], r22_p1['y'], r22_p2['x'], r22_p2['y']));
+                _r22_t17 = r22_d1s;
+                _r22_t18 = _r22_t17['push'];
+                if (r22_p2['d1'] >= 0)
+                    _r22_t19 = r22_p2['d1'];
                 else
-                    _r21_t19 = r21_d1;
-                _r21_t20 = r21_d1 = _r21_t19;
-                _r21_t18['call'](_r21_t17, _r21_t20);
-                _r21_t26 = r21_d2s;
-                _r21_t27 = _r21_t26['push'];
-                if (r21_p2['d2'] >= 0)
-                    _r21_t28 = r21_p2['d2'];
+                    _r22_t19 = r22_d1;
+                _r22_t20 = r22_d1 = _r22_t19;
+                _r22_t18['call'](_r22_t17, _r22_t20);
+                _r22_t26 = r22_d2s;
+                _r22_t27 = _r22_t26['push'];
+                if (r22_p2['d2'] >= 0)
+                    _r22_t28 = r22_p2['d2'];
                 else
-                    _r21_t28 = r21_d2;
-                _r21_t29 = r21_d2 = _r21_t28;
-                _r21_t27['call'](_r21_t26, _r21_t29);
-                r21_normalpt = r21_seg['normal'](1);
-                _r21_t41 = r21_pdxs;
-                _r21_t42 = _r21_t41['push'];
-                if (r21_p2['pdx'] !== void 0)
-                    _r21_t43 = r21_p2['pdx'] - r21_normalpt['x'];
+                    _r22_t28 = r22_d2;
+                _r22_t29 = r22_d2 = _r22_t28;
+                _r22_t27['call'](_r22_t26, _r22_t29);
+                r22_normalpt = r22_seg['normal'](1);
+                _r22_t41 = r22_pdxs;
+                _r22_t42 = _r22_t41['push'];
+                if (r22_p2['pdx'] !== void 0)
+                    _r22_t43 = r22_p2['pdx'] - r22_normalpt['x'];
                 else
-                    _r21_t43 = 0;
-                _r21_t42['call'](_r21_t41, _r21_t43);
-                _r21_t47 = r21_pdys;
-                _r21_t48 = _r21_t47['push'];
-                if (r21_p2['pdy'] !== void 0)
-                    _r21_t49 = r21_p2['pdy'] - r21_normalpt['y'];
+                    _r22_t43 = 0;
+                _r22_t42['call'](_r22_t41, _r22_t43);
+                _r22_t47 = r22_pdys;
+                _r22_t48 = _r22_t47['push'];
+                if (r22_p2['pdy'] !== void 0)
+                    _r22_t49 = r22_p2['pdy'] - r22_normalpt['y'];
                 else
-                    _r21_t49 = 0;
-                _r21_t48['call'](_r21_t47, _r21_t49);
-                r21_p0 = r21_p2;
-                r21_j = r21_j + 1;
+                    _r22_t49 = 0;
+                _r22_t48['call'](_r22_t47, _r22_t49);
+                r22_p0 = r22_p2;
+                r22_j = r22_j + 1;
             } else
                 void 0;
         }
-        if (_r21_t2['points'][0]['pdx'] !== void 0)
-            _r21_t12 = r21_pdxs[0] = _r21_t2['points'][0]['pdx'] - r21_subSegments[0]['normal'](0)['x'];
+        if (_r22_t2['points'][0]['pdx'] !== void 0)
+            _r22_t12 = r22_pdxs[0] = _r22_t2['points'][0]['pdx'] - r22_subSegments[0]['normal'](0)['x'];
         else
-            _r21_t12 = void 0;
-        if (_r21_t2['points'][0]['pdy'] !== void 0)
-            _r21_t21 = r21_pdys[0] = _r21_t2['points'][0]['pdy'] - r21_subSegments[0]['normal'](0)['y'];
+            _r22_t12 = void 0;
+        if (_r22_t2['points'][0]['pdy'] !== void 0)
+            _r22_t21 = r22_pdys[0] = _r22_t2['points'][0]['pdy'] - r22_subSegments[0]['normal'](0)['y'];
         else
-            _r21_t21 = void 0;
-        r21_f1 = r0_smooth(r0_xn$xsarray$3cah(0, r21_d1s['length']), r0_xn$ysarray$3cah(r21_d1s));
-        r21_f2 = r0_smooth(r0_xn$xsarray$3cah(0, r21_d2s['length']), r0_xn$ysarray$3cah(r21_d2s['map'](function _r21_t37(r22_x) {
-            var r22_x, _r22_t0, _r22_t1;
-            return -r22_x;
+            _r22_t21 = void 0;
+        r22_f1 = r0_smooth(r0_xn$xsarray$3cah(0, r22_d1s['length']), r0_xn$ysarray$3cah(r22_d1s));
+        r22_f2 = r0_smooth(r0_xn$xsarray$3cah(0, r22_d2s['length']), r0_xn$ysarray$3cah(r22_d2s['map'](function _r22_t37(r23_x) {
+            var r23_x, _r23_t0, _r23_t1;
+            return -r23_x;
         })));
-        r21_fpdx = r0_smooth(r0_xn$xsarray$3cah(0, r21_d1s['length']), r0_xn$ysarray$3cah(r21_pdxs));
-        r21_fpdy = r0_smooth(r0_xn$xsarray$3cah(0, r21_d2s['length']), r0_xn$ysarray$3cah(r21_pdys));
-        r21_left = [];
-        r21_right = [];
-        r21_j = 0;
-        for (; r21_j < r21_subSegments['length']; r21_j = r21_j + 1) {
-            r21_curve = r21_subSegments[r21_j];
-            _r21_t0 = 0;
-            _r21_t1 = r21_samples;
-            r21_sample = _r21_t0;
-            for (; r21_sample < _r21_t1; r21_sample = r21_sample + 1) {
-                r21_t = r21_j + r21_sample / r21_samples;
-                r21_tn = r21_j + (r21_sample + 1) / r21_samples;
-                r21_lthis = r0_computeOffsetPoint(r21_curve, r21_t, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rthis = r0_computeOffsetPoint(r21_curve, r21_t, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnext = r0_computeOffsetPoint(r21_curve, r21_tn, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnext = r0_computeOffsetPoint(r21_curve, r21_tn, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnthis1 = r0_computeOffsetPoint(r21_curve, r21_t + r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnthis1 = r0_computeOffsetPoint(r21_curve, r21_t + r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnnext1 = r0_computeOffsetPoint(r21_curve, r21_tn - r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnnext1 = r0_computeOffsetPoint(r21_curve, r21_tn - r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnthis2 = r0_computeOffsetPoint(r21_curve, r21_t + 2 * r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnthis2 = r0_computeOffsetPoint(r21_curve, r21_t + 2 * r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnnext2 = r0_computeOffsetPoint(r21_curve, r21_tn - 2 * r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnnext2 = r0_computeOffsetPoint(r21_curve, r21_tn - 2 * r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnthis3 = r0_computeOffsetPoint(r21_curve, r21_t + 3 * r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnthis3 = r0_computeOffsetPoint(r21_curve, r21_t + 3 * r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_lnnext3 = r0_computeOffsetPoint(r21_curve, r21_tn - 3 * r0_TINY, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-                r21_rnnext3 = r0_computeOffsetPoint(r21_curve, r21_tn - 3 * r0_TINY, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-                r21_dlthis = r0_dforward(r21_lthis, r21_lnthis1, r21_lnthis2, r21_lnthis3);
-                r21_drthis = r0_dforward(r21_rthis, r21_rnthis1, r21_rnthis2, r21_rnthis3);
-                r21_dlnext = r0_dbackward(r21_lnext, r21_lnnext1, r21_lnnext2, r21_lnnext3);
-                r21_drnext = r0_dbackward(r21_rnext, r21_rnnext2, r21_rnnext2, r21_rnnext3);
-                r21_il = r0_intersection(r21_lthis['x'], r21_lthis['y'], r21_dlthis['x'], r21_dlthis['y'], r21_lnext['x'], r21_lnext['y'], r21_dlnext['x'], r21_dlnext['y']);
-                if (!r21_straight && r0_nonlinear(r21_lthis, r21_lnext, r21_dlthis) && r0_nonlinear(r21_lthis, r21_lnext, r21_dlnext) && r21_il['x'] !== null && r21_il['y'] !== null && Math['abs'](r21_il['x']) <= r0_CUTOFF && Math['abs'](r21_il['y']) <= r0_CUTOFF && r0_nonlinear(r21_lthis, r21_il, r21_lnext)) {
-                    r21_left['push']({
-                        'x': r21_lthis['x'],
-                        'y': r21_lthis['y'],
+        r22_fpdx = r0_smooth(r0_xn$xsarray$3cah(0, r22_d1s['length']), r0_xn$ysarray$3cah(r22_pdxs));
+        r22_fpdy = r0_smooth(r0_xn$xsarray$3cah(0, r22_d2s['length']), r0_xn$ysarray$3cah(r22_pdys));
+        r22_left = [];
+        r22_right = [];
+        r22_j = 0;
+        for (; r22_j < r22_subSegments['length']; r22_j = r22_j + 1) {
+            r22_curve = r22_subSegments[r22_j];
+            _r22_t0 = 0;
+            _r22_t1 = r22_samples;
+            r22_sample = _r22_t0;
+            for (; r22_sample < _r22_t1; r22_sample = r22_sample + 1) {
+                r22_t = r22_j + r22_sample / r22_samples;
+                r22_tn = r22_j + (r22_sample + 1) / r22_samples;
+                r22_lthis = r0_computeOffsetPoint(r22_curve, r22_t, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rthis = r0_computeOffsetPoint(r22_curve, r22_t, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnext = r0_computeOffsetPoint(r22_curve, r22_tn, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnext = r0_computeOffsetPoint(r22_curve, r22_tn, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnthis1 = r0_computeOffsetPoint(r22_curve, r22_t + r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnthis1 = r0_computeOffsetPoint(r22_curve, r22_t + r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnnext1 = r0_computeOffsetPoint(r22_curve, r22_tn - r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnnext1 = r0_computeOffsetPoint(r22_curve, r22_tn - r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnthis2 = r0_computeOffsetPoint(r22_curve, r22_t + 2 * r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnthis2 = r0_computeOffsetPoint(r22_curve, r22_t + 2 * r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnnext2 = r0_computeOffsetPoint(r22_curve, r22_tn - 2 * r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnnext2 = r0_computeOffsetPoint(r22_curve, r22_tn - 2 * r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnthis3 = r0_computeOffsetPoint(r22_curve, r22_t + 3 * r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnthis3 = r0_computeOffsetPoint(r22_curve, r22_t + 3 * r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_lnnext3 = r0_computeOffsetPoint(r22_curve, r22_tn - 3 * r0_TINY, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+                r22_rnnext3 = r0_computeOffsetPoint(r22_curve, r22_tn - 3 * r0_TINY, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+                r22_dlthis = r0_dforward(r22_lthis, r22_lnthis1, r22_lnthis2, r22_lnthis3);
+                r22_drthis = r0_dforward(r22_rthis, r22_rnthis1, r22_rnthis2, r22_rnthis3);
+                r22_dlnext = r0_dbackward(r22_lnext, r22_lnnext1, r22_lnnext2, r22_lnnext3);
+                r22_drnext = r0_dbackward(r22_rnext, r22_rnnext2, r22_rnnext2, r22_rnnext3);
+                r22_il = r0_intersection(r22_lthis['x'], r22_lthis['y'], r22_dlthis['x'], r22_dlthis['y'], r22_lnext['x'], r22_lnext['y'], r22_dlnext['x'], r22_dlnext['y']);
+                if (!r22_straight && r0_nonlinear(r22_lthis, r22_lnext, r22_dlthis) && r0_nonlinear(r22_lthis, r22_lnext, r22_dlnext) && r22_il['x'] !== null && r22_il['y'] !== null && Math['abs'](r22_il['x']) <= r0_CUTOFF && Math['abs'](r22_il['y']) <= r0_CUTOFF && r0_nonlinear(r22_lthis, r22_il, r22_lnext)) {
+                    r22_left['push']({
+                        'x': r22_lthis['x'],
+                        'y': r22_lthis['y'],
                         'onCurve': true
                     }, {
-                        'x': r21_il['x'],
-                        'y': r21_il['y'],
+                        'x': r22_il['x'],
+                        'y': r22_il['y'],
                         'onCurve': false
                     });
                 } else {
-                    r21_left['push']({
-                        'x': r21_lthis['x'],
-                        'y': r21_lthis['y'],
+                    r22_left['push']({
+                        'x': r22_lthis['x'],
+                        'y': r22_lthis['y'],
                         'onCurve': true
                     });
                 }
-                r21_ir = r0_intersection(r21_rthis['x'], r21_rthis['y'], r21_drthis['x'], r21_drthis['y'], r21_rnext['x'], r21_rnext['y'], r21_drnext['x'], r21_drnext['y']);
-                if (!r21_straight && r0_nonlinear(r21_rthis, r21_rnext, r21_drthis) && r0_nonlinear(r21_rthis, r21_rnext, r21_drnext) && r21_ir['x'] !== null && r21_ir['y'] !== null && Math['abs'](r21_ir['x']) <= r0_CUTOFF && Math['abs'](r21_ir['y']) <= r0_CUTOFF && r0_nonlinear(r21_rthis, r21_ir, r21_rnext)) {
-                    r21_right['push']({
-                        'x': r21_rthis['x'],
-                        'y': r21_rthis['y'],
+                r22_ir = r0_intersection(r22_rthis['x'], r22_rthis['y'], r22_drthis['x'], r22_drthis['y'], r22_rnext['x'], r22_rnext['y'], r22_drnext['x'], r22_drnext['y']);
+                if (!r22_straight && r0_nonlinear(r22_rthis, r22_rnext, r22_drthis) && r0_nonlinear(r22_rthis, r22_rnext, r22_drnext) && r22_ir['x'] !== null && r22_ir['y'] !== null && Math['abs'](r22_ir['x']) <= r0_CUTOFF && Math['abs'](r22_ir['y']) <= r0_CUTOFF && r0_nonlinear(r22_rthis, r22_ir, r22_rnext)) {
+                    r22_right['push']({
+                        'x': r22_rthis['x'],
+                        'y': r22_rthis['y'],
                         'onCurve': true
                     }, {
-                        'x': r21_ir['x'],
-                        'y': r21_ir['y'],
+                        'x': r22_ir['x'],
+                        'y': r22_ir['y'],
                         'onCurve': false
                     });
                 } else {
-                    r21_right['push']({
-                        'x': r21_rthis['x'],
-                        'y': r21_rthis['y'],
+                    r22_right['push']({
+                        'x': r22_rthis['x'],
+                        'y': r22_rthis['y'],
                         'onCurve': true
                     });
                 }
             }
-            _r21_t54 = r21_left;
-            _r21_t55 = _r21_t54['push'];
-            r21_last = r0_computeOffsetPoint(r21_curve, r21_j + 1, r21_j, r21_f1, r21_fpdx, r21_fpdy);
-            _r21_t56 = {
-                'x': r21_last['x'],
-                'y': r21_last['y'],
+            _r22_t54 = r22_left;
+            _r22_t55 = _r22_t54['push'];
+            r22_last = r0_computeOffsetPoint(r22_curve, r22_j + 1, r22_j, r22_f1, r22_fpdx, r22_fpdy);
+            _r22_t56 = {
+                'x': r22_last['x'],
+                'y': r22_last['y'],
                 'onCurve': true
             };
-            _r21_t55['call'](_r21_t54, _r21_t56);
-            _r21_t57 = r21_right;
-            _r21_t58 = _r21_t57['push'];
-            r21_last = r0_computeOffsetPoint(r21_curve, r21_j + 1, r21_j, r21_f2, r21_fpdx, r21_fpdy);
-            _r21_t59 = {
-                'x': r21_last['x'],
-                'y': r21_last['y'],
+            _r22_t55['call'](_r22_t54, _r22_t56);
+            _r22_t57 = r22_right;
+            _r22_t58 = _r22_t57['push'];
+            r22_last = r0_computeOffsetPoint(r22_curve, r22_j + 1, r22_j, r22_f2, r22_fpdx, r22_fpdy);
+            _r22_t59 = {
+                'x': r22_last['x'],
+                'y': r22_last['y'],
                 'onCurve': true
             };
-            _r21_t58['call'](_r21_t57, _r21_t59);
+            _r22_t58['call'](_r22_t57, _r22_t59);
         }
-        r21_shapes['push'](r21_left['concat'](r21_right['reverse']()));
-        return r21_shapes['map'](function _r21_t53(r24_shape) {
-            var r24_shape, r24_j, r24_p0, r24_p1, r24_still, r24_k, r24_p2, _r24_t0, _r24_t1, _r24_t2, _r24_t3, _r24_t4;
-            r24_j = 1;
-            for (; r24_j < r24_shape['length'] - 1; r24_j = r24_j + 1) {
-                r24_p0 = r24_shape[r24_j - 1];
-                r24_p1 = r24_shape[r24_j];
-                if (r24_p0['onCurve'] && r24_p1['onCurve'] && r24_p0['x'] === r24_p1['x'] && r24_p0['y'] === r24_p1['y'])
-                    _r24_t2 = r24_p1['removable'] = true;
+        r22_shapes['push'](r22_left['concat'](r22_right['reverse']()));
+        return r22_shapes['map'](function _r22_t53(r25_shape) {
+            var r25_shape, r25_p0, r25_p1, r25_j, r25_still, r25_k, r25_p2, _r25_t0, _r25_t1, _r25_t2, _r25_t3, _r25_t4, _r25_t5, _r25_t6;
+            for (; r25_j < r25_shape['length'] - 1; r25_j = r25_j + 1) {
+                r25_p0 = r25_shape[r25_j];
+                r25_p1 = r25_shape[r25_j + 1];
+                if (r25_p0['onCurve'] && r25_p1['onCurve'] && r25_p0['x'] === r25_p1['x'] && r25_p0['y'] === r25_p1['y'])
+                    _r25_t2 = r25_p1['removable'] = true;
                 else
-                    _r24_t2 = void 0;
+                    _r25_t2 = void 0;
             }
-            r24_shape = r24_shape['filter'](function _r24_t3(r25_point) {
-                var r25_point, _r25_t0, _r25_t1;
-                return r25_point && !r25_point['removable'];
-            });
-            r24_j = 0;
-            for (; r24_j < r24_shape['length'] - 1; r24_j = r24_j + 1) {
-                r24_p0 = r24_shape[r24_j];
-                r24_still = true;
-                r24_k = r24_j + 1;
-                for (; r24_still && r24_k < r24_shape['length'] - 1; r24_k = r24_k + 1) {
-                    r24_p1 = r24_shape[r24_k];
-                    r24_p2 = r24_shape[r24_k + 1];
-                    if (r24_p0['onCurve'] && r24_p1['onCurve'] && r24_p2['onCurve'] && !r0_nonlinear(r24_p0, r24_p1, r24_p2)) {
-                        r24_p1['removable'] = true;
-                    } else {
-                        r24_still = false;
-                    }
-                }
-                r24_j = r24_k - 1;
-            }
-            return r24_shape['filter'](function _r24_t4(r26_point) {
+            r25_shape = r25_shape['filter'](function _r25_t3(r26_point) {
                 var r26_point, _r26_t0, _r26_t1;
                 return r26_point && !r26_point['removable'];
             });
+            r25_j = 0;
+            for (; r25_j < r25_shape['length'] - 1; r25_j = r25_j + 1) {
+                r25_p0 = r25_shape[r25_j];
+                r25_still = true;
+                r25_k = r25_j + 1;
+                for (; r25_still && r25_k < r25_shape['length'] - 1; r25_k = r25_k + 1) {
+                    r25_p1 = r25_shape[r25_k];
+                    r25_p2 = r25_shape[r25_k + 1];
+                    if (r25_p0['onCurve'] && r25_p1['onCurve'] && r25_p2['onCurve'] && !r0_nonlinear(r25_p0, r25_p1, r25_p2)) {
+                        r25_p1['removable'] = true;
+                    } else {
+                        r25_still = false;
+                    }
+                }
+                r25_j = r25_k - 1;
+            }
+            r25_shape = r25_shape['filter'](function _r25_t4(r27_point) {
+                var r27_point, _r27_t0, _r27_t1;
+                return r27_point && !r27_point['removable'];
+            });
+            r25_j = 1;
+            for (; r25_j < r25_shape['length'] - 2; r25_j = r25_j + 1) {
+                r25_p0 = r25_shape[r25_j];
+                r25_p1 = r25_shape[r25_j + 1];
+                r25_p2 = r25_shape[r25_j + 2];
+                if (!r25_p0['onCurve'] && r25_p1['onCurve'] && !r25_p2['onCurve'] && r0_midclose(r25_p0, r25_p1, r25_p2)) {
+                    r25_p1['removable'] = true;
+                    _r25_t6 = r25_j = r25_j + 1;
+                } else
+                    _r25_t6 = void 0;
+            }
+            r25_shape = r25_shape['filter'](function _r25_t5(r28_point) {
+                var r28_point, _r28_t0, _r28_t1;
+                return r28_point && !r28_point['removable'];
+            });
+            return r25_shape;
         });
     };
     exports['Stroke'] = r0_Stroke;

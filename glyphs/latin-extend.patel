@@ -75,10 +75,10 @@ create-glyph 'OE' : glyph-construction {
 create-glyph 'ae-epart' : glyph-construction {
 	local sw : Math.min STROKE [[WIDTH - SB * 2] * 0.23]
 	local eLeft : MIDDLE - sw / 2 * ITALICCOR
-	local eMiddle : mix eLeft RIGHTSB 0.5
+	local eMiddle : [mix eLeft [RIGHTSB - O] 0.5] - sw * globalTransform.yx
 	local barbottom [XH * EBARPOS]
 	
-	local hookx [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx]
+	local hookx [RIGHTSB - O - OXHOOK + TAILADJX * globalTransform.yx]
 	local eHookMiddle [mix eLeft hookx 0.5]
 	
 	local sma : SMALLSMOOTHA * 0.6
@@ -106,8 +106,8 @@ create-glyph 'ae-apart' : glyph-construction {
 	
 	local bartop [XH * BARPOS + sw]
 	local abarRight : MIDDLE + sw / 2 * ITALICCOR
-	local m1        : mix SB abarRight 0.5
-	local lowmiddle : mix SB [abarRight - sw] 0.7
+	local m1        : mix [SB + OXHOOK] abarRight 0.5
+	local lowmiddle : [mix [SB + sw] [abarRight - sw] 0.5] + sw * globalTransform.yx
 	local barsmooth : mix SB abarRight 0.6
 	
 	local sma : SMALLSMOOTHA * 0.6
@@ -130,11 +130,8 @@ create-glyph 'ae-apart' : glyph-construction {
 create-glyph 'oe-opart' : glyph-construction {
 	local sw : Math.min STROKE [[WIDTH - SB * 2] * 0.23]
 	
-	local bartop [XH * BARPOS + sw]
 	local abarRight : MIDDLE + sw / 2 * ITALICCOR
-	local m1        : mix SB abarRight 0.5
-	local lowmiddle : mix SB [abarRight - sw] 0.7
-	local barsmooth : mix SB abarRight 0.6
+	local m1        : mix [SB + O] abarRight 0.5
 	
 	local sma : SMALLSMOOTHA * 0.6
 	local smb : SMALLSMOOTHB * 0.6
@@ -142,12 +139,11 @@ create-glyph 'oe-opart' : glyph-construction {
 	include : create-stroke
 		:.start-from abarRight smb
 		:.set-width 0 sw
-		:.arc-vh-to lowmiddle O
+		:.arc-vh-to [m1 + sw * globalTransform.yx] O
 		:.arc-hv-to [SB + O] smb
 		:.line-to   [SB + O] [XH - sma]
-		:.arc-vh-to lowmiddle [XH - O]
+		:.arc-vh-to [m1 - sw * globalTransform.yx] [XH - O]
 		:.arc-hv-to abarRight [XH - smb]
-		:.heads-to RIGHTWARD
 }
 
 create-glyph 'ae' : glyph-construction {
@@ -208,4 +204,114 @@ create-glyph 'dcroat' : glyph-construction {
 		:.heads-to   RIGHTWARD
 		:.line-to    [mix RIGHTSB WIDTH 0.7 ] [mix XH CAP 0.45]
 		:.heads-to   RIGHTWARD
+}
+
+create-glyph 'Oslash' : glyph-construction {
+	assign-unicode 0xD8
+	
+	local fine : Math.min [HALFSTROKE * 0.75] [[RIGHTSB - SB] * 0.1]
+	
+	include glyphs.O BASE
+	include : create-stroke
+		:.start-from [SB + O + fine] [mix CAP 0 1.05]
+		:.set-width  fine fine
+		:.line-to    [RIGHTSB - O - fine] [mix 0 CAP 1.05]
+}
+create-glyph 'oslash' : glyph-construction {
+	assign-unicode 0xF8
+	
+	local fine : Math.min [HALFSTROKE * 0.75] [[RIGHTSB - SB] * 0.1]
+	
+	include glyphs.o BASE
+	include : create-stroke
+		:.start-from [SB + O + fine] [mix XH 0 1.05]
+		:.set-width  fine fine
+		:.line-to    [RIGHTSB - O - fine] [mix 0 XH 1.05]
+}
+
+create-glyph 'Thorn' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xDE
+	include capitalMarks
+	
+	local bowlTop [CAP * 0.77]
+	local bowlBottom [CAP * 0.23]
+	local bkappa [COKAPPA - 0.2]
+	
+	local turn : mix bowlTop bowlBottom 0.5
+	local turnRadius : [bowlTop - bowlBottom] / 2
+	
+	include : create-stroke
+		:.start-from [SB * 1.25 + HALFSTROKE * 0.1] bowlTop
+		:.heads-to   RIGHTWARD
+		:.set-width  0 STROKE
+		:.line-to    [RIGHTSB - turnRadius] bowlTop
+		:.arc-hv-to  [RIGHTSB - O] turn
+		:.arc-vh-to  [RIGHTSB - turnRadius] bowlBottom
+		:.line-to    [SB * 1.25 + HALFSTROKE * 0.1] bowlBottom
+		:.heads-to   LEFTWARD
+	
+	include : create-stroke 
+		:.start-from [SB * 1.25] 0
+		:.heads-to   UPWARD
+		:.set-width  0 STROKE
+		:.line-to    [SB * 1.25] CAP
+		:.heads-to   UPWARD
+}
+create-glyph 'thorn' : glyph-construction {
+	assign-unicode 0xFE
+	
+	include glyphs.b BASE
+	include glyphs.p
+	include ifMarks
+}
+
+create-glyph 'eszet.upright' : glyph-construction {
+	set-width WIDTH
+	include bMarks
+	
+	local yTopTurn [CAP * 0.78]
+	local yMiddleTurn [CAP * 0.57 + HALFSTROKE]
+	local yBottomTurn [CAP * 0.52 - HALFSTROKE]
+	
+	local xTopTurn [mix [SB + STROKE] RIGHTSB 0.75]
+	local xMiddleTurn [mix [SB + STROKE] RIGHTSB 0.375]
+	local xBottomTurn [mix [SB + STROKE] RIGHTSB 0.9]
+	local xBottomFinal [mix [SB + STROKE] RIGHTSB 0.4]
+	
+	include : create-stroke
+		:.start-from [SB + HALFSTROKE] 0
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   UPWARD
+		:.line-to    [SB + HALFSTROKE] [CAP - SMOOTHA - HALFSTROKE]
+		:.arc-vh-to  [mix [SB + HALFSTROKE] xTopTurn 0.5] [CAP - O - HALFSTROKE]
+		:.heads-to   RIGHTWARD
+		:.arc-hv-to  xTopTurn [mix [yMiddleTurn - HALFSTROKE] CAP 0.5]
+		:.arc-vh-to  [mix xMiddleTurn xTopTurn 0.5] yMiddleTurn
+		:.arc-hv-to  xMiddleTurn [mix yMiddleTurn yBottomTurn 0.5]
+		:.arc-vh-to  [mix xMiddleTurn xBottomTurn 0.5] yBottomTurn
+		:.arc-hv-to  xBottomTurn [mix [yBottomTurn + HALFSTROKE] 0 0.5]
+		:.arc-vh-to  xBottomFinal HALFSTROKE
+		:.line-to    [SB + STROKE * 1.5] HALFSTROKE
+		:.heads-to   LEFTWARD
+}
+create-glyph 'eszet.italic' : glyph-construction {
+	set-width WIDTH
+	include glyphs.'eszet.upright' BASE
+	include ifMarks
+	include : create-stroke
+		:.start-from [[SB + HALFSTROKE] - SHOOK * 2] [HALFSTROKE + O * 6 - SHOOK]
+		:.heads-to RIGHTWARD
+		:.set-width HALFSTROKE HALFSTROKE
+		:.arc-hv-to [SB + HALFSTROKE] 0
+		:.line-to   [SB + HALFSTROKE] STROKE
+}
+create-glyph 'eszet' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xDF
+	
+	if [para.italicangle > 0] {
+		then : include glyphs.'eszet.italic' true
+		else : include glyphs.'eszet.upright' true
+	}
 }
