@@ -1,7 +1,7 @@
 ﻿{
     var r0_regular, r0_bold, r0_italic, r0_bolditalic;
     r0_regular = {
-        'upmscale': 4.096,
+        'upmscale': 2.048,
         'width': 500,
         'stroke': 80,
         'dotsize': 125,
