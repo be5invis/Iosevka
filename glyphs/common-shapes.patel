@@ -167,15 +167,17 @@ define [nBowl left middle right fine] : begin {
 	return : bandLeft.concat bandRight
 }
 
-define [sHookUpper top smooth hook _middle] : glyph-construction {
-	local middle : _middle || MIDDLE
+define [XSHookUpper top left middle right smooth hook] : glyph-construction {
 	include : create-stroke
 		:.set-transform globalTransform
-		:.start-from [RIGHTSB - OXHOOK] [top - hook]
+		:.start-from [right - OXHOOK] [top - hook]
 		:.set-width STROKE 0
-		:.curve-to [mix middle RIGHTSB KAPPA_HOOK] [top - O] middle [top - O]
-		:.heads-to LEFTWARD
-		:.arc-hv-to SB [top - smooth]
+		:.curve-to [mix middle right KAPPA_HOOK] [top - O] middle [top - O]
+		:.heads-to [if [left < right] LEFTWARD RIGHTWARD]
+		:.arc-hv-to left [top - smooth]
+}
+define [sHookUpper top smooth hook _middle] : glyph-construction {
+	include : XSHookUpper top SB [fallback _middle MIDDLE] RIGHTSB smooth hook
 }
 define [twoHookUpper top smooth hook _middle] : glyph-construction {
 	local middle : _middle || MIDDLE
@@ -188,14 +190,7 @@ define [twoHookUpper top smooth hook _middle] : glyph-construction {
 		:.arc-hv-to RIGHTSB [top - smooth]
 }
 define [sHookLower bottom smooth hook _middle] : glyph-construction {
-	local middle : _middle || MIDDLE
-	include : create-stroke
-		:.set-transform globalTransform
-		:.start-from RIGHTSB [bottom + smooth]
-		:.set-width 0 STROKE
-		:.arc-vh-to middle [bottom + O]
-		:.heads-to LEFTWARD
-		:.curve-to [mix middle SB KAPPA_HOOK] [bottom + O] [SB + OXHOOK] [bottom + hook]
+	include : XSHookLower bottom SB [fallback _middle MIDDLE] RIGHTSB smooth hook
 }
 define [XSHookLower bottom left middle right smooth hook] : glyph-construction {
 	include : create-stroke
@@ -203,7 +198,7 @@ define [XSHookLower bottom left middle right smooth hook] : glyph-construction {
 		:.start-from right [bottom + smooth]
 		:.set-width 0 STROKE
 		:.arc-vh-to middle [bottom + O]
-		:.heads-to LEFTWARD
+		:.heads-to [if [left < right] LEFTWARD RIGHTWARD]
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 
