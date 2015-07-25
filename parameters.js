@@ -7,14 +7,14 @@
         'dotsize': 125,
         'periodsize': 150,
         'sb': 60,
-        'cap': 770,
-        'descender': -210,
-        'xheight': 560,
+        'cap': 765,
+        'descender': -190,
+        'xheight': 575,
         'barpos': 0.45,
-        'gbarpos': 0.34,
+        'gbarpos': 0.35,
         'fivebarpos': 0.49,
         'hook': 145,
-        'ahook': 135,
+        'ahook': 130,
         'shook': 100,
         'rhook': 100,
         'smooth': 192,
@@ -39,6 +39,8 @@
         'copyright': 'Copyright (c) 2015 Belleve Invis.'
     };
     r0_bold = Object['create'](r0_regular);
+    r0_bold['style'] = 'Bold';
+    r0_bold['isBold'] = true;
     r0_bold['sb'] = 50;
     r0_bold['stroke'] = 120;
     r0_bold['dotsize'] = 160;
@@ -54,23 +56,23 @@
     r0_bold['jbalance'] = 60;
     r0_bold['tbalance'] = 60;
     r0_bold['rbalance'] = 18;
-    r0_bold['style'] = 'Bold';
     r0_bold['weight'] = 700;
     r0_bold['bkappa'] = 0.5;
     r0_bold['smoothadjust'] = 130;
-    r0_bold['isBold'] = true;
     r0_italic = Object['create'](r0_regular);
     r0_italic['italicangle'] = 10;
+    r0_italic['isItalic'] = true;
+    r0_italic['style'] = 'Italic';
     r0_italic['tbalance'] = 70;
     r0_italic['rbalance'] = 30;
-    r0_italic['style'] = 'Italic';
-    r0_italic['isItalic'] = true;
+    r0_italic['ebarpos'] = 0.41;
     r0_bolditalic = Object['create'](r0_bold);
     r0_bolditalic['italicangle'] = 10;
-    r0_bolditalic['tbalance'] = 90;
-    r0_bolditalic['style'] = 'Bold Italic';
     r0_bolditalic['isBold'] = true;
     r0_bolditalic['isItalic'] = true;
+    r0_bolditalic['style'] = 'Bold Italic';
+    r0_bolditalic['tbalance'] = 90;
+    r0_bolditalic['ebalance'] = 0.375;
     exports['regular'] = r0_regular;
     exports['bold'] = r0_bold;
     exports['italic'] = r0_italic;
