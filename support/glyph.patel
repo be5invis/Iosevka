@@ -10,8 +10,8 @@ define id (
 	.x 0
 	.y 0
 )
-
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
+define aFunction (.unapply [function [obj arity] [if [obj <@ Function] (obj) null]])
 
 define [Glyph name] : begin {
 	set this.name name
@@ -29,6 +29,7 @@ define [Glyph name] : begin {
 	)
 	return nothing
 }
+define Glyph.is (.unapply [function [obj arity] [if [obj <@ Glyph] (obj) null]])
 define [Glyph.prototype.set-width w] : begin {
 	this.advanceWidth = w
 	return this
@@ -86,13 +87,15 @@ define [Glyph.prototype.put-shapes contours] : begin {
 	set this.gizmo t
 	return this
 }
-define [Glyph.prototype.include glyph tfm] : begin {
-	local contours : match glyph {
-		(:: contours)    contours
-		[Stroke.is it] : glyph.to-outline 0 0
-		otherwise        glyph.contours
+define [Glyph.prototype.include component copyAnchors] : begin {
+	local glyph : match component {
+		[aFunction it] : return : component.call this
+		[Stroke.is it]   (.contours [component.to-outline 0 0])
+		(:: contours)    (.contours contours)
+		otherwise        component
 	}
-	local transform : if [tfm && [typeof tfm] === 'object'] (.x tfm.x .y tfm.y .xx tfm.xx .yy tfm.yy .xy tfm.xy .yx tfm.yx .copyAnchors tfm.copyAnchors) (.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0)
+	local contours glyph.contours
+	local transform (.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0)
 	local shiftx 0
 	local shifty 0
 	if [this.anchors && glyph.anchors] : foreach markid [items-of [Object.keys this.anchors]] : begin {
@@ -121,7 +124,7 @@ define [Glyph.prototype.include glyph tfm] : begin {
 			contour.map : function [point] : tp transform point
 		}
 	}
-	if [[[not contours] || transform.copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
+	if [[[not contours] || copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
 		foreach k [items-of keys] [set a`k anchors`k]
 		* a
 	}
