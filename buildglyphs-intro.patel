@@ -1,5 +1,6 @@
 define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
+define tp [require './support/transform'].transformPoint
 
 ### COMMON FUNCTIONS
 
@@ -96,11 +97,26 @@ define TBALANCE :  para.tbalance   || JBALANCE
 define TBALANCE2 : para.tbalance2  || TBALANCE
 define RBALANCE :  para.rbalance   || JBALANCE * 0.3
 
+define ORIGIN (.x 0 .y 0)
 
 # Anchor parameters
 define BASE 'base'
 define MARK 'mark'
 define MARKBASE 'markbase'
+
+define AS_BASE (.xx 1 .yx 0 .xy 0 .yy 1 .x 0 .y 0 .copyAnchors true)
+define [Attach pt1 pt2] : begin {
+	local transformedPt1 [tp globalTransform pt1]
+	local transformedPt2 [tp globalTransform pt2]
+	return (
+		.xx 1
+		.yx 0
+		.xy 0
+		.yy 1
+		.x  [transformedPt1.x - transformedPt2.x]
+		.y  [transformedPt1.y - transformedPt2.y]
+	)
+}
 
 define [tm anchor] : return (
 	.x [anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x]
@@ -172,6 +188,7 @@ define-macro glyph-construction : syntax-rules {
 		local include : this.include.bind this
 		local create-stroke : this.create-stroke.bind this
 		local set-anchor : this.set-anchor.bind this
+		local [dont-export] : set currentGlyph.dontExport true
 		this.gizmo = globalTransform
 		this.set-width WIDTH
 		begin @::[steps.map formOf]
@@ -193,6 +210,7 @@ define [select-variant glyphid unicode default] : begin {
 	set glyphs`glyphid chosenGlyph
 	if unicode : begin {
 		chosenGlyph.assign-unicode unicode
+		set chosenGlyph.dontExport false
 		set unicodeGlyphs.(chosenGlyph.unicode`[chosenGlyph.unicode.length - 1]) chosenGlyph
 	}
 }

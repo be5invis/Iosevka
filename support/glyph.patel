@@ -86,12 +86,13 @@ define [Glyph.prototype.put-shapes contours] : begin {
 	set this.gizmo t
 	return this
 }
-define [Glyph.prototype.include glyph copyAnchors] : begin {
+define [Glyph.prototype.include glyph tfm] : begin {
 	local contours : match glyph {
 		(:: contours)    contours
 		[Stroke.is it] : glyph.to-outline 0 0
 		otherwise        glyph.contours
 	}
+	local transform : if [tfm && [typeof tfm] === 'object'] (.x tfm.x .y tfm.y .xx tfm.xx .yy tfm.yy .xy tfm.xy .yx tfm.yx .copyAnchors tfm.copyAnchors) (.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0)
 	local shiftx 0
 	local shifty 0
 	if [this.anchors && glyph.anchors] : foreach markid [items-of [Object.keys this.anchors]] : begin {
@@ -113,17 +114,14 @@ define [Glyph.prototype.include glyph copyAnchors] : begin {
 			}
 		}
 	}
+	set transform.x : transform.x + shiftx
+	set transform.y : transform.y + shifty
 	if contours : begin {
 		this.put-shapes : contours.map : function [contour] {
-			contour.map : function [point] : object {
-				x [point.x + shiftx]
-				y [point.y + shifty]
-				onCurve point.onCurve
-				cubic point.cubic
-			}
+			contour.map : function [point] : tp transform point
 		}
 	}
-	if [[[not contours] || copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
+	if [[[not contours] || transform.copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
 		foreach k [items-of keys] [set a`k anchors`k]
 		* a
 	}

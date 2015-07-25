@@ -174,8 +174,8 @@
         _r12_t3['gizmo'] = r12_t;
         return _r12_t3;
     };
-    r0_Glyph['prototype']['include'] = function _r0_t11(r14_glyph, r14_copyAnchors) {
-        var r14_glyph, r14_copyAnchors, r14_contours, r14_otherwise, r14_it, r14_shiftx, r14_shifty, r14_markid, r14_anchorThis, r14_anchorThat, _r14_t0, _r14_t1, _r14_t2, _r14_t3, _r14_t4, _r14_t5, _r14_t6, _r14_t7, _r14_t8, _r14_t9, _r14_t10, _r14_t11, _r14_t12, _r14_t13, _r14_t14, _r14_t15, _r14_t16, _r14_t17, _r14_t18, _r14_tag19, _r14_t20, _r14_t21, _r14_t22, _r14_t23;
+    r0_Glyph['prototype']['include'] = function _r0_t11(r14_glyph, r14_tfm) {
+        var r14_glyph, r14_tfm, r14_contours, r14_otherwise, r14_it, r14_transform, r14_shiftx, r14_shifty, r14_markid, r14_anchorThis, r14_anchorThat, _r14_t0, _r14_t1, _r14_t2, _r14_t3, _r14_t4, _r14_t5, _r14_t6, _r14_t7, _r14_t8, _r14_t9, _r14_t10, _r14_t11, _r14_t12, _r14_t13, _r14_t14, _r14_t15, _r14_t16, _r14_t17, _r14_t18, _r14_t19, _r14_t20, _r14_t21, _r14_tag22, _r14_t23, _r14_t24;
         _r14_t6 = this;
         _r14_t0 = r14_glyph;
         if (_r14_t0 instanceof Array && _r14_t0['length'] >= 0) {
@@ -192,14 +192,34 @@
             _r14_t8 = _r14_t9;
         }
         r14_contours = _r14_t8;
+        if (r14_tfm && typeof r14_tfm === 'object')
+            _r14_t10 = {
+                'x': r14_tfm['x'],
+                'y': r14_tfm['y'],
+                'xx': r14_tfm['xx'],
+                'yy': r14_tfm['yy'],
+                'xy': r14_tfm['xy'],
+                'yx': r14_tfm['yx'],
+                'copyAnchors': r14_tfm['copyAnchors']
+            };
+        else
+            _r14_t10 = {
+                'x': 0,
+                'y': 0,
+                'xx': 1,
+                'yy': 1,
+                'xy': 0,
+                'yx': 0
+            };
+        r14_transform = _r14_t10;
         r14_shiftx = 0;
         r14_shifty = 0;
         if (_r14_t6['anchors'] && r14_glyph['anchors']) {
             _r14_t2 = Object['keys'](_r14_t6['anchors']);
             _r14_t3 = _r14_t2['length'];
             _r14_t4 = 0;
-            _r14_t20 = _r14_t4 < _r14_t3;
-            for (; _r14_t20; _r14_t20 = _r14_t4 < _r14_t3) {
+            _r14_t12 = _r14_t4 < _r14_t3;
+            for (; _r14_t12; _r14_t12 = _r14_t4 < _r14_t3) {
                 r14_markid = _r14_t2[_r14_t4];
                 r14_anchorThis = _r14_t6['anchors'][r14_markid];
                 r14_anchorThat = r14_glyph['anchors'][r14_markid];
@@ -211,42 +231,39 @@
                     r14_shiftx = _r14_t5[0];
                     r14_shifty = _r14_t5[1];
                     if (r14_anchorThat['mbx'] !== void 0 && r14_anchorThat['mby'] !== void 0)
-                        _r14_t23 = _r14_t6['anchors'][r14_markid] = {
+                        _r14_t24 = _r14_t6['anchors'][r14_markid] = {
                             'x': r14_anchorThis['x'] + r14_anchorThat['mbx'] - r14_anchorThat['x'],
                             'y': r14_anchorThis['y'] + r14_anchorThat['mby'] - r14_anchorThat['y'],
                             'type': r14_anchorThis['type'],
                             'mbx': r14_anchorThis['mbx'],
                             'mby': r14_anchorThis['mby']
                         };
-                    _r14_t22 = _r14_t23;
+                    _r14_t23 = _r14_t24;
                 } else
-                    _r14_t22 = void 0;
-                _r14_t21 = _r14_t4 = _r14_t4 + 1;
+                    _r14_t23 = void 0;
+                _r14_t13 = _r14_t4 = _r14_t4 + 1;
             }
-            _r14_t10 = _r14_t21;
+            _r14_t11 = _r14_t13;
         } else
-            _r14_t10 = void 0;
+            _r14_t11 = void 0;
+        r14_transform['x'] = r14_transform['x'] + r14_shiftx;
+        r14_transform['y'] = r14_transform['y'] + r14_shifty;
         if (r14_contours)
-            _r14_t11 = _r14_t6['put-shapes'](r14_contours['map'](function _r14_t12(r16_contour) {
+            _r14_t14 = _r14_t6['put-shapes'](r14_contours['map'](function _r14_t15(r16_contour) {
                 var r16_contour, _r16_t0, _r16_t1, _r16_t2;
                 return r16_contour['map'](function _r16_t2(r17_point) {
                     var r17_point, _r17_t0, _r17_t1;
-                    return {
-                        'x': r17_point['x'] + r14_shiftx,
-                        'y': r17_point['y'] + r14_shifty,
-                        'onCurve': r17_point['onCurve'],
-                        'cubic': r17_point['cubic']
-                    };
+                    return r0_tp(r14_transform, r17_point);
                 });
             }));
         else
-            _r14_t11 = void 0;
-        if ((!r14_contours || r14_copyAnchors) && r14_glyph['anchors']) {
-            _r14_t14 = 'anchors';
-            _r14_t15 = {};
-            _r14_t16 = r14_glyph['anchors'];
-            _r14_t17 = Object['keys'](r14_glyph['anchors']);
-            return _r14_t6[_r14_t14] = function (r18_a, r18_anchors, r18_keys) {
+            _r14_t14 = void 0;
+        if ((!r14_contours || r14_transform['copyAnchors']) && r14_glyph['anchors']) {
+            _r14_t17 = 'anchors';
+            _r14_t18 = {};
+            _r14_t19 = r14_glyph['anchors'];
+            _r14_t20 = Object['keys'](r14_glyph['anchors']);
+            return _r14_t6[_r14_t17] = function (r18_a, r18_anchors, r18_keys) {
                 var r18_a, r18_anchors, r18_keys, r18_k, _r18_t0, _r18_t1, _r18_t2;
                 _r18_t0 = r18_keys;
                 _r18_t1 = _r18_t0['length'];
@@ -255,8 +272,8 @@
                     r18_k = _r18_t0[_r18_t2];
                     r18_a[r18_k] = r18_anchors[r18_k];
                 }
-                return _r14_t18 = r18_a;
-            }(_r14_t15, _r14_t16, _r14_t17);
+                return _r14_t21 = r18_a;
+            }(_r14_t18, _r14_t19, _r14_t20);
         } else
             return void 0;
     };
