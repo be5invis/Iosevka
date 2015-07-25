@@ -13,10 +13,9 @@ define [xs-array low high] : begin {
 }
 define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
-define SAMPLES 5
+define SAMPLES 3
 define TINY 0.0001
 define LITTLE 0.01
-define CUTOFF 2000
 define KAPPA 0.51
 define COKAPPA : 1 - KAPPA
 define BKAPPA : KAPPA + 0.1
@@ -108,6 +107,12 @@ define [midclose a b c] : begin {
 	local xm : [a.x + c.x] / 2
 	local ym : [a.y + c.y] / 2
 	return : [Math.abs [b.x - xm]] < 0.5 && [Math.abs [b.y - ym]] < 0.5
+}
+define [near a b c] : begin {
+	local mx : [a.x + c.x] / 2
+	local my : [a.y + c.y] / 2
+	local dist : Math.max [Math.abs [a.y - c.y]] [Math.abs [a.x - c.x]]
+	return : [Math.abs [b.y - my]] < dist && [Math.abs [b.x - mx]] < dist
 }
 define [computeOffsetPoint curve t j foffset fpdx fpdy] : begin {
 	local onpoint : curve.compute [t - j]
@@ -202,14 +207,14 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			local drnext [dbackward rnext rnnext2 rnnext2 rnnext3]
 			
 			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
-			if [[not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [Math.abs il.x] <= CUTOFF && [Math.abs il.y] <= CUTOFF && [nonlinear lthis il lnext]] [then {
+			if [[not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [nonlinear lthis il lnext] && [near lthis il lnext]] [then {
 				left.push (.x lthis.x .y lthis.y .onCurve true) (.x il.x .y il.y .onCurve false)
 			}] [else {
 				left.push (.x lthis.x .y lthis.y .onCurve true)
 			}]
 			
 			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
-			if [[not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [Math.abs ir.x] <= CUTOFF && [Math.abs ir.y] <= CUTOFF && [nonlinear rthis ir rnext]] [then {
+			if [[not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext] && [near rthis ir rnext]] [then {
 				right.push (.x rthis.x .y rthis.y .onCurve true) (.x ir.x .y ir.y .onCurve false)
 			}] [else {
 				right.push (.x rthis.x .y rthis.y .onCurve true)
