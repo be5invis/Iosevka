@@ -1,67 +1,6 @@
-### Automatic build accented letters
+### Automatic builds
 
-define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
-
-foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
-	local str : String.fromCharCode code
-	local nfd : str.normalize 'NFD'
-	if [nfd.length > 1] : begin {
-		local parts ()
-		local allFound true
-		local hasMarkAbove false
-		foreach j [range 0 nfd.length] : begin {
-			set parts`j unicodeGlyphs`[nfd.charCodeAt j]
-			if [not parts`j] : set allFound false
-			if [isAboveMark parts`j] : set hasMarkAbove true
-		}
-		if allFound : begin {
-			if [parts.0 === glyphs.i && hasMarkAbove] : parts.0 = glyphs.dotlessi
-			if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
-			
-			create-glyph [parts.map [[part] -> part.name] :.join '_'] : glyph-construction {
-				assign-unicode code
-				include parts.0 AS_BASE
-				foreach part [items-of : parts.slice 1] : include part
-			}
-		}
-	}
-}
-
-create-glyph 'grave' : glyph-construction {
-	assign-unicode '`'
-	include glyphs.space AS_BASE
-	include glyphs.graveAbove
-}
-create-glyph 'acute' : glyph-construction {
-	assign-unicode 0xB4
-	include glyphs.space AS_BASE
-	include glyphs.acuteAbove
-}
-create-glyph 'asciicircum' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0x5E
-	include glyphs.space AS_BASE
-	include glyphs.circumflexAbove
-}
-create-glyph 'asciitilde' : glyph-construction {
-	set-width WIDTH
-	assign-unicode '~'
-	include glyphs.space AS_BASE
-	include glyphs.tildeAbove
-}
-create-glyph 'latin1dieresis' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xA8
-	include glyphs.space AS_BASE
-	include glyphs.dieresisAbove
-}
-create-glyph 'latin1cedilla' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xB8
-	include glyphs.space AS_BASE
-	include glyphs.cedillaBelow
-}
-
+# Build miniature clyphs : circled, superscripts, subscripts...
 define [Miniature glyphs fold scale] : begin {
 	local forkedPara : Object.create para
 	forkedPara.upmscale = 1
@@ -72,25 +11,31 @@ define [Miniature glyphs fold scale] : begin {
 	local forkFont : buildFont forkedPara shouldBuildList
 	return forkFont.glyfMap
 }
-define [CircledGlyph glyphid] : glyph-construction {
-	local sw [adviceBlackness 6]
-	include : create-glyph : glyph-construction {
-		include [Miniature (glyphid) 4.2 0.6].(glyphid)
+define [createCircledGlyphs records] : if [not recursive] : begin {
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 4.2 0.6
+	
+	foreach (unicode glyphid) [items-of records] : create-glyph ['circled_' + glyphid] : glyph-construction {
+		local sw [adviceBlackness 6]
+		if unicode : assign-unicode unicode
+		include : create-glyph : glyph-construction {
+			include miniatureFont.(glyphid)
+			apply-transform : Upright
+			apply-transform : Scale 0.45
+			apply-transform : Translate [[WIDTH - WIDTH * 0.45] / 2] [sw * 2]
+			apply-transform : Italify
+		}
+		include : smallo [CAP * 0.45 + sw * 4] 0 SB RIGHTSB sw
 		apply-transform : Upright
-		apply-transform : Scale 0.45
-		apply-transform : Translate [[WIDTH - WIDTH * 0.45] / 2] [sw * 2]
+		apply-transform : Translate 0 [parenMid - [CAP * 0.45 + sw * 4] / 2]
 		apply-transform : Italify
 	}
-	include : smallo [CAP * 0.45 + sw * 4] 0 SB RIGHTSB sw
-	apply-transform : Upright
-	apply-transform : Translate 0 [parenMid - [CAP * 0.45 + sw * 4] / 2]
-	apply-transform : Italify
 }
 define [createSuperscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 4.2 0.6
 	foreach (unicode glyphid) [items-of records] : create-glyph ['superscript_' + glyphid] : glyph-construction {
-		assign-unicode unicode
+		if unicode : assign-unicode unicode
 		include : create-glyph : glyph-construction {
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
@@ -105,7 +50,7 @@ define [createSubscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 4.2 0.6
 	foreach (unicode glyphid) [items-of records] : create-glyph ['subscript_' + glyphid] : glyph-construction {
-		assign-unicode unicode
+		if unicode : assign-unicode unicode
 		include : create-glyph : glyph-construction {
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
@@ -117,18 +62,15 @@ define [createSubscripts records] : if [not recursive] : begin {
 	}
 }
 
-create-glyph 'copyright' : glyph-construction {
-	assign-unicode 0xA9
-	include : CircledGlyph 'C'
-}
-create-glyph 'registered' : glyph-construction {
-	assign-unicode 0xAE
-	include : CircledGlyph 'R'
+createCircledGlyphs : list {
+	list 0xA9   'C'
+	list 0xAE   'R'
+	list 0x2117 'P'
 }
 
 create-glyph 'ordfeminine' : glyph-construction {
 	assign-unicode 0xAA
-	include : Miniature 'a' 4.2 0.6
+	include : Miniature ('a') 4.2 0.6
 	include : create-stroke
 		:.start-from SB DESCENDER
 		:.set-width  STROKE 0
@@ -144,7 +86,7 @@ create-glyph 'ordfeminine' : glyph-construction {
 }
 create-glyph 'ordmasculine' : glyph-construction {
 	assign-unicode 0xBA
-	include : Miniature 'o' 4.2 0.6
+	include : Miniature ('o') 4.2 0.6
 	include : create-stroke
 		:.start-from SB DESCENDER
 		:.set-width  STROKE 0
@@ -210,6 +152,7 @@ createSuperscripts : list {
 	list 0x1D3C 'O'
 	list 0x1D3E 'P'
 	list 0x1D3F 'R'
+	list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 	list 0x1D40 'T'
 	list 0x1D41 'U'
 	list 0x1D42 'W'
@@ -243,4 +186,101 @@ createSubscripts : list {
 	list 0x1D63 'r'
 	list 0x1D64 'u'
 	list 0x1D65 'v'
+}
+
+# Composite superscripts and subscripts
+define [doubleSuperscript a b] : glyph-construction {
+	include a
+	apply-transform : Translate [-WIDTH * 0.6] 0
+	include b
+	apply-transform : Upright
+	apply-transform : Translate [-WIDTH * 0.2] [-CAP]
+	apply-transform : Scale 0.8
+	apply-transform : Translate MIDDLE CAP
+	apply-transform : Italify
+}
+create-glyph 'trademark' : glyph-construction {
+	assign-unicode 0x2122
+	include : doubleSuperscript glyphs.superscript_T glyphs.superscript_M
+}
+create-glyph 'servicemark' : glyph-construction {
+	assign-unicode 0x2120
+	include : doubleSuperscript glyphs.superscript_S glyphs.superscript_M
+}
+
+# Build accented glyphs
+
+define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
+
+foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
+	local str : String.fromCharCode code
+	local nfd : str.normalize 'NFD'
+	if [nfd.length > 1] : begin {
+		local parts ()
+		local allFound true
+		local hasMarkAbove false
+		foreach j [range 0 nfd.length] : begin {
+			set parts`j unicodeGlyphs`[nfd.charCodeAt j]
+			if [not parts`j] : set allFound false
+			if [isAboveMark parts`j] : set hasMarkAbove true
+		}
+		if allFound : begin {
+			if [parts.0 === glyphs.i && hasMarkAbove] : parts.0 = glyphs.dotlessi
+			if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
+			
+			create-glyph [parts.map [[part] -> part.name] :.join '_'] : glyph-construction {
+				assign-unicode code
+				include parts.0 AS_BASE
+				foreach part [items-of : parts.slice 1] : include part
+			}
+		}
+	}
+}
+
+# Spacing marks
+create-glyph 'grave' : glyph-construction {
+	assign-unicode '`'
+	include glyphs.space AS_BASE
+	include glyphs.graveAbove
+}
+create-glyph 'acute' : glyph-construction {
+	assign-unicode 0xB4
+	include glyphs.space AS_BASE
+	include glyphs.acuteAbove
+}
+create-glyph 'asciicircum' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0x5E
+	include glyphs.space AS_BASE
+	include glyphs.circumflexAbove
+}
+create-glyph 'asciitilde' : glyph-construction {
+	set-width WIDTH
+	assign-unicode '~'
+	include glyphs.space AS_BASE
+	include glyphs.tildeAbove
+}
+create-glyph 'latin1dieresis' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xA8
+	include glyphs.space AS_BASE
+	include glyphs.dieresisAbove
+}
+create-glyph 'latin1cedilla' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xB8
+	include glyphs.space AS_BASE
+	include glyphs.cedillaBelow
+}
+create-glyph 'latin1macron' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xAF
+	include glyphs.space AS_BASE
+	include glyphs.macronAbove
+}
+create-glyph 'degree' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xB0
+	include glyphs.space AS_BASE
+	include glyphs.ringAbove
 }
