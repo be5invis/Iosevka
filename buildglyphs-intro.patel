@@ -8,7 +8,7 @@ define [mix a b p] : a + [b - a] * p
 define [linreg x0 y0 x1 y1 x] : y0 + [x - x0] * [y1 - y0] / [x1 - x0]
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
 
-define [exports.build para] : begin {
+define [exports.build para picks] : begin {
 
 define variantSelector para.variantSelector
 
@@ -192,17 +192,22 @@ define-macro glyph-construction : syntax-rules {
 	}]] env)
 }
 
+local dependencyProfile (.)
 local nTemp 0
-define [create-glyph name groupid actions] : piecewise {
-	[name && groupid && actions] : begin {
-		if [para.buildFor && para.buildFor !== groupid && groupid !== '*'] : return nothing
+define [create-glyph name actions] : piecewise {
+	[name && actions] : begin {
+		if [picks && [picks.indexOf name] < 0] : return nothing
+		set dependencyProfile`name ()
 		define glyphObject [new Glyph name]
 		glyphList.push glyphObject
 		glyphs`name = glyphObject
 		actions.call glyphObject
+		foreach d [items-of glyphObject.dependencies] : begin {
+			local allAliases : Object.keys glyphs :.filter [[k] -> [glyphs`k === glyphs`d]]
+			dependencyProfile`name = [dependencyProfile`name.concat dependencyProfile`d allAliases]
+		}
 		return glyphObject
 	}
-	[name && groupid] : create-glyph name name arguments.1
 	true : begin {
 		local actions arguments.0
 		local glyphObject [new Glyph ['.temp-' + [set nTemp [inc nTemp]]]]
@@ -211,19 +216,18 @@ define [create-glyph name groupid actions] : piecewise {
 	}
 }
 
-define [select-variant glyphid groupid unicode default] : piecewise {
-	[glyphid && groupid && unicode && default] : begin {
-		if [para.buildFor && para.buildFor !== groupid && groupid !== '*'] : return nothing
-		local variant : variantSelector`glyphid || default
-		local chosenGlyph glyphs`[glyphid + '.' + variant]
-		set glyphs`glyphid chosenGlyph
-		if unicode : begin {
-			chosenGlyph.assign-unicode unicode
-			set chosenGlyph.dontExport false
-			set unicodeGlyphs.(chosenGlyph.unicode`[chosenGlyph.unicode.length - 1]) chosenGlyph
-		}
+define [select-variant glyphid unicode default] : begin {
+	if [picks && [picks.indexOf glyphid] < 0] : return nothing
+	local variant : variantSelector`glyphid || default
+	local chosenGlyph glyphs`[glyphid + '.' + variant]
+	set glyphs`glyphid chosenGlyph
+	local allAliases : Object.keys glyphs :.filter [[k] -> [glyphs`k === glyphs.(chosenGlyph.name)]]
+	set dependencyProfile`glyphid : allAliases.concat dependencyProfile.(chosenGlyph.name)
+	if unicode : begin {
+		chosenGlyph.assign-unicode unicode
+		set chosenGlyph.dontExport false
+		set unicodeGlyphs.(chosenGlyph.unicode`[chosenGlyph.unicode.length - 1]) chosenGlyph
 	}
-	[glyphid && groupid && unicode] : select-variant glyphid glyphid arguments.1 arguments.2
 }
 
 ###### HERE WE GO!

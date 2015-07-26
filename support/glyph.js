@@ -50,6 +50,7 @@
             'x': 0,
             'y': 0
         };
+        _r3_t0['dependencies'] = [];
         return void 0;
     };
     r0_Glyph['is'] = {
@@ -193,7 +194,7 @@
         return _r14_t3;
     };
     r0_Glyph['prototype']['include'] = function _r0_t13(r16_component, r16_copyAnchors) {
-        var r16_component, r16_copyAnchors, r16_glyph, r16_otherwise, r16_contours, r16_it, r16_transform, r16_shiftx, r16_shifty, r16_markid, r16_anchorThis, r16_anchorThat, _r16_t0, _r16_t1, _r16_t2, _r16_t3, _r16_t4, _r16_t5, _r16_t6, _r16_t7, _r16_t8, _r16_t9, _r16_t10, _r16_t11, _r16_t12, _r16_t13, _r16_t14, _r16_t15, _r16_t16, _r16_t17, _r16_t18, _r16_t19, _r16_t20, _r16_t21, _r16_t22, _r16_tag23, _r16_t24, _r16_t25;
+        var r16_component, r16_copyAnchors, r16_glyph, r16_otherwise, r16_contours, r16_it, r16_transform, r16_shiftx, r16_shifty, r16_markid, r16_anchorThis, r16_anchorThat, _r16_t0, _r16_t1, _r16_t2, _r16_t3, _r16_t4, _r16_t5, _r16_t6, _r16_t7, _r16_t8, _r16_t9, _r16_t10, _r16_t11, _r16_t12, _r16_t13, _r16_t14, _r16_t15, _r16_t16, _r16_t17, _r16_t18, _r16_t19, _r16_t20, _r16_t21, _r16_t22, _r16_tag23, _r16_t24, _r16_t25, _r16_t26;
         _r16_t7 = this;
         _r16_t0 = r16_component;
         if (_r16_t2 = r0_aFunction['unapply'](_r16_t0, 1)) {
@@ -244,16 +245,16 @@
                     r16_shiftx = _r16_t6[0];
                     r16_shifty = _r16_t6[1];
                     if (r16_anchorThat['mbx'] !== void 0 && r16_anchorThat['mby'] !== void 0)
-                        _r16_t25 = _r16_t7['anchors'][r16_markid] = {
+                        _r16_t26 = _r16_t7['anchors'][r16_markid] = {
                             'x': r16_anchorThis['x'] + r16_anchorThat['mbx'] - r16_anchorThat['x'],
                             'y': r16_anchorThis['y'] + r16_anchorThat['mby'] - r16_anchorThat['y'],
                             'type': r16_anchorThis['type'],
                             'mbx': r16_anchorThis['mbx'],
                             'mby': r16_anchorThis['mby']
                         };
-                    _r16_t24 = _r16_t25;
+                    _r16_t25 = _r16_t26;
                 } else
-                    _r16_t24 = void 0;
+                    _r16_t25 = void 0;
                 _r16_t14 = _r16_t5 = _r16_t5 + 1;
             }
             _r16_t12 = _r16_t14;
@@ -276,7 +277,7 @@
             _r16_t19 = {};
             _r16_t20 = r16_glyph['anchors'];
             _r16_t21 = Object['keys'](r16_glyph['anchors']);
-            return _r16_t7[_r16_t18] = function (r20_a, r20_anchors, r20_keys) {
+            _r16_t17 = _r16_t7[_r16_t18] = function (r20_a, r20_anchors, r20_keys) {
                 var r20_a, r20_anchors, r20_keys, r20_k, _r20_t0, _r20_t1, _r20_t2;
                 _r20_t0 = r20_keys;
                 _r20_t1 = _r20_t0['length'];
@@ -288,6 +289,10 @@
                 return _r16_t22 = r20_a;
             }(_r16_t19, _r16_t20, _r16_t21);
         } else
+            _r16_t17 = void 0;
+        if (r16_glyph['name'])
+            return _r16_t7['dependencies']['push'](r16_glyph['name']);
+        else
             return void 0;
     };
     r0_Glyph['prototype']['apply-transform'] = function _r0_t14(r22_transform) {
