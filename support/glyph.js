@@ -194,7 +194,7 @@
         return _r14_t3;
     };
     r0_Glyph['prototype']['include'] = function _r0_t13(r16_component, r16_copyAnchors) {
-        var r16_component, r16_copyAnchors, r16_glyph, r16_otherwise, r16_contours, r16_it, r16_transform, r16_shiftx, r16_shifty, r16_markid, r16_anchorThis, r16_anchorThat, _r16_t0, _r16_t1, _r16_t2, _r16_t3, _r16_t4, _r16_t5, _r16_t6, _r16_t7, _r16_t8, _r16_t9, _r16_t10, _r16_t11, _r16_t12, _r16_t13, _r16_t14, _r16_t15, _r16_t16, _r16_t17, _r16_t18, _r16_t19, _r16_t20, _r16_t21, _r16_t22, _r16_tag23, _r16_t24, _r16_t25, _r16_t26;
+        var r16_component, r16_copyAnchors, r16_glyph, r16_otherwise, r16_contours, r16_it, r16_transform, r16_shiftx, r16_shifty, r16_markid, r16_anchorThis, r16_anchorThat, _r16_t0, _r16_t1, _r16_t2, _r16_t3, _r16_t4, _r16_t5, _r16_t6, _r16_t7, _r16_t8, _r16_t9, _r16_t10, _r16_t11, _r16_t12, _r16_t13, _r16_t14, _r16_t15, _r16_t16, _r16_t17, _r16_t18, _r16_t19, _r16_t20, _r16_t21, _r16_t22, _r16_tag23, _r16_t24, _r16_t25, _r16_t26, _r16_t27;
         _r16_t7 = this;
         _r16_t0 = r16_component;
         if (_r16_t2 = r0_aFunction['unapply'](_r16_t0, 1)) {
@@ -245,16 +245,16 @@
                     r16_shiftx = _r16_t6[0];
                     r16_shifty = _r16_t6[1];
                     if (r16_anchorThat['mbx'] !== void 0 && r16_anchorThat['mby'] !== void 0)
-                        _r16_t26 = _r16_t7['anchors'][r16_markid] = {
+                        _r16_t27 = _r16_t7['anchors'][r16_markid] = {
                             'x': r16_anchorThis['x'] + r16_anchorThat['mbx'] - r16_anchorThat['x'],
                             'y': r16_anchorThis['y'] + r16_anchorThat['mby'] - r16_anchorThat['y'],
                             'type': r16_anchorThis['type'],
                             'mbx': r16_anchorThis['mbx'],
                             'mby': r16_anchorThis['mby']
                         };
-                    _r16_t25 = _r16_t26;
+                    _r16_t26 = _r16_t27;
                 } else
-                    _r16_t25 = void 0;
+                    _r16_t26 = void 0;
                 _r16_t14 = _r16_t5 = _r16_t5 + 1;
             }
             _r16_t12 = _r16_t14;
@@ -292,6 +292,8 @@
             _r16_t17 = void 0;
         if (r16_glyph['name'])
             return _r16_t7['dependencies']['push'](r16_glyph['name']);
+        else if (r16_glyph['dependencies'])
+            return _r16_t7['dependencies'] = _r16_t7['dependencies']['concat'](r16_glyph['dependencies']);
         else
             return void 0;
     };
