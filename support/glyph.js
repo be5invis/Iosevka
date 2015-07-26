@@ -1,5 +1,5 @@
 ﻿{
-    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_fallback, r0_aFunction, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15;
+    var r0_bezierCubic2Q2, r0_tp, r0_Stroke, r0_id, r0_fallback, r0_aFunction, r0_Glyph, _r0_t0, _r0_t1, _r0_t2, _r0_t3, _r0_t4, _r0_t5, _r0_t6, _r0_t7, _r0_t8, _r0_t9, _r0_t10, _r0_t11, _r0_t12, _r0_t13, _r0_t14, _r0_t15, _r0_t16;
     r0_bezierCubic2Q2 = require('node-sfnt/lib/math/bezierCubic2Q2');
     r0_tp = require('./transform')['transformPoint'];
     r0_Stroke = require('./stroke')['Stroke'];
@@ -290,37 +290,48 @@
         } else
             return void 0;
     };
-    r0_Glyph['prototype']['create-stroke'] = function _r0_t14() {
-        var r22_s, _r22_t0, _r22_t1;
+    r0_Glyph['prototype']['apply-transform'] = function _r0_t14(r22_transform) {
+        var r22_transform, _r22_t0, _r22_t1, _r22_t2;
         _r22_t0 = this;
-        r22_s = new r0_Stroke();
-        r22_s['gizmo'] = Object['create'](_r22_t0['gizmo']);
-        return r22_s;
-    };
-    r0_Glyph['prototype']['set-anchor'] = function _r0_t15(r23_id, r23_type, r23_x, r23_y, r23_mbx, r23_mby) {
-        var r23_id, r23_type, r23_x, r23_y, r23_mbx, r23_mby, r23_anchorpoint, r23_markbasepoint, _r23_t0, _r23_t1, _r23_t2;
-        _r23_t0 = this;
-        r23_anchorpoint = r0_tp(_r23_t0['gizmo'], {
-            'x': r23_x,
-            'y': r23_y
+        return _r22_t0['contours'] = _r22_t0['contours']['map'](function _r22_t2(r23_contour) {
+            var r23_contour, _r23_t0, _r23_t1, _r23_t2;
+            return r23_contour['map'](function _r23_t2(r24_point) {
+                var r24_point, _r24_t0, _r24_t1;
+                return r0_tp(r22_transform, r24_point);
+            });
         });
-        if (r23_mbx !== void 0 && r23_mby !== void 0)
-            _r23_t2 = r0_tp(_r23_t0['gizmo'], {
-                'x': r23_mbx,
-                'y': r23_mby
+    };
+    r0_Glyph['prototype']['create-stroke'] = function _r0_t15() {
+        var r25_s, _r25_t0, _r25_t1;
+        _r25_t0 = this;
+        r25_s = new r0_Stroke();
+        r25_s['gizmo'] = Object['create'](_r25_t0['gizmo']);
+        return r25_s;
+    };
+    r0_Glyph['prototype']['set-anchor'] = function _r0_t16(r26_id, r26_type, r26_x, r26_y, r26_mbx, r26_mby) {
+        var r26_id, r26_type, r26_x, r26_y, r26_mbx, r26_mby, r26_anchorpoint, r26_markbasepoint, _r26_t0, _r26_t1, _r26_t2;
+        _r26_t0 = this;
+        r26_anchorpoint = r0_tp(_r26_t0['gizmo'], {
+            'x': r26_x,
+            'y': r26_y
+        });
+        if (r26_mbx !== void 0 && r26_mby !== void 0)
+            _r26_t2 = r0_tp(_r26_t0['gizmo'], {
+                'x': r26_mbx,
+                'y': r26_mby
             });
         else
-            _r23_t2 = {
+            _r26_t2 = {
                 'x': void 0,
                 'y': void 0
             };
-        r23_markbasepoint = _r23_t2;
-        return _r23_t0['anchors'][r23_id] = {
-            'x': r23_anchorpoint['x'],
-            'y': r23_anchorpoint['y'],
-            'type': r23_type,
-            'mbx': r23_markbasepoint['x'],
-            'mby': r23_markbasepoint['y']
+        r26_markbasepoint = _r26_t2;
+        return _r26_t0['anchors'][r26_id] = {
+            'x': r26_anchorpoint['x'],
+            'y': r26_anchorpoint['y'],
+            'type': r26_type,
+            'mbx': r26_markbasepoint['x'],
+            'mby': r26_markbasepoint['y']
         };
     };
     exports['Glyph'] = r0_Glyph;
