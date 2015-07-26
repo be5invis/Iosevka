@@ -1,5 +1,10 @@
 ### Extended symbols
 
+create-glyph 'nbsp' : glyph-construction {
+	assign-unicode 0xA0
+	include glyphs.space
+}
+
 create-glyph 'cent' : glyph-construction {
 	assign-unicode 0xA2
 	include glyphs.c AS_BASE
@@ -79,11 +84,10 @@ create-glyph 'sterling' : glyph-construction {
 	assign-unicode 0xA3
 	set-width WIDTH
 	include glyphs.'longs.upright'
-	apply-transform : Translate [-WIDTH * 0.15] 0
-	include : fBar [mix SB RIGHTSB 0.05] [[mix SB RIGHTSB 0.65] + HALFSTROKE] [CAP * 0.5 + STROKE]
+	apply-transform : Translate [-WIDTH * 0.125] 0
+	include : fBar [mix SB RIGHTSB 0.05] [mix SB RIGHTSB 0.7] [CAP * 0.5 + STROKE]
 	include glyphs.underscore
 }
-
 create-glyph 'micro' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 0xB5
@@ -109,7 +113,7 @@ create-glyph 'bullet' : glyph-construction {
 }
 create-glyph 'currency' : glyph-construction {
 	assign-unicode 0xA4
-	local sw : adviceBlackness 5
+	local sw : adviceBlackness 3.5
 	local radius : [RIGHTSB - SB] / 2
 	include : smallo [parenMid + radius * 0.9] [parenMid - radius * 0.9] [MIDDLE - radius * 0.9] [MIDDLE + radius * 0.9] sw
 	foreach j [range 0 4] : begin {
@@ -125,4 +129,110 @@ create-glyph 'euro' : glyph-construction {
 	include glyphs.C
 	include : hbar [SB - HALFSTROKE] [mix SB RIGHTSB 0.7] [CAP * 0.4] [adviceBlackness 4]
 	include : hbar [SB - HALFSTROKE] [mix SB RIGHTSB 0.7] [CAP * 0.6] [adviceBlackness 4]
+}
+create-glyph 'multiply' : glyph-construction {
+	assign-unicode 0xD7
+	local radius : [RIGHTSB - SB] / 2
+	include : create-stroke
+		:.start-from [MIDDLE - radius] [parenMid - radius]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    [MIDDLE + radius] [parenMid + radius]
+	
+	include : create-stroke
+		:.start-from [MIDDLE + radius] [parenMid - radius]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    [MIDDLE - radius] [parenMid + radius]
+}
+create-glyph 'divide' : glyph-construction {
+	assign-unicode 0xF7
+	include glyphs.hyphen
+	local radius : [RIGHTSB - SB] / 2
+	include : list {
+		Ring [parenMid + radius + DOTRADIUS] [parenMid + radius - DOTRADIUS] [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O]
+		Ring [parenMid - radius + DOTRADIUS] [parenMid - radius - DOTRADIUS] [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O]
+	}
+}
+create-glyph 'brokenbar' : glyph-construction {
+	assign-unicode 0xA6
+	include : vbar MIDDLE [parenMid + HALFSTROKE] parenTop
+	include : vbar MIDDLE parenBot [parenMid - HALFSTROKE]
+}
+create-glyph 'singleguillemetleft' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0x2039
+	
+	local top : mix parenMid parenTop 0.5
+	local bot : mix parenMid parenBot 0.5
+	local extension 0.55
+	local extension2x [-0.2]
+	local extension2y 0.375
+	local cor 1
+	
+	local halfsw : 0.5 * [adviceBlackness 3.5]
+	
+	include : create-stroke
+		:.start-from  [mix MIDDLE RIGHTSB extension] top
+		:.set-width   halfsw halfsw
+		:.curve-to    [mix MIDDLE SB extension2x] [mix top bot extension2y] [mix MIDDLE SB extension] [mix top bot 0.5]
+		:.set-width   [halfsw * cor] [halfsw * cor]
+		:.heads-to    LEFTWARD
+		:.set-samples 1
+	
+	include : create-stroke
+		:.start-from  [mix MIDDLE SB extension] [mix top bot 0.5]
+		:.set-width   [halfsw * cor] [halfsw * cor]
+		:.heads-to    RIGHTWARD
+		:.curve-to    [mix MIDDLE SB extension2x] [mix bot top extension2y] [mix MIDDLE RIGHTSB extension] bot
+		:.set-width   halfsw halfsw
+		:.set-samples 1
+	
+	apply-transform : Translate [-[RIGHTSB - SB] * 0.05] 0
+}
+create-glyph 'guillemetleft' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xAB
+	
+	include glyphs.singleguillemetleft
+	apply-transform : Translate [[RIGHTSB - SB] * 0.5] 0
+	include glyphs.singleguillemetleft
+	apply-transform : Translate [-[RIGHTSB - SB] * 0.25] 0
+}
+
+create-glyph 'singleguillemetright' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0x203A
+	
+	include glyphs.singleguillemetleft
+	include : FlipAround MIDDLE parenMid
+}
+create-glyph 'guillemetright' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xBB
+	
+	include glyphs.guillemetleft
+	include : FlipAround MIDDLE parenMid
+}
+
+create-glyph 'paragraph' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xB6
+	local sw : adviceBlackness 3.6
+	
+	include : vbar [MIDDLE + sw / 4] 0 CAP sw
+	include : vbar [RIGHTSB - sw / 2] 0 CAP sw
+	include : create-stroke
+		:.start-from [MIDDLE - sw / 4] [CAP - sw / 2]
+		:.set-width  [sw / 2] [sw / 2]
+		:.heads-to   LEFTWARD
+		:.arc-hv-to  [SB + sw / 2] [mix [CAP * 0.5] [CAP - sw / 2] 0.5]
+		:.heads-to   DOWNWARD
+		:.arc-vh-to  [MIDDLE - sw / 4] [CAP * 0.5]
+		:.heads-to   RIGHTWARD
+}
+create-glyph 'negate' : glyph-construction {
+	assign-unicode 0xAC
+	
+	include glyphs.hyphen
+	
+	include : vbar [RIGHTSB - HALFSTROKE] [hyphenCenter - [RIGHTSB - SB] * 0.55] [hyphenCenter + HALFSTROKE]
 }

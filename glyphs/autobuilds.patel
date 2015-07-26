@@ -40,7 +40,7 @@ define [createSuperscripts records] : if [not recursive] : begin {
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
 			apply-transform : Translate [-MIDDLE] [-CAP]
-			apply-transform : Scale 0.6
+			apply-transform : Scale 0.7
 			apply-transform : Translate MIDDLE CAP
 			apply-transform : Italify
 		}
@@ -55,10 +55,38 @@ define [createSubscripts records] : if [not recursive] : begin {
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
 			apply-transform : Translate [-MIDDLE] 0
-			apply-transform : Scale 0.6
-			apply-transform : Translate MIDDLE [-DESCENDER / 2]
+			apply-transform : Scale 0.7
+			apply-transform : Translate MIDDLE [DESCENDER / 2]
 			apply-transform : Italify
 		}
+	}
+}
+
+define [createFractions records] : if [not recursive] : begin {
+	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
+	local miniatureFont : Miniature pendingGlyphs 4 0.6
+	foreach (unicode numid denid) [items-of records] : create-glyph ['fraction_' + numid + '_' + denid] : glyph-construction {
+		if unicode : assign-unicode unicode
+		local fine : adviceBlackness 4.2
+		include : create-glyph : glyph-construction {
+			include : create-glyph : glyph-construction {
+				include miniatureFont.(numid)
+				apply-transform : Translate [MIDDLE - miniatureFont.(numid).advanceWidth / 2] 0
+			}
+			apply-transform : Upright
+			apply-transform : Translate 0 [CAP + fine * 4]
+			apply-transform : Italify
+			include : create-glyph : glyph-construction {
+				include miniatureFont.(denid)
+				apply-transform : Translate [MIDDLE - miniatureFont.(denid).advanceWidth / 2] 0
+			}
+			apply-transform : Upright
+			apply-transform : Translate [-MIDDLE] [-CAP - fine * 2]
+			apply-transform : Scale 0.5
+			apply-transform : Translate MIDDLE parenMid
+			apply-transform : Italify
+		}
+		include : hbar SB RIGHTSB parenMid fine
 	}
 }
 
@@ -70,33 +98,33 @@ createCircledGlyphs : list {
 
 create-glyph 'ordfeminine' : glyph-construction {
 	assign-unicode 0xAA
-	include : Miniature ('a') 4.2 0.6
+	include [Miniature ('a') 4.2 0.6].a
 	include : create-stroke
 		:.start-from SB DESCENDER
 		:.set-width  STROKE 0
 		:.heads-to   RIGHTWARD
 		:.line-to    RIGHTSB DESCENDER
 		:.heads-to   RIGHTWARD
-		
+	
 	apply-transform : Upright
 	apply-transform : Translate [-MIDDLE] [-XH]
-	apply-transform : Scale 0.6
+	apply-transform : Scale 0.7
 	apply-transform : Translate MIDDLE CAP
 	apply-transform : Italify
 }
 create-glyph 'ordmasculine' : glyph-construction {
 	assign-unicode 0xBA
-	include : Miniature ('o') 4.2 0.6
+	include [Miniature ('o') 4.2 0.6].o
 	include : create-stroke
 		:.start-from SB DESCENDER
 		:.set-width  STROKE 0
 		:.heads-to   RIGHTWARD
 		:.line-to    RIGHTSB DESCENDER
 		:.heads-to   RIGHTWARD
-		
+	
 	apply-transform : Upright
 	apply-transform : Translate [-MIDDLE] [-XH]
-	apply-transform : Scale 0.6
+	apply-transform : Scale 0.7
 	apply-transform : Translate MIDDLE CAP
 	apply-transform : Italify
 }
@@ -186,6 +214,27 @@ createSubscripts : list {
 	list 0x1D63 'r'
 	list 0x1D64 'u'
 	list 0x1D65 'v'
+}
+
+createFractions : list {
+	list 0x00BC 'one' 'four'
+	list 0x00BD 'one' 'two'
+	list 0x00BE 'three' 'four'
+	list 0x2150 'one' 'seven'
+	list 0x2151 'one' 'nine'
+	list 0x2152 'one' 'ten'
+	list 0x2153 'one' 'three'
+	list 0x2154 'two' 'three'
+	list 0x2155 'one' 'five'
+	list 0x2156 'two' 'five'
+	list 0x2157 'three' 'five'
+	list 0x2158 'four' 'five'
+	list 0x2159 'one' 'six'
+	list 0x215A 'five' 'six'
+	list 0x215B 'one' 'eight'
+	list 0x215C 'three' 'eight'
+	list 0x215D 'five' 'eight'
+	list 0x215E 'seven' 'eight'
 }
 
 # Composite superscripts and subscripts
