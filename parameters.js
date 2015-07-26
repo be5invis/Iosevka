@@ -3,7 +3,7 @@
     r0_regular = {
         'upmscale': 2.048,
         'width': 500,
-        'stroke': 80,
+        'stroke': 70,
         'dotsize': 125,
         'periodsize': 150,
         'sb': 60,
@@ -42,7 +42,7 @@
     r0_bold['style'] = 'Bold';
     r0_bold['isBold'] = true;
     r0_bold['sb'] = 50;
-    r0_bold['stroke'] = 120;
+    r0_bold['stroke'] = 105;
     r0_bold['dotsize'] = 160;
     r0_bold['periodsize'] = 180;
     r0_bold['ebarpos'] = 0.4;
