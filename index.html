@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<meta charset="utf-8">
+	<title>Iosevka</title>
+	<style>
+		@font-face {
+			font-family: IosevkaWEB;
+			src: url(iosevka-regular.ttf);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-style: italic;
+			src: url(iosevka-italic.ttf);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-weight: bold;
+			src: url(iosevka-bold.ttf);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-style: italic;
+			font-weight: bold;
+			src: url(iosevka-bolditalic.ttf);
+		}
+		body {
+			width: 68rem;
+			margin: 0 auto;
+			padding: 4rem 0;
+		}
+		pre, .show, #links {
+			font-family: "IosevkaWEB", monospace
+		}
+		div.show {
+			font-size: 2rem;
+			width: 68rem;
+		}
+		div.show.bold { font-weight: bold }
+		div.show.italic { font-style: italic }
+		div.block {
+			display: flex;
+			width: 68rem;
+			flex-wrap: wrap;
+			border-bottom: 1px dotted #ccc;
+			margin-bottom: -1px;
+		}
+		.show span {
+			display: block;
+			width: 2rem;
+			height: 2rem;
+			line-height: 2rem;
+			padding: 1rem;
+			flex: none;
+			text-align: center;
+			position: relative;
+			cursor: default;
+		}
+		.show span.indicator {
+			font-size: 1rem;
+		}
+		.show span.missing {
+			opacity: 0.1
+		}
+		.show span.present:before {
+			display: none;
+			content: attr(alt);
+			position: absolute;
+			font-size: 0.33em;
+			top: -2em;
+			left: -5em;
+			right: -5em;
+			text-align: center;
+			font-weight: normal;
+			font-style: normal;
+			text-shadow: white 0 0 0.4em;
+		}
+		.show span.present:hover {
+			background: #eee;
+		}
+		.show span.present:hover:before {
+			display: block;
+		}
+		.show span > s {
+			text-decoration: none;
+			position: relative;
+		}
+		.show span.present:hover s:before {
+			display: block;
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 100%;
+			width: 0.2em;
+			border-right: 1px solid rgba(255, 0, 0, 0.1);
+			border-top: 1px solid rgba(255, 0, 0, 0.1);
+			border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+		}
+		.show span.present:hover s:after {
+			display: block;
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 100%;
+			width: 0.2em;
+			border-left: 1px solid rgba(255, 0, 0, 0.1);
+			border-top: 1px solid rgba(255, 0, 0, 0.1);
+			border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+		}
+		
+		#links {
+			display: flex;
+		}
+		#links a {
+			display: block;
+			flex: 1;
+			padding: 1rem 0;
+			text-align: center;
+			text-decoration: none;
+			color: black;
+		}
+		#links a.active {
+			background: black;
+			color: white;
+		}
+	</style>
+	<script src="http://cdnjscn.b0.upaiyun.com/libs/zepto/1.1.4/zepto.min.js"></script>
+</html>
+<body>
+	<pre>Informations can be disclosed so far.</pre>
+	<div id="links"></div>
+	<script>
+		function padzero(s, n){
+			while(s.length < n) s = '0' + s;
+			return s;
+		}
+		var BLOCKSIZE = 16 * 4;
+		var fonts = [
+			{name: 'iosevka-regular', cls: ''},
+			{name: 'iosevka-bold', cls: 'bold'},
+			{name: 'iosevka-italic', cls:'italic'},
+			{name: 'iosevka-bolditalic', cls:'bold italic'}
+		];
+		
+		var divs = [];
+		var links = [];
+		function Click(j){
+			return function(){
+				for(var k = 0; k < divs.length; k++) if(k === j) {
+					divs[k].show()
+					links[k].addClass('active')
+				} else {
+					divs[k].hide()
+					links[k].removeClass('active')
+				}
+				return false;
+			}
+		}
+		fonts.forEach(function(font, fontindex){
+			var div = $('<div>').addClass('show ' + font.cls);
+			$.getJSON(font.name + '.charmap', function(data){
+				var uhash = [];
+				for(var j = 0; j < data.length; j++) {
+					var unicodes = data[j][1];
+					if(unicodes && unicodes.length) for(var k = 0; k < unicodes.length; k++){
+						uhash[unicodes[k]] = data[j][0].trim()
+					}
+				}
+				for(var block = 0; block < (65536 / BLOCKSIZE); block++) {
+					var blockdiv = $('<div>').addClass('block');
+					var hasGlyphInThisBlock = false;
+					for(j = block * BLOCKSIZE; j < (block + 1) * BLOCKSIZE; j++) if(uhash[j]){
+						 hasGlyphInThisBlock = true;
+					}
+					if(hasGlyphInThisBlock) {
+						for(j = block * BLOCKSIZE; j < (block + 1) * BLOCKSIZE; j++) {
+							if(j % 16 === 0) blockdiv.append('<span class="indicator">' + padzero(j.toString(16).toUpperCase(), 4) + '</span>')
+							blockdiv.append('<span class="' + (uhash[j] ? 'present' : 'missing') + '" alt="' + (uhash[j] || '') + '"><s>' + String.fromCharCode(j) + '</s></span>')
+						}
+						div.append(blockdiv)
+					}
+				};
+			});
+			divs.push(div);
+			$('body').append(div);
+			
+			var a = $('<a>').attr('href', '#').append(font.name);
+			a.on('click', Click(fontindex));
+			links.push(a)
+			$('#links').append(a);
+		});
+		Click(0)();
+	</script>
+	<a href="https://github.com/be5invis/Iosevka"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+</body>
