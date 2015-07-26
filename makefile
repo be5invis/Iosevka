@@ -9,6 +9,7 @@ SUPPRESS_ERRORS = 2> /dev/null
 endif
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
+MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 STEP0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 STEP1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 STEP2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
@@ -18,13 +19,13 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 fonts : update $(TARGETS)
 	
 $(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) $(OBJDIR)
-	node generate regular $@
+	node generate regular $@ --dumpmap $(OBJDIR)/iosevka-regular.charmap
 $(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) $(OBJDIR)
-	node generate bold $@
+	node generate bold $@ --dumpmap $(OBJDIR)/iosevka-bold.charmap
 $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) $(OBJDIR)
-	node generate italic $@
+	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
-	node generate bolditalic $@
+	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap
 
 $(STEP1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf
 	fontforge -script pass1-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
