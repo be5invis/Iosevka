@@ -100,7 +100,7 @@ define RBALANCE :  para.rbalance   || JBALANCE * 0.3
 # Blackness parameters
 # We will estimate blackness using lower-case 'e'
 define WHITENESS : [[XH - STROKE * 2.5] * [RIGHTSB - SB] * [1 / 3]] / [XH * [RIGHTSB - SB]]
-define [adviceBlackness m] : Math.min STROKE [[RIGHTSB - SB] * [1 - WHITENESS] / m]
+define [adviceBlackness crowdedness] : Math.min STROKE [[RIGHTSB - SB] * [1 - WHITENESS] / crowdedness]
 
 # Anchor parameters
 define BASE 'base'
@@ -184,6 +184,19 @@ define-macro glyph-construction : syntax-rules {
 		local create-stroke : this.create-stroke.bind this
 		local set-anchor : this.set-anchor.bind this
 		local apply-transform : this.apply-transform.bind this
+
+#		Actually I can define them using macros, but it makes compilation slow.
+#		define-macro set-width : syntax-rules { @`[set-width @::args] @`[currentGlyph.set-width @::args] }
+#		define-macro start-from : syntax-rules { @`[start-from @::args] @`[currentGlyph.start-from @::args] }
+#		define-macro line-to : syntax-rules { @`[line-to @::args] @`[currentGlyph.line-to @::args] }
+#		define-macro curve-to : syntax-rules { @`[curve-to @::args] @`[currentGlyph.curve-to @::args] }
+#		define-macro cubic-to : syntax-rules { @`[cubic-to @::args] @`[currentGlyph.cubic-to @::args] }
+#		define-macro include : syntax-rules { @`[include @::args] @`[currentGlyph.include @::args] }
+#		define-macro create-stroke : syntax-rules { @`[create-stroke @::args] @`[currentGlyph.create-stroke @::args] }
+#		define-macro set-anchor : syntax-rules { @`[set-anchor @::args] @`[currentGlyph.set-anchor @::args] }
+#		define-macro apply-transform : syntax-rules { @`[apply-transform @::args] @`[currentGlyph.apply-transform @::args] }
+#		define-macro reverse-last : syntax-rules { @`[reverse-last @::args] @`[currentGlyph.reverse-last @::args] }
+
 		local [dont-export] : set currentGlyph.dontExport true
 		this.gizmo = globalTransform
 		this.set-width WIDTH
@@ -207,6 +220,7 @@ define [create-glyph name actions] : piecewise {
 		console.log : "Building /" + name + [if recursive " (recursive)" ""] + " for " + para.family + ' ' + para.style
 		set dependencyProfile`name ()
 		define glyphObject [new Glyph name]
+		glyphObject.set-width WIDTH
 		glyphList.push glyphObject
 		glyphs`name = glyphObject
 		actions.call glyphObject
@@ -219,6 +233,7 @@ define [create-glyph name actions] : piecewise {
 	true : begin {
 		local actions arguments.0
 		local glyphObject [new Glyph ['.temp-' + [set nTemp [inc nTemp]]]]
+		glyphObject.set-width WIDTH
 		actions.call glyphObject
 		return glyphObject
 	}
