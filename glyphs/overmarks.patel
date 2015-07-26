@@ -2,17 +2,17 @@
 ### Combining marks
 
 local markExtend [ACCENTX * 0.5]
-local markStress : 0.5 * [Math.min STROKE [ACCENT * 0.6]]
+local markStress : 0.5 * [adviceBlackness 3.25]
 local markFine : markStress * 0.8
 local markHalfStroke : mix markFine markStress 0.5
 local markMiddle [-MIDDLE]
 local markDotsRadius : DOTRADIUS * markStress / HALFSTROKE
 
 local aboveMarkTop [XH + ACCENT * 1.375]
-local aboveMarkBot [XH + ACCENT * 0.35]
+local aboveMarkBot [XH + ACCENT * 0.325]
 
 local belowMarkBot [0 - ACCENT * 1.375]
-local belowMarkTop [0 - ACCENT * 0.35]
+local belowMarkTop [0 - ACCENT * 0.325]
 
 
 ### Above marks
@@ -141,10 +141,10 @@ create-glyph 'macronAbove' : glyph-construction {
 	local rightEnd [markMiddle + markExtend * 1.5]
 	
 	include : create-stroke
-		:.start-from leftEnd [aboveMarkTop - DOTRADIUS]
+		:.start-from leftEnd [XH + ACCENT]
 		:.set-width  markHalfStroke markHalfStroke
 		:.heads-to   RIGHTWARD
-		:.line-to    rightEnd [aboveMarkTop - DOTRADIUS]
+		:.line-to    rightEnd [XH + ACCENT]
 		:.heads-to   RIGHTWARD
 }
 create-glyph 'breveAbove' : glyph-construction {
@@ -193,7 +193,7 @@ create-glyph 'hookabove' : glyph-construction {
 		:.heads-to   RIGHTWARD
 		:.set-width  [fine * 2] 0
 		:.line-to    [markMiddle + fine * 0.5] hookBot
-		:.arc-hv-to  [markMiddle + markExtend - O] [mix hookBot hookTop 0.5]
+		:.arc-hv-to  [markMiddle + markExtend - O] [mix hookBot hookTop [SMOOTHB / [SMOOTHB + SMOOTHA]]]
 		:.arc-vh-to  markMiddle hookTop
 		:.line-to    [markMiddle - markExtend + fine] hookTop
 		:.heads-to   LEFTWARD
@@ -240,23 +240,15 @@ create-glyph 'doubleAcuteAbove' : glyph-construction {
 }
 
 ### Below marks
-create-glyph 'dotBelow' : glyph-construction {
-	set-width 0
-	assign-unicode 0x323
-	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
-	include : list {
-		Ring [0 - ACCENT + DOTRADIUS] [0 - ACCENT - DOTRADIUS] [markMiddle - DOTRADIUS] [markMiddle + DOTRADIUS]
-	}
-}
 create-glyph 'cedillaBelow' : glyph-construction {
 	set-width 0
 	assign-unicode 0x327
 	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
 	
-	local fine : Math.min markFine [[belowMarkTop - belowMarkBot] * 0.2]
+	local fine : Math.min markHalfStroke [[belowMarkTop - belowMarkBot] * 0.25]
 	
 	local cedillaTop [belowMarkTop + fine * 0.85]
-	local cedillaBot [mix belowMarkTop belowMarkBot 0.8]
+	local cedillaBot belowMarkBot
 	include : create-stroke
 		:.start-from [markMiddle - fine * ITALICCOR] cedillaTop
 		:.heads-to   RIGHTWARD
@@ -272,4 +264,86 @@ create-glyph 'cedillaBelow' : glyph-construction {
 		:.set-width  fine fine
 		:.line-to    markMiddle [cedillaTop - fine]
 		:.heads-to   DOWNWARD
+}
+create-glyph 'ogonekBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x328
+	
+	local fine : markHalfStroke * 0.2
+	local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress * 2
+	local ogonekLeft : markMiddle - markExtend * 0.2
+	local ogonekRight : markMiddle + markExtend * 0.85
+	set-anchor 'ogonek' MARK markMiddle 0 ogonekRight ogonekBot
+	
+	include : create-stroke
+		:.start-from markMiddle 0
+		:.set-width  0 [fine * 2]
+		:.arc-hv-to  ogonekLeft [mix 0 ogonekBot 0.5]
+		:.set-width  0 [[mix fine markStress 0.75] * 2]
+		:.arc-vh-to  [markMiddle + markExtend * 0.25] ogonekBot
+		:.set-width  0 [markStress * 2]
+		:.line-to    ogonekRight ogonekBot
+		:.heads-to   RIGHTWARD
+}
+
+# Flipped below marks
+create-glyph 'dotBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x323
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	include glyphs.dotAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'dieresisBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x324
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	include glyphs.dieresisAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'tildeBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x330
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	include glyphs.tildeAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'ringBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x325
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	include glyphs.ringAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'macronBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x331
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	
+	include glyphs.macronAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'circumflexBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x32D
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	
+	include glyphs.caronAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'breveBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x32E
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	
+	include glyphs.archAbove
+	include : FlipAround markMiddle [XH / 2]
+}
+create-glyph 'archBelow' : glyph-construction {
+	set-width 0
+	assign-unicode 0x32F
+	set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+	
+	include glyphs.breveAbove
+	include : FlipAround markMiddle [XH / 2]
 }
