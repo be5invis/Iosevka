@@ -865,7 +865,7 @@
             r76_include([r4_Ring(r4_XH + r4_ACCENT + r4_DOTRADIUS, r4_XH + r4_ACCENT - r4_DOTRADIUS, r4_markMiddle - r4_DOTRADIUS, r4_markMiddle + r4_DOTRADIUS)]);
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('dieresisAbove', '*', function _r4_t62() {
+        r4_xn$createglyph$7Hrq('dieresisAbove', function _r4_t62() {
             var r80_currentGlyph, r80_xn$setwidth$9Jrj, r80_xn$assignunicode$7Hrq, r80_xn$startfrom$1aao, r80_xn$lineto$5sIl, r80_xn$curveto$1aao, r80_xn$cubicto$1aao, r80_xn$putshapes$9Jrj, r80_xn$reverselast$3qIs, r80_include, r80_xn$createstroke$7Hrq, r80_xn$setanchor$9Jrj, r80_xn$applytransform$1aao, r80_xn$dontexport$5sIl, _r80_t0, _r80_t1, _r80_t2, _r80_t3;
             _r80_t0 = this;
             r80_currentGlyph = _r80_t0;
@@ -900,7 +900,7 @@
             ]);
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('ringAbove', '*', function _r4_t63() {
+        r4_xn$createglyph$7Hrq('ringAbove', function _r4_t63() {
             var r84_currentGlyph, r84_xn$setwidth$9Jrj, r84_xn$assignunicode$7Hrq, r84_xn$startfrom$1aao, r84_xn$lineto$5sIl, r84_xn$curveto$1aao, r84_xn$cubicto$1aao, r84_xn$putshapes$9Jrj, r84_xn$reverselast$3qIs, r84_include, r84_xn$createstroke$7Hrq, r84_xn$setanchor$9Jrj, r84_xn$applytransform$1aao, r84_xn$dontexport$5sIl, r84_radiusOut, r84_radiusIn, _r84_t0, _r84_t1, _r84_t2, _r84_t3;
             _r84_t0 = this;
             r84_currentGlyph = _r84_t0;
@@ -938,7 +938,7 @@
             r84_xn$reverselast$3qIs();
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('graveAbove', '*', function _r4_t64() {
+        r4_xn$createglyph$7Hrq('graveAbove', function _r4_t64() {
             var r88_currentGlyph, r88_xn$setwidth$9Jrj, r88_xn$assignunicode$7Hrq, r88_xn$startfrom$1aao, r88_xn$lineto$5sIl, r88_xn$curveto$1aao, r88_xn$cubicto$1aao, r88_xn$putshapes$9Jrj, r88_xn$reverselast$3qIs, r88_include, r88_xn$createstroke$7Hrq, r88_xn$setanchor$9Jrj, r88_xn$applytransform$1aao, r88_xn$dontexport$5sIl, _r88_t0, _r88_t1, _r88_t2, _r88_t3;
             _r88_t0 = this;
             r88_currentGlyph = _r88_t0;
@@ -970,7 +970,7 @@
             r88_include(r88_xn$createstroke$7Hrq()['start-from'](r4_markMiddle + r4_markStress, r4_aboveMarkBot)['set-width'](r4_markFine, r4_markFine)['line-to'](r4_markMiddle - r4_markExtend, r4_aboveMarkTop)['set-width'](r4_markStress, r4_markStress)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('acuteAbove', '*', function _r4_t65() {
+        r4_xn$createglyph$7Hrq('acuteAbove', function _r4_t65() {
             var r92_currentGlyph, r92_xn$setwidth$9Jrj, r92_xn$assignunicode$7Hrq, r92_xn$startfrom$1aao, r92_xn$lineto$5sIl, r92_xn$curveto$1aao, r92_xn$cubicto$1aao, r92_xn$putshapes$9Jrj, r92_xn$reverselast$3qIs, r92_include, r92_xn$createstroke$7Hrq, r92_xn$setanchor$9Jrj, r92_xn$applytransform$1aao, r92_xn$dontexport$5sIl, _r92_t0, _r92_t1, _r92_t2, _r92_t3;
             _r92_t0 = this;
             r92_currentGlyph = _r92_t0;
@@ -1002,7 +1002,7 @@
             r92_include(r92_xn$createstroke$7Hrq()['start-from'](r4_markMiddle - r4_markStress, r4_aboveMarkBot)['set-width'](r4_markFine, r4_markFine)['line-to'](r4_markMiddle + r4_markExtend, r4_aboveMarkTop)['set-width'](r4_markStress, r4_markStress)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('circumflexAbove', '*', function _r4_t66() {
+        r4_xn$createglyph$7Hrq('circumflexAbove', function _r4_t66() {
             var r96_currentGlyph, r96_xn$setwidth$9Jrj, r96_xn$assignunicode$7Hrq, r96_xn$startfrom$1aao, r96_xn$lineto$5sIl, r96_xn$curveto$1aao, r96_xn$cubicto$1aao, r96_xn$putshapes$9Jrj, r96_xn$reverselast$3qIs, r96_include, r96_xn$createstroke$7Hrq, r96_xn$setanchor$9Jrj, r96_xn$applytransform$1aao, r96_xn$dontexport$5sIl, _r96_t0, _r96_t1, _r96_t2, _r96_t3;
             _r96_t0 = this;
             r96_currentGlyph = _r96_t0;
@@ -1035,7 +1035,7 @@
             r96_include(r96_xn$createstroke$7Hrq()['start-from'](r4_markMiddle + r4_markExtend + r4_markStress, r4_aboveMarkBot + r4_markStress - r4_markFine)['set-width'](r4_markStress, r4_markStress)['line-to'](r4_markMiddle, r4_aboveMarkTop + r4_markFine * 0.7)['heads-to'](r4_UPWARD)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('caronAbove', '*', function _r4_t67() {
+        r4_xn$createglyph$7Hrq('caronAbove', function _r4_t67() {
             var r100_currentGlyph, r100_xn$setwidth$9Jrj, r100_xn$assignunicode$7Hrq, r100_xn$startfrom$1aao, r100_xn$lineto$5sIl, r100_xn$curveto$1aao, r100_xn$cubicto$1aao, r100_xn$putshapes$9Jrj, r100_xn$reverselast$3qIs, r100_include, r100_xn$createstroke$7Hrq, r100_xn$setanchor$9Jrj, r100_xn$applytransform$1aao, r100_xn$dontexport$5sIl, _r100_t0, _r100_t1, _r100_t2, _r100_t3;
             _r100_t0 = this;
             r100_currentGlyph = _r100_t0;
@@ -1068,7 +1068,7 @@
             r100_include(r100_xn$createstroke$7Hrq()['start-from'](r4_markMiddle + r4_markExtend + r4_markStress, r4_aboveMarkTop)['set-width'](r4_markStress, r4_markStress)['line-to'](r4_markMiddle, r4_aboveMarkBot - r4_markFine * 1.7 + r4_markStress)['heads-to'](r4_DOWNWARD)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('tildeAbove', '*', function _r4_t68() {
+        r4_xn$createglyph$7Hrq('tildeAbove', function _r4_t68() {
             var r104_currentGlyph, r104_xn$setwidth$9Jrj, r104_xn$assignunicode$7Hrq, r104_xn$startfrom$1aao, r104_xn$lineto$5sIl, r104_xn$curveto$1aao, r104_xn$cubicto$1aao, r104_xn$putshapes$9Jrj, r104_xn$reverselast$3qIs, r104_include, r104_xn$createstroke$7Hrq, r104_xn$setanchor$9Jrj, r104_xn$applytransform$1aao, r104_xn$dontexport$5sIl, r104_leftEnd, r104_rightEnd, r104_ttop, r104_tbot, r104_top, r104_bot, r104_tildeWave, r104_tildeWaveX, r104_tildeWaveEnd, _r104_t0, _r104_t1, _r104_t2, _r104_t3;
             _r104_t0 = this;
             r104_currentGlyph = _r104_t0;
@@ -1109,7 +1109,7 @@
             r104_include(r104_xn$createstroke$7Hrq()['start-from'](r104_leftEnd, r0_mix(r104_tbot, r104_ttop, r104_tildeWaveEnd))['set-width'](r4_markHalfStroke, r4_markHalfStroke)['cubic-to'](r0_mix(r104_leftEnd, r104_rightEnd, r104_tildeWaveX), r0_mix(r104_bot, r104_top, r104_tildeWave), r0_mix(r104_leftEnd, r104_rightEnd, 1 - r104_tildeWaveX), r0_mix(r104_bot, r104_top, 1 - r104_tildeWave), r104_rightEnd, r0_mix(r104_tbot, r104_ttop, 1 - r104_tildeWaveEnd))['set-samples'](11));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('macronAbove', '*', function _r4_t69() {
+        r4_xn$createglyph$7Hrq('macronAbove', function _r4_t69() {
             var r108_currentGlyph, r108_xn$setwidth$9Jrj, r108_xn$assignunicode$7Hrq, r108_xn$startfrom$1aao, r108_xn$lineto$5sIl, r108_xn$curveto$1aao, r108_xn$cubicto$1aao, r108_xn$putshapes$9Jrj, r108_xn$reverselast$3qIs, r108_include, r108_xn$createstroke$7Hrq, r108_xn$setanchor$9Jrj, r108_xn$applytransform$1aao, r108_xn$dontexport$5sIl, r108_leftEnd, r108_rightEnd, _r108_t0, _r108_t1, _r108_t2, _r108_t3;
             _r108_t0 = this;
             r108_currentGlyph = _r108_t0;
@@ -1143,7 +1143,7 @@
             r108_include(r108_xn$createstroke$7Hrq()['start-from'](r108_leftEnd, r4_aboveMarkTop - r4_DOTRADIUS)['set-width'](r4_markHalfStroke, r4_markHalfStroke)['heads-to'](r4_RIGHTWARD)['line-to'](r108_rightEnd, r4_aboveMarkTop - r4_DOTRADIUS)['heads-to'](r4_RIGHTWARD));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('breveAbove', '*', function _r4_t70() {
+        r4_xn$createglyph$7Hrq('breveAbove', function _r4_t70() {
             var r112_currentGlyph, r112_xn$setwidth$9Jrj, r112_xn$assignunicode$7Hrq, r112_xn$startfrom$1aao, r112_xn$lineto$5sIl, r112_xn$curveto$1aao, r112_xn$cubicto$1aao, r112_xn$putshapes$9Jrj, r112_xn$reverselast$3qIs, r112_include, r112_xn$createstroke$7Hrq, r112_xn$setanchor$9Jrj, r112_xn$applytransform$1aao, r112_xn$dontexport$5sIl, r112_leftEnd, r112_rightEnd, _r112_t0, _r112_t1, _r112_t2, _r112_t3;
             _r112_t0 = this;
             r112_currentGlyph = _r112_t0;
@@ -1177,7 +1177,7 @@
             r112_include(r112_xn$createstroke$7Hrq()['start-from'](r112_leftEnd, r4_aboveMarkTop)['set-width'](r4_markHalfStroke, r4_markHalfStroke)['heads-to'](r4_DOWNWARD)['arc-vh-to'](r4_markMiddle, r4_aboveMarkBot + r4_markHalfStroke)['arc-hv-to'](r112_rightEnd, r4_aboveMarkTop)['heads-to'](r4_UPWARD));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('archAbove', '*', function _r4_t71() {
+        r4_xn$createglyph$7Hrq('archAbove', function _r4_t71() {
             var r116_currentGlyph, r116_xn$setwidth$9Jrj, r116_xn$assignunicode$7Hrq, r116_xn$startfrom$1aao, r116_xn$lineto$5sIl, r116_xn$curveto$1aao, r116_xn$cubicto$1aao, r116_xn$putshapes$9Jrj, r116_xn$reverselast$3qIs, r116_include, r116_xn$createstroke$7Hrq, r116_xn$setanchor$9Jrj, r116_xn$applytransform$1aao, r116_xn$dontexport$5sIl, r116_leftEnd, r116_rightEnd, _r116_t0, _r116_t1, _r116_t2, _r116_t3;
             _r116_t0 = this;
             r116_currentGlyph = _r116_t0;
@@ -1211,7 +1211,7 @@
             r116_include(r116_xn$createstroke$7Hrq()['start-from'](r116_leftEnd, r4_aboveMarkBot)['set-width'](r4_markHalfStroke, r4_markHalfStroke)['heads-to'](r4_UPWARD)['arc-vh-to'](r4_markMiddle, r4_aboveMarkTop - r4_markHalfStroke)['arc-hv-to'](r116_rightEnd, r4_aboveMarkBot)['heads-to'](r4_DOWNWARD));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('hookabove', '*', function _r4_t72() {
+        r4_xn$createglyph$7Hrq('hookabove', function _r4_t72() {
             var r120_currentGlyph, r120_xn$setwidth$9Jrj, r120_xn$assignunicode$7Hrq, r120_xn$startfrom$1aao, r120_xn$lineto$5sIl, r120_xn$curveto$1aao, r120_xn$cubicto$1aao, r120_xn$putshapes$9Jrj, r120_xn$reverselast$3qIs, r120_include, r120_xn$createstroke$7Hrq, r120_xn$setanchor$9Jrj, r120_xn$applytransform$1aao, r120_xn$dontexport$5sIl, r120_fine, r120_hookBot, r120_hookTop, _r120_t0, _r120_t1, _r120_t2, _r120_t3;
             _r120_t0 = this;
             r120_currentGlyph = _r120_t0;
@@ -1246,7 +1246,7 @@
             r120_include(r120_xn$createstroke$7Hrq()['start-from'](r4_markMiddle - r120_fine * r4_ITALICCOR, r120_hookBot)['heads-to'](r4_RIGHTWARD)['set-width'](r120_fine * 2, 0)['line-to'](r4_markMiddle + r120_fine * 0.5, r120_hookBot)['arc-hv-to'](r4_markMiddle + r4_markExtend - r4_O, r0_mix(r120_hookBot, r120_hookTop, 0.5))['arc-vh-to'](r4_markMiddle, r120_hookTop)['line-to'](r4_markMiddle - r4_markExtend + r120_fine, r120_hookTop)['heads-to'](r4_LEFTWARD));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('doubleGraveAbove', '*', function _r4_t73() {
+        r4_xn$createglyph$7Hrq('doubleGraveAbove', function _r4_t73() {
             var r124_currentGlyph, r124_xn$setwidth$9Jrj, r124_xn$assignunicode$7Hrq, r124_xn$startfrom$1aao, r124_xn$lineto$5sIl, r124_xn$curveto$1aao, r124_xn$cubicto$1aao, r124_xn$putshapes$9Jrj, r124_xn$reverselast$3qIs, r124_include, r124_xn$createstroke$7Hrq, r124_xn$setanchor$9Jrj, r124_xn$applytransform$1aao, r124_xn$dontexport$5sIl, r124_m1, r124_m2, _r124_t0, _r124_t1, _r124_t2, _r124_t3;
             _r124_t0 = this;
             r124_currentGlyph = _r124_t0;
@@ -1281,7 +1281,7 @@
             r124_include(r124_xn$createstroke$7Hrq()['start-from'](r124_m2 + r4_markStress, r4_aboveMarkBot)['set-width'](r4_markFine, r4_markFine)['line-to'](r124_m2 - r4_markExtend, r4_aboveMarkTop)['set-width'](r4_markStress, r4_markStress)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('doubleAcuteAbove', '*', function _r4_t74() {
+        r4_xn$createglyph$7Hrq('doubleAcuteAbove', function _r4_t74() {
             var r128_currentGlyph, r128_xn$setwidth$9Jrj, r128_xn$assignunicode$7Hrq, r128_xn$startfrom$1aao, r128_xn$lineto$5sIl, r128_xn$curveto$1aao, r128_xn$cubicto$1aao, r128_xn$putshapes$9Jrj, r128_xn$reverselast$3qIs, r128_include, r128_xn$createstroke$7Hrq, r128_xn$setanchor$9Jrj, r128_xn$applytransform$1aao, r128_xn$dontexport$5sIl, r128_m1, r128_m2, _r128_t0, _r128_t1, _r128_t2, _r128_t3;
             _r128_t0 = this;
             r128_currentGlyph = _r128_t0;
@@ -1316,7 +1316,7 @@
             r128_include(r128_xn$createstroke$7Hrq()['start-from'](r128_m2 - r4_markStress, r4_aboveMarkBot)['set-width'](r4_markFine, r4_markFine)['line-to'](r128_m2 + r4_markExtend, r4_aboveMarkTop)['set-width'](r4_markStress, r4_markStress)['set-samples'](1));
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('dotBelow', '*', function _r4_t75() {
+        r4_xn$createglyph$7Hrq('dotBelow', function _r4_t75() {
             var r132_currentGlyph, r132_xn$setwidth$9Jrj, r132_xn$assignunicode$7Hrq, r132_xn$startfrom$1aao, r132_xn$lineto$5sIl, r132_xn$curveto$1aao, r132_xn$cubicto$1aao, r132_xn$putshapes$9Jrj, r132_xn$reverselast$3qIs, r132_include, r132_xn$createstroke$7Hrq, r132_xn$setanchor$9Jrj, r132_xn$applytransform$1aao, r132_xn$dontexport$5sIl, _r132_t0, _r132_t1, _r132_t2, _r132_t3;
             _r132_t0 = this;
             r132_currentGlyph = _r132_t0;
@@ -1348,7 +1348,7 @@
             r132_include([r4_Ring(0 - r4_ACCENT + r4_DOTRADIUS, 0 - r4_ACCENT - r4_DOTRADIUS, r4_markMiddle - r4_DOTRADIUS, r4_markMiddle + r4_DOTRADIUS)]);
             return void 0;
         });
-        r4_xn$createglyph$7Hrq('cedillaBelow', '*', function _r4_t76() {
+        r4_xn$createglyph$7Hrq('cedillaBelow', function _r4_t76() {
             var r136_currentGlyph, r136_xn$setwidth$9Jrj, r136_xn$assignunicode$7Hrq, r136_xn$startfrom$1aao, r136_xn$lineto$5sIl, r136_xn$curveto$1aao, r136_xn$cubicto$1aao, r136_xn$putshapes$9Jrj, r136_xn$reverselast$3qIs, r136_include, r136_xn$createstroke$7Hrq, r136_xn$setanchor$9Jrj, r136_xn$applytransform$1aao, r136_xn$dontexport$5sIl, r136_fine, r136_cedillaTop, r136_cedillaBot, _r136_t0, _r136_t1, _r136_t2, _r136_t3;
             _r136_t0 = this;
             r136_currentGlyph = _r136_t0;
