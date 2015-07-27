@@ -262,9 +262,24 @@ create-glyph 'servicemark' : glyph-construction {
 
 define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
 
+local customDecompositions (
+	# Latvians use comma instead of cedillas in several letters.
+	# Record them as custom decomposition.
+	."\u0156" "R\u0326"
+	."\u0157" "r\u0326"
+	."\u0136" "K\u0326"
+	."\u0137" "k\u0326"
+	."\u0145" "N\u0326"
+	."\u0146" "n\u0326"
+	."\u013B" "L\u0326"
+	."\u013C" "l\u0326"
+	."\u0122" "G\u0326"
+	."\u0123" "g\u0312"
+)
+
 foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	local str : String.fromCharCode code
-	local nfd : str.normalize 'NFD'
+	local nfd : fallback customDecompositions.(str) [str.normalize 'NFD']
 	if [nfd.length > 1] : begin {
 		local parts ()
 		local allFound true
