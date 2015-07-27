@@ -206,28 +206,30 @@ define [XSHookLower bottom left middle right smooth hook] : glyph-construction {
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 
-define [smallo u d l r _width] : glyph-construction {
+define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local middle : [l + r] / 2
 	local width : fallback _width STROKE
-	if [u - d > SMALLSMOOTHA + SMALLSMOOTHB] {
+	local sma : fallback _sma SMALLSMOOTHA
+	local smb : fallback _smb SMALLSMOOTHB
+	if [u - d > sma + smb] {
 		then : begin {
 			include : create-stroke
 				:.set-transform globalTransform
 				:.start-from middle [u - O]
 				:.set-width width 0
 				:.heads-to LEFTWARD
-				:.arc-hv-to [l + O] [u - SMALLSMOOTHA]
-				:.line-to  [l + O] [d + SMALLSMOOTHB]
+				:.arc-hv-to [l + O] [u - sma]
+				:.line-to  [l + O] [d + smb]
 				:.arc-vh-to middle [d + O]
 				:.heads-to RIGHTWARD
-				:.arc-hv-to [r - O] [d + SMALLSMOOTHA]
-				:.line-to  [r - O] [u - SMALLSMOOTHB]
+				:.arc-hv-to [r - O] [d + sma]
+				:.line-to  [r - O] [u - smb]
 				:.arc-vh-to middle [u - O]
 				:.heads-to LEFTWARD
 		}
 		else : begin {
-			local ymiddlea : [u - SMALLSMOOTHA + d + SMALLSMOOTHB] / 2
-			local ymiddleb : [u - SMALLSMOOTHB + d + SMALLSMOOTHA] / 2
+			local ymiddlea : [u - sma + d + smb] / 2
+			local ymiddleb : [u - smb + d + sma] / 2
 			include : create-stroke
 				:.set-transform globalTransform
 				:.start-from middle [u - O]
@@ -266,10 +268,10 @@ define [VBar x ydown yup _fine] : glyph-construction {
 define [HOverlayBar xleft xright y] : HBar xleft xright y [adviceBlackness 5] 
 
 # Common transformations
-define [FlipAround x y] : glyph-construction {
+define [FlipAround x y sx sy] : glyph-construction {
 	apply-transform : Upright
 	apply-transform : Translate [-x] [-y]
-	apply-transform : Scale [-1]
+	apply-transform : Scale [fallback sx [-1]] [fallback sy sx [-1]]
 	apply-transform : Translate x y
 	apply-transform : Italify
 }
