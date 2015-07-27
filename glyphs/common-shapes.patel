@@ -145,22 +145,26 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : begin {
 	       :.concat : halfXStrand _rightx righty middlex middley turn straight tension
 }
 
-define [nBowl left middle right fine] : begin {
+define [nBowl left middle right fine _top _bottom _sma _smb] : begin {
+	local top : fallback _top XH
+	local bottom : fallback _bottom 0
+	local sma : fallback _sma SMALLSMOOTHA
+	local smb : fallback _smb SMALLSMOOTHB
 	local bandLeft : new Stroke
 		:.set-transform globalTransform
-		:.start-from right 0
+		:.start-from right bottom
 		:.heads-to UPWARD
 		:.set-width STROKE 0
-		:.line-to   right [XH - SMALLSMOOTHB]
-		:.arc-vh-to middle XO
+		:.line-to   right [top - smb]
+		:.arc-vh-to middle [top - O]
 		:.heads-to LEFTWARD
 		:.to-outline
 	local bandRight : new Stroke
 		:.set-transform globalTransform
-		:.start-from middle [XO - STROKE]
+		:.start-from middle [top - O - STROKE]
 		:.set-width 0 STROKE
 		:.heads-to LEFTWARD
-		:.arc-hv-to left [XH - SMALLSMOOTHA]
+		:.arc-hv-to left [top - sma]
 		:.heads-to DOWNWARD
 		:.set-width 0 fine
 		:.to-outline
@@ -239,7 +243,7 @@ define [smallo u d l r _width] : glyph-construction {
 	}
 }
 
-define [hbar xleft xright y _fine] : glyph-construction {
+define [HBar xleft xright y _fine] : glyph-construction {
 	local fine : [fallback _fine STROKE] / 2
 	include : create-stroke
 		:.set-transform globalTransform
@@ -249,7 +253,7 @@ define [hbar xleft xright y _fine] : glyph-construction {
 		:.line-to xright y
 		:.heads-to RIGHTWARD
 }
-define [vbar x ydown yup _fine] : glyph-construction {
+define [VBar x ydown yup _fine] : glyph-construction {
 	local fine : [fallback _fine STROKE] / 2
 	include : create-stroke
 		:.set-transform globalTransform
@@ -259,7 +263,7 @@ define [vbar x ydown yup _fine] : glyph-construction {
 		:.line-to x yup
 		:.heads-to [if [ydown < yup] UPWARD DOWNWARD]
 }
-
+define [HOverlayBar xleft xright y] : HBar xleft xright y [adviceBlackness 5] 
 
 # Common transformations
 define [FlipAround x y] : glyph-construction {
@@ -268,4 +272,12 @@ define [FlipAround x y] : glyph-construction {
 	apply-transform : Scale [-1]
 	apply-transform : Translate x y
 	apply-transform : Italify
+}
+
+define [VerticalHook x y extend depth] : glyph-construction {
+	include : create-stroke
+		:.start-from x y
+		:.heads-to   DOWNWARD
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.arc-vh-to  [x + extend] [y - depth]
 }
