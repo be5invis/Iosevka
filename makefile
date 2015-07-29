@@ -2,11 +2,7 @@ SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-extend.patel glyphs/autobuilds.patel
 OBJDIR = build
 
-ifeq ($(OS),Windows_NT)
-SUPPRESS_ERRORS = 2> NUL
-else
 SUPPRESS_ERRORS = 2> /dev/null
-endif
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
