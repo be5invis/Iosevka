@@ -1,5 +1,5 @@
 SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
-GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-extend.patel glyphs/autobuilds.patel
+GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-extend.patel glyphs/symbol-geometric.patel glyphs/autobuilds.patel
 OBJDIR = build
 
 SUPPRESS_ERRORS = 2> /dev/null
