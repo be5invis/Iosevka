@@ -287,6 +287,24 @@ define customDecompositions (
 	."\u04AB" "\u0441\u0327"
 	
 	# Spacing modifers
+	."`"      " \u0300"
+	."\u02CB" " \u0300"
+	."\u00B4" " \u0301"
+	."\u02CA" " \u0301"
+	."^"      " \u0302"
+	."\u02C6" " \u0302"
+	."~"      " \u0303"
+	."\u02DC" " \u0303"
+	."\u00AF" " \u0304"
+	."\u02C9" " \u0304"
+	."\u02D8" " \u0306"
+	."\u02D9" " \u0307"
+	."\u00A8" " \u0308"
+	."\u00B0" " \u030A"
+	."\u02DA" " \u030A"
+	."\u02C7" " \u030C"
+	."\u00B8" " \u0327"
+
 	."\u1FED" " \u0308\u0300"
 	."\u1FEE" " \u0308\u0301"
 	."\u1FEF" " \u0300"
@@ -307,7 +325,7 @@ define [decompositionModify s] : s.replace [regex '\u0313\u0300'] "\u1FCD"
 	:.replace [regex '\u0314\u0301'] "\u1FDE"
 	:.replace [regex '\u0314\u0342'] "\u1FDF"
 
-foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
+foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	local str : String.fromCharCode code
 	local nfd : fallback customDecompositions.(str) : decompositionModify : str.normalize 'NFD'
 	if [nfd.length > 1] : begin {
@@ -323,60 +341,17 @@ foreach code [range 0x00A0 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 			local namingParts : parts.slice 0
 			if [[parts.0 === glyphs.i || parts.0 === glyphs.ukrainiani] && hasMarkAbove] : parts.0 = glyphs.dotlessi
 			if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
-			
-			create-glyph [namingParts.map [[part] -> part.name] :.join '_'] : glyph-construction {
+			local glyphName : namingParts.map [[part] -> part.name] :.join '_'
+			if glyphs.(glyphName) : begin {
+				local j 2
+				while glyphs.[glyphName + '.alias' + j] : inc j
+				set glyphName [glyphName + '.alias' + j]
+			}
+			create-glyph glyphName : glyph-construction {
 				assign-unicode code
 				include parts.0 AS_BASE
 				foreach part [items-of : parts.slice 1] : include part
 			}
 		}
 	}
-}
-
-# Spacing marks
-create-glyph 'grave' : glyph-construction {
-	assign-unicode '`'
-	include glyphs.space AS_BASE
-	include glyphs.graveAbove
-}
-create-glyph 'acute' : glyph-construction {
-	assign-unicode 0xB4
-	include glyphs.space AS_BASE
-	include glyphs.acuteAbove
-}
-create-glyph 'asciicircum' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0x5E
-	include glyphs.space AS_BASE
-	include glyphs.circumflexAbove
-}
-create-glyph 'asciitilde' : glyph-construction {
-	set-width WIDTH
-	assign-unicode '~'
-	include glyphs.space AS_BASE
-	include glyphs.tildeAbove
-}
-create-glyph 'latin1dieresis' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xA8
-	include glyphs.space AS_BASE
-	include glyphs.dieresisAbove
-}
-create-glyph 'latin1cedilla' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xB8
-	include glyphs.space AS_BASE
-	include glyphs.cedillaBelow
-}
-create-glyph 'latin1macron' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xAF
-	include glyphs.space AS_BASE
-	include glyphs.macronAbove
-}
-create-glyph 'degree' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xB0
-	include glyphs.space AS_BASE
-	include glyphs.ringAbove
 }
