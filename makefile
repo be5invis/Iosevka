@@ -35,10 +35,8 @@ update : $(FILES)
 $(SUPPORT_FILES) :
 	patel-c $< -o $@ --strict
 
-.buildglyphs.all.patel : buildglyphs-intro.patel $(GLYPH_SEGMENTS) buildglyphs-final.patel
-	cat $^ > .buildglyphs.all.patel
-buildglyphs.js : .buildglyphs.all.patel
-	patel-c --strict $^ -o $@
+buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
+	patel-c --strict $< -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
 parameters.js : parameters.patel
