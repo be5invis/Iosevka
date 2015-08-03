@@ -1,4 +1,6 @@
-### Automatic builds
+###### Automatic builds
+
+local font.features (.)
 
 # Build miniature clyphs : circled, superscripts, subscripts...
 define [Miniature glyphs fold scale] : begin {
@@ -325,6 +327,8 @@ define [decompositionModify s] : s.replace [regex '\u0313\u0300'] "\u1FCD"
 	:.replace [regex '\u0314\u0301'] "\u1FDE"
 	:.replace [regex '\u0314\u0342'] "\u1FDF"
 
+set font.features.ccmp ()
+
 foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	local str : String.fromCharCode code
 	local nfd : fallback customDecompositions.(str) : decompositionModify : str.normalize 'NFD'
@@ -338,6 +342,7 @@ foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 			if [isAboveMark parts`j] : set hasMarkAbove true
 		}
 		if allFound : begin {
+			local aliased false
 			local namingParts : parts.slice 0
 			if [[parts.0 === glyphs.i || parts.0 === glyphs.ukrainiani] && hasMarkAbove] : parts.0 = glyphs.dotlessi
 			if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
@@ -346,12 +351,14 @@ foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 				local j 2
 				while glyphs.[glyphName + '.alias' + j] : inc j
 				set glyphName [glyphName + '.alias' + j]
+				set aliased true
 			}
 			create-glyph glyphName : glyph-construction {
 				assign-unicode code
 				include parts.0 AS_BASE
 				foreach part [items-of : parts.slice 1] : include part
 			}
+			if [not aliased] : font.features.ccmp.push : 'sub ' + [glyphName.replace [regex '_' 'g'] ' '] + ' by ' + glyphName
 		}
 	}
 }

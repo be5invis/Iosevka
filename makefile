@@ -1,4 +1,4 @@
-SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js
+SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js generate.js empty.json
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-extend.patel glyphs/symbol-geometric.patel glyphs/autobuilds.patel
 OBJDIR = build
 
@@ -6,28 +6,37 @@ SUPPRESS_ERRORS = 2> /dev/null
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
-STEP0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
-STEP1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
-STEP2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
+PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
+ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
+FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
+PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
 fonts : update $(TARGETS)
 	
-$(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) $(OBJDIR)
-	node generate regular $@ --dumpmap $(OBJDIR)/iosevka-regular.charmap
-$(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) $(OBJDIR)
-	node generate bold $@ --dumpmap $(OBJDIR)/iosevka-bold.charmap
-$(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) $(OBJDIR)
-	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap
-$(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
-	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap
 
-# $(STEP1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf
-# 	fontforge -script pass1-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
-$(STEP2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass0-%.ttf
-	fontforge -script pass2-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
+# Pass 0 : file construction
+$(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) | $(OBJDIR)
+	node generate regular $@ --dumpmap $(OBJDIR)/iosevka-regular.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-regular.ab.fea
+$(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) | $(OBJDIR)
+	node generate bold $@ --dumpmap $(OBJDIR)/iosevka-bold.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bold.ab.fea
+$(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
+	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-italic.ab.fea
+$(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
+	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bolditalic.ab.fea
+
+$(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
+	-@echo Autobuild feature $@ from $<
+$(FEATURE) : $(OBJDIR)/.pass0-%.fea : features/common.fea $(OBJDIR)/.pass0-%.ab.fea
+	cat $^ > $@
+
+# Pass 1 : Outline cleanup and merge
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
+	fontforge -script final.pe $^ $@ $(SUPPRESS_ERRORS)
+
+# Pass 2 : Simplify and output
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass1-%.ttf
 	ttfautohint $< $@
 
 update : $(FILES)
@@ -45,5 +54,4 @@ $(OBJDIR) :
 	@- mkdir $@
 
 cleartemps :
-	-rm $(STEP0)
-	-rm $(STEP1)
+	-rm $(PASS0) $(PASS1)

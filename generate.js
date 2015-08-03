@@ -23,6 +23,7 @@ function toBuffer(arrayBuffer) {
 	}
 	return buffer;
 }
+function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
 
 var options = {preserveOS2Version: true}
 
@@ -31,7 +32,21 @@ var outputPath = argv._[1]
 
 var ttfFont = buildGlyphs.build(parameters[variant]);
 
+ttfFont.glyf = [ttfFont.glyf[0]].concat(ttfFont.glyf.slice(1).sort(function(a, b){
+	if(a.unicode && b.unicode && a.unicode[0] && b.unicode[0]) return a.unicode[0] - b.unicode[0]
+	else if(a.unicode && a.unicode[0]) return -1
+	else if(b.unicode && b.unicode[0]) return 1
+	else return (a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
+}));
+
 if(outputPath) fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(ttfFont)));
 if(argv.dumpmap) {
 	fs.writeFileSync(argv.dumpmap, JSON.stringify(ttfFont.glyf.map(function(glyph){ return [glyph.name, glyph.unicode]})), 'utf8')
-}
+};
+if(argv.dumpfeature) {
+	var featurefile = '\n\n';
+	// ccmp
+	var ccmp = ttfFont.features.ccmp;
+	featurefile += 'feature ccmp {' + ccmp.join(';\n') + ';} ccmp;'
+	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8')
+};
