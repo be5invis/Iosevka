@@ -23,10 +23,10 @@ $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) $(OBJDIR)
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) $(OBJDIR)
 	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap
 
-$(STEP1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf
-	fontforge -script pass1-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
-$(STEP2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
-	fontforge -script pass2-simplify.pe $< $@ $(SUPPRESS_ERRORS)
+# $(STEP1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf
+# 	fontforge -script pass1-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
+$(STEP2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass0-%.ttf
+	fontforge -script pass2-cleanup.pe $< $@ $(SUPPRESS_ERRORS)
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	ttfautohint $< $@
 
