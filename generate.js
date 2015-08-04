@@ -46,7 +46,20 @@ if(argv.dumpmap) {
 if(argv.dumpfeature) {
 	var featurefile = '\n\n';
 	// ccmp
-	var ccmp = ttfFont.features.ccmp;
-	featurefile += 'feature ccmp {' + ccmp.join(';\n') + ';} ccmp;'
-	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8')
+	// var ccmp = ttfFont.features.ccmp;
+	// featurefile += 'lookup ccmpAuto {' + ccmp.join(';\n') + ';} ccmpAuto;';
+
+	// markGlyphs
+	for(var key in ttfFont.features.markGlyphs){
+		featurefile += '@MG_' + key + '= [' + ttfFont.features.markGlyphs[key].join(' ') + '];\n'
+	}
+	// mark
+	var mark = ttfFont.features.mark;
+	featurefile += 'lookup markAuto {' + mark.marks.join(';\n') + ';\n' + mark.bases.join(';\n') + ';} markAuto;'
+	
+	// mkmk
+	var mkmk = ttfFont.features.mkmk;
+	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n' + mkmk.bases.join(';\n') + ';} mkmkAuto;'
+
+	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8');
 };

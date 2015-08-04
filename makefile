@@ -28,7 +28,7 @@ $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
-$(FEATURE) : $(OBJDIR)/.pass0-%.fea : features/common.fea $(OBJDIR)/.pass0-%.ab.fea
+$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea
 	cat $^ > $@
 
 # Pass 1 : Outline cleanup and merge

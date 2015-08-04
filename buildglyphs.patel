@@ -143,11 +143,11 @@ define [buildFont para recursive] : begin {
 	define markLFZero        (.anchors (.lf       [tm (.x MIDDLE .y 0            .type BASE)]))
 	
 	
-	define capitalMarks   (.anchors (.above markAboveCap.anchors.above .below markBelowZero.anchors.below .trailing markTrailingZero.anchors.trailing .lf markLFZero.anchors.lf))
-	define bMarks         (.anchors (.above markAboveCap.anchors.above .below markBelowZero.anchors.below .trailing markTrailingZero.anchors.trailing .lf markLFZero.anchors.lf))
-	define eMarks         (.anchors (.above markAboveLower.anchors.above .below markBelowZero.anchors.below .trailing markTrailingZero.anchors.trailing .lf markLFZero.anchors.lf))
-	define pMarks         (.anchors (.above markAboveLower.anchors.above .below markBelowLower.anchors.below .trailing markTrailingLower.anchors.trailing .lf markLFLower.anchors.lf))
-	define ifMarks        (.anchors (.above markAboveCap.anchors.above .below markBelowLower.anchors.below .trailing markTrailingLower.anchors.trailing .lf markLFLower.anchors.lf))
+	define capitalMarks   (.anchors (.above markAboveCap.anchors.above .below markBelowZero.anchors.below))
+	define bMarks         (.anchors (.above markAboveCap.anchors.above .below markBelowZero.anchors.below))
+	define eMarks         (.anchors (.above markAboveLower.anchors.above .below markBelowZero.anchors.below))
+	define pMarks         (.anchors (.above markAboveLower.anchors.above .below markBelowLower.anchors.below))
+	define ifMarks        (.anchors (.above markAboveCap.anchors.above .below markBelowLower.anchors.below))
 	
 	Stroke.bindParameters para
 	
@@ -220,7 +220,6 @@ define [buildFont para recursive] : begin {
 	
 			local [dont-export] : set currentGlyph.dontExport true
 			this.gizmo = globalTransform
-			this.set-width WIDTH
 			begin @::[steps.map formOf]
 			return nothing
 		}]] env)
@@ -264,14 +263,12 @@ define [buildFont para recursive] : begin {
 		if [pickHash && [not pickHash.(name)]] : return nothing
 		local variant : variantSelector`name || default
 		local chosenGlyph glyphs`[name + '.' + variant]
-		set glyphs`name chosenGlyph
+		create-glyph name : glyph-construction {
+			include chosenGlyph AS_BASE
+			if unicode : assign-unicode unicode
+		}
 		local allAliases : Object.keys glyphs :.filter [[k] -> [glyphs`k === glyphs.(chosenGlyph.name)]]
 		set dependencyProfile`name : allAliases.concat dependencyProfile.(chosenGlyph.name)
-		if unicode : begin {
-			chosenGlyph.assign-unicode unicode
-			set chosenGlyph.dontExport false
-			set unicodeGlyphs.(chosenGlyph.unicode`[chosenGlyph.unicode.length - 1]) chosenGlyph
-		}
 	}
 	define [italic-variant name unicode] : create-glyph name : glyph-construction {
 		if [para.italicangle > 0] {
