@@ -85,7 +85,7 @@ create-glyph 'softhyphen' : glyph-construction {
 	assign-unicode 0xAD
 	include glyphs.hyphen AS_BASE
 }
-create-glyph 'bullet' : glyph-construction {
+create-glyph 'interpunct' : glyph-construction {
 	assign-unicode 0xB7
 	include : list : Ring [parenMid + PERIODRADIUS - O] [parenMid - PERIODRADIUS + O] [MIDDLE - PERIODRADIUS + O] [MIDDLE + PERIODRADIUS - O]
 }
@@ -218,6 +218,18 @@ create-glyph 'negate' : glyph-construction {
 
 
 ### General punctuation segment
+# spaces
+# we set the width of emquad to 1000mem (1em) and the width of emspace to WIDTH (0.5em)
+alias 'enquad' 0x2000 'space'
+alias 'emquad' 0x2001 'space'
+alias 'ensp' 0x2002 'space'
+alias 'emsp' 0x2003 'space'
+alias 'threePerEmsp' 0x2004 'space'
+alias 'fourPerEmsp' 0x2005 'space'
+alias 'sixPerEmsp' 0x2006 'space'
+alias 'fgsp' 0x2007 'space'
+create-glyph 'zwsp' : glyph-construction { assign-unicode 0x200B; set-width 0 }
+
 alias 'gpHyphen' 0x2010 'hyphen'
 alias 'nbHyphen' 0x2011 'hyphen'
 alias 'figureDash' 0x2012 'hyphen'
@@ -272,4 +284,177 @@ create-glyph 'invertDoubleQuote' : glyph-construction {
 	apply-transform : Translate dist 0
 	include : FlipAround MIDDLE [yCurlyQuotes / 2]
 	include : FlipAround MIDDLE yCurlyQuotes
+}
+create-glyph 'dagger' : glyph-construction {
+	assign-unicode 0x2020
+	include : HBar SB RIGHTSB [mix parenTop parenBot 0.33]
+	include : VBar MIDDLE parenBot parenTop
+}
+create-glyph 'doubledagger' : glyph-construction {
+	assign-unicode 0x2021
+	include glyphs.dagger
+	include : HBar SB RIGHTSB [mix parenTop parenBot 0.67]
+}
+create-glyph 'onedotLeader' : glyph-construction {
+	assign-unicode 0x2024
+	local radius : 0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE
+	include : list {
+		Ring [radius * 2 - O] O [MIDDLE - radius + O] [MIDDLE + radius - O]
+	}
+}
+create-glyph 'twodotsLEader' : glyph-construction {
+	assign-unicode 0x2025
+	local radius : 0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE
+	local left : mix 0 WIDTH [1 / 4]
+	local right : mix 0 WIDTH [3 / 4]
+	include : list {
+		Ring [radius * 2 - O] O [left - radius + O] [left + radius - O]
+		Ring [radius * 2 - O] O [right - radius + O] [right + radius - O]
+	}
+}
+create-glyph 'ellipsis' : glyph-construction {
+	assign-unicode 0x2026
+	local radius : 0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE
+	local left : mix 0 WIDTH [1 / 6]
+	local right : mix 0 WIDTH [5 / 6]
+	include : list {
+		Ring [radius * 2 - O] O [left - radius + O] [left + radius - O]
+		Ring [radius * 2 - O] O [MIDDLE - radius + O] [MIDDLE + radius - O]
+		Ring [radius * 2 - O] O [right - radius + O] [right + radius - O]
+	}
+}
+alias 'bullet' 0x2022 'interpunct'
+alias 'hyphenpoint' 0x2027 'interpunct'
+create-glyph 'permille' : glyph-construction {
+	assign-unicode 0x2030
+	local dotwidth [[adviceBlackness 4] * 1.5]
+	
+	include : create-stroke
+		:.start-from SB [CAP * 0.2]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    [mix SB RIGHTSB 0.85] [CAP * 0.9]
+
+	include : VBarLeft [mix SB RIGHTSB 0.075] [mix CAP 0 0.3] CAP dotwidth
+	include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotwidth
+	include : VBarRight [RIGHTSB - dotwidth * 1.5] 0 [mix 0 CAP 0.3] dotwidth
+}
+create-glyph 'basepoint' : glyph-construction {
+	assign-unicode 0x2031
+	local dotwidth [[adviceBlackness 4] * 1.5]
+	local dotfine [adviceBlackness 3.5]
+	
+	include : create-stroke
+		:.start-from SB [CAP * 0.2]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.line-to    [mix SB RIGHTSB 0.85] [CAP * 0.9]
+
+	include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
+	include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotfine
+	include : VBar [mix [mix SB RIGHTSB 0.1] RIGHTSB 0.5] 0 [mix 0 CAP 0.3] dotfine
+	include : VBarLeft [mix SB RIGHTSB 0.1] 0 [mix 0 CAP 0.3] dotfine
+}
+create-glyph 'doubleexclam' : glyph-construction {
+	assign-unicode 0x203C
+	local d : 0.25 * WIDTH
+	include glyphs.exclam
+	apply-transform : Translate [-d * 2] 0
+	include glyphs.exclam
+	apply-transform : Translate d 0
+}
+create-glyph 'overline' : glyph-construction {
+	assign-unicode 0x203E
+	include : HBarTop SB RIGHTSB CAP
+}
+alias 'solidus' 0x2044 'slash'
+create-glyph 'prime' : glyph-construction {
+	assign-unicode 0x2032
+	local wide : WIDTH * 0.1
+	include : create-stroke
+		:.start-from [MIDDLE + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [HALFSTROKE * 1.2] [HALFSTROKE * 1.2]
+		:.line-to    [MIDDLE - wide] [XH * 0.85]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   DOWNWARD
+}
+create-glyph 'doubleprime' : glyph-construction {
+	assign-unicode 0x2033
+	local d : 0.25 * [RIGHTSB - SB]
+	include glyphs.prime
+	apply-transform : Translate [-d * 2] 0
+	include glyphs.prime
+	apply-transform : Translate d 0
+}
+create-glyph 'tripleprime' : glyph-construction {
+	assign-unicode 0x2034
+	local wide : WIDTH * 0.1
+	local d : WIDTH * 0.3
+	local fine : 0.5 * [adviceBlackness 3.5]
+	include : create-stroke
+		:.start-from [MIDDLE + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
+	include : create-stroke
+		:.start-from [MIDDLE - d + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE - d - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
+	include : create-stroke
+		:.start-from [MIDDLE + d + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE + d - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
+}
+create-glyph 'revprime' : glyph-construction {
+	assign-unicode 0x2035
+	local wide : -WIDTH * 0.1
+	include : create-stroke
+		:.start-from [MIDDLE + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [HALFSTROKE * 1.2] [HALFSTROKE * 1.2]
+		:.line-to    [MIDDLE - wide] [XH * 0.85]
+		:.set-width  HALFSTROKE HALFSTROKE
+		:.heads-to   DOWNWARD
+}
+create-glyph 'revdoubleprime' : glyph-construction {
+	assign-unicode 0x2036
+	local d : 0.25 * [RIGHTSB - SB]
+	include glyphs.revprime
+	apply-transform : Translate [-d * 2] 0
+	include glyphs.revprime
+	apply-transform : Translate d 0
+}
+create-glyph 'revtripleprime' : glyph-construction {
+	assign-unicode 0x2037
+	local wide : -WIDTH * 0.1
+	local d : WIDTH * 0.3
+	local fine : 0.5 * [adviceBlackness 3.5]
+	include : create-stroke
+		:.start-from [MIDDLE + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
+	include : create-stroke
+		:.start-from [MIDDLE - d + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE - d - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
+	include : create-stroke
+		:.start-from [MIDDLE + d + wide] CAP
+		:.heads-to   DOWNWARD
+		:.set-width  [fine * 1.2] [fine * 1.2]
+		:.line-to    [MIDDLE + d - wide] [XH * 0.85]
+		:.set-width  fine fine
+		:.heads-to   DOWNWARD
 }
