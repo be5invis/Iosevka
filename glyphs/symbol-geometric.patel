@@ -67,43 +67,44 @@ create-glyph 'rightHalfBlock' : glyph-construction {
 let : begin {
 	local light : adviceBlackness 3.5
 	local heavy : light * 2
-	define [boxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16]] : glyph-construction {
+	local width WIDTH
+	local midx : width / 2
+	local midy : mix font.hhea.descent font.hhea.ascent 0.5
+	define [boxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
 		assign-unicode unicode
 		local stopH : [Math.max u d] / 2
 		local stopV : [Math.max l r] / 2
-		local midy : mix font.hhea.descent font.hhea.ascent 0.5
-		if l : include : HBar 0 [MIDDLE + stopH] midy l
-		if r : include : HBar [MIDDLE - stopH] WIDTH midy r
-		if d : include : VBar MIDDLE font.hhea.descent [midy + stopV] d
-		if u : include : VBar MIDDLE [midy - stopV] font.hhea.ascent u 
+		if l : include : HBar 0 [midx + stopH] midy l
+		if r : include : HBar [midx - stopH] width midy r
+		if d : include : VBar midx font.hhea.descent [midy + stopV] d
+		if u : include : VBar midx [midy - stopV] font.hhea.ascent u 
 	}
-	define [dlboxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16]] : glyph-construction {
+	define [dlboxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
 		assign-unicode unicode
 		local stopH : [[Math.max u d] - light] / 2
 		local stopV : [[Math.max l r] - light] / 2
 		local capH  : stopH * heavy / [heavy - light]
 		local capV  : stopV * heavy / [heavy - light]
-		local midy : mix font.hhea.descent font.hhea.ascent 0.5
 		if l : begin {
-			include : HBar 0 [MIDDLE - stopH] [midy + [l - light]] light
-			if [l > light] : include : HBar 0 [MIDDLE - stopH] [midy - [l - light]] light
+			include : HBar 0 [midx - stopH] [midy + [l - light]] light
+			if [l > light] : include : HBar 0 [midx - stopH] [midy - [l - light]] light
 		}
 		if r : begin {
-			include : HBar [MIDDLE + stopH] WIDTH [midy + [r - light]] light
-			if [r > light] : include : HBar [MIDDLE + stopH] WIDTH [midy - [r - light]] light
+			include : HBar [midx + stopH] width [midy + [r - light]] light
+			if [r > light] : include : HBar [midx + stopH] width [midy - [r - light]] light
 		}
 		if d : begin {
-			include : VBar [MIDDLE + [d - light]] font.hhea.descent [midy - stopV] light
-			if [d > light] : include : VBar [MIDDLE - [d - light]] font.hhea.descent [midy - stopV] light
+			include : VBar [midx + [d - light]] font.hhea.descent [midy - stopV] light
+			if [d > light] : include : VBar [midx - [d - light]] font.hhea.descent [midy - stopV] light
 		}
 		if u : begin {
-			include : VBar [MIDDLE + [u - light]] [midy + stopV] font.hhea.ascent light
-			if [u > light] : include : VBar [MIDDLE - [u - light]] [midy + stopV] font.hhea.ascent light
+			include : VBar [midx + [u - light]] [midy + stopV] font.hhea.ascent light
+			if [u > light] : include : VBar [midx - [u - light]] [midy + stopV] font.hhea.ascent light
 		}
-		if [stopH > 0 && [not u]] : include : HBar [MIDDLE - stopH - light] [MIDDLE + stopH + light] [midy + capV] light
-		if [stopH > 0 && [not d]] : include : HBar [MIDDLE - stopH - light] [MIDDLE + stopH + light] [midy - capV] light
-		if [stopV > 0 && [not l]] : include : VBar [MIDDLE - capH] [midy - stopV - light] [midy + stopV + light] light
-		if [stopV > 0 && [not r]] : include : VBar [MIDDLE + capH] [midy - stopV - light] [midy + stopV + light] light
+		if [stopH > 0 && [not u]] : include : HBar [midx - stopH - light] [midx + stopH + light] [midy + capV] light
+		if [stopH > 0 && [not d]] : include : HBar [midx - stopH - light] [midx + stopH + light] [midy - capV] light
+		if [stopV > 0 && [not l]] : include : VBar [midx - capH] [midy - stopV - light] [midy + stopV + light] light
+		if [stopV > 0 && [not r]] : include : VBar [midx + capH] [midy - stopV - light] [midy + stopV + light] light
 	}
 	define [complexBoxDraw unicodeStart U D L R fn dl] : begin {
 		local order (
@@ -143,10 +144,27 @@ let : begin {
 			}
 		}
 	}
+	# Straight
 	boxdraw 0x2500 0 0 light light
 	boxdraw 0x2501 0 0 heavy heavy
 	boxdraw 0x2502 light light 0 0
-	boxdraw 0x2503 heavy heavy 0 0	
+	boxdraw 0x2503 heavy heavy 0 0
+	boxdraw 0x2574 0 0 light 0
+	boxdraw 0x2575 light 0 0 0
+	boxdraw 0x2576 0 0 0 light
+	boxdraw 0x2577 0 light 0 0
+	boxdraw 0x2578 0 0 heavy 0
+	boxdraw 0x2579 heavy 0 0 0
+	boxdraw 0x257A 0 0 0 heavy
+	boxdraw 0x257B 0 heavy 0 0
+	boxdraw 0x257C 0 0 light heavy
+	boxdraw 0x257D light heavy 0 0
+	boxdraw 0x257E 0 0 heavy light
+	boxdraw 0x257F heavy light 0 0
+	dlboxdraw 0x2550 0 0 heavy heavy
+	dlboxdraw 0x2551 heavy heavy 0 0
+	
+	# Complex
 	complexBoxDraw 0x250C 0 1 0 1
 	complexBoxDraw 0x2510 0 1 1 0
 	complexBoxDraw 0x2514 1 0 0 1
@@ -156,8 +174,6 @@ let : begin {
 	complexBoxDraw 0x252C 0 1 1 1
 	complexBoxDraw 0x2534 1 0 1 1
 	complexBoxDraw 0x253C 1 1 1 1
-	dlboxdraw 0x2550 0 0 heavy heavy
-	dlboxdraw 0x2551 heavy heavy 0 0
 	complexBoxDraw 0x2552 0 1 0 1 dlboxdraw 1
 	complexBoxDraw 0x2555 0 1 1 0 dlboxdraw 1
 	complexBoxDraw 0x2558 1 0 0 1 dlboxdraw 1
@@ -167,6 +183,85 @@ let : begin {
 	complexBoxDraw 0x2564 0 1 1 1 dlboxdraw 1
 	complexBoxDraw 0x2567 1 0 1 1 dlboxdraw 1
 	complexBoxDraw 0x256A 1 1 1 1 dlboxdraw 1
+	
+	# Dashed
+	define [hDashed unicode segments weight] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+		assign-unicode unicode
+		foreach j [range 0 segments] : include : HBar [mix [width * j / segments] [width * [j + 1] / segments] 0.2] [mix [width * j / segments] [width * [j + 1] / segments] 0.8] midy weight
+	}
+	define [vDashed unicode segments weight] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+		assign-unicode unicode
+		foreach j [range 0 segments] : include : VBar midx [mix [mix font.hhea.descent font.hhea.ascent [j / segments]] [mix font.hhea.descent font.hhea.ascent [[j + 1] / segments]] 0.2] [mix [mix font.hhea.descent font.hhea.ascent [j / segments]] [mix font.hhea.descent font.hhea.ascent [[j + 1] / segments]] 0.8] weight
+	}
+	hDashed 0x2504 3 light
+	hDashed 0x2505 3 heavy
+	hDashed 0x2508 4 light
+	hDashed 0x2509 4 heavy
+	hDashed 0x254C 2 light
+	hDashed 0x254D 2 heavy
+	vDashed 0x2506 3 light
+	vDashed 0x2507 3 heavy
+	vDashed 0x250A 4 light
+	vDashed 0x250B 4 heavy
+	vDashed 0x254E 2 light
+	vDashed 0x254F 2 heavy
+	
+	# Args
+	create-glyph 'bd256D' : glyph-construction {
+		assign-unicode 0x256D
+		include : create-stroke
+			:.start-from midx font.hhea.descent
+			:.heads-to   UPWARD
+			:.set-width  [light / 2] [light / 2]
+			:.arc-vh-to  width midy
+			:.heads-to   RIGHTWARD
+	}
+	create-glyph 'bd256E' : glyph-construction {
+		assign-unicode 0x256E
+		include : create-stroke
+			:.start-from midx font.hhea.descent
+			:.heads-to   UPWARD
+			:.set-width  [light / 2] [light / 2]
+			:.arc-vh-to  0 midy
+			:.heads-to   LEFTWARD
+	}
+	create-glyph 'bd256F' : glyph-construction {
+		assign-unicode 0x256F
+		include : create-stroke
+			:.start-from midx font.hhea.ascent
+			:.heads-to   DOWNWARD
+			:.set-width  [light / 2] [light / 2]
+			:.arc-vh-to  0 midy
+			:.heads-to   LEFTWARD
+	}
+	create-glyph 'bd2570' : glyph-construction {
+		assign-unicode 0x2570
+		include : create-stroke
+			:.start-from midx font.hhea.ascent
+			:.heads-to   DOWNWARD
+			:.set-width  [light / 2] [light / 2]
+			:.arc-vh-to  width midy
+			:.heads-to   RIGHTWARD
+	}
+	create-glyph 'bd2571' : glyph-construction {
+		assign-unicode 0x2571
+		include : create-stroke
+			:.start-from width font.hhea.ascent
+			:.set-width  [light / 2] [light / 2]
+			:.line-to    0 font.hhea.descent
+	}
+	create-glyph 'bd2572' : glyph-construction {
+		assign-unicode 0x2572
+		include : create-stroke
+			:.start-from 0 font.hhea.ascent
+			:.set-width  [light / 2] [light / 2]
+			:.line-to    width font.hhea.descent
+	}
+	create-glyph 'bd2573' : glyph-construction {
+		assign-unicode 0x2573
+		include glyphs.bd2571
+		include glyphs.bd2572
+	}
 }
 
 ### POWERLINE glyphs
