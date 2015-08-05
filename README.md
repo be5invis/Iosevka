@@ -16,4 +16,5 @@ npm install node-sfnt
 npm install bezier-js
 npm install yargs
 ```
-4. Once environments are prepared, `make`. You will find ttfs in the `build/` directory.
+
+Once environments are prepared, `make`. You will find ttfs in the `build/` directory.
