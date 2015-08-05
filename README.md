@@ -9,7 +9,7 @@ Building
 To build Iosevka you should prepare:
 
 1. `node`, `FontForge`, `ttfautohint` and `make`. Make sure that you can run them in your terminal.
-2. patel-c (via `npm install patel-c -g`)
+2. patel-c (via `npm install patel -g`)
 3. Necessary libs :
        npm install node-sfnt
        npm install bezier-js
