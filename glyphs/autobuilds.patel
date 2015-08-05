@@ -326,7 +326,7 @@ define [subParts parts] : begin {
 	foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
 	
 	# replace dotted-i and dotted-j with dotless equalivents
-	if [[parts.0 === glyphs.i || parts.0 === glyphs.ukrainiani] && hasMarkAbove] : parts.0 = glyphs.dotlessi
+	if [[parts.0 === glyphs.i || parts.0 === glyphs.cyrUkraniani] && hasMarkAbove] : parts.0 = glyphs.dotlessi
 	if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
 	
 	# replace below marks with trailing marks
@@ -335,14 +335,14 @@ define [subParts parts] : begin {
 	
 	# composite greek overmarks
 	for [local j 0] [j < parts.length] [inc j] : piecewise {
-		[parts.(j) === glyphs.closeApostropheAbove] : begin {
+		[parts.(j) === glyphs.commaAbove] : begin {
 			piecewise {
 				[parts.[j + 1] === glyphs.graveAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psilivaria }
 				[parts.[j + 1] === glyphs.acuteAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psilioxia }
 				[parts.[j + 1] === glyphs.perispomeniAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psiliperispomeni }
 			}
 		}
-		[parts.(j) === glyphs.invCommaAbove] : begin {
+		[parts.(j) === glyphs.revCommaAbove] : begin {
 			piecewise {
 				[parts.[j + 1] === glyphs.graveAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.dasiavaria }
 				[parts.[j + 1] === glyphs.acuteAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.dasiaoxia }
@@ -358,6 +358,19 @@ define [pad s n] : begin {
 }
 
 set font.features.ccmp ()
+define [shorter x y] : if [x.length < y.length] x y
+define [decideName namingParts parts code] : begin {
+	local baseName namingParts.0.name
+	local combname0 : namingParts.slice 1 :.map [[part] -> [fallback part.shortName part.name]] :.join ' '
+	local glyphName : baseName + [combname0.replace [regex ' ' 'g'] '']
+	if glyphs.(glyphName) : begin {
+		local j 2
+		while glyphs.[glyphName + j] [inc j]
+		set glyphName [glyphName + j]
+	}
+	if [glyphName.length > 30] : set glyphName ['uni' + [pad [[code.toString 16].toUpperCase] 4]]
+	return glyphName
+}
 
 foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	local str : String.fromCharCode code
@@ -373,7 +386,7 @@ foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 			local namingParts : parts.slice 0
 			set parts : subParts parts
 			local composition : namingParts.map [[part] -> part.name] :.join ' '
-			local glyphName : 'uni' + [pad [[code.toString 16].toUpperCase] 4]
+			local glyphName : decideName namingParts parts code
 			create-glyph glyphName : glyph-construction {
 				assign-unicode code
 				include parts.0 AS_BASE
