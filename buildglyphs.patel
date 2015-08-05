@@ -1,6 +1,7 @@
 define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
+define inverse [require './support/transform'].inverse
 
 ### COMMON FUNCTIONS
 
@@ -32,15 +33,16 @@ define [buildFont para recursive] : begin {
 	define glyphs (.'.notdef' glyphList.0)
 	define unicodeGlyphs ()
 	
-	define globalTransform (
-		.xx 1
-		.yx [Math.tan [para.italicangle / 180 * Math.PI]]
-		.xy 0
-		.yy 1
-		.x 0
-		.y 0
-	)
+	# Transform constructors
+	define [Italify angle] : begin {
+		local slope [Math.tan [[fallback angle para.italicangle] / 180 * Math.PI]]
+		return (.xx 1 .yx slope .xy 0 .yy 1 .x [-slope * 0.5 * para.xheight] .y 0)
+	}
+	define [Upright angle] [inverse : Italify angle]
+	define [Scale sx sy] (.xx sx .yx 0 .xy 0 .yy [fallback sy sx] .x 0 .y 0)
+	define [Translate x y] (.xx 1 .yx 0 .xy 0 .yy 1 .x x .y y)
 	
+	define globalTransform : Italify para.italicAngle
 	define ITALICCOR : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
 	
 	define UPWARD (.x [-ITALICCOR] .y 0)
@@ -122,10 +124,6 @@ define [buildFont para recursive] : begin {
 	define MARKBASE 'markbase'
 	
 	define AS_BASE 'AS-BASE'
-	define [Upright angle] (.xx 1 .yx [-[Math.tan [[fallback angle para.italicangle] / 180 * Math.PI]]] .xy 0 .yy 1 .x 0 .y 0)
-	define [Italify angle] (.xx 1 .yx [Math.tan [[fallback angle para.italicangle] / 180 * Math.PI]] .xy 0 .yy 1 .x 0 .y 0)
-	define [Scale sx sy] (.xx sx .yx 0 .xy 0 .yy [fallback sy sx] .x 0 .y 0)
-	define [Translate x y] (.xx 1 .yx 0 .xy 0 .yy 1 .x x .y y)
 	
 	define [tm anchor] : return (
 		.x [anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x]

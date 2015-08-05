@@ -6,6 +6,17 @@ exports.transformPoint = function(tfm, pt){
 		cubic: pt.cubic
 	}
 }
+exports.inverse = function(tfm){
+	var denom = tfm.xx * tfm.yy - tfm.xy * tfm.yx;
+	return {
+		xx : tfm.yy / denom,
+		yx : -tfm.yx / denom,
+		xy : -tfm.xy / denom,
+		yy : tfm.xx / denom,
+		x : -(tfm.x * tfm.yy - tfm.y * tfm.yx) / denom,
+		y : -(-tfm.x * tfm.xy + tfm.y * tfm.xx) / denom,
+	}
+}
 exports.untransform = function(tfm, pt){
 	var xx = pt.x - tfm.x
 	var yy = pt.y - tfm.y
