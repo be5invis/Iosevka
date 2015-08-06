@@ -298,3 +298,20 @@ define [LegShape xt xb xs top bottom _fine] : glyph-construction {
 		:.curve-to   [linreg top xt [bottom + LONGJUT] xb [bottom + fine]] [bottom + fine] xs [bottom + fine]
 		:.heads-to   LEFTWARD
 }
+
+# Derived subfonts
+define [Miniature glyphs fold scale] : begin {
+	local forkedPara : Object.create para
+	forkedPara.upmscale = 1
+	forkedPara.stroke = [adviceBlackness fold] / scale
+	forkedPara.sb = SB / 2
+	local shouldBuildList ()
+	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
+	local forkFont : buildFont forkedPara shouldBuildList
+	return forkFont.glyfMap
+}
+define [turned unicode id x y newid] : create-glyph [fallback newid : 'turn' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs`id AS_BASE
+	include : FlipAround x y
+}

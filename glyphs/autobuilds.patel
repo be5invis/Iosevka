@@ -3,16 +3,6 @@
 local font.features (.)
 
 # Build miniature clyphs : circled, superscripts, subscripts...
-define [Miniature glyphs fold scale] : begin {
-	local forkedPara : Object.create para
-	forkedPara.upmscale = 1
-	forkedPara.stroke = [adviceBlackness fold] / scale
-	forkedPara.sb = SB / 2
-	local shouldBuildList ()
-	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
-	local forkFont : buildFont forkedPara shouldBuildList
-	return forkFont.glyfMap
-}
 define [createCircledGlyphs records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
@@ -67,20 +57,28 @@ define [createSubscripts records] : if [not recursive] : begin {
 define [createFractions records] : if [not recursive] : begin {
 	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
 	local miniatureFont : Miniature pendingGlyphs 4 0.7
-	foreach (unicode numid denid) [items-of records] : create-glyph ['fraction_' + numid + '_' + denid] : glyph-construction {
+	foreach (unicode numid denid height) [items-of records] : create-glyph ['fraction_' + numid + '_' + denid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		local fine : adviceBlackness 3.7
 		include : create-glyph : glyph-construction {
 			include : create-glyph : glyph-construction {
 				include miniatureFont.(numid)
-				apply-transform : Translate [MIDDLE - miniatureFont.(numid).advanceWidth / 2] 0
+				apply-transform : Upright
+				apply-transform : Translate [- miniatureFont.(numid).advanceWidth / 2] 0
+				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Translate MIDDLE 0
+				apply-transform : Italify
 			}
 			apply-transform : Upright
 			apply-transform : Translate 0 [CAP + fine * 4]
 			apply-transform : Italify
 			include : create-glyph : glyph-construction {
 				include miniatureFont.(denid)
-				apply-transform : Translate [MIDDLE - miniatureFont.(denid).advanceWidth / 2] 0
+				apply-transform : Upright
+				apply-transform : Translate [- miniatureFont.(denid).advanceWidth / 2] 0
+				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Translate MIDDLE 0
+				apply-transform : Italify
 			}
 			apply-transform : Upright
 			apply-transform : Translate [-MIDDLE] [-CAP - fine * 2]
@@ -239,7 +237,9 @@ createFractions : list {
 	list 0x215D 'five' 'eight'
 	list 0x215E 'seven' 'eight'
 	list 0x2189 'zero' 'three'
-	
+	# care-of
+	list 0x2105 'c' 'o' XH
+	list 0x2106 'c' 'u' XH
 	# Powerline LN symbol
 	list 0xE0A1 'L' 'N'
 }
