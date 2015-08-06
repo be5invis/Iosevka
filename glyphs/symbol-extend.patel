@@ -239,12 +239,20 @@ create-glyph 'emDash' : glyph-construction {
 	include : HBar 0 WIDTH hyphenCenter
 }
 alias 'horizontalBar' 0x2015 'emDash'
-alias 'lowSinvleQuote' 0x201A 'comma'
-local yCurlyQuotes [mix [XH * 0.85] CAP 0.6]
+
+# quotation marks
+local yCurlyQuotes [mix quoteBottom quoteTop 0.5]
+local commaLow [DESCENDER * 0.9]
+create-glyph 'lowSingleQuote' : glyph-construction {
+	assign-unicode 0x201A
+	include glyphs.comma
+	local ratio : [quoteTop - quoteBottom] / [PERIODSIZE - commaLow]
+	include : FlipAround MIDDLE 0 ratio ratio
+}
 create-glyph 'openSingleQuote' : glyph-construction {
 	assign-unicode 0x2018
-	include glyphs.comma
-	include : FlipAround MIDDLE [yCurlyQuotes / 2]
+	include glyphs.lowSingleQuote
+	include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 }
 create-glyph 'closeSingleQuote' : glyph-construction {
 	assign-unicode 0x2019
@@ -254,21 +262,23 @@ create-glyph 'closeSingleQuote' : glyph-construction {
 create-glyph 'invertSingleQuote' : glyph-construction {
 	assign-unicode 0x201B
 	include glyphs.invertComma
-	include : FlipAround MIDDLE [yCurlyQuotes / 2]
+	local ratio : [quoteTop - quoteBottom] / [PERIODSIZE - commaLow]
+	include : FlipAround MIDDLE 0 ratio ratio
+	include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 	include : FlipAround MIDDLE yCurlyQuotes
 }
 create-glyph 'lowDoubleQuote' : glyph-construction {
 	assign-unicode 0x201E
 	local dist : WIDTH * 0.225
-	include glyphs.comma
+	include glyphs.lowSingleQuote
 	apply-transform : Translate [-dist * 2] 0
-	include glyphs.comma
+	include glyphs.lowSingleQuote
 	apply-transform : Translate dist 0
 }
 create-glyph 'openDoubleQuote' : glyph-construction {
 	assign-unicode 0x201C
 	include glyphs.lowDoubleQuote
-	include : FlipAround MIDDLE [yCurlyQuotes / 2]
+	include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 }
 create-glyph 'closeDoubleQuote' : glyph-construction {
 	assign-unicode 0x201D
@@ -278,13 +288,12 @@ create-glyph 'closeDoubleQuote' : glyph-construction {
 create-glyph 'invertDoubleQuote' : glyph-construction {
 	assign-unicode 0x201F
 	local dist : WIDTH * 0.225
-	include glyphs.invertComma
+	include glyphs.invertSingleQuote
 	apply-transform : Translate [-dist * 2] 0
-	include glyphs.invertComma
+	include glyphs.invertSingleQuote
 	apply-transform : Translate dist 0
-	include : FlipAround MIDDLE [yCurlyQuotes / 2]
-	include : FlipAround MIDDLE yCurlyQuotes
 }
+# Daggers
 create-glyph 'dagger' : glyph-construction {
 	assign-unicode 0x2020
 	include : HBar SB RIGHTSB [mix parenTop parenBot 0.33]
@@ -295,6 +304,7 @@ create-glyph 'doubledagger' : glyph-construction {
 	include glyphs.dagger
 	include : HBar SB RIGHTSB [mix parenTop parenBot 0.67]
 }
+# Ellipsis
 create-glyph 'onedotLeader' : glyph-construction {
 	assign-unicode 0x2024
 	local radius : 0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE
