@@ -1,5 +1,87 @@
 ###### GEOMETRIC SHAPES
 
+### Standard geometric shapes
+define squareRadius : [RIGHTSB - SB] / 2
+define [hollowScale w] : [w - [adviceBlackness 5]] / w
+define [hollow newid unicode oldid zx zy] : create-glyph newid : glyph-construction {
+	assign-unicode unicode
+	include glyphs.(oldid)
+	reverse-last
+	local zoom : hollowScale squareRadius
+	include : FlipAround MIDDLE parenMid [fallback zx zoom] [fallback zy zx zoom]
+	include glyphs.(oldid)
+}
+create-glyph 'blacksquare' : glyph-construction {
+	assign-unicode 0x25A0
+	start-from SB [parenMid + squareRadius]
+	line-to    RIGHTSB [parenMid + squareRadius]
+	line-to    RIGHTSB [parenMid - squareRadius]
+	line-to    SB [parenMid - squareRadius]
+}
+create-glyph 'blackrectangle' : glyph-construction {
+	assign-unicode 0x25AC
+	start-from SB [parenMid + squareRadius / 1.5]
+	line-to    RIGHTSB [parenMid + squareRadius / 1.5]
+	line-to    RIGHTSB [parenMid - squareRadius / 1.5]
+	line-to    SB [parenMid - squareRadius / 1.5]
+}
+create-glyph 'blacklongrectangle' : glyph-construction {
+	assign-unicode 0x25AE
+	start-from SB [parenMid + squareRadius * 1.5]
+	line-to    RIGHTSB [parenMid + squareRadius * 1.5]
+	line-to    RIGHTSB [parenMid - squareRadius * 1.5]
+	line-to    SB [parenMid - squareRadius * 1.5]
+}
+create-glyph 'blacktriangleup' : glyph-construction {
+	assign-unicode 0x25B2
+	start-from MIDDLE [parenMid + squareRadius]
+	line-to    RIGHTSB [parenMid - squareRadius]
+	line-to    SB [parenMid - squareRadius]
+}
+create-glyph 'blackdiamond' : glyph-construction {
+	assign-unicode 0x25C6
+	start-from MIDDLE [parenMid + squareRadius]
+	line-to    RIGHTSB parenMid
+	line-to    MIDDLE [parenMid - squareRadius]
+	line-to    SB parenMid
+}
+create-glyph 'blacktriangledown' : glyph-construction {
+	assign-unicode 0x25BC
+	start-from MIDDLE [parenMid - squareRadius]
+	line-to    SB [parenMid + squareRadius]
+	line-to    RIGHTSB [parenMid + squareRadius]
+}
+create-glyph 'blackcircle' : glyph-construction {
+	assign-unicode 0x25CF
+	include : list : Ring [parenMid + squareRadius] [parenMid - squareRadius] SB RIGHTSB
+}
+create-glyph 'dottedcircle' : glyph-construction {
+	assign-unicode 0x25CC
+	local n 12
+	local fine : [adviceBlackness 5] / 2
+	foreach j [range 0 n] : begin {
+		local angle : Math.PI * 2 * j / n
+		local cx : MIDDLE + [RIGHTSB - MIDDLE] * [Math.cos angle]
+		local cy : [XH / 2] + [RIGHTSB - MIDDLE] * [Math.sin angle]
+		include : list : Ring [cy + fine] [cy - fine] [cx - fine] [cx + fine] true
+	}
+	apply-transform : Upright
+	apply-transform : Translate 0 [parenMid - [XH / 2]]
+	apply-transform : Italify
+	include eMarks
+	foreach k [items-of : Object.keys this.anchors] : begin {
+		set this.anchors.(k).x : this.anchors.(k).x + [parenMid - [XH / 2]] * globalTransform.yx
+		set this.anchors.(k).y : this.anchors.(k).y + [parenMid - [XH / 2]]
+	}
+}
+
+hollow 'whitesquare' 0x25A1 'blacksquare'
+hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale [squareRadius / 1.5]]
+hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale [squareRadius * 1.5]]
+hollow 'whitecircle' 0x25CB 'blackcircle'
+hollow 'whitebullet' 0x25E6 'bullet' [hollowScale [PERIODSIZE - O]]
+hollow 'whitediamond' 0x25C7 'blackdiamond'
+
 ### Blocks
 create-glyph 'fullblock' : glyph-construction {
 	assign-unicode 0x2588

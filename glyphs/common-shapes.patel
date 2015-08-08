@@ -1,15 +1,22 @@
 ###### COMMON SHAPES
 
-define [Ring u d l r] : begin {
+define [Ring u d l r transformShiftOnly] : begin {
 	local my [[u + d] / 2]
 	local mx [[l + r] / 2]
 	local s : new Stroke
-		:.set-transform globalTransform
-		:.start-from mx d
+	if [not transformShiftOnly] : s.set-transform globalTransform
+	s.start-from mx d
 		:.cubic-to [mx + [l - mx] * CKAPPA] d l [my + [d - my] * CKAPPA] l my
 		:.cubic-to l [my + [u - my] * CKAPPA] [mx + [l - mx] * CKAPPA] u mx u
 		:.cubic-to [mx + [r - mx] * CKAPPA] u r [my + [u - my] * CKAPPA] r my
 		:.cubic-to r [my + [d - my] * CKAPPA] [mx + [r - mx] * CKAPPA] d mx d
+	if transformShiftOnly : begin {
+		local (.x mx1 .y my1) [tp globalTransform (.x mx .y my)]
+		foreach p [items-of s.points] : begin {
+			set p.x : p.x + mx1 - mx
+			set p.y : p.y + my1 - my
+		}
+	}
 	return s.points
 }
 define [RingAt x y r] : Ring [y + r] [y - r] [x - r] [x + r]
