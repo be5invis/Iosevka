@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+	<meta charset="utf-8">
+	<title>Iosevka</title>
+	<style>
+		@font-face {
+			font-family: IosevkaWEB;
+			src: url(iosevka-regular.woff) format(woff), url(iosevka-regular.ttf) format(truetype);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-style: italic;
+			src: url(iosevka-italic.woff) format(woff), url(iosevka-italic.ttf) format(truetype);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-weight: bold;
+			src: url(iosevka-bold.woff) format(woff), url(iosevka-bold.ttf) format(truetype);
+		}
+		@font-face {
+			font-family: IosevkaWEB;
+			font-style: italic;
+			font-weight: bold;
+			src: url(iosevka-bolditalic.woff) format(woff), url(iosevka-bolditalic.ttf) format(truetype);
+		}
+		a {
+			color: black;
+			background-image: linear-gradient(white 50%, #888 50%);
+			background-position: 0px 1.075em;
+			background-repeat: repeat-x;
+			background-size: 2px 2px;
+			text-decoration: none;
+			text-shadow: white -1px 0px 0px, white 1px 0px 0px;
+		}
+		a:hover {
+			background-image: linear-gradient(white 50%, black 50%);
+		}
+		body {
+			width: 68rem;
+			margin: 0 auto;
+			padding: 4rem 0;
+		}
+		p, pre, .show, .show samp, #links {
+			font-family: "IosevkaWEB", monospace;
+			line-height: 1.5;
+		}
+		p {
+			margin: 0.5rem 0;
+		}
+		div.show {
+			font-size: 2rem;
+			width: 68rem;
+		}
+		div.show.bold { font-weight: bold }
+		div.show.italic { font-style: italic }
+		div.block {
+			display: flex;
+			width: 68rem;
+			flex-wrap: wrap;
+			border-top: 1px dotted #ccc;
+			margin-bottom: -1px;
+		}
+		.show div.block span {
+			display: block;
+			width: 2rem;
+			height: 2rem;
+			line-height: 2rem;
+			padding: 1rem;
+			flex: none;
+			text-align: center;
+			position: relative;
+			cursor: default;
+		}
+		.show div.block span.indicator {
+			font-size: 1rem;
+		}
+		.show div.block span.missing {
+			opacity: 0.1
+		}
+		.show div.block span.present:before {
+			display: none;
+			content: attr(alt);
+			position: absolute;
+			font-size: 0.33em;
+			top: -2em;
+			left: -5em;
+			right: -5em;
+			text-align: center;
+			font-weight: normal;
+			font-style: normal;
+			text-shadow: white 0 0 0.4em;
+		}
+		.show div.block span.present:hover {
+			background: #eee;
+		}
+		.show div.block span.present:hover:before {
+			display: block;
+		}
+		.show div.block span > s {
+			text-decoration: none;
+			position: relative;
+		}
+		.show div.block span.present:hover s:before {
+			display: block;
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 100%;
+			width: 0.2em;
+			border-right: 1px solid rgba(255, 0, 0, 0.1);
+			border-top: 1px solid rgba(255, 0, 0, 0.1);
+			border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+		}
+		.show div.block span.present:hover s:after {
+			display: block;
+			content: '';
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 100%;
+			width: 0.2em;
+			border-left: 1px solid rgba(255, 0, 0, 0.1);
+			border-top: 1px solid rgba(255, 0, 0, 0.1);
+			border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+		}
+		.show samp {
+			display: flex;
+			font-size: 1rem;
+			white-space: pre;
+		}
+		.show samp > span.langname {
+			display: inline-block;
+			background: #eee;
+			padding: 0.5em;
+			flex: none;
+			font-weight: normal;
+			font-style: normal;
+			min-width: 12em;
+			text-align: right;
+		}
+		.show samp > span.sentence {
+			flex: 1;
+			padding: 0.5em;
+		}
+		
+		#links {
+			position: fixed;
+			z-index: 99;
+			top: 0;
+			width: 68rem;
+			display: flex;
+			border-bottom: 2px solid black;
+			background: white;
+		}
+		#links a {
+			display: block;
+			flex: 1;
+			padding: 1rem 0;
+			text-align: center;
+			text-decoration: none;
+			color: black;
+			background: none;
+			text-shadow: none;
+		}
+		#links a.active {
+			background: black;
+			color: white;
+		}
+	</style>
+	<script src="https://cdn.bootcss.com/zepto/1.1.6/zepto.min.js"></script>
+	<script>
+	if (!window.Zepto) document.write('<script src="zepto.min.js">\x3C/script>')
+	</script>
+	
+</html>
+<body>
+	<div id="links"></div>
+	<script>
+		function padzero(s, n){
+			while(s.length < n) s = '0' + s;
+			return s;
+		}
+		var BLOCKSIZE = 16 * 4;
+		var fonts = [
+			{name: 'iosevka-regular', cls: ''},
+			{name: 'iosevka-bold', cls: 'bold'},
+			{name: 'iosevka-italic', cls:'italic'},
+			{name: 'iosevka-bolditalic', cls:'bold italic'}
+		];
+		
+		var sampleSentences = [
+			{lang: 'English', sample: 'Shaw, those twelve beige hooks are joined if I patch a young, gooey mouth.'},
+			{lang: 'Powerline', sample: '<span style="background:black;color:white"> NORMAL </span><span style="background:#ccc;color:black;font-style:normal">\uE0B0</span><span style="background:#ccc;color:black"> <span style="font-style:normal">\uE0A0</span> master <span style="font-style:normal">\uE0B1</span> glyphs/powerline.patel </span><span style="background:#eee;color:#ccc;font-style:normal">\uE0B0</span><span style="background:#eee;color:#555">      dos <span style="font-style:normal">\uE0B3</span> utf-8 <span style="font-style:normal">\uE0B3</span> PatEL </span><span style="background:#eee;color:#ccc;font-style:normal">\uE0B2</span><span style="background:#ccc"> 2% </span><span style="background:#ccc;color:black;font-style:normal">\uE0B2</span><span style="color:white;background:black"> \uE0A1 1:1 </span>'},
+			{lang: 'Bulgarian', sample: 'Я, пазачът Вальо уж бди, а скришом хапва кюфтенца зад щайгите.'},
+			{lang: 'Czech', sample: 'Nechť již hříšné saxofony ďáblů rozezvučí síň úděsnými tóny waltzu, tanga a quickstepu.'},
+			{lang: 'Finnish', sample: 'Charles Darwin jammaili Åken hevixylofonilla Qatarin yöpub Zeligissä.'},
+			{lang: 'French', sample: 'Voix ambiguë d\'un cœur qui au zéphyr préfère les jattes de kiwi.'},
+			{lang: 'German', sample: 'Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich.'},
+			{lang: 'Greek (monotonic)', sample: 'Ταχίστη αλώπηξ βαφής ψημένη γη, δρασκελίζει υπέρ νωθρού κυνός.'},
+			{lang: 'Greek (polytonic)', sample: 'Ἄδμηθ\', ὁρᾷς γὰρ τἀμὰ πράγμαθ\' ὡς ἔχει, λέξαι θέλω σοι πρὶν θανεῖν ἃ βούλομαι. '},
+			{lang: 'Hungarian', sample: 'Jó foxim és don Quijote húszwattos lámpánál ülve egy pár bűvös cipőt készít.'},
+			{lang: 'Icelandic', sample: 'Kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa.'},
+			{lang: 'Irish', sample: 'Ċuaiġ bé ṁórṡáċ le dlúṫspád fíorḟinn trí hata mo ḋea-ṗorcáin ḃig.'},
+			{lang: 'Latvian', sample: 'Muļķa hipiji mēģina brīvi nogaršot celofāna žņaudzējčūsku.'},
+			{lang: 'Macedonian', sample: 'Ѕидарски пејзаж: шугав билмез со чудење џвака ќофте и кељ на туѓ цех.'},
+			{lang: 'Norwegian', sample: 'Jeg begynte å fortære en sandwich mens jeg kjørte taxi på vei til quiz'},
+			{lang: 'Lithuanian', sample: 'Įlinkdama fechtuotojo špaga sublykčiojusi pragręžė apvalų arbūzą.'},
+			{lang: 'Polish', sample: 'Pchnąć w tę łódź jeża lub ośm skrzyń fig.'},
+			{lang: 'Portuguese', sample: 'Luís argüia à Júlia que «brações, fé, chá, óxido, pôr, zângão» eram palavras do português.'},
+			{lang: 'Romanian', sample: 'Înjurând pițigăiat, zoofobul comandă vexat whisky și tequila.'},
+			{lang: 'Russian', sample: 'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.'},
+			{lang: 'Spainish', sample: 'Benjamín pidió una bebida de kiwi y fresa; Noé, sin vergüenza, la más exquisita champaña del menú.'},
+			{lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.'},
+			{lang: 'Ukranian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!'}
+		]
+		
+		var divs = [];
+		var links = [];
+		function Click(j){
+			return function(){
+				for(var k = 0; k < divs.length; k++) if(k === j) {
+					divs[k].show()
+					links[k].addClass('active')
+				} else {
+					divs[k].hide()
+					links[k].removeClass('active')
+				}
+				return false;
+			}
+		}
+		fonts.forEach(function(font, fontindex){
+			var div = $('<div>').addClass('show ' + font.cls);
+			sampleSentences.forEach(function(record){
+				var sample = $('<samp>').append('<span class="langname">' + record.lang + '</span><span class="sentence">' + record.sample + '</span>');
+				div.append(sample);
+			});
+			$.get(font.name + '.charmap', function(data){
+				data = JSON.parse(data);
+				var uhash = [];
+				for(var j = 0; j < data.length; j++) {
+					var unicodes = data[j][1];
+					if(unicodes && unicodes.length) for(var k = 0; k < unicodes.length; k++){
+						uhash[unicodes[k]] = data[j][0].trim()
+					}
+				}
+				for(var block = 0; block < (65536 / BLOCKSIZE); block++) {
+					var blockdiv = $('<div>').addClass('block');
+					var hasGlyphInThisBlock = false;
+					for(j = block * BLOCKSIZE; j < (block + 1) * BLOCKSIZE; j++) if(uhash[j]){
+						 hasGlyphInThisBlock = true;
+					}
+					if(hasGlyphInThisBlock) {
+						for(j = block * BLOCKSIZE; j < (block + 1) * BLOCKSIZE; j++) {
+							if(j % 16 === 0) blockdiv.append('<span class="indicator">' + padzero(j.toString(16).toUpperCase(), 4) + '</span>')
+							blockdiv.append('<span class="' + (uhash[j] ? 'present' : 'missing') + '" alt="' + (uhash[j] || '') + '"><s>' + String.fromCharCode(j) + '</s></span>')
+						}
+						div.append(blockdiv)
+					}
+				};
+			});
+			divs.push(div);
+			$('body').append(div);
+			
+			var a = $('<a>').attr('href', '#').append(font.name);
+			a.on('click', Click(fontindex));
+			links.push(a)
+			$('#links').append(a);
+		});
+		Click(0)();
+	</script>
+</body>
