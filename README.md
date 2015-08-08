@@ -2,7 +2,7 @@ Iosevka
 ======================================================
 A programmer's typeface.
 
-![preview](http://ww2.sinaimg.cn/large/798f7769gw1euq8czfv1aj21kw1f3nck.jpg)
+![preview](http://ww2.sinaimg.cn/large/798f7769gw1euvzxiywngj21di154wx5.jpg)
 
 Building
 -----------------------------------------------------
