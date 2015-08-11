@@ -26,7 +26,7 @@ define [createCircledGlyphs records] : if [not recursive] : begin {
 define [createSuperscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['superscript_' + glyphid] : glyph-construction {
+	foreach (unicode glyphid) [items-of records] : create-glyph ['superscript' + glyphid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		include : create-glyph : glyph-construction {
 			include miniatureFont.(glyphid)
@@ -41,7 +41,7 @@ define [createSuperscripts records] : if [not recursive] : begin {
 define [createSubscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['subscript_' + glyphid] : glyph-construction {
+	foreach (unicode glyphid) [items-of records] : create-glyph ['subscript' + glyphid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		include : create-glyph : glyph-construction {
 			include miniatureFont.(glyphid)
@@ -56,10 +56,11 @@ define [createSubscripts records] : if [not recursive] : begin {
 
 define [createFractions records] : if [not recursive] : begin {
 	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
-	local miniatureFont : Miniature pendingGlyphs 4 0.7
-	foreach (unicode numid denid height) [items-of records] : create-glyph ['fraction_' + numid + '_' + denid] : glyph-construction {
+	local miniatureFont : Miniature pendingGlyphs 4 0.6
+	foreach (unicode numid denid height) [items-of records] : create-glyph [numid + 'over' + denid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		local fine : adviceBlackness 3.7
+		local dist : XH * 0.4
 		include : create-glyph : glyph-construction {
 			include : create-glyph : glyph-construction {
 				include miniatureFont.(numid)
@@ -70,7 +71,7 @@ define [createFractions records] : if [not recursive] : begin {
 				apply-transform : Italify
 			}
 			apply-transform : Upright
-			apply-transform : Translate 0 [CAP + fine * 4]
+			apply-transform : Translate 0 [CAP + dist]
 			apply-transform : Italify
 			include : create-glyph : glyph-construction {
 				include miniatureFont.(denid)
@@ -81,8 +82,8 @@ define [createFractions records] : if [not recursive] : begin {
 				apply-transform : Italify
 			}
 			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] [-CAP - fine * 2]
-			apply-transform : Scale 0.5
+			apply-transform : Translate [-MIDDLE] [-CAP - dist / 2]
+			apply-transform : Scale 0.55
 			apply-transform : Translate MIDDLE parenMid
 			apply-transform : Italify
 		}
@@ -274,8 +275,8 @@ createFractions : list {
 	list 0x215E 'seven' 'eight'
 	list 0x2189 'zero' 'three'
 	# care-of
-	list 0x2105 'c' 'o' XH
-	list 0x2106 'c' 'u' XH
+	list 0x2105 'C' 'O'
+	list 0x2106 'C' 'U'
 	# Powerline LN symbol
 	list 0xE0A1 'L' 'N'
 }
@@ -293,11 +294,11 @@ define [doubleSuperscript a b] : glyph-construction {
 }
 create-glyph 'trademark' : glyph-construction {
 	assign-unicode 0x2122
-	include : doubleSuperscript glyphs.superscript_T glyphs.superscript_M
+	include : doubleSuperscript glyphs.superscriptT glyphs.superscriptM
 }
 create-glyph 'servicemark' : glyph-construction {
 	assign-unicode 0x2120
-	include : doubleSuperscript glyphs.superscript_S glyphs.superscript_M
+	include : doubleSuperscript glyphs.superscriptS glyphs.superscriptM
 }
 
 # Build accented glyphs
