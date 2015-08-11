@@ -9,7 +9,7 @@ MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
-PASS1   = $(subst .ttf,.otf,$(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS)))
+PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
@@ -33,9 +33,10 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 	cat $^ > $@
 
 # Pass 1 : Outline cleanup and merge
-$(PASS1) : $(OBJDIR)/.pass1-%.otf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
 	fontforge -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.otf
+# Pass 2 : Curve simplification
+$(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
 	fontforge -script pass2-finalize.py $^ $@
 # Pass 3 : Simplify and output
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf

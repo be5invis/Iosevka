@@ -20,19 +20,17 @@ define [Ring u d l r transformShiftOnly] : begin {
 	return s.points
 }
 define [RingAt x y r] : Ring [y + r] [y - r] [x - r] [x + r]
-define [ORing u d l r smooth] : begin {
-	local myu [u - smooth]
-	local myd [d + smooth]
+define [ORing u d l r sma smb shift] : begin {
 	local mx [[l + r] / 2]
 	local s : new Stroke
 		:.set-transform globalTransform
-		:.start-from mx d
-		:.cubic-to [mx + [l - mx] * CKAPPA] d l [myd + [d - myd] * CKAPPA] l myd
-		:.line-to l myu
-		:.cubic-to l [myu + [u - myu] * CKAPPA] [mx + [l - mx] * CKAPPA] u mx u
-		:.cubic-to [mx + [r - mx] * CKAPPA] u r [myu + [u - myu] * CKAPPA] r myu
-		:.line-to r myd
-		:.cubic-to r [myd + [d - myd] * CKAPPA] [mx + [r - mx] * CKAPPA] d mx d
+		:.start-from [mx + shift] d
+		:.arc-hv-to  l [d + smb]
+		:.line-to    l [u - sma]
+		:.arc-vh-to  [mx - shift] u
+		:.arc-hv-to  r [u - smb]
+		:.line-to    r [d + sma]
+		:.arc-vh-to  [mx + shift] d
 	return s.points
 }
 define [leftwardTopSerif x y length] : begin {
@@ -152,30 +150,29 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : begin {
 	       :.concat : halfXStrand _rightx righty middlex middley turn straight tension
 }
 
-define [nBowl left middle right fine _top _bottom _sma _smb] : begin {
+define [nShoulder left middle right fine _top _bottom _sma _smb] : begin {
 	local top : fallback _top XH
 	local bottom : fallback _bottom 0
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
-	local bandLeft : new Stroke
+	local band : new Stroke
 		:.set-transform globalTransform
 		:.start-from right bottom
-		:.heads-to UPWARD
-		:.set-width STROKE 0
-		:.line-to   right [top - smb]
-		:.arc-vh-to middle [top - O]
-		:.heads-to LEFTWARD
+		:.heads-to   UPWARD
+		:.set-width  STROKE 0
+		:.line-to    right [top - smb]
+		:.arc-vh-to  middle [top - O]
+		:.heads-to   LEFTWARD
+		:.set-samples 12
 		:.to-outline
-	local bandRight : new Stroke
+	local shoulder : new Stroke
 		:.set-transform globalTransform
 		:.start-from middle [top - O - STROKE]
-		:.set-width 0 STROKE
-		:.heads-to LEFTWARD
-		:.arc-hv-to left [top - sma]
-		:.heads-to DOWNWARD
-		:.set-width 0 fine
-		:.to-outline
-	return : bandLeft.concat bandRight
+		:.arc-hv-to  left [top - sma]
+		:.line-to    [left - fine] [top - sma]
+		:.arc-vh-to  middle [top - O]
+
+	return : band.concat (shoulder.points)
 }
 
 define [XSHookUpper top left middle right smooth hook] : glyph-construction {
@@ -183,8 +180,7 @@ define [XSHookUpper top left middle right smooth hook] : glyph-construction {
 		:.set-transform globalTransform
 		:.start-from [right - OXHOOK] [top - hook]
 		:.set-width STROKE 0
-		:.curve-to [mix middle right KAPPA_HOOK] [top - O] middle [top - O]
-		:.heads-to [if [left < right] LEFTWARD RIGHTWARD]
+		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
 		:.arc-hv-to left [top - smooth]
 }
 define [sHookUpper top smooth hook _middle] : glyph-construction {
@@ -196,8 +192,7 @@ define [twoHookUpper top smooth hook _middle] : glyph-construction {
 		:.set-transform globalTransform
 		:.start-from [SB + OXHOOK] [top - hook]
 		:.set-width 0 STROKE
-		:.curve-to [mix middle SB KAPPA_HOOK] [top - O] middle [top - O]
-		:.heads-to RIGHTWARD
+		:.curve-to [mix middle SB KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
 		:.arc-hv-to RIGHTSB [top - smooth]
 }
 define [sHookLower bottom smooth hook _middle] : glyph-construction {
@@ -208,8 +203,7 @@ define [XSHookLower bottom left middle right smooth hook] : glyph-construction {
 		:.set-transform globalTransform
 		:.start-from right [bottom + smooth]
 		:.set-width [if [left < right] 0 STROKE] [if [left < right] STROKE 0]
-		:.arc-vh-to middle [bottom + O]
-		:.heads-to [if [left < right] LEFTWARD RIGHTWARD]
+		:.arc-vh-to [middle + OMIDCOR_S] [bottom + O]
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 
@@ -218,36 +212,31 @@ define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local width : fallback _width STROKE
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
+	local mc : OMIDCOR * width
 	if [u - d > sma + smb] {
 		then : begin {
 			include : create-stroke
 				:.set-transform globalTransform
-				:.start-from middle [u - O]
+				:.start-from [middle - mc] [u - O]
 				:.set-width width 0
-				:.heads-to LEFTWARD
 				:.arc-hv-to [l + O] [u - sma]
 				:.line-to  [l + O] [d + smb]
-				:.arc-vh-to middle [d + O]
-				:.heads-to RIGHTWARD
+				:.arc-vh-to [middle + mc] [d + O]
 				:.arc-hv-to [r - O] [d + sma]
 				:.line-to  [r - O] [u - smb]
-				:.arc-vh-to middle [u - O]
-				:.heads-to LEFTWARD
+				:.arc-vh-to [middle - mc] [u - O]
 		}
 		else : begin {
 			local ymiddlea : mix d u [smb / [sma + smb]]
 			local ymiddleb : mix d u [sma / [sma + smb]]
 			include : create-stroke
 				:.set-transform globalTransform
-				:.start-from middle [u - O]
+				:.start-from [middle - mc] [u - O]
 				:.set-width width 0
-				:.heads-to LEFTWARD
 				:.arc-hv-to [l + O] ymiddlea
-				:.arc-vh-to middle [d + O]
-				:.heads-to RIGHTWARD
+				:.arc-vh-to [middle + mc] [d + O]
 				:.arc-hv-to [r - O] ymiddleb
-				:.arc-vh-to middle [u - O]
-				:.heads-to LEFTWARD
+				:.arc-vh-to [middle - mc] [u - O]
 		}
 	}
 }

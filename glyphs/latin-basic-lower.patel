@@ -6,64 +6,18 @@ create-glyph 'o' : glyph-construction {
 	assign-unicode 'o'
 	include eMarks
 	
-	include : create-stroke
-		:.start-from MIDDLE XO
-		:.set-width  STROKE 0
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + O] SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  [RIGHTSB - O] SMALLSMOOTHA
-		:.line-to    [RIGHTSB - O] [XH - SMALLSMOOTHB]
-		:.arc-vh-to  MIDDLE XO
-		:.heads-to   LEFTWARD
+	include : smallo XH 0 SB RIGHTSB
 }
 define [oLeft] : glyph-construction {
-	# right half
-	include : create-stroke
-		:.start-from MIDDLE XO
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.arc-hv-to  [RIGHTSB - O] [XH - SMALLSMOOTHB]
-		:.line-to    [RIGHTSB - O] SMALLSMOOTHA
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   LEFTWARD
-	# left half
-	include : create-stroke
-		:.start-from MIDDLE [O + STROKE]
-		:.heads-to   LEFTWARD
-		:.set-width  STROKE 0
-		:.arc-hv-to  [SB + STROKE * ITALICCOR] [SMALLSMOOTHB - STROKE * 0.05]
-		:.set-width  [STROKE * 0.25] 0
-		:.line-to    [SB + STROKE * ITALICCOR] [XH - SMALLSMOOTHA + STROKE * 0.05]
-		:.set-width  [STROKE * 0.25] 0
-		:.arc-vh-to  MIDDLE [XO - STROKE]
-		:.set-width  STROKE 0
-		:.heads-to   RIGHTWARD
+	include : list {
+		ORing XO O [SB + HALFSTROKE] [RIGHTSB - O] SMALLSMOOTHA SMALLSMOOTHB 0
+		ORing [XO - STROKE] [O + STROKE] [SB + STROKE * ITALICCOR] [RIGHTSB - STROKE * ITALICCOR - O] [SMALLSMOOTHA - STROKE] [SMALLSMOOTHB - STROKE] 0
+	}
+	reverse-last
 }
 define [oRight] : glyph-construction {
-	# left half
-	include : create-stroke
-		:.start-from MIDDLE XO
-		:.heads-to   LEFTWARD
-		:.set-width  STROKE 0
-		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + O] SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   RIGHTWARD
-	# right half
-	include : create-stroke
-		:.start-from MIDDLE [O + STROKE]
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.arc-hv-to  [RIGHTSB - STROKE * ITALICCOR] [SMALLSMOOTHA - STROKE * 0.05]
-		:.set-width  0 [STROKE * 0.25]
-		:.line-to    [RIGHTSB - STROKE * ITALICCOR] [XH - SMALLSMOOTHB + STROKE * 0.05]
-		:.set-width  0 [STROKE * 0.25]
-		:.arc-vh-to  MIDDLE [XO - STROKE]
-		:.set-width  0 STROKE
-		:.heads-to   LEFTWARD
+	include : create-glyph [oLeft]
+	include : FlipAround MIDDLE [XH / 2]
 }
 create-glyph 'p' : glyph-construction {
 	set-width WIDTH
@@ -156,18 +110,16 @@ create-glyph 'c' : glyph-construction {
 	include : create-stroke
 		:.start-from [RIGHTSB - OXHOOK] [XH - HOOK]
 		:.set-width  STROKE 0
-		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO MIDDLE XO
-		:.heads-to   LEFTWARD
+		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO [MIDDLE - OMIDCOR_S] XO
 		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
 		:.line-to    [SB + O] SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   RIGHTWARD
+		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
 		:.curve-to   [MIDDLE + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
 }
 define [SmallEShape top stroke barpos] : glyph-construction {
 	local barbottom [top * [fallback barpos EBARPOS]]
 	local hookx [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx]
-	local hookmiddle [mix [SB + O] hookx 0.55]
+	local hookmiddle : [mix [SB + O] hookx 0.55] + OMIDCOR_S
 	
 	include : create-stroke
 		:.start-from [RIGHTSB - O] barbottom
@@ -175,11 +127,9 @@ define [SmallEShape top stroke barpos] : glyph-construction {
 		:.set-width  stroke 0
 		:.line-to    [RIGHTSB - O] [top - SMALLSMOOTHB]
 		:.arc-vh-to  MIDDLE [top - O]
-		:.heads-to   LEFTWARD
 		:.arc-hv-to  [SB + O] [top - SMALLSMOOTHA]
 		:.line-to    [SB + O] SMALLSMOOTHB
 		:.arc-vh-to  hookmiddle O
-		:.heads-to   RIGHTWARD
 		:.curve-to   [mix hookmiddle hookx KAPPA_HOOK] O hookx [SHOOK - TAILADJY * globalTransform.yx]
 	include : create-stroke
 		:.start-from [SB + [stroke / 2]] barbottom
@@ -204,12 +154,10 @@ create-glyph 'e.italic' : glyph-construction {
 		:.start-from [SB + O + STROKE] barbottom
 		:.set-width  STROKE 0
 		:.arc-hv-to  [RIGHTSB - O] [XH - SMALLSMOOTHB * 0.95]
-		:.arc-vh-to  MIDDLE XO
-		:.heads-to   LEFTWARD
+		:.arc-vh-to  [MIDDLE - OMIDCOR_S] XO
 		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
 		:.line-to    [SB + O] SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   RIGHTWARD
+		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
 		:.curve-to   [MIDDLE + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [MIDDLE - SB]] O [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
 		:.set-samples 4
 }
@@ -264,19 +212,17 @@ create-glyph 'a.upright' : glyph-construction {
 		:.heads-to UPWARD
 		:.set-width STROKE 0
 		:.line-to RIGHTSB [XH - SMOOTHA]
-		:.arc-vh-to MIDDLE XO
-		:.heads-to LEFTWARD
+		:.arc-vh-to [MIDDLE - OMIDCOR_S] XO
 		:.curve-to [MIDDLE - KAPPA_HOOK * [MIDDLE - SB]] XO [SB + OXHOOK] [XH - AHOOK]
 	include : create-stroke
-		:.start-from lowmiddle O
+		:.start-from [lowmiddle + OMIDCOR_S] O
 		:.set-width 0 STROKE
-		:.heads-to LEFTWARD
 		:.arc-hv-to [SB + O] [bartop * 0.45]
 		:.arc-vh-to barsmooth bartop
 		:.line-to RIGHTSB bartop
 		:.heads-to RIGHTWARD
 	include : create-stroke
-		:.start-from lowmiddle [O + STROKE]
+		:.start-from [lowmiddle + OMIDCOR_S - ITALICCORS] [O + STROKE]
 		:.set-width 0 STROKE
 		:.heads-to RIGHTWARD
 		:.arc-hv-to [RIGHTSB - STROKE] [SMALLSMOOTHB * 0.65]
@@ -306,40 +252,14 @@ create-glyph 'a' : glyph-construction {
 		else : include glyphs.'a.upright' AS_BASE
 	}
 }
-create-glyph 'u' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 'u'
-	include eMarks
-	set-anchor 'trailing' BASE [RIGHTSB - markHalfStroke] 0
-	include : create-stroke
-		:.start-from SB XH
-		:.heads-to DOWNWARD
-		:.set-width STROKE 0
-		:.line-to  SB SMALLSMOOTHA
-		:.arc-vh-to MIDDLE O
-		:.heads-to RIGHTWARD
-	include : create-stroke
-		:.start-from MIDDLE [O + STROKE]
-		:.set-width 0 STROKE
-		:.heads-to RIGHTWARD
-		:.arc-hv-to [RIGHTSB - STROKE * ITALICCOR] SMALLSMOOTHA
-		:.heads-to UPWARD
-		:.set-width 0 [STROKE * 0.4]
-	include : create-stroke
-		:.start-from RIGHTSB 0
-		:.heads-to UPWARD
-		:.set-width STROKE 0
-		:.line-to RIGHTSB XH
-		:.heads-to UPWARD
-}
 
-### n h m
+### n u h m
 create-glyph 'n' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'n'
 	include eMarks
 	
-	include : nBowl [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
+	include : nShoulder [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
 	include : create-stroke
 		:.start-from SB 0
 		:.heads-to UPWARD
@@ -347,12 +267,20 @@ create-glyph 'n' : glyph-construction {
 		:.line-to SB XH
 		:.heads-to UPWARD
 }
+create-glyph 'u' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'u'
+	include eMarks
+	set-anchor 'trailing' BASE [RIGHTSB - markHalfStroke] 0
+	include glyphs.n
+	include : FlipAround MIDDLE [XH / 2]
+}
 create-glyph 'h' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'h'
 	include bMarks
 	
-	include : nBowl [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
+	include : nShoulder [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
 	include : create-stroke 
 		:.start-from SB 0
 		:.heads-to UPWARD
@@ -694,17 +622,15 @@ create-glyph 'r' : glyph-construction {
 	local coexpand [[1 - expand] / 2]
 	
 	local rhookx : RIGHTSB + JBALANCE / 2
-	local rmiddle : mix [SB + RBALANCE + STROKE] [rhookx - HALFSTROKE] 0.5
+	local rmiddle : [mix [SB + RBALANCE + STROKE] [rhookx - HALFSTROKE] 0.5] - OMIDCOR_S
 
 	include : create-stroke
 		:.start-from rhookx [XH - RHOOK]
 		:.set-width  STROKE 0
 		:.curve-to   [mix rmiddle rhookx KAPPA_AHOOK] XO rmiddle XO
-		:.heads-to   LEFTWARD
 	include : create-stroke
-		:.start-from rmiddle [XO - STROKE]
+		:.start-from [rmiddle + ITALICCORS] [XO - STROKE]
 		:.set-width  0 STROKE
-		:.heads-to   LEFTWARD
 		:.arc-hv-to  [SB + STROKE * ITALICCOR + RBALANCE] [XH - SMALLSMOOTHA]
 		:.heads-to   DOWNWARD
 		:.set-width  0 [STROKE * 0.3]
