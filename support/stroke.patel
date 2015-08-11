@@ -182,6 +182,9 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	local right ()
 	for [local j 0] [j < subSegments.length] [inc j] : begin {
 		local curve subSegments`j
+		left.push [begin [local last [computeOffsetPoint curve j j f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
+		right.push [begin [local last [computeOffsetPoint curve j j f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
+
 		foreach sample [range 0 samples] : begin {
 			local t : j + sample / samples
 			local tn : j + [sample + 1] / samples
@@ -210,23 +213,22 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			
 			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
 			if [[not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [nonlinear lthis il lnext] && [near lthis il lnext]] [then {
-				left.push (.x lthis.x .y lthis.y .onCurve true) (.x il.x .y il.y .onCurve false)
+				left.push (.x il.x .y il.y .onCurve false) (.x lnext.x .y lnext.y .onCurve true)
 			}] [else {
-				left.push (.x lthis.x .y lthis.y .onCurve true)
+				left.push (.x lnext.x .y lnext.y .onCurve true)
 			}]
 			
 			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
 			if [[not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext] && [near rthis ir rnext]] [then {
-				right.push (.x rthis.x .y rthis.y .onCurve true) (.x ir.x .y ir.y .onCurve false)
+				right.push (.x ir.x .y ir.y .onCurve false) (.x rnext.x .y rnext.y .onCurve true)
 			}] [else {
-				right.push (.x rthis.x .y rthis.y .onCurve true)
+				right.push (.x rnext.x .y rnext.y .onCurve true)
 			}]
 		}
-		left.push [begin [local last [computeOffsetPoint curve [j + 1] j f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
-		right.push [begin [local last [computeOffsetPoint curve [j + 1] j f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
+		shapes.push : left.concat [right.reverse]
+		set left ()
+		set right ()
 	}
-
-	shapes.push : left.concat [right.reverse]
 
 	return : shapes.map : function [shape] : begin {
 		# Remove duplicate points
