@@ -20,6 +20,7 @@ define KAPPA 0.51
 define COKAPPA : 1 - KAPPA
 define BKAPPA : KAPPA + 0.1
 define COBKAPPA : COKAPPA - 0.1
+define CKAPPA BKAPPA
 
 define [Stroke] : begin {
 	this.points = ()
@@ -46,6 +47,7 @@ define [Stroke.bindParameters para] : begin {
 	COKAPPA = 1 - KAPPA
 	COBKAPPA = COKAPPA - 0.1
 	BKAPPA = KAPPA + 0.1
+	CKAPPA = para.ckappa || BKAPPA
 }
 define [Stroke.prototype.set-width d1 d2] : begin {
 	local point this.points`[this.points.length - 1]
@@ -79,16 +81,18 @@ define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
 	this.points.push [tp this.gizmo (.x x1 .y y1 .onCurve false .cubic true)] [tp this.gizmo (.x x2 .y y2 .onCurve false .cubic true)] [tp this.gizmo (.x x .y y .onCurve true)]
 	return this
 }
-define [Stroke.prototype.arc-vh-to x y _kappa] : begin {
-	local kappa : fallback _kappa BKAPPA
+define [Stroke.prototype.arc-vh-to x y _kappah _kappav] : begin {
+	local kappah : fallback _kappah BKAPPA
+	local kappav : fallback _kappav _kappah CKAPPA
 	local last :utp this.gizmo this.points`[this.points.length - 1]
-	this.cubic-to last.x [last.y + kappa * [y - last.y]] [x + kappa * [last.x - x]] y x y
+	this.cubic-to last.x [last.y + kappav * [y - last.y]] [x + kappah * [last.x - x]] y x y
 	return this
 }
-define [Stroke.prototype.arc-hv-to x y _kappa] : begin {
-	local kappa : fallback _kappa BKAPPA
+define [Stroke.prototype.arc-hv-to x y _kappah _kappav] : begin {
+	local kappah : fallback _kappah BKAPPA
+	local kappav : fallback _kappav _kappah CKAPPA
 	local last :utp this.gizmo this.points`[this.points.length - 1]
-	this.cubic-to [last.x + kappa * [x - last.x]] last.y x [y + kappa * [last.y - y]] x y
+	this.cubic-to [last.x + kappah * [x - last.x]] last.y x [y + kappav * [last.y - y]] x y
 	return this
 }
 define [Stroke.prototype.set-samples samples] : begin {
