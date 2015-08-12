@@ -121,7 +121,7 @@ define [sStrand yleft yright _expansion] : begin {
 }
 
 define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : begin {
-	local leftx : _leftx + [HALFSTROKE * [if [rightx > _leftx] 1 [-1]]]
+	local leftx : _leftx + [HALFSTROKE * ITALICCOR * [if [rightx > _leftx] 1 [-1]]]
 	local fine  : [_fine || STROKE] * 0.5
 	
 	local turnyleft : mix lefty righty turn
@@ -280,7 +280,7 @@ define [FlipAround x y sx sy] : glyph-construction {
 define [VerticalHook x y extend depth] : glyph-construction {
 	include : create-stroke
 		:.start-from x y
-		:.heads-to   DOWNWARD
+		:.heads-to   [if [depth > 0] DOWNWARD UPWARD]
 		:.set-width  HALFSTROKE HALFSTROKE
 		:.arc-vh-to  [x + extend] [y - depth]
 }
@@ -307,9 +307,10 @@ define [Miniature glyphs fold scale] : begin {
 	local forkFont : buildFont forkedPara shouldBuildList
 	return forkFont.glyfMap
 }
-define [turned newid unicode id x y] : create-glyph [fallback newid : 'turn' + id] : glyph-construction {
+define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction {
 	if unicode : assign-unicode unicode
-	include glyphs`id AS_BASE
+	include glyphs`id [if mark false AS_BASE]
+	if mark : include mark
 	include : FlipAround x y
 }
 define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction {
