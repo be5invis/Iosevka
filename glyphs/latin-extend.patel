@@ -578,7 +578,90 @@ create-glyph 'latingamma' : glyph-construction {
 		:.set-width  HALFSTROKE HALFSTROKE
 		:.heads-to   UPWARD
 }
+# Left-tail
+create-glyph 'nltail' : glyph-construction {
+	assign-unicode 0x272
+	include glyphs.n AS_BASE
+	include : VerticalHook [SB + HALFSTROKE * ITALICCOR] 0 [-HOOK] HOOK
+}
+# Retroflex-tail
+create-glyph 'srtail' : glyph-construction {
+	assign-unicode 0x282
+	include glyphs.rtailBR
+	apply-transform : Upright
+	apply-transform : Translate [SB + STROKE * ITALICCOR] 0
+	apply-transform : Italify
+	include pMarks
+	include glyphs.s
+	include : VBarLeft SB 0 SHOOK
+}
+# Curly tail
+define [CurlyTail fine wide rinner m1 y1 _right x1 x2 y2] : glyph-construction {
+	local right : _right - fine
+	include : create-stroke
+		:.start-from m1 y1
+		:.heads-to   DOWNWARD
+		:.set-width  0 wide
+		:.arc-vh-to  [mix m1 right 0.5] [fine + O]
+		:.set-width  0 fine
+		:.arc-hv-to  right [fine + rinner]
+		:.arc-vh-to  [mix m1 right 0.5] [fine + rinner * 2 - O]
+		:.curve-to   x1 [fine + rinner * 2 - O] x2 y2
+}
+create-glyph 'ncurlytail' : glyph-construction {
+	assign-unicode 0x235
+	local fine : adviceBlackness 4.5
+	local rinner : fine * 0.35
+	local wide : adviceBlackness 3.25
+	local m1 : RIGHTSB - rinner * 2
+	local x1 : mix SB m1 0.8
+	local x2 : mix SB m1 0.5
+	local y2 : -fine
+	include eMarks
+	include : VBarLeft SB 0 XH wide
+	include : nShoulder [SB + wide * ITALICCOR] [mix SB m1 0.5] m1 [STROKE * 0.4] nothing [fine * 2] nothing nothing wide
+	include : CurlyTail fine wide rinner m1 [fine * 2] [m1 + rinner * 2 + fine] x1 x2 y2
+}
+create-glyph 'ccurlytail' : glyph-construction {
+	assign-unicode 0x255
+	include eMarks
+	local rinner : [[XH * 0.5] - STROKE * 1.5] / 2
+	
+	include : create-stroke
+		:.start-from [RIGHTSB - OXHOOK] [XH - HOOK]
+		:.set-width  STROKE 0
+		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO [MIDDLE - OMIDCOR_S] XO
+		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
+		:.line-to    [SB + O] [STROKE + rinner]
 
+	local m1 : SB + STROKE * ITALICCOR
+	local x1 : mix SB RIGHTSB 0.2
+	local x2 SB
+	local y2 : -XH * 0.2
+	include : CurlyTail STROKE STROKE rinner m1 [STROKE + rinner] RIGHTSB x1 x2 y2
+}
+# Hooktop
+define [HooktopLeftBar stroke] : glyph-construction {
+	include : create-stroke
+		:.start-from [RIGHTSB - OXHOOK] [CAP - HOOK]
+		:.set-width  [fallback stroke STROKE] 0
+		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO [MIDDLE - OMIDCOR_S] CAPO
+		:.arc-hv-to  SB [CAP - SMALLSMOOTHA]
+		:.line-to    SB 0
+		:.heads-to   DOWNWARD
+}
+create-glyph 'hooktoph' : glyph-construction {
+	assign-unicode 0x266
+	include bMarks
+	include : nShoulder [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
+	include : HooktopLeftBar
+}
+create-glyph 'hooktopb' : glyph-construction {
+	assign-unicode 0x253
+	include bMarks
+	include : oLeft
+	include : HooktopLeftBar
+}
 # Aliases
 alias 'latinLambda' 0x245 'Lambda'
 alias 'latindelta' 0x1E9F 'delta'
