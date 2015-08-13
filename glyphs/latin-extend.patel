@@ -598,21 +598,36 @@ create-glyph 'srtail' : glyph-construction {
 # Curly tail
 define [CurlyTail fine wide rinner m1 y1 _right x1 x2 y2] : glyph-construction {
 	local right : _right - fine
+	local mid : mix [mix m1 right 0.5] [right - rinner] 0.4
+	local midb : mix [mix m1 right 0.5] [right - rinner] 0.3
 	include : create-stroke
 		:.start-from m1 y1
 		:.heads-to   DOWNWARD
 		:.set-width  0 wide
-		:.arc-vh-to  [mix m1 right 0.5] [fine + O]
+		:.arc-vh-to  midb [fine + O]
 		:.set-width  0 fine
 		:.arc-hv-to  right [fine + rinner]
-		:.arc-vh-to  [mix m1 right 0.5] [fine + rinner * 2 - O]
+		:.arc-vh-to  mid [fine + rinner * 2 - O]
 		:.curve-to   x1 [fine + rinner * 2 - O] x2 y2
+}
+define [HCurlyTail fine wide rinner left m1 _right x1 x2 y2] : glyph-construction {
+	local right : _right - fine
+	local mid : mix [mix m1 right 0.5] [right - rinner] 0.4
+	include : create-stroke
+		:.start-from left wide
+		:.heads-to   RIGHTWARD
+		:.set-width  0 wide
+		:.line-to    m1 wide
+		:.arc-hv-to  right [wide + rinner]
+		:.set-width  0 fine
+		:.arc-vh-to  mid [wide + rinner * 2 - O]
+		:.curve-to   x1 [wide + rinner * 2 - O] x2 y2
 }
 create-glyph 'ncurlytail' : glyph-construction {
 	assign-unicode 0x235
 	local fine : adviceBlackness 4.5
 	local rinner : fine * 0.35
-	local wide : adviceBlackness 3.25
+	local wide STROKE
 	local m1 : RIGHTSB - rinner * 2
 	local x1 : mix SB m1 0.8
 	local x2 : mix SB m1 0.5
@@ -625,20 +640,42 @@ create-glyph 'ncurlytail' : glyph-construction {
 create-glyph 'ccurlytail' : glyph-construction {
 	assign-unicode 0x255
 	include eMarks
-	local rinner : [[XH * 0.5] - STROKE * 1.5] / 2
+	local rinner : [[XH * 0.425] - STROKE * 1.5] / 2
 	
 	include : create-stroke
 		:.start-from [RIGHTSB - OXHOOK] [XH - HOOK]
 		:.set-width  STROKE 0
 		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO [MIDDLE - OMIDCOR_S] XO
 		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + O] [STROKE + rinner]
+		:.line-to    [SB + O] SMALLSMOOTHB
+		:.heads-to   DOWNWARD
 
-	local m1 : SB + STROKE * ITALICCOR
-	local x1 : mix SB RIGHTSB 0.2
-	local x2 SB
+	local m1 : SB + O + STROKE * ITALICCOR
+	local x1 : mix SB RIGHTSB 0.25
+	local x2 : SB + HALFSTROKE
+	local y2 : -XH * 0.1
+	include : CurlyTail STROKE STROKE rinner m1 SMALLSMOOTHB RIGHTSB x1 x2 y2
+}
+create-glyph 'zcurlytail' : glyph-construction {
+	assign-unicode 0x291
+	include eMarks
+	
+	local cor 1.2
+	local fine : adviceBlackness 4.25
+	local m1 : RIGHTSB - fine * 2
+	local x1 : mix [SB + STROKE] RIGHTSB 0.55
+	local x2 : mix [SB + STROKE] RIGHTSB 0.3
 	local y2 : -XH * 0.2
-	include : CurlyTail STROKE STROKE rinner m1 [STROKE + rinner] RIGHTSB x1 x2 y2
+	local rinner : fine * 0.3
+	include : HCurlyTail fine STROKE rinner SB m1 [RIGHTSB + fine / 2] x1 x2 y2
+	
+	include : HBarTop SB RIGHTSB XH
+	
+	start-from SB STROKE
+	line-to [SB + STROKE * cor] STROKE
+	line-to RIGHTSB [XH - STROKE]
+	line-to [RIGHTSB - STROKE * cor] [XH - STROKE]
+	reverse-last
 }
 # Hooktop
 define [HooktopLeftBar stroke] : glyph-construction {
