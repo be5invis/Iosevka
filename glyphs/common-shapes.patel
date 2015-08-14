@@ -185,23 +185,24 @@ define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : begin {
 	return : band.concat (shoulder.points)
 }
 
-define [XSHookUpper top left middle right smooth hook] : glyph-construction {
+define [XSHookUpper top left middle right smooth hook stroke] : glyph-construction {
 	include : create-stroke
 		:.set-transform globalTransform
 		:.start-from [right - OXHOOK] [top - hook]
-		:.set-width STROKE 0
+		:.set-width [fallback stroke STROKE] 0
 		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
 		:.arc-hv-to left [top - smooth]
 }
-define [sHookUpper top smooth hook _middle] : glyph-construction {
-	include : XSHookUpper top SB [fallback _middle MIDDLE] RIGHTSB smooth hook
+define [sHookUpper top smooth hook _middle stroke] : glyph-construction {
+	include : XSHookUpper top SB [fallback _middle MIDDLE] RIGHTSB smooth hook stroke
 }
-define [twoHookUpper top smooth hook _middle] : glyph-construction {
+define [twoHookUpper top smooth hook _middle _width] : glyph-construction {
 	local middle : _middle || MIDDLE
+	local width : fallback _width STROKE
 	include : create-stroke
 		:.set-transform globalTransform
 		:.start-from [SB + OXHOOK] [top - hook]
-		:.set-width 0 STROKE
+		:.set-width 0 width
 		:.curve-to [mix middle SB KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
 		:.arc-hv-to RIGHTSB [top - smooth]
 }
@@ -324,7 +325,7 @@ define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn
 }
 define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction {
 	if unicode : assign-unicode unicode
-	include glyphs.(id)
+	include glyphs.(id) AS_BASE
 	apply-transform : Translate [-spacing] 0
 	include glyphs.(id)
 	apply-transform : Translate [spacing / 2] 0

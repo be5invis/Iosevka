@@ -2,311 +2,6 @@
 
 local font.features (.)
 
-# Build miniature clyphs : circled, superscripts, subscripts...
-define [createCircledGlyphs records] : if [not recursive] : begin {
-	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	
-	foreach (unicode glyphid) [items-of records] : create-glyph ['circled_' + glyphid] : glyph-construction {
-		local sw [adviceBlackness 6]
-		if unicode : assign-unicode unicode
-		include : create-glyph : glyph-construction {
-			include miniatureFont.(glyphid)
-			apply-transform : Upright
-			apply-transform : Scale 0.45
-			apply-transform : Translate [[WIDTH - WIDTH * 0.45] / 2] [sw * 2]
-			apply-transform : Italify
-		}
-		include : smallo [CAP * 0.45 + sw * 4] 0 SB RIGHTSB sw
-		apply-transform : Upright
-		apply-transform : Translate 0 [parenMid - [CAP * 0.45 + sw * 4] / 2]
-		apply-transform : Italify
-	}
-}
-define [createSuperscripts records] : if [not recursive] : begin {
-	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['superscript' + glyphid] : glyph-construction {
-		if unicode : assign-unicode unicode
-		include : create-glyph : glyph-construction {
-			include miniatureFont.(glyphid)
-			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] [-CAP]
-			apply-transform : Scale 0.7
-			apply-transform : Translate MIDDLE [CAP + ACCENT / 2]
-			apply-transform : Italify
-		}
-	}
-}
-define [createSubscripts records] : if [not recursive] : begin {
-	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['subscript' + glyphid] : glyph-construction {
-		if unicode : assign-unicode unicode
-		include : create-glyph : glyph-construction {
-			include miniatureFont.(glyphid)
-			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] 0
-			apply-transform : Scale 0.7
-			apply-transform : Translate MIDDLE [DESCENDER / 2]
-			apply-transform : Italify
-		}
-	}
-}
-
-define [createFractions records] : if [not recursive] : begin {
-	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
-	local miniatureFont : Miniature pendingGlyphs 4 0.6
-	foreach (unicode numid denid height) [items-of records] : create-glyph [numid + 'over' + denid] : glyph-construction {
-		if unicode : assign-unicode unicode
-		local fine : adviceBlackness 3.7
-		local dist : XH * 0.4
-		include : create-glyph : glyph-construction {
-			include : create-glyph : glyph-construction {
-				include miniatureFont.(numid)
-				apply-transform : Upright
-				apply-transform : Translate [- miniatureFont.(numid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP]]
-				apply-transform : Translate MIDDLE 0
-				apply-transform : Italify
-			}
-			apply-transform : Upright
-			apply-transform : Translate 0 [CAP + dist]
-			apply-transform : Italify
-			include : create-glyph : glyph-construction {
-				include miniatureFont.(denid)
-				apply-transform : Upright
-				apply-transform : Translate [- miniatureFont.(denid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP]]
-				apply-transform : Translate MIDDLE 0
-				apply-transform : Italify
-			}
-			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] [-CAP - dist / 2]
-			apply-transform : Scale 0.55
-			apply-transform : Translate MIDDLE parenMid
-			apply-transform : Italify
-		}
-		include : HBar SB RIGHTSB parenMid [fine * 0.75]
-	}
-}
-
-createCircledGlyphs : list {
-	list 0xA9   'C'
-	list 0xAE   'R'
-	list 0x2117 'P'
-}
-
-create-glyph 'ordfeminine' : glyph-construction {
-	assign-unicode 0xAA
-	include [Miniature ('a') 3.7 0.7].a
-	include : create-stroke
-		:.start-from SB DESCENDER
-		:.set-width  STROKE 0
-		:.heads-to   RIGHTWARD
-		:.line-to    RIGHTSB DESCENDER
-		:.heads-to   RIGHTWARD
-	
-	apply-transform : Upright
-	apply-transform : Translate [-MIDDLE] [-XH]
-	apply-transform : Scale 0.7
-	apply-transform : Translate MIDDLE CAP
-	apply-transform : Italify
-}
-create-glyph 'ordmasculine' : glyph-construction {
-	assign-unicode 0xBA
-	include [Miniature ('o') 3.7 0.7].o
-	include : create-stroke
-		:.start-from SB DESCENDER
-		:.set-width  STROKE 0
-		:.heads-to   RIGHTWARD
-		:.line-to    RIGHTSB DESCENDER
-		:.heads-to   RIGHTWARD
-	
-	apply-transform : Upright
-	apply-transform : Translate [-MIDDLE] [-XH]
-	apply-transform : Scale 0.7
-	apply-transform : Translate MIDDLE CAP
-	apply-transform : Italify
-}
-
-createSuperscripts : list {
-	list 0x2070 'zero'
-	list 0x00B9 'one'
-	list 0x00B2 'two'
-	list 0x00B3 'three'
-	list 0x2074 'four'
-	list 0x2075 'five'
-	list 0x2076 'six'
-	list 0x2077 'seven'
-	list 0x2078 'eight'
-	list 0x2079 'nine'
-	list 0x207A 'plus'
-	list 0x207B 'minus'
-	list 0x207C 'equal'
-	list 0x207D 'parenLeft'
-	list 0x207E 'parenRight'
-	list 0x02B0 'h'
-	list 0x02B1 'hooktoph'
-	list 0x02B2 'j'
-	list 0x02B3 'r'
-	list 0x02B4 'turnr'
-	list 0x02B7 'w'
-	list 0x02B8 'y'
-	list 0x02E0 'latingamma'
-	list 0x02E1 'l'
-	list 0x02E2 's'
-	list 0x02E3 'x'
-	list 0x2071 'i'
-	list 0x207F 'n'
-	list 0x1D43 'a'
-	list 0x1D44 'turna'
-	list 0x1D45 'scripta'
-	list 0x1D47 'b'
-	list 0x1D48 'd'
-	list 0x1D49 'e'
-	list 0x1D4A 'turne'
-	list 0x1D4B 'epsilon'
-	list 0x1D4C 'cyrze'
-	list 0x1D4D 'g'
-	list 0x1D4F 'k'
-	list 0x1D50 'm'
-	list 0x1D51 'eng'
-	list 0x1D52 'o'
-	list 0x1D53 'turnc'
-	list 0x1D56 'p'
-	list 0x1D57 't'
-	list 0x1D58 'u'
-	list 0x1D5A 'turnm'
-	list 0x1D5B 'v'
-	list 0x1D5D 'beta'
-	list 0x1D5E 'gamma'
-	list 0x1D5F 'delta'
-	list 0x1D60 'phi'
-	list 0x1D61 'chi'
-	list 0x1D9B 'turnscripta'
-	list 0x1D9C 'c'
-	list 0x1D9E 'eth'
-	list 0x1D9F 'turnlatinepsilon'
-	list 0x1DA0 'f'
-	list 0x1DA1 'turnf'
-	list 0x1DA2 'scriptg'
-	list 0x1DA3 'turnh'
-	list 0x1DB2 'varphi'
-	list 0x1DB4 'esh'
-	list 0x1DBA 'turnv'
-	list 0x1DBE 'ezh'
-	list 0x1DBF 'theta'
-	list 0x1DBB 'z'
-	list 0x1D2C 'A'
-	list 0x1D2E 'B'
-	list 0x1D30 'D'
-	list 0x1D31 'E'
-	list 0x1D33 'G'
-	list 0x1D34 'H'
-	list 0x1D35 'I'
-	list 0x1D36 'J'
-	list 0x1D37 'K'
-	list 0x1D38 'L'
-	list 0x1D39 'M'
-	list 0x1D3A 'N'
-	list 0x1D3C 'O'
-	list 0x1D3E 'P'
-	list 0x1D3F 'R'
-	list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
-	list 0x1D40 'T'
-	list 0x1D41 'U'
-	list 0x1D42 'W'
-}
-
-createSubscripts : list {
-	list 0x2080 'zero'
-	list 0x2081 'one'
-	list 0x2082 'two'
-	list 0x2083 'three'
-	list 0x2084 'four'
-	list 0x2085 'five'
-	list 0x2086 'six'
-	list 0x2087 'seven'
-	list 0x2088 'eight'
-	list 0x2089 'nine'
-	list 0x208A 'plus'
-	list 0x208B 'minus'
-	list 0x208C 'equal'
-	list 0x208D 'parenLeft'
-	list 0x208E 'parenRight'
-	list 0x2090 'a'
-	list 0x2091 'e'
-	list 0x2092 'o'
-	list 0x2093 'x'
-	list 0x2094 'turne'
-	list 0x2095 'h'
-	list 0x2096 'k'
-	list 0x2097 'l'
-	list 0x2098 'm'
-	list 0x2099 'n'
-	list 0x209A 'p'
-	list 0x209B 's'
-	list 0x209C 't'
-	list 0x1D62 'i'
-	list 0x1D63 'r'
-	list 0x1D64 'u'
-	list 0x1D65 'v'
-	list 0x1D66 'beta'
-	list 0x1D67 'gamma'
-	list 0x1D68 'rho'
-	list 0x1D69 'phi'
-	list 0x1D6A 'chi'
-}
-
-createFractions : list {
-	# Unicode fractions
-	list 0x00BC 'one' 'four'
-	list 0x00BD 'one' 'two'
-	list 0x00BE 'three' 'four'
-	list 0x2150 'one' 'seven'
-	list 0x2151 'one' 'nine'
-	list 0x2152 'one' 'ten'
-	list 0x2153 'one' 'three'
-	list 0x2154 'two' 'three'
-	list 0x2155 'one' 'five'
-	list 0x2156 'two' 'five'
-	list 0x2157 'three' 'five'
-	list 0x2158 'four' 'five'
-	list 0x2159 'one' 'six'
-	list 0x215A 'five' 'six'
-	list 0x215B 'one' 'eight'
-	list 0x215C 'three' 'eight'
-	list 0x215D 'five' 'eight'
-	list 0x215E 'seven' 'eight'
-	list 0x2189 'zero' 'three'
-	# care-of
-	list 0x2105 'C' 'O'
-	list 0x2106 'C' 'U'
-	# Powerline LN symbol
-	list 0xE0A1 'L' 'N'
-}
-
-# Composite superscripts and subscripts
-define [doubleSuperscript a b] : glyph-construction {
-	include a
-	apply-transform : Translate [-WIDTH * 0.6] 0
-	include b
-	apply-transform : Upright
-	apply-transform : Translate [-WIDTH * 0.2] [-CAP]
-	apply-transform : Scale 0.8
-	apply-transform : Translate MIDDLE CAP
-	apply-transform : Italify
-}
-create-glyph 'trademark' : glyph-construction {
-	assign-unicode 0x2122
-	include : doubleSuperscript glyphs.superscriptT glyphs.superscriptM
-}
-create-glyph 'servicemark' : glyph-construction {
-	assign-unicode 0x2120
-	include : doubleSuperscript glyphs.superscriptS glyphs.superscriptM
-}
-
 # Build accented glyphs
 
 define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
@@ -447,6 +142,323 @@ foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 		}
 	}
 }
+
+# Build miniature clyphs : circled, superscripts, subscripts...
+define [createCircledGlyphs records] : if [not recursive] : begin {
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	
+	foreach (unicode glyphid) [items-of records] : create-glyph ['circle' + glyphid] : glyph-construction {
+		local sw [adviceBlackness 6]
+		if unicode : assign-unicode unicode
+		include : create-glyph : glyph-construction {
+			include miniatureFont.(glyphid)
+			apply-transform : Upright
+			apply-transform : Scale 0.45
+			apply-transform : Translate [[WIDTH - WIDTH * 0.45] / 2] [sw * 2]
+			apply-transform : Italify
+		}
+		include : smallo [CAP * 0.45 + sw * 4] 0 SB RIGHTSB sw
+		apply-transform : Upright
+		apply-transform : Translate 0 [parenMid - [CAP * 0.45 + sw * 4] / 2]
+		apply-transform : Italify
+	}
+}
+define [createSuperscripts records] : if [not recursive] : begin {
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	foreach (unicode glyphid) [items-of records] : create-glyph ['sup' + glyphid] : glyph-construction {
+		if unicode : assign-unicode unicode
+		include miniatureFont.(glyphid) AS_BASE
+		apply-transform [Upright] true
+		apply-transform [Translate [-MIDDLE] [-CAP]] true
+		apply-transform [Scale 0.7] true
+		apply-transform [Translate MIDDLE [CAP + ACCENT / 2]] true
+		apply-transform [Italify] true
+	}
+}
+define [createSubscripts records] : if [not recursive] : begin {
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	foreach (unicode glyphid) [items-of records] : create-glyph ['sub' + glyphid] : glyph-construction {
+		if unicode : assign-unicode unicode
+		include miniatureFont.(glyphid) AS_BASE
+		apply-transform [Upright] true
+		apply-transform [Translate [-MIDDLE] 0] true
+		apply-transform [Scale 0.7] true
+		apply-transform [Translate MIDDLE [DESCENDER / 2]] true
+		apply-transform [Italify] true
+	}
+}
+
+define [createFractions records] : if [not recursive] : begin {
+	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
+	local miniatureFont : Miniature pendingGlyphs 4 0.6
+	foreach (unicode numid denid height) [items-of records] : create-glyph [numid + 'over' + denid] : glyph-construction {
+		if unicode : assign-unicode unicode
+		local fine : adviceBlackness 3.7
+		local dist : XH * 0.4
+		include : create-glyph : glyph-construction {
+			include : create-glyph : glyph-construction {
+				include miniatureFont.(numid)
+				apply-transform : Upright
+				apply-transform : Translate [- miniatureFont.(numid).advanceWidth / 2] 0
+				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Translate MIDDLE 0
+				apply-transform : Italify
+			}
+			apply-transform : Upright
+			apply-transform : Translate 0 [CAP + dist]
+			apply-transform : Italify
+			include : create-glyph : glyph-construction {
+				include miniatureFont.(denid)
+				apply-transform : Upright
+				apply-transform : Translate [- miniatureFont.(denid).advanceWidth / 2] 0
+				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Translate MIDDLE 0
+				apply-transform : Italify
+			}
+			apply-transform : Upright
+			apply-transform : Translate [-MIDDLE] [-CAP - dist / 2]
+			apply-transform : Scale 0.55
+			apply-transform : Translate MIDDLE parenMid
+			apply-transform : Italify
+		}
+		include : HBar SB RIGHTSB parenMid [fine * 0.75]
+	}
+}
+
+createCircledGlyphs : list {
+	list 0xA9   'C'
+	list 0xAE   'R'
+	list 0x2117 'P'
+}
+
+create-glyph 'ordfeminine' : glyph-construction {
+	assign-unicode 0xAA
+	include [Miniature ('a') 3.7 0.7].a
+	include : create-stroke
+		:.start-from SB DESCENDER
+		:.set-width  STROKE 0
+		:.heads-to   RIGHTWARD
+		:.line-to    RIGHTSB DESCENDER
+		:.heads-to   RIGHTWARD
+	
+	apply-transform : Upright
+	apply-transform : Translate [-MIDDLE] [-XH]
+	apply-transform : Scale 0.7
+	apply-transform : Translate MIDDLE CAP
+	apply-transform : Italify
+}
+create-glyph 'ordmasculine' : glyph-construction {
+	assign-unicode 0xBA
+	include [Miniature ('o') 3.7 0.7].o
+	include : create-stroke
+		:.start-from SB DESCENDER
+		:.set-width  STROKE 0
+		:.heads-to   RIGHTWARD
+		:.line-to    RIGHTSB DESCENDER
+		:.heads-to   RIGHTWARD
+	
+	apply-transform : Upright
+	apply-transform : Translate [-MIDDLE] [-XH]
+	apply-transform : Scale 0.7
+	apply-transform : Translate MIDDLE CAP
+	apply-transform : Italify
+}
+
+createSuperscripts : list {
+	list 0x2070 'zero'
+	list 0x00B9 'one'
+	list 0x00B2 'two'
+	list 0x00B3 'three'
+	list 0x2074 'four'
+	list 0x2075 'five'
+	list 0x2076 'six'
+	list 0x2077 'seven'
+	list 0x2078 'eight'
+	list 0x2079 'nine'
+	list 0x207A 'plus'
+	list 0x207B 'minus'
+	list 0x207C 'equal'
+	list 0x207D 'parenLeft'
+	list 0x207E 'parenRight'
+	list 0x02B0 'h'
+	list 0x02B1 'hooktoph'
+	list 0x02B2 'j'
+	list 0x02B3 'r'
+	list 0x02B4 'turnr'
+	list 0x02B7 'w'
+	list 0x02B8 'y'
+	list 0x02C0 'fineglottalstop'
+	list 0x02C1 'finerevglottalstop'
+	list 0x02E0 'latingamma'
+	list 0x02E1 'l'
+	list 0x02E2 's'
+	list 0x02E3 'x'
+	list 0x02E4 'revglottalstop'
+	list 0x2071 'i'
+	list 0x207F 'n'
+	list 0x1D43 'a'
+	list 0x1D44 'turna'
+	list 0x1D45 'scripta'
+	list 0x1D46 'turnae'
+	list 0x1D47 'b'
+	list 0x1D48 'd'
+	list 0x1D49 'e'
+	list 0x1D4A 'turne'
+	list 0x1D4B 'epsilon'
+	list 0x1D4C 'cyrze'
+	list 0x1D4D 'g'
+	list 0x1D4E 'turni'
+	list 0x1D4F 'k'
+	list 0x1D50 'm'
+	list 0x1D51 'eng'
+	list 0x1D52 'o'
+	list 0x1D53 'turnc'
+	list 0x1D56 'p'
+	list 0x1D57 't'
+	list 0x1D58 'u'
+	list 0x1D5A 'turnm'
+	list 0x1D5B 'v'
+	list 0x1D5D 'beta'
+	list 0x1D5E 'gamma'
+	list 0x1D5F 'delta'
+	list 0x1D60 'phi'
+	list 0x1D61 'chi'
+	list 0x1D9B 'turnscripta'
+	list 0x1D9C 'c'
+	list 0x1D9D 'ccurlytail'
+	list 0x1D9E 'eth'
+	list 0x1D9F 'turnlatinepsilon'
+	list 0x1DA0 'f'
+	list 0x1DA1 'turnf'
+	list 0x1DA2 'scriptg'
+	list 0x1DA3 'turnh'
+	list 0x1DA9 'lrtail'
+	list 0x1DAE 'nltail'
+	list 0x1DAF 'nrtailBR'
+	list 0x1DB2 'varphi'
+	list 0x1DB3 'srtail'
+	list 0x1DB4 'esh'
+	list 0x1DB7 'latinupsilon1'
+	list 0x1DBA 'turnv'
+	list 0x1DBC 'zrtailBR'
+	list 0x1DBD 'zcurlytail'
+	list 0x1DBE 'ezh'
+	list 0x1DBF 'theta'
+	list 0x1DBB 'z'
+	list 0x1D2C 'A'
+	list 0x1D2E 'B'
+	list 0x1D30 'D'
+	list 0x1D31 'E'
+	list 0x1D32 'turnE'
+	list 0x1D33 'G'
+	list 0x1D34 'H'
+	list 0x1D35 'I'
+	list 0x1D36 'J'
+	list 0x1D37 'K'
+	list 0x1D38 'L'
+	list 0x1D39 'M'
+	list 0x1D3A 'N'
+	list 0x1D3B 'cyrI'
+	list 0x1D3C 'O'
+	list 0x1D3E 'P'
+	list 0x1D3F 'R'
+	list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
+	list 0x1D40 'T'
+	list 0x1D41 'U'
+	list 0x1D42 'W'
+}
+
+createSubscripts : list {
+	list 0x2080 'zero'
+	list 0x2081 'one'
+	list 0x2082 'two'
+	list 0x2083 'three'
+	list 0x2084 'four'
+	list 0x2085 'five'
+	list 0x2086 'six'
+	list 0x2087 'seven'
+	list 0x2088 'eight'
+	list 0x2089 'nine'
+	list 0x208A 'plus'
+	list 0x208B 'minus'
+	list 0x208C 'equal'
+	list 0x208D 'parenLeft'
+	list 0x208E 'parenRight'
+	list 0x2090 'a'
+	list 0x2091 'e'
+	list 0x2092 'o'
+	list 0x2093 'x'
+	list 0x2094 'turne'
+	list 0x2095 'h'
+	list 0x2096 'k'
+	list 0x2097 'l'
+	list 0x2098 'm'
+	list 0x2099 'n'
+	list 0x209A 'p'
+	list 0x209B 's'
+	list 0x209C 't'
+	list 0x1D62 'i'
+	list 0x1D63 'r'
+	list 0x1D64 'u'
+	list 0x1D65 'v'
+	list 0x1D66 'beta'
+	list 0x1D67 'gamma'
+	list 0x1D68 'rho'
+	list 0x1D69 'phi'
+	list 0x1D6A 'chi'
+}
+
+createFractions : list {
+	# Unicode fractions
+	list 0x00BC 'one' 'four'
+	list 0x00BD 'one' 'two'
+	list 0x00BE 'three' 'four'
+	list 0x2150 'one' 'seven'
+	list 0x2151 'one' 'nine'
+	list 0x2152 'one' 'ten'
+	list 0x2153 'one' 'three'
+	list 0x2154 'two' 'three'
+	list 0x2155 'one' 'five'
+	list 0x2156 'two' 'five'
+	list 0x2157 'three' 'five'
+	list 0x2158 'four' 'five'
+	list 0x2159 'one' 'six'
+	list 0x215A 'five' 'six'
+	list 0x215B 'one' 'eight'
+	list 0x215C 'three' 'eight'
+	list 0x215D 'five' 'eight'
+	list 0x215E 'seven' 'eight'
+	list 0x2189 'zero' 'three'
+	# care-of
+	list 0x2105 'C' 'O'
+	list 0x2106 'C' 'U'
+	# Powerline LN symbol
+	list 0xE0A1 'L' 'N'
+}
+
+# Composite superscripts and subscripts
+define [doubleSuperscript a b] : glyph-construction {
+	include a
+	apply-transform : Translate [-WIDTH * 0.6] 0
+	include b
+	apply-transform : Upright
+	apply-transform : Translate [-WIDTH * 0.2] [-CAP]
+	apply-transform : Scale 0.8
+	apply-transform : Translate MIDDLE CAP
+	apply-transform : Italify
+}
+create-glyph 'trademark' : glyph-construction {
+	assign-unicode 0x2122
+	include : doubleSuperscript glyphs.supT glyphs.supM
+}
+create-glyph 'servicemark' : glyph-construction {
+	assign-unicode 0x2120
+	include : doubleSuperscript glyphs.supS glyphs.supM
+}
+
 
 ### Generate MARK and MKMK features
 set font.features.mark (.marks () .bases ())

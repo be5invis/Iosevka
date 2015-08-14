@@ -162,8 +162,19 @@ define [Glyph.prototype.include component copyAnchors] : begin {
 		glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
 	}
 }
-define [Glyph.prototype.apply-transform transform] : set this.contours : this.contours.map : function [contour] : begin {
-	return : contour.map : function [point] [tp transform point]
+define [Glyph.prototype.apply-transform transform alsoAnchors] : begin {
+	set this.contours : this.contours.map : function [contour] : begin {
+		return : contour.map : function [point] [tp transform point]
+	}
+	if alsoAnchors : foreach key [items-of [Object.keys this.anchors]] : begin {
+		local thisanchor this.anchors.(key)
+		local newanchor (.type thisanchor.type)
+		set (.x newanchor.x .y newanchor.y) [tp transform thisanchor]
+		if [thisanchor.mbx !== nothing && thisanchor.mby !== nothing] : begin {
+			set (.x newanchor.mbx .y newanchor.mby) [tp transform (.x thisanchor.mbx .y thisanchor.mby)]
+		}
+		set this.anchors.(key) newanchor
+	}
 }
 define [Glyph.prototype.create-stroke] : begin {
 	local s : new Stroke

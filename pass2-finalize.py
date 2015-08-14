@@ -6,7 +6,7 @@ font = fontforge.open(source)
 
 font.selection.all()
 font.removeOverlap()
-font.em = 1024
+font.em = 1000
 font.simplify(1)
 font.canonicalContours()
 font.canonicalStart()

@@ -171,33 +171,28 @@ create-glyph 'e' : glyph-construction {
 		else : include glyphs.'e.upright'
 	}
 }
-
-create-glyph 't' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 't'
-	include bMarks
-	
+define [SmallTShape top bot] : glyph-construction {
 	local center [MIDDLE - TBALANCE - HALFSTROKE]
 	local hookx  [center + [WIDTH - SB * 2] * 0.78 - OXHOOK + TAILADJX * globalTransform.yx]
 	local turn : mix center hookx [0.5 + globalTransform.yx * 0.5]
 	local smb  : [turn - center] * 1.1
 	
 	include : create-stroke
-		:.start-from center CAP
+		:.start-from center top
 		:.set-width  STROKE 0
 		:.heads-to   DOWNWARD
-		:.line-to    center smb
-		:.arc-vh-to  turn O
-		:.curve-to   [turn + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] * [hookx - turn]] O hookx [HOOK - TAILADJY * globalTransform.yx]
+		:.line-to    center [bot + smb]
+		:.arc-vh-to  turn [bot + O]
+		:.curve-to   [turn + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] * [hookx - turn]] [bot + O] hookx [bot + HOOK - TAILADJY * globalTransform.yx]
 	
-	include : create-stroke
-		:.start-from [center + HALFSTROKE - LONGJUT + TBALANCE2] XH
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.line-to    [center + HALFSTROKE + LONGJUT + TBALANCE2] XH
-		:.heads-to   RIGHTWARD
+	include : HBarTop [center + HALFSTROKE - LONGJUT + TBALANCE2] [center + HALFSTROKE + LONGJUT + TBALANCE2] [top * XH / CAP]
 }
-
+create-glyph 't' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 't'
+	include bMarks
+	include : SmallTShape CAP 0
+}
 ### a u
 create-glyph 'a.upright' : glyph-construction {
 	set-width WIDTH
@@ -385,6 +380,7 @@ create-glyph 'i' : glyph-construction {
 
 create-glyph 'dotlessj.straight' : glyph-construction {
 	dont-export
+	include pMarks
 	set-anchor 'above' BASE [MIDDLE + JBALANCE] XH
 	include : create-stroke
 		:.start-from [MIDDLE + JBALANCE] XH
@@ -395,6 +391,7 @@ create-glyph 'dotlessj.straight' : glyph-construction {
 }
 create-glyph 'dotlessj.serifed' : glyph-construction {
 	dont-export
+	include pMarks
 	include glyphs.'dotlessj.straight' AS_BASE
 	include : leftwardTopSerif [MIDDLE + JBALANCE] XH LONGJUT
 }
@@ -411,17 +408,12 @@ create-glyph 'j' : glyph-construction {
 create-glyph 'l.straight'  : glyph-construction {
 	include bMarks
 	dont-export
-	include : create-stroke
-		:.start-from MIDDLE 0
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.line-to MIDDLE CAP
-		:.heads-to UPWARD
+	include : VBar MIDDLE 0 CAP
 }
 create-glyph 'l.hooky' : glyph-construction {
 	include bMarks
 	dont-export
-	include glyphs.'l.straight'
+	include : VBar MIDDLE 0 [CAP - STROKE]
 	include : leftwardTopSerif MIDDLE CAP LONGJUT
 }
 create-glyph 'l.zshaped' : glyph-construction {
