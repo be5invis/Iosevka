@@ -92,8 +92,17 @@ define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _exp
 	local halfstroke0 : _halfstroke0 || HALFSTROKE
 	local halfstroke1 : _halfstroke1 || HALFSTROKE
 	local ess         : _ess || [halfstroke0 + halfstroke1] / 2
-	local yItalicCorrection [globalTransform.yx * 0.985]
-	local xItalicCorrection : 1 / [Math.sqrt [1 - yItalicCorrection * yItalicCorrection]]
+	local upright : Upright
+	# calculate italic correction
+	local outline : [new Stroke
+		:.set-transform globalTransform
+		:.start-from _xleft yleft
+		:.set-width  [2 * halfstroke0] 0
+		:.line-to    _xleft [yleft - 1000]
+		:.set-samples 1
+		:.to-outline].0.map : [p] -> [tp upright p]
+	local xItalicCorrection : -[outline.3.x - outline.0.x] / [2 * halfstroke0]
+	local yItalicCorrection : [outline.3.y - outline.0.y] / [2 * halfstroke0]
 
 	local roundsize : [_roundp || SMOOTHA * 0.4] * [if [yleft < yright] [-1] 1]
 	local roundleft   [yleft - roundsize]
