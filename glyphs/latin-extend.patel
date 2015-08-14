@@ -334,14 +334,6 @@ define [EzhShape top bot pleft] : glyph-construction {
 	local ezhRight : mix SB RIGHTSB 0.925
 	include : create-stroke :.start-from SB top :.heads-to RIGHTWARD :.set-width 0 STROKE
 		:.line-to ezhRight top :.heads-to RIGHTWARD :.to-outline
-	include : create-stroke 
-		:.start-from ezhLeft yMidBar
-		:.heads-to   RIGHTWARD 
-		:.set-width  0 STROKE
-		:.line-to    MIDDLE yMidBar
-		:.arc-hv-to  RIGHTSB [mix yMidBar bot 0.5]
-		:.to-outline
-	include : XSHookLower bot SB [mix SB RIGHTSB 0.465] RIGHTSB [[yMidBar - bot] / 2] SHOOK
 	
 	start-from ezhLeft yMidBar
 	line-to [ezhLeft + STROKE * cor] [yMidBar - HALFSTROKE]
@@ -350,6 +342,14 @@ define [EzhShape top bot pleft] : glyph-construction {
 	line-to [ezhRight - STROKE * cor] [top - STROKE]
 	reverse-last
 	
+	include : create-stroke 
+		:.start-from ezhLeft yMidBar
+		:.heads-to   RIGHTWARD 
+		:.set-width  0 STROKE
+		:.line-to    MIDDLE yMidBar
+		:.arc-hv-to  RIGHTSB [mix yMidBar bot 0.5]
+		:.to-outline
+	include : XSHookLower bot SB [mix SB RIGHTSB 0.465] RIGHTSB [[yMidBar - bot] / 2] SHOOK
 }
 create-glyph 'Ezh' : glyph-construction {
 	set-width WIDTH
@@ -560,25 +560,32 @@ create-glyph 'scriptg' : glyph-construction {
 	include : sHookLower DESCENDER SMALLSMOOTHA SHOOK
 	include : VBarRight RIGHTSB [DESCENDER + SMALLSMOOTHA] XH
 }
-create-glyph 'latingamma' : glyph-construction {
-	assign-unicode 0x263
-	include pMarks
-	
+define [RamsHornShape bottom top] : glyph-construction {
 	local hf : [adviceBlackness 4] / 2
 	local d : hf * 2 + WIDTH * 0.05
 
 	
 	include : create-stroke
-		:.start-from [SB + HALFSTROKE * ITALICCOR + O] XH
+		:.start-from [SB + HALFSTROKE * ITALICCOR + O] top
 		:.heads-to   DOWNWARD
 		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [MIDDLE + d - hf] 0 [MIDDLE + d - hf] [DESCENDER + d * [1 - globalTransform.yx * 0.5]]
+		:.curve-to   [MIDDLE + d - hf] [mix bottom top 0.3] [MIDDLE + d - hf] [bottom + d * [1 - globalTransform.yx * 0.5]]
 		:.set-width  hf hf
-		:.arc-vh-to  [MIDDLE + OMIDCOR * hf * 2] [DESCENDER + hf]
-		:.arc-hv-to  [MIDDLE - d + hf] [DESCENDER + d * [1 + globalTransform.yx * 0.5]]
-		:.curve-to   [MIDDLE - d + hf] 0 [RIGHTSB - HALFSTROKE * ITALICCOR - O] XH
+		:.arc-vh-to  [MIDDLE + OMIDCOR * hf * 2] [bottom + hf]
+		:.arc-hv-to  [MIDDLE - d + hf] [bottom + d * [1 + globalTransform.yx * 0.5]]
+		:.curve-to   [MIDDLE - d + hf] [mix bottom top 0.3] [RIGHTSB - HALFSTROKE * ITALICCOR - O] top
 		:.set-width  HALFSTROKE HALFSTROKE
 		:.heads-to   UPWARD
+}
+create-glyph 'latingamma' : glyph-construction {
+	assign-unicode 0x263
+	include pMarks
+	include : RamsHornShape DESCENDER XH
+}
+create-glyph 'ramshorn' : glyph-construction {
+	assign-unicode 0x264
+	include eMarks
+	include : RamsHornShape 0 XH
 }
 # legged
 create-glyph 'rlongleg' : glyph-construction {
@@ -724,7 +731,7 @@ create-glyph 'jcurlytail' : glyph-construction {
 	local y2 : DESCENDER + O
 	include : leftwardTopSerif [MIDDLE + JBALANCE] XH LONGJUT
 	include : VBarLeft m1 [DESCENDER + fine * 3] [XH - STROKE]
-	include : CurlyTail fine STROKE rinner m1 [DESCENDER + fine * 3] DESCENDER [m1 - LONGJUT ] x1 x2 y2
+	include : CurlyTail fine STROKE rinner m1 [DESCENDER + fine * 3] DESCENDER [m1 - LONGJUT] x1 x2 y2
 	include glyphs.dotAbove
 }
 create-glyph 'eshcurlytail' : glyph-construction {
@@ -770,6 +777,21 @@ create-glyph 'ccurlytail' : glyph-construction {
 	local x2 : SB + HALFSTROKE
 	local y2 : -XH * 0.1
 	include : CurlyTail STROKE STROKE rinner m1 SMALLSMOOTHB 0 RIGHTSB x1 x2 y2
+}
+create-glyph 'ezhcurlytail' : glyph-construction {
+	assign-unicode 0x293
+	include eMarks
+	local rinner : [[XH * 0.425] - STROKE * 1.5] / 2
+	
+	include : EzhShape XH DESCENDER
+	this.contours.pop
+	this.contours.pop
+
+	local m1 : RIGHTSB - STROKE * ITALICCOR
+	local x1 : mix RIGHTSB SB 0.25
+	local x2 : RIGHTSB - HALFSTROKE
+	local y2 DESCENDER
+	include : CurlyTail STROKE STROKE rinner m1 [mix [mix DESCENDER XH 0.6] DESCENDER 0.5] DESCENDER SB x1 x2 y2
 }
 create-glyph 'zcurlytail' : glyph-construction {
 	assign-unicode 0x291
@@ -921,16 +943,14 @@ create-glyph 'rflap' : glyph-construction {
 }
 create-glyph 'ifishhook' : glyph-construction {
 	assign-unicode 0x27F
-	include eMarks
-	include : VBar MIDDLE 0 [XH - HOOK]
+	include pMarks
+	include : VBar MIDDLE DESCENDER [XH - HOOK]
 	include : VerticalHook MIDDLE [XH - HOOK] [-LONGJUT + ILBALANCE] [-HOOK + HALFSTROKE]
 	apply-transform : Translate ILBALANCE 0
-	include : rightwardBottomSerif MIDDLE 0 LONGJUT
-	include : leftwardBottomSerif MIDDLE 0 LONGJUT
 }
 create-glyph 'iviby' : glyph-construction {
 	assign-unicode 0x285
-	include eMarks
+	include pMarks
 	include : VBar MIDDLE 0 [XH - HOOK - HALFSTROKE]
 	include : VerticalHook MIDDLE [XH - HOOK - HALFSTROKE] [-LONGJUT] [-HOOK]
 	include : VerticalHook MIDDLE 0 LONGJUT HOOK
@@ -956,6 +976,12 @@ create-glyph 'smcpI' : glyph-construction {
 	include eMarks
 	include : ISerifShape XH
 }
+create-glyph 'smcpturnE' : glyph-construction {
+	assign-unicode 0x2C7B
+	include eMarks
+	include : EShape XH
+	include : FlipAround MIDDLE [XH / 2]
+}
 # Others
 create-glyph 'turnf' : glyph-construction {
 	assign-unicode 0x25F
@@ -968,7 +994,7 @@ create-glyph 'lyogh' : glyph-construction {
 	assign-unicode 0x26E
 	include ifMarks
 	include : EzhShape XH DESCENDER 0.4
-	include : VBarLeft SB STROKE CAP
+	include : VBarLeft SB [XH * 0.1] CAP
 }
 # Aliases
 alias 'latinLambda' 0x245 'Lambda'
