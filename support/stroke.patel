@@ -186,12 +186,17 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	local right ()
 	for [local j 0] [j < subSegments.length] [inc j] : begin {
 		local curve subSegments`j
+		local arcLength : curve.length
+		local segLengths (0)
+		foreach sample [range 1 till samples] : begin {
+			segLengths.push : curve.split 0 [sample / samples] :.length
+		}
 		left.push [begin [local last [computeOffsetPoint curve j j f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
 		right.push [begin [local last [computeOffsetPoint curve j j f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
 
 		foreach sample [range 0 samples] : begin {
-			local t : j + sample / samples
-			local tn : j + [sample + 1] / samples
+			local t : j + segLengths.(sample) / arcLength
+			local tn : j + segLengths.[sample + 1] / arcLength
 			
 			local lthis : computeOffsetPoint curve t j f1 fpdx fpdy
 			local rthis : computeOffsetPoint curve t j f2 fpdx fpdy
