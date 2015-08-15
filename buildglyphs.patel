@@ -149,16 +149,10 @@ define [buildFont para recursive] : begin {
 	define markAboveCap      (.anchors (.above    [tm (.x MIDDLE  .y CAP       .type BASE)]))
 	define markBelowLower    (.anchors (.below    [tm (.x MIDDLE  .y DESCENDER .type BASE)]))
 	define markBelowZero     (.anchors (.below    [tm (.x MIDDLE  .y 0         .type BASE)]))
-	define marktoprightLower (.anchors (.topright [tm (.x RIGHTSB .y XH        .type BASE)]))
-	define marktoprightCap   (.anchors (.topright [tm (.x RIGHTSB .y CAP       .type BASE)]))
+	define markToprightLower (.anchors (.topright [tm (.x RIGHTSB .y XH        .type BASE)]))
+	define markToprightCap   (.anchors (.topright [tm (.x RIGHTSB .y CAP       .type BASE)]))
 	define markBottomrightLower (.anchors (.bottomright [tm (.x RIGHTSB .y DESCENDER        .type BASE)]))
 	define markBottomrightZero   (.anchors (.bottomright [tm (.x RIGHTSB .y 0       .type BASE)]))
-	
-	define capitalMarks (.anchors (.above markAboveCap.anchors.above .topright marktoprightCap.anchors.topright .below markBelowZero.anchors.below .bottomright markBottomrightZero.anchors.bottomright))
-	define bMarks       (.anchors (.above markAboveCap.anchors.above .topright marktoprightCap.anchors.topright .below markBelowZero.anchors.below .bottomright markBottomrightZero.anchors.bottomright))
-	define eMarks       (.anchors (.above markAboveLower.anchors.above .topright marktoprightLower.anchors.topright .below markBelowZero.anchors.below .bottomright markBottomrightZero.anchors.bottomright))
-	define pMarks       (.anchors (.above markAboveLower.anchors.above .topright marktoprightLower.anchors.topright .below markBelowLower.anchors.below .bottomright markBottomrightLower.anchors.bottomright))
-	define ifMarks      (.anchors (.above markAboveCap.anchors.above .topright marktoprightCap.anchors.topright .below markBelowLower.anchors.below .bottomright markBottomrightLower.anchors.bottomright))
 	
 	define [anchorDeriv] : begin {
 		local h (.)
@@ -168,6 +162,17 @@ define [buildFont para recursive] : begin {
 		}
 		return (.anchors h)
 	}
+	define [StdAnchorGroup] : begin {
+		local a : anchorDeriv.apply null arguments
+		set a.anchors.overlay (.type BASE .x [mix a.anchors.above.x a.anchors.below.x 0.5] .y [mix a.anchors.above.y a.anchors.below.y 0.5])
+		return a
+	}
+	
+	define capitalMarks : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
+	define bMarks       : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
+	define eMarks       : StdAnchorGroup markAboveLower markBelowZero markToprightLower markBottomrightZero
+	define pMarks       : StdAnchorGroup markAboveLower markBelowZero markToprightLower markBottomrightLower
+	define ifMarks      : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightLower
 	
 	Stroke.bindParameters para
 	

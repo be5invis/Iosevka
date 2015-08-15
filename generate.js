@@ -41,7 +41,7 @@ ttfFont.glyf = [ttfFont.glyf[0]].concat(ttfFont.glyf.slice(1).sort(function(a, b
 
 if(outputPath) fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(ttfFont)));
 if(argv.dumpmap) {
-	fs.writeFileSync(argv.dumpmap, JSON.stringify(ttfFont.glyf.map(function(glyph){ return [glyph.name, glyph.unicode]})), 'utf8')
+	fs.writeFileSync(argv.dumpmap, JSON.stringify(ttfFont.glyf.map(function(glyph){ return [glyph.name, glyph.unicode, glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0]})), 'utf8')
 };
 if(argv.dumpfeature) {
 	var featurefile = '\n\n';
