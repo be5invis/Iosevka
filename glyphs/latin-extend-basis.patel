@@ -168,10 +168,8 @@ create-glyph 'Eth' : glyph-construction {
 		:.line-to    [mix [SB + STROKE] [RIGHTSB - STROKE] 0.55] [CAP * 0.54]
 		:.heads-to   RIGHTWARD
 }
-create-glyph 'Dcroat' : glyph-construction {
-	assign-unicode 0x110
-	include glyphs.Eth AS_BASE
-}
+alias 'DCroat' 0x110 'Eth'
+alias 'arficanD' 0x189 'Eth'
 
 create-glyph 'eth' : glyph-construction {
 	set-width WIDTH
@@ -299,13 +297,12 @@ create-glyph 'eszet' : glyph-construction {
 	}
 }
 
-define [EzhShape top bot pleft] : glyph-construction {
+define [EzhShape top bot pleft flat] : glyph-construction {
 	local cor 1.2
 	local yMidBar : mix bot top 0.6
 	local ezhLeft : mix SB RIGHTSB [fallback pleft 0.2]
 	local ezhRight : mix SB RIGHTSB 0.925
-	include : create-stroke :.start-from SB top :.heads-to RIGHTWARD :.set-width 0 STROKE
-		:.line-to ezhRight top :.heads-to RIGHTWARD :.to-outline
+	include : HBarTop SB ezhRight top
 	
 	start-from ezhLeft yMidBar
 	line-to [ezhLeft + STROKE * cor] [yMidBar - HALFSTROKE]
@@ -314,14 +311,42 @@ define [EzhShape top bot pleft] : glyph-construction {
 	line-to [ezhRight - STROKE * cor] [top - STROKE]
 	reverse-last
 	
-	include : create-stroke 
+	local s : create-stroke 
 		:.start-from ezhLeft yMidBar
 		:.heads-to   RIGHTWARD 
 		:.set-width  0 STROKE
 		:.line-to    MIDDLE yMidBar
 		:.arc-hv-to  RIGHTSB [mix yMidBar bot 0.5]
-		:.to-outline
-	include : XSHookLower bot SB [mix SB RIGHTSB 0.465] RIGHTSB [[yMidBar - bot] / 2] SHOOK
+	if flat {
+		then : s.heads-to DOWNWARD
+		else : include : XSHookLower bot SB [mix SB RIGHTSB 0.465] RIGHTSB [[yMidBar - bot] / 2] SHOOK
+	}
+	include s
+}
+define [RevEzhShape top bot pleft flat] : glyph-construction {
+	local cor 1.2
+	local yMidBar : mix bot top 0.6
+	local ezhRight : mix RIGHTSB SB [fallback pleft 0.2]
+	local ezhLeft : mix RIGHTSB SB 0.925
+	include : HBarTop ezhLeft RIGHTSB top
+	
+	start-from ezhRight yMidBar
+	line-to [ezhRight - STROKE * cor] [yMidBar - HALFSTROKE]
+	line-to [ezhRight - STROKE * cor] yMidBar
+	line-to ezhLeft [top - STROKE]
+	line-to [ezhLeft + STROKE * cor] [top - STROKE]
+	
+	local s : create-stroke 
+		:.start-from ezhRight yMidBar
+		:.heads-to   LEFTWARD 
+		:.set-width  STROKE 0
+		:.line-to    MIDDLE yMidBar
+		:.arc-hv-to  SB [mix yMidBar bot 0.5]
+	if flat {
+		then : s.heads-to DOWNWARD
+		else : include : XSHookLower bot RIGHTSB [mix RIGHTSB SB 0.465] SB [[yMidBar - bot] / 2] SHOOK
+	}
+	include s
 }
 create-glyph 'Ezh' : glyph-construction {
 	set-width WIDTH
@@ -334,6 +359,14 @@ create-glyph 'ezh' : glyph-construction {
 	assign-unicode 0x292
 	include pMarks
 	include : EzhShape XH DESCENDER
+}
+create-glyph 'revEzh' : glyph-construction {
+	assign-unicode 0x1B8
+	include : RevEzhShape CAP 0
+}
+create-glyph 'revezh' : glyph-construction {
+	assign-unicode 0x1B9
+	include : RevEzhShape XH DESCENDER
 }
 create-glyph 'esh' : glyph-construction {
 	assign-unicode 0x283
@@ -397,10 +430,11 @@ create-glyph 'scripta' : glyph-construction {
 	line-to    [RIGHTSB - STROKE * ITALICCOR] [XH - STROKE / 2]
 	line-to    RIGHTSB [XH - O]
 }
-create-glyph 'ftail' : glyph-construction {
-	assign-unicode 0x192
-	include glyphs.'longs.italic' AS_BASE
-	include : fBar
+create-glyph 'turnSmallE' : glyph-construction {
+	assign-unicode 0x18F
+	include capitalMarks
+	include : SmallEShape CAP STROKE
+	include : FlipAround MIDDLE [CAP / 2]
 }
 create-glyph 'iogonek.dotless' : glyph-construction {
 	include glyphs.dotlessi AS_BASE
@@ -481,10 +515,25 @@ create-glyph 'latingamma' : glyph-construction {
 	include pMarks
 	include : RamsHornShape DESCENDER XH
 }
+create-glyph 'latinGamma' : glyph-construction {
+	assign-unicode 0x194
+	include ifMarks
+	include : RamsHornShape DESCENDER CAP
+}
 create-glyph 'ramshorn' : glyph-construction {
 	assign-unicode 0x264
 	include eMarks
 	include : RamsHornShape 0 XH
+}
+create-glyph 'latinEpsilon' : glyph-construction {
+	assign-unicode 0x190
+	include capitalMarks
+	include : SmallEpsilonShape CAP
+}
+create-glyph 'latinIota' : glyph-construction {
+	assign-unicode 0x196
+	include capitalMarks
+	include : IotaShape CAP
 }
 define [RevSmallEShape top stroke barpos] : glyph-construction {
 	local barbottom [top * [fallback barpos EBARPOS]]
@@ -655,11 +704,12 @@ alias 'dentalclick' 0x1C0 'bar'
 dual 'alveolarlateralclick' 0x1C1 'bar' [WIDTH * 0.35]
 alias 'alveolarclick' 0x1C3 'exclam'
 alias 'smcpH' 0x29C 'cyren'
-alias 'latiniota' 0x269 'dotlessi.italic'
+alias 'latiniota' 0x269 'iota'
 alias 'revlatinepsilon' 0x25C 'cyrze'
 # Turned glyphs
 turned nothing 0x250 'a' MIDDLE [XH / 2]
 turned nothing 0x252 'scripta' MIDDLE [XH / 2]
+turned nothing 0x186 'C' MIDDLE [CAP / 2]
 turned nothing 0x254 'c' MIDDLE [XH / 2]
 turned nothing 0x18E 'E' MIDDLE [CAP / 2]
 turned nothing 0x1DD 'e' MIDDLE [XH / 2]

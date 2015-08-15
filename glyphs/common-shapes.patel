@@ -196,6 +196,7 @@ define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construc
 		:.arc-hv-to left [top - smooth]
 }
 define [sHookUpper top smooth hook _middle _stroke] : XSHookUpper top SB _middle RIGHTSB smooth hook _stroke
+define [CHookUpper top smooth hook _middle _stroke] : XSHookUpper top [SB + O] _middle RIGHTSB smooth hook _stroke
 define [twoHookUpper top smooth hook _middle _stroke] : XSHookUpper top RIGHTSB _middle SB smooth hook _stroke
 define [XSHookLower bottom left _middle right smooth hook _stroke] : glyph-construction {
 	local middle : fallback _middle [mix left right SBALANCE]
@@ -208,7 +209,8 @@ define [XSHookLower bottom left _middle right smooth hook _stroke] : glyph-const
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 define [sHookLower bottom smooth hook _middle _stroke] : XSHookLower bottom SB _middle RIGHTSB smooth hook _stroke
-define [EHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom [RIGHTSB + TAILADJX * globalTransform.yx] _middle [SB + [fallback _o O]] smooth [hook - TAILADJY * globalTransform.yx] _stroke
+define [EHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom [RIGHTSB - O + TAILADJX * globalTransform.yx] _middle [SB + [fallback _o O]] smooth [hook - TAILADJY * globalTransform.yx] _stroke
+define [CHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom [RIGHTSB + TAILADJX * globalTransform.yx] _middle [SB + [fallback _o O]] smooth [hook - TAILADJY * globalTransform.yx] _stroke
 define [RevEHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom SB _middle [RIGHTSB - [fallback _o O]] smooth hook _stroke
 
 define [smallo u d l r _width _sma _smb] : glyph-construction {
@@ -305,6 +307,15 @@ define [Miniature glyphs fold scale] : begin {
 	forkedPara.upmscale = 1
 	forkedPara.stroke = [adviceBlackness fold] / scale
 	forkedPara.sb = SB / 2
+	local shouldBuildList ()
+	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
+	local forkFont : buildFont forkedPara shouldBuildList
+	return forkFont.glyfMap
+}
+define [Thinner glyphs p] : begin {
+	local forkedPara : Object.create para
+	forkedPara.upmscale = 1
+	forkedPara.width = WIDTH * p
 	local shouldBuildList ()
 	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
 	local forkFont : buildFont forkedPara shouldBuildList

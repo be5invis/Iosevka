@@ -122,6 +122,11 @@ create-glyph 'revglottalstopbar' : glyph-construction {
 	include glyphs.revglottalstop AS_BASE
 	include : HOverlayBar [MIDDLE - LONGJUT * 0.6] [MIDDLE + LONGJUT * 0.6] [CAP * 0.25]
 }
+create-glyph 'eshbar' : glyph-construction {
+	assign-unicode 0x284
+	include glyphs.esh AS_BASE
+	include : HOverlayBar [MIDDLE - LONGJUT * 0.6] [MIDDLE + LONGJUT * 0.6] [XH * 0.25]
+}
 # bdot and ddot 's dots are closer to the glyph
 create-glyph 'bdot' : glyph-construction {
 	include glyphs.dotAbove
@@ -159,20 +164,50 @@ define [HooktopLeftBar stroke] : glyph-construction {
 		:.line-to    SB 0
 		:.heads-to   DOWNWARD
 }
-create-glyph 'hooktoph' : glyph-construction {
+create-glyph 'hhooktop' : glyph-construction {
 	assign-unicode 0x266
 	include bMarks
 	include : nShoulder [SB + STROKE * ITALICCOR] MIDDLE RIGHTSB [STROKE * 0.4]
 	include : HooktopLeftBar
 }
-create-glyph 'hooktopb' : glyph-construction {
+create-glyph 'bhooktop' : glyph-construction {
 	assign-unicode 0x253
 	include bMarks
 	include : oLeft
 	include : HooktopLeftBar
 }
-
+create-glyph 'dhooktop' : glyph-construction {
+	assign-unicode 0x260
+	include glyphs.scriptg AS_BASE
+	include : VerticalHook [RIGHTSB - HALFSTROKE * ITALICCOR] XH HOOKX [-HOOK]
+}
+create-glyph 'scriptghooktop' : glyph-construction {
+	assign-unicode 0x257
+	include bMarks
+	include glyphs.'a.italic'
+	include : VerticalHook [RIGHTSB - HALFSTROKE * ITALICCOR] XH HOOKX [-HOOK]
+}
+create-glyph 'Chooktop' : glyph-construction {
+	assign-unicode 0x187
+	include glyphs.C AS_BASE
+	include : VerticalHook [RIGHTSB - HALFSTROKE * ITALICCOR] [CAP - HOOK] HOOKX [-HOOK * 1.5]
+}
+create-glyph 'chooktop' : glyph-construction {
+	assign-unicode 0x188
+	include glyphs.c AS_BASE
+	include : VerticalHook [RIGHTSB - HALFSTROKE * ITALICCOR] [XH - HOOK] HOOKX [-HOOK * 1.5]
+}
 # Left-tail
+create-glyph 'fltail' : glyph-construction {
+	assign-unicode 0x192
+	include glyphs.'longs.italic' AS_BASE
+	include : fBar
+}
+create-glyph 'Fltail' : glyph-construction {
+	assign-unicode 0x191
+	include glyphs.F AS_BASE
+	include : VerticalHook [SB * 1.5 + HALFSTROKE * ITALICCOR] 0 [-HOOKX] HOOK
+}
 create-glyph 'nltail' : glyph-construction {
 	assign-unicode 0x272
 	include glyphs.n AS_BASE
@@ -185,10 +220,10 @@ create-glyph 'mltail' : glyph-construction {
 	local fine : adviceBlackness 3.5
 	include : VerticalHook [RIGHTSB - O - fine / 2 * ITALICCOR] 0 [-HOOKX] HOOK fine
 }
-create-glyph 'hooktophltail' : glyph-construction {
+create-glyph 'hhooktopltail' : glyph-construction {
 	assign-unicode 0x267
 	include pMarks
-	include glyphs.hooktoph
+	include glyphs.hhooktop
 	include : VerticalHook [RIGHTSB - HALFSTROKE * ITALICCOR] 0 [-HOOKX] HOOK
 }
 # Right-tail
@@ -237,7 +272,21 @@ create-glyph 'trtail' : glyph-construction {
 	include ifMarks
 	include : SmallTShape CAP DESCENDER
 }
-
+create-glyph 'ezhtail' : glyph-construction {
+	assign-unicode 0x1BA
+	local b : mix DESCENDER XH 0.25
+	include : EzhShape XH b nothing true
+	local y : mix [mix b XH 0.6] b 0.5
+	include : create-stroke
+		:.start-from RIGHTSB y
+		:.heads-to   DOWNWARD
+		:.set-width  0 STROKE
+		:.arc-vh-to  [mix SB RIGHTSB 0.45] b
+		:.line-to    [mix SB RIGHTSB 0.4] b
+		:.arc-hv-to  [SB + STROKE * ITALICCOR] [mix [DESCENDER + STROKE] b 0.5]
+		:.arc-vh-to  [mix SB RIGHTSB 0.4] [DESCENDER + STROKE]
+		:.line-to    RIGHTSB [DESCENDER + STROKE]
+}
 # Curly tail
 define [CurlyTail fine wide rinner m1 y1 bottom _right x1 x2 y2] : glyph-construction {
 	local right : _right - fine * [if [_right > m1] 1 [-1]]
@@ -355,12 +404,10 @@ create-glyph 'ccurlytail' : glyph-construction {
 	assign-unicode 0x255
 	include eMarks
 	local rinner : [[XH * 0.425] - STROKE * 1.5] / 2
-	
+	include : XSHookUpper XH [SB + O] nothing RIGHTSB SMALLSMOOTHA [HOOK - TAILADJY * globalTransform.yx]
 	include : create-stroke
-		:.start-from [RIGHTSB - OXHOOK] [XH - HOOK]
+		:.start-from [SB + O] [XH - SMALLSMOOTHA]
 		:.set-width  STROKE 0
-		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] XO [MIDDLE - OMIDCOR_S] XO
-		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
 		:.line-to    [SB + O] SMALLSMOOTHB
 		:.heads-to   DOWNWARD
 
@@ -375,9 +422,7 @@ create-glyph 'ezhcurlytail' : glyph-construction {
 	include eMarks
 	local rinner : [[XH * 0.425] - STROKE * 1.5] / 2
 	
-	include : EzhShape XH DESCENDER
-	this.contours.pop
-	this.contours.pop
+	include : EzhShape XH DESCENDER nothing true
 
 	local m1 : RIGHTSB - STROKE * ITALICCOR
 	local x1 : mix RIGHTSB SB 0.25
@@ -405,6 +450,28 @@ create-glyph 'zcurlytail' : glyph-construction {
 	line-to RIGHTSB [XH - STROKE]
 	line-to [RIGHTSB - STROKE * cor] [XH - STROKE]
 	reverse-last
+}
+# Er tail
+define [ErTail] : glyph-construction {
+	local left : WIDTH * 0.85 - SB
+	include : HBarTop [left - markFine * 2] [left + markFine] [XH * 0.6]
+	include : create-stroke
+		:.start-from left [XH * 0.6]
+		:.set-width  [markFine * 2] 0
+		:.arc-vh-to  WIDTH [XH * 0.3]
+		:.heads-to   RIGHTWARD
+}
+create-glyph 'er' : glyph-construction {
+	assign-unicode 0x25A
+	local f : Thinner ('schwa') 0.85
+	include f.schwa
+	include : ErTail
+}
+create-glyph 'revlatinepsiloner' : glyph-construction {
+	assign-unicode 0x25D
+	local f : Thinner ('revlatinepsilon') 0.85
+	include f.revlatinepsilon
+	include : ErTail
 }
 # Belted
 define [Belt] : glyph-construction {
