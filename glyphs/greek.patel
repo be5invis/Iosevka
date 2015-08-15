@@ -329,28 +329,30 @@ create-glyph 'delta' : glyph-construction {
 		:.arc-vh-to  xOTLeft [bar - STROKE]
 		:.set-width  fine 0
 }
-
-create-glyph 'epsilon' : glyph-construction {
-	assign-unicode 0x3B5
-	include eMarks
-	
-	local mid : mix SB RIGHTSB 0.65
-	local sma : SMOOTHA * 0.815
-	local smb : SMOOTHB * 0.815
-	include : sHookUpper XH sma SHOOK
-	include : XSHookLower 0 [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] MIDDLE SB smb [SHOOK - TAILADJY * globalTransform.yx]
+define [SmallEpsilonShape top hook] : glyph-construction {
+	local midx : mix SB RIGHTSB 0.65
+	local midy : top * BARPOS
+	local sma : top - [mix [midy + HALFSTROKE] [top - O - STROKE] [SMOOTHB / [SMOOTHA + SMOOTHB]]]
+	local smb : mix [STROKE + O] [midy - HALFSTROKE] [SMOOTHB / [SMOOTHA + SMOOTHB]]
+	include : sHookUpper top sma [fallback hook SHOOK]
+	include : EHookLower 0 smb [fallback hook SHOOK] nothing nothing 0
 	include : create-stroke
-		:.start-from SB [XH - sma]
+		:.start-from SB [top - sma]
 		:.set-width  STROKE 0
-		:.arc-vh-to  MIDDLE [XH / 2 - HALFSTROKE] KAPPA
-		:.line-to    mid [XH / 2 - HALFSTROKE]
+		:.arc-vh-to  MIDDLE [midy - HALFSTROKE] KAPPA
+		:.line-to    midx [midy - HALFSTROKE]
 		:.heads-to   RIGHTWARD
 	include : create-stroke
 		:.start-from SB smb
 		:.set-width  0 STROKE
-		:.arc-vh-to  MIDDLE [XH / 2 + HALFSTROKE] KAPPA
-		:.line-to    mid [XH / 2 + HALFSTROKE]
+		:.arc-vh-to  MIDDLE [midy + HALFSTROKE] KAPPA
+		:.line-to    midx [midy + HALFSTROKE]
 		:.heads-to   RIGHTWARD
+}
+create-glyph 'epsilon' : glyph-construction {
+	assign-unicode 0x3B5
+	include eMarks
+	include : SmallEpsilonShape XH
 }
 create-glyph 'zeta' : glyph-construction {
 	assign-unicode 0x3B6
