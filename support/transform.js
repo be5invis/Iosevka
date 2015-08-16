@@ -3,7 +3,8 @@ exports.transformPoint = function(tfm, pt){
 		x : pt.x * tfm.xx + pt.y * tfm.yx + tfm.x,
 		y : pt.x * tfm.xy + pt.y * tfm.yy + tfm.y,
 		onCurve: pt.onCurve,
-		cubic: pt.cubic
+		cubic: pt.cubic,
+		subdivided: pt.subdivided
 	}
 }
 exports.inverse = function(tfm){
@@ -25,6 +26,7 @@ exports.untransform = function(tfm, pt){
 		x : (xx * tfm.yy - yy * tfm.yx) / denom,
 		y : (yy * tfm.xx - xx * tfm.xy) / denom,
 		onCurve: pt.onCurve,
-		cubic: pt.cubic
+		cubic: pt.cubic,
+		subdivided: pt.subdivided
 	}
 }

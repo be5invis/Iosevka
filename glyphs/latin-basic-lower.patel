@@ -77,7 +77,7 @@ create-glyph 'g' : glyph-construction {
 	assign-unicode 'g'
 	include pMarks
 	
-	include : smallo XH [XH * GBARPOS - O] SB [RIGHTSB - 0.3 * SB]
+	include : SmalloAlt XH [XH * GBARPOS] SB [RIGHTSB - 0.3 * SB]
 	
 	local gleftx  [SB * 0.8 + O]
 	local grightx [RIGHTSB + SB * 0.1 - O]
@@ -106,27 +106,29 @@ create-glyph 'c' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'c'
 	include eMarks
-	
-	include : CHookLower 0 SMALLSMOOTHB HOOK
-	include : CHookUpper XH SMALLSMOOTHA HOOK
-	include : create-stroke
-		:.start-from [SB + O] [XH - SMALLSMOOTHA]	:.set-width STROKE 0
-		:.line-to    [SB + O] SMALLSMOOTHB
+	include : spiro {
+		PREPARE [SETWIDTH STROKE 0]
+		SpiroCHookUpper SB RIGHTSB XH LEFT
+		SpiroCHookLower SB RIGHTSB 0  RIGHT
+	}
+#	include : CHookLower 0 SMALLSMOOTHB HOOK
+#	include : CHookUpper XH SMALLSMOOTHA HOOK
+#	include : create-stroke
+#		:.start-from [SB + O] [XH - SMALLSMOOTHA]	:.set-width STROKE 0
+#		:.line-to    [SB + O] SMALLSMOOTHB
 }
 define [SmallEShape top stroke barpos] : glyph-construction {
 	local barbottom [top * [fallback barpos EBARPOS]]
 	local hookx [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx]
 	local hookmiddle : [mix [SB + O] hookx 0.55] + OMIDCOR_S
 	
-	include : create-stroke
-		:.start-from [RIGHTSB - O] barbottom
-		:.heads-to   UPWARD
-		:.set-width  stroke 0
-		:.line-to    [RIGHTSB - O] [top - SMALLSMOOTHB]
-		:.arc-vh-to  MIDDLE [top - O]
-		:.arc-hv-to  [SB + O] [top - SMALLSMOOTHA]
-		:.line-to    [SB + O] SMALLSMOOTHB
-	include : EHookLower 0 SMALLSMOOTHB SHOOK [mix SB RIGHTSB SBALANCE] stroke
+	include : spiro {
+		LEFT  [RIGHTSB - O] barbottom [WIDTHHEADS stroke 0 UPWARD]
+		RIGHT [RIGHTSB - O] [top - SMALLSMOOTHB]
+		G4    [MIDDLE - OMIDCOR_S] [top - O]
+		LEFT  [SB + O] [top - SMALLSMOOTHA]
+		SpiroCHookLower SB RIGHTSB 0  RIGHT
+	}
 	include : create-stroke
 		:.start-from [SB + [stroke / 2]] barbottom
 		:.set-width  stroke 0
@@ -171,14 +173,14 @@ define [SmallTShape top bot] : glyph-construction {
 	local hookx  [center + [WIDTH - SB * 2] * 0.78 - OXHOOK + TAILADJX * globalTransform.yx]
 	local turn : mix center hookx [0.5 + globalTransform.yx * 0.5]
 	local smb  : [turn - center] * 1.1
+	local rho 0.77
 	
-	include : create-stroke
-		:.start-from center top
-		:.set-width  STROKE 0
-		:.heads-to   DOWNWARD
-		:.line-to    center [bot + smb]
-		:.arc-vh-to  turn [bot + O]
-		:.curve-to   [turn + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] * [hookx - turn]] [bot + O] hookx [bot + HOOK - TAILADJY * globalTransform.yx]
+	include : spiro {
+		LEFT    center top [WIDTHHEADS STROKE 0 DOWNWARD]
+		RIGHT   center [bot + smb]
+		CUP_LTR turn [bot + O] [[hookx - center] * 0.6]
+		G2      hookx [bot + HOOK - TAILADJY * globalTransform.yx]
+	}
 	
 	include : HBarTop [center + HALFSTROKE - LONGJUT + TBALANCE2] [center + HALFSTROKE + LONGJUT + TBALANCE2] [top * XH / CAP]
 }
@@ -283,22 +285,24 @@ create-glyph 'm' : glyph-construction {
 	local m2 : m1 + [MIDDLE - sw / 2 - SB]
 	include : create-stroke
 		:.start-from [MIDDLE - sw / 2] 0
-		:.set-width 0 sw :.heads-to UPWARD
+		:.set-width 0 sw
+		:.heads-to UPWARD
 		:.line-to [MIDDLE - sw / 2] [XH - SMALLSMOOTHA]
 		:.arc-vh-to m1 [XO - STROKE]
 		:.set-width 0 STROKE
 		:.heads-to LEFTWARD
-		:.arc-hv-to [SB + sw * 0.75] [XH - SMALLSMOOTHA]
+		:.arc-hv-to [SB + sw * 0.75 * ITALICCOR] [XH - SMALLSMOOTHA]
 		:.heads-to DOWNWARD
 		:.set-width 0 [sw * 0.4]
 	include : create-stroke
 		:.start-from [RIGHTSB - sw - O] 0
-		:.set-width 0 sw :.heads-to UPWARD
+		:.set-width 0 sw
+		:.heads-to UPWARD
 		:.line-to [RIGHTSB - sw - O] [XH - SMALLSMOOTHA]
 		:.arc-vh-to m2 [XO - STROKE]
 		:.set-width 0 STROKE
 		:.heads-to LEFTWARD
-		:.arc-hv-to [MIDDLE + sw * 0.25] [XH - SMALLSMOOTHA]
+		:.arc-hv-to [MIDDLE + sw * 0.25 * ITALICCOR] [XH - SMALLSMOOTHA]
 		:.heads-to DOWNWARD
 		:.set-width 0 [sw * 0.4]
 	include : create-stroke

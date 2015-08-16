@@ -213,6 +213,36 @@ define [EHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom [
 define [CHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom [RIGHTSB + TAILADJX * globalTransform.yx] _middle [SB + [fallback _o O]] smooth [hook - TAILADJY * globalTransform.yx] _stroke
 define [RevEHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom SB _middle [RIGHTSB - [fallback _o O]] smooth hook _stroke
 
+define [SpiroGeneralHookUpper conn free smooth y hook connectType fconn ffree tension refsmooth] : begin {
+	set tension : fallback tension 0
+	set refsmooth : fallback refsmooth smooth
+	local dist : free - conn
+	local radius : dist * dist / [[2.6 + tension] * refsmooth]
+	return : flatpts : list {
+		G4                                  free [y - hook] ffree
+		[if [free > conn] CAP_RTL CAP_LTR]  [[mix conn free SBALANCE] - OMIDCOR_S] y radius
+		[fallback connectType G4]           conn [y - smooth] fconn
+	}
+}
+define [SpiroGeneralHookLower conn free smooth y hook connectType fconn ffree tension refsmooth] : begin {
+	set tension : fallback tension 0
+	set refsmooth : fallback refsmooth smooth
+	local dist : free - conn
+	local radius : dist * dist / [[2.6 + tension] * refsmooth]
+	return : flatpts : list {
+		G4                                  free [y + hook] ffree
+		[if [free > conn] CUP_RTL CUP_LTR]  [[mix conn free SBALANCE] - OMIDCOR_S] y radius
+		[fallback connectType G4]           conn [y + smooth] fconn
+	}
+}
+
+define [SpiroCHookUpper l r y connectType s] : begin {
+	return : SpiroGeneralHookUpper [l + O] r SMALLSMOOTHA [y - O] HOOK connectType nothing nothing 0 SMALLSMOOTH
+}
+define [SpiroCHookLower l r y connectType s] : list {
+	return : reverse : SpiroGeneralHookLower [l + O] r SMALLSMOOTHB [y + O] HOOK connectType nothing nothing 0 SMALLSMOOTH
+}
+
 define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local middle : [l + r] / 2
 	local width : fallback _width STROKE
@@ -221,29 +251,48 @@ define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local mc : OMIDCOR * width
 	if [u - d > sma + smb] {
 		then : begin {
-			include : create-stroke
-				:.set-transform globalTransform
-				:.start-from [middle - mc] [u - O]
-				:.set-width width 0
-				:.arc-hv-to [l + O] [u - sma]
-				:.line-to  [l + O] [d + smb]
-				:.arc-vh-to [middle + mc] [d + O]
-				:.arc-hv-to [r - O] [d + sma]
-				:.line-to  [r - O] [u - smb]
-				:.arc-vh-to [middle - mc] [u - O]
+			include : spiro {
+				G4    [middle - mc] [u - O] [SETWIDTH width 0]
+				LEFT  [l + O] [u - sma]
+				RIGHT [l + O] [d + smb]
+				G4    [middle + mc] [d + O]
+				LEFT  [r - O] [d + sma]
+				RIGHT [r - O] [u - smb]
+				CLOSE [SAMPLES 2]
+			}
 		}
 		else : begin {
 			local ymiddlea : mix d u [smb / [sma + smb]]
 			local ymiddleb : mix d u [sma / [sma + smb]]
-			include : create-stroke
-				:.set-transform globalTransform
-				:.start-from [middle - mc] [u - O]
-				:.set-width width 0
-				:.arc-hv-to [l + O] ymiddlea
-				:.arc-vh-to [middle + mc] [d + O]
-				:.arc-hv-to [r - O] ymiddleb
-				:.arc-vh-to [middle - mc] [u - O]
+			include : spiro {
+				G4    [middle - mc] [u - O] [SETWIDTH width 0]
+				G4    [l + O] ymiddlea
+				G4    [middle + mc] [d + O]
+				G4    [r - O] ymiddleb
+				CLOSE [SAMPLES 2]
+			}
 		}
+	}
+}
+define [SmalloAlt u d l r _width _sma _smb] : glyph-construction {
+	local middle : [l + r] / 2
+	local width : fallback _width STROKE
+	local sma : fallback _sma SMALLSMOOTHA
+	local smb : fallback _smb SMALLSMOOTHB
+	local mc : OMIDCOR * width
+	local rho 0.77
+	local ymiddlea : mix d u [smb / [sma + smb]]
+	local ymiddleb : mix d u [sma / [sma + smb]]
+	include : spiro {
+		G4    [middle - mc] [u - O] [SETWIDTH width 0]
+		G4    [mix middle l rho] [mix ymiddlea u rho]
+		G4    [l + O] ymiddlea
+		G4    [mix middle l rho] [mix ymiddlea d rho]
+		G4    [middle + mc] [d + O]
+		G4    [mix middle r rho] [mix ymiddleb d rho]
+		G4    [r - O] ymiddleb
+		G4    [mix middle r rho] [mix ymiddleb u rho]
+		CLOSE [SAMPLES 2]
 	}
 }
 
