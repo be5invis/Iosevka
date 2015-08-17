@@ -28,34 +28,30 @@ create-glyph 'ampersand' : glyph-construction {
 	local r 1.1
 	local s 0
 	
-	include : create-stroke
-		:.start-from [RIGHTSB - O] CAPMIDDLE
-		:.set-width  0 STROKE
-		:.heads-to   DOWNWARD
-		:.line-to    [RIGHTSB - O] SMOOTHA
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [SB + O] SMOOTHB
-
-	include : xsStrand [SB + O] SMOOTHB [mix SB RIGHTSB p] [CAP - SMOOTHB * pr] HALFSTROKE [fine / 2]
-
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB p] [CAP - SMOOTHB * pr]
-		:.set-width  fine 0
-		:.arc-vh-to  [mix SB RIGHTSB [mix p l 0.5]] CAPO
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [mix SB RIGHTSB l] [CAP - SMOOTHA * pr]
-		
-	include : xsStrand [mix SB RIGHTSB l] [CAP - SMOOTHA * pr] [mix SB RIGHTSB r] [SMOOTHA * s] [fine / 2] [fine / 2] null null [SMOOTHA * pr * 0.6]
-
+	include : spiro {
+		widths.lhs
+		flat [RIGHTSB - O - STROKE * ITALICCOR] CAPMIDDLE [heading DOWNWARD]
+		curl [RIGHTSB - O - STROKE * ITALICCOR] [SMOOTHA + ITALICCOR * ITALICCORS]
+		arcvh
+		g4   MIDDLE [O + STROKE]
+		archv
+		g4   [SB + O + STROKE * ITALICCOR] [SMOOTHB - ITALICCOR * ITALICCORS]
+		g4   [[mix SB RIGHTSB p] - fine * ITALICCOR] [CAP - SMOOTHB * pr + ITALICCOR * ITALICCORS * [fine / STROKE]] [widths 0 fine]
+		arcvh
+		g4   [[mix SB RIGHTSB [mix p l 0.5]] - OMIDCOR_S + ITALICCORS] [CAPO - fine]
+		archv
+		g4   [[mix SB RIGHTSB l] + fine * ITALICCOR] [CAP - SMOOTHA * pr - ITALICCOR * ITALICCORS * [fine / STROKE]]
+		flat [mix SB RIGHTSB r] [SMOOTHA * s]
+		curl [mix SB RIGHTSB r] [[SMOOTHA * s] - 1]
+	}
 }
 
 create-glyph 'at' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '@'
 	
-	local top [CAP + HALFSTROKE]
-	local bot [DESCENDER + HALFSTROKE]
+	local top parenTop
+	local bot parenBot
 	local otop : mix bot top 0.75
 	local obot : mix top bot 0.8
 
@@ -66,26 +62,27 @@ create-glyph 'at' : glyph-construction {
 	local sma : SMOOTHA * [[RIGHTSB - m1] / [RIGHTSB - SB] * 1.1]
 	local smb : SMOOTHB * [[RIGHTSB - m1] / [RIGHTSB - SB] * 1.1]
 	
-	include : create-stroke
-		:.start-from RIGHTSB [otop - O]
-		:.heads-to  LEFTWARD
-		:.set-width sw 0
-		:.line-to   m2 [otop - O]
-		:.arc-hv-to m1 [otop - sma]
-		:.line-to   m1 [obot + smb]
-		:.arc-vh-to m2 [obot + O]
-		:.arc-hv-to RIGHTSB [obot + sma]
-		:.line-to   RIGHTSB [top - SMOOTHB]
-		:.arc-vh-to MIDDLE [top - O]
-		:.heads-to  LEFTWARD
-		:.set-width STROKE 0
-		:.arc-hv-to SB [top - SMOOTHA]
-		:.set-width sw 0
-		:.line-to   SB [bot + SMOOTHB]
-		:.arc-vh-to MIDDLE [bot + O]
-		:.set-width STROKE 0
-		:.heads-to  RIGHTWARD
-		:.line-to   [RIGHTSB - HALFSTROKE + globalTransform.yx * sw] [bot + O]
+	include : spiro {
+		widths.lhs sw
+		flat RIGHTSB [otop - O] [heading LEFTWARD]
+		curl m2 [otop - O]
+		archv
+		flat m1 [otop - sma]
+		curl m1 [obot + smb]
+		arcvh
+		g4   m2 [obot + O]
+		archv
+		flat RIGHTSB [obot + sma]
+		curl RIGHTSB [top - SMOOTHB]
+		arcvh
+		g4   [MIDDLE - OMIDCOR_S] [top - O] [widths STROKE 0]
+		archv
+		flat SB [top - SMOOTHA] [widths sw 0]
+		curl SB [bot + SMOOTHB]
+		arcvh
+		flat [MIDDLE + OMIDCOR_S] [bot + O] [widths STROKE 0 ]
+		curl [RIGHTSB - HALFSTROKE + globalTransform.yx * sw] [bot + O]
+	}
 }
 
 ### Brackets
