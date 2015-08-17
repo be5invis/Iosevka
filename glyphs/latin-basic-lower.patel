@@ -107,26 +107,34 @@ create-glyph 'c' : glyph-construction {
 	assign-unicode 'c'
 	include eMarks
 	
-	include : CHookLower 0 SMALLSMOOTHB HOOK
-	include : CHookUpper XH SMALLSMOOTHA HOOK
-	include : create-stroke
-		:.start-from [SB + O] [XH - SMALLSMOOTHA]	:.set-width STROKE 0
-		:.line-to    [SB + O] SMALLSMOOTHB
+	include : spiro {
+		widths.lhs
+		g4 [RIGHTSB - OXHOOK] [XH - HOOK]
+		g4 [[mix SB RIGHTSB SBALANCE] - OMIDCOR_S] [XH - O]
+		archv	
+		flat [SB + O] [XH - SMALLSMOOTHA]
+		curl [SB + O] [0 + SMALLSMOOTHB]
+		hookend O
+		g4 [RIGHTSB + TAILADJX * globalTransform.yx] [HOOK - TAILADJY * globalTransform.yx]
+	}
 }
 define [SmallEShape top stroke barpos] : glyph-construction {
 	local barbottom [top * [fallback barpos EBARPOS]]
 	local hookx [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx]
 	local hookmiddle : [mix [SB + O] hookx 0.55] + OMIDCOR_S
 	
-	include : create-stroke
-		:.start-from [RIGHTSB - O] barbottom
-		:.heads-to   UPWARD
-		:.set-width  stroke 0
-		:.line-to    [RIGHTSB - O] [top - SMALLSMOOTHB]
-		:.arc-vh-to  MIDDLE [top - O]
-		:.arc-hv-to  [SB + O] [top - SMALLSMOOTHA]
-		:.line-to    [SB + O] SMALLSMOOTHB
-	include : EHookLower 0 SMALLSMOOTHB SHOOK [mix SB RIGHTSB SBALANCE] stroke
+	include : spiro {
+		widths.lhs
+		flat [RIGHTSB - O] barbottom [heading UPWARD]
+		curl [RIGHTSB - O] [top - SMALLSMOOTHB]
+		arcvh
+		g4 [MIDDLE - OMIDCOR_S] [XH - O]
+		archv
+		flat [SB + O] [XH - SMALLSMOOTHA]
+		curl [SB + O] [0 + SMALLSMOOTHB]
+		hookend O
+		g4 [RIGHTSB + TAILADJX * globalTransform.yx - O] [HOOK - TAILADJY * globalTransform.yx]
+	}
 	include : create-stroke
 		:.start-from [SB + [stroke / 2]] barbottom
 		:.set-width  stroke 0
@@ -146,15 +154,20 @@ create-glyph 'e.italic' : glyph-construction {
 	
 	local barbottom [XH * EBARPOS]
 	
-	include : create-stroke
-		:.start-from [SB + O + STROKE] barbottom
-		:.set-width  STROKE 0
-		:.arc-hv-to  [RIGHTSB - O] [XH - SMALLSMOOTHB * 0.95]
-		:.arc-vh-to  [MIDDLE - OMIDCOR_S] XO
-		:.arc-hv-to  [SB + O] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + O] SMALLSMOOTHB
-		:.set-samples 4
-	include : EHookLower 0 SMALLSMOOTHB HOOK
+	include : spiro {
+		widths.lhs
+		g4 [SB + O + STROKE] barbottom
+		archv 8
+		g4 [RIGHTSB - O] [XH - SMALLSMOOTHB * 0.95]
+		#complexThru [alsothru 0.015 0.4] [arcvh]
+		arcvh 8
+		g4 [MIDDLE - OMIDCOR_S] [XH - O]
+		archv
+		flat [SB + O] [XH - SMALLSMOOTHA]
+		curl [SB + O] [0 + SMALLSMOOTHB]
+		hookend O
+		g4 [RIGHTSB + TAILADJX * globalTransform.yx - O] [HOOK - TAILADJY * globalTransform.yx]
+	}
 }
 create-glyph 'e' : glyph-construction {
 	set-width WIDTH

@@ -109,6 +109,7 @@ define [buildFont para recursive] : begin {
 	define KAPPA para.kappa
 	define COKAPPA : 1 - KAPPA
 	define BKAPPA : para.bkappa || KAPPA + 0.1
+	define KAPPA_SPIRO_ARC : KAPPA + 0.1
 	define CKAPPA : para.ckappa || BKAPPA
 	define COBKAPPA : 1 - BKAPPA
 	define KAPPA_HOOK  : fallback para.kappa_hook  [BKAPPA + 0.1]
@@ -223,7 +224,13 @@ define [buildFont para recursive] : begin {
 		return a
 	}
 	define [VIRTUAL] : this.points.[this.points.length - 1].subdivided = true
-	define [afInterpolate before after args] : g2 [mix before.x after.x args.rx] [mix before.y after.y args.ry] VIRTUAL
+	define [afInterpolate before after args] : g4 [mix before.x after.x args.rx] [mix before.y after.y args.ry] VIRTUAL
+	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
+	define [afInterpolateThem before after args] : begin {
+		local knots ()
+		foreach (rx ry) [items-of args.rs] : knots.push : g4 [mix before.x after.x rx] [mix before.y after.y ry] VIRTUAL
+		return knots
+	}
 	
 	define [g4 x y f] (.x x .y y .type 'g4' .af f)
 	define [g2 x y f] (.x x .y y .type 'g2' .af f)
@@ -233,9 +240,35 @@ define [buildFont para recursive] : begin {
 	define [prepare f] (.type 'prepare' .af f)
 	define [widths l r] : lambda [] : this.set-width l r
 	
-	define [controls rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
-	define [archv] : controls [1 - [3 * [1 - BKAPPA] + 1] / 8] [[3 * [1 - CKAPPA] + 1] / 8]
-	define [arcvh] : controls [[3 * [1 - BKAPPA] + 1] / 8] [1 - [3 * [1 - CKAPPA] + 1] / 8]
+	define [widths.lhs w] : prepare : widths [fallback w STROKE] 0
+	define [widths.rhs w] : prepare : widths 0 [fallback w STROKE]
+	define [widths.center w] : prepare : widths [[fallback w STROKE] / 2] [[fallback w STROKE] / 2]
+	define [heading d] : lambda [] : this.heads-to d
+	
+	define [alsothru rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
+	define [alsothruthem rs] (.type 'interpolate' .rs rs .af afInterpolateThem)
+	define [bezcontrols x1 y1 x2 y2 _samples] : begin {
+		local samples : fallback _samples 2
+		local tiny 0.01
+		local rs (([bez3 0 x1 x2 1 tiny] [bez3 0 y1 y2 1 tiny]))
+		foreach j [range 1 samples] : rs.push : list {
+			bez3 0 x1 x2 1 [mix tiny [1 - tiny] [j / samples]]
+			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
+		}
+		rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]])
+		alsothruthem rs
+	}
+	define [archv samples] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples
+	define [arcvh samples] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples
+	
+	define [complexThru] : begin {
+		local a : ().slice.call arguments
+		return (.type 'interpolate' .af [lambda [before after args] : begin {
+			local ks ()
+			foreach knot [items-of a] : ks.push [knot.af.call this before after knot]
+			return ks
+		}])
+	}
 	
 	define [spiro] : begin {
 		local s : new Stroke
@@ -259,7 +292,7 @@ define [buildFont para recursive] : begin {
 		}
 		if closed : knots.pop
 		set knots : flatten knots
-		s.set-samples 1
+		s.set-samples 2
 		libspiro.spiroToBezierOnContext knots closed s
 		if lastaf : lastaf.call s
 		return s

@@ -356,3 +356,15 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	apply-transform : Translate 0 [spacing / 2]
 	apply-transform : Italify
 }
+
+define [hookend y] (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : before.y > y
+	local ltr : after.x > before.x
+	after.x = after.x + OXHOOK * [if ltr [-1] 1]
+	local vh : arcvh
+	local mx [[mix before.x after.x SBALANCE] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	return : list {
+		vh.af.call this before (.x mx .y y) vh
+		g4 mx y
+	}
+}])

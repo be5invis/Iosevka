@@ -238,41 +238,36 @@ create-glyph 'D' : glyph-construction {
 	local dsmooth [SMOOTH * 1.35]
 	local bsmooth [SMOOTH * 1.1]
 	
-	include : create-stroke 
-		:.start-from SB 0
-		:.heads-to   UPWARD
-		:.set-width  0 STROKE
-		:.line-to    SB CAP
-		:.heads-to   UPWARD
+	include : VBarLeft SB 0 CAP
 	
-	include : create-stroke
-		:.start-from [SB - O] 0
-		:.heads-to   RIGHTWARD
-		:.set-width  STROKE 0
-		:.line-to    [RIGHTSB - bsmooth] 0
-		:.arc-hv-to  RIGHTSB dsmooth
-		:.line-to    RIGHTSB [CAP - dsmooth]
-		:.arc-vh-to  [RIGHTSB - bsmooth] CAP
-		:.line-to    [SB - O] CAP
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		flat [SB - O] CAP [heading RIGHTWARD]
+		curl [RIGHTSB - bsmooth] CAP
+		archv
+		flat RIGHTSB [CAP - dsmooth - [SMOOTHB - SMOOTH]]
+		curl RIGHTSB [dsmooth + [SMOOTHA - SMOOTH]]
+		arcvh
+		flat [RIGHTSB - bsmooth] 0
+		curl [SB - O] 0 [heading LEFTWARD]
+	}
 }
 define [PShape top] : glyph-construction {
 	local bowlTop [top * 1]
 	local bowlBottom [[top - STROKE] * 0.55 - HALFSTROKE]
 	
-	local turn : mix bowlTop bowlBottom 0.5
+	local turn : mix bowlTop bowlBottom [SMOOTHB / [SMOOTHA + SMOOTHB]]
 	local turnRadius : [bowlTop - bowlBottom] / 2
-	
-	include : create-stroke
-		:.start-from [SB * 1.25 - O] bowlTop
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.line-to    [RIGHTSB - turnRadius] bowlTop
-		:.arc-hv-to  [RIGHTSB - O] turn
-		:.arc-vh-to  [RIGHTSB - turnRadius] bowlBottom
-		:.line-to    [SB * 1.25 - O] bowlBottom
-		:.heads-to   LEFTWARD
-	
+	include : spiro {
+		widths.rhs
+		flat [SB * 1.25 - O] bowlTop [heading RIGHTWARD]
+		curl [RIGHTSB - turnRadius - OMIDCOR_S] bowlTop
+		archv
+		g4 [RIGHTSB - O] turn
+		arcvh
+		flat [RIGHTSB - turnRadius + OMIDCOR_S] bowlBottom
+		curl [SB * 1.25 - O] bowlBottom [heading LEFTWARD]
+	}
 	include : VBarLeft SB 0 top
 }
 define [RShape top] : glyph-construction {
@@ -345,15 +340,7 @@ create-glyph 'O' : glyph-construction {
 	assign-unicode 'O'
 	include capitalMarks
 	
-	include : create-stroke
-		:.start-from [MIDDLE - OMIDCOR_S] CAPO
-		:.set-width  STROKE 0
-		:.arc-hv-to  SB [CAP - SMOOTHA]
-		:.line-to    SB SMOOTHB
-		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
-		:.arc-hv-to  RIGHTSB SMOOTHA
-		:.line-to    RIGHTSB [CAP - SMOOTHB]
-		:.arc-vh-to  [MIDDLE - OMIDCOR_S] CAPO
+	include : smallo CAP 0 SB RIGHTSB nothing SMOOTHA SMOOTHB
 }
 
 create-glyph 'Q' : glyph-construction {
