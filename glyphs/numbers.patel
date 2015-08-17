@@ -50,13 +50,14 @@ create-glyph 'two' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '2'
 	
+	local smb : SMOOTHB * 1
 	include : spiro {
 		widths.rhs
 		g4 [SB + OXHOOK] [CAP - HOOK]
 		g4 [[mix RIGHTSB SB SBALANCE] - OMIDCOR_S] CAPO
-		archv
-		g4 RIGHTSB [CAP - SMOOTHB]
-		alsothruthem : list (0.0125 0.1) (0.5 [0.475 + 0.4 * HALFSTROKE / [CAP - SMOOTHB - STROKE]])
+		archv 4
+		g4 RIGHTSB [CAP - smb]
+		alsothruthem : list (0.5 [0.475 + 0.4 * HALFSTROKE / [CAP - smb - STROKE]])
 		flat [SB + STROKE * ITALICCOR] STROKE
 		curl [SB + STROKE * ITALICCOR] HALFSTROKE
 	}
@@ -74,21 +75,25 @@ create-glyph 'three' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '3'
 	
-	local threeRadius [CAPMIDDLE + HALFSTROKE - SMOOTH]
+	local barcenter : CAP * 0.52
+	local threeRadius : [CAPMIDDLE + HALFSTROKE - SMOOTH] * 1.1
 	
-	include : twoHookUpper CAP SMOOTHB HOOK
-	include : sHookLower 0 SMOOTHA HOOK
-	
-	include : create-stroke
-		:.start-from RIGHTSB [CAP - SMOOTHB]
-		:.set-width  0 STROKE
-		:.arc-vh-to  [RIGHTSB - threeRadius] [CAPMIDDLE - HALFSTROKE]
-		:.heads-to   LEFTWARD
-	include : create-stroke
-		:.start-from RIGHTSB SMOOTHA
-		:.set-width  STROKE 0
-		:.arc-vh-to  [RIGHTSB - threeRadius] [CAPMIDDLE + HALFSTROKE]
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		g4 SB [CAP - HOOK]
+		hookstart CAPO
+		g4 RIGHTSB [CAP - [SMOOTHB * [CAP - barcenter] / CAPMIDDLE]]
+		arcvh
+		flat [RIGHTSB - threeRadius] [barcenter - HALFSTROKE] [heading LEFTWARD]
+	}
+	include : spiro {
+		widths.lhs
+		g4 SB HOOK
+		hookstart O
+		g4 RIGHTSB [SMOOTHA * barcenter / CAPMIDDLE]
+		arcvh
+		flat [RIGHTSB - threeRadius] [barcenter + HALFSTROKE] [heading LEFTWARD]
+	}
 }
 
 create-glyph 'four' : glyph-construction {
@@ -124,18 +129,18 @@ create-glyph 'five' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '5'
 	
-	local ycurly : [CAP * FIVEBARPOS + STROKE] / 2 - HALFSTROKE * globalTransform.yx
+	local ycurly : mix 0 [CAP * FIVEBARPOS + HALFSTROKE] [SMOOTHA / [SMOOTHA + SMOOTHB]]
 	local xleft : SB + TBALANCE * [0.6 - globalTransform.yx * 2]
 	
 	include : spiro {
 		widths.rhs
-		flat xleft [CAP * FIVEBARPOS + STROKE] [heading RIGHTWARD]
-		curl [MIDDLE - OMIDCOR_S] [CAP * FIVEBARPOS + STROKE]
+		flat xleft [CAP * FIVEBARPOS + HALFSTROKE] [heading RIGHTWARD]
+		curl [[mix SB RIGHTSB 0.4] - OMIDCOR_S] [CAP * FIVEBARPOS + HALFSTROKE]
 		g4 RIGHTSB ycurly
 		hookend O
 		g4 SB HOOK
 	}
-	include : VBarLeft xleft [CAP * FIVEBARPOS + STROKE] CAP
+	include : VBarLeft xleft [CAP * FIVEBARPOS + HALFSTROKE] CAP
 	include : HBarTop xleft [RIGHTSB - TBALANCE / 2] CAP
 }
 

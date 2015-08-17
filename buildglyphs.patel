@@ -214,91 +214,6 @@ define [buildFont para recursive] : begin {
 	set font.'OS/2'.sxHeight          XH
 	set font.post.italicAnvle         [0 - para.italicangle]
 	
-	### Spiro constructions
-	define [flatten knots] : begin {
-		local a ()
-		foreach p [items-of knots] : piecewise {
-			[p <@ Array] : set a : a.concat [flatten p]
-			true         : a.push p
-		}
-		return a
-	}
-	define [unimportant] : this.points.[this.points.length - 1].subdivided = true
-	define [afInterpolate before after args] : g4 [mix before.x after.x args.rx] [mix before.y after.y args.ry] unimportant
-	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
-	define [afInterpolateThem before after args] : begin {
-		local knots ()
-		foreach (rx ry) [items-of args.rs] : knots.push : g4 [mix before.x after.x rx] [mix before.y after.y ry] unimportant
-		return knots
-	}
-	
-	define [g4 x y f] (.x x .y y .type 'g4' .af f)
-	define [g2 x y f] (.x x .y y .type 'g2' .af f)
-	define [flat x y f] (.x x .y y .type 'left' .af f)
-	define [curl x y f] (.x x .y y .type 'right' .af f)
-	define [close f] (.type 'close' .af f)
-	define [prepare f] (.type 'prepare' .af f)
-	define [widths l r] : lambda [] : this.set-width l r
-	
-	define [widths.lhs w] : prepare : widths [fallback w STROKE] 0
-	define [widths.rhs w] : prepare : widths 0 [fallback w STROKE]
-	define [widths.center w] : prepare : widths [[fallback w STROKE] / 2] [[fallback w STROKE] / 2]
-	define [widths.heading l r d] : lambda [] : begin { this.set-width l r; this.heads-to d }
-	define [heading d] : lambda [] : this.heads-to d
-	
-	define [alsothru rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
-	define [alsothruthem rs] (.type 'interpolate' .rs rs .af afInterpolateThem)
-	define [bezcontrols x1 y1 x2 y2 _samples] : begin {
-		local samples : fallback _samples 2
-		local tiny 0.01
-		local rs (([bez3 0 x1 x2 1 tiny] [bez3 0 y1 y2 1 tiny]))
-		foreach j [range 1 samples] : rs.push : list {
-			bez3 0 x1 x2 1 [mix tiny [1 - tiny] [j / samples]]
-			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
-		}
-		rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]])
-		alsothruthem rs
-	}
-	define [archv samples] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples
-	define [arcvh samples] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples
-	
-	define [complexThru] : begin {
-		local a : ().slice.call arguments
-		return (.type 'interpolate' .af [lambda [before after args] : begin {
-			local ks ()
-			foreach knot [items-of a] : ks.push [knot.af.call this before after knot]
-			return ks
-		}])
-	}
-	
-	define [spiro] : begin {
-		local s : new Stroke
-		s.set-transform globalTransform
-		local knots : ().slice.call arguments 0
-		local closed false
-		local lastaf
-		if [knots.0 && knots.0.type === 'prepare'] : begin {
-			knots.0.af.call s
-			set knots : knots.slice 1
-		}
-		if [knots.[knots.length - 1] && knots.[knots.length - 1].type === 'close'] : begin {
-			set closed true
-			set lastaf knots.[knots.length - 1].af
-			set knots : knots.slice 0 [-1]
-		}
-		set knots : flatten knots
-		if closed : knots.push knots.0
-		foreach j [range 0 knots.length] : if [knots.(j) && knots.(j).type === 'interpolate'] : begin {
-			set knots.(j) : knots.(j).af.call s knots.[j - 1] knots.[j + 1] knots.(j)
-		}
-		if closed : knots.pop
-		set knots : flatten knots
-		s.set-samples 2
-		libspiro.spiroToBezierOnContext knots closed s
-		if lastaf : lastaf.call s
-		return s
-	}
-	
 	### Necessary macros
 	define-macro glyph-construction : syntax-rules {
 		@`[glyph-construction @::steps] ('.syntactic-closure' @`[lambda [] [begin {
@@ -395,6 +310,101 @@ define [buildFont para recursive] : begin {
 	define [alias newid unicode oldid] : create-glyph newid : glyph-construction {
 		if unicode : assign-unicode unicode
 		include glyphs`oldid AS_BASE
+	}
+	
+		### Spiro constructions
+	define [flatten knots] : begin {
+		local a ()
+		foreach p [items-of knots] : piecewise {
+			[p <@ Array] : set a : a.concat [flatten p]
+			true         : a.push p
+		}
+		return a
+	}
+	define [unimportant] : if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
+	define [afInterpolate before after args] : g4 [mix before.x after.x args.rx] [mix before.y after.y args.ry] unimportant
+	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
+	define [afInterpolateThem before after args] : begin {
+		local knots ()
+		foreach (rx ry) [items-of args.rs] : knots.push : g4 [mix before.x after.x rx] [mix before.y after.y ry] unimportant
+		return knots
+	}
+	
+	define [g4 x y f] (.x x .y y .type 'g4' .af f)
+	define [g2 x y f] (.x x .y y .type 'g2' .af f)
+	define [corner x y f] (.x x .y y .type 'corner' .af f)
+	define [flat x y f] (.x x .y y .type 'left' .af f)
+	define [curl x y f] (.x x .y y .type 'right' .af f)
+	define [close f] (.type 'close' .af f)
+	define [end f] (.type 'end' .af f)
+	define [prepare f] (.type 'prepare' .af f)
+	define [widths l r] : lambda [] : this.set-width l r
+	
+	define [widths.lhs w] : prepare : widths [fallback w STROKE] 0
+	define [widths.rhs w] : prepare : widths 0 [fallback w STROKE]
+	define [widths.center w] : prepare : widths [[fallback w STROKE] / 2] [[fallback w STROKE] / 2]
+	define [widths.heading l r d] : lambda [] : begin { this.set-width l r; this.heads-to d }
+	define [heading d] : lambda [] : this.heads-to d
+	
+	define [alsothru rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
+	define [alsothruthem rs] (.type 'interpolate' .rs rs .af afInterpolateThem)
+	define [bezcontrols x1 y1 x2 y2 _samples notiny] : begin {
+		local samples : fallback _samples 2
+		local tiny 0.005
+		local rs ()
+		if [not notiny] : rs.push ([bez3 0 x1 x2 1 tiny] [bez3 0 y1 y2 1 tiny])
+		foreach j [range 1 samples] : rs.push : list {
+			bez3 0 x1 x2 1 [mix tiny [1 - tiny] [j / samples]]
+			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
+		}
+		if [not notiny] : rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]])
+		alsothruthem rs
+	}
+	define [quadcontrols x1 y1 samples] : bezcontrols [x1 * 2 / 3] [y1 * 2 / 3] [mix 1 x1 [2 / 3]] [mix 1 y1 [2 / 3]] samples
+	define [archv samples notiny] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples notiny
+	define [arcvh samples notiny] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples notiny
+	
+	define [complexThru] : begin {
+		local a : ().slice.call arguments
+		return (.type 'interpolate' .af [lambda [before after args] : begin {
+			local ks ()
+			foreach knot [items-of a] : ks.push [knot.af.call this before after knot]
+			return ks
+		}])
+	}
+	define [prepareSpiroKnots knots s] : begin {
+		local closed false
+		local lastafs ()
+		while [knots.0 && knots.0.type === 'prepare'] : begin {
+			knots.0.af.call s
+			set knots : knots.slice 1
+		}
+		while [knots.[knots.length - 1] && [knots.[knots.length - 1].type === 'close' || knots.[knots.length - 1].type === 'end']] : begin {
+			set closed : knots.[knots.length - 1].type === 'close'
+			lastafs.push knots.[knots.length - 1].af
+			set knots : knots.slice 0 [-1]
+		}
+		set knots : flatten knots
+		if closed : knots.push knots.0
+		foreach j [range 0 knots.length] : if [knots.(j) && knots.(j).type === 'interpolate'] : begin {
+			set knots.(j) : knots.(j).af.call s knots.[j - 1] knots.[j + 1] knots.(j)
+		}
+		if closed : knots.pop
+		return (.knots [flatten knots] .closed closed .lastafs lastafs)
+	}
+	define [spiro] : begin {
+		local s : new Stroke
+		s.set-transform globalTransform
+		s.set-samples 1
+		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots [().slice.call arguments 0] s
+		libspiro.spiroToBezierOnContext knots closed s
+		foreach af : [items-of lastafs] : if af : af.call s
+		return s
+	}
+	define [spiro-outline] : let [k : ().slice.call arguments 0] : glyph-construction {
+		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots k this
+		libspiro.spiroToBezierOnContext knots closed this
+		foreach af : [items-of lastafs] : if af : af.call this
 	}
 	
 	###### HERE WE GO!

@@ -354,15 +354,16 @@ create-glyph 'Q' : glyph-construction {
 	reverse-last
 }
 define [UShape top bottom stroke] : glyph-construction {
-	include : create-stroke
-		:.start-from SB top
-		:.heads-to   DOWNWARD
-		:.set-width  [fallback stroke STROKE] 0
-		:.line-to    SB [bottom + SMOOTHB]
-		:.arc-vh-to  [MIDDLE + OMIDCOR_S] [bottom + O]
-		:.arc-hv-to  RIGHTSB [bottom + SMOOTHA]
-		:.line-to    RIGHTSB top
-		:.heads-to   UPWARD
+	include : spiro {
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB [bottom + SMOOTHB]
+		arcvh
+		g4   [MIDDLE + OMIDCOR_S] [bottom + O]
+		archv
+		flat RIGHTSB [bottom + SMOOTHA]
+		curl RIGHTSB top [heading UPWARD]
+	}
 }
 create-glyph 'U' : glyph-construction {
 	set-width WIDTH
@@ -503,12 +504,14 @@ create-glyph 'J.straight' : glyph-construction {
 	local smooth : HOOK + 0.75 * STROKE
 	
 	local hookx [0.5 * SB + OXHOOK]
-
-	include : create-stroke
-		:.start-from [RIGHTSB - JBALANCE] CAP :.set-width 0 STROKE :.heads-to DOWNWARD
-		:.line-to    [RIGHTSB - JBALANCE] smooth
-		:.arc-vh-to  [mix hookx [RIGHTSB - JBALANCE] 0.5] O :.heads-to LEFTWARD
-		:.curve-to   [MIDDLE - kappa * [MIDDLE - SB] - SB * 0.5] O hookx HOOK
+	
+	include : spiro {
+		widths.rhs
+		flat [RIGHTSB - JBALANCE] CAP [heading DOWNWARD]
+		curl [RIGHTSB - JBALANCE] smooth
+		hookend O
+		g4 hookx HOOK
+	}
 }
 create-glyph 'J.shorthook' : glyph-construction {
 	set-width WIDTH

@@ -179,20 +179,22 @@ create-glyph 'e' : glyph-construction {
 	}
 }
 define [SmallTShape top bot] : glyph-construction {
-	local center [MIDDLE - TBALANCE - HALFSTROKE]
-	local hookx  [center + [WIDTH - SB * 2] * 0.78 - OXHOOK + TAILADJX * globalTransform.yx]
-	local turn : mix center hookx [0.5 + globalTransform.yx * 0.5]
-	local smb  : [turn - center] * 1.1
+	local center : MIDDLE - TBALANCE + HALFSTROKE
+	local hookx  [center - STROKE * 2 + [WIDTH - SB * 2] * 0.8 - OXHOOK + TAILADJX * globalTransform.yx]
+	local turn : [mix center hookx 0.5] + OMIDCOR_S - ITALICCORS
+	local smb  : [turn - center] * 1.2
 	
-	include : create-stroke
-		:.start-from center top
-		:.set-width  STROKE 0
-		:.heads-to   DOWNWARD
-		:.line-to    center [bot + smb]
-		:.arc-vh-to  turn [bot + O]
-		:.curve-to   [turn + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] * [hookx - turn]] [bot + O] hookx [bot + HOOK - TAILADJY * globalTransform.yx]
+	include : spiro {
+		widths.rhs
+		flat center top [heading DOWNWARD]
+		curl center [bot + smb + STROKE]
+		arcvh
+		g4 turn [bot + O + STROKE]
+		quadcontrols [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx + 0.1] 0
+		g4 hookx [bot + HOOK + STROKE * 0.24]
+	}
 	
-	include : HBarTop [center + HALFSTROKE - LONGJUT + TBALANCE2] [center + HALFSTROKE + LONGJUT + TBALANCE2] [top * XH / CAP]
+	include : HBarTop [center - HALFSTROKE - LONGJUT + TBALANCE2] [center - HALFSTROKE + LONGJUT + TBALANCE2] [top * XH / CAP]
 }
 create-glyph 't' : glyph-construction {
 	set-width WIDTH
@@ -291,28 +293,10 @@ create-glyph 'm' : glyph-construction {
 	include eMarks
 	
 	local sw : adviceBlackness 3.5
-	local m1 : [MIDDLE + SB + sw * 0.25] / 2
-	local m2 : m1 + [MIDDLE - sw / 2 - SB]
-	include : create-stroke
-		:.start-from [MIDDLE - sw / 2] 0
-		:.set-width 0 sw :.heads-to UPWARD
-		:.line-to [MIDDLE - sw / 2] [XH - SMALLSMOOTHA]
-		:.arc-vh-to m1 [XO - STROKE]
-		:.set-width 0 STROKE
-		:.heads-to LEFTWARD
-		:.arc-hv-to [SB + sw * 0.75] [XH - SMALLSMOOTHA]
-		:.heads-to DOWNWARD
-		:.set-width 0 [sw * 0.4]
-	include : create-stroke
-		:.start-from [RIGHTSB - sw - O] 0
-		:.set-width 0 sw :.heads-to UPWARD
-		:.line-to [RIGHTSB - sw - O] [XH - SMALLSMOOTHA]
-		:.arc-vh-to m2 [XO - STROKE]
-		:.set-width 0 STROKE
-		:.heads-to LEFTWARD
-		:.arc-hv-to [MIDDLE + sw * 0.25] [XH - SMALLSMOOTHA]
-		:.heads-to DOWNWARD
-		:.set-width 0 [sw * 0.4]
+	local m1 : mix [SB + O] [MIDDLE + sw / 2 * ITALICCOR] 0.5
+	local m2 : mix [RIGHTSB - O] [MIDDLE - sw / 2 * ITALICCOR] 0.5
+	include : mShoulderSpiro [SB + O + sw] [MIDDLE + sw / 2 * ITALICCOR] XH 0 sw [sw * 0.4]
+	include : mShoulderSpiro [MIDDLE + sw * 0.48 * ITALICCOR] [RIGHTSB - O] XH 0 sw [sw * 0.8]
 	include : create-stroke
 		:.start-from [SB + O] 0
 		:.heads-to UPWARD
@@ -361,13 +345,13 @@ create-glyph 'dotlessi.italic' : glyph-construction {
 	local left : MIDDLE - HALFSTROKE
 	local right : mix SB RIGHTSB 1.1
 	local middle : mix left right 0.55
-	include : create-stroke
-		:.start-from left XH
-		:.set-width  STROKE 0
-		:.heads-to   DOWNWARD
-		:.line-to    left [SMALLSMOOTHB * 0.7]
-		:.arc-vh-to  [middle + OMIDCOR_S] O BKAPPA CKAPPA
-		:.curve-to   [middle + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [right - middle]] O [right - OXHOOK + TAILADJX * globalTransform.yx] [SHOOK * 0.8 - TAILADJY * globalTransform.yx]
+	include : spiro {
+		widths.lhs
+		flat left XH [heading DOWNWARD]
+		curl left [SMALLSMOOTHB * 0.7]
+		hookend O
+		g4   right [SHOOK * 0.8]
+	}
 	include : create-stroke
 		:.start-from [left - LONGJUT + ILBALANCE + HALFSTROKE] XH
 		:.set-width  0 STROKE
@@ -390,12 +374,13 @@ create-glyph 'dotlessj.straight' : glyph-construction {
 	include pMarks
 	set-anchor 'above' BASE [MIDDLE + JBALANCE] XH
 	set-anchor 'overlay' BASE [MIDDLE + JBALANCE] [XH / 2]
-	include : create-stroke
-		:.start-from [MIDDLE + JBALANCE] XH
-		:.heads-to DOWNWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.line-to [MIDDLE + JBALANCE] 0
-		:.arc-vh-to [MIDDLE + DESCENDER * 0.85] [DESCENDER + HALFSTROKE]
+	include : spiro {
+		widths.center
+		flat [MIDDLE + JBALANCE] XH [heading DOWNWARD]
+		curl [MIDDLE + JBALANCE] 0
+		arcvh 3
+		g4   [MIDDLE + DESCENDER * 0.85] [DESCENDER + HALFSTROKE]
+	}
 }
 create-glyph 'dotlessj.serifed' : glyph-construction {
 	dont-export
@@ -448,13 +433,13 @@ create-glyph 'l.italic' : glyph-construction {
 	local left : mix SB RIGHTSB 0.3
 	local right : mix SB RIGHTSB 1.1
 	local middle : mix left right 0.54
-	include : create-stroke
-		:.start-from left CAP
-		:.set-width  STROKE 0
-		:.heads-to   DOWNWARD
-		:.line-to    left [SMALLSMOOTHB * 0.75]
-		:.arc-vh-to  [middle + OMIDCOR_S] O BKAPPA CKAPPA
-		:.curve-to   [middle + [KAPPA_HOOK + TAILADJKAPPA * globalTransform.yx] * [right - middle]] O [right - OXHOOK + TAILADJX * globalTransform.yx] [SHOOK - TAILADJY * globalTransform.yx]
+	include : spiro {
+		widths.lhs
+		flat left CAP [heading DOWNWARD]
+		curl left [SMALLSMOOTHB * 0.75]
+		hookend O
+		g4   right SHOOK
+	}
 	include : create-stroke
 		:.start-from SB CAP
 		:.set-width  0 STROKE
@@ -650,19 +635,17 @@ create-glyph 'r' : glyph-construction {
 	assign-unicode 'r'
 	include eMarks
 	
-	local rhookx : RIGHTSB + JBALANCE / 2
+	local rhookx : RIGHTSB + JBALANCE / 2 - STROKE
 	local rmiddle : [mix [SB + RBALANCE + STROKE] [rhookx - HALFSTROKE] 0.5] - OMIDCOR_S
-
-	include : create-stroke
-		:.start-from rhookx [XH - RHOOK]
-		:.set-width  STROKE 0
-		:.curve-to   [mix rmiddle rhookx KAPPA_RHOOK] XO rmiddle XO
-	include : create-stroke
-		:.start-from [rmiddle + ITALICCORS] [XO - STROKE]
-		:.set-width  0 STROKE
-		:.arc-hv-to  [SB + STROKE * ITALICCOR + RBALANCE] [XH - SMALLSMOOTHA]
-		:.heads-to   DOWNWARD
-		:.set-width  0 [STROKE * 0.3]
+	local barright : SB + STROKE * ITALICCOR + RBALANCE
+	include : spiro {
+		widths.rhs
+		g4 rhookx [XH - RHOOK - STROKE * 0.5]
+		g4 [mix barright rhookx 0.52] [XO - STROKE] [heading LEFTWARD]
+		archv
+		flat barright [XH - SMALLSMOOTHA] [widths 0 [STROKE * 0.3]]
+		curl barright [XH - SMALLSMOOTHA - 1]
+	}
 	include : create-stroke
 		:.start-from [SB + RBALANCE] 0
 		:.heads-to   UPWARD

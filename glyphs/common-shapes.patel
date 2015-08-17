@@ -160,29 +160,44 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : begin {
 	       :.concat : halfXStrand _rightx righty middlex middley turn straight tension
 }
 
-define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : begin {
+define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : glyph-construction {
 	local top : fallback _top XH
 	local bottom : fallback _bottom 0
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
 	local stroke : fallback _wide STROKE
-	local band : new Stroke
-		:.set-transform globalTransform
-		:.start-from right bottom
-		:.heads-to   UPWARD
-		:.set-width  stroke 0
-		:.line-to    right [top - smb]
-		:.arc-vh-to  middle [top - O]
-		:.heads-to   LEFTWARD
-		:.to-outline
-	local shoulder : new Stroke
-		:.set-transform globalTransform
-		:.start-from middle [top - O - stroke]
-		:.arc-hv-to  left [top - sma]
-		:.line-to    [left - fine] [top - sma]
-		:.arc-vh-to  middle [top - O]
+	include : spiro {
+		widths.lhs stroke
+		flat right bottom [heading UPWARD]
+		curl right [top - smb]
+		arcvh
+		g4 middle [top - O] [heading LEFTWARD]
+	}
+	start-from middle [top - O - stroke]
+	arc-hv-to  left [top - sma]
+	line-to    [left - fine] [top - sma]
+	arc-vh-to  middle [top - O]
+}
 
-	return : band.concat (shoulder.points)
+define [mShoulderSpiro left right top bottom width fine] : glyph-construction {
+	local fix : ITALICCORS * ITALICCOR * width / STROKE
+	include : spiro-outline {
+		corner [right - width * ITALICCOR] bottom
+		curl   [right - width * ITALICCOR] [top - SMALLSMOOTHB + fix]
+		arcvh 8 'no-tiny'
+		g2     [mix left [right - width * ITALICCOR] 0.5] [top - O - width]
+		archv 8 'no-tiny'
+		flat   left [top - SMALLSMOOTHA - fix]
+		corner left [top - SMALLSMOOTHA - fix - 1]
+		corner [left - fine] [top - SMALLSMOOTHA - 1]
+		curl   [left - fine] [top - SMALLSMOOTHA]
+		arcvh 8 'no-tiny'
+		g2     [mix [left - fine * ITALICCOR] right 0.5] [top - O]
+		archv 8 'no-tiny'
+		flat   right [top - SMALLSMOOTHB]
+		corner right bottom
+		close
+	}
 }
 
 define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construction {
@@ -356,29 +371,31 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	apply-transform : Translate 0 [spacing / 2]
 	apply-transform : Italify
 }
-define [hookstart y] (.type 'interpolate' .af [lambda [before after] : begin {
+define [hookstart y p f] (.type 'interpolate' .af [lambda [before after] : begin {
 	local atBottom : after.y > y
 	local ltr : after.x > before.x
 	before.x = before.x - OXHOOK * [if ltr [-1] 1]
 	local hv : archv
-	local mx [[mix after.x before.x SBALANCE] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[after.y - y] / [before.y - y]]
+	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
 	return : list {
-		g4 mx y
+		g4 mx y f
 		hv.af.call this (.x mx .y y) after hv
 	}
 }])
-define [hookend y dontextend] (.type 'interpolate' .af [lambda [before after] : begin {
+define [hookend y p f dontextend] (.type 'interpolate' .af [lambda [before after] : begin {
 	local atBottom : before.y > y
 	local ltr : after.x > before.x
 	after.x = after.x + OXHOOK * [if ltr [-1] 1]
 	local vh : arcvh
-	local mx [[mix before.x after.x SBALANCE] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[before.y - y] / [after.y - y]]
+	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
 	if [!dontextend && atBottom && ltr] : begin {
 		after.x = after.x + TAILADJX * globalTransform.yx
 		after.y = after.y - TAILADJY * globalTransform.yx
 	}
 	return : list {
 		vh.af.call this before (.x mx .y y) vh
-		g4 mx y
+		g4 mx y f
 	}
 }])
