@@ -3,6 +3,8 @@ define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define inverse [require './support/transform'].inverse
 
+define libspiro : require 'libspiro-js'
+
 ### COMMON FUNCTIONS
 
 define [mix a b p] : a + [b - a] * p
@@ -210,6 +212,53 @@ define [buildFont para recursive] : begin {
 	set font.'OS/2'.sTypoLineGap      [CAP * 0.2]
 	set font.'OS/2'.sxHeight          XH
 	set font.post.italicAnvle         [0 - para.italicangle]
+	
+	### Spiro constructions
+	define [flatten knots] : begin {
+		local a ()
+		foreach p [items-of knots] : piecewise {
+			[p <@ Array] : set a : a.concat [flatten p]
+			true         : a.push p
+		}
+		return a
+	}
+	define [afInterpolate before after args] : G2 [mix before.x after.x args.rx] [mix before.y after.y args.ry] VIRTUAL
+	define [G4 x y f] (.x x .y y .type 'g4' .af f)
+	define [G2 x y f] (.x x .y y .type 'g2' .af f)
+	define [LEFT x y f] (.x x .y y .type 'left' .af f)
+	define [RIGHT x y f] (.x x .y y .type 'right' .af f)
+	define [CLOSE f] (.type 'close' .af f)
+	define [PREPARE f] (.type 'prepare' .af f)
+	define [WIDTHS l r] : lambda [] : this.set-width l r
+	define [VIRTUAL] : this.points.[this.points.length - 1].subdivided = true
+	define [INTERPOLATE rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
+	define [spiro] : begin {
+		local s : new Stroke
+		s.set-transform globalTransform
+		local knots : ().slice.call arguments 0
+		local closed false
+		local lastaf
+		if [knots.0 && knots.0.type === 'prepare'] : begin {
+			knots.0.af.call s
+			set knots : knots.slice 1
+		}
+		if [knots.[knots.length - 1] && knots.[knots.length - 1].type === 'close'] : begin {
+			set closed true
+			set lastaf knots.[knots.length - 1].af
+			set knots : knots.slice 0 [-1]
+		}
+		set knots : flatten knots
+		if closed : knots.push knots.0
+		foreach j [range 0 knots.length] : if [knots.(j) && knots.(j).type === 'interpolate'] : begin {
+			set knots.(j) : knots.(j).af.call s knots.[j - 1] knots.[j + 1] knots.(j)
+		}
+		if closed : knots.pop
+		set knots : flatten knots
+		s.set-samples 1
+		libspiro.spiroToBezierOnContext knots closed s
+		if lastaf : lastaf.call s
+		return s
+	}
 	
 	### Necessary macros
 	define-macro glyph-construction : syntax-rules {

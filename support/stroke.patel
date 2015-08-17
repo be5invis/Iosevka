@@ -29,6 +29,8 @@ define [Stroke] : begin {
 		.x 0
 		.y 0
 	)
+	this.defaultd1 = 0
+	this.defaultd2 = 0
 	return this
 }
 define Stroke.is : object {
@@ -47,8 +49,16 @@ define [Stroke.bindParameters para] : begin {
 }
 define [Stroke.prototype.set-width d1 d2] : begin {
 	local point this.points`[this.points.length - 1]
-	point.d1 = d1
-	point.d2 = d2
+	if point {
+		then {
+			point.d1 = d1
+			point.d2 = d2
+		}
+		else {
+			this.defaultd1 = d1
+			this.defualtd2 = d2
+		}
+	}
 	return this
 }
 define [Stroke.prototype.heads-to x y] : begin {
@@ -126,13 +136,14 @@ define [computeOffsetPoint curve t j sl foffset fpdx fpdy] : begin {
 }
 
 define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
-	local d1s ([set d1 [if [this.points.0.d1 >= 0] this.points.0.d1 d1]])
-	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 d2]])
+	local d1s ([set d1 [if [this.points.0.d1 >= 0] this.points.0.d1 this.defaultd1]])
+	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 this.defaultd2]])
 	local pdxs (0)
 	local pdys (0)
 	local ts (0)
+	local brk ()
 	
-	local samples : fallback _samples this.samples SAMPLES
+	local minSamples : fallback _samples this.samples SAMPLES
 	local shapes ()
 	local subSegments ()
 	
@@ -146,6 +157,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				arcLengthSofar = arcLengthSofar + [seg.length]
 				if [not p1.subdivided] : begin {
 					ts.push arcLengthSofar
+					brk.[subSegments.length - 1] = true
 					d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
 					d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
 					local normalpt : seg.normal 1
@@ -161,6 +173,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				arcLengthSofar = arcLengthSofar + [seg.length]
 				if [not p3.subdivided] : begin {
 					ts.push arcLengthSofar
+					brk.[subSegments.length - 1] = true
 					d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
 					d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
 					local normalpt : seg.normal 1
@@ -176,6 +189,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				arcLengthSofar = arcLengthSofar + [seg.length]
 				if [not p2.subdivided] : begin {
 					ts.push arcLengthSofar
+					brk.[subSegments.length - 1] = true
 					d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
 					d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
 					local normalpt : seg.normal 1
@@ -203,12 +217,14 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 		local curve subSegments`j
 		local segLength : curve.length
 		local segLengths (0)
+		
+		local samples : Math.max minSamples : Math.ceil : segLength / 150
+		
 		foreach sample [range 1 till samples] : begin {
 			segLengths.push : curve.split 0 [sample / samples] :.length
 		}
 		left.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
 		right.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
-
 		foreach sample [range 0 samples] : begin {
 			local t : arcLengthSofar + segLengths.(sample)
 			local tn : arcLengthSofar + segLengths.[sample + 1]
@@ -250,6 +266,13 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			}]
 		}
 		arcLengthSofar = arcLengthSofar + segLength
+		if brk.(j) : begin {
+			shapes.push : left.concat [right.reverse]
+			set left ()
+			set right ()
+		}
+	}
+	if [left.length + right.length > 2] : begin {
 		shapes.push : left.concat [right.reverse]
 		set left ()
 		set right ()
@@ -257,13 +280,14 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 
 	return : shapes.map : function [shape] : begin {
 		# Remove duplicate points
-		for [local j] [j < shape.length - 1] [inc j] : begin {
+		for [local j 0] [j < shape.length - 1] [inc j] : begin {
 			local p0 shape.(j)
 			local p1 shape.[j + 1]
-			if [p0.onCurve && p1.onCurve && p0.x === p1.x && p0.y === p1.y] : set p1.removable true
+			if [p0.onCurve && p1.onCurve && [Math.abs : p0.x - p1.x] <= 0.1 && [Math.abs : p0.y - p1.y] <= 0.1] : set p1.removable true
 		}
-		# Remove colinear oncurve points
 		set shape : shape.filter : function [point] [point && [not point.removable]]
+		
+		# Remove colinear oncurve points
 		for [local j 0] [j < shape.length - 1] [inc j] : begin {
 			local p0 shape`j
 			local still true
@@ -279,6 +303,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			set j [k - 1]
 		}
 		set shape : shape.filter : function [point] [point && [not point.removable]]
+		
 		# Remove removable midpoints
 		for [local j 1] [j < shape.length - 2] [inc j] : begin {
 			local p0 shape`j
