@@ -356,13 +356,27 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	apply-transform : Translate 0 [spacing / 2]
 	apply-transform : Italify
 }
-
-define [hookend y] (.type 'interpolate' .af [lambda [before after] : begin {
+define [hookstart y] (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : after.y > y
+	local ltr : after.x > before.x
+	before.x = before.x - OXHOOK * [if ltr [-1] 1]
+	local hv : archv
+	local mx [[mix after.x before.x SBALANCE] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	return : list {
+		g4 mx y
+		hv.af.call this (.x mx .y y) after hv
+	}
+}])
+define [hookend y dontextend] (.type 'interpolate' .af [lambda [before after] : begin {
 	local atBottom : before.y > y
 	local ltr : after.x > before.x
 	after.x = after.x + OXHOOK * [if ltr [-1] 1]
 	local vh : arcvh
 	local mx [[mix before.x after.x SBALANCE] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	if [!dontextend && atBottom && ltr] : begin {
+		after.x = after.x + TAILADJX * globalTransform.yx
+		after.y = after.y - TAILADJY * globalTransform.yx
+	}
 	return : list {
 		vh.af.call this before (.x mx .y y) vh
 		g4 mx y

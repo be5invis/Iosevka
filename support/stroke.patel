@@ -140,8 +140,15 @@ define [computeOffsetPoint curve t j sl foffset fpdx fpdy] : begin {
 }
 
 define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
-	local d1s ([set d1 [if [this.points.0.d1 >= 0] this.points.0.d1 this.defaultd1]])
-	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 this.defaultd2]])
+	local width : [d1 || this.defaultd1] + [d2 || this.defaultd2]
+	local bias  : [d1 || this.defaultd1] - [d2 || this.defaultd2]
+	if [this.points.0.d1 >= 0 && this.points.0.d2 >= 0] : begin {
+		local width : this.points.0.d1 + this.points.0.d2
+		local bias : this.points.0.d1 - this.points.0.d2
+	}
+	
+	local widths (width)
+	local biases (bias)
 	local pdxs (0)
 	local pdys (0)
 	local ts (0)
@@ -163,8 +170,12 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				if [not p1.subdivided] : begin {
 					ts.push arcLengthSofar
 					brk.[subSegments.length - 1] = true
-					d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
-					d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
+					if [p1.d1 >= 0 && p1.d2 >= 0] : begin {
+						set width : p1.d1 + p1.d2
+						set bias : p1.d1 - p1.d2
+					}
+					widths.push width
+					biases.push bias
 					local normalpt : seg.normal 1
 					pdxs.push : if [p1.pdx !== nothing] [p1.pdx - normalpt.x] 0
 					pdys.push : if [p1.pdy !== nothing] [p1.pdy - normalpt.y] 0
@@ -179,8 +190,12 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				if [not p3.subdivided] : begin {
 					ts.push arcLengthSofar
 					brk.[subSegments.length - 1] = true
-					d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
-					d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
+					if [p3.d1 >= 0 && p3.d2 >= 0] : begin {
+						set width : p3.d1 + p3.d2
+						set bias : p3.d1 - p3.d2
+					}
+					widths.push width
+					biases.push bias
 					local normalpt : seg.normal 1
 					pdxs.push : if [p3.pdx !== nothing] [p3.pdx - normalpt.x] 0
 					pdys.push : if [p3.pdy !== nothing] [p3.pdy - normalpt.y] 0
@@ -195,8 +210,12 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				if [not p2.subdivided] : begin {
 					ts.push arcLengthSofar
 					brk.[subSegments.length - 1] = true
-					d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
-					d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
+					if [p2.d1 >= 0 && p2.d2 >= 0] : begin {
+						set width : p2.d1 + p2.d2
+						set bias : p2.d1 - p2.d2
+					}
+					widths.push width
+					biases.push bias
 					local normalpt : seg.normal 1
 					pdxs.push : if [p2.pdx !== nothing] [p2.pdx - normalpt.x] 0
 					pdys.push : if [p2.pdy !== nothing] [p2.pdy - normalpt.y] 0
@@ -209,8 +228,10 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	if [this.points.0.pdx !== nothing] : set pdxs.0 [this.points.0.pdx - [subSegments.0.normal 0].x]
 	if [this.points.0.pdy !== nothing] : set pdys.0 [this.points.0.pdy - [subSegments.0.normal 0].y]
 	
-	local f1 : smooth [xs-array ts] [ys-array d1s]
-	local f2 : smooth [xs-array ts] [ys-array [d2s.map [[x] -> [-x]]]]
+	local fWidth : smooth [xs-array ts] [ys-array widths]
+	local fBias : smooth [xs-array ts] [ys-array biases]
+	local [f1 t] : [[fWidth t] + [fBias t]] / 2
+	local [f2 t] : - [[fWidth t] - [fBias t]] / 2 
 	local fpdx : smooth [xs-array ts] [ys-array pdxs]
 	local fpdy : smooth [xs-array ts] [ys-array pdys]
 	

@@ -193,35 +193,30 @@ define [BShape top] : glyph-construction {
 	local tkappa [COKAPPA - 0.22]
 	local bkappa [COKAPPA - 0.2]
 	
-	local turntop : [top + [bowl - STROKE]] / 2
-	local turnbottom : bowl / 2
-	
-	include : create-stroke
-		:.start-from [SB - O] top
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.line-to    [RIGHTSB - SB * 0.5 - turnbottom] top
-		:.arc-hv-to  [RIGHTSB - SB * 0.5] turntop
-		:.arc-vh-to  [RIGHTSB - SB * 0.5 - turnbottom] [bowl - STROKE]
-		:.line-to    [SB - O] [bowl - STROKE]
-		:.heads-to   LEFTWARD
-	
-	include : create-stroke
-		:.start-from [SB - O] 0
-		:.heads-to   RIGHTWARD
-		:.set-width  STROKE 0
-		:.line-to    [RIGHTSB - turnbottom] 0
-		:.arc-hv-to  RIGHTSB turnbottom
-		:.arc-vh-to  [RIGHTSB - turnbottom] bowl
-		:.line-to    [SB - O] bowl
-		:.heads-to   LEFTWARD
-	
-	include : create-stroke 
-		:.start-from SB 0 
-		:.heads-to   UPWARD
-		:.set-width  0 STROKE
-		:.line-to    SB top
-		:.heads-to   UPWARD
+	local turntop : [top - [bowl - STROKE]] * 0.5
+	local turnbottom : bowl * 0.45
+
+	include : spiro {
+		widths.rhs
+		flat [SB - O] top [heading RIGHTWARD]
+		curl [RIGHTSB - SB * 0.5 - turntop - OMIDCOR_S] top
+		archv
+		g4 [RIGHTSB - SB * 0.5 - O] [mix top [bowl - STROKE] [SMOOTHB / [SMOOTHA + SMOOTHB]]]
+		arcvh
+		flat [RIGHTSB - SB * 0.5 - turntop + OMIDCOR_S] [bowl - STROKE]
+		curl [SB - O] [bowl - STROKE] [heading LEFTWARD]
+	}
+	include : spiro {
+		widths.rhs
+		flat [SB - O] bowl [heading RIGHTWARD]
+		curl [RIGHTSB - turnbottom - OMIDCOR_S] bowl
+		archv
+		g4 [RIGHTSB - O] [mix bowl 0 [SMOOTHB / [SMOOTHA + SMOOTHB]]]
+		arcvh
+		flat [RIGHTSB - turnbottom + OMIDCOR_S] 0
+		curl [SB - O] 0 [heading LEFTWARD]
+	}
+	include : VBarLeft SB 0 top
 }
 create-glyph 'B' : glyph-construction {
 	set-width WIDTH
@@ -257,7 +252,7 @@ define [PShape top] : glyph-construction {
 	local bowlBottom [[top - STROKE] * 0.55 - HALFSTROKE]
 	
 	local turn : mix bowlTop bowlBottom [SMOOTHB / [SMOOTHA + SMOOTHB]]
-	local turnRadius : [bowlTop - bowlBottom] / 2
+	local turnRadius : [bowlTop - bowlBottom] * 0.45
 	include : spiro {
 		widths.rhs
 		flat [SB * 1.25 - O] bowlTop [heading RIGHTWARD]
@@ -268,7 +263,7 @@ define [PShape top] : glyph-construction {
 		flat [RIGHTSB - turnRadius + OMIDCOR_S] bowlBottom
 		curl [SB * 1.25 - O] bowlBottom [heading LEFTWARD]
 	}
-	include : VBarLeft SB 0 top
+	include : VBarLeft [SB * 1.25] 0 top
 }
 define [RShape top] : glyph-construction {
 	include : PShape top
@@ -300,14 +295,15 @@ create-glyph 'C' : glyph-construction {
 	assign-unicode 'C'
 	include capitalMarks
 	
-	include : create-stroke
-		:.start-from [RIGHTSB - OXHOOK] [CAP - HOOK]
-		:.set-width  STROKE 0
-		:.curve-to   [MIDDLE + KAPPA_HOOK * [MIDDLE - para.sb]] CAPO [MIDDLE - OMIDCOR_S] CAPO
-		:.arc-hv-to  SB [CAP - SMOOTHA]
-		:.line-to    SB SMOOTHB
-		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
-		:.curve-to   [MIDDLE + ITALICCORS + KAPPA_HOOK * [MIDDLE - SB]] O [RIGHTSB - OXHOOK] HOOK
+	include : spiro {
+		widths.lhs
+		g4 RIGHTSB [CAP - HOOK]
+		hookstart CAPO
+		flat SB [CAP - SMOOTHA]
+		curl SB SMOOTHB
+		hookend O
+		g4 RIGHTSB HOOK
+	}
 }
 define [GShape top sma smb] : glyph-construction {
 	include : create-stroke
