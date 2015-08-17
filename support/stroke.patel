@@ -6,11 +6,7 @@ define utp [require './transform'].untransform
 
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
 
-define [xs-array low high] : begin {
-	local a ()
-	for [local j [low - 1]] [j <= high] [inc j] : a.push j
-	return a
-}
+define [xs-array a] ([a.0 - 1] :: [a.concat ([a`[a.length - 1] + 1])])
 define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
 define SAMPLES 3
@@ -69,18 +65,21 @@ define [Stroke.prototype.start-from x y] : begin {
 	this.points = ([tp this.gizmo (.x x .y y .onCurve true)])
 	return this
 }
-define [Stroke.prototype.line-to x y] : begin {
-	this.points.push [tp this.gizmo (.x x .y y .onCurve true)]
+Stroke.prototype.moveTo = Stroke.prototype.start-from
+define [Stroke.prototype.line-to x y subdivided] : begin {
+	this.points.push [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
 	return this
 }
-define [Stroke.prototype.curve-to xc yc x y] : begin {
-	this.points.push [tp this.gizmo (.x xc .y yc .onCurve false)] [tp this.gizmo (.x x .y y .onCurve true)]
+Stroke.prototype.lineTo = Stroke.prototype.line-to
+define [Stroke.prototype.curve-to xc yc x y subdivided] : begin {
+	this.points.push [tp this.gizmo (.x xc .y yc .onCurve false)] [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
 	return this
 }
-define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
-	this.points.push [tp this.gizmo (.x x1 .y y1 .onCurve false .cubic true)] [tp this.gizmo (.x x2 .y y2 .onCurve false .cubic true)] [tp this.gizmo (.x x .y y .onCurve true)]
+define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y subdivided] : begin {
+	this.points.push [tp this.gizmo (.x x1 .y y1 .onCurve false .cubic true)] [tp this.gizmo (.x x2 .y y2 .onCurve false .cubic true)] [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
 	return this
 }
+Stroke.prototype.cubicTo = Stroke.prototype.cubic-to
 define [Stroke.prototype.arc-vh-to x y _kappah _kappav] : begin {
 	local kappah : fallback _kappah BKAPPA
 	local kappav : fallback _kappav _kappah CKAPPA
@@ -120,9 +119,9 @@ define [near a b c] : begin {
 	local dist : Math.max [Math.abs [a.y - c.y]] [Math.abs [a.x - c.x]]
 	return : [Math.abs [b.y - my]] < dist && [Math.abs [b.x - mx]] < dist
 }
-define [computeOffsetPoint curve t j foffset fpdx fpdy] : begin {
-	local onpoint : curve.compute [t - j]
-	local normal : curve.normal [t - j]
+define [computeOffsetPoint curve t j sl foffset fpdx fpdy] : begin {
+	local onpoint : curve.compute [[t - j] / sl]
+	local normal : curve.normal [[t - j] / sl]
 	return (.x onpoint.x + [foffset t] * [normal.x + [fpdx t]] .y onpoint.y + [foffset t] * [normal.y + [fpdy t]])
 }
 
@@ -131,44 +130,58 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	local d2s ([set d2 [if [this.points.0.d2 >= 0] this.points.0.d2 d2]])
 	local pdxs (0)
 	local pdys (0)
+	local ts (0)
 	
 	local samples : fallback _samples this.samples SAMPLES
 	local shapes ()
 	local subSegments ()
 	
 	local p0 this.points.0
+	local arcLengthSofar 0
 	for [local j 1] [j < this.points.length] [inc j] : begin {
 		local p1 this.points`j
 		piecewise {
 			p1.onCurve : begin {
 				subSegments.push : local seg : new Bezier p0.x p0.y [[p0.x + p1.x] / 2] [[p0.y + p1.y] / 2] p1.x p1.y
-				d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
-				d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
-				local normalpt : seg.normal 1
-				pdxs.push : if [p1.pdx !== nothing] [p1.pdx - normalpt.x] 0
-				pdys.push : if [p1.pdy !== nothing] [p1.pdy - normalpt.y] 0
+				arcLengthSofar = arcLengthSofar + [seg.length]
+				if [not p1.subdivided] : begin {
+					ts.push arcLengthSofar
+					d1s.push : set d1 [if [p1.d1 >= 0] p1.d1 d1]
+					d2s.push : set d2 [if [p1.d2 >= 0] p1.d2 d2]
+					local normalpt : seg.normal 1
+					pdxs.push : if [p1.pdx !== nothing] [p1.pdx - normalpt.x] 0
+					pdys.push : if [p1.pdy !== nothing] [p1.pdy - normalpt.y] 0
+				}
 				p0 = p1
 			}
 			p1.cubic : begin {
 				local p2 this.points`[j + 1]
 				local p3 this.points`[j + 2]
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y p3.x p3.y
-				d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
-				d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
-				local normalpt : seg.normal 1
-				pdxs.push : if [p3.pdx !== nothing] [p3.pdx - normalpt.x] 0
-				pdys.push : if [p3.pdy !== nothing] [p3.pdy - normalpt.y] 0
+				arcLengthSofar = arcLengthSofar + [seg.length]
+				if [not p3.subdivided] : begin {
+					ts.push arcLengthSofar
+					d1s.push : set d1 [if [p3.d1 >= 0] p3.d1 d1]
+					d2s.push : set d2 [if [p3.d2 >= 0] p3.d2 d2]
+					local normalpt : seg.normal 1
+					pdxs.push : if [p3.pdx !== nothing] [p3.pdx - normalpt.x] 0
+					pdys.push : if [p3.pdy !== nothing] [p3.pdy - normalpt.y] 0
+				}
 				p0 = p3
 				j = j + 2
 			}
 			true : begin {
 				local p2 this.points`[j + 1]
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
-				d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
-				d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
-				local normalpt : seg.normal 1
-				pdxs.push : if [p2.pdx !== nothing] [p2.pdx - normalpt.x] 0
-				pdys.push : if [p2.pdy !== nothing] [p2.pdy - normalpt.y] 0
+				arcLengthSofar = arcLengthSofar + [seg.length]
+				if [not p2.subdivided] : begin {
+					ts.push arcLengthSofar
+					d1s.push : set d1 [if [p2.d1 >= 0] p2.d1 d1]
+					d2s.push : set d2 [if [p2.d2 >= 0] p2.d2 d2]
+					local normalpt : seg.normal 1
+					pdxs.push : if [p2.pdx !== nothing] [p2.pdx - normalpt.x] 0
+					pdys.push : if [p2.pdy !== nothing] [p2.pdy - normalpt.y] 0
+				}
 				p0 = p2
 				j = j + 1
 			}
@@ -177,43 +190,45 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	if [this.points.0.pdx !== nothing] : set pdxs.0 [this.points.0.pdx - [subSegments.0.normal 0].x]
 	if [this.points.0.pdy !== nothing] : set pdys.0 [this.points.0.pdy - [subSegments.0.normal 0].y]
 	
-	local f1 : smooth [xs-array 0 d1s.length] [ys-array d1s]
-	local f2 : smooth [xs-array 0 d2s.length] [ys-array [d2s.map [[x] -> [-x]]]]
-	local fpdx : smooth [xs-array 0 d1s.length] [ys-array pdxs]
-	local fpdy : smooth [xs-array 0 d2s.length] [ys-array pdys]
+	local f1 : smooth [xs-array ts] [ys-array d1s]
+	local f2 : smooth [xs-array ts] [ys-array [d2s.map [[x] -> [-x]]]]
+	local fpdx : smooth [xs-array ts] [ys-array pdxs]
+	local fpdy : smooth [xs-array ts] [ys-array pdys]
 	
 	local left ()
 	local right ()
+	set arcLengthSofar 0
+
 	for [local j 0] [j < subSegments.length] [inc j] : begin {
 		local curve subSegments`j
-		local arcLength : curve.length
+		local segLength : curve.length
 		local segLengths (0)
 		foreach sample [range 1 till samples] : begin {
 			segLengths.push : curve.split 0 [sample / samples] :.length
 		}
-		left.push [begin [local last [computeOffsetPoint curve j j f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
-		right.push [begin [local last [computeOffsetPoint curve j j f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
+		left.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
+		right.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
 
 		foreach sample [range 0 samples] : begin {
-			local t : j + segLengths.(sample) / arcLength
-			local tn : j + segLengths.[sample + 1] / arcLength
+			local t : arcLengthSofar + segLengths.(sample)
+			local tn : arcLengthSofar + segLengths.[sample + 1]
 			
-			local lthis : computeOffsetPoint curve t j f1 fpdx fpdy
-			local rthis : computeOffsetPoint curve t j f2 fpdx fpdy
-			local lnext : computeOffsetPoint curve tn j f1 fpdx fpdy
-			local rnext : computeOffsetPoint curve tn j f2 fpdx fpdy
-			local lnthis1 : computeOffsetPoint curve [t + TINY] j f1 fpdx fpdy
-			local rnthis1 : computeOffsetPoint curve [t + TINY] j f2 fpdx fpdy
-			local lnnext1 : computeOffsetPoint curve [tn - TINY] j f1 fpdx fpdy
-			local rnnext1 : computeOffsetPoint curve [tn - TINY] j f2 fpdx fpdy
-			local lnthis2 : computeOffsetPoint curve [t + 2 * TINY] j f1 fpdx fpdy
-			local rnthis2 : computeOffsetPoint curve [t + 2 * TINY] j f2 fpdx fpdy
-			local lnnext2 : computeOffsetPoint curve [tn - 2 * TINY] j f1 fpdx fpdy
-			local rnnext2 : computeOffsetPoint curve [tn - 2 * TINY] j f2 fpdx fpdy
-			local lnthis3 : computeOffsetPoint curve [t + 3 * TINY] j f1 fpdx fpdy
-			local rnthis3 : computeOffsetPoint curve [t + 3 * TINY] j f2 fpdx fpdy
-			local lnnext3 : computeOffsetPoint curve [tn - 3 * TINY] j f1 fpdx fpdy
-			local rnnext3 : computeOffsetPoint curve [tn - 3 * TINY] j f2 fpdx fpdy
+			local lthis : computeOffsetPoint curve t arcLengthSofar segLength f1 fpdx fpdy
+			local rthis : computeOffsetPoint curve t arcLengthSofar segLength f2 fpdx fpdy
+			local lnext : computeOffsetPoint curve tn arcLengthSofar segLength f1 fpdx fpdy
+			local rnext : computeOffsetPoint curve tn arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis1 : computeOffsetPoint curve [t + TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis1 : computeOffsetPoint curve [t + TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext1 : computeOffsetPoint curve [tn - TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext1 : computeOffsetPoint curve [tn - TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis2 : computeOffsetPoint curve [t + 2 * TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis2 : computeOffsetPoint curve [t + 2 * TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext2 : computeOffsetPoint curve [tn - 2 * TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext2 : computeOffsetPoint curve [tn - 2 * TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis3 : computeOffsetPoint curve [t + 3 * TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis3 : computeOffsetPoint curve [t + 3 * TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext3 : computeOffsetPoint curve [tn - 3 * TINY] arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext3 : computeOffsetPoint curve [tn - 3 * TINY] arcLengthSofar segLength f2 fpdx fpdy
 
 			local dlthis [dforward lthis lnthis1 lnthis2 lnthis3]
 			local drthis [dforward rthis rnthis1 rnthis2 rnthis3]
@@ -234,6 +249,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 				right.push (.x rnext.x .y rnext.y .onCurve true)
 			}]
 		}
+		arcLengthSofar = arcLengthSofar + segLength
 		shapes.push : left.concat [right.reverse]
 		set left ()
 		set right ()
