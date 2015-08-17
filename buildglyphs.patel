@@ -2,45 +2,6 @@ define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define inverse [require './support/transform'].inverse
-define unspiro : let [s2b [require 'libspiro-js'].spiroToBezierOnContext] : function [c closed pts] [s2b pts closed c]
-
-### Spiro functions
-define [PREPARE f] (.type 'prepare' .af f)
-define [CLOSE f] (.type 'close' .af f)
-define [SETWIDTH l r] : function [] : this.set-width l r
-define [HEADS d] : function [] : this.heads-to d
-define [WIDTHHEADS l r d] : function [] : begin [this.set-width l r] [this.heads-to d]
-define [SAMPLES n] : lambda [] : this.set-samples n
-define [VIRTUAL] : this.points.[this.points.length - 1].subdivided = true
-define [reverse a] : a.reverse
-
-define [flatpts pts] : begin {
-	local ans ()
-	foreach p [items-of pts] : piecewise {
-		[p <@ Array] : set ans : ans.concat [flatpts p]
-		true         : ans.push p
-	}
-	return ans
-}
-define [spiro pts] : begin {
-	local s : new Stroke
-	local points : ().slice.call arguments 0
-	local closed false
-	local lastaf null
-	if [points.0 && points.0.type === 'prepare'] : begin {
-		points.0.af.call s
-		set points : points.slice 1
-	}
-	if [points.[points.length - 1] && points.[points.length - 1].type === 'close'] : begin {
-		set lastaf points.[points.length - 1].af
-		set points : points.slice 0 [-1]
-		set closed true
-	}
-	unspiro s closed [flatpts points]
-	if lastaf : lastaf.call s
-	s.set-samples 2
-	return s
-}
 
 ### COMMON FUNCTIONS
 
@@ -115,43 +76,6 @@ define [buildFont para recursive] : begin {
 	
 	define globalTransform : Italify para.italicAngle
 	define ITALICCOR : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
-	
-	define [G4 _x _y f] : begin {
-		local (.x x .y y) : tp globalTransform (.x _x .y _y)
-		return (.x x .y y .type 'g4' .af f)
-	}
-	define [G2 _x _y f] : begin {
-		local (.x x .y y) : tp globalTransform (.x _x .y _y)
-		return (.x x .y y .type 'g2' .af f)
-	}
-	define [LEFT _x _y f] : begin {
-		local (.x x .y y) : tp globalTransform (.x _x .y _y)
-		return (.x x .y y .type 'left' .af f)
-	}
-	define [RIGHT _x _y f] : begin {
-		local (.x x .y y) : tp globalTransform (.x _x .y _y)
-		return (.x x .y y .type 'right' .af f)
-	}
-	define [CAP_RTL x y _radius f] : begin {
-		local radius : fallback _radius [RIGHTSB - SB - STROKE]
-		local shift : radius * [1 - [Math.cos : Math.asin [0.25 / radius]]]
-		return : list {
-			G4 [x + 0.25] [y - shift] VIRTUAL
-			G4 x y f
-			G4 [x - 0.25] [y - shift] VIRTUAL
-		}
-	}
-	define [CAP_LTR x y r f] : [CAP_RTL x y r f].reverse
-	define [CUP_RTL x y _radius f] : begin {
-		local radius : fallback _radius [RIGHTSB - SB - STROKE]
-		local shift : radius * [1 - [Math.cos : Math.asin [0.25 / radius]]]
-		return : list {
-			G4 [x + 0.25] [y + shift] VIRTUAL
-			G4 x y f
-			G4 [x - 0.25] [y + shift] VIRTUAL
-		}
-	}
-	define [CUP_LTR x y r f] : [CUP_RTL x y r f].reverse
 	
 	define UPWARD (.x [-ITALICCOR] .y 0)
 	define DOWNWARD (.x ITALICCOR .y 0)
@@ -340,7 +264,7 @@ define [buildFont para recursive] : begin {
 	define [create-glyph name actions] : piecewise {
 		[name && actions] : begin {
 			if [pickHash && [not pickHash.(name)]] : return nothing
-#			process.stderr.write : "Building /" + name + [if recursive " (recursive)" ""] + " for " + para.family + ' ' + para.style + "\n"
+			process.stderr.write : "Building /" + name + [if recursive " (recursive)" ""] + " for " + para.family + ' ' + para.style + "\n"
 			set dependencyProfile`name ()
 			define glyphObject [new Glyph name]
 			glyphObject.set-width WIDTH

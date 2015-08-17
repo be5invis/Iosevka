@@ -21,7 +21,6 @@ font.removeOverlap()
 font.addExtrema()
 font.simplify(2)
 font.layers["Fore"].is_quadratic = False
-font.addExtrema()
 font.simplify(6, ("smoothcurves", "removesingletonpoints", "setstarttoextremum"), 0.2)
 font.canonicalContours()
 font.canonicalStart()
