@@ -101,8 +101,8 @@ define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _exp
 		:.line-to    _xleft [yleft - 1000]
 		:.max-samples 1
 		:.to-outline].0.map : [p] -> [tp upright p]
-	local xItalicCorrection : -[outline.3.x - outline.0.x] / [2 * halfstroke0]
-	local yItalicCorrection : [outline.3.y - outline.0.y] / [2 * halfstroke0]
+	local xItalicCorrection : -[outline.5.x - outline.0.x] / [2 * halfstroke0]
+	local yItalicCorrection : [outline.5.y - outline.0.y] / [2 * halfstroke0]
 
 	local roundsize : [_roundp || SMOOTHA * 0.4] * [if [yleft < yright] [-1] 1]
 	local roundleft   [yleft - roundsize]
@@ -323,6 +323,55 @@ define [LegShape xt xb xs top bottom _fine] : glyph-construction {
 		:.curve-to   [linreg top xt [bottom + LONGJUT] xb [bottom + fine]] [bottom + fine] xs [bottom + fine]
 		:.heads-to   LEFTWARD
 }
+# Spiro shapes
+define [sband sw rtl _tension _tangle _compression] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local tension : fallback _tension 0.7
+	local compression : fallback _compression 1
+	local tensionw 0
+	local minangle : -para.italicangle / 180 * Math.PI
+	local maxangle : Math.atan2 [after.x - before.x] [[mix after.y before.y tension] - [mix before.y after.y tension]]
+	set maxangle : Math.atan2 [[Math.sin maxangle] * compression] [Math.cos maxangle]
+	local p : fallback _tangle 0.25
+	local pts ()
+	local samples 32
+	foreach j [range 1 samples] : begin {
+		local t : j / samples
+		local angle : mix minangle maxangle [bez3 0 p 1 1 : if [t < 1/2] [2 * t] [2 * [1 - t]]]
+		local k : bez3 0 tensionw [1 - tensionw] 1 t
+		if rtl : k = 1 - k
+		pts.push : g2 [mix before.x after.x [bez3 0 0 1 1 t]] [mix before.y after.y [bez3 0 tension [1 - tension] 1 t]] [widths.heading [[1 - k] * STROKE] [k * STROKE] (.x [Math.cos angle] .y [Math.sin angle])]
+	}
+	# throw 'w'
+	return pts
+}])
+define [hookstart y p f] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : after.y > y
+	local ltr : after.x > before.x
+	before.x = before.x - OXHOOK * [if ltr [-1] 1]
+	local hv : archv
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[after.y - y] / [before.y - y]]
+	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	return : list {
+		g4 mx y f
+		hv.af.call this (.x mx .y y) after hv
+	}
+}])
+define [hookend y p f dontextend] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : before.y > y
+	local ltr : after.x > before.x
+	after.x = after.x + OXHOOK * [if ltr [-1] 1]
+	local vh : arcvh
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[before.y - y] / [after.y - y]]
+	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	if [!dontextend && atBottom && ltr] : begin {
+		after.x = after.x + TAILADJX * globalTransform.yx
+		after.y = after.y - TAILADJY * globalTransform.yx
+	}
+	return : list {
+		vh.af.call this before (.x mx .y y) vh
+		g4 mx y f
+	}
+}])
 
 # Derived subfonts
 define [Miniature glyphs fold scale] : begin {
@@ -371,31 +420,3 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	apply-transform : Translate 0 [spacing / 2]
 	apply-transform : Italify
 }
-define [hookstart y p f] (.type 'interpolate' .af [lambda [before after] : begin {
-	local atBottom : after.y > y
-	local ltr : after.x > before.x
-	before.x = before.x - OXHOOK * [if ltr [-1] 1]
-	local hv : archv
-	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[after.y - y] / [before.y - y]]
-	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
-	return : list {
-		g4 mx y f
-		hv.af.call this (.x mx .y y) after hv
-	}
-}])
-define [hookend y p f dontextend] (.type 'interpolate' .af [lambda [before after] : begin {
-	local atBottom : before.y > y
-	local ltr : after.x > before.x
-	after.x = after.x + OXHOOK * [if ltr [-1] 1]
-	local vh : arcvh
-	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[before.y - y] / [after.y - y]]
-	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
-	if [!dontextend && atBottom && ltr] : begin {
-		after.x = after.x + TAILADJX * globalTransform.yx
-		after.y = after.y - TAILADJY * globalTransform.yx
-	}
-	return : list {
-		vh.af.call this before (.x mx .y y) vh
-		g4 mx y f
-	}
-}])

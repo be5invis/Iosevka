@@ -9,6 +9,13 @@ define libspiro : require 'libspiro-js'
 
 define [mix a b p] : a + [b - a] * p
 define [linreg x0 y0 x1 y1 x] : y0 + [x - x0] * [y1 - y0] / [x1 - x0]
+define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg {
+	* y0
+	linreg x0 z00 x1 z10 x
+	* y1
+	linreg x0 z01 x1 z11 x
+	* y
+}
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
 
 define emptyFontStr : JSON.stringify [require './empty.json']
@@ -79,10 +86,15 @@ define [buildFont para recursive] : begin {
 	define globalTransform : Italify para.italicAngle
 	define ITALICCOR : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
 	
+	# Orient parameters
 	define UPWARD (.x [-ITALICCOR] .y 0)
 	define DOWNWARD (.x ITALICCOR .y 0)
 	define RIGHTWARD (.x globalTransform.yx .y 1)
 	define LEFTWARD  (.x [- globalTransform.yx] .y [-1])
+	define [normalize a] : begin {
+		local m : Math.hypot a.x a.y
+		return (.x [a.x / m] .y [a.y / m])
+	}
 	
 	# derived metrics
 	define XO : XH - O
@@ -322,11 +334,11 @@ define [buildFont para recursive] : begin {
 		return a
 	}
 	define [unimportant] : if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
-	define [afInterpolate before after args] : g4 [mix before.x after.x args.rx] [mix before.y after.y args.ry] unimportant
+	define [afInterpolate before after args] : g2 [mix before.x after.x args.rx] [mix before.y after.y args.ry] unimportant
 	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
 	define [afInterpolateThem before after args] : begin {
 		local knots ()
-		foreach (rx ry) [items-of args.rs] : knots.push : g4 [mix before.x after.x rx] [mix before.y after.y ry] unimportant
+		foreach (rx ry) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] unimportant
 		return knots
 	}
 	
@@ -398,13 +410,13 @@ define [buildFont para recursive] : begin {
 		s.set-samples 1
 		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots [().slice.call arguments 0] s
 		libspiro.spiroToBezierOnContext knots closed s
-		foreach af : [items-of lastafs] : if af : af.call s
+		foreach af [items-of lastafs] : if af : af.call s
 		return s
 	}
 	define [spiro-outline] : let [k : ().slice.call arguments 0] : glyph-construction {
 		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots k this
 		libspiro.spiroToBezierOnContext knots closed this
-		foreach af : [items-of lastafs] : if af : af.call this
+		foreach af [items-of lastafs] : if af : af.call this
 	}
 	
 	###### HERE WE GO!

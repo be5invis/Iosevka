@@ -6,6 +6,7 @@ font = fontforge.open(source)
 
 font.selection.all()
 font.removeOverlap()
+font.addExtrema()
 font.simplify(1)
 font.canonicalContours()
 font.canonicalStart()

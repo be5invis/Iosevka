@@ -5,7 +5,7 @@ define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
-
+define [mix a b p] : a + [b - a] * p
 define [xs-array a] ([a.0 - 1] :: [a.concat ([a`[a.length - 1] + 1])])
 define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
 
@@ -161,6 +161,7 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	
 	local p0 this.points.0
 	local arcLengthSofar 0
+	local unjoinedSeglength 0
 	for [local j 1] [j < this.points.length] [inc j] : begin {
 		local p1 this.points`j
 		piecewise {
@@ -242,9 +243,11 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 	for [local j 0] [j < subSegments.length] [inc j] : begin {
 		local curve subSegments`j
 		local segLength : curve.length
+		set unjoinedSeglength : unjoinedSeglength + segLength
 		local segLengths (0)
 		
 		local samples : Math.min maxSamples : Math.max minSamples : Math.ceil : segLength / 100
+		if [segLength <= 5] : samples = 1
 		
 		foreach sample [range 1 till samples] : begin {
 			segLengths.push : curve.split 0 [sample / samples] :.length
@@ -281,21 +284,22 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			if [[not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [nonlinear lthis il lnext] && [near lthis il lnext]] [then {
 				left.push (.x il.x .y il.y .onCurve false) (.x lnext.x .y lnext.y .onCurve true)
 			}] [else {
-				left.push (.x lnext.x .y lnext.y .onCurve true)
+				left.push (.x [mix lthis.x lnext.x 0.5] .y [mix lthis.y lnext.y 0.5]) (.x lnext.x .y lnext.y .onCurve true)
 			}]
 			
 			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
 			if [[not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext] && [near rthis ir rnext]] [then {
 				right.push (.x ir.x .y ir.y .onCurve false) (.x rnext.x .y rnext.y .onCurve true)
 			}] [else {
-				right.push (.x rnext.x .y rnext.y .onCurve true)
+				right.push (.x [mix rthis.x rnext.x 0.5] .y [mix rthis.y rnext.y 0.5]) (.x rnext.x .y rnext.y .onCurve true)
 			}]
 		}
 		arcLengthSofar = arcLengthSofar + segLength
-		if brk.(j) : begin {
+		if [brk.(j) && unjoinedSeglength >= 100] : begin {
 			shapes.push : left.concat [right.reverse]
 			set left ()
 			set right ()
+			set unjoinedSeglength 0
 		}
 	}
 	if [left.length + right.length > 2] : begin {
