@@ -2,9 +2,8 @@ define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define inverse [require './support/transform'].inverse
-
 define libspiro : require 'libspiro-js'
-
+define SpiroExpansionContext [require './support/spiroexpand'].SpiroExpansionContext
 ### COMMON FUNCTIONS
 
 define [mix a b p] : a + [b - a] * p
@@ -333,12 +332,23 @@ define [buildFont para recursive] : begin {
 		}
 		return a
 	}
-	define [unimportant] : if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
-	define [afInterpolate before after args] : g2 [mix before.x after.x args.rx] [mix before.y after.y args.ry] unimportant
+	define [unimportant] : begin {
+		if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
+		if [this.controlKnots && this.controlKnots.length && this.controlKnots.[this.controlKnots.length - 1]] : this.controlKnots.[this.controlKnots.length - 1].unimportant = true
+	}
+	define [afInterpolate before after args] : g2 {
+		mix before.x after.x args.rx
+		mix before.y after.y args.ry
+		fallback args.raf unimportant
+	}
 	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
 	define [afInterpolateThem before after args] : begin {
 		local knots ()
-		foreach (rx ry) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] unimportant
+		foreach (rx ry preserve) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : match preserve {
+			1 before.af
+			2 after.af
+			otherwise unimportant
+		}
 		return knots
 	}
 	
@@ -358,18 +368,18 @@ define [buildFont para recursive] : begin {
 	define [widths.heading l r d] : lambda [] : begin { this.set-width l r; this.heads-to d }
 	define [heading d] : lambda [] : this.heads-to d
 	
-	define [alsothru rx ry] (.type 'interpolate' .rx rx .ry ry .af afInterpolate)
+	define [alsothru rx ry raf] (.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate)
 	define [alsothruthem rs] (.type 'interpolate' .rs rs .af afInterpolateThem)
 	define [bezcontrols x1 y1 x2 y2 _samples notiny] : begin {
-		local samples : fallback _samples 2
+		local samples : fallback _samples 5
 		local tiny 0.005
 		local rs ()
-		if [not notiny] : rs.push ([bez3 0 x1 x2 1 tiny] [bez3 0 y1 y2 1 tiny])
+#		if [not notiny] : rs.push ([bez3 0 x1 x2 1 tiny] [bez3 0 y1 y2 1 tiny] 1)
 		foreach j [range 1 samples] : rs.push : list {
 			bez3 0 x1 x2 1 [mix tiny [1 - tiny] [j / samples]]
 			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
 		}
-		if [not notiny] : rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]])
+#		if [not notiny] : rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]] 2)
 		alsothruthem rs
 	}
 	define [quadcontrols x1 y1 samples] : bezcontrols [x1 * 2 / 3] [y1 * 2 / 3] [mix 1 x1 [2 / 3]] [mix 1 y1 [2 / 3]] samples
@@ -404,7 +414,7 @@ define [buildFont para recursive] : begin {
 		if closed : knots.pop
 		return (.knots [flatten knots] .closed closed .lastafs lastafs)
 	}
-	define [spiro] : begin {
+	define [spiro-stroke] : begin {
 		local s : new Stroke
 		s.set-transform globalTransform
 		s.set-samples 1
@@ -412,6 +422,24 @@ define [buildFont para recursive] : begin {
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
 		return s
+	}
+	define [spiro] : begin {
+		local s : new SpiroExpansionContext
+		set s.gizmo globalTransform
+		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots [().slice.call arguments 0] s
+		foreach knot [items-of knots] : let [ty knot.type] [af knot.af] : begin {
+			set knot.af : lambda [] : begin {
+				this.set-type ty
+				if af : af.apply this arguments
+			}
+		}
+		libspiro.spiroToBezierOnContext knots closed s
+		foreach af [items-of lastafs] : if af : af.call s
+		local outlineKnots : s.expand
+		local g : new Glyph
+		libspiro.spiroToBezierOnContext outlineKnots true g
+#		g.cleanup
+		return g.contours
 	}
 	define [spiro-outline] : let [k : ().slice.call arguments 0] : glyph-construction {
 		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots k this
