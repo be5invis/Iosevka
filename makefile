@@ -59,6 +59,7 @@ $(OBJDIR) :
 
 cleartemps :
 	-rm $(PASS0) $(PASS1)
+pass0 : $(PASS0)
 
 test : $(TARGETS)
 	cp $(TARGETS) $(MAPS) testdrive/
