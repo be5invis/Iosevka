@@ -83,11 +83,11 @@ define [buildFont para recursive] : begin {
 	define [Rotate angle] (.xx [Math.cos angle] .yx [-[Math.sin angle]] .xy [Math.sin angle] .yy [Math.cos angle] .x 0 .y 0)
 	
 	define globalTransform : Italify para.italicAngle
-	define ITALICCOR : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
+	define CORRECTION_HX : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
 	
 	# Orient parameters
-	define UPWARD (.x [-ITALICCOR] .y 0)
-	define DOWNWARD (.x ITALICCOR .y 0)
+	define UPWARD (.x [-CORRECTION_HX] .y 0)
+	define DOWNWARD (.x CORRECTION_HX .y 0)
 	define RIGHTWARD (.x globalTransform.yx .y 1)
 	define LEFTWARD  (.x [- globalTransform.yx] .y [-1])
 	define [normalize a] : begin {
@@ -110,10 +110,10 @@ define [buildFont para recursive] : begin {
 	define SMOOTHB : SMOOTH + globalTransform.yx * para.smoothadjust
 	define SMALLSMOOTHA : SMALLSMOOTH - globalTransform.yx * para.smoothadjust
 	define SMALLSMOOTHB : SMALLSMOOTH + globalTransform.yx * para.smoothadjust
-	define ITALICCORS : STROKE * globalTransform.yx
+	define CORRECTION_VS : STROKE * globalTransform.yx
 	
-	define OMIDCOR : globalTransform.yx * 1.2
-	define OMIDCOR_S : STROKE * OMIDCOR
+	define CORRECTION_OMIDX : globalTransform.yx * 1.2
+	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
 	
 	# style parameters
 	define EBARPOS : para.ebarpos || BARPOS
@@ -336,6 +336,7 @@ define [buildFont para recursive] : begin {
 		if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
 		if [this.controlKnots && this.controlKnots.length && this.controlKnots.[this.controlKnots.length - 1]] : this.controlKnots.[this.controlKnots.length - 1].unimportant = true
 	}
+	define [important] nothing
 	define [afInterpolate before after args] : g2 {
 		mix before.x after.x args.rx
 		mix before.y after.y args.ry
@@ -344,7 +345,7 @@ define [buildFont para recursive] : begin {
 	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
 	define [afInterpolateThem before after args] : begin {
 		local knots ()
-		foreach (rx ry preserve) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : match preserve {
+		foreach (rx ry preserve) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve {
 			1 before.af
 			2 after.af
 			otherwise unimportant
@@ -369,7 +370,7 @@ define [buildFont para recursive] : begin {
 	define [heading d] : lambda [] : this.heads-to d
 	
 	define [alsothru rx ry raf] (.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate)
-	define [alsothruthem rs] (.type 'interpolate' .rs rs .af afInterpolateThem)
+	define [alsothruthem rs raf] (.type 'interpolate' .rs rs .raf raf .af afInterpolateThem)
 	define [bezcontrols x1 y1 x2 y2 _samples notiny] : begin {
 		local samples : fallback _samples 5
 		local tiny 0.005

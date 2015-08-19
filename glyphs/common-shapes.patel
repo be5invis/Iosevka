@@ -130,7 +130,7 @@ define [sStrand yleft yright _expansion] : begin {
 }
 
 define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : begin {
-	local leftx : _leftx + [HALFSTROKE * ITALICCOR * [if [rightx > _leftx] 1 [-1]]]
+	local leftx : _leftx + [HALFSTROKE * CORRECTION_HX * [if [rightx > _leftx] 1 [-1]]]
 	local fine  : [_fine || STROKE] * 0.5
 	
 	local turnyleft : mix lefty righty turn
@@ -183,19 +183,19 @@ define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : glyph-c
 }
 
 define [mShoulderSpiro left right top bottom width fine] : glyph-construction {
-	local fix : ITALICCORS * ITALICCOR * width / STROKE
+	local fix : CORRECTION_VS * CORRECTION_HX * width / STROKE
 	include : spiro-outline {
-		corner [right - width * ITALICCOR] bottom
-		curl   [right - width * ITALICCOR] [top - SMALLSMOOTHB + fix]
+		corner [right - width * CORRECTION_HX] bottom
+		curl   [right - width * CORRECTION_HX] [top - SMALLSMOOTHB + fix]
 		arcvh 8 'no-tiny'
-		g2     [mix left [right - width * ITALICCOR] 0.5] [top - O - width]
+		g2     [mix left [right - width * CORRECTION_HX] 0.5] [top - O - width]
 		archv 8 'no-tiny'
 		flat   left [top - SMALLSMOOTHA - fix]
 		corner left [top - SMALLSMOOTHA - fix - 1]
 		corner [left - fine] [top - SMALLSMOOTHA - 1]
 		curl   [left - fine] [top - SMALLSMOOTHA]
 		arcvh 8 'no-tiny'
-		g2     [mix [left - fine * ITALICCOR] right 0.5] [top - O]
+		g2     [mix [left - fine * CORRECTION_HX] right 0.5] [top - O]
 		archv 8 'no-tiny'
 		flat   right [top - SMALLSMOOTHB]
 		corner right bottom
@@ -210,7 +210,7 @@ define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construc
 		:.set-transform globalTransform
 		:.start-from [right - OXHOOK] [top - hook]
 		:.set-width [if [left < right] stroke 0] [if [left < right] 0 stroke]
-		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
+		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - CORRECTION_OMIDS] [top - O]
 		:.arc-hv-to left [top - smooth]
 }
 define [sHookUpper top smooth hook _middle _stroke] : XSHookUpper top SB _middle RIGHTSB smooth hook _stroke
@@ -223,7 +223,7 @@ define [XSHookLower bottom left _middle right smooth hook _stroke] : glyph-const
 		:.set-transform globalTransform
 		:.start-from right [bottom + smooth]
 		:.set-width [if [left < right] 0 stroke] [if [left < right] stroke 0]
-		:.arc-vh-to [middle + OMIDCOR_S] [bottom + O]
+		:.arc-vh-to [middle + CORRECTION_OMIDS] [bottom + O]
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 define [sHookLower bottom smooth hook _middle _stroke] : XSHookLower bottom SB _middle RIGHTSB smooth hook _stroke
@@ -236,7 +236,7 @@ define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local width : fallback _width STROKE
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
-	local mc : OMIDCOR * width
+	local mc : CORRECTION_OMIDX * width
 	if [u - d > sma + smb] {
 		then : begin {
 			include : spiro {
@@ -296,8 +296,8 @@ define [VBar x ydown yup _fine] : glyph-construction {
 		:.line-to x yup
 		:.heads-to [if [ydown < yup] UPWARD DOWNWARD]
 }
-define [VBarLeft x yd yu _fine] : VBar [x + [fallback _fine STROKE] * 0.5 * ITALICCOR] yd yu _fine
-define [VBarRight x yd yu _fine] : VBar [x - [fallback _fine STROKE] * 0.5 * ITALICCOR] yd yu _fine
+define [VBarLeft x yd yu _fine] : VBar [x + [fallback _fine STROKE] * 0.5 * CORRECTION_HX] yd yu _fine
+define [VBarRight x yd yu _fine] : VBar [x - [fallback _fine STROKE] * 0.5 * CORRECTION_HX] yd yu _fine
 
 # Common transformations
 define [FlipAround x y sx sy] : glyph-construction {
@@ -318,13 +318,14 @@ define [VerticalHook x y extend depth fine] : glyph-construction {
 
 define [LegShape xt xb xs top bottom _fine] : glyph-construction {
 	local fine : fallback _fine STROKE
-	include : create-stroke
-		:.start-from xt top
-		:.heads-to   DOWNWARD
-		:.set-width  fine 0
-		:.line-to    xb [bottom + LONGJUT]
-		:.curve-to   [linreg top xt [bottom + LONGJUT] xb [bottom + fine]] [bottom + fine] xs [bottom + fine]
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.lhs fine
+		flat xt top [heading DOWNWARD]
+		curl xb [bottom + LONGJUT]
+		alsothruthem ((0.5 0.94)) important
+		flat [xs + 1] [bottom + fine] [heading LEFTWARD]
+		curl xs [bottom + fine] [heading LEFTWARD]
+	}
 }
 # Spiro shapes
 define [sband sw rtl _tension _tangle _compression] : return (.type 'interpolate' .af [lambda [before after] : begin {
@@ -353,7 +354,7 @@ define [hookstart y p f] : return (.type 'interpolate' .af [lambda [before after
 	before.x = before.x - OXHOOK * [if ltr [-1] 1]
 	local hv : archv
 	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[after.y - y] / [before.y - y]]
-	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * CORRECTION_OMIDS]
 	return : list {
 		g4 mx y f
 		hv.af.call this (.x mx .y y) after hv
@@ -365,7 +366,7 @@ define [hookend y p f dontextend] : return (.type 'interpolate' .af [lambda [bef
 	after.x = after.x + OXHOOK * [if ltr [-1] 1]
 	local vh : arcvh
 	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[before.y - y] / [after.y - y]]
-	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * OMIDCOR_S]
+	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * CORRECTION_OMIDS]
 	if [!dontextend && atBottom && ltr] : begin {
 		after.x = after.x + TAILADJX * globalTransform.yx
 		after.y = after.y - TAILADJY * globalTransform.yx
