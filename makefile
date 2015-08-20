@@ -45,7 +45,7 @@ $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 update : $(FILES)
 
 $(SUPPORT_FILES) :
-	patel-c $< -o $@ --strict
+	patel-c --strict $< -o $@
 
 buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
 	patel-c --strict $< -o $@

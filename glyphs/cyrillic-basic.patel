@@ -166,9 +166,16 @@ create-glyph 'cyrghe.upright' : glyph-construction {
 }
 create-glyph 'cyrghe.italic' : glyph-construction {
 	include eMarks
-	include : twoHookUpper XH [SMOOTHB * 0.87] SHOOK
-	include : XSHookLower 0 [RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx] MIDDLE SB [SMOOTHB * 0.87] [SHOOK - TAILADJY * globalTransform.yx]
-	include : sStrand [SMOOTHB * 0.87] [XH - [SMOOTHB * 0.87]] 0.2 0.45
+	include : spiro {
+		widths.rhs
+		g4   SB [XH - SHOOK]
+		hookstart XO SBALANCE
+		g4   RIGHTSB [XH - SMOOTHB * 0.85]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		g4   SB [SMOOTHB * 0.85] [widths STROKE 0]
+		hookend O SBALANCE
+		g4   RIGHTSB SHOOK
+	}
 }
 italic-variant 'cyrghe' 0x433
 define [CyrDeShape top] : glyph-construction {
@@ -194,10 +201,12 @@ create-glyph 'cyrde.italic' : glyph-construction {
 	include bMarks
 	include : smallo [CAP * 0.7] 0 SB RIGHTSB
 	local ymiddlea : [XH + SMALLSMOOTHA - SMALLSMOOTHB] / 2
-	include : create-stroke
-		:.start-from [RIGHTSB - O] ymiddlea
-		:.set-width  STROKE 0
-		:.curve-to   [RIGHTSB - O] [mix ymiddlea CAP 0.8] [SB + STROKE * 1.1] CAP
+	include : spiro {
+		widths.lhs
+		g4 [RIGHTSB - O] ymiddlea
+		quadcontrols 0 0.8
+		g4 [SB + STROKE * 1.1] CAP
+	}
 }
 italic-variant 'cyrde' 0x434
 define [CyrZheShape top] : glyph-construction {
@@ -307,22 +316,22 @@ create-glyph 'cyrtse' : glyph-construction {
 	include eMarks
 	include : CyrTseShape XH
 }
-define [CyrCheShape top] : glyph-construction {
+define [CyrCheShape top _barp] : glyph-construction {
+	local bar : top * [fallback _barp 0.4]
 	include : VBarRight RIGHTSB 0 top
-	include : create-stroke
-		:.start-from SB top
-		:.set-width  STROKE 0
-		:.heads-to   DOWNWARD
-		:.line-to    SB [top * 0.3 + SMOOTHB - HALFSTROKE]
-		:.arc-vh-to  MIDDLE [top * 0.3 - HALFSTROKE]
-		:.heads-to   RIGHTWARD
-		:.line-to    RIGHTSB [top * 0.3 - HALFSTROKE]
-		:.heads-to   RIGHTWARD
+	include : spiro {
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB [bar + SMOOTHB - HALFSTROKE]
+		arcvh
+		flat MIDDLE [bar - HALFSTROKE]
+		curl [RIGHTSB - 1] [bar - HALFSTROKE] [heading RIGHTWARD]
+	}
 }
 create-glyph 'cyrChe' : glyph-construction {
 	assign-unicode 0x427
 	include capitalMarks
-	include : CyrCheShape CAP
+	include : CyrCheShape CAP 0.35
 }
 create-glyph 'cyrche' : glyph-construction {
 	assign-unicode 0x447
