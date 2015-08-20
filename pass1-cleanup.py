@@ -18,7 +18,6 @@ font.selection.all()
 font.removeOverlap()
 font.round()
 font.removeOverlap()
-font.layers["Fore"].is_quadratic = False
 font.addExtrema()
 font.canonicalContours()
 font.canonicalStart()

@@ -34,10 +34,10 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
-	fontforge -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
+	fontforge -quiet -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
 # Pass 2 : Curve simplification
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
-	fontforge -script pass2-finalize.py $^ $@
+	fontforge -quiet -script pass2-finalize.py $^ $@
 # Pass 3 : Simplify and output
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	ttfautohint $< $@
