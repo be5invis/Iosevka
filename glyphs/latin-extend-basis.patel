@@ -240,63 +240,6 @@ create-glyph 'thorn' : glyph-construction {
 	include ifMarks
 }
 
-create-glyph 'eszet.upright' : glyph-construction {
-	set-width WIDTH
-	dont-export
-	include bMarks
-	
-	local yTopTurn [CAP * 0.62 + HALFSTROKE]
-	local yBottomTurn [CAP * 0.41]
-	
-	local xTopTurn : Math.min [mix [SB + STROKE] RIGHTSB 0.75] [RIGHTSB - STROKE * 0.77]
-	local xMiddleTurn : [mix [SB + STROKE] RIGHTSB 0.15] + HALFSTROKE
-	local xBottomTurn : RIGHTSB - O - HALFSTROKE
-	local xBottomFinal [mix [SB + STROKE] RIGHTSB 0.4]
-	
-	include : create-stroke
-		:.start-from [SB + HALFSTROKE] 0
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   UPWARD
-		:.line-to    [SB + HALFSTROKE] [CAP - SMOOTHA - HALFSTROKE]
-		:.arc-vh-to  [mix [SB + HALFSTROKE] xTopTurn 0.5] [CAP - O - HALFSTROKE]
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  xTopTurn [yTopTurn + HALFSTROKE]
-		:.heads-to   DOWNWARD
-		:.line-to    xTopTurn [yTopTurn - HALFSTROKE]
-		:.heads-to   DOWNWARD
-	include : create-stroke
-		:.start-from [xTopTurn + HALFSTROKE] yTopTurn
-		:.heads-to   LEFTWARD
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.line-to    [xMiddleTurn + [yTopTurn - yBottomTurn] / 2] yTopTurn
-		:.arc-hv-to  xMiddleTurn [mix yTopTurn yBottomTurn 0.5]
-		:.arc-vh-to  [mix xMiddleTurn xBottomTurn 0.5] yBottomTurn
-		:.arc-hv-to  xBottomTurn [mix [yBottomTurn + HALFSTROKE] 0 0.475]
-		:.arc-vh-to  xBottomFinal HALFSTROKE
-		:.line-to    [SB + STROKE * 1.25] HALFSTROKE
-		:.heads-to   LEFTWARD
-		:.set-samples 2
-	
-	set this.italicHookAttachPoint (.x [SB + HALFSTROKE] .y 0)
-}
-create-glyph 'eszet.italic' : glyph-construction {
-	set-width WIDTH
-	dont-export
-
-	include glyphs.'eszet.upright' AS_BASE
-	include ifMarks
-	include : eshHook glyphs.'eszet.upright'.italicHookAttachPoint
-}
-create-glyph 'eszet' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 0xDF
-	
-	if [para.italicangle > 0] {
-		then : include glyphs.'eszet.italic' AS_BASE
-		else : include glyphs.'eszet.upright' AS_BASE
-	}
-}
-
 define [EzhShape top bot pleft flat] : glyph-construction {
 	local cor 1.2
 	local yMidBar : mix bot top 0.6
@@ -373,6 +316,39 @@ create-glyph 'revezh' : glyph-construction {
 create-glyph 'esh' : glyph-construction {
 	assign-unicode 0x283
 	include glyphs.'longs.italic' AS_BASE
+}
+
+create-glyph 'eszet' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0xDF
+	include ifMarks
+	local l : SB * 1.25
+	include : spiro {
+		widths.lhs
+		g4 [l + HOOKX + HALFSTROKE] CAP [heading LEFTWARD]
+		archv
+		flat l [CAP - HOOK]
+		curl l 0 [heading DOWNWARD]
+	}
+	local t : mix 0 CAP 0.675
+	local tm : [mix DESCENDER t 0.625] + HALFSTROKE
+	local tl : [mix l RIGHTSB 0.35] + HALFSTROKE
+	include : HBarTop [l + 1] [RIGHTSB - HALFSTROKE * 1.2] t
+	include : spiro {
+		widths.rhs
+		flat tl tm [heading RIGHTWARD]
+		curl [tl + 1] tm [heading RIGHTWARD]
+		g2 [RIGHTSB - O] [mix DESCENDER tm 0.70]
+		g2 [RIGHTSB - O] [mix DESCENDER tm 0.67]
+		alsothru 0.5 0.75
+		g4 [mix SB RIGHTSB 0.3] DESCENDER
+	}
+	include : spiro {
+		widths.center [STROKE * 1.1]
+		corner tl [tm - STROKE] [heading UPWARD]
+		corner [RIGHTSB - HALFSTROKE * 1.2] t [heading UPWARD]
+	}
+	set this.italicHookAttachPoint (.x [l + HALFSTROKE] .y 0)
 }
 alias 'latinkappa' 0x138 'kappa'
 
