@@ -4,7 +4,7 @@ OBJDIR = build
 
 SUPPRESS_ERRORS = 2> /dev/null
 
-TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
+TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
@@ -26,6 +26,14 @@ $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
 	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-italic.ab.fea
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
 	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bolditalic.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-regular.ttf : $(FILES) | $(OBJDIR)
+	node generate regularCC $@ --dumpmap $(OBJDIR)/iosevkacc-regular.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-regular.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-bold.ttf : $(FILES) | $(OBJDIR)
+	node generate boldCC $@ --dumpmap $(OBJDIR)/iosevkacc-bold.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bold.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-italic.ttf : $(FILES) | $(OBJDIR)
+	node generate italicCC $@ --dumpmap $(OBJDIR)/iosevkacc-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-italic.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
+	node generate bolditalicCC $@ --dumpmap $(OBJDIR)/iosevkacc-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bolditalic.ab.fea
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
