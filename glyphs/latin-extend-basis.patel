@@ -31,7 +31,7 @@ create-glyph 'AE' : glyph-construction {
 		:.heads-to   RIGHTWARD
 	
 	# E half
-	include : VBarLeft eleft 0 CAP
+	include : VBarLeft eleft 0 CAP sw
 	include : HBarTop [eleft - O] RIGHTSB CAP
 	include : HBar [eleft - O] [RIGHTSB - sw / 4] [CAP * 0.54]
 	include : HBarBottom [eleft - O] RIGHTSB 0
@@ -53,7 +53,7 @@ define [OEShape top] : glyph-construction {
 		:.heads-to   RIGHTWARD
 	
 	# E half
-	include : VBarLeft eleft 0 top
+	include : VBarLeft eleft 0 top sw
 	include : HBarTop [eleft - O] RIGHTSB top
 	include : HBar [eleft - O] [RIGHTSB - sw / 4] [top * 0.54]
 	include : HBarBottom [eleft - O] RIGHTSB 0
@@ -72,22 +72,20 @@ create-glyph 'ae-epart' : glyph-construction {
 	local eMiddle : [mix eLeft [RIGHTSB - O] 0.5] - sw * globalTransform.yx
 	local barbottom [XH * EBARPOS]
 	
-	local hookx [RIGHTSB - O * 2 - OXHOOK + TAILADJX * globalTransform.yx]
-	local eHookMiddle [mix eLeft hookx 0.5]
-	
 	local sma : SMALLSMOOTHA * 0.6
 	local smb : SMALLSMOOTHB * 0.6
-	
-	include : create-stroke
-		:.start-from [RIGHTSB - O * 2] barbottom
-		:.heads-to   UPWARD
-		:.set-width  sw 0
-		:.line-to    [RIGHTSB - O * 2] [XH - smb]
-		:.arc-vh-to  eMiddle XO
-		:.arc-hv-to  eLeft [XH - sma]
-		:.line-to    eLeft smb
-		:.arc-vh-to  eHookMiddle O
-		:.curve-to   [mix eHookMiddle hookx KAPPA_HOOK] O hookx [SHOOK - TAILADJY * globalTransform.yx]
+	include : spiro {
+		widths.lhs sw
+		flat [RIGHTSB - O * 2] barbottom [heading UPWARD]
+		curl [RIGHTSB - O * 2] [XH - smb]
+		arcvh
+		g4   eMiddle XO
+		archv
+		flat eLeft [XH - sma]
+		curl eLeft smb
+		hookend O
+		g4   [RIGHTSB - O * 2] SHOOK
+	}
 	include : create-stroke
 		:.start-from [eLeft + sw / 2] barbottom
 		:.set-width  sw 0
@@ -99,47 +97,38 @@ create-glyph 'ae-apart' : glyph-construction {
 	dont-export
 	local sw : adviceBlackness 3.25
 	
-	local bartop [XH * BARPOS + sw / 2]
+	local bartop [XH * BARPOS + HALFSTROKE]
 	local abarRight : MIDDLE + sw / 2 * CORRECTION_HX
-	local m1        : mix [SB + OXHOOK] abarRight 0.5
 	local lowmiddle : [mix [SB + sw] [abarRight - sw] 0.5] + sw * globalTransform.yx
 	local barsmooth : mix SB abarRight 0.6
 	
 	local sma : SMALLSMOOTHA * 0.6
 	local smb : SMALLSMOOTHB * 0.6
 	
-	include : create-stroke 
-		:.start-from abarRight [XH - smb]
-		:.set-width sw 0
-		:.arc-vh-to m1 XO
-		:.curve-to [mix m1 SB KAPPA_HOOK] XO [SB + OXHOOK] [XH - SHOOK]
-	include : create-stroke
-		:.start-from abarRight smb
-		:.set-width 0 sw
-		:.arc-vh-to lowmiddle O
-		:.arc-hv-to [SB + O * 2] [mix 0 bartop [smb / [sma + smb]]]
-		:.arc-vh-to barsmooth bartop
-		:.line-to abarRight bartop
-		:.heads-to RIGHTWARD
+	include : spiro {
+		widths.lhs sw
+		g4 abarRight [XH - smb]
+		hookend XO 0.5
+		g4 [SB + O] [XH - SHOOK]
+	}
+	include : spiro {
+		widths.rhs sw
+		g4 abarRight smb
+		arcvh
+		g4 lowmiddle O
+		archv
+		g4 [SB + O * 2] [mix 0 bartop [smb / [sma + smb]]]
+		arcvh
+		flat barsmooth bartop
+		curl [abarRight - 1] bartop [heading RIGHTWARD]
+	}
 }
 create-glyph 'oe-opart' : glyph-construction {
 	dont-export
 	local sw : adviceBlackness 3.25
 	
 	local abarRight : MIDDLE + sw / 2 * CORRECTION_HX
-	local m1        : mix [SB + O] abarRight 0.5
-	
-	local sma : SMALLSMOOTHA * 0.6
-	local smb : SMALLSMOOTHB * 0.6
-	
-	include : create-stroke
-		:.start-from abarRight smb
-		:.set-width 0 sw
-		:.arc-vh-to [m1 + sw * globalTransform.yx] O
-		:.arc-hv-to [SB + O * 2] smb
-		:.line-to   [SB + O * 2] [XH - sma]
-		:.arc-vh-to [m1 - sw * globalTransform.yx] [XH - O]
-		:.arc-hv-to abarRight [XH - smb]
+	include : smallo XH 0 [SB + O] [abarRight + O] sw [SMALLSMOOTHA * 0.6] [SMALLSMOOTHB * 0.6]
 }
 
 create-glyph 'ae' : glyph-construction {
@@ -240,7 +229,7 @@ create-glyph 'thorn' : glyph-construction {
 	include ifMarks
 }
 
-define [EzhShape top bot pleft flat] : glyph-construction {
+define [EzhShape top bot pleft hookless] : glyph-construction {
 	local cor 1.2
 	local yMidBar : mix bot top 0.6
 	local ezhLeft : mix SB RIGHTSB [fallback pleft 0.2]
@@ -254,19 +243,19 @@ define [EzhShape top bot pleft flat] : glyph-construction {
 	line-to [ezhRight - STROKE * cor] [top - STROKE]
 	reverse-last
 	
-	local s : create-stroke 
-		:.start-from ezhLeft yMidBar
-		:.heads-to   RIGHTWARD 
-		:.set-width  0 STROKE
-		:.line-to    MIDDLE yMidBar
-		:.arc-hv-to  RIGHTSB [mix yMidBar bot 0.5]
-	if flat {
-		then : s.heads-to DOWNWARD
-		else : include : XSHookLower bot SB [mix SB RIGHTSB 0.465] RIGHTSB [[yMidBar - bot] / 2] SHOOK
+	include : spiro {
+		widths.rhs
+		flat ezhLeft yMidBar [heading RIGHTWARD]
+		curl MIDDLE yMidBar
+		archv
+		g4   RIGHTSB [mix yMidBar bot 0.5] [if [not hookless] important [heading DOWNWARD]]
+		if hookless () : list {
+			hookend bot
+			g4 SB [bot + SHOOK]
+		}
 	}
-	include s
 }
-define [RevEzhShape top bot pleft flat] : glyph-construction {
+define [RevEzhShape top bot pleft hookless] : glyph-construction {
 	local cor 1.2
 	local yMidBar : mix bot top 0.6
 	local ezhRight : mix RIGHTSB SB [fallback pleft 0.2]
@@ -279,17 +268,17 @@ define [RevEzhShape top bot pleft flat] : glyph-construction {
 	line-to ezhLeft [top - STROKE]
 	line-to [ezhLeft + STROKE * cor] [top - STROKE]
 	
-	local s : create-stroke 
-		:.start-from ezhRight yMidBar
-		:.heads-to   LEFTWARD 
-		:.set-width  STROKE 0
-		:.line-to    MIDDLE yMidBar
-		:.arc-hv-to  SB [mix yMidBar bot 0.5]
-	if flat {
-		then : s.heads-to DOWNWARD
-		else : include : XSHookLower bot RIGHTSB [mix RIGHTSB SB 0.465] SB [[yMidBar - bot] / 2] SHOOK
+	include : spiro {
+		widths.lhs
+		flat ezhRight yMidBar [heading LEFTWARD]
+		curl MIDDLE yMidBar
+		archv
+		g4   SB [mix yMidBar bot 0.5] [if [not hookless] important [heading DOWNWARD]]
+		if hookless () : list {
+			hookend bot
+			g4 RIGHTSB [bot + SHOOK]
+		}
 	}
-	include s
 }
 create-glyph 'Ezh' : glyph-construction {
 	set-width WIDTH
@@ -341,7 +330,7 @@ create-glyph 'eszet' : glyph-construction {
 		g2 [RIGHTSB - O * 1.5] [mix DESCENDER tm 0.70]
 		g2 [RIGHTSB - O * 1.5] [mix DESCENDER tm 0.67]
 		alsothru 0.5 0.75
-		g4 [mix SB RIGHTSB 0.3] DESCENDER
+		g4 [mix SB RIGHTSB 0.35] DESCENDER
 	}
 	include : spiro {
 		widths.center [STROKE * 1.1]
@@ -482,18 +471,18 @@ define [RamsHornShape bottom top] : glyph-construction {
 	local hf : [adviceBlackness 4] / 2
 	local d : hf * 2 + WIDTH * 0.05
 
-	
-	include : create-stroke
-		:.start-from [SB + HALFSTROKE * CORRECTION_HX + O] top
-		:.heads-to   DOWNWARD
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [MIDDLE + d - hf] [mix bottom top 0.3] [MIDDLE + d - hf] [bottom + d * [1 - globalTransform.yx * 0.5]]
-		:.set-width  hf hf
-		:.arc-vh-to  [MIDDLE + CORRECTION_OMIDX * hf * 2] [bottom + hf]
-		:.arc-hv-to  [MIDDLE - d + hf] [bottom + d * [1 + globalTransform.yx * 0.5]]
-		:.curve-to   [MIDDLE - d + hf] [mix bottom top 0.3] [RIGHTSB - HALFSTROKE * CORRECTION_HX - O] top
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   UPWARD
+	include : spiro {
+		widths.center
+		g4 [SB + HALFSTROKE * CORRECTION_HX + O] top [heading DOWNWARD]
+		quadcontrols 1 0.7 16
+		g4 [MIDDLE + d - hf] [bottom + d * [1 - globalTransform.yx * 0.5]] [widths hf hf]
+		arcvh
+		g4 [MIDDLE + CORRECTION_OMIDX * hf * 2] [bottom + hf]
+		archv
+		g4 [MIDDLE - d + hf] [bottom + d * [1 + globalTransform.yx * 0.5]]
+		quadcontrols 0 0.3 16
+		g4 [RIGHTSB - HALFSTROKE * CORRECTION_HX - O] top [widths.heading HALFSTROKE HALFSTROKE UPWARD]
+	}
 }
 create-glyph 'latingamma' : glyph-construction {
 	assign-unicode 0x263
@@ -611,13 +600,13 @@ create-glyph 'rflap' : glyph-construction {
 	local rhookx : RIGHTSB + JBALANCE / 2
 	local rmiddle : [mix [SB + RBALANCE + STROKE] [rhookx - HALFSTROKE] 0.5] - CORRECTION_OMIDS
 
-	include : create-stroke
-		:.start-from rhookx [XH - RHOOK]
-		:.set-width  STROKE 0
-		:.curve-to   [mix rmiddle rhookx KAPPA_AHOOK] XO rmiddle XO
-		:.arc-hv-to  [SB + RBALANCE] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + RBALANCE] 0
-		:.heads-to   DOWNWARD
+	include : spiro {
+		widths.lhs
+		g4   rhookx [XH - RHOOK]
+		hookstart XO
+		flat [SB + RBALANCE] [XH - SMALLSMOOTHA]
+		curl [SB + RBALANCE] 0 [heading DOWNWARD]
+	}
 }
 create-glyph 'ifishhook' : glyph-construction {
 	assign-unicode 0x27F

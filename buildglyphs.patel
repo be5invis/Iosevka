@@ -442,10 +442,25 @@ define [buildFont para recursive] : begin {
 		}
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
-		local outlineKnots : s.expand
-		local g : new Glyph
-		libspiro.spiroToBezierOnContext outlineKnots true g
-		g.cleanup
+		local (.lhs lhs .rhs rhs) : s.expand
+		if closed {
+			then {
+				local g : new Glyph
+				libspiro.spiroToBezierOnContext [lhs.slice 0 [-1]] true g
+				local lhsContour g.contours.0
+				set g.contours ()
+				libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 [-1]] true g
+				local rhsContour g.contours.0
+				set g.contours ([lhsContour.concat rhsContour])
+				g.cleanup
+			}
+			else {
+				local g : new Glyph
+				lhs.0.type = rhs.0.type = lhs.[lhs.length - 1].type = rhs.[rhs.length - 1].type = 'corner'
+				libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g
+				g.cleanup
+			}
+		}
 		return g.contours
 	}
 	define [spiro-outline] : let [k : ().slice.call arguments 0] : glyph-construction {
