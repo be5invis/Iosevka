@@ -50,11 +50,20 @@ create-glyph 'two' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '2'
 	
-	include : twoHookUpper CAP SMOOTHB HOOK
-	include : sStrand STROKE [CAP - SMOOTHB]
-		
+	local smb : SMOOTHB * 1
+	include : spiro {
+		widths.rhs
+		g4 [SB + OXHOOK] [CAP - HOOK]
+		g4 [[mix RIGHTSB SB SBALANCE] - CORRECTION_OMIDS] CAPO
+		archv 4
+		g4 RIGHTSB [CAP - smb]
+		alsothru 0.5 0.45 [widths HALFSTROKE HALFSTROKE]
+		flat SB 1 [widths.heading STROKE 0 DOWNWARD]
+		curl SB 0 [heading DOWNWARD]
+	}
+	
 	include : create-stroke
-		:.start-from SB 0
+		:.start-from [SB + HALFSTROKE] 0
 		:.set-width  STROKE 0
 		:.heads-to   RIGHTWARD
 		:.line-to    RIGHTSB 0
@@ -66,21 +75,27 @@ create-glyph 'three' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '3'
 	
-	local threeRadius [CAPMIDDLE + HALFSTROKE - SMOOTH]
+	local barcenter : CAP * 0.51
+	local threeRadius : [CAPMIDDLE + HALFSTROKE - SMOOTH] * 1.1
 	
-	include : twoHookUpper CAP SMOOTHB HOOK
-	include : sHookLower 0 SMOOTHA HOOK
-	
-	include : create-stroke
-		:.start-from RIGHTSB [CAP - SMOOTHB]
-		:.set-width  0 STROKE
-		:.arc-vh-to  [RIGHTSB - threeRadius] [CAPMIDDLE - HALFSTROKE]
-		:.heads-to   LEFTWARD
-	include : create-stroke
-		:.start-from RIGHTSB SMOOTHA
-		:.set-width  STROKE 0
-		:.arc-vh-to  [RIGHTSB - threeRadius] [CAPMIDDLE + HALFSTROKE]
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		g4 SB [CAP - HOOK]
+		hookstart CAPO
+		g4 RIGHTSB [CAP - [SMOOTHB * [CAP - barcenter] / CAPMIDDLE]]
+#		arcvh
+		flat [RIGHTSB - threeRadius] [barcenter - HALFSTROKE] [heading LEFTWARD]
+		curl [RIGHTSB - threeRadius - 1] [barcenter - HALFSTROKE] [heading LEFTWARD]
+	}
+	include : spiro {
+		widths.lhs
+		g4 SB HOOK
+		hookstart O
+		g4 RIGHTSB [SMOOTHA * barcenter / CAPMIDDLE]
+#		arcvh
+		flat [RIGHTSB - threeRadius] [barcenter + HALFSTROKE] [heading LEFTWARD]
+		curl [RIGHTSB - threeRadius - 1] [barcenter + HALFSTROKE] [heading LEFTWARD]
+	}
 }
 
 create-glyph 'four' : glyph-construction {
@@ -116,17 +131,18 @@ create-glyph 'five' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '5'
 	
-	local ycurly : [CAP * FIVEBARPOS + STROKE] / 2 - HALFSTROKE * globalTransform.yx
+	local ycurly : mix 0 [CAP * FIVEBARPOS + HALFSTROKE] [SMOOTHA / [SMOOTHA + SMOOTHB]]
 	local xleft : SB + TBALANCE * [0.6 - globalTransform.yx * 2]
 	
-	include : sHookLower 0 ycurly HOOK
-	include : create-stroke
-		:.start-from RIGHTSB ycurly
-		:.set-width STROKE 0
-		:.arc-vh-to [MIDDLE - OMIDCOR_S] [CAP * FIVEBARPOS + STROKE]
-		:.line-to   xleft [CAP * FIVEBARPOS + STROKE]
-		:.heads-to  LEFTWARD
-	include : VBarLeft xleft [CAP * FIVEBARPOS + STROKE] CAP
+	include : spiro {
+		widths.rhs
+		flat xleft [CAP * FIVEBARPOS + HALFSTROKE] [heading RIGHTWARD]
+		curl [[mix SB RIGHTSB 0.4] - CORRECTION_OMIDS] [CAP * FIVEBARPOS + HALFSTROKE]
+		g4 RIGHTSB ycurly
+		hookend O
+		g4 SB HOOK
+	}
+	include : VBarLeft xleft [CAP * FIVEBARPOS + HALFSTROKE] CAP
 	include : HBarTop xleft [RIGHTSB - TBALANCE / 2] CAP
 }
 
@@ -167,25 +183,27 @@ create-glyph 'eight' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '8'
 	
-	local sma : SMOOTHA * 0.975
-	local smb : SMOOTHB * 0.975
+	local sma : SMOOTHA * 0.975 + CORRECTION_VS * CORRECTION_HX
+	local smb : SMOOTHB * 0.975 - CORRECTION_VS * CORRECTION_HX
 	
 	local p 0.96
 	
-	include : xsStrand [mix RIGHTSB SB p] [CAP - sma * p] RIGHTSB sma
-	include : xsStrand SB smb [mix SB RIGHTSB p] [CAP - smb * p]
-	
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB p] [CAP - smb * p]
-		:.set-width  STROKE 0
-		:.arc-vh-to  [MIDDLE - OMIDCOR_S] [CAP - O]
-		:.arc-hv-to  [mix RIGHTSB SB p] [CAP - sma * p]
-	
-	include : create-stroke
-		:.start-from SB smb
-		:.set-width  STROKE 0
-		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
-		:.arc-hv-to  RIGHTSB sma
+	include : spiro {
+		widths.lhs
+		g4 [MIDDLE - CORRECTION_OMIDS + CORRECTION_VS] [CAP - O - STROKE]
+		archv 1
+		g4 [[mix SB RIGHTSB p] - STROKE] [CAP - smb * p]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		g4 [SB + STROKE] smb [widths 0 STROKE]
+		arcvh 1
+		g4 [MIDDLE + CORRECTION_OMIDS - CORRECTION_VS] [O + STROKE]
+		archv 1
+		g4 [RIGHTSB - STROKE] sma [widths 0 STROKE]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		g4 [[mix RIGHTSB SB p] + STROKE] [CAP - sma * p] [widths STROKE 0]
+		arcvh 1
+		close
+	}
 }
 
 create-glyph 'nine' : glyph-construction {

@@ -55,7 +55,11 @@ if(argv.dumpfeature) {
 	}
 	// mark
 	var mark = ttfFont.features.mark;
-	featurefile += 'lookup markAuto {' + mark.marks.join(';\n') + ';\n' + mark.bases.join(';\n') + ';} markAuto;'
+	for(var id in mark) {
+		var lookup = mark[id];
+		var lookupName = 'markAuto_' + id;
+		featurefile += 'lookup ' + lookupName + ' {' + lookup.marks.join(';\n') + ';\n' + lookup.bases.join(';\n') + ';} ' + lookupName + ';'
+	}
 	
 	// mkmk
 	var mkmk = ttfFont.features.mkmk;

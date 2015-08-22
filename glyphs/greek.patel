@@ -97,8 +97,8 @@ create-glyph 'Xi' : glyph-construction {
 define [PiShape top bottom shrink _fine] : glyph-construction {
 	local fine : fallback _fine STROKE
 	include : HBar SB RIGHTSB [top - [fine / 2]] fine
-	include : VBar [[mix SB RIGHTSB [fallback shrink 0.05]] + [fine / 2]] bottom top fine
-	include : VBar [[mix RIGHTSB SB [fallback shrink 0.05]] - [fine / 2]] bottom top fine
+	include : VBar [[mix SB RIGHTSB [fallback shrink 0.05]] + [fine / 2]] bottom [top - fine / 2] fine
+	include : VBar [[mix RIGHTSB SB [fallback shrink 0.05]] - [fine / 2]] bottom [top - fine / 2] fine
 }
 create-glyph 'Pi' : glyph-construction {
 	assign-unicode 0x3A0
@@ -113,47 +113,45 @@ create-glyph 'pi' : glyph-construction {
 create-glyph 'Phi' : glyph-construction {
 	assign-unicode 0x3A6
 	include capitalMarks
-	local fine : adviceBlackness 3.5
 	local y1 : CAP * 0.125
 	local y2 : CAP * 0.875
 	include : VBar MIDDLE 0 [y1 + HALFSTROKE]
-	include : smallo y2 y1 SB RIGHTSB fine SMOOTHA SMOOTHB
-	include : VBar MIDDLE y1 y2 fine
+	include : smallo y2 y1 SB RIGHTSB MVERTSTROKE SMOOTHA SMOOTHB
+	include : VBar MIDDLE y1 y2 MVERTSTROKE
 	include : VBar MIDDLE [y2 - HALFSTROKE] CAP
 }
 create-glyph 'Psi' : glyph-construction {
 	assign-unicode 0x3A8
 	include capitalMarks
-	local fine : adviceBlackness 3.5
 	local y : CAP * 0.25
-	include : create-stroke
-		:.start-from SB CAP
-		:.heads-to   DOWNWARD
-		:.set-width  fine 0
-		:.line-to    SB [y + SMOOTHB]
-		:.arc-vh-to  MIDDLE y
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  RIGHTSB [y + SMOOTHA]
-		:.line-to    RIGHTSB CAP
-		:.heads-to   UPWARD
-	include : VBar MIDDLE y CAP fine
+	include : spiro {
+		widths.lhs MVERTSTROKE
+		flat SB CAP [heading DOWNWARD]
+		curl SB [y + SMOOTHB]
+		arcvh
+		g4   MIDDLE y [heading RIGHTWARD]
+		archv
+		flat RIGHTSB [y + SMOOTHA]
+		curl RIGHTSB CAP [heading UPWARD]
+	}
+	include : VBar MIDDLE y CAP MVERTSTROKE
 	include : VBar MIDDLE 0 [y + HALFSTROKE]
 }
 define [OmegaShape top sma smb ssma ssmb] : glyph-construction {
 	local fine : STROKE * 0.4
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB 0.4] STROKE
-		:.set-width  fine 0
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [SB + STROKE * ITALICCOR] [ssmb - ITALICCORS]
-		:.set-width  STROKE 0
-		:.line-to    [SB + STROKE * ITALICCOR] [top - sma - ITALICCORS]
-		:.arc-vh-to  [MIDDLE - OMIDCOR_S + ITALICCORS][top - STROKE]
-		:.arc-hv-to  [RIGHTSB - STROKE * ITALICCOR] [top - smb + ITALICCORS]
-		:.line-to    [RIGHTSB - STROKE * ITALICCOR] [ssma + ITALICCORS]
-		:.arc-vh-to  [mix RIGHTSB SB 0.4] STROKE
-		:.set-width  fine 0
-		:.heads-to   LEFTWARD
+	include : spiro {
+		g4 [mix SB RIGHTSB 0.4] STROKE [widths.heading fine 0 LEFTWARD]
+		archv
+		flat SB ssmb [widths 0 STROKE]
+		curl SB [top - sma]
+		arcvh
+		g4   [MIDDLE - CORRECTION_OMIDS] [top - O]
+		archv
+		flat RIGHTSB [top - smb]
+		curl RIGHTSB ssma
+		arcvh
+		g4   [mix RIGHTSB SB 0.4] STROKE [widths.heading fine 0 LEFTWARD]
+	}
 	include : HBar SB [mix SB RIGHTSB 0.4] HALFSTROKE
 	include : HBar [mix RIGHTSB SB 0.4] RIGHTSB HALFSTROKE
 }
@@ -168,37 +166,35 @@ create-glyph 'alpha' : glyph-construction {
 	assign-unicode 0x3B1
 	include eMarks
 	
-	local middle : mix SB RIGHTSB 0.425
-	local cx     : mix SB RIGHTSB 0.7
-	local cy     : mix 0  XH      0.3
-	local cx2    : mix SB RIGHTSB 0.625
+	local middle : mix SB RIGHTSB 0.5
 	local fine   : adviceBlackness 3.5
-	include : create-stroke
-		:.start-from [RIGHTSB - fine * ITALICCOR - O] XH
-		:.heads-to   DOWNWARD
-		:.set-width  fine 0
-		:.cubic-to   cx cy cx2 [O + STROKE] middle [O + STROKE]
-		:.set-width  STROKE 0
-		:.arc-hv-to  [SB + STROKE * ITALICCOR + O] SMALLSMOOTHB
-		:.line-to    [SB + STROKE * ITALICCOR + O] [XH - SMALLSMOOTHA]
-		:.arc-vh-to  middle [XO - STROKE]
-		:.set-width  STROKE 0
-		:.cubic-to   cx2 [XO - STROKE] cx [XH - cy] [RIGHTSB - fine * ITALICCOR - O] 0
-		:.set-width  fine 0
-		:.heads-to   DOWNWARD
+	local k1 0.25
+	local k2 0.5
+	local k3 0.35
+	include : spiro {
+		widths.rhs fine
+		g4   [RIGHTSB - O] XH [heading DOWNWARD]
+		bezcontrols k1 k2 k3 1
+		g4   [middle + CORRECTION_OMIDS] O [widths 0 STROKE]
+		flat [SB + O] SMALLSMOOTHB
+		curl [SB + O] [XH - SMALLSMOOTHA]
+		g4   [middle - CORRECTION_OMIDS] XO [widths 0 STROKE]
+		bezcontrols [1 - k3] 0 [1 - k1] [1 - k2]
+		g4   [RIGHTSB - O] 0 [widths.heading 0 fine DOWNWARD]
+	}
 }
 define [IotaShape top] : glyph-construction {
 	local middle MIDDLE
 	set-anchor 'above' BASE middle top
 	include : leftwardTopSerif middle top LONGJUT
-	include : create-stroke
-		:.start-from middle top
-		:.heads-to   DOWNWARD
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.line-to    middle HOOK
-		:.arc-vh-to  [middle + HOOK - HALFSTROKE] HALFSTROKE
-		:.line-to    [middle + LONGJUT * 1.05] HALFSTROKE
-		:.heads-to   RIGHTWARD
+	include : spiro {
+		widths.center
+		flat middle top [heading DOWNWARD]
+		curl middle HOOK
+		arcvh
+		flat [middle + HOOK - HALFSTROKE] HALFSTROKE
+		curl [middle + LONGJUT * 1.05] HALFSTROKE [heading RIGHTWARD]
+	}
 }
 create-glyph 'iota' : glyph-construction {
 	assign-unicode 0x3B9
@@ -211,7 +207,7 @@ create-glyph 'eta' : glyph-construction {
 	set-anchor 'lf' BASE [SB + HALFSTROKE] 0
 	
 	include : nShoulder [SB + STROKE] MIDDLE RIGHTSB [STROKE * 0.3] XH DESCENDER SMALLSMOOTHA SMALLSMOOTHB
-	include : VBar [SB + HALFSTROKE * ITALICCOR] 0 XH
+	include : VBar [SB + HALFSTROKE * CORRECTION_HX] 0 XH
 }
 create-glyph 'kappa' : glyph-construction {
 	set-width WIDTH
@@ -262,22 +258,27 @@ create-glyph 'beta' : glyph-construction {
 	assign-unicode 0x3B2
 	include ifMarks
 	local ymiddle : [mix 0 CAP 0.55] - HALFSTROKE
-	include : create-stroke
-		:.start-from SB DESCENDER
-		:.set-width  0 STROKE
-		:.line-to    SB [CAP - SMALLSMOOTHA]
-		:.arc-vh-to  [mix SB [RIGHTSB + O * 2] 0.5] CAPO
-		:.arc-hv-to  [RIGHTSB + O * 2] [mix CAP ymiddle 0.5]
-		:.arc-vh-to  [mix SB [RIGHTSB + O * 2] 0.5] ymiddle
-		:.line-to    [mix SB RIGHTSB 0.3] ymiddle
-	
-	include : create-stroke
-		:.start-from [RIGHTSB - ymiddle / 2 - HALFSTROKE] [ymiddle + STROKE]
-		:.set-width  0 STROKE
-		:.arc-hv-to  [RIGHTSB - O] [mix 0 [ymiddle + STROKE] 0.5]
-		:.arc-vh-to  [RIGHTSB - ymiddle / 2 - HALFSTROKE] 0
-		:.line-to    [SB + HALFSTROKE] 0
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		flat SB DESCENDER [heading UPWARD]
+		curl SB [CAP - SMALLSMOOTHA]
+		arcvh
+		g4   [mix SB [RIGHTSB + O * 2] 0.5] CAPO
+		archv
+		g4   [RIGHTSB + O * 2] [mix CAP ymiddle 0.5]
+		arcvh
+		flat [mix SB [RIGHTSB + O * 2] 0.5] ymiddle
+		curl [mix SB RIGHTSB 0.3] ymiddle
+	}
+	include : spiro {
+		widths.rhs
+		g4   [RIGHTSB - ymiddle / 2 - HALFSTROKE] [ymiddle + STROKE]
+		archv
+		g4   [RIGHTSB - O] [mix 0 [ymiddle + STROKE] 0.5]
+		arcvh
+		flat [RIGHTSB - ymiddle / 2 - HALFSTROKE] 0
+		curl [SB + HALFSTROKE] 0 [heading LEFTWARD]
+	}
 }
 
 create-glyph 'gamma' : glyph-construction {
@@ -289,7 +290,7 @@ create-glyph 'gamma' : glyph-construction {
 	local y2 0
 	local xmid : [mix SB RIGHTSB 0.46] + HALFSTROKE
 	include : create-stroke
-		:.start-from [SB + 0.4 * STROKE * ITALICCOR] XH
+		:.start-from [SB + 0.4 * STROKE * CORRECTION_HX] XH
 		:.set-width  0 STROKE
 		:.cubic-to   x0 y0 xmid y1 xmid y2
 		:.heads-to   DOWNWARD
@@ -310,47 +311,56 @@ create-glyph 'delta' : glyph-construction {
 	assign-unicode 0x3B4
 	include bMarks
 	
-	local xNeck : mix SB RIGHTSB 0.125
+	local xNeck : mix SB RIGHTSB 0.07
 	local bar : mix 0 XH 0.96
 	local xOTLeft : mix SB RIGHTSB 0.5
 	local fine : STROKE * 0.5
 	
-	include : create-stroke
-		:.start-from [mix MIDDLE RIGHTSB 0.85] [mix XH CAP 0.8]
-		:.heads-to   LEFTWARD
-		:.set-width  STROKE 0
-		:.curve-to   [mix MIDDLE RIGHTSB 0.66] CAPO MIDDLE CAPO
-		:.arc-hv-to  xNeck [mix CAPO [bar - STROKE] 0.5]
-		:.arc-vh-to  xOTLeft [bar - STROKE]
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  [RIGHTSB - STROKE * ITALICCOR - O] [bar - SMALLSMOOTHB]
-		:.line-to    [RIGHTSB - STROKE * ITALICCOR - O] SMALLSMOOTHA
-		:.arc-vh-to  MIDDLE [STROKE + O]
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [SB + STROKE * ITALICCOR] SMALLSMOOTHB
-		:.line-to    [SB + STROKE * ITALICCOR] [bar - SMALLSMOOTHA]
-		:.arc-vh-to  xOTLeft [bar - STROKE]
-		:.set-width  fine 0
+	local sma : SMALLSMOOTHA * bar / XH
+	local smb : SMALLSMOOTHB * bar / XH
+	
+	include : spiro {
+		widths.rhs
+		g4   [mix MIDDLE RIGHTSB 0.85] [[mix XH CAP 0.8] - STROKE] [heading LEFTWARD]
+		alsothru 0.5 0.7
+		g4   MIDDLE [CAPO - STROKE]
+		archv 2
+		g4   [xNeck + STROKE] [mix [CAPO - STROKE] bar 0.5]
+		arcvh 2
+		g4   xOTLeft bar [heading RIGHTWARD]
+		alsothruthem : list (0.25 0.06) (0.5 0.13)
+		flat [RIGHTSB - O] [bar - smb]
+		curl [RIGHTSB - O] sma
+		arcvh 16
+		g4   [MIDDLE + CORRECTION_OMIDS] O
+		archv
+		flat [SB + O] smb
+		curl [SB + O] [bar - sma]
+		arcvh
+		g4   xOTLeft [bar - [STROKE - fine] / 2] [widths 0 fine]
+	}
 }
 define [SmallEpsilonShape top hook] : glyph-construction {
 	local midx : mix SB RIGHTSB 0.65
 	local midy : top * BARPOS
 	local sma : top - [mix [midy + HALFSTROKE] [top - O - STROKE] [SMOOTHB / [SMOOTHA + SMOOTHB]]]
 	local smb : mix [STROKE + O] [midy - HALFSTROKE] [SMOOTHB / [SMOOTHA + SMOOTHB]]
-	include : sHookUpper top sma [fallback hook SHOOK]
-	include : EHookLower 0 smb [fallback hook SHOOK] nothing nothing 0
-	include : create-stroke
-		:.start-from SB [top - sma]
-		:.set-width  STROKE 0
-		:.arc-vh-to  MIDDLE [midy - HALFSTROKE] KAPPA
-		:.line-to    midx [midy - HALFSTROKE]
-		:.heads-to   RIGHTWARD
-	include : create-stroke
-		:.start-from SB smb
-		:.set-width  0 STROKE
-		:.arc-vh-to  MIDDLE [midy + HALFSTROKE] KAPPA
-		:.line-to    midx [midy + HALFSTROKE]
-		:.heads-to   RIGHTWARD
+	include : spiro {
+		widths.lhs
+		g4 RIGHTSB [top - [fallback hook SHOOK]]
+		hookstart top
+		g4 SB [top - sma]
+		flat MIDDLE [midy - HALFSTROKE]
+		curl midx [midy - HALFSTROKE] [heading RIGHTWARD]
+	}
+	include : spiro {
+		widths.rhs
+		g4 RIGHTSB [fallback hook SHOOK]
+		hookstart 0
+		g4 SB smb
+		flat MIDDLE [midy + HALFSTROKE]
+		curl midx [midy + HALFSTROKE] [heading RIGHTWARD]
+	}
 }
 create-glyph 'epsilon' : glyph-construction {
 	assign-unicode 0x3B5
@@ -361,15 +371,19 @@ create-glyph 'zeta' : glyph-construction {
 	assign-unicode 0x3B6
 	include ifMarks
 	include : HBar SB [RIGHTSB + O] [CAP - HALFSTROKE]
-	include : create-stroke
-		:.start-from [RIGHTSB + O] [CAP - STROKE]
-		:.set-width  0 STROKE
-		:.cubic-to   [mix SB RIGHTSB 0.3] [mix 0 CAP 0.66] [SB + STROKE * ITALICCOR] [mix 0 CAP 0.4] [SB + STROKE * ITALICCOR] [mix 0 CAP 0.25]
-		:.arc-vh-to  [mix SB RIGHTSB 0.5] STROKE
-		:.arc-hv-to  RIGHTSB [mix DESCENDER STROKE 0.5]
-		:.arc-vh-to  [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] DESCENDER
-		:.line-to    [mix SB RIGHTSB 0.5] DESCENDER
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		g4 [RIGHTSB + O] [CAP - STROKE]
+		bezcontrols 0.7 0.37 1 0.62
+		g4 [SB + STROKE * CORRECTION_HX] [mix 0 CAP 0.27]
+		alsothru 0.5 0.8
+		g4 [mix SB RIGHTSB 0.5] STROKE
+		alsothru 0.5 0.135
+		g4 RIGHTSB [mix DESCENDER STROKE 0.5]
+		#arcvh
+		flat [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] DESCENDER
+		curl [mix SB RIGHTSB 0.5] DESCENDER [heading LEFTWARD]
+	}
 }
 create-glyph 'xi' : glyph-construction {
 	assign-unicode 0x3BE
@@ -378,20 +392,27 @@ create-glyph 'xi' : glyph-construction {
 	
 	local xbar : mix SB RIGHTSB 0.85
 	local ybar : mix 0 CAP 0.55
-	include : create-stroke
-		:.start-from xbar [CAP - STROKE]
-		:.set-width  0 STROKE
-		:.arc-hv-to  [SB - O * 2 + STROKE * ITALICCOR] [mix [CAP - STROKE] ybar 0.6]
-		:.arc-vh-to  xbar ybar
-	include : create-stroke
-		:.start-from xbar [ybar - STROKE]
-		:.set-width  0 STROKE
-		:.cubic-to   [mix SB RIGHTSB 0.3] [ybar - STROKE] [SB + STROKE * ITALICCOR] [mix 0 ybar 0.65] [SB + STROKE * ITALICCOR] [mix 0 ybar 0.45]
-		:.arc-vh-to  [mix SB RIGHTSB 0.5] STROKE
-		:.arc-hv-to  RIGHTSB [mix DESCENDER STROKE 0.5]
-		:.arc-vh-to  [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] DESCENDER
-		:.line-to    [mix SB RIGHTSB 0.5] DESCENDER
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.rhs
+		g4 xbar [CAP - STROKE]
+		archv
+		g4 [SB - O * 2 + STROKE * CORRECTION_HX] [mix [CAP - STROKE] ybar 0.6]
+		arcvh
+		g4 xbar ybar
+	}
+	include : spiro {
+		widths.rhs
+		g4 xbar [ybar - STROKE]
+		bezcontrols 0.7 0 1 0.63
+		g4 [SB + STROKE * CORRECTION_HX] [mix 0 ybar 0.45]
+		arcvh
+		g4 [mix SB RIGHTSB 0.5] STROKE
+		archv
+		g4 RIGHTSB [mix DESCENDER STROKE 0.5]
+		arcvh
+		flat [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] DESCENDER
+		curl [mix SB RIGHTSB 0.5] DESCENDER [heading LEFTWARD]
+	}
 }
 create-glyph 'nu' : glyph-construction {
 	assign-unicode 0x3BD
@@ -403,7 +424,7 @@ create-glyph 'nu' : glyph-construction {
 	local y2 0
 	local xmid : MIDDLE + HALFSTROKE * 0.75
 	include : create-stroke
-		:.start-from [SB + 0.4 * STROKE * ITALICCOR] XH
+		:.start-from [SB + 0.4 * STROKE * CORRECTION_HX] XH
 		:.set-width  0 STROKE
 		:.cubic-to   x0 y0 xmid y1 xmid y2
 		:.heads-to   DOWNWARD
@@ -420,29 +441,34 @@ create-glyph 'nu' : glyph-construction {
 create-glyph 'sigmafinal' : glyph-construction {
 	assign-unicode 0x3C2
 	include pMarks
-	include : XSHookUpper XH [SB + O] MIDDLE RIGHTSB SMALLSMOOTHA SHOOK
-	include : create-stroke
-		:.start-from [SB + O + STROKE * ITALICCOR] [XH - SMALLSMOOTHA]
-		:.set-width  0 STROKE
-		:.line-to    [SB + O + STROKE * ITALICCOR] SMALLSMOOTHB
-		:.arc-vh-to  [mix SB RIGHTSB 0.5] STROKE
-		:.arc-hv-to  RIGHTSB [mix DESCENDER STROKE 0.5]
-		:.arc-vh-to  [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] DESCENDER
-		:.line-to    [mix SB RIGHTSB 0.5] DESCENDER
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.lhs
+		g4 RIGHTSB [XH - HOOK]
+		hookstart XH
+		flat SB [XH - SMALLSMOOTHA]
+		curl SB SMALLSMOOTHB
+		alsothru 0.4 0.8
+		g4 MIDDLE 0
+		alsothru 0.5 0.135
+		g4 [RIGHTSB - STROKE * CORRECTION_HX] [mix DESCENDER STROKE 0.5]
+		arcvh
+		flat [RIGHTSB - [STROKE - [mix DESCENDER STROKE 0.5]] * 1.1] [DESCENDER + STROKE]
+		curl MIDDLE [DESCENDER + STROKE] [heading LEFTWARD]
+	}
 }
 create-glyph 'upsilon' : glyph-construction {
 	assign-unicode 0x3C5
 	include eMarks
-	include : create-stroke
-		:.start-from SB XH
-		:.heads-to   DOWNWARD
-		:.set-width  STROKE 0
-		:.line-to    SB SMALLSMOOTHB
-		:.arc-vh-to  [MIDDLE + OMIDCOR_S] O
-		:.arc-hv-to  RIGHTSB SMALLSMOOTHA
-		:.line-to    RIGHTSB XH
-		:.heads-to   UPWARD
+	include : spiro {
+		widths.lhs
+		flat SB XH [heading DOWNWARD]
+		curl SB SMALLSMOOTHB
+		arcvh
+		g4   [MIDDLE + CORRECTION_OMIDS] O
+		archv
+		flat RIGHTSB SMALLSMOOTHA
+		curl RIGHTSB XH [heading UPWARD]
+	}
 }
 create-glyph 'tau' : glyph-construction {
 	assign-unicode 0x3C4
@@ -454,106 +480,114 @@ create-glyph 'rho' : glyph-construction {
 	assign-unicode 0x3C1
 	include pMarks
 	include glyphs.o
-	include : VBar [SB + HALFSTROKE * ITALICCOR + O] DESCENDER SMALLSMOOTHB
+	include : VBar [SB + HALFSTROKE * CORRECTION_HX + O] DESCENDER SMALLSMOOTHB
 }
 create-glyph 'sigma' : glyph-construction {
 	assign-unicode 0x3C3
 	include eMarks
 	start-from [RIGHTSB + 0.25 * SB] XH
 	line-to    [RIGHTSB + 0.25 * SB] [XH - STROKE]
-	line-to    MIDDLE  [XH - STROKE - O]
+	line-to    MIDDLE  [XH - STROKE - O * 1.5]
 	line-to    MIDDLE  [XH - O]
-	include : create-stroke
-		:.start-from MIDDLE [XH - STROKE - O]
-		:.heads-to   LEFTWARD
-		:.set-width  0 STROKE
-		:.arc-hv-to  [SB + STROKE * ITALICCOR + O] [XH - SMALLSMOOTHA]
-		:.line-to    [SB + STROKE * ITALICCOR + O] SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE [STROKE + O]
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  [RIGHTSB - STROKE * ITALICCOR + O] SMALLSMOOTHA
-		:.line-to    [RIGHTSB - STROKE * ITALICCOR + O] [XH - SMALLSMOOTHB]
-		:.arc-vh-to  MIDDLE [XH - STROKE - O]
-		:.set-width  0 [STROKE * 0.5]
+	include : spiro {
+		widths.lhs
+		flat [MIDDLE + 1] [XH - O]
+		curl MIDDLE [XH - O]
+		archv
+		flat SB [XH - SMALLSMOOTHA]
+		curl SB SMALLSMOOTHB
+		arcvh
+		g4   [MIDDLE + CORRECTION_OMIDS] O
+		archv
+		flat RIGHTSB SMALLSMOOTHA
+		curl RIGHTSB [XH - SMALLSMOOTHB]
+		arcvh
+		flat MIDDLE [XH - HALFSTROKE - O] [widths HALFSTROKE 0]
+		curl [MIDDLE - 1] [XH - HALFSTROKE - O]
+	}
 }
 create-glyph 'omega' : glyph-construction {
 	assign-unicode 0x3C9
 	include eMarks
 	local fine : adviceBlackness 3.25
-	local x0 : [mix SB RIGHTSB 0.1] + fine
+	local x0 : mix SB RIGHTSB 0.1
 	local y0 : XH - STROKE * 0.2
 	local y1 : mix 0 XH 0.8
-	local x1 : SB + fine * ITALICCOR + O
+	local x1 : SB + O *2
 	local y3 : XH / 2
 	local y4 : XH * 0.65
 	
-	include : create-stroke
-		:.start-from x0 y0
-		:.set-width  0 fine
-		:.curve-to   x1 y1 x1 [XH / 2]
-		:.arc-vh-to  [mix x1 [MIDDLE - fine / 2] 0.5] [fine + O]
-		:.arc-hv-to  [MIDDLE - fine / 2] y3
-		:.line-to    [MIDDLE - fine / 2] y4
-		:.heads-to   UPWARD
-	
-	include : create-stroke
-		:.start-from [WIDTH - x0] [y0 + TAILADJY * globalTransform.yx]
-		:.set-width  fine 0
-		:.curve-to   [WIDTH - x1] y1 [WIDTH - x1] [XH / 2]
-		:.arc-vh-to  [mix [WIDTH - x1] [MIDDLE + fine / 2] 0.5] [fine + O]
-		:.arc-hv-to  [MIDDLE + fine / 2] y3
-		:.line-to    [MIDDLE + fine / 2] y4
-		:.heads-to   UPWARD
+	include : spiro {
+		widths.lhs fine
+		g4 x0 y0
+		g4 x1 [XH / 2]
+		arcvh 8
+		g4 [mix x1 [MIDDLE + fine / 2] 0.5] O [heading RIGHTWARD]
+		archv 8
+		flat [MIDDLE + fine / 2] y3
+		curl [MIDDLE + fine / 2] y4 [heading UPWARD]
+	}
+	include : spiro {
+		widths.rhs fine
+		g4 [WIDTH - x0] y0
+		g4 [WIDTH - x1] [XH / 2]
+		arcvh 8
+		g4 [mix [WIDTH - x1] [MIDDLE - fine / 2] 0.5] O [heading LEFTWARD]
+		archv 8
+		flat [MIDDLE - fine / 2] y3
+		curl [MIDDLE - fine / 2] y4 [heading UPWARD]
+	}
 }
 
 create-glyph 'varphi' : glyph-construction {
 	assign-unicode 0x3D5
 	include ifMarks
-	local fine : adviceBlackness 3.5
 	local y1 0
 	local y2 XH
 	include : VBar MIDDLE DESCENDER [y1 + HALFSTROKE]
-	include : smallo y2 y1 SB RIGHTSB fine
-	include : VBar MIDDLE y1 y2 fine
+	include : smallo y2 y1 SB RIGHTSB MVERTSTROKE
+	include : VBar MIDDLE y1 y2 MVERTSTROKE
 	include : VBar MIDDLE [y2 - HALFSTROKE] CAP
 }
 create-glyph 'phi' : glyph-construction {
 	assign-unicode 0x3C6
 	include pMarks
-	local fine : adviceBlackness 3.25
-	local x0 : [mix SB RIGHTSB 0.1] + fine
-	local y0 : XH - STROKE * 0.2
+	local x0 : mix SB RIGHTSB 0.1
 	local y1 : mix 0 XH 0.75
-	local x1 : SB + fine * ITALICCOR + O * 2
-	local y3 : XH / 2
+	local x1 : SB + O * 2
+	local y3 : XH * 0.66
 	local y4 : XH * 0.65
-	
-	include : create-stroke
-		:.start-from x0 y0
-		:.set-width  0 fine
-		:.curve-to   x1 y1 x1 [XH / 2]
-		:.arc-vh-to  MIDDLE [fine + O]
-		:.arc-hv-to  [WIDTH - x1] [XH / 2]
-		:.arc-vh-to  [mix [WIDTH - x1] [MIDDLE + fine / 2] 0.5] [XH - fine - O]
-		:.arc-hv-to  [MIDDLE + fine / 2] y3
-		:.line-to    [MIDDLE + fine / 2] 0
-	include : VBar MIDDLE DESCENDER [fine * 0.2]
+	include : spiro {
+		widths.lhs MVERTSTROKE
+		g4 x0 XH
+		g4 x1 [XH / 2]
+		arcvh
+		g4 [MIDDLE + CORRECTION_OMIDS] O
+		archv
+		g4 [WIDTH - x1] [XH / 2]
+		arcvh 8
+		g4 [mix [WIDTH - x1] [MIDDLE - MVERTSTROKE / 2] 0.6] XH [heading (.x 0.1 .y [-1])]
+		archv
+		flat [MIDDLE - MVERTSTROKE / 2] y3
+		curl [MIDDLE - MVERTSTROKE / 2] 0
+	}
+	include : VBar MIDDLE DESCENDER [MVERTSTROKE * 0.2]
 }
 
 create-glyph 'psi' : glyph-construction {
 	assign-unicode 0x3C8
 	include ifMarks
 	local fine : adviceBlackness 3.5
-	include : create-stroke
-		:.start-from SB XH
-		:.heads-to   DOWNWARD
-		:.set-width  fine 0
-		:.line-to    SB SMALLSMOOTHB
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   RIGHTWARD
-		:.arc-hv-to  RIGHTSB SMALLSMOOTHA
-		:.line-to    RIGHTSB XH
-		:.heads-to   UPWARD
+	include : spiro {
+		widths.lhs fine
+		flat SB XH [heading DOWNWARD]
+		curl SB SMALLSMOOTHB
+		arcvh
+		g4   MIDDLE O [heading RIGHTWARD]
+		archv
+		flat RIGHTSB SMALLSMOOTHA
+		curl RIGHTSB XH [heading UPWARD]
+	}
 	include : VBar MIDDLE 0 CAP fine
 	include : VBar MIDDLE DESCENDER HALFSTROKE
 }

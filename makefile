@@ -1,10 +1,10 @@
-SUPPORT_FILES = support/glyph.js support/stroke.js parameters.js generate.js empty.json
+SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js generate.js empty.json
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 OBJDIR = build
 
 SUPPRESS_ERRORS = 2> /dev/null
 
-TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf
+TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
@@ -26,6 +26,14 @@ $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
 	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-italic.ab.fea
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
 	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bolditalic.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-regular.ttf : $(FILES) | $(OBJDIR)
+	node generate regularCC $@ --dumpmap $(OBJDIR)/iosevkacc-regular.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-regular.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-bold.ttf : $(FILES) | $(OBJDIR)
+	node generate boldCC $@ --dumpmap $(OBJDIR)/iosevkacc-bold.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bold.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-italic.ttf : $(FILES) | $(OBJDIR)
+	node generate italicCC $@ --dumpmap $(OBJDIR)/iosevkacc-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-italic.ab.fea
+$(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
+	node generate bolditalicCC $@ --dumpmap $(OBJDIR)/iosevkacc-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bolditalic.ab.fea
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
@@ -34,10 +42,10 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
-	fontforge -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
+	fontforge -quiet -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
 # Pass 2 : Curve simplification
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
-	fontforge -script pass2-finalize.py $^ $@
+	fontforge -quiet -script pass2-finalize.py $^ $@
 # Pass 3 : Simplify and output
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	ttfautohint $< $@
@@ -45,12 +53,13 @@ $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 update : $(FILES)
 
 $(SUPPORT_FILES) :
-	patel-c $< -o $@ --strict
+	patel-c --strict $< -o $@
 
 buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
 	patel-c --strict $< -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
+support/spiroexpand.js : support/spiroexpand.patel
 parameters.js : parameters.patel
 
 $(OBJDIR) :
@@ -58,6 +67,7 @@ $(OBJDIR) :
 
 cleartemps :
 	-rm $(PASS0) $(PASS1)
+pass0 : $(PASS0)
 
 test : $(TARGETS)
 	cp $(TARGETS) $(MAPS) testdrive/

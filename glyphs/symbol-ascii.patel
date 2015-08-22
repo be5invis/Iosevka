@@ -28,34 +28,32 @@ create-glyph 'ampersand' : glyph-construction {
 	local r 1.1
 	local s 0
 	
-	include : create-stroke
-		:.start-from [RIGHTSB - O] CAPMIDDLE
-		:.set-width  0 STROKE
-		:.heads-to   DOWNWARD
-		:.line-to    [RIGHTSB - O] SMOOTHA
-		:.arc-vh-to  MIDDLE O
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [SB + O] SMOOTHB
-
-	include : xsStrand [SB + O] SMOOTHB [mix SB RIGHTSB p] [CAP - SMOOTHB * pr] HALFSTROKE [fine / 2]
-
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB p] [CAP - SMOOTHB * pr]
-		:.set-width  fine 0
-		:.arc-vh-to  [mix SB RIGHTSB [mix p l 0.5]] CAPO
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  [mix SB RIGHTSB l] [CAP - SMOOTHA * pr]
-		
-	include : xsStrand [mix SB RIGHTSB l] [CAP - SMOOTHA * pr] [mix SB RIGHTSB r] [SMOOTHA * s] [fine / 2] [fine / 2] null null [SMOOTHA * pr * 0.6]
-
+	include : spiro {
+		widths.lhs
+		flat [RIGHTSB - O - STROKE * CORRECTION_HX] CAPMIDDLE [heading DOWNWARD]
+		curl [RIGHTSB - O - STROKE * CORRECTION_HX] [SMOOTHA + CORRECTION_HX * CORRECTION_VS]
+		arcvh
+		g4   MIDDLE [O + fine] [widths fine 0]
+		archv
+		g4   [SB + O + fine * CORRECTION_HX] [SMOOTHB - CORRECTION_HX * CORRECTION_VS]
+		alsothru 0.5 0.5 [widths [fine / 2] [fine / 2]]
+		g4   [[mix SB RIGHTSB p] - fine * CORRECTION_HX] [CAP - SMOOTHB * pr + CORRECTION_HX * CORRECTION_VS * [fine / STROKE]] [widths 0 fine]
+		arcvh
+		g4   [[mix SB RIGHTSB [mix p l 0.5]] - CORRECTION_OMIDS + CORRECTION_VS] [CAPO - fine]
+		archv
+		g4   [[mix SB RIGHTSB l] + fine * CORRECTION_HX] [CAP - SMOOTHA * pr - CORRECTION_HX * CORRECTION_VS * [fine / STROKE]]
+		alsothru 0.5 0.45 [lambda]
+		flat [mix SB RIGHTSB r] [SMOOTHA * s]
+		curl [mix SB RIGHTSB r] [[SMOOTHA * s] - 1]
+	}
 }
 
 create-glyph 'at' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '@'
 	
-	local top [CAP + HALFSTROKE]
-	local bot [DESCENDER + HALFSTROKE]
+	local top parenTop
+	local bot parenBot
 	local otop : mix bot top 0.75
 	local obot : mix top bot 0.8
 
@@ -66,26 +64,27 @@ create-glyph 'at' : glyph-construction {
 	local sma : SMOOTHA * [[RIGHTSB - m1] / [RIGHTSB - SB] * 1.1]
 	local smb : SMOOTHB * [[RIGHTSB - m1] / [RIGHTSB - SB] * 1.1]
 	
-	include : create-stroke
-		:.start-from RIGHTSB [otop - O]
-		:.heads-to  LEFTWARD
-		:.set-width sw 0
-		:.line-to   m2 [otop - O]
-		:.arc-hv-to m1 [otop - sma]
-		:.line-to   m1 [obot + smb]
-		:.arc-vh-to m2 [obot + O]
-		:.arc-hv-to RIGHTSB [obot + sma]
-		:.line-to   RIGHTSB [top - SMOOTHB]
-		:.arc-vh-to MIDDLE [top - O]
-		:.heads-to  LEFTWARD
-		:.set-width STROKE 0
-		:.arc-hv-to SB [top - SMOOTHA]
-		:.set-width sw 0
-		:.line-to   SB [bot + SMOOTHB]
-		:.arc-vh-to MIDDLE [bot + O]
-		:.set-width STROKE 0
-		:.heads-to  RIGHTWARD
-		:.line-to   [RIGHTSB - HALFSTROKE + globalTransform.yx * sw] [bot + O]
+	include : spiro {
+		widths.lhs sw
+		flat RIGHTSB [otop - O] [heading LEFTWARD]
+		curl m2 [otop - O]
+		archv
+		flat m1 [otop - sma]
+		curl m1 [obot + smb]
+		arcvh
+		g4   m2 [obot + O]
+		archv
+		flat RIGHTSB [obot + sma]
+		curl RIGHTSB [top - SMOOTHB]
+		arcvh
+		g4   [MIDDLE - CORRECTION_OMIDS] [top - O] [widths STROKE 0]
+		archv
+		flat SB [top - SMOOTHA] [widths sw 0]
+		curl SB [bot + SMOOTHB]
+		arcvh
+		flat [MIDDLE + CORRECTION_OMIDS] [bot + O] [widths STROKE 0 ]
+		curl [RIGHTSB - HALFSTROKE + globalTransform.yx * sw] [bot + O]
+	}
 }
 
 ### Brackets
@@ -102,12 +101,14 @@ create-glyph 'parenLeft' : glyph-construction {
 	assign-unicode '('
 	
 	local p 0.6
-
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB parenInside] parenTop
-		:.set-width  STROKE 0
-		:.curve-to   [mix SB RIGHTSB parenOutside] [mix parenMid parenTop p] [mix SB RIGHTSB parenOutside] parenMid
-		:.curve-to   [mix SB RIGHTSB parenOutside] [mix parenMid parenBot p] [mix SB RIGHTSB parenInside] parenBot
+	include : spiro {
+		widths.lhs
+		g4 [mix SB RIGHTSB parenInside] parenTop
+		quadcontrols 1 [1 - p]
+		g4 [mix SB RIGHTSB parenOutside] parenMid
+		quadcontrols 0 p
+		g4 [mix SB RIGHTSB parenInside] parenBot
+	}
 }
 
 create-glyph 'parenRight' : glyph-construction {
@@ -239,9 +240,16 @@ create-glyph 'semicolon' : glyph-construction {
 create-glyph 'question' : glyph-construction {
 	set-width WIDTH
 	assign-unicode '?'
-	include : xsStrand [MIDDLE - HALFSTROKE * ITALICCOR] [mix [DOTSIZE + STROKE] [XH / 2] 0.5] RIGHTSB [CAP - SMOOTHB]
-	include : twoHookUpper CAP SMOOTHB HOOK
 	include : list : Ring [DOTSIZE - O] O [MIDDLE - DOTRADIUS + O] [MIDDLE + DOTRADIUS - O] true
+	include : spiro {
+		widths.rhs
+		g4 SB [CAP - HOOK]
+		hookstart CAPO
+		g4 RIGHTSB [CAP - SMOOTHB * 0.85]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		flat [MIDDLE - HALFSTROKE * CORRECTION_HX] [mix [DOTSIZE + STROKE] [XH / 2] 0.5] [widths STROKE 0]
+		curl [MIDDLE - HALFSTROKE * CORRECTION_HX] [[mix [DOTSIZE + STROKE] [XH / 2] 0.5] - 1]
+	}
 }
 create-glyph 'exclam' : glyph-construction {
 	set-width WIDTH
@@ -351,14 +359,14 @@ create-glyph 'less' : glyph-construction {
 		:.set-width   [OPERATORSTROKE / 2] [OPERATORSTROKE / 2]
 		:.line-to     SB [mix top bot 0.5]
 		:.heads-to    LEFTWARD
-		:.set-samples 1
+		:.max-samples 1
 	
 	include : create-stroke
 		:.start-from  SB [mix top bot 0.5]
 		:.set-width   [OPERATORSTROKE / 2] [OPERATORSTROKE / 2]
 		:.heads-to    RIGHTWARD
 		:.line-to     RIGHTSB bot
-		:.set-samples 1
+		:.max-samples 1
 }
 
 create-glyph 'greater' : glyph-construction {
@@ -414,7 +422,7 @@ create-glyph 'asterisk' : glyph-construction {
 			:.set-width   fine fine
 			:.line-to     [MIDDLE + radius * [Math.sin [j / 5 * Math.PI * 2]]] [centery + radius * [Math.cos [j / 5 * Math.PI * 2]]]
 			:.set-width   final final
-			:.set-samples 1
+			:.max-samples 1
 	}
 }
 

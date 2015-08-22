@@ -1,9 +1,10 @@
 exports.transformPoint = function(tfm, pt){
 	return {
+		onCurve: pt.onCurve || false,
+		cubic: pt.cubic || false,
+		subdivided: pt.subdivided || false,
 		x : pt.x * tfm.xx + pt.y * tfm.yx + tfm.x,
-		y : pt.x * tfm.xy + pt.y * tfm.yy + tfm.y,
-		onCurve: pt.onCurve,
-		cubic: pt.cubic
+		y : pt.x * tfm.xy + pt.y * tfm.yy + tfm.y
 	}
 }
 exports.inverse = function(tfm){
@@ -22,9 +23,10 @@ exports.untransform = function(tfm, pt){
 	var yy = pt.y - tfm.y
 	var denom = tfm.xx * tfm.yy - tfm.xy * tfm.yx
 	return {
+		onCurve: pt.onCurve || false,
+		cubic: pt.cubic || false,
+		subdivided: pt.subdivided || false,
 		x : (xx * tfm.yy - yy * tfm.yx) / denom,
-		y : (yy * tfm.xx - xx * tfm.xy) / denom,
-		onCurve: pt.onCurve,
-		cubic: pt.cubic
+		y : (yy * tfm.xx - xx * tfm.xy) / denom
 	}
 }

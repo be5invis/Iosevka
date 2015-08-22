@@ -99,7 +99,7 @@ define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _exp
 		:.start-from _xleft yleft
 		:.set-width  [2 * halfstroke0] 0
 		:.line-to    _xleft [yleft - 1000]
-		:.set-samples 1
+		:.max-samples 1
 		:.to-outline].0.map : [p] -> [tp upright p]
 	local xItalicCorrection : -[outline.3.x - outline.0.x] / [2 * halfstroke0]
 	local yItalicCorrection : [outline.3.y - outline.0.y] / [2 * halfstroke0]
@@ -130,7 +130,7 @@ define [sStrand yleft yright _expansion] : begin {
 }
 
 define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : begin {
-	local leftx : _leftx + [HALFSTROKE * ITALICCOR * [if [rightx > _leftx] 1 [-1]]]
+	local leftx : _leftx + [HALFSTROKE * CORRECTION_HX * [if [rightx > _leftx] 1 [-1]]]
 	local fine  : [_fine || STROKE] * 0.5
 	
 	local turnyleft : mix lefty righty turn
@@ -159,30 +159,45 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : begin {
 	return : halfXStrand _leftx lefty middlex middley turn straight tension
 	       :.concat : halfXStrand _rightx righty middlex middley turn straight tension
 }
-
-define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : begin {
+define [nShoulderKnots left middle right fine _top _bottom _sma _smb _wide] : begin {
 	local top : fallback _top XH
 	local bottom : fallback _bottom 0
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
 	local stroke : fallback _wide STROKE
-	local band : new Stroke
-		:.set-transform globalTransform
-		:.start-from right bottom
-		:.heads-to   UPWARD
-		:.set-width  stroke 0
-		:.line-to    right [top - smb]
-		:.arc-vh-to  middle [top - O]
-		:.heads-to   LEFTWARD
-		:.to-outline
-	local shoulder : new Stroke
-		:.set-transform globalTransform
-		:.start-from middle [top - O - stroke]
-		:.arc-hv-to  left [top - sma]
-		:.line-to    [left - fine] [top - sma]
-		:.arc-vh-to  middle [top - O]
+	return : list {
+		flat left [top - sma - 2] [widths fine 0]
+		curl left [top - sma]
+		arcvh
+		g4   middle [top - O] [widths.heading 0 stroke RIGHTWARD]
+		archv
+		flat right [top - smb]
+		curl right bottom [heading DOWNWARD]
+	}
+}
+define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : let [a arguments] : glyph-construction {
+	include : spiro : nShoulderKnots.apply null a
+}
 
-	return : band.concat (shoulder.points)
+define [mShoulderSpiro left right top bottom width fine] : glyph-construction {
+	local fix : CORRECTION_VS * CORRECTION_HX * width / STROKE
+	include : spiro-outline {
+		corner [right - width * CORRECTION_HX] bottom
+		curl   [right - width * CORRECTION_HX] [top - SMALLSMOOTHB + fix]
+		arcvh 8 'no-tiny'
+		g2     [mix left [right - width * CORRECTION_HX] 0.5] [top - O - width]
+		archv 8 'no-tiny'
+		flat   left [top - SMALLSMOOTHA - fix]
+		corner left [top - SMALLSMOOTHA - fix - 1]
+		corner [left - fine] [top - SMALLSMOOTHA - 1]
+		curl   [left - fine] [top - SMALLSMOOTHA]
+		arcvh 8 'no-tiny'
+		g2     [mix [left - fine * CORRECTION_HX] right 0.5] [top - O]
+		archv 8 'no-tiny'
+		flat   right [top - SMALLSMOOTHB]
+		corner right bottom
+		close
+	}
 }
 
 define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construction {
@@ -192,7 +207,7 @@ define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construc
 		:.set-transform globalTransform
 		:.start-from [right - OXHOOK] [top - hook]
 		:.set-width [if [left < right] stroke 0] [if [left < right] 0 stroke]
-		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - OMIDCOR_S] [top - O]
+		:.curve-to [mix middle right KAPPA_HOOK] [top - O] [middle - CORRECTION_OMIDS] [top - O]
 		:.arc-hv-to left [top - smooth]
 }
 define [sHookUpper top smooth hook _middle _stroke] : XSHookUpper top SB _middle RIGHTSB smooth hook _stroke
@@ -205,7 +220,7 @@ define [XSHookLower bottom left _middle right smooth hook _stroke] : glyph-const
 		:.set-transform globalTransform
 		:.start-from right [bottom + smooth]
 		:.set-width [if [left < right] 0 stroke] [if [left < right] stroke 0]
-		:.arc-vh-to [middle + OMIDCOR_S] [bottom + O]
+		:.arc-vh-to [middle + CORRECTION_OMIDS] [bottom + O]
 		:.curve-to [mix middle left KAPPA_HOOK] [bottom + O] [left + OXHOOK] [bottom + hook]
 }
 define [sHookLower bottom smooth hook _middle _stroke] : XSHookLower bottom SB _middle RIGHTSB smooth hook _stroke
@@ -218,31 +233,39 @@ define [smallo u d l r _width _sma _smb] : glyph-construction {
 	local width : fallback _width STROKE
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
-	local mc : OMIDCOR * width
+	local mc : CORRECTION_OMIDX * width
 	if [u - d > sma + smb] {
 		then : begin {
-			include : create-stroke
-				:.set-transform globalTransform
-				:.start-from [middle - mc] [u - O]
-				:.set-width width 0
-				:.arc-hv-to [l + O] [u - sma]
-				:.line-to  [l + O] [d + smb]
-				:.arc-vh-to [middle + mc] [d + O]
-				:.arc-hv-to [r - O] [d + sma]
-				:.line-to  [r - O] [u - smb]
-				:.arc-vh-to [middle - mc] [u - O]
+			include : spiro {
+				prepare : widths width 0
+				g4 [middle - mc] [u - O]
+				archv
+				flat [l + O] [u - sma]
+				curl [l + O] [d + smb]
+				arcvh
+				g4 [middle + mc] [d + O]
+				archv
+				flat [r - O] [d + sma]
+				curl [r - O] [u - smb]
+				arcvh
+				close
+			}
 		}
 		else : begin {
 			local ymiddlea : mix d u [smb / [sma + smb]]
 			local ymiddleb : mix d u [sma / [sma + smb]]
-			include : create-stroke
-				:.set-transform globalTransform
-				:.start-from [middle - mc] [u - O]
-				:.set-width width 0
-				:.arc-hv-to [l + O] ymiddlea
-				:.arc-vh-to [middle + mc] [d + O]
-				:.arc-hv-to [r - O] ymiddleb
-				:.arc-vh-to [middle - mc] [u - O]
+			include : spiro {
+				prepare : widths width 0
+				g4 [middle - mc] [u - O]
+				archv
+				g4 [l + O] ymiddlea
+				arcvh
+				g4 [middle + mc] [d + O]
+				archv
+				g4 [r - O] ymiddleb
+				arcvh
+				close
+			}
 		}
 	}
 }
@@ -270,8 +293,8 @@ define [VBar x ydown yup _fine] : glyph-construction {
 		:.line-to x yup
 		:.heads-to [if [ydown < yup] UPWARD DOWNWARD]
 }
-define [VBarLeft x yd yu _fine] : VBar [x + [fallback _fine STROKE] * 0.5 * ITALICCOR] yd yu _fine
-define [VBarRight x yd yu _fine] : VBar [x - [fallback _fine STROKE] * 0.5 * ITALICCOR] yd yu _fine
+define [VBarLeft x yd yu _fine] : VBar [x + [fallback _fine STROKE] * 0.5 * CORRECTION_HX] yd yu _fine
+define [VBarRight x yd yu _fine] : VBar [x - [fallback _fine STROKE] * 0.5 * CORRECTION_HX] yd yu _fine
 
 # Common transformations
 define [FlipAround x y sx sy] : glyph-construction {
@@ -292,14 +315,64 @@ define [VerticalHook x y extend depth fine] : glyph-construction {
 
 define [LegShape xt xb xs top bottom _fine] : glyph-construction {
 	local fine : fallback _fine STROKE
-	include : create-stroke
-		:.start-from xt top
-		:.heads-to   DOWNWARD
-		:.set-width  fine 0
-		:.line-to    xb [bottom + LONGJUT]
-		:.curve-to   [linreg top xt [bottom + LONGJUT] xb [bottom + fine]] [bottom + fine] xs [bottom + fine]
-		:.heads-to   LEFTWARD
+	include : spiro {
+		widths.lhs fine
+		flat xt top [heading DOWNWARD]
+		curl xb [bottom + LONGJUT]
+		alsothruthem ((0.5 0.94)) important
+		flat [xs + 1] [bottom + fine] [heading LEFTWARD]
+		curl xs [bottom + fine] [heading LEFTWARD]
+	}
 }
+# Spiro shapes
+define [sband sw rtl _tension _tangle _compression] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local tension : fallback _tension 0.7
+	local compression : fallback _compression 1
+	local tensionw 0
+	local minangle : -para.italicangle / 180 * Math.PI
+	local maxangle : Math.atan2 [after.x - before.x] [[mix after.y before.y tension] - [mix before.y after.y tension]]
+	set maxangle : Math.atan2 [[Math.sin maxangle] * compression] [Math.cos maxangle]
+	local p : fallback _tangle 0.25
+	local pts ()
+	local samples 32
+	foreach j [range 1 samples] : begin {
+		local t : j / samples
+		local angle : mix minangle maxangle [bez3 0 p 1 1 : if [t < 1/2] [2 * t] [2 * [1 - t]]]
+		local k : bez3 0 tensionw [1 - tensionw] 1 t
+		if rtl : k = 1 - k
+		pts.push : g2 [mix before.x after.x [bez3 0 0 1 1 t]] [mix before.y after.y [bez3 0 tension [1 - tension] 1 t]] [widths.heading [[1 - k] * STROKE] [k * STROKE] (.x [Math.cos angle] .y [Math.sin angle])]
+	}
+	# throw 'w'
+	return pts
+}])
+define [hookstart y p f] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : after.y > y
+	local ltr : after.x > before.x
+	before.x = before.x - OXHOOK * [if ltr [-1] 1]
+	local hv : archv
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.53 [[after.y - y] / [before.y - y]]
+	local mx [[mix after.x before.x mixr] + [if atBottom 1 [-1]] * CORRECTION_OMIDS]
+	return : list {
+		g4 mx y f
+		hv.af.call this (.x mx .y y) after hv
+	}
+}])
+define [hookend y p f dontextend] : return (.type 'interpolate' .af [lambda [before after] : begin {
+	local atBottom : before.y > y
+	local ltr : after.x > before.x
+	after.x = after.x + OXHOOK * [if ltr [-1] 1]
+	local vh : arcvh
+	local mixr : fallback p : linreg 1 0.5 [SMALLSMOOTH / HOOK] 0.525 [[before.y - y] / [after.y - y]]
+	local mx [[mix before.x after.x mixr] + [if atBottom 1 [-1]] * CORRECTION_OMIDS]
+	if [!dontextend && atBottom && ltr] : begin {
+		after.x = after.x + TAILADJX * globalTransform.yx
+		after.y = after.y - TAILADJY * globalTransform.yx
+	}
+	return : list {
+		vh.af.call this before (.x mx .y y) vh
+		g4 mx y f
+	}
+}])
 
 # Derived subfonts
 define [Miniature glyphs fold scale] : begin {
@@ -347,4 +420,32 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	}
 	apply-transform : Translate 0 [spacing / 2]
 	apply-transform : Italify
+}
+define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width FULLWIDTH
+}
+define [fwr newid unicode id] : create-glyph [fallback newid : 'fwr' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width FULLWIDTH
+	apply-transform : Translate [FULLWIDTH - WIDTH] 0
+}
+define [dwl newid unicode id] : create-glyph [fallback newid : 'dwl' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+}
+define [dwr newid unicode id] : create-glyph [fallback newid : 'dwr' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+	apply-transform : Translate [UPM - WIDTH] 0
+}
+define [dwc newid unicode id] : create-glyph [fallback newid : 'dwc' + id] : glyph-construction {
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+	apply-transform : Translate [[UPM - WIDTH] / 2] 0
 }

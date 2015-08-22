@@ -55,7 +55,8 @@ create-glyph 'softhyphen' : glyph-construction {
 }
 create-glyph 'interpunct' : glyph-construction {
 	assign-unicode 0xB7
-	include : list : Ring [parenMid + PERIODRADIUS - O] [parenMid - PERIODRADIUS + O] [MIDDLE - PERIODRADIUS + O] [MIDDLE + PERIODRADIUS - O] true
+	set-width FULLWIDTH
+	include : list : Ring [parenMid + PERIODRADIUS - O] [parenMid - PERIODRADIUS + O] [FWMIDDLE - PERIODRADIUS + O] [FWMIDDLE + PERIODRADIUS - O] true
 }
 create-glyph 'brokenbar' : glyph-construction {
 	assign-unicode 0xA6
@@ -81,7 +82,7 @@ create-glyph 'singleGuillemetLeft' : glyph-construction {
 		:.curve-to    [mix MIDDLE SB extension2x] [mix top bot extension2y] [mix MIDDLE SB extension] [mix top bot 0.5]
 		:.set-width   [halfsw * cor] [halfsw * cor]
 		:.heads-to    LEFTWARD
-		:.set-samples 1
+		:.max-samples 1
 	
 	include : create-stroke
 		:.start-from  [mix MIDDLE SB extension] [mix top bot 0.5]
@@ -89,7 +90,7 @@ create-glyph 'singleGuillemetLeft' : glyph-construction {
 		:.heads-to    RIGHTWARD
 		:.curve-to    [mix MIDDLE SB extension2x] [mix bot top extension2y] [mix MIDDLE RIGHTSB extension] bot
 		:.set-width   halfsw halfsw
-		:.set-samples 1
+		:.max-samples 1
 	
 	apply-transform : Translate [-[RIGHTSB - SB] * 0.05] 0
 }
@@ -168,9 +169,11 @@ alias 'gpHyphen' 0x2010 'hyphen'
 alias 'nbHyphen' 0x2011 'hyphen'
 alias 'figureDash' 0x2012 'hyphen'
 alias 'enDash' 0x2013 'hyphen'
+
 create-glyph 'emDash' : glyph-construction {
 	assign-unicode 0x2014
-	include : HBar 0 WIDTH parenMid
+	set-width FULLWIDTH
+	include : HBar 0 FULLWIDTH parenMid
 }
 alias 'horizontalBar' 0x2015 'emDash'
 
@@ -178,23 +181,19 @@ alias 'horizontalBar' 0x2015 'emDash'
 local yCurlyQuotes [mix quoteBottom quoteTop 0.5]
 local commaLow [DESCENDER * 0.9]
 create-glyph 'lowSingleQuote' : glyph-construction {
-	assign-unicode 0x201A
 	include glyphs.comma
 	local ratio : [quoteTop - quoteBottom] / [PERIODSIZE - commaLow]
 	include : FlipAround MIDDLE 0 ratio ratio
 }
 create-glyph 'openSingleQuote' : glyph-construction {
-	assign-unicode 0x2018
 	include glyphs.lowSingleQuote
 	include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 }
 create-glyph 'closeSingleQuote' : glyph-construction {
-	assign-unicode 0x2019
 	include glyphs.openSingleQuote
 	include : FlipAround MIDDLE yCurlyQuotes
 }
 create-glyph 'revertSingleQuote' : glyph-construction {
-	assign-unicode 0x201B
 	include glyphs.invertComma
 	local ratio : [quoteTop - quoteBottom] / [PERIODSIZE - commaLow]
 	include : FlipAround MIDDLE 0 ratio ratio
@@ -202,7 +201,6 @@ create-glyph 'revertSingleQuote' : glyph-construction {
 	include : FlipAround MIDDLE yCurlyQuotes
 }
 create-glyph 'lowDoubleQuote' : glyph-construction {
-	assign-unicode 0x201E
 	local dist : WIDTH * 0.225
 	include glyphs.lowSingleQuote
 	apply-transform : Translate [-dist * 2] 0
@@ -210,23 +208,28 @@ create-glyph 'lowDoubleQuote' : glyph-construction {
 	apply-transform : Translate dist 0
 }
 create-glyph 'openDoubleQuote' : glyph-construction {
-	assign-unicode 0x201C
 	include glyphs.lowDoubleQuote
 	include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 }
 create-glyph 'closeDoubleQuote' : glyph-construction {
-	assign-unicode 0x201D
 	include glyphs.openDoubleQuote
 	include : FlipAround MIDDLE yCurlyQuotes
 }
-create-glyph 'invertDoubleQuote' : glyph-construction {
-	assign-unicode 0x201F
+create-glyph 'revertDoubleQuote' : glyph-construction {
 	local dist : WIDTH * 0.225
 	include glyphs.revertSingleQuote
 	apply-transform : Translate [-dist * 2] 0
 	include glyphs.revertSingleQuote
 	apply-transform : Translate dist 0
 }
+fwr nothing 0x201A 'lowSingleQuote'
+fwr nothing 0x2018 'openSingleQuote'
+fwl nothing 0x2019 'closeSingleQuote'
+fwr nothing 0x201B 'revertSingleQuote'
+fwr nothing 0x201E 'lowDoubleQuote'
+fwr nothing 0x201C 'openDoubleQuote'
+fwl nothing 0x201D 'closeDoubleQuote'
+fwr nothing 0x201F 'revertDoubleQuote'
 # Daggers
 create-glyph 'dagger' : glyph-construction {
 	assign-unicode 0x2020
@@ -412,3 +415,25 @@ alias 'mdfApostrophe' 0x2BC 'closeSingleQuote'
 alias 'mdfRevComma' 0x2BD 'revertSingleQuote'
 alias 'mdfStress' 0x2C8 'singleQuote'
 turned 'mdfSecondaryStress' 0x2CC 'singleQuote' MIDDLE [XH / 2]
+
+dwc nothing 0xFF01 'exclam'
+dwc nothing 0xFF1A 'colon'
+dwc nothing 0xFF1B 'semicolon'
+dwl nothing 0xFF0C 'comma'
+dwl nothing 0xFF0E 'period'
+dwr nothing 0xFF08 'parenLeft'
+dwl nothing 0xFF09 'parenRight'
+create-glyph 'dwquestion' : glyph-construction {
+	set-width UPM
+	assign-unicode 0xFF1F
+	include : list : Ring [DOTSIZE - O] O [UPM / 2 - DOTRADIUS + O] [UPM / 2 + DOTRADIUS - O] true
+	include : spiro {
+		widths.rhs
+		g4 [UPM * 0.25] [CAP - HOOK]
+		hookstart CAPO
+		g4 [UPM * 0.75] [CAP - SMOOTHB * 0.85]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		flat [UPM / 2 - HALFSTROKE * CORRECTION_HX] [mix [DOTSIZE + STROKE] [XH / 2] 0.5] [widths STROKE 0]
+		curl [UPM / 2 - HALFSTROKE * CORRECTION_HX] [[mix [DOTSIZE + STROKE] [XH / 2] 0.5] - 1]
+	}
+}

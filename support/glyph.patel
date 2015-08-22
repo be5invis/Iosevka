@@ -48,10 +48,12 @@ define [Glyph.prototype.start-from x y] : begin {
 	this.contours.push ([tp this.gizmo (.x x .y y .onCurve true)])
 	return this
 }
+Glyph.prototype.moveTo = Glyph.prototype.start-from
 define [Glyph.prototype.line-to x y] : begin {
 	this.contours`[this.contours.length - 1].push [tp this.gizmo (.x x .y y .onCurve true)]
 	return this
 }
+Glyph.prototype.lineTo = Glyph.prototype.line-to
 define [Glyph.prototype.curve-control x y] : begin {
 	this.contours`[this.contours.length - 1].push [tp this.gizmo (.x x .y y .onCurve false)]
 	return this
@@ -77,11 +79,11 @@ define [Glyph.prototype.arc-hv-to x y kappa] : begin {
 define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
 	local lastContour this.contours`[this.contours.length - 1]
 	local lastPoint lastContour`[lastContour.length - 1]
-	local last : utp this.gizmo lastPoint
-	local segments [bezierCubic2Q2 last (.x x1 .y y1) (.x x2 .y y2) (.x x .y y)]
-	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : this.curve-to xc yc xf yf
+	local segments : bezierCubic2Q2 lastPoint [tp this.gizmo (.x x1 .y y1)] [tp this.gizmo (.x x2 .y y2)] [tp this.gizmo (.x x .y y)]
+	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : lastContour.push (.x xc .y yc) (.x xf .y yf .onCurve true)
 	return this
 }
+Glyph.prototype.cubicTo = Glyph.prototype.cubic-to
 define [Glyph.prototype.reverse-last] : begin {
 	this.contours.[this.contours.length - 1] = [this.contours.[this.contours.length - 1].reverse]
 }
@@ -107,7 +109,7 @@ define [Glyph.prototype.put-shapes contours] : begin {
 define [Glyph.prototype.include component copyAnchors] : begin {
 	local glyph : match component {
 		[aFunction it] : return : component.call this
-		[Stroke.is it]   (.contours [component.to-outline 0 0])
+		[Stroke.is it]   (.contours [component.to-outline])
 		(:: contours)    (.contours contours)
 		otherwise        component
 	}
@@ -178,7 +180,7 @@ define [Glyph.prototype.apply-transform transform alsoAnchors] : begin {
 }
 define [Glyph.prototype.create-stroke] : begin {
 	local s : new Stroke
-	s.gizmo = [Object.create this.gizmo]
+	s.gizmo = (.x this.gizmo.x .y this.gizmo.y .xx this.gizmo.xx .xy this.gizmo.xy .yx this.gizmo.yx .yy this.gizmo.yy)
 	return s
 }
 define [Glyph.prototype.set-anchor id type x y mbx mby] : begin {
@@ -186,5 +188,24 @@ define [Glyph.prototype.set-anchor id type x y mbx mby] : begin {
 	local markbasepoint : if [mbx !== nothing && mby !== nothing] [tp this.gizmo (.x mbx .y mby)] (.x nothing .y nothing)
 	this.anchors`id = (.x anchorpoint.x .y anchorpoint.y .type type .mbx markbasepoint.x .mby markbasepoint.y)
 }
-
+define [oncurveRemovable a b c] : begin {
+	local xm : [a.x + c.x] / 2
+	local ym : [a.y + c.y] / 2
+	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x] && [a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y] && [Math.abs [b.x - xm]] <= 0.5 && [Math.abs [b.y - ym]] <= 0.5
+}
+define [Glyph.prototype.cleanup] : begin {
+	foreach c [range 0 this.contours.length] : begin {
+		local contour this.contours.(c)
+		local cleanedContour ()
+		foreach j [range 1 : contour.length - 1] : begin {
+			local p0 contour.[j - 1]
+			local p1 contour.(j)
+			local p2 contour.[j + 1]
+			if [oncurveRemovable p0 p1 p2] : set p1.unimportant true
+		}
+		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
+		this.contours.(c) = cleanedContour
+	}
+	return this
+}
 exports.Glyph = Glyph
