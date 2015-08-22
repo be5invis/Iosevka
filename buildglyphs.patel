@@ -43,33 +43,14 @@ define [buildFont para recursive] : begin {
 	define unicodeGlyphs ()
 
 	define UPM 1000
-	# metrics
-	define DESCENDER para.descender
+	define serifed : not [not para.serif]
+	# Key metrics
 	define WIDTH para.width
+	define SB para.sb
 	define CAP para.cap
 	define XH para.xheight
-	define O para.o
-	define OXHOOK para.oxhook
-	define SB para.sb
-	define HOOK para.hook
-	define AHOOK para.ahook
-	define SHOOK para.shook
-	define RHOOK para.rhook
-	define HOOKX para.hookx
-	define SMOOTH para.smooth
-	define SMALLSMOOTH para.smallsmooth
-	define STROKE para.stroke
-	define DOTSIZE para.dotsize
-	define PERIODSIZE para.periodsize
-	define BARPOS para.barpos
-	define GBARPOS para.gbarpos
-	define FIVEBARPOS para.fivebarpos
-	define LONGJUT para.longjut
-	define JUT para.jut
-	define ACCENT para.accent
-	define ACCENTX para.accentx
-	
-	# Common metrics for symbols
+	define DESCENDER para.descender
+	# Key metrics for symbols
 	local parenTop [[XH * 0.625] + [CAP - XH] * 2.5]
 	local parenBot [[XH * 0.625] - [CAP - XH] * 2.5]
 	local parenMid [mix parenTop parenBot 0.5]
@@ -97,6 +78,45 @@ define [buildFont para recursive] : begin {
 		return (.x [a.x / m] .y [a.y / m])
 	}
 	
+	# Style parameters
+	define O para.o
+	define OXHOOK para.oxhook
+	define HOOK para.hook
+	define AHOOK para.ahook
+	define SHOOK para.shook
+	define RHOOK para.rhook
+	define HOOKX para.hookx
+	define SMOOTH para.smooth
+	define SMALLSMOOTH para.smallsmooth
+	define STROKE para.stroke
+	define DOTSIZE : fallback para.dotsize STROKE
+	define PERIODSIZE : fallback para.periodsize DOTSIZE
+	define BARPOS : fallback para.barpos 0.5
+	define GBARPOS : fallback para.gbarpos 0.5
+	define EBARPOS : fallback para.ebarpos BARPOS
+	define OVERLAYPOS para.overlaypos
+	define FIVEBARPOS para.fivebarpos
+	define LONGJUT para.longjut
+	define JUT para.jut
+	define ACCENT para.accent
+	define ACCENTX para.accentx
+	
+	define KAPPA para.kappa
+	define BKAPPA : para.bkappa || KAPPA + 0.1
+	define KAPPA_SPIRO_ARC : KAPPA + 0.1
+	define CKAPPA : para.ckappa || BKAPPA
+	define KAPPA_HOOK  : fallback para.kappa_hook  [BKAPPA + 0.1]
+	define KAPPA_AHOOK : fallback para.kappa_ahook KAPPA_HOOK
+	define KAPPA_RHOOK : fallback para.kappa_rhook KAPPA_HOOK
+	define TAILADJX : WIDTH * 0.2
+	define TAILADJY : XH * 0.25
+	define ILBALANCE : LONGJUT * 0.04
+	define JBALANCE : fallback para.jbalance [STROKE / 2 + ILBALANCE]
+	define TBALANCE : fallback para.tbalance JBALANCE
+	define TBALANCE2 : fallback para.tbalance2 TBALANCE
+	define RBALANCE : fallback para.rbalance [JBALANCE * 0.3]
+	define SBALANCE : fallback para.sbalance 0.52
+	
 	# derived metrics
 	define FULLWIDTH : if para.cjkSpacing [WIDTH * 2] WIDTH
 	define XO : XH - O
@@ -119,32 +139,6 @@ define [buildFont para recursive] : begin {
 	
 	define CORRECTION_OMIDX : globalTransform.yx * 1.2
 	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
-	
-	# style parameters
-	define EBARPOS : para.ebarpos || BARPOS
-	define KAPPA para.kappa
-	define COKAPPA : 1 - KAPPA
-	define BKAPPA : para.bkappa || KAPPA + 0.1
-	define KAPPA_SPIRO_ARC : KAPPA + 0.1
-	define CKAPPA : para.ckappa || BKAPPA
-	define COBKAPPA : 1 - BKAPPA
-	define KAPPA_HOOK  : fallback para.kappa_hook  [BKAPPA + 0.1]
-	define KAPPA_AHOOK : fallback para.kappa_ahook KAPPA_HOOK
-	define KAPPA_RHOOK : fallback para.kappa_rhook KAPPA_HOOK
-	define TAILADJX : WIDTH * 0.2
-	define TAILADJY : XH * 0.25
-	define TAILADJKAPPA 0.75
-	define TAILADJSX :   WIDTH * 0.2
-	define TAILADJSY     0
-	define TAILADJSKAPPA 0.75
-	define ILBALANCE : LONGJUT * 0.04
-	define JBALANCE :  para.jbalance   || HALFSTROKE + ILBALANCE
-	define TBALANCE :  para.tbalance   || JBALANCE
-	define TBALANCE2 : para.tbalance2  || TBALANCE
-	define RBALANCE :  para.rbalance   || JBALANCE * 0.3
-	define SBALANCE : fallback para.sbalance 0.52
-	
-	define serifed : not [not para.serif]
 	
 	# Blackness parameters
 	# We will estimate blackness using lower-case 'e'
@@ -184,7 +178,14 @@ define [buildFont para recursive] : begin {
 	}
 	define [StdAnchorGroup] : begin {
 		local a : anchorDeriv.apply null arguments
-		set a.anchors.overlay (.type BASE .x [mix a.anchors.below.x a.anchors.above.x BARPOS] .y [mix a.anchors.below.y a.anchors.above.y BARPOS])
+		set a.anchors.overlay (.type BASE 
+			.x [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
+			.y [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
+		)
+		set a.anchors.slash (.type BASE
+			.x [mix a.anchors.below.x a.anchors.above.x 0.5]
+			.y [mix a.anchors.below.y a.anchors.above.y 0.5]
+		)
 		return a
 	}
 	
