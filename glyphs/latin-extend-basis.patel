@@ -424,33 +424,28 @@ create-glyph 'latinupsilon1' : glyph-construction {
 	include : OmegaShape XH SMALLSMOOTHA SMALLSMOOTHB SMALLSMOOTHA SMALLSMOOTHB
 	include : FlipAround MIDDLE [XH / 2]
 }
+define [LatinUpsilon2Shape top sma smb] : glyph-construction {
+	include : spiro {
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB smb
+		arcvh
+		g4 [MIDDLE + CORRECTION_OMIDS] O
+		archv
+		flat RIGHTSB sma
+		curl RIGHTSB [top - HOOK - HALFSTROKE] [heading UPWARD]
+	}
+	include : VerticalHook [RIGHTSB - HALFSTROKE * CORRECTION_HX] [top - HOOK - HALFSTROKE] [-[RIGHTSB - HALFSTROKE * CORRECTION_HX - MIDDLE]] [-HOOK]
+}
 create-glyph 'latinUpsilon2' : glyph-construction {
 	assign-unicode 0x1B2
 	include eMarks
-	include : create-stroke
-		:.start-from SB CAP
-		:.heads-to   DOWNWARD
-		:.set-width  STROKE 0
-		:.line-to    SB SMOOTHB
-		:.arc-vh-to  [MIDDLE + CORRECTION_OMIDS] O
-		:.arc-hv-to  RIGHTSB SMOOTHA
-		:.line-to    RIGHTSB [CAP - HOOK - HALFSTROKE]
-		:.heads-to   UPWARD
-	include : VerticalHook [RIGHTSB - HALFSTROKE * CORRECTION_HX] [CAP - HOOK - HALFSTROKE] [-[RIGHTSB - HALFSTROKE * CORRECTION_HX - MIDDLE]] [-HOOK]
+	include : LatinUpsilon2Shape CAP SMOOTHA SMOOTHB
 }
 create-glyph 'latinupsilon2' : glyph-construction {
 	assign-unicode 0x28B
 	include eMarks
-	include : create-stroke
-		:.start-from SB XH
-		:.heads-to   DOWNWARD
-		:.set-width  STROKE 0
-		:.line-to    SB SMALLSMOOTHB
-		:.arc-vh-to  [MIDDLE + CORRECTION_OMIDS] O
-		:.arc-hv-to  RIGHTSB SMALLSMOOTHA
-		:.line-to    RIGHTSB [XH - HOOK - HALFSTROKE]
-		:.heads-to   UPWARD
-	include : VerticalHook [RIGHTSB - HALFSTROKE * CORRECTION_HX] [XH - HOOK - HALFSTROKE] [-[RIGHTSB - HALFSTROKE * CORRECTION_HX - MIDDLE]] [-HOOK]
+	include : LatinUpsilon2Shape XH SMALLSMOOTHA SMALLSMOOTHB
 }
 create-glyph 'scriptg' : glyph-construction {
 	assign-unicode 0x261
@@ -501,20 +496,58 @@ create-glyph 'latinIota' : glyph-construction {
 	include capitalMarks
 	include : IotaShape CAP
 }
+create-glyph 'closeomega' : glyph-construction {
+	assign-unicode 0x277
+	include eMarks
+	local fine : adviceBlackness 3.25
+	local x0 : MIDDLE - CORRECTION_OMIDS
+	local y0 : XH - O
+	local y1 : mix 0 XH 0.45
+	local x1 : SB + O *2
+	local y3 : XH / 2
+	local y4 : XH * 0.65
+	include : spiro {
+		widths.rhs fine
+		flat [MIDDLE + fine / 2] y4 [heading DOWNWARD]
+		curl [MIDDLE + fine / 2] y3
+		arcvh 8
+		g4 [mix x1 [MIDDLE + fine / 2] 0.5] O [heading LEFTWARD]
+		archv 8
+		g4 x1 y1
+		arcvh
+		g4 x0 y0
+		archv
+		g4 [WIDTH - x1] y1
+		arcvh 8
+		g4 [mix [WIDTH - x1] [MIDDLE - fine / 2] 0.5] O [heading LEFTWARD]
+		archv 8
+		flat [MIDDLE - fine / 2] y3
+		curl [MIDDLE - fine / 2] y4 [heading UPWARD]
+	}
+}
+create-glyph 'strenchedC' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 0x297
+	include pMarks
+	include : CShape XH DESCENDER
+}
 define [RevSmallEShape top stroke barpos] : glyph-construction {
 	local barbottom [top * [fallback barpos EBARPOS]]
 	local hookx SB
 	local hookmiddle : [mix [RIGHTSB - O] hookx 0.55] + CORRECTION_OMIDS
 	
-	include : create-stroke
-		:.start-from [SB + O] barbottom
-		:.heads-to   UPWARD
-		:.set-width  0 stroke
-		:.line-to    [SB + O] [top - SMALLSMOOTHA]
-		:.arc-vh-to  MIDDLE [top - O]
-		:.arc-hv-to  [RIGHTSB - O] [top - SMALLSMOOTHB]
-		:.line-to    [RIGHTSB - O] SMALLSMOOTHA
-	include : RevEHookLower 0 SMALLSMOOTHA HOOK
+	include : spiro {
+		widths.rhs stroke
+		flat [SB + O] barbottom [heading UPWARD]
+		curl [SB + O] [top - SMALLSMOOTHA]
+		arcvh
+		g4   MIDDLE [top - O]
+		archv
+		flat [RIGHTSB - O] [top - SMALLSMOOTHB]
+		curl [RIGHTSB - O] SMALLSMOOTHA
+		hookend O
+		g4 [SB + O] HOOK
+	}
 	include : create-stroke
 		:.start-from [SB + [stroke / 2]] barbottom
 		:.set-width  stroke 0
@@ -553,6 +586,19 @@ create-glyph 'revglottalstop' : glyph-construction {
 		alsothru 0.5 0.45 [widths HALFSTROKE HALFSTROKE]
 		flat [MIDDLE + HALFSTROKE * CORRECTION_HX] [XH * 0.3] [widths 0 STROKE]
 		curl [MIDDLE + HALFSTROKE * CORRECTION_HX] 0 [heading DOWNWARD]
+	}
+}
+create-glyph 'smallglottalstop' : glyph-construction {
+	assign-unicode 0x242
+	include bMarks
+	include : spiro {
+		widths.rhs
+		g4 SB [XH - HOOK]
+		hookstart XO
+		g4 RIGHTSB [XH - SMOOTHB]
+		alsothru 0.5 0.45 [widths HALFSTROKE HALFSTROKE]
+		flat [MIDDLE - HALFSTROKE * CORRECTION_HX] [XH * 0.15] [widths STROKE 0]
+		curl [MIDDLE - HALFSTROKE * CORRECTION_HX] 0 [heading DOWNWARD]
 	}
 }
 create-glyph 'fineglottalstop' : glyph-construction {
@@ -684,6 +730,8 @@ alias 'alveolarclick' 0x1C3 'exclam'
 alias 'smcpH' 0x29C 'cyren'
 alias 'latiniota' 0x269 'iota'
 alias 'revlatinepsilon' 0x25C 'cyrze'
+alias 'lstinSigma' 0x1A9 'Sigma'
+alias 'capglottalstop' 0x241 'glottalstop'
 # Turned glyphs
 turned nothing 0x2C6F 'A' MIDDLE [CAP / 2]
 turned nothing 0x250 'a' MIDDLE [XH / 2]
