@@ -157,7 +157,6 @@ define [buildFont para recursive] : begin {
 	define BASE 'base'
 	define MARK 'mark'
 	define MARKBASE 'markbase'
-	
 	define AS_BASE 'AS-BASE'
 	
 	define [tm anchor] : return (
@@ -195,84 +194,41 @@ define [buildFont para recursive] : begin {
 	define pMarks       : StdAnchorGroup markAboveLower markBelowZero markToprightLower markBottomrightLower
 	define ifMarks      : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightLower
 	
-	Stroke.bindParameters para
-	
-	### Font names
-	set font.name.fontFamily          para.family
-	set font.name.fontSubFamily       para.style
-	set font.name.preferredFamily     para.family
-	set font.name.preferredSubFamily  para.style
-	set font.name.uniqueSubFamily     : para.family + ' ' + para.style + ' ' + para.version
-	set font.name.version             para.version
-	set font.name.fullName            : if [para.style != 'Regular'] [para.family + ' ' + para.style] para.family
-	set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
-	set font.name.copyright           para.copyright
-	set font.'OS/2'.usWeightClass     para.weight
-	set font.'OS/2'.bProportion       9 # Monospaced
-	set font.'OS/2'.bWeight           : 1 + para.weight / 100
-	set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if [[not para.isBold] && [not para.isItalic]] 64 0] + 128
-	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
-	
-	### Metric metadata
-	# Note: we use 1000upm in design, and 4096upm in production
-	
-	define upmscale : fallback para.upmscale 1
-	
-	let [asc : 1250 * CAP / [CAP - DESCENDER]] [desc : 1250 * DESCENDER / [CAP - DESCENDER]] : begin { 
-		set font.head.unitsPerEm          1000
-		set font.hhea.ascent              asc
-		set font.'OS/2'.usWinAscent       asc
-		set font.'OS/2'.sTypoAscender     asc
-		set font.hhea.descent             desc
-		set font.'OS/2'.usWinDescent      [Math.abs desc]
-		set font.'OS/2'.sTypoDescender    desc
-		set font.hhea.lineGap             [CAP * 0.2]
-		set font.'OS/2'.sTypoLineGap      [CAP * 0.2]
-		set font.'OS/2'.sxHeight          XH
-		set font.post.italicAnvle         [0 - para.italicangle]
-	}
-	
 	### Necessary macros
+	# Remap Glyph's methods to macros in order to simplify writing
+	define-macro set-width : syntax-rules { @`[set-width @::args] ('.syntactic-closure' @`[currentGlyph.set-width @::args] env) }
+	define-macro start-from : syntax-rules { @`[start-from @::args] ('.syntactic-closure' @`[currentGlyph.start-from @::args] env) }
+	define-macro line-to : syntax-rules { @`[line-to @::args] ('.syntactic-closure' @`[currentGlyph.line-to @::args] env) }
+	define-macro curve-to : syntax-rules { @`[curve-to @::args] ('.syntactic-closure' @`[currentGlyph.curve-to @::args] env) }
+	define-macro cubic-to : syntax-rules { @`[cubic-to @::args] ('.syntactic-closure' @`[currentGlyph.cubic-to @::args] env) }
+	define-macro arc-hv-to : syntax-rules { @`[arc-hv-to @::args] ('.syntactic-closure' @`[currentGlyph.arc-hv-to @::args] env) }
+	define-macro arc-vh-to : syntax-rules { @`[arc-vh-to @::args] ('.syntactic-closure' @`[currentGlyph.arc-vh-to @::args] env) }
+	define-macro include : syntax-rules { @`[include @::args] ('.syntactic-closure' @`[currentGlyph.include @::args] env) }
+	define-macro create-stroke : syntax-rules { @`[create-stroke @::args] ('.syntactic-closure' @`[currentGlyph.create-stroke @::args] env) }
+	define-macro set-anchor : syntax-rules { @`[set-anchor @::args] ('.syntactic-closure' @`[currentGlyph.set-anchor @::args] env) }
+	define-macro apply-transform : syntax-rules { @`[apply-transform @::args] ('.syntactic-closure' @`[currentGlyph.apply-transform @::args] env) }
+	define-macro reverse-last : syntax-rules { @`[reverse-last @::args] ('.syntactic-closure' @`[currentGlyph.reverse-last @::args] env) }
+	define-macro dont-export : syntax-rules {
+		@`[dont-export] (".syntactic-closure" @`[set currentGlyph.dontExport true] env)
+	}
+	define-macro assign-unicode : syntax-rules {
+		@`[assign-unicode @code] (".syntactic-closure" @`[begin {
+			currentGlyph.assign-unicode @code
+			set unicodeGlyphs.(currentGlyph.unicode`[currentGlyph.unicode.length - 1]) currentGlyph
+		}] env)
+	}
+	# The macro [glyph-construction] creates a function which builds a glyph.
 	define-macro glyph-construction : syntax-rules {
 		@`[glyph-construction @::steps] ('.syntactic-closure' @`[lambda [] [begin {
 			local currentGlyph this
-			local set-width : this.set-width.bind this
-			local assign-unicode : lambda [code] : begin {
-				currentGlyph.assign-unicode code
-				set unicodeGlyphs.(currentGlyph.unicode`[currentGlyph.unicode.length - 1]) currentGlyph
-			}
-			local start-from : this.start-from.bind this
-			local line-to : this.line-to.bind this
-			local curve-to : this.curve-to.bind this
-			local cubic-to : this.cubic-to.bind this
-			local arc-hv-to : this.arc-hv-to.bind this
-			local arc-vh-to : this.arc-vh-to.bind this
-			local put-shapes : this.put-shapes.bind this
-			local reverse-last : this.reverse-last.bind this
-			local include : this.include.bind this
-			local create-stroke : this.create-stroke.bind this
-			local set-anchor : this.set-anchor.bind this
-			local apply-transform : this.apply-transform.bind this
-	
-	#		Actually I can define them using macros, but it makes compilation slow.
-	#		define-macro set-width : syntax-rules { @`[set-width @::args] @`[currentGlyph.set-width @::args] }
-	#		define-macro start-from : syntax-rules { @`[start-from @::args] @`[currentGlyph.start-from @::args] }
-	#		define-macro line-to : syntax-rules { @`[line-to @::args] @`[currentGlyph.line-to @::args] }
-	#		define-macro curve-to : syntax-rules { @`[curve-to @::args] @`[currentGlyph.curve-to @::args] }
-	#		define-macro cubic-to : syntax-rules { @`[cubic-to @::args] @`[currentGlyph.cubic-to @::args] }
-	#		define-macro include : syntax-rules { @`[include @::args] @`[currentGlyph.include @::args] }
-	#		define-macro create-stroke : syntax-rules { @`[create-stroke @::args] @`[currentGlyph.create-stroke @::args] }
-	#		define-macro set-anchor : syntax-rules { @`[set-anchor @::args] @`[currentGlyph.set-anchor @::args] }
-	#		define-macro apply-transform : syntax-rules { @`[apply-transform @::args] @`[currentGlyph.apply-transform @::args] }
-	#		define-macro reverse-last : syntax-rules { @`[reverse-last @::args] @`[currentGlyph.reverse-last @::args] }
-	
-			local [dont-export] : set currentGlyph.dontExport true
-			this.gizmo = globalTransform
+			currentGlyph.gizmo = globalTransform
 			begin @::[steps.map formOf]
 			return nothing
 		}]] env)
 	}
 	
+	
+	### Glyph slots and dependency profile generation (used for recursive subfonts)
 	local dependencyProfile (.)
 	local nTemp 0
 	local pickHash : if recursive {
@@ -331,7 +287,7 @@ define [buildFont para recursive] : begin {
 		set-width glyphs.(oldid).advanceWidth
 	}
 	
-		### Spiro constructions
+	### Spiro constructions
 	define [flatten knots] : begin {
 		local a ()
 		foreach p [items-of knots] : piecewise {
@@ -359,8 +315,7 @@ define [buildFont para recursive] : begin {
 			otherwise unimportant
 		}
 		return knots
-	}
-	
+	}	
 	define [g4 x y f] (.x x .y y .type 'g4' .af f)
 	define [g2 x y f] (.x x .y y .type 'g2' .af f)
 	define [corner x y f] (.x x .y y .type 'corner' .af f)
@@ -473,6 +428,43 @@ define [buildFont para recursive] : begin {
 	
 	###### HERE WE GO!
 	
+	### Metadata
+	# Font names
+	set font.name.fontFamily          para.family
+	set font.name.fontSubFamily       para.style
+	set font.name.preferredFamily     para.family
+	set font.name.preferredSubFamily  para.style
+	set font.name.uniqueSubFamily     : para.family + ' ' + para.style + ' ' + para.version
+	set font.name.version             para.version
+	set font.name.fullName            : if [para.style != 'Regular'] [para.family + ' ' + para.style] para.family
+	set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
+	set font.name.copyright           para.copyright
+	set font.'OS/2'.usWeightClass     para.weight
+	set font.'OS/2'.bProportion       9 # Monospaced
+	set font.'OS/2'.bWeight           : 1 + para.weight / 100
+	set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if [[not para.isBold] && [not para.isItalic]] 64 0] + 128
+	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
+	
+	# Metric metadata
+	# Note: we use 1000upm in design, and 4096upm in production
+	
+	define upmscale : fallback para.upmscale 1
+	
+	let [asc : 1250 * CAP / [CAP - DESCENDER]] [desc : 1250 * DESCENDER / [CAP - DESCENDER]] : begin { 
+		set font.head.unitsPerEm          1000
+		set font.hhea.ascent              asc
+		set font.'OS/2'.usWinAscent       asc
+		set font.'OS/2'.sTypoAscender     asc
+		set font.hhea.descent             desc
+		set font.'OS/2'.usWinDescent      [Math.abs desc]
+		set font.'OS/2'.sTypoDescender    desc
+		set font.hhea.lineGap             [CAP * 0.2]
+		set font.'OS/2'.sTypoLineGap      [CAP * 0.2]
+		set font.'OS/2'.sxHeight          XH
+		set font.post.italicAnvle         [0 - para.italicangle]
+	}
+	
+	# Necessary space glyph
 	create-glyph 'space' : glyph-construction {
 		set-width WIDTH
 		assign-unicode ' '
