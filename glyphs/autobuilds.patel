@@ -479,6 +479,11 @@ createFractions : list {
 define [createLigature unicode] : begin {
 	local ids : ().slice.call arguments 1
 	local glyphName : ids.join '_'
+	if glyphs.(glyphName) : begin {
+		local j 2
+		while glyphs.[glyphName + j] : inc j
+		set glyphName [glyphName + j]
+	}
 	create-glyph glyphName : glyph-construction {
 		if unicode : assign-unicode unicode
 		set-width : ids.length * WIDTH
@@ -560,21 +565,26 @@ createMarkLookup 'bottomright'
 createMarkLookup 'overlay'
 createMarkLookup 'slash'
 # mkmk and GDEF
-foreach glyph [items-of glyphList] : if [glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]] : begin {
-	local isMarkGlyph false
-	foreach key [items-of anchorKeys] : if [glyph.anchors.(key).type == 'mark'] : set isMarkGlyph true
+foreach glyph [items-of glyphList] : if [glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]] {
+	then {
+		local isMarkGlyph false
+		foreach key [items-of anchorKeys] : if [glyph.anchors.(key).type == 'mark'] : set isMarkGlyph true
+		
+		if isMarkGlyph {
+			then {
 	
-	if isMarkGlyph {
-		then {
-
-			font.features.mkmk.marks.push : 'markClass [' + glyph.name + '] ' + [buildAnchorDescription glyph '' 'x' 'y']
-			font.features.mkmk.bases.push : 'pos mark [' + glyph.name + '] ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby']
-			foreach key [items-of anchorKeys] : begin {
-				if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) ()
-				font.features.markGlyphs.(key).push glyph.name
+				font.features.mkmk.marks.push : 'markClass [' + glyph.name + '] ' + [buildAnchorDescription glyph '' 'x' 'y']
+				font.features.mkmk.bases.push : 'pos mark [' + glyph.name + '] ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby']
+				foreach key [items-of anchorKeys] : begin {
+					if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) ()
+					font.features.markGlyphs.(key).push glyph.name
+				}
+				font.features.gdef.mark.push glyph.name
 			}
-			font.features.gdef.mark.push glyph.name
+			else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
 		}
-		else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
+	}
+	else {
+		if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
 	}
 }
