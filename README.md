@@ -6,15 +6,11 @@ A programmer's typeface.
 
 Building
 -----------------------------------------------------
-To build Iosevka you should prepare:
+To build Iosevka you should:
 
-1. `node`, `FontForge`, `ttfautohint` and `make`. Make sure that you can run them in your terminal.
-2. patel-c (via `npm install patel -g`)
-3. Necessary libs :
-```bash
-npm install node-sfnt
-npm install bezier-js
-npm install yargs
-```
+1. Ensure that `node`, `FontForge`, `ttfautohint` and `make` are runnable in your terminal.
+2. Install `patel-c` bt `npm install patel -g`
+3. Install necessary libs by `npm install`
+4. `make`.
 
-Once environments are prepared, `make`. You will find ttfs in the `build/` directory.
+You will find ttfs in the `build/` directory.
