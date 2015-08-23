@@ -64,6 +64,10 @@ if(argv.dumpfeature) {
 	// mkmk
 	var mkmk = ttfFont.features.mkmk;
 	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n' + mkmk.bases.join(';\n') + ';} mkmkAuto;'
+	
+	// gdef
+	var gdef = ttfFont.features.gdef;
+	featurefile += '@GDEF_Simple = [' + gdef.simple.join(' ') + ']; @GDEF_Ligature =[' + gdef.ligature.join(' ') + ']; @GDEF_Mark = [' + gdef.mark.join(' ') + ']; table GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
 
 	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8');
 };

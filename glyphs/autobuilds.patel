@@ -535,7 +535,7 @@ create-glyph 'servicemark' : glyph-construction {
 set font.features.mark (.)
 set font.features.mkmk (.marks () .bases ())
 set font.features.markGlyphs (.)
-
+set font.features.gdef (.simple () .ligature () .mark ())
 define [buildAnchorDescription glyph inserter propx propy] : begin {
 	local buf ''
 	foreach key [items-of : Object.keys glyph.anchors] : buf = buf + ' <anchor ' + [Math.round [upmscale * glyph.anchors.(key).(propx)]] + ' ' + [Math.round [upmscale * glyph.anchors.(key).(propy)]] + '> ' + inserter + ' @' + key
@@ -559,21 +559,22 @@ createMarkLookup 'topright'
 createMarkLookup 'bottomright'
 createMarkLookup 'overlay'
 createMarkLookup 'slash'
-# mkmk
+# mkmk and GDEF
 foreach glyph [items-of glyphList] : if [glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]] : begin {
 	local isMarkGlyph false
 	foreach key [items-of anchorKeys] : if [glyph.anchors.(key).type == 'mark'] : set isMarkGlyph true
 	
 	if isMarkGlyph {
 		then {
-#			font.features.mark.marks.push : 'markClass [' + glyph.name + '] ' + [buildAnchorDescription glyph '' 'x' 'y']
+
 			font.features.mkmk.marks.push : 'markClass [' + glyph.name + '] ' + [buildAnchorDescription glyph '' 'x' 'y']
 			font.features.mkmk.bases.push : 'pos mark [' + glyph.name + '] ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby']
 			foreach key [items-of anchorKeys] : begin {
 				if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) ()
 				font.features.markGlyphs.(key).push glyph.name
 			}
+			font.features.gdef.mark.push glyph.name
 		}
-#		else : font.features.mark.bases.push : 'pos base [' + glyph.name + '] ' + [buildAnchorDescription glyph 'mark' 'x' 'y']
+		else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
 	}
 }
