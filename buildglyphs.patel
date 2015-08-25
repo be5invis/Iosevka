@@ -1,11 +1,17 @@
+define fs : require 'fs'
+define path : require 'path'
+
 define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define inverse [require './support/transform'].inverse
+
 define libspiro : require 'libspiro-js'
 define SpiroExpansionContext [require './support/spiroexpand'].SpiroExpansionContext
-### COMMON FUNCTIONS
 
+define toml : require 'toml'
+
+### COMMON FUNCTIONS
 define [mix a b p] : a + [b - a] * p
 define [linreg x0 y0 x1 y1 x] : y0 + [x - x0] * [y1 - y0] / [x1 - x0]
 define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg {
@@ -17,7 +23,8 @@ define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg {
 }
 define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
 
-define emptyFontStr : JSON.stringify [require './empty.json']
+# Empty font base file
+define emptyFontStr : fs.readFileSync : path.join [path.dirname require.main.filename] 'emptyfont.toml'
 
 define-macro $$include : syntax-rules {
 	('$$include' ('.quote' file)) : begin {
@@ -37,9 +44,10 @@ define-macro $$include : syntax-rules {
 define [buildFont para recursive] : begin {
 	
 	define variantSelector para.variantSelector
-	define font : JSON.parse emptyFontStr
+	define font : toml.parse emptyFontStr
+	
 	define glyphList font.glyf
-	define glyphs (.'.notdef' glyphList.0)
+	define glyphs (.)
 	define unicodeGlyphs ()
 
 	define UPM 1000
@@ -466,7 +474,18 @@ define [buildFont para recursive] : begin {
 		set font.post.italicAnvle         [0 - para.italicangle]
 	}
 	
-	# Necessary space glyph
+	# Necessary notdef glyph
+	create-glyph '.notdef' : glyph-construction {
+		start-from SB 0
+		line-to    SB CAP
+		line-to    RIGHTSB CAP
+		line-to    RIGHTSB 0
+		
+		start-from [SB + STROKE] STROKE
+		line-to    [RIGHTSB - STROKE] STROKE
+		line-to    [RIGHTSB - STROKE] [CAP - STROKE]
+		line-to    [SB + STROKE] [CAP - STROKE]
+	}
 	create-glyph 'space' : glyph-construction {
 		set-width WIDTH
 		assign-unicode ' '
