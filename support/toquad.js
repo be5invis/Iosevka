@@ -45,7 +45,7 @@ function bezierCubic2Q2(p1, c1, c2, p2, level) {
     var my = p2.y - 3 * c2.y + 3 * c1.y - p1.y;
 
     // control points near
-    if (mx * mx + my * my <= 1 || level > 5) {
+    if (mx * mx + my * my <= 4 || level > 5) {
         return [
             toQuad(p1, c1, c2, p2)
         ];
