@@ -1,4 +1,4 @@
-define bezierCubic2Q2 [require 'node-sfnt/lib/math/bezierCubic2Q2']
+define bezierCubic2Q2 [require './toquad']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 define Stroke [require './stroke'].Stroke
@@ -80,7 +80,9 @@ define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
 	local lastContour this.contours`[this.contours.length - 1]
 	local lastPoint lastContour`[lastContour.length - 1]
 	local segments : bezierCubic2Q2 lastPoint [tp this.gizmo (.x x1 .y y1)] [tp this.gizmo (.x x2 .y y2)] [tp this.gizmo (.x x .y y)]
-	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : lastContour.push (.x xc .y yc) (.x xf .y yf .onCurve true)
+	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : lastContour.push (.x xc .y yc) #(.x xf .y yf .onCurve true)
+	local final segments.[segments.length - 1].2
+	lastContour.push (.x final.x .y final.y .onCurve true)
 	return this
 }
 Glyph.prototype.cubicTo = Glyph.prototype.cubic-to

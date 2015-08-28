@@ -6,14 +6,6 @@ var TTF = require('node-sfnt').TTF;
 
 var argv = require('yargs').argv;
 
-function toArrayBuffer(buffer) {
-	var length = buffer.length;
-	var view = new DataView(new ArrayBuffer(length), 0, length);
-	for (var i = 0, l = length; i < l; i++) {
-		view.setUint8(i, buffer[i], false);
-	}
-	return view.buffer;
-}
 function toBuffer(arrayBuffer) {
 	var length = arrayBuffer.byteLength;
 	var view = new DataView(arrayBuffer, 0, length);

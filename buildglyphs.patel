@@ -471,7 +471,7 @@ define [buildFont para recursive] : begin {
 		set font.hhea.lineGap             [CAP * 0.2]
 		set font.'OS/2'.sTypoLineGap      [CAP * 0.2]
 		set font.'OS/2'.sxHeight          XH
-		set font.post.italicAnvle         [0 - para.italicangle]
+		set font.post.italicAngle         [0 - para.italicangle]
 	}
 	
 	# Necessary notdef glyph
@@ -531,6 +531,29 @@ define [buildFont para recursive] : begin {
 		if glyph.contours: foreach contour [items-of glyph.contours] : foreach point [items-of contour] : begin {
 			point.x = point.x * upmscale
 			point.y = point.y * upmscale
+		}
+	}
+	
+	# We will uprightify all italic glyphs before outputing
+	# to prevent rounding error for common glyphs
+	local finalUprightify : Upright
+	finalUprightify.x = 0
+	finalUprightify.y = 0
+	if [not recursive] : foreach glyph [items-of glyphList] : begin {
+		glyph.apply-transform finalUprightify
+		local p0 nothing
+		foreach [contour : items-of glyph.contours] : foreach [point : items-of contour] : begin {
+			if [not p0] : set p0 (.x point.x .y point.y)
+			if [[Math.abs point.x] < [Math.abs p0.x]] : set p0.x point.x
+			if [[Math.abs point.y] < [Math.abs p0.y]] : set p0.y point.y
+		}
+		if p0 : begin {
+			local pr (.x [Math.round p0.x] .y [Math.round p0.y])
+			foreach [contour : items-of glyph.contours] : foreach [k : range 0 contour.length] : set contour.(k) : object {
+				x : pr.x + [Math.round : contour.(k).x - p0.x]
+				y : pr.y + [Math.round : contour.(k).y - p0.y]
+				onCurve contour.(k).onCurve
+			}
 		}
 	}
 	

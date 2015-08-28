@@ -1,3 +1,5 @@
+TARGETUPM = 1000
+
 SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js generate.js emptyfont.toml
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 OBJDIR = build
@@ -6,11 +8,11 @@ SUPPRESS_ERRORS = 2> /dev/null
 
 TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
+OTFS    = $(subst .ttf,.otf,$(TARGETS))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
-PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
@@ -43,11 +45,7 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
 	fontforge -quiet -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
-# Pass 2 : Curve simplification
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
-	fontforge -quiet -script pass2-finalize.py $^ $@
-# Pass 3 : Simplify and output
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass1-%.ttf
 	ttfautohint $< $@
 
 update : $(FILES)

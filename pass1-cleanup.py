@@ -1,4 +1,6 @@
 import fontforge
+import psMat
+import math
 import sys
 
 source = sys.argv[1]
@@ -18,7 +20,24 @@ font.selection.all()
 font.removeOverlap()
 font.round()
 font.removeOverlap()
-font.addExtrema()
+for i in font:
+	glyph = font[i]
+	if len(glyph.references) > 0 and len(glyph.layers["Fore"]) > 0: # a mixed glyph
+		glyph.unlinkRef()
+		glyph.removeOverlap()
+
+font.layers["Fore"].is_quadratic = False
+font.selection.all()
+font.simplify(font.em / 1000.0, ("smoothcurves"), 0.05)
+font.transform(psMat.skew(-font.italicangle / 180 * math.pi))
+# convert cubic outlines to quadratic under 1000upm
+oldem = font.em
+font.em = 1000
+for i in font:
+	font[i].addExtrema(("all"))
+font.layers["Fore"].is_quadratic = True
+font.round()
+font.simplify(1)
 font.canonicalContours()
 font.canonicalStart()
 font.generate(sys.argv[3], flags = ("short-post", "opentype"))
