@@ -75,3 +75,18 @@ pass0 : $(PASS0)
 
 test : $(TARGETS)
 	cp $(TARGETS) $(MAPS) testdrive/
+
+# releaseing
+RELEASES = $(subst $(OBJDIR)/,releases/,$(TARGETS))
+$(RELEASES) : releases/%.ttf : $(OBJDIR)/%.ttf
+	cp $< $@
+PAGESTTF = $(subst $(OBJDIR)/,pages/,$(TARGETS))
+$(PAGESTTF) : pages/%.ttf : $(OBJDIR)/%.ttf
+	cp $< $@
+PAGESWOFF = $(subst .ttf,.woff,$(PAGESTTF))
+$(PAGESWOFF) : pages/%.woff : pages/%.ttf
+	sfnt2woff $<
+PAGESMAPS = $(subst $(OBJDIR)/,pages/,$(MAPS))
+$(PAGESMAPS) : pages/%.charmap : $(OBJDIR)/%.charmap
+	cp $< $@
+release : $(RELEASES) $(PAGESTTF) $(PAGESWOFF)
