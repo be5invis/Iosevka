@@ -164,31 +164,43 @@ foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
 	}
 }
 
+define [suggestName name] : begin {
+	if glyphs.(name) : begin {
+		local j 2
+		while glyphs.[name + j] : inc j
+		set name [name + j]
+	}
+	return name
+}
+
 # Build miniature clyphs : circled, superscripts, subscripts...
 define [createCircledGlyphs records] : if [not recursive] : begin {
+	local dscale 0.45
 	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.65
 	
-	foreach (unicode glyphid) [items-of records] : create-glyph ['circle' + glyphid] : glyph-construction {
+	foreach (unicode glyphid _scale shift) [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction {
+		local scale : fallback _scale dscale
 		local sw [adviceBlackness 6]
 		if unicode : assign-unicode unicode
-		include : create-glyph : glyph-construction {
+		include : create-glyph [suggestName : 'circleinner' + glyphid] : glyph-construction {
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
-			apply-transform : Scale 0.45
-			apply-transform : Translate [[WIDTH - WIDTH * 0.45] / 2] [sw * 2]
+			apply-transform : Translate [-WIDTH / 2] [-CAP / 2 + [fallback shift 0]]
+			apply-transform : Scale scale
+			apply-transform : Translate [WIDTH / 2] [CAP / 2 * dscale]
 			apply-transform : Italify
 		}
-		include : smallo [CAP * 0.45 + sw * 4] 0 SB RIGHTSB sw
+		include : smallo [CAP * dscale + sw * 2.5] [-sw * 2.5] [SB + O * 3] [RIGHTSB - O * 3] sw
 		apply-transform : Upright
-		apply-transform : Translate 0 [parenMid - [CAP * 0.45 + sw * 4] / 2]
+		apply-transform : Translate 0 [parenMid - CAP * dscale / 2]
 		apply-transform : Italify
 	}
 }
 define [createSuperscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['sup' + glyphid] : glyph-construction {
+	foreach (unicode glyphid) [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		include miniatureFont.(glyphid) AS_BASE
 		apply-transform [Upright] true
@@ -201,7 +213,7 @@ define [createSuperscripts records] : if [not recursive] : begin {
 define [createSubscripts records] : if [not recursive] : begin {
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph ['sub' + glyphid] : glyph-construction {
+	foreach (unicode glyphid) [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		include miniatureFont.(glyphid) AS_BASE
 		apply-transform [Upright] true
@@ -215,33 +227,32 @@ define [createSubscripts records] : if [not recursive] : begin {
 define [createFractions records] : if [not recursive] : begin {
 	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
 	local miniatureFont : Miniature pendingGlyphs 4 0.6
-	foreach (unicode numid denid height) [items-of records] : create-glyph [numid + 'over' + denid] : glyph-construction {
+	foreach (unicode numid denid height) [items-of records] : create-glyph [suggestName : numid + 'over' + denid] : glyph-construction {
 		if unicode : assign-unicode unicode
 		local fine : adviceBlackness 3.7
 		local dist : XH * 0.4
 		include : create-glyph : glyph-construction {
-			include : create-glyph : glyph-construction {
+			include : create-glyph [suggestName : 'num' + numid] : glyph-construction {
 				include miniatureFont.(numid)
 				apply-transform : Upright
 				apply-transform : Translate [- miniatureFont.(numid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Scale [CAP / [fallback height CAP] * 0.55]
 				apply-transform : Translate MIDDLE 0
 				apply-transform : Italify
 			}
 			apply-transform : Upright
-			apply-transform : Translate 0 [CAP + dist]
+			apply-transform : Translate 0 [CAP * 0.55 + dist]
 			apply-transform : Italify
-			include : create-glyph : glyph-construction {
+			include : create-glyph [suggestName : 'den' + denid] : glyph-construction {
 				include miniatureFont.(denid)
 				apply-transform : Upright
 				apply-transform : Translate [- miniatureFont.(denid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP]]
+				apply-transform : Scale [CAP / [fallback height CAP] * 0.55]
 				apply-transform : Translate MIDDLE 0
 				apply-transform : Italify
 			}
 			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] [-CAP - dist / 2]
-			apply-transform : Scale 0.55
+			apply-transform : Translate [-MIDDLE] [-CAP * 0.55 - dist / 2]
 			apply-transform : Translate MIDDLE parenMid
 			apply-transform : Italify
 		}
@@ -249,10 +260,16 @@ define [createFractions records] : if [not recursive] : begin {
 	}
 }
 
-createCircledGlyphs : list {
+if [not recursive] : createCircledGlyphs : [list {
 	list 0xA9   'C'
 	list 0xAE   'R'
 	list 0x2117 'P'
+	list null   'space' # a blank circle glyph for size optimization
+}].concat : let [a ()] : begin {
+	foreach [j : range 1 till 9] : a.push ([0x2460 + j - 1] unicodeGlyphs.[['0'.charCodeAt 0] + j].name)
+	foreach [j : range 0 26] : a.push ([0x24B6 + j] unicodeGlyphs.[['A'.charCodeAt 0] + j].name)
+	foreach [j : range 0 26] : a.push ([0x24D0 + j] unicodeGlyphs.[['a'.charCodeAt 0] + j].name 0.425 [CAP / 2 - XH / 2])
+	* a
 }
 
 create-glyph 'ordfeminine' : glyph-construction {
@@ -473,6 +490,8 @@ createFractions : list {
 	list 0x2106 'C' 'U'
 	# Powerline LN symbol
 	list 0xE0A1 'L' 'N'
+	# fraction bar
+	list null 'space' 'space'
 }
 
 # Ligatures

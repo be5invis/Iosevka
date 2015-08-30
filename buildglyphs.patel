@@ -74,6 +74,7 @@ define [buildFont para recursive] : begin {
 	define [Rotate angle] (.xx [Math.cos angle] .yx [-[Math.sin angle]] .xy [Math.sin angle] .yy [Math.cos angle] .x 0 .y 0)
 	
 	define globalTransform : Italify para.italicAngle
+	define deGlobalTransform : inverse globalTransform
 	define CORRECTION_HX : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
 	
 	# Orient parameters
@@ -344,7 +345,7 @@ define [buildFont para recursive] : begin {
 	
 	define [alsothru rx ry raf] (.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate)
 	define [alsothruthem rs raf] (.type 'interpolate' .rs rs .raf raf .af afInterpolateThem)
-	define [bezcontrols x1 y1 x2 y2 _samples notiny] : begin {
+	define [bezcontrols x1 y1 x2 y2 _samples raf] : begin {
 		local samples : fallback _samples 5
 		local tiny 0.005
 		local rs ()
@@ -354,11 +355,11 @@ define [buildFont para recursive] : begin {
 			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
 		}
 #		if [not notiny] : rs.push ([bez3 0 x1 x2 1 [1 - tiny]] [bez3 0 y1 y2 1 [1 - tiny]] 2)
-		alsothruthem rs
+		alsothruthem rs raf
 	}
-	define [quadcontrols x1 y1 samples] : bezcontrols [x1 * 2 / 3] [y1 * 2 / 3] [mix 1 x1 [2 / 3]] [mix 1 y1 [2 / 3]] samples
-	define [archv samples notiny] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples notiny
-	define [arcvh samples notiny] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples notiny
+	define [quadcontrols x1 y1 samples raf] : bezcontrols [x1 * 2 / 3] [y1 * 2 / 3] [mix 1 x1 [2 / 3]] [mix 1 y1 [2 / 3]] samples raf
+	define [archv samples] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples
+	define [arcvh samples] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples
 	
 	define [complexThru] : begin {
 		local a : ().slice.call arguments
@@ -419,13 +420,11 @@ define [buildFont para recursive] : begin {
 				libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 [-1]] true g
 				local rhsContour g.contours.0
 				set g.contours ([lhsContour.concat rhsContour])
-				g.cleanup
 			}
 			else {
 				local g : new Glyph
 				lhs.0.type = rhs.0.type = lhs.[lhs.length - 1].type = rhs.[rhs.length - 1].type = 'corner'
 				libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g
-				g.cleanup
 			}
 		}
 		return g.contours
@@ -541,20 +540,7 @@ define [buildFont para recursive] : begin {
 	finalUprightify.y = 0
 	if [not recursive] : foreach glyph [items-of glyphList] : begin {
 		glyph.apply-transform finalUprightify
-		local p0 nothing
-		foreach [contour : items-of glyph.contours] : foreach [point : items-of contour] : begin {
-			if [not p0] : set p0 (.x point.x .y point.y)
-			if [[Math.abs point.x] < [Math.abs p0.x]] : set p0.x point.x
-			if [[Math.abs point.y] < [Math.abs p0.y]] : set p0.y point.y
-		}
-		if p0 : begin {
-			local pr (.x [Math.round p0.x] .y [Math.round p0.y])
-			foreach [contour : items-of glyph.contours] : foreach [k : range 0 contour.length] : set contour.(k) : object {
-				x : pr.x + [Math.round : contour.(k).x - p0.x]
-				y : pr.y + [Math.round : contour.(k).y - p0.y]
-				onCurve contour.(k).onCurve
-			}
-		}
+		glyph.cleanup
 	}
 	
 	set font.glyfMap glyphs

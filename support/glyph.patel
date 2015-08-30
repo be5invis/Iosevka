@@ -2,6 +2,8 @@ define bezierCubic2Q2 [require './toquad']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 define Stroke [require './stroke'].Stroke
+define Bezier [require 'bezier-js']
+define [mix a b p] : a + [b - a] * p
 
 define id (
 	.xx 1
@@ -194,9 +196,34 @@ define [oncurveRemovable a b c] : begin {
 	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x] && [a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y] && [Math.abs [b.x - xm]] <= 0.5 && [Math.abs [b.y - ym]] <= 0.5
 }
 define [Glyph.prototype.cleanup] : begin {
-	return this
 	foreach c [range 0 this.contours.length] : begin {
-		local contour this.contours.(c)
+		local ocontour this.contours.(c)
+		# add infections
+		local contour (ocontour.0)
+		foreach [j : range 1 [ocontour.length - 1]] : piecewise {
+			ocontour.(j).onCurve : contour.push ocontour.(j)
+			true : begin {
+				local p0 contour.[contour.length - 1]
+				local p1 ocontour.(j)
+				local p2 ocontour.[j + 1]
+				if [not p2.onCurve] : set p1 (.x [mix p1.x p2.x 0.5] .y [mix p1.y p2.y 0.5] .onCurve true)
+				local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
+				local ts [strand.inflections].y
+				piecewise {
+					[!ts || ts.length < 1] : contour.push p1 p2
+					true : begin {
+						ts.unshift 0
+						ts.push 1
+						foreach [k : range 0 [ts.length - 1]] : begin {
+							local s : strand.split ts.(k) ts.[k + 1]
+							if s.points : contour.push (.x s.points.1.x .y s.points.1.y .onCurve false) (.x s.points.2.x .y s.points.2.y .onCurve true)
+						}
+					}
+				}
+			}
+		}
+		contour.push ocontour.[ocontour.length - 1]
+		# cleanup
 		local cleanedContour ()
 		foreach j [range 1 : contour.length - 1] : begin {
 			local p0 contour.[j - 1]

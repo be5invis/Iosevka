@@ -45,12 +45,12 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 	cat $^ > $@
 
 # Pass 1 : Outline cleanup and merge
-$(PASS1) : $(OBJDIR)/.pass1-%.ttf : $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
-	fontforge -quiet -script pass1-cleanup.py $^ $@ $(SUPPRESS_ERRORS)
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : $(OBJDIR)/.pass1-%.ttf
-	node pass2-smartround.js $^ $@ --upm $(TARGETUPM)
-$(PASS3) : $(OBJDIR)/.pass3-%.ttf : $(OBJDIR)/.pass2-%.ttf
-	fontforge -quiet -script pass3-finalize.py $^ $@ $(TARGETUPM)
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.ttf $(OBJDIR)/.pass0-%.fea
+	fontforge -quiet -script $^ $@ $(SUPPRESS_ERRORS)
+$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
+	node $^ $@ --upm $(TARGETUPM)
+$(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-finalize.py $(OBJDIR)/.pass2-%.ttf
+	fontforge -quiet -script $^ $@ $(TARGETUPM)
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass3-%.ttf
 	ttfautohint $< $@
 
