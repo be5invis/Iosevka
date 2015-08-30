@@ -15,6 +15,7 @@ FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
+PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
@@ -51,8 +52,10 @@ $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
 	node $^ $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-finalize.py $(OBJDIR)/.pass2-%.ttf
 	fontforge -quiet -script $^ $@ $(TARGETUPM)
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass3-%.ttf
+$(PASS4) : $(OBJDIR)/.pass4-%.ttf : $(OBJDIR)/.pass3-%.ttf
 	ttfautohint $< $@
+$(TARGETS) : $(OBJDIR)/%.ttf : pass4-fixmeta.js $(OBJDIR)/.pass4-%.ttf
+	node $^ $@
 
 update : $(FILES)
 
