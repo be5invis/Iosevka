@@ -27,6 +27,7 @@ for i in font:
 		glyph.removeOverlap()
 font.selection.all()
 font.replaceWithReference(2)
+
 # Outline simplify
 print "Simplify, pass 1: ", font.fontname
 font.layers["Fore"].is_quadratic = False
@@ -39,6 +40,7 @@ font.em = 1000
 font.layers["Fore"].is_quadratic = True
 font.transform(psMat.skew(-font.italicangle / 180 * math.pi))
 
+# Feature merging and output
 print "Finalize: ", font.fontname
 font.em = oldem
 font.mergeFeature(sys.argv[2])
