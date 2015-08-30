@@ -52,10 +52,13 @@ $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
 	node $^ $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-finalize.py $(OBJDIR)/.pass2-%.ttf
 	fontforge -quiet -script $^ $@ $(TARGETUPM)
-$(PASS4) : $(OBJDIR)/.pass4-%.ttf : $(OBJDIR)/.pass3-%.ttf
+$(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-fixmeta.js $(OBJDIR)/.pass3-%.ttf
+	@node $^ $@.a.ttf
+	@ttx -o $@.a.ttx $@.a.ttf
+	@ttx -o $@ $@.a.ttx
+	@rm $@.a.ttf $@.a.ttx
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
 	ttfautohint $< $@
-$(TARGETS) : $(OBJDIR)/%.ttf : pass4-fixmeta.js $(OBJDIR)/.pass4-%.ttf
-	node $^ $@
 
 update : $(FILES)
 
