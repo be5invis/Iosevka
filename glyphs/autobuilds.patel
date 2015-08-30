@@ -175,23 +175,27 @@ define [suggestName name] : begin {
 
 # Build miniature clyphs : circled, superscripts, subscripts...
 define [createCircledGlyphs records] : if [not recursive] : begin {
-	local dscale 0.45
+	local dscale 0.55
 	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.65
+	local miniatureFont : Miniature pendingGlyphs 4 0.65
 	
-	foreach (unicode glyphid _scale shift) [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction {
-		local scale : fallback _scale dscale
+	foreach (unicode glyphid w) [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction {
+		local width : fallback w WIDTH
+		set-width width
 		local sw [adviceBlackness 6]
 		if unicode : assign-unicode unicode
 		include : create-glyph [suggestName : 'circleinner' + glyphid] : glyph-construction {
-			include miniatureFont.(glyphid)
+			local g miniatureFont.(glyphid)
+			include g
+			local shift 0
+			if [g.anchors.above && g.anchors.below] : set shift : CAP / 2 -  [mix g.anchors.above.y g.anchors.below.y 0.5]
 			apply-transform : Upright
-			apply-transform : Translate [-WIDTH / 2] [-CAP / 2 + [fallback shift 0]]
-			apply-transform : Scale scale
-			apply-transform : Translate [WIDTH / 2] [CAP / 2 * dscale]
+			apply-transform : Translate [-WIDTH / 2] [-CAP / 2 + shift]
+			apply-transform : Scale dscale
+			apply-transform : Translate [width / 2] [CAP / 2 * dscale]
 			apply-transform : Italify
 		}
-		include : smallo [CAP * dscale + sw * 2.5] [-sw * 2.5] [SB + O * 3] [RIGHTSB - O * 3] sw
+		include : smallo [CAP * dscale + sw * 3] [-sw * 3] [Math.max [SB + O * 3] [width / 2 - CAP / 2 * dscale - sw * 2.5]] [Math.min [width - SB - O * 3] [width / 2 + CAP / 2 * dscale + sw * 2.5]] sw [SMALLSMOOTHA * width / WIDTH] [SMALLSMOOTHB * width / WIDTH]
 		apply-transform : Upright
 		apply-transform : Translate 0 [parenMid - CAP * dscale / 2]
 		apply-transform : Italify
@@ -264,11 +268,12 @@ if [not recursive] : createCircledGlyphs : [list {
 	list 0xA9   'C'
 	list 0xAE   'R'
 	list 0x2117 'P'
-	list null   'space' # a blank circle glyph for size optimization
+	list 0x24EA 'zero' FULLWIDTH
+	list null   'space' FULLWIDTH # a blank circle glyph for size optimization
 }].concat : let [a ()] : begin {
-	foreach [j : range 1 till 9] : a.push ([0x2460 + j - 1] unicodeGlyphs.[['0'.charCodeAt 0] + j].name)
-	foreach [j : range 0 26] : a.push ([0x24B6 + j] unicodeGlyphs.[['A'.charCodeAt 0] + j].name)
-	foreach [j : range 0 26] : a.push ([0x24D0 + j] unicodeGlyphs.[['a'.charCodeAt 0] + j].name 0.425 [CAP / 2 - XH / 2])
+	foreach [j : range 1 till 9] : a.push ([0x2460 + j - 1] unicodeGlyphs.[['0'.charCodeAt 0] + j].name FULLWIDTH)
+	foreach [j : range 0 26] : a.push ([0x24B6 + j] unicodeGlyphs.[['A'.charCodeAt 0] + j].name FULLWIDTH)
+	foreach [j : range 0 26] : a.push ([0x24D0 + j] unicodeGlyphs.[['a'.charCodeAt 0] + j].name FULLWIDTH)
 	* a
 }
 
