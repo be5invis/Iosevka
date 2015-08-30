@@ -35,5 +35,6 @@ function writettf(ttf, file){
 
 var ttf = readttf(process.argv[2]);
 // Fixes xAvgCharWidth
-if(process.argv[3]) ttf['OS/2'].xAvgCharWidth = ttf.head.unitsPerEm / 2; // 0.5em
+ttf['OS/2'].xAvgCharWidth = ttf.head.unitsPerEm / 2; // 0.5em
+ttf.post.isFixedPitch = 1                            // mono
 fs.writeFileSync(process.argv[3], toBuffer(new TTFWriter(options).write(ttf)));
