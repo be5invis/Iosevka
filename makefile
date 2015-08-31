@@ -95,4 +95,4 @@ $(PAGESWOFF) : pages/%.woff : pages/%.ttf
 PAGESMAPS = $(subst $(OBJDIR)/,pages/,$(MAPS))
 $(PAGESMAPS) : pages/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
-release : $(RELEASES) $(PAGESTTF) $(PAGESWOFF)
+release : $(RELEASES) $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
