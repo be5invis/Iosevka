@@ -5,9 +5,10 @@ import math
 
 source = sys.argv[1]
 font = fontforge.open(source)
-font.em = int(sys.argv[3])
+font.em = int(sys.argv[4])
 font.selection.all()
 font.round()
 font.removeOverlap()
 font.simplify(0.1)
-font.generate(sys.argv[2], flags = ("short-post", "opentype"))
+font.mergeFeature(sys.argv[2])
+font.generate(sys.argv[3], flags = ("short-post", "opentype"))

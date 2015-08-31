@@ -43,8 +43,7 @@ font.transform(psMat.skew(-font.italicangle / 180 * math.pi))
 # Feature merging and output
 print "Finalize: ", font.fontname
 font.em = oldem
-font.mergeFeature(sys.argv[2])
 
 font.canonicalContours()
 font.canonicalStart()
-font.generate(sys.argv[3], flags = ("short-post", "opentype"))
+font.generate(sys.argv[2])
