@@ -47,7 +47,7 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.ttf
-	fontforge -quiet -script $^ $@ $(SUPPRESS_ERRORS)
+	fontforge -quiet -script $^ $@ $(FAST) $(SUPPRESS_ERRORS)
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
 	node $^ $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(OBJDIR)/.pass0-%.fea

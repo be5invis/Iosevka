@@ -109,6 +109,8 @@ create-glyph 'g' : glyph-construction {
 	line-to    [RIGHTSB + 0.25 * SB] [XH - STROKE]
 	line-to    MIDDLE  [XH - STROKE - O]
 	line-to    MIDDLE  XH
+	
+	set-anchor 'overlay' BASE MIDDLE [mix [DESCENDER + O] groundy 0.53]
 }
 
 ### c e t
@@ -189,22 +191,23 @@ create-glyph 'e' : glyph-construction {
 	}
 }
 define [SmallTShape top bot] : glyph-construction {
-	local center : MIDDLE - TBALANCE + HALFSTROKE
-	local hookx  [center - STROKE * 2 + [WIDTH - SB * 2] * 0.8 - OXHOOK + TAILADJX * globalTransform.yx]
-	local turn : [mix center hookx 0.5] + CORRECTION_OMIDS - CORRECTION_VS
+	local center : MIDDLE - TBALANCE - HALFSTROKE
+	local hookx  [center + [WIDTH - SB * 2] * 0.8 - OXHOOK + TAILADJX * globalTransform.yx]
+	local turn : [mix center hookx 0.5] + CORRECTION_OMIDS
 	local smb  : [turn - center] * 1.2
 	
 	include : spiro {
-		widths.rhs
+		widths.lhs
 		flat center top [heading DOWNWARD]
-		curl center [bot + smb + STROKE]
-		arcvh
-		g4 turn [bot + O + STROKE]
+		curl center [bot + smb]
+		arcvh 6
+		g4 turn [bot + O]
 		quadcontrols [KAPPA_HOOK + 0.75 * globalTransform.yx + 0.1] 0
-		g4 hookx [bot + HOOK + STROKE * 0.24]
+		g4 hookx [bot + HOOK]
 	}
+	set-anchor 'bottomright' BASE hookx [bot + HOOK]
 	
-	include : HBarTop [center - HALFSTROKE - LONGJUT + TBALANCE2] [center - HALFSTROKE + LONGJUT + TBALANCE2] [top * XH / CAP]
+	include : HBarTop [center + HALFSTROKE - LONGJUT + TBALANCE2] [center + HALFSTROKE + LONGJUT + TBALANCE2] XH
 }
 create-glyph 't' : glyph-construction {
 	set-width WIDTH
@@ -295,21 +298,19 @@ create-glyph 'h' : glyph-construction {
 		:.line-to SB CAP
 		:.heads-to UPWARD
 }
+define [SmallMShape top bot] : glyph-construction {
+	local m1 : mix [SB + O] [MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX] 0.5
+	local m2 : mix [RIGHTSB - O] [MIDDLE - MVERTSTROKE / 2 * CORRECTION_HX] 0.5
+	include : mShoulderSpiro [SB + O + MVERTSTROKE * CORRECTION_HX] [MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX] top bot MVERTSTROKE [MVERTSTROKE * 0.4]
+	include : mShoulderSpiro [MIDDLE + MVERTSTROKE * 0.5 * CORRECTION_HX] [RIGHTSB - O] top bot MVERTSTROKE [MVERTSTROKE * 0.8]
+	include : VBarLeft [SB + O] bot top MVERTSTROKE
+}
 create-glyph 'm' : glyph-construction {
 	set-width WIDTH
 	assign-unicode 'm'
 	include eMarks
 	
-	local m1 : mix [SB + O] [MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX] 0.5
-	local m2 : mix [RIGHTSB - O] [MIDDLE - MVERTSTROKE / 2 * CORRECTION_HX] 0.5
-	include : mShoulderSpiro [SB + O + MVERTSTROKE * CORRECTION_HX] [MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX] XH 0 MVERTSTROKE [MVERTSTROKE * 0.4]
-	include : mShoulderSpiro [MIDDLE + MVERTSTROKE * 0.5 * CORRECTION_HX] [RIGHTSB - O] XH 0 MVERTSTROKE [MVERTSTROKE * 0.8]
-	include : create-stroke
-		:.start-from [SB + O] 0
-		:.heads-to UPWARD
-		:.set-width 0 MVERTSTROKE
-		:.line-to [SB + O] XH
-		:.heads-to UPWARD
+	include : SmallMShape XH 0
 }
 
 ### i j l

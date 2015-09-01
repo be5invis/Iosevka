@@ -6,13 +6,16 @@ import sys
 source = sys.argv[1]
 font = fontforge.open(source)
 
+print sys.argv
+
 # Replace accented characters into references
-print "Reference finding: ", font.fontname
-font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
-font.replaceWithReference(2)
-font.selection.all()
-font.selection.select(("less", None), "I.straight", "dotlessi.straight", "l.straight", "rtailBR")
-font.replaceWithReference(2)
+if len(sys.argv) <= 3:
+	print "Reference finding: ", font.fontname
+	font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
+	font.replaceWithReference(2)
+	font.selection.all()
+	font.selection.select(("less", None), "I.straight", "dotlessi.straight", "l.straight", "ltailBR", "rtailBR")
+	font.replaceWithReference(2)
 
 # Remove overlapped area
 print "Overlap Removal: ", font.fontname
@@ -25,8 +28,9 @@ for i in font:
 	if len(glyph.references) > 0 and len(glyph.layers["Fore"]) > 0: # a mixed glyph
 		glyph.unlinkRef()
 		glyph.removeOverlap()
-font.selection.all()
-font.replaceWithReference(2)
+if len(sys.argv) <= 3:
+	font.selection.all()
+	font.replaceWithReference(2)
 
 # Outline simplify
 print "Simplify, pass 1: ", font.fontname
