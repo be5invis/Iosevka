@@ -11,7 +11,7 @@ print "Reference finding: ", font.fontname
 font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
 font.replaceWithReference(2)
 font.selection.all()
-font.selection.select(("less", None), "I.straight", "dotlessi.straight", "l.straight")
+font.selection.select(("less", None), "I.straight", "dotlessi.straight", "l.straight", "rtailBR")
 font.replaceWithReference(2)
 
 # Remove overlapped area

@@ -58,8 +58,8 @@ if(argv.dumpfeature) {
 	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n' + mkmk.bases.join(';\n') + ';} mkmkAuto;'
 	
 	// gdef
-	//var gdef = ttfFont.features.gdef;
-	//featurefile += '@GDEF_Simple = [' + gdef.simple.join(' \n') + '];\n@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\ntable GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
+	var gdef = ttfFont.features.gdef;
+	featurefile += '@GDEF_Simple = [' + gdef.simple.join(' \n') + '];\n@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\ntable GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
 
 	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8');
 };
