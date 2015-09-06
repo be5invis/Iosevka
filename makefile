@@ -42,6 +42,8 @@ $(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
+$(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.ttf
+	-@echo Autobuild CM $@ from $<
 $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea
 	cat $^ > $@
 

@@ -137,12 +137,7 @@ define [YShape top] : glyph-construction {
 	local cross [top * 0.4]
 	include : halfXStrand SB top MIDDLE cross 0.1 0.4 0.28
 	include : halfXStrand RIGHTSB top MIDDLE cross 0.1 0.4 0.28
-	include : create-stroke
-		:.start-from MIDDLE 0
-		:.set-width HALFSTROKE HALFSTROKE
-		:.heads-to UPWARD
-		:.line-to MIDDLE [cross + HALFSTROKE]
-		:.heads-to UPWARD
+	include : VBar MIDDLE 0 [cross + HALFSTROKE]
 }
 create-glyph 'Y' : glyph-construction {
 	set-width WIDTH
@@ -151,24 +146,12 @@ create-glyph 'Y' : glyph-construction {
 	include : YShape CAP
 }
 
-create-glyph 'K' : glyph-construction {
-	set-width WIDTH
-	assign-unicode 'K'
-	include capitalMarks
-	
+define [KShape] : glyph-construction {
 	local TURN [CAP * 0.95]
 	local rturn [XH * 0.1]
 	local right [RIGHTSB - O]
 	
 	local fine : adviceBlackness 3.5
-	
-	include : create-stroke 
-		:.start-from SB 0
-		:.set-width  0 STROKE
-		:.heads-to   UPWARD
-		:.line-to    SB CAP
-		:.heads-to   UPWARD
-		
 	include : create-stroke
 		:.start-from RIGHTSB CAP
 		:.heads-to   DOWNWARD
@@ -184,7 +167,13 @@ create-glyph 'K' : glyph-construction {
 		:.set-width HALFSTROKE HALFSTROKE
 		:.curve-to [right - HALFSTROKE] [rturn + 0.2 * [XH - rturn]] MIDDLE [CAPMIDDLE + HALFSTROKE]
 		:.set-width [fine / 2] [fine / 2]
-		
+}
+create-glyph 'K' : glyph-construction {
+	set-width WIDTH
+	assign-unicode 'K'
+	include capitalMarks	
+	include : VBarLeft SB 0 CAP
+	include : KShape
 }
 
 ### B D P R
@@ -246,26 +235,27 @@ create-glyph 'D' : glyph-construction {
 		curl [SB - O] 0 [heading LEFTWARD]
 	}
 }
-define [PShape top] : glyph-construction {
+define [PShape top _mul bp] : glyph-construction {
+	local mul : fallback _mul 1.25
 	local bowlTop [top * 1]
-	local bowlBottom [[top - STROKE] * 0.55 - HALFSTROKE]
+	local bowlBottom [[top - STROKE] * [fallback bp 0.55] - HALFSTROKE]
 	
 	local turn : mix bowlTop bowlBottom [SMOOTHB / [SMOOTHA + SMOOTHB]]
 	local turnRadius : [bowlTop - bowlBottom] * 0.45
 	include : spiro {
 		widths.rhs
-		flat [SB * 1.25 - O] bowlTop [heading RIGHTWARD]
+		flat [SB * mul - O] bowlTop [heading RIGHTWARD]
 		curl [RIGHTSB - turnRadius - CORRECTION_OMIDS] bowlTop
 		archv
 		g4 [RIGHTSB - O] turn
 		arcvh
 		flat [RIGHTSB - turnRadius + CORRECTION_OMIDS] bowlBottom
-		curl [SB * 1.25 - O] bowlBottom [heading LEFTWARD]
+		curl [SB * mul - O] bowlBottom [heading LEFTWARD]
 	}
-	include : VBarLeft [SB * 1.25] 0 top
+	include : VBarLeft [SB * mul] 0 top
 }
 define [RShape top] : glyph-construction {
-	include : PShape top
+	include : PShape top 1
 	local TURN [XH * 0.1]
 	local right [RIGHTSB - O]
 	include : create-stroke
@@ -337,7 +327,7 @@ create-glyph 'O' : glyph-construction {
 	assign-unicode 'O'
 	include capitalMarks
 	
-	include : smallo CAP 0 [SB - O] [RIGHTSB + O] nothing SMOOTHA SMOOTHB
+	include : smallo CAP 0 SB RIGHTSB nothing SMOOTHA SMOOTHB
 }
 
 create-glyph 'Q' : glyph-construction {
