@@ -12,27 +12,22 @@ create-glyph 'section' : glyph-construction {
 	
 	local top parenTop
 	local bot parenBot
-	local sma [SMOOTHA * 0.85]
+	local sma SMOOTHA
 	
-	local extension1    0.5
-	local extension2    0.625
-	local extension3x   0.5
-	local extension3y : mix extension1 [1 - sma / [top - bot]] 0.5
+	local s : spiro {
+		widths.lhs
+		g4 RIGHTSB [top - HOOK]
+		hookstart top
+		g4 SB [top - sma]
+		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		g4 RIGHTSB [mix bot top 0.501] [widths 0 STROKE]
+		g4 RIGHTSB [mix bot top 0.5] [widths 0 STROKE]
+		g4 [mix SB RIGHTSB 0.6] [mix bot top 0.29]
+	}
 	
-	include : XSHookUpper top SB MIDDLE RIGHTSB sma HOOK
-	include : sStrand [top - sma] [mix bot top extension1]
-	include : sStrand [mix top bot extension1] [bot + sma]
-	include : XSHookLower bot SB MIDDLE RIGHTSB sma HOOK
-	
-	include : create-stroke
-		:.start-from [SB + HALFSTROKE] [[mix top bot extension1] - HALFSTROKE * [globalTransform.yx * 0.985]]
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [SB + HALFSTROKE] [mix bot top extension2] [mix [SB + HALFSTROKE] [RIGHTSB - HALFSTROKE] extension3x] [mix bot top extension3y]
-	
-	include : create-stroke
-		:.start-from [RIGHTSB - HALFSTROKE] [[mix bot top extension1] + HALFSTROKE * [globalTransform.yx * 0.985]]
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.curve-to   [RIGHTSB - HALFSTROKE] [mix top bot extension2] [mix [RIGHTSB - HALFSTROKE] [SB + HALFSTROKE] extension3x] [mix top bot extension3y]
+	include s
+	include : FlipAround MIDDLE parenMid
+	include s
 }
 
 create-glyph 'exclamDown' : glyph-construction {
