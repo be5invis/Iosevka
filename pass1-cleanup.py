@@ -6,8 +6,6 @@ import sys
 source = sys.argv[1]
 font = fontforge.open(source)
 
-print sys.argv
-
 # Replace accented characters into references
 if len(sys.argv) <= 3:
 	print "Reference finding: ", font.fontname
@@ -31,6 +29,8 @@ for i in font:
 if len(sys.argv) <= 3:
 	font.selection.all()
 	font.replaceWithReference(2)
+	font.selection.select(("ranges", "unicode", None), 0x20, 0x7e)
+	font.unlinkReferences()
 
 # Outline simplify
 print "Simplify, pass 1: ", font.fontname
