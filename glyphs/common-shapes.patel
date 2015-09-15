@@ -385,38 +385,34 @@ define [hookend y p f dontextend] : return (.type 'interpolate' .af [lambda [bef
 }])
 
 # Derived subfonts
-define [Miniature glyphs fold scale] : begin {
-	local forkedPara : Object.create para
-	forkedPara.upmscale = 1
-	forkedPara.stroke = [adviceBlackness fold] / scale
-	forkedPara.sb = SB / 2
+define [Fork glyphs params] : begin {
+	local p : Object.create params
+	p.upmscale = 1
 	local shouldBuildList ()
 	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
-	local forkFont : buildFont forkedPara shouldBuildList
+	local forkFont : buildFont p shouldBuildList
 	return forkFont.glyfMap
+}
+define [Miniature glyphs fold scale] : begin {
+	local forkedPara : Object.create para
+	forkedPara.stroke = [adviceBlackness fold] / scale
+	forkedPara.sb = SB / 2
+	return : Fork glyphs forkedPara
 }
 define [Thinner glyphs p] : begin {
 	local forkedPara : Object.create para
-	forkedPara.upmscale = 1
 	forkedPara.width = WIDTH * p
-	local shouldBuildList ()
-	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
-	local forkFont : buildFont forkedPara shouldBuildList
-	return forkFont.glyfMap
+	return : Fork glyphs forkedPara
 }
 define [Widen glyphs p psb] : begin {
 	local forkedPara : Object.create para
-	forkedPara.upmscale = 1
 	forkedPara.width = WIDTH * p
 	forkedPara.sb = SB * [fallback psb p]
 	forkedPara.accentx = ACCENTX * p
 	forkedPara.jut = JUT * p
 	forkedPara.longjut = LONGJUT * p
 	forkedPara.hookx = HOOKX * p
-	local shouldBuildList ()
-	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat (glyphid :: dependencyProfile.(glyphid))
-	local forkFont : buildFont forkedPara shouldBuildList
-	return forkFont.glyfMap
+	return : Fork glyphs forkedPara
 }
 define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction {
 	if unicode : assign-unicode unicode
