@@ -19,10 +19,9 @@ function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
 
 var options = {preserveOS2Version: true}
 
-var variant = argv._[0]
-var outputPath = argv._[1]
+var outputPath = argv.o
 
-var ttfFont = buildGlyphs.build(parameters[variant]);
+var ttfFont = buildGlyphs.build(parameters.build(argv._));
 
 ttfFont.glyf = [ttfFont.glyf[0]].concat(ttfFont.glyf.slice(1).sort(function(a, b){
 	if(a.unicode && b.unicode && a.unicode[0] && b.unicode[0]) return a.unicode[0] - b.unicode[0]
@@ -37,9 +36,6 @@ if(argv.dumpmap) {
 };
 if(argv.dumpfeature) {
 	var featurefile = '\n\n';
-	// ccmp
-	// var ccmp = ttfFont.features.ccmp;
-	// featurefile += 'lookup ccmpAuto {' + ccmp.join(';\n') + ';} ccmpAuto;';
 
 	// markGlyphs
 	for(var key in ttfFont.features.markGlyphs){

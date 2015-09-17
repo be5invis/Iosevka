@@ -1,6 +1,6 @@
 TARGETUPM = 1000
 
-SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js generate.js emptyfont.toml
+SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js generate.js emptyfont.toml parameters.toml
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 OBJDIR = build
 
@@ -21,24 +21,24 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 
 fonts : update $(TARGETS)
 	
-
+PASS0C = -o $@ --dumpmap $(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$(subst .ttf,.charmap,$@)) --dumpfeature $(subst .ttf,.ab.fea,$@)
 # Pass 0 : file construction
 $(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) | $(OBJDIR)
-	node generate regular $@ --dumpmap $(OBJDIR)/iosevka-regular.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-regular.ab.fea
+	node generate $(PASS0C) iosevka		w-book	s-upright	x-regular
 $(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) | $(OBJDIR)
-	node generate bold $@ --dumpmap $(OBJDIR)/iosevka-bold.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bold.ab.fea
+	node generate $(PASS0C) iosevka		w-bold	s-upright	x-bold
 $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
-	node generate italic $@ --dumpmap $(OBJDIR)/iosevka-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-italic.ab.fea
+	node generate $(PASS0C) iosevka		w-book	s-italic	x-italic
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
-	node generate bolditalic $@ --dumpmap $(OBJDIR)/iosevka-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevka-bolditalic.ab.fea
+	node generate $(PASS0C) iosevka		w-bold	s-italic	x-bolditalic
 $(OBJDIR)/.pass0-iosevkacc-regular.ttf : $(FILES) | $(OBJDIR)
-	node generate regularCC $@ --dumpmap $(OBJDIR)/iosevkacc-regular.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-regular.ab.fea
+	node generate $(PASS0C) iosevka cc	w-book	s-upright	x-regular
 $(OBJDIR)/.pass0-iosevkacc-bold.ttf : $(FILES) | $(OBJDIR)
-	node generate boldCC $@ --dumpmap $(OBJDIR)/iosevkacc-bold.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bold.ab.fea
+	node generate $(PASS0C) iosevka cc	w-bold	s-upright	x-bold
 $(OBJDIR)/.pass0-iosevkacc-italic.ttf : $(FILES) | $(OBJDIR)
-	node generate italicCC $@ --dumpmap $(OBJDIR)/iosevkacc-italic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-italic.ab.fea
+	node generate $(PASS0C) iosevka cc	w-book	s-italic	x-italic
 $(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
-	node generate bolditalicCC $@ --dumpmap $(OBJDIR)/iosevkacc-bolditalic.charmap --dumpfeature $(OBJDIR)/.pass0-iosevkacc-bolditalic.ab.fea
+	node generate $(PASS0C) iosevka cc	w-bold	s-italic	x-bolditalic
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
