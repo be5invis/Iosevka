@@ -1,6 +1,11 @@
+var path = require('path');
 var fs = require('fs');
 var TTFReader = require('node-sfnt').TTFReader;
 var TTFWriter = require('node-sfnt').TTFWriter;
+var toml = require('toml');
+
+var param = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'))
+
 function toArrayBuffer(buffer) {
     var length = buffer.length;
     var view = new DataView(new ArrayBuffer(length), 0, length);
@@ -36,5 +41,7 @@ function writettf(ttf, file){
 var ttf = readttf(process.argv[2]);
 // Fixes xAvgCharWidth
 ttf['OS/2'].xAvgCharWidth = ttf.head.unitsPerEm / 2; // 0.5em
+ttf['OS/2'].sxHeight = param.iosevka.xheight
+ttf['OS/2'].sCapHeight = param.iosevka.cap
 ttf.post.isFixedPitch = 1                            // mono
 fs.writeFileSync(process.argv[3], toBuffer(new TTFWriter(options).write(ttf)));
