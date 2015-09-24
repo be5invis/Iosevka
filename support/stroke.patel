@@ -4,10 +4,10 @@ define Bezier [require 'bezier-js']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 
-define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
-define [mix a b p] : a + [b - a] * p
-define [xs-array a] ([a.0 - 1] :: [a.concat ([a`[a.length - 1] + 1])])
-define [ys-array a] (a.0 :: [a.concat (a`[a.length - 1])])
+define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
+define [mix a b p] : a + (b - a) * p
+define [xs-array a] {(a.0 - 1) :: [a.concat {(a.((a.length - 1)) + 1)}]}
+define [ys-array a] {a.0 :: [a.concat {a.((a.length - 1))}]}
 
 define SAMPLES 3
 define TINY 0.001
@@ -16,257 +16,238 @@ define KAPPA 0.51
 define BKAPPA : KAPPA + 0.1
 define CKAPPA BKAPPA
 
-define [Stroke] : begin {
-	this.points = ()
+define [Stroke] : begin
+	this.points = {}
 	this.samples = SAMPLES
-	this.gizmo = (
-		.xx 1
+	this.gizmo = {
+	.xx 1
 		.yx 0
 		.xy 0
 		.yy 1
 		.x 0
 		.y 0
-	)
+	}
 	this.defaultd1 = 0
 	this.defaultd2 = 0
 	return this
-}
-define Stroke.is : object {
-	unapply : function [obj] : if [obj <@ Stroke] (obj) null
-}
-define [Stroke.prototype.set-transform t] : begin {
+
+define Stroke.is : object
+	unapply : function [obj] : if (obj <@ Stroke) {obj} null
+
+define [Stroke.prototype.set-transform t] : begin
 	this.gizmo = t
 	return this
-}
-define [Stroke.prototype.set-width d1 d2] : begin {
-	local point this.points`[this.points.length - 1]
-	if point {
-		then {
+
+define [Stroke.prototype.set-width d1 d2] : begin
+	local point this.points.((this.points.length - 1))
+	if point
+		then
 			point.d1 = d1
 			point.d2 = d2
-		}
-		else {
+		else
 			this.defaultd1 = d1
 			this.defaultd2 = d2
-		}
-	}
 	return this
-}
-define [Stroke.prototype.heads-to x y] : begin {
-	if [x.x !== nothing || x.y !== nothing] : begin {
+
+define [Stroke.prototype.heads-to x y] : begin
+	if (x.x !== nothing || x.y !== nothing) : begin
 		set y x.y
 		set x x.x
-	}
-	local point this.points`[this.points.length - 1]
+	local point this.points.((this.points.length - 1))
 	point.pdx = x
 	point.pdy = y
 	return this
-}
-define [Stroke.prototype.start-from x y] : begin {
-	#local pt [tp this.gizmo (.x x .y y .onCurve true .subdivided false)]
-	#if [x === 250] : console.log x y this.gizmo pt
-	this.points = ([tp this.gizmo (.x x .y y .onCurve true .subdivided false)])
+
+define [Stroke.prototype.start-from x y] : begin
+	this.points = {[tp this.gizmo {.x x .y y .onCurve true .subdivided false}]}
 	return this
-}
+
 Stroke.prototype.moveTo = Stroke.prototype.start-from
-define [Stroke.prototype.line-to x y subdivided] : begin {
-	this.points.push [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
+define [Stroke.prototype.line-to x y subdivided] : begin
+	this.points.push [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
 	return this
-}
+
 Stroke.prototype.lineTo = Stroke.prototype.line-to
-define [Stroke.prototype.curve-to xc yc x y subdivided] : begin {
-	this.points.push [tp this.gizmo (.x xc .y yc .onCurve false)] [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
+define [Stroke.prototype.curve-to xc yc x y subdivided] : begin
+	this.points.push [tp this.gizmo {.x xc .y yc .onCurve false}] [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
 	return this
-}
-define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y subdivided] : begin {
-	this.points.push [tp this.gizmo (.x x1 .y y1 .onCurve false .cubic true)] [tp this.gizmo (.x x2 .y y2 .onCurve false .cubic true)] [tp this.gizmo (.x x .y y .onCurve true .subdivided subdivided)]
+
+define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y subdivided] : begin
+	this.points.push [tp this.gizmo {.x x1 .y y1 .onCurve false .cubic true}] [tp this.gizmo {.x x2 .y y2 .onCurve false .cubic true}] [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
 	return this
-}
+
 Stroke.prototype.cubicTo = Stroke.prototype.cubic-to
-define [Stroke.prototype.arc-vh-to x y _kappah _kappav] : begin {
+define [Stroke.prototype.arc-vh-to x y _kappah _kappav] : begin
 	local kappah : fallback _kappah BKAPPA
 	local kappav : fallback _kappav _kappah CKAPPA
-	local last :utp this.gizmo this.points`[this.points.length - 1]
-	this.cubic-to last.x [last.y + kappav * [y - last.y]] [x + kappah * [last.x - x]] y x y
+	local last :utp this.gizmo this.points.((this.points.length - 1))
+	this.cubic-to last.x (last.y + kappav * (y - last.y)) (x + kappah * (last.x - x)) y x y
 	return this
-}
-define [Stroke.prototype.arc-hv-to x y _kappah _kappav] : begin {
+
+define [Stroke.prototype.arc-hv-to x y _kappah _kappav] : begin
 	local kappah : fallback _kappah BKAPPA
 	local kappav : fallback _kappav _kappah CKAPPA
-	local last :utp this.gizmo this.points`[this.points.length - 1]
-	this.cubic-to [last.x + kappah * [x - last.x]] last.y x [y + kappav * [last.y - y]] x y
+	local last :utp this.gizmo this.points.((this.points.length - 1))
+	this.cubic-to (last.x + kappah * (x - last.x)) last.y x (y + kappav * (last.y - y)) x y
 	return this
-}
-define [Stroke.prototype.set-samples samples] : begin {
+
+define [Stroke.prototype.set-samples samples] : begin
 	this.samples = samples
 	return this
-}
-define [Stroke.prototype.max-samples samples] : begin {
+
+define [Stroke.prototype.max-samples samples] : begin
 	this.maxSamples = samples
 	return this
-}
 
-define [dforward p0 p1 p2 p3] (
-	.x [p0.x + [[-11] / 6 * p0.x + 3 * p1.x - 3 / 2 * p2.x + p3.x / 3] / TINY * LITTLE]
-	.y [p0.y + [[-11] / 6 * p0.y + 3 * p1.y - 3 / 2 * p2.y + p3.y / 3] / TINY * LITTLE]
-)
-define [dbackward p0 p1 p2 p3] (
-	.x [p0.x + [11 / 6 * p0.x - 3 * p1.x + 3 / 2 * p2.x - p3.x / 3] / TINY * LITTLE]
-	.y [p0.y + [11 / 6 * p0.y - 3 * p1.y + 3 / 2 * p2.y - p3.y / 3] / TINY * LITTLE]
-)
-define [nonlinear a b c] : [Math.abs [[c.y - a.y] * [b.x - a.x] - [c.x - a.x] * [b.y - a.y]]] > TINY
-define [midclose a b c] : begin {
-	local xm : [a.x + c.x] / 2
-	local ym : [a.y + c.y] / 2
-	return : [Math.abs [b.x - xm]] < 0.5 && [Math.abs [b.y - ym]] < 0.5
-}
-define [near a b c] : begin {
-	local mx : [a.x + c.x] / 2
-	local my : [a.y + c.y] / 2
-	local dist : Math.max [Math.abs [a.y - c.y]] [Math.abs [a.x - c.x]]
-	return : [Math.abs [b.y - my]] < dist && [Math.abs [b.x - mx]] < dist
-}
-define [computeOffsetPoint curve t j sl foffset fpdx fpdy] : begin {
-	local onpoint : curve.compute [[t - j] / sl]
-	local normal : curve.normal [[t - j] / sl]
-	return (.x onpoint.x + [foffset t] * [normal.x + [fpdx t]] .y onpoint.y + [foffset t] * [normal.y + [fpdy t]])
-}
 
-define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
-	local width : [d1 || this.defaultd1] + [d2 || this.defaultd2]
-	local bias  : [d1 || this.defaultd1] - [d2 || this.defaultd2]
-	if [this.points.0.d1 >= 0 && this.points.0.d2 >= 0] : begin {
+define [dforward p0 p1 p2 p3] {
+.x (p0.x + ((-11) / 6 * p0.x + 3 * p1.x - 3 / 2 * p2.x + p3.x / 3) / TINY * LITTLE)
+	.y (p0.y + ((-11) / 6 * p0.y + 3 * p1.y - 3 / 2 * p2.y + p3.y / 3) / TINY * LITTLE)
+}
+define [dbackward p0 p1 p2 p3] {
+.x (p0.x + (11 / 6 * p0.x - 3 * p1.x + 3 / 2 * p2.x - p3.x / 3) / TINY * LITTLE)
+	.y (p0.y + (11 / 6 * p0.y - 3 * p1.y + 3 / 2 * p2.y - p3.y / 3) / TINY * LITTLE)
+}
+define [nonlinear a b c] : [Math.abs ((c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y))] > TINY
+define [midclose a b c] : begin
+	local xm : (a.x + c.x) / 2
+	local ym : (a.y + c.y) / 2
+	return : [Math.abs (b.x - xm)] < 0.5 && [Math.abs (b.y - ym)] < 0.5
+
+define [near a b c] : begin
+	local mx : (a.x + c.x) / 2
+	local my : (a.y + c.y) / 2
+	local dist : Math.max [Math.abs (a.y - c.y)] [Math.abs (a.x - c.x)]
+	return : [Math.abs (b.y - my)] < dist && [Math.abs (b.x - mx)] < dist
+
+define [computeOffsetPoint curve t j sl foffset fpdx fpdy] : begin
+	local onpoint : curve.compute ((t - j) / sl)
+	local normal : curve.normal ((t - j) / sl)
+	return {.x onpoint.x + [foffset t] * (normal.x + [fpdx t]) .y onpoint.y + [foffset t] * (normal.y + [fpdy t])}
+
+
+define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin
+	local width : (d1 || this.defaultd1) + (d2 || this.defaultd2)
+	local bias  : (d1 || this.defaultd1) - (d2 || this.defaultd2)
+	if (this.points.0.d1 >= 0 && this.points.0.d2 >= 0) : begin
 		local width : this.points.0.d1 + this.points.0.d2
 		local bias : this.points.0.d1 - this.points.0.d2
-	}
 	
-	local widths (width)
-	local biases (bias)
-	local pdxs (0)
-	local pdys (0)
-	local ts (0)
-	local brk ()
+	local widths {width}
+	local biases {bias}
+	local pdxs {0}
+	local pdys {0}
+	local ts {0}
+	local brk {}
 	
 	local minSamples : fallback _samples this.samples SAMPLES
 	local maxSamples : fallback this.maxSamples 1000
-	local shapes ()
-	local subSegments ()
+	local shapes {}
+	local subSegments {}
 	
 	local p0 this.points.0
 	local arcLengthSofar 0
 	local unjoinedSeglength 0
-	for [local j 1] [j < this.points.length] [inc j] : begin {
-		local p1 this.points`j
-		piecewise {
-			p1.onCurve : begin {
-				subSegments.push : local seg : new Bezier p0.x p0.y [[p0.x + p1.x] / 2] [[p0.y + p1.y] / 2] p1.x p1.y
+	for [local j 1] (j < this.points.length) [inc j] : begin
+		local p1 this.points.(j)
+		piecewise
+			p1.onCurve : begin
+				subSegments.push : local seg : new Bezier p0.x p0.y ((p0.x + p1.x) / 2) ((p0.y + p1.y) / 2) p1.x p1.y
 				arcLengthSofar = arcLengthSofar + [seg.length]
-				if [not p1.subdivided] : begin {
+				if [not p1.subdivided] : begin
 					ts.push arcLengthSofar
-					brk.[subSegments.length - 1] = true
-					if [p1.d1 >= 0 && p1.d2 >= 0] : begin {
+					brk.(subSegments.length - 1) = true
+					if (p1.d1 >= 0 && p1.d2 >= 0) : begin
 						set width : p1.d1 + p1.d2
 						set bias : p1.d1 - p1.d2
-					}
 					widths.push width
 					biases.push bias
 					local normalpt : seg.normal 1
-					pdxs.push : if [p1.pdx !== nothing] [p1.pdx - normalpt.x] 0
-					pdys.push : if [p1.pdy !== nothing] [p1.pdy - normalpt.y] 0
-				}
+					pdxs.push : if (p1.pdx !== nothing) (p1.pdx - normalpt.x) 0
+					pdys.push : if (p1.pdy !== nothing) (p1.pdy - normalpt.y) 0
 				p0 = p1
-			}
-			p1.cubic : begin {
-				local p2 this.points`[j + 1]
-				local p3 this.points`[j + 2]
+			p1.cubic : begin
+				local p2 this.points.((j + 1))
+				local p3 this.points.((j + 2))
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y p3.x p3.y
 				arcLengthSofar = arcLengthSofar + [seg.length]
-				if [not p3.subdivided] : begin {
+				if [not p3.subdivided] : begin
 					ts.push arcLengthSofar
-					brk.[subSegments.length - 1] = true
-					if [p3.d1 >= 0 && p3.d2 >= 0] : begin {
+					brk.(subSegments.length - 1) = true
+					if (p3.d1 >= 0 && p3.d2 >= 0) : begin
 						set width : p3.d1 + p3.d2
 						set bias : p3.d1 - p3.d2
-					}
 					widths.push width
 					biases.push bias
 					local normalpt : seg.normal 1
-					pdxs.push : if [p3.pdx !== nothing] [p3.pdx - normalpt.x] 0
-					pdys.push : if [p3.pdy !== nothing] [p3.pdy - normalpt.y] 0
-				}
+					pdxs.push : if (p3.pdx !== nothing) (p3.pdx - normalpt.x) 0
+					pdys.push : if (p3.pdy !== nothing) (p3.pdy - normalpt.y) 0
 				p0 = p3
 				j = j + 2
-			}
-			true : begin {
-				local p2 this.points`[j + 1]
+			true : begin
+				local p2 this.points.((j + 1))
 				subSegments.push : local seg : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 				arcLengthSofar = arcLengthSofar + [seg.length]
-				if [not p2.subdivided] : begin {
+				if [not p2.subdivided] : begin
 					ts.push arcLengthSofar
-					brk.[subSegments.length - 1] = true
-					if [p2.d1 >= 0 && p2.d2 >= 0] : begin {
+					brk.(subSegments.length - 1) = true
+					if (p2.d1 >= 0 && p2.d2 >= 0) : begin
 						set width : p2.d1 + p2.d2
 						set bias : p2.d1 - p2.d2
-					}
 					widths.push width
 					biases.push bias
 					local normalpt : seg.normal 1
-					pdxs.push : if [p2.pdx !== nothing] [p2.pdx - normalpt.x] 0
-					pdys.push : if [p2.pdy !== nothing] [p2.pdy - normalpt.y] 0
-				}
+					pdxs.push : if (p2.pdx !== nothing) (p2.pdx - normalpt.x) 0
+					pdys.push : if (p2.pdy !== nothing) (p2.pdy - normalpt.y) 0
 				p0 = p2
 				j = j + 1
-			}
-		}
-	}
-	if [this.points.0.pdx !== nothing] : set pdxs.0 [this.points.0.pdx - [subSegments.0.normal 0].x]
-	if [this.points.0.pdy !== nothing] : set pdys.0 [this.points.0.pdy - [subSegments.0.normal 0].y]
+	if (this.points.0.pdx !== nothing) : set pdxs.0 (this.points.0.pdx - [subSegments.0.normal 0].x)
+	if (this.points.0.pdy !== nothing) : set pdys.0 (this.points.0.pdy - [subSegments.0.normal 0].y)
 	
 	local fWidth : smooth [xs-array ts] [ys-array widths]
 	local fBias : smooth [xs-array ts] [ys-array biases]
-	local [f1 t] : [[fWidth t] + [fBias t]] / 2
-	local [f2 t] : - [[fWidth t] - [fBias t]] / 2 
+	local [f1 t] : ([fWidth t] + [fBias t]) / 2
+	local [f2 t] : - ([fWidth t] - [fBias t]) / 2
 	local fpdx : smooth [xs-array ts] [ys-array pdxs]
 	local fpdy : smooth [xs-array ts] [ys-array pdys]
 	
-	local left ()
-	local right ()
+	local left {}
+	local right {}
 	set arcLengthSofar 0
 
-	for [local j 0] [j < subSegments.length] [inc j] : begin {
-		local curve subSegments`j
+	for [local j 0] (j < subSegments.length) [inc j] : begin
+		local curve subSegments.(j)
 		local segLength : curve.length
 		set unjoinedSeglength : unjoinedSeglength + segLength
-		local segLengths (0)
+		local segLengths {0}
 		
 		local samples : Math.min maxSamples : Math.max minSamples : Math.ceil : segLength / 100
-		if [segLength <= 5] : samples = 1
+		if (segLength <= 5) : samples = 1
 		
-		foreach sample [range 1 till samples] : begin {
-			segLengths.push : curve.split 0 [sample / samples] :.length
-		}
-		left.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f1 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
-		right.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f2 fpdx fpdy]] (.x last.x .y last.y .onCurve true)]
-		foreach sample [range 0 samples] : begin {
+		foreach sample [range 1 till samples] : begin
+			segLengths.push : curve.split 0 (sample / samples) :.length
+		left.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f1 fpdx fpdy]] {.x last.x .y last.y .onCurve true}]
+		right.push [begin [local last [computeOffsetPoint curve arcLengthSofar arcLengthSofar segLength f2 fpdx fpdy]] {.x last.x .y last.y .onCurve true}]
+		foreach sample [range 0 samples] : begin
 			local t : arcLengthSofar + segLengths.(sample)
-			local tn : arcLengthSofar + segLengths.[sample + 1]
+			local tn : arcLengthSofar + segLengths.(sample + 1)
 			
 			local lthis : computeOffsetPoint curve t arcLengthSofar segLength f1 fpdx fpdy
 			local rthis : computeOffsetPoint curve t arcLengthSofar segLength f2 fpdx fpdy
 			local lnext : computeOffsetPoint curve tn arcLengthSofar segLength f1 fpdx fpdy
 			local rnext : computeOffsetPoint curve tn arcLengthSofar segLength f2 fpdx fpdy
-			local lnthis1 : computeOffsetPoint curve [t + TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnthis1 : computeOffsetPoint curve [t + TINY] arcLengthSofar segLength f2 fpdx fpdy
-			local lnnext1 : computeOffsetPoint curve [tn - TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnnext1 : computeOffsetPoint curve [tn - TINY] arcLengthSofar segLength f2 fpdx fpdy
-			local lnthis2 : computeOffsetPoint curve [t + 2 * TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnthis2 : computeOffsetPoint curve [t + 2 * TINY] arcLengthSofar segLength f2 fpdx fpdy
-			local lnnext2 : computeOffsetPoint curve [tn - 2 * TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnnext2 : computeOffsetPoint curve [tn - 2 * TINY] arcLengthSofar segLength f2 fpdx fpdy
-			local lnthis3 : computeOffsetPoint curve [t + 3 * TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnthis3 : computeOffsetPoint curve [t + 3 * TINY] arcLengthSofar segLength f2 fpdx fpdy
-			local lnnext3 : computeOffsetPoint curve [tn - 3 * TINY] arcLengthSofar segLength f1 fpdx fpdy
-			local rnnext3 : computeOffsetPoint curve [tn - 3 * TINY] arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis1 : computeOffsetPoint curve (t + TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis1 : computeOffsetPoint curve (t + TINY) arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext1 : computeOffsetPoint curve (tn - TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext1 : computeOffsetPoint curve (tn - TINY) arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis2 : computeOffsetPoint curve (t + 2 * TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis2 : computeOffsetPoint curve (t + 2 * TINY) arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext2 : computeOffsetPoint curve (tn - 2 * TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext2 : computeOffsetPoint curve (tn - 2 * TINY) arcLengthSofar segLength f2 fpdx fpdy
+			local lnthis3 : computeOffsetPoint curve (t + 3 * TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnthis3 : computeOffsetPoint curve (t + 3 * TINY) arcLengthSofar segLength f2 fpdx fpdy
+			local lnnext3 : computeOffsetPoint curve (tn - 3 * TINY) arcLengthSofar segLength f1 fpdx fpdy
+			local rnnext3 : computeOffsetPoint curve (tn - 3 * TINY) arcLengthSofar segLength f2 fpdx fpdy
 
 			local dlthis [dforward lthis lnthis1 lnthis2 lnthis3]
 			local drthis [dforward rthis rnthis1 rnthis2 rnthis3]
@@ -274,60 +255,51 @@ define [Stroke.prototype.to-outline d1 d2 _samples straight] : begin {
 			local drnext [dbackward rnext rnnext2 rnnext2 rnnext3]
 			
 			local il : intersection lthis.x lthis.y dlthis.x dlthis.y lnext.x lnext.y dlnext.x dlnext.y
-			if [[not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && [il.x != null] && [il.y != null] && [nonlinear lthis il lnext] && [near lthis il lnext]] [then {
-				left.push (.x il.x .y il.y .onCurve false) (.x lnext.x .y lnext.y .onCurve true)
-			}] [else {
-				left.push (.x lnext.x .y lnext.y .onCurve true)
-			}]
+			if ([not straight] && [nonlinear lthis lnext dlthis] && [nonlinear lthis lnext dlnext] && (il.x != null) && (il.y != null) && [nonlinear lthis il lnext] && [near lthis il lnext]) [then \\
+					left.push {.x il.x .y il.y .onCurve false} {.x lnext.x .y lnext.y .onCurve true}
+				] [else \\
+					left.push {.x lnext.x .y lnext.y .onCurve true}
+				]
 			
 			local ir : intersection rthis.x rthis.y drthis.x drthis.y rnext.x rnext.y drnext.x drnext.y
-			if [[not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && [ir.x != null] && [ir.y != null] && [nonlinear rthis ir rnext] && [near rthis ir rnext]] [then {
-				right.push (.x ir.x .y ir.y .onCurve false) (.x rnext.x .y rnext.y .onCurve true)
-			}] [else {
-				right.push (.x rnext.x .y rnext.y .onCurve true)
-			}]
-		}
+			if ([not straight] && [nonlinear rthis rnext drthis] && [nonlinear rthis rnext drnext] && (ir.x != null) && (ir.y != null) && [nonlinear rthis ir rnext] && [near rthis ir rnext]) [then \\
+					right.push {.x ir.x .y ir.y .onCurve false} {.x rnext.x .y rnext.y .onCurve true}
+				] [else \\
+					right.push {.x rnext.x .y rnext.y .onCurve true}
+				]
 		arcLengthSofar = arcLengthSofar + segLength
-		if [brk.(j) && unjoinedSeglength >= 100] : begin {
+		if (brk.(j) && unjoinedSeglength >= 100) : begin
 			shapes.push : left.concat [right.reverse]
-			set left ()
-			set right ()
+			set left {}
+			set right {}
 			set unjoinedSeglength 0
-		}
-	}
-	if [left.length + right.length > 2] : begin {
+	if (left.length + right.length > 2) : begin
 		shapes.push : left.concat [right.reverse]
-		set left ()
-		set right ()
-	}
+		set left {}
+		set right {}
 
-	return : shapes.map : function [shape] : begin {
-		# Remove duplicate points
-		for [local j 0] [j < shape.length - 1] [inc j] : begin {
+	return : shapes.map : function [shape] : begin
+		for [local j 0] (j < shape.length - 1) [inc j] : begin
 			local p0 shape.(j)
-			local p1 shape.[j + 1]
-			if [p0.onCurve && p1.onCurve && [Math.abs : p0.x - p1.x] <= 0.1 && [Math.abs : p0.y - p1.y] <= 0.1] : set p1.removable true
-		}
-		set shape : shape.filter : function [point] [point && [not point.removable]]
+			local p1 shape.(j + 1)
+			if (p0.onCurve && p1.onCurve && [Math.abs : p0.x - p1.x] <= 0.1 && [Math.abs : p0.y - p1.y] <= 0.1) : set p1.removable true
+		set shape : shape.filter : function [point] (point && [not point.removable])
 		
 		# Remove colinear oncurve points
-		for [local j 0] [j < shape.length - 1] [inc j] : begin {
-			local p0 shape`j
+		for [local j 0] (j < shape.length - 1) [inc j] : begin
+			local p0 shape.(j)
 			local still true
-			for [local k [j + 1]] [still && k < shape.length - 1] [inc k] : begin {
-				local p1 shape`k
-				local p2 shape`[k + 1]
-				if [p0.onCurve && p1.onCurve && p2.onCurve && [not [nonlinear p0 p1 p2]]] [then {
-					set p1.removable true
-				}] [else {
-					set still false
-				}]
-			}
-			set j [k - 1]
-		}
-		set shape : shape.filter : function [point] [point && [not point.removable]]
+			for [local k (j + 1)] (still && k < shape.length - 1) [inc k] : begin
+				local p1 shape.(k)
+				local p2 shape.((k + 1))
+				if (p0.onCurve && p1.onCurve && p2.onCurve && [not [nonlinear p0 p1 p2]]) [then \\
+						set p1.removable true
+					] [else \\
+						set still false
+					]
+			set j (k - 1)
+		set shape : shape.filter : function [point] (point && [not point.removable])
 		return shape
-	}
-}
+
 
 exports.Stroke = Stroke

@@ -1,46 +1,43 @@
 ###### GEOMETRIC SHAPES
 
 ### Arrowheads
-define (ArrowHead ArrowShape) : let [arrowSize : [RIGHTSB - SB] / 3 * [Math.pow [FULLWIDTH / WIDTH] 0.4]] [halfstroke : [adviceBlackness 4] / 2] [fine : adviceBlackness 4.5] [arrowTop : mix parenMid parenTop 0.85] [arrowBot : mix parenMid parenBot 0.85] : begin {
-	define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction {
+define {ArrowHead ArrowShape} : let [arrowSize : (RIGHTSB - SB) / 3 * [Math.pow (FULLWIDTH / WIDTH) 0.4]] [halfstroke : [adviceBlackness 4] / 2] [fine : adviceBlackness 4.5] [arrowTop : mix parenMid parenTop 0.85] [arrowBot : mix parenMid parenBot 0.85] : begin
+	define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
 		local size : fallback _size arrowSize
 		set this.gizmo : Translate 0 0
 		include : create-stroke
 			:.start-from 0 0
 			:.heads-to   UPWARD
 			:.set-width  0 fine
-			:.line-to    [size * 1] size
+			:.line-to    (size * 1) size
 			:.set-width  0 fine
 			:.max-samples 1
 		include : create-stroke
 			:.start-from 0 0
 			:.heads-to   DOWNWARD
 			:.set-width  fine 0
-			:.line-to    [size * 1] [-size]
+			:.line-to    (size * 1) (-size)
 			:.set-width  fine 0
 			:.max-samples 1
 		apply-transform : Translate O 0
-		local (.x xo .y yo) : tp globalTransform (.x x1 .y y1)
-		local (.x xt .y yt) : tp globalTransform (.x x2 .y y2)
-		apply-transform : Rotate : Math.atan2 [yo - yt] [xo - xt]
+		local {.x xo .y yo} : tp globalTransform {.x x1 .y y1}
+		local {.x xt .y yt} : tp globalTransform {.x x2 .y y2}
+		apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
 		apply-transform : Translate xt yt
-	}
-	define [ArrowShape x1 y1 x2 y2 size] : glyph-construction {
-		local mag : Math.hypot [y2 - y1] [x2 - x1]
-		local p : [mag - halfstroke * 1.1] / mag
+	define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
+		local mag : Math.hypot (y2 - y1) (x2 - x1)
+		local p : (mag - halfstroke * 1.1) / mag
 		include : ArrowHead x1 y1 x2 y2 size
 		include : create-stroke
 			:.start-from x1 y1
 			:.set-width  halfstroke halfstroke
 			:.line-to    [mix x1 x2 p] [mix y1 y2 p]
-	}
-	define [arrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction {
+	define [arrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction
 		set-width FULLWIDTH
 		set-anchor "slash" BASE FWMIDDLE parenMid
 		assign-unicode unicode
 		include : ArrowShape x1 y1 x2 y2
-	}
-	define [doublearrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction {
+	define [doublearrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction
 		set-width FULLWIDTH
 		set-anchor "slash" BASE FWMIDDLE parenMid
 		assign-unicode unicode
@@ -48,7 +45,6 @@ define (ArrowHead ArrowShape) : let [arrowSize : [RIGHTSB - SB] / 3 * [Math.pow 
 		local ym : mix y1 y2 0.5
 		include : ArrowShape xm ym x1 y1
 		include : ArrowShape xm ym x2 y2
-	}
 	arrow 'arrowleft' 0x2190 FWRSB parenMid SB parenMid
 	arrow 'arrowright' 0x2192 SB parenMid FWRSB parenMid
 	arrow 'arrowup' 0x2191 FWMIDDLE arrowBot FWMIDDLE arrowTop
@@ -60,279 +56,243 @@ define (ArrowHead ArrowShape) : let [arrowSize : [RIGHTSB - SB] / 3 * [Math.pow 
 	arrow 'arrowdownright' 0x2198 SB arrowTop FWRSB arrowBot
 	arrow 'arrowdownleft' 0x2199 FWRSB arrowTop SB arrowBot
 	
-	* (ArrowHead ArrowShape)
-}
+	* {ArrowHead ArrowShape}
+
 ### Standard geometric shapes
-let : begin {
-	define squareRadius : [RIGHTSB - SB] / 2
-	define [hollowScale w d] : [w - [adviceBlackness 5] * [fallback d : WIDTH / FULLWIDTH]] / w
-	define [hollow newid unicode oldid zx zy] : create-glyph newid : glyph-construction {
+let : begin
+	define squareRadius : (RIGHTSB - SB) / 2
+	define [hollowScale w d] : (w - [adviceBlackness 5] * [fallback d : WIDTH / FULLWIDTH]) / w
+	define [hollow newid unicode oldid zx zy] : create-glyph newid : glyph-construction
 		assign-unicode unicode
-		include : create-glyph : glyph-construction {
+		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
 			include : UnFullWidthify
-		}
 		reverse-last
 		local zoom : hollowScale squareRadius
 		include : FlipAround MIDDLE parenMid [fallback zx zoom] [fallback zy zx zoom]
-		include : create-glyph : glyph-construction {
+		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
 			include : UnFullWidthify
-		}
 		include : FullWidthify
-	}
-	define [FullWidthify] : glyph-construction {
+	define [FullWidthify] : glyph-construction
 		apply-transform [Upright] true
-		apply-transform [Translate [-MIDDLE] [-parenMid]] true
-		apply-transform [Scale [FULLWIDTH / WIDTH]] true
+		apply-transform [Translate (-MIDDLE) (-parenMid)] true
+		apply-transform [Scale (FULLWIDTH / WIDTH)] true
 		apply-transform [Translate FWMIDDLE parenMid] true
 		apply-transform [Italify] true
 		set-width FULLWIDTH
-	}
-	define [UnFullWidthify] : glyph-construction {
+	define [UnFullWidthify] : glyph-construction
 		apply-transform [Upright] true
-		apply-transform [Translate [-FWMIDDLE] [-parenMid]] true
-		apply-transform [Scale [WIDTH / FULLWIDTH]] true
+		apply-transform [Translate (-FWMIDDLE) (-parenMid)] true
+		apply-transform [Scale (WIDTH / FULLWIDTH)] true
 		apply-transform [Translate MIDDLE parenMid] true
 		apply-transform [Italify] true
 		set-width WIDTH
-	}
-	create-glyph 'blacksquare' : glyph-construction {
+	create-glyph 'blacksquare' : glyph-construction
 		assign-unicode 0x25A0
-		start-from SB [parenMid + squareRadius]
-		line-to    RIGHTSB [parenMid + squareRadius]
-		line-to    RIGHTSB [parenMid - squareRadius]
-		line-to    SB [parenMid - squareRadius]
+		start-from SB (parenMid + squareRadius)
+		line-to    RIGHTSB (parenMid + squareRadius)
+		line-to    RIGHTSB (parenMid - squareRadius)
+		line-to    SB (parenMid - squareRadius)
 		include : FullWidthify
-	}
-	create-glyph 'blackrectangle' : glyph-construction {
+	create-glyph 'blackrectangle' : glyph-construction
 		assign-unicode 0x25AC
-		start-from SB [parenMid + squareRadius / 1.5]
-		line-to    RIGHTSB [parenMid + squareRadius / 1.5]
-		line-to    RIGHTSB [parenMid - squareRadius / 1.5]
-		line-to    SB [parenMid - squareRadius / 1.5]
+		start-from SB (parenMid + squareRadius / 1.5)
+		line-to    RIGHTSB (parenMid + squareRadius / 1.5)
+		line-to    RIGHTSB (parenMid - squareRadius / 1.5)
+		line-to    SB (parenMid - squareRadius / 1.5)
 		include : FullWidthify
-	}
-	create-glyph 'blacklongrectangle' : glyph-construction {
+	create-glyph 'blacklongrectangle' : glyph-construction
 		assign-unicode 0x25AE
-		start-from SB [parenMid + squareRadius * 1.5]
-		line-to    RIGHTSB [parenMid + squareRadius * 1.5]
-		line-to    RIGHTSB [parenMid - squareRadius * 1.5]
-		line-to    SB [parenMid - squareRadius * 1.5]
+		start-from SB (parenMid + squareRadius * 1.5)
+		line-to    RIGHTSB (parenMid + squareRadius * 1.5)
+		line-to    RIGHTSB (parenMid - squareRadius * 1.5)
+		line-to    SB (parenMid - squareRadius * 1.5)
 		include : FullWidthify
-	}
-	create-glyph 'blacktriangleup' : glyph-construction {
+	create-glyph 'blacktriangleup' : glyph-construction
 		assign-unicode 0x25B2
-		start-from MIDDLE [parenMid + squareRadius]
-		line-to    RIGHTSB [parenMid - squareRadius]
-		line-to    SB [parenMid - squareRadius]
+		start-from MIDDLE (parenMid + squareRadius)
+		line-to    RIGHTSB (parenMid - squareRadius)
+		line-to    SB (parenMid - squareRadius)
 		include : FullWidthify
-	}
-	create-glyph 'blackdiamond' : glyph-construction {
+	create-glyph 'blackdiamond' : glyph-construction
 		assign-unicode 0x25C6
-		start-from MIDDLE [parenMid + squareRadius]
+		start-from MIDDLE (parenMid + squareRadius)
 		line-to    RIGHTSB parenMid
-		line-to    MIDDLE [parenMid - squareRadius]
+		line-to    MIDDLE (parenMid - squareRadius)
 		line-to    SB parenMid
 		include : FullWidthify
-	}
-	create-glyph 'blacktriangledown' : glyph-construction {
+	create-glyph 'blacktriangledown' : glyph-construction
 		assign-unicode 0x25BC
-		start-from MIDDLE [parenMid - squareRadius]
-		line-to    SB [parenMid + squareRadius]
-		line-to    RIGHTSB [parenMid + squareRadius]
+		start-from MIDDLE (parenMid - squareRadius)
+		line-to    SB (parenMid + squareRadius)
+		line-to    RIGHTSB (parenMid + squareRadius)
 		include : FullWidthify
-	}
-	create-glyph 'blackcircle' : glyph-construction {
+	create-glyph 'blackcircle' : glyph-construction
 		assign-unicode 0x25CF
-		include : list : Ring [parenMid + squareRadius] [parenMid - squareRadius] SB RIGHTSB
+		include : list : Ring (parenMid + squareRadius) (parenMid - squareRadius) SB RIGHTSB
 		include : FullWidthify
-	}
-	create-glyph 'dottedcircle' : glyph-construction {
+	create-glyph 'dottedcircle' : glyph-construction
 		assign-unicode 0x25CC
 		local n 12
 		local fine : [adviceBlackness 5] / 2
-		foreach j [range 0 n] : begin {
+		foreach j [range 0 n] : begin
 			local angle : Math.PI * 2 * j / n
-			local cx : MIDDLE + [RIGHTSB - MIDDLE] * [Math.cos angle]
-			local cy : [XH / 2] + [RIGHTSB - MIDDLE] * [Math.sin angle]
-			include : list : Ring [cy + fine] [cy - fine] [cx - fine] [cx + fine] true
-		}
+			local cx : MIDDLE + (RIGHTSB - MIDDLE) * [Math.cos angle]
+			local cy : (XH / 2) + (RIGHTSB - MIDDLE) * [Math.sin angle]
+			include : list : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
 		include eMarks
 		apply-transform [Upright] true
-		apply-transform [Translate 0 [parenMid - [XH / 2]]] true
+		apply-transform [Translate 0 (parenMid - (XH / 2))] true
 		apply-transform [Italify] true
 		include : FullWidthify
-	}
 	
 	hollow 'whitesquare' 0x25A1 'blacksquare'
-	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale [squareRadius / 1.5]]
-	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale [squareRadius * 1.5]]
+	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
+	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
 	hollow 'whitecircle' 0x25CB 'blackcircle'
-	hollow 'whitebullet' 0x25E6 'bullet' [hollowScale [PERIODSIZE - O] 1]
+	hollow 'whitebullet' 0x25E6 'bullet' [hollowScale (PERIODSIZE - O) 1]
 	hollow 'whitediamond' 0x25C7 'blackdiamond'
-}
+
 
 ### Blocks
-let : begin {
-	create-glyph 'fullblock' : glyph-construction {
+let : begin
+	create-glyph 'fullblock' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2588
 		start-from 0 font.hhea.ascent
 		line-to    FULLWIDTH font.hhea.ascent
 		line-to    FULLWIDTH font.hhea.descent
 		line-to    0 font.hhea.descent
-	}
-	define [Shade fn] : glyph-construction {
+	define [Shade fn] : glyph-construction
 		local top font.hhea.ascent
 		local bottom font.hhea.descent
 		local segx 6
 		local segy 16
-		foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin {
-			start-from [mix 0 WIDTH [j / segx]] [mix bottom top [k / segy]]
-			line-to    [mix 0 WIDTH [j / segx]] [mix bottom top [[k + 1] / segy]]
-			line-to    [mix 0 WIDTH [[j + 1] / segx]] [mix bottom top [[k + 1] / segy]]
-			line-to    [mix 0 WIDTH [[j + 1] / segx]] [mix bottom top [k / segy]]
-		}
-		if [FULLWIDTH > WIDTH] : begin {
+		foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
+			start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
+			line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
+			line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
+			line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
+		if (FULLWIDTH > WIDTH) : begin
 			local cc this.contours
-			apply-transform : Translate [FULLWIDTH - WIDTH] 0
+			apply-transform : Translate (FULLWIDTH - WIDTH) 0
 			include cc
-		}
-	}
-	create-glyph 'lightshade' : glyph-construction {
+	create-glyph 'lightshade' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2591
-		include : Shade [[j k] -> [[k % 2] && [j + [k - 1] / 2] % 2]]
-	}
-	create-glyph 'mediumshade' : glyph-construction {
+		include : Shade ([j k] -> ((k % 2) && (j + (k - 1) / 2) % 2))
+	create-glyph 'mediumshade' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2592
-		include : Shade [[j k] -> [[j + k] % 2]]
-	}
-	create-glyph 'heavyshade' : glyph-construction {
+		include : Shade ([j k] -> ((j + k) % 2))
+	create-glyph 'heavyshade' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2593
-		include : Shade [[j k] -> [[k % 2] || [j + k / 2] % 2]]
-	}
-	let : foreach fill [range 1 8] : begin {
-		create-glyph ['vfill' + fill] : glyph-construction {
+		include : Shade ([j k] -> ((k % 2) || (j + k / 2) % 2))
+	let : foreach fill [range 1 8] : begin
+		create-glyph ('vfill' + fill) : glyph-construction
 			set-width FULLWIDTH
-			assign-unicode [0x2580 + fill]
-			start-from 0 [mix font.hhea.descent font.hhea.ascent [fill / 8]]
-			line-to    FULLWIDTH [mix font.hhea.descent font.hhea.ascent [fill / 8]]
+			assign-unicode (0x2580 + fill)
+			start-from 0 [mix font.hhea.descent font.hhea.ascent (fill / 8)]
+			line-to    FULLWIDTH [mix font.hhea.descent font.hhea.ascent (fill / 8)]
 			line-to    FULLWIDTH font.hhea.descent
 			line-to    0 font.hhea.descent
-		}
-		create-glyph ['hfill' + fill] : glyph-construction {
+		create-glyph ('hfill' + fill) : glyph-construction
 			set-width FULLWIDTH
-			assign-unicode [0x2590 - fill]
+			assign-unicode (0x2590 - fill)
 			start-from 0 font.hhea.ascent
-			line-to    [FULLWIDTH * fill / 8] font.hhea.ascent
-			line-to    [FULLWIDTH * fill / 8] font.hhea.descent
+			line-to    (FULLWIDTH * fill / 8) font.hhea.ascent
+			line-to    (FULLWIDTH * fill / 8) font.hhea.descent
 			line-to    0 font.hhea.descent
-		}
-	}
-	create-glyph 'upHalfblock' : glyph-construction {
+	create-glyph 'upHalfblock' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2580
 		start-from 0 font.hhea.ascent
 		line-to    FULLWIDTH font.hhea.ascent
 		line-to    FULLWIDTH [mix font.hhea.descent font.hhea.ascent 0.5]
 		line-to    0 [mix font.hhea.descent font.hhea.ascent 0.5]
-	}
-	create-glyph 'rightHalfBlock' : glyph-construction {
+	create-glyph 'rightHalfBlock' : glyph-construction
 		set-width FULLWIDTH
 		assign-unicode 0x2590
-		start-from [FULLWIDTH * 0.5] font.hhea.ascent
+		start-from (FULLWIDTH * 0.5) font.hhea.ascent
 		line-to    FULLWIDTH font.hhea.ascent
 		line-to    FULLWIDTH font.hhea.descent
-		line-to    [FULLWIDTH * 0.5] font.hhea.descent
-	}
-}
+		line-to    (FULLWIDTH * 0.5) font.hhea.descent
+
 ### Box drawing glyphs
-let : begin {
+let : begin
 	local light : adviceBlackness 3.5
 	local heavy : light * 2
 	local width FULLWIDTH
 	local midx : FULLWIDTH / 2
 	local midy : mix font.hhea.descent font.hhea.ascent 0.5
-	define [boxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+	define [boxdraw unicode u d l r] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
 		assign-unicode unicode
 		set-width width
 		local stopH : [Math.max u d] / 2
 		local stopV : [Math.max l r] / 2
-		if l : include : HBar 0 [midx + stopH] midy l
-		if r : include : HBar [midx - stopH] width midy r
-		if d : include : VBar midx font.hhea.descent [midy + stopV] d
-		if u : include : VBar midx [midy - stopV] font.hhea.ascent u 
-	}
-	define [dlboxdraw unicode u d l r] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+		if l : include : HBar 0 (midx + stopH) midy l
+		if r : include : HBar (midx - stopH) width midy r
+		if d : include : VBar midx font.hhea.descent (midy + stopV) d
+		if u : include : VBar midx (midy - stopV) font.hhea.ascent u
+	define [dlboxdraw unicode u d l r] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
 		assign-unicode unicode
 		set-width width
-		local stopH : [[Math.max u d] - light] / 2
-		local stopV : [[Math.max l r] - light] / 2
-		local capH  : stopH * heavy / [heavy - light]
-		local capV  : stopV * heavy / [heavy - light]
-		if l : begin {
-			include : HBar 0 [midx - stopH] [midy + [l - light]] light
-			if [l > light] : include : HBar 0 [midx - stopH] [midy - [l - light]] light
+		local stopH : ([Math.max u d] - light) / 2
+		local stopV : ([Math.max l r] - light) / 2
+		local capH  : stopH * heavy / (heavy - light)
+		local capV  : stopV * heavy / (heavy - light)
+		if l : begin
+			include : HBar 0 (midx - stopH) (midy + (l - light)) light
+			if (l > light) : include : HBar 0 (midx - stopH) (midy - (l - light)) light
+		if r : begin
+			include : HBar (midx + stopH) width (midy + (r - light)) light
+			if (r > light) : include : HBar (midx + stopH) width (midy - (r - light)) light
+		if d : begin
+			include : VBar (midx + (d - light)) font.hhea.descent (midy - stopV) light
+			if (d > light) : include : VBar (midx - (d - light)) font.hhea.descent (midy - stopV) light
+		if u : begin
+			include : VBar (midx + (u - light)) (midy + stopV) font.hhea.ascent light
+			if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) font.hhea.ascent light
+		if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light) (midx + stopH + light) (midy + capV) light
+		if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light) (midx + stopH + light) (midy - capV) light
+		if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
+		if (stopV > 0 && [not r]) : include : VBar (midx + capH) (midy - stopV - light) (midy + stopV + light) light
+	define [complexBoxDraw unicodeStart U D L R fn dl] : begin
+		local order {
+		{light light light light}
+			{light light heavy light}
+			{light light light heavy}
+			{light light heavy heavy}
+			{heavy light light light}
+			{light heavy light light}
+			{heavy heavy light light}
+			{heavy light heavy light}
+			{heavy light light heavy}
+			{light heavy heavy light}
+			{light heavy light heavy}
+			{heavy light heavy heavy}
+			{light heavy heavy heavy}
+			{heavy heavy heavy light}
+			{heavy heavy light heavy}
+			{heavy heavy heavy heavy}
 		}
-		if r : begin {
-			include : HBar [midx + stopH] width [midy + [r - light]] light
-			if [r > light] : include : HBar [midx + stopH] width [midy - [r - light]] light
-		}
-		if d : begin {
-			include : VBar [midx + [d - light]] font.hhea.descent [midy - stopV] light
-			if [d > light] : include : VBar [midx - [d - light]] font.hhea.descent [midy - stopV] light
-		}
-		if u : begin {
-			include : VBar [midx + [u - light]] [midy + stopV] font.hhea.ascent light
-			if [u > light] : include : VBar [midx - [u - light]] [midy + stopV] font.hhea.ascent light
-		}
-		if [stopH > 0 && [not u]] : include : HBar [midx - stopH - light] [midx + stopH + light] [midy + capV] light
-		if [stopH > 0 && [not d]] : include : HBar [midx - stopH - light] [midx + stopH + light] [midy - capV] light
-		if [stopV > 0 && [not l]] : include : VBar [midx - capH] [midy - stopV - light] [midy + stopV + light] light
-		if [stopV > 0 && [not r]] : include : VBar [midx + capH] [midy - stopV - light] [midy + stopV + light] light
-	}
-	define [complexBoxDraw unicodeStart U D L R fn dl] : begin {
-		local order (
-			(light light light light)
-			(light light heavy light)
-			(light light light heavy)
-			(light light heavy heavy)
-			(heavy light light light)
-			(light heavy light light)
-			(heavy heavy light light)
-			(heavy light heavy light)
-			(heavy light light heavy)
-			(light heavy heavy light)
-			(light heavy light heavy)
-			(heavy light heavy heavy)
-			(light heavy heavy heavy)
-			(heavy heavy heavy light)
-			(heavy heavy light heavy)
-			(heavy heavy heavy heavy)
-		)
-		local existings ()
+		local existings {}
 		local n 0
-		foreach (u d l r) [items-of order] : begin {
+		foreach {u d l r} [items-of order] : begin
 			local newcome true
-			local masked ([U * u] [D * d] [L * l] [R * r])
-			foreach existing [items-of existings] : if ['' + existing === '' + masked] : set newcome false
-			if newcome : begin {
-				if [[not dl] 
-				||  [[not masked.0] || [not masked.1] || [masked.0 === masked.1]]
-				 && [[not masked.2] || [not masked.3] || [masked.2 === masked.3]]
-				 && [masked.0 > light || masked.1 > light || masked.2 > light || masked.3 > light]
-				] : begin {
-					[fallback fn boxdraw].apply null ([unicodeStart + n] :: masked)
+			local masked {(U * u) (D * d) (L * l) (R * r)}
+			foreach existing [items-of existings] : if ('' + existing === '' + masked) : set newcome false
+			if newcome : begin
+				if ([not dl]
+					||  ([not masked.0] || [not masked.1] || (masked.0 === masked.1))
+					&& ([not masked.2] || [not masked.3] || (masked.2 === masked.3))
+					&& (masked.0 > light || masked.1 > light || masked.2 > light || masked.3 > light)
+				) : begin
+					[fallback fn boxdraw].apply null {(unicodeStart + n) :: masked}
 					inc n
-				}
 				existings.push masked
-			}
-		}
-	}
 	# Straight
 	boxdraw 0x2500 0 0 light light
 	boxdraw 0x2501 0 0 heavy heavy
@@ -374,16 +334,14 @@ let : begin {
 	complexBoxDraw 0x256A 1 1 1 1 dlboxdraw 1
 	
 	# Dashed
-	define [hDashed unicode segments weight] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+	define [hDashed unicode segments weight] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
 		assign-unicode unicode
 		set-width width
-		foreach j [range 0 segments] : include : HBar [mix [width * j / segments] [width * [j + 1] / segments] 0.2] [mix [width * j / segments] [width * [j + 1] / segments] 0.8] midy weight
-	}
-	define [vDashed unicode segments weight] : create-glyph ['bd' + [unicode.toString 16 :.toUpperCase]] : glyph-construction {
+		foreach j [range 0 segments] : include : HBar [mix (width * j / segments) (width * (j + 1) / segments) 0.2] [mix (width * j / segments) (width * (j + 1) / segments) 0.8] midy weight
+	define [vDashed unicode segments weight] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
 		assign-unicode unicode
 		set-width width
-		foreach j [range 0 segments] : include : VBar midx [mix [mix font.hhea.descent font.hhea.ascent [j / segments]] [mix font.hhea.descent font.hhea.ascent [[j + 1] / segments]] 0.2] [mix [mix font.hhea.descent font.hhea.ascent [j / segments]] [mix font.hhea.descent font.hhea.ascent [[j + 1] / segments]] 0.8] weight
-	}
+		foreach j [range 0 segments] : include : VBar midx [mix [mix font.hhea.descent font.hhea.ascent (j / segments)] [mix font.hhea.descent font.hhea.ascent ((j + 1) / segments)] 0.2] [mix [mix font.hhea.descent font.hhea.ascent (j / segments)] [mix font.hhea.descent font.hhea.ascent ((j + 1) / segments)] 0.8] weight
 	hDashed 0x2504 3 light
 	hDashed 0x2505 3 heavy
 	hDashed 0x2508 4 light
@@ -398,96 +356,88 @@ let : begin {
 	vDashed 0x254F 2 heavy
 	
 	# Args
-	create-glyph 'bd256D' : glyph-construction {
+	create-glyph 'bd256D' : glyph-construction
 		assign-unicode 0x256D
 		set-width width
 		include : create-stroke
 			:.start-from midx font.hhea.descent
 			:.heads-to   UPWARD
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.arc-vh-to  width midy
 			:.heads-to   RIGHTWARD
-	}
-	create-glyph 'bd256E' : glyph-construction {
+	create-glyph 'bd256E' : glyph-construction
 		assign-unicode 0x256E
 		set-width width
 		include : create-stroke
 			:.start-from midx font.hhea.descent
 			:.heads-to   UPWARD
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.arc-vh-to  0 midy
 			:.heads-to   LEFTWARD
-	}
-	create-glyph 'bd256F' : glyph-construction {
+	create-glyph 'bd256F' : glyph-construction
 		assign-unicode 0x256F
 		set-width width
 		include : create-stroke
 			:.start-from midx font.hhea.ascent
 			:.heads-to   DOWNWARD
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.arc-vh-to  0 midy
 			:.heads-to   LEFTWARD
-	}
-	create-glyph 'bd2570' : glyph-construction {
+	create-glyph 'bd2570' : glyph-construction
 		assign-unicode 0x2570
 		set-width width
 		include : create-stroke
 			:.start-from midx font.hhea.ascent
 			:.heads-to   DOWNWARD
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.arc-vh-to  width midy
 			:.heads-to   RIGHTWARD
-	}
-	create-glyph 'bd2571' : glyph-construction {
+	create-glyph 'bd2571' : glyph-construction
 		assign-unicode 0x2571
 		set-width width
 		include : create-stroke
 			:.start-from width font.hhea.ascent
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.line-to    0 font.hhea.descent
-	}
-	create-glyph 'bd2572' : glyph-construction {
+	create-glyph 'bd2572' : glyph-construction
 		assign-unicode 0x2572
 		set-width width
 		include : create-stroke
 			:.start-from 0 font.hhea.ascent
-			:.set-width  [light / 2] [light / 2]
+			:.set-width  (light / 2) (light / 2)
 			:.line-to    width font.hhea.descent
-	}
-	create-glyph 'bd2573' : glyph-construction {
+	create-glyph 'bd2573' : glyph-construction
 		assign-unicode 0x2573
 		set-width width
 		include glyphs.bd2571
 		include glyphs.bd2572
-	}
-}
+
 
 ### POWERLINE glyphs
-create-glyph 'branch' : glyph-construction {
+create-glyph 'branch' : glyph-construction
 	assign-unicode 0xE0A0
 	local fine : adviceBlackness 3.5
 	local vBarPos : mix SB RIGHTSB 0.2
 	local xRightBall : RIGHTSB - PERIODRADIUS
 	local yRightBall : mix parenBot parenTop 0.45
-	include : VBar vBarPos [parenBot + PERIODSIZE] [linreg SB parenTop xRightBall yRightBall vBarPos] fine
+	include : VBar vBarPos (parenBot + PERIODSIZE) [linreg SB parenTop xRightBall yRightBall vBarPos] fine
 	include : create-stroke
 		:.start-from SB parenTop
-		:.set-width  [fine / 2] [fine / 2]
+		:.set-width  (fine / 2) (fine / 2)
 		:.line-to    xRightBall yRightBall
-	include : list {
-		RingAt vBarPos [parenBot + PERIODSIZE] PERIODRADIUS
+	include : list
+		RingAt vBarPos (parenBot + PERIODSIZE) PERIODRADIUS
 		RingAt xRightBall yRightBall PERIODRADIUS
-	}
-}
-create-glyph 'pwlTriangleRight' : glyph-construction {
+
+create-glyph 'pwlTriangleRight' : glyph-construction
 	assign-unicode 0xE0B0
 	start-from O font.hhea.ascent
 	line-to    0 font.hhea.ascent
 	line-to    WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
 	line-to    0 font.hhea.descent
 	line-to    O font.hhea.descent
-}
-create-glyph 'pwlAngleRight' : glyph-construction {
+
+create-glyph 'pwlAngleRight' : glyph-construction
 	assign-unicode 0xE0B1
 	local fine : adviceBlackness 4
 	include : create-stroke
@@ -498,18 +448,18 @@ create-glyph 'pwlAngleRight' : glyph-construction {
 		:.start-from WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
 		:.set-width  0 fine
 		:.line-to    0 font.hhea.descent
-}
-create-glyph 'pwlTriangleLeft' : glyph-construction {
+
+create-glyph 'pwlTriangleLeft' : glyph-construction
 	assign-unicode 0xE0B2
 	include glyphs.pwlTriangleRight
 	include : FlipAround MIDDLE [mix font.hhea.ascent font.hhea.descent 0.5]
-}
-create-glyph 'pwlAngleLeft' : glyph-construction {
+
+create-glyph 'pwlAngleLeft' : glyph-construction
 	assign-unicode 0xE0B3
 	include glyphs.pwlAngleRight
 	include : FlipAround MIDDLE [mix font.hhea.ascent font.hhea.descent 0.5]
-}
-create-glyph 'pwlLock' : glyph-construction {
+
+create-glyph 'pwlLock' : glyph-construction
 	assign-unicode 0xE0A2
 	local fine : adviceBlackness 3.5
 	include glyphs.O
@@ -517,4 +467,3 @@ create-glyph 'pwlLock' : glyph-construction {
 	line-to    RIGHTSB parenMid
 	line-to    RIGHTSB parenBot
 	line-to    SB parenBot
-}

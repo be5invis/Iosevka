@@ -3,245 +3,220 @@ define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 define Stroke [require './stroke'].Stroke
 define Bezier [require 'bezier-js']
-define [mix a b p] : a + [b - a] * p
+define [mix a b p] : a + (b - a) * p
 
-define id (
-	.xx 1
+define id {
+.xx 1
 	.yx 0
 	.xy 0
 	.yy 1
 	.x 0
 	.y 0
-)
-define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
-define aFunction (.unapply [function [obj arity] [if [obj <@ Function] (obj) null]])
+}
+define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
+define aFunction {.unapply [function [obj arity] [if (obj <@ Function) {obj} null]]}
 
-define [Glyph name] : begin {
+define [Glyph name] : begin
 	set this.name name
-	set this.unicode ()
-	set this.contours ()
+	set this.unicode {}
+	set this.contours {}
 	set this.advanceWidth 500
-	set this.anchors (.)
-	set this.gizmo (
-		.xx 1
+	set this.anchors {.}
+	set this.gizmo {
+	.xx 1
 		.yx 0
 		.xy 0
 		.yy 1
 		.x 0
 		.y 0
-	)
-	set this.dependencies ()
+	}
+	set this.dependencies {}
 	return nothing
-}
-define Glyph.is (.unapply [function [obj arity] [if [obj <@ Glyph] (obj) null]])
-define [Glyph.prototype.set-width w] : begin {
+
+define Glyph.is {.unapply [function [obj arity] [if (obj <@ Glyph) {obj} null]]}
+define [Glyph.prototype.set-width w] : begin
 	this.advanceWidth = w
 	return this
-}
-define [Glyph.prototype.assign-unicode u] : begin {
-	this.unicode.push : piecewise {
-		[[typeof u] === 'string'] : u.charCodeAt 0
-		true u 
-	}
-	return this
-}
 
-define [Glyph.prototype.start-from x y] : begin {
-	this.contours.push ([tp this.gizmo (.x x .y y .onCurve true)])
+define [Glyph.prototype.assign-unicode u] : begin
+	this.unicode.push : piecewise
+		([typeof u] === 'string') : u.charCodeAt 0
+		true u
 	return this
-}
+
+
+define [Glyph.prototype.start-from x y] : begin
+	this.contours.push {[tp this.gizmo {.x x .y y .onCurve true}]}
+	return this
+
 Glyph.prototype.moveTo = Glyph.prototype.start-from
-define [Glyph.prototype.line-to x y] : begin {
-	this.contours`[this.contours.length - 1].push [tp this.gizmo (.x x .y y .onCurve true)]
+define [Glyph.prototype.line-to x y] : begin
+	this.contours.((this.contours.length - 1)).push [tp this.gizmo {.x x .y y .onCurve true}]
 	return this
-}
+
 Glyph.prototype.lineTo = Glyph.prototype.line-to
-define [Glyph.prototype.curve-control x y] : begin {
-	this.contours`[this.contours.length - 1].push [tp this.gizmo (.x x .y y .onCurve false)]
+define [Glyph.prototype.curve-control x y] : begin
+	this.contours.((this.contours.length - 1)).push [tp this.gizmo {.x x .y y .onCurve false}]
 	return this
-}
-define [Glyph.prototype.curve-to xc yc x y] : begin {
-	this.contours`[this.contours.length - 1].push [tp this.gizmo (.x xc .y yc .onCurve false)] [tp this.gizmo (.x x .y y .onCurve true)]
+
+define [Glyph.prototype.curve-to xc yc x y] : begin
+	this.contours.((this.contours.length - 1)).push [tp this.gizmo {.x xc .y yc .onCurve false}] [tp this.gizmo {.x x .y y .onCurve true}]
 	return this
-}
-define [Glyph.prototype.arc-vh-to x y kappa] : begin {
-	local lastContour this.contours`[this.contours.length - 1]
-	local lastPoint lastContour`[lastContour.length - 1]
+
+define [Glyph.prototype.arc-vh-to x y kappa] : begin
+	local lastContour this.contours.((this.contours.length - 1))
+	local lastPoint lastContour.((lastContour.length - 1))
 	local last : utp this.gizmo lastPoint
-	this.cubic-to last.x [last.y + [fallback kappa 0.618] * [y - last.y]] [x + [fallback kappa 0.618] * [last.x - x]] y x y
+	this.cubic-to last.x (last.y + [fallback kappa 0.618] * (y - last.y)) (x + [fallback kappa 0.618] * (last.x - x)) y x y
 	return this
-}
-define [Glyph.prototype.arc-hv-to x y kappa] : begin {
-	local lastContour this.contours`[this.contours.length - 1]
-	local lastPoint lastContour`[lastContour.length - 1]
+
+define [Glyph.prototype.arc-hv-to x y kappa] : begin
+	local lastContour this.contours.((this.contours.length - 1))
+	local lastPoint lastContour.((lastContour.length - 1))
 	local last : utp this.gizmo lastPoint
-	this.cubic-to [last.x + [fallback kappa 0.618] * [x - last.x]] last.y x [y + [fallback kappa 0.618] * [last.y - y]] x y
+	this.cubic-to (last.x + [fallback kappa 0.618] * (x - last.x)) last.y x (y + [fallback kappa 0.618] * (last.y - y)) x y
 	return this
-}
-define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin {
-	local lastContour this.contours`[this.contours.length - 1]
-	local lastPoint lastContour`[lastContour.length - 1]
-	local segments : bezierCubic2Q2 lastPoint [tp this.gizmo (.x x1 .y y1)] [tp this.gizmo (.x x2 .y y2)] [tp this.gizmo (.x x .y y)]
-	foreach (p0 (.x xc .y yc) (.x xf .y yf)) [items-of segments] : lastContour.push (.x xc .y yc) (.x xf .y yf .onCurve true)
+
+define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin
+	local lastContour this.contours.((this.contours.length - 1))
+	local lastPoint lastContour.((lastContour.length - 1))
+	local segments : bezierCubic2Q2 lastPoint [tp this.gizmo {.x x1 .y y1}] [tp this.gizmo {.x x2 .y y2}] [tp this.gizmo {.x x .y y}]
+	foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push {.x xc .y yc} {.x xf .y yf .onCurve true}
 	return this
-}
+
 Glyph.prototype.cubicTo = Glyph.prototype.cubic-to
-define [Glyph.prototype.reverse-last] : begin {
-	this.contours.[this.contours.length - 1] = [this.contours.[this.contours.length - 1].reverse]
-}
-define [Glyph.prototype.put-shapes contours] : begin {
-	# do not double-transform
+define [Glyph.prototype.reverse-last] : begin
+	this.contours.(this.contours.length - 1) = [this.contours.(this.contours.length - 1).reverse]
+
+define [Glyph.prototype.put-shapes contours] : begin
 	local t this.gizmo
 	set this.gizmo id
-	foreach contour [items-of contours] : begin {
+	foreach contour [items-of contours] : begin
 		this.start-from contour.0.x contour.0.y
-		for [local j 1] [j < contour.length] [inc j] : begin {
-			local point contour`j
-			if point.cubic [begin {
-				local p2 contour`[j + 1]
-				local p3 contour`[j + 2]
-				this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
-				j = j + 2
-			}] [if point.onCurve [this.line-to point.x point.y] [this.curve-control point.x point.y]]
-		}
-	}
+		for [local j 1] (j < contour.length) [inc j] : begin
+			local point contour.(j)
+			if point.cubic [begin \\
+					local p2 contour.((j + 1))
+					local p3 contour.((j + 2))
+					this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
+					j = j + 2
+				] [if point.onCurve [this.line-to point.x point.y] [this.curve-control point.x point.y]]
 	set this.gizmo t
 	return this
-}
-define [Glyph.prototype.include component copyAnchors] : begin {
-	local glyph : match component {
+
+define [Glyph.prototype.include component copyAnchors] : begin
+	local glyph : match component
 		[aFunction it] : return : component.call this
-		[Stroke.is it]   (.contours [component.to-outline])
-		(:: contours)    (.contours contours)
+		[Stroke.is it]   {.contours [component.to-outline]}
+		{:: contours}    {.contours contours}
 		otherwise        component
-	}
 	local contours glyph.contours
-	local transform (.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0)
+	local transform {.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0}
 	local shiftx 0
 	local shifty 0
-	if [this.anchors && glyph.anchors] : foreach markid [items-of [Object.keys this.anchors]] : begin {
-		local anchorThis this.anchors`markid
-		local anchorThat glyph.anchors`markid
-		if [anchorThis && [anchorThis.type === 'base' || anchorThis.mbx !== nothing && anchorThis.mby !== nothing] && anchorThat && anchorThat.type === 'mark'] : begin {
-			set (shiftx shifty) (
-				[[fallback anchorThis.mbx anchorThis.x] - anchorThat.x]
-				[[fallback anchorThis.mby anchorThis.y] - anchorThat.y]
-			)
+	if (this.anchors && glyph.anchors) : foreach markid [items-of [Object.keys this.anchors]] : begin
+		local anchorThis this.anchors.(markid)
+		local anchorThat glyph.anchors.(markid)
+		if (anchorThis && (anchorThis.type === 'base' || anchorThis.mbx !== nothing && anchorThis.mby !== nothing) && anchorThat && anchorThat.type === 'mark') : begin
+			set {shiftx shifty} {
+			([fallback anchorThis.mbx anchorThis.x] - anchorThat.x)
+				([fallback anchorThis.mby anchorThis.y] - anchorThat.y)
+			}
 			# we have a mark-to-mark position
-			if [anchorThat.mbx !== nothing && anchorThat.mby !== nothing] : if [anchorThis.type === 'base'] {
-				then {
-					set this.anchors`markid (
-						.x [anchorThis.x + anchorThat.mbx - anchorThat.x]
-						.y [anchorThis.y + anchorThat.mby - anchorThat.y]
+			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing) : if (anchorThis.type === 'base')
+				then
+					set this.anchors.(markid) {
+					.x (anchorThis.x + anchorThat.mbx - anchorThat.x)
+						.y (anchorThis.y + anchorThat.mby - anchorThat.y)
 						.type anchorThis.type
 						.mbx anchorThis.mbx
 						.mby anchorThis.mby
-					)
-				}
-				else {
-					set this.anchors`markid (
-						.mbx [anchorThis.mbx + anchorThat.mbx - anchorThat.x]
-						.mby [anchorThis.mby + anchorThat.mby - anchorThat.y]
+					}
+				else
+					set this.anchors.(markid) {
+					.mbx (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
+						.mby (anchorThis.mby + anchorThat.mby - anchorThat.y)
 						.type anchorThis.type
 						.x anchorThis.x
 						.y anchorThis.y
-					)
-				}
-			}
-		}
-	}
+					}
 	set transform.x : transform.x + shiftx
 	set transform.y : transform.y + shifty
-	if contours : begin {
-		this.put-shapes : contours.map : function [contour] {
+	if contours : begin
+		this.put-shapes : contours.map : function [contour]
 			contour.map : function [point] : tp transform point
-		}
-	}
-	if [[[not contours] || copyAnchors] && glyph.anchors] : set this.anchors : let [a (.)] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin {
-		foreach k [items-of keys] [set a`k anchors`k]
+	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
+		foreach k [items-of keys] [set a.(k) anchors.(k)]
 		* a
-	}
-	piecewise {
+	piecewise
 		glyph.name : this.dependencies.push glyph.name
 		glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
-	}
-}
-define [Glyph.prototype.apply-transform transform alsoAnchors] : begin {
-	set this.contours : this.contours.map : function [contour] : begin {
+
+define [Glyph.prototype.apply-transform transform alsoAnchors] : begin
+	set this.contours : this.contours.map : function [contour] : begin
 		return : contour.map : function [point] [tp transform point]
-	}
-	if alsoAnchors : foreach key [items-of [Object.keys this.anchors]] : begin {
+	if alsoAnchors : foreach key [items-of [Object.keys this.anchors]] : begin
 		local thisanchor this.anchors.(key)
-		local newanchor (.type thisanchor.type)
-		set (.x newanchor.x .y newanchor.y) [tp transform thisanchor]
-		if [thisanchor.mbx !== nothing && thisanchor.mby !== nothing] : begin {
-			set (.x newanchor.mbx .y newanchor.mby) [tp transform (.x thisanchor.mbx .y thisanchor.mby)]
-		}
+		local newanchor {.type thisanchor.type}
+		set {.x newanchor.x .y newanchor.y} [tp transform thisanchor]
+		if (thisanchor.mbx !== nothing && thisanchor.mby !== nothing) : begin
+			set {.x newanchor.mbx .y newanchor.mby} [tp transform {.x thisanchor.mbx .y thisanchor.mby}]
 		set this.anchors.(key) newanchor
-	}
-}
-define [Glyph.prototype.create-stroke] : begin {
+
+define [Glyph.prototype.create-stroke] : begin
 	local s : new Stroke
-	s.gizmo = (.x this.gizmo.x .y this.gizmo.y .xx this.gizmo.xx .xy this.gizmo.xy .yx this.gizmo.yx .yy this.gizmo.yy)
+	s.gizmo = {.x this.gizmo.x .y this.gizmo.y .xx this.gizmo.xx .xy this.gizmo.xy .yx this.gizmo.yx .yy this.gizmo.yy}
 	return s
-}
-define [Glyph.prototype.set-anchor id type x y mbx mby] : begin {
-	local anchorpoint [tp this.gizmo (.x x .y y)]
-	local markbasepoint : if [mbx !== nothing && mby !== nothing] [tp this.gizmo (.x mbx .y mby)] (.x nothing .y nothing)
-	this.anchors`id = (.x anchorpoint.x .y anchorpoint.y .type type .mbx markbasepoint.x .mby markbasepoint.y)
-}
-define [oncurveRemovable a b c] : begin {
-	local xm : [a.x + c.x] / 2
-	local ym : [a.y + c.y] / 2
-	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x] && [a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y] && [Math.abs [b.x - xm]] <= 0.5 && [Math.abs [b.y - ym]] <= 0.5
-}
-define [Glyph.prototype.cleanup] : begin {
-	foreach c [range 0 this.contours.length] : begin {
+
+define [Glyph.prototype.set-anchor id type x y mbx mby] : begin
+	local anchorpoint [tp this.gizmo {.x x .y y}]
+	local markbasepoint : if (mbx !== nothing && mby !== nothing) [tp this.gizmo {.x mbx .y mby}] {.x nothing .y nothing}
+	this.anchors.(id) = {.x anchorpoint.x .y anchorpoint.y .type type .mbx markbasepoint.x .mby markbasepoint.y}
+
+define [oncurveRemovable a b c] : begin
+	local xm : (a.x + c.x) / 2
+	local ym : (a.y + c.y) / 2
+	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= 0.5 && [Math.abs (b.y - ym)] <= 0.5
+
+define [Glyph.prototype.cleanup] : begin
+	foreach c [range 0 this.contours.length] : begin
 		local ocontour this.contours.(c)
 		# add infections
-		local contour (ocontour.0)
-		foreach [j : range 1 [ocontour.length - 1]] : piecewise {
+		local contour {ocontour.0}
+		foreach [j : range 1 (ocontour.length - 1)] : piecewise
 			ocontour.(j).onCurve : contour.push ocontour.(j)
-			true : begin {
-				local p0 contour.[contour.length - 1]
+			true : begin
+				local p0 contour.(contour.length - 1)
 				local p1 ocontour.(j)
-				local p2 ocontour.[j + 1]
-				if [not p2.onCurve] : set p1 (.x [mix p1.x p2.x 0.5] .y [mix p1.y p2.y 0.5] .onCurve true)
+				local p2 ocontour.(j + 1)
+				if [not p2.onCurve] : set p1 {.x [mix p1.x p2.x 0.5] .y [mix p1.y p2.y 0.5] .onCurve true}
 				local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 				local ts [strand.inflections].y
-				piecewise {
-					[!ts || ts.length < 1] : contour.push p1 p2
-					true : begin {
+				piecewise
+					(!ts || ts.length < 1) : contour.push p1 p2
+					true : begin
 						ts.unshift 0
 						ts.push 1
-						foreach [k : range 0 [ts.length - 1]] : begin {
-							local s : strand.split ts.(k) ts.[k + 1]
-							if s.points : contour.push (.x s.points.1.x .y s.points.1.y .onCurve false) (.x s.points.2.x .y s.points.2.y .onCurve true)
-						}
-					}
-				}
-			}
-		}
-		contour.push ocontour.[ocontour.length - 1]
+						foreach [k : range 0 (ts.length - 1)] : begin
+							local s : strand.split ts.(k) ts.(k + 1)
+							if s.points : contour.push {.x s.points.1.x .y s.points.1.y .onCurve false} {.x s.points.2.x .y s.points.2.y .onCurve true}
+		contour.push ocontour.(ocontour.length - 1)
 		# smart round
 		local p0 contour.0
 		local rx : Math.round p0.x
 		local ry : Math.round p0.y
-		foreach [j : range 0 contour.length] : begin {
+		foreach [j : range 0 contour.length] : begin
 			contour.(j).x = [Math.round : contour.(j).x - p0.x + rx]
 			contour.(j).y = [Math.round : contour.(j).y - p0.y + ry]
-		}
 		# cleanup
-		local cleanedContour ()
-		foreach j [range 1 : contour.length - 1] : begin {
-			local p0 contour.[j - 1]
+		local cleanedContour {}
+		foreach j [range 1 : contour.length - 1] : begin
+			local p0 contour.(j - 1)
 			local p1 contour.(j)
-			local p2 contour.[j + 1]
+			local p2 contour.(j + 1)
 			if [oncurveRemovable p0 p1 p2] : set p1.unimportant true
-		}
 		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 		this.contours.(c) = cleanedContour
-	}
 	return this
-}
+
 exports.Glyph = Glyph

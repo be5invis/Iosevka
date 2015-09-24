@@ -12,22 +12,22 @@ define SpiroExpansionContext [require './support/spiroexpand'].SpiroExpansionCon
 define toml : require 'toml'
 
 ### COMMON FUNCTIONS
-define [mix a b p] : a + [b - a] * p
-define [linreg x0 y0 x1 y1 x] : y0 + [x - x0] * [y1 - y0] / [x1 - x0]
-define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg {
+define [mix a b p] : a + (b - a) * p
+define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg
 	* y0
 	linreg x0 z00 x1 z10 x
 	* y1
 	linreg x0 z01 x1 z11 x
 	* y
-}
-define [fallback] : for [local j 0] [j < arguments.length] [inc j] : if [arguments`j !== nothing] : return arguments`j
+
+define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 
 # Empty font base file
 define emptyFontStr : fs.readFileSync : path.join [path.dirname require.main.filename] 'emptyfont.toml'
 
-define-macro $$include : syntax-rules {
-	('$$include' ('.quote' file)) : begin {
+define-macro $$include : syntax-rules
+	{'$$include' {'.quote' file}} : begin
 		local path : require 'path'
 		local fs : require 'fs'
 		local f0 [[env.macros.get 'input-path']].1
@@ -35,20 +35,18 @@ define-macro $$include : syntax-rules {
 		
 		local absolutePath : path.resolve [path.dirname f0] [formOf file]
 		local input : fs.readFileSync absolutePath 'utf-8'
-		local ast : parse input (.within (.file absolutePath .input input))
-		return ('.syntactic-closure' ast env)
-	}
-	otherwise @`nothing
-}
+		local ast : parse input {.within {.file absolutePath .input input}}
+		return {'.syntactic-closure' ast env}
+	otherwise `nothing
 
-define [buildFont para recursive] : begin {
-	
+
+define [buildFont para recursive] : begin
 	define variantSelector para.variantSelector
 	define font : toml.parse emptyFontStr
 	
 	define glyphList font.glyf
-	define glyphs (.)
-	define unicodeGlyphs ()
+	define glyphs {.}
+	define unicodeGlyphs {}
 
 	define UPM 1000
 	define serifed : not [not para.serif]
@@ -59,33 +57,31 @@ define [buildFont para recursive] : begin {
 	define XH para.xheight
 	define DESCENDER para.descender
 	# Key metrics for symbols
-	local parenTop [[XH * 0.625] + [CAP - XH] * 2.5]
-	local parenBot [[XH * 0.625] - [CAP - XH] * 2.5]
+	local parenTop ((XH * 0.625) + (CAP - XH) * 2.5)
+	local parenBot ((XH * 0.625) - (CAP - XH) * 2.5)
 	local parenMid [mix parenTop parenBot 0.5]
 	
 	# Transform constructors
-	define [Italify angle shift] : begin {
-		local slope [Math.tan [[fallback angle para.italicangle] / 180 * Math.PI]]
-		return (.xx 1 .yx slope .xy 0 .yy 1 .x [fallback shift : -slope * parenMid] .y 0)
-	}
+	define [Italify angle shift] : begin
+		local slope [Math.tan ([fallback angle para.italicangle] / 180 * Math.PI)]
+		return {.xx 1 .yx slope .xy 0 .yy 1 .x [fallback shift : -slope * parenMid] .y 0}
 	define [Upright angle shift] [inverse : Italify angle shift]
-	define [Scale sx sy] (.xx sx .yx 0 .xy 0 .yy [fallback sy sx] .x 0 .y 0)
-	define [Translate x y] (.xx 1 .yx 0 .xy 0 .yy 1 .x x .y y)
-	define [Rotate angle] (.xx [Math.cos angle] .yx [-[Math.sin angle]] .xy [Math.sin angle] .yy [Math.cos angle] .x 0 .y 0)
+	define [Scale sx sy] {.xx sx .yx 0 .xy 0 .yy [fallback sy sx] .x 0 .y 0}
+	define [Translate x y] {.xx 1 .yx 0 .xy 0 .yy 1 .x x .y y}
+	define [Rotate angle] {.xx [Math.cos angle] .yx (-[Math.sin angle]) .xy [Math.sin angle] .yy [Math.cos angle] .x 0 .y 0}
 	
 	define globalTransform : Italify para.italicAngle
 	define deGlobalTransform : inverse globalTransform
-	define CORRECTION_HX : 1 / [Math.sqrt [1 - globalTransform.yx * globalTransform.yx]]
+	define CORRECTION_HX : 1 / [Math.sqrt (1 - globalTransform.yx * globalTransform.yx)]
 	
 	# Orient parameters
-	define UPWARD (.x [-CORRECTION_HX] .y 0)
-	define DOWNWARD (.x CORRECTION_HX .y 0)
-	define RIGHTWARD (.x globalTransform.yx .y 1)
-	define LEFTWARD  (.x [- globalTransform.yx] .y [-1])
-	define [normalize a] : begin {
+	define UPWARD {.x (-CORRECTION_HX) .y 0}
+	define DOWNWARD {.x CORRECTION_HX .y 0}
+	define RIGHTWARD {.x globalTransform.yx .y 1}
+	define LEFTWARD  {.x (- globalTransform.yx) .y (-1)}
+	define [normalize a] : begin
 		local m : Math.hypot a.x a.y
-		return (.x [a.x / m] .y [a.y / m])
-	}
+		return {.x (a.x / m) .y (a.y / m)}
 	
 	# Style parameters
 	define O para.overshoot
@@ -115,20 +111,20 @@ define [buildFont para recursive] : begin {
 	define BKAPPA : para.bkappa || KAPPA + 0.1
 	define KAPPA_SPIRO_ARC : KAPPA + 0.1
 	define CKAPPA : para.ckappa || BKAPPA
-	define KAPPA_HOOK  : fallback para.kappa_hook  [BKAPPA + 0.1]
+	define KAPPA_HOOK  : fallback para.kappa_hook  (BKAPPA + 0.1)
 	define KAPPA_AHOOK : fallback para.kappa_ahook KAPPA_HOOK
 	define KAPPA_RHOOK : fallback para.kappa_rhook KAPPA_HOOK
 	define TAILADJX : WIDTH * 0.2
 	define TAILADJY : XH * 0.25
 	define ILBALANCE : LONGJUT * 0.04
-	define JBALANCE : fallback para.jbalance [STROKE / 2 + ILBALANCE]
+	define JBALANCE : fallback para.jbalance (STROKE / 2 + ILBALANCE)
 	define TBALANCE : fallback para.tbalance JBALANCE
 	define TBALANCE2 : fallback para.tbalance2 TBALANCE
-	define RBALANCE : fallback para.rbalance [JBALANCE * 0.3]
+	define RBALANCE : fallback para.rbalance (JBALANCE * 0.3)
 	define SBALANCE : fallback para.sbalance 0.52
 	
 	# derived metrics
-	define FULLWIDTH : if para.cjkSpacing [WIDTH * 2] WIDTH
+	define FULLWIDTH : if para.cjkSpacing (WIDTH * 2) WIDTH
 	define XO : XH - O
 	define CAPO : CAP - O
 	define HALFSTROKE : STROKE / 2
@@ -153,9 +149,9 @@ define [buildFont para recursive] : begin {
 	
 	# Blackness parameters
 	# We will estimate blackness using lower-case 'e'
-	define WHITENESS : [[XH - STROKE * 3] * [RIGHTSB - SB] * [1 / 3]] / [XH * [RIGHTSB - SB]]
-	define [adviceBlackness crowdedness] : Math.min STROKE [[RIGHTSB - SB] * [1 - WHITENESS] / crowdedness]
-	define MVERTSTROKE : adviceBlackness : fallback para.lllcrowdedness [3 + 1 / 3]
+	define WHITENESS : ((XH - STROKE * 3) * (RIGHTSB - SB) * (1 / 3)) / (XH * (RIGHTSB - SB))
+	define [adviceBlackness crowdedness] : Math.min STROKE ((RIGHTSB - SB) * (1 - WHITENESS) / crowdedness)
+	define MVERTSTROKE : adviceBlackness : fallback para.lllcrowdedness (3 + 1 / 3)
 	define OPERATORSTROKE : adviceBlackness 3.4
 	
 	# Anchor parameters
@@ -164,41 +160,38 @@ define [buildFont para recursive] : begin {
 	define MARKBASE 'markbase'
 	define AS_BASE 'AS-BASE'
 	
-	define [tm anchor] : return (
-		.x [anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x]
-		.y [anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y]
+	define [tm anchor] : return {
+	.x (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
+		.y (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
 		.type anchor.type
-	)
-	
-	define markAboveLower    (.anchors (.above    [tm (.x MIDDLE  .y XH        .type BASE)]))
-	define markAboveCap      (.anchors (.above    [tm (.x MIDDLE  .y CAP       .type BASE)]))
-	define markBelowLower    (.anchors (.below    [tm (.x MIDDLE  .y DESCENDER .type BASE)]))
-	define markBelowZero     (.anchors (.below    [tm (.x MIDDLE  .y 0         .type BASE)]))
-	define markToprightLower (.anchors (.topright [tm (.x RIGHTSB .y XH        .type BASE)]))
-	define markToprightCap   (.anchors (.topright [tm (.x RIGHTSB .y CAP       .type BASE)]))
-	define markBottomrightLower (.anchors (.bottomright [tm (.x RIGHTSB .y DESCENDER        .type BASE)]))
-	define markBottomrightZero   (.anchors (.bottomright [tm (.x RIGHTSB .y 0       .type BASE)]))
-	
-	define [anchorDeriv] : begin {
-		local h (.)
-		foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin {
-			set h.(k) (.)
-			set (.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby) a.anchors.(k)
-		}
-		return (.anchors h)
 	}
-	define [StdAnchorGroup] : begin {
+	
+	define markAboveLower    {.anchors {.above    [tm {.x MIDDLE  .y XH        .type BASE}]}}
+	define markAboveCap      {.anchors {.above    [tm {.x MIDDLE  .y CAP       .type BASE}]}}
+	define markBelowLower    {.anchors {.below    [tm {.x MIDDLE  .y DESCENDER .type BASE}]}}
+	define markBelowZero     {.anchors {.below    [tm {.x MIDDLE  .y 0         .type BASE}]}}
+	define markToprightLower {.anchors {.topright [tm {.x RIGHTSB .y XH        .type BASE}]}}
+	define markToprightCap   {.anchors {.topright [tm {.x RIGHTSB .y CAP       .type BASE}]}}
+	define markBottomrightLower {.anchors {.bottomright [tm {.x RIGHTSB .y DESCENDER        .type BASE}]}}
+	define markBottomrightZero   {.anchors {.bottomright [tm {.x RIGHTSB .y 0       .type BASE}]}}
+	
+	define [anchorDeriv] : begin
+		local h {.}
+		foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
+			set h.(k) {.}
+			set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
+		return {.anchors h}
+	define [StdAnchorGroup] : begin
 		local a : anchorDeriv.apply null arguments
-		set a.anchors.overlay (.type BASE 
+		set a.anchors.overlay {.type BASE
 			.x [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
 			.y [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
-		)
-		set a.anchors.slash (.type BASE
+		}
+		set a.anchors.slash {.type BASE
 			.x [mix a.anchors.below.x a.anchors.above.x 0.5]
 			.y [mix a.anchors.below.y a.anchors.above.y 0.5]
-		)
+		}
 		return a
-	}
 	
 	define capitalMarks : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
 	define bMarks       : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
@@ -208,230 +201,208 @@ define [buildFont para recursive] : begin {
 	
 	### Necessary macros
 	# Remap Glyph's methods to macros in order to simplify writing
-	define-macro set-width : syntax-rules { @`[set-width @::args] ('.syntactic-closure' @`[currentGlyph.set-width @::args] env) }
-	define-macro start-from : syntax-rules { @`[start-from @::args] ('.syntactic-closure' @`[currentGlyph.start-from @::args] env) }
-	define-macro line-to : syntax-rules { @`[line-to @::args] ('.syntactic-closure' @`[currentGlyph.line-to @::args] env) }
-	define-macro curve-to : syntax-rules { @`[curve-to @::args] ('.syntactic-closure' @`[currentGlyph.curve-to @::args] env) }
-	define-macro cubic-to : syntax-rules { @`[cubic-to @::args] ('.syntactic-closure' @`[currentGlyph.cubic-to @::args] env) }
-	define-macro arc-hv-to : syntax-rules { @`[arc-hv-to @::args] ('.syntactic-closure' @`[currentGlyph.arc-hv-to @::args] env) }
-	define-macro arc-vh-to : syntax-rules { @`[arc-vh-to @::args] ('.syntactic-closure' @`[currentGlyph.arc-vh-to @::args] env) }
-	define-macro include : syntax-rules { @`[include @::args] ('.syntactic-closure' @`[currentGlyph.include @::args] env) }
-	define-macro create-stroke : syntax-rules { @`[create-stroke @::args] ('.syntactic-closure' @`[currentGlyph.create-stroke @::args] env) }
-	define-macro set-anchor : syntax-rules { @`[set-anchor @::args] ('.syntactic-closure' @`[currentGlyph.set-anchor @::args] env) }
-	define-macro apply-transform : syntax-rules { @`[apply-transform @::args] ('.syntactic-closure' @`[currentGlyph.apply-transform @::args] env) }
-	define-macro reverse-last : syntax-rules { @`[reverse-last @::args] ('.syntactic-closure' @`[currentGlyph.reverse-last @::args] env) }
-	define-macro dont-export : syntax-rules {
-		@`[dont-export] (".syntactic-closure" @`[set currentGlyph.dontExport true] env)
-	}
-	define-macro assign-unicode : syntax-rules {
-		@`[assign-unicode @code] (".syntactic-closure" @`[begin {
-			currentGlyph.assign-unicode @code
-			set unicodeGlyphs.(currentGlyph.unicode`[currentGlyph.unicode.length - 1]) currentGlyph
-		}] env)
-	}
+	define-macro set-width : syntax-rules
+		`[set-width @::args] {'.syntactic-closure' `[currentGlyph.set-width @::args] env}
+	define-macro start-from : syntax-rules
+		`[start-from @::args] {'.syntactic-closure' `[currentGlyph.start-from @::args] env}
+	define-macro line-to : syntax-rules
+		`[line-to @::args] {'.syntactic-closure' `[currentGlyph.line-to @::args] env}
+	define-macro curve-to : syntax-rules
+		`[curve-to @::args] {'.syntactic-closure' `[currentGlyph.curve-to @::args] env}
+	define-macro cubic-to : syntax-rules
+		`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
+	define-macro arc-hv-to : syntax-rules
+		`[arc-hv-to @::args] {'.syntactic-closure' `[currentGlyph.arc-hv-to @::args] env}
+	define-macro arc-vh-to : syntax-rules
+		`[arc-vh-to @::args] {'.syntactic-closure' `[currentGlyph.arc-vh-to @::args] env}
+	define-macro include : syntax-rules
+		`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
+	define-macro create-stroke : syntax-rules
+		`[create-stroke @::args] {'.syntactic-closure' `[currentGlyph.create-stroke @::args] env}
+	define-macro set-anchor : syntax-rules
+		`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
+	define-macro apply-transform : syntax-rules
+		`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
+	define-macro reverse-last : syntax-rules
+		`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
+	define-macro dont-export : syntax-rules
+		`[dont-export] {".syntactic-closure" `[set currentGlyph.dontExport true] env}
+	define-macro assign-unicode : syntax-rules
+		`[assign-unicode @code] {".syntactic-closure" `[begin \\
+					currentGlyph.assign-unicode @code
+					set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
+				] env}
 	# The macro [glyph-construction] creates a function which builds a glyph.
-	define-macro glyph-construction : syntax-rules {
-		@`[glyph-construction @::steps] ('.syntactic-closure' @`[lambda [] [begin {
+	define-macro glyph-construction : syntax-rules
+		`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
 			local currentGlyph this
 			currentGlyph.gizmo = globalTransform
 			begin @::[steps.map formOf]
 			return nothing
-		}]] env)
-	}
+		]] env}
 	
 	
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
-	local dependencyProfile (.)
+	local dependencyProfile {.}
 	local nTemp 0
-	local pickHash : if recursive {
-		then : let [h (.)] : begin {
+	local pickHash : if recursive
+		then : let [h {.}] : begin
 			foreach j [items-of recursive] : set h.(j) j
 			* h
-		}
 		else nothing
-	}
-	define [create-glyph name actions] : piecewise {
-		[name && actions] : begin {
-			if [pickHash && [not pickHash.(name)]] : return nothing
-			set dependencyProfile`name ()
+	define [create-glyph name actions] : piecewise
+		(name && actions) : begin
+			if (pickHash && [not pickHash.(name)]) : return nothing
+			set dependencyProfile.(name) {}
 			define glyphObject [new Glyph name]
 			glyphObject.set-width WIDTH
 			glyphList.push glyphObject
-			glyphs`name = glyphObject
+			glyphs.(name) = glyphObject
 			actions.call glyphObject
-			foreach d [items-of glyphObject.dependencies] : begin {
-				local allAliases : Object.keys glyphs :.filter [[k] -> [glyphs`k === glyphs`d]]
-				dependencyProfile`name = [dependencyProfile`name.concat dependencyProfile`d allAliases]
-			}
+			foreach d [items-of glyphObject.dependencies] : begin
+				local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(d)))
+				dependencyProfile.(name) = [dependencyProfile.(name).concat dependencyProfile.(d) allAliases]
 			return glyphObject
-		}
-		true : begin {
+		true : begin
 			local actions arguments.0
-			local glyphObject [new Glyph ['.temp-' + [set nTemp [inc nTemp]]]]
+			local glyphObject [new Glyph ('.temp-' + [set nTemp [inc nTemp]])]
 			glyphObject.set-width WIDTH
 			actions.call glyphObject
 			return glyphObject
-		}
-	}
 	
-	define [select-variant name unicode default] : begin {
-		if [pickHash && [not pickHash.(name)]] : return nothing
-		local variant : variantSelector`name || default
-		local chosenGlyph glyphs`[name + '.' + variant]
-		create-glyph name : glyph-construction {
+	define [select-variant name unicode default] : begin
+		if (pickHash && [not pickHash.(name)]) : return nothing
+		local variant : variantSelector.(name) || default
+		local chosenGlyph glyphs.((name + '.' + variant))
+		create-glyph name : glyph-construction
 			include chosenGlyph AS_BASE
 			if unicode : assign-unicode unicode
-		}
-		local allAliases : Object.keys glyphs :.filter [[k] -> [glyphs`k === glyphs.(chosenGlyph.name)]]
-		set dependencyProfile`name : allAliases.concat dependencyProfile.(chosenGlyph.name)
-	}
-	define [italic-variant name unicode] : create-glyph name : glyph-construction {
-		if [para.italicangle > 0] {
-			then : include glyphs.[name + '.italic'] AS_BASE
-			else : include glyphs.[name + '.upright'] AS_BASE
-		}
+		local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(chosenGlyph.name)))
+		set dependencyProfile.(name) : allAliases.concat dependencyProfile.(chosenGlyph.name)
+	define [italic-variant name unicode] : create-glyph name : glyph-construction
+		if (para.italicangle > 0)
+			then : include glyphs.(name + '.italic') AS_BASE
+			else : include glyphs.(name + '.upright') AS_BASE
 		if unicode : assign-unicode unicode
-	}
-	define [alias newid unicode oldid] : create-glyph newid : glyph-construction {
+	define [alias newid unicode oldid] : create-glyph newid : glyph-construction
 		if unicode : assign-unicode unicode
-		include glyphs`oldid AS_BASE
+		include glyphs.(oldid) AS_BASE
 		set-width glyphs.(oldid).advanceWidth
-	}
 	
 	### Spiro constructions
-	define [flatten knots] : begin {
-		local a ()
-		foreach p [items-of knots] : piecewise {
-			[p <@ Array] : set a : a.concat [flatten p]
+	define [flatten knots] : begin
+		local a {}
+		foreach p [items-of knots] : piecewise
+			(p <@ Array) : set a : a.concat [flatten p]
 			true         : a.push p
-		}
 		return a
-	}
-	define [unimportant] : begin {
-		if [this.points && this.points.length && this.points.[this.points.length - 1]] : this.points.[this.points.length - 1].subdivided = true
-		if [this.controlKnots && this.controlKnots.length && this.controlKnots.[this.controlKnots.length - 1]] : this.controlKnots.[this.controlKnots.length - 1].unimportant = true
-	}
+	define [unimportant] : begin
+		if (this.points && this.points.length && this.points.(this.points.length - 1)) : this.points.(this.points.length - 1).subdivided = true
+		if (this.controlKnots && this.controlKnots.length && this.controlKnots.(this.controlKnots.length - 1)) : this.controlKnots.(this.controlKnots.length - 1).unimportant = true
 	define [important] nothing
-	define [afInterpolate before after args] : g2 {
+	define [afInterpolate before after args] : g2
 		mix before.x after.x args.rx
 		mix before.y after.y args.ry
 		fallback args.raf unimportant
-	}
-	define [bez3 a b c d t] : [1 - t] * [1 - t] * [1 - t] * a + 3 * [1 - t] * [1 - t] * t * b +3 * t * t * [1 - t] * c + t * t * t * d
-	define [afInterpolateThem before after args] : begin {
-		local knots ()
-		foreach (rx ry preserve) [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve {
+	define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b +3 * t * t * (1 - t) * c + t * t * t * d
+	define [afInterpolateThem before after args] : begin
+		local knots {}
+		foreach {rx ry preserve} [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve
 			1 before.af
 			2 after.af
 			otherwise unimportant
-		}
 		return knots
-	}
-	define [g4 x y f] (.x x .y y .type 'g4' .af f)
-	define [g2 x y f] (.x x .y y .type 'g2' .af f)
-	define [corner x y f] (.x x .y y .type 'corner' .af f)
-	define [flat x y f] (.x x .y y .type 'left' .af f)
-	define [curl x y f] (.x x .y y .type 'right' .af f)
-	define [close f] (.type 'close' .af f)
-	define [end f] (.type 'end' .af f)
-	define [prepare f] (.type 'prepare' .af f)
+	define [g4 x y f] {.x x .y y .type 'g4' .af f}
+	define [g2 x y f] {.x x .y y .type 'g2' .af f}
+	define [corner x y f] {.x x .y y .type 'corner' .af f}
+	define [flat x y f] {.x x .y y .type 'left' .af f}
+	define [curl x y f] {.x x .y y .type 'right' .af f}
+	define [close f] {.type 'close' .af f}
+	define [end f] {.type 'end' .af f}
+	define [prepare f] {.type 'prepare' .af f}
 	define [widths l r] : lambda [] : this.set-width l r
 	
 	define [widths.lhs w] : prepare : widths [fallback w STROKE] 0
 	define [widths.rhs w] : prepare : widths 0 [fallback w STROKE]
-	define [widths.center w] : prepare : widths [[fallback w STROKE] / 2] [[fallback w STROKE] / 2]
-	define [widths.heading l r d] : lambda [] : begin { this.set-width l r; this.heads-to d }
+	define [widths.center w] : prepare : widths ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)
+	define [widths.heading l r d] : lambda [] : begin
+		this.set-width l r; this.heads-to d
 	define [heading d] : lambda [] : this.heads-to d
 	
-	define [alsothru rx ry raf] (.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate)
-	define [alsothruthem rs raf] (.type 'interpolate' .rs rs .raf raf .af afInterpolateThem)
-	define [bezcontrols x1 y1 x2 y2 _samples raf] : begin {
+	define [alsothru rx ry raf] {.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate}
+	define [alsothruthem rs raf] {.type 'interpolate' .rs rs .raf raf .af afInterpolateThem}
+	define [bezcontrols x1 y1 x2 y2 _samples raf] : begin
 		local samples : fallback _samples 5
 		local tiny 0.005
-		local rs ()
-		foreach j [range 1 samples] : rs.push : list {
-			bez3 0 x1 x2 1 [mix tiny [1 - tiny] [j / samples]]
-			bez3 0 y1 y2 1 [mix tiny [1 - tiny] [j / samples]]
-		}
+		local rs {}
+		foreach j [range 1 samples] : rs.push : list
+			bez3 0 x1 x2 1 [mix tiny (1 - tiny) (j / samples)]
+			bez3 0 y1 y2 1 [mix tiny (1 - tiny) (j / samples)]
 		alsothruthem rs raf
-	}
-	define [quadcontrols x1 y1 samples raf] : bezcontrols [x1 * 2 / 3] [y1 * 2 / 3] [mix 1 x1 [2 / 3]] [mix 1 y1 [2 / 3]] samples raf
-	define [archv samples] : bezcontrols KAPPA_SPIRO_ARC 0 1 [1 - KAPPA_SPIRO_ARC] samples
-	define [arcvh samples] : bezcontrols 0 KAPPA_SPIRO_ARC [1 - KAPPA_SPIRO_ARC] 1 samples
+	define [quadcontrols x1 y1 samples raf] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf
+	define [archv samples] : bezcontrols KAPPA_SPIRO_ARC 0 1 (1 - KAPPA_SPIRO_ARC) samples
+	define [arcvh samples] : bezcontrols 0 KAPPA_SPIRO_ARC (1 - KAPPA_SPIRO_ARC) 1 samples
 	
-	define [complexThru] : begin {
-		local a : ().slice.call arguments
-		return (.type 'interpolate' .af [lambda [before after args] : begin {
-			local ks ()
+	define [complexThru] : begin
+		local a : {}.slice.call arguments
+		return {.type 'interpolate' .af [lambda [before after args] : begin \\
+			local ks {}
 			foreach knot [items-of a] : ks.push [knot.af.call this before after knot]
 			return ks
-		}])
-	}
-	define [prepareSpiroKnots knots s] : begin {
+		]}
+	define [prepareSpiroKnots knots s] : begin
 		local closed false
-		local lastafs ()
-		while [knots.0 && knots.0.type === 'prepare'] : begin {
+		local lastafs {}
+		while (knots.0 && knots.0.type === 'prepare') : begin
 			knots.0.af.call s
 			set knots : knots.slice 1
-		}
-		while [knots.[knots.length - 1] && [knots.[knots.length - 1].type === 'close' || knots.[knots.length - 1].type === 'end']] : begin {
-			set closed : knots.[knots.length - 1].type === 'close'
-			lastafs.push knots.[knots.length - 1].af
-			set knots : knots.slice 0 [-1]
-		}
+		while (knots.(knots.length - 1) && (knots.(knots.length - 1).type === 'close' || knots.(knots.length - 1).type === 'end')) : begin
+			set closed : knots.(knots.length - 1).type === 'close'
+			lastafs.push knots.(knots.length - 1).af
+			set knots : knots.slice 0 (-1)
 		set knots : flatten knots
 		if closed : knots.push knots.0
-		foreach j [range 0 knots.length] : if [knots.(j) && knots.(j).type === 'interpolate'] : begin {
-			set knots.(j) : knots.(j).af.call s knots.[j - 1] knots.[j + 1] knots.(j)
-		}
+		foreach j [range 0 knots.length] : if (knots.(j) && knots.(j).type === 'interpolate') : begin
+			set knots.(j) : knots.(j).af.call s knots.(j - 1) knots.(j + 1) knots.(j)
 		if closed : knots.pop
-		return (.knots [flatten knots] .closed closed .lastafs lastafs)
-	}
-	define [spiro-stroke] : begin {
+		return {.knots [flatten knots] .closed closed .lastafs lastafs}
+	define [spiro-stroke] : begin
 		local s : new Stroke
 		s.set-transform globalTransform
 		s.set-samples 1
-		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots [().slice.call arguments 0] s
+		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call arguments 0] s
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
 		return s
-	}
-	define [spiro] : begin {
+	define [spiro] : begin
 		local s : new SpiroExpansionContext
 		set s.gizmo globalTransform
-		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots [().slice.call arguments 0] s
-		foreach knot [items-of knots] : let [ty knot.type] [af knot.af] : begin {
-			set knot.af : lambda [] : begin {
+		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call arguments 0] s
+		foreach knot [items-of knots] : let [ty knot.type] [af knot.af] : begin
+			set knot.af : lambda [] : begin
 				this.set-type ty
 				if af : af.apply this arguments
-			}
-		}
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
-		local (.lhs lhs .rhs rhs) : s.expand
-		if closed {
-			then {
+		local {.lhs lhs .rhs rhs} : s.expand
+		if closed
+			then
 				local g : new Glyph
-				libspiro.spiroToBezierOnContext [lhs.slice 0 [-1]] true g
+				libspiro.spiroToBezierOnContext [lhs.slice 0 (-1)] true g
 				local lhsContour g.contours.0
-				set g.contours ()
-				libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 [-1]] true g
+				set g.contours {}
+				libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g
 				local rhsContour g.contours.0
-				set g.contours ([lhsContour.concat rhsContour])
-			}
-			else {
+				set g.contours {[lhsContour.concat rhsContour]}
+			else
 				local g : new Glyph
-				lhs.0.type = rhs.0.type = lhs.[lhs.length - 1].type = rhs.[rhs.length - 1].type = 'corner'
+				lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 				libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g
-			}
-		}
 		return g.contours
-	}
-	define [spiro-outline] : let [k : ().slice.call arguments 0] : glyph-construction {
-		local (.knots knots .closed closed .lastafs lastafs) : prepareSpiroKnots k this
+	define [spiro-outline] : let [k : {}.slice.call arguments 0] : glyph-construction
+		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k this
 		libspiro.spiroToBezierOnContext knots closed this
 		foreach af [items-of lastafs] : if af : af.call this
-	}
 	
 	###### HERE WE GO!
 	
@@ -443,13 +414,13 @@ define [buildFont para recursive] : begin {
 	set font.name.preferredSubFamily  para.style
 	set font.name.uniqueSubFamily     : para.family + ' ' + para.style + ' ' + para.version
 	set font.name.version             para.version
-	set font.name.fullName            : if [para.style != 'Regular'] [para.family + ' ' + para.style] para.family
+	set font.name.fullName            : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
 	set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
 	set font.name.copyright           para.copyright
 	set font.'OS/2'.usWeightClass     para.weight
 	set font.'OS/2'.bProportion       9 # Monospaced
 	set font.'OS/2'.bWeight           : 1 + para.weight / 100
-	set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if [[not para.isBold] && [not para.isItalic]] 64 0] + 128
+	set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if ([not para.isBold] && [not para.isItalic]) 64 0] + 128
 	set font.'OS/2'.sFamilyClass      : 8 * 0x100 + 9
 	set font.post.isFixedPitch        1
 	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
@@ -459,7 +430,7 @@ define [buildFont para recursive] : begin {
 	
 	define upmscale : fallback para.upmscale 1
 	
-	let [asc : 1250 * CAP / [CAP - DESCENDER]] [desc : 1250 * DESCENDER / [CAP - DESCENDER]] : begin { 
+	let [asc : 1250 * CAP / (CAP - DESCENDER)] [desc : 1250 * DESCENDER / (CAP - DESCENDER)] : begin
 		set font.head.unitsPerEm          1000
 		set font.hhea.ascent              asc
 		set font.'OS/2'.usWinAscent       asc
@@ -467,30 +438,27 @@ define [buildFont para recursive] : begin {
 		set font.hhea.descent             desc
 		set font.'OS/2'.usWinDescent      [Math.abs desc]
 		set font.'OS/2'.sTypoDescender    desc
-		set font.hhea.lineGap             [CAP * 0.2]
-		set font.'OS/2'.sTypoLineGap      [CAP * 0.2]
+		set font.hhea.lineGap             (CAP * 0.2)
+		set font.'OS/2'.sTypoLineGap      (CAP * 0.2)
 		set font.'OS/2'.sxHeight          XH
 		set font.'OS/2'.sCapHeight        CAP
-		set font.post.italicAngle         [0 - para.italicangle]
-	}
+		set font.post.italicAngle         (0 - para.italicangle)
 	
 	# Necessary notdef glyph
-	create-glyph '.notdef' : glyph-construction {
+	create-glyph '.notdef' : glyph-construction
 		start-from SB 0
 		line-to    SB CAP
 		line-to    RIGHTSB CAP
 		line-to    RIGHTSB 0
 		
-		start-from [SB + STROKE] STROKE
-		line-to    [RIGHTSB - STROKE] STROKE
-		line-to    [RIGHTSB - STROKE] [CAP - STROKE]
-		line-to    [SB + STROKE] [CAP - STROKE]
-	}
-	create-glyph 'space' : glyph-construction {
+		start-from (SB + STROKE) STROKE
+		line-to    (RIGHTSB - STROKE) STROKE
+		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
+		line-to    (SB + STROKE) (CAP - STROKE)
+	create-glyph 'space' : glyph-construction
 		set-width WIDTH
 		assign-unicode ' '
 		include eMarks
-	}
 	
 	# ASCII
 	$$include 'glyphs/common-shapes.patel'
@@ -527,26 +495,23 @@ define [buildFont para recursive] : begin {
 	set font.'OS/2'.sxHeight          : upmscale * font.'OS/2'.sxHeight
 	set font.'OS/2'.sCapHeight        : upmscale * font.'OS/2'.sCapHeight
 	
-	if [upmscale != 1] : foreach glyph [items-of glyphList] : begin {
+	if (upmscale != 1) : foreach glyph [items-of glyphList] : begin
 		glyph.advanceWidth = glyph.advanceWidth * upmscale
-		if glyph.contours: foreach contour [items-of glyph.contours] : foreach point [items-of contour] : begin {
+		if glyph.contours: foreach contour [items-of glyph.contours] : foreach point [items-of contour] : begin
 			point.x = point.x * upmscale
 			point.y = point.y * upmscale
-		}
-	}
 	
 	# We will uprightify all italic glyphs before outputing
 	# to prevent rounding error for common glyphs
 	local finalUprightify : Upright
 	finalUprightify.x = 0
 	finalUprightify.y = 0
-	if [not recursive] : foreach glyph [items-of glyphList] : begin {
+	if [not recursive] : foreach glyph [items-of glyphList] : begin
 		glyph.apply-transform finalUprightify
 		glyph.cleanup
-	}
 	
 	set font.glyfMap glyphs
 	return font
-}
+
 
 exports.build = buildFont

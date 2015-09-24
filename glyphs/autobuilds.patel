@@ -1,12 +1,12 @@
 ###### Automatic builds
 
-local font.features (.)
+local font.features {.}
 
 # Build accented glyphs
 define unorm : require 'unorm'
 define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
 
-define customDecompositions (
+define customDecompositions {
 	# Latvians use comma instead of cedillas in several letters.
 	# Record them as custom decomposition.
 	."\u0156" "R\u0326"
@@ -96,204 +96,190 @@ define customDecompositions (
 	."\u219A" ""
 	."\u219B" ""
 	."\u21AE" ""
-)
+}
 
-define [subParts parts] : begin {
+define [subParts parts] : begin
 	local hasMarkAbove false
 	foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
 	
 	# replace dotted-i and dotted-j with dotless equalivents
-	if [[parts.0 === glyphs.i || parts.0 === glyphs.cyrUkraniani] && hasMarkAbove] : parts.0 = glyphs.dotlessi
-	if [parts.0 === glyphs.j && hasMarkAbove] : parts.0 = glyphs.dotlessj
+	if ((parts.0 === glyphs.i || parts.0 === glyphs.cyrUkraniani) && hasMarkAbove) : parts.0 = glyphs.dotlessi
+	if (parts.0 === glyphs.j && hasMarkAbove) : parts.0 = glyphs.dotlessj
 	
 	# replace below marks with trailing marks
-	if parts.0.anchors.lf : set parts : parts.map : function [p] : if [p === glyphs.iotaBelow] glyphs.iotaLF p
-	if parts.0.anchors.trailing : set parts : parts.map : function [p] : if [p === glyphs.ogonekBelow] glyphs.ogonekTR p
+	if parts.0.anchors.lf : set parts : parts.map : function [p] : if (p === glyphs.iotaBelow) glyphs.iotaLF p
+	if parts.0.anchors.trailing : set parts : parts.map : function [p] : if (p === glyphs.ogonekBelow) glyphs.ogonekTR p
 	
 	# composite greek overmarks
-	for [local j 0] [j < parts.length] [inc j] : piecewise {
-		[parts.(j) === glyphs.commaAbove] : begin {
-			piecewise {
-				[parts.[j + 1] === glyphs.graveAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psilivaria }
-				[parts.[j + 1] === glyphs.acuteAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psilioxia }
-				[parts.[j + 1] === glyphs.perispomeniAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.psiliperispomeni }
-			}
-		}
-		[parts.(j) === glyphs.revCommaAbove] : begin {
-			piecewise {
-				[parts.[j + 1] === glyphs.graveAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.dasiavaria }
-				[parts.[j + 1] === glyphs.acuteAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.dasiaoxia }
-				[parts.[j + 1] === glyphs.perispomeniAbove] : begin { set parts.(j) null; set parts.[j + 1] glyphs.dasiaperispomeni }
-			}
-		}
-	}
-	return : parts.filter [[x] -> [not [not x]]]
-}
-define [pad s n] : begin {
-	while [s.length < n] : s = '0' + s
+	for [local j 0] (j < parts.length) [inc j] : piecewise
+		(parts.(j) === glyphs.commaAbove) : begin
+			piecewise
+				(parts.(j + 1) === glyphs.graveAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.psilivaria
+				(parts.(j + 1) === glyphs.acuteAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.psilioxia
+				(parts.(j + 1) === glyphs.perispomeniAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.psiliperispomeni
+		(parts.(j) === glyphs.revCommaAbove) : begin
+			piecewise
+				(parts.(j + 1) === glyphs.graveAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.dasiavaria
+				(parts.(j + 1) === glyphs.acuteAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.dasiaoxia
+				(parts.(j + 1) === glyphs.perispomeniAbove) : begin
+					set parts.(j) null; set parts.(j + 1) glyphs.dasiaperispomeni
+	return : parts.filter ([x] -> [not [not x]])
+
+define [pad s n] : begin
+	while (s.length < n) : s = '0' + s
 	return s
-}
 
-set font.features.ccmp ()
-define [shorter x y] : if [x.length < y.length] x y
-define [decideName namingParts parts code] : begin {
+
+set font.features.ccmp {}
+define [shorter x y] : if (x.length < y.length) x y
+define [decideName namingParts parts code] : begin
 	local baseName namingParts.0.name
-	local combname0 : namingParts.slice 1 :.map [[part] -> [fallback part.shortName part.name]] :.join ' '
+	local combname0 : namingParts.slice 1 :.map ([part] -> [fallback part.shortName part.name]) :.join ' '
 	local glyphName : baseName + [combname0.replace [regex ' ' 'g'] '']
-	if glyphs.(glyphName) : begin {
+	if glyphs.(glyphName) : begin
 		local j 2
-		while glyphs.[glyphName + j] [inc j]
-		set glyphName [glyphName + j]
-	}
-	if [glyphName.length > 30] : set glyphName ['uni' + [pad [[code.toString 16].toUpperCase] 4]]
+		while glyphs.(glyphName + j) [inc j]
+		set glyphName (glyphName + j)
+	if (glyphName.length > 30) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
 	return glyphName
-}
 
-foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs`code] : begin {
+
+foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs.(code)] : begin
 	local str : String.fromCharCode code
 	local nfd : fallback customDecompositions.(str) : unorm.nfd str
-	if [nfd.length > 1] : begin {
-		local parts ()
+	if (nfd.length > 1) : begin
+		local parts {}
 		local allFound true
-		foreach j [range 0 nfd.length] : begin {
-			set parts`j unicodeGlyphs`[nfd.charCodeAt j]
-			if [not parts`j] : set allFound false
-		}
-		if allFound : begin {
+		foreach j [range 0 nfd.length] : begin
+			set parts.(j) unicodeGlyphs.([nfd.charCodeAt j])
+			if [not parts.(j)] : set allFound false
+		if allFound : begin
 			local namingParts : parts.slice 0
 			set parts : subParts parts
-			local composition : namingParts.map [[part] -> part.name] :.join ' '
+			local composition : namingParts.map ([part] -> part.name) :.join ' '
 			local glyphName : decideName namingParts parts code
-			create-glyph glyphName : glyph-construction {
+			create-glyph glyphName : glyph-construction
 				assign-unicode code
 				include parts.0 AS_BASE
 				set-width parts.0.advanceWidth
 				foreach part [items-of : parts.slice 1] : include part
-			}
-			if [not glyphs.(composition)] : begin {
+			if [not glyphs.(composition)] : begin
 				font.features.ccmp.push : 'sub ' + composition + ' by ' + glyphName
 				set glyphs.(composition) glyphs.(glyphName)
-			}
-		}
-	}
-}
 
-define [suggestName name] : begin {
-	if glyphs.(name) : begin {
+
+define [suggestName name] : begin
+	if glyphs.(name) : begin
 		local j 2
-		while glyphs.[name + j] : inc j
-		set name [name + j]
-	}
+		while glyphs.(name + j) : inc j
+		set name (name + j)
 	return name
-}
+
 
 # Build miniature clyphs : circled, superscripts, subscripts...
-define [createCircledGlyphs records] : if [not recursive] : begin {
+define [createCircledGlyphs records] : if [not recursive] : begin
 	local dscale 0.55
 	local pendingGlyphs : records.map : [record] -> record.1
 	local miniatureFont : Miniature pendingGlyphs 4 0.65
 	
-	foreach (unicode glyphid w) [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction {
+	foreach {unicode glyphid w} [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction
 		local width : fallback w WIDTH
 		set-width width
 		local sw [adviceBlackness 6]
 		if unicode : assign-unicode unicode
-		include : create-glyph [suggestName : 'circleinner' + glyphid] : glyph-construction {
+		include : create-glyph [suggestName : 'circleinner' + glyphid] : glyph-construction
 			local g miniatureFont.(glyphid)
 			include g
 			local shift 0
-			if [g.anchors.above && g.anchors.below] : set shift : CAP / 2 -  [mix g.anchors.above.y g.anchors.below.y 0.5]
+			if (g.anchors.above && g.anchors.below) : set shift : CAP / 2 -  [mix g.anchors.above.y g.anchors.below.y 0.5]
 			apply-transform : Upright
-			apply-transform : Translate [-WIDTH / 2] [-CAP / 2 + shift]
+			apply-transform : Translate (-WIDTH / 2) (-CAP / 2 + shift)
 			apply-transform : Scale dscale
-			apply-transform : Translate [width / 2] [CAP / 2 * dscale]
+			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
 			apply-transform : Italify
-		}
-		include : smallo [CAP * dscale + sw * 3] [-sw * 3] [Math.max [SB + O * 3] [width / 2 - CAP / 2 * dscale - sw * 2.5]] [Math.min [width - SB - O * 3] [width / 2 + CAP / 2 * dscale + sw * 2.5]] sw [SMALLSMOOTHA * width / WIDTH] [SMALLSMOOTHB * width / WIDTH]
+		include : smallo (CAP * dscale + sw * 3) (-sw * 3) [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)] sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
 		apply-transform : Upright
-		apply-transform : Translate 0 [parenMid - CAP * dscale / 2]
+		apply-transform : Translate 0 (parenMid - CAP * dscale / 2)
 		apply-transform : Italify
-	}
-}
-define [createSuperscripts records] : if [not recursive] : begin {
-	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction {
-		if unicode : assign-unicode unicode
-		include miniatureFont.(glyphid) AS_BASE
-		apply-transform [Upright] true
-		apply-transform [Translate [-MIDDLE] [-CAP]] true
-		apply-transform [Scale 0.7] true
-		apply-transform [Translate MIDDLE [CAP + ACCENT / 2]] true
-		apply-transform [Italify] true
-	}
-}
-define [createSubscripts records] : if [not recursive] : begin {
-	local pendingGlyphs : records.map : [record] -> record.1
-	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
-	foreach (unicode glyphid) [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction {
-		if unicode : assign-unicode unicode
-		include miniatureFont.(glyphid) AS_BASE
-		apply-transform [Upright] true
-		apply-transform [Translate [-MIDDLE] 0] true
-		apply-transform [Scale 0.7] true
-		apply-transform [Translate MIDDLE [DESCENDER / 2]] true
-		apply-transform [Italify] true
-	}
-}
 
-define [createFractions records] : if [not recursive] : begin {
+define [createSuperscripts records] : if [not recursive] : begin
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
+		if unicode : assign-unicode unicode
+		include miniatureFont.(glyphid) AS_BASE
+		apply-transform [Upright] true
+		apply-transform [Translate (-MIDDLE) (-CAP)] true
+		apply-transform [Scale 0.7] true
+		apply-transform [Translate MIDDLE (CAP + ACCENT / 2)] true
+		apply-transform [Italify] true
+
+define [createSubscripts records] : if [not recursive] : begin
+	local pendingGlyphs : records.map : [record] -> record.1
+	local miniatureFont : Miniature pendingGlyphs 3.7 0.7
+	foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
+		if unicode : assign-unicode unicode
+		include miniatureFont.(glyphid) AS_BASE
+		apply-transform [Upright] true
+		apply-transform [Translate (-MIDDLE) 0] true
+		apply-transform [Scale 0.7] true
+		apply-transform [Translate MIDDLE (DESCENDER / 2)] true
+		apply-transform [Italify] true
+
+
+define [createFractions records] : if [not recursive] : begin
 	local pendingGlyphs : [records.map : [record] -> record.1].concat : records.map : [record] -> record.2
 	local miniatureFont : Miniature pendingGlyphs 4 0.6
-	foreach (unicode numid denid height) [items-of records] : create-glyph [suggestName : numid + 'over' + denid] : glyph-construction {
+	foreach {unicode numid denid height} [items-of records] : create-glyph [suggestName : numid + 'over' + denid] : glyph-construction
 		if unicode : assign-unicode unicode
 		local fine : adviceBlackness 3.7
 		local dist : XH * 0.4
-		include : create-glyph : glyph-construction {
-			include : create-glyph [suggestName : 'num' + numid] : glyph-construction {
+		include : create-glyph : glyph-construction
+			include : create-glyph [suggestName : 'num' + numid] : glyph-construction
 				include miniatureFont.(numid)
 				apply-transform : Upright
-				apply-transform : Translate [- miniatureFont.(numid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP] * 0.55]
+				apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
+				apply-transform : Scale (CAP / [fallback height CAP] * 0.55)
 				apply-transform : Translate MIDDLE 0
 				apply-transform : Italify
-			}
 			apply-transform : Upright
-			apply-transform : Translate 0 [CAP * 0.55 + dist]
+			apply-transform : Translate 0 (CAP * 0.55 + dist)
 			apply-transform : Italify
-			include : create-glyph [suggestName : 'den' + denid] : glyph-construction {
+			include : create-glyph [suggestName : 'den' + denid] : glyph-construction
 				include miniatureFont.(denid)
 				apply-transform : Upright
-				apply-transform : Translate [- miniatureFont.(denid).advanceWidth / 2] 0
-				apply-transform : Scale [CAP / [fallback height CAP] * 0.55]
+				apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
+				apply-transform : Scale (CAP / [fallback height CAP] * 0.55)
 				apply-transform : Translate MIDDLE 0
 				apply-transform : Italify
-			}
 			apply-transform : Upright
-			apply-transform : Translate [-MIDDLE] [-CAP * 0.55 - dist / 2]
+			apply-transform : Translate (-MIDDLE) (-CAP * 0.55 - dist / 2)
 			apply-transform : Translate MIDDLE parenMid
 			apply-transform : Italify
-		}
-		include : HBar SB RIGHTSB parenMid [fine * 0.75]
-	}
-}
+		include : HBar SB RIGHTSB parenMid (fine * 0.75)
 
-if [not recursive] : createCircledGlyphs : [list {
-	list 0xA9   'C'
-	list 0xAE   'R'
-	list 0x2117 'P'
-	list 0x24EA 'zero' FULLWIDTH
-	list null   'space' FULLWIDTH # a blank circle glyph for size optimization
-}].concat : let [a ()] : begin {
-	foreach [j : range 1 till 9] : a.push ([0x2460 + j - 1] unicodeGlyphs.[['0'.charCodeAt 0] + j].name FULLWIDTH)
-	foreach [j : range 0 26] : a.push ([0x24B6 + j] unicodeGlyphs.[['A'.charCodeAt 0] + j].name FULLWIDTH)
-	foreach [j : range 0 26] : a.push ([0x24D0 + j] unicodeGlyphs.[['a'.charCodeAt 0] + j].name FULLWIDTH)
+
+if [not recursive] : createCircledGlyphs : [list \\
+		list 0xA9   'C'
+		list 0xAE   'R'
+		list 0x2117 'P'
+		list 0x24EA 'zero' FULLWIDTH
+		list null   'space' FULLWIDTH
+	].concat : let [a {}] : begin
+	foreach [j : range 1 till 9] : a.push {(0x2460 + j - 1) unicodeGlyphs.(['0'.charCodeAt 0] + j).name FULLWIDTH}
+	foreach [j : range 0 26] : a.push {(0x24B6 + j) unicodeGlyphs.(['A'.charCodeAt 0] + j).name FULLWIDTH}
+	foreach [j : range 0 26] : a.push {(0x24D0 + j) unicodeGlyphs.(['a'.charCodeAt 0] + j).name FULLWIDTH}
 	* a
-}
 
-create-glyph 'ordfeminine' : glyph-construction {
+
+create-glyph 'ordfeminine' : glyph-construction
 	assign-unicode 0xAA
-	include [Miniature ('a') 3.7 0.7].a
+	include [Miniature {'a'} 3.7 0.7].a
 	include : create-stroke
 		:.start-from SB DESCENDER
 		:.set-width  STROKE 0
@@ -302,29 +288,29 @@ create-glyph 'ordfeminine' : glyph-construction {
 		:.heads-to   RIGHTWARD
 	
 	apply-transform : Upright
-	apply-transform : Translate [-MIDDLE] [-XH]
+	apply-transform : Translate (-MIDDLE) (-XH)
 	apply-transform : Scale 0.7
 	apply-transform : Translate MIDDLE CAP
 	apply-transform : Italify
-}
-create-glyph 'ordmasculine' : glyph-construction {
-	assign-unicode 0xBA
-	include [Miniature ('o') 3.7 0.7].o
-	include : create-stroke
-		:.start-from SB DESCENDER
-		:.set-width  STROKE 0
-		:.heads-to   RIGHTWARD
-		:.line-to    RIGHTSB DESCENDER
-		:.heads-to   RIGHTWARD
-	
-	apply-transform : Upright
-	apply-transform : Translate [-MIDDLE] [-XH]
-	apply-transform : Scale 0.7
-	apply-transform : Translate MIDDLE CAP
-	apply-transform : Italify
-}
 
-createSuperscripts : list {
+create-glyph 'ordmasculine' : glyph-construction
+	assign-unicode 0xBA
+	include [Miniature {'o'} 3.7 0.7].o
+	include : create-stroke
+		:.start-from SB DESCENDER
+		:.set-width  STROKE 0
+		:.heads-to   RIGHTWARD
+		:.line-to    RIGHTSB DESCENDER
+		:.heads-to   RIGHTWARD
+	
+	apply-transform : Upright
+	apply-transform : Translate (-MIDDLE) (-XH)
+	apply-transform : Scale 0.7
+	apply-transform : Translate MIDDLE CAP
+	apply-transform : Italify
+
+
+createSuperscripts : list
 	list 0x2070 'zero'
 	list 0x00B9 'one'
 	list 0x00B2 'two'
@@ -440,9 +426,9 @@ createSuperscripts : list {
 	list 0x1D41 'U'
 	list 0x1D42 'W'
 	list 0x2C7D 'V'
-}
 
-createSubscripts : list {
+
+createSubscripts : list
 	list 0x2080 'zero'
 	list 0x2081 'one'
 	list 0x2082 'two'
@@ -481,10 +467,9 @@ createSubscripts : list {
 	list 0x1D69 'phi'
 	list 0x1D6A 'chi'
 	list 0x2C7C 'j'
-}
 
-createFractions : list {
-	# Unicode fractions
+
+createFractions : list
 	list 0x00BC 'one' 'four'
 	list 0x00BD 'one' 'two'
 	list 0x00BE 'three' 'four'
@@ -511,26 +496,23 @@ createFractions : list {
 	list 0xE0A1 'L' 'N'
 	# fraction bar
 	list null 'space' 'space'
-}
+
 
 # Ligatures
-define [createLigature unicode] : begin {
-	local ids : ().slice.call arguments 1
+define [createLigature unicode] : begin
+	local ids : {}.slice.call arguments 1
 	local glyphName : ids.join '_'
-	if glyphs.(glyphName) : begin {
+	if glyphs.(glyphName) : begin
 		local j 2
-		while glyphs.[glyphName + j] : inc j
-		set glyphName [glyphName + j]
-	}
-	create-glyph glyphName : glyph-construction {
+		while glyphs.(glyphName + j) : inc j
+		set glyphName (glyphName + j)
+	create-glyph glyphName : glyph-construction
 		if unicode : assign-unicode unicode
 		set-width : ids.length * WIDTH
-		foreach id [items-of : ids.reverse] : begin {
+		foreach id [items-of : ids.reverse] : begin
 			apply-transform : Translate WIDTH 0
 			include glyphs.(id)
-		}
-	}
-}
+
 createLigature 0x1C4 'D' 'Zcaron'
 createLigature 0x1C5 'D' 'zcaron'
 createLigature 0x1C6 'd' 'zcaron'
@@ -554,93 +536,82 @@ createLigature 0x2AA 'l' 's'
 createLigature 0x2AB 'l' 'z'
 
 # Composite superscripts and subscripts
-define [doubleSuperscript a b] : glyph-construction {
+define [doubleSuperscript a b] : glyph-construction
 	include a
-	apply-transform : Translate [-WIDTH * 0.6] 0
+	apply-transform : Translate (-WIDTH * 0.6) 0
 	include b
 	apply-transform : Upright
-	apply-transform : Translate [-WIDTH * 0.2] [-CAP]
+	apply-transform : Translate (-WIDTH * 0.2) (-CAP)
 	apply-transform : Scale 0.8
 	apply-transform : Translate MIDDLE CAP
 	apply-transform : Italify
-}
-create-glyph 'trademark' : glyph-construction {
+
+create-glyph 'trademark' : glyph-construction
 	assign-unicode 0x2122
 	include : doubleSuperscript glyphs.supT glyphs.supM
-}
-create-glyph 'servicemark' : glyph-construction {
+
+create-glyph 'servicemark' : glyph-construction
 	assign-unicode 0x2120
 	include : doubleSuperscript glyphs.supS glyphs.supM
-}
+
 
 # CJK double width letters
-define [createDoubleWidth records] : if [not recursive] : begin {
+define [createDoubleWidth records] : if [not recursive] : begin
 	local scale 1.3
 	local pendingGlyphs : records.map : [record] -> record.1
-	local widenFont : Widen pendingGlyphs scale [scale * 1.1]
-	foreach (unicode glyphid) [items-of records] : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction {
+	local widenFont : Widen pendingGlyphs scale (scale * 1.1)
+	foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction
 		set-width UPM
 		if unicode : assign-unicode unicode
 		include widenFont.(glyphid) AS_BASE
-		apply-transform [Translate [UPM / 2 - [WIDTH * scale] / 2] 0] true
-	}
-}
-if [not recursive] : createDoubleWidth : let [a ()] : begin {
-	foreach [j : range 1 0x5f] : if [not unicodeGlyphs.[0xff00 + j]] : a.push ([0xff00 + j] unicodeGlyphs.[0x20 + j].name)
+		apply-transform [Translate (UPM / 2 - (WIDTH * scale) / 2) 0] true
+
+if [not recursive] : createDoubleWidth : let [a {}] : begin
+	foreach [j : range 1 0x5f] : if [not unicodeGlyphs.(0xff00 + j)] : a.push {(0xff00 + j) unicodeGlyphs.(0x20 + j).name}
 	* a
-}
+
 
 ### Generate MARK and MKMK features
-set font.features.mark (.)
-set font.features.mkmk (.marks () .bases ())
-set font.features.markGlyphs (.)
-set font.features.gdef (.simple () .ligature () .mark ())
-define [buildAnchorDescription glyph inserter propx propy prefix th] : begin {
+set font.features.mark {.}
+set font.features.mkmk {.marks {} .bases {}}
+set font.features.markGlyphs {.}
+set font.features.gdef {.simple {} .ligature {} .mark {}}
+define [buildAnchorDescription glyph inserter propx propy prefix th] : begin
 	local buf ''
-	foreach key [items-of : Object.keys glyph.anchors] : if [!th || th.(key)] : buf = buf + ' <anchor ' + [Math.round glyph.anchors.(key).(propx)] + ' ' + [Math.round glyph.anchors.(key).(propy)] + '> ' + inserter + ' @' + prefix + key
+	foreach key [items-of : Object.keys glyph.anchors] : if (!th || th.(key)) : buf = buf + ' <anchor ' + [Math.round glyph.anchors.(key).(propx)] + ' ' + [Math.round glyph.anchors.(key).(propy)] + '> ' + inserter + ' @' + prefix + key
 	return buf
-}
+
 # mark
-define [createMarkLookup tableName anchorClasses] : let [lookup : set font.features.mark.(tableName) (.marks () .bases ())] : begin {
-	local th (.)
+define [createMarkLookup tableName anchorClasses] : let [lookup : set font.features.mark.(tableName) {.marks {} .bases {}}] : begin
+	local th {.}
 	foreach [ac : items-of anchorClasses] : set th.(ac) true
-	foreach glyph [items-of glyphList] : if glyph.anchors : begin {
+	foreach glyph [items-of glyphList] : if glyph.anchors : begin
 		local anchorKeys : Object.keys glyph.anchors
 		local hasAnchor false
 		foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
-		if hasAnchor : begin {
+		if hasAnchor : begin
 			local isMarkGlyph false
-			foreach key [items-of anchorKeys] : if [glyph.anchors.(key).type == 'mark'] : set isMarkGlyph true
-			if isMarkGlyph {
+			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : set isMarkGlyph true
+			if isMarkGlyph
 				then : lookup.marks.push : 'markClass ' + glyph.name + [buildAnchorDescription glyph '' 'x' 'y' 'mark' th]
 				else : lookup.bases.push : 'pos base ' + glyph.name + [buildAnchorDescription glyph 'mark' 'x' 'y' 'mark' th]
-			}
-		}
-	}
-}
-createMarkLookup 'letter' ('above' 'below' 'trailing' 'lf' 'topright' 'bottomright')
-createMarkLookup 'overlay' ('overlay' 'slash')
+
+createMarkLookup 'letter' {'above' 'below' 'trailing' 'lf' 'topright' 'bottomright'}
+createMarkLookup 'overlay' {'overlay' 'slash'}
 # mkmk and GDEF
-foreach glyph [items-of glyphList] : if [glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]] {
-	then {
+foreach glyph [items-of glyphList] : if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length])
+	then
 		local isMarkGlyph false
-		foreach key [items-of anchorKeys] : if [glyph.anchors.(key).type == 'mark'] : set isMarkGlyph true
+		foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : set isMarkGlyph true
 		
-		if isMarkGlyph {
-			then {
-	
+		if isMarkGlyph
+			then
 				font.features.mkmk.marks.push : 'markClass ' + glyph.name + ' ' + [buildAnchorDescription glyph '' 'x' 'y' 'mkmk']
 				font.features.mkmk.bases.push : 'pos mark ' + glyph.name + ' ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby' 'mkmk']
-				foreach key [items-of anchorKeys] : begin {
-					if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) ()
+				foreach key [items-of anchorKeys] : begin
+					if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) {}
 					font.features.markGlyphs.(key).push glyph.name
-				}
 				font.features.gdef.mark.push glyph.name
-			}
 			else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
-		}
-	}
-	else {
+	else
 		if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
-	}
-}
