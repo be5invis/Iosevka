@@ -417,6 +417,9 @@ define [buildFont para recursive] : begin
 	set font.name.fullName            : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
 	set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
 	set font.name.copyright           para.copyright
+	set font.name.licence             'This font software is licenced under the SIL Open Font Licence, Version 1.1. This is licence is avaliable with a FAQ at: http://scripts.sil.org/OFL. This font software is distributes on an ''AS IS'' basis, without warranties or conditions of any kind, either express or implied. See the SIL Open Font licence fot the specific language, premissions and limitations governing your use of this font software.'
+	
+	# Weight, width and slantness
 	set font.'OS/2'.usWeightClass     para.weight
 	set font.'OS/2'.bProportion       9 # Monospaced
 	set font.'OS/2'.bWeight           : 1 + para.weight / 100
@@ -426,8 +429,7 @@ define [buildFont para recursive] : begin
 	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
 	
 	# Metric metadata
-	# Note: we use 1000upm in design, and 4096upm in production
-	
+	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
 	define upmscale : fallback para.upmscale 1
 	
 	let [asc : 1250 * CAP / (CAP - DESCENDER)] [desc : 1250 * DESCENDER / (CAP - DESCENDER)] : begin
@@ -455,6 +457,7 @@ define [buildFont para recursive] : begin
 		line-to    (RIGHTSB - STROKE) STROKE
 		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
 		line-to    (SB + STROKE) (CAP - STROKE)
+	
 	create-glyph 'space' : glyph-construction
 		set-width WIDTH
 		assign-unicode ' '
