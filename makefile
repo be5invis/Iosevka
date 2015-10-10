@@ -6,12 +6,15 @@ OBJDIR = build
 
 SUPPRESS_ERRORS = 2> /dev/null
 
-TARGETS = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
+UPRIGHT = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf
+ITALIC  = $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
+TARGETS = $(UPRIGHT) $(ITALIC)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 OTFS    = $(subst .ttf,.otf,$(TARGETS))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
-FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
+FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(UPRIGHT)))
+FEATITA = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(ITALIC)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
@@ -44,8 +47,11 @@ $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild feature $@ from $<
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.ttf
 	-@echo Autobuild CM $@ from $<
-$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea
+$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/uprightonly.fea
 	cat $^ > $@
+$(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/italiconly.fea
+	cat $^ > $@
+
 
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.ttf
