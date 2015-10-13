@@ -1,9 +1,10 @@
-define bezierCubic2Q2 [require './toquad']
+define bezierCubic2Q2 [require 'node-sfnt/lib/math/bezierCubic2Q2']
 define tp [require './transform'].transformPoint
 define utp [require './transform'].untransform
 define Stroke [require './stroke'].Stroke
 define Bezier [require 'bezier-js']
 define [mix a b p] : a + (b - a) * p
+define [ratio l r m] : if [l === r] 0 ((m - l) / (r - l))
 
 define id {
 .xx 1
@@ -79,10 +80,10 @@ define [Glyph.prototype.arc-hv-to x y kappa] : begin
 	return this
 
 define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin
-	local lastContour this.contours.((this.contours.length - 1))
-	local lastPoint lastContour.((lastContour.length - 1))
-	local segments : bezierCubic2Q2 lastPoint [tp this.gizmo {.x x1 .y y1}] [tp this.gizmo {.x x2 .y y2}] [tp this.gizmo {.x x .y y}]
-	foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push {.x xc .y yc} {.x xf .y yf .onCurve true}
+	local lastContour this.contours.(this.contours.length - 1)
+	local lastPoint : utp this.gizmo lastContour.(lastContour.length - 1)
+	local segments : bezierCubic2Q2 lastPoint {.x x1 .y y1} {.x x2 .y y2} {.x x .y y}
+	foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push [tp this.gizmo {.x xc .y yc}] [tp this.gizmo {.x xf .y yf .onCurve true}]
 	return this
 
 Glyph.prototype.cubicTo = Glyph.prototype.cubic-to
@@ -184,8 +185,11 @@ define [Glyph.prototype.cleanup] : begin
 		local ocontour this.contours.(c)
 		# add infections
 		local contour {ocontour.0}
+		local flag false
 		foreach [j : range 1 (ocontour.length - 1)] : piecewise
-			ocontour.(j).onCurve : contour.push ocontour.(j)
+			ocontour.(j).onCurve : begin
+				if [not flag] : contour.push ocontour.(j)
+				set flag false
 			true : begin
 				local p0 contour.(contour.length - 1)
 				local p1 ocontour.(j)
@@ -201,14 +205,26 @@ define [Glyph.prototype.cleanup] : begin
 						foreach [k : range 0 (ts.length - 1)] : begin
 							local s : strand.split ts.(k) ts.(k + 1)
 							if s.points : contour.push {.x s.points.1.x .y s.points.1.y .onCurve false} {.x s.points.2.x .y s.points.2.y .onCurve true}
+				set flag true
+
 		contour.push ocontour.(ocontour.length - 1)
 		# smart round
-		local p0 contour.0
-		local rx : Math.round p0.x
-		local ry : Math.round p0.y
-		foreach [j : range 0 contour.length] : begin
-			contour.(j).x = [Math.round : contour.(j).x - p0.x + rx]
-			contour.(j).y = [Math.round : contour.(j).y - p0.y + ry]
+		local xs : contour.map : [p] -> p.x
+		local ys : contour.map : [p] -> p.y
+		local xmin : Math.min.apply null xs
+		local xmax : Math.max.apply null xs
+		local ymin : Math.min.apply null ys
+		local ymax : Math.max.apply null ys
+		
+		local rxmin : Math.round xmin
+		local rxmax : Math.round xmax
+		local rymin : Math.round ymin
+		local rymax : Math.round ymax
+		foreach [p : items-of contour] : begin
+			set {p.x p.y} : list
+				mix rxmin rxmax [ratio xmin xmax p.x]
+				mix rymin rymax [ratio ymin ymax p.y]
+		
 		# cleanup
 		local cleanedContour {}
 		foreach j [range 1 : contour.length - 1] : begin

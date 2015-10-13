@@ -2,6 +2,10 @@ function toQuad(p1, c1, c2, p2) {
     // Quad control point is (3*c2 - p2 + 3*c1 - p1)/4
     var x = (3 * c2.x - p2.x + 3 * c1.x - p1.x) / 4;
     var y = (3 * c2.y - p2.y + 3 * c1.y - p1.y) / 4;
+    if(Math.abs(c1.x - p1.x) < 0.25) x = p1.x;
+    if(Math.abs(c2.x - p2.x) < 0.25) x = p2.x;
+    if(Math.abs(c1.y - p1.y) < 0.25) y = p1.y;
+    if(Math.abs(c2.y - p2.y) < 0.25) y = p2.y;
     return [
         p1,
         {
