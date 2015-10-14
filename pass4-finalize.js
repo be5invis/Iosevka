@@ -43,5 +43,7 @@ var ttf = readttf(process.argv[2]);
 ttf['OS/2'].xAvgCharWidth = ttf.head.unitsPerEm / 2; // 0.5em
 ttf['OS/2'].sxHeight = param.iosevka.xheight
 ttf['OS/2'].sCapHeight = param.iosevka.cap
+ttf['OS/2'].fsSelection |= (ttf['OS/2'].usWeightClass > 400 ? 1 << 5 : 0) | (ttf.post.italicAngle ? 1 : 0)
+ttf.head.macStyle |= (ttf['OS/2'].usWeightClass > 400 ? 1 : 0) | (ttf.post.italicAngle ? 2 : 0)
 ttf.post.isFixedPitch = 1                            // mono
 fs.writeFileSync(process.argv[3], toBuffer(new TTFWriter(options).write(ttf)));
