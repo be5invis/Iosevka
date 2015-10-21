@@ -68,11 +68,13 @@ define [shortestAngle end start] : begin
 
 
 define [normalY angle] : Math.sin angle
-define [normalX angle] : Math.cos angle
+define [normalX angle vex] : [Math.cos angle] * vex
 
-define [SpiroExpansionContext.prototype.expand] : begin
+define [SpiroExpansionContext.prototype.expand vexpansion] : begin
 	local lhs {}
 	local rhs {}
+	
+	local vexpansion : fallback vexpansion 1.14
 	
 	local d1s {}
 	local d2s {}
@@ -86,8 +88,8 @@ define [SpiroExpansionContext.prototype.expand] : begin
 		d2s.push knot.d2
 		if knot.proposedNormal
 			then
-				dxs.push : knot.proposedNormal.x - [normalX knot.normalAngle]
-				dys.push : knot.proposedNormal.y - [normalY knot.normalAngle]
+				dxs.push : knot.proposedNormal.x - [normalX knot.normalAngle vexpansion]
+				dys.push : knot.proposedNormal.y - [normalY knot.normalAngle vexpansion]
 			else
 				dxs.push 0; dys.push 0
 	local fd1 : smooth js d1s
@@ -101,12 +103,12 @@ define [SpiroExpansionContext.prototype.expand] : begin
 		local knot this.controlKnots.(j)
 		if [not knot.unimportant] : begin
 			set lhs.(j) : object
-				x : knot.x + ([fdx j] + [normalX knot.normalAngle]) * [fd1 j]
-				y : knot.y + ([fdy j] + [normalY knot.normalAngle]) * [fd1 j]
+				x : knot.x + ([fdx j] + [normalX knot.normalAngle vexpansion]) * [fd1 j]
+				y : knot.y + ([fdy j] + [normalY knot.normalAngle vexpansion]) * [fd1 j]
 				type knot.type
 			set rhs.(j) : object
-				x : knot.x - ([fdx j] + [normalX knot.normalAngle]) * [fd2 j]
-				y : knot.y - ([fdy j] + [normalY knot.normalAngle]) * [fd2 j]
+				x : knot.x - ([fdx j] + [normalX knot.normalAngle vexpansion]) * [fd2 j]
+				y : knot.y - ([fdy j] + [normalY knot.normalAngle vexpansion]) * [fd2 j]
 				type : match knot.type
 					"left" "right"
 					"right" "left"

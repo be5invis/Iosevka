@@ -99,21 +99,21 @@ create-glyph 'W' : glyph-construction
 		:.set-width 0 bottomStroke
 		
 	include : create-stroke
-		:.start-from (MIDDLE + bottomStroke / 2) wheight
+		:.start-from (MIDDLE + bottomStroke / 2 * CORRECTION_HX) wheight
 		:.heads-to DOWNWARD
 		:.set-width 0 bottomStroke
-		:.line-to (MIDDLE + bottomStroke / 2) turn2
+		:.line-to (MIDDLE + bottomStroke / 2 * CORRECTION_HX) turn2
 		:.heads-to DOWNWARD
-		:.curve-to (MIDDLE + bottomStroke / 2) ((1 - 0.1) * turn2) (m1 + bottomStroke / 2) 0
+		:.curve-to (MIDDLE + bottomStroke / 2 * CORRECTION_HX) ((1 - 0.1) * turn2) (m1 + bottomStroke / 2) 0
 		:.set-width 0 bottomStroke
 	
 	include : create-stroke
-		:.start-from (MIDDLE - bottomStroke / 2) wheight
+		:.start-from (MIDDLE - bottomStroke / 2 * CORRECTION_HX) wheight
 		:.heads-to DOWNWARD
 		:.set-width bottomStroke 0
-		:.line-to (MIDDLE - bottomStroke / 2) turn2
+		:.line-to (MIDDLE - bottomStroke / 2 * CORRECTION_HX) turn2
 		:.heads-to DOWNWARD
-		:.curve-to (MIDDLE - bottomStroke / 2) ((1 - 0.1) * turn2) (m2 - bottomStroke / 2) 0
+		:.curve-to (MIDDLE - bottomStroke / 2 * CORRECTION_HX) ((1 - 0.1) * turn2) (m2 - bottomStroke / 2) 0
 		:.set-width bottomStroke 0
 
 	#bottom cap
@@ -522,17 +522,19 @@ define [NShape top left right coward diagcoward] : glyph-construction
 	local stroke : adviceBlackness [fallback coward 1]
 	local halftopstroke : topstroke / 2
 	
-	include : create-stroke
-		:.start-from left 0 :.heads-to UPWARD :.set-width 0 stroke
-		:.line-to left (top * 0.4) :.heads-to UPWARD
-		:.line-to left top :.heads-to UPWARD :.set-width 0 topstroke
-	include : create-stroke
-		:.start-from right 0 :.heads-to UPWARD :.set-width topstroke 0
-		:.line-to right (top * 0.6) :.heads-to UPWARD :.set-width stroke 0
-		:.line-to right top :.heads-to UPWARD
-	include : create-stroke
-		:.start-from (left + halftopstroke) top :.heads-to DOWNWARD :.set-width topstroke 0
-		:.line-to (right - topstroke - halftopstroke) 0 :.heads-to DOWNWARD
+	include : spiro
+		flat left 0 [widths.heading 0 stroke UPWARD]
+		curl left (top * 0.4) [heading UPWARD]
+		flat left (top - 0.01) [widths.heading 0 topstroke UPWARD]
+		curl left top [heading UPWARD]
+	include : spiro
+		flat right top [widths.heading 0 stroke DOWNWARD]
+		curl right (top * 0.6) [heading DOWNWARD]
+		flat right 0.01 [widths.heading 0 topstroke DOWNWARD]
+		curl right 0 [heading DOWNWARD]
+	include : spiro
+		flat (left + halftopstroke) top [widths.heading topstroke 0 DOWNWARD]
+		curl (right - halftopstroke) 0 [widths.heading 0 topstroke DOWNWARD]
 
 create-glyph 'N' : glyph-construction
 	set-width WIDTH
@@ -544,20 +546,23 @@ define [MShape top] : glyph-construction
 	local topstroke : adviceBlackness 5
 	local halftopstroke : topstroke / 2
 	
-	include : create-stroke
-		:.start-from SB 0 :.heads-to UPWARD :.set-width 0 STROKE
-		:.line-to SB (top * 0.2) :.heads-to UPWARD
-		:.line-to SB top :.heads-to UPWARD :.set-width 0 topstroke
-	include : create-stroke
-		:.start-from RIGHTSB 0 :.heads-to UPWARD :.set-width STROKE 0
-		:.line-to RIGHTSB (top * 0.2) :.heads-to UPWARD
-		:.line-to RIGHTSB top :.heads-to UPWARD :.set-width topstroke 0
-	include : create-stroke
-		:.start-from (SB + halftopstroke) top :.heads-to DOWNWARD :.set-width topstroke 0
-		:.line-to (MIDDLE - halftopstroke) (top * 0.3) :.heads-to DOWNWARD
-	include : create-stroke
-		:.start-from (MIDDLE + halftopstroke) (top * 0.3) :.heads-to UPWARD :.set-width topstroke 0
-		:.line-to (RIGHTSB - halftopstroke) top :.heads-to UPWARD
+	include : spiro
+		flat SB 0 [widths.heading 0 STROKE UPWARD]
+		curl SB (top * 0.2) [heading UPWARD]
+		flat   SB (top - 0.01) [widths.heading 0 topstroke UPWARD]
+		curl   SB top [heading UPWARD]
+	include : spiro
+		flat RIGHTSB 0 [widths.heading STROKE 0 UPWARD]
+		curl RIGHTSB (top * 0.2) [heading UPWARD]
+		flat   RIGHTSB (top - 0.01) [widths.heading topstroke 0 UPWARD]
+		curl   RIGHTSB top [heading UPWARD]
+	include : spiro
+		flat (SB + halftopstroke) top [widths.heading topstroke 0 DOWNWARD]
+		curl MIDDLE (top * 0.3) [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
+	
+	include : spiro
+		flat (RIGHTSB - halftopstroke) top [widths.heading 0 topstroke DOWNWARD]
+		curl MIDDLE (top * 0.3) [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
 
 create-glyph 'M' : glyph-construction
 	set-width WIDTH
@@ -576,7 +581,7 @@ create-glyph 'S' : glyph-construction
 		g4   RIGHTSB (CAP - HOOK)
 		hookstart CAPO
 		g4   SB (CAP - SMOOTHA)
-		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
+		alsothru 0.5 0.5 [widths (HALFSTROKE * VEXPANSION) (HALFSTROKE * VEXPANSION)]
 		g4   RIGHTSB SMOOTHA [widths 0 STROKE]
 		hookend O
 		g4   SB HOOK
