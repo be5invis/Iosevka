@@ -48,6 +48,6 @@ ttf.head.macStyle |= (ttf['OS/2'].usWeightClass > 400 ? 1 : 0) | (ttf.post.itali
 ttf.post.isFixedPitch = 1                            // mono
 ttf.DSIG = {                                         // add a dummy SDIG
     name: 'DSIG',
-    content: [0, 1, 0, 0]
+    content: [0, 0, 0, 1, 0, 0, 0, 0]
 }
 fs.writeFileSync(process.argv[3], toBuffer(new TTFWriter(options).write(ttf)));

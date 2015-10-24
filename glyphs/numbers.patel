@@ -32,16 +32,11 @@ create-glyph 'one' : glyph-construction
 	set-width WIDTH
 	assign-unicode '1'
 	
+	include : VBar (MIDDLE + ONEBALANCE) 0 CAP
 	include : create-stroke
-		:.start-from (MIDDLE + JBALANCE * 0.5) 0
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   UPWARD
-		:.line-to    (MIDDLE + JBALANCE * 0.5) CAP
-		:.heads-to   UPWARD
-	include : create-stroke
-		:.start-from (MIDDLE - HALFSTROKE + JBALANCE * 0.5) CAP
+		:.start-from (MIDDLE - HALFSTROKE * CORRECTION_HX + ONEBALANCE) CAP
 		:.set-width STROKE 0
-		:.line-to (MIDDLE - HOOK * 1.5 + JBALANCE * 0.5) (CAP - HOOK * 0.75)
+		:.line-to (MIDDLE - HOOK * 1.5 + ONEBALANCE) (CAP - HOOK * 0.75)
 
 
 create-glyph 'two' : glyph-construction
@@ -74,7 +69,7 @@ create-glyph 'three' : glyph-construction
 	assign-unicode '3'
 	
 	local barcenter : CAP * 0.51
-	local threeRadius : (CAPMIDDLE + HALFSTROKE - SMOOTH) * 1.1
+	local threeRadius : (CAPMIDDLE + HALFSTROKE - SMOOTH) * 1.25
 	
 	include : spiro
 		widths.rhs
@@ -82,16 +77,16 @@ create-glyph 'three' : glyph-construction
 		hookstart CAPO
 		g4 RIGHTSB (CAP - (SMOOTHB * (CAP - barcenter) / CAPMIDDLE))
 #		arcvh
-		flat (RIGHTSB - threeRadius) (barcenter - HALFSTROKE) [heading LEFTWARD]
-		curl (RIGHTSB - threeRadius - 1) (barcenter - HALFSTROKE) [heading LEFTWARD]
+		flat (RIGHTSB - threeRadius + 0.01) (barcenter - HALFSTROKE) [heading LEFTWARD]
+		curl (RIGHTSB - threeRadius) (barcenter - HALFSTROKE) [heading LEFTWARD]
 	include : spiro
 		widths.lhs
 		g4 SB HOOK
 		hookstart O
 		g4 RIGHTSB (SMOOTHA * barcenter / CAPMIDDLE)
 #		arcvh
-		flat (RIGHTSB - threeRadius) (barcenter + HALFSTROKE) [heading LEFTWARD]
-		curl (RIGHTSB - threeRadius - 1) (barcenter + HALFSTROKE) [heading LEFTWARD]
+		flat (RIGHTSB - threeRadius + 0.01) (barcenter + HALFSTROKE) [heading LEFTWARD]
+		curl (RIGHTSB - threeRadius) (barcenter + HALFSTROKE) [heading LEFTWARD]
 
 
 create-glyph 'four' : glyph-construction
@@ -100,26 +95,16 @@ create-glyph 'four' : glyph-construction
 	assign-unicode '4'
 	
 	local bar (CAP * 0.4)
-	local vert (WIDTH * 0.55)
+	local vert : [mix SB RIGHTSB 0.85] - CORRECTION_HX * STROKE
+	local p 0.25
+	local fine (STROKE * 0.9)
 	
-	include : create-stroke
-		:.start-from SB bar
-		:.set-width  0 STROKE
-		:.heads-to   RIGHTWARD
-		:.line-to    RIGHTSB bar
-		:.heads-to   RIGHTWARD
-	
-	include : create-stroke
-		:.start-from vert 0
-		:.set-width  0 STROKE
-		:.heads-to   UPWARD
-		:.line-to    vert CAP
-		:.heads-to   UPWARD
-	
-	include : create-stroke
-		:.start-from SB bar
-		:.set-width  0 STROKE
-		:.line-to    vert CAP
+	include : HBarTop SB RIGHTSB bar
+	include : VBarLeft vert 0 CAP
+	local slope : (CAP - bar) / (vert - fine * p * CORRECTION_HX - SB)
+	include : spiro
+		g4   SB bar [widths 0 fine]
+		g4   (vert - fine * p * CORRECTION_HX) CAP [widths.heading 0 [Math.hypot fine (fine / slope)] UPWARD]
 
 define [FiveShape top bp] : glyph-construction
 	local ycurly : mix 0 (top * bp + HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))
@@ -225,14 +210,29 @@ create-glyph 'nine' : glyph-construction
 	include capitalMarks
 	set-width WIDTH
 	assign-unicode '9'
-	
-	include : smallo CAP (CAP * 0.425 - HALFSTROKE) SB (RIGHTSB + O)
-	local ymiddlea : mix CAP (CAP * 0.425 - HALFSTROKE) 0.5
-	include : create-stroke
-		:.start-from RIGHTSB ymiddlea
-		:.set-width 0 STROKE
-		:.line-to RIGHTSB (CAP * 0.4)
-	include : sHookLower 0 (CAP * 0.4) HOOK [mix SB RIGHTSB 0.48]
+
+	local u CAP
+	local d (CAP * 0.425 - HALFSTROKE)
+	local l SB
+	local r RIGHTSB
+	local ymiddlea : mix u d 0.5
+	local p 0.5
+	include : spiro
+		widths.rhs (STROKE * p)
+		flat (r - STROKE * (1 - p) * CORRECTION_HX) ymiddlea
+		curl (r - STROKE * (1 - p) * CORRECTION_HX) (d + SMALLSMOOTHA)
+		arcvh
+		g4   ([mix l r 0.5] + CORRECTION_OMIDS) (d + O) [widths 0 STROKE]
+		archv
+		flat l (d + SMALLSMOOTHB)
+		curl l (u - SMALLSMOOTHA)
+		arcvh
+		g4   ([mix l r 0.5] - CORRECTION_OMIDS) (u - O)
+		archv
+		flat RIGHTSB ymiddlea
+		curl RIGHTSB (CAP * 0.35)
+		hookend O
+		g4 SB HOOK
 
 
 create-glyph 'ten' : glyph-construction

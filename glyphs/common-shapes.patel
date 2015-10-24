@@ -35,7 +35,7 @@ define [ORing u d l r sma smb shift] : begin
 define [leftwardTopSerif x y length] : begin
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from (x + HALFSTROKE) y
+		:.start-from (x + HALFSTROKE * CORRECTION_HX) y
 		:.heads-to LEFTWARD
 		:.set-width STROKE 0
 		:.line-to (x - length - globalTransform.yx * STROKE) y
@@ -44,7 +44,7 @@ define [leftwardTopSerif x y length] : begin
 define [leftwardBottomSerif x y length] : begin
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from (x + HALFSTROKE) y
+		:.start-from (x + HALFSTROKE * CORRECTION_HX) y
 		:.heads-to LEFTWARD
 		:.set-width 0 STROKE
 		:.line-to (x - length + globalTransform.yx * STROKE) y
@@ -53,7 +53,7 @@ define [leftwardBottomSerif x y length] : begin
 define [rightwardTopSerif x y length] : begin
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from (x - HALFSTROKE) y
+		:.start-from (x - HALFSTROKE * CORRECTION_HX) y
 		:.heads-to RIGHTWARD
 		:.set-width 0 STROKE
 		:.line-to (x + length - globalTransform.yx * STROKE) y
@@ -62,7 +62,7 @@ define [rightwardTopSerif x y length] : begin
 define [rightwardBottomSerif x y length] : begin
 	return : new Stroke
 		:.set-transform globalTransform
-		:.start-from (x - HALFSTROKE) y
+		:.start-from (x - HALFSTROKE * CORRECTION_HX) y
 		:.heads-to RIGHTWARD
 		:.set-width STROKE 0
 		:.line-to (x + length + globalTransform.yx * STROKE) y
@@ -197,35 +197,6 @@ define [mShoulderSpiro left right top bottom width fine] : glyph-construction
 		corner right bottom
 		close
 
-
-define [XSHookUpper top left _middle right smooth hook _stroke] : glyph-construction
-	local middle : fallback _middle [mix left right SBALANCE]
-	local stroke : fallback _stroke STROKE
-	include : create-stroke
-		:.set-transform globalTransform
-		:.start-from (right - OXHOOK) (top - hook)
-		:.set-width [if (left < right) stroke 0] [if (left < right) 0 stroke]
-		:.curve-to [mix middle right KAPPA_HOOK] (top - O) (middle - CORRECTION_OMIDS) (top - O)
-		:.arc-hv-to left (top - smooth)
-
-define [sHookUpper top smooth hook _middle _stroke] : XSHookUpper top SB _middle RIGHTSB smooth hook _stroke
-define [CHookUpper top smooth hook _middle _stroke] : XSHookUpper top (SB + O) _middle RIGHTSB smooth hook _stroke
-define [twoHookUpper top smooth hook _middle _stroke] : XSHookUpper top RIGHTSB _middle SB smooth hook _stroke
-define [XSHookLower bottom left _middle right smooth hook _stroke] : glyph-construction
-	local middle : fallback _middle [mix left right SBALANCE]
-	local stroke : fallback _stroke STROKE
-	include : create-stroke
-		:.set-transform globalTransform
-		:.start-from right (bottom + smooth)
-		:.set-width [if (left < right) 0 stroke] [if (left < right) stroke 0]
-		:.arc-vh-to (middle + CORRECTION_OMIDS) (bottom + O)
-		:.curve-to [mix middle left KAPPA_HOOK] (bottom + O) (left + OXHOOK) (bottom + hook)
-
-define [sHookLower bottom smooth hook _middle _stroke] : XSHookLower bottom SB _middle RIGHTSB smooth hook _stroke
-define [EHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom (RIGHTSB - O + TAILADJX * globalTransform.yx) _middle (SB + [fallback _o O]) smooth (hook - TAILADJY * globalTransform.yx) _stroke
-define [CHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom (RIGHTSB + TAILADJX * globalTransform.yx) _middle (SB + [fallback _o O]) smooth (hook - TAILADJY * globalTransform.yx) _stroke
-define [RevEHookLower bottom smooth hook _middle _stroke _o] : XSHookLower bottom SB _middle (RIGHTSB - [fallback _o O]) smooth hook _stroke
-
 define [smallo u d l r _width _sma _smb] : glyph-construction
 	local middle : (l + r) / 2
 	local width : fallback _width STROKE
@@ -287,11 +258,12 @@ define [VBarLeft x yd yu _fine] : VBar (x + [fallback _fine STROKE] * 0.5 * CORR
 define [VBarRight x yd yu _fine] : VBar (x - [fallback _fine STROKE] * 0.5 * CORRECTION_HX) yd yu _fine
 
 define [VerticalHook x y extend depth fine] : glyph-construction
-	include : create-stroke
-		:.start-from x y
-		:.heads-to   [if (depth > 0) DOWNWARD UPWARD]
-		:.set-width  ([fallback fine STROKE] / 2) ([fallback fine STROKE] / 2)
-		:.arc-vh-to  (x + extend) (y - depth)
+	include : spiro
+		widths.center [fallback fine STROKE]
+		flat x y [heading [if (depth > 0) DOWNWARD UPWARD]]
+		curl x (y - [if (depth > 0) 0.01 (-0.01)]) [heading [if (depth > 0) DOWNWARD UPWARD]]
+		flat (x + extend - [if (extend > 0) 0.01 (-0.01)]) (y - depth)
+		curl (x + extend) (y - depth)
 
 define [LegShape xt xb xs top bottom _fine] : glyph-construction
 	local fine : fallback _fine STROKE
