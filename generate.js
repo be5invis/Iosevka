@@ -30,7 +30,6 @@ ttfFont.glyf = [ttfFont.glyf[0]].concat(ttfFont.glyf.slice(1).sort(function(a, b
 	else return (a.name > b.name ? 1 : a.name === b.name ? 0 : -1)
 }));
 
-if(outputPath) fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(ttfFont)));
 if(argv.dumpmap) {
 	fs.writeFileSync(argv.dumpmap, JSON.stringify(ttfFont.glyf.map(function(glyph){ return [glyph.name, glyph.unicode, glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0]})), 'utf8')
 };
@@ -59,3 +58,5 @@ if(argv.dumpfeature) {
 
 	fs.writeFileSync(argv.dumpfeature, featurefile, 'utf8');
 };
+
+if(outputPath) fs.writeFileSync(outputPath, toBuffer(new TTFWriter(options).write(ttfFont)));

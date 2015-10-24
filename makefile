@@ -24,23 +24,32 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 
 fonts : update $(TARGETS)
 	
+RMTARGETS = -@rm $@ $(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$(subst .ttf,.charmap,$@)) $(subst .ttf,.ab.fea,$@)
 PASS0C = -o $@ --dumpmap $(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$(subst .ttf,.charmap,$@)) --dumpfeature $(subst .ttf,.ab.fea,$@)
 # Pass 0 : file construction
 $(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka		w-book	s-upright	x-regular
 $(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka		w-bold	s-upright	x-bold
 $(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka		w-book	s-italic	x-italic
 $(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka		w-bold	s-italic	x-bolditalic
 $(OBJDIR)/.pass0-iosevkacc-regular.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka cc	w-book	s-upright	x-regular
 $(OBJDIR)/.pass0-iosevkacc-bold.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka cc	w-bold	s-upright	x-bold
 $(OBJDIR)/.pass0-iosevkacc-italic.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka cc	w-book	s-italic	x-italic
 $(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
+	$(RMTARGETS)
 	node generate $(PASS0C) iosevka cc	w-bold	s-italic	x-bolditalic
 
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf

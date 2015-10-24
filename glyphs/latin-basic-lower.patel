@@ -357,26 +357,24 @@ create-glyph 'i' : glyph-construction
 create-glyph 'dotlessj.straight' : glyph-construction
 	dont-export
 	include pMarks
-	set-anchor 'above' BASE (MIDDLE + JBALANCE - HALFSTROKE * CORRECTION_HX) XH
-	set-anchor 'overlay' BASE (MIDDLE + JBALANCE - HALFSTROKE * CORRECTION_HX) (XH / 2)
-	local center : MIDDLE + JBALANCE
-	local hookx  : center - (WIDTH * 0.7) + OXHOOK - TAILADJX * globalTransform.yx
+	set-anchor 'above' BASE (MIDDLE + JBALANCE) XH
+	set-anchor 'overlay' BASE (MIDDLE + JBALANCE) (XH / 2)
+	local center : MIDDLE + JBALANCE + HALFSTROKE * CORRECTION_HX
+	local hookx  : center - (WIDTH * 0.5) - STROKE * CORRECTION_HX + OXHOOK
 	local turn : [mix center hookx 0.5] + CORRECTION_OMIDS
 	local smb  : (center - turn) * 1.2
 	include : spiro
 		widths.rhs
 		flat center XH [heading DOWNWARD]
 		curl center (DESCENDER + smb)
-		arcvh 6
-		g4 turn (DESCENDER + O)
-		quadcontrols (KAPPA_HOOK + 0.75 * globalTransform.yx + 0.1) 0
+		hookend (DESCENDER + O)
 		g4 hookx (DESCENDER + JHOOK)
 
 create-glyph 'dotlessj.serifed' : glyph-construction
 	dont-export
 	include pMarks
 	include glyphs.'dotlessj.straight' AS_BASE
-	include : leftwardTopSerif (MIDDLE + JBALANCE - HALFSTROKE * CORRECTION_HX) XH LONGJUT
+	include : leftwardTopSerif (MIDDLE + JBALANCE) XH LONGJUT
 
 
 select-variant 'dotlessj' 0x237 'serifed'
@@ -650,6 +648,8 @@ define [fBar left right y] : glyph-construction
 		:.line-to    [fallback right (MIDDLE + LONGJUT)] [fallback y XH]
 		:.heads-to   RIGHTWARD
 
+
+define fovershoot : O * 5
 create-glyph 'longs.upright' : glyph-construction
 	set-width WIDTH
 	dont-export
@@ -658,12 +658,12 @@ create-glyph 'longs.upright' : glyph-construction
 		widths.center
 		flat (MIDDLE - FBALANCE) 0 [heading UPWARD]
 		curl (MIDDLE - FBALANCE) (CAP - FHOOK)
-		flat (MIDDLE - FBALANCE + HOOKX - 0.01) (CAP - HALFSTROKE - O * 6) [heading RIGHTWARD]
-		curl (MIDDLE - FBALANCE + HOOKX) (CAP - HALFSTROKE - O * 6) [heading RIGHTWARD]
+		flat (MIDDLE - FBALANCE + HOOKX - 0.01) (CAP - HALFSTROKE - fovershoot) [heading RIGHTWARD]
+		curl (MIDDLE - FBALANCE + HOOKX) (CAP - HALFSTROKE - fovershoot) [heading RIGHTWARD]
 
 define [eshHook attach] : glyph-construction
 	include : create-stroke
-		:.start-from (attach.x - SHOOK * 2) (attach.y + HALFSTROKE + O * 6 - SHOOK)
+		:.start-from (attach.x - SHOOK * 2) (attach.y + HALFSTROKE + fovershoot - SHOOK)
 		:.heads-to RIGHTWARD
 		:.set-width HALFSTROKE HALFSTROKE
 		:.arc-hv-to attach.x attach.y
@@ -673,12 +673,12 @@ define [LongSShape top bottom hookx hooky fine] : glyph-construction
 	local w [fallback fine STROKE]
 	include : spiro
 		widths.center w
-		flat (MIDDLE - hookx) (bottom + w + O * 6) [heading RIGHTWARD]
-		curl (MIDDLE - hookx + 0.01) (bottom + w + O * 6) [heading RIGHTWARD]
+		flat (MIDDLE - hookx) (bottom + w / 2 + fovershoot) [heading RIGHTWARD]
+		curl (MIDDLE - hookx + 0.01) (bottom + w / 2 + fovershoot) [heading RIGHTWARD]
 		flat MIDDLE (bottom + hooky)
 		curl MIDDLE (top - hooky)
-		flat (MIDDLE + hookx - 0.01) (top - w - O * 6) [heading RIGHTWARD]
-		curl (MIDDLE + hookx) (top - w - O * 6) [heading RIGHTWARD]
+		flat (MIDDLE + hookx - 0.01) (top - w / 2 - fovershoot) [heading RIGHTWARD]
+		curl (MIDDLE + hookx) (top - w / 2 - fovershoot) [heading RIGHTWARD]
 
 create-glyph 'longs.italic' : glyph-construction
 	set-width WIDTH
