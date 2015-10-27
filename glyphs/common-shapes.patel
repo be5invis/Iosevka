@@ -157,23 +157,24 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : begin
 	return : halfXStrand _leftx lefty middlex middley turn straight tension
 		:.concat : halfXStrand _rightx righty middlex middley turn straight tension
 
-define [nShoulderKnots left _middle right fine _top _bottom _sma _smb _wide] : begin
+define [nShoulderKnots left right fine _top _bottom _sma _smb _wide] : begin
 	local top : fallback _top XH
 	local bottom : fallback _bottom 0
 	local sma : fallback _sma SMALLSMOOTHA
 	local smb : fallback _smb SMALLSMOOTHB
 	local stroke : fallback _wide STROKE
-	local middle : fallback _middle [mix (left - stroke * CORRECTION_HX) right 0.5]
+	local slope : 0.25 + globalTransform.yx
+	local middle : [mix (left - stroke * CORRECTION_HX) right 0.5] + (slope - CORRECTION_OMIDX) * STROKE
 	return : list
 		flat left (top - sma - 2) [widths fine 0]
 		curl left (top - sma)
 		arcvh
-		g4   middle (top - O) [widths.heading 0 stroke RIGHTWARD]
+		g4   middle (top - O) [widths.heading 0 stroke {.y (1) .x (slope)}]
 		archv
 		flat right (top - smb)
 		curl right bottom [heading DOWNWARD]
 
-define [nShoulder left middle right fine _top _bottom _sma _smb _wide] : let [a arguments] : glyph-construction
+define [nShoulder left right fine _top _bottom _sma _smb _wide] : let [a arguments] : glyph-construction
 	include : spiro : nShoulderKnots.apply null a
 
 
