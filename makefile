@@ -15,6 +15,7 @@ PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(UPRIGHT)))
 FEATITA = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(ITALIC)))
+PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
@@ -24,38 +25,30 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 
 fonts : update $(TARGETS)
 	
-RMTARGETS = -@rm $@ $(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$(subst .ttf,.charmap,$@)) $(subst .ttf,.ab.fea,$@)
-PASS0C = -o $@ --dumpmap $(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$(subst .ttf,.charmap,$@)) --dumpfeature $(subst .ttf,.ab.fea,$@)
 # Pass 0 : file construction
-$(OBJDIR)/.pass0-iosevka-regular.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka		w-book	s-upright	x-regular
-$(OBJDIR)/.pass0-iosevka-bold.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka		w-bold	s-upright	x-bold
-$(OBJDIR)/.pass0-iosevka-italic.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka		w-book	s-italic	x-italic
-$(OBJDIR)/.pass0-iosevka-bolditalic.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka		w-bold	s-italic	x-bolditalic
-$(OBJDIR)/.pass0-iosevkacc-regular.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka cc	w-book	s-upright	x-regular
-$(OBJDIR)/.pass0-iosevkacc-bold.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka cc	w-bold	s-upright	x-bold
-$(OBJDIR)/.pass0-iosevkacc-italic.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka cc	w-book	s-italic	x-italic
-$(OBJDIR)/.pass0-iosevkacc-bolditalic.ttf : $(FILES) | $(OBJDIR)
-	$(RMTARGETS)
-	node generate $(PASS0C) iosevka cc	w-bold	s-italic	x-bolditalic
+$(OBJDIR)/.pass0-iosevka-regular.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-book	s-upright	x-regular
+$(OBJDIR)/.pass0-iosevka-bold.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-bold	s-upright	x-bold
+$(OBJDIR)/.pass0-iosevka-italic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-book	s-italic	x-italic
+$(OBJDIR)/.pass0-iosevka-bolditalic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-bold	s-italic	x-bolditalic
+$(OBJDIR)/.pass0-iosevkacc-regular.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-book	s-upright	x-regular
+$(OBJDIR)/.pass0-iosevkacc-bold.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-bold	s-upright	x-bold
+$(OBJDIR)/.pass0-iosevkacc-italic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-book	s-italic	x-italic
+$(OBJDIR)/.pass0-iosevkacc-bolditalic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-bold	s-italic	x-bolditalic
 
-$(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.ttf
-	-@echo Autobuild feature $@ from $<
-$(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.ttf
-	-@echo Autobuild CM $@ from $<
+$(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
+	node extract --ttf $@ $<
+$(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
+	node extract --feature $@ $<
+$(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
+	node extract --charmap $@ $<
 $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/uprightonly.fea
 	cat $^ > $@
 $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/italiconly.fea
@@ -96,7 +89,7 @@ cleartemps :
 	-rm $(PASS0) $(PASS1)
 pass0 : $(PASS0)
 
-test : $(TARGETS)
+test : $(TARGETS) $(MAPS)
 	cp $(TARGETS) $(MAPS) testdrive/
 
 # releaseing
