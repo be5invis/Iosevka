@@ -1,11 +1,13 @@
 Iosevka
-======================================================
-A programmer's typeface.
+=======
+
+Coders' typeface, built from code.
 
 ![preview](http://ooo.0o0.ooo/2015/10/21/5627399ca9f60.png)
 
 Building
------------------------------------------------------
+--------
+
 To build Iosevka you should:
 
 1. Ensure that `node`, `FontForge`, `ttfautohint`, `ttx` and `make` are runnable in your terminal.
