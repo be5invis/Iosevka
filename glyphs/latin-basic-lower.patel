@@ -6,7 +6,7 @@ create-glyph 'o' : glyph-construction
 	assign-unicode 'o'
 	include eMarks
 	
-	include : smallo XH 0 SB RIGHTSB
+	include : smallo XH 0 SB RIGHTSB nothing nothing nothing true
 
 define [oLeft _top] : glyph-construction
 	local top : fallback _top XH
@@ -19,8 +19,8 @@ define [oLeft _top] : glyph-construction
 		arcvh
 		g4   (MIDDLE + CORRECTION_OMIDS + HALFSTROKE / 4 * CORRECTION_HX) O [widths STROKE 0]
 		archv
-		flat (RIGHTSB - O) (0 + SMALLSMOOTHA)
-		curl (RIGHTSB - O) (top - SMALLSMOOTHB)
+		flat.ai (RIGHTSB - O) (0 + SMALLSMOOTHA)
+		curl.ai (RIGHTSB - O) (top - SMALLSMOOTHB)
 		arcvh
 		close
 
@@ -111,12 +111,12 @@ create-glyph 'c' : glyph-construction
 		widths.lhs
 		g4 RIGHTSB (XH - HOOK)
 		hookstart XO
-		flat (SB + O) (XH - SMALLSMOOTHA)
-		curl (SB + O) (0 + SMALLSMOOTHB)
+		flat.ai (SB + O) (XH - SMALLSMOOTHA)
+		curl.ai (SB + O) (0 + SMALLSMOOTHB)
 		hookend O
 		g4 RIGHTSB HOOK
 
-define [SmallEShape top stroke barpos] : glyph-construction
+define [SmallEShape top stroke barpos curly] : glyph-construction
 	local barbottom (top * [fallback barpos EBARPOS])
 	local hookx (RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx)
 	local hookmiddle : [mix (SB + O) hookx 0.55] + CORRECTION_OMIDS
@@ -128,8 +128,8 @@ define [SmallEShape top stroke barpos] : glyph-construction
 		arcvh
 		g4 (MIDDLE - CORRECTION_OMIDS) (top - O)
 		archv
-		flat (SB + O) (top - SMALLSMOOTHA)
-		curl (SB + O) (0 + SMALLSMOOTHB)
+		flat.ai (SB + O) (top - SMALLSMOOTHA)
+		curl.ai (SB + O) (0 + SMALLSMOOTHB)
 		hookend O
 		g4 (RIGHTSB - O) HOOK
 	include : create-stroke
@@ -139,40 +139,12 @@ define [SmallEShape top stroke barpos] : glyph-construction
 		:.line-to    (RIGHTSB - (stroke / 2)) barbottom
 		:.heads-to   RIGHTWARD
 
-create-glyph 'e.upright' : glyph-construction
-	set-width WIDTH
-	dont-export
-	
-	include : SmallEShape XH STROKE
-
-create-glyph 'e.italic' : glyph-construction
-	set-width WIDTH
-	dont-export
-	
-	local barbottom (XH * EBARPOS)
-	
-	include : spiro-stroke
-		widths.lhs
-		g4 (SB + O + STROKE) barbottom
-		archv 8
-		g4 (RIGHTSB - O) (XH - SMALLSMOOTHB * 0.95)
-		#complexThru [alsothru 0.015 0.4] [arcvh]
-		arcvh 8
-		g4 (MIDDLE - CORRECTION_OMIDS) (XH - O)
-		archv
-		flat (SB + O) (XH - SMALLSMOOTHA)
-		curl (SB + O) (0 + SMALLSMOOTHB)
-		hookend O
-		g4 (RIGHTSB - O) HOOK
-
 create-glyph 'e' : glyph-construction
 	set-width WIDTH
 	assign-unicode 'e'
 	include eMarks
 	
-	if (para.italicangle > 0)
-		then : include glyphs.'e.italic'
-		else : include glyphs.'e.upright'
+	include : SmallEShape XH STROKE
 
 define [SmallTShape top bot] : glyph-construction
 	local center : MIDDLE - TBALANCE - HALFSTROKE * CORRECTION_HX
