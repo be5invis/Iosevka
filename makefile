@@ -1,13 +1,15 @@
 TARGETUPM = 1000
 
+PREFIX = iosevka$(VARIANTNAME)
+
 SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 OBJDIR = build
 
 SUPPRESS_ERRORS = 2> /dev/null
 
-UPRIGHT = $(OBJDIR)/iosevka-regular.ttf $(OBJDIR)/iosevka-bold.ttf $(OBJDIR)/iosevkacc-regular.ttf $(OBJDIR)/iosevkacc-bold.ttf
-ITALIC  = $(OBJDIR)/iosevka-italic.ttf $(OBJDIR)/iosevka-bolditalic.ttf $(OBJDIR)/iosevkacc-italic.ttf $(OBJDIR)/iosevkacc-bolditalic.ttf
+UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf $(OBJDIR)/$(PREFIX)cc-regular.ttf $(OBJDIR)/$(PREFIX)cc-bold.ttf
+ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf $(OBJDIR)/$(PREFIX)cc-italic.ttf $(OBJDIR)/$(PREFIX)cc-bolditalic.ttf
 TARGETS = $(UPRIGHT) $(ITALIC)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 OTFS    = $(subst .ttf,.otf,$(TARGETS))
@@ -26,22 +28,22 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 fonts : update $(TARGETS)
 	
 # Pass 0 : file construction
-$(OBJDIR)/.pass0-iosevka-regular.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka		w-book	s-upright	x-regular
-$(OBJDIR)/.pass0-iosevka-bold.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka		w-bold	s-upright	x-bold
-$(OBJDIR)/.pass0-iosevka-italic.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka		w-book	s-italic	x-italic
-$(OBJDIR)/.pass0-iosevka-bolditalic.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka		w-bold	s-italic	x-bolditalic
-$(OBJDIR)/.pass0-iosevkacc-regular.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka cc	w-book	s-upright	x-regular
-$(OBJDIR)/.pass0-iosevkacc-bold.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka cc	w-bold	s-upright	x-bold
-$(OBJDIR)/.pass0-iosevkacc-italic.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka cc	w-book	s-italic	x-italic
-$(OBJDIR)/.pass0-iosevkacc-bolditalic.fdt : $(FILES) | $(OBJDIR)
-	node generate -o $@		 iosevka cc	w-bold	s-italic	x-bolditalic
+$(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-book	s-upright	x-regular $(STYLE_COMMON) $(STYLE_UPRIGHT)
+$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-bold	s-upright	x-bold $(STYLE_COMMON) $(STYLE_UPRIGHT)
+$(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-book	s-italic	x-italic $(STYLE_COMMON) $(STYLE_ITALIC)
+$(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka		w-bold	s-italic	x-bolditalic $(STYLE_COMMON) $(STYLE_ITALIC)
+$(OBJDIR)/.pass0-$(PREFIX)cc-regular.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-book	s-upright	x-regular $(STYLE_COMMON) $(STYLE_UPRIGHT)
+$(OBJDIR)/.pass0-$(PREFIX)cc-bold.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-bold	s-upright	x-bold $(STYLE_COMMON) $(STYLE_UPRIGHT)
+$(OBJDIR)/.pass0-$(PREFIX)cc-italic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-book	s-italic	x-italic $(STYLE_COMMON) $(STYLE_ITALIC)
+$(OBJDIR)/.pass0-$(PREFIX)cc-bolditalic.fdt : $(FILES) | $(OBJDIR)
+	node generate -o $@		 iosevka cc	w-bold	s-italic	x-bolditalic $(STYLE_COMMON) $(STYLE_ITALIC)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
 	node extract --upm 16000 --uprightify 1 --ttf $@ $<
