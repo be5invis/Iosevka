@@ -96,8 +96,11 @@ test : $(TARGETS) $(MAPS)
 	cp $(TARGETS) $(MAPS) testdrive/
 
 # releaseing
-RELEASES = $(subst $(OBJDIR)/,releases/,$(TARGETS))
-$(RELEASES) : releases/%.ttf : $(OBJDIR)/%.ttf
+RELEASEDIR = releases
+ARCHIVEDIR = release-archives
+
+RELEASES = $(subst $(OBJDIR)/,$(RELEASEDIR)/,$(TARGETS))
+$(RELEASES) : $(RELEASEDIR)/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
 PAGESTTF = $(subst $(OBJDIR)/,pages/,$(TARGETS))
 $(PAGESTTF) : pages/%.ttf : $(OBJDIR)/%.ttf
@@ -108,4 +111,18 @@ $(PAGESWOFF) : pages/%.woff : pages/%.ttf
 PAGESMAPS = $(subst $(OBJDIR)/,pages/,$(MAPS))
 $(PAGESMAPS) : pages/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
-release : $(RELEASES) $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
+$(ARCHIVEDIR)/$(PREFIX).tar.bz2 : $(TARGETS)
+	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
+$(ARCHIVEDIR)/$(PREFIX).zip : $(TARGETS)
+	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
+archives : $(ARCHIVEDIR)/$(PREFIX).tar.bz2 $(ARCHIVEDIR)/$(PREFIX).zip
+release : archives $(RELEASES) $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
+
+# release all variants
+release-normal :
+	$(MAKE) release
+release-hooky :
+	$(MAKE) archives VARIANTNAME=-hooky STYLE_UPRIGHT='v-l-hooky v-i-hooky'
+release-zshaped :
+	$(MAKE) archives VARIANTNAME=-zshaped STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
+release-all : release-normal release-hooky release-zshaped
