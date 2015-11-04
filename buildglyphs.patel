@@ -73,7 +73,7 @@ define [buildFont para recursive] : begin
 	
 	define globalTransform : Italify para.italicAngle
 	define deGlobalTransform : inverse globalTransform
-	define CORRECTION_HX : [fallback para.vexpansion 1] / [Math.sqrt (1 - globalTransform.yx * globalTransform.yx)]
+	define CORRECTION_HX : [fallback para.contrast 1] / [Math.sqrt (1 - globalTransform.yx * globalTransform.yx)]
 	
 	# Orient parameters
 	define UPWARD {.x (-CORRECTION_HX) .y 0}
@@ -97,7 +97,7 @@ define [buildFont para recursive] : begin
 	define SMOOTH para.smooth
 	define SMALLSMOOTH para.smallsmooth
 	define STROKE para.stroke
-	define VEXPANSION para.vexpansion
+	define CONTRAST para.contrast
 	define DOTSIZE : fallback para.dotsize STROKE
 	define PERIODSIZE : fallback para.periodsize DOTSIZE
 	define BARPOS : fallback para.barpos 0.5
@@ -134,8 +134,8 @@ define [buildFont para recursive] : begin
 	
 	# derived metrics
 	define FULLWIDTH : if para.cjkSpacing (WIDTH * 2) WIDTH
-	define VSTROKE : STROKE * VEXPANSION
-	define ESS : STROKE * [fallback para.essx VEXPANSION]
+	define VSTROKE : STROKE * CONTRAST
+	define ESS : STROKE * [fallback para.essx CONTRAST]
 	define XO : XH - O
 	define CAPO : CAP - O
 	define HALFSTROKE : STROKE / 2
@@ -386,14 +386,7 @@ define [buildFont para recursive] : begin
 			set knots.(j) : knots.(j).af.call s knots.(j - 1) knots.(j + 1) knots.(j)
 		if closed : knots.pop
 		return {.knots [flatten knots] .closed closed .lastafs lastafs}
-	define [spiro-stroke] : begin
-		local s : new Stroke
-		s.set-transform globalTransform
-		s.set-samples 1
-		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call arguments 0] s
-		libspiro.spiroToBezierOnContext knots closed s
-		foreach af [items-of lastafs] : if af : af.call s
-		return s
+
 	define [spiro] : begin
 		local s : new SpiroExpansionContext
 		set s.gizmo globalTransform
@@ -404,7 +397,7 @@ define [buildFont para recursive] : begin
 				if af : af.apply this arguments
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
-		local {.lhs lhs .rhs rhs} : s.expand VEXPANSION
+		local {.lhs lhs .rhs rhs} : s.expand CONTRAST
 		if closed
 			then
 				local g : new Glyph
