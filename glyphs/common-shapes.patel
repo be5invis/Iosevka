@@ -309,15 +309,16 @@ define [sband sw rtl _tension _tangle _compression] : return {.type 'interpolate
 	# throw 'w'
 	return pts
 ]}
+define [determineMixR w v] : if (w == v) 0.5 ((w * w - [Math.sqrt : (2 * w - v) * v * w * w]) / ((v - w) * (v - w)))
 define [hookstart y p f] : return {.type 'interpolate' .af [lambda [before after] : begin \\
 	local atBottom : after.y > y
 	local ltr : after.x > before.x
 	before.x = before.x - OXHOOK * [if ltr (-1) 1]
 	local hv : archv
-	local mixr : fallback p : linreg 1 0.5 (SMALLSMOOTH / HOOK) 0.53 ((after.y - y) / (before.y - y))
+	local mixr : determineMixR (after.y - y) (before.y - y)
 	local mx ([mix after.x before.x mixr] + [if atBottom 1 (-1)] * CORRECTION_OMIDS)
 	return : list
-		g4 mx y f
+		g4.[if ltr "right" "left"].mid mx y f
 		hv.af.call this {.x mx .y y} after hv
 ]}
 define [hookend y p f dontextend] : return {.type 'interpolate' .af [lambda [before after] : begin \\
@@ -325,14 +326,14 @@ define [hookend y p f dontextend] : return {.type 'interpolate' .af [lambda [bef
 	local ltr : after.x > before.x
 	after.x = after.x + OXHOOK * [if ltr (-1) 1]
 	local vh : arcvh
-	local mixr : fallback p : linreg 1 0.5 (SMALLSMOOTH / HOOK) 0.525 ((before.y - y) / (after.y - y))
+	local mixr : determineMixR (before.y - y) (after.y - y)
 	local mx ([mix before.x after.x mixr] + [if atBottom 1 (-1)] * CORRECTION_OMIDS)
 	if (!dontextend && atBottom && ltr) : begin
 		after.x = after.x + TAILADJX * globalTransform.yx
 		after.y = after.y - TAILADJY * globalTransform.yx
 	return : list
 		vh.af.call this before {.x mx .y y} vh
-		g4 mx y f
+		g4.[if ltr "right" "left"].mid mx y f
 ]}
 
 # Derived subfonts
