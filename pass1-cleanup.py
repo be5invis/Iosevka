@@ -36,7 +36,7 @@ if len(sys.argv) <= 3:
 print "Simplify, pass 1: ", font.fontname
 font.layers["Fore"].is_quadratic = False
 font.selection.all()
-font.simplify(font.em / 1000.0, ("smoothcurves", "choosehv"), 0.1)
+font.simplify(font.em / 2000.0, ("smoothcurves", "choosehv"), 0.1)
 
 print "Simplify, pass 2: ", font.fontname
 oldem = font.em

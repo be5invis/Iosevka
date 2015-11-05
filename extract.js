@@ -56,14 +56,16 @@ if(argv.ttf) {
 	for(var j = 0; j < font.glyf.length; j++){
 		var g = font.glyf[j];
 		g.advanceWidth *= upmscale;
-		if(g.contours) for(var k = 0; k < g.contours.length; k++) {
-			var contour = g.contours[k];
-			for(var p = 0; p < contour.length; p++) {
-				contour[p].y *= upmscale;
-				contour[p].x = contour[p].x * upmscale + contour[p].y * skew;
+		if(g.contours) {
+			for(var k = 0; k < g.contours.length; k++) {
+				var contour = g.contours[k];
+				for(var p = 0; p < contour.length; p++) {
+					contour[p].y *= upmscale;
+					contour[p].x = contour[p].x * upmscale + contour[p].y * skew;
+				}
 			}
+			Glyph.prototype.cleanup.call(g, 1);
 		}
-		Glyph.prototype.cleanup.call(g);
 	}
 	font.head.unitsPerEm        *= upmscale;
 	font.hhea.ascent            *= upmscale;

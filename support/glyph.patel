@@ -175,12 +175,12 @@ define [Glyph.prototype.set-anchor id type x y mbx mby] : begin
 	local markbasepoint : if (mbx !== nothing && mby !== nothing) [tp this.gizmo {.x mbx .y mby}] {.x nothing .y nothing}
 	this.anchors.(id) = {.x anchorpoint.x .y anchorpoint.y .type type .mbx markbasepoint.x .mby markbasepoint.y}
 
-define [oncurveRemovable a b c] : begin
+define [oncurveRemovable a b c t] : begin
 	local xm : (a.x + c.x) / 2
 	local ym : (a.y + c.y) / 2
-	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= 0.5 && [Math.abs (b.y - ym)] <= 0.5
+	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
 
-define [Glyph.prototype.cleanup] : begin
+define [Glyph.prototype.cleanup t] : begin
 	foreach c [range 0 this.contours.length] : begin
 		local ocontour this.contours.(c)
 		# add infections
@@ -231,7 +231,7 @@ define [Glyph.prototype.cleanup] : begin
 			local p0 contour.(j - 1)
 			local p1 contour.(j)
 			local p2 contour.(j + 1)
-			if [oncurveRemovable p0 p1 p2] : set p1.unimportant true
+			if [oncurveRemovable p0 p1 p2 t] : set p1.unimportant true
 		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 		this.contours.(c) = cleanedContour
 	return this
