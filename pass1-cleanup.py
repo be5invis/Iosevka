@@ -33,19 +33,16 @@ if len(sys.argv) <= 3:
 	font.unlinkReferences()
 
 # Outline simplify
-print "Simplify, pass 1: ", font.fontname
+print "Simplify: ", font.fontname
 font.layers["Fore"].is_quadratic = False
 font.selection.all()
 font.simplify(font.em / 2000.0, ("smoothcurves", "choosehv"), 0.1)
 
-print "Simplify, pass 2: ", font.fontname
+print "Finalize: ", font.fontname
 oldem = font.em
 font.em = 1000
 font.layers["Fore"].is_quadratic = True
 font.transform(psMat.skew(-font.italicangle / 180 * math.pi))
-
-# Feature merging and output
-print "Finalize: ", font.fontname
 font.em = oldem
 
 font.canonicalContours()

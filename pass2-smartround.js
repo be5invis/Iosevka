@@ -65,8 +65,8 @@ for(var j = 0; j < ttf.glyf.length; j++){
 		var rymin = (upm / targetupm) * Math.round(ymin * targetupm / upm);
 		var rymax = (upm / targetupm) * Math.round(ymax * targetupm / upm);
 		for(var l = 0; l < c.length; l++){
-			c[l].y = (upm / targetupm) * Math.round(mix(rymin, rymax, ratio(ymin, c[l].y, ymax)) * targetupm / upm)
-			c[l].x = (upm / targetupm) * Math.round((mix(rxmin, rxmax, ratio(xmin, c[l].x, xmax)) - c[l].y * skew) * targetupm / upm)
+			c[l].y = (upm / targetupm) * (mix(rymin, rymax, ratio(ymin, c[l].y, ymax)) * targetupm / upm)
+			c[l].x = (upm / targetupm) * ((mix(rxmin, rxmax, ratio(xmin, c[l].x, xmax)) - c[l].y * skew) * targetupm / upm)
 		}
 		glyph.contours[k] = c.filter(function(p){ return !p.removable })
 	}
