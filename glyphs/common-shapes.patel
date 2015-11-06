@@ -290,50 +290,59 @@ define [FlipAround x y sx sy] : glyph-construction
 	apply-transform : Italify
 
 # Spiro shapes
-define [sband sw rtl _tension _tangle _compression] : return {.type 'interpolate' .af [lambda [before after] : begin \\
-	local tension : fallback _tension 0.7
-	local compression : fallback _compression 1
-	local tensionw 0
-	local minangle : -para.italicangle / 180 * Math.PI
-	local maxangle : Math.atan2 (after.x - before.x) ([mix after.y before.y tension] - [mix before.y after.y tension])
-	set maxangle : Math.atan2 ([Math.sin maxangle] * compression) [Math.cos maxangle]
-	local p : fallback _tangle 0.25
-	local pts {}
-	local samples 32
-	foreach j [range 1 samples] : begin
-		local t : j / samples
-		local angle : mix minangle maxangle [bez3 0 p 1 1 : if (t < 1/2) (2 * t) (2 * (1 - t))]
-		local k : bez3 0 tensionw (1 - tensionw) 1 t
-		if rtl : k = 1 - k
-		pts.push : g2 [mix before.x after.x [bez3 0 0 1 1 t]] [mix before.y after.y [bez3 0 tension (1 - tension) 1 t]] [widths.heading ((1 - k) * STROKE) (k * STROKE) {.x [Math.cos angle] .y [Math.sin angle]}]
-	# throw 'w'
-	return pts
-]}
-define [determineMixR w v] : if (w == v) 0.5 ((w * w - [Math.sqrt : (2 * w - v) * v * w * w]) / ((v - w) * (v - w)))
-define [hookstart y p f] : return {.type 'interpolate' .af [lambda [before after] : begin \\
+define [determineMixR w v] : piecewise
+	(w <= v) 0.5
+	true     ((w * w - [Math.sqrt : (2 * w - v) * v * w * w]) / ((v - w) * (v - w)))
+define [calculateHook u w v p] : begin
+	if (w <= v) : return {0.5, 0}
+	local mixr : determineMixR w v
+	local mixrRho : clamp 0.97 1 (1 + (1 - w / (u * mixr)) / 15)
+	local k : w * (mixr - 1) / (mixr * [Math.sqrt : 2 * mixr - 1] * u)
+	local deltay : STROKE / [Math.sqrt : 1 + k * k]
+	local deltax : k * deltay
+	local winner (w - STROKE)
+	local vinner (v - STROKE + deltay)
+	if (winner <= 0 || vinner <= 0 || winner <= vinner) : return {[fallback p (mixrRho * mixr)], 0}
+	local mixrinner : determineMixR winner vinner
+	local skew : 1 / STROKE * (u * mixr - ((u - STROKE * CORRECTION_HX + deltax) * mixrinner + STROKE * CORRECTION_HX)) + globalTransform.yx
+	return {[fallback p (mixrRho * mixr)], skew}
+
+define [hookstart y p] : return {.type 'interpolate' .af [lambda [before after] : begin \\
 	local atBottom : after.y > y
 	local ltr : after.x > before.x
 	before.x = before.x - OXHOOK * [if ltr (-1) 1]
-	local hv : archv
-	local mixr : determineMixR (after.y - y) (before.y - y)
+	
+	local w : Math.abs (after.y - y)
+	local v : Math.abs (before.y - y)
+	local u : Math.abs (after.x - before.x)
+	local {mixr, skew} : calculateHook u w v p
 	local mx ([mix after.x before.x mixr] + [if atBottom 1 (-1)] * CORRECTION_OMIDS)
+	local hv : archv
 	return : list
-		g4.[if ltr "right" "left"].mid mx y f
+		g4.[if ltr "right" "left"].mid mx y [heading {
+			.y [if ltr 1 (-1)] 
+			.x (skew * [if atBottom (-1) (1)]) }]
 		hv.af.call this {.x mx .y y} after hv
 ]}
-define [hookend y p f dontextend] : return {.type 'interpolate' .af [lambda [before after] : begin \\
+define [hookend y p] : return {.type 'interpolate' .af [lambda [before after] : begin \\
 	local atBottom : before.y > y
 	local ltr : after.x > before.x
 	after.x = after.x + OXHOOK * [if ltr (-1) 1]
-	local vh : arcvh
-	local mixr : determineMixR (before.y - y) (after.y - y)
+
+	local w : Math.abs (before.y - y)
+	local v : Math.abs (after.y - y)
+	local u : Math.abs (after.x - before.x)
+	local {mixr, skew} : calculateHook u w v p
 	local mx ([mix before.x after.x mixr] + [if atBottom 1 (-1)] * CORRECTION_OMIDS)
-	if (!dontextend && atBottom && ltr) : begin
+	if (atBottom && ltr) : begin
 		after.x = after.x + TAILADJX * globalTransform.yx
 		after.y = after.y - TAILADJY * globalTransform.yx
+	local vh : arcvh
 	return : list
 		vh.af.call this before {.x mx .y y} vh
-		g4.[if ltr "right" "left"].mid mx y f
+		g4.[if ltr "right" "left"].mid mx y [heading {
+			.y [if ltr 1 (-1)] 
+			.x (skew * [if atBottom 1 (-1)]) }]
 ]}
 
 # Derived subfonts
