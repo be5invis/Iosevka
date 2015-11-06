@@ -10,24 +10,17 @@ create-glyph 'AE' : glyph-construction
 	local turn : XH * 0.1
 	
 	# A half
-	
-	include : create-stroke
-		:.start-from SB 0
-		:.heads-to   UPWARD
-		:.set-width  0 MVERTSTROKE
-		:.line-to    SB turn
-		:.heads-to   UPWARD
-		:.curve-to   SB [mix turn CAP 0.27] (eleft - HALFSTROKE) CAP
-		:.set-width  0 (MVERTSTROKE * 0.8)
+	include : spiro
+		widths.rhs MVERTSTROKE
+		flat SB 0 [heading UPWARD]
+		curl SB (CAP * 0.1) [heading UPWARD]
+		quadcontrols 0 0.3 6 unimportant
+		g4   (eleft - HALFSTROKE) CAP [widths.rhs (MVERTSTROKE * 0.8)]
+
 	start-from (eleft - HALFSTROKE) CAP
 	line-to    eleft CAP
 	line-to    eleft (CAP - MVERTSTROKE)
-	include : create-stroke
-		:.start-from (SB + MVERTSTROKE) (XH / 2)
-		:.heads-to   RIGHTWARD
-		:.set-width  0 MVERTSTROKE
-		:.line-to    (eleft + MVERTSTROKE / 2) (XH / 2)
-		:.heads-to   RIGHTWARD
+	include : HBarTop  (SB + MVERTSTROKE)  (eleft + MVERTSTROKE / 2) (XH / 2) MVERTSTROKE
 	
 	# E half
 	include : VBarLeft eleft 0 CAP MVERTSTROKE
@@ -40,15 +33,14 @@ define [OEShape top] : glyph-construction
 	
 	# O half
 	
-	include : create-stroke
-		:.start-from (eleft + 1) top
-		:.set-width  MVERTSTROKE 0
-		:.line-to    (eleft - CORRECTION_OMIDS) top
-		:.arc-hv-to  SB (top - SMOOTHA)
-		:.line-to    SB SMOOTHB
-		:.arc-vh-to  eleft 0
-		:.line-to    (eleft + 1) 0
-		:.heads-to   RIGHTWARD
+	include : spiro
+		widths.lhs MVERTSTROKE 0
+		straight.left.start eleft top [heading LEFTWARD]
+		archv
+		flat  SB (top - SMOOTHA)
+		curl  SB SMOOTHB
+		arcvh
+		straight.right.end eleft 0 [heading RIGHTWARD]
 	
 	# E half
 	include : VBarLeft eleft 0 top MVERTSTROKE
@@ -65,7 +57,7 @@ create-glyph 'OE' : glyph-construction
 
 define aeepart : glyph-construction
 	local eLeft : MIDDLE - MVERTSTROKE / 2 * CORRECTION_HX
-	local eMiddle : [mix eLeft (RIGHTSB - O) 0.5] - MVERTSTROKE * globalTransform.yx
+	local eMiddle : [mix eLeft (RIGHTSB - O * 2) 0.5] - MVERTSTROKE * globalTransform.yx
 	local barbottom (XH * EBARPOS)
 	
 	local sma : SMALLSMOOTHA * 0.6
@@ -81,12 +73,7 @@ define aeepart : glyph-construction
 		curl eLeft smb
 		hookend O
 		g4   (RIGHTSB - O * 2) SHOOK
-	include : create-stroke
-		:.start-from (eLeft + MVERTSTROKE / 2) barbottom
-		:.set-width  MVERTSTROKE 0
-		:.heads-to   RIGHTWARD
-		:.line-to    (RIGHTSB - MVERTSTROKE / 2) barbottom
-		:.heads-to   RIGHTWARD
+	include : HBarBottom (eLeft + MVERTSTROKE / 2) (RIGHTSB - MVERTSTROKE / 2) barbottom
 
 define aeapart : glyph-construction
 	local bartop (XH * BARPOS * 1.02 + HALFSTROKE)
@@ -194,30 +181,22 @@ create-glyph 'eth' : glyph-construction
 	
 	include : smallo (CAP * 0.6) 0 SB RIGHTSB
 	local ymiddlea : (CAP * 0.6 + SMALLSMOOTHA - SMALLSMOOTHB) / 2
-	include : create-stroke
-		:.start-from (RIGHTSB - O) ymiddlea
-		:.set-width  STROKE 0
-		:.curve-to   (RIGHTSB - O) [mix ymiddlea CAP 0.8] (SB + STROKE * 1.1) CAP
+	include : spiro
+		widths.lhs
+		g4.up.start (RIGHTSB - O) ymiddlea
+		quadcontrols 0 0.8
+		g4 (SB + STROKE * 1.1) CAP
 	
-	local sw : 0.5 * [adviceBlackness 4]
-	
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB 0.1] [mix XH CAP (-0.1)]
-		:.set-width  sw sw
-		:.line-to    [mix SB RIGHTSB 0.95] [mix XH CAP 0.3]
+	include : spiro
+		widths.center OVERLAYSTROKE
+		flat [mix SB RIGHTSB 0.1] [mix XH CAP (-0.1)]
+		curl [mix SB RIGHTSB 0.95] [mix XH CAP 0.3]
 
 create-glyph 'dcroat' : glyph-construction
 	assign-unicode 0x111
 	
 	include glyphs.d AS_BASE
-	local sw : 0.5 * [adviceBlackness 5]
-	include : create-stroke
-		:.start-from [mix (SB + STROKE) (RIGHTSB - STROKE) 0.5] [mix XH CAP 0.45]
-		:.set-width  sw sw
-		:.heads-to   RIGHTWARD
-		:.line-to    [mix RIGHTSB WIDTH 0.7 ] [mix XH CAP 0.45]
-		:.heads-to   RIGHTWARD
-
+	include : HBar [mix (SB + STROKE) (RIGHTSB - STROKE) 0.5] [mix RIGHTSB WIDTH 0.7] [mix XH CAP 0.45] OVERLAYSTROKE
 
 create-glyph 'Thorn' : glyph-construction
 	set-width WIDTH
@@ -237,12 +216,7 @@ create-glyph 'Thorn' : glyph-construction
 		flat (RIGHTSB - turnRadius) bowlBottom
 		curl (SB * 1.25 + 1) bowlBottom [heading LEFTWARD]
 	
-	include : create-stroke
-		:.start-from (SB * 1.25) 0
-		:.heads-to   UPWARD
-		:.set-width  0 STROKE
-		:.line-to    (SB * 1.25) CAP
-		:.heads-to   UPWARD
+	include : VBarLeft (SB * 1.25) 0 CAP
 
 create-glyph 'thorn' : glyph-construction
 	assign-unicode 0xFE
@@ -756,12 +730,7 @@ define [RevSmallEShape top stroke barpos] : glyph-construction
 		curl (RIGHTSB - O) SMALLSMOOTHA
 		hookend O
 		g4 (SB + O) HOOK
-	include : create-stroke
-		:.start-from (SB + (stroke / 2)) barbottom
-		:.set-width  stroke 0
-		:.heads-to   RIGHTWARD
-		:.line-to    (RIGHTSB - (stroke / 2)) barbottom
-		:.heads-to   RIGHTWARD
+	include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
 
 create-glyph 'reve' : glyph-construction
 	assign-unicode 0x258
@@ -779,11 +748,11 @@ create-glyph 'Yr' : glyph-construction
 	
 	local TURN (XH * 0.1)
 	local right (RIGHTSB - O)
-	include : create-stroke
-		:.start-from (right - HALFSTROKE) DESCENDER
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.curve-to (right - HALFSTROKE) [mix (DESCENDER + TURN) top 0.2] MIDDLE ((top - STROKE) * bp)
+	include : spiro
+		widths.center
+		g4.up.start (right - HALFSTROKE) 0 [heading UPWARD]
+		quadcontrols 0 0.4 8
+		g4 MIDDLE ((top - STROKE) * bp)
 
 
 # Glottalstop

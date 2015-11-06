@@ -1,43 +1,6 @@
 ###### UPPER CASE
 
 ### A V X Y K
-create-glyph 'A' : glyph-construction
-	set-width WIDTH
-	assign-unicode 'A'
-	include capitalMarks
-	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
-	local TURN (XH * 0.1)
-	
-	include : create-stroke
-		:.start-from SB 0
-		:.heads-to   UPWARD
-		:.set-width  0 STROKE
-		:.line-to    SB TURN
-		:.heads-to   UPWARD
-		:.curve-to   SB [mix TURN CAP 0.27] (MIDDLE - STROKE / 2) CAP
-		:.set-width  0 (STROKE * 0.9)
-	
-	include : create-stroke
-		:.start-from RIGHTSB 0
-		:.heads-to   UPWARD
-		:.set-width  STROKE 0
-		:.line-to    RIGHTSB TURN
-		:.heads-to   UPWARD
-		:.curve-to   RIGHTSB [mix TURN CAP 0.27] (MIDDLE + STROKE / 2) CAP
-		:.set-width  (STROKE * 0.9) 0
-	
-	include : create-stroke
-		:.start-from (SB + STROKE) (XH / 2)
-		:.heads-to   RIGHTWARD
-		:.set-width  0 STROKE
-		:.line-to    (RIGHTSB - STROKE) (XH / 2)
-		:.heads-to   RIGHTWARD
-	
-	#top cap
-	start-from (MIDDLE - STROKE / 2) CAP
-	line-to (MIDDLE + STROKE / 2) CAP
-	line-to MIDDLE (CAP - STROKE)
-
 define [VShape top] : glyph-construction
 	include : spiro
 		widths.lhs
@@ -64,6 +27,17 @@ create-glyph 'V' : glyph-construction
 	assign-unicode 'V'
 	include capitalMarks
 	include : VShape CAP
+
+create-glyph 'A' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'A'
+	include capitalMarks
+	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
+	
+	include : VShape CAP
+	include : FlipAround MIDDLE (CAP / 2)
+	
+	include : HBarTop (SB + STROKE) (RIGHTSB - STROKE) (XH / 2)
 
 define [WShape top] : glyph-construction
 	local wheight (top * 0.6)
@@ -132,35 +106,29 @@ create-glyph 'Y' : glyph-construction
 	include capitalMarks
 	include : YShape CAP
 
-
-define [KShape] : glyph-construction
-	local TURN (CAP * 0.95)
-	local rturn (XH * 0.1)
-	local right (RIGHTSB - O)
+define [KShape top] : glyph-construction
+	local turn (top * 0.99)
+	
+	local attach (top * 0.375)
+	local attach2 MIDDLE
 	
 	local fine : adviceBlackness 3.5
-	include : create-stroke
-		:.start-from RIGHTSB CAP
-		:.heads-to   DOWNWARD
-		:.set-width  0 STROKE
-		:.line-to    RIGHTSB TURN
-		:.heads-to   DOWNWARD
-		:.curve-to   RIGHTSB ((1 - 0.18) * TURN) (SB + STROKE) (CAP * 0.35)
-		:.set-width  0 fine
-		
-	include : create-stroke
-		:.start-from (right - HALFSTROKE) 0
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.curve-to (right - HALFSTROKE) (rturn + 0.2 * (XH - rturn)) MIDDLE (CAPMIDDLE + HALFSTROKE)
-		:.set-width (fine / 2) (fine / 2)
+	include : spiro
+		g4.down.start (RIGHTSB + O) top [widths.heading 0 (STROKE * 1.05 * (WIDTH * 2 / UPM)) DOWNWARD]
+		bezcontrols 0 0.2 0.5 0.65 8
+		g4 (SB + STROKE) attach [widths 0 fine]
+	include : spiro
+		widths.center
+		g4.up.start (RIGHTSB - HALFSTROKE) 0
+		quadcontrols 0 0.3 8
+		g4 attach2 (top * 0.61) [widths.center fine]
 
 create-glyph 'K' : glyph-construction
 	set-width WIDTH
 	assign-unicode 'K'
 	include capitalMarks	
 	include : VBarLeft SB 0 CAP
-	include : KShape
+	include : KShape CAP
 
 
 ### B D P R
@@ -240,11 +208,11 @@ define [RShape top] : glyph-construction
 	include : PShape top 1
 	local TURN (XH * 0.1)
 	local right (RIGHTSB - O)
-	include : create-stroke
-		:.start-from (right - HALFSTROKE) 0
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.curve-to (right - HALFSTROKE) (TURN + 0.2 * (XH - TURN)) MIDDLE ((top - STROKE) * PBARPOS)
+	include : spiro
+		widths.center
+		g4.up.start (right - HALFSTROKE) 0 [heading UPWARD]
+		quadcontrols 0 0.4 8
+		g4 MIDDLE ((top - STROKE) * PBARPOS)
 
 create-glyph 'P' : glyph-construction
 	set-width WIDTH
@@ -290,11 +258,9 @@ define [GShape top sma smb] : glyph-construction
 		archv
 		flat RIGHTSB sma
 		curl RIGHTSB ybar [heading UPWARD]
-	include : create-stroke
-		:.start-from  MIDDLE ybar
-		:.set-width   0 STROKE
-		:.line-to     RIGHTSB ybar
-		:.heads-to    RIGHTWARD
+	include : spiro
+		flat MIDDLE ybar [widths 0 STROKE]
+		curl RIGHTSB ybar [heading RIGHTWARD]
 
 create-glyph 'G' : glyph-construction
 	set-width WIDTH
@@ -376,18 +342,8 @@ create-glyph 'H' : glyph-construction
 	include : HShape CAP
 
 define [LShape top] : glyph-construction
-	include : create-stroke
-		:.start-from (SB * 1.5) top
-		:.set-width STROKE 0
-		:.heads-to DOWNWARD
-		:.line-to (SB * 1.5) 0
-		:.heads-to DOWNWARD
-	include : create-stroke
-		:.start-from (SB * 1.5 - O) 0
-		:.set-width STROKE 0
-		:.heads-to RIGHTWARD
-		:.line-to RIGHTSB 0
-		:.heads-to RIGHTWARD
+	include : VBarLeft (SB * 1.5) 0 top
+	include : HBarBottom (SB * 1.5 - O) RIGHTSB 0
 
 create-glyph 'L' : glyph-construction
 	set-width WIDTH
@@ -399,25 +355,20 @@ create-glyph 'L' : glyph-construction
 create-glyph 'I.straight' : glyph-construction
 	dont-export
 	include capitalMarks
-	include : create-stroke
-		:.start-from MIDDLE 0
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.line-to MIDDLE CAP
-		:.heads-to UPWARD
+	include : VBar MIDDLE 0 CAP
 
 define [ISerifShape top] : glyph-construction
-	include : create-stroke
-		:.start-from (MIDDLE - WIDTH * 0.26 - STROKE * globalTransform.yx) top
-		:.set-width 0 STROKE
-		:.line-to (MIDDLE + WIDTH * 0.26 - STROKE * globalTransform.yx) top
+	include : spiro
+		widths.rhs
+		flat (MIDDLE - WIDTH * 0.26 - STROKE * globalTransform.yx) top
+		curl (MIDDLE + WIDTH * 0.26 - STROKE * globalTransform.yx) top
 	# Bar
 	include : VBar MIDDLE 0 top
 	# Bottom serif
-	include : create-stroke
-		:.start-from (MIDDLE - WIDTH * 0.26 + STROKE * globalTransform.yx) 0
-		:.set-width STROKE 0
-		:.line-to (MIDDLE + WIDTH * 0.26 + STROKE * globalTransform.yx) 0
+	include : spiro
+		widths.lhs
+		flat (MIDDLE - WIDTH * 0.26 + STROKE * globalTransform.yx) 0
+		curl (MIDDLE + WIDTH * 0.26 + STROKE * globalTransform.yx) 0
 
 create-glyph 'I.serifed' : glyph-construction
 	dont-export
@@ -431,10 +382,8 @@ create-glyph 'T' : glyph-construction
 	assign-unicode 'T'
 	include capitalMarks
 	set-anchor 'bottomright' BASE (MIDDLE + HALFSTROKE * CORRECTION_HX) 0
-	include : create-stroke :.start-from MIDDLE 0 :.heads-to UPWARD :.set-width HALFSTROKE HALFSTROKE
-		:.line-to MIDDLE CAP :.heads-to UPWARD
-	include : create-stroke :.start-from SB CAP :.heads-to RIGHTWARD :.set-width 0 STROKE
-		:.line-to RIGHTSB CAP :.heads-to RIGHTWARD
+	include : VBar MIDDLE 0 CAP
+	include : HBarTop SB RIGHTSB CAP
 
 
 create-glyph 'Z' : glyph-construction
