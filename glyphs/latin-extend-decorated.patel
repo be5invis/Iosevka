@@ -1,6 +1,28 @@
 ###### EXTENDED LATIN CHARACTERS
 ###### DECORATED
-
+# Czech háčeks
+create-glyph 'tcaron' : glyph-construction
+	assign-unicode 0x165
+	include glyphs.commaAbove
+	apply-transform : Translate (WIDTH + (RIGHTSB - SB) / 2) 0
+	include glyphs.t AS_BASE
+create-glyph 'dcaron' : glyph-construction
+	assign-unicode 0x10F
+	include glyphs.commaAbove
+	apply-transform : Translate (WIDTH + (RIGHTSB - SB) / 2 + markExtend / 2) 0
+	local f : Thinner {'d'} 0.95
+	include f.d
+	include bMarks
+create-glyph 'Lcaron' : glyph-construction
+	assign-unicode 0x13D
+	include glyphs.commaAbove
+	apply-transform : Translate (WIDTH + (RIGHTSB - SB) * 0.375) 0
+	include glyphs.L AS_BASE
+create-glyph 'lcaron' : glyph-construction
+	assign-unicode 0x13E
+	include glyphs.commaAbove
+	apply-transform : Translate (WIDTH + (RIGHTSB - SB) * 0.375) 0
+	include glyphs.l AS_BASE
 # Slashed
 create-glyph 'Oslash' : glyph-construction
 	assign-unicode 0xD8
@@ -484,15 +506,17 @@ create-glyph 'ezhtail' : glyph-construction
 	local b : mix DESCENDER XH 0.25
 	include : EzhShape XH b nothing true
 	local y : mix [mix b XH 0.6] b 0.5
-	include : create-stroke
-		:.start-from RIGHTSB y
-		:.heads-to   DOWNWARD
-		:.set-width  0 STROKE
-		:.arc-vh-to  [mix SB RIGHTSB 0.45] b
-		:.line-to    [mix SB RIGHTSB 0.4] b
-		:.arc-hv-to  (SB + STROKE * CORRECTION_HX) [mix (DESCENDER + STROKE) b 0.5]
-		:.arc-vh-to  [mix SB RIGHTSB 0.4] (DESCENDER + STROKE)
-		:.line-to    RIGHTSB (DESCENDER + STROKE)
+	include : spiro
+		widths.rhs
+		g4.down.start RIGHTSB y [heading DOWNWARD]
+		arcvh
+		flat [mix SB RIGHTSB 0.45] b
+		curl [mix SB RIGHTSB 0.4] b
+		archv
+		g4 (SB + STROKE * CORRECTION_HX) [mix (DESCENDER + STROKE) b 0.5]
+		arcvh
+		flat [mix SB RIGHTSB 0.4] (DESCENDER + STROKE)
+		curl RIGHTSB (DESCENDER + STROKE)
 
 create-glyph 'Qrtail' : glyph-construction
 	assign-unicode 0x24A
@@ -648,15 +672,16 @@ define [CurlyTail fine rinner m1 bottom _right x2 y2] : begin
 define [HCurlyTail fine wide rinner left m1 _right x1 x2 y2] : glyph-construction
 	local right : _right - fine
 	local mid : right - rinner + O
-	include : create-stroke
-		:.start-from left wide
-		:.heads-to   RIGHTWARD
-		:.set-width  0 wide
-		:.line-to    m1 wide
-		:.arc-hv-to  right (wide + rinner)
-		:.set-width  0 fine
-		:.arc-vh-to  mid (wide + rinner * 2 - O)
-		:.curve-to   x1 (wide + rinner * 2 - O) x2 y2
+	include : spiro
+		widths.rhs wide
+		flat left wide [heading RIGHTWARD]
+		curl m1 wide [heading RIGHTWARD]
+		archv
+		g4   right (wide + rinner) [widths.heading 0 fine UPWARD]
+		arcvh
+		g4   mid (wide + rinner * 2 - O) [heading LEFTWARD]
+		quadcontrols ((x1 - mid) / (x2 - mid)) 0
+		g4   x2 y2
 
 create-glyph 'ncurlytail' : glyph-construction
 	assign-unicode 0x235
@@ -845,14 +870,15 @@ create-glyph 'revlatinepsiloner' : glyph-construction
 define [Belt] : glyph-construction
 	local fine : adviceBlackness 4.5
 	local r : XH * 0.05
-	include : create-stroke
-		:.start-from MIDDLE (CAPMIDDLE + r)
-		:.set-width  0 fine
-		:.heads-to   LEFTWARD
-		:.line-to    (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE + r)
-		:.arc-hv-to  (MIDDLE - HALFSTROKE - r * 2.5) CAPMIDDLE
-		:.arc-vh-to  (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE - r)
-		:.line-to    (MIDDLE + HALFSTROKE + r * 1.5 + fine) (CAPMIDDLE - r)
+	include : spiro
+		widths.rhs fine
+		flat MIDDLE (CAPMIDDLE + r) [heading LEFTWARD]
+		curl (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE + r)
+		archv
+		g4.down.mid (MIDDLE - HALFSTROKE - r * 2.5) CAPMIDDLE [heading DOWNWARD]
+		arcvh
+		flat (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE - r)
+		curl (MIDDLE + HALFSTROKE + r * 1.5 + fine) (CAPMIDDLE - r)
 
 create-glyph 'lbelt' : glyph-construction
 	assign-unicode 0x26C
