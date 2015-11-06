@@ -119,10 +119,10 @@ archives : $(ARCHIVEDIR)/$(PREFIX).tar.bz2 $(ARCHIVEDIR)/$(PREFIX).zip
 release : archives $(RELEASES) $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
 
 # release all variants
-release-normal :
+release-normal : $(FILES) | $(OBJDIR)
 	$(MAKE) release
-release-hooky :
+release-hooky : $(FILES) | $(OBJDIR)
 	$(MAKE) archives VARIANTNAME=-hooky STYLE_UPRIGHT='v-l-hooky v-i-hooky'
-release-zshaped :
+release-zshaped : $(FILES) | $(OBJDIR)
 	$(MAKE) archives VARIANTNAME=-zshaped STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
 release-all : release-normal release-hooky release-zshaped
