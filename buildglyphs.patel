@@ -168,7 +168,12 @@ define [buildFont para recursive] : begin
 	define OPERATORSTROKE : adviceBlackness 3.2
 	define SHOULDERFINE : [adviceBlackness 4] / 2
 	
-	define [adviceSSmooth y sign] : y * 0.22 + STROKE * 0.22 + 0.0583 * (RIGHTSB - SB) + sign * globalTransform.yx * para.smoothadjust
+	define SUPERNESS : fallback para.superness 2
+	define [superxy x] : Math.pow (1 - [Math.pow x SUPERNESS]) (1 / SUPERNESS)
+	
+	define [adviceSSmooth y sign] : begin
+		local ss : y * 0.22 + STROKE * 0.22 + 0.02 * (RIGHTSB - SB)
+		return : ss + sign * globalTransform.yx * para.smoothadjust * (ss / SMALLSMOOTH)
 	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.25 + STROKE / 2) + sign * globalTransform.yx * para.smoothadjust
 	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * CORRECTION_HX * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * globalTransform.yx
 	
@@ -350,7 +355,7 @@ define [buildFont para recursive] : begin
 	define [important] nothing
 	
 	# Interpolation pesudoknots
-	define [afInterpolate before after args] : g2
+	define [afInterpolate before after args] : g4
 		mix before.x after.x args.rx
 		mix before.y after.y args.ry
 		fallback args.raf unimportant
@@ -373,8 +378,18 @@ define [buildFont para recursive] : begin
 			bez3 0 y1 y2 1 [mix tiny (1 - tiny) (j / samples)]
 		alsothruthem rs raf
 	define [quadcontrols x1 y1 samples raf] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf
-	define [archv samples notiny k raf] : bezcontrols [fallback k KAPPA_SPIRO_ARC] 0 1 (1 - [fallback k KAPPA_SPIRO_ARC]) samples raf
-	define [arcvh samples notiny k raf] : bezcontrols 0 [fallback k KAPPA_SPIRO_ARC] (1 - [fallback k KAPPA_SPIRO_ARC]) 1 samples raf
+	
+	define {jhv, jvh} : let [hv {}] [vh {}] : begin
+		local samples 4
+		foreach [j : range 1 samples] : begin
+			local theta : j / samples * Math.PI / 2
+			local c : Math.pow [Math.cos theta] (2 / SUPERNESS)
+			local s : Math.pow [Math.sin theta] (2 / SUPERNESS)
+			hv.push {s (1 - c)}
+			vh.push {(1 - c) s}
+		list hv vh
+	define [archv samples notiny k raf] : alsothruthem jhv raf
+	define [arcvh samples notiny k raf] : alsothruthem jvh raf
 	
 	define [complexThru] : begin
 		local a : {}.slice.call arguments
