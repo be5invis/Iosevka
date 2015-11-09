@@ -102,14 +102,14 @@ ARCHIVEDIR = release-archives
 RELEASES = $(subst $(OBJDIR)/,$(RELEASEDIR)/,$(TARGETS))
 $(RELEASES) : $(RELEASEDIR)/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
-PAGESTTF = $(subst $(OBJDIR)/,pages/,$(TARGETS))
-$(PAGESTTF) : pages/%.ttf : $(OBJDIR)/%.ttf
+PAGESTTF = $(subst $(OBJDIR)/,pages/assets/,$(TARGETS))
+$(PAGESTTF) : pages/assets/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
 PAGESWOFF = $(subst .ttf,.woff,$(PAGESTTF))
-$(PAGESWOFF) : pages/%.woff : pages/%.ttf
+$(PAGESWOFF) : pages/assets/%.woff : pages/assets/%.ttf
 	sfnt2woff $<
-PAGESMAPS = $(subst $(OBJDIR)/,pages/,$(MAPS))
-$(PAGESMAPS) : pages/%.charmap : $(OBJDIR)/%.charmap
+PAGESMAPS = $(subst $(OBJDIR)/,pages/assets/,$(MAPS))
+$(PAGESMAPS) : pages/assets/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 $(ARCHIVEDIR)/$(PREFIX).tar.bz2 : $(TARGETS)
 	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
