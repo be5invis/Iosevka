@@ -36,19 +36,21 @@ Build your own style
 
 Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:
 
-* `STYLE_COMMON` for both upright and italics,
-* `STYLE_UPRIGHT` for upright only, and
+* `STYLE_COMMON` for both uprights and italics,
+* `STYLE_UPRIGHT` for uprights only, and
 * `STYLE_ITALICS` for itaics only.
+
+You can add arbitary styles for these variables, for example, `make STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'` to create a variant with Z-shaped letter `l` and `i` for uprights.
 
 The current avaliable styles are:
 
 * Styles for letter `l`:
 	* `v-l-hooky` : Hooky `l`
 	* `v-l-zshaped` : Z-shaped `l`
-	* `v-l-serifed` : Serifed `l`
-	* `v-l-italic` : Italic `l`
+	* `v-l-serifed` : Serifed `l` (default for upright subfamilies)
+	* `v-l-italic` : Italic `l` (default for italic subfamilies)
 * Styles for letter `i`:
 	* `v-i-hooky` : Hooky `i`
 	* `v-i-zshaped` : Z-shaped `i`
-	* `v-i-serifed` : Serifed `i`
-	* `v-l-italic` : Italic `i`
+	* `v-i-serifed` : Serifed `i` (default for upright subfamilies)
+	* `v-l-italic` : Italic `i` (default for italic subfamilies)
