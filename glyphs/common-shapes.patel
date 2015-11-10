@@ -332,6 +332,18 @@ define [HookShape toStraight toFinish isStart y tight s] : begin
 define [hookstart y tight s] : return {.type 'interpolate' .af [lambda [before after] [HookShape after before true y tight s]]}
 define [hookend y tight s] : return {.type 'interpolate' .af [lambda [before after] [HookShape before after false y tight s]]}
 
+define [WaveShape l r cy extendy tension sw] : glyph-construction
+	local cx : mix l r 0.5
+	local wavex : (r - l) * tension
+	local endwavey : extendy * 0.95
+	include : spiro
+		widths.center sw
+		g4 l (cy - endwavey)
+		bezcontrols.absolute (l + wavex) (cy + extendy) (cx - wavex * 1.25) (cy + extendy) 4 important
+		g4 cx cy
+		bezcontrols.absolute (cx + wavex) (cy - extendy) (r - wavex * 1.25) (cy - extendy) 4 important
+		g4 r (cy + endwavey)
+
 # Derived subfonts
 define [Fork glyphs params] : begin
 	local p : Object.create params
@@ -369,6 +381,7 @@ define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn
 	if mark : include mark
 	include : FlipAround x y
 
+# Dual derivatives
 define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
 	if unicode : assign-unicode unicode
 	include glyphs.(id) AS_BASE
@@ -388,6 +401,7 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 	apply-transform : Translate 0 (spacing / 2)
 	apply-transform : Italify
 
+# Full-width derivatives
 define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
 	if unicode : assign-unicode unicode
 	include glyphs.(id)
