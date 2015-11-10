@@ -15,7 +15,7 @@ var CompactPicker = Vue.component('compact-picker', {
 var CodeSnippet = Vue.component('snippet', {
 	template: '#code-snippet-template',
 	props: {
-		id: String,
+		name: String,
 		current: String
 	},
 	data: {},
@@ -31,4 +31,4 @@ var codeArea = new Vue({
 		theme: 'dark'
 	}
 });
-codeArea.snippets = codeArea.$children.map(function(e){ return e.id }).filter(function(x){ return !!x });
+codeArea.snippets = codeArea.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
