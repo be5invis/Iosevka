@@ -109,8 +109,11 @@ define [buildFont para recursive] : begin
 	define FIVEBARPOS para.fivebarpos
 	define LONGJUT para.longjut
 	define JUT para.jut
+	define VJUT para.vjut
 	define ACCENT para.accent
 	define ACCENTX para.accentx
+	
+	define SLAB para.slab
 	
 	define KAPPA para.kappa
 	define BKAPPA : para.bkappa || KAPPA + 0.1
@@ -148,6 +151,7 @@ define [buildFont para recursive] : begin
 	define CAP_SMOOTH : CAP - SMOOTH
 	define DOTRADIUS : DOTSIZE / 2
 	define PERIODRADIUS : PERIODSIZE / 2
+	define SIDEJUT : JUT - HALFSTROKE * CORRECTION_HX
 	
 	define SMOOTHA : SMOOTH - globalTransform.yx * para.smoothadjust
 	define SMOOTHB : SMOOTH + globalTransform.yx * para.smoothadjust
@@ -248,13 +252,15 @@ define [buildFont para recursive] : begin
 		`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
 	define-macro reverse-last : syntax-rules
 		`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
+	define-macro last-contour : syntax-rules
+		`[last-contour] {'.syntactic-closure' `(currentGlyph.contours.(currentGlyph.contours.length - 1)) env}
 	define-macro dont-export : syntax-rules
 		`[dont-export] {".syntactic-closure" `[set currentGlyph.dontExport true] env}
 	define-macro assign-unicode : syntax-rules
 		`[assign-unicode @code] {".syntactic-closure" `[begin \\
-					currentGlyph.assign-unicode @code
-					set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
-				] env}
+			currentGlyph.assign-unicode @code
+			set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
+		] env}
 	# The macro [glyph-construction] creates a function which builds a glyph.
 	define-macro glyph-construction : syntax-rules
 		`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
@@ -361,23 +367,23 @@ define [buildFont para recursive] : begin
 		fallback args.raf unimportant
 	define [afInterpolateThem before after args] : begin
 		local knots {}
-		foreach {rx ry preserve} [items-of args.rs] : knots.push : g2 [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve
+		foreach {rx ry preserve} [items-of args.rs] : knots.push : [fallback args.ty g2] [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve
 			1 before.af
 			2 after.af
 			otherwise unimportant
 		return knots
 	define [alsothru rx ry raf] {.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate}
-	define [alsothruthem rs raf] {.type 'interpolate' .rs rs .raf raf .af afInterpolateThem}
+	define [alsothruthem rs raf ty] {.type 'interpolate' .rs rs .raf raf .ty ty .af afInterpolateThem}
 	define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b +3 * t * t * (1 - t) * c + t * t * t * d
-	define [bezcontrols x1 y1 x2 y2 _samples raf] : begin
+	define [bezcontrols x1 y1 x2 y2 _samples raf ty] : begin
 		local samples : fallback _samples 3
 		local tiny 0.005
 		local rs {}
 		foreach j [range 1 samples] : rs.push : list
 			bez3 0 x1 x2 1 [mix tiny (1 - tiny) (j / samples)]
 			bez3 0 y1 y2 1 [mix tiny (1 - tiny) (j / samples)]
-		alsothruthem rs raf
-	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf] : object [type 'interpolate'] : af : lambda [before after] : begin
+		alsothruthem rs raf ty
+	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
 		local samples : fallback _samples 3
 		local tiny 0.005
 		local rs {}
@@ -386,7 +392,7 @@ define [buildFont para recursive] : begin
 			bez3 before.y y1 y2 after.y [mix tiny (1 - tiny) (j / samples)]
 			fallback raf unimportant
 		return rs
-	define [quadcontrols x1 y1 samples raf] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf
+	define [quadcontrols x1 y1 samples raf ty] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf ty
 	
 	define {jhv, jvh} : let [hv {}] [vh {}] : begin
 		local samples 4

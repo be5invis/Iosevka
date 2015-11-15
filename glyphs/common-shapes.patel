@@ -32,57 +32,98 @@ define [ORing u d l r sma smb shift] : begin
 		:.arc-vh-to  (mx + shift) d
 	return s.points
 
-define [leftwardTopSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [LeftwardTopSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x + HALFSTROKE * CORRECTION_HX) y
 		:.heads-to LEFTWARD
 		:.set-width STROKE 0
 		:.line-to (x - length - globalTransform.yx * STROKE) y
-		:.to-outline
 
-define [leftwardBottomSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [LeftwardBottomSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x + HALFSTROKE * CORRECTION_HX) y
 		:.heads-to LEFTWARD
 		:.set-width 0 STROKE
 		:.line-to (x - length + globalTransform.yx * STROKE) y
-		:.to-outline
 
-define [rightwardTopSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [RightwardTopSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x - HALFSTROKE * CORRECTION_HX) y
 		:.heads-to RIGHTWARD
 		:.set-width 0 STROKE
 		:.line-to (x + length - globalTransform.yx * STROKE) y
-		:.to-outline
 
-define [rightwardBottomSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [RightwardBottomSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x - HALFSTROKE * CORRECTION_HX) y
 		:.heads-to RIGHTWARD
 		:.set-width STROKE 0
 		:.line-to (x + length + globalTransform.yx * STROKE) y
-		:.to-outline
 
-define [centerTopSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [CenterTopSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x + length - globalTransform.yx * STROKE) y
 		:.set-width STROKE 0
 		:.line-to (x - length - globalTransform.yx * STROKE) y
-		:.to-outline
 
-define [centerBottomSerif x y length] : begin
-	return : new Stroke
-		:.set-transform globalTransform
+define [CenterBottomSerif x y length] : glyph-construction
+	include : create-stroke
 		:.start-from (x + length + globalTransform.yx * STROKE) y
 		:.set-width 0 STROKE
 		:.line-to (x - length + globalTransform.yx * STROKE) y
-		:.to-outline
+
+define [DownwardRightSerif x y length sw] : glyph-construction
+	include : dispiro
+		widths.rhs sw
+		flat x y [heading DOWNWARD]
+		curl x (y - length) [heading DOWNWARD]
+define [UpwardRightSerif x y length sw] : glyph-construction
+	include : dispiro
+		widths.lhs sw
+		flat x y [heading UPWARD]
+		curl x (y + length) [heading UPWARD]
+define [DownwardLeftSerif x y length sw] : glyph-construction
+	include : dispiro
+		widths.lhs sw
+		flat x y [heading DOWNWARD]
+		curl x (y - length) [heading DOWNWARD]
+define [UpwardLeftSerif x y length sw] : glyph-construction
+	include : dispiro
+		widths.rhs sw
+		flat x y [heading UPWARD]
+		curl x (y + length) [heading UPWARD]
+
+define sideSerifK 0.5
+define [AIVSerifs top _left _right] : glyph-construction
+	local left : fallback _left SB
+	local right : fallback _right RIGHTSB
+	if SLAB : begin
+		include : CenterTopSerif (left + STROKE * sideSerifK * CORRECTION_HX) top JUT
+		include : CenterTopSerif (right - STROKE * sideSerifK * CORRECTION_HX) top JUT
+define [AIHSerifs top _left _right] : glyph-construction
+	local left : fallback _left SB
+	local right : fallback _right RIGHTSB
+	if SLAB : begin
+		include : AIVSerifs top _left _right
+		include : CenterBottomSerif (left + STROKE * sideSerifK * CORRECTION_HX) 0 JUT
+		include : CenterBottomSerif (right - STROKE * sideSerifK * CORRECTION_HX) 0 JUT
+define [AINSerifs top _left _right] : glyph-construction
+	local left : fallback _left SB
+	local right : fallback _right RIGHTSB
+	if SLAB : begin
+		include : LeftwardTopSerif (left + STROKE * (sideSerifK - 0.5) * CORRECTION_HX) top SIDEJUT
+		include : CenterTopSerif (right - STROKE * sideSerifK * CORRECTION_HX) top JUT
+		include : CenterBottomSerif (left + STROKE * sideSerifK * CORRECTION_HX) 0 JUT
+		set currentGlyph.serifLB : last-contour
+		#include : CenterdBottomSerif (right - STROKE * (sideSerifK - 0.5) * CORRECTION_HX) 0 (JUT / 2)
+define [AIMSerifs top _left _right] : glyph-construction
+	local left : fallback _left SB
+	local right : fallback _right RIGHTSB
+	if SLAB : begin
+		include : LeftwardTopSerif (left + STROKE * (sideSerifK - 0.5) * CORRECTION_HX) top SIDEJUT
+		include : RightwardTopSerif (right - STROKE * (sideSerifK - 0.5) * CORRECTION_HX) top SIDEJUT
+		include : CenterBottomSerif (left + STROKE * sideSerifK * CORRECTION_HX) 0 JUT
+		include : CenterBottomSerif (right - STROKE * sideSerifK * CORRECTION_HX) 0 JUT
 
 
 define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _expansion _roundp] : begin

@@ -40,6 +40,9 @@ create-glyph 'p' : glyph-construction
 
 	include : oLeft
 	include : VBarLeft SB DESCENDER XH
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
+		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) DESCENDER JUT
 
 create-glyph 'b' : glyph-construction
 	set-width WIDTH
@@ -48,6 +51,9 @@ create-glyph 'b' : glyph-construction
 	
 	include : oLeft
 	include : VBarLeft SB 0 CAP
+	if SLAB : begin
+		include : LeftwardTopSerif SB CAP SIDEJUT
+		include : LeftwardBottomSerif SB 0 SIDEJUT
 
 create-glyph 'q' : glyph-construction
 	set-width WIDTH
@@ -56,6 +62,9 @@ create-glyph 'q' : glyph-construction
 	
 	include : oRight
 	include : VBarRight RIGHTSB DESCENDER XH
+	if SLAB : begin
+		include : RightwardTopSerif RIGHTSB XH SIDEJUT
+		include : CenterBottomSerif (RIGHTSB - HALFSTROKE * CORRECTION_HX) DESCENDER JUT
 
 create-glyph 'd' : glyph-construction
 	set-width WIDTH
@@ -64,6 +73,9 @@ create-glyph 'd' : glyph-construction
 	
 	include : oRight
 	include : VBarRight RIGHTSB 0 CAP
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		include : LeftwardTopSerif (RIGHTSB - STROKE * CORRECTION_HX) CAP SIDEJUT
 
 create-glyph 'g.doublestorey' : glyph-construction
 	set-width WIDTH
@@ -197,6 +209,8 @@ create-glyph 'a.upright' : glyph-construction
 		archv
 		flat   (RIGHTSB - STROKE * CORRECTION_HX) (SMALLSMOOTHB * 0.9) [widths 0 SHOULDERFINE]
 		curl   (RIGHTSB - STROKE * CORRECTION_HX) (SMALLSMOOTHB * 0.9 + 1)
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 
 create-glyph 'a.italic' : glyph-construction
 	set-width WIDTH
@@ -205,6 +219,9 @@ create-glyph 'a.italic' : glyph-construction
 	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 	include : oRight
 	include : VBarRight RIGHTSB 0 XH
+	
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 
 
 create-glyph 'a' : glyph-construction
@@ -224,14 +241,27 @@ create-glyph 'n' : glyph-construction
 	
 	include : nShoulder (SB + STROKE * CORRECTION_HX) RIGHTSB SHOULDERFINE
 	include : VBarLeft SB 0 XH
+	
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
+		if (para.italicangle > 0)
+		: then : include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		: else : include : CenterBottomSerif (RIGHTSB - HALFSTROKE * CORRECTION_HX) 0 JUT
+		set currentGlyph.serifRB : last-contour
+		if (para.italicangle === 0) : include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+		set currentGlyph.serifLB : last-contour
 
 create-glyph 'u' : glyph-construction
 	set-width WIDTH
 	assign-unicode 'u'
 	include eMarks
 	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
-	include glyphs.n
+	include glyphs.n false {'serifRB', 'serifLB'}
 	include : FlipAround MIDDLE (XH / 2)
+	
+	if SLAB : begin
+		include : LeftwardTopSerif (RIGHTSB - STROKE * CORRECTION_HX) XH SIDEJUT
+		include : LeftwardTopSerif SB XH SIDEJUT
 
 create-glyph 'h' : glyph-construction
 	set-width WIDTH
@@ -240,6 +270,14 @@ create-glyph 'h' : glyph-construction
 	
 	include : nShoulder (SB + STROKE * CORRECTION_HX) RIGHTSB SHOULDERFINE
 	include : VBarLeft SB 0 CAP
+	if SLAB : begin
+		include : LeftwardTopSerif SB CAP SIDEJUT
+		if (para.italicangle > 0)
+		: then : include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		: else : include : CenterBottomSerif (RIGHTSB - HALFSTROKE * CORRECTION_HX) 0 JUT
+		if (para.italicangle === 0) : begin
+			include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+			set currentGlyph.serifLB : last-contour
 
 define [SmallMShape top bot] : glyph-construction
 	local m1 : mix (SB + O) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) 0.5
@@ -247,6 +285,10 @@ define [SmallMShape top bot] : glyph-construction
 	include : mShoulderSpiro (SB + O + MVERTSTROKE * CORRECTION_HX) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) top bot MVERTSTROKE (MVERTSTROKE * 0.4)
 	include : mShoulderSpiro (MIDDLE + MVERTSTROKE * 0.5 * CORRECTION_HX) (RIGHTSB - O) top bot MVERTSTROKE (MVERTSTROKE * 0.5)
 	include : VBarLeft (SB + O) bot top MVERTSTROKE
+	if SLAB : begin
+		include : LeftwardTopSerif SB top SIDEJUT
+		if (para.italicangle === 0) : include : LeftwardBottomSerif SB bot SIDEJUT
+		include : RightwardBottomSerif RIGHTSB bot SIDEJUT
 
 create-glyph 'm' : glyph-construction
 	set-width WIDTH
@@ -263,12 +305,12 @@ create-glyph 'dotlessi.straight' : glyph-construction
 create-glyph 'dotlessi.hooky' : glyph-construction
 	dont-export
 	include glyphs.'dotlessi.straight' AS_BASE
-	include : leftwardTopSerif MIDDLE XH LONGJUT
+	include : LeftwardTopSerif MIDDLE XH LONGJUT
 
 create-glyph 'dotlessi.zshaped' : glyph-construction
 	dont-export
 	include glyphs.'dotlessi.hooky' AS_BASE
-	include : rightwardBottomSerif MIDDLE 0 LONGJUT
+	include : RightwardBottomSerif MIDDLE 0 LONGJUT
 
 create-glyph 'dotlessi.serifed' : glyph-construction
 	dont-export
@@ -276,9 +318,9 @@ create-glyph 'dotlessi.serifed' : glyph-construction
 	
 	local balance IBALANCE
 	include : VBar (MIDDLE + balance) 0 XH
-	include : leftwardTopSerif (MIDDLE + balance) XH (LONGJUT - balance)
-	include : rightwardBottomSerif MIDDLE 0 LONGJUT
-	include : leftwardBottomSerif MIDDLE 0 LONGJUT
+	include : LeftwardTopSerif (MIDDLE + balance) XH (LONGJUT - balance)
+	include : RightwardBottomSerif MIDDLE 0 LONGJUT
+	include : LeftwardBottomSerif MIDDLE 0 LONGJUT
 
 create-glyph 'dotlessi.italic' : glyph-construction
 	local left : [mix SB RIGHTSB 0.48] - HALFSTROKE * CORRECTION_HX
@@ -326,7 +368,7 @@ create-glyph 'dotlessj.serifed' : glyph-construction
 	dont-export
 	include pMarks
 	include glyphs.'dotlessj.straight' AS_BASE
-	include : leftwardTopSerif (MIDDLE + JBALANCE) XH LONGJUT
+	include : LeftwardTopSerif (MIDDLE + JBALANCE) XH LONGJUT
 
 
 select-variant 'dotlessj' 0x237 'serifed'
@@ -347,21 +389,21 @@ create-glyph 'l.hooky' : glyph-construction
 	include bMarks
 	dont-export
 	include : VBar MIDDLE 0 (CAP - STROKE)
-	include : leftwardTopSerif MIDDLE CAP LONGJUT
+	include : LeftwardTopSerif MIDDLE CAP LONGJUT
 
 create-glyph 'l.zshaped' : glyph-construction
 	include bMarks
 	dont-export
 	include glyphs.'l.hooky'
-	include : rightwardBottomSerif MIDDLE 0 LONGJUT
+	include : RightwardBottomSerif MIDDLE 0 LONGJUT
 
 create-glyph 'l.serifed' : glyph-construction
 	include bMarks
 	dont-export
 	local balance LBALANCE
 	include : VBar (MIDDLE + balance) 0 CAP
-	include : leftwardTopSerif (MIDDLE + balance) CAP (LONGJUT - balance)
-	include : centerBottomSerif MIDDLE 0 LONGJUT
+	include : LeftwardTopSerif (MIDDLE + balance) CAP (LONGJUT - balance)
+	include : CenterBottomSerif MIDDLE 0 LONGJUT
 	set this.barx (MIDDLE + balance)
 
 create-glyph 'l.italic' : glyph-construction
@@ -394,6 +436,7 @@ create-glyph 'x' : glyph-construction
 	
 	include : xStrand SB 0 RIGHTSB XH 0.02 0.4 0.14
 	include : xStrand SB XH RIGHTSB 0 0.02 0.4 0.14
+	include : AIHSerifs XH
 
 create-glyph 'v' : glyph-construction
 	set-width WIDTH
@@ -419,6 +462,10 @@ create-glyph 'y' : glyph-construction
 	
 	include : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
 	include : halfXStrand SB XH xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
+	
+	include : AIVSerifs XH
+	if SLAB : begin
+		include : LeftwardBottomSerif xbottom DESCENDER (SIDEJUT + JUT / 4)
 
 create-glyph 'z' : glyph-construction
 	set-width WIDTH
@@ -436,7 +483,9 @@ create-glyph 'z' : glyph-construction
 	reverse-last
 
 	include : HBarBottom SB RIGHTSB 0
-
+	if SLAB : begin
+		include : DownwardLeftSerif SB XH VJUT
+		include : UpwardRightSerif RIGHTSB 0 VJUT
 
 create-glyph 'k' : glyph-construction
 	set-width WIDTH
@@ -444,6 +493,11 @@ create-glyph 'k' : glyph-construction
 	include bMarks
 	include : VBarLeft SB 0 CAP
 	include : KShape XH
+	if SLAB : begin
+		include : LeftwardTopSerif SB CAP SIDEJUT
+		if (para.italicangle === 0) : begin
+			include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+			set currentGlyph.serifLB : last-contour
 
 
 ### s
@@ -482,6 +536,12 @@ create-glyph 'r' : glyph-construction
 		curl (rbar - fine * CORRECTION_HX) (XH - SMALLSMOOTHA - 1)
 	include : VBarLeft (SB + RBALANCE) 0 XH
 	set-anchor 'overlay' BASE rbar (XH * 0.5)
+	
+	if SLAB : begin
+		include : CenterBottomSerif (SB + RBALANCE + STROKE * 0.75 * CORRECTION_HX) 0 (JUT + HALFSTROKE / 2)
+		this.serifLB = [last-contour]
+		include : LeftwardTopSerif (SB + RBALANCE) XH SIDEJUT
+		this.serifLT = [last-contour]
 
 
 ### f
@@ -495,6 +555,9 @@ create-glyph 'longs.upright' : glyph-construction
 		flat (MIDDLE - FBALANCE) 0 [heading UPWARD]
 		curl (MIDDLE - FBALANCE) (CAP - FHOOK)
 		straight.right.end (MIDDLE - FBALANCE + HOOKX) (CAP - HALFSTROKE - fovershoot) [heading RIGHTWARD]
+	if SLAB : begin
+		include : CenterBottomSerif (MIDDLE - FBALANCE) 0 JUT
+		this.serifMB = [last-contour]
 
 define [LongSShape top bottom hookx hooky fine] : glyph-construction
 	local w [fallback fine STROKE]
@@ -519,8 +582,23 @@ create-glyph 'longs' : glyph-construction
 		then : include glyphs.'longs.italic' AS_BASE
 		else : include glyphs.'longs.upright' AS_BASE
 
+create-glyph 'f.slab' : glyph-construction
+	include bMarks
+	local barleft [mix SB RIGHTSB 0.24]
+	include : dispiro
+		widths.lhs
+		g4 RIGHTSB (CAP - HOOK * 0.7)
+		hookstart (CAP - O) true
+		flat barleft [CAP - SMOOTHA * 0.85]
+		curl barleft 0
+	include : HBarTop [mix SB RIGHTSB 0] [mix SB RIGHTSB 0.9] (XH * 0.95)
+	include : HBarBottom [mix SB RIGHTSB 0.02] [mix SB RIGHTSB 0.8] 0
+
 create-glyph 'f' : glyph-construction
 	set-width WIDTH
 	assign-unicode 'f'
-	include glyphs.longs AS_BASE
-	include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
+	if (SLAB && para.italicangle === 0)
+	: then : include glyphs.'f.slab' AS_BASE
+	: else : begin
+		include glyphs.longs AS_BASE
+		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH

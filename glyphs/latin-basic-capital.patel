@@ -20,6 +20,8 @@ define [VShape top] : glyph-construction
 		curl RIGHTSB (top * 0.9) [heading DOWNWARD]
 		quadcontrols 0 0.3 6 unimportant
 		g4   (MIDDLE + HALFSTROKE * CORRECTION_HX) 0 [widths.rhs VShape.fine]
+	
+	include : AIVSerifs top
 set VShape.fine (STROKE * 0.8)
 
 create-glyph 'V' : glyph-construction
@@ -76,6 +78,7 @@ define [WShape top] : glyph-construction
 		curl RIGHTSB (top * 0.75) [heading DOWNWARD]
 		quadcontrols 0 0.3 6 unimportant
 		g4   (WShape.m2 + WShape.fine / 2 * CORRECTION_HX) 0 [widths.rhs (WShape.fine * 0.8)]
+	include : AIVSerifs top
 set WShape.fine : adviceBlackness 6
 set WShape.m1 : WIDTH * 0.325
 set WShape.m2 : WIDTH * 0.675
@@ -93,12 +96,16 @@ create-glyph 'X' : glyph-construction
 	
 	include : xStrand SB 0 RIGHTSB CAP 0.1 0.4 0.28
 	include : xStrand SB CAP RIGHTSB 0 0.1 0.4 0.28
+	include : AIHSerifs CAP
 
 define [YShape top bot] : glyph-construction
 	local cross : mix [fallback bot 0] top 0.4
 	include : halfXStrand SB top MIDDLE cross 0.1 0.4 0.28
 	include : halfXStrand RIGHTSB top MIDDLE cross 0.1 0.4 0.28
 	include : VBar MIDDLE [fallback bot 0] (cross + HALFSTROKE)
+	include : AIVSerifs top
+	if SLAB : begin
+		include : CenterBottomSerif MIDDLE [fallback bot 0] JUT
 
 create-glyph 'Y' : glyph-construction
 	set-width WIDTH
@@ -114,14 +121,17 @@ define [KShape top] : glyph-construction
 	
 	local fine : adviceBlackness 3.5
 	include : dispiro
-		g4.down.start (RIGHTSB + O) top [widths.heading 0 (STROKE * 1.05 * (WIDTH * 2 / UPM)) DOWNWARD]
+		g4.down.start (RIGHTSB + O - [if SLAB (JUT / 4) 0]) top [widths.heading 0 (STROKE * 1.05 * (WIDTH * 2 / UPM)) DOWNWARD]
 		bezcontrols 0 0.2 0.5 0.65 8
 		g4 (SB + STROKE) attach [widths 0 fine]
 	include : dispiro
 		widths.center
-		g4.up.start (RIGHTSB - HALFSTROKE) 0 [heading UPWARD]
+		g4.up.start (RIGHTSB - HALFSTROKE - [if SLAB (JUT / 4) 0]) 0 [heading UPWARD]
 		quadcontrols 0 0.3 8
 		g4 attach2 (top * 0.61) [widths.center fine]
+	if SLAB : begin
+		include : RightwardTopSerif (RIGHTSB + O - JUT / 4) top (SIDEJUT + O)
+		include : RightwardBottomSerif (RIGHTSB - JUT / 4) 0 SIDEJUT
 
 create-glyph 'K' : glyph-construction
 	set-width WIDTH
@@ -129,7 +139,9 @@ create-glyph 'K' : glyph-construction
 	include capitalMarks	
 	include : VBarLeft SB 0 CAP
 	include : KShape CAP
-
+	if SLAB : begin
+		include : CenterTopSerif (SB + HALFSTROKE * CORRECTION_HX) CAP JUT
+		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
 
 ### B D P R
 define [BShape top] : glyph-construction
@@ -137,26 +149,34 @@ define [BShape top] : glyph-construction
 	
 	local turntop : (top - (bowl - STROKE)) * 0.5
 	local turnbottom : bowl * 0.45
+	
+	local barleft SB
 
 	include : dispiro
 		widths.rhs
-		flat (SB - O) top [heading RIGHTWARD]
+		flat (barleft - O) top [heading RIGHTWARD]
 		curl (RIGHTSB - SB * 0.5 - turntop - CORRECTION_OMIDS) top
 		archv
 		g4 (RIGHTSB - SB * 0.5 - O) [mix top (bowl - STROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))]
 		arcvh
 		flat (RIGHTSB - SB * 0.5 - turntop + CORRECTION_OMIDS) (bowl - STROKE)
-		curl (SB - O) (bowl - STROKE) [heading LEFTWARD]
+		curl (barleft - O) (bowl - STROKE) [heading LEFTWARD]
 	include : dispiro
 		widths.rhs
-		flat (SB - O) bowl [heading RIGHTWARD]
+		flat (barleft - O) bowl [heading RIGHTWARD]
 		curl (RIGHTSB - turnbottom - CORRECTION_OMIDS) bowl
 		archv
 		g4 (RIGHTSB - O) [mix bowl 0 (SMOOTHB / (SMOOTHA + SMOOTHB))]
 		arcvh
 		flat (RIGHTSB - turnbottom + CORRECTION_OMIDS) 0
-		curl (SB - O) 0 [heading LEFTWARD]
-	include : VBarLeft SB 0 top
+		curl (barleft - O) 0 [heading LEFTWARD]
+	include : VBarLeft barleft 0 top
+	if SLAB : begin
+		include : LeftwardTopSerif barleft top SIDEJUT
+		this.serifLT = [last-contour]
+		include : LeftwardBottomSerif barleft 0 SIDEJUT
+		this.serifLB = [last-contour]
+
 
 create-glyph 'B' : glyph-construction
 	set-width WIDTH
@@ -173,18 +193,25 @@ create-glyph 'D' : glyph-construction
 	local dsmooth : Math.min (CAP * 0.499) (SMOOTH * 1.35)
 	local bsmooth (SMOOTH * 1.1)
 	
-	include : VBarLeft SB 0 CAP
+	local barleft SB
+	
+	include : VBarLeft barleft 0 CAP
 	
 	include : dispiro
 		widths.rhs
-		flat (SB - O) CAP [heading RIGHTWARD]
+		flat (barleft - O) CAP [heading RIGHTWARD]
 		curl (RIGHTSB - bsmooth) CAP
 		archv
 		flat RIGHTSB (CAP - dsmooth - (SMOOTHB - SMOOTH))
 		curl RIGHTSB (dsmooth + (SMOOTHA - SMOOTH))
 		arcvh
 		flat (RIGHTSB - bsmooth) 0
-		curl (SB - O) 0 [heading LEFTWARD]
+		curl (barleft - O) 0 [heading LEFTWARD]
+	if SLAB : begin
+		include : LeftwardTopSerif barleft CAP SIDEJUT
+		this.serifLT = [last-contour]
+		include : LeftwardBottomSerif barleft 0 SIDEJUT
+		this.serifLB = [last-contour]
 
 define [PShape top _mul bp] : glyph-construction
 	local mul : fallback _mul 1.25
@@ -203,16 +230,22 @@ define [PShape top _mul bp] : glyph-construction
 		flat (RIGHTSB - turnRadius + CORRECTION_OMIDS) bowlBottom
 		curl (SB * mul - O) bowlBottom [heading LEFTWARD]
 	include : VBarLeft (SB * mul) 0 top
+	if SLAB : begin
+		include : LeftwardTopSerif (SB * mul) top SIDEJUT
+		this.serifLT = [last-contour]
+		include : CenterBottomSerif (SB * mul + HALFSTROKE * CORRECTION_HX) 0 JUT
 
 define [RShape top] : glyph-construction
 	include : PShape top 1
 	local TURN (XH * 0.1)
-	local right (RIGHTSB - O)
+	local right (RIGHTSB - O - [if SLAB (JUT / 4) 0])
 	include : dispiro
 		widths.center
 		g4.up.start (right - HALFSTROKE) 0 [heading UPWARD]
 		quadcontrols 0 0.4 8
 		g4 MIDDLE ((top - STROKE) * PBARPOS)
+	if SLAB : begin
+		include : RightwardBottomSerif (RIGHTSB - JUT / 4) 0 (SIDEJUT + JUT / 4)
 
 create-glyph 'P' : glyph-construction
 	set-width WIDTH
@@ -301,6 +334,7 @@ define [UShape top bottom stroke] : glyph-construction
 		archv
 		flat RIGHTSB (bottom + SMOOTHA)
 		curl RIGHTSB top [heading UPWARD]
+	include : AIVSerifs top
 
 create-glyph 'U' : glyph-construction
 	set-width WIDTH
@@ -312,7 +346,12 @@ create-glyph 'U' : glyph-construction
 define [FShape top y] : glyph-construction
 	include : VBarLeft (SB * 1.5) 0 [fallback top CAP]
 	include : HBarTop (SB * 1.5 - O) RIGHTSB [fallback top CAP]
-	include : HBar (SB * 1.5 - O) (RIGHTSB - HALFSTROKE) ([fallback top CAP] * [fallback y 0.54])
+	include : HBar (SB * 1.5 - O) (RIGHTSB - [if SLAB (STROKE * 0.75) HALFSTROKE]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]])
+	if SLAB : begin
+		include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SIDEJUT
+		include : CenterBottomSerif (SB * 1.5 + HALFSTROKE * CORRECTION_HX) 0 JUT
+		set currentGlyph.serifBottom : last-contour
+		include : DownwardRightSerif RIGHTSB [fallback top CAP] VJUT
 
 create-glyph 'F' : glyph-construction
 	set-width WIDTH
@@ -323,6 +362,9 @@ create-glyph 'F' : glyph-construction
 define [EShape top] : glyph-construction
 	include : FShape top
 	include : HBarBottom (SB * 1.5 - O) RIGHTSB 0
+	if SLAB : begin
+		include : LeftwardBottomSerif (SB * 1.5) 0 SIDEJUT
+		include : UpwardRightSerif RIGHTSB 0 VJUT
 
 create-glyph 'E' : glyph-construction
 	set-width WIDTH
@@ -334,6 +376,7 @@ define [HShape top] : glyph-construction
 	include : VBarLeft SB 0 top
 	include : VBarRight RIGHTSB 0 top
 	include : HBar (SB - O) (RIGHTSB + O) (top * BARPOS)
+	include : AIHSerifs top
 
 create-glyph 'H' : glyph-construction
 	set-width WIDTH
@@ -344,6 +387,10 @@ create-glyph 'H' : glyph-construction
 define [LShape top] : glyph-construction
 	include : VBarLeft (SB * 1.5) 0 top
 	include : HBarBottom (SB * 1.5 - O) RIGHTSB 0
+	if SLAB : begin
+		include : LeftwardBottomSerif (SB * 1.5) 0 SIDEJUT
+		include : CenterTopSerif (SB * 1.5 + CORRECTION_HX * HALFSTROKE) top JUT
+		include : UpwardRightSerif RIGHTSB 0 VJUT
 
 create-glyph 'L' : glyph-construction
 	set-width WIDTH
@@ -384,6 +431,12 @@ create-glyph 'T' : glyph-construction
 	set-anchor 'bottomright' BASE (MIDDLE + HALFSTROKE * CORRECTION_HX) 0
 	include : VBar MIDDLE 0 CAP
 	include : HBarTop SB RIGHTSB CAP
+	if SLAB : begin
+		include : DownwardRightSerif RIGHTSB CAP VJUT MVERTSTROKE
+		this.serifRT = [last-contour]
+		include : DownwardLeftSerif SB CAP VJUT MVERTSTROKE
+		this.serifLT = [last-contour]
+		include : CenterBottomSerif MIDDLE 0 JUT
 
 
 create-glyph 'Z' : glyph-construction
@@ -402,6 +455,10 @@ create-glyph 'Z' : glyph-construction
 	reverse-last
 	
 	include : HBarBottom SB RIGHTSB 0
+	
+	if SLAB : begin
+		include : DownwardLeftSerif SB CAP VJUT
+		include : UpwardRightSerif RIGHTSB 0 VJUT
 
 
 ### J
@@ -450,7 +507,7 @@ create-glyph 'J.serifed' : glyph-construction
 	set-width WIDTH
 	dont-export
 	include glyphs.'J.straight' AS_BASE
-	include : leftwardTopSerif (RIGHTSB - HALFSTROKE * CORRECTION_HX - JBALANCE2) CAP LONGJUT
+	include : LeftwardTopSerif (RIGHTSB - HALFSTROKE * CORRECTION_HX - JBALANCE2) CAP LONGJUT
 
 select-variant 'J' 'J' 'serifed'
 
@@ -471,6 +528,7 @@ define [NShape top left right coward diagcoward] : glyph-construction
 	include : dispiro
 		flat (left + halftopstroke) top [widths.heading topstroke 0 DOWNWARD]
 		curl (right - halftopstroke) 0 [widths.heading 0 topstroke DOWNWARD]
+	include : AINSerifs top left right
 
 create-glyph 'N' : glyph-construction
 	set-width WIDTH
@@ -496,6 +554,7 @@ define [MShape top] : glyph-construction
 	include : dispiro
 		flat (RIGHTSB - halftopstroke) top [widths.heading 0 topstroke DOWNWARD]
 		curl MIDDLE (top * 0.3) [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
+	include : AIMSerifs top
 
 create-glyph 'M' : glyph-construction
 	set-width WIDTH

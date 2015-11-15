@@ -88,12 +88,13 @@ define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin
 
 Glyph.prototype.cubicTo = Glyph.prototype.cubic-to
 define [Glyph.prototype.reverse-last] : begin
-	this.contours.(this.contours.length - 1) = [this.contours.(this.contours.length - 1).reverse]
+	if [this.contours && this.contours.(this.contours.length - 1)] : begin
+		this.contours.(this.contours.length - 1) = [this.contours.(this.contours.length - 1).reverse]
 
 define [Glyph.prototype.put-shapes contours] : begin
 	local t this.gizmo
 	set this.gizmo id
-	foreach contour [items-of contours] : begin
+	foreach contour [items-of contours] : if contour : begin
 		this.start-from contour.0.x contour.0.y
 		for [local j 1] (j < contour.length) [inc j] : begin
 			local point contour.(j)
@@ -106,7 +107,7 @@ define [Glyph.prototype.put-shapes contours] : begin
 	set this.gizmo t
 	return this
 
-define [Glyph.prototype.include component copyAnchors] : begin
+define [Glyph.prototype.include component copyAnchors quenches] : begin
 	local glyph : match component
 		[aFunction it] : return : component.call this
 		[Stroke.is it]   {.contours [component.to-outline]}
@@ -116,6 +117,7 @@ define [Glyph.prototype.include component copyAnchors] : begin
 	local transform {.x 0 .y 0 .xx 1 .yy 1 .xy 0 .yx 0}
 	local shiftx 0
 	local shifty 0
+	local t this
 	if (this.anchors && glyph.anchors) : foreach markid [items-of [Object.keys this.anchors]] : begin
 		local anchorThis this.anchors.(markid)
 		local anchorThat glyph.anchors.(markid)
@@ -145,8 +147,10 @@ define [Glyph.prototype.include component copyAnchors] : begin
 	set transform.x : transform.x + shiftx
 	set transform.y : transform.y + shifty
 	if contours : begin
-		this.put-shapes : contours.map : function [contour]
-			contour.map : function [point] : tp transform point
+		this.put-shapes : contours.map : function [contour] : begin
+			if quenches : foreach [tag : items-of quenches] : begin
+				if [component.(tag) === contour] : return null
+			return : contour.map : function [point] : tp transform point
 	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
 		foreach k [items-of keys] [set a.(k) anchors.(k)]
 		* a
