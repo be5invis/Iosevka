@@ -7,13 +7,10 @@ GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-
 OBJDIR = build
 FILES = $(SUPPORT_FILES) buildglyphs.js
 
-ifeq ($(OS),Windows_NT)
-NODE = node.exe
-else
-NODE = node
-endif
-
+# Change this when an error reports
+# On windows, maybe `2> NUL`.
 SUPPRESS_ERRORS = 2> /dev/null
+NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
@@ -32,6 +29,7 @@ PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
 PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
 fonts : update $(TARGETS)
+	
 fdts : $(FDTS)
 	
 # Pass 0 : file construction

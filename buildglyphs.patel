@@ -1,6 +1,3 @@
-define fs : require 'fs'
-define path : require 'path'
-
 define Glyph [require './support/glyph'].Glyph
 define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
@@ -9,8 +6,6 @@ define inverse [require './support/transform'].inverse
 
 define libspiro : require 'libspiro-js'
 define SpiroExpansionContext [require './support/spiroexpand'].SpiroExpansionContext
-
-define toml : require 'toml'
 
 ### COMMON FUNCTIONS
 define [mix a b p] : a + (b - a) * p
@@ -22,11 +17,11 @@ define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg
 	linreg x0 z01 x1 z11 x
 	* y
 define [clamp l h x] : if (x < l) l : if (x > h) h x
-
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 
+define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
+
 # Empty font base file
-define emptyFontStr : fs.readFileSync : path.join [path.dirname require.main.filename] 'emptyfont.toml'
 
 define-macro $$include : syntax-rules
 	{'$$include' {'.quote' file}} : begin
@@ -44,7 +39,7 @@ define-macro $$include : syntax-rules
 
 define [buildFont para recursive] : begin
 	define variantSelector para.variantSelector
-	define font : toml.parse emptyFontStr
+	define font this
 	
 	define glyphList font.glyf
 	define glyphs {.}
@@ -252,8 +247,10 @@ define [buildFont para recursive] : begin
 		`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
 	define-macro reverse-last : syntax-rules
 		`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
-	define-macro last-contour : syntax-rules
-		`[last-contour] {'.syntactic-closure' `(currentGlyph.contours.(currentGlyph.contours.length - 1)) env}
+	define-macro eject-contour : syntax-rules
+		`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
+	define-macro tag-contour : syntax-rules
+		`[tag-contour @name] {'.syntactic-closure' `(currentGlyph.contours.(currentGlyph.contours.length - 1).tag = @name) env}
 	define-macro dont-export : syntax-rules
 		`[dont-export] {".syntactic-closure" `[set currentGlyph.dontExport true] env}
 	define-macro assign-unicode : syntax-rules
@@ -263,10 +260,17 @@ define [buildFont para recursive] : begin
 		] env}
 	# The macro [glyph-construction] creates a function which builds a glyph.
 	define-macro glyph-construction : syntax-rules
-		`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
+		`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [_args] [begin \\
+			local glyphArguments : fallback _args {.}
 			local currentGlyph this
 			currentGlyph.gizmo = globalTransform
+			
+			local _tag currentGlyph.defaultTag
+			if glyphArguments.tag : set currentGlyph.defaultTag glyphArguments.tag
+			
 			begin @::[steps.map formOf]
+			
+			set currentGlyph.defaultTag _tag
 			return nothing
 		]] env}
 	
@@ -291,11 +295,11 @@ define [buildFont para recursive] : begin
 			foreach d [items-of glyphObject.dependencies] : begin
 				local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(d)))
 				dependencyProfile.(name) = [dependencyProfile.(name).concat dependencyProfile.(d) allAliases]
-			# if [not recursive] : process.stdout.write "Built Glyph /\(name).\n"
+			# process.stderr.write "\[if recursive 'Recursive ' '']Built Glyph /\(name).\n"
 			return glyphObject
 		true : begin
 			local actions arguments.0
-			local glyphObject [new Glyph ('.temp-' + [set nTemp [inc nTemp]])]
+			local glyphObject [new Glyph ('.temp-' + [set nTemp (nTemp + 1)])]
 			glyphObject.set-width WIDTH
 			actions.call glyphObject
 			return glyphObject
@@ -470,6 +474,11 @@ define [buildFont para recursive] : begin
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k this
 		libspiro.spiroToBezierOnContext knots closed this
 		foreach af [items-of lastafs] : if af : af.call this
+	
+	# contour tagging
+	define [tagged tag fn] : lambda [_args] : begin
+		local args : if _args [begin [local a : Object.create _args] [set a.tag tag] a] {.tag tag}
+		return : fn.call this args
 	
 	###### HERE WE GO!
 	

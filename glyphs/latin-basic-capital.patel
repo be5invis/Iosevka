@@ -20,7 +20,7 @@ define [VShape top] : glyph-construction
 		curl RIGHTSB (top * 0.9) [heading DOWNWARD]
 		quadcontrols 0 0.3 6 unimportant
 		g4   (MIDDLE + HALFSTROKE * CORRECTION_HX) 0 [widths.rhs VShape.fine]
-	
+	tag-contour 'strokeUp'
 	include : AIVSerifs top
 set VShape.fine (STROKE * 0.8)
 
@@ -102,6 +102,7 @@ define [YShape top bot] : glyph-construction
 	local cross : mix [fallback bot 0] top 0.4
 	include : halfXStrand SB top MIDDLE cross 0.1 0.4 0.28
 	include : halfXStrand RIGHTSB top MIDDLE cross 0.1 0.4 0.28
+	tag-contour 'strokeRT'
 	include : VBar MIDDLE [fallback bot 0] (cross + HALFSTROKE)
 	include : AIVSerifs top
 	if SLAB : begin
@@ -173,9 +174,9 @@ define [BShape top] : glyph-construction
 	include : VBarLeft barleft 0 top
 	if SLAB : begin
 		include : LeftwardTopSerif barleft top SIDEJUT
-		this.serifLT = [last-contour]
+		tag-contour 'serifLT'
 		include : LeftwardBottomSerif barleft 0 SIDEJUT
-		this.serifLB = [last-contour]
+		tag-contour 'serifLB'
 
 
 create-glyph 'B' : glyph-construction
@@ -209,9 +210,9 @@ create-glyph 'D' : glyph-construction
 		curl (barleft - O) 0 [heading LEFTWARD]
 	if SLAB : begin
 		include : LeftwardTopSerif barleft CAP SIDEJUT
-		this.serifLT = [last-contour]
+		tag-contour 'serifLT'
 		include : LeftwardBottomSerif barleft 0 SIDEJUT
-		this.serifLB = [last-contour]
+		tag-contour 'serifLB'
 
 define [PShape top _mul bp] : glyph-construction
 	local mul : fallback _mul 1.25
@@ -232,7 +233,7 @@ define [PShape top _mul bp] : glyph-construction
 	include : VBarLeft (SB * mul) 0 top
 	if SLAB : begin
 		include : LeftwardTopSerif (SB * mul) top SIDEJUT
-		this.serifLT = [last-contour]
+		tag-contour 'serifLT'
 		include : CenterBottomSerif (SB * mul + HALFSTROKE * CORRECTION_HX) 0 JUT
 
 define [RShape top] : glyph-construction
@@ -351,7 +352,7 @@ define [FShape top y] : glyph-construction
 	if SLAB : begin
 		include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SIDEJUT
 		include : CenterBottomSerif (SB * 1.5 + HALFSTROKE * CORRECTION_HX) 0 JUT
-		set currentGlyph.serifBottom : last-contour
+		tag-contour 'serifBottom'
 		include : DownwardRightSerif RIGHTSB [fallback top CAP] VJUT
 
 create-glyph 'F' : glyph-construction
@@ -425,19 +426,22 @@ create-glyph 'I.serifed' : glyph-construction
 
 select-variant 'I' 'I' 'serifed'
 
+define [TShape top] : glyph-construction
+	include : VBar MIDDLE 0 top
+	include : HBarTop SB RIGHTSB top
+	if SLAB : begin
+		include : DownwardRightSerif RIGHTSB top VJUT MVERTSTROKE
+		tag-contour 'serifRT'
+		include : DownwardLeftSerif SB top VJUT MVERTSTROKE
+		tag-contour 'serifLT'
+		include : CenterBottomSerif MIDDLE 0 JUT
+
 create-glyph 'T' : glyph-construction
 	set-width WIDTH
 	assign-unicode 'T'
 	include capitalMarks
 	set-anchor 'bottomright' BASE (MIDDLE + HALFSTROKE * CORRECTION_HX) 0
-	include : VBar MIDDLE 0 CAP
-	include : HBarTop SB RIGHTSB CAP
-	if SLAB : begin
-		include : DownwardRightSerif RIGHTSB CAP VJUT MVERTSTROKE
-		this.serifRT = [last-contour]
-		include : DownwardLeftSerif SB CAP VJUT MVERTSTROKE
-		this.serifLT = [last-contour]
-		include : CenterBottomSerif MIDDLE 0 JUT
+	include : TShape CAP
 
 
 create-glyph 'Z' : glyph-construction
@@ -456,10 +460,12 @@ create-glyph 'Z' : glyph-construction
 	reverse-last
 	
 	include : HBarBottom SB RIGHTSB 0
+	tag-contour 'strokeBottom'
 	
 	if SLAB : begin
 		include : DownwardLeftSerif SB CAP VJUT
 		include : UpwardRightSerif RIGHTSB 0 VJUT
+		tag-contour 'serifRB'
 
 
 ### J

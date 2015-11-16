@@ -32,6 +32,7 @@ define [Glyph name] : begin
 		.y 0
 	}
 	set this.dependencies {}
+	set this.defaultTag null
 	return nothing
 
 define Glyph.is {.unapply [function [obj arity] [if (obj <@ Glyph) {obj} null]]}
@@ -98,13 +99,24 @@ define [Glyph.prototype.put-shapes contours] : begin
 		this.start-from contour.0.x contour.0.y
 		for [local j 1] (j < contour.length) [inc j] : begin
 			local point contour.(j)
-			if point.cubic [begin \\
-					local p2 contour.((j + 1))
-					local p3 contour.((j + 2))
-					this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
-					j = j + 2
-				] [if point.onCurve [this.line-to point.x point.y] [this.curve-control point.x point.y]]
+			if point.cubic
+			: then : begin
+				local p2 contour.((j + 1))
+				local p3 contour.((j + 2))
+				this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
+				j = j + 2
+			: else : if point.onCurve [this.line-to point.x point.y] [this.curve-control point.x point.y]
+		this.tag-contour [fallback contour.tag this.defaultTag]
 	set this.gizmo t
+	return this
+
+define [Glyph.prototype.tag-contour tag n] : begin
+	if this.contours : begin
+		local lastContour this.contours.(this.contours.length - 1)
+		if lastContour : if tag : set lastContour.tag tag
+	return this
+define [Glyph.prototype.eject-contour tag] : begin
+	set this.contours : this.contours.filter : lambda [c] (c.tag !== tag)
 	return this
 
 define [Glyph.prototype.include component copyAnchors quenches] : begin
@@ -149,8 +161,11 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 	if contours : begin
 		this.put-shapes : contours.map : function [contour] : begin
 			if quenches : foreach [tag : items-of quenches] : begin
-				if [component.(tag) === contour] : return null
-			return : contour.map : function [point] : tp transform point
+				if [contour.tag === tag] : return null
+			return : begin
+				local r : contour.map : function [point] : tp transform point
+				set r.tag contour.tag
+				* r
 	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
 		foreach k [items-of keys] [set a.(k) anchors.(k)]
 		* a
@@ -160,7 +175,9 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 
 define [Glyph.prototype.apply-transform transform alsoAnchors] : begin
 	set this.contours : this.contours.map : function [contour] : begin
-		return : contour.map : function [point] [tp transform point]
+		local c : contour.map : function [point] [tp transform point]
+		set c.tag contour.tag
+		return c
 	if alsoAnchors : foreach key [items-of [Object.keys this.anchors]] : begin
 		local thisanchor this.anchors.(key)
 		local newanchor {.type thisanchor.type}
