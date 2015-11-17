@@ -12,6 +12,21 @@ var CompactPicker = Vue.component('compact-picker', {
 		}
 	}
 });
+var CompactToggle = Vue.component('compact-toggle', {
+	template: '#compact-toggle-template',
+	props: {
+		label: String,
+		on: Boolean
+	},
+	data: {},
+	methods: {
+		toggle: function(){
+			this.on = !this.on
+			console.log(this.on)
+			return false;
+		}
+	}
+});
 var CodeSnippet = Vue.component('snippet', {
 	template: '#code-snippet-template',
 	props: {
@@ -27,8 +42,9 @@ var codeArea = new Vue({
 	data: {
 		themes: ['light', 'dark'],
 		snippets: [],
-		snippet: 'javascript',
-		theme: 'dark'
+		snippet: 'js',
+		theme: 'dark',
+		isSlab: false
 	}
 });
 codeArea.snippets = codeArea.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
