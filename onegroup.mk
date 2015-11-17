@@ -43,7 +43,7 @@ $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(FILES) | $(OBJDIR)
 	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  x-bolditalic $(STYLE_ITALIC) $(STYLE_X_BOLDITALIC)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
-	$(NODE) extract --upm 16000 --uprightify 1 --ttf $@ $<
+	$(NODE) extract --upm 12800 --uprightify 1 --ttf $@ $<
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
 	$(NODE) extract --feature $@ $<
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
@@ -91,32 +91,37 @@ ARCHIVEDIR = release-archives
 RELEASES = $(subst $(OBJDIR)/,$(RELEASEDIR)/,$(TARGETS))
 $(RELEASES) : $(RELEASEDIR)/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
-PAGESTTF = $(subst $(OBJDIR)/,pages/assets/,$(TARGETS))
-$(PAGESTTF) : pages/assets/%.ttf : $(OBJDIR)/%.ttf
+
+PAGEDIR = pages/assets
+PAGESTTF = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(TARGETS))
+$(PAGESTTF) : $(PAGEDIR)/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
 PAGESWOFF = $(subst .ttf,.woff,$(PAGESTTF))
-$(PAGESWOFF) : pages/assets/%.woff : pages/assets/%.ttf
+$(PAGESWOFF) : $(PAGEDIR)/%.woff : $(PAGEDIR)/%.ttf
 	sfnt2woff $<
-PAGESMAPS = $(subst $(OBJDIR)/,pages/assets/,$(MAPS))
-$(PAGESMAPS) : pages/assets/%.charmap : $(OBJDIR)/%.charmap
+PAGESMAPS = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(MAPS))
+$(PAGESMAPS) : $(PAGEDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
-$(ARCHIVEDIR)/$(PREFIX).tar.bz2 : $(TARGETS)
+
+$(ARCHIVEDIR)/$(PREFIX)-$(VERSION).tar.bz2 : $(TARGETS)
 	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
-$(ARCHIVEDIR)/$(PREFIX).zip : $(TARGETS)
+$(ARCHIVEDIR)/$(PREFIX)-$(VERSION).zip : $(TARGETS)
 	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
-archives : $(ARCHIVEDIR)/$(PREFIX).tar.bz2 $(ARCHIVEDIR)/$(PREFIX).zip
+
+archives : $(ARCHIVEDIR)/$(PREFIX)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(PREFIX)-$(VERSION).zip
 pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
 release : $(RELEASES) archives pages
 
 # testdrive
-TESTTTF = $(subst $(OBJDIR)/,testdrive/,$(TARGETS))
-$(TESTTTF) : testdrive/%.ttf : $(OBJDIR)/%.ttf
+TESTDIR = testdrive/assets
+TESTTTF = $(subst $(OBJDIR)/,$(TESTDIR)/,$(TARGETS))
+$(TESTTTF) : $(TESTDIR)/%.ttf : $(OBJDIR)/%.ttf
 	cp $< $@
 TESTWOFF = $(subst .ttf,.woff,$(TESTTTF))
-$(TESTWOFF) : testdrive/%.woff : testdrive/%.ttf
+$(TESTWOFF) : $(TESTDIR)/%.woff : $(TESTDIR)/%.ttf
 	sfnt2woff $<
-TESTMAPS = $(subst $(OBJDIR)/,testdrive/,$(MAPS))
-$(TESTMAPS) : testdrive/%.charmap : $(OBJDIR)/%.charmap
+TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(MAPS))
+$(TESTMAPS) : $(TESTDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
 test : $(TESTTTF) $(TESTWOFF) $(TESTMAPS)
