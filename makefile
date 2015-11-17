@@ -2,10 +2,10 @@ OBJDIR = build
 SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 FILES = $(SUPPORT_FILES) buildglyphs.js
-PARAM_DEFAULT = FAST='$(FAST)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
-PARAM_SLAB = FAST='$(FAST)' VARIANTNAME='-slab$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
-PARAM_CC   = FAST='$(FAST)' VARIANTNAME='cc$(VARIANTNAME)' STYLE_COMMON='cc $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
-PARAM_CC_SLAB = FAST='$(FAST)' VARIANTNAME='cc-slab$(VARIANTNAME)' STYLE_COMMON='cc slab x-cc-slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
+PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
+PARAM_SLAB = FAST='$(FAST)' SUFFIX='-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
+PARAM_CC   = FAST='$(FAST)' SUFFIX='cc' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='cc $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
+PARAM_CC_SLAB = FAST='$(FAST)' SUFFIX='cc-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='cc slab x-cc-slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 ifeq ($(OS),Windows_NT)
@@ -90,9 +90,9 @@ archives-cc-slab : fonts-cc-slab
 releasepack-default : $(FILES) | $(OBJDIR)
 	$(MAKE) pages release VERSION=$(VERSION)
 releasepack-hooky : $(FILES) | $(OBJDIR)
-	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='-hooky' STYLE_UPRIGHT='v-l-hooky v-i-hooky'
+	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky'
 releasepack-zshaped : $(FILES) | $(OBJDIR)
-	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='-zshaped' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
+	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
 release-all : releasepack-default releasepack-hooky releasepack-zshaped
 
 $(SUPPORT_FILES) :
