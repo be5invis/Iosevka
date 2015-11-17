@@ -63,8 +63,8 @@ $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(O
 	fontforge -quiet -script $^ $@ $(TARGETUPM)
 $(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
 	@$(NODE) $^ $@.a.ttf
-	@ttx -o $@.a.ttx $@.a.ttf
-	@ttx -o $@ $@.a.ttx
+	@ttx -q -o $@.a.ttx $@.a.ttf
+	@ttx -q -o $@ $@.a.ttx
 	@rm $@.a.ttf $@.a.ttx
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
 	ttfautohint $< $@
@@ -105,7 +105,8 @@ $(ARCHIVEDIR)/$(PREFIX).tar.bz2 : $(TARGETS)
 $(ARCHIVEDIR)/$(PREFIX).zip : $(TARGETS)
 	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
 archives : $(ARCHIVEDIR)/$(PREFIX).tar.bz2 $(ARCHIVEDIR)/$(PREFIX).zip
-release : archives $(RELEASES) $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
+pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
+release : $(RELEASES) archives pages
 
 # testdrive
 TESTTTF = $(subst $(OBJDIR)/,testdrive/,$(TARGETS))

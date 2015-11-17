@@ -53,8 +53,6 @@ test-cc-slab : fonts-cc-slab
 	@$(MAKE) -s -f onegroup.mk test $(PARAM_CC_SLAB)
 
 
-
-
 $(SUPPORT_FILES) :
 	patel-c --strict $< -o $@
 
