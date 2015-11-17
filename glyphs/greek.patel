@@ -18,25 +18,31 @@ alias 'Chi' 0x3A7 'X'
 alias 'omicron' 0x3BF 'o'
 
 # Capital
-define [LambdaShape STROKE] : glyph-construction
+define [LambdaShape sw] : glyph-construction
 	local TURN (CAP * 0.1)
 	local curviness 0.2
 	include : dispiro
-		widths.rhs STROKE
+		widths.rhs sw
 		flat SB 0    [heading UPWARD]
 		curl SB TURN [heading UPWARD]
 		quadcontrols 0 curviness
-		g4   (MIDDLE - STROKE / 2) CAP [widths 0 (STROKE * 0.8)]
+		g4   (MIDDLE - sw / 2) CAP [widths 0 (sw * 0.8)]
 	include : dispiro
-		widths.lhs STROKE
+		widths.lhs sw
 		flat RIGHTSB 0    [heading UPWARD]
 		curl RIGHTSB TURN [heading UPWARD]
 		quadcontrols 0 curviness
-		g4   (MIDDLE + STROKE / 2) CAP [widths (STROKE * 0.8) 0]
+		g4   (MIDDLE + sw / 2) CAP [widths (sw * 0.8) 0]
 
-	start-from (MIDDLE - STROKE / 2) CAP
-	line-to (MIDDLE + STROKE / 2) CAP
-	line-to MIDDLE (CAP - STROKE)
+	start-from (MIDDLE - sw / 2) CAP
+	line-to (MIDDLE + sw / 2) CAP
+	line-to MIDDLE (CAP - sw)
+	
+	if SLAB : begin
+		include : CenterBottomSerif (SB + sw / 2 * CORRECTION_HX) 0 JUT
+		tag-contour 'serif'
+		include : CenterBottomSerif (RIGHTSB - sw / 2 * CORRECTION_HX) 0 JUT
+		tag-contour 'serif'
 
 create-glyph 'Lambda' : glyph-construction
 	assign-unicode 0x39B
@@ -47,10 +53,20 @@ create-glyph 'Delta' : glyph-construction
 	assign-unicode 0x394
 	include glyphs.Lambda AS_BASE
 	include : HBar (SB + HALFSTROKE) (RIGHTSB - HALFSTROKE) HALFSTROKE
+	eject-contour 'serif'
+
+define [GammaShape top] : glyph-construction
+	include : VBarLeft (SB * 1.5) 0 top
+	include : HBarTop (SB * 1.5 - O) RIGHTSB top
+	if SLAB : begin
+		include : LeftwardTopSerif (SB * 1.5) top SIDEJUT
+		include : CenterBottomSerif (SB * 1.5 + CORRECTION_HX * HALFSTROKE) 0 JUT
+		include : DownwardRightSerif RIGHTSB top VJUT
 
 create-glyph 'Gamma' : glyph-construction
 	assign-unicode 0x393
-	include glyphs.L AS_BASE
+	include capitalMarks
+	include : GammaShape CAP
 	include : FlipAround MIDDLE CAPMIDDLE 1 (-1)
 
 define [SigmaShape top bottom _fine] : glyph-construction
@@ -68,6 +84,10 @@ define [SigmaShape top bottom _fine] : glyph-construction
 	line-to SB (top - fine)
 	line-to midx [mix bottom top 0.5]
 	reverse-last
+	
+	if SLAB : begin
+		include : DownwardRightSerif RIGHTSB top VJUT
+		include : UpwardRightSerif RIGHTSB bottom VJUT
 
 create-glyph 'Sigma' : glyph-construction
 	set-width WIDTH
@@ -88,12 +108,24 @@ create-glyph 'Xi' : glyph-construction
 	include : HBar [mix SB RIGHTSB 0.15] [mix RIGHTSB SB 0.15] [mix 0 CAP 0.54]
 	include : HBar SB RIGHTSB (CAP - HALFSTROKE)
 	include : HBar SB RIGHTSB (0 + HALFSTROKE)
+	if SLAB : begin
+		include : DownwardLeftSerif SB CAP VJUT
+		include : DownwardRightSerif RIGHTSB CAP VJUT
+		include : UpwardLeftSerif SB 0 VJUT
+		include : UpwardRightSerif RIGHTSB 0 VJUT
 
-define [PiShape top bottom shrink _fine] : glyph-construction
+define [PiShape top bottom _shrink _fine] : glyph-construction
 	local fine : fallback _fine STROKE
-	include : HBar SB RIGHTSB (top - (fine / 2)) fine
-	include : VBar ([mix SB RIGHTSB [fallback shrink 0.05]] + (fine / 2)) bottom (top - fine / 2) fine
-	include : VBar ([mix RIGHTSB SB [fallback shrink 0.05]] - (fine / 2)) bottom (top - fine / 2) fine
+	local shrink : if SLAB 0 ([fallback _shrink 0.03] * (RIGHTSB - SB))
+	include : HBarTop SB RIGHTSB top fine
+	include : VBarLeft (SB + shrink) bottom (top - fine / 2) fine
+	include : VBarRight (RIGHTSB - shrink) bottom (top - fine / 2) fine
+	
+	if SLAB : begin
+		include : CenterBottomSerif (SB + shrink + fine * 0.5 * CORRECTION_HX) bottom JUT
+		include : CenterBottomSerif (RIGHTSB - shrink - fine * 0.5 * CORRECTION_HX) bottom JUT
+		include : CenterTopSerif (SB + shrink + fine * 0.5 * CORRECTION_HX) top JUT
+		include : CenterTopSerif (RIGHTSB - shrink - fine * 0.5 * CORRECTION_HX) top JUT
 
 create-glyph 'Pi' : glyph-construction
 	assign-unicode 0x3A0
@@ -103,8 +135,23 @@ create-glyph 'Pi' : glyph-construction
 create-glyph 'pi' : glyph-construction
 	assign-unicode 0x3C0
 	include eMarks
-	include : PiShape XH 0
-
+	include : HBarTop SB RIGHTSB XH
+	local m1 : mix SB RIGHTSB (0.3)
+	include : dispiro
+		widths.rhs
+		straight.down.start (m1 + HALFSTROKE * CORRECTION_HX) XH [heading DOWNWARD]
+		alsothru 0.5 0.85 important
+		g4 [mix SB RIGHTSB 0.1] O
+	local m2 : mix SB RIGHTSB (0.7)
+	local hook : HOOK * 0.8
+	include : dispiro
+		widths.center
+		flat m2 XH [heading DOWNWARD]
+		curl m2 hook
+		arcvh
+		flat (m2 + hook - HALFSTROKE) HALFSTROKE [heading RIGHTWARD]
+		curl RIGHTSB HALFSTROKE [heading RIGHTWARD]
+	
 create-glyph 'Phi' : glyph-construction
 	assign-unicode 0x3A6
 	include capitalMarks
@@ -205,13 +252,13 @@ create-glyph 'kappa' : glyph-construction
 	set-width WIDTH
 	assign-unicode 0x3BA
 	include eMarks
-	include : create-stroke
-		:.start-from SB 0
-		:.set-width  0 STROKE
-		:.heads-to   UPWARD
-		:.line-to    SB XH
-		:.heads-to   UPWARD
+	include : VBarLeft SB 0 XH
 	include : KShape XH
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
+		if (para.italicangle === 0) : begin
+			include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+			tag-contour 'serifLB'
 
 create-glyph 'lambda' : glyph-construction
 	assign-unicode 0x3BB
@@ -230,15 +277,16 @@ create-glyph 'mu' : glyph-construction
 	assign-unicode 0x3BC
 	include pMarks
 	include glyphs.u
-	include : create-stroke
-		:.start-from SB DESCENDER
-		:.heads-to   UPWARD
-		:.set-width  0 STROKE
-		:.line-to    SB (DESCENDER / 2)
-		:.heads-to   UPWARD
-		:.line-to    SB SMALLSMOOTHB
-		:.heads-to   UPWARD
-		:.set-width  0 [adviceBlackness 4]
+	include : dispiro
+		widths.rhs
+		flat SB DESCENDER [heading UPWARD]
+		curl SB (DESCENDER / 2) [heading UPWARD]
+		straight.up.end SB SMALLSMOOTHB [widths.heading 0 [adviceBlackness 4] UPWARD]
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
+		if (para.italicangle === 0) : begin
+			include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) DESCENDER JUT
+			tag-contour 'serifLB'
 
 create-glyph 'theta' : glyph-construction
 	assign-unicode 0x3B8
@@ -410,6 +458,8 @@ create-glyph 'nu' : glyph-construction
 		curl RIGHTSB (XH * 0.9) [heading DOWNWARD]
 		quadcontrols 0 0.3 6
 		g4   xmid 0
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
 
 create-glyph 'sigmafinal' : glyph-construction
 	assign-unicode 0x3C2

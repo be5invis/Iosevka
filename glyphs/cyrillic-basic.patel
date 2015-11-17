@@ -13,9 +13,7 @@ alias 'cyrEn' 0x41D 'H'
 alias 'cyrO' 0x41E 'O'
 alias 'cyro' 0x43e 'o'
 alias 'cyrPe' 0x41F 'Pi'
-alias 'cyrpe.upright' null 'pi'
 alias 'cyrpe.italic' null 'n'
-italic-variant 'cyrpe' 0x43f
 alias 'cyrEr' 0x420 'P'
 alias 'cyrer' 0x440 'p'
 alias 'cyrEs' 0x421 'C'
@@ -36,10 +34,11 @@ alias 'cyrDze' 0x405 'S'
 alias 'cyrdze' 0x455 's'
 
 ### Russian letters
-define [CyrYeriShape top _left _right _fine] : glyph-construction
+define [CyrYeriShape top _left _right _fine _jut] : glyph-construction
 	local fine : fallback _fine STROKE
 	local left : fallback _left SB
 	local right : fallback _right RIGHTSB
+	local jut : fallback _jut JUT
 	
 	local bowl : top * 0.55 + HALFSTROKE
 
@@ -54,6 +53,11 @@ define [CyrYeriShape top _left _right _fine] : glyph-construction
 		flat (right - turnbottom * (right - left) / (RIGHTSB - SB)) bowl [heading LEFTWARD]
 		curl (left + STROKE * 0.2) bowl [heading LEFTWARD]
 	include : VBarLeft left 0 top fine
+	if SLAB : begin
+		include : LeftwardBottomSerif left 0 (jut - fine / 2 * CORRECTION_HX)
+		tag-contour 'serifYeriLB'
+		include : CenterTopSerif (left + fine / 2 * CORRECTION_HX) top jut
+		tag-contour 'serifYeriLT'
 
 define [RevCyrYeriShape top _left _right _fine] : glyph-construction
 	local fine : fallback _fine STROKE
@@ -89,7 +93,7 @@ create-glyph 'cyrBe' : glyph-construction
 	include glyphs.cyrYeri AS_BASE
 	include : HBar SB [mix SB RIGHTSB 0.9] (CAP - HALFSTROKE)
 
-define [CyrCyrIShape top] : glyph-construction
+define [CyrIShape top] : glyph-construction
 	local topstroke : adviceBlackness 4
 	local halftopstroke : topstroke / 2
 	include : create-stroke
@@ -103,16 +107,17 @@ define [CyrCyrIShape top] : glyph-construction
 	include : create-stroke
 		:.start-from (SB + halftopstroke) 0 :.heads-to UPWARD :.set-width 0 topstroke
 		:.line-to (RIGHTSB - topstroke - halftopstroke) top :.heads-to UPWARD
+	include : AICyrISerifs top
 
 create-glyph 'cyrI' : glyph-construction
 	assign-unicode 0x418
 	include capitalMarks
-	include : CyrCyrIShape CAP
+	include : CyrIShape CAP
 
 create-glyph 'cyri.upright' : glyph-construction
 	include eMarks
 	dont-export
-	include : CyrCyrIShape XH
+	include : CyrIShape XH
 
 create-glyph 'cyri.italic' : glyph-construction
 	dont-export
@@ -187,8 +192,7 @@ create-glyph 'cyrve.upright' : glyph-construction
 italic-variant 'cyrve' 0x432
 create-glyph 'cyrghe.upright' : glyph-construction
 	include eMarks
-	include : LShape XH
-	include : FlipAround MIDDLE (XH / 2) 1 (-1)
+	include : GammaShape XH
 
 create-glyph 'cyrghe.italic' : glyph-construction
 	include eMarks
@@ -213,10 +217,14 @@ define [CyrDeShape top] : glyph-construction
 	local cutright : mix SB RIGHTSB 0.92
 	include : HBar (SB + O * 2) RIGHTSB HALFSTROKE
 	include : VBar (cutright - HALFSTROKE * CORRECTION_HX) 0 top
-	include : HBar cutleft cutright (top - HALFSTROKE)
 	include : halfXStrand (cutleft + STROKE * CORRECTION_HX) top (SB + HALFSTROKE * CORRECTION_HX) HALFSTROKE 0.1 0.75 0.5
 	include : VBar (SB + HALFSTROKE * CORRECTION_HX + O * 2) (-LONGJUT + HALFSTROKE) 0
 	include : VBar (RIGHTSB - HALFSTROKE * CORRECTION_HX) (-LONGJUT + HALFSTROKE) 0
+	
+	if SLAB : then
+		include : HBarTop (cutleft - (RIGHTSB - cutright)) RIGHTSB top
+	: else
+		include : HBarTop cutleft cutright top
 
 create-glyph 'cyrDe' : glyph-construction
 	assign-unicode 0x414
@@ -316,9 +324,10 @@ define [CyrElShape top] : glyph-construction
 	local cutright : mix SB RIGHTSB 0.95
 	include : VBarRight cutright 0 top
 	include : HBar cutleft cutright (top - HALFSTROKE)
-	include : LegShape cutleft cutleft2 [mix SB 0 0.25] top 0
+	include : LegShape cutleft cutleft2 [mix SB 0 [if SLAB 0.5 0.25]] top 0
 	if SLAB : begin
 		include : RightwardTopSerif cutright top SIDEJUT
+		include : LeftwardTopSerif cutleft top SIDEJUT
 		include : CenterBottomSerif (cutright - HALFSTROKE * CORRECTION_HX) 0 JUT
 
 create-glyph 'cyrEl' : glyph-construction
@@ -347,6 +356,9 @@ define [CyrTseShape top] : glyph-construction
 	include : HBarBottom SB RIGHTSB 0
 	include : VBarRight RIGHTSB 0 top
 	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
+	if SLAB : begin
+		include : AIVSerifs top
+		include : LeftwardBottomSerif SB 0 SIDEJUT
 
 create-glyph 'cyrTse' : glyph-construction
 	assign-unicode 0x426
@@ -359,6 +371,7 @@ create-glyph 'cyrtse.upright' : glyph-construction
 create-glyph 'cyrtse.italic' : glyph-construction
 	include eMarks
 	include glyphs.u
+	eject-contour 'serifLT'
 	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
 italic-variant 'cyrtse' 0x446
 
@@ -419,12 +432,17 @@ create-glyph 'cyrshcha.upright' : glyph-construction
 create-glyph 'cyrshcha.italic' : glyph-construction
 	include eMarks
 	include glyphs.'cyrsha.italic'
+	eject-contour 'serifLT'
 	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
 italic-variant 'cyrshcha' 0x449
 
 define [CyrYerShape top] : glyph-construction
-	include : CyrYeriShape top [mix SB RIGHTSB 0.1] RIGHTSB
-	include : HBarTop [mix 0 SB 0.6] (STROKE * 0.1 + [mix SB RIGHTSB 0.1]) top
+	local left : if SLAB ([mix SB RIGHTSB 0.35] - MVERTSTROKE / 2 * CORRECTION_HX) [mix SB RIGHTSB 0.1]
+	local barleft : mix 0 SB [if SLAB 0.25 0.6]
+	include : CyrYeriShape top left RIGHTSB [if SLAB MVERTSTROKE STROKE]
+	include : HBarTop barleft (STROKE * 0.1 + left) top
+	if SLAB : begin
+		include : DownwardLeftSerif barleft top VJUT MVERTSTROKE
 
 create-glyph 'cyrYer' : glyph-construction
 	assign-unicode 0x42A
@@ -437,8 +455,11 @@ create-glyph 'cyryer' : glyph-construction
 	include : CyrYerShape XH
 
 define [CyrYeryShape top] : glyph-construction
-	include : CyrYeriShape top (SB + O) [mix (RIGHTSB - MVERTSTROKE * CORRECTION_HX) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) 0.5] MVERTSTROKE
+	include : CyrYeriShape top (SB + O) [mix (RIGHTSB - MVERTSTROKE * CORRECTION_HX) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) 0.5] MVERTSTROKE (JUT * 0.75)
 	include : VBarRight (RIGHTSB - O) 0 top MVERTSTROKE
+	if SLAB : begin
+		include : CenterTopSerif (RIGHTSB - O - MVERTSTROKE / 2 * CORRECTION_HX) top (JUT * 0.75)
+		include : CenterBottomSerif (RIGHTSB - O - MVERTSTROKE / 2 * CORRECTION_HX) 0 (JUT * 0.75)
 
 create-glyph 'cyrYery' : glyph-construction
 	assign-unicode 0x42B
@@ -517,9 +538,13 @@ create-glyph 'cyrya' : glyph-construction
 	include : CyrYaShape XH
 
 # Serbian pe and te
+create-glyph 'cyrpe.upright' : glyph-construction
+	include eMarks
+	include : PiShape XH 0
 create-glyph 'cyrpe.serbian' : glyph-construction
 	include glyphs.u AS_BASE
 	include glyphs.macronAbove
+italic-variant 'cyrpe' 0x43f
 
 create-glyph 'cyrte.upright' : glyph-construction
 	include eMarks

@@ -9,7 +9,7 @@ PARAM_CC_SLAB = FAST='$(FAST)' VARIANTNAME='cc-slab$(VARIANTNAME)' STYLE_COMMON=
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 ifeq ($(OS),Windows_NT)
-LOOPS = 1 2 3 4 5 6
+LOOPS = 1 2 3 4 5 6 7 8 9 10
 else
 LOOPS = 1
 endif
@@ -24,25 +24,22 @@ $(OBJDIR) :
 
 # fdts
 fdts-default : $(FILES) | $(OBJDIR)
-	@$(MAKE) -s -f onegroup.mk fdts $(PARAM_DEFAULT)
+	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_DEFAULT) LOOP=$(var);)
 fdts-slab : $(FILES) | $(OBJDIR)
-	@$(MAKE) -s -f onegroup.mk fdts $(PARAM_SLAB)
+	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_SLAB) LOOP=$(var);)
 fdts-cc : $(FILES) | $(OBJDIR)
-	@$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC)
+	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC) LOOP=$(var);)
 fdts-cc-slab : $(FILES) | $(OBJDIR)
-	@$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC_SLAB)
-
-fdts : $(FILES) | $(OBJDIR)
-	@$(foreach var,$(LOOPS),$(MAKE) -s fdts-default fdts-slab fdts-cc fdts-cc-slab LOOP=$(var);)
+	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC_SLAB) LOOP=$(var);)
 
 # ttfs
-fonts-default : fdts
+fonts-default : fdts-default
 	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : fdts
+fonts-slab : fdts-slab
 	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_SLAB)
-fonts-cc : fdts
+fonts-cc : fdts-cc
 	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_CC)
-fonts-cc-slab : fdts
+fonts-cc-slab : fdts-cc-slab
 	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_CC_SLAB)
 
 # testdrive
