@@ -7,7 +7,6 @@ alias 'cyrGhe' 0x413 'Gamma'
 alias 'cyrIe' 0x415 'E'
 alias 'cyrie' 0x435 'e'
 alias 'cyrKa' 0x41A 'K'
-alias 'cyrka' 0x43A 'kappa'
 alias 'cyrEm' 0x41C 'M'
 alias 'cyrEn' 0x41D 'H'
 alias 'cyrO' 0x41E 'O'
@@ -92,6 +91,8 @@ create-glyph 'cyrBe' : glyph-construction
 	assign-unicode 0x411
 	include glyphs.cyrYeri AS_BASE
 	include : HBar SB [mix SB RIGHTSB 0.9] (CAP - HALFSTROKE)
+	if SLAB : begin
+		include : DownwardRightSerif [mix SB RIGHTSB 0.9] CAP VJUT
 
 define [CyrIShape top] : glyph-construction
 	local topstroke : adviceBlackness 4
@@ -161,6 +162,16 @@ create-glyph 'cyrbe' : glyph-construction
 		g4   (RIGHTSB - HALFSTROKE * CORRECTION_HX) CAP
 
 alias 'cyrbe.serbian' null 'delta'
+
+create-glyph 'cyrka' : glyph-construction
+	set-width WIDTH
+	assign-unicode 0x43A
+	include eMarks
+	include : VBarLeft SB 0 XH
+	include : KShape XH
+	if SLAB : begin
+		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+		include : CenterTopSerif (SB + HALFSTROKE * CORRECTION_HX) XH JUT
 
 create-glyph 'cyrve.italic' : glyph-construction
 	include eMarks
@@ -376,7 +387,7 @@ create-glyph 'cyrtse.italic' : glyph-construction
 italic-variant 'cyrtse' 0x446
 
 define [CyrCheShape top _barp] : glyph-construction
-	local bar : top * [fallback _barp 0.4]
+	local bar : top * [fallback _barp [if SLAB 0.45 0.4]]
 	include : VBarRight RIGHTSB 0 top
 	include : dispiro
 		widths.lhs
@@ -393,7 +404,7 @@ define [CyrCheShape top _barp] : glyph-construction
 create-glyph 'cyrChe' : glyph-construction
 	assign-unicode 0x427
 	include capitalMarks
-	include : CyrCheShape CAP 0.35
+	include : CyrCheShape CAP [if SLAB nothing 0.35]
 
 create-glyph 'cyrche' : glyph-construction
 	assign-unicode 0x447
@@ -502,30 +513,32 @@ create-glyph 'cyryu' : glyph-construction
 
 define [CyrYaShape top] : glyph-construction
 	local bowlTop (top * 1)
-	local bowlBottom ((top - STROKE) * 0.55 - HALFSTROKE)
-	
-	local turn : mix bowlTop bowlBottom 0.5
-	local turnRadius : (bowlTop - bowlBottom) / 2
-	
-	include : create-stroke
-		:.start-from (WIDTH - SB * 1.25 - HALFSTROKE * 0.1) bowlTop
-		:.heads-to   LEFTWARD
-		:.set-width  STROKE 0
-		:.line-to    (SB + turnRadius) bowlTop
-		:.arc-hv-to  (SB + O) turn
-		:.arc-vh-to  (SB + turnRadius) bowlBottom
-		:.line-to    (WIDTH - SB * 1.25 - HALFSTROKE * 0.1) bowlBottom
-		:.heads-to   RIGHTWARD
-	
+	local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
+	local bowlBottom ((top - STROKE) * m - HALFSTROKE)
+	local turn : mix bowlTop bowlBottom (SMOOTHA / (SMOOTHA + SMOOTHB))
+	local turnRadius : (bowlTop - bowlBottom) * 0.45
+	local barright : WIDTH - SB * 1.25
+	include : dispiro
+		widths.lhs
+		flat (barright - HALFSTROKE * 0.1) bowlTop [heading LEFTWARD]
+		curl (SB + turnRadius) bowlTop
+		archv
+		g4 (SB + O) turn
+		arcvh
+		flat (SB + turnRadius) bowlBottom
+		curl    (barright - HALFSTROKE * 0.1) bowlBottom [heading RIGHTWARD]
 	include : VBarRight RIGHTSB 0 top
+	local left (SB + O + [if SLAB (JUT / 4) 0])
+	include : dispiro
+		widths.center
+		g4.up.start (left + HALFSTROKE) 0 [heading UPWARD]
+		quadcontrols 0 0.4 8
+		g4 MIDDLE ((top - STROKE) * m)
 	
-	local turn (XH * 0.1)
-	local left (SB + O)
-	include : create-stroke
-		:.start-from (left + HALFSTROKE) 0
-		:.heads-to UPWARD
-		:.set-width HALFSTROKE HALFSTROKE
-		:.curve-to (left + HALFSTROKE) (turn + 0.2 * (XH - turn)) MIDDLE (bowlBottom + HALFSTROKE)
+	if SLAB : begin
+		include : RightwardTopSerif barright top SIDEJUT
+		include : CenterBottomSerif (barright - HALFSTROKE * CORRECTION_HX) 0 JUT
+		include : LeftwardBottomSerif (SB + JUT / 4) 0 (SIDEJUT + JUT / 4)
 
 create-glyph 'cyrYa' : glyph-construction
 	assign-unicode 0x42F
