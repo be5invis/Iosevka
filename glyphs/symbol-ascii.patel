@@ -120,27 +120,9 @@ create-glyph 'bracketLeft' : glyph-construction
 	set-width WIDTH
 	assign-unicode '['
 
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB bracketOutside] parenBot
-		:.set-width  STROKE 0
-		:.heads-to   RIGHTWARD
-		:.line-to    [mix SB RIGHTSB bracketInside] parenBot
-		:.heads-to   RIGHTWARD
-
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB bracketOutside] parenTop
-		:.set-width  0 STROKE
-		:.heads-to   RIGHTWARD
-		:.line-to    [mix SB RIGHTSB bracketInside] parenTop
-		:.heads-to   RIGHTWARD
-		
-	include : create-stroke
-		:.start-from [mix SB RIGHTSB bracketOutside] parenBot
-		:.set-width  0 STROKE
-		:.heads-to   UPWARD
-		:.line-to    [mix SB RIGHTSB bracketOutside] parenTop
-		:.heads-to   UPWARD
-
+	include : HBarBottom [mix SB RIGHTSB bracketOutside] [mix SB RIGHTSB bracketInside] parenBot
+	include : HBarTop    [mix SB RIGHTSB bracketOutside] [mix SB RIGHTSB bracketInside] parenTop
+	include : VBarLeft   [mix SB RIGHTSB bracketOutside] parenBot parenTop
 
 create-glyph 'bracketRight' : glyph-construction
 	set-width WIDTH
@@ -206,20 +188,22 @@ create-glyph 'comma' : glyph-construction
 	include glyphs.period
 	
 	local sw : PERIODSIZE * 0.5
-	include : create-stroke
-		:.start-from (MIDDLE + PERIODRADIUS - O) [mix O (PERIODSIZE - O) 0.5]
-		:.set-width  0 sw
-		:.curve-to   (MIDDLE + PERIODRADIUS - O) [mix [mix O (PERIODSIZE - O) 0.5] DESCENDER 0.5] [mix MIDDLE (MIDDLE - PERIODRADIUS) 0.3] DESCENDER
+	include : dispiro
+		widths.rhs sw
+		g4.down.start (MIDDLE + PERIODRADIUS - O) [mix O (PERIODSIZE - O) 0.5]
+		quadcontrols 0 0.5
+		g4 [mix MIDDLE (MIDDLE - PERIODRADIUS) 0.3] DESCENDER
 
 create-glyph 'invertComma' : glyph-construction
 	set-width WIDTH
 	include glyphs.period
 	
 	local sw : PERIODSIZE * 0.5
-	include : create-stroke
-		:.start-from (MIDDLE - PERIODRADIUS + O) [mix O (PERIODSIZE - O) 0.5]
-		:.set-width  sw 0
-		:.curve-to   (MIDDLE - PERIODRADIUS + O) [mix [mix O (PERIODSIZE - O) 0.5] DESCENDER 0.5] [mix MIDDLE (MIDDLE + PERIODRADIUS) 0.3] DESCENDER
+	include : dispiro
+		widths.lhs sw
+		g4.down.start (MIDDLE - PERIODRADIUS + O) [mix O (PERIODSIZE - O) 0.5]
+		quadcontrols 0 0.5
+		g4 [mix MIDDLE (MIDDLE + PERIODRADIUS) 0.3] DESCENDER
 
 
 
@@ -253,12 +237,7 @@ create-glyph 'exclam' : glyph-construction
 	set-width WIDTH
 	include capitalMarks
 	assign-unicode '!'
-	include : create-stroke
-		:.start-from MIDDLE CAP
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   DOWNWARD
-		:.line-to    MIDDLE [mix (DOTSIZE + STROKE) (XH / 2) 0.5]
-		:.heads-to   DOWNWARD
+	include : VBar MIDDLE [mix (DOTSIZE + STROKE) (XH / 2) 0.5] CAP
 	include : list : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
 
 
@@ -268,12 +247,7 @@ create-glyph 'underscore' : glyph-construction
 	set-width WIDTH
 	assign-unicode '_'
 	
-	include : create-stroke
-		:.start-from SB 0
-		:.heads-to RIGHTWARD
-		:.set-width STROKE 0
-		:.line-to RIGHTSB 0
-		:.heads-to RIGHTWARD
+	include : HBarBottom SB RIGHTSB 0
 
 
 create-glyph 'hyphen' : glyph-construction
@@ -302,12 +276,7 @@ create-glyph 'bar' : glyph-construction
 	set this.anchors.above {.type BASE .x MIDDLE .y parenTop}
 	set this.anchors.below {.type BASE .x MIDDLE .y parenBot}
 	assign-unicode '|'
-	include : create-stroke
-		:.start-from MIDDLE parenTop
-		:.heads-to DOWNWARD
-		:.set-width (STROKE / 2) (STROKE / 2)
-		:.line-to MIDDLE parenBot
-		:.heads-to DOWNWARD
+	include : VBar MIDDLE parenBot parenTop
 
 create-glyph 'slash' : glyph-construction
 	set-width WIDTH
@@ -382,13 +351,10 @@ create-glyph 'singleQuote' : glyph-construction
 	set-width WIDTH
 	assign-unicode 0x27
 	
-	include : create-stroke
-		:.start-from MIDDLE quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (HALFSTROKE * 1.2) (HALFSTROKE * 1.2)
-		:.line-to    MIDDLE quoteBottom
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   DOWNWARD
+	include : dispiro
+		widths.center (STROKE * 1.1)
+		g4.down.start MIDDLE quoteTop [heading DOWNWARD]
+		g4 MIDDLE quoteBottom [widths.heading (HALFSTROKE * 0.95) (HALFSTROKE * 0.95) DOWNWARD]
 
 create-glyph 'doubleQuote' : glyph-construction
 	set-width WIDTH
@@ -412,12 +378,11 @@ create-glyph 'asterisk' : glyph-construction
 	local final : 0.5 * [Math.min STROKE (radius * Math.PI * 2 / 10)]
 	
 	foreach j [range 0 5] : begin
-		include : create-stroke
-			:.start-from  MIDDLE centery
-			:.set-width   fine fine
-			:.line-to     (MIDDLE + radius * [Math.sin (j / 5 * Math.PI * 2)]) (centery + radius * [Math.cos (j / 5 * Math.PI * 2)])
-			:.set-width   final final
-			:.max-samples 1
+		local s : Math.sin (j / 5 * Math.PI * 2)
+		local c : Math.cos (j / 5 * Math.PI * 2)
+		include : dispiro
+			flat MIDDLE centery [widths fine fine]
+			curl (MIDDLE + radius * s) (centery + radius * c) [widths final final]
 
 
 create-glyph 'percent' : glyph-construction

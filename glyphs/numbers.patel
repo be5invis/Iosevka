@@ -11,10 +11,9 @@ create-glyph 'zero.slashed' : glyph-construction
 	set-width WIDTH
 	include glyphs.'zero.unslashed'
 	local fine : 0.5 * OVERLAYSTROKE
-	include : create-stroke
-		:.start-from (SB + STROKE / 2) (CAP * (1 - 0.77))
-		:.set-width  fine fine
-		:.line-to    (RIGHTSB - STROKE / 2) (CAP * 0.77)
+	include : dispiro
+		flat (SB + STROKE / 2) (CAP * (1 - 0.77)) [widths fine fine]
+		curl (RIGHTSB - STROKE / 2) (CAP * 0.77)
 
 create-glyph 'zero.dotted' : glyph-construction
 	include capitalMarks
@@ -33,10 +32,9 @@ create-glyph 'one' : glyph-construction
 	assign-unicode '1'
 	
 	include : VBar (MIDDLE + ONEBALANCE) 0 CAP
-	include : create-stroke
-		:.start-from (MIDDLE - HALFSTROKE * CORRECTION_HX + ONEBALANCE) CAP
-		:.set-width STROKE 0
-		:.line-to (MIDDLE - HOOKX * 1.25 + ONEBALANCE) (CAP - HOOK * 0.75)
+	include : dispiro
+		flat (MIDDLE - HALFSTROKE * CORRECTION_HX + ONEBALANCE) CAP [widths STROKE 0]
+		curl (MIDDLE - HOOKX * 1.25 + ONEBALANCE) (CAP - HOOK * 0.75)
 	
 	if SLAB : begin
 		include : CenterBottomSerif (MIDDLE + ONEBALANCE) 0 LONGJUT
@@ -115,7 +113,7 @@ define [FiveShape top bp] : glyph-construction
 		widths.rhs
 		flat xleft (top * bp + HALFSTROKE) [heading RIGHTWARD]
 		curl ([mix SB RIGHTSB 0.4] - CORRECTION_OMIDS) (top * bp + HALFSTROKE)
-		g4 RIGHTSB ycurly
+		g4 (RIGHTSB - OX) ycurly
 		hookend O
 		g4 SB HOOK
 	include : VBarLeft xleft (top * bp + HALFSTROKE) top
@@ -137,10 +135,11 @@ create-glyph 'six' : glyph-construction
 	
 	include : smallo (CAP * 0.6) 0 SB RIGHTSB
 	local ymiddlea : (CAP * 0.6 - SMALLSMOOTHA + SMALLSMOOTHB) / 2
-	include : create-stroke
-		:.start-from (SB + O) ymiddlea
-		:.set-width  0 STROKE
-		:.curve-to   (SB + O) [mix ymiddlea CAP 0.8] (RIGHTSB - STROKE * 1.1) CAP
+	include : dispiro
+		widths.rhs
+		g4.up.start (SB + OX) ymiddlea
+		quadcontrols 0 0.8
+		g4 (RIGHTSB - STROKE * 1.1) CAP
 
 
 create-glyph 'seven' : glyph-construction
@@ -171,20 +170,22 @@ create-glyph 'eight' : glyph-construction
 	local sm : SMOOTH * 0.975
 	
 	local p 0.96
+	local l (SB + OX)
+	local r (RIGHTSB - OX)
 	
 	include : dispiro
 		widths.lhs
 		g4 (MIDDLE) (CAP - O - STROKE) [heading RIGHTWARD]
 		archv 1
-		g4 ([mix SB RIGHTSB p] - STROKE) (CAP - sm * p) [heading DOWNWARD]
+		g4 ([mix l r p] - STROKE) (CAP - sm * p) [heading DOWNWARD]
 		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
-		g4 (SB + STROKE) sm [widths.heading 0 STROKE DOWNWARD]
+		g4 (l + STROKE) sm [widths.heading 0 STROKE DOWNWARD]
 		arcvh 1
 		g4 (MIDDLE) (O + STROKE) [heading RIGHTWARD]
 		archv 1
-		g4 (RIGHTSB - STROKE) sm [widths.heading 0 STROKE UPWARD]
+		g4 (r - STROKE) sm [widths.heading 0 STROKE UPWARD]
 		alsothru 0.5 0.5 [widths HALFSTROKE HALFSTROKE]
-		g4 ([mix RIGHTSB SB p] + STROKE) (CAP - sm * p) [widths.heading STROKE 0 UPWARD]
+		g4 ([mix r l p] + STROKE) (CAP - sm * p) [widths.heading STROKE 0 UPWARD]
 		arcvh 1
 		close
 
@@ -195,19 +196,20 @@ create-glyph 'rotetedpropto' : glyph-construction
 	
 	local p 0.96
 	local py 0.6
-	
+	local l (SB + OX)
+	local r (RIGHTSB - OX)
 	include : dispiro
-		flat (RIGHTSB - STROKE) 0 [widths 0 STROKE]
-		curl (RIGHTSB - STROKE) 1 [widths 0 STROKE]
+		flat (r - STROKE) 0 [widths 0 STROKE]
+		curl (r - STROKE) 1 [widths 0 STROKE]
 		alsothru 0.5 py [widths (STROKE * py) (STROKE * (1 - py))]
-		g4 ([mix RIGHTSB SB p] + STROKE) (CAP - sma * p) [widths STROKE 0]
+		g4 ([mix r l p] + STROKE) (CAP - sma * p) [widths STROKE 0]
 		arcvh 1
 		g4 (MIDDLE - CORRECTION_OMIDS + CORRECTION_VS) (CAP - O - STROKE)
 		archv 1
-		g4 ([mix SB RIGHTSB p] - STROKE) (CAP - smb * p)
+		g4 ([mix l r p] - STROKE) (CAP - smb * p)
 		alsothru 0.5 (1 - py) [widths (STROKE * py) (STROKE * (1 - py))]
-		flat (SB + STROKE) 1 [widths 0 STROKE]
-		curl (SB + STROKE) 0 [widths 0 STROKE]
+		flat (l + STROKE) 1 [widths 0 STROKE]
+		curl (l + STROKE) 0 [widths 0 STROKE]
 
 create-glyph 'nine' : glyph-construction
 	include capitalMarks
@@ -216,8 +218,8 @@ create-glyph 'nine' : glyph-construction
 
 	local u CAP
 	local d (CAP * 0.425 - HALFSTROKE)
-	local l SB
-	local r RIGHTSB
+	local l (SB + OX)
+	local r (RIGHTSB - OX)
 	local ymiddlea : mix u d 0.5
 	local p 0.5
 	include : dispiro
@@ -232,8 +234,8 @@ create-glyph 'nine' : glyph-construction
 		arcvh
 		g4   ([mix l r 0.5] - CORRECTION_OMIDS) (u - O)
 		archv
-		flat RIGHTSB ymiddlea
-		curl RIGHTSB (CAP * 0.35)
+		flat r ymiddlea
+		curl r (CAP * 0.35)
 		hookend O
 		g4 SB HOOK
 

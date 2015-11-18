@@ -24,8 +24,8 @@ define [oLeft _top] : glyph-construction
 		arcvh
 		g4   (mb) O [widths.heading STROKE 0 {.y (1) .x (-sb)}]
 		archv
-		flat.ai (RIGHTSB - O) (0 + SMALLSMOOTHA)
-		curl.ai (RIGHTSB - O) (top - SMALLSMOOTHB)
+		flat.ai (RIGHTSB - OX) (0 + SMALLSMOOTHA)
+		curl.ai (RIGHTSB - OX) (top - SMALLSMOOTHB)
 		arcvh
 		close
 
@@ -44,6 +44,7 @@ create-glyph 'p' : glyph-construction
 		include : LeftwardTopSerif SB XH SIDEJUT
 		tag-contour 'serifLT'
 		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) DESCENDER JUT
+		tag-contour 'serifLB'
 
 create-glyph 'b' : glyph-construction
 	set-width WIDTH
@@ -89,8 +90,8 @@ create-glyph 'g.doublestorey' : glyph-construction
 	local obot : XH * GBARPOS - O - HALFSTROKE
 	include : smallo XH obot SB (RIGHTSB - 0.3 * SB)
 	
-	local gleftx  (SB * 0.8 + O)
-	local grightx (RIGHTSB + SB * 0.1 - O)
+	local gleftx  (SB * 0.8 + OX)
+	local grightx (RIGHTSB + SB * 0.1 - OX)
 	local groundy : Math.round : [mix DESCENDER (XH * GBARPOS) 0.625] + HALFSTROKE
 	include : dispiro
 		g4 [mix SB RIGHTSB 0.3] [mix XH obot 0.95] [widths 0 (STROKE * 0.7)]
@@ -105,10 +106,11 @@ create-glyph 'g.doublestorey' : glyph-construction
 		g4 gleftx [mix (DESCENDER + O) groundy 0.53]
 		arcvh
 		g4 [mix SB RIGHTSB 0.435] groundy [heading RIGHTWARD]
-	start-from (RIGHTSB + 0.25 * SB) XH
-	line-to    (RIGHTSB + 0.25 * SB) (XH - STROKE)
-	line-to    MIDDLE  (XH - STROKE - O)
-	line-to    MIDDLE  XH
+	local gm : mix SB (RIGHTSB - 0.3 * SB) 0.5
+	start-from (RIGHTSB + 0.25 * SB - OX) XH
+	line-to    (RIGHTSB + 0.25 * SB - OX) (XH - STROKE)
+	line-to    gm  (XH - STROKE - O)
+	line-to    gm  XH
 	
 	set-anchor 'overlay' BASE MIDDLE [mix (DESCENDER + O) groundy 0.5]
 create-glyph 'g.singlestorey' : glyph-construction
@@ -116,7 +118,7 @@ create-glyph 'g.singlestorey' : glyph-construction
 	include : oRight
 	include : dispiro
 		widths.rhs
-		flat RIGHTSB XH
+		flat RIGHTSB XH [heading DOWNWARD]
 		curl RIGHTSB (DESCENDER + SMALLSMOOTHA)
 		hookend (DESCENDER + O)
 		g4 SB (DESCENDER + SHOOK)
@@ -136,8 +138,8 @@ create-glyph 'c' : glyph-construction
 		widths.lhs
 		g4 RIGHTSB (XH - HOOK)
 		hookstart XO
-		flat.ai (SB + O) (XH - SMALLSMOOTHA)
-		curl.ai (SB + O) (0 + SMALLSMOOTHB)
+		flat.ai (SB + OX) (XH - SMALLSMOOTHA)
+		curl.ai (SB + OX) (0 + SMALLSMOOTHB)
 		hookend O
 		g4 RIGHTSB HOOK
 
@@ -148,15 +150,15 @@ define [SmallEShape top stroke barpos curly] : glyph-construction
 	
 	include : dispiro
 		widths.lhs stroke
-		flat (RIGHTSB - O) barbottom [heading UPWARD]
-		curl (RIGHTSB - O) (top - SMALLSMOOTHB)
+		flat (RIGHTSB - OX) barbottom [heading UPWARD]
+		curl (RIGHTSB - OX) (top - SMALLSMOOTHB)
 		arcvh
 		g4 (MIDDLE - CORRECTION_OMIDS) (top - O)
 		archv
-		flat.ai (SB + O) (top - SMALLSMOOTHA)
-		curl.ai (SB + O) (0 + SMALLSMOOTHB)
+		flat.ai (SB + OX) (top - SMALLSMOOTHA)
+		curl.ai (SB + OX) (0 + SMALLSMOOTHB)
 		hookend O nothing stroke
-		g4 (RIGHTSB - O * 0.5) AHOOK
+		g4 (RIGHTSB - OX * 0.5) AHOOK
 	include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
 
 create-glyph 'e' : glyph-construction
@@ -211,7 +213,7 @@ create-glyph 'a.upright' : glyph-construction
 		flat (RIGHTSB + O) bartop [heading LEFTWARD]
 		curl barsmooth bartop
 		archv
-		g4   (SB + O) (bartop * 0.475)
+		g4   (SB + OX) (bartop * 0.475)
 		arcvh
 		g4   (lowmiddle + (-lowslope) * STROKE) O [heading {.y 1 .x lowslope}]
 		archv
@@ -227,7 +229,6 @@ create-glyph 'a.italic' : glyph-construction
 	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 	include : oRight
 	include : VBarRight RIGHTSB 0 XH
-	
 	if SLAB : begin
 		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 		tag-contour 'serifRB'
@@ -539,7 +540,7 @@ create-glyph 'r' : glyph-construction
 	assign-unicode 'r'
 	include eMarks
 	
-	local rhookx (RIGHTSB + RBALANCE2)
+	local rhookx (RIGHTSB + RBALANCE2 - OXE)
 	local fine (STROKE * 0.25)
 	local rbar : SB + RBALANCE + STROKE * CORRECTION_HX
 	local rmiddle : [mix (rbar - fine) rhookx (0.5 + globalTransform.yx * STROKE / WIDTH)] - CORRECTION_OMIDS

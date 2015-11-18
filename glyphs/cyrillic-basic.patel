@@ -46,7 +46,7 @@ define [CyrYeriShape top _left _right _fine _jut] : glyph-construction
 		flat (left + STROKE * 0.2) 0 [heading RIGHTWARD]
 		curl (right - turnbottom * (right - left) / (RIGHTSB - SB)) 0 [heading RIGHTWARD]
 		archv 8
-		g4   (right - O) turnbottom
+		g4   (right - OX) turnbottom
 		arcvh 8
 		flat (right - turnbottom * (right - left) / (RIGHTSB - SB)) bowl [heading LEFTWARD]
 		curl (left + STROKE * 0.2) bowl [heading LEFTWARD]
@@ -96,17 +96,19 @@ create-glyph 'cyrBe' : glyph-construction
 define [CyrIShape top] : glyph-construction
 	local topstroke : adviceBlackness 4
 	local halftopstroke : topstroke / 2
-	include : create-stroke
-		:.start-from RIGHTSB 0 :.heads-to UPWARD :.set-width STROKE 0
-		:.line-to RIGHTSB (top * 0.4) :.heads-to UPWARD
-		:.line-to RIGHTSB top :.heads-to UPWARD :.set-width topstroke 0
-	include : create-stroke
-		:.start-from SB 0 :.heads-to UPWARD :.set-width 0 topstroke
-		:.line-to SB (top * 0.6) :.heads-to UPWARD :.set-width 0 STROKE
-		:.line-to SB top :.heads-to UPWARD
-	include : create-stroke
-		:.start-from (SB + halftopstroke) 0 :.heads-to UPWARD :.set-width 0 topstroke
-		:.line-to (RIGHTSB - topstroke - halftopstroke) top :.heads-to UPWARD
+	include : dispiro
+		widths.lhs
+		flat RIGHTSB 0 [heading UPWARD]
+		curl RIGHTSB (top * 0.4) [heading UPWARD]
+		straight.up.end RIGHTSB top [widths.heading topstroke 0 UPWARD]
+	include : dispiro
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB (top * 0.6) [heading DOWNWARD]
+		straight.down.end SB 0 [widths.heading topstroke 0 DOWNWARD]
+	include : dispiro
+		flat (RIGHTSB - halftopstroke) top [widths.heading 0 topstroke DOWNWARD]
+		curl (SB + halftopstroke) 0 [widths.heading topstroke 0 DOWNWARD]
 	include : AICyrISerifs top
 
 create-glyph 'cyrI' : glyph-construction
@@ -145,18 +147,18 @@ create-glyph 'cyrbe' : glyph-construction
 	include bMarks
 	include : dispiro
 		widths.rhs
-		flat (SB + O) SMALLSMOOTHB
-		curl (SB + O) (XH - SMALLSMOOTHA)
+		flat (SB + OX) SMALLSMOOTHB
+		curl (SB + OX) (XH - SMALLSMOOTHA)
 		arcvh
 		g4 (MIDDLE - CORRECTION_OMIDS) (CAP * 0.7 - O)
 		archv
-		flat.ai (RIGHTSB - O) (XH - SMALLSMOOTHB)
-		curl.ai (RIGHTSB - O) SMALLSMOOTHA
+		flat.ai (RIGHTSB - OX) (XH - SMALLSMOOTHB)
+		curl.ai (RIGHTSB - OX) SMALLSMOOTHA
 		arcvh
 		g4 (MIDDLE + CORRECTION_OMIDX) O
 		archv
-		flat (SB + O) SMALLSMOOTHB
-		curl (SB + O) (XH - SMALLSMOOTHA)
+		flat (SB + OX) SMALLSMOOTHB
+		curl (SB + OX) (XH - SMALLSMOOTHA)
 		alsothruthem [list {0.25 0.79} {0.5 0.87}] important
 		g4   (RIGHTSB - HALFSTROKE * CORRECTION_HX) CAP
 
@@ -316,7 +318,7 @@ define [CyrZeShape top hook] : glyph-construction
 		widths.rhs
 		g4 SB (top - [fallback hook SHOOK])
 		hookstart top
-		g4 RIGHTSB (top - smb)
+		g4 (RIGHTSB - OXE) (top - smb)
 		arcvh
 		flat MIDDLE (midy - HALFSTROKE)
 		curl midx (midy - HALFSTROKE) [heading LEFTWARD]
@@ -324,7 +326,7 @@ define [CyrZeShape top hook] : glyph-construction
 		widths.lhs
 		g4 SB [fallback hook SHOOK]
 		hookstart 0
-		g4 RIGHTSB sma
+		g4 (RIGHTSB - OXE) sma
 		arcvh
 		flat MIDDLE (midy + HALFSTROKE)
 		curl midx (midy + HALFSTROKE) [heading LEFTWARD]
@@ -427,7 +429,11 @@ define [CyrShaShape top] : glyph-construction
 	include : VBarLeft SB 0 top MVERTSTROKE
 	include : VBarRight RIGHTSB 0 top MVERTSTROKE
 	include : VBar MIDDLE 0 top MVERTSTROKE
-
+	if SLAB : begin
+		include : tagged 'serifLT' : LeftwardTopSerif SB top SIDEJUT
+		include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SIDEJUT
+		include : tagged 'serifRT' : RightwardTopSerif RIGHTSB top SIDEJUT
+		include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 create-glyph 'cyrSha' : glyph-construction
 	assign-unicode 0x428
 	include capitalMarks
@@ -441,6 +447,7 @@ italic-variant 'cyrsha' 0x448
 
 define [CyrShchaShape top] : glyph-construction
 	include : CyrShaShape top
+	eject-contour 'serifRB'
 	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
 
 create-glyph 'cyrShcha' : glyph-construction
@@ -508,9 +515,14 @@ create-glyph 'cyre' : glyph-construction
 	include : HBar [mix SB RIGHTSB 0.25] RIGHTSB (XH / 2)
 
 define [CyrYuShape top sma smb] : glyph-construction
+	local xm : mix (SB + O + MVERTSTROKE * CORRECTION_HX) (RIGHTSB - OX) 0.15
 	include : VBarLeft (SB + O) 0 top MVERTSTROKE
-	include : smallo top 0 [mix (SB + MVERTSTROKE * CORRECTION_HX) RIGHTSB 0.15] (RIGHTSB - O) MVERTSTROKE (sma * 0.8) (smb * 0.8)
-	include : HBar (SB + MVERTSTROKE * 0.1) [mix (SB + MVERTSTROKE * CORRECTION_HX) RIGHTSB 0.15] (top / 2)
+	include : smallo top 0 xm (RIGHTSB - OX) MVERTSTROKE (sma * 0.8) (smb * 0.8)
+	include : HBar (SB + O + 1) xm (top / 2)
+	
+	if SLAB : begin
+		include : CenterTopSerif (SB + O + MVERTSTROKE / 2 * CORRECTION_HX) top (JUT * 0.75)
+		include : CenterBottomSerif (SB + O + MVERTSTROKE / 2 * CORRECTION_HX) 0 (JUT * 0.75)
 
 create-glyph 'cyrYu' : glyph-construction
 	assign-unicode 0x42E

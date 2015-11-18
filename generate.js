@@ -12,6 +12,6 @@ var para = parameters.build(parametersData, argv._);
 var ttfFont = buildGlyphs.build.call(emptyFont, para);
 
 if(argv.o) {
-	console.log(argv.o + " Successfully built.")
+	console.log(argv.o + " Successfully built. Styles: " + argv._)
 	fs.writeFileSync(argv.o, JSON.stringify(ttfFont));
 }
