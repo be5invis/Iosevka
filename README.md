@@ -1,12 +1,10 @@
-Iosevka
-=======
+# Iosevka
 
 Coders' typeface, built from code.
 
 ![preview](http://ooo.0o0.ooo/2015/10/21/5627399ca9f60.png)
 
-Installation
-------------
+## Installation
 
 Quit your editor/program. Unzip and open the folder.
 
@@ -14,12 +12,11 @@ Quit your editor/program. Unzip and open the folder.
 * **Windows** : Right click the .ttf files → Install.
 * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
 
-**Detailed Instructions**  
-[How to](http://www.howtogeek.com/192980/how-to-install-remove-and-manage-fonts-on-windows-mac-and-linux/) Install, Remove, and Manage Fonts on Windows, Mac, and Linux  
-[Ubuntu Wiki](https://wiki.ubuntu.com/Fonts#Manually)
+### Detailed Instructions
+ * [How to](http://www.howtogeek.com/192980/how-to-install-remove-and-manage-fonts-on-windows-mac-and-linux/) Install, Remove, and Manage Fonts on Windows, Mac, and Linux.
+ * [Ubuntu Wiki](https://wiki.ubuntu.com/Fonts#Manually)
 
-Building
---------
+## Building
 
 To build Iosevka you should:
 
@@ -30,8 +27,8 @@ To build Iosevka you should:
 
 You will find ttfs in the `build/` directory.
 
-Build your own style
---------------------
+## Build your own style
+
 ![](https://cloud.githubusercontent.com/assets/240091/10895370/cc80f088-81ee-11e5-919b-a6daefdbc3f0.png)
 
 Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:

@@ -16,12 +16,17 @@ function toBuffer(arrayBuffer) {
 }
 function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
 
-var options = {preserveOS2Version: true}
 
+var options = { preserveOS2Version: true };
 var font = JSON.parse(fs.readFileSync(argv._[0], 'utf-8'));
-
 if(argv.charmap) {
-	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function(glyph){ return [glyph.name, glyph.unicode, glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0]})), 'utf8')
+	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function(glyph){
+		return [
+			glyph.name,
+			glyph.unicode,
+			glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0
+		]
+	})), 'utf8')
 };
 if(argv.feature) {
 	var featurefile = '\n\n';
@@ -35,16 +40,21 @@ if(argv.feature) {
 	for(var id in mark) {
 		var lookup = mark[id];
 		var lookupName = 'markAuto_' + id;
-		featurefile += 'lookup ' + lookupName + ' {' + lookup.marks.join(';\n') + ';\n' + lookup.bases.join(';\n') + ';} ' + lookupName + ';'
+		featurefile += 'lookup ' + lookupName + ' {' + lookup.marks.join(';\n') + ';\n'
+			+ lookup.bases.join(';\n') + ';} ' + lookupName + ';'
 	}
 	
 	// mkmk
 	var mkmk = font.features.mkmk;
-	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n' + mkmk.bases.join(';\n') + ';} mkmkAuto;'
+	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n'
+		+ mkmk.bases.join(';\n') + ';} mkmkAuto;'
 	
 	// gdef
 	var gdef = font.features.gdef;
-	featurefile += '@GDEF_Simple = [' + gdef.simple.join(' \n') + '];\n@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\ntable GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
+	featurefile += '@GDEF_Simple = [' + gdef.simple.join(' \n') + '];\n'
+		+ '@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n'
+		+ '@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\n'
+		+ 'table GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
 
 	fs.writeFileSync(argv.feature, featurefile, 'utf8');
 };
