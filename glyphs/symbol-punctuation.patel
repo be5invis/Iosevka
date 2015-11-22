@@ -50,7 +50,7 @@ create-glyph 'softhyphen' : glyph-construction
 create-glyph 'interpunct' : glyph-construction
 	assign-unicode 0xB7
 	set-width FULLWIDTH
-	include : list : Ring (parenMid + PERIODRADIUS - O) (parenMid - PERIODRADIUS + O) (FWMIDDLE - PERIODRADIUS + O) (FWMIDDLE + PERIODRADIUS - O) true
+	include : Ring (parenMid + PERIODRADIUS - O) (parenMid - PERIODRADIUS + O) (FWMIDDLE - PERIODRADIUS + O) (FWMIDDLE + PERIODRADIUS - O) true
 
 create-glyph 'brokenbar' : glyph-construction
 	assign-unicode 0xA6
@@ -64,27 +64,21 @@ create-glyph 'singleGuillemetLeft' : glyph-construction
 	local top : mix parenMid parenTop 0.5
 	local bot : mix parenMid parenBot 0.5
 	local extension 0.55
-	local extension2x (-0.2)
-	local extension2y 0.375
 	local cor 1
 	
-	local halfsw : 0.5 * [adviceBlackness 3.5]
+	local sw : adviceBlackness 3.5
 	
-	include : create-stroke
-		:.start-from  [mix MIDDLE RIGHTSB extension] top
-		:.set-width   halfsw halfsw
-		:.curve-to    [mix MIDDLE SB extension2x] [mix top bot extension2y] [mix MIDDLE SB extension] [mix top bot 0.5]
-		:.set-width   (halfsw * cor) (halfsw * cor)
-		:.heads-to    LEFTWARD
-		:.max-samples 1
+	include : dispiro
+		widths.center sw
+		g4 [mix MIDDLE RIGHTSB extension] top
+		quadcontrols 0.4 0.75
+		g4 [mix MIDDLE SB extension] [mix top bot 0.5] [widths.center.heading (cor * sw) LEFTWARD]
 	
-	include : create-stroke
-		:.start-from  [mix MIDDLE SB extension] [mix top bot 0.5]
-		:.set-width   (halfsw * cor) (halfsw * cor)
-		:.heads-to    RIGHTWARD
-		:.curve-to    [mix MIDDLE SB extension2x] [mix bot top extension2y] [mix MIDDLE RIGHTSB extension] bot
-		:.set-width   halfsw halfsw
-		:.max-samples 1
+	include : dispiro
+		widths.center (sw * cor)
+		g4 [mix MIDDLE SB extension] [mix top bot 0.5] [heading RIGHTWARD]
+		quadcontrols 0.4 0.75
+		g4 [mix MIDDLE RIGHTSB extension] bot [widths.center sw]
 	
 	apply-transform : Translate (-(RIGHTSB - SB) * 0.05) 0
 
@@ -120,14 +114,13 @@ create-glyph 'paragraph' : glyph-construction
 	
 	include : VBar (MIDDLE + sw / 4) 0 CAP sw
 	include : VBar (RIGHTSB - sw / 2) 0 CAP sw
-	include : create-stroke
-		:.start-from (MIDDLE - sw / 4) (CAP - sw / 2)
-		:.set-width  (sw / 2) (sw / 2)
-		:.heads-to   LEFTWARD
-		:.arc-hv-to  (SB + sw / 2) [mix (CAP * 0.5) (CAP - sw / 2) 0.5]
-		:.heads-to   DOWNWARD
-		:.arc-vh-to  (MIDDLE - sw / 4) (CAP * 0.5)
-		:.heads-to   RIGHTWARD
+	include : dispiro
+		widths.center sw
+		straight.left.start (MIDDLE - sw / 4) (CAP - sw / 2) [heading LEFTWARD]
+		archv
+		g4.down.mid (SB + sw / 2) [mix (CAP * 0.5) (CAP - sw / 2) 0.5] [heading DOWNWARD]
+		arcvh
+		straight.right.end (MIDDLE - sw / 4) (CAP * 0.5) [heading RIGHTWARD]
 
 
 ### Phonetic symbols
@@ -246,8 +239,7 @@ create-glyph 'onedotLeader' : glyph-construction
 	set-width FULLWIDTH
 	assign-unicode 0x2024
 	local radius : linreg WIDTH (0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE) UPM PERIODRADIUS FULLWIDTH
-	include : list
-		Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
+	include : Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
 
 create-glyph 'twodotsLEader' : glyph-construction
 	set-width FULLWIDTH
@@ -255,9 +247,8 @@ create-glyph 'twodotsLEader' : glyph-construction
 	local radius : linreg WIDTH (0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE) UPM PERIODRADIUS FULLWIDTH
 	local left : mix 0 FULLWIDTH (1 / 4)
 	local right : mix 0 FULLWIDTH (3 / 4)
-	include : list
-		Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
-		Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
+	include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
+	include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
 
 create-glyph 'ellipsis' : glyph-construction
 	set-width FULLWIDTH
@@ -265,10 +256,9 @@ create-glyph 'ellipsis' : glyph-construction
 	local radius : linreg WIDTH (0.5 * [adviceBlackness 3.25] * PERIODSIZE / DOTSIZE) UPM PERIODRADIUS FULLWIDTH
 	local left : mix 0 FULLWIDTH (1 / 6)
 	local right : mix 0 FULLWIDTH (5 / 6)
-	include : list
-		Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
-		Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
-		Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
+	include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
+	include : Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
+	include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
 
 alias 'bullet' 0x2022 'interpunct'
 alias 'hyphenpoint' 0x2027 'interpunct'
@@ -277,10 +267,10 @@ create-glyph 'permille' : glyph-construction
 	assign-unicode 0x2030
 	local dotwidth ([adviceBlackness 4] * 1.5)
 	
-	include : create-stroke
-		:.start-from SB (CAP * 0.2)
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.line-to    [mix SB RIGHTSB 0.85] (CAP * 0.9)
+	include : dispiro
+		widths.center
+		flat SB (CAP * 0.2)
+		curl [mix SB RIGHTSB 0.85] (CAP * 0.9)
 
 	include : VBarLeft [mix SB RIGHTSB 0.075] [mix CAP 0 0.3] CAP dotwidth
 	include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotwidth
@@ -291,10 +281,10 @@ create-glyph 'basepoint' : glyph-construction
 	local dotwidth ([adviceBlackness 4] * 1.5)
 	local dotfine [adviceBlackness 3.5]
 	
-	include : create-stroke
-		:.start-from SB (CAP * 0.2)
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.line-to    [mix SB RIGHTSB 0.85] (CAP * 0.9)
+	include : dispiro
+		widths.center
+		flat SB (CAP * 0.2)
+		curl [mix SB RIGHTSB 0.85] (CAP * 0.9)
 
 	include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
 	include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotfine
@@ -317,13 +307,10 @@ alias 'solidus' 0x2044 'slash'
 create-glyph 'prime' : glyph-construction
 	assign-unicode 0x2032
 	local wide : WIDTH * 0.1
-	include : create-stroke
-		:.start-from (MIDDLE + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (HALFSTROKE * 1.2) (HALFSTROKE * 1.2)
-		:.line-to    (MIDDLE - wide) quoteBottom
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   DOWNWARD
+	include : dispiro
+		widths.center (STROKE * 1.2)
+		flat (MIDDLE + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - wide) quoteBottom [widths.heading HALFSTROKE HALFSTROKE DOWNWARD]
 
 create-glyph 'doubleprime' : glyph-construction
 	assign-unicode 0x2033
@@ -338,38 +325,26 @@ create-glyph 'tripleprime' : glyph-construction
 	local wide : WIDTH * 0.1
 	local d : WIDTH * 0.3
 	local fine : 0.5 * [adviceBlackness 3.5]
-	include : create-stroke
-		:.start-from (MIDDLE + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
-	include : create-stroke
-		:.start-from (MIDDLE - d + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE - d - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
-	include : create-stroke
-		:.start-from (MIDDLE + d + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE + d - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - wide) quoteBottom [widths.heading fine fine DOWNWARD]
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE - d + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - d - wide) quoteBottom [widths.heading fine fine DOWNWARD]
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE + d + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE + d - wide) quoteBottom [widths.heading fine fine DOWNWARD]
 
 create-glyph 'revprime' : glyph-construction
 	assign-unicode 0x2035
 	local wide : -WIDTH * 0.1
-	include : create-stroke
-		:.start-from (MIDDLE + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (HALFSTROKE * 1.2) (HALFSTROKE * 1.2)
-		:.line-to    (MIDDLE - wide) quoteBottom
-		:.set-width  HALFSTROKE HALFSTROKE
-		:.heads-to   DOWNWARD
+	include : dispiro
+		widths.center (STROKE * 1.2)
+		flat (MIDDLE + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - wide) quoteBottom [widths.heading HALFSTROKE HALFSTROKE DOWNWARD]
 
 create-glyph 'revdoubleprime' : glyph-construction
 	assign-unicode 0x2036
@@ -384,27 +359,18 @@ create-glyph 'revtripleprime' : glyph-construction
 	local wide : -WIDTH * 0.1
 	local d : WIDTH * 0.3
 	local fine : 0.5 * [adviceBlackness 3.5]
-	include : create-stroke
-		:.start-from (MIDDLE + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
-	include : create-stroke
-		:.start-from (MIDDLE - d + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE - d - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
-	include : create-stroke
-		:.start-from (MIDDLE + d + wide) quoteTop
-		:.heads-to   DOWNWARD
-		:.set-width  (fine * 1.2) (fine * 1.2)
-		:.line-to    (MIDDLE + d - wide) quoteBottom
-		:.set-width  fine fine
-		:.heads-to   DOWNWARD
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - wide) quoteBottom [widths.heading fine fine DOWNWARD]
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE - d + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE - d - wide) quoteBottom [widths.heading fine fine DOWNWARD]
+	include : dispiro
+		widths.center (fine * 2 * 1.2)
+		flat (MIDDLE + d + wide) quoteTop [heading DOWNWARD]
+		curl (MIDDLE + d - wide) quoteBottom [widths.heading fine fine DOWNWARD]
 
 
 ### Aliased modifer letters
@@ -426,7 +392,7 @@ dwl nothing 0xFF09 'parenRight'
 create-glyph 'dwquestion' : glyph-construction
 	set-width UPM
 	assign-unicode 0xFF1F
-	include : list : Ring (DOTSIZE - O) O (UPM / 2 - DOTRADIUS + O) (UPM / 2 + DOTRADIUS - O) true
+	include : Ring (DOTSIZE - O) O (UPM / 2 - DOTRADIUS + O) (UPM / 2 + DOTRADIUS - O) true
 	include : dispiro
 		widths.rhs
 		g4 (UPM * 0.25) (CAP - HOOK)

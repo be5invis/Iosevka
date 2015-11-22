@@ -3,6 +3,7 @@ define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define utp [require './support/transform'].untransform
 define inverse [require './support/transform'].inverse
+define unorm : require 'unorm'
 
 define libspiro : require 'libspiro-js'
 define SpiroExpansionContext [require './support/spiroexpand'].SpiroExpansionContext
@@ -111,13 +112,6 @@ define [buildFont para recursive] : begin
 	
 	define SLAB para.slab
 	
-	define KAPPA para.kappa
-	define BKAPPA : para.bkappa || KAPPA + 0.1
-	define KAPPA_SPIRO_ARC : KAPPA + 0.1
-	define CKAPPA : para.ckappa || BKAPPA
-	define KAPPA_HOOK  : fallback para.kappa_hook  (BKAPPA + 0.1)
-	define KAPPA_AHOOK : fallback para.kappa_ahook KAPPA_HOOK
-	define KAPPA_RHOOK : fallback para.kappa_rhook KAPPA_HOOK
 	define TAILADJX : WIDTH * 0.2
 	define TAILADJY : XH * 0.25
 	define LBALANCE : LONGJUT * 0.04
@@ -235,14 +229,8 @@ define [buildFont para recursive] : begin
 		`[curve-to @::args] {'.syntactic-closure' `[currentGlyph.curve-to @::args] env}
 	define-macro cubic-to : syntax-rules
 		`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
-	define-macro arc-hv-to : syntax-rules
-		`[arc-hv-to @::args] {'.syntactic-closure' `[currentGlyph.arc-hv-to @::args] env}
-	define-macro arc-vh-to : syntax-rules
-		`[arc-vh-to @::args] {'.syntactic-closure' `[currentGlyph.arc-vh-to @::args] env}
 	define-macro include : syntax-rules
 		`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
-	define-macro create-stroke : syntax-rules
-		`[create-stroke @::args] {'.syntactic-closure' `[currentGlyph.create-stroke @::args] env}
 	define-macro set-anchor : syntax-rules
 		`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
 	define-macro apply-transform : syntax-rules
@@ -359,9 +347,12 @@ define [buildFont para recursive] : begin
 	define [widths.lhs w] : widths [fallback w STROKE] 0
 	define [widths.rhs w] : widths 0 [fallback w STROKE]
 	define [widths.center w] : widths ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)
+	
 	define [heading d] : lambda [] : this.heads-to d
-	define [widths.heading l r d] : lambda [] : begin
-		this.set-width l r; this.heads-to d
+	define [widths.heading l r d] : lambda [] : begin [this.set-width l r] [this.heads-to d]
+	define [widths.lhs.heading w d] : lambda [] : begin [this.set-width [fallback w STROKE] 0] [this.heads-to d]
+	define [widths.rhs.heading w d] : lambda [] : begin [this.set-width 0 [fallback w STROKE]] [this.heads-to d]
+	define [widths.center.heading w d] : lambda [] : begin [this.set-width ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)] [this.heads-to d]
 	define [unimportant] : begin
 		if (this.points && this.points.length && this.points.(this.points.length - 1)) : this.points.(this.points.length - 1).subdivided = true
 		if (this.controlKnots && this.controlKnots.length && this.controlKnots.(this.controlKnots.length - 1)) : this.controlKnots.(this.controlKnots.length - 1).unimportant = true
@@ -381,26 +372,27 @@ define [buildFont para recursive] : begin
 		return knots
 	define [alsothru rx ry raf] {.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate}
 	define [alsothruthem rs raf ty] {.type 'interpolate' .rs rs .raf raf .ty ty .af afInterpolateThem}
-	define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b +3 * t * t * (1 - t) * c + t * t * t * d
+	define [bez2 a b c t] : (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c
+	define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b + 3 * t * t * (1 - t) * c + t * t * t * d
 	define [bezcontrols x1 y1 x2 y2 _samples raf ty] : begin
 		local samples : fallback _samples 3
-		local tiny 0.005
 		local rs {}
 		foreach j [range 1 samples] : rs.push : list
-			bez3 0 x1 x2 1 [mix tiny (1 - tiny) (j / samples)]
-			bez3 0 y1 y2 1 [mix tiny (1 - tiny) (j / samples)]
+			bez3 0 x1 x2 1 (j / samples)
+			bez3 0 y1 y2 1 (j / samples)
 		alsothruthem rs raf ty
-	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
-		local samples : fallback _samples 3
-		local tiny 0.005
-		local rs {}
-		foreach j [range 1 samples] : rs.push : g4
-			bez3 before.x x1 x2 after.x [mix tiny (1 - tiny) (j / samples)]
-			bez3 before.y y1 y2 after.y [mix tiny (1 - tiny) (j / samples)]
-			fallback raf unimportant
-		return rs
 	define [quadcontrols x1 y1 samples raf ty] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf ty
 	
+	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
+		local samples : fallback _samples 3
+		local rs {}
+		foreach j [range 1 samples] : rs.push : g4
+			bez3 before.x x1 x2 after.x (j / samples)
+			bez3 before.y y1 y2 after.y (j / samples)
+			fallback raf unimportant
+		return rs
+
+
 	define {jhv, jvh} : let [cache {}] : begin
 		local [build samples] : begin
 			local hv {}
@@ -464,7 +456,8 @@ define [buildFont para recursive] : begin
 				if af : af.apply this arguments
 		libspiro.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
-		local {.lhs lhs .rhs rhs} : s.expand CONTRAST
+		
+		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast CONTRAST]
 		if closed : then
 			local g : new Glyph
 			libspiro.spiroToBezierOnContext [lhs.slice 0 (-1)] true g true
@@ -477,9 +470,8 @@ define [buildFont para recursive] : begin
 			local g : new Glyph
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 			libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g true
-		local r g.contours
-		r.knots = knots
-		return r
+		
+		return g
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : glyph-construction
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k this
 		libspiro.spiroToBezierOnContext knots closed this
@@ -547,10 +539,11 @@ define [buildFont para recursive] : begin
 		set-width WIDTH
 		assign-unicode ' '
 		include eMarks
-	
-	# ASCII
+
 	$$include 'glyphs/common-shapes.patel'
 	$$include 'glyphs/overmarks.patel'
+	
+	# ASCII
 	$$include 'glyphs/latin-basic-capital.patel'
 	$$include 'glyphs/latin-basic-lower.patel'
 	$$include 'glyphs/numbers.patel'

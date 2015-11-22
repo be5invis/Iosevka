@@ -9,7 +9,7 @@ PARAM_CC_SLAB = FAST='$(FAST)' SUFFIX='cc-slab' VARIANTNAME='$(VARIANTNAME)' STY
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 ifeq ($(OS),Windows_NT)
-LOOPS = 1 2 3 4 5 6 7 8 9 10
+LOOPS = 0 1 2 3 4 5 6 7 8 9
 else
 LOOPS = 1
 endif

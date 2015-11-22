@@ -11,20 +11,16 @@ define {ArrowHead ArrowShape} : let
 		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
 			local size : fallback _size arrowSize
 			set this.gizmo : Translate 0 0
-			include : create-stroke
-				:.start-from 0 0
-				:.heads-to   UPWARD
-				:.set-width  0 fine
-				:.line-to    (size * 1) size
-				:.set-width  0 fine
-				:.max-samples 1
-			include : create-stroke
-				:.start-from 0 0
-				:.heads-to   DOWNWARD
-				:.set-width  fine 0
-				:.line-to    (size * 1) (-size)
-				:.set-width  fine 0
-				:.max-samples 1
+			include : dispiro
+				widths.rhs fine
+				flat 0 0 [heading UPWARD]
+				curl (size * 1) size
+				end [[] -> (this.contrast = 1)]
+			include : dispiro
+				widths.lhs fine
+				flat 0 0 [heading DOWNWARD]
+				curl (size * 1) (-size)
+				end [[] -> (this.contrast = 1)]
 			apply-transform : Translate O 0
 			local {.x xo .y yo} : tp globalTransform {.x x1 .y y1}
 			local {.x xt .y yt} : tp globalTransform {.x x2 .y y2}
@@ -34,10 +30,11 @@ define {ArrowHead ArrowShape} : let
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - halfstroke * 1.1) / mag
 			include : ArrowHead x1 y1 x2 y2 size
-			include : create-stroke
-				:.start-from x1 y1
-				:.set-width  halfstroke halfstroke
-				:.line-to    [mix x1 x2 p] [mix y1 y2 p]
+			include : dispiro
+				widths.center (halfstroke * 2)
+				flat x1 y1
+				curl [mix x1 x2 p] [mix y1 y2 p]
+				end [[] -> (this.contrast = 1)]
 		define [arrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction
 			set-width FULLWIDTH
 			set-anchor "slash" BASE FWMIDDLE parenMid
@@ -136,7 +133,7 @@ let : begin
 		include : FullWidthify
 	create-glyph 'blackcircle' : glyph-construction
 		assign-unicode 0x25CF
-		include : list : Ring (parenMid + squareRadius) (parenMid - squareRadius) SB RIGHTSB
+		include : Ring (parenMid + squareRadius) (parenMid - squareRadius) SB RIGHTSB
 		include : FullWidthify
 	create-glyph 'dottedcircle' : glyph-construction
 		assign-unicode 0x25CC
@@ -146,7 +143,7 @@ let : begin
 			local angle : Math.PI * 2 * j / n
 			local cx : MIDDLE + (RIGHTSB - MIDDLE) * [Math.cos angle]
 			local cy : (XH / 2) + (RIGHTSB - MIDDLE) * [Math.sin angle]
-			include : list : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
+			include : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
 		include eMarks
 		apply-transform [Upright] true
 		apply-transform [Translate 0 (parenMid - (XH / 2))] true
@@ -361,57 +358,53 @@ let : begin
 	vDashed 0x254E 2 light
 	vDashed 0x254F 2 heavy
 	
-	# Args
+	# Arcs
 	create-glyph 'bd256D' : glyph-construction
 		assign-unicode 0x256D
 		set-width width
-		include : create-stroke
-			:.start-from midx font.hhea.descent
-			:.heads-to   UPWARD
-			:.set-width  (light / 2) (light / 2)
-			:.arc-vh-to  width midy
-			:.heads-to   RIGHTWARD
+		include : dispiro
+			widths.center light
+			g4.up.start midx font.hhea.descent [heading UPWARD]
+			arcvh
+			g4.right.end width midy [heading RIGHTWARD]
 	create-glyph 'bd256E' : glyph-construction
 		assign-unicode 0x256E
 		set-width width
-		include : create-stroke
-			:.start-from midx font.hhea.descent
-			:.heads-to   UPWARD
-			:.set-width  (light / 2) (light / 2)
-			:.arc-vh-to  0 midy
-			:.heads-to   LEFTWARD
+		include : dispiro
+			widths.center light
+			g4.up.start midx font.hhea.descent [heading UPWARD]
+			arcvh
+			g4.left.end 0 midy [heading LEFTWARD]
 	create-glyph 'bd256F' : glyph-construction
 		assign-unicode 0x256F
 		set-width width
-		include : create-stroke
-			:.start-from midx font.hhea.ascent
-			:.heads-to   DOWNWARD
-			:.set-width  (light / 2) (light / 2)
-			:.arc-vh-to  0 midy
-			:.heads-to   LEFTWARD
+		include : dispiro
+			widths.center light
+			g4.down.start midx font.hhea.ascent [heading DOWNWARD]
+			arcvh
+			g4.left.end 0 midy [heading LEFTWARD]
 	create-glyph 'bd2570' : glyph-construction
 		assign-unicode 0x2570
 		set-width width
-		include : create-stroke
-			:.start-from midx font.hhea.ascent
-			:.heads-to   DOWNWARD
-			:.set-width  (light / 2) (light / 2)
-			:.arc-vh-to  width midy
-			:.heads-to   RIGHTWARD
+		include : dispiro
+			widths.center light
+			g4.down.start midx font.hhea.ascent [heading DOWNWARD]
+			arcvh
+			g4.right.end width midy [heading RIGHTWARD]
 	create-glyph 'bd2571' : glyph-construction
 		assign-unicode 0x2571
 		set-width width
-		include : create-stroke
-			:.start-from width font.hhea.ascent
-			:.set-width  (light / 2) (light / 2)
-			:.line-to    0 font.hhea.descent
+		include : dispiro
+			widths.center light
+			flat width font.hhea.ascent
+			curl 0 font.hhea.descent
 	create-glyph 'bd2572' : glyph-construction
 		assign-unicode 0x2572
 		set-width width
-		include : create-stroke
-			:.start-from 0 font.hhea.ascent
-			:.set-width  (light / 2) (light / 2)
-			:.line-to    width font.hhea.descent
+		include : dispiro
+			widths.center light
+			flat 0 font.hhea.ascent
+			curl width font.hhea.descent
 	create-glyph 'bd2573' : glyph-construction
 		assign-unicode 0x2573
 		set-width width
@@ -427,13 +420,12 @@ create-glyph 'branch' : glyph-construction
 	local xRightBall : RIGHTSB - PERIODRADIUS
 	local yRightBall : mix parenBot parenTop 0.45
 	include : VBar vBarPos (parenBot + PERIODSIZE) [linreg SB parenTop xRightBall yRightBall vBarPos] fine
-	include : create-stroke
-		:.start-from SB parenTop
-		:.set-width  (fine / 2) (fine / 2)
-		:.line-to    xRightBall yRightBall
-	include : list
-		RingAt vBarPos (parenBot + PERIODSIZE) PERIODRADIUS
-		RingAt xRightBall yRightBall PERIODRADIUS
+	include : dispiro
+		widths.center fine
+		flat SB parenTop
+		curl xRightBall yRightBall
+	include : RingAt vBarPos (parenBot + PERIODSIZE) PERIODRADIUS
+	include : RingAt xRightBall yRightBall PERIODRADIUS
 
 create-glyph 'pwlTriangleRight' : glyph-construction
 	assign-unicode 0xE0B0
@@ -446,14 +438,14 @@ create-glyph 'pwlTriangleRight' : glyph-construction
 create-glyph 'pwlAngleRight' : glyph-construction
 	assign-unicode 0xE0B1
 	local fine : adviceBlackness 4
-	include : create-stroke
-		:.start-from 0 font.hhea.ascent
-		:.set-width  0 fine
-		:.line-to    WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
-	include : create-stroke
-		:.start-from WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
-		:.set-width  0 fine
-		:.line-to    0 font.hhea.descent
+	include : dispiro
+		widths.rhs fine
+		flat 0 font.hhea.ascent
+		curl WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
+	include : dispiro
+		widths.rhs fine
+		flat WIDTH [mix font.hhea.ascent font.hhea.descent 0.5]
+		curl 0 font.hhea.descent
 
 create-glyph 'pwlTriangleLeft' : glyph-construction
 	assign-unicode 0xE0B2

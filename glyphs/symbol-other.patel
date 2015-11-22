@@ -16,13 +16,20 @@ let : begin
 		local y2 : mix heartBot heartTop 0.75
 		local y3 : mix heartBot heartTop 0.75
 		
-		start-from MIDDLE heartBot
-		curve-to   (RIGHTSB - O) y1 (RIGHTSB - O) y2
-		arc-vh-to  [mix MIDDLE RIGHTSB 0.5] heartTop
-		arc-hv-to  MIDDLE y3
-		arc-vh-to  [mix MIDDLE SB 0.5] heartTop
-		arc-hv-to  (SB + O) y2
-		curve-to   (SB + O) y1 MIDDLE heartBot
+		include : spiro-outline
+			corner MIDDLE heartBot
+			quadcontrols 1 (2 / 3)
+			g4 (RIGHTSB - O) y2
+			arcvh
+			g4 [mix MIDDLE RIGHTSB 0.5] heartTop
+			archv
+			corner MIDDLE y3
+			arcvh
+			g4 [mix MIDDLE SB 0.5] heartTop
+			archv
+			g4 (SB + O) y2
+			quadcontrols 0 (1 / 3)
+			close
 	create-glyph 'spade' : glyph-construction
 		assign-unicode 0x2660
 		include glyphs.heart
@@ -38,10 +45,9 @@ let : begin
 		assign-unicode 0x2663
 		
 		local circleRadius : (heartTop - heartBot) * 0.2
-		include : list
-			RingAt MIDDLE (heartTop - circleRadius) circleRadius
-			RingAt (SB + O + circleRadius) [mix heartBot heartTop 0.45] circleRadius
-			RingAt (RIGHTSB - O - circleRadius) [mix heartBot heartTop 0.45] circleRadius
+		include : RingAt MIDDLE (heartTop - circleRadius) circleRadius
+		include : RingAt (SB + O + circleRadius) [mix heartBot heartTop 0.45] circleRadius
+		include : RingAt (RIGHTSB - O - circleRadius) [mix heartBot heartTop 0.45] circleRadius
 		
 		include : HBarBottom [mix SB RIGHTSB 0.25] [mix RIGHTSB SB 0.25] heartBot
 		include : VBar MIDDLE heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)]
@@ -76,9 +82,10 @@ create-glyph 'quaver' : glyph-construction
 	local y2 : mix operBot operTop 0.4
 	local x3 : mix SB RIGHTSB 0.7
 	local y3 : mix operBot operTop 0.25
-	include : list : Ring (operBot + 0.8 * noteSize) operBot SB (SB + noteSize)
+	include : Ring (operBot + 0.8 * noteSize) operBot SB (SB + noteSize)
 	include : VBarRight (SB + noteSize) (operBot + 0.4 * noteSize) operTop fine
-	include : create-stroke
-		:.start-from (SB + noteSize) operTop
-		:.set-width  0 fine
-		:.cubic-to   RIGHTSB y1 RIGHTSB y2 x3 y3
+	include : dispiro
+		widths.rhs fine
+		g4 (SB + noteSize) operTop
+		bezcontrols.absolute RIGHTSB y1 RIGHTSB y2
+		g4 x3 y3

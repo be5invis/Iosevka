@@ -9,8 +9,16 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
+
+ifeq ($(OS),Windows_NT)
+SHELL = C:\\Windows\\System32\\cmd.exe
+SUPPRESS_ERRORS = 2> NUL
+else
 SUPPRESS_ERRORS = 2> /dev/null
-NODE = node
+endif
+
+
+NODE = node --max_old_space_size=8192
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
