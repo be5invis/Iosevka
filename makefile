@@ -1,5 +1,5 @@
 OBJDIR = build
-SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
+SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js support/spirokit.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
 GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 FILES = $(SUPPORT_FILES) buildglyphs.js
 PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
@@ -9,7 +9,7 @@ PARAM_CC_SLAB = FAST='$(FAST)' SUFFIX='cc-slab' VARIANTNAME='$(VARIANTNAME)' STY
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 ifeq ($(OS),Windows_NT)
-LOOPS = 0 1 2 3 4 5 6 7 8 9
+LOOPS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 else
 LOOPS = 1
 endif
@@ -102,5 +102,6 @@ buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
 	patel-c --strict $< -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
+support/spirokit.js : support/spirokit.patel
 support/spiroexpand.js : support/spiroexpand.patel
 parameters.js : parameters.patel
