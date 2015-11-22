@@ -1,5 +1,10 @@
 ###### Cyrillic glyphs
 
+# Style parameters
+define [CyrDescender x shift] : glyph-construction
+	local descenderOverflow : if SLAB SIDEJUT ((RIGHTSB - SB) * [fallback shift 0.1])
+	include : VBarRight (x + descenderOverflow) (HALFSTROKE - LONGJUT) STROKE
+# Copy and turned characters
 alias 'cyrA' 0x410 'A'
 alias 'cyra' 0x430 'a'
 alias 'cyrVe' 0x412 'B'
@@ -237,18 +242,23 @@ create-glyph 'cyrghe.serbian' : glyph-construction
 
 italic-variant 'cyrghe' 0x433
 define [CyrDeShape top] : glyph-construction
-	local cutleft : mix SB RIGHTSB 0.2
-	local cutright : mix SB RIGHTSB 0.92
-	include : HBar (SB + O * 2) RIGHTSB HALFSTROKE
-	include : VBar (cutright - HALFSTROKE * CORRECTION_HX) 0 top
-	include : halfXStrand (cutleft + STROKE * CORRECTION_HX) top (SB + HALFSTROKE * CORRECTION_HX) HALFSTROKE 0.1 0.75 0.5
-	include : VBar (SB + HALFSTROKE * CORRECTION_HX + O * 2) (-LONGJUT + HALFSTROKE) 0
-	include : VBar (RIGHTSB - HALFSTROKE * CORRECTION_HX) (-LONGJUT + HALFSTROKE) 0
+	local descenderOverflow : if SLAB SIDEJUT ((RIGHTSB - SB) * 0.05)
+	local cutleft : if SLAB SB (SB + descenderOverflow)
+	local cutright : if SLAB RIGHTSB (RIGHTSB - descenderOverflow)
+	local topleft : mix cutleft cutright 0.15
+	include : HBarBottom (cutleft - descenderOverflow) (cutright + descenderOverflow) 0
+	include : VBarRight cutright 0 top
+	include : halfXStrand (topleft + STROKE * CORRECTION_HX) top (cutleft + HALFSTROKE * CORRECTION_HX) HALFSTROKE 0.1 0.75 0.5
+	include : VBarLeft (cutleft - descenderOverflow) (-LONGJUT + HALFSTROKE) 0
+	include : VBarRight (cutright + descenderOverflow) (-LONGJUT + HALFSTROKE) 0
 	
 	if SLAB : then
-		include : HBarTop (cutleft - (RIGHTSB - cutright)) RIGHTSB top
+		include : dispiro
+			widths.rhs
+			flat (topleft - descenderOverflow) top
+			curl (cutright + descenderOverflow) top
 	: else
-		include : HBarTop cutleft cutright top
+		include : HBarTop topleft cutright top
 
 create-glyph 'cyrDe' : glyph-construction
 	assign-unicode 0x414
@@ -263,18 +273,18 @@ create-glyph 'cyrde.italic' : glyph-construction
 	include bMarks
 	include : dispiro
 		widths.lhs
-		flat (RIGHTSB - O) SMALLSMOOTHA
-		curl (RIGHTSB - O) (XH - SMALLSMOOTHB)
+		flat (RIGHTSB - OX) SMALLSMOOTHA
+		curl (RIGHTSB - OX) (XH - SMALLSMOOTHB)
 		arcvh
 		g4 (MIDDLE - CORRECTION_OMIDS) (CAP * 0.7 - O)
 		archv
-		flat.ai (SB + O) (XH - SMALLSMOOTHA)
-		curl.ai (SB + O) SMALLSMOOTHB
+		flat.ai (SB + OX) (XH - SMALLSMOOTHA)
+		curl.ai (SB + OX) SMALLSMOOTHB
 		arcvh
 		g4 (MIDDLE + CORRECTION_OMIDS) O
 		archv
-		flat (RIGHTSB - O) SMALLSMOOTHA
-		curl (RIGHTSB - O) (XH - SMALLSMOOTHB)
+		flat (RIGHTSB - OX) SMALLSMOOTHA
+		curl (RIGHTSB - OX) (XH - SMALLSMOOTHB)
 		quadcontrols 0 0.8
 		g4 (SB + STROKE * 1.1) CAP
 
@@ -379,7 +389,7 @@ define [CyrTseShape top] : glyph-construction
 	include : VBarLeft SB 0 top
 	include : HBarBottom SB RIGHTSB 0
 	include : VBarRight RIGHTSB 0 top
-	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
+	include : CyrDescender RIGHTSB 0.05
 	if SLAB : begin
 		include : AIVSerifs top
 		include : LeftwardBottomSerif SB 0 SIDEJUT
@@ -396,7 +406,7 @@ create-glyph 'cyrtse.italic' : glyph-construction
 	include eMarks
 	include glyphs.u
 	eject-contour 'serifLT'
-	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
+	include : CyrDescender RIGHTSB 0.05
 italic-variant 'cyrtse' 0x446
 
 define [CyrCheShape top _barp] : glyph-construction
@@ -448,7 +458,7 @@ italic-variant 'cyrsha' 0x448
 define [CyrShchaShape top] : glyph-construction
 	include : CyrShaShape top
 	eject-contour 'serifRB'
-	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
+	include : CyrDescender RIGHTSB 0.05
 
 create-glyph 'cyrShcha' : glyph-construction
 	assign-unicode 0x429
@@ -462,7 +472,7 @@ create-glyph 'cyrshcha.italic' : glyph-construction
 	include eMarks
 	include glyphs.'cyrsha.italic'
 	eject-contour 'serifLT'
-	include : VBarRight [mix SB RIGHTSB 1.05] (HALFSTROKE - LONGJUT) STROKE
+	include : CyrDescender RIGHTSB 0.05
 italic-variant 'cyrshcha' 0x449
 
 define [CyrYerShape top] : glyph-construction

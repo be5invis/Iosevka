@@ -106,13 +106,14 @@ define [AIHSerifs top _left _right] : glyph-construction
 		include : AIVSerifs top _left _right
 		include : CenterBottomSerif (left + STROKE * sideSerifK * CORRECTION_HX) 0 JUT
 		include : CenterBottomSerif (right - STROKE * sideSerifK * CORRECTION_HX) 0 JUT
-define [AINSerifs top _left _right] : glyph-construction
+define [AINSerifs top _left _right sw xn] : glyph-construction
 	local left : fallback _left SB
 	local right : fallback _right RIGHTSB
+	local jut : JUT * [fallback xn 1]
 	if SLAB : begin
-		include : LeftwardTopSerif (left + STROKE * (sideSerifK - 0.5) * CORRECTION_HX) top SIDEJUT
-		include : CenterTopSerif (right - STROKE * sideSerifK * CORRECTION_HX) top JUT
-		include : CenterBottomSerif (left + STROKE * sideSerifK * CORRECTION_HX) 0 JUT
+		include : LeftwardTopSerif (left + sw * (sideSerifK - 0.5) * CORRECTION_HX) top (jut - sw / 2 * CORRECTION_HX)
+		include : CenterTopSerif (right - sw * sideSerifK * CORRECTION_HX) top jut
+		include : CenterBottomSerif (left + sw * sideSerifK * CORRECTION_HX) 0 jut
 		tag-contour 'serifLB'
 		#include : CenterdBottomSerif (right - STROKE * (sideSerifK - 0.5) * CORRECTION_HX) 0 (JUT / 2)
 define [AICyrISerifs top _left _right] : glyph-construction
@@ -446,6 +447,11 @@ define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double
 		apply-transform : Upright
 	apply-transform : Translate 0 (spacing / 2)
 	apply-transform : Italify
+
+define [composite newid unicode parts] : create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
+	if unicode : assign-unicode unicode
+	include parts.0 AS_BASE
+	foreach [part : items-of [parts.slice 1]] : include part
 
 # Full-width derivatives
 define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction

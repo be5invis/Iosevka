@@ -8,9 +8,9 @@ Coders' typeface, built from code.
 
 Quit your editor/program. Unzip and open the folder.
 
-* **Mac + Linux (with font-viewer)** : Select the .ttf files and double click → Follow the on-screen guide.
-* **Windows** : Right click the .ttf files → Install.
-* **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
+ * **Mac + Linux (with font-viewer)** : Select the .ttf files and double click → Follow the on-screen guide.
+ * **Windows** : Right click the .ttf files → Install.
+ * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
 
 ### Detailed Instructions
  * [How to](http://www.howtogeek.com/192980/how-to-install-remove-and-manage-fonts-on-windows-mac-and-linux/) Install, Remove, and Manage Fonts on Windows, Mac, and Linux.
@@ -29,7 +29,7 @@ You will find ttfs in the `build/` directory.
 
 ## Build your own style
 
-![](https://cloud.githubusercontent.com/assets/240091/10895370/cc80f088-81ee-11e5-919b-a6daefdbc3f0.png)
+![Styles Preview](https://cloud.githubusercontent.com/assets/240091/10895370/cc80f088-81ee-11e5-919b-a6daefdbc3f0.png)
 
 Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:
 
