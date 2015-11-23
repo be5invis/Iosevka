@@ -35,56 +35,56 @@ fdts-cc-slab : $(FILES) | $(OBJDIR)
 
 # ttfs
 fonts-default : fdts-default
-	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_DEFAULT)
+	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
 fonts-slab : fdts-slab
-	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_SLAB)
+	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
 fonts-cc : fdts-cc
-	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_CC)
+	@$(MAKE) -f onegroup.mk fonts $(PARAM_CC)
 fonts-cc-slab : fdts-cc-slab
-	@$(MAKE) -s -f onegroup.mk fonts $(PARAM_CC_SLAB)
+	@$(MAKE) -f onegroup.mk fonts $(PARAM_CC_SLAB)
 
 
 ### USED FOR TESTING AND RELEASING
 ### DO NOT TOUCH!
 # testdrive
 test-default : fonts-default
-	@$(MAKE) -s -f onegroup.mk test $(PARAM_DEFAULT)
+	@$(MAKE) -f onegroup.mk test $(PARAM_DEFAULT)
 test-slab : fonts-slab
-	@$(MAKE) -s -f onegroup.mk test $(PARAM_SLAB)
+	@$(MAKE) -f onegroup.mk test $(PARAM_SLAB)
 test-cc : fonts-cc
-	@$(MAKE) -s -f onegroup.mk test $(PARAM_CC)
+	@$(MAKE) -f onegroup.mk test $(PARAM_CC)
 test-cc-slab : fonts-cc-slab
-	@$(MAKE) -s -f onegroup.mk test $(PARAM_CC_SLAB)
+	@$(MAKE) -f onegroup.mk test $(PARAM_CC_SLAB)
 
 # Pages
 pages-default : fonts-default
-	@$(MAKE) -s -f onegroup.mk pages $(PARAM_DEFAULT)
+	@$(MAKE) -f onegroup.mk pages $(PARAM_DEFAULT)
 pages-slab : fonts-slab
-	@$(MAKE) -s -f onegroup.mk pages $(PARAM_SLAB)
+	@$(MAKE) -f onegroup.mk pages $(PARAM_SLAB)
 pages-cc : fonts-cc
-	@$(MAKE) -s -f onegroup.mk pages $(PARAM_CC)
+	@$(MAKE) -f onegroup.mk pages $(PARAM_CC)
 pages-cc-slab : fonts-cc-slab
-	@$(MAKE) -s -f onegroup.mk pages $(PARAM_CC_SLAB)
+	@$(MAKE) -f onegroup.mk pages $(PARAM_CC_SLAB)
 
 # Release
 release-default : fonts-default
-	@$(MAKE) -s -f onegroup.mk release $(PARAM_DEFAULT)
+	@$(MAKE) -f onegroup.mk release $(PARAM_DEFAULT)
 release-slab : fonts-slab
-	@$(MAKE) -s -f onegroup.mk release $(PARAM_SLAB)
+	@$(MAKE) -f onegroup.mk release $(PARAM_SLAB)
 release-cc : fonts-cc
-	@$(MAKE) -s -f onegroup.mk release $(PARAM_CC)
+	@$(MAKE) -f onegroup.mk release $(PARAM_CC)
 release-cc-slab : fonts-cc-slab
-	@$(MAKE) -s -f onegroup.mk release $(PARAM_CC_SLAB)
+	@$(MAKE) -f onegroup.mk release $(PARAM_CC_SLAB)
 
 # Archives
 archives-default : fonts-default
-	@$(MAKE) -s -f onegroup.mk archives $(PARAM_DEFAULT)
+	@$(MAKE) -f onegroup.mk archives $(PARAM_DEFAULT)
 archives-slab : fonts-slab
-	@$(MAKE) -s -f onegroup.mk archives $(PARAM_SLAB)
+	@$(MAKE) -f onegroup.mk archives $(PARAM_SLAB)
 archives-cc : fonts-cc
-	@$(MAKE) -s -f onegroup.mk archives $(PARAM_CC)
+	@$(MAKE) -f onegroup.mk archives $(PARAM_CC)
 archives-cc-slab : fonts-cc-slab
-	@$(MAKE) -s -f onegroup.mk archives $(PARAM_CC_SLAB)
+	@$(MAKE) -f onegroup.mk archives $(PARAM_CC_SLAB)
 
 # Variant releases
 releasepack-default : $(FILES) | $(OBJDIR)

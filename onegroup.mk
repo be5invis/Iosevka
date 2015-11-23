@@ -13,12 +13,11 @@ FILES = $(SUPPORT_FILES) buildglyphs.js
 ifeq ($(OS),Windows_NT)
 SHELL = C:\\Windows\\System32\\cmd.exe
 SUPPRESS_ERRORS = 2> NUL
+NODE = node --noincremental_marking --max_executable_size=1024
 else
 SUPPRESS_ERRORS = 2> /dev/null
+NODE = node
 endif
-
-
-NODE = node --max_old_space_size=4096
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf

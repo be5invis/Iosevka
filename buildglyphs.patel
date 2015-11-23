@@ -20,7 +20,16 @@ define [clamp l h x] : if (x < l) l : if (x > h) h x
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 
 define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
+define [normalize a] : begin
+	local m : Math.hypot a.x a.y
+	return {.x (a.x / m) .y (a.y / m)}
 
+define [anchorDeriv] : begin
+	local h {.}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
+		set h.(k) {.}
+		set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
+	return {.anchors h}
 # Empty font base file
 
 ### File inclusion macro
@@ -61,8 +70,6 @@ define-macro eject-contour : syntax-rules
 	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
 define-macro tag-contour : syntax-rules
 	`[tag-contour @name] {'.syntactic-closure' `(currentGlyph.contours.(currentGlyph.contours.length - 1).tag = @name) env}
-define-macro dont-export : syntax-rules
-	`[dont-export] {".syntactic-closure" `[set currentGlyph.dontExport true] env}
 define-macro assign-unicode : syntax-rules
 	`[assign-unicode @code] {".syntactic-closure" `[begin \\
 		currentGlyph.assign-unicode @code
@@ -72,9 +79,8 @@ define-macro assign-unicode : syntax-rules
 define-macro glyph-construction : syntax-rules
 	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
 		local currentGlyph this
-		currentGlyph.gizmo = globalTransform
 		begin @::[steps.map formOf]
-		return nothing
+		return currentGlyph
 	]] env}
 
 # contour tagging
@@ -94,7 +100,7 @@ define [buildFont para recursive] : begin
 	define unicodeGlyphs {}
 
 	define UPM 1000
-	define serifed : not [not para.serif]
+
 	# Key metrics
 	define WIDTH para.width
 	define SB para.sb
@@ -105,6 +111,8 @@ define [buildFont para recursive] : begin
 	local parenTop ((XH * 0.625) + (CAP - XH) * 2.5)
 	local parenBot ((XH * 0.625) - (CAP - XH) * 2.5)
 	local parenMid [mix parenTop parenBot 0.5]
+	local operTop : mix parenMid parenTop 0.8
+	local operBot : mix parenMid parenBot 0.8
 	
 	# Transform constructors
 	define [Italify angle shift] : begin
@@ -124,9 +132,6 @@ define [buildFont para recursive] : begin
 	define DOWNWARD {.x CORRECTION_HX .y 0}
 	define RIGHTWARD {.x globalTransform.yx .y 1}
 	define LEFTWARD  {.x (- globalTransform.yx) .y (-1)}
-	define [normalize a] : begin
-		local m : Math.hypot a.x a.y
-		return {.x (a.x / m) .y (a.y / m)}
 	
 	# Style parameters
 	define O para.overshoot
@@ -226,7 +231,7 @@ define [buildFont para recursive] : begin
 	define AS_BASE 'AS-BASE'
 	
 	define [tm anchor] : return {
-	.x (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
+		.x (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
 		.y (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
 		.type anchor.type
 	}
@@ -240,12 +245,6 @@ define [buildFont para recursive] : begin
 	define markBottomrightLower {.anchors {.bottomright [tm {.x RIGHTSB .y DESCENDER        .type BASE}]}}
 	define markBottomrightZero   {.anchors {.bottomright [tm {.x RIGHTSB .y 0       .type BASE}]}}
 	
-	define [anchorDeriv] : begin
-		local h {.}
-		foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
-			set h.(k) {.}
-			set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
-		return {.anchors h}
 	define [StdAnchorGroup] : begin
 		local a : anchorDeriv.apply null arguments
 		set a.anchors.overlay {.type BASE
@@ -279,6 +278,7 @@ define [buildFont para recursive] : begin
 			set dependencyProfile.(name) {}
 			define glyphObject [new Glyph name]
 			glyphObject.set-width WIDTH
+			glyphObject.gizmo = globalTransform
 			glyphList.push glyphObject
 			glyphs.(name) = glyphObject
 			actions.call glyphObject
@@ -320,7 +320,7 @@ define [buildFont para recursive] : begin
 		widths heading unimportant important
 		alsothru alsothruthem bezcontrols quadcontrols archv arcvh complexThru
 		dispiro spiro-outline] : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
-	
+
 	###### HERE WE GO!
 	
 	### Metadata
@@ -374,11 +374,13 @@ define [buildFont para recursive] : begin
 		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
 		line-to    (SB + STROKE) (CAP - STROKE)
 	
+	# Space
 	create-glyph 'space' : glyph-construction
 		set-width WIDTH
 		assign-unicode ' '
 		include eMarks
 
+	### HERE WE GO
 	$$include 'glyphs/common-shapes.patel'
 	$$include 'glyphs/overmarks.patel'
 	
