@@ -14,6 +14,7 @@ else
 LOOPS = 1
 endif
 
+fdts : fdts-default fdts-cc fdts-slab fdts-cc-slab
 fonts : fonts-default fonts-cc fonts-slab fonts-cc-slab
 test  : test-default test-cc test-slab test-cc-slab
 pages : pages-default pages-cc pages-slab pages-cc-slab

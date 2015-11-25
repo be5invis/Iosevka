@@ -3,34 +3,10 @@ define Stroke [require './support/stroke'].Stroke
 define tp [require './support/transform'].transformPoint
 define utp [require './support/transform'].untransform
 define inverse [require './support/transform'].inverse
-define unorm : require 'unorm'
-
+define unorm [require 'unorm']
 define spirokit [require './support/spirokit']
 
-### COMMON FUNCTIONS
-define [mix a b p] : a + (b - a) * p
-define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
-define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg
-	* y0
-	linreg x0 z00 x1 z10 x
-	* y1
-	linreg x0 z01 x1 z11 x
-	* y
-define [clamp l h x] : if (x < l) l : if (x > h) h x
-define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 
-define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
-define [normalize a] : begin
-	local m : Math.hypot a.x a.y
-	return {.x (a.x / m) .y (a.y / m)}
-
-define [anchorDeriv] : begin
-	local h {.}
-	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
-		set h.(k) {.}
-		set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
-	return {.anchors h}
-# Empty font base file
 
 ### File inclusion macro
 define-macro $$include : syntax-rules
@@ -46,6 +22,10 @@ define-macro $$include : syntax-rules
 		return {'.syntactic-closure' ast env}
 	otherwise `nothing
 
+define [includeGlyphPart cg gs nm] : begin
+	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
+	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
+
 ### Necessary macros
 # Remap Glyph's methods to macros in order to simplify writing
 define-macro set-width : syntax-rules
@@ -59,6 +39,7 @@ define-macro curve-to : syntax-rules
 define-macro cubic-to : syntax-rules
 	`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
 define-macro include : syntax-rules
+	`[include glyphs.(@name) @::args] : dirty `[includeGlyphPart currentGlyph glyphs @name @::args]
 	`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
 define-macro set-anchor : syntax-rules
 	`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
@@ -83,6 +64,35 @@ define-macro glyph-construction : syntax-rules
 		return nothing
 	]] env}
 
+define-macro symbol-block : syntax-rules
+	`[symbol-block @name @::steps] : let [t : env.newt] : dirty `[begin [let : set @t : begin @::[steps.map formOf]] [progress @name] @t]
+
+
+
+### COMMON FUNCTIONS
+define [mix a b p] : a + (b - a) * p
+define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+define [bilinear x0 x1 y0 y1 z00 z01 z10 z11 x y] : linreg
+	* y0
+	linreg x0 z00 x1 z10 x
+	* y1
+	linreg x0 z01 x1 z11 x
+	* y
+define [clamp l h x] : if (x < l) l : if (x > h) h x
+define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
+
+define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
+define [normalize a] : begin
+	local m : Math.hypot a.x a.y
+	return {.x (a.x / m) .y (a.y / m)}
+
+define [anchorDeriv] : begin
+	local h {.}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
+		set h.(k) {.}
+		set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
+	return {.anchors h}
+
 # contour tagging
 define [tagged tag fn] : lambda [] : begin
 	local _tag this.defaultTag
@@ -100,6 +110,9 @@ define [buildFont para recursive] : begin
 	define unicodeGlyphs {}
 
 	define UPM 1000
+	
+	# Progress indicator
+	define [progress name] : if [not recursive] : console.log "    \(font.name.uniqueSubFamily) : Done \(name)"
 
 	# Key metrics
 	define WIDTH para.width
@@ -277,7 +290,7 @@ define [buildFont para recursive] : begin
 	define [create-glyph name actions] : piecewise
 		(name && actions) : begin
 			if (pickHash && nPending <= 0) : begin
-				console.log "    Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
+				console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
 			set dependencyProfile.(name) {}
@@ -391,22 +404,25 @@ define [buildFont para recursive] : begin
 	$$include 'glyphs/overmarks.patel'
 	
 	# ASCII
-	$$include 'glyphs/latin-basic-capital.patel'
-	$$include 'glyphs/latin-basic-lower.patel'
-	$$include 'glyphs/numbers.patel'
-	$$include 'glyphs/symbol-ascii.patel'
+	$$include 'glyphs/latin-basic-capital.patel'     ; progress 'Basic Latin Majuscule'
+	$$include 'glyphs/latin-basic-lower.patel'       ; progress 'Basic Latin Minuscule'
+	$$include 'glyphs/numbers.patel'                 ; progress 'Numbers'
 	
 	# Extended
-	$$include 'glyphs/greek.patel'
-	$$include 'glyphs/cyrillic-basic.patel'
-	$$include 'glyphs/latin-extend-basis.patel'
-	$$include 'glyphs/latin-extend-decorated.patel'
-	$$include 'glyphs/cyrillic-extended.patel'
+	$$include 'glyphs/greek.patel'                   ; progress 'Greek'
+	$$include 'glyphs/cyrillic-basic.patel'          ; progress 'Cyrillic'
+	$$include 'glyphs/latin-extend-basis.patel'      ; progress 'Extended Latin Undecorated'
+	$$include 'glyphs/latin-extend-decorated.patel'  ; progress 'Extended Latin Decorated'
+	$$include 'glyphs/cyrillic-extended.patel'       ; progress 'Extended Cyrillic'
+	
+	# Symbols
 	$$include 'glyphs/symbol-punctuation.patel'
 	$$include 'glyphs/symbol-math.patel'
 	$$include 'glyphs/symbol-letter.patel'
 	$$include 'glyphs/symbol-geometric.patel'
 	$$include 'glyphs/symbol-other.patel'
+	
+	# Autobuilds
 	$$include 'glyphs/autobuilds.patel'
 	
 	set font.glyfMap glyphs
