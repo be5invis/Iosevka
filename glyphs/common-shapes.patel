@@ -381,13 +381,15 @@ define [WaveShape l r cy extendy tension sw] : glyph-construction
 		g4 r (cy + endwavey)
 
 # Derived subfonts
-define [Fork glyphs params] : begin
+define [Fork gs params] : begin
 	local p : Object.create params
 	local shouldBuildList {}
-	foreach glyphid [items-of glyphs] : set shouldBuildList : shouldBuildList.concat {glyphid :: dependencyProfile.(glyphid)}
+	foreach glyphid [items-of gs] : set shouldBuildList : shouldBuildList.concat {glyphid :: dependencyProfile.(glyphid)}
 	set shouldBuildList : shouldBuildList.filter : [x] -> [not [not x]]
+	local shouldBuildUnicodes : shouldBuildList.map ([x] -> [if (glyphs.(x) && glyphs.(x).unicode) glyphs.(x).unicode.0 nothing])
+		:.filter ([x] -> [not [not x]])
 	try : begin
-		local forkFont : buildFont.call [TempFont] p shouldBuildList
+		local forkFont : buildFont.call [TempFont] p shouldBuildList shouldBuildUnicodes
 	: ex
 	: begin
 		if ex.glyfMap : return ex.glyfMap

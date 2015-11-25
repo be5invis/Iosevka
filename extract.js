@@ -3,7 +3,7 @@ var TTFWriter = require('node-sfnt').TTFWriter;
 var TTF = require('node-sfnt').TTF;
 var argv = require('yargs').argv;
 
-var Glyph = require('./support/glyph').Glyph;
+var Glyph = require('./support/glyph');
 
 function toBuffer(arrayBuffer) {
 	var length = arrayBuffer.byteLength;

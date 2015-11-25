@@ -21,7 +21,7 @@ Quit your editor/program. Unzip and open the folder.
 To build Iosevka you should:
 
 1. Ensure that `node`, `FontForge`, `ttfautohint`, `ttx` and `make` are runnable in your terminal.
-2. Install the newest `patel-c` (≥ 0.21.0) by `npm install patel -g`
+2. Install the newest `patel-c` (≥ 0.25.0) by `npm install patel -g`
 3. Install necessary libs by `npm install`
 4. `make`.
 

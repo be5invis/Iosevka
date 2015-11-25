@@ -1,8 +1,7 @@
-define bezierCubic2Q2 [require 'node-sfnt/lib/math/bezierCubic2Q2']
-define tp [require './transform'].transformPoint
-define utp [require './transform'].untransform
-define Stroke [require './stroke'].Stroke
-define Bezier [require 'bezier-js']
+import 'node-sfnt/lib/math/bezierCubic2Q2' as bezierCubic2Q2
+import './transform' as [object [transformPoint tp] [untransform utp] inverse]
+import 'bezier-js' as Bezier
+
 define [mix a b p] : a + (b - a) * p
 define [ratio l r m] : if [l === r] 0 ((m - l) / (r - l))
 
@@ -17,7 +16,7 @@ define id {
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define aFunction {.unapply [function [obj arity] [if (obj <@ Function) {obj} null]]}
 
-define [Glyph name] : begin
+export default : define [Glyph name] : begin
 	set this.name name
 	set this.unicode {}
 	set this.contours {}
@@ -80,24 +79,6 @@ define [Glyph.prototype.reverse-last] : begin
 	if [this.contours && this.contours.(this.contours.length - 1)] : begin
 		this.contours.(this.contours.length - 1) = [this.contours.(this.contours.length - 1).reverse]
 
-define [Glyph.prototype.put-shapes contours] : begin
-	local t this.gizmo
-	set this.gizmo id
-	foreach contour [items-of contours] : if contour : begin
-		this.start-from contour.0.x contour.0.y
-		for [local j 1] (j < contour.length) [inc j] : begin
-			local point contour.(j)
-			if point.cubic
-			: then : begin
-				local p2 contour.((j + 1))
-				local p3 contour.((j + 2))
-				this.cubic-to point.x point.y p2.x p2.y p3.x p3.y
-				j = j + 2
-			: else : if point.onCurve [this.line-to point.x point.y] [this.curve-control point.x point.y]
-		this.tag-contour [fallback contour.tag this.defaultTag]
-	set this.gizmo t
-	return this
-
 define [Glyph.prototype.tag-contour tag n] : begin
 	if this.contours : begin
 		local lastContour this.contours.(this.contours.length - 1)
@@ -110,7 +91,6 @@ define [Glyph.prototype.eject-contour tag] : begin
 define [Glyph.prototype.include component copyAnchors quenches] : begin
 	local glyph : match component
 		[aFunction it] : return : component.call this
-		[Stroke.is it]   {.contours [component.to-outline]}
 		{:: contours}    {.contours contours}
 		otherwise        component
 	local contours glyph.contours
@@ -123,14 +103,14 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 		local anchorThat glyph.anchors.(markid)
 		if (anchorThis && (anchorThis.type === 'base' || anchorThis.mbx !== nothing && anchorThis.mby !== nothing) && anchorThat && anchorThat.type === 'mark') : begin
 			set {shiftx shifty} {
-			([fallback anchorThis.mbx anchorThis.x] - anchorThat.x)
+				([fallback anchorThis.mbx anchorThis.x] - anchorThat.x)
 				([fallback anchorThis.mby anchorThis.y] - anchorThat.y)
 			}
 			# we have a mark-to-mark position
 			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing) : if (anchorThis.type === 'base')
 				then
 					set this.anchors.(markid) {
-					.x (anchorThis.x + anchorThat.mbx - anchorThat.x)
+						.x (anchorThis.x + anchorThat.mbx - anchorThat.x)
 						.y (anchorThis.y + anchorThat.mby - anchorThat.y)
 						.type anchorThis.type
 						.mbx anchorThis.mbx
@@ -138,7 +118,7 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 					}
 				else
 					set this.anchors.(markid) {
-					.mbx (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
+						.mbx (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
 						.mby (anchorThis.mby + anchorThat.mby - anchorThat.y)
 						.type anchorThis.type
 						.x anchorThis.x
@@ -147,13 +127,15 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 	set transform.x : transform.x + shiftx
 	set transform.y : transform.y + shifty
 	if contours : begin
-		this.put-shapes : contours.map : function [contour] : begin
+		foreach [contour : items-of contours] : begin
+			local doput true
 			if quenches : foreach [tag : items-of quenches] : begin
-				if [contour.tag === tag] : return null
-			return : begin
-				local r : contour.map : function [point] : tp transform point
-				set r.tag contour.tag
-				* r
+				if [contour.tag === tag] : set doput false
+			if doput : begin
+				local c {}
+				foreach [point : items-of contour] : c.push : tp transform point
+				set c.tag contour.tag
+				this.contours.push c
 	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
 		foreach k [items-of keys] [set a.(k) anchors.(k)]
 		* a
@@ -239,5 +221,3 @@ define [Glyph.prototype.cleanup t] : begin
 		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 		this.contours.(c) = cleanedContour
 	return this
-
-exports.Glyph = Glyph

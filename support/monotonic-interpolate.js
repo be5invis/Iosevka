@@ -1,4 +1,4 @@
-exports.createInterpolant = function(xs, ys) {
+module.exports = function(xs, ys) {
 	var i, length = xs.length;
 	
 	// Deal with length issues

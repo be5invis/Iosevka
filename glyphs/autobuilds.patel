@@ -116,6 +116,8 @@ define customDecompositions {
 	."\u21AE" ""
 }
 
+define iotaBelowToLF : function [p] : if (p === glyphs.iotaBelow) glyphs.iotaLF p
+define ogonekBelowToTR : function [p] : if (p === glyphs.ogonekBelow) glyphs.ogonekTR p
 define [subParts parts] : begin
 	local hasMarkAbove false
 	foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
@@ -125,8 +127,8 @@ define [subParts parts] : begin
 	if (parts.0 === glyphs.j && hasMarkAbove) : parts.0 = glyphs.dotlessj
 	
 	# replace below marks with trailing marks
-	if parts.0.anchors.lf : set parts : parts.map : function [p] : if (p === glyphs.iotaBelow) glyphs.iotaLF p
-	if parts.0.anchors.trailing : set parts : parts.map : function [p] : if (p === glyphs.ogonekBelow) glyphs.ogonekTR p
+	if parts.0.anchors.lf : set parts : parts.map iotaBelowToLF
+	if parts.0.anchors.trailing : set parts : parts.map ogonekBelowToTR
 	
 	# composite greek overmarks
 	for [local j 0] (j < parts.length) [inc j] : piecewise
@@ -153,7 +155,7 @@ define [pad s n] : begin
 	return s
 
 
-set font.features.ccmp {}
+#set font.features.ccmp {}
 define [shorter x y] : if (x.length < y.length) x y
 define [decideName namingParts parts code] : begin
 	local baseName namingParts.0.name
@@ -168,32 +170,42 @@ define [decideName namingParts parts code] : begin
 
 let : begin
 	local nComposed 0
-	foreach code [range 0x0000 0xFFFF] : if [not unicodeGlyphs.(code)] : begin
+	local foundDecompositions {}
+	local itsName : [part] -> part.name
+	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
 		local str : String.fromCharCode code
 		local nfd : fallback customDecompositions.(str) : unorm.nfd str
 		if (nfd.length > 1) : begin
 			local parts {}
 			local allFound true
 			foreach j [range 0 nfd.length] : begin
-				set parts.(j) unicodeGlyphs.([nfd.charCodeAt j])
-				if [not parts.(j)] : set allFound false
+				local part unicodeGlyphs.([nfd.charCodeAt j])
+				if [not part] : then : set allFound false
+				: else : set parts.(j) unicodeGlyphs.([nfd.charCodeAt j])
 			if allFound : begin
 				local namingParts : parts.slice 0
 				set parts : subParts parts
-				local composition : namingParts.map ([part] -> part.name) :.join ' '
+				# local composition : namingParts.map itsName :.join ' '
 				local glyphName : decideName namingParts parts code
-				create-glyph glyphName : glyph-construction
-					assign-unicode code
-					include parts.0 AS_BASE
-					set-width parts.0.advanceWidth
-					foreach part [items-of : parts.slice 1] : begin
-						include part
-						# eject right-bottom serifs
-						if (part.name === 'rtailBR') : eject-contour 'serifRB'
-				if [not glyphs.(composition)] : begin
-					font.features.ccmp.push : 'sub ' + composition + ' by ' + glyphName
-					set glyphs.(composition) glyphs.(glyphName)
+				foundDecompositions.push {glyphName code parts}
 				inc nComposed
+	
+	if recursiveCodes : recursiveCodes.forEach buildForCode
+	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
+	
+	define construction : glyph-construction
+		assign-unicode code
+		include parts.0 AS_BASE
+		set-width parts.0.advanceWidth
+		foreach part [items-of : parts.slice 1] : begin
+			include part
+			# eject right-bottom serifs
+			if (part.name === 'rtailBR') : eject-contour 'serifRB'
+#				if [not glyphs.(composition)] : begin
+#					font.features.ccmp.push : 'sub ' + composition + ' by ' + glyphName
+#					set glyphs.(composition) glyphs.(glyphName)
+	foreach [{glyphName code parts} : items-of foundDecompositions] : begin
+		create-glyph glyphName construction
 	progress "Precomposed (\(nComposed) glyphs)"
 
 
