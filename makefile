@@ -99,7 +99,7 @@ $(SUPPORT_FILES) :
 	patel-c --strict $< -o $@
 
 buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
-	patel-c --strict $< -o $@
+	patel-c --optimize --mangle --strict $< -o $@
 support/glyph.js : support/glyph.patel
 support/stroke.js : support/stroke.patel
 support/spirokit.js : support/spirokit.patel
