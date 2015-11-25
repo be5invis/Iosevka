@@ -267,13 +267,18 @@ define [buildFont para recursive] : begin
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
 	local dependencyProfile {.}
 	local nTemp 0
+	local nPending 0
 	local pickHash : if recursive
 		then : let [h {.}] : begin
 			foreach j [items-of recursive] : set h.(j) j
+			set nPending recursive.length
 			* h
 		else nothing
 	define [create-glyph name actions] : piecewise
 		(name && actions) : begin
+			if (pickHash && nPending <= 0) : begin
+				console.log "    Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
+				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
 			set dependencyProfile.(name) {}
 			define glyphObject [new Glyph name]
@@ -286,6 +291,7 @@ define [buildFont para recursive] : begin
 				local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(d)))
 				dependencyProfile.(name) = [dependencyProfile.(name).concat dependencyProfile.(d) allAliases]
 			# process.stderr.write "\[if recursive 'Recursive ' '']Built Glyph /\(name).\n"
+			dec nPending
 			return glyphObject
 		true : begin
 			local actions arguments.0

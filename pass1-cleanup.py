@@ -8,7 +8,7 @@ font = fontforge.open(source)
 
 # Replace accented characters into references
 if len(sys.argv) <= 3:
-	print "Reference finding: ", font.fontname
+	print "    Reference finding: ", font.fontname
 	font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
 	font.replaceWithReference(2)
 	font.selection.all()
@@ -16,7 +16,7 @@ if len(sys.argv) <= 3:
 	font.replaceWithReference(2)
 
 # Remove overlapped area
-print "Overlap Removal: ", font.fontname
+print "    Overlap Removal: ", font.fontname
 font.selection.all()
 font.removeOverlap()
 font.round()
@@ -33,12 +33,12 @@ if len(sys.argv) <= 3:
 	font.unlinkReferences()
 
 # Outline simplify
-print "Simplify: ", font.fontname
+print "    Simplify: ", font.fontname
 font.layers["Fore"].is_quadratic = False
 font.selection.all()
 font.simplify(font.em / 2000.0, ("smoothcurves", "choosehv"), 0.1)
 
-print "Finalize: ", font.fontname
+print "    Finalize: ", font.fontname
 oldem = font.em
 font.em = 1000
 font.layers["Fore"].is_quadratic = True

@@ -1,3 +1,5 @@
+default: fonts
+
 TARGETUPM = 1000
 OBJDIR = build
 include makesupport.mk
@@ -63,11 +65,11 @@ $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.ttf
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
 	$(NODE) $^ $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(OBJDIR)/.pass0-%.fea
-	fontforge -quiet -script $^ $@ $(TARGETUPM)
+	fontforge -quiet -script $^ $@ $(TARGETUPM) $(SUPPRESS_ERRORS)
 $(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
 	@$(NODE) $^ $@.a.ttf
-	@ttx -q -o $@.a.ttx $@.a.ttf
-	@ttx -q -o $@ $@.a.ttx
+	@ttx -q -o $@.a.ttx $@.a.ttf $(SUPPRESS_ERRORS)
+	@ttx -q -o $@ $@.a.ttx $(SUPPRESS_ERRORS)
 	@rm $@.a.ttf $@.a.ttx
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
 	ttfautohint $< $@

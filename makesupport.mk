@@ -3,7 +3,7 @@ GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-
 SCRIPTS = $(SUPPORT_FILES) buildglyphs.js
 
 buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
-	patel-c --optimize --mangle --strict $< -o $@
+	patel-c --optimize --strict $< -o $@
 
 $(SUPPORT_FILES) :
 	patel-c --strict $< -o $@

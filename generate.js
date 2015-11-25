@@ -8,10 +8,10 @@ var toml = require('toml');
 var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
 var emptyFont      = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'emptyfont.toml'), 'utf-8'));
 var para = parameters.build(parametersData, argv._);
+var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
 
-var ttfFont = buildGlyphs.build.call(emptyFont, para);
+console.log('    Start build font' + fontUniqueName);
+var font = buildGlyphs.build.call(emptyFont, para);
+console.log('    ' + fontUniqueName + " Successfully built.");
 
-if(argv.o) {
-	console.log(argv.o + " Successfully built. Styles: " + argv._)
-	fs.writeFileSync(argv.o, JSON.stringify(ttfFont));
-}
+if(argv.o) fs.writeFileSync(argv.o, JSON.stringify(font));
