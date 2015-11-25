@@ -1,7 +1,5 @@
 OBJDIR = build
-SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js support/spirokit.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
-GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
-FILES = $(SUPPORT_FILES) buildglyphs.js
+include makesupport.mk
 PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
 PARAM_SLAB = FAST='$(FAST)' SUFFIX='-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
 PARAM_CC   = FAST='$(FAST)' SUFFIX='cc' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='cc $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
@@ -24,13 +22,13 @@ $(OBJDIR) :
 
 
 # fdts
-fdts-default : $(FILES) | $(OBJDIR)
+fdts-default : $(SCRIPTS) | $(OBJDIR)
 	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_DEFAULT) LOOP=$(var);)
-fdts-slab : $(FILES) | $(OBJDIR)
+fdts-slab : $(SCRIPTS) | $(OBJDIR)
 	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_SLAB) LOOP=$(var);)
-fdts-cc : $(FILES) | $(OBJDIR)
+fdts-cc : $(SCRIPTS) | $(OBJDIR)
 	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC) LOOP=$(var);)
-fdts-cc-slab : $(FILES) | $(OBJDIR)
+fdts-cc-slab : $(SCRIPTS) | $(OBJDIR)
 	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_CC_SLAB) LOOP=$(var);)
 
 # ttfs
@@ -87,21 +85,10 @@ archives-cc-slab : fonts-cc-slab
 	@$(MAKE) -f onegroup.mk archives $(PARAM_CC_SLAB)
 
 # Variant releases
-releasepack-default : $(FILES) | $(OBJDIR)
+releasepack-default : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) pages release VERSION=$(VERSION)
-releasepack-hooky : $(FILES) | $(OBJDIR)
+releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky'
-releasepack-zshaped : $(FILES) | $(OBJDIR)
+releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default archives-cc VERSION=$(VERSION) VARIANTNAME='variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
 release-all : releasepack-default releasepack-hooky releasepack-zshaped
-
-$(SUPPORT_FILES) :
-	patel-c --strict $< -o $@
-
-buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
-	patel-c --optimize --mangle --strict $< -o $@
-support/glyph.js : support/glyph.patel
-support/stroke.js : support/stroke.patel
-support/spirokit.js : support/spirokit.patel
-support/spiroexpand.js : support/spiroexpand.patel
-parameters.js : parameters.patel

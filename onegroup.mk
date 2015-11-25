@@ -1,11 +1,7 @@
 TARGETUPM = 1000
-
-PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
-
-SUPPORT_FILES = support/glyph.js support/stroke.js support/spiroexpand.js support/spirokit.js parameters.js extract.js generate.js emptyfont.toml parameters.toml
-GLYPH_SEGMENTS = glyphs/common-shapes.patel glyphs/overmarks.patel glyphs/latin-basic-capital.patel glyphs/latin-basic-lower.patel glyphs/greek.patel glyphs/cyrillic-basic.patel glyphs/latin-extend-basis.patel glyphs/latin-extend-decorated.patel glyphs/cyrillic-extended.patel glyphs/numbers.patel glyphs/symbol-ascii.patel glyphs/symbol-punctuation.patel glyphs/symbol-math.patel glyphs/symbol-geometric.patel glyphs/symbol-other.patel glyphs/symbol-letter.patel glyphs/autobuilds.patel
 OBJDIR = build
-FILES = $(SUPPORT_FILES) buildglyphs.js
+include makesupport.mk
+PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
 
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
@@ -35,18 +31,18 @@ PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
 PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
-fonts : update $(TARGETS)
+fonts : $(TARGETS)
 	
 fdts : $(FDTS)
 	
 # Pass 0 : file construction
-$(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(FILES) | $(OBJDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright x-regular $(STYLE_UPRIGHT) $(STYLE_X_REGILAR)
-$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(FILES) | $(OBJDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright x-bold $(STYLE_UPRIGHT) $(STYLE_X_BOLD)
-$(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(FILES) | $(OBJDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-book s-italic  x-italic $(STYLE_ITALIC) $(STYLE_X_ITALIC)
-$(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(FILES) | $(OBJDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  x-bolditalic $(STYLE_ITALIC) $(STYLE_X_BOLDITALIC)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
@@ -75,19 +71,6 @@ $(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
 	@rm $@.a.ttf $@.a.ttx
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
 	ttfautohint $< $@
-
-update : $(FILES)
-
-$(SUPPORT_FILES) :
-	patel-c --strict $< -o $@
-
-buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
-	patel-c --strict $< -o $@
-support/glyph.js : support/glyph.patel
-support/stroke.js : support/stroke.patel
-support/spirokit.js : support/spirokit.patel
-support/spiroexpand.js : support/spiroexpand.patel
-parameters.js : parameters.patel
 
 $(OBJDIR) :
 	@- mkdir $@
