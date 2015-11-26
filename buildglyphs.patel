@@ -46,7 +46,9 @@ define-macro reverse-last : syntax-rules
 define-macro eject-contour : syntax-rules
 	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
 define-macro tag-contour : syntax-rules
-	`[tag-contour @name] {'.syntactic-closure' `(currentGlyph.contours.(currentGlyph.contours.length - 1).tag = @name) env}
+	`[tag-contour @::args] {'.syntactic-closure' `[currentGlyph.tag-contour @::args] env}
+define-macro retag-contour : syntax-rules
+	`[retag-contour @::args] {'.syntactic-closure' `[currentGlyph.retag-contour @::args] env}
 define-macro assign-unicode : syntax-rules
 	`[assign-unicode @code] {".syntactic-closure" `[begin \\
 		currentGlyph.assign-unicode @code
@@ -90,12 +92,9 @@ define [anchorDeriv] : begin
 	return {.anchors h}
 
 # contour tagging
-define [tagged tag fn] : lambda [] : begin
-	local _tag this.defaultTag
-	set this.defaultTag tag
-	fn.apply this arguments
-	set this.defaultTag _tag
-	return nothing
+define [tagged tag component] : begin
+	set component.tag tag
+	return component
 
 export as build : define [buildFont para recursive recursiveCodes] : begin
 	define variantSelector para.variantSelector
@@ -220,7 +219,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define WHITENESS : ((XH - STROKE * 3) * (RIGHTSB - SB) * (1 / 3)) / (XH * (RIGHTSB - SB))
 	define [adviceBlackness crowdedness] : Math.min STROKE ((RIGHTSB - SB) * (1 - WHITENESS) / (crowdedness * CORRECTION_HX))
 	define MVERTSTROKE : adviceBlackness : fallback para.lllcrowdedness (3 + 1 / 3)
-	define OVERLAYSTROKE : adviceBlackness 4
+	define OVERLAYSTROKE : adviceBlackness 3.75
 	define OPERATORSTROKE : adviceBlackness 3.2
 	define SHOULDERFINE : [adviceBlackness 4] / 2
 	

@@ -84,13 +84,21 @@ define [Glyph.prototype.tag-contour tag n] : begin
 		local lastContour this.contours.(this.contours.length - 1)
 		if lastContour : if tag : set lastContour.tag tag
 	return this
+define [Glyph.prototype.retag-contour oldtag newtag] : begin
+	if this.contours : foreach [c : items-of this.contours] : if (c.tag === oldtag) : set c.tag newtag
+	return this
 define [Glyph.prototype.eject-contour tag] : begin
 	set this.contours : this.contours.filter : lambda [c] (c.tag !== tag)
 	return this
 
 define [Glyph.prototype.include component copyAnchors] : begin
 	local glyph : match component
-		[aFunction it] : return : component.call this
+		[aFunction it] : begin
+			local t this.defaultTag
+			set this.defaultTag component.tag
+			component.call this
+			set this.defaultTag t
+			return this
 		{:: contours}    {.contours contours}
 		otherwise        component
 	local contours glyph.contours
@@ -130,7 +138,7 @@ define [Glyph.prototype.include component copyAnchors] : begin
 		foreach [contour : items-of contours] : begin
 			local c {}
 			foreach [point : items-of contour] : c.push : tp transform point
-			set c.tag : contour.tag || t.defaultTag
+			set c.tag : contour.tag || component.tag || t.defaultTag
 			this.contours.push c
 	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
 		foreach k [items-of keys] [set a.(k) anchors.(k)]

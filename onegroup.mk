@@ -11,7 +11,7 @@ PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
 ifeq ($(OS),Windows_NT)
 SHELL = C:\\Windows\\System32\\cmd.exe
 SUPPRESS_ERRORS = 2> NUL
-NODE = node --noincremental_marking --max_executable_size=1024
+NODE = node --max_executable_size=4096
 else
 SUPPRESS_ERRORS = 2> /dev/null
 NODE = node
