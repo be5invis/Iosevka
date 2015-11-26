@@ -5,7 +5,7 @@ SCRIPTS = $(SUPPORT_FILES) buildglyphs.js
 SCRIPTS_FROM_PATEL = $(SUPPORT_FILES_FROM_PATEL) buildglyphs.js
 
 buildglyphs.js : buildglyphs.patel $(GLYPH_SEGMENTS)
-	patel-c --strict $< -o $@
+	patel-c --optimize --strict $< -o $@
 
 $(SUPPORT_FILES_FROM_PATEL) :
 	patel-c --optimize --strict $< -o $@

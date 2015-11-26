@@ -88,7 +88,7 @@ define [Glyph.prototype.eject-contour tag] : begin
 	set this.contours : this.contours.filter : lambda [c] (c.tag !== tag)
 	return this
 
-define [Glyph.prototype.include component copyAnchors quenches] : begin
+define [Glyph.prototype.include component copyAnchors] : begin
 	local glyph : match component
 		[aFunction it] : return : component.call this
 		{:: contours}    {.contours contours}
@@ -128,14 +128,10 @@ define [Glyph.prototype.include component copyAnchors quenches] : begin
 	set transform.y : transform.y + shifty
 	if contours : begin
 		foreach [contour : items-of contours] : begin
-			local doput true
-			if quenches : foreach [tag : items-of quenches] : begin
-				if [contour.tag === tag] : set doput false
-			if doput : begin
-				local c {}
-				foreach [point : items-of contour] : c.push : tp transform point
-				set c.tag contour.tag
-				this.contours.push c
+			local c {}
+			foreach [point : items-of contour] : c.push : tp transform point
+			set c.tag : contour.tag || t.defaultTag
+			this.contours.push c
 	if (([not contours] || copyAnchors) && glyph.anchors) : set this.anchors : let [a {.}] [anchors glyph.anchors] [keys : Object.keys glyph.anchors] : begin
 		foreach k [items-of keys] [set a.(k) anchors.(k)]
 		* a
