@@ -64,16 +64,18 @@ define {ArrowHead ArrowShape}
 
 ### Standard geometric shapes
 symbol-block 'Geometric'
-	define squareRadius : (RIGHTSB - SB) / 2
-	define [hollowScale w d] : (w - [adviceBlackness 5] * [fallback d : WIDTH / FULLWIDTH]) / w
-	define [hollow newid unicode oldid zx zy] : create-glyph newid : glyph-construction
+	define left : mix MIDDLE SB 1.1
+	define right : mix MIDDLE RIGHTSB 1.1
+	define squareRadius : (right - left) / 2
+	define [hollowScale w d s] : (w - [fallback s : adviceBlackness 5] * [fallback d : WIDTH / FULLWIDTH]) / w
+	define [hollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
 		assign-unicode unicode
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
 			include : UnFullWidthify
 		reverse-last
 		local zoom : hollowScale squareRadius
-		include : FlipAround MIDDLE parenMid [fallback zx zoom] [fallback zy zx zoom]
+		include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
 			include : UnFullWidthify
@@ -92,49 +94,69 @@ symbol-block 'Geometric'
 		apply-transform [Translate MIDDLE parenMid] true
 		apply-transform [Italify] true
 		set-width WIDTH
+
 	create-glyph 'blacksquare' : glyph-construction
 		assign-unicode 0x25A0
-		start-from SB (parenMid + squareRadius)
-		line-to    RIGHTSB (parenMid + squareRadius)
-		line-to    RIGHTSB (parenMid - squareRadius)
-		line-to    SB (parenMid - squareRadius)
+		start-from left (parenMid + squareRadius)
+		line-to    right (parenMid + squareRadius)
+		line-to    right (parenMid - squareRadius)
+		line-to    left (parenMid - squareRadius)
 		include : FullWidthify
 	create-glyph 'blackrectangle' : glyph-construction
 		assign-unicode 0x25AC
-		start-from SB (parenMid + squareRadius / 1.5)
-		line-to    RIGHTSB (parenMid + squareRadius / 1.5)
-		line-to    RIGHTSB (parenMid - squareRadius / 1.5)
-		line-to    SB (parenMid - squareRadius / 1.5)
+		start-from left (parenMid + squareRadius / 1.5)
+		line-to    right (parenMid + squareRadius / 1.5)
+		line-to    right (parenMid - squareRadius / 1.5)
+		line-to    left (parenMid - squareRadius / 1.5)
 		include : FullWidthify
 	create-glyph 'blacklongrectangle' : glyph-construction
 		assign-unicode 0x25AE
-		start-from SB (parenMid + squareRadius * 1.5)
-		line-to    RIGHTSB (parenMid + squareRadius * 1.5)
-		line-to    RIGHTSB (parenMid - squareRadius * 1.5)
-		line-to    SB (parenMid - squareRadius * 1.5)
+		start-from left (parenMid + squareRadius * 1.5)
+		line-to    right (parenMid + squareRadius * 1.5)
+		line-to    right (parenMid - squareRadius * 1.5)
+		line-to    left (parenMid - squareRadius * 1.5)
 		include : FullWidthify
+	local triangleOvershoot : 2 / [Math.sqrt 3]
 	create-glyph 'blacktriangleup' : glyph-construction
 		assign-unicode 0x25B2
 		start-from MIDDLE (parenMid + squareRadius)
-		line-to    RIGHTSB (parenMid - squareRadius)
-		line-to    SB (parenMid - squareRadius)
-		include : FullWidthify
-	create-glyph 'blackdiamond' : glyph-construction
-		assign-unicode 0x25C6
-		start-from MIDDLE (parenMid + squareRadius)
-		line-to    RIGHTSB parenMid
-		line-to    MIDDLE (parenMid - squareRadius)
-		line-to    SB parenMid
+		line-to    [mix MIDDLE right triangleOvershoot] (parenMid - squareRadius)
+		line-to    [mix MIDDLE left triangleOvershoot] (parenMid - squareRadius)
 		include : FullWidthify
 	create-glyph 'blacktriangledown' : glyph-construction
 		assign-unicode 0x25BC
 		start-from MIDDLE (parenMid - squareRadius)
-		line-to    SB (parenMid + squareRadius)
-		line-to    RIGHTSB (parenMid + squareRadius)
+		line-to    [mix MIDDLE left triangleOvershoot] (parenMid + squareRadius)
+		line-to    [mix MIDDLE right triangleOvershoot] (parenMid + squareRadius)
+		include : FullWidthify
+	create-glyph 'blacktriangleleft' : glyph-construction
+		assign-unicode 0x25C0
+		start-from left parenMid
+		line-to    right (parenMid - squareRadius * triangleOvershoot)
+		line-to    right (parenMid + squareRadius * triangleOvershoot)
+		include : FullWidthify
+	create-glyph 'blacktriangleright' : glyph-construction
+		assign-unicode 0x25B6
+		start-from right parenMid
+		line-to    left (parenMid + squareRadius * triangleOvershoot)
+		line-to    left (parenMid - squareRadius * triangleOvershoot)
+		include : FullWidthify
+		
+	create-glyph 'blackdiamond' : glyph-construction
+		assign-unicode 0x25C6
+		start-from MIDDLE (parenMid + squareRadius)
+		line-to    right parenMid
+		line-to    MIDDLE (parenMid - squareRadius)
+		line-to    left parenMid
 		include : FullWidthify
 	create-glyph 'blackcircle' : glyph-construction
 		assign-unicode 0x25CF
-		include : Ring (parenMid + squareRadius) (parenMid - squareRadius) SB RIGHTSB
+		include : spiro-outline
+			g4 MIDDLE (parenMid + squareRadius)
+			g4 left parenMid
+			g4 MIDDLE (parenMid - squareRadius)
+			g4 right parenMid
+			close
 		include : FullWidthify
 	create-glyph 'dottedcircle' : glyph-construction
 		assign-unicode 0x25CC
@@ -142,8 +164,8 @@ symbol-block 'Geometric'
 		local fine : [adviceBlackness 5] / 2
 		foreach j [range 0 n] : begin
 			local angle : Math.PI * 2 * j / n
-			local cx : MIDDLE + (RIGHTSB - MIDDLE) * [Math.cos angle]
-			local cy : (XH / 2) + (RIGHTSB - MIDDLE) * [Math.sin angle]
+			local cx : MIDDLE + (right - MIDDLE) * [Math.cos angle]
+			local cy : (XH / 2) + (right - MIDDLE) * [Math.sin angle]
 			include : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
 		include eMarks
 		apply-transform [Upright] true
@@ -157,6 +179,26 @@ symbol-block 'Geometric'
 	hollow 'whitecircle' 0x25CB 'blackcircle'
 	hollow 'whitebullet' 0x25E6 'bullet' [hollowScale (PERIODSIZE - O) 1]
 	hollow 'whitediamond' 0x25C7 'blackdiamond'
+	
+	let [sts 0.75]
+	: begin
+		resized-glyph 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
+		resized-glyph 'smallblacktriangleright' 0x25B8 'blacktriangleright' MIDDLE parenMid 0.75
+		resized-glyph 'smallblacktriangledown' 0x25BE 'blacktriangledown' MIDDLE parenMid 0.75
+		resized-glyph 'smallblacktriangleleft' 0x25C2 'blacktriangleleft' MIDDLE parenMid 0.75
+		
+		let 
+		: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing ([adviceBlackness 5] * [Math.sqrt 3])
+		: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing ([adviceBlackness 5] * [Math.sqrt 3])
+		: begin
+			hollow 'whitetriangleup' 0x25B3 'blacktriangleup' sl nothing MIDDLE (parenMid - squareRadius / 3)
+			hollow 'whitetriangledown' 0x25BD 'blacktriangledown' sl nothing MIDDLE (parenMid + squareRadius / 3)
+			hollow 'whitetriangleleft' 0x25C1 'blacktriangleleft' sl nothing [mix MIDDLE right (1 / 3)] parenMid
+			hollow 'whitetriangleright' 0x25B7 'blacktriangleright' sl nothing [mix MIDDLE left (1 / 3)] parenMid
+			hollow 'smallwhitetriangleup' 0x25B5 'smallblacktriangleup' ss nothing MIDDLE (parenMid - squareRadius / 3 * sts)
+			hollow 'smallwhitetriangledown' 0x25BF 'smallblacktriangledown' ss nothing MIDDLE (parenMid + squareRadius / 3 * sts)
+			hollow 'smallwhitetriangleleft' 0x25C3 'smallblacktriangleleft' ss nothing [mix MIDDLE right (sts / 3)] parenMid
+			hollow 'smallwhitetriangleright' 0x25B9 'smallblacktriangleright' ss nothing [mix MIDDLE left (sts / 3)] parenMid
 
 ### Blocks
 symbol-block 'Block Shapes'
@@ -465,3 +507,4 @@ symbol-block 'Powerline'
 		line-to    (RIGHTSB - OX) parenMid
 		line-to    (RIGHTSB - OX) parenBot
 		line-to    (SB + OX) parenBot
+		

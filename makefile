@@ -8,11 +8,7 @@ PARAM_CC   = FAST='$(FAST)' SUFFIX='cc' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMO
 PARAM_CC_SLAB = FAST='$(FAST)' SUFFIX='cc-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='cc slab x-cc-slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
-ifeq ($(OS),Windows_NT)
 LOOPS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-else
-LOOPS = 1
-endif
 
 fdts : fdts-default fdts-cc fdts-slab fdts-cc-slab
 fonts : fonts-default fonts-cc fonts-slab fonts-cc-slab

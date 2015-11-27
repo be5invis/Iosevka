@@ -317,14 +317,6 @@ define [LeftHook x y xextend] : glyph-construction
 		g4 (x - fine * 1.5) (y - HOOKX)
 
 
-# Common transformations
-define [FlipAround x y sx sy] : glyph-construction
-	apply-transform : Upright
-	apply-transform : Translate (-x) (-y)
-	apply-transform : Scale [fallback sx (-1)] [fallback sy sx (-1)]
-	apply-transform : Translate x y
-	apply-transform : Italify
-
 # Spiro shapes
 define [determineMixR w v] : piecewise
 	(w <= v)   0.5
@@ -419,11 +411,23 @@ define [Widen glyphs p psb] : begin
 	#forkedPara.smoothadjust = para.smoothadjust / p
 	return : Fork glyphs forkedPara
 
+# Composite transformations
+define [FlipAround x y sx sy] : glyph-construction
+	apply-transform : Upright
+	apply-transform : Translate (-x) (-y)
+	apply-transform : Scale [fallback sx (-1)] [fallback sy sx (-1)]
+	apply-transform : Translate x y
+	apply-transform : Italify
+# Transformation variants
 define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction
 	if unicode : assign-unicode unicode
 	include glyphs.(id) [if mark false AS_BASE]
 	if mark : include mark
 	include : FlipAround x y
+define [resized-glyph newid unicode id x y s sy] : create-glyph [fallback newid : [if (s < 1) 'small' 'large'] + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id) AS_BASE
+	include : FlipAround x y s [fallback sy s]
 
 # Dual derivatives
 define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction

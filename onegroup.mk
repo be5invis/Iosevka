@@ -11,11 +11,11 @@ PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
 ifeq ($(OS),Windows_NT)
 SHELL = C:\\Windows\\System32\\cmd.exe
 SUPPRESS_ERRORS = 2> NUL
-NODE = node --max_executable_size=4096
 else
 SUPPRESS_ERRORS = 2> /dev/null
-NODE = node
 endif
+
+NODE = node --max_executable_size=4096
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
