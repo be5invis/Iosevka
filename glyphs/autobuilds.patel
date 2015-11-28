@@ -148,7 +148,7 @@ define [subParts parts] : begin
 					set parts.(j) null; set parts.(j + 1) glyphs.dasiaoxia
 				(parts.(j + 1) === glyphs.perispomeniAbove) : begin
 					set parts.(j) null; set parts.(j + 1) glyphs.dasiaperispomeni
-	return : parts.filter ([x] -> [not [not x]])
+	return parts
 
 define [pad s n] : begin
 	while (s.length < n) : s = '0' + s
@@ -157,21 +157,20 @@ define [pad s n] : begin
 
 #set font.features.ccmp {}
 define [shorter x y] : if (x.length < y.length) x y
-define [decideName namingParts parts code] : begin
-	local baseName namingParts.0.name
-	local combname0 : namingParts.slice 1 :.map ([part] -> [fallback part.shortName part.name]) :.join ' '
-	local glyphName : baseName + [combname0.replace [regex ' ' 'g'] '']
-	if glyphs.(glyphName) : begin
-		local j 2
-		while glyphs.(glyphName + j) [inc j]
-		set glyphName (glyphName + j)
-	if (glyphName.length > 30) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
-	return glyphName
 
 let : begin
 	local nComposed 0
-	local foundDecompositions {}
-	local itsName : [part] -> part.name
+	local foundDecompositions {.}
+	define [decideName namingParts parts code] : begin
+		local baseName namingParts.0.name
+		local glyphName baseName
+		foreach [part : namingParts.slice 1] : if part : glyphName = glyphName + [fallback part.shortName part.name]
+		if foundDecompositions.(glyphName) : begin
+			local j 2
+			while foundDecompositions.(glyphName + j) [inc j]
+			set glyphName (glyphName + j)
+		if (glyphName.length > 30) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
+		return glyphName
 	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
 		local str : String.fromCharCode code
 		local nfd : fallback customDecompositions.(str) : unorm.nfd str
@@ -185,26 +184,28 @@ let : begin
 			if allFound : begin
 				local namingParts : parts.slice 0
 				set parts : subParts parts
-				# local composition : namingParts.map itsName :.join ' '
 				local glyphName : decideName namingParts parts code
-				foundDecompositions.push {glyphName code parts}
+				set foundDecompositions.(glyphName) {glyphName code parts}
 				inc nComposed
-	
+	#if (global && global.gc) : global.gc
 	if recursiveCodes : recursiveCodes.forEach buildForCode
 	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
+	#if (global && global.gc) : global.gc
+	progress "Composition Decision"
 	
 	define construction : glyph-construction
 		assign-unicode code
 		include parts.0 AS_BASE
 		set-width parts.0.advanceWidth
-		foreach part [items-of : parts.slice 1] : begin
+		
+		local names {parts.0.name}
+		foreach part [items-of : parts.slice 1] : if part : begin
 			include part
-			# eject right-bottom serifs
+			names.push part.name
 			if (part.name === 'rtailBR') : eject-contour 'serifRB'
-#				if [not glyphs.(composition)] : begin
-#					font.features.ccmp.push : 'sub ' + composition + ' by ' + glyphName
-#					set glyphs.(composition) glyphs.(glyphName)
-	foreach [{glyphName code parts} : items-of foundDecompositions] : begin
+		#progress "Compose [\[names.join ' + ']] --> \(glyphName)"
+	foreach [_id : items-of : Object.keys foundDecompositions] : begin
+		local {glyphName code parts} foundDecompositions.(_id)
 		create-glyph glyphName construction
 	progress "Precomposed (\(nComposed) glyphs)"
 
@@ -236,7 +237,7 @@ define [createCircledGlyphs records] : if [not recursive] : begin
 			apply-transform : Scale dscale
 			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
 			apply-transform : Italify
-		include : smallo (CAP * dscale + sw * 3) (-sw * 3) [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)] sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+		include : OShape (CAP * dscale + sw * 3) (-sw * 3) [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)] sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
 		apply-transform : Upright
 		apply-transform : Translate 0 (parenMid - CAP * dscale / 2)
 		apply-transform : Italify
@@ -716,7 +717,6 @@ foreach glyph [items-of glyphList] : if (glyph.anchors && [begin [local anchorKe
 					font.features.markGlyphs.(key).push glyph.name
 				font.features.gdef.mark.push glyph.name
 			else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
-	else
-		if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
+	else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
 
 progress 'Features'

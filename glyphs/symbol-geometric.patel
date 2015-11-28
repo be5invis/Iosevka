@@ -12,13 +12,16 @@ define {ArrowHead ArrowShape}
 	
 	define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
 		local size : fallback _size arrowSize
+		local g this.gizmo
 		set this.gizmo : Translate 0 0
 		include : dispiro
+			function [set this.gizmo [Transform.Id]]
 			widths.rhs fine
 			flat 0 0 [heading UPWARD]
 			curl (size * 1) size
 			end [[] -> (this.contrast = 1)]
 		include : dispiro
+			function [set this.gizmo [Transform.Id]]
 			widths.lhs fine
 			flat 0 0 [heading DOWNWARD]
 			curl (size * 1) (-size)
@@ -28,6 +31,7 @@ define {ArrowHead ArrowShape}
 		local {.x xt .y yt} : tp globalTransform {.x x2 .y y2}
 		apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
 		apply-transform : Translate xt yt
+		set this.gizmo g
 	define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
 		local mag : Math.hypot (y2 - y1) (x2 - x1)
 		local p : (mag - halfstroke * 1.1) / mag
@@ -67,27 +71,35 @@ symbol-block 'Geometric'
 	define left : mix MIDDLE SB 1.1
 	define right : mix MIDDLE RIGHTSB 1.1
 	define squareRadius : (right - left) / 2
-	define [hollowScale w d s] : (w - [fallback s : adviceBlackness 5] * [fallback d : WIDTH / FULLWIDTH]) / w
+	local hollowSW : adviceBlackness 5
+	define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / FULLWIDTH]) / w
 	define [hollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
 		assign-unicode unicode
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
-			include : UnFullWidthify
+			include UnFullWidthify
 		reverse-last
 		local zoom : hollowScale squareRadius
 		include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
-			include : UnFullWidthify
-		include : FullWidthify
-	define [FullWidthify] : glyph-construction
+			include UnFullWidthify
+		include FullWidthify
+	define [resized newid unicode id x y s sy] : create-glyph [fallback newid : [if (s < 1) 'small' 'large'] + id] : glyph-construction
+		if unicode : assign-unicode unicode
+		include glyphs.(id) AS_BASE
+		include UnFullWidthify
+		include : FlipAround x y s [fallback sy s]
+		include FullWidthify
+
+	define FullWidthify : glyph-construction
 		apply-transform [Upright] true
 		apply-transform [Translate (-MIDDLE) (-parenMid)] true
 		apply-transform [Scale (FULLWIDTH / WIDTH)] true
 		apply-transform [Translate FWMIDDLE parenMid] true
 		apply-transform [Italify] true
 		set-width FULLWIDTH
-	define [UnFullWidthify] : glyph-construction
+	define UnFullWidthify : glyph-construction
 		apply-transform [Upright] true
 		apply-transform [Translate (-FWMIDDLE) (-parenMid)] true
 		apply-transform [Scale (WIDTH / FULLWIDTH)] true
@@ -101,46 +113,46 @@ symbol-block 'Geometric'
 		line-to    right (parenMid + squareRadius)
 		line-to    right (parenMid - squareRadius)
 		line-to    left (parenMid - squareRadius)
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blackrectangle' : glyph-construction
 		assign-unicode 0x25AC
 		start-from left (parenMid + squareRadius / 1.5)
 		line-to    right (parenMid + squareRadius / 1.5)
 		line-to    right (parenMid - squareRadius / 1.5)
 		line-to    left (parenMid - squareRadius / 1.5)
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blacklongrectangle' : glyph-construction
 		assign-unicode 0x25AE
 		start-from left (parenMid + squareRadius * 1.5)
 		line-to    right (parenMid + squareRadius * 1.5)
 		line-to    right (parenMid - squareRadius * 1.5)
 		line-to    left (parenMid - squareRadius * 1.5)
-		include : FullWidthify
+		include FullWidthify
 	local triangleOvershoot : 2 / [Math.sqrt 3]
 	create-glyph 'blacktriangleup' : glyph-construction
 		assign-unicode 0x25B2
 		start-from MIDDLE (parenMid + squareRadius)
 		line-to    [mix MIDDLE right triangleOvershoot] (parenMid - squareRadius)
 		line-to    [mix MIDDLE left triangleOvershoot] (parenMid - squareRadius)
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blacktriangledown' : glyph-construction
 		assign-unicode 0x25BC
 		start-from MIDDLE (parenMid - squareRadius)
 		line-to    [mix MIDDLE left triangleOvershoot] (parenMid + squareRadius)
 		line-to    [mix MIDDLE right triangleOvershoot] (parenMid + squareRadius)
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blacktriangleleft' : glyph-construction
 		assign-unicode 0x25C0
 		start-from left parenMid
 		line-to    right (parenMid - squareRadius * triangleOvershoot)
 		line-to    right (parenMid + squareRadius * triangleOvershoot)
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blacktriangleright' : glyph-construction
 		assign-unicode 0x25B6
 		start-from right parenMid
 		line-to    left (parenMid + squareRadius * triangleOvershoot)
 		line-to    left (parenMid - squareRadius * triangleOvershoot)
-		include : FullWidthify
+		include FullWidthify
 		
 	create-glyph 'blackdiamond' : glyph-construction
 		assign-unicode 0x25C6
@@ -148,7 +160,7 @@ symbol-block 'Geometric'
 		line-to    right parenMid
 		line-to    MIDDLE (parenMid - squareRadius)
 		line-to    left parenMid
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'blackcircle' : glyph-construction
 		assign-unicode 0x25CF
 		include : spiro-outline
@@ -157,7 +169,7 @@ symbol-block 'Geometric'
 			g4 MIDDLE (parenMid - squareRadius)
 			g4 right parenMid
 			close
-		include : FullWidthify
+		include FullWidthify
 	create-glyph 'dottedcircle' : glyph-construction
 		assign-unicode 0x25CC
 		local n 12
@@ -171,25 +183,25 @@ symbol-block 'Geometric'
 		apply-transform [Upright] true
 		apply-transform [Translate 0 (parenMid - (XH / 2))] true
 		apply-transform [Italify] true
-		include : FullWidthify
+		include FullWidthify
 	
 	hollow 'whitesquare' 0x25A1 'blacksquare'
 	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
 	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
 	hollow 'whitecircle' 0x25CB 'blackcircle'
 	hollow 'whitebullet' 0x25E6 'bullet' [hollowScale (PERIODSIZE - O) 1]
-	hollow 'whitediamond' 0x25C7 'blackdiamond'
+	hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
 	
 	let [sts 0.75]
 	: begin
-		resized-glyph 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
-		resized-glyph 'smallblacktriangleright' 0x25B8 'blacktriangleright' MIDDLE parenMid 0.75
-		resized-glyph 'smallblacktriangledown' 0x25BE 'blacktriangledown' MIDDLE parenMid 0.75
-		resized-glyph 'smallblacktriangleleft' 0x25C2 'blacktriangleleft' MIDDLE parenMid 0.75
+		resized 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
+		resized 'smallblacktriangleright' 0x25B8 'blacktriangleright' MIDDLE parenMid 0.75
+		resized 'smallblacktriangledown' 0x25BE 'blacktriangledown' MIDDLE parenMid 0.75
+		resized 'smallblacktriangleleft' 0x25C2 'blacktriangleleft' MIDDLE parenMid 0.75
 		
 		let 
-		: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing ([adviceBlackness 5] * [Math.sqrt 3])
-		: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing ([adviceBlackness 5] * [Math.sqrt 3])
+		: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
+		: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
 		: begin
 			hollow 'whitetriangleup' 0x25B3 'blacktriangleup' sl nothing MIDDLE (parenMid - squareRadius / 3)
 			hollow 'whitetriangledown' 0x25BD 'blacktriangledown' sl nothing MIDDLE (parenMid + squareRadius / 3)

@@ -1,8 +1,12 @@
+import 'unorm' as unorm
+
 import './support/glyph' as Glyph
 import './support/stroke' as Stroke
 import './support/spirokit' as spirokit
-import './support/transform' as [object [transformPoint tp] [untransform utp] inverse]
-import 'unorm' as unorm
+import './support/transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
+import './support/anchor' as Anchor
+
+extern global
 
 ### File inclusion macro
 define-macro $$include : syntax-rules
@@ -87,8 +91,7 @@ define [normalize a] : begin
 define [anchorDeriv] : begin
 	local h {.}
 	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
-		set h.(k) {.}
-		set {.x h.(k).x .y h.(k).y .type h.(k).type .mbx h.(k).mbx .mby h.(k).mby} a.anchors.(k)
+		set h.(k) : new Anchor a.anchors.(k).x a.anchors.(k).y a.anchors.(k).type a.anchors.(k).mbx a.anchors.(k).mby
 	return {.anchors h}
 
 # contour tagging
@@ -107,7 +110,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define UPM 1000
 	
 	# Progress indicator
-	define [progress name] : if [not recursive] : console.log "    \(font.name.uniqueSubFamily) : Done \(name)"
+	define [progress status] : if [not recursive] : begin
+		console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
+		if (global && global.gc) : global.gc
 
 	# Key metrics
 	define WIDTH para.width
@@ -125,11 +130,11 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	# Transform constructors
 	define [Italify angle shift] : begin
 		local slope [Math.tan ([fallback angle para.italicangle] / 180 * Math.PI)]
-		return {.xx 1 .yx slope .xy 0 .yy 1 .x [fallback shift : -slope * parenMid] .y 0}
-	define [Upright angle shift] [inverse : Italify angle shift]
-	define [Scale sx sy] {.xx sx .yx 0 .xy 0 .yy [fallback sy sx] .x 0 .y 0}
-	define [Translate x y] {.xx 1 .yx 0 .xy 0 .yy 1 .x x .y y}
-	define [Rotate angle] {.xx [Math.cos angle] .yx (-[Math.sin angle]) .xy [Math.sin angle] .yy [Math.cos angle] .x 0 .y 0}
+		return : new Transform 1 slope 0 1 [fallback shift : -slope * parenMid] 0
+	define [Upright angle shift] [Italify angle shift :.inverse]
+	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
+	define [Translate x y] : new Transform 1 0 0 1 x y
+	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
 	
 	define globalTransform : Italify para.italicAngle
 	define deGlobalTransform : inverse globalTransform
@@ -211,7 +216,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define CORRECTION_VX globalTransform.yx
 	define CORRECTION_VS : STROKE * globalTransform.yx
 	
-	define CORRECTION_OMIDX : globalTransform.yx * 1.2
+	define CORRECTION_OMIDX : globalTransform.yx * 1.3
 	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
 	
 	# Blackness parameters
@@ -233,36 +238,35 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * CORRECTION_HX * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * globalTransform.yx
 	
 	# Anchor parameters
-	define BASE 'base'
-	define MARK 'mark'
-	define MARKBASE 'markbase'
+	define BASE Anchor.BASE
+	define MARK Anchor.MARK
+
 	define AS_BASE 'AS-BASE'
 	
-	define [tm anchor] : return {
-		.x (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
-		.y (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
-		.type anchor.type
-	}
+	define [tm anchor] : return : new Anchor
+		* (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
+		* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
+		* anchor.type
 	
-	define markAboveLower    {.anchors {.above    [tm {.x MIDDLE  .y XH        .type BASE}]}}
-	define markAboveCap      {.anchors {.above    [tm {.x MIDDLE  .y CAP       .type BASE}]}}
-	define markBelowLower    {.anchors {.below    [tm {.x MIDDLE  .y DESCENDER .type BASE}]}}
-	define markBelowZero     {.anchors {.below    [tm {.x MIDDLE  .y 0         .type BASE}]}}
-	define markToprightLower {.anchors {.topright [tm {.x RIGHTSB .y XH        .type BASE}]}}
-	define markToprightCap   {.anchors {.topright [tm {.x RIGHTSB .y CAP       .type BASE}]}}
-	define markBottomrightLower {.anchors {.bottomright [tm {.x RIGHTSB .y DESCENDER        .type BASE}]}}
-	define markBottomrightZero   {.anchors {.bottomright [tm {.x RIGHTSB .y 0       .type BASE}]}}
+	define markAboveLower       {.anchors {.above       [tm : new Anchor MIDDLE  XH        BASE]}}
+	define markAboveCap         {.anchors {.above       [tm : new Anchor MIDDLE  CAP       BASE]}}
+	define markBelowLower       {.anchors {.below       [tm : new Anchor MIDDLE  DESCENDER BASE]}}
+	define markBelowZero        {.anchors {.below       [tm : new Anchor MIDDLE  0         BASE]}}
+	define markToprightLower    {.anchors {.topright    [tm : new Anchor RIGHTSB XH        BASE]}}
+	define markToprightCap      {.anchors {.topright    [tm : new Anchor RIGHTSB CAP       BASE]}}
+	define markBottomrightLower {.anchors {.bottomright [tm : new Anchor RIGHTSB DESCENDER BASE]}}
+	define markBottomrightZero  {.anchors {.bottomright [tm : new Anchor RIGHTSB 0         BASE]}}
 	
 	define [StdAnchorGroup] : begin
 		local a : anchorDeriv.apply null arguments
-		set a.anchors.overlay {.type BASE
-			.x [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
-			.y [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
-		}
-		set a.anchors.slash {.type BASE
-			.x [mix a.anchors.below.x a.anchors.above.x 0.5]
-			.y [mix a.anchors.below.y a.anchors.above.y 0.5]
-		}
+		set a.anchors.overlay : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
+			* [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
+			* BASE
+		set a.anchors.slash : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x 0.5]
+			* [mix a.anchors.below.y a.anchors.above.y 0.5]
+			* BASE
 		return a
 	
 	define capitalMarks : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
@@ -282,50 +286,37 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			set nPending recursive.length
 			* h
 		else nothing
+	define [getDependencyProfile glyph] : begin
+		local dp {}
+		foreach d [items-of glyph.dependencies] : begin
+			dp.push d
+			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
+		return dp
 	define [create-glyph name actions] : piecewise
 		(name && actions) : begin
 			if (pickHash && nPending <= 0) : begin
 				console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
-			set dependencyProfile.(name) {}
+			
 			define glyphObject [new Glyph name]
-			glyphObject.set-width WIDTH
-			glyphObject.gizmo = globalTransform
 			glyphList.push glyphObject
 			glyphs.(name) = glyphObject
+			glyphObject.set-width WIDTH
+			glyphObject.gizmo = globalTransform
+			
 			actions.call glyphObject
-			foreach d [items-of glyphObject.dependencies] : begin
-				local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(d)))
-				dependencyProfile.(name) = [dependencyProfile.(name).concat dependencyProfile.(d) allAliases]
-			# process.stderr.write "\[if recursive 'Recursive ' '']Built Glyph /\(name).\n"
+			
+			set dependencyProfile.(name) : getDependencyProfile glyphObject
 			dec nPending
 			return glyphObject
+		
 		true : begin
 			local actions arguments.0
 			local glyphObject [new Glyph ('.temp-' + [set nTemp (nTemp + 1)])]
 			glyphObject.set-width WIDTH
 			actions.call glyphObject
 			return glyphObject
-	
-	define [select-variant name unicode default] : begin
-		if (pickHash && [not pickHash.(name)]) : return nothing
-		local variant : variantSelector.(name) || default
-		local chosenGlyph glyphs.((name + '.' + variant))
-		create-glyph name : glyph-construction
-			include chosenGlyph AS_BASE
-			if unicode : assign-unicode unicode
-		local allAliases : Object.keys glyphs :.filter ([k] -> (glyphs.(k) === glyphs.(chosenGlyph.name)))
-		set dependencyProfile.(name) : allAliases.concat dependencyProfile.(chosenGlyph.name)
-	define [italic-variant name unicode] : create-glyph name : glyph-construction
-		if (para.italicangle > 0)
-			then : include glyphs.(name + '.italic') AS_BASE
-			else : include glyphs.(name + '.upright') AS_BASE
-		if unicode : assign-unicode unicode
-	define [alias newid unicode oldid] : create-glyph newid : glyph-construction
-		if unicode : assign-unicode unicode
-		include glyphs.(oldid) AS_BASE
-		set-width glyphs.(oldid).advanceWidth
 
 	### Spiro constructions
 	# Basic knots

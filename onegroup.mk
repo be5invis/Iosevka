@@ -15,7 +15,8 @@ else
 SUPPRESS_ERRORS = 2> /dev/null
 endif
 
-NODE = node --max_executable_size=4096
+NODE_FDT = node --expose-gc
+NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
@@ -39,13 +40,13 @@ fdts : $(FDTS)
 	
 # Pass 0 : file construction
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright x-regular $(STYLE_UPRIGHT) $(STYLE_X_REGILAR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright x-regular $(STYLE_UPRIGHT) $(STYLE_X_REGILAR)
 $(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright x-bold $(STYLE_UPRIGHT) $(STYLE_X_BOLD)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright x-bold $(STYLE_UPRIGHT) $(STYLE_X_BOLD)
 $(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-book s-italic  x-italic $(STYLE_ITALIC) $(STYLE_X_ITALIC)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-italic  x-italic $(STYLE_ITALIC) $(STYLE_X_ITALIC)
 $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  x-bolditalic $(STYLE_ITALIC) $(STYLE_X_BOLDITALIC)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  x-bolditalic $(STYLE_ITALIC) $(STYLE_X_BOLDITALIC)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
 	$(NODE) extract --upm 12800 --uprightify 1 --ttf $@ $<

@@ -1,3 +1,80 @@
+###### COMMON GLYPH CONSTRUCTIONS
+define [select-variant name unicode default] : begin
+	if (pickHash && [not pickHash.(name)]) : return nothing
+	local variant : variantSelector.(name) || default
+	local chosenGlyph glyphs.((name + '.' + variant))
+	create-glyph name : glyph-construction
+		include chosenGlyph AS_BASE
+		if unicode : assign-unicode unicode
+define [italic-variant name unicode] : create-glyph name : glyph-construction
+	if (para.italicangle > 0)
+		then : include glyphs.(name + '.italic') AS_BASE
+		else : include glyphs.(name + '.upright') AS_BASE
+	if unicode : assign-unicode unicode
+define [alias newid unicode oldid] : create-glyph newid : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(oldid) AS_BASE
+	set-width glyphs.(oldid).advanceWidth
+define [composite newid unicode parts] : create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
+	if unicode : assign-unicode unicode
+	include parts.0 AS_BASE
+	foreach [part : items-of [parts.slice 1]] : include part
+# Transformation variants
+define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id) [if mark false AS_BASE]
+	if mark : include mark
+	include : FlipAround x y
+# Dual derivatives
+define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id) AS_BASE
+	apply-transform : Translate (-spacing) 0
+	include glyphs.(id)
+	apply-transform : Translate (spacing / 2) 0
+
+define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include : create-glyph : glyph-construction
+		include glyphs.(id)
+		apply-transform : Upright
+	apply-transform : Translate 0 (-spacing)
+	include : create-glyph : glyph-construction
+		include glyphs.(id)
+		apply-transform : Upright
+	apply-transform : Translate 0 (spacing / 2)
+	apply-transform : Italify
+# Full-width derivatives
+define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width FULLWIDTH
+
+define [fwr newid unicode id] : create-glyph [fallback newid : 'fwr' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width FULLWIDTH
+	apply-transform : Translate (FULLWIDTH - WIDTH) 0
+
+define [dwl newid unicode id] : create-glyph [fallback newid : 'dwl' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+
+define [dwr newid unicode id] : create-glyph [fallback newid : 'dwr' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+	apply-transform : Translate (UPM - WIDTH) 0
+
+define [dwc newid unicode id] : create-glyph [fallback newid : 'dwc' + id] : glyph-construction
+	if unicode : assign-unicode unicode
+	include glyphs.(id)
+	set-width UPM
+	apply-transform : Translate ((UPM - WIDTH) / 2) 0
+
+
+
 ###### COMMON SHAPES
 
 define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
@@ -18,9 +95,68 @@ define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
 	if transformShiftOnly : begin
 		local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
 		apply-transform : Translate (mx1 - mx) (my1 - my)
-
 define [RingAt x y r] : Ring (y + r) (y - r) (x - r) (x + r)
 define [DotAt x y r] : Ring (y + r) (y - r) (x - r) (x + r) true
+
+define [OShape u d l r _width _sma _smb ai] : glyph-construction
+	local middle : (l + r) / 2
+	local width : fallback _width STROKE
+	local sma : fallback _sma SMALLSMOOTHA
+	local smb : fallback _smb SMALLSMOOTHB
+	local mc : CORRECTION_OMIDX * width
+	if (u - d > sma + smb) : then : begin
+		include : dispiro
+			widths width 0
+			g4 (middle - mc) (u - O)
+			archv
+			[if ai flat.ai flat] (l + OX) (u - sma)
+			[if ai curl.ai curl] (l + OX) (d + smb)
+			arcvh
+			g4 (middle + mc) (d + O)
+			archv
+			[if ai flat.ai flat] (r - OX) (d + sma)
+			[if ai curl.ai curl] (r - OX) (u - smb)
+			arcvh
+			close
+	: else : begin
+		local ymiddlea : mix d u (smb / (sma + smb))
+		local ymiddleb : mix d u (sma / (sma + smb))
+		include : dispiro
+			widths width 0
+			g4 (middle - mc) (u - O)
+			archv
+			g4 (l + OX) ymiddlea
+			arcvh
+			g4 (middle + mc) (d + O)
+			archv
+			g4 (r - OX) ymiddleb
+			arcvh
+			close
+define [OBarLeftShape _top _left] : glyph-construction
+	local top : fallback _top XH
+	local left : fallback _left SB
+	local fine SHOULDERFINE
+	local st : shoulderMidSlope fine nothing 1
+	local sb : shoulderMidSlope fine nothing (-1)
+	local mt : [mix left RIGHTSB 0.5] + (st - CORRECTION_OMIDX) * STROKE
+	local mb : [mix left RIGHTSB 0.5] + (sb + CORRECTION_OMIDX) * STROKE
+	include : dispiro
+		widths.lhs
+		g4   (mt) (top - O) [heading {.y (-1) .x (-st)}]
+		archv
+		flat (left + (STROKE - fine) * CORRECTION_HX) (top - SMALLSMOOTHA) [widths fine 0]
+		curl (left + (STROKE - fine) * CORRECTION_HX) (0 + SMALLSMOOTHB) [widths fine 0]
+		arcvh
+		g4   (mb) O [widths.heading STROKE 0 {.y (1) .x (-sb)}]
+		archv
+		flat.ai (RIGHTSB - OX) (0 + SMALLSMOOTHA)
+		curl.ai (RIGHTSB - OX) (top - SMALLSMOOTHB)
+		arcvh
+		close
+
+define [OBarRightShape top right] : glyph-construction
+	include : create-glyph [OBarLeftShape top (WIDTH - [fallback right RIGHTSB])]
+	include : FlipAround MIDDLE ([fallback top XH] / 2)
 
 define SERIF_SHIFT_X 0.6
 define [LeftwardTopSerif x y length _sw] : glyph-construction
@@ -234,42 +370,6 @@ define [mShoulderSpiro left right top bottom width fine] : glyph-construction
 		corner right bottom
 		close
 
-define [smallo u d l r _width _sma _smb ai] : glyph-construction
-	local middle : (l + r) / 2
-	local width : fallback _width STROKE
-	local sma : fallback _sma SMALLSMOOTHA
-	local smb : fallback _smb SMALLSMOOTHB
-	local mc : CORRECTION_OMIDX * width
-	if (u - d > sma + smb) : then : begin
-		include : dispiro
-			widths width 0
-			g4 (middle - mc) (u - O)
-			archv
-			[if ai flat.ai flat] (l + OX) (u - sma)
-			[if ai curl.ai curl] (l + OX) (d + smb)
-			arcvh
-			g4 (middle + mc) (d + O)
-			archv
-			[if ai flat.ai flat] (r - OX) (d + sma)
-			[if ai curl.ai curl] (r - OX) (u - smb)
-			arcvh
-			close
-	: else : begin
-		local ymiddlea : mix d u (smb / (sma + smb))
-		local ymiddleb : mix d u (sma / (sma + smb))
-		include : dispiro
-			widths width 0
-			g4 (middle - mc) (u - O)
-			archv
-			g4 (l + OX) ymiddlea
-			arcvh
-			g4 (middle + mc) (d + O)
-			archv
-			g4 (r - OX) ymiddleb
-			arcvh
-			close
-
-
 define [HBar xleft xright y _fine] : glyph-construction
 	local fine : [fallback _fine STROKE] / 2
 	include : dispiro
@@ -388,11 +488,12 @@ define [Fork gs params] : begin
 		: else : throw ex
 	return forkFont.glyfMap
 
-define [Miniature glyphs fold scale] : begin
+define [Miniature glyphs fold scale ia] : begin
 	local forkedPara : Object.create para
 	forkedPara.stroke = [adviceBlackness fold] / scale
 	forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
 	forkedPara.sb = SB / 2
+	forkedPara.italicangle = [fallback ia para.italicangle]
 	return : Fork glyphs forkedPara
 
 define [Thinner glyphs p] : begin
@@ -418,67 +519,3 @@ define [FlipAround x y sx sy] : glyph-construction
 	apply-transform : Scale [fallback sx (-1)] [fallback sy sx (-1)]
 	apply-transform : Translate x y
 	apply-transform : Italify
-# Transformation variants
-define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id) [if mark false AS_BASE]
-	if mark : include mark
-	include : FlipAround x y
-define [resized-glyph newid unicode id x y s sy] : create-glyph [fallback newid : [if (s < 1) 'small' 'large'] + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id) AS_BASE
-	include : FlipAround x y s [fallback sy s]
-
-# Dual derivatives
-define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id) AS_BASE
-	apply-transform : Translate (-spacing) 0
-	include glyphs.(id)
-	apply-transform : Translate (spacing / 2) 0
-
-define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include : create-glyph : glyph-construction
-		include glyphs.(id)
-		apply-transform : Upright
-	apply-transform : Translate 0 (-spacing)
-	include : create-glyph : glyph-construction
-		include glyphs.(id)
-		apply-transform : Upright
-	apply-transform : Translate 0 (spacing / 2)
-	apply-transform : Italify
-
-define [composite newid unicode parts] : create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
-	if unicode : assign-unicode unicode
-	include parts.0 AS_BASE
-	foreach [part : items-of [parts.slice 1]] : include part
-
-# Full-width derivatives
-define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id)
-	set-width FULLWIDTH
-
-define [fwr newid unicode id] : create-glyph [fallback newid : 'fwr' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id)
-	set-width FULLWIDTH
-	apply-transform : Translate (FULLWIDTH - WIDTH) 0
-
-define [dwl newid unicode id] : create-glyph [fallback newid : 'dwl' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id)
-	set-width UPM
-
-define [dwr newid unicode id] : create-glyph [fallback newid : 'dwr' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id)
-	set-width UPM
-	apply-transform : Translate (UPM - WIDTH) 0
-
-define [dwc newid unicode id] : create-glyph [fallback newid : 'dwc' + id] : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(id)
-	set-width UPM
-	apply-transform : Translate ((UPM - WIDTH) / 2) 0

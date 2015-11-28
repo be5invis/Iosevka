@@ -12,6 +12,8 @@ var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' 
 
 console.log('    Start build font' + fontUniqueName);
 var font = buildGlyphs.build.call(emptyFont, para);
+// glyf list construction
+font.glyfMap = null;
 console.log('    ' + fontUniqueName + " Successfully built.");
 
 if(argv.o) fs.writeFileSync(argv.o, JSON.stringify(font));

@@ -1,11 +1,18 @@
 import './monotonic-interpolate' as smooth
-import './transform' as [object [transformPoint tp] [untransform utp] inverse]
+import './transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
 
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
 
+define-macro xytransform : syntax-rules
+	`[xytransform @tfm @x @y] : let [t : env.newt] `[begin \\
+		set @t @x
+		set @x : @x * @tfm.xx + @y * @tfm.yx + @tfm.x
+		set @y : @t * @tfm.xy + @y * @tfm.yy + @tfm.y
+	]
+
 export default : define [SpiroExpansionContext] : begin
-	set this.gizmo {.xx 1 .yy 1 .xy 0 .yy 0 .x 0 .y 0}
+	set this.gizmo [Transform.Id]
 	set this.controlKnots {}
 	set this.defaultd1 0
 	set this.defaultd2 0
@@ -14,12 +21,12 @@ export default : define [SpiroExpansionContext] : begin
 define [SpiroExpansionContext.prototype.moveTo x y unimportant] : begin
 	if unimportant : return nothing
 	# Transform incoming knots using gizmo
-	set {.x x .y y} : tp this.gizmo {.x x .y y}
+	xytransform this.gizmo x y
 	this.controlKnots.push {.x x .y y .type 'g4' .d1 this.defaultd1 .d2 this.defaultd2}
 
 define [SpiroExpansionContext.prototype.lineTo x y unimportant] : begin
 	local lastKnot this.controlKnots.(this.controlKnots.length - 1)
-	set {.x x .y y} : tp this.gizmo {.x x .y y}
+	xytransform this.gizmo x y
 	local thisKnot {.x x .y y .type 'g4' .d1 lastKnot.d1 .d2 lastKnot.d2}
 	if lastKnot : begin
 		local normalAngle : Math.PI / 2 + [Math.atan2 (y - lastKnot.y) (x - lastKnot.x)]
@@ -29,9 +36,9 @@ define [SpiroExpansionContext.prototype.lineTo x y unimportant] : begin
 
 define [SpiroExpansionContext.prototype.cubicTo x1 y1 x2 y2 x y unimportant] : begin
 	local lastKnot this.controlKnots.(this.controlKnots.length - 1)
-	set {.x x1 .y y1} : tp this.gizmo {.x x1 .y y1}
-	set {.x x2 .y y2} : tp this.gizmo {.x x2 .y y2}
-	set {.x x .y y} : tp this.gizmo {.x x .y y}
+	xytransform this.gizmo x1 y1
+	xytransform this.gizmo x2 y2
+	xytransform this.gizmo x y
 	local thisKnot {.x x .y y .type 'g4' .d1 lastKnot.d1 .d2 lastKnot.d2}
 	if (lastKnot && lastKnot.normalAngle === nothing) : begin
 		local normalAngle : Math.PI / 2 + [Math.atan2 (y1 - lastKnot.y) (x1 - lastKnot.x)]

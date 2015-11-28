@@ -1,7 +1,8 @@
 import './monotonic-interpolate' as smooth
 import 'bezier-js' as Bezier
 import './intersection' as intersection
-import './transform' as [object [transformPoint tp] [untransform utp] inverse]
+import './transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
+import './point' as Point
 
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define [mix a b p] : a + (b - a) * p
@@ -18,14 +19,7 @@ define CKAPPA BKAPPA
 export default : define [Stroke] : begin
 	this.points = {}
 	this.samples = SAMPLES
-	this.gizmo = {
-	.xx 1
-		.yx 0
-		.xy 0
-		.yy 1
-		.x 0
-		.y 0
-	}
+	this.gizmo = [Transform.Id]
 	this.defaultd1 = 0
 	this.defaultd2 = 0
 	return this
@@ -58,21 +52,21 @@ define [Stroke.prototype.heads-to x y] : begin
 	return this
 
 define [Stroke.prototype.start-from x y] : begin
-	this.points = {[tp this.gizmo {.x x .y y .onCurve true .subdivided false}]}
+	this.points = {[Point.transformed this.gizmo x y true]}
 	return this
 
 Stroke.prototype.moveTo = Stroke.prototype.start-from
 define [Stroke.prototype.line-to x y subdivided] : begin
-	this.points.push [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
+	this.points.push [Point.transformed this.gizmo x y true false subdivided]
 	return this
 
 Stroke.prototype.lineTo = Stroke.prototype.line-to
 define [Stroke.prototype.curve-to xc yc x y subdivided] : begin
-	this.points.push [tp this.gizmo {.x xc .y yc .onCurve false}] [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
+	this.points.push [Point.transformed this.gizmo xc yc false] [Point.transformed this.gizmo x y true false subdivided]
 	return this
 
 define [Stroke.prototype.cubic-to x1 y1 x2 y2 x y subdivided] : begin
-	this.points.push [tp this.gizmo {.x x1 .y y1 .onCurve false .cubic true}] [tp this.gizmo {.x x2 .y y2 .onCurve false .cubic true}] [tp this.gizmo {.x x .y y .onCurve true .subdivided subdivided}]
+	this.points.push [Point.transformed this.gizmo x1 y1 false true] [Point.transformed this.gizmo x2 y2 false true] [Point.transformed this.gizmo x y true false subdivided]
 	return this
 Stroke.prototype.cubicTo = Stroke.prototype.cubic-to
 
