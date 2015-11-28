@@ -165,7 +165,7 @@ define [Glyph.prototype.cleanup t] : begin
 	foreach c [range 0 this.contours.length] : begin
 		local ocontour this.contours.(c)
 		# add infections
-		local contour {ocontour.0}
+		local contour {[new Point ocontour.0.x ocontour.0.y ocontour.0.onCurve]}
 		local flag false
 		foreach [j : range 1 (ocontour.length - 1)] : piecewise
 			ocontour.(j).onCurve : begin
@@ -190,7 +190,7 @@ define [Glyph.prototype.cleanup t] : begin
 								new Point s.points.2.x s.points.2.y true
 				set flag true
 
-		contour.push ocontour.(ocontour.length - 1)
+		contour.push [new Point ocontour.(ocontour.length - 1).x ocontour.(ocontour.length - 1).y ocontour.(ocontour.length - 1).onCurve]
 		# smart round
 		local xs : contour.map : [p] -> p.x
 		local ys : contour.map : [p] -> p.y
@@ -210,20 +210,23 @@ define [Glyph.prototype.cleanup t] : begin
 		
 		# cleanup
 		local cleanedContour {}
-		foreach j [range 0 contour.length] : begin
-			local found false
-			for [local k : j + 1] (k < contour.length && [closepoint contour.(j) contour.(k)]) [inc k] : set contour.(k).unimportant true
-			if found : begin
-				set contour.(j).onCurve true
-				set j (k - 1)
-		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
-		set contour cleanedContour
-		set cleanedContour {}
 		foreach j [range 1 : contour.length - 1] : begin
 			local p0 contour.(j - 1)
 			local p1 contour.(j)
 			local p2 contour.(j + 1)
 			if [oncurveRemovable p0 p1 p2 t] : set p1.unimportant true
+		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
+		set contour cleanedContour
+		
+		set cleanedContour {}
+		foreach j [range 0 contour.length] : if [not contour.(j).unimportant] : begin
+			local found false
+			for [local k : j + 1] ((k < contour.length) && [closepoint contour.(j) contour.(k)]) [inc k] : begin
+				set contour.(k).unimportant true
+				set found true
+			if found : begin
+				set contour.(j).onCurve true
+				set j (k - 1)
 		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 		this.contours.(c) = cleanedContour
 	return this
