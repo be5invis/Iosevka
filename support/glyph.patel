@@ -154,11 +154,12 @@ define [Glyph.prototype.set-anchor id type x y mbx mby] : begin
 	: else : set this.anchors.(id) : new Anchor x y type
 	return this
 
+define [closepoint p q] : begin
+	return : [Math.abs (p.x - q.x)] <= 0.5 && [Math.abs (p.y - q.y)] <= 0.5
 define [oncurveRemovable a b c t] : begin
 	local xm : (a.x + c.x) / 2
 	local ym : (a.y + c.y) / 2
 	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
-	return this
 
 define [Glyph.prototype.cleanup t] : begin
 	foreach c [range 0 this.contours.length] : begin
@@ -174,7 +175,7 @@ define [Glyph.prototype.cleanup t] : begin
 				local p0 contour.(contour.length - 1)
 				local p1 ocontour.(j)
 				local p2 ocontour.(j + 1)
-				if [not p2.onCurve] : set p1 {.x [mix p1.x p2.x 0.5] .y [mix p1.y p2.y 0.5] .onCurve true}
+				if [not p2.onCurve] : set p1 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
 				local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 				local ts [strand.inflections].y
 				piecewise
@@ -184,7 +185,9 @@ define [Glyph.prototype.cleanup t] : begin
 						ts.push 1
 						foreach [k : range 0 (ts.length - 1)] : begin
 							local s : strand.split ts.(k) ts.(k + 1)
-							if s.points : contour.push {.x s.points.1.x .y s.points.1.y .onCurve false} {.x s.points.2.x .y s.points.2.y .onCurve true}
+							if s.points : contour.push 
+								new Point s.points.1.x s.points.1.y false
+								new Point s.points.2.x s.points.2.y true
 				set flag true
 
 		contour.push ocontour.(ocontour.length - 1)
@@ -207,6 +210,15 @@ define [Glyph.prototype.cleanup t] : begin
 		
 		# cleanup
 		local cleanedContour {}
+		foreach j [range 0 contour.length] : begin
+			local found false
+			for [local k : j + 1] (k < contour.length && [closepoint contour.(j) contour.(k)]) [inc k] : set contour.(k).unimportant true
+			if found : begin
+				set contour.(j).onCurve true
+				set j (k - 1)
+		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
+		set contour cleanedContour
+		set cleanedContour {}
 		foreach j [range 1 : contour.length - 1] : begin
 			local p0 contour.(j - 1)
 			local p1 contour.(j)
