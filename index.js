@@ -37,14 +37,16 @@ var CodeSnippet = Vue.component('snippet', {
 	methods: {}
 });
 
-var codeArea = new Vue({
+var indexPage = new Vue({
 	el: 'body',
 	data: {
 		themes: ['light', 'dark'],
 		snippets: [],
 		snippet: 'js',
 		theme: 'dark',
-		isSlab: false
+		isSlab: false,
+		version: "1.0.0",
+		codename: "Tabris"
 	}
 });
-codeArea.snippets = codeArea.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
+indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
