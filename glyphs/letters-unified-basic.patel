@@ -1,0 +1,661 @@
+###########################################################################################
+# LETTERFORM COMMON PARAMETERS
+###########################################################################################
+define [CyrDescender x shift] : glyph-construction
+	local descenderOverflow : if SLAB SIDEJUT ((RIGHTSB - SB) * [fallback shift 0.1])
+	include : VBarRight (x + descenderOverflow) (HALFSTROKE - LONGJUT) STROKE
+
+###########################################################################################
+# UNIFIED LETTERFORMS
+###########################################################################################
+
+### V and v
+define [VShape top] : glyph-construction
+	include : dispiro
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB (top * 0.9) [heading DOWNWARD]
+		quadcontrols 0 0.3 6 unimportant
+		g4   (MIDDLE - HALFSTROKE * CORRECTION_HX) 0 [widths.lhs VShape.fine]
+
+	#bottom cap
+	start-from (MIDDLE + HALFSTROKE * CORRECTION_HX) 0
+	line-to (MIDDLE - HALFSTROKE * CORRECTION_HX) 0
+	line-to MIDDLE VShape.fine
+
+	include : dispiro
+		widths.rhs
+		flat RIGHTSB top [heading DOWNWARD]
+		curl RIGHTSB (top * 0.9) [heading DOWNWARD]
+		quadcontrols 0 0.3 6 unimportant
+		g4   (MIDDLE + HALFSTROKE * CORRECTION_HX) 0 [widths.rhs VShape.fine]
+	tag-contour 'strokeUp'
+	include : AIVSerifs top
+set VShape.fine (STROKE * 0.8)
+
+create-glyph 'V' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'V'
+	include capitalMarks
+	include : VShape CAP
+
+create-glyph 'v' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'v'
+	include eMarks
+	include : VShape XH
+
+define [VHooktopShape top] : glyph-construction
+	include : VShape top
+	eject-contour 'serifRT'
+	eject-contour 'strokeUp'
+	
+	include : dispiro
+		widths.rhs
+		straight.left.start (RIGHTSB + HOOKX / 3) (top - STROKE)
+		g4 (RIGHTSB - HOOKX / 3) (top - HALFSTROKE - HOOK)
+		quadcontrols 0.4 0.75 10 unimportant g2
+		g4   (MIDDLE + HALFSTROKE * CORRECTION_HX) 0 [widths.rhs VShape.fine]
+
+create-glyph 'vhooktop' : glyph-construction
+	assign-unicode 0x2C71
+	include eMarks
+	include : VHooktopShape XH
+
+create-glyph 'cyrIzhitsa' : glyph-construction
+	assign-unicode 0x474
+	include capitalMarks
+	include : VHooktopShape CAP
+alias 'cyrizhitsa' 0x475 'vhooktop'
+
+### A
+create-glyph 'A' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'A'
+	include capitalMarks
+	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
+	
+	include : VShape CAP
+	include : FlipAround MIDDLE (CAP / 2)
+	
+	include : HBarTop (SB + STROKE) (RIGHTSB - STROKE) (XH / 2)
+alias 'Alpha' 0x391 'A'
+alias 'cyrA' 0x410 'A'
+
+### a
+create-glyph 'a.upright' : glyph-construction
+	set-width WIDTH
+	include eMarks
+	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
+	local bartop (XH * BARPOS * 1.02 + HALFSTROKE)
+	local lowslope : shoulderMidSlope SHOULDERFINE nothing (-1)
+	local lowmiddle : mix SB (RIGHTSB - HALFSTROKE * CORRECTION_HX) [linreg 72 0.51 120 0.56 STROKE]
+	local barsmooth : mix SB RIGHTSB 0.55
+	include : dispiro
+		widths.lhs
+		flat RIGHTSB 0 [heading UPWARD]
+		curl RIGHTSB (XH - SMOOTHA)
+		hookend XO
+		g4 SB (XH - AHOOK)
+	include : dispiro
+		widths.lhs
+		flat (RIGHTSB + O) bartop [heading LEFTWARD]
+		curl barsmooth bartop
+		archv
+		g4   (SB + OX) (bartop * 0.475)
+		arcvh
+		g4   (lowmiddle + (-lowslope) * STROKE) O [heading {.y 1 .x lowslope}]
+		archv
+		flat   (RIGHTSB - STROKE * CORRECTION_HX) (SMALLSMOOTHB * 0.9) [widths 0 SHOULDERFINE]
+		curl   (RIGHTSB - STROKE * CORRECTION_HX) (SMALLSMOOTHB * 0.9 + 1)
+	if SLAB : begin
+		include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+
+create-glyph 'a.italic' : glyph-construction
+	set-width WIDTH
+	include eMarks
+	set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
+	include : OBarRightShape
+	include : VBarRight RIGHTSB 0 XH
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		tag-contour 'serifRB'
+
+create-glyph 'a' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'a'
+	
+	if (para.italicangle > 0)
+		then : include glyphs.'a.italic' AS_BASE
+		else : include glyphs.'a.upright' AS_BASE
+alias 'cyra' 0x430 'a'
+
+create-glyph 'scripta' : glyph-construction
+	assign-unicode 0x0251
+	include eMarks
+	include : OBarRightShape
+	start-from RIGHTSB 0
+	line-to    (RIGHTSB - STROKE * CORRECTION_HX) 0
+	line-to    (RIGHTSB - STROKE * CORRECTION_HX) (XH - STROKE / 2)
+	line-to    RIGHTSB (XH - O)
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		tag-contour 'serifRB'
+
+turned nothing 0x2C6F 'A' MIDDLE (CAP / 2)
+turned 'turna' 0x250 'a.upright' MIDDLE (XH / 2)
+turned nothing 0x252 'scripta' MIDDLE (XH / 2)
+
+### W and w
+define [WShape top] : glyph-construction
+	local wheight (top * 0.6)
+	
+	include : dispiro
+		widths.lhs
+		flat SB top [heading DOWNWARD]
+		curl SB (top * 0.75) [heading DOWNWARD]
+		quadcontrols 0 0.3 6 unimportant
+		g4   (WShape.m1 - WShape.fine / 2 * CORRECTION_HX) 0 [widths.lhs (WShape.fine * 0.8)]
+	
+	# bottom cap 1
+	start-from (WShape.m1 + WShape.fine / 2 * CORRECTION_HX) 0
+	line-to (WShape.m1 - WShape.fine / 2 * CORRECTION_HX) 0
+	line-to WShape.m1 WShape.fine
+	
+	include : dispiro
+		widths.rhs WShape.fine
+		straight.down.start (MIDDLE + WShape.fine / 2 * CORRECTION_HX) wheight [heading DOWNWARD]
+		quadcontrols 0 0.1 6 unimportant
+		g4  (WShape.m1 + WShape.fine / 2 * CORRECTION_HX) 0 [widths.rhs WShape.fine]
+	include : dispiro
+		widths.lhs WShape.fine
+		straight.down.start (MIDDLE - WShape.fine / 2 * CORRECTION_HX) wheight [heading DOWNWARD]
+		quadcontrols 0 0.1 6 unimportant
+		g4  (WShape.m2 - WShape.fine / 2 * CORRECTION_HX) 0 [widths.lhs WShape.fine]
+		
+	# bottom cap 2
+	start-from (WShape.m2 + WShape.fine / 2 * CORRECTION_HX) 0
+	line-to (WShape.m2 - WShape.fine / 2 * CORRECTION_HX) 0
+	line-to WShape.m2 WShape.fine
+	
+	include : dispiro
+		widths.rhs
+		flat RIGHTSB top [heading DOWNWARD]
+		curl RIGHTSB (top * 0.75) [heading DOWNWARD]
+		quadcontrols 0 0.3 6 unimportant
+		g4   (WShape.m2 + WShape.fine / 2 * CORRECTION_HX) 0 [widths.rhs (WShape.fine * 0.8)]
+	include : AIVSerifs top
+set WShape.fine : adviceBlackness 6
+set WShape.m1 : WIDTH * 0.325
+set WShape.m2 : WIDTH * 0.675
+
+create-glyph 'W' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'W'
+	include capitalMarks
+	include : WShape CAP
+create-glyph 'w' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'w'
+	include eMarks
+	include : WShape XH
+define [WHooktopShape top] : glyph-construction
+	include : WShape top
+	this.contours.pop
+	if SLAB : begin
+		local s : this.contours.pop
+		this.contours.pop
+		this.contours.push s
+
+	include : dispiro
+		widths.rhs
+		straight.down.start RIGHTSB (top - HOOK) [heading DOWNWARD]
+		quadcontrols 0 0.3 6 unimportant g2
+		g4   (WShape.m2 + WShape.fine / 2 * CORRECTION_HX) 0 [widths.rhs (WShape.fine * 0.8)]
+	include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
+
+create-glyph 'Whooktop' : glyph-construction
+	assign-unicode 0x2C72
+	include capitalMarks
+	
+	include : WHooktopShape CAP
+create-glyph 'whooktop' : glyph-construction
+	assign-unicode 0x2C73
+	include eMarks
+	
+	include : WHooktopShape XH
+
+### X and x
+create-glyph 'X' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'X'
+	include capitalMarks
+	
+	include : xStrand SB 0 RIGHTSB CAP 0.1 0.4 0.28
+	include : xStrand SB CAP RIGHTSB 0 0.1 0.4 0.28
+	include : AIHSerifs CAP
+alias 'Chi' 0x3A7 'X'
+alias 'cyrHa' 0x425 'X'
+
+create-glyph 'x' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'x'
+	include eMarks
+	
+	local TURN (XH * 0.1)
+	
+	include : xStrand SB 0 RIGHTSB XH 0.02 0.4 0.14
+	include : xStrand SB XH RIGHTSB 0 0.02 0.4 0.14
+	include : AIHSerifs XH
+create-glyph 'chi' : glyph-construction
+	set-width WIDTH
+	assign-unicode 0x3C7
+	include pMarks
+	
+	include : xStrand SB DESCENDER RIGHTSB XH 0.05 0.4 0.1
+	include : xStrand SB XH RIGHTSB DESCENDER 0.05 0.4 0.1
+alias 'cyrha' 0x445 'x'
+
+composite nothing 0x4B2 { glyphs.cyrHa [CyrDescender RIGHTSB] }
+composite nothing 0x4B3 { glyphs.cyrha [CyrDescender RIGHTSB] }
+
+### Y
+define [YShape top bot] : glyph-construction
+	local cross : mix [fallback bot 0] top 0.4
+	include : halfXStrand SB top MIDDLE cross 0.1 0.4 0.28
+	include : halfXStrand RIGHTSB top MIDDLE cross 0.1 0.4 0.28
+	tag-contour 'strokeRT'
+	include : VBar MIDDLE [fallback bot 0] (cross + HALFSTROKE)
+	include : AIVSerifs top
+	if SLAB : begin
+		include : CenterBottomSerif MIDDLE [fallback bot 0] JUT
+create-glyph 'Y' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'Y'
+	include capitalMarks
+	include : YShape CAP
+alias 'Upsilon' 0x3A5 'Y'
+alias 'cyrUe' 0x4AE 'Y'
+
+create-glyph 'Yhooktop' : glyph-construction
+	assign-unicode 0x1B3
+	include glyphs.Y AS_BASE
+	eject-contour 'strokeRT'
+	eject-contour 'serifRT'
+	local cross (CAP * 0.4)
+	include : dispiro
+		widths.rhs
+		straight.left.start (RIGHTSB + HOOKX / 3) (CAP - STROKE)
+		g4 (RIGHTSB - HOOKX / 3) (CAP - HOOK)
+		quadcontrols 0.55 0.7 8 unimportant
+		g4   (MIDDLE + STROKE / 2 * CORRECTION_HX) cross
+
+create-glyph 'cyrue' : glyph-construction
+	assign-unicode 0x4AF
+	include pMarks
+	include : YShape XH DESCENDER
+
+### y
+create-glyph 'y' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'y'
+	include pMarks
+	
+	local xbottom : mix SB RIGHTSB 0.28
+	local turnp : XH / (XH - DESCENDER)
+	local xb : mix SB RIGHTSB 0.51
+	local yb : mix 0 XH (0.05 * turnp)
+	
+	include : tagged 'strokeR' : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
+	include : tagged 'strokeL' : halfXStrand SB XH xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
+	
+	if SLAB : begin
+		include : AIVSerifs XH
+		include : LeftwardBottomSerif xbottom DESCENDER (SIDEJUT + JUT / 4)
+alias 'cyru' 0x443 'y'
+
+create-glyph 'yhooktop' : glyph-construction
+	assign-unicode 0x1B4
+	include glyphs.y AS_BASE
+	eject-contour 'strokeR'
+	eject-contour 'serifRT'
+	
+	local xbottom : mix SB RIGHTSB 0.28
+	local turnp : XH / (XH - DESCENDER)
+	local xb : mix SB RIGHTSB 0.49
+	local yb : mix 0 XH (0.05 * turnp)
+	
+	# include : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
+	include : dispiro
+		widths.center
+		flat (xbottom + HALFSTROKE * CORRECTION_HX) DESCENDER [heading UPWARD]
+		curl (xbottom + HALFSTROKE * CORRECTION_HX) (DESCENDER + 1) [heading UPWARD]
+		alsothruthem {{0 0.05} {0.1 0.19} {0.2125 0.33} {0.44 0.6} {0.93 0.98}} important
+		g2   (RIGHTSB - HOOKX / 6) [mix DESCENDER (XH - HALFSTROKE) 0.98]
+		flat (RIGHTSB + HOOKX / 4 - 1) (XH - HALFSTROKE)
+		curl (RIGHTSB + HOOKX / 4) (XH - HALFSTROKE)
+
+create-glyph 'cyrU' : glyph-construction
+	set-width WIDTH
+	assign-unicode 0x423
+	include capitalMarks
+	
+	local xbottom : mix SB RIGHTSB 0.28
+	local turnp : XH / CAP
+	local xb : mix SB RIGHTSB 0.51
+	local yb : mix (CAP - XH) CAP (0.05 * turnp)
+	
+	include : xStrand xbottom 0 RIGHTSB CAP 0.1 0.6 0.14
+	include : halfXStrand SB CAP xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
+	if SLAB : begin
+		include : AIVSerifs CAP
+		include : LeftwardBottomSerif xbottom 0 (SIDEJUT + JUT / 4)
+
+### K and k
+
+define [KShape top] : glyph-construction
+	local turn (top * 0.99)
+	
+	local attach (top * [if SLAB 0.325 0.375])
+	local attach2 [if SLAB [mix SB RIGHTSB 0.48] MIDDLE]
+	
+	local fine : adviceBlackness 3.5
+	include : dispiro
+		g4.down.start (RIGHTSB) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
+		bezcontrols 0 [if SLAB 0.1 0.2] 0.5 [if SLAB 0.55 0.65] 8
+		g4 (SB + STROKE) attach [widths 0 fine]
+	include : dispiro
+		widths.center
+		g4.up.start (RIGHTSB - O - HALFSTROKE * CORRECTION_HX) 0 [heading UPWARD]
+		quadcontrols 0 [if SLAB 0.125 0.25] 8
+		g4 attach2 (top * 0.61) [widths.center fine]
+	if SLAB : begin
+		include : RightwardTopSerif (RIGHTSB - (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - HALFSTROKE) * CORRECTION_HX) top (SIDEJUT)
+		include : RightwardBottomSerif (RIGHTSB - O) 0 SIDEJUT
+
+create-glyph 'K' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'K'
+	include capitalMarks	
+	include : VBarLeft SB 0 CAP
+	include : KShape CAP
+	if SLAB : begin
+		include : CenterTopSerif (SB + HALFSTROKE * CORRECTION_HX) CAP JUT
+		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+alias 'Kappa' 0x39A 'K'
+alias 'cyrKa' 0x41A 'K'
+
+create-glyph 'k' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'k'
+	include bMarks
+	include : VBarLeft SB 0 CAP
+	include : KShape XH
+	if SLAB : begin
+		include : LeftwardTopSerif SB CAP SIDEJUT
+		if (para.italicangle === 0) : begin
+			include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+			tag-contour 'serifLB'
+
+create-glyph 'kappa' : glyph-construction
+	set-width WIDTH
+	assign-unicode 0x3BA
+	include eMarks
+	include : VBarLeft SB 0 XH
+	include : KShape XH
+	if SLAB : begin
+		include : LeftwardTopSerif SB XH SIDEJUT
+
+create-glyph 'cyrka' : glyph-construction
+	set-width WIDTH
+	assign-unicode 0x43A
+	include eMarks
+	include : VBarLeft SB 0 XH
+	include : KShape XH
+	if SLAB : begin
+		include : CenterBottomSerif (SB + HALFSTROKE * CORRECTION_HX) 0 JUT
+		include : CenterTopSerif (SB + HALFSTROKE * CORRECTION_HX) XH JUT
+alias 'latinkappa' 0x138 'cyrka'
+
+create-glyph 'Khooktop' : glyph-construction
+	assign-unicode 0x198
+	include capitalMarks
+	include : KShape CAP
+	include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
+	include : VerticalHook (SB + HALFSTROKE * CORRECTION_HX) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+
+create-glyph 'khooktop' : glyph-construction
+	assign-unicode 0x199
+	include bMarks
+	include : KShape XH
+	include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
+	include : VerticalHook (SB + HALFSTROKE * CORRECTION_HX) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+	
+turned nothing 0xA7B0 'K' MIDDLE (CAP / 2)
+turned nothing 0x29E 'k' MIDDLE (XH / 2) pMarks
+
+
+### B
+define [BShape top] : glyph-construction
+	local bowl : top * 0.52 + HALFSTROKE	
+	local barleft SB
+	local curvleft : RIGHTSB - SB * 0.5 - (top - (bowl - STROKE)) * 0.45
+	local fine : STROKE * 0.8
+
+	include : dispiro
+		widths.rhs
+		flat (barleft - O) top [heading RIGHTWARD]
+		curl (curvleft - CORRECTION_OMIDS) top
+		archv
+		g4 (RIGHTSB - SB * 0.5 - OX) [mix top (bowl - STROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))]
+		arcvh
+		flat (curvleft + CORRECTION_OMIDS) (bowl - fine) [widths.rhs fine]
+		curl (barleft - O) (bowl - fine) [heading LEFTWARD]
+	include : dispiro
+		widths.rhs fine
+		flat (barleft - O) (bowl - STROKE + fine) [heading RIGHTWARD]
+		curl (curvleft - CORRECTION_OMIDS) (bowl - STROKE + fine)
+		archv
+		g4 (RIGHTSB - OX) [mix bowl 0 (SMOOTHB / (SMOOTHA + SMOOTHB))] [widths.rhs STROKE]
+		arcvh
+		flat (curvleft + CORRECTION_OMIDS) 0
+		curl (barleft - O) 0 [heading LEFTWARD]
+	include : VBarLeft barleft 0 top
+	if SLAB : begin
+		include : LeftwardTopSerif barleft top SIDEJUT
+		tag-contour 'serifLT'
+		include : LeftwardBottomSerif barleft 0 SIDEJUT
+		tag-contour 'serifLB'
+
+create-glyph 'B' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'B'
+	include capitalMarks
+	include : BShape CAP
+alias 'Beta' 0x392 'B'
+alias 'cyrVe' 0x412 'B'
+create-glyph 'Bhookleft' : glyph-construction
+	assign-unicode 0x181
+	include glyphs.B AS_BASE
+	eject-contour "serifLT"
+	include : LeftHook SB CAP
+
+create-glyph 'cyrve.italic' : glyph-construction
+	include eMarks
+	local mid : mix RIGHTSB SB 0.65
+	include : dispiro
+		widths.lhs
+		flat mid (XH / 2 - HALFSTROKE) [heading RIGHTWARD]
+		curl MIDDLE (XH / 2 - HALFSTROKE)
+		archv
+		g4   (RIGHTSB + O) (XH - SMOOTHB * 0.87)
+		arcvh
+		g4   (MIDDLE - CORRECTION_OMIDS) XO
+		archv
+		flat.ai (SB + O) (XH - SMALLSMOOTHA)
+		curl.ai (SB + O) SMALLSMOOTHB
+		arcvh
+		g4   (MIDDLE + CORRECTION_OMIDS) O
+		archv
+		g4   (RIGHTSB - O) (SMOOTHA * 0.87)
+		arcvh
+		flat MIDDLE (XH / 2 + HALFSTROKE)
+		curl mid (XH / 2 + HALFSTROKE) [heading LEFTWARD]
+create-glyph 'cyrve.upright' : glyph-construction
+	include eMarks
+	include : BShape XH
+italic-variant 'cyrve' 0x432
+
+create-glyph 'Bbar' : glyph-construction
+	assign-unicode 0x243
+	
+	include glyphs.B AS_BASE
+	include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3]
+
+### b
+create-glyph 'b' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'b'
+	include bMarks
+	
+	include : OBarLeftShape
+	include : VBarLeft SB 0 CAP
+	if SLAB : begin
+		include : LeftwardTopSerif SB CAP SIDEJUT
+		tag-contour 'serifLT'
+		include : LeftwardBottomSerif SB 0 SIDEJUT
+		tag-contour 'serifLB'
+
+create-glyph 'bhooktop' : glyph-construction
+	assign-unicode 0x253
+	include bMarks
+	include : OBarLeftShape
+	include : HooktopLeftBar
+	if SLAB : begin
+		include : LeftwardBottomSerif SB 0 SIDEJUT
+		tag-contour 'serifLB'
+
+
+create-glyph 'bbar' : glyph-construction
+	assign-unicode 0x180
+	
+	include glyphs.b AS_BASE
+	include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix XH CAP 0.45]
+
+### beta
+create-glyph 'beta' : glyph-construction
+	assign-unicode 0x3B2
+	include ifMarks
+	local ymiddle : [mix 0 CAP 0.55] - HALFSTROKE
+	include : dispiro
+		widths.rhs
+		flat SB DESCENDER [heading UPWARD]
+		curl SB (CAP - SMALLSMOOTHA)
+		arcvh
+		g4   [mix SB (RIGHTSB - OX + O * 3) 0.5] CAPO
+		archv
+		g4   (RIGHTSB - OX + O * 3) [mix CAP ymiddle 0.5]
+		arcvh
+		flat [mix SB (RIGHTSB - OX + O * 3) 0.5] ymiddle
+		curl [mix SB RIGHTSB 0.3] ymiddle
+	include : dispiro
+		widths.rhs
+		g4   (RIGHTSB - ymiddle / 2 - HALFSTROKE) (ymiddle + STROKE)
+		archv
+		g4   (RIGHTSB - OX) [mix 0 (ymiddle + STROKE) 0.5]
+		arcvh
+		flat (RIGHTSB - ymiddle / 2 - HALFSTROKE) 0
+		curl (SB + HALFSTROKE) 0 [heading LEFTWARD]
+
+### D
+create-glyph 'D' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'D'
+	include capitalMarks
+	
+	local dsmooth : Math.min (CAP * 0.499) (SMOOTH * 1.35)
+	local bsmooth (SMOOTH * 1.1)
+	
+	local barleft SB
+	
+	include : VBarLeft barleft 0 CAP
+	
+	include : dispiro
+		widths.rhs
+		flat (barleft - O) CAP [heading RIGHTWARD]
+		curl (RIGHTSB - bsmooth) CAP
+		archv
+		flat (RIGHTSB - OX) (CAP - dsmooth - (SMOOTHB - SMOOTH))
+		curl (RIGHTSB - OX) (dsmooth + (SMOOTHA - SMOOTH))
+		arcvh
+		flat (RIGHTSB - bsmooth) 0
+		curl (barleft - O) 0 [heading LEFTWARD]
+	if SLAB : begin
+		include : LeftwardTopSerif barleft CAP SIDEJUT
+		tag-contour 'serifLT'
+		include : LeftwardBottomSerif barleft 0 SIDEJUT
+		tag-contour 'serifLB'
+
+create-glyph 'Eth' : glyph-construction
+	assign-unicode 0xD0
+	
+	include glyphs.D AS_BASE
+	include : HOverlayBar (SB * 0.3) [mix (SB + STROKE) (RIGHTSB - STROKE) 0.55] (CAP * BARPOS)
+alias 'Dcroat' 0x110 'Eth'
+alias 'arficanD' 0x189 'Eth'
+
+create-glyph 'Dhookleft' : glyph-construction
+	assign-unicode 0x18A
+	include glyphs.D AS_BASE
+	eject-contour "serifLT"
+	include : LeftHook SB CAP
+
+### d
+create-glyph 'd' : glyph-construction
+	set-width WIDTH
+	assign-unicode 'd'
+	include bMarks
+	
+	include : OBarRightShape
+	include : VBarRight RIGHTSB 0 CAP
+	if SLAB : begin
+		include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+		tag-contour 'serifRB'
+		include : LeftwardTopSerif (RIGHTSB - STROKE * CORRECTION_HX) CAP SIDEJUT
+
+create-glyph 'dcroat' : glyph-construction
+	assign-unicode 0x111
+	include glyphs.d AS_BASE
+	include : HBar [mix (SB + STROKE) (RIGHTSB - STROKE) 0.5] [mix RIGHTSB WIDTH 0.7] [mix XH CAP 0.45] OVERLAYSTROKE
+
+create-glyph 'dcaron' : glyph-construction
+	assign-unicode 0x10F
+	include glyphs.commaAbove
+	apply-transform : Translate (WIDTH + (RIGHTSB - SB) / 2 + markExtend / 2) 0
+	local f : Thinner {'d'} 0.95
+	include f.d
+	include bMarks
+
+create-glyph 'dcurlytail' : glyph-construction
+	assign-unicode 0x221
+	local fine : adviceBlackness 4
+	local rinner : fine * 0.35
+	local wide STROKE
+	local m1 : RIGHTSB - rinner * 2
+	local x2 : mix SB m1 0.5
+	local y2 : -fine * 1.5
+	include eMarks
+	include : OBarRightShape XH m1
+	include : dispiro
+		widths.rhs
+		flat m1 CAP [heading DOWNWARD]
+		curl m1 (fine * 2)
+		CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
+	if SLAB : begin
+		include : LeftwardTopSerif (m1 - STROKE * CORRECTION_HX) CAP SIDEJUT
+
+create-glyph 'dhooktop' : glyph-construction
+	assign-unicode 0x257
+	include bMarks
+	include glyphs.'a.italic'
+	include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX) XH HOOKX (-HOOK)
