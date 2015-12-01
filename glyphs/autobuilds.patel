@@ -1,7 +1,5 @@
 ###### Automatic builds
 
-local font.features {.}
-
 # Build accented glyphs
 define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
 
@@ -666,7 +664,7 @@ progress 'Double Superscripts'
 
 
 # CJK double width letters
-let : begin
+symbol-block 'CJK Double Width Characters'
 	define [createDoubleWidth records] : if [not recursive] : begin
 		local scale 1.25
 		local pendingGlyphs : records.map : [record] -> record.1
@@ -680,50 +678,56 @@ let : begin
 	if [not recursive] : createDoubleWidth : let [a {}] : begin
 		foreach [j : range 1 0x5f] : if [not unicodeGlyphs.(0xff00 + j)] : a.push {(0xff00 + j) unicodeGlyphs.(0x20 + j).name}
 		* a
-progress 'CJK Double Width Characters'
+	
+### Generate Features and remove double-width glyphs when necessary
+if [not recursive] : begin
 
-### Generate MARK and MKMK features
-set font.features.mark {.}
-set font.features.mkmk {.marks {} .bases {}}
-set font.features.markGlyphs {.}
-set font.features.gdef {.simple {} .ligature {} .mark {}}
-define [buildAnchorDescription glyph inserter propx propy prefix th] : begin
-	local buf ''
-	foreach key [items-of : Object.keys glyph.anchors] : if (!th || th.(key)) : buf = buf + ' <anchor ' + [Math.round glyph.anchors.(key).(propx)] + ' ' + [Math.round glyph.anchors.(key).(propy)] + '> ' + inserter + ' @' + prefix + key
-	return buf
+	if [not para.cjk] : begin
+		set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
+		set glyphList font.glyf
 
-# mark
-define [createMarkLookup tableName anchorClasses] : let [lookup : set font.features.mark.(tableName) {.marks {} .bases {}}] : begin
-	local th {.}
-	foreach [ac : items-of anchorClasses] : set th.(ac) true
-	foreach glyph [items-of glyphList] : if glyph.anchors : begin
-		local anchorKeys : Object.keys glyph.anchors
-		local hasAnchor false
-		foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
-		if hasAnchor : begin
+	set font.features {.}
+	set font.features.mark {.}
+	set font.features.mkmk {.marks {} .bases {}}
+	set font.features.markGlyphs {.}
+	set font.features.gdef {.simple {} .ligature {} .mark {}}
+	define [buildAnchorDescription glyph inserter propx propy prefix th] : begin
+		local buf ''
+		foreach key [items-of : Object.keys glyph.anchors] : if (!th || th.(key)) : buf = buf + ' <anchor ' + [Math.round glyph.anchors.(key).(propx)] + ' ' + [Math.round glyph.anchors.(key).(propy)] + '> ' + inserter + ' @' + prefix + key
+		return buf
+	
+	# mark
+	define [createMarkLookup tableName anchorClasses] : let [lookup : set font.features.mark.(tableName) {.marks {} .bases {}}] : begin
+		local th {.}
+		foreach [ac : items-of anchorClasses] : set th.(ac) true
+		foreach glyph [items-of glyphList] : if glyph.anchors : begin
+			local anchorKeys : Object.keys glyph.anchors
+			local hasAnchor false
+			foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
+			if hasAnchor : begin
+				local isMarkGlyph false
+				foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : set isMarkGlyph true
+				if isMarkGlyph
+					then : lookup.marks.push : 'markClass ' + glyph.name + [buildAnchorDescription glyph '' 'x' 'y' 'mark' th]
+					else : lookup.bases.push : 'pos base ' + glyph.name + [buildAnchorDescription glyph 'mark' 'x' 'y' 'mark' th]
+	
+	createMarkLookup 'letter' {'above' 'below' 'trailing' 'lf' 'topright' 'bottomright'}
+	createMarkLookup 'overlay' {'overlay' 'slash'}
+	# mkmk and GDEF
+	foreach glyph [items-of glyphList] : if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length])
+		then
 			local isMarkGlyph false
 			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : set isMarkGlyph true
+			
 			if isMarkGlyph
-				then : lookup.marks.push : 'markClass ' + glyph.name + [buildAnchorDescription glyph '' 'x' 'y' 'mark' th]
-				else : lookup.bases.push : 'pos base ' + glyph.name + [buildAnchorDescription glyph 'mark' 'x' 'y' 'mark' th]
-
-createMarkLookup 'letter' {'above' 'below' 'trailing' 'lf' 'topright' 'bottomright'}
-createMarkLookup 'overlay' {'overlay' 'slash'}
-# mkmk and GDEF
-foreach glyph [items-of glyphList] : if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length])
-	then
-		local isMarkGlyph false
-		foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : set isMarkGlyph true
-		
-		if isMarkGlyph
-			then
-				font.features.mkmk.marks.push : 'markClass ' + glyph.name + ' ' + [buildAnchorDescription glyph '' 'x' 'y' 'mkmk']
-				font.features.mkmk.bases.push : 'pos mark ' + glyph.name + ' ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby' 'mkmk']
-				foreach key [items-of anchorKeys] : begin
-					if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) {}
-					font.features.markGlyphs.(key).push glyph.name
-				font.features.gdef.mark.push glyph.name
-			else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
-	else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
-
-progress 'Features'
+				then
+					font.features.mkmk.marks.push : 'markClass ' + glyph.name + ' ' + [buildAnchorDescription glyph '' 'x' 'y' 'mkmk']
+					font.features.mkmk.bases.push : 'pos mark ' + glyph.name + ' ' + [buildAnchorDescription glyph 'mark' 'mbx' 'mby' 'mkmk']
+					foreach key [items-of anchorKeys] : begin
+						if [not font.features.markGlyphs.(key)] : set font.features.markGlyphs.(key) {}
+						font.features.markGlyphs.(key).push glyph.name
+					font.features.gdef.mark.push glyph.name
+				else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
+		else : if [[regex '_'].test glyph.name] [font.features.gdef.ligature.push glyph.name] [font.features.gdef.simple.push glyph.name]
+	
+	progress 'Features'
