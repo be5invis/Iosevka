@@ -45,8 +45,8 @@ var indexPage = new Vue({
 		snippet: 'js',
 		theme: 'dark',
 		isSlab: false,
-		version: "1.0.1",
-		codename: "Tabris-1"
+		version: "1.0.2",
+		codename: "Tabris-2"
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });

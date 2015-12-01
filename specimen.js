@@ -15,18 +15,6 @@ var fonts = [
 		{name: 'iosevka-slab-bold', cls: 'slab bold', display: 'Iosevka Slab Bold'},
 		{name: 'iosevka-slab-italic', cls:'slab italic', display: 'Iosevka Slab Italic'},
 		{name: 'iosevka-slab-bolditalic', cls:'slab bold italic', display: 'Iosevka Slab Bold Italic'}
-	],
-	[
-		{name: 'iosevkacc-regular', cls: 'cc', display: 'IosevkaCC'},
-		{name: 'iosevkacc-bold', cls: 'cc bold', display: 'IosevkaCC Bold'},
-		{name: 'iosevkacc-italic', cls:'cc italic', display: 'IosevkaCC Italic'},
-		{name: 'iosevkacc-bolditalic', cls:'cc bold italic', display: 'IosevkaCC Bold Italic'}
-	],
-	[
-		{name: 'iosevkacc-slab-regular', cls: 'cc slab', display: 'IosevkaCC Slab'},
-		{name: 'iosevkacc-slab-bold', cls: 'cc slab bold', display: 'IosevkaCC Slab Bold'},
-		{name: 'iosevkacc-slab-italic', cls:'cc slab italic', display: 'IosevkaCC Slab Italic'},
-		{name: 'iosevkacc-slab-bolditalic', cls:'cc slab bold italic', display: 'IosevkaCC Slab Bold Italic'}
 	]
 ];
 var lipsums = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur semper ipsum quam, at molestie libero euismod vitae. Etiam vehicula felis mi, et ultricies libero consequat at. Donec consequat, nunc id elementum tempor, lectus orci vulputate leo, eget lobortis lectus nulla sed orci. Donec in dolor non orci aliquet gravida. Nulla volutpat magna et nulla pretium, quis consequat nibh euismod. Suspendisse eget metus enim. Fusce vulputate scelerisque eros et consequat. Quisque dapibus accumsan augue, et semper lectus vehicula sit amet. Ut ornare venenatis tortor, non gravida tellus mattis interdum. In hac habitasse platea dictumst. Donec interdum commodo ex eu tincidunt. Curabitur non fermentum enim. Proin luctus orci ut commodo auctor. Pellentesque accumsan id sem eu semper. Sed non pharetra nibh. Vivamus mattis luctus arcu, a rutrum dui venenatis sit amet. aja ojo ojoined',
