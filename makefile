@@ -2,8 +2,8 @@ default: fonts
 
 OBJDIR = build
 include makesupport.mk
-PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)'
-PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)'
+PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
+PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 LOOPS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
@@ -61,14 +61,14 @@ archives-slab : fonts-slab
 releasepack-default : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) pages release VERSION=$(VERSION)
 releasepack-cjk : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='cjk-'
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='cjk-' ARCPREFIX='with'
 releasepack-cc : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='cjk-compat-'
+	$(MAKE) archives-default VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='cjk-compat-' ARCPREFIX='with'
 releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc x-cc-slab' VARIANTNAME='cjk-compat-'
+	$(MAKE) archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc x-cc-slab' VARIANTNAME='cjk-compat-' ARCPREFIX='with'
 releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-'
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-'
 release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-cc-slab releasepack-hooky releasepack-zshaped
-cjkall : releasepack-cjk releasepack-cc releasepack-cc-slab
+cjk-all : releasepack-cjk releasepack-cc releasepack-cc-slab
