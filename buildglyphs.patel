@@ -22,11 +22,18 @@ define-macro $$include : syntax-rules
 		return {'.syntactic-closure' ast env}
 	otherwise `nothing
 
-define [includeGlyphPart cg gs nm] : begin
-	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
-	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
+# A symbol block defines a group of similar glyphs. They may expose some functions used in glyphs in other blocks.
+define-macro symbol-block : syntax-rules
+	`[symbol-block @name @::steps] : let [t : env.newt] : dirty `[begin [let : set @t : begin @::[steps.map formOf]] [progress @name] @t]
 
 ### Necessary macros
+# A glyph construction is a function which "modifies" a glyph.
+define-macro glyph-construction : syntax-rules
+	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
+		local currentGlyph this
+		begin @::[steps.map formOf]
+		return nothing
+	]] env}
 # Remap Glyph's methods to macros in order to simplify writing
 define-macro set-width : syntax-rules
 	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.set-width @::args] env}
@@ -58,17 +65,10 @@ define-macro assign-unicode : syntax-rules
 		currentGlyph.assign-unicode @code
 		set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
 	] env}
-# The macro [glyph-construction] creates a function which builds a glyph.
-define-macro glyph-construction : syntax-rules
-	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
-		local currentGlyph this
-		begin @::[steps.map formOf]
-		return nothing
-	]] env}
 
-define-macro symbol-block : syntax-rules
-	`[symbol-block @name @::steps] : let [t : env.newt] : dirty `[begin [let : set @t : begin @::[steps.map formOf]] [progress @name] @t]
-
+define [includeGlyphPart cg gs nm] : begin
+	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
+	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
 
 
 ### COMMON FUNCTIONS
@@ -390,16 +390,16 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	$$include 'glyphs/overmarks.patel'
 	
 	# Unified letters and numerics
-	$$include 'glyphs/letters-unified-basic.patel'    ; progress 'Unified Letterforms'
-	$$include 'glyphs/letters-unified-extended.patel' ; progress 'Unified Letterforms Extended'
+	$$include 'glyphs/letters-unified-basic.patel'
+	$$include 'glyphs/letters-unified-extended.patel'
 	
 	# ASCII
-#	$$include 'glyphs/latin-basic-capital.patel'      ; progress 'Basic Latin Majuscule'
-#	$$include 'glyphs/latin-basic-lower.patel'        ; progress 'Basic Latin Minuscule'
+	#$$include 'glyphs/latin-basic-capital.patel'      ; progress 'Basic Latin Majuscule'
+	#$$include 'glyphs/latin-basic-lower.patel'        ; progress 'Basic Latin Minuscule'
 	$$include 'glyphs/numbers.patel'                  ; progress 'Numbers'
 	
 	# Extended
-	$$include 'glyphs/greek.patel'                    ; progress 'Greek'
+	#$$include 'glyphs/greek.patel'                    ; progress 'Greek'
 	$$include 'glyphs/cyrillic-basic.patel'           ; progress 'Cyrillic'
 	$$include 'glyphs/latin-extend-basis.patel'       ; progress 'Extended Latin Undecorated'
 	$$include 'glyphs/latin-extend-decorated.patel'   ; progress 'Extended Latin Decorated'
