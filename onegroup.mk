@@ -97,9 +97,9 @@ PAGESMAPS = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(MAPS))
 $(PAGESMAPS) : $(PAGEDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
-$(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).tar.bz2 : $(TARGETS)
+$(ARCHIVEDIR)/$(ARCPREFIX)-$(VERSION).tar.bz2 : $(TARGETS)
 	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
-$(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).zip : $(TARGETS)
+$(ARCHIVEDIR)/$(ARCPREFIX)-$(VERSION).zip : $(TARGETS)
 	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
 
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).zip

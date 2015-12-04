@@ -61,14 +61,14 @@ archives-slab : fonts-slab
 releasepack-default : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) pages release VERSION=$(VERSION)
 releasepack-cjk : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='cjk-' ARCPREFIX='with'
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='cjk-' ARCPREFIX='withfw'
 releasepack-cc : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='cjk-compat-' ARCPREFIX='with'
+	$(MAKE) archives-default VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='cjk-compat-' ARCPREFIX='withfw'
 releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc x-cc-slab' VARIANTNAME='cjk-compat-' ARCPREFIX='with'
+	$(MAKE) archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc x-cc-slab' VARIANTNAME='cjk-compat-' ARCPREFIX='withfw'
 releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-hooky-'
 release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-cc-slab releasepack-hooky releasepack-zshaped
 cjk-all : releasepack-cjk releasepack-cc releasepack-cc-slab
