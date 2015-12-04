@@ -946,7 +946,7 @@ symbol-block 'r'
 	create-glyph 'rflap' : glyph-construction
 		assign-unicode 0x27E
 		include eMarks
-		local rhookx : RIGHTSB + JBALANCE / 2
+		local rhookx (RIGHTSB + RBALANCE2 - OXE)
 		local rmiddle : [mix (SB + RBALANCE + STROKE) (rhookx - HALFSTROKE) 0.5] - CORRECTION_OMIDS
 	
 		include : dispiro
@@ -956,8 +956,7 @@ symbol-block 'r'
 			flat (SB + RBALANCE) (XH - SMALLSMOOTHA)
 			curl (SB + RBALANCE) 0 [heading DOWNWARD]
 		if SLAB : begin
-			include : CenterBottomSerif (SB + RBALANCE + STROKE * 0.75 * CORRECTION_HX) 0 (JUT + HALFSTROKE / 2)
-			tag-contour 'serifLB'
+			include : tagged 'serifLB' : CenterBottomSerif (SB + RBALANCE + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) 0 (JUT + RBALANCE * 0.65)
 
 ### C and c, also cyre
 define {CShape} : symbol-block 'C'
@@ -1269,6 +1268,12 @@ symbol-block 'O'
 		include glyphs.o AS_BASE
 		include : HOverlayBar (SB - O) (RIGHTSB + O) (XH * 0.5)
 	alias 'cyroe' 0x4E9 'obar'
+	
+	create-glyph 'bulleye' : glyph-construction
+		assign-unicode 0x298
+		include glyphs.O AS_BASE
+		local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
+		include : Ring (CAPMIDDLE + radius) (CAPMIDDLE - radius) (MIDDLE + radius) (MIDDLE - radius)
 
 ### Q
 symbol-block 'Q'
@@ -2181,7 +2186,7 @@ define {FShape} : symbol-block 'F'
 ### long s, and f
 define {LongSShape} : symbol-block 'f'
 	define fovershoot : fallback para.fovershoot (O * 6)
-	create-glyph 'longs.upright' : glyph-construction
+	create-glyph 'longs.straight' : glyph-construction
 		set-width WIDTH
 		include bMarks
 		include : dispiro
@@ -2193,6 +2198,18 @@ define {LongSShape} : symbol-block 'f'
 			include : CenterBottomSerif (MIDDLE - FBALANCE) 0 JUT
 			tag-contour 'serifMB'
 	
+	create-glyph 'longs.upright' : glyph-construction
+		local m : MIDDLE - JBALANCE - HALFSTROKE * CORRECTION_HX
+		local r : m + (WIDTH * 0.5) + STROKE * CORRECTION_HX - OXHOOK
+		include : dispiro
+			widths.lhs
+			g4 r (CAP - HOOK)
+			hookstart (CAP - O) true
+			flat m (CAP - SMOOTHA)
+			curl m 0
+		if SLAB : begin
+			include : tagged 'serifLB' : CenterBottomSerif (m + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) 0 (JUT + RBALANCE * 0.65)
+		
 	define [LongSShape top bottom hookx hooky fine] : glyph-construction
 		local w [fallback fine STROKE]
 		include : dispiro
@@ -2237,7 +2254,7 @@ define {LongSShape} : symbol-block 'f'
 		local m1 : MIDDLE - HALFSTROKE * CORRECTION_HX - FBALANCE
 		local x2 : mix RIGHTSB m1 0.25
 		local y2 : DESCENDER + O
-		include glyphs.'longs.upright' false
+		include glyphs.'longs.straight' false
 		eject-contour 'serifMB'
 		include : dispiro
 			widths.lhs
@@ -2245,7 +2262,7 @@ define {LongSShape} : symbol-block 'f'
 			curl m1 (DESCENDER + fine * 3)
 			CurlyTail fine rinner m1 DESCENDER (m1 - LONGJUT) x2 y2
 	
-	create-glyph 'f.slab' : glyph-construction
+	create-glyph 'f.upright' : glyph-construction
 		include bMarks
 		local barleft [mix SB RIGHTSB 0.24]
 		include : dispiro
@@ -2255,16 +2272,13 @@ define {LongSShape} : symbol-block 'f'
 			flat barleft [CAP - SMOOTHA * 0.85]
 			curl barleft 0
 		include : HBarTop [mix SB RIGHTSB 0] [mix SB RIGHTSB 0.9] (XH * 0.95)
-		include : HBarBottom [mix SB RIGHTSB 0.02] [mix SB RIGHTSB 0.8] 0
+		if SLAB : include : HBarBottom [mix SB RIGHTSB 0.02] [mix SB RIGHTSB 0.8] 0
 	
-	create-glyph 'f' : glyph-construction
-		set-width WIDTH
-		assign-unicode 'f'
-		if (SLAB && para.italicangle === 0)
-		: then : include glyphs.'f.slab' AS_BASE
-		: else : begin
-			include glyphs.longs AS_BASE
-			include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
+	create-glyph 'f.italic' : glyph-construction
+		include glyphs.'longs.italic' AS_BASE
+		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
+	
+	italic-variant 'f' 'f'
 	
 	create-glyph 'fltail' : glyph-construction
 		assign-unicode 0x192
