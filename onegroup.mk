@@ -4,6 +4,7 @@ TARGETUPM = 1000
 OBJDIR = build
 include makesupport.mk
 PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
+ARCPREFIXB = iosevka$(SUFFIX)
 
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
@@ -97,12 +98,12 @@ PAGESMAPS = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(MAPS))
 $(PAGESMAPS) : $(PAGEDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
-$(ARCHIVEDIR)/$(ARCPREFIX)-$(VERSION).tar.bz2 : $(TARGETS)
+$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(TARGETS)
 	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
-$(ARCHIVEDIR)/$(ARCPREFIX)-$(VERSION).zip : $(TARGETS)
+$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip : $(TARGETS)
 	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
 
-archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(PREFIX)-$(VERSION).zip
+archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
 release : $(RELEASES) archives pages
 
