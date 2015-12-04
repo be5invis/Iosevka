@@ -45,8 +45,8 @@ var indexPage = new Vue({
 		snippet: 'js',
 		theme: 'dark',
 		isSlab: false,
-		version: "1.1.0",
-		codename: "Calibum"
+		version: "1.1.1",
+		codename: "Calibum-1"
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
