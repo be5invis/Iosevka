@@ -69,6 +69,6 @@ releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR)
 releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-hooky-'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
 release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-cc-slab releasepack-hooky releasepack-zshaped
 cjk-all : releasepack-cjk releasepack-cc releasepack-cc-slab
