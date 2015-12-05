@@ -50,7 +50,7 @@ $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  x-bolditalic $(STYLE_ITALIC) $(STYLE_X_BOLDITALIC)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
-	$(NODE) extract --upm 12800 --uprightify 1 --ttf $@ $<
+	$(NODE) extract --upm 16000 --uprightify 1 --ttf $@ $<
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
 	$(NODE) extract --feature $@ $<
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
