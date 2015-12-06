@@ -2,7 +2,8 @@ var CompactPicker = Vue.component('compact-picker', {
 	template: '#compact-picker-template',
 	props: {
 		items: Array,
-		current: String
+		current: String,
+		cls: String
 	},
 	data: {},
 	methods: {
@@ -16,7 +17,8 @@ var CompactToggle = Vue.component('compact-toggle', {
 	template: '#compact-toggle-template',
 	props: {
 		label: String,
-		on: Boolean
+		on: Boolean,
+		cls: String
 	},
 	data: {},
 	methods: {
@@ -45,6 +47,8 @@ var indexPage = new Vue({
 		snippet: 'javascript',
 		theme: 'dark',
 		isSlab: false,
+		isBold: false,
+		isItalic: false,
 		version: "1.1.2",
 		codename: "Calibum-2"
 	}
