@@ -42,11 +42,11 @@ var indexPage = new Vue({
 	data: {
 		themes: ['light', 'dark'],
 		snippets: [],
-		snippet: 'js',
+		snippet: 'javascript',
 		theme: 'dark',
 		isSlab: false,
-		version: "1.1.1",
-		codename: "Calibum-1"
+		version: "1.1.2",
+		codename: "Calibum-2"
 	}
 });
-indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x });
+indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
