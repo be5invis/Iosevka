@@ -40,7 +40,11 @@ function writettf(ttf, file){
 
 var ttf = readttf(process.argv[2]);
 // Fixes xAvgCharWidth
-ttf['OS/2'].xAvgCharWidth = ttf.head.unitsPerEm / 2; // 0.5em
+var spacewidth = ttf.head.unitsPerEm / 2;
+for(var j = 0; j < ttf.glyf.length; j++) if(ttf.glyf[j] && ttf.glyf[j].unicode && ttf.glyf[j].unicode[0] === 0x20) {
+    spacewidth = ttf.glyf[j].advanceWidth
+}
+ttf['OS/2'].xAvgCharWidth = spacewidth; // 0.5em
 ttf['OS/2'].sxHeight = param.iosevka.xheight
 ttf['OS/2'].sCapHeight = param.iosevka.cap
 ttf['OS/2'].fsSelection |= (ttf['OS/2'].usWeightClass > 400 ? 1 << 5 : 0) | (ttf.post.italicAngle ? 1 : 0)
