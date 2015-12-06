@@ -54,3 +54,19 @@ The current avaliable styles are:
 	* `v-i-zshaped` : Z-shaped `i`
 	* `v-i-serifed` : Serifed `i` (default for upright subfamilies)
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
+
+## Release Notes
+* **1.1.2** 
+ - Improved the balancing of `/longs`, `/f` and `/eszet`.
+ - The strokes of `/A`, `/V` and `/v` in Iosevka Slab is straightened.
+* **1.1.1** 
+ - Added the missing serifs for `/cyrdzhe`.
+ - Balanced `/pi` in bold weights.
+ - Moved the descender lines of Cyrillic letters rightward a little in italics.
+* **1.1.0**
+ - Enwiden the boldfaces. This will improve the consistency between regular and bold weights.
+ - The curves in `/xi` are optimized.
+* **1.0.2**
+ - Fixed the incorrect `/yhooktop`.
+ - The digaphs defined in Unicode is now single-width.
+ - Reorganized subfamilies: Now the default Iosevka does not contain full-width glyphs any more.
