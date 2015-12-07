@@ -12,7 +12,7 @@ define [CyrDescender x shift] : glyph-construction
 ### V and v
 define VShape : symbol-block 'V, v and nu'
 	local cornerdist : HALFSTROKE * CORRECTION_HX * [if SLAB 1.2 1]
-	local vcurviness : if SLAB 0.15 0.3
+	local vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
 	define [VShape top] : glyph-construction
 
 		include : dispiro
@@ -44,10 +44,19 @@ define VShape : symbol-block 'V, v and nu'
 		include : VShape CAP
 	
 	create-glyph 'v' : glyph-construction
-		set-width WIDTH
 		assign-unicode 'v'
 		include eMarks
 		include : VShape XH
+	
+#	create-glyph 'v.italic' : glyph-construction
+#		include eMarks
+#		include : VShape XH
+#		if (SLAB && para.isItalic) : begin
+#			eject-contour 'serifLT'
+#			eject-contour 'serifRT'
+#			include : LeftwardTopSerif SB XH SIDEJUT
+#	
+#	italic-variant 'v' 'v'
 	
 	define [VHooktopShape top] : glyph-construction
 		include : VShape top
@@ -72,7 +81,7 @@ define VShape : symbol-block 'V, v and nu'
 		include : VHooktopShape CAP
 	alias 'cyrizhitsa' 0x475 'vhooktop'
 	
-	turned nothing 0x28C 'v' MIDDLE (XH / 2)
+	turned 'turnv' 0x28C 'v' MIDDLE (XH / 2)
 	
 	create-glyph 'nu' : glyph-construction
 		assign-unicode 0x3BD
@@ -282,32 +291,35 @@ symbol-block 'X'
 	alias 'Chi' 0x3A7 'X'
 	alias 'cyrHa' 0x425 'X'
 	
-	create-glyph 'x.upright' : glyph-construction
+	create-glyph 'x' : glyph-construction
 		include eMarks
-		
+		assign-unicode 'x'
 		local TURN (XH * 0.1)
 		
 		include : xStrand SB 0 RIGHTSB XH 0.02 0.4 0.14
 		include : xStrand SB XH RIGHTSB 0 0.02 0.4 0.14
 		include : AIHSerifs XH
 	
-	create-glyph 'x.italic' : glyph-construction
-		local g : create-glyph : glyph-construction
-			local p 0.85
-			local fine : STROKE * 0.8
-			include : dispiro
-				g4 (SB + O * 3) (XH - HOOK) [widths.rhs MVERTSTROKE]
-				hookstart (XH - O) true nothing [widths.heading 0 STROKE RIGHTWARD]
-				flat (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (XH - SMALLSMOOTH * p) [widths.heading 0 fine DOWNWARD]
-				curl (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (0  + SMALLSMOOTH * p) [heading DOWNWARD]
-				hookend O true nothing [widths.heading 0 STROKE LEFTWARD]
-				g4 (SB + O * 3) HOOK [widths.rhs MVERTSTROKE]
-
-		include eMarks
-		include g
-		include : FlipAround MIDDLE (XH / 2)
-		include g
-	italic-variant 'x' 'x'
+#	create-glyph 'x.italic' : glyph-construction
+#		if SLAB
+#		: then
+#			local g : create-glyph : glyph-construction
+#				local p 0.85
+#				local fine : STROKE * 0.8
+#				include : dispiro
+#					g4 (SB + O * 3) (XH - HOOK) [widths.rhs MVERTSTROKE]
+#					hookstart (XH - O) true nothing [widths.heading 0 STROKE RIGHTWARD]
+#					flat (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (XH - SMALLSMOOTH * p) [widths.heading 0 fine DOWNWARD]
+#					curl (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (0  + SMALLSMOOTH * p) [heading DOWNWARD]
+#					hookend O true nothing [widths.heading 0 STROKE LEFTWARD]
+#					g4 (SB + O * 3) HOOK [widths.rhs MVERTSTROKE]
+#	
+#			include eMarks
+#			include g
+#			include : FlipAround MIDDLE (XH / 2)
+#			include g
+#		: else : include glyphs.'x.upright' AS_BASE
+#	italic-variant 'x' 'x'
 	
 	create-glyph 'chi' : glyph-construction
 		set-width WIDTH
@@ -383,17 +395,22 @@ symbol-block 'y'
 		include : SmallYShape XH DESCENDER
 
 	create-glyph 'y.italic' : glyph-construction
-		include pMarks
-		include : nShoulder (SB + STROKE * CORRECTION_HX) RIGHTSB SHOULDERFINE
-		include : FlipAround MIDDLE (XH / 2)
-		include : dispiro
-			widths.rhs
-			flat RIGHTSB XH [heading DOWNWARD]
-			curl RIGHTSB (DESCENDER + SMALLSMOOTHA)
-			hookend (DESCENDER + O)
-			g4 SB (DESCENDER + SHOOK)
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SIDEJUT
+		if SLAB
+		: then
+			include pMarks
+			include : nShoulder (SB + STROKE * CORRECTION_HX) RIGHTSB SHOULDERFINE
+			include : FlipAround MIDDLE (XH / 2)
+			include : dispiro
+				widths.rhs
+				flat RIGHTSB XH [heading DOWNWARD]
+				curl RIGHTSB (DESCENDER + SMALLSMOOTHA)
+				hookend (DESCENDER + O)
+				g4 SB (DESCENDER + SHOOK)
+			if SLAB : begin
+				include : LeftwardTopSerif SB XH SIDEJUT
+		: else
+			include glyphs.'y.upright' AS_BASE
+
 	italic-variant 'y' 'y'
 	alias 'cyru' 0x443 'y'
 	
@@ -1868,7 +1885,7 @@ symbol-block 'i'
 		include : dispiro
 			widths.lhs
 			flat left XH [heading DOWNWARD]
-			curl left (SMALLSMOOTHB * 0.7)
+			curl left (SMALLSMOOTHB * 0.8)
 			hookend O
 			g4   right (SHOOK * 0.8)
 		include : dispiro
@@ -2086,7 +2103,7 @@ symbol-block 'l'
 		include : dispiro
 			widths.lhs
 			flat left CAP [heading DOWNWARD]
-			curl left (SMALLSMOOTHB * 0.75)
+			curl left (SMALLSMOOTHB * 0.85)
 			hookend O
 			g4   right SHOOK
 		include : dispiro
