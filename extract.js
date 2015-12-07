@@ -90,4 +90,36 @@ if(argv.ttf) {
 	font['OS/2'].sCapHeight     *= upmscale;
 	
 	fs.writeFileSync(argv.ttf, toBuffer(new TTFWriter(options).write(font)));
-}
+};
+
+if(argv.svg) {
+	function toSVGPath(glyph){
+		var buf = '';
+		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
+			var contour = glyph.contours[j];
+			if(contour.length){
+				buf += 'M' + contour[0].x + ' ' + contour[0].y;
+				for(var k = 1; k < contour.length; k++) if(contour[k].onCurve){
+					buf += 'L' + contour[k].x + ' ' + contour[k].y;
+				} else if(contour[k + 1]){
+					if(contour[k + 1].onCurve){
+						buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + contour[k + 1].x + ' ' + contour[k + 1].y;
+						k += 1
+					} else {
+						buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + (contour[k].x + contour[k + 1].x) / 2 + ' ' + (contour[k].y + contour[k + 1].y) / 2;
+					}
+				}
+				buf += 'Z\n'
+			}
+		}
+		return buf;
+	}
+	var svg = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><font id="' + font.name.fullName + '">'
+	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font['OS/2'].usWeightClass + '" font-stretch="normal" units-per-em="1000"/>'
+	for(var j = 0; j < font.glyf.length; j++){
+		var gd = '<glyph glyph-name="' + font.glyf[j].name + '" horiz-adv-x="' + font.glyf[j].advanceWidth + '" '+ (font.glyf[j].unicode && font.glyf[j].unicode.length ? 'unicode="&#x' + font.glyf[j].unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(font.glyf[j]) + '" />'
+		svg += gd;
+	}
+	svg += '</font></defs></svg>'
+	fs.writeFileSync(argv.svg, svg, 'utf-8')
+};
