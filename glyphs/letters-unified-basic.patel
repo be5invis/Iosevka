@@ -108,10 +108,6 @@ symbol-block 'A'
 		include : FlipAround MIDDLE (CAP / 2)
 		
 		include : HBarTop (SB + STROKE) (RIGHTSB - STROKE) (XH / 2)
-#		if SLAB : include : dispiro
-#			widths.rhs
-#			flat (MIDDLE - HALFSTROKE * CORRECTION_HX - JUT) CAP
-#			curl MIDDLE CAP
 	alias 'Alpha' 0x391 'A'
 	alias 'cyrA' 0x410 'A'
 	turned nothing 0x2C6F 'A' MIDDLE (CAP / 2)
@@ -286,9 +282,7 @@ symbol-block 'X'
 	alias 'Chi' 0x3A7 'X'
 	alias 'cyrHa' 0x425 'X'
 	
-	create-glyph 'x' : glyph-construction
-		set-width WIDTH
-		assign-unicode 'x'
+	create-glyph 'x.upright' : glyph-construction
 		include eMarks
 		
 		local TURN (XH * 0.1)
@@ -296,6 +290,26 @@ symbol-block 'X'
 		include : xStrand SB 0 RIGHTSB XH 0.02 0.4 0.14
 		include : xStrand SB XH RIGHTSB 0 0.02 0.4 0.14
 		include : AIHSerifs XH
+	
+	create-glyph 'x.italic' : glyph-construction
+		local g : create-glyph : glyph-construction
+			local p 0.85
+			local fine : STROKE * 0.8
+			include : dispiro
+				widths.rhs
+				g4 (SB + O * 3) (XH - HOOK)
+				hookstart (XH - O)
+				flat (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (XH - SMALLSMOOTH * p) [widths.heading 0 fine DOWNWARD]
+				curl (MIDDLE + (fine - HALFSTROKE) * CORRECTION_HX) (0  + SMALLSMOOTH * p) [heading DOWNWARD]
+				hookend O false nothing [widths.rhs]
+				g4 (SB + O * 3) HOOK
+
+		include eMarks
+		include g
+		include : FlipAround MIDDLE (XH / 2)
+		include g
+	italic-variant 'x' 'x'
+	
 	create-glyph 'chi' : glyph-construction
 		set-width WIDTH
 		assign-unicode 0x3C7
@@ -352,29 +366,43 @@ symbol-block 'Y'
 
 ### y
 symbol-block 'y'
-	create-glyph 'y' : glyph-construction
-		set-width WIDTH
-		assign-unicode 'y'
-		include pMarks
-		
+	define [SmallYShape top bottom] : glyph-construction
 		local xbottom : mix SB RIGHTSB 0.28
-		local turnp : XH / (XH - DESCENDER)
+		local turnp : top / (top - DESCENDER)
 		local xb : mix SB RIGHTSB 0.51
-		local yb : mix 0 XH (0.05 * turnp)
+		local yb : mix 0 top (0.05 * turnp)
 		
-		include : tagged 'strokeR' : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
-		include : tagged 'strokeL' : halfXStrand SB XH xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
+		include : tagged 'strokeR' : xStrand xbottom bottom RIGHTSB top 0.1 0.6 0.14
+		include : tagged 'strokeL' : halfXStrand SB top xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
 		
 		if SLAB : begin
-			include : AIVSerifs XH
-			include : LeftwardBottomSerif xbottom DESCENDER (SIDEJUT + JUT / 4)
+			include : AIVSerifs top
+			include : LeftwardBottomSerif xbottom bottom (SIDEJUT + JUT / 4)
+			
+	create-glyph 'y.upright' : glyph-construction
+		include pMarks
+		include : SmallYShape XH DESCENDER
+
+	create-glyph 'y.italic' : glyph-construction
+		include pMarks
+		include : nShoulder (SB + STROKE * CORRECTION_HX) RIGHTSB SHOULDERFINE
+		include : FlipAround MIDDLE (XH / 2)
+		include : dispiro
+			widths.rhs
+			flat RIGHTSB XH [heading DOWNWARD]
+			curl RIGHTSB (DESCENDER + SMALLSMOOTHA)
+			hookend (DESCENDER + O)
+			g4 SB (DESCENDER + SHOOK)
+		if SLAB : begin
+			include : LeftwardTopSerif SB XH SIDEJUT
+	italic-variant 'y' 'y'
 	alias 'cyru' 0x443 'y'
 	
-	turned nothing 0x28E 'y' MIDDLE (XH / 2) bMarks
+	turned nothing 0x28E 'y.upright' MIDDLE (XH / 2) bMarks
 	
 	create-glyph 'yhooktop' : glyph-construction
 		assign-unicode 0x1B4
-		include glyphs.y AS_BASE
+		include glyphs.'y.upright' AS_BASE
 		eject-contour 'strokeR'
 		eject-contour 'serifRT'
 		
@@ -394,20 +422,19 @@ symbol-block 'y'
 			curl (RIGHTSB + HOOKX / 4) (XH - HALFSTROKE)
 	
 	create-glyph 'cyrU' : glyph-construction
-		set-width WIDTH
-		assign-unicode 0x423
-		include capitalMarks
+		include : SmallYShape CAP 0
+	
+	create-glyph 'lambda' : glyph-construction
+		assign-unicode 0x3BB
+		include bMarks
 		
-		local xbottom : mix SB RIGHTSB 0.28
-		local turnp : XH / CAP
+		local xTop : mix SB RIGHTSB 0.28
+		local turnp : XH / (XH - DESCENDER)
 		local xb : mix SB RIGHTSB 0.51
-		local yb : mix (CAP - XH) CAP (0.05 * turnp)
+		local yb : mix XH 0 (0.05 * turnp)
 		
-		include : xStrand xbottom 0 RIGHTSB CAP 0.1 0.6 0.14
-		include : halfXStrand SB CAP xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
-		if SLAB : begin
-			include : AIVSerifs CAP
-			include : LeftwardBottomSerif xbottom 0 (SIDEJUT + JUT / 4)
+		include : xStrand xTop CAP RIGHTSB 0 0.1 0.6 0.14
+		include : halfXStrand SB 0 xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
 
 ### K and k
 symbol-block 'K'
