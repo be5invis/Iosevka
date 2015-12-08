@@ -157,7 +157,7 @@ if(argv.svg) {
 			}
 			Glyph.prototype.cleanup.call(g, 0.25);
 		}
-		var gd = '<glyph glyph-name="' + g.name + '" horiz-adv-x="' + g.advanceWidth + '" '+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(g) + '" />'
+		var gd = '<' + (j === 0 ? 'missing-glyph' : 'glyph') + ' glyph-name="' + g.name + '" horiz-adv-x="' + g.advanceWidth + '" '+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(g) + '" />'
 		svg += gd;
 	}
 	svg += '</font></defs></svg>'

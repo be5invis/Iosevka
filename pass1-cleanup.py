@@ -25,8 +25,6 @@ for i in font:
 		glyph.removeOverlap()
 font.selection.all()
 font.replaceWithReference(2)
-font.selection.select(("ranges", "unicode", None), 0x20, 0x7e)
-font.unlinkReferences()
 
 print "    Simplify: ", font.fontname
 font.selection.all()
