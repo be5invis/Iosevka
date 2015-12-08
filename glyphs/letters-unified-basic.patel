@@ -131,14 +131,13 @@ symbol-block 'J'
 		local slope (STROKE * 0.00092)
 		local expand 0.35
 		local coexpand ((1 - expand) / 2)
-		local smooth : HOOK + 0.75 * STROKE
 		
 		local hookx (0.5 * SB + OXHOOK)
 		
 		include : dispiro
 			widths.rhs
 			flat (RIGHTSB - JBALANCE2) CAP [heading DOWNWARD]
-			curl (RIGHTSB - JBALANCE2) smooth
+			curl (RIGHTSB - JBALANCE2) SMOOTH
 			hookend O
 			g4 hookx HOOK
 	
@@ -176,11 +175,10 @@ symbol-block 'j'
 		local center : MIDDLE + JBALANCE + HALFSTROKE * CORRECTION_HX
 		local hookx  : center - (WIDTH * 0.5) - STROKE * CORRECTION_HX + OXHOOK
 		local turn : [mix center hookx 0.5] + CORRECTION_OMIDS
-		local smb  : (center - turn) * 1.2
 		include : dispiro
 			widths.rhs
 			flat center XH [heading DOWNWARD]
-			curl center (DESCENDER + smb)
+			curl center (DESCENDER + SMOOTH)
 			hookend (DESCENDER + O)
 			g4 hookx (DESCENDER + JHOOK)
 	
@@ -992,7 +990,7 @@ symbol-block 'B'
 		assign-unicode 0x243
 		
 		include glyphs.B AS_BASE
-		include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3]
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3] [Math.min (CAP / 8) OVERLAYSTROKE]
 
 	create-glyph 'beta' : glyph-construction
 		assign-unicode 0x3B2
@@ -1066,9 +1064,11 @@ symbol-block 'b'
 		assign-unicode 0x185
 		include glyphs.b AS_BASE
 		eject-contour 'serifLT'
-		start-from SB CAP
+		start-from (SB - O) CAP
+		line-to    SB CAP
 		line-to    (SB - STROKE) (CAP - STROKE)
 		line-to    SB (CAP - STROKE * 2)
+		line-to    (SB - O) (CAP - STROKE * 2)
 		reverse-last
 ### D
 symbol-block 'D'
@@ -1683,8 +1683,8 @@ symbol-block 'O'
 		set-width WIDTH
 		assign-unicode 'o'
 		include eMarks
-		
 		include : OShape XH 0 SB RIGHTSB nothing nothing nothing true
+
 	alias 'omicron' 0x3BF 'o'
 	alias 'cyro' 0x43e 'o'
 	
@@ -1725,6 +1725,31 @@ symbol-block 'O'
 		include glyphs.O AS_BASE
 		local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
 		include : Ring (CAPMIDDLE + radius) (CAPMIDDLE - radius) (MIDDLE + radius) (MIDDLE - radius)
+	
+	create-glyph 'oupperhalf' : glyph-construction
+		assign-unicode 0x1D16
+		include eMarks
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) (XH / 2) [heading UPWARD]
+			curl (SB + OX) (XH - SMALLSMOOTHA)
+			arcvh
+			g4 (MIDDLE - CORRECTION_OMIDS) (XH - O)
+			archv
+			flat (RIGHTSB - OX) (XH - SMALLSMOOTHB)
+			curl (RIGHTSB - OX) (XH / 2) [heading DOWNWARD]
+	create-glyph 'olowerhalf' : glyph-construction
+		assign-unicode 0x1D17
+		include eMarks
+		include : dispiro
+			widths.lhs
+			flat (SB + OX) (XH / 2) [heading DOWNWARD]
+			curl (SB + OX) SMALLSMOOTHB
+			arcvh
+			g4 (MIDDLE + CORRECTION_OMIDS) O
+			archv
+			flat (RIGHTSB - OX) SMALLSMOOTHA
+			curl (RIGHTSB - OX) (XH / 2) [heading UPWARD]
 
 ### Q
 symbol-block 'Q'
@@ -2523,13 +2548,14 @@ symbol-block 't'
 		local turn : [mix center hookx 0.5] + CORRECTION_OMIDS
 		local smb  : (turn - center) * 1.2
 		
-		include : dispiro
+		local g : dispiro
 			widths.lhs
 			flat center top [heading DOWNWARD]
 			curl center (bot + smb)
 			hookend (bot + O)
 			g4 hookx (bot + HOOK)
-		set-anchor 'bottomright' BASE hookx (bot + HOOK)
+		include g
+		set-anchor 'bottomright' BASE g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
 		
 		include : HBarTop (center + HALFSTROKE - LONGJUT + TBALANCE2) (center + HALFSTROKE + LONGJUT + TBALANCE2) XH
 	
