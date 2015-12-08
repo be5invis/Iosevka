@@ -56,6 +56,11 @@ The current avaliable styles are:
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
 
 ## Release Notes
+* **1.2.0**
+ - Glyphs added: `/cyrGhayn`, `/cyrghayn`, `/cyrChevbar`, `/cyrchevbar`, `/turnoe`, `/voicedlaryngenalspirant`, `/oupperhalf`, `/olowerhalf` and their derived glyphs.
+ - Shape optimization: `/eight`, `/propto`, `/J`, `/j`, `/epsilon`, `/cyrze`, `/taillessphi`, `/smcpPsi` and their derived glyphs.
+ - Added the missing marks of `/longs`.
+ - Introduced a new SVG-based outline exporting mechanism. Now I am finally free from the rounding nightmare.
 * **1.1.2** 
  - Improved the balancing of `/longs`, `/f` and `/eszet`.
  - The strokes of `/A`, `/V` and `/v` in Iosevka Slab is straightened.
