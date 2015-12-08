@@ -6,7 +6,7 @@ PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' S
 PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
-LOOPS = 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+LOOPS = 0 1 2
 
 fdts : fdts-default fdts-slab
 fonts : fonts-default fonts-slab
