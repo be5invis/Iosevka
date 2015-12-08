@@ -1,3 +1,4 @@
+extern isFinite
 import 'node-sfnt/lib/math/bezierCubic2Q2' as bezierCubic2Q2
 import 'bezier-js' as Bezier
 import './point' as Point
@@ -13,7 +14,7 @@ define-macro xytransform : syntax-rules
 
 define [mix a b p] : a + (b - a) * p
 define [ratio l r m] : if [l === r] 0 ((m - l) / (r - l))
-
+define [byx a b] : a - b
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 
 export all : define [Glyph name] : begin
@@ -61,10 +62,14 @@ define [Glyph.prototype.curve-to xc yc x y] : begin
 Glyph.prototype.curveTo = Glyph.prototype.curve-to
 
 define [Glyph.prototype.cubic-to x1 y1 x2 y2 x y] : begin
-	local lastContour this.contours.(this.contours.length - 1)
-	local lastPoint : utp this.gizmo lastContour.(lastContour.length - 1)
-	local segments : bezierCubic2Q2 lastPoint {.x x1 .y y1} {.x x2 .y y2} {.x x .y y}
-	foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push [Point.transformed this.gizmo xc yc false] [Point.transformed this.gizmo xf yf true]
+	#local lastContour this.contours.(this.contours.length - 1)
+	#local lastPoint : utp this.gizmo lastContour.(lastContour.length - 1)
+	#local segments : bezierCubic2Q2 lastPoint {.x x1 .y y1} {.x x2 .y y2} {.x x .y y}
+	#foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push [Point.transformed this.gizmo xc yc false] [Point.transformed this.gizmo xf yf true]
+	this.contours.((this.contours.length - 1)).push
+		Point.transformed this.gizmo x1 y1 false true
+		Point.transformed this.gizmo x2 y2 false true
+		Point.transformed this.gizmo x y true
 	return this
 
 Glyph.prototype.cubicTo = Glyph.prototype.cubic-to
@@ -154,33 +159,53 @@ define [Glyph.prototype.set-anchor id type x y mbx mby] : begin
 	: else : set this.anchors.(id) : new Anchor x y type
 	return this
 
-define [closepoint p q] : begin
-	return : [Math.abs (p.x - q.x)] <= 0.5 && [Math.abs (p.y - q.y)] <= 0.5
+define [closepoint p q t] : begin
+	return : [Math.abs (p.x - q.x)] <= t && [Math.abs (p.y - q.y)] <= t
 define [oncurveRemovable a b c t] : begin
 	local xm : (a.x + c.x) / 2
 	local ym : (a.y + c.y) / 2
-	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
+	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [not a.cubic] && [not c.cubic] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
 
 define [Glyph.prototype.cleanup t] : begin
 	foreach c [range 0 this.contours.length] : begin
 		local ocontour this.contours.(c)
 		# add infections
 		local contour {[new Point ocontour.0.x ocontour.0.y ocontour.0.onCurve]}
-		local flag false
+		local flag 0
 		foreach [j : range 1 (ocontour.length - 1)] : piecewise
-			ocontour.(j).onCurve : begin
-				if [not flag] : contour.push ocontour.(j)
-				set flag false
+			flag : dec flag
+			ocontour.(j).onCurve : contour.push ocontour.(j)
+			ocontour.(j).cubic : begin
+				local p0 contour.(contour.length - 1)
+				local p1 ocontour.(j)
+				local p2 ocontour.(j + 1)
+				local p3 ocontour.(j + 2)
+				local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y p3.x p3.y
+				local ts [strand.inflections].y
+				piecewise
+					(!ts || ts.length < 1) : contour.push p1 p2 p3
+					true : begin
+						set ts [ts.sort byx]
+						ts.unshift 0
+						ts.push 1
+						foreach [k : range 0 (ts.length - 1)] : begin
+							local s : strand.split ts.(k) ts.(k + 1)
+							if s.points : contour.push 
+								new Point s.points.1.x s.points.1.y false true
+								new Point s.points.2.x s.points.2.y false true
+								new Point s.points.3.x s.points.3.y true
+				set flag 2
 			true : begin
 				local p0 contour.(contour.length - 1)
 				local p1 ocontour.(j)
 				local p2 ocontour.(j + 1)
-				if [not p2.onCurve] : set p1 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
+				if [not p2.onCurve] : set p2 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
 				local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 				local ts [strand.inflections].y
 				piecewise
 					(!ts || ts.length < 1) : contour.push p1 p2
 					true : begin
+						set ts [ts.sort byx]
 						ts.unshift 0
 						ts.push 1
 						foreach [k : range 0 (ts.length - 1)] : begin
@@ -188,25 +213,9 @@ define [Glyph.prototype.cleanup t] : begin
 							if s.points : contour.push 
 								new Point s.points.1.x s.points.1.y false
 								new Point s.points.2.x s.points.2.y true
-				set flag true
+				set flag 1
 
 		contour.push [new Point ocontour.(ocontour.length - 1).x ocontour.(ocontour.length - 1).y ocontour.(ocontour.length - 1).onCurve]
-		# smart round
-		local xs : contour.map : [p] -> p.x
-		local ys : contour.map : [p] -> p.y
-		local xmin : Math.min.apply null xs
-		local xmax : Math.max.apply null xs
-		local ymin : Math.min.apply null ys
-		local ymax : Math.max.apply null ys
-		
-		local rxmin : Math.round xmin
-		local rxmax : Math.round xmax
-		local rymin : Math.round ymin
-		local rymax : Math.round ymax
-		foreach [p : items-of contour] : begin
-			set {p.x p.y} : list
-				Math.round : mix rxmin rxmax [ratio xmin xmax p.x]
-				Math.round : mix rymin rymax [ratio ymin ymax p.y]
 		
 		# cleanup
 		local cleanedContour {}
@@ -217,11 +226,11 @@ define [Glyph.prototype.cleanup t] : begin
 			if [oncurveRemovable p0 p1 p2 t] : set p1.unimportant true
 		foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 		set contour cleanedContour
-		
+			
 		set cleanedContour {}
-		foreach j [range 0 contour.length] : if [not contour.(j).unimportant] : begin
+		foreach j [range 0 contour.length] : if ([not contour.(j).cubic] && [not contour.(j).unimportant]) : begin
 			local found false
-			for [local k : j + 1] ((k < contour.length) && [closepoint contour.(j) contour.(k)]) [inc k] : begin
+			for [local k : j + 1] ((k < contour.length) && [not contour.(k).cubic] && [closepoint contour.(j) contour.(k) t]) [inc k] : begin
 				set contour.(k).unimportant true
 				set found true
 			if found : begin

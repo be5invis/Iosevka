@@ -15,7 +15,7 @@ function toBuffer(arrayBuffer) {
 	return buffer;
 }
 function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
-
+function mix(a, b, p){ return a + (b - a) * p }
 
 var options = { preserveOS2Version: true };
 var font = JSON.parse(fs.readFileSync(argv._[0], 'utf-8'));
@@ -59,7 +59,7 @@ if(argv.feature) {
 	fs.writeFileSync(argv.feature, featurefile, 'utf8');
 };
 
-if(argv.ttf) {
+/*if(argv.ttf) {
 	var upm = (argv.upm - 0) || 1000;
 	var upmscale = upm / font.head.unitsPerEm;
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
@@ -90,34 +90,74 @@ if(argv.ttf) {
 	font['OS/2'].sCapHeight     *= upmscale;
 	
 	fs.writeFileSync(argv.ttf, toBuffer(new TTFWriter(options).write(font)));
-};
+};*/
 
 if(argv.svg) {
 	function toSVGPath(glyph){
 		var buf = '';
 		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
 			var contour = glyph.contours[j];
-			if(contour.length){
-				buf += 'M' + contour[0].x + ' ' + contour[0].y;
+			var lx = 0;
+			var ly = 0;
+			if(contour.length) {
+				lx = contour[0].x;
+				ly = contour[0].y;
+				buf += 'M' + lx + ' ' + ly;
 				for(var k = 1; k < contour.length; k++) if(contour[k].onCurve){
-					buf += 'L' + contour[k].x + ' ' + contour[k].y;
-				} else if(contour[k + 1]){
+					lx = contour[k].x;
+					ly = contour[k].y;
+					buf += 'L' + lx + ' ' + ly;
+				} else if(contour[k].cubic) {
+					var rx = contour[k + 2].x;
+					var ry = contour[k + 2].y;					
+					buf += 'C' + [contour[k].x, contour[k].y, contour[k + 1].x, contour[k + 1].y, rx, ry].join(' ');
+					lx = rx;
+					ly = ry;
+					k += 2;
+				} else if(contour[k + 1]) {
 					if(contour[k + 1].onCurve){
-						buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + contour[k + 1].x + ' ' + contour[k + 1].y;
-						k += 1
+						var rx = contour[k + 1].x;
+						var ry = contour[k + 1].y;
 					} else {
-						buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + (contour[k].x + contour[k + 1].x) / 2 + ' ' + (contour[k].y + contour[k + 1].y) / 2;
+						var rx = (contour[k].x + contour[k + 1].x) / 2;
+						var ry = (contour[k].y + contour[k + 1].y) / 2;
 					}
+					var x1 = mix(lx, contour[k].x, 2 / 3);
+					var y1 = mix(ly, contour[k].y, 2 / 3);
+					var x2 = mix(rx, contour[k].x, 2 / 3);
+					var y2 = mix(ry, contour[k].y, 2 / 3);
+					
+					buf += 'C' + [x1, y1, x2, y2, rx, ry].join(' ');
+					lx = rx;
+					ly = ry;
+					if(contour[k + 1].onCurve) k += 1;
+				} else {
+					var rx = contour[0].x;
+					var ry = contour[0].y;
+					buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + contour[0].x + ' ' + contour[0].y;
+					lx = rx;
+					ly = ry;
 				}
 				buf += 'Z\n'
 			}
 		}
 		return buf;
 	}
-	var svg = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><font id="' + font.name.fullName + '">'
+	var svg = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><font id="' + font.name.postScriptName + '">'
 	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font['OS/2'].usWeightClass + '" font-stretch="normal" units-per-em="1000"/>'
+	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
 	for(var j = 0; j < font.glyf.length; j++){
-		var gd = '<glyph glyph-name="' + font.glyf[j].name + '" horiz-adv-x="' + font.glyf[j].advanceWidth + '" '+ (font.glyf[j].unicode && font.glyf[j].unicode.length ? 'unicode="&#x' + font.glyf[j].unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(font.glyf[j]) + '" />'
+		var g = font.glyf[j];
+		if(g.contours) {
+			for(var k = 0; k < g.contours.length; k++) {
+				var contour = g.contours[k];
+				for(var p = 0; p < contour.length; p++) {
+					contour[p].x += contour[p].y * skew;
+				}
+			}
+			Glyph.prototype.cleanup.call(g, 0.25);
+		}
+		var gd = '<glyph glyph-name="' + g.name + '" horiz-adv-x="' + g.advanceWidth + '" '+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(g) + '" />'
 		svg += gd;
 	}
 	svg += '</font></defs></svg>'

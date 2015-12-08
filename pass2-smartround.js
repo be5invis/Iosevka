@@ -43,32 +43,7 @@ function ratio(l, m, r){
 function colinear(a, b, c){
 	return Math.abs(((c.y - a.y) * (b.x - a.x) - (c.x - a.x) * (b.y - a.y))) <= 1e-5
 }
-var ttf = readttf(argv._[0]);
-var targetupm = argv.upm - 0 || 1000;
-var upm = ttf.head.unitsPerEm - 0;
-var skew = Math.tan(ttf.post.italicAngle / 180 * Math.PI);
-for(var j = 0; j < ttf.glyf.length; j++){
-	var glyph = ttf.glyf[j];
-	if(glyph.contours && glyph.contours.length > 0) for(var k = 0; k < glyph.contours.length; k++) if(glyph.contours[k].length > 0) {
-		var c = glyph.contours[k];
-		for(var l = 0; l < c.length; l++){
-			c[l].x += skew * c[l].y
-		}
-		var xs = c.map(function(p){ return p.x });
-		var ys = c.map(function(p){ return p.y });
-		var xmin = Math.min.apply(null, xs);
-		var xmax = Math.max.apply(null, xs);
-		var ymin = Math.min.apply(null, ys);
-		var ymax = Math.max.apply(null, ys);
-		var rxmin = (upm / targetupm) * Math.round(xmin * targetupm / upm);
-		var rxmax = (upm / targetupm) * Math.round(xmax * targetupm / upm);
-		var rymin = (upm / targetupm) * Math.round(ymin * targetupm / upm);
-		var rymax = (upm / targetupm) * Math.round(ymax * targetupm / upm);
-		for(var l = 0; l < c.length; l++){
-			c[l].y = (upm / targetupm) * (mix(rymin, rymax, ratio(ymin, c[l].y, ymax)) * targetupm / upm)
-			c[l].x = (upm / targetupm) * ((mix(rxmin, rxmax, ratio(xmin, c[l].x, xmax)) - c[l].y * skew) * targetupm / upm)
-		}
-		glyph.contours[k] = c.filter(function(p){ return !p.removable })
-	}
-}
-fs.writeFileSync(argv._[1], toBuffer(new TTFWriter(options).write(ttf)));
+var glyfsource = readttf(argv._[0]);
+var ttf = JSON.parse(fs.readFileSync(argv._[1], 'utf-8'));
+ttf.glyf = glyfsource.glyf;
+fs.writeFileSync(argv.o, toBuffer(new TTFWriter(options).write(ttf)));

@@ -25,6 +25,7 @@ TARGETS = $(UPRIGHT) $(ITALIC)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 
 FDTS    = $(subst .ttf,.fdt,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
+SVG0    = $(subst .ttf,.svg,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 PASS0   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(UPRIGHT)))
@@ -51,6 +52,8 @@ $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
 
 $(PASS0) : $(OBJDIR)/.pass0-%.ttf : $(OBJDIR)/.pass0-%.fdt
 	$(NODE) extract --upm 16000 --uprightify 1 --ttf $@ $<
+$(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
+	$(NODE) extract --uprightify 1 --svg $@ $<
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
 	$(NODE) extract --feature $@ $<
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
@@ -62,10 +65,10 @@ $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 
 
 # Pass 1 : Outline cleanup and merge
-$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.ttf
-	fontforge -quiet -script $^ $@ $(FAST) $(SUPPRESS_ERRORS)
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf
-	$(NODE) $^ $@ --upm $(TARGETUPM)
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
+	fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,0) $(FAST) $(SUPPRESS_ERRORS)
+$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+	$(NODE) $^ -o $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(OBJDIR)/.pass0-%.fea
 	fontforge -quiet -script $^ $@ $(TARGETUPM) $(SUPPRESS_ERRORS)
 $(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
