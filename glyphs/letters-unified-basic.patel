@@ -231,6 +231,8 @@ symbol-block 'L'
 		include capitalMarks
 		include : LShape CAP
 	
+	turned 'turnL' 0xA780 'L' MIDDLE (CAP / 2)
+	
 	create-glyph 'Lcaron' : glyph-construction
 		assign-unicode 0x13D
 		include glyphs.commaAbove
@@ -305,6 +307,7 @@ symbol-block 'l'
 	
 	select-variant 'l' 'l' [if para.italicangle 'italic' 'serifed']
 	alias 'palochka' 0x4CF 'l'
+	turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) pMarks
 	
 	create-glyph 'lcaron' : glyph-construction
 		assign-unicode 0x13E
@@ -2280,6 +2283,7 @@ define {FShape} : symbol-block 'F'
 ### long s, and f
 define {LongSShape} : symbol-block 'f'
 	define fovershoot : fallback para.fovershoot (O * 6)
+	define fbar : XH * 0.925
 	create-glyph 'longs.straight' : glyph-construction
 		set-width WIDTH
 		include bMarks
@@ -2299,7 +2303,7 @@ define {LongSShape} : symbol-block 'f'
 		include : dispiro
 			widths.lhs
 			g4 r (CAP - HOOK)
-			hookstart (CAP - O) true
+			hookstart (CAP - O)
 			flat m (CAP - SMOOTHA)
 			curl m 0
 		if SLAB : begin
@@ -2356,30 +2360,7 @@ define {LongSShape} : symbol-block 'f'
 			flat m1 XH [heading DOWNWARD]
 			curl m1 (DESCENDER + fine * 3)
 			CurlyTail fine rinner m1 DESCENDER (m1 - LONGJUT) x2 y2
-	
-	create-glyph 'f.upright' : glyph-construction
-		include bMarks
-		local barleft : [mix SB RIGHTSB 0.35] - STROKE * 0.25 * CORRECTION_HX
-		include : dispiro
-			widths.lhs
-			g4 (RIGHTSB - OX * 2) (CAP - HOOK * 0.7)
-			hookstart (CAP - O) true
-			flat barleft [CAP - SMOOTHA * 0.85]
-			curl barleft 0
-		include : HBarTop [mix SB RIGHTSB 0] [mix SB RIGHTSB 0.95] (XH * 0.95)
-		if SLAB : include : HBarBottom [mix SB RIGHTSB 0.02] [mix SB RIGHTSB 0.875] 0
-	
-	create-glyph 'f.italic' : glyph-construction
-		include glyphs.'longs.italic' AS_BASE
-		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
-	
-	italic-variant 'f' 'f'
-	
-	create-glyph 'fltail' : glyph-construction
-		assign-unicode 0x192
-		include glyphs.'longs.italic' AS_BASE
-		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
-	
+
 	create-glyph 'ifishhook' : glyph-construction
 		assign-unicode 0x27F
 		include pMarks
@@ -2396,7 +2377,68 @@ define {LongSShape} : symbol-block 'f'
 		include : VerticalHook MIDDLE (XH - HOOK - HALFSTROKE) (-LONGJUT) (-HOOK)
 		include : VerticalHook MIDDLE 0 LONGJUT HOOK
 	
+	create-glyph 'f.upright' : glyph-construction
+		include bMarks
+		local barleft : [mix SB RIGHTSB 0.35] - STROKE * 0.25 * CORRECTION_HX
+		include : dispiro
+			widths.lhs
+			g4 (RIGHTSB - OX * 2) (CAP - HOOK * 0.7)
+			hookstart (CAP - O) true
+			flat barleft [CAP - SMOOTHA * 0.85]
+			curl barleft 0
+		include : HBarTop [mix SB RIGHTSB 0] [mix SB RIGHTSB 0.95] fbar
+		if SLAB : include : HBarBottom [mix SB RIGHTSB 0.02] [mix SB RIGHTSB 0.875] 0
+	
+	create-glyph 'f.italic' : glyph-construction
+		include glyphs.'longs.italic' AS_BASE
+		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) fbar
+	alias 'fltail' 0x192 'f.italic'
+
+	italic-variant 'f' 'f'
+	
 	turned 'turnf' 0x25F 'f' MIDDLE (XH / 2) pMarks
+	
+	symbol-block 'compatibility ligatures'
+		local shift (-(MIDDLE - STROKE * [if para.isItalic 0.25 0.75] - SB * 2))
+		local barr (RIGHTSB - SB * 0.5)
+		local hbarleft (SB + shift + STROKE * [if para.isItalic 0.5 0.25])
+		
+		create-glyph 'f_i' : glyph-construction
+			assign-unicode 0xFB01
+			include bMarks
+			include : create-glyph : glyph-construction
+				include glyphs.longs
+				apply-transform : Translate shift 0
+			include : VBarRight barr 0 fbar
+			include : HBarTop hbarleft barr fbar
+			if SLAB : begin
+				if para.isItalic
+				: then : include : tagged 'serifRB' : RightwardBottomSerif barr 0 SIDEJUT
+				: else : include : tagged 'serifRB' : CenterBottomSerif (barr - HALFSTROKE * CORRECTION_HX) 0 JUT
+		
+		create-glyph 'f_l.upright' : glyph-construction
+			local m : MIDDLE - JBALANCE - HALFSTROKE * CORRECTION_HX + shift
+			include : dispiro
+				widths.rhs
+				flat m 0
+				curl m (CAP - SMOOTHA)
+				hookend (CAP - O)
+				g4 (barr + OXHOOK) (CAP - HOOK)
+			include : VBarRight barr 0 (CAP - HOOK)
+			include : HBarTop hbarleft [mix SB barr 0.6] fbar
+			if SLAB : begin
+				include : tagged 'serifLB' : CenterBottomSerif (m + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) 0 (JUT + RBALANCE * 0.65)
+				include : tagged 'serifRB' : CenterBottomSerif (barr - HALFSTROKE * CORRECTION_HX) 0 JUT
+		
+		create-glyph 'f_l.italic' : glyph-construction
+			include : create-glyph : glyph-construction
+				include glyphs.'longs.italic' AS_BASE
+				apply-transform : Translate shift 0
+			include : VBarRight barr 0 CAP
+			include : HBarTop hbarleft [mix SB barr 0.65] fbar
+			if SLAB : include : tagged 'serifRB' : RightwardBottomSerif barr 0 SIDEJUT
+		
+		italic-variant 'f_l' 0xFB02
 	
 	* {LongSShape}
 
@@ -2510,9 +2552,11 @@ symbol-block 'T'
 		include capitalMarks
 		set-anchor 'bottomright' BASE (MIDDLE + HALFSTROKE * CORRECTION_HX) 0
 		include : TShape CAP
+
 	alias 'Tau' 0x3A4 'T'
 	alias 'cyrTe' 0x422 'T'
 	composite nothing 0x4AC { glyphs.cyrTe [CyrDescender (MIDDLE + HALFSTROKE * CORRECTION_HX)] ifMarks}
+	turned 'turnT' 0xA7B1 'T' MIDDLE (CAP / 2)
 	
 	create-glyph 'cyrte.upright' : glyph-construction
 		include eMarks
