@@ -29,9 +29,9 @@ font.replaceWithReference(2)
 
 print "    Simplify: ", font.fontname
 font.selection.all()
-font.transform(psMat.scale(5, 1))
+font.transform(psMat.scale(5))
 font.simplify(1, ("smoothcurves", "choosehv"), 0.1)
-font.transform(psMat.scale(0.2, 1))
+font.transform(psMat.scale(0.2))
 font.simplify(1, ("smoothcurves", "choosehv"), 0.1)
 font.layers["Fore"].is_quadratic = True
 font.transform(psMat.skew(float(sys.argv[3]) / 180 * math.pi))
