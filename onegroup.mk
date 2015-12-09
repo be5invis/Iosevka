@@ -39,6 +39,7 @@ PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 fonts : $(TARGETS)
 	
 fdts : $(FDTS)
+svgs : $(SVG0)
 	
 # Pass 0 : file construction
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)

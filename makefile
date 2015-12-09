@@ -9,6 +9,7 @@ PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)'
 LOOPS = 0 1 2
 
 fdts : fdts-default fdts-slab
+svgs : svgs-default svgs-slab
 fonts : fonts-default fonts-slab
 test  : test-default test-slab
 pages : pages-default pages-slab
@@ -24,10 +25,17 @@ fdts-default : $(SCRIPTS) | $(OBJDIR)
 fdts-slab : $(SCRIPTS) | $(OBJDIR)
 	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_SLAB) LOOP=$(var);)
 
+# svgs
+svgs-default : fdts-default
+	@$(MAKE) -f onegroup.mk svgs $(PARAM_DEFAULT)
+svgs-slab : fdts-slab
+	@$(MAKE) -f onegroup.mk svgs $(PARAM_SLAB)
+
+
 # ttfs
-fonts-default : fdts-default
+fonts-default : svgs-default
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : fdts-slab
+fonts-slab : svgs-slab
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
 
 
