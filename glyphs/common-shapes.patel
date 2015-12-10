@@ -18,10 +18,15 @@ define [alias newid unicode oldid] : create-glyph newid : glyph-construction
 	include glyphs.(oldid) AS_BASE
 	set-width glyphs.(oldid).advanceWidth
 
-define [composite newid unicode parts] : create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
-	if unicode : assign-unicode unicode
-	include parts.0 AS_BASE
-	foreach [part : items-of [parts.slice 1]] : include part
+define [composite newid] : let [parts : {}.slice.call arguments 1] : begin
+	create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
+		local first true
+		foreach [part : items-of parts] : begin
+			include part first
+			set first false
+
+define [into-unicode code] : glyph-construction
+	if code : assign-unicode code
 
 # Transformation variants
 define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction
