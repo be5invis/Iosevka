@@ -1337,29 +1337,34 @@ symbol-block 'R and CyrYa'
 
 ### r
 symbol-block 'r'
+	local rbar : SB + RBALANCE + STROKE * CORRECTION_HX
+	local [rBottomSerif y] : tagged 'serifLB' : CenterBottomSerif (rbar - HALFSTROKE * CORRECTION_HX + RBALANCE * 0.4) y (JUT + RBALANCE * 0.7)
+	local [rTopSerif y] : tagged 'serifLT' : LeftwardTopSerif (rbar - STROKE * CORRECTION_HX) y (SIDEJUT + RBALANCE * 0.3)
 	create-glyph 'r' : glyph-construction
 		set-width WIDTH
 		assign-unicode 'r'
 		include eMarks
 		
+		local fine : SHOULDERFINE * 0.75
 		local rhookx (RIGHTSB + RBALANCE2 - OXE)
-		local rbar : SB + RBALANCE + STROKE * CORRECTION_HX
-		local mixp : 0.54 + 2 * globalTransform.yx * STROKE / WIDTH - [linreg 72 0 108 0.01 STROKE]
-		local rmiddle : mix (rbar - SHOULDERFINE) rhookx mixp
-		local skew : (rmiddle - ([mix rbar (rhookx - STROKE * CORRECTION_HX * 0.97) ([linreg 72 0.6 108 0.578 STROKE] + globalTransform.yx * [linreg 72 0.1 108 0.5 STROKE])] - CORRECTION_OMIDS)) / STROKE - globalTransform.yx
+		local mixp : 0.54 + 2 * globalTransform.yx * STROKE / WIDTH
+		local mixpin : 0.65 + globalTransform.yx * [linreg 72 0.1 108 0.5 STROKE]
+		local rmiddle : mix (rbar - fine) rhookx mixp
+		local rmiddlein : [mix rbar (rhookx - STROKE * CORRECTION_HX * 1.05) mixpin] - CORRECTION_OMIDS
+		local skew : (rmiddle - rmiddlein) / STROKE - globalTransform.yx * [linreg 72 0.25 108 0.75 STROKE]
 		include : dispiro
 			widths.lhs
-			g4 rhookx (XH - RHOOK)
+			g4 rhookx (XH - RHOOK) [heading {.y (-0.45) .x (-1.04 - globalTransform.yx)}]
 			alsothru 0.37 0.72
-			g4.left.mid (rmiddle - CORRECTION_OMIDS) XO [heading {.y (-1) .x (-skew)}]
+			g4.left.mid (rmiddle - CORRECTION_OMIDS * [linreg 72 0.75 108 1 STROKE]) XO [widths.heading STROKE 0 {.y (-1) .x (-skew)}]
 			alsothru 0.75 0.25
-			straight.down.end (rbar - SHOULDERFINE * CORRECTION_HX) (XH * 0.5 + (SMALLSMOOTH - SMALLSMOOTHA)) [widths.heading SHOULDERFINE 0 DOWNWARD]
-		include : VBarLeft (SB + RBALANCE) 0 XH
+			straight.down.end (rbar - fine * CORRECTION_HX) (XH * 0.53 + (SMALLSMOOTH - SMALLSMOOTHA)) [widths.heading fine 0 DOWNWARD]
+		include : VBarRight rbar 0 XH
 		set-anchor 'overlay' BASE rbar (XH * 0.5)
 		
 		if SLAB : begin
-			include : tagged 'serifLB' : CenterBottomSerif (SB + RBALANCE + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) 0 (JUT + RBALANCE * 0.65)
-			include : tagged 'serifLT' : LeftwardTopSerif (SB + RBALANCE) XH (SIDEJUT + RBALANCE * 0.3)
+			include : rBottomSerif 0
+			include : rTopSerif XH
 	turned nothing 0x279 'r' MIDDLE (XH / 2) [anchorDeriv eMarks {.anchors {.bottomright {.type BASE .x RIGHTSB - RBALANCE .y 0}}}]
 	
 	create-glyph 'rlongleg' : glyph-construction
@@ -1367,9 +1372,8 @@ symbol-block 'r'
 		include pMarks
 		include glyphs.r false
 		eject-contour 'serifLB'
-		include : VBarLeft (SB + RBALANCE) DESCENDER 0
-		if SLAB : begin
-			include : tagged 'serifLB' : CenterBottomSerif (SB + RBALANCE + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) DESCENDER (JUT + RBALANCE * 0.65)
+		include : VBarRight rbar DESCENDER 0
+		if SLAB : include : rBottomSerif DESCENDER
 	turned nothing 0x27A 'rlongleg' MIDDLE (XH / 2) [anchorDeriv bMarks {.anchors {.bottomright {.type BASE .x RIGHTSB - RBALANCE .y 0}}}]
 	
 	create-glyph 'rrtail' : glyph-construction
@@ -1380,7 +1384,7 @@ symbol-block 'r'
 		include : create-glyph : glyph-construction
 			include glyphs.rtailBR
 			apply-transform : Upright
-			apply-transform : Translate (SB + RBALANCE + STROKE * CORRECTION_HX) 0
+			apply-transform : Translate rbar 0
 			apply-transform : Italify
 
 	create-glyph 'turnrrtail' : glyph-construction
@@ -1399,16 +1403,15 @@ symbol-block 'r'
 		assign-unicode 0x27E
 		include eMarks
 		local rhookx (RIGHTSB + RBALANCE2 - OXE)
-		local rmiddle : [mix (SB + RBALANCE + STROKE) (rhookx - HALFSTROKE) 0.5] - CORRECTION_OMIDS
+		local rmiddle : [mix rbar (rhookx - HALFSTROKE) 0.5] - CORRECTION_OMIDS
 	
 		include : dispiro
 			widths.lhs
 			g4   rhookx (XH - RHOOK)
 			hookstart XO
-			flat (SB + RBALANCE) (XH - SMALLSMOOTHA)
-			curl (SB + RBALANCE) 0 [heading DOWNWARD]
-		if SLAB : begin
-			include : tagged 'serifLB' : CenterBottomSerif (SB + RBALANCE + HALFSTROKE * CORRECTION_HX + RBALANCE * 0.35) 0 (JUT + RBALANCE * 0.65)
+			flat (rbar - STROKE * CORRECTION_HX) (XH - SMALLSMOOTHA)
+			curl (rbar - STROKE * CORRECTION_HX) 0 [heading DOWNWARD]
+		if SLAB : include : rBottomSerif 0
 	
 	turned nothing 0x2C79 'rrtail' MIDDLE (XH / 2)
 
@@ -2283,7 +2286,6 @@ define {FShape} : symbol-block 'F'
 ### long s, and f
 define {LongSShape} : symbol-block 'f'
 	define fovershoot : fallback para.fovershoot (O * 6)
-	define fbar : XH * 0.925
 	create-glyph 'longs.straight' : glyph-construction
 		set-width WIDTH
 		include bMarks
@@ -2377,6 +2379,7 @@ define {LongSShape} : symbol-block 'f'
 		include : VerticalHook MIDDLE (XH - HOOK - HALFSTROKE) (-LONGJUT) (-HOOK)
 		include : VerticalHook MIDDLE 0 LONGJUT HOOK
 	
+	define fbar : XH * 0.9 + HALFSTROKE
 	create-glyph 'f.upright' : glyph-construction
 		include bMarks
 		local barleft : [mix SB RIGHTSB 0.35] - STROKE * 0.25 * CORRECTION_HX
