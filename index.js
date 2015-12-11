@@ -49,8 +49,8 @@ var indexPage = new Vue({
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
-		version: "1.2.0",
-		codename: "Adelin"
+		version: "1.3.0",
+		codename: "Ellyne"
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
