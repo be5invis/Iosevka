@@ -3,7 +3,7 @@ default: fonts
 OBJDIR = build
 include makesupport.mk
 PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
-PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='slab $(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
+PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' STYLE_X_REGULAR='x-slab-regular' STYLE_X_BOLD='x-slab-bold' STYLE_X_ITALIC='x-slab-italic' STYLE_X_BOLDITALIC='x-slab-bolditalic' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 LOOPS = 0 1 2
@@ -71,12 +71,10 @@ releasepack-default : $(SCRIPTS) | $(OBJDIR)
 releasepack-cjk : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
 releasepack-cc : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-default VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
-releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR)
-	$(MAKE) archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc x-cc-slab' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
 releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
-release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-cc-slab releasepack-hooky releasepack-zshaped
-cjk-all : releasepack-cjk releasepack-cc releasepack-cc-slab
+release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-hooky releasepack-zshaped
+cjk-all : releasepack-cjk releasepack-cc
