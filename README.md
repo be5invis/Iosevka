@@ -56,6 +56,10 @@ The current avaliable styles are:
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
 
 ## Release Notes
+* **1.3.0**
+ - Shape optimizations: `/f`, `/r`, `/a`, `/s`, `/epsilon`, `/cyrze` and their derived glyphs.
+ - Narrowed slab-serif variants.
+ - Added `/overlineTieAbove`, `/underlineTieBelow` and `/turnTieAbove`.
 * **1.2.0**
  - Glyphs added: `/cyrGhayn`, `/cyrghayn`, `/cyrChevbar`, `/cyrchevbar`, `/turnoe`, `/voicedlaryngenalspirant`, `/oupperhalf`, `/olowerhalf` and their derived glyphs.
  - Shape optimization: `/eight`, `/propto`, `/J`, `/j`, `/epsilon`, `/cyrze`, `/taillessphi`, `/smcpPsi` and their derived glyphs.
