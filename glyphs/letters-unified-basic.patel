@@ -210,7 +210,7 @@ symbol-block 'j'
 		include : dispiro
 			widths.lhs
 			flat m1 XH [heading DOWNWARD]
-			curl m1 (DESCENDER + fine * 3)
+			curl m1 (DESCENDER + fine + rinner * 2)
 			CurlyTail fine rinner m1 DESCENDER (m1 - LONGJUT) x2 y2
 		include glyphs.dotAbove
 
@@ -345,7 +345,7 @@ symbol-block 'l'
 		include : dispiro
 			widths.rhs
 			flat m1 CAP [heading DOWNWARD]
-			curl m1 (fine * 2)
+			curl m1 (fine + rinner * 2)
 			CurlyTail fine rinner m1 0 (m1 + LONGJUT) x2 y2
 	
 	create-glyph 'ltildeover' : glyph-construction
@@ -964,12 +964,15 @@ symbol-block 'B'
 	create-glyph 'cyrve.italic' : glyph-construction
 		include eMarks
 		local mid : mix RIGHTSB SB 0.65
+		local midy : XH * BARPOS
+		local smb : XH - [mix (midy + HALFSTROKE) (XH - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + globalTransform.yx * CORRECTION_HX * STROKE
+		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - globalTransform.yx * CORRECTION_HX * STROKE
 		include : dispiro
 			widths.lhs
-			flat mid (XH / 2 - HALFSTROKE) [heading RIGHTWARD]
-			curl MIDDLE (XH / 2 - HALFSTROKE)
+			flat mid (midy - HALFSTROKE) [heading RIGHTWARD]
+			curl MIDDLE (midy - HALFSTROKE)
 			archv
-			g4   (RIGHTSB + O) (XH - SMOOTHB * 0.87)
+			g4   (RIGHTSB + O) (XH - smb)
 			arcvh
 			g4   (MIDDLE - CORRECTION_OMIDS) XO
 			archv
@@ -978,10 +981,10 @@ symbol-block 'B'
 			arcvh
 			g4   (MIDDLE + CORRECTION_OMIDS) O
 			archv
-			g4   (RIGHTSB - O) (SMOOTHA * 0.87)
+			g4   (RIGHTSB - O) (sma)
 			arcvh
-			flat MIDDLE (XH / 2 + HALFSTROKE)
-			curl mid (XH / 2 + HALFSTROKE) [heading LEFTWARD]
+			flat MIDDLE (midy + HALFSTROKE)
+			curl mid (midy + HALFSTROKE) [heading LEFTWARD]
 	alias 'closeturnepsilon' 0x25E 'cyrve.italic'
 	create-glyph 'cyrve.upright' : glyph-construction
 		include eMarks
@@ -1147,17 +1150,17 @@ symbol-block 'd'
 	create-glyph 'dcurlytail' : glyph-construction
 		assign-unicode 0x221
 		local fine : adviceBlackness 4
-		local rinner : fine * 0.35
+		local rinner : Math.max (WIDTH * 0.05) (fine * 0.35)
 		local wide STROKE
 		local m1 : RIGHTSB - rinner * 2
 		local x2 : mix SB m1 0.5
-		local y2 : -fine * 1.5
+		local y2 : 0 - fine - rinner *  1.25
 		include eMarks
 		include : OBarRightShape XH m1
 		include : dispiro
 			widths.rhs
 			flat m1 CAP [heading DOWNWARD]
-			curl m1 (fine * 2)
+			curl m1 (rinner * 2 + fine)
 			CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
 		if SLAB : begin
 			include : LeftwardTopSerif (m1 - STROKE * CORRECTION_HX) CAP SIDEJUT
@@ -1310,7 +1313,7 @@ symbol-block 'R and CyrYa'
 			arcvh
 			flat (SB + turnRadius) bowlBottom
 			curl    (barright - HALFSTROKE * 0.1) bowlBottom [heading RIGHTWARD]
-		include : VBarRight RIGHTSB 0 top
+		include : VBarRight barright 0 top
 		local left (SB + O + [if SLAB (JUT / 8) 0])
 		include : dispiro
 			widths.center
@@ -1623,10 +1626,10 @@ symbol-block 'g'
 		local gleftx  ([mix 0 SB 0.85] + OX)
 		local grightx ([mix WIDTH RIGHTSB 0.825] - OX)
 		local groundy : Math.round : [mix DESCENDER (XH * GBARPOS) 0.64] + HALFSTROKE
-		local gtipy [mix XH obot 0.975]
+		local gtipy : [mix groundy (obot + STROKE + O) 1.005] - STROKE * CTHIN
 		include : dispiro
-			g4.left.start [mix SB RIGHTSB 0.4] gtipy [widths 0 (STROKE * 0.7)]
-			g4 ([mix SB RIGHTSB 0.0575] + STROKE * 0.85) [mix groundy gtipy 0.5] [widths.rhs (STROKE * 0.85)]
+			g4.left.start [mix SB RIGHTSB 0.4] gtipy [widths 0 (STROKE * CTHIN)]
+			g4 ([mix SB RIGHTSB 0.0575] + STROKE * 0.85) [mix groundy gtipy 0.5] [widths.rhs (STROKE * [mix CTHIN 1 0.5])]
 			flat [mix SB RIGHTSB 0.435] groundy [widths 0 STROKE]
 			curl [mix RIGHTSB SB 0.435] groundy
 			archv 4
@@ -1914,7 +1917,7 @@ symbol-block 'n'
 	create-glyph 'ncurlytail' : glyph-construction
 		assign-unicode 0x235
 		local fine : adviceBlackness 4
-		local rinner : fine * 0.35
+		local rinner : Math.max (WIDTH * 0.05) (fine * 0.35)
 		local wide STROKE
 		local m1 : RIGHTSB - rinner * 2
 		local x2 : mix SB m1 0.5
@@ -1922,7 +1925,7 @@ symbol-block 'n'
 		include eMarks
 		include : VBarLeft SB 0 XH wide
 		include : dispiro
-			nShoulderKnots (SB + wide * CORRECTION_HX) m1 SHOULDERFINE nothing (fine * 2) nothing nothing wide
+			nShoulderKnots (SB + wide * CORRECTION_HX) m1 SHOULDERFINE nothing (rinner * 2 + fine) nothing nothing wide
 			CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
 		
 		if SLAB : begin
@@ -2644,7 +2647,7 @@ symbol-block 't'
 		include : dispiro
 			widths.lhs
 			flat m1 CAP [heading DOWNWARD]
-			curl m1 (fine * 2)
+			curl m1 (fine + rinner * 2)
 			CurlyTail fine rinner (m1 + STROKE * CORRECTION_HX) 0 (m1 + STROKE * CORRECTION_HX + LONGJUT) x2 y2
 	
 	create-glyph 'tbar' : glyph-construction
@@ -2891,7 +2894,7 @@ symbol-block 'Z'
 		local x1 : mix (SB + STROKE) RIGHTSB 0.55
 		local x2 : mix (SB + STROKE) RIGHTSB 0.3
 		local y2 : -XH * 0.2
-		local rinner : fine * 0.3
+		local rinner : Math.max (WIDTH * 0.05) (fine * 0.3)
 		local m1 : RIGHTSB - fine / 2 - rinner + O
 		include : HCurlyTail fine STROKE rinner SB m1 (RIGHTSB + fine / 2) x1 x2 y2
 		
