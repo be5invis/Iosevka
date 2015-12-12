@@ -231,7 +231,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define MVERTSTROKE : adviceBlackness : fallback para.lllcrowdedness (3 + 1 / 3)
 	define OVERLAYSTROKE : adviceBlackness 3.75
 	define OPERATORSTROKE : adviceBlackness 3.2
-	define SHOULDERFINE : adviceBlackness 10
+	define SHOULDERFINE : if para.shoulderfine (STROKE * para.shoulderfine) [adviceBlackness 10]
 	
 	define SUPERNESS : fallback para.superness 2
 	define [superxy x] : Math.pow (1 - [Math.pow x SUPERNESS]) (1 / SUPERNESS)
@@ -297,8 +297,8 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			dp.push d
 			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
 		return dp
-	define [create-glyph name actions] : piecewise
-		(name && actions) : begin
+	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
+		`[@name @actions] : begin
 			if (pickHash && nPending <= 0) : begin
 				console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
@@ -316,8 +316,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			dec nPending
 			return glyphObject
 		
-		true : begin
-			local actions arguments.0
+		`[@actions] : begin
 			local glyphObject [new Glyph ('.temp-' + [set nTemp (nTemp + 1)])]
 			glyphObject.set-width WIDTH
 			actions.call glyphObject

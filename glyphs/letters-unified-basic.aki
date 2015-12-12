@@ -4,6 +4,7 @@
 define [CyrDescender x shift] : glyph-construction
 	local descenderOverflow : if SLAB SIDEJUT ((RIGHTSB - SB) * [fallback shift 0.1])
 	include : VBarRight (x + descenderOverflow + 0.25 * STROKE) (HALFSTROKE - LONGJUT) STROKE
+	if (descenderOverflow > HALFSTROKE) : include : HBarTop (x - HALFSTROKE * CORRECTION_HX) (x + descenderOverflow) STROKE
 
 ###########################################################################################
 # UNIFIED LETTERFORMS : LATIN ORIGINALS
@@ -748,9 +749,9 @@ symbol-block 'Y'
 ### y
 symbol-block 'y'
 	define [SmallYShape top bottom] : glyph-construction
-		local xbottom : mix SB RIGHTSB 0.28
 		local turnp : top / (top - bottom)
-		local xb : mix SB RIGHTSB 0.51
+		local xbottom : mix SB RIGHTSB [linreg 18 0.3025 108 0.28 STROKE]
+		local xb : mix SB RIGHTSB [linreg 10 0.495 108 0.51 STROKE]
 		local yb : mix [mix bottom top (-DESCENDER / (XH - DESCENDER))] top (0.05 * turnp)
 		
 		include : tagged 'strokeR' : xStrand xbottom bottom RIGHTSB top 0.1 0.6 0.14
@@ -791,13 +792,7 @@ symbol-block 'y'
 		include glyphs.'y.upright' AS_BASE
 		eject-contour 'strokeR'
 		eject-contour 'serifRT'
-		
-		local xbottom : mix SB RIGHTSB 0.28
-		local turnp : XH / (XH - DESCENDER)
-		local xb : mix SB RIGHTSB 0.49
-		local yb : mix 0 XH (0.05 * turnp)
-		
-		# include : xStrand xbottom DESCENDER RIGHTSB XH 0.1 0.6 0.14
+		local xbottom : mix SB RIGHTSB [linreg 18 0.36 108 0.27 STROKE]
 		include : dispiro
 			widths.center
 			flat (xbottom + HALFSTROKE * CORRECTION_HX) DESCENDER [heading UPWARD]
@@ -2101,8 +2096,8 @@ symbol-block 'm'
 	define [SmallMShape top bot] : glyph-construction
 		local m1 : mix (SB + O) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) 0.5
 		local m2 : mix (RIGHTSB - O) (MIDDLE - MVERTSTROKE / 2 * CORRECTION_HX) 0.5
-		include : mShoulderSpiro (SB + O + MVERTSTROKE * CORRECTION_HX) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) top bot MVERTSTROKE (MVERTSTROKE * 0.4)
-		include : mShoulderSpiro (MIDDLE + MVERTSTROKE * 0.5 * CORRECTION_HX) (RIGHTSB - O) top bot MVERTSTROKE (MVERTSTROKE * 0.5)
+		include : mShoulderSpiro (SB + O + MVERTSTROKE * CORRECTION_HX) (MIDDLE + MVERTSTROKE / 2 * CORRECTION_HX) top bot MVERTSTROKE (MVERTSTROKE * SHOULDERFINE / STROKE)
+		include : mShoulderSpiro (MIDDLE + MVERTSTROKE * 0.5 * CORRECTION_HX) (RIGHTSB - O) top bot MVERTSTROKE (MVERTSTROKE * SHOULDERFINE / STROKE)
 		include : VBarLeft (SB + O) bot top MVERTSTROKE
 		if SLAB : begin
 			include : LeftwardTopSerif SB top SIDEJUT
@@ -2363,7 +2358,7 @@ define {LongSShape} : symbol-block 'f'
 		include : dispiro
 			widths.lhs
 			flat m1 XH [heading DOWNWARD]
-			curl m1 (DESCENDER + fine * 3)
+			curl m1 (DESCENDER + fine + rinner * 2)
 			CurlyTail fine rinner m1 DESCENDER (m1 - LONGJUT) x2 y2
 
 	create-glyph 'ifishhook' : glyph-construction
@@ -2574,7 +2569,7 @@ symbol-block 'T'
 		assign-unicode 0x1AC
 		include capitalMarks
 		eject-contour "serifLT"
-		include : LeftHook (SB + [adviceBlackness 4.25] * 1.5) CAP MIDDLE
+		include : LeftHook (SB + LeftHook.extension) CAP MIDDLE
 		include : HBarTop MIDDLE RIGHTSB CAP
 		include : VBar MIDDLE 0 CAP
 

@@ -21,7 +21,10 @@ NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
 ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
-TARGETS = $(UPRIGHT) $(ITALIC)
+EXTUPRG = $(OBJDIR)/$(PREFIX)-hair.ttf
+EXTITAL = $(OBJDIR)/$(PREFIX)-hairitalic.ttf
+OUTPUTS = $(UPRIGHT) $(ITALIC)
+TARGETS = $(UPRIGHT) $(ITALIC) $(EXTUPRG) $(EXTITAL)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 
 FDTS    = $(subst .ttf,.fdt,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
@@ -36,18 +39,22 @@ PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
 PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
-fonts : $(TARGETS)
+fonts : $(OUTPUTS)
 	
 fdts : $(FDTS)
 svgs : $(SVG0)
 	
 # Pass 0 : file construction
+$(OBJDIR)/.pass0-$(PREFIX)-hair.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-hairitalic.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
-$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
 
