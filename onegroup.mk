@@ -27,6 +27,7 @@ OUTPUTS = $(UPRIGHT) $(ITALIC)
 TARGETS = $(UPRIGHT) $(ITALIC) $(EXTUPRG) $(EXTITAL)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
 
+
 FDTS    = $(subst .ttf,.fdt,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 SVG0    = $(subst .ttf,.svg,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 
@@ -131,7 +132,8 @@ $(TESTTTF) : $(TESTDIR)/%.ttf : $(OBJDIR)/%.ttf
 TESTWOFF = $(subst .ttf,.woff,$(TESTTTF))
 $(TESTWOFF) : $(TESTDIR)/%.woff : $(TESTDIR)/%.ttf
 	sfnt2woff $<
-TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(MAPS))
+OUTMAPS    = $(subst .ttf,.charmap,$(OUTPUTS))
+TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(OUTMAPS))
 $(TESTMAPS) : $(TESTDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
