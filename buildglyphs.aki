@@ -319,6 +319,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		`[@actions] : begin
 			local glyphObject [new Glyph ('.temp-' + [set nTemp (nTemp + 1)])]
 			glyphObject.set-width WIDTH
+			glyphObject.gizmo = globalTransform
 			actions.call glyphObject
 			return glyphObject
 
@@ -334,10 +335,14 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	
 	### Metadata
 	# Font names
-	set font.name.fontFamily          para.family
-	set font.name.fontSubFamily       para.style
 	set font.name.preferredFamily     para.family
 	set font.name.preferredSubFamily  para.style
+	if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
+		set font.name.fontFamily      para.family
+		set font.name.fontSubFamily   para.style
+	: else
+		set font.name.fontFamily      : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
+		set font.name.fontSubFamily   : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
 	set font.name.uniqueSubFamily     "\(para.family) \(para.style) \(para.version) (\(para.codename))"
 	set font.name.version             para.version
 	set font.name.fullName            : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family

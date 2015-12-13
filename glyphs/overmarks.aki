@@ -107,16 +107,16 @@ symbol-block 'Above marks'
 		local top : ttop + (markFine * 2)
 		local bot : tbot - (markFine * 2)
 		
-		local tildeWave [linreg 40 1.52 52 1.33 markStress]
+		local tildeWave [linreg 16 2.5 90 1.33 (markHalfStroke * 2)]
 		local tildeWaveX 0.52
-		local tildeWaveEnd 0
+		local tildeWaveEnd [linreg 16 (-0.01) 90 0 (markHalfStroke * 2)]
 		
 		local s : new Stroke
 		local outlines : s.set-transform globalTransform
 		:.start-from leftEnd [mix tbot ttop tildeWaveEnd]
 		:.set-width  markHalfStroke markHalfStroke
 		:.cubic-to   [mix leftEnd rightEnd tildeWaveX] [mix bot top tildeWave] [mix leftEnd rightEnd (1 - tildeWaveX)] [mix bot top (1 - tildeWave)] rightEnd [mix tbot ttop (1 - tildeWaveEnd)]
-		:.set-samples    11
+		:.set-samples    22
 		:.to-outline
 		
 		include outlines
@@ -245,9 +245,8 @@ symbol-block 'Above marks'
 		local radius : adviceBlackness 6
 		include : Ring aboveMarkTop (aboveMarkTop - radius * 2) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
-			widths.rhs (markFine * 1.75)
-			flat (markMiddle + radius) (aboveMarkTop - radius)
-			curl (markMiddle + radius) (aboveMarkTop - radius - 1)
+			widths.rhs : Math.min radius (markFine * 1.75)
+			straight.down.start (markMiddle + radius) (aboveMarkTop - radius)
 			quadcontrols 0 0.6
 			g4   [mix markMiddle (markMiddle - radius) 0.2] (aboveMarkBot - radius)
 		apply-transform : Upright
@@ -271,9 +270,8 @@ symbol-block 'Above marks'
 		local radius : adviceBlackness 6
 		include : Ring aboveMarkTop (aboveMarkTop - radius * 2) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
-			widths.lhs (markFine * 1.75)
-			flat (markMiddle - radius) (aboveMarkTop - radius)
-			curl (markMiddle - radius) (aboveMarkTop - radius - 1)
+			widths.lhs : Math.min radius (markFine * 1.75)
+			straight.down.start (markMiddle - radius) (aboveMarkTop - radius)
 			quadcontrols 0 0.6
 			g4   [mix markMiddle (markMiddle + radius) 0.2] (aboveMarkBot - radius)
 		apply-transform : Upright
@@ -317,9 +315,9 @@ symbol-block 'Above marks'
 		assign-unicode 0x310
 		local fine : adviceBlackness 6.5
 		local yc : XH + ACCENT
-		local radius : fine * 1.35
+		local radius : Math.max (markExtend - DOTRADIUS) (fine * 1.35)
 		include : dispiro
-			widths.rhs (fine * 1.25)
+			widths.rhs : Math.min (markHalfStroke * 2) (fine * 1.25)
 			g4.down.start (markMiddle - radius) yc [heading DOWNWARD]
 			arcvh
 			g4.right.mid markMiddle (yc - radius)
@@ -873,13 +871,14 @@ symbol-block 'Greek Polytonic Marks'
 	GreekLRDoubleMark 'dasiavaria' 0x1FDD glyphs.revCommaAbove glyphs.variaAbove
 	GreekLRDoubleMark 'dasiaoxia'  0x1FDE glyphs.revCommaAbove glyphs.oxiaAbove
 	
+	local yc : aboveMarkTop - [adviceBlackness 6] + DOTRADIUS * 0.3
+	
 	create-glyph 'psiliperispomeni' : glyph-construction
 		set-width 0
 		include glyphs.commaAbove
-		local yc : XH + ACCENT + DOTRADIUS * 0.3 - O
-		local radius : [adviceBlackness 6] * 1.5
+		local radius : Math.max (markExtend - [adviceBlackness 6]) ([adviceBlackness 6] * 1.5)
 		include : dispiro
-			widths.lhs : Math.min STROKE ([adviceBlackness 6.5] * 1.25)
+			widths.lhs : Math.min (markHalfStroke * 2) ([adviceBlackness 6.5] * 1.25)
 			g4.up.start (markMiddle - radius) yc [heading UPWARD]
 			arcvh
 			g4.right.mid markMiddle (yc + radius)
@@ -895,10 +894,9 @@ symbol-block 'Greek Polytonic Marks'
 	create-glyph 'dasiaperispomeni' : glyph-construction
 		set-width 0
 		include glyphs.revCommaAbove
-		local yc : XH + ACCENT + DOTRADIUS * 0.3 - O
-		local radius : [adviceBlackness 6] * 1.5
+		local radius : Math.max (markExtend - [adviceBlackness 6]) ([adviceBlackness 6] * 1.5)
 		include : dispiro
-			widths.lhs : Math.min STROKE ([adviceBlackness 6.5] * 1.25)
+			widths.lhs : Math.min (markHalfStroke * 2) ([adviceBlackness 6.5] * 1.25)
 			g4.up.start (markMiddle - radius) yc [heading UPWARD]
 			arcvh
 			g4.right.mid markMiddle (yc + radius)
