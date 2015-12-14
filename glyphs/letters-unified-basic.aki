@@ -4,7 +4,7 @@
 define [CyrDescender x shift] : glyph-construction
 	local descenderOverflow : if SLAB SIDEJUT ((RIGHTSB - SB) * [fallback shift 0.1])
 	include : VBarRight (x + descenderOverflow + 0.25 * STROKE) (HALFSTROKE - LONGJUT) STROKE
-	if (descenderOverflow > HALFSTROKE) : include : HBarTop (x - HALFSTROKE * CORRECTION_HX) (x + descenderOverflow) STROKE
+	if (descenderOverflow > STROKE * 0.75) : include : HBarTop (x - HALFSTROKE * CORRECTION_HX) (x + descenderOverflow) STROKE
 
 ###########################################################################################
 # UNIFIED LETTERFORMS : LATIN ORIGINALS
@@ -1146,9 +1146,9 @@ symbol-block 'd'
 	create-glyph 'dcurlytail' : glyph-construction
 		assign-unicode 0x221
 		local fine : adviceBlackness 4
-		local rinner : clamp (WIDTH * 0.05) (XH * 0.05) (fine * 0.35)
+		local rinner : clamp (WIDTH * 0.065) (XH * 0.05) (fine * 0.35)
 		local wide STROKE
-		local m1 : RIGHTSB - rinner * 2
+		local m1 : Math.min RIGHTSB (WIDTH - rinner * 2 - fine - OX)
 		local x2 : mix SB m1 0.5
 		local y2 : 0 - fine - rinner *  1.25
 		include eMarks
@@ -1597,13 +1597,13 @@ symbol-block 'G'
 		assign-unicode 0x193
 		include glyphs.G AS_BASE
 		include : VBarRight (RIGHTSB - OXHOOK) (CAP - HOOK) CAP
-		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX - OXHOOK) CAP HOOKX (-HOOK)
+		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX - OXHOOK) CAP HOOKX (-HOOK) nothing O
 	
 	create-glyph 'smcpGhooktop' : glyph-construction
 		assign-unicode 0x29B
 		include glyphs.smcpG AS_BASE
 		include : VBarRight (RIGHTSB - OXHOOK) (XH - HOOK) XH
-		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX - OXHOOK) XH HOOKX (-HOOK)
+		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX - OXHOOK) XH HOOKX (-HOOK) nothing O
 	
 	create-glyph 'Gbar' : glyph-construction
 		assign-unicode 0x1E4
@@ -1666,7 +1666,7 @@ symbol-block 'g'
 		assign-unicode 0x260
 		include glyphs.scriptg AS_BASE
 		eject-contour 'serifRT'
-		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX) XH HOOKX (-HOOK)
+		include : VerticalHook (RIGHTSB - HALFSTROKE * CORRECTION_HX) XH HOOKX (-HOOK) nothing O
 	
 	create-glyph 'gbar' : glyph-construction
 		assign-unicode 0x1E5
@@ -1716,13 +1716,13 @@ symbol-block 'O'
 	create-glyph 'Obar' : glyph-construction
 		assign-unicode 0x19F
 		include glyphs.O AS_BASE
-		include : HOverlayBar (SB - O) (RIGHTSB + O) (CAP * 0.5)
+		include : HOverlayBar (SB + OX + 1) (RIGHTSB - OX - 1) (CAP * 0.5)
 	alias 'cyrOe' 0x4E8 'Obar'
 	
 	create-glyph 'obar' : glyph-construction
 		assign-unicode 0x275
 		include glyphs.o AS_BASE
-		include : HOverlayBar (SB - O) (RIGHTSB + O) (XH * 0.5)
+		include : HOverlayBar (SB + OX + 1) (RIGHTSB - OX - 1) (XH * 0.5)
 	alias 'cyroe' 0x4E9 'obar'
 	
 	create-glyph 'bulleye' : glyph-construction
@@ -1913,9 +1913,9 @@ symbol-block 'n'
 	create-glyph 'ncurlytail' : glyph-construction
 		assign-unicode 0x235
 		local fine : adviceBlackness 4
-		local rinner : clamp (WIDTH * 0.05) (XH * 0.05) (fine * 0.35)
+		local rinner : clamp (WIDTH * 0.065) (XH * 0.05) (fine * 0.35)
 		local wide STROKE
-		local m1 : RIGHTSB - rinner * 2
+		local m1 : Math.min RIGHTSB (WIDTH - rinner * 2 - fine - OX)
 		local x2 : mix SB m1 0.5
 		local y2 : -fine
 		include eMarks
@@ -2472,7 +2472,7 @@ symbol-block 'E'
 ### e
 define {SmallEShape} : symbol-block 'e'
 	define [SmallEShape top stroke barpos curly] : glyph-construction
-		local barbottom (top * [fallback barpos EBARPOS])
+		local barbottom (top * [fallback barpos EBARPOS] - HALFSTROKE)
 		local hookx (RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx)
 		local hookmiddle : [mix (SB + O) hookx 0.55] + CORRECTION_OMIDS
 		
@@ -2487,7 +2487,7 @@ define {SmallEShape} : symbol-block 'e'
 			[if (top <= XH) curl.ai curl] (SB + OX) (0 + SMALLSMOOTHB)
 			hookend O nothing stroke
 			g4 (RIGHTSB - OX * 0.5) AHOOK
-		include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
+		include : HBarBottom (SB + (stroke / 2) + OX) (RIGHTSB - (stroke / 2) - OX) barbottom stroke
 	
 	create-glyph 'e' : glyph-construction
 		set-width WIDTH
@@ -2509,7 +2509,7 @@ define {SmallEShape} : symbol-block 'e'
 	alias 'cyrschwa' 0x4D9 'schwa'
 	
 	define [RevSmallEShape top stroke barpos] : glyph-construction
-		local barbottom (top * [fallback barpos EBARPOS])
+		local barbottom (top * [fallback barpos EBARPOS] - HALFSTROKE)
 		local hookx SB
 		local hookmiddle : [mix (RIGHTSB - O) hookx 0.55] + CORRECTION_OMIDS
 		
@@ -2887,7 +2887,7 @@ symbol-block 'Z'
 		include eMarks
 		
 		local fine : adviceBlackness 4
-		local rinner : Math.max (XH * 0.035) (fine * 0.3)
+		local rinner : Math.max (XH * 0.04) (fine * 0.3)
 		local x2 : mix (SB + STROKE) RIGHTSB 0.3
 		local x1 : mix x2 (RIGHTSB - fine - rinner * 1.5) 0.45
 		local y2 : -XH * 0.2

@@ -231,9 +231,21 @@ define [Glyph.prototype.cleanup t] : begin
 		set cleanedContour {}
 		foreach j [range 0 contour.length] : if ([not contour.(j).cubic] && [not contour.(j).unimportant]) : begin
 			local found false
-			for [local k : j + 1] ((k < contour.length) && [not contour.(k).cubic] && [closepoint contour.(j) contour.(k) t]) [inc k] : begin
+			for [local k : j + 1] ((k < contour.length) && (
+					[not contour.(k).cubic] && [closepoint contour.(j) contour.(k) t]
+				||	contour.(k).cubic && contour.(k + 1).cubic 
+						&& [closepoint contour.(j) contour.(k) t] 
+						&& [closepoint contour.(j) contour.(k) t] 
+						&& [closepoint contour.(j) contour.(k + 2) t])) [inc k] : begin
 				set contour.(k).unimportant true
 				set found true
+				if (contour.(k).cubic && contour.(k + 1).cubic 
+						&& [closepoint contour.(j) contour.(k) t] 
+						&& [closepoint contour.(j) contour.(k) t] 
+						&& [closepoint contour.(j) contour.(k + 2) t]) : begin
+							set contour.(k + 1).unimportant true
+							set contour.(k + 2).unimportant true
+							set k : k + 2
 			if found : begin
 				set contour.(j).onCurve true
 				set j (k - 1)

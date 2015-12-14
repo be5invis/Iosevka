@@ -30,7 +30,7 @@ font.replaceWithReference(1)
 print "    Simplify: ", font.fontname
 font.selection.all()
 font.transform(psMat.scale(5))
-font.simplify(0.05, ("smoothcurves", "choosehv"), 0.1)
+font.simplify(0.025, ("smoothcurves", "choosehv"), 0.1)
 font.transform(psMat.scale(0.2))
 font.simplify(0.2, ("smoothcurves", "choosehv"), 0.1)
 

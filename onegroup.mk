@@ -19,10 +19,10 @@ endif
 NODE_FDT = node --expose-gc
 NODE = node
 
-UPRIGHT = $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
-ITALIC  = $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
-EXTUPRG = $(OBJDIR)/$(PREFIX)-hair.ttf
-EXTITAL = $(OBJDIR)/$(PREFIX)-hairitalic.ttf
+UPRIGHT = $(OBJDIR)/$(PREFIX)-hair.ttf $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
+ITALIC  = $(OBJDIR)/$(PREFIX)-hairitalic.ttf $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
+EXTUPRG = 
+EXTITAL = 
 OUTPUTS = $(UPRIGHT) $(ITALIC)
 TARGETS = $(UPRIGHT) $(ITALIC) $(EXTUPRG) $(EXTITAL)
 MAPS    = $(subst .ttf,.charmap,$(TARGETS))
@@ -55,6 +55,14 @@ $(OBJDIR)/.pass0-$(PREFIX)-hair.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-hairitalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
