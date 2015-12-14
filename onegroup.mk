@@ -19,8 +19,8 @@ endif
 NODE_FDT = node --expose-gc
 NODE = node
 
-UPRIGHT = $(OBJDIR)/$(PREFIX)-hair.ttf $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
-ITALIC  = $(OBJDIR)/$(PREFIX)-hairitalic.ttf $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
+UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-bold.ttf
+ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf
 EXTUPRG = 
 EXTITAL = 
 OUTPUTS = $(UPRIGHT) $(ITALIC)
@@ -51,14 +51,14 @@ svgs : $(OUTPUT_SVG0)
 
 	
 # Pass 0 : file construction
-$(OBJDIR)/.pass0-$(PREFIX)-hair.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
-$(OBJDIR)/.pass0-$(PREFIX)-hairitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-hair s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extralight s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+$(OBJDIR)/.pass0-$(PREFIX)-extralightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
+	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
