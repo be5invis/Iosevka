@@ -476,6 +476,7 @@ define nHookSegments 8
 define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
 	local atBottom : toStraight.y > y
 	local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
+	local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
 	toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
 	if (atBottom && ltr && !isStart) : begin
 		toFinish.x = toFinish.x + TAILADJX * globalTransform.yx
@@ -487,6 +488,20 @@ define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
 	local mixr : determineMixR w v adj
 	local mx ([mix toStraight.x toFinish.x mixr] + ([if tight 0 : if atBottom 1 (-1)] * CORRECTION_OMIDX) * [fallback s STROKE])
 	local keyKnot : g4.[if ltr "right" "left"].mid mx y [fallback kkaf : if tight [heading [if ltr RIGHTWARD LEFTWARD]] nothing]
+	
+	local faf toFinish.af
+	set toFinish.af : lambda [] : begin
+		local sw : fallback s STROKE
+		local rad : Math.min w (mixr * u)
+		local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixr * u / w)] - 1) * 0.5
+		local depth : v + skew0 * sw - sw
+		local shallowLimit (sw * 0.5)
+		local skew : clamp 0 (1 / 2) : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
+		if faf : faf.apply this arguments
+		this.heads-to {
+			.x (CONTRAST / [Math.sqrt : 1 + skew * skew] * [if dtu (-1) 1])
+			.y (skew / [Math.sqrt : 1 + skew * skew] * [if ltr 1 (-1)])
+		}
 	
 	local segBefore {}
 	local segAfter {}
