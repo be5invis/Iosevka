@@ -384,7 +384,7 @@ symbol-block 'l'
 	create-glyph 'looprevesh' : glyph-construction
 		assign-unicode 0x1AA
 		include ifMarks
-		local fine : adviceBlackness 5
+		local fine : adviceBlackness 4
 		include : dispiro
 			widths.center fine
 			g4 MIDDLE (CAP - fine * 1.5) [heading DOWNWARD]
@@ -1345,7 +1345,7 @@ symbol-block 'r'
 		assign-unicode 'r'
 		include eMarks
 		
-		local fine : SHOULDERFINE * 0.75
+		local fine : SHOULDERFINE * CTHIN
 		local rhookx (RIGHTSB + RBALANCE2 - OXE)
 		local mixp : 0.54 + 2 * globalTransform.yx * STROKE / WIDTH
 		local mixpin : 0.65 + globalTransform.yx * [linreg 72 0.1 108 0.5 STROKE]
@@ -1495,7 +1495,7 @@ define {CShape} : symbol-block 'C'
 			flat.ai (SB + OX) (XH - SMALLSMOOTHA)
 			curl.ai (SB + OX) SMALLSMOOTHB
 			arcvh
-			CurlyTail fine rinner m1 0 RIGHTSB x2 y2
+			CurlyTail fine rinner m1 0 RIGHTSB x2 y2 [linreg 500 (0.5) 375 (-0.25) WIDTH] nothing 1
 	
 	create-glyph 'cyrE' : glyph-construction
 		assign-unicode 0x42D
@@ -2262,7 +2262,7 @@ define {FShape} : symbol-block 'F'
 	define [FShape top y] : glyph-construction
 		include : VBarLeft (SB * 1.5) 0 [fallback top CAP]
 		include : HBarTop (SB * 1.5 - O) RIGHTSB [fallback top CAP]
-		include : HBar (SB * 1.5 - O) (RIGHTSB - [if SLAB (STROKE * 0.75) HALFSTROKE]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]])
+		include : HBar (SB * 1.5 - O) (RIGHTSB - [Math.max HALFSTROKE ((RIGHTSB - SB) * 0.1)] - [if SLAB (STROKE * 0.25) 0]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]])
 		if SLAB : begin
 			include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SIDEJUT
 			include : CenterBottomSerif (SB * 1.5 + HALFSTROKE * CORRECTION_HX) 0 JUT
@@ -2484,8 +2484,8 @@ define {SmallEShape} : symbol-block 'e'
 			arcvh
 			g4 (MIDDLE - CORRECTION_OMIDS) (top - O)
 			archv
-			[if (top <= XH) flat.ai flat] (SB + OX) (top - SMALLSMOOTHA)
-			[if (top <= XH) curl.ai curl] (SB + OX) (0 + SMALLSMOOTHB)
+			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (SB + OX) (top - SMALLSMOOTHA)
+			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (SB + OX) (0 + SMALLSMOOTHB)
 			hookend O nothing stroke
 			g4 (RIGHTSB - OX * 0.5) AHOOK
 		include : HBarBottom (SB + (stroke / 2) + OX) (RIGHTSB - (stroke / 2) - OX) barbottom stroke
@@ -2677,19 +2677,20 @@ symbol-block 'S'
 			g4   SB HOOK
 	alias 'cyrDze' 0x405 'S'
 	
+	local smallSMix : clamp 0 1 : linreg 0 [linreg 18 1 108 0.95 STROKE] 50 1 [Math.abs : WIDTH - 500]
 	create-glyph 's' : glyph-construction
 		set-width WIDTH
 		assign-unicode 's'
 		include eMarks
-		define smooth : adviceSSmooth XH (-1)
+		define smooth : adviceSSmooth XH (-1 - globalTransform.yx * 3)
 		include : dispiro
 			widths.lhs
 			g4   RIGHTSB (XH - SHOOK)
-			hookstart XO
+			hookstart XO nothing nothing nothing smallSMix
 			g4.down.mid   SB (XH - smooth)
-			alsothru 0.5 0.5 [widths (ESS / 2) (ESS / 2)]
+			alsothru 0.5 0.5 [widths.center ESS]
 			g4.down.mid   RIGHTSB (smooth) [widths 0 STROKE]
-			hookend O
+			hookend O nothing nothing nothing smallSMix
 			g4   SB SHOOK
 	alias 'cyrdze' 0x455 's'
 	
@@ -2710,15 +2711,15 @@ symbol-block 'S'
 	create-glyph 'revs' : glyph-construction
 		assign-unicode 0x1A8
 		include eMarks
-		local smooth : adviceSSmooth XH 1
+		local smooth : adviceSSmooth XH (1 + globalTransform.yx * 5)
 		include : dispiro
 			widths.rhs
 			g4   SB (XH - SHOOK)
-			hookstart XO
+			hookstart XO nothing nothing nothing smallSMix
 			g4   RIGHTSB (XH - smooth)
-			alsothru 0.5 0.5 [widths (ESS / 2) (ESS / 2)]
+			alsothru 0.5 0.5 [widths.center ESS]
 			g4   SB (smooth) [widths STROKE 0]
-			hookend O
+			hookend O nothing nothing nothing smallSMix
 			g4   RIGHTSB SHOOK
 	
 	create-glyph 'srtail' : glyph-construction
@@ -2808,11 +2809,10 @@ symbol-block 'Z'
 		eject-contour 'serifRB'
 		include : dispiro
 			widths.lhs
-			flat SB 0
+			flat SB 0 [heading RIGHTWARD]
 			curl (RIGHTSB - HOOKX) 0
 			archv
-			flat RIGHTSB (-HOOK) [widths 0 STROKE]
-			curl RIGHTSB (-HOOK - 1)
+			straight.down.end RIGHTSB (-HOOK) [widths.heading 0 STROKE DOWNWARD]
 	
 	create-glyph 'zdtail' : glyph-construction
 		assign-unicode 0x225
@@ -2824,7 +2824,7 @@ symbol-block 'Z'
 			flat SB 0 [heading RIGHTWARD]
 			curl (RIGHTSB - HOOKX) 0
 			archv
-			g4 RIGHTSB (-HOOK) [widths.heading 0 STROKE DOWNWARD]
+			straight.down.end RIGHTSB (-HOOK) [widths.heading 0 STROKE DOWNWARD]
 	
 	create-glyph 'Zswash' : glyph-construction
 		assign-unicode 0x2C7F

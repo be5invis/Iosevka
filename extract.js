@@ -93,6 +93,7 @@ if(argv.feature) {
 };*/
 
 if(argv.svg) {
+	function cov(x){ return x.toFixed(4) }
 	function toSVGPath(glyph){
 		var buf = '';
 		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
@@ -102,15 +103,15 @@ if(argv.svg) {
 			if(contour.length) {
 				lx = contour[0].x;
 				ly = contour[0].y;
-				buf += 'M' + lx + ' ' + ly;
+				buf += 'M' + cov(lx) + ' ' + cov(ly);
 				for(var k = 1; k < contour.length; k++) if(contour[k].onCurve){
 					lx = contour[k].x;
 					ly = contour[k].y;
-					buf += 'L' + lx + ' ' + ly;
+					buf += 'L' + cov(lx) + ' ' + cov(ly);
 				} else if(contour[k].cubic) {
 					var rx = contour[k + 2].x;
-					var ry = contour[k + 2].y;					
-					buf += 'C' + [contour[k].x, contour[k].y, contour[k + 1].x, contour[k + 1].y, rx, ry].join(' ');
+					var ry = contour[k + 2].y;
+					buf += 'C' + [contour[k].x, contour[k].y, contour[k + 1].x, contour[k + 1].y, rx, ry].map(cov).join(' ');
 					lx = rx;
 					ly = ry;
 					k += 2;
@@ -127,14 +128,14 @@ if(argv.svg) {
 					var x2 = mix(rx, contour[k].x, 2 / 3);
 					var y2 = mix(ry, contour[k].y, 2 / 3);
 					
-					buf += 'C' + [x1, y1, x2, y2, rx, ry].join(' ');
+					buf += 'C' + [cov(x1), cov(y1), cov(x2), cov(y2), cov(rx), cov(ry)].join(' ');
 					lx = rx;
 					ly = ry;
 					if(contour[k + 1].onCurve) k += 1;
 				} else {
 					var rx = contour[0].x;
 					var ry = contour[0].y;
-					buf += 'Q' + contour[k].x + ' ' + contour[k].y + ' ' + contour[0].x + ' ' + contour[0].y;
+					buf += 'Q' + cov(contour[k].x) + ' ' + cov(contour[k].y) + ' ' + cov(contour[0].x) + ' ' + cov(contour[0].y);
 					lx = rx;
 					ly = ry;
 				}

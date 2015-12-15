@@ -158,8 +158,8 @@ define [OBarLeftShape _top _left] : glyph-construction
 		arcvh
 		g4   (mb) O [widths.heading STROKE 0 {.y (1) .x (-sb)}]
 		archv
-		flat.ai (RIGHTSB - OX) (0 + SMALLSMOOTHA)
-		curl.ai (RIGHTSB - OX) (top - SMALLSMOOTHB)
+		[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (RIGHTSB - OX) (0 + SMALLSMOOTHA)
+		[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (RIGHTSB - OX) (top - SMALLSMOOTHB)
 		arcvh
 		close
 
@@ -434,11 +434,12 @@ define [HooktopLeftBar stroke bottom] : glyph-construction
 		flat SB (CAP - SMALLSMOOTHA)
 		curl SB [fallback bottom 0] [heading DOWNWARD]
 
-define [CurlyTail fine rinner m1 bottom _right x2 y2] : begin
+define [CurlyTail fine rinner m1 bottom _right x2 y2 adj adj2 adj3] : begin
 	local right : _right - fine * [if (_right > m1) 1 (-1)]
-	local mid : mix [mix m1 right 0.5] (right - rinner * [if (_right > m1) 1 (-1)]) 0.4
+	local mid : mix [mix m1 right 0.5] (right - rinner * [if (_right > m1) 1 (-1)]) [fallback adj 0.4]
+	local midu : mix [mix m1 right 0.5] (right - rinner * [if (_right > m1) 1 (-1)]) [fallback adj2 0.4]
 	return : list
-		g4   mid (bottom + fine + O) [widths [if (_right > m1) 0 fine] [if (_right > m1) fine 0]]
+		g4.[if (_right > m1) 'right' 'left'].mid (mid + CORRECTION_OMIDX * fine * [fallback adj3 0] * [if (_right > m1) 1 (-1)]) (bottom + fine + O) [widths [if (_right > m1) 0 fine] [if (_right > m1) fine 0]]
 		archv 2
 		g4   right (bottom + fine + rinner - 0.1)
 		g4   right (bottom + fine + rinner + 0.1)
@@ -467,12 +468,12 @@ define [FlatSlashShape middlex middle fine kx ky] : glyph-construction
 		curl (middlex + LONGJUT * [fallback kx 0.8]) (middle + LONGJUT * [fallback ky 0.4])
 
 # Spiro shapes
-define [determineMixR w v] : piecewise
+define [determineMixR w v adj] : piecewise
 	(w <= v)   0.5
-	true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) SUPERNESS]) (1 / SUPERNESS)] + 1)
-define nHookSegments 4
+	true     : (adj || 1) / ([Math.pow (1 - [Math.pow (1 - v / w) SUPERNESS]) (1 / SUPERNESS)] + 1)
+define nHookSegments 8
 
-define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
+define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
 	local atBottom : toStraight.y > y
 	local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 	toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
@@ -483,7 +484,7 @@ define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
 	local w : Math.abs (toStraight.y - y)
 	local v : Math.abs (toFinish.y - y)
 	local u : Math.abs (toFinish.x - toStraight.x)
-	local mixr : determineMixR w v
+	local mixr : determineMixR w v adj
 	local mx ([mix toStraight.x toFinish.x mixr] + ([if tight 0 : if atBottom 1 (-1)] * CORRECTION_OMIDX) * [fallback s STROKE])
 	local keyKnot : g4.[if ltr "right" "left"].mid mx y [fallback kkaf : if tight [heading [if ltr RIGHTWARD LEFTWARD]] nothing]
 	
@@ -506,8 +507,8 @@ define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
 		* keyKnot
 		* segAfter
 
-define [hookstart y tight s kkaf] : return {.type 'interpolate' .af [lambda [before after] [HookShape after before true y tight s kkaf]]}
-define [hookend y tight s kkaf] : return {.type 'interpolate' .af [lambda [before after] [HookShape before after false y tight s kkaf]]}
+define [hookstart y tight s kkaf adj] : return {.type 'interpolate' .af [lambda [before after] [HookShape after before true y tight s kkaf adj]]}
+define [hookend y tight s kkaf adj] : return {.type 'interpolate' .af [lambda [before after] [HookShape before after false y tight s kkaf adj]]}
 
 define [WaveShape l r cy extendy tension sw] : glyph-construction
 	local cx : mix l r 0.5
