@@ -20,7 +20,7 @@ NODE_FDT = node --expose-gc
 NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-medium.ttf $(OBJDIR)/$(PREFIX)-bold.ttf $(OBJDIR)/$(PREFIX)-heavy.ttf
-ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-mediumitalic.ttf $(OBJDIR)/$(PREFIX)-extrabolditalic.ttf $(OBJDIR)/$(PREFIX)-heavyitalic.ttf
+ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-mediumitalic.ttf $(OBJDIR)/$(PREFIX)-heavyitalic.ttf
 EXTUPRG = 
 EXTITAL = 
 OUTPUTS = $(UPRIGHT) $(ITALIC)
