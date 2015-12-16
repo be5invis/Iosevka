@@ -42,10 +42,10 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		themes: ['light', 'dark'],
+		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
-		theme: 'dark',
+		theme: 'color-dark',
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
