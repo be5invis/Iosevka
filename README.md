@@ -56,6 +56,9 @@ The current avaliable styles are:
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
 
 ## Release Notes
+* **1.4.0**
+ - Added five new weights: *thin*, *extralight*, *light*, *medium* and *heavy*
+ - Shape optimizations for MANY letters, including `/s`, `/r`, `/a`, `/beta`, `/cyryeri` and their derived characters
 * **1.3.0**
  - Shape optimizations: `/f`, `/r`, `/a`, `/s`, `/epsilon`, `/cyrze` and their derived glyphs.
  - Narrowed slab-serif variants.
