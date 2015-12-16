@@ -4,19 +4,24 @@ function padzero(s, n){
 }
 var BLOCKSIZE = 16 * 4;
 var fonts = [
-	[
-		{name: 'iosevka-regular', cls: '', display: 'Iosevka'},
-		{name: 'iosevka-bold', cls: 'bold', display: 'Iosevka Bold'},
-		{name: 'iosevka-italic', cls:'italic', display: 'Iosevka Italic'},
-		{name: 'iosevka-bolditalic', cls:'bold italic', display: 'Iosevka Bold Italic'}
-	],
-	[
-		{name: 'iosevka-slab-regular', cls: 'slab', display: 'Iosevka Slab'},
-		{name: 'iosevka-slab-bold', cls: 'slab bold', display: 'Iosevka Slab Bold'},
-		{name: 'iosevka-slab-italic', cls:'slab italic', display: 'Iosevka Slab Italic'},
-		{name: 'iosevka-slab-bolditalic', cls:'slab bold italic', display: 'Iosevka Slab Bold Italic'}
-	]
+	[	{name: 'iosevka-thin', cls: 'thin', display: 'Thin'}, {name: 'iosevka-slab-thin', cls: 'slab thin', display: 'Slab Thin'},
+		{name: 'iosevka-thinitalic', cls:'thin italic', display: 'Thin Italic'}, {name: 'iosevka-slab-thinitalic', cls:'slab thin italic', display: 'Slab Thin Italic'} ],
+	[	{name: 'iosevka-extralight', cls: 'extralight', display: 'Extralight'}, {name: 'iosevka-slab-extralight', cls: 'slab extralight', display: 'Slab Extralight'},
+		{name: 'iosevka-extralightitalic', cls:'extralight italic', display: 'Extralight Italic'}, {name: 'iosevka-slab-extralightitalic', cls:'slab extralight italic', display: 'Slab Extralight Italic'} ],
+	[	{name: 'iosevka-light', cls: 'light', display: 'Light'}, {name: 'iosevka-slab-light', cls: 'slab light', display: 'Slab Light'},
+		{name: 'iosevka-lightitalic', cls:'light italic', display: 'Light Italic'}, {name: 'iosevka-slab-lightitalic', cls:'slab light italic', display: 'Slab Light Italic'} ],
+	[	{name: 'iosevka-regular', cls: '', display: 'Regular'}, {name: 'iosevka-slab-regular', cls: 'slab', display: 'Slab Regular'},
+		{name: 'iosevka-italic', cls:'italic', display: 'Italic'}, {name: 'iosevka-slab-italic', cls:'slab italic', display: 'Slab Italic'} ],
+	[	{name: 'iosevka-medium', cls: 'medium', display: 'Medium'}, {name: 'iosevka-slab-medium', cls: 'slab medium', display: 'Slab Medium'},
+		{name: 'iosevkamediumitalic', cls:'medium italic', display: 'Medium Italic'}, {name: 'iosevka-slab-mediumitalic', cls:'slab medium italic', display: 'Slab Medium Italic'} ],
+	[	{name: 'iosevka-bold', cls: 'bold', display: 'Bold'}, {name: 'iosevka-slab-bold', cls: 'slab bold', display: 'Slab Bold'},
+		{name: 'iosevka-bolditalic', cls:'bold italic', display: 'Bold Italic'}, {name: 'iosevka-slab-bolditalic', cls:'slab bold italic', display: 'Slab Bold Italic'} ],
+//	[	{name: 'iosevka-extrabold', cls: 'extrabold', display: 'Extrabold'}, {name: 'iosevka-slab-extrabold', cls: 'slab extrabold', display: 'Slab Extrabold'},
+//		{name: 'iosevka-extrabolditalic', cls:'extrabold italic', display: 'Extrabold Italic'}, {name: 'iosevka-slab-extrabolditalic', cls:'slab extrabold italic', display: 'Slab Extrabold Italic'} ],
+	[	{name: 'iosevka-heavy', cls: 'heavy', display: 'Heavy'}, {name: 'iosevka-slab-heavy', cls: 'slab heavy', display: 'Slab Heavy'},
+		{name: 'iosevka-heavyitalic', cls:'heavy italic', display: 'Heavy Italic'}, {name: 'iosevka-slab-heavyitalic', cls:'slab heavy italic', display: 'Slab Heavy Italic'} ]
 ];
+var REGULAR = 3;
 var lipsums = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur semper ipsum quam, at molestie libero euismod vitae. Etiam vehicula felis mi, et ultricies libero consequat at. Donec consequat, nunc id elementum tempor, lectus orci vulputate leo, eget lobortis lectus nulla sed orci. Donec in dolor non orci aliquet gravida. Nulla volutpat magna et nulla pretium, quis consequat nibh euismod. Suspendisse eget metus enim. Fusce vulputate scelerisque eros et consequat. Quisque dapibus accumsan augue, et semper lectus vehicula sit amet. Ut ornare venenatis tortor, non gravida tellus mattis interdum. In hac habitasse platea dictumst. Donec interdum commodo ex eu tincidunt. Curabitur non fermentum enim. Proin luctus orci ut commodo auctor. Pellentesque accumsan id sem eu semper. Sed non pharetra nibh. Vivamus mattis luctus arcu, a rutrum dui venenatis sit amet. aja ojo ojoined',
 'Troh tper es sos, bo slisxil spôrtjư uzx, cxital posteluf hrvatzem ili bi. Tenis lubôvijm roksăfnâvơi da din. Bo cxtir dajte lubim onă, dev ti silăju môrkva vecxer. Din om leto glfădju problêm. Sâm slơzxju răzumim vnimanie na, vsê ăzia kưdrju prôgram nô. Slôzxju zavoduf nơ den, hcê licơ sxkol toplju so. Vi knigis sidili polozxij bil, ne polnfju ovơcxjư dla, es ônâ mamâ pisajut mălôstis.',
 'Жят эним либриз аюдиам ад. Мыа ан одео нонумй опортэры, но дуо вэре эчжынт ыпикурэи. Ан вим алёквюам пыртенакж. Эжт но оратио факэтэ, дольорэ индоктум дыфинитеоным эжт ты.',
@@ -60,7 +65,7 @@ var display = new Vue({
 			for(var j = 0; j < ss.length; j++){ ss[j].spaces = new Array(langlen - ss[j].lang.length + 2).join(' ') };
 			return ss;
 		})(sampleSentences),
-		currentFont: fonts[0][0],
+		currentFont: fonts[REGULAR][0],
 		waterfall: [36, 28, 24, 20, 18, 16, 14, 12, 11, 10],
 		sampleRows: []
 	},
@@ -105,7 +110,7 @@ var picker = new Vue({
 	el: '#picker',
 	data: {
 		fonts: fonts,
-		current: fonts[0][0]
+		current: fonts[REGULAR][0]
 	},
 	methods: {
 		choose: function(item){
