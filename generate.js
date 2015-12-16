@@ -10,7 +10,7 @@ var emptyFont      = toml.parse(fs.readFileSync(path.join(path.dirname(require.m
 var para = parameters.build(parametersData, argv._);
 var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
 
-console.log('    Start build font' + fontUniqueName);
+console.log('    Start build font ' + fontUniqueName);
 var font = buildGlyphs.build.call(emptyFont, para);
 // glyf list construction
 font.glyfMap = null;
