@@ -286,7 +286,7 @@ symbol-block 'Block Shapes'
 ### Box drawing glyphs
 symbol-block 'Box-Drawing'
 	local light : adviceBlackness 3.5
-	local heavy : light * 2
+	local heavy : Math.max (light * 2) (WIDTH * 0.15)
 	local width FULLWIDTH
 	local midx : FULLWIDTH / 2
 	local midy : mix font.hhea.descent font.hhea.ascent 0.5
@@ -302,10 +302,10 @@ symbol-block 'Box-Drawing'
 	define [dlboxdraw unicode u d l r] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
 		assign-unicode unicode
 		set-width width
-		local stopH : ([Math.max u d] - light) / 2
-		local stopV : ([Math.max l r] - light) / 2
-		local capH  : stopH * heavy / (heavy - light)
-		local capV  : stopV * heavy / (heavy - light)
+		local stopH : [Math.max u d] - light * 1 - light * 0.5 * CORRECTION_HX
+		local stopV : [Math.max l r] - light * 1.5
+		local capH  : [Math.max u d] - light * 1
+		local capV  : [Math.max l r] - light * 1
 		if l : begin
 			include : HBar 0 (midx - stopH) (midy + (l - light)) light
 			if (l > light) : include : HBar 0 (midx - stopH) (midy - (l - light)) light
@@ -318,8 +318,8 @@ symbol-block 'Box-Drawing'
 		if u : begin
 			include : VBar (midx + (u - light)) (midy + stopV) font.hhea.ascent light
 			if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) font.hhea.ascent light
-		if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light) (midx + stopH + light) (midy + capV) light
-		if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light) (midx + stopH + light) (midy - capV) light
+		if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light * CORRECTION_HX) (midx + stopH + light * CORRECTION_HX) (midy + capV) light
+		if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light * CORRECTION_HX) (midx + stopH + light * CORRECTION_HX) (midy - capV) light
 		if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
 		if (stopV > 0 && [not r]) : include : VBar (midx + capH) (midy - stopV - light) (midy + stopV + light) light
 	define [complexBoxDraw unicodeStart U D L R fn dl] : begin

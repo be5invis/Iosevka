@@ -93,7 +93,7 @@ if(argv.feature) {
 };*/
 
 if(argv.svg) {
-	function cov(x){ return x.toFixed(4) }
+	function cov(x){ return Math.round(x * 10000) / 10000 }
 	function toSVGPath(glyph){
 		var buf = '';
 		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
