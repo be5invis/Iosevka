@@ -49,7 +49,7 @@ var indexPage = new Vue({
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
-		version: "1.4.0",
+		version: "1.4.1",
 		codename: "Aureta"
 	}
 });
