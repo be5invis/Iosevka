@@ -410,7 +410,7 @@ define VShape : symbol-block 'V, v and nu'
 			g4   (MIDDLE + cornerdist) 0 [widths.rhs VShape.fine]
 		tag-contour 'strokeUp'
 		include : AIVSerifs top
-	set VShape.fine : if SLAB (STROKE * 0.9) (STROKE * 0.8)
+	set VShape.fine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
 	
 	create-glyph 'V' : glyph-construction
 		set-width WIDTH
@@ -422,16 +422,6 @@ define VShape : symbol-block 'V, v and nu'
 		assign-unicode 'v'
 		include eMarks
 		include : VShape XH
-	
-#	create-glyph 'v.italic' : glyph-construction
-#		include eMarks
-#		include : VShape XH
-#		if (SLAB && para.isItalic) : begin
-#			eject-contour 'serifLT'
-#			eject-contour 'serifRT'
-#			include : LeftwardTopSerif SB XH SIDEJUT
-#	
-#	italic-variant 'v' 'v'
 	
 	define [VHooktopShape top] : glyph-construction
 		include : VShape top
@@ -508,9 +498,9 @@ symbol-block 'a'
 		include : dispiro
 			widths.lhs
 			flat RIGHTSB 0 [heading UPWARD]
-			curl RIGHTSB (XH - SMOOTHB * [Math.pow (AHOOK / HOOK) 0.375])
+			curl RIGHTSB (XH - SMOOTHB * [linreg 18 0.9 126 0.81 STROKE])
 			hookend XO
-			g4 SB (XH - AHOOK)
+			g4 (SB - OXHOOK / 2) (XH - AHOOK)
 		include : dispiro
 			widths.lhs
 			flat (RIGHTSB + O) bartop [heading LEFTWARD]
@@ -981,22 +971,24 @@ symbol-block 'B'
 		assign-unicode 0x3B2
 		include ifMarks
 		local ymiddle : [mix 0 CAP 0.55] - HALFSTROKE
+		local fine : STROKE * CTHIN
 		include : dispiro
 			widths.rhs
 			flat SB DESCENDER [heading UPWARD]
 			curl SB (CAP - SMALLSMOOTHA)
 			arcvh
-			g4   [mix SB (RIGHTSB - OX + O * 3) 0.5] CAPO
+			g4   ([mix SB (RIGHTSB - OX + O * 3) 0.5] - CORRECTION_OMIDS) CAPO
 			archv
 			g4   (RIGHTSB - OX + O * 3) [mix CAP ymiddle 0.5]
 			arcvh
-			flat [mix SB (RIGHTSB - OX + O * 3) 0.5] ymiddle
-			curl [mix SB RIGHTSB 0.3] ymiddle
+			flat [mix SB (RIGHTSB - OX + O * 3) 0.5] (ymiddle + STROKE - fine) [widths.rhs fine]
+			curl [mix SB RIGHTSB 0.3] (ymiddle + STROKE - fine)
 		include : dispiro
-			widths.rhs
-			g4   (RIGHTSB - ymiddle / 2 - HALFSTROKE) (ymiddle + STROKE)
+			widths.rhs fine
+			flat   ([mix SB RIGHTSB 0.3] - (2 * fine - STROKE) * globalTransform.yx) (ymiddle + fine)
+			curl   (RIGHTSB - ymiddle / 2 - HALFSTROKE) (ymiddle + fine)
 			archv
-			g4   (RIGHTSB - OX) [mix 0 (ymiddle + STROKE) 0.5]
+			g4   (RIGHTSB - OX) [mix 0 (ymiddle + STROKE) 0.5] [widths.rhs]
 			arcvh
 			flat (RIGHTSB - ymiddle / 2 - HALFSTROKE) 0
 			curl (SB + HALFSTROKE) 0 [heading LEFTWARD]
@@ -1286,11 +1278,11 @@ symbol-block 'R and CyrYa'
 		include : dispiro
 			widths.lhs
 			flat (barright - HALFSTROKE * 0.1) bowlTop [heading LEFTWARD]
-			curl (SB + turnRadius) bowlTop
+			curl (SB + turnRadius - CORRECTION_OMIDS) bowlTop
 			archv
 			g4 (SB + O) turn
 			arcvh
-			flat (SB + turnRadius) bowlBottom
+			flat (SB + turnRadius + CORRECTION_OMIDS) bowlBottom
 			curl    (barright - HALFSTROKE * 0.1) bowlBottom [heading RIGHTWARD]
 		include : VBarRight barright 0 top
 		local left (SB + O + [if SLAB (JUT / 8) 0])
@@ -1336,10 +1328,11 @@ symbol-block 'r'
 		local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE - globalTransform.yx * [linreg 72 0.25 108 0.75 STROKE]
 		include : dispiro
 			widths.lhs
-			g4 rhookx (XH - RHOOK) [heading {.y (-0.45) .x (-1.04 - globalTransform.yx)}]
-			alsothru 0.37 0.72
+			g4 rhookx (XH - RHOOK) [heading {.y [linreg 18 (-0.45) 126 (-0.5) STROKE] .x (-1.04)}]
+			alsothru (0.37 - globalTransform.yx * 0.1) 0.72
 			g4.left.mid (rmiddle - CORRECTION_OMIDS * [linreg 72 0.75 108 1 STROKE]) XO [widths.heading STROKE 0 {.y (-1) .x (-skew)}]
-			alsothru 0.75 0.25
+			#alsothru 0.75 [linreg 18 0.25 126 0.23 STROKE]
+			archv
 			straight.down.end (rbar - fine * CORRECTION_HX) (XH * 0.53 + (SMALLSMOOTH - SMALLSMOOTHA)) [widths.heading fine 0 DOWNWARD]
 		include : VBarRight rbar 0 XH
 		set-anchor 'overlay' BASE (rbar - STROKE * 0.25) (XH * 0.5)
@@ -1720,11 +1713,11 @@ symbol-block 'O'
 		include : dispiro
 			widths.rhs
 			flat (SB + OX) (XH / 2) [heading UPWARD]
-			curl (SB + OX) (XH - SMALLSMOOTHA)
+			curl (SB + OX) (XH - [Math.min (XH / 2 - 0.1) SMALLSMOOTHA])
 			arcvh
 			g4 (MIDDLE - CORRECTION_OMIDS) (XH - O)
 			archv
-			flat (RIGHTSB - OX) (XH - SMALLSMOOTHB)
+			flat (RIGHTSB - OX) (XH - [Math.min (XH / 2 - 0.1) SMALLSMOOTHB])
 			curl (RIGHTSB - OX) (XH / 2) [heading DOWNWARD]
 	create-glyph 'olowerhalf' : glyph-construction
 		assign-unicode 0x1D17
@@ -1732,11 +1725,11 @@ symbol-block 'O'
 		include : dispiro
 			widths.lhs
 			flat (SB + OX) (XH / 2) [heading DOWNWARD]
-			curl (SB + OX) SMALLSMOOTHB
+			curl (SB + OX) [Math.min (XH / 2 - 0.1) SMALLSMOOTHB]
 			arcvh
 			g4 (MIDDLE + CORRECTION_OMIDS) O
 			archv
-			flat (RIGHTSB - OX) SMALLSMOOTHA
+			flat (RIGHTSB - OX) [Math.min (XH / 2 - 0.1) SMALLSMOOTHA]
 			curl (RIGHTSB - OX) (XH / 2) [heading UPWARD]
 
 ### Q
@@ -2664,7 +2657,7 @@ symbol-block 'S'
 		set-width WIDTH
 		assign-unicode 's'
 		include eMarks
-		define smooth : adviceSSmooth XH (-1 - globalTransform.yx * (8.5 - (WIDTH / 500) * 5.5) * [clamp 0 1 : linreg 120 1 130 0.5 STROKE])
+		define smooth : adviceSSmooth XH (-1 - globalTransform.yx * (8.5 - (WIDTH / 500) * 5.5) * [clamp 0 1 : linreg 126 1 135 0.5 STROKE])
 		include : dispiro
 			widths.lhs
 			g4   RIGHTSB (XH - SHOOK)

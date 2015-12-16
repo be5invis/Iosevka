@@ -671,16 +671,16 @@ define {CyrYeriShape RevCyrYeriShape} : symbol-block 'CyrYeri-related'
 		local jut : fallback _jut JUT
 		
 		local bowl : top * 0.55 + HALFSTROKE
-	
-		local turnbottom : bowl / 2
+		local turnRadius : bowl * 0.55
+		local turnbottom : mix 0 bowl (SMOOTHA / (SMOOTHA + SMOOTHB))
 		include : dispiro
 			widths.lhs fine
 			flat (left + STROKE * 0.2) 0 [heading RIGHTWARD]
-			curl (right - turnbottom * (right - left) / (RIGHTSB - SB)) 0 [heading RIGHTWARD]
+			curl ([Math.max (left + fine * CORRECTION_HX) (right - turnRadius * [Math.pow ((right - left) / (RIGHTSB - SB)) 0.5])] + CORRECTION_OMIDX * fine) 0
 			archv 8
 			g4   (right - OX) turnbottom
 			arcvh 8
-			flat (right - turnbottom * (right - left) / (RIGHTSB - SB)) bowl [heading LEFTWARD]
+			flat ([Math.max (left + fine * CORRECTION_HX) (right - turnRadius * [Math.pow ((right - left) / (RIGHTSB - SB)) 0.5])] - CORRECTION_OMIDX * fine) bowl
 			curl (left + STROKE * 0.2) bowl [heading LEFTWARD]
 		include : VBarLeft left 0 top fine
 		if SLAB : begin
@@ -697,15 +697,16 @@ define {CyrYeriShape RevCyrYeriShape} : symbol-block 'CyrYeri-related'
 		
 		local bowl : top * 0.55 + HALFSTROKE
 	
-		local turnbottom : bowl / 2
+		local turnRadius : bowl * 0.55
+		local turnbottom : mix 0 bowl (SMOOTHB / (SMOOTHA + SMOOTHB))
 		include : dispiro
 			widths.rhs
 			flat (right - STROKE * 0.2) 0 [heading LEFTWARD]
-			curl (left + turnbottom * (right - left) / (RIGHTSB - SB)) 0
+			curl (left + turnRadius * [Math.pow ((right - left) / (RIGHTSB - SB)) 0.5] + CORRECTION_OMIDX * fine) 0
 			archv
 			g4   (left + O) turnbottom [widths.rhs fine]
 			arcvh
-			flat (left + turnbottom * (right - left) / (RIGHTSB - SB)) bowl [widths.rhs]
+			flat (left + turnRadius * [Math.pow ((right - left) / (RIGHTSB - SB)) 0.5] - CORRECTION_OMIDX * fine) bowl [widths.rhs]
 			curl (right - STROKE * 0.2) bowl [heading RIGHTWARD]
 		include : VBarRight right 0 top fine
 		if SLAB : begin
@@ -754,7 +755,7 @@ define {CyrYeriShape RevCyrYeriShape} : symbol-block 'CyrYeri-related'
 	define [CyrYerShape top] : glyph-construction
 		local left : if SLAB ([mix SB RIGHTSB 0.35] - MVERTSTROKE / 2 * CORRECTION_HX) [mix SB RIGHTSB 0.1]
 		local barleft : mix 0 SB [if SLAB 0.25 0.6]
-		include : CyrYeriShape top left RIGHTSB [if SLAB MVERTSTROKE STROKE]
+		include : CyrYeriShape top left RIGHTSB
 		include : HBarTop barleft (STROKE * 0.1 + left) top
 		if SLAB : begin
 			include : DownwardLeftSerif barleft top VJUT (MVERTSTROKE / CORRECTION_HX)
@@ -1428,12 +1429,12 @@ symbol-block 'Ezh'
 		include : dispiro
 			widths.rhs
 			flat ezhLeft yMidBar [heading RIGHTWARD]
-			curl MIDDLE yMidBar
+			curl (MIDDLE - CORRECTION_OMIDS) yMidBar
 			archv
-			g4   RIGHTSB [mix yMidBar bot 0.5] [if [not hookless] important [heading DOWNWARD]]
+			g4   RIGHTSB [mix yMidBar bot : hookless || (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
 			if hookless {} : list
 				hookend bot
-				g4 SB (bot + SHOOK)
+				g4 SB (bot + HOOK * (top - bot) / [fallback para.cap0 CAP])
 		
 		if SLAB : begin
 			include : DownwardLeftSerif SB top VJUT
@@ -1454,12 +1455,12 @@ symbol-block 'Ezh'
 		include : dispiro
 			widths.lhs
 			flat ezhRight yMidBar [heading LEFTWARD]
-			curl MIDDLE yMidBar
+			curl (MIDDLE + CORRECTION_OMIDS) yMidBar
 			archv
-			g4   SB [mix yMidBar bot 0.5] [if [not hookless] important [heading DOWNWARD]]
+			g4   SB [mix yMidBar bot (SMALLSMOOTHA / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
 			if hookless {} : list
 				hookend bot
-				g4 RIGHTSB (bot + SHOOK)
+				g4 RIGHTSB (bot + HOOK * ((top - bot) / CAP))
 		if SLAB : begin
 			include : DownwardRightSerif RIGHTSB top VJUT
 	
@@ -1496,7 +1497,7 @@ symbol-block 'Ezh'
 	create-glyph 'ezhtail' : glyph-construction
 		assign-unicode 0x1BA
 		local b : mix DESCENDER XH 0.25
-		include : EzhShape XH b nothing true
+		include : EzhShape XH b nothing 0.5
 		local y : mix [mix b XH 0.6] b 0.5
 		include : dispiro
 			widths.rhs
@@ -1513,7 +1514,8 @@ symbol-block 'Ezh'
 	create-glyph 'ezhcurlytail' : glyph-construction
 		assign-unicode 0x293
 		include eMarks
-		include : EzhShape XH DESCENDER nothing true
+		local p (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB))
+		include : EzhShape XH DESCENDER nothing p
 		local fine : adviceBlackness 3
 		local rinner : (XH * 0.4 - fine * 1.5) / 2
 		local m1 : RIGHTSB - STROKE * CORRECTION_HX
@@ -1521,8 +1523,7 @@ symbol-block 'Ezh'
 		local y2 DESCENDER
 		include : dispiro
 			widths.lhs
-			flat m1 [mix [mix DESCENDER XH 0.6] DESCENDER 0.5] [heading DOWNWARD]
-			curl m1 ([mix [mix DESCENDER XH 0.6] DESCENDER 0.5] - 1) [heading DOWNWARD]
+			straight.down.start m1 [mix [mix DESCENDER XH 0.6] DESCENDER p] [heading DOWNWARD]
 			CurlyTail fine rinner m1 DESCENDER SB x2 y2
 
 symbol-block 'Glottal stop'

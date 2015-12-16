@@ -20,7 +20,7 @@ NODE_FDT = node --expose-gc
 NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-medium.ttf $(OBJDIR)/$(PREFIX)-bold.ttf $(OBJDIR)/$(PREFIX)-heavy.ttf
-ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-mediumitalic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf $(OBJDIR)/$(PREFIX)-heavyitalic.ttf
+ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-mediumitalic.ttf $(OBJDIR)/$(PREFIX)-extrabolditalic.ttf $(OBJDIR)/$(PREFIX)-heavyitalic.ttf
 EXTUPRG = 
 EXTITAL = 
 OUTPUTS = $(UPRIGHT) $(ITALIC)
@@ -75,6 +75,10 @@ $(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+#$(OBJDIR)/.pass0-$(PREFIX)-extrabold.fdt : $(SCRIPTS) | $(OBJDIR)
+#	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extrabold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+#$(OBJDIR)/.pass0-$(PREFIX)-extrabolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
+#	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extrabold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-heavy.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-heavy s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
 $(OBJDIR)/.pass0-$(PREFIX)-heavyitalic.fdt : $(SCRIPTS) | $(OBJDIR)
