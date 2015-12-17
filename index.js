@@ -49,8 +49,8 @@ var indexPage = new Vue({
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
-		version: "1.4.1",
-		codename: "Aureta"
+		version: "1.4.2",
+		codename: "Aureta-2"
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
