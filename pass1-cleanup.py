@@ -36,8 +36,9 @@ font.simplify(0.2, ("smoothcurves", "choosehv"), 0.1)
 
 #font.em = 2000
 font.layers["Fore"].is_quadratic = True
+font.simplify(0.1, ("smoothcurves", "choosehv"), 0.1)
 font.transform(psMat.skew(float(sys.argv[3]) / 180 * math.pi))
-#font.em = 1000
+font.em = 1000
 
 font.canonicalContours()
 font.canonicalStart()

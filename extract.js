@@ -145,8 +145,12 @@ if(argv.svg) {
 		return buf;
 	}
 	var svg = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><font id="' + font.name.postScriptName + '">'
-	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font['OS/2'].usWeightClass + '" font-stretch="normal" units-per-em="1000"/>'
+	
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
+	var scale = (argv.upm || 1000) / 1000;
+	
+	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font['OS/2'].usWeightClass + '" font-stretch="normal" units-per-em="' + (1000 * scale) + '"/>'
+	
 	for(var j = 0; j < font.glyf.length; j++){
 		var g = font.glyf[j];
 		if(g.contours) {
@@ -154,8 +158,11 @@ if(argv.svg) {
 				var contour = g.contours[k];
 				for(var p = 0; p < contour.length; p++) {
 					contour[p].x += contour[p].y * skew;
+					contour[p].x *= scale;
+					contour[p].y *= scale;
 				}
 			}
+			g.advanceWidth *= scale;
 			Glyph.prototype.cleanup.call(g, 0.25);
 		}
 		var gd = '<' + (j === 0 ? 'missing-glyph' : 'glyph') + ' glyph-name="' + g.name + '" horiz-adv-x="' + g.advanceWidth + '" '+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '') +' d="' + toSVGPath(g) + '" />'
