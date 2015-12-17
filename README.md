@@ -2,11 +2,7 @@
 
 Coders' typeface, built from code.
 
-## Preview
-### Iosevka
-![preview-sans](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-sans.png)
-### Iosevka Slab
-![preview-slab](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-slab.png)
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
 ## Installation
 
