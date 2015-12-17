@@ -133,22 +133,24 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	
 	# Transform constructors
 	define [Italify angle shift] : begin
-		local slope [Math.tan ([fallback angle para.italicangle] / 180 * Math.PI)]
+		local slope [Math.tan ([fallback angle para.slantAngle] / 180 * Math.PI)]
 		return : new Transform 1 slope 0 1 [fallback shift : -slope * parenMid] 0
 	define [Upright angle shift] [Italify angle shift :.inverse]
 	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
 	define [Translate x y] : new Transform 1 0 0 1 x y
 	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
 	
-	define globalTransform : Italify para.italicAngle
-	define deGlobalTransform : inverse globalTransform
-	define HVCONTRAST : CONTRAST * [Math.cos (para.italicangle / 180 * Math.PI)] + [Math.sin (para.italicangle / 180 * Math.PI)] * globalTransform.yx
+	define globalTransform : Italify para.slantAngle
+	define TANSLANT   globalTransform.yx
+	define SINSLANT : Math.sin (para.slantAngle / 180 * Math.PI)
+	define COSSLANT : Math.cos (para.slantAngle / 180 * Math.PI)
+	define HVCONTRAST : CONTRAST * COSSLANT + SINSLANT * TANSLANT
 	
 	# Orient parameters
 	define UPWARD {.x (-HVCONTRAST) .y 0}
 	define DOWNWARD {.x HVCONTRAST .y 0}
-	define RIGHTWARD {.x globalTransform.yx .y 1}
-	define LEFTWARD  {.x (- globalTransform.yx) .y (-1)}
+	define RIGHTWARD {.x TANSLANT .y 1}
+	define LEFTWARD  {.x (- TANSLANT) .y (-1)}
 	
 	# Style parameters
 	define O para.overshoot
@@ -199,7 +201,6 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	# derived metrics
 	define OXE : OX - O
 	define FULLWIDTH : if para.cjkSpacing (WIDTH * 2) WIDTH
-	define VSTROKE : STROKE * CONTRAST
 	define ESS : STROKE * [fallback para.essx CONTRAST]
 	define ESSQUESTION : STROKE * [fallback para.essxq CONTRAST]
 	define XO : XH - O
@@ -215,14 +216,12 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define PERIODRADIUS : PERIODSIZE / 2
 	define SIDEJUT : JUT - HALFSTROKE * HVCONTRAST
 	
-	define SMOOTHA : SMOOTH - globalTransform.yx * para.smoothadjust
-	define SMOOTHB : SMOOTH + globalTransform.yx * para.smoothadjust
-	define SMALLSMOOTHA : SMALLSMOOTH - globalTransform.yx * para.smoothadjust
-	define SMALLSMOOTHB : SMALLSMOOTH + globalTransform.yx * para.smoothadjust
-	define CORRECTION_VX globalTransform.yx
-	define CORRECTION_VS : STROKE * globalTransform.yx
+	define SMOOTHA : SMOOTH - TANSLANT * para.smoothadjust
+	define SMOOTHB : SMOOTH + TANSLANT * para.smoothadjust
+	define SMALLSMOOTHA : SMALLSMOOTH - TANSLANT * para.smoothadjust
+	define SMALLSMOOTHB : SMALLSMOOTH + TANSLANT * para.smoothadjust
 	
-	define CORRECTION_OMIDX : globalTransform.yx * [linreg 18 1.3 120 1 STROKE]
+	define CORRECTION_OMIDX : TANSLANT * [linreg 18 1.3 120 1 STROKE]
 	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
 	
 	# Blackness parameters
@@ -239,9 +238,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	
 	define [adviceSSmooth y sign] : begin
 		local ss : y * 0.22 + STROKE * 0.23 + 0.02 * (RIGHTSB - SB)
-		return : ss + sign * globalTransform.yx * para.smoothadjust * (ss / SMALLSMOOTH)
-	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * globalTransform.yx * para.smoothadjust
-	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * HVCONTRAST * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * globalTransform.yx
+		return : ss + sign * TANSLANT * para.smoothadjust * (ss / SMALLSMOOTH)
+	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * TANSLANT * para.smoothadjust
+	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * HVCONTRAST * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * TANSLANT
 	
 	# Anchor parameters
 	define BASE Anchor.BASE
@@ -250,7 +249,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define AS_BASE 'AS-BASE'
 	
 	define [tm anchor] : return : new Anchor
-		* (anchor.x * globalTransform.xx + anchor.y * globalTransform.yx + globalTransform.x)
+		* (anchor.x * globalTransform.xx + anchor.y * TANSLANT + globalTransform.x)
 		* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
 		* anchor.type
 	
@@ -377,7 +376,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		set font.'OS/2'.sTypoLineGap      para.linegap
 		set font.'OS/2'.sxHeight          XH
 		set font.'OS/2'.sCapHeight        CAP
-		set font.post.italicAngle         (0 - para.italicangle)
+		set font.post.italicAngle         (0 - para.slantAngle)
 	
 	# Necessary notdef glyph
 	create-glyph '.notdef' : glyph-construction

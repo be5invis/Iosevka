@@ -64,10 +64,10 @@ symbol-block 'i'
 			flat (left - LONGJUT + HALFSTROKE * HVCONTRAST) XH [widths 0 STROKE]
 			curl left XH
 		include eMarks
-		set-anchor 'above' BASE (left + HALFSTROKE * HVCONTRAST + [linreg 18 0.25 126 0 STROKE] * globalTransform.yx * WIDTH) XH
+		set-anchor 'above' BASE (left + HALFSTROKE * HVCONTRAST + [linreg 18 0.25 126 0 STROKE] * TANSLANT * WIDTH) XH
 		set-anchor 'below' BASE middle 0
 	
-	select-variant 'dotlessi' 0x131 [if para.italicangle 'italic' 'serifed']
+	select-variant 'dotlessi' 0x131 [if para.isItalic 'italic' 'serifed']
 	create-glyph 'iogonek.dotless' : glyph-construction
 		include glyphs.dotlessi AS_BASE
 		include glyphs.ogonekBelow
@@ -291,7 +291,7 @@ symbol-block 'l'
 		set-anchor 'below' BASE middle 0
 		set this.barx (left + HALFSTROKE)
 	
-	select-variant 'l' 'l' [if para.italicangle 'italic' 'serifed']
+	select-variant 'l' 'l' [if para.isItalic 'italic' 'serifed']
 	alias 'palochka' 0x4CF 'l'
 	turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) pMarks
 	
@@ -493,7 +493,7 @@ symbol-block 'a'
 		include eMarks
 		set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 		local bartop (XH * BARPOS * 1.02 + HALFSTROKE)
-		local lowslope : let [k : linreg 18 0 126 0.85 STROKE] : [shoulderMidSlope SHOULDERFINE nothing (-1)] * k - globalTransform.yx * (1 - k)
+		local lowslope : let [k : linreg 18 0 126 0.85 STROKE] : [shoulderMidSlope SHOULDERFINE nothing (-1)] * k - TANSLANT * (1 - k)
 		local lowmiddle : [mix (SB + OX) (RIGHTSB - HALFSTROKE * HVCONTRAST) [linreg 72 0.51 126 0.56 STROKE]] + CORRECTION_OMIDS
 		local barsmooth : mix SB RIGHTSB 0.55
 		include : dispiro
@@ -530,7 +530,7 @@ symbol-block 'a'
 		set-width WIDTH
 		assign-unicode 'a'
 		
-		if (para.italicangle > 0)
+		if (para.isItalic)
 			then : include glyphs.'a.italic' AS_BASE
 			else : include glyphs.'a.upright' AS_BASE
 	alias 'cyra' 0x430 'a'
@@ -870,7 +870,7 @@ symbol-block 'K'
 		include : KShape XH
 		if SLAB : begin
 			include : LeftwardTopSerif SB CAP SIDEJUT
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 	
@@ -963,8 +963,8 @@ symbol-block 'B'
 		include eMarks
 		local mid : mix RIGHTSB SB 0.65
 		local midy : XH * BARPOS
-		local smb : XH - [mix (midy + HALFSTROKE) (XH - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + globalTransform.yx * HVCONTRAST * STROKE
-		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - globalTransform.yx * HVCONTRAST * STROKE
+		local smb : XH - [mix (midy + HALFSTROKE) (XH - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
+		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
 		include : dispiro
 			widths.lhs
 			flat mid (midy - HALFSTROKE) [heading RIGHTWARD]
@@ -1014,7 +1014,7 @@ symbol-block 'B'
 			curl [mix SB RIGHTSB 0.3] (ymiddle + STROKE - fine)
 		include : dispiro
 			widths.rhs fine
-			flat   ([mix SB RIGHTSB 0.3] - (2 * fine - STROKE) * globalTransform.yx) (ymiddle + fine)
+			flat   ([mix SB RIGHTSB 0.3] - (2 * fine - STROKE) * TANSLANT) (ymiddle + fine)
 			curl   (RIGHTSB - ymiddle / 2 - HALFSTROKE) (ymiddle + fine)
 			archv
 			g4   (RIGHTSB - OX) [mix 0 (ymiddle + STROKE) 0.5] [widths.rhs]
@@ -1351,15 +1351,15 @@ symbol-block 'r'
 		
 		local fine : SHOULDERFINE * CTHIN
 		local rhookx (RIGHTSB + RBALANCE2 - OXE)
-		local mixp : 0.54 + 2 * globalTransform.yx * STROKE / WIDTH
-		local mixpin : 0.65 + globalTransform.yx * [linreg 72 0.1 108 0.5 STROKE]
+		local mixp : 0.54 + 2 * TANSLANT * STROKE / WIDTH
+		local mixpin : 0.65 + TANSLANT * [linreg 72 0.1 108 0.5 STROKE]
 		local rmiddle : mix (rbar - fine) rhookx mixp
 		local rmiddlein : [mix rbar (rhookx - STROKE * HVCONTRAST * 1.05) mixpin] - CORRECTION_OMIDS
-		local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE - globalTransform.yx * [linreg 72 0.25 108 0.75 STROKE]
+		local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE - TANSLANT * [linreg 72 0.25 108 0.75 STROKE]
 		include : dispiro
 			widths.lhs
 			g4 rhookx (XH - RHOOK) [heading {.y [linreg 18 (-0.45) 126 (-0.5) STROKE] .x (-1.04)}]
-			alsothru (0.37 - globalTransform.yx * 0.1) 0.72
+			alsothru (0.37 - TANSLANT * 0.1) 0.72
 			g4.left.mid (rmiddle - CORRECTION_OMIDS * [linreg 72 0.75 108 1 STROKE]) XO [widths.heading STROKE 0 {.y (-1) .x (-skew)}]
 			#alsothru 0.75 [linreg 18 0.25 126 0.23 STROKE]
 			archv
@@ -1882,10 +1882,10 @@ symbol-block 'n'
 		if SLAB : begin
 			include : LeftwardTopSerif SB XH SIDEJUT
 			tag-contour 'serifLT'
-			if (para.italicangle > 0)
+			if (para.isItalic)
 			: then : include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 			: else : include : tagged 'serifRB' : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 JUT
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : tagged 'serifLB' : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 	alias 'cyrpe.italic' null 'n'
 	
@@ -1933,7 +1933,7 @@ symbol-block 'n'
 		if SLAB : begin
 			include : LeftwardTopSerif SB XH SIDEJUT
 			tag-contour 'serifLT'
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 	
@@ -1959,10 +1959,10 @@ symbol-block 'n'
 		if SLAB : begin
 			include : LeftwardTopSerif SB CAP SIDEJUT
 			tag-contour 'serifLT'
-			if (para.italicangle > 0)
+			if (para.isItalic)
 			: then : include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB DESCENDER SIDEJUT
 			: else : include : tagged 'serifRB' : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) DESCENDER JUT
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 				
@@ -1976,10 +1976,10 @@ symbol-block 'n'
 		if SLAB : begin
 			include : LeftwardTopSerif SB XH SIDEJUT
 			tag-contour 'serifLT'
-			if (para.italicangle > 0)
+			if (para.isItalic)
 			: then : include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB DESCENDER SIDEJUT
 			: else : include : tagged 'serifRB' : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) DESCENDER JUT
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 
@@ -2109,7 +2109,7 @@ symbol-block 'm'
 		if SLAB : begin
 			include : LeftwardTopSerif SB top SIDEJUT
 			tag-contour 'serifLT'
-			if (para.italicangle === 0) : include : LeftwardBottomSerif SB bot SIDEJUT
+			if (!para.isItalic) : include : LeftwardBottomSerif SB bot SIDEJUT
 			include : RightwardBottomSerif RIGHTSB bot SIDEJUT
 			tag-contour 'serifRB'
 	
@@ -2183,11 +2183,11 @@ symbol-block 'h'
 		include : VBarLeft SB 0 CAP
 		if SLAB : begin
 			include : LeftwardTopSerif SB CAP SIDEJUT
-			if (para.italicangle > 0)
+			if (para.isItalic)
 			: then : include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 			: else : include : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 JUT
 			tag-contour 'serifRB'
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 	alias 'cyrshha' 0x4BB 'h'
@@ -2198,11 +2198,11 @@ symbol-block 'h'
 		include : nShoulder (SB + STROKE * HVCONTRAST) RIGHTSB SHOULDERFINE
 		include : HooktopLeftBar
 		if SLAB : begin
-			if (para.italicangle > 0)
+			if (para.isItalic)
 			: then : include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 			: else : include : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 JUT
 			tag-contour 'serifRB'
-			if (para.italicangle === 0) : begin
+			if (!para.isItalic) : begin
 				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 				tag-contour 'serifLB'
 	
@@ -2334,7 +2334,7 @@ define {LongSShape} : symbol-block 'f'
 		set-width WIDTH
 		assign-unicode 0x17f
 		
-		if (para.italicangle > 0)
+		if (para.isItalic)
 			then : include glyphs.'longs.italic' AS_BASE
 			else : include glyphs.'longs.upright' AS_BASE
 	
@@ -2479,7 +2479,7 @@ symbol-block 'E'
 define {SmallEShape} : symbol-block 'e'
 	define [SmallEShape top stroke barpos curly] : glyph-construction
 		local barbottom (top * [fallback barpos EBARPOS] - HALFSTROKE)
-		local hookx (RIGHTSB - OXHOOK + TAILADJX * globalTransform.yx)
+		local hookx (RIGHTSB - OXHOOK + TAILADJX * TANSLANT)
 		local hookmiddle : [mix (SB + O) hookx 0.55] + CORRECTION_OMIDS
 		
 		include : dispiro
@@ -2686,7 +2686,7 @@ symbol-block 'S'
 		set-width WIDTH
 		assign-unicode 's'
 		include eMarks
-		define smooth : adviceSSmooth XH (-1 - globalTransform.yx * (15 - (WIDTH / 500) * 12) * [clamp 0 1 : linreg 126 1 135 0.5 STROKE])
+		define smooth : adviceSSmooth XH (-1 - TANSLANT * (15 - (WIDTH / 500) * 12) * [clamp 0 1 : linreg 126 1 135 0.5 STROKE])
 		include : dispiro
 			widths.lhs
 			g4   RIGHTSB (XH - SHOOK)
@@ -2715,7 +2715,7 @@ symbol-block 'S'
 	create-glyph 'revs' : glyph-construction
 		assign-unicode 0x1A8
 		include eMarks
-		local smooth : adviceSSmooth XH (1 + globalTransform.yx * 5)
+		local smooth : adviceSSmooth XH (1 + TANSLANT * 5)
 		include : dispiro
 			widths.rhs
 			g4   SB (XH - SHOOK)
