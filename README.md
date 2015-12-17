@@ -56,6 +56,10 @@ The current avaliable styles are:
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
 
 ## Release Notes
+* **1.4.2**
+ - The shape of lowercase `y` is improved. Its slab version is redesigned.
+ - Rebalanced italic `l` and `i`.
+ - Enwiden `/t`.
 * **1.4.1**
  - Fixed the incorrectly-shaped `/nine` in the thin variant.
  - Fixed the broken serif of `/yhooktop`.
