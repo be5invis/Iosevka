@@ -51,20 +51,20 @@ symbol-block 'i'
 		include : LeftwardBottomSerif MIDDLE 0 LONGJUT
 	
 	create-glyph 'dotlessi.italic' : glyph-construction
-		local left : [mix SB RIGHTSB 0.48] - HALFSTROKE * CORRECTION_HX
-		local right : mix SB RIGHTSB [linreg 18 1.05 120 1.1 STROKE]
+		local left : [mix SB RIGHTSB [linreg 18 0.42 126 0.46 STROKE]] - HALFSTROKE * CORRECTION_HX
+		local right : mix SB RIGHTSB 1.1
 		local middle : mix left right 0.55
 		include : dispiro
 			widths.lhs
 			flat left XH [heading DOWNWARD]
 			curl left (SMALLSMOOTHB * 0.8)
 			hookend O
-			g4   right (SHOOK * [linreg 18 0.8 120 1 STROKE])
+			g4   right (HOOK * [linreg 18 0.85 126 1 STROKE])
 		include : dispiro
 			flat (left - LONGJUT + HALFSTROKE * CORRECTION_HX) XH [widths 0 STROKE]
 			curl left XH
 		include eMarks
-		set-anchor 'above' BASE (left + HALFSTROKE * CORRECTION_HX) XH
+		set-anchor 'above' BASE (left + HALFSTROKE * CORRECTION_HX + [linreg 18 0.25 126 0 STROKE] * globalTransform.yx * WIDTH) XH
 		set-anchor 'below' BASE middle 0
 	
 	select-variant 'dotlessi' 0x131 [if para.italicangle 'italic' 'serifed']
@@ -111,6 +111,7 @@ symbol-block 'J'
 	create-glyph 'J.straight' : glyph-construction
 		set-width WIDTH
 		include capitalMarks
+		set-anchor 'above' BASE (RIGHTSB - STROKE * CORRECTION_HX * 0.75 - JBALANCE2) CAP
 		set-anchor 'overlay' BASE (RIGHTSB - STROKE * CORRECTION_HX * 0.75 - JBALANCE2) (CAP * BARPOS)
 		
 		local slope (STROKE * 0.00092)
@@ -281,7 +282,7 @@ symbol-block 'l'
 			flat left CAP [heading DOWNWARD]
 			curl left (SMALLSMOOTHB * 0.85)
 			hookend O
-			g4   right SHOOK
+			g4   right HOOK
 		include : dispiro
 			flat SB CAP [widths 0 STROKE]
 			curl left CAP
@@ -492,8 +493,8 @@ symbol-block 'a'
 		include eMarks
 		set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 		local bartop (XH * BARPOS * 1.02 + HALFSTROKE)
-		local lowslope : shoulderMidSlope SHOULDERFINE nothing (-1)
-		local lowmiddle : mix SB (RIGHTSB - HALFSTROKE * CORRECTION_HX) [linreg 72 0.51 120 0.56 STROKE]
+		local lowslope : let [k : linreg 18 0 126 0.85 STROKE] : [shoulderMidSlope SHOULDERFINE nothing (-1)] * k - globalTransform.yx * (1 - k)
+		local lowmiddle : [mix (SB + OX) (RIGHTSB - HALFSTROKE * CORRECTION_HX) [linreg 72 0.51 126 0.56 STROKE]] + CORRECTION_OMIDS
 		local barsmooth : mix SB RIGHTSB 0.55
 		include : dispiro
 			widths.lhs
@@ -506,7 +507,7 @@ symbol-block 'a'
 			flat (RIGHTSB + O) bartop [heading LEFTWARD]
 			curl barsmooth bartop
 			archv
-			g4   (SB + OX) (bartop * 0.475)
+			g4   (SB + OX) (bartop * 0.95 * (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB)))
 			arcvh
 			g4   (lowmiddle + (-lowslope) * STROKE) O [heading {.y 1 .x lowslope}]
 			archv
@@ -722,19 +723,51 @@ symbol-block 'Y'
 
 ### y
 symbol-block 'y'
+	local px1 0.84
+	local py1 0.76
+	local px2 0.95
+	local py2 : if SLAB [linreg 18 0.97 126 0.85 STROKE] 0.88
+	local pds 0.05
+	local pds2 0.01
+	local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
+	local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
+	local yrstrokel : MIDDLE - WIDTH * [if SLAB 0.15 0.1] + [if SLAB HALFSTROKE 0]
+	local yrstroker : RIGHTSB - HALFSTROKE * CORRECTION_HX
+	local yshrink : linreg 18 1 126 0.85 STROKE
+	local slabysize : JUT * [linreg 18 0.85 126 1 STROKE]
+	local slabyvx : linreg 18 0.7 126 0.5 STROKE
+	define [yBaseKnots top bottom] : begin
+		local ds : (top - bottom) * pds
+		local ds2 : (top - bottom) * pds2 + [if SLAB (slabysize * slabyvx) 0]
+		return : list
+			flat [mix yrstrokel yrstroker px1] [mix (bottom + ds2) (top - ds) py1]
+			curl [mix yrstrokel yrstroker (1 - px2)] [mix (bottom + ds2) (top - ds) (1 - py2)] [widths.center : STROKE * [if SLAB yshrink 1]]
+			if SLAB : then : list
+				flat (yrstrokel - slabysize) (bottom + HALFSTROKE) [widths.center]
+				curl [Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - HALFSTROKE - JUT)] (bottom + HALFSTROKE) [heading LEFTWARD]
+			: else : list
+				quadcontrols 1 (1 - dpy2) 16
+				flat yrstrokel (bottom + ds2) [heading DOWNWARD]
+				curl yrstrokel bottom [heading DOWNWARD]
+
 	define [SmallYShape top bottom] : glyph-construction
-		local turnp : top / (top - bottom)
-		local xbottom : mix SB RIGHTSB [linreg 18 0.3025 108 0.28 STROKE]
-		local xb : mix SB RIGHTSB [linreg 10 0.495 108 0.51 STROKE]
-		local yb : mix [mix bottom top (-DESCENDER / (XH - DESCENDER))] top (0.05 * turnp)
-		
-		include : tagged 'strokeR' : xStrand xbottom bottom RIGHTSB top 0.1 0.6 0.14
-		include : tagged 'strokeL' : halfXStrand SB top xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
-		
+		local ds : (top - bottom) * pds
+		local ds2 : (top - bottom) * pds2 + [if SLAB (slabysize * slabyvx) 0]
+		include : tagged 'strokeR' : dispiro
+			widths.center
+			flat yrstroker top [heading DOWNWARD]
+			curl yrstroker (top - ds) [heading DOWNWARD]
+			quadcontrols 0 dpy1 16
+			yBaseKnots top bottom
+		include : dispiro
+			widths.center
+			flat (WIDTH - yrstroker) top [heading DOWNWARD]
+			curl (WIDTH - yrstroker) (top - ds) [heading DOWNWARD]
+			quadcontrols 0 dpy1 16
+			flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds) (top - ds) py1]
+			curl MIDDLE [mix (bottom + ds2) (top - ds) [linreg (1 - px2) (1 - py2) px1 py1 ((MIDDLE - yrstrokel) / (yrstroker - yrstrokel))]] [widths.center (STROKE * yshrink)]
 		if SLAB : begin
 			include : AIVSerifs top
-			include : tagged 'serifB' : LeftwardBottomSerif xbottom bottom (SIDEJUT + JUT / 4)
-			
 	create-glyph 'y.upright' : glyph-construction
 		include pMarks
 		include : SmallYShape XH DESCENDER
@@ -766,18 +799,11 @@ symbol-block 'y'
 		include glyphs.'y.upright' AS_BASE
 		eject-contour 'strokeR'
 		eject-contour 'serifRT'
-		eject-contour 'serifB'
-		local xbottom : mix SB RIGHTSB [linreg 18 0.36 108 0.27 STROKE]
-		include : dispiro
+
+		include : tagged 'strokeR' : dispiro
 			widths.center
-			flat (xbottom + HALFSTROKE * CORRECTION_HX) DESCENDER [heading UPWARD]
-			curl (xbottom + HALFSTROKE * CORRECTION_HX) (DESCENDER + 1) [heading UPWARD]
-			alsothruthem {{0 0.05} {0.1 0.19} {0.2125 0.33} {0.44 0.6} {0.93 0.98}} important
-			g2   (RIGHTSB - HOOKX / 6) [mix DESCENDER (XH - HALFSTROKE) 0.98]
-			flat (RIGHTSB + HOOKX / 4 - 1) (XH - HALFSTROKE)
-			curl (RIGHTSB + HOOKX / 4) (XH - HALFSTROKE)
-		if SLAB : begin
-			include : tagged 'serifB' : LeftwardBottomSerif xbottom DESCENDER (SIDEJUT + JUT / 4)
+			straight.left.start ([mix yrstrokel yrstroker px1] + HOOKX) (XH - HALFSTROKE)
+			yBaseKnots XH DESCENDER
 	
 	create-glyph 'cyrU' : glyph-construction
 		assign-unicode 0x423
@@ -968,7 +994,7 @@ symbol-block 'B'
 		assign-unicode 0x243
 		
 		include glyphs.B AS_BASE
-		include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3] [Math.min (CAP / 8) OVERLAYSTROKE]
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3] [Math.min ((CAP - STROKE * 3) / 4) OVERLAYSTROKE]
 
 	create-glyph 'beta' : glyph-construction
 		assign-unicode 0x3B2
@@ -1044,11 +1070,12 @@ symbol-block 'b'
 		assign-unicode 0x185
 		include glyphs.b AS_BASE
 		eject-contour 'serifLT'
+		local s : Math.max (XH * 0.1) STROKE
 		start-from (SB - O) CAP
 		line-to    SB CAP
-		line-to    (SB - STROKE) (CAP - STROKE)
-		line-to    SB (CAP - STROKE * 2)
-		line-to    (SB - O) (CAP - STROKE * 2)
+		line-to    (SB - s) (CAP - s)
+		line-to    SB (CAP - s * 2)
+		line-to    (SB - O) (CAP - s * 2)
 		reverse-last
 ### D
 symbol-block 'D'
@@ -1650,7 +1677,7 @@ symbol-block 'g'
 	create-glyph 'gbar' : glyph-construction
 		assign-unicode 0x1E5
 		include glyphs.g AS_BASE
-		include : HBar [mix 0 SB 0.3] [mix WIDTH RIGHTSB 0.3] glyphs.g.anchors.overlay.y [adviceBlackness 5]
+		include : HBar [mix 0 SB 0.3] [mix WIDTH RIGHTSB 0.3] glyphs.g.anchors.overlay.y [Math.min [adviceBlackness 5] (0.5 / 3 * (CAP - STROKE * 4))]
 
 ### O and o
 symbol-block 'O'
@@ -2567,22 +2594,22 @@ symbol-block 'T'
 
 ### t
 symbol-block 't'
+	define tcenter : MIDDLE - TBALANCE - STROKE * 0.5 * CORRECTION_HX
 	define [SmallTShape top bot] : glyph-construction
-		local center : MIDDLE - TBALANCE - HALFSTROKE * CORRECTION_HX
-		local hookx  (center + (WIDTH - SB * 2) * 0.8 - OXHOOK + TAILADJX * globalTransform.yx)
-		local turn : [mix center hookx 0.5] + CORRECTION_OMIDS
-		local smb  : Math.max HOOK ((turn - center) * 1.2)
+		local hookx : tcenter + (WIDTH - SB * 2) * 0.8 + STROKE * 0.25 * CORRECTION_HX
+		local turn : [mix tcenter hookx 0.5] + CORRECTION_OMIDS
+		local smb  : Math.max HOOK ((turn - tcenter) * 1.2)
 		
 		local g : dispiro
 			widths.lhs
-			flat center top [heading DOWNWARD]
-			curl center (bot + smb)
+			flat tcenter top [heading DOWNWARD]
+			curl tcenter (bot + smb)
 			hookend (bot + O)
 			g4 hookx (bot + HOOK)
 		include g
 		set-anchor 'bottomright' BASE g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
-		
-		include : HBarTop (center + HALFSTROKE - LONGJUT + TBALANCE2) (center + HALFSTROKE + LONGJUT + TBALANCE2) XH
+		set-anchor 'below' BASE [mix tcenter g.knots.(g.knots.length - 1).x : linreg 18 0.375 126 0.5 STROKE] bot
+		include : HBarTop (tcenter + HALFSTROKE - LONGJUT + TBALANCE2) (tcenter + HALFSTROKE + LONGJUT + TBALANCE2) XH
 	
 	create-glyph 't' : glyph-construction
 		set-width WIDTH
@@ -2603,7 +2630,7 @@ symbol-block 't'
 		assign-unicode 0x1AD
 		include eMarks
 		include : SmallTShape (XH - HALFSTROKE) 0
-		include : VerticalHook (MIDDLE - TBALANCE) XH HOOKX (-HOOK)
+		include : VerticalHook (tcenter + HALFSTROKE * CORRECTION_HX) XH HOOKX (-HOOK)
 	
 	create-glyph 'trtail' : glyph-construction
 		assign-unicode 0x288
@@ -2615,21 +2642,20 @@ symbol-block 't'
 		include bMarks
 		local fine : adviceBlackness 3.5
 		local rinner : LONGJUT / 2 - fine / 2
-		local m1 : MIDDLE - TBALANCE - HALFSTROKE
-		local x2 : mix SB m1 0.4
+		local x2 : mix SB tcenter 0.4
 		local y2 : -fine
-		include : HBarTop (m1 + HALFSTROKE - LONGJUT + TBALANCE2) (m1 + HALFSTROKE + LONGJUT + TBALANCE2) XH
+		include : HBarTop (tcenter + HALFSTROKE - LONGJUT + TBALANCE2) (tcenter + HALFSTROKE + LONGJUT + TBALANCE2) XH
 		include : dispiro
 			widths.lhs
-			flat m1 CAP [heading DOWNWARD]
-			curl m1 (fine + rinner * 2)
-			CurlyTail fine rinner (m1 + STROKE * CORRECTION_HX) 0 (m1 + STROKE * CORRECTION_HX + LONGJUT) x2 y2
+			flat tcenter CAP [heading DOWNWARD]
+			curl tcenter (fine + rinner * 2)
+			CurlyTail fine rinner (tcenter+ STROKE * CORRECTION_HX) 0 (tcenter + STROKE * CORRECTION_HX + LONGJUT) x2 y2
 	
 	create-glyph 'tbar' : glyph-construction
 		assign-unicode 0x167
 		
 		include glyphs.t AS_BASE
-		include : HOverlayBar ([mix MIDDLE SB 0.7] - TBALANCE * 0.5) ([mix MIDDLE RIGHTSB 0.7] - TBALANCE * 0.5) [mix 0 XH 0.6]
+		include : HOverlayBar ([mix MIDDLE SB 0.7] - TBALANCE * 0.5 - STROKE * 0.25 * CORRECTION_HX) ([mix MIDDLE RIGHTSB 0.7] - TBALANCE * 0.5 - STROKE * 0.25 * CORRECTION_HX) [mix 0 XH 0.6]
 
 	create-glyph 'tcaron' : glyph-construction
 		assign-unicode 0x165
