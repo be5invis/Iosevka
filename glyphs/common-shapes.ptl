@@ -89,7 +89,6 @@ define [dwc newid unicode id] : create-glyph [fallback newid : 'dwc' + id] : gly
 define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
 	local my ((u + d) / 2)
 	local mx ((l + r) / 2)
-	local s : new Stroke
 	currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] globalTransform]
 	include : spiro-outline
 		g4 mx d
@@ -268,48 +267,6 @@ define [AIMSerifs top _left _right] : glyph-construction
 		include : RightwardTopSerif (right - STROKE * (sideSerifK - 0.5) * HVCONTRAST) top SIDEJUT
 		include : CenterBottomSerif (left + STROKE * sideSerifK * HVCONTRAST) 0 JUT
 		include : CenterBottomSerif (right - STROKE * sideSerifK * HVCONTRAST) 0 JUT
-
-
-define [xsStrand _xleft yleft _xright yright _halfstroke0 _halfstroke1 _ess _expansion _roundp] : begin
-	local expansion : _expansion || 0.25
-	local halfstroke0 : _halfstroke0 || HALFSTROKE
-	local halfstroke1 : _halfstroke1 || HALFSTROKE
-	local ess         : _ess || (halfstroke0 + halfstroke1) / 2
-	local upright : Upright
-	# calculate italic correction
-	local outline : [new Stroke
-			:.set-transform globalTransform
-			:.start-from _xleft yleft
-			:.set-width  (2 * halfstroke0) 0
-			:.line-to    _xleft (yleft - 1000)
-			:.max-samples 1
-			:.to-outline].0.map : [p] -> [tp upright p]
-	local xItalicCorrection : -(outline.3.x - outline.0.x) / (2 * halfstroke0)
-	local yItalicCorrection : (outline.3.y - outline.0.y) / (2 * halfstroke0)
-
-	local roundsize : (_roundp || SMOOTHA * 0.4) * [if (yleft < yright) (-1) 1]
-	local roundleft   (yleft - roundsize)
-	local roundright  (yright + roundsize)
-	local xleft     : _xleft + halfstroke0 * xItalicCorrection
-	local xright    : _xright - halfstroke1 * xItalicCorrection
-	local sxleft    : mix xleft xright (0.5 - expansion)
-	local sxright   : mix xleft xright (0.5 + expansion)
-	local syleft    : mix roundleft roundright (0.5 - expansion)
-	local syright   : mix roundleft roundright (0.5 + expansion)
-	
-	return : new Stroke
-		:.set-transform globalTransform
-		:.start-from xleft (yleft - halfstroke0 * yItalicCorrection)
-		:.set-width  halfstroke0 halfstroke0
-		:.curve-to   xleft roundleft sxleft syleft
-		:.set-width  ess ess
-		:.line-to    sxright syright
-		:.curve-to   xright roundright xright (yright + halfstroke1 * yItalicCorrection)
-		:.set-width  halfstroke1 halfstroke1
-		:.to-outline
-
-define [sStrand yleft yright _expansion] : begin
-	return : xsStrand SB yleft RIGHTSB yright HALFSTROKE HALFSTROKE HALFSTROKE _expansion (SMOOTHA * 0.4)
 
 
 define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
