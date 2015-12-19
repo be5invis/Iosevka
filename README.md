@@ -52,6 +52,9 @@ The current avaliable styles are:
 	* `v-l-italic` : Italic `i` (default for italic subfamilies)
 
 ## Release Notes
+* **1.4.3**
+ - Added the "oblique" variant.
+ - Corrected the stroke width in italic variants. It will reduce the file size of italics and improve its outline quality.
 * **1.4.2**
  - The shape of lowercase `y` is improved. Its slab version is redesigned.
  - Rebalanced italic `l` and `i`.
