@@ -5,7 +5,7 @@ import sys
 
 source = sys.argv[1]
 font = fontforge.open(source)
-
+font.selection.all()
 # Replace accented characters into references
 print "    Reference finding: ", font.fontname
 font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
@@ -29,14 +29,11 @@ for i in font:
 
 print "    Simplify: ", font.fontname
 font.selection.all()
-font.transform(psMat.scale(5))
-font.simplify(0.25, ("smoothcurves", "choosehv"), 0.1)
-font.transform(psMat.scale(0.2))
-font.simplify(0.5, ("smoothcurves", "choosehv"), 0.1)
+font.simplify(0.05, ("smoothcurves", "choosehv"), 0.1)
 
 #font.em = 2000
+font.selection.all()
 font.layers["Fore"].is_quadratic = True
-font.simplify(0.1, ("smoothcurves", "choosehv"), 0.1)
 font.transform(psMat.skew(float(sys.argv[3]) / 180 * math.pi))
 font.em = 1000
 

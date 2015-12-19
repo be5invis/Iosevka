@@ -1,5 +1,6 @@
 import 'libspiro-js' as libspiro
 import './spiroexpand' as SpiroExpansionContext
+import './fairify' as fairify
 
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define [mix a b p] : a + (b - a) * p
@@ -79,13 +80,13 @@ export : define [SetupBuilders args] : begin
 	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
 		local samples : fallback _samples 3
 		local rs {}
-		foreach j [range 1 samples] : rs.push : g4
+		foreach j [range 1 samples] : rs.push : [fallback ty g4]
 			bez3 before.x x1 x2 after.x (j / samples)
 			bez3 before.y y1 y2 after.y (j / samples)
 			fallback raf unimportant
 		return rs
 
-	define DEFAULT_STEPS 8
+	define DEFAULT_STEPS 6
 	define {jhv, jvh} : let [cache {}] : begin
 		local [build samples] : begin
 			local hv {}
@@ -138,7 +139,7 @@ export : define [SetupBuilders args] : begin
 		return {.knots [flatten knots] .closed closed .lastafs lastafs}
 	
 	define QUAD false
-	define PRECISION 1
+	define PRECISION 0.5
 	define [dispiro] : begin
 		local s : new SpiroExpansionContext
 		set s.gizmo globalTransform
@@ -163,14 +164,21 @@ export : define [SetupBuilders args] : begin
 			local g : new Glyph
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 			libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
+		foreach [j : range 0 g.contours.length] : begin
+			set g.contours.(j) : fairify g.contours.(j) globalTransform  s.angles
 		set g.knots knots
 		set g.lhsknots lhs
 		set g.rhsknots rhs
 		return g
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [] : begin
-		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k this
-		libspiro.spiroToBezierOnContext knots closed this
-		foreach af [items-of lastafs] : if af : af.call this
+		local g : new Glyph
+		set g.gizmo globalTransform 
+		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
+		libspiro.spiroToBezierOnContext knots closed g QUAD PRECISION
+		foreach af [items-of lastafs] : if af : af.call g
+		foreach [j : range 0 g.contours.length] : begin
+			set g.contours.(j) : fairify g.contours.(j) (g.fairGizmo || g.gizmo) g.angles
+		this.include g
 	
 	return [object
 		g4 g2 corner flat curl close end straight
