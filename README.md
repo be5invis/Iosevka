@@ -10,7 +10,7 @@ Quit your editor/program. Unzip and open the folder.
 
  * **Mac + Linux (with font-viewer)** : Select the .ttf files and double click → Follow the on-screen guide.
  * **Windows** : Right click the .ttf files → Install.
- * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
+ * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`. Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually.
 
 ### Detailed Instructions
  * [How to](http://www.howtogeek.com/192980/how-to-install-remove-and-manage-fonts-on-windows-mac-and-linux/) Install, Remove, and Manage Fonts on Windows, Mac, and Linux.
@@ -74,10 +74,10 @@ The current avaliable styles are:
  - Shape optimization: `/eight`, `/propto`, `/J`, `/j`, `/epsilon`, `/cyrze`, `/taillessphi`, `/smcpPsi` and their derived glyphs.
  - Added the missing marks of `/longs`.
  - Introduced a new SVG-based outline exporting mechanism. Now I am finally free from the rounding nightmare.
-* **1.1.2** 
+* **1.1.2**
  - Improved the balancing of `/longs`, `/f` and `/eszet`.
  - The strokes of `/A`, `/V` and `/v` in Iosevka Slab is straightened.
-* **1.1.1** 
+* **1.1.1**
  - Added the missing serifs for `/cyrdzhe`.
  - Balanced `/pi` in bold weights.
  - Moved the descender lines of Cyrillic letters rightward a little in italics.
