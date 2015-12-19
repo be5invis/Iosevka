@@ -10,7 +10,8 @@ Quit your editor/program. Unzip and open the folder.
 
  * **Mac + Linux (with font-viewer)** : Select the .ttf files and double click → Follow the on-screen guide.
  * **Windows** : Right click the .ttf files → Install.
- * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`. Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually.
+ * **Linux (manually)** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
+    - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually.
 
 ### Detailed Instructions
  * [How to](http://www.howtogeek.com/192980/how-to-install-remove-and-manage-fonts-on-windows-mac-and-linux/) Install, Remove, and Manage Fonts on Windows, Mac, and Linux.
