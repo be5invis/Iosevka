@@ -178,8 +178,7 @@ function enoughRotate(bef, z0, z1, z2, aft){
 	return !((angleRotatedBefore < SMALLANGLE || angleRotatedBefore > Math.PI - SMALLANGLE)
 				|| (angleRotatedAfter < SMALLANGLE || angleRotatedAfter > Math.PI - SMALLANGLE))
 }
-function fairify(scurve, gizmo, angles){
-	angles = angles || ANGLES
+function fairify(scurve, gizmo, denseQ){
 	for(var j = 0; j < scurve.length; j++){
 		scurve[j] = Transform.untransform(gizmo, scurve[j])
 	}
@@ -244,7 +243,7 @@ function fairify(scurve, gizmo, angles){
 					var inflect = ((z0.y-z2.y)*(za.x-z0.x) + (z2.x-z0.x)*(za.y-z0.y)) * ((z0.y-z2.y)*(zb.x-z0.x) + (z2.x-z0.x)*(zb.y-z0.y));
 					if(inflect < 0) isInflection = true;
 				};
-				if((z1.inflect || isInflection) && enoughRotate(lastmark, z0, z1, z2, nextmark)) {
+				if((z1.inflect || isInflection) && (denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark))) {
 					z1.mark = true;
 				}
 			}
@@ -268,7 +267,7 @@ function fairify(scurve, gizmo, angles){
 			var angle = Math.abs(angle0 / Math.PI * segments % 1);
 			var angleRotatedBefore = Math.abs(angleBetween(z1, lastmark, z1, z0));
 			var angleRotatedAfter = Math.abs(angleBetween(z1, nextmark, z1, z2));
-			if(!enoughRotate(lastmark, z0, z1, z2, nextmark)
+			if(!(denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark))
 				|| !(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL)){
 				z1.remove = z0.remove = z2.remove = true;
 			}
