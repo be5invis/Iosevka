@@ -2,10 +2,12 @@ var Transform = require('./transform.js');
 
 var ANGLES = 12;
 var VERYCROWD = 2;
-var SMALLANGLE = 0.1;
+var SMALLANGLE = 0.05;
+var SMALLANGLE_CLEANMORE = 0.075;
 var CROWD = 4;
 var LOOSE = 6;
 var SMALL = 1e-4
+var CLOSE = 1;
 function cross(z1, z2, z3){
 	return (z2.x - z1.x) * (z3.y - z1.y) - (z3.x - z1.x) * (z2.y - z1.y)
 };
@@ -161,24 +163,32 @@ function fitpts(p1, c1, c2, p2){
 	}
 	return [mix(mid, p1, 1/3), mix(mid, p2, 1/3)]
 };
+function distance(z1, z2){
+	return Math.sqrt((z1.x - z2.x) * (z1.x - z2.x) + (z1.y - z2.y) * (z1.y - z2.y))
+}
 function veryclose(z1, z2){
 	return (z1.x - z2.x) * (z1.x - z2.x) + (z1.y - z2.y) * (z1.y - z2.y) <= SMALL
 };
 function angleBetween(z1, z2, z3, z4){
-	return Math.atan2(z2.y - z1.y, z2.x - z1.x) - Math.atan2(z4.y - z3.y, z4.x - z3.x);
+	return (Math.atan2(z2.y - z1.y, z2.x - z1.x) - Math.atan2(z4.y - z3.y, z4.x - z3.x)) % Math.PI;
 };
+function pldistance(z1, z2, z){
+	return Math.abs((z2.y - z1.y) * z.x - (z2.x - z1.x) * z.y + z2.x * z1.y - z2.y * z1.x) / Math.sqrt((z2.x - z1.x) * (z2.x - z1.x) + (z2.y - z1.y) * (z2.y - z1.y))
+}
 function estimateSegments(z1, z2){
 	var hspan = Math.abs(z1.x - z2.x);
 	var vspan = Math.abs(z1.y - z2.y);
 	return hspan <= 5 * CROWD || vspan <= 5 * CROWD ? VERYCROWD : hspan <= 10 * LOOSE || vspan <= 10 * LOOSE  ? CROWD : LOOSE;
 };
-function enoughRotate(bef, z0, z1, z2, aft){
-	var angleRotatedBefore = Math.abs(angleBetween(z1, bef, z1, z0));
-	var angleRotatedAfter = Math.abs(angleBetween(z1, aft, z1, z2));
-	return !((angleRotatedBefore < SMALLANGLE || angleRotatedBefore > Math.PI - SMALLANGLE)
-				|| (angleRotatedAfter < SMALLANGLE || angleRotatedAfter > Math.PI - SMALLANGLE))
-}
-function fairify(scurve, gizmo, denseQ){
+function enoughRotate(bef, z0, z1, z2, aft, cleanMore, flagl, flagr){
+	var angleRotatedBefore = Math.abs(angleBetween(bef.next || z1, bef, z1, z0));
+	var angleRotatedAfter = Math.abs(angleBetween(aft.prev || z1, aft, z1, z2));
+	var smallanglel = (cleanMore ? SMALLANGLE_CLEANMORE : SMALLANGLE) * (flagl && cleanMore ? 1 : 2);
+	var smallangler = (cleanMore ? SMALLANGLE_CLEANMORE : SMALLANGLE) * (flagr && cleanMore ? 1 : 2);
+	return !((angleRotatedBefore < smallanglel || angleRotatedBefore > Math.PI - smallanglel) && pldistance(z1, z0, bef) <= CLOSE && distance(z1, bef) <= 5 * CROWD
+			|| (flagr ? false : (angleRotatedAfter < smallangler || angleRotatedAfter > Math.PI - smallangler) && pldistance(z1, z2, aft) <= CLOSE && distance(z1, aft) <= 5 * CROWD))
+};
+function fairify(scurve, gizmo, denseQ, cleanMore){
 	for(var j = 0; j < scurve.length; j++){
 		scurve[j] = Transform.untransform(gizmo, scurve[j])
 	}
@@ -207,6 +217,12 @@ function fairify(scurve, gizmo, denseQ){
 	};
 	// Mark corners and extremae
 	for(var j = 1; j < splitpoints.length - 1; j++) {
+		if(splitpoints[j].onCurve && !splitpoints[j - 1].onCurve){
+			splitpoints[j].prev = splitpoints[j - 1]
+		}
+		if(splitpoints[j].onCurve && !splitpoints[j + 1].onCurve){
+			splitpoints[j].next = splitpoints[j + 1]
+		}
 		if(splitpoints[j].onCurve && !splitpoints[j - 1].onCurve && !splitpoints[j + 1].onCurve){
 			var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1]
 			if(cross(z1, z0, z2) < 1e-6 && dot(z1, z0, z2) < 0){
@@ -214,6 +230,20 @@ function fairify(scurve, gizmo, denseQ){
 				var angle = Math.abs(angle0 / Math.PI * 2 % 1);
 				if(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL){
 					z1.mark = true; // extrema
+					z1.inflect = false;
+				} else {
+					var isInflection = false;
+					if(j > 2 && j < splitpoints.length - 2){
+						var za = bez3(z1, z0, splitpoints[j - 2], splitpoints[j - 3], SMALL);
+						var zb = bez3(z1, z2, splitpoints[j + 2], splitpoints[j + 3], SMALL);
+						var inflect = ((z0.y-z2.y)*(za.x-z0.x) + (z2.x-z0.x)*(za.y-z0.y))
+									* ((z0.y-z2.y)*(zb.x-z0.x) + (z2.x-z0.x)*(zb.y-z0.y));
+						if(inflect < 0) isInflection = true;
+					};
+					if(z1.inflect || isInflection) {
+						z1.mark = true;
+						z1.asinflect = true;
+					}
 				}
 			} else {
 				z1.mark = true; // also corner
@@ -223,31 +253,24 @@ function fairify(scurve, gizmo, denseQ){
 		}
 	};
 	splitpoints[0].mark = splitpoints[splitpoints.length - 1].mark = true;
-	// Mark infections
-	var lastmark = splitpoints[0];
-	for(var k = 1; k < splitpoints.length && !splitpoints[k].mark; k++);
-	var nextmark = splitpoints[k];
-	for(var j = 1; j < splitpoints.length - 1; j++) {
-		if(splitpoints[j].mark){
-			lastmark = splitpoints[j];
-			for(var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
-			nextmark = splitpoints[k];
-		}
-		if(splitpoints[j].onCurve && !splitpoints[j - 1].onCurve && !splitpoints[j + 1].onCurve){
-			var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1]
-			if(cross(z1, z0, z2) < 1e-6 && dot(z1, z0, z2) < 0){
-				var isInflection = false;
-				if(j > 2 && j < splitpoints.length - 2){
-					var za = bez3(z1, z0, splitpoints[j - 2], splitpoints[j - 3], SMALL);
-					var zb = bez3(z1, z2, splitpoints[j + 2], splitpoints[j + 3], SMALL);
-					var inflect = ((z0.y-z2.y)*(za.x-z0.x) + (z2.x-z0.x)*(za.y-z0.y)) * ((z0.y-z2.y)*(zb.x-z0.x) + (z2.x-z0.x)*(zb.y-z0.y));
-					if(inflect < 0) isInflection = true;
-				};
-				if((z1.inflect || isInflection) && (denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark))) {
-					z1.mark = true;
+	// Mark cleanup inflections
+	for(var pass = 0; pass < 2; pass++){
+		for(var j = 1; j < splitpoints.length - 1; j++) {
+			if(splitpoints[j].mark){
+				for(var k = j - 1; k >= 0 && !splitpoints[k].mark; k--);
+				lastmark = splitpoints[k];
+				for(var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+				nextmark = splitpoints[k];
+			}
+			if(splitpoints[j].mark && splitpoints[j].asinflect){
+				var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1]
+				if(!(denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark, cleanMore, lastmark.asinflect, nextmark.asinflect))) {
+					//z1.mark = false;
+					z0.remove = z1.remove = z2.remove = true;
 				}
 			}
-		}
+		};
+		for(var j = 0; j < splitpoints.length; j++) if(splitpoints[j].remove) splitpoints[j].mark = false;
 	};
 	// Mark diagonals
 	var lastmark = splitpoints[0];
@@ -267,8 +290,8 @@ function fairify(scurve, gizmo, denseQ){
 			var angle = Math.abs(angle0 / Math.PI * segments % 1);
 			var angleRotatedBefore = Math.abs(angleBetween(z1, lastmark, z1, z0));
 			var angleRotatedAfter = Math.abs(angleBetween(z1, nextmark, z1, z2));
-			if(!(denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark))
-				|| !(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL)){
+			if(!(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL)
+				|| !(denseQ || enoughRotate(lastmark, z0, z1, z2, nextmark))){
 				z1.remove = z0.remove = z2.remove = true;
 			}
 		}

@@ -433,20 +433,21 @@ define VShape : symbol-block 'V, v and nu'
 			widths.rhs
 			straight.left.start (RIGHTSB + HOOKX / 3) (top - STROKE)
 			g4 (RIGHTSB - HOOKX / 3) (top - HALFSTROKE - HOOK)
-			quadcontrols 0.4 0.75 10 unimportant g2
+			quadcontrols 0.4 0.75 64 unimportant
 			g4   (MIDDLE + cornerdist) 0 [widths.rhs VShape.fine]
+			#end [function : set this.dense true]
 	
 	create-glyph 'vhooktop' : glyph-construction
 		assign-unicode 0x2C71
 		include eMarks
 		include : VHooktopShape XH
-	
+
 	create-glyph 'cyrIzhitsa' : glyph-construction
 		assign-unicode 0x474
 		include capitalMarks
 		include : VHooktopShape CAP
 	alias 'cyrizhitsa' 0x475 'vhooktop'
-	
+
 	turned 'turnv' 0x28C 'v' MIDDLE (XH / 2)
 	
 	create-glyph 'nu' : glyph-construction
@@ -655,7 +656,7 @@ symbol-block 'X'
 		include : AIHSerifs CAP
 	alias 'Chi' 0x3A7 'X'
 	alias 'cyrHa' 0x425 'X'
-	
+	###console.log 'x'
 	create-glyph 'x' : glyph-construction
 		include eMarks
 		assign-unicode 'x'
@@ -664,7 +665,7 @@ symbol-block 'X'
 		include : xStrand SB 0 RIGHTSB XH 0.02 0.4 0.14
 		include : xStrand SB XH RIGHTSB 0 0.02 0.4 0.14
 		include : AIHSerifs XH
-	
+	#if [not recursive] : throw 'xxx'
 	create-glyph 'chi' : glyph-construction
 		set-width WIDTH
 		assign-unicode 0x3C7
@@ -707,8 +708,9 @@ symbol-block 'Y'
 			widths.rhs
 			straight.left.start (RIGHTSB + HOOKX / 3) (CAP - STROKE)
 			g4 (RIGHTSB - HOOKX / 3) (CAP - HOOK)
-			quadcontrols 0.55 0.7 8 unimportant
-			g4   (MIDDLE + STROKE / 2 * HVCONTRAST) cross
+			quadcontrols 0.55 0.7 32 unimportant
+			g4 (MIDDLE + STROKE / 2 * HVCONTRAST) cross
+			end [function : set this.loose true]
 	
 	create-glyph 'cyrue' : glyph-construction
 		assign-unicode 0x4AF
@@ -723,13 +725,16 @@ symbol-block 'Y'
 ### y
 symbol-block 'y'
 	local px1 0.84
-	local py1 0.76
+	local py1 : linreg 18 0.8 126 0.76 STROKE
 	local px2 0.95
-	local py2 : if SLAB [linreg 18 0.97 126 0.85 STROKE] 0.88
+	local py20 0.88
+	local py2 : if SLAB [linreg 18 0.97 126 0.85 STROKE] py20
 	local pds 0.05
 	local pds2 0.01
 	local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
+	local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 	local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
+	local yrstrokel0 : MIDDLE - WIDTH * 0.1
 	local yrstrokel : MIDDLE - WIDTH * [if SLAB 0.15 0.1] + [if SLAB HALFSTROKE 0]
 	local yrstroker : RIGHTSB - HALFSTROKE * HVCONTRAST
 	local yshrink : linreg 18 1 126 0.85 STROKE
@@ -758,13 +763,15 @@ symbol-block 'y'
 			curl yrstroker (top - ds) [heading DOWNWARD]
 			quadcontrols 0 dpy1 16
 			yBaseKnots top bottom
+			end [function : set this.cleanmore true]
 		include : dispiro
 			widths.center
 			flat (WIDTH - yrstroker) top [heading DOWNWARD]
 			curl (WIDTH - yrstroker) (top - ds) [heading DOWNWARD]
 			quadcontrols 0 dpy1 16
-			flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds) (top - ds) py1]
+			flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds2) (top - ds) py1]
 			curl MIDDLE [mix (bottom + ds2) (top - ds) [linreg (1 - px2) (1 - py2) px1 py1 ((MIDDLE - yrstrokel) / (yrstroker - yrstrokel))]] [widths.center (STROKE * yshrink)]
+			end [function : set this.cleanmore true]
 		if SLAB : begin
 			include : AIVSerifs top
 	create-glyph 'y.upright' : glyph-construction
@@ -803,6 +810,7 @@ symbol-block 'y'
 			widths.center
 			straight.left.start ([mix yrstrokel yrstroker px1] + HOOKX) (XH - HALFSTROKE)
 			yBaseKnots XH DESCENDER
+			end [function : set this.cleanmore true]
 	
 	create-glyph 'cyrU' : glyph-construction
 		assign-unicode 0x423
@@ -812,14 +820,30 @@ symbol-block 'y'
 	create-glyph 'lambda' : glyph-construction
 		assign-unicode 0x3BB
 		include bMarks
+		local top CAP
+		local bottom 0
+		local ds : (top - bottom) * pds
+		local ds2 : (top - bottom) * pds2
+		include : tagged 'strokeR' : dispiro
+			widths.center
+			flat yrstroker bottom [heading UPWARD]
+			curl yrstroker (bottom + ds) [heading UPWARD]
+			quadcontrols 0 dpy1 16
+			flat [mix yrstroker yrstrokel0 (1 - px1)] [mix (top - ds2) (bottom + ds) py1]
+			curl [mix yrstroker yrstrokel0 px2] [mix (top - ds2) (bottom + ds) (1 - py20)]
+			quadcontrols 1 (1 - dpy20) 16
+			flat yrstrokel0 (top - ds2) [heading UPWARD]
+			curl yrstrokel0 top [heading UPWARD]
+			end [function : set this.cleanmore true]
 		
-		local xTop : mix SB RIGHTSB 0.28
-		local turnp : XH / (XH - DESCENDER)
-		local xb : mix SB RIGHTSB 0.51
-		local yb : mix XH 0 (0.05 * turnp)
-		
-		include : xStrand xTop CAP RIGHTSB 0 0.1 0.6 0.14
-		include : halfXStrand SB 0 xb yb (0.1 * turnp) 0.4 (0.14 * turnp)
+		include : dispiro
+			widths.center
+			flat (WIDTH - yrstroker) bottom [heading UPWARD]
+			curl (WIDTH - yrstroker) (bottom + ds) [heading UPWARD]
+			quadcontrols 0 dpy1 16
+			flat [mix (WIDTH - yrstrokel0) (WIDTH - yrstroker) px1] [mix (top - ds2) (bottom + ds) py1]
+			curl MIDDLE [mix (top - ds2) (bottom + ds) [linreg (1 - px2) (1 - py20) px1 py1 ((MIDDLE - yrstrokel0) / (yrstroker - yrstrokel0))]]
+			end [function : set this.cleanmore true]
 	
 	create-glyph 'lambdaslash' : glyph-construction
 		assign-unicode 0x19B
@@ -1550,7 +1574,6 @@ define {CShape} : symbol-block 'C'
 			arcvh
 			flat MIDDLE (XH - HALFSTROKE - O) [widths HALFSTROKE 0]
 			curl (MIDDLE - 1) (XH - HALFSTROKE - O)
-	
 	create-glyph 'sigmafinal' : glyph-construction
 		assign-unicode 0x3C2
 		include pMarks
@@ -1696,7 +1719,6 @@ symbol-block 'O'
 		assign-unicode 'o'
 		include eMarks
 		include : OShape XH 0 SB RIGHTSB nothing nothing nothing true
-
 	alias 'omicron' 0x3BF 'o'
 	alias 'cyro' 0x43e 'o'
 	
