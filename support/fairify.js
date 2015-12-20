@@ -1,6 +1,8 @@
 var Transform = require('./transform.js');
 
 var ANGLES = 12;
+var VERYCROWD = 2;
+var SMALLANGLE = 0.1;
 var CROWD = 4;
 var LOOSE = 6;
 var SMALL = 1e-4
@@ -159,8 +161,22 @@ function fitpts(p1, c1, c2, p2){
 	}
 	return [mix(mid, p1, 1/3), mix(mid, p2, 1/3)]
 };
-function close(z1, z2){
+function veryclose(z1, z2){
 	return (z1.x - z2.x) * (z1.x - z2.x) + (z1.y - z2.y) * (z1.y - z2.y) <= SMALL
+};
+function angleBetween(z1, z2, z3, z4){
+	return Math.atan2(z2.y - z1.y, z2.x - z1.x) - Math.atan2(z4.y - z3.y, z4.x - z3.x);
+};
+function estimateSegments(z1, z2){
+	var hspan = Math.abs(z1.x - z2.x);
+	var vspan = Math.abs(z1.y - z2.y);
+	return hspan <= 5 * CROWD || vspan <= 5 * CROWD ? VERYCROWD : hspan <= 10 * LOOSE || vspan <= 10 * LOOSE  ? CROWD : LOOSE;
+};
+function enoughRotate(bef, z0, z1, z2, aft){
+	var angleRotatedBefore = Math.abs(angleBetween(z1, bef, z1, z0));
+	var angleRotatedAfter = Math.abs(angleBetween(z1, aft, z1, z2));
+	return !((angleRotatedBefore < SMALLANGLE || angleRotatedBefore > Math.PI - SMALLANGLE)
+				|| (angleRotatedAfter < SMALLANGLE || angleRotatedAfter > Math.PI - SMALLANGLE))
 }
 function fairify(scurve, gizmo, angles){
 	angles = angles || ANGLES
@@ -174,14 +190,14 @@ function fairify(scurve, gizmo, angles){
 			splitpoints.push(last = scurve[j])
 		} else if(scurve[j].cubic) {
 			var z1 = last, z2 = scurve[j], z3 = scurve[j + 1], z4 = scurve[j + 2];
-			if(!(close(z1, z2) && close(z2, z3) && close(z3, z4))) {
+			if(!(veryclose(z1, z2) && veryclose(z2, z3) && veryclose(z3, z4))) {
 				splitSegment(z1, z2, z3, z4, ANGLES, splitpoints);
 				last = z4;
 			}
 			j += 2;
 		} else {
 			var z1 = last, zm = scurve[j], z4 = scurve[j + 1]
-			if(!(close(z1, zm) && close(zm, z4))) {
+			if(!(veryclose(z1, zm) && veryclose(zm, z4))) {
 				var z2 = mix(zm, z1, 1/3);
 				var z3 = mix(zm, z4, 1/3);
 				splitSegment(z1, z2, z3, z4, ANGLES, splitpoints);
@@ -190,8 +206,34 @@ function fairify(scurve, gizmo, angles){
 			j += 1;
 		}
 	};
-	// Mark infections and extremae
+	// Mark corners and extremae
 	for(var j = 1; j < splitpoints.length - 1; j++) {
+		if(splitpoints[j].onCurve && !splitpoints[j - 1].onCurve && !splitpoints[j + 1].onCurve){
+			var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1]
+			if(cross(z1, z0, z2) < 1e-6 && dot(z1, z0, z2) < 0){
+				var angle0 = Math.atan2(z2.y - z0.y, z2.x - z0.x);
+				var angle = Math.abs(angle0 / Math.PI * 2 % 1);
+				if(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL){
+					z1.mark = true; // extrema
+				}
+			} else {
+				z1.mark = true; // also corner
+			}
+		} else if(splitpoints[j].onCurve) {
+			splitpoints[j].mark = true // corner
+		}
+	};
+	splitpoints[0].mark = splitpoints[splitpoints.length - 1].mark = true;
+	// Mark infections
+	var lastmark = splitpoints[0];
+	for(var k = 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+	var nextmark = splitpoints[k];
+	for(var j = 1; j < splitpoints.length - 1; j++) {
+		if(splitpoints[j].mark){
+			lastmark = splitpoints[j];
+			for(var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+			nextmark = splitpoints[k];
+		}
 		if(splitpoints[j].onCurve && !splitpoints[j - 1].onCurve && !splitpoints[j + 1].onCurve){
 			var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1]
 			if(cross(z1, z0, z2) < 1e-6 && dot(z1, z0, z2) < 0){
@@ -202,39 +244,32 @@ function fairify(scurve, gizmo, angles){
 					var inflect = ((z0.y-z2.y)*(za.x-z0.x) + (z2.x-z0.x)*(za.y-z0.y)) * ((z0.y-z2.y)*(zb.x-z0.x) + (z2.x-z0.x)*(zb.y-z0.y));
 					if(inflect < 0) isInflection = true;
 				};
-				if(!(z1.inflect || isInflection)) {
-					var angle0 = Math.atan2(z2.y - z0.y, z2.x - z0.x);
-					var angle = Math.abs(angle0 / Math.PI * 2 % 1);
-					if(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL){
-						z1.mark = true;
-					}
-				} else {
+				if((z1.inflect || isInflection) && enoughRotate(lastmark, z0, z1, z2, nextmark)) {
 					z1.mark = true;
 				}
-			} else {
-				z1.mark = true;
 			}
-		} else if(splitpoints[j].onCurve) {
-			splitpoints[j].mark = true // corner
 		}
 	};
-	splitpoints[0].mark = splitpoints[splitpoints.length - 1].mark = true;
-	
 	// Mark diagonals
 	var lastmark = splitpoints[0];
+	for(var k = 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+	var nextmark = splitpoints[k];
+	var segments = estimateSegments(lastmark, nextmark);
 	for(var j = 1; j < splitpoints.length - 1; j++) {
 		if(splitpoints[j].mark){
 			lastmark = splitpoints[j];
 			for(var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
 			nextmark = splitpoints[k];
-			var hspan = Math.abs(lastmark.x - nextmark.x);
-			var vspan = Math.abs(lastmark.y - nextmark.y);
+			segments = estimateSegments(lastmark, nextmark);
 		}
 		if(splitpoints[j].onCurve && !splitpoints[j].mark){
 			var z1 = splitpoints[j], z0 = splitpoints[j - 1], z2 = splitpoints[j + 1];
 			var angle0 = Math.atan2(z2.y - z0.y, z2.x - z0.x);
-			var angle = Math.abs(angle0 / Math.PI * (hspan <= 10 * LOOSE || vspan <= 10 * LOOSE  ? CROWD : LOOSE) % 1);
-			if(!(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL)){
+			var angle = Math.abs(angle0 / Math.PI * segments % 1);
+			var angleRotatedBefore = Math.abs(angleBetween(z1, lastmark, z1, z0));
+			var angleRotatedAfter = Math.abs(angleBetween(z1, nextmark, z1, z2));
+			if(!enoughRotate(lastmark, z0, z1, z2, nextmark)
+				|| !(Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL)){
 				z1.remove = z0.remove = z2.remove = true;
 			}
 		}

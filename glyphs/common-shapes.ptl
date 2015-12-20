@@ -284,10 +284,9 @@ define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : gl
 		widths.center
 		flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
 		curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
-		quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 4
+		quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
 		flat straightxleft straightyleft
 		curl rightx righty
-		end [function : set this.unfair true]
 
 
 define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-construction
@@ -505,6 +504,10 @@ define [CyrDescender x shift] : glyph-construction
 	if (!SLAB && descenderOverflow > STROKE * 0.75) : include : HBarTop (x - HALFSTROKE * HVCONTRAST) (x + descenderOverflow) STROKE
 
 # Derived subfonts
+define [refair g] : begin
+	foreach [j : range 0 g.contours.length] : begin
+		set g.contours.(j) : fairify g.contours.(j) globalTransform
+	return nothing
 define [Fork gs params] : begin
 	local p : Object.create params
 	local shouldBuildList {}
@@ -520,12 +523,13 @@ define [Fork gs params] : begin
 		: else : throw ex
 	return forkFont.glyfMap
 
-define [Miniature glyphs fold scale ia] : begin
+define [Miniature glyphs fold scale ia unfair] : begin
 	local forkedPara : Object.create para
 	forkedPara.stroke = [adviceBlackness fold] / scale
 	forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
 	forkedPara.sb = SB / 2
 	forkedPara.slantAngle = [fallback ia para.slantAngle]
+	forkedPara.unfair = unfair
 	return : Fork glyphs forkedPara
 
 define [Thinner glyphs p] : begin
