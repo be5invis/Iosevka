@@ -68,7 +68,11 @@ archives-slab : fonts-slab
 # Variant releases
 releasepack-default : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) pages release VERSION=$(VERSION)
-releasepack-cjk : $(SCRIPTS) | $(OBJDIR)
+fonts-fw : $(SCRIPTS) | $(OBJDIR)
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
+fonts-cc : $(SCRIPTS) | $(OBJDIR)
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
+releasepack-fw : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
 releasepack-cc : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
@@ -76,5 +80,5 @@ releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
-release-all : releasepack-default releasepack-cjk releasepack-cc releasepack-hooky releasepack-zshaped
-cjk-all : releasepack-cjk releasepack-cc
+release-all : releasepack-default releasepack-fw releasepack-cc releasepack-hooky releasepack-zshaped
+fw : fonts-fw fonts-cc

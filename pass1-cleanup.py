@@ -28,8 +28,11 @@ for i in font:
 #font.replaceWithReference()
 
 print "    Simplify: ", font.fontname
+font.selection.select("X", "x", "chi", "cyrHadescender", "cyrhadescender", "supx", "supchi", "subx", "subchi", "circlex", "circleinnerx", "circleX", "circleinnerX", "combx",
+                      "Y", "y", "y.upright", "yhooktop", "Yhooktop", "turny.upright", "cyrU", "cyrue", "lambda", "lambdaslash", "circley", "circleinnery", "circleY", "circleinnerY")
+font.simplify(1, ("smoothcurves", "choosehv"), 0.2)
 font.selection.all()
-font.simplify(0.05, ("smoothcurves", "choosehv"), 0.1)
+font.simplify(0.075, ("smoothcurves", "choosehv"), 0.1)
 
 #font.em = 2000
 font.selection.all()
