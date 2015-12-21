@@ -1,7 +1,12 @@
 var fs = require('fs');
+var path = require('path');
+
 var TTFWriter = require('node-sfnt').TTFWriter;
 var TTF = require('node-sfnt').TTF;
 var argv = require('yargs').argv;
+var buildGlyphs  = require('./buildglyphs.js');
+var parameters = require('./parameters');
+var toml = require('toml');
 
 var Glyph = require('./support/glyph');
 
@@ -17,9 +22,18 @@ function toBuffer(arrayBuffer) {
 function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
 function mix(a, b, p){ return a + (b - a) * p }
 
-var options = { preserveOS2Version: true };
-var font = JSON.parse(fs.readFileSync(argv._[0], 'utf-8'));
+// Font building
+var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
+var emptyFont      = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'emptyfont.toml'), 'utf-8'));
+var para = parameters.build(parametersData, argv._);
+var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
+
+console.log('    Start build font ' + fontUniqueName);
+var font = buildGlyphs.build.call(emptyFont, para);
+console.log('    ' + fontUniqueName + " Successfully built.");
+
 if(argv.charmap) {
+	console.log('    Writing character map -> ' + argv.charmap);
 	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function(glyph){
 		return [
 			glyph.name,
@@ -28,9 +42,10 @@ if(argv.charmap) {
 		]
 	})), 'utf8')
 };
-if(argv.feature) {
-	var featurefile = '\n\n';
 
+if(argv.feature) {
+	console.log('    Writing feature file -> ' + argv.feature);
+	var featurefile = '\n\n';
 	// markGlyphs
 	for(var key in font.features.markGlyphs){
 		featurefile += '@MG_' + key + '= [' + font.features.markGlyphs[key].join(' ') + '];\n'
@@ -59,7 +74,10 @@ if(argv.feature) {
 	fs.writeFileSync(argv.feature, featurefile, 'utf8');
 };
 
-/*if(argv.ttf) {
+/*
+// Currently unused
+var options = { preserveOS2Version: true };
+if(argv.ttf) {
 	var upm = (argv.upm - 0) || 1000;
 	var upmscale = upm / font.head.unitsPerEm;
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
@@ -90,9 +108,11 @@ if(argv.feature) {
 	font['OS/2'].sCapHeight     *= upmscale;
 	
 	fs.writeFileSync(argv.ttf, toBuffer(new TTFWriter(options).write(font)));
-};*/
+};
+*/
 
 if(argv.svg) {
+	console.log('    Writing outline as SVG -> ' + argv.svg);
 	function cov(x){ return Math.round(x * 10000) / 10000 }
 	function toSVGPath(glyph){
 		var buf = '';
@@ -171,3 +191,16 @@ if(argv.svg) {
 	svg += '</font></defs></svg>'
 	fs.writeFileSync(argv.svg, svg, 'utf-8')
 };
+
+if(argv.meta){
+	console.log('    Writing metadata as JSON -> ' + argv.meta);
+	var glyf = font.glyf;
+	var glyfMap = font.glyfMap;
+	font.glyf = null;
+	font.glyfMap = null;
+	
+	fs.writeFileSync(argv.meta, JSON.stringify(font));
+	
+	font.glyf = glyf; 
+	font.glyfMap = glyfMap;
+}

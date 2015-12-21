@@ -8,7 +8,6 @@ PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)'
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 LOOPS = 0 1 2
 
-fdts : fdts-default fdts-slab
 svgs : svgs-default svgs-slab
 fonts : fonts-default fonts-slab
 test  : test-default test-slab
@@ -18,24 +17,17 @@ release : release-default release-slab
 $(OBJDIR) :
 	@- mkdir $@
 
-
-# fdts
-fdts-default : $(SCRIPTS) | $(OBJDIR)
-	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_DEFAULT) LOOP=$(var);)
-fdts-slab : $(SCRIPTS) | $(OBJDIR)
-	@$(foreach var,$(LOOPS),$(MAKE) -s -f onegroup.mk fdts $(PARAM_SLAB) LOOP=$(var);)
-
 # svgs
-svgs-default : fdts-default
+svgs-default : $(SCRIPTS) | $(OBJDIR)
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_DEFAULT)
-svgs-slab : fdts-slab
+svgs-slab : $(SCRIPTS) | $(OBJDIR)
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_SLAB)
 
 
 # ttfs
-fonts-default : svgs-default
+fonts-default : $(SCRIPTS) | $(OBJDIR)
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : svgs-slab
+fonts-slab : $(SCRIPTS) | $(OBJDIR)
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
 
 

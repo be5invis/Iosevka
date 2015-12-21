@@ -39,63 +39,62 @@ PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
 PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
 fonts : $(TARGETS)
-
-fdts : $(FDTS)
 svgs : $(SVG0)
 
 	
 # Pass 0 : file construction
+OUTPUTS = --meta $@ --feature $(subst .fdt,.ab.fea,$@) --svg $(subst .fdt,.svg,$@) --charmap $(subst .fdt,.charmap,$(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$@))
 $(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extralight s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-medium.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-medium s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-heavy.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-heavy s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 
 $(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-extralightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-mediumitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-medium s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-heavyitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-heavy s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 
 $(OBJDIR)/.pass0-$(PREFIX)-thinoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-thin s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-extralightoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-extralight s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-lightoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-light s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-oblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-book s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-mediumoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-medium s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-boldoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-bold s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-heavyoblique.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generate -o $@ iosevka $(STYLE_COMMON) w-heavy s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 
 $(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
-	$(NODE) extract --uprightify 1 --svg $@ $<
+	@echo $^ "'->'" $@
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
-	$(NODE) extract --feature $@ $<
+	@echo $^ "'->'" $@
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
-	$(NODE) extract --charmap $@ $<
+	@echo $^ "'->'" $@
 $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/uprightonly.fea
 	cat $^ > $@
 $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/italiconly.fea
@@ -105,7 +104,7 @@ $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 # Pass 1 : Outline cleanup and merge
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
 	fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-smartround.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-addmeta.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
 	$(NODE) $^ -o $@ --upm $(TARGETUPM)
 $(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(OBJDIR)/.pass0-%.fea
 	fontforge -quiet -script $^ $@ $(TARGETUPM) $(SUPPRESS_ERRORS)
