@@ -10,29 +10,20 @@ var toml = require('toml');
 
 var Glyph = require('./support/glyph');
 
-function toBuffer(arrayBuffer) {
-	var length = arrayBuffer.byteLength;
-	var view = new DataView(arrayBuffer, 0, length);
-	var buffer = new Buffer(length);
-	for (var i = 0, l = length; i < l; i++) {
-		buffer[i] = view.getUint8(i, false);
-	}
-	return buffer;
-}
-function pad(s, n){ while(s.length < n) s = '0' + s; return s; }
-function mix(a, b, p){ return a + (b - a) * p }
-
 // Font building
-var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
-var emptyFont      = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'emptyfont.toml'), 'utf-8'));
-var para = parameters.build(parametersData, argv._);
-var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
+var font = function(){
+	var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
+	var emptyFont      = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'emptyfont.toml'), 'utf-8'));
+	var para = parameters.build(parametersData, argv._);
+	var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
 
-console.log('    Start build font ' + fontUniqueName);
-var font = buildGlyphs.build.call(emptyFont, para);
-console.log('    ' + fontUniqueName + " Successfully built.");
+	console.log('    Start build font ' + fontUniqueName);
+	var font = buildGlyphs.build.call(emptyFont, para);
+	console.log('    ' + fontUniqueName + " Successfully built.");
+	return font;
+}();
 
-if(argv.charmap) {
+if(argv.charmap) (function(){
 	console.log('    Writing character map -> ' + argv.charmap);
 	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function(glyph){
 		return [
@@ -41,9 +32,9 @@ if(argv.charmap) {
 			glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0
 		]
 	})), 'utf8')
-};
+})();
 
-if(argv.feature) {
+if(argv.feature) (function(){
 	console.log('    Writing feature file -> ' + argv.feature);
 	var featurefile = '\n\n';
 	// markGlyphs
@@ -72,12 +63,21 @@ if(argv.feature) {
 		+ 'table GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
 
 	fs.writeFileSync(argv.feature, featurefile, 'utf8');
-};
+})();
 
 /*
 // Currently unused
-var options = { preserveOS2Version: true };
-if(argv.ttf) {
+if(argv.ttf) (function(){
+	function toBuffer(arrayBuffer) {
+		var length = arrayBuffer.byteLength;
+		var view = new DataView(arrayBuffer, 0, length);
+		var buffer = new Buffer(length);
+		for (var i = 0, l = length; i < l; i++) {
+			buffer[i] = view.getUint8(i, false);
+		}
+		return buffer;
+	};
+	var options = { preserveOS2Version: true };
 	var upm = (argv.upm - 0) || 1000;
 	var upmscale = upm / font.head.unitsPerEm;
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
@@ -108,12 +108,14 @@ if(argv.ttf) {
 	font['OS/2'].sCapHeight     *= upmscale;
 	
 	fs.writeFileSync(argv.ttf, toBuffer(new TTFWriter(options).write(font)));
-};
+})();
 */
 
-if(argv.svg) {
+if(argv.svg) (function(){
 	console.log('    Writing outline as SVG -> ' + argv.svg);
-	function cov(x){ return Math.round(x * 10000) / 10000 }
+	function cov(x){ return Math.round(x * 10000) / 10000 };
+	function mix(a, b, p){ return a + (b - a) * p };
+	
 	function toSVGPath(glyph){
 		var buf = '';
 		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
@@ -190,9 +192,9 @@ if(argv.svg) {
 	}
 	svg += '</font></defs></svg>'
 	fs.writeFileSync(argv.svg, svg, 'utf-8')
-};
+})();
 
-if(argv.meta){
+if(argv.meta) (function(){
 	console.log('    Writing metadata as JSON -> ' + argv.meta);
 	var glyf = font.glyf;
 	var glyfMap = font.glyfMap;
@@ -203,4 +205,4 @@ if(argv.meta){
 	
 	font.glyf = glyf; 
 	font.glyfMap = glyfMap;
-}
+})();
