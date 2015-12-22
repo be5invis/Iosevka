@@ -230,41 +230,6 @@ let : begin
 	suggestGC
 
 
-symbol-block "Other Precomposites"
-	set font.features.cv {.}
-	foreach [name : items-of : Object.keys glyphs] : begin
-		if glyphs.(name).featureSelector : begin
-			local fs glyphs.(name).featureSelector
-			foreach [feature : items-of : Object.keys fs] : begin
-				if [not font.features.cv.(feature)] : set font.features.cv.(feature) {.}
-				set font.features.cv.(feature).(name) fs.(feature)
-	
-	local MarkZoom : glyph-construction
-		apply-transform : Upright
-		apply-transform : Translate (-MIDDLE) (-XH - ACCENT)
-		apply-transform : Scale ((RIGHTSB - SB) / (markExtend * 3))
-		apply-transform : Translate (MIDDLE) (XH + ACCENT)
-		apply-transform : Italify 
-	
-	composite 'asciitilde' glyphs.space glyphs.tildeAbove MarkZoom [into-unicode '~']
-	composite 'asciigrave' glyphs.space glyphs.graveAbove MarkZoom [into-unicode '`']
-	composite 'asciicaret' glyphs.space glyphs.circumflexAbove MarkZoom [into-unicode '^']
-	composite 'latin1acute' glyphs.space glyphs.acuteAbove MarkZoom [into-unicode 0xB4]
-	composite 'degree' glyphs.space glyphs.ringAbove MarkZoom [into-unicode 0xB0]
-	
-	if [not recursive] : begin
-		composite 'asciitilde.centered' glyphs.asciitilde [Upright] [Translate 0 (parenMid - XH - ACCENT)] [Italify]
-		set glyphs.asciitilde.featureSelector {
-			.cv16 'asciitilde'
-			.cv17 'asciitilde.centered'
-		}
-		composite 'asterisk.centered' glyphs.asterisk [Upright] [Translate 0 (parenMid - glyphs.asterisk.centery)] [Italify]
-		set glyphs.asterisk.featureSelector {
-			.cv18 'asterisk'
-			.cv19 'asterisk.centered'
-		}
-	suggestGC
-
 define [suggestName name] : begin
 	if glyphs.(name) : begin
 		local j 2
@@ -760,10 +725,17 @@ symbol-block 'CJK Double Width Characters'
 	
 ### Generate Features and remove double-width glyphs when necessary
 if [not recursive] : begin
-
 	if [not para.cjk] : begin
 		set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
 		set glyphList font.glyf
+
+	set font.features.cv {.}
+	foreach [name : items-of : Object.keys glyphs] : begin
+		if glyphs.(name).featureSelector : begin
+			local fs glyphs.(name).featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not font.features.cv.(feature)] : set font.features.cv.(feature) {.}
+				set font.features.cv.(feature).(name) fs.(feature)
 
 	set font.features.mark {.}
 	set font.features.mkmk {.marks {} .bases {}}

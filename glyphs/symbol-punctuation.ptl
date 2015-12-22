@@ -354,12 +354,13 @@ symbol-block 'Typographic Symbols'
 		include s
 		include : FlipAround MIDDLE parenMid
 		include s
-	create-glyph 'asterisk' : glyph-construction
+	
+	local asteriskCenterY : parenTop - LONGJUT * 1.5
+	create-glyph 'asterisk.top' : glyph-construction
 		set-width WIDTH
 		assign-unicode '*'
 		
 		local radius : LONGJUT * 1.2
-		local centery : parenTop - LONGJUT * 1.5
 		local fine : STROKE * 0.4
 		local final : 0.5 * [Math.min STROKE (radius * Math.PI * 2 / 10)]
 		
@@ -367,10 +368,15 @@ symbol-block 'Typographic Symbols'
 			local s : Math.sin (j / 5 * Math.PI * 2)
 			local c : Math.cos (j / 5 * Math.PI * 2)
 			include : dispiro
-				flat MIDDLE centery [widths fine fine]
-				curl (MIDDLE + radius * s) (centery + radius * c) [widths final final]
+				flat MIDDLE asteriskCenterY [widths fine fine]
+				curl (MIDDLE + radius * s) (asteriskCenterY + radius * c) [widths final final]
 		
-		set currentGlyph.centery centery
+	composite 'asterisk.centered' glyphs.'asterisk.top' [Upright] [Translate 0 (parenMid - asteriskCenterY)] [Italify]
+	select-variant 'asterisk' '*' 'top' {
+		.cv18 'asterisk.top'
+		.cv19 'asterisk.centered'
+	}
+	
 	create-glyph 'numbersign' : glyph-construction
 		set-width WIDTH
 		assign-unicode '#'
@@ -724,6 +730,26 @@ symbol-block 'Percentages'
 		include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotfine
 		include : VBar [mix [mix SB RIGHTSB 0.1] RIGHTSB 0.5] 0 [mix 0 CAP 0.3] dotfine
 		include : VBarLeft [mix SB RIGHTSB 0.1] 0 [mix 0 CAP 0.3] dotfine
+
+symbol-block "ASCII Marks"
+	local MarkZoom : glyph-construction
+		apply-transform : Upright
+		apply-transform : Translate (-MIDDLE) (-XH - ACCENT)
+		apply-transform : Scale ((RIGHTSB - SB) / (markExtend * 3))
+		apply-transform : Translate (MIDDLE) (XH + ACCENT)
+		apply-transform : Italify 
+	
+	composite 'asciitilde.top' glyphs.space glyphs.tildeAbove MarkZoom
+	composite 'asciitilde.centered' glyphs.'asciitilde.top' [Upright] [Translate 0 (parenMid - XH - ACCENT)] [Italify]
+	select-variant 'asciitilde' '~' 'top'  {
+		.cv16 'asciitilde'
+		.cv17 'asciitilde.centered'
+	}
+	
+	composite 'asciigrave' glyphs.space glyphs.graveAbove MarkZoom [into-unicode '`']
+	composite 'asciicaret' glyphs.space glyphs.circumflexAbove MarkZoom [into-unicode '^']
+	composite 'latin1acute' glyphs.space glyphs.acuteAbove MarkZoom [into-unicode 0xB4]
+	composite 'degree' glyphs.space glyphs.ringAbove MarkZoom [into-unicode 0xB0]
 
 ### Aliased modifer letters
 alias 'mdfPrime' 0x2B9 'prime'
