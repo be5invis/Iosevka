@@ -39,6 +39,7 @@ function writettf(ttf, file){
 }
 
 var ttf = readttf(process.argv[2]);
+delete ttf.FFTM
 // Fixes xAvgCharWidth
 var spacewidth = ttf.head.unitsPerEm / 2;
 for(var j = 0; j < ttf.glyf.length; j++) if(ttf.glyf[j] && ttf.glyf[j].unicode && ttf.glyf[j].unicode[0] === 0x20) {

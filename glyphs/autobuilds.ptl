@@ -2,6 +2,8 @@
 
 # Build accented glyphs
 define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
+set font.features {.}
+set font.features.cv {.}
 
 define customDecompositions {
 	# Latvians use comma instead of cedillas in several letters.
@@ -160,7 +162,7 @@ define [pad s n] : begin
 #set font.features.ccmp {}
 define [shorter x y] : if (x.length < y.length) x y
 
-let : begin
+local {cfv} : let : begin
 	local nComposed 0
 	local foundDecompositions {.}
 	define [decideName namingParts parts code] : begin
@@ -171,7 +173,7 @@ let : begin
 			local j 2
 			while foundDecompositions.(glyphName + j) [inc j]
 			set glyphName (glyphName + j)
-		if (glyphName.length > 30) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
+		if (glyphName.length > 27) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
 		return glyphName
 	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
 		local str : String.fromCharCode code
@@ -195,8 +197,9 @@ let : begin
 	#if (global && global.gc) : global.gc
 	progress "Composition Decision"
 	
+	local {glyphName code parts} {}
 	define construction : glyph-construction
-		assign-unicode code
+		if code : assign-unicode code
 		include parts.0 AS_BASE
 		set-width parts.0.advanceWidth
 		
@@ -205,18 +208,40 @@ let : begin
 			include part
 			names.push part.name
 			if (part.name === 'rtailBR') : eject-contour 'serifRB'
-		#progress "Compose [\[names.join ' + ']] --> \(glyphName)"
+	
+	define [cfv glyphName _pa] : if (!recursive && _pa.0.featureSelector) : begin
+		local h {.}
+		foreach [feature : items-of : Object.keys _pa.0.featureSelector] : begin
+			local variant _pa.0.featureSelector.(feature)
+			local variantRoot glyphs.(variant)
+			if variantRoot : begin
+				set parts {variantRoot :: [_pa.slice 1]}
+				set code null
+				create-glyph (glyphName + '.' + feature) construction
+
+				set h.(feature) (glyphName + '.' + feature)
+		if glyphs.(glyphName) : set glyphs.(glyphName).featureSelector h
+	
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
-		local {glyphName code parts} foundDecompositions.(_id)
+		set {glyphName code parts} foundDecompositions.(_id)
 		create-glyph glyphName construction
+		cfv glyphName parts
+
 	progress "Unicode Precomposites (\(nComposed) glyphs)"
+	
+	list cfv
 
 
-symbol-block "Manual Precomposites"
-	composite 'i.serifed' glyphs.'dotlessi.serifed' glyphs.dotAbove
-	composite 'i.italic' glyphs.'dotlessi.italic' glyphs.dotAbove
-	composite 'i.hooky' glyphs.'dotlessi.hooky' glyphs.dotAbove
-	composite 'i.zshaped' glyphs.'dotlessi.zshaped' glyphs.dotAbove
+symbol-block "Manual Precomposites and CV variants"
+	cfv 'i' {glyphs.dotlessi glyphs.dotAbove}
+	cfv 'cyrUkrainiani' {glyphs.i}
+
+	foreach [name : items-of : Object.keys glyphs] : begin
+		if glyphs.(name).featureSelector : begin
+			local fs glyphs.(name).featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not font.features.cv.(feature)] : set font.features.cv.(feature) {.}
+				set font.features.cv.(feature).(name) fs.(feature)
 	
 	local MarkZoom : glyph-construction
 		apply-transform : Upright
@@ -231,7 +256,17 @@ symbol-block "Manual Precomposites"
 	composite 'latin1acute' glyphs.space glyphs.acuteAbove MarkZoom [into-unicode 0xB4]
 	composite 'degree' glyphs.space glyphs.ringAbove MarkZoom [into-unicode 0xB0]
 	
-	composite 'asciitilde.centered' glyphs.asciitilde [Upright] [Translate 0 (parenMid - XH - ACCENT)] [Italify]
+	if [not recursive] : begin
+		composite 'asciitilde.centered' glyphs.asciitilde [Upright] [Translate 0 (parenMid - XH - ACCENT)] [Italify]
+		set glyphs.asciitilde.featureSelector {
+			.cv16 'asciitilde'
+			.cv17 'asciitilde.centered'
+		}
+		composite 'asterisk.centered' glyphs.asterisk [Upright] [Translate 0 (parenMid - glyphs.asterisk.centery)] [Italify]
+		set glyphs.asterisk.featureSelector {
+			.cv18 'asterisk'
+			.cv19 'asterisk.centered'
+		}
 
 define [suggestName name] : begin
 	if glyphs.(name) : begin
@@ -261,7 +296,14 @@ define [createCircledGlyphs records] : if [not recursive] : begin
 			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
 			apply-transform : Italify
 			refair this
-		include : OShape (CAP * dscale + [Math.max (CAP * 0.175) (sw * 3)]) (-[Math.max (CAP * 0.175) (sw * 3)]) [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)] sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+		include : OShape 
+			* (CAP * dscale + [Math.max (CAP * 0.175) (sw * 3)])
+			* (-[Math.max (CAP * 0.175) (sw * 3)])
+			* [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)]
+			* [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)]
+			* sw
+			* (SMALLSMOOTHA * width / WIDTH)
+			* (SMALLSMOOTHB * width / WIDTH)
 		apply-transform : Upright
 		apply-transform : Translate 0 (parenMid - CAP * dscale / 2)
 		apply-transform : Italify
@@ -724,7 +766,6 @@ if [not recursive] : begin
 		set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
 		set glyphList font.glyf
 
-	set font.features {.}
 	set font.features.mark {.}
 	set font.features.mkmk {.marks {} .bases {}}
 	set font.features.markGlyphs {.}
@@ -749,7 +790,8 @@ if [not recursive] : begin
 					then : lookup.marks.push : 'markClass ' + glyph.name + [buildAnchorDescription glyph '' 'x' 'y' 'mark' th]
 					else : lookup.bases.push : 'pos base ' + glyph.name + [buildAnchorDescription glyph 'mark' 'x' 'y' 'mark' th]
 	
-	createMarkLookup 'letter' {'above' 'below' 'trailing' 'lf' 'topright' 'bottomright'}
+	createMarkLookup 'letter1' {'above' 'below'}
+	createMarkLookup 'letter2' {'trailing' 'lf' 'topright' 'bottomright'}
 	createMarkLookup 'overlay' {'overlay' 'slash'}
 	# mkmk and GDEF
 	foreach glyph [items-of glyphList] : if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length])

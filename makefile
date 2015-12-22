@@ -1,6 +1,5 @@
 default: fonts
 
-OBJDIR = build
 include makesupport.mk
 PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
 PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)'
@@ -14,20 +13,18 @@ test  : test-default test-slab
 pages : pages-default pages-slab
 release : release-default release-slab
 	
-$(OBJDIR) :
-	@- mkdir $@
 
 # svgs
-svgs-default : $(SCRIPTS) | $(OBJDIR)
+svgs-default : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_DEFAULT)
-svgs-slab : $(SCRIPTS) | $(OBJDIR)
+svgs-slab : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_SLAB)
 
 
 # ttfs
-fonts-default : $(SCRIPTS) | $(OBJDIR)
+fonts-default : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : $(SCRIPTS) | $(OBJDIR)
+fonts-slab : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
 
 

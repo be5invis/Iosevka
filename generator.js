@@ -20,6 +20,7 @@ var font = function(){
 	console.log('    Start build font ' + fontUniqueName);
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log('    ' + fontUniqueName + " Successfully built.");
+	font.features.sscompose = para.sscompose
 	return font;
 }();
 
@@ -38,6 +39,20 @@ if(argv.feature) (function(){
 	console.log('    Writing feature file -> ' + argv.feature);
 	var featurefile = '\n\n';
 	// markGlyphs
+	for(var feature in font.features.cv) {
+		var base = [], replace = [];
+		for(var key in font.features.cv[feature]) {
+			base.push(key);
+			replace.push(font.features.cv[feature][key]);
+		};
+		var lookupName = feature + 'Auto';
+		featurefile += 'lookup ' + lookupName + ' { sub [' + base.join(' ') + '] by [' + replace.join(' ') + '];} ' + lookupName + ';\n\n';
+		featurefile += 'feature ' + feature + ' { script latn; lookup ' + lookupName + '; script grek; lookup ' + lookupName + '; script cyrl; lookup ' + lookupName + '; script dflt; lookup ' + lookupName + '; } ' + feature + ';\n\n';
+	}
+	for(var feature in font.features.sscompose) {
+		var stmt = font.features.sscompose[feature].map(function(lookup){ return 'lookup ' + lookup + 'Auto'}).join(';')
+		featurefile += 'feature ' + feature + ' { script latn; ' + stmt + '; script grek; ' + stmt + '; script cyrl; ' + stmt + '; script dflt; ' + stmt + '; } ' + feature + ';\n\n';
+	}
 	for(var key in font.features.markGlyphs){
 		featurefile += '@MG_' + key + '= [' + font.features.markGlyphs[key].join(' ') + '];\n'
 	}

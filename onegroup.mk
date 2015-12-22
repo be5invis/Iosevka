@@ -1,7 +1,6 @@
 default: fonts
 
 TARGETUPM = 1000
-OBJDIR = build
 include makesupport.mk
 PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
 ARCPREFIXB = iosevka$(SUFFIX)
@@ -38,7 +37,9 @@ PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
 PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
 PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
-fonts : $(TARGETS)
+DISTTARGETS = $(subst $(OBJDIR)/,$(DISTDIR)/,$(TARGETS))
+
+fonts : $(DISTTARGETS)
 svgs : $(SVG0)
 
 	
@@ -116,8 +117,8 @@ $(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
 	ttfautohint $< $@
 
-$(OBJDIR) :
-	@- mkdir $@
+$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
+	cp $< $@
 
 # releaseing
 RELEASEDIR = releases

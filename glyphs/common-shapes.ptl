@@ -1,11 +1,12 @@
 ###### COMMON GLYPH CONSTRUCTIONS
-define [select-variant name unicode default] : begin
+define [select-variant name unicode default featureSelector] : begin
 	if (pickHash && [not pickHash.(name)]) : return nothing
 	local variant : variantSelector.(name) || default
 	local chosenGlyph glyphs.((name + '.' + variant))
 	create-glyph name : glyph-construction
 		include chosenGlyph AS_BASE
 		if unicode : assign-unicode unicode
+		if featureSelector : set currentGlyph.featureSelector featureSelector
 
 define [italic-variant name unicode] : create-glyph name : glyph-construction
 	if para.isItalic
@@ -13,10 +14,12 @@ define [italic-variant name unicode] : create-glyph name : glyph-construction
 		else : include glyphs.(name + '.upright') AS_BASE
 	if unicode : assign-unicode unicode
 
-define [alias newid unicode oldid] : create-glyph newid : glyph-construction
-	if unicode : assign-unicode unicode
-	include glyphs.(oldid) AS_BASE
-	set-width glyphs.(oldid).advanceWidth
+define [alias newid unicode oldid] : begin
+	create-glyph newid : glyph-construction
+		if unicode : assign-unicode unicode
+		include glyphs.(oldid) AS_BASE
+		set-width glyphs.(oldid).advanceWidth
+		set this.featureSelector glyphs.(oldid).featureSelector
 
 define [composite newid] : let [parts : {}.slice.call arguments 1] : begin
 	create-glyph [fallback newid ('glyph' + [set nTemp (nTemp + 1)])] : glyph-construction
