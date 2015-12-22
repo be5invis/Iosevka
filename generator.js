@@ -211,13 +211,12 @@ if(argv.svg) (function(){
 
 if(argv.meta) (function(){
 	console.log('    Writing metadata as JSON -> ' + argv.meta);
-	var glyf = font.glyf;
-	var glyfMap = font.glyfMap;
-	font.glyf = null;
-	font.glyfMap = null;
-	
+	if(argv.svg){
+		font.glyf = null;
+		font.glyfMap = null;
+	}
+	if(argv.feature){
+		font.features = null;
+	}
 	fs.writeFileSync(argv.meta, JSON.stringify(font));
-	
-	font.glyf = glyf; 
-	font.glyfMap = glyfMap;
 })();

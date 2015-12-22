@@ -24,8 +24,6 @@ for i in font:
 	if len(glyph.references) > 0 and len(glyph.layers["Fore"]) > 0: # a mixed glyph
 		glyph.unlinkRef()
 		glyph.removeOverlap()
-#font.selection.all()
-#font.replaceWithReference()
 
 print "    Simplify: ", font.fontname
 font.selection.all()
@@ -34,9 +32,17 @@ font.simplify(0.05, ("smoothcurves", "choosehv"), 0.1)
 #font.em = 2000
 font.selection.all()
 font.layers["Fore"].is_quadratic = True
-font.transform(psMat.skew(float(sys.argv[3]) / 180 * math.pi))
+font.transform(psMat.skew(float(sys.argv[4]) / 180 * math.pi))
 font.em = 1000
 
+font.selection.all()
+font.round()
+font.removeOverlap()
+font.simplify(0.01)
+font.selection.all()
+font.removeOverlap()
+
+font.mergeFeature(sys.argv[2])
 font.canonicalContours()
 font.canonicalStart()
-font.generate(sys.argv[2])
+font.generate(sys.argv[3], flags = ("short-post", "opentype"))

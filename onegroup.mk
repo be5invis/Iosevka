@@ -34,8 +34,6 @@ FEATITA = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(ITALIC)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
-PASS3   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass3-,$(TARGETS))
-PASS4   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass4-,$(TARGETS))
 
 DISTTARGETS = $(subst $(OBJDIR)/,$(DISTDIR)/,$(TARGETS))
 
@@ -102,19 +100,17 @@ $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.
 	cat $^ > $@
 
 
-# Pass 1 : Outline cleanup and merge
-$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
+# Pass 1 : Outline cleanup and merge features
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg $(OBJDIR)/.pass0-%.fea
 	fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-addmeta.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
-	$(NODE) $^ -o $@ --upm $(TARGETUPM)
-$(PASS3) : $(OBJDIR)/.pass3-%.ttf : pass3-features.py $(OBJDIR)/.pass2-%.ttf $(OBJDIR)/.pass0-%.fea
-	fontforge -quiet -script $^ $@ $(TARGETUPM) $(SUPPRESS_ERRORS)
-$(PASS4) : $(OBJDIR)/.pass4-%.ttf : pass4-finalize.js $(OBJDIR)/.pass3-%.ttf
-	@$(NODE) $^ $@.a.ttf
+# Pass 2 : add metadata
+# IDKY, but converting into TTX and convert back dramatically reduces the file size
+$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+	@$(NODE) $^ -o $@.a.ttf
 	@ttx -q -o $@.a.ttx $@.a.ttf $(SUPPRESS_ERRORS)
 	@ttx -q -o $@ $@.a.ttx $(SUPPRESS_ERRORS)
 	@rm $@.a.ttf $@.a.ttx
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass4-%.ttf
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	ttfautohint $< $@
 
 $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf

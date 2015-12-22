@@ -3,6 +3,7 @@ var fs = require('fs');
 var TTFReader = require('node-sfnt').TTFReader;
 var TTFWriter = require('node-sfnt').TTFWriter;
 var toml = require('toml');
+var argv = require('yargs').argv;
 
 var param = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'))
 
@@ -38,21 +39,16 @@ function writettf(ttf, file){
     fs.writeFileSync(file, toBuffer(buffer));
 }
 
-var ttf = readttf(process.argv[2]);
-delete ttf.FFTM
-// Fixes xAvgCharWidth
-var spacewidth = ttf.head.unitsPerEm / 2;
-for(var j = 0; j < ttf.glyf.length; j++) if(ttf.glyf[j] && ttf.glyf[j].unicode && ttf.glyf[j].unicode[0] === 0x20) {
-    spacewidth = ttf.glyf[j].advanceWidth
-}
-ttf['OS/2'].xAvgCharWidth = spacewidth; // 0.5em
-ttf['OS/2'].sxHeight = param.iosevka.xheight
-ttf['OS/2'].sCapHeight = param.iosevka.cap
-ttf['OS/2'].fsSelection |= (ttf['OS/2'].usWeightClass > 400 ? 1 << 5 : 0) | (ttf.post.italicAngle ? 1 : 0)
-ttf.head.macStyle |= (ttf['OS/2'].usWeightClass > 400 ? 1 : 0) | (ttf.post.italicAngle ? 2 : 0)
-ttf.post.isFixedPitch = 1                            // mono
+var glyfsource = readttf(argv._[0]);
+var ttf = JSON.parse(fs.readFileSync(argv._[1], 'utf-8'));
+
+ttf.post.format = 3
 ttf.DSIG = {                                         // add a dummy SDIG
     name: 'DSIG',
     content: [0, 0, 0, 1, 0, 0, 0, 0]
 }
-fs.writeFileSync(process.argv[3], toBuffer(new TTFWriter(options).write(ttf)));
+ttf.glyf = glyfsource.glyf;
+ttf.GDEF = glyfsource.GDEF;
+ttf.GSUB = glyfsource.GSUB;
+ttf.GPOS = glyfsource.GPOS;
+fs.writeFileSync(argv.o, toBuffer(new TTFWriter(options).write(ttf)));
