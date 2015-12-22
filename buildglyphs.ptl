@@ -9,7 +9,7 @@ import './support/monotonic-interpolate' as smoothreg
 import './support/fairify' as fairify
 
 extern global
-define [gc] : begin
+define [suggestGC] : begin
 	if (global && global.gc) : global.gc
 	return nothing
 
@@ -118,8 +118,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	
 	# Progress indicator
 	define [progress status] : if [not recursive] : begin
-		#console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
-		gc
+		if para.verbose : console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
+		#suggestGC
+		return nothing
 
 	# Key metrics
 	define WIDTH para.width
@@ -304,7 +305,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
 		`[@name @actions] : begin
 			if (pickHash && nPending <= 0) : begin
-				#console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
+				if para.verbose: console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
 			
@@ -420,6 +421,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	$$include 'glyphs/symbol-other.ptl'
 	
 	# Autobuilds
+	set font.features {.}
 	$$include 'glyphs/autobuilds.ptl'
 	
 	set font.glyfMap glyphs
