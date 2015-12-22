@@ -11,11 +11,13 @@ ARCPREFIXB = iosevka$(SUFFIX)
 ifeq ($(OS),Windows_NT)
 SHELL = C:\\Windows\\System32\\cmd.exe
 SUPPRESS_ERRORS = 2> NUL
+PASS = @rem
 else
 SUPPRESS_ERRORS = 2> /dev/null
+PASS = @:
 endif
 
-NODE_FDT = node --expose-gc
+NODE_FDT = @node --expose-gc
 NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-medium.ttf $(OBJDIR)/$(PREFIX)-bold.ttf $(OBJDIR)/$(PREFIX)-heavy.ttf
@@ -89,20 +91,20 @@ $(OBJDIR)/.pass0-$(PREFIX)-heavyoblique.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-oblique  $(STYLE_oblique) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 
 $(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
-	@echo $^ "'->'" $@
+	$(PASS)
 $(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
-	@echo $^ "'->'" $@
+	$(PASS)
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
-	@echo $^ "'->'" $@
+	$(PASS)
 $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/uprightonly.fea
-	cat $^ > $@
+	@cat $^ > $@
 $(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/italiconly.fea
-	cat $^ > $@
+	@cat $^ > $@
 
 
 # Pass 1 : Outline cleanup and merge features
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg $(OBJDIR)/.pass0-%.fea
-	fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+	@fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
 # Pass 2 : add metadata
 # IDKY, but converting into TTX and convert back dramatically reduces the file size
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
@@ -111,10 +113,10 @@ $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(O
 	@ttx -q -o $@ $@.a.ttx $(SUPPRESS_ERRORS)
 	@rm $@.a.ttf $@.a.ttx
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
-	ttfautohint $< $@
+	@ttfautohint $< $@
 
 $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
-	cp $< $@
+	@cp $< $@
 
 # releaseing
 RELEASEDIR = releases

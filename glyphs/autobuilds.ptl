@@ -42,6 +42,10 @@ define customDecompositions {
 	."\u04B1" "\u04AF\u0335"
 	."\u024F" "y\u0336"
 	
+	."\u0142" "l\uE090"
+	."\u013E" "l\u0315"
+	."\u0165" "t\u0315"
+	
 	."\u023A" "A\u0338"
 	."\u023B" "C\u0338"
 	."\u023C" "c\u0337"
@@ -59,6 +63,8 @@ define customDecompositions {
 	."\u1D99" "u\u0322"
 	
 	."\u1E9A" "a\u0357"
+	."\u1E9C" "\u017F\uE090"
+	."\u1E9D" "\u017F\u0335"
 	
 	# Cyrillic composite characters
 	."\u0498" "\u0417\u0327"
@@ -162,7 +168,7 @@ define [pad s n] : begin
 #set font.features.ccmp {}
 define [shorter x y] : if (x.length < y.length) x y
 
-local {cfv} : let : begin
+let : begin
 	local nComposed 0
 	local foundDecompositions {.}
 	define [decideName namingParts parts code] : begin
@@ -190,7 +196,7 @@ local {cfv} : let : begin
 				set parts : subParts parts
 				local glyphName : decideName namingParts parts code
 				set foundDecompositions.(glyphName) {glyphName code parts}
-				inc nComposed
+
 	#if (global && global.gc) : global.gc
 	if recursiveCodes : recursiveCodes.forEach buildForCode
 	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
@@ -208,6 +214,7 @@ local {cfv} : let : begin
 			include part
 			names.push part.name
 			if (part.name === 'rtailBR') : eject-contour 'serifRB'
+		inc nComposed
 	
 	define [cfv glyphName _pa] : if (!recursive && _pa.0.featureSelector) : begin
 		local h {.}
@@ -227,15 +234,16 @@ local {cfv} : let : begin
 		create-glyph glyphName construction
 		cfv glyphName parts
 
+	# Manual decomposites
+	#cfv 'i' {glyphs.dotlessi glyphs.dotAbove}
+	#cfv 'cyrUkrainiani' {glyphs.i}
+
 	progress "Unicode Precomposites (\(nComposed) glyphs)"
 	
-	list cfv
+	* nothing
 
 
-symbol-block "Manual Precomposites and CV variants"
-	cfv 'i' {glyphs.dotlessi glyphs.dotAbove}
-	cfv 'cyrUkrainiani' {glyphs.i}
-
+symbol-block "Other Precomposites"
 	foreach [name : items-of : Object.keys glyphs] : begin
 		if glyphs.(name).featureSelector : begin
 			local fs glyphs.(name).featureSelector
@@ -756,6 +764,9 @@ symbol-block 'CJK Double Width Characters'
 	
 	if [not recursive] : createDoubleWidth : let [a {}] : begin
 		foreach [j : range 1 0x5f] : if [not unicodeGlyphs.(0xff00 + j)] : a.push {(0xff00 + j) unicodeGlyphs.(0x20 + j).name}
+		a.push {0xFFE0 'cent'}
+		a.push {0xFFE1 'sterling'}
+		a.push {0xFFE5 'yen'}
 		* a
 	
 ### Generate Features and remove double-width glyphs when necessary
