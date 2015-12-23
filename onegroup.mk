@@ -61,11 +61,11 @@ $(OBJDIR)/.pass0-$(PREFIX)-heavy.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 
 $(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-extralightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS) | $(OBJDIR)
-	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) | $(OBJDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 $(OBJDIR)/.pass0-$(PREFIX)-mediumitalic.fdt : $(SCRIPTS) | $(OBJDIR)
