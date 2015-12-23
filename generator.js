@@ -2,7 +2,6 @@ var fs = require('fs');
 var path = require('path');
 
 var TTFWriter = require('node-sfnt').TTFWriter;
-var TTF = require('node-sfnt').TTF;
 var argv = require('yargs').argv;
 var buildGlyphs  = require('./buildglyphs.js');
 var parameters = require('./parameters');
