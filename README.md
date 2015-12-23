@@ -34,7 +34,7 @@ You will find ttfs in the `build/` directory.
 Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:
 
 * `STYLE_COMMON` for both uprights and italics,
-* `STYLE_UPRIGHT` for uprights only, and
+* `STYLE_UPRIGHT` for upright and oblique, and
 * `STYLE_ITALICS` for itaics only.
 
 You can add arbitary styles for these variables, for example, `make STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'` to create a variant with Z-shaped letter `l` and `i` for uprights.
@@ -44,13 +44,28 @@ The current avaliable styles are:
 * Styles for letter `l`:
 	* `v-l-hooky` : Hooky `l`
 	* `v-l-zshaped` : Z-shaped `l`
-	* `v-l-serifed` : Serifed `l` (default for upright subfamilies)
-	* `v-l-italic` : Italic `l` (default for italic subfamilies)
+	* `v-l-serifed` : Serifed `l` (default for upright and oblique)
+	* `v-l-italic` : Italic `l` (default for italic)
 * Styles for letter `i`:
 	* `v-i-hooky` : Hooky `i`
 	* `v-i-zshaped` : Z-shaped `i`
-	* `v-i-serifed` : Serifed `i` (default for upright subfamilies)
-	* `v-l-italic` : Italic `i` (default for italic subfamilies)
+	* `v-i-serifed` : Serifed `i` (default for upright and oblique)
+	* `v-l-italic` : Italic `i` (default for italic)
+* Styles for letter `a`:
+	* `v-a-doublestorey` : Double-storey `a` (default for upright and oblique)
+	* `v-a-singlestorey` : Single-storey `a` (default for italic)
+* Styles for letter `g`:
+	* `v-g-doublestorey` : Double-storey `g` (default)
+	* `v-g-singlestorey` : Single-storey `g`
+* Styles for letter `0`:
+	* `v-zero-slashed` : Slashed Zero `0` (default)
+	* `v-zero-dotted` : Dotted Zero `0`
+	* `v-zero-unslashed` : O-like `0`
+* Styles for ASCII tilde (`~`) and asterisk (`*`):
+	* `v-tilde-high` : Higher tilde `~` (default)
+	* `v-tilde-low` : Lower tilde `~`
+	* `v-asterisk-high` : Higher asterisk `*` (default)
+	* `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
 * **1.4.3**
