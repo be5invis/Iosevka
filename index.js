@@ -46,11 +46,12 @@ var indexPage = new Vue({
 		snippets: [],
 		snippet: 'javascript',
 		theme: 'color-dark',
+		opentypeSamples: ['cv01','cv02','cv03','cv04','cv05','cv06','cv07','cv08','cv09','cv10'],
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
-		version: "1.4.3",
-		codename: "Aureta-3"
+		version: "1.5.0",
+		codename: "Elvirel"
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
