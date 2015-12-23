@@ -68,6 +68,10 @@ The current avaliable styles are:
 	* `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.0**
+ - The new "fairizer" now replaces FontForge's outline simplification. It will create smooth and fair outline curves now.
+ - Introduced centered asterisk (`*`) and tilde (`~`). They can be enabled by OpenType features `ss10`.
+ - `cv**` and `ss**` features introduced in 1.4.0 now supports accented letters.
 * **1.4.3**
  - Added the "oblique" variant.
  - Corrected the stroke width in italic variants. It will reduce the file size of italics and improve its outline quality.
