@@ -46,7 +46,29 @@ var indexPage = new Vue({
 		snippets: [],
 		snippet: 'javascript',
 		theme: 'color-dark',
-		opentypeSamples: ['cv01','cv02','cv03','cv04','cv05','cv06','cv07','cv08','cv09','cv10'],
+		opentypeSamples: [
+			
+			'Stylistic sets',
+			['volatile',['ss01','ss02','ss03'], 'sub', 'il'],
+			['percentage',['ss04','ss05'], 'sub', 'g'],
+			['msk & 0xFF',['ss06','ss07','ss08'], 'sub', '0'],
+			['*ptr=~mask',['ss09','ss10'], 'sub', '*~'],
+			
+			'Character Variants',
+			['variable', ['cv01', 'cv02'], 'sub', 'a'],
+			['integer', ['cv03', 'cv04', 'cv05', 'cv06'], 'sub', 'i'],
+			['long',['cv07','cv08','cv09','cv10'], 'sub', 'l'],
+			['git',['cv11','cv12'], 'sub', 'g'],
+			['0x1337F001',['cv13','cv14','cv15'], 'sub', '0'],
+			['~bitsRead',['cv16','cv17'], 'sub', '~'],
+			['*handler',['cv18','cv19'], 'sub', '*']
+		].map(function(item){
+			if(item instanceof Array && item[3]){
+				return [item[0].replace(new RegExp('[' + item[3] + ']', 'g'), '<b>$&</b>'), item[1], item[2]]
+			} else {
+				return item;
+			}
+		}),
 		isSlab: false,
 		isBold: false,
 		isItalic: false,
