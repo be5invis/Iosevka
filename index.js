@@ -42,6 +42,8 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
+		version: "1.5.1",
+		codename: "Elvirel",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -52,7 +54,7 @@ var indexPage = new Vue({
 			['volatile',['ss01','ss02','ss03'], 'sub', 'il'],
 			['percentage',['ss04','ss05'], 'sub', 'g'],
 			['msk & 0xFF',['ss06','ss07','ss08'], 'sub', '0'],
-			['*ptr=~mask',['ss09','ss10'], 'sub', '*~'],
+			['*p=~mask_0',['ss09','ss10'], 'sub', '*~_'],
 			
 			'Character Variants',
 			['variable', ['cv01', 'cv02'], 'sub', 'a'],
@@ -61,7 +63,8 @@ var indexPage = new Vue({
 			['git',['cv11','cv12'], 'sub', 'g'],
 			['0x1337F001',['cv13','cv14','cv15'], 'sub', '0'],
 			['~bitsRead',['cv16','cv17'], 'sub', '~'],
-			['*handler',['cv18','cv19'], 'sub', '*']
+			['*handler',['cv18','cv19'], 'sub', '*'],
+			['shared_ptr',['cv20','cv21'], 'sub', '_']
 		].map(function(item){
 			if(item instanceof Array && item[3]){
 				return [item[0].replace(new RegExp('[' + item[3] + ']', 'g'), '<b>$&</b>'), item[1], item[2]]
@@ -71,9 +74,7 @@ var indexPage = new Vue({
 		}),
 		isSlab: false,
 		isBold: false,
-		isItalic: false,
-		version: "1.5.0",
-		codename: "Elvirel"
+		isItalic: false
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
