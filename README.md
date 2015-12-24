@@ -68,6 +68,9 @@ The current avaliable styles are:
 	* `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.1**
+ - Added `cv20` and `cv21` for underscore variants (https://github.com/be5invis/Iosevka/pull/44)
+ - Reorganized `ss01`, `ss02` and `ss03`. The less-frequent style (`cv04` and `cv08`) is moved to `ss03`, while `ss01` is for hooky shapes.
 * **1.5.0**
  - The new "fairizer" now replaces FontForge's outline simplification. It will create smooth and fair outline curves now.
  - Introduced centered asterisk (`*`) and tilde (`~`). They can be enabled by OpenType features `ss10`.
