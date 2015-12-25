@@ -61,22 +61,22 @@ fonts-fw : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
 fonts-cc : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
-releasepack-fw : $(SCRIPTS) | $(OBJDIR)
+releasepack-fw : fonts-fw
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
-releasepack-cc : $(SCRIPTS) | $(OBJDIR)
+releasepack-cc : fonts-cc
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
 fonts-hooky : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
 fonts-zshaped : $(SCRIPTS) | $(OBJDIR)
 	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
-releasepack-hooky : $(SCRIPTS) | $(OBJDIR)
+releasepack-hooky : fonts-hooky
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
-releasepack-zshaped : $(SCRIPTS) | $(OBJDIR)
+releasepack-zshaped : fonts-zshaped
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
 release-all : releasepack-default releasepack-fw releasepack-cc releasepack-hooky releasepack-zshaped
 fw : fonts-fw fonts-cc
 
-sampleimage : fonts
+images/weights.png : fonts
 	convert -size 4800x1700 xc:white -pointsize 125 \
 		-fill black \
 		-font dist/iosevka-thin.ttf       -draw "text 0,121  '      thin    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
@@ -88,13 +88,15 @@ sampleimage : fonts
 		-font dist/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-trim images/weights.png
 
-sampleimage-variants : fonts fonts-hooky fonts-zshaped
+imges/variants.png : fonts fonts-hooky fonts-zshaped
 	convert -size 6800x1700 xc:white -pointsize 125 \
 		-fill black \
 		-font dist/iosevka-italic.ttf          -draw "text 0,121  'default:    '" \
 		-font dist/iosevka-regular.ttf         -draw "fill blue text 750,121 'set ' fill black text 1000,121 'font.name.uniqueSubFamily ' fill green text 2625,121 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/hooky-iosevka-italic.ttf    -draw "text 0,299  '  hooky:    '" \
-		-font dist/hooky-iosevka-regular.ttf   -draw "fill blue text 750,299 'set ' fill black text 1000,299 'font.name.uniqueSubFamily ' fill green text 2625,299 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/zshaped-iosevka-italic.ttf  -draw "text 0,478  'zshaped:    '" \
-		-font dist/zshaped-iosevka-regular.ttf -draw "fill blue text 750,478 'set ' fill black text 1000,478 'font.name.uniqueSubFamily ' fill green text 2625,478 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
+		-font dist/hooky-iosevka-italic.ttf    -draw "text 0,308  '  hooky:    '" \
+		-font dist/hooky-iosevka-regular.ttf   -draw "fill blue text 750,308 'set ' fill black text 1000,308 'font.name.uniqueSubFamily ' fill green text 2625,308 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
+		-font dist/zshaped-iosevka-italic.ttf  -draw "text 0,496  'zshaped:    '" \
+		-font dist/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
 		-trim images/variants.png
+
+sampleimages: images/weights.png images/variants.png
