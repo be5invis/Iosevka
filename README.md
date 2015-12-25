@@ -29,7 +29,7 @@ You will find ttfs in the `build/` directory.
 
 ## Build your own style
 
-![Styles Preview](https://cloud.githubusercontent.com/assets/240091/10895370/cc80f088-81ee-11e5-919b-a6daefdbc3f0.png)
+![Styles Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/variants.png)
 
 Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:
 
@@ -50,7 +50,7 @@ The current avaliable styles are:
 	* `v-i-hooky` : Hooky `i`
 	* `v-i-zshaped` : Z-shaped `i`
 	* `v-i-serifed` : Serifed `i` (default for upright and oblique)
-	* `v-l-italic` : Italic `i` (default for italic)
+	* `v-i-italic` : Italic `i` (default for italic)
 * Styles for letter `a`:
 	* `v-a-doublestorey` : Double-storey `a` (default for upright and oblique)
 	* `v-a-singlestorey` : Single-storey `a` (default for italic)
