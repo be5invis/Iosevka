@@ -68,6 +68,9 @@ The current avaliable styles are:
 	* `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.2**
+ - Told OS X not to increase line height for bold weights.
+ - Pushed the `i` and `l` undef hooky variants rightward slightly.
 * **1.5.1**
  - Added `cv20` and `cv21` for underscore variants (https://github.com/be5invis/Iosevka/pull/44)
  - Reorganized `ss01`, `ss02` and `ss03`. The less-frequent style (`cv04` and `cv08`) is moved to `ss03`, while `ss01` is for hooky shapes.
