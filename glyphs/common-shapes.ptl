@@ -433,12 +433,14 @@ define [FlatSlashShape middlex middle fine kx ky] : glyph-construction
 		curl (middlex + LONGJUT * [fallback kx 0.8]) (middle + LONGJUT * [fallback ky 0.4])
 
 # Spiro shapes
-define [determineMixR w v adj] : piecewise
-	(w <= v)   0.5
-	true     : (adj || 1) / ([Math.pow (1 - [Math.pow (1 - v / w) SUPERNESS]) (1 / SUPERNESS)] + 1)
-define nHookSegments 8
+define [determineMixR w v u] : begin
+	local smallSMix : clamp 0 1 : linreg 0 [linreg 18 1 108 0.975 STROKE] 50 1 [clamp 0 500 : 500 - WIDTH]
+	return : piecewise
+		(w <= v)   0.5
+		true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) SUPERNESS]) (1 / SUPERNESS)] + 1)
 
-define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
+define nHookSegments 16
+define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
 	local atBottom : toStraight.y > y
 	local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 	local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
@@ -450,7 +452,7 @@ define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
 	local w : Math.abs (toStraight.y - y)
 	local v : Math.abs (toFinish.y - y)
 	local u : Math.abs (toFinish.x - toStraight.x)
-	local mixr : determineMixR w v adj
+	local mixr : determineMixR w v u
 	local mx ([mix toStraight.x toFinish.x mixr] + ([if tight 0 : if atBottom 1 (-1)] * CORRECTION_OMIDX) * [fallback s STROKE])
 	local keyKnot : g4.[if ltr "right" "left"].mid mx y [fallback kkaf : if tight [heading [if ltr RIGHTWARD LEFTWARD]] nothing]
 	
@@ -487,8 +489,8 @@ define [HookShape toStraight toFinish isStart y tight s kkaf adj] : begin
 		* keyKnot
 		* segAfter
 
-define [hookstart y tight s kkaf adj] : return {.type 'interpolate' .af [lambda [before after] [HookShape after before true y tight s kkaf adj]]}
-define [hookend y tight s kkaf adj] : return {.type 'interpolate' .af [lambda [before after] [HookShape before after false y tight s kkaf adj]]}
+define [hookstart y tight s kkaf] : return {.type 'interpolate' .af [lambda [before after] [HookShape after before true y tight s kkaf]]}
+define [hookend y tight s kkaf] : return {.type 'interpolate' .af [lambda [before after] [HookShape before after false y tight s kkaf]]}
 
 define [WaveShape l r cy extendy tension sw] : glyph-construction
 	local cx : mix l r 0.5
