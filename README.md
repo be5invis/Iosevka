@@ -68,6 +68,8 @@ The current avaliable styles are:
 	* `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.3**
+ - Fixed the slanted bottom tip of `y` in Slab oblique.
 * **1.5.2**
  - Told OS X not to increase line height for bold weights.
  - Pushed the `i` and `l` undef hooky variants rightward slightly.
