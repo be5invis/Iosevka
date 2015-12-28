@@ -25,7 +25,7 @@ To build Iosevka you should:
 2. Install necessary libs by `npm install`
 3. `make`.
 
-You will find ttfs in the `build/` directory.
+You will find ttfs in the `dist/` directory.
 
 ## Build your own style
 
@@ -68,6 +68,8 @@ The current avaliable styles are:
  * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.5**
+ - Adjusted the outlines of `f`, `2` and `&`, as well as full-width symbol `~`.
 * **1.5.4**
  - Fixed the distortion of letter `s` under several situations, for example, full-width.
 * **1.5.3**
