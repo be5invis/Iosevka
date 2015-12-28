@@ -42,32 +42,34 @@ You can add arbitary styles for these variables, for example, `make STYLE_UPRIGH
 The current avaliable styles are:
 
 * Styles for letter `l`:
-	* `v-l-hooky` : Hooky `l`
-	* `v-l-zshaped` : Z-shaped `l`
-	* `v-l-serifed` : Serifed `l` (default for upright and oblique)
-	* `v-l-italic` : Italic `l` (default for italic)
+ * `v-l-hooky` : Hooky `l`
+ * `v-l-zshaped` : Z-shaped `l`
+ * `v-l-serifed` : Serifed `l` (default for upright and oblique)
+ * `v-l-italic` : Italic `l` (default for italic)
 * Styles for letter `i`:
-	* `v-i-hooky` : Hooky `i`
-	* `v-i-zshaped` : Z-shaped `i`
-	* `v-i-serifed` : Serifed `i` (default for upright and oblique)
-	* `v-i-italic` : Italic `i` (default for italic)
+ * `v-i-hooky` : Hooky `i`
+ * `v-i-zshaped` : Z-shaped `i`
+ * `v-i-serifed` : Serifed `i` (default for upright and oblique)
+ * `v-i-italic` : Italic `i` (default for italic)
 * Styles for letter `a`:
-	* `v-a-doublestorey` : Double-storey `a` (default for upright and oblique)
-	* `v-a-singlestorey` : Single-storey `a` (default for italic)
+ * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique)
+ * `v-a-singlestorey` : Single-storey `a` (default for italic)
 * Styles for letter `g`:
-	* `v-g-doublestorey` : Double-storey `g` (default)
-	* `v-g-singlestorey` : Single-storey `g`
+ * `v-g-doublestorey` : Double-storey `g` (default)
+ * `v-g-singlestorey` : Single-storey `g`
 * Styles for letter `0`:
-	* `v-zero-slashed` : Slashed Zero `0` (default)
-	* `v-zero-dotted` : Dotted Zero `0`
-	* `v-zero-unslashed` : O-like `0`
+ * `v-zero-slashed` : Slashed Zero `0` (default)
+ * `v-zero-dotted` : Dotted Zero `0`
+ * `v-zero-unslashed` : O-like `0`
 * Styles for ASCII tilde (`~`) and asterisk (`*`):
-	* `v-tilde-high` : Higher tilde `~` (default)
-	* `v-tilde-low` : Lower tilde `~`
-	* `v-asterisk-high` : Higher asterisk `*` (default)
-	* `v-asterisk-low` : Lower asterisk `*`
+ * `v-tilde-high` : Higher tilde `~` (default)
+ * `v-tilde-low` : Lower tilde `~`
+ * `v-asterisk-high` : Higher asterisk `*` (default)
+ * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.5.4**
+ - Fixed the distortion of letter `s` under several situations, for example, full-width.
 * **1.5.3**
  - Fixed the slanted bottom tip of `y` in Slab oblique.
 * **1.5.2**

@@ -109,26 +109,26 @@ $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg $(OB
 # IDKY, but converting into TTX and convert back dramatically reduces the file size
 $(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
 	@$(NODE) $^ -o $@.a.ttf
-	@ttx -q -o $@.a.ttx $@.a.ttf $(SUPPRESS_ERRORS)
-	@ttx -q -o $@ $@.a.ttx $(SUPPRESS_ERRORS)
-	@rm $@.a.ttf $@.a.ttx
+	@ttx -q -o $@.a.ttx $@.a.ttf
+	@ttx -q -o $@ $@.a.ttx
+	@-rm $@.a.ttf $@.a.ttx
 $(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	@ttfautohint $< $@
 
-$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
-	@cp $< $@
+$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
+	@ttfautohint $< $@
 
 # releaseing
 RELEASEDIR = releases
 ARCHIVEDIR = release-archives
 
-RELEASES = $(subst $(OBJDIR)/,$(RELEASEDIR)/,$(TARGETS))
-$(RELEASES) : $(RELEASEDIR)/%.ttf : $(OBJDIR)/%.ttf
+RELEASES = $(subst $(DISTDIR)/,$(RELEASEDIR)/,$(DISTTARGETS))
+$(RELEASES) : $(RELEASEDIR)/%.ttf : $(DISTDIR)/%.ttf
 	cp $< $@
 
 PAGEDIR = pages/assets
-PAGESTTF = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(TARGETS))
-$(PAGESTTF) : $(PAGEDIR)/%.ttf : $(OBJDIR)/%.ttf
+PAGESTTF = $(subst $(DISTDIR)/,$(PAGEDIR)/,$(DISTTARGETS))
+$(PAGESTTF) : $(PAGEDIR)/%.ttf : $(DISTDIR)/%.ttf
 	cp $< $@
 PAGESWOFF = $(subst .ttf,.woff,$(PAGESTTF))
 $(PAGESWOFF) : $(PAGEDIR)/%.woff : $(PAGEDIR)/%.ttf
@@ -137,10 +137,10 @@ PAGESMAPS = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(MAPS))
 $(PAGESMAPS) : $(PAGEDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
-#$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(TARGETS)
-#	cd $(OBJDIR) && tar -cjvf ../$@ $(subst $(OBJDIR)/,,$^)
-$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip : $(TARGETS)
-	cd $(OBJDIR) && 7z a -tzip ../$@ $(subst $(OBJDIR)/,,$^)
+#$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)
+#	cd $(DISTDIR) && tar -cjvf ../$@ $(subst $(DISTDIR)/,,$^)
+$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip : $(DISTTARGETS)
+	cd $(DISTDIR) && 7z a -tzip ../$@ $(subst $(DISTDIR)/,,$^)
 
 #archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
@@ -149,14 +149,13 @@ release : $(RELEASES) archives pages
 
 # testdrive
 TESTDIR = testdrive/assets
-TESTTTF = $(subst $(OBJDIR)/,$(TESTDIR)/,$(TARGETS))
-$(TESTTTF) : $(TESTDIR)/%.ttf : $(OBJDIR)/%.ttf
+TESTTTF = $(subst $(DISTDIR)/,$(TESTDIR)/,$(DISTTARGETS))
+$(TESTTTF) : $(TESTDIR)/%.ttf : $(DISTDIR)/%.ttf
 	cp $< $@
 TESTWOFF = $(subst .ttf,.woff,$(TESTTTF))
 $(TESTWOFF) : $(TESTDIR)/%.woff : $(TESTDIR)/%.ttf
 	sfnt2woff $<
-OUTMAPS    = $(subst .ttf,.charmap,$(TARGETS))
-TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(OUTMAPS))
+TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(MAPS))
 $(TESTMAPS) : $(TESTDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
