@@ -42,8 +42,8 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.5.3",
-		codename: "Elvirel-3",
+		version: "1.5.4",
+		codename: "Elvirel-4",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
