@@ -27,6 +27,39 @@ define-macro $$include : syntax-rules
 		return {'.syntactic-closure' ast env}
 	otherwise `nothing
 
+### Autoarg macro
+define [$NamedParameterPair$ l r] : begin
+	set this.left l
+	set this.right r
+	return this
+
+define-macro "--" : syntax-rules
+	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
+
+define-macro params : syntax-rules
+	`[params @_pairs @body] : begin
+		local ta : env.newt
+		local t : env.newt
+		local ps `[begin [local @ta : {}.slice.call arguments 0]]
+		local aps `[begin]
+		local dps `[begin]
+		local j 0
+		foreach [pf : items-of : formOf _pairs] : begin
+			local name
+			if [atom pf] : then
+				ps.push `[local @pf : fallback @pf (@ta).(@{".quote" j})]
+				set name pf
+			: else
+				ps.push `[local @(pf.0) : fallback @(pf.0) @(pf.1)]
+				set name pf.0
+			aps.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name}) [set @name @t.right]]
+			if pf.2 : dps.push `[local @(pf.2) @name]
+			inc j
+		ps.push `[foreach [@t : items-of @ta] @aps]
+		ps.push dps
+		ps.push : formOf body
+		return : dirty ps
+
 # A symbol block defines a group of similar glyphs. They may expose some functions used in glyphs in other blocks.
 define-macro symbol-block : syntax-rules
 	`[symbol-block @name @::steps] : let [t : env.newt] : dirty `[begin [let : set @t : begin @::[steps.map formOf]] [progress @name] @t]
