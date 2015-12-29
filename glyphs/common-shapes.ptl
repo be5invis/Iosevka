@@ -299,13 +299,8 @@ define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-const
 	include : halfXStrand _leftx lefty middlex middley turn straight tension
 	include : halfXStrand _rightx righty middlex middley turn straight tension
 
-define [nShoulderKnots left right fine _top _bottom _sma _smb _wide] : begin
-	local top : fallback _top XH
-	local bottom : fallback _bottom 0
-	local sma : fallback _sma SMALLSMOOTHA
-	local smb : fallback _smb SMALLSMOOTHB
-	local stroke : fallback _wide STROKE
-	local slope : shoulderMidSlope fine
+define [nShoulderKnots] : params [left right [fine SHOULDERFINE] [top XH] [bottom 0] [sma SMALLSMOOTHA] [smb SMALLSMOOTHB] [stroke STROKE]] : begin
+	local slope : shoulderMidSlope fine stroke
 	local middle : [mix (left - stroke * HVCONTRAST) right 0.5] + (slope - CORRECTION_OMIDX) * stroke
 	return : list
 		flat left (top - sma - 2) [widths fine 0]
@@ -316,8 +311,10 @@ define [nShoulderKnots left right fine _top _bottom _sma _smb _wide] : begin
 		flat right (top - smb)
 		curl right bottom [heading DOWNWARD]
 
-define [nShoulder left right fine _top _bottom _sma _smb _wide] : let [a arguments] : glyph-construction
-	include : dispiro : nShoulderKnots.apply null a
+define [nShoulder] : begin
+	local a arguments
+	glyph-construction
+		include : dispiro : nShoulderKnots.apply null a
 
 
 define [mShoulderSpiro] : params [left right top bottom width fine] : glyph-construction
@@ -371,7 +368,7 @@ define [VerticalHook x y extend depth fine strg] : glyph-construction
 		flat (x + extend - [if (extend > 0) 0.01 (-0.01)]) (y - depth)
 		curl (x + extend) (y - depth)
 
-define [LegShape] : params [xt xb xs top bottom [fine STROKE]] : glyph-construction
+define [LegShape] : params [[ztop nothing {.x xt .y top}] [zbot nothing {.x xs .y bottom}] xb [fine STROKE]] : glyph-construction
 	include : dispiro
 		widths.lhs fine
 		flat xt top [heading DOWNWARD]

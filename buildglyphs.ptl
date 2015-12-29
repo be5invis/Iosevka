@@ -35,22 +35,29 @@ define [$NamedParameterPair$ l r] : begin
 
 define-macro "--" : syntax-rules
 	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
+define-macro "<>" : syntax-rules
+	`(@l <> @r) : dirty `{.x @[formOf l] .y @[formOf r]}
 
 define-macro params : syntax-rules
 	`[params @_pairs @body] : begin
 		local ta : env.newt
+		local tb : env.newt
 		local t : env.newt
-		local ps `[begin [local @ta : {}.slice.call arguments 0]]
+		local ps `[begin
+			[local @ta : {}.slice.call arguments 0]
+			[local @tb {}]
+			[for [local @t 0] (@t < @ta.length) [inc @t] : if [not : @ta.(@t) <@ $NamedParameterPair$] : @tb.push @ta.(@t)]
+		]
 		local aps `[begin]
 		local dps `[begin]
 		local j 0
 		foreach [pf : items-of : formOf _pairs] : begin
 			local name
 			if [atom pf] : then
-				ps.push `[local @pf : fallback @pf (@ta).(@{".quote" j})]
+				ps.push `[local @pf : fallback @pf (@tb).(@{".quote" j})]
 				set name pf
 			: else
-				ps.push `[local @(pf.0) : fallback @(pf.0) @(pf.1)]
+				ps.push `[local @(pf.0) : fallback @(pf.0) (@tb).(@{".quote" j}) @(pf.1)]
 				set name pf.0
 			aps.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name}) [set @name @t.right]]
 			if pf.2 : dps.push `[local @(pf.2) @name]
@@ -124,9 +131,6 @@ define [fallback] : begin
 	return nothing
 
 define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
-define [normalize a] : begin
-	local m : Math.hypot a.x a.y
-	return {.x (a.x / m) .y (a.y / m)}
 
 define [anchorDeriv] : begin
 	local h {.}
@@ -185,10 +189,10 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define HVCONTRAST : CONTRAST * COSSLANT + SINSLANT * TANSLANT
 	
 	# Orient parameters
-	define UPWARD {.x (-HVCONTRAST) .y 0}
-	define DOWNWARD {.x HVCONTRAST .y 0}
-	define RIGHTWARD {.x TANSLANT .y 1}
-	define LEFTWARD  {.x (- TANSLANT) .y (-1)}
+	define UPWARD    : (-HVCONTRAST) <> 0
+	define DOWNWARD  : HVCONTRAST <> 0
+	define RIGHTWARD : TANSLANT <> 1
+	define LEFTWARD  : (- TANSLANT) <> (-1)
 	
 	# Style parameters
 	define O para.overshoot
