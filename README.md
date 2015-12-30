@@ -21,7 +21,7 @@ Quit your editor/program. Unzip and open the folder.
 
 To build Iosevka you should:
 
-1. Ensure that `node`, `FontForge` (≥ Aug. 2015 release), `ttfautohint`, `ttx` and `make` are runnable in your terminal.
+1. Ensure that `node` (≥ 5.0), `FontForge` (≥ Aug. 2015 release), `ttfautohint`, `ttx` and `make` are runnable in your terminal.
 2. Install necessary libs by `npm install`
 3. `make`.
 
