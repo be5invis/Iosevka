@@ -15,16 +15,16 @@ release : release-default release-slab
 	
 
 # svgs
-svgs-default : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
+svgs-default : $(SCRIPTS) | $(OBJDIR) dist
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_DEFAULT)
-svgs-slab : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
+svgs-slab : $(SCRIPTS) | $(OBJDIR) dist
 	@$(MAKE) -f onegroup.mk svgs $(PARAM_SLAB)
 
 
 # ttfs
-fonts-default : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
+fonts-default : $(SCRIPTS) | $(OBJDIR) dist
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
+fonts-slab : $(SCRIPTS) | $(OBJDIR) dist
 	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
 
 
@@ -55,19 +55,19 @@ archives-slab : fonts-slab
 	@$(MAKE) -f onegroup.mk archives $(PARAM_SLAB)
 
 # Variant releases
-releasepack-default : $(SCRIPTS) | $(OBJDIR)
+releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) pages release VERSION=$(VERSION)
-fonts-fw : $(SCRIPTS) | $(OBJDIR)
+fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
-fonts-cc : $(SCRIPTS) | $(OBJDIR)
+fonts-cc : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
 releasepack-fw : fonts-fw
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
 releasepack-cc : fonts-cc
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
-fonts-hooky : $(SCRIPTS) | $(OBJDIR)
+fonts-hooky : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
-fonts-zshaped : $(SCRIPTS) | $(OBJDIR)
+fonts-zshaped : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
 releasepack-hooky : fonts-hooky
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'

@@ -35,8 +35,29 @@ define [$NamedParameterPair$ l r] : begin
 
 define-macro "--" : syntax-rules
 	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
-define-macro "<>" : syntax-rules
-	`(@l <> @r) : dirty `{.x @[formOf l] .y @[formOf r]}
+
+define-macro "<>" : begin
+	local tClass [definingEnv.newt 'class']
+	local m : syntax-rules
+		`(@x <> @y) `[new @tClass @x @y]
+		
+	set coinit.initFn : lambda [m] : begin
+		set m.toPattern : lambda [form env wrapper] : match form
+			`(@x <> @y) : begin
+				local p1 [toPattern x env wrapper]
+				local p2 [toPattern y env wrapper]
+				object
+					whether : lambda [t] `(@t && @[p1.whether `(@t.x)] && @[p2.whether `(@t.y)])
+					assign : lambda [t locallyQ] : ex `[begin 
+						@{".preserve" [p1.assign `(@t.x) locallyQ]}
+						@{".preserve" [p2.assign `(@t.y) locallyQ]}
+					] env
+	set coinit.injectForm `[define [@tClass x y] : begin \\
+		set this.x x
+		set this.y y
+		return nothing
+	]
+	return m
 
 define-macro params : syntax-rules
 	`[params @_pairs @body] : begin

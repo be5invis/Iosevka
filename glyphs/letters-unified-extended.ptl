@@ -66,11 +66,11 @@ symbol-block 'Gamma'
 	create-glyph 'cyrGhayn' : glyph-construction
 		assign-unicode 0x492
 		include glyphs.cyrGhe AS_BASE
-		include : HOverlayBar (SB * 0.3) [mix (SB + STROKE) (RIGHTSB - STROKE) 0.55] (CAP * (1 - BARPOS))
+		include : HOverlayBar (SB * 0.3) [mix (SB + STROKE) (RIGHTSB - STROKE) 0.55] (CAP * (1 - OVERLAYPOS))
 	
 	create-glyph 'cyrghayn.upright' : glyph-construction
 		include glyphs.'cyrghe.upright' AS_BASE
-		include : HOverlayBar (SB * 0.3) [mix (SB + STROKE) (RIGHTSB - STROKE) 0.55] (XH * (1 - BARPOS))
+		include : HOverlayBar (SB * 0.3) [mix (SB + STROKE) (RIGHTSB - STROKE) 0.55] (XH * (1 - OVERLAYPOS))
 	
 	create-glyph 'cyrghayn.italic' : glyph-construction
 		include glyphs.'cyrghe.italic' AS_BASE
@@ -199,7 +199,7 @@ symbol-block 'Delta and cyrbe'
 symbol-block 'epsilon and cyrze'
 	define [SmallEpsilonShape top hook] : glyph-construction
 		local midx : mix SB RIGHTSB 0.65
-		local midy : top * BARPOS
+		local midy : top * OVERLAYPOS
 		local sma : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
 		local smb : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
 		local fine : STROKE * CTHIN
@@ -232,7 +232,7 @@ symbol-block 'epsilon and cyrze'
 		
 	define [CyrZeShape top hook] : glyph-construction
 		local midx : mix RIGHTSB SB 0.65
-		local midy : top * BARPOS
+		local midy : top * OVERLAYPOS
 		local smb : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
 		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
 		local fine : STROKE * CTHIN
@@ -1142,13 +1142,21 @@ symbol-block 'CyrTshe and CyrDje'
 		assign-unicode 0x40B
 		include capitalMarks
 		
-		local left : mix SB RIGHTSB 0.15
+		local left : [mix SB RIGHTSB 0.15] + OX
+		local right : RIGHTSB - OX
 		
 		include : nShoulder
 			left -- (left + STROKE * HVCONTRAST)
-			right -- RIGHTSB
+			right -- right
 		include : VBarLeft left 0 CAP
-		include : HBarTop SB [mix left RIGHTSB 0.5] CAP
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) CAP
+			curl [mix left RIGHTSB 0.475] CAP
+		
+		if SLAB : begin
+			include : CenterBottomSerif (left + HVCONTRAST * HALFSTROKE) 0 JUT
+			include : CenterBottomSerif (right - HVCONTRAST * HALFSTROKE) 0 JUT
 	
 	alias 'cyrtshe' 0x45B 'hbar'
 	
@@ -1156,18 +1164,25 @@ symbol-block 'CyrTshe and CyrDje'
 		assign-unicode 0x402
 		include capitalMarks
 		
-		local left : mix SB RIGHTSB 0.15
+		local left : [mix SB RIGHTSB 0.15] + OX
+		local right: RIGHTSB - OX * 1.5
 		
 		include : nShoulder
 			left -- (left + STROKE * HVCONTRAST)
-			right -- RIGHTSB
+			right -- right
 			top -- XH
 			bottom -- (HOOK + HALFSTROKE + O)
 			sma -- SMOOTHA
 			smb -- SMOOTHB
 		include : VBarLeft left 0 CAP
-		include : HBarTop SB [mix left RIGHTSB 0.5] CAP
-		include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) (HOOK + HALFSTROKE + O) [Math.max ((left - RIGHTSB) / 2 + HALFSTROKE) (-HOOK * 1.2)] HOOK
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) CAP
+			curl [mix left RIGHTSB 0.475] CAP
+		include : VerticalHook (right - HALFSTROKE * HVCONTRAST) (HOOK + HALFSTROKE + O) [Math.max ((left - right) / 2 + HALFSTROKE) (-HOOK * 1.2)] HOOK
+		
+		if SLAB : begin
+			include : LeftwardBottomSerif left 0 SIDEJUT
 	
 	create-glyph 'cyrdje' : glyph-construction
 		assign-unicode 0x452
@@ -1252,13 +1267,17 @@ symbol-block 'Digraphs'
 		start-from (eleft - HALFSTROKE) CAP
 		line-to    eleft CAP
 		line-to    eleft (CAP - MVERTSTROKE)
-		include : HBarTop  (SB + MVERTSTROKE)  (eleft + MVERTSTROKE / 2) (XH / 2) MVERTSTROKE
+		include : HBarTop  ([mix SB (eleft - HALFSTROKE) (1/6)] + MVERTSTROKE * 0.5 * HVCONTRAST)  (eleft + MVERTSTROKE / 2) (XH / 2) MVERTSTROKE
 		
 		# E half
 		include : VBarLeft eleft 0 CAP MVERTSTROKE
 		include : HBarTop (eleft - O) RIGHTSB CAP
 		include : HBar (eleft - O) (RIGHTSB - MVERTSTROKE / 4) (CAP * 0.54)
 		include : HBarBottom (eleft - O) RIGHTSB 0
+		if SLAB : begin
+			include : CenterBottomSerif (SB + MVERTSTROKE / 2 * HVCONTRAST) 0 JUT MVERTSTROKE
+			include : DownwardRightSerif RIGHTSB CAP VJUT MVERTSTROKE
+			include : UpwardRightSerif RIGHTSB 0 VJUT MVERTSTROKE
 	alias 'cyrAE' 0x4D4 'AE'
 	
 	define [OEShape top] : glyph-construction
@@ -1280,6 +1299,10 @@ symbol-block 'Digraphs'
 		include : HBarTop (eleft - O) RIGHTSB top
 		include : HBar (eleft - O) (RIGHTSB - MVERTSTROKE / 4) (top * 0.54)
 		include : HBarBottom (eleft - O) RIGHTSB 0
+		
+		if SLAB : begin
+			include : DownwardRightSerif RIGHTSB top VJUT MVERTSTROKE
+			include : UpwardRightSerif RIGHTSB 0 VJUT MVERTSTROKE
 	
 	create-glyph 'OE' : glyph-construction
 		set-width WIDTH
@@ -1312,7 +1335,7 @@ symbol-block 'Digraphs'
 		include : HBarBottom (eLeft + MVERTSTROKE / 2) (RIGHTSB - OX * 2 - MVERTSTROKE / 2) barbottom MVERTSTROKE
 	
 	define aeapart : glyph-construction
-		local bartop (XH * BARPOS * 1.02 + HALFSTROKE)
+		local bartop (XH * OVERLAYPOS * 1.02 + HALFSTROKE)
 		local abarRight : MIDDLE + MVERTSTROKE / 2 * HVCONTRAST - 0.1
 		local lowmiddle : mix (SB + OX * 2) abarRight 0.5
 		local barsmooth : mix SB abarRight 0.7

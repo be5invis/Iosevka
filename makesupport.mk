@@ -1,11 +1,10 @@
 OBJDIR = build
-DISTDIR = dist
 
 $(OBJDIR) :
 	@- mkdir $@
-$(DISTDIR) :
+dist :
 	@- mkdir $@
-
+	
 PATELC = node ./node_modules/patel/bin/patel-c
 SUPPORT_FILES_FROM_aki = support/glyph.js support/spiroexpand.js support/spirokit.js parameters.js
 SUPPORT_FILES = $(SUPPORT_FILES_FROM_aki) support/point.js generator.js emptyfont.toml parameters.toml support/fairify.js
