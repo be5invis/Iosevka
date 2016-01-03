@@ -523,12 +523,25 @@ define [refair g] : begin
 		set g.contours.(j) : fairify g.contours.(j) globalTransform g.dense
 	return nothing
 define [Fork gs params] : begin
-	local p : Object.create params
-	local shouldBuildList {}
-	foreach glyphid [items-of gs] : set shouldBuildList : shouldBuildList.concat {glyphid :: dependencyProfile.(glyphid)}
-	set shouldBuildList : shouldBuildList.filter : [x] -> [not [not x]]
+	# BFS construct ShouldBuildList
+	local sbh {.}
+	local found true
+	local PENDING 1
+	local CHECKED 2
+	foreach [glyphid : items-of gs] : set sbh.(glyphid) PENDING
+	while found : begin
+		set found false
+		foreach [glyphid : items-of : Object.keys sbh] : if (sbh.(glyphid) === PENDING) : begin
+			set sbh.(glyphid) CHECKED
+			if dependencyProfile.(glyphid) : foreach [k : items-of dependencyProfile.(glyphid)] : if [not sbh.(k)] : begin
+				set sbh.(k) PENDING
+				set found true
+	
+	local shouldBuildList : Object.keys sbh :.filter ([x] -> [not [not x]])
 	local shouldBuildUnicodes : shouldBuildList.map ([x] -> [if (glyphs.(x) && glyphs.(x).unicode) glyphs.(x).unicode.0 nothing])
 		:.filter ([x] -> [not [not x]])
+	
+	local p : Object.create params
 	try : begin
 		local forkFont : buildFont.call [TempFont] p shouldBuildList shouldBuildUnicodes
 	: ex

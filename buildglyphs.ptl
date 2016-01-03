@@ -136,6 +136,20 @@ define [includeGlyphPart cg gs nm] : begin
 	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
 	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
 
+###### Canvas-based mechanism
+define-macro draw : syntax-rules
+	`[draw @::steps] : begin
+		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
+		inc externEnv.$nWFGlyphs$
+		dirty `[[lambda [currentGlyph] [begin \\
+			if [not currentGlyph] : return nothing
+			if [glyphList.(glyphList.length - 1).name === @{".quote" (".WF" + externEnv.$nWFGlyphs$)}] : glyphList.pop
+			begin @::[steps.map formOf]
+			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
+			return nothing
+		]] [create-glyph @{".quote" (".WF" + externEnv.$nWFGlyphs$)} [lambda]]]
+define-macro save : syntax-rules
+	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
 
 ### COMMON FUNCTIONS
 define [mix a b p] : a + (b - a) * p
@@ -385,6 +399,17 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			glyphObject.gizmo = globalTransform
 			actions.call glyphObject
 			return glyphObject
+	
+	define [$save$ name unicode] : begin
+		local t this
+		local g : create-glyph name [lambda]
+		if g : begin
+			g.include t AS_BASE
+			if name : set dependencyProfile.(name) : getDependencyProfile g
+		if (g && unicode) : begin
+			g.assign-unicode unicode
+			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+		return g
 
 	### Spiro constructions
 	# Basic knots
