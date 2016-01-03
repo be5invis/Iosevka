@@ -66,12 +66,12 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.6.1**
+ - Added `ꭤ` U+AB64, `Ɑ` U+2C6D, `Ɒ` U+2C70, `ꬰ` U+AB30, etc.
 * **1.6.0**
   - Fixed the broken `Æ` at thin weights.
   - Increased the length of the bottom serif in `T`.
   - Made `Ђ` and `Ћ` wider to balance Cyrillic letters
-
-
 * **1.5.5**
   - Adjusted the outlines of `f`, `2` and `&`, as well as full-width symbol `~`.
 * **1.5.4**
