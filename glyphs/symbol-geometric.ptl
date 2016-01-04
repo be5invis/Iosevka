@@ -31,6 +31,7 @@ define {ArrowHead ArrowShape} : symbol-block 'Arrows'
 		apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
 		apply-transform : Translate xt yt
 		set this.gizmo g
+		
 	define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
 		local mag : Math.hypot (y2 - y1) (x2 - x1)
 		local p : (mag - halfstroke * 1.1) / mag
@@ -40,19 +41,22 @@ define {ArrowHead ArrowShape} : symbol-block 'Arrows'
 			flat x1 y1
 			curl [mix x1 x2 p] [mix y1 y2 p]
 			end [[] -> (this.contrast = 1)]
-	define [arrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction
+			
+	define [arrow id unicode x1 y1 x2 y2] : sketch
 		set-width FULLWIDTH
 		set-anchor "slash" BASE FWMIDDLE parenMid
-		assign-unicode unicode
 		include : ArrowShape x1 y1 x2 y2
-	define [doublearrow id unicode x1 y1 x2 y2] : create-glyph id : glyph-construction
+		save id unicode
+	
+	define [doublearrow id unicode x1 y1 x2 y2] : sketch
 		set-width FULLWIDTH
 		set-anchor "slash" BASE FWMIDDLE parenMid
-		assign-unicode unicode
 		local xm : mix x1 x2 0.5
 		local ym : mix y1 y2 0.5
 		include : ArrowShape xm ym x1 y1
 		include : ArrowShape xm ym x2 y2
+		save id unicode
+		
 	arrow 'arrowleft' 0x2190 FWRSB parenMid SB parenMid
 	arrow 'arrowright' 0x2192 SB parenMid FWRSB parenMid
 	arrow 'arrowup' 0x2191 FWMIDDLE arrowBot FWMIDDLE arrowTop
@@ -107,62 +111,69 @@ symbol-block 'Geometric'
 		apply-transform [Italify] true
 		set-width WIDTH
 
-	create-glyph 'blacksquare' : glyph-construction
-		assign-unicode 0x25A0
+	sketch # blacksquare
 		start-from left (parenMid + squareRadius)
 		line-to    right (parenMid + squareRadius)
 		line-to    right (parenMid - squareRadius)
 		line-to    left (parenMid - squareRadius)
 		include FullWidthify
-	create-glyph 'blackrectangle' : glyph-construction
-		assign-unicode 0x25AC
+		save 'blacksquare' 0x25A0
+	
+	sketch # blackrectangle
 		start-from left (parenMid + squareRadius / 1.5)
 		line-to    right (parenMid + squareRadius / 1.5)
 		line-to    right (parenMid - squareRadius / 1.5)
 		line-to    left (parenMid - squareRadius / 1.5)
 		include FullWidthify
-	create-glyph 'blacklongrectangle' : glyph-construction
-		assign-unicode 0x25AE
+		save 'blackrectangle' 0x25AC
+	
+	sketch # blacklongrectangle
 		start-from left (parenMid + squareRadius * 1.5)
 		line-to    right (parenMid + squareRadius * 1.5)
 		line-to    right (parenMid - squareRadius * 1.5)
 		line-to    left (parenMid - squareRadius * 1.5)
 		include FullWidthify
+		save 'blacklongrectangle' 0x25AE
 	local triangleOvershoot : 2 / [Math.sqrt 3]
-	create-glyph 'blacktriangleup' : glyph-construction
-		assign-unicode 0x25B2
+	
+	sketch # blacktriangleup
 		start-from MIDDLE (parenMid + squareRadius)
 		line-to    [mix MIDDLE right triangleOvershoot] (parenMid - squareRadius)
 		line-to    [mix MIDDLE left triangleOvershoot] (parenMid - squareRadius)
 		include FullWidthify
-	create-glyph 'blacktriangledown' : glyph-construction
-		assign-unicode 0x25BC
+		save 'blacktriangleup' 0x25B2
+	
+	sketch # blacktriangledown
 		start-from MIDDLE (parenMid - squareRadius)
 		line-to    [mix MIDDLE left triangleOvershoot] (parenMid + squareRadius)
 		line-to    [mix MIDDLE right triangleOvershoot] (parenMid + squareRadius)
 		include FullWidthify
-	create-glyph 'blacktriangleleft' : glyph-construction
-		assign-unicode 0x25C0
+		save 'blacktriangledown' 0x25BC
+	
+	sketch # blacktriangleleft
 		start-from left parenMid
 		line-to    right (parenMid - squareRadius * triangleOvershoot)
 		line-to    right (parenMid + squareRadius * triangleOvershoot)
 		include FullWidthify
-	create-glyph 'blacktriangleright' : glyph-construction
-		assign-unicode 0x25B6
+		save 'blacktriangleleft' 0x25C0
+	
+	sketch # blacktriangleright
 		start-from right parenMid
 		line-to    left (parenMid + squareRadius * triangleOvershoot)
 		line-to    left (parenMid - squareRadius * triangleOvershoot)
 		include FullWidthify
 		
-	create-glyph 'blackdiamond' : glyph-construction
-		assign-unicode 0x25C6
+		save 'blacktriangleright' 0x25B6
+	
+	sketch # blackdiamond
 		start-from MIDDLE (parenMid + squareRadius)
 		line-to    right parenMid
 		line-to    MIDDLE (parenMid - squareRadius)
 		line-to    left parenMid
 		include FullWidthify
-	create-glyph 'blackcircle' : glyph-construction
-		assign-unicode 0x25CF
+		save 'blackdiamond' 0x25C6
+	
+	sketch # blackcircle
 		include : spiro-outline
 			g4 MIDDLE (parenMid + squareRadius)
 			g4 left parenMid
@@ -170,8 +181,9 @@ symbol-block 'Geometric'
 			g4 right parenMid
 			close
 		include FullWidthify
-	create-glyph 'dottedcircle' : glyph-construction
-		assign-unicode 0x25CC
+		save 'blackcircle' 0x25CF
+	
+	sketch # dottedcircle
 		local n 12
 		local fine : adviceBlackness 10
 		foreach j [range 0 n] : begin
@@ -191,6 +203,7 @@ symbol-block 'Geometric'
 		apply-transform [Italify] true
 		include FullWidthify
 	
+		save 'dottedcircle' 0x25CC
 	hollow 'whitesquare' 0x25A1 'blacksquare'
 	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
 	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
@@ -220,13 +233,13 @@ symbol-block 'Geometric'
 
 ### Blocks
 symbol-block 'Block Shapes'
-	create-glyph 'fullblock' : glyph-construction
+	sketch # fullblock
 		set-width FULLWIDTH
-		assign-unicode 0x2588
 		start-from 0 font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH (-font.'OS/2'.usWinDescent)
 		line-to    0 (-font.'OS/2'.usWinDescent)
+		save 'fullblock' 0x2588
 	define [Shade fn] : glyph-construction
 		local top font.'OS/2'.usWinAscent
 		local bottom (-font.'OS/2'.usWinDescent)
@@ -241,18 +254,21 @@ symbol-block 'Block Shapes'
 		if (FULLWIDTH > WIDTH) : begin
 			apply-transform : Translate (FULLWIDTH - WIDTH) 0
 			include g
-	create-glyph 'lightshade' : glyph-construction
+	
+	sketch # lightshade
 		set-width FULLWIDTH
-		assign-unicode 0x2591
 		include : Shade ([j k] -> ((k % 2) && (j + (k - 1) / 2) % 2))
-	create-glyph 'mediumshade' : glyph-construction
+		save 'lightshade' 0x2591
+	
+	sketch # mediumshade
 		set-width FULLWIDTH
-		assign-unicode 0x2592
 		include : Shade ([j k] -> ((j + k) % 2))
-	create-glyph 'heavyshade' : glyph-construction
+		save 'mediumshade' 0x2592
+	
+	sketch # heavyshade
 		set-width FULLWIDTH
-		assign-unicode 0x2593
 		include : Shade ([j k] -> ((k % 2) || (j + k / 2) % 2))
+		save 'heavyshade' 0x2593
 	let : foreach fill [range 1 8] : begin
 		create-glyph ('vfill' + fill) : glyph-construction
 			set-width FULLWIDTH
@@ -268,21 +284,23 @@ symbol-block 'Block Shapes'
 			line-to    (FULLWIDTH * fill / 8) font.'OS/2'.usWinAscent
 			line-to    (FULLWIDTH * fill / 8) (-font.'OS/2'.usWinDescent)
 			line-to    0 (-font.'OS/2'.usWinDescent)
-	create-glyph 'upHalfblock' : glyph-construction
+	
+	sketch # upHalfblock
 		set-width FULLWIDTH
-		assign-unicode 0x2580
 		start-from 0 font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent 0.5]
 		line-to    0 [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent 0.5]
-	create-glyph 'rightHalfBlock' : glyph-construction
+		save 'upHalfblock' 0x2580
+	
+	sketch # rightHalfBlock
 		set-width FULLWIDTH
-		assign-unicode 0x2590
 		start-from (FULLWIDTH * 0.5) font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH font.'OS/2'.usWinAscent
 		line-to    FULLWIDTH (-font.'OS/2'.usWinDescent)
 		line-to    (FULLWIDTH * 0.5) (-font.'OS/2'.usWinDescent)
 	
+		save 'rightHalfBlock' 0x2590
 ### Box drawing glyphs
 symbol-block 'Box-Drawing'
 	local light : adviceBlackness 3.5
@@ -419,62 +437,67 @@ symbol-block 'Box-Drawing'
 	vDashed 0x254F 2 heavy
 	
 	# Arcs
-	create-glyph 'bd256D' : glyph-construction
-		assign-unicode 0x256D
+	sketch # bd256D
 		set-width width
 		include : dispiro
 			widths.center light
 			g4.up.start midx (-font.'OS/2'.usWinDescent) [heading UPWARD]
 			arcvh
 			g4.right.end width midy [heading RIGHTWARD]
-	create-glyph 'bd256E' : glyph-construction
-		assign-unicode 0x256E
+		save 'bd256D' 0x256D
+	
+	sketch # bd256E
 		set-width width
 		include : dispiro
 			widths.center light
 			g4.up.start midx (-font.'OS/2'.usWinDescent) [heading UPWARD]
 			arcvh
 			g4.left.end 0 midy [heading LEFTWARD]
-	create-glyph 'bd256F' : glyph-construction
-		assign-unicode 0x256F
+		save 'bd256E' 0x256E
+	
+	sketch # bd256F
 		set-width width
 		include : dispiro
 			widths.center light
 			g4.down.start midx font.'OS/2'.usWinAscent [heading DOWNWARD]
 			arcvh
 			g4.left.end 0 midy [heading LEFTWARD]
-	create-glyph 'bd2570' : glyph-construction
-		assign-unicode 0x2570
+		save 'bd256F' 0x256F
+	
+	sketch # bd2570
 		set-width width
 		include : dispiro
 			widths.center light
 			g4.down.start midx font.'OS/2'.usWinAscent [heading DOWNWARD]
 			arcvh
 			g4.right.end width midy [heading RIGHTWARD]
-	create-glyph 'bd2571' : glyph-construction
-		assign-unicode 0x2571
+		save 'bd2570' 0x2570
+	
+	sketch # bd2571
 		set-width width
 		include : dispiro
 			widths.center light
 			flat width font.'OS/2'.usWinAscent
 			curl 0 (-font.'OS/2'.usWinDescent)
-	create-glyph 'bd2572' : glyph-construction
-		assign-unicode 0x2572
+		save 'bd2571' 0x2571
+	
+	sketch # bd2572
 		set-width width
 		include : dispiro
 			widths.center light
 			flat 0 font.'OS/2'.usWinAscent
 			curl width (-font.'OS/2'.usWinDescent)
-	create-glyph 'bd2573' : glyph-construction
-		assign-unicode 0x2573
+		save 'bd2572' 0x2572
+	
+	sketch # bd2573
 		set-width width
 		include glyphs.bd2571
 		include glyphs.bd2572
+		save 'bd2573' 0x2573
 
 ### POWERLINE glyphs
 symbol-block 'Powerline'
-	create-glyph 'branch' : glyph-construction
-		assign-unicode 0xE0A0
+	sketch # branch
 		local fine : adviceBlackness 3.5
 		local vBarPos : mix SB RIGHTSB 0.2
 		local xRightBall : RIGHTSB - PERIODRADIUS
@@ -487,16 +510,18 @@ symbol-block 'Powerline'
 		include : RingAt vBarPos (parenBot + PERIODSIZE) PERIODRADIUS
 		include : RingAt xRightBall yRightBall PERIODRADIUS
 	
-	create-glyph 'pwlTriangleRight' : glyph-construction
-		assign-unicode 0xE0B0
+		save 'branch' 0xE0A0
+	
+	sketch # pwlTriangleRight
 		start-from O font.'OS/2'.usWinAscent
 		line-to    0 font.'OS/2'.usWinAscent
 		line-to    WIDTH [mix font.'OS/2'.usWinAscent (-font.'OS/2'.usWinDescent) 0.5]
 		line-to    0 (-font.'OS/2'.usWinDescent)
 		line-to    O (-font.'OS/2'.usWinDescent)
 	
-	create-glyph 'pwlAngleRight' : glyph-construction
-		assign-unicode 0xE0B1
+		save 'pwlTriangleRight' 0xE0B0
+	
+	sketch # pwlAngleRight
 		local fine : adviceBlackness 4
 		include : dispiro
 			widths.rhs fine
@@ -507,22 +532,26 @@ symbol-block 'Powerline'
 			flat WIDTH [mix font.'OS/2'.usWinAscent (-font.'OS/2'.usWinDescent) 0.5]
 			curl 0 (-font.'OS/2'.usWinDescent)
 	
-	create-glyph 'pwlTriangleLeft' : glyph-construction
-		assign-unicode 0xE0B2
+		save 'pwlAngleRight' 0xE0B1
+	
+	sketch # pwlTriangleLeft
 		include glyphs.pwlTriangleRight
 		include : FlipAround MIDDLE [mix font.'OS/2'.usWinAscent (-font.'OS/2'.usWinDescent) 0.5]
 	
-	create-glyph 'pwlAngleLeft' : glyph-construction
-		assign-unicode 0xE0B3
+		save 'pwlTriangleLeft' 0xE0B2
+	
+	sketch # pwlAngleLeft
 		include glyphs.pwlAngleRight
 		include : FlipAround MIDDLE [mix font.'OS/2'.usWinAscent (-font.'OS/2'.usWinDescent) 0.5]
 	
-	create-glyph 'pwlLock' : glyph-construction
-		assign-unicode 0xE0A2
+		save 'pwlAngleLeft' 0xE0B3
+	
+	sketch # pwlLock
 		local fine : adviceBlackness 3.5
 		include glyphs.O
 		start-from (SB + OX) parenMid
 		line-to    (RIGHTSB - OX) parenMid
 		line-to    (RIGHTSB - OX) parenBot
 		line-to    (SB + OX) parenBot
+		save 'pwlLock' 0xE0A2
 		

@@ -137,8 +137,8 @@ define [includeGlyphPart cg gs nm] : begin
 	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
 
 ###### Canvas-based mechanism
-define-macro draw : syntax-rules
-	`[draw @::steps] : begin
+define-macro sketch : syntax-rules
+	`[sketch @::steps] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
 		inc externEnv.$nWFGlyphs$
 		dirty `[[lambda [currentGlyph] [begin \\
@@ -418,6 +418,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		local g : create-glyph name [lambda]
 		if g : begin
 			g.include t AS_BASE
+			set g.advanceWidth t.advanceWidth
+			set g.shortName t.shortName
+			set g.dense t.dense
 			if name : set dependencyProfile.(name) : getDependencyProfile g
 		if (g && unicode) : begin
 			g.assign-unicode unicode
@@ -484,7 +487,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		set font.post.italicAngle         (0 - para.slantAngle)
 	
 	# Necessary notdef glyph
-	create-glyph '.notdef' : glyph-construction
+	sketch # .notdef
 		start-from SB 0
 		line-to    SB CAP
 		line-to    RIGHTSB CAP
@@ -494,12 +497,14 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		line-to    (RIGHTSB - STROKE) STROKE
 		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
 		line-to    (SB + STROKE) (CAP - STROKE)
+		
+		save '.notdef'
 	
 	# Space
-	create-glyph 'space' : glyph-construction
+	sketch # space
 		set-width WIDTH
-		assign-unicode ' '
 		include eMarks
+		save 'space' ' '
 
 	### HERE WE GO
 	$$include 'glyphs/common-shapes.ptl'
