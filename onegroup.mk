@@ -126,12 +126,7 @@ $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
 	@$(HINT) $< $@
 
 # releaseing
-RELEASEDIR = releases
 ARCHIVEDIR = release-archives
-
-RELEASES = $(subst $(DISTDIR)/,$(RELEASEDIR)/,$(DISTTARGETS))
-$(RELEASES) : $(RELEASEDIR)/%.ttf : $(DISTDIR)/%.ttf
-	cp $< $@
 
 PAGEDIR = pages/assets
 PAGESTTF = $(subst $(DISTDIR)/,$(PAGEDIR)/,$(DISTTARGETS))
@@ -154,7 +149,6 @@ $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z : $(DISTTARGETS)
 #archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z
 pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
-release : $(RELEASES) archives pages
 
 # testdrive
 TESTDIR = testdrive/assets

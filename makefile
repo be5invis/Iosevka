@@ -10,9 +10,6 @@ LOOPS = 0 1 2
 svgs : svgs-default svgs-slab
 fonts : fonts-default fonts-slab
 test  : test-default test-slab
-pages : pages-default pages-slab
-release : release-default release-slab
-	
 
 # svgs
 svgs-default : $(SCRIPTS) | $(OBJDIR) dist
@@ -56,7 +53,7 @@ archives-slab : fonts-slab
 
 # Variant releases
 releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages release VERSION=$(VERSION)
+	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION)
 fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
 fonts-cc : $(SCRIPTS) | $(OBJDIR) dist
