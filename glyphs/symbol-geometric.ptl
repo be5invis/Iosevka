@@ -77,8 +77,7 @@ symbol-block 'Geometric'
 	define squareRadius : (right - left) / 2
 	local hollowSW : adviceBlackness 5
 	define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / FULLWIDTH]) / w
-	define [hollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
-		assign-unicode unicode
+	define [hollow newid unicode oldid zx zy cx cy] : sketch
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
 			include UnFullWidthify
@@ -89,12 +88,16 @@ symbol-block 'Geometric'
 			include glyphs.(oldid)
 			include UnFullWidthify
 		include FullWidthify
-	define [resized newid unicode id x y s sy] : create-glyph [fallback newid : [if (s < 1) 'small' 'large'] + id] : glyph-construction
-		if unicode : assign-unicode unicode
+		
+		save newid unicode
+
+	define [resized newid unicode id x y s sy] : sketch
 		include glyphs.(id) AS_BASE
 		include UnFullWidthify
 		include : FlipAround x y s [fallback sy s]
 		include FullWidthify
+		
+		save [fallback newid : [if (s < 1) 'small' 'large'] + id] unicode
 
 	define FullWidthify : glyph-construction
 		apply-transform [Upright] true
@@ -269,21 +272,24 @@ symbol-block 'Block Shapes'
 		set-width FULLWIDTH
 		include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
 		save 'heavyshade' 0x2593
-	let : foreach fill [range 1 8] : begin
-		create-glyph ('vfill' + fill) : glyph-construction
+
+	foreach [fill : range 1 8] : begin
+		sketch # Vertical fill
 			set-width FULLWIDTH
-			assign-unicode (0x2580 + fill)
 			start-from 0 [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent (fill / 8)]
 			line-to    FULLWIDTH [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent (fill / 8)]
 			line-to    FULLWIDTH (-font.'OS/2'.usWinDescent)
 			line-to    0 (-font.'OS/2'.usWinDescent)
-		create-glyph ('hfill' + fill) : glyph-construction
+			
+			save ('vfill' + fill) (0x2580 + fill)
+		sketch # Horizontal fill
 			set-width FULLWIDTH
-			assign-unicode (0x2590 - fill)
 			start-from 0 font.'OS/2'.usWinAscent
 			line-to    (FULLWIDTH * fill / 8) font.'OS/2'.usWinAscent
 			line-to    (FULLWIDTH * fill / 8) (-font.'OS/2'.usWinDescent)
 			line-to    0 (-font.'OS/2'.usWinDescent)
+			
+			save ('hfill' + fill) (0x2590 - fill)
 	
 	sketch # upHalfblock
 		set-width FULLWIDTH
@@ -308,8 +314,8 @@ symbol-block 'Box-Drawing'
 	local width FULLWIDTH
 	local midx : FULLWIDTH / 2
 	local midy : mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent 0.5
-	define [boxdraw unicode u d l r] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
-		assign-unicode unicode
+
+	define [boxdraw unicode u d l r] : sketch
 		set-width width
 		local stopH : [Math.max u d] / 2
 		local stopV : [Math.max l r] / 2
@@ -317,8 +323,10 @@ symbol-block 'Box-Drawing'
 		if r : include : HBar (midx - stopH) width midy r
 		if d : include : VBar midx (-font.'OS/2'.usWinDescent) (midy + stopV) d
 		if u : include : VBar midx (midy - stopV) font.'OS/2'.usWinAscent u
-	define [dlboxdraw unicode u d l r] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
-		assign-unicode unicode
+		
+		save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
+
+	define [dlboxdraw unicode u d l r] : sketch
 		set-width width
 		local stopH : [Math.max u d] - light * 1 - light * 0.5 * HVCONTRAST
 		local stopV : [Math.max l r] - light * 1.5
@@ -340,6 +348,9 @@ symbol-block 'Box-Drawing'
 		if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light * HVCONTRAST) (midx + stopH + light * HVCONTRAST) (midy - capV) light
 		if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
 		if (stopV > 0 && [not r]) : include : VBar (midx + capH) (midy - stopV - light) (midy + stopV + light) light
+		
+		save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
+		
 	define [complexBoxDraw unicodeStart U D L R fn dl] : begin
 		local order {
 		{light light light light}
@@ -374,6 +385,7 @@ symbol-block 'Box-Drawing'
 					[fallback fn boxdraw].apply null {(unicodeStart + n) :: masked}
 					inc n
 				existings.push masked
+	
 	# Straight
 	boxdraw 0x2500 0 0 light light
 	boxdraw 0x2501 0 0 heavy heavy
@@ -415,14 +427,18 @@ symbol-block 'Box-Drawing'
 	complexBoxDraw 0x256A 1 1 1 1 dlboxdraw 1
 	
 	# Dashed
-	define [hDashed unicode segments weight] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
-		assign-unicode unicode
+	define [hDashed unicode segments weight] : sketch
 		set-width width
 		foreach j [range 0 segments] : include : HBar [mix (width * j / segments) (width * (j + 1) / segments) 0.2] [mix (width * j / segments) (width * (j + 1) / segments) 0.8] midy weight
-	define [vDashed unicode segments weight] : create-glyph ('bd' + [unicode.toString 16 :.toUpperCase]) : glyph-construction
-		assign-unicode unicode
+		
+		save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
+		
+	define [vDashed unicode segments weight] : sketch
 		set-width width
 		foreach j [range 0 segments] : include : VBar midx [mix [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent (j / segments)] [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent ((j + 1) / segments)] 0.2] [mix [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent (j / segments)] [mix (-font.'OS/2'.usWinDescent) font.'OS/2'.usWinAscent ((j + 1) / segments)] 0.8] weight
+		
+		save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
+	
 	hDashed 0x2504 3 light
 	hDashed 0x2505 3 heavy
 	hDashed 0x2508 4 light

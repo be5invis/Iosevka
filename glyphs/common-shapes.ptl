@@ -522,7 +522,7 @@ define [refair g] : begin
 	foreach [j : range 0 g.contours.length] : begin
 		set g.contours.(j) : fairify g.contours.(j) globalTransform g.dense
 	return nothing
-define [Fork gs params] : begin
+define [Fork gs ps] : begin
 	# BFS construct ShouldBuildList
 	local sbh {.}
 	local found true
@@ -542,7 +542,7 @@ define [Fork gs params] : begin
 	local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphs.(x) && glyphs.(x).unicode) glyphs.(x).unicode.0 nothing])
 		:.filter ([x] => [not [not x]])
 	
-	local p : Object.create params
+	local p : Object.create ps
 	try : begin
 		local forkFont : buildFont.call [TempFont] p shouldBuildList shouldBuildUnicodes
 	: ex
@@ -551,12 +551,12 @@ define [Fork gs params] : begin
 		: else : throw ex
 	return forkFont.glyfMap
 
-define [Miniature glyphs fold scale ia unfair] : begin
+define [Miniature] : params [glyphs crowd scale [slantAngle para.slantAngle] unfair [sbscale 0.5]] : begin
 	local forkedPara : Object.create para
-	forkedPara.stroke = [adviceBlackness fold] / scale
+	forkedPara.stroke = [adviceBlackness crowd] / scale
 	forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
-	forkedPara.sb = SB / 2
-	forkedPara.slantAngle = [fallback ia para.slantAngle]
+	forkedPara.sb = SB * sbscale
+	forkedPara.slantAngle = slantAngle
 	forkedPara.unfair = unfair
 	return : Fork glyphs forkedPara
 
