@@ -65,7 +65,10 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
-
+* **1.6.2**
+ - Added braced letters and numbers, like `⑴` and `⒜`.
+ - Added several Greek letterforms, including `Ϸ` and `ϸ`.
+ - Rebuild the script into [sketch]es.
 * **1.6.1**
  - Added `ꭤ` U+AB64, `Ɑ` U+2C6D, `Ɒ` U+2C70, `ꬰ` U+AB30, etc.
 * **1.6.0**
