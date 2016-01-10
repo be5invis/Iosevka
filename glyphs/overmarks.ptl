@@ -2,19 +2,23 @@
 ### Combining marks
 
 local markExtend (ACCENTX * 0.5)
-local markStress : 0.5 * [adviceBlackness 3.2]
-local markFine : markStress * 0.8
-local markHalfStroke : mix markFine markStress 0.5
+local markHalfStroke : 0.5 * [adviceBlackness 3.375]
+local markStress : markHalfStroke * 1.1
+local markFine : markHalfStroke * 0.9
+
 local markMiddle (-MIDDLE)
-local markDotsRadius : DOTRADIUS * markStress / HALFSTROKE
+local markDotsRadius : DOTRADIUS * [Math.min 1 (markStress / HALFSTROKE)]
 
 local aboveMarkTop (XH + ACCENT * 1.38)
 local aboveMarkBot (XH + ACCENT * 0.35)
+local aboveMarkMid [mix aboveMarkBot aboveMarkTop 0.5]
 
 local belowMarkBot (0 - ACCENT * 1.38)
 local belowMarkTop (0 - ACCENT * 0.35)
 
-local commaOvershoot : O * [linreg 16 1 90 (-1) (markHalfStroke * 2)]
+local commaOvershoot  : O * [linreg 16 0 90 (-1) (markHalfStroke * 2)]
+local commaOvershoot2 : O * [linreg 16 1 90 (-1) (markHalfStroke * 2)]
+local commaAboveRadius : 0.85 * DOTRADIUS * markHalfStroke / HALFSTROKE
 
 ### Above marks
 symbol-block 'Above marks'
@@ -50,6 +54,16 @@ symbol-block 'Above marks'
 		apply-transform : Italify
 	
 		save 'ringAbove' 0x30A
+		
+		local g [branch]
+		branch
+			set currentGlyph.anchors {.}
+			local k : 2 * (radiusOut - (radiusOut - radiusIn) * 0.25)
+			apply-transform : Translate k 0
+			include g
+			include : Translate (-k / 2) 0
+			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+			save 'dblRingAbove' 0x1AB2
 	
 	sketch # graveAbove
 		set-width 0
@@ -101,33 +115,108 @@ symbol-block 'Above marks'
 	
 		save 'caronAbove' 0x30c
 	
+	
+	define [TildeShape] : params [ttop tbot leftEnd rightEnd hs] : glyph-construction
+		local fine : hs * 8 / 9
+		local hsvh : hs * 2 / (ttop - tbot)
+
+		local hsvhThin 0.116
+		local hsvhHeav 0.732
+		local tildeWave [linreg hsvhThin 2.95 hsvhHeav 2.4 hsvh]
+		local tildeWaveX 0.51
+		
+		include : dispiro
+			widths.center (hs * 2 / CONTRAST)
+			g2 leftEnd tbot
+			bezcontrols.absolute 
+				* [mix leftEnd rightEnd tildeWaveX]; * [mix tbot ttop tildeWave]
+				* [mix leftEnd rightEnd (1 - tildeWaveX)]; * [mix tbot ttop (1 - tildeWave)]
+				* 256; * important; * g2
+			g2 rightEnd ttop
+
 	sketch # tildeAbove
 		set-width 0
 		currentGlyph.shortName = 'tilde'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		
-		local leftEnd (markMiddle - markExtend * 1.5)
-		local rightEnd (markMiddle + markExtend * 1.5)
-		
-		local ttop aboveMarkTop
-		local tbot : aboveMarkBot + markFine / 2
-		local top : ttop + (markFine * 2)
-		local bot : tbot - (markFine * 2)
-		local tildeWave : [linreg 16 2.6 90 1.36 (markHalfStroke * 2)] * (1 + [linreg 100 0 125 1 markExtend] * [clamp 0 1 : linreg 91 0 95 0.05 (markHalfStroke * 2)])
-		local tildeWaveX [linreg 16 0.5 90 0.52 (markHalfStroke * 2)]
-		local tildeWaveEnd : [smoothreg {16 60 90} {(-0.025) (-0.05) 0}] (markHalfStroke * 2)
-		
-		include : dispiro
-			widths.center (markHalfStroke * 2 / CONTRAST)
-			g2 leftEnd [mix tbot ttop tildeWaveEnd]
-			bezcontrols.absolute 
-				* [mix leftEnd rightEnd tildeWaveX]; * [mix bot top tildeWave]
-				* [mix leftEnd rightEnd (1 - tildeWaveX)]; * [mix bot top (1 - tildeWave)]
-				* 256; * important; * g2
-			g2 rightEnd [mix tbot ttop (1 - tildeWaveEnd)]		
-		
-		set currentGlyph.dense true	
+		include : TildeShape
+			ttop -- aboveMarkTop
+			tbot -- aboveMarkBot + markFine / 2
+			leftEnd -- (markMiddle - markExtend * 1.5)
+			rightEnd -- (markMiddle + markExtend * 1.5)
+			hs -- markHalfStroke
+			
+		set currentGlyph.dense true
 		save 'tildeAbove' 0x303
+	
+	sketch # asciitilde.high
+		include : TildeShape
+			ttop -- [mix (XH + ACCENT) aboveMarkTop ((RIGHTSB - SB) / (markExtend * 3))]
+			tbot -- [mix (XH + ACCENT) (aboveMarkBot + markFine / 2) ((RIGHTSB - SB) / (markExtend * 3))]
+			leftEnd -- SB
+			rightEnd -- RIGHTSB
+			hs -- (OPERATORSTROKE / 2)
+			
+		set currentGlyph.dense true
+		save 'asciitilde.high'
+	
+	sketch
+		set-width 0
+		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+		
+		local m [mix aboveMarkBot aboveMarkTop 0.4]
+		local ttop [mix m aboveMarkTop 0.7]
+		local tbot [mix m (aboveMarkBot + markFine / 2) 0.7]
+		local fine : [adviceBlackness 4.5] / 2
+		
+		include : TildeShape
+			ttop -- ttop
+			tbot -- tbot
+			leftEnd -- (markMiddle - markExtend * 1.5)
+			rightEnd -- (markMiddle + markExtend * 1.5)
+			hs -- fine
+
+		branch
+			include : dispiro
+				widths.center (fine * 2)
+				flat (markMiddle + markExtend * 0.2) [mix tbot ttop 1.5]
+				curl (markMiddle - markExtend * 0.2) [mix ttop tbot 1.5]
+			save 'tildeSlashAbove' 0x34A
+		
+		branch
+			local r : 0.75 * DOTRADIUS * fine / HALFSTROKE
+			include : DotAt markMiddle [mix tbot ttop 1.5] r
+			include : DotAt markMiddle [mix ttop tbot 1.5] r
+			save 'tildedotdotAbove' 0x34B
+	
+	sketch
+		set-width 0
+		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+		
+		local m aboveMarkBot
+		local ttop [mix m aboveMarkTop 0.7]
+		local tbot [mix m (aboveMarkBot + markFine / 2) 0.7]
+		
+		include : TildeShape
+			ttop -- ttop
+			tbot -- tbot
+			leftEnd -- (markMiddle - markExtend * 1.5)
+			rightEnd -- (markMiddle + markExtend * 1.5)
+			hs -- ([adviceBlackness 4.5] / 2)
+		local k : branch
+			
+		branch
+			local shift : (ttop - tbot) * 1.2
+			set currentGlyph.anchors {.}
+			apply-transform : Upright
+			apply-transform : Translate 0 shift
+			apply-transform : Italify
+			include k
+			apply-transform : Upright
+			apply-transform : Translate 0 (-0.5 * shift)
+			apply-transform : Italify
+			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+			save 'dblTildeAbove' 0x34C
 	
 	sketch # macronAbove
 		set-width 0
@@ -257,13 +346,13 @@ symbol-block 'Above marks'
 		currentGlyph.shortName = 'comma'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		
-		local radius : adviceBlackness 6
+		local radius commaAboveRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.rhs : Math.min radius (markFine * [linreg 16 2 90 1.75 (markHalfStroke * 2)])
 			straight.down.start (markMiddle + radius) (aboveMarkTop - radius + commaOvershoot)
 			quadcontrols 0 0.6
-			g4   [mix markMiddle (markMiddle - radius) 0.2] (aboveMarkBot - radius)
+			g4   [mix markMiddle (markMiddle - radius) 0.2] (aboveMarkBot - radius - commaOvershoot2)
 		apply-transform : Upright
 		apply-transform : Translate 0 (DOTRADIUS * 0.3)
 		apply-transform : Italify
@@ -274,7 +363,7 @@ symbol-block 'Above marks'
 		set-width 0
 		currentGlyph.shortName = 'turnComma'
 		include glyphs.commaAbove
-		include : FlipAround markMiddle ([mix aboveMarkTop (aboveMarkBot - [adviceBlackness 6]) 0.5] + (DOTRADIUS * 0.3))
+		include : FlipAround markMiddle ([mix aboveMarkTop (aboveMarkBot - commaAboveRadius) 0.5] + (DOTRADIUS * 0.3) + commaOvershoot / 2)
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 	
 		save 'turnCommaAbove' 0x312
@@ -284,13 +373,13 @@ symbol-block 'Above marks'
 		currentGlyph.shortName = 'revComma'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		
-		local radius : adviceBlackness 6
+		local radius commaAboveRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
 		include : dispiro
 			widths.lhs : Math.min radius (markFine * [linreg 16 2 90 1.75 (markHalfStroke * 2)])
 			straight.down.start (markMiddle - radius) (aboveMarkTop - radius + commaOvershoot)
 			quadcontrols 0 0.6
-			g4   [mix markMiddle (markMiddle + radius) 0.2] (aboveMarkBot - radius)
+			g4   [mix markMiddle (markMiddle + radius) 0.2] (aboveMarkBot - radius - commaOvershoot2)
 		apply-transform : Upright
 		apply-transform : Translate 0 (DOTRADIUS * 0.3)
 		apply-transform : Italify
@@ -327,9 +416,9 @@ symbol-block 'Above marks'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		include : dispiro
 			widths.center (markFine * 2)
-			g4 (markMiddle - markFine * 0.5) aboveMarkBot [heading UPWARD]
-			alsothruthem {{0.9 0.35} {0.1 0.65}} [heading UPWARD]
-			g4 (markMiddle + markFine * 0.5) aboveMarkTop  [heading UPWARD]
+			g2 (markMiddle - markFine * 0.5) aboveMarkBot [heading UPWARD]
+			alsothruthem {{0.9 0.36} {0.1 0.64}} [heading UPWARD]
+			g2 (markMiddle + markFine * 0.5) aboveMarkTop  [heading UPWARD]
 	
 		save 'yerikAbove' 0x33E
 	
@@ -394,7 +483,27 @@ symbol-block 'Above marks'
 			flat (markMiddle - markExtend) aboveMarkBot [widths markFine markFine]
 			curl (markMiddle + markExtend) aboveMarkTop
 		save 'crossAbove' 0x33D
-
+		
+	sketch # greaterAbove
+		set-width 0
+		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+		local top aboveMarkTop
+		local bot aboveMarkBot
+		local exp : Math.sqrt : 1 + (top - bot) / (markExtend) * (top - bot) / (markExtend)
+		include : dispiro
+			widths.center : markFine * 2
+			flat (markMiddle + markExtend) top
+			curl (markMiddle - markExtend) [mix top bot 0.5] [widths.heading (markFine / 2 * exp) (markFine / 2 * exp) LEFTWARD]
+		
+		include : dispiro
+			widths.center : markFine * 2
+			flat (markMiddle + markExtend) bot
+			curl (markMiddle - markExtend) [mix top bot 0.5] [widths.heading (markFine / 2 * exp) (markFine / 2 * exp) LEFTWARD]
+		
+		save 'lessAbove' 0x1DFE
+		
+		include : FlipAround markMiddle [mix top bot 0.5]
+		save 'greaterAbove' 0x350
 
 ### Below marks
 symbol-block 'Below marks'
@@ -421,16 +530,16 @@ symbol-block 'Below marks'
 	sketch # ogonekBelow
 		set-width 0
 		
-		local fine : markHalfStroke * [linreg 16 1 90 0.2 (markHalfStroke * 2)]
+		local fine : markHalfStroke * [linreg 16 1 90 0.25 (markHalfStroke * 2)]
 		local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress * 2
-		local ogonekLeft : markMiddle - markExtend * 0.5
+		local ogonekLeft : markMiddle + ogonekBot * 0.5
 		local ogonekRight : markMiddle + markExtend * 0.85
 		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
 		
 		include : dispiro
-			g4.left.start markMiddle 0 [widths 0 (fine * 2)]
+			g4.left.start markMiddle O [widths 0 (fine * 2)]
 			#archv
-			g4   ogonekLeft [mix 0 ogonekBot 0.5] [widths 0 ([mix fine markStress 0.75] * 2)]
+			g4   ogonekLeft [mix O ogonekBot 0.5] [widths 0 ([mix fine markStress 0.75] * 2)]
 			#arcvh
 			flat          (markMiddle + markExtend * 0.25) ogonekBot [widths 0 (markStress * 2)]
 			curl          ogonekRight ogonekBot [heading RIGHTWARD]
@@ -778,6 +887,82 @@ symbol-block 'Below marks'
 		include glyphs.crossAbove
 		include : FlipAround markMiddle (XH / 2)
 		save 'crossBelow' 0x353
+	
+	sketch # lessBelow
+		set-width 0
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+		
+		include glyphs.greaterAbove
+		include : FlipAround markMiddle (XH / 2)
+	
+		save 'lessBelow' 0x354
+	
+	sketch # greaterBelow
+		set-width 0
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+		
+		include glyphs.lessAbove
+		include : FlipAround markMiddle (XH / 2)
+	
+		save 'greaterBelow' 0x355
+	
+	sketch # greaterBelow
+		set-width 0
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+		
+		include glyphs.dblRingAbove
+		include : FlipAround markMiddle (XH / 2)
+	
+		save 'dblRingBelow' 0x35a
+		
+	sketch # lrArrowBelow
+		set-width 0
+		local fine : [adviceBlackness 5.75] / 2
+		local h : branch
+			local top belowMarkTop
+			local bot belowMarkBot
+			local left : markMiddle - markExtend * 1.5
+			local right : markMiddle - markExtend * 0.5
+			local exp : Math.sqrt : 1 + (top - bot) / (2 * (right - left)) * (top - bot) / (2 * (right - left))
+			include : dispiro
+				widths.center : fine * 2
+				flat right top
+				curl left [mix top bot 0.5] [widths.heading (fine * exp) (fine * exp) DOWNWARD]
+				
+			include : dispiro
+				widths.center : fine * 2
+				flat right bot
+				curl left [mix top bot 0.5] [widths.heading (fine * exp) (fine * exp) UPWARD]
+		
+		include h
+		include : FlipAround markMiddle [mix belowMarkTop belowMarkBot 0.5]
+		include h
+		include : HBar (markMiddle - markExtend * 1.5) (markMiddle + markExtend * 1.5) [mix belowMarkTop belowMarkBot 0.5] (fine * 2)
+		
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+		save 'lrArrowBelow' 0x34D
+	
+	sketch # upArrowBelow
+		set-width 0
+		local fine : [adviceBlackness 6] / 2
+		
+		local top belowMarkTop
+		local bot [mix belowMarkBot belowMarkTop 0.5]
+		local left : markMiddle - markExtend * 0.75
+		local right : markMiddle + markExtend * 0.75
+		local exp : Math.sqrt : 1 + (2 * (top - bot)) / (right - left) * (2 * (top - bot)) / (right - left)
+		include : dispiro
+			widths.center : fine * 2
+			flat left bot
+			curl [mix left right 0.5] top [widths.heading (fine * exp) (fine * exp) RIGHTWARD]
+			
+		include : dispiro
+			widths.center : fine * 2
+			flat right bot
+			curl [mix left right 0.5] top [widths.heading (fine * exp) (fine * exp) LEFTWARD]
+		include : VBar markMiddle belowMarkBot top (fine * 2)
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
+		save 'lrArrowBelow' 0x34E
 
 # horn and angle marks
 symbol-block 'Corner marks'
@@ -965,12 +1150,12 @@ symbol-block 'Greek Polytonic Marks'
 	GreekLRDoubleMark 'dasiavaria' 0x1FDD glyphs.revCommaAbove glyphs.variaAbove
 	GreekLRDoubleMark 'dasiaoxia'  0x1FDE glyphs.revCommaAbove glyphs.oxiaAbove
 	
-	local yc : aboveMarkTop - [adviceBlackness 6] + DOTRADIUS * 0.3 + commaOvershoot
+	local yc : aboveMarkTop - commaAboveRadius + DOTRADIUS * 0.3 + commaOvershoot
 	
 	sketch # psiliperispomeni
 		set-width 0
 		include glyphs.commaAbove
-		local radius : Math.max (markExtend - [adviceBlackness 6]) ([adviceBlackness 6] * 1.5)
+		local radius : Math.max (markExtend - commaAboveRadius) (commaAboveRadius * 1.25)
 		include : dispiro
 			widths.lhs : Math.min (markHalfStroke * 2) ([adviceBlackness 6.5] * 1.25)
 			g4.up.start (markMiddle - radius) yc [heading UPWARD]
@@ -991,7 +1176,7 @@ symbol-block 'Greek Polytonic Marks'
 	sketch # dasiaperispomeni
 		set-width 0
 		include glyphs.revCommaAbove
-		local radius : Math.max (markExtend - [adviceBlackness 6]) ([adviceBlackness 6] * 1.5)
+		local radius : Math.max (markExtend - commaAboveRadius) (commaAboveRadius * 1.25)
 		include : dispiro
 			widths.lhs : Math.min (markHalfStroke * 2) ([adviceBlackness 6.5] * 1.25)
 			g4.up.start (markMiddle - radius) yc [heading UPWARD]
