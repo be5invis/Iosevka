@@ -9,6 +9,12 @@ var toml = require('toml');
 
 var Glyph = require('./support/glyph');
 
+function hasv(obj){
+	if(!obj) return false;
+	for(var k in obj) if(obj[k]) return true;
+	return false;
+}
+
 // Font building
 var font = function(){
 	var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
@@ -29,7 +35,7 @@ if(argv.charmap) (function(){
 		return [
 			glyph.name,
 			glyph.unicode,
-			glyph.advanceWidth === 0 && glyph.anchors && Object.keys(glyph.anchors).length > 0
+			glyph.advanceWidth === 0 && hasv(glyph.anchors)
 		]
 	})), 'utf8')
 })();

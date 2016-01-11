@@ -442,15 +442,17 @@ define [determineMixR w v u sw] : begin
 	return r
 
 define nHookSegments 12
-define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
+define [HookShape toStraight toFinish isStart y tight s kkaf dontadjust] : begin
 	local atBottom : toStraight.y > y
 	local sw : fallback s STROKE
 	local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 	local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
-	toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
-	if (atBottom && ltr && !isStart) : begin
-		toFinish.x = toFinish.x + TAILADJX * TANSLANT
-		toFinish.y = toFinish.y - TAILADJY * TANSLANT
+	
+	if [not dontadjust] : begin
+		toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
+		if (atBottom && ltr && !isStart) : begin
+			toFinish.x = toFinish.x + TAILADJX * TANSLANT
+			toFinish.y = toFinish.y - TAILADJY * TANSLANT
 
 	local w : Math.abs (toStraight.y - y)
 	local v : Math.abs (toFinish.y - y)
@@ -491,13 +493,13 @@ define [HookShape toStraight toFinish isStart y tight s kkaf] : begin
 		* keyKnot
 		* segAfter
 
-define [hookstart] : params [y tight sw kkaf] : return {
+define [hookstart] : params [y tight sw kkaf dontadjust] : return {
 	.type 'interpolate'
-	.af [lambda [before after] [HookShape after before true y tight sw kkaf]]
+	.af [lambda [before after] [HookShape after before true y tight sw kkaf dontadjust]]
 }
-define [hookend] : params [y tight sw kkaf] : return {
+define [hookend] : params [y tight sw kkaf dontadjust] : return {
 	.type 'interpolate'
-	.af [lambda [before after] [HookShape before after false y tight sw kkaf]]
+	.af [lambda [before after] [HookShape before after false y tight sw kkaf dontadjust]]
 }
 
 define [WaveShape] : params [l r cy extendy tension sw] : glyph-construction
