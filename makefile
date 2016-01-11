@@ -73,27 +73,27 @@ releasepack-zshaped : fonts-zshaped
 release-all : releasepack-default releasepack-fw releasepack-cc releasepack-hooky releasepack-zshaped
 fw : fonts-fw fonts-cc
 
-images/weights.png : fonts
+images/weights.png : fonts-default fonts-slab
 	convert -size 4800x1700 xc:white -pointsize 125 \
 		-fill black \
-		-font dist/iosevka-thin.ttf       -draw "text 0,121  '      thin    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-extralight.ttf -draw "text 0,299  'extralight    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-light.ttf      -draw "text 0,478  '     light    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-regular.ttf    -draw "text 0,656  '   retular    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-medium.ttf     -draw "text 0,835  '    medium    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-bold.ttf       -draw "text 0,1013 '      bold    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-thin.ttf       -draw "text 0,121  '      thin    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-extralight.ttf -draw "text 0,299  'extralight    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-light.ttf      -draw "text 0,478  '     light    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-regular.ttf    -draw "text 0,656  '   retular    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-medium.ttf     -draw "text 0,835  '    medium    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-bold.ttf       -draw "text 0,1013 '      bold    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-trim images/weights.png
 
-imges/variants.png : fonts fonts-hooky fonts-zshaped
+images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
 	convert -size 6800x1700 xc:white -pointsize 125 \
 		-fill black \
-		-font dist/iosevka-italic.ttf          -draw "text 0,121  'default:    '" \
-		-font dist/iosevka-regular.ttf         -draw "fill blue text 750,121 'set ' fill black text 1000,121 'font.name.uniqueSubFamily ' fill green text 2625,121 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/hooky-iosevka-italic.ttf    -draw "text 0,308  '  hooky:    '" \
-		-font dist/hooky-iosevka-regular.ttf   -draw "fill blue text 750,308 'set ' fill black text 1000,308 'font.name.uniqueSubFamily ' fill green text 2625,308 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/zshaped-iosevka-italic.ttf  -draw "text 0,496  'zshaped:    '" \
-		-font dist/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
+		-font dist/iosevka/iosevka-italic.ttf          -draw "text 0,121  'default:    '" \
+		-font dist/iosevka/iosevka-regular.ttf         -draw "fill blue text 750,121 'set ' fill black text 1000,121 'font.name.uniqueSubFamily ' fill green text 2625,121 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
+		-font dist/variant-hooky-iosevka/hooky-iosevka-italic.ttf    -draw "text 0,308  '  hooky:    '" \
+		-font dist/variant-hooky-iosevka/hooky-iosevka-regular.ttf   -draw "fill blue text 750,308 'set ' fill black text 1000,308 'font.name.uniqueSubFamily ' fill green text 2625,308 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
+		-font dist/variant-zshaped-iosevka/zshaped-iosevka-italic.ttf  -draw "text 0,496  'zshaped:    '" \
+		-font dist/variant-zshaped-iosevka/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
 		-trim images/variants.png
 
 sampleimages: images/weights.png images/variants.png
