@@ -65,6 +65,11 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.6.3**
+ - Fixed the missing vertical stroke of `¬`.
+ - Fixed the dot position of `ĳ`.
+ - Added several combining marks : `o͐`, `o͚`, etc.
+ - Redesigned the tilde `~` for better consistency.
 * **1.6.2**
  - Added braced letters and numbers, like `⑴` and `⒜`.
  - Added several Greek letterforms, including `Ϸ` and `ϸ`.
