@@ -79,7 +79,7 @@ images/weights.png : fonts-default fonts-slab
 		-font dist/iosevka/iosevka-thin.ttf       -draw "text 0,121  '      thin    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-extralight.ttf -draw "text 0,299  'extralight    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-light.ttf      -draw "text 0,478  '     light    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-regular.ttf    -draw "text 0,656  '   retular    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
+		-font dist/iosevka/iosevka-regular.ttf    -draw "text 0,656  '   regular    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-medium.ttf     -draw "text 0,835  '    medium    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-bold.ttf       -draw "text 0,1013 '      bold    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
