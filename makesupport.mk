@@ -13,7 +13,7 @@ SCRIPTS = $(SUPPORT_FILES) buildglyphs.js
 SCRIPTS_FROM_aki = $(SUPPORT_FILES_FROM_aki) buildglyphs.js
 
 buildglyphs.js : buildglyphs.ptl $(GLYPH_SEGMENTS)
-	$(PATELC) --strict $< -o $@
+	$(PATELC) --optimize --strict $< -o $@
 
 $(SUPPORT_FILES_FROM_aki) :
 	$(PATELC) --optimize --strict $< -o $@
