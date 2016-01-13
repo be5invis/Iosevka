@@ -35,7 +35,7 @@ if(argv.charmap) (function(){
 		return [
 			glyph.name,
 			glyph.unicode,
-			glyph.advanceWidth === 0 && hasv(glyph.anchors)
+			glyph.advanceWidth === 0 ? hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0 : 0
 		]
 	})), 'utf8')
 })();

@@ -23,7 +23,7 @@ local commaAboveRadius : 0.85 * DOTRADIUS * markHalfStroke / HALFSTROKE
 local asciiMarkZoom : (RIGHTSB - SB) / (markExtend * 3)
 
 ### Above marks
-symbol-block 'Above marks'
+define {TildeShape} : symbol-block 'Above marks'
 	sketch # dotAbove
 		set-width 0
 		currentGlyph.shortName = 'dot'
@@ -145,10 +145,12 @@ symbol-block 'Above marks'
 	define [TildeShape] : params [ttop tbot leftEnd rightEnd hs] : glyph-construction
 		local fine : hs * 8 / 9
 		local hsvh : hs * 2 / (ttop - tbot)
+		local hvc : (rightEnd - leftEnd) / (ttop - tbot)
+		local defaultHvc : markExtend * 3 / (aboveMarkTop - aboveMarkBot - markFine / 2)
 
 		local hsvhThin 0.116
 		local hsvhHeav 0.732
-		local tildeWave [linreg hsvhThin 2.925 hsvhHeav 2.375 hsvh]
+		local tildeWave : [linreg hsvhThin 2.925 hsvhHeav 2.375 hsvh] * [linreg defaultHvc 1 4.35 1.1 hvc]
 		local tildeWaveX 0.51
 		
 		include : dispiro
@@ -465,9 +467,10 @@ symbol-block 'Above marks'
 		apply-transform : Translate 0 (fine * 0.5)
 		apply-transform : Italify
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
-	
-	
 		save 'candrabinduAbove' 0x310
+		
+		include : FlipAround markMiddle (XH + ACCENT)
+		save 'turncandrabinduAbove' 0x352
 	
 	sketch # variaAbove
 		set-width 0
@@ -530,6 +533,9 @@ symbol-block 'Above marks'
 		
 		include : FlipAround markMiddle [mix top bot 0.5]
 		save 'greaterAbove' 0x350
+	
+	list
+		* TildeShape
 
 ### Below marks
 symbol-block 'Below marks'
@@ -1109,15 +1115,17 @@ symbol-block 'Overlay Marks'
 
 # Double-character arcs
 symbol-block 'Tie marks'
+	local tieLeft [mix 0 markMiddle 1.25]
+	local tieRight (-tieLeft)
 	sketch # tieAbove
 		set-width 0
 		include : dispiro
 			widths.rhs (markHalfStroke * 2)
-			g4 [mix 0 markMiddle 1.25] aboveMarkBot
+			g4 tieLeft aboveMarkBot
 			quadcontrols  0.5 1
 			g4.right.mid  0 aboveMarkTop [heading RIGHTWARD]
 			quadcontrols  0.5 0
-			g4 [mix 0 markMiddle (-1.25)] aboveMarkBot
+			g4 tieRight aboveMarkBot
 		apply-transform : Upright
 		apply-transform : Translate 0 (CAP - XH)
 		apply-transform : Italify
@@ -1127,11 +1135,11 @@ symbol-block 'Tie marks'
 		set-width 0
 		include : dispiro
 			widths.lhs (markHalfStroke * 2)
-			g4 [mix 0 markMiddle 1.25] aboveMarkTop
+			g4 tieLeft aboveMarkTop
 			quadcontrols  0.5 1
 			g4.right.mid  0 aboveMarkBot [heading RIGHTWARD]
 			quadcontrols  0.5 0
-			g4 [mix 0 markMiddle (-1.25)] aboveMarkTop
+			g4 tieRight aboveMarkTop
 		apply-transform : Upright
 		apply-transform : Translate 0 (CAP - XH)
 		apply-transform : Italify
@@ -1142,13 +1150,47 @@ symbol-block 'Tie marks'
 		set-width 0
 		include : dispiro
 			widths.center (markHalfStroke * 2)
-			flat [mix 0 markMiddle 1.25] (XH + ACCENT)
-			curl [mix 0 markMiddle (-1.25)] (XH + ACCENT)
+			flat tieLeft (XH + ACCENT)
+			curl tieRight (XH + ACCENT)
 		apply-transform : Upright
 		apply-transform : Translate 0 (CAP - XH)
 		apply-transform : Italify
 		save 'overlineTieAbove' 0x35E
 	composite 'underlineTieBelow' glyphs.overlineTieAbove [FlipAround 0 (XH / 2)] [into-unicode 0x35F]
+
+	sketch # arrowTieBelow
+		set-width 0
+		local fine markFine
+		local h : branch
+			local top (DESCENDER - ACCENT + (belowMarkTop - belowMarkBot) / 2 * 1.5)
+			local bot (DESCENDER - ACCENT - (belowMarkTop - belowMarkBot) / 2 * 1.5)
+			local left : tieRight - markExtend * 1.5
+			local right tieRight
+			local exp : Math.sqrt : 1 + (top - bot) / (2 * (right - left)) * (top - bot) / (2 * (right - left))
+			include : dispiro
+				widths.center : fine * 2
+				flat left top
+				curl right [mix top bot 0.5] [widths.heading (fine * exp) (fine * exp) DOWNWARD]
+			include : dispiro
+				widths.center : fine * 2
+				flat left bot
+				curl right [mix top bot 0.5] [widths.heading (fine * exp) (fine * exp) UPWARD]
+		
+		include h
+		include : HBar tieLeft tieRight (DESCENDER - ACCENT) (fine * 2)
+		save 'arrowTieBelow' 0x362
+	
+	sketch # tildeTieAbove
+		set-width 0
+		include : TildeShape
+			ttop -- aboveMarkTop + (CAP - XH)
+			tbot -- aboveMarkBot + (CAP - XH)
+			leftEnd -- tieLeft
+			rightEnd -- tieRight
+			hs -- markHalfStroke
+			
+		set currentGlyph.dense true
+		save 'tildeTieAbove' 0x360
 
 symbol-block 'Greek Polytonic Marks'
 	define [GreekLRDoubleMark id unicode leftGlyph rightGlyph] : begin
