@@ -107,8 +107,9 @@ var display = new Vue({
 						};
 						row.chars.push({
 							name: uhash[j],
-							char: (whash[j] ? '\u25CC' : '') + String.fromCharCode(j),
-							isMark: whash[j]
+							char: uhash[j] ? (whash[j] ? '\u200B' : '') + (whash[j] === 1 ? '\u00A0' : '') + String.fromCharCode(j) + (whash[j] ? '\u200B' : '') : String.fromCharCode(j),
+							isMark: whash[j] === 1,
+							isTie: whash[j] === 2
 						});
 					}
 				}
