@@ -65,6 +65,9 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.7.0**
+ - Added more tie marks and combining marks.
+ - Fixed the incorrect weights created by `[turned]` and `[composite]`.
 * **1.6.3**
  - Fixed the missing vertical stroke of `¬`.
  - Fixed the dot position of `ĳ`.
