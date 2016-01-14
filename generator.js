@@ -133,11 +133,25 @@ if(argv.ttf) (function(){
 
 if(argv.svg) (function(){
 	console.log('    Writing outline as SVG -> ' + argv.svg);
-	function cov(x){ return Math.round(x * 10000) / 10000 };
+	
+	var foundNaN = false;
+	var glyfname = '';
+	function cov(x) {
+		if(!isFinite(x)){
+			if(!foundNaN) {
+				console.log("*** NaN value found in " + argv.svg + '(' + glyfname + ')' + " ***")
+				foundNaN = true
+			}
+			return 0
+		}
+		return Math.round(x * 10000) / 10000
+	};
 	function mix(a, b, p){ return a + (b - a) * p };
 	
 	function toSVGPath(glyph){
 		var buf = '';
+		foundNaN = false;
+		glyfname = glyph.name;
 		if(glyph.contours) for(var j = 0; j < glyph.contours.length; j++) {
 			var contour = glyph.contours[j];
 			var lx = 0;
