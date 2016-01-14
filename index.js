@@ -42,7 +42,7 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.7.0",
+		version: "1.7.1",
 		codename: "Galanodel",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
