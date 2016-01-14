@@ -65,6 +65,8 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.7.1**
+ - Fixed incorrect outline of braced glyphs under heavy weights.
 * **1.7.0**
  - Added more tie marks and combining marks.
  - Fixed the incorrect weights created by `[turned]` and `[composite]`.
