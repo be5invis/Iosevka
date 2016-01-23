@@ -445,26 +445,25 @@ symbol-block 'l'
 define VShape : symbol-block 'V, v and nu'
 	local cornerdist : HALFSTROKE * HVCONTRAST * [if SLAB 1.2 1]
 	local vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
-	define [VShape top] : glyph-construction
-
+	define [VShape] : params [top [sw STROKE]] : glyph-construction
 		include : dispiro
-			widths.lhs
+			widths.lhs sw
 			flat SB top [heading DOWNWARD]
 			curl SB (top * 0.9) [heading DOWNWARD]
 			quadcontrols 0 vcurviness 9 unimportant
-			g4   (MIDDLE - cornerdist) 0 [widths.lhs VShape.fine]
+			g4   (MIDDLE - cornerdist) 0 [widths.lhs (VShape.fine * sw / STROKE)]
 	
 		#bottom cap
 		start-from (MIDDLE + cornerdist) 0
 		line-to (MIDDLE - cornerdist) 0
-		line-to MIDDLE VShape.fine
+		line-to MIDDLE (VShape.fine * sw / STROKE)
 	
 		include : dispiro
-			widths.rhs
+			widths.rhs sw
 			flat RIGHTSB top [heading DOWNWARD]
 			curl RIGHTSB (top * 0.9) [heading DOWNWARD]
 			quadcontrols 0 vcurviness 9 unimportant
-			g4   (MIDDLE + cornerdist) 0 [widths.rhs VShape.fine]
+			g4   (MIDDLE + cornerdist) 0 [widths.rhs (VShape.fine * sw / STROKE)]
 		tag-contour 'strokeUp'
 		include : AIVSerifs top
 	set VShape.fine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
@@ -2624,14 +2623,15 @@ define {LongSShape} : symbol-block 'f'
 	
 		save 'iviby' 0x285
 	define fbar : XH * 0.91 + STROKE * 0.25	
-	sketch # lenisf
+	sketch # f.upright
+		local fovershoot2 (O * 2)
 		include bMarks
 		local barleft : [mix SB RIGHTSB 0.35] - STROKE * 0.25 * HVCONTRAST
 		include : dispiro
 			widths.lhs
-			g4 (RIGHTSB + RBALANCE2 - OXE) (CAP - HOOK * 0.75)
-			hookstart (CAP - O) {.shift 0.1 .skew 0.5}
-			flat barleft [CAP - SMOOTHA * 0.8]
+			g4 (RIGHTSB + RBALANCE2 - OXE) (CAP - HOOK * 0.75 - fovershoot2)
+			hookstart (CAP - O - fovershoot2) {.shift 0.1 .skew 0.5}
+			flat barleft (CAP - SMOOTHA * 0.8 - fovershoot2)
 			curl barleft 0 [heading DOWNWARD]
 		include : dispiro
 			widths.rhs 

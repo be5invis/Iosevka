@@ -368,14 +368,15 @@ symbol-block 'Xi' : sketch
 	save 'Xi' 0x39E
 
 define {PiShape} : symbol-block 'Pi'
-	define [PiShape top bottom _shrink _fine] : glyph-construction
+	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noserif] : glyph-construction
 		local fine : fallback _fine STROKE
-		local shrink : if SLAB 0 ([fallback _shrink 0.03] * (RIGHTSB - SB))
-		include : HBarTop SB RIGHTSB top fine
+		local shrink : if (!noserif && SLAB) 0 (shrinkrate * (RIGHTSB - SB))
+		local endexpand : shrink / 2
+		include : HBarTop (SB - endexpand) (RIGHTSB + endexpand) top fine
 		include : VBarLeft (SB + shrink) bottom (top - fine / 2) fine
 		include : VBarRight (RIGHTSB - shrink) bottom (top - fine / 2) fine
 		
-		if SLAB : begin
+		if (!noserif && SLAB) : begin
 			include : CenterBottomSerif (SB + shrink + fine * 0.5 * HVCONTRAST) bottom JUT fine
 			include : CenterBottomSerif (RIGHTSB - shrink - fine * 0.5 * HVCONTRAST) bottom JUT fine
 			include : CenterTopSerif (SB + shrink + fine * 0.5 * HVCONTRAST) top JUT fine
@@ -383,7 +384,7 @@ define {PiShape} : symbol-block 'Pi'
 	
 	sketch # Pi
 		include capitalMarks
-		include : PiShape CAP 0
+		include : PiShape CAP 0 (shrinkrate -- 0)
 		save 'Pi' 0x3A0
 		save 'cyrPe' 0x41F
 	
@@ -398,30 +399,12 @@ define {PiShape} : symbol-block 'Pi'
 		save 'cyrpe.serbian'
 
 	italic-variant 'cyrpe' 0x43f
-	
-	list PiShape
-
-symbol-block 'pi'
 	sketch # pi
 		include eMarks
-		include : HBarTop SB RIGHTSB XH
-		local m : linreg 72 0.275 108 0.29 STROKE
-		local m1 : mix SB RIGHTSB m
-		include : dispiro
-			widths.rhs
-			straight.down.start (m1 + HALFSTROKE * HVCONTRAST) XH [heading DOWNWARD]
-			alsothru 0.5 0.85 important
-			g4 [mix SB RIGHTSB 0.1] O
-		local m2 : mix SB RIGHTSB (1 - m)
-		local hook : Math.max (STROKE * HVCONTRAST * 1.1) (HOOK * 0.8)
-		include : dispiro
-			widths.center
-			flat m2 XH [heading DOWNWARD]
-			curl m2 hook
-			arcvh
-			flat [Math.min (RIGHTSB - STROKE * 0.25) (m2 + hook - HALFSTROKE)] HALFSTROKE [heading RIGHTWARD]
-			curl RIGHTSB HALFSTROKE [heading RIGHTWARD]
+		include : PiShape XH 0 (noserif -- true) (shrinkrate -- 0.06)
 		save 'pi' 0x3C0
+	
+	list PiShape
 
 define {SigmaShape} : symbol-block 'Sigma'
 	define [SigmaShape top bottom _fine] : glyph-construction
@@ -1034,13 +1017,78 @@ symbol-block 'CyrZhe'
 		include capitalMarks
 		include : CyrZheShape CAP
 		save 'cyrZhe' 0x416
-	composite nothing glyphs.cyrZhe [CyrDescender (RIGHTSB - O * 4)] [into-unicode 0x496]
+	composite nothing glyphs.cyrZhe [CyrDescender (RIGHTSB - O * 4) nothing true] [into-unicode 0x496]
 	
 	sketch # cyrzhe
 		include eMarks
 		include : CyrZheShape XH
 		save 'cyrzhe' 0x436
-	composite nothing glyphs.cyrzhe [CyrDescender (RIGHTSB - O * 4)] [into-unicode 0x497]
+	composite nothing glyphs.cyrzhe [CyrDescender (RIGHTSB - O * 4) nothing true] [into-unicode 0x497]
+
+	define [CyrBigYusShape top yp] : glyph-construction
+		local fine : adviceBlackness 3.3
+		local cor HVCONTRAST
+		local midx : mix SB MIDDLE 0.3
+		local midx2 : Math.min (MIDDLE - fine * cor) [mix SB MIDDLE 0.75]
+		local yb : top * yp
+		local tovershoot 2
+		start-from (SB + O * 4) 0
+		line-to (SB + fine * cor + O * 4) 0
+		line-to (midx + fine * cor) yb
+		line-to midx yb
+		reverse-last
+		
+		start-from (midx2 + fine * cor) yb
+		line-to (SB + fine * cor + O * tovershoot) top
+		line-to (SB + O * tovershoot) top
+		line-to midx2 yb
+		reverse-last
+		
+		start-from (WIDTH - SB - O * 4) 0
+		line-to (WIDTH - SB - fine * cor - O * 4) 0
+		line-to (WIDTH - midx - fine * cor) yb
+		line-to (WIDTH - midx) yb
+		
+		start-from (WIDTH - midx2 - fine * cor) yb
+		line-to (WIDTH - SB - fine * cor - O * tovershoot) top
+		line-to (WIDTH - SB - O * tovershoot) top
+		line-to (WIDTH - midx2) yb
+
+
+		include : VBar MIDDLE 0 yb fine
+		include : HBarTop midx (WIDTH - midx) yb fine
+		include : HBarTop (SB + O * tovershoot + HVCONTRAST * fine * 0.99) (RIGHTSB - O * tovershoot - HVCONTRAST * fine * 0.99) top fine
+	sketch # cyrbigYus
+		include capitalMarks
+		include : CyrBigYusShape CAP 0.575
+		save 'cyrbigYus' 0x46A
+	sketch # cyrbigyus
+		include eMarks
+		include : CyrBigYusShape XH 0.55
+		save 'cyrbigyus' 0x46B
+
+	define [CyrSmallYusShape top] : glyph-construction
+		local fine : adviceBlackness 3.3
+		include : VShape top (sw -- fine)
+		eject-contour 'serifLT'
+		eject-contour 'serifRT'
+		include : FlipAround MIDDLE (top / 2)
+		local p 0.16
+		local bary (top / 2)
+		if (SLAB && !para.isItalic) : set p : p * 1.33
+		include : HBarTop [mix SB RIGHTSB p] [mix RIGHTSB SB p] bary fine
+		include : VBar MIDDLE bary 0 fine
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SIDEJUT
+			include : tagged 'serifRB' : RightwardBottomSerif RIGHTSB 0 SIDEJUT
+	sketch # cyrsmallYus
+		include capitalMarks
+		include : CyrSmallYusShape CAP
+		save 'cyrsmallYus' 0x466
+	sketch # cyrsmallyus
+		include eMarks
+		include : CyrSmallYusShape XH
+		save 'cyrsmallyus' 0x467
 
 symbol-block 'CyrSha'
 	define [CyrShaShape top] : glyph-construction
