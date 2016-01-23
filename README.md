@@ -65,6 +65,10 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.7.2**
+ - Entallen upright letter `f`.
+ - Reverted shape of `π` to the 1.3.x.
+ - Added `Ѧ` and `Ѫ`.
 * **1.7.1**
  - Fixed incorrect outline of braced glyphs under heavy weights.
 * **1.7.0**
