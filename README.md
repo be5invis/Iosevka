@@ -65,6 +65,8 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+* **1.7.3**
+ - Optimize the shapes of three-like glyphs, including `3`, `ε` and `з`
 * **1.7.2**
  - Entallen upright letter `f`.
  - Reverted shape of `π` to the 1.3.x.
