@@ -17,12 +17,12 @@ Quit your editor/program. Unzip and open the folder.
 
 To build Iosevka you should:
 
-1. Ensure that `node` (≥ 5.0), `FontForge` (≥ Aug. 2015 release), `ttfautohint`, `ttx` and `make` are runnable in your terminal
+1. Ensure that [`node`](http://nodejs.org) (≥ 5.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`ttx`](http://www.adobe.com/cn/devnet/opentype/afdko.html) and `make` are runnable in your terminal.
    - Windows users may need to install MinGW and make \*nix	 utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`.
 3. `make`.
 
-You will find ttfs in the `dist/` directory.
+You will find TTFs in the `dist/` directory.
 
 ## Build your own style
 
@@ -65,28 +65,29 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
+
 * **1.7.3**
- - Optimize the shapes of three-like glyphs, including `3`, `ε` and `з`
+  - Optimize the shapes of three-like glyphs, including `3`, `ε` and `з`.
 * **1.7.2**
- - Entallen upright letter `f`.
- - Reverted shape of `π` to the 1.3.x.
- - Added `Ѧ` and `Ѫ`.
+  - Entallen upright letter `f`.
+  - Reverted shape of `π` to the 1.3.x.
+  - Added `Ѧ` and `Ѫ`.
 * **1.7.1**
- - Fixed incorrect outline of braced glyphs under heavy weights.
+  - Fixed incorrect outline of braced glyphs under heavy weights.
 * **1.7.0**
- - Added more tie marks and combining marks.
- - Fixed the incorrect weights created by `[turned]` and `[composite]`.
+  - Added more tie marks and combining marks.
+  - Fixed the incorrect weights created by `[turned]` and `[composite]`.
 * **1.6.3**
- - Fixed the missing vertical stroke of `¬`.
- - Fixed the dot position of `ĳ`.
- - Added several combining marks : `o͐`, `o͚`, etc.
- - Redesigned the tilde `~` for better consistency.
+  - Fixed the missing vertical stroke of `¬`.
+  - Fixed the dot position of `ĳ`.
+  - Added several combining marks : `o͐`, `o͚`, etc.
+  - Redesigned the tilde `~` for better consistency.
 * **1.6.2**
- - Added braced letters and numbers, like `⑴` and `⒜`.
- - Added several Greek letterforms, including `Ϸ` and `ϸ`.
- - Rebuild the script into [sketch]es.
+  - Added braced letters and numbers, like `⑴` and `⒜`.
+  - Added several Greek letterforms, including `Ϸ` and `ϸ`.
+  - Rebuild the script into [sketch]es.
 * **1.6.1**
- - Added `ꭤ` U+AB64, `Ɑ` U+2C6D, `Ɒ` U+2C70, `ꬰ` U+AB30, etc.
+  - Added `ꭤ` U+AB64, `Ɑ` U+2C6D, `Ɒ` U+2C70, `ꬰ` U+AB30, etc.
 * **1.6.0**
   - Fixed the broken `Æ` at thin weights.
   - Increased the length of the bottom serif in `T`.
