@@ -24,6 +24,16 @@ To build Iosevka you should:
 
 You will find TTFs in the `dist/` directory.
 
+### Building web font
+
+The `webfonts/` directory is used to build Iosevka for web font uses. To build the web fonts you should:
+
+1. Build Iosevka.
+2. Ensure that `sfnt2woff` and `woff2_compress` are installed and runnable.
+3. `make webfonts`.
+
+The web fonts will be generated into `dist/webfonts`.
+
 ## Build your own style
 
 ![Styles Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/variants.png)
