@@ -173,11 +173,8 @@ TESTDIR = testdrive/assets
 TESTTTF = $(subst $(DISTDIR)/,$(TESTDIR)/,$(DISTTARGETS))
 $(TESTTTF) : $(TESTDIR)/%.ttf : $(DISTDIR)/%.ttf
 	cp $< $@
-TESTWOFF = $(subst .ttf,.woff,$(TESTTTF))
-$(TESTWOFF) : $(TESTDIR)/%.woff : $(TESTDIR)/%.ttf
-	sfnt2woff $<
 TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(MAPS))
 $(TESTMAPS) : $(TESTDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
-test : $(TESTTTF) $(TESTWOFF) $(TESTMAPS)
+test : $(TESTTTF) $(TESTMAPS)
