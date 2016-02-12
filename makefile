@@ -96,6 +96,7 @@ images/weights.png : fonts-default fonts-slab
 		-font dist/iosevka/iosevka-bold.ttf       -draw "text 0,1013 '      bold    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-font dist/iosevka/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
 		-trim images/weights.png
+	optipng images/weights.png
 
 images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
 	convert -size 6800x1700 xc:white -pointsize 125 \
@@ -107,8 +108,14 @@ images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
 		-font dist/variant-zshaped-iosevka/zshaped-iosevka-italic.ttf  -draw "text 0,496  'zshaped:    '" \
 		-font dist/variant-zshaped-iosevka/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
 		-trim images/variants.png
+	optipng images/variants.png
 
-electronsnaps: pages
+electronsnaps1: pages
 	cd pages && electron getsnap.js --opentype ../images/opentype.png --languages ../images/languages.png
+images/opentype.png: electronsnaps1
+	optipng images/opentype.png
+images/languages.png: electronsnaps1
+	optipng images/languages.png
 
-sampleimages: images/weights.png images/variants.png electronsnaps
+
+sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png

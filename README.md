@@ -13,6 +13,10 @@ Quit your editor/program. Unzip and open the folder.
 * **Linux** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
 
+## OpenType features
+
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
+
 ## Building from source
 
 To build Iosevka you should:
