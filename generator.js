@@ -22,7 +22,7 @@ var font = function(){
 	var para = parameters.build(parametersData, argv._);
 	var fontUniqueName = para.family + ' ' + para.style + ' ' + para.version + ' (' + para.codename + ')'
 
-	console.log('    Start build font ' + fontUniqueName);
+	console.log('    Start building font ' + fontUniqueName);
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log('    ' + fontUniqueName + " Successfully built.");
 	font.features.sscompose = para.sscompose
