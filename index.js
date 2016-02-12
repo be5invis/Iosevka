@@ -78,3 +78,66 @@ var indexPage = new Vue({
 	}
 });
 indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
+
+// The getsnap initiates an Electron instance to get snapshots from the page
+if(window && window.process && window.process.type && process.versions['electron']) (function(){
+	console.log('I AN IN ELECTRON');
+	var windowWidth = window.innerWidth;
+	var windowHeight = window.innerHeight;
+	var dpi = window.devicePixelRatio;
+	var ipc = require('electron').ipcRenderer;
+	
+	// hide scroll bar
+	var sheet = (function() {
+		var style = document.createElement("style");
+		style.appendChild(document.createTextNode(""));
+		document.head.appendChild(style);
+		return style.sheet;
+	})();
+	sheet.insertRule('::-webkit-scrollbar {display: none;}');
+	sheet.insertRule('#preview-toolbar{display:none}');
+	sheet.insertRule('#opentype>h2{display:none}');
+	sheet.insertRule('#opentype:before{display:none}');
+	document.querySelector('#preview').style.paddingBottom = windowHeight * 2 + 'px';
+
+	var onScroll = function(){};
+	ipc.on('scroll', function(){
+		onScroll.apply(this, arguments);
+		setTimeout(function(){ ipc.send('snapshot', 'scroll-done') }, 100);
+	});
+	var onComplete = function(){};
+	ipc.on('complete', function(){ onComplete.apply(this, arguments) });
+	
+	function captureElement(el, name, callback){
+		window.scroll(0, 0);
+		var rect = el.getBoundingClientRect();
+		ipc.send('snapshot', {
+			name: name,
+			windowWidth: windowWidth,
+			windowHeight: windowHeight,
+			dpi: dpi,
+			x: rect.left | 0,
+			y: rect.top | 0,
+			width: rect.width | 0,
+			height: rect.height | 0
+		});
+		onScroll = function(event, arg){
+			window.scrollTo(0, arg)
+		};
+		onComplete = function(){
+			if(callback) callback();
+		}
+	}
+	
+	window.onload = function(){
+		ipc.send('snapshot', 'i am ready');
+		console.log('I AM READY');
+		setTimeout(function(){
+			captureElement(document.querySelector('#opentype'), 'opentype', function(){
+				captureElement(document.querySelector('#preview>pre#javascript'), 'languages', function(){
+					window.close()
+				})
+			})
+		}, 1000)
+	}
+})()
