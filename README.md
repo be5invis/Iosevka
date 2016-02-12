@@ -69,13 +69,16 @@ The current avaliable styles are:
   * `v-zero-dotted` : Dotted Zero `0`
   * `v-zero-unslashed` : O-like `0`
 * Styles for ASCII tilde (`~`) and asterisk (`*`):
-  * `v-tilde-high` : Higher tilde `~` (default)
-  * `v-tilde-low` : Lower tilde `~`
+  * `v-tilde-high` : Higher tilde `~`
+  * `v-tilde-low` : Lower tilde `~` (default)
   * `v-asterisk-high` : Higher asterisk `*` (default)
   * `v-asterisk-low` : Lower asterisk `*`
 
 ## Release Notes
 
+* **1.7.4**
+  - The lower tilde (`~`) is used by default.
+  - Added slanted inequality symbol (U+2A7D and U+2A7E) and corrected the shape of `≤` and `≥`.
 * **1.7.3**
   - Optimize the shapes of three-like glyphs, including `3`, `ε` and `з`.
 * **1.7.2**
