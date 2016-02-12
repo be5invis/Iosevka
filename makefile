@@ -130,5 +130,8 @@ images/preview-light.png: electronsnaps1
 	optipng $@
 images/preview-slab-light.png: electronsnaps1
 	optipng $@
+images/preview-all.png: images/preview.png images/preview-light.png images/preview-slab.png images/preview-slab-light.png
+	convert $^ -append $@
+	optipng $@
 
-sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png images/languages-slab.png images/languages-light.png images/languages-slab-light.png images/preview.png images/preview-slab.png images/preview-light.png images/preview-slab-light.png
+sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png images/languages-slab.png images/languages-light.png images/languages-slab-light.png images/preview.png images/preview-slab.png images/preview-light.png images/preview-slab-light.png images/preview-all.png
