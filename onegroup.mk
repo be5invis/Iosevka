@@ -135,8 +135,25 @@ $(PAGESTTF) : $(PAGEDIR)/%.ttf : $(DISTDIR)/%.ttf
 PAGESWOFF = $(subst .ttf,.woff,$(PAGESTTF))
 $(PAGESWOFF) : $(PAGEDIR)/%.woff : $(PAGEDIR)/%.ttf
 	sfnt2woff $<
+PAGESWOFF2 = $(subst .ttf,.woff2,$(PAGESTTF))
+$(PAGESWOFF2) : $(PAGEDIR)/%.woff2 : $(PAGEDIR)/%.ttf
+	woff2_compress $<
 PAGESMAPS = $(subst $(OBJDIR)/,$(PAGEDIR)/,$(MAPS))
 $(PAGESMAPS) : $(PAGEDIR)/%.charmap : $(OBJDIR)/%.charmap
+	cp $< $@
+
+WEBFONTDIR = dist/webfonts/assets
+WEBFONTSTTF = $(subst $(DISTDIR)/,$(WEBFONTDIR)/,$(DISTTARGETS))
+$(WEBFONTSTTF) : $(WEBFONTDIR)/%.ttf : $(DISTDIR)/%.ttf
+	cp $< $@
+WEBFONTSWOFF = $(subst .ttf,.woff,$(WEBFONTSTTF))
+$(WEBFONTSWOFF) : $(WEBFONTDIR)/%.woff : $(WEBFONTDIR)/%.ttf
+	sfnt2woff $<
+WEBFONTSWOFF2 = $(subst .ttf,.woff2,$(WEBFONTSTTF))
+$(WEBFONTSWOFF2) : $(WEBFONTDIR)/%.woff2 : $(WEBFONTDIR)/%.ttf
+	woff2_compress $<
+WEBFONTCSS = dist/webfonts/$(ARCPREFIX)$(ARCPREFIXB).css
+$(WEBFONTCSS) : webfont-csses/$(ARCPREFIX)$(ARCPREFIXB).css
 	cp $< $@
 
 #$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)
@@ -148,18 +165,16 @@ $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z : $(DISTTARGETS)
 
 #archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z
-pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESMAPS)
+pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESWOFF2) $(PAGESMAPS)
+webfonts : $(WEBFONTSTTF) $(WEBFONTSWOFF) $(WEBFONTSWOFF2) $(WEBFONTCSS)
 
 # testdrive
 TESTDIR = testdrive/assets
 TESTTTF = $(subst $(DISTDIR)/,$(TESTDIR)/,$(DISTTARGETS))
 $(TESTTTF) : $(TESTDIR)/%.ttf : $(DISTDIR)/%.ttf
 	cp $< $@
-TESTWOFF = $(subst .ttf,.woff,$(TESTTTF))
-$(TESTWOFF) : $(TESTDIR)/%.woff : $(TESTDIR)/%.ttf
-	sfnt2woff $<
 TESTMAPS = $(subst $(OBJDIR)/,$(TESTDIR)/,$(MAPS))
 $(TESTMAPS) : $(TESTDIR)/%.charmap : $(OBJDIR)/%.charmap
 	cp $< $@
 
-test : $(TESTTTF) $(TESTWOFF) $(TESTMAPS)
+test : $(TESTTTF) $(TESTMAPS)

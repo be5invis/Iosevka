@@ -33,6 +33,16 @@ test-default : fonts-default
 test-slab : fonts-slab
 	@$(MAKE) -f onegroup.mk test $(PARAM_SLAB)
 
+# Webfonts
+dist/webfonts : | dist
+	@- mkdir $@
+dist/webfonts/assets : |dist/webfonts
+	@- mkdir $@
+webfonts-default : fonts-default | dist/webfonts/assets
+	@$(MAKE) -f onegroup.mk webfonts $(PARAM_DEFAULT)
+webfonts-slab : fonts-slab | dist/webfonts/assets
+	@$(MAKE) -f onegroup.mk webfonts $(PARAM_SLAB)
+
 # Pages
 pages-default : fonts-default
 	@$(MAKE) -f onegroup.mk pages $(PARAM_DEFAULT)
@@ -72,6 +82,8 @@ releasepack-zshaped : fonts-zshaped
 	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
 release-all : releasepack-default releasepack-fw releasepack-cc releasepack-hooky releasepack-zshaped
 fw : fonts-fw fonts-cc
+
+webfonts : webfonts-default webfonts-slab
 
 images/weights.png : fonts-default fonts-slab
 	convert -size 4800x1700 xc:white -pointsize 125 \
