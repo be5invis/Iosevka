@@ -4,6 +4,8 @@ Coders' typeface, built from code.
 
 ![Weights Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
+
 ## Installation
 
 Quit your editor/program. Unzip and open the folder.

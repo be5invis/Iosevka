@@ -111,11 +111,13 @@ images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
 	optipng images/variants.png
 
 electronsnaps1: pages
-	cd pages && electron getsnap.js --opentype ../images/opentype.png --languages ../images/languages.png
+	cd pages && electron getsnap.js --opentype ../images/opentype.png --languages ../images/languages.png --languagesslab ../images/languagsslab.png
 images/opentype.png: electronsnaps1
 	optipng images/opentype.png
 images/languages.png: electronsnaps1
 	optipng images/languages.png
+images/languagesslab.png: electronsnaps1
+	optipng images/languagesslab.png
 
 
-sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png
+sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png images/languagesslab.png
