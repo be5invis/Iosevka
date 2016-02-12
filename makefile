@@ -108,4 +108,7 @@ images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
 		-font dist/variant-zshaped-iosevka/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
 		-trim images/variants.png
 
-sampleimages: images/weights.png images/variants.png
+electronsnaps: pages
+	cd pages && electron getsnap.js --opentype ../images/opentype.png --languages ../images/languages.png
+
+sampleimages: images/weights.png images/variants.png electronsnaps
