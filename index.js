@@ -42,8 +42,8 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.7.3",
-		codename: "Galanodel-3",
+		version: "1.7.4",
+		codename: "Galanodel-4",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
