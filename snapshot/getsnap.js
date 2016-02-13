@@ -19,7 +19,7 @@ app.on('window-all-closed', function() {
 });
 
 function combineImages(images, outfile, width, height, background, padding){
-	var command = 'convert ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor rgb(52,52,53) -trim  ' + outfile;
+	var command = 'convert ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  ' + outfile;
 	console.log(command);
 	cp.exec(command, function(err, stdout, stderr){
 		images.forEach(function(file){
@@ -83,5 +83,6 @@ ipc.on('log', function(event, arg){
 app.on('ready', function() {
 	mainWindow = new BrowserWindow({width: 64 * 16 * zoom, height: 1024 * zoom, x: 5000, y: 5000, zoomFactor: zoom});
 	mainWindow.loadURL('file://' + __dirname + '/index.html');
+	mainWindow.blurWebView();
 	//mainWindow.hide();
 });
