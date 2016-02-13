@@ -4,6 +4,8 @@ $(OBJDIR) :
 	@- mkdir $@
 dist :
 	@- mkdir $@
+snapshot/assets :
+	@- mkdir $@
 	
 PATELC = node ./node_modules/patel/bin/patel-c
 SUPPORT_FILES_FROM_PTL = support/glyph.js support/spiroexpand.js support/spirokit.js parameters.js support/anchor.js support/point.js support/transform.js

@@ -10,6 +10,7 @@ LOOPS = 0 1 2
 svgs : svgs-default svgs-slab
 fonts : fonts-default fonts-slab
 test  : test-default test-slab
+snapshot  : snapshot-default snapshot-slab
 
 # svgs
 svgs-default : $(SCRIPTS) | $(OBJDIR) dist
@@ -32,6 +33,12 @@ test-default : fonts-default
 	@$(MAKE) -f onegroup.mk test $(PARAM_DEFAULT)
 test-slab : fonts-slab
 	@$(MAKE) -f onegroup.mk test $(PARAM_SLAB)
+	
+# snapshot
+snapshot-default : webfonts-default | snapshot/assets
+	@$(MAKE) -f onegroup.mk snapshot $(PARAM_DEFAULT)
+snapshot-slab : webfonts-slab | snapshot/assets
+	@$(MAKE) -f onegroup.mk snapshot $(PARAM_SLAB)
 
 # Webfonts
 dist/webfonts : | dist
@@ -85,53 +92,22 @@ fw : fonts-fw fonts-cc
 
 webfonts : webfonts-default webfonts-slab
 
-images/weights.png : fonts-default fonts-slab
-	convert -size 4800x1700 xc:white -pointsize 125 \
-		-fill black \
-		-font dist/iosevka/iosevka-thin.ttf       -draw "text 0,121  '      thin    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-extralight.ttf -draw "text 0,299  'extralight    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-light.ttf      -draw "text 0,478  '     light    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-regular.ttf    -draw "text 0,656  '   regular    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-medium.ttf     -draw "text 0,835  '    medium    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-bold.ttf       -draw "text 0,1013 '      bold    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-font dist/iosevka/iosevka-heavy.ttf      -draw "text 0,1192 '     heavy    float Fox.quick(h){ is_brown && it_jumps_over(doges.lazy) }'" \
-		-trim images/weights.png
-	optipng images/weights.png
-
-images/variants.png : fonts-default fonts-slab fonts-hooky fonts-zshaped
-	convert -size 6800x1700 xc:white -pointsize 125 \
-		-fill black \
-		-font dist/iosevka/iosevka-italic.ttf          -draw "text 0,121  'default:    '" \
-		-font dist/iosevka/iosevka-regular.ttf         -draw "fill blue text 750,121 'set ' fill black text 1000,121 'font.name.uniqueSubFamily ' fill green text 2625,121 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/variant-hooky-iosevka/hooky-iosevka-italic.ttf    -draw "text 0,308  '  hooky:    '" \
-		-font dist/variant-hooky-iosevka/hooky-iosevka-regular.ttf   -draw "fill blue text 750,308 'set ' fill black text 1000,308 'font.name.uniqueSubFamily ' fill green text 2625,308 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-font dist/variant-zshaped-iosevka/zshaped-iosevka-italic.ttf  -draw "text 0,496  'zshaped:    '" \
-		-font dist/variant-zshaped-iosevka/zshaped-iosevka-regular.ttf -draw "fill blue text 750,496 'set ' fill black text 1000,496 'font.name.uniqueSubFamily ' fill green text 2625,496 '\"\\(para.family) \\(para.style) \\(para.version) (\\(para.codename))\"'" \
-		-trim images/variants.png
-	optipng images/variants.png
-
-electronsnaps1: pages
-	cd pages && electron getsnap.js --dir ../images
+electronsnaps1: webfonts snapshot
+	cd snapshot && electron getsnap.js --dir ../images
 images/opentype.png: electronsnaps1
 	optipng $@
 images/languages.png: electronsnaps1
 	optipng $@
-images/languages-slab.png: electronsnaps1
+images/preview-all.png: electronsnaps1
 	optipng $@
-images/languages-light.png: electronsnaps1
+images/weights.png: electronsnaps1
 	optipng $@
-images/languages-slab-light.png: electronsnaps1
+images/variants.png: electronsnaps1
 	optipng $@
-images/preview.png: electronsnaps1
+images/matrix.png: electronsnaps1
 	optipng $@
-images/preview-slab.png: electronsnaps1
-	optipng $@
-images/preview-light.png: electronsnaps1
-	optipng $@
-images/preview-slab-light.png: electronsnaps1
-	optipng $@
-images/preview-all.png: images/preview.png images/preview-light.png images/preview-slab.png images/preview-slab-light.png
-	convert $^ -append $@
+images/family.png: electronsnaps1
 	optipng $@
 
-sampleimages: images/weights.png images/variants.png images/opentype.png images/languages.png images/languages-slab.png images/languages-light.png images/languages-slab-light.png images/preview.png images/preview-slab.png images/preview-light.png images/preview-slab-light.png images/preview-all.png
+
+sampleimages: images/family.png images/matrix.png images/weights.png images/variants.png images/opentype.png images/languages.png images/preview-all.png
