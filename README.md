@@ -90,6 +90,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+
+* **1.7.5**
+  - Reduced the weight of Bold, and increased the size of periods of Medium.
 * **1.7.4**
   - The lower tilde (`~`) is used by default.
   - Added slanted inequality symbol (U+2A7D and U+2A7E) and corrected the shape of `≤` and `≥`.
