@@ -95,10 +95,11 @@ if(window && window.process && window.process.type && process.versions['electron
 		return style.sheet;
 	})();
 	sheet.insertRule('::-webkit-scrollbar {display: none;}');
-	sheet.insertRule('#preview-toolbar{display:none}');
+	sheet.insertRule('section#preview #preview-toolbar{display:none}');
 	sheet.insertRule('#opentype>h2{display:none}');
 	sheet.insertRule('#opentype:before{display:none}');
 	document.querySelector('#preview').style.paddingBottom = windowHeight * 2 + 'px';
+	document.querySelector('#preview').style.transition = 'none';
 
 	var onScroll = function(){};
 	ipc.on('scroll', function(){
@@ -108,13 +109,15 @@ if(window && window.process && window.process.type && process.versions['electron
 	var onComplete = function(){};
 	ipc.on('complete', function(){ onComplete.apply(this, arguments) });
 	
-	function captureElement(el, name, callback){
+	function captureElement(options, callback){
 		window.scroll(0, 0);
-		var rect = el.getBoundingClientRect();
+		var rect = options.el.getBoundingClientRect();
 		ipc.send('snapshot', {
-			name: name,
+			name: options.name,
 			windowWidth: windowWidth,
 			windowHeight: windowHeight,
+			background: options.background || 'white',
+			padding: options.padding || 1,
 			dpi: dpi,
 			x: rect.left | 0,
 			y: rect.top | 0,
@@ -126,18 +129,116 @@ if(window && window.process && window.process.type && process.versions['electron
 		};
 		onComplete = function(){
 			if(callback) callback();
+			onComplete = function(){};
 		}
 	}
+	
+	var snapshotTasks = [
+		{
+			el: document.querySelector('#opentype'),
+			name: 'opentype',
+			background: 'white',
+			padding: 1
+		},
+		{
+			el: document.querySelector('#preview>pre#javascript'),
+			name: 'languages',
+			background: 'rgb(32,31,28)', 
+			padding: 72
+		},
+		{
+			el: document.querySelector('#preview>pre#javascript'),
+			name: 'languages-slab',
+			background: 'rgb(32,31,28)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = true;
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#javascript'),
+			name: 'languages-light',
+			background: 'rgb(243,243,242)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = false;
+				indexPage.theme = 'color-light';
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#javascript'),
+			name: 'languages-slab-light',
+			background: 'rgb(243,243,242)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = true;
+				indexPage.theme = 'color-light';
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#cpp-2'),
+			name: 'preview',
+			background: 'rgb(32,31,28)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = false;
+				indexPage.theme = 'color-dark';
+				indexPage.snippet = "cpp-2"
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#cpp-2'),
+			name: 'preview-slab',
+			background: 'rgb(32,31,28)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = true;
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#cpp-2'),
+			name: 'preview-light',
+			background: 'rgb(243,243,242)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = false;
+				indexPage.theme = 'color-light';
+				setTimeout(callback, 1)
+			}
+		},
+		{
+			el: document.querySelector('#preview>pre#cpp-2'),
+			name: 'preview-slab-light',
+			background: 'rgb(243,243,242)', 
+			padding: 72,
+			prepare: function(callback){
+				indexPage.isSlab = true;
+				indexPage.theme = 'color-light';
+				setTimeout(callback, 1)
+			}
+		}
+	]
 	
 	window.onload = function(){
 		ipc.send('snapshot', 'i am ready');
 		console.log('I AM READY');
-		setTimeout(function(){
-			captureElement(document.querySelector('#opentype'), 'opentype', function(){
-				captureElement(document.querySelector('#preview>pre#javascript'), 'languages', function(){
-					window.close()
+		current = 0;
+		var step = function(){
+			var doit = function(){
+				captureElement(snapshotTasks[current], function(){
+					current += 1;
+					if(current >= snapshotTasks.length) window.close()
+					else setTimeout(step, 100)
 				})
-			})
-		}, 1000)
+			};
+			if(snapshotTasks[current].prepare) snapshotTasks[current].prepare(doit);
+			else setTimeout(doit, 1)
+		};
+		setTimeout(step, 500);
 	}
 })()
