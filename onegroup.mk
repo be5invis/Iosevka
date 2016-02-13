@@ -168,6 +168,11 @@ archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip $(ARCHIVEDIR)/
 pages : $(PAGESTTF) $(PAGESWOFF) $(PAGESWOFF2) $(PAGESMAPS)
 webfonts : $(WEBFONTSTTF) $(WEBFONTSWOFF) $(WEBFONTSWOFF2) $(WEBFONTCSS)
 
+SNAPSHOT_ASSETS = $(subst dist/webfonts/,snapshot/,$(WEBFONTSTTF) $(WEBFONTSWOFF) $(WEBFONTSWOFF2) $(WEBFONTCSS))
+$(SNAPSHOT_ASSETS) : snapshot/% : dist/webfonts/%
+	cp $< $@
+snapshot: $(SNAPSHOT_ASSETS)
+
 # testdrive
 TESTDIR = testdrive/assets
 TESTTTF = $(subst $(DISTDIR)/,$(TESTDIR)/,$(DISTTARGETS))

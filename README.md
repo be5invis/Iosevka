@@ -1,8 +1,8 @@
-# Iosevka
+# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpe0v.com1.z0.glb.clouddn.com/aeqr9bewtqtvpkpl18.png)
 
 Coders' typeface, built from code.
 
-![Weights Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
 
 ## Installation
 
@@ -13,7 +13,21 @@ Quit your editor/program. Unzip and open the folder.
 * **Linux** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
 
-## Building from source
+## Weights, Variants and OpenType features
+
+The typeface contains seven weights (thin, extra-light, light, regular, medium, bold and heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
+
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
+
+All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic Greek), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
+
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
+
+Iosevka supports accessing all letter variants using OpenType features.
+
+![opentype](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
+
+## Building from Source
 
 To build Iosevka you should:
 
@@ -24,7 +38,7 @@ To build Iosevka you should:
 
 You will find TTFs in the `dist/` directory.
 
-### Building web font
+### Building the Web Font
 
 The `webfonts/` directory is used to build Iosevka for web font uses. To build the web fonts you should:
 
@@ -34,7 +48,7 @@ The `webfonts/` directory is used to build Iosevka for web font uses. To build t
 
 The web fonts will be generated into `dist/webfonts`.
 
-## Build your own style
+## Build Your Own Style
 
 ![Styles Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/variants.png)
 
@@ -157,3 +171,5 @@ The current avaliable styles are:
   - Fixed the incorrect `/yhooktop`.
   - The digaphs defined in Unicode is now single-width.
   - Reorganized subfamilies: Now the default Iosevka does not contain full-width glyphs any more.
+
+![Family Matrix](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/matrix.png)
