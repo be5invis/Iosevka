@@ -171,3 +171,5 @@ The current avaliable styles are:
   - Fixed the incorrect `/yhooktop`.
   - The digaphs defined in Unicode is now single-width.
   - Reorganized subfamilies: Now the default Iosevka does not contain full-width glyphs any more.
+
+![Family Matrix](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/matrix.png)
