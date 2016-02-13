@@ -15,9 +15,13 @@ Quit your editor/program. Unzip and open the folder.
 
 ## Weights, Variants and OpenType features
 
-The typeface contains seven weights (thin, extra-light, light, regular, medium, bold and heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic Greek), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
+The typeface contains seven weights (thin, extra-light, light, regular, medium, bold and heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
 
 ![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
+
+All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic Greek), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
+
+![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
 Iosevka supports accessing all letter variants using OpenType features.
 
