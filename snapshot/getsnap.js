@@ -81,7 +81,13 @@ ipc.on('log', function(event, arg){
 })
 
 app.on('ready', function() {
-	mainWindow = new BrowserWindow({width: 64 * 16 * zoom, height: 1024 * zoom, x: 5000, y: 5000, zoomFactor: zoom});
+	mainWindow = new BrowserWindow({
+		width: 64 * 16 * zoom, height: 1024 * zoom,
+		x: 5000, y: 5000,
+		zoomFactor: zoom,
+		show: false
+	});
+	mainWindow.showInactive();
 	mainWindow.loadURL('file://' + __dirname + '/index.html');
 	mainWindow.blurWebView();
 	//mainWindow.hide();
