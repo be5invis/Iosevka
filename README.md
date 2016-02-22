@@ -12,6 +12,7 @@ Quit your editor/program. Unzip and open the folder.
 * **[Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
 * **Linux** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
+  - Void Linux users can install the font with `xbps-install font-iosevka`.
 
 ## Weights, Variants and OpenType features
 
