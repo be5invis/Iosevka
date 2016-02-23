@@ -12,6 +12,7 @@ Quit your editor/program. Unzip and open the folder.
 * **[Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
 * **Linux** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
+  - Void Linux users can install the font with `xbps-install font-iosevka`.
 
 ## Weights, Variants and OpenType features
 
@@ -82,14 +83,17 @@ The current avaliable styles are:
   * `v-zero-slashed` : Slashed Zero `0` (default)
   * `v-zero-dotted` : Dotted Zero `0`
   * `v-zero-unslashed` : O-like `0`
-* Styles for ASCII tilde (`~`) and asterisk (`*`):
+* Styles for ASCII tilde (`~`), asterisk (`*`) amd paragaraph(`¶`):
   * `v-tilde-high` : Higher tilde `~`
   * `v-tilde-low` : Lower tilde `~` (default)
   * `v-asterisk-high` : Higher asterisk `*` (default)
   * `v-asterisk-low` : Lower asterisk `*`
+  * `v-paragraph-high` : Higher paragraph symbol `¶` (default)
+  * `v-paragraph-low` : Lower paragraph symbol `¶`
 
 ## Release Notes
-
+* **1.7.5**
+  - Reduced the weight of Bold, and increased the size of periods of Medium.
 * **1.7.4**
   - The lower tilde (`~`) is used by default.
   - Added slanted inequality symbol (U+2A7D and U+2A7E) and corrected the shape of `≤` and `≥`.
