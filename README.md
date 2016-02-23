@@ -92,6 +92,11 @@ The current avaliable styles are:
   * `v-paragraph-low` : Lower paragraph symbol `¶`
 
 ## Release Notes
+
+* **1.8.0**
+  * ​Added a lower paragraph symbol (`¶`) shape, and two OpenType features (`cv22` and `cv23`) to enable them.
+  * Most mathematical operators, like `≤`, will be full-width in the CC variants.
+  * Added experimental ligatures support. Currently the ligatures are assigned to feature “`calt`” and contains these feagures only: `-> --> <- <-- <-> <!--` . Note that Iosevka does not contain "real" ligature glyphs, these figures are implemented using chained substitution and long dashes.
 * **1.7.5**
   - Reduced the weight of Bold, and increased the size of periods of Medium.
 * **1.7.4**
