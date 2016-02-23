@@ -5,6 +5,7 @@ import sys
 
 source = sys.argv[1]
 font = fontforge.open(source)
+font.mergeFeature(sys.argv[2])
 font.selection.all()
 # Replace accented characters into references
 print "    Reference finding: ", font.fontname
@@ -42,7 +43,6 @@ font.simplify(0.01)
 font.selection.all()
 font.removeOverlap()
 
-font.mergeFeature(sys.argv[2])
 font.canonicalContours()
 font.canonicalStart()
 font.generate(sys.argv[3], flags = ("short-post", "opentype"))
