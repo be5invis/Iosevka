@@ -8,9 +8,9 @@ Coders' typeface, built from code.
 
 Quit your editor/program. Unzip and open the folder.
 
-* **[OS X](http://support.apple.com/kb/HT2509)**
-* **[Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
-* **Linux** : Copy the .ttf files to your fonts-directory → Run `sudo fc-cache`.
+* **[Instructions for OS X](http://support.apple.com/kb/HT2509)**
+* **[Instructions for Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
+* **Linux** : Copy the .ttf files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
 
@@ -18,22 +18,22 @@ Quit your editor/program. Unzip and open the folder.
 
 The typeface contains seven weights (thin, extra-light, light, regular, medium, bold and heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
 
-![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
+![Weights sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
 All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic Greek), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
 
-![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
+![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
 Iosevka supports accessing all letter variants using OpenType features.
 
-![opentype](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
+![OpenType Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
 
 ## Building from Source
 
 To build Iosevka you should:
 
 1. Ensure that [`node`](http://nodejs.org) (≥ 5.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`ttx`](http://www.adobe.com/cn/devnet/opentype/afdko.html) and `make` are runnable in your terminal.
-   - Windows users may need to install MinGW and make \*nix	 utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
+   - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`.
 3. `make`.
 
@@ -64,39 +64,39 @@ You can add arbitary styles for these variables, for example, `make STYLE_UPRIGH
 The current avaliable styles are:
 
 * Styles for letter `l`:
-  * `v-l-hooky` : Hooky `l`
-  * `v-l-zshaped` : Z-shaped `l`
-  * `v-l-serifed` : Serifed `l` (default for upright and oblique)
-  * `v-l-italic` : Italic `l` (default for italic)
+  * `v-l-hooky` : Hooky `l`.
+  * `v-l-zshaped` : Z-shaped `l`.
+  * `v-l-serifed` : Serifed `l` (default for upright and oblique).
+  * `v-l-italic` : Italic `l` (default for italic).
 * Styles for letter `i`:
-  * `v-i-hooky` : Hooky `i`
-  * `v-i-zshaped` : Z-shaped `i`
-  * `v-i-serifed` : Serifed `i` (default for upright and oblique)
-  * `v-i-italic` : Italic `i` (default for italic)
+  * `v-i-hooky` : Hooky `i`.
+  * `v-i-zshaped` : Z-shaped `i`.
+  * `v-i-serifed` : Serifed `i` (default for upright and oblique).
+  * `v-i-italic` : Italic `i` (default for italic).
 * Styles for letter `a`:
-  * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique)
-  * `v-a-singlestorey` : Single-storey `a` (default for italic)
+  * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
+  * `v-a-singlestorey` : Single-storey `a` (default for italic).
 * Styles for letter `g`:
-  * `v-g-doublestorey` : Double-storey `g` (default)
-  * `v-g-singlestorey` : Single-storey `g`
+  * `v-g-doublestorey` : Double-storey `g` (default).
+  * `v-g-singlestorey` : Single-storey `g`.
 * Styles for letter `0`:
-  * `v-zero-slashed` : Slashed Zero `0` (default)
-  * `v-zero-dotted` : Dotted Zero `0`
-  * `v-zero-unslashed` : O-like `0`
+  * `v-zero-slashed` : Slashed Zero `0` (default).
+  * `v-zero-dotted` : Dotted Zero `0`.
+  * `v-zero-unslashed` : O-like `0`.
 * Styles for ASCII tilde (`~`), asterisk (`*`) amd paragaraph(`¶`):
-  * `v-tilde-high` : Higher tilde `~`
-  * `v-tilde-low` : Lower tilde `~` (default)
-  * `v-asterisk-high` : Higher asterisk `*` (default)
-  * `v-asterisk-low` : Lower asterisk `*`
-  * `v-paragraph-high` : Higher paragraph symbol `¶` (default)
-  * `v-paragraph-low` : Lower paragraph symbol `¶`
+  * `v-tilde-high` : Higher tilde `~`.
+  * `v-tilde-low` : Lower tilde `~` (default).
+  * `v-asterisk-high` : Higher asterisk `*` (default).
+  * `v-asterisk-low` : Lower asterisk `*`.
+  * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
+  * `v-paragraph-low` : Lower paragraph symbol `¶`.
 
 ## Release Notes
 
 * **1.8.0**
-  * ​Added a lower paragraph symbol (`¶`) shape, and two OpenType features (`cv22` and `cv23`) to enable them.
-  * Most mathematical operators, like `≤`, will be full-width in the CC variants.
-  * Added experimental ligatures support. Currently the ligatures are assigned to feature “`calt`” and contains these feagures only: `-> --> <- <-- <-> <!--` . Note that Iosevka does not contain "real" ligature glyphs, these figures are implemented using chained substitution and long dashes.
+  - Added a lower paragraph symbol (`¶`) shape, and two OpenType features (`cv22` and `cv23`) to enable them.
+  - Most mathematical operators, like `≤`, will be full-width in the CC variants.
+  - Added experimental ligatures support. Currently the ligatures are assigned to feature “`calt`” and contains these feagures only: `-> --> <- <-- <-> <!--` . Note that Iosevka does not contain "real" ligature glyphs, these figures are implemented using chained substitution and long dashes.
 * **1.7.5**
   - Reduced the weight of Bold, and increased the size of periods of Medium.
 * **1.7.4**
