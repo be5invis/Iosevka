@@ -127,74 +127,69 @@ symbol-block 'Metric marks'
 
 ### Ligature-orienteds
 symbol-block 'Ligature-oriented Subglyphs'
+	# Shifted arrowheads
+	local arrowheadsKern : clamp 0 (WIDTH / 2) (WIDTH - OPERATORSTROKE * 3)
+	sketch
+		include glyphs.greater AS_BASE ALSO_METRICS
+		include : Translate arrowheadsKern 0
+		save 'greater.shift1'
+		include : Translate arrowheadsKern 0
+		save 'greater.shift2'
+		include : Translate (-arrowheadsKern * 3) 0
+		save 'greater.shiftN1'
+	sketch
+		include glyphs.less AS_BASE ALSO_METRICS
+		include : Translate (-arrowheadsKern) 0
+		save 'less.shift1'
+		include : Translate (-arrowheadsKern) 0
+		save 'less.shift2'
+		include : Translate (arrowheadsKern * 3) 0
+		save 'less.shiftN1'
+	
 	# arrows
-	local cleft  (O)
-	local cright (WIDTH - O)
-	local arrowr [clamp WIDTH (WIDTH * 2) (WIDTH + RIGHTSB - OPERATORSTROKE * 2.5)]
-	local arrowl (WIDTH - arrowr)
-	sketch
-		include : HBar SB arrowr parenMid OPERATORSTROKE
-		save 'minus.fr'
-	sketch
-		include : HBar arrowl RIGHTSB parenMid OPERATORSTROKE
-		save 'minus.lf'
-	sketch
-		include : HBar cleft arrowr parenMid OPERATORSTROKE
-		save 'minus.cr'
-	sketch
-		include : HBar arrowl cright parenMid OPERATORSTROKE
-		save 'minus.lc'
-	sketch
-		include : HBar cleft RIGHTSB parenMid OPERATORSTROKE
-		save 'minus.cf'
-	sketch
-		include : HBar SB cright parenMid OPERATORSTROKE
-		save 'minus.fc'
-	sketch
-		include : HBar arrowl arrowr parenMid OPERATORSTROKE
-		save 'minus.lr'
-	sketch
-		include : HBar cleft cright parenMid OPERATORSTROKE
-		save 'minus.cc'
-	sketch
-		include glyphs.exclam
-		include : Translate (((RIGHTSB - WIDTH) + (arrowl + WIDTH)) / 2 - MIDDLE) 0
-		save 'exclam.htmlcommentstart'
+	# ->
+	define arrowheadSlope : (RIGHTSB - SB) / (parenTop - parenBot) * 4
+	define [ArrowBarConfig extend kern join] : let [cleft O] [cright (WIDTH - O)] [arrowr : WIDTH + extend] [arrowl : 0 - extend] : list
+		list 'fr' SB arrowr
+		list 'lf' arrowl RIGHTSB
+		list 'cr' cleft arrowr
+		list 'lc' arrowl cright
+		list 'fr1' SB (arrowr + kern)
+		list 'l1f' (arrowl - kern) RIGHTSB
+		list 'cr1' cleft (arrowr + kern)
+		list 'l1c' (arrowl - kern) cright
+		list 'fr2' SB (arrowr + kern * 2)
+		list 'l2f' (arrowl - kern * 2) RIGHTSB
+		list 'cr2' cleft (arrowr + kern * 2)
+		list 'l2c' (arrowl - kern * 2) cright
+		list 'cf' cleft RIGHTSB
+		list 'fc' SB cright
+		list 'jf' (-join) RIGHTSB
+		list 'fj' SB (WIDTH + join)
+		list 'jr' (-join) arrowr
+		list 'lj' arrowl (WIDTH + join)
+		list 'j1f' (-join - kern) RIGHTSB
+		list 'fj1' SB (WIDTH + join + kern)
+		list 'lr' arrowl arrowr
+		list 'cc' cleft cright
+
+	local arrowextend [clamp 0 WIDTH (RIGHTSB - OPERATORSTROKE / 2 * arrowheadSlope)]
+	local arrowj : clamp 0 WIDTH (SB + OPERATORSTROKE / 2 * arrowheadSlope)
+	foreach [{subclass left right} : items-of [ArrowBarConfig arrowextend arrowheadsKern arrowj]] : sketch
+		include : HBar left right parenMid OPERATORSTROKE
+		save ('minus.' + subclass)
 	 
 	# =>
-	local dblarrowd : XH * [linreg 18 0.125 126 0.25 STROKE]
+	local dblarrowd : XH * [linreg 18 0.15 126 0.3 STROKE]
 	local sw : Math.min OPERATORSTROKE (dblarrowd * [clamp 0.45 0.75 ((1 - WHITENESS) * 1)])
-	local dblarrowr [clamp WIDTH (WIDTH * 2) (WIDTH + RIGHTSB - dblarrowd * 2)]
-	local dblarrowl (WIDTH - dblarrowr)
+	local dblextend [clamp 0 WIDTH (RIGHTSB - (dblarrowd - sw / 2) * arrowheadSlope)]
+	local dblarrowj : clamp 0 WIDTH (SB + (dblarrowd - sw / 2) * arrowheadSlope)
+	foreach [{subclass left right} : items-of [ArrowBarConfig dblextend arrowheadsKern dblarrowj]] : sketch
+		include : HBarTop left right (parenMid + dblarrowd) sw
+		include : HBarBottom left right (parenMid - dblarrowd) sw
+		save ('equal.' + subclass)
+	
 	sketch
-		include : HBarTop SB dblarrowr (parenMid + dblarrowd) sw
-		include : HBarBottom SB dblarrowr (parenMid - dblarrowd) sw
-		save 'equal.fr'
-	sketch
-		include : HBarTop dblarrowl RIGHTSB (parenMid + dblarrowd) sw
-		include : HBarBottom dblarrowl RIGHTSB (parenMid - dblarrowd) sw
-		save 'equal.lf'
-	sketch
-		include : HBarTop cleft dblarrowr (parenMid + dblarrowd) sw
-		include : HBarBottom cleft dblarrowr (parenMid - dblarrowd) sw
-		save 'equal.cr'
-	sketch
-		include : HBarTop dblarrowl cright (parenMid + dblarrowd) sw
-		include : HBarBottom dblarrowl cright (parenMid - dblarrowd) sw
-		save 'equal.lc'
-	sketch
-		include : HBarTop cleft RIGHTSB (parenMid + dblarrowd) sw
-		include : HBarBottom cleft RIGHTSB (parenMid - dblarrowd) sw
-		save 'equal.cf'
-	sketch
-		include : HBarTop SB cright (parenMid + dblarrowd) sw
-		include : HBarBottom SB cright (parenMid - dblarrowd) sw
-		save 'equal.fc'
-	sketch
-		include : HBarTop dblarrowl dblarrowr (parenMid + dblarrowd) sw
-		include : HBarBottom dblarrowl dblarrowr (parenMid - dblarrowd) sw
-		save 'equal.lr'
-	sketch
-		include : HBarTop cleft cright (parenMid + dblarrowd) sw
-		include : HBarBottom cleft cright (parenMid - dblarrowd) sw
-		save 'equal.cc'
+		include glyphs.exclam
+		include : Translate (((RIGHTSB - WIDTH) + (WIDTH - arrowextend)) / 2 - MIDDLE) 0
+		save 'exclam.htmlcommentstart'
