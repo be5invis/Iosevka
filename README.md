@@ -93,6 +93,11 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.8.1**
+  - Added more ligations. The current set is:
+    	>>- <-< <-- <- >- <-> -< -> --> >-> -<<  <--> <!-- -->
+    	>>= <=< <==       <=> =< => ==> >=> =<<  <==>
+  - Fixed the incorrectly-sized symbol `∞` in the CC variants.
 * **1.8.0**
   - Added a lower paragraph symbol (`¶`) shape, and two OpenType features (`cv22` and `cv23`) to enable them.
   - Most mathematical operators, like `≤`, will be full-width in the CC variants.
