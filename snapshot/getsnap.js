@@ -18,8 +18,8 @@ app.on('window-all-closed', function() {
 	checkQuit()
 });
 
-function combineImages(images, outfile, width, height, background, padding){
-	var command = 'convert ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  ' + outfile;
+function combineImages(images, outfile, width, height, doubleTrim){
+	var command = 'convert ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  ' + (doubleTrim ? '-bordercolor ' + doubleTrim + ' -trim ' : '') + outfile;
 	console.log(command);
 	cp.exec(command, function(err, stdout, stderr){
 		images.forEach(function(file){
@@ -51,7 +51,7 @@ var phases = {
 				for(var k = 0; k < j; k++){
 					images.push(argv.dir + '/' + rect.name + '.' + k + '.png')
 				}
-				combineImages(images, file, rect.windowWidth * rect.dpi, rect.height * rect.dpi, rect.background, rect.padding);
+				combineImages(images, file, rect.windowWidth * rect.dpi, rect.height * rect.dpi, rect.doubleTrim);
 			}
 		}
 		function step(){
