@@ -75,24 +75,18 @@ releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
 releasepack-nl : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
 		VARNAME='nl-' ARCPREFIX='a-nl-' STYLE_COMMON='nl' NOCHARMAP='true'
-fonts-hooky : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) \
-		VARNAME='hooky-' ARCPREFIX='b-variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
-fonts-zshaped : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) \
-		VARNAME='zshaped-' ARCPREFIX='b-variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
-releasepack-hooky : fonts-hooky
+releasepack-hooky : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		VARNAME='hooky-' ARCPREFIX='b-variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
-releasepack-zshaped : fonts-zshaped
+		VARNAME='hooky-' ARCPREFIX='b-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+releasepack-zshaped : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		VARNAME='zshaped-' ARCPREFIX='b-variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
-releasepack-hooky-nl : fonts-hooky
+		VARNAME='zshaped-' ARCPREFIX='b-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+releasepack-hooky-nl : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		VARNAME='hooky-nl-' ARCPREFIX='b-variant-hooky-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
-releasepack-zshaped-nl : fonts-zshaped
+		VARNAME='hooky-nl-' ARCPREFIX='b-hooky-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+releasepack-zshaped-nl : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		VARNAME='zshaped-nl-' ARCPREFIX='b-variant-zshaped-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+		VARNAME='zshaped-nl-' ARCPREFIX='b-zshaped-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
 fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) \
 		VARNAME='wfw-' ARCPREFIX='c-withfw-' STYLE_COMMON='cjk' NOCHARMAP='true'
