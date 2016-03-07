@@ -25,7 +25,8 @@ var font = function(){
 	console.log('    Start building font ' + fontUniqueName);
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log('    ' + fontUniqueName + " Successfully built.");
-	font.features.sscompose = para.sscompose
+	font.features.sscompose = para.sscompose;
+	font.parameters = para;
 	return font;
 }();
 
@@ -81,8 +82,12 @@ if(argv.feature) (function(){
 		+ '@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n'
 		+ '@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\n'
 		+ 'table GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
-
-	fs.writeFileSync(argv.feature, featurefile, 'utf8');
+	
+	featurefile += fs.readFileSync(__dirname + '/features/common.fea', 'utf-8');
+	featurefile += fs.readFileSync(__dirname + '/features/' + (font.parameters.isItalic ? 'italiconly.fea' : 'uprightonly.fea'), 'utf-8');
+	if(!font.parameters.disableLigation)
+		featurefile += fs.readFileSync(__dirname + '/features/ligation.fea', 'utf-8');
+	fs.writeFileSync(argv.feature, featurefile, 'utf-8');
 })();
 
 /*

@@ -2,7 +2,7 @@ default: fonts
 
 TARGETUPM = 1000
 include makesupport.mk
-PREFIX = $(VARIANTNAME)iosevka$(SUFFIX)
+PREFIX = $(VARNAME)iosevka$(SUFFIX)
 ARCPREFIXB = iosevka$(SUFFIX)
 
 # Change this when an error reports
@@ -30,15 +30,13 @@ UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJD
 ITALIC  = $(OBJDIR)/$(PREFIX)-thinitalic.ttf $(OBJDIR)/$(PREFIX)-extralightitalic.ttf $(OBJDIR)/$(PREFIX)-lightitalic.ttf $(OBJDIR)/$(PREFIX)-italic.ttf $(OBJDIR)/$(PREFIX)-mediumitalic.ttf $(OBJDIR)/$(PREFIX)-bolditalic.ttf $(OBJDIR)/$(PREFIX)-heavyitalic.ttf
 OBLIQUE = $(OBJDIR)/$(PREFIX)-thinoblique.ttf $(OBJDIR)/$(PREFIX)-extralightoblique.ttf $(OBJDIR)/$(PREFIX)-lightoblique.ttf $(OBJDIR)/$(PREFIX)-oblique.ttf $(OBJDIR)/$(PREFIX)-mediumoblique.ttf $(OBJDIR)/$(PREFIX)-boldoblique.ttf $(OBJDIR)/$(PREFIX)-heavyoblique.ttf
 TARGETS = $(UPRIGHT) $(ITALIC) $(OBLIQUE)
-MAPS    = $(subst .ttf,.charmap,$(TARGETS))
+MAPS    = $(if $(NOCHARMAP),,$(OBJDIR)/$(PREFIX)-regular.charmap)
 
 
 FDTS    = $(subst .ttf,.fdt,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 SVG0    = $(subst .ttf,.svg,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 
-ABFEAT  = $(subst .ttf,.ab.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
-FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(UPRIGHT) $(OBLIQUE)))
-FEATITA = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(ITALIC)))
+FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
@@ -48,9 +46,9 @@ DISTTARGETS = $(subst $(OBJDIR)/,$(DISTDIR)/,$(TARGETS))
 fonts : $(DISTTARGETS)
 svgs : $(SVG0)
 
-	
 # Pass 0 : file construction
-OUTPUTS = --meta $@ --feature $(subst .fdt,.ab.fea,$@) --svg $(subst .fdt,.svg,$@) --charmap $(subst .fdt,.charmap,$(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$@))
+OUTPUTS = --meta $@ --feature $(subst .fdt,.fea,$@) --svg $(subst .fdt,.svg,$@)
+OUTPUT_CM = $(if $(NOCHARMAP),,--charmap $(subst .fdt,.charmap,$(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$@)))
 $(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
@@ -58,7 +56,7 @@ $(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 $(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
-	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
+	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) $(OUTPUT_CM)
 $(OBJDIR)/.pass0-$(PREFIX)-medium.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 $(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
@@ -98,14 +96,10 @@ $(OBJDIR)/.pass0-$(PREFIX)-heavyoblique.fdt : $(SCRIPTS) | $(OBJDIR) $(DISTDIR)
 
 $(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
-$(ABFEAT) : $(OBJDIR)/.pass0-%.ab.fea : $(OBJDIR)/.pass0-%.fdt
+$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
-$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/uprightonly.fea
-	@cat $^ > $@
-$(FEATITA) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.ab.fea features/common.fea features/italiconly.fea
-	@cat $^ > $@
 
 
 # Pass 1 : Outline cleanup and merge features
@@ -159,9 +153,9 @@ $(WEBFONTCSS) : webfont-csses/$(ARCPREFIX)$(ARCPREFIXB).css
 #$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)
 #	cd $(DISTDIR) && tar -cjvf ../$@ $(subst $(DISTDIR)/,,$^)
 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip : $(DISTTARGETS)
-	cd dist && 7z a -tzip -mx=9 ../$@ $(subst dist/,,$(DISTDIR))
+	cd $(DISTDIR) && 7z a -tzip -mx=9 ../../$@ ./*.ttf
 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z : $(DISTTARGETS)
-	cd dist && 7z a -t7z -mx=9 ../$@ $(subst dist/,,$(DISTDIR))
+	cd $(DISTDIR) && 7z a -t7z -mmt=on -m0=LZMA:a=1:d=1536m:fb=256 ../../$@ ./*.ttf
 
 #archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z
