@@ -68,26 +68,33 @@ archives-default : fonts-default
 archives-slab : fonts-slab
 	@$(MAKE) -f onegroup.mk archives $(PARAM_SLAB)
 
-# Variant releases
+# Releases
 releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION)
-fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
-fonts-cc : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
-releasepack-fw : fonts-fw
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='withfw-'
-releasepack-cc : fonts-cc
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='withfw-cc-'
+	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) ARCPREFIX='a-'
+releasepack-nolig : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) VARIANTNAME='nolig-' STYLE_COMMON='nolig' NOLIG='true' ARCPREFIX='a-nolig-'
 fonts-hooky : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
+	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-'
 fonts-zshaped : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
+	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-'
 releasepack-hooky : fonts-hooky
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='variant-hooky-'
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-'
 releasepack-zshaped : fonts-zshaped
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='variant-zshaped-'
-release-all : releasepack-default releasepack-fw releasepack-cc releasepack-hooky releasepack-zshaped
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-'
+releasepack-hooky-nolig : fonts-hooky
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-nolig-' STYLE_COMMON='nolig' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-nolig-'
+releasepack-zshaped-nolig : fonts-zshaped
+	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-nolig-' STYLE_COMMON='nolig' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-nolig-'
+fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='c-withfw-'
+fonts-cc : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='c-withfw-cc-'
+releasepack-fw : fonts-fw
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='c-withfw-'
+releasepack-cc : fonts-cc
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='c-withfw-cc-'
+
+release-all : releasepack-default releasepack-nolig releasepack-hooky releasepack-zshaped releasepack-hooky-nolig releasepack-zshaped-nolig releasepack-fw releasepack-cc 
 fw : fonts-fw fonts-cc
 
 webfonts : webfonts-default webfonts-slab

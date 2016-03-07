@@ -159,9 +159,9 @@ $(WEBFONTCSS) : webfont-csses/$(ARCPREFIX)$(ARCPREFIXB).css
 #$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)
 #	cd $(DISTDIR) && tar -cjvf ../$@ $(subst $(DISTDIR)/,,$^)
 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip : $(DISTTARGETS)
-	cd dist && 7z a -tzip -mx=9 ../$@ $(subst dist/,,$(DISTDIR))
+	cd $(DISTDIR) && 7z a -tzip -mx=9 ../../$@ ./*.ttf
 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z : $(DISTTARGETS)
-	cd dist && 7z a -t7z -mx=9 ../$@ $(subst dist/,,$(DISTDIR))
+	cd $(DISTDIR) && 7z a -t7z -mmt=on -m0=LZMA:a=1:d=1536m:fb=256 ../../$@ ./*.ttf
 
 #archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip
 archives : $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).zip $(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).7z
