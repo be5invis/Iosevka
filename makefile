@@ -1,8 +1,8 @@
 default: fonts
 
 include makesupport.mk
-PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)'
-PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARIANTNAME='$(VARIANTNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)'
+PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
+PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 LOOPS = 0 1 2
@@ -70,31 +70,43 @@ archives-slab : fonts-slab
 
 # Releases
 releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) ARCPREFIX='a-'
-releasepack-nolig : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) VARIANTNAME='nolig-' STYLE_COMMON='nolig' NOLIG='true' ARCPREFIX='a-nolig-'
+	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) \
+		ARCPREFIX='a-'
+releasepack-nl : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) \
+		VARNAME='nl-' ARCPREFIX='a-nl-' STYLE_COMMON='nl' NOCHARMAP='true'
 fonts-hooky : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-'
+	$(MAKE) fonts-default VERSION=$(VERSION) \
+		VARNAME='hooky-' ARCPREFIX='b-variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
 fonts-zshaped : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-'
+	$(MAKE) fonts-default VERSION=$(VERSION) \
+		VARNAME='zshaped-' ARCPREFIX='b-variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
 releasepack-hooky : fonts-hooky
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-'
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		VARNAME='hooky-' ARCPREFIX='b-variant-hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
 releasepack-zshaped : fonts-zshaped
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-'
-releasepack-hooky-nolig : fonts-hooky
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='hooky-nolig-' STYLE_COMMON='nolig' STYLE_UPRIGHT='v-l-hooky v-i-hooky' ARCPREFIX='b-variant-hooky-nolig-'
-releasepack-zshaped-nolig : fonts-zshaped
-	$(MAKE) archives-default VERSION=$(VERSION) VARIANTNAME='zshaped-nolig-' STYLE_COMMON='nolig' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' ARCPREFIX='b-variant-zshaped-nolig-'
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		VARNAME='zshaped-' ARCPREFIX='b-variant-zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+releasepack-hooky-nl : fonts-hooky
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		VARNAME='hooky-nl-' ARCPREFIX='b-variant-hooky-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+releasepack-zshaped-nl : fonts-zshaped
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		VARNAME='zshaped-nl-' ARCPREFIX='b-variant-zshaped-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
 fonts-fw : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='c-withfw-'
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) \
+		VARNAME='wfw-' ARCPREFIX='c-withfw-' STYLE_COMMON='cjk' NOCHARMAP='true'
 fonts-cc : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='c-withfw-cc-'
+	$(MAKE) fonts-default fonts-slab VERSION=$(VERSION) \
+		VARNAME='wcc-' ARCPREFIX='c-withfw-cc-' STYLE_COMMON='cjk cc' NOCHARMAP='true'
 releasepack-fw : fonts-fw
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk' VARIANTNAME='wfw-' ARCPREFIX='c-withfw-'
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
+		VARNAME='wfw-' ARCPREFIX='c-withfw-' STYLE_COMMON='cjk' NOCHARMAP='true'
 releasepack-cc : fonts-cc
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) STYLE_COMMON='cjk cc' VARIANTNAME='wcc-' ARCPREFIX='c-withfw-cc-'
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
+		VARNAME='wcc-' ARCPREFIX='c-withfw-cc-' STYLE_COMMON='cjk cc' NOCHARMAP='true'
 
-release-all : releasepack-default releasepack-nolig releasepack-hooky releasepack-zshaped releasepack-hooky-nolig releasepack-zshaped-nolig releasepack-fw releasepack-cc 
+release-all : releasepack-default releasepack-nl releasepack-hooky releasepack-zshaped releasepack-hooky-nl releasepack-zshaped-nl releasepack-fw releasepack-cc 
 fw : fonts-fw fonts-cc
 
 webfonts : webfonts-default webfonts-slab

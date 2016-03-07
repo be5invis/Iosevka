@@ -95,6 +95,9 @@ There's another building option `NOLIG`, which removes all ligations in the resu
 
 ## Release Notes
 
+* **1.8.2**
+  * Iosevka now provides a new variant family “IosevkaNL”, with ligation disabled to avoid typesetting issues under some Linux environments.
+
 * **1.8.1**
   - Added more ligations. The current set is:
 
