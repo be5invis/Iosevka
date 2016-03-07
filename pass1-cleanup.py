@@ -14,7 +14,7 @@ font.replaceWithReference()
 font.selection.all()
 font.selection.select(("less", None), "I.straight", "dotlessi.straight", "l.straight", "ltailBR", "rtailBR")
 font.selection.select(("less", "ranges", "unicode"), 0x207A, 0x207E, 0x208A, 0x208E)
-font.selection.select(("less", "ranges"), "minus.fr", "minus.cc", "equal.fr", "equal.cc")
+font.selection.select(("less", "ranges"), "lighy.fr", "lighy.cc", "ligeq.fr", "ligeq.cc")
 font.replaceWithReference()
 
 # Remove overlapped area
