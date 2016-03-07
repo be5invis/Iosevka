@@ -73,7 +73,7 @@ releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) \
 		ARCPREFIX='a-'
 releasepack-nl : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) \
+	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
 		VARNAME='nl-' ARCPREFIX='a-nl-' STYLE_COMMON='nl' NOCHARMAP='true'
 fonts-hooky : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) fonts-default VERSION=$(VERSION) \
