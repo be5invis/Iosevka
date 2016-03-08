@@ -790,23 +790,28 @@ symbol-block 'CJK Double Width Characters'
 		local scale 1.25
 		local pendingGlyphs : records.map : [record] => record.1
 		local widenFont : Widen pendingGlyphs scale (scale * 1.1)
-		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction
-			set-width UPM
-			if unicode : assign-unicode unicode
-			include widenFont.(glyphid) AS_BASE
-			apply-transform [Translate (UPM / 2 - (WIDTH * scale) / 2) 0] true
+		foreach {unicode glyphid} [items-of records] : begin
+			if [not unicodeGlyphs.(unicode)] : then : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction
+				set-width UPM
+				if unicode : assign-unicode unicode
+				include widenFont.(glyphid) AS_BASE
+				apply-transform [Translate (UPM / 2 - (WIDTH * scale) / 2) 0] true
+			: else : let [this-glyph widenFont.(glyphid)] [that-glyph unicodeGlyphs.(unicode)] : if (this-glyph && that-glyph) : begin
+				set that-glyph.advanceWidth FULLWIDTH
+				set that-glyph.anchors this-glyph.anchors
+				set that-glyph.contours this-glyph.contours
+				that-glyph.include : Translate (FULLWIDTH / 2 - this-glyph.advanceWidth / 2) 0
 	
 	if [not recursive] : begin
 		createDoubleWidth : let [a {}] : begin
 			foreach [j : range 1 0x5f] : if [not unicodeGlyphs.(0xff00 + j)] : a.push {(0xff00 + j) unicodeGlyphs.(0x20 + j).name}
+			if para.fullwidth_codes : foreach [j : items-of para.fullwidth_codes] : if (unicodeGlyphs.(j) && unicodeGlyphs.(j).advanceWidth < 1000) : begin
+				a.push {j unicodeGlyphs.(j).name}
 			a.push {0xFFE0 'cent'}
 			a.push {0xFFE1 'sterling'}
 			a.push {0xFFE5 'yen'}
 			* a
-		if para.fullwidth_codes : foreach [j : items-of para.fullwidth_codes] : if (unicodeGlyphs.(j) && unicodeGlyphs.(j).advanceWidth < 1000) : begin
-			unicodeGlyphs.(j).include : Translate (500 - unicodeGlyphs.(j).advanceWidth / 2) 0
-			set unicodeGlyphs.(j).advanceWidth 1000
-	
+
 ### Generate Features and remove double-width glyphs when necessary
 if [not recursive] : begin
 	if [not para.cjk] : begin
