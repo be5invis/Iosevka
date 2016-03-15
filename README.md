@@ -90,8 +90,9 @@ The current avaliable styles are:
   * `v-asterisk-low` : Lower asterisk `*`.
   * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
   * `v-paragraph-low` : Lower paragraph symbol `¶`.
+* Styles related to ligations
+  * `nl` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `IosevkaNL`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
-There's another building option `NOLIG`, which removes all ligations in the result font. `make NOLIG=true` will produce a “default” Iosevka without ligation support.
 
 ## Release Notes
 
@@ -99,8 +100,8 @@ There's another building option `NOLIG`, which removes all ligations in the resu
   - Iosevka now provides a new variant family “IosevkaNL”, with ligation disabled to avoid typesetting issues under some Linux environments. The current ligation set is:
 
     ```
->>- <-< <<- <-- <- >- <-> -< -> --> ->> >-> -<<  <--> <!-- -->
->>= <=< <<= <==       <=> =< => ==> =>> >=> =<<  <==>
+    >>- <-< <<- <-- <- >- <-> -< -> --> ->> >-> -<<  <--> <!-- -->
+    >>= <=< <<= <==       <=> =< => ==> =>> >=> =<<  <==>
     ```
 * **1.8.1**
   - Added more ligations.
@@ -108,7 +109,7 @@ There's another building option `NOLIG`, which removes all ligations in the resu
 * **1.8.0**
   - Added a lower paragraph symbol (`¶`) shape, and two OpenType features (`cv22` and `cv23`) to enable them.
   - Most mathematical operators, like `≤`, will be full-width in the CC variants.
-  - Added experimental ligatures support. Currently the ligatures are assigned to feature “`calt`” and contains these feagures only: `-> --> <- <-- <-> <!--` . Note that Iosevka does not contain "real" ligature glyphs, these figures are implemented using chained substitution and long dashes. 
+  - Added experimental ligatures support. Currently the ligatures are assigned to feature “`calt`” and contains these feagures only: `-> --> <- <-- <-> <!--` . Note that Iosevka does not contain "real" ligature glyphs, these figures are implemented using chained substitution and long dashes.
 * **1.7.5**
   - Reduced the weight of Bold, and increased the size of periods of Medium.
 * **1.7.4**
