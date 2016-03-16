@@ -1,5 +1,7 @@
 default: fonts
 
+ARCPREFIX=$(if $(ARCPREFIX1),$(ARCPREFIX1),01.)
+
 include makesupport.mk
 PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
 PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
@@ -70,31 +72,44 @@ archives-slab : fonts-slab
 
 # Releases
 releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default pages-slab archives-default archives-slab VERSION=$(VERSION) \
-		ARCPREFIX='std-'
-releasepack-nl : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
-		ARCPREFIX='std-nl-' VARNAME='nl-' STYLE_COMMON='nl' NOCHARMAP='true'
-releasepack-wcc : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default archives-slab VERSION=$(VERSION) \
-		ARCPREFIX='std-wcc-' VARNAME='wcc-' STYLE_COMMON='cc' NOCHARMAP='true'
+	$(MAKE) pages-default archives-default VERSION=$(VERSION) \
+		ARCPREFIX1='01.'
+releasepack-term : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		ARCPREFIX1='02.' SUFFIX='-term' STYLE_COMMON='term' NOCHARMAP='true'
+releasepack-cc : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) archives-default VERSION=$(VERSION) \
+		ARCPREFIX1='03.' SUFFIX='-cc' STYLE_COMMON='cc' NOCHARMAP='true'
+
+releasepack-slab : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) pages-slab archives-slab VERSION=$(VERSION) \
+		ARCPREFIX1='04.'
+releasepack-term-slab : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) archives-slab VERSION=$(VERSION) \
+		ARCPREFIX1='05.' SUFFIX='-term' STYLE_COMMON='term' NOCHARMAP='true'
+releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) archives-slab VERSION=$(VERSION) \
+		ARCPREFIX1='06.' SUFFIX='-cc' STYLE_COMMON='cc' NOCHARMAP='true'
 
 releasepack-hooky : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX='var-hooky-' VARNAME='hooky-' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
-releasepack-hooky-nl : $(SCRIPTS) | $(OBJDIR) dist
+		ARCPREFIX1='07.' SUFFIX='-hooky' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+releasepack-hooky-term : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX='var-hooky-nl-' VARNAME='hooky-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+		ARCPREFIX1='08.' SUFFIX='-term-hooky' STYLE_COMMON='term' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
 
 releasepack-zshaped : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX='var-zshaped-' VARNAME='zshaped-' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
-releasepack-zshaped-nl : $(SCRIPTS) | $(OBJDIR) dist
+		ARCPREFIX1='09.' SUFFIX='-zshaped' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+releasepack-zshaped-term : $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX='var-zshaped-nl-' VARNAME='zshaped-nl-' STYLE_COMMON='nl' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+		ARCPREFIX1='10.' SUFFIX='-term-zshaped' STYLE_COMMON='term' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
 
-release-all : releasepack-default releasepack-nl releasepack-wcc releasepack-hooky releasepack-zshaped releasepack-hooky-nl releasepack-zshaped-nl
-fw : releasepack-default releasepack-wcc
+release-all : releasepack-default releasepack-term releasepack-cc \
+              releasepack-slab releasepack-term-slab releasepack-cc-slab \
+              releasepack-hooky releasepack-zshaped \
+              releasepack-hooky-term releasepack-zshaped-term
+fw : releasepack-default releasepack-cc releasepack-slab releasepack-cc-slab
 
 webfonts : webfonts-default webfonts-slab
 
