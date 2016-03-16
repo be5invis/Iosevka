@@ -7,7 +7,7 @@ var CompactPicker = Vue.component('compact-picker', {
 	},
 	data: {},
 	methods: {
-		setItem: function(item){
+		setItem: function(item) {
 			this.current = item;
 			return false;
 		}
@@ -22,7 +22,7 @@ var CompactToggle = Vue.component('compact-toggle', {
 	},
 	data: {},
 	methods: {
-		toggle: function(){
+		toggle: function() {
 			this.on = !this.on
 			console.log(this.on)
 			return false;
@@ -42,32 +42,32 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.8.2",
-		codename: "Hermandine-2",
+		version: "1.8.3",
+		codename: "Hermandine-3",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
 		theme: 'color-dark',
 		opentypeSamples: [
-			
+
 			'Stylistic sets',
-			['volatile',['ss01','ss02','ss03'], 'sub', 'il'],
-			['percentage',['ss04','ss05'], 'sub', 'g'],
-			['msk & 0xFF',['ss06','ss07','ss08'], 'sub', '0'],
-			['*p=~mask_0',['ss09','ss10'], 'sub', '*~_'],
-			
+			['volatile', ['ss01', 'ss02', 'ss03'], 'sub', 'il'],
+			['percentage', ['ss04', 'ss05'], 'sub', 'g'],
+			['msk & 0xFF', ['ss06', 'ss07', 'ss08'], 'sub', '0'],
+			['*p=~mask_0', ['ss09', 'ss10'], 'sub', '*~_'],
+
 			'Character Variants',
 			['variable', ['cv01', 'cv02'], 'sub', 'a'],
 			['integer', ['cv03', 'cv04', 'cv05', 'cv06'], 'sub', 'i'],
-			['long',['cv07','cv08','cv09','cv10'], 'sub', 'l'],
-			['git',['cv11','cv12'], 'sub', 'g'],
-			['0x1337F001',['cv13','cv14','cv15'], 'sub', '0'],
-			['~bitsRead',['cv16','cv17'], 'sub', '~'],
-			['*handler',['cv18','cv19'], 'sub', '*'],
-			['shared_ptr',['cv20','cv21'], 'sub', '_'],
-			['ref:¶1.1',['cv22','cv23'], 'sub', '¶']
-		].map(function(item){
-			if(item instanceof Array && item[3]){
+			['long', ['cv07', 'cv08', 'cv09', 'cv10'], 'sub', 'l'],
+			['git', ['cv11', 'cv12'], 'sub', 'g'],
+			['0x1337F001', ['cv13', 'cv14', 'cv15'], 'sub', '0'],
+			['~bitsRead', ['cv16', 'cv17'], 'sub', '~'],
+			['*handler', ['cv18', 'cv19'], 'sub', '*'],
+			['shared_ptr', ['cv20', 'cv21'], 'sub', '_'],
+			['ref:¶1.1', ['cv22', 'cv23'], 'sub', '¶']
+		].map(function(item) {
+			if (item instanceof Array && item[3]) {
 				return [item[0].replace(new RegExp('[' + item[3] + ']', 'g'), '<b>$&</b>'), item[1], item[2]]
 			} else {
 				return item;
@@ -78,4 +78,4 @@ var indexPage = new Vue({
 		isItalic: false
 	}
 });
-indexPage.snippets = indexPage.$children.map(function(e){ return e.name }).filter(function(x){ return !!x }).sort();
+indexPage.snippets = indexPage.$children.map(function(e) { return e.name }).filter(function(x) { return !!x }).sort();
