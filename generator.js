@@ -85,8 +85,9 @@ if (argv.feature) (function() {
 
 	featurefile += fs.readFileSync(__dirname + '/features/common.fea', 'utf-8');
 	featurefile += fs.readFileSync(__dirname + '/features/' + (font.parameters.isItalic ? 'italiconly.fea' : 'uprightonly.fea'), 'utf-8');
-	if (!font.parameters.disableLigation)
+	if (font.parameters.spacing > 0) {
 		featurefile += fs.readFileSync(__dirname + '/features/ligation.fea', 'utf-8');
+	}
 	fs.writeFileSync(argv.feature, featurefile, 'utf-8');
 })();
 
