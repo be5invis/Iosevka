@@ -122,6 +122,8 @@ define-macro apply-transform : syntax-rules
 	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
 define-macro reverse-last : syntax-rules
 	`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
+define-macro depends-on : syntax-rules
+	`[depends-on @::args] {'.syntactic-closure' `[currentGlyph.depends-on @::args] env}
 define-macro eject-contour : syntax-rules
 	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
 define-macro tag-contour : syntax-rules
@@ -287,7 +289,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	
 	# derived metrics
 	define OXE : OX - O
-	define FULLWIDTH : if para.cjkSpacing 1000 WIDTH
+	define FULLWIDTH : if (para.spacing == 2) 1000 WIDTH
 	define ESS : STROKE * [fallback para.essx CONTRAST]
 	define ESSQUESTION : STROKE * [fallback para.essxq CONTRAST]
 	define XO : XH - O
@@ -388,11 +390,12 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
 		`[@name @actions] : begin
 			if (pickHash && nPending <= 0) : begin
-				if para.verbose: console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
+				if para.verbose : console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
 			
-			define glyphObject [new Glyph name]
+			if para.verbose : console.log name
+			local glyphObject [new Glyph name]
 			glyphList.push glyphObject
 			glyphs.(name) = glyphObject
 			glyphObject.set-width WIDTH
@@ -405,7 +408,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			return glyphObject
 		
 		`[@actions] : begin
-			local glyphObject [new Glyph ('.temp-' + [set nTemp (nTemp + 1)])]
+			local glyphName ('.temp-' + [set nTemp (nTemp + 1)])
+			if para.verbose : console.log glyphName
+			local glyphObject [new Glyph glyphName]
 			glyphObject.set-width WIDTH
 			glyphObject.gizmo = globalTransform
 			actions.call glyphObject

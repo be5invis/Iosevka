@@ -6,11 +6,14 @@ import './transform' as : Transform && [object [transformPoint tp] [untransform 
 import './anchor' as Anchor
 
 define-macro xytransform : syntax-rules
-	`[xytransform @tfm @x @y] : let [t : env.newt] `[begin \\
-		set @t @x
-		set @x : @x * @tfm.xx + @y * @tfm.yx + @tfm.x
-		set @y : @t * @tfm.xy + @y * @tfm.yy + @tfm.y
-	]
+	`[xytransform @tfm @x @y] : begin
+		set [env.declarations.get [formOf x]].isParameter 0
+		set [env.declarations.get [formOf y]].isParameter 0
+		let [t : env.newt] `[begin \\
+			set @t @x
+			set @x : @x * @tfm.xx + @y * @tfm.yx + @tfm.x
+			set @y : @t * @tfm.xy + @y * @tfm.yy + @tfm.y
+		]
 
 define [mix a b p] : a + (b - a) * p
 define [ratio l r m] : if [l === r] 0 ((m - l) / (r - l))
@@ -97,7 +100,11 @@ export all : class Glyph
 	public [eject-contour tag] : begin
 		set this.contours : this.contours.filter : lambda [c] (c.tag !== tag)
 		return this
-
+	public [depends-on glyph] : begin
+		piecewise
+			glyph.name : this.dependencies.push glyph.name
+			glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
+		return this
 	public [include component copyAnchors copyWidth] : begin
 		piecewise
 			(component <@ Function) : begin

@@ -128,8 +128,8 @@ define customDecompositions : object
 let : begin
 	suggestGC
 	define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
-	define iotaBelowToLF : function [p] : if (p === glyphs.iotaBelow) glyphs.iotaLF p
-	define ogonekBelowToTR : function [p] : if (p === glyphs.ogonekBelow) glyphs.ogonekTR p
+	define [iotaBelowToLF p j parts] : if (p === glyphs.iotaBelow) : set parts.(j) glyphs.iotaLF
+	define [ogonekBelowToTR p j parts] : if (p === glyphs.ogonekBelow) : set parts.(j) glyphs.ogonekTR
 	define [subParts parts] : begin
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
@@ -139,8 +139,8 @@ let : begin
 		if (parts.0 === glyphs.j && hasMarkAbove) : parts.0 = glyphs.dotlessj
 		
 		# replace below marks with trailing marks
-		if parts.0.anchors.lf : set parts : parts.map iotaBelowToLF
-		if parts.0.anchors.trailing : set parts : parts.map ogonekBelowToTR
+		if parts.0.anchors.lf : parts.forEach iotaBelowToLF
+		if parts.0.anchors.trailing : parts.forEach ogonekBelowToTR
 		
 		# composite greek overmarks
 		for [local j 0] (j < parts.length) [inc j] : piecewise
@@ -162,7 +162,8 @@ let : begin
 						set parts.(j) null; set parts.(j + 1) glyphs.dasiaperispomeni
 		return parts
 
-	define [pad s n] : begin
+	define [pad _s n] : begin
+		local s _s
 		while (s.length < n) : s = '0' + s
 		return s
 	local nComposed 0
@@ -233,7 +234,8 @@ let : begin
 	suggestGC
 
 
-define [suggestName name] : begin
+define [suggestName _name] : begin
+	local name _name
 	if glyphs.(name) : begin
 		local j 2
 		while glyphs.(name + j) : inc j
@@ -790,28 +792,34 @@ symbol-block 'CJK Double Width Characters'
 		local scale 1.25
 		local pendingGlyphs : records.map : [record] => record.1
 		local widenFont : Widen pendingGlyphs scale (scale * 1.1)
-		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction
-			set-width UPM
-			if unicode : assign-unicode unicode
-			include widenFont.(glyphid) AS_BASE
-			apply-transform [Translate (UPM / 2 - (WIDTH * scale) / 2) 0] true
+		foreach {unicode glyphid} [items-of records] : begin
+			if [not unicodeGlyphs.(unicode)] : then : create-glyph [suggestName : 'dw' + glyphid] : glyph-construction
+				set-width UPM
+				if unicode : assign-unicode unicode
+				include widenFont.(glyphid) AS_BASE
+				apply-transform [Translate (UPM / 2 - (WIDTH * scale) / 2) 0] true
+			: else : let [this-glyph widenFont.(glyphid)] [that-glyph unicodeGlyphs.(unicode)] : if (this-glyph && that-glyph) : begin
+				set that-glyph.advanceWidth FULLWIDTH
+				set that-glyph.anchors this-glyph.anchors
+				set that-glyph.contours this-glyph.contours
+				that-glyph.include : Translate (FULLWIDTH / 2 - this-glyph.advanceWidth / 2) 0
 	
 	if [not recursive] : begin
 		createDoubleWidth : let [a {}] : begin
 			foreach [j : range 1 0x5f] : if [not unicodeGlyphs.(0xff00 + j)] : a.push {(0xff00 + j) unicodeGlyphs.(0x20 + j).name}
+			if para.fullwidth_codes : foreach [j : items-of para.fullwidth_codes] : if (unicodeGlyphs.(j) && unicodeGlyphs.(j).advanceWidth < 1000) : begin
+				a.push {j unicodeGlyphs.(j).name}
 			a.push {0xFFE0 'cent'}
 			a.push {0xFFE1 'sterling'}
 			a.push {0xFFE5 'yen'}
 			* a
-		if para.fullwidth_codes : foreach [j : items-of para.fullwidth_codes] : if (unicodeGlyphs.(j) && unicodeGlyphs.(j).advanceWidth < 1000) : begin
-			unicodeGlyphs.(j).include : Translate (500 - unicodeGlyphs.(j).advanceWidth / 2) 0
-			set unicodeGlyphs.(j).advanceWidth 1000
-	
+
 ### Generate Features and remove double-width glyphs when necessary
 if [not recursive] : begin
-	if [not para.cjk] : begin
+	if (para.spacing == 0) : begin
 		set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
-		set glyphList font.glyf
+		set glyphList.length font.glyf.length
+		for [local j 0] (j < font.glyf.length) [inc j] : set glyphList.(j) font.glyf.(j)
 
 	set font.features.cv {.}
 	foreach [name : items-of : Object.keys glyphs] : begin
