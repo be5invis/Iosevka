@@ -96,13 +96,11 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.8.3**
+  - Added Kome symbol (`※`).
+  - Reorganized pre-built release packages. The “IosevkaNL” is renamed to “Iosevka Term”.
 * **1.8.2**
-  - Iosevka now provides a new variant family “IosevkaNL”, with ligation disabled to avoid typesetting issues under some Linux environments. The current ligation set is:
-
-    ```
-    >>- <-< <<- <-- <- >- <-> -< -> --> ->> >-> -<<  <--> <!-- -->
-    >>= <=< <<= <==       <=> =< => ==> =>> >=> =<<  <==>
-    ```
+  - Iosevka now provides a new variant family “IosevkaNL”, with ligation disabled to avoid typesetting issues under some Linux environments.
 * **1.8.1**
   - Added more ligations.
   - Fixed the incorrectly-sized symbol `∞` in the CC variants.
