@@ -42,40 +42,6 @@ lookup caltArrow1 {
 	sub @arrowstick' lookup arrowStickFJ less; # -<, =<
 } caltArrow1;
 
-@compress1l  = [
-	dwccolon dwcsemicolon dwlperiod dwlcomma dwlcjkperiod dwlcjkcomma
-	colon semicolon period comma cjkperiod cjkcomma ellipsis
-	fwlcloseDoubleQuote fwlcloseSingleQuote dwlcjkSingleQuoteRight dwlcjkDoubleQuoteRight dwlparenRight
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-];
-@compress1lc = [
-	colon semicolon period comma cjkperiod cjkcomma
-	colon semicolon period comma cjkperiod cjkcomma ellipsis
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-];
-@compress1r  = [
-	fwropenDoubleQuote fwropenSingleQuote dwrcjkSingleQuoteLeft dwrcjkDoubleQuoteLeft dwrparenLeft
-	openDoubleQuote openSingleQuote cjkSingleQuoteLeft cjkDoubleQuoteLeft parenLeft
-	fwlcloseDoubleQuote fwlcloseSingleQuote dwlcjkSingleQuoteRight dwlcjkDoubleQuoteRight dwlparenRight
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-	period comma dwlperiod dwlcomma dwlcjkcomma dwlcjkperiod ellipsis
-];
-@compress1rc = [
-	openDoubleQuote openSingleQuote cjkSingleQuoteLeft cjkDoubleQuoteLeft parenLeft
-	openDoubleQuote openSingleQuote cjkSingleQuoteLeft cjkDoubleQuoteLeft parenLeft
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-	closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight
-	period comma dwlperiod dwlcomma dwlcjkcomma dwlcjkperiod ellipsis
-];
-
-lookup CJKCompressLeft1 { sub @compress1l by @compress1lc; } CJKCompressLeft1;
-lookup CJKCompressRight1 { sub @compress1r by @compress1rc; } CJKCompressRight1;
-lookup paltCJKCompress {
-	sub @compress1l' lookup CJKCompressLeft1 @compress1r;
-	sub @compress1lc @compress1r' lookup CJKCompressRight1;
-} paltCJKCompress;
-
 feature calt {
 	script latn;
 		language dflt;
@@ -91,23 +57,38 @@ feature calt {
 		lookup caltArrow1;
 } calt;
 
-feature palt {
+@fwclose = [fwlcloseDoubleQuote fwlcloseSingleQuote dwlcjkSingleQuoteRight dwlcjkDoubleQuoteRight dwlparenRight];
+@hwclose = [closeDoubleQuote closeSingleQuote cjkSingleQuoteRight cjkDoubleQuoteRight parenRight];
+@fwopen = [fwropenDoubleQuote fwropenSingleQuote dwrcjkSingleQuoteLeft dwrcjkDoubleQuoteLeft dwrparenLeft];
+@hwopen = [openDoubleQuote openSingleQuote cjkSingleQuoteLeft cjkDoubleQuoteLeft parenLeft];
+@fwquoteopen = [fwropenDoubleQuote fwropenSingleQuote];
+@hwquoteopen = [openDoubleQuote openSingleQuote];
+@fwtrail = [dwccolon dwcsemicolon dwlperiod dwlcomma dwlcjkperiod dwlcjkcomma];
+@hwtrail = [colon semicolon period comma cjkperiod cjkcomma];
+
+lookup cjkCompress {
+	pos [@fwtrail @hwtrail @fwopen @hwopen] @fwopen' <-500 0 -500 0>;
+	pos @fwclose' <0 0 -500 0> [@fwtrail @hwtrail @fwclose @hwclose @fwopen @hwopen];
+	pos @fwtrail' <0 0 -500 0> @fwquoteopen;
+} cjkCompress;
+
+feature opbd {
 	script latn;
 		language dflt;
-		lookup paltCJKCompress;
+		lookup cjkCompress;
 	script grek;
 		language dflt;
-		lookup paltCJKCompress;
+		lookup cjkCompress;
 	script cyrl;
 		language dflt;
-		lookup paltCJKCompress;
+		lookup cjkCompress;
 	script hani;
 		language dflt;
-		lookup paltCJKCompress;
+		lookup cjkCompress;
 	script kana;
 		language dflt;
-		lookup paltCJKCompress;
+		lookup cjkCompress;
 	script DFLT;
 		language dflt;
-		lookup paltCJKCompress;
-} palt;
+		lookup cjkCompress;
+} opbd;
