@@ -563,13 +563,11 @@ symbol-block 'Quotes and Primes'
 	sketch # openDoubleQuote
 		include glyphs.lowDoubleQuote
 		include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
-	
 		save 'openDoubleQuote'
 
 	sketch # closeDoubleQuote
 		include glyphs.openDoubleQuote
 		include : FlipAround MIDDLE yCurlyQuotes
-	
 		save 'closeDoubleQuote'
 
 	sketch # revertDoubleQuote
@@ -817,7 +815,7 @@ symbol-block "ASCII Marks"
 	}
 	
 	#composite 'asciigrave' glyphs.space glyphs.graveAbove MarkZoom [into-unicode '`']
-#	composite 'asciicaret' glyphs.space glyphs.circumflexAbove MarkZoom [into-unicode '^']
+	#composite 'asciicaret' glyphs.space glyphs.circumflexAbove MarkZoom [into-unicode '^']
 	#composite 'latin1acute' glyphs.space glyphs.acuteAbove MarkZoom [into-unicode 0xB4]
 	composite 'degree' glyphs.space glyphs.ringAbove MarkZoom [into-unicode 0xB0]
 
@@ -839,3 +837,67 @@ symbol-block 'Double-width punctuations'
 	dwl nothing 0xFF0E 'period'
 	dwr nothing 0xFF08 'parenLeft'
 	dwl nothing 0xFF09 'parenRight'
+	
+	local r : Math.max PERIODRADIUS (WIDTH * 0.225)
+	local ry : r * 0.25
+	sketch
+		include : CircleDotAt MIDDLE ry (r + PERIODRADIUS * 0.5)
+		include : CircleDotAt MIDDLE ry (r - PERIODRADIUS * 0.4)
+		reverse-last
+		branch
+			set-width FULLWIDTH1
+			save "dwlcjkperiod" 0x3002
+		branch
+			save 'cjkperiod' 0xFF61
+	sketch
+		local k 0.9
+		include : dispiro
+			widths.center
+			g4 (MIDDLE - r * 1.1) (ry + r * (k - 0.2))
+			quadcontrols 0.5 0.45
+			g4 (MIDDLE + r) (ry + r * (-k - 0.35))
+		branch
+			set-width FULLWIDTH1
+			save "dwlcjkcomma" 0x3001
+		branch
+			save 'cjkcomma' 0xFF64
+	
+	local bracketOutside 0.05
+	local bracketInside 0.95
+	local cjkqd 0.75
+	local cjkqd2 0.97
+	local ideotop : para.ideoMid + (parenTop - parenMid)
+	local ideobot : para.ideoMid - (parenTop - parenMid)
+	sketch # cjkSingleQuoteLeft
+		include : HBarTop    [mix SB RIGHTSB bracketOutside] [mix SB RIGHTSB bracketInside] [mix ideobot ideotop cjkqd2]
+		include : VBarLeft   [mix SB RIGHTSB bracketOutside] [mix ideotop ideobot cjkqd] [mix ideobot ideotop cjkqd2]
+		save 'cjkSingleQuoteLeft' 0xFF62
+	sketch # cjkSingleQuoteRight
+		include glyphs.cjkSingleQuoteLeft
+		include : FlipAround MIDDLE parenMid
+		save 'cjkSingleQuoteRight' 0xFF63
+
+	sketch # cjkDoubleQuoteLeft
+		local sw : adviceBlackness 6
+		local dw : [Math.max (WIDTH * 0.175) [adviceBlackness 3.25]] + sw * 2
+		local outside : mix SB RIGHTSB bracketOutside
+		local inside : mix SB RIGHTSB bracketInside
+		local top : mix ideobot ideotop cjkqd2
+		local bottom : mix ideotop ideobot cjkqd
+		
+		include : VBarLeft outside bottom top sw
+		include : HBarTop outside inside top sw
+		include : VBarRight inside top (top - dw) sw
+		include : HBarBottom outside (outside + dw) bottom sw
+		include : VBarRight (outside + dw) bottom (top - dw + sw) sw
+		include : HBarBottom (outside + dw) inside (top - dw) sw
+		save 'cjkDoubleQuoteLeft'
+	sketch # cjkSingleQuoteRight
+		include glyphs.cjkDoubleQuoteLeft
+		include : FlipAround MIDDLE parenMid
+		save 'cjkDoubleQuoteRight'
+	
+	dwr nothing 0x300C 'cjkSingleQuoteLeft'
+	dwl nothing 0x300D 'cjkSingleQuoteRight'
+	dwr nothing 0x300E 'cjkDoubleQuoteLeft'
+	dwl nothing 0x300F 'cjkDoubleQuoteRight'
