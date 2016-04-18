@@ -483,17 +483,23 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		nameFont 4 fontfullName # Full Name
 		nameFont 6 : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
 		nameFont 0 para.copyright # Copyright
-		nameFont 14 para.licence  # License
+		nameFont 13 para.licence  # License
+		
+		set font.name : font.name.sort : lambda [a b] : begin
+			if (a.platformID != b.platformID) : return : a.platformID - b.platformID
+			if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
+			if (a.languageID != b.languageID) : return : a.languageID - b.languageID
+			return : a.nameID - b.nameID
 	
 	# Weight, width and slantness
 	set font.OS_2.usWeightClass     para.weight
 	set font.OS_2.panose.3          9 # Monospaced
 	set font.OS_2.panose.2          : 1 + para.weight / 100
-	set font.OS_2.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if ([not para.isBold] && [not para.isItalic]) 64 0] + 128
+	set font.OS_2.fsSelection       : [if para.isOblique 512 0] + [if para.isBold 32 0] + [if (para.isItalic || para.isOblique) 1 0] + [if ([not para.isBold] && [not para.isItalic] && [not para.isOblique]) 64 0] + 128
 	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
 	set font.OS_2.xAvgCharWidth     WIDTH
-	set font.post.isFixedPitch        true
-	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
+	set font.post.isFixedPitch      true
+	set font.head.macStyle          : [if para.isBold 1 0] + [if para.isItalic 2 0]
 	
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
