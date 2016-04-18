@@ -211,7 +211,7 @@ if (argv.svg) (function() {
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
 	var scale = (argv.upm || 1000) / 1000;
 
-	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font['OS/2'].usWeightClass + '" font-stretch="normal" units-per-em="' + (1000 * scale) + '"/>'
+	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font.OS_2.usWeightClass + '" font-stretch="normal" units-per-em="' + (1000 * scale) + '"/>'
 
 	for (var j = 0; j < font.glyf.length; j++) {
 		var g = font.glyf[j];
