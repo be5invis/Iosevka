@@ -52,4 +52,4 @@ font.removeOverlap()
 
 font.canonicalContours()
 font.canonicalStart()
-font.generate(sys.argv[3], flags = ("short-post", "opentype"))
+font.generate(sys.argv[3], flags = ("opentype"))

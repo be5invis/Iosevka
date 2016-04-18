@@ -102,20 +102,20 @@ $(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.fdt
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
 
+HINT = ttfautohint --increase-x-height=0
 
 # Pass 1 : Outline cleanup and merge features
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg $(OBJDIR)/.pass0-%.fea
-	@fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+	@$(HINT) $@.a.ttf $@
+	@-rm $@.a.ttf
 # Pass 2 : add metadata
 # IDKY, but converting into TTX and convert back dramatically reduces the file size
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+$(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
 	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -o $@ --ignore-glyph-order --keep-average-char-width --dummy-dsig --short-post
 
-HINT = ttfautohint --increase-x-height=0
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
-	@$(HINT) $< $@
-$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
-	@$(HINT) $< $@
+$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
+	@cp $< $@
 
 # releaseing
 ARCHIVEDIR = release-archives
