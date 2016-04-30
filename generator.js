@@ -44,44 +44,11 @@ if (argv.charmap) (function() {
 if (argv.feature) (function() {
 	console.log('    Writing feature file -> ' + argv.feature);
 	var featurefile = '\n\n';
-	// markGlyphs
-	for (var feature in font.features.cv) {
-		var base = [], replace = [];
-		for (var key in font.features.cv[feature]) {
-			base.push(key);
-			replace.push(font.features.cv[feature][key]);
-		};
-		var lookupName = feature + 'Auto';
-		featurefile += 'lookup ' + lookupName + ' { sub [' + base.join(' ') + '] by [' + replace.join(' ') + '];} ' + lookupName + ';\n\n';
-		featurefile += 'feature ' + feature + ' { script latn; lookup ' + lookupName + '; script grek; lookup ' + lookupName + '; script cyrl; lookup ' + lookupName + '; script DFLT; lookup ' + lookupName + '; } ' + feature + ';\n\n';
-	}
-	for (var feature in font.features.sscompose) {
-		var stmt = font.features.sscompose[feature].map(function(lookup) { return 'lookup ' + lookup + 'Auto' }).join(';')
-		featurefile += 'feature ' + feature + ' { script latn; ' + stmt + '; script grek; ' + stmt + '; script cyrl; ' + stmt + '; script DFLT; ' + stmt + '; } ' + feature + ';\n\n';
-	}
+
+	// MG groups
 	for (var key in font.features.markGlyphs) {
 		featurefile += '@MG_' + key + '= [' + font.features.markGlyphs[key].join(' ') + '];\n'
 	}
-	// mark
-	var mark = font.features.mark;
-	for (var id in mark) {
-		var lookup = mark[id];
-		var lookupName = 'markAuto_' + id;
-		featurefile += 'lookup ' + lookupName + ' {' + lookup.marks.join(';\n') + ';\n'
-			+ lookup.bases.join(';\n') + ';} ' + lookupName + ';'
-	}
-
-	// mkmk
-	var mkmk = font.features.mkmk;
-	featurefile += 'lookup mkmkAuto {' + mkmk.marks.join(';\n') + ';\n'
-		+ mkmk.bases.join(';\n') + ';} mkmkAuto;'
-
-	// gdef
-	var gdef = font.features.gdef;
-	featurefile += '@GDEF_Simple = [' + gdef.simple.join(' \n') + '];\n'
-		+ '@GDEF_Ligature =[' + gdef.ligature.join(' \n') + '];\n'
-		+ '@GDEF_Mark = [' + gdef.mark.join(' \n') + '];\n'
-		+ 'table GDEF { GlyphClassDef @GDEF_Simple, @GDEF_Ligature, @GDEF_Mark, ;} GDEF;'
 
 	featurefile += fs.readFileSync(__dirname + '/features/common.fea', 'utf-8');
 	featurefile += fs.readFileSync(__dirname + '/features/' + (font.parameters.isItalic ? 'italiconly.fea' : 'uprightonly.fea'), 'utf-8');
