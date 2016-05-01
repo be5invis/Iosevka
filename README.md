@@ -91,7 +91,7 @@ The current avaliable styles are:
   * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
   * `v-paragraph-low` : Lower paragraph symbol `¶`.
 * Styles related to ligations
-  * `nl` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `IosevkaNL`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
+  * `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
 
 ## Release Notes
