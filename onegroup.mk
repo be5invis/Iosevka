@@ -5,6 +5,13 @@ include makesupport.mk
 PREFIX = $(VARNAME)iosevka$(SUFFIX)
 ARCPREFIXB = iosevka$(SUFFIX)
 
+ifdef DONTHINT
+HINT = cp
+HINT_SUFFIX = --ignore-hints
+else
+HINT = ttfautohint --increase-x-height=0
+endif
+
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
 
@@ -97,8 +104,6 @@ $(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
 
-HINT = ttfautohint --increase-x-height=0
-
 # Pass 1 : Outline cleanup and merge features
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
 	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
@@ -107,7 +112,7 @@ $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
 # Pass 2 : add metadata
 # IDKY, but converting into TTX and convert back dramatically reduces the file size
 $(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
-	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -o $@ --ignore-glyph-order --keep-average-char-width --dummy-dsig --short-post
+	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -o $@ --ignore-glyph-order --keep-average-char-width --dummy-dsig --short-post $(HINT_SUFFIX)
 
 $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
 	@cp $< $@
