@@ -5,8 +5,15 @@ import sys
 
 source = sys.argv[1]
 font = fontforge.open(source)
-font.selection.all()
 # Replace accented characters into references
+font.selection.select("braille1237")
+font.replaceWithReference()
+font.selection.select("braille123", "braille127", "braille137")
+font.replaceWithReference()
+font.selection.select("braille13", "braille12")
+font.replaceWithReference()
+font.selection.select("braille1")
+font.replaceWithReference()
 font.selection.select(("ranges", "unicode", None), 0x1FCD, 0x1FCF, 0x1FDD, 0x1FDF)
 font.replaceWithReference()
 font.selection.all()
@@ -22,7 +29,13 @@ except TypeError:
 
 if hasLigation:
 	font.selection.select(("less", "ranges"), "lighy.fr", "lighy.cc", "ligeq.fr", "ligeq.cc")
+font.selection.select(("less", "ranges"), "braille1", "braille12345678")
 font.replaceWithReference()
+
+font.selection.select("braille1", "braille13", "braille12", "braille123", "braille127", "braille137", "braille1237")
+for i in font.selection:
+	glyph = font[i]
+	glyph.unlinkRef()
 
 # Remove overlapped area
 font.selection.all()
