@@ -144,8 +144,8 @@ $(WEBFONTSWOFF) : $(WEBFONTDIR)/%.woff : $(WEBFONTDIR)/%.ttf
 WEBFONTSWOFF2 = $(subst .ttf,.woff2,$(WEBFONTSTTF))
 $(WEBFONTSWOFF2) : $(WEBFONTDIR)/%.woff2 : $(WEBFONTDIR)/%.ttf
 	woff2_compress $<
-WEBFONTCSS = dist/webfonts/$(ARCPREFIX)$(ARCPREFIXB).css
-$(WEBFONTCSS) : webfont-csses/$(ARCPREFIX)$(ARCPREFIXB).css
+WEBFONTCSS = dist/webfonts/$(ARCPREFIXB).css
+$(WEBFONTCSS) : webfont-csses/$(ARCPREFIXB).css
 	cp $< $@
 
 #$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)
