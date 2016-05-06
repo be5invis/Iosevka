@@ -152,6 +152,7 @@ fw : fonts-default fonts-cc fonts-slab fonts-cc-slab
 
 d-fonts : fonts-d-sans fonts-d-slab
 test : testdrive-d-sans testdrive-d-slab
+webfonts : d-webfonts
 d-webfonts : webfont-pkg-d-sans webfont-pkg-d-slab
 d-snapshot : x-snapshot-d-sans x-snapshot-d-slab
 
