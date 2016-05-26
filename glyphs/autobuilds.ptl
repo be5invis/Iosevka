@@ -1045,26 +1045,39 @@ if [not recursive] : begin
 			lookup-single 'greaterShiftN1' {'greater'} {'liggreater.shiftN1'}
 			lookup-single 'arrowExclamHTMLComment' {'exclam'} {'ligexclam.htmlcommentstart'}
 			
-			commonList.push 'calt'
-			set features.calt {'caltArrow1'}
-			set lookups.caltArrow1
-				.type 'gsub_chaining'
-				.subtables : list
-					chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCR'} {greater}
-					chain-rule {less} {arrowStick 'arrowStickLR'} {greater} # <->, <=>
-					chain-rule {less} {arrowStick 'arrowStickLJ'} {less} # <-<, <=<
-					chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCF'} # <--, <==
-					chain-rule {less} {less 'lessShift1'} {arrowStick 'arrowStickL1F'} # <<-, <<=
-					chain-rule {less} {{'hyphen'} 'arrowStickLF'} # <-
-					chain-rule {less} {{'exclam'} 'arrowExclamHTMLComment'} {{'hyphen'} 'arrowStickLXC'} {{'hyphen'} 'arrowStickCF'} # <!--
-					chain-rule {greater} {greater 'greaterShiftN1'} {arrowStick 'arrowStickJ1F'} # >>-, >>=
-					chain-rule {greater} {arrowStick 'arrowStickJR'} {greater} # >->, >=>
-					chain-rule {greater} {{'hyphen'} 'arrowStickJF'} # >-
-					chain-rule {arrowStick 'arrowStickFC'} {arrowStick 'arrowStickCR'} {greater} # -->, ==>
-					chain-rule {arrowStick 'arrowStickFR1'} {greater 'greaterShift1'} {greater} # ->>, =>>
-					chain-rule {arrowStick 'arrowStickFR'} {greater} # ->, =>
-					chain-rule {arrowStick 'arrowStickFJ1'} {less 'lessShiftN1'} {less} # -<<, =<<
-					chain-rule {arrowStick 'arrowStickFJ'} {less} # -<, =<
+			local progLigNameMap
+				.XHS_ 'hask'
+				.XPTL 'hask'
+			foreach
+			: ligationFeatureName : items-of : {'calt'}.concat [Object.keys progLigNameMap]
+			: begin
+				local mappedFeature : progLigNameMap.(ligationFeatureName) || ligationFeatureName
+				local ligationLookupName : 'lig_' + mappedFeature
+				local [only lns subtable] : begin
+					if ([lns.indexOf mappedFeature] >= 0) [then : return subtable] : else : begin
+						set subtable.apply {}
+						return subtable
+				
+				commonList.push ligationFeatureName
+				set features.(ligationFeatureName) {ligationLookupName}
+				if [not lookups.(ligationLookupName)] : set lookups.(ligationLookupName)
+					.type 'gsub_chaining'
+					.subtables : list
+						chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCR'} {greater}
+						chain-rule {less} {arrowStick 'arrowStickLR'} {greater} # <->, <=>
+						chain-rule {less} {arrowStick 'arrowStickLJ'} {less} # <-<, <=<
+						chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCF'} # <--, <==
+						only {'hask'} : chain-rule {less} {less 'lessShift1'} {arrowStick 'arrowStickL1F'} # <<-, <<=
+						chain-rule {less} {{'hyphen'} 'arrowStickLF'} # <-
+						chain-rule {less} {{'exclam'} 'arrowExclamHTMLComment'} {{'hyphen'} 'arrowStickLXC'} {{'hyphen'} 'arrowStickCF'} # <!--
+						only {'hask'} : chain-rule {greater} {greater 'greaterShiftN1'} {arrowStick 'arrowStickJ1F'} # >>-, >>=
+						chain-rule {greater} {arrowStick 'arrowStickJR'} {greater} # >->, >=>
+						only {'hask'} : chain-rule {greater} {{'hyphen'} 'arrowStickJF'} # >-
+						chain-rule {arrowStick 'arrowStickFC'} {arrowStick 'arrowStickCR'} {greater} # -->, ==>
+						only {'hask'} : chain-rule {arrowStick 'arrowStickFR1'} {greater 'greaterShift1'} {greater} # ->>, =>>
+						chain-rule {arrowStick 'arrowStickFR'} {greater} # ->, =>
+						chain-rule {arrowStick 'arrowStickFJ1'} {less 'lessShiftN1'} {less} # -<<, =<<
+						only {'hask'} : chain-rule {arrowStick 'arrowStickFJ'} {less} # -<, =<
 			
 			#opbd
 			local fwclose {'fwlcloseDoubleQuote' 'fwlcloseSingleQuote' 'dwlcjkSingleQuoteRight' 'dwlcjkDoubleQuoteRight' 'dwlparenRight'}
