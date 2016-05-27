@@ -43,7 +43,7 @@ var indexPage = new Vue({
 	el: 'body',
 	data: {
 		version: "1.8.5",
-		codename: "Hermandine-4",
+		codename: "Hermandine-5",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
