@@ -28,6 +28,12 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 ![OpenType Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
 
+## Ligations (Experimental)
+
+![Ligations Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/ligations.png)
+
+Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default. Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS_`.
+
 ## Building from Source
 
 To build Iosevka you should:
