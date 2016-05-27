@@ -177,7 +177,7 @@ define [fallback] : begin
 	for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 	return nothing
 
-define [TempFont] {.glyf {} .head {.} .hhea {.} ."OS/2" {.} .name {.} .post {.}}
+define [TempFont] {.glyf {} .head {.} .hhea {.} .OS_2 {.panose {}} .name {.} .post {.}}
 
 define [anchorDeriv] : begin
 	local h {.}
@@ -219,6 +219,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	local parenBot (parenMid - (CAP - XH) * 2.6)
 	local operTop : mix parenMid parenTop 0.8
 	local operBot : mix parenMid parenBot 0.8
+	local operMid parenMid
 	
 	# Transform constructors
 	define [Italify angle shift] : begin
@@ -448,52 +449,88 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	# Font names
 	set para.family [para.family.trim]
 	set para.style : [para.style.trim] || "Regular"
-	set font.name.preferredFamily     para.family
-	set font.name.preferredSubFamily  para.style
-	if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
-		set font.name.fontFamily      para.family
-		set font.name.fontSubFamily   para.style
-	: else
-		set font.name.fontFamily      : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
-		set font.name.fontSubFamily   : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
-	set font.name.uniqueSubFamily     "\(para.family) \(para.style) \(para.version) (\(para.codename))"
-	set font.name.version             para.version
-	set font.name.fullName            : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
-	set font.name.postScriptName      : font.name.fullName.replace [regex ' ' 'g'] '-'
-	set font.name.copyright           para.copyright
-	set font.name.licence             para.licence
+	set font.name {}
+	let : begin
+		define [nameFont nameid str] : begin
+			font.name.push : object # Mac Roman
+				platformID 1
+				encodingID 0
+				languageID 0
+				nameID nameid
+				nameString str
+			font.name.push : object # Windows Unicode English
+				platformID 3
+				encodingID 1
+				languageID 1033
+				nameID nameid
+				nameString str
+
+		nameFont 16 para.family # Preferred Family
+		nameFont 17 para.style  # Preferred Style
+		nameFont 21 para.family # WWS Preferred Family
+		nameFont 22 para.style  # WWS Preferred Style
+
+		set font.name.preferredFamily     para.family
+		set font.name.preferredSubFamily  para.style
+		if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
+			nameFont 1 para.family # Family
+			nameFont 2 para.style  # Style
+		: else
+			nameFont 1 : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
+			nameFont 2 : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
+		nameFont 3 "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
+		nameFont 5 para.version # Version
+		local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
+		nameFont 4 fontfullName # Full Name
+		nameFont 6 : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
+		nameFont 0 para.copyright # Copyright
+		nameFont 13 para.licence  # License
+		
+		set font.name : font.name.sort : lambda [a b] : begin
+			if (a.platformID != b.platformID) : return : a.platformID - b.platformID
+			if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
+			if (a.languageID != b.languageID) : return : a.languageID - b.languageID
+			return : a.nameID - b.nameID
 	
 	# Weight, width and slantness
-	set font.'OS/2'.usWeightClass     para.weight
-	set font.'OS/2'.bProportion       9 # Monospaced
-	set font.'OS/2'.bWeight           : 1 + para.weight / 100
-	set font.'OS/2'.fsSelection       : [if para.isBold 32 0] + [if para.isItalic 1 0] + [if ([not para.isBold] && [not para.isItalic]) 64 0] + 128
-	set font.'OS/2'.sFamilyClass      : 8 * 0x100 + 9
-	set font.'OS/2'.xAvgCharWidth     WIDTH
-	set font.post.isFixedPitch        1
-	set font.head.macStyle            : [if para.isBold 1 0] + [if para.isItalic 2 0]
+	set font.OS_2.usWeightClass     para.weight
+	set font.OS_2.panose.3          9 # Monospaced
+	set font.OS_2.panose.2          : 1 + para.weight / 100
+	set font.OS_2.fsSelection       : object
+		oblique        : not : not para.isOblique
+		bold           : not : not para.isBold
+		italic         : not : not (para.isItalic || para.isOblique)
+		regular        : not : not ([not para.isBold] && [not para.isItalic] && [not para.isOblique])
+		useTypoMetrics true
+	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
+	set font.OS_2.xAvgCharWidth     WIDTH
+	set font.post.isFixedPitch      true
+	set font.head.macStyle          : object
+		bold          : not : not para.isBold
+		italic        : not : not (para.isItalic || para.isOblique)
 	
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
 	
 	let [asc : para.leading * CAP / (CAP - DESCENDER)] [desc : para.leading * DESCENDER / (CAP - DESCENDER)] : begin
-		set font.head.unitsPerEm          1000
-		set font.hhea.ascent              asc
-		set font.'OS/2'.usWinAscent       asc
-		set font.'OS/2'.sTypoAscender     asc
+		local descenderPad : fallback para.descenderPad 0
+		set font.head.unitsPerEm        1000
+		set font.hhea.ascender          asc
+		set font.OS_2.usWinAscent       asc
+		set font.OS_2.sTypoAscender     asc
 		
-		set font.hhea.descent             DESCENDER
-		set font.'OS/2'.usWinDescent      [Math.abs desc]
-		set font.'OS/2'.sTypoDescender    desc
+		set font.hhea.descender         (DESCENDER - descenderPad)
+		set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad)
+		set font.OS_2.sTypoDescender    (desc - descenderPad)
 		
-		set font.hhea.lineGap             (para.leading - asc + DESCENDER)
-		set font.'OS/2'.sTypoLineGap      (para.leading - asc + desc)
+		set font.hhea.lineGap           (para.leading - asc + DESCENDER)
+		set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
 		
-		set font.'OS/2'.sxHeight          XH
-		set font.'OS/2'.sCapHeight        CAP
-		set font.post.italicAngle         (0 - para.slantAngle)
+		set font.OS_2.sxHeight          XH
+		set font.OS_2.sCapHeight        CAP
+		set font.post.italicAngle       (0 - para.slantAngle)
 	
-	# Necessary notdef glyph
+	# Necessary notdef, .null and nonmarkingreturn glyph
 	sketch # .notdef
 		start-from SB 0
 		line-to    SB CAP
@@ -506,6 +543,12 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		line-to    (SB + STROKE) (CAP - STROKE)
 		
 		save '.notdef'
+	sketch # .null
+		set-width 0
+		save '.null'
+	sketch # nonmarkingreturn
+		set-width WIDTH
+		save 'nonmarkingreturn' 0x000D
 	
 	# Space
 	sketch # space
@@ -529,6 +572,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	$$include 'glyphs/symbol-math.ptl'
 	$$include 'glyphs/symbol-letter.ptl'
 	$$include 'glyphs/symbol-geometric.ptl'
+	$$include 'glyphs/symbol-braille.ptl'
 	$$include 'glyphs/symbol-other.ptl'
 	
 	# Autobuilds

@@ -5,6 +5,13 @@ include makesupport.mk
 PREFIX = $(VARNAME)iosevka$(SUFFIX)
 ARCPREFIXB = iosevka$(SUFFIX)
 
+ifdef DONTHINT
+HINT = cp
+HINT_SUFFIX = --ignore-hints
+else
+HINT = ttfautohint --increase-x-height=0
+endif
+
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
 
@@ -32,12 +39,9 @@ OBLIQUE = $(OBJDIR)/$(PREFIX)-thinoblique.ttf $(OBJDIR)/$(PREFIX)-extralightobli
 TARGETS = $(UPRIGHT) $(ITALIC) $(OBLIQUE)
 MAPS    = $(if $(NOCHARMAP),,$(OBJDIR)/$(PREFIX)-regular.charmap)
 
-FEASRC  = features/common.fea features/ligation.fea features/uprightonly.fea features/italiconly.fea
-
 FDTS    = $(subst .ttf,.fdt,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 SVG0    = $(subst .ttf,.svg,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 
-FEATURE = $(subst .ttf,.fea,$(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS)))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass0-,$(TARGETS))
 PASS1   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass1-,$(TARGETS))
 PASS2   = $(subst $(OBJDIR)/,$(OBJDIR)/.pass2-,$(TARGETS))
@@ -48,77 +52,70 @@ fonts : $(DISTTARGETS)
 svgs : $(SVG0)
 
 # Pass 0 : file construction
-OUTPUTS = --meta $@ --feature $(subst .fdt,.fea,$@) --svg $(subst .fdt,.svg,$@)
+OUTPUTS = --meta $@ --svg $(subst .fdt,.svg,$@)
 OUTPUT_CM = $(if $(NOCHARMAP),,--charmap $(subst .fdt,.charmap,$(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$@)))
-$(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
-$(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-extralight.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
-$(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-light.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
-$(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-regular.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) $(OUTPUT_CM)
-$(OBJDIR)/.pass0-$(PREFIX)-medium.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-medium.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
-$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-bold.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
-$(OBJDIR)/.pass0-$(PREFIX)-heavy.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-heavy.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
 
-$(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-thinitalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-extralightitalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-extralightitalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-lightitalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-italic $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-italic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-mediumitalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-mediumitalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-bolditalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-heavyitalic.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-heavyitalic.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-italic  $(STYLE_ITALIC) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 
-$(OBJDIR)/.pass0-$(PREFIX)-thinoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-thinoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-extralightoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-extralightoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-extralight s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-lightoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-lightoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-light s-oblique $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-oblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-oblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-book s-oblique  $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-mediumoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-mediumoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-medium s-oblique  $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-boldoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-boldoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-bold s-oblique  $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
-$(OBJDIR)/.pass0-$(PREFIX)-heavyoblique.fdt : $(SCRIPTS) $(FEASRC) | $(OBJDIR) $(DISTDIR)
+$(OBJDIR)/.pass0-$(PREFIX)-heavyoblique.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-heavy s-oblique  $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS) --uprightify 1
 
 $(SVG0) : $(OBJDIR)/.pass0-%.svg : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
-$(FEATURE) : $(OBJDIR)/.pass0-%.fea : $(OBJDIR)/.pass0-%.fdt
-	$(PASS)
 $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
 
-
 # Pass 1 : Outline cleanup and merge features
-$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg $(OBJDIR)/.pass0-%.fea
-	@fontforge -quiet -script $^ $@ $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
+	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+	@$(HINT) $@.a.ttf $@
+	@-rm $@.a.ttf
 # Pass 2 : add metadata
 # IDKY, but converting into TTX and convert back dramatically reduces the file size
-$(PASS2) : $(OBJDIR)/.pass2-%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
-	@$(NODE) $^ -o $@.a.ttf
-	@ttx -q -o $@.a.ttx $@.a.ttf
-	@ttx -q -o $@ $@.a.ttx
-	@-rm $@.a.ttf $@.a.ttx
+$(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -o $@ --ignore-glyph-order --keep-average-char-width --dummy-dsig --short-post $(HINT_SUFFIX)
 
-HINT = ttfautohint --increase-x-height=0
-$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
-	@$(HINT) $< $@
-$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/.pass2-%.ttf
-	@$(HINT) $< $@
+$(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
+	@cp $< $@
 
 # releaseing
 ARCHIVEDIR = release-archives
@@ -147,8 +144,8 @@ $(WEBFONTSWOFF) : $(WEBFONTDIR)/%.woff : $(WEBFONTDIR)/%.ttf
 WEBFONTSWOFF2 = $(subst .ttf,.woff2,$(WEBFONTSTTF))
 $(WEBFONTSWOFF2) : $(WEBFONTDIR)/%.woff2 : $(WEBFONTDIR)/%.ttf
 	woff2_compress $<
-WEBFONTCSS = dist/webfonts/$(ARCPREFIX)$(ARCPREFIXB).css
-$(WEBFONTCSS) : webfont-csses/$(ARCPREFIX)$(ARCPREFIXB).css
+WEBFONTCSS = dist/webfonts/$(ARCPREFIXB).css
+$(WEBFONTCSS) : webfont-csses/$(ARCPREFIXB).css
 	cp $< $@
 
 #$(ARCHIVEDIR)/$(ARCPREFIX)$(ARCPREFIXB)-$(VERSION).tar.bz2 : $(DISTTARGETS)

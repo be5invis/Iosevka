@@ -1,119 +1,163 @@
-default: fonts
+default: d-fonts
 
-ARCPREFIX=$(if $(ARCPREFIX1),$(ARCPREFIX1),01.)
+ifeq ($(config),default)
+TARGET=sans
+ARCPREFIX =01.
+else ifeq ($(config),term)
+TARGET=sans
+ARCPREFIX =02.
+SUFFIX = -term
+STYLE_COMMON = term
+NOCHARMAP = true
+else ifeq ($(config),cc)
+TARGET=sans
+ARCPREFIX = 03.
+SUFFIX = -cc
+STYLE_COMMON=cc
+NOCHARMAP=true
+else ifeq ($(config),slab)
+TARGET=slab
+ARCPREFIX=04.
+else ifeq ($(config),term-slab)
+TARGET=slab
+ARCPREFIX=05.
+SUFFIX=-term
+STYLE_COMMON=term
+NOCHARMAP=true
+else ifeq ($(config),cc-slab)
+TARGET=slab
+ARCPREFIX=06.
+SUFFIX=-cc
+STYLE_COMMON=cc
+NOCHARMAP=true
+else ifeq ($(config),hooky)
+TARGET=sans
+ARCPREFIX=07.
+SUFFIX=-hooky
+STYLE_UPRIGHT=v-l-hooky v-i-hooky
+NOCHARMAP=true
+else ifeq ($(config),hooky-term)
+TARGET=sans
+ARCPREFIX=08.
+SUFFIX=-term-hooky
+STYLE_COMMON=term
+STYLE_UPRIGHT=v-l-hooky v-i-hooky
+NOCHARMAP=true
+else ifeq ($(config),zshaped)
+TARGET=sans
+ARCPREFIX=09.
+SUFFIX=-zshaped
+STYLE_UPRIGHT=v-l-zshaped v-i-zshaped
+NOCHARMAP=true
+else ifeq ($(config),zshaped-term)
+TARGET=sans
+ARCPREFIX=10.
+SUFFIX=-term-zshaped
+STYLE_COMMON=term
+STYLE_UPRIGHT=v-l-zshaped v-i-zshaped
+NOCHARMAP=true
+else ifeq ($(config),d-sans)
+TARGET=sans
+else ifeq ($(config),d-slab)
+TARGET=slab
+else
+TARGET=sans
+endif
 
 include makesupport.mk
-PARAM_DEFAULT = FAST='$(FAST)' SUFFIX='$(SUFFIX)' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
-PARAM_SLAB = FAST='$(FAST)' SUFFIX='$(SUFFIX)-slab' VARNAME='$(VARNAME)' STYLE_COMMON='$(STYLE_COMMON)' STYLE_SUFFIX='slab' STYLE_UPRIGHT='$(STYLE_UPRIGHT)' STYLE_ITALIC='$(STYLE_ITALIC)' VERSION='$(VERSION)' ARCPREFIX='$(ARCPREFIX)' NOLIG='$(NOLIG)' NOCHARMAP='$(NOCHARMAP)'
+ifeq ($(TARGET),slab)
+PARAM = SUFFIX='$(SUFFIX)-slab' STYLE_SUFFIX='slab'
+else
+PARAM = SUFFIX='$(SUFFIX)' VERSION='$(VERSION)'
+endif
+
+export VERSION
+export FAST
+export VARNAME
+export STYLE_COMMON
+export STYLE_UPRIGHT
+export STYLE_ITALIC
+export VERSION
+export ARCPREFIX
+export NOCHARMAP
+export NOLIG
+export DONTHINT
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation
 LOOPS = 0 1 2
 
-svgs : svgs-default svgs-slab
-fonts : fonts-default fonts-slab
-test  : test-default test-slab
-snapshot  : snapshot-default snapshot-slab
-
 # svgs
-svgs-default : $(SCRIPTS) | $(OBJDIR) dist
-	@$(MAKE) -f onegroup.mk svgs $(PARAM_DEFAULT)
-svgs-slab : $(SCRIPTS) | $(OBJDIR) dist
-	@$(MAKE) -f onegroup.mk svgs $(PARAM_SLAB)
-
-
+svgs : $(SCRIPTS) | $(OBJDIR) dist
+	@$(MAKE) -f onegroup.mk svgs $(PARAM)
 # ttfs
-fonts-default : $(SCRIPTS) | $(OBJDIR) dist
-	@$(MAKE) -f onegroup.mk fonts $(PARAM_DEFAULT)
-fonts-slab : $(SCRIPTS) | $(OBJDIR) dist
-	@$(MAKE) -f onegroup.mk fonts $(PARAM_SLAB)
-
+fonts : $(SCRIPTS) | $(OBJDIR) dist
+	@$(MAKE) -f onegroup.mk fonts $(PARAM)
 
 ### USED FOR TESTING AND RELEASING
 ### DO NOT TOUCH!
-# testdrive
-test-default : fonts-default
-	@$(MAKE) -f onegroup.mk test $(PARAM_DEFAULT)
-test-slab : fonts-slab
-	@$(MAKE) -f onegroup.mk test $(PARAM_SLAB)
+# Testdrive
+testdrive : fonts
+	@$(MAKE) -f onegroup.mk test $(PARAM)
 	
-# snapshot
-snapshot-default : webfonts-default | snapshot/assets
-	@$(MAKE) -f onegroup.mk snapshot $(PARAM_DEFAULT)
-snapshot-slab : webfonts-slab | snapshot/assets
-	@$(MAKE) -f onegroup.mk snapshot $(PARAM_SLAB)
-
 # Webfonts
 dist/webfonts : | dist
 	@- mkdir $@
-dist/webfonts/assets : |dist/webfonts
+dist/webfonts/assets : | dist/webfonts
 	@- mkdir $@
-webfonts-default : fonts-default | dist/webfonts/assets
-	@$(MAKE) -f onegroup.mk webfonts $(PARAM_DEFAULT)
-webfonts-slab : fonts-slab | dist/webfonts/assets
-	@$(MAKE) -f onegroup.mk webfonts $(PARAM_SLAB)
+webfont-pkg : fonts | dist/webfonts/assets
+	@$(MAKE) -f onegroup.mk webfonts $(PARAM)
+
+# Snapshot
+x-snapshot : webfont-pkg | snapshot/assets
+	@$(MAKE) -f onegroup.mk snapshot $(PARAM)
 
 # Pages
-pages-default : fonts-default
-	@$(MAKE) -f onegroup.mk pages $(PARAM_DEFAULT)
-pages-slab : fonts-slab
-	@$(MAKE) -f onegroup.mk pages $(PARAM_SLAB)
-
-# Release
-release-default : fonts-default
-	@$(MAKE) -f onegroup.mk release $(PARAM_DEFAULT)
-release-slab : fonts-slab
-	@$(MAKE) -f onegroup.mk release $(PARAM_SLAB)
+pages : fonts
+	@$(MAKE) -f onegroup.mk pages $(PARAM)
 
 # Archives
-archives-default : fonts-default
-	@$(MAKE) -f onegroup.mk archives $(PARAM_DEFAULT)
-archives-slab : fonts-slab
-	@$(MAKE) -f onegroup.mk archives $(PARAM_SLAB)
+archives : fonts
+	@$(MAKE) -f onegroup.mk archives $(PARAM)
 
-# Releases
-releasepack-default : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-default archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='01.'
-releasepack-term : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='02.' SUFFIX='-term' STYLE_COMMON='term' NOCHARMAP='true'
-releasepack-cc : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='03.' SUFFIX='-cc' STYLE_COMMON='cc' NOCHARMAP='true'
 
-releasepack-slab : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) pages-slab archives-slab VERSION=$(VERSION) \
-		ARCPREFIX1='04.'
-releasepack-term-slab : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-slab VERSION=$(VERSION) \
-		ARCPREFIX1='05.' SUFFIX='-term' STYLE_COMMON='term' NOCHARMAP='true'
-releasepack-cc-slab : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-slab VERSION=$(VERSION) \
-		ARCPREFIX1='06.' SUFFIX='-cc' STYLE_COMMON='cc' NOCHARMAP='true'
 
-releasepack-hooky : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='07.' SUFFIX='-hooky' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
-releasepack-hooky-term : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='08.' SUFFIX='-term-hooky' STYLE_COMMON='term' STYLE_UPRIGHT='v-l-hooky v-i-hooky' NOCHARMAP='true'
+# Release building commands
+standard-styles = default term cc slab term-slab cc-slab hooky hooky-term zshaped zshaped-term d-sans d-slab
+fonts-styles = $(foreach style,$(standard-styles),fonts-$(style))
+testdrive-styles = $(foreach style,$(standard-styles),testdrive-$(style))
+archives-styles = $(foreach style,$(standard-styles),archives-$(style))
+pages-styles = $(foreach style,$(standard-styles),pages-$(style))
+webfont-pkg-styles = $(foreach style,$(standard-styles),webfont-pkg-$(style))
+x-snapshot-styles = $(foreach style,$(standard-styles),x-snapshot-$(style))
 
-releasepack-zshaped : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='09.' SUFFIX='-zshaped' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
-releasepack-zshaped-term : $(SCRIPTS) | $(OBJDIR) dist
-	$(MAKE) archives-default VERSION=$(VERSION) \
-		ARCPREFIX1='10.' SUFFIX='-term-zshaped' STYLE_COMMON='term' STYLE_UPRIGHT='v-l-zshaped v-i-zshaped' NOCHARMAP='true'
+$(fonts-styles) : fonts-% : $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) fonts config=$(subst fonts-,,$@)
+$(testdrive-styles) : testdrive-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) testdrive config=$(subst testdrive-,,$@)
+$(archives-styles) : archives-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) archives config=$(subst archives-,,$@)
+$(pages-styles) : pages-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) pages config=$(subst pages-,,$@)
+$(webfont-pkg-styles) : webfont-pkg-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) webfont-pkg config=$(subst webfont-pkg-,,$@)
+$(x-snapshot-styles) : x-snapshot-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
+	$(MAKE) x-snapshot config=$(subst x-snapshot-,,$@)
 
-release-all : releasepack-default releasepack-term releasepack-cc \
-              releasepack-slab releasepack-term-slab releasepack-cc-slab \
-              releasepack-hooky releasepack-zshaped \
-              releasepack-hooky-term releasepack-zshaped-term
-fw : releasepack-default releasepack-cc releasepack-slab releasepack-cc-slab
+release-all : archives-default archives-term archives-cc \
+              archives-slab archives-term-slab archives-cc-slab \
+              archives-hooky archives-zshaped \
+              archives-hooky-term archives-zshaped-term \
+              pages-default pages-slab
+fw : fonts-default fonts-cc fonts-slab fonts-cc-slab
 
-webfonts : webfonts-default webfonts-slab
+d-fonts : fonts-d-sans fonts-d-slab
+test : testdrive-d-sans testdrive-d-slab
+webfonts : d-webfonts
+d-webfonts : webfont-pkg-d-sans webfont-pkg-d-slab
+d-snapshot : x-snapshot-d-sans x-snapshot-d-slab
 
-electronsnaps1: webfonts snapshot
+electronsnaps1: d-snapshot
+	cd snapshot && stylus index.styl -c
 	cd snapshot && electron getsnap.js --dir ../images
 images/opentype.png: electronsnaps1
 	optipng $@

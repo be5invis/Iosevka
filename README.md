@@ -1,6 +1,6 @@
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpe0v.com1.z0.glb.clouddn.com/aeqr9bewtqtvpkpl18.png)
 
-Coders' typeface, built from code.
+Coders' typeface, built from code. //[→ Inziu Iosevka for Chinese and Japanese.](http://be5invis.github.io/Iosevka/inziu.html)
 
 ![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
 
@@ -28,11 +28,17 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 ![OpenType Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
 
+## Ligations (Experimental)
+
+![Ligations Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/ligations.png)
+
+Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default. Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS_`.
+
 ## Building from Source
 
 To build Iosevka you should:
 
-1. Ensure that [`node`](http://nodejs.org) (≥ 5.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`ttx`](http://www.adobe.com/cn/devnet/opentype/afdko.html) and `make` are runnable in your terminal.
+1. Ensure that [`node`](http://nodejs.org) (≥ 5.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.1.6) and `make` are runnable in your terminal.
    - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`.
 3. `make`.
@@ -91,11 +97,14 @@ The current avaliable styles are:
   * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
   * `v-paragraph-low` : Lower paragraph symbol `¶`.
 * Styles related to ligations
-  * `nl` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `IosevkaNL`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
+  * `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
 
 ## Release Notes
 
+* **1.8.5**
+  - Added `XHS_` and `XPTL` feature tags for Language-Specific ligations.
+  - Added `/bolt`, `/blackflag`, `/circlestar` and `/heavyballotcross` symbols.
 * **1.8.4**
   - Added `opbd` feature for punctuation compression.
 * **1.8.3**
