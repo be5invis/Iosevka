@@ -102,6 +102,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.8.5**
+  - Added `XHS_` and `XPTL` feature tags for Language-Specific ligations.
+  - Added `/bolt`, `/blackflag`, `/circlestar` and `/heavyballotcross` symbols.
 * **1.8.4**
   - Added `opbd` feature for punctuation compression.
 * **1.8.3**
