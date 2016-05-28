@@ -27,6 +27,11 @@ define [oncurveRemovable a b c t] : begin
 	local ym : (a.y + c.y) / 2
 	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [not a.cubic] && [not c.cubic] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
 
+define PRECISION 1000
+define [cov x] : piecewise
+	[isFinite x] : return : [Math.round : x * PRECISION] / PRECISION
+	true : return 0
+
 export all : class Glyph
 	public [new name] : begin
 		set this.name name
@@ -175,6 +180,44 @@ export all : class Glyph
 		: else : set this.anchors.(id) : new Anchor x y type
 		return this
 
+	
+
+	static [contourToSVGPath contour delta] : if (contour && contour.length) : begin
+		local lx contour.0.x
+		local ly contour.0.y
+		local buf : if delta "" "M \[cov lx] \[cov ly]"
+		for [local j 1] (j < contour.length) [inc j] : begin
+			local point contour.(j)
+			piecewise
+				point.onCurve : begin
+					if delta
+					: then : set buf : buf + "l \[cov : point.x - lx] \[cov : point.y - ly]"
+					: else : set buf : buf + "L \[cov point.x] \[cov point.y]"
+					set {.x lx .y ly} point
+				point.cubic : begin
+					local z1 point
+					local z2 contour.(j + 1)
+					local z3 contour.(j + 2)
+					if delta
+					: then : set buf : buf + "c \[cov : z1.x - lx] \[cov : z1.y - ly] \[cov : z2.x - lx] \[cov : z2.y - ly] \[cov : z3.x - lx] \[cov : z3.y - ly]"
+					: else : set buf : buf + "C \[cov z1.x] \[cov z1.y] \[cov z2.x] \[cov z2.y] \[cov z3.x] \[cov z3.y]"
+					set {.x lx .y ly} z3
+					set j : j + 2
+				true : begin
+					local zc point
+					local zf : if contour.(j + 1) contour.(j + 1) contour.0
+					local x1 : mix lx zc.x (2 / 3)
+					local y1 : mix ly zc.y (2 / 3)
+					local x2 : mix zf.x zc.x (2 / 3)
+					local y2 : mix zf.y zc.y (2 / 3)
+					if delta
+					: then : set buf : buf + "c \[cov : x1 - lx] \[cov : y1 - ly] \[cov : x2 - lx] \[cov : y2 - ly] \[cov : zf.x - lx] \[cov : zf.y - ly]"
+					: else : set buf : buf + "C \[cov x1] \[cov y1] \[cov x2] \[cov y2] \[cov zf.x] \[cov zf.y]"
+					set {.x lx .y ly} zf
+					inc j
+		set buf : buf + " Z\n"
+		return buf
+
 	public [cleanup t] : begin
 		foreach c [range 0 this.contours.length] : begin
 			local ocontour this.contours.(c)
@@ -190,7 +233,7 @@ export all : class Glyph
 					local p2 ocontour.(j + 1)
 					local p3 ocontour.(j + 2)
 					local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y p3.x p3.y
-					local ts [strand.extremas].y
+					local ts [strand.extrema].y
 					piecewise
 						(!ts || ts.length < 1) : contour.push p1 p2 p3
 						true : begin
@@ -199,10 +242,11 @@ export all : class Glyph
 							ts.push 1
 							foreach [k : range 0 (ts.length - 1)] : begin
 								local s : strand.split ts.(k) ts.(k + 1)
-								if s.points : contour.push 
-									new Point s.points.1.x s.points.1.y false true
-									new Point s.points.2.x s.points.2.y false true
-									new Point s.points.3.x s.points.3.y true
+								if s.points : begin
+									local segments : bezierCubic2Q2 s.points.0 s.points.1 s.points.2 s.points.3
+									foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : contour.push
+										new Point xc yc false
+										new Point xf yf true
 					set flag 2
 				true : begin
 					local p0 contour.(contour.length - 1)
@@ -210,7 +254,7 @@ export all : class Glyph
 					local p2 ocontour.(j + 1)
 					if [not p2.onCurve] : set p2 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
 					local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
-					local ts [strand.extremas].y
+					local ts [strand.extrema].y
 					piecewise
 						(!ts || ts.length < 1) : contour.push p1 p2
 						true : begin
