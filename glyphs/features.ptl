@@ -1,0 +1,273 @@
+### Generate Features and remove double-width glyphs when necessary
+if [not recursive] : begin
+	
+
+	# GPOS mark and mkmk
+	local markGlyphs {.}
+	
+	local lookup_mark
+		.type 'gpos_mark_to_base'
+		.subtables {}
+	local lookup_mkmk
+		.type 'gpos_mark_to_mark'
+		.subtables {}
+	
+	set font.GPOS : object
+		languages
+			.DFLT_DFLT {.features {'mark0', 'mkmk0'}}
+			.latn_DFLT {.features {'mark0', 'mkmk0'}}
+			.grek_DFLT {.features {'mark0', 'mkmk0'}}
+			.cyrl_DFLT {.features {'mark0', 'mkmk0'}}
+		features
+			.mark0 {'l_mark'}
+			.mkmk0 {'l_mkmk'}
+		lookups
+			.l_mark lookup_mark
+			.l_mkmk lookup_mkmk
+	set font.GDEF {.glyphClassDef {.}}
+	
+	# mark and mkmk
+	define [createBaseInfo g th px py] : begin
+		local res {.}
+		local pushed false
+		foreach key [items-of : Object.keys g.anchors] : if (!th || th.(key)) : begin
+			set res.(key) : object
+				.x g.anchors.(key).(px || 'x')
+				.y g.anchors.(key).(py || 'y')
+			set pushed true
+		return : if pushed res nothing
+		
+	define [createMTSSubtable lookup anchorClasses] : begin
+		local subtable {.marks {.} .bases {.}}
+		local th {.}
+		foreach [ac : items-of anchorClasses] : set th.(ac) true
+		foreach glyph [items-of glyphList] : if glyph.anchors : begin
+			local anchorKeys : Object.keys glyph.anchors
+			local hasAnchor false
+			foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
+			if hasAnchor : begin
+				local isMarkGlyph false
+				local markKey nothing
+				foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
+					set isMarkGlyph true
+					set markKey key
+				if isMarkGlyph
+				: then : begin
+					set subtable.marks.(glyph.name) : object
+						class markKey
+						x glyph.anchors.(markKey).x
+						y glyph.anchors.(markKey).y
+					if (lookup == lookup_mkmk) : begin
+						local r : createBaseInfo glyph th 'mbx' 'mby'
+						if r : set subtable.bases.(glyph.name) r
+				: else : if (lookup == lookup_mark) : begin
+					local r : createBaseInfo glyph th 'x' 'y'
+					if r : set subtable.bases.(glyph.name) r
+		lookup.subtables.push subtable
+	
+	createMTSSubtable lookup_mark {'above' 'below' 'overlay' 'slash'}
+	createMTSSubtable lookup_mark {'trailing' 'lf' 'topright' 'bottomright'}
+	createMTSSubtable lookup_mkmk {'above'}
+	createMTSSubtable lookup_mkmk {'below'}
+	createMTSSubtable lookup_mkmk {'trailing' 'lf' 'topright' 'bottomright' 'overlay' 'slash'}
+	# GDEF
+	foreach glyph [items-of glyphList] : begin
+		set font.GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] 2 1
+		if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]) : begin
+			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
+				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
+				markGlyphs.(key).push glyph.name
+				set font.GDEF.glyphClassDef.(glyph.name) 3
+	
+	# GSUB
+	let : begin
+		local commonList {}
+		local languages
+			.DFLT_DFLT {.features commonList}
+			.latn_DFLT {.features commonList}
+			.grek_DFLT {.features commonList}
+			.cyrl_DFLT {.features commonList}
+			.kana_DFLT {.features commonList}
+			.hani_DFLT {.features commonList}
+		local features {.}
+		local lookups {.}
+		
+		define [lookup-single name f t] : begin
+			local subtable {.}
+			set lookups.(name) {.type 'gsub_single' .subtables {subtable}}
+			foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
+		define [chain-rule] : begin
+			local terms : {}.slice.call arguments 0
+			local subtable {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+			local foundi false
+			local founde false
+			foreach [j : range 0 terms.length] : if (!foundi && terms.(j).1) : begin
+				set subtable.inputBegins j
+				set foundi true
+			foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).1) : begin
+				set subtable.inputEnds (j + 1)
+				set founde true
+			foreach [j : range 0 terms.length] : begin
+				local term terms.(j)
+				subtable.match.push term.0
+				if term.1 : begin
+					subtable.apply.push {.at j .lookup term.1}
+			return subtable
+		define [flatten] : begin
+			local ans {}
+			foreach [term : items-of : {}.slice.call arguments 0] : begin
+				if (term <@ Array)
+				: then : set ans : ans.concat term
+				: else : ans.push term
+			return ans
+		
+		# cvxx
+		foreach [name : items-of : Object.keys glyphs] : begin
+			if glyphs.(name).featureSelector : begin
+				local fs glyphs.(name).featureSelector
+				foreach [feature : items-of : Object.keys fs] : begin
+					if [not lookups.(feature)] : begin
+						set features.(feature) {feature}
+						set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+						commonList.push feature
+					set lookups.(feature).subtables.0.(name) fs.(feature)
+		# ssxx
+		foreach [name : items-of : Object.keys para.sscompose] : begin
+			commonList.push name
+			set features.(name) para.sscompose.(name)
+		#ccmp
+		commonList.push 'ccmp'
+		set features.ccmp {'ccmp1' 'ccmp2'}
+		set lookups.ccmpSubIota {.type 'gsub_single' .subtables {{.iotaBelow 'iotaLF'}}}
+		set lookups.ccmpSubOgonek {.type 'gsub_single' .subtables {{.ogonekBelow 'ogonekTR'}}}
+		set lookups.ccmpSubIJ {.type 'gsub_single' .subtables {{
+			.i 'dotlessi'
+			.cyrUkrainiani 'dotlessi'
+			.j 'dotlessj'
+			.cyrje 'dotlessj'
+			.iogonekBelow 'iogonek.dotless'
+		}}}
+		set lookups.ccmp1
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule {{'i' 'cyrUkrainiani' 'j' 'cyrje' 'iogonekBelow'} 'ccmpSubIJ'} {markGlyphs.above}
+				chain-rule {{'eta'}} {{'iotaBelow'} 'ccmpSubIota'}
+				chain-rule {{'eta'}} {markGlyphs.above} {{'iotaBelow'} 'ccmpSubIota'}
+				chain-rule {{'eta'}} {markGlyphs.above} {markGlyphs.above} {{'iotaBelow'} 'ccmpSubIota'}
+				chain-rule {{'eta'}} {markGlyphs.above} {markGlyphs.above} {markGlyphs.above} {{'iotaBelow'} 'ccmpSubIota'}
+				chain-rule {{'A' 'a' 'u' 'cyrA' 'cyra'}} {{'ogonekBelow'} 'ccmpSubOgonek'}
+				chain-rule {{'A' 'a' 'u' 'cyrA' 'cyra'}} {markGlyphs.above} {{'ogonekBelow'} 'ccmpSubOgonek'}
+				chain-rule {{'A' 'a' 'u' 'cyrA' 'cyra'}} {markGlyphs.above} {markGlyphs.above} {{'ogonekBelow'} 'ccmpSubOgonek'}
+				chain-rule {{'A' 'a' 'u' 'cyrA' 'cyra'}} {markGlyphs.above} {markGlyphs.above} {markGlyphs.above} {{'ogonekBelow'} 'ccmpSubOgonek'}
+		set lookups.ccmp2
+			.type 'gsub_ligature'
+			.subtables : list : object
+				psilivaria {'commaAbove' 'graveAbove'}
+				psilioxia {'commaAbove' 'acuteAbove'}
+				psiliperispomeni {'commaAbove' 'perispomeniAbove'}
+				dasiavaria {'revCommaAbove' 'graveAbove'}
+				dasiaoxia {'revCommaAbove' 'acuteAbove'}
+				dasiaperispomeni {'revCommaAbove' 'perispomeniAbove'}
+		
+		#calt
+		if (para.spacing > 0) : let : begin
+			local arrowStick {'hyphen' 'equal'}
+			local less {'less'}
+			local greater {'greater'}
+			lookup-single 'arrowStickFR'  {'hyphen' 'equal'} {'lighy.fr'  'ligeq.fr'}
+			lookup-single 'arrowStickLF'  {'hyphen' 'equal'} {'lighy.lf'  'ligeq.lf'}
+			lookup-single 'arrowStickFR1' {'hyphen' 'equal'} {'lighy.fr1' 'ligeq.fr1'}
+			lookup-single 'arrowStickL1F' {'hyphen' 'equal'} {'lighy.l1f' 'ligeq.l1f'}
+			lookup-single 'arrowStickCR'  {'hyphen' 'equal'} {'lighy.cr'  'ligeq.cr'}
+			lookup-single 'arrowStickLC'  {'hyphen' 'equal'} {'lighy.lc'  'ligeq.lc'}
+			lookup-single 'arrowStickLXC' {'hyphen' 'equal'} {'lighy.lxc' 'ligeq.lxc'}
+			lookup-single 'arrowStickCF'  {'hyphen' 'equal'} {'lighy.cf'  'ligeq.cf'}
+			lookup-single 'arrowStickFC'  {'hyphen' 'equal'} {'lighy.fc'  'ligeq.fc'}
+			lookup-single 'arrowStickJF'  {'hyphen' 'equal'} {'lighy.jf'  'ligeq.jf'}
+			lookup-single 'arrowStickFJ'  {'hyphen' 'equal'} {'lighy.fj'  'ligeq.fj'}
+			lookup-single 'arrowStickJ1F' {'hyphen' 'equal'} {'lighy.j1f' 'ligeq.j1f'}
+			lookup-single 'arrowStickFJ1' {'hyphen' 'equal'} {'lighy.fj1' 'ligeq.fj1'}
+			lookup-single 'arrowStickJR'  {'hyphen' 'equal'} {'lighy.jr'  'ligeq.jr'}
+			lookup-single 'arrowStickLJ'  {'hyphen' 'equal'} {'lighy.lj'  'ligeq.lj'}
+			lookup-single 'arrowStickLR'  {'hyphen' 'equal'} {'lighy.lr'  'ligeq.lr'}
+			
+			lookup-single 'lessShift1' {'less'} {'ligless.shift1'}
+			lookup-single 'greaterShift1' {'greater'} {'liggreater.shift1'}
+			lookup-single 'lessShiftN1' {'less'} {'ligless.shiftN1'}
+			lookup-single 'greaterShiftN1' {'greater'} {'liggreater.shiftN1'}
+			lookup-single 'arrowExclamHTMLComment' {'exclam'} {'ligexclam.htmlcommentstart'}
+			
+			local progLigNameMap
+				.XHS_ 'hask'
+				.XPTL 'hask'
+			foreach
+			: ligationFeatureName : items-of : {'calt'}.concat [Object.keys progLigNameMap]
+			: begin
+				local mappedFeature : progLigNameMap.(ligationFeatureName) || ligationFeatureName
+				local ligationLookupName : 'lig_' + mappedFeature
+				local [only lns subtable] : begin
+					if ([lns.indexOf mappedFeature] >= 0) [then : return subtable] : else : begin
+						set subtable.apply {}
+						return subtable
+				
+				commonList.push ligationFeatureName
+				set features.(ligationFeatureName) {ligationLookupName}
+				if [not lookups.(ligationLookupName)] : set lookups.(ligationLookupName)
+					.type 'gsub_chaining'
+					.subtables : list
+						chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCR'} {greater} # <--> <==>
+						chain-rule {less} {arrowStick 'arrowStickLR'} {greater} # <->, <=>
+						chain-rule {less} {arrowStick 'arrowStickLJ'} {less} # <-<, <=<
+						chain-rule {less} {arrowStick 'arrowStickLC'} {arrowStick 'arrowStickCF'} # <--, <==
+						only {'hask'} : chain-rule {less} {less 'lessShift1'} {arrowStick 'arrowStickL1F'} # <<-, <<=
+						chain-rule {less} {{'hyphen'} 'arrowStickLF'} # <-
+						chain-rule {less} {{'exclam'} 'arrowExclamHTMLComment'} {{'hyphen'} 'arrowStickLXC'} {{'hyphen'} 'arrowStickCF'} # <!--
+						only {'hask'} : chain-rule {greater} {greater 'greaterShiftN1'} {arrowStick 'arrowStickJ1F'} # >>-, >>=
+						chain-rule {greater} {arrowStick 'arrowStickJR'} {greater} # >->, >=>
+						only {'hask'} : chain-rule {greater} {{'hyphen'} 'arrowStickJF'} # >-
+						chain-rule {arrowStick 'arrowStickFC'} {arrowStick 'arrowStickCR'} {greater} # -->, ==>
+						only {'hask'} : chain-rule {arrowStick 'arrowStickFR1'} {greater 'greaterShift1'} {greater} # ->>, =>>
+						chain-rule {arrowStick 'arrowStickFR'} {greater} # ->, =>
+						only {'hask'} : chain-rule {arrowStick 'arrowStickFJ1'} {less 'lessShiftN1'} {less} # -<<, =<<
+						only {'hask'} : chain-rule {arrowStick 'arrowStickFJ'} {less} # -<, =<
+			
+			#opbd
+			local fwclose {'fwlcloseDoubleQuote' 'fwlcloseSingleQuote' 'dwlcjkSingleQuoteRight' 'dwlcjkDoubleQuoteRight' 'dwlparenRight'}
+			local hwclose {'closeDoubleQuote' 'closeSingleQuote' 'cjkSingleQuoteRight' 'cjkDoubleQuoteRight' 'parenRight'}
+			local fwopen {'fwropenDoubleQuote' 'fwropenSingleQuote' 'dwrcjkSingleQuoteLeft' 'dwrcjkDoubleQuoteLeft' 'dwrparenLeft'}
+			local hwopen {'openDoubleQuote' 'openSingleQuote' 'cjkSingleQuoteLeft' 'cjkDoubleQuoteLeft' 'parenLeft'}
+			local fwquoteopen {'fwropenDoubleQuote' 'fwropenSingleQuote'}
+			local hwquoteopen {'openDoubleQuote' 'openSingleQuote'}
+			local fwtrail {'dwlperiod' 'dwlcomma' 'dwlcjkperiod' 'dwlcjkcomma'}
+			local hwtrail {'period' 'comma' 'cjkperiod' 'cjkcomma'}
+			local fwmid {'dwccolon' 'dwcsemicolon'}
+			local hwmid {'colon' 'semicolon'}
+			
+			lookup-single 'closefw' [flatten fwopen fwclose] [flatten hwopen hwclose]
+			commonList.push 'opbd'
+			set features.opbd {'opbd1'}
+			set lookups.opbd1
+				.type 'gsub_chaining'
+				.subtables : list
+					chain-rule {[flatten fwtrail hwtrail fwopen hwopen fwmid hwmid]} {fwopen 'closefw'}
+					chain-rule {fwclose 'closefw'} {[flatten fwtrail hwtrail fwclose hwclose fwopen hwopen fwmid hwmid]}
+
+		#locl, SRB
+		local srbSubtable null
+		if para.isItalic
+		: then : set srbSubtable : object
+			cyrbe 'cyrbe.serbian'
+			cyrghe 'cyrghe.serbian'
+			cyrde 'cyrde.serbian'
+			cyrpe 'cyrpe.serbian'
+			cyrte 'cyrte.serbian'
+		: else : set srbSubtable : object
+			cyrbe 'cyrbe.serbian'
+		
+		set lookups.locl_srb {.type 'gsub_single' .subtables {srbSubtable}}
+		set features.locl_srb {'locl_srb'}
+		set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
+		
+		set font.GSUB {.languages languages .features features .lookups lookups}
+	
+	progress 'Features'
