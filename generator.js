@@ -27,6 +27,11 @@ var font = function () {
 	console.log('    ' + fontUniqueName + " Successfully built.");
 	font.features.sscompose = para.sscompose;
 	font.parameters = para;
+	font.glyf = font.glyf.sort(function(a, b){
+		var pri1 = a.cmpPriority || 0;
+		var pri2 = b.cmpPriority || 0;
+		return (pri2 !== pri1 ? pri2 - pri1 : a.contours.length !== b.contours.length ? a.contours.length - b.contours.length : (a.unicode && b.unicode && a.unicode[0] !== b.unicode[0]) ? a.unicode[0] - b.unicode[0] : (a.name < b.name ) ? (-1) : (a.name > b.name) ? 1 : 0);
+	})
 	return font;
 } ();
 
