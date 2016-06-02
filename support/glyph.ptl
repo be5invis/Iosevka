@@ -1,5 +1,5 @@
 extern isFinite
-import 'node-sfnt/lib/math/bezierCubic2Q2' as bezierCubic2Q2
+import 'cubic2quad' as cubic2quad
 import 'bezier-js' as Bezier
 import './point' as Point
 import './transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
@@ -243,10 +243,17 @@ export all : class Glyph
 							foreach [k : range 0 (ts.length - 1)] : begin
 								local s : strand.split ts.(k) ts.(k + 1)
 								if s.points : begin
-									local segments : bezierCubic2Q2 s.points.0 s.points.1 s.points.2 s.points.3
-									foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : contour.push
-										new Point xc yc false
-										new Point xf yf true
+									local quads : cubic2quad
+										* s.points.0.x ; * s.points.0.y
+										* s.points.1.x ; * s.points.1.y
+										* s.points.2.x ; * s.points.2.y
+										* s.points.3.x ; * s.points.3.y
+										* 0.05
+									local m 2
+									while (m < quads.length) : begin
+										contour.push : new Point quads.(m) quads.(m + 1) false
+										contour.push : new Point quads.(m + 2) quads.(m + 3) false
+										inc m 4
 					set flag 2
 				true : begin
 					local p0 contour.(contour.length - 1)
