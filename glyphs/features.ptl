@@ -1,0 +1,294 @@
+### Generate Features and remove double-width glyphs when necessary
+local markGlyphs {.all {} }
+
+# GPOS
+symbol-block 'GPOS' : if [not recursive] : begin
+	local lookup_mark
+		.type 'gpos_mark_to_base'
+		.subtables {}
+	local lookup_mkmk
+		.type 'gpos_mark_to_mark'
+		.subtables {}
+	
+	set font.GPOS : object
+		languages
+			.DFLT_DFLT {.features {'mark0', 'mkmk0'}}
+			.latn_DFLT {.features {'mark0', 'mkmk0'}}
+			.grek_DFLT {.features {'mark0', 'mkmk0'}}
+			.cyrl_DFLT {.features {'mark0', 'mkmk0'}}
+		features
+			.mark0 {'l_mark'}
+			.mkmk0 {'l_mkmk'}
+		lookups
+			.l_mark lookup_mark
+			.l_mkmk lookup_mkmk
+	
+	# mark and mkmk
+	define [createBaseInfo g th px py] : begin
+		local res {.}
+		local pushed false
+		foreach key [items-of : Object.keys g.anchors] : if (!th || th.(key)) : begin
+			set res.(key) : object
+				.x g.anchors.(key).(px || 'x')
+				.y g.anchors.(key).(py || 'y')
+			set pushed true
+		return : if pushed res nothing
+		
+	define [createMTSSubtable lookup anchorClasses] : begin
+		local subtable {.marks {.} .bases {.}}
+		local th {.}
+		foreach [ac : items-of anchorClasses] : set th.(ac) true
+		foreach glyph [items-of glyphList] : if glyph.anchors : begin
+			local anchorKeys : Object.keys glyph.anchors
+			local hasAnchor false
+			foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
+			if hasAnchor : begin
+				local isMarkGlyph false
+				local markKey nothing
+				foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
+					set isMarkGlyph true
+					set markKey key
+				if isMarkGlyph
+				: then : begin
+					set subtable.marks.(glyph.name) : object
+						class markKey
+						x glyph.anchors.(markKey).x
+						y glyph.anchors.(markKey).y
+					if (lookup == lookup_mkmk) : begin
+						local r : createBaseInfo glyph th 'mbx' 'mby'
+						if r : set subtable.bases.(glyph.name) r
+				: else : if (lookup == lookup_mark) : begin
+					local r : createBaseInfo glyph th 'x' 'y'
+					if r : set subtable.bases.(glyph.name) r
+		lookup.subtables.push subtable
+	
+	createMTSSubtable lookup_mark {'above' 'below' 'overlay' 'slash'}
+	createMTSSubtable lookup_mark {'trailing' 'lf' 'topright' 'bottomright'}
+	createMTSSubtable lookup_mkmk {'above'}
+	createMTSSubtable lookup_mkmk {'below'}
+	createMTSSubtable lookup_mkmk {'trailing' 'lf' 'topright' 'bottomright' 'overlay' 'slash'}
+
+# GDEF
+symbol-block 'GDEF' : if [not recursive] : begin
+	set font.GDEF {.glyphClassDef {.}}
+	foreach glyph [items-of glyphList] : begin
+		set font.GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] 2 1
+		if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]) : begin
+			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
+				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
+				markGlyphs.(key).push glyph.name
+				markGlyphs.all.push glyph.name
+				set font.GDEF.glyphClassDef.(glyph.name) 3
+
+# GSUB
+symbol-block 'GSUB' : if [not recursive] : begin
+	local commonList {}
+	local languages
+		.DFLT_DFLT {.features commonList}
+		.latn_DFLT {.features commonList}
+		.grek_DFLT {.features commonList}
+		.cyrl_DFLT {.features commonList}
+		.kana_DFLT {.features commonList}
+		.hani_DFLT {.features commonList}
+	local features {.}
+	local lookups {.}
+	
+	define [lookup-single name f t] : begin
+		local subtable {.}
+		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
+		set lookups.(name) {.type 'gsub_single' .subtables {subtable}}
+	define [getsublookup left right] : piecewise
+		([typeof right] === "string") right
+		(right <@ Function) : getsublookup left [right left]
+		true : begin
+			local found null
+			foreach [{name lookup} : pairs-of lookups] : match lookup
+				{.type "gsub_single" .subtables {st}} : begin
+					local check true
+					foreach [j : range 0 left.length] : if (st.(left.(j)) !== right.(j)) : set check false
+					if check : set found name
+			if found : return found
+			
+			local name "_lookup_\([Object.keys lookups].length)"
+			lookup-single name left right
+			return name
+	define [chain-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x (x ~> null)])
+		local subtable {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+		local foundi false
+		local founde false
+		foreach [j : range 0 terms.length] : if (!foundi && terms.(j).right) : begin
+			set subtable.inputBegins j
+			set foundi true
+		foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).right) : begin
+			set subtable.inputEnds (j + 1)
+			set founde true
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			subtable.match.push term.left
+			if term.right : begin
+				subtable.apply.push {.at j .lookup [getsublookup term.left term.right]}
+		return subtable
+	define [flatten] : begin
+		local ans {}
+		foreach [term : items-of : {}.slice.call arguments 0] : begin
+			if (term <@ Array)
+			: then : set ans : ans.concat term
+			: else : ans.push term
+		return ans
+	
+	# cvxx
+	foreach [name : items-of : Object.keys glyphs] : begin
+		if glyphs.(name).featureSelector : begin
+			local fs glyphs.(name).featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not lookups.(feature)] : begin
+					set features.(feature) {feature}
+					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+					commonList.push feature
+				set lookups.(feature).subtables.0.(name) fs.(feature)
+	# ssxx
+	foreach [name : items-of : Object.keys para.sscompose] : begin
+		commonList.push name
+		set features.(name) para.sscompose.(name)
+	
+	# ccmp
+	commonList.push 'ccmp'
+	set features.ccmp {'ccmp1' 'ccmp2'}
+	
+	let [groupA {'A' 'a' 'u' 'cyrA' 'cyra'}] : set lookups.ccmp1
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule
+				{'i' 'cyrUkrainiani' 'j' 'cyrje' 'iogonekBelow'} ~> {'dotlessi' 'dotlessi' 'dotlessj' 'dotlessj' 'iogonek.dotless'}
+				markGlyphs.above ~> null
+			chain-rule {'eta'} ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule groupA ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+	
+	set lookups.ccmp2
+		.type 'gsub_ligature'
+		.subtables : list : object
+			psilivaria {'commaAbove' 'graveAbove'}
+			psilioxia {'commaAbove' 'acuteAbove'}
+			psiliperispomeni {'commaAbove' 'perispomeniAbove'}
+			dasiavaria {'revCommaAbove' 'graveAbove'}
+			dasiaoxia {'revCommaAbove' 'acuteAbove'}
+			dasiaperispomeni {'revCommaAbove' 'perispomeniAbove'}
+	
+	# calt and other ligations
+	if (para.spacing > 0) : let : begin
+		local stick {'hyphen' 'equal'}
+		local less {'less'}
+		local hyphen {'hyphen'}
+		local exclam {'exclam'}
+		local greater {'greater'}
+		
+		define [lsx s] : lambda [t] : t.map : lambda [x] "lig\(x).\(s)"
+		
+		local progLigNameMap
+			.XHS_ 'hask'
+			.XPTL 'hask'
+		foreach
+		: ligationFeatureName : items-of : {'calt'}.concat [Object.keys progLigNameMap]
+		: begin
+			local mappedFeature : progLigNameMap.(ligationFeatureName) || ligationFeatureName
+			local ligationLookupName : 'lig_' + mappedFeature
+			local [only subtable lns] : begin
+				if ([lns.indexOf mappedFeature] >= 0) [then : return subtable] : else : begin
+					set subtable.apply {}
+					return subtable
+			
+			commonList.push ligationFeatureName
+			set features.(ligationFeatureName) {ligationLookupName}
+			if [not lookups.(ligationLookupName)] : set lookups.(ligationLookupName)
+				.type 'gsub_chaining'
+				.subtables : list
+					chain-rule less (stick ~> [lsx 'lc'] ) (stick ~> [lsx 'cr']) greater # <--> <==>
+					chain-rule less (stick ~> [lsx 'lr']) greater # <->, <=>
+					chain-rule less (stick ~> [lsx 'lj']) less # <-<, <=<
+					chain-rule less (stick ~> [lsx 'lc']) (stick ~> [lsx 'cf']) # <--, <==
+					chain-rule less (less ~> [lsx 'shift1']) (stick ~> [lsx 'l1f']) # <<-, <<=
+						:> only {'hask'}
+					chain-rule less (hyphen ~> [lsx 'lf']) # <-
+					chain-rule less (exclam ~> [lsx 'htmlcommentstart']) (hyphen ~> [lsx 'lxc']) (hyphen ~> [lsx 'cf']) # <!--
+					chain-rule greater (greater ~> [lsx 'shiftN1']) (stick ~> [lsx 'j1f']) # >>-, >>=
+						:> only {'hask'}
+					chain-rule greater (stick ~> [lsx 'jr']) greater # >->, >=>
+					chain-rule greater (hyphen ~> [lsx 'jf']) # >-
+						:> only {'hask'}
+					chain-rule (stick ~> [lsx 'fc']) (stick ~> [lsx 'cr']) greater # -->, ==>
+					chain-rule (stick ~> [lsx 'fr1']) (greater ~> [lsx 'shift1']) greater # ->>, =>>
+						:> only {'hask'}
+					chain-rule (stick ~> [lsx 'fr']) greater # ->, =>
+					chain-rule (stick ~> [lsx 'fj1']) (less ~> [lsx 'shiftN1']) less # -<<, =<<
+						:> only {'hask'}
+					chain-rule (stick ~> [lsx 'fj']) less # -<, =<
+						:> only {'hask'}
+					
+					chain-rule ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus'} # :> :- := :< :+
+					chain-rule {'greater' 'less' 'hyphen' 'equal' 'plus'} ({'colon'} ~> {'colon.mid'}) # <: >: -: =: +:
+		
+		#opbd
+		local fwclose {'fwlcloseDoubleQuote' 'fwlcloseSingleQuote' 'dwlcjkSingleQuoteRight' 'dwlcjkDoubleQuoteRight' 'dwlparenRight'}
+		local hwclose {'closeDoubleQuote' 'closeSingleQuote' 'cjkSingleQuoteRight' 'cjkDoubleQuoteRight' 'parenRight'}
+		local fwopen {'fwropenDoubleQuote' 'fwropenSingleQuote' 'dwrcjkSingleQuoteLeft' 'dwrcjkDoubleQuoteLeft' 'dwrparenLeft'}
+		local hwopen {'openDoubleQuote' 'openSingleQuote' 'cjkSingleQuoteLeft' 'cjkDoubleQuoteLeft' 'parenLeft'}
+		local fwquoteopen {'fwropenDoubleQuote' 'fwropenSingleQuote'}
+		local hwquoteopen {'openDoubleQuote' 'openSingleQuote'}
+		local fwtrail {'dwlperiod' 'dwlcomma' 'dwlcjkperiod' 'dwlcjkcomma'}
+		local hwtrail {'period' 'comma' 'cjkperiod' 'cjkcomma'}
+		local fwmid {'dwccolon' 'dwcsemicolon'}
+		local hwmid {'colon' 'semicolon'}
+		
+		commonList.push 'opbd'
+		set features.opbd {'opbd1'}
+		set lookups.opbd1
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule [flatten fwtrail hwtrail fwopen hwopen fwmid hwmid] (fwopen ~> hwopen)
+				chain-rule (fwclose ~> hwclose) [flatten fwtrail hwtrail fwclose hwclose fwopen hwopen fwmid hwmid]
+
+	# locl, SRB
+	local srbSubtable null
+	if para.isItalic
+	: then : set srbSubtable : object
+		cyrbe 'cyrbe.serbian'
+		cyrghe 'cyrghe.serbian'
+		cyrde 'cyrde.serbian'
+		cyrpe 'cyrpe.serbian'
+		cyrte 'cyrte.serbian'
+	: else : set srbSubtable : object
+		cyrbe 'cyrbe.serbian'
+	set lookups.locl_srb {.type 'gsub_single' .subtables {srbSubtable}}
+	set features.locl_srb {'locl_srb'}
+	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
+	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}
+	
+	# locl, BGR
+	local bgrSubtable : object
+		cyrve 'cyrve.BGR'
+		cyrghe 'cyrghe.italic'
+		cyrde 'g'
+		cyrzhe 'cyrzhe.BGR'
+		cyrze 'cyrze.BGR'
+		cyri 'u'
+		cyribreve 'ubreve'
+		cyrka 'k'
+		cyrEl 'Lambda'
+		cyrel 'turnv'
+		cyrpe 'n'
+		cyrte 'm'
+		cyrsha 'cyrsha.italic'
+		cyrshcha 'cyrshcha.italic'
+		cyryu 'cyryu.BGR'
+	set lookups.locl_bgr {.type 'gsub_single' .subtables {bgrSubtable}}
+	set features.locl_bgr {'locl_bgr'}
+	set languages.'cyrl_BGR ' {.features [{'locl_bgr'}.concat commonList]}
+	
+	set font.GSUB {.languages languages .features features .lookups lookups}

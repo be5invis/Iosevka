@@ -102,6 +102,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.8.6**
+  - Added Bulgarian and Macedonian Cyrillic variants
+  - Added ligations about colons
 * **1.8.5**
   - Added `XHS_` and `XPTL` feature tags for Language-Specific ligations.
   - Added `/bolt`, `/blackflag`, `/circlestar` and `/heavyballotcross` symbols.

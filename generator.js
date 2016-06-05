@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var TTFWriter = require('node-sfnt').TTFWriter;
+//var TTFWriter = require('node-sfnt').TTFWriter;
 var argv = require('yargs').argv;
 var buildGlyphs = require('./buildglyphs.js');
 var parameters = require('./parameters');
@@ -16,7 +16,7 @@ function hasv(obj) {
 }
 
 // Font building
-var font = function() {
+var font = function () {
 	var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'parameters.toml'), 'utf-8'));
 	var emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), 'emptyfont.toml'), 'utf-8'));
 	var para = parameters.build(parametersData, argv._);
@@ -27,12 +27,17 @@ var font = function() {
 	console.log('    ' + fontUniqueName + " Successfully built.");
 	font.features.sscompose = para.sscompose;
 	font.parameters = para;
+	font.glyf = font.glyf.sort(function(a, b){
+		var pri1 = a.cmpPriority || 0;
+		var pri2 = b.cmpPriority || 0;
+		return (pri2 !== pri1 ? pri2 - pri1 : a.contours.length !== b.contours.length ? a.contours.length - b.contours.length : (a.unicode && b.unicode && a.unicode[0] !== b.unicode[0]) ? a.unicode[0] - b.unicode[0] : (a.name < b.name ) ? (-1) : (a.name > b.name) ? 1 : 0);
+	})
 	return font;
 } ();
 
-if (argv.charmap) (function() {
+if (argv.charmap) (function () {
 	console.log('    Writing character map -> ' + argv.charmap);
-	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function(glyph) {
+	fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function (glyph) {
 		return [
 			glyph.name,
 			glyph.unicode,
@@ -41,7 +46,7 @@ if (argv.charmap) (function() {
 	})), 'utf8')
 })();
 
-if (argv.feature) (function() {
+if (argv.feature) (function () {
 	console.log('    Writing feature file -> ' + argv.feature);
 	var featurefile = '\n\n';
 
@@ -104,21 +109,11 @@ if(argv.ttf) (function(){
 })();
 */
 
-if (argv.svg) (function() {
+if (argv.svg) (function () {
 	console.log('    Writing outline as SVG -> ' + argv.svg);
 
 	var foundNaN = false;
 	var glyfname = '';
-	function cov(x) {
-		if (!isFinite(x)) {
-			if (!foundNaN) {
-				console.log("*** NaN value found in " + argv.svg + '(' + glyfname + ')' + " ***")
-				foundNaN = true
-			}
-			return 0
-		}
-		return Math.round(x * 10000) / 10000
-	};
 	function mix(a, b, p) { return a + (b - a) * p };
 
 	function toSVGPath(glyph) {
@@ -126,59 +121,22 @@ if (argv.svg) (function() {
 		foundNaN = false;
 		glyfname = glyph.name;
 		if (glyph.contours) for (var j = 0; j < glyph.contours.length; j++) {
-			var contour = glyph.contours[j];
-			var lx = 0;
-			var ly = 0;
-			if (contour.length) {
-				lx = contour[0].x;
-				ly = contour[0].y;
-				buf += 'M' + cov(lx) + ' ' + cov(ly);
-				for (var k = 1; k < contour.length; k++) if (contour[k].onCurve) {
-					lx = contour[k].x;
-					ly = contour[k].y;
-					buf += 'L' + cov(lx) + ' ' + cov(ly);
-				} else if (contour[k].cubic) {
-					var rx = contour[k + 2].x;
-					var ry = contour[k + 2].y;
-					buf += 'C' + [contour[k].x, contour[k].y, contour[k + 1].x, contour[k + 1].y, rx, ry].map(cov).join(' ');
-					lx = rx;
-					ly = ry;
-					k += 2;
-				} else if (contour[k + 1]) {
-					if (contour[k + 1].onCurve) {
-						var rx = contour[k + 1].x;
-						var ry = contour[k + 1].y;
-					} else {
-						var rx = (contour[k].x + contour[k + 1].x) / 2;
-						var ry = (contour[k].y + contour[k + 1].y) / 2;
-					}
-					var x1 = mix(lx, contour[k].x, 2 / 3);
-					var y1 = mix(ly, contour[k].y, 2 / 3);
-					var x2 = mix(rx, contour[k].x, 2 / 3);
-					var y2 = mix(ry, contour[k].y, 2 / 3);
-
-					buf += 'C' + [cov(x1), cov(y1), cov(x2), cov(y2), cov(rx), cov(ry)].join(' ');
-					lx = rx;
-					ly = ry;
-					if (contour[k + 1].onCurve) k += 1;
-				} else {
-					var rx = contour[0].x;
-					var ry = contour[0].y;
-					buf += 'Q' + cov(contour[k].x) + ' ' + cov(contour[k].y) + ' ' + cov(contour[0].x) + ' ' + cov(contour[0].y);
-					lx = rx;
-					ly = ry;
-				}
-				buf += 'Z\n'
-			}
+			buf += Glyph.contourToSVGPath(glyph.contours[j], false);
 		}
 		return buf;
 	}
-	var svg = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" ><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><font id="' + font.name.postScriptName + '">'
+	var svg = '<?xml version="1.0" standalone="no"?>'
+		+ '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >'
+		+ '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
+		+ '<defs><font id="' + font.name.postScriptName + '">';
 
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
 	var scale = (argv.upm || 1000) / 1000;
 
-	svg += '<font-face font-family="' + font.name.fontFamily + '" font-weight="' + font.OS_2.usWeightClass + '" font-stretch="normal" units-per-em="' + (1000 * scale) + '"/>'
+	svg += '<font-face font-family="' + font.name.fontFamily
+		+ '" font-weight="' + font.OS_2.usWeightClass
+		+ '" font-stretch="normal" units-per-em="'
+		+ (1000 * scale) + '"/>'
 
 	for (var j = 0; j < font.glyf.length; j++) {
 		var g = font.glyf[j];
@@ -192,16 +150,20 @@ if (argv.svg) (function() {
 				}
 			}
 			g.advanceWidth *= scale;
-			//Glyph.prototype.cleanup.call(g, 0.25);
+			Glyph.prototype.cleanup.call(g, 0.25);
 		}
-		var gd = '<' + (j === 0 ? 'missing-glyph' : 'glyph') + ' glyph-name="' + g.name + '" horiz-adv-x="' + g.advanceWidth + '" ' + (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '') + ' d="' + toSVGPath(g) + '" />'
+		var gd = '<' + (j === 0 ? 'missing-glyph' : 'glyph')
+			+ ' glyph-name="' + g.name
+			+ '" horiz-adv-x="' + g.advanceWidth + '" '
+			+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '')
+			+ ' d="' + toSVGPath(g) + '" />';
 		svg += gd;
 	}
 	svg += '</font></defs></svg>'
 	fs.writeFileSync(argv.svg, svg, 'utf-8')
 })();
 
-if (argv.meta) (function() {
+if (argv.meta) (function () {
 	console.log('    Writing metadata as JSON -> ' + argv.meta);
 	if (argv.svg) {
 		font.glyf = null;

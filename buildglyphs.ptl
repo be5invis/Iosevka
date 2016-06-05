@@ -35,6 +35,8 @@ define [$NamedParameterPair$ l r] : begin
 
 define-operator "--" 890 'right' : syntax-rules
 	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
 
 define-macro params : syntax-rules
 	`[params @_pairs @body] : begin
@@ -429,6 +431,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			set g.advanceWidth t.advanceWidth
 			set g.shortName t.shortName
 			set g.dense t.dense
+			set g.cmpPriority t.cmpPriority
 			if name : set dependencyProfile.(name) : getDependencyProfile g
 		if (g && unicode) : begin
 			g.assign-unicode unicode
@@ -541,13 +544,15 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		line-to    (RIGHTSB - STROKE) STROKE
 		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
 		line-to    (SB + STROKE) (CAP - STROKE)
-		
+		set currentGlyph.cmpPriority (9999)
 		save '.notdef'
 	sketch # .null
 		set-width 0
+		set currentGlyph.cmpPriority (9998)
 		save '.null'
 	sketch # nonmarkingreturn
 		set-width WIDTH
+		set currentGlyph.cmpPriority (-1)
 		save 'nonmarkingreturn' 0x000D
 	
 	# Space
@@ -578,6 +583,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	# Autobuilds
 	set font.features {.}
 	$$include 'glyphs/autobuilds.ptl'
+	$$include 'glyphs/features.ptl'
 	
 	set font.glyfMap glyphs
 	return font
