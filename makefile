@@ -156,7 +156,7 @@ release-all : archives-default archives-term archives-cc \
               archives-hooky archives-zshaped \
               archives-hooky-term archives-zshaped-term \
               pages-default pages-slab x-archives-bundled
-fw : fonts-default fonts-cc fonts-slab fonts-cc-slab
+fw : fonts-default fonts-cc fonts-slab fonts-cc-slab fonts-term fonts-term-slab
 
 d-fonts : fonts-d-sans fonts-d-slab
 test : testdrive-d-sans testdrive-d-slab
