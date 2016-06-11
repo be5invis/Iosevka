@@ -296,6 +296,7 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 			}
 		}
 	};
+	// Rebuild curve
 	for (var j = 0; j < splitpoints.length; j++) if (splitpoints[j].onCurve && !splitpoints[j].remove && splitpoints[j + 1] && !splitpoints[j + 1].onCurve) {
 		for (var k = j + 2; k < splitpoints.length && splitpoints[k].remove; k++);
 		if (k - j > 2) {
