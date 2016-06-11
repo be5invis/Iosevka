@@ -20,7 +20,7 @@ define-macro $$include : syntax-rules
 		local fs : require 'fs'
 		local f0 [[env.macros.get 'input-path']].1
 		local parse [require './syntax.js'].parse
-		
+
 		local absolutePath : path.resolve [path.dirname f0] [formOf file]
 		local input : fs.readFileSync absolutePath 'utf-8'
 		local ast : parse input {.within {.file absolutePath .input input}}
@@ -80,7 +80,7 @@ define-operator "<>" 800 "never" : begin
 				local p2 [toPattern y env wrapper]
 				object
 					whether : lambda [t] `(@t && @[p1.whether `(@t.x)] && @[p2.whether `(@t.y)])
-					assign : lambda [t locallyQ] : ex `[begin 
+					assign : lambda [t locallyQ] : ex `[begin
 						@{".preserve" [p1.assign `(@t.x) locallyQ]}
 						@{".preserve" [p2.assign `(@t.y) locallyQ]}
 					] env
@@ -195,13 +195,13 @@ define [tagged tag component] : begin
 export as build : define [buildFont para recursive recursiveCodes] : begin
 	define variantSelector para.variantSelector
 	define font this
-	
+
 	define glyphList font.glyf
 	define glyphs {.}
 	define unicodeGlyphs {}
 
 	define UPM 1000
-	
+
 	# Progress indicator
 	define [progress status] : if [not recursive] : begin
 		if para.verbose : console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
@@ -222,7 +222,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	local operTop : mix parenMid parenTop 0.8
 	local operBot : mix parenMid parenBot 0.8
 	local operMid parenMid
-	
+
 	# Transform constructors
 	define [Italify angle shift] : begin
 		local slope [Math.tan ([fallback angle para.slantAngle] / 180 * Math.PI)]
@@ -231,19 +231,19 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
 	define [Translate x y] : new Transform 1 0 0 1 x y
 	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
-	
+
 	define globalTransform : Italify para.slantAngle
 	define TANSLANT   globalTransform.yx
 	define SINSLANT : Math.sin (para.slantAngle / 180 * Math.PI)
 	define COSSLANT : Math.cos (para.slantAngle / 180 * Math.PI)
 	define HVCONTRAST : CONTRAST * COSSLANT + SINSLANT * TANSLANT
-	
+
 	# Orient parameters
 	define UPWARD    : (-HVCONTRAST) <> 0
 	define DOWNWARD  : HVCONTRAST <> 0
 	define RIGHTWARD : TANSLANT <> 1
 	define LEFTWARD  : (- TANSLANT) <> (-1)
-	
+
 	# Style parameters
 	define O para.overshoot
 	define OX para.overshootx
@@ -271,12 +271,12 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define VJUT para.vjut
 	define ACCENT para.accent
 	define ACCENTX para.accentx
-	
+
 	define CTHIN : fallback para.cthin 0.75
 	define CTHINB : fallback para.cthinb 0.5
-	
+
 	define SLAB para.slab
-	
+
 	define TAILADJX : WIDTH * 0.2
 	define TAILADJY : XH * 0.25
 	define LBALANCE : LONGJUT * 0.04
@@ -289,13 +289,13 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define RBALANCE2 : fallback para.rbalance2 0
 	define FBALANCE : fallback para.fbalance 0
 	define ONEBALANCE : fallback para.onebalance 0
-	
+
 	# derived metrics
 	define FULLWIDTH : if (para.spacing >= 2) 1000 WIDTH
 	define FULLWIDTH1 : if (para.spacing >= 1) 1000 WIDTH
 	define FULLWIDTH2 : if (para.spacing >= 2) 1000 WIDTH
 	define FULLWIDTH3 : if (para.spacing >= 3) 1000 WIDTH
-	
+
 	define OXE : OX - O
 	define ESS : STROKE * [fallback para.essx CONTRAST]
 	define ESSQUESTION : STROKE * [fallback para.essxq CONTRAST]
@@ -311,15 +311,15 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define DOTRADIUS : DOTSIZE / 2
 	define PERIODRADIUS : PERIODSIZE / 2
 	define SIDEJUT : JUT - HALFSTROKE * HVCONTRAST
-	
+
 	define SMOOTHA : SMOOTH - TANSLANT * para.smoothadjust
 	define SMOOTHB : SMOOTH + TANSLANT * para.smoothadjust
 	define SMALLSMOOTHA : SMALLSMOOTH - TANSLANT * para.smoothadjust
 	define SMALLSMOOTHB : SMALLSMOOTH + TANSLANT * para.smoothadjust
-	
+
 	define CORRECTION_OMIDX : TANSLANT * [linreg 18 1.3 126 0.9 STROKE]
 	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
-	
+
 	# Blackness parameters
 	# We will estimate blackness using lower-case 'e'
 	define WHITENESS : ((XH - STROKE * 3) * (RIGHTSB - SB) * (1 / 3)) / (XH * (RIGHTSB - SB))
@@ -328,28 +328,28 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define OVERLAYSTROKE : adviceBlackness 3.75
 	define OPERATORSTROKE : adviceBlackness 3.2
 	define SHOULDERFINE : if para.shoulderfine (STROKE * para.shoulderfine) [adviceBlackness 10]
-	
+
 	define SUPERNESS : fallback para.superness 2
 	define [superxy x] : Math.pow (1 - [Math.pow x SUPERNESS]) (1 / SUPERNESS)
-	
+
 	define [adviceSSmooth y sign] : begin
 		local ss : y * 0.21 + STROKE * 0.22 * [clamp 1 2 : linreg 126 1 137 1.025 STROKE] + 0.035 * (RIGHTSB - SB)
 		return : ss + sign * TANSLANT * para.smoothadjust * (ss / SMALLSMOOTH)
 	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * TANSLANT * para.smoothadjust
 	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * HVCONTRAST * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * TANSLANT
-	
+
 	# Anchor parameters
 	define BASE Anchor.BASE
 	define MARK Anchor.MARK
 
 	define AS_BASE 'AS-BASE'
 	define ALSO_METRICS 'ALSO-METRICS'
-	
+
 	define [tm anchor] : return : new Anchor
 		* (anchor.x * globalTransform.xx + anchor.y * TANSLANT + globalTransform.x)
 		* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
 		* anchor.type
-	
+
 	define markAboveLower       {.anchors {.above       [tm : new Anchor MIDDLE  XH        BASE]}}
 	define markAboveCap         {.anchors {.above       [tm : new Anchor MIDDLE  CAP       BASE]}}
 	define markBelowLower       {.anchors {.below       [tm : new Anchor MIDDLE  DESCENDER BASE]}}
@@ -358,7 +358,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define markToprightCap      {.anchors {.topright    [tm : new Anchor RIGHTSB CAP       BASE]}}
 	define markBottomrightLower {.anchors {.bottomright [tm : new Anchor RIGHTSB DESCENDER BASE]}}
 	define markBottomrightZero  {.anchors {.bottomright [tm : new Anchor RIGHTSB 0         BASE]}}
-	
+
 	define [StdAnchorGroup] : begin
 		local a : anchorDeriv.apply null arguments
 		set a.anchors.overlay : new Anchor
@@ -370,14 +370,14 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			* [mix a.anchors.below.y a.anchors.above.y 0.5]
 			* BASE
 		return a
-	
+
 	define capitalMarks : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
 	define bMarks       : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
 	define eMarks       : StdAnchorGroup markAboveLower markBelowZero markToprightLower markBottomrightZero
 	define pMarks       : StdAnchorGroup markAboveLower markBelowLower markToprightLower markBottomrightLower
 	define ifMarks      : StdAnchorGroup markAboveCap markBelowLower markToprightCap markBottomrightLower
-	
-	
+
+
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
 	local dependencyProfile {.}
 	local nTemp 0
@@ -400,20 +400,20 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 				if para.verbose : console.log "    *** Done recursive build for \[if (recursive.length > 3) [recursive.slice 0 3 :.concat {'...'} :.join ','] [recursive.join ',']] in \(font.name.uniqueSubFamily)"
 				throw {.glyfMap glyphs}
 			if (pickHash && [not pickHash.(name)]) : return nothing
-			
+
 			if para.verbose : console.log name
 			local glyphObject [new Glyph name]
 			glyphList.push glyphObject
 			glyphs.(name) = glyphObject
 			glyphObject.set-width WIDTH
 			glyphObject.gizmo = globalTransform
-			
+
 			actions.call glyphObject
-			
+
 			set dependencyProfile.(name) : getDependencyProfile glyphObject
 			dec nPending
 			return glyphObject
-		
+
 		`[@actions] : begin
 			local glyphName ('.temp-' + [set nTemp (nTemp + 1)])
 			if para.verbose : console.log glyphName
@@ -422,7 +422,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			glyphObject.gizmo = globalTransform
 			actions.call glyphObject
 			return glyphObject
-	
+
 	define [$save$ name unicode] : begin
 		local t this
 		local g : create-glyph name [lambda]
@@ -447,7 +447,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		dispiro spiro-outline] : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
 
 	###### HERE WE GO!
-	
+
 	### Metadata
 	# Font names
 	set para.family [para.family.trim]
@@ -490,13 +490,13 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		nameFont 9 para.designer # Designer
 		nameFont 0 para.copyright # Copyright
 		nameFont 13 para.licence  # License
-		
+
 		set font.name : font.name.sort : lambda [a b] : begin
 			if (a.platformID != b.platformID) : return : a.platformID - b.platformID
 			if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
 			if (a.languageID != b.languageID) : return : a.languageID - b.languageID
 			return : a.nameID - b.nameID
-	
+
 	# Weight, width and slantness
 	set font.OS_2.usWeightClass     para.weight
 	set font.OS_2.panose.3          9 # Monospaced
@@ -513,35 +513,35 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	set font.head.macStyle          : object
 		bold          : not : not para.isBold
 		italic        : not : not (para.isItalic || para.isOblique)
-	
+
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
-	
+
 	let [asc : para.leading * CAP / (CAP - DESCENDER)] [desc : para.leading * DESCENDER / (CAP - DESCENDER)] : begin
 		local descenderPad : fallback para.descenderPad 0
 		set font.head.unitsPerEm        1000
 		set font.hhea.ascender          asc
 		set font.OS_2.usWinAscent       asc
 		set font.OS_2.sTypoAscender     asc
-		
+
 		set font.hhea.descender         (DESCENDER - descenderPad)
 		set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad)
 		set font.OS_2.sTypoDescender    (desc - descenderPad)
-		
+
 		set font.hhea.lineGap           (para.leading - asc + DESCENDER)
 		set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
-		
+
 		set font.OS_2.sxHeight          XH
 		set font.OS_2.sCapHeight        CAP
 		set font.post.italicAngle       (0 - para.slantAngle)
-	
+
 	# Necessary notdef, .null and nonmarkingreturn glyph
 	sketch # .notdef
 		start-from SB 0
 		line-to    SB CAP
 		line-to    RIGHTSB CAP
 		line-to    RIGHTSB 0
-		
+
 		start-from (SB + STROKE) STROKE
 		line-to    (RIGHTSB - STROKE) STROKE
 		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
@@ -556,7 +556,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		set-width WIDTH
 		set currentGlyph.cmpPriority (-1)
 		save 'nonmarkingreturn' 0x000D
-	
+
 	# Space
 	sketch # space
 		set-width WIDTH
@@ -566,14 +566,14 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	### HERE WE GO
 	$$include 'glyphs/common-shapes.ptl'
 	$$include 'glyphs/overmarks.ptl'
-	
+
 	# Unified letters
 	$$include 'glyphs/letters-unified-basic.ptl'
 	$$include 'glyphs/letters-unified-extended.ptl'
-	
+
 	# Numbers
 	$$include 'glyphs/numbers.ptl'
-	
+
 	# Symbols
 	$$include 'glyphs/symbol-punctuation.ptl'
 	$$include 'glyphs/symbol-math.ptl'
@@ -581,11 +581,11 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	$$include 'glyphs/symbol-geometric.ptl'
 	$$include 'glyphs/symbol-braille.ptl'
 	$$include 'glyphs/symbol-other.ptl'
-	
+
 	# Autobuilds
 	set font.features {.}
 	$$include 'glyphs/autobuilds.ptl'
 	$$include 'glyphs/features.ptl'
-	
+
 	set font.glyfMap glyphs
 	return font
