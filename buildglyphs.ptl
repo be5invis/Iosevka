@@ -8,6 +8,8 @@ import './support/anchor' as Anchor
 import './support/monotonic-interpolate' as smoothreg
 import './support/fairify' as fairify
 
+import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet] from './support/utils'
+
 extern global
 define [suggestGC] : begin
 	if (global && global.gc) : global.gc
@@ -138,10 +140,6 @@ define-macro assign-unicode : syntax-rules
 		set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
 	] env}
 
-define [includeGlyphPart cg gs nm] : begin
-	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
-	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
-
 ###### Canvas-based mechanism
 define [$donothing$] nothing
 define-macro sketch : syntax-rules
@@ -170,22 +168,6 @@ define-macro branch : syntax-rules
 
 define-macro save : syntax-rules
 	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
-
-### COMMON FUNCTIONS
-define [mix a b p] : a + (b - a) * p
-define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
-define [clamp l h x] : if (x < l) l : if (x > h) h x
-define [fallback] : begin
-	for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
-	return nothing
-
-define [TempFont] {.glyf {} .head {.} .hhea {.} .OS_2 {.panose {}} .name {.} .post {.}}
-
-define [anchorDeriv] : begin
-	local h {.}
-	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
-		set h.(k) : new Anchor a.anchors.(k).x a.anchors.(k).y a.anchors.(k).type a.anchors.(k).mbx a.anchors.(k).mby
-	return {.anchors h}
 
 # contour tagging
 define [tagged tag component] : begin
@@ -345,37 +327,39 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define AS_BASE 'AS-BASE'
 	define ALSO_METRICS 'ALSO-METRICS'
 
-	define [tm anchor] : return : new Anchor
-		* (anchor.x * globalTransform.xx + anchor.y * TANSLANT + globalTransform.x)
-		* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
-		* anchor.type
+	define markset : do
+		define [ta anchor] : return : new Anchor
+			* (anchor.x * globalTransform.xx + anchor.y * TANSLANT + globalTransform.x)
+			* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
+			* anchor.type
 
-	define markAboveLower       {.anchors {.above       [tm : new Anchor MIDDLE  XH        BASE]}}
-	define markAboveCap         {.anchors {.above       [tm : new Anchor MIDDLE  CAP       BASE]}}
-	define markBelowLower       {.anchors {.below       [tm : new Anchor MIDDLE  DESCENDER BASE]}}
-	define markBelowZero        {.anchors {.below       [tm : new Anchor MIDDLE  0         BASE]}}
-	define markToprightLower    {.anchors {.topright    [tm : new Anchor RIGHTSB XH        BASE]}}
-	define markToprightCap      {.anchors {.topright    [tm : new Anchor RIGHTSB CAP       BASE]}}
-	define markBottomrightLower {.anchors {.bottomright [tm : new Anchor RIGHTSB DESCENDER BASE]}}
-	define markBottomrightZero  {.anchors {.bottomright [tm : new Anchor RIGHTSB 0         BASE]}}
+		define markAboveLower       {.anchors {.above       [ta : new Anchor MIDDLE  XH        BASE]}}
+		define markAboveCap         {.anchors {.above       [ta : new Anchor MIDDLE  CAP       BASE]}}
+		define markBelowLower       {.anchors {.below       [ta : new Anchor MIDDLE  DESCENDER BASE]}}
+		define markBelowZero        {.anchors {.below       [ta : new Anchor MIDDLE  0         BASE]}}
+		define markToprightLower    {.anchors {.topright    [ta : new Anchor RIGHTSB XH        BASE]}}
+		define markToprightCap      {.anchors {.topright    [ta : new Anchor RIGHTSB CAP       BASE]}}
+		define markBottomrightLower {.anchors {.bottomright [ta : new Anchor RIGHTSB DESCENDER BASE]}}
+		define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor RIGHTSB 0         BASE]}}
 
-	define [StdAnchorGroup] : begin
-		local a : anchorDeriv.apply null arguments
-		set a.anchors.overlay : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
-			* [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
-			* BASE
-		set a.anchors.slash : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x 0.5]
-			* [mix a.anchors.below.y a.anchors.above.y 0.5]
-			* BASE
-		return a
-
-	define capitalMarks : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
-	define bMarks       : StdAnchorGroup markAboveCap markBelowZero markToprightCap markBottomrightZero
-	define eMarks       : StdAnchorGroup markAboveLower markBelowZero markToprightLower markBottomrightZero
-	define pMarks       : StdAnchorGroup markAboveLower markBelowLower markToprightLower markBottomrightLower
-	define ifMarks      : StdAnchorGroup markAboveCap markBelowLower markToprightCap markBottomrightLower
+		define [buildStandardMarkSet] : begin
+			local a : compsiteMarkSet.apply null arguments
+			set a.anchors.overlay : new Anchor
+				* [mix a.anchors.below.x a.anchors.above.x OVERLAYPOS]
+				* [mix a.anchors.below.y a.anchors.above.y OVERLAYPOS]
+				* BASE
+			set a.anchors.slash : new Anchor
+				* [mix a.anchors.below.x a.anchors.above.x 0.5]
+				* [mix a.anchors.below.y a.anchors.above.y 0.5]
+				* BASE
+			return a
+		
+		object
+			capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+			b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+			e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero
+			p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower
+			if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower
 
 
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
@@ -562,7 +546,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	# Space
 	sketch # space
 		set-width WIDTH
-		include eMarks
+		include markset.e
 		save 'space' ' '
 
 	### HERE WE GO

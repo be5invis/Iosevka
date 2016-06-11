@@ -1,0 +1,19 @@
+import './anchor' as Anchor
+
+export : define [mix a b p] : a + (b - a) * p
+export : define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
+export : define [clamp l h x] : if (x < l) l : if (x > h) h x
+export : define [fallback] : begin
+	for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
+	return nothing
+export : define [TempFont] {.glyf {} .head {.} .hhea {.} .OS_2 {.panose {}} .name {.} .post {.}}
+
+export : define [includeGlyphPart cg gs nm] : begin
+	if [not gs.(nm)] : throw : new Error "Glyph \(nm) is not defined, which is used for \(cg.name)."
+	return : cg.include.apply cg [{gs.(nm)}.concat [{}.slice.call arguments 3]]
+
+export : define [compsiteMarkSet] : begin
+	local h {.}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
+		set h.(k) : new Anchor a.anchors.(k).x a.anchors.(k).y a.anchors.(k).type a.anchors.(k).mbx a.anchors.(k).mby
+	return {.anchors h}
