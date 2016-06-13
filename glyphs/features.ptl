@@ -137,21 +137,6 @@ symbol-block 'GSUB' : if [not recursive] : begin
 			: else : ans.push term
 		return ans
 	
-	# cvxx
-	foreach [name : items-of : Object.keys glyphs] : begin
-		if glyphs.(name).featureSelector : begin
-			local fs glyphs.(name).featureSelector
-			foreach [feature : items-of : Object.keys fs] : begin
-				if [not lookups.(feature)] : begin
-					set features.(feature) {feature}
-					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
-					commonList.push feature
-				set lookups.(feature).subtables.0.(name) fs.(feature)
-	# ssxx
-	foreach [name : items-of : Object.keys para.sscompose] : begin
-		commonList.push name
-		set features.(name) para.sscompose.(name)
-	
 	# ccmp
 	commonList.push 'ccmp'
 	set features.ccmp {'ccmp1' 'ccmp2'}
@@ -267,9 +252,7 @@ symbol-block 'GSUB' : if [not recursive] : begin
 		cyrbe 'cyrbe.serbian'
 	set lookups.locl_srb {.type 'gsub_single' .subtables {srbSubtable}}
 	set features.locl_srb {'locl_srb'}
-	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
-	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}
-	
+
 	# locl, BGR
 	local bgrSubtable : object
 		cyrve 'cyrve.BGR'
@@ -289,6 +272,25 @@ symbol-block 'GSUB' : if [not recursive] : begin
 		cyryu 'cyryu.BGR'
 	set lookups.locl_bgr {.type 'gsub_single' .subtables {bgrSubtable}}
 	set features.locl_bgr {'locl_bgr'}
+
+	# cvxx
+	foreach [name : items-of : Object.keys glyphs] : begin
+		if glyphs.(name).featureSelector : begin
+			local fs glyphs.(name).featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not lookups.(feature)] : begin
+					set features.(feature) {feature}
+					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+					commonList.push feature
+				set lookups.(feature).subtables.0.(name) fs.(feature)
+	# ssxx
+	local sscompose : if para.isItalic para.sscompose.italic para.sscompose.upright
+	foreach [name : items-of : Object.keys sscompose] : begin
+		commonList.push name
+		set features.(name) sscompose.(name)
+
+	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
+	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_BGR ' {.features [{'locl_bgr'}.concat commonList]}
-	
+
 	set font.GSUB {.languages languages .features features .lookups lookups}

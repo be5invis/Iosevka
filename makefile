@@ -112,7 +112,9 @@ x-snapshot : webfont-pkg | snapshot/assets
 	@$(MAKE) -f onegroup.mk snapshot $(PARAM)
 
 # Pages
-pages : fonts
+pages/index.css : pages/index.styl
+	stylus $<
+pages : fonts pages/index.css
 	@$(MAKE) -f onegroup.mk pages $(PARAM)
 
 # Archives
@@ -143,12 +145,12 @@ $(webfont-pkg-styles) : webfont-pkg-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
 $(x-snapshot-styles) : x-snapshot-% : fonts-% $(SCRIPTS) | $(OBJDIR) dist
 	$(MAKE) x-snapshot config=$(subst x-snapshot-,,$@)
 
-x-archives-bundled : release-archives/iosevka-pack.zip release-archives/iosevka-pack.7z
+x-archives-bundled : release-archives/iosevka-pack-$(VERSION).zip release-archives/iosevka-pack-$(VERSION).7z
 
-release-archives/iosevka-pack.zip : fonts-default fonts-term fonts-cc fonts-slab fonts-term-slab fonts-cc-slab
+release-archives/iosevka-pack-$(VERSION).zip : fonts-default fonts-term fonts-cc fonts-slab fonts-term-slab fonts-cc-slab
 	7z a -tzip -mx=9 $@ ./dist/01.iosevka/* ./dist/02.iosevka-term/* ./dist/03.iosevka-cc/* ./dist/04.iosevka-slab/* ./dist/05.iosevka-term-slab/* ./dist/06.iosevka-cc-slab/*
 
-release-archives/iosevka-pack.7z : fonts-default fonts-term fonts-cc fonts-slab fonts-term-slab fonts-cc-slab
+release-archives/iosevka-pack-$(VERSION).7z : fonts-default fonts-term fonts-cc fonts-slab fonts-term-slab fonts-cc-slab
 	7z a -t7z -mmt=on -m0=LZMA:a=1:d=1536m:fb=256 $@ ./dist/01.iosevka/* ./dist/02.iosevka-term/* ./dist/03.iosevka-cc/* ./dist/04.iosevka-slab/* ./dist/05.iosevka-term-slab/* ./dist/06.iosevka-cc-slab/*
 
 release-all : archives-default archives-term archives-cc \
@@ -156,7 +158,7 @@ release-all : archives-default archives-term archives-cc \
               archives-hooky archives-zshaped \
               archives-hooky-term archives-zshaped-term \
               pages-default pages-slab x-archives-bundled
-fw : fonts-default fonts-cc fonts-slab fonts-cc-slab
+fw : fonts-default fonts-cc fonts-slab fonts-cc-slab fonts-term fonts-term-slab
 
 d-fonts : fonts-d-sans fonts-d-slab
 test : testdrive-d-sans testdrive-d-slab
