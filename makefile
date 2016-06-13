@@ -112,7 +112,9 @@ x-snapshot : webfont-pkg | snapshot/assets
 	@$(MAKE) -f onegroup.mk snapshot $(PARAM)
 
 # Pages
-pages : fonts
+pages/index.css : pages/index.styl
+	stylus $<
+pages : fonts pages/index.css
 	@$(MAKE) -f onegroup.mk pages $(PARAM)
 
 # Archives
