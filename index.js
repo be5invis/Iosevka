@@ -7,7 +7,7 @@ var CompactPicker = Vue.component('compact-picker', {
 	},
 	data: {},
 	methods: {
-		setItem: function(item) {
+		setItem: function (item) {
 			this.current = item;
 			return false;
 		}
@@ -22,7 +22,7 @@ var CompactToggle = Vue.component('compact-toggle', {
 	},
 	data: {},
 	methods: {
-		toggle: function() {
+		toggle: function () {
 			this.on = !this.on
 			console.log(this.on)
 			return false;
@@ -49,6 +49,58 @@ var indexPage = new Vue({
 		snippet: 'javascript',
 		theme: 'color-dark',
 		opentypeSamples: [
+			{
+				title: "Stylistic Sets",
+				sampleText: "float Fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789",
+				stress: 'agil*0',
+				type: 'wide',
+				terms: [
+					{tag:'off', desc:'Default'},
+					{tag:'ss01', desc:'Andale Mono Style'},
+					{tag:'ss02', desc:'Anonymous Pro Style'},
+					{tag:'ss03', desc:'Consolas Style'},
+					{tag:'ss04', desc:'Menlo Style'},
+					{tag:'ss05', desc:'Fira Mono Style'},
+					{tag:'ss06', desc:'Liberation Mono Style'},
+					{tag:'ss07', desc:'Monaco Style'},
+					{tag:'ss08', desc:'Pragmata Pro Style'},
+					{tag:'ss09', desc:'Source Code Pro Style'}
+				]
+			},
+			{
+				title: "Character Variants",
+				sampleText: "",
+				stress: '?',
+				type: 'narrow',
+				terms: [
+					{tag:'cv01', sample:'a'},
+					{tag:'cv02', sample:'a'},
+					{tag:'cv03', sample:'i'},
+					{tag:'cv04', sample:'i'},
+					{tag:'cv05', sample:'i'},
+					{tag:'cv06', sample:'i'},
+					{tag:'cv07', sample:'l'},
+					{tag:'cv08', sample:'l'},
+					{tag:'cv09', sample:'l'},
+					{tag:'cv10', sample:'l'},
+					{tag:'cv11', sample:'g'},
+					{tag:'cv12', sample:'g'},
+					{tag:'cv24', sample:'g'},
+					{tag:'cv13', sample:'0'},
+					{tag:'cv14', sample:'0'},
+					{tag:'cv15', sample:'0'},
+					{tag:'cv16', sample:'~'},
+					{tag:'cv17', sample:'~'},
+					{tag:'cv18', sample:'*'},
+					{tag:'cv19', sample:'*'},
+					{tag:'cv20', sample:'_'},
+					{tag:'cv21', sample:'_'},
+					{tag:'cv22', sample:'¶'},
+					{tag:'cv23', sample:'¶'},
+				]
+			}
+		],
+		opentypeSample: [
 
 			'Stylistic sets',
 			['volatile', ['ss01', 'ss02', 'ss03'], 'sub', 'il'],
@@ -66,7 +118,7 @@ var indexPage = new Vue({
 			['*handler', ['cv18', 'cv19'], 'sub', '*'],
 			['shared_ptr', ['cv20', 'cv21'], 'sub', '_'],
 			['ref:¶1.1', ['cv22', 'cv23'], 'sub', '¶']
-		].map(function(item) {
+		].map(function (item) {
 			if (item instanceof Array && item[3]) {
 				return [item[0].replace(new RegExp('[' + item[3] + ']', 'g'), '<b>$&</b>'), item[1], item[2]]
 			} else {
@@ -76,6 +128,11 @@ var indexPage = new Vue({
 		isSlab: false,
 		isBold: false,
 		isItalic: false
+	},
+	methods:{
+		stressSample: function(st, stress){
+			return st.replace(new RegExp('[' + stress + ']', 'g'), '<b>$&</b>')
+		}
 	}
 });
-indexPage.snippets = indexPage.$children.map(function(e) { return e.name }).filter(function(x) { return !!x }).sort();
+indexPage.snippets = indexPage.$children.map(function (e) { return e.name }).filter(function (x) { return !!x }).sort();
