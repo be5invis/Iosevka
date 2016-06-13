@@ -85,6 +85,7 @@ The current avaliable styles are:
 * Styles for letter `g`:
   * `v-g-doublestorey` : Double-storey `g` (default).
   * `v-g-singlestorey` : Single-storey `g`.
+  * `v-g-opendoublestorey` : Open Single-storey `g`.
 * Styles for letter `0`:
   * `v-zero-slashed` : Slashed Zero `0` (default).
   * `v-zero-dotted` : Dotted Zero `0`.
@@ -102,6 +103,10 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.0**
+  - Added open double-storey `g` (assigned to `cv24`).
+  - Redesigned single-storey `a`.
+  - Reassigned the `ss**` styles. Now they are designed to simulate existing fonts.
 * **1.8.6**
   - Added Bulgarian and Macedonian Cyrillic variants
   - Added ligations about colons
