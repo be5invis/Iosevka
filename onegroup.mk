@@ -30,7 +30,7 @@ DISTDIR = dist/$(ARCPREFIX)$(ARCPREFIXB)
 $(DISTDIR) : dist
 	@- $(MKDIR) $@
 
-NODE_FDT = @node --expose-gc
+NODE_FDT = @node $(NODE_FDT_OPTIONS)
 NODE = node
 
 UPRIGHT = $(OBJDIR)/$(PREFIX)-thin.ttf $(OBJDIR)/$(PREFIX)-extralight.ttf $(OBJDIR)/$(PREFIX)-light.ttf $(OBJDIR)/$(PREFIX)-regular.ttf $(OBJDIR)/$(PREFIX)-medium.ttf $(OBJDIR)/$(PREFIX)-bold.ttf $(OBJDIR)/$(PREFIX)-heavy.ttf
