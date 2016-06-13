@@ -8,26 +8,9 @@ import './support/anchor' as Anchor
 import './support/monotonic-interpolate' as smoothreg
 import './support/fairify' as fairify
 
-import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet] from './support/utils'
-
-extern global
-define [suggestGC] : begin
-	if (global && global.gc) : global.gc
-	return nothing
-
-### File inclusion macro
-define-macro $$include : syntax-rules
-	{'$$include' {'.quote' file}} : begin
-		local path : require 'path'
-		local fs : require 'fs'
-		local f0 [[env.macros.get 'input-path']].1
-		local parse [require './syntax.js'].parse
-
-		local absolutePath : path.resolve [path.dirname f0] [formOf file]
-		local input : fs.readFileSync absolutePath 'utf-8'
-		local ast : parse input {.within {.file absolutePath .input input}}
-		return {'.syntactic-closure' ast env}
-	otherwise `nothing
+import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet suggestGC] from './support/utils'
+import [calculateMetrics setFontMetrics] from './meta/aesthetics'
+import [nameFont] from './meta/naming'
 
 ### Autoarg macro
 define [$NamedParameterPair$ l r] : begin
@@ -174,6 +157,7 @@ define [tagged tag component] : begin
 	set component.tag tag
 	return component
 
+# Main build procedure
 export as build : define [buildFont para recursive recursiveCodes] : begin
 	define variantSelector para.variantSelector
 	define font this
@@ -182,150 +166,28 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	define glyphs {.}
 	define unicodeGlyphs {}
 
-	define UPM 1000
-
 	# Progress indicator
 	define [progress status] : if [not recursive] : begin
 		if para.verbose : console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
 		#suggestGC
 		return nothing
-
-	# Key metrics
-	define WIDTH para.width
-	define SB para.sb
-	define CAP para.cap
-	define XH para.xheight
-	define DESCENDER : fallback para.descender (XH - CAP)
-	define CONTRAST : fallback para.contrast 1
-	# Key metrics for symbols
-	local parenMid : fallback para.parenMid (XH * 0.65)
-	local parenTop (parenMid + (CAP - XH) * 2.6)
-	local parenBot (parenMid - (CAP - XH) * 2.6)
-	local operTop : mix parenMid parenTop 0.8
-	local operBot : mix parenMid parenBot 0.8
-	local operMid parenMid
-
-	# Transform constructors
-	define [Italify angle shift] : begin
-		local slope [Math.tan ([fallback angle para.slantAngle] / 180 * Math.PI)]
-		return : new Transform 1 slope 0 1 [fallback shift : -slope * parenMid] 0
-	define [Upright angle shift] [Italify angle shift :.inverse]
-	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
-	define [Translate x y] : new Transform 1 0 0 1 x y
-	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
-
-	define globalTransform : Italify para.slantAngle
-	define TANSLANT   globalTransform.yx
-	define SINSLANT : Math.sin (para.slantAngle / 180 * Math.PI)
-	define COSSLANT : Math.cos (para.slantAngle / 180 * Math.PI)
-	define HVCONTRAST : CONTRAST * COSSLANT + SINSLANT * TANSLANT
-
-	# Orient parameters
-	define UPWARD    : (-HVCONTRAST) <> 0
-	define DOWNWARD  : HVCONTRAST <> 0
-	define RIGHTWARD : TANSLANT <> 1
-	define LEFTWARD  : (- TANSLANT) <> (-1)
-
-	# Style parameters
-	define O para.overshoot
-	define OX para.overshootx
-	define OXHOOK para.oxhook
-	define HOOK para.hook
-	define AHOOK para.ahook
-	define SHOOK para.shook
-	define RHOOK para.rhook
-	define JHOOK para.jhook
-	define FHOOK para.fhook
-	define HOOKX para.hookx
-	define SMOOTH para.smooth
-	define SMALLSMOOTH para.smallsmooth
-	define STROKE para.stroke
-	define DOTSIZE : fallback para.dotsize STROKE
-	define PERIODSIZE : fallback para.periodsize DOTSIZE
-	define BARPOS : fallback para.barpos 0.5
-	define GBARPOS : fallback para.gbarpos 0.5
-	define PBARPOS : fallback para.pbarpos 0.5
-	define EBARPOS : fallback para.ebarpos BARPOS
-	define OVERLAYPOS para.overlaypos
-	define FIVEBARPOS para.fivebarpos
-	define LONGJUT para.longjut
-	define JUT para.jut
-	define VJUT para.vjut
-	define ACCENT para.accent
-	define ACCENTX para.accentx
-
-	define CTHIN : fallback para.cthin 0.75
-	define CTHINB : fallback para.cthinb 0.5
-
-	define SLAB para.slab
-
-	define TAILADJX : WIDTH * 0.2
-	define TAILADJY : XH * 0.25
-	define LBALANCE : LONGJUT * 0.04
-	define IBALANCE : fallback para.ibalance (LONGJUT * 0.04)
-	define JBALANCE : fallback para.jbalance 0
-	define JBALANCE2 : fallback para.jbalance2 (STROKE * 0.25 + LBALANCE)
-	define TBALANCE : fallback para.tbalance JBALANCE
-	define TBALANCE2 : fallback para.tbalance2 TBALANCE
-	define RBALANCE : fallback para.rbalance (JBALANCE * 0.3)
-	define RBALANCE2 : fallback para.rbalance2 0
-	define FBALANCE : fallback para.fbalance 0
-	define ONEBALANCE : fallback para.onebalance 0
-
-	# derived metrics
-	define FULLWIDTH : if (para.spacing >= 2) 1000 WIDTH
-	define FULLWIDTH1 : if (para.spacing >= 1) 1000 WIDTH
-	define FULLWIDTH2 : if (para.spacing >= 2) 1000 WIDTH
-	define FULLWIDTH3 : if (para.spacing >= 3) 1000 WIDTH
-
-	define OXE : OX - O
-	define ESS : STROKE * [fallback para.essx CONTRAST]
-	define ESSQUESTION : STROKE * [fallback para.essxq CONTRAST]
-	define XO : XH - O
-	define CAPO : CAP - O
-	define HALFSTROKE : STROKE / 2
-	define RIGHTSB : WIDTH - SB
-	define FWRSB : FULLWIDTH - SB
-	define MIDDLE : WIDTH / 2
-	define FWMIDDLE : FULLWIDTH / 2
-	define CAPMIDDLE : CAP / 2
-	define CAP_SMOOTH : CAP - SMOOTH
-	define DOTRADIUS : DOTSIZE / 2
-	define PERIODRADIUS : PERIODSIZE / 2
-	define SIDEJUT : JUT - HALFSTROKE * HVCONTRAST
-
-	define SMOOTHA : SMOOTH - TANSLANT * para.smoothadjust
-	define SMOOTHB : SMOOTH + TANSLANT * para.smoothadjust
-	define SMALLSMOOTHA : SMALLSMOOTH - TANSLANT * para.smoothadjust
-	define SMALLSMOOTHB : SMALLSMOOTH + TANSLANT * para.smoothadjust
-
-	define CORRECTION_OMIDX : TANSLANT * [linreg 18 1.3 126 0.9 STROKE]
-	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
-
-	# Blackness parameters
-	# We will estimate blackness using lower-case 'e'
-	define WHITENESS : ((XH - STROKE * 3) * (RIGHTSB - SB) * (1 / 3)) / (XH * (RIGHTSB - SB))
-	define [adviceBlackness crowdedness] : Math.min STROKE ((RIGHTSB - SB) * (1 - WHITENESS) / (crowdedness * HVCONTRAST))
-	define MVERTSTROKE : adviceBlackness : fallback para.lllcrowdedness (3 + 1 / 3)
-	define OVERLAYSTROKE : adviceBlackness 3.75
-	define OPERATORSTROKE : adviceBlackness 3.2
-	define SHOULDERFINE : if para.shoulderfine (STROKE * para.shoulderfine) [adviceBlackness 10]
-
-	define SUPERNESS : fallback para.superness 2
-	define [superxy x] : Math.pow (1 - [Math.pow x SUPERNESS]) (1 / SUPERNESS)
-
-	define [adviceSSmooth y sign] : begin
-		local ss : y * 0.21 + STROKE * 0.22 * [clamp 1 2 : linreg 126 1 137 1.025 STROKE] + 0.035 * (RIGHTSB - SB)
-		return : ss + sign * TANSLANT * para.smoothadjust * (ss / SMALLSMOOTH)
-	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * TANSLANT * para.smoothadjust
-	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * HVCONTRAST * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * TANSLANT
+	
+	define metrics : calculateMetrics para
+	define [object 
+		UPM WIDTH SB CAP XH DESCENDER CONTRAST
+		parenMid parenTop parenBot operTop operBot operMid Italify Upright Scale Translate Rotate globalTransform
+		TANSLANT SINSLANT COSSLANT HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD
+		O OX OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE
+		BARPOS GBARPOS PBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
+		TAILADJX TAILADJY LBALANCE IBALANCE JBALANCE JBALANCE2 TBALANCE TBALANCE2 RBALANCE RBALANCE2
+		FBALANCE ONEBALANCE FULLWIDTH FULLWIDTH1 FULLWIDTH2 FULLWIDTH3 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB
+		MIDDLE FWMIDDLE CAPMIDDLE CAP_SMOOTH DOTRADIUS PERIODRADIUS SIDEJUT SMOOTHA SMOOTHB SMALLSMOOTHA SMALLSMOOTHB CORRECTION_OMIDX CORRECTION_OMIDS
+		WHITENESS adviceBlackness MVERTSTROKE OVERLAYSTROKE OPERATORSTROKE SHOULDERFINE SUPERNESS superxy
+		adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope] metrics
 
 	# Anchor parameters
-	define BASE Anchor.BASE
-	define MARK Anchor.MARK
-
-	define AS_BASE 'AS-BASE'
-	define ALSO_METRICS 'ALSO-METRICS'
+	define [object MARK BASE] Anchor
+	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
 	define markset : do
 		define [ta anchor] : return : new Anchor
@@ -432,73 +294,8 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	###### HERE WE GO!
 
 	### Metadata
-	# Font names
-	set para.family [para.family.trim]
-	set para.style : [para.style.trim] || "Regular"
-	set font.name {}
-	let : begin
-		define [nameFont nameid str] : begin
-			font.name.push : object # Mac Roman
-				platformID 1
-				encodingID 0
-				languageID 0
-				nameID nameid
-				nameString str
-			font.name.push : object # Windows Unicode English
-				platformID 3
-				encodingID 1
-				languageID 1033
-				nameID nameid
-				nameString str
-
-		nameFont 16 para.family # Preferred Family
-		nameFont 17 para.style  # Preferred Style
-		nameFont 21 para.family # WWS Preferred Family
-		nameFont 22 para.style  # WWS Preferred Style
-
-		set font.name.preferredFamily     para.family
-		set font.name.preferredSubFamily  para.style
-		if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
-			nameFont 1 para.family # Family
-			nameFont 2 para.style  # Style
-		: else
-			nameFont 1 : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
-			nameFont 2 : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
-		nameFont 3 "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
-		nameFont 5 para.version # Version
-		local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
-		nameFont 4 fontfullName # Full Name
-		nameFont 6 : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
-		
-		nameFont 0 para.copyright # Copyright
-		# nameFont 7 para.trademark # Trademark
-		nameFont 8 para.manufacturer # Manufacturer
-		nameFont 9 para.designer # Designer
-		nameFont 10 para.description # Description
-		nameFont 13 para.licence  # License
-
-		set font.name : font.name.sort : lambda [a b] : begin
-			if (a.platformID != b.platformID) : return : a.platformID - b.platformID
-			if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
-			if (a.languageID != b.languageID) : return : a.languageID - b.languageID
-			return : a.nameID - b.nameID
-
-	# Weight, width and slantness
-	set font.OS_2.usWeightClass     para.weight
-	set font.OS_2.panose.3          9 # Monospaced
-	set font.OS_2.panose.2          : 1 + para.weight / 100
-	set font.OS_2.fsSelection       : object
-		oblique        : not : not para.isOblique
-		bold           : not : not para.isBold
-		italic         : not : not (para.isItalic || para.isOblique)
-		regular        : not : not ([not para.isBold] && [not para.isItalic] && [not para.isOblique])
-		useTypoMetrics true
-	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
-	set font.OS_2.xAvgCharWidth     WIDTH
-	set font.post.isFixedPitch      true
-	set font.head.macStyle          : object
-		bold          : not : not para.isBold
-		italic        : not : not (para.isItalic || para.isOblique)
+	nameFont para metrics font
+	setFontMetrics para metrics font
 
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
