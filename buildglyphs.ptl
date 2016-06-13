@@ -11,6 +11,7 @@ import './support/fairify' as fairify
 import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet suggestGC] from './support/utils'
 import [calculateMetrics setFontMetrics] from './meta/aesthetics'
 import [nameFont] from './meta/naming'
+import './meta/features' as Features
 
 ### Autoarg macro
 define [$NamedParameterPair$ l r] : begin
@@ -20,8 +21,6 @@ define [$NamedParameterPair$ l r] : begin
 
 define-operator "--" 890 'right' : syntax-rules
 	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
-define-operator "~>" 880 'right' : syntax-rules
-	`(@l ~> @r) `{.left @l .right @r}
 
 define-macro params : syntax-rules
 	`[params @_pairs @body] : begin
@@ -366,9 +365,10 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	$$include 'glyphs/symbol-other.ptl'
 
 	# Autobuilds
-	set font.features {.}
 	$$include 'glyphs/autobuilds.ptl'
-	$$include 'glyphs/features.ptl'
+
+	if [not recursive] : begin
+		set {.GSUB font.GSUB .GPOS font.GPOS .GDEF font.GDEF} : Features.apply para glyphList
 
 	set font.glyfMap glyphs
 	return font

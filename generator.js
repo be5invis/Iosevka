@@ -25,7 +25,6 @@ var font = function () {
 	console.log('    Start building font ' + fontUniqueName);
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log('    ' + fontUniqueName + " Successfully built.");
-	font.features.sscompose = para.sscompose;
 	font.parameters = para;
 	font.glyf = font.glyf.sort(function(a, b){
 		var pri1 = a.cmpPriority || 0;
@@ -44,23 +43,6 @@ if (argv.charmap) (function () {
 			glyph.advanceWidth === 0 ? hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0 : 0
 		]
 	})), 'utf8')
-})();
-
-if (argv.feature) (function () {
-	console.log('    Writing feature file -> ' + argv.feature);
-	var featurefile = '\n\n';
-
-	// MG groups
-	for (var key in font.features.markGlyphs) {
-		featurefile += '@MG_' + key + '= [' + font.features.markGlyphs[key].join(' ') + '];\n'
-	}
-
-	featurefile += fs.readFileSync(__dirname + '/features/common.fea', 'utf-8');
-	featurefile += fs.readFileSync(__dirname + '/features/' + (font.parameters.isItalic ? 'italiconly.fea' : 'uprightonly.fea'), 'utf-8');
-	if (font.parameters.spacing > 0) {
-		featurefile += fs.readFileSync(__dirname + '/features/ligation.fea', 'utf-8');
-	}
-	fs.writeFileSync(argv.feature, featurefile, 'utf-8');
 })();
 
 /*
@@ -168,9 +150,6 @@ if (argv.meta) (function () {
 	if (argv.svg) {
 		font.glyf = null;
 		font.glyfMap = null;
-	}
-	if (argv.feature) {
-		font.features = null;
 	}
 	fs.writeFileSync(argv.meta, JSON.stringify(font));
 })();

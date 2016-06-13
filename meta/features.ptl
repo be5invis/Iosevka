@@ -1,8 +1,9 @@
-### Generate Features and remove double-width glyphs when necessary
-local markGlyphs {.all {} }
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
 
-# GPOS
-symbol-block 'GPOS' : if [not recursive] : begin
+export : define [apply para glyphList] : begin
+	local markGlyphs {.all {} }
+	# GPOS
 	local lookup_mark
 		.type 'gpos_mark_to_base'
 		.subtables {}
@@ -10,7 +11,7 @@ symbol-block 'GPOS' : if [not recursive] : begin
 		.type 'gpos_mark_to_mark'
 		.subtables {}
 	
-	set font.GPOS : object
+	local GPOS : object
 		languages
 			.DFLT_DFLT {.features {'mark0', 'mkmk0'}}
 			.latn_DFLT {.features {'mark0', 'mkmk0'}}
@@ -68,20 +69,18 @@ symbol-block 'GPOS' : if [not recursive] : begin
 	createMTSSubtable lookup_mkmk {'below'}
 	createMTSSubtable lookup_mkmk {'trailing' 'lf' 'topright' 'bottomright' 'overlay' 'slash'}
 
-# GDEF
-symbol-block 'GDEF' : if [not recursive] : begin
-	set font.GDEF {.glyphClassDef {.}}
+	# GDEF
+	local GDEF {.glyphClassDef {.}}
 	foreach glyph [items-of glyphList] : begin
-		set font.GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] 2 1
+		set GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] 2 1
 		if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]) : begin
 			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
 				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
 				markGlyphs.(key).push glyph.name
 				markGlyphs.all.push glyph.name
-				set font.GDEF.glyphClassDef.(glyph.name) 3
+				set GDEF.glyphClassDef.(glyph.name) 3
 
-# GSUB
-symbol-block 'GSUB' : if [not recursive] : begin
+	# GSUB
 	local commonList {}
 	local languages
 		.DFLT_DFLT {.features commonList}
@@ -274,15 +273,14 @@ symbol-block 'GSUB' : if [not recursive] : begin
 	set features.locl_bgr {'locl_bgr'}
 
 	# cvxx
-	foreach [name : items-of : Object.keys glyphs] : begin
-		if glyphs.(name).featureSelector : begin
-			local fs glyphs.(name).featureSelector
-			foreach [feature : items-of : Object.keys fs] : begin
-				if [not lookups.(feature)] : begin
-					set features.(feature) {feature}
-					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
-					commonList.push feature
-				set lookups.(feature).subtables.0.(name) fs.(feature)
+	foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
+		local fs glyph.featureSelector
+		foreach [feature : items-of : Object.keys fs] : begin
+			if [not lookups.(feature)] : begin
+				set features.(feature) {feature}
+				set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+				commonList.push feature
+			set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
 	# ssxx
 	local sscompose : if para.isItalic para.sscompose.italic para.sscompose.upright
 	foreach [name : items-of : Object.keys sscompose] : begin
@@ -293,4 +291,6 @@ symbol-block 'GSUB' : if [not recursive] : begin
 	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_BGR ' {.features [{'locl_bgr'}.concat commonList]}
 
-	set font.GSUB {.languages languages .features features .lookups lookups}
+	local GSUB {.languages languages .features features .lookups lookups}
+
+	return [object GSUB GPOS GDEF]
