@@ -13,143 +13,14 @@ import [calculateMetrics setFontMetrics] from './meta/aesthetics'
 import [nameFont] from './meta/naming'
 import './meta/features' as Features
 
-### Autoarg macro
+$$include 'meta/macros.ptl'
+
 define [$NamedParameterPair$ l r] : begin
 	set this.left l
 	set this.right r
 	return this
 
-define-operator "--" 890 'right' : syntax-rules
-	`(@l -- @r) [atom l] `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
-
-define-macro params : syntax-rules
-	`[params @_pairs @body] : begin
-		local ta : env.newt
-		local tb : env.newt
-		local t : env.newt
-		local ps `[begin
-			[local @ta : {}.slice.call arguments 0]
-			[local @tb {}]
-			[for [local @t 0] (@t < @ta.length) [inc @t] : if [not : @ta.(@t) <@ $NamedParameterPair$] : @tb.push @ta.(@t)]
-		]
-		local aps `[begin]
-		local dps `[begin]
-		local j 0
-		foreach [pf : items-of : formOf _pairs] : begin
-			local name
-			if [atom pf] : then
-				ps.push `[local @pf : fallback @pf (@tb).(@{".quote" j})]
-				set name pf
-			: else
-				ps.push `[local @(pf.0) : fallback @(pf.0) (@tb).(@{".quote" j}) @(pf.1)]
-				set name pf.0
-			aps.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name}) [set @name @t.right]]
-			if pf.2 : dps.push `[local @(pf.2) @name]
-			inc j
-		ps.push `[foreach [@t : items-of @ta] @aps]
-		ps.push dps
-		ps.push : formOf body
-		return : dirty ps
-
-### Point macro
-define-operator "<>" 800 "never" : begin
-	local tClass [definingEnv.newt 'class']
-	local m : syntax-rules
-		`(@x <> @y) `[new @tClass @x @y]
-
-	set coinit.initFn : lambda [m] : begin
-		set m.toPattern : lambda [form env wrapper] : match form
-			`(@x <> @y) : begin
-				local p1 [toPattern x env wrapper]
-				local p2 [toPattern y env wrapper]
-				object
-					whether : lambda [t] `(@t && @[p1.whether `(@t.x)] && @[p2.whether `(@t.y)])
-					assign : lambda [t locallyQ] : ex `[begin
-						@{".preserve" [p1.assign `(@t.x) locallyQ]}
-						@{".preserve" [p2.assign `(@t.y) locallyQ]}
-					] env
-
-	set coinit.injectForm `[define [@tClass x y] : begin \\
-		set this.x x
-		set this.y y
-		return nothing
-	]
-	return m
-
-# A symbol block defines a group of similar glyphs. They may expose some functions used in glyphs in other blocks.
-define-macro symbol-block : syntax-rules
-	`[symbol-block @name @::steps] : let [t : env.newt] : dirty `[begin [let : set @t : begin @::[steps.map formOf]] [progress @name] @t]
-
-### Necessary macros
-# A glyph construction is a function which "modifies" a glyph.
-define-macro glyph-construction : syntax-rules
-	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
-		local currentGlyph this
-		begin @::[steps.map formOf]
-		return nothing
-	]] env}
-# Remap Glyph's methods to macros in order to simplify writing
-define-macro set-width : syntax-rules
-	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.set-width @::args] env}
-define-macro start-from : syntax-rules
-	`[start-from @::args] {'.syntactic-closure' `[currentGlyph.start-from @::args] env}
-define-macro line-to : syntax-rules
-	`[line-to @::args] {'.syntactic-closure' `[currentGlyph.line-to @::args] env}
-define-macro curve-to : syntax-rules
-	`[curve-to @::args] {'.syntactic-closure' `[currentGlyph.curve-to @::args] env}
-define-macro cubic-to : syntax-rules
-	`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
-define-macro include : syntax-rules
-	`[include glyphs.(@name) @::args] : dirty `[includeGlyphPart currentGlyph glyphs @name @::args]
-	`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
-define-macro set-anchor : syntax-rules
-	`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
-define-macro apply-transform : syntax-rules
-	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
-define-macro reverse-last : syntax-rules
-	`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
-define-macro depends-on : syntax-rules
-	`[depends-on @::args] {'.syntactic-closure' `[currentGlyph.depends-on @::args] env}
-define-macro eject-contour : syntax-rules
-	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
-define-macro tag-contour : syntax-rules
-	`[tag-contour @::args] {'.syntactic-closure' `[currentGlyph.tag-contour @::args] env}
-define-macro retag-contour : syntax-rules
-	`[retag-contour @::args] {'.syntactic-closure' `[currentGlyph.retag-contour @::args] env}
-define-macro assign-unicode : syntax-rules
-	`[assign-unicode @code] {".syntactic-closure" `[begin \\
-		currentGlyph.assign-unicode @code
-		set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
-	] env}
-
-###### Canvas-based mechanism
 define [$donothing$] nothing
-define-macro sketch : syntax-rules
-	`[sketch @::steps] : begin
-		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
-		inc externEnv.$nWFGlyphs$
-		dirty `[[lambda [currentGlyph] [begin \\
-			if [not currentGlyph] : return nothing
-			if [glyphList.(glyphList.length - 1).name === @{".quote" (".WF" + externEnv.$nWFGlyphs$)}] : glyphList.pop
-			begin @::[steps.map formOf]
-			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
-			return currentGlyph
-		]] [create-glyph @{".quote" (".WF" + externEnv.$nWFGlyphs$)} $donothing$]]
-
-define-macro branch : syntax-rules
-	`[branch @::steps] : begin
-		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
-		inc externEnv.$nWFGlyphs$
-		dirty `[[lambda [currentGlyph] [begin \\
-			if [not currentGlyph] : return nothing
-			if [glyphList.(glyphList.length - 1).name === @{".quote" (".WF" + externEnv.$nWFGlyphs$)}] : glyphList.pop
-			begin @::[steps.map formOf]
-			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
-			return currentGlyph
-		]] [create-glyph @{".quote" (".WF" + externEnv.$nWFGlyphs$)} [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
-
-define-macro save : syntax-rules
-	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
 
 # contour tagging
 define [tagged tag component] : begin
@@ -172,17 +43,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		return nothing
 	
 	define metrics : calculateMetrics para
-	define [object 
-		UPM WIDTH SB CAP XH DESCENDER CONTRAST
-		parenMid parenTop parenBot operTop operBot operMid Italify Upright Scale Translate Rotate globalTransform
-		TANSLANT SINSLANT COSSLANT HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD
-		O OX OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE
-		BARPOS GBARPOS PBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
-		TAILADJX TAILADJY LBALANCE IBALANCE JBALANCE JBALANCE2 TBALANCE TBALANCE2 RBALANCE RBALANCE2
-		FBALANCE ONEBALANCE FULLWIDTH FULLWIDTH1 FULLWIDTH2 FULLWIDTH3 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB
-		MIDDLE FWMIDDLE CAPMIDDLE CAP_SMOOTH DOTRADIUS PERIODRADIUS SIDEJUT SMOOTHA SMOOTHB SMALLSMOOTHA SMALLSMOOTHB CORRECTION_OMIDX CORRECTION_OMIDS
-		WHITENESS adviceBlackness MVERTSTROKE OVERLAYSTROKE OPERATORSTROKE SHOULDERFINE SUPERNESS superxy
-		adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope] metrics
+	define [object globalTransform MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER] metrics
 
 	# Anchor parameters
 	define [object MARK BASE] Anchor
@@ -226,6 +87,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
 	local dependencyProfile {.}
 	local nTemp 0
+	define [newtemp] : set nTemp (nTemp + 1)
 	local nPending 0
 	local pickHash : if recursive
 		then : let [h {.}] : begin
@@ -260,7 +122,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			return glyphObject
 
 		`[@actions] : begin
-			local glyphName ('.temp-' + [set nTemp (nTemp + 1)])
+			local glyphName ('.temp-' + [newtemp])
 			if para.verbose : console.log glyphName
 			local glyphObject [new Glyph glyphName]
 			glyphObject.set-width WIDTH
@@ -284,38 +146,12 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 
 	### Spiro constructions
 	# Basic knots
-	local [object
-		g4 g2 corner flat curl close end straight
-		widths heading unimportant important
-		alsothru alsothruthem bezcontrols quadcontrols archv arcvh complexThru
-		dispiro spiro-outline] : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
+	define spirofns : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
 
 	###### HERE WE GO!
-
 	### Metadata
 	nameFont para metrics font
 	setFontMetrics para metrics font
-
-	# Metric metadata
-	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
-
-	let [asc : para.leading * CAP / (CAP - DESCENDER)] [desc : para.leading * DESCENDER / (CAP - DESCENDER)] : begin
-		local descenderPad : fallback para.descenderPad 0
-		set font.head.unitsPerEm        1000
-		set font.hhea.ascender          asc
-		set font.OS_2.usWinAscent       asc
-		set font.OS_2.sTypoAscender     asc
-
-		set font.hhea.descender         (DESCENDER - descenderPad)
-		set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad)
-		set font.OS_2.sTypoDescender    (desc - descenderPad)
-
-		set font.hhea.lineGap           (para.leading - asc + DESCENDER)
-		set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
-
-		set font.OS_2.sxHeight          XH
-		set font.OS_2.sCapHeight        CAP
-		set font.post.italicAngle       (0 - para.slantAngle)
 
 	# Necessary notdef, .null and nonmarkingreturn glyph
 	sketch # .notdef
@@ -344,28 +180,30 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		set-width WIDTH
 		include markset.e
 		save 'space' ' '
+	
+	define capture : object metrics $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged
 
 	### HERE WE GO
-	$$include 'glyphs/common-shapes.ptl'
-	$$include 'glyphs/overmarks.ptl'
+	set capture.commonShapes : [import './glyphs/common-shapes.js'].apply.call capture
+	set capture.overmarks : [import './glyphs/overmarks.js'].apply.call capture
 
 	# Unified letters
-	$$include 'glyphs/letters-unified-basic.ptl'
-	$$include 'glyphs/letters-unified-extended.ptl'
+	set capture.letterBasic : [import './glyphs/letters-unified-basic.js'].apply.call capture
+	set capture.letterExt : [import './glyphs/letters-unified-extended.js'].apply.call capture
 
 	# Numbers
-	$$include 'glyphs/numbers.ptl'
+	[import './glyphs/numbers.js'].apply.call capture
 
 	# Symbols
-	$$include 'glyphs/symbol-punctuation.ptl'
-	$$include 'glyphs/symbol-math.ptl'
-	$$include 'glyphs/symbol-letter.ptl'
-	$$include 'glyphs/symbol-geometric.ptl'
-	$$include 'glyphs/symbol-braille.ptl'
-	$$include 'glyphs/symbol-other.ptl'
-
+	[import './glyphs/symbol-punctuation.js'].apply.call capture
+	[import './glyphs/symbol-math.js'].apply.call capture
+	[import './glyphs/symbol-letter.js'].apply.call capture
+	set capture.geometricSymbols : [import './glyphs/symbol-geometric.js'].apply.call capture
+	[import './glyphs/symbol-braille.js'].apply.call capture
+	[import './glyphs/symbol-other.js'].apply.call capture
+	
 	# Autobuilds
-	$$include 'glyphs/autobuilds.ptl'
+	[import './glyphs/autobuilds.js'].apply.call capture
 
 	if [not recursive] : begin
 		set {.GSUB font.GSUB .GPOS font.GPOS .GDEF font.GDEF} : Features.apply para glyphList
