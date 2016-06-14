@@ -1,47 +1,66 @@
-export : define [nameFont para metrics font] : begin
+define COPYRIGHT             0
+define FAMILY                1
+define STYLE                 2
+define UNIQUE_NAME           3
+define FULL_NAME             4
+define VERSION               5
+define POSTSCRIPT            6
+define TRADEMARK             7
+define MANUFACTURER          8
+define DESIGNER              9
+define DESCRIPTION          10
+define LICENCE              13
+define PREFERRED_FAMILY     16
+define PREFERRED_STYLE      17
+define WWS_PREFERRED_FAMILY 21
+define WWS_PREFERRED_STYLE  22
+
+define [nameFont font nameid str] : begin
+	font.name.push : object # Mac Roman
+		platformID 1
+		encodingID 0
+		languageID 0
+		nameID nameid
+		nameString str
+	font.name.push : object # Windows Unicode English
+		platformID 3
+		encodingID 1
+		languageID 1033
+		nameID nameid
+		nameString str
+
+export : define [assignFontNames para metrics font] : begin
 	set font.name {}
 
 	set para.family [para.family.trim]
 	set para.style : [para.style.trim] || "Regular"
-	define [nameFont nameid str] : begin
-		font.name.push : object # Mac Roman
-			platformID 1
-			encodingID 0
-			languageID 0
-			nameID nameid
-			nameString str
-		font.name.push : object # Windows Unicode English
-			platformID 3
-			encodingID 1
-			languageID 1033
-			nameID nameid
-			nameString str
 
-	nameFont 16 para.family # Preferred Family
-	nameFont 17 para.style  # Preferred Style
-	nameFont 21 para.family # WWS Preferred Family
-	nameFont 22 para.style  # WWS Preferred Style
+	nameFont font PREFERRED_FAMILY para.family # Preferred Family
+	nameFont font PREFERRED_STYLE para.style  # Preferred Style
+	nameFont font WWS_PREFERRED_FAMILY para.family # WWS Preferred Family
+	nameFont font WWS_PREFERRED_STYLE para.style  # WWS Preferred Style
 
 	set font.name.preferredFamily     para.family
 	set font.name.preferredSubFamily  para.style
 	if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
-		nameFont 1 para.family # Family
-		nameFont 2 para.style  # Style
+		nameFont font FAMILY para.family # Family
+		nameFont font STYLE para.style  # Style
 	: else
-		nameFont 1 : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
-		nameFont 2 : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
-	nameFont 3 "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
-	nameFont 5 para.version # Version
+		nameFont font FAMILY : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
+		nameFont font STYLE : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
+	nameFont font UNIQUE_NAME "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
 	local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
-	nameFont 4 fontfullName # Full Name
-	nameFont 6 : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
+	nameFont font FULL_NAME fontfullName # Full Name
+	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
 	
-	nameFont 0 para.copyright # Copyright
-	# nameFont 7 para.trademark # Trademark
-	nameFont 8 para.manufacturer # Manufacturer
-	nameFont 9 para.designer # Designer
-	nameFont 10 para.description # Description
-	nameFont 13 para.licence  # License
+	nameFont font VERSION para.version # Version
+	
+	nameFont font COPYRIGHT para.copyright # Copyright
+	# nameFont font TRADEMARK para.trademark # Trademark
+	nameFont font MANUFACTURER para.manufacturer # Manufacturer
+	nameFont font DESIGNER para.designer # Designer
+	nameFont font DESCRIPTION para.description # Description
+	nameFont font LICENCE para.licence  # Licence
 
 	set font.name : font.name.sort : lambda [a b] : begin
 		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
