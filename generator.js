@@ -26,10 +26,10 @@ var font = function () {
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log('    ' + fontUniqueName + " Successfully built.");
 	font.parameters = para;
-	font.glyf = font.glyf.sort(function(a, b){
+	font.glyf = font.glyf.sort(function (a, b) {
 		var pri1 = a.cmpPriority || 0;
 		var pri2 = b.cmpPriority || 0;
-		return (pri2 !== pri1 ? pri2 - pri1 : a.contours.length !== b.contours.length ? a.contours.length - b.contours.length : (a.unicode && b.unicode && a.unicode[0] !== b.unicode[0]) ? a.unicode[0] - b.unicode[0] : (a.name < b.name ) ? (-1) : (a.name > b.name) ? 1 : 0);
+		return (pri2 !== pri1 ? pri2 - pri1 : a.contours.length !== b.contours.length ? a.contours.length - b.contours.length : (a.unicode && b.unicode && a.unicode[0] !== b.unicode[0]) ? a.unicode[0] - b.unicode[0] : (a.name < b.name) ? (-1) : (a.name > b.name) ? 1 : 0);
 	})
 	return font;
 } ();
@@ -42,54 +42,8 @@ if (argv.charmap) (function () {
 			glyph.unicode,
 			glyph.advanceWidth === 0 ? hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0 : 0
 		]
-	})), 'utf8')
+	})), 'utf8');
 })();
-
-/*
-// Currently unused
-if(argv.ttf) (function(){
-	function toBuffer(arrayBuffer) {
-		var length = arrayBuffer.byteLength;
-		var view = new DataView(arrayBuffer, 0, length);
-		var buffer = new Buffer(length);
-		for (var i = 0, l = length; i < l; i++) {
-			buffer[i] = view.getUint8(i, false);
-		}
-		return buffer;
-	};
-	var options = { preserveOS2Version: true };
-	var upm = (argv.upm - 0) || 1000;
-	var upmscale = upm / font.head.unitsPerEm;
-	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
-	for(var j = 0; j < font.glyf.length; j++){
-		var g = font.glyf[j];
-		g.advanceWidth *= upmscale;
-		if(g.contours) {
-			for(var k = 0; k < g.contours.length; k++) {
-				var contour = g.contours[k];
-				for(var p = 0; p < contour.length; p++) {
-					contour[p].y *= upmscale;
-					contour[p].x = contour[p].x * upmscale + contour[p].y * skew;
-				}
-			}
-			Glyph.prototype.cleanup.call(g, 1);
-		}
-	}
-	font.head.unitsPerEm        *= upmscale;
-	font.hhea.ascent            *= upmscale;
-	font['OS/2'].usWinAscent    *= upmscale;
-	font['OS/2'].sTypoAscender  *= upmscale;
-	font.hhea.descent           *= upmscale;
-	font['OS/2'].usWinDescent   *= upmscale;
-	font['OS/2'].sTypoDescender *= upmscale;
-	font.hhea.lineGap           *= upmscale;
-	font['OS/2'].sTypoLineGap   *= upmscale;
-	font['OS/2'].sxHeight       *= upmscale;
-	font['OS/2'].sCapHeight     *= upmscale;
-	
-	fs.writeFileSync(argv.ttf, toBuffer(new TTFWriter(options).write(font)));
-})();
-*/
 
 if (argv.svg) (function () {
 	console.log('    Writing outline as SVG -> ' + argv.svg);
@@ -118,7 +72,7 @@ if (argv.svg) (function () {
 	svg += '<font-face font-family="' + font.name.fontFamily
 		+ '" font-weight="' + font.OS_2.usWeightClass
 		+ '" font-stretch="normal" units-per-em="'
-		+ (1000 * scale) + '"/>'
+		+ (1000 * scale) + '"/>';
 
 	for (var j = 0; j < font.glyf.length; j++) {
 		var g = font.glyf[j];
@@ -141,8 +95,8 @@ if (argv.svg) (function () {
 			+ ' d="' + toSVGPath(g) + '" />';
 		svg += gd;
 	}
-	svg += '</font></defs></svg>'
-	fs.writeFileSync(argv.svg, svg, 'utf-8')
+	svg += '</font></defs></svg>';
+	fs.writeFileSync(argv.svg, svg, 'utf-8');
 })();
 
 if (argv.meta) (function () {

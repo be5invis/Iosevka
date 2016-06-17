@@ -18,8 +18,5 @@ process.stdin.on('end', function () {
 	ttf.cvt_ = glyfs.cvt_;
 	ttf.maxp = glyfs.maxp;
 	ttf.gasp = glyfs.gasp;
-	//ttf.GDEF = glyfs.GDEF;
-	//ttf.GSUB = glyfs.GSUB;
-	//ttf.GPOS = glyfs.GPOS;
 	process.stdout.write(JSON.stringify(ttf));
 });
