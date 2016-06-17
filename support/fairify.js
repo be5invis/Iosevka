@@ -295,8 +295,9 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 				}
 			}
 		}
-		for (var j = 0; j < splitpoints.length; j++) if (splitpoints[j].remove)
+		for (var j = 0; j < splitpoints.length; j++) if (splitpoints[j].remove) {
 			splitpoints[j].mark = false;
+		}
 	}
 	// Mark diagonals
 	var lastmark = splitpoints[0];
