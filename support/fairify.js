@@ -61,7 +61,7 @@ function rotate(z, angle) {
 function ASCEND(a, b) {
 	return a - b;
 }
-function fineAllExtremae(z1, z2, z3, z4, angles) {
+function fineAllExtrema(z1, z2, z3, z4, angles) {
 	var exs = [];
 	findInflections(z1, z2, z3, z4, exs);
 	for (var a = 0; a < angles; a += 1) {
@@ -103,8 +103,8 @@ function splitBefore(z1, z2, z3, z4, t) {
 function splitAfter(z1, z2, z3, z4, t) {
 	return [bez3(z1, z2, z3, z4, t), bez2(z2, z3, z4, t), mix(z3, z4, t), z4];
 }
-function splitAtExtremae(z1, z2, z3, z4, angles, splitpoints) {
-	var ts = fineAllExtremae(z1, z2, z3, z4, angles);
+function splitAtExtrema(z1, z2, z3, z4, angles, splitpoints) {
+	var ts = fineAllExtrema(z1, z2, z3, z4, angles);
 	if (ts[0] < SMALL) {
 		ts[0] = 0;
 	} else {
@@ -151,7 +151,7 @@ function splitSegment(z1, z2, z3, z4, angles, splitpoints) {
 			var t2 = ts[k];
 			var bef = splitBefore(z1, z2, z3, z4, t2);
 			var seg = splitAfter(bef[0], bef[1], bef[2], bef[3], t1 / t2);
-			splitAtExtremae(seg[0], seg[1], seg[2], seg[3], angles, splitpoints);
+			splitAtExtrema(seg[0], seg[1], seg[2], seg[3], angles, splitpoints);
 			if (t2 < 1 || inflectAtEnd)
 				splitpoints[splitpoints.length - 1].inflect = true;
 		}
@@ -235,7 +235,7 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 			j += 1;
 		}
 	}
-	// Mark corners and extremae
+	// Mark corners and extrema
 	for (var j = 1; j < splitpoints.length - 1; j++) {
 		if (splitpoints[j].onCurve && !splitpoints[j - 1].onCurve) {
 			splitpoints[j].prev = splitpoints[j - 1];
@@ -251,7 +251,7 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 				var angle0 = Math.atan2(z2.y - z0.y, z2.x - z0.x);
 				var angle = Math.abs(angle0 / Math.PI * 2 % 1);
 				if (Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL || angle <= SMALL || angle >= 1 - SMALL) {
-					z1.mark = true; // extrema
+					z1.mark = true; // extremum
 					z1.inflect = false;
 				} else {
 					var isInflection = false;
