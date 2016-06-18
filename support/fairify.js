@@ -280,10 +280,10 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 	for (var pass = 0; pass < 2; pass++) {
 		for (var j = 1; j < splitpoints.length - 1; j++) {
 			if (splitpoints[j].mark) {
-				for (var k = j - 1; k >= 0 && !splitpoints[k].mark; k--)
-					lastmark = splitpoints[k];
-				for (var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++)
-					nextmark = splitpoints[k];
+				for (var k = j - 1; k >= 0 && !splitpoints[k].mark; k--);
+				lastmark = splitpoints[k];
+				for (var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+				nextmark = splitpoints[k];
 			}
 			if (splitpoints[j].mark && splitpoints[j].asinflect) {
 				var z1 = splitpoints[j],
@@ -301,14 +301,14 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 	}
 	// Mark diagonals
 	var lastmark = splitpoints[0];
-	for (var k = 1; k < splitpoints.length && !splitpoints[k].mark; k++)
-		var nextmark = splitpoints[k];
+	for (var k = 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+	var nextmark = splitpoints[k];
 	var segments = estimateSegments(lastmark, nextmark);
 	for (var j = 1; j < splitpoints.length - 1; j++) {
 		if (splitpoints[j].mark) {
 			lastmark = splitpoints[j];
-			for (var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++)
-				nextmark = splitpoints[k];
+			for (var k = j + 1; k < splitpoints.length && !splitpoints[k].mark; k++);
+			nextmark = splitpoints[k];
 			segments = estimateSegments(lastmark, nextmark);
 		}
 		if (splitpoints[j].onCurve && !splitpoints[j].mark) {
@@ -327,23 +327,22 @@ function fairify(scurve, gizmo, denseQ, cleanMore) {
 	}
 	// Rebuild curve
 	for (var j = 0; j < splitpoints.length; j++) if (splitpoints[j].onCurve && !splitpoints[j].remove && splitpoints[j + 1] && !splitpoints[j + 1].onCurve) {
-		for (var k = j + 2; k < splitpoints.length && splitpoints[k].remove; k++)
-			if (k - j > 2) {
-				var zs = fitpts(splitpoints[j], splitpoints[j + 1], splitpoints[k], splitpoints[k + 1]);
-				if (zs) {
-					zs[0].onCurve = zs[1].onCurve = false;
-					zs[0].cubic = zs[1].cubic = true;
-					splitpoints[j + 1] = zs[0];
-					splitpoints[k] = zs[1];
-				}
+		for (var k = j + 2; k < splitpoints.length && splitpoints[k].remove; k++);
+		if (k - j > 2) {
+			var zs = fitpts(splitpoints[j], splitpoints[j + 1], splitpoints[k], splitpoints[k + 1]);
+			if (zs) {
+				zs[0].onCurve = zs[1].onCurve = false;
+				zs[0].cubic = zs[1].cubic = true;
+				splitpoints[j + 1] = zs[0];
+				splitpoints[k] = zs[1];
 			}
+		}
 		j = k;
 	}
 	var ans = [];
-	for (var j = 0; j < splitpoints.length; j++)
-		if (splitpoints[j] && !splitpoints[j].remove) {
-			ans.push(Transform.transformPoint(gizmo, splitpoints[j]));
-		}
+	for (var j = 0; j < splitpoints.length; j++)if (splitpoints[j] && !splitpoints[j].remove) {
+		ans.push(Transform.transformPoint(gizmo, splitpoints[j]));
+	}
 	return ans;
 }
 module.exports = fairify;
