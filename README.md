@@ -103,6 +103,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.1**
+  - Added /latinayin.
+  - Added more symbols.
 * **1.9.0**
   - Added open double-storey `g` (assigned to `cv24`).
   - Redesigned single-storey `a`.
