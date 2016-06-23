@@ -6,28 +6,21 @@ dist :
 	@- mkdir $@
 snapshot/assets :
 	@- mkdir $@
-	
+
 PATELC = node ./node_modules/patel/bin/patel-c
-SUPPORT_FILES_FROM_PTL = support/glyph.js support/spiroexpand.js support/spirokit.js parameters.js support/anchor.js support/point.js support/transform.js support/utils.js
-SUPPORT_FILES = $(SUPPORT_FILES_FROM_PTL) generator.js emptyfont.toml parameters.toml support/fairify.js
-GLYPH_SEGMENTS = glyphs/common-shapes.ptl glyphs/overmarks.ptl glyphs/letters-unified-basic.ptl glyphs/letters-unified-extended.ptl  glyphs/numbers.ptl glyphs/symbol-punctuation.ptl glyphs/symbol-math.ptl glyphs/symbol-geometric.ptl glyphs/symbol-other.ptl glyphs/symbol-braille.ptl glyphs/symbol-letter.ptl glyphs/autobuilds.ptl glyphs/features.ptl
-SCRIPTS = $(SUPPORT_FILES) buildglyphs.js
-SCRIPTS_FROM_aki = $(SUPPORT_FILES_FROM_PTL) buildglyphs.js
 
-buildglyphs.js : buildglyphs.ptl $(GLYPH_SEGMENTS)
-	$(PATELC) --strict $< -o $@
+GLYPH_SEGMENTS = glyphs/common-shapes.js glyphs/overmarks.js glyphs/letters-unified-basic.js glyphs/letters-unified-extended.js glyphs/numbers.js glyphs/symbol-punctuation.js glyphs/symbol-math.js glyphs/symbol-letter.js glyphs/symbol-geometric.js glyphs/symbol-other.js glyphs/symbol-braille.js glyphs/autobuilds.js buildglyphs.js
+SUPPORT_FILES_FROM_PTL = support/glyph.js support/spiroexpand.js support/spirokit.js parameters.js support/anchor.js support/point.js support/transform.js support/utils.js meta/aesthetics.js meta/naming.js meta/features.js
+SUPPORT_FILES_JS = generator.js emptyfont.toml parameters.toml support/fairify.js
+SUPPORT_FILES = $(SUPPORT_FILES_FROM_PTL) $(SUPPORT_FILES_JS)
+SCRIPTS = $(SUPPORT_FILES) $(GLYPH_SEGMENTS)
+SCRIPTS_FROM_PTL = $(SUPPORT_FILES_FROM_PTL) $(GLYPH_SEGMENTS)
 
-$(SUPPORT_FILES_FROM_PTL) :
+$(SUPPORT_FILES_FROM_PTL) : %.js : %.ptl meta/macros.ptl
 	$(PATELC) --optimize --strict $< -o $@
-support/anchor.js : support/anchor.ptl
-support/point.js : support/point.ptl
-support/transform.js : support/transform.ptl
-support/glyph.js : support/glyph.ptl
-support/spirokit.js : support/spirokit.ptl
-support/spiroexpand.js : support/spiroexpand.ptl
-support/utils.js : support/utils.ptl
-parameters.js : parameters.ptl
+$(GLYPH_SEGMENTS) : %.js : %.ptl meta/macros.ptl $(subst .js,.ptl,$(SUPPORT_FILES_FROM_PTL)) $(SUPPORT_FILES_JS)
+	$(PATELC) --optimize --strict $< -o $@
 
-cleanscripts : 
-	-@rm $(SCRIPTS_FROM_aki)
+cleanscripts :
+	-@rm $(SCRIPTS_FROM_PTL)
 scripts : $(SCRIPTS)

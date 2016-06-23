@@ -1,0 +1,169 @@
+### Autoarg macro
+define-operator "--" 890 'right' : syntax-rules
+	`(@l -- @r) [atom l] : dirty `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
+
+define-macro params : syntax-rules
+	`[params @_pairs @body] : begin
+		local ta : env.newt
+		local tb : env.newt
+		local t : env.newt
+		local ps `[begin
+			[local @ta : {}.slice.call arguments 0]
+			[local @tb {}]
+			[for [local @t 0] (@t < @ta.length) [inc @t] : if [not : @ta.(@t) <@ $NamedParameterPair$] : @tb.push @ta.(@t)]
+		]
+		local aps `[begin]
+		local dps `[begin]
+		local j 0
+		foreach [pf : items-of : formOf _pairs] : begin
+			local name
+			if [atom pf] : then
+				ps.push `[local @pf : fallback @pf (@tb).(@{".quote" j})]
+				set name pf
+			: else
+				ps.push `[local @(pf.0) : fallback @(pf.0) (@tb).(@{".quote" j}) @(pf.1)]
+				set name pf.0
+			aps.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name}) [set @name @t.right]]
+			if pf.2 : dps.push `[local @(pf.2) @name]
+			inc j
+		ps.push `[foreach [@t : items-of @ta] @aps]
+		ps.push dps
+		ps.push : formOf body
+		return : dirty ps
+
+### Point macro
+define-operator "<>" 800 "never" : begin
+	local tClass [definingEnv.newt 'class']
+	local m : syntax-rules
+		`(@x <> @y) `[new @tClass @x @y]
+
+	set coinit.initFn : lambda [m] : begin
+		set m.toPattern : lambda [form env wrapper] : match form
+			`(@x <> @y) : begin
+				local p1 [toPattern x env wrapper]
+				local p2 [toPattern y env wrapper]
+				object
+					whether : lambda [t] `(@t && @[p1.whether `(@t.x)] && @[p2.whether `(@t.y)])
+					assign : lambda [t locallyQ] : ex `[begin
+						@{".preserve" [p1.assign `(@t.x) locallyQ]}
+						@{".preserve" [p2.assign `(@t.y) locallyQ]}
+					] env
+
+	set coinit.injectForm `[define [@tClass x y] : begin \\
+		set this.x x
+		set this.y y
+		return nothing
+	]
+	return m
+
+### Necessary macros
+# A glyph construction is a function which "modifies" a glyph.
+define-macro glyph-construction : syntax-rules
+	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
+		local currentGlyph this
+		begin @::[steps.map formOf]
+		return nothing
+	]] env}
+# Remap Glyph's methods to macros in order to simplify writing
+define-macro set-width : syntax-rules
+	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.set-width @::args] env}
+define-macro start-from : syntax-rules
+	`[start-from @::args] {'.syntactic-closure' `[currentGlyph.start-from @::args] env}
+define-macro line-to : syntax-rules
+	`[line-to @::args] {'.syntactic-closure' `[currentGlyph.line-to @::args] env}
+define-macro curve-to : syntax-rules
+	`[curve-to @::args] {'.syntactic-closure' `[currentGlyph.curve-to @::args] env}
+define-macro cubic-to : syntax-rules
+	`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
+define-macro include : syntax-rules
+	`[include glyphs.(@name) @::args] : dirty `[includeGlyphPart currentGlyph glyphs @name @::args]
+	`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
+define-macro set-anchor : syntax-rules
+	`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
+define-macro apply-transform : syntax-rules
+	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
+define-macro reverse-last : syntax-rules
+	`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
+define-macro depends-on : syntax-rules
+	`[depends-on @::args] {'.syntactic-closure' `[currentGlyph.depends-on @::args] env}
+define-macro eject-contour : syntax-rules
+	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
+define-macro tag-contour : syntax-rules
+	`[tag-contour @::args] {'.syntactic-closure' `[currentGlyph.tag-contour @::args] env}
+define-macro retag-contour : syntax-rules
+	`[retag-contour @::args] {'.syntactic-closure' `[currentGlyph.retag-contour @::args] env}
+define-macro assign-unicode : syntax-rules
+	`[assign-unicode @code] {".syntactic-closure" `[begin \\
+		currentGlyph.assign-unicode @code
+		set unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
+	] env}
+
+###### Canvas-based mechanism
+define-macro sketch : syntax-rules
+	`[sketch @::steps] : begin
+		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
+		inc externEnv.$nWFGlyphs$
+		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
+		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
+		dirty `[[lambda [currentGlyph] [begin \\
+			if [not currentGlyph] : return nothing
+			if [glyphList.(glyphList.length - 1).name === @tcn] : glyphList.pop
+			begin @::[steps.map formOf]
+			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
+			return currentGlyph
+		]] [create-glyph @tcn $donothing$]]
+
+define-macro branch : syntax-rules
+	`[branch @::steps] : begin
+		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
+		inc externEnv.$nWFGlyphs$
+		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
+		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
+		dirty `[[lambda [currentGlyph] [begin \\
+			if [not currentGlyph] : return nothing
+			if [glyphList.(glyphList.length - 1).name === @tcn] : glyphList.pop
+			begin @::[steps.map formOf]
+			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
+			return currentGlyph
+		]] [create-glyph @tcn [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
+
+define-macro save : syntax-rules
+	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
+
+define-macro glyph-module-entry : syntax-rules
+	`[glyph-module-entry @::_opts] : begin
+		define optionalImports : object
+			commonShapes `[define [object select-variant italic-variant alias composite into-unicode turned dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend WaveShape CyrDescender refair Fork Miniature Thinner Widen FlipAround] $capture.commonShapes]
+
+			overmarks `[define [object markExtend markHalfStroke markStress markFine markMiddle markDotsRadius aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot commaOvershoot2 commaAboveRadius] $capture.overmarks]
+
+			letterBasic `[define [object ISerifShape IotaShape LShape Belt VShape VHooktopShape WShape WHooktopShape YShape yBaseKnots SmallYShape KShape BShape ItalicCyrveShape PShape RShape CyrYaShape CShape GShape NShape UShape LatinUpsilon2Shape MShape SmallMShape HShape FShape fovershoot LongSShape EShape SmallEShape RevSmallEShape TShape SmallTShape] $capture.letterBasic]
+
+			letterExt `[define [object LambdaShape SigmaShape PiShape] $capture.letterExt]
+			geometricSymbols `[define [object ArrowShape] $capture.geometricSymbols]
+
+		local opts : _opts.map formOf
+		#console.log opts
+		local optionalImportStatements `[begin]
+		for [local j 0] (j < opts.length) [inc j] : if optionalImports.(opts.(j)) : optionalImportStatements.push optionalImports.(opts.(j))
+		dirty `[begin \\
+			define $capture this
+			define [object metrics $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ spirofns markset  MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet] $capture
+			define [object 
+				UPM WIDTH SB CAP XH DESCENDER CONTRAST
+				parenMid parenTop parenBot operTop operBot operMid Italify Upright Scale Translate Rotate globalTransform
+				TANSLANT SINSLANT COSSLANT HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD
+				O OX OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE
+				BARPOS GBARPOS PBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
+				TAILADJX TAILADJY LBALANCE IBALANCE JBALANCE JBALANCE2 TBALANCE TBALANCE2 RBALANCE RBALANCE2
+				FBALANCE ONEBALANCE FULLWIDTH FULLWIDTH1 FULLWIDTH2 FULLWIDTH3 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB
+				MIDDLE FWMIDDLE CAPMIDDLE CAP_SMOOTH DOTRADIUS PERIODRADIUS SIDEJUT SMOOTHA SMOOTHB SMALLSMOOTHA SMALLSMOOTHB CORRECTION_OMIDX CORRECTION_OMIDS
+				WHITENESS adviceBlackness MVERTSTROKE OVERLAYSTROKE OPERATORSTROKE SHOULDERFINE SUPERNESS superxy
+				adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope] metrics
+			define [object
+				g4 g2 corner flat curl close end straight
+				widths heading unimportant important
+				alsothru alsothruthem bezcontrols quadcontrols archv arcvh complexThru
+				dispiro spiro-outline] spirofns
+			* @optionalImportStatements
+		]

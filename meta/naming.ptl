@@ -1,0 +1,85 @@
+define COPYRIGHT             0
+define FAMILY                1
+define STYLE                 2
+define UNIQUE_NAME           3
+define FULL_NAME             4
+define VERSION               5
+define POSTSCRIPT            6
+define TRADEMARK             7
+define MANUFACTURER          8
+define DESIGNER              9
+define DESCRIPTION          10
+define LICENCE              13
+define PREFERRED_FAMILY     16
+define PREFERRED_STYLE      17
+define WWS_PREFERRED_FAMILY 21
+define WWS_PREFERRED_STYLE  22
+
+define [nameFont font nameid str] : begin
+	font.name.push : object # Mac Roman
+		platformID 1
+		encodingID 0
+		languageID 0
+		nameID nameid
+		nameString str
+	font.name.push : object # Windows Unicode English
+		platformID 3
+		encodingID 1
+		languageID 1033
+		nameID nameid
+		nameString str
+
+export : define [assignFontNames para metrics font] : begin
+	set font.name {}
+
+	set para.family [para.family.trim]
+	set para.style : [para.style.trim] || "Regular"
+
+	nameFont font PREFERRED_FAMILY para.family # Preferred Family
+	nameFont font PREFERRED_STYLE para.style  # Preferred Style
+	nameFont font WWS_PREFERRED_FAMILY para.family # WWS Preferred Family
+	nameFont font WWS_PREFERRED_STYLE para.style  # WWS Preferred Style
+
+	set font.name.preferredFamily     para.family
+	set font.name.preferredSubFamily  para.style
+	if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
+		nameFont font FAMILY para.family # Family
+		nameFont font STYLE para.style  # Style
+	: else
+		nameFont font FAMILY : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
+		nameFont font STYLE : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
+	nameFont font UNIQUE_NAME "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
+	local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
+	nameFont font FULL_NAME fontfullName # Full Name
+	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
+	
+	nameFont font VERSION para.version # Version
+	
+	nameFont font COPYRIGHT para.copyright # Copyright
+	# nameFont font TRADEMARK para.trademark # Trademark
+	nameFont font MANUFACTURER para.manufacturer # Manufacturer
+	nameFont font DESIGNER para.designer # Designer
+	nameFont font DESCRIPTION para.description # Description
+	nameFont font LICENCE para.licence  # Licence
+
+	set font.name : font.name.sort : lambda [a b] : begin
+		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
+		if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
+		if (a.languageID != b.languageID) : return : a.languageID - b.languageID
+		return : a.nameID - b.nameID
+
+	# Weight, width and slantness
+	set font.OS_2.usWeightClass     para.weight
+	set font.OS_2.panose.3          9 # Monospaced
+	set font.OS_2.panose.2          : 1 + para.weight / 100
+	set font.OS_2.fsSelection       : object
+		oblique        : not : not para.isOblique
+		bold           : not : not para.isBold
+		italic         : not : not (para.isItalic || para.isOblique)
+		regular        : not : not ([not para.isBold] && [not para.isItalic] && [not para.isOblique])
+		useTypoMetrics true
+	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
+	set font.post.isFixedPitch      true
+	set font.head.macStyle          : object
+		bold          : not : not para.isBold
+		italic        : not : not (para.isItalic || para.isOblique)

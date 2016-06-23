@@ -1,29 +1,33 @@
+$$include '../meta/macros.ptl'
 
-### Combining marks
+import [mix linreg clamp fallback] from '../support/utils'
 
-local markExtend (ACCENTX * 0.5)
-local markHalfStroke : 0.5 * [adviceBlackness 3.375]
-local markStress : markHalfStroke * 1.1
-local markFine : markHalfStroke * 0.9
+export : define [apply] : begin
+	glyph-module-entry commonShapes
 
-local markMiddle (-MIDDLE)
-local markDotsRadius : DOTRADIUS * [Math.min 1 (markStress / HALFSTROKE)]
+	### Combining marks
+	local markExtend (ACCENTX * 0.5)
+	local markHalfStroke : 0.5 * [adviceBlackness 3.375]
+	local markStress : markHalfStroke * 1.1
+	local markFine : markHalfStroke * 0.9
 
-local aboveMarkTop (XH + ACCENT * 1.38)
-local aboveMarkBot (XH + ACCENT * 0.35)
-local aboveMarkMid [mix aboveMarkBot aboveMarkTop 0.5]
+	local markMiddle (-MIDDLE)
+	local markDotsRadius : DOTRADIUS * [Math.min 1 (markStress / HALFSTROKE)]
 
-local belowMarkBot (0 - ACCENT * 1.38)
-local belowMarkTop (0 - ACCENT * 0.35)
+	local aboveMarkTop (XH + ACCENT * 1.38)
+	local aboveMarkBot (XH + ACCENT * 0.35)
+	local aboveMarkMid [mix aboveMarkBot aboveMarkTop 0.5]
 
-local commaOvershoot  : O * [linreg 16 0 90 (-1) (markHalfStroke * 2)]
-local commaOvershoot2 : O * [linreg 16 1 90 (-1) (markHalfStroke * 2)]
-local commaAboveRadius : 0.85 * DOTRADIUS * markHalfStroke / HALFSTROKE
+	local belowMarkBot (0 - ACCENT * 1.38)
+	local belowMarkTop (0 - ACCENT * 0.35)
 
-local asciiMarkZoom : (RIGHTSB - SB) / (markExtend * 3)
+	local commaOvershoot  : O * [linreg 16 0 90 (-1) (markHalfStroke * 2)]
+	local commaOvershoot2 : O * [linreg 16 1 90 (-1) (markHalfStroke * 2)]
+	local commaAboveRadius : 0.85 * DOTRADIUS * markHalfStroke / HALFSTROKE
 
-### Above marks
-define {TildeShape} : symbol-block 'Above marks'
+	local asciiMarkZoom : (RIGHTSB - SB) / (markExtend * 3)
+
+	### Above marks
 	sketch # dotAbove
 		set-width 0
 		currentGlyph.shortName = 'dot'
@@ -569,12 +573,8 @@ define {TildeShape} : symbol-block 'Above marks'
 		
 		include : FlipAround markMiddle [mix top bot 0.5]
 		save 'greaterAbove' 0x350
-	
-	list
-		* TildeShape
 
-### Below marks
-symbol-block 'Below marks'
+	### Below marks
 	sketch # cedillaBelow
 		set-width 0
 		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
@@ -1032,8 +1032,7 @@ symbol-block 'Below marks'
 		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
 		save 'lrArrowBelow' 0x34E
 
-# horn and angle marks
-symbol-block 'Corner marks'
+	# horn and angle marks
 	sketch # horn
 		set-width 0
 		local radius : markHalfStroke * 1.5
@@ -1098,8 +1097,7 @@ symbol-block 'Corner marks'
 		set currentGlyph.cmpPriority (-2)
 		save 'ltailBR' 0x321
 
-# Overlay Marks
-symbol-block 'Overlay Marks'
+	# Overlay Marks
 	sketch # tildeOver
 		set-width 0
 		set-anchor 'overlay' MARK markMiddle (XH / 2) markMiddle (XH / 2)
@@ -1150,8 +1148,6 @@ symbol-block 'Overlay Marks'
 			curl (RIGHTSB + O * 3 - fine - WIDTH) (XH * 0.5 + CAP * 0.6)
 		save 'longSlashOver' 0x338
 
-# Double-character arcs
-symbol-block 'Tie marks'
 	local tieLeft [mix 0 markMiddle 1.25]
 	local tieRight (-tieLeft)
 	sketch # tieAbove
@@ -1228,7 +1224,6 @@ symbol-block 'Tie marks'
 			
 		save 'tildeTieAbove' 0x360
 
-symbol-block 'Greek Polytonic Marks'
 	define [GreekLRDoubleMark id unicode leftGlyph rightGlyph] : begin
 		sketch # Combining double mark
 			set-width 0
@@ -1295,3 +1290,8 @@ symbol-block 'Greek Polytonic Marks'
 		include glyphs.space AS_BASE
 		include glyphs.dasiaperispomeni
 		save 'spaced_dasiaperispomeni' 0x1FDF
+	
+	return [object markExtend markHalfStroke markStress markFine
+		markMiddle markDotsRadius aboveMarkTop aboveMarkBot
+		aboveMarkMid belowMarkBot belowMarkTop commaOvershoot
+		commaOvershoot2 commaAboveRadius]
