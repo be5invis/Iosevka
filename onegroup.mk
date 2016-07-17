@@ -110,9 +110,8 @@ $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
 	@$(HINT) $@.a.ttf $@
 	@-rm $@.a.ttf
 # Pass 2 : add metadata
-# IDKY, but converting into TTX and convert back dramatically reduces the file size
 $(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
-	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -o $@ --ignore-glyph-order --keep-average-char-width --dummy-dsig --short-post $(HINT_SUFFIX)
+	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -s -O3 -o $@ --keep-average-char-width $(HINT_SUFFIX)
 
 $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
 	@cp $< $@
