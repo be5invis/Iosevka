@@ -5,14 +5,16 @@ import sys
 
 source = sys.argv[1]
 font = fontforge.open(source)
-# Replace accented characters into references
-font.selection.select(("ranges", None), ".notdef", "nonmarkingreturn")
-font.replaceWithReference()
 
-font.selection.select("braille1", "braille13", "braille12", "braille17", "braille123", "braille127", "braille137", "braille1237")
-for i in font.selection:
-	glyph = font[i]
-	glyph.unlinkRef()
+if len(sys.argv) < 5 or sys.argv[4] != "true":
+	# Replace accented characters into references
+	font.selection.select(("ranges", None), ".notdef", "nonmarkingreturn")
+	font.replaceWithReference()
+
+	font.selection.select("braille1", "braille13", "braille12", "braille17", "braille123", "braille127", "braille137", "braille1237")
+	for i in font.selection:
+		glyph = font[i]
+		glyph.unlinkRef()
 
 # Remove overlapped area
 font.selection.all()

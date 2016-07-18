@@ -12,6 +12,12 @@ else
 HINT = ttfautohint --increase-x-height=0
 endif
 
+ifdef DONTREF
+_DONTREF = true
+else
+_DONTREF = 
+endif
+
 # Change this when an error reports
 # On windows, maybe `2> NUL`.
 
@@ -106,7 +112,7 @@ $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 
 # Pass 1 : Outline cleanup and merge features
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
-	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(FAST) $(SUPPRESS_ERRORS)
+	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(_DONTREF) $(SUPPRESS_ERRORS)
 	@$(HINT) $@.a.ttf $@
 	@-rm $@.a.ttf
 # Pass 2 : add metadata
