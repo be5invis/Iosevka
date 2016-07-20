@@ -61,7 +61,7 @@ if (argv.svg) (function () {
 		}
 		return buf;
 	}
-	var svg = '<?xml version="1.0" standalone="no"?>'
+	var svg = '<?xml version="1.0" encoding="utf-8"?>'
 		+ '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >'
 		+ '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
 		+ '<defs><font id="' + font.name.postScriptName + '">';
@@ -92,7 +92,7 @@ if (argv.svg) (function () {
 			+ ' glyph-name="' + g.name
 			+ '" horiz-adv-x="' + g.advanceWidth + '" '
 			+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : '')
-			+ ' d="' + toSVGPath(g) + '" />';
+			+ ' d="' + toSVGPath(g) + '" />\n';
 		svg += gd;
 	}
 	svg += '</font></defs></svg>';
