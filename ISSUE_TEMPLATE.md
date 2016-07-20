@@ -9,6 +9,7 @@ If you have problem when building Iosevka, please provide these informations:
 * Your results of `npm list`
 * Your _otfcc_ version:
 * Your FontForge version:
+* Your `parameters.toml`:
 
 ---
 
