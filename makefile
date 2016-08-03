@@ -72,7 +72,6 @@ PARAM = SUFFIX='$(SUFFIX)' VERSION='$(VERSION)'
 endif
 
 export VERSION
-export FAST
 export VARNAME
 export STYLE_COMMON
 export STYLE_UPRIGHT
@@ -81,6 +80,7 @@ export VERSION
 export ARCPREFIX
 export NOCHARMAP
 export NOLIG
+export DONTREF
 export DONTHINT
 
 ### Sometimes make will freak out and report ACCESS VIOLATION for me... so i have to add some repeation

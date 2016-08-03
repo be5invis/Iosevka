@@ -74,27 +74,28 @@ function fineAllExtrema(z1, z2, z3, z4, angles) {
 	return exs.sort(ASCEND);
 }
 function mix(z1, z2, t) {
-	return {
-		x: (1 - t) * z1.x + t * z2.x,
-		y: (1 - t) * z1.y + t * z2.y
-	};
+	if (t <= 0) return z1;
+	if (t >= 1) return z2;
+	var x = (1 - t) * z1.x + t * z2.x, y = (1 - t) * z1.y + t * z2.y
+	return { x: x, y: y };
 }
 function bez2(z1, z2, z3, t) {
+	if (t <= 0) return z1;
+	if (t >= 1) return z3;
+	var c1 = (1 - t) * (1 - t), c2 = 2 * (1 - t) * t, c3 = t * t;
 	return {
-		x: (1 - t) * (1 - t) * z1.x + 2 * (1 - t) * t * z2.x + t * t * z3.x,
-		y: (1 - t) * (1 - t) * z1.y + 2 * (1 - t) * t * z2.y + t * t * z3.y
+		x: c1 * z1.x + c2 * z2.x + c3 * z3.x,
+		y: c1 * z1.y + c2 * z2.y + c3 * z3.y
 	};
 }
 function bez3(z1, z2, z3, z4, t) {
+	if (t <= 0) return z1;
+	if (t >= 1) return z4;
+	var c1 = (1 - t) * (1 - t) * (1 - t), c2 = 3 * t * (1 - t) * (1 - t),
+		c3 = 3 * t * t * (1 - t), c4 = t * t * t;
 	return {
-		x: (1 - t) * (1 - t) * (1 - t) * z1.x
-		+ 3 * t * (1 - t) * (1 - t) * z2.x
-		+ 3 * t * t * (1 - t) * z3.x
-		+ t * t * t * z4.x,
-		y: (1 - t) * (1 - t) * (1 - t) * z1.y
-		+ 3 * t * (1 - t) * (1 - t) * z2.y
-		+ 3 * t * t * (1 - t) * z3.y
-		+ t * t * t * z4.y
+		x: c1 * z1.x + c2 * z2.x + c3 * z3.x + c4 * z4.x,
+		y: c1 * z1.y + c2 * z2.y + c3 * z3.y + c4 * z4.y
 	};
 }
 function splitBefore(z1, z2, z3, z4, t) {

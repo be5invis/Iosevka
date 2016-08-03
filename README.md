@@ -38,10 +38,13 @@ Iosevka’s default ligation set is assigned to `calt` feature, though not all o
 
 To build Iosevka you should:
 
-1. Ensure that [`node`](http://nodejs.org) (≥ 5.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.1.6) and `make` are runnable in your terminal.
+1. Ensure that [`node`](http://nodejs.org) (≥ 6.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.2.3) and `make` are runnable in your terminal.
    - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
-2. Install necessary libs by `npm install`.
+2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make`.
+   - Use `make DONTHINT=1` to disable hinting.
+   - Use `make DONTREF=1` to turn off reference-ify (will increase file size but provide better compatibility).
+
 
 You will find TTFs in the `dist/` directory.
 
@@ -86,6 +89,9 @@ The current avaliable styles are:
   * `v-g-doublestorey` : Double-storey `g` (default).
   * `v-g-singlestorey` : Single-storey `g`.
   * `v-g-opendoublestorey` : Open Single-storey `g`.
+* Styles for letter `m`:
+  * `v-m-longleg` : `m` with long middle leg (default).
+  * `v-m-shortleg` : `m` with shorter middle leg.
 * Styles for letter `0`:
   * `v-zero-slashed` : Slashed Zero `0` (default).
   * `v-zero-dotted` : Dotted Zero `0`.
@@ -103,6 +109,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.2**
+  - Added short-legged `m` (assigned to `cv26`).
 * **1.9.1**
   - Added /latinayin.
   - Added more symbols.
