@@ -89,6 +89,9 @@ The current avaliable styles are:
   * `v-g-doublestorey` : Double-storey `g` (default).
   * `v-g-singlestorey` : Single-storey `g`.
   * `v-g-opendoublestorey` : Open Single-storey `g`.
+* Styles for letter `m`:
+  * `v-m-longleg` : `m` with long middle leg (default).
+  * `v-m-shortleg` : `m` with shorter middle leg.
 * Styles for letter `0`:
   * `v-zero-slashed` : Slashed Zero `0` (default).
   * `v-zero-dotted` : Dotted Zero `0`.
@@ -106,6 +109,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.2**
+  - Added short-legged `m` (assigned to `cv26`).
 * **1.9.1**
   - Added /latinayin.
   - Added more symbols.
