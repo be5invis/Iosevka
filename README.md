@@ -109,6 +109,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.3**
+  - Minor symbol additions.
 * **1.9.2**
   - Added short-legged `m` (assigned to `cv26`).
 * **1.9.1**
