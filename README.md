@@ -109,6 +109,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.4**
+  - Fixed a bug about stylized `l`.
 * **1.9.3**
   - Minor symbol additions.
 * **1.9.2**
