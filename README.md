@@ -77,6 +77,8 @@ The current avaliable styles are:
   * `v-l-zshaped` : Z-shaped `l`.
   * `v-l-serifed` : Serifed `l` (default for upright and oblique).
   * `v-l-italic` : Italic `l` (default for italic).
+  * `v-l-tailed` : `l` with a curved tail.
+  * `v-l-hookybottom` : `l` with a straight tail.
 * Styles for letter `i`:
   * `v-i-hooky` : Hooky `i`.
   * `v-i-zshaped` : Z-shaped `i`.
@@ -109,6 +111,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.4**
+  - Add two styles of `l`.
 * **1.9.3**
   - Minor symbol additions.
 * **1.9.2**
