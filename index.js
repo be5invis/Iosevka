@@ -42,8 +42,8 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.9.3",
-		codename: "Ingrid-3",
+		version: "1.9.4",
+		codename: "Ingrid-4",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -98,7 +98,9 @@ var indexPage = new Vue({
 					{tag:'cv23', sample:'¶'},
 					{tag:'cv24', sample:'g'},
 					{tag:'cv25', sample:'m'},
-					{tag:'cv26', sample:'m'}
+					{tag:'cv26', sample:'m'},
+					{tag:'cv27', sample:'l'},
+					{tag:'cv28', sample:'l'}
 				]
 			}
 		],
