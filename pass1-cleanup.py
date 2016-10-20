@@ -25,6 +25,11 @@ for i in font:
 		glyph.unlinkRef()
 		glyph.removeOverlap()
 
+for u in range(0x20, 0x7F):
+	font.selection.select(("unicode", None), u)
+	for g in font.selection:
+		font[g].unlinkRef()
+
 font.selection.all()
 font.simplify(0.05, ("smoothcurves", "choosehv"), 0.1)
 
