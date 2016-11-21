@@ -66,7 +66,7 @@ Iosevka comes with several visual styles, however they are inactive using the de
 
 * `STYLE_COMMON` for both uprights and italics,
 * `STYLE_UPRIGHT` for upright and oblique, and
-* `STYLE_ITALICS` for itaics only.
+* `STYLE_ITALIC` for itaics only.
 
 You can add arbitary styles for these variables, for example, `make STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'` to create a variant with Z-shaped letter `l` and `i` for uprights.
 
