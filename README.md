@@ -111,6 +111,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.6**
+  - Make the font conformal with MS FontVal.
+  - Make backslash less slant.
 * **1.9.5**
   - Fixed the bug that FireFox reject to display.
 * **1.9.4**
