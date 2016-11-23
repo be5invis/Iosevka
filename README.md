@@ -1,4 +1,4 @@
-# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpe0v.com1.z0.glb.clouddn.com/aeqr9bewtqtvpkpl18.png)
+# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpdnl.dl1.z0.glb.clouddn.com/T1v4huXnleXXXXXXXX.png)
 
 Coders' typeface, built from code. //[→ Inziu Iosevka for Chinese and Japanese.](http://be5invis.github.io/Iosevka/inziu.html)
 
@@ -66,7 +66,7 @@ Iosevka comes with several visual styles, however they are inactive using the de
 
 * `STYLE_COMMON` for both uprights and italics,
 * `STYLE_UPRIGHT` for upright and oblique, and
-* `STYLE_ITALICS` for itaics only.
+* `STYLE_ITALIC` for itaics only.
 
 You can add arbitary styles for these variables, for example, `make STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'` to create a variant with Z-shaped letter `l` and `i` for uprights.
 
@@ -111,6 +111,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.9.6**
+  - Make the font conformal with MS FontVal.
+  - Make backslash less slant.
 * **1.9.5**
   - Fixed the bug that FireFox reject to display.
 * **1.9.4**
