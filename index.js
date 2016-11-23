@@ -42,8 +42,8 @@ var CodeSnippet = Vue.component('snippet', {
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.9.5",
-		codename: "Ingrid-5",
+		version: "1.9.6",
+		codename: "Ingrid-6",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
