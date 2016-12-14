@@ -111,6 +111,10 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.10.0**
+  - Added `cv29` and `cv30` for `^`.
+  - Added two new `@` glyphs, assigned to `cv32` and `cv33`, while the old `@` is assigned to `cv31`.
+  - Made `S` and `$` more distinctive.
 * **1.9.6**
   - Make the font conformal with MS FontVal.
   - Make backslash less slant.
