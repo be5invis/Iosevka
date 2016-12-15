@@ -98,13 +98,19 @@ The current avaliable styles are:
   * `v-zero-slashed` : Slashed Zero `0` (default).
   * `v-zero-dotted` : Dotted Zero `0`.
   * `v-zero-unslashed` : O-like `0`.
-* Styles for ASCII tilde (`~`), asterisk (`*`) amd paragaraph(`¶`):
+* Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), and ASCII Caret (^):
   * `v-tilde-high` : Higher tilde `~`.
   * `v-tilde-low` : Lower tilde `~` (default).
   * `v-asterisk-high` : Higher asterisk `*` (default).
   * `v-asterisk-low` : Lower asterisk `*`.
   * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
   * `v-paragraph-low` : Lower paragraph symbol `¶`.
+  * `v-caret-high` : Higher circumflex `^` (default).
+  * `v-caret-low` : Lower circumflex `^`.
+* Styles for At (@):
+  * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
+  * `v-at-fourfold` : The traditional, four-fold At symbol.
+  * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
 * Styles related to ligations
   * `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
