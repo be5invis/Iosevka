@@ -66,8 +66,8 @@ export : define [apply] : begin
 		include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
 		include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
 
-	define [arrow shape id unicode x1 y1 x2 y2 width] : sketch
-		set-width arrowWidth
+	define [arrow shape id unicode x1 y1 x2 y2 width gwidth] : sketch
+		set-width [fallback gwidth arrowWidth]
 		set-anchor "slash" BASE arrowMidX parenMid
 		include : shape x1 y1 x2 y2 arrowSize
 		if width : set-width width
@@ -81,18 +81,18 @@ export : define [apply] : begin
 		include : shape xm ym x2 y2 arrowSize
 		save id unicode
 
-	arrow ArrowShape 'arrowleft' 0x2190 arrowRSB parenMid SB parenMid
-	arrow ArrowShape 'arrowright.dflt' null SB parenMid arrowRSB parenMid
-	arrow ArrowShape 'arrowup' 0x2191 arrowMidX arrowBot arrowMidX arrowTop
-	arrow ArrowShape 'arrowdown' 0x2193 arrowMidX arrowTop arrowMidX arrowBot
-	arrow ArrowShape 'hwarrowleft' null hwArrowRSB parenMid SB parenMid
-	arrow ArrowShape 'hwarrowright' null SB parenMid hwArrowRSB parenMid
-	arrow ArrowShape 'hwarrowup' null hwArrowMidX arrowBot hwArrowMidX arrowTop
-	arrow ArrowShape 'hwarrowdown' null hwArrowMidX arrowTop hwArrowMidX arrowBot
-	arrow ArrowShape 'arrowupleft' 0x2196 arrowRSB arrowBot SB arrowTop
-	arrow ArrowShape 'arrowupright' 0x2197 SB arrowBot arrowRSB arrowTop
-	arrow ArrowShape 'arrowdownright' 0x2198 SB arrowTop arrowRSB arrowBot
-	arrow ArrowShape 'arrowdownleft' 0x2199 arrowRSB arrowTop SB arrowBot
+	arrow ArrowShape 'arrowleft'       0x2190 arrowRSB parenMid SB parenMid
+	arrow ArrowShape 'arrowright.dflt' null   SB parenMid arrowRSB parenMid
+	arrow ArrowShape 'arrowup'         0x2191 arrowMidX arrowBot arrowMidX arrowTop
+	arrow ArrowShape 'arrowdown'       0x2193 arrowMidX arrowTop arrowMidX arrowBot
+	arrow ArrowShape 'hwarrowleft'     null   hwArrowRSB parenMid SB parenMid nothing WIDTH
+	arrow ArrowShape 'hwarrowright'    null   SB parenMid hwArrowRSB parenMid nothing WIDTH
+	arrow ArrowShape 'hwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
+	arrow ArrowShape 'hwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
+	arrow ArrowShape 'arrowupleft'     0x2196 arrowRSB arrowBot SB arrowTop
+	arrow ArrowShape 'arrowupright'    0x2197 SB arrowBot arrowRSB arrowTop
+	arrow ArrowShape 'arrowdownright'  0x2198 SB arrowTop arrowRSB arrowBot
+	arrow ArrowShape 'arrowdownleft'   0x2199 arrowRSB arrowTop SB arrowBot
 
 	arrow ArrowShape 'arrowright.IDT2' null SB parenMid (WIDTH * 2 - SB) parenMid WIDTH
 	arrow ArrowShape 'arrowright.IDT4' null SB parenMid (WIDTH * 4 - SB) parenMid WIDTH
@@ -128,17 +128,17 @@ export : define [apply] : begin
 	local hollowSW : adviceBlackness 5
 	define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / shapeWidth]) / w
 	define [hollow newid unicode oldid zx zy cx cy] : sketch
+		local isWide : glyphs.(oldid).advanceWidth > WIDTH
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
-			include UnFullWidthify
+			if isWide : include UnFullWidthify
 		reverse-last
-		local zoom : hollowScale squareRadius
+		local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
 		include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
 		include : create-glyph : glyph-construction
 			include glyphs.(oldid)
-			include UnFullWidthify
-		include FullWidthify
-
+			if isWide : include UnFullWidthify
+		if isWide : include FullWidthify
 		save newid unicode
 
 	define [resized newid unicode id x y s sy] : sketch
@@ -336,9 +336,9 @@ export : define [apply] : begin
 	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
 	hollow 'whitecircle' 0x25CB 'blackcircle'
 	hollow 'bigwhitecircle' 0x25EF 'bigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
-	hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
+	hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale (squareRadius * designParameters.geometric_large_x) 1]
 	hollow 'smallwhitecircle' null 'smallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
-	hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
+	hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale (squareRadius * designParameters.geometric_small_x) 1]
 	hollow 'hwwhitecircle' null 'hwblackcircle'
 	hollow 'hwwhitediamond' null 'hwblackdiamond'
 	hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]

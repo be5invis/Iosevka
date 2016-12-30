@@ -112,6 +112,7 @@ $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 
 # Pass 1 : Outline cleanup and merge features
 $(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
+	@echo Fontforge $< --> $@
 	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(_DONTREF) $(SUPPRESS_ERRORS)
 	@$(HINT) $@.a.ttf $@
 	@-rm $@.a.ttf
