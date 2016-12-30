@@ -117,6 +117,8 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.10.1**
+  - Add APL symbols.
 * **1.10.0**
   - Added `cv29` and `cv30` for `^`.
   - Added two new `@` glyphs, assigned to `cv32` and `cv33`, while the old `@` is assigned to `cv31`.
