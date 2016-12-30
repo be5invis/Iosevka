@@ -11,10 +11,13 @@ export : define [apply] : begin
 	define arrowWidth FULLWIDTH2
 	define arrowMidX : arrowWidth / 2
 	define arrowRSB : arrowWidth - SB
+	define hwArrowRSB : WIDTH - SB
+	define hwArrowMidX : WIDTH / 2
 
-	local arrowSize : (RIGHTSB - SB) / 3 * [Math.pow (arrowWidth / WIDTH) 0.4]
+	local arrowSize : (RIGHTSB - SB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
 	local halfstroke : OPERATORSTROKE / 2
 	local fine : adviceBlackness 4
+	local terminal : adviceBlackness 6
 	local arrowTop : mix parenMid parenTop 0.85
 	local arrowBot : mix parenMid parenBot 0.85
 
@@ -26,13 +29,13 @@ export : define [apply] : begin
 			function [set this.gizmo [Transform.Id]]
 			widths.rhs fine
 			flat 0 0 [heading UPWARD]
-			curl (size * 1) size
+			curl (size * 1) size [widths.rhs terminal]
 			end [[] => (this.contrast = 1)]
 		include : dispiro
 			function [set this.gizmo [Transform.Id]]
 			widths.lhs fine
 			flat 0 0 [heading DOWNWARD]
-			curl (size * 1) (-size)
+			curl (size * 1) (-size) [widths.lhs terminal]
 			end [[] => (this.contrast = 1)]
 		apply-transform : Translate O 0
 		local {.x xo .y yo} : tp g {.x x1 .y y1}
@@ -82,6 +85,10 @@ export : define [apply] : begin
 	arrow ArrowShape 'arrowright.dflt' null SB parenMid arrowRSB parenMid
 	arrow ArrowShape 'arrowup' 0x2191 arrowMidX arrowBot arrowMidX arrowTop
 	arrow ArrowShape 'arrowdown' 0x2193 arrowMidX arrowTop arrowMidX arrowBot
+	arrow ArrowShape 'hwarrowleft' null hwArrowRSB parenMid SB parenMid
+	arrow ArrowShape 'hwarrowright' null SB parenMid hwArrowRSB parenMid
+	arrow ArrowShape 'hwarrowup' null hwArrowMidX arrowBot hwArrowMidX arrowTop
+	arrow ArrowShape 'hwarrowdown' null hwArrowMidX arrowTop hwArrowMidX arrowBot
 	arrow ArrowShape 'arrowupleft' 0x2196 arrowRSB arrowBot SB arrowTop
 	arrow ArrowShape 'arrowupright' 0x2197 SB arrowBot arrowRSB arrowTop
 	arrow ArrowShape 'arrowdownright' 0x2198 SB arrowTop arrowRSB arrowBot
@@ -240,18 +247,46 @@ export : define [apply] : begin
 		line-to    right parenMid
 		line-to    MIDDLE (parenMid - squareRadius)
 		line-to    left parenMid
+		save 'hwblackdiamond'
 		include FullWidthify
 		save 'blackdiamond' 0x25C6
 
 	sketch # blackcircle
+		include markset.plus
 		include : spiro-outline
 			g4 MIDDLE (parenMid + squareRadius)
 			g4 left parenMid
 			g4 MIDDLE (parenMid - squareRadius)
 			g4 right parenMid
 			close
+		reverse-last
+		save 'hwblackcircle'
 		include FullWidthify
 		save 'blackcircle' 0x25CF
+
+	sketch # smallblackcircle
+		include : spiro-outline
+			g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_small_x)
+			g4 (MIDDLE - squareRadius * designParameters.geometric_small_x) parenMid
+			g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_small_x)
+			g4 (MIDDLE + squareRadius * designParameters.geometric_small_x) parenMid
+			close
+		reverse-last
+		save 'hwsmallblackcircle'
+		include FullWidthify
+		save 'smallblackcircle'
+
+	sketch # bigblackcircle
+		include : spiro-outline
+			g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_large_x)
+			g4 (MIDDLE - squareRadius * designParameters.geometric_large_x) parenMid
+			g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_large_x)
+			g4 (MIDDLE + squareRadius * designParameters.geometric_large_x) parenMid
+			close
+		reverse-last
+		save 'hwbigblackcircle'
+		include FullWidthify
+		save 'bigblackcircle'
 
 	let
 	: configurations : list
@@ -261,6 +296,7 @@ export : define [apply] : begin
 		* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
 		* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
 	: foreach [{.sides sides .skip skip .name name .unicode unicode .overflow overflow .phase phase} : items-of configurations] : sketch
+		include markset.plus
 		foreach [j : range 0 sides] : begin
 			local angle : 2 * Math.PI * j * skip / sides + phase
 			currentGlyph.([if j 'line-to' 'start-from'])
@@ -299,9 +335,13 @@ export : define [apply] : begin
 	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
 	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
 	hollow 'whitecircle' 0x25CB 'blackcircle'
+	hollow 'bigwhitecircle' 0x25EF 'bigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
+	hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
+	hollow 'smallwhitecircle' null 'smallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
+	hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
+	hollow 'hwwhitecircle' null 'hwblackcircle'
+	hollow 'hwwhitediamond' null 'hwblackdiamond'
 	hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
-
-	composite 'circlestar' glyphs.hwblackstar [FlipAround MIDDLE parenMid 0.75] glyphs.mathO [into-unicode 0x235F]
 
 	let [sts 0.75]
 	: begin

@@ -4,7 +4,7 @@ The support code is licensed under Berkeley Software Distribution license.
 ---
 ---
 
-Copyright (c) 2015-2016 Belleve Invis (belleve@typeof.net), with Reserved Font Name “Iosevka”.
+Copyright (c) 2015-2016 Belleve Invis (belleve@typeof.net).
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 ---
 
-Copyright 2015-2016, Belleve Invis (belleve@typeof.net), with Reserved Font Name “Iosevka”.
+Copyright 2015-2016, Belleve Invis (belleve@typeof.net).
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

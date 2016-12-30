@@ -333,7 +333,6 @@ var display = new Vue({
 	el: '#display',
 	data: {
 		charsHTML: '',
-		lipsums: [], //lipsums,
 		samples: (function (ss) {
 			var langlen = 0;
 			for (var j = 0; j < ss.length; j++) { if (ss[j].lang.length > langlen) langlen = ss[j].lang.length };
@@ -359,12 +358,16 @@ var display = new Vue({
 				} else {
 					t.waiting -= 1;
 				}
-			}, 10);
+			});
 		}
 	},
-	ready: function () {
+	created: function () {
+		console.log('Ready to show up.');
 		this.waiting += 1;
-		this.$http.get('assets/' + this.currentFont.name + '.charmap', function (data) {
+		var t = this;
+		fetch('assets/' + this.currentFont.name + '.charmap').then(function (response) {
+			return response.json()
+		}).then(function(data){
 			var blocks = [];
 			var uhash = [];
 			var whash = [];
@@ -414,10 +417,9 @@ var display = new Vue({
 			};
 
 			var nblocks = 0;
-			var t = this;
 			requestAnimationFrame(function fn() {
 				if (nblocks < blocks.length) {
-					t.blocks.$set(nblocks, blocks[nblocks]);
+					Vue.set(t.blocks, nblocks, blocks[nblocks]);
 					nblocks += 1;
 					requestAnimationFrame(fn)
 				} else {
