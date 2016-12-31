@@ -297,6 +297,7 @@ export : define [apply] : begin
 			save 'greatereqslant' 0x2A7E
 	
 	sketch # subst
+		include markset.plus
 		local top : mix parenMid parenTop 0.5
 		local bot : mix parenMid parenBot 0.5
 		include : dispiro
@@ -308,17 +309,16 @@ export : define [apply] : begin
 			arcvh
 			flat (SB + (top - bot) / 2) bot
 			curl RIGHTSB bot [heading RIGHTWARD]
-	
 		save 'subst' 0x2282
 	
 	sketch # element
-		include glyphs.subst
+		include glyphs.subst AS_BASE
 		include : HBar (SB + HALFSTROKE) RIGHTSB parenMid OPERATORSTROKE
-	
 		save 'element' 0x2208
 	turned nothing 0x2283 'subst' MIDDLE parenMid
 	turned nothing 0x220B 'element' MIDDLE parenMid
-	
+	composite glyphs.element glyphs.underlineBelow [into-unicode 0x22F8]
+
 	sketch # sym
 		include : WaveShape
 			l -- SB
@@ -413,15 +413,24 @@ export : define [apply] : begin
 		include : VBarLeft   l operTop operBot aplBoxSW
 		include : VBarRight  r operTop operBot aplBoxSW
 		save 'aplsquare' 0x2395
+	sketch # aplibar
+		local l [mix 0 SB (1 / 3)]
+		local r [mix WIDTH RIGHTSB (1 / 3)]
+		include : HBarTop    l r operTop aplBoxSW
+		include : HBarBottom l r operBot aplBoxSW
+		include : VBar    MIDDLE operTop operBot aplBoxSW
+		save 'aplibar' 0x2336
+	sketch # aplsquish
+		local l SB
+		local r RIGHTSB
+		include : HBarTop    l r operTop aplBoxSW
+		include : HBarBottom l r operBot aplBoxSW
+		include : VBarLeft   l operTop operBot aplBoxSW
+		include : VBarRight  r operTop operBot aplBoxSW
+		save 'aplsquish' 0x2337
 	sketch # aplbar
 		include : VBar MIDDLE parenTop parenBot aplBoxSW
 		save 'aplbar'
-	sketch # aplslash
-		include : dispiro
-			widths.center aplBoxSW
-			flat SB       operBot
-			curl RIGHTSB  operTop
-		save 'aplslash'
 	sketch # aplbackslash
 		include : dispiro
 			widths.center aplBoxSW
@@ -429,7 +438,7 @@ export : define [apply] : begin
 			curl RIGHTSB  operBot
 		save 'aplbackslash'
 	
-	define aplBoxTfm : ScaleAround MIDDLE parenMid ((WIDTH - aplBoxSW * 1.75) / WIDTH)
+	define aplBoxTfm : ScaleAround MIDDLE parenMid [Math.min ((WIDTH - aplBoxSW * 1.75) / WIDTH) ((operTop - operBot) / (parenTop - parenBot))]
 
 	composite glyphs.equal aplBoxTfm glyphs.aplsquare [into-unicode 0x2338]
 	composite glyphs.divide aplBoxTfm glyphs.aplsquare [into-unicode 0x2339]
@@ -438,8 +447,8 @@ export : define [apply] : begin
 	composite glyphs.hwwhitecircle aplBoxTfm glyphs.aplsquare [into-unicode 0x233C]
 	composite glyphs.hwwhitecircle glyphs.aplbar [into-unicode 0x233D]
 	composite glyphs.hwwhitecircle glyphs.hwsmallwhitecircle [into-unicode 0x233E]
-	composite glyphs.minus glyphs.aplslash [into-unicode 0x233F]
-	composite glyphs.minus glyphs.aplbackslash [into-unicode 0x2340]
+	composite glyphs.minus glyphs.slash [into-unicode 0x233F]
+	composite glyphs.minus glyphs.backslash [into-unicode 0x2340]
 	composite glyphs.slash aplBoxTfm glyphs.aplsquare [into-unicode 0x2341]
 	composite glyphs.backslash aplBoxTfm glyphs.aplsquare [into-unicode 0x2342]
 	composite glyphs.less aplBoxTfm glyphs.aplsquare [into-unicode 0x2343]
@@ -472,7 +481,14 @@ export : define [apply] : begin
 	composite glyphs.hwarrowdown glyphs.minus [into-unicode 0x2356]
 	composite glyphs.hwarrowdown aplBoxTfm glyphs.aplsquare [into-unicode 0x2357]
 	composite glyphs.singleQuote markset.plus glyphs.underlineBelow [into-unicode 0x2358]
-	composite glyphs.nabla glyphs.underlineBelow [into-unicode 0x2359]
+	composite
+		begin glyphs.space
+		LambdaShape OPERATORSTROKE (plusTop - plusBot + ACCENT)
+		HBarBottom (SB + OPERATORSTROKE / 2) (RIGHTSB - OPERATORSTROKE / 2) 0 OPERATORSTROKE
+		Realign MIDDLE ((plusTop - plusBot) / 2) MIDDLE parenMid
+		begin markset.plus
+		begin glyphs.underlineBelow
+		into-unicode 0x2359
 	composite glyphs.hwwhitediamond markset.plus glyphs.underlineBelow [into-unicode 0x235A]
 	composite glyphs.hwsmallwhitecircle markset.plus glyphs.underlineBelow [into-unicode 0x235B]
 	composite glyphs.hwwhitecircle markset.plus glyphs.underlineBelow [into-unicode 0x235C]
@@ -496,14 +512,14 @@ export : define [apply] : begin
 	composite glyphs.'asciitilde.low' glyphs.dieresisAbove [into-unicode 0x2368]
 	composite glyphs.'greater.narrow' glyphs.dieresisAbove [into-unicode 0x2369]
 	composite glyphs.minus glyphs.comma [Upright] [Translate 0 (XH / 2)] [Italify] [into-unicode 0x236A]
-	composite glyphs.nabla glyphs.'asciitilde.low' [into-unicode 0x236B]
-	composite glyphs.'zero.unslashed' glyphs.'asciitilde.low' [into-unicode 0x236C]
-	composite glyphs.bar glyphs.'asciitilde.low' [into-unicode 0x236D]
+	composite glyphs.nabla glyphs.overlaytilde [into-unicode 0x236B]
+	composite glyphs.'zero.unslashed' glyphs.overlaytilde [into-unicode 0x236C]
+	composite glyphs.bar glyphs.overlaytilde [into-unicode 0x236D]
 	composite glyphs.semicolon [Realign MIDDLE (XH/2) MIDDLE parenMid] markset.plus glyphs.underlineBelow [into-unicode 0x236E]
 	composite glyphs.noteq aplBoxTfm glyphs.aplsquare [into-unicode 0x236F]
 	composite glyphs.question aplBoxTfm glyphs.aplsquare [into-unicode 0x2370]
-	composite glyphs.vee glyphs.'asciitilde.low' [into-unicode 0x2371]
-	composite glyphs.wedge glyphs.'asciitilde.low' [into-unicode 0x2372]
+	composite glyphs.vee glyphs.overlaytilde [into-unicode 0x2371]
+	composite glyphs.wedge glyphs.overlaytilde [into-unicode 0x2372]
 	alias 'apliota'  0x2373 'iota'
 	alias 'aplrho'   0x2374 'rho'
 	alias 'aplomega' 0x2375 'omega'
@@ -516,6 +532,7 @@ export : define [apply] : begin
 
 	### Others
 	alias 'mathbullet' 0x2219 'bullet'
+	alias 'mathbar' 0x2223 'bar'
 	alias 'mathsmallcircle' 0x2218 'hwsmallwhitecircle'
 	alias 'mathstar' 0x22C6 'hwblackstar'
 
