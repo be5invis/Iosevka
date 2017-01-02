@@ -163,35 +163,50 @@ export : define [apply para glyphList] : begin
 			dasiaoxia {'revCommaAbove' 'acuteAbove'}
 			dasiaperispomeni {'revCommaAbove' 'perispomeniAbove'}
 	
+	local lookupOrder {}
+	
 	# calt and other ligations
-	if (para.spacing > 0) : let : begin
+	if (para.spacing > 0) : do
 		local stick {'hyphen' 'equal'}
 		local less {'less'}
 		local hyphen {'hyphen'}
 		local exclam {'exclam'}
 		local greater {'greater'}
-		
 		define [lsx s] : lambda [t] : t.map : lambda [x] "lig\(x).\(s)"
-		
+
 		local progLigNameMap
 			.XHS_ 'hask'
 			.XPTL 'hask'
 		foreach
 		: ligationFeatureName : items-of : {'calt'}.concat [Object.keys progLigNameMap]
-		: begin
+		: do
 			local mappedFeature : progLigNameMap.(ligationFeatureName) || ligationFeatureName
-			local ligationLookupName : 'lig_' + mappedFeature
+			local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
 			local [only subtable lns] : begin
-				if ([lns.indexOf mappedFeature] >= 0) [then : return subtable] : else : begin
+				if ([lns.indexOf mappedFeature] >= 0) 
+				: then : return subtable
+				: else : begin
 					set subtable.apply {}
 					return subtable
-			
 			commonList.push ligationFeatureName
-			set features.(ligationFeatureName) {ligationLookupName}
-			if [not lookups.(ligationLookupName)] : set lookups.(ligationLookupName)
+			local featLookups {}
+			local [includeLookup obj] : begin
+				local ln : ligationLookupName + featLookups.length
+				set lookups.(ln) obj
+				featLookups.push ln
+				lookupOrder.push ln
+			set features.(ligationFeatureName) featLookups
+
+			includeLookup
 				.type 'gsub_chaining'
 				.subtables : list
-					chain-rule less (stick ~> [lsx 'lc'] ) (stick ~> [lsx 'cc'] ) (stick ~> [lsx 'cc'] ) (stick ~> [lsx 'cr']) greater # <----> <=-==>
+					chain-rule {'less' 'hyphen' 'equal'} ({'asterisk'} ~> {'asterisk.low'}) # <*
+					chain-rule ({'asterisk'} ~> {'asterisk.low'}) {'greater' 'hyphen' 'equal'} # *>
+
+			includeLookup
+				.type 'gsub_chaining'
+				.subtables : list
+					chain-rule less (stick ~> [lsx 'lc'] ) (stick ~> [lsx 'cc'] ) (stick ~> [lsx 'cc'] ) (stick ~> [lsx 'cr']) greater # <----> <====>
 					chain-rule less (stick ~> [lsx 'lc'] ) (stick ~> [lsx 'cc'] ) (stick ~> [lsx 'cr']) greater # <---> <===>
 					chain-rule less (stick ~> [lsx 'lc'] ) (stick ~> [lsx 'cr']) greater # <--> <==>
 					chain-rule less (stick ~> [lsx 'lr']) greater # <->, <=>
@@ -210,18 +225,26 @@ export : define [apply para glyphList] : begin
 						:> only {'hask'}
 					chain-rule (stick ~> [lsx 'fc']) (stick ~> [lsx 'cc']) (stick ~> [lsx 'cr']) greater # --->, ===>
 					chain-rule (stick ~> [lsx 'fc']) (stick ~> [lsx 'cr']) greater # -->, ==>
+					chain-rule  (stick ~> [lsx 'fr']) greater (stick ~> [lsx 'jf']) # ->- =>=
+						:> only {'hask'}
 					chain-rule (stick ~> [lsx 'fr1']) (greater ~> [lsx 'shift1']) greater # ->>, =>>
 						:> only {'hask'}
 					chain-rule (stick ~> [lsx 'fr']) greater # ->, =>
+					chain-rule  (stick ~> [lsx 'fj']) less (stick ~> [lsx 'lf']) # -<- =<=
+						:> only {'hask'}
 					chain-rule (stick ~> [lsx 'fj1']) (less ~> [lsx 'shiftN1']) less # -<<, =<<
 						:> only {'hask'}
 					chain-rule (stick ~> [lsx 'fj']) less # -<, =<
 						:> only {'hask'}
 					
-					chain-rule ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} # :> :- := :< :+
-					chain-rule ({'colon'} ~> {'colon.mid'}) ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} # ::> ::- ::= ::< ::+
+					chain-rule ({'colon'} ~> {'colon.mid'}) ({'asterisk'} ~> {'asterisk.low'}) # :*
+					chain-rule ({'colon'} ~> {'colon.mid'}) ({'colon'} ~> {'colon.mid'}) ({'asterisk'} ~> {'asterisk.low'}) # ::*
+					chain-rule ({'asterisk'} ~> {'asterisk.low'}) ({'colon'} ~> {'colon.mid'}) # *:
 					chain-rule ({'colon'} ~> {'colon.mid'}) ({'colon'} ~> {'colon.mid'}) ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} # :::> :::- :::= :::< :::+
+					chain-rule ({'colon'} ~> {'colon.mid'}) ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} # ::> ::- ::= ::< ::+
+					chain-rule ({'colon'} ~> {'colon.mid'}) {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} # :> :- := :< :+
 					chain-rule {'greater' 'less' 'hyphen' 'equal' 'plus' 'colon.mid'} ({'colon'} ~> {'colon.mid'}) # <: >: -: =: +:
+					chain-rule {'colon.mid'} ({'colon'} ~> {'colon.mid'}) # ::
 
 					# Colon chains
 					chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dmid'}) {'colon'}
@@ -247,7 +270,7 @@ export : define [apply para glyphList] : begin
 			.subtables : list
 				chain-rule [flatten fwtrail hwtrail fwopen hwopen fwmid hwmid] (fwopen ~> hwopen)
 				chain-rule (fwclose ~> hwclose) [flatten fwtrail hwtrail fwclose hwclose fwopen hwopen fwmid hwmid]
-
+	
 	# locl, SRB
 	local srbSubtable null
 	if para.isItalic
@@ -301,6 +324,6 @@ export : define [apply para glyphList] : begin
 	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_BGR ' {.features [{'locl_bgr'}.concat commonList]}
 
-	local GSUB {.languages languages .features features .lookups lookups}
+	local GSUB {.languages languages .features features .lookups lookups .lookupOrder lookupOrder}
 
 	return [object GSUB GPOS GDEF]
