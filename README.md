@@ -117,6 +117,10 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.10.3**
+  - Improved ligations, including `<*>`, etc.
+* **1.10.2**
+  - Complete APL Support.Optimize shape of overlay symbols.
 * **1.10.1**
   - Add APL symbols.
 * **1.10.0**
