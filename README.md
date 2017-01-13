@@ -118,8 +118,9 @@ The current avaliable styles are:
 ## Release Notes
 
 * **1.10.4**
-  - Added feature tag for ML (`XML_`), Idris (`XIDR`), F\* (`XFST`) and Coq (`XCOQ`)
+  - Added feature tag for ML (`XML_`), Idris (`XIDR`), F# (`XFS_`), F\* (`XFST`), Elm (`XELM`), PureScript (`PURS`), Swift (`SWFT`) and Coq (`XV__`).
   - Added ligation for `/\` and `\/`.
+  - Added arbitary-length ligations, like `***********>` or `<-------------`.
 * **1.10.3**
   - Improved ligations, including `<*>`, etc.
 * **1.10.2**
