@@ -516,24 +516,41 @@ export : define [apply] : begin
 		include : VBar [mix SB RIGHTSB 0.7] (parenBot + fine) (parenTop - fine) fine
 		save 'numbersign' '#'
 
-	sketch # slash
-		local cor : HVCONTRAST / [Math.sqrt (1 - [Math.pow ((RIGHTSB - SB - STROKE) / (parenTop - parenBot)) 2])]
-		start-from SB parenBot
-		line-to (SB + STROKE * cor) parenBot
-		line-to RIGHTSB parenTop
-		line-to (RIGHTSB - STROKE * cor) parenTop
+	define [SlashShape l r] : glyph-construction
+		local cor : (1 / 2) * HVCONTRAST / [Math.sqrt (1 - [Math.pow ((r - l - STROKE) / (parenTop - parenBot)) 2])]
+		start-from (l - STROKE * cor) parenBot
+		line-to    (l + STROKE * cor) parenBot
+		line-to    (r + STROKE * cor) parenTop
+		line-to    (r - STROKE * cor) parenTop
 		reverse-last
-		save 'slash' '/'
-	alias 'solidus' 0x2044 'slash'
 
+	sketch # slash
+		include : SlashShape SB RIGHTSB
+		save 'slash' '/'
+		save 'solidus' 0x2044
+	sketch # slash.left
+		include : SlashShape SB WIDTH
+		save 'slash.left'
+	sketch # slash.right
+		include : SlashShape 0 RIGHTSB
+		save 'slash.right'
+
+	define [BackslashShape l r] : glyph-construction
+		local cor : (1 / 2) * HVCONTRAST / [Math.sqrt (1 - [Math.pow ((r - l - STROKE) / (parenTop - parenBot)) 2])]
+		start-from (l - STROKE * cor) parenTop
+		line-to    (l + STROKE * cor) parenTop
+		line-to    (r + STROKE * cor) parenBot
+		line-to    (r - STROKE * cor) parenBot
+	local backslashWidth : (RIGHTSB - SB) * (1 + TANSLANT * 2)
 	sketch # backslash
-		local width : (RIGHTSB - SB) * (1 + TANSLANT * 2)
-		local cor : HVCONTRAST / [Math.sqrt (1 - [Math.pow ((width - STROKE) / (parenTop - parenBot)) 2])]
-		start-from (MIDDLE - width / 2) parenTop
-		line-to (MIDDLE - width / 2 + STROKE * cor) parenTop
-		line-to (MIDDLE + width / 2) parenBot
-		line-to (MIDDLE + width / 2 - STROKE * cor) parenBot
+		include : BackslashShape (MIDDLE - backslashWidth / 2) (MIDDLE + backslashWidth / 2)
 		save 'backslash' "\\"
+	sketch # backslash.left
+		include : BackslashShape (MIDDLE - backslashWidth / 2) WIDTH
+		save 'backslash.left'
+	sketch # backslash.right
+		include : BackslashShape 0 (MIDDLE + backslashWidth / 2)
+		save 'backslash.right'
 
 
 	### 'Dashes'
