@@ -117,6 +117,9 @@ The current avaliable styles are:
 
 ## Release Notes
 
+* **1.10.4**
+  - Added feature tag for ML (`XML_`), Idris (`XIDR`), F\* (`XFST`) and Coq (`XCOQ`)
+  - Added ligation for `/\` and `\/`.
 * **1.10.3**
   - Improved ligations, including `<*>`, etc.
 * **1.10.2**
