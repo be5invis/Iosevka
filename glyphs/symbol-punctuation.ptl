@@ -67,35 +67,66 @@ export : define [apply] : begin
 		include : FlipAround MIDDLE parenMid
 		save 'bracketRight' ']'
 
-	sketch # braceLeft
+	sketch # braceLeft.straight
 		local parenCenter [mix SB RIGHTSB [mix braceInside braceOutside 0.5]]
 		local radius    : [mix SB RIGHTSB braceInside] - parenCenter
 
 		include : dispiro
-			flat [mix SB RIGHTSB braceInside] (parenTop - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-			curl ([mix SB RIGHTSB braceInside] - 0.01) (parenTop - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+			straight.left.start [mix SB RIGHTSB braceInside] (parenTop - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
 			archv
 			flat parenCenter (parenTop - radius) [heading DOWNWARD]
 			curl parenCenter (parenMid + radius) [heading DOWNWARD]
 			arcvh
-			flat ([mix SB RIGHTSB braceOutside] + 0.01) parenMid [heading LEFTWARD]
-			curl [mix SB RIGHTSB braceOutside] parenMid [heading LEFTWARD]
+			straight.left.end [mix SB RIGHTSB braceOutside] parenMid [heading LEFTWARD]
 
 		include : dispiro
-			flat [mix SB RIGHTSB braceInside] (parenBot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-			curl ([mix SB RIGHTSB braceInside] - 0.01) (parenBot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+			straight.left.start [mix SB RIGHTSB braceInside] (parenBot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
 			archv
 			flat parenCenter (parenBot + radius) [heading UPWARD]
 			curl parenCenter (parenMid - radius) [heading UPWARD]
 			arcvh
-			flat ([mix SB RIGHTSB braceOutside] + 0.01) parenMid [heading LEFTWARD]
-			curl [mix SB RIGHTSB braceOutside] parenMid [heading LEFTWARD]
-		save 'braceLeft' '{'
+			straight.left.end [mix SB RIGHTSB braceOutside] parenMid [heading LEFTWARD]
+		save 'braceLeft.straight'
 
-	sketch # braceRight
-		include glyphs.braceLeft
-		include : FlipAround MIDDLE parenMid
-		save 'braceRight' '}'
+	sketch # braceLeft.curly
+		local xIns : mix SB RIGHTSB [mix braceOutside braceInside 1]
+		local xOus : mix SB RIGHTSB [mix braceInside braceOutside 1]
+		local m1   : mix SB RIGHTSB [mix braceInside braceOutside 0.6]
+		local m2   : mix SB RIGHTSB [mix braceInside braceOutside 0.4]
+		local braceRadiusLowLimit : (parenTop - parenMid - STROKE) * (1 / 3) + HALFSTROKE
+		local radius1 : Math.min (xIns - m1) braceRadiusLowLimit
+		local radius2 : [Math.min (m2 - xOus) braceRadiusLowLimit] - HALFSTROKE
+		local ess : mix STROKE ESS 0.25
+		include : dispiro
+			straight.left.start xIns (parenTop - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+			archv
+			g4.down.mid m1 (parenTop - radius1) [heading DOWNWARD]
+			alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
+			g4.down.mid m2 (parenMid + radius2) [widths.heading HALFSTROKE HALFSTROKE DOWNWARD]
+			arcvh
+			straight.left.end xOus parenMid [heading LEFTWARD]
+
+		include : dispiro
+			straight.left.start xIns (parenBot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+			archv
+			g4.up.mid m1 (parenBot + radius1) [heading UPWARD]
+			alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
+			g4.up.mid m2 (parenMid - radius2) [widths.heading HALFSTROKE HALFSTROKE UPWARD]
+			arcvh
+			straight.left.end xOus parenMid [heading LEFTWARD]
+		save 'braceLeft.curly'
+
+	composite 'braceRight.straight' glyphs.'braceLeft.straight' [FlipAround MIDDLE parenMid]
+	composite 'braceRight.curly' glyphs.'braceLeft.curly' [FlipAround MIDDLE parenMid]
+	
+	select-variant 'braceLeft' '{' 'curly' {
+		.cv36 'braceLeft.straight'
+		.cv37 'braceLeft.curly'
+	}
+	select-variant 'braceRight' '}' 'curly' {
+		.cv36 'braceRight.straight'
+		.cv37 'braceRight.curly'
+	}
 
 	sketch # angleLeft
 		local fatten : Math.hypot 1 (([mix SB RIGHTSB : parenInside - parenOutside] - O) / (parenTop - parenMid))
