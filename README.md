@@ -111,12 +111,23 @@ The current avaliable styles are:
   * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
   * `v-at-fourfold` : The traditional, four-fold At symbol.
   * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
+* Styles for Eszet(ß)
+  * `v-eszet-traditional` : Tratidional, Fraktur-like Eszet.
+  * `v-eszet-sulzbacher` : A more modern, beta-like Eszet (default).
+* Styles for curly brackets ({})
+  * `v-brace-straight` : More straight braces.
+  * `v-brace-curly` : More curly braces (default).
 * Styles related to ligations
   * `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
 
 ## Release Notes
 
+* **1.10.5**
+  - Added a Sulzbacher-style Eszet (`ß`), assigned to `cv35`/`v-eszet-sulzbacher`. The old, traditional Eszet is assigned to `cv34`/`v-eszet-traditional`.
+  - Made braces more curly. It is assigned to `cv37`/`v-brace-curly`. The old straight braces are assigned to `cv36`/`v-brace-straight`.
+  - Added several symbols.
+  - Fixed incorrect shapes of /capitalTurnm (`Ɯ`), /lrtail(`ɭ`) and /suplrtail (`ᶩ`).
 * **1.10.4**
   - Added feature tag for ML (`XML_`), Idris (`XIDR`), F# (`XFS_`), F\* (`XFST`), Elm (`XELM`), PureScript (`PURS`), Swift (`SWFT`) and Coq (`XV__`).
   - Added ligation for `/\` and `\/`.
