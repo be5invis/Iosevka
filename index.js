@@ -102,8 +102,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.10.4",
-		codename: "Juno-4",
+		version: "1.10.5",
+		codename: "Juno-5",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -126,8 +126,8 @@ var indexPage = new Vue({
 		opentypeSamples: [
 			{
 				title: "Stylistic Sets",
-				sampleText: "float Fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789",
-				stress: 'agil*0',
+				sampleText: "@real fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789",
+				stress: 'agil*0_{}@',
 				type: 'wide',
 				terms: [
 					{ tag: 'off', desc: 'Default' },
@@ -180,7 +180,11 @@ var indexPage = new Vue({
 					{ tag: 'cv30', sample: '^' },
 					{ tag: 'cv31', sample: '@' },
 					{ tag: 'cv32', sample: '@' },
-					{ tag: 'cv33', sample: '@' }
+					{ tag: 'cv33', sample: '@' },
+					{ tag: 'cv34', sample: 'ß' },
+					{ tag: 'cv35', sample: 'ß' },
+					{ tag: 'cv36', sample: '{' },
+					{ tag: 'cv37', sample: '{' }
 				]
 			}
 		],
