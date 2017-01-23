@@ -58,7 +58,7 @@ fonts : $(DISTTARGETS)
 svgs : $(SVG0)
 
 # Pass 0 : file construction
-OUTPUTS = --meta $@ --svg $(subst .fdt,.svg,$@)
+OUTPUTS = -o $@
 OUTPUT_CM = $(if $(NOCHARMAP),,--charmap $(subst .fdt,.charmap,$(subst $(OBJDIR)/.pass0-,$(OBJDIR)/,$@)))
 $(OBJDIR)/.pass0-$(PREFIX)-thin.fdt : $(SCRIPTS)  | $(OBJDIR) $(DISTDIR)
 	$(NODE_FDT) generator iosevka $(STYLE_COMMON) w-thin s-upright $(STYLE_UPRIGHT) $(STYLE_SUFFIX) $(OUTPUTS)
@@ -111,14 +111,14 @@ $(MAPS) : $(OBJDIR)/%.charmap : $(OBJDIR)/.pass0-%.fdt
 	$(PASS)
 
 # Pass 1 : Outline cleanup and merge features
-$(PASS1) : $(OBJDIR)/.pass1-%.ttf : pass1-cleanup.py $(OBJDIR)/.pass0-%.svg
-	@echo Fontforge $< --> $@
-	@fontforge -quiet -script $^ $@.a.ttf $(if $(findstring italic,$@),10,$(if $(findstring oblique,$@),10,0)) $(_DONTREF) $(SUPPRESS_ERRORS)
-	@$(HINT) $@.a.ttf $@
-	@-rm $@.a.ttf
+$(TARGETS) : $(OBJDIR)/%.ttf : $(OBJDIR)/.pass0-%.fdt
+	@otfccbuild $< -o $@.a.ttf
+	@$(HINT) $@.a.ttf $@.b.ttf
+	@otfccdump $@.b.ttf | otfccbuild -O3 -s -o $@
+	@-rm $@.a.ttf $@.b.ttf
 # Pass 2 : add metadata
-$(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
-	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -s -O3 -o $@ --keep-average-char-width $(HINT_SUFFIX)
+#$(TARGETS) : $(OBJDIR)/%.ttf : pass2-finalize.js $(OBJDIR)/.pass1-%.ttf $(OBJDIR)/.pass0-%.fdt
+#	@otfccdump $(word 2,$^) | $(NODE) $< $(word 3,$^) | otfccbuild -s -O3 -o $@ --keep-average-char-width $(HINT_SUFFIX)
 
 $(DISTTARGETS) : $(DISTDIR)/%.ttf : $(OBJDIR)/%.ttf
 	@cp $< $@
