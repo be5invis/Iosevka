@@ -38,7 +38,7 @@ Iosevka’s default ligation set is assigned to `calt` feature, though not all o
 
 To build Iosevka you should:
 
-1. Ensure that [`node`](http://nodejs.org) (≥ 6.0), [`FontForge`](http://fontforge.org) (with Python scripting support, ≥ Aug. 2015 release), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and `make` are runnable in your terminal.
+1. Ensure that [`node`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and `make` are runnable in your terminal.
    - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make`.

@@ -8,10 +8,15 @@ var parameters = require("./parameters");
 var toml = require("toml");
 
 var Glyph = require("./support/glyph");
+var autoref = require("./support/autoref");
+
+var caryllShapeOps = require("caryll-shapeops");
+var c2q = require("otfcc-c2q");
 
 function hasv(obj) {
 	if (!obj) return false;
-	for (var k in obj) if (obj[k]) return true;
+	for (var k in obj)
+		if (obj[k]) return true;
 	return false;
 }
 
@@ -29,7 +34,13 @@ var font = function () {
 	font.glyf = font.glyf.sort(function (a, b) {
 		var pri1 = a.cmpPriority || 0;
 		var pri2 = b.cmpPriority || 0;
-		return (pri2 !== pri1 ? pri2 - pri1 : a.contours.length !== b.contours.length ? a.contours.length - b.contours.length : (a.unicode && b.unicode && a.unicode[0] !== b.unicode[0]) ? a.unicode[0] - b.unicode[0] : (a.name < b.name) ? (-1) : (a.name > b.name) ? 1 : 0);
+		if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
+		if (a.contours && b.contours && a.contours.length > b.contours.length) return (-1);
+		if (a.unicode && a.unicode[0] && !b.unicode || !b.unicode[0]) return (-1);
+		if (b.unicode && b.unicode[0] && !a.unicode || !a.unicode[0]) return (+1);
+		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] < b.unicode[0]) return (-1);
+		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] > b.unicode[0]) return (+1);
+		return (a.name < b.name) ? (-1) : (a.name > b.name) ? 1 : 0;
 	});
 	return font;
 }();
@@ -41,7 +52,7 @@ if (argv.charmap) {
 			return [
 				glyph.name,
 				glyph.unicode,
-				glyph.advanceWidth === 0 ? hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0 : 0
+				glyph.advanceWidth === 0 ? (hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0) : 0
 			];
 		})), "utf8");
 	})();
@@ -53,13 +64,16 @@ if (argv.svg) {
 
 		var foundNaN = false;
 		var glyfname = "";
-		function mix(a, b, p) { return a + (b - a) * p; }
+		function mix(a, b, p) {
+			return a + (b - a) * p;
+		}
 
 		function toSVGPath(glyph) {
 			var buf = "";
 			foundNaN = false;
 			glyfname = glyph.name;
-			if (glyph.contours) for (var j = 0; j < glyph.contours.length; j++) {
+			if (glyph.contours)
+				for (var j = 0; j < glyph.contours.length; j++) {
 					buf += Glyph.contourToSVGPath(glyph.contours[j], false);
 			}
 			return buf;
@@ -101,6 +115,110 @@ if (argv.svg) {
 		svg += "</font></defs></svg>";
 		fs.writeFileSync(argv.svg, svg, "utf-8");
 	})();
+}
+
+var StatusBar = function (message, n) {
+	this.message = message;
+	this.total = n;
+	this.progress = 0;
+	this.lastUpdate = new Date();
+};
+StatusBar.prototype.update = function (j) {
+	var j0 = this.progress;
+	var LEN = 25;
+	this.progress = j;
+	if (Math.round(this.progress / this.total * LEN) !== Math.round(j0 / this.total * LEN)) {
+		var filled = Math.round(this.progress / this.total * LEN);
+		var remain = LEN - filled;
+		var pg = Array(filled + 1).join("#") + Array(remain + 1).join(" ");
+		var d = new Date();
+		if (!remain || d - this.lastUpdate > 500) {
+			process.stderr.write("      [" + pg + "] " + this.message + "\n");
+			this.lastUpdate = d;
+		}
+	}
+};
+
+StatusBar.each = function (message, a, f) {
+	var bar = new StatusBar(message, a.length);
+	a.forEach(function (x, j) {
+		var r = f.apply(this, arguments);
+		bar.update(j + 1);
+		return r;
+	});
+};
+
+if (argv.o) {
+	console.log("    Writing output -> " + argv.o);
+	var o_glyf = {};
+	var cmap = {};
+	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
+	// autoref
+	autoref(font.glyf);
+	// regulate
+	StatusBar.each("Regulate", font.glyf, (g) => {
+		if (g.contours) {
+			for (var k = 0; k < g.contours.length; k++) {
+				var contour = g.contours[k];
+				for (var p = 0; p < contour.length; p++) {
+					contour[p].x += contour[p].y * skew;
+					if (contour[p].on) {
+						contour[p].x = Math.round(contour[p].x);
+					}
+				}
+				var offJ = null, mx = null;
+				for (var p = 0; p < contour.length; p++) {
+					if (contour[p].on) {
+						if (offJ) {
+							var origx = contour[p].x;
+							var rx = Math.round(contour[p].x * 4) / 4;
+							var origx0 = mx;
+							var rx0 = contour[offJ - 1].x;
+							if (origx != origx0) {
+								for (var poff = offJ; poff < p; poff++) {
+									contour[poff].x = (contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) + rx0;
+								}
+							}
+						}
+						mx = contour[p].x;
+						contour[p].x = Math.round(contour[p].x * 4) / 4;
+						offJ = p + 1;
+					}
+				}
+			}
+			var c1 = [];
+			for (var k = 0; k < g.contours.length; k++) {
+				c1.push(Glyph.contourToStandardCubic(g.contours[k]));
+			}
+			g.contours = c1;
+		}
+	});
+	StatusBar.each("Remove Overlap", font.glyf, (g) => {
+		if (g.contours) {
+			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
+		}
+	});
+	StatusBar.each("Finalize", font.glyf, (g) => {
+		if (g.contours) {
+			Glyph.prototype.cleanup.call(g, 0.25);
+			g.contours = c2q.contours(g.contours);
+			for (var k = 0; k < g.contours.length; k++) {
+				var contour = g.contours[k];
+				for (var p = 0; p < contour.length; p++) {
+					contour[p].x -= contour[p].y * skew;
+				}
+			}
+		}
+		o_glyf[g.name] = g;
+		if (g.unicode && g.unicode.length) {
+			cmap[g.unicode[0]] = g.name;
+		}
+	});
+
+	font.glyf = o_glyf;
+	font.cmap = cmap;
+	font.glyfMap = null;
+	fs.writeFileSync(argv.o, JSON.stringify(font));
 }
 
 if (argv.meta) {
