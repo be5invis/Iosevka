@@ -38,7 +38,7 @@ Iosevka’s default ligation set is assigned to `calt` feature, though not all o
 
 To build Iosevka you should:
 
-1. Ensure that [`node`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and `make` are runnable in your terminal.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and `make` are runnable in your terminal.
    - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make`.
@@ -54,24 +54,36 @@ The `webfonts/` directory is used to build Iosevka for web font uses. To build t
 
 1. Build Iosevka.
 2. Ensure that `sfnt2woff` and `woff2_compress` are installed and runnable.
-3. `make webfonts`.
+3. Run `make web` .
 
-The web fonts will be generated into `dist/webfonts`.
+The web fonts will be generated into `dist/iosevka/web` and `dist/iosevka-slab/web`.
 
 ## Build Your Own Style
 
 ![Styles Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/variants.png)
 
-Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants you should use style variables in the `make` procedure:
+Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants, you should perform custom build:
 
-* `STYLE_COMMON` for both uprights and italics,
-* `STYLE_UPRIGHT` for upright and oblique, and
-* `STYLE_ITALIC` for itaics only.
+1. `make custom-config [set=<name>]` with the parameters listed below to create a configuration. The `set=<name>` part is optional, it will be set to `custom` when absent.
+2. `make custom [set=<name>]` to acquire your custom font.
+   - `make custom-web [set=<name>]` is for web fonts.
 
-You can add arbitary styles for these variables, for example, `make STYLE_UPRIGHT='v-l-zshaped v-i-zshaped'` to create a variant with Z-shaped letter `l` and `i` for uprights.
+The first step, `make custom-config` takes following parameters to set styles of your custom build. All of them are optional, and would default to Iosevka’s default configuration:
+
+* `design='<styles>'`, styles for your custom font set.
+* `upright='<styles>'`, styles for uprights only.
+* `italic='<styles>'`, styles for italics only.
+* `oblique='<styles>'`, styles for obliques only.
+
+You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights.
 
 The current avaliable styles are:
 
+* Styles for general shape:
+  * `sans` : Sans serif (default).
+  * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
+* Styles related to ligations
+  - `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
 * Styles for letter `l`:
   * `v-l-hooky` : Hooky `l`.
   * `v-l-zshaped` : Z-shaped `l`.
@@ -117,8 +129,6 @@ The current avaliable styles are:
 * Styles for curly brackets ({})
   * `v-brace-straight` : More straight braces.
   * `v-brace-curly` : More curly braces (default).
-* Styles related to ligations
-  * `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations using it.
 
 
 ## Release Notes

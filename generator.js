@@ -58,95 +58,6 @@ if (argv.charmap) {
 	})();
 }
 
-if (argv.svg) {
-	(function () {
-		console.log("    Writing outline as SVG -> " + argv.svg);
-
-		var foundNaN = false;
-		var glyfname = "";
-		function mix(a, b, p) {
-			return a + (b - a) * p;
-		}
-
-		function toSVGPath(glyph) {
-			var buf = "";
-			foundNaN = false;
-			glyfname = glyph.name;
-			if (glyph.contours)
-				for (var j = 0; j < glyph.contours.length; j++) {
-					buf += Glyph.contourToSVGPath(glyph.contours[j], false);
-			}
-			return buf;
-		}
-		var svg = '<?xml version="1.0" encoding="utf-8"?>'
-			+ '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >'
-			+ '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">'
-			+ '<defs><font id="' + font.name.postScriptName + '">';
-
-		var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
-		var scale = (argv.upm || 1000) / 1000;
-
-		svg += '<font-face font-family="' + font.name.fontFamily
-			+ '" font-weight="' + font.OS_2.usWeightClass
-			+ '" font-stretch="normal" units-per-em="'
-			+ (1000 * scale) + '"/>';
-
-		for (var j = 0; j < font.glyf.length; j++) {
-			var g = font.glyf[j];
-			if (g.contours) {
-				for (var k = 0; k < g.contours.length; k++) {
-					var contour = g.contours[k];
-					for (var p = 0; p < contour.length; p++) {
-						contour[p].x += contour[p].y * skew;
-						contour[p].x *= scale;
-						contour[p].y *= scale;
-					}
-				}
-				g.advanceWidth *= scale;
-				Glyph.prototype.cleanup.call(g, 0.25);
-			}
-			var gd = "<" + (j === 0 ? "missing-glyph" : "glyph")
-				+ ' glyph-name="' + g.name
-				+ '" horiz-adv-x="' + g.advanceWidth + '" '
-				+ (g.unicode && g.unicode.length ? 'unicode="&#x' + g.unicode[0].toString(16) + ';"' : "")
-				+ ' d="' + toSVGPath(g) + '" />\n';
-			svg += gd;
-		}
-		svg += "</font></defs></svg>";
-		fs.writeFileSync(argv.svg, svg, "utf-8");
-	})();
-}
-
-var StatusBar = function (message, n) {
-	this.message = message;
-	this.total = n;
-	this.progress = 0;
-	this.lastUpdate = new Date();
-};
-StatusBar.prototype.update = function (j) {
-	var j0 = this.progress;
-	var LEN = 25;
-	this.progress = j;
-	if (Math.round(this.progress / this.total * LEN) !== Math.round(j0 / this.total * LEN)) {
-		var filled = Math.round(this.progress / this.total * LEN);
-		var remain = LEN - filled;
-		var pg = Array(filled + 1).join("#") + Array(remain + 1).join(" ");
-		var d = new Date();
-		if (!remain || d - this.lastUpdate > 500) {
-			process.stderr.write("      [" + pg + "] " + this.message + "\n");
-			this.lastUpdate = d;
-		}
-	}
-};
-
-StatusBar.each = function (message, a, f) {
-	var bar = new StatusBar(message, a.length);
-	a.forEach(function (x, j) {
-		var r = f.apply(this, arguments);
-		bar.update(j + 1);
-		return r;
-	});
-};
 
 if (argv.o) {
 	console.log("    Writing output -> " + argv.o);
@@ -156,7 +67,7 @@ if (argv.o) {
 	// autoref
 	autoref(font.glyf);
 	// regulate
-	StatusBar.each("Regulate", font.glyf, (g) => {
+	font.glyf.forEach((g) => {
 		if (g.contours) {
 			for (var k = 0; k < g.contours.length; k++) {
 				var contour = g.contours[k];
@@ -193,12 +104,14 @@ if (argv.o) {
 			g.contours = c1;
 		}
 	});
-	StatusBar.each("Remove Overlap", font.glyf, (g) => {
+	// overlap removal
+	font.glyf.forEach((g) => {
 		if (g.contours) {
 			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
 		}
 	});
-	StatusBar.each("Finalize", font.glyf, (g) => {
+	// finalize
+	font.glyf.forEach((g) => {
 		if (g.contours) {
 			Glyph.prototype.cleanup.call(g, 0.25);
 			g.contours = c2q.contours(g.contours);
@@ -219,15 +132,4 @@ if (argv.o) {
 	font.cmap = cmap;
 	font.glyfMap = null;
 	fs.writeFileSync(argv.o, JSON.stringify(font));
-}
-
-if (argv.meta) {
-	(function () {
-		console.log("    Writing metadata as JSON -> " + argv.meta);
-		if (argv.svg) {
-			font.glyf = null;
-			font.glyfMap = null;
-		}
-		fs.writeFileSync(argv.meta, JSON.stringify(font));
-	})();
 }
