@@ -25,7 +25,7 @@ define [closepoint p q t] : begin
 define [oncurveRemovable a b c t] : begin
 	local xm : (a.x + c.x) / 2
 	local ym : (a.y + c.y) / 2
-	return : [not a.onCurve] && b.onCurve && [not c.onCurve] && [not a.cubic] && [not c.cubic] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
+	return : [not a.on] && b.on && [not c.on] && [not a.cubic] && [not c.cubic] && (a.x <= b.x && b.x <= c.x || a.x >= b.x && b.x >= c.x) && (a.y <= b.y && b.y <= c.y || a.y >= b.y && b.y >= c.y) && [Math.abs (b.x - xm)] <= (t / 2) && [Math.abs (b.y - ym)] <= (t / 2)
 
 define PRECISION 1000
 define [cov x] : piecewise
@@ -154,7 +154,7 @@ export all : class Glyph
 				local c {}
 				set c.tag : contour.tag || component.tag || t.defaultTag
 				foreach [point : items-of contour] : begin
-					c.push : new Point (point.x + shiftx) (point.y + shifty) point.onCurve point.cubic point.subdivided
+					c.push : new Point (point.x + shiftx) (point.y + shifty) point.on point.cubic point.subdivided
 				newcontours.push c
 			set this.contours : this.contours.concat newcontours
 		if (([not contours] || copyAnchors) && glyph.anchors) : begin
@@ -187,7 +187,7 @@ export all : class Glyph
 		for [local j 1] (j < contour.length) [inc j] : begin
 			local point contour.(j)
 			piecewise
-				point.onCurve : begin
+				point.on : begin
 					if delta
 					: then : set buf : buf + "l \[cov : point.x - lx] \[cov : point.y - ly]"
 					: else : set buf : buf + "L \[cov point.x] \[cov point.y]"
@@ -215,16 +215,52 @@ export all : class Glyph
 					inc j
 		set buf : buf + " Z\n"
 		return buf
+	
+	static [contourToStandardCubic contour] : begin
+		local c {}
+		if (!contour || !contour.length) : return c
+
+		local lx contour.0.x
+		local ly contour.0.y
+		c.push {.x lx .y ly .on true}
+		for [local j 1] (j < contour.length) [inc j] : begin
+			local point contour.(j)
+			piecewise
+				point.on : begin
+					c.push {.x point.x .y point.y .on true}
+					set {.x lx .y ly} point
+				point.cubic : begin
+					local z1 point
+					local z2 contour.(j + 1)
+					local z3 contour.(j + 2)
+					c.push {.x z1.x .y z1.y .on false}
+					c.push {.x z2.x .y z2.y .on false}
+					c.push {.x z3.x .y z3.y .on true}
+					set {.x lx .y ly} z3
+					set j : j + 2
+				true : begin
+					local zc point
+					local zf : if contour.(j + 1) contour.(j + 1) contour.0
+					local x1 : mix lx zc.x (2 / 3)
+					local y1 : mix ly zc.y (2 / 3)
+					local x2 : mix zf.x zc.x (2 / 3)
+					local y2 : mix zf.y zc.y (2 / 3)
+					c.push {.x x1 .y y1 .on false}
+					c.push {.x x2 .y y2 .on false}
+					c.push {.x zf.x .y zf.y .on true}
+					set {.x lx .y ly} zf
+					inc j
+		return c
 
 	public [cleanup t] : begin
 		foreach c [range 0 this.contours.length] : begin
 			local ocontour this.contours.(c)
 			# add infections
-			local contour {[new Point ocontour.0.x ocontour.0.y ocontour.0.onCurve]}
+			local contour {[new Point ocontour.0.x ocontour.0.y ocontour.0.on]}
 			local flag 0
 			foreach [j : range 1 (ocontour.length - 1)] : piecewise
 				flag : dec flag
-				ocontour.(j).onCurve : contour.push ocontour.(j)
+				ocontour.(j).on : contour.push ocontour.(j)
 				ocontour.(j).cubic : begin
 					local p0 contour.(contour.length - 1)
 					local p1 ocontour.(j)
@@ -249,7 +285,7 @@ export all : class Glyph
 					local p0 contour.(contour.length - 1)
 					local p1 ocontour.(j)
 					local p2 ocontour.(j + 1)
-					if [not p2.onCurve] : set p2 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
+					if [not p2.on] : set p2 : new Point [mix p1.x p2.x 0.5] [mix p1.y p2.y 0.5] true
 					local strand : new Bezier p0.x p0.y p1.x p1.y p2.x p2.y
 					local ts [strand.extrema].y
 					piecewise
@@ -265,7 +301,7 @@ export all : class Glyph
 									new Point s.points.2.x s.points.2.y true
 					set flag 1
 
-			contour.push [new Point ocontour.(ocontour.length - 1).x ocontour.(ocontour.length - 1).y ocontour.(ocontour.length - 1).onCurve]
+			contour.push [new Point ocontour.(ocontour.length - 1).x ocontour.(ocontour.length - 1).y ocontour.(ocontour.length - 1).on]
 
 			# cleanup
 			local cleanedContour {}
@@ -296,7 +332,7 @@ export all : class Glyph
 								set contour.(k + 2).unimportant true
 								set k : k + 2
 				if found : begin
-					set contour.(j).onCurve true
+					set contour.(j).on true
 					set j (k - 1)
 			foreach point [items-of contour] : if [not point.unimportant] : cleanedContour.push point
 			this.contours.(c) = cleanedContour

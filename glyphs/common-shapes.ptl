@@ -81,33 +81,35 @@ export : define [apply] : begin
 		apply-transform : Translate 0 (spacing / 2)
 		apply-transform : Italify
 	# Full-width derivatives
-	define [fwl newid unicode id] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
+	define [fwl newid unicode id shift] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
 		if unicode : assign-unicode unicode
 		include glyphs.(id)
 		set-width FULLWIDTH
+		apply-transform : Translate [fallback shift 0] 0
 
-	define [fwr newid unicode id] : create-glyph [fallback newid : 'fwr' + id] : glyph-construction
+	define [fwr newid unicode id shift] : create-glyph [fallback newid : 'fwr' + id] : glyph-construction
 		if unicode : assign-unicode unicode
 		include glyphs.(id)
 		set-width FULLWIDTH
-		apply-transform : Translate (FULLWIDTH - WIDTH) 0
+		apply-transform : Translate (FULLWIDTH - WIDTH + [fallback shift 0]) 0
 
-	define [dwl newid unicode id] : create-glyph [fallback newid : 'dwl' + id] : glyph-construction
+	define [dwl newid unicode id shift] : create-glyph [fallback newid : 'dwl' + id] : glyph-construction
 		if unicode : assign-unicode unicode
 		include glyphs.(id)
 		set-width UPM
+		apply-transform : Translate [fallback shift 0] 0
 
-	define [dwr newid unicode id] : create-glyph [fallback newid : 'dwr' + id] : glyph-construction
+	define [dwr newid unicode id shift] : create-glyph [fallback newid : 'dwr' + id] : glyph-construction
 		if unicode : assign-unicode unicode
 		include glyphs.(id)
 		set-width UPM
-		apply-transform : Translate (UPM - WIDTH) 0
+		apply-transform : Translate (UPM - WIDTH + [fallback shift 0]) 0
 
-	define [dwc newid unicode id] : create-glyph [fallback newid : 'dwc' + id] : glyph-construction
+	define [dwc newid unicode id shift] : create-glyph [fallback newid : 'dwc' + id] : glyph-construction
 		if unicode : assign-unicode unicode
 		include glyphs.(id)
 		set-width UPM
-		apply-transform : Translate ((UPM - WIDTH) / 2) 0
+		apply-transform : Translate ((UPM - WIDTH) / 2 + [fallback shift 0]) 0
 
 
 
@@ -193,10 +195,7 @@ export : define [apply] : begin
 		local mt : [mix left RIGHTSB 0.5] + (st - CORRECTION_OMIDX) * STROKE
 		local mb : [mix left RIGHTSB 0.5] + (sb + CORRECTION_OMIDX) * STROKE
 		include : dispiro
-			widths.lhs
-			g4   (mt) (top - O) [heading {.y (-1) .x (-st)}]
-			archv
-			flat (left + (STROKE - fine) * HVCONTRAST) (top - SMALLSMOOTHA) [widths fine 0]
+			flat (left + (STROKE - fine) * HVCONTRAST) (top - SMALLSMOOTHA - 0.01) [widths fine 0]
 			curl (left + (STROKE - fine) * HVCONTRAST) (0 + SMALLSMOOTHB) [widths fine 0]
 			arcvh
 			g4   (mb) O [widths.heading STROKE 0 {.y (1) .x (-sb)}]
@@ -204,7 +203,10 @@ export : define [apply] : begin
 			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (RIGHTSB - OX) (0 + SMALLSMOOTHA)
 			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (RIGHTSB - OX) (top - SMALLSMOOTHB)
 			arcvh
-			close
+			g4   (mt) (top - O) [widths.heading STROKE 0 {.y (-1) .x (-st)}]
+			archv
+			flat (left + (STROKE - fine) * HVCONTRAST) (top - SMALLSMOOTHA) [widths fine 0]
+			curl (left + (STROKE - fine) * HVCONTRAST) (top - SMALLSMOOTHA - 0.01) [widths fine 0]
 
 	define [OBarRightShape top right] : glyph-construction
 		include : create-glyph [OBarLeftShape top (WIDTH - [fallback right RIGHTSB])]
