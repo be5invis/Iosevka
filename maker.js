@@ -65,7 +65,7 @@ function createMake(mapping) {
 	let buf = "";
 	if (!definedBuildSeqs[tfname]) {
 		buf += `
-${tfname} : $(SCRIPTS) ${custom || ''} | $(BUILD) $(DIST)/${dir}/
+${tfname} : scripts ${custom || ''} | $(BUILD) $(DIST)/${dir}/
 	@echo Building ${filename} with ${hives.join(' ')}
 	$(GENERATE) ${hives.join(' ')} -o $@ ${cm ? ('--charmap $(BUILD)/'+filename+'.charmap') :''}`;
 		definedBuildSeqs[tfname] = true;
