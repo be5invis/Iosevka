@@ -49,6 +49,7 @@ var sampleSentences = [
 	{ code: 'de', lang: 'German', sample: 'Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich. Waſſerschloſʒ' },
 	{ code: 'el', lang: 'Greek', sample: 'Ταχίστη αλώπηξ βαφής ψημένη γη, δρασκελίζει υπέρ νωθρού κυνός.' },
 	{ code: 'el', lang: 'Ancient Greek', sample: 'Ἄδμηθ’, ὁρᾷς γὰρ τἀμὰ πράγμαθ\' ὡς ἔχει, λέξαι θέλω σοι πρὶν θανεῖν ἃ βούλομαι. ' },
+	{ code: 'gn', lang: 'Guarani', sample: 'Hĩlandiagua kuñanguéra oho peteĩ saʼyju ypaʼũme Gavõme omboʼe hag̃ua ingyleñeʼẽ mitãnguérare neʼẽndyʼỹ.' },
 	{ code: 'hu', lang: 'Hungarian', sample: 'Jó foxim és don Quijote húszwattos lámpánál ülve egy pár bűvös cipőt készít.' },
 	{ code: 'is', lang: 'Icelandic', sample: 'Kæmi ný öxi hér, ykist þjófum nú bæði víl og ádrepa.' },
 	{ code: 'ga', lang: 'Irish', sample: 'Ċuaiġ bé ṁórṡáċ le dlúṫspád fíorḟinn trí hata mo ḋea-ṗorcáin ḃig.' },
