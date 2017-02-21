@@ -48,7 +48,7 @@ function getMapping(options) {
 		options.fileSuffix || "",
 		(weight === "book" ? (slantness === "upright" ? "regular" : "") : weight) + (slantness === "upright" ? "" : slantness)
 	].filter(present).join("-");
-	return {hives, dir, filename, custom: options.custom};
+	return { hives, dir, filename, custom: options.custom };
 }
 
 let definedBuildSeqs = {};
@@ -67,7 +67,7 @@ function createMake(mapping) {
 		buf += `
 ${tfname} : scripts ${custom || ''} | $(BUILD) $(DIST)/${dir}/
 	@echo Building ${filename} with ${hives.join(' ')}
-	$(GENERATE) ${hives.join(' ')} -o $@ ${cm ? ('--charmap $(BUILD)/'+filename+'.charmap') :''}`;
+	$(GENERATE) ${hives.join(' ')} -o $@ ${cm ? ('--charmap $(BUILD)/' + filename + '.charmap') : ''}`;
 		definedBuildSeqs[tfname] = true;
 	}
 	buf += `
@@ -88,7 +88,7 @@ ${woff2Target} : ${target} | $(DIST)/${dir}/web/
 	woff2_compress $<
 	mv $(subst .ttf,.woff2,$<) $@`;
 
-	return {buf, target, woffTarget, woff2Target, cmTarget};
+	return { buf, target, woffTarget, woff2Target, cmTarget };
 }
 
 let designGroups = [];
@@ -109,18 +109,18 @@ if (argv.custom) {
 	];
 } else {
 	designGroups = [
-		{name: "sans", design: [], dirPrefix: ""},
-		{name: "slab", design: ["slab"], dirPrefix: ""},
-		{name: "r-sans", design: [], dirPrefix: "01"},
-		{name: "r-sans-term", design: ["term"], dirPrefix: "02"},
-		{name: "r-sans-cc", design: ["cc"], dirPrefix: "03"},
-		{name: "r-slab", design: ["slab"], dirPrefix: "04"},
-		{name: "r-slab-term", design: ["term", "slab"], dirPrefix: "05"},
-		{name: "r-slab-cc", design: ["cc", "slab"], dirPrefix: "06"},
-		{name: "r-hooky", design: [], infix: "hooky", dirPrefix: "07", styles: {upright: ["v-l-hooky", "v-i-hooky"]}},
-		{name: "r-hooky-term", design: ["term"], infix: "hooky-term", dirPrefix: "08", styles: {upright: ["v-l-hooky", "v-i-hooky"]}},
-		{name: "r-zshaped", design: [], infix: "zshaped",dirPrefix: "09", styles: {upright: ["v-l-zshaped", "v-i-zshaped"]}},
-		{name: "r-zshaped-term", design: ["term"], infix: "zshaped-term", dirPrefix: "10", styles: {upright: ["v-l-zshaped", "v-i-zshaped"]}},
+		{ name: "sans", design: [], dirPrefix: "" },
+		{ name: "slab", design: ["slab"], dirPrefix: "" },
+		{ name: "r-sans", design: [], dirPrefix: "01" },
+		{ name: "r-sans-term", design: ["term"], dirPrefix: "02" },
+		{ name: "r-sans-cc", design: ["cc"], dirPrefix: "03" },
+		{ name: "r-slab", design: ["slab"], dirPrefix: "04" },
+		{ name: "r-slab-term", design: ["term", "slab"], dirPrefix: "05" },
+		{ name: "r-slab-cc", design: ["cc", "slab"], dirPrefix: "06" },
+		{ name: "r-hooky", design: [], infix: "hooky", dirPrefix: "07", styles: { upright: ["v-l-hooky", "v-i-hooky"] } },
+		{ name: "r-hooky-term", design: ["term"], infix: "hooky-term", dirPrefix: "08", styles: { upright: ["v-l-hooky", "v-i-hooky"] } },
+		{ name: "r-zshaped", design: [], infix: "zshaped", dirPrefix: "09", styles: { upright: ["v-l-zshaped", "v-i-zshaped"] } },
+		{ name: "r-zshaped-term", design: ["term"], infix: "zshaped-term", dirPrefix: "10", styles: { upright: ["v-l-zshaped", "v-i-zshaped"] } },
 	];
 }
 
@@ -158,7 +158,7 @@ $(DIST)/${groupMapping.dir}/web/ : | $(DIST)/${groupMapping.dir}/
 			groupTargets[slantness].push(target);
 			groupTargets.woff.push(woffTarget);
 			groupTargets.woff2.push(woff2Target);
-	}
+		}
 
 	makes.push(`fonts-${dg.name} : ${groupTargets.ttf.join(' ')}`);
 	makes.push(`fonts-${dg.name}-upright : ${groupTargets.upright.join(' ')}`);
@@ -173,8 +173,8 @@ $(DIST)/${groupMapping.dir}/web/ : | $(DIST)/${groupMapping.dir}/
 if (argv.custom) {
 } else {
 	const ttcgroups = [
-		{groups: [designGroups[2], designGroups[3], designGroups[4]]},
-		{groups: [designGroups[5], designGroups[6], designGroups[7]]}
+		{ groups: [designGroups[2], designGroups[3], designGroups[4]] },
+		{ groups: [designGroups[5], designGroups[6], designGroups[7]] }
 	];
 	// ttc
 	let ttcs = [];
