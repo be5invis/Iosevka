@@ -18,9 +18,10 @@ app.on('window-all-closed', function () {
 });
 
 function combineImages(images, outfile, width, height, doubleTrim) {
-	var command = 'convert ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  ' + (doubleTrim ? '-bordercolor ' + doubleTrim + ' -trim ' : '') + outfile;
+	var command = 'magick ' + images.join(' ') + ' -append -crop ' + width + 'x' + height + '+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  ' + (doubleTrim ? '-bordercolor ' + doubleTrim + ' -trim ' : '') + outfile;
 	console.log(command);
 	cp.exec(command, function (err, stdout, stderr) {
+		if (err) console.log(err)
 		images.forEach(function (file) {
 			fs.unlinkSync(file);
 		});

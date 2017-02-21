@@ -1,8 +1,11 @@
-VERSION = 1.11.0
+VERSION = 1.11.1
 
 BUILD = build
 DIST = dist
 ARCHIVEDIR = release-archives
+
+.SECONDARY : scripts
+
 _start : default
 
 $(BUILD)/ :
@@ -16,6 +19,7 @@ GENERATE = @node --expose-gc $(NODE_FDT_OPTIONS) generator
 
 ###################################################################################################
 # Standard builds
+
 $(BUILD)/targets.mk : maker.js $(SCRIPTS) | $(BUILD)/
 	@node maker.js > $@
 include $(BUILD)/targets.mk
@@ -61,6 +65,11 @@ endif
 
 ###################################################################################################
 # Iosevka standard release scripts
+
+.PHONY : pages test release sample-images _start default
+.SECONDARY: fonts-sans fonts-slab web-sans web-slab archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc d-snapshot electronsnaps1 
+
+
 release : archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc pages sample-images
 
 test : fonts-sans fonts-slab
@@ -106,8 +115,11 @@ images/family.png: electronsnaps1
 
 sample-images: images/family.png images/matrix.png images/weights.png images/variants.png images/opentype.png images/languages.png images/preview-all.png
 
+
 ###################################################################################################
 # Support Files
+# DO NOT CHANGE
+
 PATELC = node ./node_modules/patel/bin/patel-c
 
 GLYPH_SEGMENTS = glyphs/common-shapes.js glyphs/overmarks.js glyphs/letters-unified-basic.js glyphs/letters-unified-extended.js glyphs/numbers.js glyphs/symbol-punctuation.js glyphs/symbol-math.js glyphs/symbol-letter.js glyphs/symbol-geometric.js glyphs/symbol-other.js glyphs/symbol-braille.js glyphs/autobuilds.js buildglyphs.js
