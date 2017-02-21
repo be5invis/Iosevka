@@ -39,60 +39,60 @@ var CodeSnippet = Vue.component('snippet', {
 	methods: {}
 });
 
-var escapeHTML = function(){
-'use strict';
-var matchHtmlRegExp = /["'&<>]/;
-function escapeHTML(string) {
-  var str = '' + string;
-  var match = matchHtmlRegExp.exec(str);
+var escapeHTML = function () {
+	'use strict';
+	var matchHtmlRegExp = /["'&<>]/;
+	function escapeHTML(string) {
+		var str = '' + string;
+		var match = matchHtmlRegExp.exec(str);
 
-  if (!match) {
-    return str;
-  }
+		if (!match) {
+			return str;
+		}
 
-  var escape;
-  var html = '';
-  var index = 0;
-  var lastIndex = 0;
+		var escape;
+		var html = '';
+		var index = 0;
+		var lastIndex = 0;
 
-  for (index = match.index; index < str.length; index++) {
-    switch (str.charCodeAt(index)) {
-      case 34: // "
-        escape = '&quot;';
-        break;
-      case 38: // &
-        escape = '&amp;';
-        break;
-      case 39: // '
-        escape = '&#39;';
-        break;
-      case 60: // <
-        escape = '&lt;';
-        break;
-      case 62: // >
-        escape = '&gt;';
-        break;
-      default:
-        continue;
-    }
+		for (index = match.index; index < str.length; index++) {
+			switch (str.charCodeAt(index)) {
+				case 34: // "
+					escape = '&quot;';
+					break;
+				case 38: // &
+					escape = '&amp;';
+					break;
+				case 39: // '
+					escape = '&#39;';
+					break;
+				case 60: // <
+					escape = '&lt;';
+					break;
+				case 62: // >
+					escape = '&gt;';
+					break;
+				default:
+					continue;
+			}
 
-    if (lastIndex !== index) {
-      html += str.substring(lastIndex, index);
-    }
+			if (lastIndex !== index) {
+				html += str.substring(lastIndex, index);
+			}
 
-    lastIndex = index + 1;
-    html += escape;
-  }
+			lastIndex = index + 1;
+			html += escape;
+		}
 
-  return lastIndex !== index
-    ? html + str.substring(lastIndex, index)
-    : html;
-}
-return escapeHTML;
+		return lastIndex !== index
+			? html + str.substring(lastIndex, index)
+			: html;
+	}
+	return escapeHTML;
 }();
 
 
-function TAG(ltag){return function(s){return {ltag: ltag, s: s}}}
+function TAG(ltag) { return function (s) { return { ltag: ltag, s: s } } }
 var arw2 = TAG('arrow2');
 var logc = TAG('logic');
 var cmpr = TAG('cmpr');
@@ -102,26 +102,30 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.11.0",
+		version: "1.11.1",
 		codename: "Klaes",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
 		theme: 'color-dark',
-		ligationSamples:[
-			[arw2('-<<'),arw2('-<'),arw2('-<-'),'<--','<---',arw2('<<-'),'<-','->',arw2('->>'),'-->','--->',arw2('->-'),arw2('>-'),arw2('>>-'), '<->','<-->','<--->','<---->','<!--'],
-			[arw2('=<<'),arw2('=<'),arw2('=<='),'<==','<===',arw2('<<='),cmpr('<='),'=>',arw2('=>>'),'==>','===>',arw2('=>='),cmpr('>='),arw2('>>='), '<=>','<==>','<===>','<====>','<!---'],
-			['<----------------', '---------------->', '<===============>', 'a:b','a::b','a:::b', logc('a\\/b'), logc('a/\\b')],
-			[':=',':-', ':+', '<*','<*>','*>', dopr('<.'), dopr('<.>'), dopr('.>'), '+:', '-:','=:', '<******>', brst('(* comm *)')]
+		ligationSamples: [
+			[arw2('-<<'), arw2('-<'), arw2('-<-'), '<--', '<---', arw2('<<-'), '<-', '->', arw2('->>'), '-->', '--->', arw2('->-'), arw2('>-'), arw2('>>-'), '<->', '<-->', '<--->', '<---->', '<!--'],
+			[arw2('=<<'), arw2('=<'), arw2('=<='), '<==', '<===', arw2('<<='), cmpr('<='), '=>', arw2('=>>'), '==>', '===>', arw2('=>='), cmpr('>='), arw2('>>='), '<=>', '<==>', '<===>', '<====>', '<!---'],
+			['<----------------', '---------------->', '<===============>', 'a:b', 'a::b', 'a:::b', logc('a\\/b'), logc('a/\\b')],
+			[':=', ':-', ':+', '<*', '<*>', '*>', dopr('<.'), dopr('<.>'), dopr('.>'), '+:', '-:', '=:', '<******>', brst('(* comm *)')]
 		],
 		ligationSets: [
-			{tag: 'calt', desc:'Default setting in text editors', group: []},
-			{tag: 'XFST', tagName: 'XML_, XFS_, XFST', desc:'ML, OCaml, F#, F*', group: ['brst', 'logic', 'ml']},
-			{tag: 'SWFT', tagName: 'SWFT, XPTL', desc:'Swift, PatEL', group: ['arrow2']},
-			{tag: 'XHS_', tagName: 'XHS_, XIDR, XELM, PURS',
-				desc:'Haskell, Idris, Elm, PureScript', group: ['arrow2', 'dotoper', 'logic']},
-			{tag: 'XV__', tagName: 'XV__',
-				desc:'Coq', group: ['arrow2', 'dotoper', 'logic', 'brst']}
+			{ tag: 'calt', desc: 'Default setting in text editors', group: [] },
+			{ tag: 'XFST', tagName: 'XML0, XFS0, XFST', desc: 'ML, OCaml, F#, F*', group: ['brst', 'logic', 'ml'] },
+			{ tag: 'SWFT', tagName: 'SWFT, XPTL', desc: 'Swift, PatEL', group: ['arrow2'] },
+			{
+				tag: 'XHS0', tagName: 'XHS0, XIDR, XELM, PURS',
+				desc: 'Haskell, Idris, Elm, PureScript', group: ['arrow2', 'dotoper', 'logic']
+			},
+			{
+				tag: 'XV00', tagName: 'XV00',
+				desc: 'Coq', group: ['arrow2', 'dotoper', 'logic', 'brst']
+			}
 		],
 		opentypeSamples: [
 			{
@@ -196,12 +200,12 @@ var indexPage = new Vue({
 		stressSample: function (st, stress) {
 			return st.replace(new RegExp('[' + stress + ']', 'g'), '<b>$&</b>')
 		},
-		elabSample: function(g, s){
-			if(typeof s === 'string'){
+		elabSample: function (g, s) {
+			if (typeof s === 'string') {
 				return '<em>' + escapeHTML(s) + '</em>'
-			} else if(s.ltag && g.indexOf(s.ltag) >= 0){
+			} else if (s.ltag && g.indexOf(s.ltag) >= 0) {
 				return '<em>' + escapeHTML(s.s) + '</em>'
-			} else{
+			} else {
 				return '<s>' + escapeHTML(s.s) + '</s>'
 			}
 		}
