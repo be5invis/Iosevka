@@ -206,6 +206,8 @@ function enoughRotate(bef, z0, z1, z2, aft, cleanMore, flagl, flagr) {
 }
 function fairify(scurve, gizmo, denseQ, cleanMore) {
 	for (var j = 0; j < scurve.length; j++) {
+		if (!isFinite(scurve[j].x)) scurve[j].x = 0;
+		if (!isFinite(scurve[j].y)) scurve[j].y = 0;
 		scurve[j] = Transform.untransform(gizmo, scurve[j]);
 	}
 	var splitpoints = [scurve[0]];
