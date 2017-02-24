@@ -5,8 +5,10 @@ DIST = dist
 ARCHIVEDIR = release-archives
 
 .SECONDARY : scripts
+.PHONY : pages test release sample-images _start web fw custom custom-web custom-config
 
-_start : default
+
+_start : __default
 
 $(BUILD)/ :
 	-@mkdir -p $@
@@ -15,13 +17,13 @@ $(DIST)/ :
 $(ARCHIVEDIR)/ :
 	-@mkdir -p $@
 
-GENERATE = @node --expose-gc $(NODE_FDT_OPTIONS) generator
+GENERATE = @node --expose-gc generator
 
 ###################################################################################################
 # Standard builds
 
 $(BUILD)/targets.mk : maker.js $(SCRIPTS) | $(BUILD)/
-	@node maker.js > $@
+	node maker.js > $@
 include $(BUILD)/targets.mk
 
 web : web-sans web-slab
@@ -60,17 +62,10 @@ include $(BUILD)/targets-$(set).mk
 endif
 
 
-
-
-
 ###################################################################################################
 # Iosevka standard release scripts
 
-.PHONY : pages test release sample-images _start default
-.SECONDARY: fonts-sans fonts-slab web-sans web-slab archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc d-snapshot electronsnaps1 
-
-
-release : archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc pages sample-images
+release : __release pages sample-images
 
 test : fonts-sans fonts-slab
 	cp dist/iosevka/*.ttf testdrive/assets/
@@ -131,7 +126,7 @@ SCRIPTS_FROM_PTL = $(SUPPORT_FILES_FROM_PTL) $(GLYPH_SEGMENTS)
 
 $(SUPPORT_FILES_FROM_PTL) : %.js : %.ptl meta/macros.ptl
 	$(PATELC) --optimize --strict $< -o $@
-$(GLYPH_SEGMENTS) : %.js : %.ptl meta/macros.ptl $(subst .js,.ptl,$(SUPPORT_FILES_FROM_PTL)) $(SUPPORT_FILES_JS)
+$(GLYPH_SEGMENTS) : %.js : %.ptl meta/macros.ptl $(SUPPORT_FILES_FROM_PTL) $(SUPPORT_FILES_JS)
 	$(PATELC) --optimize --strict $< -o $@
 
 cleanscripts :

@@ -65,7 +65,7 @@ function createMake(mapping) {
 	let buf = "";
 	if (!definedBuildSeqs[tfname]) {
 		buf += `
-${tfname} : scripts ${custom || ''} | $(BUILD) $(DIST)/${dir}/
+${tfname} : ${custom || ''} scripts | $(BUILD) $(DIST)/${dir}/
 	@echo Building ${filename} with ${hives.join(' ')}
 	$(GENERATE) ${hives.join(' ')} -o $@ ${cm ? ('--charmap $(BUILD)/' + filename + '.charmap') : ''}`;
 		definedBuildSeqs[tfname] = true;
@@ -210,7 +210,8 @@ $(DIST)/ttc/${mapping.filename}.ttc : ${ttctargets.join(' ')} | $(DIST)/ttc/
 	makes.push(`$(ARCHIVEDIR)/iosevka-pack-$(VERSION).zip : ttc | $(ARCHIVEDIR)/
 	cd $(DIST)/ttc/ && 7z a -tzip -mx=9 ../../$@ ./*.ttc`);
 	makes.push(`archive-ttc : $(ARCHIVEDIR)/iosevka-pack-$(VERSION).zip`);
-	makes.push(`default : fonts-sans fonts-slab`);
+	makes.push(`__default : fonts-sans fonts-slab`);
+	makes.push(`__release : archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc`);
 }
 
 console.log(makes.join("\n\n"));
