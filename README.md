@@ -102,7 +102,7 @@ The current avaliable styles are:
 * Styles for letter `g`:
   * `v-g-doublestorey` : Double-storey `g` (default).
   * `v-g-singlestorey` : Single-storey `g`.
-  * `v-g-opendoublestorey` : Open Single-storey `g`.
+  * `v-g-opendoublestorey` : Open Double-storey `g`.
 * Styles for letter `m`:
   * `v-m-longleg` : `m` with long middle leg (default).
   * `v-m-shortleg` : `m` with shorter middle leg.
