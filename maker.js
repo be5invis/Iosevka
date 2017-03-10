@@ -213,7 +213,7 @@ $(DIST)/ttc/${mapping.filename}.ttc : ${ttctargets.join(' ')} | $(DIST)/ttc/
 	cd $(DIST)/ttc/ && 7z a -tzip -mx=9 ../../$@ ./*.ttc`);
 	makes.push(`archive-ttc : $(ARCHIVEDIR)/iosevka-pack-$(VERSION).zip`);
 	makes.push(`__default : fonts-sans fonts-slab`);
-	makes.push(`__release : archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-cc archive-r-slab-term archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc`);
+	makes.push(`__release : archive-r-sans archive-r-slab archive-r-sans-term archive-r-sans-type archive-r-sans-cc archive-r-slab-term archive-r-slab-type archive-r-slab-cc archive-r-hooky archive-r-hooky-term archive-r-zshaped archive-r-zshaped-term archive-ttc`);
 }
 
 console.log(makes.join("\n\n"));
