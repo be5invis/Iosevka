@@ -10,7 +10,7 @@ function contourHash(c) {
 	var buf = "";
 	for (var j = 1; j < c.length; j++) {
 		var z = c[j];
-		buf += `${z.on ? 'o':'f'}${z.cubic?'c':'q'}${delta(z.x, lx)},${delta(z.y, ly)};`;
+		buf += `${z.on ? 'o' : 'f'}${z.cubic ? 'c' : 'q'}${delta(z.x, lx)},${delta(z.y, ly)};`;
 		lx = z.x, ly = z.y;
 	}
 	return buf;
@@ -22,7 +22,7 @@ function match(g1, g2, _n) {
 		for (var k = j; k < g2.contours.length && k - j < g1.contours.length; k++) {
 			if (g1.contours[k - j].hash !== g2.contours[k].hash
 				|| !(k <= j || delta(g1.contours[k - j][0].x, g1.contours[k - j - 1][0].x) === delta(g2.contours[k][0].x, g2.contours[k - 1][0].x)
-				&& delta(g1.contours[k - j][0].y, g1.contours[k - j - 1][0].y) === delta(g2.contours[k][0].y, g2.contours[k - 1][0].y))) {
+					&& delta(g1.contours[k - j][0].y, g1.contours[k - j - 1][0].y) === delta(g2.contours[k][0].y, g2.contours[k - 1][0].y))) {
 				found = false;
 				break;
 			}
@@ -47,11 +47,13 @@ function unlinkRef(g, dx, dy, glyf) {
 	if (g.references)
 		for (let r of g.references) {
 			cntrs = cntrs.concat(unlinkRef(glyf[r._n], r.x + dx, r.y + dy, glyf));
-	}
+		}
 	return cntrs;
 }
 
 function autoref(glyf) {
+	supporessNaN(glyf);
+
 	for (var j = 0; j < glyf.length; j++) {
 		var g = glyf[j];
 		if (g.contours) {
@@ -74,18 +76,18 @@ function autoref(glyf) {
 			}
 		}
 	}
-	
+
 	// referencify, backward
 	for (var j = 0; j < glyf.length; j++) {
 		if (glyf[j].cmpPriority < 0 || !glyf[j].contours.length || glyf[j].references && glyf[j].references.length) continue;
 		for (var k = j - 1; k >= 0; k--) {
 			if (glyf[j].contours.length > glyf[k].contours.length) continue;
-			while(match(glyf[j], glyf[k], j)){
+			while (match(glyf[j], glyf[k], j)) {
 				// console.log("Part", glyf[j].name, "->", glyf[k].name);
 			}
 		}
 	}
-	
+
 	// unlink composite
 	for (var j = 0; j < glyf.length; j++) {
 		if (glyf[j].contours.length === 0 || !glyf[j].references || glyf[j].references.length === 0) continue;
@@ -93,6 +95,20 @@ function autoref(glyf) {
 		var cs = unlinkRef(glyf[j], 0, 0, glyf);
 		glyf[j].contours = g.contours.concat(cs);
 		glyf[j].references = [];
+	}
+}
+
+function supporessNaN(glyf) {
+	for (var j = 0; j < glyf.length; j++) {
+		var g = glyf[j];
+		if (!g.contours) continue;
+		for (var k = 0; k < g.contours.length; k++) {
+			var contour = g.contours[k];
+			for (let z of contour) {
+				if (!isFinite(z.x)) z.x = 0
+				if (!isFinite(z.y)) z.y = 0
+			}
+		}
 	}
 }
 

@@ -46,9 +46,13 @@ export : define [assignFontNames para metrics font] : begin
 		nameFont font FAMILY para.family # Family
 		nameFont font STYLE para.style  # Style
 	: else
-		nameFont font FAMILY : para.family + ' ' + [para.style.replace [regex ' Italic$'] '']
-		nameFont font STYLE : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
+		local compatFamilySuffix : para.style.replace [regex ' Italic$'] '' :.replace [regex ' Extra'] 'X'
+		local compatStyle : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
+		nameFont font FAMILY : para.family + ' ' + compatFamilySuffix
+		nameFont font STYLE compatStyle
+
 	nameFont font UNIQUE_NAME "\(para.family) \(para.style) \(para.version) (\(para.codename))" # Unique Name
+	
 	local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
 	nameFont font FULL_NAME fontfullName # Full Name
 	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
@@ -56,7 +60,6 @@ export : define [assignFontNames para metrics font] : begin
 	nameFont font VERSION para.version # Version
 	
 	nameFont font COPYRIGHT para.copyright # Copyright
-	# nameFont font TRADEMARK para.trademark # Trademark
 	nameFont font MANUFACTURER para.manufacturer # Manufacturer
 	nameFont font DESIGNER para.designer # Designer
 	nameFont font DESCRIPTION para.description # Description
@@ -80,6 +83,7 @@ export : define [assignFontNames para metrics font] : begin
 		useTypoMetrics true
 	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
 	set font.post.isFixedPitch      true
+	set font.OS_2.xAvgCharWidth     para.width
 	set font.head.macStyle          : object
 		bold          : not : not para.isBold
 		italic        : not : not (para.isItalic || para.isOblique)

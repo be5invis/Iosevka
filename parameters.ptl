@@ -1,15 +1,21 @@
 export : define [build parametersData styles] : begin
 	local param {.}
 	local variantSelector {.}
-	foreach [style : items-of styles] : begin
+	
+	define [introStyle style] : begin
 		local hive parametersData.(style)
-		if hive : then
-			foreach [k : items-of : Object.keys hive] : set param.(k) hive.(k)
-			if hive.multiplies : foreach [k : items-of : Object.keys hive.multiplies] : set param.(k) : param.(k) * hive.multiplies.(k)
-			if hive.adds : foreach [k : items-of : Object.keys hive.adds] : set param.(k) : param.(k) + hive.adds.(k)
-			#if hive.familySuffix : set param.family "\(param.family)\(hive.familySuffix)"
-			#if hive.styleSuffix : set param.style "\(param.style)\(hive.styleSuffix)"
-			if hive.variantSelector : foreach [k : items-of : Object.keys hive.variantSelector] : begin
-				set variantSelector.(k) hive.variantSelector.(k)
+		if (!hive) : return nothing
+		if hive.inherits : foreach [h : items-of hive.inherits] : introStyle h
+		foreach [k : items-of : Object.keys hive] : set param.(k) hive.(k)
+		if hive.multiplies : foreach [k : items-of : Object.keys hive.multiplies] : begin
+			set param.(k) : param.(k) * hive.multiplies.(k)
+		if hive.adds : foreach [k : items-of : Object.keys hive.adds] : begin
+			set param.(k) : param.(k) + hive.adds.(k)
+		if hive.appends : foreach [k : items-of : Object.keys hive.appends] : begin
+			set param.(k) : (param.(k) || {}).concat(hive.appends.(k))
+		if hive.variantSelector : foreach [k : items-of : Object.keys hive.variantSelector] : begin
+			set variantSelector.(k) hive.variantSelector.(k)
+	
+	foreach [style : items-of styles] : introStyle style
 	set param.variantSelector variantSelector
 	return param
