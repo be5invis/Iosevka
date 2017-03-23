@@ -12,7 +12,7 @@ export : define [apply para glyphList] : begin
 	local lookup_mkmk
 		.type 'gpos_mark_to_mark'
 		.subtables {}
-	
+
 	local GPOS : object
 		languages
 			.DFLT_DFLT {.features {'mark0', 'mkmk0'}}
@@ -25,7 +25,7 @@ export : define [apply para glyphList] : begin
 		lookups
 			.l_mark lookup_mark
 			.l_mkmk lookup_mkmk
-	
+
 	# mark and mkmk
 	define [createBaseInfo g th px py] : begin
 		local res {.}
@@ -36,7 +36,7 @@ export : define [apply para glyphList] : begin
 				.y g.anchors.(key).(py || 'y')
 			set pushed true
 		return : if pushed res nothing
-		
+
 	define [createMTSSubtable lookup anchorClasses] : begin
 		local subtable {.marks {.} .bases {.}}
 		local th {.}
@@ -64,7 +64,7 @@ export : define [apply para glyphList] : begin
 					local r : createBaseInfo glyph th 'x' 'y'
 					if r : set subtable.bases.(glyph.name) r
 		lookup.subtables.push subtable
-	
+
 	foreach [marktag : items-of {'above' 'below' 'overlay' 'slash' 'topright' 'bottomright' 'trailing' 'lf'}] : begin
 		createMTSSubtable lookup_mark {marktag}
 		createMTSSubtable lookup_mkmk {marktag}
@@ -91,7 +91,7 @@ export : define [apply para glyphList] : begin
 		.hani_DFLT {.features commonList}
 	local features {.}
 	local lookups {.}
-	
+
 	define [lookup-single name f t] : begin
 		local subtable {.}
 		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
@@ -107,7 +107,7 @@ export : define [apply para glyphList] : begin
 					foreach [j : range 0 left.length] : if (st.(left.(j)) !== right.(j)) : set check false
 					if check : set found name
 			if found : return found
-			
+
 			local name "_lookup_\([Object.keys lookups].length)"
 			lookup-single name left right
 			return name
@@ -135,11 +135,11 @@ export : define [apply para glyphList] : begin
 			: then : set ans : ans.concat term
 			: else : ans.push term
 		return ans
-	
+
 	# ccmp
 	commonList.push 'ccmp'
 	set features.ccmp {'ccmp1' 'ccmp2'}
-	
+
 	let [groupA {'A' 'a' 'u' 'cyrA' 'cyra'}] : set lookups.ccmp1
 		.type 'gsub_chaining'
 		.subtables : list
@@ -154,7 +154,7 @@ export : define [apply para glyphList] : begin
 			chain-rule groupA markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
 			chain-rule groupA markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
 			chain-rule groupA markGlyphs.all markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
-	
+
 	set lookups.ccmp2
 		.type 'gsub_ligature'
 		.subtables : list : object
@@ -164,14 +164,17 @@ export : define [apply para glyphList] : begin
 			dasiavaria {'revCommaAbove' 'graveAbove'}
 			dasiaoxia {'revCommaAbove' 'acuteAbove'}
 			dasiaperispomeni {'revCommaAbove' 'perispomeniAbove'}
-	
+
 	local lookupOrder {}
-	
+
 	# calt and other ligations
 	if (para.spacing > 0) : do
 		local [stick style] : {'hyphen' 'equal'} ~> [lsx style]
 		local [stickClass style] : [lsx style] {'hyphen' 'equal'}
+		local [equality style] : {'equal'} ~> [lsx style]
+		local [equalityClass style] : [lsx style] {'equal'}
 		local less {'less'}
+		local equal {'equal'}
 		local hyphen {'hyphen'}
 		local exclam {'exclam'}
 		local greater {'greater'}
@@ -208,7 +211,7 @@ export : define [apply para glyphList] : begin
 			local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
 			local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
 			local [only subtable ln] : begin
-				if ([mappedFeature.indexOf ln] >= 0) 
+				if ([mappedFeature.indexOf ln] >= 0)
 				: then : return subtable
 				: else : begin
 					set subtable.apply {}
@@ -281,7 +284,7 @@ export : define [apply para glyphList] : begin
 						chain-rule centerizeR (centerizeL ~> centerizeR)
 				includeLookup
 					.type 'gsub_reverse'
-					.subtables : list 
+					.subtables : list
 						object
 							match      {centerizeL [acskip] [acskip] centerizeR}
 							to         centerizeR
@@ -294,14 +297,14 @@ export : define [apply para glyphList] : begin
 							match      {centerizeL centerizeR}
 							to         centerizeR
 							inputIndex 0
-				
+
 				# Operator centering : Avoid "letter-point" being centered
 				includeLookup
 					.type 'gsub_chaining'
 					.subtables : list
 						chain-rule alphabet [no_period_center]
 						chain-rule [no_period_center] alphabet
-			
+
 			do "Colon chains" : includeLookup
 				.type 'gsub_chaining'
 				.subtables : list
@@ -309,6 +312,12 @@ export : define [apply para glyphList] : begin
 					chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dmid'}) {'colon'}
 					chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dleft'})
 					chain-rule ({'colon'} ~> {'colon.dright'}) {'colon'}
+			do "Equality"
+				includeLookup
+					.type 'gsub_chaining'
+					.subtables : list
+						chain-rule [equality 'fc'] [equality 'cf'] # ==
+						chain-rule [equality 'fc'] [equality 'cc'] [equality 'cf'] # ===
 
 			do "Arrows"
 				includeLookup
@@ -348,7 +357,7 @@ export : define [apply para glyphList] : begin
 				# --------------------->
 				includeLookup
 					.type 'gsub_reverse'
-					.subtables : list 
+					.subtables : list
 						object
 							match      {{'hyphen' 'equal'} [stickClass 'fr']}
 							to         [stickClass 'fz']
@@ -392,7 +401,7 @@ export : define [apply para glyphList] : begin
 		local hwtrail {'period' 'comma' 'cjkperiod' 'cjkcomma'}
 		local fwmid {'dwccolon' 'dwcsemicolon'}
 		local hwmid {'colon' 'semicolon'}
-		
+
 		commonList.push 'opbd'
 		set features.opbd {'opbd1'}
 		set lookups.opbd1
@@ -400,7 +409,7 @@ export : define [apply para glyphList] : begin
 			.subtables : list
 				chain-rule [flatten fwtrail hwtrail fwopen hwopen fwmid hwmid] (fwopen ~> hwopen)
 				chain-rule (fwclose ~> hwclose) [flatten fwtrail hwtrail fwclose hwclose fwopen hwopen fwmid hwmid]
-	
+
 	# locl, SRB
 	local srbSubtable null
 	if para.isItalic
