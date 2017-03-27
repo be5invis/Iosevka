@@ -1,0 +1,216 @@
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
+
+define progLigNameMap
+	# language-specific tags
+	.XML_ {'brst', 'logic', 'ml'}
+	.XML0 {'brst', 'logic', 'ml'}
+	.XFS_ {'brst', 'logic', 'fsharp'}
+	.XFS0 {'brst', 'logic', 'fsharp'}
+	.XFST {'brst', 'logic', 'fstar'}
+	.XHS_ {'arrow2', 'dotoper', 'logic', 'haskell'}
+	.XHS0 {'arrow2', 'dotoper', 'logic', 'haskell'}
+	.XIDR {'arrow2', 'dotoper', 'logic', 'idris'}
+	.XELM {'arrow2', 'dotoper', 'logic', 'elm'}
+	.PURS {'arrow2', 'dotoper', 'logic', 'purescript'}
+	.XPTL {'arrow2', 'patel'}
+	.SWFT {'arrow2', 'swift'}
+	.XV__ {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
+	.XV00 {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
+	# common feature tags
+	.dlig {'arrow2', 'dotoper', 'logic', 'brst', 'dlig'}
+	.calt {}
+
+define [lsx s] : lambda [t] : t.map : lambda [x] "lig\(x).\(s)"
+
+local [stick style] : {'hyphen' 'equal'} ~> [lsx style]
+local [stickClass style] : [lsx style] {'hyphen' 'equal'}
+local less {'less'}
+local hyphen {'hyphen'}
+local exclam {'exclam'}
+local greater {'greater'}
+local alphabet {'a' 'a.doublestorey' 'a.singlestorey' 'b' 'c' 'd' 'e' 'f' 'g' 'g.doublestorey' 'g.singlestorey' 'g.opendoublestorey' 'h' 'i' 'i.hooky' 'i.serifed' 'i.italic' 'i.zshaped' 'j' 'j.straight' 'j.serifed' 'k' 'l' 'l.serifed' 'l.italic' 'l.hooky' 'l.zshaped' 'l.tailed' 'l.hookybottom' 'm' 'm.longleg' 'm.shortleg' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' 'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' 'zero' 'zero.slashed' 'zero.dotted' 'zero.unslashed' 'one' 'two' 'three' 'four' 'five' 'six' 'seven' 'eight' 'nine' 'underscore' 'underscore.high' 'underscore.low'}
+local [acops]  {'less' 'greater' 'hyphen' 'equal' 'plus'}
+local [acskip] {'slash' 'bar' 'at' 'ampersand' 'percent' 'numbersign'}
+local [asterisk_center] ({'asterisk'} ~> {'asterisk.low'})
+local [colon_center]    ({'colon'} ~> {'colon.mid'})
+local [tilde_center]    ({'asciitilde'} ~> {'asciitilde.low'})
+local [period_center]   ({'period'} ~> {'period.center'})
+local [no_period_center] ({'period.center'} ~> {'period'})
+
+export all : define [buildLigations chain-rule lookupOrder commonList features lookups] : foreach [ ligationFeatureName : items-of : Object.keys progLigNameMap] : do
+	local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
+	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
+	local [only subtable ln] : begin
+		if ([mappedFeature.indexOf ln] >= 0) 
+		: then : return subtable
+		: else : begin
+			set subtable.apply {}
+			return subtable
+	commonList.push ligationFeatureName
+
+	local featLookups {}
+	local lastLookupName null
+
+	local [dedup ln0 obj] : begin
+		local h : JSON.stringify obj
+		foreach [{name lookup} : pairs-of lookups] : begin
+			local h1 : JSON.stringify lookup
+			if (h == h1) : return name
+		return ln0
+
+	local [includeLookup obj] : begin
+		local ln : dedup (ligationLookupName + featLookups.length) obj
+		if [not lookups.(ln)] : set lookups.(ln) obj
+		featLookups.push ln
+		if lastLookupName : lookupOrder.push {lastLookupName ln}
+		set lastLookupName ln
+
+	set features.(ligationFeatureName) featLookups
+
+	do "Operator centering"
+		define centerizeGroups {asterisk_center tilde_center colon_center period_center}
+		define [avoid-dot g] : if (g == period_center)
+			then (subtable => [only subtable "dotoper"])
+			else (subtable => subtable)
+		define [centerize-standard g] : includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule [g] [g] [acskip] [acskip] [acops] :> [avoid-dot g] # ::+
+				chain-rule [g] [g] [acskip] [acops]          :> [avoid-dot g] # ::+
+				chain-rule [g] [g] [acops]                   :> [avoid-dot g] # ::+
+				chain-rule [g] [acskip] [acskip] [acops]     :> [avoid-dot g] # :+
+				chain-rule [g] [acskip] [acops]              :> [avoid-dot g] # :+
+				chain-rule [g] [acops]                       :> [avoid-dot g] # :+
+				chain-rule [acops] [acskip] [acskip] [g]     :> [avoid-dot g] # +:
+				chain-rule [acops] [acskip] [g]              :> [avoid-dot g] # +:
+				chain-rule [acops] [g]                       :> [avoid-dot g] # +:
+
+		define [centerize-cross g1 g2] : includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule [g1] [g1] [g2]  :> [avoid-dot g1] :> [avoid-dot g2] # ::*
+				chain-rule [g1] [g2]       :> [avoid-dot g1] :> [avoid-dot g2] # :*
+
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				# (* and *)
+				chain-rule {'parenLeft'} [asterisk_center]  :> only 'brst' # (*
+				chain-rule [asterisk_center] {'parenRight'} :> only 'brst' # *)
+
+		# Operator centering
+		foreach [g : items-of centerizeGroups] : begin
+			centerize-standard g
+			foreach [g2 : items-of centerizeGroups] : if (g != g2) : centerize-cross g g2
+
+		# Operator centering : Trailing
+		local centerizeL : centerizeGroups.map : x => [x].left.0
+		local centerizeR : centerizeGroups.map : x => [x].right.0
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule centerizeR [acskip] [acskip] (centerizeL ~> centerizeR)
+				chain-rule centerizeR [acskip] (centerizeL ~> centerizeR)
+				chain-rule centerizeR (centerizeL ~> centerizeR)
+		includeLookup
+			.type 'gsub_reverse'
+			.subtables : list 
+				object
+					match      {centerizeL [acskip] [acskip] centerizeR}
+					to         centerizeR
+					inputIndex 0
+				object
+					match      {centerizeL [acskip] centerizeR}
+					to         centerizeR
+					inputIndex 0
+				object
+					match      {centerizeL centerizeR}
+					to         centerizeR
+					inputIndex 0
+		
+		# Operator centering : Avoid "letter-point" being centered
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule alphabet [no_period_center]
+				chain-rule [no_period_center] alphabet
+	
+	do "Colon chains" : includeLookup
+		.type 'gsub_chaining'
+		.subtables : list
+			# Colon chains
+			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dmid'}) {'colon'}
+			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dleft'})
+			chain-rule ({'colon'} ~> {'colon.dright'}) {'colon'}
+
+	do "Arrows"
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cc'] [stick 'cr'] greater # <----> <====>
+				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cr'] greater # <---> <===>
+				chain-rule less [stick 'lc'] [stick 'cr'] greater # <--> <==>
+				chain-rule less [stick 'lr'] greater # <->, <=>
+				chain-rule less [stick 'lj'] less # <-<, <=<
+				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cf'] # <---, <===
+				chain-rule less [stick 'lc'] [stick 'cf'] # <--, <==
+				chain-rule less (less ~> [lsx 'shift1']) [stick 'l1f'] # <<-, <<=
+					:> only 'arrow2'
+				chain-rule less (hyphen ~> [lsx 'lf']) # <-
+				chain-rule less (exclam ~> [lsx 'htmlcommentstart']) (hyphen ~> [lsx 'lxc']) (hyphen ~> [lsx 'cc']) (hyphen ~> [lsx 'cf']) # <!---
+				chain-rule less (exclam ~> [lsx 'htmlcommentstart']) (hyphen ~> [lsx 'lxc']) (hyphen ~> [lsx 'cf']) # <!--
+				chain-rule greater (greater ~> [lsx 'shiftN1']) [stick 'j1f'] # >>-, >>=
+					:> only 'arrow2'
+				chain-rule greater [stick 'jr'] greater # >->, >=>
+				chain-rule greater (hyphen ~> [lsx 'jf']) # >-
+					:> only 'arrow2'
+				chain-rule [stick 'fc'] [stick 'cc'] [stick 'cr'] greater # --->, ===>
+				chain-rule [stick 'fc'] [stick 'cr'] greater # -->, ==>
+				chain-rule [stick 'fr'] greater [stick 'jf'] # ->- =>=
+					:> only 'arrow2'
+				chain-rule [stick 'fr1'] (greater ~> [lsx 'shift1']) greater # ->>, =>>
+					:> only 'arrow2'
+				chain-rule [stick 'fr'] greater # ->, =>
+				chain-rule [stick 'fj'] less [stick 'lf'] # -<- =<=
+					:> only 'arrow2'
+				chain-rule [stick 'fj1'] (less ~> [lsx 'shiftN1']) less # -<<, =<<
+					:> only 'arrow2'
+				chain-rule [stick 'fj'] less # -<, =<
+					:> only 'arrow2'
+		# Extended arrow sticks
+		# --------------------->
+		includeLookup
+			.type 'gsub_reverse'
+			.subtables : list 
+				object
+					match      {{'hyphen' 'equal'} [stickClass 'fr']}
+					to         [stickClass 'fz']
+					inputIndex 0
+				object
+					match      {{'hyphen' 'equal'} [stickClass 'fc']}
+					to         [stickClass 'fz']
+					inputIndex 0
+				object
+					match      {{'hyphen' 'equal'} [stickClass 'fz']}
+					to         [stickClass 'fz']
+					inputIndex 0
+		# <--------------------, <------------------->
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule ([stickClass 'zf'] ~> [stickClass 'zc']) ([stickClass 'fr'] ~> [stickClass 'cr'])
+				chain-rule ([stickClass 'zf'] ~> [stickClass 'zc']) ([stickClass 'fc'] ~> [stickClass 'cc'])
+				chain-rule ([stickClass 'lf'] ~> [stickClass 'lc']) ([stickClass 'fz'] ~> [stickClass 'cz'])
+				chain-rule ([stickClass 'cf'] ~> [stickClass 'cc']) ([stickClass 'fz'] ~> [stickClass 'cz'])
+				chain-rule ([stickClass 'zf'] ~> [stickClass 'zc']) ([stickClass 'fz'] ~> [stickClass 'cz'])
+				chain-rule [stickClass 'lf'] [stick 'zf']
+				chain-rule [stickClass 'cf'] [stick 'zf']
+				chain-rule [stickClass 'zf'] [stick 'zf']
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule ({'slash'} ~> {'slash.left'}) ({'backslash'} ~> {'backslash.right'}) # /\
+					:> only 'logic'
+				chain-rule ({'backslash'} ~> {'backslash.left'}) ({'slash'} ~> {'slash.right'}) # \/
+					:> only 'logic'
