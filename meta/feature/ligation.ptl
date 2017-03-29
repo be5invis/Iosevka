@@ -23,6 +23,7 @@ define progLigNameMap
 
 define [lsx s] : lambda [t] : t.map : lambda [x] "lig\(x).\(s)"
 
+define arrowStick  {'hyphen' 'equal'}
 local [stick style] : {'hyphen' 'equal'} ~> [lsx style]
 local [stickClass style] : [lsx style] {'hyphen' 'equal'}
 local less {'less'}
@@ -38,15 +39,24 @@ local [tilde_center]    ({'asciitilde'} ~> {'asciitilde.low'})
 local [period_center]   ({'period'} ~> {'period.center'})
 local [no_period_center] ({'period.center'} ~> {'period'})
 
+define preserved null
+
 export all : define [buildLigations chain-rule lookupOrder commonList features lookups] : foreach [ ligationFeatureName : items-of : Object.keys progLigNameMap] : do
 	local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
 	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
-	local [only subtable ln] : begin
-		if ([mappedFeature.indexOf ln] >= 0) 
-		: then : return subtable
-		: else : begin
-			set subtable.apply {}
-			return subtable
+
+	define [only ln f g] : lambda [left] : begin
+		if ([mappedFeature.indexOf ln] < 0)
+		: then : begin
+			if g
+			: then : piecewise
+				(g <@ Function) : g left
+				true : return g
+			: else : return null
+		: else : piecewise
+			(f <@ Function) : f left
+			true : return f
+
 	commonList.push ligationFeatureName
 
 	local featLookups {}
@@ -69,35 +79,40 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	set features.(ligationFeatureName) featLookups
 
 	do "Operator centering"
-		define centerizeGroups {asterisk_center tilde_center colon_center period_center}
-		define [avoid-dot g] : if (g == period_center)
-			then (subtable => [only subtable "dotoper"])
-			else (subtable => subtable)
+		define centerizeGroups : list
+			begin asterisk_center
+			begin tilde_center
+			begin colon_center
+			lambda [] : {'period'} ~> [only "dotoper" {'period.center'}]
+
 		define [centerize-standard g] : includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
-				chain-rule [g] [g] [acskip] [acskip] [acops] :> [avoid-dot g] # ::+
-				chain-rule [g] [g] [acskip] [acops]          :> [avoid-dot g] # ::+
-				chain-rule [g] [g] [acops]                   :> [avoid-dot g] # ::+
-				chain-rule [g] [acskip] [acskip] [acops]     :> [avoid-dot g] # :+
-				chain-rule [g] [acskip] [acops]              :> [avoid-dot g] # :+
-				chain-rule [g] [acops]                       :> [avoid-dot g] # :+
-				chain-rule [acops] [acskip] [acskip] [g]     :> [avoid-dot g] # +:
-				chain-rule [acops] [acskip] [g]              :> [avoid-dot g] # +:
-				chain-rule [acops] [g]                       :> [avoid-dot g] # +:
+				chain-rule [g] [g] [acskip] [acskip] [acops] # ::+
+				chain-rule [g] [g] [acskip] [acops]          # ::+
+				chain-rule [g] [g] [acops]                   # ::+
+				chain-rule [g] [acskip] [acskip] [acops]     # :+
+				chain-rule [g] [acskip] [acops]              # :+
+				chain-rule [g] [acops]                       # :+
+				chain-rule [acops] [acskip] [acskip] [g]     # +:
+				chain-rule [acops] [acskip] [g]              # +:
+				chain-rule [acops] [g]                       # +:
 
 		define [centerize-cross g1 g2] : includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
-				chain-rule [g1] [g1] [g2]  :> [avoid-dot g1] :> [avoid-dot g2] # ::*
-				chain-rule [g1] [g2]       :> [avoid-dot g1] :> [avoid-dot g2] # :*
+				chain-rule [g1] [g1] [g2]                    # ::*
+				chain-rule [g1] [g2]                         # :*
 
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
-				# (* and *)
-				chain-rule {'parenLeft'} [asterisk_center]  :> only 'brst' # (*
-				chain-rule [asterisk_center] {'parenRight'} :> only 'brst' # *)
+				chain-rule # (*
+					{'parenLeft'}  ~> preserved
+					{'asterisk'}   ~> [only 'brst' {'asterisk.low'}]
+				chain-rule # *)
+					{'asterisk'}   ~> [only 'brst' {'asterisk.low'}]
+					{'parenRight'} ~> preserved
 
 		# Operator centering
 		foreach [g : items-of centerizeGroups] : begin
@@ -106,7 +121,12 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 
 		# Operator centering : Trailing
 		local centerizeL : centerizeGroups.map : x => [x].left.0
-		local centerizeR : centerizeGroups.map : x => [x].right.0
+		local centerizeR : centerizeGroups.map : lambda [x] : begin
+			local left [x].left
+			local right [x].right
+			while (right <@ Function) : set right [right left]
+			return : if right (right.0 || left.0) (left.0)
+
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
@@ -148,36 +168,101 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
-				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cc'] [stick 'cr'] greater # <----> <====>
-				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cr'] greater # <---> <===>
-				chain-rule less [stick 'lc'] [stick 'cr'] greater # <--> <==>
-				chain-rule less [stick 'lr'] greater # <->, <=>
-				chain-rule less [stick 'lj'] less # <-<, <=<
-				chain-rule less [stick 'lc'] [stick 'cc'] [stick 'cf'] # <---, <===
-				chain-rule less [stick 'lc'] [stick 'cf'] # <--, <==
-				chain-rule less (less ~> [lsx 'shift1']) [stick 'l1f'] # <<-, <<=
-					:> only 'arrow2'
-				chain-rule less (hyphen ~> [lsx 'lf']) # <-
-				chain-rule less (exclam ~> [lsx 'htmlcommentstart']) (hyphen ~> [lsx 'lxc']) (hyphen ~> [lsx 'cc']) (hyphen ~> [lsx 'cf']) # <!---
-				chain-rule less (exclam ~> [lsx 'htmlcommentstart']) (hyphen ~> [lsx 'lxc']) (hyphen ~> [lsx 'cf']) # <!--
-				chain-rule greater (greater ~> [lsx 'shiftN1']) [stick 'j1f'] # >>-, >>=
-					:> only 'arrow2'
-				chain-rule greater [stick 'jr'] greater # >->, >=>
-				chain-rule greater (hyphen ~> [lsx 'jf']) # >-
-					:> only 'arrow2'
-				chain-rule [stick 'fc'] [stick 'cc'] [stick 'cr'] greater # --->, ===>
-				chain-rule [stick 'fc'] [stick 'cr'] greater # -->, ==>
-				chain-rule [stick 'fr'] greater [stick 'jf'] # ->- =>=
-					:> only 'arrow2'
-				chain-rule [stick 'fr1'] (greater ~> [lsx 'shift1']) greater # ->>, =>>
-					:> only 'arrow2'
-				chain-rule [stick 'fr'] greater # ->, =>
-				chain-rule [stick 'fj'] less [stick 'lf'] # -<- =<=
-					:> only 'arrow2'
-				chain-rule [stick 'fj1'] (less ~> [lsx 'shiftN1']) less # -<<, =<<
-					:> only 'arrow2'
-				chain-rule [stick 'fj'] less # -<, =<
-					:> only 'arrow2'
+				chain-rule # <---->, <====>
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cc']
+					arrowStick ~> [lsx 'cc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # <--->, <===>
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # <-->, <==>
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # <->, <=>
+					less       ~> preserved
+					arrowStick ~> [lsx 'lr']
+					greater    ~> preserved
+				chain-rule # <-<, <=<
+					less       ~> preserved
+					arrowStick ~> [lsx 'lj']
+					less       ~> preserved
+				chain-rule # <---, <===
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cc']
+					arrowStick ~> [lsx 'cf']
+				chain-rule # <--, <==
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cf']
+				chain-rule # <<-, <<=
+					less       ~> preserved
+					less       ~> [only 'arrow2' : lsx 'shift1']
+					arrowStick ~> [only 'arrow2' [lsx 'l1f'] : lsx 'lf']
+				chain-rule # <-
+					less       ~> preserved
+					hyphen     ~> [lsx 'lf']
+				chain-rule # <!---
+					less       ~> preserved
+					exclam     ~> [lsx 'htmlcommentstart']
+					hyphen     ~> [lsx 'lxc']
+					hyphen     ~> [lsx 'cc']
+					hyphen     ~> [lsx 'cf']
+				chain-rule # <!--
+					less       ~> preserved
+					exclam     ~> [lsx 'htmlcommentstart']
+					hyphen     ~> [lsx 'lxc']
+					hyphen     ~> [lsx 'cf']
+				chain-rule # >>-, >>=
+					greater    ~> preserved
+					greater    ~> [only 'arrow2' : lsx 'shiftN1']
+					arrowStick ~> [only 'arrow2' : lsx 'j1f']
+				chain-rule # >->
+					greater    ~> preserved
+					arrowStick ~> [lsx 'jr']
+					greater    ~> preserved
+				chain-rule # >-
+					greater    ~> preserved
+					arrowStick ~> [only 'arrow2' : lsx 'jf']
+				chain-rule # --->
+					arrowStick ~> [lsx 'fc']
+					arrowStick ~> [lsx 'cc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # -->
+					arrowStick ~> [lsx 'fc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # ->-, =>=
+					arrowStick ~> [only 'arrow2' : lsx 'fr']
+					greater    ~> preserved
+					arrowStick ~> [only 'arrow2' : lsx 'jf']
+				chain-rule # ->>, =>>
+					arrowStick ~> [only 'arrow2' [lsx 'fr1'] : lsx 'fr']
+					greater    ~> [only 'arrow2' : lsx 'shift1']
+					greater    ~> preserved
+				chain-rule # ->, =>
+					arrowStick ~> [lsx 'fr']
+					greater    ~> preserved
+				chain-rule # -<-, =<=
+					arrowStick ~> [only 'arrow2' : lsx 'fj']
+					less       ~> preserved
+					arrowStick ~> [only 'arrow2' : lsx 'lf']
+				chain-rule # -<<, =<<
+					arrowStick ~> [only 'arrow2' : lsx 'fj1']
+					less       ~> [only 'arrow2' : lsx 'shiftN1']
+					less       ~> preserved
+				chain-rule # -<, =<
+					arrowStick ~> [only 'arrow2' : lsx 'fj']
+					less       ~> preserved
 		# Extended arrow sticks
 		# --------------------->
 		includeLookup
@@ -207,10 +292,13 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 				chain-rule [stickClass 'lf'] [stick 'zf']
 				chain-rule [stickClass 'cf'] [stick 'zf']
 				chain-rule [stickClass 'zf'] [stick 'zf']
+		# /\ and \/
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
-				chain-rule ({'slash'} ~> {'slash.left'}) ({'backslash'} ~> {'backslash.right'}) # /\
-					:> only 'logic'
-				chain-rule ({'backslash'} ~> {'backslash.left'}) ({'slash'} ~> {'slash.right'}) # \/
-					:> only 'logic'
+				chain-rule 
+					{'slash'}     ~> [only 'logic' {'slash.left'}]
+					{'backslash'} ~> [only 'logic' {'backslash.right'}]
+				chain-rule
+					{'backslash'} ~> [only 'logic' {'backslash.left'}]
+					{'slash'}     ~> [only 'logic' {'slash.right'}]
