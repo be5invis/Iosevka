@@ -45,8 +45,10 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
 	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
 
+	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
+
 	define [only ln f g] : lambda [left] : begin
-		if ([mappedFeature.indexOf ln] < 0)
+		if [not : hasLG ln]
 		: then : begin
 			if g
 			: then : piecewise
@@ -79,11 +81,7 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	set features.(ligationFeatureName) featLookups
 
 	do "Operator centering"
-		define centerizeGroups : list
-			begin asterisk_center
-			begin tilde_center
-			begin colon_center
-			lambda [] : {'period'} ~> [only "dotoper" {'period.center'}]
+		define centerizeGroups : { asterisk_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
 
 		define [centerize-standard g] : includeLookup
 			.type 'gsub_chaining'

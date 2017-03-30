@@ -9,6 +9,7 @@ var toml = require("toml");
 
 var Glyph = require("./support/glyph");
 var autoref = require("./support/autoref");
+const objectAssign = require('object-assign');
 
 var caryllShapeOps = require("caryll-shapeops");
 var c2q = require("otfcc-c2q");
@@ -20,11 +21,39 @@ function hasv(obj) {
 	return false;
 }
 
+function formVariantData(data, para) {
+	const vs = {};
+	for (let k in data.simple) {
+		const hive = objectAssign({}, data.simple[k]);
+		vs[k] = hive;
+		vs[hive.tag] = hive;
+		delete hive.tag;
+	}
+	for (let slantness in data.composite) {
+		if (slantness !== (para.isItalic ? 'italic' : 'upright')) continue;
+		for (let k in data.composite[slantness]) {
+			const hive = data.composite[slantness][k];
+			let sel = {};
+			for (let h of hive) {
+				sel = objectAssign(sel, vs[h]);
+			}
+			vs[k] = sel;
+		}
+	}
+	return vs;
+}
+
 // Font building
-var font = function () {
-	var parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "parameters.toml"), "utf-8"));
-	var emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8"));
-	var para = parameters.build(parametersData, argv._);
+const font = function () {
+	const parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "parameters.toml"), "utf-8"));
+	const variantData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "variants.toml"), "utf-8"));
+	const emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8"));
+
+	let para = parameters.build(parametersData, argv._);
+	para.variants = variantData;
+	para.variantSelector = parameters.build(formVariantData(variantData, para), argv._);
+
+
 	var fontUniqueName = para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
 
 	console.log("    Start building font " + fontUniqueName);
