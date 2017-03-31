@@ -9,6 +9,14 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry
 	###### COMMON GLYPH CONSTRUCTIONS
+	define [queryFeatureSelector name para alias] : begin
+		local fs {.}
+		local introduced false
+		foreach [{k h} : pairs-of para.variants.simple] : if (h.(name) && h.tag)
+			set fs.(h.tag) ([fallback alias name] + '.' + h.(name))
+			set introduced true
+		return : if introduced fs null
+
 	define [select-variant name unicode default featureSelector] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
 		local variant : variantSelector.(name) || default
@@ -16,7 +24,9 @@ export : define [apply] : begin
 		create-glyph name : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			if featureSelector : set currentGlyph.featureSelector featureSelector
+			if featureSelector
+			: then : set currentGlyph.featureSelector featureSelector
+			: else : set currentGlyph.featureSelector : queryFeatureSelector name para
 			set this.cmpPriority chosenGlyph.cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
@@ -362,7 +372,7 @@ export : define [apply] : begin
 
 	define [mShoulderSpiro] : params [left right top bottom width fine] : glyph-construction
 		local fix : TANSLANT * STROKE * HVCONTRAST * width / STROKE
-		local sm : SMALLSMOOTH * 0.75
+		local sm : SMALLSMOOTH * 0.7
 		include : spiro-outline
 			corner (right - width * HVCONTRAST) bottom
 			curl   (right - width * HVCONTRAST) (top - sm + fix)
@@ -632,4 +642,4 @@ export : define [apply] : begin
 		apply-transform : Translate sx sy
 		apply-transform : Italify
 	
-	return [object select-variant italic-variant alias composite into-unicode turned dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign]
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign]

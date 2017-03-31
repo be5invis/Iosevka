@@ -30,12 +30,23 @@ local less {'less'}
 local hyphen {'hyphen'}
 local exclam {'exclam'}
 local greater {'greater'}
-local alphabet {'a' 'a.doublestorey' 'a.singlestorey' 'b' 'c' 'd' 'e' 'f' 'g' 'g.doublestorey' 'g.singlestorey' 'g.opendoublestorey' 'h' 'i' 'i.hooky' 'i.serifed' 'i.italic' 'i.zshaped' 'j' 'j.straight' 'j.serifed' 'k' 'l' 'l.serifed' 'l.italic' 'l.hooky' 'l.zshaped' 'l.tailed' 'l.hookybottom' 'm' 'm.longleg' 'm.shortleg' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' 'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' 'zero' 'zero.slashed' 'zero.dotted' 'zero.unslashed' 'one' 'two' 'three' 'four' 'five' 'six' 'seven' 'eight' 'nine' 'underscore' 'underscore.high' 'underscore.low'}
+local alphabet {
+	'a' 'a.doublestorey' 'a.singlestorey' 'b' 'c' 'd' 'e' 'f' 'g' 'g.doublestorey' 'g.singlestorey'
+	'g.opendoublestorey' 'h' 'i' 'i.hooky' 'i.serifed' 'i.italic' 'i.zshaped' 'j' 'j.straight' 'j.serifed'
+	'k' 'l' 'l.serifed' 'l.italic' 'l.hooky' 'l.zshaped' 'l.tailed' 'l.hookybottom' 'm' 'm.longleg'
+	'm.shortleg' 'n' 'o' 'p' 'q' 'r' 's' 't' 't.standard' 't.cross' 'u' 'v' 'w' 'x' 'y' 'z' 'A' 'B' 'C'
+	'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 'Q' 'Q.straight' 'Q.taily' 'R' 'S' 'T' 'U' 'V' 'W'
+	'X' 'Y' 'Z' 'zero' 'zero.slashed' 'zero.dotted' 'zero.unslashed' 'one' 'two' 'three' 'four' 'five' 'six'
+	'seven' 'eight' 'nine' 'underscore' 'underscore.high' 'underscore.low'
+}
 local [acops]  {'less' 'greater' 'hyphen' 'equal' 'plus'}
-local [acskip] {'slash' 'bar' 'at' 'ampersand' 'percent' 'numbersign'}
-local [asterisk_center] ({'asterisk'} ~> {'asterisk.low'})
-local [colon_center]    ({'colon'} ~> {'colon.mid'})
-local [tilde_center]    ({'asciitilde'} ~> {'asciitilde.low'})
+local [acskip] {
+	'slash' 'bar' 'at' 'ampersand' 'percent' 
+	'numbersign' 'numbersign.upright' 'numbersign.slanted'
+}
+local [asterisk_center] ({'asterisk' 'asterisk.high' 'asterisk.low'} ~> {'asterisk.low' 'asterisk.low' 'asterisk.low'})
+local [colon_center]    ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
+local [tilde_center]    ({'asciitilde' 'asciitilde.high' 'asciitilde.low'} ~> {'asciitilde.low' 'asciitilde.low' 'asciitilde.low'})
 local [period_center]   ({'period'} ~> {'period.center'})
 local [no_period_center] ({'period.center'} ~> {'period'})
 
@@ -45,8 +56,10 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
 	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
 
+	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
+
 	define [only ln f g] : lambda [left] : begin
-		if ([mappedFeature.indexOf ln] < 0)
+		if [not : hasLG ln]
 		: then : begin
 			if g
 			: then : piecewise
@@ -79,11 +92,7 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	set features.(ligationFeatureName) featLookups
 
 	do "Operator centering"
-		define centerizeGroups : list
-			begin asterisk_center
-			begin tilde_center
-			begin colon_center
-			lambda [] : {'period'} ~> [only "dotoper" {'period.center'}]
+		define centerizeGroups : { asterisk_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
 
 		define [centerize-standard g] : includeLookup
 			.type 'gsub_chaining'
@@ -113,6 +122,16 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 				chain-rule # *)
 					{'asterisk'}   ~> [only 'brst' {'asterisk.low'}]
 					{'parenRight'} ~> preserved
+		# Smiley :)
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule # (:
+					{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> preserved
+					colon_center
+				chain-rule # :)
+					colon_center
+					{'parenRight' 'bracketRight' 'braceRight'} ~> preserved
 
 		# Operator centering
 		foreach [g : items-of centerizeGroups] : begin

@@ -115,13 +115,7 @@ export : define [apply] : begin
 			include : IotaShape XH
 		save 'dotlessi.italic'
 
-	select-variant 'dotlessi' 0x131 [if para.isItalic 'italic' 'serifed'] {
-		.'cv03' 'dotlessi.serifed'
-		.'cv04' 'dotlessi.italic'
-		.'cv05' 'dotlessi.hooky'
-		.'cv06' 'dotlessi.zshaped'
-	}
-
+	select-variant 'dotlessi' 0x131 [if para.isItalic 'italic' 'serifed']
 	sketch # iogonek.dotless
 		include glyphs.dotlessi AS_BASE
 		include glyphs.ogonekBelow
@@ -130,16 +124,11 @@ export : define [apply] : begin
 
 	composite 'i' glyphs.dotlessi glyphs.dotAbove [into-unicode 'i']
 	if (glyphs.i && glyphs.dotlessi) : begin
-		composite 'i.serifed' glyphs.(glyphs.dotlessi.featureSelector.cv03) glyphs.dotAbove
-		composite 'i.italic' glyphs.(glyphs.dotlessi.featureSelector.cv04) glyphs.dotAbove
-		composite 'i.hooky' glyphs.(glyphs.dotlessi.featureSelector.cv05) glyphs.dotAbove
-		composite 'i.zshaped' glyphs.(glyphs.dotlessi.featureSelector.cv06) glyphs.dotAbove
-		set glyphs.i.featureSelector {
-			.cv03 'i.serifed'
-			.cv04 'i.italic'
-			.cv05 'i.hooky'
-			.cv06 'i.zshaped'
-		}
+		local fs : queryFeatureSelector 'dotlessi' para
+		local fs_i : queryFeatureSelector 'dotlessi' para 'i'
+		foreach [{k gid} : pairs-of fs] : begin
+			composite fs_i.(k) glyphs.(gid) glyphs.dotAbove
+		set glyphs.i.featureSelector fs_i
 	alias 'cyrUkrainiani' 0x456 'i'
 	turned nothing 0x1D09 'i' MIDDLE (XH / 2) markset.p
 	* IotaShape
@@ -391,14 +380,7 @@ export : define [apply] : begin
 		save 'l.hookybottom'
 
 
-	select-variant 'l' 'l' [if para.isItalic 'italic' 'serifed'] {
-		.'cv07' 'l.serifed'
-		.'cv08' 'l.italic'
-		.'cv09' 'l.hooky'
-		.'cv10' 'l.zshaped'
-		.'cv27' 'l.tailed'
-		.'cv28' 'l.hookybottom'
-	}
+	select-variant 'l' 'l' [if para.isItalic 'italic' 'serifed']
 	alias 'palochka' 0x4CF 'l'
 	turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) markset.p
 
@@ -630,14 +612,11 @@ export : define [apply] : begin
 				widths.rhs
 				flat RIGHTSB XH [heading DOWNWARD]
 				curl RIGHTSB SMOOTHA [heading DOWNWARD]
-				g4 [mix SB RIGHTSB 1.075] 0 [heading DOWNWARD]
+				g4 [mix SB RIGHTSB (1 + 0.4 * TANSLANT)] 0 [heading DOWNWARD]
 			set-anchor 'bottomright' BASE [mix SB RIGHTSB 1.075] 0
 		save 'a.singlestorey'
 
-	select-variant 'a' 'a' [if para.isItalic 'singlestorey' 'doublestorey'] {
-		.'cv01' 'a.doublestorey'
-		.'cv02' 'a.singlestorey'
-	}
+	select-variant 'a' 'a' [if para.isItalic 'singlestorey' 'doublestorey']
 	alias 'cyra' 0x430 'a'
 
 	sketch # turnlargescripta
@@ -1895,12 +1874,7 @@ export : define [apply] : begin
 		save 'scriptg' 0x261
 		save 'cyrde.serbian'
 
-	select-variant 'g' 'g' 'doublestorey' {
-		.cv11 'g.doublestorey'
-		.cv12 'g.singlestorey'
-		.cv24 'g.opendoublestorey'
-	}
-
+	select-variant 'g' 'g' 'doublestorey'
 	turned nothing 0x1D77 'g' MIDDLE [mix DESCENDER XH 0.5]
 
 	sketch # scriptghooktop
@@ -2002,23 +1976,32 @@ export : define [apply] : begin
 		save 'olowerhalf' 0x1D17
 
 	### Q
-	sketch # Q
+	sketch # Q.straight
 		set-width WIDTH
-
-		include    glyphs.O AS_BASE
+		include glyphs.O AS_BASE
 		local shift : linreg 18 0 126 0.25 STROKE
 		include : dispiro
 			widths.rhs
 			flat (MIDDLE + WIDTH * 0.075 - STROKE * HVCONTRAST * shift) (-CAP * 0.2) [heading UPWARD]
 			curl (MIDDLE - STROKE * HVCONTRAST * shift) 0
-		#start-from MIDDLE 0
-		#line-to    (MIDDLE + WIDTH * 0.15 - HALFSTROKE * HVCONTRAST) (-CAP * 0.2)
-		#line-to    (MIDDLE + WIDTH * 0.15 + HALFSTROKE * HVCONTRAST) (-CAP * 0.2)
-		#line-to    (MIDDLE + STROKE * HVCONTRAST) 0
-		#line-to    (MIDDLE + STROKE * (1 - 0.5 / 3) * HVCONTRAST) (STROKE * 0.5)
-		#reverse-last
-		save 'Q' 'Q'
-		save 'cyrQa' 0x51A
+		save 'Q.straight'
+	sketch # Q.taily
+		set-width WIDTH
+		include glyphs.O AS_BASE
+		local shift : linreg 18 0.5 126 0.6 STROKE
+		local startx : MIDDLE + (STROKE * shift) * HVCONTRAST
+		local terminalx : MIDDLE + HOOKX
+		include : dispiro
+			widths.rhs
+			flat startx HALFSTROKE [heading DOWNWARD]
+			curl startx 0 [heading DOWNWARD]
+			arcvh
+			flat [Math.min (terminalx - 1) (startx + HOOK - STROKE)] (STROKE - HOOK)
+			curl terminalx (STROKE - HOOK)
+		save 'Q.taily'
+	
+	select-variant 'Q' 'Q' 'taily'
+	alias 'cyrQa' 0x51A 'Q'
 
 	### q
 	sketch # q
@@ -2406,10 +2389,7 @@ export : define [apply] : begin
 		include markset.e
 		include : SmallMShape XH 0 [XH * 0.2]
 		save 'm.shortleg'
-	select-variant 'm' 'm' 'longleg' {
-		.'cv25' 'm.longleg'
-		.'cv26' 'm.shortleg'
-	}
+	select-variant 'm' 'm' 'longleg'
 	composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender RIGHTSB] markset.e
 
 	sketch # mltail
@@ -2950,11 +2930,18 @@ export : define [apply] : begin
 			flat (tcenter + HALFSTROKE - LONGJUT + TBALANCE2 - HALFSTROKE * TANSLANT) XH
 			curl (tcenter + HALFSTROKE + LONGJUT + TBALANCE2 - HALFSTROKE * TANSLANT) XH
 
-	sketch # t
+	sketch # t.standard
 		set-width WIDTH
 		include markset.b
 		include : SmallTShape CAP 0
-		save 't' 't'
+		save 't.standard'
+	sketch # t.cross
+		set-width WIDTH
+		include markset.b
+		include : VBar MIDDLE 0 CAP
+		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
+		save 't.cross'
+	select-variant 't' 't' 'standard'
 	turned nothing 0x287 't' MIDDLE (XH / 2) markset.p
 
 	sketch # tltail

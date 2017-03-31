@@ -77,57 +77,75 @@ The first step, `make custom-config` takes following parameters to set styles of
 
 You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights.
 
-The current avaliable styles are:
+The current available styles are:
 
 * Styles for general shape:
   * `sans` : Sans serif (default).
   * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
 * Styles related to ligations
   - `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to `Iosevka Term`. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
-* Styles for letter `l`:
-  * `v-l-hooky` : Hooky `l`.
-  * `v-l-zshaped` : Z-shaped `l`.
-  * `v-l-serifed` : Serifed `l` (default for upright and oblique).
-  * `v-l-italic` : Italic `l` (default for italic).
-  * `v-l-tailed` : `l` with a curved tail.
-  * `v-l-hookybottom` : `l` with a straight tail.
-* Styles for letter `i`:
-  * `v-i-hooky` : Hooky `i`.
-  * `v-i-zshaped` : Z-shaped `i`.
-  * `v-i-serifed` : Serifed `i` (default for upright and oblique).
-  * `v-i-italic` : Italic `i` (default for italic).
-* Styles for letter `a`:
-  * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
-  * `v-a-singlestorey` : Single-storey `a` (default for italic).
-* Styles for letter `g`:
-  * `v-g-doublestorey` : Double-storey `g` (default).
-  * `v-g-singlestorey` : Single-storey `g`.
-  * `v-g-opendoublestorey` : Open Double-storey `g`.
-* Styles for letter `m`:
-  * `v-m-longleg` : `m` with long middle leg (default).
-  * `v-m-shortleg` : `m` with shorter middle leg.
-* Styles for letter `0`:
-  * `v-zero-slashed` : Slashed Zero `0` (default).
-  * `v-zero-dotted` : Dotted Zero `0`.
-  * `v-zero-unslashed` : O-like `0`.
-* Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), and ASCII Caret (^):
-  * `v-tilde-high` : Higher tilde `~`.
-  * `v-tilde-low` : Lower tilde `~` (default).
-  * `v-asterisk-high` : Higher asterisk `*` (default).
-  * `v-asterisk-low` : Lower asterisk `*`.
-  * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
-  * `v-paragraph-low` : Lower paragraph symbol `¶`.
-  * `v-caret-high` : Higher circumflex `^` (default).
-  * `v-caret-low` : Lower circumflex `^`.
-* Styles for At (@):
-  * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
-  * `v-at-fourfold` : The traditional, four-fold At symbol.
-  * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
-* Styles for Eszet(ß)
-  * `v-eszet-traditional` : Tratidional, Fraktur-like Eszet.
-  * `v-eszet-sulzbacher` : A more modern, beta-like Eszet (default).
-* Styles for curly brackets ({})
-  * `v-brace-straight` : More straight braces.
-  * `v-brace-curly` : More curly braces (default).
+* All registered `ss##` and `cv##` feature tags, including:
+  * `ss01`~`ss09` : Predefined stylistic sets based on other Monospace fonts.
+  * `cv01`~`cv45` : Standalone character variants.
+* Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
+  * Styles for letter `l`:
+    * `v-l-hooky` : Hooky `l`.
+    * `v-l-zshaped` : Z-shaped `l`.
+    * `v-l-serifed` : Serifed `l` (default for upright and oblique).
+    * `v-l-italic` : Italic `l` (default for italic).
+    * `v-l-tailed` : `l` with a curved tail.
+    * `v-l-hookybottom` : `l` with a straight tail.
+  * Styles for letter `i`:
+    * `v-i-hooky` : Hooky `i`.
+    * `v-i-zshaped` : Z-shaped `i`.
+    * `v-i-serifed` : Serifed `i` (default for upright and oblique).
+    * `v-i-italic` : Italic `i` (default for italic).
+  * Styles for letter `a`:
+    * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
+    * `v-a-singlestorey` : Single-storey `a` (default for italic).
+  * Styles for letter `g`:
+    * `v-g-doublestorey` : Double-storey `g` (default).
+    * `v-g-singlestorey` : Single-storey `g`.
+    * `v-g-opendoublestorey` : Open Double-storey `g`.
+  * Styles for letter `m`:
+    * `v-m-longleg` : `m` with long middle leg (default).
+    * `v-m-shortleg` : `m` with shorter middle leg.
+  * Styles for letter `t`:
+    * `v-t-standard` : Standard `t` shape (default).
+    * `v-t-cross` : Futura-like `t` shape.
+  * Styles for letter `Q`:
+    * `v-q-taily` : `Q` with a curly tail (default).
+    * `v-q-straight` : `Q` with a straight tail in the old versions.
+  * Styles for zero (`0`):
+    * `v-zero-slashed` : Slashed Zero `0` (default).
+    * `v-zero-dotted` : Dotted Zero `0`.
+    * `v-zero-unslashed` : O-like `0`.
+  * Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), underscore (`_`) and ASCII Caret (^):
+    * `v-tilde-high` : Higher tilde `~`.
+    * `v-tilde-low` : Lower tilde `~` (default).
+    * `v-asterisk-high` : Higher asterisk `*` (default).
+    * `v-asterisk-low` : Lower asterisk `*`.
+    * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
+    * `v-paragraph-low` : Lower paragraph symbol `¶`.
+    * `v-caret-high` : Higher circumflex `^` (default).
+    * `v-caret-low` : Lower circumflex `^`.
+    * `v-underscore-high` : Higher underscore `_` (default).
+    * `v-underscore-low` : Lower underscore `_`.
+  * Styles for At (`@`):
+    * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
+    * `v-at-fourfold` : The traditional, four-fold At symbol.
+    * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
+  * Styles for Eszet (`ß`):
+    * `v-eszet-traditional` : Tratidional, Fraktur-like Eszet.
+    * `v-eszet-sulzbacher` : A more modern, beta-like Eszet (default).
+  * Styles for curly brackets (`{}`):
+    * `v-brace-straight` : More straight braces.
+    * `v-brace-curly` : More curly braces (default).
+  * Styles for dollar symbol (`$`):
+    * `v-dollar-open` : Dollar symbol with open contour.
+    * `v-dollar-through` : Dollar symbol with strike-through vertical bar (default).
+  * Styles for Number sign (`#`):
+    * `v-numbersign-upright` : Number sign with vertical bars (default).
+    * `v-numbersign-slanted` : Number sign with slanted bars.
 
 ![Family Matrix](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/matrix.png)
