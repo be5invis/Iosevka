@@ -102,8 +102,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.11.5",
-		codename: "Klaes-5",
+		version: "1.12.0",
+		codename: "Lorraine",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -188,7 +188,15 @@ var indexPage = new Vue({
 					{ tag: 'cv34', sample: 'ß' },
 					{ tag: 'cv35', sample: 'ß' },
 					{ tag: 'cv36', sample: '{' },
-					{ tag: 'cv37', sample: '{' }
+					{ tag: 'cv37', sample: '{' },
+					{ tag: 'cv38', sample: '$' },
+					{ tag: 'cv39', sample: '$' },
+					{ tag: 'cv40', sample: 't' },
+					{ tag: 'cv41', sample: 't' },
+					{ tag: 'cv42', sample: 'Q' },
+					{ tag: 'cv43', sample: 'Q' },
+					{ tag: 'cv44', sample: '#' },
+					{ tag: 'cv45', sample: '#' }
 				]
 			}
 		],
