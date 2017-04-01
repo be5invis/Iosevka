@@ -70,7 +70,6 @@ function formVariantData(data, para) {
 		}
 		vs[k] = sel;
 	}
-	console.log(vs);
 	return vs;
 }
 
@@ -81,8 +80,8 @@ const font = function () {
 	const emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8"));
 
 	let para = parameters.build(parametersData, argv._);
-	para.variants = variantData;
 	let vsdata = formVariantData(variantData, para)
+	para.variants = vsdata;
 	para.variantSelector = parameters.build(vsdata, argv._);
 	para.defaultVariant = vsdata.default;
 

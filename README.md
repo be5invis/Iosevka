@@ -42,8 +42,6 @@ To build Iosevka you should:
    - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make`.
-   - Use `make DONTHINT=1` to disable hinting.
-   - Use `make DONTREF=1` to turn off reference-ify (will increase file size but provide better compatibility).
 
 
 You will find TTFs in the `dist/` directory.
