@@ -52,7 +52,7 @@ custom-web : $(BUILD)/targets-$(set).mk $(BUILD)/targets.mk
 	@$(MAKE) -f utility/makefile.custom.mk web-customized-$(set) __IOSEVKA_CUSTOM_BUILD__=true
 
 # Cleaning
-clean : cleanscrcipts
+clean : cleanscripts
 	@-rm -rf $(BUILD)
 	@-rm -rf $(DIST)
 	@-rm -rf $(ARCHIVEDIR)
