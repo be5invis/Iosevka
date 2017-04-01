@@ -4,7 +4,7 @@ var path = require("path");
 // var TTFWriter = require('node-sfnt').TTFWriter;
 var argv = require("yargs").argv;
 var buildGlyphs = require("./buildglyphs.js");
-var parameters = require("./parameters");
+var parameters = require("./support/parameters");
 var toml = require("toml");
 
 var Glyph = require("./support/glyph");
@@ -21,24 +21,51 @@ function hasv(obj) {
 	return false;
 }
 
+function mergeVSHive(_target, source) {
+	if (!source) return _target;
+	let __cvmap = objectAssign({}, _target.__cvmap, source.__cvmap);
+	let target = objectAssign(_target, source);
+	target.__cvmap = __cvmap;
+	return target;
+}
+function produceComposite(vs, para, dflt, g) {
+	let sel = objectAssign({}, dflt);
+	if (g.design) for (let h of g.design) {
+		sel = mergeVSHive(sel, vs[h]);
+	}
+	if (!para.isItalic && g.upright) {
+		for (let h of g.upright) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+	}
+	if (para.isItalic && g.italic) {
+		for (let h of g.italic) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+	}
+	sel.__isComposite = true;
+	return sel;
+}
 function formVariantData(data, para) {
 	const vs = {};
+	// simple selector
 	for (let k in data.simple) {
 		const hive = objectAssign({}, data.simple[k]);
-		vs[k] = hive;
-		vs[hive.tag] = hive;
+		const tag = hive.tag;
 		delete hive.tag;
-	}
-	for (let slantness in data.composite) {
-		if (slantness !== (para.isItalic ? 'italic' : 'upright')) continue;
-		for (let k in data.composite[slantness]) {
-			const hive = data.composite[slantness][k];
-			let sel = {};
-			for (let h of hive) {
-				sel = objectAssign(sel, vs[h]);
-			}
-			vs[k] = sel;
+		if (tag) {
+			let __cvmap = {}
+			for (let k in hive) __cvmap[k] = tag;
+			hive.__cvmap = __cvmap;
 		}
+		vs[k] = hive;
+		if (tag) vs[tag] = hive;
+	}
+	// default selector
+	vs.default = produceComposite(vs, para, {}, data.default);
+	// ss## selector
+	for (let k in data.composite) {
+		vs[k] = produceComposite(vs, para, vs.default, data.composite[k]);
 	}
 	return vs;
 }
@@ -50,9 +77,10 @@ const font = function () {
 	const emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8"));
 
 	let para = parameters.build(parametersData, argv._);
-	para.variants = variantData;
-	para.variantSelector = parameters.build(formVariantData(variantData, para), argv._);
-
+	let vsdata = formVariantData(variantData, para)
+	para.variants = vsdata;
+	para.variantSelector = parameters.build(vsdata, argv._);
+	para.defaultVariant = vsdata.default;
 
 	var fontUniqueName = para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
 

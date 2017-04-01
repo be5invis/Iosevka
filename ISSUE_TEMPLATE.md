@@ -6,11 +6,20 @@
 If you have problem when building Iosevka, please provide these informations:
 
 * Your Node.js version:
-* Your results of `npm list`
 * Your _otfcc_ version:
-* Your FontForge version:
+* Your `make` version:
+* Your results of `npm list`:
+```
+paste here
+```
 * Your `parameters.toml`:
-
+```
+paste here
+```
+* Your results of `make -d --no-builtin-rules`:
+```
+paste here
+```
 ---
 
 Describe your problem here. Provide pictures and files if necessary.

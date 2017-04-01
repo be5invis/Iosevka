@@ -113,10 +113,11 @@ define [buildGSUB para glyphList markGlyphs] : begin
 				commonList.push feature
 			set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
 	# ssxx
-	local sscompose : if para.isItalic para.variants.composite.italic para.variants.composite.upright
-	foreach [name : items-of : Object.keys sscompose] : begin
+	foreach [{name composition} : pairs-of para.variants] : if (name.length === 4 && composition.__isComposite) : begin
 		commonList.push name
-		set features.(name) sscompose.(name)
+		local tags {.}
+		foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
+		set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
 
 	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}

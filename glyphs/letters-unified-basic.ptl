@@ -29,7 +29,7 @@ export : define [apply] : begin
 
 		save 'I.serifed'
 
-	select-variant 'I' 'I' 'serifed'
+	select-variant 'I' 'I'
 	alias 'Iota' 0x399 'I'
 	alias 'cyrUkrainianI' 0x406 'I'
 	alias 'Palochka' 0x4C0 'I'
@@ -115,7 +115,7 @@ export : define [apply] : begin
 			include : IotaShape XH
 		save 'dotlessi.italic'
 
-	select-variant 'dotlessi' 0x131 [if para.isItalic 'italic' 'serifed']
+	select-variant 'dotlessi' 0x131
 	sketch # iogonek.dotless
 		include glyphs.dotlessi AS_BASE
 		include glyphs.ogonekBelow
@@ -181,7 +181,7 @@ export : define [apply] : begin
 
 		save 'J.serifed'
 
-	select-variant 'J' 'J' 'serifed'
+	select-variant 'J' 'J'
 	alias 'cyrJe' 0x408 'J'
 	alias 'grkJ' 0x37F 'J'
 
@@ -211,7 +211,7 @@ export : define [apply] : begin
 		set-anchor 'overlay' BASE (MIDDLE + JBALANCE - STROKE * 0.166 * HVCONTRAST) (XH / 2)
 		save 'dotlessj.serifed'
 
-	select-variant 'dotlessj' 0x237 'serifed'
+	select-variant 'dotlessj' 0x237
 
 	sketch # j
 		set-width WIDTH
@@ -380,7 +380,7 @@ export : define [apply] : begin
 		save 'l.hookybottom'
 
 
-	select-variant 'l' 'l' [if para.isItalic 'italic' 'serifed']
+	select-variant 'l' 'l'
 	alias 'palochka' 0x4CF 'l'
 	turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) markset.p
 
@@ -616,7 +616,7 @@ export : define [apply] : begin
 			set-anchor 'bottomright' BASE [mix SB RIGHTSB 1.075] 0
 		save 'a.singlestorey'
 
-	select-variant 'a' 'a' [if para.isItalic 'singlestorey' 'doublestorey']
+	select-variant 'a' 'a'
 	alias 'cyra' 0x430 'a'
 
 	sketch # turnlargescripta
@@ -826,29 +826,33 @@ export : define [apply] : begin
 		save 'smcpY' 0x28F
 
 	### y
+	local useCurlyBottom : para.isItalic || SLAB
 	local px1 0.84
 	local py1 : linreg 18 0.8 126 0.76 STROKE
 	local px2 0.95
 	local py20 0.88
-	local py2 : if SLAB [linreg 18 0.97 126 0.85 STROKE] py20
+	local py2 : if useCurlyBottom [linreg 18 0.97 126 0.85 STROKE] py20
 	local pds 0.05
 	local pds2 0.01
 	local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
 	local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 	local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 	local yrstrokel0 : MIDDLE - WIDTH * 0.1
-	local yrstrokel : MIDDLE - WIDTH * [if SLAB 0.15 0.1] + [if SLAB HALFSTROKE 0]
+	local yrstrokel : MIDDLE - WIDTH * [if useCurlyBottom 0.15 0.1] + [if useCurlyBottom HALFSTROKE 0]
 	local yrstroker : RIGHTSB - HALFSTROKE * HVCONTRAST
 	local yshrink : linreg 18 1 126 0.85 STROKE
-	local slabysize : JUT * [linreg 18 0.85 126 1 STROKE]
+	local slabysize JUT
 	local slabyvx : linreg 18 0.7 126 0.5 STROKE
 	define [yBaseKnots top bottom] : begin
 		local ds : (top - bottom) * pds
-		local ds2 : (top - bottom) * pds2 + [if SLAB (slabysize * slabyvx) 0]
+		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
 		return : list
 			flat [mix yrstrokel yrstroker px1] [mix (bottom + ds2) (top - ds) py1]
-			curl [mix yrstrokel yrstroker (1 - px2)] [mix (bottom + ds2) (top - ds) (1 - py2)] [widths.center : STROKE * [if SLAB yshrink 1]]
-			if SLAB : then : list
+			curl 
+				mix yrstrokel yrstroker (1 - px2)
+				mix (bottom + ds2) (top - ds) (1 - py2)
+				widths.center : STROKE * [if useCurlyBottom yshrink 1]
+			if useCurlyBottom : then : list
 				flat (yrstrokel - slabysize) (bottom + HALFSTROKE) [widths.center]
 				curl [Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - HALFSTROKE - JUT)] (bottom + HALFSTROKE)
 			: else : list
@@ -858,7 +862,7 @@ export : define [apply] : begin
 
 	define [SmallYShape top bottom] : glyph-construction
 		local ds : (top - bottom) * pds
-		local ds2 : (top - bottom) * pds2 + [if SLAB (slabysize * slabyvx) 0]
+		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
 		include : tagged 'strokeR' : dispiro
 			widths.center
 			flat yrstroker top [heading DOWNWARD]
@@ -872,7 +876,10 @@ export : define [apply] : begin
 			curl (WIDTH - yrstroker) (top - ds) [heading DOWNWARD]
 			quadcontrols 0 dpy1 16
 			flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds2) (top - ds) py1]
-			curl MIDDLE [mix (bottom + ds2) (top - ds) [linreg (1 - px2) (1 - py2) px1 py1 ((MIDDLE - yrstrokel) / (yrstroker - yrstrokel))]] [widths.center (STROKE * yshrink)]
+			curl MIDDLE 
+				mix (bottom + ds2) (top - ds) 
+					linreg (1 - px2) (1 - py2) px1 py1 ((MIDDLE - yrstrokel) / (yrstroker - yrstrokel))
+				widths.center (STROKE * yshrink)
 			end [function : set this.cleanmore true]
 		if SLAB : begin
 			include : AIVSerifs top
@@ -881,7 +888,6 @@ export : define [apply] : begin
 		include markset.p
 		include : SmallYShape XH DESCENDER
 		save 'y.upright'
-
 
 	sketch # y.italic
 		if SLAB
@@ -1874,7 +1880,7 @@ export : define [apply] : begin
 		save 'scriptg' 0x261
 		save 'cyrde.serbian'
 
-	select-variant 'g' 'g' 'doublestorey'
+	select-variant 'g' 'g'
 	turned nothing 0x1D77 'g' MIDDLE [mix DESCENDER XH 0.5]
 
 	sketch # scriptghooktop
@@ -2000,7 +2006,7 @@ export : define [apply] : begin
 			curl terminalx (STROKE - HOOK)
 		save 'Q.taily'
 	
-	select-variant 'Q' 'Q' 'taily'
+	select-variant 'Q' 'Q'
 	alias 'cyrQa' 0x51A 'Q'
 
 	### q
@@ -2389,7 +2395,7 @@ export : define [apply] : begin
 		include markset.e
 		include : SmallMShape XH 0 [XH * 0.2]
 		save 'm.shortleg'
-	select-variant 'm' 'm' 'longleg'
+	select-variant 'm' 'm'
 	composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender RIGHTSB] markset.e
 
 	sketch # mltail
@@ -2916,13 +2922,13 @@ export : define [apply] : begin
 		local turn : [mix tcenter hookx 0.5] + CORRECTION_OMIDS
 		local smb  : Math.max HOOK ((turn - tcenter) * 1.2)
 
-		local g : dispiro
+		local G : dispiro
 			widths.lhs
 			flat tcenter top [heading DOWNWARD]
 			curl tcenter (bot + smb)
 			hookend (bot + O)
 			g4 hookx (bot + HOOK)
-		include g
+		local g : G.call currentGlyph # Not using include
 		set-anchor 'bottomright' BASE g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
 		set-anchor 'below' BASE [mix tcenter g.knots.(g.knots.length - 1).x : linreg 18 0.375 126 0.5 STROKE] bot
 		include : dispiro
@@ -2941,7 +2947,7 @@ export : define [apply] : begin
 		include : VBar MIDDLE 0 CAP
 		include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
 		save 't.cross'
-	select-variant 't' 't' 'standard'
+	select-variant 't' 't'
 	turned nothing 0x287 't' MIDDLE (XH / 2) markset.p
 
 	sketch # tltail
