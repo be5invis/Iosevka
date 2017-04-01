@@ -53,6 +53,6 @@ custom-web : $(BUILD)/targets-$(set).mk $(BUILD)/targets.mk
 
 # Cleaning
 clean : cleanscrcipts
-	rm -rf $(BUILD)
-	rm -rf $(DIST)
-	rm -rf $(ARCHIVEDIR)
+	@-rm -rf $(BUILD)
+	@-rm -rf $(DIST)
+	@-rm -rf $(ARCHIVEDIR)
