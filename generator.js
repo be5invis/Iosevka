@@ -164,7 +164,7 @@ if (argv.o) {
 	// overlap removal
 	font.glyf.forEach((g) => {
 		if (g.contours) {
-			//g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
+			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
 		}
 	});
 	// finalize
