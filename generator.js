@@ -4,7 +4,7 @@ var path = require("path");
 // var TTFWriter = require('node-sfnt').TTFWriter;
 var argv = require("yargs").argv;
 var buildGlyphs = require("./buildglyphs.js");
-var parameters = require("./parameters");
+var parameters = require("./support/parameters");
 var toml = require("toml");
 
 var Glyph = require("./support/glyph");
@@ -22,10 +22,29 @@ function hasv(obj) {
 }
 
 function mergeVSHive(_target, source) {
+	if (!source) return _target;
 	let __cvmap = objectAssign({}, _target.__cvmap, source.__cvmap);
 	let target = objectAssign(_target, source);
 	target.__cvmap = __cvmap;
 	return target;
+}
+function produceComposite(vs, para, dflt, g) {
+	let sel = objectAssign({}, dflt);
+	if (g.design) for (let h of g.design) {
+		sel = mergeVSHive(sel, vs[h]);
+	}
+	if (!para.isItalic && g.upright) {
+		for (let h of g.upright) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+	}
+	if (para.isItalic && g.italic) {
+		for (let h of g.italic) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+	}
+	sel.__isComposite = true;
+	return sel;
 }
 function formVariantData(data, para) {
 	const vs = {};
@@ -43,32 +62,10 @@ function formVariantData(data, para) {
 		if (tag) vs[tag] = hive;
 	}
 	// default selector
-	vs.default = {};
-	for (let slantness in data.default) {
-		if (slantness !== (para.isItalic ? 'italic' : 'upright')) continue;
-		let sel = vs.default || {};
-		for (let h of data.default.upright) {
-			sel = mergeVSHive(sel, vs[h]);
-		}
-		if (para.isItalic) {
-			for (let h of data.default.italic) {
-				sel = mergeVSHive(sel, vs[h]);
-			}
-		}
-		vs.default = sel;
-	}
+	vs.default = produceComposite(vs, para, {}, data.default);
 	// ss## selector
 	for (let k in data.composite) {
-		let sel = mergeVSHive({}, vs.default);
-		for (let h of data.composite[k].upright) {
-			sel = mergeVSHive(sel, vs[h]);
-		}
-		if (para.isItalic && data.composite[k].italic) {
-			for (let h of data.composite[k].italic) {
-				sel = mergeVSHive(sel, vs[h]);
-			}
-		}
-		vs[k] = sel;
+		vs[k] = produceComposite(vs, para, vs.default, data.composite[k]);
 	}
 	return vs;
 }

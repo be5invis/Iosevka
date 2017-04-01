@@ -38,10 +38,10 @@ Iosevka’s default ligation set is assigned to `calt` feature, though not all o
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and `make` are runnable in your terminal.
-   - Windows users may need to install MinGW and make \*nix utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) works fine.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
+   - Windows users may need to install MinGW and make POSIX utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) or MSYS2 works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
-3. `make`.
+3. `make` (or `gmake`).
 
 
 You will find TTFs in the `dist/` directory.
@@ -102,8 +102,8 @@ The current available styles are:
     * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
     * `v-a-singlestorey` : Single-storey `a` (default for italic).
   * Styles for letter `g`:
-    * `v-g-doublestorey` : Double-storey `g` (default).
-    * `v-g-singlestorey` : Single-storey `g`.
+    * `v-g-doublestorey` : Double-storey `g` (default for upright and oblique).
+    * `v-g-singlestorey` : Single-storey `g` (default for italic).
     * `v-g-opendoublestorey` : Open Double-storey `g`.
   * Styles for letter `m`:
     * `v-m-longleg` : `m` with long middle leg (default).
