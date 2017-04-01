@@ -42,10 +42,8 @@ endif
 
 CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' > $(BUILD)/targets-$(set).mk
 
-$(BUILD)/targets-$(set).mk : | $(BUILD)/
+custom-config : | $(BUILD)/
 	$(CREATECONFIG)
-
-custom-config : $(BUILD)/targets-$(set).mk
 
 export set
 custom : $(BUILD)/targets-$(set).mk $(BUILD)/targets.mk
