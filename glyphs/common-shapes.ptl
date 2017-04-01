@@ -19,7 +19,9 @@ export : define [apply] : begin
 
 	define [select-variant name unicode default featureSelector] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
-		local variant : variantSelector.(name) || default
+		local variant : variantSelector.(name) || default || para.defaultVariant.(name)
+		if [not variant] : begin
+			throw : new Error "Variant for \(name) is not assigned."
 		local chosenGlyph glyphs.((name + '.' + variant))
 		create-glyph name : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
@@ -393,8 +395,8 @@ export : define [apply] : begin
 	define [HBar xleft xright y _fine] : glyph-construction
 		include : dispiro
 			widths.center [fallback _fine STROKE]
-			flat xleft y [heading RIGHTWARD]
-			curl xright y [heading RIGHTWARD]
+			flat xleft y [heading : Rightward.call this]
+			curl xright y [heading : Rightward.call this]
 
 	define [HBarTop xl xr y _fine] : HBar xl xr (y - [fallback _fine STROKE] * 0.5) _fine
 	define [HBarBottom xl xr y _fine] : HBar xl xr (y + [fallback _fine STROKE] * 0.5) _fine
@@ -406,8 +408,8 @@ export : define [apply] : begin
 		local fine : fallback _fine STROKE
 		include : dispiro
 			widths.center fine
-			flat x ydown [heading [if (ydown < yup) UPWARD DOWNWARD]]
-			curl x yup [heading [if (ydown < yup) UPWARD DOWNWARD]]
+			flat x ydown [heading : [if (ydown < yup) Upward Downward].call this]
+			curl x yup [heading : [if (ydown < yup) Upward Downward].call this]
 
 	define [VBarLeft x yd yu _fine] : VBar (x + [fallback _fine STROKE] * 0.5 * HVCONTRAST) yd yu _fine
 	define [VBarRight x yd yu _fine] : VBar (x - [fallback _fine STROKE] * 0.5 * HVCONTRAST) yd yu _fine

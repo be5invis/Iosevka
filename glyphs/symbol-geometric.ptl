@@ -7,6 +7,10 @@ import [designParameters] from '../meta/aesthetics'
 
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks
+
+	define [forceUpright] : glyph-construction
+		set this.gizmo : Translate 0 0
+
 	### Arrowheads
 	define arrowWidth FULLWIDTH2
 	define arrowMidX : arrowWidth / 2
@@ -381,23 +385,28 @@ export : define [apply] : begin
 
 	### Blocks
 	### 'Block Shapes'
+	
 	sketch # fullblock
 		set-width FULLWIDTH
+		include : forceUpright
 		start-from 0 font.OS_2.usWinAscent
 		line-to    FULLWIDTH font.OS_2.usWinAscent
 		line-to    FULLWIDTH (-font.OS_2.usWinDescent)
 		line-to    0 (-font.OS_2.usWinDescent)
 		save 'fullblock' 0x2588
+
 	define [Shade fn] : glyph-construction
 		local top font.OS_2.usWinAscent
 		local bottom (-font.OS_2.usWinDescent)
 		local segx 6
 		local segy 16
-		local g : create-glyph : glyph-construction : foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
-			start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
-			line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
-			line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
-			line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
+		local g : create-glyph : glyph-construction : begin
+			include : forceUpright
+			foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
+				start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
+				line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
+				line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
+				line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
 		include g
 		if (FULLWIDTH > WIDTH) : begin
 			apply-transform : Translate (FULLWIDTH - WIDTH) 0
@@ -405,22 +414,26 @@ export : define [apply] : begin
 
 	sketch # lightshade
 		set-width FULLWIDTH
+		include : forceUpright
 		include : Shade ([j k] => ((k % 2) && (j + (k - 1) / 2) % 2))
 		save 'lightshade' 0x2591
 
 	sketch # mediumshade
 		set-width FULLWIDTH
+		include : forceUpright
 		include : Shade ([j k] => ((j + k) % 2))
 		save 'mediumshade' 0x2592
 
 	sketch # heavyshade
 		set-width FULLWIDTH
+		include : forceUpright
 		include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
 		save 'heavyshade' 0x2593
 
 	foreach [fill : range 1 8] : begin
 		sketch # Vertical fill
 			set-width FULLWIDTH
+			include : forceUpright
 			start-from 0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
 			line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
 			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
@@ -428,6 +441,7 @@ export : define [apply] : begin
 			save ('vfill' + fill) (0x2580 + fill)
 		sketch # Horizontal fill
 			set-width FULLWIDTH
+			include : forceUpright
 			start-from 0 font.OS_2.usWinAscent
 			line-to    (FULLWIDTH * fill / 8) font.OS_2.usWinAscent
 			line-to    (FULLWIDTH * fill / 8) (-font.OS_2.usWinDescent)
@@ -436,6 +450,7 @@ export : define [apply] : begin
 
 	sketch # upHalfblock
 		set-width FULLWIDTH
+		include : forceUpright
 		start-from 0 font.OS_2.usWinAscent
 		line-to    FULLWIDTH font.OS_2.usWinAscent
 		line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
@@ -444,6 +459,7 @@ export : define [apply] : begin
 
 	sketch # rightHalfBlock
 		set-width FULLWIDTH
+		include : forceUpright
 		start-from (FULLWIDTH * 0.5) font.OS_2.usWinAscent
 		line-to    FULLWIDTH font.OS_2.usWinAscent
 		line-to    FULLWIDTH (-font.OS_2.usWinDescent)
@@ -462,6 +478,7 @@ export : define [apply] : begin
 
 		define [boxdraw unicode u d l r] : sketch
 			set-width width
+			include : forceUpright
 			local stopH : [Math.max u d] / 2
 			local stopV : [Math.max l r] / 2
 			if l : include : HBar 0 (midx + stopH) midy l
@@ -473,6 +490,7 @@ export : define [apply] : begin
 
 		define [dlboxdraw unicode u d l r] : sketch
 			set-width width
+			include : forceUpright
 			local stopH : [Math.max u d] - light * 1 - light * 0.5 * HVCONTRAST
 			local stopV : [Math.max l r] - light * 1.5
 			local capH  : [Math.max u d] - light * 1
@@ -574,12 +592,14 @@ export : define [apply] : begin
 		# Dashed
 		define [hDashed unicode segments weight] : sketch
 			set-width width
+			include : forceUpright
 			foreach j [range 0 segments] : include : HBar [mix (width * j / segments) (width * (j + 1) / segments) 0.2] [mix (width * j / segments) (width * (j + 1) / segments) 0.8] midy weight
 
 			save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
 
 		define [vDashed unicode segments weight] : sketch
 			set-width width
+			include : forceUpright
 			foreach j [range 0 segments] : include : VBar midx [mix [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (j / segments)] [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent ((j + 1) / segments)] 0.2] [mix [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (j / segments)] [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent ((j + 1) / segments)] 0.8] weight
 
 			save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
@@ -601,6 +621,7 @@ export : define [apply] : begin
 		local bdArcRadius : Math.min (midx + O * 2) ((midy - boty) / 2)
 		sketch # bd256D
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat midx boty                 [heading UPWARD]
@@ -612,6 +633,7 @@ export : define [apply] : begin
 
 		sketch # bd256E
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat midx boty                 [heading UPWARD]
@@ -623,6 +645,7 @@ export : define [apply] : begin
 
 		sketch # bd256F
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat midx topy                 [heading DOWNWARD]
@@ -634,6 +657,7 @@ export : define [apply] : begin
 
 		sketch # bd2570
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat midx topy                 [heading DOWNWARD]
@@ -645,6 +669,7 @@ export : define [apply] : begin
 
 		sketch # bd2571
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat width font.OS_2.usWinAscent
@@ -653,6 +678,7 @@ export : define [apply] : begin
 
 		sketch # bd2572
 			set-width width
+			include : forceUpright
 			include : dispiro
 				widths.center light
 				flat 0 font.OS_2.usWinAscent
@@ -661,6 +687,7 @@ export : define [apply] : begin
 
 		sketch # bd2573
 			set-width width
+			include : forceUpright
 			include glyphs.bd2571
 			include glyphs.bd2572
 			save 'bd2573' 0x2573
@@ -686,6 +713,7 @@ export : define [apply] : begin
 	local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
 	local pwlFar : WIDTH * para.powerlineScaleX + para.powerlineShiftX
 	sketch # pwlTriangleRight
+		include : forceUpright
 		start-from (pwlNear + O) pwlTop
 		line-to    pwlNear pwlTop
 		line-to    pwlFar [mix pwlTop pwlBot 0.5]
@@ -694,6 +722,7 @@ export : define [apply] : begin
 		save 'pwlTriangleRight' 0xE0B0
 
 	sketch # pwlAngleRight
+		include : forceUpright
 		local fine : adviceBlackness 4
 		include : dispiro
 			widths.rhs fine
@@ -706,21 +735,25 @@ export : define [apply] : begin
 		save 'pwlAngleRight' 0xE0B1
 
 	sketch # pwlTriangleLeft
+		include : forceUpright
 		include glyphs.pwlTriangleRight
 		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
 		save 'pwlTriangleLeft' 0xE0B2
 
 	sketch # pwlAngleLeft
+		include : forceUpright
 		include glyphs.pwlAngleRight
 		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
 		save 'pwlAngleLeft' 0xE0B3
 
 	sketch # pwlUnderline
+		include : forceUpright
 		local fine : adviceBlackness 4
 		include : HBarBottom 0 WIDTH pwlBot
 		save 'pwlUnderline' 0xE0AE
 
 	sketch # pwlOverline
+		include : forceUpright
 		local fine : adviceBlackness 4
 		include : HBarTop 0 WIDTH pwlTop
 		save 'pwlOverline' 0xE0AF

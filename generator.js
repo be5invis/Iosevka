@@ -21,25 +21,56 @@ function hasv(obj) {
 	return false;
 }
 
+function mergeVSHive(_target, source) {
+	let __cvmap = objectAssign({}, _target.__cvmap, source.__cvmap);
+	let target = objectAssign(_target, source);
+	target.__cvmap = __cvmap;
+	return target;
+}
 function formVariantData(data, para) {
 	const vs = {};
+	// simple selector
 	for (let k in data.simple) {
 		const hive = objectAssign({}, data.simple[k]);
-		vs[k] = hive;
-		vs[hive.tag] = hive;
+		const tag = hive.tag;
 		delete hive.tag;
-	}
-	for (let slantness in data.composite) {
-		if (slantness !== (para.isItalic ? 'italic' : 'upright')) continue;
-		for (let k in data.composite[slantness]) {
-			const hive = data.composite[slantness][k];
-			let sel = {};
-			for (let h of hive) {
-				sel = objectAssign(sel, vs[h]);
-			}
-			vs[k] = sel;
+		if (tag) {
+			let __cvmap = {}
+			for (let k in hive) __cvmap[k] = tag;
+			hive.__cvmap = __cvmap;
 		}
+		vs[k] = hive;
+		if (tag) vs[tag] = hive;
 	}
+	// default selector
+	vs.default = {};
+	for (let slantness in data.default) {
+		if (slantness !== (para.isItalic ? 'italic' : 'upright')) continue;
+		let sel = vs.default || {};
+		for (let h of data.default.upright) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+		if (para.isItalic) {
+			for (let h of data.default.italic) {
+				sel = mergeVSHive(sel, vs[h]);
+			}
+		}
+		vs.default = sel;
+	}
+	// ss## selector
+	for (let k in data.composite) {
+		let sel = mergeVSHive({}, vs.default);
+		for (let h of data.composite[k].upright) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
+		if (para.isItalic && data.composite[k].italic) {
+			for (let h of data.composite[k].italic) {
+				sel = mergeVSHive(sel, vs[h]);
+			}
+		}
+		vs[k] = sel;
+	}
+	console.log(vs);
 	return vs;
 }
 
@@ -51,8 +82,9 @@ const font = function () {
 
 	let para = parameters.build(parametersData, argv._);
 	para.variants = variantData;
-	para.variantSelector = parameters.build(formVariantData(variantData, para), argv._);
-
+	let vsdata = formVariantData(variantData, para)
+	para.variantSelector = parameters.build(vsdata, argv._);
+	para.defaultVariant = vsdata.default;
 
 	var fontUniqueName = para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
 
