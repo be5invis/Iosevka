@@ -12,450 +12,504 @@ export : define [apply] : begin
 		set this.gizmo : Translate 0 0
 
 	### Arrowheads
-	define arrowWidth FULLWIDTH2
-	define arrowMidX : arrowWidth / 2
-	define arrowRSB : arrowWidth - SB
-	define hwArrowRSB : WIDTH - SB
-	define hwArrowMidX : WIDTH / 2
+	define {ArrowShape} : do 'Arrows'
+		define arrowWidth FULLWIDTH2
+		define arrowMidX : arrowWidth / 2
+		define arrowSB : SB / 2
+		define arrowRSB : arrowWidth - arrowSB
+		define hwArrowRSB : WIDTH - arrowSB
+		define hwArrowMidX : WIDTH / 2
 
-	local arrowSize : (RIGHTSB - SB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
-	local halfstroke : OPERATORSTROKE / 2
-	local fine : adviceBlackness 4
-	local terminal : adviceBlackness 6
-	local arrowTop : mix parenMid parenTop 0.85
-	local arrowBot : mix parenMid parenBot 0.85
+		local arrowSize : (RIGHTSB - arrowSB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
+		local halfstroke : OPERATORSTROKE / 2
+		local fine : adviceBlackness 4
+		local terminal : adviceBlackness 6
+		local arrowTop : mix parenMid parenTop 0.85
+		local arrowBot : mix parenMid parenBot 0.85
+		local doubleArrowStemWidth : arrowSize * 1.1
 
-	define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
-		local size : fallback _size arrowSize
-		local g this.gizmo
-		set this.gizmo : Translate 0 0
-		include : dispiro
-			function [set this.gizmo [Transform.Id]]
-			widths.rhs fine
-			flat 0 0 [heading UPWARD]
-			curl (size * 1) size [widths.rhs terminal]
-			end [[] => (this.contrast = 1)]
-		include : dispiro
-			function [set this.gizmo [Transform.Id]]
-			widths.lhs fine
-			flat 0 0 [heading DOWNWARD]
-			curl (size * 1) (-size) [widths.lhs terminal]
-			end [[] => (this.contrast = 1)]
-		apply-transform : Translate O 0
-		local {.x xo .y yo} : tp g {.x x1 .y y1}
-		local {.x xt .y yt} : tp g {.x x2 .y y2}
-		apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
-		apply-transform : Translate xt yt
-		set this.gizmo g
+		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
+			local size : fallback _size arrowSize
+			local g this.gizmo
+			set this.gizmo : Translate 0 0
+			include : dispiro
+				function [set this.gizmo [Transform.Id]]
+				widths.rhs fine
+				flat 0 0 [heading UPWARD]
+				curl (size * 1) size [widths.rhs terminal]
+				end [[] => (this.contrast = 1)]
+			include : dispiro
+				function [set this.gizmo [Transform.Id]]
+				widths.lhs fine
+				flat 0 0 [heading DOWNWARD]
+				curl (size * 1) (-size) [widths.lhs terminal]
+				end [[] => (this.contrast = 1)]
+			apply-transform : Translate O 0
+			local {.x xo .y yo} : tp g {.x x1 .y y1}
+			local {.x xt .y yt} : tp g {.x x2 .y y2}
+			apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
+			apply-transform : Translate xt yt
+			set this.gizmo g
 
-	define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
-		local mag : Math.hypot (y2 - y1) (x2 - x1)
-		local p : (mag - halfstroke * 1.1) / mag
-		include : ArrowHead x1 y1 x2 y2 size
-		include : dispiro
-			widths.center (halfstroke * 2)
-			flat x1 y1
-			curl [mix x1 x2 p] [mix y1 y2 p]
-			end [[] => (this.contrast = 1)]
+		define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - halfstroke * 1.1) / mag
+			include : ArrowHead x1 y1 x2 y2 size
+			include : dispiro
+				widths.center (halfstroke * 2)
+				flat x1 y1
+				curl [mix x1 x2 p] [mix y1 y2 p]
+				end [[] => (this.contrast = 1)]
 
-	define [dhArrowShape x1 y1 x2 y2 size] : glyph-construction
-		local mag : Math.hypot (y2 - y1) (x2 - x1)
-		local p : (mag - size) / mag
-		include : ArrowShape x1 y1 x2 y2 size
-		include : ArrowHead x1 y1 [mix x1 x2 p] [mix y1 y2 p] size
-	define [htArrowShape x1 y1 x2 y2 size] : glyph-construction
-		local mag : Math.hypot (y2 - y1) (x2 - x1)
-		local p1 : (size - halfstroke * 1.1) / mag
-		local p2 : size / mag
-		include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
-		include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
+		define [DoubleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-construction
+			include : ArrowHead x1 y1 x2 y2 size
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - w / 2 + O) / mag
+			local fine : Math.min (w / 3) (halfstroke * 2)
+			local coFine : w / 2 - fine / 2
+			local G : dispiro
+				widths.center fine
+				flat x1 y1
+				curl [mix x1 x2 p] [mix y1 y2 p]
+				end [[] => (this.contrast = 1)]
+			local g : G.call currentGlyph "don't include"
+			# double arrowstick
+			g.include : Translate (-x1) (-y1)
+			g.include : Rotate (- [Math.atan2 (y2 - y1) (x2 - x1)])
+			include : Translate (-x1) (-y1)
+			include : Rotate (- [Math.atan2 (y2 - y1) (x2 - x1)])
+			include : Translate 0 (-coFine)
+			include g
+			include : Translate 0 (2 * coFine)
+			include g
+			include : Translate 0 (-coFine)
+			include : Rotate [Math.atan2 (y2 - y1) (x2 - x1)]
+			include : Translate x1 y1
 
-	define [arrow shape id unicode x1 y1 x2 y2 width gwidth] : sketch
-		set-width [fallback gwidth arrowWidth]
-		set-anchor "slash" BASE arrowMidX parenMid
-		include : shape x1 y1 x2 y2 arrowSize
-		if width : set-width width
-		save id unicode
-	define [doublearrow shape id unicode x1 y1 x2 y2] : sketch
-		set-width arrowWidth
-		set-anchor "slash" BASE arrowMidX parenMid
-		local xm : mix x1 x2 0.5
-		local ym : mix y1 y2 0.5
-		include : shape xm ym x1 y1 arrowSize
-		include : shape xm ym x2 y2 arrowSize
-		save id unicode
+		define [dhArrowShape x1 y1 x2 y2 size] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - size) / mag
+			include : ArrowShape x1 y1 x2 y2 size
+			include : ArrowHead x1 y1 [mix x1 x2 p] [mix y1 y2 p] size
 
-	arrow ArrowShape 'arrowleft'       0x2190 arrowRSB parenMid SB parenMid
-	arrow ArrowShape 'arrowright'      0x2192 SB parenMid arrowRSB parenMid
-	arrow ArrowShape 'arrowup'         0x2191 arrowMidX arrowBot arrowMidX arrowTop
-	arrow ArrowShape 'arrowdown'       0x2193 arrowMidX arrowTop arrowMidX arrowBot
-	arrow ArrowShape 'hwarrowleft'     null   hwArrowRSB parenMid SB parenMid nothing WIDTH
-	arrow ArrowShape 'hwarrowright'    null   SB parenMid hwArrowRSB parenMid nothing WIDTH
-	arrow ArrowShape 'hwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
-	arrow ArrowShape 'hwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
-	arrow ArrowShape 'arrowupleft'     0x2196 arrowRSB arrowBot SB arrowTop
-	arrow ArrowShape 'arrowupright'    0x2197 SB arrowBot arrowRSB arrowTop
-	arrow ArrowShape 'arrowdownright'  0x2198 SB arrowTop arrowRSB arrowBot
-	arrow ArrowShape 'arrowdownleft'   0x2199 arrowRSB arrowTop SB arrowBot
+		define [htArrowShape x1 y1 x2 y2 size] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p1 : (size - halfstroke * 1.1) / mag
+			local p2 : size / mag
+			include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
+			include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
+		
+		define [arrow shape id unicode x1 y1 x2 y2 width gwidth] : sketch
+			set-width [fallback gwidth arrowWidth]
+			set-anchor "slash" BASE [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
+			include : shape x1 y1 x2 y2 arrowSize
+			if width : set-width width
+			save id unicode
 
-	doublearrow ArrowShape 'arrowleftright' 0x2194 SB parenMid arrowRSB parenMid
-	doublearrow ArrowShape 'arrowupdown' 0x2195 arrowMidX arrowTop arrowMidX arrowBot
-	doublearrow ArrowShape 'arrowupleftdownright' 0x2921 SB arrowTop arrowRSB arrowBot
-	doublearrow ArrowShape 'arrowuprightdownleft' 0x2922 arrowRSB arrowTop SB arrowBot
+		define [doublearrow shape id unicode x1 y1 x2 y2] : sketch
+			set-width arrowWidth
+			set-anchor "slash" BASE [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
+			local xm : mix x1 x2 0.5
+			local ym : mix y1 y2 0.5
+			include : shape xm ym x1 y1 arrowSize
+			include : shape xm ym x2 y2 arrowSize
+			save id unicode
 
-	arrow dhArrowShape 'dharrowleft' 0x219E arrowRSB parenMid SB parenMid
-	arrow dhArrowShape 'dharrowright' 0x21A0 SB parenMid arrowRSB parenMid
-	arrow dhArrowShape 'dharrowup' 0x219F arrowMidX arrowBot arrowMidX arrowTop
-	arrow dhArrowShape 'dharrowdown' 0x21A1 arrowMidX arrowTop arrowMidX arrowBot
+		arrow ArrowShape 'arrowleft'       0x2190 arrowRSB parenMid arrowSB parenMid
+		arrow ArrowShape 'arrowright'      0x2192 arrowSB parenMid arrowRSB parenMid
+		arrow ArrowShape 'arrowup'         0x2191 arrowMidX arrowBot arrowMidX arrowTop
+		arrow ArrowShape 'arrowdown'       0x2193 arrowMidX arrowTop arrowMidX arrowBot
+		arrow ArrowShape 'hwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid nothing WIDTH
+		arrow ArrowShape 'hwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid nothing WIDTH
+		arrow ArrowShape 'hwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
+		arrow ArrowShape 'hwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
+		arrow ArrowShape 'arrowupleft'     0x2196 arrowRSB arrowBot arrowSB arrowTop
+		arrow ArrowShape 'arrowupright'    0x2197 arrowSB arrowBot arrowRSB arrowTop
+		arrow ArrowShape 'arrowdownright'  0x2198 arrowSB arrowTop arrowRSB arrowBot
+		arrow ArrowShape 'arrowdownleft'   0x2199 arrowRSB arrowTop arrowSB arrowBot
 
-	arrow htArrowShape 'htarrowleft' 0x21A2 arrowRSB parenMid SB parenMid
-	arrow htArrowShape 'htarrowright' 0x21A3 SB parenMid arrowRSB parenMid
+		let [dasw doubleArrowStemWidth] : do
+			arrow [DoubleArrowShape dasw] 'dblarrowleft'       0x21D0 arrowRSB parenMid arrowSB parenMid
+			arrow [DoubleArrowShape dasw] 'dblarrowright'      0x21D2 arrowSB parenMid arrowRSB parenMid
+			arrow [DoubleArrowShape dasw] 'dblarrowup'         0x21D1 arrowMidX arrowBot arrowMidX arrowTop
+			arrow [DoubleArrowShape dasw] 'dblarrowdown'       0x21D3 arrowMidX arrowTop arrowMidX arrowBot
+			arrow [DoubleArrowShape dasw] 'dblhwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid nothing WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid nothing WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
+			arrow [DoubleArrowShape dasw] 'dblarrowupleft'     0x21D6 arrowRSB arrowBot arrowSB arrowTop
+			arrow [DoubleArrowShape dasw] 'dblarrowupright'    0x21D7 arrowSB arrowBot arrowRSB arrowTop
+			arrow [DoubleArrowShape dasw] 'dblarrowdownright'  0x21D8 arrowSB arrowTop arrowRSB arrowBot
+			arrow [DoubleArrowShape dasw] 'dblarrowdownleft'   0x21D9 arrowRSB arrowTop arrowSB arrowBot
+
+		doublearrow ArrowShape 'arrowleftright' 0x2194 arrowSB parenMid arrowRSB parenMid
+		doublearrow ArrowShape 'arrowupdown' 0x2195 arrowMidX arrowTop arrowMidX arrowBot
+		doublearrow ArrowShape 'arrowupleftdownright' 0x2921 arrowSB arrowTop arrowRSB arrowBot
+		doublearrow ArrowShape 'arrowuprightdownleft' 0x2922 arrowRSB arrowTop arrowSB arrowBot
+
+		let [dasw doubleArrowStemWidth] : do
+			doublearrow [DoubleArrowShape dasw] 'dblarrowleftright' 0x21D4 arrowSB parenMid arrowRSB parenMid
+			doublearrow [DoubleArrowShape dasw] 'dblarrowupdown' 0x21D5 arrowMidX arrowTop arrowMidX arrowBot
+
+		arrow dhArrowShape 'dharrowleft' 0x219E arrowRSB parenMid arrowSB parenMid
+		arrow dhArrowShape 'dharrowright' 0x21A0 arrowSB parenMid arrowRSB parenMid
+		arrow dhArrowShape 'dharrowup' 0x219F arrowMidX arrowBot arrowMidX arrowTop
+		arrow dhArrowShape 'dharrowdown' 0x21A1 arrowMidX arrowTop arrowMidX arrowBot
+
+		arrow htArrowShape 'htarrowleft' 0x21A2 arrowRSB parenMid arrowSB parenMid
+		arrow htArrowShape 'htarrowright' 0x21A3 arrowSB parenMid arrowRSB parenMid
+
+		composite glyphs.dblarrowleft glyphs.arrSlashOver [into-unicode 0x21CD]
+		composite glyphs.dblarrowleftright glyphs.arrSlashOver [into-unicode 0x21CE]
+		composite glyphs.dblarrowright glyphs.arrSlashOver [into-unicode 0x21CF]
+
+		break : list ArrowShape
 
 	### Standard geometric shapes
-	### 'Geometric'
-	define shapeWidth FULLWIDTH2
+	do 'Geometric'
+		define shapeWidth FULLWIDTH2
 
-	define left : mix MIDDLE SB 1.1
-	define right : mix MIDDLE RIGHTSB 1.1
-	define squareRadius : (right - left) / 2
+		define left : mix MIDDLE SB 1.1
+		define right : mix MIDDLE RIGHTSB 1.1
+		define squareRadius : (right - left) / 2
 
-	local hollowSW : adviceBlackness 5
-	define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / shapeWidth]) / w
-	define [hollow newid unicode oldid zx zy cx cy] : sketch
-		local isWide : glyphs.(oldid).advanceWidth > WIDTH
-		include : create-glyph : glyph-construction
-			include glyphs.(oldid)
-			if isWide : include UnFullWidthify
-		reverse-last
-		local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
-		include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
-		include : create-glyph : glyph-construction
-			include glyphs.(oldid)
-			if isWide : include UnFullWidthify
-		if isWide : include FullWidthify
-		save newid unicode
+		local hollowSW : adviceBlackness 5
+		define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / shapeWidth]) / w
+		define [hollow newid unicode oldid zx zy cx cy] : sketch
+			local isWide : glyphs.(oldid).advanceWidth > WIDTH
+			include : create-glyph : glyph-construction
+				include glyphs.(oldid)
+				if isWide : include UnFullWidthify
+			reverse-last
+			local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
+			include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
+			include : create-glyph : glyph-construction
+				include glyphs.(oldid)
+				if isWide : include UnFullWidthify
+			if isWide : include FullWidthify
+			save newid unicode
 
-	define [resized newid unicode id x y s sy] : sketch
-		include glyphs.(id) AS_BASE
-		include UnFullWidthify
-		include : FlipAround x y s [fallback sy s]
-		include FullWidthify
+		define [resized newid unicode id x y s sy] : sketch
+			include glyphs.(id) AS_BASE
+			include UnFullWidthify
+			include : FlipAround x y s [fallback sy s]
+			include FullWidthify
 
-		save [fallback newid : [if (s < 1) 'small' 'large'] + id] unicode
+			save [fallback newid : [if (s < 1) 'small' 'large'] + id] unicode
 
-	define FullWidthify : glyph-construction
-		apply-transform [Upright] true
-		apply-transform [Translate (-MIDDLE) (-parenMid)] true
-		apply-transform [Scale (shapeWidth / WIDTH)] true
-		apply-transform [Translate (shapeWidth / 2) parenMid] true
-		apply-transform [Italify] true
-		set-width shapeWidth
+		define FullWidthify : glyph-construction
+			apply-transform [Upright] true
+			apply-transform [Translate (-MIDDLE) (-parenMid)] true
+			apply-transform [Scale (shapeWidth / WIDTH)] true
+			apply-transform [Translate (shapeWidth / 2) parenMid] true
+			apply-transform [Italify] true
+			set-width shapeWidth
 
-	define UnFullWidthify : glyph-construction
-		apply-transform [Upright] true
-		apply-transform [Translate (-shapeWidth / 2) (-parenMid)] true
-		apply-transform [Scale (WIDTH / shapeWidth)] true
-		apply-transform [Translate MIDDLE parenMid] true
-		apply-transform [Italify] true
-		set-width WIDTH
+		define UnFullWidthify : glyph-construction
+			apply-transform [Upright] true
+			apply-transform [Translate (-shapeWidth / 2) (-parenMid)] true
+			apply-transform [Scale (WIDTH / shapeWidth)] true
+			apply-transform [Translate MIDDLE parenMid] true
+			apply-transform [Italify] true
+			set-width WIDTH
 
-	sketch # blacksquare
-		start-from left (parenMid + squareRadius)
-		line-to    right (parenMid + squareRadius)
-		line-to    right (parenMid - squareRadius)
-		line-to    left (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacksquare' 0x25A0
-	sketch # blacktrianglerb
-		start-from right (parenMid + squareRadius)
-		line-to    right (parenMid - squareRadius)
-		line-to    left (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacktrianglerb' 0x25E2
-	sketch # blacktrianglelb
-		start-from left (parenMid + squareRadius)
-		line-to    right (parenMid - squareRadius)
-		line-to    left (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacktrianglelb' 0x25E3
-	sketch # blacktrianglelt
-		start-from left (parenMid + squareRadius)
-		line-to    right (parenMid + squareRadius)
-		line-to    left (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacktrianglelt' 0x25E4
-	sketch # blacktrianglert
-		start-from left (parenMid + squareRadius)
-		line-to    right (parenMid + squareRadius)
-		line-to    right (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacktrianglert' 0x25E5
+		sketch # blacksquare
+			start-from left (parenMid + squareRadius)
+			line-to    right (parenMid + squareRadius)
+			line-to    right (parenMid - squareRadius)
+			line-to    left (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacksquare' 0x25A0
+		sketch # blacktrianglerb
+			start-from right (parenMid + squareRadius)
+			line-to    right (parenMid - squareRadius)
+			line-to    left (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacktrianglerb' 0x25E2
+		sketch # blacktrianglelb
+			start-from left (parenMid + squareRadius)
+			line-to    right (parenMid - squareRadius)
+			line-to    left (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacktrianglelb' 0x25E3
+		sketch # blacktrianglelt
+			start-from left (parenMid + squareRadius)
+			line-to    right (parenMid + squareRadius)
+			line-to    left (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacktrianglelt' 0x25E4
+		sketch # blacktrianglert
+			start-from left (parenMid + squareRadius)
+			line-to    right (parenMid + squareRadius)
+			line-to    right (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacktrianglert' 0x25E5
 
-	sketch # blackrectangle
-		start-from left (parenMid + squareRadius / 1.5)
-		line-to    right (parenMid + squareRadius / 1.5)
-		line-to    right (parenMid - squareRadius / 1.5)
-		line-to    left (parenMid - squareRadius / 1.5)
-		include FullWidthify
-		save 'blackrectangle' 0x25AC
+		sketch # blackrectangle
+			start-from left (parenMid + squareRadius / 1.5)
+			line-to    right (parenMid + squareRadius / 1.5)
+			line-to    right (parenMid - squareRadius / 1.5)
+			line-to    left (parenMid - squareRadius / 1.5)
+			include FullWidthify
+			save 'blackrectangle' 0x25AC
 
-	sketch # blacklongrectangle
-		start-from left (parenMid + squareRadius * 1.5)
-		line-to    right (parenMid + squareRadius * 1.5)
-		line-to    right (parenMid - squareRadius * 1.5)
-		line-to    left (parenMid - squareRadius * 1.5)
-		include FullWidthify
-		save 'blacklongrectangle' 0x25AE
-	local triangleOvershoot : 2 / [Math.sqrt 3]
+		sketch # blacklongrectangle
+			start-from left (parenMid + squareRadius * 1.5)
+			line-to    right (parenMid + squareRadius * 1.5)
+			line-to    right (parenMid - squareRadius * 1.5)
+			line-to    left (parenMid - squareRadius * 1.5)
+			include FullWidthify
+			save 'blacklongrectangle' 0x25AE
+		local triangleOvershoot : 2 / [Math.sqrt 3]
 
-	sketch # blacktriangleup
-		start-from MIDDLE (parenMid + squareRadius)
-		line-to    [mix MIDDLE right triangleOvershoot] (parenMid - squareRadius)
-		line-to    [mix MIDDLE left triangleOvershoot] (parenMid - squareRadius)
-		include FullWidthify
-		save 'blacktriangleup' 0x25B2
+		sketch # blacktriangleup
+			start-from MIDDLE (parenMid + squareRadius)
+			line-to    [mix MIDDLE right triangleOvershoot] (parenMid - squareRadius)
+			line-to    [mix MIDDLE left triangleOvershoot] (parenMid - squareRadius)
+			include FullWidthify
+			save 'blacktriangleup' 0x25B2
 
-	sketch # blacktriangledown
-		start-from MIDDLE (parenMid - squareRadius)
-		line-to    [mix MIDDLE left triangleOvershoot] (parenMid + squareRadius)
-		line-to    [mix MIDDLE right triangleOvershoot] (parenMid + squareRadius)
-		include FullWidthify
-		save 'blacktriangledown' 0x25BC
+		sketch # blacktriangledown
+			start-from MIDDLE (parenMid - squareRadius)
+			line-to    [mix MIDDLE left triangleOvershoot] (parenMid + squareRadius)
+			line-to    [mix MIDDLE right triangleOvershoot] (parenMid + squareRadius)
+			include FullWidthify
+			save 'blacktriangledown' 0x25BC
 
-	sketch # blacktriangleleft
-		start-from left parenMid
-		line-to    right (parenMid - squareRadius * triangleOvershoot)
-		line-to    right (parenMid + squareRadius * triangleOvershoot)
-		include FullWidthify
-		save 'blacktriangleleft' 0x25C0
+		sketch # blacktriangleleft
+			start-from left parenMid
+			line-to    right (parenMid - squareRadius * triangleOvershoot)
+			line-to    right (parenMid + squareRadius * triangleOvershoot)
+			include FullWidthify
+			save 'blacktriangleleft' 0x25C0
 
-	sketch # blacktriangleright
-		start-from right parenMid
-		line-to    left (parenMid + squareRadius * triangleOvershoot)
-		line-to    left (parenMid - squareRadius * triangleOvershoot)
-		include FullWidthify
-		save 'blacktriangleright' 0x25B6
+		sketch # blacktriangleright
+			start-from right parenMid
+			line-to    left (parenMid + squareRadius * triangleOvershoot)
+			line-to    left (parenMid - squareRadius * triangleOvershoot)
+			include FullWidthify
+			save 'blacktriangleright' 0x25B6
 
-	sketch # blackdiamond
-		start-from MIDDLE (parenMid + squareRadius)
-		line-to    right parenMid
-		line-to    MIDDLE (parenMid - squareRadius)
-		line-to    left parenMid
-		save 'hwblackdiamond'
-		include FullWidthify
-		save 'blackdiamond' 0x25C6
+		sketch # blackdiamond
+			start-from MIDDLE (parenMid + squareRadius)
+			line-to    right parenMid
+			line-to    MIDDLE (parenMid - squareRadius)
+			line-to    left parenMid
+			save 'hwblackdiamond'
+			include FullWidthify
+			save 'blackdiamond' 0x25C6
 
-	sketch # blackcircle
-		include markset.plus
-		include : spiro-outline
-			g4 MIDDLE (parenMid + squareRadius)
-			g4 left parenMid
-			g4 MIDDLE (parenMid - squareRadius)
-			g4 right parenMid
-			close
-		reverse-last
-		save 'hwblackcircle'
-		include FullWidthify
-		save 'blackcircle' 0x25CF
-
-	sketch # smallblackcircle
-		include : spiro-outline
-			g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_small_x)
-			g4 (MIDDLE - squareRadius * designParameters.geometric_small_x) parenMid
-			g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_small_x)
-			g4 (MIDDLE + squareRadius * designParameters.geometric_small_x) parenMid
-			close
-		reverse-last
-		save 'hwsmallblackcircle'
-		include FullWidthify
-		save 'smallblackcircle'
-
-	sketch # bigblackcircle
-		include : spiro-outline
-			g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_large_x)
-			g4 (MIDDLE - squareRadius * designParameters.geometric_large_x) parenMid
-			g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_large_x)
-			g4 (MIDDLE + squareRadius * designParameters.geometric_large_x) parenMid
-			close
-		reverse-last
-		save 'hwbigblackcircle'
-		include FullWidthify
-		save 'bigblackcircle'
-
-	let
-	: configurations : list
-		* {.sides 5 .skip 2 .name 'blackstar' .unicode 0x2605 .overflow 1.1 .phase 0}
-		* {.sides 5 .skip 1 .name 'blackpentagon' .unicode 0x2B1F .overflow 1.05 .phase 0}
-		* {.sides 6 .skip 1 .name 'blackhexagon' .unicode 0x2B22 .overflow 1.05 .phase 0}
-		* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
-		* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
-	: foreach [{.sides sides .skip skip .name name .unicode unicode .overflow overflow .phase phase} : items-of configurations] : sketch
-		include markset.plus
-		foreach [j : range 0 sides] : begin
-			local angle : 2 * Math.PI * j * skip / sides + phase
-			currentGlyph.([if j 'line-to' 'start-from'])
-				mix left right (0.5 - 0.5 * overflow * [Math.sin angle])
-				parenMid + squareRadius * [Math.cos angle] * overflow
-		save "hw\(name)"
-		include FullWidthify
-		save name unicode
-
-	sketch # dottedcircle
-		local n 12
-		local fine : adviceBlackness 10
-		foreach j [range 0 n] : begin
-			local angle : Math.PI * 2 * j / n
-			local cx : MIDDLE + (right - MIDDLE) * [Math.cos angle]
-			local cy : (XH / 2) + (right - MIDDLE) * [Math.sin angle]
+		sketch # blackcircle
+			include markset.plus
 			include : spiro-outline
-				g4 cx (cy + fine)
-				g4 (cx + fine) cy
-				g4 cx (cy - fine)
-				g4 (cx - fine) cy
+				g4 MIDDLE (parenMid + squareRadius)
+				g4 left parenMid
+				g4 MIDDLE (parenMid - squareRadius)
+				g4 right parenMid
 				close
-			#include : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
-		include markset.e
-		apply-transform [Upright] true
-		apply-transform [Translate 0 (parenMid - (XH / 2))] true
-		apply-transform [Italify] true
-		include FullWidthify
+			reverse-last
+			save 'hwblackcircle'
+			include FullWidthify
+			save 'blackcircle' 0x25CF
 
-		save 'dottedcircle' 0x25CC
+		sketch # smallblackcircle
+			include : spiro-outline
+				g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_small_x)
+				g4 (MIDDLE - squareRadius * designParameters.geometric_small_x) parenMid
+				g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_small_x)
+				g4 (MIDDLE + squareRadius * designParameters.geometric_small_x) parenMid
+				close
+			reverse-last
+			save 'hwsmallblackcircle'
+			include FullWidthify
+			save 'smallblackcircle'
 
-	hollow 'whitesquare' 0x25A1 'blacksquare'
-	hollow 'whitehexagon' 0x2B21 'blackhexagon'
-	hollow 'whitepentagon' 0x2B20 'blackpentagon'
-	hollow 'rhwhitepentagon' 0x2B54 'rhblackpentagon'
-	hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
-	hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
-	hollow 'whitecircle' 0x25CB 'blackcircle'
-	hollow 'bigwhitecircle' 0x25EF 'bigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
-	hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale (squareRadius * designParameters.geometric_large_x) 1]
-	hollow 'smallwhitecircle' null 'smallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
-	hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale (squareRadius * designParameters.geometric_small_x) 1]
-	hollow 'hwwhitecircle' null 'hwblackcircle'
-	hollow 'hwwhitediamond' null 'hwblackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
-	hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
-
-	let [sts 0.75]
-	: begin
-		resized 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
-		resized 'smallblacktriangleright' 0x25B8 'blacktriangleright' MIDDLE parenMid 0.75
-		resized 'smallblacktriangledown' 0x25BE 'blacktriangledown' MIDDLE parenMid 0.75
-		resized 'smallblacktriangleleft' 0x25C2 'blacktriangleleft' MIDDLE parenMid 0.75
+		sketch # bigblackcircle
+			include : spiro-outline
+				g4 MIDDLE (parenMid + squareRadius * designParameters.geometric_large_x)
+				g4 (MIDDLE - squareRadius * designParameters.geometric_large_x) parenMid
+				g4 MIDDLE (parenMid - squareRadius * designParameters.geometric_large_x)
+				g4 (MIDDLE + squareRadius * designParameters.geometric_large_x) parenMid
+				close
+			reverse-last
+			save 'hwbigblackcircle'
+			include FullWidthify
+			save 'bigblackcircle'
 
 		let
-		: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
-		: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
+		: configurations : list
+			* {.sides 5 .skip 2 .name 'blackstar' .unicode 0x2605 .overflow 1.1 .phase 0}
+			* {.sides 5 .skip 1 .name 'blackpentagon' .unicode 0x2B1F .overflow 1.05 .phase 0}
+			* {.sides 6 .skip 1 .name 'blackhexagon' .unicode 0x2B22 .overflow 1.05 .phase 0}
+			* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
+			* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
+		: foreach [{.sides sides .skip skip .name name .unicode unicode .overflow overflow .phase phase} : items-of configurations] : sketch
+			include markset.plus
+			foreach [j : range 0 sides] : begin
+				local angle : 2 * Math.PI * j * skip / sides + phase
+				currentGlyph.([if j 'line-to' 'start-from'])
+					mix left right (0.5 - 0.5 * overflow * [Math.sin angle])
+					parenMid + squareRadius * [Math.cos angle] * overflow
+			save "hw\(name)"
+			include FullWidthify
+			save name unicode
+
+		sketch # dottedcircle
+			local n 12
+			local fine : adviceBlackness 10
+			foreach j [range 0 n] : begin
+				local angle : Math.PI * 2 * j / n
+				local cx : MIDDLE + (right - MIDDLE) * [Math.cos angle]
+				local cy : (XH / 2) + (right - MIDDLE) * [Math.sin angle]
+				include : spiro-outline
+					g4 cx (cy + fine)
+					g4 (cx + fine) cy
+					g4 cx (cy - fine)
+					g4 (cx - fine) cy
+					close
+				#include : Ring (cy + fine) (cy - fine) (cx - fine) (cx + fine) true
+			include markset.e
+			apply-transform [Upright] true
+			apply-transform [Translate 0 (parenMid - (XH / 2))] true
+			apply-transform [Italify] true
+			include FullWidthify
+
+			save 'dottedcircle' 0x25CC
+
+		hollow 'whitesquare' 0x25A1 'blacksquare'
+		hollow 'whitehexagon' 0x2B21 'blackhexagon'
+		hollow 'whitepentagon' 0x2B20 'blackpentagon'
+		hollow 'rhwhitepentagon' 0x2B54 'rhblackpentagon'
+		hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
+		hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
+		hollow 'whitecircle' 0x25CB 'blackcircle'
+		hollow 'bigwhitecircle' 0x25EF 'bigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
+		hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale (squareRadius * designParameters.geometric_large_x) 1]
+		hollow 'smallwhitecircle' null 'smallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
+		hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale (squareRadius * designParameters.geometric_small_x) 1]
+		hollow 'hwwhitecircle' null 'hwblackcircle'
+		hollow 'hwwhitediamond' null 'hwblackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
+		hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
+
+		let [sts 0.75]
 		: begin
-			hollow 'whitetriangleup' 0x25B3 'blacktriangleup' sl nothing MIDDLE (parenMid - squareRadius / 3)
-			hollow 'whitetriangledown' 0x25BD 'blacktriangledown' sl nothing MIDDLE (parenMid + squareRadius / 3)
-			hollow 'whitetriangleleft' 0x25C1 'blacktriangleleft' sl nothing [mix MIDDLE right (1 / 3)] parenMid
-			hollow 'whitetriangleright' 0x25B7 'blacktriangleright' sl nothing [mix MIDDLE left (1 / 3)] parenMid
-			hollow 'smallwhitetriangleup' 0x25B5 'smallblacktriangleup' ss nothing MIDDLE (parenMid - squareRadius / 3 * sts)
-			hollow 'smallwhitetriangledown' 0x25BF 'smallblacktriangledown' ss nothing MIDDLE (parenMid + squareRadius / 3 * sts)
-			hollow 'smallwhitetriangleleft' 0x25C3 'smallblacktriangleleft' ss nothing [mix MIDDLE right (sts / 3)] parenMid
-			hollow 'smallwhitetriangleright' 0x25B9 'smallblacktriangleright' ss nothing [mix MIDDLE left (sts / 3)] parenMid
+			resized 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
+			resized 'smallblacktriangleright' 0x25B8 'blacktriangleright' MIDDLE parenMid 0.75
+			resized 'smallblacktriangledown' 0x25BE 'blacktriangledown' MIDDLE parenMid 0.75
+			resized 'smallblacktriangleleft' 0x25C2 'blacktriangleleft' MIDDLE parenMid 0.75
 
-	# Mark sampler
-	sketch
-		include markset.e
-		include : spiro-outline
-			g4 MIDDLE XH
-			g4 (MIDDLE - XH / 2) (XH / 2)
-			g4 MIDDLE 0
-			close
+			let
+			: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
+			: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
+			: begin
+				hollow 'whitetriangleup' 0x25B3 'blacktriangleup' sl nothing MIDDLE (parenMid - squareRadius / 3)
+				hollow 'whitetriangledown' 0x25BD 'blacktriangledown' sl nothing MIDDLE (parenMid + squareRadius / 3)
+				hollow 'whitetriangleleft' 0x25C1 'blacktriangleleft' sl nothing [mix MIDDLE right (1 / 3)] parenMid
+				hollow 'whitetriangleright' 0x25B7 'blacktriangleright' sl nothing [mix MIDDLE left (1 / 3)] parenMid
+				hollow 'smallwhitetriangleup' 0x25B5 'smallblacktriangleup' ss nothing MIDDLE (parenMid - squareRadius / 3 * sts)
+				hollow 'smallwhitetriangledown' 0x25BF 'smallblacktriangledown' ss nothing MIDDLE (parenMid + squareRadius / 3 * sts)
+				hollow 'smallwhitetriangleleft' 0x25C3 'smallblacktriangleleft' ss nothing [mix MIDDLE right (sts / 3)] parenMid
+				hollow 'smallwhitetriangleright' 0x25B9 'smallblacktriangleright' ss nothing [mix MIDDLE left (sts / 3)] parenMid
 
-		include : spiro-outline
-			g4 MIDDLE (XH * 0.9)
-			g4 (MIDDLE + XH * 0.4) (XH * 0.5)
-			g4 MIDDLE (XH * 0.1)
-			close
-		save 'marksampler' 0xE09E
+		# Mark sampler
+		sketch
+			include markset.e
+			include : spiro-outline
+				g4 MIDDLE XH
+				g4 (MIDDLE - XH / 2) (XH / 2)
+				g4 MIDDLE 0
+				close
+
+			include : spiro-outline
+				g4 MIDDLE (XH * 0.9)
+				g4 (MIDDLE + XH * 0.4) (XH * 0.5)
+				g4 MIDDLE (XH * 0.1)
+				close
+			save 'marksampler' 0xE09E
 
 	### Blocks
-	### 'Block Shapes'
-	
-	sketch # fullblock
-		set-width FULLWIDTH
-		include : forceUpright
-		start-from 0 font.OS_2.usWinAscent
-		line-to    FULLWIDTH font.OS_2.usWinAscent
-		line-to    FULLWIDTH (-font.OS_2.usWinDescent)
-		line-to    0 (-font.OS_2.usWinDescent)
-		save 'fullblock' 0x2588
+	do 'Block Shapes'
 
-	define [Shade fn] : glyph-construction
-		local top font.OS_2.usWinAscent
-		local bottom (-font.OS_2.usWinDescent)
-		local segx 6
-		local segy 16
-		local g : create-glyph : glyph-construction : begin
-			include : forceUpright
-			foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
-				start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
-				line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
-				line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
-				line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
-		include g
-		if (FULLWIDTH > WIDTH) : begin
-			apply-transform : Translate (FULLWIDTH - WIDTH) 0
-			include g
-
-	sketch # lightshade
-		set-width FULLWIDTH
-		include : forceUpright
-		include : Shade ([j k] => ((k % 2) && (j + (k - 1) / 2) % 2))
-		save 'lightshade' 0x2591
-
-	sketch # mediumshade
-		set-width FULLWIDTH
-		include : forceUpright
-		include : Shade ([j k] => ((j + k) % 2))
-		save 'mediumshade' 0x2592
-
-	sketch # heavyshade
-		set-width FULLWIDTH
-		include : forceUpright
-		include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
-		save 'heavyshade' 0x2593
-
-	foreach [fill : range 1 8] : begin
-		sketch # Vertical fill
-			set-width FULLWIDTH
-			include : forceUpright
-			start-from 0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
-			line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
-			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
-			line-to    0 (-font.OS_2.usWinDescent)
-			save ('vfill' + fill) (0x2580 + fill)
-		sketch # Horizontal fill
+		sketch # fullblock
 			set-width FULLWIDTH
 			include : forceUpright
 			start-from 0 font.OS_2.usWinAscent
-			line-to    (FULLWIDTH * fill / 8) font.OS_2.usWinAscent
-			line-to    (FULLWIDTH * fill / 8) (-font.OS_2.usWinDescent)
+			line-to    FULLWIDTH font.OS_2.usWinAscent
+			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
 			line-to    0 (-font.OS_2.usWinDescent)
-			save ('hfill' + fill) (0x2590 - fill)
+			save 'fullblock' 0x2588
 
-	sketch # upHalfblock
-		set-width FULLWIDTH
-		include : forceUpright
-		start-from 0 font.OS_2.usWinAscent
-		line-to    FULLWIDTH font.OS_2.usWinAscent
-		line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
-		line-to    0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
-		save 'upHalfblock' 0x2580
+		define [Shade fn] : glyph-construction
+			local top font.OS_2.usWinAscent
+			local bottom (-font.OS_2.usWinDescent)
+			local segx 6
+			local segy 16
+			local g : create-glyph : glyph-construction : begin
+				include : forceUpright
+				foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
+					start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
+					line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
+					line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
+					line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
+			include g
+			if (FULLWIDTH > WIDTH) : begin
+				apply-transform : Translate (FULLWIDTH - WIDTH) 0
+				include g
 
-	sketch # rightHalfBlock
-		set-width FULLWIDTH
-		include : forceUpright
-		start-from (FULLWIDTH * 0.5) font.OS_2.usWinAscent
-		line-to    FULLWIDTH font.OS_2.usWinAscent
-		line-to    FULLWIDTH (-font.OS_2.usWinDescent)
-		line-to    (FULLWIDTH * 0.5) (-font.OS_2.usWinDescent)
+		sketch # lightshade
+			set-width FULLWIDTH
+			include : forceUpright
+			include : Shade ([j k] => ((k % 2) && (j + (k - 1) / 2) % 2))
+			save 'lightshade' 0x2591
 
-		save 'rightHalfBlock' 0x2590
+		sketch # mediumshade
+			set-width FULLWIDTH
+			include : forceUpright
+			include : Shade ([j k] => ((j + k) % 2))
+			save 'mediumshade' 0x2592
+
+		sketch # heavyshade
+			set-width FULLWIDTH
+			include : forceUpright
+			include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
+			save 'heavyshade' 0x2593
+
+		foreach [fill : range 1 8] : begin
+			sketch # Vertical fill
+				set-width FULLWIDTH
+				include : forceUpright
+				start-from 0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
+				line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
+				line-to    FULLWIDTH (-font.OS_2.usWinDescent)
+				line-to    0 (-font.OS_2.usWinDescent)
+				save ('vfill' + fill) (0x2580 + fill)
+			sketch # Horizontal fill
+				set-width FULLWIDTH
+				include : forceUpright
+				start-from 0 font.OS_2.usWinAscent
+				line-to    (FULLWIDTH * fill / 8) font.OS_2.usWinAscent
+				line-to    (FULLWIDTH * fill / 8) (-font.OS_2.usWinDescent)
+				line-to    0 (-font.OS_2.usWinDescent)
+				save ('hfill' + fill) (0x2590 - fill)
+
+		sketch # upHalfblock
+			set-width FULLWIDTH
+			include : forceUpright
+			start-from 0 font.OS_2.usWinAscent
+			line-to    FULLWIDTH font.OS_2.usWinAscent
+			line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
+			line-to    0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
+			save 'upHalfblock' 0x2580
+
+		sketch # rightHalfBlock
+			set-width FULLWIDTH
+			include : forceUpright
+			start-from (FULLWIDTH * 0.5) font.OS_2.usWinAscent
+			line-to    FULLWIDTH font.OS_2.usWinAscent
+			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
+			line-to    (FULLWIDTH * 0.5) (-font.OS_2.usWinDescent)
+
+			save 'rightHalfBlock' 0x2590
 	### Box drawing glyphs
 	do "Box Drawing"
 		local light : adviceBlackness 3.5
