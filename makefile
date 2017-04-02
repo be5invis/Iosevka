@@ -1,26 +1,25 @@
 start : __start
 
-include utility/makefile.dirs.mk
-include utility/makefile.scripts.mk
+include utility/dirs.mk
 
 # Standard
-$(BUILD)/targets.mk : maker.js $(SCRIPTS) | $(BUILD)/
+$(BUILD)/targets.mk : maker.js | $(BUILD)/
 	node maker.js > $@
 
 __start : $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.standard.mk __default
+	@$(MAKE) -f utility/standard.mk __default
 
 release : $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.standard.mk release
+	@$(MAKE) -f utility/standard.mk release
 
 test : $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.standard.mk test
+	@$(MAKE) -f utility/standard.mk test
 
 fw : $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.standard.mk fw
+	@$(MAKE) -f utility/standard.mk fw
 
 sample-images :
-	@$(MAKE) -f utility/makefile.standard.mk sample-images
+	@$(MAKE) -f utility/standard.mk sample-images
 
 # Custom
 ifndef set
@@ -42,17 +41,18 @@ endif
 
 CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' > $(BUILD)/targets-$(set).mk
 
-custom-config : | $(BUILD)/
+custom-config : maker.js | $(BUILD)/
 	$(CREATECONFIG)
 
 export set
 custom : $(BUILD)/targets-$(set).mk $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.custom.mk fonts-customized-$(set) __IOSEVKA_CUSTOM_BUILD__=true
+	@$(MAKE) -f utility/custom.mk fonts-customized-$(set) __IOSEVKA_CUSTOM_BUILD__=true
 custom-web : $(BUILD)/targets-$(set).mk $(BUILD)/targets.mk
-	@$(MAKE) -f utility/makefile.custom.mk web-customized-$(set) __IOSEVKA_CUSTOM_BUILD__=true
+	@$(MAKE) -f utility/custom.mk web-customized-$(set) __IOSEVKA_CUSTOM_BUILD__=true
 
 # Cleaning
-clean : cleanscripts
+clean :
+	@$(MAKE) -f utility/scripts.mk cleanscripts
 	@-rm -rf $(BUILD)
 	@-rm -rf $(DIST)
 	@-rm -rf $(ARCHIVEDIR)
