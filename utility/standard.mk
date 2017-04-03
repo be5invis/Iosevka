@@ -1,4 +1,3 @@
-VERSION = 1.12.1
 start : __default
 
 include utility/dirs.mk

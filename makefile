@@ -1,3 +1,6 @@
+VERSION = 1.12.2
+export VERSION
+
 start : __start
 
 include utility/dirs.mk

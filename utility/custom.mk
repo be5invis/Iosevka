@@ -1,5 +1,3 @@
-VERSION = 1.12.1
-
 include utility/dirs.mk
 include utility/scripts.mk
 
