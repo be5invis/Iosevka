@@ -40,9 +40,11 @@ endif
 ifndef oblique
 oblique = normal
 endif
+ifndef poststyle
+poststyle = nothing
+endif
 
-
-CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' > $(BUILD)/targets-$(set).mk
+CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' --poststyle '$(poststyle)' > $(BUILD)/targets-$(set).mk
 
 custom-config : maker.js | $(BUILD)/
 	$(CREATECONFIG)

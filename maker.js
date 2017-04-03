@@ -28,12 +28,14 @@ function getMapping(options) {
 		fileSuffix: ""
 	};
 	let design = options.design || [];
+	let poststyle = options.poststyle || [];
 	let weight = options.weight || "book";
 	let slantness = options.slantness || "upright";
 	let hives = ["iosevka"].concat(
 		design,
 		["w-" + weight, "s-" + slantness],
-		(options.styles || {})[slantness] || []
+		(options.styles || {})[slantness] || [],
+		poststyle
 	);
 	let dir = [
 		options.dirPrefix || "",
@@ -98,6 +100,7 @@ if (argv.custom) {
 			custom: '$(BUILD)/targets-' + argv.custom + '.mk',
 			name: "customized-" + argv.custom,
 			design: argv.design.trim().split(/ +/),
+			poststyle: argv.poststyle.trim().split(/ +/),
 			width: argv.width,
 			infix: argv.custom,
 			styles: {
