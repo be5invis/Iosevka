@@ -8,9 +8,6 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks
 
-	define [forceUpright] : glyph-construction
-		set this.gizmo : Translate 0 0
-
 	### Arrowheads
 	define {ArrowShape} : do 'Arrows'
 		define arrowWidth FULLWIDTH2
@@ -19,6 +16,7 @@ export : define [apply] : begin
 		define arrowRSB : arrowWidth - arrowSB
 		define hwArrowRSB : WIDTH - arrowSB
 		define hwArrowMidX : WIDTH / 2
+		define o : O * 2
 
 		local arrowSize : (RIGHTSB - arrowSB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
 		local halfstroke : OPERATORSTROKE / 2
@@ -35,14 +33,14 @@ export : define [apply] : begin
 			include : dispiro
 				function [set this.gizmo [Transform.Id]]
 				widths.rhs fine
-				flat 0 0 [heading UPWARD]
-				curl (size * 1) size [widths.rhs terminal]
+				flat o 0 [heading UPWARD]
+				curl (o + size) size [widths.rhs terminal]
 				end [[] => (this.contrast = 1)]
 			include : dispiro
 				function [set this.gizmo [Transform.Id]]
 				widths.lhs fine
-				flat 0 0 [heading DOWNWARD]
-				curl (size * 1) (-size) [widths.lhs terminal]
+				flat o 0 [heading DOWNWARD]
+				curl (o + size) (-size) [widths.lhs terminal]
 				end [[] => (this.contrast = 1)]
 			apply-transform : Translate O 0
 			local {.x xo .y yo} : tp g {.x x1 .y y1}
@@ -53,7 +51,7 @@ export : define [apply] : begin
 
 		define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - halfstroke * 1.1) / mag
+			local p : (mag - o - halfstroke * 1.1) / mag
 			include : ArrowHead x1 y1 x2 y2 size
 			include : dispiro
 				widths.center (halfstroke * 2)
@@ -63,38 +61,48 @@ export : define [apply] : begin
 
 		define [DoubleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
-			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - w / 2 + O) / mag
+
+			local giz this.gizmo
+			local {.x xo .y yo} : tp giz {.x x1 .y y1}
+			local {.x xt .y yt} : tp giz {.x x2 .y y2}
+
+			local mag : Math.hypot (yt - yo) (xt - xo)
+			local p : (mag - o - w / 2 + O) / mag
+
 			local fine : Math.min (w / 3) (halfstroke * 2)
 			local coFine : w / 2 - fine / 2
+			
 			local G : dispiro
+				disable-gizmo
+				disable-contrast
 				widths.center fine
-				flat x1 y1
-				curl [mix x1 x2 p] [mix y1 y2 p]
-				end [[] => (this.contrast = 1)]
+				# begin
+				flat xo yo
+				curl [mix xo xt p] [mix yo yt p]
+				end
 			local g : G.call currentGlyph "don't include"
 			# double arrowstick
-			g.include : Translate (-x1) (-y1)
-			g.include : Rotate (- [Math.atan2 (y2 - y1) (x2 - x1)])
-			include : Translate (-x1) (-y1)
-			include : Rotate (- [Math.atan2 (y2 - y1) (x2 - x1)])
+			g.include : Translate (-xo) (-yo)
+			g.include : Rotate (- [Math.atan2 (yt - yo) (xt - xo)])
+			include : Translate (-xo) (-yo)
+			include : Rotate (- [Math.atan2 (yt - yo) (xt - xo)])
 			include : Translate 0 (-coFine)
 			include g
 			include : Translate 0 (2 * coFine)
 			include g
 			include : Translate 0 (-coFine)
-			include : Rotate [Math.atan2 (y2 - y1) (x2 - x1)]
-			include : Translate x1 y1
+			include : Rotate [Math.atan2 (yt - yo) (xt - xo)]
+			include : Translate xo yo
 
 		define [dhArrowShape x1 y1 x2 y2 size] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - size) / mag
+			local p : (mag - o - size) / mag
 			include : ArrowShape x1 y1 x2 y2 size
 			include : ArrowHead x1 y1 [mix x1 x2 p] [mix y1 y2 p] size
 
 		define [htArrowShape x1 y1 x2 y2 size] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p1 : (size - halfstroke * 1.1) / mag
+			local p1 : (size + o - halfstroke * 1.1) / mag
 			local p2 : size / mag
 			include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
 			include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
@@ -159,6 +167,15 @@ export : define [apply] : begin
 		arrow htArrowShape 'htarrowleft' 0x21A2 arrowRSB parenMid arrowSB parenMid
 		arrow htArrowShape 'htarrowright' 0x21A3 arrowSB parenMid arrowRSB parenMid
 
+		composite glyphs.arrowleft glyphs.arrSlashOver [into-unicode 0x219A]
+		composite glyphs.arrowright glyphs.arrSlashOver [into-unicode 0x219B]
+		composite glyphs.arrowleftright glyphs.arrSlashOver [into-unicode 0x21AE]
+		composite glyphs.arrowleft glyphs.arrVStrokeOver [into-unicode 0x21F7]
+		composite glyphs.arrowright glyphs.arrVStrokeOver [into-unicode 0x21F8]
+		composite glyphs.arrowleftright glyphs.arrVStrokeOver [into-unicode 0x21F9]
+		composite glyphs.arrowleft glyphs.arrDblVStrokeOver [into-unicode 0x21FA]
+		composite glyphs.arrowright glyphs.arrDblVStrokeOver [into-unicode 0x21FB]
+		composite glyphs.arrowleftright glyphs.arrDblVStrokeOver [into-unicode 0x21FC]
 		composite glyphs.dblarrowleft glyphs.arrSlashOver [into-unicode 0x21CD]
 		composite glyphs.dblarrowleftright glyphs.arrSlashOver [into-unicode 0x21CE]
 		composite glyphs.dblarrowright glyphs.arrSlashOver [into-unicode 0x21CF]
@@ -432,7 +449,7 @@ export : define [apply] : begin
 
 		sketch # fullblock
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			start-from 0 font.OS_2.usWinAscent
 			line-to    FULLWIDTH font.OS_2.usWinAscent
 			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
@@ -445,7 +462,7 @@ export : define [apply] : begin
 			local segx 6
 			local segy 16
 			local g : create-glyph : glyph-construction : begin
-				include : forceUpright
+				include : ForceUpright
 				foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
 					start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
 					line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
@@ -458,26 +475,26 @@ export : define [apply] : begin
 
 		sketch # lightshade
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			include : Shade ([j k] => ((k % 2) && (j + (k - 1) / 2) % 2))
 			save 'lightshade' 0x2591
 
 		sketch # mediumshade
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			include : Shade ([j k] => ((j + k) % 2))
 			save 'mediumshade' 0x2592
 
 		sketch # heavyshade
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
 			save 'heavyshade' 0x2593
 
 		foreach [fill : range 1 8] : begin
 			sketch # Vertical fill
 				set-width FULLWIDTH
-				include : forceUpright
+				include : ForceUpright
 				start-from 0 [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
 				line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (fill / 8)]
 				line-to    FULLWIDTH (-font.OS_2.usWinDescent)
@@ -485,7 +502,7 @@ export : define [apply] : begin
 				save ('vfill' + fill) (0x2580 + fill)
 			sketch # Horizontal fill
 				set-width FULLWIDTH
-				include : forceUpright
+				include : ForceUpright
 				start-from 0 font.OS_2.usWinAscent
 				line-to    (FULLWIDTH * fill / 8) font.OS_2.usWinAscent
 				line-to    (FULLWIDTH * fill / 8) (-font.OS_2.usWinDescent)
@@ -494,7 +511,7 @@ export : define [apply] : begin
 
 		sketch # upHalfblock
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			start-from 0 font.OS_2.usWinAscent
 			line-to    FULLWIDTH font.OS_2.usWinAscent
 			line-to    FULLWIDTH [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent 0.5]
@@ -503,7 +520,7 @@ export : define [apply] : begin
 
 		sketch # rightHalfBlock
 			set-width FULLWIDTH
-			include : forceUpright
+			include : ForceUpright
 			start-from (FULLWIDTH * 0.5) font.OS_2.usWinAscent
 			line-to    FULLWIDTH font.OS_2.usWinAscent
 			line-to    FULLWIDTH (-font.OS_2.usWinDescent)
@@ -522,7 +539,7 @@ export : define [apply] : begin
 
 		define [boxdraw unicode u d l r] : sketch
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			local stopH : [Math.max u d] / 2
 			local stopV : [Math.max l r] / 2
 			if l : include : HBar 0 (midx + stopH) midy l
@@ -534,7 +551,7 @@ export : define [apply] : begin
 
 		define [dlboxdraw unicode u d l r] : sketch
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			local stopH : [Math.max u d] - light * 1 - light * 0.5 * HVCONTRAST
 			local stopV : [Math.max l r] - light * 1.5
 			local capH  : [Math.max u d] - light * 1
@@ -636,14 +653,14 @@ export : define [apply] : begin
 		# Dashed
 		define [hDashed unicode segments weight] : sketch
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			foreach j [range 0 segments] : include : HBar [mix (width * j / segments) (width * (j + 1) / segments) 0.2] [mix (width * j / segments) (width * (j + 1) / segments) 0.8] midy weight
 
 			save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
 
 		define [vDashed unicode segments weight] : sketch
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			foreach j [range 0 segments] : include : VBar midx [mix [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (j / segments)] [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent ((j + 1) / segments)] 0.2] [mix [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent (j / segments)] [mix (-font.OS_2.usWinDescent) font.OS_2.usWinAscent ((j + 1) / segments)] 0.8] weight
 
 			save ('bd' + [unicode.toString 16 :.toUpperCase]) unicode
@@ -665,7 +682,7 @@ export : define [apply] : begin
 		local bdArcRadius : Math.min (midx + O * 2) ((midy - boty) / 2)
 		sketch # bd256D
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat midx boty                 [heading UPWARD]
@@ -677,7 +694,7 @@ export : define [apply] : begin
 
 		sketch # bd256E
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat midx boty                 [heading UPWARD]
@@ -689,7 +706,7 @@ export : define [apply] : begin
 
 		sketch # bd256F
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat midx topy                 [heading DOWNWARD]
@@ -701,7 +718,7 @@ export : define [apply] : begin
 
 		sketch # bd2570
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat midx topy                 [heading DOWNWARD]
@@ -713,7 +730,7 @@ export : define [apply] : begin
 
 		sketch # bd2571
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat width font.OS_2.usWinAscent
@@ -722,7 +739,7 @@ export : define [apply] : begin
 
 		sketch # bd2572
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include : dispiro
 				widths.center light
 				flat 0 font.OS_2.usWinAscent
@@ -731,7 +748,7 @@ export : define [apply] : begin
 
 		sketch # bd2573
 			set-width width
-			include : forceUpright
+			include : ForceUpright
 			include glyphs.bd2571
 			include glyphs.bd2572
 			save 'bd2573' 0x2573
@@ -757,7 +774,7 @@ export : define [apply] : begin
 	local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
 	local pwlFar : WIDTH * para.powerlineScaleX + para.powerlineShiftX
 	sketch # pwlTriangleRight
-		include : forceUpright
+		include : ForceUpright
 		start-from (pwlNear + O) pwlTop
 		line-to    pwlNear pwlTop
 		line-to    pwlFar [mix pwlTop pwlBot 0.5]
@@ -766,7 +783,7 @@ export : define [apply] : begin
 		save 'pwlTriangleRight' 0xE0B0
 
 	sketch # pwlAngleRight
-		include : forceUpright
+		include : ForceUpright
 		local fine : adviceBlackness 4
 		include : dispiro
 			widths.rhs fine
@@ -779,25 +796,25 @@ export : define [apply] : begin
 		save 'pwlAngleRight' 0xE0B1
 
 	sketch # pwlTriangleLeft
-		include : forceUpright
+		include : ForceUpright
 		include glyphs.pwlTriangleRight
 		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
 		save 'pwlTriangleLeft' 0xE0B2
 
 	sketch # pwlAngleLeft
-		include : forceUpright
+		include : ForceUpright
 		include glyphs.pwlAngleRight
 		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
 		save 'pwlAngleLeft' 0xE0B3
 
 	sketch # pwlUnderline
-		include : forceUpright
+		include : ForceUpright
 		local fine : adviceBlackness 4
 		include : HBarBottom 0 WIDTH pwlBot
 		save 'pwlUnderline' 0xE0AE
 
 	sketch # pwlOverline
-		include : forceUpright
+		include : ForceUpright
 		local fine : adviceBlackness 4
 		include : HBarTop 0 WIDTH pwlTop
 		save 'pwlOverline' 0xE0AF
