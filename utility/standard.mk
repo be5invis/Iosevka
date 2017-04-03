@@ -1,8 +1,7 @@
-VERSION = 1.12.1
 start : __default
 
-include utility/makefile.dirs.mk
-include utility/makefile.scripts.mk
+include utility/dirs.mk
+include utility/scripts.mk
 
 GENERATE = @node --expose-gc generator
 
