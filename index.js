@@ -102,8 +102,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.12.1",
-		codename: "Lorraine",
+		version: "1.12.2",
+		codename: "Lorraine-2",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -143,7 +143,8 @@ var indexPage = new Vue({
 					{ tag: 'ss06', desc: 'Liberation Mono Style' },
 					{ tag: 'ss07', desc: 'Monaco Style' },
 					{ tag: 'ss08', desc: 'Pragmata Pro Style' },
-					{ tag: 'ss09', desc: 'Source Code Pro Style' }
+					{ tag: 'ss09', desc: 'Source Code Pro Style' },
+					{ tag: 'ss10', desc: 'Envy Code R Style' }
 				]
 			},
 			{
