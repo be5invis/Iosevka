@@ -115,31 +115,43 @@ export : define [apply] : begin
 		include : HBar SB RIGHTSB (parenMid - equalHalfSpace) OPERATORSTROKE
 		save 'equal' '='
 	
-	sketch # less
-		include markset.plus
-		local top : mix parenMid parenTop 0.5
-		local bot : mix parenMid parenBot 0.5
-		local exp : Math.sqrt : 1 + (top - bot) / (2 * (RIGHTSB - SB)) * (top - bot) / (2 * (RIGHTSB - SB))
+	do "less and greater"
+		define lessSlantness : 1/4 * (parenTop - parenBot) / (RIGHTSB - SB)
+
+		define [LessShape top bot l r] : glyph-construction
+			local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+			include : dispiro
+				widths.center OPERATORSTROKE
+				flat r top
+				curl l [mix top bot 0.5] [widths.heading (OPERATORSTROKE / 2 * exp) (OPERATORSTROKE / 2 * exp) LEFTWARD]
+			
+			include : dispiro
+				widths.center OPERATORSTROKE
+				flat r bot
+				curl l [mix top bot 0.5] [widths.heading (OPERATORSTROKE / 2 * exp) (OPERATORSTROKE / 2 * exp) LEFTWARD]
+
+		sketch # less
+			include markset.plus
+			local dH : lessSlantness * (RIGHTSB - SB)
+			include : LessShape (parenMid + dH) (parenMid - dH) SB RIGHTSB
+			save 'less' '<'
 		
-		include : dispiro
-			widths.center OPERATORSTROKE
-			flat RIGHTSB top
-			curl SB [mix top bot 0.5] [widths.heading (OPERATORSTROKE / 2 * exp) (OPERATORSTROKE / 2 * exp) LEFTWARD]
+		sketch # greater
+			include glyphs.less AS_BASE
+			include : FlipAround MIDDLE parenMid
+			save 'greater' '>'
 		
-		include : dispiro
-			widths.center OPERATORSTROKE
-			flat RIGHTSB bot
-			curl SB [mix top bot 0.5] [widths.heading (OPERATORSTROKE / 2 * exp) (OPERATORSTROKE / 2 * exp) LEFTWARD]
-		save 'less' '<'
-	
-	sketch # greater
-		include markset.plus
-		local top : mix 0 CAP 0.75
-		local bot : mix 0 CAP 0.1
+		sketch # ligless.trig
+			include markset.plus
+			local right : WIDTH * 1.5 - STROKE * 1.5 * HVCONTRAST
+			local dH : lessSlantness * (right - SB)
+			include : LessShape (parenMid + dH) (parenMid - dH) SB right
+			save 'ligless.trig'
 		
-		include glyphs.less
-		include : FlipAround MIDDLE parenMid
-		save 'greater' '>'
+		sketch # liggreater.trig
+			include glyphs.'ligless.trig' AS_BASE
+			include : FlipAround MIDDLE parenMid
+			save 'liggreater.trig'
 
 	sketch # multiply
 		include markset.plus
