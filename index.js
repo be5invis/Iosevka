@@ -102,8 +102,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.12.2",
-		codename: "Lorraine-2",
+		version: "1.12.3",
+		codename: "Lorraine-3",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
@@ -112,7 +112,7 @@ var indexPage = new Vue({
 			[arw2('-<<'), arw2('-<'), arw2('-<-'), '<--', '<---', arw2('<<-'), '<-', '->', arw2('->>'), '-->', '--->', arw2('->-'), arw2('>-'), arw2('>>-'), '<->', '<-->', '<--->', '<---->', '<!--'],
 			[arw2('=<<'), arw2('=<'), arw2('=<='), '<==', '<===', arw2('<<='), cmpr('<='), '=>', arw2('=>>'), '==>', '===>', arw2('=>='), cmpr('>='), arw2('>>='), '<=>', '<==>', '<===>', '<====>', '<!---'],
 			['<----------------', '---------------->', '<===============>', 'a:b', 'a::b', 'a:::b', logc('a\\/b'), logc('a/\\b')],
-			[':=', ':-', ':+', '<*', '<*>', '*>', dopr('<.'), dopr('<.>'), dopr('.>'), '+:', '-:', '=:', '<******>', brst('(* comm *)')]
+			[':=', ':-', ':+', '<*', '<*>', '*>', '<|', '<|>', '|>', dopr('<.'), dopr('<.>'), dopr('.>'), '+:', '-:', '=:', '<******>', brst('(* comm *)')]
 		],
 		ligationSets: [
 			{ tag: 'calt', desc: 'Default setting in text editors', group: [] },
