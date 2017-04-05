@@ -1,16 +1,20 @@
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpdnl.dl1.z0.glb.clouddn.com/T1v4huXnleXXXXXXXX.png)
 
-Coders' typeface, built from code. //[→ Inziu Iosevka for Chinese and Japanese.](http://be5invis.github.io/Iosevka/inziu.html)
+Coders’ typeface, built from code.
 
 ![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
+
+Chinese and Japanese users → [Inziu Iosevka for Chinese and Japanese.](http://be5invis.github.io/Iosevka/inziu.html) (A **hinted** Composite with M+ and Source Han Sans.)
 
 ## Installation
 
 Quit your editor/program. Unzip and open the folder.
 
-* **[Instructions for OS X](http://support.apple.com/kb/HT2509)**
 * **[Instructions for Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
-* **Linux** : Copy the .ttf files to your fonts directory → Run `sudo fc-cache`. 
+* **[Instructions for macOS](http://support.apple.com/kb/HT2509)**
+  * Standard distribution in Homebrew: `brew tap caskroom/fonts && brew cask install font-iosevka` (May be outdated).
+  * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
+* **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
 
@@ -20,7 +24,7 @@ The typeface contains seven weights (thin, extra-light, light, regular, medium, 
 
 ![Weights sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
-All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic Greek), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
+All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
 
 ![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
@@ -28,17 +32,19 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 ![OpenType Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
 
-## Ligations (Experimental)
+### Ligations
 
 ![Ligations Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/ligations.png)
 
-Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default. Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS_`.
+Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
+
+Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS0`.
 
 ## Building from Source
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.4.4) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.7.0) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
    - Windows users may need to install MinGW and make POSIX utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) or MSYS2 works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make` (or `gmake`).
@@ -82,6 +88,7 @@ The current available styles are:
   * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
 * Styles related to ligations and spacing:
   - `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
   - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width. The family name will be set to “`Iosevka StFW`”.
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
@@ -146,5 +153,7 @@ The current available styles are:
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
+
+---
 
 ![Family Matrix](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/matrix.png)

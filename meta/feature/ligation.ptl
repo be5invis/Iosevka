@@ -17,6 +17,8 @@ define progLigNameMap
 	.SWFT {'arrow2', 'swift'}
 	.XV__ {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
 	.XV00 {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
+	# "special" tags
+	.ZALE {'arrowZALE'} # <= as arrow
 	# common feature tags
 	.dlig {'arrow2', 'dotoper', 'logic', 'brst', 'dlig'}
 	.calt {}
@@ -28,6 +30,7 @@ local [stick style] : {'hyphen' 'equal'} ~> [lsx style]
 local [stickClass style] : [lsx style] {'hyphen' 'equal'}
 local less {'less'}
 local hyphen {'hyphen'}
+local equal {'equal'}
 local exclam {'exclam'}
 local greater {'greater'}
 local alphabet {
@@ -46,6 +49,7 @@ local [acskip] {
 }
 local [asterisk_center] ({'asterisk' 'asterisk.high' 'asterisk.low'} ~> {'asterisk.low' 'asterisk.low' 'asterisk.low'})
 local [colon_center]    ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
+local [caret_center]    ({'asciicaret' 'asciicaret.high' 'asciicaret.low'} ~> {'asciicaret.low' 'asciicaret.low' 'asciicaret.low'})
 local [tilde_center]    ({'asciitilde' 'asciitilde.high' 'asciitilde.low'} ~> {'asciitilde.low' 'asciitilde.low' 'asciitilde.low'})
 local [period_center]   ({'period'} ~> {'period.center'})
 local [no_period_center] ({'period.center'} ~> {'period'})
@@ -92,7 +96,7 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 	set features.(ligationFeatureName) featLookups
 
 	do "Operator centering"
-		define centerizeGroups : { asterisk_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
+		define centerizeGroups : { asterisk_center caret_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
 
 		define [centerize-standard g] : includeLookup
 			.type 'gsub_chaining'
@@ -182,8 +186,18 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dmid'}) {'colon'}
 			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dleft'})
 			chain-rule ({'colon'} ~> {'colon.dright'}) {'colon'}
+	
+	do "triangles" : includeLookup
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule # <|
+				less    ~> [lsx 'trig']
+				{'bar'} ~> preserved
+			chain-rule # |>
+				{'bar'} ~> preserved
+				greater ~> [lsx 'trig']
 
-	do "Arrows"
+	do "Arrows" 
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
@@ -209,6 +223,11 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 					less       ~> preserved
 					arrowStick ~> [lsx 'lr']
 					greater    ~> preserved
+				chain-rule # <--<, <==<
+					less       ~> preserved
+					arrowStick ~> [lsx 'lc']
+					arrowStick ~> [lsx 'cj']
+					less       ~> preserved
 				chain-rule # <-<, <=<
 					less       ~> preserved
 					arrowStick ~> [lsx 'lj']
@@ -229,6 +248,9 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 				chain-rule # <-
 					less       ~> preserved
 					hyphen     ~> [lsx 'lf']
+				chain-rule # <=
+					less       ~> preserved
+					equal      ~> [only 'arrowZALE' : lsx 'lf']
 				chain-rule # <!---
 					less       ~> preserved
 					exclam     ~> [lsx 'htmlcommentstart']
@@ -244,7 +266,12 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 					greater    ~> preserved
 					greater    ~> [only 'arrow2' : lsx 'shiftN1']
 					arrowStick ~> [only 'arrow2' : lsx 'j1f']
-				chain-rule # >->
+				chain-rule # >-->, >==>
+					greater    ~> preserved
+					arrowStick ~> [lsx 'jc']
+					arrowStick ~> [lsx 'cr']
+					greater    ~> preserved
+				chain-rule # >->, >=>
 					greater    ~> preserved
 					arrowStick ~> [lsx 'jr']
 					greater    ~> preserved
@@ -303,6 +330,7 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
+				chain-rule ([stickClass 'cf'] ~> [stickClass 'cc']) ([stickClass 'fc'] ~> [stickClass 'cc'])
 				chain-rule ([stickClass 'zf'] ~> [stickClass 'zc']) ([stickClass 'fr'] ~> [stickClass 'cr'])
 				chain-rule ([stickClass 'zf'] ~> [stickClass 'zc']) ([stickClass 'fc'] ~> [stickClass 'cc'])
 				chain-rule ([stickClass 'lf'] ~> [stickClass 'lc']) ([stickClass 'fz'] ~> [stickClass 'cz'])
@@ -311,13 +339,13 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 				chain-rule [stickClass 'lf'] [stick 'zf']
 				chain-rule [stickClass 'cf'] [stick 'zf']
 				chain-rule [stickClass 'zf'] [stick 'zf']
-		# /\ and \/
-		includeLookup
-			.type 'gsub_chaining'
-			.subtables : list
-				chain-rule 
-					{'slash'}     ~> [only 'logic' {'slash.left'}]
-					{'backslash'} ~> [only 'logic' {'backslash.right'}]
-				chain-rule
-					{'backslash'} ~> [only 'logic' {'backslash.left'}]
-					{'slash'}     ~> [only 'logic' {'slash.right'}]
+	# /\ and \/
+	do "logical" : includeLookup
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule 
+				{'slash'}     ~> [only 'logic' {'slash.left'}]
+				{'backslash'} ~> [only 'logic' {'backslash.right'}]
+			chain-rule
+				{'backslash'} ~> [only 'logic' {'backslash.left'}]
+				{'slash'}     ~> [only 'logic' {'slash.right'}]

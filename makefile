@@ -1,4 +1,4 @@
-VERSION = 1.12.2
+VERSION = 1.12.3
 export VERSION
 
 start : __start
@@ -40,9 +40,11 @@ endif
 ifndef oblique
 oblique = normal
 endif
+ifndef prestyle
+prestyle = nothing
+endif
 
-
-CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' > $(BUILD)/targets-$(set).mk
+CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' --prestyle '$(prestyle)' > $(BUILD)/targets-$(set).mk
 
 custom-config : maker.js | $(BUILD)/
 	$(CREATECONFIG)
