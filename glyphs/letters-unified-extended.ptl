@@ -1627,11 +1627,12 @@ export : define [apply] : begin
 		save 'ij' 0x133
 
 
-	define [EzhShape top bot pleft hookless] : glyph-construction
+	define [EzhShape top bot pleft pright hookless] : glyph-construction
 		local cor : 1.2 * HVCONTRAST
 		local yMidBar : mix bot top 0.6
 		local ezhLeft : mix SB RIGHTSB [fallback pleft 0.2]
-		local ezhRight : mix SB RIGHTSB 0.925
+		local ezhRight : mix SB RIGHTSB [fallback pright 0.925]
+
 		include : HBarTop SB ezhRight top
 
 		start-from ezhLeft yMidBar
@@ -1646,7 +1647,7 @@ export : define [apply] : begin
 			flat ezhLeft yMidBar [heading RIGHTWARD]
 			curl (MIDDLE - CORRECTION_OMIDS) yMidBar
 			archv
-			g4   RIGHTSB [mix yMidBar bot : hookless || (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
+			g4   (RIGHTSB - OX) [mix yMidBar bot : hookless || (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
 			if hookless {} : list
 				hookend bot
 				g4 SB (bot + HOOK * (top - bot) / [fallback para.cap0 CAP])
@@ -1654,11 +1655,11 @@ export : define [apply] : begin
 		if SLAB : begin
 			include : DownwardLeftSerif SB top VJUT
 
-	define [RevEzhShape top bot pleft hookless] : glyph-construction
+	define [RevEzhShape top bot pleft pright hookless] : glyph-construction
 		local cor : 1.2 * HVCONTRAST
 		local yMidBar : mix bot top 0.6
 		local ezhRight : mix RIGHTSB SB [fallback pleft 0.2]
-		local ezhLeft : mix RIGHTSB SB 0.925
+		local ezhLeft : mix RIGHTSB SB [fallback pright 0.925]
 		include : HBarTop ezhLeft RIGHTSB top
 
 		start-from ezhRight yMidBar
@@ -1672,7 +1673,7 @@ export : define [apply] : begin
 			flat ezhRight yMidBar [heading LEFTWARD]
 			curl (MIDDLE + CORRECTION_OMIDS) yMidBar
 			archv
-			g4   SB [mix yMidBar bot (SMALLSMOOTHA / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
+			g4   (SB + OX) [mix yMidBar bot (SMALLSMOOTHA / (SMALLSMOOTHA + SMALLSMOOTHB))] [if [not hookless] important [heading DOWNWARD]]
 			if hookless {} : list
 				hookend bot
 				g4 RIGHTSB (bot + HOOK * ((top - bot) / CAP))
@@ -1714,7 +1715,7 @@ export : define [apply] : begin
 
 	sketch # ezhtail
 		local b : mix DESCENDER XH 0.25
-		include : EzhShape XH b nothing 0.5
+		include : EzhShape XH b nothing nothing 0.5
 		local y : mix [mix b XH 0.6] b 0.5
 		include : dispiro
 			widths.rhs
@@ -1733,7 +1734,7 @@ export : define [apply] : begin
 	sketch # ezhcurlytail
 		include markset.e
 		local p (SMALLSMOOTHB / (SMALLSMOOTHA + SMALLSMOOTHB))
-		include : EzhShape XH DESCENDER nothing p
+		include : EzhShape XH DESCENDER nothing nothing p
 		local fine : adviceBlackness 3
 		local rinner : (XH * 0.4 - fine * 1.5) / 2
 		local m1 : RIGHTSB - STROKE * HVCONTRAST
@@ -2138,4 +2139,4 @@ export : define [apply] : begin
 		include g
 		save 'bidentalpercussive' 0x2AD
 
-	return [object LambdaShape SigmaShape PiShape]
+	return [object LambdaShape SigmaShape PiShape EzhShape]

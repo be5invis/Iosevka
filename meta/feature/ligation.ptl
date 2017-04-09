@@ -186,16 +186,38 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dmid'}) {'colon'}
 			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dleft'})
 			chain-rule ({'colon'} ~> {'colon.dright'}) {'colon'}
-	
-	do "triangles" : includeLookup
+
+	do "Plus chains" : includeLookup
 		.type 'gsub_chaining'
 		.subtables : list
-			chain-rule # <|
-				less    ~> [lsx 'trig']
-				{'bar'} ~> preserved
-			chain-rule # |>
-				{'bar'} ~> preserved
-				greater ~> [lsx 'trig']
+			# +++++++++
+			chain-rule ({'ligplus.cr' 'ligplus.jr'}) ({'plus'} ~> [lsx 'jr'])
+			chain-rule ({'plus'} ~> [lsx 'lc']) ({'plus'} ~> [lsx 'cc']) ({'plus'} ~> [lsx 'cr'])
+			chain-rule ({'plus'} ~> [lsx 'lc']) ({'plus'} ~> [lsx 'cr'])
+	
+	do "triangles" : begin
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule # <|
+					less    ~> [lsx 'trig']
+					{'bar'} ~> [lsx 'trig']
+				chain-rule # |>
+					{'bar'} ~> [lsx 'trig']
+					greater ~> [lsx 'trig']
+				chain-rule # |>
+					[[lsx 'trig'] {'bar'}] ~> preserved
+					greater                ~> [lsx 'trig']
+				chain-rule # <||||
+					[[lsx 'trig'] {'bar'}] ~> preserved
+					{'bar'}                ~> [lsx 'trig']
+		includeLookup
+			.type 'gsub_reverse'
+			.subtables : list 
+				object # ||||>
+					match      {{'bar'} [[lsx 'trig'] {'bar'}]}
+					to         [[lsx 'trig'] {'bar'}]
+					inputIndex 0
 
 	do "Arrows" 
 		includeLookup
@@ -309,6 +331,20 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 				chain-rule # -<, =<
 					arrowStick ~> [only 'arrow2' : lsx 'fj']
 					less       ~> preserved
+				chain-rule # <<<
+					less       ~> [only 'arrow2' : lsx 'shiftN0q']
+					less       ~> preserved
+					less       ~> [only 'arrow2' : lsx 'shift0q']
+				chain-rule # >>>
+					greater    ~> [only 'arrow2' : lsx 'shift0q']
+					greater    ~> preserved
+					greater    ~> [only 'arrow2' : lsx 'shiftN0q']
+				chain-rule # <<
+					less       ~> [only 'arrow2' : lsx 'shiftN0q']
+					less       ~> [only 'arrow2' : lsx 'shift0q']
+				chain-rule # >>
+					greater    ~> [only 'arrow2' : lsx 'shift0q']
+					greater    ~> [only 'arrow2' : lsx 'shiftN0q']
 		# Extended arrow sticks
 		# --------------------->
 		includeLookup
