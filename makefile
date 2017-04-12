@@ -1,4 +1,4 @@
-VERSION = 1.12.4
+VERSION = 1.12.5
 export VERSION
 
 start : __start
