@@ -170,7 +170,7 @@ if (argv.o) {
 	// finalize
 	font.glyf.forEach((g) => {
 		if (g.contours) {
-			Glyph.prototype.cleanup.call(g, 0.25);
+			Glyph.prototype.cleanup.call(g, 0.1);
 			g.contours = c2q.contours(g.contours);
 			for (var k = 0; k < g.contours.length; k++) {
 				var contour = g.contours[k];
