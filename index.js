@@ -102,8 +102,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.12.4",
-		codename: "Lorraine-4",
+		version: "1.12.5",
+		codename: "Lorraine-5",
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
