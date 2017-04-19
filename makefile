@@ -12,6 +12,9 @@ $(BUILD)/targets.mk : maker.js | $(BUILD)/
 __start : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk __default
 
+web : $(BUILD)/targets.mk
+	@$(MAKE) -f utility/standard.mk web
+
 sans : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk fonts-sans
 
