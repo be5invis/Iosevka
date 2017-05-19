@@ -1,7 +1,7 @@
 import 'topsort' as topsort
 import '../support/glyph' as Glyph
 import '../support/transform' as Transform
-import './feature/ligation' as buildLigations
+import [progLigNameMap buildLigations] from './feature/ligation'
 import './feature/opbd' as buildOPBD
 import './feature/ccmp' as buildCCMP
 
@@ -66,7 +66,10 @@ define [buildGSUB para glyphList markGlyphs] : begin
 		return subtable
 	
 	buildCCMP chain-rule markGlyphs commonList features lookups
-	if (para.spacing > 0) : buildLigations chain-rule lookupOrder commonList features lookups
+	if (para.spacing > 0) : do
+		define plm : progLigNameMap
+		set plm.calt : plm.(para.defLigSet) || {}
+		buildLigations chain-rule lookupOrder commonList features lookups plm
 	if (para.spacing > 0) : buildOPBD chain-rule lookupOrder commonList features lookups
 	
 	# locl, SRB

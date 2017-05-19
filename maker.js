@@ -58,11 +58,11 @@ let definedBuildSeqs = {};
 function createMake(mapping) {
 	const { hives, dir, filename, cm, custom } = mapping;
 	let tfname = `$(BUILD)/${filename}.0.otd`;
-	let target = `$(DIST)/${dir}/${filename}.ttf`;
 	let cmTarget = `$(BUILD)/${filename}.charmap`;
 
-	let woffTarget = `$(DIST)/${dir}/web/${filename}.woff`;
-	let woff2Target = `$(DIST)/${dir}/web/${filename}.woff2`;
+	let target = `$(DIST)/${dir}/ttf/${filename}.ttf`;
+	let woffTarget = `$(DIST)/${dir}/woff/${filename}.woff`;
+	let woff2Target = `$(DIST)/${dir}/woff2/${filename}.woff2`;
 
 	let buf = "";
 	if (!definedBuildSeqs[tfname]) {
@@ -73,7 +73,7 @@ ${tfname} : ${custom || ''} $(SCRIPTS) | $(BUILD) $(DIST)/${dir}/
 		definedBuildSeqs[tfname] = true;
 	}
 	buf += `
-${target} : ${tfname} | $(DIST)/${dir}/
+${target} : ${tfname} | $(DIST)/${dir}/ttf/
 	@echo Hinting and optimizing ${tfname} '->' $@
 	@otfccbuild ${tfname} -o $(BUILD)/${filename}.1.ttf --keep-average-char-width
 	@ttfautohint $(BUILD)/${filename}.1.ttf $(BUILD)/${filename}.2.ttf
@@ -82,11 +82,11 @@ ${target} : ${tfname} | $(DIST)/${dir}/
 	@rm $(BUILD)/${filename}.1.ttf $(BUILD)/${filename}.2.ttf $(BUILD)/${filename}.2.otd`;
 
 	buf += `
-${woffTarget} : ${target} | $(DIST)/${dir}/web/
+${woffTarget} : ${target} | $(DIST)/${dir}/woff/
 	sfnt2woff $<
 	mv $(subst .ttf,.woff,$<) $@`;
 	buf += `
-${woff2Target} : ${target} | $(DIST)/${dir}/web/
+${woff2Target} : ${target} | $(DIST)/${dir}/woff2/
 	woff2_compress $<
 	mv $(subst .ttf,.woff2,$<) $@`;
 
@@ -145,7 +145,13 @@ for (let dg of designGroups) {
 $(DIST)/${groupMapping.dir}/ : | $(DIST)/
 	-@mkdir -p $@`);
 	makes.push(`
-$(DIST)/${groupMapping.dir}/web/ : | $(DIST)/${groupMapping.dir}/
+$(DIST)/${groupMapping.dir}/ttf/ : | $(DIST)/${groupMapping.dir}/
+	-@mkdir -p $@`);
+	makes.push(`
+$(DIST)/${groupMapping.dir}/woff/ : | $(DIST)/${groupMapping.dir}/
+	-@mkdir -p $@`);
+	makes.push(`
+$(DIST)/${groupMapping.dir}/woff2/ : | $(DIST)/${groupMapping.dir}/
 	-@mkdir -p $@`);
 	for (let weight of weights)
 		for (let slantness of slantnesses) {
@@ -170,8 +176,8 @@ $(DIST)/${groupMapping.dir}/web/ : | $(DIST)/${groupMapping.dir}/
 	makes.push(`fonts-${dg.name}-italic  : ${groupTargets.italic.join(' ')}`);
 	makes.push(`fonts-${dg.name}-oblique : ${groupTargets.oblique.join(' ')}`);
 	makes.push(`web-${dg.name} : ${groupTargets.woff.join(' ')} ${groupTargets.woff2.join(' ')}`);
-	makes.push(`$(ARCHIVEDIR)/${groupMapping.dir}-$(VERSION).zip : fonts-${dg.name} | $(ARCHIVEDIR)/
-	cd $(DIST)/${groupMapping.dir}/ && 7z a -tzip -mx=9 ../../$@ ./*.ttf`);
+	makes.push(`$(ARCHIVEDIR)/${groupMapping.dir}-$(VERSION).zip : fonts-${dg.name} web-${dg.name} | $(ARCHIVEDIR)/
+	cd $(DIST)/${groupMapping.dir}/ && 7z a -tzip -r -mx=9 ../../$@ ./`);
 	makes.push(`archive-${dg.name} : $(ARCHIVEDIR)/${groupMapping.dir}-$(VERSION).zip`);
 }
 
