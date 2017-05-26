@@ -93,6 +93,16 @@ The current available styles are:
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv45` : Standalone character variants.
+* Styles for ligation sets, include:
+  * `ligset-haskell`: Default ligation set would assigned to Haskell.
+  * `ligset-idris`: Default ligation set would assigned to Idris.
+  * `ligset-coq`: Default ligation set would be assigned to Coq.
+  * `ligset-elm`: Default ligation set would be assigned to Elm.
+  * `ligset-ml`: Default ligation set would be assigned to ML.
+  * `ligset-fs`: Default ligation set would be assigned to F#.
+  * `ligset-fstar`: Default ligation set would be assigned to F\*.
+  * `ligset-swift`: Default ligation set would be assigned to Swift.
+  * `ligset-purescript`: Default ligation set would be assigned to PureScript.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.
