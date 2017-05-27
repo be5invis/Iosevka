@@ -5,6 +5,7 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 ## Generous Backers
 
 - Cheng-Wei Chien
+- (Anonymous User 4362976)
 
 ## Backers
 
