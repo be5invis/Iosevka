@@ -16,26 +16,30 @@ web : web-sans web-slab
 release : __release pages sample-images
 
 test : fonts-sans fonts-slab
-	cp dist/iosevka/*.ttf testdrive/assets/
-	cp dist/iosevka-slab/*.ttf testdrive/assets/
+	cp dist/iosevka/ttf/* testdrive/assets/
+	cp dist/iosevka-slab/ttf/* testdrive/assets/
 	cp build/iosevka-regular.charmap testdrive/assets/
 	cp build/iosevka-slab-regular.charmap testdrive/assets/
 
 pages : fonts-sans fonts-slab web-sans web-slab
-	cp dist/iosevka/*.ttf pages/assets/
-	cp dist/iosevka/web/* pages/assets/
-	cp dist/iosevka-slab/*.ttf pages/assets/
-	cp dist/iosevka-slab/web/* pages/assets/
+	cp dist/iosevka/ttf/* pages/assets/
+	cp dist/iosevka/woff/* pages/assets/
+	cp dist/iosevka/woff2/* pages/assets/
+	cp dist/iosevka-slab/ttf/* pages/assets/
+	cp dist/iosevka-slab/woff/* pages/assets/
+	cp dist/iosevka-slab/woff2/* pages/assets/
 	cp build/iosevka-regular.charmap pages/assets/
 	cp build/iosevka-slab-regular.charmap pages/assets/
 
 fw : ttc
 
 d-snapshot : fonts-sans fonts-slab web-sans web-slab
-	cp dist/iosevka/*.ttf snapshot/assets/
-	cp dist/iosevka/web/* snapshot/assets/
-	cp dist/iosevka-slab/*.ttf snapshot/assets/
-	cp dist/iosevka-slab/web/* snapshot/assets/
+	cp dist/iosevka/ttf/* snapshot/assets/
+	cp dist/iosevka/woff/* snapshot/assets/
+	cp dist/iosevka/woff2/* snapshot/assets/
+	cp dist/iosevka-slab/ttf/* snapshot/assets/
+	cp dist/iosevka-slab/woff/* snapshot/assets/
+	cp dist/iosevka-slab/woff2/* snapshot/assets/
 	cp build/iosevka-regular.charmap snapshot/assets/
 	cp build/iosevka-slab-regular.charmap snapshot/assets/
 electronsnaps1: d-snapshot

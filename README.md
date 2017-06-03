@@ -1,4 +1,4 @@
-# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpdnl.dl1.z0.glb.clouddn.com/T1v4huXnleXXXXXXXX.png)
+# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Patreon](https://img.shields.io/badge/donate-patreon-red.svg)](https://www.patreon.com/user?u=5787198) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpdnl.dl1.z0.glb.clouddn.com/T1v4huXnleXXXXXXXX.png)
 
 Coders’ typeface, built from code.
 
@@ -93,6 +93,16 @@ The current available styles are:
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv45` : Standalone character variants.
+* Styles for ligation sets, include:
+  * `ligset-haskell`: Default ligation set would be assigned to Haskell.
+  * `ligset-idris`: Default ligation set would be assigned to Idris.
+  * `ligset-coq`: Default ligation set would be assigned to Coq.
+  * `ligset-elm`: Default ligation set would be assigned to Elm.
+  * `ligset-ml`: Default ligation set would be assigned to ML.
+  * `ligset-fs`: Default ligation set would be assigned to F#.
+  * `ligset-fstar`: Default ligation set would be assigned to F\*.
+  * `ligset-swift`: Default ligation set would be assigned to Swift.
+  * `ligset-purescript`: Default ligation set would be assigned to PureScript.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.

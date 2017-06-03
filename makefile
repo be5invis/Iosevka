@@ -1,4 +1,4 @@
-VERSION = 1.12.5
+VERSION = 1.13.0
 export VERSION
 
 start : __start
@@ -11,6 +11,9 @@ $(BUILD)/targets.mk : maker.js | $(BUILD)/
 
 __start : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk __default
+
+web : $(BUILD)/targets.mk
+	@$(MAKE) -f utility/standard.mk web
 
 sans : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk fonts-sans

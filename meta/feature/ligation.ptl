@@ -1,26 +1,27 @@
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
-define progLigNameMap
+export : define [progLigNameMap] : object
 	# language-specific tags
-	.XML_ {'brst', 'logic', 'ml'}
-	.XML0 {'brst', 'logic', 'ml'}
-	.XFS_ {'brst', 'logic', 'fsharp'}
-	.XFS0 {'brst', 'logic', 'fsharp'}
-	.XFST {'brst', 'logic', 'fstar'}
-	.XHS_ {'arrow2', 'dotoper', 'logic', 'haskell'}
-	.XHS0 {'arrow2', 'dotoper', 'logic', 'haskell'}
-	.XIDR {'arrow2', 'dotoper', 'logic', 'idris'}
-	.XELM {'arrow2', 'dotoper', 'logic', 'elm'}
-	.PURS {'arrow2', 'dotoper', 'logic', 'purescript'}
-	.XPTL {'arrow2', 'patel'}
-	.SWFT {'arrow2', 'swift'}
-	.XV__ {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
-	.XV00 {'arrow2', 'dotoper', 'logic', 'brst', 'coq'}
+	.XML_ {'brst', 'plusplus', 'logic', 'ml'}
+	.XML0 {'brst', 'plusplus', 'logic', 'ml'}
+	.XFS_ {'brst', 'plusplus', 'logic', 'fsharp'}
+	.XFS0 {'brst', 'plusplus', 'logic', 'fsharp'}
+	.XFST {'brst', 'plusplus', 'logic', 'fstar'}
+	.XHS_ {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskell'}
+	.XHS0 {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskell'}
+	.XIDR {'arrow2', 'plusplus', 'dotoper', 'logic', 'idris'}
+	.XELM {'arrow2', 'plusplus', 'dotoper', 'logic', 'elm'}
+	.PURS {'arrow2', 'plusplus', 'dotoper', 'logic', 'purescript'}
+	.XPTL {'arrow2', 'plusplus', 'patel'}
+	.SWFT {'arrow2', 'plusplus', 'swift'}
+	.XV__ {'arrow2', 'plusplus', 'dotoper', 'logic', 'brst', 'coq'}
+	.XV00 {'arrow2', 'plusplus', 'dotoper', 'logic', 'brst', 'coq'}
 	# "special" tags
 	.ZALE {'arrowZALE'} # <= as arrow
 	# common feature tags
-	.dlig {'arrow2', 'dotoper', 'logic', 'brst', 'dlig'}
+	.XCCC {}
+	.dlig {'arrow2', 'plusplus', 'dotoper', 'logic', 'brst', 'dlig'}
 	.calt {}
 
 define [lsx s] : lambda [t] : t.map : lambda [x] "lig\(x).\(s)"
@@ -56,8 +57,8 @@ local [no_period_center] ({'period.center'} ~> {'period'})
 
 define preserved null
 
-export all : define [buildLigations chain-rule lookupOrder commonList features lookups] : foreach [ ligationFeatureName : items-of : Object.keys progLigNameMap] : do
-	local mappedFeature : progLigNameMap.(ligationFeatureName) || {}
+export : define [buildLigations chain-rule lookupOrder commonList features lookups plm] : foreach [ ligationFeatureName : items-of : Object.keys plm] : do
+	local mappedFeature : plm.(ligationFeatureName) || {}
 	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
 
 	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
@@ -187,13 +188,36 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 			chain-rule {'colon.dright' 'colon.dmid'} ({'colon'} ~> {'colon.dleft'})
 			chain-rule ({'colon'} ~> {'colon.dright'}) {'colon'}
 
-	do "Plus chains" : includeLookup
-		.type 'gsub_chaining'
-		.subtables : list
-			# +++++++++
-			chain-rule ({'ligplus.cr' 'ligplus.jr'}) ({'plus'} ~> [lsx 'jr'])
-			chain-rule ({'plus'} ~> [lsx 'lc']) ({'plus'} ~> [lsx 'cc']) ({'plus'} ~> [lsx 'cr'])
-			chain-rule ({'plus'} ~> [lsx 'lc']) ({'plus'} ~> [lsx 'cr'])
+	do "Plus chains" : begin
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				# +++++++++
+				chain-rule 
+					{'ligplus.cr' 'ligplus.jr'} ~> preserved
+					{'plus'} ~> [only 'plusplus' : lsx 'jr']
+				chain-rule 
+					{'plus'} ~> [only 'plusplus' : lsx 'lc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cr']
+				chain-rule 
+					{'plus'} ~> [only 'plusplus' : lsx 'lc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cr']
+				chain-rule 
+					{'plus'} ~> [only 'plusplus' : lsx 'lc']
+					{'plus'} ~> [only 'plusplus' : lsx 'cr']
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				chain-rule # +++
+					{'ligplus.lc'} ~> [only 'plusplus' {'ligplus.lc.s'}]
+					{'ligplus.cc'} ~> preserved
+					{'ligplus.cr'} ~> [only 'plusplus' {'ligplus.cr.s'}]
+				chain-rule # ++
+					{'ligplus.lc'} ~> [only 'plusplus' {'ligplus.lc.s'}]
+					{'ligplus.cr'} ~> [only 'plusplus' {'ligplus.cr.s'}]
 	
 	do "triangles" : begin
 		includeLookup
@@ -336,19 +360,19 @@ export all : define [buildLigations chain-rule lookupOrder commonList features l
 			.type 'gsub_chaining'
 			.subtables : list
 				chain-rule # <<<
-					less       ~> [only 'arrow2' : lsx 'shiftN0q']
+					less       ~> [only 'arrow2' : lsx 'shiftN0t']
 					less       ~> preserved
-					less       ~> [only 'arrow2' : lsx 'shift0q']
+					less       ~> [only 'arrow2' : lsx 'shift0t']
 				chain-rule # >>>
-					greater    ~> [only 'arrow2' : lsx 'shift0q']
+					greater    ~> [only 'arrow2' : lsx 'shift0t']
 					greater    ~> preserved
-					greater    ~> [only 'arrow2' : lsx 'shiftN0q']
+					greater    ~> [only 'arrow2' : lsx 'shiftN0t']
 				chain-rule # <<
-					less       ~> [only 'arrow2' : lsx 'shiftN0q']
-					less       ~> [only 'arrow2' : lsx 'shift0q']
+					less       ~> [only 'arrow2' : lsx 'shiftN0t']
+					less       ~> [only 'arrow2' : lsx 'shift0t']
 				chain-rule # >>
-					greater    ~> [only 'arrow2' : lsx 'shift0q']
-					greater    ~> [only 'arrow2' : lsx 'shiftN0q']
+					greater    ~> [only 'arrow2' : lsx 'shift0t']
+					greater    ~> [only 'arrow2' : lsx 'shiftN0t']
 		# Extended arrow sticks
 		# --------------------->
 		includeLookup
