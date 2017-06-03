@@ -7,7 +7,7 @@ var CompactPicker = Vue.component('compact-picker', {
 	},
 	data: {},
 	methods: {
-		setItem: function (item) {
+		setItem: function(item) {
 			this.current = item;
 			return false;
 		}
@@ -22,9 +22,9 @@ var CompactToggle = Vue.component('compact-toggle', {
 	},
 	data: {},
 	methods: {
-		toggle: function () {
-			this.on = !this.on
-			console.log(this.on)
+		toggle: function() {
+			this.on = !this.on;
+			console.log(this.on);
 			return false;
 		}
 	}
@@ -39,7 +39,7 @@ var CodeSnippet = Vue.component('snippet', {
 	methods: {}
 });
 
-var escapeHTML = function () {
+var escapeHTML = (function() {
 	'use strict';
 	var matchHtmlRegExp = /["'&<>]/;
 	function escapeHTML(string) {
@@ -60,18 +60,23 @@ var escapeHTML = function () {
 				case 34: // "
 					escape = '&quot;';
 					break;
+
 				case 38: // &
 					escape = '&amp;';
 					break;
+
 				case 39: // '
 					escape = '&#39;';
 					break;
+
 				case 60: // <
 					escape = '&lt;';
 					break;
+
 				case 62: // >
 					escape = '&gt;';
 					break;
+
 				default:
 					continue;
 			}
@@ -84,15 +89,16 @@ var escapeHTML = function () {
 			html += escape;
 		}
 
-		return lastIndex !== index
-			? html + str.substring(lastIndex, index)
-			: html;
+		return lastIndex !== index ? html + str.substring(lastIndex, index) : html;
 	}
 	return escapeHTML;
-}();
+})();
 
-
-function TAG(ltag) { return function (s) { return { ltag: ltag, s: s } } }
+function TAG(ltag) {
+	return function(s) {
+		return { ltag: ltag, s: s };
+	};
+}
 var arw2 = TAG('arrow2');
 var logc = TAG('logic');
 var cmpr = TAG('cmpr');
@@ -102,35 +108,106 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: "1.12.5",
-		codename: "Lorraine-5",
+		version: '1.13.0',
+		codename: 'Marisa',
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
 		theme: 'color-dark',
 		ligationSamples: [
-			[arw2('-<<'), arw2('-<'), arw2('-<-'), '<--', '<---', arw2('<<-'), '<-', '->', arw2('->>'), '-->', '--->', arw2('->-'), arw2('>-'), arw2('>>-'), '<->', '<-->', '<--->', '<---->', '<!--'],
-			[arw2('=<<'), arw2('=<'), arw2('=<='), '<==', '<===', arw2('<<='), cmpr('<='), '=>', arw2('=>>'), '==>', '===>', arw2('=>='), cmpr('>='), arw2('>>='), '<=>', '<==>', '<===>', '<====>', '<!---'],
-			['<----------------', '---------------->', '<===============>', 'a:b', 'a::b', 'a:::b', logc('a\\/b'), logc('a/\\b')],
-			[':=', ':-', ':+', '<*', '<*>', '*>', '<|', '<|>', '|>', dopr('<.'), dopr('<.>'), dopr('.>'), '+:', '-:', '=:', '<******>', brst('(* comm *)')]
+			[
+				arw2('-<<'),
+				arw2('-<'),
+				arw2('-<-'),
+				'<--',
+				'<---',
+				arw2('<<-'),
+				'<-',
+				'->',
+				arw2('->>'),
+				'-->',
+				'--->',
+				arw2('->-'),
+				arw2('>-'),
+				arw2('>>-'),
+				'<->',
+				'<-->',
+				'<--->',
+				'<---->',
+				'<!--'
+			],
+			[
+				arw2('=<<'),
+				arw2('=<'),
+				arw2('=<='),
+				'<==',
+				'<===',
+				arw2('<<='),
+				cmpr('<='),
+				'=>',
+				arw2('=>>'),
+				'==>',
+				'===>',
+				arw2('=>='),
+				cmpr('>='),
+				arw2('>>='),
+				'<=>',
+				'<==>',
+				'<===>',
+				'<====>',
+				'<!---'
+			],
+			[
+				'<----------------',
+				'---------------->',
+				'<===============>',
+				'a:b',
+				'a::b',
+				'a:::b',
+				logc('a\\/b'),
+				logc('a/\\b')
+			],
+			[
+				':=',
+				':-',
+				':+',
+				'<*',
+				'<*>',
+				'*>',
+				'<|',
+				'<|>',
+				'|>',
+				dopr('<.'),
+				dopr('<.>'),
+				dopr('.>'),
+				'+:',
+				'-:',
+				'=:',
+				'<******>',
+				brst('(* comm *)')
+			]
 		],
 		ligationSets: [
 			{ tag: 'calt', desc: 'Default setting in text editors', group: [] },
 			{ tag: 'XFST', tagName: 'XML0, XFS0, XFST', desc: 'ML, OCaml, F#, F*', group: ['brst', 'logic', 'ml'] },
 			{ tag: 'SWFT', tagName: 'SWFT, XPTL', desc: 'Swift, PatEL', group: ['arrow2'] },
 			{
-				tag: 'XHS0', tagName: 'XHS0, XIDR, XELM, PURS',
-				desc: 'Haskell, Idris, Elm, PureScript', group: ['arrow2', 'dotoper', 'logic']
+				tag: 'XHS0',
+				tagName: 'XHS0, XIDR, XELM, PURS',
+				desc: 'Haskell, Idris, Elm, PureScript',
+				group: ['arrow2', 'dotoper', 'logic']
 			},
 			{
-				tag: 'XV00', tagName: 'XV00',
-				desc: 'Coq', group: ['arrow2', 'dotoper', 'logic', 'brst']
+				tag: 'XV00',
+				tagName: 'XV00',
+				desc: 'Coq',
+				group: ['arrow2', 'dotoper', 'logic', 'brst']
 			}
 		],
 		opentypeSamples: [
 			{
-				title: "Stylistic Sets",
-				sampleText: "@real fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789",
+				title: 'Stylistic Sets',
+				sampleText: '@real fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789',
 				stress: 'agil*0_{}@',
 				type: 'wide',
 				terms: [
@@ -144,12 +221,13 @@ var indexPage = new Vue({
 					{ tag: 'ss07', desc: 'Monaco Style' },
 					{ tag: 'ss08', desc: 'Pragmata Pro Style' },
 					{ tag: 'ss09', desc: 'Source Code Pro Style' },
-					{ tag: 'ss10', desc: 'Envy Code R Style' }
+					{ tag: 'ss10', desc: 'Envy Code R Style' },
+					{ tag: 'ss11', desc: 'X Windows Fixed Style' }
 				]
 			},
 			{
-				title: "Character Variants",
-				sampleText: "",
+				title: 'Character Variants',
+				sampleText: '',
 				stress: '?',
 				type: 'narrow',
 				terms: [
@@ -208,18 +286,25 @@ var indexPage = new Vue({
 		isItalic: false
 	},
 	methods: {
-		stressSample: function (st, stress) {
-			return st.replace(new RegExp('[' + stress + ']', 'g'), '<b>$&</b>')
+		stressSample: function(st, stress) {
+			return st.replace(new RegExp('[' + stress + ']', 'g'), '<b>$&</b>');
 		},
-		elabSample: function (g, s) {
+		elabSample: function(g, s) {
 			if (typeof s === 'string') {
-				return '<em>' + escapeHTML(s) + '</em>'
+				return '<em>' + escapeHTML(s) + '</em>';
 			} else if (s.ltag && g.indexOf(s.ltag) >= 0) {
-				return '<em>' + escapeHTML(s.s) + '</em>'
+				return '<em>' + escapeHTML(s.s) + '</em>';
 			} else {
-				return '<s>' + escapeHTML(s.s) + '</s>'
+				return '<s>' + escapeHTML(s.s) + '</s>';
 			}
 		}
 	}
 });
-indexPage.snippets = indexPage.$children.map(function (e) { return e.name }).filter(function (x) { return !!x }).sort();
+indexPage.snippets = indexPage.$children
+	.map(function(e) {
+		return e.name;
+	})
+	.filter(function(x) {
+		return !!x;
+	})
+	.sort();
