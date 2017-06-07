@@ -30,7 +30,9 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 
 Iosevka supports accessing all letter variants using OpenType features.
 
-![OpenType Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/opentype.png)
+![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/stylesets.png)
+
+![Character Variants](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/charvars.png)
 
 ### Ligations
 
