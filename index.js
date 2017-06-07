@@ -208,7 +208,7 @@ var indexPage = new Vue({
 			{
 				title: 'Stylistic Sets',
 				sampleText: '@real fox.quick(h){ *is_brown && it_jumps_over(doges.lazy) } 0123456789',
-				stress: 'agil*0_{}@',
+				stress: 'agil*0_{}@3',
 				type: 'wide',
 				terms: [
 					{ tag: 'off', desc: 'Default' },
