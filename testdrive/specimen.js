@@ -63,7 +63,8 @@ var sampleSentences = [
 	{ code: 'sr', lang: 'Serbian', sample: 'Ајшо, лепото и чежњо, за љубав срца мога дођи у Хаџиће на кафу.', comment: ' # Yes, we have Serbian variants!' },
 	{ code: 'es', lang: 'Spainish', sample: 'Benjamín pidió una bebida de kiwi y fresa; Noé, sin vergüenza, la más exquisita champaña del menú.' },
 	{ code: 'tr', lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.' },
-	{ code: 'uk', lang: 'Ukranian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' }
+	{ code: 'uk', lang: 'Ukranian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' },
+	{ code: 'he', lang: 'Hebrew', sample: 'כך התרסק נפץ על גוזל קטן, שדחף את צבי למים'}
 ]
 
 var blockData = [{ from: 0x0000, to: 0x007F, name: 'Basic Latin' },
