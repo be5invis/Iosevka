@@ -10,8 +10,8 @@ function contourHash(c) {
 	var buf = "";
 	for (var j = 1; j < c.length; j++) {
 		var z = c[j];
-		buf += `${z.on ? 'o' : 'f'}${z.cubic ? 'c' : 'q'}${delta(z.x, lx)},${delta(z.y, ly)};`;
-		lx = z.x, ly = z.y;
+		buf += `${z.on ? "o" : "f"}${z.cubic ? "c" : "q"}${delta(z.x, lx)},${delta(z.y, ly)};`;
+		(lx = z.x), (ly = z.y);
 	}
 	return buf;
 }
@@ -20,9 +20,14 @@ function match(g1, g2, _n) {
 	for (let j = 0; j + g1.contours.length <= g2.contours.length; j++) {
 		var found = true;
 		for (var k = j; k < g2.contours.length && k - j < g1.contours.length; k++) {
-			if (g1.contours[k - j].hash !== g2.contours[k].hash
-				|| !(k <= j || delta(g1.contours[k - j][0].x, g1.contours[k - j - 1][0].x) === delta(g2.contours[k][0].x, g2.contours[k - 1][0].x)
-					&& delta(g1.contours[k - j][0].y, g1.contours[k - j - 1][0].y) === delta(g2.contours[k][0].y, g2.contours[k - 1][0].y))) {
+			if (
+				g1.contours[k - j].hash !== g2.contours[k].hash ||
+				!(k <= j ||
+					(delta(g1.contours[k - j][0].x, g1.contours[k - j - 1][0].x) ===
+						delta(g2.contours[k][0].x, g2.contours[k - 1][0].x) &&
+						delta(g1.contours[k - j][0].y, g1.contours[k - j - 1][0].y) ===
+							delta(g2.contours[k][0].y, g2.contours[k - 1][0].y)))
+			) {
 				found = false;
 				break;
 			}
@@ -64,10 +69,9 @@ function autoref(glyf) {
 		}
 	}
 
-
 	// Refl-referencify, forward.
 	for (var j = 0; j < glyf.length; j++) {
-		if (!glyf[j].contours.length || glyf[j].references && glyf[j].references.length) continue;
+		if (!glyf[j].contours.length || (glyf[j].references && glyf[j].references.length)) continue;
 		for (var k = j + 1; k < glyf.length; k++) {
 			if (glyf[j].contours.length === glyf[k].contours.length) {
 				if (match(glyf[j], glyf[k], j)) {
@@ -79,7 +83,12 @@ function autoref(glyf) {
 
 	// referencify, backward
 	for (var j = 0; j < glyf.length; j++) {
-		if (glyf[j].cmpPriority < 0 || !glyf[j].contours.length || glyf[j].references && glyf[j].references.length) continue;
+		if (
+			glyf[j].cmpPriority < 0 ||
+			!glyf[j].contours.length ||
+			(glyf[j].references && glyf[j].references.length)
+		)
+			continue;
 		for (var k = j - 1; k >= 0; k--) {
 			if (glyf[j].contours.length > glyf[k].contours.length) continue;
 			while (match(glyf[j], glyf[k], j)) {
@@ -90,8 +99,10 @@ function autoref(glyf) {
 
 	// unlink composite
 	for (var j = 0; j < glyf.length; j++) {
-		if (glyf[j].contours.length === 0 || !glyf[j].references || glyf[j].references.length === 0) continue;
-		// console.log("Unlink", glyf[j].name);
+		if (!glyf[j].references || glyf[j].references.length === 0) continue;
+		if (glyf[j].contours.length === 0 && !(glyf[j].unicode && glyf[j].unicode[0] < 0x80))
+			continue;
+
 		var cs = unlinkRef(glyf[j], 0, 0, glyf);
 		glyf[j].contours = g.contours.concat(cs);
 		glyf[j].references = [];
@@ -105,8 +116,8 @@ function supporessNaN(glyf) {
 		for (var k = 0; k < g.contours.length; k++) {
 			var contour = g.contours[k];
 			for (let z of contour) {
-				if (!isFinite(z.x)) z.x = 0
-				if (!isFinite(z.y)) z.y = 0
+				if (!isFinite(z.x)) z.x = 0;
+				if (!isFinite(z.y)) z.y = 0;
 			}
 		}
 	}
