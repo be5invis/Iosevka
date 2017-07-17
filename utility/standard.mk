@@ -45,8 +45,6 @@ d-snapshot : fonts-sans fonts-slab web-sans web-slab
 electronsnaps1: d-snapshot
 	cd snapshot && stylus index.styl -c
 	cd snapshot && electron getsnap.js --dir ../images
-images/opentype.png: electronsnaps1
-	optipng $@
 images/languages.png: electronsnaps1
 	optipng $@
 images/preview-all.png: electronsnaps1
@@ -60,5 +58,5 @@ images/matrix.png: electronsnaps1
 images/family.png: electronsnaps1
 	optipng $@
 
-sample-images: images/family.png images/matrix.png images/weights.png images/variants.png images/opentype.png images/languages.png images/preview-all.png
+sample-images: images/family.png images/matrix.png images/weights.png images/variants.png images/languages.png images/preview-all.png
 
