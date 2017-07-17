@@ -249,86 +249,145 @@ export : define [apply] : begin
 		local dscale 0.55
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature 
-			glyphs -- pendingGlyphs
+			glyphs -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 			crowd  -- [fallback para.smallCrowd 3.75]
 			scale  -- 0.65
 			unfair -- true
 		
-		foreach {unicode glyphid w} [items-of records] : create-glyph [suggestName : 'circle' + glyphid] : glyph-construction
+		foreach {unicode parts w} [items-of records] : do
+			local gn : suggestName : 'circle-' + [parts.join '_']
+			local gni : suggestName : 'circle-inner-' + [parts.join '_']
 			local width : fallback w WIDTH
-			set-width width
 			local sw [adviceBlackness 5]
-			if unicode : assign-unicode unicode
-			include : create-glyph [suggestName : 'circleinner' + glyphid] : glyph-construction
-				local g miniatureFont.(glyphid)
-				include g
-				local shift 0
-				if (g.anchors.above && g.anchors.below) : set shift : CAP / 2 -  [mix g.anchors.above.y g.anchors.below.y 0.5]
+			local top (CAP * dscale + [Math.max (CAP * 0.175) (sw * 3)])
+			local bot (-[Math.max (CAP * 0.175) (sw * 3)])
+			local left : Math.max (SB + O * 3) : Math.min (width / 2 - (top - bot) / 2) (width / 2 - CAP / 2 * dscale - sw * 2.5)
+			local right : Math.min (width - SB - O * 3) : Math.max (width / 2 + (top - bot) / 2) (width / 2 + CAP / 2 * dscale + sw * 2.5)
+
+			local lg : create-glyph gni : glyph-construction
+				local tw 0
+				foreach [glyphid : items-of parts] : begin
+					local g miniatureFont.(glyphid)
+					include g
+					apply-transform : Translate (-g.advanceWidth) 0
+					set tw : tw + g.advanceWidth
+				apply-transform : Translate tw 0
 				apply-transform : Upright
-				apply-transform : Translate (-WIDTH / 2) (-CAP / 2 + shift)
+				apply-transform : Scale [Math.min 1 (width / tw)] 1
+				set tw : Math.min width tw
+				local shift 0
+				if (g.anchors.above && g.anchors.below) : set shift : CAP / 2 - [mix g.anchors.above.y g.anchors.below.y 0.5]
+				apply-transform : Translate (-tw / 2) (-CAP / 2 + shift)
 				apply-transform : Scale dscale
 				apply-transform : Translate (width / 2) (CAP / 2 * dscale)
 				apply-transform : Italify
 				set currentGlyph.cmpPriority 12
 				refair this
-			
-			include : OShape
-				* (CAP * dscale + [Math.max (CAP * 0.175) (sw * 3)])
-				* (-[Math.max (CAP * 0.175) (sw * 3)])
-				* [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)]
-				* [Math.min (width - SB - O * 3) (width / 2 + CAP / 2 * dscale + sw * 2.5)]
-				* sw
-				* (SMALLSMOOTHA * width / WIDTH)
-				* (SMALLSMOOTHB * width / WIDTH)
-			apply-transform : Upright
-			apply-transform : Translate 0 (parenMid - CAP * dscale / 2)
-			apply-transform : Italify
+
+			create-glyph gn : glyph-construction
+				set-width width
+				if unicode : assign-unicode unicode
+				include lg
+				include : OShape top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+				apply-transform : Upright
+				apply-transform : Translate 0 (parenMid - CAP * dscale / 2)
+				apply-transform : Italify
 
 	define [createBracedGlyphs records] : if [not recursive] : begin
 		local dscale 0.55
 		local pscale 0.6
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature 
-			glyphs  -- pendingGlyphs
+			glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 			crowd   -- [fallback para.smallCrowd 3.75]
 			scale   -- 0.65
-			sbscale -- 1 
+			sbscale -- 1
 			unfair  -- true
 		
-		foreach {unicode glyphid w} [items-of records] : sketch
+		foreach {unicode parts w} [items-of records] : do
+			local gn : suggestName : 'braced-' + [parts.join '_']
+			local gni : suggestName : 'braced-inner-' + [parts.join '_']
 			local width : fallback w WIDTH
-			set-width width
 			local sw [adviceBlackness 5]
 			local l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] + OX
 			local r : width - l
 			
-			include : create-glyph [suggestName : 'braceinner' + glyphid] : glyph-construction
-				include miniatureFont.(glyphid)
+			local lg : create-glyph gni : glyph-construction
+				local tw 0
+				foreach [glyphid : items-of parts] : begin
+					local g miniatureFont.(glyphid)
+					if tw : begin # Add a little kern
+						set tw : tw - SB
+						apply-transform : Translate SB 0
+					include g
+					apply-transform : Translate (-g.advanceWidth) 0
+					set tw : tw + g.advanceWidth
+				apply-transform : Translate tw 0
 				apply-transform : Upright
-				apply-transform : Translate (-WIDTH / 2) 0
+				apply-transform : Scale [Math.min 1 (width / tw)] 1
+				set tw : Math.min width tw
+				apply-transform : Translate (-tw / 2) 0
 				apply-transform : Scale dscale
 				apply-transform : Translate (width / 2) 0
 				apply-transform : Italify
 				set currentGlyph.cmpPriority 11
 				refair this
-			
-			include : dispiro
-				widths.lhs sw
-				g4 [mix l r 0.15] (parenTop * pscale)
-				g4.down.mid l     (parenMid * pscale)
-				g4 [mix l r 0.15] (parenBot * pscale)
-			
-			include : dispiro
-				widths.rhs sw
-				g4 [mix r l 0.15] (parenTop * pscale)
-				g4.down.mid r     (parenMid * pscale)
-				g4 [mix r l 0.15] (parenBot * pscale)
+			sketch
+				set-width width
+				include lg
+				include : dispiro
+					widths.lhs sw
+					g4 [mix l r 0.15] (parenTop * pscale)
+					g4.down.mid l     (parenMid * pscale)
+					g4 [mix l r 0.15] (parenBot * pscale)
 				
-			include : Upright
-			include : Translate 0 (parenMid - parenMid * pscale)
-			include : Italify
+				include : dispiro
+					widths.rhs sw
+					g4 [mix r l 0.15] (parenTop * pscale)
+					g4.down.mid r     (parenMid * pscale)
+					g4 [mix r l 0.15] (parenBot * pscale)
+					
+				include : Upright
+				include : Translate 0 (parenMid - parenMid * pscale)
+				include : Italify
+				
+				save gn unicode
+
+	define [createDottedGlyphs shrink records] : if [not recursive] : begin
+		local dscale 0.55
+		local pscale 0.6
+		local pendingGlyphs : records.map : [record] => record.1
+		local miniatureFont : Thinner
+			[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {'period'}
+			if (para.spacing > 1) 1 shrink
+
+		foreach {unicode parts w} [items-of records] : do
+			local gn : suggestName : 'dotted-' + [parts.join '_']
+			local width : fallback w WIDTH
+			local sw [adviceBlackness 5]
+			local l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] + OX
+			local r : width - l
 			
-			save [suggestName : 'braced' + glyphid] unicode
+			sketch
+				set-width width
+				local tw 0
+				foreach [glyphid : items-of : parts.concat {'period'}] : begin
+					local g miniatureFont.(glyphid)
+					if tw : begin # Add a little kern
+						set tw : tw - SB
+						apply-transform : Translate SB 0
+					include g
+					apply-transform : Translate (-g.advanceWidth) 0
+					set tw : tw + g.advanceWidth
+				apply-transform : Translate tw 0
+				set tw : tw - SB
+				apply-transform : Upright
+				if (tw > width)
+				: then : apply-transform : Scale [Math.min 1 (width / tw)] 1
+				: else : apply-transform : Translate (width / 2 - tw / 2) 0
+				apply-transform : Italify
+				set currentGlyph.cmpPriority 11
+				save gn unicode
 
 	define [createSuperscripts records] : if [not recursive] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -433,25 +492,6 @@ export : define [apply] : begin
 				apply-transform : Translate MIDDLE parenMid
 				apply-transform : Italify
 			include : HBar SB RIGHTSB parenMid (fine * 0.75)
-
-
-	if [not recursive] : let : begin
-		local compositions : list
-			list 0xA9   'C' FULLWIDTH2
-			list 0xAE   'R' FULLWIDTH2
-			list 0x2117 'P' FULLWIDTH2
-			list 0x24EA 'zero' FULLWIDTH1
-			list null   'space' FULLWIDTH1
-		foreach [j : range 1 till 9] : compositions.push {(0x2460 + j - 1) unicodeGlyphs.(['0'.charCodeAt 0] + j).name FULLWIDTH1}
-		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) unicodeGlyphs.(['A'.charCodeAt 0] + j).name FULLWIDTH1}
-		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) unicodeGlyphs.(['a'.charCodeAt 0] + j).name FULLWIDTH1}
-		createCircledGlyphs compositions
-
-		local compositions : list
-			list null   'space' FULLWIDTH1
-		foreach [j : range 1 till 9] : compositions.push {(0x2474 + j - 1) unicodeGlyphs.(['0'.charCodeAt 0] + j).name FULLWIDTH1}
-		foreach [j : range 0 26] : compositions.push {(0x249C + j) unicodeGlyphs.(['a'.charCodeAt 0] + j).name FULLWIDTH1}
-		createBracedGlyphs compositions
 
 	createSMCPs : list
 		list 0x1D00 'A'
@@ -747,73 +787,106 @@ export : define [apply] : begin
 		list 0x1DF4 'udieresis'
 
 	# Unicode Ligatures
-	let : begin
-		define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
-		define [createLigatures shrink1 shrink2 wadj1 wadj2 records] : if [not recursive] : begin
-			local pendingGlyphs1 : records.map : [record] => record.1
-			local pendingGlyphs2 : records.map : [record] => record.2
-			local df1 : Thinner pendingGlyphs1 [if (para.spacing > 1) 1 shrink1]
-			local df2 : Thinner pendingGlyphs2 [if (para.spacing > 1) 1 shrink2]
+	define [createLigatures shrink1 shrink2 wadj1 wadj2 records] : if [not recursive] : begin
+		local pendingGlyphs1 : records.map : [record] => record.1
+		local pendingGlyphs2 : records.map : [record] => record.2
+		local df1 : Thinner pendingGlyphs1 [if (para.spacing > 1) 1 shrink1]
+		local df2 : Thinner pendingGlyphs2 [if (para.spacing > 1) 1 shrink2]
 
-			foreach [{unicode c1 c2 mark} : items-of records] : begin
-				local glyphName "\(c1)_\(c2)"
-				if glyphs.(glyphName) : begin
-					local j 2
-					while glyphs.(glyphName + j) : inc j
-					set glyphName (glyphName + j)
-				if (para.spacing > 1) : begin
-					sketch
-						include df2.(c2)
-						include : Translate WIDTH 0
-						include df1.(c1)
-						set-width FULLWIDTH
-						save glyphName unicode
-				: else
-					local kern : SB * 7/8 * (shrink1 + shrink2)
-					local refw : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
-					sketch
-						include df2.(c2)
-						include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
-						include df1.(c1)
-						include : Translate (-WIDTH * shrink1 * (1 - wadj1) / 2) 0
-						include : Upright
-						include : Translate (-refw / 2) 0
-						include : Scale ((WIDTH - SB * 1.25) / (WIDTH - SB * 2) * WIDTH / refw) 1
-						include : Translate (WIDTH / 2) 0
-						include : Italify
-						
-						if mark : include mark
-						save glyphName unicode
+		foreach [{unicode c1 c2 mark} : items-of records] : begin
+			local glyphName "\(c1)_\(c2)"
+			if glyphs.(glyphName) : begin
+				local j 2
+				while glyphs.(glyphName + j) : inc j
+				set glyphName (glyphName + j)
+			if (para.spacing > 1) : begin
+				sketch
+					include df2.(c2)
+					include : Translate WIDTH 0
+					include df1.(c1)
+					set-width FULLWIDTH
+					save glyphName unicode
+			: else
+				local kern : SB * 7/8 * (shrink1 + shrink2)
+				local refw : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
+				sketch
+					include df2.(c2)
+					include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
+					include df1.(c1)
+					include : Translate (-WIDTH * shrink1 * (1 - wadj1) / 2) 0
+					include : Upright
+					include : Translate (-refw / 2) 0
+					include : Scale ((WIDTH - SB * 1.25) / (WIDTH - SB * 2) * WIDTH / refw) 1
+					include : Translate (WIDTH / 2) 0
+					include : Italify
+					
+					if mark : include mark
+					save glyphName unicode
 
-		createLigatures stdShrink stdShrink 1 1 : list
-			list 0x1C4 'D' 'Zcaron'
-			list 0x1C5 'D' 'zcaron'
-			list 0x1C6 'd' 'zcaron'
-			list 0x1C7 'L' 'J'
-			list 0x1C8 'L' 'j'
-			list 0x1C9 'l' 'j'
-			list 0x1CA 'N' 'J'
-			list 0x1CB 'N' 'j'
-			list 0x1CC 'n' 'j'
-			list 0x2A3 'd' 'z'
-			list 0x1F1 'D' 'Z'
-			list 0x1F2 'D' 'z'
-			list 0x1F3 'd' 'z'
-			list 0x2A4 'd' 'ezh'
-			list 0x2A5 'd' 'zcurlytail'
-			list 0x2A6 't' 's'
-			list 0x2A7 't' 'esh'
-			list 0x2A8 't' 'ccurlytail'
-			list 0x2A9 'f' 'eng'
-			list 0x2AA 'l' 's'
-			list 0x2AB 'l' 'z'
-			list 0x478 'O' 'y' markset.if
-			list 0x479 'o' 'y' markset.p
-			list 0x20A7 'P' 's'
-			list 0x20A8 'R' 's'
-		createLigatures 0.7 0.8 0.75 0.9 : list
-			list 0x2103 'degree' 'C'
-			list 0x2109 'degree' 'F'
+	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
+	createLigatures stdShrink stdShrink 1 1 : list
+		list 0x1C4 'D' 'Zcaron'
+		list 0x1C5 'D' 'zcaron'
+		list 0x1C6 'd' 'zcaron'
+		list 0x1C7 'L' 'J'
+		list 0x1C8 'L' 'j'
+		list 0x1C9 'l' 'j'
+		list 0x1CA 'N' 'J'
+		list 0x1CB 'N' 'j'
+		list 0x1CC 'n' 'j'
+		list 0x2A3 'd' 'z'
+		list 0x1F1 'D' 'Z'
+		list 0x1F2 'D' 'z'
+		list 0x1F3 'd' 'z'
+		list 0x2A4 'd' 'ezh'
+		list 0x2A5 'd' 'zcurlytail'
+		list 0x2A6 't' 's'
+		list 0x2A7 't' 'esh'
+		list 0x2A8 't' 'ccurlytail'
+		list 0x2A9 'f' 'eng'
+		list 0x2AA 'l' 's'
+		list 0x2AB 'l' 'z'
+		list 0x478 'O' 'y' markset.if
+		list 0x479 'o' 'y' markset.p
+		list 0x20A7 'P' 's'
+		list 0x20A8 'R' 's'
+	createLigatures 0.7 0.8 0.75 0.9 : list
+		list 0x2103 'degree' 'C'
+		list 0x2109 'degree' 'F'
+	
+	# Circled & Braced
+	if [not recursive] : let : begin
+		local compositions : list
+			list 0xA9   {'C'} FULLWIDTH2
+			list 0xAE   {'R'} FULLWIDTH2
+			list 0x2117 {'P'} FULLWIDTH2
+			list 0x24EA {'zero'} FULLWIDTH1
+			list null   {'space'} FULLWIDTH1
+		foreach [j : range 1 till 20] : compositions.push : list
+			0x2460 + j - 1
+			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
+			begin FULLWIDTH1
+		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createCircledGlyphs compositions
+
+	if [not recursive] : let : begin
+		local compositions : list
+			list null   {'space'} FULLWIDTH1
+		foreach [j : range 1 till 20] : compositions.push : list
+			0x2474 + j - 1
+			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
+			begin FULLWIDTH1
+		foreach [j : range 0 26] : compositions.push {(0x249C + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createBracedGlyphs compositions
+	
+	if [not recursive] : let : begin
+		local compositions {}
+		foreach [j : range 1 till [if (para.spacing > 0) 20 9]] : compositions.push : list
+			0x2488 + j - 1
+			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
+			begin FULLWIDTH1
+		createDottedGlyphs 0.9 compositions
 
 	# Composite superscripts and subscripts
 	let : begin
