@@ -108,8 +108,8 @@ var dopr = TAG('dotoper');
 var indexPage = new Vue({
 	el: 'body',
 	data: {
-		version: '1.13.1',
-		codename: 'Marisa',
+		version: '1.13.2',
+		codename: 'Marisa-2',
 		themes: ['color-light', 'color-dark'],
 		snippets: [],
 		snippet: 'javascript',
