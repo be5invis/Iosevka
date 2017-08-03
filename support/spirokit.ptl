@@ -1,6 +1,7 @@
 import 'libspiro-js' as libspiro
 import './spiroexpand' as SpiroExpansionContext
 import './fairify' as fairify
+import 'caryll-shapeops' as ShapeOps
 
 import './transform' as Transform 
 
@@ -179,7 +180,7 @@ export : define [SetupBuilders args] : begin
 		if [not dontinc] : this.include g
 		return g
 
-	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [] : begin
+	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
 		local g : new Glyph
 		set g.gizmo : this.gizmo || globalTransform 
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
@@ -187,11 +188,32 @@ export : define [SetupBuilders args] : begin
 		foreach af [items-of lastafs] : if af : af.call g
 		if [not para.unfair] : foreach [j : range 0 g.contours.length] : begin
 			set g.contours.(j) : fairify g.contours.(j) (g.fairGizmo || g.gizmo)
-		this.include g
+		if [not dontinc] : this.include g
 		return g
+	
+	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
+		local g : new Glyph
+		set g.gizmo : this.gizmo || globalTransform
+		if (k.length == 0) : return g
+		
+		g.include k.0
+		set g.contours : g.contours.map Glyph.contourToStandardCubic
+		foreach [item : items-of : k.slice 1] : begin
+			local g1 : new Glyph
+			set g1.gizmo : this.gizmo || globalTransform
+			g1.include item
+			set g1.contours : g1.contours.map Glyph.contourToStandardCubic
+			local c1 : ShapeOps.boole operator g.contours g1.contours ShapeOps.fillRules.nonzero ShapeOps.fillRules.nonzero 2048
+			set g.contours : c1.map Glyph.contourToStandardCubic
+		if [not dontinc] : this.include g
+		return g
+	
+	define union : Boole ShapeOps.ops.union
+	define intersection : Boole ShapeOps.ops.intersection
+	define difference : Boole ShapeOps.ops.difference
 	
 	return [object
 		g4 g2 corner flat curl close end straight
 		widths disable-gizmo disable-contrast heading unimportant important
 		alsothru alsothruthem bezcontrols quadcontrols archv arcvh complexThru
-		dispiro spiro-outline]
+		dispiro spiro-outline union intersection difference]
