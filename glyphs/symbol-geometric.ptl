@@ -457,39 +457,41 @@ export : define [apply] : begin
 			line-to    0 (-font.OS_2.usWinDescent)
 			save 'fullblock' 0x2588
 
-		define [Shade fn] : glyph-construction
+		define [Shade steps fill] : glyph-construction
 			local top font.OS_2.usWinAscent
 			local bottom (-font.OS_2.usWinDescent)
-			local segx 6
-			local segy 16
-			local g : create-glyph : glyph-construction : begin
-				include : ForceUpright
-				foreach j [range 0 segx] : foreach k [range 0 segy] : if [fn j k] : begin
-					start-from [mix 0 WIDTH (j / segx)] [mix bottom top (k / segy)]
-					line-to    [mix 0 WIDTH (j / segx)] [mix bottom top ((k + 1) / segy)]
-					line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top ((k + 1) / segy)]
-					line-to    [mix 0 WIDTH ((j + 1) / segx)] [mix bottom top (k / segy)]
-			include g
-			if (FULLWIDTH > WIDTH) : begin
-				apply-transform : Translate (FULLWIDTH - WIDTH) 0
-				include g
+			local sw : (top - bottom) / steps * fill
+			include : intersection
+				create-glyph : glyph-construction
+					foreach j [range 0 (steps * 2 + 2)] : begin
+						local y0 : mix top bottom (j / steps)
+						local y1 : y0 + top - bottom
+						start-from 0         (y0 - sw / 2)
+						line-to    FULLWIDTH (y1 - sw / 2)
+						line-to    FULLWIDTH (y1 + sw / 2)
+						line-to    0         (y0 + sw / 2)
+				spiro-outline
+					corner 0 bottom
+					corner 0 top
+					corner FULLWIDTH top
+					corner FULLWIDTH bottom
 
 		sketch # lightshade
 			set-width FULLWIDTH
 			include : ForceUpright
-			include : Shade ([j k] => ((k % 2) && (j + (k - 1) / 2) % 2))
+			include : Shade 2 (1 / 8)
 			save 'lightshade' 0x2591
 
 		sketch # mediumshade
 			set-width FULLWIDTH
 			include : ForceUpright
-			include : Shade ([j k] => ((j + k) % 2))
+			include : Shade 4 (1 / 4)
 			save 'mediumshade' 0x2592
 
 		sketch # heavyshade
 			set-width FULLWIDTH
 			include : ForceUpright
-			include : Shade ([j k] => ((k % 2) || (j + k / 2) % 2))
+			include : Shade 8 (1 / 2)
 			save 'heavyshade' 0x2593
 
 		foreach [fill : range 1 8] : begin
