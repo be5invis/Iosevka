@@ -6,7 +6,8 @@ function delta(a, b) {
 
 function contourHash(c) {
 	if (!c || c.length < 2) return ".";
-	var lx = c[0].x, ly = c[0].y;
+	var lx = c[0].x,
+		ly = c[0].y;
 	var buf = "";
 	for (var j = 1; j < c.length; j++) {
 		var z = c[j];
@@ -22,11 +23,13 @@ function match(g1, g2, _n) {
 		for (var k = j; k < g2.contours.length && k - j < g1.contours.length; k++) {
 			if (
 				g1.contours[k - j].hash !== g2.contours[k].hash ||
-				!(k <= j ||
+				!(
+					k <= j ||
 					(delta(g1.contours[k - j][0].x, g1.contours[k - j - 1][0].x) ===
 						delta(g2.contours[k][0].x, g2.contours[k - 1][0].x) &&
 						delta(g1.contours[k - j][0].y, g1.contours[k - j - 1][0].y) ===
-							delta(g2.contours[k][0].y, g2.contours[k - 1][0].y)))
+							delta(g2.contours[k][0].y, g2.contours[k - 1][0].y))
+				)
 			) {
 				found = false;
 				break;
@@ -38,7 +41,8 @@ function match(g1, g2, _n) {
 				glyph: g1.name,
 				_n: _n,
 				x: g2.contours[j][0].x - g1.contours[0][0].x,
-				y: g2.contours[j][0].y - g1.contours[0][0].y
+				y: g2.contours[j][0].y - g1.contours[0][0].y,
+				roundToGrid: true // RTG
 			});
 			g2.contours.splice(j, g1.contours.length);
 			return true;

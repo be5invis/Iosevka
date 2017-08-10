@@ -9,15 +9,14 @@ var toml = require("toml");
 
 var Glyph = require("./support/glyph");
 var autoref = require("./support/autoref");
-const objectAssign = require('object-assign');
+const objectAssign = require("object-assign");
 
 var caryllShapeOps = require("caryll-shapeops");
-var c2q = require("otfcc-c2q");
+var c2q = require("megaminx").geometry.c2q;
 
 function hasv(obj) {
 	if (!obj) return false;
-	for (var k in obj)
-		if (obj[k]) return true;
+	for (var k in obj) if (obj[k]) return true;
 	return false;
 }
 
@@ -30,9 +29,10 @@ function mergeVSHive(_target, source) {
 }
 function produceComposite(vs, para, dflt, g) {
 	let sel = objectAssign({}, dflt);
-	if (g.design) for (let h of g.design) {
-		sel = mergeVSHive(sel, vs[h]);
-	}
+	if (g.design)
+		for (let h of g.design) {
+			sel = mergeVSHive(sel, vs[h]);
+		}
 	if (!para.isItalic && g.upright) {
 		for (let h of g.upright) {
 			sel = mergeVSHive(sel, vs[h]);
@@ -54,7 +54,7 @@ function formVariantData(data, para) {
 		const tag = hive.tag;
 		delete hive.tag;
 		if (tag) {
-			let __cvmap = {}
+			let __cvmap = {};
 			for (let k in hive) __cvmap[k] = tag;
 			hive.__cvmap = __cvmap;
 		}
@@ -71,50 +71,68 @@ function formVariantData(data, para) {
 }
 
 // Font building
-const font = function () {
-	const parametersData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "parameters.toml"), "utf-8"));
-	const variantData = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "variants.toml"), "utf-8"));
-	const emptyFont = toml.parse(fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8"));
+const font = (function() {
+	const parametersData = toml.parse(
+		fs.readFileSync(path.join(path.dirname(require.main.filename), "parameters.toml"), "utf-8")
+	);
+	const variantData = toml.parse(
+		fs.readFileSync(path.join(path.dirname(require.main.filename), "variants.toml"), "utf-8")
+	);
+	const emptyFont = toml.parse(
+		fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8")
+	);
 
 	let para = parameters.build(parametersData, argv._);
-	let vsdata = formVariantData(variantData, para)
+	let vsdata = formVariantData(variantData, para);
 	para.variants = vsdata;
 	para.variantSelector = parameters.build(vsdata, argv._);
 	para.defaultVariant = vsdata.default;
 
-	var fontUniqueName = para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
+	var fontUniqueName =
+		para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
 
 	console.log("    Start building font " + fontUniqueName);
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log("    " + fontUniqueName + " Successfully built.");
 	font.parameters = para;
-	font.glyf = font.glyf.sort(function (a, b) {
+	font.glyf = font.glyf.sort(function(a, b) {
 		var pri1 = a.cmpPriority || 0;
 		var pri2 = b.cmpPriority || 0;
 		if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
-		if (a.contours && b.contours && a.contours.length > b.contours.length) return (-1);
-		if (a.unicode && a.unicode[0] && !b.unicode || !b.unicode[0]) return (-1);
-		if (b.unicode && b.unicode[0] && !a.unicode || !a.unicode[0]) return (+1);
-		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] < b.unicode[0]) return (-1);
-		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] > b.unicode[0]) return (+1);
-		return (a.name < b.name) ? (-1) : (a.name > b.name) ? 1 : 0;
+		if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
+		if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
+		if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
+		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] < b.unicode[0])
+			return -1;
+		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] > b.unicode[0])
+			return +1;
+		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
 	});
 	return font;
-}();
+})();
 
 if (argv.charmap) {
-	(function () {
+	(function() {
 		console.log("    Writing character map -> " + argv.charmap);
-		fs.writeFileSync(argv.charmap, JSON.stringify(font.glyf.map(function (glyph) {
-			return [
-				glyph.name,
-				glyph.unicode,
-				glyph.advanceWidth === 0 ? (hasv(glyph.anchors) ? 1 : (glyph.contours && glyph.contours.length) ? 2 : 0) : 0
-			];
-		})), "utf8");
+		fs.writeFileSync(
+			argv.charmap,
+			JSON.stringify(
+				font.glyf.map(function(glyph) {
+					return [
+						glyph.name,
+						glyph.unicode,
+						glyph.advanceWidth === 0
+							? hasv(glyph.anchors)
+								? 1
+								: glyph.contours && glyph.contours.length ? 2 : 0
+							: 0
+					];
+				})
+			),
+			"utf8"
+		);
 	})();
 }
-
 
 if (argv.o) {
 	console.log("    Writing output -> " + argv.o);
@@ -124,7 +142,7 @@ if (argv.o) {
 	// autoref
 	autoref(font.glyf);
 	// regulate
-	font.glyf.forEach((g) => {
+	font.glyf.forEach(g => {
 		if (g.contours) {
 			for (var k = 0; k < g.contours.length; k++) {
 				var contour = g.contours[k];
@@ -134,7 +152,8 @@ if (argv.o) {
 						contour[p].x = Math.round(contour[p].x);
 					}
 				}
-				var offJ = null, mx = null;
+				var offJ = null,
+					mx = null;
 				for (var p = 0; p < contour.length; p++) {
 					if (contour[p].on) {
 						if (offJ) {
@@ -144,7 +163,9 @@ if (argv.o) {
 							var rx0 = contour[offJ - 1].x;
 							if (origx != origx0) {
 								for (var poff = offJ; poff < p; poff++) {
-									contour[poff].x = (contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) + rx0;
+									contour[poff].x =
+										(contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) +
+										rx0;
 								}
 							}
 						}
@@ -162,13 +183,13 @@ if (argv.o) {
 		}
 	});
 	// overlap removal
-	font.glyf.forEach((g) => {
+	font.glyf.forEach(g => {
 		if (g.contours) {
 			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
 		}
 	});
 	// finalize
-	font.glyf.forEach((g) => {
+	font.glyf.forEach(g => {
 		if (g.contours) {
 			Glyph.prototype.cleanup.call(g, 0.1);
 			g.contours = c2q.contours(g.contours);
