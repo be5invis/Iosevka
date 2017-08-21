@@ -72,15 +72,15 @@ function formVariantData(data, para) {
 
 // Font building
 const font = (function() {
-	const parametersData = toml.parse(
-		fs.readFileSync(path.join(path.dirname(require.main.filename), "parameters.toml"), "utf-8")
+	const parametersData = Object.assign(
+		{},
+		toml.parse(fs.readFileSync(path.join(__dirname, "parameters.toml"), "utf-8")),
+		fs.existsSync(path.join(__dirname, "private.toml"))
+			? toml.parse(fs.readFileSync(path.join(__dirname, "private.toml"), "utf-8"))
+			: []
 	);
-	const variantData = toml.parse(
-		fs.readFileSync(path.join(path.dirname(require.main.filename), "variants.toml"), "utf-8")
-	);
-	const emptyFont = toml.parse(
-		fs.readFileSync(path.join(path.dirname(require.main.filename), "emptyfont.toml"), "utf-8")
-	);
+	const variantData = toml.parse(fs.readFileSync(path.join(__dirname, "variants.toml"), "utf-8"));
+	const emptyFont = toml.parse(fs.readFileSync(path.join(__dirname, "emptyfont.toml"), "utf-8"));
 
 	let para = parameters.build(parametersData, argv._);
 	let vsdata = formVariantData(variantData, para);

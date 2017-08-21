@@ -185,15 +185,24 @@ export : define [apply] : begin
 	### Standard geometric shapes
 	do 'Geometric'
 		define shapeWidth FULLWIDTH2
+		define middleFW : shapeWidth / 2
 
 		define left : mix MIDDLE SB 1.1
 		define right : mix MIDDLE RIGHTSB 1.1
 		define squareRadius : (right - left) / 2
+		
+		define leftFW : shapeWidth / 2 - (MIDDLE - left) * (shapeWidth / WIDTH)
+		define rightFW : shapeWidth / 2 + (MIDDLE - left) * (shapeWidth / WIDTH)
+		define squareRadiusFW : (rightFW - leftFW) / 2
+		define topFW : parenMid + squareRadiusFW
+		define bottomFW : parenMid - squareRadiusFW
 
 		local hollowSW : adviceBlackness 5
 		define [hollowScale w d s] : (w - [fallback s hollowSW] * [fallback d : WIDTH / shapeWidth]) / w
+
 		define [hollow newid unicode oldid zx zy cx cy] : sketch
 			local isWide : glyphs.(oldid).advanceWidth > WIDTH
+			local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
 			include : difference
 				create-glyph : glyph-construction
 					include glyphs.(oldid)
@@ -201,8 +210,59 @@ export : define [apply] : begin
 				create-glyph : glyph-construction
 					include glyphs.(oldid)
 					if isWide : include UnFullWidthify
-					local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
 					include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] [fallback zx zoom] [fallback zy zx zoom]
+			if isWide : include FullWidthify
+			save newid unicode
+
+		define [hollowWithCenter newid unicode oldid zx zy cx cy] : sketch
+			local isWide : glyphs.(oldid).advanceWidth > WIDTH
+			local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
+			local zx1 : mix [fallback zx zoom] 1 0.25
+			local zx2 : mix zx1 0 0.5
+			local zy1 : mix [fallback zy zx zoom] 1 0.25
+			local zy2 : mix zy1 0 0.5
+			include : union
+				difference
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+						include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] zx1 zy1
+				create-glyph : glyph-construction
+					include glyphs.(oldid)
+					if isWide : include UnFullWidthify
+					include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] zx2 zy2
+			if isWide : include FullWidthify
+			save newid unicode
+		define [doubleHollow newid unicode oldid zx zy cx cy] : sketch
+			local isWide : glyphs.(oldid).advanceWidth > WIDTH
+			local zoom : hollowScale squareRadius (WIDTH / glyphs.(oldid).advanceWidth)
+			local zx1 : mix [fallback zx zoom] 1 0.25
+			local zx2 : [mix zx1 0 0.5] + (1 - zx1) / 2
+			local zx3 : zx2 - (1 - zx1)
+			local zy1 : mix [fallback zy zx zoom] 1 0.25
+			local zy2 : [mix zy1 0 0.5] + (1 - zy1) / 2
+			local zy3 : zy2 - (1 - zy1)
+			include : union
+				difference
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+						include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] zx1 zy1
+				difference
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+						include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] zx2 zy2
+					create-glyph : glyph-construction
+						include glyphs.(oldid)
+						if isWide : include UnFullWidthify
+						include : FlipAround [fallback cx MIDDLE] [fallback cy parenMid] zx3 zy3
 			if isWide : include FullWidthify
 			save newid unicode
 
@@ -270,6 +330,42 @@ export : define [apply] : begin
 			include FullWidthify
 			save 'blackrectangle' 0x25AC
 
+		sketch # blackparallelogram
+			define skew : squareRadius * 1 / 4
+			start-from (left + skew) (parenMid + squareRadius / 1.5)
+			line-to    (right + skew) (parenMid + squareRadius / 1.5)
+			line-to    (right - skew) (parenMid - squareRadius / 1.5)
+			line-to    (left - skew) (parenMid - squareRadius / 1.5)
+			include FullWidthify
+			save 'blackparallelogram' 0x25B0
+
+		sketch # whiteparallelogram
+			define skew : squareRadius * 1 / 4
+			define w : hollowSW * (WIDTH / shapeWidth)
+			set-width shapeWidth
+			include : intersection
+				begin glyphs.blackparallelogram
+				create-glyph : glyph-construction
+					include : dispiro
+						widths.rhs w
+						flat (left + skew) (parenMid + squareRadius / 1.5)
+						curl (right + skew) (parenMid + squareRadius / 1.5)
+					include : dispiro
+						widths.rhs w
+						flat (right + skew) (parenMid + squareRadius / 1.5)
+						curl (right - skew) (parenMid - squareRadius / 1.5)
+					include : dispiro
+						widths.rhs w
+						flat (right - skew) (parenMid - squareRadius / 1.5)
+						curl (left - skew) (parenMid - squareRadius / 1.5)
+					include : dispiro
+						widths.rhs w
+						flat (left - skew) (parenMid - squareRadius / 1.5)
+						curl (left + skew) (parenMid + squareRadius / 1.5)
+					include FullWidthify
+			
+			save 'whiteparallelogram' 0x25B1
+
 		sketch # blacklongrectangle
 			start-from left (parenMid + squareRadius * 1.5)
 			line-to    right (parenMid + squareRadius * 1.5)
@@ -315,6 +411,40 @@ export : define [apply] : begin
 			save 'hwblackdiamond'
 			include FullWidthify
 			save 'blackdiamond' 0x25C6
+
+		sketch # blackLonzenge
+			start-from MIDDLE (parenMid + squareRadius)
+			line-to    [mix MIDDLE right (2 / 3)] parenMid
+			line-to    MIDDLE (parenMid - squareRadius)
+			line-to    [mix MIDDLE left (2 / 3)] parenMid
+			save 'hwBlackLonzenge'
+			include FullWidthify
+			save 'blackLonzenge'
+
+		sketch # whiteLonzenge
+			define w : hollowSW * (WIDTH / shapeWidth)
+			set-width shapeWidth
+			include : intersection
+				begin glyphs.blackLonzenge
+				create-glyph : glyph-construction
+					include : dispiro
+						widths.rhs w
+						flat MIDDLE (parenMid + squareRadius)
+						curl [mix MIDDLE right (2 / 3)] parenMid
+					include : dispiro
+						widths.rhs w
+						flat [mix MIDDLE right (2 / 3)] parenMid
+						curl MIDDLE (parenMid - squareRadius)
+					include : dispiro
+						widths.rhs w
+						flat MIDDLE (parenMid - squareRadius)
+						curl [mix MIDDLE left (2 / 3)] parenMid
+					include : dispiro
+						widths.rhs w
+						flat [mix MIDDLE left (2 / 3)] parenMid
+						curl MIDDLE (parenMid + squareRadius)
+					include FullWidthify
+			save 'whiteLonzenge' 0x25CA
 
 		sketch # blackcircle
 			include markset.plus
@@ -394,20 +524,25 @@ export : define [apply] : begin
 			save 'dottedcircle' 0x25CC
 
 		hollow 'whitesquare' 0x25A1 'blacksquare'
+		hollowWithCenter 'whitesquareWithCenter' 0x25A3 'blacksquare'
 		hollow 'whitehexagon' 0x2B21 'blackhexagon'
 		hollow 'whitepentagon' 0x2B20 'blackpentagon'
 		hollow 'rhwhitepentagon' 0x2B54 'rhblackpentagon'
 		hollow 'whiterectangle' 0x25AD 'blackrectangle' [hollowScale squareRadius] [hollowScale (squareRadius / 1.5)]
 		hollow 'whitelongrectangle' 0x25AF 'blacklongrectangle' [hollowScale squareRadius] [hollowScale (squareRadius * 1.5)]
+
 		hollow 'whitecircle' 0x25CB 'blackcircle'
+		hollowWithCenter 'whitecircleWithCenter' 0x25C9 'blackcircle'
+		doubleHollow 'doubleWhitecircle' 0x25CE 'blackcircle'
 		hollow 'bigwhitecircle' 0x25EF 'bigblackcircle' [hollowScale : squareRadius * designParameters.geometric_large_x]
 		hollow 'hwbigwhitecircle' null 'hwbigblackcircle' [hollowScale (squareRadius * designParameters.geometric_large_x) 1]
 		hollow 'smallwhitecircle' null 'smallblackcircle' [hollowScale : squareRadius * designParameters.geometric_small_x]
 		hollow 'hwsmallwhitecircle' null 'hwsmallblackcircle' [hollowScale (squareRadius * designParameters.geometric_small_x) 1]
 		hollow 'hwwhitecircle' null 'hwblackcircle'
-		hollow 'hwwhitediamond' null 'hwblackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
-		hollow 'whitediamond' 0x25C7 'blackdiamond' [hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])]
-
+		let [s : hollowScale squareRadius nothing (hollowSW * [Math.sqrt 2])] : begin
+			hollow 'hwwhitediamond' null 'hwblackdiamond' s
+			hollow 'whitediamond' 0x25C7 'blackdiamond' s
+			hollowWithCenter 'whitediamondWithCenter' 0x25C8 'blackdiamond' s
 		let [sts 0.75]
 		: begin
 			resized 'smallblacktriangleup' 0x25B4 'blacktriangleup' MIDDLE parenMid 0.75
@@ -444,6 +579,156 @@ export : define [apply] : begin
 				g4 MIDDLE (XH * 0.1)
 				close
 			save 'marksampler' 0xE09E
+		
+		# Rounded
+		sketch # roundwhitesquare, U+25A2
+			set-width shapeWidth
+			define cr : squareRadiusFW - hollowSW * 2
+			include : dispiro
+				widths.lhs hollowSW
+				flat (middleFW + 1) (parenMid + squareRadiusFW) [heading LEFTWARD]
+				curl (middleFW - cr) (parenMid + squareRadiusFW) [heading LEFTWARD]
+				archv
+				flat (middleFW - squareRadiusFW) (parenMid + cr) [heading DOWNWARD]
+				curl (middleFW - squareRadiusFW) (parenMid - cr) [heading DOWNWARD]
+				arcvh
+				flat (middleFW - cr) (parenMid - squareRadiusFW) [heading RIGHTWARD]
+				curl (middleFW + cr) (parenMid - squareRadiusFW) [heading RIGHTWARD]
+				archv
+				flat (middleFW + squareRadiusFW) (parenMid - cr) [heading UPWARD]
+				curl (middleFW + squareRadiusFW) (parenMid + cr) [heading UPWARD]
+				arcvh
+				flat (middleFW + cr) (parenMid + squareRadiusFW) [heading LEFTWARD]
+				curl (middleFW - 1) (parenMid + squareRadiusFW) [heading LEFTWARD]
+			save 'roundwhitesquare' 0x25A2
+		# Shaded hollow squares
+		sketch # hshadesquare, U+25A4
+			define lineWidth : Math.min hollowSW ((squareRadiusFW * 2 - hollowSW * 2) * 1 / 11)
+			define top : parenMid + squareRadiusFW - hollowSW + lineWidth / 2
+			define bot : parenMid - (top - parenMid)
+			set-width shapeWidth
+			include : union
+				begin glyphs.whitesquare
+				intersection
+					begin glyphs.blacksquare
+					create-glyph : glyph-construction
+						include : dispiro
+							widths.center lineWidth
+							flat leftFW [mix top bot 0.25] [heading RIGHTWARD]
+							curl rightFW [mix top bot 0.25] [heading RIGHTWARD]
+						include : dispiro
+							widths.center lineWidth
+							flat leftFW [mix top bot 0.5] [heading RIGHTWARD]
+							curl rightFW [mix top bot 0.5] [heading RIGHTWARD]
+						include : dispiro
+							widths.center lineWidth
+							flat leftFW [mix top bot 0.75] [heading RIGHTWARD]
+							curl rightFW [mix top bot 0.75] [heading RIGHTWARD]
+			save 'hshadesquare' 0x25A4
+		sketch # vshadesquare, U+25A5
+			define lineWidth : Math.min hollowSW ((squareRadiusFW * 2 - hollowSW * 2) * 1 / 11)
+			define r : shapeWidth / 2 + squareRadiusFW - hollowSW + lineWidth / 2
+			define l : shapeWidth / 2 - (r - shapeWidth / 2)
+			set-width shapeWidth
+			include : union
+				begin glyphs.whitesquare
+				intersection
+					begin glyphs.blacksquare
+					create-glyph : glyph-construction
+						include : dispiro
+							widths.center lineWidth
+							flat [mix l r 0.25] topFW [heading DOWNWARD]
+							curl [mix l r 0.25] bottomFW [heading DOWNWARD]
+						include : dispiro
+							widths.center lineWidth
+							flat [mix l r 0.5] topFW [heading DOWNWARD]
+							curl [mix l r 0.5] bottomFW [heading DOWNWARD]
+						include : dispiro
+							widths.center lineWidth
+							flat [mix l r 0.75] topFW [heading DOWNWARD]
+							curl [mix l r 0.75] bottomFW [heading DOWNWARD]
+			save 'vshadesquare' 0x25A5
+		sketch # hvshadesquare, U+25A6
+			set-width shapeWidth
+			include : union glyphs.hshadesquare glyphs.vshadesquare
+			save 'hvshadesquare' 0x25A6
+		sketch # ddiagshadesquare, U+25A7
+			define lineWidth : Math.min hollowSW ((squareRadiusFW * 2 - hollowSW * 2) * 1 / 11)
+			define top : parenMid + squareRadiusFW
+			define bot : parenMid - (top - parenMid)
+			set-width shapeWidth
+			include : union
+				begin glyphs.whitesquare
+				intersection
+					begin glyphs.blacksquare
+					create-glyph : glyph-construction
+						foreach [j : range (-10) till 10] : include : dispiro
+							widths.center lineWidth
+							flat leftFW [mix top bot (j / 4)] [heading RIGHTWARD]
+							curl rightFW [mix top bot (j / 4 + 1)] [heading RIGHTWARD]
+			save 'ddiagshadesquare' 0x25A7
+		sketch # udiagshadesquare, U+25A8
+			define lineWidth : Math.min hollowSW ((squareRadiusFW * 2 - hollowSW * 2) * 1 / 11)
+			define top : parenMid + squareRadiusFW
+			define bot : parenMid - (top - parenMid)
+			set-width shapeWidth
+			include : union
+				begin glyphs.whitesquare
+				intersection
+					begin glyphs.blacksquare
+					create-glyph : glyph-construction
+						foreach [j : range (-10) till 10] : include : dispiro
+							widths.center lineWidth
+							flat leftFW [mix top bot (j / 4)] [heading RIGHTWARD]
+							curl rightFW [mix top bot (j / 4 - 1)] [heading RIGHTWARD]
+			save 'udiagshadesquare' 0x25A8
+		sketch # uddiagshadesquare, U+25A9
+			set-width shapeWidth
+			include : union glyphs.ddiagshadesquare glyphs.udiagshadesquare
+			save 'uddiagshadesquare' 0x25A9
+		
+		# partial circles
+		define quarters : list
+			list 0x25D0 1 1 0 0
+			list 0x25D1 0 0 1 1
+			list 0x25D2 0 1 0 1
+			list 0x25D3 1 0 1 0
+			list 0x25D4 0 0 1 0
+			list 0x25D5 0 1 1 1
+		foreach [{u LT LB RT RB} : items-of quarters] : sketch
+			define r : squareRadiusFW - hollowSW / 2
+			set-width shapeWidth
+			include : union
+				begin glyphs.whitecircle
+				intersection
+					spiro-outline
+						g4 middleFW (parenMid + r)
+						g4 (middleFW - r) parenMid
+						g4 middleFW (parenMid - r)
+						g4 (middleFW + r) parenMid
+						close
+					create-glyph : glyph-construction
+						if LT : include : spiro-outline
+							corner middleFW parenMid
+							corner middleFW (parenMid + squareRadiusFW)
+							corner (middleFW - squareRadiusFW) (parenMid + squareRadiusFW)
+							corner (middleFW - squareRadiusFW) parenMid
+						if LB : include : spiro-outline
+							corner middleFW parenMid
+							corner middleFW (parenMid - squareRadiusFW)
+							corner (middleFW - squareRadiusFW) (parenMid - squareRadiusFW)
+							corner (middleFW - squareRadiusFW) parenMid
+						if RT : include : spiro-outline
+							corner middleFW parenMid
+							corner middleFW (parenMid + squareRadiusFW)
+							corner (middleFW + squareRadiusFW) (parenMid + squareRadiusFW)
+							corner (middleFW + squareRadiusFW) parenMid
+						if RB : include : spiro-outline
+							corner middleFW parenMid
+							corner middleFW (parenMid - squareRadiusFW)
+							corner (middleFW + squareRadiusFW) (parenMid - squareRadiusFW)
+							corner (middleFW + squareRadiusFW) parenMid
+			save ('uni' + u) u
 
 	### Blocks
 	do 'Block Shapes'
