@@ -95,19 +95,36 @@ const font = (function() {
 	var font = buildGlyphs.build.call(emptyFont, para);
 	console.log("    " + fontUniqueName + " Successfully built.");
 	font.parameters = para;
-	font.glyf = font.glyf.sort(function(a, b) {
-		var pri1 = a.cmpPriority || 0;
-		var pri2 = b.cmpPriority || 0;
-		if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
-		if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
-		if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
-		if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
-		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] < b.unicode[0])
-			return -1;
-		if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] > b.unicode[0])
-			return +1;
-		return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-	});
+	font.glyf = font.glyf
+		.map(function(g, j) {
+			g.gord = j;
+			return g;
+		})
+		.sort(function(a, b) {
+			var pri1 = a.cmpPriority || 0;
+			var pri2 = b.cmpPriority || 0;
+			if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
+			if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
+			if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
+			if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
+			if (
+				a.unicode &&
+				a.unicode[0] &&
+				b.unicode &&
+				b.unicode[0] &&
+				a.unicode[0] < b.unicode[0]
+			)
+				return -1;
+			if (
+				a.unicode &&
+				a.unicode[0] &&
+				b.unicode &&
+				b.unicode[0] &&
+				a.unicode[0] > b.unicode[0]
+			)
+				return +1;
+			return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+		});
 	return font;
 })();
 
@@ -188,6 +205,8 @@ if (argv.o) {
 			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
 		}
 	});
+	// reorder
+	font.glyf = font.glyf.sort((a, b) => a.gord - b.gord);
 	// finalize
 	font.glyf.forEach(g => {
 		if (g.contours) {

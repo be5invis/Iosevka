@@ -26,22 +26,19 @@ export : define [apply] : begin
 		local arrowBot : mix parenMid parenBot 0.85
 		local doubleArrowStemWidth : arrowSize * 1.1
 
-		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
-			local size : fallback _size arrowSize
+		define [ArrowBar x1 y1 x2 y2 halfstroke w] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			include : dispiro
+				widths.center (halfstroke * 2)
+				flat x1 y1
+				curl [mix x1 x2 p] [mix y1 y2 p]
+				end : function [set this.contrast 1]
+
+		define [PointingTo x1 y1 x2 y2 F] : glyph-construction
 			local g this.gizmo
 			set this.gizmo : Translate 0 0
-			include : dispiro
-				function [set this.gizmo [Transform.Id]]
-				widths.rhs fine
-				flat o 0 [heading UPWARD]
-				curl (o + size) size [widths.rhs terminal]
-				end [[] => (this.contrast = 1)]
-			include : dispiro
-				function [set this.gizmo [Transform.Id]]
-				widths.lhs fine
-				flat o 0 [heading DOWNWARD]
-				curl (o + size) (-size) [widths.lhs terminal]
-				end [[] => (this.contrast = 1)]
+			include F
 			apply-transform : Translate O 0
 			local {.x xo .y yo} : tp g {.x x1 .y y1}
 			local {.x xt .y yt} : tp g {.x x2 .y y2}
@@ -49,15 +46,65 @@ export : define [apply] : begin
 			apply-transform : Translate xt yt
 			set this.gizmo g
 
+		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
+			include : LHSHalfArrowHead x1 y1 x2 y2 0 _size
+			include : RHSHalfArrowHead x1 y1 x2 y2 0 _size
+
+		define [RHSHalfArrowHead x1 y1 x2 y2 width _size] : create-glyph : glyph-construction
+			local size : fallback _size arrowSize
+			include : PointingTo x1 y1 x2 y2 : dispiro
+				function [set this.gizmo [Transform.Id]]
+				widths.rhs fine
+				flat (o) (-width / 2) [heading UPWARD]
+				curl (o + size) size [widths.rhs terminal]
+				end : function [set this.contrast 1]
+
+		define [LHSHalfArrowHead x1 y1 x2 y2 width _size] : create-glyph : glyph-construction
+			local size : fallback _size arrowSize
+			include : PointingTo x1 y1 x2 y2 : dispiro
+				function [set this.gizmo [Transform.Id]]
+				widths.lhs fine
+				flat (o) (width / 2) [heading DOWNWARD]
+				curl (o + size) (-size) [widths.lhs terminal]
+				end : function [set this.contrast 1]
+
+		define [TriangleArrowHead x1 y1 x2 y2 width length] : create-glyph : glyph-construction
+			include : PointingTo x1 y1 x2 y2 : spiro-outline
+				corner o 0
+				corner length (width - o)
+				corner length (-width + o)
+
 		define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
-			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - o - halfstroke * 1.1) / mag
 			include : ArrowHead x1 y1 x2 y2 size
-			include : dispiro
-				widths.center (halfstroke * 2)
-				flat x1 y1
-				curl [mix x1 x2 p] [mix y1 y2 p]
-				end [[] => (this.contrast = 1)]
+			include : ArrowBar x1 y1 x2 y2 halfstroke
+
+		define [ThickArrowShape x1 y1 x2 y2] : glyph-construction
+			local headLen : WIDTH * 0.4
+			local halfBarWidth : headLen / 3
+			local headWidth : halfBarWidth * 2
+			
+			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.4)
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - fine) / mag
+			local p2 : (mag - fine * [Math.sqrt 13] / 2) / mag
+			local innerHeaderLengthShrink : fine * (1 + [Math.sqrt 13] / 2)
+
+			local x1a : mix x1 x2 (1 - p)
+			local y1a : mix y1 y2 (1 - p)
+			local x2a : mix x1 x2 p2
+			local y2a : mix y1 y2 p2
+			
+			include : difference
+				union
+					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+					ArrowBar x1 y1 x2 y2 halfBarWidth 2
+				union
+					TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					ArrowBar x1a y1a x2a y2a (halfBarWidth - fine) 2
+
+		define [HalfArrowShape side] : lambda [x1 y1 x2 y2 size] : glyph-construction
+			include : side x1 y1 x2 y2 (halfstroke * 2) size
+			include : ArrowBar x1 y1 x2 y2 halfstroke 1.5
 
 		define [DoubleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
@@ -136,6 +183,27 @@ export : define [apply] : begin
 		arrow ArrowShape 'arrowdownright'  0x2198 arrowSB arrowTop arrowRSB arrowBot
 		arrow ArrowShape 'arrowdownleft'   0x2199 arrowRSB arrowTop arrowSB arrowBot
 
+		arrow [HalfArrowShape RHSHalfArrowHead] 'arrowleftHR'  0x21BC arrowRSB parenMid arrowSB parenMid
+		arrow [HalfArrowShape LHSHalfArrowHead] 'arrowleftHL'  0x21BD arrowRSB parenMid arrowSB parenMid
+		arrow [HalfArrowShape RHSHalfArrowHead] 'arrowupHR'    0x21BE arrowMidX arrowBot arrowMidX arrowTop
+		arrow [HalfArrowShape LHSHalfArrowHead] 'arrowupHL'    0x21BF arrowMidX arrowBot arrowMidX arrowTop
+		arrow [HalfArrowShape LHSHalfArrowHead] 'arrowrightHL' 0x21C0 arrowSB parenMid arrowRSB parenMid
+		arrow [HalfArrowShape RHSHalfArrowHead] 'arrowrightHR' 0x21C1 arrowSB parenMid arrowRSB parenMid
+		arrow [HalfArrowShape LHSHalfArrowHead] 'arrowdownHL'  0x21C2 arrowMidX arrowTop arrowMidX arrowBot
+		arrow [HalfArrowShape RHSHalfArrowHead] 'arrowdownHR'  0x21C3 arrowMidX arrowTop arrowMidX arrowBot
+
+		arrow ThickArrowShape null 0x21E6 arrowRSB parenMid arrowSB parenMid
+		arrow ThickArrowShape null 0x21E7 arrowMidX arrowBot arrowMidX arrowTop
+		arrow ThickArrowShape null 0x21E8 arrowSB parenMid arrowRSB parenMid
+		arrow ThickArrowShape null 0x21E9 arrowMidX arrowTop arrowMidX arrowBot
+
+		arrow ArrowShape 'arrowleftK'  null arrowRSB parenMid (arrowSB + fine) parenMid
+		arrow ArrowShape 'arrowrightK' null arrowSB parenMid (arrowRSB - fine) parenMid
+		arrow ArrowShape 'arrowupleftTK' null arrowRSB arrowBot arrowSB (arrowTop - fine * 1.5)
+		composite 'bararrowleft' glyphs.arrowleftK [VBar arrowSB (parenMid - arrowSize) (parenMid + arrowSize) fine] [into-unicode 0x21E4]
+		composite 'bararrowright' glyphs.arrowrightK [VBar arrowRSB (parenMid - arrowSize) (parenMid + arrowSize) fine] [into-unicode 0x21E5]
+		composite glyphs.arrowupleftTK [HBar (arrowSB - arrowSize / 2) (arrowRSB + arrowSize / 2) arrowTop fine] [into-unicode 0x21B8]
+
 		let [dasw doubleArrowStemWidth] : do
 			arrow [DoubleArrowShape dasw] 'dblarrowleft'       0x21D0 arrowRSB parenMid arrowSB parenMid
 			arrow [DoubleArrowShape dasw] 'dblarrowright'      0x21D2 arrowSB parenMid arrowRSB parenMid
@@ -179,6 +247,16 @@ export : define [apply] : begin
 		composite glyphs.dblarrowleft glyphs.arrSlashOver [into-unicode 0x21CD]
 		composite glyphs.dblarrowleftright glyphs.arrSlashOver [into-unicode 0x21CE]
 		composite glyphs.dblarrowright glyphs.arrSlashOver [into-unicode 0x21CF]
+
+		do
+			local hcDist : Math.max (halfstroke * 5) (arrowWidth / 2)
+			vcombine nothing 0x21C4 'arrowright' 'arrowleft' (arrowSize * 1.75)
+			hcombine nothing 0x21C5 'arrowup' 'arrowdown' hcDist
+			vcombine nothing 0x21C6 'arrowleft' 'arrowright' (arrowSize * 1.75)
+			hcombine nothing 0x21F5 'arrowdown' 'arrowup' hcDist
+			vcombine nothing 0x21CB 'arrowleftHR' 'arrowrightHR' (arrowSize)
+			vcombine nothing 0x21CC 'arrowrightHL' 'arrowleftHL' (arrowSize)
+			vcombine nothing 0x21B9 'bararrowright' 'bararrowleft' (arrowSize * 1.75)
 
 		break : list ArrowShape
 
