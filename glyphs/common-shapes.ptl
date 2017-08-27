@@ -71,26 +71,33 @@ export : define [apply] : begin
 		set-width glyphs.(id).advanceWidth
 		if mark : include mark
 		include : FlipAround x y
-	# Dual derivatives
-	define [dual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
-		if unicode : assign-unicode unicode
-		include glyphs.(id) AS_BASE
-		apply-transform : Translate (-spacing) 0
-		include glyphs.(id)
-		apply-transform : Translate (spacing / 2) 0
 
-	define [vdual newid unicode id spacing] : create-glyph [fallback newid : 'double' + id] : glyph-construction
+	# Dual derivatives
+	define [hcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'hcombine_' + id1 + '_' + id2] : glyph-construction
 		if unicode : assign-unicode unicode
-		depends-on glyphs.(id)
+		include glyphs.(id1) AS_BASE
+		set-width glyphs.(id1).advanceWidth
+		apply-transform : Translate (-spacing) 0
+		include glyphs.(id2)
+		apply-transform : Translate (spacing / 2) 0
+	define [dual newid unicode id spacing] : hcombine [fallback newid : 'double' + id] unicode id id spacing
+
+	define [vcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] : glyph-construction
+		if unicode : assign-unicode unicode
+		set-width glyphs.(id1).advanceWidth
+		depends-on glyphs.(id1)
+		depends-on glyphs.(id2)
 		include : create-glyph : glyph-construction
-			include glyphs.(id)
+			include glyphs.(id2)
 			apply-transform : Upright
 		apply-transform : Translate 0 (-spacing)
 		include : create-glyph : glyph-construction
-			include glyphs.(id)
+			include glyphs.(id1)
 			apply-transform : Upright
 		apply-transform : Translate 0 (spacing / 2)
 		apply-transform : Italify
+	define [vdual newid unicode id spacing] : vcombine [fallback newid : 'double' + id] unicode id id spacing
+	
 	# Full-width derivatives
 	define [fwl newid unicode id shift wk] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
 		if unicode : assign-unicode unicode
@@ -188,6 +195,38 @@ export : define [apply] : begin
 			local ymiddleb : mix d u (sma / (sma + smb))
 			include : dispiro
 				widths width 0
+				g4 (middle - mc) (u - O)
+				archv
+				g4 (l + OX) ymiddlea
+				arcvh
+				g4 (middle + mc) (d + O)
+				archv
+				g4 (r - OX) ymiddleb
+				arcvh
+				close
+	define [OShapeOutline u d l r _width _sma _smb ai] : glyph-construction
+		local middle : (l + r) / 2
+		local width : fallback _width STROKE
+		local sma : fallback _sma SMALLSMOOTHA
+		local smb : fallback _smb SMALLSMOOTHB
+		local mc : CORRECTION_OMIDX * width
+		if (u - d > sma + smb) : then : begin
+			include : spiro-outline
+				g4 (middle - mc) (u - O)
+				archv
+				[if ai flat.ai flat] (l + OX) (u - sma)
+				[if ai curl.ai curl] (l + OX) (d + smb)
+				arcvh
+				g4 (middle + mc) (d + O)
+				archv
+				[if ai flat.ai flat] (r - OX) (d + sma)
+				[if ai curl.ai curl] (r - OX) (u - smb)
+				arcvh
+				close
+		: else : begin
+			local ymiddlea : mix d u (smb / (sma + smb))
+			local ymiddleb : mix d u (sma / (sma + smb))
+			include : spiro-outline
 				g4 (middle - mc) (u - O)
 				archv
 				g4 (l + OX) ymiddlea
@@ -646,4 +685,4 @@ export : define [apply] : begin
 	define [ForceUpright] : glyph-construction
 		set this.gizmo : Translate 0 0
 	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright]
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright]

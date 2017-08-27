@@ -137,14 +137,17 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		local g : create-glyph name [lambda]
 		if g : begin
 			g.include t AS_BASE
-			set g.advanceWidth t.advanceWidth
-			set g.shortName t.shortName
-			set g.cmpPriority t.cmpPriority
+			if (t <@ Glyph) : begin
+				set g.advanceWidth t.advanceWidth
+				set g.shortName t.shortName
+				set g.cmpPriority t.cmpPriority
 			if name : set dependencyProfile.(name) : getDependencyProfile g
 		if (g && unicode) : begin
 			g.assign-unicode unicode
 			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
 		return g
+	
+	define [save-glyph name unicode g] : $save$.call g name unicode
 
 	### Spiro constructions
 	# Basic knots
@@ -184,7 +187,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		save 'space' ' '
 	
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define capture : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet
+	define capture : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet
 
 	### HERE WE GO
 	set capture.commonShapes : [import './glyphs/common-shapes.js'].apply.call capture

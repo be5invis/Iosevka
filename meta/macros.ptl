@@ -105,13 +105,14 @@ define-macro sketch : syntax-rules
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [currentGlyph] [begin \\
+		dirty `[[lambda [] [begin \\
+			local currentGlyph this
 			if [not currentGlyph] : return nothing
 			if [glyphList.(glyphList.length - 1).name === @tcn] : glyphList.pop
 			begin @::[steps.map formOf]
 			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
 			return currentGlyph
-		]] [create-glyph @tcn $donothing$]]
+		]].call [create-glyph @tcn $donothing$]]
 
 define-macro branch : syntax-rules
 	`[branch @::steps] : begin
@@ -119,13 +120,14 @@ define-macro branch : syntax-rules
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [currentGlyph] [begin \\
+		dirty `[[lambda [] [begin \\
+			local currentGlyph this
 			if [not currentGlyph] : return nothing
 			if [glyphList.(glyphList.length - 1).name === @tcn] : glyphList.pop
 			begin @::[steps.map formOf]
 			set dependencyProfile.(currentGlyph.name) : getDependencyProfile currentGlyph
 			return currentGlyph
-		]] [create-glyph @tcn [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
+		]].call [create-glyph @tcn [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
 
 define-macro save : syntax-rules
 	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
@@ -133,7 +135,7 @@ define-macro save : syntax-rules
 define-macro glyph-module-entry : syntax-rules
 	`[glyph-module-entry @::_opts] : begin
 		define optionalImports : object
-			commonShapes `[define [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright] $capture.commonShapes]
+			commonShapes `[define [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned hcombine vcombine dual vdual fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright] $capture.commonShapes]
 
 			overmarks `[define [object markExtend markHalfStroke markStress markFine markMiddle markDotsRadius aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot commaOvershoot2 commaAboveRadius TildeShape] $capture.overmarks]
 
@@ -148,7 +150,7 @@ define-macro glyph-module-entry : syntax-rules
 		for [local j 0] (j < opts.length) [inc j] : if optionalImports.(opts.(j)) : optionalImportStatements.push optionalImports.(opts.(j))
 		dirty `[begin \\
 			define $capture this
-			define [object metrics $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ spirofns markset  MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet] $capture
+			define [object metrics $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet] $capture
 			define [object 
 				UPM WIDTH SB CAP XH DESCENDER CONTRAST
 				parenMid parenTop parenBot operTop operBot plusTop plusBot operMid Italify Upright Scale Translate Rotate globalTransform
@@ -164,6 +166,6 @@ define-macro glyph-module-entry : syntax-rules
 				g4 g2 corner flat curl close end straight
 				widths disable-gizmo disable-contrast heading unimportant important
 				alsothru alsothruthem bezcontrols quadcontrols archv arcvh complexThru
-				dispiro spiro-outline] spirofns
+				dispiro spiro-outline union intersection difference] spirofns
 			* @optionalImportStatements
 		]
