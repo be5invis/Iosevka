@@ -46,7 +46,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 6.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.7.0) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.7.0) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
    - Windows users may need to install MinGW and make POSIX utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) or MSYS2 works fine.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `make` (or `gmake`).
