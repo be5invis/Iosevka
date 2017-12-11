@@ -17,3 +17,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Marek Kubica
 - Yoshito Komatsu
 - Dylan Sinnott
+- robertgzr
