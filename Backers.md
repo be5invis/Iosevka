@@ -16,3 +16,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Alexander Payne
 - Marek Kubica
 - Yoshito Komatsu
+- Dylan Sinnott
