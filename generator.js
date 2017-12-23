@@ -103,8 +103,12 @@ const font = (function() {
 		.sort(function(a, b) {
 			var pri1 = a.cmpPriority || 0;
 			var pri2 = b.cmpPriority || 0;
+			if (pri1 > pri2) return -1;
+			if (pri1 < pri2) return 1;
 			if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
 			if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
+			if (a.advanceWidth < b.advanceWidth) return -1;
+			if (a.advanceWidth > b.advanceWidth) return 1;
 			if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
 			if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
 			if (
