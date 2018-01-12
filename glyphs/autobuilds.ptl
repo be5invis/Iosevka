@@ -521,30 +521,33 @@ export : define [apply] : begin
 			scale  -- 0.6
 			unfair -- true
 		foreach {unicode numid denid height} [items-of records] : do
-			local fine : adviceBlackness 3
 			local dist : XH * 0.4
 			
-			local num : save-glyph null null : sketch
-				include miniatureFont.(numid)
-				apply-transform : Upright
-				apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
-				apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
-				apply-transform : Translate MIDDLE (parenMid + dist / 2)
-				apply-transform : Italify
-				refair this
+			if [not glyphs.(numid + ".numpart")] : begin
+				save-glyph (numid + ".numpart") null : sketch
+					include miniatureFont.(numid)
+					apply-transform : Upright
+					apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
+					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
+					apply-transform : Translate MIDDLE (parenMid + dist / 2)
+					apply-transform : Italify
+					refair this
 
-			local den : save-glyph null null : sketch
-				include miniatureFont.(denid)
-				apply-transform : Upright
-				apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
-				apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
-				apply-transform : Translate MIDDLE (parenMid - CAP * scaleFactor - dist / 2)
-				apply-transform : Italify
-				refair this
+			if [not glyphs.(denid + ".denpart")] : begin
+				save-glyph (denid + ".denpart") null : sketch
+					include miniatureFont.(denid)
+					apply-transform : Upright
+					apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
+					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
+					apply-transform : Translate MIDDLE (parenMid - CAP * scaleFactor - dist / 2)
+					apply-transform : Italify
+					refair this
 
+		foreach {unicode numid denid height} [items-of records] : do
+			local fine : adviceBlackness 3
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include num
-				include den
+				include glyphs.(numid + ".numpart")
+				include glyphs.(denid + ".denpart")
 				include : HBar SB RIGHTSB parenMid (fine * 0.75)
 
 	createSMCPs : list
