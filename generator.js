@@ -103,8 +103,12 @@ const font = (function() {
 		.sort(function(a, b) {
 			var pri1 = a.cmpPriority || 0;
 			var pri2 = b.cmpPriority || 0;
+			if (pri1 > pri2) return -1;
+			if (pri1 < pri2) return 1;
 			if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
 			if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
+			if (a.advanceWidth < b.advanceWidth) return -1;
+			if (a.advanceWidth > b.advanceWidth) return 1;
 			if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
 			if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
 			if (
@@ -160,49 +164,44 @@ if (argv.o) {
 	autoref(font.glyf);
 	// regulate
 	font.glyf.forEach(g => {
-		if (g.contours) {
-			for (var k = 0; k < g.contours.length; k++) {
-				var contour = g.contours[k];
-				for (var p = 0; p < contour.length; p++) {
-					contour[p].x += contour[p].y * skew;
-					if (contour[p].on) {
-						contour[p].x = Math.round(contour[p].x);
+		if (!g.contours) return;
+		for (var k = 0; k < g.contours.length; k++) {
+			var contour = g.contours[k];
+			for (var p = 0; p < contour.length; p++) {
+				contour[p].x += contour[p].y * skew;
+				if (!contour[p].on) continue;
+				contour[p].x = Math.round(contour[p].x);
+			}
+			var offJ = null,
+				mx = null;
+			for (var p = 0; p < contour.length; p++) {
+				if (!contour[p].on) continue;
+				if (offJ) {
+					var origx = contour[p].x;
+					var rx = Math.round(contour[p].x * 4) / 4;
+					var origx0 = mx;
+					var rx0 = contour[offJ - 1].x;
+					if (origx === origx0) continue;
+					for (var poff = offJ; poff < p; poff++) {
+						contour[poff].x =
+							(contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) + rx0;
 					}
 				}
-				var offJ = null,
-					mx = null;
-				for (var p = 0; p < contour.length; p++) {
-					if (contour[p].on) {
-						if (offJ) {
-							var origx = contour[p].x;
-							var rx = Math.round(contour[p].x * 4) / 4;
-							var origx0 = mx;
-							var rx0 = contour[offJ - 1].x;
-							if (origx != origx0) {
-								for (var poff = offJ; poff < p; poff++) {
-									contour[poff].x =
-										(contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) +
-										rx0;
-								}
-							}
-						}
-						mx = contour[p].x;
-						contour[p].x = Math.round(contour[p].x * 4) / 4;
-						offJ = p + 1;
-					}
-				}
+				mx = contour[p].x;
+				contour[p].x = Math.round(contour[p].x * 4) / 4;
+				offJ = p + 1;
 			}
-			var c1 = [];
-			for (var k = 0; k < g.contours.length; k++) {
-				c1.push(Glyph.contourToStandardCubic(g.contours[k]));
-			}
-			g.contours = c1;
 		}
+		var c1 = [];
+		for (var k = 0; k < g.contours.length; k++) {
+			c1.push(Glyph.contourToStandardCubic(g.contours[k]));
+		}
+		g.contours = c1;
 	});
 	// overlap removal
 	font.glyf.forEach(g => {
 		if (g.contours) {
-			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 2048, true);
+			g.contours = caryllShapeOps.removeOverlap(g.contours, 1, 256, true);
 		}
 	});
 	// reorder

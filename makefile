@@ -1,4 +1,4 @@
-VERSION = 1.13.3
+VERSION = 1.13.4
 export VERSION
 
 start : __start
@@ -25,7 +25,7 @@ test : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk test
 
 fw : $(BUILD)/targets.mk
-	@$(MAKE) -f utility/standard.mk fw
+	@$(MAKE) -f utility/standard.mk archive-ttc
 
 scripts :
 	@$(MAKE) -f utility/scripts.mk scripts

@@ -5,6 +5,7 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 ## Generous Backers
 
 - Cheng-Wei Chien
+- Tianyu Ge
 - (Anonymous User 4362976)
 
 ## Backers
@@ -12,3 +13,8 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Danny O'Brien
 - Yanjia Huang
 - Leon Breedt
+- Alexander Payne
+- Marek Kubica
+- Yoshito Komatsu
+- Dylan Sinnott
+- robertgzr

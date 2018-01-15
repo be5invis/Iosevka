@@ -36,12 +36,17 @@ function match(g1, g2, _n) {
 			}
 		}
 		if (found) {
+			const refX = g2.contours[j][0].x - g1.contours[0][0].x || 0;
+			const refY = g2.contours[j][0].y - g1.contours[0][0].y || 0;
+			if (Math.abs(refY) > 1 && g1.advanceWidth > 1) {
+				continue;
+			}
 			if (!g2.references) g2.references = [];
 			g2.references.push({
 				glyph: g1.name,
 				_n: _n,
-				x: g2.contours[j][0].x - g1.contours[0][0].x,
-				y: g2.contours[j][0].y - g1.contours[0][0].y,
+				x: refX,
+				y: refY,
 				roundToGrid: true // RTG
 			});
 			g2.contours.splice(j, g1.contours.length);
@@ -78,26 +83,24 @@ function autoref(glyf) {
 		if (!glyf[j].contours.length || (glyf[j].references && glyf[j].references.length)) continue;
 		for (var k = j + 1; k < glyf.length; k++) {
 			if (glyf[j].contours.length === glyf[k].contours.length) {
-				if (match(glyf[j], glyf[k], j)) {
-					// console.log("Refl", glyf[j].name, glyf[j].unicode, "->", glyf[k].name, glyf[k].unicode);
-				}
+				match(glyf[j], glyf[k], j);
 			}
 		}
 	}
 
 	// referencify, backward
 	for (var j = 0; j < glyf.length; j++) {
-		if (
-			glyf[j].cmpPriority < 0 ||
-			!glyf[j].contours.length ||
-			(glyf[j].references && glyf[j].references.length)
-		)
-			continue;
-		for (var k = j - 1; k >= 0; k--) {
-			if (glyf[j].contours.length > glyf[k].contours.length) continue;
-			while (match(glyf[j], glyf[k], j)) {
-				// console.log("Part", glyf[j].name, "->", glyf[k].name);
-			}
+		if (glyf[j].cmpPriority < 0) continue;
+		if (!glyf[j].contours.length) continue;
+		if (glyf[j].references && glyf[j].references.length) continue;
+		for (var k = glyf.length - 1; k >= 0; k--) {
+			if (
+				glyf[j].contours.length > glyf[k].contours.length ||
+				(glyf[j].contours.length === glyf[k].contours.length &&
+					!(glyf[k].references && glyf[k].references.length))
+			)
+				continue;
+			while (match(glyf[j], glyf[k], j)) "pass";
 		}
 	}
 

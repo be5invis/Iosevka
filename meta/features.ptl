@@ -107,21 +107,22 @@ define [buildGSUB para glyphList markGlyphs] : begin
 	set lookups.locl_bgr {.type 'gsub_single' .subtables {bgrSubtable}}
 	set features.locl_bgr {'locl_bgr'}
 
-	# cvxx
-	foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
-		local fs glyph.featureSelector
-		foreach [feature : items-of : Object.keys fs] : begin
-			if [not lookups.(feature)] : begin
-				set features.(feature) {feature}
-				set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
-				commonList.push feature
-			set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
-	# ssxx
-	foreach [{name composition} : pairs-of para.variants] : if (name.length === 4 && composition.__isComposite) : begin
-		commonList.push name
-		local tags {.}
-		foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
-		set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
+	if [not para.disableVariants] : begin
+		# cvxx
+		foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
+			local fs glyph.featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not lookups.(feature)] : begin
+					set features.(feature) {feature}
+					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+					commonList.push feature
+				set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
+		# ssxx
+		foreach [{name composition} : pairs-of para.variants] : if (name.length === 4 && composition.__isComposite) : begin
+			commonList.push name
+			local tags {.}
+			foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
+			set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
 
 	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}

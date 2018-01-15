@@ -2,7 +2,7 @@
 # Support Files
 # DO NOT CHANGE
 
-PATELC = node --stack-size=16384 ./node_modules/patel/bin/patel-c
+PATELC = node ./node_modules/patel/bin/patel-c
 
 GLYPH_SEGMENTS = glyphs/common-shapes.js glyphs/overmarks.js glyphs/letters-unified-basic.js glyphs/letters-unified-extended.js glyphs/numbers.js glyphs/symbol-punctuation.js glyphs/symbol-math.js glyphs/symbol-letter.js glyphs/symbol-geometric.js glyphs/symbol-other.js glyphs/symbol-braille.js glyphs/autobuilds.js buildglyphs.js
 SUPPORT_FILES_FROM_PTL = support/glyph.js support/spiroexpand.js support/spirokit.js support/parameters.js support/anchor.js support/point.js support/transform.js support/utils.js meta/aesthetics.js meta/naming.js meta/features.js meta/feature/ligation.js meta/feature/opbd.js meta/feature/ccmp.js

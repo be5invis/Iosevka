@@ -268,6 +268,7 @@ export : define [apply] : begin
 			apply-transform : Italify
 			set currentGlyph.cmpPriority 12
 			refair this
+			set-width 0
 		return lg
 	
 	define [circleDimens dscale w m] : begin
@@ -389,6 +390,7 @@ export : define [apply] : begin
 				apply-transform : Italify
 				set currentGlyph.cmpPriority 11
 				refair this
+				set-width 0
 
 			sketch
 				local s : TANSLANT * parenMid
@@ -519,30 +521,33 @@ export : define [apply] : begin
 			scale  -- 0.6
 			unfair -- true
 		foreach {unicode numid denid height} [items-of records] : do
-			local fine : adviceBlackness 3
 			local dist : XH * 0.4
 			
-			local num : save-glyph null null : sketch
-				include miniatureFont.(numid)
-				apply-transform : Upright
-				apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
-				apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
-				apply-transform : Translate MIDDLE (parenMid + dist / 2)
-				apply-transform : Italify
-				refair this
+			if [not glyphs.(numid + ".numpart")] : begin
+				save-glyph (numid + ".numpart") null : sketch
+					include miniatureFont.(numid)
+					apply-transform : Upright
+					apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
+					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
+					apply-transform : Translate MIDDLE (parenMid + dist / 2)
+					apply-transform : Italify
+					refair this
 
-			local den : save-glyph null null : sketch
-				include miniatureFont.(denid)
-				apply-transform : Upright
-				apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
-				apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
-				apply-transform : Translate MIDDLE (parenMid - CAP * scaleFactor - dist / 2)
-				apply-transform : Italify
-				refair this
+			if [not glyphs.(denid + ".denpart")] : begin
+				save-glyph (denid + ".denpart") null : sketch
+					include miniatureFont.(denid)
+					apply-transform : Upright
+					apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
+					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
+					apply-transform : Translate MIDDLE (parenMid - CAP * scaleFactor - dist / 2)
+					apply-transform : Italify
+					refair this
 
+		foreach {unicode numid denid height} [items-of records] : do
+			local fine : adviceBlackness 3
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include num
-				include den
+				include glyphs.(numid + ".numpart")
+				include glyphs.(denid + ".denpart")
 				include : HBar SB RIGHTSB parenMid (fine * 0.75)
 
 	createSMCPs : list
@@ -913,7 +918,7 @@ export : define [apply] : begin
 			list 0xAE   {'R'} FULLWIDTH2
 			list 0x2117 {'P'} FULLWIDTH2
 			list 0x24EA {'zero'} FULLWIDTH1
-			list null   {'space'} FULLWIDTH1
+		if [not para.disableVariants] : compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 1 till 20] : compositions.push : list
 			0x2460 + j - 1
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
@@ -944,8 +949,8 @@ export : define [apply] : begin
 		createInsetCircledGlyphs compositions
 
 	if [not recursive] : let : begin
-		local compositions : list
-			list null {'space'} FULLWIDTH1
+		local compositions {}
+		if [not para.disableVariants] : compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 1 till 10] : compositions.push : list
 			0x24F5 + j - 1
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
@@ -953,17 +958,19 @@ export : define [apply] : begin
 		createDoubleCircledGlyphs compositions
 
 	if [not recursive] : let : begin
-		local compositions : list
-			list null   {'space'} FULLWIDTH1
+		local compositions {}
+		if [not para.disableVariants] : compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 1 till 20] : compositions.push : list
 			0x2474 + j - 1
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
 			begin FULLWIDTH1
 		foreach [j : range 0 26] : compositions.push {(0x249C + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} FULLWIDTH1}
+		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
 		createBracedGlyphs compositions
 	
 	if [not recursive] : let : begin
-		local compositions {}
+		local compositions : list
+			list 0x1F100 {'zero'} FULLWIDTH1
 		foreach [j : range 1 till [if (para.spacing > 0) 20 9]] : compositions.push : list
 			0x2488 + j - 1
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
@@ -991,7 +998,13 @@ export : define [apply] : begin
 			save 'servicemark' 0x2120
 
 	# CJK double width letters
-	if [not recursive] : let : begin
+
+	if (!recursive && para.spacing == 0) : begin
+		set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
+		set glyphList.length font.glyf.length
+		for [local j 0] (j < font.glyf.length) [inc j] : set glyphList.(j) font.glyf.(j)
+
+	if (!recursive && (!para.noCJKV || para.makeFFXX) && para.spacing > 0) : do
 		define [createDoubleWidth records] : begin
 			local scale : 1.25 / (WIDTH / 500)
 			local pendingGlyphs : records.map : [record] => record.1
@@ -1016,11 +1029,6 @@ export : define [apply] : begin
 			a.push {0xFFE1 'sterling'}
 			a.push {0xFFE5 'yen'}
 			* a
-		
-		if (para.spacing == 0) : begin
-			set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
-			set glyphList.length font.glyf.length
-			for [local j 0] (j < font.glyf.length) [inc j] : set glyphList.(j) font.glyf.(j)
 		
 		if para.stressFW : begin
 			sketch # fw-box
