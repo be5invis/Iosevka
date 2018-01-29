@@ -89,7 +89,8 @@ The current available styles are:
   * `sans` : Sans serif (default).
   * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
 * Styles related to ligations and spacing:
-  - `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `term` : Disable ligations and exact monospace. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
   - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
   - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width. The family name will be set to “`Iosevka StFW`”.
 * All registered `ss##` and `cv##` feature tags, including:
