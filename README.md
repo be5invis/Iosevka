@@ -84,8 +84,16 @@ The first step, `make custom-config` takes following parameters to set styles of
 You can also customize the font family:
 
 * `family='<Font Family>'`, for a customized font family name.
+* `weights='<list of weights>'`, a space-separated list, indicates the specific weights needed to be built. The candidates are:
+  * `thin`
+  * `extralight`
+  * `light`
+  * `book`
+  * `medium`
+  * `bold`
+  * `heavy`
 
-You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation.
+You can add arbitrary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation.
 
 The current available styles are:
 

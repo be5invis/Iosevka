@@ -3,7 +3,10 @@ const path = require("path");
 const argv = require("yargs").argv;
 const pad = require("pad");
 
-const weights = ["thin", "extralight", "light", "book", "medium", "bold", "heavy"];
+const possibleWeights = new Set(["thin", "extralight", "light", "book", "medium", "bold", "heavy"]);
+const weights = argv.weights
+	? argv.weights.split(/ +/g).filter(w => possibleWeights.has(w))
+	: [...possibleWeights];
 const slantnesses = ["upright", "italic", "oblique"];
 const widths = ["term", "normal", "cc"];
 const designs = ["sans", "slab"];
