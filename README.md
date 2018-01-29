@@ -81,7 +81,9 @@ The first step, `make custom-config` takes following parameters to set styles of
 * `italic='<styles>'`, styles for italics only.
 * `oblique='<styles>'`, styles for obliques only.
 
-You can also customize the font family:
+You can add arbitrary styles for these variables.
+
+You can also customize the font family and target weights:
 
 * `family='<Font Family>'`, for a customized font family name.
 * `weights='<list of weights>'`, a space-separated list, indicates the specific weights needed to be built. The candidates are:
@@ -93,9 +95,16 @@ You can also customize the font family:
   * `bold`
   * `heavy`
 
-You can add arbitrary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation.
+For example,
 
-The current available styles are:
+```bash
+make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' weights='book bold'
+make custom
+```
+
+will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation, and only Regular and Bold weights would be created.
+
+The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
 * Styles for general shape:
   * `sans` : Sans serif (default).
