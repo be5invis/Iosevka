@@ -88,7 +88,7 @@ You can also customize the font family:
   * `thin`
   * `extralight`
   * `light`
-  * `book`
+  * `book` (regular)
   * `medium`
   * `bold`
   * `heavy`
