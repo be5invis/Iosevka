@@ -81,7 +81,11 @@ The first step, `make custom-config` takes following parameters to set styles of
 * `italic='<styles>'`, styles for italics only.
 * `oblique='<styles>'`, styles for obliques only.
 
-You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights.
+You can also customize the font family:
+
+* `family='<Font Family>'`, for a customized font family name.
+
+You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation.
 
 The current available styles are:
 

@@ -53,7 +53,7 @@ ifndef prestyle
 prestyle = nothing
 endif
 
-CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' --prestyle '$(prestyle)' > $(BUILD)/targets-$(set).mk
+CREATECONFIG = node maker.js --custom $(set) --design '$(design)' --upright '$(upright)' --italic '$(italic)' --oblique '$(oblique)' --prestyle '$(prestyle)' --family '$(family)' > $(BUILD)/targets-$(set).mk
 
 custom-config : maker.js | $(BUILD)/
 	$(CREATECONFIG)
