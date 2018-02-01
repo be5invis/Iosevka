@@ -220,5 +220,9 @@ if (argv.o) {
 	font.glyf = o_glyf;
 	font.cmap = cmap;
 	font.glyfMap = null;
-	fs.writeFileSync(argv.o, JSON.stringify(font));
+	if (argv.o === "|") {
+		process.stdout.write(JSON.stringify(font));
+	} else {
+		fs.writeFileSync(argv.o, JSON.stringify(font));
+	}
 }

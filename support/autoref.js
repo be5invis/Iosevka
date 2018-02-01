@@ -106,14 +106,15 @@ function autoref(glyf) {
 
 	// unlink composite
 	for (var j = 0; j < glyf.length; j++) {
-		if (!glyf[j].references || glyf[j].references.length === 0) continue;
-		if (
-			glyf[j].contours.length === 0 &&
-			!(glyf[j].unicode && glyf[j].unicode[0] < 0x80) &&
-			!(glyf[j].unicode && glyf[j].unicode[0] >= 0x2500 && glyf[j].unicode[0] <= 0x259f)
-		)
-			continue;
-
+		if (!glyf[j].flatten) {
+			if (!glyf[j].references || glyf[j].references.length === 0) continue;
+			if (
+				glyf[j].contours.length === 0 &&
+				!(glyf[j].unicode && glyf[j].unicode[0] < 0x80) &&
+				!(glyf[j].unicode && glyf[j].unicode[0] >= 0x2500 && glyf[j].unicode[0] <= 0x259f)
+			)
+				continue;
+		}
 		var cs = unlinkRef(glyf[j], 0, 0, glyf);
 		glyf[j].contours = g.contours.concat(cs);
 		glyf[j].references = [];
