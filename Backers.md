@@ -19,3 +19,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Dylan Sinnott
 - robertgzr
 - Pavlos Vinieratos
+- Matthew Piziak
