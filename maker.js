@@ -3,7 +3,10 @@ const path = require("path");
 const argv = require("yargs").argv;
 const pad = require("pad");
 
-const weights = ["thin", "extralight", "light", "book", "medium", "bold", "heavy"];
+const possibleWeights = new Set(["thin", "extralight", "light", "book", "medium", "bold", "heavy"]);
+const weights = argv.weights
+	? argv.weights.split(/ +/g).filter(w => possibleWeights.has(w))
+	: [...possibleWeights];
 const slantnesses = ["upright", "italic", "oblique"];
 const widths = ["term", "normal", "cc"];
 const designs = ["sans", "slab"];
@@ -64,29 +67,33 @@ let definedBuildSeqs = {};
 
 function createMake(mapping) {
 	const { hives, dir, filename, cm, custom } = mapping;
-	let tfname = `$(BUILD)/${filename}.0.otd`;
-	let cmTarget = `$(BUILD)/${filename}.charmap`;
+	const tfname = `$(BUILD)/${filename}.0.otd`;
+	const cmTarget = `$(BUILD)/${filename}.charmap`;
 
-	let target = `$(DIST)/${dir}/ttf/${filename}.ttf`;
-	let woffTarget = `$(DIST)/${dir}/woff/${filename}.woff`;
-	let woff2Target = `$(DIST)/${dir}/woff2/${filename}.woff2`;
+	const target = `$(DIST)/${dir}/ttf/${filename}.ttf`;
+	const woffTarget = `$(DIST)/${dir}/woff/${filename}.woff`;
+	const woff2Target = `$(DIST)/${dir}/woff2/${filename}.woff2`;
 
 	let buf = "";
 	if (!definedBuildSeqs[tfname]) {
+		const output = `-o $@`;
+		const charmapOutput = cm ? "--charmap $(BUILD)/" + filename + ".charmap" : "";
+		const familyDirective = argv.family ? `--family '${argv.family}'` : "";
+
 		buf += `
 ${tfname} : ${custom || ""} $(SCRIPTS) | $(BUILD) $(DIST)/${dir}/
-	@echo Building ${filename} with ${hives.join(" ")}
-	$(GENERATE) ${hives.join(" ")} -o $@ ${cm ? "--charmap $(BUILD)/" + filename + ".charmap" : ""}`;
+	@echo Building ${filename}, with ${hives.join(" ")}
+	$(GENERATE) ${hives.join(" ")} ${familyDirective} ${output} ${charmapOutput}
+`;
 		definedBuildSeqs[tfname] = true;
 	}
 	buf += `
 ${target} : ${tfname} | $(DIST)/${dir}/ttf/
 	@echo Hinting and optimizing ${tfname} '->' $@
-	@otfccbuild ${tfname} -o $(BUILD)/${filename}.1.ttf --keep-average-char-width
-	@ttfautohint $(BUILD)/${filename}.1.ttf $(BUILD)/${filename}.2.ttf
-	@otfccdump $(BUILD)/${filename}.2.ttf -o $(BUILD)/${filename}.2.otd --pretty
-	@otfccbuild $(BUILD)/${filename}.2.otd -o $@ -O3 -s --keep-average-char-width
-	@rm $(BUILD)/${filename}.1.ttf $(BUILD)/${filename}.2.ttf $(BUILD)/${filename}.2.otd`;
+	@otfccbuild ${tfname} -o $(BUILD)/${filename}.1.ttf -O3 --keep-average-char-width
+	@ttfautohint $(BUILD)/${filename}.1.ttf $@
+	@rm $(BUILD)/${filename}.1.ttf
+`;
 
 	buf += `
 ${woffTarget} : ${target} | $(DIST)/${dir}/woff/

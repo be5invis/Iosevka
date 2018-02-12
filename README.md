@@ -81,15 +81,37 @@ The first step, `make custom-config` takes following parameters to set styles of
 * `italic='<styles>'`, styles for italics only.
 * `oblique='<styles>'`, styles for obliques only.
 
-You can add arbitary styles for these variables, for example, `make custom-config upright='v-l-zshaped v-i-zshaped' && make custom` will create a variant with Z-shaped letter `l` and `i` for uprights.
+You can add arbitrary styles for these variables.
 
-The current available styles are:
+You can also customize the font family and target weights:
+
+* `family='<Font Family>'`, for a customized font family name.
+* `weights='<list of weights>'`, a space-separated list, indicates the specific weights needed to be built. The candidates are:
+  * `thin`
+  * `extralight`
+  * `light`
+  * `book` (regular)
+  * `medium`
+  * `bold`
+  * `heavy`
+
+For example,
+
+```bash
+make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' weights='book bold'
+make custom
+```
+
+will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation, and only Regular and Bold weights would be created.
+
+The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
 * Styles for general shape:
   * `sans` : Sans serif (default).
   * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
 * Styles related to ligations and spacing:
-  - `term` : Disable ligations. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `term` : Disable ligations and exact monospace. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
   - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
   - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width. The family name will be set to “`Iosevka StFW`”.
 * All registered `ss##` and `cv##` feature tags, including:

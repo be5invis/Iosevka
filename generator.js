@@ -82,18 +82,17 @@ const font = (function() {
 	const variantData = toml.parse(fs.readFileSync(path.join(__dirname, "variants.toml"), "utf-8"));
 	const emptyFont = toml.parse(fs.readFileSync(path.join(__dirname, "emptyfont.toml"), "utf-8"));
 
-	let para = parameters.build(parametersData, argv._);
-	let vsdata = formVariantData(variantData, para);
+	const para = parameters.build(parametersData, argv._);
+	const vsdata = formVariantData(variantData, para);
 	para.variants = vsdata;
 	para.variantSelector = parameters.build(vsdata, argv._);
 	para.defaultVariant = vsdata.default;
-
-	var fontUniqueName =
+	if (argv.family) para.family = argv.family;
+	const fontUniqueName =
 		para.family + " " + para.style + " " + para.version + " (" + para.codename + ")";
 
-	console.log("    Start building font " + fontUniqueName);
-	var font = buildGlyphs.build.call(emptyFont, para);
-	console.log("    " + fontUniqueName + " Successfully built.");
+	const font = buildGlyphs.build.call(emptyFont, para);
+
 	font.parameters = para;
 	font.glyf = font.glyf
 		.map(function(g, j) {
@@ -101,8 +100,8 @@ const font = (function() {
 			return g;
 		})
 		.sort(function(a, b) {
-			var pri1 = a.cmpPriority || 0;
-			var pri2 = b.cmpPriority || 0;
+			const pri1 = a.cmpPriority || 0;
+			const pri2 = b.cmpPriority || 0;
 			if (pri1 > pri2) return -1;
 			if (pri1 < pri2) return 1;
 			if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
@@ -133,30 +132,24 @@ const font = (function() {
 })();
 
 if (argv.charmap) {
-	(function() {
-		console.log("    Writing character map -> " + argv.charmap);
-		fs.writeFileSync(
-			argv.charmap,
-			JSON.stringify(
-				font.glyf.map(function(glyph) {
-					return [
-						glyph.name,
-						glyph.unicode,
-						glyph.advanceWidth === 0
-							? hasv(glyph.anchors)
-								? 1
-								: glyph.contours && glyph.contours.length ? 2 : 0
-							: 0
-					];
-				})
-			),
-			"utf8"
-		);
-	})();
+	fs.writeFileSync(
+		argv.charmap,
+		JSON.stringify(
+			font.glyf.map(function(glyph) {
+				return [
+					glyph.name,
+					glyph.unicode,
+					glyph.advanceWidth === 0
+						? hasv(glyph.anchors) ? 1 : glyph.contours && glyph.contours.length ? 2 : 0
+						: 0
+				];
+			})
+		),
+		"utf8"
+	);
 }
 
 if (argv.o) {
-	console.log("    Writing output -> " + argv.o);
 	var o_glyf = {};
 	var cmap = {};
 	var skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
@@ -227,5 +220,9 @@ if (argv.o) {
 	font.glyf = o_glyf;
 	font.cmap = cmap;
 	font.glyfMap = null;
-	fs.writeFileSync(argv.o, JSON.stringify(font));
+	if (argv.o === "|") {
+		process.stdout.write(JSON.stringify(font));
+	} else {
+		fs.writeFileSync(argv.o, JSON.stringify(font));
+	}
 }

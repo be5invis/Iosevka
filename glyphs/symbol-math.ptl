@@ -206,6 +206,38 @@ export : define [apply] : begin
 			include : DotAt [mix SB RIGHTSB (5/6)] (parenMid - equalHalfSpace * 2.5) DOTRADIUS
 			save 'twodotapproxeq' 0x2252
 
+	define [equalHole x] : VBar x (parenMid - equalHalfSpace) (parenMid + equalHalfSpace) [adviceBlackness 6]
+
+	# Ligation glyphs
+	sketch # equal.fc
+		include markset.plus
+		include : difference
+			union
+				HBar SB (WIDTH - O) (parenMid + equalHalfSpace) OPERATORSTROKE
+				HBar SB (WIDTH - O) (parenMid - equalHalfSpace) OPERATORSTROKE
+			equalHole WIDTH
+		save 'equal.fc'
+
+	sketch # equal.cf
+		include markset.plus
+		include : difference
+			union
+				HBar O RIGHTSB (parenMid + equalHalfSpace) OPERATORSTROKE
+				HBar O RIGHTSB (parenMid - equalHalfSpace) OPERATORSTROKE
+			equalHole 0
+		save 'equal.cf'
+
+	sketch # equal.cc
+		include markset.plus
+		include : difference
+			union
+				HBar O (WIDTH - O) (parenMid + equalHalfSpace) OPERATORSTROKE
+				HBar O (WIDTH - O) (parenMid - equalHalfSpace) OPERATORSTROKE
+			union
+				equalHole 0
+				equalHole WIDTH
+		save 'equal.cc'
+
 	sketch # multiply
 		include markset.plus
 		local radius : (RIGHTSB - SB) / 2
@@ -484,6 +516,21 @@ export : define [apply] : begin
 			branch
 				include : GreaterShapeB (parenMid + dH - lessEqDist) (parenMid - dH - lessEqDist) SB RIGHTSB OPERATORSTROKE
 				save 'greatereqslant' 0x2A7E
+		
+		# Ligation
+		sketch
+			local l : 0.3 * WIDTH
+			local r : 2 * WIDTH - l
+			include markset.plus
+			branch
+				include : LessShape (parenMid + dH + lessEqDist) (parenMid - dH + lessEqDist) l r
+				save 'less.lig2'
+			branch
+				include : HBar (l - WIDTH) (r - WIDTH) (parenMid - dH - lessEqDist) OPERATORSTROKE
+				save 'eq.at-ltgteq.lig2'
+			branch
+				include : GreaterShape (parenMid + dH + lessEqDist) (parenMid - dH + lessEqDist) l r
+				save 'greater.lig2'
 
 		do
 			define lesslessSW : adviceBlackness 4
@@ -548,8 +595,8 @@ export : define [apply] : begin
 			include : HBar SB RIGHTSB parenMid OPERATORSTROKE
 			include : HBar SB RIGHTSB (parenMid - equalHalfSpace * 1.5) OPERATORSTROKE
 			save 'ident' 0x2261
-			
-		sketch # ident
+
+		sketch # iiiident
 			include markset.plus
 			include : HBar SB RIGHTSB (parenMid + equalHalfSpace * 2.25) OPERATORSTROKE
 			include : HBar SB RIGHTSB (parenMid + equalHalfSpace * 0.75) OPERATORSTROKE
@@ -663,17 +710,19 @@ export : define [apply] : begin
 			save 'elementBar' 0x22F8
 
 
-	### 'Negative Operators'
-	define [notGlyph unicode oldid top bot prop shift] : create-glyph ('not' + oldid) : glyph-construction
-		assign-unicode unicode
-		include glyphs.(oldid)
-		include : dispiro
-			widths.center [adviceBlackness 4]
-			flat ([fallback shift 0] + [mix SB RIGHTSB [fallback prop 0.25]]) [fallback bot operBot]
-			curl ([fallback shift 0] + [mix RIGHTSB SB [fallback prop 0.25]]) [fallback top operTop]
+	define [notGlyph unicode oldid top bot prop shift newid] 
+		create-glyph [fallback newid ('not' + oldid)] : glyph-construction
+			if unicode : assign-unicode unicode
+			include glyphs.(oldid)
+			include : dispiro
+				widths.center [adviceBlackness 4]
+				flat ([fallback shift 0] + [mix SB RIGHTSB [fallback prop 0.25]]) [fallback bot operBot]
+				curl ([fallback shift 0] + [mix RIGHTSB SB [fallback prop 0.25]]) [fallback top operTop]
 	
-	define [notGlyph.right unicode oldid top bot prop shift] : notGlyph unicode oldid top bot prop (-OPERATORSTROKE * 0.5)
-	define [notGlyph.left unicode oldid top bot prop shift] : notGlyph unicode oldid top bot prop (OPERATORSTROKE * 0.5)
+	define [notGlyph.right unicode oldid top bot prop shift]
+		notGlyph unicode oldid top bot prop (-OPERATORSTROKE * 0.5)
+	define [notGlyph.left unicode oldid top bot prop shift]
+		notGlyph unicode oldid top bot prop (OPERATORSTROKE * 0.5)
 	
 	notGlyph 0x2260 'equal'
 	notGlyph 0x2262 'ident'
@@ -698,6 +747,10 @@ export : define [apply] : begin
 	notGlyph 0x2278 'lessgreater'
 	notGlyph 0x2279 'greaterless'
 	notGlyph.right 0x2204 'exists' (CAP - DESCENDER / 2) (DESCENDER / 2) 0.4
+	do "Ligation glyphs"
+		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 0.5) 'equal.fc.neg'
+		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.0) 'equal.fc.neg3'
+		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.5) 'equal.fc.neg4'
 
 	### 'Large Operators'
 	sketch # sum

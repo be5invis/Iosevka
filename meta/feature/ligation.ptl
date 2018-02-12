@@ -8,11 +8,11 @@ export : define [progLigNameMap] : object
 	.XFS_ {'brst', 'plusplus', 'logic', 'fsharp'}
 	.XFS0 {'brst', 'plusplus', 'logic', 'fsharp'}
 	.XFST {'brst', 'plusplus', 'logic', 'fstar'}
-	.XHS_ {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskell'}
-	.XHS0 {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskell'}
-	.XIDR {'arrow2', 'plusplus', 'dotoper', 'logic', 'idris'}
-	.XELM {'arrow2', 'plusplus', 'dotoper', 'logic', 'elm'}
-	.PURS {'arrow2', 'plusplus', 'dotoper', 'logic', 'purescript'}
+	.XHS_ {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskellish', 'haskell'}
+	.XHS0 {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskellish', 'haskell'}
+	.XIDR {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskellish', 'idris'}
+	.XELM {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskellish', 'elm'}
+	.PURS {'arrow2', 'plusplus', 'dotoper', 'logic', 'haskellish', 'purescript'}
 	.XPTL {'arrow2', 'plusplus', 'patel'}
 	.SWFT {'arrow2', 'plusplus', 'swift'}
 	.XV__ {'arrow2', 'plusplus', 'dotoper', 'logic', 'brst', 'coq'}
@@ -57,6 +57,7 @@ local [period_center]   ({'period'} ~> {'period.center'})
 local [no_period_center] ({'period.center'} ~> {'period'})
 
 define preserved null
+define advance : lambda [t] : t.map : lambda [x] x
 
 export : define [buildLigations chain-rule lookupOrder commonList features lookups plm] : foreach [ ligationFeatureName : items-of : Object.keys plm] : do
 	local mappedFeature : plm.(ligationFeatureName) || {}
@@ -417,3 +418,53 @@ export : define [buildLigations chain-rule lookupOrder commonList features looku
 			chain-rule
 				{'backslash'} ~> [only 'logic' {'backslash.left'}]
 				{'slash'}     ~> [only 'logic' {'slash.right'}]
+	
+	# <= and >=
+	do "inequals" : includeLookup
+		.type 'gsub_chaining'
+		.subtables : list			
+			chain-rule
+				[acops]            ~> preserved
+				{'less' 'greater'} ~> advance
+				{'equal'}          ~> advance
+			chain-rule
+				{'less' 'greater'} ~> advance
+				{'equal'}          ~> advance
+				[acops]            ~> preserved
+			chain-rule
+				{'less'}    ~> {'less.lig2'}
+				{'equal'}   ~> {'eq.at-ltgteq.lig2'}
+			chain-rule
+				{'greater'} ~> {'greater.lig2'}
+				{'equal'}   ~> {'eq.at-ltgteq.lig2'}
+	# == and ===
+	do "equals" : includeLookup
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule 
+				{'equal'}   ~> {'equal.fc'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule 
+				{'exclam'}  ~> {'equal.fc.neg4'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule 
+				{'equal'}   ~> {'equal.fc'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule 
+				{'exclam'}  ~> {'equal.fc.neg3'}
+				{'equal'}   ~> {'equal.cc'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule
+				{'equal'}   ~> {'equal.fc'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule
+				{'exclam'}  ~> {'equal.fc.neg'}
+				{'equal'}   ~> {'equal.cf'}
+			chain-rule
+				{'slash'}   ~> [only 'haskellish' {'equal.fc.neg'}]
+				{'equal'}   ~> [only 'haskellish' {'equal.cf'}]
