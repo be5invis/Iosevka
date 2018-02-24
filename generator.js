@@ -14,6 +14,8 @@ const objectAssign = require("object-assign");
 var caryllShapeOps = require("caryll-shapeops");
 var c2q = require("megaminx").geometry.c2q;
 
+var remapLatin = require('./remap-latin');
+
 function hasv(obj) {
 	if (!obj) return false;
 	for (var k in obj) if (obj[k]) return true;
@@ -96,6 +98,7 @@ const font = (function() {
 	font.parameters = para;
 	font.glyf = font.glyf
 		.map(function(g, j) {
+			remapLatin(g);
 			g.gord = j;
 			return g;
 		})

@@ -8,7 +8,7 @@ GLYPH_SEGMENTS = glyphs/common-shapes.js glyphs/overmarks.js glyphs/letters-unif
 SUPPORT_FILES_FROM_PTL = support/glyph.js support/spiroexpand.js support/spirokit.js support/parameters.js support/anchor.js support/point.js support/transform.js support/utils.js meta/aesthetics.js meta/naming.js meta/features.js meta/feature/ligation.js meta/feature/opbd.js meta/feature/ccmp.js
 SUPPORT_FILES_JS = generator.js emptyfont.toml parameters.toml variants.toml support/fairify.js support/autoref.js
 SUPPORT_FILES = $(SUPPORT_FILES_FROM_PTL) $(SUPPORT_FILES_JS)
-SCRIPTS = $(SUPPORT_FILES) $(GLYPH_SEGMENTS)
+SCRIPTS = $(SUPPORT_FILES) $(GLYPH_SEGMENTS) remap-latin.js
 SCRIPTS_FROM_PTL = $(SUPPORT_FILES_FROM_PTL) $(GLYPH_SEGMENTS)
 
 $(SUPPORT_FILES_FROM_PTL) : %.js : %.ptl meta/macros.ptl
