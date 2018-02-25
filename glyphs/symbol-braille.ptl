@@ -1,87 +1,80 @@
-###### Brailles symbols
+###### Braille symbols
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 
-import [braillePatterns] from './glyph-data.json'
+# Needed for bitwise operators
+import '../support/mask-bit' as maskBit
 
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks
 
 	if recursive : return nothing
-	local leftMiddle : MIDDLE - (0.25 * WIDTH)
-	local rightMiddle : MIDDLE + (0.25 * WIDTH)
+	local left : MIDDLE - (0.25 * WIDTH)
+	local right : MIDDLE + (0.25 * WIDTH)
 	local offsetY : 0.25 * (parenMid - parenTop)
-	local brailleStress : 0.5 * [adviceBlackness 3.375]
-	local brailleDotsRadius : PERIODRADIUS * [Math.min 1 (brailleStress / HALFSTROKE)]
-	
-	### Basics / Templates
+	local stress : 0.5 * [adviceBlackness 3.375]
+	local dotRadius : PERIODRADIUS * [Math.min 1 (stress / HALFSTROKE)]
+
+	### Blank
 	sketch # brailleBlank
 		set-width WIDTH
 		save 'brailleBlank' 0x2800
-	sketch # braille1
-		include : DotAt (leftMiddle) (parenMid - 3 * offsetY) brailleDotsRadius
-		save 'braille1' 0x2801
-	sketch # braille2
-		include : DotAt (leftMiddle) (parenMid - 1 * offsetY) brailleDotsRadius
-		save 'braille2' 0x2802
-	sketch # braille3
-		include : DotAt (leftMiddle) (parenMid + 1 * offsetY) brailleDotsRadius
-		save 'braille3' 0x2804
-	sketch # braille4
-		include : DotAt (leftMiddle) (parenMid + 3 * offsetY) brailleDotsRadius
-		save 'braille4' 0x2840
-	sketch # braille5
-		include : DotAt (rightMiddle) (parenMid - 3 * offsetY) brailleDotsRadius
-		save 'braille5' 0x2808
-	sketch # braille6
-		include : DotAt (rightMiddle) (parenMid - 1 * offsetY) brailleDotsRadius
-		save 'braille6' 0x2810
-	sketch # braille7
-		include : DotAt (rightMiddle) (parenMid + 1 * offsetY) brailleDotsRadius
-		save 'braille7' 0x2820
-	sketch # braille8
-		include : DotAt (rightMiddle) (parenMid + 3 * offsetY) brailleDotsRadius
-		save 'braille8' 0x2880
-	
-	### Template
-	define [build-braille-patterns archive] : if [not recursive] : begin
-		foreach [{assignments unicode} : items-of archive] : sketch
-			foreach [b : items-of assignments] : include glyphs.("braille" + b)
-			set currentGlyph.cmpPriority (-101)
-			save ("braille" + [assignments.join '']) unicode
-	
-	### Inheriting characters
-	build-braille-patterns braillePatterns
-	
-	set glyphs.braille4.cmpPriority    101
-	set glyphs.braille34.cmpPriority   102
+
+	### Computed Braille Patterns
+	###
+	### Bit to Dot mapping:
+	###   0  3
+	###   1  4
+	###   2  5
+	###   6  7
+	###
+	foreach [byte : range 1 256] : sketch
+		local dots {}
+		local [y-coord y] (parenMid + y * offsetY)
+		# Is there a way to directly use (byte & (1 << bit)) here?
+		foreach [bit : range 0 8] : if [maskBit byte bit] : begin
+			include : match bit
+				0 : DotAt left  [y-coord (-3)] dotRadius
+				1 : DotAt left  [y-coord (-1)] dotRadius
+				2 : DotAt left  [y-coord   1 ] dotRadius
+				3 : DotAt right [y-coord (-3)] dotRadius
+				4 : DotAt right [y-coord (-1)] dotRadius
+				5 : DotAt right [y-coord   1 ] dotRadius
+				6 : DotAt left  [y-coord   3 ] dotRadius
+				7 : DotAt right [y-coord   3 ] dotRadius
+			dots.push (bit + 1) # Match numerals in Unicode spec
+		set currentGlyph.cmpPriority (-101)
+		save ("braille" + [dots.join '']) (0x2800 + byte)
+
+	set glyphs.braille7.cmpPriority    101
+	set glyphs.braille37.cmpPriority   102
 	set glyphs.braille3.cmpPriority    101
-	set glyphs.braille234.cmpPriority  103
-	set glyphs.braille24.cmpPriority   102
+	set glyphs.braille237.cmpPriority  103
+	set glyphs.braille27.cmpPriority   102
 	set glyphs.braille23.cmpPriority   102
 	set glyphs.braille2.cmpPriority    101
-	set glyphs.braille1234.cmpPriority 104
+	set glyphs.braille1237.cmpPriority 104
 	set glyphs.braille123.cmpPriority  103
-	set glyphs.braille124.cmpPriority  103
-	set glyphs.braille134.cmpPriority  103
+	set glyphs.braille127.cmpPriority  103
+	set glyphs.braille137.cmpPriority  103
 	set glyphs.braille13.cmpPriority   102
 	set glyphs.braille12.cmpPriority   102
-	set glyphs.braille14.cmpPriority   102
+	set glyphs.braille17.cmpPriority   102
 	set glyphs.braille1.cmpPriority    101
-	set glyphs.braille4.flatten        true
-	set glyphs.braille34.flatten       true
+	set glyphs.braille7.flatten        true
+	set glyphs.braille37.flatten       true
 	set glyphs.braille3.flatten        true
-	set glyphs.braille234.flatten      true
-	set glyphs.braille24.flatten       true
+	set glyphs.braille237.flatten      true
+	set glyphs.braille27.flatten       true
 	set glyphs.braille23.flatten       true
 	set glyphs.braille2.flatten        true
-	set glyphs.braille1234.flatten     true
+	set glyphs.braille1237.flatten     true
 	set glyphs.braille123.flatten      true
-	set glyphs.braille124.flatten      true
-	set glyphs.braille134.flatten      true
+	set glyphs.braille127.flatten      true
+	set glyphs.braille137.flatten      true
 	set glyphs.braille13.flatten       true
 	set glyphs.braille12.flatten       true
-	set glyphs.braille14.flatten       true
+	set glyphs.braille17.flatten       true
 	set glyphs.braille1.flatten        true
