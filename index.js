@@ -108,7 +108,7 @@ var dopr = TAG("dotoper");
 var indexPage = new Vue({
 	el: "body",
 	data: {
-		version: "1.14.0",
+		version: "1.14.1",
 		codename: "Nagisa",
 		themes: ["color-light", "color-dark"],
 		snippets: [],
