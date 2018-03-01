@@ -160,7 +160,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-slashed` : Slashed Zero `0` (default).
     * `v-zero-dotted` : Dotted Zero `0`.
     * `v-zero-unslashed` : O-like `0`.
-  * Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), underscore (`_`) and ASCII Caret (^):
+  * Styles for three (`3`):
+    * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
+    * `v-three-twoarks` : Arched top `3` (default).
+  * Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
     * `v-tilde-high` : Higher tilde `~`.
     * `v-tilde-low` : Lower tilde `~` (default).
     * `v-asterisk-high` : Higher asterisk `*` (default).
