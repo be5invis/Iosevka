@@ -36,7 +36,7 @@ function getMapping(options) {
 	let prestyle = options.prestyle || [];
 	let weight = options.weight || "book";
 	let slantness = options.slantness || "upright";
-	let hives = ["iosevka"].concat(
+	let hives = ["cyriosevka"].concat(
 		prestyle,
 		["w-" + weight, "s-" + slantness],
 		(options.styles || {})[slantness] || [],
@@ -44,7 +44,7 @@ function getMapping(options) {
 	);
 	let dir = [
 		options.dirPrefix || "",
-		"iosevka",
+		"cyriosevka",
 		options.infix || tofn(design),
 		options.dirSuffix || ""
 	]
@@ -52,7 +52,7 @@ function getMapping(options) {
 		.join("-");
 	let filename = [
 		options.filePrefix || "",
-		"iosevka",
+		"cyriosevka",
 		options.infix || tofn(design),
 		options.fileSuffix || "",
 		(weight === "book" ? (slantness === "upright" ? "regular" : "") : weight) +
@@ -257,10 +257,10 @@ $(DIST)/ttc/${mapping.filename}.ttc : ${ttctargets.join(" ")} | $(DIST)/ttc/
 
 	makes.push(`ttc : ${ttcs.join(" ")}`);
 	makes.push(
-		`$(ARCHIVEDIR)/iosevka-pack-$(VERSION).zip : ttc | $(ARCHIVEDIR)/
+		`$(ARCHIVEDIR)/cyriosevka-pack-$(VERSION).zip : ttc | $(ARCHIVEDIR)/
 	cd $(DIST)/ttc/ && 7z a -tzip -mx=9 ../../$@ ./*.ttc`
 	);
-	makes.push(`archive-ttc : $(ARCHIVEDIR)/iosevka-pack-$(VERSION).zip`);
+	makes.push(`archive-ttc : $(ARCHIVEDIR)/cyriosevka-pack-$(VERSION).zip`);
 	makes.push(`__default : fonts-sans fonts-slab`);
 	makes.push(`__release : archive-ttc ${designGroups.map(g => "archive-" + g.name).join(" ")}`);
 }
