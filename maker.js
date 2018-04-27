@@ -71,6 +71,7 @@ function createMake(mapping) {
 	const cmTarget = `$(BUILD)/${filename}.charmap`;
 
 	const target = `$(DIST)/${dir}/ttf/${filename}.ttf`;
+	const unhintedTarget = `$(DIST)/${dir}/ttf-unhinted/${filename}.ttf`;
 	const woffTarget = `$(DIST)/${dir}/woff/${filename}.woff`;
 	const woff2Target = `$(DIST)/${dir}/woff2/${filename}.woff2`;
 
@@ -93,18 +94,16 @@ ${target} : ${tfname} | $(DIST)/${dir}/ttf/
 	@otfccbuild ${tfname} -o $(BUILD)/${filename}.1.ttf -O3 --keep-average-char-width
 	@ttfautohint $(BUILD)/${filename}.1.ttf $@
 	@rm $(BUILD)/${filename}.1.ttf
-`;
-
-	buf += `
+${unhintedTarget} : ${tfname} | $(DIST)/${dir}/ttf-unhinted/
+	@otfccbuild ${tfname} -o $@ -O3 --keep-average-char-width
 ${woffTarget} : ${target} | $(DIST)/${dir}/woff/
 	sfnt2woff $<
-	mv $(subst .ttf,.woff,$<) $@`;
-	buf += `
+	mv $(subst .ttf,.woff,$<) $@
 ${woff2Target} : ${target} | $(DIST)/${dir}/woff2/
 	woff2_compress $<
 	mv $(subst .ttf,.woff2,$<) $@`;
 
-	return { buf, target, woffTarget, woff2Target, cmTarget };
+	return { buf, target, unhintedTarget, woffTarget, woff2Target, cmTarget };
 }
 
 let designGroups = [];
@@ -160,6 +159,7 @@ for (let dg of designGroups) {
 		upright: [],
 		italic: [],
 		oblique: [],
+		ttf_unhinted: [],
 		woff: [],
 		woff2: []
 	};
@@ -172,6 +172,11 @@ $(DIST)/${groupMapping.dir}/ : | $(DIST)/
 	makes.push(
 		`
 $(DIST)/${groupMapping.dir}/ttf/ : | $(DIST)/${groupMapping.dir}/
+	-@mkdir -p $@`
+	);
+	makes.push(
+		`
+$(DIST)/${groupMapping.dir}/ttf-unhinted/ : | $(DIST)/${groupMapping.dir}/
 	-@mkdir -p $@`
 	);
 	makes.push(
@@ -194,15 +199,20 @@ $(DIST)/${groupMapping.dir}/woff2/ : | $(DIST)/${groupMapping.dir}/
 				mapping.cm = true;
 			}
 
-			let { buf, target, woffTarget, woff2Target, cmTarget } = createMake(mapping);
+			let { buf, target, unhintedTarget, woffTarget, woff2Target, cmTarget } = createMake(
+				mapping
+			);
 			makes.push(buf);
 			groupTargets.ttf.push(target);
 			groupTargets[slantness].push(target);
+			groupTargets.ttf_unhinted.push(unhintedTarget);
 			groupTargets.woff.push(woffTarget);
 			groupTargets.woff2.push(woff2Target);
 		}
 
-	makes.push(`fonts-${dg.name} : ${groupTargets.ttf.join(" ")}`);
+	makes.push(
+		`fonts-${dg.name} : ${[...groupTargets.ttf, ...groupTargets.ttf_unhinted].join(" ")}`
+	);
 	makes.push(`fonts-${dg.name}-upright : ${groupTargets.upright.join(" ")}`);
 	makes.push(`fonts-${dg.name}-italic  : ${groupTargets.italic.join(" ")}`);
 	makes.push(`fonts-${dg.name}-oblique : ${groupTargets.oblique.join(" ")}`);
