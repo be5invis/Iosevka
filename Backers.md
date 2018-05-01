@@ -21,3 +21,6 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Pavlos Vinieratos
 - Matthew Piziak
 - Winnie Quinn
+- Clemens
+- Pascal
+- Kevin Sidarous

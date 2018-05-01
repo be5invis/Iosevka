@@ -34,17 +34,32 @@ export : define [apply] : begin
 				flat x1 y1
 				curl [mix x1 x2 p] [mix y1 y2 p]
 				end : function [set this.contrast 1]
+		
+		define [HookArrowBar x1 y1 x2 y2 halfstroke s w] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			include : dispiro
+				widths.center (halfstroke * 2)
+				g4 (mag - [Math.abs s] / 2 - 0.1) s
+				g4 (mag - [Math.abs s] / 2) s
+				archv
+				g4 (mag - O) (s / 2)
+				arcvh
+				flat (mag - [Math.abs s] / 2) 0
+				curl [mix mag 0 p] 0
+				end : function [set this.contrast 1]
 
-		define [PointingTo x1 y1 x2 y2 F] : glyph-construction
-			local g this.gizmo
-			set this.gizmo : Translate 0 0
-			include F
-			apply-transform : Translate O 0
-			local {.x xo .y yo} : tp g {.x x1 .y y1}
-			local {.x xt .y yt} : tp g {.x x2 .y y2}
-			apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
-			apply-transform : Translate xt yt
-			set this.gizmo g
+		define [PointingTo x1 y1 x2 y2 oo F] : glyph-construction
+			local giz this.gizmo
+			local g : create-glyph : glyph-construction
+				set this.gizmo : Translate 0 0
+				include F
+				apply-transform : Translate oo 0
+				local {.x xo .y yo} : tp giz {.x x1 .y y1}
+				local {.x xt .y yt} : tp giz {.x x2 .y y2}
+				apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
+				apply-transform : Translate xt yt
+			include g
 
 		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
 			include : LHSHalfArrowHead x1 y1 x2 y2 0 _size
@@ -52,7 +67,7 @@ export : define [apply] : begin
 
 		define [RHSHalfArrowHead x1 y1 x2 y2 width _size] : create-glyph : glyph-construction
 			local size : fallback _size arrowSize
-			include : PointingTo x1 y1 x2 y2 : dispiro
+			include : PointingTo x1 y1 x2 y2 O : dispiro
 				function [set this.gizmo [Transform.Id]]
 				widths.rhs fine
 				flat (o) (-width / 2) [heading UPWARD]
@@ -61,7 +76,7 @@ export : define [apply] : begin
 
 		define [LHSHalfArrowHead x1 y1 x2 y2 width _size] : create-glyph : glyph-construction
 			local size : fallback _size arrowSize
-			include : PointingTo x1 y1 x2 y2 : dispiro
+			include : PointingTo x1 y1 x2 y2 O : dispiro
 				function [set this.gizmo [Transform.Id]]
 				widths.lhs fine
 				flat (o) (width / 2) [heading DOWNWARD]
@@ -69,7 +84,7 @@ export : define [apply] : begin
 				end : function [set this.contrast 1]
 
 		define [TriangleArrowHead x1 y1 x2 y2 width length] : create-glyph : glyph-construction
-			include : PointingTo x1 y1 x2 y2 : spiro-outline
+			include : PointingTo x1 y1 x2 y2 O : spiro-outline
 				corner o 0
 				corner length (width - o)
 				corner length (-width + o)
@@ -78,7 +93,11 @@ export : define [apply] : begin
 			include : ArrowHead x1 y1 x2 y2 size
 			include : ArrowBar x1 y1 x2 y2 halfstroke
 
-		define [ThickArrowShape x1 y1 x2 y2] : glyph-construction
+		define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size] : glyph-construction
+			include : ArrowHead x1 y1 x2 y2 size
+			include : PointingTo x1 y1 x2 y2 0 : HookArrowBar x1 y1 x2 y2 halfstroke (arrowSize * mul)
+
+		define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : glyph-construction
 			local headLen : WIDTH * 0.4
 			local halfBarWidth : headLen / 3
 			local headWidth : halfBarWidth * 2
@@ -94,13 +113,17 @@ export : define [apply] : begin
 			local x2a : mix x1 x2 p2
 			local y2a : mix y1 y2 p2
 			
-			include : difference
+			if (color == "white") : include : difference
 				union
 					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
 					ArrowBar x1 y1 x2 y2 halfBarWidth 2
 				union
 					TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
 					ArrowBar x1a y1a x2a y2a (halfBarWidth - fine) 2
+
+			if (color == "black") : include : union
+				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+				ArrowBar x1 y1 x2 y2 halfBarWidth 2
 
 		define [HalfArrowShape side] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : side x1 y1 x2 y2 (halfstroke * 2) size
@@ -154,11 +177,10 @@ export : define [apply] : begin
 			include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
 			include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
 		
-		define [arrow shape id unicode x1 y1 x2 y2 width gwidth] : sketch
-			set-width [fallback gwidth arrowWidth]
+		define [arrow shape id unicode x1 y1 x2 y2 width] : sketch
+			set-width [fallback width arrowWidth]
 			set-anchor "slash" BASE [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
 			include : shape x1 y1 x2 y2 arrowSize
-			if width : set-width width
 			save id unicode
 
 		define [doublearrow shape id unicode x1 y1 x2 y2] : sketch
@@ -169,15 +191,30 @@ export : define [apply] : begin
 			include : shape xm ym x1 y1 arrowSize
 			include : shape xm ym x2 y2 arrowSize
 			save id unicode
+		
+		define [anglearrow shape bar id unicode x1 y1 x2 y2 x3 y3] : sketch
+			set-width arrowWidth
+			include : shape x2 y2 x3 y3 arrowSize
+			include : bar x1 y1 x2 y2
+			save id unicode
 
 		arrow ArrowShape 'arrowleft'       0x2190 arrowRSB parenMid arrowSB parenMid
 		arrow ArrowShape 'arrowright'      0x2192 arrowSB parenMid arrowRSB parenMid
 		arrow ArrowShape 'arrowup'         0x2191 arrowMidX arrowBot arrowMidX arrowTop
 		arrow ArrowShape 'arrowdown'       0x2193 arrowMidX arrowTop arrowMidX arrowBot
-		arrow ArrowShape 'hwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid nothing WIDTH
-		arrow ArrowShape 'hwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid nothing WIDTH
-		arrow ArrowShape 'hwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
-		arrow ArrowShape 'hwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
+
+		arrow [HookArrowShape 1] 'hookarrowleft' 0x21A9 arrowRSB parenMid arrowSB parenMid
+		arrow [HookArrowShape (-1)] 'hookarrowright' 0x21AA arrowSB parenMid arrowRSB parenMid
+
+		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarLeft x1 y1 y2] 'arrow-up-angle-right' 0x21b1 arrowSB arrowBot arrowSB (arrowTop - arrowSize) arrowRSB (arrowTop - arrowSize)
+		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarRight x1 y1 y2] 'arrow-up-angle-left' 0x21b0 arrowRSB arrowBot arrowRSB (arrowTop - arrowSize) arrowSB (arrowTop - arrowSize)
+		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarLeft x1 y1 y2] 'arrow-down-angle-right' 0x21b3 arrowSB arrowTop arrowSB (arrowBot + arrowSize) arrowRSB (arrowBot + arrowSize)
+		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarRight x1 y1 y2] 'arrow-down-angle-left' 0x21b2 arrowRSB arrowTop arrowRSB (arrowBot + arrowSize) arrowSB (arrowBot + arrowSize)
+		
+		arrow ArrowShape 'hwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid WIDTH
+		arrow ArrowShape 'hwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid WIDTH
+		arrow ArrowShape 'hwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop WIDTH
+		arrow ArrowShape 'hwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot WIDTH
 		arrow ArrowShape 'arrowupleft'     0x2196 arrowRSB arrowBot arrowSB arrowTop
 		arrow ArrowShape 'arrowupright'    0x2197 arrowSB arrowBot arrowRSB arrowTop
 		arrow ArrowShape 'arrowdownright'  0x2198 arrowSB arrowTop arrowRSB arrowBot
@@ -192,10 +229,24 @@ export : define [apply] : begin
 		arrow [HalfArrowShape LHSHalfArrowHead] 'arrowdownHL'  0x21C2 arrowMidX arrowTop arrowMidX arrowBot
 		arrow [HalfArrowShape RHSHalfArrowHead] 'arrowdownHR'  0x21C3 arrowMidX arrowTop arrowMidX arrowBot
 
-		arrow ThickArrowShape null 0x21E6 arrowRSB parenMid arrowSB parenMid
-		arrow ThickArrowShape null 0x21E7 arrowMidX arrowBot arrowMidX arrowTop
-		arrow ThickArrowShape null 0x21E8 arrowSB parenMid arrowRSB parenMid
-		arrow ThickArrowShape null 0x21E9 arrowMidX arrowTop arrowMidX arrowBot
+		arrow [ThickArrowShape 'white'] null 0x21E6 arrowRSB parenMid arrowSB parenMid
+		arrow [ThickArrowShape 'white'] null 0x21E7 arrowMidX arrowBot arrowMidX arrowTop
+		arrow [ThickArrowShape 'white'] null 0x21E8 arrowSB parenMid arrowRSB parenMid
+		arrow [ThickArrowShape 'white'] null 0x21E9 arrowMidX arrowTop arrowMidX arrowBot
+		arrow [ThickArrowShape 'white'] null 0x2B00 arrowSB arrowBot arrowRSB arrowTop
+		arrow [ThickArrowShape 'white'] null 0x2B01 arrowRSB arrowBot arrowSB arrowTop
+		arrow [ThickArrowShape 'white'] null 0x2B02 arrowSB arrowTop arrowRSB arrowBot
+		arrow [ThickArrowShape 'white'] null 0x2B03 arrowRSB arrowTop arrowSB arrowBot
+
+		arrow [ThickArrowShape 'black'] null 0x2B05 arrowRSB parenMid arrowSB parenMid
+		arrow [ThickArrowShape 'black'] null 0x2B06 arrowMidX arrowBot arrowMidX arrowTop
+		arrow [ThickArrowShape 'black'] null 0x27A1 arrowSB parenMid arrowRSB parenMid
+		arrow [ThickArrowShape 'black'] null 0x2B07 arrowMidX arrowTop arrowMidX arrowBot
+		arrow [ThickArrowShape 'black'] null 0x2B08 arrowSB arrowBot arrowRSB arrowTop
+		arrow [ThickArrowShape 'black'] null 0x2B09 arrowRSB arrowBot arrowSB arrowTop
+		arrow [ThickArrowShape 'black'] null 0x2B0A arrowSB arrowTop arrowRSB arrowBot
+		arrow [ThickArrowShape 'black'] null 0x2B0B arrowRSB arrowTop arrowSB arrowBot
+
 
 		arrow ArrowShape 'arrowleftK'  null arrowRSB parenMid (arrowSB + fine) parenMid
 		arrow ArrowShape 'arrowrightK' null arrowSB parenMid (arrowRSB - fine) parenMid
@@ -209,10 +260,10 @@ export : define [apply] : begin
 			arrow [DoubleArrowShape dasw] 'dblarrowright'      0x21D2 arrowSB parenMid arrowRSB parenMid
 			arrow [DoubleArrowShape dasw] 'dblarrowup'         0x21D1 arrowMidX arrowBot arrowMidX arrowTop
 			arrow [DoubleArrowShape dasw] 'dblarrowdown'       0x21D3 arrowMidX arrowTop arrowMidX arrowBot
-			arrow [DoubleArrowShape dasw] 'dblhwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid nothing WIDTH
-			arrow [DoubleArrowShape dasw] 'dblhwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid nothing WIDTH
-			arrow [DoubleArrowShape dasw] 'dblhwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop nothing WIDTH
-			arrow [DoubleArrowShape dasw] 'dblhwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot nothing WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowleft'     null   hwArrowRSB parenMid arrowSB parenMid WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowright'    null   arrowSB parenMid hwArrowRSB parenMid WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowup'       null   hwArrowMidX arrowBot hwArrowMidX arrowTop WIDTH
+			arrow [DoubleArrowShape dasw] 'dblhwarrowdown'     null   hwArrowMidX arrowTop hwArrowMidX arrowBot WIDTH
 			arrow [DoubleArrowShape dasw] 'dblarrowupleft'     0x21D6 arrowRSB arrowBot arrowSB arrowTop
 			arrow [DoubleArrowShape dasw] 'dblarrowupright'    0x21D7 arrowSB arrowBot arrowRSB arrowTop
 			arrow [DoubleArrowShape dasw] 'dblarrowdownright'  0x21D8 arrowSB arrowTop arrowRSB arrowBot
@@ -489,6 +540,20 @@ export : define [apply] : begin
 			include FullWidthify
 			save 'blacktriangleright' 0x25B6
 
+		sketch # thinblacktriangleleft
+			start-from left parenMid
+			line-to    right (parenMid - squareRadius * triangleOvershoot * 0.618)
+			line-to    right (parenMid + squareRadius * triangleOvershoot * 0.618)
+			include FullWidthify
+			save 'thinblacktriangleleft' 0x25C4
+
+		sketch # thinblacktriangleright
+			start-from right parenMid
+			line-to    left (parenMid + squareRadius * triangleOvershoot * 0.618)
+			line-to    left (parenMid - squareRadius * triangleOvershoot * 0.618)
+			include FullWidthify
+			save 'thinblacktriangleright' 0x25BA
+
 		sketch # blackdiamond
 			start-from MIDDLE (parenMid + squareRadius)
 			line-to    right parenMid
@@ -639,6 +704,7 @@ export : define [apply] : begin
 
 			let
 			: sl : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
+			: slt : hollowScale (squareRadius * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
 			: ss : hollowScale (squareRadius * sts * 2 / [Math.sqrt 3]) nothing (hollowSW * [Math.sqrt 3])
 			: begin
 				hollow 'whitetriangleup' 0x25B3 'blacktriangleup' sl nothing MIDDLE (parenMid - squareRadius / 3)
@@ -649,6 +715,8 @@ export : define [apply] : begin
 				hollow 'smallwhitetriangledown' 0x25BF 'smallblacktriangledown' ss nothing MIDDLE (parenMid + squareRadius / 3 * sts)
 				hollow 'smallwhitetriangleleft' 0x25C3 'smallblacktriangleleft' ss nothing [mix MIDDLE right (sts / 3)] parenMid
 				hollow 'smallwhitetriangleright' 0x25B9 'smallblacktriangleright' ss nothing [mix MIDDLE left (sts / 3)] parenMid
+				hollow 'thinwhitetriangleleft' 0x25C5 'thinblacktriangleleft' sl nothing [mix MIDDLE right (1 / 3)] parenMid
+				hollow 'thinwhitetriangleright' 0x25BB 'thinblacktriangleright' sl nothing [mix MIDDLE left (1 / 3)] parenMid
 				hollow 'whitestar' 0x2606 'blackstar' sl
 
 		# Mark sampler
