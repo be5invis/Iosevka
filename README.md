@@ -116,7 +116,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width. The family name will be set to “`Iosevka StFW`”.
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
-  * `cv01`~`cv45` : Standalone character variants.
+  * `cv01`~`cv53` : Standalone character variants.
 * Styles for ligation sets, include:
   * `ligset-haskell`: Default ligation set would be assigned to Haskell.
   * `ligset-idris`: Default ligation set would be assigned to Idris.
@@ -143,6 +143,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for letter `a`:
     * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
     * `v-a-singlestorey` : Single-storey `a` (default for italic).
+  * Styles for letter `f`:
+    * `v-f-straight`: `f` without bottom hook (default for upright and oblique).
+    * `v-f-tailed`: `f` with a leftward bottom hook (default for italic).
   * Styles for letter `g`:
     * `v-g-doublestorey` : Double-storey `g` (default for upright and oblique).
     * `v-g-singlestorey` : Single-storey `g` (default for italic).
@@ -156,10 +159,16 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for letter `Q`:
     * `v-q-taily` : `Q` with a curly tail (default).
     * `v-q-straight` : `Q` with a straight tail in the old versions.
+  * Styles for letter `y`:
+    * `v-y-straight`: More-straight letter `y`.
+    * `v-y-curly`: Curly, cursive-like `y`.
   * Styles for zero (`0`):
     * `v-zero-slashed` : Slashed Zero `0` (default).
     * `v-zero-dotted` : Dotted Zero `0`.
     * `v-zero-unslashed` : O-like `0`.
+  * Styles for one (`1`)
+    * `v-one-serifed` : `1` with bottom serif (default for Slab).
+    * `v-one-hooky` : `1` without bottom serif (default for Sans).
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarks` : Arched top `3` (default).
