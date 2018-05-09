@@ -129,7 +129,11 @@ if (argv.charmap) {
 			glyph.name,
 			glyph.unicode,
 			glyph.advanceWidth === 0
-				? hasv(glyph.anchors) ? 1 : glyph.contours && glyph.contours.length ? 2 : 0
+				? hasv(glyph.anchors)
+					? 1
+					: glyph.contours && glyph.contours.length
+						? 2
+						: 0
 				: 0
 		];
 	});
@@ -213,6 +217,6 @@ if (argv.o) {
 	if (argv.o === "|") {
 		process.stdout.write(JSON.stringify(otd));
 	} else {
-		fs.writeFileSync(argv.o, JSON.stringify(otd));
+		fs.writeFileSync(argv.o, JSON.stringify(otd, null, "    "));
 	}
 }
