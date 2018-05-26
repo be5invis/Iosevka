@@ -46,8 +46,7 @@ function match(g1, g2, _n) {
 				glyph: g1.name,
 				_n: _n,
 				x: refX,
-				y: refY,
-				roundToGrid: true // RTG
+				y: refY
 			});
 			g2.contours.splice(j, g1.contours.length);
 			return true;

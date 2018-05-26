@@ -92,7 +92,7 @@ ${tfname} : ${custom || ""} $(SCRIPTS) | $(BUILD) $(DIST)/${dir}/
 ${target} : ${tfname} | $(DIST)/${dir}/ttf/
 	@echo Hinting and optimizing ${tfname} '->' $@
 	@otfccbuild ${tfname} -o $(BUILD)/${filename}.1.ttf -O3 --keep-average-char-width
-	@ttfautohint $(BUILD)/${filename}.1.ttf $@
+	@ttfautohint -c $(BUILD)/${filename}.1.ttf $@
 	@rm $(BUILD)/${filename}.1.ttf
 ${unhintedTarget} : ${tfname} | $(DIST)/${dir}/ttf-unhinted/
 	@otfccbuild ${tfname} -o $@ -O3 --keep-average-char-width
