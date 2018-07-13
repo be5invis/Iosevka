@@ -13,7 +13,17 @@ want(...argv._);
 
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "--expose-gc", "generator"];
-const WEIGHTS = ["thin", "extralight", "light", "book", "medium", "bold", "extrabold", "heavy"];
+const WEIGHTS = [
+	"thin",
+	"extralight",
+	"light",
+	"book",
+	"medium",
+	"semibold",
+	"bold",
+	"extrabold",
+	"heavy"
+];
 const SLANTS = ["upright", "italic", "oblique"];
 
 const weightSlantMap = (function() {

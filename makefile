@@ -30,7 +30,7 @@ fw : $(BUILD)/targets.mk
 scripts :
 	@$(MAKE) -f utility/scripts.mk scripts
 
-sample-images :
+sample-images : $(BUILD)/targets.mk
 	@$(MAKE) -f utility/standard.mk sample-images
 
 # Custom

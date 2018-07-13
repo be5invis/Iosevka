@@ -9,6 +9,7 @@ const possibleWeights = new Set([
 	"light",
 	"book",
 	"medium",
+	"semibold",
 	"bold",
 	"extrabold",
 	"heavy"
