@@ -15,7 +15,10 @@ web : web-sans web-slab
 
 release : __release pages sample-images
 
-test : fonts-sans fonts-slab
+testdrive/assets/:
+	-@ mkdir -p $@
+
+test : fonts-sans fonts-slab | testdrive/assets/
 	cp dist/iosevka/ttf/* testdrive/assets/
 	cp dist/iosevka-slab/ttf/* testdrive/assets/
 	cp build/iosevka-regular.charmap testdrive/assets/
