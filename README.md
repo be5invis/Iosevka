@@ -78,12 +78,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles for general shape:
   * `sans` : Sans serif (default).
-  * `slab` : Slab serif. When present, the family of your font would be `Iosevka Slab`.
+  * `slab` : Slab serif.
 * Styles related to ligations and spacing:
-  - `term` : Disable ligations and exact monospace. When this style is present, the font built will not contain ligatures, and its family name will be set to “`Iosevka Term`”. In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
+  - `term` : Disable ligations and exact monospace.
+    - The font built will not contain ligatures.
+    - All glyphs wider than one letter would be deleted.
+    - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
   - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
   - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
-  - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width. The family name will be set to “`Iosevka StFW`”.
+  - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width.
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.
@@ -104,6 +107,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.
   * `powerline-shift-y-n500`, `powerline-shift-y-n450`, `powerline-shift-y-n400`, `powerline-shift-y-n350`, `powerline-shift-y-n300`, `powerline-shift-y-n250`, `powerline-shift-y-n200`, `powerline-shift-y-n150`, `powerline-shift-y-n100`, `powerline-shift-y-n50`, `powerline-shift-y-0`, `powerline-shift-y-p50`, `powerline-shift-y-p100`, `powerline-shift-y-p150`, `powerline-shift-y-p200`, `powerline-shift-y-p250`, `powerline-shift-y-p300`, `powerline-shift-y-p350`, `powerline-shift-y-p400`, `powerline-shift-y-p450`, `powerline-shift-y-p500`: Shift the Powerline symbols vertically, from -0.5em to +0.5em.
   * `powerline-shift-x-n500`, `powerline-shift-x-n450`, `powerline-shift-x-n400`, `powerline-shift-x-n350`, `powerline-shift-x-n300`, `powerline-shift-x-n250`, `powerline-shift-x-n200`, `powerline-shift-x-n150`, `powerline-shift-x-n100`, `powerline-shift-x-n50`, `powerline-shift-x-0`, `powerline-shift-x-p50`, `powerline-shift-x-p100`, `powerline-shift-x-p150`, `powerline-shift-x-p200`, `powerline-shift-x-p250`, `powerline-shift-x-p300`, `powerline-shift-x-p350`, `powerline-shift-x-p400`, `powerline-shift-x-p450`, `powerline-shift-x-p500`: Shift the Powerline symbols horizontally, from -0.5em to +0.5em.
+* Styles for changing the width:
+  * `expanded`: Expand the width by 10%;
+  * `compressed`: Compress the width by 10%.
+  * NOTE: these styles are highly experimental. Handle with extreme care.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.
