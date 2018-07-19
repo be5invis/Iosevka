@@ -46,63 +46,35 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3) and GNU `make` (≥ 4.1; BSD `make` may not work) are runnable in your terminal.
-   - Windows users may need to install MinGW and make POSIX utilities accessible (`mkdir.exe`, `cp.exe`, `cat.exe` and `rm.exe`, in particular) from Command Prompt. Utilities provided by [Git for Windows](https://git-for-windows.github.io/) or MSYS2 works fine.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3).
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
-3. `make` (or `gmake`).
+3. `npm run build -- contents:iosevka`.
 
 
-You will find TTFs in the `dist/` directory.
-
-### Building the Web Font
-
-The `webfonts/` directory is used to build Iosevka for web font uses. To build the web fonts you should:
-
-1. Build Iosevka.
-2. Ensure that `sfnt2woff` and `woff2_compress` are installed and runnable.
-3. Run `make web` .
-
-The web fonts will be generated into `dist/iosevka/web` and `dist/iosevka-slab/web`.
+You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
 ## Build Your Own Style
 
-![Styles Preview](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/variants.png)
+Since version 2.0, Iosevka would no longer support building via `makefile`. To initialize a custom build, you need:
 
-Iosevka comes with several visual styles, however they are inactive using the default build. To build these variants, you should perform custom build:
+1. Add a new term into `buildPlans` in `build-plans.toml`, following this format:
 
-1. `make custom-config [set=<name>]` with the parameters listed below to create a configuration. The `set=<name>` part is optional, it will be set to `custom` when absent.
-2. `make custom [set=<name>]` to acquire your custom font.
-   - `make custom-web [set=<name>]` is for web fonts.
+   ```toml
+   [buildPlans.iosevka-custom]            # <iosevka-custom> is your plan name
+   family = "Iosevka Custom"              # Font menu family name
+   design = ["common styles"]             # Common styles
+   upright = ["upright-only", "styles"]   # Upright-only styles
+   italic = ["italic-only", "styles"]     # Italic-only styles
+   oblique = ["oblique-only", "styles"]   # Oblique-only styles
+   ```
 
-The first step, `make custom-config` takes following parameters to set styles of your custom build. All of them are optional, and would default to Iosevka’s default configuration:
+2. Run `npm run build -- contents:<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents:<plan>`, other options are:
 
-* `design='<styles>'`, styles for your custom font set.
-* `upright='<styles>'`, styles for uprights only.
-* `italic='<styles>'`, styles for italics only.
-* `oblique='<styles>'`, styles for obliques only.
-
-You can add arbitrary styles for these variables.
-
-You can also customize the font family and target weights:
-
-* `family='<Font Family>'`, for a customized font family name.
-* `weights='<list of weights>'`, a space-separated list, indicates the specific weights needed to be built. The candidates are:
-  * `thin`
-  * `extralight`
-  * `light`
-  * `book` (regular)
-  * `medium`
-  * `bold`
-  * `heavy`
-
-For example,
-
-```bash
-make custom-config upright='v-l-zshaped v-i-zshaped' family='Iosevka X' weights='book bold'
-make custom
-```
-
-will create a variant with Z-shaped letter `l` and `i` for uprights, and it would be named as '`Iosevka X`' after installation, and only Regular and Bold weights would be created.
+   1. `contents:<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
+   2. `ttf:<plan>` : TTF;
+   3. `ttf-unhinted:<plan>` : Unhinted TTF only;
+   4. `woff:<plan>` : TTF and WOFF only;
+   5. `woff2:<plan>` : TTF and WOFF2 only;
 
 The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
@@ -127,6 +99,13 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-fstar`: Default ligation set would be assigned to F\*.
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
+* Styles for changing the line space (leading):
+  * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
+* Styles for changing Powerline symbols' position:
+  * `powerline-scale-y-750`, `powerline-scale-y-875`, `powerline-scale-y-1000`, `powerline-scale-y-1125`, `powerline-scale-y-1250`, `powerline-scale-y-1375`, `powerline-scale-y-1500`: Resize the Powerline symbols vertically, from 75% to 150%.
+  * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.
+  * `powerline-shift-y-n500`, `powerline-shift-y-n450`, `powerline-shift-y-n400`, `powerline-shift-y-n350`, `powerline-shift-y-n300`, `powerline-shift-y-n250`, `powerline-shift-y-n200`, `powerline-shift-y-n150`, `powerline-shift-y-n100`, `powerline-shift-y-n50`, `powerline-shift-y-0`, `powerline-shift-y-p50`, `powerline-shift-y-p100`, `powerline-shift-y-p150`, `powerline-shift-y-p200`, `powerline-shift-y-p250`, `powerline-shift-y-p300`, `powerline-shift-y-p350`, `powerline-shift-y-p400`, `powerline-shift-y-p450`, `powerline-shift-y-p500`: Shift the Powerline symbols vertically, from -0.5em to +0.5em.
+  * `powerline-shift-x-n500`, `powerline-shift-x-n450`, `powerline-shift-x-n400`, `powerline-shift-x-n350`, `powerline-shift-x-n300`, `powerline-shift-x-n250`, `powerline-shift-x-n200`, `powerline-shift-x-n150`, `powerline-shift-x-n100`, `powerline-shift-x-n50`, `powerline-shift-x-0`, `powerline-shift-x-p50`, `powerline-shift-x-p100`, `powerline-shift-x-p150`, `powerline-shift-x-p200`, `powerline-shift-x-p250`, `powerline-shift-x-p300`, `powerline-shift-x-p350`, `powerline-shift-x-p400`, `powerline-shift-x-p450`, `powerline-shift-x-p500`: Shift the Powerline symbols horizontally, from -0.5em to +0.5em.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.

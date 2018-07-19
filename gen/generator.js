@@ -1,18 +1,20 @@
-let fs = require("fs");
-let path = require("path");
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
 
 // let TTFWriter = require('node-sfnt').TTFWriter;
-let argv = require("yargs").argv;
-let buildGlyphs = require("./buildglyphs.js");
-let parameters = require("./support/parameters");
-let toml = require("toml");
+const argv = require("yargs").argv;
+const buildGlyphs = require("./buildglyphs.js");
+const parameters = require("../support/parameters");
+const toml = require("toml");
 
-let Glyph = require("./support/glyph");
-let autoref = require("./support/autoref");
+const Glyph = require("../support/glyph");
+const autoref = require("../support/autoref");
 const objectAssign = require("object-assign");
 
-let caryllShapeOps = require("caryll-shapeops");
-let c2q = require("megaminx").geometry.c2q;
+const caryllShapeOps = require("caryll-shapeops");
+const c2q = require("megaminx").geometry.c2q;
 
 function hasv(obj) {
 	if (!obj) return false;
@@ -88,28 +90,32 @@ function byGlyphPriority(a, b) {
 	return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
 }
 
+const PARAMETERS_TOML = path.resolve(__dirname, "../parameters.toml");
+const PRIVATE_TOML = path.resolve(__dirname, "../private.toml");
+const VARIANTS_TOML = path.resolve(__dirname, "../variants.toml");
+const EMPTYFONT_TOML = path.resolve(__dirname, "../emptyfont.toml");
+
 function getParameters(argv) {
 	const parametersData = Object.assign(
 		{},
-		toml.parse(fs.readFileSync(path.join(__dirname, "parameters.toml"), "utf-8")),
-		fs.existsSync(path.join(__dirname, "private.toml"))
-			? toml.parse(fs.readFileSync(path.join(__dirname, "private.toml"), "utf-8"))
-			: []
+		toml.parse(fs.readFileSync(PARAMETERS_TOML, "utf-8")),
+		fs.existsSync(PRIVATE_TOML) ? toml.parse(fs.readFileSync(PRIVATE_TOML, "utf-8")) : []
 	);
-	const variantData = toml.parse(fs.readFileSync(path.join(__dirname, "variants.toml"), "utf-8"));
+	const variantData = toml.parse(fs.readFileSync(VARIANTS_TOML, "utf-8"));
 
 	const para = parameters.build(parametersData, argv._);
-	const vsdata = formVariantData(variantData, para);
-	para.variants = vsdata;
-	para.variantSelector = parameters.build(vsdata, argv._);
-	para.defaultVariant = vsdata.default;
+	const variantsData = formVariantData(variantData, para);
+	para.variants = variantsData;
+	para.variantSelector = parameters.build(variantsData, argv._);
+	para.defaultVariant = variantsData.default;
 	if (argv.family) para.family = argv.family;
+	if (argv.ver) para.version = argv.ver;
 	return para;
 }
 
 // Font building
 const font = (function() {
-	const emptyFont = toml.parse(fs.readFileSync(path.join(__dirname, "emptyfont.toml"), "utf-8"));
+	const emptyFont = toml.parse(fs.readFileSync(EMPTYFONT_TOML, "utf-8"));
 	const para = getParameters(argv);
 	const font = buildGlyphs.build.call(emptyFont, para);
 
@@ -164,7 +170,7 @@ if (argv.o) {
 					if (origx === origx0) continue;
 					for (let poff = offJ; poff < p; poff++) {
 						contour[poff].x =
-							(contour[poff].x - origx0) / (origx - origx0) * (rx - rx0) + rx0;
+							((contour[poff].x - origx0) / (origx - origx0)) * (rx - rx0) + rx0;
 					}
 				}
 				mx = contour[p].x;
@@ -191,7 +197,8 @@ if (argv.o) {
 		}
 	}
 
-	const skew = (argv.uprightify ? 1 : 0) * Math.tan((font.post.italicAngle || 0) / 180 * Math.PI);
+	const skew =
+		(argv.uprightify ? 1 : 0) * Math.tan(((font.post.italicAngle || 0) / 180) * Math.PI);
 	// autoref
 	autoref(font.glyf);
 	// regulate
