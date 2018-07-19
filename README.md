@@ -4,8 +4,6 @@ Coders’ typeface, built from code.
 
 ![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
 
-Chinese and Japanese users → [Inziu Iosevka for Chinese and Japanese.](http://be5invis.github.io/Iosevka/inziu.html) (A **hinted** Composite with M+ and Source Han Sans.)
-
 ## Installation
 
 Quit your editor/program. Unzip and open the folder.
@@ -178,6 +176,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
+
+## For Chinese and Japanese users...
+
+→ [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic).
 
 ---
 
