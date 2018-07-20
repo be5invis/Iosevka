@@ -108,8 +108,14 @@ function getParameters(argv) {
 	para.variants = variantsData;
 	para.variantSelector = parameters.build(variantsData, argv._);
 	para.defaultVariant = variantsData.default;
-	if (argv.family) para.family = argv.family;
-	if (argv.ver) para.version = argv.ver;
+
+	para.naming = {
+		family: argv.family,
+		version: argv.ver,
+		weight: argv.weight - 0,
+		slant: argv.slant
+	};
+
 	return para;
 }
 

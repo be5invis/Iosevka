@@ -29,41 +29,65 @@ define [nameFont font nameid str] : begin
 		nameID nameid
 		nameString str
 
+define weightToMenuStyleMap : object
+	100 "Thin"
+	200 "Extralight"
+	300 "Light"
+	400 ""
+	500 "Medium"
+	600 "Semibold"
+	700 "Bold"
+	800 "Extrabold"
+	900 "Heavy"
+
+define slantToMenuStyleMap : object
+	normal  ""
+	italic  "Italic"
+	oblique "Oblique"
+
+define [getStyle weight slant] : [(weightToMenuStyleMap.(weight) + " " + slantToMenuStyleMap.(slant)).trim] || "Regular"
+
+
 export : define [assignFontNames para metrics font] : begin
 	set font.name {}
 
-	set para.family [para.family.trim]
-	set para.style : [para.style.trim] || "Regular"
+	define family  : para.naming.family.trim
+	define style   : getStyle para.naming.weight para.naming.slant
+	define version   para.naming.version
 
-	nameFont font PREFERRED_FAMILY para.family # Preferred Family
-	nameFont font PREFERRED_STYLE para.style  # Preferred Style
-	nameFont font WWS_PREFERRED_FAMILY para.family # WWS Preferred Family
-	nameFont font WWS_PREFERRED_STYLE para.style  # WWS Preferred Style
+	define isItalic  : para.naming.slant == "italic"
+	define isOblique : para.naming.slant == "oblique"
+	define isBold    : para.naming.weight > 650
 
-	set font.name.preferredFamily     para.family
-	set font.name.preferredSubFamily  para.style
-	if (para.style == 'Regular' || para.style == 'Bold' || para.style == 'Italic' || para.style == "Bold Italic") : then
-		nameFont font FAMILY para.family # Family
-		nameFont font STYLE para.style  # Style
+	nameFont font PREFERRED_FAMILY family # Preferred Family
+	nameFont font PREFERRED_STYLE style  # Preferred Style
+	nameFont font WWS_PREFERRED_FAMILY family # WWS Preferred Family
+	nameFont font WWS_PREFERRED_STYLE style  # WWS Preferred Style
+
+	set font.name.preferredFamily     family
+	set font.name.preferredSubFamily  style
+	if (style == 'Regular' || style == 'Bold' || style == 'Italic' || style == "Bold Italic") : then
+		nameFont font FAMILY family # Family
+		nameFont font STYLE style  # Style
 	: else
-		local compatFamilySuffix : para.style.replace [regex ' Italic$'] '' :.replace [regex ' Extra'] 'X'
-		local compatStyle : if [[regex ' Italic$'].test para.style] 'Italic' 'Regular'
-		nameFont font FAMILY : para.family + ' ' + compatFamilySuffix
+		local compatFamilySuffix : style.replace [regex ' Italic$'] '' :.replace [regex ' Extra'] 'X'
+		local compatStyle : if [[regex ' Italic$'].test style] 'Italic' 'Regular'
+		nameFont font FAMILY : family + ' ' + compatFamilySuffix
 		nameFont font STYLE compatStyle
 
-	nameFont font UNIQUE_NAME "\(para.family) \(para.style) \(para.version)" # Unique Name
+	nameFont font UNIQUE_NAME "\(family) \(style) \(version)" # Unique Name
 	
-	local fontfullName : if (para.style != 'Regular') (para.family + ' ' + para.style) para.family
+	local fontfullName : if (style != 'Regular') (family + ' ' + style) family
 	nameFont font FULL_NAME fontfullName # Full Name
 	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
 	
-	nameFont font VERSION para.version # Version
+	nameFont font VERSION version # Version
 	
-	nameFont font COPYRIGHT para.copyright # Copyright
+	nameFont font COPYRIGHT    para.copyright # Copyright
 	nameFont font MANUFACTURER para.manufacturer # Manufacturer
-	nameFont font DESIGNER para.designer # Designer
-	nameFont font DESCRIPTION para.description # Description
-	nameFont font LICENCE para.licence  # Licence
+	nameFont font DESIGNER     para.designer # Designer
+	nameFont font DESCRIPTION  para.description # Description
+	nameFont font LICENCE      para.licence  # Licence
 
 	set font.name : font.name.sort : lambda [a b] : begin
 		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
@@ -72,18 +96,18 @@ export : define [assignFontNames para metrics font] : begin
 		return : a.nameID - b.nameID
 
 	# Weight, width and slantness
-	set font.OS_2.usWeightClass     para.weight
+	set font.OS_2.usWeightClass     para.naming.weight
 	set font.OS_2.panose.3          9 # Monospaced
-	set font.OS_2.panose.2          : 1 + para.weight / 100
+	set font.OS_2.panose.2          : 1 + para.naming.weight / 100
 	set font.OS_2.fsSelection       : object
-		oblique        : not : not para.isOblique
-		bold           : not : not para.isBold
-		italic         : not : not (para.isItalic || para.isOblique)
-		regular        : not : not ([not para.isBold] && [not para.isItalic] && [not para.isOblique])
+		oblique        : not : not isOblique
+		bold           : not : not isBold
+		italic         : not : not (isItalic || isOblique)
+		regular        : not : not ([not isBold] && [not isItalic] && [not isOblique])
 		useTypoMetrics true
 	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
 	set font.post.isFixedPitch      true
 	set font.OS_2.xAvgCharWidth     para.width
 	set font.head.macStyle          : object
-		bold          : not : not para.isBold
-		italic        : not : not (para.isItalic || para.isOblique)
+		bold          : not : not isBold
+		italic        : not : not (isItalic || isOblique)

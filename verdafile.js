@@ -83,13 +83,13 @@ oracle(`o:suffixes`).def(async target => {
 	for (const w in weights) {
 		for (const s in slants) {
 			const suffix =
-				(w === "book" ? (s === "upright" ? "regular" : "") : w) +
+				(w === "regular" ? (s === "upright" ? "regular" : "") : w) +
 				(s === "upright" ? "" : s);
 			mapping[suffix] = {
-				hives: [`w-${w}`, `s-${s}`],
+				hives: [`w-${weights[w].shape}`, `s-${s}`],
 				weight: w,
 				slant: s,
-				cssWeight: weights[w],
+				cssWeight: weights[w].css,
 				cssStyle: slants[s]
 			};
 		}
@@ -173,17 +173,22 @@ oracle("collection-parts-of:*").def(async (target, id) => {
 ///////////////////////////////////////////////////////////
 
 file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
-	const [{ hives, family }, version] = await target.need(`hives-of:${suffix}`, `o:version`);
+	const [{ hives, family, cssWeight, cssStyle }, version] = await target.need(
+		`hives-of:${suffix}`,
+		`o:version`
+	);
 	const otd = target.path.dir + "/" + target.path.name + ".otd";
 	const charmap = target.path.dir + "/" + target.path.name + ".charmap";
 	await target.need("scripts", "parameters.toml", `dir:${target.path.dir}`);
 	await run(
 		GENERATE,
-		hives,
 		["-o", otd],
 		["--charmap", charmap],
 		["--family", family],
-		["--ver", version]
+		["--ver", version],
+		["--weight", cssWeight],
+		["--slant", cssStyle],
+		hives
 	);
 	await run("otfccbuild", otd, "-o", target.path.full, "-O3", "--keep-average-char-width");
 	await rm(otd);
