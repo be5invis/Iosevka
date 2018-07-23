@@ -27,12 +27,12 @@ want(...argv._);
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-oracle(`o:version`).def(async target => {
+oracle(`o:version`).def(async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
 });
 
-oracle(`o:raw-plans`).def(async target => {
+oracle(`o:raw-plans`).def(async () => {
 	const t = toml.parse(fs.readFileSync(path.resolve(__dirname, "build-plans.toml")));
 	for (const prefix in t.buildPlans) {
 		const plan = t.buildPlans[prefix];
@@ -287,7 +287,7 @@ task("contents:***").def(async (target, gid) => {
 });
 
 // Archive
-task(`${ARCHIVE_DIR}/*-*.zip`).def(async (target, gid, version) => {
+task(`${ARCHIVE_DIR}/*-*.zip`).def(async (target, gid) => {
 	// Note: this target does NOT depend on the font files.
 	const [exportPlans] = await target.need(`o:export-plans`, `dir:${target.path.dir}`);
 	await target.need(`contents:${exportPlans[gid]}`);
@@ -308,7 +308,7 @@ task("collection-fonts:***").def(async (target, cid) => {
 	const [{ groups }] = await target.need("o:collect-plans");
 	await target.need(groups[cid].map(file => `${DIST}/collections/${cid}/${file}.ttc`));
 });
-task(`${ARCHIVE_DIR}/ttc-*-*.zip`).def(async (target, cid, version) => {
+task(`${ARCHIVE_DIR}/ttc-*-*.zip`).def(async (target, cid) => {
 	// Note: this target does NOT depend on the font files.
 	await target.need(`dir:${target.path.dir}`);
 	await target.need(`collection-fonts:${cid}`);
@@ -375,7 +375,7 @@ task(`all:archives`).def(async target => {
 	);
 });
 
-phony(`clean`).def(async target => {
+phony(`clean`).def(async () => {
 	await rm(`build`);
 	await rm(`dist`);
 	await rm(`release-archives`);
