@@ -102,9 +102,11 @@ oracle(`o:font-building-parameters`).def(async target => {
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
-		const { pre, post, prefix, family } = buildPlans[p];
+		const { pre, post, prefix, family, weights, slants } = buildPlans[p];
 		const targets = [];
 		for (const suffix in suffixMapping) {
+			if (weights && !weights.includes(suffixMapping[suffix].weight)) continue;
+			if (slants && !slants.includes(suffixMapping[suffix].slant)) continue;
 			const fileName = [prefix, suffix].join("-");
 			const preHives = [...pre.design, ...pre[suffixMapping[suffix].slant]];
 			const postHives = [...post.design, ...post[suffixMapping[suffix].slant]];
