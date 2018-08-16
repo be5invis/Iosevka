@@ -19,6 +19,9 @@ const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "gen/generator"];
 const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
 
+const BUILD_PLANS = path.resolve(__dirname, "./build-plans.toml");
+const PRIVATE_BUILD_PLANS = path.resolve(__dirname, "./private-build-plans.toml");
+
 // Save journal to build/
 journal(`${BUILD}/.verda-journal`);
 want(...argv._);
@@ -33,7 +36,13 @@ oracle(`o:version`).def(async () => {
 });
 
 oracle(`o:raw-plans`).def(async () => {
-	const t = toml.parse(fs.readFileSync(path.resolve(__dirname, "build-plans.toml")));
+	const t = toml.parse(fs.readFileSync(BUILD_PLANS, "utf-8"));
+	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
+		Object.assign(
+			t.buildPlans,
+			toml.parse(fs.readFileSync(PRIVATE_BUILD_PLANS, "utf-8")).buildPlans
+		);
+	}
 	for (const prefix in t.buildPlans) {
 		const plan = t.buildPlans[prefix];
 		plan.prefix = prefix;
