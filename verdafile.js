@@ -86,8 +86,7 @@ oracle("o:slants").def(async target => {
 	return rp.slants;
 });
 
-oracle(`o:suffixes`).def(async target => {
-	const [weights, slants] = await target.need(`o:weights`, `o:slants`);
+function getSuffixSet(weights, slants) {
 	const mapping = {};
 	for (const w in weights) {
 		for (const s in slants) {
@@ -104,18 +103,28 @@ oracle(`o:suffixes`).def(async target => {
 		}
 	}
 	return mapping;
+}
+
+oracle(`o:suffixes`).def(async target => {
+	const [weights, slants] = await target.need(`o:weights`, `o:slants`);
+	return getSuffixSet(weights, slants);
 });
 
 oracle(`o:font-building-parameters`).def(async target => {
-	const [buildPlans, suffixMapping] = await target.need(`o:build-plans`, `o:suffixes`);
+	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
+		`o:build-plans`,
+		`o:weights`,
+		`o:slants`
+	);
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
 		const { pre, post, prefix, family, weights, slants } = buildPlans[p];
 		const targets = [];
+		const suffixMapping = getSuffixSet(weights || defaultWeights, slants || defaultSlants);
 		for (const suffix in suffixMapping) {
-			if (weights && !weights.includes(suffixMapping[suffix].weight)) continue;
-			if (slants && !slants.includes(suffixMapping[suffix].slant)) continue;
+			if (weights && !weights[suffixMapping[suffix].weight]) continue;
+			if (slants && !slants[suffixMapping[suffix].slant]) continue;
 			const fileName = [prefix, suffix].join("-");
 			const preHives = [...pre.design, ...pre[suffixMapping[suffix].slant]];
 			const postHives = [...post.design, ...post[suffixMapping[suffix].slant]];
@@ -223,7 +232,7 @@ file(`${DIST}/*/ttf/*.ttf`).def(async (target, dir, file) => {
 		`${DIST}/${dir}/ttf-unhinted/${file}.ttf`,
 		`dir:${target.path.dir}`
 	);
-	await run("ttfautohint", "-c", from.full, target.path.full);
+	await run("ttfautohint", from.full, target.path.full);
 });
 file(`${DIST}/*/woff/*.woff`).def(async (target, dir, file) => {
 	const [from] = await target.need(`${DIST}/${dir}/ttf/${file}.ttf`, `dir:${target.path.dir}`);

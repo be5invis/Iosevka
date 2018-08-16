@@ -55,7 +55,9 @@ You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dis
 
 Since version 2.0, Iosevka would no longer support building via `makefile`. To initialize a custom build, you need:
 
-1. Add a new term into `buildPlans` in `build-plans.toml`, following this format:
+1. Create `private-build-plans.toml` file.
+
+2. Add a build plan into `private-build-plans.toml`, following this format:
 
    ```toml
    [buildPlans.iosevka-custom]            # <iosevka-custom> is your plan name
@@ -64,9 +66,28 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    upright = ["upright-only", "styles"]   # Upright-only styles
    italic = ["italic-only", "styles"]     # Italic-only styles
    oblique = ["oblique-only", "styles"]   # Oblique-only styles
+   
+   # Override default building weights
+   # When buildPlans.<plan name>.weights is absent
+   # All weights would built and mapped to default shape/CSS
+   [buildPlans.iosevka-custom.weights.regular]
+   shape = 400                            # Weight of glyph shapes
+   css   = 400                            # Weight of menu and CSS
+   
+   [buildPlans.iosevka-custom.weights.bold]
+   shape = 700
+   css   = 700
+   
+   # Override default building slant sets
+   # Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
+   # When this section is absent, all slants would be built.
+   [buildPlans.iosevka-custom.slants]
+   upright = "normal"
+   italic = "italic"
+   oblique = "oblique"
    ```
 
-2. Run `npm run build -- contents:<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents:<plan>`, other options are:
+3. Run `npm run build -- contents:<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents:<plan>`, other options are:
 
    1. `contents:<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
    2. `ttf:<plan>` : TTF;
