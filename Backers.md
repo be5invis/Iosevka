@@ -26,3 +26,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Pascal
 - Kevin Sidarous
 - Beni Cherniavsky-Paskin
+- Bartłomiej T. Listwon
