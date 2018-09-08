@@ -430,7 +430,7 @@ file(`{gen|glyphs|support|meta}/**/*.js`).def(async target => {
 	if (jsFromPtl.indexOf(target.path.full) >= 0) {
 		const ptl = target.path.full.replace(/\.js$/g, ".ptl");
 		await target.need(`file-updated:${ptl}`);
-		await run(PATEL_C, "--optimize", "--strict", ptl, "-o", target.path.full);
+		await run(PATEL_C, "--strict", ptl, "-o", target.path.full);
 	} else {
 		await target.need(`file-updated:${target.path.full}`);
 	}

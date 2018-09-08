@@ -14,21 +14,22 @@ export : define [calculateMetrics para] : begin
 	define DESCENDER : fallback para.descender (XH - CAP)
 	define CONTRAST : fallback para.contrast 1
 	# Key metrics for symbols
-	define parenMid : fallback para.parenMid (XH * 0.65)
-	define parenTop (parenMid + (CAP - XH) * 2.6)
-	define parenBot (parenMid - (CAP - XH) * 2.6)
-	define operTop : mix parenMid parenTop 0.8
-	define operBot : mix parenMid parenBot 0.8
-	define logicTop : mix parenMid operTop 0.75
-	define logicBot : mix parenMid operBot 0.75
-	define plusTop : parenMid + (WIDTH - SB * 2) * 0.55
-	define plusBot : parenMid - (WIDTH - SB * 2) * 0.55
-	define operMid parenMid
+	define symbolMid : fallback para.symbolMid (XH * 0.65)
+	define parenTop : symbolMid + para.parenSize / 2
+	define parenBot : symbolMid - para.parenSize / 2
+
+	define operTop : symbolMid + para.operSize / 2
+	define operBot : symbolMid - para.operSize / 2
+	define tackTop : symbolMid + para.tackSize / 2
+	define tackBot : symbolMid - para.tackSize / 2
+	define plusTop : symbolMid + (WIDTH - SB * 2) * 0.55
+	define plusBot : symbolMid - (WIDTH - SB * 2) * 0.55
+
 
 	# Transform constructors
 	define [Italify angle shift] : begin
 		local slope [Math.tan ([fallback angle para.slantAngle] / 180 * Math.PI)]
-		return : new Transform 1 slope 0 1 [fallback shift : -slope * parenMid] 0
+		return : new Transform 1 slope 0 1 [fallback shift : -slope * symbolMid] 0
 	define [Upright angle shift] [Italify angle shift :.inverse]
 	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
 	define [Translate x y] : new Transform 1 0 0 1 x y
@@ -150,7 +151,7 @@ export : define [calculateMetrics para] : begin
 
 	return [object
 		UPM WIDTH SB CAP XH DESCENDER CONTRAST
-		parenMid parenTop parenBot operTop operBot logicTop logicBot plusTop plusBot operMid Italify Upright Scale Translate Rotate globalTransform
+		symbolMid parenTop parenBot operTop operBot tackTop tackBot plusTop plusBot Italify Upright Scale Translate Rotate globalTransform
 		TANSLANT SINSLANT COSSLANT HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD
 		Upward Downward Leftward Rightward
 		O OX OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE
