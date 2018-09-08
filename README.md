@@ -201,6 +201,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for dollar symbol (`$`):
     * `v-dollar-open` : Dollar symbol with open contour.
     * `v-dollar-through` : Dollar symbol with strike-through vertical bar (default).
+    * `v-dollar-opencap` : Dollar symbol with open contour, not exceeding baseline and ascender.
+    * `v-dollar-throughcap` : Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
