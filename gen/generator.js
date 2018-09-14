@@ -112,8 +112,8 @@ function getParameters(argv) {
 	para.naming = {
 		family: argv.family,
 		version: argv.ver,
-		weight: argv.weight - 0,
-		slant: argv.slant
+		weight: argv["menu-weight"] - 0,
+		slant: argv["menu-slant"]
 	};
 
 	return para;

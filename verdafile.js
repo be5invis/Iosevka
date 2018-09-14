@@ -1,4 +1,5 @@
 "use strict";
+
 const {
 	want,
 	rule: { task, file, oracle, phony },
@@ -7,6 +8,7 @@ const {
 	journal,
 	argv
 } = require("verda");
+
 const fs = require("fs");
 const path = require("path");
 const toml = require("toml");
@@ -96,9 +98,11 @@ function getSuffixSet(weights, slants) {
 			mapping[suffix] = {
 				hives: [`w-${weights[w].shape}`, `s-${s}`],
 				weight: w,
+				cssWeight: weights[w].css || w,
+				menuWeight: weights[w].menu || weights[w].css || w,
 				slant: s,
-				cssWeight: weights[w].css,
-				cssStyle: slants[s]
+				cssStyle: slants[s] || s,
+				menuStyle: slants[s] || s
 			};
 		}
 	}
@@ -132,6 +136,8 @@ oracle(`o:font-building-parameters`).def(async target => {
 				name: fileName,
 				family,
 				hives: ["iosevka", ...preHives, ...suffixMapping[suffix].hives, ...postHives],
+				menuWeight: suffixMapping[suffix].menuWeight,
+				menuStyle: suffixMapping[suffix].menuStyle,
 				cssWeight: suffixMapping[suffix].cssWeight,
 				cssStyle: suffixMapping[suffix].cssStyle
 			};
@@ -193,7 +199,7 @@ oracle("collection-parts-of:*").def(async (target, id) => {
 ///////////////////////////////////////////////////////////
 
 file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
-	const [{ hives, family, cssWeight, cssStyle }, version] = await target.need(
+	const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
 		`hives-of:${suffix}`,
 		`o:version`
 	);
@@ -206,8 +212,8 @@ file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
 		["--charmap", charmap],
 		["--family", family],
 		["--ver", version],
-		["--weight", cssWeight],
-		["--slant", cssStyle],
+		["--menu-weight", menuWeight],
+		["--menu-slant", menuStyle],
 		hives
 	);
 	await run("otfccbuild", otd, "-o", target.path.full, "-O3", "--keep-average-char-width");

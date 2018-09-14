@@ -71,11 +71,13 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    # When buildPlans.<plan name>.weights is absent
    # All weights would built and mapped to default shape/CSS
    [buildPlans.iosevka-custom.weights.regular]
-   shape = 400                            # Weight of glyph shapes
-   css   = 400                            # Weight of menu and CSS
+   shape = 400                            # Weight for glyph shapes
+   menu  = 400                            # Weight for menu name
+   css   = 400                            # Weight for WebFont CSS
    
    [buildPlans.iosevka-custom.weights.bold]
    shape = 700
+   menu  = 700
    css   = 700
    
    # Override default building slant sets
