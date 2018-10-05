@@ -1,4 +1,5 @@
 "use strict";
+
 const {
 	want,
 	rule: { task, file, oracle, phony },
@@ -7,6 +8,7 @@ const {
 	journal,
 	argv
 } = require("verda");
+
 const fs = require("fs");
 const path = require("path");
 const toml = require("toml");
@@ -19,6 +21,9 @@ const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "gen/generator"];
 const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
 
+const BUILD_PLANS = path.resolve(__dirname, "./build-plans.toml");
+const PRIVATE_BUILD_PLANS = path.resolve(__dirname, "./private-build-plans.toml");
+
 // Save journal to build/
 journal(`${BUILD}/.verda-journal`);
 want(...argv._);
@@ -27,13 +32,19 @@ want(...argv._);
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-oracle(`o:version`).def(async target => {
+oracle(`o:version`).def(async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
 });
 
-oracle(`o:raw-plans`).def(async target => {
-	const t = toml.parse(fs.readFileSync(path.resolve(__dirname, "build-plans.toml")));
+oracle(`o:raw-plans`).def(async () => {
+	const t = toml.parse(fs.readFileSync(BUILD_PLANS, "utf-8"));
+	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
+		Object.assign(
+			t.buildPlans,
+			toml.parse(fs.readFileSync(PRIVATE_BUILD_PLANS, "utf-8")).buildPlans
+		);
+	}
 	for (const prefix in t.buildPlans) {
 		const plan = t.buildPlans[prefix];
 		plan.prefix = prefix;
@@ -77,34 +88,47 @@ oracle("o:slants").def(async target => {
 	return rp.slants;
 });
 
-oracle(`o:suffixes`).def(async target => {
-	const [weights, slants] = await target.need(`o:weights`, `o:slants`);
+function getSuffixSet(weights, slants) {
 	const mapping = {};
 	for (const w in weights) {
 		for (const s in slants) {
 			const suffix =
-				(w === "book" ? (s === "upright" ? "regular" : "") : w) +
+				(w === "regular" ? (s === "upright" ? "regular" : "") : w) +
 				(s === "upright" ? "" : s);
 			mapping[suffix] = {
-				hives: [`w-${w}`, `s-${s}`],
+				hives: [`w-${weights[w].shape}`, `s-${s}`],
 				weight: w,
+				cssWeight: weights[w].css || w,
+				menuWeight: weights[w].menu || weights[w].css || w,
 				slant: s,
-				cssWeight: weights[w],
-				cssStyle: slants[s]
+				cssStyle: slants[s] || s,
+				menuStyle: slants[s] || s
 			};
 		}
 	}
 	return mapping;
+}
+
+oracle(`o:suffixes`).def(async target => {
+	const [weights, slants] = await target.need(`o:weights`, `o:slants`);
+	return getSuffixSet(weights, slants);
 });
 
 oracle(`o:font-building-parameters`).def(async target => {
-	const [buildPlans, suffixMapping] = await target.need(`o:build-plans`, `o:suffixes`);
+	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
+		`o:build-plans`,
+		`o:weights`,
+		`o:slants`
+	);
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
-		const { pre, post, prefix, family } = buildPlans[p];
+		const { pre, post, prefix, family, weights, slants } = buildPlans[p];
 		const targets = [];
+		const suffixMapping = getSuffixSet(weights || defaultWeights, slants || defaultSlants);
 		for (const suffix in suffixMapping) {
+			if (weights && !weights[suffixMapping[suffix].weight]) continue;
+			if (slants && !slants[suffixMapping[suffix].slant]) continue;
 			const fileName = [prefix, suffix].join("-");
 			const preHives = [...pre.design, ...pre[suffixMapping[suffix].slant]];
 			const postHives = [...post.design, ...post[suffixMapping[suffix].slant]];
@@ -112,6 +136,8 @@ oracle(`o:font-building-parameters`).def(async target => {
 				name: fileName,
 				family,
 				hives: ["iosevka", ...preHives, ...suffixMapping[suffix].hives, ...postHives],
+				menuWeight: suffixMapping[suffix].menuWeight,
+				menuStyle: suffixMapping[suffix].menuStyle,
 				cssWeight: suffixMapping[suffix].cssWeight,
 				cssStyle: suffixMapping[suffix].cssStyle
 			};
@@ -173,17 +199,22 @@ oracle("collection-parts-of:*").def(async (target, id) => {
 ///////////////////////////////////////////////////////////
 
 file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
-	const [{ hives, family }, version] = await target.need(`hives-of:${suffix}`, `o:version`);
+	const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
+		`hives-of:${suffix}`,
+		`o:version`
+	);
 	const otd = target.path.dir + "/" + target.path.name + ".otd";
 	const charmap = target.path.dir + "/" + target.path.name + ".charmap";
 	await target.need("scripts", "parameters.toml", `dir:${target.path.dir}`);
 	await run(
 		GENERATE,
-		hives,
 		["-o", otd],
 		["--charmap", charmap],
 		["--family", family],
-		["--ver", version]
+		["--ver", version],
+		["--menu-weight", menuWeight],
+		["--menu-slant", menuStyle],
+		hives
 	);
 	await run("otfccbuild", otd, "-o", target.path.full, "-O3", "--keep-average-char-width");
 	await rm(otd);
@@ -207,7 +238,7 @@ file(`${DIST}/*/ttf/*.ttf`).def(async (target, dir, file) => {
 		`${DIST}/${dir}/ttf-unhinted/${file}.ttf`,
 		`dir:${target.path.dir}`
 	);
-	await run("ttfautohint", "-c", from.full, target.path.full);
+	await run("ttfautohint", from.full, target.path.full);
 });
 file(`${DIST}/*/woff/*.woff`).def(async (target, dir, file) => {
 	const [from] = await target.need(`${DIST}/${dir}/ttf/${file}.ttf`, `dir:${target.path.dir}`);
@@ -282,7 +313,7 @@ task("contents:***").def(async (target, gid) => {
 });
 
 // Archive
-task(`${ARCHIVE_DIR}/*-*.zip`).def(async (target, gid, version) => {
+task(`${ARCHIVE_DIR}/*-*.zip`).def(async (target, gid) => {
 	// Note: this target does NOT depend on the font files.
 	const [exportPlans] = await target.need(`o:export-plans`, `dir:${target.path.dir}`);
 	await target.need(`contents:${exportPlans[gid]}`);
@@ -303,7 +334,7 @@ task("collection-fonts:***").def(async (target, cid) => {
 	const [{ groups }] = await target.need("o:collect-plans");
 	await target.need(groups[cid].map(file => `${DIST}/collections/${cid}/${file}.ttc`));
 });
-task(`${ARCHIVE_DIR}/ttc-*-*.zip`).def(async (target, cid, version) => {
+task(`${ARCHIVE_DIR}/ttc-*-*.zip`).def(async (target, cid) => {
 	// Note: this target does NOT depend on the font files.
 	await target.need(`dir:${target.path.dir}`);
 	await target.need(`collection-fonts:${cid}`);
@@ -370,7 +401,7 @@ task(`all:archives`).def(async target => {
 	);
 });
 
-phony(`clean`).def(async target => {
+phony(`clean`).def(async () => {
 	await rm(`build`);
 	await rm(`dist`);
 	await rm(`release-archives`);
@@ -405,7 +436,7 @@ file(`{gen|glyphs|support|meta}/**/*.js`).def(async target => {
 	if (jsFromPtl.indexOf(target.path.full) >= 0) {
 		const ptl = target.path.full.replace(/\.js$/g, ".ptl");
 		await target.need(`file-updated:${ptl}`);
-		await run(PATEL_C, "--optimize", "--strict", ptl, "-o", target.path.full);
+		await run(PATEL_C, "--strict", ptl, "-o", target.path.full);
 	} else {
 		await target.need(`file-updated:${target.path.full}`);
 	}

@@ -685,4 +685,31 @@ export : define [apply] : begin
 	define [ForceUpright] : glyph-construction
 		set this.gizmo : Translate 0 0
 	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright]
+	define [Overlay overlay background] : glyph-construction
+		define sw : [adviceBlackness 6] / 2
+		local candidates {}
+		define segs 3
+		if background.anchors : include {.anchors background.anchors}
+
+		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
+			define dx : r / segs * sw
+			define dy : c / segs * sw
+			candidates.push : glyph-construction
+				if background.anchors : include {.anchors background.anchors}
+				include overlay
+				apply-transform : Translate dx dy
+		
+		foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
+			define x z.x
+			define y z.y
+			candidates.push : glyph-construction
+				set this.gizmo : Translate 0 0
+				start-from (x - sw) (y - sw)
+				line-to    (x + sw) (y - sw)
+				line-to    (x + sw) (y + sw)
+				line-to    (x - sw) (y + sw)
+		
+		include : difference background [union.apply null candidates]
+		include overlay
+	
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay]

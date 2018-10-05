@@ -108,8 +108,14 @@ function getParameters(argv) {
 	para.variants = variantsData;
 	para.variantSelector = parameters.build(variantsData, argv._);
 	para.defaultVariant = variantsData.default;
-	if (argv.family) para.family = argv.family;
-	if (argv.ver) para.version = argv.ver;
+
+	para.naming = {
+		family: argv.family,
+		version: argv.ver,
+		weight: argv["menu-weight"] - 0,
+		slant: argv["menu-slant"]
+	};
+
 	return para;
 }
 
@@ -146,61 +152,63 @@ if (argv.charmap) {
 	fs.writeFileSync(argv.charmap, JSON.stringify(charmap), "utf8");
 }
 
-if (argv.o) {
-	function regulateGlyph(g, skew) {
-		if (!g.contours) return;
+function regulateGlyph(g, skew) {
+	if (!g.contours) return;
 
-		// Regulate
-		for (let k = 0; k < g.contours.length; k++) {
-			const contour = g.contours[k];
-			for (let p = 0; p < contour.length; p++) {
-				contour[p].x += contour[p].y * skew;
-				if (!contour[p].on) continue;
-				contour[p].x = Math.round(contour[p].x);
-			}
-			let offJ = null,
-				mx = null;
-			for (let p = 0; p < contour.length; p++) {
-				if (!contour[p].on) continue;
-				if (offJ) {
-					const origx = contour[p].x;
-					const rx = Math.round(contour[p].x * 4) / 4;
-					const origx0 = mx;
-					const rx0 = contour[offJ - 1].x;
-					if (origx === origx0) continue;
-					for (let poff = offJ; poff < p; poff++) {
-						contour[poff].x =
-							((contour[poff].x - origx0) / (origx - origx0)) * (rx - rx0) + rx0;
-					}
+	// Regulate
+	for (let k = 0; k < g.contours.length; k++) {
+		const contour = g.contours[k];
+		for (let p = 0; p < contour.length; p++) {
+			contour[p].x += contour[p].y * skew;
+			if (!contour[p].on) continue;
+			contour[p].x = Math.round(contour[p].x);
+		}
+		let offJ = null,
+			mx = null;
+		for (let p = 0; p < contour.length; p++) {
+			if (!contour[p].on) continue;
+			if (offJ) {
+				const origx = contour[p].x;
+				const rx = Math.round(contour[p].x * 4) / 4;
+				const origx0 = mx;
+				const rx0 = contour[offJ - 1].x;
+				if (origx === origx0) continue;
+				for (let poff = offJ; poff < p; poff++) {
+					contour[poff].x =
+						((contour[poff].x - origx0) / (origx - origx0)) * (rx - rx0) + rx0;
 				}
-				mx = contour[p].x;
-				contour[p].x = Math.round(contour[p].x * 4) / 4;
-				offJ = p + 1;
 			}
-		}
-		const c1 = [];
-		for (let k = 0; k < g.contours.length; k++) {
-			c1.push(Glyph.contourToStandardCubic(g.contours[k]));
-		}
-
-		// De-overlap
-		g.contours = caryllShapeOps.removeOverlap(c1, 1, 256, true);
-
-		// Finalize
-		Glyph.prototype.cleanup.call(g, 0.1);
-		g.contours = c2q.contours(g.contours);
-		for (let k = 0; k < g.contours.length; k++) {
-			const contour = g.contours[k];
-			for (let p = 0; p < contour.length; p++) {
-				contour[p].x -= contour[p].y * skew;
-			}
+			mx = contour[p].x;
+			contour[p].x = Math.round(contour[p].x * 4) / 4;
+			offJ = p + 1;
 		}
 	}
+	const c1 = [];
+	for (let k = 0; k < g.contours.length; k++) {
+		c1.push(Glyph.contourToStandardCubic(g.contours[k]));
+	}
 
+	// De-overlap
+	g.contours = caryllShapeOps.removeOverlap(c1, 1, 256, true);
+
+	// Finalize
+	g.contours = c2q.contours(g.contours);
+	for (let k = 0; k < g.contours.length; k++) {
+		const contour = g.contours[k];
+		for (let p = 0; p < contour.length; p++) {
+			contour[p].x -= contour[p].y * skew;
+		}
+	}
+}
+
+if (argv.o) {
 	const skew =
 		(argv.uprightify ? 1 : 0) * Math.tan(((font.post.italicAngle || 0) / 180) * Math.PI);
+	const excludeUnicodes = new Set();
+	excludeUnicodes.add(0x80);
+	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicodes.add(c);
 	// autoref
-	autoref(font.glyf);
+	autoref(font.glyf, excludeUnicodes);
 	// regulate
 	for (let g of font.glyf) regulateGlyph(g, skew);
 
