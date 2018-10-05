@@ -108,7 +108,7 @@ var dopr = TAG("dotoper");
 var indexPage = new Vue({
 	el: "body",
 	data: {
-		version: "2.0.0",
+		version: "2.0.1",
 		codename: "Olivida",
 		themes: ["color-light", "color-dark"],
 		snippets: [],
@@ -293,7 +293,9 @@ var indexPage = new Vue({
 					{ tag: "cv50", sample: "1" },
 					{ tag: "cv51", sample: "1" },
 					{ tag: "cv52", sample: "f" },
-					{ tag: "cv53", sample: "f" }
+					{ tag: "cv53", sample: "f" },
+					{ tag: "cv54", sample: "$" },
+					{ tag: "cv55", sample: "$" }
 				]
 			}
 		],
