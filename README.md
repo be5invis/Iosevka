@@ -18,7 +18,7 @@ Quit your editor/program. Unzip and open the folder.
 
 ## Weights, Variants and OpenType features
 
-The typeface contains seven weights (thin, extra-light, light, regular, medium, bold and heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
+The typeface contains 9 weights (Thin to Heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
 
 ![Weights sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
