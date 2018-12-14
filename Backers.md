@@ -9,6 +9,7 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - (Anonymous User 4362976)
 - Delton Ding
 - Codi Matters
+- Vasily Shmelev
 
 ## Backers
 
