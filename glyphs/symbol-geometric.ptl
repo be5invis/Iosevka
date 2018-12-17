@@ -34,6 +34,16 @@ export : define [apply] : begin
 				flat x1 y1
 				curl [mix x1 x2 p] [mix y1 y2 p]
 				end : function [set this.contrast 1]
+
+		define [DashArrowBar x1 y1 x2 y2 halfstroke gap stop w] : glyph-construction
+			local mag : Math.hypot (y2 - y1) (x2 - x1)
+			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			local deltaT : (gap + stop) / mag
+			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+				widths.center (halfstroke * 2)
+				flat [mix x1 x2 t] [mix y1 y2 t]
+				curl [mix x1 x2 : Math.min p (t + stop / mag)] [mix y1 y2 : Math.min p (t + stop / mag)]
+				end : function [set this.contrast 1]
 		
 		define [HookArrowBar x1 y1 x2 y2 halfstroke s w] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
@@ -92,6 +102,10 @@ export : define [apply] : begin
 		define [ArrowShape x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
 			include : ArrowBar x1 y1 x2 y2 halfstroke
+		define [DashArrowShape x1 y1 x2 y2 size] : glyph-construction
+			local gap : adviceBlackness 6
+			include : ArrowHead x1 y1 x2 y2 size
+			include : DashArrowBar x1 y1 x2 y2 halfstroke gap [Math.max (WIDTH / 5) (gap * 3)]
 
 		define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
@@ -199,12 +213,21 @@ export : define [apply] : begin
 			save id unicode
 
 		arrow ArrowShape 'arrowleft'       0x2190 arrowRSB symbolMid arrowSB symbolMid
-		arrow ArrowShape 'arrowright'      0x2192 arrowSB symbolMid arrowRSB symbolMid
 		arrow ArrowShape 'arrowup'         0x2191 arrowMidX arrowBot arrowMidX arrowTop
+		arrow ArrowShape 'arrowright'      0x2192 arrowSB symbolMid arrowRSB symbolMid
 		arrow ArrowShape 'arrowdown'       0x2193 arrowMidX arrowTop arrowMidX arrowBot
+	
+		arrow DashArrowShape 'dasharrowleft'  0x21E0 arrowRSB symbolMid arrowSB symbolMid
+		arrow DashArrowShape 'dasharrowup'    0x21E1 arrowMidX arrowBot arrowMidX arrowTop
+		arrow DashArrowShape 'dasharrowright' 0x21E2 arrowSB symbolMid arrowRSB symbolMid
+		arrow DashArrowShape 'dasharrowdown'  0x21E3 arrowMidX arrowTop arrowMidX arrowBot
 
-		arrow [HookArrowShape 1] 'hookarrowleft' 0x21A9 arrowRSB symbolMid arrowSB symbolMid
-		arrow [HookArrowShape (-1)] 'hookarrowright' 0x21AA arrowSB symbolMid arrowRSB symbolMid
+		arrow [HookArrowShape 1]    'hookarrowleft'      0x21A9 arrowRSB symbolMid arrowSB symbolMid
+		arrow [HookArrowShape (-1)] 'hookarrowright'     0x21AA arrowSB symbolMid arrowRSB symbolMid
+		arrow [HookArrowShape (-1)] 'hookarrowupleft'    0x2923 arrowRSB arrowBot arrowSB arrowTop
+		arrow [HookArrowShape 1]    'hookarrowupright'   0x2924 arrowSB arrowBot arrowRSB arrowTop
+		arrow [HookArrowShape (-1)] 'hookarrowdownright' 0x2925 arrowSB arrowTop arrowRSB arrowBot
+		arrow [HookArrowShape 1]    'hookarrowdownleft'  0x2926 arrowRSB arrowTop arrowSB arrowBot
 
 		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarLeft x1 y1 y2] 'arrow-up-angle-right' 0x21b1 arrowSB arrowBot arrowSB (arrowTop - arrowSize) arrowRSB (arrowTop - arrowSize)
 		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarRight x1 y1 y2] 'arrow-up-angle-left' 0x21b0 arrowRSB arrowBot arrowRSB (arrowTop - arrowSize) arrowSB (arrowTop - arrowSize)
@@ -248,11 +271,25 @@ export : define [apply] : begin
 		arrow [ThickArrowShape 'black'] null 0x2B0B arrowRSB arrowTop arrowSB arrowBot
 
 
-		arrow ArrowShape 'arrowleftK'  null arrowRSB symbolMid (arrowSB + fine) symbolMid
-		arrow ArrowShape 'arrowrightK' null arrowSB symbolMid (arrowRSB - fine) symbolMid
+		arrow ArrowShape 'arrowleftK'    null arrowRSB symbolMid (arrowSB + fine) symbolMid
+		arrow ArrowShape 'arrowrightK'   null arrowSB symbolMid (arrowRSB - fine) symbolMid
+		arrow ArrowShape 'arrowupK'      null arrowMidX arrowBot arrowMidX (arrowTop - fine)
+		arrow ArrowShape 'arrowdownK'    null arrowMidX arrowTop arrowMidX (arrowBot + fine)
+		arrow ArrowShape 'arrowleftSK'   null (arrowRSB - fine / 2) symbolMid arrowSB symbolMid
+		arrow ArrowShape 'arrowrightSK'  null (arrowSB + fine / 2) symbolMid arrowRSB symbolMid
+		arrow ArrowShape 'arrowupSK'     null arrowMidX (arrowBot + fine / 2) arrowMidX arrowTop
+		arrow ArrowShape 'arrowdownSK'   null arrowMidX (arrowTop - fine / 2) arrowMidX arrowBot
 		arrow ArrowShape 'arrowupleftTK' null arrowRSB arrowBot arrowSB (arrowTop - fine * 1.5)
-		composite 'bararrowleft' glyphs.arrowleftK [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21E4]
-		composite 'bararrowright' glyphs.arrowrightK [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21E5]
+
+		composite 'arrowbarleft' glyphs.arrowleftK [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21E4]
+		composite 'arrowbarright' glyphs.arrowrightK [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21E5]
+		composite 'arrowbarup' glyphs.arrowupK [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode 0x2912]
+		composite 'arrowbardown' glyphs.arrowdownK [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode 0x2913]
+		composite 'bararrowleft' glyphs.arrowleftSK [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21A4]
+		composite 'bararrowright' glyphs.arrowrightSK [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode 0x21A6]
+		composite 'bararrowup' glyphs.arrowupSK [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode 0x21A5]
+		composite 'bararrowdown' glyphs.arrowdownSK [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode 0x21A7]
+
 		composite glyphs.arrowupleftTK [HBar (arrowSB - arrowSize / 2) (arrowRSB + arrowSize / 2) arrowTop fine] [into-unicode 0x21B8]
 
 		let [dasw doubleArrowStemWidth] : do
@@ -304,10 +341,14 @@ export : define [apply] : begin
 			vcombine nothing 0x21C4 'arrowright' 'arrowleft' (arrowSize * 1.75)
 			hcombine nothing 0x21C5 'arrowup' 'arrowdown' hcDist
 			vcombine nothing 0x21C6 'arrowleft' 'arrowright' (arrowSize * 1.75)
+			vcombine nothing 0x21C7 'arrowleft' 'arrowleft' (arrowSize * 1.75)
+			hcombine nothing 0x21C8 'arrowup' 'arrowup' hcDist
+			vcombine nothing 0x21C9 'arrowright' 'arrowright' (arrowSize * 1.75)
+			hcombine nothing 0x21CA 'arrowdown' 'arrowdown' hcDist
 			hcombine nothing 0x21F5 'arrowdown' 'arrowup' hcDist
 			vcombine nothing 0x21CB 'arrowleftHR' 'arrowrightHR' (arrowSize)
 			vcombine nothing 0x21CC 'arrowrightHL' 'arrowleftHL' (arrowSize)
-			vcombine nothing 0x21B9 'bararrowright' 'bararrowleft' (arrowSize * 1.75)
+			vcombine nothing 0x21B9 'arrowbarright' 'arrowbarleft' (arrowSize * 1.75)
 
 		break : list ArrowShape
 
