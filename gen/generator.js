@@ -144,8 +144,8 @@ if (argv.charmap) {
 				? hasv(glyph.anchors)
 					? 1
 					: glyph.contours && glyph.contours.length
-						? 2
-						: 0
+					? 2
+					: 0
 				: 0
 		];
 	});
