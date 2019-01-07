@@ -4,6 +4,8 @@ $$include '../meta/macros.ptl'
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 import '../support/transform' as Transform
+import '../support/mask-bit' as maskBit
+
 
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks geometricSymbols
@@ -391,7 +393,7 @@ export : define [apply] : begin
 		include : RingAt MIDDLE (symbolMid - r) r0
 		save 'kome' 0x203B
 	
-	save-glyph 'boltSymbol' 0x26A1 : sketch
+	sketch
 		local sw : [adviceBlackness 3] / 2
 		local kInside 0.5
 		local kOutside 2.5
@@ -403,6 +405,7 @@ export : define [apply] : begin
 		line-to [mix r l 0.6] operBot
 		line-to (r + sw * kInside) (symbolMid + sw)
 		line-to (l + sw * kOutside) (symbolMid + sw)
+		save 'boltSymbol 0x26A1'
 	
 	do "Checking marks"
 		local light : adviceBlackness 4.5
@@ -471,6 +474,34 @@ export : define [apply] : begin
 				corner [mix (SB + sw / 2) (RIGHTSB - sw / 2) (1 - op)] symbolMid [heading DOWNWARD]
 				corner [mix (SB + sw / 2) (RIGHTSB - sw / 2) op] operBot [heading DOWNWARD]
 			save null unicode
+	
+	do "I-Ching"
+		# Trigrams
+		define [yin m n] : glyph-construction
+			local offsetY : (2 / 3) * (operBot - operTop) / n
+			local startY : symbolMid - offsetY * (n - 1) / 2
+			local bar : adviceBlackness n
+			local fine : adviceBlackness 5
+			include : HBar SB (MIDDLE - fine / 2 * HVCONTRAST) (startY + offsetY * m) bar
+			include : HBar (MIDDLE + fine / 2 * HVCONTRAST) RIGHTSB (startY + offsetY * m) bar
+		
+		define [yang m n] : glyph-construction
+			local offsetY : (2 / 3) * (operBot - operTop) / n
+			local startY : symbolMid - offsetY * (n - 1) / 2
+			local bar : adviceBlackness n
+			include : HBar SB RIGHTSB (startY + offsetY * m) bar
+		
+		define [patterns n su] : foreach [offset: range 0 [Math.pow 2 n]] : sketch
+			foreach [bit : range 0 n] : begin
+				if [maskBit offset bit] 
+					then : include : yin bit n
+					else : include : yang bit n
+			save null (su + offset)
+
+		patterns 1 0x268A
+		patterns 2 0x268C
+		patterns 3 0x2630
+		
 
 	### ### Ligature-orienteds
 	### symbol-block 'Ligature-oriented Subglyphs' : if (para.spacing > 0) : begin
