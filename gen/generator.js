@@ -137,16 +137,11 @@ const font = (function() {
 
 if (argv.charmap) {
 	const charmap = font.glyf.map(function(glyph) {
+		const isSpace = glyph.contours && glyph.contours.length ? 2 : 0;
 		return [
 			glyph.name,
 			glyph.unicode,
-			glyph.advanceWidth === 0
-				? hasv(glyph.anchors)
-					? 1
-					: glyph.contours && glyph.contours.length
-					? 2
-					: 0
-				: 0
+			glyph.advanceWidth === 0 ? (hasv(glyph.anchors) ? 1 : isSpace ? 2 : 0) : 0
 		];
 	});
 	fs.writeFileSync(argv.charmap, JSON.stringify(charmap), "utf8");
@@ -207,10 +202,10 @@ if (argv.o) {
 	const excludeUnicodes = new Set();
 	excludeUnicodes.add(0x80);
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicodes.add(c);
-	// autoref
-	autoref(font.glyf, excludeUnicodes);
-	// regulate
-	for (let g of font.glyf) regulateGlyph(g, skew);
+	// // autoref
+	// autoref(font.glyf, excludeUnicodes);
+	// // regulate
+	// for (let g of font.glyf) regulateGlyph(g, skew);
 
 	// reorder
 	font.glyf = font.glyf.sort((a, b) => a.gord - b.gord);
