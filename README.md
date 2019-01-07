@@ -108,6 +108,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     - All glyphs wider than one letter would be deleted.
     - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
   - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
+  - `nolig` : Disable ligation only.
   - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
   - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width.
 * All registered `ss##` and `cv##` feature tags, including:
@@ -123,6 +124,25 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-fstar`: Default ligation set would be assigned to F\*.
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
+* Styles for further customizing default (`calt`) ligation sets. When any of these styles present in your configuration, the `ligset-*` styles would be overridden.
+  * `calt-clear`: Clear the `calt` ligation set.
+  * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`);
+  * `calt-arrow`: Enable ligation set that forms arrows;
+  * `calt-arrow2`: Enable ligation for more arrows, like `>>=`;
+  * `calt-html-comment`: Enable ligation for `<!--` and `<!---`;
+  * `calt-eqeq`: Enable ligation for `==` and `===`;
+  * `calt-ineq`: Enable ligation for `<=` and `>=`;
+  * `calt-arrowZALE`: Enable ligation for `<=` to form a left double arrow;
+  * `calt-arrowZAGE`: Enable ligation for `>=` to form a right inverse double arrow;
+  * `calt-exeq`: Enable ligation for `!=` and `!==`;
+  * `calt-slasheq`: Enable ligation for `/=` and `/==`;
+  * `calt-plusplus`: Enable ligation for `++` and further plus-chaining;
+  * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining;
+  * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols;
+  * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering;
+  * `calt-brst`: Center asterisk in `(*` and `*)`;
+  * `calt-logic`: Enable ligation for `/\` and `\/`;
+  * `calt-colons`: Enable ligation for `::` and `:::` ;
 * Styles for changing the line space (leading):
   * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
 * Styles for changing Powerline symbols' position:
