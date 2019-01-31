@@ -15,6 +15,7 @@ Quit your editor/program. Unzip and open the folder.
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
+* **FreeBSD**: The font can be installed with `pkg install iosevka`.
 
 ## Weights, Variants and OpenType features
 
@@ -89,7 +90,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    oblique = "oblique"
    ```
 
-3. Run `npm run build -- contents:<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents:<plan>`, other options are:
+3. Run `npm run build -- contents:<your plan name>` and the built fonts would be available in `dist/`. Aside from `contents:<plan>`, other options are:
 
    1. `contents:<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
    2. `ttf:<plan>` : TTF;
@@ -199,7 +200,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarks` : Arched top `3` (default).
-  * Styles for ASCII tilde (`~`), asterisk (`*`), paragaraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
+  * Styles for ASCII tilde (`~`), asterisk (`*`), paragraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
     * `v-tilde-high` : Higher tilde `~`.
     * `v-tilde-low` : Lower tilde `~` (default).
     * `v-asterisk-high` : Higher asterisk `*` (default).
@@ -215,7 +216,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-at-fourfold` : The traditional, four-fold At symbol.
     * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
   * Styles for Eszet (`ß`):
-    * `v-eszet-traditional` : Tratidional, Fraktur-like Eszet.
+    * `v-eszet-traditional` : Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher` : A more modern, beta-like Eszet (default).
   * Styles for curly brackets (`{}`):
     * `v-brace-straight` : More straight braces.
