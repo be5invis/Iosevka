@@ -505,6 +505,7 @@ export : define [apply] : begin
 		foreach {unicode glyphid tfm} [items-of records] : create-glyph [suggestName : 'smcp' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
 			include sf.(glyphid) AS_BASE
+			set-width sf.(glyphid).advanceWidth
 			if tfm : include tfm
 
 	define [createMedievalCombs records] : if [not recursive] : begin
@@ -859,11 +860,14 @@ export : define [apply] : begin
 		list 0x1DF4 'udieresis'
 
 	# Unicode Ligatures
-	define [createLigatures shrink1 shrink2 wadj1 wadj2 records] : if [not recursive] : begin
+	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : if [not recursive] : begin
 		local pendingGlyphs1 : records.map : [record] => record.1
 		local pendingGlyphs2 : records.map : [record] => record.2
-		local df1 : Thinner pendingGlyphs1 [if (para.spacing > 1) 1 shrink1]
-		local df2 : Thinner pendingGlyphs2 [if (para.spacing > 1) 1 shrink2]
+		local wide : para.spaing > 1 || para.diversityW > 1
+		local shrink1 : if (wide) 1 [clamp 0 1 (_shrink1 * para.diversityW)]
+		local shrink2 : if (wide) 1 [clamp 0 1 (_shrink2 * para.diversityW)]
+		local df1 : Thinner pendingGlyphs1 shrink1
+		local df2 : Thinner pendingGlyphs2 shrink2
 
 		foreach [{unicode c1 c2 mark} : items-of records] : begin
 			local glyphName "\(c1)_\(c2)"
@@ -871,7 +875,7 @@ export : define [apply] : begin
 				local j 2
 				while glyphs.(glyphName + j) : inc j
 				set glyphName (glyphName + j)
-			if (para.spacing > 1) : begin
+			if wide : begin
 				sketch
 					include df2.(c2)
 					include : Translate WIDTH 0
@@ -880,19 +884,20 @@ export : define [apply] : begin
 					save glyphName unicode
 			: else
 				local kern : SB * 7/8 * (shrink1 + shrink2)
-				local refw : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
+				local refW : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
+				local targetW : WIDTH * para.diversityW
 				sketch
 					include df2.(c2)
 					include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
 					include df1.(c1)
 					include : Translate (-WIDTH * shrink1 * (1 - wadj1) / 2) 0
 					include : Upright
-					include : Translate (-refw / 2) 0
-					include : Scale ((WIDTH - SB * 1.25) / (WIDTH - SB * 2) * WIDTH / refw) 1
-					include : Translate (WIDTH / 2) 0
+					include : Translate (-refW / 2) 0
+					include : Scale ((targetW - SB * 1.25) / (targetW - SB * 2) * targetW / refW) 1
+					include : Translate (targetW / 2) 0
 					include : Italify
 					
-					if mark : include mark
+					if mark : include [MarksetDiv para.diversityW].(mark)
 					save glyphName unicode
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
@@ -918,8 +923,8 @@ export : define [apply] : begin
 		list 0x2A9 'f' 'eng'
 		list 0x2AA 'l' 's'
 		list 0x2AB 'l' 'z'
-		list 0x478 'O' 'y' markset.if
-		list 0x479 'o' 'y' markset.p
+		list 0x478 'O' 'y' 'if'
+		list 0x479 'o' 'y' 'p'
 		list 0x20A7 'P' 's'
 		list 0x20A8 'R' 's'
 	createLigatures 0.7 0.8 0.75 0.9 : list

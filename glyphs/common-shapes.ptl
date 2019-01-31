@@ -31,9 +31,9 @@ export : define [apply] : begin
 			set this.cmpPriority chosenGlyph.cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
-		if para.isItalic
-			then : include glyphs.(name + '.italic') AS_BASE
-			else : include glyphs.(name + '.upright') AS_BASE
+		define base : if para.isItalic glyphs.(name + '.italic') glyphs.(name + '.upright')
+		include base AS_BASE
+		set-width base.advanceWidth
 		if unicode : assign-unicode unicode
 
 	define [alias newid unicode oldid] : begin
@@ -132,6 +132,20 @@ export : define [apply] : begin
 
 
 	###### COMMON SHAPES
+	define [Rect u d l r transformShiftOnly] : create-glyph : glyph-construction
+		local my ((u + d) / 2)
+		local mx ((l + r) / 2)
+		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] globalTransform]
+		include : spiro-outline
+			begin [lambda : set this.gizmo currentGlyph.gizmo]
+			corner l d
+			corner l u
+			corner u u
+			corner r d
+			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
+		if transformShiftOnly : begin
+			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			apply-transform : Translate (mx1 - mx) (my1 - my)
 	define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
 		local my ((u + d) / 2)
 		local mx ((l + r) / 2)
@@ -410,7 +424,7 @@ export : define [apply] : begin
 			include : dispiro : nShoulderKnots.apply null a
 
 
-	define [mShoulderSpiro] : params [left right top bottom width fine] : glyph-construction
+	define [mShoulderSpiro] : params [left right top bottom width fine diversity] : glyph-construction
 		local fix : TANSLANT * STROKE * HVCONTRAST * width / STROKE
 		local sm : SMALLSMOOTH * 0.7
 		include : spiro-outline
@@ -429,6 +443,7 @@ export : define [apply] : begin
 			flat   right (top - sm)
 			corner right bottom
 			close
+
 
 	define [HBar xleft xright y _fine] : glyph-construction
 		include : dispiro
@@ -653,6 +668,10 @@ export : define [apply] : begin
 		forkedPara.accentx = ACCENTX * p
 		forkedPara.jut = JUT * p
 		forkedPara.longjut = LONGJUT * p
+		forkedPara.diversityM = 1
+		forkedPara.diversityW = 1
+		forkedPara.diversityI = 1
+		forkedPara.diversityF = 1
 		#forkedPara.hookx = HOOKX * p
 		return : Fork glyphs forkedPara
 
@@ -712,4 +731,4 @@ export : define [apply] : begin
 		include : difference background [union.apply null candidates]
 		include overlay
 	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay]
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay]

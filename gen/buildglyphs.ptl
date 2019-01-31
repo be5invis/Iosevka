@@ -41,32 +41,34 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		return nothing
 	
 	define metrics : calculateMetrics para
-	define [object globalTransform MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot] metrics
+	define [object globalTransform MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER MVERTSTROKE_D symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot] metrics
 
 	# Anchor parameters
 	define [object MARK BASE] Anchor
 	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
-	define markset : do
+	define [MarksetDiv p] : begin
+		define middle : p * MIDDLE
+		define rightSB : WIDTH * p - SB
 		define [ta anchor] : return : new Anchor
 			* (anchor.x * globalTransform.xx + anchor.y * TANSLANT + globalTransform.x)
 			* (anchor.x * globalTransform.xy + anchor.y * globalTransform.yy + globalTransform.y)
 			* anchor.type
 
-		define markAboveLower       {.anchors {.above       [ta : new Anchor MIDDLE  XH        BASE]}}
-		define markAboveOper        {.anchors {.above       [ta : new Anchor MIDDLE  operTop   BASE]}}
-		define markAboveTack        {.anchors {.above       [ta : new Anchor MIDDLE  tackTop  BASE]}}
-		define markAbovePlus        {.anchors {.above       [ta : new Anchor MIDDLE  plusTop   BASE]}}
-		define markAboveCap         {.anchors {.above       [ta : new Anchor MIDDLE  CAP       BASE]}}
-		define markBelowLower       {.anchors {.below       [ta : new Anchor MIDDLE  DESCENDER BASE]}}
-		define markBelowTack        {.anchors {.below       [ta : new Anchor MIDDLE  tackBot  BASE]}}
-		define markBelowOper        {.anchors {.below       [ta : new Anchor MIDDLE  operBot   BASE]}}
-		define markBelowPlus        {.anchors {.below       [ta : new Anchor MIDDLE  plusBot   BASE]}}
-		define markBelowZero        {.anchors {.below       [ta : new Anchor MIDDLE  0         BASE]}}
-		define markToprightLower    {.anchors {.topright    [ta : new Anchor RIGHTSB XH        BASE]}}
-		define markToprightCap      {.anchors {.topright    [ta : new Anchor RIGHTSB CAP       BASE]}}
-		define markBottomrightLower {.anchors {.bottomright [ta : new Anchor RIGHTSB DESCENDER BASE]}}
-		define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor RIGHTSB 0         BASE]}}
+		define markAboveLower       {.anchors {.above       [ta : new Anchor middle  XH        BASE]}}
+		define markAboveOper        {.anchors {.above       [ta : new Anchor middle  operTop   BASE]}}
+		define markAboveTack        {.anchors {.above       [ta : new Anchor middle  tackTop  BASE]}}
+		define markAbovePlus        {.anchors {.above       [ta : new Anchor middle  plusTop   BASE]}}
+		define markAboveCap         {.anchors {.above       [ta : new Anchor middle  CAP       BASE]}}
+		define markBelowLower       {.anchors {.below       [ta : new Anchor middle  DESCENDER BASE]}}
+		define markBelowTack        {.anchors {.below       [ta : new Anchor middle  tackBot  BASE]}}
+		define markBelowOper        {.anchors {.below       [ta : new Anchor middle  operBot   BASE]}}
+		define markBelowPlus        {.anchors {.below       [ta : new Anchor middle  plusBot   BASE]}}
+		define markBelowZero        {.anchors {.below       [ta : new Anchor middle  0         BASE]}}
+		define markToprightLower    {.anchors {.topright    [ta : new Anchor rightSB XH        BASE]}}
+		define markToprightCap      {.anchors {.topright    [ta : new Anchor rightSB CAP       BASE]}}
+		define markBottomrightLower {.anchors {.bottomright [ta : new Anchor rightSB DESCENDER BASE]}}
+		define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor rightSB 0         BASE]}}
 
 		define [buildStandardMarkSet] : begin
 			local a : compsiteMarkSet.apply null arguments
@@ -90,6 +92,17 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower
 			if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower
 
+	define markset : MarksetDiv 1
+
+	define [DivFrame _div] : begin
+		local div : fallback _div 1
+		return : object
+			div div
+			width : WIDTH * div
+			middle : MIDDLE * div
+			rightSB : WIDTH * div - SB
+			mvs : MVERTSTROKE_D div
+			markSet: MarksetDiv div
 
 	### Glyph slots and dependency profile generation (used for recursive subfonts)
 	local dependencyProfile {.}
@@ -190,7 +203,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		save 'space' ' '
 	
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define capture : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet
+	define capture : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet MarksetDiv DivFrame
 
 	### HERE WE GO
 	set capture.commonShapes : [import '../glyphs/common-shapes.js'].apply.call capture
