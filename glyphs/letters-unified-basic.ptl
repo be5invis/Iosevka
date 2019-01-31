@@ -469,27 +469,41 @@ export : define [apply] : begin
 		save 'looprevesh' 0x1AA
 
 	### V and v
-	local cornerdist : HALFSTROKE * HVCONTRAST * [if SLAB 1.2 1]
+	local cornerdist : HALFSTROKE * HVCONTRAST * 1.15
 	local vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
-	define [VShape] : params [top [sw STROKE]] : glyph-construction
-		include : dispiro
-			widths.lhs sw
-			flat SB top [heading DOWNWARD]
-			curl SB (top * 0.9) [heading DOWNWARD]
-			quadcontrols 0 vcurviness 9 unimportant
-			g4   (MIDDLE - cornerdist) 0 [widths.lhs (VShape.fine * sw / STROKE)]
+	define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
+		local df : DivFrame div
+		local fine : if barStraight STROKE (VShape.fine * sw / STROKE)
+		if barStraight : begin
+			include : dispiro
+				widths.lhs sw
+				flat (SB + O * 2) top [heading DOWNWARD]
+				g4   (df.middle - cornerdist) 0 [widths.lhs fine]
+		: else : begin
+			include : dispiro
+				widths.lhs sw
+				flat SB top [heading DOWNWARD]
+				curl SB (top * 0.9) [heading DOWNWARD]
+				quadcontrols 0 vcurviness 9 unimportant
+				g4   (df.middle - cornerdist) 0 [widths.lhs fine]
 
 		#bottom cap
-		start-from (MIDDLE + cornerdist) 0
-		line-to (MIDDLE - cornerdist) 0
-		line-to MIDDLE (VShape.fine * sw / STROKE)
+		start-from (df.middle + cornerdist) 0
+		line-to (df.middle - cornerdist) 0
+		line-to df.middle fine
 
-		include : dispiro
-			widths.rhs sw
-			flat RIGHTSB top [heading DOWNWARD]
-			curl RIGHTSB (top * 0.9) [heading DOWNWARD]
-			quadcontrols 0 vcurviness 9 unimportant
-			g4   (MIDDLE + cornerdist) 0 [widths.rhs (VShape.fine * sw / STROKE)]
+		if barStraight : begin
+			include : dispiro
+				widths.rhs sw
+				flat (df.rightSB - O * 2) top [heading DOWNWARD]
+				g4   (df.middle + cornerdist) 0 [widths.rhs fine]
+		: else : begin
+			include : dispiro
+				widths.rhs sw
+				flat df.rightSB top [heading DOWNWARD]
+				curl df.rightSB (top * 0.9) [heading DOWNWARD]
+				quadcontrols 0 vcurviness 9 unimportant
+				g4   (df.middle + cornerdist) 0 [widths.rhs fine]
 		tag-contour 'strokeUp'
 		include : AIVSerifs top
 	set VShape.fine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
@@ -497,17 +511,17 @@ export : define [apply] : begin
 	sketch # V
 		set-width WIDTH
 		include markset.capital
-		include : VShape CAP
+		include : VShape CAP STROKE para.straightBar
 
 		save 'V' 'V'
 
 	sketch # v
 		include markset.e
-		include : VShape XH
+		include : VShape XH STROKE para.straightBar
 
 		save 'v' 'v'
-	define [VHooktopShape top] : glyph-construction
-		include : VShape top
+	define [VHooktopShape top _stroke barStraight] : glyph-construction
+		include : VShape top [fallback _stroke STROKE] barStraight
 		eject-contour 'serifRT'
 		eject-contour 'strokeUp'
 
@@ -520,13 +534,13 @@ export : define [apply] : begin
 
 	sketch # vhooktop
 		include markset.e
-		include : VHooktopShape XH
+		include : VHooktopShape XH STROKE para.straightBar
 		save 'vhooktop' 0x2C71
 		save 'cyrizhitsa' 0x475
 
 	sketch # cyrIzhitsa
 		include markset.capital
-		include : VHooktopShape CAP
+		include : VHooktopShape CAP STROKE para.straightBar
 		save 'cyrIzhitsa' 0x474
 
 	turned 'turnv' 0x28C 'v' MIDDLE (XH / 2)
@@ -557,10 +571,12 @@ export : define [apply] : begin
 		include markset.capital
 		set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 
-		include : VShape CAP
+		include : VShape CAP STROKE para.straightBar
 		include : FlipAround MIDDLE (CAP / 2)
 
-		local p : linreg 18 0.075 108 0.075 STROKE
+		local p : if para.straightBar 
+			linreg 18 0.16 108 0.16 STROKE
+			linreg 18 0.075 108 0.075 STROKE
 		if (SLAB && !para.isItalic) : set p : p * 1.33
 		include : HBarTop [mix SB RIGHTSB p] [mix RIGHTSB SB p] (XH / 2)
 		save 'A' 'A'
@@ -651,90 +667,131 @@ export : define [apply] : begin
 		save 'artail' 0x1D8F
 
 	### W and w
-	define [WShape top] : glyph-construction
-		local wheight (top * 0.6)
+	define [WShape top barStraight _div] : glyph-construction
+		local div : fallback _div 1
+		local rightSB : WIDTH * div - SB
+		local middle : MIDDLE * div
+		local fine : if barStraight
+			adviceBlackness WShape.fineS div
+			[adviceBlackness WShape.fine div] / WShape.fineOffset
+		local fineOffset : fine / 2 * HVCONTRAST * WShape.fineOffset
+		local m1 : WIDTH * div * [if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
+		local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+		local wheight : if barStraight top (top * 0.6)
 
-		include : dispiro
-			widths.lhs
-			flat SB top [heading DOWNWARD]
-			curl SB (top * 0.75) [heading DOWNWARD]
-			quadcontrols 0 0.3 6 unimportant
-			g4   (WShape.m1 - WShape.fine / 2 * HVCONTRAST) 0 [widths.lhs (WShape.fine * 0.8)]
+		if barStraight : begin
+			include : dispiro
+				widths.lhs
+				flat (SB + O * 2) top [heading DOWNWARD]
+				g4   (m1 - fineOffset) 0 [widths.lhs fine]
+		: else : begin
+			include : dispiro
+				widths.lhs
+				flat SB top [heading DOWNWARD]
+				curl SB (top * 0.75) [heading DOWNWARD]
+				quadcontrols 0 0.3 6 unimportant
+				g4   (m1 - fineOffset) 0 [widths.lhs fine]
 
 		# bottom cap 1
-		start-from (WShape.m1 + WShape.fine / 2 * HVCONTRAST) 0
-		line-to (WShape.m1 - WShape.fine / 2 * HVCONTRAST) 0
-		line-to WShape.m1 WShape.fine
+		start-from (m1 + fineOffset) 0
+		line-to (m1 - fineOffset) 0
+		line-to m1 fine
 
 		include : dispiro
-			widths.rhs WShape.fine
-			flat (MIDDLE + WShape.fine / 2 * HVCONTRAST) wheight [heading DOWNWARD]
+			widths.lhs fine
+			flat (middle - fineOffset) wheight
 			#quadcontrols 0 0.1 6 unimportant
-			g4  (WShape.m1 + WShape.fine / 2 * HVCONTRAST) 0 [widths.rhs WShape.fine]
+			g4  (m1 + fineOffset) 0 [widths.rhs fine]
 		include : dispiro
-			widths.lhs WShape.fine
-			flat (MIDDLE - WShape.fine / 2 * HVCONTRAST) wheight [heading DOWNWARD]
+			widths.rhs fine
+			flat (middle + fineOffset) wheight
 			#quadcontrols 0 0.1 6 unimportant
-			curl  (WShape.m2 - WShape.fine / 2 * HVCONTRAST) 0 [widths.lhs WShape.fine]
+			curl  (m2 - fineOffset) 0 [widths.lhs fine]
+
+		# middle cap
+		start-from (middle + fineOffset) wheight
+		line-to middle (wheight - fine)
+		line-to (middle - fineOffset) wheight
 
 		# bottom cap 2
-		start-from (WShape.m2 + WShape.fine / 2 * HVCONTRAST) 0
-		line-to (WShape.m2 - WShape.fine / 2 * HVCONTRAST) 0
-		line-to WShape.m2 WShape.fine
+		start-from (m2 + fineOffset) 0
+		line-to (m2 - fineOffset) 0
+		line-to m2 fine
 
-		include : dispiro
-			widths.rhs
-			flat RIGHTSB top [heading DOWNWARD]
-			curl RIGHTSB (top * 0.75) [heading DOWNWARD]
-			quadcontrols 0 0.3 6 unimportant
-			g4   (WShape.m2 + WShape.fine / 2 * HVCONTRAST) 0 [widths.rhs (WShape.fine * 0.8)]
-		include : AIVSerifs top
-	set WShape.fine : adviceBlackness 6
-	set WShape.m1 : WIDTH * 0.325
-	set WShape.m2 : WIDTH * 0.675
+		if barStraight : begin
+			include : dispiro
+				widths.rhs
+				flat (rightSB - O * 2) top [heading DOWNWARD]
+				g4   (m2 + fineOffset) 0 [widths.rhs fine]
+		: else : begin
+			include : dispiro
+				widths.rhs
+				flat rightSB top [heading DOWNWARD]
+				curl rightSB (top * 0.75) [heading DOWNWARD]
+				quadcontrols 0 0.3 6 unimportant
+				g4   (m2 + fineOffset) 0 [widths.rhs fine]
+		include : AIVSerifs top SB rightSB
+
+	set WShape.fine 5.5
+	set WShape.fineS 5.5
+	set WShape.fineOffset 1.375
+	set WShape.m1 0.325
+	set WShape.m2 0.675
+	set WShape.m1S 0.30
+	set WShape.m2S 0.70
 
 	sketch # W
-		set-width WIDTH
-		include markset.capital
-		include : WShape CAP
+		set-width (WIDTH * para.diversityW)
+		include [MarksetDiv para.diversityW].capital
+		include : WShape CAP para.straightBar para.diversityW
 		save 'W' 'W'
 		save 'cyrWe' 0x51C
 
 	sketch # w
-		set-width WIDTH
-		include markset.e
-		include : WShape XH
+		set-width (WIDTH * para.diversityW)
+		include [MarksetDiv para.diversityW].e
+		include : WShape XH para.straightBar para.diversityW
 		save 'w' 'w'
 		save 'cyrwe' 0x51D
 
-	turned nothing 0x28D 'w' MIDDLE (XH / 2)
+	turned nothing 0x28D 'w' (MIDDLE * para.diversityW) (XH / 2)
 
-	define [WHooktopShape top] : glyph-construction
-		include : WShape top
+	define [WHooktopShape top barStraight _div] : glyph-construction
+		local div : fallback _div 1
+		local fine : if barStraight
+			adviceBlackness WShape.fineS div
+			[adviceBlackness WShape.fine div] / WShape.fineOffset
+		local fineOffset : fine / 2 * HVCONTRAST * WShape.fineOffset
+		local rightSB : WIDTH * div - SB
+		local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+
+		include : WShape top barStraight div
+
+		# Eject unnecessary contours
 		this.contours.pop
 		if SLAB : begin
 			local s : this.contours.pop
 			this.contours.pop
 			this.contours.push s
-
+		
 		include : dispiro
 			widths.rhs
-			straight.down.start RIGHTSB (top - HOOK) [heading DOWNWARD]
+			straight.down.start rightSB (top - HOOK) [heading DOWNWARD]
 			quadcontrols 0 0.3 6 unimportant g2
-			g4   (WShape.m2 + WShape.fine / 2 * HVCONTRAST) 0 [widths.rhs (WShape.fine * 0.8)]
-		include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
+			g4   (m2 + fineOffset) 0 [widths.rhs fine]
+
+		include : VerticalHook (rightSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
 
 	sketch # Whooktop
-		include markset.capital
-
-		include : WHooktopShape CAP
+		set-width (WIDTH * para.diversityW)
+		include [MarksetDiv para.diversityW].capital
+		include : WHooktopShape CAP para.straightBar para.diversityW
 		save 'Whooktop' 0x2C72
 
 	sketch # whooktop
-		include markset.e
-
-		include : WHooktopShape XH
-
+		set-width (WIDTH * para.diversityW)
+		include [MarksetDiv para.diversityW].e
+		include : WHooktopShape XH para.straightBar para.diversityW
 		save 'whooktop' 0x2C73
 
 	sketch # ww
@@ -965,22 +1022,44 @@ export : define [apply] : begin
 		save 'lambdaslash' 0x19B
 
 	### K and k
-	define [KShape top] : glyph-construction
+	define [KShape top straightBar] : glyph-construction
 		local turn (top * 0.99)
-
-		local attach (top * [if SLAB 0.325 0.375])
-		local attach2 [if SLAB [mix SB RIGHTSB 0.48] MIDDLE]
-
 		local fine : adviceBlackness 3.5
-		include : dispiro
-			g4.down.start (RIGHTSB) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
-			bezcontrols 0 [if SLAB 0.1 0.2] 0.5 [if SLAB 0.55 0.65] 8
-			g4 (SB + STROKE) attach [widths 0 fine]
-		include : dispiro
-			widths.center
-			g4.up.start (RIGHTSB - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
-			quadcontrols 0 [if SLAB 0.125 0.25] 8
-			g4 attach2 (top * 0.61) [widths.center fine]
+
+		if straightBar : do
+			local attach (top * 0.42 - STROKE)
+			local attach2 (top * 0.72 + STROKE)
+			include : intersection
+				Rect top 0 0 WIDTH
+				dispiro
+					widths.rhs
+					flat (RIGHTSB - O * 2) top
+					curl (SB + STROKE) attach [widths 0 fine]
+			
+			include : intersection
+				spiro-outline
+					corner (SB + STROKE) 0
+					corner (SB + STROKE) (attach + 1)
+					corner (RIGHTSB - O * 2 - 1) top
+					corner (RIGHTSB - O * 2) top
+					corner (RIGHTSB - O * 2) 0
+				dispiro
+					widths.lhs
+					flat (RIGHTSB - O * 2) 0
+					curl (SB + STROKE) attach2
+		: else : do
+			local attach (top * [if SLAB 0.325 0.375])
+			local attach2 [if SLAB [mix SB RIGHTSB 0.48] MIDDLE]
+			include : dispiro
+				g4.down.start (RIGHTSB) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
+				bezcontrols 0 [if SLAB 0.1 0.2] 0.5 [if SLAB 0.55 0.65] 8
+				g4 (SB + STROKE) attach [widths 0 fine]
+			include : dispiro
+				widths.center
+				g4.up.start (RIGHTSB - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
+				quadcontrols 0 [if SLAB 0.125 0.25] 8
+				g4 attach2 (top * 0.61) [widths.center fine]
+
 		if SLAB : begin
 			include : RightwardTopSerif (RIGHTSB - (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - HALFSTROKE) * HVCONTRAST * [if para.isItalic 1 0] - HALFSTROKE * 0.5 * HVCONTRAST) top (SIDEJUT + HALFSTROKE * 0.5 * HVCONTRAST)
 			include : RightwardBottomSerif (RIGHTSB - O * [if para.isItalic 1 0]) 0 SIDEJUT
@@ -989,7 +1068,7 @@ export : define [apply] : begin
 		set-width WIDTH
 		include markset.capital
 		include : VBarLeft SB 0 CAP
-		include : KShape CAP
+		include : KShape CAP para.straightBar
 		if SLAB : begin
 			include : CenterTopSerif (SB + HALFSTROKE * HVCONTRAST) CAP JUT
 			include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
@@ -1003,7 +1082,7 @@ export : define [apply] : begin
 		set-width WIDTH
 		include markset.b
 		include : VBarLeft SB 0 CAP
-		include : KShape XH
+		include : KShape XH para.straightBar
 		if SLAB : begin
 			include : LeftwardTopSerif SB CAP SIDEJUT
 			if (!para.isItalic) : begin
@@ -1016,7 +1095,7 @@ export : define [apply] : begin
 		set-width WIDTH
 		include markset.e
 		include : VBarLeft SB 0 XH
-		include : KShape XH
+		include : KShape XH para.straightBar
 		if SLAB : begin
 			include : LeftwardTopSerif SB XH SIDEJUT
 
@@ -1026,7 +1105,7 @@ export : define [apply] : begin
 		set-width WIDTH
 		include markset.e
 		include : VBarLeft SB 0 XH
-		include : KShape XH
+		include : KShape XH para.straightBar
 		if SLAB : begin
 			include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
 			include : CenterTopSerif (SB + HALFSTROKE * HVCONTRAST) XH JUT
@@ -1037,7 +1116,7 @@ export : define [apply] : begin
 
 	sketch # Khooktop
 		include markset.capital
-		include : KShape CAP
+		include : KShape CAP para.straightBar
 		include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
 		include : VerticalHook (SB + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 
@@ -1045,7 +1124,7 @@ export : define [apply] : begin
 
 	sketch # khooktop
 		include markset.b
-		include : KShape XH
+		include : KShape XH para.straightBar
 		include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
 		include : VerticalHook (SB + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 
@@ -2321,30 +2400,34 @@ export : define [apply] : begin
 		save 'latinupsilon2' 0x28B
 
 	### M
-	define [MShape top] : glyph-construction
-		local topstroke : adviceBlackness 5
+	define [MShape top _div] : glyph-construction
+		local div : fallback _div 1
+		local rightSB : WIDTH * div - SB
+		local middle : MIDDLE * div
+		local topstroke : adviceBlackness 5 div
 		local halftopstroke : topstroke / 2
+		local middleY : top * 0.3 / div
 
 		include : dispiro
 			flat SB 0 [widths.heading 0 STROKE UPWARD]
 			curl SB (top * 0.2) [heading UPWARD]
 			straight.up.end SB top [widths.heading 0 topstroke UPWARD]
 		include : dispiro
-			flat RIGHTSB 0 [widths.heading STROKE 0 UPWARD]
-			curl RIGHTSB (top * 0.2) [heading UPWARD]
-			straight.up.end RIGHTSB top [widths.heading topstroke 0 UPWARD]
+			flat rightSB 0 [widths.heading STROKE 0 UPWARD]
+			curl rightSB (top * 0.2) [heading UPWARD]
+			straight.up.end rightSB top [widths.heading topstroke 0 UPWARD]
 		include : dispiro
 			flat (SB + halftopstroke) top [widths.heading topstroke 0 DOWNWARD]
-			curl MIDDLE (top * 0.3) [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
+			curl middle middleY [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
 		include : dispiro
-			flat (RIGHTSB - halftopstroke) top [widths.heading 0 topstroke DOWNWARD]
-			curl MIDDLE (top * 0.3) [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
-		include : AIMSerifs top
+			flat (rightSB - halftopstroke) top [widths.heading 0 topstroke DOWNWARD]
+			curl middle middleY [widths.heading (topstroke / 2) (topstroke / 2) DOWNWARD]
+		include : AIMSerifs top SB rightSB
 
 	sketch # M
-		set-width WIDTH
-		include markset.capital
-		include : MShape CAP
+		set-width (WIDTH * para.diversityM)
+		include [MarksetDiv para.diversityM].capital
+		include : MShape CAP para.diversityM
 		save 'M' 'M'
 		save 'Mu' 0x39C
 		save 'cyrEm' 0x41C
@@ -2355,66 +2438,77 @@ export : define [apply] : begin
 		save 'cyrem' 0x43C
 
 	### m
-	define [SmallMShape top bot mbot] : glyph-construction
-		local m1 : mix (SB + O) (MIDDLE + MVERTSTROKE / 2 * HVCONTRAST) 0.5
-		local m2 : mix (RIGHTSB - O) (MIDDLE - MVERTSTROKE / 2 * HVCONTRAST) 0.5
+	define [SmallMShape top bot mbot _div] : glyph-construction
+		local div : fallback _div 1
+		local rightSB : WIDTH * div - SB
+		local middle : MIDDLE * div
+		local mvs : MVERTSTROKE_D div
+
+		local m1 : mix (SB + O) (middle + mvs / 2 * HVCONTRAST) 0.5
+		local m2 : mix (rightSB - O) (middle - mvs / 2 * HVCONTRAST) 0.5
 		include : mShoulderSpiro
-			left   -- (SB + O + MVERTSTROKE * HVCONTRAST)
-			right  -- (MIDDLE + MVERTSTROKE / 2 * HVCONTRAST)
-			top    -- top
-			bottom -- mbot
-			width  -- MVERTSTROKE
-			fine   -- (MVERTSTROKE * SHOULDERFINE / STROKE)
+			left      -- (SB + O + mvs * HVCONTRAST)
+			right     -- (middle + mvs / 2 * HVCONTRAST)
+			top       -- top
+			bottom    -- mbot
+			width     -- mvs
+			fine      -- (mvs * SHOULDERFINE / STROKE)
+			diversity -- div
 		include : mShoulderSpiro
-			left   -- (MIDDLE + MVERTSTROKE * 0.5 * HVCONTRAST)
-			right  -- (RIGHTSB - O)
-			top    -- top
-			bottom -- bot
-			width  -- MVERTSTROKE
-			fine   -- (MVERTSTROKE * SHOULDERFINE / STROKE)
-		include : VBarLeft (SB + O) bot top MVERTSTROKE
+			left      -- (middle + mvs * 0.5 * HVCONTRAST)
+			right     -- (rightSB - O)
+			top       -- top
+			bottom    -- bot
+			width     -- mvs
+			fine      -- (mvs * SHOULDERFINE / STROKE)
+			diversity -- div
+		include : VBarLeft (SB + O) bot top mvs
 		if SLAB : begin
 			include : LeftwardTopSerif SB top SIDEJUT
 			tag-contour 'serifLT'
 			if (!para.isItalic) : include : LeftwardBottomSerif SB bot SIDEJUT
-			include : RightwardBottomSerif RIGHTSB bot SIDEJUT
+			include : RightwardBottomSerif rightSB bot SIDEJUT
 			tag-contour 'serifRB'
 
 	sketch # m
-		set-width WIDTH
-		include markset.e
-		include : SmallMShape XH 0 0
+		set-width (WIDTH * para.diversityM)
+		include [MarksetDiv para.diversityM].e
+		include : SmallMShape XH 0 0 para.diversityM
 		save 'm.longleg'
 		save 'cyrte.italic'
 	sketch # m
-		set-width WIDTH
-		include markset.e
-		include : SmallMShape XH 0 [XH * 0.2]
+		set-width (WIDTH * para.diversityM)
+		include [MarksetDiv para.diversityM].e
+		include : SmallMShape XH 0 [XH * 0.2] para.diversityM
 		save 'm.shortleg'
 	select-variant 'm' 'm'
-	composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender RIGHTSB] markset.e
+	composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender (WIDTH * para.diversityM - SB)] markset.e
 
 	sketch # mltail
+		local mvs : MVERTSTROKE_D para.diversityM
 		include markset.p
 		include glyphs.m
 		eject-contour 'serifRB'
-		include : VerticalHook (RIGHTSB - O - MVERTSTROKE / 2 * HVCONTRAST) 0 (-HOOKX) HOOK MVERTSTROKE
+		include : VerticalHook (WIDTH * para.diversityM - SB - O - mvs / 2 * HVCONTRAST) 0 (-HOOKX) HOOK mvs
 
 		save 'mltail' 0x271
-	turned nothing 0x26F 'm' MIDDLE (XH / 2)
+	turned nothing 0x26F 'm' (MIDDLE * para.diversityM) (XH / 2)
 
 	sketch # capitalTurnm
-		include markset.capital
-		include : SmallMShape CAP 0 0
-		include : FlipAround MIDDLE (CAP / 2)
+		set-width (WIDTH * para.diversityM)
+		include [MarksetDiv para.diversityM].capital
+		include : SmallMShape CAP 0 0 para.diversityM
+		include : FlipAround (MIDDLE * para.diversityM) (CAP / 2)
 		save 'capitalTurnm' 0x19C
 
 	sketch # turnmleg
-		include markset.p
+		local mvs : MVERTSTROKE_D para.diversityM
+		set-width (WIDTH * para.diversityM)
+		include [MarksetDiv para.diversityM].p
 		include glyphs.m
 		eject-contour 'serifLT'
-		include : FlipAround MIDDLE (XH / 2)
-		include : VBarRight (RIGHTSB - O) DESCENDER 0 MVERTSTROKE
+		include : FlipAround (MIDDLE * para.diversityM) (XH / 2)
+		include : VBarRight (WIDTH * para.diversityM - SB - O) DESCENDER 0 mvs
 		save 'turnmleg' 0x270
 
 	### H

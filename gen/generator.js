@@ -137,16 +137,11 @@ const font = (function() {
 
 if (argv.charmap) {
 	const charmap = font.glyf.map(function(glyph) {
+		const isSpace = glyph.contours && glyph.contours.length ? 2 : 0;
 		return [
 			glyph.name,
 			glyph.unicode,
-			glyph.advanceWidth === 0
-				? hasv(glyph.anchors)
-					? 1
-					: glyph.contours && glyph.contours.length
-					? 2
-					: 0
-				: 0
+			glyph.advanceWidth === 0 ? (hasv(glyph.anchors) ? 1 : isSpace ? 2 : 0) : 0
 		];
 	});
 	fs.writeFileSync(argv.charmap, JSON.stringify(charmap), "utf8");

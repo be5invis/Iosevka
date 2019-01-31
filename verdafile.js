@@ -414,6 +414,7 @@ phony(`release`).def(async target => {
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
+const MARCOS = [`file-updated:meta/macros.ptl`];
 oracle("{ptl|js}-scripts-under:***").def((target, $ext, $1) =>
 	FileList({ under: $1, pattern: `**/*.${$ext}` })(target)
 );
@@ -435,6 +436,9 @@ file(`{gen|glyphs|support|meta}/**/*.js`).def(async target => {
 	const [jsFromPtl] = await target.need("scripts:js-from-ptl");
 	if (jsFromPtl.indexOf(target.path.full) >= 0) {
 		const ptl = target.path.full.replace(/\.js$/g, ".ptl");
+		if (/^glyphs\//.test(target.path.full)) {
+			await target.need(MARCOS);
+		}
 		await target.need(`file-updated:${ptl}`);
 		await run(PATEL_C, "--strict", ptl, "-o", target.path.full);
 	} else {
