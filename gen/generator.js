@@ -202,10 +202,10 @@ if (argv.o) {
 	const excludeUnicodes = new Set();
 	excludeUnicodes.add(0x80);
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicodes.add(c);
-	// // autoref
-	// autoref(font.glyf, excludeUnicodes);
-	// // regulate
-	// for (let g of font.glyf) regulateGlyph(g, skew);
+	// autoref
+	autoref(font.glyf, excludeUnicodes);
+	// regulate
+	for (let g of font.glyf) regulateGlyph(g, skew);
 
 	// reorder
 	font.glyf = font.glyf.sort((a, b) => a.gord - b.gord);
