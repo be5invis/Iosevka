@@ -108,8 +108,8 @@ var dopr = TAG("dotoper");
 var indexPage = new Vue({
 	el: "body",
 	data: {
-		version: "2.0.2",
-		codename: "Olivida-2",
+		version: "2.1.0",
+		codename: "Presca",
 		themes: ["color-light", "color-dark"],
 		snippets: [],
 		snippet: "javascript",
