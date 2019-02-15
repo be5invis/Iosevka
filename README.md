@@ -162,11 +162,16 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-italic` : Italic `l` (default for italic).
     * `v-l-tailed` : `l` with a curved tail.
     * `v-l-hookybottom` : `l` with a straight tail.
+    * `v-l-line` : `l` like a straight line.
   * Styles for letter `i`:
     * `v-i-hooky` : Hooky `i`.
     * `v-i-zshaped` : Z-shaped `i`.
     * `v-i-serifed` : Serifed `i` (default for upright and oblique).
     * `v-i-italic` : Italic `i` (default for italic).
+    * `v-i-line` : `i` like a straight line.
+  * Styles for letter `j`:
+    * `v-j-line`: `j` like a straight line.
+    * `v-j-serifed`: `j` with top serif (default).
   * Styles for letter `a`:
     * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
     * `v-a-singlestorey` : Single-storey `a` (default for italic).
