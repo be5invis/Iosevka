@@ -1,13 +1,13 @@
 "use strict";
 
-const {
-	want,
-	rule: { task, file, oracle, phony },
-	macro: { FileList },
-	action: { run, node, cd, cp, rm },
-	journal,
-	argv
-} = require("verda");
+const build = require("verda").create();
+const { task, file, oracle, phony } = build.ruleTypes;
+const { de, fu } = build.rules;
+const { run, node, cd, cp, rm } = build.actions;
+const { FileList } = build.predefinedFuncs;
+module.exports = build;
+
+///////////////////////////////////////////////////////////
 
 const fs = require("fs");
 const path = require("path");
@@ -25,19 +25,24 @@ const BUILD_PLANS = path.resolve(__dirname, "./build-plans.toml");
 const PRIVATE_BUILD_PLANS = path.resolve(__dirname, "./private-build-plans.toml");
 
 // Save journal to build/
-journal(`${BUILD}/.verda-journal`);
-want(...argv._);
+build.setJournal(`${BUILD}/.verda-journal`);
+build.setSelfTracking();
 
 ///////////////////////////////////////////////////////////
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-oracle(`o:version`).def(async () => {
+const o_version = oracle.plain(`version`, async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
 });
 
-oracle(`o:raw-plans`).def(async () => {
+const o_rawPlans = oracle.plain(`raw-plans`, async target => {
+	await target.need(BUILD_PLANS);
+	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
+		await target.need(PRIVATE_BUILD_PLANS);
+	}
+
 	const t = toml.parse(fs.readFileSync(BUILD_PLANS, "utf-8"));
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
 		Object.assign(
@@ -67,24 +72,24 @@ oracle(`o:raw-plans`).def(async () => {
 	return t;
 });
 
-oracle("o:build-plans").def(async target => {
-	const [rp] = await target.need(`o:raw-plans`);
+const o_buildPlans = oracle.plain("build-plans", async target => {
+	const [rp] = await target.need(o_rawPlans);
 	return rp.buildPlans;
 });
-oracle("o:export-plans").def(async target => {
-	const [rp] = await target.need(`o:raw-plans`);
+const o_exportPlans = oracle.plain("export-plans", async target => {
+	const [rp] = await target.need(o_rawPlans);
 	return rp.exportPlans;
 });
-oracle("o:raw-collect-plans").def(async target => {
-	const [rp] = await target.need(`o:raw-plans`);
+const o_rawCollectPlans = oracle.plain("raw-collect-plans", async target => {
+	const [rp] = await target.need(o_rawPlans);
 	return rp.collectPlans;
 });
-oracle("o:weights").def(async target => {
-	const [rp] = await target.need(`o:raw-plans`);
+const o_weights = oracle.plain("weights", async target => {
+	const [rp] = await target.need(o_rawPlans);
 	return rp.weights;
 });
-oracle("o:slants").def(async target => {
-	const [rp] = await target.need(`o:raw-plans`);
+const o_slants = oracle.plain("slants", async target => {
+	const [rp] = await target.need(o_rawPlans);
 	return rp.slants;
 });
 
@@ -109,16 +114,16 @@ function getSuffixSet(weights, slants) {
 	return mapping;
 }
 
-oracle(`o:suffixes`).def(async target => {
-	const [weights, slants] = await target.need(`o:weights`, `o:slants`);
+const o_suffixes = oracle.plain(`suffixes`, async target => {
+	const [weights, slants] = await target.need(o_weights, o_slants);
 	return getSuffixSet(weights, slants);
 });
 
-oracle(`o:font-building-parameters`).def(async target => {
+const o_fontBuildingParameters = oracle.plain(`font-building-parameters`, async target => {
 	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
-		`o:build-plans`,
-		`o:weights`,
-		`o:slants`
+		o_buildPlans,
+		o_weights,
+		o_slants
 	);
 	const fontInfos = {};
 	const bp = {};
@@ -152,8 +157,8 @@ oracle(`o:font-building-parameters`).def(async target => {
 	return { fontInfos, buildPlans: bp };
 });
 
-oracle(`o:collect-plans`).def(async target => {
-	const [rawCollectPlans, suffixMapping] = await target.need(`o:raw-collect-plans`, `o:suffixes`);
+const o_collectPlans = oracle.plain(`collect-plans`, async target => {
+	const [rawCollectPlans, suffixMapping] = await target.need(o_rawCollectPlans, o_suffixes);
 	const composition = {},
 		groups = {};
 	for (const gid in rawCollectPlans) {
@@ -174,23 +179,23 @@ oracle(`o:collect-plans`).def(async target => {
 	return { composition, groups };
 });
 
-oracle("hives-of:***").def(async (target, gid) => {
-	const [{ fontInfos }] = await target.need("o:font-building-parameters");
+oracle("hives-of:***", async (target, gid) => {
+	const [{ fontInfos }] = await target.need(o_fontBuildingParameters);
 	return fontInfos[gid];
 });
 
-oracle("group-info:***").def(async (target, gid) => {
-	const [{ buildPlans }] = await target.need("o:font-building-parameters");
+oracle("group-info:***", async (target, gid) => {
+	const [{ buildPlans }] = await target.need(o_fontBuildingParameters);
 	return buildPlans[gid];
 });
 
-oracle("group-fonts-of:***").def(async (target, gid) => {
+oracle("group-fonts-of:***", async (target, gid) => {
 	const [plan] = await target.need(`group-info:${gid}`);
 	return plan.targets;
 });
 
-oracle("collection-parts-of:*").def(async (target, id) => {
-	const [{ composition }] = await target.need("o:collect-plans");
+oracle("collection-parts-of:*", async (target, id) => {
+	const [{ composition }] = await target.need(o_collectPlans);
 	return composition[id];
 });
 
@@ -198,14 +203,15 @@ oracle("collection-parts-of:*").def(async (target, id) => {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
+file(`${BUILD}/*/*.ttf`, async (target, path) => {
+	const [, suffix] = path.$;
 	const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
 		`hives-of:${suffix}`,
-		`o:version`
+		o_version
 	);
-	const otd = target.path.dir + "/" + target.path.name + ".otd";
-	const charmap = target.path.dir + "/" + target.path.name + ".charmap";
-	await target.need("scripts", "parameters.toml", `dir:${target.path.dir}`);
+	const otd = path.dir + "/" + path.name + ".otd";
+	const charmap = path.dir + "/" + path.name + ".charmap";
+	await target.need("scripts", "parameters.toml", de`${path.dir}`);
 	await run(
 		GENERATE,
 		["-o", otd],
@@ -216,12 +222,12 @@ file(`${BUILD}/*/*.ttf`).def(async (target, prefix, suffix) => {
 		["--menu-slant", menuStyle],
 		hives
 	);
-	await run("otfccbuild", otd, "-o", target.path.full, "-O3", "--keep-average-char-width");
+	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width");
 	await rm(otd);
 });
 
-file(`${BUILD}/*/*.charmap`).def(async target => {
-	await target.need(target.path.dir + "/" + target.path.name + ".ttf");
+const buildCM = file(`${BUILD}/*/*.charmap`, async (target, path) => {
+	await target.need(path.dir + "/" + path.name + ".ttf");
 });
 
 ///////////////////////////////////////////////////////////
@@ -229,69 +235,66 @@ file(`${BUILD}/*/*.charmap`).def(async target => {
 ///////////////////////////////////////////////////////////
 
 // Per group file
-file(`${DIST}/*/ttf-unhinted/*.ttf`).def(async (target, dir, file) => {
-	const [from] = await target.need(`${BUILD}/${dir}/${file}.ttf`, `dir:${target.path.dir}`);
-	await cp(from.full, target.path.full);
+file(`${DIST}/*/ttf-unhinted/*.ttf`, async (target, path) => {
+	const [gr, f] = path.$;
+	const [from] = await target.need(`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
+	await cp(from.full, path.full);
 });
-file(`${DIST}/*/ttf/*.ttf`).def(async (target, dir, file) => {
-	const [from] = await target.need(
-		`${DIST}/${dir}/ttf-unhinted/${file}.ttf`,
-		`dir:${target.path.dir}`
-	);
-	await run("ttfautohint", from.full, target.path.full);
+file(`${DIST}/*/ttf/*.ttf`, async (target, path) => {
+	const [group, f] = path.$;
+	const [from] = await target.need(`${DIST}/${group}/ttf-unhinted/${f}.ttf`, de`${path.dir}`);
+	await run("ttfautohint", from.full, path.full);
 });
-file(`${DIST}/*/woff/*.woff`).def(async (target, dir, file) => {
-	const [from] = await target.need(`${DIST}/${dir}/ttf/${file}.ttf`, `dir:${target.path.dir}`);
-	await node(`utility/ttf-to-woff.js`, from.full, target.path.full);
+file(`${DIST}/*/woff/*.woff`, async (target, path) => {
+	const [group, f] = path.$;
+	const [from] = await target.need(`${DIST}/${group}/ttf/${f}.ttf`, de`${path.dir}`);
+	await node(`utility/ttf-to-woff.js`, from.full, path.full);
 });
-file(`${DIST}/*/woff2/*.woff2`).def(async (target, dir, file) => {
-	const [from] = await target.need(`${DIST}/${dir}/ttf/${file}.ttf`, `dir:${target.path.dir}`);
-	await node(`utility/ttf-to-woff2.js`, from.full, target.path.full);
+file(`${DIST}/*/woff2/*.woff2`, async (target, path) => {
+	const [group, f] = path.$;
+	const [from] = await target.need(`${DIST}/${group}/ttf/${f}.ttf`, de`${path.dir}`);
+	await node(`utility/ttf-to-woff2.js`, from.full, path.full);
 });
 
 // TTC
-file(`${DIST}/collections/*/*.ttc`).def(async (target, cid, fileName) => {
-	const [parts] = await target.need(`collection-parts-of:${fileName}`);
-	await target.need(`dir:${target.path.dir}`);
+file(`${DIST}/collections/*/*.ttc`, async (target, { full, dir, $: [, f] }) => {
+	const [parts] = await target.need(`collection-parts-of:${f}`);
+	await target.need(de`${dir}`);
 	const [ttfs] = await target.need(parts.map(part => `${DIST}/${part.dir}/ttf/${part.file}.ttf`));
-	await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", target.path.full);
+	await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full);
 });
 
 // Group-level
-task("ttf:***").def(async (target, gid) => {
+task("ttf:***", async (target, gid) => {
 	const [ts] = await target.need(`group-fonts-of:${gid}`);
 	await target.need(ts.map(tn => `${DIST}/${gid}/ttf/${tn}.ttf`));
 });
-task("ttf-unhinted:***").def(async (target, gid) => {
+task("ttf-unhinted:***", async (target, gid) => {
 	const [ts] = await target.need(`group-fonts-of:${gid}`);
 	await target.need(ts.map(tn => `${DIST}/${gid}/ttf-unhinted/${tn}.ttf`));
 });
-task("woff:***").def(async (target, gid) => {
+task("woff:***", async (target, gid) => {
 	const [ts] = await target.need(`group-fonts-of:${gid}`);
 	await target.need(ts.map(tn => `${DIST}/${gid}/woff/${tn}.woff`));
 });
-task("woff2:***").def(async (target, gid) => {
+task("woff2:***", async (target, gid) => {
 	const [ts] = await target.need(`group-fonts-of:${gid}`);
 	await target.need(ts.map(tn => `${DIST}/${gid}/woff2/${tn}.woff2`));
 });
-task("fonts:***").def(async (target, gid) => {
+task("fonts:***", async (target, gid) => {
 	await target.need(`ttf:${gid}`, `ttf-unhinted:${gid}`, `woff:${gid}`, `woff2:${gid}`);
 });
 
 // Charmap (for specimen)
-file(`${DIST}/*/*.charmap`).def(async (target, gid, suffix) => {
-	const [src] = await target.need(`${BUILD}/${gid}/${suffix}.charmap`, `dir:${target.path.dir}`);
-	await cp(src.full, target.path.full);
+file(`${DIST}/*/*.charmap`, async (target, { full, dir, $: [gid, suffix] }) => {
+	const [src] = await target.need(buildCM`${BUILD}/${gid}/${suffix}.charmap`, de`${dir}`);
+	await cp(src.full, full);
 });
 
 // Webfont CSS
-file(`${DIST}/*/webfont.css`).def(async (target, gid) => {
+file(`${DIST}/*/webfont.css`, async (target, { dir, $: [gid] }) => {
 	// Note: this target does NOT depend on the font files.
-	const [gr, ts] = await target.need(
-		`group-info:${gid}`,
-		`group-fonts-of:${gid}`,
-		`dir:${target.path.dir}`
-	);
+	const [gr, ts] = await target.need(`group-info:${gid}`, `group-fonts-of:${gid}`, de`${dir}`);
 	const hs = await target.need(...ts.map(t => `hives-of:${t}`));
 	await node(
 		"utility/make-webfont-css.js",
@@ -302,7 +305,7 @@ file(`${DIST}/*/webfont.css`).def(async (target, gid) => {
 	);
 });
 
-task("contents:***").def(async (target, gid) => {
+task("contents:***", async (target, gid) => {
 	const [gr] = await target.need(`group-info:${gid}`);
 	await target.need(
 		`fonts:${gid}`,
@@ -313,39 +316,39 @@ task("contents:***").def(async (target, gid) => {
 });
 
 // Archive
-task(`${ARCHIVE_DIR}/*-*.zip`).def(async (target, gid) => {
+task(`${ARCHIVE_DIR}/*-*.zip`, async (target, { dir, full, $: [gid] }) => {
 	// Note: this target does NOT depend on the font files.
-	const [exportPlans] = await target.need(`o:export-plans`, `dir:${target.path.dir}`);
+	const [exportPlans] = await target.need(o_exportPlans, de`${dir}`);
 	await target.need(`contents:${exportPlans[gid]}`);
 	await cd(`${DIST}/${exportPlans[gid]}`).run(
 		["7z", "a"],
 		["-tzip", "-r", "-mx=9"],
-		`../../${target.path.full}`,
+		`../../${full}`,
 		`./`
 	);
 });
-task(`archive:***`).def(async (target, gid) => {
+task(`archive:***`, async (target, gid) => {
 	const [version] = await target.need(`o:version`);
 	await target.need(`${ARCHIVE_DIR}/${gid}-${version}.zip`);
 });
 
 // Collection-level
-task("collection-fonts:***").def(async (target, cid) => {
-	const [{ groups }] = await target.need("o:collect-plans");
+task("collection-fonts:***", async (target, { $: [cid] }) => {
+	const [{ groups }] = await target.need(o_collectPlans);
 	await target.need(groups[cid].map(file => `${DIST}/collections/${cid}/${file}.ttc`));
 });
-task(`${ARCHIVE_DIR}/ttc-*-*.zip`).def(async (target, cid) => {
+task(`${ARCHIVE_DIR}/ttc-*-*.zip`, async (target, { dir, full, $: [cid] }) => {
 	// Note: this target does NOT depend on the font files.
-	await target.need(`dir:${target.path.dir}`);
+	await target.need(de`${dir}`);
 	await target.need(`collection-fonts:${cid}`);
 	await cd(`${DIST}/collections/${cid}`).run(
 		["7z", "a"],
 		["-tzip", "-r", "-mx=9"],
-		`../../../${target.path.full}`,
+		`../../../${full}`,
 		`./`
 	);
 });
-task(`collection-archive:***`).def(async (target, cid) => {
+task(`collection-archive:***`, async (target, cid) => {
 	const [version] = await target.need(`o:version`);
 	await target.need(`${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`);
 });
@@ -354,30 +357,30 @@ task(`collection-archive:***`).def(async (target, cid) => {
 //////                  Root Tasks                   //////
 ///////////////////////////////////////////////////////////
 
-task(`pages`).def(async target => {
+task(`pages`, async target => {
 	const [sans, slab] = await target.need(`contents:iosevka`, `contents:iosevka-slab`);
 	await cp(`${DIST}/${sans}`, `pages/${sans}`);
 	await cp(`${DIST}/${slab}`, `pages/${slab}`);
 });
 
-task(`sample-images:pre`).def(async target => {
+task(`sample-images:pre`, async target => {
 	const [sans, slab] = await target.need(`contents:iosevka`, `contents:iosevka-slab`);
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
-file(`snapshot/index.css`).def(async target => {
+file(`snapshot/index.css`, async target => {
 	await target.need(`snapshot/index.styl`);
 	await cd(`snapshot`).run(`stylus`, `index.styl`, `-c`);
 });
-task(`sample-images:take`).def(async target => {
+task(`sample-images:take`, async target => {
 	await target.need(`sample-images:pre`, `snapshot/index.css`);
 	await cd(`snapshot`).run("npx", "electron", "get-snap.js", ["--dir", "../images"]);
 });
-file(`images/*.png`).def(async target => {
+file(`images/*.png`, async (target, { full }) => {
 	await target.need(`sample-images:take`);
-	await run("optipng", target.path.full);
+	await run("optipng", full);
 });
-task(`sample-images`).def(async target => {
+task(`sample-images`, async target => {
 	await target.need(`sample-images:take`);
 	await target.need(
 		`images/charvars.png`,
@@ -393,20 +396,20 @@ task(`sample-images`).def(async target => {
 	);
 });
 
-task(`all:archives`).def(async target => {
-	const [exportPlans, collectPlans] = await target.need("o:export-plans", "o:collect-plans");
+task(`all:archives`, async target => {
+	const [exportPlans, collectPlans] = await target.need(o_exportPlans, o_collectPlans);
 	await target.need(
 		Object.keys(exportPlans).map(gid => `archive:${gid}`),
 		Object.keys(collectPlans.groups).map(cid => `collection-archive:${cid}`)
 	);
 });
 
-phony(`clean`).def(async () => {
+phony(`clean`, async () => {
 	await rm(`build`);
 	await rm(`dist`);
 	await rm(`release-archives`);
 });
-phony(`release`).def(async target => {
+phony(`release`, async target => {
 	await target.need(`all:archives`, `sample-images`, `pages`);
 });
 
@@ -414,41 +417,41 @@ phony(`release`).def(async target => {
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
-const MARCOS = [`file-updated:meta/macros.ptl`];
-oracle("{ptl|js}-scripts-under:***").def((target, $ext, $1) =>
+const MARCOS = [fu`meta/macros.ptl`];
+oracle("{ptl|js}-scripts-under::***", (target, $ext, $1) =>
 	FileList({ under: $1, pattern: `**/*.${$ext}` })(target)
 );
-oracle("scripts:{ptl|js}").def(async (target, ext) => {
+const o_scripts = oracle.prefix("scripts", async (target, ext) => {
 	const [gen, meta, glyphs, support] = await target.need(
-		`${ext}-scripts-under:gen`,
-		`${ext}-scripts-under:meta`,
-		`${ext}-scripts-under:glyphs`,
-		`${ext}-scripts-under:support`
+		`${ext}-scripts-under::gen`,
+		`${ext}-scripts-under::meta`,
+		`${ext}-scripts-under::glyphs`,
+		`${ext}-scripts-under::support`
 	);
 	return [...gen, ...meta, ...glyphs, ...support];
 });
-oracle("scripts:js-from-ptl").def(async target => {
-	const [ptl] = await target.need("scripts:ptl");
-	return target.trackModification(ptl.map(x => x.replace(/\.ptl$/g, ".js")));
+const o_jsonFromPtl = oracle.plain("scripts-js-from-ptl", async target => {
+	const [ptl] = await target.need(o_scripts`ptl`);
+	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-file(`{gen|glyphs|support|meta}/**/*.js`).def(async target => {
-	const [jsFromPtl] = await target.need("scripts:js-from-ptl");
-	if (jsFromPtl.indexOf(target.path.full) >= 0) {
-		const ptl = target.path.full.replace(/\.js$/g, ".ptl");
-		if (/^glyphs\//.test(target.path.full)) {
+file(`{gen|glyphs|support|meta}/**/*.js`, async (target, path) => {
+	const [jsFromPtl] = await target.need(o_jsonFromPtl);
+	if (jsFromPtl.indexOf(path.full) >= 0) {
+		const ptl = path.full.replace(/\.js$/g, ".ptl");
+		if (/^glyphs\//.test(path.full)) {
 			await target.need(MARCOS);
 		}
-		await target.need(`file-updated:${ptl}`);
-		await run(PATEL_C, "--strict", ptl, "-o", target.path.full);
+		await target.need(fu`${ptl}`);
+		await run(PATEL_C, "--strict", ptl, "-o", path.full);
 	} else {
-		await target.need(`file-updated:${target.path.full}`);
+		await target.need(fu`${path.full}`);
 	}
 });
-task("scripts").def(async target => {
-	const [jsFromPtl] = await target.need("scripts:js-from-ptl");
+task("scripts", async target => {
+	const [jsFromPtl] = await target.need(o_jsonFromPtl);
 	await target.need(jsFromPtl);
-	const [js] = await target.need("scripts:js");
+	const [js] = await target.need(o_scripts`js`);
 	await target.need(js);
-	await target.need(`parameters.toml`, `variants.toml`, `emptyfont.toml`);
+	await target.need(fu`parameters.toml`, fu`variants.toml`, fu`emptyfont.toml`);
 });
