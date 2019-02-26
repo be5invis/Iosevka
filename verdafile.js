@@ -203,7 +203,7 @@ oracle("collection-parts-of:*", async (target, id) => {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-file(`${BUILD}/*/*.ttf`, async (target, path) => {
+const buildTTF = file(`${BUILD}/*/*.ttf`, async (target, path) => {
 	const [, suffix] = path.$;
 	const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
 		`hives-of:${suffix}`,
@@ -237,12 +237,12 @@ const buildCM = file(`${BUILD}/*/*.charmap`, async (target, path) => {
 // Per group file
 file(`${DIST}/*/ttf-unhinted/*.ttf`, async (target, path) => {
 	const [gr, f] = path.$;
-	const [from] = await target.need(`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
+	const [from] = await target.need(buildTTF`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
 	await cp(from.full, path.full);
 });
 file(`${DIST}/*/ttf/*.ttf`, async (target, path) => {
-	const [group, f] = path.$;
-	const [from] = await target.need(`${DIST}/${group}/ttf-unhinted/${f}.ttf`, de`${path.dir}`);
+	const [gr, f] = path.$;
+	const [from] = await target.need(buildTTF`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
 	await run("ttfautohint", from.full, path.full);
 });
 file(`${DIST}/*/woff/*.woff`, async (target, path) => {
@@ -380,6 +380,7 @@ file(`images/*.png`, async (target, { full }) => {
 	await target.need(`sample-images:take`);
 	await run("optipng", full);
 });
+
 task(`sample-images`, async target => {
 	await target.need(`sample-images:take`);
 	await target.need(
@@ -408,6 +409,7 @@ phony(`clean`, async () => {
 	await rm(`build`);
 	await rm(`dist`);
 	await rm(`release-archives`);
+	build.deleteJournal(); // Disable journal
 });
 phony(`release`, async target => {
 	await target.need(`all:archives`, `sample-images`, `pages`);
