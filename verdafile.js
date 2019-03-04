@@ -1,7 +1,7 @@
 "use strict";
 
 const build = require("verda").create();
-const { task, tasks, file, files, oracle, oracles, phony } = build.ruleTypes;
+const { task, tasks, file, files, oracle, oracles, computed, computes, phony } = build.ruleTypes;
 const { de, fu } = build.rules;
 const { run, node, cd, cp, rm } = build.actions;
 const { FileList } = build.predefinedFuncs;
@@ -75,23 +75,23 @@ const RawPlans = oracle(`raw-plans`, async target => {
 	return t;
 });
 
-const BuildPlans = oracle("build-plans", async target => {
+const BuildPlans = computed("build-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.buildPlans;
 });
-const ExportPlans = oracle("export-plans", async target => {
+const ExportPlans = computed("export-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.exportPlans;
 });
-const RawCollectPlans = oracle("raw-collect-plans", async target => {
+const RawCollectPlans = computed("raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
 });
-const Weights = oracle("weights", async target => {
+const Weights = computed("weights", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.weights;
 });
-const Slants = oracle("slants", async target => {
+const Slants = computed("slants", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.slants;
 });
@@ -117,12 +117,12 @@ function getSuffixSet(weights, slants) {
 	return mapping;
 }
 
-const Suffixes = oracle(`suffixes`, async target => {
+const Suffixes = computed(`suffixes`, async target => {
 	const [weights, slants] = await target.need(Weights, Slants);
 	return getSuffixSet(weights, slants);
 });
 
-const FontBuildingParameters = oracle(`font-building-parameters`, async target => {
+const FontBuildingParameters = computed(`font-building-parameters`, async target => {
 	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
 		BuildPlans,
 		Weights,
@@ -160,7 +160,7 @@ const FontBuildingParameters = oracle(`font-building-parameters`, async target =
 	return { fontInfos, buildPlans: bp };
 });
 
-const CollectPlans = oracle(`collect-plans`, async target => {
+const CollectPlans = computed(`collect-plans`, async target => {
 	const [rawCollectPlans, suffixMapping] = await target.need(RawCollectPlans, Suffixes);
 	const composition = {},
 		groups = {};
@@ -182,22 +182,22 @@ const CollectPlans = oracle(`collect-plans`, async target => {
 	return { composition, groups };
 });
 
-const HivesOf = oracles.group("hives-of", async (target, gid) => {
+const HivesOf = computes.group("hives-of", async (target, gid) => {
 	const [{ fontInfos }] = await target.need(FontBuildingParameters);
 	return fontInfos[gid];
 });
 
-const GroupInfo = oracles.group("group-info", async (target, gid) => {
+const GroupInfo = computes.group("group-info", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(FontBuildingParameters);
 	return buildPlans[gid];
 });
 
-const GroupFontsOf = oracles.group("group-fonts-of", async (target, gid) => {
+const GroupFontsOf = computes.group("group-fonts-of", async (target, gid) => {
 	const [plan] = await target.need(GroupInfo(gid));
 	return plan.targets;
 });
 
-const CollectionPartsOf = oracles.group("collection-parts-of", async (target, id) => {
+const CollectionPartsOf = computes.group("collection-parts-of", async (target, id) => {
 	const [{ composition }] = await target.need(CollectPlans);
 	return composition[id];
 });
@@ -228,7 +228,6 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width");
 	await rm(otd);
 });
-
 const BuildCM = files(`${BUILD}/*/*.charmap`, async (target, path) => {
 	await target.need(BuildTTF(path.dir + "/" + path.name + ".ttf"));
 });
@@ -434,7 +433,7 @@ const MARCOS = [fu`meta/macros.ptl`];
 const ScriptsUnder = oracles("{ptl|js}-scripts-under::***", (target, $ext, $1) =>
 	FileList({ under: $1, pattern: `**/*.${$ext}` })(target)
 );
-const ScriptFiles = oracles.group("script-files", async (target, ext) => {
+const ScriptFiles = computes.group("script-files", async (target, ext) => {
 	const [gen, meta, glyphs, support] = await target.need(
 		ScriptsUnder`${ext}-scripts-under::gen`,
 		ScriptsUnder`${ext}-scripts-under::meta`,
@@ -443,7 +442,7 @@ const ScriptFiles = oracles.group("script-files", async (target, ext) => {
 	);
 	return [...gen, ...meta, ...glyphs, ...support];
 });
-const JavaScriptFromPtl = oracle("scripts-js-from-ptl", async target => {
+const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles`ptl`);
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });

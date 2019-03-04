@@ -90,13 +90,13 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    oblique = "oblique"
    ```
 
-3. Run `npm run build -- contents:<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents:<plan>`, other options are:
+3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
-   1. `contents:<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
-   2. `ttf:<plan>` : TTF;
-   3. `ttf-unhinted:<plan>` : Unhinted TTF only;
-   4. `woff:<plan>` : TTF and WOFF only;
-   5. `woff2:<plan>` : TTF and WOFF2 only;
+   1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
+   2. `ttf::<plan>` : TTF;
+   3. `ttf-unhinted::<plan>` : Unhinted TTF only;
+   4. `woff::<plan>` : TTF and WOFF only;
+   5. `woff2::<plan>` : TTF and WOFF2 only;
 
 The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
