@@ -340,7 +340,7 @@ const GroupArchives = tasks.group(`archive`, async (target, gid) => {
 });
 
 // Collection-level
-const CollectionFontsOf = tasks.group("collection-fonts", async (target, { $: [cid] }) => {
+const CollectionFontsOf = tasks.group("collection-fonts", async (target, cid) => {
 	const [{ groups }] = await target.need(CollectPlans);
 	await target.need(groups[cid].map(file => DistTTC`${DIST}/collections/${cid}/${file}.ttc`));
 });

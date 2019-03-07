@@ -210,12 +210,17 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-tilde-low` : Lower tilde `~` (default).
     * `v-asterisk-high` : Higher asterisk `*` (default).
     * `v-asterisk-low` : Lower asterisk `*`.
+    * `v-asterisk-hexhigh` : Higher six-pointed asterisk `*`.
+    * `v-asterisk-hexlow` : Lower six-pointed asterisk `*`.
     * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
     * `v-paragraph-low` : Lower paragraph symbol `¶`.
     * `v-caret-high` : Higher circumflex `^` (default).
     * `v-caret-low` : Lower circumflex `^`.
     * `v-underscore-high` : Higher underscore `_` (default).
     * `v-underscore-low` : Lower underscore `_`.
+  * Styles for Percent (`%`):
+    * `v-percent-dots`: Percent `%`, Per-mille `‰` and basis point `‱` will use rectangular dots.
+    * `v-percent-rings`: Percent `%`, Per-mille `‰` and basis point `‱` will use rings (default).
   * Styles for At (`@`):
     * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
     * `v-at-fourfold` : The traditional, four-fold At symbol.

@@ -223,18 +223,15 @@ export : define [apply] : begin
 
 	select-variant 'dotlessj' 0x237
 
-	sketch # j
-		set-width WIDTH
-
-		include glyphs.dotlessj AS_BASE
-		include glyphs.dotAbove
-		save 'j' 'j'
-		save 'grkj' 0x3F3
-		save 'cyrje' 0x458
-
+	composite 'j' glyphs.dotlessj glyphs.dotAbove [into-unicode 'j']
 	if (glyphs.j && glyphs.dotlessj) : begin
-		composite 'j.straight' glyphs.'dotlessj.straight' glyphs.dotAbove
-		composite 'j.serifed' glyphs.'dotlessj.serifed' glyphs.dotAbove
+		local fs : queryFeatureSelector 'dotlessj' para
+		local fs_j : queryFeatureSelector 'dotlessj' para 'j'
+		foreach [{k gid} : pairs-of fs] : begin
+			composite fs_j.(k) glyphs.(gid) glyphs.dotAbove
+		set glyphs.j.featureSelector fs_j
+	alias "grkj" 0x3F3 'j'
+	alias "cyrje" 0x458 'j'
 
 	sketch # jcurlytail
 		include markset.p
@@ -790,10 +787,10 @@ export : define [apply] : begin
 
 	define [WHooktopShape top barStraight _div] : glyph-construction
 		local div : fallback _div 1
-		local fine : if barStraight
+		local fineOuter : if barStraight
 			adviceBlackness WShape.fineS div
-			[adviceBlackness WShape.fine div] / WShape.fineOffset
-		local fineOffset : fine / 2 * HVCONTRAST * WShape.fineOffset
+			adviceBlackness WShape.fineOuter div
+		local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
 		local rightSB : WIDTH * div - SB
 		local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 
@@ -810,7 +807,7 @@ export : define [apply] : begin
 			widths.rhs
 			straight.down.start rightSB (top - HOOK) [heading DOWNWARD]
 			quadcontrols 0 0.3 6 unimportant g2
-			g4   (m2 + fineOffset) 0 [widths.rhs fine]
+			g4 (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 
 		include : VerticalHook (rightSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
 
