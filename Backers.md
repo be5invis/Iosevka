@@ -30,3 +30,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Beni Cherniavsky-Paskin
 - Bartłomiej T. Listwon
 - Will Binns-Smith
+- Jeff S
