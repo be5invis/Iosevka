@@ -8,7 +8,8 @@ Coders’ typeface, built from code.
 
 Quit your editor/program. Unzip and open the folder.
 
-* **[Instructions for Windows](https://www.microsoft.com/en-us/Typography/TrueTypeInstall.aspx)**
+* **Instructions for Windows**: Download the fonts from the [Releases](https://github.com/be5invis/Iosevka/releases), select the font files and right click, then hit "Install".
+  * On Windows 10 1809 or newer the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select "Install for all users" instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
 * **[Instructions for macOS](http://support.apple.com/kb/HT2509)**
   * Standard distribution in Homebrew: `brew tap caskroom/fonts && brew cask install font-iosevka` (May be outdated).
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
@@ -90,13 +91,14 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    oblique = "oblique"
    ```
 
-3. Run `npm run build -- contents:<your plan name>` and the built fonts would be available in `dist/`. Aside from `contents:<plan>`, other options are:
+3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
-   1. `contents:<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
-   2. `ttf:<plan>` : TTF;
-   3. `ttf-unhinted:<plan>` : Unhinted TTF only;
-   4. `woff:<plan>` : TTF and WOFF only;
-   5. `woff2:<plan>` : TTF and WOFF2 only;
+   1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
+   2. `ttf::<plan>` : TTF;
+   3. `ttf-unhinted::<plan>` : Unhinted TTF only;
+   4. `woff::<plan>` : TTF and WOFF only;
+   5. `woff2::<plan>` : TTF and WOFF2 only;
+      - Note: Since version 2.2.0, we are using two colons (`::`) in the build target names.
 
 The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
@@ -163,11 +165,16 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-italic` : Italic `l` (default for italic).
     * `v-l-tailed` : `l` with a curved tail.
     * `v-l-hookybottom` : `l` with a straight tail.
+    * `v-l-line` : `l` like a straight line.
   * Styles for letter `i`:
     * `v-i-hooky` : Hooky `i`.
     * `v-i-zshaped` : Z-shaped `i`.
     * `v-i-serifed` : Serifed `i` (default for upright and oblique).
     * `v-i-italic` : Italic `i` (default for italic).
+    * `v-i-line` : `i` like a straight line.
+  * Styles for letter `j`:
+    * `v-j-line`: `j` like a straight line.
+    * `v-j-serifed`: `j` with top serif (default).
   * Styles for letter `a`:
     * `v-a-doublestorey` : Double-storey `a` (default for upright and oblique).
     * `v-a-singlestorey` : Single-storey `a` (default for italic).
@@ -205,12 +212,17 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-tilde-low` : Lower tilde `~` (default).
     * `v-asterisk-high` : Higher asterisk `*` (default).
     * `v-asterisk-low` : Lower asterisk `*`.
+    * `v-asterisk-hexhigh` : Higher six-pointed asterisk `*`.
+    * `v-asterisk-hexlow` : Lower six-pointed asterisk `*`.
     * `v-paragraph-high` : Higher paragraph symbol `¶` (default).
     * `v-paragraph-low` : Lower paragraph symbol `¶`.
     * `v-caret-high` : Higher circumflex `^` (default).
     * `v-caret-low` : Lower circumflex `^`.
     * `v-underscore-high` : Higher underscore `_` (default).
     * `v-underscore-low` : Lower underscore `_`.
+  * Styles for Percent (`%`):
+    * `v-percent-dots`: Percent `%`, Per-mille `‰` and basis point `‱` will use rectangular dots.
+    * `v-percent-rings`: Percent `%`, Per-mille `‰` and basis point `‱` will use rings (default).
   * Styles for At (`@`):
     * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
     * `v-at-fourfold` : The traditional, four-fold At symbol.

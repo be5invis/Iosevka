@@ -83,6 +83,11 @@ export : define [apply] : begin
 		include : RightwardBottomSerif MIDDLE 0 LONGJUT
 		save 'dotlessi.zshaped'
 
+	sketch # dotlessi.line
+		include markset.e
+		include : VBar (MIDDLE) 0 XH
+		save 'dotlessi.line'
+
 	sketch # dotlessi.serifed
 		include markset.e
 		local balance IBALANCE
@@ -202,6 +207,11 @@ export : define [apply] : begin
 
 		save 'dotlessj.straight'
 
+	sketch # dotlessj.line
+		include markset.p
+		include : VBar MIDDLE DESCENDER XH
+		save 'dotlessj.line'
+
 	sketch # dotlessj.serifed
 		include markset.p
 		include glyphs.'dotlessj.straight' AS_BASE
@@ -213,18 +223,15 @@ export : define [apply] : begin
 
 	select-variant 'dotlessj' 0x237
 
-	sketch # j
-		set-width WIDTH
-
-		include glyphs.dotlessj AS_BASE
-		include glyphs.dotAbove
-		save 'j' 'j'
-		save 'grkj' 0x3F3
-		save 'cyrje' 0x458
-
+	composite 'j' glyphs.dotlessj glyphs.dotAbove [into-unicode 'j']
 	if (glyphs.j && glyphs.dotlessj) : begin
-		composite 'j.straight' glyphs.'dotlessj.straight' glyphs.dotAbove
-		composite 'j.serifed' glyphs.'dotlessj.serifed' glyphs.dotAbove
+		local fs : queryFeatureSelector 'dotlessj' para
+		local fs_j : queryFeatureSelector 'dotlessj' para 'j'
+		foreach [{k gid} : pairs-of fs] : begin
+			composite fs_j.(k) glyphs.(gid) glyphs.dotAbove
+		set glyphs.j.featureSelector fs_j
+	alias "grkj" 0x3F3 'j'
+	alias "cyrje" 0x458 'j'
 
 	sketch # jcurlytail
 		include markset.p
@@ -296,11 +303,6 @@ export : define [apply] : begin
 		save 'smcpL' 0x29F
 
 	### l
-	create-glyph 'l.straight'  : glyph-construction
-		include markset.b
-		set currentGlyph.cmpPriority (-2)
-		include : VBar MIDDLE 0 CAP
-
 	sketch # l.hooky
 		include markset.b
 		local middle : MIDDLE + LBALANCE2
@@ -319,6 +321,12 @@ export : define [apply] : begin
 		include : tagged 'serifRB' : RightwardBottomSerif MIDDLE 0 LONGJUT
 
 		save 'l.zshaped'
+
+	sketch # l.line
+		include markset.b
+		include : VBar MIDDLE 0 (CAP * 0.6)
+		include : VBar MIDDLE (CAP * 0.4) CAP
+		save 'l.line'
 
 	sketch # l.serifed
 		include markset.b
@@ -671,10 +679,16 @@ export : define [apply] : begin
 		local div : fallback _div 1
 		local rightSB : WIDTH * div - SB
 		local middle : MIDDLE * div
-		local fine : if barStraight
+		local fineOuter : if barStraight
 			adviceBlackness WShape.fineS div
-			[adviceBlackness WShape.fine div] / WShape.fineOffset
-		local fineOffset : fine / 2 * HVCONTRAST * WShape.fineOffset
+			adviceBlackness WShape.fineOuter div
+		local fineInner : if barStraight
+			adviceBlackness WShape.fineS div
+			adviceBlackness WShape.fineInner div
+		local fineHeight : (fineOuter + fineInner) / 2
+		
+		local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
+		local fineOffsetInner : fineInner / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
 		local m1 : WIDTH * div * [if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
 		local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 		local wheight : if barStraight top (top * 0.6)
@@ -683,58 +697,73 @@ export : define [apply] : begin
 			include : dispiro
 				widths.lhs
 				flat (SB + O * 2) top [heading DOWNWARD]
-				g4   (m1 - fineOffset) 0 [widths.lhs fine]
+				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 		: else : begin
 			include : dispiro
 				widths.lhs
 				flat SB top [heading DOWNWARD]
 				curl SB (top * 0.75) [heading DOWNWARD]
 				quadcontrols 0 0.3 6 unimportant
-				g4   (m1 - fineOffset) 0 [widths.lhs fine]
+				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 
 		# bottom cap 1
-		start-from (m1 + fineOffset) 0
-		line-to (m1 - fineOffset) 0
-		line-to m1 fine
+		start-from (m1 + fineOffsetInner) 0
+		line-to (m1 - fineOffsetOuter) 0
+		line-to m1 fineHeight
 
-		include : dispiro
-			widths.lhs fine
-			flat (middle - fineOffset) wheight
-			#quadcontrols 0 0.1 6 unimportant
-			g4  (m1 + fineOffset) 0 [widths.rhs fine]
-		include : dispiro
-			widths.rhs fine
-			flat (middle + fineOffset) wheight
-			#quadcontrols 0 0.1 6 unimportant
-			curl  (m2 - fineOffset) 0 [widths.lhs fine]
+		include : difference
+			union
+				dispiro
+					widths.lhs fineInner
+					flat (middle - fineOffsetInner) wheight
+					#quadcontrols 0 0.1 6 unimportant
+					g4  (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
+				dispiro
+					widths.rhs fineInner
+					flat (middle + fineOffsetInner) wheight
+					#quadcontrols 0 0.1 6 unimportant
+					curl  (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
+			union
+				spiro-outline
+					corner 0             0
+					corner (WIDTH * div) 0
+					corner (WIDTH * div) (-WIDTH * div)
+					corner 0             (-WIDTH * div)
+				spiro-outline
+					corner 0             wheight
+					corner (WIDTH * div) wheight
+					corner (WIDTH * div) (wheight + WIDTH * div)
+					corner 0             (wheight + WIDTH * div)
 
 		# middle cap
-		start-from (middle + fineOffset) wheight
-		line-to middle (wheight - fine)
-		line-to (middle - fineOffset) wheight
+		start-from (middle + fineOffsetInner) wheight
+		line-to middle (wheight - fineHeight)
+		line-to (middle - fineOffsetInner) wheight
 
 		# bottom cap 2
-		start-from (m2 + fineOffset) 0
-		line-to (m2 - fineOffset) 0
-		line-to m2 fine
+		start-from (m2 + fineOffsetOuter) 0
+		line-to (m2 - fineOffsetInner) 0
+		line-to m2 fineHeight
 
 		if barStraight : begin
 			include : dispiro
 				widths.rhs
 				flat (rightSB - O * 2) top [heading DOWNWARD]
-				g4   (m2 + fineOffset) 0 [widths.rhs fine]
+				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 		: else : begin
 			include : dispiro
 				widths.rhs
 				flat rightSB top [heading DOWNWARD]
 				curl rightSB (top * 0.75) [heading DOWNWARD]
 				quadcontrols 0 0.3 6 unimportant
-				g4   (m2 + fineOffset) 0 [widths.rhs fine]
+				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 		include : AIVSerifs top SB rightSB
 
-	set WShape.fine 5.5
+	set WShape.fineOuter 5
+	set WShape.fineInner 6
 	set WShape.fineS 5.5
-	set WShape.fineOffset 1.375
+	set WShape.fineOffset  1.5
+	set WShape.fineOffsetS 1.375
 	set WShape.m1 0.325
 	set WShape.m2 0.675
 	set WShape.m1S 0.30
@@ -758,10 +787,10 @@ export : define [apply] : begin
 
 	define [WHooktopShape top barStraight _div] : glyph-construction
 		local div : fallback _div 1
-		local fine : if barStraight
+		local fineOuter : if barStraight
 			adviceBlackness WShape.fineS div
-			[adviceBlackness WShape.fine div] / WShape.fineOffset
-		local fineOffset : fine / 2 * HVCONTRAST * WShape.fineOffset
+			adviceBlackness WShape.fineOuter div
+		local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
 		local rightSB : WIDTH * div - SB
 		local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 
@@ -778,7 +807,7 @@ export : define [apply] : begin
 			widths.rhs
 			straight.down.start rightSB (top - HOOK) [heading DOWNWARD]
 			quadcontrols 0 0.3 6 unimportant g2
-			g4   (m2 + fineOffset) 0 [widths.rhs fine]
+			g4 (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 
 		include : VerticalHook (rightSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
 
@@ -2773,7 +2802,7 @@ export : define [apply] : begin
 		include : VerticalHook MIDDLE 0 LONGJUT HOOK
 
 		save 'iviby' 0x285
-	define fbar : XH * 0.91 + STROKE * 0.25
+	define fbar : XH * para.fbarpos + STROKE * para.fbarStrokeAdj
 	sketch # f.straight
 		local fovershoot2 (O * 2)
 		include markset.b
