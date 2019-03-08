@@ -108,8 +108,8 @@ var dopr = TAG("dotoper");
 var indexPage = new Vue({
 	el: "body",
 	data: {
-		version: "2.1.0",
-		codename: "Presca",
+		version: "2.2.0",
+		codename: "Quinn",
 		themes: ["color-light", "color-dark"],
 		snippets: [],
 		snippet: "javascript",
@@ -295,7 +295,15 @@ var indexPage = new Vue({
 					{ tag: "cv52", sample: "f" },
 					{ tag: "cv53", sample: "f" },
 					{ tag: "cv54", sample: "$" },
-					{ tag: "cv55", sample: "$" }
+					{ tag: "cv55", sample: "$" },
+					{ tag: "cv56", sample: "i" },
+					{ tag: "cv57", sample: "j" },
+					{ tag: "cv58", sample: "j" },
+					{ tag: "cv59", sample: "l" },
+					{ tag: "cv60", sample: "*" },
+					{ tag: "cv61", sample: "*" },
+					{ tag: "cv62", sample: "%" },
+					{ tag: "cv63", sample: "%" }
 				]
 			}
 		],
