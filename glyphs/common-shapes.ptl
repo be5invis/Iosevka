@@ -18,13 +18,15 @@ export : define [apply] : begin
 			set introduced true
 		return : if introduced fs null
 
-	define [select-variant name unicode] : begin
+	define [select-variant name unicode altname altmap] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
 		local variant : variantSelector.(name) || para.defaultVariant.(name)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
+		if (altmap && altmap.(variant)) : set variant altmap.(variant)
 		local chosenGlyph glyphs.((name + '.' + variant))
-		create-glyph name : glyph-construction
+
+		create-glyph [fallback altname name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
 			set currentGlyph.featureSelector : queryFeatureSelector name para
