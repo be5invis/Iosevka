@@ -29,6 +29,7 @@ const PRIVATE_BUILD_PLANS = path.relative(
 
 // Save journal to build/
 build.setJournal(`${BUILD}/.verda-build-journal`);
+// Enable self-tracking
 build.setSelfTracking();
 
 ///////////////////////////////////////////////////////////
