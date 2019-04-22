@@ -29,6 +29,7 @@ const PRIVATE_BUILD_PLANS = path.relative(
 
 // Save journal to build/
 build.setJournal(`${BUILD}/.verda-build-journal`);
+// Enable self-tracking
 build.setSelfTracking();
 
 ///////////////////////////////////////////////////////////
@@ -374,7 +375,11 @@ const Pages = task(`pages`, async target => {
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
-	const [sans, slab] = await target.need(GroupContents`iosevka`, GroupContents`iosevka-slab`);
+	const [sans, slab] = await target.need(
+		GroupContents`iosevka`,
+		GroupContents`iosevka-slab`,
+		de`images`
+	);
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
@@ -422,7 +427,8 @@ phony(`clean`, async () => {
 	build.deleteJournal(); // Disable journal
 });
 phony(`release`, async target => {
-	await target.need(AllArchives, SampleImages, Pages);
+	await target.need(AllArchives);
+	await target.need(SampleImages, Pages);
 });
 
 ///////////////////////////////////////////////////////////

@@ -13,7 +13,7 @@ define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
 # GSUB
-define [buildGSUB para glyphList markGlyphs] : begin
+define [buildGSUB para glyphs glyphList markGlyphs] : begin
 	local commonList {}
 	local languages
 		.DFLT_DFLT {.features commonList}
@@ -69,7 +69,7 @@ define [buildGSUB para glyphList markGlyphs] : begin
 	if [not para.disableLigation] : do
 		define plm : progLigNameMap
 		set plm.calt : para.customLigSet || plm.(para.defLigSet) || plm.calt
-		buildLigations chain-rule lookupOrder commonList features lookups plm
+		buildLigations chain-rule lookupOrder commonList features lookups plm glyphs
 	if (para.spacing > 0 && [not para.noCJKV]) : begin
 		buildOPBD chain-rule lookupOrder commonList features lookups
 	
@@ -132,7 +132,7 @@ define [buildGSUB para glyphList markGlyphs] : begin
 	return {.languages languages .features features .lookups lookups .lookupOrder [topsort lookupOrder]}
 
 # GPOS
-define [buildGPOS para glyphList markGlyphs] : begin
+define [buildGPOS para glyphs glyphList markGlyphs] : begin
 	local lookup_mark
 		.type 'gpos_mark_to_base'
 		.subtables {}
@@ -197,7 +197,7 @@ define [buildGPOS para glyphList markGlyphs] : begin
 			.l_mkmk lookup_mkmk
 
 # GDEF
-define [buildGDEF para glyphList markGlyphs] : begin
+define [buildGDEF para glyphs glyphList markGlyphs] : begin
 	local GDEF {.glyphClassDef {.}}
 	foreach glyph [items-of glyphList] : begin
 		set GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] GDEF_LIGATURE GDEF_SIMPLE
@@ -261,9 +261,9 @@ define [interpretLookupAt gs j lut] : match lut.type
 
 export : define [apply para glyphs glyphList unicodeGlyphs] : begin
 	local markGlyphs {.all {} }
-	local GPOS : buildGPOS para glyphList markGlyphs
-	local GDEF : buildGDEF para glyphList markGlyphs
-	local GSUB : buildGSUB para glyphList markGlyphs
+	local GPOS : buildGPOS para glyphs glyphList markGlyphs
+	local GDEF : buildGDEF para glyphs glyphList markGlyphs
+	local GSUB : buildGSUB para glyphs glyphList markGlyphs
 
 	# Build compatibility ligatures
 	if (para.spacing > 0 && para.compLig) : foreach [cldef : items-of para.compLig] : do

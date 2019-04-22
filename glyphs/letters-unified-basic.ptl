@@ -707,43 +707,44 @@ export : define [apply] : begin
 				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 
 		# bottom cap 1
-		start-from (m1 + fineOffsetInner) 0
-		line-to (m1 - fineOffsetOuter) 0
-		line-to m1 fineHeight
+		define [InnerShapes] : union
+			spiro-outline
+				corner (m1 + fineOffsetInner) 0
+				corner (m1 - fineOffsetOuter) 0
+				corner m1 fineHeight
+			spiro-outline
+				corner (middle + fineOffsetInner) wheight
+				corner middle (wheight - fineHeight)
+				corner (middle - fineOffsetInner) wheight
+			spiro-outline
+				corner (m2 + fineOffsetOuter) 0
+				corner (m2 - fineOffsetInner) 0
+				corner m2 fineHeight
 
-		include : difference
-			union
-				dispiro
-					widths.lhs fineInner
-					flat (middle - fineOffsetInner) wheight
-					#quadcontrols 0 0.1 6 unimportant
-					g4  (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
-				dispiro
-					widths.rhs fineInner
-					flat (middle + fineOffsetInner) wheight
-					#quadcontrols 0 0.1 6 unimportant
-					curl  (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
-			union
-				spiro-outline
-					corner 0             0
-					corner (WIDTH * div) 0
-					corner (WIDTH * div) (-WIDTH * div)
-					corner 0             (-WIDTH * div)
-				spiro-outline
-					corner 0             wheight
-					corner (WIDTH * div) wheight
-					corner (WIDTH * div) (wheight + WIDTH * div)
-					corner 0             (wheight + WIDTH * div)
+			dispiro
+				widths.lhs fineInner
+				flat (middle - fineOffsetInner) wheight
+				#quadcontrols 0 0.1 6 unimportant
+				curl (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
+			dispiro
+				widths.rhs fineInner
+				flat (middle + fineOffsetInner) wheight
+				#quadcontrols 0 0.1 6 unimportant
+				curl (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
 
-		# middle cap
-		start-from (middle + fineOffsetInner) wheight
-		line-to middle (wheight - fineHeight)
-		line-to (middle - fineOffsetInner) wheight
-
-		# bottom cap 2
-		start-from (m2 + fineOffsetOuter) 0
-		line-to (m2 - fineOffsetInner) 0
-		line-to m2 fineHeight
+		define [InnerStrokeMask] : union
+			spiro-outline
+				corner 0             0
+				corner (WIDTH * div) 0
+				corner (WIDTH * div) (-WIDTH * div)
+				corner 0             (-WIDTH * div)
+			spiro-outline
+				corner 0             wheight
+				corner (WIDTH * div) wheight
+				corner (WIDTH * div) (wheight + WIDTH * div)
+				corner 0             (wheight + WIDTH * div)
+		
+		include : difference [InnerShapes] [InnerStrokeMask]
 
 		if barStraight : begin
 			include : dispiro
