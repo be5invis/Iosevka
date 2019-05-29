@@ -266,7 +266,7 @@ var sampleSentences = [
 	{ code: "tr", lang: "Turkish", sample: "Pijamalı hasta yağız şoföre çabucak güvendi." },
 	{
 		code: "uk",
-		lang: "Ukranian",
+		lang: "Ukrainian",
 		sample: "Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!"
 	}
 ];
