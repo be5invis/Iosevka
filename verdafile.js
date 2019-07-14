@@ -61,14 +61,16 @@ const RawPlans = oracle(`raw-plans`, async target => {
 		// Style groups
 		if (!plan.pre) plan.pre = {};
 		if (!plan.post) plan.post = {};
+
 		if (!plan.pre.design) plan.pre.design = plan.design || [];
 		if (!plan.pre.upright) plan.pre.upright = plan.upright || [];
-		if (!plan.pre.italic) plan.pre.italic = plan.italic || [];
 		if (!plan.pre.oblique) plan.pre.oblique = plan.oblique || [];
+		if (!plan.pre.italic) plan.pre.italic = plan.italic || [];
+
 		if (!plan.post.design) plan.post.design = [];
 		if (!plan.post.upright) plan.post.upright = [];
-		if (!plan.post.italic) plan.post.italic = [];
 		if (!plan.post.oblique) plan.post.oblique = [];
+		if (!plan.post.italic) plan.post.italic = [];
 	}
 	for (const prefix in t.collectPlans) {
 		t.collectPlans[prefix].prefix = prefix;
@@ -385,7 +387,7 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(fu`snapshot/index.styl`);
-	await cd(`snapshot`).run(`stylus`, `index.styl`, `-c`);
+	await run(`npm`, `run`, `stylus`, `snapshot/index.styl`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre, SnapShotCSS);
