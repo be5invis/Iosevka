@@ -382,7 +382,7 @@ export : define [apply] : begin
 
 
 	define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
-		local leftx : _leftx + (HALFSTROKE * HVCONTRAST * [if (rightx > _leftx) 1 (-1)])
+		local leftx : _leftx + ((HALFSTROKE * HVCONTRAST + [if para.straightBar OX 0]) * [if (rightx > _leftx) 1 (-1)])
 		local fine  : (_fine || STROKE) * 0.5
 		
 		local turnyleft : mix lefty righty turn
@@ -391,14 +391,25 @@ export : define [apply] : begin
 		local straightxleft : mix leftx rightx straight
 		local straightyleft : mix cyleft righty straight
 		
-		include : dispiro
-			widths.center
-			flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
-			flat straightxleft straightyleft
-			curl rightx righty
-			end [function : set this.cleanmore true]
+		if para.straightBar : begin
+			local cor : 1 / [Math.sin [Math.atan2 [Math.abs (righty - lefty)] [Math.abs (rightx - leftx)]]]
+			local hst : HALFSTROKE * [mix 1 cor [linreg 18 1 126 0 STROKE]]
+			local hse : HALFSTROKE * ([adviceBlackness 3] / STROKE)
+			include : dispiro
+				widths.center
+				corner leftx lefty [widths.heading hst hst [if (lefty < righty) UPWARD DOWNWARD]]
+				corner rightx righty [widths hse hse]
+				end [function : set this.cleanmore true]
+		: else : begin
+			include : dispiro
+				widths.center
+				flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
+				flat straightxleft straightyleft
+				curl rightx righty
+				end [function : set this.cleanmore true]
+
 
 
 	define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-construction

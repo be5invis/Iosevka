@@ -393,10 +393,11 @@ export : define [apply] : begin
 				apply-transform : Italify
 
 	define [bracedDottdeDimens width] : begin
-		define sw : Math.max (WIDTH * 0.075) [adviceBlackness 5]
+		define sw0 : Math.max (WIDTH * 0.075) [adviceBlackness 5]
+		define sw : Math.min STROKE sw0
 		define dscale : linreg WIDTH 0.55 UPM 0.65 width
 		define pscale : linreg WIDTH 0.6 UPM 0.75 width
-		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] + OX
+		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw0 * 2.5)] + OX
 		define r : width - l
 		return : object width sw dscale pscale l r
 
@@ -507,11 +508,12 @@ export : define [apply] : begin
 			unfair -- true
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
-			include miniatureFont.(glyphid) AS_BASE
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
+			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
 			apply-transform [Upright] true
-			apply-transform [Translate (-MIDDLE) (-CAP)] true
+			apply-transform [Translate (-middle) (-CAP)] true
 			apply-transform [Scale 0.7] true
-			apply-transform [Translate MIDDLE (CAP + ACCENT / 2)] true
+			apply-transform [Translate middle (CAP + ACCENT / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
 			refair this
@@ -525,11 +527,12 @@ export : define [apply] : begin
 			unfair -- true
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
-			include miniatureFont.(glyphid) AS_BASE
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
+			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
 			apply-transform [Upright] true
-			apply-transform [Translate (-MIDDLE) 0] true
+			apply-transform [Translate (-middle) 0] true
 			apply-transform [Scale 0.7] true
-			apply-transform [Translate MIDDLE (DESCENDER / 2)] true
+			apply-transform [Translate middle (DESCENDER / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
 			refair this
@@ -557,9 +560,10 @@ export : define [apply] : begin
 		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
 			set-width 0
 			if unicode : assign-unicode unicode
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
-			apply-transform : Translate (-MIDDLE) 0
+			apply-transform : Translate (-middle) 0
 			apply-transform : Scale 0.4
 			apply-transform : Translate markMiddle aboveMarkBot
 			apply-transform : Italify 
@@ -922,7 +926,7 @@ export : define [apply] : begin
 					include df2.(c2)
 					include : Translate WIDTH 0
 					include df1.(c1)
-					set-width FULLWIDTH
+					set-width UPM
 					save glyphName unicode
 			: else
 				local kern : SB * 7/8 * (shrink1 + shrink2)

@@ -481,7 +481,7 @@ export : define [apply] : begin
 	local vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
 	define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
 		local df : DivFrame div
-		local fine : if barStraight STROKE (VShape.fine * sw / STROKE)
+		local fine : [if barStraight VShape.fineStraight VShape.fine] * sw / STROKE
 		if barStraight : begin
 			include : dispiro
 				widths.lhs sw
@@ -515,6 +515,7 @@ export : define [apply] : begin
 		tag-contour 'strokeUp'
 		include : AIVSerifs top
 	set VShape.fine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
+	set VShape.fineStraight : STROKE * 0.95
 
 	sketch # V
 		set-width WIDTH
@@ -762,7 +763,7 @@ export : define [apply] : begin
 
 	set WShape.fineOuter 5
 	set WShape.fineInner 6
-	set WShape.fineS 5.5
+	set WShape.fineS 5.75
 	set WShape.fineOffset  1.5
 	set WShape.fineOffsetS 1.375
 	set WShape.m1 0.325
@@ -913,7 +914,8 @@ export : define [apply] : begin
 		save 'smcpY' 0x28F
 
 	### y
-	local useCurlyBottom : para.isItalic || SLAB
+	do "small-y"
+	local useCurlyBottom : para.isItalic || SLAB || para.straightBar
 	local px1 0.84
 	local py1 : linreg 18 0.8 126 0.76 STROKE
 	local px2 0.95
@@ -927,14 +929,24 @@ export : define [apply] : begin
 	local yrstrokel0 : MIDDLE - WIDTH * 0.1
 	local yrstrokel : MIDDLE - WIDTH * [if useCurlyBottom 0.15 0.1] + [if useCurlyBottom HALFSTROKE 0]
 	local yrstroker : RIGHTSB - HALFSTROKE * HVCONTRAST
-	local yshrink : linreg 18 1 126 0.85 STROKE
+	local yshrink : [linreg 18 1 126 0.85 STROKE] * [if para.straightBar ([adviceBlackness 3.25] / STROKE) 1]
 	local slabysize JUT
 	local slabyvx : linreg 18 0.7 126 0.5 STROKE
-	define [yBaseKnots top bottom] : begin
+
+	define [yTopKnots x top ds dir] : begin
+		if para.straightBar : return : list
+			flat (x - OX * dir) top [heading DOWNWARD]
+		: else : return : list
+			flat x top [heading DOWNWARD]
+			curl x (top - ds) [heading DOWNWARD]
+			quadcontrols 0 dpy1 16
+
+	define [yBaseKnots top bottom hooktop] : begin
 		local ds : (top - bottom) * pds
 		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
 		return : list
-			flat [mix yrstrokel yrstroker px1] [mix (bottom + ds2) (top - ds) py1]
+			if (para.straightBar && (! hooktop)) : then {}
+			: else { [flat [mix yrstrokel yrstroker px1] [mix (bottom + ds2) (top - ds) py1]] }
 			curl 
 				mix yrstrokel yrstroker (1 - px2)
 				mix (bottom + ds2) (top - ds) (1 - py2)
@@ -947,29 +959,52 @@ export : define [apply] : begin
 				flat yrstrokel (bottom + ds2) [heading DOWNWARD]
 				curl yrstrokel bottom [heading DOWNWARD]
 
+	define [yJoinKnots ds ds2 top bottom hooktop] : begin
+		local joinProportion : linreg 
+			1 - px2
+			1 - py2
+			if (para.straightBar && !hooktop) 0.965 px1
+			if (para.straightBar && !hooktop) 1 py1
+			(MIDDLE - yrstrokel) / (yrstroker - yrstrokel)
+		return : list
+			if para.straightBar : then {}
+			: else { [flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds2) (top - ds) py1]] }
+			curl MIDDLE 
+				mix (bottom + ds2) (top - ds) joinProportion
+				widths.center (STROKE * yshrink)
+
 	define [SmallYShape top bottom] : glyph-construction
 		local ds : (top - bottom) * pds
 		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
 		include : tagged 'strokeR' : dispiro
 			widths.center
-			flat yrstroker top [heading DOWNWARD]
-			curl yrstroker (top - ds) [heading DOWNWARD]
-			quadcontrols 0 dpy1 16
+			yTopKnots yrstroker top ds 1
 			yBaseKnots top bottom
 			end [function : set this.cleanmore true]
 		include : dispiro
 			widths.center
-			flat (WIDTH - yrstroker) top [heading DOWNWARD]
-			curl (WIDTH - yrstroker) (top - ds) [heading DOWNWARD]
-			quadcontrols 0 dpy1 16
-			flat [mix (WIDTH - yrstrokel) (WIDTH - yrstroker) px1] [mix (bottom + ds2) (top - ds) py1]
-			curl MIDDLE 
-				mix (bottom + ds2) (top - ds) 
-					linreg (1 - px2) (1 - py2) px1 py1 ((MIDDLE - yrstrokel) / (yrstroker - yrstrokel))
-				widths.center (STROKE * yshrink)
+			yTopKnots (WIDTH - yrstroker) top ds (-1)
+			yJoinKnots ds ds2 top bottom
 			end [function : set this.cleanmore true]
 		if SLAB : begin
 			include : AIVSerifs top
+
+	define [SmallYHookTopShape top bottom] : glyph-construction
+		local ds : (top - bottom) * pds
+		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
+		include : tagged 'strokeR' : dispiro
+			widths.center
+			straight.left.start ([mix yrstrokel yrstroker px1] + HOOKX) (XH - HALFSTROKE)
+			yBaseKnots top bottom true
+			end [function : set this.cleanmore true]
+		include : dispiro
+			widths.center
+			yTopKnots (WIDTH - yrstroker) top ds (-1)
+			yJoinKnots ds ds2 top bottom true
+			end [function : set this.cleanmore true]
+		if SLAB : begin
+			include : AIVSerifs top
+			eject-contour 'serifRT'
 
 	sketch # y.straight
 		include markset.p
@@ -999,16 +1034,8 @@ export : define [apply] : begin
 	turned nothing 0x28E 'y.straight' MIDDLE (XH / 2) markset.b
 
 	sketch # yhooktop
-		include glyphs.'y.straight' AS_BASE
-		eject-contour 'strokeR'
-		eject-contour 'serifRT'
-
-		include : tagged 'strokeR' : dispiro
-			widths.center
-			straight.left.start ([mix yrstrokel yrstroker px1] + HOOKX) (XH - HALFSTROKE)
-			yBaseKnots XH DESCENDER
-			end [function : set this.cleanmore true]
-
+		include markset.p
+		include : SmallYHookTopShape XH DESCENDER
 		save 'yhooktop' 0x1B4
 
 	sketch # cyrU
@@ -2517,10 +2544,9 @@ export : define [apply] : begin
 	sketch # mltail
 		local mvs : MVERTSTROKE_D para.diversityM
 		include markset.p
-		include glyphs.m
+		include glyphs.m AS_BASE ALSO_METRICS
 		eject-contour 'serifRB'
 		include : VerticalHook (WIDTH * para.diversityM - SB - O - mvs / 2 * HVCONTRAST) 0 (-HOOKX) HOOK mvs
-
 		save 'mltail' 0x271
 	turned nothing 0x26F 'm' (MIDDLE * para.diversityM) (XH / 2)
 
