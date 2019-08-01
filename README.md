@@ -148,6 +148,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-colons`: Enable ligation for `::` and `:::` ;
 * Styles for changing the line space (leading):
   * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
+  * `win-metric-pad-0`, `win-metric-pad-50`, `win-metric-pad-100`, `win-metric-pad-150`, `win-metric-pad-200`, `win-metric-pad-250`, `win-metric-pad-300`: Add extra space to [OS/2 table’s Win metrics](C:\Users\be5in\AppData\Roaming\Python\Python37\Scripts) to avoid clipping in certain legacy software.
 * Styles for changing Powerline symbols' position:
   * `powerline-scale-y-750`, `powerline-scale-y-875`, `powerline-scale-y-1000`, `powerline-scale-y-1125`, `powerline-scale-y-1250`, `powerline-scale-y-1375`, `powerline-scale-y-1500`: Resize the Powerline symbols vertically, from 75% to 150%.
   * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.

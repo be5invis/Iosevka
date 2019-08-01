@@ -244,11 +244,12 @@ export : define [apply] : begin
 			while glyphs.(name + j) : inc j
 			set name (name + j)
 		return name
-		
+
 	# Build miniature clyphs : circled, superscripts, subscripts...
 	# Circled
 	define [circleInner dscale miniatureFont unicode parts width bal baly] : begin
-		define gni : suggestName : 'circle-inner-' + [parts.join '_'] + '.' + dscale
+		define gni : '.ci.' + [parts.join '_'] + '.' + [{dscale width bal baly}.join '.']
+		if (glyphs.(gni)) : return glyphs.(gni)
 		define lg : create-glyph gni : glyph-construction
 			local tw 0
 			foreach [glyphid : items-of parts] : begin
@@ -315,6 +316,24 @@ export : define [apply] : begin
 				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 				apply-transform : Italify
 
+	define [createBoxedGlyphs records] : if [not recursive] : begin
+		local miniatureFont : circledMiniatureFont records
+		foreach {unicode parts w bal baly} [items-of records] : do
+			define [object width dscale sw top bot left right] : circleDimens dscale w
+			create-glyph [suggestName : 'boxed-' + [parts.join '_']] : glyph-construction
+				set-width width
+				if unicode : assign-unicode unicode
+				include : circleInner dscale miniatureFont unicode parts width bal baly
+				include : union
+					HBarTop    left right top sw
+					HBarBottom left right bot sw
+					VBarLeft   left bot top   sw
+					VBarRight  right bot top  sw
+
+				apply-transform : Upright
+				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+				apply-transform : Italify
+	
 	define [createInsetCircledGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
@@ -324,6 +343,26 @@ export : define [apply] : begin
 				if unicode : assign-unicode unicode
 				include : difference
 					OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					circleInner dscale miniatureFont unicode parts width bal baly
+
+				apply-transform : Upright
+				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+				apply-transform : Italify
+
+	define [createInsetBoxedGlyphs records] : if [not recursive] : begin
+		local miniatureFont : circledMiniatureFont records
+		foreach {unicode parts w bal baly} [items-of records] : do
+			define [object width dscale sw top bot left right] : circleDimens dscale w
+			create-glyph [suggestName : 'inset-boxed-' + [parts.join '_']] : glyph-construction
+				set-width width
+				if unicode : assign-unicode unicode
+				include : difference
+					spiro-outline
+						corner left  top
+						corner left  bot
+						corner right bot
+						corner right top
+						close
 					circleInner dscale miniatureFont unicode parts width bal baly
 
 				apply-transform : Upright
@@ -966,7 +1005,19 @@ export : define [apply] : begin
 			0x24EB + j - 11
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
 			begin FULLWIDTH1
+		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
 		createInsetCircledGlyphs compositions
+
+	if [not recursive] : let : begin
+		local compositions {}
+		if [not para.disableVariants] : compositions.push { null {'space'} FULLWIDTH1 }
+		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createBoxedGlyphs compositions
+
+	if [not recursive] : let : begin
+		local compositions {}
+		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createInsetBoxedGlyphs compositions
 
 	if [not recursive] : let : begin
 		local compositions {}
