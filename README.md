@@ -225,9 +225,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-percent-dots`: Percent `%`, Per-mille `‰` and basis point `‱` will use rectangular dots.
     * `v-percent-rings`: Percent `%`, Per-mille `‰` and basis point `‱` will use rings (default).
   * Styles for At (`@`):
-    * `v-at-long` : The long, three-fold At symbol in Iosevka 1.7.x.
-    * `v-at-fourfold` : The traditional, four-fold At symbol.
-    * `v-at-short` : The shorter, Fira-like At symbol introduced in Iosevka 1.8.
+    * `v-at-threefold` : The three-fold `@` symbol (default).
+    * `v-at-fourfold` : The traditional, four-fold `@` symbol.
+    * `v-at-short` : The shorter, Fira-like `@` symbol.
   * Styles for Eszet (`ß`):
     * `v-eszet-traditional` : Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher` : A more modern, beta-like Eszet (default).

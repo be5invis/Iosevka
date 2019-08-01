@@ -19,6 +19,7 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "gen/generator"];
+const GC = ["node", "gen/gc"];
 const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
@@ -216,11 +217,13 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 		Version
 	);
 	const otd = path.dir + "/" + path.name + ".otd";
+	const ttfTmp = path.dir + "/" + path.name + ".tmp.ttf";
+	const otdTmp = path.dir + "/" + path.name + ".tmp.otd";
 	const charmap = path.dir + "/" + path.name + ".charmap";
 	await target.need(Scripts, fu`parameters.toml`, de`${path.dir}`);
 	await run(
 		GENERATE,
-		["-o", otd],
+		["-o", otdTmp],
 		["--charmap", charmap],
 		["--family", family],
 		["--ver", version],
@@ -228,7 +231,10 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 		["--menu-slant", menuStyle],
 		hives
 	);
-	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width");
+	await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
+	await run(GC, ["-i", ttfTmp], ["-o", otd]);
+	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width", "-q");
+	await rm(otdTmp);
 	await rm(otd);
 });
 const BuildCM = files(`${BUILD}/*/*.charmap`, async (target, path) => {

@@ -566,19 +566,18 @@ export : define [apply] : begin
 			refair this
 			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 
-	define [createFractions records] : if [not recursive] : begin
+	define [createFracImpl suffix records fine scaleFactor closing] : if [not recursive] : begin
 		local pendingGlyphs : [records.map : [record] => record.1].concat : records.map : [record] => record.2
-		local scaleFactor 0.55
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
 			crowd  -- 4
-			scale  -- 0.6
+			scale  -- (scaleFactor + 0.05)
 			unfair -- true
 		foreach {unicode numid denid height} [items-of records] : do
-			local dist : XH * 0.4
+			local dist : XH * (1 - scaleFactor - closing)
 			
-			if [not glyphs.(numid + ".numpart")] : begin
-				save-glyph (numid + ".numpart") null : sketch
+			if [not glyphs.(numid + suffix + ".numpart")] : begin
+				save-glyph (numid + suffix +  ".numpart") null : sketch
 					include miniatureFont.(numid)
 					apply-transform : Upright
 					apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
@@ -587,8 +586,8 @@ export : define [apply] : begin
 					apply-transform : Italify
 					refair this
 
-			if [not glyphs.(denid + ".denpart")] : begin
-				save-glyph (denid + ".denpart") null : sketch
+			if [not glyphs.(denid + suffix +  ".denpart")] : begin
+				save-glyph (denid + suffix +  ".denpart") null : sketch
 					include miniatureFont.(denid)
 					apply-transform : Upright
 					apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
@@ -598,11 +597,13 @@ export : define [apply] : begin
 					refair this
 
 		foreach {unicode numid denid height} [items-of records] : do
-			local fine : adviceBlackness 3
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include glyphs.(numid + ".numpart")
-				include glyphs.(denid + ".denpart")
-				include : HBar SB RIGHTSB symbolMid (fine * 0.75)
+				include glyphs.(numid + suffix +  ".numpart")
+				include glyphs.(denid + suffix +  ".denpart")
+				if fine : include : HBar SB RIGHTSB symbolMid (fine * 0.75)
+
+	define [createFractions records] : createFracImpl '.frac' records [adviceBlackness 3] 0.55 0.05
+	define [createPowerlineStacks records] : createFracImpl '.pwlStack' records 0 0.6 0.15
 
 	createSMCPs : list
 		list 0x1D00 'A'
@@ -848,11 +849,13 @@ export : define [apply] : begin
 		# care-of
 		list 0x2105 'C' 'O'
 		list 0x2106 'C' 'U'
+		# fraction bar
+		list null 'space' 'space'
+	
+	createPowerlineStacks : list
 		# Powerline LN symbol
 		list 0xE0A1 'L' 'N'
 		list 0xE0A3 'C' 'N'
-		# fraction bar
-		list null 'space' 'space'
 
 	createMedievalCombs : list
 		list 0x363 'a'
