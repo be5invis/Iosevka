@@ -37,91 +37,96 @@ export : define [apply] : begin
 			include : HBar [mix SB RIGHTSB 0.1] ([mix SB RIGHTSB 0.9] - 1) [mix (OPERATORSTROKE / 2) (CAP - OPERATORSTROKE / 2) (tone / 4)] OPERATORSTROKE
 
 	do "Suit card"
+		local df : DivFrame para.diversityM
 		local heartTop : mix symbolMid operTop 0.75
 		local heartBot : mix symbolMid operBot 0.75
-		local heartRight : mix RIGHTSB WIDTH 0.5
-		local heartLeft : mix SB 0 0.5
+		local heartRight : df.middle + [mix RIGHTSB WIDTH (1 / 2)] - MIDDLE
+		local heartLeft : df.middle - (heartRight - df.middle)
 		local sw : adviceBlackness 4.25
 		
 		local y1 : mix heartBot heartTop 0.5
 		local y2 : mix heartBot heartTop 0.75
 		local y3 : mix heartBot heartTop 0.75
 
+		define [wrap g] : glyph-construction
+			set-width df.width
+			include g AS_BASE
+
 		define [HeartInnerShape sw tip ext] : spiro-outline
-			corner MIDDLE (heartBot + sw * tip)
+			corner df.middle (heartBot + sw * tip)
 			quadcontrols 1 (2 / 3)
 			g4 (heartRight - O - sw) y2
 			arcvh
-			g4 [mix MIDDLE heartRight 0.5] (heartTop - sw * tip / 1.75)
+			g4 [mix df.middle heartRight 0.5] (heartTop - sw * tip / 1.75)
 			archv
 			if sw
 			: then : list
-				corner (MIDDLE + sw / 3) (y3 - sw * ext)
-				corner (MIDDLE - sw / 3) (y3 - sw * ext)
-			: else : corner MIDDLE (y3 - sw)
+				corner (df.middle + sw / 3) (y3 - sw * ext)
+				corner (df.middle - sw / 3) (y3 - sw * ext)
+			: else : corner df.middle (y3 - sw)
 			arcvh
-			g4 [mix MIDDLE heartLeft 0.5] (heartTop - sw * tip / 1.75)
+			g4 [mix df.middle heartLeft 0.5] (heartTop - sw * tip / 1.75)
 			archv
 			g4 (heartLeft + O + sw) y2
 			quadcontrols 0 (1 / 3)
 			close
 		
-		save-glyph 'heartSuit' 0x2665 : HeartInnerShape 0 0 0
-		save-glyph 'whiteHeartSuit' 0x2661 : difference glyphs.heartSuit [HeartInnerShape sw 1.75 0.8]
-		save-glyph 'spadeSuit' 0x2660 : union
+		save-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape 0 0 0
+		save-glyph 'whiteHeartSuit' 0x2661 : wrap : difference glyphs.heartSuit [HeartInnerShape sw 1.75 0.8]
+		save-glyph 'spadeSuit' 0x2660 : wrap : union
 			sketch
 				include glyphs.heartSuit
 				apply-transform : Upright
-				apply-transform : Translate (-MIDDLE) (-heartBot)
+				apply-transform : Translate (-df.middle) (-heartBot)
 				apply-transform : Scale 1 (-0.75)
-				apply-transform : Translate MIDDLE heartTop
+				apply-transform : Translate df.middle heartTop
 				apply-transform : Italify
-			HBarBottom [mix SB RIGHTSB 0.25] [mix RIGHTSB SB 0.25] heartBot sw
-			VBar MIDDLE heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)] sw
+			HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
+			VBar df.middle heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)] sw
 		
-		save-glyph 'whiteSpadeSuit' 0x2664 : difference glyphs.spadeSuit : sketch
+		save-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference glyphs.spadeSuit : sketch
 			include : HeartInnerShape sw 2 0
 			apply-transform : Upright
-			apply-transform : Translate (-MIDDLE) (-heartBot)
+			apply-transform : Translate (-df.middle) (-heartBot)
 			apply-transform : Scale 1 (-0.75)
-			apply-transform : Translate MIDDLE heartTop
+			apply-transform : Translate df.middle heartTop
 			apply-transform : Italify
 		
 		local clubTopY : mix heartTop heartBot 0.22
 		local clubTriangleHeight : (heartTop - heartBot) * 0.3
 		define [ClubTriangles r] : union
-			RingAt MIDDLE clubTopY r
-			RingAt (MIDDLE - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
-			RingAt (MIDDLE + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
+			RingAt df.middle clubTopY r
+			RingAt (df.middle - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
+			RingAt (df.middle + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
 			spiro-outline
-				corner MIDDLE clubTopY
-				corner (MIDDLE - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
-				corner (MIDDLE + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
+				corner df.middle clubTopY
+				corner (df.middle - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
+				corner (df.middle + clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight)
 
 		define [ClubShape r] : sketch
 			include : ClubTriangles r
-			include : HBarBottom [mix SB RIGHTSB 0.25] [mix RIGHTSB SB 0.25] heartBot sw
-			include : VBar MIDDLE heartBot [mix heartBot heartTop 0.45] sw
+			include : HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
+			include : VBar df.middle heartBot [mix heartBot heartTop 0.45] sw
 		
 		local circleRadius : (heartTop - heartBot) * 0.18
-		save-glyph 'clubSuit' 0x2663 : ClubShape circleRadius
-		save-glyph 'whiteClubSuit' 0x2667 : sketch
+		save-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
+		save-glyph 'whiteClubSuit' 0x2667 : wrap : sketch
 			local ro : circleRadius + sw / 2
 			local ri : circleRadius - sw / 2
 			include : difference [ClubShape ro] [ClubTriangles ri]
 
-		save-glyph 'diamondSuit' 0x2666 : sketch
-			start-from MIDDLE heartTop
+		save-glyph 'diamondSuit' 0x2666 : wrap : sketch
+			start-from df.middle heartTop
 			line-to    (heartRight - O) symbolMid
-			line-to    MIDDLE heartBot
+			line-to    df.middle heartBot
 			line-to    (heartLeft + O) symbolMid
 
-		save-glyph 'whiteDiamondSuit' 0x2662 : intersection glyphs.diamondSuit
+		save-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection glyphs.diamondSuit
 			union
-				dispiro [widths.rhs sw] [flat MIDDLE heartTop] [curl (heartRight - O) symbolMid]
-				dispiro [widths.rhs sw] [flat (heartRight - O) symbolMid] [curl MIDDLE heartBot]
-				dispiro [widths.rhs sw] [flat MIDDLE heartBot] [curl (heartLeft + O) symbolMid]
-				dispiro [widths.rhs sw] [flat (heartLeft + O) symbolMid] [curl MIDDLE heartTop]
+				dispiro [widths.rhs sw] [flat df.middle heartTop] [curl (heartRight - O) symbolMid]
+				dispiro [widths.rhs sw] [flat (heartRight - O) symbolMid] [curl df.middle heartBot]
+				dispiro [widths.rhs sw] [flat df.middle heartBot] [curl (heartLeft + O) symbolMid]
+				dispiro [widths.rhs sw] [flat (heartLeft + O) symbolMid] [curl df.middle heartTop]
 
 	### symbol-block 'Planets'
 	sketch # venus

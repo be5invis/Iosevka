@@ -143,6 +143,29 @@ export : define [apply] : begin
 		: else : begin
 			include : IotaShape XH
 		save 'dotlessi.italic'
+	
+	define [TailedIShape df top] : glyph-construction
+		local middle : df.middle - LBALANCE2
+		local x0 : HALFSTROKE + (HOOK - STROKE + 1) * 0.85 * df.div + LBALANCE2
+		local x1 : [Math.max (HOOK - HALFSTROKE + 1) (LONGJUT * df.div)] + LBALANCE2
+		include : dispiro
+			widths.center
+			flat middle top [heading DOWNWARD]
+			curl middle HOOK
+			arcvh
+			g4.right.mid (middle + x0) (HALFSTROKE + O) [heading RIGHTWARD]
+			g4 (middle + x1) (HALFSTROKE - O) [heading RIGHTWARD]
+		set-anchor 'above' BASE middle top
+		set-anchor 'below' BASE middle 0
+		set-anchor 'overlay' BASE middle (top * OVERLAYPOS)
+		set-anchor 'topright' BASE (middle + RIGHTSB - MIDDLE) top
+	
+	sketch # dotlessi.tailed
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include df.markSet.b
+		include : TailedIShape df XH
+		save 'dotlessi.tailed'
 
 	select-variant 'dotlessi' 0x131
 	sketch # iogonek.dotless
@@ -336,6 +359,7 @@ export : define [apply] : begin
 		set-anchor 'above' BASE middle CAP
 		set-anchor 'below' BASE middle 0
 		set-anchor 'overlay' BASE middle (CAP * OVERLAYPOS)
+		set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
 		include : VBar (df.middle + balance) 0 (CAP - STROKE)
 		include : LeftwardTopSerif (df.middle + balance) CAP (LONGJUT * df.div)
 		save 'l.hooky'
@@ -347,6 +371,8 @@ export : define [apply] : begin
 		include : VBar (df.middle) 0 (CAP - STROKE)
 		include : tagged 'serifLT' : LeftwardTopSerif (df.middle) CAP (LONGJUT * df.div)
 		include : tagged 'serifRB' : RightwardBottomSerif (df.middle) 0 (LONGJUT * df.div)
+		set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
+
 		save 'l.zshaped'
 
 	sketch # l.line
@@ -355,6 +381,8 @@ export : define [apply] : begin
 		include df.markSet.b
 		include : VBar (df.middle) 0 (CAP * 0.6)
 		include : VBar (df.middle) (CAP * 0.4) CAP
+		set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
+
 		save 'l.line'
 
 	sketch # l.serifed
@@ -366,6 +394,7 @@ export : define [apply] : begin
 		include : LeftwardTopSerif (df.middle + balance) CAP ((LONGJUT * df.div) - balance)
 		include : CenterBottomSerif df.middle 0 (LONGJUT * df.div)
 		set-anchor 'overlay' BASE (df.middle + balance / 2) (CAP * OVERLAYPOS)
+		set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
 		save 'l.serifed'
 
 	sketch # l.italic
@@ -391,27 +420,17 @@ export : define [apply] : begin
 			set-anchor 'above' BASE (left + HALFSTROKE) CAP
 			set-anchor 'below' BASE middle 0
 			set-anchor 'overlay' BASE (left + HALFSTROKE) (CAP * OVERLAYPOS)
-		: else : include : IotaShape CAP
+			set-anchor 'topright' BASE (left + HALFSTROKE + RIGHTSB - MIDDLE) CAP
+		: else : begin
+			include : IotaShape CAP
+			set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
 		save 'l.italic'
 	
 	sketch # l.tailed
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include df.markSet.b
-		local middle : df.middle - LBALANCE2
-		local top CAP
-		local x0 : (HOOK - HALFSTROKE + 1) * 0.9 + LBALANCE2
-		local x1 : [Math.max (HOOK - HALFSTROKE + 1) (LONGJUT * df.div)] + LBALANCE2
-		include : dispiro
-			widths.center
-			flat middle top [heading DOWNWARD]
-			curl middle HOOK
-			arcvh
-			g4.right.mid (middle + x0) (HALFSTROKE + O) [heading RIGHTWARD]
-			g4 (middle + x1) (HALFSTROKE - O) [heading RIGHTWARD]
-		set-anchor 'above' BASE middle CAP
-		set-anchor 'below' BASE middle 0
-		set-anchor 'overlay' BASE middle (CAP * OVERLAYPOS)
+		include : TailedIShape df CAP
 		save 'l.tailed'
 
 	sketch # l.hookybottom
@@ -422,6 +441,7 @@ export : define [apply] : begin
 		set-anchor 'above' BASE middle CAP
 		set-anchor 'below' BASE middle 0
 		set-anchor 'overlay' BASE middle (CAP * OVERLAYPOS)
+		set-anchor 'topright' BASE (middle + RIGHTSB - MIDDLE) CAP
 		include : VBar middle 0 CAP
 		include : RightwardBottomSerif middle 0 (LONGJUT * df.div)
 		save 'l.hookybottom'
@@ -439,10 +459,11 @@ export : define [apply] : begin
 		save 'ldot' 0x140
 
 	sketch # lrtail
+		local df : DivFrame para.diversityI
 		include glyphs.rtailBR
-		apply-transform : Translate (MIDDLE + LBALANCE2 + HALFSTROKE * HVCONTRAST) 0
+		apply-transform : Translate (df.middle + LBALANCE2 + HALFSTROKE * HVCONTRAST) 0
 		include glyphs.'l.hooky'
-		include markset.if
+		include df.markSet.if
 
 		save 'lrtail' 0x26D
 
@@ -463,37 +484,38 @@ export : define [apply] : begin
 		save 'lcurlytail' 0x234
 
 	sketch # ltildeover
-		include glyphs.'l.serifed' AS_BASE
+		local df : DivFrame para.diversityI
+		include glyphs.'l.serifed' AS_BASE ALSO_METRICS
 		include : create-glyph : glyph-construction
 			include glyphs.tildeAbove
 			apply-transform : Upright
-			apply-transform : Translate (MIDDLE - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
+			apply-transform : Translate (df.middle - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
 			apply-transform : Italify
-
 		save 'ltildeover' 0x26B
-	define [Belt] : glyph-construction
+
+	define [Belt middle] : glyph-construction
 		local fine : adviceBlackness 4.5
 		local r : XH * 0.05
 		include : dispiro
 			widths.rhs fine
-			flat MIDDLE (CAPMIDDLE + r) [heading LEFTWARD]
-			curl (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE + r)
+			flat middle (CAPMIDDLE + r) [heading LEFTWARD]
+			curl (middle - HALFSTROKE - r * 1.5) (CAPMIDDLE + r)
 			archv
-			g4.down.mid (MIDDLE - HALFSTROKE - r * 2.5) CAPMIDDLE [heading DOWNWARD]
+			g4.down.mid (middle - HALFSTROKE - r * 2.5) CAPMIDDLE [heading DOWNWARD]
 			arcvh
-			flat (MIDDLE - HALFSTROKE - r * 1.5) (CAPMIDDLE - r)
-			curl (MIDDLE + HALFSTROKE + r * 1.5 + fine) (CAPMIDDLE - r)
+			flat (middle - HALFSTROKE - r * 1.5) (CAPMIDDLE - r)
+			curl (middle + HALFSTROKE + r * 1.5 + fine) (CAPMIDDLE - r)
 
 	sketch # lbelt
-		include glyphs.'l.serifed' AS_BASE
-		include : Belt
-
+		local df : DivFrame para.diversityI
+		include glyphs.'l.serifed' AS_BASE ALSO_METRICS
+		include : Belt df.middle
 		save 'lbelt' 0x26C
 
 	sketch # lbeltrtail
-		include glyphs.lrtail AS_BASE
-		include : Belt
-
+		local df : DivFrame para.diversityI
+		include glyphs.lrtail AS_BASE ALSO_METRICS
+		include : Belt df.middle
 		save 'lbeltrtail' 0xA78E
 
 	sketch # looprevesh
@@ -521,10 +543,12 @@ export : define [apply] : begin
 	define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
 		local df : DivFrame div
 		local fine : [if barStraight VShape.fineStraight VShape.fine] * sw / STROKE
+		local sbCor : (top / CAP) * (OX * [if SLAB 1 4])
+		local dgCor : diagCor top (WIDTH / 2) 0 (sw * 2)
 		if barStraight : begin
 			include : dispiro
-				widths.lhs sw
-				flat (SB + O * 2) top [heading DOWNWARD]
+				widths.lhs (sw * dgCor)
+				flat (SB + sbCor) top [heading DOWNWARD]
 				g4   (df.middle - cornerdist) 0 [widths.lhs fine]
 		: else : begin
 			include : dispiro
@@ -541,8 +565,8 @@ export : define [apply] : begin
 
 		if barStraight : begin
 			include : dispiro
-				widths.rhs sw
-				flat (df.rightSB - O * 2) top [heading DOWNWARD]
+				widths.rhs (sw * dgCor)
+				flat (df.rightSB - sbCor) top [heading DOWNWARD]
 				g4   (df.middle + cornerdist) 0 [widths.rhs fine]
 		: else : begin
 			include : dispiro
@@ -972,9 +996,10 @@ export : define [apply] : begin
 	local slabysize JUT
 	local slabyvx : linreg 18 0.7 126 0.5 STROKE
 
-	define [yTopKnots x top ds dir] : begin
+	define [yTopKnots x top ds dir dx dy] : begin
+		local hs : HALFSTROKE * [diagCor dy dx 0 (STROKE * 2)]
 		if para.straightBar : return : list
-			flat (x - OX * dir) top [heading DOWNWARD]
+			flat (x - OX * dir) top [widths.heading hs hs DOWNWARD]
 		: else : return : list
 			flat x top [heading DOWNWARD]
 			curl x (top - ds) [heading DOWNWARD]
@@ -1017,12 +1042,12 @@ export : define [apply] : begin
 		local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
 		include : tagged 'strokeR' : dispiro
 			widths.center
-			yTopKnots yrstroker top ds 1
+			yTopKnots yrstroker top ds 1 WIDTH (top - bottom)
 			yBaseKnots top bottom
 			end [function : set this.cleanmore true]
 		include : dispiro
 			widths.center
-			yTopKnots (WIDTH - yrstroker) top ds (-1)
+			yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
 			yJoinKnots ds ds2 top bottom
 			end [function : set this.cleanmore true]
 		if SLAB : begin
@@ -1038,7 +1063,7 @@ export : define [apply] : begin
 			end [function : set this.cleanmore true]
 		include : dispiro
 			widths.center
-			yTopKnots (WIDTH - yrstroker) top ds (-1)
+			yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
 			yJoinKnots ds ds2 top bottom true
 			end [function : set this.cleanmore true]
 		if SLAB : begin
@@ -1594,9 +1619,13 @@ export : define [apply] : begin
 		local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
 		include : PShape top 1 m
 		local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
-		include : dispiro
+		if para.straightBar : then : include : dispiro
+			widths.center (STROKE * [diagCor top WIDTH 0 (STROKE * 2)])
+			corner MIDDLE ((top - STROKE) * m) [heading DOWNWARD]
+			corner (right - OX * 2 - HALFSTROKE * HVCONTRAST) 0 [heading DOWNWARD]
+		: else : include : dispiro
 			widths.center
-			g4.up.start (right - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
+			g4.up.start (right ) 0 [heading UPWARD]
 			quadcontrols 0 [if SLAB 0.3 0.4] 8
 			g4 MIDDLE ((top - STROKE) * m)
 		if SLAB : begin
@@ -1652,7 +1681,12 @@ export : define [apply] : begin
 			curl    (barright - HALFSTROKE * 0.1) bowlBottom [heading RIGHTWARD]
 		include : VBarRight barright 0 top
 		local left (SB + O + [if SLAB (JUT / 8) 0])
-		include : dispiro
+
+		if para.straightBar : then : include : dispiro
+			widths.center (STROKE * [diagCor top (WIDTH - STROKE * 2)])
+			corner MIDDLE ((top - STROKE) * m) [heading DOWNWARD]
+			corner (left + OX * 2 + HALFSTROKE * HVCONTRAST) 0 [heading DOWNWARD]
+		: else : include : dispiro
 			widths.center
 			g4.up.start (left + HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
 			quadcontrols 0 [if SLAB 0.3 0.4] 8
@@ -1978,7 +2012,7 @@ export : define [apply] : begin
 	### g
 	sketch # g.doublestorey
 		include markset.p
-		local obot : XH * GBARPOS - O - HALFSTROKE
+		local obot : XH * GBARPOS - O - STROKE * 0.4
 		include : OShape XH obot SB (RIGHTSB - 0.3 * SB)
 
 		local gleftx  ([mix 0 SB 0.85] + OX)
@@ -2009,7 +2043,7 @@ export : define [apply] : begin
 
 	sketch # g.opendoublestorey
 		include markset.p
-		local obot : XH * GBARPOS - O - HALFSTROKE
+		local obot : XH * GBARPOS - O - STROKE * 0.4
 		include : OShape XH obot SB (RIGHTSB - 0.3 * SB)
 
 		local gleftx  ([mix 0 SB 0.85] + OX)
