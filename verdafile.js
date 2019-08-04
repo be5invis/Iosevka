@@ -19,6 +19,7 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "gen/generator"];
+const GC = ["node", "gen/gc"];
 const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
@@ -61,14 +62,16 @@ const RawPlans = oracle(`raw-plans`, async target => {
 		// Style groups
 		if (!plan.pre) plan.pre = {};
 		if (!plan.post) plan.post = {};
+
 		if (!plan.pre.design) plan.pre.design = plan.design || [];
 		if (!plan.pre.upright) plan.pre.upright = plan.upright || [];
-		if (!plan.pre.italic) plan.pre.italic = plan.italic || [];
 		if (!plan.pre.oblique) plan.pre.oblique = plan.oblique || [];
+		if (!plan.pre.italic) plan.pre.italic = plan.italic || [];
+
 		if (!plan.post.design) plan.post.design = [];
 		if (!plan.post.upright) plan.post.upright = [];
-		if (!plan.post.italic) plan.post.italic = [];
 		if (!plan.post.oblique) plan.post.oblique = [];
+		if (!plan.post.italic) plan.post.italic = [];
 	}
 	for (const prefix in t.collectPlans) {
 		t.collectPlans[prefix].prefix = prefix;
@@ -214,11 +217,13 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 		Version
 	);
 	const otd = path.dir + "/" + path.name + ".otd";
+	const ttfTmp = path.dir + "/" + path.name + ".tmp.ttf";
+	const otdTmp = path.dir + "/" + path.name + ".tmp.otd";
 	const charmap = path.dir + "/" + path.name + ".charmap";
 	await target.need(Scripts, fu`parameters.toml`, de`${path.dir}`);
 	await run(
 		GENERATE,
-		["-o", otd],
+		["-o", otdTmp],
 		["--charmap", charmap],
 		["--family", family],
 		["--ver", version],
@@ -226,7 +231,10 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 		["--menu-slant", menuStyle],
 		hives
 	);
-	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width");
+	await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
+	await run(GC, ["-i", ttfTmp], ["-o", otd]);
+	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width", "-q");
+	await rm(otdTmp);
 	await rm(otd);
 });
 const BuildCM = files(`${BUILD}/*/*.charmap`, async (target, path) => {
@@ -385,7 +393,7 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(fu`snapshot/index.styl`);
-	await cd(`snapshot`).run(`stylus`, `index.styl`, `-c`);
+	await run(`npm`, `run`, `stylus`, `snapshot/index.styl`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre, SnapShotCSS);

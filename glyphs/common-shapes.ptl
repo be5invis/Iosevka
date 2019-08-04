@@ -381,8 +381,14 @@ export : define [apply] : begin
 			include : CenterBottomSerif (right - STROKE * sideSerifK * HVCONTRAST) 0 JUT
 
 
+	define [diagCor dy dx dyt dxt] : begin
+		local ay : Math.max 0 : [Math.abs dy] - [fallback dyt 0]
+		local ax : Math.max 0 : [Math.abs dx] - [fallback dxt 0]
+		return : [Math.hypot ay ax] / ay
+
 	define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
-		local leftx : _leftx + (HALFSTROKE * HVCONTRAST * [if (rightx > _leftx) 1 (-1)])
+		local sbCor : if para.straightBar ((OX * 4) * ([Math.abs  (lefty - righty)] / CAP)) 0
+		local leftx : _leftx + ((HALFSTROKE * HVCONTRAST + sbCor) * [if (rightx > _leftx) 1 (-1)])
 		local fine  : (_fine || STROKE) * 0.5
 		
 		local turnyleft : mix lefty righty turn
@@ -391,14 +397,25 @@ export : define [apply] : begin
 		local straightxleft : mix leftx rightx straight
 		local straightyleft : mix cyleft righty straight
 		
-		include : dispiro
-			widths.center
-			flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
-			flat straightxleft straightyleft
-			curl rightx righty
-			end [function : set this.cleanmore true]
+		if para.straightBar : begin
+			local cor : diagCor (righty - lefty) (rightx - leftx)
+			local hst : HALFSTROKE * [mix 1 cor [linreg 18 1 126 0 STROKE]]
+			local hse : HALFSTROKE * ([adviceBlackness 3] / STROKE)
+			include : dispiro
+				widths.center
+				corner leftx lefty [widths.heading hst hst [if (lefty < righty) UPWARD DOWNWARD]]
+				corner rightx righty [widths hse hse]
+				end [function : set this.cleanmore true]
+		: else : begin
+			include : dispiro
+				widths.center
+				flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
+				flat straightxleft straightyleft
+				curl rightx righty
+				end [function : set this.cleanmore true]
+
 
 
 	define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-construction
@@ -671,7 +688,7 @@ export : define [apply] : begin
 		forkedPara.jut = JUT * p
 		forkedPara.longjut = LONGJUT * p
 		forkedPara.diversityM = 1
-		forkedPara.diversityW = 1
+		forkedPara.diversityM = 1
 		forkedPara.diversityI = 1
 		forkedPara.diversityF = 1
 		#forkedPara.hookx = HOOKX * p
@@ -733,4 +750,4 @@ export : define [apply] : begin
 		include : difference background [union.apply null candidates]
 		include overlay
 	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay]
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor]

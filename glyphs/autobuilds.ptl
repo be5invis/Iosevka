@@ -244,11 +244,12 @@ export : define [apply] : begin
 			while glyphs.(name + j) : inc j
 			set name (name + j)
 		return name
-		
+
 	# Build miniature clyphs : circled, superscripts, subscripts...
 	# Circled
 	define [circleInner dscale miniatureFont unicode parts width bal baly] : begin
-		define gni : suggestName : 'circle-inner-' + [parts.join '_'] + '.' + dscale
+		define gni : '.ci.' + [parts.join '_'] + '.' + [{dscale width bal baly}.join '.']
+		if (glyphs.(gni)) : return glyphs.(gni)
 		define lg : create-glyph gni : glyph-construction
 			local tw 0
 			foreach [glyphid : items-of parts] : begin
@@ -315,6 +316,24 @@ export : define [apply] : begin
 				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 				apply-transform : Italify
 
+	define [createBoxedGlyphs records] : if [not recursive] : begin
+		local miniatureFont : circledMiniatureFont records
+		foreach {unicode parts w bal baly} [items-of records] : do
+			define [object width dscale sw top bot left right] : circleDimens dscale w
+			create-glyph [suggestName : 'boxed-' + [parts.join '_']] : glyph-construction
+				set-width width
+				if unicode : assign-unicode unicode
+				include : circleInner dscale miniatureFont unicode parts width bal baly
+				include : union
+					HBarTop    left right top sw
+					HBarBottom left right bot sw
+					VBarLeft   left bot top   sw
+					VBarRight  right bot top  sw
+
+				apply-transform : Upright
+				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+				apply-transform : Italify
+	
 	define [createInsetCircledGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
@@ -324,6 +343,26 @@ export : define [apply] : begin
 				if unicode : assign-unicode unicode
 				include : difference
 					OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					circleInner dscale miniatureFont unicode parts width bal baly
+
+				apply-transform : Upright
+				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+				apply-transform : Italify
+
+	define [createInsetBoxedGlyphs records] : if [not recursive] : begin
+		local miniatureFont : circledMiniatureFont records
+		foreach {unicode parts w bal baly} [items-of records] : do
+			define [object width dscale sw top bot left right] : circleDimens dscale w
+			create-glyph [suggestName : 'inset-boxed-' + [parts.join '_']] : glyph-construction
+				set-width width
+				if unicode : assign-unicode unicode
+				include : difference
+					spiro-outline
+						corner left  top
+						corner left  bot
+						corner right bot
+						corner right top
+						close
 					circleInner dscale miniatureFont unicode parts width bal baly
 
 				apply-transform : Upright
@@ -354,10 +393,11 @@ export : define [apply] : begin
 				apply-transform : Italify
 
 	define [bracedDottdeDimens width] : begin
-		define sw : Math.max (WIDTH * 0.075) [adviceBlackness 5]
+		define sw0 : Math.max (WIDTH * 0.075) [adviceBlackness 5]
+		define sw : Math.min STROKE sw0
 		define dscale : linreg WIDTH 0.55 UPM 0.65 width
 		define pscale : linreg WIDTH 0.6 UPM 0.75 width
-		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw * 2.5)] + OX
+		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw0 * 2.5)] + OX
 		define r : width - l
 		return : object width sw dscale pscale l r
 
@@ -468,11 +508,12 @@ export : define [apply] : begin
 			unfair -- true
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
-			include miniatureFont.(glyphid) AS_BASE
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
+			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
 			apply-transform [Upright] true
-			apply-transform [Translate (-MIDDLE) (-CAP)] true
+			apply-transform [Translate (-middle) (-CAP)] true
 			apply-transform [Scale 0.7] true
-			apply-transform [Translate MIDDLE (CAP + ACCENT / 2)] true
+			apply-transform [Translate middle (CAP + ACCENT / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
 			refair this
@@ -486,11 +527,12 @@ export : define [apply] : begin
 			unfair -- true
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
-			include miniatureFont.(glyphid) AS_BASE
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
+			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
 			apply-transform [Upright] true
-			apply-transform [Translate (-MIDDLE) 0] true
+			apply-transform [Translate (-middle) 0] true
 			apply-transform [Scale 0.7] true
-			apply-transform [Translate MIDDLE (DESCENDER / 2)] true
+			apply-transform [Translate middle (DESCENDER / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
 			refair this
@@ -518,28 +560,28 @@ export : define [apply] : begin
 		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
 			set-width 0
 			if unicode : assign-unicode unicode
+			local middle : miniatureFont.(glyphid).advanceWidth / 2
 			include miniatureFont.(glyphid)
 			apply-transform : Upright
-			apply-transform : Translate (-MIDDLE) 0
+			apply-transform : Translate (-middle) 0
 			apply-transform : Scale 0.4
 			apply-transform : Translate markMiddle aboveMarkBot
 			apply-transform : Italify 
 			refair this
 			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 
-	define [createFractions records] : if [not recursive] : begin
+	define [createFracImpl suffix records fine scaleFactor closing] : if [not recursive] : begin
 		local pendingGlyphs : [records.map : [record] => record.1].concat : records.map : [record] => record.2
-		local scaleFactor 0.55
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
 			crowd  -- 4
-			scale  -- 0.6
+			scale  -- (scaleFactor + 0.05)
 			unfair -- true
 		foreach {unicode numid denid height} [items-of records] : do
-			local dist : XH * 0.4
+			local dist : XH * (1 - scaleFactor - closing)
 			
-			if [not glyphs.(numid + ".numpart")] : begin
-				save-glyph (numid + ".numpart") null : sketch
+			if [not glyphs.(numid + suffix + ".numpart")] : begin
+				save-glyph (numid + suffix +  ".numpart") null : sketch
 					include miniatureFont.(numid)
 					apply-transform : Upright
 					apply-transform : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
@@ -548,8 +590,8 @@ export : define [apply] : begin
 					apply-transform : Italify
 					refair this
 
-			if [not glyphs.(denid + ".denpart")] : begin
-				save-glyph (denid + ".denpart") null : sketch
+			if [not glyphs.(denid + suffix +  ".denpart")] : begin
+				save-glyph (denid + suffix +  ".denpart") null : sketch
 					include miniatureFont.(denid)
 					apply-transform : Upright
 					apply-transform : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
@@ -559,11 +601,13 @@ export : define [apply] : begin
 					refair this
 
 		foreach {unicode numid denid height} [items-of records] : do
-			local fine : adviceBlackness 3
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include glyphs.(numid + ".numpart")
-				include glyphs.(denid + ".denpart")
-				include : HBar SB RIGHTSB symbolMid (fine * 0.75)
+				include glyphs.(numid + suffix +  ".numpart")
+				include glyphs.(denid + suffix +  ".denpart")
+				if fine : include : HBar SB RIGHTSB symbolMid (fine * 0.75)
+
+	define [createFractions records] : createFracImpl '.frac' records [adviceBlackness 3] 0.55 0.05
+	define [createPowerlineStacks records] : createFracImpl '.pwlStack' records 0 0.6 0.15
 
 	createSMCPs : list
 		list 0x1D00 'A'
@@ -809,11 +853,13 @@ export : define [apply] : begin
 		# care-of
 		list 0x2105 'C' 'O'
 		list 0x2106 'C' 'U'
+		# fraction bar
+		list null 'space' 'space'
+	
+	createPowerlineStacks : list
 		# Powerline LN symbol
 		list 0xE0A1 'L' 'N'
 		list 0xE0A3 'C' 'N'
-		# fraction bar
-		list null 'space' 'space'
 
 	createMedievalCombs : list
 		list 0x363 'a'
@@ -863,9 +909,9 @@ export : define [apply] : begin
 	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : if [not recursive] : begin
 		local pendingGlyphs1 : records.map : [record] => record.1
 		local pendingGlyphs2 : records.map : [record] => record.2
-		local wide : para.spaing > 1 || para.diversityW > 1
-		local shrink1 : if (wide) 1 [clamp 0 1 (_shrink1 * para.diversityW)]
-		local shrink2 : if (wide) 1 [clamp 0 1 (_shrink2 * para.diversityW)]
+		local wide : para.spaing > 1 || para.diversityM > 1
+		local shrink1 : if (wide) 1 [clamp 0 1 (_shrink1 * para.diversityM)]
+		local shrink2 : if (wide) 1 [clamp 0 1 (_shrink2 * para.diversityM)]
 		local df1 : Thinner pendingGlyphs1 shrink1
 		local df2 : Thinner pendingGlyphs2 shrink2
 
@@ -880,12 +926,12 @@ export : define [apply] : begin
 					include df2.(c2)
 					include : Translate WIDTH 0
 					include df1.(c1)
-					set-width FULLWIDTH
+					set-width UPM
 					save glyphName unicode
 			: else
 				local kern : SB * 7/8 * (shrink1 + shrink2)
 				local refW : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
-				local targetW : WIDTH * para.diversityW
+				local targetW : WIDTH * para.diversityM
 				sketch
 					include df2.(c2)
 					include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
@@ -897,7 +943,7 @@ export : define [apply] : begin
 					include : Translate (targetW / 2) 0
 					include : Italify
 					
-					if mark : include [MarksetDiv para.diversityW].(mark)
+					if mark : include [MarksetDiv para.diversityM].(mark)
 					save glyphName unicode
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
@@ -966,7 +1012,19 @@ export : define [apply] : begin
 			0x24EB + j - 11
 			[(j+'').split ''].map : c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
 			begin FULLWIDTH1
+		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
 		createInsetCircledGlyphs compositions
+
+	if [not recursive] : let : begin
+		local compositions {}
+		if [not para.disableVariants] : compositions.push { null {'space'} FULLWIDTH1 }
+		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createBoxedGlyphs compositions
+
+	if [not recursive] : let : begin
+		local compositions {}
+		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		createInsetBoxedGlyphs compositions
 
 	if [not recursive] : let : begin
 		local compositions {}

@@ -52,7 +52,8 @@ export : define [apply] : begin
 		turned 'nabla' 0x2207 'increment' MIDDLE (CAP / 2)
 
 		if [not recursive] : let : begin
-			local s : (RIGHTSB - SB - O * 4 + (FULLWIDTH - WIDTH) * 0.5) / CAP
+			local fullWidth FULLWIDTH2
+			local s : (RIGHTSB - SB - O * 4 + (fullWidth - WIDTH) * 0.5) / CAP
 			local df : Miniature
 				glyphs     -- {'eight' 'rotetedpropto'}
 				crowd      -- 4
@@ -61,23 +62,23 @@ export : define [apply] : begin
 				unfair     -- true
 
 			sketch # infty
-				set-width FULLWIDTH
+				set-width fullWidth
 				include df.eight
-				apply-transform : Translate (-MIDDLE) (-CAP / 2)
+				apply-transform : Translate (-(fullWidth / 2)) (-CAP / 2)
 				apply-transform : Rotate (Math.PI / 2)
 				apply-transform : Scale s
-				apply-transform : Translate FWMIDDLE symbolMid
+				apply-transform : Translate (fullWidth / 2) symbolMid
 				apply-transform : Italify
 				refair this
 				save 'infty' 0x221E
 			
 			sketch # propto
-				set-width FULLWIDTH
+				set-width fullWidth
 				include df.rotetedpropto
-				apply-transform : Translate (-MIDDLE) (-CAP / 2)
+				apply-transform : Translate (-(fullWidth / 2)) (-CAP / 2)
 				apply-transform : Rotate (Math.PI / 2)
 				apply-transform : Scale s
-				apply-transform : Translate FWMIDDLE symbolMid
+				apply-transform : Translate (fullWidth / 2) symbolMid
 				apply-transform : Italify
 				refair this
 				save 'propto' 0x221D
@@ -191,6 +192,11 @@ export : define [apply] : begin
 			include markset.plus
 			include : HBar SB RIGHTSB symbolMid OPERATORSTROKE
 			save 'minus' 0x2212
+		sketch # minus.preTurnstile
+			include markset.plus
+			include : HBar (-SB) RIGHTSB symbolMid OPERATORSTROKE
+			save 'ligminus.preTurnstile'
+			save 'lighyphen.preTurnstile'
 		sketch # innerMinus
 			include markset.plus
 			include : HBar SB RIGHTSB symbolMid GEOMETRYSTROKE
@@ -313,28 +319,28 @@ export : define [apply] : begin
 	do "Dots and Colon-likes"
 		local radius1 PERIODRADIUS
 		local radius : Math.min PERIODRADIUS
-			linreg WIDTH (0.5 * [adviceBlackness 3.5] * PERIODSIZE / STROKE) UPM PERIODRADIUS FULLWIDTH
-		local left : mix 0 FULLWIDTH (1 / 4)
-		local right : mix 0 FULLWIDTH (3 / 4)
+			linreg WIDTH (0.5 * [adviceBlackness 3.5] * PERIODSIZE / STROKE) UPM PERIODRADIUS FULLWIDTH3
+		local left : mix 0 FULLWIDTH3 (1 / 4)
+		local right : mix 0 FULLWIDTH3 (3 / 4)
 		sketch
-			set-width FULLWIDTH
-			include : Ring (XH - O) (XH - radius * 2 + O) (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
+			set-width FULLWIDTH3
+			include : Ring (XH - O) (XH - radius * 2 + O) (FULLWIDTH3 / 2 - radius + O) (FULLWIDTH3 / 2 + radius - O) true
 			include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
 			include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
 			save 'therefore' 0x2234
 		sketch
-			set-width FULLWIDTH
+			set-width FULLWIDTH3
 			include : Ring (XH - O) (XH - radius * 2 + O) (left - radius + O) (left + radius - O) true
 			include : Ring (XH - O) (XH - radius * 2 + O) (right - radius + O) (right + radius - O) true
-			include : Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
+			include : Ring (radius * 2 - O) O (FULLWIDTH3 / 2 - radius + O) (FULLWIDTH3 / 2 + radius - O) true
 			save 'because' 0x2235
 		sketch
-			set-width FULLWIDTH
-			include : Ring (PERIODRADIUS * 2 - O) O (FULLWIDTH / 2 - PERIODRADIUS + O) (FULLWIDTH / 2 + PERIODRADIUS - O) true
-			include : Ring (XH - O) (XH - PERIODRADIUS * 2 + O) (FULLWIDTH / 2 - PERIODRADIUS + O) (FULLWIDTH / 2 + PERIODRADIUS - O) true
+			set-width FULLWIDTH3
+			include : Ring (PERIODRADIUS * 2 - O) O (FULLWIDTH3 / 2 - PERIODRADIUS + O) (FULLWIDTH3 / 2 + PERIODRADIUS - O) true
+			include : Ring (XH - O) (XH - PERIODRADIUS * 2 + O) (FULLWIDTH3 / 2 - PERIODRADIUS + O) (FULLWIDTH3 / 2 + PERIODRADIUS - O) true
 			save 'mathcolon' 0x2236
 		sketch # coloncolon
-			set-width FULLWIDTH
+			set-width FULLWIDTH3
 			include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
 			include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
 			include : Ring (XH - O) (XH - radius * 2 + O) (left - radius + O) (left + radius - O) true
@@ -814,13 +820,17 @@ export : define [apply] : begin
 		define largeOperTop : mix symbolMid operTop 1.25
 		define largeOperBot : mix symbolMid operBot 1.25
 		sketch # sum
-			include : SigmaShape largeOperTop largeOperBot OPERATORSTROKE
+			local df : DivFrame para.diversityM
+			set-width df.width
+			include : SigmaShape largeOperTop largeOperBot OPERATORSTROKE para.diversityM
 			save 'sum' 0x2211
 		
 		sketch # product
-			include : PiShape largeOperTop largeOperBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE)
+			local df : DivFrame para.diversityM
+			set-width df.width
+			include : PiShape largeOperTop largeOperBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE) (div -- para.diversityM)
 			save 'product' 0x220F
-		turned 'coproduct' 0x2210 'product' MIDDLE symbolMid
+		turned 'coproduct' 0x2210 'product' (MIDDLE * para.diversityM) symbolMid
 
 		sketch # integrate
 			include : LongSShape largeOperTop largeOperBot HOOK (HOOK * 0.75) OPERATORSTROKE

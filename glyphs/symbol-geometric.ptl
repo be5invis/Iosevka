@@ -10,7 +10,8 @@ export : define [apply] : begin
 
 	### Arrowheads
 	define {ArrowShape} : do 'Arrows'
-		define arrowWidth FULLWIDTH2
+		define arrowHeight : operTop - operBot
+		define arrowWidth  : Math.min FULLWIDTH2 arrowHeight
 		define arrowMidX : arrowWidth / 2
 		define arrowSB : SB / 2
 		define arrowRSB : arrowWidth - arrowSB
@@ -22,8 +23,8 @@ export : define [apply] : begin
 		local halfstroke : OPERATORSTROKE / 2
 		local fine : adviceBlackness 4
 		local terminal : adviceBlackness 6
-		local arrowTop operTop
-		local arrowBot operBot
+		local arrowTop : [mix operBot operTop (1 / 2)] + arrowHeight / 2
+		local arrowBot : [mix operBot operTop (1 / 2)] - arrowHeight / 2
 		local doubleArrowStemWidth : arrowSize * 1.1
 
 		define [ArrowBar x1 y1 x2 y2 halfstroke w] : glyph-construction
@@ -1375,11 +1376,34 @@ export : define [apply] : begin
 
 	sketch # pwlLock
 		local fine : adviceBlackness 3.5
-		include glyphs.O
-		start-from (SB + OX) symbolMid
-		line-to    (RIGHTSB - OX) symbolMid
-		line-to    (RIGHTSB - OX) parenBot
-		line-to    (SB + OX) parenBot
+		local y1 : mix parenBot parenTop 0.95
+		local y2 : mix parenBot parenTop 0.05
+		local lockTop : mix y2 y1 0.6
+		local lockLeft : SB / 2
+		local lockRight : WIDTH - SB / 2
+		local lockHoleWidth : 1 / 5
+		local lockHoleLeft : mix lockLeft lockRight (1 / 2 - lockHoleWidth / 2)
+		local lockHoleRight : mix lockLeft lockRight (1 / 2 + lockHoleWidth / 2)
+		local lockHoleTop : mix y2 lockTop 0.75
+		local lockHoleBottom : mix y2 lockTop 0.25
+		include : union
+			intersection
+				spiro-outline
+					corner 0 (2 * y1)
+					corner WIDTH (2 * y1)
+					corner WIDTH (lockTop - 1)
+					corner 0 (lockTop - 1)
+					close
+				OShape y1 y2 SB RIGHTSB fine (SMALLSMOOTHA) (SMALLSMOOTHB)
+			difference
+				spiro-outline
+					corner lockLeft lockTop
+					corner lockRight lockTop
+					corner lockRight y2
+					corner lockLeft y2
+					close
+				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SMALLSMOOTHA * lockHoleWidth) (SMALLSMOOTHB * lockHoleWidth)
+		
 		save 'pwlLock' 0xE0A2
 
 	sketch # pwlCornerBottomLeft
