@@ -235,6 +235,7 @@ const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
 	await run(GC, ["-i", ttfTmp], ["-o", otd]);
 	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width", "-q");
 	await rm(otdTmp);
+	await rm(ttfTmp);
 	await rm(otd);
 });
 const BuildCM = files(`${BUILD}/*/*.charmap`, async (target, path) => {
