@@ -118,55 +118,40 @@ export : define [apply] : begin
 		save 'gamma' 0x3B3
 
 
-	define [LambdaShape sw _top barStraight] : glyph-construction
-		local cornerdist : HALFSTROKE * HVCONTRAST * [if SLAB 1.2 1]
-		local fine : fallback para.vtipfine : if SLAB 0.9 0.8
-		local TURN (CAP * 0.1)
-		local curviness 0.2
-		local top : fallback _top CAP
-		if barStraight : begin
-			include : dispiro
-				widths.rhs sw
-				flat (SB + O * 2) 0    [heading UPWARD]
-				g4   (MIDDLE - cornerdist) top [widths 0 (sw * fine)]
-			include : dispiro
-				widths.lhs sw
-				flat (RIGHTSB - O * 2) 0    [heading UPWARD]
-				g4   (MIDDLE + cornerdist) top [widths (sw * fine) 0]
-		: else : begin
-			include : dispiro
-				widths.rhs sw
-				flat SB 0    [heading UPWARD]
-				curl SB TURN [heading UPWARD]
-				quadcontrols 0 curviness 9 unimportant
-				g4   (MIDDLE - cornerdist) top [widths 0 (sw * fine)]
-			include : dispiro
-				widths.lhs sw
-				flat RIGHTSB 0    [heading UPWARD]
-				curl RIGHTSB TURN [heading UPWARD]
-				quadcontrols 0 curviness 9 unimportant
-				g4   (MIDDLE + cornerdist) top [widths (sw * fine) 0]
-
-		start-from (MIDDLE - cornerdist) top
-		line-to (MIDDLE + cornerdist) top
-		line-to MIDDLE (top - sw * fine)
-
+	define [LambdaShape top sw barStraight div] : glyph-construction
+		local df : DivFrame [fallback div 1]
+		include : VShape top sw barStraight div
+		include : FlipAround df.middle (top / 2)
 		if SLAB : begin
 			include : CenterBottomSerif (SB + sw / 2 * HVCONTRAST) 0 JUT
 			tag-contour 'serif'
 			include : CenterBottomSerif (RIGHTSB - sw / 2 * HVCONTRAST) 0 JUT
 			tag-contour 'serif'
+	
+	define [DeltaMaskShape top sw barStraight div] : begin
+		local df : DivFrame [fallback div 1]
+		local sbCor : if barStraight ((top / CAP) * (OX * [if SLAB 1 4])) 0
+		return : spiro-outline
+			corner (SB + sbCor) 0
+			corner (df.rightSB - sbCor) 0
+			corner df.middle CAP
+	
+	define [DeltaShape top sw barStraight div] : glyph-construction
+		include : LambdaShape top sw barStraight div
+		eject-contour 'serif'
+		include : intersection
+			HBarBottom 0 WIDTH 0 sw
+			DeltaMaskShape top sw barStraight div
 
 	sketch # Lambda
 		include markset.capital
-		include : LambdaShape STROKE CAP para.straightBar
+		include : LambdaShape CAP STROKE para.straightBar
 		save 'Lambda' 0x39B
 		save 'latinLambda' 0x245
 
 	sketch # Delta
-		include glyphs.Lambda AS_BASE
-		include : HBarBottom (SB + HALFSTROKE) (RIGHTSB - HALFSTROKE) 0
-		eject-contour 'serif'
+		include markset.capital
+		include : DeltaShape CAP STROKE para.straightBar
 		save 'Delta' 0x394
 
 	sketch
@@ -227,27 +212,28 @@ export : define [apply] : begin
 		save 'cyrbe' 0x431
 
 	define [SmallEpsilonShape top hook] : glyph-construction
+		local stroke : adviceBlackness2 2.875 2 top
 		local midx : mix SB RIGHTSB 0.65
 		local midy : top * OVERLAYPOS
-		local sma : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
-		local smb : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
-		local fine : STROKE * CTHIN
+		local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
+		local smb : [mix (STROKE + O) (midy - stroke / 2) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
+		local fine : stroke * CTHIN
 		include : dispiro
 			widths.lhs
 			g4 (RIGHTSB + O) (top - [fallback hook SHOOK])
 			hookstart (top - O)
 			g4 (SB + OXE) (top - sma)
 			arcvh
-			flat MIDDLE (midy - (fine - HALFSTROKE)) [widths.heading fine 0 RIGHTWARD]
-			curl midx (midy - (fine - HALFSTROKE)) [heading RIGHTWARD]
+			flat MIDDLE (midy - (fine - stroke / 2)) [widths.heading fine 0 RIGHTWARD]
+			curl midx (midy - (fine - stroke / 2)) [heading RIGHTWARD]
 		include : dispiro
 			widths.rhs
 			g4 (RIGHTSB - O) [fallback hook SHOOK]
 			hookstart O
 			g4 (SB + OXE + O * 2) smb
 			arcvh
-			flat MIDDLE (midy + (fine - HALFSTROKE)) [widths.heading 0 fine RIGHTWARD]
-			curl midx (midy + (fine - HALFSTROKE)) [heading RIGHTWARD]
+			flat MIDDLE (midy + (fine - stroke / 2)) [widths.heading 0 fine RIGHTWARD]
+			curl midx (midy + (fine - stroke / 2)) [heading RIGHTWARD]
 
 	sketch # epsilon
 		include markset.e
@@ -261,27 +247,28 @@ export : define [apply] : begin
 		save 'latinEpsilon' 0x190
 		
 	define [CyrZeShape top hook] : glyph-construction
+		local stroke : adviceBlackness2 2.875 2 top
 		local midx : mix RIGHTSB SB 0.65
 		local midy : top * OVERLAYPOS
-		local smb : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
-		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
-		local fine : STROKE * CTHIN
+		local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
+		local sma : [mix (stroke + O) (midy - stroke / 2) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * stroke
+		local fine : stroke * CTHIN
 		include : dispiro
 			widths.rhs
 			g4 (SB - O) (top - [fallback hook SHOOK])
 			hookstart (top - O)
 			g4 (RIGHTSB - OXE) (top - smb)
 			arcvh
-			flat MIDDLE (midy - (fine - HALFSTROKE)) [widths.heading 0 fine LEFTWARD]
-			curl midx (midy - (fine - HALFSTROKE)) [heading LEFTWARD]
+			flat MIDDLE (midy - (fine - stroke / 2)) [widths.heading 0 fine LEFTWARD]
+			curl midx (midy - (fine - stroke / 2)) [heading LEFTWARD]
 		include : dispiro
 			widths.lhs
 			g4 (SB + O) [fallback hook SHOOK]
 			hookstart O
 			g4 (RIGHTSB - OXE - O * 2) sma
 			arcvh
-			flat MIDDLE (midy + (fine - HALFSTROKE)) [widths.heading fine 0 LEFTWARD]
-			curl midx (midy + (fine - HALFSTROKE)) [heading LEFTWARD]
+			flat MIDDLE (midy + (fine - stroke / 2)) [widths.heading fine 0 LEFTWARD]
+			curl midx (midy + (fine - stroke / 2)) [heading LEFTWARD]
 
 	sketch # cyrZe
 		include markset.capital
@@ -1578,7 +1565,7 @@ export : define [apply] : begin
 			straight.left.start eleft top [heading LEFTWARD]
 			archv
 			flat  SB (top - SMOOTHA)
-			curl  SB SMOOTHB
+			curl  SB (SMOOTHB)
 			arcvh
 			straight.right.end eleft 0 [heading RIGHTWARD]
 
@@ -1608,14 +1595,15 @@ export : define [apply] : begin
 
 	define [aeepart div] : glyph-construction
 		local df : DivFrame div
-		local eLeft : df.middle - df.mvs / 2 * HVCONTRAST + 0.1
-		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] - df.mvs * TANSLANT
-		local barbottom (XH * EBARPOS - HALFSTROKE)
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local eLeft : df.middle - stroke / 2 * HVCONTRAST + 0.1
+		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] -  stroke * TANSLANT
+		local barbottom (XH * EBARPOS - stroke / 2)
 
 		local sma : SMALLSMOOTHA * 0.6 * df.div
 		local smb : SMALLSMOOTHB * 0.6 * df.div
 		include : dispiro
-			widths.lhs df.mvs
+			widths.lhs stroke
 			flat (df.rightSB - OX * 2) barbottom [heading UPWARD]
 			curl (df.rightSB - OX * 2) (XH - smb)
 			arcvh
@@ -1623,14 +1611,15 @@ export : define [apply] : begin
 			archv
 			flat eLeft (XH - sma)
 			curl eLeft smb
-			hookend O true df.mvs
-			g4 (df.rightSB - OX * 2) (AHOOK + df.mvs * TANSLANT) [heading UPWARD]
-		include : HBarBottom (eLeft + df.mvs / 2) (df.rightSB - OX * 2 - df.mvs / 2) barbottom df.mvs
+			hookend O true stroke
+			g4 (df.rightSB - OX * 2) (AHOOK + stroke * TANSLANT) [heading UPWARD]
+		include : HBarBottom (eLeft +  stroke / 2) (df.rightSB - OX * 2 -  stroke / 2) barbottom stroke
 
 	define [aeapart div] : glyph-construction
 		local df : DivFrame div
-		local bartop (XH * OVERLAYPOS * 1.02 + HALFSTROKE)
-		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST - 0.1
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local bartop (XH * OVERLAYPOS * 1.02 + stroke / 2)
+		local abarRight : df.middle + stroke / 2 * HVCONTRAST - 0.1
 		local lowmiddle : mix (SB + OX * 2) abarRight 0.5
 		local barsmooth : mix SB abarRight 0.7
 
@@ -1638,9 +1627,9 @@ export : define [apply] : begin
 		local smb : SMALLSMOOTHB * 0.6 * df.div
 
 		include : dispiro
-			widths.rhs df.mvs
-			g4 (SB + OX) (XH - AHOOK - df.mvs * TANSLANT) [heading UPWARD]
-			hookstart XO true df.mvs
+			widths.rhs stroke
+			g4 (SB + OX) (XH - AHOOK - stroke * TANSLANT) [heading UPWARD]
+			hookstart XO true stroke
 			flat abarRight (XH - smb)
 			curl abarRight smb
 			arcvh
@@ -1653,8 +1642,9 @@ export : define [apply] : begin
 
 	define [oeopart div] : glyph-construction
 		local df : DivFrame div
-		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST
-		include : OShape XH 0 (SB + OX) (abarRight + OX) df.mvs (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div)
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local abarRight : df.middle + stroke / 2 * HVCONTRAST
+		include : OShape XH 0 (SB + OX) (abarRight + OX) stroke (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div)
 
 	sketch # ae
 		local df : DivFrame para.diversityM
@@ -2282,4 +2272,4 @@ export : define [apply] : begin
 		include g
 		save 'bidentalpercussive' 0x2AD
 
-	return [object LambdaShape SigmaShape PiShape EzhShape]
+	return [object LambdaShape DeltaMaskShape DeltaShape SigmaShape PiShape EzhShape]
