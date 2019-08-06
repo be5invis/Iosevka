@@ -111,9 +111,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     - All glyphs wider than one letter would be deleted.
     - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
   - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
-  - `nolig` : Disable ligation only.
-  - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
-  - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width.
+  - `no-ligation` : Disable ligation only.
+  - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
+  - `type` : Make some symbols, like arrows (`→`) full-width.
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.

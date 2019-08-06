@@ -18,15 +18,15 @@ export : define [apply] : begin
 			set introduced true
 		return : if introduced fs null
 
-	define [select-variant name unicode altname altmap] : begin
+	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
-		local variant : variantSelector.(name) || para.defaultVariant.(name)
+		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
-		if (altmap && altmap.(variant)) : set variant altmap.(variant)
+		if (transform && transform.(variant)) : set variant transform.(variant)
 		local chosenGlyph glyphs.((name + '.' + variant))
 
-		create-glyph [fallback altname name] : glyph-construction
+		create-glyph [fallback to-name name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
 			set currentGlyph.featureSelector : queryFeatureSelector name para
@@ -282,25 +282,25 @@ export : define [apply] : begin
 	define [LeftwardTopSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x + HALFSTROKE * HVCONTRAST) y [widths.heading sw 0 LEFTWARD]
+			flat (x + sw / 2 * HVCONTRAST) y [widths.heading sw 0 LEFTWARD]
 			curl (x - length - TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [LeftwardBottomSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x + HALFSTROKE * HVCONTRAST) y [widths.heading 0 sw LEFTWARD]
+			flat (x + sw / 2 * HVCONTRAST) y [widths.heading 0 sw LEFTWARD]
 			curl (x - length + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [RightwardTopSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x - HALFSTROKE * HVCONTRAST) y [widths.heading 0 sw RIGHTWARD]
+			flat (x - sw / 2 * HVCONTRAST) y [widths.heading 0 sw RIGHTWARD]
 			curl (x + length - TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [RightwardBottomSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x - HALFSTROKE * HVCONTRAST) y [widths.heading sw 0 RIGHTWARD]
+			flat (x - sw / 2 * HVCONTRAST) y [widths.heading sw 0 RIGHTWARD]
 			curl (x + length + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [CenterTopSerif x y length _sw] : glyph-construction
