@@ -798,8 +798,9 @@ export : define [apply] : begin
 	define { WShape } : do "W, w and related ======================================================"
 		define [WShape top barStraight _div] : glyph-construction
 			local div : fallback _div 1
-			local rightSB : WIDTH * div - SB
-			local middle : MIDDLE * div
+			local df : DivFrame div
+			local left : SB / [if barStraight (1 + 3 * (div - 1)) 1]
+			local right : df.width - left
 			local fineOuter : if barStraight
 				adviceBlackness WShape.fineS div
 				adviceBlackness WShape.fineOuter div
@@ -808,22 +809,26 @@ export : define [apply] : begin
 				adviceBlackness WShape.fineInner div
 			local fineHeight : (fineOuter + fineInner) / 2
 			
-			local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
-			local fineOffsetInner : fineInner / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
-			local m1 : WIDTH * div * [if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
-			local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
-			local wheight : if barStraight top (top * 0.6)
+			local hwCO : if barStraight
+				(1 / 2) * [adviceBlackness WShape.hwCOS div]
+				(1 / 2) * [adviceBlackness WShape.hwCO div]
+			local delimBias : hwCO * HVCONTRAST
+			local fineOffsetOuter : hwCO * HVCONTRAST
+			local fineOffsetInner : hwCO * HVCONTRAST
+			local m1 : [mix (left + delimBias) (right - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
+			local m2 : [mix (left + delimBias) (right - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+			local wMidHeight : if barStraight top (top * 0.6)
 
 			if barStraight : begin
 				include : dispiro
 					widths.lhs
-					flat (SB + O * 2) top [heading DOWNWARD]
+					flat (left + O * 2) top [heading DOWNWARD]
 					g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 			: else : begin
 				include : dispiro
 					widths.lhs
-					flat SB top [heading DOWNWARD]
-					curl SB (top * 0.75) [heading DOWNWARD]
+					flat left top [heading DOWNWARD]
+					curl left (top * 0.75) [heading DOWNWARD]
 					quadcontrols 0 0.3 6 unimportant
 					g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 
@@ -834,9 +839,9 @@ export : define [apply] : begin
 					corner (m1 - fineOffsetOuter) 0
 					corner m1 fineHeight
 				spiro-outline
-					corner (middle + fineOffsetInner) wheight
-					corner middle (wheight - fineHeight)
-					corner (middle - fineOffsetInner) wheight
+					corner (df.middle + fineOffsetInner) wMidHeight
+					corner df.middle (wMidHeight - fineHeight)
+					corner (df.middle - fineOffsetInner) wMidHeight
 				spiro-outline
 					corner (m2 + fineOffsetOuter) 0
 					corner (m2 - fineOffsetInner) 0
@@ -844,52 +849,50 @@ export : define [apply] : begin
 
 				dispiro
 					widths.lhs fineInner
-					flat (middle - fineOffsetInner) wheight
-					#quadcontrols 0 0.1 6 unimportant
+					flat (df.middle - fineOffsetInner) wMidHeight
 					curl (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
 				dispiro
 					widths.rhs fineInner
-					flat (middle + fineOffsetInner) wheight
-					#quadcontrols 0 0.1 6 unimportant
+					flat (df.middle + fineOffsetInner) wMidHeight
 					curl (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
 
 			define [InnerStrokeMask] : union
 				spiro-outline
 					corner 0             0
-					corner (WIDTH * div) 0
-					corner (WIDTH * div) (-WIDTH * div)
-					corner 0             (-WIDTH * div)
+					corner df.width      0
+					corner df.width      (-df.width)
+					corner 0             (-df.width)
 				spiro-outline
-					corner 0             wheight
-					corner (WIDTH * div) wheight
-					corner (WIDTH * div) (wheight + WIDTH * div)
-					corner 0             (wheight + WIDTH * div)
+					corner 0             wMidHeight
+					corner df.width      wMidHeight
+					corner df.width      (wMidHeight + df.width)
+					corner 0             (wMidHeight + df.width)
 			
 			include : difference [InnerShapes] [InnerStrokeMask]
 
 			if barStraight : begin
 				include : dispiro
 					widths.rhs
-					flat (rightSB - O * 2) top [heading DOWNWARD]
+					flat (right - O * 2) top [heading DOWNWARD]
 					g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 			: else : begin
 				include : dispiro
 					widths.rhs
-					flat rightSB top [heading DOWNWARD]
-					curl rightSB (top * 0.75) [heading DOWNWARD]
+					flat right top [heading DOWNWARD]
+					curl right (top * 0.75) [heading DOWNWARD]
 					quadcontrols 0 0.3 6 unimportant
 					g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
-			include : AIVSerifs top SB rightSB
+			include : AIVSerifs top left right
 
 		set WShape.fineOuter 5
 		set WShape.fineInner 6
-		set WShape.fineS 5.75
-		set WShape.fineOffset  1.5
-		set WShape.fineOffsetS 1.25
-		set WShape.m1 0.325
-		set WShape.m2 0.675
-		set WShape.m1S 0.30
-		set WShape.m2S 0.70
+		set WShape.fineS 5.5
+		set WShape.hwCO 5
+		set WShape.hwCOS 4
+		set WShape.m1 0.25
+		set WShape.m2 0.75
+		set WShape.m1S 0.24
+		set WShape.m2S 0.76
 
 		sketch # W
 			set-width (WIDTH * para.diversityM)
