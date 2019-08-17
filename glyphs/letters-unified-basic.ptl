@@ -795,40 +795,36 @@ export : define [apply] : begin
 			save 'artail' 0x1D8F
 
 	### W and w
-	define { WShape } : do "W, w and related ======================================================"
-		define [WShape top barStraight _div] : glyph-construction
-			local div : fallback _div 1
-			local df : DivFrame div
-			local left : SB / [if barStraight (1 + 3 * (div - 1)) 1]
-			local right : df.width - left
+	do "W, w and related ========================================================================="
+		define [WShape top barStraight df] : glyph-construction
 			local fineOuter : if barStraight
-				adviceBlackness WShape.fineS div
-				adviceBlackness WShape.fineOuter div
+				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineOuter df.div
 			local fineInner : if barStraight
-				adviceBlackness WShape.fineS div
-				adviceBlackness WShape.fineInner div
+				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineInner df.div
 			local fineHeight : (fineOuter + fineInner) / 2
 			
 			local hwCO : if barStraight
-				(1 / 2) * [adviceBlackness WShape.hwCOS div]
-				(1 / 2) * [adviceBlackness WShape.hwCO div]
+				(1 / 2) * [adviceBlackness WShape.hwCOS df.div]
+				(1 / 2) * [adviceBlackness WShape.hwCO df.div]
 			local delimBias : hwCO * HVCONTRAST
 			local fineOffsetOuter : hwCO * HVCONTRAST
 			local fineOffsetInner : hwCO * HVCONTRAST
-			local m1 : [mix (left + delimBias) (right - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
-			local m2 : [mix (left + delimBias) (right - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+			local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
+			local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 			local wMidHeight : if barStraight top (top * 0.6)
 
 			if barStraight : begin
 				include : dispiro
 					widths.lhs
-					flat (left + O * 2) top [heading DOWNWARD]
+					flat (df.leftSB + O * 2) top [heading DOWNWARD]
 					g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 			: else : begin
 				include : dispiro
 					widths.lhs
-					flat left top [heading DOWNWARD]
-					curl left (top * 0.75) [heading DOWNWARD]
+					flat df.leftSB top [heading DOWNWARD]
+					curl df.leftSB (top * 0.75) [heading DOWNWARD]
 					quadcontrols 0 0.3 6 unimportant
 					g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
 
@@ -873,16 +869,16 @@ export : define [apply] : begin
 			if barStraight : begin
 				include : dispiro
 					widths.rhs
-					flat (right - O * 2) top [heading DOWNWARD]
+					flat (df.rightSB - O * 2) top [heading DOWNWARD]
 					g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 			: else : begin
 				include : dispiro
 					widths.rhs
-					flat right top [heading DOWNWARD]
-					curl right (top * 0.75) [heading DOWNWARD]
+					flat df.rightSB top [heading DOWNWARD]
+					curl df.rightSB (top * 0.75) [heading DOWNWARD]
 					quadcontrols 0 0.3 6 unimportant
 					g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
-			include : AIVSerifs top left right
+			include : AIVSerifs top df.leftSB df.rightSB
 
 		set WShape.fineOuter 5
 		set WShape.fineInner 6
@@ -895,31 +891,31 @@ export : define [apply] : begin
 		set WShape.m2S 0.76
 
 		sketch # W
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].capital
-			include : WShape CAP para.straightBar para.diversityM
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include df.markSet.capital
+			include : WShape CAP para.straightBar df
 			save 'W' 'W'
 			save 'cyrWe' 0x51C
 
 		sketch # w
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].e
-			include : WShape XH para.straightBar para.diversityM
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include df.markSet.e
+			include : WShape XH para.straightBar df
 			save 'w' 'w'
 			save 'cyrwe' 0x51D
 
 		turned nothing 0x28D 'w' (MIDDLE * para.diversityM) (XH / 2)
 
-		define [WHooktopShape top barStraight _div] : glyph-construction
-			local div : fallback _div 1
+		define [WHooktopShape top barStraight df] : glyph-construction
 			local fineOuter : if barStraight
-				adviceBlackness WShape.fineS div
-				adviceBlackness WShape.fineOuter div
+				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineOuter df.div
 			local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
-			local rightSB : WIDTH * div - SB
-			local m2 : WIDTH * div * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+			local m2 : df.width * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 
-			include : WShape top barStraight div
+			include : WShape top barStraight df
 
 			# Eject unnecessary contours
 			this.contours.pop
@@ -930,30 +926,36 @@ export : define [apply] : begin
 			
 			include : dispiro
 				widths.rhs
-				straight.down.start rightSB (top - HOOK) [heading DOWNWARD]
+				straight.down.start df.rightSB (top - HOOK) [heading DOWNWARD]
 				quadcontrols 0 0.3 6 unimportant g2
 				g4 (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 
-			include : VerticalHook (rightSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
+			include : VerticalHook (df.rightSB - HALFSTROKE * HVCONTRAST) (top - HOOK) (HOOKX * 0.65) (-HOOK + HALFSTROKE)
 
 		sketch # Whooktop
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].capital
-			include : WHooktopShape CAP para.straightBar para.diversityM
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include df.markSet.capital
+			include : WHooktopShape CAP para.straightBar df
 			save 'Whooktop' 0x2C72
 
 		sketch # whooktop
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].e
-			include : WHooktopShape XH para.straightBar para.diversityM
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include df.markSet.e
+			include : WHooktopShape XH para.straightBar df
 			save 'whooktop' 0x2C73
 
 		sketch # ww
-			include : WShape (CAP / 2)
+			local df : DivFrame 1 3
+			set-width df.width
+			include df.markSet.capital
+
+			include : WShape (CAP / 2) para.straightBar df
 			apply-transform : Upright
 			apply-transform : Translate 0 (CAP / 2)
 			apply-transform : Italify
-			include : WShape (CAP / 2)
+			include : WShape (CAP / 2) para.straightBar df
 			save 'ww' 0x2AC
 		
 		list WShape
@@ -2794,37 +2796,33 @@ export : define [apply] : begin
 			save 'cyrem' 0x43C
 
 	### m
-	do "m and related"
-		define [SmallMShape top bot mbot _div] : glyph-construction
-			local div : fallback _div 1
-			local rightSB : WIDTH * div - SB
-			local middle : MIDDLE * div
-			local mvs : MVERTSTROKE_D div
-
-			local m1 : mix (SB + O) (middle + mvs / 2 * HVCONTRAST) 0.5
-			local m2 : mix (rightSB - O) (middle - mvs / 2 * HVCONTRAST) 0.5
+	do "m and related ============================================================================"
+		define [dfM] : DivFrame para.diversityM 3
+		define [SmallMShape top bot mbot df] : glyph-construction
+			local m1 : mix df.leftSB (df.middle + df.mvs / 2 * HVCONTRAST) 0.5
+			local m2 : mix df.rightSB (df.middle - df.mvs / 2 * HVCONTRAST) 0.5
 			include : mShoulderSpiro
-				left      -- (SB + O + mvs * HVCONTRAST)
-				right     -- (middle + mvs / 2 * HVCONTRAST)
+				left      -- (df.leftSB + df.mvs * HVCONTRAST)
+				right     -- (df.middle + df.mvs / 2 * HVCONTRAST)
 				top       -- top
 				bottom    -- mbot
-				width     -- mvs
-				fine      -- (mvs * SHOULDERFINE / STROKE)
-				diversity -- div
+				width     -- df.mvs
+				fine      -- (df.mvs * SHOULDERFINE / STROKE)
+				diversity -- df.div
 			include : mShoulderSpiro
-				left      -- (middle + mvs * 0.5 * HVCONTRAST)
-				right     -- (rightSB - O)
+				left      -- (df.middle + df.mvs * 0.5 * HVCONTRAST)
+				right     -- df.rightSB
 				top       -- top
 				bottom    -- bot
-				width     -- mvs
-				fine      -- (mvs * SHOULDERFINE / STROKE)
-				diversity -- div
-			include : VBarLeft (SB + O) bot top mvs
+				width     -- df.mvs
+				fine      -- (df.mvs * SHOULDERFINE / STROKE)
+				diversity -- df.div
+			include : VBarLeft df.leftSB bot top df.mvs
 			if SLAB : begin
-				local jut : JUT * mvs / STROKE + O
-				if (WIDTH * div > jut * 3.5) : begin
+				local jut : JUT * df.mvs / STROKE + O
+				if (WIDTH * df.div > jut * 3.5) : begin
 					include : intersection
-						CenterTopSerif (SB + O + 0.5 * mvs * HVCONTRAST) top jut mvs
+						CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVCONTRAST) top jut df.mvs
 						spiro-outline
 							corner SB bot
 							corner SB top
@@ -2832,64 +2830,68 @@ export : define [apply] : begin
 							corner 0 bot
 					tag-contour 'serifLT'
 					if (!para.isItalic) : begin
-						include : CenterBottomSerif (SB + O + 0.5 * mvs * HVCONTRAST) bot jut mvs
-						include : CenterBottomSerif middle bot jut mvs
-						include : CenterBottomSerif (rightSB - O - 0.5 * mvs * HVCONTRAST) bot jut mvs
+						include : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVCONTRAST) bot jut df.mvs
+						include : CenterBottomSerif df.middle bot jut df.mvs
+						include : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVCONTRAST) bot jut df.mvs
 						tag-contour 'serifRB'
 					: else : begin
 						include : intersection
-							RightwardBottomSerif rightSB bot (jut / 2) mvs
+							RightwardBottomSerif (df.rightSB + O) bot (jut / 2) df.mvs
 							spiro-outline
-								corner rightSB bot
-								corner rightSB top
-								corner (WIDTH * div) top
-								corner (WIDTH * div) bot
+								corner (df.rightSB + O) bot
+								corner (df.rightSB + O) top
+								corner df.width top
+								corner df.width bot
 						tag-contour 'serifRB'
 				: else : begin
-					include : LeftwardTopSerif (SB + O) top SIDEJUT mvs
+					include : LeftwardTopSerif df.leftSB top SIDEJUT df.mvs
 					tag-contour 'serifLT'
-					if (!para.isItalic) : include : LeftwardBottomSerif (SB + O) bot SIDEJUT mvs
-					include : RightwardBottomSerif (rightSB - O) bot SIDEJUT mvs
+					if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB bot SIDEJUT df.mvs
+					include : RightwardBottomSerif df.rightSB bot SIDEJUT df.mvs
 					tag-contour 'serifRB'
 
 		sketch # m
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].e
-			include : SmallMShape XH 0 0 para.diversityM
+			local df : dfM
+			set-width df.width
+			include df.markSet.e
+			include : SmallMShape XH 0 0 df
 			save 'm.longleg'
 			save 'cyrte.italic'
 		sketch # m
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].e
-			include : SmallMShape XH 0 [XH * 0.2] para.diversityM
+			local df : dfM
+			set-width df.width
+			include df.markSet.e
+			include : SmallMShape XH 0 [XH * 0.2] df
 			save 'm.shortleg'
 		select-variant 'm' 'm'
 		composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender (WIDTH * para.diversityM - SB)] markset.e
 
 		sketch # mltail
-			local mvs : MVERTSTROKE_D para.diversityM
-			include markset.p
-			include glyphs.m AS_BASE ALSO_METRICS
+			local df : dfM
+			include df.markSet.p
+			include glyphs.m
 			eject-contour 'serifRB'
-			include : VerticalHook (WIDTH * para.diversityM - SB - O - mvs / 2 * HVCONTRAST) 0 (-HOOKX) HOOK mvs
+			include : VerticalHook (df.rightSB - df.mvs / 2 * HVCONTRAST) 0 (-HOOKX) HOOK df.mvs
 			save 'mltail' 0x271
-		turned nothing 0x26F 'm' (MIDDLE * para.diversityM) (XH / 2)
+
+		turned nothing 0x26F 'm' [dfM].middle (XH / 2)
 
 		sketch # capitalTurnm
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].capital
-			include : SmallMShape CAP 0 0 para.diversityM
-			include : FlipAround (MIDDLE * para.diversityM) (CAP / 2)
+			local df : dfM
+			set-width df.width
+			include df.markSet.capital
+			include : SmallMShape CAP 0 0 df
+			include : FlipAround df.middle (CAP / 2)
 			save 'capitalTurnm' 0x19C
 
 		sketch # turnmleg
-			local mvs : MVERTSTROKE_D para.diversityM
-			set-width (WIDTH * para.diversityM)
-			include [MarksetDiv para.diversityM].p
+			local df : dfM
+			set-width df.width
+			include df.markSet.p
 			include glyphs.m
 			eject-contour 'serifLT'
-			include : FlipAround (MIDDLE * para.diversityM) (XH / 2)
-			include : VBarRight (WIDTH * para.diversityM - SB - O) DESCENDER 0 mvs
+			include : FlipAround df.middle (XH / 2)
+			include : VBarRight df.rightSB DESCENDER 0 df.mvs
 			save 'turnmleg' 0x270
 
 	### H
@@ -3787,4 +3789,4 @@ export : define [apply] : begin
 			eject-contour 'serifRB'
 			save 'zcurlytail' 0x291
 
-	return [object ISerifShape IotaShape LShape VShape WShape YShape yBaseKnots SmallYShape KShape PShape NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape]
+	return [object ISerifShape IotaShape LShape VShape YShape yBaseKnots SmallYShape KShape PShape NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape]
