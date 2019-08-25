@@ -41,7 +41,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		return nothing
 	
 	define metrics : calculateMetrics para
-	define [object globalTransform MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER MVERTSTROKE_D symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot] metrics
+	define [object globalTransform UPM MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER MVERTSTROKE_D symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness] metrics
 
 	# Anchor parameters
 	define [object MARK BASE] Anchor
@@ -94,13 +94,17 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 
 	define markset : MarksetDiv 1
 
-	define [DivFrame _div] : begin
+	define [DivFrame _div _hPack] : begin
 		local div : fallback _div 1
+		local hPack : Math.max 2 [fallback _hPack 0]
+		local sbMul : Math.min 1 : (WIDTH * div - hPack * [adviceBlackness hPack div]) / (2 * hPack * SB)
 		return : object
 			div div
 			width : WIDTH * div
 			middle : MIDDLE * div
-			rightSB : WIDTH * div - SB
+			sb : SB * sbMul
+			leftSB : SB * sbMul
+			rightSB : WIDTH * div - SB * sbMul
 			mvs : MVERTSTROKE_D div
 			markSet: MarksetDiv div
 
@@ -198,8 +202,9 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 
 	# Space
 	sketch # space
-		set-width WIDTH
-		include markset.e
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include df.markSet.e
 		save 'space' ' '
 	
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
