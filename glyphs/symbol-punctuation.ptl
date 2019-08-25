@@ -251,12 +251,6 @@ export : define [apply] : begin
 			include : FlipAround MIDDLE (CAP / 2)
 			save 'gnaborretni' 0x2E18
 
-		if (!para.noCJKV) : sketch # dwquestion
-			set-width UPM
-			include : QuestionShape CAP questionBottom (UPM * 0.25) (UPM * 0.75)
-			include : Ring (DOTSIZE - O) O (UPM / 2 - DOTRADIUS + O) (UPM / 2 + DOTRADIUS - O) true
-			save 'dwquestion' 0xFF1F
-
 		sketch # questionDown
 			set-width WIDTH
 			include glyphs.question
@@ -338,11 +332,11 @@ export : define [apply] : begin
 				g4.down.end [mix SB RIGHTSB r] 0 [widths.heading 0 fine DOWNWARD]
 			save 'ampersand' '&'
 
-		sketch # at.long
+		sketch # at.threefold
 			set-width WIDTH
 
-			local top parenTop
-			local bot parenBot
+			local top : mix operTop parenTop 0.4
+			local bot : mix operBot parenBot 0.4
 			local otop : mix bot top 0.75
 			local obot : mix top bot 0.8
 
@@ -373,14 +367,14 @@ export : define [apply] : begin
 				arcvh
 				flat (MIDDLE + CORRECTION_OMIDS) (bot + O) [widths STROKE 0 ]
 				curl (RIGHTSB - HALFSTROKE + TANSLANT * sw) (bot + O)
-			save 'at.long'
+			save 'at.threefold'
 
 		sketch # at.fourfold
 			local div para.diversityM
 			set-width (WIDTH * div)
 
-			local top parenTop
-			local bot parenBot
+			local top : mix operTop parenTop 0.4
+			local bot : mix operBot parenBot 0.4
 			local otop : mix bot top 0.75
 			local obot : mix top bot 0.8
 
@@ -551,7 +545,9 @@ export : define [apply] : begin
 				Italify
 
 		select-variant 'asterisk' '*'
-		select-variant 'asterisk' nothing 'asterisk.dfltlow' {.high 'low' .hexhigh 'hexlow'}
+		select-variant 'asterisk' nothing
+			to-name   -- 'asterisk.dfltlow'
+			transform -- {.high 'low' .hexhigh 'hexlow'}
 
 	do "Slashes and numbersign"
 		define slashDefautLeft   : SB + HALFSTROKE
@@ -940,31 +936,37 @@ export : define [apply] : begin
 			save 'percent.dots'
 
 		sketch # permille
+			local width : WIDTH * para.diversityM
+			local rightSB : width - SB
+			set-width width
 			local dotwidth ([adviceBlackness 4] * 1.5)
 
 			include : dispiro
 				widths.center
 				flat SB (CAP * 0.2)
-				curl [mix SB RIGHTSB 0.85] (CAP * 0.9)
+				curl [mix SB rightSB 0.85] (CAP * 0.9)
 
-			include : VBarLeft [mix SB RIGHTSB 0.075] [mix CAP 0 0.3] CAP dotwidth
-			include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotwidth
-			include : VBarRight (RIGHTSB - [Math.max (WIDTH * 0.25) (dotwidth * 1.5)]) 0 [mix 0 CAP 0.3] dotwidth
+			include : VBarLeft [mix SB rightSB 0.075] [mix CAP 0 0.3] CAP dotwidth
+			include : VBarRight rightSB 0 [mix 0 CAP 0.3] dotwidth
+			include : VBarRight (rightSB - [Math.max (WIDTH * 0.25) (dotwidth * 1.5)]) 0 [mix 0 CAP 0.3] dotwidth
 			save 'permille.dots'
 
 		sketch # basepoint
+			local width : WIDTH * para.diversityM
+			local rightSB : width - SB
+			set-width width
 			local dotwidth ([adviceBlackness 4] * 1.5)
 			local dotfine [adviceBlackness 3.5]
 
 			include : dispiro
 				widths.center
 				flat SB (CAP * 0.2)
-				curl [mix SB RIGHTSB 0.85] (CAP * 0.9)
+				curl [mix SB rightSB 0.85] (CAP * 0.9)
 
 			include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
-			include : VBarRight RIGHTSB 0 [mix 0 CAP 0.3] dotfine
-			include : VBar [mix [mix SB RIGHTSB 0.1] RIGHTSB 0.5] 0 [mix 0 CAP 0.3] dotfine
-			include : VBarLeft [mix SB RIGHTSB 0.1] 0 [mix 0 CAP 0.3] dotfine
+			include : VBarRight rightSB 0 [mix 0 CAP 0.3] dotfine
+			include : VBar [mix [mix SB rightSB 0.1] rightSB 0.5] 0 [mix 0 CAP 0.3] dotfine
+			include : VBarLeft [mix SB rightSB 0.1] 0 [mix 0 CAP 0.3] dotfine
 			save 'basepoint.dots'
 
 		sketch # percent.rings
@@ -995,14 +997,16 @@ export : define [apply] : begin
 			save 'percent.rings'
 		
 		sketch # permille.rings, basepoint.rings
-			set-width WIDTH
+			local width : WIDTH * para.diversityM
+			local rightSB : width - SB
+			set-width width
 			local l   : SB / 2
-			local r   : WIDTH - l
+			local r   : width - l
 			local m   : mix l r (1 / 2)
-			local sma  : SMOOTHA * 0.5
-			local smb  : SMOOTHB * 0.5
-			local sw   : adviceBlackness 4
-			local fine : adviceBlackness 5
+			local sma  : SMOOTHA * 0.5 * para.diversityM
+			local smb  : SMOOTHB * 0.5 * para.diversityM
+			local sw   : adviceBlackness2 5 4 CAP para.diversityM
+			local fine : adviceBlackness2 5 5 CAP para.diversityM
 			local cor : HVCONTRAST / [Math.sqrt (1 - [Math.pow ((r - l - sw) / (CAP - 0)) 2])]
 			local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
 			local pFine : 1 / 2 - (STROKE / 2) / [Math.hypot CAP (r - l)]
@@ -1020,7 +1024,7 @@ export : define [apply] : begin
 			branch
 				local l1   : l - O
 				local r2   r
-				local gap  : SB / 2 - O * 2
+				local gap  : (SB / 2 - O * 2) * para.diversityM
 				local fill : ((r2 - l1) - gap) / 2
 				local r1 : l1 + fill
 				local l2 : r1 + gap
@@ -1031,15 +1035,15 @@ export : define [apply] : begin
 			branch
 				local l1   : l - O
 				local r3   r
-				local gap  : SB / 2 - O
+				local gap  : (SB / 2 - O) * para.diversityM
 				local fill : ((r3 - l1) - 2 * gap) / 3
 				local r1 : l1 + fill
 				local l2 : r1 + gap
 				local r2 : l2 + fill
 				local l3 : r2 + gap
-				local swp : adviceBlackness 6
-				local smap : SMOOTHA * (1/3)
-				local smbp : SMOOTHB * (1/3)
+				local swp : adviceBlackness2 5 6.5 CAP para.diversityM
+				local smap : SMOOTHA * (1/3) * para.diversityM
+				local smbp : SMOOTHB * (1/3) * para.diversityM
 				include : OShape otop  0  l1 r1 swp smap smbp
 				include : OShape otop  0  l2 r2 swp smap smbp
 				include : OShape otop  0  l3 r3 swp smap smbp
@@ -1071,79 +1075,3 @@ export : define [apply] : begin
 		alias 'mdfRevComma' 0x2BD 'revertSingleQuote'
 		alias 'mdfStress' 0x2C8 'singleQuote'
 		turned 'mdfSecondaryStress' 0x2CC 'singleQuote' MIDDLE (XH / 2)
-
-
-	if [not para.noCJKV] : do 'Double-width punctuations'
-		dwc nothing 0xFF01 'exclam'
-		dwc nothing 0xFF1A 'colon'
-		dwc nothing 0xFF1B 'semicolon'
-		dwl nothing 0xFF0C 'comma'
-		dwl nothing 0xFF0E 'period'
-
-		local parenDist (WIDTH * 0.15)
-		dwr nothing 0xFF08 'parenLeft' (-parenDist)
-		dwl nothing 0xFF09 'parenRight' (parenDist)
-		composite 'opbdParenLeft' glyphs.parenLeft [Translate (-parenDist) 0]
-		composite 'opbdParenRight' glyphs.parenRight [Translate (parenDist) 0]
-
-		local r : Math.max PERIODRADIUS (WIDTH * 0.225)
-		local ry : r * 0.25
-		sketch
-			include : CircleDotAt MIDDLE ry (r + PERIODRADIUS * 0.5)
-			include : CircleDotAt MIDDLE ry (r - PERIODRADIUS * 0.4)
-			reverse-last
-			branch
-				set-width FULLWIDTH1
-				save "dwlcjkperiod" 0x3002
-			branch
-				save 'cjkperiod' 0xFF61
-		sketch
-			local k 0.9
-			include : dispiro
-				widths.center
-				g4 (MIDDLE - r * 1.1) (ry + r * (k - 0.2))
-				quadcontrols 0.5 0.45
-				g4 (MIDDLE + r) (ry + r * (-k - 0.35))
-			branch
-				set-width FULLWIDTH1
-				save "dwlcjkcomma" 0x3001
-			branch
-				save 'cjkcomma' 0xFF64
-
-		local cjkqd 0.75
-		local cjkqd2 0.97
-		local ideotop : para.ideoMid + (parenTop - symbolMid)
-		local ideobot : para.ideoMid - (parenTop - symbolMid)
-		sketch # cjkSingleQuoteLeft
-			include : HBarTop    [mix SB RIGHTSB designParameters.bracketOutside] [mix SB RIGHTSB designParameters.bracketInside] [mix ideobot ideotop cjkqd2]
-			include : VBarLeft   [mix SB RIGHTSB designParameters.bracketOutside] [mix ideotop ideobot cjkqd] [mix ideobot ideotop cjkqd2]
-			save 'cjkSingleQuoteLeft' 0xFF62
-		sketch # cjkSingleQuoteRight
-			include glyphs.cjkSingleQuoteLeft
-			include : FlipAround MIDDLE symbolMid
-			save 'cjkSingleQuoteRight' 0xFF63
-
-		sketch # cjkDoubleQuoteLeft
-			local sw : adviceBlackness 6
-			local dw : [Math.max (WIDTH * 0.175) [adviceBlackness 3.25]] + sw * 2
-			local outside : mix SB RIGHTSB designParameters.bracketOutside
-			local inside : mix SB RIGHTSB designParameters.bracketInside
-			local top : mix ideobot ideotop cjkqd2
-			local bottom : mix ideotop ideobot cjkqd
-
-			include : VBarLeft outside bottom top sw
-			include : HBarTop outside inside top sw
-			include : VBarRight inside top (top - dw) sw
-			include : HBarBottom outside (outside + dw) bottom sw
-			include : VBarRight (outside + dw) bottom (top - dw + sw) sw
-			include : HBarBottom (outside + dw) inside (top - dw) sw
-			save 'cjkDoubleQuoteLeft'
-		sketch # cjkSingleQuoteRight
-			include glyphs.cjkDoubleQuoteLeft
-			include : FlipAround MIDDLE symbolMid
-			save 'cjkDoubleQuoteRight'
-
-		dwr nothing 0x300C 'cjkSingleQuoteLeft'
-		dwl nothing 0x300D 'cjkSingleQuoteRight'
-		dwr nothing 0x300E 'cjkDoubleQuoteLeft'
-		dwl nothing 0x300F 'cjkDoubleQuoteRight'

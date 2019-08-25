@@ -18,15 +18,15 @@ export : define [apply] : begin
 			set introduced true
 		return : if introduced fs null
 
-	define [select-variant name unicode altname altmap] : begin
+	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
-		local variant : variantSelector.(name) || para.defaultVariant.(name)
+		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
-		if (altmap && altmap.(variant)) : set variant altmap.(variant)
+		if (transform && transform.(variant)) : set variant transform.(variant)
 		local chosenGlyph glyphs.((name + '.' + variant))
 
-		create-glyph [fallback altname name] : glyph-construction
+		create-glyph [fallback to-name name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
 			set currentGlyph.featureSelector : queryFeatureSelector name para
@@ -282,25 +282,25 @@ export : define [apply] : begin
 	define [LeftwardTopSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x + HALFSTROKE * HVCONTRAST) y [widths.heading sw 0 LEFTWARD]
+			flat (x + sw / 2 * HVCONTRAST) y [widths.heading sw 0 LEFTWARD]
 			curl (x - length - TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [LeftwardBottomSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x + HALFSTROKE * HVCONTRAST) y [widths.heading 0 sw LEFTWARD]
+			flat (x + sw / 2 * HVCONTRAST) y [widths.heading 0 sw LEFTWARD]
 			curl (x - length + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [RightwardTopSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x - HALFSTROKE * HVCONTRAST) y [widths.heading 0 sw RIGHTWARD]
+			flat (x - sw / 2 * HVCONTRAST) y [widths.heading 0 sw RIGHTWARD]
 			curl (x + length - TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [RightwardBottomSerif x y length _sw] : glyph-construction
 		local sw : fallback _sw STROKE
 		include : dispiro
-			flat (x - HALFSTROKE * HVCONTRAST) y [widths.heading sw 0 RIGHTWARD]
+			flat (x - sw / 2 * HVCONTRAST) y [widths.heading sw 0 RIGHTWARD]
 			curl (x + length + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [CenterTopSerif x y length _sw] : glyph-construction
@@ -381,8 +381,14 @@ export : define [apply] : begin
 			include : CenterBottomSerif (right - STROKE * sideSerifK * HVCONTRAST) 0 JUT
 
 
+	define [diagCor dy dx dyt dxt] : begin
+		local ay : Math.max 0 : [Math.abs dy] - [fallback dyt 0]
+		local ax : Math.max 0 : [Math.abs dx] - [fallback dxt 0]
+		return : [Math.hypot ay ax] / ay
+
 	define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
-		local leftx : _leftx + (HALFSTROKE * HVCONTRAST * [if (rightx > _leftx) 1 (-1)])
+		local sbCor : if para.straightBar ((OX * 4) * ([Math.abs  (lefty - righty)] / CAP)) 0
+		local leftx : _leftx + ((HALFSTROKE * HVCONTRAST + sbCor) * [if (rightx > _leftx) 1 (-1)])
 		local fine  : (_fine || STROKE) * 0.5
 		
 		local turnyleft : mix lefty righty turn
@@ -391,15 +397,24 @@ export : define [apply] : begin
 		local straightxleft : mix leftx rightx straight
 		local straightyleft : mix cyleft righty straight
 		
-		include : dispiro
-			widths.center
-			flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
-			quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
-			flat straightxleft straightyleft
-			curl rightx righty
-			end [function : set this.cleanmore true]
-
+		if para.straightBar : begin
+			local cor : diagCor (righty - lefty) (rightx - leftx)
+			local hst : HALFSTROKE * [mix 1 cor [linreg 18 1 126 0 STROKE]]
+			local hse : HALFSTROKE * ([adviceBlackness 3] / STROKE)
+			include : dispiro
+				widths.center
+				corner leftx lefty [widths.heading hst hst [if (lefty < righty) UPWARD DOWNWARD]]
+				corner rightx righty [widths hse hse]
+				end [function : set this.cleanmore true]
+		: else : begin
+			include : dispiro
+				widths.center
+				flat leftx lefty [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				curl leftx turnyleft [heading [if (lefty < righty) UPWARD DOWNWARD]]
+				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
+				flat straightxleft straightyleft
+				curl rightx righty
+				end [function : set this.cleanmore true]
 
 	define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-construction
 		local middlex : mix _leftx _rightx 0.5
@@ -428,7 +443,7 @@ export : define [apply] : begin
 
 	define [mShoulderSpiro] : params [left right top bottom width fine diversity] : glyph-construction
 		local fix : TANSLANT * STROKE * HVCONTRAST * width / STROKE
-		local sm : SMALLSMOOTH * 0.7
+		local sm : SMALLSMOOTH * 0.7 * [fallback diversity 1]
 		include : spiro-outline
 			corner (right - width * HVCONTRAST) bottom
 			curl   (right - width * HVCONTRAST) (top - sm + fix)
@@ -653,7 +668,7 @@ export : define [apply] : begin
 			: else : throw ex
 		return forkFont.glyfMap
 
-	define [Miniature] : params [glyphs crowd scale [slantAngle para.slantAngle] unfair [sbscale 0.5]] : begin
+	define [Miniature] : params [glyphs crowd scale [slantAngle para.slantAngle] unfair [sbscale (WIDTH / UPM)] [mono false]] : begin
 		local forkedPara : Object.create para
 		forkedPara.stroke = [adviceBlackness crowd] / scale
 		forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
@@ -662,6 +677,8 @@ export : define [apply] : begin
 		forkedPara.sb = SB * sbscale
 		forkedPara.slantAngle = slantAngle
 		forkedPara.unfair = unfair
+		if mono : begin
+			forkedPara.diversityM  = 1
 		return : Fork glyphs forkedPara
 
 	define [Thinner glyphs p] : begin
@@ -671,9 +688,6 @@ export : define [apply] : begin
 		forkedPara.jut = JUT * p
 		forkedPara.longjut = LONGJUT * p
 		forkedPara.diversityM = 1
-		forkedPara.diversityW = 1
-		forkedPara.diversityI = 1
-		forkedPara.diversityF = 1
 		#forkedPara.hookx = HOOKX * p
 		return : Fork glyphs forkedPara
 
@@ -733,4 +747,4 @@ export : define [apply] : begin
 		include : difference background [union.apply null candidates]
 		include overlay
 	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay]
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor]

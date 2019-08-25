@@ -111,9 +111,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     - All glyphs wider than one letter would be deleted.
     - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
   - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
-  - `nolig` : Disable ligation only.
-  - `type` : Make some symbols, like arrows (`→`) and mathematical operators full-width.
-  - `stress-fw` : When included, full-width characters varying form `U+FF00` to `U+FFFF` will be boxed to present a clear distinguish between ASCII and Full-width.
+  - `no-ligation` : Disable ligation only.
+  - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
+  - `type` : Make some symbols, like arrows (`→`) full-width.
 * All registered `ss##` and `cv##` feature tags, including:
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.
@@ -148,6 +148,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-colons`: Enable ligation for `::` and `:::` ;
 * Styles for changing the line space (leading):
   * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
+  * `win-metric-pad-0`, `win-metric-pad-50`, `win-metric-pad-100`, `win-metric-pad-150`, `win-metric-pad-200`, `win-metric-pad-250`, `win-metric-pad-300`: Add extra space to [OS/2 table’s Win metrics](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#uswinascent) to avoid clipping in certain legacy software.
 * Styles for changing Powerline symbols' position:
   * `powerline-scale-y-750`, `powerline-scale-y-875`, `powerline-scale-y-1000`, `powerline-scale-y-1125`, `powerline-scale-y-1250`, `powerline-scale-y-1375`, `powerline-scale-y-1500`: Resize the Powerline symbols vertically, from 75% to 150%.
   * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.

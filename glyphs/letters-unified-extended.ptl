@@ -118,55 +118,40 @@ export : define [apply] : begin
 		save 'gamma' 0x3B3
 
 
-	define [LambdaShape sw _top barStraight] : glyph-construction
-		local cornerdist : HALFSTROKE * HVCONTRAST * [if SLAB 1.2 1]
-		local fine : fallback para.vtipfine : if SLAB 0.9 0.8
-		local TURN (CAP * 0.1)
-		local curviness 0.2
-		local top : fallback _top CAP
-		if barStraight : begin
-			include : dispiro
-				widths.rhs sw
-				flat (SB + O * 2) 0    [heading UPWARD]
-				g4   (MIDDLE - cornerdist) top [widths 0 (sw * fine)]
-			include : dispiro
-				widths.lhs sw
-				flat (RIGHTSB - O * 2) 0    [heading UPWARD]
-				g4   (MIDDLE + cornerdist) top [widths (sw * fine) 0]
-		: else : begin
-			include : dispiro
-				widths.rhs sw
-				flat SB 0    [heading UPWARD]
-				curl SB TURN [heading UPWARD]
-				quadcontrols 0 curviness 9 unimportant
-				g4   (MIDDLE - cornerdist) top [widths 0 (sw * fine)]
-			include : dispiro
-				widths.lhs sw
-				flat RIGHTSB 0    [heading UPWARD]
-				curl RIGHTSB TURN [heading UPWARD]
-				quadcontrols 0 curviness 9 unimportant
-				g4   (MIDDLE + cornerdist) top [widths (sw * fine) 0]
-
-		start-from (MIDDLE - cornerdist) top
-		line-to (MIDDLE + cornerdist) top
-		line-to MIDDLE (top - sw * fine)
-
+	define [LambdaShape top sw barStraight div] : glyph-construction
+		local df : DivFrame [fallback div 1]
+		include : VShape top sw barStraight div
+		include : FlipAround df.middle (top / 2)
 		if SLAB : begin
 			include : CenterBottomSerif (SB + sw / 2 * HVCONTRAST) 0 JUT
 			tag-contour 'serif'
 			include : CenterBottomSerif (RIGHTSB - sw / 2 * HVCONTRAST) 0 JUT
 			tag-contour 'serif'
+	
+	define [DeltaMaskShape top sw barStraight div] : begin
+		local df : DivFrame [fallback div 1]
+		local sbCor : if barStraight ((top / CAP) * (OX * [if SLAB 1 4])) 0
+		return : spiro-outline
+			corner (SB + sbCor) 0
+			corner (df.rightSB - sbCor) 0
+			corner df.middle CAP
+	
+	define [DeltaShape top sw barStraight div] : glyph-construction
+		include : LambdaShape top sw barStraight div
+		eject-contour 'serif'
+		include : intersection
+			HBarBottom 0 WIDTH 0 sw
+			DeltaMaskShape top sw barStraight div
 
 	sketch # Lambda
 		include markset.capital
-		include : LambdaShape STROKE CAP para.straightBar
+		include : LambdaShape CAP STROKE para.straightBar
 		save 'Lambda' 0x39B
 		save 'latinLambda' 0x245
 
 	sketch # Delta
-		include glyphs.Lambda AS_BASE
-		include : HBarBottom (SB + HALFSTROKE) (RIGHTSB - HALFSTROKE) 0
-		eject-contour 'serif'
+		include markset.capital
+		include : DeltaShape CAP STROKE para.straightBar
 		save 'Delta' 0x394
 
 	sketch
@@ -227,27 +212,28 @@ export : define [apply] : begin
 		save 'cyrbe' 0x431
 
 	define [SmallEpsilonShape top hook] : glyph-construction
+		local stroke : adviceBlackness2 2.875 2 top
 		local midx : mix SB RIGHTSB 0.65
 		local midy : top * OVERLAYPOS
-		local sma : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
-		local smb : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
-		local fine : STROKE * CTHIN
+		local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
+		local smb : [mix (STROKE + O) (midy - stroke / 2) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
+		local fine : stroke * CTHIN
 		include : dispiro
 			widths.lhs
 			g4 (RIGHTSB + O) (top - [fallback hook SHOOK])
 			hookstart (top - O)
 			g4 (SB + OXE) (top - sma)
 			arcvh
-			flat MIDDLE (midy - (fine - HALFSTROKE)) [widths.heading fine 0 RIGHTWARD]
-			curl midx (midy - (fine - HALFSTROKE)) [heading RIGHTWARD]
+			flat MIDDLE (midy - (fine - stroke / 2)) [widths.heading fine 0 RIGHTWARD]
+			curl midx (midy - (fine - stroke / 2)) [heading RIGHTWARD]
 		include : dispiro
 			widths.rhs
 			g4 (RIGHTSB - O) [fallback hook SHOOK]
 			hookstart O
 			g4 (SB + OXE + O * 2) smb
 			arcvh
-			flat MIDDLE (midy + (fine - HALFSTROKE)) [widths.heading 0 fine RIGHTWARD]
-			curl midx (midy + (fine - HALFSTROKE)) [heading RIGHTWARD]
+			flat MIDDLE (midy + (fine - stroke / 2)) [widths.heading 0 fine RIGHTWARD]
+			curl midx (midy + (fine - stroke / 2)) [heading RIGHTWARD]
 
 	sketch # epsilon
 		include markset.e
@@ -261,27 +247,28 @@ export : define [apply] : begin
 		save 'latinEpsilon' 0x190
 		
 	define [CyrZeShape top hook] : glyph-construction
+		local stroke : adviceBlackness2 2.875 2 top
 		local midx : mix RIGHTSB SB 0.65
 		local midy : top * OVERLAYPOS
-		local smb : top - [mix (midy + HALFSTROKE) (top - O - STROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * STROKE
-		local sma : [mix (STROKE + O) (midy - HALFSTROKE) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
-		local fine : STROKE * CTHIN
+		local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
+		local sma : [mix (stroke + O) (midy - stroke / 2) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * stroke
+		local fine : stroke * CTHIN
 		include : dispiro
 			widths.rhs
 			g4 (SB - O) (top - [fallback hook SHOOK])
 			hookstart (top - O)
 			g4 (RIGHTSB - OXE) (top - smb)
 			arcvh
-			flat MIDDLE (midy - (fine - HALFSTROKE)) [widths.heading 0 fine LEFTWARD]
-			curl midx (midy - (fine - HALFSTROKE)) [heading LEFTWARD]
+			flat MIDDLE (midy - (fine - stroke / 2)) [widths.heading 0 fine LEFTWARD]
+			curl midx (midy - (fine - stroke / 2)) [heading LEFTWARD]
 		include : dispiro
 			widths.lhs
 			g4 (SB + O) [fallback hook SHOOK]
 			hookstart O
 			g4 (RIGHTSB - OXE - O * 2) sma
 			arcvh
-			flat MIDDLE (midy + (fine - HALFSTROKE)) [widths.heading fine 0 LEFTWARD]
-			curl midx (midy + (fine - HALFSTROKE)) [heading LEFTWARD]
+			flat MIDDLE (midy + (fine - stroke / 2)) [widths.heading fine 0 LEFTWARD]
+			curl midx (midy + (fine - stroke / 2)) [heading LEFTWARD]
 
 	sketch # cyrZe
 		include markset.capital
@@ -389,19 +376,20 @@ export : define [apply] : begin
 		save 'Xi' 0x39E
 
 
-	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noserif [endShrink 0]] : glyph-construction
+	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noserif [endShrink 0] [div 1]] : glyph-construction
+		local df : DivFrame (div || 1)
 		local fine : fallback _fine STROKE
-		local shrink : if (!noserif && SLAB) 0 (shrinkrate * (RIGHTSB - SB))
-		local endexpand : if (!noserif && SLAB) 0 (- endShrink * (RIGHTSB - SB) || shrink / 2)
-		include : HBarTop (SB - endexpand) (RIGHTSB + endexpand) top fine
+		local shrink : if (!noserif && SLAB) 0 (shrinkrate * (df.rightSB - SB))
+		local endexpand : if (!noserif && SLAB) 0 (- endShrink * (df.rightSB - SB) || shrink / 2)
+		include : HBarTop (SB - endexpand) (df.rightSB + endexpand) top fine
 		include : VBarLeft (SB + shrink) bottom (top - fine / 2) fine
-		include : VBarRight (RIGHTSB - shrink) bottom (top - fine / 2) fine
+		include : VBarRight (df.rightSB - shrink) bottom (top - fine / 2) fine
 
 		if (!noserif && SLAB) : begin
 			include : CenterBottomSerif (SB + shrink + fine * 0.5 * HVCONTRAST) bottom JUT fine
-			include : CenterBottomSerif (RIGHTSB - shrink - fine * 0.5 * HVCONTRAST) bottom JUT fine
+			include : CenterBottomSerif (df.rightSB - shrink - fine * 0.5 * HVCONTRAST) bottom JUT fine
 			include : CenterTopSerif (SB + shrink + fine * 0.5 * HVCONTRAST) top JUT fine
-			include : CenterTopSerif (RIGHTSB - shrink - fine * 0.5 * HVCONTRAST) top JUT fine
+			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVCONTRAST) top JUT fine
 
 	sketch # Pi
 		include markset.capital
@@ -428,14 +416,15 @@ export : define [apply] : begin
 	list PiShape
 
 
-	define [SigmaShape top bottom _fine] : glyph-construction
+	define [SigmaShape top bottom _fine div] : glyph-construction
 		local cor 1.15
 		local fine : fallback _fine STROKE
+		local df : DivFrame (div || 1)
 
-		include : HBarTop SB RIGHTSB top fine
-		include : HBarBottom SB RIGHTSB bottom fine
+		include : HBarTop SB df.rightSB top fine
+		include : HBarBottom SB df.rightSB bottom fine
 
-		local midx : mix SB RIGHTSB 0.4
+		local midx : mix SB df.rightSB 0.4
 		start-from SB (bottom + fine)
 		line-to (SB + fine * cor) (bottom + fine)
 		line-to (midx + fine * cor) [mix bottom top 0.5]
@@ -445,8 +434,8 @@ export : define [apply] : begin
 		reverse-last
 
 		if SLAB : begin
-			include : DownwardRightSerif RIGHTSB top VJUT
-			include : UpwardRightSerif RIGHTSB bottom VJUT
+			include : DownwardRightSerif df.rightSB top VJUT
+			include : UpwardRightSerif df.rightSB bottom VJUT
 
 	sketch # Sigma
 		set-width WIDTH
@@ -460,14 +449,14 @@ export : define [apply] : begin
 
 
 	sketch # Phi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
 
 		local y1 : CAP * [if SLAB 0.175 0.125]
 		local y2 : CAP * [if SLAB 0.825 0.875]
 		include : VBar df.middle 0 (y1 + HALFSTROKE)
-		include : OShape y2 y1 (SB + O) (df.rightSB - O) df.mvs (SMOOTHA * df.div) (SMOOTHB * df.div)
+		include : OShape y2 y1 (df.leftSB + O) (df.rightSB - O) df.mvs (SMOOTHA * df.div) (SMOOTHB * df.div)
 		include : VBar df.middle y1 y2 df.mvs
 		include : VBar df.middle (y2 - HALFSTROKE) CAP
 
@@ -478,13 +467,13 @@ export : define [apply] : begin
 		save 'cyrEf' 0x424
 
 	sketch # taillessphi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
 
-		local x0 : mix SB df.rightSB 0.1
+		local x0 : mix df.leftSB df.rightSB 0.1
 		local y1 : mix 0 XH 0.75
-		local x1 : SB + OX * 2
+		local x1 : df.leftSB + OX * 2
 		local y3 : XH * 0.66
 		local y4 : XH * 0.65
 		include : dispiro
@@ -503,7 +492,7 @@ export : define [apply] : begin
 		save 'taillessphi' 0x2C77
 
 	sketch # phi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.p
 		include glyphs.taillessphi
@@ -511,30 +500,29 @@ export : define [apply] : begin
 		save 'phi' 0x3C6
 
 	sketch # varphi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.if
 
 		local y1 0
 		local y2 XH
 		include : VBar df.middle DESCENDER (y1 + HALFSTROKE)
-		include : OShape y2 y1 SB df.rightSB df.mvs (SMOOTHA * df.div) (SMOOTHB * df.div) nothing true
+		include : OShape y2 y1 df.leftSB df.rightSB df.mvs (SMOOTHA * df.div) (SMOOTHB * df.div) nothing true
 		include : VBar df.middle y1 y2 df.mvs
 		include : VBar df.middle (y2 - HALFSTROKE) CAP
 		save 'varphi' 0x3D5
 
 	sketch # cyref
-		local div para.diversityM
-		set-width (WIDTH * div)
-		include glyphs.varphi AS_BASE
+		local df : DivFrame para.diversityM 3
+		include glyphs.varphi AS_BASE ALSO_METRICS
 		if SLAB : begin
-			include : tagged 'serifMT' : CenterTopSerif MIDDLE CAP JUT
-			include : tagged 'serifMB' : CenterBottomSerif MIDDLE DESCENDER JUT
+			include : tagged 'serifMT' : CenterTopSerif df.middle CAP JUT
+			include : tagged 'serifMB' : CenterBottomSerif df.middle DESCENDER JUT
 		save 'cyref' 0x444
 		save 'latinphi' 0x278
 
 	sketch # Psi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
 
@@ -542,8 +530,8 @@ export : define [apply] : begin
 		local y2 : CAP * (1 - 0.2 / df.div)
 		include : dispiro
 			widths.lhs df.mvs
-			flat SB y2 [heading DOWNWARD]
-			curl SB (y + (SMOOTHB * df.div))
+			flat df.leftSB y2 [heading DOWNWARD]
+			curl df.leftSB (y + (SMOOTHB * df.div))
 			arcvh
 			g4   df.middle y [heading RIGHTWARD]
 			archv
@@ -552,7 +540,7 @@ export : define [apply] : begin
 		include : VBar df.middle y CAP df.mvs
 		include : VBar df.middle 0 (y + HALFSTROKE)
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB y2 SIDEJUT
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB y2 SIDEJUT
 			include : tagged 'serifRT' : RightwardTopSerif df.rightSB y2 SIDEJUT
 			include : tagged 'serifMT' : CenterTopSerif df.middle CAP JUT
 			include : tagged 'serifMB' : CenterBottomSerif df.middle 0 JUT
@@ -560,7 +548,7 @@ export : define [apply] : begin
 		save 'Psi' 0x3A8
 
 	sketch # smcpPsi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
 
@@ -568,8 +556,8 @@ export : define [apply] : begin
 		local y2 XH
 		include : dispiro
 			widths.lhs df.mvs
-			flat SB y2 [heading DOWNWARD]
-			curl SB (y + (SMOOTHB * df.div))
+			flat df.leftSB y2 [heading DOWNWARD]
+			curl df.leftSB (y + (SMOOTHB * df.div))
 			arcvh
 			g4   df.middle y [heading RIGHTWARD]
 			archv
@@ -578,21 +566,21 @@ export : define [apply] : begin
 		include : VBar df.middle y XH df.mvs
 		include : VBar df.middle 0 (y + HALFSTROKE)
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB y2 SIDEJUT
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB y2 SIDEJUT
 			include : tagged 'serifRT' : RightwardTopSerif df.rightSB y2 SIDEJUT
 			include : tagged 'serifMB' : CenterBottomSerif df.middle 0 JUT
 
 		save 'smcpPsi' 0x1D2A
 
 	sketch # psi
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.if
 
 		include : dispiro
 			widths.lhs df.mvs
-			flat SB XH [heading DOWNWARD]
-			curl SB SMALLSMOOTHB
+			flat df.leftSB XH [heading DOWNWARD]
+			curl df.leftSB SMALLSMOOTHB
 			arcvh
 			g4   df.middle O [heading RIGHTWARD]
 			archv
@@ -601,7 +589,7 @@ export : define [apply] : begin
 		include : VBar df.middle 0 CAP df.mvs
 		include : VBar df.middle DESCENDER HALFSTROKE
 		if SLAB : begin
-			include : LeftwardTopSerif SB XH SIDEJUT
+			include : LeftwardTopSerif df.leftSB XH SIDEJUT
 			tag-contour 'serifLT'
 			if (!para.isItalic) : begin
 				include : tagged 'serifRT' : RightwardTopSerif df.rightSB XH SIDEJUT
@@ -648,16 +636,16 @@ export : define [apply] : begin
 
 
 	sketch # omega
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include [MarksetDiv df.div].e
 
 		local fine : adviceBlackness 3.25 df.div
 		local mfine : fine * CTHIN
-		local x0 : mix SB df.rightSB 0.1
+		local x0 : mix df.leftSB df.rightSB 0.1
 		local y0 : XH - STROKE * 0.2
 		local y1 : mix 0 XH 0.8
-		local x1 : SB + OX * 2
+		local x1 : df.leftSB + OX
 		local y3 : XH / 2
 		local y4 : XH * 0.65
 
@@ -685,16 +673,16 @@ export : define [apply] : begin
 		save 'omega' 0x3C9
 
 	sketch # pomega
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 
 		include glyphs.omega AS_BASE
-		include : HBar SB df.rightSB (XH - HALFSTROKE)
+		include : HBar df.leftSB df.rightSB (XH - HALFSTROKE)
 
 		save 'pomega' 0x3D6
 
 	sketch # closeomega
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include [MarksetDiv df.div].e
 		local fine : adviceBlackness 3.25
@@ -702,7 +690,7 @@ export : define [apply] : begin
 		local x0 : df.middle - CORRECTION_OMIDS
 		local y0 : XH - O
 		local y1 : mix 0 XH 0.45
-		local x1 : SB + OX * 2
+		local x1 : df.leftSB + OX
 		local y3 : XH / 2
 		local y4 : XH * 0.65
 		include : dispiro
@@ -728,7 +716,6 @@ export : define [apply] : begin
 	###########################################################################################
 	# UNIFIED LETTERFORMS : CYRILLIC ORIGINALS
 	###########################################################################################
-
 
 	define [CyrYeriShape top _left _right _fine _jut] : glyph-construction
 		local fine : fallback _fine STROKE
@@ -841,26 +828,25 @@ export : define [apply] : begin
 		include : CyrYerShape XH
 		save 'cyryer' 0x44A
 
-	define [CyrYeryShape top div] : glyph-construction
-		local df : DivFrame div
+	define [CyrYeryShape top df] : glyph-construction
 		local overshoot : O * 2
-		include : CyrYeriShape top (SB + overshoot) [mix (df.rightSB - df.mvs * HVCONTRAST) (MIDDLE + df.mvs / 2 * HVCONTRAST) (0.75 / div)] df.mvs (JUT * 0.75)
+		include : CyrYeriShape top (df.leftSB + overshoot) [mix (df.rightSB - df.mvs * HVCONTRAST) (MIDDLE + df.mvs / 2 * HVCONTRAST) (0.75 / df.div)] df.mvs (JUT * 0.75)
 		include : VBarRight (df.rightSB - overshoot) 0 top df.mvs
 		if SLAB : begin
 			include : CenterTopSerif (df.rightSB - overshoot - df.mvs / 2 * HVCONTRAST) top (JUT * 0.75)
 			include : CenterBottomSerif (df.rightSB - overshoot - df.mvs / 2 * HVCONTRAST) 0 (JUT * 0.75)
 
 	sketch # cyrYery
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrYeryShape CAP df.div
+		include : CyrYeryShape CAP df
 		save 'cyrYery' 0x42B
 	sketch # cyryery
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrYeryShape XH df.div
+		include : CyrYeryShape XH df
 		save 'cyryery' 0x44B
 
 	define [CyrIShape top] : glyph-construction
@@ -1042,17 +1028,17 @@ export : define [apply] : begin
 		save 'cyrel' 0x43B
 
 
-	define [CyrZheShape top midtop _div] : glyph-construction
-		local df : DivFrame [fallback _div 1]
+	define [CyrZheShape top midtop df] : glyph-construction
 		local fine : adviceBlackness 3.3 df.div
-		local midx : mix SB df.middle 0.3
+		local midx : mix df.leftSB df.middle 0.3
 		define [CyrAngleShape] : glyph-construction
 			local cor HVCONTRAST
-			start-from (SB + O * 4) 0
-			line-to (SB + fine * cor + O * 4) 0
+			local overshoot : O * 3 * df.div
+			start-from (df.leftSB + overshoot) 0
+			line-to (df.leftSB + fine * cor + overshoot) 0
 			line-to (midx + fine * cor) (top / 2)
-			line-to (SB + fine * cor + O * 4) top
-			line-to (SB + O * 4) top
+			line-to (df.leftSB + fine * cor + overshoot) top
+			line-to (df.leftSB + overshoot) top
 			line-to midx (top / 2)
 			reverse-last
 		include : CyrAngleShape
@@ -1062,91 +1048,89 @@ export : define [apply] : begin
 		include : HBar midx (df.width - midx) (top / 2) fine
 		if SLAB : begin
 			define fineK 0.1
-			include : LeftwardTopSerif     (SB + fine * fineK) top SIDEJUT
-			include : LeftwardBottomSerif  (SB + fine * fineK) 0 SIDEJUT
+			include : LeftwardTopSerif     (df.leftSB + fine * fineK) top SIDEJUT
+			include : LeftwardBottomSerif  (df.leftSB + fine * fineK) 0 SIDEJUT
 			include : RightwardTopSerif    (df.rightSB - fine * fineK) top SIDEJUT
 			include : RightwardBottomSerif (df.rightSB - fine * fineK) 0 SIDEJUT
 
 	sketch # cyrZhe
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrZheShape CAP CAP df.div
+		include : CyrZheShape CAP CAP df
 		save 'cyrZhe' 0x416
 	composite glyphs.cyrZhe 
-		CyrDescender ([DivFrame para.diversityM].rightSB - O * 4) nothing true
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) nothing true
 		into-unicode 0x496
 
 	sketch # cyrzhe
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrZheShape XH XH df.div
+		include : CyrZheShape XH XH df
 		save 'cyrzhe' 0x436
 	composite glyphs.cyrzhe
-		CyrDescender ([DivFrame para.diversityM].rightSB - O * 4) nothing true
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) nothing true
 		into-unicode 0x497
 
 	sketch # cyrzhe.BGR
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrZheShape XH CAP df.div
+		include : CyrZheShape XH CAP df
 		save 'cyrzhe.BGR'
 
-	define [CyrBigYusShape top yp div] : glyph-construction
-		local df : DivFrame div
+	define [CyrBigYusShape top yp df] : glyph-construction
 		local fine : adviceBlackness 3.3 df.div
 		local cor HVCONTRAST
-		local midx : mix SB df.middle 0.3
-		local midx2 : Math.min (df.middle - fine * cor) [mix SB df.middle 0.75]
+		local midx : mix df.leftSB df.middle 0.3
+		local midx2 : Math.min (df.middle - fine * cor) [mix df.leftSB df.middle 0.75]
 		local yb : top * yp
 		local tovershoot 2
 
-		start-from (SB + O * 4) 0
-		line-to (SB + fine * cor + O * 4) 0
+		start-from (df.leftSB + O * 2) 0
+		line-to (df.leftSB + fine * cor + O * 2) 0
 		line-to (midx + fine * cor) yb
 		line-to midx yb
 		reverse-last
 
 		start-from (midx2 + fine * cor) yb
-		line-to (SB + fine * cor + O * tovershoot) top
-		line-to (SB + O * tovershoot) top
+		line-to (df.leftSB + fine * cor + O * tovershoot) top
+		line-to (df.leftSB + O * tovershoot) top
 		line-to midx2 yb
 		reverse-last
 
-		start-from (df.width - SB - O * 4) 0
-		line-to (df.width - SB - fine * cor - O * 4) 0
+		start-from (df.width - df.leftSB - O * 2) 0
+		line-to (df.width - df.leftSB - fine * cor - O * 2) 0
 		line-to (df.width - midx - fine * cor) yb
 		line-to (df.width - midx) yb
 
 		start-from (df.width - midx2 - fine * cor) yb
-		line-to (df.width - SB - fine * cor - O * tovershoot) top
-		line-to (df.width - SB - O * tovershoot) top
+		line-to (df.width - df.leftSB - fine * cor - O * tovershoot) top
+		line-to (df.width - df.leftSB - O * tovershoot) top
 		line-to (df.width - midx2) yb
 
 
 		include : VBar df.middle 0 yb fine
 		include : HBarTop midx (df.width - midx) yb fine
-		include : HBarTop (SB + O * tovershoot + HVCONTRAST * fine * 0.99) (df.rightSB - O * tovershoot - HVCONTRAST * fine * 0.99) top fine
+		include : HBarTop (df.leftSB + O * tovershoot + HVCONTRAST * fine * 0.99) (df.rightSB - O * tovershoot - HVCONTRAST * fine * 0.99) top fine
 
 	sketch # cyrbigYus
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrBigYusShape CAP 0.575 df.div
+		include : CyrBigYusShape CAP 0.575 df
 		save 'cyrbigYus' 0x46A
 	sketch # cyrbigyus
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrBigYusShape XH 0.55 df.div
+		include : CyrBigYusShape XH 0.55 df
 		save 'cyrbigyus' 0x46B
 
-	define [CyrSmallYusShape top div] : glyph-construction
-		local df : DivFrame div
+	define [CyrSmallYusShape top df] : glyph-construction
 		local fine : adviceBlackness 3.3 df.div
-		include : VShape top fine para.straightBar div
+		include : VShape top fine para.straightBar df.div
 		eject-contour 'serifLT'
 		eject-contour 'serifRT'
 		include : FlipAround df.middle (top / 2)
@@ -1155,80 +1139,88 @@ export : define [apply] : begin
 			linreg 18 0.16 108 0.16 STROKE
 		local bary (top / 2)
 		if (SLAB && !para.isItalic) : set p : p * 1.33
-		include : HBarTop [mix SB df.rightSB p] [mix df.rightSB SB p] bary fine
+		include : HBarTop [mix df.leftSB df.rightSB p] [mix df.rightSB df.leftSB p] bary fine
 		include : VBar df.middle bary 0 fine
 		if SLAB : begin
-			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SIDEJUT
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SIDEJUT
 			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SIDEJUT
 	sketch # cyrsmallYus
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrSmallYusShape CAP df.div
+		include : CyrSmallYusShape CAP df
 		save 'cyrsmallYus' 0x466
 	sketch # cyrsmallyus
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrSmallYusShape XH df.div
+		include : CyrSmallYusShape XH df
 		save 'cyrsmallyus' 0x467
 
 
-	define [CyrShaShape top _div] : glyph-construction
-		local div : fallback _div 1
-		local df : DivFrame div
-		include : HBarBottom SB df.rightSB 0
-		include : VBarLeft SB 0 top df.mvs
-		include : VBarRight df.rightSB 0 top df.mvs
-		include : VBar df.middle 0 top df.mvs
+	define [CyrShaShape top df] : glyph-construction
+		include : union
+			HBarBottom df.leftSB df.rightSB 0
+			VBarLeft df.leftSB 0 top df.mvs
+			VBarRight df.rightSB 0 top df.mvs
+			VBar df.middle 0 top df.mvs
+
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB top SIDEJUT
-			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SIDEJUT
-			include : tagged 'serifRT' : RightwardTopSerif df.rightSB top SIDEJUT
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SIDEJUT
 			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SIDEJUT
 
+			local jut : JUT * df.mvs / STROKE + O
+			if (WIDTH * df.div > jut * 3.5) : begin
+				include : tagged 'serifLT' 
+					CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVCONTRAST) top jut df.mvs
+				include : tagged 'serifMT'
+					CenterTopSerif df.middle top jut df.mvs
+				include : tagged 'serifRT' 
+					CenterTopSerif (df.rightSB - 0.5 * df.mvs * HVCONTRAST) top jut df.mvs
+			: else : begin
+				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SIDEJUT
+				include : tagged 'serifRT' : RightwardTopSerif df.rightSB top SIDEJUT
+
 	sketch # cyrSha
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrShaShape CAP df.div
+		include : CyrShaShape CAP df
 
 		save 'cyrSha' 0x428
 
 	sketch # cyrsha.upright
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrShaShape XH df.div
+		include : CyrShaShape XH df
 		save 'cyrsha.upright'
 
-	turned 'cyrsha.italic' null 'm' [DivFrame para.diversityM].middle (XH / 2)
+	turned 'cyrsha.italic' null 'm' [DivFrame para.diversityM 3].middle (XH / 2)
 	italic-variant 'cyrsha' 0x448
 
-	define [CyrShchaShape top _div] : glyph-construction
-		local div : fallback _div 1
-		local df : DivFrame div
-		include : CyrShaShape top div
+	define [CyrShchaShape top df] : glyph-construction
+		include : CyrShaShape top df
 		#eject-contour 'serifRB'
 		include : CyrDescender df.rightSB 0.05
 
 	sketch # cyrShcha
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrShchaShape CAP df.div
+		include : CyrShchaShape CAP df
 
 		save 'cyrShcha' 0x429
 
 	sketch # cyrshcha.upright
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrShchaShape XH df.div
+		include : CyrShchaShape XH df
 		save 'cyrshcha.upright'
 
 	sketch # cyrshcha.italic
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
 		include glyphs.'cyrsha.italic'
@@ -1239,7 +1231,7 @@ export : define [apply] : begin
 
 	# Serbian pe and te
 	sketch # cyrte.serbian
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include glyphs.'cyrsha.italic' AS_BASE
 		include glyphs.macronAbove
@@ -1291,85 +1283,97 @@ export : define [apply] : begin
 
 
 	define [CyrYuShape top xtop sma smb div] : glyph-construction
-		local df : DivFrame div
-		local xm : barmixL (SB + O) (df.rightSB - OX) (df.mvs * HVCONTRAST) [linreg 18 0.4 126 0.45 STROKE]
-		include : VBarLeft (SB + O) 0 xtop df.mvs
-		include : OShape top 0 xm (df.rightSB - OX) df.mvs (sma * 0.7 * df.div) (smb * 0.7 * df.div)
-		include : HBar (SB + O + 1) xm (top / 2)
+		local df : DivFrame div 3
+		local xm : barmixL df.leftSB df.rightSB (df.mvs * HVCONTRAST) [linreg 18 0.4 126 0.45 STROKE]
+		include : VBarLeft df.leftSB 0 xtop df.mvs
+		include : OShape top 0 xm df.rightSB df.mvs (sma * 0.7 * df.div) (smb * 0.7 * df.div)
+		include : HBar (df.leftSB + 1) xm (top / 2)
 
 		if SLAB : begin
-			include : CenterTopSerif (SB + O + df.mvs / 2 * HVCONTRAST) top (JUT * 0.75)
-			include : CenterBottomSerif (SB + O + df.mvs / 2 * HVCONTRAST) 0 (JUT * 0.75)
+			include : CenterTopSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) top (JUT * 0.75)
+			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) 0 (JUT * 0.75)
 
 	sketch # cyrYu
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
 		include : CyrYuShape CAP CAP SMOOTHA SMOOTHB df.div
 		save 'cyrYu' 0x42E
 
 	sketch # cyryu
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
 		include : CyrYuShape XH XH SMALLSMOOTHA SMALLSMOOTHB df.div
 		save 'cyryu' 0x44E
 
 	sketch # cyryu.BGR
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.b
 		include : CyrYuShape XH CAP SMALLSMOOTHA SMALLSMOOTHB df.div
 		save 'cyryu.BGR'
 
 
-	define [CyrLjeShape top] : glyph-construction
-		local l : SB + O
-		local r : RIGHTSB - O
+	define [CyrLjeShape top df] : glyph-construction
+		local rightSB : df.width - df.leftSB
+		local l : df.leftSB + O
+		local r : rightSB - O
+		local middle : df.width / 2
 		local xlefttop : mix l r 0.075
 		local jut : JUT * 0.72
+		set-width df.width
 		include : LegShape
 			ztop -- (xlefttop                      <> top)
 			zbot -- ([mix l 0 [if SLAB 1 0.75]] <> 0)
 			xb -- [mix l r 0.025]
 			fine -- MVERTSTROKE
-		include : CyrYeriShape top (MIDDLE - MVERTSTROKE / 2 * HVCONTRAST) (r - O) MVERTSTROKE jut
-		include : HBarTop xlefttop MIDDLE top
+		include : CyrYeriShape top (middle - MVERTSTROKE / 2 * HVCONTRAST) (r - O) MVERTSTROKE jut
+		include : HBarTop xlefttop middle top
 		if SLAB : begin
 			include : LeftwardTopSerif xlefttop top (jut - MVERTSTROKE / 2 * HVCONTRAST)
 
 	sketch # cyrLje
-		include markset.capital
-		include : CyrLjeShape CAP
-
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrLjeShape CAP df
 		save 'cyrLje' 0x409
 
 	sketch # cyrlje
-		include markset.e
-		include : CyrLjeShape XH
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrLjeShape XH df
 		save 'cyrlje' 0x459
 
-	define [CyrNjeShape top] : glyph-construction
-		local xlefttop : mix SB RIGHTSB 0.075
+	define [CyrNjeShape top df] : glyph-construction
+		local rightSB : df.width - df.leftSB
+		local xlefttop : mix df.leftSB df.rightSB 0.075
 		local jut : JUT * 0.72
-		local l : SB + O
-		local r : RIGHTSB - O
+		local l : df.leftSB + O
+		local r : rightSB - O
+		local middle : df.width / 2
+		set-width df.width
 		include : VBarLeft l 0 top MVERTSTROKE
-		include : CyrYeriShape top (MIDDLE - MVERTSTROKE / 2 * HVCONTRAST) (r - O) MVERTSTROKE jut
-		include : HBar (SB + MVERTSTROKE * 0.1) MIDDLE (top / 2)
+		include : CyrYeriShape top (middle - MVERTSTROKE / 2 * HVCONTRAST) (r - O) MVERTSTROKE jut
+		include : HBar (df.leftSB + MVERTSTROKE * 0.1) middle (top / 2)
 		if SLAB : begin
 			include : CenterTopSerif (l + MVERTSTROKE / 2 * HVCONTRAST) top jut
 			include : CenterBottomSerif (l + MVERTSTROKE / 2 * HVCONTRAST) 0 jut
 
 	sketch # cyrNje
-		include markset.capital
-		include : CyrNjeShape CAP
-
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrNjeShape CAP df
 		save 'cyrNje' 0x40A
 
 	sketch # cyrnje
-		include markset.e
-		include : CyrNjeShape XH
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrNjeShape XH df
 		save 'cyrnje' 0x45A
 
 
@@ -1521,7 +1525,7 @@ export : define [apply] : begin
 
 
 	sketch # AE
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
 
@@ -1531,15 +1535,15 @@ export : define [apply] : begin
 		# A half
 		include : dispiro
 			widths.rhs df.mvs
-			flat SB 0 [heading UPWARD]
-			curl SB (CAP * 0.1) [heading UPWARD]
+			flat df.leftSB 0 [heading UPWARD]
+			curl df.leftSB (CAP * 0.1) [heading UPWARD]
 			quadcontrols 0 0.3 6 unimportant
 			g4   (eleft - HALFSTROKE) CAP [widths.rhs (df.mvs * 0.8)]
 
 		start-from (eleft - HALFSTROKE) CAP
 		line-to    eleft CAP
 		line-to    eleft (CAP - df.mvs)
-		include : HBarTop  ([mix SB (eleft - HALFSTROKE) (1/6)] + df.mvs * 0.5 * HVCONTRAST)  (eleft + df.mvs / 2) (XH / 2) df.mvs
+		include : HBarTop  ([mix df.leftSB (eleft - HALFSTROKE) (1/6)] + df.mvs * 0.5 * HVCONTRAST)  (eleft + df.mvs / 2) (XH / 2) df.mvs
 
 		# E half
 		include : VBarLeft eleft 0 CAP df.mvs
@@ -1547,14 +1551,13 @@ export : define [apply] : begin
 		include : HBar (eleft - O) (df.rightSB - df.mvs / 4) (CAP * 0.54)
 		include : HBarBottom (eleft - O) df.rightSB 0
 		if SLAB : begin
-			include : CenterBottomSerif (SB + df.mvs / 2 * HVCONTRAST) 0 JUT df.mvs
+			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) 0 JUT df.mvs
 			include : DownwardRightSerif df.rightSB CAP VJUT df.mvs
 			include : UpwardRightSerif df.rightSB 0 VJUT df.mvs
 		save 'AE' 0xC6
 		save 'cyrAE' 0x4D4
 
-	define [OEShape top div] : glyph-construction
-		local df : DivFrame div
+	define [OEShape top df] : glyph-construction
 		local eleft df.middle
 
 		# O half
@@ -1563,8 +1566,8 @@ export : define [apply] : begin
 			widths.lhs df.mvs 0
 			straight.left.start eleft top [heading LEFTWARD]
 			archv
-			flat  SB (top - SMOOTHA)
-			curl  SB SMOOTHB
+			flat  df.leftSB (top - SMOOTHA)
+			curl  df.leftSB (SMOOTHB)
 			arcvh
 			straight.right.end eleft 0 [heading RIGHTWARD]
 
@@ -1579,29 +1582,29 @@ export : define [apply] : begin
 			include : UpwardRightSerif df.rightSB 0 VJUT df.mvs
 
 	sketch # OE
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : OEShape CAP df.div
+		include : OEShape CAP df
 		save 'OE' 0x152
 
 	sketch # smcpOE
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : OEShape XH df.div
+		include : OEShape XH df
 		save 'smcpOE' 0x276
 
-	define [aeepart div] : glyph-construction
-		local df : DivFrame div
-		local eLeft : df.middle - df.mvs / 2 * HVCONTRAST + 0.1
-		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] - df.mvs * TANSLANT
-		local barbottom (XH * EBARPOS - HALFSTROKE)
+	define [aeepart df] : glyph-construction
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local eLeft : df.middle - stroke / 2 * HVCONTRAST + 0.1
+		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] -  stroke * TANSLANT
+		local barbottom (XH * EBARPOS - stroke / 2)
 
 		local sma : SMALLSMOOTHA * 0.6 * df.div
 		local smb : SMALLSMOOTHB * 0.6 * df.div
 		include : dispiro
-			widths.lhs df.mvs
+			widths.lhs stroke
 			flat (df.rightSB - OX * 2) barbottom [heading UPWARD]
 			curl (df.rightSB - OX * 2) (XH - smb)
 			arcvh
@@ -1609,65 +1612,65 @@ export : define [apply] : begin
 			archv
 			flat eLeft (XH - sma)
 			curl eLeft smb
-			hookend O true df.mvs
-			g4 (df.rightSB - OX * 2) (AHOOK + df.mvs * TANSLANT) [heading UPWARD]
-		include : HBarBottom (eLeft + df.mvs / 2) (df.rightSB - OX * 2 - df.mvs / 2) barbottom df.mvs
+			hookend O true stroke
+			g4 (df.rightSB - OX * 2) (AHOOK + stroke * TANSLANT) [heading UPWARD]
+		include : HBarBottom (eLeft +  stroke / 2) (df.rightSB - OX * 2 -  stroke / 2) barbottom stroke
 
-	define [aeapart div] : glyph-construction
-		local df : DivFrame div
-		local bartop (XH * OVERLAYPOS * 1.02 + HALFSTROKE)
-		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST - 0.1
-		local lowmiddle : mix (SB + OX * 2) abarRight 0.5
-		local barsmooth : mix SB abarRight 0.7
+	define [aeapart df] : glyph-construction
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local bartop (XH * OVERLAYPOS * 1.02 + stroke / 2)
+		local abarRight : df.middle + stroke / 2 * HVCONTRAST - 0.1
+		local lowmiddle : mix (df.leftSB + OX * 2) abarRight 0.5
+		local barsmooth : mix df.leftSB abarRight 0.7
 
 		local sma : SMALLSMOOTHA * 0.6 * df.div
 		local smb : SMALLSMOOTHB * 0.6 * df.div
 
 		include : dispiro
-			widths.rhs df.mvs
-			g4 (SB + OX) (XH - AHOOK - df.mvs * TANSLANT) [heading UPWARD]
-			hookstart XO true df.mvs
+			widths.rhs stroke
+			g4 (df.leftSB + OX) (XH - AHOOK - stroke * TANSLANT) [heading UPWARD]
+			hookstart XO true stroke
 			flat abarRight (XH - smb)
 			curl abarRight smb
 			arcvh
 			g4 lowmiddle O [heading LEFTWARD]
 			archv
-			g4 (SB + OX * 2) [mix 0 bartop 0.45]
+			g4 (df.leftSB + OX * 2) [mix 0 bartop 0.45]
 			arcvh
 			flat barsmooth bartop
 			curl (abarRight - 1) bartop [heading RIGHTWARD]
 
-	define [oeopart div] : glyph-construction
-		local df : DivFrame div
-		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST
-		include : OShape XH 0 (SB + OX) (abarRight + OX) df.mvs (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div)
+	define [oeopart df] : glyph-construction
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local abarRight : df.middle + stroke / 2 * HVCONTRAST
+		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) stroke (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div)
 
 	sketch # ae
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : aeepart df.div
-		include : aeapart df.div
+		include : aeepart df
+		include : aeapart df
 		save 'ae' 0xE6
 		save 'cyrae' 0x4D5
 	turned nothing 0x1D02 'ae' [DivFrame para.diversityM].middle (XH / 2)
 
 	sketch # oe
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : aeepart df.div
-		include : oeopart df.div
+		include : aeepart df
+		include : oeopart df
 		save 'oe' 0x153
 	turned nothing 0x1D14 'oe' [DivFrame para.diversityM].middle (XH / 2)
 
 	sketch # db
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.b
-		include : oeopart df.div
+		include : oeopart df
 		include : FlipAround df.middle (XH / 2)
-		include : oeopart df.div
+		include : oeopart df
 		include : VBar df.middle (XH / 2) CAP MVERTSTROKE
 		if SLAB : begin
 			include : LeftwardTopSerif (df.middle - MVERTSTROKE / 2 * HVCONTRAST) CAP SIDEJUT
@@ -1675,12 +1678,12 @@ export : define [apply] : begin
 		save 'db' 0x238
 
 	sketch # qp
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.p
-		include : oeopart df.div
+		include : oeopart df
 		include : FlipAround df.middle (XH / 2)
-		include : oeopart df.div
+		include : oeopart df
 		include : VBar df.middle DESCENDER (XH / 2) MVERTSTROKE
 		if SLAB : begin
 			include : CenterBottomSerif df.middle DESCENDER JUT
@@ -2036,79 +2039,79 @@ export : define [apply] : begin
 
 
 	sketch # Hwair
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : VBarLeft (SB + O) 0 CAP df.mvs
+		include : VBarLeft df.leftSB 0 CAP df.mvs
 		include : HBar SB df.middle (CAP / 2)
 		include : dispiro
 			widths.lhs df.mvs
 			flat (df.middle - df.mvs * 0.5 * HVCONTRAST) CAP [heading DOWNWARD]
 			curl (df.middle - df.mvs * 0.5 * HVCONTRAST) (SMALLSMOOTHB * 0.6 * df.div)
 			arcvh
-			g4 [mix (df.middle - df.mvs * 0.5 * HVCONTRAST) (df.rightSB - O) 0.5] O [heading RIGHTWARD]
+			g4 [mix (df.middle - df.mvs * 0.5 * HVCONTRAST) df.rightSB 0.5] O [heading RIGHTWARD]
 			archv
-			flat (df.rightSB - O) (SMALLSMOOTHA * 0.6 * df.div)
-			curl (df.rightSB - O) XH [heading UPWARD]
+			flat df.rightSB (SMALLSMOOTHA * 0.6 * df.div)
+			curl df.rightSB XH [heading UPWARD]
 		if SLAB : begin
 			local jut : JUT * 0.75
-			include : CenterTopSerif (SB + O + df.mvs / 2 * HVCONTRAST) CAP jut
-			include : CenterBottomSerif (SB + O + df.mvs / 2 * HVCONTRAST) 0 jut
+			include : CenterTopSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) CAP jut
+			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) 0 jut
 			include : CenterTopSerif df.middle CAP jut
 
 		save 'Hwair' 0x1F6
 
 	sketch # hwair
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.b
-		include : VBarLeft (SB + O) 0 CAP df.mvs
+		include : VBarLeft df.leftSB 0 CAP df.mvs
 		include : dispiro
-			nShoulderKnots (SB + O + df.mvs * HVCONTRAST) (df.middle + df.mvs * 0.5 * HVCONTRAST) (df.mvs * 0.4) nothing (XH * 0.51) (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div) df.mvs
+			nShoulderKnots (df.leftSB + df.mvs * HVCONTRAST) (df.middle + df.mvs * 0.5 * HVCONTRAST) (df.mvs * 0.4) nothing (XH * 0.51) (SMALLSMOOTHA * 0.6 * df.div) (SMALLSMOOTHB * 0.6 * df.div) df.mvs
 			flat (df.middle + df.mvs * 0.5 * HVCONTRAST) (XH * 0.5) [heading DOWNWARD]
 			curl (df.middle + df.mvs * 0.5 * HVCONTRAST) (SMALLSMOOTHB * 0.6 * df.div)
 			arcvh
-			g4 [mix (df.middle - df.mvs * 0.5 * HVCONTRAST) (df.rightSB - O) 0.5] O [widths.heading df.mvs 0 RIGHTWARD]
+			g4 [mix (df.middle - df.mvs * 0.5 * HVCONTRAST) df.rightSB 0.5] O [widths.heading df.mvs 0 RIGHTWARD]
 			archv
-			flat (df.rightSB - O) (SMALLSMOOTHA * 0.6 * df.div)
-			curl (df.rightSB - O) XH [heading UPWARD]
+			flat df.rightSB (SMALLSMOOTHA * 0.6 * df.div)
+			curl df.rightSB XH [heading UPWARD]
 		if SLAB : begin
 			local jut : JUT * 0.75
-			include : LeftwardTopSerif (SB + O) CAP (jut - df.mvs / 2 * HVCONTRAST)
+			include : LeftwardTopSerif df.leftSB CAP (jut - df.mvs / 2 * HVCONTRAST)
 			if (!para.isItalic) : begin
-				include : CenterBottomSerif (SB + O + df.mvs / 2 * HVCONTRAST) 0 jut
+				include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVCONTRAST) 0 jut
 				tag-contour 'serifLB'
 		save 'hwair' 0x195
 
 
 	sketch # Gha
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
 		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST
-		include : OShape CAP 0 (SB + O) abarRight df.mvs (SMALLSMOOTHA * df.div * 0.6) (SMALLSMOOTHB * df.div * 0.6)
-		include : VBarRight (df.rightSB - O * 2) DESCENDER CAP df.mvs
+		include : OShape CAP 0 df.leftSB abarRight df.mvs (SMALLSMOOTHA * df.div * 0.6) (SMALLSMOOTHB * df.div * 0.6)
+		include : VBarRight (df.rightSB - O) DESCENDER CAP df.mvs
 		include : dispiro
 			widths.lhs df.mvs
 			flat df.middle (CAP - SMALLSMOOTHB * 0.6 * df.div) [heading RIGHTWARD]
 			curl (df.middle + 1) (CAP - SMALLSMOOTHB * 0.6 * df.div) [heading RIGHTWARD]
 			alsothru 0.5 0.15
-			g4   (df.rightSB - O * 2 - df.mvs * HVCONTRAST) CAP [widths 0 df.mvs]
+			g4   (df.rightSB - O - df.mvs * HVCONTRAST) CAP [widths 0 df.mvs]
 		save 'Gha' 0x1A2
 
 	sketch # gha
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.p
 		local abarRight : df.middle + df.mvs / 2 * HVCONTRAST
-		include : OShape XH 0 (SB + O) abarRight df.mvs (SMALLSMOOTHA * df.div * 0.6) (SMALLSMOOTHB * df.div * 0.6)
-		include : VBarRight (df.rightSB - O * 2) DESCENDER XH df.mvs
+		include : OShape XH 0 df.leftSB abarRight df.mvs (SMALLSMOOTHA * df.div * 0.6) (SMALLSMOOTHB * df.div * 0.6)
+		include : VBarRight (df.rightSB - O) DESCENDER XH df.mvs
 		include : dispiro
 			widths.lhs df.mvs
 			flat df.middle (XH - SMALLSMOOTHB * 0.6 * df.div) [heading RIGHTWARD]
 			curl (df.middle + 1) (XH - SMALLSMOOTHB * 0.6 * df.div) [heading RIGHTWARD]
 			alsothru 0.5 0.15
-			g4   (df.rightSB - O * 2 - df.mvs * HVCONTRAST) XH [widths 0 df.mvs]
+			g4   (df.rightSB - O - df.mvs * HVCONTRAST) XH [widths 0 df.mvs]
 		save 'gha' 0x1A3
 
 
@@ -2268,4 +2271,4 @@ export : define [apply] : begin
 		include g
 		save 'bidentalpercussive' 0x2AD
 
-	return [object LambdaShape SigmaShape PiShape EzhShape]
+	return [object LambdaShape DeltaMaskShape DeltaShape SigmaShape PiShape EzhShape]
