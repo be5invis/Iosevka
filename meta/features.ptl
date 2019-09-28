@@ -70,6 +70,41 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 		define plm : progLigNameMap
 		set plm.calt : para.customLigSet || plm.(para.defLigSet) || plm.calt
 		buildLigations chain-rule lookupOrder commonList features lookups plm glyphs
+
+	if para.enableCvSs : begin
+		# cvxx
+		foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
+			local fs glyph.featureSelector
+			foreach [feature : items-of : Object.keys fs] : begin
+				if [not lookups.(feature)] : begin
+					set features.(feature) {feature}
+					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
+					commonList.push feature
+				set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
+		# ssxx
+		foreach [{name composition} : pairs-of para.variants] : begin
+			if (name.length === 4 && composition.__isComposite && [name.slice 0 2] === 'ss') : begin
+				commonList.push name
+				local tags {.}
+				foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
+				set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
+	
+	# hwid, fwid
+	do "HWID/FWID"
+		local mapFwid {.}
+		local mapHwid {.}
+		define reHwid : regex "\\.hwid$"
+		foreach [glyph : items-of glyphList] : begin
+			if [reHwid.test glyph.name] : do
+				local gnFwid : glyph.name.replace reHwid '.fwid'
+				if (glyphs.(gnFwid)) : begin
+					set mapFwid.(glyph.name) gnFwid
+					set mapHwid.(gnFwid) glyph.name
+		set lookups.fwid {.type 'gsub_single' .subtables {mapFwid}}
+		set lookups.hwid {.type 'gsub_single' .subtables {mapHwid}}
+		set features.fwid {'fwid'}
+		set features.hwid {'hwid'}
+		commonList.push 'fwid' 'hwid'
 	
 	# locl, SRB
 	local srbSubtable null
@@ -104,24 +139,6 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 		cyryu 'cyryu.BGR'
 	set lookups.locl_bgr {.type 'gsub_single' .subtables {bgrSubtable}}
 	set features.locl_bgr {'locl_bgr'}
-
-	if para.enableCvSs : begin
-		# cvxx
-		foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
-			local fs glyph.featureSelector
-			foreach [feature : items-of : Object.keys fs] : begin
-				if [not lookups.(feature)] : begin
-					set features.(feature) {feature}
-					set lookups.(feature) {.type 'gsub_single' .subtables{{.}}}
-					commonList.push feature
-				set lookups.(feature).subtables.0.(glyph.name) fs.(feature)
-		# ssxx
-		foreach [{name composition} : pairs-of para.variants] : begin
-			if (name.length === 4 && composition.__isComposite && [name.slice 0 2] === 'ss') : begin
-				commonList.push name
-				local tags {.}
-				foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
-				set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
 
 	set languages.'cyrl_SRB ' {.features [{'locl_srb'}.concat commonList]}
 	set languages.'cyrl_MKD ' {.features [{'locl_srb'}.concat commonList]}

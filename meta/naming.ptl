@@ -39,20 +39,43 @@ define weightToMenuStyleMap : object
 	700 "Bold"
 	800 "Extrabold"
 	900 "Heavy"
-
+define widthToMenuStyleMap : object
+	5 ""
+	7 "Extended"
 define slantToMenuStyleMap : object
 	normal  ""
 	italic  "Italic"
 	oblique "Oblique"
 
-define [getStyle weight slant] : [(weightToMenuStyleMap.(weight) + " " + slantToMenuStyleMap.(slant)).trim] || "Regular"
+define weightToMenuStyleMapShort : object
+	100 "Th"
+	200 "XLt"
+	300 "Lt"
+	400 ""
+	500 "Md"
+	600 "SmBd"
+	700 "Bd"
+	800 "XBd"
+	900 "Xv"
+define widthToMenuStyleMapShort : object
+	5 ""
+	7 "Ex"
+define slantToMenuStyleMapShort : object
+	normal  ""
+	italic  "It"
+	oblique "Obl"
 
+define [getStyle weight width slant] : [[(weightToMenuStyleMap.(weight) + " " + widthToMenuStyleMap.(width) + " " + slantToMenuStyleMap.(slant)).replace [regex ' +' 'g'] ' '].trim] || "Regular"
+
+define [getShortStyle weight width slant] : [(weightToMenuStyleMapShort.(weight) + " " + widthToMenuStyleMapShort.(width) + " " + slantToMenuStyleMapShort.(slant)).replace [regex ' ' 'g'] ''] || "Regular"
+
+define [isRBIBI style] : style == 'Regular' || style == 'Bold' || style == 'Italic' || style == "Bold Italic"
 
 export : define [assignFontNames para metrics font] : begin
 	set font.name {}
 
 	define family  : para.naming.family.trim
-	define style   : getStyle para.naming.weight para.naming.slant
+	define style   : getStyle para.naming.weight para.menuWidth para.naming.slant
 	define version   para.naming.version
 
 	define isItalic  : para.naming.slant == "italic"
@@ -66,14 +89,30 @@ export : define [assignFontNames para metrics font] : begin
 
 	set font.name.preferredFamily     family
 	set font.name.preferredSubFamily  style
-	if (style == 'Regular' || style == 'Bold' || style == 'Italic' || style == "Bold Italic") : then
-		nameFont font FAMILY family # Family
-		nameFont font STYLE style  # Style
-	: else
-		local compatFamilySuffix : style.replace [regex ' Italic$'] '' :.replace [regex ' Extra'] 'X'
-		local compatStyle : if [[regex ' Italic$'].test style] 'Italic' 'Regular'
-		nameFont font FAMILY : family + ' ' + compatFamilySuffix
-		nameFont font STYLE compatStyle
+
+	local compatFamily family
+	local compatStyle style
+
+	if [not : isRBIBI style] : begin
+		if isItalic : begin
+			set compatStyle slantToMenuStyleMap.italic
+			set compatFamily : family + ' ' + [getStyle para.naming.weight para.menuWidth 'normal']
+		: else : begin
+			set compatStyle 'Regular'
+			set compatFamily : family + ' ' + style
+	
+	# Sometimes compatibility family will grow too large.
+	if (compatFamily.length >= 31) : begin
+		if isItalic : begin
+			set compatStyle slantToMenuStyleMap.italic
+			set compatFamily : family + ' ' + [getShortStyle para.naming.weight para.menuWidth 'normal']
+		: else : begin
+			local shortStyle : getShortStyle para.naming.weight para.menuWidth para.naming.slant
+			set compatStyle 'Regular'
+			set compatFamily : family + ' ' + shortStyle
+	
+	nameFont font FAMILY compatFamily # Family
+	nameFont font STYLE compatStyle  # Style
 
 	nameFont font UNIQUE_NAME "\(family) \(style) \(version)" # Unique Name
 	
@@ -97,6 +136,7 @@ export : define [assignFontNames para metrics font] : begin
 
 	# Weight, width and slantness
 	set font.OS_2.usWeightClass     para.naming.weight
+	set font.OS_2.usWidthClass      para.menuWidth
 	set font.OS_2.panose.2          : 1 + para.naming.weight / 100
 	set font.OS_2.fsSelection       : object
 		oblique        : not : not isOblique
