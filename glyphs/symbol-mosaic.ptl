@@ -375,8 +375,11 @@ export : define [apply] : begin
 			local light : adviceBlackness 3.5
 			local heavy : Math.max (light * 2) (WIDTH * 0.15)
 			local midx : MosaicWidth / 2
-			local topy top
-			local boty bottom
+
+			# Add a little overshoot to the lines to make them join vertically
+			local verticalOvershoot 1.02
+			local topy : mix bottom top verticalOvershoot
+			local boty : mix top bottom verticalOvershoot
 			local midy : mix boty topy 0.5
 
 			define [boxdraw unicode u d l r] : sketch
@@ -386,8 +389,8 @@ export : define [apply] : begin
 				local stopV : [Math.max l r] / 2
 				if l : include : HBar 0 (midx + stopH) midy l
 				if r : include : HBar (midx - stopH) MosaicWidth midy r
-				if d : include : VBar midx bottom (midy + stopV) d
-				if u : include : VBar midx (midy - stopV) top u
+				if d : include : VBar midx boty (midy + stopV) d
+				if u : include : VBar midx (midy - stopV) topy u
 
 				save [BdGlyphName unicode] [MangleUnicode unicode]
 
@@ -405,11 +408,11 @@ export : define [apply] : begin
 					include : HBar (midx + stopH) MosaicWidth (midy + (r - light)) light
 					if (r > light) : include : HBar (midx + stopH) MosaicWidth (midy - (r - light)) light
 				if d : begin
-					include : VBar (midx + (d - light)) bottom (midy - stopV) light
-					if (d > light) : include : VBar (midx - (d - light)) bottom (midy - stopV) light
+					include : VBar (midx + (d - light)) boty (midy - stopV) light
+					if (d > light) : include : VBar (midx - (d - light)) boty (midy - stopV) light
 				if u : begin
-					include : VBar (midx + (u - light)) (midy + stopV) top light
-					if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) top light
+					include : VBar (midx + (u - light)) (midy + stopV) topy light
+					if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) topy light
 				if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light * HVCONTRAST) (midx + stopH + light * HVCONTRAST) (midy + capV) light
 				if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light * HVCONTRAST) (midx + stopH + light * HVCONTRAST) (midy - capV) light
 				if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
@@ -503,7 +506,11 @@ export : define [apply] : begin
 			define [vDashed unicode segments weight] : sketch
 				set-width MosaicWidth
 				include : ForceUpright
-				foreach j [range 0 segments] : include : VBar midx [mix [mix bottom top (j / segments)] [mix bottom top ((j + 1) / segments)] 0.2] [mix [mix bottom top (j / segments)] [mix bottom top ((j + 1) / segments)] 0.8] weight
+				foreach j [range 0 segments] : include : VBar 
+					begin midx 
+					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.2
+					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.8
+					begin weight
 
 				save [BdGlyphName unicode] [MangleUnicode unicode]
 
@@ -575,8 +582,8 @@ export : define [apply] : begin
 				include : ForceUpright
 				include : dispiro
 					widths.center light
-					flat MosaicWidth top
-					curl 0 bottom
+					flat MosaicWidth topy
+					curl 0 boty
 				save [BdGlyphName 0x2571] [MangleUnicode 0x2571]
 
 			sketch # bd2572
@@ -584,8 +591,8 @@ export : define [apply] : begin
 				include : ForceUpright
 				include : dispiro
 					widths.center light
-					flat 0 top
-					curl MosaicWidth bottom
+					flat 0 topy
+					curl MosaicWidth boty
 				save [BdGlyphName 0x2572] [MangleUnicode 0x2572]
 
 			sketch # bd2573
