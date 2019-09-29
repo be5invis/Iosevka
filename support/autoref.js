@@ -111,6 +111,7 @@ function autoref(glyf, excludeUnicodes) {
 	for (let j = 0; j < glyf.length; j++) {
 		if (!glyf[j].references || glyf[j].references.length === 0) continue;
 		if (
+			!glyf[j].flatten &&
 			glyf[j].contours.length === 0 &&
 			!(glyf[j].unicode && excludeUnicodes.has(glyf[j].unicode[0]))
 		) {
