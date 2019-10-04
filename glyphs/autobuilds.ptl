@@ -247,6 +247,9 @@ export : define [apply] : begin
 
 	# Build miniature clyphs : circled, superscripts, subscripts...
 	# Circled
+
+	define circleWidthClasses {{'hwid' WIDTH} {'fwid' FULLWIDTH0}}
+
 	define [circleInner dscale miniatureFont unicode parts width bal baly] : begin
 		define gni : '.ci.' + [parts.join '_'] + '.' + [{dscale width bal baly}.join '.']
 		if (glyphs.(gni)) : return glyphs.(gni)
@@ -274,11 +277,14 @@ export : define [apply] : begin
 			set-width 0
 		return lg
 	
+	define CircCrowd 5
+	define CircScale 0.65
+	
 	define [circleDimens dscale w m] : begin
 		define width : fallback w WIDTH
 		define dscale : linreg WIDTH 0.55  UPM 0.6  width
 		define spatt  : linreg WIDTH 0.175 UPM 0.27 width
-		define sw0 : adviceBlackness 5
+		define sw0 : dscale * [adviceBlackness CircCrowd] / CircScale
 		define sw : Math.max sw0 [fallback m 0]
 		define top : CAP * dscale + [Math.max (CAP * spatt) (sw * 3)]
 		define bot : 0 - [Math.max (CAP * spatt) (sw * 3)]
@@ -298,105 +304,117 @@ export : define [apply] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		return : Miniature 
 			glyphs -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
-			crowd  -- 5
-			scale  -- 0.65
+			crowd  -- CircCrowd
+			scale  -- CircScale
 			unfair -- true
+	
+	define [CircName prefix parts suffix] : suggestName : prefix + '-' + [parts.join '_'] + '.' + suffix
 
 	define [createCircledGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale sw top bot left right] : circleDimens dscale w
-			create-glyph [suggestName : 'circle-' + [parts.join '_']] : glyph-construction
-				set-width width
-				if unicode : assign-unicode unicode
-				include : circleInner dscale miniatureFont unicode parts width bal baly
-				include : OShape top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale sw top bot left right] : circleDimens dscale ww
+				create-glyph [CircName 'circle' parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : OShape top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
 
-				apply-transform : Upright
-				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-				apply-transform : Italify
+					apply-transform : Upright
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
 
 	define [createBoxedGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale sw top bot left right] : circleDimens dscale w
-			create-glyph [suggestName : 'boxed-' + [parts.join '_']] : glyph-construction
-				set-width width
-				if unicode : assign-unicode unicode
-				include : circleInner dscale miniatureFont unicode parts width bal baly
-				include : union
-					HBarTop    left right top sw
-					HBarBottom left right bot sw
-					VBarLeft   left bot top   sw
-					VBarRight  right bot top  sw
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale sw top bot left right] : circleDimens dscale ww
+				create-glyph [CircName 'boxed' parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : union
+						HBarTop    left right top sw
+						HBarBottom left right bot sw
+						VBarLeft   left bot top   sw
+						VBarRight  right bot top  sw
 
-				apply-transform : Upright
-				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-				apply-transform : Italify
+					apply-transform : Upright
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
 	
 	define [createInsetCircledGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale sw top bot left right] : circleDimens dscale w
-			create-glyph [suggestName : 'inset-circle-' + [parts.join '_']] : glyph-construction
-				set-width width
-				if unicode : assign-unicode unicode
-				include : difference
-					OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
-					circleInner dscale miniatureFont unicode parts width bal baly
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale sw top bot left right] : circleDimens dscale ww
+				create-glyph [CircName 'inset-circle' parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : difference
+						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+						circleInner dscale miniatureFont unicode parts width bal baly
 
-				apply-transform : Upright
-				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-				apply-transform : Italify
+					apply-transform : Upright
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
 
 	define [createInsetBoxedGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale sw top bot left right] : circleDimens dscale w
-			create-glyph [suggestName : 'inset-boxed-' + [parts.join '_']] : glyph-construction
-				set-width width
-				if unicode : assign-unicode unicode
-				include : difference
-					spiro-outline
-						corner left  top
-						corner left  bot
-						corner right bot
-						corner right top
-						close
-					circleInner dscale miniatureFont unicode parts width bal baly
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale sw top bot left right] : circleDimens dscale ww
+				create-glyph [CircName 'inset-boxed' parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : difference
+						spiro-outline
+							corner left  top
+							corner left  bot
+							corner right bot
+							corner right top
+							close
+						circleInner dscale miniatureFont unicode parts width bal baly
 
-				apply-transform : Upright
-				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-				apply-transform : Italify
+					apply-transform : Upright
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
 
 	define [createDoubleCircledGlyphs records] : if [not recursive] : begin
 		local miniatureFont : circledMiniatureFont records
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale sw0 sw top bot left right] : circleDimens dscale w (w * 0.08)
-			define sw1 : Math.min sw0 (sw / 3)
-			create-glyph [suggestName : 'double-circle-' + [parts.join '_']] : glyph-construction
-				set-width width
-				if unicode : assign-unicode unicode
-				include : circleInner dscale miniatureFont unicode parts width bal baly
-				include : OShape top bot left right sw1 (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
-				include : OShape
-					top - sw + sw1
-					bot + sw - sw1
-					left + sw * HVCONTRAST - sw1 * HVCONTRAST
-					right - sw * HVCONTRAST + sw1 * HVCONTRAST
-					begin sw1
-					SMALLSMOOTHA * width / WIDTH
-					SMALLSMOOTHB * width / WIDTH
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale sw0 sw top bot left right] : circleDimens dscale ww (ww * 0.08)
+				define sw1 : Math.min sw0 (sw / 3)
+				create-glyph [CircName 'double-circle' parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					include : OShape
+						top - sw + sw1
+						bot + sw - sw1
+						left + sw * HVCONTRAST - sw1 * HVCONTRAST
+						right - sw * HVCONTRAST + sw1 * HVCONTRAST
+						begin sw1
+						SMALLSMOOTHA * width / WIDTH
+						SMALLSMOOTHB * width / WIDTH
 
-				apply-transform : Upright
-				apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-				apply-transform : Italify
+					apply-transform : Upright
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
+	
+	define BraceCrowd [fallback para.smallCrowd 3.75]
+	define BraceScale 0.65
 
 	define [bracedDottdeDimens width] : begin
-		define sw0 : Math.max (WIDTH * 0.075) [adviceBlackness 5]
-		define sw : Math.min STROKE sw0
 		define dscale : linreg WIDTH 0.55 UPM 0.65 width
 		define pscale : linreg WIDTH 0.6 UPM 0.75 width
+		define sw0 : Math.max
+			WIDTH * 0.075
+			dscale * [adviceBlackness BraceCrowd] / BraceScale
+		define sw : Math.min STROKE sw0
 		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw0 * 2.5)] + OX
 		define r : width - l
 		return : object width sw dscale pscale l r
@@ -405,68 +423,70 @@ export : define [apply] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature 
 			glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
-			crowd   -- [fallback para.smallCrowd 3.75]
-			scale   -- 0.65
+			crowd   -- BraceCrowd
+			scale   -- BraceScale
 			sbscale -- 1
 			unfair  -- true
 		
 		foreach {unicode parts w bal baly} [items-of records] : do
-			define [object width dscale pscale sw l r] : bracedDottdeDimens w
-			local gn : suggestName : 'braced-' + [parts.join '_']
-			local gni : suggestName : 'braced-inner-' + [parts.join '_'] + '.' + dscale
-			
-			local lg : create-glyph gni : glyph-construction
-				local tw 0
-				local lastg null
-				foreach [glyphid : items-of parts] : begin
-					local g miniatureFont.(glyphid)
-					if tw : begin # Add a little kern
-						set tw : tw - SB
-						apply-transform : Translate SB 0
-					include g
-					apply-transform : Translate (-g.advanceWidth) 0
-					set tw : tw + g.advanceWidth
-					set lastg g
-				apply-transform : Translate tw 0
-				apply-transform : Upright
-				apply-transform : Scale [Math.min 1 (width / tw)] 1
-				set tw : Math.min width tw
-				apply-transform : Translate (-tw / 2) 0
-				apply-transform : Scale dscale
-
-				local shift 0
-				if (lastg.anchors.above && lastg.anchors.below) : begin
-					local gMiddleY [mix lastg.anchors.above.y lastg.anchors.below.y 0.5]
-					if bal : set shift : CAP / 2 - [mix baly gMiddleY bal]
-					: else : set shift : CAP / 2 - gMiddleY
-
-				apply-transform : Translate (width / 2) (symbolMid * pscale - (CAP / 2 - shift) * dscale)
-				apply-transform : Italify
-				set currentGlyph.cmpPriority 11
-				refair this
-				set-width 0
-
-			sketch
-				local s : TANSLANT * symbolMid
-				set-width width
-				include lg
-				include : dispiro
-					widths.lhs sw
-					g4 ([mix l r 0.15] - s) (parenTop * pscale)
-					g4.down.mid (l - s + O) (symbolMid * pscale)
-					g4 ([mix l r 0.15] - s) (parenBot * pscale)
+			foreach {suffix ww} [items-of circleWidthClasses] : do
+				define [object width dscale pscale sw l r] : bracedDottdeDimens ww
+				local gn : CircName 'braced' parts suffix
+				local gni : CircName 'braced-inner' parts suffix
 				
-				include : dispiro
-					widths.rhs sw
-					g4 ([mix r l 0.15] + s) (parenTop * pscale)
-					g4.down.mid (r + s - O) (symbolMid * pscale)
-					g4 ([mix r l 0.15] + s) (parenBot * pscale)
+				local lg : create-glyph gni : glyph-construction
+					local tw 0
+					local lastg null
+					foreach [glyphid : items-of parts] : begin
+						local g miniatureFont.(glyphid)
+						if tw : begin # Add a little kern
+							set tw : tw - SB
+							apply-transform : Translate SB 0
+						include g
+						apply-transform : Translate (-g.advanceWidth) 0
+						set tw : tw + g.advanceWidth
+						set lastg g
+					apply-transform : Translate tw 0
+					apply-transform : Upright
+					apply-transform : Scale [Math.min 1 (width / tw)] 1
+					set tw : Math.min width tw
+					apply-transform : Translate (-tw / 2) 0
+					apply-transform : Scale dscale
+
+					local shift 0
+					if (lastg.anchors.above && lastg.anchors.below) : begin
+						local gMiddleY [mix lastg.anchors.above.y lastg.anchors.below.y 0.5]
+						if bal : set shift : CAP / 2 - [mix baly gMiddleY bal]
+						: else : set shift : CAP / 2 - gMiddleY
+
+					apply-transform : Translate (width / 2) (symbolMid * pscale - (CAP / 2 - shift) * dscale)
+					apply-transform : Italify
+					set currentGlyph.cmpPriority 11
+					refair this
+					set-width 0
+
+				sketch
+					local s : TANSLANT * symbolMid
+					set-width width
+					include lg
+					include : dispiro
+						widths.lhs sw
+						g4 ([mix l r 0.15] - s) (parenTop * pscale)
+						g4.down.mid (l - s + O) (symbolMid * pscale)
+						g4 ([mix l r 0.15] - s) (parenBot * pscale)
 					
-				include : Upright
-				include : Translate 0 (symbolMid - symbolMid * pscale)
-				include : Italify
-				
-				save gn unicode
+					include : dispiro
+						widths.rhs sw
+						g4 ([mix r l 0.15] + s) (parenTop * pscale)
+						g4.down.mid (r + s - O) (symbolMid * pscale)
+						g4 ([mix r l 0.15] + s) (parenBot * pscale)
+						
+					include : Upright
+					include : Translate 0 (symbolMid - symbolMid * pscale)
+					include : Italify
+					
+					if (w == ww) : save gn unicode
+					: else : save gn
 
 	define [createDottedGlyphs shrink records] : if [not recursive] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -475,29 +495,33 @@ export : define [apply] : begin
 			if (para.spacing > 1) 1 shrink
 
 		foreach {unicode parts w} [items-of records] : do
-			local gn : suggestName : 'dotted-' + [parts.join '_']
-			define [object width dscale pscale sw l r] : bracedDottdeDimens w
+			foreach {suffix ww} [items-of circleWidthClasses] : do
 
-			sketch
-				set-width width
-				local tw 0
-				foreach [glyphid : items-of : parts.concat {'period'}] : begin
-					local g miniatureFont.(glyphid)
-					if tw : begin # Add a little kern
-						set tw : tw - SB
-						apply-transform : Translate SB 0
-					include g
-					apply-transform : Translate (-g.advanceWidth) 0
-					set tw : tw + g.advanceWidth
-				apply-transform : Translate tw 0
-				set tw : tw - SB
-				apply-transform : Upright
-				if (tw > width)
-				: then : apply-transform : Scale [Math.min 1 (width / tw)] 1
-				: else : apply-transform : Translate (width / 2 - tw / 2) 0
-				apply-transform : Italify
-				set currentGlyph.cmpPriority 11
-				save gn unicode
+				local gn : CircName 'dotted' parts suffix
+				define [object width dscale pscale sw l r] : bracedDottdeDimens ww
+
+				sketch
+					set-width width
+					local tw 0
+					foreach [glyphid : items-of : parts.concat {'period'}] : begin
+						local g miniatureFont.(glyphid)
+						if tw : begin # Add a little kern
+							set tw : tw - SB
+							apply-transform : Translate SB 0
+						include g
+						apply-transform : Translate (-g.advanceWidth) 0
+						set tw : tw + g.advanceWidth
+					apply-transform : Translate tw 0
+					set tw : tw - SB
+					apply-transform : Upright
+					if (tw > width)
+					: then : apply-transform : Scale [Math.min 1 (width / tw)] 1
+					: else : apply-transform : Translate (width / 2 - tw / 2) 0
+					apply-transform : Italify
+					set currentGlyph.cmpPriority 11
+
+					if (w == ww) : save gn unicode
+					: else : save gn
 
 	define [createSuperscripts records] : if [not recursive] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -987,10 +1011,11 @@ export : define [apply] : begin
 	# Circled & Braced
 	if [not recursive] : let : begin
 		local compositions : list
-			list 0xA9   {'C'} FULLWIDTH2
-			list 0xAE   {'R'} FULLWIDTH2
-			list 0x2117 {'P'} FULLWIDTH2
-			list 0x24EA {'zero'} FULLWIDTH1
+			list 0xA9    {'C'}     FULLWIDTH2
+			list 0x1F12F {'turnC'} FULLWIDTH2
+			list 0xAE    {'R'}     FULLWIDTH2
+			list 0x2117  {'P'}     FULLWIDTH2
+			list 0x24EA  {'zero'}  FULLWIDTH1
 		compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 1 till 20] : compositions.push : list
 			0x2460 + j - 1
