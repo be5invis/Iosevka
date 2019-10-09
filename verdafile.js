@@ -1,7 +1,7 @@
 "use strict";
 
 const build = require("verda").create();
-const { task, tasks, file, files, oracle, oracles, computed, computes, phony } = build.ruleTypes;
+const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu } = build.rules;
 const { run, node, cd, cp, rm } = build.actions;
 const { FileList } = build.predefinedFuncs;
@@ -186,22 +186,22 @@ const CollectPlans = computed(`collect-plans`, async target => {
 	return { composition, groups };
 });
 
-const HivesOf = computes.group("hives-of", async (target, gid) => {
+const HivesOf = computed.group("hives-of", async (target, gid) => {
 	const [{ fontInfos }] = await target.need(FontBuildingParameters);
 	return fontInfos[gid];
 });
 
-const GroupInfo = computes.group("group-info", async (target, gid) => {
+const GroupInfo = computed.group("group-info", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(FontBuildingParameters);
 	return buildPlans[gid];
 });
 
-const GroupFontsOf = computes.group("group-fonts-of", async (target, gid) => {
+const GroupFontsOf = computed.group("group-fonts-of", async (target, gid) => {
 	const [plan] = await target.need(GroupInfo(gid));
 	return plan.targets;
 });
 
-const CollectionPartsOf = computes.group("collection-parts-of", async (target, id) => {
+const CollectionPartsOf = computed.group("collection-parts-of", async (target, id) => {
 	const [{ composition }] = await target.need(CollectPlans);
 	return composition[id];
 });
@@ -210,153 +210,173 @@ const CollectionPartsOf = computes.group("collection-parts-of", async (target, i
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildTTF = files(`${BUILD}/*/*.ttf`, async (target, path) => {
-	const [, suffix] = path.$;
-	const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
-		HivesOf(suffix),
-		Version
-	);
-	const otd = path.dir + "/" + path.name + ".otd";
-	const ttfTmp = path.dir + "/" + path.name + ".tmp.ttf";
-	const otdTmp = path.dir + "/" + path.name + ".tmp.otd";
-	const charmap = path.dir + "/" + path.name + ".charmap";
-	await target.need(Scripts, fu`parameters.toml`, de`${path.dir}`);
-	await run(
-		GENERATE,
-		["-o", otdTmp],
-		["--charmap", charmap],
-		["--family", family],
-		["--ver", version],
-		["--menu-weight", menuWeight],
-		["--menu-slant", menuStyle],
-		hives
-	);
-	await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
-	await run(GC, ["-i", ttfTmp], ["-o", otd]);
-	await run("otfccbuild", otd, "-o", path.full, "-O3", "--keep-average-char-width", "-q");
-	await rm(otdTmp);
-	await rm(ttfTmp);
-	await rm(otd);
-});
-const BuildCM = files(`${BUILD}/*/*.charmap`, async (target, path) => {
-	await target.need(BuildTTF(path.dir + "/" + path.name + ".ttf"));
-});
+const BuildTTF = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+	async (target, output, _gr, fn) => {
+		const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
+			HivesOf(fn),
+			Version
+		);
+		const otd = output.dir + "/" + output.name + ".otd";
+		const ttfTmp = output.dir + "/" + output.name + ".tmp.ttf";
+		const otdTmp = output.dir + "/" + output.name + ".tmp.otd";
+		const charmap = output.dir + "/" + output.name + ".charmap";
+		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
+		await run(
+			GENERATE,
+			["-o", otdTmp],
+			["--charmap", charmap],
+			["--family", family],
+			["--ver", version],
+			["--menu-weight", menuWeight],
+			["--menu-slant", menuStyle],
+			hives
+		);
+		await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
+		await run(GC, ["-i", ttfTmp], ["-o", otd]);
+		await run("otfccbuild", otd, "-o", output.full, "-O3", "--keep-average-char-width", "-q");
+		await rm(otdTmp);
+		await rm(ttfTmp);
+		await rm(otd);
+	}
+);
+const BuildCM = file.make(
+	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
+	async (target, output, gr, f) => {
+		await target.need(BuildTTF(gr, f));
+	}
+);
 
 ///////////////////////////////////////////////////////////
 //////              Font Distribution                //////
 ///////////////////////////////////////////////////////////
 
 // Per group file
-const DistUnhintedTTF = files(`${DIST}/*/ttf-unhinted/*.ttf`, async (target, path) => {
-	const [gr, f] = path.$;
-	const [from] = await target.need(BuildTTF`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
-	await cp(from.full, path.full);
-});
-const DistHintedTTF = files(`${DIST}/*/ttf/*.ttf`, async (target, path) => {
-	const [gr, f] = path.$;
-	const [from] = await target.need(BuildTTF`${BUILD}/${gr}/${f}.ttf`, de`${path.dir}`);
-	await run("ttfautohint", from.full, path.full);
-});
-const DistWoff = files(`${DIST}/*/woff/*.woff`, async (target, path) => {
-	const [group, f] = path.$;
-	const [from] = await target.need(DistHintedTTF`${DIST}/${group}/ttf/${f}.ttf`, de`${path.dir}`);
-	await node(`utility/ttf-to-woff.js`, from.full, path.full);
-});
-const DistWoff2 = files(`${DIST}/*/woff2/*.woff2`, async (target, path) => {
-	const [group, f] = path.$;
-	const [from] = await target.need(DistHintedTTF`${DIST}/${group}/ttf/${f}.ttf`, de`${path.dir}`);
-	await node(`utility/ttf-to-woff2.js`, from.full, path.full);
-});
+const DistUnhintedTTF = file.make(
+	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
+	async (target, path, gr, f) => {
+		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
+		await cp(from.full, path.full);
+	}
+);
+const DistHintedTTF = file.make(
+	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
+	async (target, path, gr, f) => {
+		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
+		await run("ttfautohint", from.full, path.full);
+	}
+);
+const DistWoff = file.make(
+	(gr, fn) => `${DIST}/${gr}/woff/${fn}.woff`,
+	async (target, path, group, f) => {
+		const [from] = await target.need(DistHintedTTF(group, f), de`${path.dir}`);
+		await node(`utility/ttf-to-woff.js`, from.full, path.full);
+	}
+);
+const DistWoff2 = file.make(
+	(gr, fn) => `${DIST}/${gr}/woff2/${fn}.woff2`,
+	async (target, path, group, f) => {
+		const [from] = await target.need(DistHintedTTF(group, f), de`${path.dir}`);
+		await node(`utility/ttf-to-woff2.js`, from.full, path.full);
+	}
+);
 
 // TTC
-const DistTTC = files(`${DIST}/collections/*/*.ttc`, async (target, { full, dir, $: [, f] }) => {
-	const [parts] = await target.need(CollectionPartsOf(f));
-	await target.need(de`${dir}`);
-	const [ttfs] = await target.need(
-		parts.map(part => DistHintedTTF`${DIST}/${part.dir}/ttf/${part.file}.ttf`)
-	);
-	await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full);
-});
+const DistTTC = file.make(
+	(gr, f) => `${DIST}/collections/${gr}/${f}.ttc`,
+	async (target, { full, dir }, gr, f) => {
+		const [parts] = await target.need(CollectionPartsOf(f));
+		await target.need(de`${dir}`);
+		const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
+		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full);
+	}
+);
 
 // Group-level
-const GroupTTFs = tasks.group("ttf", async (target, gid) => {
+const GroupTTFs = task.group("ttf", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistHintedTTF`${DIST}/${gid}/ttf/${tn}.ttf`));
+	await target.need(ts.map(tn => DistHintedTTF(gid, tn)));
 });
-const GroupUnhintedTTFs = tasks.group("ttf-unhinted", async (target, gid) => {
+const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistUnhintedTTF`${DIST}/${gid}/ttf-unhinted/${tn}.ttf`));
+	await target.need(ts.map(tn => DistUnhintedTTF(gid, tn)));
 });
-const GroupWoffs = tasks.group("woff", async (target, gid) => {
+const GroupWoffs = task.group("woff", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistWoff`${DIST}/${gid}/woff/${tn}.woff`));
+	await target.need(ts.map(tn => DistWoff(gid, tn)));
 });
-const GroupWoff2s = tasks.group("woff2", async (target, gid) => {
+const GroupWoff2s = task.group("woff2", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistWoff2`${DIST}/${gid}/woff2/${tn}.woff2`));
+	await target.need(ts.map(tn => DistWoff2(gid, tn)));
 });
-const GroupFonts = tasks.group("fonts", async (target, gid) => {
+const GroupFonts = task.group("fonts", async (target, gid) => {
 	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoffs(gid), GroupWoff2s(gid));
 });
 
 // Charmap (for specimen)
-const DistCharMaps = files(
-	`${DIST}/*/*.charmap`,
-	async (target, { full, dir, $: [gid, suffix] }) => {
-		const [src] = await target.need(BuildCM`${BUILD}/${gid}/${suffix}.charmap`, de`${dir}`);
+const DistCharMaps = file.make(
+	(gid, suffix) => `${DIST}/${gid}/${suffix}.charmap`,
+	async (target, { full, dir }, gid, suffix) => {
+		const [src] = await target.need(BuildCM(gid, suffix), de`${dir}`);
 		await cp(src.full, full);
 	}
 );
 
 // Webfont CSS
-const DistWebFontCSS = files(`${DIST}/*/webfont.css`, async (target, { dir, $: [gid] }) => {
-	// Note: this target does NOT depend on the font files.
-	const [gr, ts] = await target.need(GroupInfo(gid), GroupFontsOf(gid), de(dir));
-	const hs = await target.need(...ts.map(HivesOf));
-	await node(
-		"utility/make-webfont-css.js",
-		`${DIST}/${gid}/webfont.css`,
-		gr.family,
-		hs,
-		webfontFormats
-	);
-});
+const DistWebFontCSS = file.make(
+	gid => `${DIST}/${gid}/webfont.css`,
+	async (target, { dir }, gid) => {
+		// Note: this target does NOT depend on the font files.
+		const [gr, ts] = await target.need(GroupInfo(gid), GroupFontsOf(gid), de(dir));
+		const hs = await target.need(...ts.map(HivesOf));
+		await node(
+			"utility/make-webfont-css.js",
+			`${DIST}/${gid}/webfont.css`,
+			gr.family,
+			hs,
+			webfontFormats
+		);
+	}
+);
 
-const GroupContents = tasks.group("contents", async (target, gid) => {
+const GroupContents = task.group("contents", async (target, gid) => {
 	const [gr] = await target.need(GroupInfo(gid));
 	await target.need(
 		GroupFonts(gid),
-		DistWebFontCSS`${DIST}/${gid}/webfont.css`,
-		DistCharMaps`${DIST}/${gid}/${gr.prefix}-regular.charmap`
+		DistWebFontCSS(gid),
+		DistCharMaps(gid, `${gr.prefix}-regular`)
 	);
 	return gid;
 });
 
 // Archive
-const ArchiveFile = files(`${ARCHIVE_DIR}/*-*.zip`, async (target, { dir, full, $: [gid] }) => {
-	// Note: this target does NOT depend on the font files.
-	const [exportPlans] = await target.need(ExportPlans, de`${dir}`);
-	await target.need(GroupContents(exportPlans[gid]));
-	await cd(`${DIST}/${exportPlans[gid]}`).run(
-		["7z", "a"],
-		["-tzip", "-r", "-mx=9"],
-		`../../${full}`,
-		`./`
-	);
-});
-const GroupArchives = tasks.group(`archive`, async (target, gid) => {
+const ArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/${gid}-${version}.zip`,
+	async (target, { dir, full }, gid, version) => {
+		// Note: this target does NOT depend on the font files.
+		const [exportPlans] = await target.need(ExportPlans, de`${dir}`);
+		await target.need(GroupContents(exportPlans[gid]));
+		await cd(`${DIST}/${exportPlans[gid]}`).run(
+			["7z", "a"],
+			["-tzip", "-r", "-mx=9"],
+			`../../${full}`,
+			`./`
+		);
+	}
+);
+const GroupArchives = task.group(`archive`, async (target, gid) => {
 	const [version] = await target.need(Version);
-	await target.need(ArchiveFile`${ARCHIVE_DIR}/${gid}-${version}.zip`);
+	await target.need(ArchiveFile(gid, version));
 });
 
 // Collection-level
-const CollectionFontsOf = tasks.group("collection-fonts", async (target, cid) => {
+const CollectionFontsOf = task.group("collection-fonts", async (target, cid) => {
 	const [{ groups }] = await target.need(CollectPlans);
-	await target.need(groups[cid].map(file => DistTTC`${DIST}/collections/${cid}/${file}.ttc`));
+	await target.need(groups[cid].map(file => DistTTC(cid, file)));
 });
-const TTCArchiveFile = files(
-	`${ARCHIVE_DIR}/ttc-*-*.zip`,
-	async (target, { dir, full, $: [cid] }) => {
+const TTCArchiveFile = file.make(
+	(cid, version) => `${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`,
+	async (target, { dir, full }, cid) => {
 		// Note: this target does NOT depend on the font files.
 		await target.need(de`${dir}`);
 		await target.need(CollectionFontsOf(cid));
@@ -368,9 +388,9 @@ const TTCArchiveFile = files(
 		);
 	}
 );
-const CollectionArchive = tasks.group(`collection-archive`, async (target, cid) => {
+const CollectionArchive = task.group(`collection-archive`, async (target, cid) => {
 	const [version] = await target.need(Version);
-	await target.need(TTCArchiveFile`${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`);
+	await target.need(TTCArchiveFile(cid, version));
 });
 
 ///////////////////////////////////////////////////////////
@@ -400,7 +420,7 @@ const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre, SnapShotCSS);
 	await cd(`snapshot`).run("npx", "electron", "get-snap.js", ["--dir", "../images"]);
 });
-const ScreenShot = files(`images/*.png`, async (target, { full }) => {
+const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 	await target.need(TakeSampleImages);
 	await run("optipng", full);
 });
@@ -445,24 +465,25 @@ phony(`release`, async target => {
 ///////////////////////////////////////////////////////////
 
 const MARCOS = [fu`meta/macros.ptl`];
-const ScriptsUnder = oracles("{ptl|js}-scripts-under::***", (target, $ext, $1) =>
-	FileList({ under: $1, pattern: `**/*.${$ext}` })(target)
+const ScriptsUnder = oracle.make(
+	(ext, dir) => `${ext}-scripts-under::${dir}`,
+	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
 );
-const ScriptFiles = computes.group("script-files", async (target, ext) => {
+const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const [gen, meta, glyphs, support] = await target.need(
-		ScriptsUnder`${ext}-scripts-under::gen`,
-		ScriptsUnder`${ext}-scripts-under::meta`,
-		ScriptsUnder`${ext}-scripts-under::glyphs`,
-		ScriptsUnder`${ext}-scripts-under::support`
+		ScriptsUnder(ext, `gen`),
+		ScriptsUnder(ext, `meta`),
+		ScriptsUnder(ext, `glyphs`),
+		ScriptsUnder(ext, `support`)
 	);
 	return [...gen, ...meta, ...glyphs, ...support];
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
-	const [ptl] = await target.need(ScriptFiles`ptl`);
+	const [ptl] = await target.need(ScriptFiles("ptl"));
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-const ScriptJS = files(`{gen|glyphs|support|meta}/**/*.js`, async (target, path) => {
+const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
@@ -478,7 +499,7 @@ const ScriptJS = files(`{gen|glyphs|support|meta}/**/*.js`, async (target, path)
 const Scripts = task("scripts", async target => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
-	const [js] = await target.need(ScriptFiles`js`);
+	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
 	await target.need(fu`parameters.toml`, fu`variants.toml`, fu`emptyfont.toml`);
 });
