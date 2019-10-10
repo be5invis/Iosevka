@@ -210,6 +210,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarks` : Arched top `3` (default).
+  * Style for seven (`7`):
+    * `v-seven-normal` : Seven `7` without serif (default). Only effective in non-Slab subfamilies.
+    * `v-seven-force-serif` : Force `7` to have serif in non-Slab subfamilies.
   * Styles for ASCII tilde (`~`), asterisk (`*`), paragraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
     * `v-tilde-high` : Higher tilde `~`.
     * `v-tilde-low` : Lower tilde `~` (default).
