@@ -68,7 +68,8 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    upright = ["upright-only", "styles"]   # Upright-only styles
    italic = ["italic-only", "styles"]     # Italic-only styles
    oblique = ["oblique-only", "styles"]   # Oblique-only styles
-   
+   hintParams = ["-a", "sss"]             # Optional custom parameters for ttfautohint
+
    # Override default building weights
    # When buildPlans.<plan name>.weights is absent
    # All weights would built and mapped to default shape/CSS
