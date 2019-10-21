@@ -290,7 +290,7 @@ const DistTTC = file.make(
 		const [parts] = await target.need(CollectionPartsOf(f));
 		await target.need(de`${dir}`);
 		const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full);
+		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full, "-h", "--common-width=500");
 	}
 );
 
