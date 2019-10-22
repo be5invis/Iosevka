@@ -135,7 +135,7 @@ const FontBuildingParameters = computed(`font-building-parameters`, async target
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
-		const { pre, post, prefix, family, weights, slants } = buildPlans[p];
+		const { pre, post, prefix, family, weights, slants, hintParams } = buildPlans[p];
 		const targets = [];
 		const suffixMapping = getSuffixSet(weights || defaultWeights, slants || defaultSlants);
 		for (const suffix in suffixMapping) {
@@ -151,7 +151,8 @@ const FontBuildingParameters = computed(`font-building-parameters`, async target
 				menuWeight: suffixMapping[suffix].menuWeight,
 				menuStyle: suffixMapping[suffix].menuStyle,
 				cssWeight: suffixMapping[suffix].cssWeight,
-				cssStyle: suffixMapping[suffix].cssStyle
+				cssStyle: suffixMapping[suffix].cssStyle,
+				hintParams: hintParams || []
 			};
 			targets.push(fileName);
 		}
@@ -262,8 +263,9 @@ const DistUnhintedTTF = file.make(
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
 	async (target, path, gr, f) => {
+		const [{ hintParams }] = await target.need(HivesOf(f));
 		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
-		await run("ttfautohint", from.full, path.full);
+		await run("ttfautohint", hintParams, from.full, path.full);
 	}
 );
 const DistWoff = file.make(
@@ -288,7 +290,7 @@ const DistTTC = file.make(
 		const [parts] = await target.need(CollectionPartsOf(f));
 		await target.need(de`${dir}`);
 		const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full);
+		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full, "-h", "--common-width=500");
 	}
 );
 

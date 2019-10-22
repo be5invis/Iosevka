@@ -16,7 +16,7 @@ paste here
 ```
 paste here
 ```
-* Your results of `make -d --no-builtin-rules`:
+* The detailed error log:
 ```
 paste here
 ```
