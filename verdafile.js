@@ -189,7 +189,9 @@ const CollectPlans = computed(`collect-plans`, async target => {
 
 const HivesOf = computed.group("hives-of", async (target, gid) => {
 	const [{ fontInfos }] = await target.need(FontBuildingParameters);
-	return fontInfos[gid];
+	const hvs = fontInfos[gid];
+	if (!hvs) throw new Error(`Build plan for ${gid} not found.`);
+	return hvs;
 });
 
 const GroupInfo = computed.group("group-info", async (target, gid) => {
@@ -449,6 +451,16 @@ const AllArchives = task(`all:archives`, async target => {
 		Object.keys(exportPlans).map(GroupArchives),
 		Object.keys(collectPlans.groups).map(CollectionArchive)
 	);
+});
+
+const AllTtfArchives = task(`all:ttf`, async target => {
+	const [exportPlans] = await target.need(ExportPlans);
+	await target.need(Object.keys(exportPlans).map(GroupArchives));
+});
+
+const AllTtcArchives = task(`all:ttc`, async target => {
+	const [collectPlans] = await target.need(CollectPlans);
+	await target.need(Object.keys(collectPlans.groups).map(CollectionArchive));
 });
 
 phony(`clean`, async () => {
