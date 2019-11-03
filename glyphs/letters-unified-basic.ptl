@@ -798,10 +798,10 @@ export : define [apply] : begin
 	do "W, w and related ========================================================================="
 		define [WShape top barStraight df] : glyph-construction
 			local fineOuter : if barStraight
-				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineSOuter df.div
 				adviceBlackness WShape.fineOuter df.div
 			local fineInner : if barStraight
-				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineSInner df.div
 				adviceBlackness WShape.fineInner df.div
 			local fineHeight : (fineOuter + fineInner) / 2
 			
@@ -813,7 +813,7 @@ export : define [apply] : begin
 			local fineOffsetInner : hwCO * HVCONTRAST
 			local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
 			local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
-			local wMidHeight : if barStraight top (top * 0.6)
+			local wMidHeight : if barStraight (top * [Math.min 1 (df.div * 0.9)]) (top * 0.6)
 
 			if barStraight : begin
 				include : dispiro
@@ -882,13 +882,14 @@ export : define [apply] : begin
 
 		set WShape.fineOuter 5
 		set WShape.fineInner 6
-		set WShape.fineS 5.5
+		set WShape.fineSOuter 5.5
+		set WShape.fineSInner 5.5
 		set WShape.hwCO 5
-		set WShape.hwCOS 4
-		set WShape.m1 0.25
-		set WShape.m2 0.75
-		set WShape.m1S 0.24
-		set WShape.m2S 0.76
+		set WShape.hwCOS 3.5
+		set WShape.m1    0.25
+		set WShape.m2  : 1 - WShape.m1
+		set WShape.m1S   0.235
+		set WShape.m2S : 1 - WShape.m1S
 
 		sketch # W
 			local df : DivFrame para.diversityM 3
@@ -910,10 +911,16 @@ export : define [apply] : begin
 
 		define [WHooktopShape top barStraight df] : glyph-construction
 			local fineOuter : if barStraight
-				adviceBlackness WShape.fineS df.div
+				adviceBlackness WShape.fineSOuter df.div
 				adviceBlackness WShape.fineOuter df.div
-			local fineOffsetOuter : fineOuter / 2 * HVCONTRAST * [if barStraight WShape.fineOffsetS WShape.fineOffset]
-			local m2 : df.width * [if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+			
+			local hwCO : if barStraight
+				(1 / 2) * [adviceBlackness WShape.hwCOS df.div]
+				(1 / 2) * [adviceBlackness WShape.hwCO df.div]
+			local delimBias : hwCO * HVCONTRAST
+			local fineOffsetOuter : hwCO * HVCONTRAST
+			local fineOffsetInner : hwCO * HVCONTRAST
+			local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 
 			include : WShape top barStraight df
 
@@ -1710,27 +1717,30 @@ export : define [apply] : begin
 
 	### R and CyrYa
 	do "R and related ============================================================================="
-		define [RShape top] : glyph-construction
-			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
-			include : PShape top 1 m
-			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
+		define [RLegShape right bottom top charTop] : glyph-construction
 			if para.straightBar : do
 				local shift : if SLAB (-JUT / 2 + 0.25 * STROKE * HVCONTRAST) 0
 				local xRightBottom : right - OX * 2 - HALFSTROKE * HVCONTRAST
 				include : dispiro
-					widths.center (STROKE * [diagCor top WIDTH 0 (STROKE * 2)])
-					corner (MIDDLE + shift / 2) ((top - STROKE) * m) [heading DOWNWARD]
-					corner (xRightBottom + shift) 0 [heading DOWNWARD]
+					widths.center (STROKE * [diagCor charTop WIDTH 0 (STROKE * 2)])
+					corner (MIDDLE + shift / 2) top [heading DOWNWARD]
+					corner (xRightBottom + shift) bottom [heading DOWNWARD]
 				if SLAB : begin
-					include : RightwardBottomSerif (xRightBottom + shift + 0.25 * STROKE * HVCONTRAST) 0 (SIDEJUT + JUT / 8)
+					include : RightwardBottomSerif (xRightBottom + shift + 0.25 * STROKE * HVCONTRAST) bottom (SIDEJUT + JUT / 8)
 			: else : begin
 				include : dispiro
 					widths.center
-					g4.up.start (right ) 0 [heading UPWARD]
+					g4.up.start (right - HALFSTROKE * HVCONTRAST) bottom [heading UPWARD]
 					quadcontrols 0 [if SLAB 0.3 0.4] 8
-					g4 MIDDLE ((top - STROKE) * m)
+					g4 MIDDLE top
 				if SLAB : begin
-					include : RightwardBottomSerif right 0 (SIDEJUT + JUT / 8)
+					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
+
+		define [RShape top] : glyph-construction
+			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
+			include : PShape top 1 m
+			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
+			include : RLegShape right 0 ((top - STROKE) * m) top
 
 		sketch # R
 			set-width WIDTH
@@ -1755,13 +1765,8 @@ export : define [apply] : begin
 			include : PShape top 1 bp
 			include : VBarLeft SB (top - 1) CAP
 
-			local TURN (XH * 0.1)
-			local right (RIGHTSB - O)
-			include : dispiro
-				widths.center
-				g4.up.start (right - HALFSTROKE) DESCENDER [heading UPWARD]
-				quadcontrols 0 0.4 8
-				g4 MIDDLE ((top - STROKE) * bp)
+			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
+			include : RLegShape right DESCENDER ((top - STROKE) * bp) (top - DESCENDER)
 
 			save 'Yr' 0x1A6
 

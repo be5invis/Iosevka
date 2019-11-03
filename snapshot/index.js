@@ -86,7 +86,7 @@ window.onload = function() {
 			doubleTrim: "white"
 		}
 	];
-	current = 0;
+	var current = 0;
 	var step = function() {
 		var doit = function() {
 			captureElement(snapshotTasks[current], function() {

@@ -11,7 +11,7 @@ Quit your editor/program. Unzip and open the folder.
 * **Instructions for Windows**: Download the fonts from the [Releases](https://github.com/be5invis/Iosevka/releases), select the font files and right click, then hit "Install".
   * On Windows 10 1809 or newer the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select "Install for all users" instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
 * **[Instructions for macOS](http://support.apple.com/kb/HT2509)**
-  * Standard distribution in Homebrew: `brew tap homebrew/cask-fonts && brew cask install font-iosevka && brew cask install iosevka-slab`
+  * Standard distribution in Homebrew: `brew tap homebrew/cask-fonts && brew cask install font-iosevka && brew cask install font-iosevka-slab`
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
@@ -68,7 +68,8 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    upright = ["upright-only", "styles"]   # Upright-only styles
    italic = ["italic-only", "styles"]     # Italic-only styles
    oblique = ["oblique-only", "styles"]   # Oblique-only styles
-   
+   hintParams = ["-a", "sss"]             # Optional custom parameters for ttfautohint
+
    # Override default building weights
    # When buildPlans.<plan name>.weights is absent
    # All weights would built and mapped to default shape/CSS
@@ -160,6 +161,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `compressed`: Compress the width by 10%.
   * `menu-subfamily-condensed`: Add “Condensed” into font menu subfamily;
   * NOTE: these styles are highly experimental. Handle with extreme care.
+* Symbol exclusion:
+  * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.
