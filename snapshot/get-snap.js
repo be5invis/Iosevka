@@ -50,11 +50,14 @@ var phases = {
 	},
 	"receive-rect": function(event, rect) {
 		pendingTasks += 1;
+		console.log("Received rect.");
 		rect = JSON.parse(JSON.stringify(rect));
 		var file = argv.dir + "/" + rect.name + ".png";
 		var j = 0;
 		var totalFiles = Math.ceil(rect.height / rect.windowHeight);
 		var pendingFiles = totalFiles;
+		step();
+
 		function doneFileWrite() {
 			pendingFiles -= 1;
 			if (pendingFiles <= 0) {
@@ -74,7 +77,7 @@ var phases = {
 		function step() {
 			event.sender.send("scroll", rect.y + j * rect.windowHeight);
 			GOTO(function(event) {
-				mainWindow.capturePage(function(image) {
+				mainWindow.capturePage().then(function(image) {
 					fs.writeFile(
 						argv.dir + "/" + rect.name + "." + j + ".png",
 						image.toPNG(),
@@ -91,7 +94,6 @@ var phases = {
 				});
 			});
 		}
-		step();
 	}
 };
 var currentPhase = phases["prepare"];
