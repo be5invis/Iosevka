@@ -161,6 +161,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `compressed`: Compress the width by 10%.
   * `menu-subfamily-condensed`: Add “Condensed” into font menu subfamily;
   * NOTE: these styles are highly experimental. Handle with extreme care.
+* Symbol exclusion:
+  * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
   * Styles for letter `l`:
     * `v-l-hooky` : Hooky `l`.
