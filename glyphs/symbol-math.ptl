@@ -260,7 +260,7 @@ export : define [apply] : begin
 			include : Ring (symbolMid - radius + DOTRADIUS) (symbolMid - radius - DOTRADIUS) (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
 		
 			save 'divide' 0xF7
-
+		
 	local equalHalfSpace : (operTop - operBot) *1.25 * designParameters.equal_wideness
 	do "Equality"
 		sketch # equal
@@ -385,15 +385,51 @@ export : define [apply] : begin
 		sketch # vee
 			include : dispiro
 				widths.center OPERATORSTROKE
-				flat SB operTop
+				flat SB operTop [heading DOWNWARD]
 				curl MIDDLE operBot [heading DOWNWARD]
 			
 			include : dispiro
 				widths.center OPERATORSTROKE
-				flat RIGHTSB operTop
+				flat RIGHTSB operTop [heading DOWNWARD]
 				curl MIDDLE operBot [heading DOWNWARD]
 			save 'vee' 0x2228
 		turned 'wedge' 0x2227 'vee' MIDDLE symbolMid
+
+		sketch # doubleVee
+			define sw : adviceBlackness 6
+			include : dispiro
+				widths.center sw
+				flat SB operTop [heading DOWNWARD]
+				curl MIDDLE operBot [heading DOWNWARD]
+			
+			include : dispiro
+				widths.center sw
+				flat RIGHTSB operTop [heading DOWNWARD]
+				curl MIDDLE operBot [heading DOWNWARD]
+
+			define offsetRatio : 1 / 4
+			define bias : (RIGHTSB - SB) * offsetRatio
+			define a : dispiro
+				widths.center sw
+				flat (SB + bias) operTop [heading DOWNWARD]
+				curl (MIDDLE + bias) operBot [heading DOWNWARD]
+			define b : dispiro
+				widths.center sw
+				flat (RIGHTSB - bias) operTop [heading DOWNWARD]
+				curl (MIDDLE - bias) operBot [heading DOWNWARD]
+
+			include : union
+				intersection a b
+				difference
+					union a b
+					spiro-outline
+						corner 0 operBot
+						corner WIDTH operBot
+						corner WIDTH [mix operBot operTop (1 - 2 * offsetRatio)]
+						corner 0 [mix operBot operTop (1 - 2 * offsetRatio)]
+
+			save 'doubleVee' 0x2A54
+		turned 'doubleWedge' 0x2A53 'doubleVee' MIDDLE symbolMid
 
 		sketch # cup
 			include : UShape operTop operBot OPERATORSTROKE true
