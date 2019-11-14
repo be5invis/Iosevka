@@ -128,6 +128,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-fstar`: Default ligation set would be assigned to F\*.
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
+  * `ligset-matlab`: Default ligation set would be assigned to MatLab.
 * Styles for further customizing default (`calt`) ligation sets. When any of these styles present in your configuration, the `ligset-*` styles would be overridden.
   * `calt-clear`: Clear the `calt` ligation set.
   * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`);
@@ -139,7 +140,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrowZALE`: Enable ligation for `<=` to form a left double arrow;
   * `calt-arrowZAGE`: Enable ligation for `>=` to form a right inverse double arrow;
   * `calt-exeq`: Enable ligation for `!=` and `!==`;
-  * `calt-slasheq`: Enable ligation for `/=` and `/==`;
+  * `calt-tildeeq`: Enable ligation for `~=` as inequality;
+  * `calt-slasheq`: Enable ligation for `/=` and `/==` as inequality;
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining;
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining;
   * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols;
