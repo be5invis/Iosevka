@@ -20,7 +20,11 @@ const ARCHIVE_DIR = "release-archives";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const GENERATE = ["node", "gen/generator"];
 const GC = ["node", "gen/gc"];
-const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
+const webfontFormats = [
+	["woff2", "woff2"],
+	["woff", "woff"],
+	["ttf", "truetype"]
+];
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
 const PRIVATE_BUILD_PLANS = path.relative(
@@ -42,21 +46,31 @@ const Version = oracle(`version`, async () => {
 	return package_json.version;
 });
 
+async function tryParseToml(str) {
+	try {
+		return toml.parse(fs.readFileSync(str, "utf-8"));
+	} catch (e) {
+		throw new Error(
+			`Failed to parse configuration file ${str}.\n` +
+				`Please validate whether there's syntax error.\n` +
+				`${e}`
+		);
+	}
+}
+
 const RawPlans = oracle(`raw-plans`, async target => {
 	await target.need(fu(BUILD_PLANS));
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
 		await target.need(fu(PRIVATE_BUILD_PLANS));
 	}
 
-	const t = toml.parse(fs.readFileSync(BUILD_PLANS, "utf-8"));
+	const bp = await tryParseToml(BUILD_PLANS);
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
-		Object.assign(
-			t.buildPlans,
-			toml.parse(fs.readFileSync(PRIVATE_BUILD_PLANS, "utf-8")).buildPlans
-		);
+		const privateBP = await tryParseToml(PRIVATE_BUILD_PLANS);
+		Object.assign(bp.buildPlans, privateBP.buildPlans);
 	}
-	for (const prefix in t.buildPlans) {
-		const plan = t.buildPlans[prefix];
+	for (const prefix in bp.buildPlans) {
+		const plan = bp.buildPlans[prefix];
 		plan.prefix = prefix;
 
 		// Style groups
@@ -73,10 +87,10 @@ const RawPlans = oracle(`raw-plans`, async target => {
 		if (!plan.post.oblique) plan.post.oblique = [];
 		if (!plan.post.italic) plan.post.italic = [];
 	}
-	for (const prefix in t.collectPlans) {
-		t.collectPlans[prefix].prefix = prefix;
+	for (const prefix in bp.collectPlans) {
+		bp.collectPlans[prefix].prefix = prefix;
 	}
-	return t;
+	return bp;
 });
 
 const BuildPlans = computed("build-plans", async target => {
@@ -290,7 +304,14 @@ const DistTTC = file.make(
 		const [parts] = await target.need(CollectionPartsOf(f));
 		await target.need(de`${dir}`);
 		const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full, "-h", "--common-width=500");
+		await run(
+			`otfcc-ttcize`,
+			ttfs.map(p => p.full),
+			"-o",
+			full,
+			"-h",
+			"--common-width=500"
+		);
 	}
 );
 
