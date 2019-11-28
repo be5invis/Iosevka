@@ -134,9 +134,16 @@ export : define [calculateMetrics para] : begin
 
 	# Blackness parameters
 	# We will estimate blackness using lower-case 'e'
-	define WHITENESS : ((XH - STROKE * 3) * (RIGHTSB - SB) * (1 / 3)) / (XH * (RIGHTSB - SB))
-	define [adviceBlackness crowdedness div] : Math.min STROKE (((WIDTH * [fallback div 1]) - SB * 2) * (1 - WHITENESS) / (crowdedness * HVCONTRAST))
-	define [adviceBlackness2 cowX cowY refH div] : Math.min [adviceBlackness cowX (refH / WIDTH)] [adviceBlackness cowY div]
+	define [WHITENESS div] : begin
+		local w : WIDTH * [fallback div 1] - SB * 2
+		return : ((XH - STROKE * 3) * w * (1 / 3)) / (XH * w)
+	define [adviceBlackness crowdedness div mul] : begin
+		local gap : (WIDTH * [fallback div 1]) - SB * 2
+		local shrink : (1 - [WHITENESS 1]) / (crowdedness * HVCONTRAST)
+		return : Math.min STROKE ([fallback mul 1] * gap * shrink)
+	define [adviceBlackness2 cowX cowY refH div] : Math.min 
+		adviceBlackness cowX (refH / WIDTH)
+		adviceBlackness cowY div
 	define [MVERTSTROKE_D div] : adviceBlackness [fallback para.lllcrowdedness (3 + 1 / 3)] div
 	define MVERTSTROKE : MVERTSTROKE_D 1
 	define OVERLAYSTROKE : adviceBlackness 3.75
