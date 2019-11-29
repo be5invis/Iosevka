@@ -1,4 +1,4 @@
-import 'libspiro-js' as libspiro
+import 'spiro-js' as SpiroJs
 import './spiroexpand' as SpiroExpansionContext
 import './fairify' as fairify
 import 'caryll-shapeops' as ShapeOps
@@ -156,22 +156,22 @@ export : define [SetupBuilders args] : begin
 			set knot.af : lambda [] : begin
 				this.set-type ty
 				if af : af.apply this args
-		libspiro.spiroToBezierOnContext knots closed s
+		SpiroJs.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
 		
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast CONTRAST]
 		if closed : then
 			local g : new Glyph
-			libspiro.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
 			local lhsContour g.contours.0
 			set g.contours {}
-			libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
 			local rhsContour g.contours.0
 			set g.contours {[lhsContour.concat rhsContour]}
 		: else
 			local g : new Glyph
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
-			libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
 		if ([not s.unfair] && [not para.unfair]) : foreach [j : range 0 g.contours.length] : begin
 			set g.contours.(j) : fairify g.contours.(j) globalTransform
 		set g.knots knots
@@ -184,7 +184,7 @@ export : define [SetupBuilders args] : begin
 		local g : new Glyph
 		set g.gizmo : this.gizmo || globalTransform 
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
-		libspiro.spiroToBezierOnContext knots closed g QUAD PRECISION
+		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
 		foreach af [items-of lastafs] : if af : af.call g
 		if [not para.unfair] : foreach [j : range 0 g.contours.length] : begin
 			set g.contours.(j) : fairify g.contours.(j) (g.fairGizmo || g.gizmo)
