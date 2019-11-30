@@ -2,7 +2,7 @@
 
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
-const { de, fu } = build.rules;
+const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm } = build.actions;
 const { FileList } = build.predefinedFuncs;
 module.exports = build;
@@ -59,10 +59,7 @@ async function tryParseToml(str) {
 }
 
 const RawPlans = oracle(`raw-plans`, async target => {
-	await target.need(fu(BUILD_PLANS));
-	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
-		await target.need(fu(PRIVATE_BUILD_PLANS));
-	}
+	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
 
 	const bp = await tryParseToml(BUILD_PLANS);
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
@@ -532,9 +529,9 @@ const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, p
 	}
 });
 const Scripts = task("scripts", async target => {
+	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`empty-font.toml`);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
-	await target.need(fu`parameters.toml`, fu`variants.toml`, fu`emptyfont.toml`);
 });
