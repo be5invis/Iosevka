@@ -1221,12 +1221,15 @@ export : define [apply] : begin
 
 	### K and k
 	define { KShape } : do "k and related ========================================================="
-		local KBalance : if (!SLAB && para.straightBar) (WIDTH / 16 + 0 * STROKE / 12) 0
+		local KBalance : if para.straightBar (WIDTH / 16) 0
+		local KBalanceRight : if (!SLAB && para.straightBar) (WIDTH / 16) 0
 		define [KShape top straightBar] : glyph-construction
 			local turn (top * 0.99)
 			local fine : adviceBlackness 3.5
 			local Ok 0
 			local OkSerif 0
+			local kshLeft : SB + KBalance
+			local kshRight : RIGHTSB + KBalanceRight
 
 			if straightBar : do
 				local attach (top * 0.42 - STROKE)
@@ -1237,36 +1240,36 @@ export : define [apply] : begin
 					Rect top 0 0 UPM
 					dispiro
 						widths.rhs
-						flat (RIGHTSB - Ok) top
-						curl (SB + STROKE) attach [widths 0 fine]
+						flat (kshRight - Ok) top
+						curl (kshLeft + STROKE) attach [widths 0 fine]
 				
 				include : intersection
 					spiro-outline
-						corner (SB + STROKE) 0
-						corner (SB + STROKE) (attach + 1)
-						corner (RIGHTSB - Ok - 1) top
-						corner (RIGHTSB - Ok) top
-						corner (RIGHTSB - Ok) 0
+						corner (kshLeft + STROKE) 0
+						corner (kshLeft + STROKE) (attach + 1)
+						corner (kshRight - Ok - 1) top
+						corner (kshRight - Ok) top
+						corner (kshRight - Ok) 0
 					dispiro
 						widths.lhs
-						flat (RIGHTSB - Ok) 0
-						curl (SB + STROKE) attach2
+						flat (kshRight - Ok) 0
+						curl (kshLeft + STROKE) attach2
 			: else : do
 				local attach (top * [if SLAB 0.325 0.375])
-				local attach2 [if SLAB [mix SB RIGHTSB 0.48] MIDDLE]
+				local attach2 [if SLAB [mix kshLeft kshRight 0.48] MIDDLE]
 				include : dispiro
-					g4.down.start (RIGHTSB) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
+					g4.down.start (kshRight) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
 					bezcontrols 0 [if SLAB 0.1 0.2] 0.5 [if SLAB 0.55 0.65] 8
-					g4 (SB + STROKE) attach [widths 0 fine]
+					g4 (kshLeft + STROKE) attach [widths 0 fine]
 				include : dispiro
 					widths.center
-					g4.up.start (RIGHTSB - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
+					g4.up.start (kshRight - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
 					quadcontrols 0 [if SLAB 0.125 0.25] 8
 					g4 attach2 (top * 0.61) [widths.center fine]
 
 			if SLAB : do
-				local topSerifX : RIGHTSB - OkSerif - (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - HALFSTROKE) * HVCONTRAST * [if para.isItalic 1 0] - HALFSTROKE * 0.5 * HVCONTRAST
-				local bottomSerifX : RIGHTSB - OkSerif - O * [if para.isItalic 1 0]
+				local topSerifX : kshRight - OkSerif - (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - HALFSTROKE) * HVCONTRAST * [if para.isItalic 1 0] - HALFSTROKE * 0.5 * HVCONTRAST
+				local bottomSerifX : kshRight - OkSerif - O * [if para.isItalic 1 0]
 
 				include : RightwardTopSerif topSerifX top (SIDEJUT + HALFSTROKE * 0.5 * HVCONTRAST)
 				include : RightwardBottomSerif bottomSerifX 0 SIDEJUT
@@ -1274,12 +1277,11 @@ export : define [apply] : begin
 		sketch # K
 			set-width WIDTH
 			include markset.capital
-			include : VBarLeft SB 0 CAP
+			include : VBarLeft (SB + KBalance) 0 CAP
 			include : KShape CAP para.straightBar
 			if SLAB : begin
-				include : CenterTopSerif (SB + HALFSTROKE * HVCONTRAST) CAP JUT
-				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
-			include : Translate KBalance 0
+				include : CenterTopSerif (SB + KBalance + HALFSTROKE * HVCONTRAST) CAP JUT
+				include : CenterBottomSerif (SB + KBalance + HALFSTROKE * HVCONTRAST) 0 JUT
 
 			save 'K' 'K'
 			save 'Kappa' 0x39A
@@ -1290,37 +1292,34 @@ export : define [apply] : begin
 		sketch # k
 			set-width WIDTH
 			include markset.b
-			include : VBarLeft SB 0 CAP
+			include : VBarLeft (SB + KBalance) 0 CAP
 			include : KShape XH para.straightBar
 			if SLAB : begin
-				include : LeftwardTopSerif SB CAP SIDEJUT
+				include : LeftwardTopSerif (SB + KBalance) CAP SIDEJUT
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
+					include : CenterBottomSerif (SB + KBalance + HALFSTROKE * HVCONTRAST) 0 JUT
 					tag-contour 'serifLB'
-			include : Translate KBalance 0
 
 			save 'k' 'k'
 
 		sketch # kappa
 			set-width WIDTH
 			include markset.e
-			include : VBarLeft SB 0 XH
+			include : VBarLeft (SB + KBalance) 0 XH
 			include : KShape XH para.straightBar
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SIDEJUT
-			include : Translate KBalance 0
+				include : LeftwardTopSerif (SB + KBalance) XH SIDEJUT
 
 			save 'kappa' 0x3BA
 
 		sketch # cyrka
 			set-width WIDTH
 			include markset.e
-			include : VBarLeft SB 0 XH
+			include : VBarLeft (SB + KBalance) 0 XH
 			include : KShape XH para.straightBar
 			if SLAB : begin
-				include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) 0 JUT
-				include : CenterTopSerif (SB + HALFSTROKE * HVCONTRAST) XH JUT
-			include : Translate KBalance 0
+				include : CenterBottomSerif (SB + KBalance + HALFSTROKE * HVCONTRAST) 0 JUT
+				include : CenterTopSerif (SB + KBalance + HALFSTROKE * HVCONTRAST) XH JUT
 
 			save 'cyrka' 0x43A
 			save 'latinkappa' 0x138
@@ -1330,16 +1329,16 @@ export : define [apply] : begin
 		sketch # Khooktop
 			include markset.capital
 			include : KShape CAP para.straightBar
-			include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
-			include : VerticalHook (SB + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+			include : VBarLeft (SB + KBalance) 0 (CAP - HOOK - HALFSTROKE)
+			include : VerticalHook (SB + KBalance + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 
 			save 'Khooktop' 0x198
 
 		sketch # khooktop
 			include markset.b
 			include : KShape XH para.straightBar
-			include : VBarLeft SB 0 (CAP - HOOK - HALFSTROKE)
-			include : VerticalHook (SB + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+			include : VBarLeft (SB + KBalance) 0 (CAP - HOOK - HALFSTROKE)
+			include : VerticalHook (SB + KBalance + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 
 			save 'khooktop' 0x199
 		turned nothing 0xA7B0 'K' MIDDLE (CAP / 2)
