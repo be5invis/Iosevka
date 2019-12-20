@@ -43,8 +43,8 @@ function regulateGlyph(g, skew) {
 	}
 
 	// De-overlap
-	// g.contours = [...cSimple, ...caryllShapeOps.removeOverlap(cFill, 1, 2048, true)];
-	g.contours = [...cSimple, ...cFill];
+	g.contours = [...cSimple, ...caryllShapeOps.removeOverlap(cFill, 1, 2048, true)];
+	// g.contours = [...cSimple, ...cFill];
 
 	// Finalize
 	g.contours = c2q.contours(g.contours);
