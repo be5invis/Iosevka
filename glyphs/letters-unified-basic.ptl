@@ -1357,6 +1357,52 @@ export : define [apply] : begin
 
 				include : RightwardTopSerif topSerifX top (SIDEJUT + HALFSTROKE * 0.5 * HVCONTRAST)
 				include : RightwardBottomSerif bottomSerifX 0 SIDEJUT
+		
+		define [KCurlyShape top straightBar] : glyph-construction
+			define kshLeft : SB + [KBalance straightBar]
+			define kshRight : RIGHTSB + [KBalanceRight straightBar] + 0.2 * STROKE
+
+			define Ok 0
+			define arcFine SHOULDERFINE
+			define arcStroke : adviceBlackness2 2 3 top
+			define arcTerminalFine : adviceBlackness2 3 4 top
+			define st : shoulderMidSlope arcFine arcStroke 1
+
+			define arcMaxPropX  : 0.8 + 2 * (arcStroke / WIDTH)
+			define startPropY   : 0.46 + 0.1 * (arcStroke / WIDTH)
+			define arcTopPropX  : 0.56 + 0.2 * (arcStroke / WIDTH)
+			define arcMaxXPropY : 0.6 - 1 * (arcStroke / WIDTH)
+			define arcEndPropX  : 0.15 - 0.5 * (arcStroke / WIDTH)
+			define arcEndPropY  : 0.45 + 0.2 * (arcStroke / WIDTH)
+
+			define arcStartX    : kshLeft + HVCONTRAST * (STROKE - arcFine)
+			define arcMaxX      : kshRight * 0.9 - Ok
+			define arcTopY      : top - O
+
+			define arcTerminalX : mix arcStartX kshRight arcEndPropX
+			define arcTerminalY : mix 0 top arcEndPropY
+			define barEndX      : kshRight - Ok
+
+			include : difference
+				dispiro
+					g2.up.start arcStartX (top * startPropY) [widths.heading 0 arcFine UPWARD]
+					arcvh
+					g2.right.mid [mix arcStartX arcMaxX arcTopPropX] arcTopY [widths.heading 0 arcStroke {.y (+1) .x (+st)}]
+					archv
+					g2.down.mid arcMaxX [mix arcTerminalY top arcMaxXPropY] [heading DOWNWARD]
+					quadcontrols 0 0.7
+					g2 arcTerminalX arcTerminalY [widths arcTerminalFine 0]
+				spiro-outline
+					corner 0 0
+					corner 0 arcTerminalY
+					corner arcTerminalX arcTerminalY
+					corner barEndX 0
+
+			include : intersection
+				Rect [mix 0 top arcEndPropY] 0 0 UPM
+				dispiro
+					flat arcTerminalX arcTerminalY [widths.lhs]
+					curl barEndX 0 [widths.rhs]
 
 		sketch # K
 			set-width WIDTH
@@ -1384,7 +1430,18 @@ export : define [apply] : begin
 					include : CenterBottomSerif (SB + [KBalance para.straightBar] + HALFSTROKE * HVCONTRAST) 0 JUT
 					tag-contour 'serifLB'
 
-			save 'k' 'k'
+			save 'k.upright'
+		
+		sketch # k
+			set-width WIDTH
+			include markset.b
+			include : VBarLeft (SB + [KBalance para.straightBar]) 0 CAP
+			include : KCurlyShape XH para.straightBar
+			if SLAB : begin
+				include : LeftwardTopSerif (SB + [KBalance para.straightBar]) CAP SIDEJUT
+			save 'k.italic'
+		
+		select-variant 'k' 'k'
 
 		sketch # kappa
 			set-width WIDTH
@@ -1425,6 +1482,7 @@ export : define [apply] : begin
 			include : VerticalHook (SB + [KBalance para.straightBar] + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 
 			save 'khooktop' 0x199
+			
 		turned nothing 0xA7B0 'K' MIDDLE (CAP / 2)
 		turned nothing 0x29E 'k' MIDDLE (XH / 2) markset.p
 
