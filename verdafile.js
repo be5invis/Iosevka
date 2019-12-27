@@ -102,53 +102,68 @@ const RawCollectPlans = computed("raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
 });
-const Weights = computed("weights", async target => {
+const Weights = computed("metadata:global-weights", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.weights;
 });
-const Slants = computed("slants", async target => {
+const Slants = computed("metadata:global-slants", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.slants;
 });
+const Widths = computed("metadata:global-widths", async target => {
+	const [rp] = await target.need(RawPlans);
+	return rp.widths;
+});
 
-function getSuffixSet(weights, slants) {
+function getSuffixSet(weights, slants, widths) {
 	const mapping = {};
 	for (const w in weights) {
 		for (const s in slants) {
-			const suffix =
-				(w === "regular" ? (s === "upright" ? "regular" : "") : w) +
-				(s === "upright" ? "" : s);
-			mapping[suffix] = {
-				hives: [`w-${weights[w].shape}`, `s-${s}`],
-				weight: w,
-				cssWeight: weights[w].css || w,
-				menuWeight: weights[w].menu || weights[w].css || w,
-				slant: s,
-				cssStyle: slants[s] || s,
-				menuStyle: slants[s] || s
-			};
+			for (const wd in widths) {
+				const suffix =
+					(wd === "normal" ? "" : wd) +
+						(w === "regular" ? "" : w) +
+						(s === "upright" ? "" : s) || "regular";
+				mapping[suffix] = {
+					hives: [`w-${weights[w].shape}`, `s-${s}`, `wd-${widths[wd].shape}`],
+					weight: w,
+					cssWeight: weights[w].css || w,
+					menuWeight: weights[w].menu || weights[w].css || w,
+					width: wd,
+					cssStretch: widths[wd].css || wd,
+					menuWidth: widths[wd].menu || widths[wd].css || wd,
+					slant: s,
+					cssStyle: slants[s] || s,
+					menuStyle: slants[s] || s
+				};
+			}
 		}
 	}
 	return mapping;
 }
 
 const Suffixes = computed(`suffixes`, async target => {
-	const [weights, slants] = await target.need(Weights, Slants);
-	return getSuffixSet(weights, slants);
+	const [weights, slants, widths] = await target.need(Weights, Slants, Widths);
+	return getSuffixSet(weights, slants, widths);
 });
 
 const FontBuildingParameters = computed(`font-building-parameters`, async target => {
-	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
+	const [buildPlans, defaultWeights, defaultSlants, defaultWidths] = await target.need(
 		BuildPlans,
 		Weights,
-		Slants
+		Slants,
+		Widths
 	);
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
-		const { pre, post, prefix, family, weights, slants, hintParams } = buildPlans[p];
+		const { pre, post, prefix, family, weights, slants, widths, hintParams } = buildPlans[p];
 		const targets = [];
-		const suffixMapping = getSuffixSet(weights || defaultWeights, slants || defaultSlants);
+		const suffixMapping = getSuffixSet(
+			weights || defaultWeights,
+			slants || defaultSlants,
+			widths || defaultWidths
+		);
 		for (const suffix in suffixMapping) {
 			if (weights && !weights[suffixMapping[suffix].weight]) continue;
 			if (slants && !slants[suffixMapping[suffix].slant]) continue;
@@ -160,8 +175,10 @@ const FontBuildingParameters = computed(`font-building-parameters`, async target
 				family,
 				hives: ["iosevka", ...preHives, ...suffixMapping[suffix].hives, ...postHives],
 				menuWeight: suffixMapping[suffix].menuWeight,
+				menuWidth: suffixMapping[suffix].menuWidth,
 				menuStyle: suffixMapping[suffix].menuStyle,
 				cssWeight: suffixMapping[suffix].cssWeight,
+				cssStretch: suffixMapping[suffix].cssStretch,
 				cssStyle: suffixMapping[suffix].cssStyle,
 				hintParams: hintParams || []
 			};
@@ -227,7 +244,7 @@ const CollectionPartsOf = computed.group("collection-parts-of", async (target, i
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, _gr, fn) => {
-		const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
+		const [{ hives, family, menuWeight, menuStyle, menuWidth }, version] = await target.need(
 			HivesOf(fn),
 			Version
 		);
@@ -244,6 +261,7 @@ const BuildTTF = file.make(
 			["--ver", version],
 			["--menu-weight", menuWeight],
 			["--menu-slant", menuStyle],
+			["--menu-width", menuWidth],
 			hives
 		);
 		await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");

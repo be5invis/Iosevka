@@ -49,6 +49,7 @@ function getParameters(argv) {
 		family: argv.family,
 		version: argv.ver,
 		weight: argv["menu-weight"] - 0,
+		width: argv["menu-width"] - 0,
 		slant: argv["menu-slant"]
 	};
 
