@@ -261,7 +261,7 @@ export : define [apply] : begin
 		
 			save 'divide' 0xF7
 		
-	local equalHalfSpace : (operTop - operBot) *1.25 * designParameters.equal_wideness
+	local equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 	do "Equality"
 		sketch # equal
 			include markset.plus
@@ -504,7 +504,7 @@ export : define [apply] : begin
 
 	do "Comparison"
 		# Less and Greater
-		define lessSlantness : (1 / 4) * (operTop - operBot) / (RIGHTSB - SB)
+		define lessSlantness : (1 / 3) * (operTop - operBot) / (RIGHTSB - SB)
 		define dH : lessSlantness * (RIGHTSB - SB)
 		define lessEqDist : Math.max [adviceBlackness 4] (XH * 0.1)
 
@@ -806,15 +806,14 @@ export : define [apply] : begin
 			include : HBar (SB + HALFSTROKE) RIGHTSB (symbolMid + lessEqDist) OPERATORSTROKE
 			save 'elementBar' 0x22F8
 
-
 	define [notGlyph unicode oldid top bot prop shift newid] 
 		create-glyph [fallback newid ('not' + oldid)] : glyph-construction
 			if unicode : assign-unicode unicode
 			include glyphs.(oldid)
 			include : dispiro
 				widths.center [adviceBlackness 4]
-				flat ([fallback shift 0] + [mix SB RIGHTSB [fallback prop 0.25]]) [fallback bot operBot]
-				curl ([fallback shift 0] + [mix RIGHTSB SB [fallback prop 0.25]]) [fallback top operTop]
+				flat ([fallback shift 0] + [mix SB RIGHTSB [fallback prop 0.25]]) [fallback bot bgopBot]
+				curl ([fallback shift 0] + [mix RIGHTSB SB [fallback prop 0.25]]) [fallback top bgopTop]
 	
 	define [notGlyph.right unicode oldid top bot prop shift]
 		notGlyph unicode oldid top bot prop (-OPERATORSTROKE * 0.5)
@@ -828,10 +827,10 @@ export : define [apply] : begin
 		notGlyph 0x22AD 'tautology'
 		notGlyph.left 0x226E 'less'
 		notGlyph.right 0x226F 'greater'
-		notGlyph 0x2241 'sym' [mix symbolMid operTop 0.75] [mix symbolMid operBot 0.75]
-		notGlyph 0x2244 'symBar' [mix symbolMid operTop 0.75] [mix symbolMid operBot 0.75]
+		notGlyph 0x2241 'sym' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
+		notGlyph 0x2244 'symBar' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
 		notGlyph 0x2247 'symBarBar'
-		notGlyph 0x2249 'approx' [mix symbolMid operTop 0.75] [mix symbolMid operBot 0.75]
+		notGlyph 0x2249 'approx' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
 		notGlyph.left 0x2284 'subst'
 		notGlyph.right 0x2285 'supst'
 		notGlyph.left 0x2288 'substBar'
@@ -852,27 +851,25 @@ export : define [apply] : begin
 		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.5) 'equal.fc.neg4'
 
 	do 'Large Operators'
-		define largeOperTop : mix symbolMid operTop 1.25
-		define largeOperBot : mix symbolMid operBot 1.25
 		sketch # sum
 			local df : DivFrame para.diversityM
 			set-width df.width
-			include : SigmaShape largeOperTop largeOperBot OPERATORSTROKE para.diversityM
+			include : SigmaShape bgopTop bgopBot OPERATORSTROKE para.diversityM
 			save 'sum' 0x2211
 		
 		sketch # product
 			local df : DivFrame para.diversityM
 			set-width df.width
-			include : PiShape largeOperTop largeOperBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE) (div -- para.diversityM)
+			include : PiShape bgopTop bgopBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE) (div -- para.diversityM)
 			save 'product' 0x220F
 		turned 'coproduct' 0x2210 'product' (MIDDLE * para.diversityM) symbolMid
 
 		sketch # integrate
-			include : LongSShape largeOperTop largeOperBot HOOK (HOOK * 0.75) OPERATORSTROKE
+			include : LongSShape bgopTop bgopBot HOOK (HOOK * 0.75) OPERATORSTROKE
 			save 'integrate' 0x222B
 		dual 'doubleintegrate' 0x222C 'integrate' (0.5 * WIDTH)
 		sketch
-			define [shape] : LongSShape largeOperTop largeOperBot HOOK (HOOK * 0.75) [adviceBlackness 3.75]
+			define [shape] : LongSShape bgopTop bgopBot HOOK (HOOK * 0.75) [adviceBlackness 3.75]
 			include [shape]
 			include : Translate (-WIDTH / 3) 0
 			include [shape]
@@ -889,26 +886,29 @@ export : define [apply] : begin
 		sketch # Vee
 			include : dispiro
 				widths.center OPERATORSTROKE
-				flat SB largeOperTop
-				curl MIDDLE largeOperBot [heading DOWNWARD]
+				flat SB bgopTop
+				curl MIDDLE bgopBot [heading DOWNWARD]
 			
 			include : dispiro
 				widths.center OPERATORSTROKE
-				flat RIGHTSB largeOperTop
-				curl MIDDLE largeOperBot [heading DOWNWARD]
+				flat RIGHTSB bgopTop
+				curl MIDDLE bgopBot [heading DOWNWARD]
 			save 'Vee' 0x22C1
 		turned 'Wedge' 0x22C0 'Vee' MIDDLE symbolMid
 		
 		sketch # Cup
-			include : UShape largeOperTop largeOperBot OPERATORSTROKE true
+			include : UShape bgopTop bgopBot OPERATORSTROKE true
 			save 'Cup' 0x22C3
 		turned 'Cap' 0x22C2 'Cup' MIDDLE symbolMid
 
 	### APL
 	do "APL"
-		local aplBoxSW : adviceBlackness 4.5
-		local aplBoxTop : mix symbolMid operTop 1.1
-		local aplBoxBot : mix symbolMid operBot 1.1
+		define aplBoxInnerTop bgopTop
+		define aplBoxInnerBot bgopBot
+		define aplBoxSW : adviceBlackness 4.5
+		define aplBoxTop : mix symbolMid aplBoxInnerTop 1.1
+		define aplBoxBot : mix symbolMid aplBoxInnerBot 1.1
+		define aplBoxInnerScale : Math.min ((WIDTH - aplBoxSW * 1.75) / WIDTH) ((aplBoxInnerTop - aplBoxInnerBot) / (parenTop - parenBot))
 		sketch # aplsquare
 			local l [mix 0 SB (1 / 3)]
 			local r [mix WIDTH RIGHTSB (1 / 3)]
@@ -941,8 +941,11 @@ export : define [apply] : begin
 			include : VBarRight  r aplBoxTop aplBoxBot aplBoxSW
 			save 'aplsquish' 0x2337
 		sketch # aplbar
-			include : VBar MIDDLE parenTop parenBot aplBoxSW
+			include : VBar MIDDLE aplBoxTop aplBoxBot aplBoxSW
 			save 'aplbar'
+		sketch # aplLongBar
+			include : VBar MIDDLE aplBoxTop aplBoxBot aplBoxSW
+			save 'aplLongBar'
 		sketch # aplminus
 			include : dispiro
 				widths.center aplBoxSW
@@ -964,7 +967,7 @@ export : define [apply] : begin
 		
 		define [aplBoxed shape] : Overlay glyphs.aplsquare : glyph-construction
 			include : intersection glyphs.aplsquareShadow shape
-			include : ScaleAround MIDDLE symbolMid [Math.min ((WIDTH - aplBoxSW * 1.75) / WIDTH) ((operTop - operBot) / (parenTop - parenBot))]
+			include : ScaleAround MIDDLE symbolMid aplBoxInnerScale
 
 		composite glyphs.space [aplBoxed glyphs.equal] [into-unicode 0x2338]
 		composite glyphs.space [aplBoxed glyphs.divide] [into-unicode 0x2339]
@@ -985,13 +988,13 @@ export : define [apply] : begin
 		composite glyphs.space [aplBoxed glyphs."arrowright.hwid"] [into-unicode 0x2348]
 		composite glyphs.space [Overlay glyphs.aplbackslash glyphs.'whitecircle.hwid'] [into-unicode 0x2349]
 		composite glyphs.bot glyphs.underlineBelow [into-unicode 0x234A]
-		composite glyphs.space [Overlay glyphs.increment glyphs.aplbar] [into-unicode 0x234B]
+		composite glyphs.space [Overlay glyphs.increment glyphs.aplLongBar] [into-unicode 0x234B]
 		composite glyphs.space [aplBoxed glyphs.vee] [into-unicode 0x234C]
 		composite glyphs.space [aplBoxed glyphs.increment] [into-unicode 0x234D]
 		composite glyphs.space [Overlay glyphs."arrowup.hwid" glyphs.minus] [into-unicode 0x234F]
 		composite glyphs.space [aplBoxed glyphs."arrowup.hwid"] [into-unicode 0x2350]
 		composite glyphs.top glyphs.overlineAbove [into-unicode 0x2351]
-		composite glyphs.space [Overlay glyphs.nabla glyphs.aplbar] [into-unicode 0x2352]
+		composite glyphs.space [Overlay glyphs.nabla glyphs.aplLongBar] [into-unicode 0x2352]
 		composite glyphs.space [aplBoxed glyphs.wedge] [into-unicode 0x2353]
 		composite glyphs.space [aplBoxed glyphs.nabla] [into-unicode 0x2354]
 		composite glyphs.space [Overlay glyphs."arrowdown.hwid" glyphs.minus] [into-unicode 0x2356]
@@ -1042,9 +1045,9 @@ export : define [apply] : begin
 	### Others
 	alias 'mathbullet' 0x2219 'bullet'
 	alias 'mathbar' 0x2223 'bar'
-	notGlyph 0x2224 'mathbar' [mix symbolMid operTop 0.5] [mix symbolMid operBot 0.5] 0.1
+	notGlyph 0x2224 'mathbar' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0.1
 	dual 'parallel' 0x2225 'bar' (WIDTH * 0.35)
-	notGlyph 0x2226 'parallel' [mix symbolMid operTop 0.5] [mix symbolMid operBot 0.5] 0
+	notGlyph 0x2226 'parallel' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0
 	alias 'mathsmallcircle' 0x2218 'smallwhitecircle.hwid'
 	alias 'whiteDiamondOperator' 0x22C4 'whitediamond.hwid'
 	alias 'mathstar' 0x22C6 'blackstar.hwid'
