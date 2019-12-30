@@ -1783,29 +1783,41 @@ export : define [apply] : begin
 			save 'latinde' 0x18C
 
 	### P
-	define { PShape } : do "P and related ========================================================="
-		define [PShape top _mul bp overshoot] : glyph-construction
-			local mul : fallback _mul 1.25
-			local bowlTop (top * 1)
-			local bowlBottom ((top - STROKE) * [fallback bp PBARPOS] - HALFSTROKE)
-
+	define { PShape PShapeOutline } : do "P and related =========================================="
+		define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
+			local bowlTop (top * 1 - offset)
+			local bowlBottom ((top - sw) * bp - sw / 2 + offset)
 			local turn : mix bowlTop bowlBottom (SMOOTHB / (SMOOTHA + SMOOTHB))
 			local turnRadius : (bowlTop - bowlBottom) * 0.45
-			include : dispiro
-				widths.rhs
+			local right : RIGHTSB - offset
+
+			list
 				flat (SB * mul - O) bowlTop [heading RIGHTWARD]
-				curl (RIGHTSB - turnRadius - CORRECTION_OMIDS) bowlTop
+				curl (right - turnRadius - CORRECTION_OMIDS) bowlTop
 				archv
-				g4 (RIGHTSB - [fallback overshoot (OX * 2)]) turn
+				g4 (right - overshoot) turn
 				arcvh
-				flat (RIGHTSB - turnRadius + CORRECTION_OMIDS) bowlBottom
+				flat (right - turnRadius + CORRECTION_OMIDS) bowlBottom
 				curl (SB * mul - O) bowlBottom [heading LEFTWARD]
-			include : VBarLeft (SB * mul) 0 top
+
+		define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp BARPOS] [overshoot PShape.defaultOvershoot] [sw STROKE] [offset 0]] : glyph-construction
+			include : spiro-outline
+				PShapeOutlineKnots top mul bp overshoot sw offset
+
+		define [PShape] : params [top [mul PShape.defaultMul] [bp BARPOS] [overshoot PShape.defaultOvershoot] [sw STROKE] [slab SLAB]] : glyph-construction
+			include : dispiro
+				widths.rhs sw
+				PShapeOutlineKnots top mul bp overshoot sw 0
+			include : VBarLeft (SB * mul) 0 top sw
 			tag-contour 'strokeL'
-			if SLAB : begin
-				include : LeftwardTopSerif (SB * mul) top SIDEJUT
+
+			if slab : begin
+				include : LeftwardTopSerif (SB * mul) top SIDEJUT sw
 				tag-contour 'serifLT'
-				include : CenterBottomSerif (SB * mul + HALFSTROKE * HVCONTRAST) 0 JUT
+				include : CenterBottomSerif (SB * mul + HALFSTROKE * HVCONTRAST) 0 JUT sw
+		
+		set PShape.defaultMul 1.25
+		set PShape.defaultOvershoot (OX * 2)
 
 		sketch # P
 			set-width WIDTH
@@ -1821,7 +1833,8 @@ export : define [apply] : begin
 			include : LeftHook (SB * 1.25) CAP
 
 			save 'Phookleft' 0x1A4
-		list PShape
+		
+		list PShape PShapeOutline
 
 	### p
 	do "p and related ============================================================================="
@@ -1857,31 +1870,32 @@ export : define [apply] : begin
 			save 'rho' 0x3C1
 
 	### R and CyrYa
-	do "R and related ============================================================================="
-		define [RLegShape right bottom top charTop] : glyph-construction
-			if para.straightBar : do
-				local shift : if SLAB (-JUT / 2 + 0.25 * STROKE * HVCONTRAST) 0
-				local xRightBottom : right - OX * 2 - HALFSTROKE * HVCONTRAST
+	define { RLegShape RLegTerminalX } : do "R and related ====================================="
+		define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVCONTRAST
+		define [RLegShape right bottom top charTop slab straight sw extraShift] : glyph-construction
+			local xRightBottom : RLegTerminalX straight right sw
+			if straight : do
+				local shift : if slab (-JUT / 2 + 0.25 * sw * HVCONTRAST) 0
 				include : dispiro
-					widths.center (STROKE * [diagCor charTop WIDTH 0 (STROKE * 2)])
-					corner (MIDDLE + shift / 2) top [heading DOWNWARD]
+					widths.center (sw * [diagCor charTop (WIDTH - extraShift * 2) 0 (sw * 2)])
+					corner (MIDDLE + extraShift + shift / 2) top [heading DOWNWARD]
 					corner (xRightBottom + shift) bottom [heading DOWNWARD]
-				if SLAB : begin
-					include : RightwardBottomSerif (xRightBottom + shift + 0.25 * STROKE * HVCONTRAST) bottom (SIDEJUT + JUT / 8)
+				if slab : begin
+					include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVCONTRAST) bottom (SIDEJUT + JUT / 8)
 			: else : begin
 				include : dispiro
-					widths.center
-					g4.up.start (right - HALFSTROKE * HVCONTRAST) bottom [heading UPWARD]
-					quadcontrols 0 [if SLAB 0.3 0.4] 8
+					widths.center sw
+					g4.up.start xRightBottom bottom [heading UPWARD]
+					quadcontrols 0 [if slab 0.3 0.4] 8
 					g4 MIDDLE top
-				if SLAB : begin
+				if slab : begin
 					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
 
 		define [RShape top] : glyph-construction
 			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
-			include : PShape top 1 m O
+			include : PShape top (mul -- 1) (bp -- m) (overshoot -- O)
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
-			include : RLegShape right 0 ((top - STROKE) * m) top
+			include : RLegShape right 0 ((top - STROKE) * m) top SLAB para.straightBar STROKE 0
 
 		sketch # R
 			set-width WIDTH
@@ -1903,11 +1917,11 @@ export : define [apply] : begin
 			include markset.if
 			local top : CAP * 0.85
 			local bp 0.45
-			include : PShape top 1 bp
+			include : PShape top (mul -- 1) (bp -- bp)
 			include : VBarLeft SB (top - 1) CAP
 
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
-			include : RLegShape right DESCENDER ((top - STROKE) * bp) (top - DESCENDER)
+			include : RLegShape right DESCENDER ((top - STROKE) * bp) (top - DESCENDER) SLAB para.straightBar STROKE 0
 
 			save 'Yr' 0x1A6
 
@@ -1956,7 +1970,10 @@ export : define [apply] : begin
 			include : CyrYaShape XH
 
 			save 'cyrya' 0x44F
+
 		turned 'invsmcpR' 0x281 'cyrya' MIDDLE (XH / 2)
+
+		list RLegShape RLegTerminalX
 
 	### r
 	do "r and related ============================================================================="
@@ -2159,15 +2176,25 @@ export : define [apply] : begin
 		select-variant 'rflap' 0x27E (follow -- 'r')
 
 	### C and c, also cyre
-	do "C, c nad related =========================================================================="
-		define [CShape top bot] : glyph-construction
+	define {CShape CShapeOutline} : do "C, c nad related ========================================"
+		define [CShape top bot sw] : glyph-construction
 			include : dispiro
-				widths.lhs
+				widths.lhs sw
 				g4 RIGHTSB (top - HOOK)
 				hookstart (top - O)
 				flat (SB + OX) (top - SMOOTHA)
 				curl (SB + OX) (bot + SMOOTHB)
 				hookend (bot + O)
+				g4 RIGHTSB (bot + HOOK)
+
+		define [CShapeOutline top bot _offset] : glyph-construction
+			define offset : fallback _offset 1
+			include : spiro-outline
+				g4 RIGHTSB (top - HOOK)
+				hookstart (top - O - offset)
+				flat (SB + OX + offset) (top - SMOOTHA)
+				curl (SB + OX + offset) (bot + SMOOTHB)
+				hookend (bot + O + offset)
 				g4 RIGHTSB (bot + HOOK)
 
 		sketch # C
@@ -2327,6 +2354,8 @@ export : define [apply] : begin
 				flat (RIGHTSB - HOOKX + OX) (DESCENDER + STROKE) [heading LEFTWARD]
 				curl [Math.min (RIGHTSB - STROKE * HVCONTRAST * 1.5) (RIGHTSB - HOOKX + OX - 1)] (DESCENDER + STROKE) [heading LEFTWARD]
 			save 'sigmafinal' 0x3C2
+		
+		begin { CShape CShapeOutline }
 
 	### G
 	do "G and related ============================================================================="
@@ -3967,4 +3996,4 @@ export : define [apply] : begin
 			eject-contour 'serifRB'
 			save 'zcurlytail' 0x291
 
-	return [object ISerifShape IotaShape LShape VShape KShape PShape NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape]
+	return [object ISerifShape IotaShape LShape VShape KShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline]
