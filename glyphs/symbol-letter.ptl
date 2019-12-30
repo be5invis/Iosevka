@@ -240,3 +240,150 @@ export : define [apply] : begin
 		save 'estimated' 0x212E
 
 	turned 'turniota' 0x2129 'iota' MIDDLE (XH / 2)
+
+	sketch # mathAleph
+		define p 0.3
+		include : xStrand SB CAP RIGHTSB 0 0.1 0.4 0.28
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.down.start RIGHTSB CAP
+				g4 [mix SB RIGHTSB p] 0
+			spiro-outline
+				corner SB CAP
+				corner RIGHTSB CAP
+				corner RIGHTSB 0
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.up.start SB 0
+				g4 [mix SB RIGHTSB (1 - p)] CAP
+			spiro-outline
+				corner SB 0
+				corner RIGHTSB 0
+				corner SB CAP
+		save 'mathAleph' 0x2135
+	
+	sketch # mathBeth
+		define p 0.8
+		define turnX : mix SB RIGHTSB p
+		include : dispiro
+			widths.rhs
+			flat SB CAP
+			curl [Math.min (turnX - STROKE * 1.5 * HVCONTRAST) [mix SB turnX p]] CAP
+			archv
+			flat turnX [Math.min (CAP - STROKE * 1.5) [mix 0 CAP p]] 
+			curl turnX 0
+		include : HBarBottom SB RIGHTSB 0
+		save 'mathBeth' 0x2136
+	
+	do "Blackboard Bolds ========================================================================"
+		define bbs : adviceBlackness 8
+		define bbd : WIDTH / 5.5
+
+		sketch # bbN
+			include : VBarLeft SB 0 CAP bbs
+			include : VBarRight RIGHTSB 0 CAP bbs
+			include : intersection
+				Rect CAP 0 SB RIGHTSB
+				union
+					dispiro
+						widths.center bbs
+						corner (SB + bbs * HVCONTRAST) CAP
+						corner (RIGHTSB - bbs * HVCONTRAST / 2) (CAP / 5)
+					dispiro
+						widths.center bbs
+						corner (SB + bbs * HVCONTRAST / 2) (CAP - (CAP / 5))
+						corner (RIGHTSB - bbs * HVCONTRAST) 0
+			save 'bbN' 0x2115
+
+		sketch # bbZ
+			include : HBarTop SB RIGHTSB CAP bbs
+			include : HBarBottom SB RIGHTSB 0 bbs
+			include : intersection
+				Rect CAP 0 SB RIGHTSB
+				union
+					dispiro
+						widths.center bbs
+						corner SB (bbs / 2)
+						corner (RIGHTSB - bbd) (CAP - bbs / 2)
+					dispiro
+						widths.center bbs
+						corner (SB + bbd) (bbs / 2)
+						corner RIGHTSB (CAP - (bbs / 2))
+			save 'bbZ' 0x2124
+
+		sketch # bbC
+			include : CShape CAP 0 bbs
+			include : intersection
+				CShapeOutline CAP 0
+				VBar (SB + bbd) 0 CAP bbs
+			save 'bbC' 0x2102
+
+		define [BBPShape] : params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-construction
+			define sb : SB * mul
+			include : difference
+				PShape CAP (sw -- bbs) (mul -- mul) (overshoot -- overshoot) (slab -- false)
+				Rect (CAP - bbs) 0 (sb + HVCONTRAST * bbs / 2) (sb + bbd - HVCONTRAST * bbs / 2)
+			include : VBarLeft sb 0 CAP bbs
+			include : VBar (sb + bbd) 0 CAP bbs
+			include : HBarBottom sb (sb + bbd) 0 bbs
+			include : intersection
+				PShapeOutline CAP (sw -- bbs) (mul -- mul) (overshoot -- overshoot) (offset -- 1)
+				VBar (RIGHTSB - overshoot - bbd) 0 CAP bbs
+
+		sketch # bbP
+			include : BBPShape
+			save 'bbP' 0x2119
+
+		sketch # bbR
+			define [SingleLeg] : RLegShape (RIGHTSB - O) 0 ((CAP - bbs) * BARPOS) CAP false true bbs (bbd / 2)
+			define terminalX : RLegTerminalX true (RIGHTSB - O) bbs
+			include : BBPShape (mul -- 1) (overshoot -- O)
+			include : difference
+				union
+					SingleLeg
+					create-glyph : glyph-construction
+						include : SingleLeg
+						apply-transform : Translate (bbs / 2 - bbd) 0
+					HBarBottom (terminalX + bbs / 2 - bbd) (terminalX - bbs / 2) 0 bbs
+				PShapeOutline CAP (sw -- bbs) (mul -- 1) (overshoot -- O) (offset -- 1)
+			save 'bbR' 0x211D
+		
+		sketch # bbH
+			include : VBarLeft  SB 0 CAP bbs
+			include : VBarRight RIGHTSB 0 CAP bbs
+			include : VBar      (SB + bbd) 0 CAP bbs
+			include : VBar      (RIGHTSB - bbd) 0 CAP bbs
+			include : HBar (SB + bbd) (RIGHTSB - bbd)  (CAP * BARPOS) bbs
+			include : HBarTop SB (SB + bbd) CAP bbs
+			include : HBarTop (RIGHTSB - bbd) RIGHTSB CAP bbs
+			include : HBarBottom SB (SB + bbd) 0 bbs
+			include : HBarBottom (RIGHTSB - bbd) RIGHTSB 0 bbs
+			save 'bbH' 0x210D
+		
+		sketch # bbQ
+			define [QInner] : OShapeOutline (CAP - 1) 1 (SB + 1) (RIGHTSB - 1) bbs SMOOTHA SMOOTHB
+			include : OShape CAP 0 SB RIGHTSB bbs SMOOTHA SMOOTHB
+			include : intersection
+				QInner
+				union
+					VBar (SB + bbd) 0 CAP bbs
+					VBar (RIGHTSB - bbd) 0 CAP bbs
+			
+			define terminalX : MIDDLE + HOOKX
+			define tailDeltaX : bbd / 2 + bbs / 4 * HVCONTRAST
+			define qTerminalY : bbs - HOOK - bbd / 4
+			define [QTail x] : dispiro
+				widths.center bbs
+				flat (x) (CAP / 2)
+				curl (x) 0
+				arcvh
+				flat [Math.min (terminalX - 1) (x - qTerminalY)] qTerminalY
+				curl terminalX qTerminalY
+			include : difference
+				union
+					QTail (MIDDLE - tailDeltaX)
+					QTail (MIDDLE + tailDeltaX)
+				QInner
+			save 'bbQ' 0x211A

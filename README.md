@@ -194,8 +194,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-g-singlestorey` : Single-storey `g` (default for italic).
     * `v-g-opendoublestorey` : Open Double-storey `g`.
   * Styles for letter `m`:
-    * `v-m-longleg` : `m` with long middle leg (default).
-    * `v-m-shortleg` : `m` with shorter middle leg.
+    * `v-m-normal` : `m` with normal middle leg, touching the baseline (default).
+    * `v-m-shortleg` : `m` with shorter middle leg, like Ubuntu Mono.
   * Styles for letter `t`:
     * `v-t-standard` : Standard `t` shape (default).
     * `v-t-cross` : Futura-like `t` shape.
@@ -210,14 +210,14 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-dotted` : Dotted Zero `0`.
     * `v-zero-unslashed` : O-like `0`.
   * Styles for one (`1`)
-    * `v-one-serifed` : `1` with bottom serif (default for Slab).
-    * `v-one-hooky` : `1` without bottom serif (default for Sans).
+    * `v-one-base` : `1` with bottom serif (default for Slab).
+    * `v-one-nobase` : `1` without bottom serif (default for Sans).
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarks` : Arched top `3` (default).
   * Style for seven (`7`):
-    * `v-seven-normal` : Seven `7` without serif (default). Only effective in non-Slab subfamilies.
-    * `v-seven-force-serif` : Force `7` to have serif in non-Slab subfamilies.
+    * `v-seven-noserif` : `7` without serif (default for Sans).
+    * `v-seven-serifed` : `7` with initial serif (default for Slab).
   * Styles for ASCII tilde (`~`), asterisk (`*`), paragraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
     * `v-tilde-high` : Higher tilde `~`.
     * `v-tilde-low` : Lower tilde `~` (default).
@@ -252,6 +252,13 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
+  * Styles for `<=` and `>=` ligation:
+    * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
+    * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
+  * Styles for lower case (`k`):
+    * `v-k-normal` : `k` with standard shape.
+    * `v-k-cursive` : `k` with a cursive loop.
+    * Note: this group of variants **do not have OpenType features assigned**. The `v-k-cursive` variant selector should only be used for italic, or it will produce broken shapes.
 
 ## For Chinese and Japanese users...
 
