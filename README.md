@@ -252,6 +252,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
+  * Styles for `<=` and `>=` ligation:
+    * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
+    * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
   * Styles for lower case (`k`):
     * `v-k-normal` : `k` with standard shape.
     * `v-k-cursive` : `k` with a cursive loop.
