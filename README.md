@@ -255,10 +255,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=` and `>=` ligation:
     * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
-  * Styles for lower case (`k`):
+  * Styles for italic lower case (`k`):
     * `v-k-normal` : `k` with standard shape.
-    * `v-k-cursive` : `k` with a cursive loop.
-    * Note: this group of variants **do not have OpenType features assigned**. The `v-k-cursive` variant selector should only be used for italic, or it will produce broken shapes.
+    * `v-k-cursive` : `k` with a cursive loop (default).
+    * Note: the corresponded OpenType features, `cv68` and `cv69` will only be effective under italics.
 
 ## For Chinese and Japanese users...
 
