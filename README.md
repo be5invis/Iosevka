@@ -214,7 +214,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-one-nobase` : `1` without bottom serif (default for Sans).
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
-    * `v-three-twoarks` : Arched top `3` (default).
+    * `v-three-twoarcs` : Arched top `3` (default).
   * Style for seven (`7`):
     * `v-seven-noserif` : `7` without serif (default for Sans).
     * `v-seven-serifed` : `7` with initial serif (default for Slab).
