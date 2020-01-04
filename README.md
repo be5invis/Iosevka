@@ -46,7 +46,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3).
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3) and `otf2otc` are present.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `npm run build -- contents::iosevka`.
 

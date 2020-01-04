@@ -15,3 +15,4 @@ function check(util) {
 check("otfccdump");
 check("otfccbuild");
 check("ttfautohint");
+check("otf2otc");
