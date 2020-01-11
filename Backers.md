@@ -33,3 +33,4 @@ You can join them in supporting Iosevka development by [pledging on Patreon](htt
 - Jeff S
 - Jeri Mason
 - Michael L. Ward
+- Freetasy
