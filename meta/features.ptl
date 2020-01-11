@@ -64,13 +64,38 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 			local lutn : getsublookup term.left term.right
 			if lutn : subtable.apply.push {.at j .lookup lutn}
 		return subtable
+
+	# hwid-fwid, lnum-onum
+	define [MakePairFrature tag1 tag2] : begin
+		local mapTag2 {.}
+		local mapTag1 {.}
+		define reHidden : regex "^\\."
+		define reTag1 : new RegExp ("\\." + tag1 + "$")
+		foreach [glyph : items-of glyphList] : begin
+			if ([reTag1.test glyph.name] && ![reHidden.test glyph.name]) : do
+				local gnTag2 : glyph.name.replace reTag1 ('.' + tag2)
+				if (glyphs.(gnTag2)) : begin
+					set mapTag2.(glyph.name) gnTag2
+					set mapTag1.(gnTag2) glyph.name
+		set lookups.(tag2) {.type 'gsub_single' .subtables {mapTag2}}
+		set lookups.(tag1) {.type 'gsub_single' .subtables {mapTag1}}
+		set features.(tag2) {tag2}
+		set features.(tag1) {tag1}
+		commonList.push tag2 tag1
 	
+	MakePairFrature 'hwid' 'fwid'
+	MakePairFrature 'lnum' 'onum'
+
+	# CCMP	
 	buildCCMP chain-rule markGlyphs commonList features lookups
+
+	# Ligation
 	if para.enableLigation : do
 		define plm : progLigNameMap
 		set plm.calt : para.customLigSet || plm.(para.defLigSet) || plm.calt
 		buildLigations chain-rule lookupOrder commonList features lookups plm glyphs
 
+	# CVxx/SSxx
 	if para.enableCvSs : begin
 		# cvxx
 		foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
@@ -88,24 +113,6 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 				local tags {.}
 				foreach [{ch tag} : pairs-of composition.__cvmap] : set tags.(tag) true
 				set features.(name) : [Object.keys tags].filter (tag => tags.(tag))
-	
-	# hwid, fwid
-	do "HWID/FWID"
-		local mapFwid {.}
-		local mapHwid {.}
-		define reHidden : regex "^\\."
-		define reHwid : regex "\\.hwid$"
-		foreach [glyph : items-of glyphList] : begin
-			if ([reHwid.test glyph.name] && ![reHidden.test glyph.name]) : do
-				local gnFwid : glyph.name.replace reHwid '.fwid'
-				if (glyphs.(gnFwid)) : begin
-					set mapFwid.(glyph.name) gnFwid
-					set mapHwid.(gnFwid) glyph.name
-		set lookups.fwid {.type 'gsub_single' .subtables {mapFwid}}
-		set lookups.hwid {.type 'gsub_single' .subtables {mapHwid}}
-		set features.fwid {'fwid'}
-		set features.hwid {'hwid'}
-		commonList.push 'fwid' 'hwid'
 	
 	# locl, SRB
 	local srbSubtable null

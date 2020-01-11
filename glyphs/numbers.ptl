@@ -7,52 +7,101 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry commonShapes letterExt
 
-	sketch # zero.unslashed
+	define [ShiftDown] : glyph-construction
+		include : Upright
+		include : Translate 0 DESCENDER
+		include : Italify
+
+	define [ZeroSlashShape top] : begin
+		local fine : 0.5 * OVERLAYSTROKE
+		return : intersection
+			OShapeOutline top 0 SB RIGHTSB
+			dispiro
+				flat (SB + STROKE / 2) (top * (1 - 0.77)) [widths fine fine]
+				curl (RIGHTSB - STROKE / 2) (top * 0.77)
+
+	define [ZeroDotShape top] : begin
+		local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
+		return : Ring (top / 2 + radius) (top / 2 - radius) (MIDDLE + radius) (MIDDLE - radius)
+
+	sketch # zero.lnum.unslashed
 		include markset.capital
 		include : OShape CAP 0 SB RIGHTSB
-		save 'zero.unslashed'
+		save 'zero.lnum.unslashed'
 
-	sketch # zero.slashed
+	sketch # zero.lnum.slashed
 		include markset.capital
-		include glyphs.'zero.unslashed'
-		local fine : 0.5 * OVERLAYSTROKE
+		include glyphs.'zero.lnum.unslashed'
+		include : ZeroSlashShape CAP
+		save 'zero.lnum.slashed'
+
+	sketch # zero.lnum.dotted
+		include markset.capital
+		include glyphs.'zero.lnum.unslashed'
+		include : ZeroDotShape CAP
+		save 'zero.lnum.dotted'
+
+	sketch # zero.onum.unslashed
+		include markset.e
+		include : OShape XH 0 SB RIGHTSB
+		save 'zero.onum.unslashed'
+
+	sketch # zero.onum.slashed
+		include markset.e
+		include glyphs.'zero.onum.unslashed'
+		include : ZeroSlashShape XH
+		save 'zero.onum.slashed'
+
+	sketch # zero.onum.dotted
+		include markset.e
+		include glyphs.'zero.onum.unslashed'
+		include : ZeroDotShape XH
+		save 'zero.onum.dotted'
+
+	select-variant 'zero.lnum' '0' (follow -- 'zero')
+	select-variant 'zero.onum' (follow -- 'zero')
+	alias 'zero' nothing 'zero.lnum'
+
+	define [OneShape top] : glyph-construction
+		include : VBar (MIDDLE + ONEBALANCE) 0 top
 		include : dispiro
-			flat (SB + STROKE / 2) (CAP * (1 - 0.77)) [widths fine fine]
-			curl (RIGHTSB - STROKE / 2) (CAP * 0.77)
-		save 'zero.slashed'
+			flat (MIDDLE - HALFSTROKE * HVCONTRAST + ONEBALANCE) top [widths STROKE 0]
+			curl (MIDDLE - HOOKX * 1.25 + ONEBALANCE) (top - HOOK * 0.75 * (top / CAP))
 
-	sketch # zero.dotted
+
+	sketch # one.lnum.nobase
 		include markset.capital
-		include glyphs.'zero.unslashed'
-		local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
-		include : Ring (CAPMIDDLE + radius) (CAPMIDDLE - radius) (MIDDLE + radius) (MIDDLE - radius)
-		save 'zero.dotted'
+		include : OneShape CAP
+		save 'one.lnum.nobase'
 
-	select-variant 'zero' '0'
-
-	sketch # one.nobase
-		include markset.capital
-		include : VBar (MIDDLE + ONEBALANCE) 0 CAP
-		include : dispiro
-			flat (MIDDLE - HALFSTROKE * HVCONTRAST + ONEBALANCE) CAP [widths STROKE 0]
-			curl (MIDDLE - HOOKX * 1.25 + ONEBALANCE) (CAP - HOOK * 0.75)
-		save 'one.nobase'
-
-	sketch # one.base
-		include glyphs.'one.nobase' AS_BASE
+	sketch # one.lnum.base
+		include glyphs.'one.lnum.nobase' AS_BASE
 		include : CenterBottomSerif (MIDDLE + ONEBALANCE) 0 LONGJUT
-		save 'one.base'
+		save 'one.lnum.base'
 
-	select-variant 'one' '1'
+	sketch # one.onum.nobase
+		include markset.e
+		include : OneShape XH
+		save 'one.onum.nobase'
 
-	sketch # two
-		include markset.capital
-		define smooth : [adviceGlottalStopSmooth CAP 1] * 0.95
+	sketch # one.onum.base
+		include glyphs.'one.onum.nobase' AS_BASE
+		include : CenterBottomSerif (MIDDLE + ONEBALANCE) 0 LONGJUT
+		save 'one.onum.base'
+
+	select-variant 'one.lnum' '1' (follow -- 'one')
+	select-variant 'one.onum' (follow -- 'one')
+	alias 'one' nothing 'one.lnum'
+
+
+
+	define [TwoShape top] : glyph-construction
+		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
 		include : dispiro
 			widths.rhs
-			g4 SB (CAP - HOOK)
-			hookstart (CAP - O)
-			g4 (RIGHTSB - OX / 2) (CAP - smooth)
+			g4 SB (top - HOOK)
+			hookstart (top - O)
+			g4.down.mid (RIGHTSB - OX / 2) (top - smooth)
 			alsothru 0.5 ([linreg 18 0.425 120 0.4 STROKE] * [linreg 500 1 700 0.95 WIDTH]) [widths.center]
 			flat SB 1 [widths.heading STROKE 0 DOWNWARD]
 			curl SB 0 [heading DOWNWARD]
@@ -60,54 +109,87 @@ export : define [apply] : begin
 		include : HBarBottom  (SB + HALFSTROKE) RIGHTSB 0
 		if SLAB : begin
 			include : UpwardRightSerif RIGHTSB 0 VJUT
-		save 'two' '2'
 
-	sketch # three
+	sketch # two.lnum
 		include markset.capital
-		local barcenter : CAP * BARPOS
-		local threeRadius : (CAPMIDDLE + HALFSTROKE - SMOOTH) * 1.25
+		include : TwoShape CAP
+		save 'two.lnum' '2'
+
+	sketch # two.onum
+		include markset.e
+		include : TwoShape XH
+		save 'two.onum'
+
+	alias 'two' nothing 'two.lnum'
+
+	define [ThreeShape top] : glyph-construction
+		local barcenter : top * BARPOS
+		local threeRadius : ((top / 2) + HALFSTROKE - SMOOTH) * 1.25
 		local fine : STROKE * CTHIN
 
 		include : dispiro
 			widths.rhs
-			g4 (SB - O) (CAP - HOOK)
-			hookstart CAPO
-			g4 (RIGHTSB) (CAP - (SMOOTHB * (CAP - barcenter) / CAPMIDDLE))
+			g4 (SB - O) (top - HOOK)
+			hookstart (top - O)
+			g4 (RIGHTSB) (top - (SMOOTHB * (top - barcenter) / (top / 2)))
 			flat (RIGHTSB - threeRadius + 0.01) (barcenter - (fine - HALFSTROKE)) [widths.heading 0 fine LEFTWARD]
 			curl (RIGHTSB - threeRadius) (barcenter - (fine - HALFSTROKE)) [heading LEFTWARD]
 		include : dispiro
 			widths.lhs
 			g4 (SB + O) HOOK
 			hookstart O
-			g4 (RIGHTSB - O * 2) (SMOOTHA * barcenter / CAPMIDDLE)
+			g4 (RIGHTSB - O * 2) (SMOOTHA * barcenter / (top / 2))
 			flat (RIGHTSB - threeRadius + 0.01) (barcenter + (fine - HALFSTROKE)) [widths.heading fine 0 LEFTWARD]
 			curl (RIGHTSB - threeRadius) (barcenter + (fine - HALFSTROKE)) [heading LEFTWARD]
 
-		save 'three.twoarcs'
-	
+	sketch # three.lnum
+		include markset.capital
+		include : ThreeShape CAP
+		save 'three.lnum.twoarcs'	
 	sketch
 		include markset.capital
 		include : EzhShape CAP 0 0.25 0.975
-		save 'three.flattop'
+		save 'three.lnum.flattop'
+	sketch # three.lnum
+		include markset.p
+		include : ThreeShape (XH - DESCENDER)
+		include : ShiftDown
+		save 'three.onum.twoarcs'
+	sketch
+		include markset.p
+		include : EzhShape (XH - DESCENDER) 0 0.25 0.975
+		include : ShiftDown
+		save 'three.onum.flattop'
 	
-	select-variant 'three' '3'
+	select-variant 'three.lnum' '3' (follow -- 'three')
+	select-variant 'three.onum' (follow -- 'three')
+	alias 'three' nothing 'three.lnum'
 
-	sketch # four
-		include markset.capital
-		local bar (CAP * 0.4)
+	define [FourShape top] : glyph-construction
+		local bar (top * 0.4)
 		local vert : [mix SB RIGHTSB 0.825] - HVCONTRAST * STROKE
 		local p 0.25
 		local fine (STROKE * 0.9)
 
 		include : HBarTop (SB + OX) RIGHTSB bar
-		include : VBarLeft vert 0 CAP
-		local slope : (CAP - bar) / (vert - fine * p * HVCONTRAST - (SB + OX))
+		include : VBarLeft vert 0 top
+		local slope : (top - bar) / (vert - fine * p * HVCONTRAST - (SB + OX))
 		include : dispiro
 			g4   (SB + OX) bar [widths 0 fine]
-			g4   (vert - fine * p * HVCONTRAST) CAP [widths.heading 0 [Math.hypot fine (fine / slope)] UPWARD]
+			g4   (vert - fine * p * HVCONTRAST) top [widths.heading 0 [Math.hypot fine (fine / slope)] UPWARD]
 		if SLAB : begin
 			include : CenterBottomSerif (vert + HALFSTROKE * HVCONTRAST) 0 JUT
-		save 'four' '4'
+
+	sketch # four.lnum
+		include markset.capital
+		include : FourShape CAP
+		save 'four.lnum' '4'
+		save 'four'
+	sketch # four.onum
+		include markset.p
+		include : FourShape (XH - DESCENDER)
+		include : ShiftDown
+		save 'four.onum'
 
 	define [FiveShape top bp] : glyph-construction
 		local t1 : top * bp * 0.8
@@ -128,10 +210,16 @@ export : define [apply] : begin
 		if SLAB : begin
 			include : DownwardRightSerif xright top VJUT
 
-	sketch # five
+	sketch # five.lnum
 		include markset.capital
 		include : FiveShape CAP FIVEBARPOS
-		save 'five' '5'
+		save 'five.lnum' '5'
+		save 'five'
+	sketch # five.onum
+		include markset.p
+		include : FiveShape (XH - DESCENDER) FIVEBARPOS
+		include : ShiftDown
+		save 'five.onum'
 
 	sketch # zhuangToneFive
 		include markset.capital
@@ -161,51 +249,69 @@ export : define [apply] : begin
 			g4.up.mid (SB + OX) ymiddlea
 			quadcontrols 0 0.8
 			g4 ([mix SB RIGHTSB 0.85] - HALFSTROKE * HVCONTRAST) CAP
-		save 'six' '6'
-
-	sketch # seven
-		include markset.capital
-		include : HBarTop (SB + OXE) RIGHTSB CAP
+		save 'six.lnum' '6'
+		save 'six.onum'
+		save 'six'
+	
+	define [SevenShape top] : glyph-construction
+		include : HBarTop (SB + OXE) RIGHTSB top
 		local x : mix SB RIGHTSB 0.28
-		local cor : [Math.hypot 1 ((RIGHTSB - x - HALFSTROKE) / (CAP - STROKE))] * HVCONTRAST
+		local cor : [Math.hypot 1 ((RIGHTSB - x - HALFSTROKE) / (top - STROKE))] * HVCONTRAST
 		start-from (x - STROKE * cor / 2) 0
 		line-to (x + STROKE * cor / 2) 0
-		line-to RIGHTSB (CAP - STROKE)
-		line-to (RIGHTSB - STROKE * cor) (CAP - STROKE)
+		line-to RIGHTSB (top - STROKE)
+		line-to (RIGHTSB - STROKE * cor) (top - STROKE)
 		reverse-last
+
+	sketch # seven.lnum
+		include markset.capital
+		include : SevenShape CAP
 		branch
-			if SLAB : include : DownwardLeftSerif (SB + OXE) CAP VJUT
-			save 'seven.noserif'
+			save 'seven.lnum.noserif'
 		branch
 			include : DownwardLeftSerif (SB + OXE) CAP VJUT
-			save 'seven.serifed'
+			save 'seven.lnum.serifed'
+	sketch # seven.onum
+		include markset.p
+		include : SevenShape (XH - DESCENDER)
+		include : ShiftDown
+		branch
+			save 'seven.onum.noserif'
+		branch
+			include : DownwardLeftSerif (SB + OXE) XH VJUT
+			save 'seven.onum.serifed'
 
-	select-variant 'seven' '7'
+	select-variant 'seven.lnum' '7' (follow -- 'seven')
+	select-variant 'seven.onum' (follow -- 'seven')
+	alias 'seven' nothing 'seven.lnum'
 
-	local pr : linreg 18 0.85 120 0.975 STROKE
-
-	sketch # eight
-		include markset.capital
+	local EightPr : linreg 18 0.85 120 0.975 STROKE
+	define [EightShape top] : begin
 		local p 0.96
 		local l (SB + OX)
 		local r (RIGHTSB - OX)
-
-		include : dispiro
+		return : dispiro
 			widths.rhs
-			g4.right.mid (MIDDLE - CORRECTION_OMIDS) (CAP - O)
+			g4.right.mid (MIDDLE - CORRECTION_OMIDS) (top - O)
 			archv
-			g4 [mix l r p] (CAP - SMOOTHB * pr * p)
+			g4 [mix l r p] (top - SMOOTHB * EightPr * p)
 			alsothru 0.5 0.5 [widths.center]
-			g4 (l) (SMOOTHB * pr) [widths.lhs]
+			g4 (l) (SMOOTHB * EightPr) [widths.lhs]
 			arcvh
 			g4.right.mid (MIDDLE + CORRECTION_OMIDS) (O)
 			archv
-			g4 (r) (SMOOTHA * pr) [widths.lhs]
+			g4 (r) (SMOOTHA * EightPr) [widths.lhs]
 			alsothru 0.5 0.5 [widths.center]
-			g4 [mix r l p] (CAP - SMOOTHA * pr * p) [widths.rhs]
+			g4 [mix r l p] (top - SMOOTHA * EightPr * p) [widths.rhs]
 			arcvh
 			close
-		save 'eight' '8'
+
+	sketch # eight
+		include markset.capital
+		include : EightShape CAP
+		save 'eight.lnum' '8'
+		save 'eight.onum'
+		save 'eight'
 
 	# There is an "eight without lower contour" shape used for /propto
 	sketch # rotetedpropto
@@ -217,24 +323,22 @@ export : define [apply] : begin
 			widths.lhs
 			straight.up.start r 0 [heading UPWARD]
 			alsothru 0.5 (1 - py) [widths (STROKE * py) (STROKE * (1 - py))]
-			g4 [mix r l p] (CAP - SMOOTHA * p * pr) [widths.rhs]
+			g4 [mix r l p] (CAP - SMOOTHA * p * EightPr) [widths.rhs]
 			arcvh
 			g4 (MIDDLE - CORRECTION_OMIDS) (CAP - O)
 			archv
-			g4 [mix l r p] (CAP - SMOOTHB * p * pr)
+			g4 [mix l r p] (CAP - SMOOTHB * p * EightPr)
 			alsothru 0.5 py [widths (STROKE * py) (STROKE * (1 - py))]
 			straight.down.end l 0 [widths.heading STROKE 0 DOWNWARD]
 		save 'rotetedpropto'
 
-	sketch # nine
-		include markset.capital
-		set-width WIDTH
-		local u CAP
-		local d : Math.min (u - SMALLSMOOTHA - SMALLSMOOTHB - 0.1) (CAP * 0.425 - HALFSTROKE)
+	define [NineShape top] : begin
+		local u top
+		local d : Math.min (u - SMALLSMOOTHA - SMALLSMOOTHB - 0.1) (top * 0.425 - HALFSTROKE)
 		local l (SB + OX)
 		local r (RIGHTSB - OX)
 		local ymiddlea : mix u d 0.5
-		include : dispiro
+		return : dispiro
 			widths.rhs (STROKE * CTHINB)
 			flat (r - STROKE * (1 - CTHINB) * HVCONTRAST) ymiddlea
 			curl (r - STROKE * (1 - CTHINB) * HVCONTRAST) (d + SMALLSMOOTHA)
@@ -247,10 +351,20 @@ export : define [apply] : begin
 			g4   ([mix l r 0.5] - CORRECTION_OMIDS) (u - O)
 			archv
 			flat r ymiddlea
-			curl r (CAP * 0.35)
+			curl r (top * 0.35)
 			hookend O
 			g4 SB HOOK
-		save 'nine' '9'
+
+	sketch # nine
+		include markset.capital
+		include : NineShape CAP
+		save 'nine.lnum' '9'
+		save 'nine'
+	sketch
+		include markset.p
+		include : NineShape (XH - DESCENDER)
+		include : ShiftDown
+		save 'nine.onum'
 
 	sketch # ten
 		include markset.capital

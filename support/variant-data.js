@@ -33,15 +33,33 @@ module.exports = function formVariantData(data, para) {
 	// simple selector
 	for (let k in data.simple) {
 		const hive = objectAssign({}, data.simple[k]);
+		vs[k] = hive;
+
 		const tag = hive.tag;
 		delete hive.tag;
+		const tagUpright = hive.tagUpright;
+		delete hive.tagUpright;
+		const tagItalic = hive.tagItalic;
+		delete hive.tagItalic;
 		if (tag) {
 			let __cvmap = {};
 			for (let k in hive) __cvmap[k] = tag;
 			hive.__cvmap = __cvmap;
+			vs[tag] = hive;
+		} else {
+			if (tagItalic && para.isItalic) {
+				let __cvmap = {};
+				for (let k in hive) __cvmap[k] = tagItalic;
+				hive.__cvmap = __cvmap;
+				vs[tagItalic] = hive;
+			}
+			if (tagUpright && !para.isItalic) {
+				let __cvmap = {};
+				for (let k in hive) __cvmap[k] = tagUpright;
+				hive.__cvmap = __cvmap;
+				vs[tagUpright] = hive;
+			}
 		}
-		vs[k] = hive;
-		if (tag) vs[tag] = hive;
 	}
 	// default selector
 	vs.default = produceComposite(vs, para, {}, data.default);

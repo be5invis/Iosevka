@@ -46,7 +46,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3).
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3) and `otf2otc` are present.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `npm run build -- contents::iosevka`.
 
@@ -214,7 +214,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-one-nobase` : `1` without bottom serif (default for Sans).
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
-    * `v-three-twoarks` : Arched top `3` (default).
+    * `v-three-twoarcs` : Arched top `3` (default).
   * Style for seven (`7`):
     * `v-seven-noserif` : `7` without serif (default for Sans).
     * `v-seven-serifed` : `7` with initial serif (default for Slab).
@@ -255,10 +255,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=` and `>=` ligation:
     * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
-  * Styles for lower case (`k`):
+  * Styles for italic lower case (`k`):
     * `v-k-normal` : `k` with standard shape.
-    * `v-k-cursive` : `k` with a cursive loop.
-    * Note: this group of variants **do not have OpenType features assigned**. The `v-k-cursive` variant selector should only be used for italic, or it will produce broken shapes.
+    * `v-k-cursive` : `k` with a cursive loop (default).
+    * Note: the corresponded OpenType features, `cv68` and `cv69` will only be effective under italics.
 
 ## For Chinese and Japanese users...
 

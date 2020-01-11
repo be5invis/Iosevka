@@ -9,27 +9,29 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry
 	###### COMMON GLYPH CONSTRUCTIONS
-	define [queryFeatureSelector name para alias] : begin
+	define [queryFeatureSelector follow para name] : begin
 		local fs {.}
 		local introduced false
-		foreach [{k h} : pairs-of para.variants] : if (h.(name) && h.__cvmap && h.__cvmap.(name)) : begin
-			local tag h.__cvmap.(name)
-			set fs.(tag) ([fallback alias name] + '.' + h.(name))
+		foreach [{k h} : pairs-of para.variants] : if (h.(follow) && h.__cvmap && h.__cvmap.(follow)) : begin
+			local tag h.__cvmap.(follow)
+			set fs.(tag) ([fallback name follow] + '.' + h.(follow))
 			set introduced true
 		return : if introduced fs null
 
 	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
+
 		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
+
 		if (transform && transform.(variant)) : set variant transform.(variant)
 		local chosenGlyph glyphs.((name + '.' + variant))
 
 		create-glyph [fallback to-name name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector name para
+			set currentGlyph.featureSelector : queryFeatureSelector follow para name
 			set this.cmpPriority chosenGlyph.cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction

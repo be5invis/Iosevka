@@ -17,6 +17,7 @@ const BUILD = "build";
 const DIST = "dist";
 const ARCHIVE_DIR = "release-archives";
 
+const OTF2OTC = "otf2otc";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
 const GENERATE = ["node", "gen/generator"];
@@ -243,9 +244,6 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	);
 	return `${prefix}-${ttcSuffix}`;
 }
-function fnSuperTtc(collectConfig, prefix, w, wd, s) {
-	return prefix;
-}
 
 const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	const [rawCollectPlans, suffixMapping, collectConfig] = await target.need(
@@ -260,14 +258,6 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 		collectConfig,
 		fnStandardTtc
 	);
-});
-const SuperTtcCollectPlans = computed(`metadata:super-ttc-collect-plans`, async target => {
-	const [rawCollectPlans, suffixMapping, collectConfig] = await target.need(
-		RawCollectPlans,
-		Suffixes,
-		CollectConfig
-	);
-	return await getCollectPlans(target, rawCollectPlans, suffixMapping, collectConfig, fnSuperTtc);
 });
 
 const HivesOf = computed.group("metadata:hives-of", async (target, gid) => {
@@ -291,13 +281,6 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 	const [{ composition }] = await target.need(CollectPlans);
 	return composition[id];
 });
-const SuperTtcCollectionPartsOf = computed.group(
-	"metadata:super-ttc-collection-parts-of",
-	async (target, id) => {
-		const [{ composition }] = await target.need(SuperTtcCollectPlans);
-		return composition[id];
-	}
-);
 
 ///////////////////////////////////////////////////////////
 //////                Font Building                  //////
@@ -387,8 +370,13 @@ const DistTTC = file.make(
 const SuperTTC = file.make(
 	f => `${DIST}/super-ttc/${f}.ttc`,
 	async (target, out, f) => {
-		const [parts] = await target.need(SuperTtcCollectionPartsOf(f));
-		await buildTtcForFile(target, parts, out, true);
+		await target.need(de(out.dir));
+		const [inputs] = await target.need(CollectionFontsOf(f));
+		await run(
+			OTF2OTC,
+			["-o", out.full],
+			inputs.map(f => f.full)
+		);
 	}
 );
 async function buildTtcForFile(target, parts, out, xMode) {
@@ -482,7 +470,8 @@ const GroupArchives = task.group(`archive`, async (target, gid) => {
 // Collection-level
 const CollectionFontsOf = task.group("collection-fonts", async (target, cid) => {
 	const [{ groups }] = await target.need(CollectPlans);
-	await target.need(groups[cid].map(file => DistTTC(cid, file)));
+	const [files] = await target.need(groups[cid].map(file => DistTTC(cid, file)));
+	return files;
 });
 const TTCArchiveFile = file.make(
 	(cid, version) => `${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`,
@@ -627,8 +616,4 @@ const Scripts = task("scripts", async target => {
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
-});
-
-task("get-collect-plans", async target => {
-	await target.need(SuperTtcCollectPlans);
 });
