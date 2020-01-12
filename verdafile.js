@@ -570,7 +570,7 @@ phony(`clean`, async () => {
 	build.deleteJournal(); // Disable journal
 });
 phony(`release`, async target => {
-	await target.need(AllArchives);
+	await target.need(AllArchives, AllSuperTtc);
 	await target.need(SampleImages, Pages);
 });
 
