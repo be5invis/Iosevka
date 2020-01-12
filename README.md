@@ -135,12 +135,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrow`: Enable ligation set that forms arrows;
   * `calt-arrow2`: Enable ligation for more arrows, like `>>=`;
   * `calt-html-comment`: Enable ligation for `<!--` and `<!---`;
+  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only;
   * `calt-eqeq`: Enable ligation for `==` and `===`;
   * `calt-ineq`: Enable ligation for `<=` and `>=`;
   * `calt-arrowZALE`: Enable ligation for `<=` to form a left double arrow;
   * `calt-arrowZAGE`: Enable ligation for `>=` to form a right inverse double arrow;
+  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only;
   * `calt-exeq`: Enable ligation for `!=` and `!==`;
   * `calt-tildeeq`: Enable ligation for `~=` as inequality;
+  * `calt-slasheqeq`: Enable special triple-line ligation for `/==` only;
   * `calt-slasheq`: Enable ligation for `/=` and `/==` as inequality;
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining;
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining;
