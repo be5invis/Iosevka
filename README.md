@@ -119,6 +119,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.
 * Styles for ligation sets, include:
+  * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
+  * `ligset-php`: Default ligation set would be assigned to PHP.
   * `ligset-haskell`: Default ligation set would be assigned to Haskell.
   * `ligset-idris`: Default ligation set would be assigned to Idris.
   * `ligset-coq`: Default ligation set would be assigned to Coq.
