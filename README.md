@@ -209,7 +209,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-q-straight` : `Q` with a straight tail in the old versions.
   * Styles for letter `y`:
     * `v-y-straight`: More-straight letter `y`.
-    * `v-y-curly`: Curly, cursive-like `y`.
+    * `v-y-curly`: More curly letter `y`, like Iosevka 2.x.
+    * `v-y-cursive`: Cursive-like `y`.
   * Styles for zero (`0`):
     * `v-zero-slashed` : Slashed Zero `0` (default).
     * `v-zero-dotted` : Dotted Zero `0`.
@@ -260,10 +261,29 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=` and `>=` ligation:
     * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
-  * Styles for italic lower case (`k`):
-    * `v-k-normal` : `k` with standard shape.
-    * `v-k-cursive` : `k` with a cursive loop (default).
-    * Note: the corresponded OpenType features, `cv68` and `cv69` will only be effective under italics.
+  * Styles for letter `V` and `v`:
+    * `v-v-straight`: Standard, straight `V` and `v` (default).
+    * `v-v-curly`: Slightly curly `V` and `v`, like Iosevka 2.x.
+  * Styles for letter `W` and `w`:
+    * `v-w-straight`: Standard, straight `W` and `w` (default).
+    * `v-w-curly`: Slightly curly `W` and `w`, like Iosevka 2.x. 
+  * Styles for letter `X` and `x`:
+    * `v-x-straight`: Standard, straight `X` and `x` (default).
+    * `v-x-curly`: Slightly curly `X` and `x`, like Iosevka 2.x. 
+  * Styles for letter `R`:
+    * `v-capital-r-straight`: Standard, straight `R` (default).
+    * `v-capital-r-curly`: Slightly curly `R`, like Iosevka 2.x.
+  * Styles for letter `Y`, `У`:
+    * `v-capital-y-straight`: Standard, straight `Y` (default).
+    * `v-capital-y-curly`: Slightly curly `Y`, like Iosevka 2.x. 
+  * Styles for letter `A`, `Λ`, `Δ`:
+    * `v-turn-v-straight`: Standard, straight `A`, `Λ`, `Δ` (default).
+    * `v-turn-v-curly`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  * Styles for lower case (`k`):
+    * `v-k-straight` : `k` with standard shape (default for Upright).
+    * `v-k-curly`: Slightly curly `k`, like Iosevka 2.x.
+    * `v-k-cursive` : `k` with a cursive loop (default for Italic).
+      * Note: the corresponded OpenType feature for this variant (`cv70`) will only be effective under italics.
 
 ## For Chinese and Japanese users...
 
