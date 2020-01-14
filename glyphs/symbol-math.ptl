@@ -15,10 +15,10 @@ export : define [apply] : begin
 			save 'micro' 0xB5
 		
 		sketch # forall
-			include : LambdaShape CAP OPERATORSTROKE para.straightBar
+			include : LambdaShape CAP OPERATORSTROKE true
 			eject-contour 'serif'
 			include : intersection
-				DeltaMaskShape CAP OPERATORSTROKE para.straightBar
+				DeltaMaskShape CAP OPERATORSTROKE true
 				HBar 0 WIDTH (XH / 2) OPERATORSTROKE
 			include : FlipAround MIDDLE (CAP / 2)
 		
@@ -46,7 +46,7 @@ export : define [apply] : begin
 		
 		sketch # increment
 			include markset.capital
-			include : DeltaShape CAP OPERATORSTROKE para.straightBar
+			include : DeltaShape CAP OPERATORSTROKE true
 			save 'increment' 0x2206
 		turned 'nabla' 0x2207 'increment' MIDDLE (CAP / 2)
 
@@ -258,10 +258,22 @@ export : define [apply] : begin
 		
 	local equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 	do "Equality"
+
+		define [EqualShape left right] : union
+			HBar left right (symbolMid + equalHalfSpace) OPERATORSTROKE
+			HBar left right (symbolMid - equalHalfSpace) OPERATORSTROKE
+			
+		define [EqualHole x] : VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
+
+		define [IdentShape left right] : union
+			HBar left right (symbolMid + equalHalfSpace * 1.5) OPERATORSTROKE
+			HBar left right symbolMid OPERATORSTROKE
+			HBar left right (symbolMid - equalHalfSpace * 1.5) OPERATORSTROKE
+		define [IdentHole x] : VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
+
 		sketch # equal
 			include markset.plus
-			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace) OPERATORSTROKE
-			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace) OPERATORSTROKE
+			include : EqualShape SB RIGHTSB
 			save 'equal' '='
 
 			branch
@@ -269,46 +281,67 @@ export : define [apply] : begin
 				include : DotAt [mix SB RIGHTSB (5/6)] (symbolMid - equalHalfSpace * 2.5) DOTRADIUS
 				save 'twodotapproxeq' 0x2252
 
-		define [equalHole x] : VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
 
 		# Ligation glyphs
 		sketch # equal.fc
 			include markset.plus
 			include : difference
-				union
-					HBar SB (WIDTH - O) (symbolMid + equalHalfSpace) OPERATORSTROKE
-					HBar SB (WIDTH - O) (symbolMid - equalHalfSpace) OPERATORSTROKE
-				equalHole WIDTH
+				EqualShape SB (WIDTH - O)
+				EqualHole WIDTH
 			save 'equal.fc'
 
 		sketch # equal.cf
 			include markset.plus
 			include : difference
-				union
-					HBar O RIGHTSB (symbolMid + equalHalfSpace) OPERATORSTROKE
-					HBar O RIGHTSB (symbolMid - equalHalfSpace) OPERATORSTROKE
-				equalHole 0
+				EqualShape O RIGHTSB
+				EqualHole 0
 			save 'equal.cf'
 
 		sketch # equal.jf
 			include markset.plus
 			include : difference
-				union
-					HBar (RIGHTSB - WIDTH + O) RIGHTSB (symbolMid + equalHalfSpace) OPERATORSTROKE
-					HBar (RIGHTSB - WIDTH + O) RIGHTSB (symbolMid - equalHalfSpace) OPERATORSTROKE
-				equalHole 0
+				EqualShape (RIGHTSB - WIDTH + O) RIGHTSB 
+				EqualHole 0
 			save 'equal.jf'
 
 		sketch # equal.cc
 			include markset.plus
 			include : difference
+				EqualShape O (WIDTH - O)
 				union
-					HBar O (WIDTH - O) (symbolMid + equalHalfSpace) OPERATORSTROKE
-					HBar O (WIDTH - O) (symbolMid - equalHalfSpace) OPERATORSTROKE
-				union
-					equalHole 0
-					equalHole WIDTH
+					EqualHole 0
+					EqualHole WIDTH
 			save 'equal.cc'
+
+		sketch # ident.fc
+			include markset.plus
+			include : difference
+				IdentShape SB (WIDTH - O)
+				IdentHole WIDTH
+			save 'ident.fc'
+
+		sketch # ident.cf
+			include markset.plus
+			include : difference
+				IdentShape O RIGHTSB
+				IdentHole 0
+			save 'ident.cf'
+
+		sketch # ident.jf
+			include markset.plus
+			include : difference
+				IdentShape (RIGHTSB - WIDTH + O) RIGHTSB 
+				IdentHole 0
+			save 'ident.jf'
+
+		sketch # ident.cc
+			include markset.plus
+			include : difference
+				IdentShape O (WIDTH - O)
+				union
+					IdentHole 0
+					IdentHole WIDTH
+			save 'ident.cc'
 
 	do "Dots and Colon-likes"
 		local radius1 PERIODRADIUS
@@ -852,6 +885,9 @@ export : define [apply] : begin
 		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 0.5) 'equal.fc.neg'
 		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.0) 'equal.fc.neg3'
 		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.5) 'equal.fc.neg4'
+		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 0.5) 'ident.fc.neg'
+		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.0) 'ident.fc.neg3'
+		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.5) 'ident.fc.neg4'
 
 	do 'Large Operators'
 		sketch # sum
