@@ -558,6 +558,9 @@ const AllTtcArchives = task(`all:ttc`, async target => {
 	await target.need(Object.keys(collectPlans.groups).map(CollectionArchive));
 });
 
+const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
+	await target.need(SuperTTC(gr));
+});
 const AllSuperTtc = task(`all:super-ttc`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
 	await target.need(Object.keys(collectPlans.groups).map(gr => SuperTTC(gr)));
