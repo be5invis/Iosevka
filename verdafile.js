@@ -563,6 +563,17 @@ const AllSuperTtc = task(`all:super-ttc`, async target => {
 	await target.need(Object.keys(collectPlans.groups).map(gr => SuperTTC(gr)));
 });
 
+const ChangeFileList = oracle.make(
+	() => `release:change-file-list`,
+	target => FileList({ under: "changes", pattern: "*.md" })(target)
+);
+const ReleaseNotes = task(`release:release-note`, async target => {
+	const [version] = await target.need(Version);
+	const [changeFiles] = await target.need(ChangeFileList());
+	await target.need(changeFiles.map(fu));
+	await run("node", "utility/generate-release-note", version);
+});
+
 phony(`clean`, async () => {
 	await rm(`build`);
 	await rm(`dist`);
@@ -572,6 +583,7 @@ phony(`clean`, async () => {
 phony(`release`, async target => {
 	await target.need(AllArchives, AllSuperTtc);
 	await target.need(SampleImages, Pages);
+	await target.need(ReleaseNotes);
 });
 
 ///////////////////////////////////////////////////////////
