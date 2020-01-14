@@ -42,7 +42,7 @@ function getParameters(argv) {
 	const para = parameters.build(parametersData, argv._);
 	const variantsData = formVariantData(variantData, para);
 	para.variants = variantsData;
-	para.variantSelector = parameters.build(variantsData, argv._);
+	para.variantSelector = parameters.build(variantsData, ["default", ...argv._]);
 	para.defaultVariant = variantsData.default;
 
 	para.naming = {
