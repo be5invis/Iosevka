@@ -1311,12 +1311,15 @@ export : define [apply] : begin
 				local {ds ds2} : CalcDS top bottom
 				local jp0 : yJoinProportion hooktop (WIDTH / 2 - WIDTH / 2 * dir)
 				local jp1 : yJoinProportion hooktop (WIDTH / 2 + WIDTH / 2 * dir)
-
+				local hs : 0.75 * STROKE
+				local yLeft  : [mix (bottom + ds2) (top - ds) jp1] + hs - [fallback elev 0]
+				local yRight : [mix (bottom + ds2) (top - ds) jp0] + hs - [fallback elev 0]
+				local yMin : Math.min bottom yLeft yRight
 				return : spiro-outline
-					corner WIDTH bottom
-					corner WIDTH ([mix (bottom + ds2) (top - ds) jp0] + STROKE / 2 - [fallback elev 0])
-					corner 0 ([mix (bottom + ds2) (top - ds) jp1] + STROKE / 2 - [fallback elev 0])
-					corner 0 bottom
+					corner WIDTH yMin
+					corner WIDTH yRight
+					corner 0 yLeft
+					corner 0 yMin
 
 			define [SmallYShape top bottom] : glyph-construction
 				local {ds ds2} : CalcDS top bottom
@@ -2259,6 +2262,7 @@ export : define [apply] : begin
 		define [RDim mode] : begin
 			local rBalanceMultiplier : match mode [0 1] [1 (4 / 3)] [2 (1 / 2)]
 			local rHookMultiplier    : match mode [0 1] [1 (3 / 4)] [2 1]
+			local rHookSwMultiplier  : match mode [0 0] [1 (1 / 4)] [2 0]
 			local rSerifLeftExtender : match mode [0 0] [1 (1 / 3)] [2 0]
 
 			local rbar : SB + RBALANCE * rBalanceMultiplier + STROKE * HVCONTRAST
@@ -2278,21 +2282,21 @@ export : define [apply] : begin
 				2 : mix rHookX dfR.width (3 / 8)
 			local mixpin : match mode
 				0 : 0.65 + 2 * TANSLANT * STROKE / WIDTH
-				1 : 0.65 + 0.75 * STROKE / WIDTH + 2 * TANSLANT * STROKE / WIDTH
+				1 : 0.65 + 0.25 * STROKE / WIDTH + 2 * TANSLANT * STROKE / WIDTH
 				2 : 0.65 + 2 * TANSLANT * STROKE / WIDTH
 			local rmiddlein : [mix rbar (rHookX - STROKE * HVCONTRAST * 1.05) mixpin] - CORRECTION_OMIDS
-			local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE - TANSLANT * [linreg 72 0.25 108 0.75 STROKE]
-			local rHookY : RHOOK * rHookMultiplier
+			local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE
+			local rHookY : RHOOK * rHookMultiplier + STROKE * rHookSwMultiplier
 			return : object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY
 
 		define [StandardLowerRShape df md doTopSerif doBottomSerif] : glyph-construction
 			define [object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY] : RDim md
 			include : dispiro
 				widths.lhs
-				g4 rHookX (XH - rHookY) [heading {.y [linreg 18 (-0.45) 126 (-0.5) STROKE] .x (-1.04)}]
-				alsothru (0.37 - TANSLANT * 0.1) 0.72
+				g4.up.start rHookX (XH - rHookY - STROKE * 0.5) [heading UPWARD]
+				arcvh nothing 2.35
 				g4.left.mid (rmiddle - CORRECTION_OMIDS * [linreg 72 0.75 108 1 STROKE]) XO [widths.heading STROKE 0 {.y (-1) .x (-skew)}]
-				archv
+				archv nothing 2.35
 				straight.down.end (rbar - fine * HVCONTRAST) (XH * 0.53 + (SMALLSMOOTH - SMALLSMOOTHA)) [widths.heading fine 0 DOWNWARD]
 			include : VBarRight rbar 0 XH
 			set-anchor 'overlay' BASE (rbar - STROKE * 0.25) (XH * 0.5)
@@ -3664,7 +3668,7 @@ export : define [apply] : begin
 			include : dispiro
 				widths.lhs
 				g4 (RIGHTSB + RBALANCE2 - OXE) (CAP - HOOK * 0.75 - fovershoot2)
-				hookstart (CAP - O - fovershoot2) {.shift 0.1 .skew 0.5}
+				hookstart (CAP - O - fovershoot2) (tight -- true)
 				flat barleft (CAP - SMOOTHA * 0.8 - fovershoot2)
 				curl barleft 0 [heading DOWNWARD]
 			include : dispiro
@@ -3807,10 +3811,10 @@ export : define [apply] : begin
 	### e
 	define { SmallEShape RevSmallEShape } : do "e and related"
 		define [SmallEShape top stroke barpos curly] : glyph-construction
-			local barbottom (top * [fallback barpos EBARPOS] - HALFSTROKE)
+			local barbottom : top * [fallback barpos EBARPOS] - (stroke / 2)
 			local hookx (RIGHTSB - OXHOOK + TAILADJX * TANSLANT)
 			local hookmiddle : [mix (SB + O) hookx 0.55] + CORRECTION_OMIDS
-
+			local hook : Math.min AHOOK : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
 			include : dispiro
 				widths.lhs stroke
 				flat (RIGHTSB - OX) barbottom [heading UPWARD]
@@ -3820,8 +3824,8 @@ export : define [apply] : begin
 				archv
 				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (SB + OX) (top - SMALLSMOOTHA)
 				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (SB + OX) (0 + SMALLSMOOTHB)
-				hookend O nothing stroke
-				g4 (RIGHTSB - OX * [if para.isItalic 0 0.5]) AHOOK
+				hookend O (sw -- stroke)
+				g4 (RIGHTSB - OX * [if para.isItalic 0 0.5]) hook
 			include : HBarBottom (SB + (stroke / 2) + OX) (RIGHTSB - (stroke / 2) - OX) barbottom stroke
 
 		sketch # cyrie
@@ -3856,7 +3860,7 @@ export : define [apply] : begin
 				archv
 				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (RIGHTSB - OX) (top - SMALLSMOOTHB)
 				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (RIGHTSB - OX) SMALLSMOOTHA
-				hookend O nothing stroke
+				hookend O (sw -- stroke)
 				g4 (SB + O) AHOOK
 			include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
 
@@ -3939,7 +3943,7 @@ export : define [apply] : begin
 				widths.lhs
 				flat tcenter top [heading DOWNWARD]
 				curl tcenter (bot + smb)
-				hookend (bot + O)
+				hookend (bot + O) (tight -- !para.isItalic)
 				g4 hookx (bot + HOOK)
 			local g : G.call currentGlyph # Not using include
 			set-anchor 'bottomright' BASE g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
@@ -4038,11 +4042,11 @@ export : define [apply] : begin
 			include : dispiro
 				widths.lhs stroke
 				g4   RIGHTSB (CAP - HOOK)
-				hookstart CAPO [sw -- stroke]
+				hookstart CAPO (sw -- stroke)
 				g4   SB (CAP - smooth)
 				alsothru 0.5 0.5 [widths.center ess]
 				g4   RIGHTSB smooth [widths 0 stroke]
-				hookend O [sw -- stroke]
+				hookend O (sw -- stroke)
 				g4   SB HOOK
 			save 'S' 'S'
 			save 'cyrDze' 0x405
@@ -4056,11 +4060,11 @@ export : define [apply] : begin
 			include : dispiro
 				widths.lhs stroke
 				g4   (RIGHTSB + OX / 4) (XH - SHOOK)
-				hookstart XO [sw -- stroke]
+				hookstart XO (sw -- stroke)
 				g4.down.mid   (SB + OX / 8) (XH - smooth)
 				alsothru 0.5 0.5 [widths.center ess]
 				g4.down.mid   (RIGHTSB - OX / 8) (smooth) [widths 0 stroke]
-				hookend O [sw -- stroke]
+				hookend O (sw -- stroke)
 				g4   (SB - OX / 4) SHOOK
 			save 's' 's'
 			save 'cyrdze' 0x455
@@ -4073,11 +4077,11 @@ export : define [apply] : begin
 			include : dispiro
 				widths.rhs stroke
 				g4   SB (CAP - HOOK)
-				hookstart CAPO [sw -- stroke]
+				hookstart CAPO (sw -- stroke)
 				g4   RIGHTSB (CAP - smooth)
 				alsothru 0.5 0.5 [widths.center ess]
 				g4   SB smooth [widths stroke 0]
-				hookend O [sw -- stroke]
+				hookend O (sw -- stroke)
 				g4   RIGHTSB HOOK
 
 			save 'revS' 0x1A7
@@ -4090,11 +4094,11 @@ export : define [apply] : begin
 			include : dispiro
 				widths.rhs stroke
 				g4   SB (XH - SHOOK)
-				hookstart XO [sw -- stroke]
+				hookstart XO (sw -- stroke)
 				g4   RIGHTSB (XH - smooth)
 				alsothru 0.5 0.5 [widths.center ess]
 				g4   SB (smooth) [widths stroke 0]
-				hookend O [sw -- stroke]
+				hookend O (sw -- stroke)
 				g4   RIGHTSB SHOOK
 
 			save 'revs' 0x1A8

@@ -5,7 +5,7 @@ import [mix linreg clamp fallback] from '../support/utils'
 # Parameter generation
 export : define [calculateMetrics para] : begin
 	define UPM 1000
-	
+
 	# Key metrics
 	define WIDTH para.width
 	define SB para.sb
@@ -145,7 +145,7 @@ export : define [calculateMetrics para] : begin
 		local gap : (WIDTH * [fallback div 1]) - SB * 2
 		local shrink : (1 - [WHITENESS 1]) / (crowdedness * HVCONTRAST)
 		return : Math.min STROKE ([fallback mul 1] * gap * shrink)
-	define [adviceBlackness2 cowX cowY refH div] : Math.min 
+	define [adviceBlackness2 cowX cowY refH div] : Math.min
 		adviceBlackness cowX (refH / WIDTH)
 		adviceBlackness cowY div
 	define [MVERTSTROKE_D div] : adviceBlackness [fallback para.lllcrowdedness (3 + 1 / 3)] div
@@ -156,7 +156,7 @@ export : define [calculateMetrics para] : begin
 	define SHOULDERFINE : Math.min (STROKE * para.shoulderfineMin) [adviceBlackness 16]
 
 	define SUPERNESS : fallback para.superness 2
-	define [superxy x] : Math.pow (1 - [Math.pow x SUPERNESS]) (1 / SUPERNESS)
+	define [superxy x superness] : Math.pow (1 - [Math.pow x [fallback superness SUPERNESS]]) (1 / [fallback superness SUPERNESS])
 
 	define [adviceSSmooth y sign _stroke] : begin
 		local stroke : fallback _stroke STROKE
@@ -185,17 +185,16 @@ export : define [setFontMetrics para metrics font] : begin
 	define asc : para.leading * CAP / (CAP - DESCENDER)
 	define desc : para.leading * DESCENDER / (CAP - DESCENDER)
 	define descenderPad : fallback para.descenderPad 0
-	define winMetricPad : fallback para.winMetricPad 0
 
 	set font.OS_2.xAvgCharWidth     WIDTH
 	set font.head.unitsPerEm        1000
 	set font.hhea.ascender          asc
-	set font.OS_2.usWinAscent       asc
+	set font.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
 	set font.OS_2.sTypoAscender     asc
 
 	set font.hhea.descender         (DESCENDER - descenderPad)
-	set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + winMetricPad)
-	set font.OS_2.sTypoDescender    (desc - descenderPad + winMetricPad)
+	set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set font.OS_2.sTypoDescender    (desc - descenderPad)
 
 	set font.hhea.lineGap           (para.leading - asc + DESCENDER)
 	set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
