@@ -553,24 +553,27 @@ export : define [apply] : begin
 			curl (middlex + LONGJUT * [fallback kx 0.8]) (middle + LONGJUT * [fallback ky 0.4])
 
 	# Spiro shapes
-	define [determineMixR w v u sw] : begin
+	define [determineMixR w v u sw swash] : begin
+		if (!swash && w < v) : return  : 1 - [determineMixR v w u sw swash]
 		local superness SUPERNESS
 		local r : piecewise
 			(w <= v)   0.5
 			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
-		local idepth : w - sw
-		local iwidth : u * r - sw
-		if (iwidth > 0 && idepth > 0 && iwidth / idepth >= 2) : begin
-			local adjust : clamp 0.975 1 (1 - (iwidth / idepth - 2) * 0.0125)
-			#console.log iwidth idepth (iwidth / idepth) adjust
-			r = r * adjust
+		if swash : begin
+			local idepth : w - sw
+			local iwidth : u * r - sw
+			if (iwidth > 0 && idepth > 0 && iwidth / idepth >= 2) : begin
+				local adjust : clamp 0.975 1 (1 - (iwidth / idepth - 2) * 0.0125)
+				#console.log iwidth idepth (iwidth / idepth) adjust
+				r = r * adjust
 		if (r < 0.5) : set r 0.5
 		return r
 
 	define nHookSegments 12
-	define [HookShape toStraight toFinish isStart y tight s] : begin
+	define [HookShape toStraight toFinish isStart y tight _sw _swItalicAdj] : begin
 		local atBottom : toStraight.y > y
-		local sw : fallback s STROKE
+		local sw : fallback _sw STROKE
+		local swItalicAdj : fallback _swItalicAdj sw
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
 		local doSwash : !tight && para.isItalic && ltr && atBottom && !isStart
@@ -586,9 +589,9 @@ export : define [apply] : begin
 		local w : Math.abs (toStraight.y - y)
 		local v : Math.abs (toFinish.y - y)
 		local u : Math.abs (toFinish.x - toStraight.x)
-		local mixRatio : determineMixR w v u sw
+		local mixRatio : determineMixR w v u sw doSwash
 		local mxSwMultiplier : [if (tight && tight.shift) tight.shift (1 - (tight || 0))] * [if atBottom 1 (-1)]
-		local mx : [mix toStraight.x toFinish.x mixRatio] + mxSwMultiplier * CORRECTION_OMIDX * sw
+		local mx : [mix toStraight.x toFinish.x mixRatio] + mxSwMultiplier * CORRECTION_OMIDX * swItalicAdj
 		local keyKnot : g4.[if ltr "right" "left"].mid
 			begin mx
 			begin y
@@ -644,13 +647,13 @@ export : define [apply] : begin
 			* keyKnot
 			* segAfter
 
-	define [hookstart] : params [y tight sw] : return {
+	define [hookstart] : params [y tight sw swItalicAdj] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape after before true y tight sw]]
+		.af [lambda [before after] [HookShape after before true y tight sw swItalicAdj]]
 	}
-	define [hookend] : params [y tight sw] : return {
+	define [hookend] : params [y tight sw swItalicAdj] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape before after false y tight sw]]
+		.af [lambda [before after] [HookShape before after false y tight sw swItalicAdj]]
 	}
 
 	define [CyrDescender x shift connex] : glyph-construction
