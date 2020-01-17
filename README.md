@@ -195,8 +195,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-straight`: `f` without bottom hook (default for upright and oblique).
     * `v-f-tailed`: `f` with a leftward bottom hook (default for italic).
   * Styles for letter `g`:
-    * `v-g-doublestorey` : Double-storey `g` (default for upright and oblique).
-    * `v-g-singlestorey` : Single-storey `g` (default for italic).
+    * `v-g-doublestorey` : Double-storey `g` (default).
+    * `v-g-singlestorey` : Single-storey `g`.
     * `v-g-opendoublestorey` : Open Double-storey `g`.
   * Styles for letter `m`:
     * `v-m-normal` : `m` with normal middle leg, touching the baseline (default).
@@ -279,11 +279,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for letter `A`, `Λ`, `Δ`:
     * `v-turn-v-straight`: Standard, straight `A`, `Λ`, `Δ` (default).
     * `v-turn-v-curly`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
-  * Styles for lower case (`k`):
+  * Styles for lower case `k`:
     * `v-k-straight` : `k` with standard shape (default for Upright).
     * `v-k-curly`: Slightly curly `k`, like Iosevka 2.x.
     * `v-k-cursive` : `k` with a cursive loop (default for Italic).
       * Note: the corresponded OpenType feature for this variant (`cv70`) will only be effective under italics.
+  * Styles for lower case `r`:
+    * `v-r-straight`: Straight, serif-less `r` (default).
+    * `v-r-serifed`: `r` with serif at both top and bottom.
+    * `v-r-top-serifed`: `r` with serifs at top-left only.
 
 ## For Chinese and Japanese users...
 
