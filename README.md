@@ -46,7 +46,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3).
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 8.4), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.9.3) and `otf2otc` are present.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `npm run build -- contents::iosevka`.
 
@@ -119,6 +119,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.
 * Styles for ligation sets, include:
+  * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
+  * `ligset-php`: Default ligation set would be assigned to PHP.
   * `ligset-haskell`: Default ligation set would be assigned to Haskell.
   * `ligset-idris`: Default ligation set would be assigned to Idris.
   * `ligset-coq`: Default ligation set would be assigned to Coq.
@@ -128,18 +130,23 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-fstar`: Default ligation set would be assigned to F\*.
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
+  * `ligset-matlab`: Default ligation set would be assigned to MatLab.
 * Styles for further customizing default (`calt`) ligation sets. When any of these styles present in your configuration, the `ligset-*` styles would be overridden.
   * `calt-clear`: Clear the `calt` ligation set.
   * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`);
   * `calt-arrow`: Enable ligation set that forms arrows;
   * `calt-arrow2`: Enable ligation for more arrows, like `>>=`;
   * `calt-html-comment`: Enable ligation for `<!--` and `<!---`;
+  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only;
   * `calt-eqeq`: Enable ligation for `==` and `===`;
   * `calt-ineq`: Enable ligation for `<=` and `>=`;
   * `calt-arrowZALE`: Enable ligation for `<=` to form a left double arrow;
   * `calt-arrowZAGE`: Enable ligation for `>=` to form a right inverse double arrow;
+  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only;
   * `calt-exeq`: Enable ligation for `!=` and `!==`;
-  * `calt-slasheq`: Enable ligation for `/=` and `/==`;
+  * `calt-tildeeq`: Enable ligation for `~=` as inequality;
+  * `calt-slasheqeq`: Enable special triple-line ligation for `/==` only;
+  * `calt-slasheq`: Enable ligation for `/=` and `/==` as inequality;
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining;
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining;
   * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols;
@@ -192,8 +199,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-g-singlestorey` : Single-storey `g` (default for italic).
     * `v-g-opendoublestorey` : Open Double-storey `g`.
   * Styles for letter `m`:
-    * `v-m-longleg` : `m` with long middle leg (default).
-    * `v-m-shortleg` : `m` with shorter middle leg.
+    * `v-m-normal` : `m` with normal middle leg, touching the baseline (default).
+    * `v-m-shortleg` : `m` with shorter middle leg, like Ubuntu Mono.
   * Styles for letter `t`:
     * `v-t-standard` : Standard `t` shape (default).
     * `v-t-cross` : Futura-like `t` shape.
@@ -202,20 +209,21 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-q-straight` : `Q` with a straight tail in the old versions.
   * Styles for letter `y`:
     * `v-y-straight`: More-straight letter `y`.
-    * `v-y-curly`: Curly, cursive-like `y`.
+    * `v-y-curly`: More curly letter `y`, like Iosevka 2.x.
+    * `v-y-cursive`: Cursive-like `y`.
   * Styles for zero (`0`):
     * `v-zero-slashed` : Slashed Zero `0` (default).
     * `v-zero-dotted` : Dotted Zero `0`.
     * `v-zero-unslashed` : O-like `0`.
   * Styles for one (`1`)
-    * `v-one-serifed` : `1` with bottom serif (default for Slab).
-    * `v-one-hooky` : `1` without bottom serif (default for Sans).
+    * `v-one-base` : `1` with bottom serif (default for Slab).
+    * `v-one-nobase` : `1` without bottom serif (default for Sans).
   * Styles for three (`3`):
     * `v-three-flattop` : Flat top `3` (Like Museo Sans / Montserrat).
-    * `v-three-twoarks` : Arched top `3` (default).
+    * `v-three-twoarcs` : Arched top `3` (default).
   * Style for seven (`7`):
-    * `v-seven-normal` : Seven `7` without serif (default). Only effective in non-Slab subfamilies.
-    * `v-seven-force-serif` : Force `7` to have serif in non-Slab subfamilies.
+    * `v-seven-noserif` : `7` without serif (default for Sans).
+    * `v-seven-serifed` : `7` with initial serif (default for Slab).
   * Styles for ASCII tilde (`~`), asterisk (`*`), paragraph(`¶`), underscore (`_`) and ASCII Caret (`^`):
     * `v-tilde-high` : Higher tilde `~`.
     * `v-tilde-low` : Lower tilde `~` (default).
@@ -250,6 +258,32 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for Number sign (`#`):
     * `v-numbersign-upright` : Number sign with vertical bars (default).
     * `v-numbersign-slanted` : Number sign with slanted bars.
+  * Styles for `<=` and `>=` ligation:
+    * `v-lig-ltgteq-flat` : The lower bar of `<=` and `>=` ligation is flat (default).
+    * `v-lig-ltgteq-slanted` : The lower bar of `<=` and `>=` ligation is slanted.
+  * Styles for letter `V` and `v`:
+    * `v-v-straight`: Standard, straight `V` and `v` (default).
+    * `v-v-curly`: Slightly curly `V` and `v`, like Iosevka 2.x.
+  * Styles for letter `W` and `w`:
+    * `v-w-straight`: Standard, straight `W` and `w` (default).
+    * `v-w-curly`: Slightly curly `W` and `w`, like Iosevka 2.x. 
+  * Styles for letter `X` and `x`:
+    * `v-x-straight`: Standard, straight `X` and `x` (default).
+    * `v-x-curly`: Slightly curly `X` and `x`, like Iosevka 2.x. 
+  * Styles for letter `R`:
+    * `v-capital-r-straight`: Standard, straight `R` (default).
+    * `v-capital-r-curly`: Slightly curly `R`, like Iosevka 2.x.
+  * Styles for letter `Y`, `У`:
+    * `v-capital-y-straight`: Standard, straight `Y` (default).
+    * `v-capital-y-curly`: Slightly curly `Y`, like Iosevka 2.x. 
+  * Styles for letter `A`, `Λ`, `Δ`:
+    * `v-turn-v-straight`: Standard, straight `A`, `Λ`, `Δ` (default).
+    * `v-turn-v-curly`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  * Styles for lower case (`k`):
+    * `v-k-straight` : `k` with standard shape (default for Upright).
+    * `v-k-curly`: Slightly curly `k`, like Iosevka 2.x.
+    * `v-k-cursive` : `k` with a cursive loop (default for Italic).
+      * Note: the corresponded OpenType feature for this variant (`cv70`) will only be effective under italics.
 
 ## For Chinese and Japanese users...
 

@@ -34,13 +34,17 @@ function regulateGlyph(g, skew) {
 			offJ = p + 1;
 		}
 	}
-	const c1 = [];
+	const cSimple = [];
+	const cFill = [];
 	for (let k = 0; k < g.contours.length; k++) {
-		c1.push(Glyph.contourToStandardCubic(g.contours[k]));
+		const contour = g.contours[k];
+		if (contour.length <= 2) cSimple.push(Glyph.contourToStandardCubic(contour));
+		else cFill.push(Glyph.contourToStandardCubic(contour));
 	}
 
 	// De-overlap
-	g.contours = caryllShapeOps.removeOverlap(c1, 1, 256, true);
+	g.contours = [...cSimple, ...caryllShapeOps.removeOverlap(cFill, 1, 2048, true)];
+	// g.contours = [...cSimple, ...cFill];
 
 	// Finalize
 	g.contours = c2q.contours(g.contours);

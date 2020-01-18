@@ -145,14 +145,27 @@ export : define [apply] : begin
 
 	sketch # Lambda
 		include markset.capital
-		include : LambdaShape CAP STROKE para.straightBar
-		save 'Lambda' 0x39B
-		save 'latinLambda' 0x245
+		branch
+			include : LambdaShape CAP STROKE true
+			save 'Lambda.straight'
+			save 'latinLambda.straight'
+		branch
+			include : LambdaShape CAP STROKE false
+			save 'Lambda.curly'
+			save 'latinLambda.curly'
 
 	sketch # Delta
 		include markset.capital
-		include : DeltaShape CAP STROKE para.straightBar
-		save 'Delta' 0x394
+		branch
+			include : DeltaShape CAP STROKE true
+			save 'Delta.straight'
+		branch
+			include : DeltaShape CAP STROKE false
+			save 'Delta.curly'
+	
+	select-variant 'Lambda' 0x39B
+	select-variant 'latinLambda' 0x245 (follow -- 'Lambda')
+	select-variant 'Delta' 0x394
 
 	sketch
 		include markset.b
@@ -953,7 +966,7 @@ export : define [apply] : begin
 		local topleft : mix cutleft cutright 0.15
 		include : HBarBottom (cutleft - descenderOverflow) (cutright + descenderOverflow) 0
 		include : VBarRight cutright 0 top
-		include : halfXStrand (topleft + STROKE * HVCONTRAST) top (cutleft + HALFSTROKE * HVCONTRAST * 0.8) HALFSTROKE 0.1 0.75 0.5
+		include : halfXStrand false (topleft + STROKE * HVCONTRAST) top (cutleft + HALFSTROKE * HVCONTRAST * 0.8) HALFSTROKE 0.1 0.75 0.5
 		include : VBarLeft (cutleft - descenderOverflow) (-LONGJUT + HALFSTROKE) 0
 		include : VBarRight (cutright + descenderOverflow) (-LONGJUT + HALFSTROKE) 0
 
@@ -1128,13 +1141,13 @@ export : define [apply] : begin
 		include : CyrBigYusShape XH 0.55 df
 		save 'cyrbigyus' 0x46B
 
-	define [CyrSmallYusShape top df] : glyph-construction
+	define [CyrSmallYusShape top df straightBar] : glyph-construction
 		local fine : adviceBlackness 3.3 df.div
-		include : VShape top fine para.straightBar df.div
+		include : VShape top fine straightBar df.div
 		eject-contour 'serifLT'
 		eject-contour 'serifRT'
 		include : FlipAround df.middle (top / 2)
-		local p : if para.straightBar 
+		local p : if straightBar 
 			linreg 18 0.24 108 0.24 STROKE
 			linreg 18 0.16 108 0.16 STROKE
 		local bary (top / 2)
@@ -1144,19 +1157,29 @@ export : define [apply] : begin
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SIDEJUT
 			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SIDEJUT
+
 	sketch # cyrsmallYus
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
-		include : CyrSmallYusShape CAP df
-		save 'cyrsmallYus' 0x466
+		branch
+			include : CyrSmallYusShape CAP df true
+			save 'cyrsmallYus.straight'
+		branch
+			include : CyrSmallYusShape CAP df false
+			save 'cyrsmallYus.curly'
 	sketch # cyrsmallyus
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : CyrSmallYusShape XH df
-		save 'cyrsmallyus' 0x467
-
+		branch
+			include : CyrSmallYusShape XH df true
+			save 'cyrsmallyus.straight'
+		branch
+			include : CyrSmallYusShape XH df false
+			save 'cyrsmallyus.curly'
+	select-variant 'cyrsmallYus' 0x466 (follow -- 'Delta')
+	select-variant 'cyrsmallyus' 0x467 (follow -- 'Delta')
 
 	define [CyrShaShape top df] : glyph-construction
 		include : union

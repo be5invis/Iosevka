@@ -51,11 +51,19 @@ export : define [SetupBuilders args] : begin
 	define [disable-gizmo] : lambda [] : set this.gizmo [Transform.Id]
 	define [disable-contrast] : lambda [] : set this.contrast 1
 	
-	define [heading d] : lambda [] : this.heads-to d
-	define [widths.heading l r d] : lambda [] : begin [this.set-width l r] [this.heads-to d]
-	define [widths.lhs.heading w d] : lambda [] : begin [this.set-width [fallback w STROKE] 0] [this.heads-to d]
-	define [widths.rhs.heading w d] : lambda [] : begin [this.set-width 0 [fallback w STROKE]] [this.heads-to d]
-	define [widths.center.heading w d] : lambda [] : begin [this.set-width ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)] [this.heads-to d]
+	define [heading d] : lambda [] : if (this.heads-to) : this.heads-to d
+	define [widths.heading l r d] : lambda [] : begin 
+		if this.set-width : this.set-width l r
+		if this.heads-to : this.heads-to d
+	define [widths.lhs.heading w d] : lambda [] : begin
+		if this.set-width : this.set-width [fallback w STROKE] 0
+		if this.heads-to : this.heads-to d
+	define [widths.rhs.heading w d] : lambda [] : begin
+		if this.set-width : this.set-width 0 [fallback w STROKE]
+		if this.heads-to : this.heads-to d
+	define [widths.center.heading w d] : lambda [] : begin 
+		if this.set-width : this.set-width ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)
+		if this.heads-to : this.heads-to d
 	define [unimportant] : begin
 		if (this.points && this.points.length && this.points.(this.points.length - 1)) : this.points.(this.points.length - 1).subdivided = true
 		if (this.controlKnots && this.controlKnots.length && this.controlKnots.(this.controlKnots.length - 1)) : this.controlKnots.(this.controlKnots.length - 1).unimportant = true
@@ -112,8 +120,8 @@ export : define [SetupBuilders args] : begin
 			if [not cache.(samples)] : build samples
 			return cache.(samples).vh
 		list hv vh
-	define [archv samples notiny k raf] : alsothruthem [jhv [fallback samples DEFAULT_STEPS]] raf
-	define [arcvh samples notiny k raf] : alsothruthem [jvh [fallback samples DEFAULT_STEPS]] raf
+	define [archv samples raf] : alsothruthem [jhv [fallback samples DEFAULT_STEPS]] raf
+	define [arcvh samples raf] : alsothruthem [jvh [fallback samples DEFAULT_STEPS]] raf
 	
 	define [complexThru] : begin
 		local a : {}.slice.call arguments
