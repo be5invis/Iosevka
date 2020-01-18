@@ -18,11 +18,11 @@ export : define [apply] : begin
 		define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH2) unicode nothing
 		define [MangleName name] : name + suffix
 
-		define arrowHeight : operTop - operBot
-		define arrowWidth  : Math.min MosaicWidth arrowHeight
-		define arrowMidX : arrowWidth / 2
-		define arrowSB : SB / 2
-		define arrowRSB : arrowWidth - arrowSB
+		define arrowHeight : para.arrowSize * (WIDTH - SB)
+		define arrowWidth  : Math.min (MosaicWidth - SB) arrowHeight
+		define arrowMidX : MosaicWidth / 2
+		define arrowSB : (MosaicWidth - arrowWidth) / 2
+		define arrowRSB : MosaicWidth - arrowSB
 		define hwArrowRSB : WIDTH - arrowSB
 		define hwArrowMidX : WIDTH / 2
 		define o : O * 2
@@ -53,7 +53,7 @@ export : define [apply] : begin
 				flat [mix x1 x2 t] [mix y1 y2 t]
 				curl [mix x1 x2 : Math.min p (t + stop / mag)] [mix y1 y2 : Math.min p (t + stop / mag)]
 				end : function [set this.contrast 1]
-		
+
 		define [HookArrowBar x1 y1 x2 y2 halfstroke s w] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
@@ -124,7 +124,7 @@ export : define [apply] : begin
 			local headLen : WIDTH * 0.4
 			local halfBarWidth : headLen / 3
 			local headWidth : halfBarWidth * 2
-			
+
 			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.4)
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - fine) / mag
@@ -135,7 +135,7 @@ export : define [apply] : begin
 			local y1a : mix y1 y2 (1 - p)
 			local x2a : mix x1 x2 p2
 			local y2a : mix y1 y2 p2
-			
+
 			if (color == "white") : include : difference
 				union
 					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
@@ -164,7 +164,7 @@ export : define [apply] : begin
 
 			local fine : Math.min (w / 3) (halfstroke * 2)
 			local coFine : w / 2 - fine / 2
-			
+
 			local G : dispiro
 				disable-gizmo
 				disable-contrast
@@ -199,24 +199,24 @@ export : define [apply] : begin
 			local p2 : size / mag
 			include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
 			include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
-		
+
 		define [arrow shape id unicode x1 y1 x2 y2 width] : sketch
-			set-width [fallback width arrowWidth]
+			set-width [fallback width MosaicWidth]
 			set-anchor "slash" BASE [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
 			include : shape x1 y1 x2 y2 arrowSize
 			save id unicode
 
 		define [doublearrow shape id unicode x1 y1 x2 y2] : sketch
-			set-width arrowWidth
+			set-width MosaicWidth
 			set-anchor "slash" BASE [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
 			local xm : mix x1 x2 0.5
 			local ym : mix y1 y2 0.5
 			include : shape xm ym x1 y1 arrowSize
 			include : shape xm ym x2 y2 arrowSize
 			save id unicode
-		
+
 		define [anglearrow shape bar id unicode x1 y1 x2 y2 x3 y3] : sketch
-			set-width arrowWidth
+			set-width MosaicWidth
 			include : shape x2 y2 x3 y3 arrowSize
 			include : bar x1 y1 x2 y2
 			save id unicode
@@ -225,7 +225,7 @@ export : define [apply] : begin
 		arrow ArrowShape [MangleName 'arrowup']         [MangleUnicode 0x2191] arrowMidX arrowBot arrowMidX arrowTop
 		arrow ArrowShape [MangleName 'arrowright']      [MangleUnicode 0x2192] arrowSB symbolMid arrowRSB symbolMid
 		arrow ArrowShape [MangleName 'arrowdown']       [MangleUnicode 0x2193] arrowMidX arrowTop arrowMidX arrowBot
-	
+
 		arrow DashArrowShape [MangleName 'dasharrowleft']  [MangleUnicode 0x21E0] arrowRSB symbolMid arrowSB symbolMid
 		arrow DashArrowShape [MangleName 'dasharrowup']    [MangleUnicode 0x21E1] arrowMidX arrowBot arrowMidX arrowTop
 		arrow DashArrowShape [MangleName 'dasharrowright'] [MangleUnicode 0x21E2] arrowSB symbolMid arrowRSB symbolMid
@@ -242,7 +242,7 @@ export : define [apply] : begin
 		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarRight x1 y1 y2] [MangleName 'arrow-up-angle-left'] [MangleUnicode 0x21b0] arrowRSB arrowBot arrowRSB (arrowTop - arrowSize) arrowSB (arrowTop - arrowSize)
 		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarLeft x1 y1 y2] [MangleName 'arrow-down-angle-right'] [MangleUnicode 0x21b3] arrowSB arrowTop arrowSB (arrowBot + arrowSize) arrowRSB (arrowBot + arrowSize)
 		anglearrow ArrowShape [lambda [x1 y1 x2 y2] : VBarRight x1 y1 y2] [MangleName 'arrow-down-angle-left'] [MangleUnicode 0x21b2] arrowRSB arrowTop arrowRSB (arrowBot + arrowSize) arrowSB (arrowBot + arrowSize)
-		
+
 		arrow ArrowShape [MangleName 'arrowupleft']     [MangleUnicode 0x2196] arrowRSB arrowBot arrowSB arrowTop
 		arrow ArrowShape [MangleName 'arrowupright']    [MangleUnicode 0x2197] arrowSB arrowBot arrowRSB arrowTop
 		arrow ArrowShape [MangleName 'arrowdownright']  [MangleUnicode 0x2198] arrowSB arrowTop arrowRSB arrowBot
@@ -364,7 +364,7 @@ export : define [apply] : begin
 		define left : mix MIDDLE SB 1.1
 		define right : mix MIDDLE RIGHTSB 1.1
 		define squareRadius : (right - left) / 2
-		
+
 		define leftFW : shapeWidth / 2 - (MIDDLE - left) * (shapeWidth / WIDTH)
 		define rightFW : shapeWidth / 2 + (MIDDLE - left) * (shapeWidth / WIDTH)
 		define squareRadiusFW : (rightFW - leftFW) / 2
@@ -411,7 +411,7 @@ export : define [apply] : begin
 					include : FlipAround [fallback cx MIDDLE] [fallback cy symbolMid] zx2 zy2
 			if isWide : include FullWidthify
 			include : into-unicode unicode
-			
+
 		define [doubleHollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
 			depends-on glyphs.(oldid)
 			local isWide : glyphs.(oldid).advanceWidth > WIDTH
@@ -547,7 +547,7 @@ export : define [apply] : begin
 						flat (left - skew) (symbolMid - squareRadius / 1.5)
 						curl (left + skew) (symbolMid + squareRadius / 1.5)
 					include FullWidthify
-			
+
 			save [MangleName 'whiteparallelogram'] [MangleUnicode 0x25B1]
 
 		sketch # blacklongrectangle
@@ -664,7 +664,7 @@ export : define [apply] : begin
 			reverse-last
 			include FullWidthify
 			save [MangleName 'blackcircle'] [MangleUnicode 0x25CF]
-		
+
 		sketch # leftblackcircle
 			set-width shapeWidth
 			include : intersection
@@ -805,7 +805,7 @@ export : define [apply] : begin
 				g4 MIDDLE (XH * 0.1)
 				close
 			save [MangleName 'marksampler'] [MangleUnicode 0xE09E]
-		
+
 		# Rounded
 		sketch # roundwhitesquare, U+25A2
 			set-width shapeWidth
@@ -918,7 +918,7 @@ export : define [apply] : begin
 			set-width shapeWidth
 			include : union glyphs.[MangleName 'ddiagshadesquare'] glyphs.[MangleName 'udiagshadesquare']
 			save [MangleName 'uddiagshadesquare'] [MangleUnicode 0x25A9]
-		
+
 		# partial circles
 		define quarters : list
 			list 0x25D0 1 1 0 0
@@ -961,7 +961,7 @@ export : define [apply] : begin
 							corner (middleFW + squareRadiusFW) (symbolMid - squareRadiusFW)
 							corner (middleFW + squareRadiusFW) symbolMid
 			save [MangleName ('uni' + u)] [MangleUnicode u]
-		
+
 		sketch
 			set-width shapeWidth
 			include : difference
@@ -976,160 +976,50 @@ export : define [apply] : begin
 				begin glyphs.[MangleName 'whitecircle']
 			save [MangleName 'uni25D9'] [MangleUnicode 0x25D9]
 
-	### POWERLINE glyphs
-	### 'Powerline'
-	sketch # branch
-		local fine : adviceBlackness 3.5
-		local y1 : mix parenBot parenTop 0.8
-		local y2 : mix parenBot parenTop 0.2
-		include : VBarLeft SB parenBot parenTop fine
-		include : dispiro
-			widths.rhs fine
-			flat RIGHTSB y1
-			curl RIGHTSB [mix y1 y2 0.4]
-			g4 (SB + fine * HVCONTRAST) y2 [heading LEFTWARD]
-		include : DotAt (RIGHTSB - fine * HVCONTRAST / 2) y1 [Math.max (fine * 1.5) PERIODRADIUS]
-		save 'branch' 0xE0A0
+	do 'Powerline Symbols'
+		sketch # branch
+			local fine : adviceBlackness 3.5
+			local y1 : mix parenBot parenTop 0.8
+			local y2 : mix parenBot parenTop 0.2
+			include : VBarLeft SB parenBot parenTop fine
+			include : dispiro
+				widths.rhs fine
+				flat RIGHTSB y1
+				curl RIGHTSB [mix y1 y2 0.4]
+				g4 (SB + fine * HVCONTRAST) y2 [heading LEFTWARD]
+			include : DotAt (RIGHTSB - fine * HVCONTRAST / 2) y1 [Math.max (fine * 1.5) PERIODRADIUS]
+			save 'branch' 0xE0A0
 
-	local pwlMid : (font.OS_2.usWinAscent - font.OS_2.usWinDescent) / 2
-	local pwlTop : (font.OS_2.usWinAscent - pwlMid) * para.powerlineScaleY + para.powerlineShiftY + pwlMid
-	local pwlBot : (-font.OS_2.usWinDescent - pwlMid) * para.powerlineScaleY + para.powerlineShiftY + pwlMid
-	local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
-	local pwlFar : WIDTH * para.powerlineScaleX + para.powerlineShiftX
-	sketch # pwlTriangleRight
-		include : ForceUpright
-		start-from (pwlNear + O) pwlTop
-		line-to    pwlNear pwlTop
-		line-to    pwlFar [mix pwlTop pwlBot 0.5]
-		line-to    pwlNear pwlBot
-		line-to    (pwlNear + O) pwlBot
-		save 'pwlTriangleRight' 0xE0B0
+		sketch # pwlLock
+			local fine : adviceBlackness 3.5
+			local y1 : mix parenBot parenTop 0.95
+			local y2 : mix parenBot parenTop 0.05
+			local lockTop : mix y2 y1 0.6
+			local lockLeft : SB / 2
+			local lockRight : WIDTH - SB / 2
+			local lockHoleWidth : 1 / 5
+			local lockHoleLeft : mix lockLeft lockRight (1 / 2 - lockHoleWidth / 2)
+			local lockHoleRight : mix lockLeft lockRight (1 / 2 + lockHoleWidth / 2)
+			local lockHoleTop : mix y2 lockTop 0.75
+			local lockHoleBottom : mix y2 lockTop 0.25
+			include : union
+				intersection
+					spiro-outline
+						corner 0 (2 * y1)
+						corner WIDTH (2 * y1)
+						corner WIDTH (lockTop - 1)
+						corner 0 (lockTop - 1)
+						close
+					OShape y1 y2 SB RIGHTSB fine (SMALLSMOOTHA) (SMALLSMOOTHB)
+				difference
+					spiro-outline
+						corner lockLeft lockTop
+						corner lockRight lockTop
+						corner lockRight y2
+						corner lockLeft y2
+						close
+					OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SMALLSMOOTHA * lockHoleWidth) (SMALLSMOOTHB * lockHoleWidth)
 
-	sketch # pwlAngleRight
-		include : ForceUpright
-		local fine : adviceBlackness 4
-		include : dispiro
-			widths.rhs fine
-			flat pwlNear pwlTop
-			curl pwlFar [mix pwlTop pwlBot 0.5]
-		include : dispiro
-			widths.rhs fine
-			flat pwlFar [mix pwlTop pwlBot 0.5]
-			curl pwlNear pwlBot
-		save 'pwlAngleRight' 0xE0B1
-
-	sketch # pwlTriangleLeft
-		include : ForceUpright
-		include glyphs.pwlTriangleRight
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlTriangleLeft' 0xE0B2
-
-	sketch # pwlAngleLeft
-		include : ForceUpright
-		include glyphs.pwlAngleRight
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlAngleLeft' 0xE0B3
-
-	sketch # pwlUnderline
-		include : ForceUpright
-		local fine : adviceBlackness 4
-		include : HBarBottom 0 WIDTH pwlBot
-		save 'pwlUnderline' 0xE0AE
-
-	sketch # pwlOverline
-		include : ForceUpright
-		local fine : adviceBlackness 4
-		include : HBarTop 0 WIDTH pwlTop
-		save 'pwlOverline' 0xE0AF
-
-	sketch # pwlLock
-		local fine : adviceBlackness 3.5
-		local y1 : mix parenBot parenTop 0.95
-		local y2 : mix parenBot parenTop 0.05
-		local lockTop : mix y2 y1 0.6
-		local lockLeft : SB / 2
-		local lockRight : WIDTH - SB / 2
-		local lockHoleWidth : 1 / 5
-		local lockHoleLeft : mix lockLeft lockRight (1 / 2 - lockHoleWidth / 2)
-		local lockHoleRight : mix lockLeft lockRight (1 / 2 + lockHoleWidth / 2)
-		local lockHoleTop : mix y2 lockTop 0.75
-		local lockHoleBottom : mix y2 lockTop 0.25
-		include : union
-			intersection
-				spiro-outline
-					corner 0 (2 * y1)
-					corner WIDTH (2 * y1)
-					corner WIDTH (lockTop - 1)
-					corner 0 (lockTop - 1)
-					close
-				OShape y1 y2 SB RIGHTSB fine (SMALLSMOOTHA) (SMALLSMOOTHB)
-			difference
-				spiro-outline
-					corner lockLeft lockTop
-					corner lockRight lockTop
-					corner lockRight y2
-					corner lockLeft y2
-					close
-				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SMALLSMOOTHA * lockHoleWidth) (SMALLSMOOTHB * lockHoleWidth)
-		
-		save 'pwlLock' 0xE0A2
-
-	sketch # pwlCornerBottomLeft
-		include : ForceUpright
-		start-from (pwlNear + O) pwlTop
-		line-to    pwlNear pwlTop
-		line-to    pwlFar pwlBot
-		line-to    (pwlNear + O) pwlBot
-		save 'pwlCornerBottomLeft' 0xE0B8
-
-	sketch # pwlSlashBottomLeft
-		include : ForceUpright
-		local fine : adviceBlackness 4
-		include : dispiro
-			widths.rhs fine
-			flat pwlNear pwlTop
-			curl pwlFar pwlBot
-		save 'pwlSlashBottomLeft' 0xE0B9
-
-	sketch # pwlCornerBottomRight
-		include : ForceUpright
-		include glyphs.pwlCornerBottomLeft
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlCornerBottomRight' 0xE0BA
-
-	sketch # pwlSlashBottomRight
-		include : ForceUpright
-		include glyphs.pwlSlashBottomLeft
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlSlashBottomRight' 0xE0BB
-
-	sketch # pwlCornerTopLeft
-		include : ForceUpright
-		start-from (pwlNear + O) pwlTop
-		line-to    pwlNear pwlTop
-		line-to    pwlFar pwlTop
-		line-to    (pwlNear + O) pwlBot
-		save 'pwlCornerTopLeft' 0xE0BC
-
-	sketch # pwlSlashTopLeft
-		include : ForceUpright
-		local fine : adviceBlackness 4
-		include : dispiro
-			widths.rhs fine
-			flat pwlNear pwlBot
-			curl pwlFar pwlTop
-		save 'pwlSlashTopLeft' 0xE0BD
-
-	sketch # pwlCornerTopRight
-		include : ForceUpright
-		include glyphs.pwlCornerBottomLeft
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlCornerTopRight' 0xE0BE
-
-	sketch # pwlSlashTopRight
-		include : ForceUpright
-		include glyphs.pwlSlashBottomLeft
-		include : FlipAround MIDDLE [mix pwlTop pwlBot 0.5]
-		save 'pwlSlashTopRight' 0xE0BF
+			save 'pwlLock' 0xE0A2
 
 	return [object [ArrowShape exportArrowShape]]

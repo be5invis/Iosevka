@@ -21,24 +21,35 @@ const PRIVATE_TOML = path.resolve(__dirname, "../private.toml");
 const VARIANTS_TOML = path.resolve(__dirname, "../variants.toml");
 const EMPTY_FONT_TOML = path.resolve(__dirname, "../empty-font.toml");
 
+function tryParseToml(str) {
+	try {
+		return toml.parse(fs.readFileSync(str, "utf-8"));
+	} catch (e) {
+		throw new Error(
+			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`
+		);
+	}
+}
+
 function getParameters(argv) {
 	const parametersData = Object.assign(
 		{},
-		toml.parse(fs.readFileSync(PARAMETERS_TOML, "utf-8")),
-		fs.existsSync(PRIVATE_TOML) ? toml.parse(fs.readFileSync(PRIVATE_TOML, "utf-8")) : []
+		tryParseToml(PARAMETERS_TOML),
+		fs.existsSync(PRIVATE_TOML) ? tryParseToml(PRIVATE_TOML) : []
 	);
-	const variantData = toml.parse(fs.readFileSync(VARIANTS_TOML, "utf-8"));
+	const variantData = tryParseToml(VARIANTS_TOML);
 
 	const para = parameters.build(parametersData, argv._);
 	const variantsData = formVariantData(variantData, para);
 	para.variants = variantsData;
-	para.variantSelector = parameters.build(variantsData, argv._);
+	para.variantSelector = parameters.build(variantsData, ["default", ...argv._]);
 	para.defaultVariant = variantsData.default;
 
 	para.naming = {
 		family: argv.family,
 		version: argv.ver,
 		weight: argv["menu-weight"] - 0,
+		width: argv["menu-width"] - 0,
 		slant: argv["menu-slant"]
 	};
 
@@ -47,7 +58,7 @@ function getParameters(argv) {
 
 // Font building
 const font = (function() {
-	const emptyFont = toml.parse(fs.readFileSync(EMPTY_FONT_TOML, "utf-8"));
+	const emptyFont = tryParseToml(EMPTY_FONT_TOML);
 	const para = getParameters(argv);
 	const font = buildGlyphs.build.call(emptyFont, para);
 	font.parameters = para;

@@ -1,0 +1,235 @@
+###### Automatic builds
+$$include '../meta/macros.ptl'
+
+import 'unorm' as unorm
+import [fallback suggestGC] from '../support/utils'
+
+define customDecompositions : object
+	# Latvians use comma instead of cedillas in several letters.
+	# Record them as custom decomposition.
+	."\u0156" "R\u0326"
+	."\u0157" "r\u0326"
+	."\u0136" "K\u0326"
+	."\u0137" "k\u0326"
+	."\u0145" "N\u0326"
+	."\u0146" "n\u0326"
+	."\u013B" "L\u0326"
+	."\u013C" "l\u0326"
+	."\u0122" "G\u0326"
+	."\u0123" "g\u0312"
+
+	# autobuild Latin glyphs
+	."\u0197" "I\u0335"
+	."\u019A" "l\u0335"
+	."\u0248" "J\u0335"
+	."\u0249" "j\u0335"
+	."\u0268" "i\u0335"
+	."\u024C" "R\u0335"
+	."\u024D" "r\u0335"
+	."\u01B5" "Z\u0335"
+	."\u01B6" "z\u0335"
+	."\u1D7B" "\u026A\u0335"
+	."\u1D7C" "\u0269\u0335"
+
+	."\u1D7F" "\u028A\uE091"
+	."\u0289" "u\uE091"
+	."\u0244" "U\uE091"
+	."\u01E5" "g\uE091"
+	."\u01BB" "2\uE091"
+	."\u024E" "Y\uE091"
+	."\u04B0" "\u04AE\u0335"
+	."\u04B1" "\u04AF\u0335"
+	."\u024F" "y\uE091"
+	."\uAB30" "\uAB64\uE091"
+	."\u1D7D" "p\uE091"
+
+	."\u0142" "l\uE090"
+	."\u013E" "l\u0315"
+	."\u0165" "t\u0315"
+
+	."\u023A" "A\u0338"
+	."\u023B" "C\u0338"
+	."\u023C" "c\u0337"
+	."\u023E" "T\u0338"
+	."\u0246" "E\u0338"
+	."\u0247" "e\u0337"
+
+	."\u0290" "z\u0322"
+	."\u0256" "d\u0322"
+	."\u0273" "n\u0322"
+	."\u01AE" "T\u0322"
+	."\u1D8F" "a\u0322"
+	."\u1D90" "\u0251\u0322"
+	."\u1D91" "\u0257\u0322"
+	."\u1D99" "u\u0322"
+
+	."\u1E9A" "a\u0357"
+	."\u1E9C" "\u017F\uE090"
+	."\u1E9D" "\u017F\u0335"
+
+ 	# Cyrillic composite characters
+	."\u0498" "\u0417\u0327"
+	."\u0499" "\u0437\u0327"
+	."\u04AA" "\u0421\u0327"
+	."\u04AB" "\u0441\u0327"
+
+	# Spacing modifers
+	."\u02CB" " \u0300"
+	."\u02CA" " \u0301"
+	."\u02C6" " \u0302"
+	."\u02DC" " \u0303"
+	."\u00AF" " \u0304"
+	."\u02C9" " \u0304"
+	."\u02D8" " \u0306"
+	."\u02D9" " \u0307"
+	."\u00A8" " \u0308"
+	."\u02DA" " \u030A"
+	."\u02C7" " \u030C"
+	."\u00B8" " \u0327"
+	."\u02CD" " \u0331"
+	."\u02CE" " \u0316"
+	."\u02CF" " \u0317"
+	."\u02D2" " \u0339"
+	."\u02D3" " \u031C"
+	."\u02D4" " \u031D"
+	."\u02D5" " \u031E"
+	."\u02D6" " \u031F"
+	."\u02D7" " \u0320"
+	."\u02DB" " \u0328"
+	."\u02DD" " \u030B"
+	."\u02DF" " \u033D"
+	."\u02EC" " \u032C"
+	."\u02ED" " \u033F"
+	."\u02F3" " \u0325"
+	."\u02F7" " \u0330"
+
+	."\u1FED" " \u0308\u0300"
+	."\u1FEE" " \u0308\u0301"
+	."\u1FEF" " \u0300"
+	."\u1FFD" " \u0301"
+	."\u1FFE" " \u0314"
+	."\u1FBD" " \u0313"
+	."\u1FBE" " \u0345"
+	."\u1FBF" " \u0313"
+	."\u1FC0" " \u0342"
+	."\u1FC1" " \u0308\u0342"
+	."\u0384" " \u0301"
+	."\u0385" " \u0308\u0301"
+	."\u037A" " \u0345"
+
+	# Suppress incorrect slashed arrows... so far
+	."\u219A" ""
+	."\u219B" ""
+	."\u21AE" ""
+
+
+
+
+
+export : define [apply] : begin
+	glyph-module-entry commonShapes overmarks
+	# Build accented glyphs
+
+	define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
+	define [iotaBelowToLF p j parts] : if (p === glyphs.iotaBelow) : set parts.(j) glyphs.iotaLF
+	define [ogonekBelowToTR p j parts] : if (p === glyphs.ogonekBelow) : set parts.(j) glyphs.ogonekTR
+	define [subParts parts] : begin
+		local hasMarkAbove false
+		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
+
+		# replace dotted-i and dotted-j with dotless equalivents
+		if ((parts.0 === glyphs.i || parts.0 === glyphs.cyrUkrainiani) && hasMarkAbove) : parts.0 = glyphs.dotlessi
+		if (parts.0 === glyphs.j && hasMarkAbove) : parts.0 = glyphs.dotlessj
+
+		# replace below marks with trailing marks
+		if parts.0.anchors.lf : parts.forEach iotaBelowToLF
+		if parts.0.anchors.trailing : parts.forEach ogonekBelowToTR
+
+		# composite greek overmarks
+		for [local j 0] (j < parts.length) [inc j] : piecewise
+			(parts.(j) === glyphs.commaAbove) : begin
+				piecewise
+					(parts.(j + 1) === glyphs.graveAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.psilivaria
+					(parts.(j + 1) === glyphs.acuteAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.psilioxia
+					(parts.(j + 1) === glyphs.perispomeniAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.psiliperispomeni
+			(parts.(j) === glyphs.revCommaAbove) : begin
+				piecewise
+					(parts.(j + 1) === glyphs.graveAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.dasiavaria
+					(parts.(j + 1) === glyphs.acuteAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.dasiaoxia
+					(parts.(j + 1) === glyphs.perispomeniAbove) : begin
+						set parts.(j) null; set parts.(j + 1) glyphs.dasiaperispomeni
+		return parts
+
+	define [pad _s n] : begin
+		local s _s
+		while (s.length < n) : s = '0' + s
+		return s
+	local nComposed 0
+	local foundDecompositions {.}
+	define [decideName namingParts parts code] : begin
+		local baseName namingParts.0.name
+		local glyphName baseName
+		foreach [part : namingParts.slice 1] : if part : glyphName = glyphName + [fallback part.shortName part.name]
+		if foundDecompositions.(glyphName) : begin
+			local j 2
+			while foundDecompositions.(glyphName + j) [inc j]
+			set glyphName (glyphName + j)
+		if (glyphName.length > 27) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
+		return glyphName
+	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
+		local str : String.fromCharCode code
+		local nfd : fallback customDecompositions.(str) : unorm.nfd str
+		if (nfd.length > 1) : begin
+			local parts {}
+			local allFound true
+			foreach j [range 0 nfd.length] : begin
+				local part unicodeGlyphs.([nfd.charCodeAt j])
+				if [not part] : then : set allFound false
+				: else : set parts.(j) unicodeGlyphs.([nfd.charCodeAt j])
+			if allFound : begin
+				local namingParts : parts.slice 0
+				set parts : subParts parts
+				local glyphName : decideName namingParts parts code
+				set foundDecompositions.(glyphName) {glyphName code parts}
+
+	if recursiveCodes : recursiveCodes.forEach buildForCode
+	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
+	suggestGC
+
+	local {glyphName code parts} {}
+	define construction : glyph-construction
+		if code : assign-unicode code
+		include parts.0 AS_BASE
+		set-width parts.0.advanceWidth
+
+		local names {parts.0.name}
+		foreach part [items-of : parts.slice 1] : if part : begin
+			include part
+			names.push part.name
+			if (part.name === 'rtailBR') : eject-contour 'serifRB'
+		inc nComposed
+
+	define [cfv glyphName _pa] : if (!recursive && _pa.0.featureSelector) : begin
+		local h {.}
+		foreach [feature : items-of : Object.keys _pa.0.featureSelector] : begin
+			local variant _pa.0.featureSelector.(feature)
+			local variantRoot glyphs.(variant)
+			if variantRoot : begin
+				set parts {variantRoot :: [_pa.slice 1]}
+				set code null
+				create-glyph (glyphName + '.' + feature) construction
+
+				set h.(feature) (glyphName + '.' + feature)
+		if glyphs.(glyphName) : set glyphs.(glyphName).featureSelector h
+
+	foreach [_id : items-of : Object.keys foundDecompositions] : begin
+		set {glyphName code parts} foundDecompositions.(_id)
+		create-glyph glyphName construction
+		cfv glyphName parts
+
+	suggestGC
