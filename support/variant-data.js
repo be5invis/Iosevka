@@ -8,8 +8,8 @@ function mergeVSHive(_target, source) {
 	return target;
 }
 
-function produceComposite(vs, para, dflt, g) {
-	let sel = objectAssign({}, dflt);
+function produceComposite(vs, para, g) {
+	let sel = {};
 	if (g.design)
 		for (let h of g.design) {
 			sel = mergeVSHive(sel, vs[h]);
@@ -62,10 +62,9 @@ module.exports = function formVariantData(data, para) {
 		}
 	}
 	// default selector
-	vs.default = produceComposite(vs, para, {}, data.default);
+	vs.default = produceComposite(vs, para, data.default);
 	// ss## selector
-	for (let k in data.composite) {
-		vs[k] = produceComposite(vs, para, vs.default, data.composite[k]);
-	}
+	for (let k in data.composite) vs[k] = produceComposite(vs, para, data.composite[k]);
+
 	return vs;
 };

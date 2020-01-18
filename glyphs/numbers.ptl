@@ -1,5 +1,6 @@
 $$include '../meta/macros.ptl'
 
+import '../support/transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 
@@ -145,7 +146,7 @@ export : define [apply] : begin
 	sketch # three.lnum
 		include markset.capital
 		include : ThreeShape CAP
-		save 'three.lnum.twoarcs'	
+		save 'three.lnum.twoarcs'
 	sketch
 		include markset.capital
 		include : EzhShape CAP 0 0.25 0.975
@@ -160,7 +161,7 @@ export : define [apply] : begin
 		include : EzhShape (XH - DESCENDER) 0 0.25 0.975
 		include : ShiftDown
 		save 'three.onum.flattop'
-	
+
 	select-variant 'three.lnum' '3' (follow -- 'three')
 	select-variant 'three.onum' (follow -- 'three')
 	alias 'three' nothing 'three.lnum'
@@ -198,14 +199,16 @@ export : define [apply] : begin
 		local xleft : mix SB RIGHTSB 0.025
 		local xright : [mix RIGHTSB SB 0.05] - OXE
 
-		include : dispiro
+		local FiveStroke : dispiro
 			widths.rhs
-			g4 (xleft - OXHOOK) (t2 - AHOOK * top / CAP)
+			g4 xleft (t2 - AHOOK * top / CAP)
 			hookstart (t2 - O)
 			g4 (RIGHTSB - OX) ycurly
 			hookend O
-			g4 SB HOOK
-		include : VBarLeft xleft (t2 - AHOOK * top / CAP) top
+			g4 SB (HOOK * top / CAP)
+		local fiveStroke : FiveStroke.call currentGlyph
+		local firstKnot : utp currentGlyph.gizmo fiveStroke.rhsKnots.(fiveStroke.rhsKnots.length - 1)
+		include : VBarRight firstKnot.x firstKnot.y top
 		include : HBarTop xleft xright top
 		if SLAB : begin
 			include : DownwardRightSerif xright top VJUT
@@ -252,7 +255,7 @@ export : define [apply] : begin
 		save 'six.lnum' '6'
 		save 'six.onum'
 		save 'six'
-	
+
 	define [SevenShape top] : glyph-construction
 		include : HBarTop (SB + OXE) RIGHTSB top
 		local x : mix SB RIGHTSB 0.28
@@ -351,7 +354,7 @@ export : define [apply] : begin
 			g4   ([mix l r 0.5] - CORRECTION_OMIDS) (u - O)
 			archv
 			flat r ymiddlea
-			curl r (top * 0.35)
+			curl r SMALLSMOOTHA
 			hookend O
 			g4 SB HOOK
 
