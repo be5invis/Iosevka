@@ -2264,6 +2264,7 @@ export : define [apply] : begin
 			local rHookMultiplier    : match mode [0 1] [1 (3 / 4)] [2 1]
 			local rHookSwMultiplier  : match mode [0 0] [1 (1 / 4)] [2 0]
 			local rSerifLeftExtender : match mode [0 0] [1 (1 / 3)] [2 0]
+			local hookSuperness      : match mode [0 2.35] [1 2.75] [2 2.35]
 
 			local rbar : SB + RBALANCE * rBalanceMultiplier + STROKE * HVCONTRAST
 			local rSerifX : rbar - HALFSTROKE * HVCONTRAST
@@ -2275,28 +2276,28 @@ export : define [apply] : begin
 			local [rTopSerif y] : tagged 'serifLT'
 				LeftwardTopSerif rSerifX y (rSerifLeftJut + HALFSTROKE * HVCONTRAST)
 			local fine : SHOULDERFINE * CTHIN
-			local rHookX (dfR.rightSB + RBALANCE2 - OXE)
+			local rHookX (dfR.rightSB + RBALANCE2 * rBalanceMultiplier - OXE)
 			local rmiddle : match mode
 				0 : mix (rbar - fine) rHookX (0.54 + 2 * TANSLANT * STROKE / WIDTH)
 				1 : mix (rbar - fine) rHookX (0.59 + 2 * TANSLANT * STROKE / WIDTH)
 				2 : mix rHookX dfR.width (3 / 8)
 			local mixpin : match mode
-				0 : 0.65 + 2 * TANSLANT * STROKE / WIDTH
-				1 : 0.65 + 0.25 * STROKE / WIDTH + 2 * TANSLANT * STROKE / WIDTH
-				2 : 0.65 + 2 * TANSLANT * STROKE / WIDTH
+				0 : 0.65 + 4 * TANSLANT * STROKE / WIDTH
+				1 : 0.65 + 0.25 * STROKE / WIDTH + 4 * TANSLANT * STROKE / WIDTH
+				2 : 0.65 + 4 * TANSLANT * STROKE / WIDTH
 			local rmiddlein : [mix rbar (rHookX - STROKE * HVCONTRAST * 1.05) mixpin] - CORRECTION_OMIDS
 			local skew : Math.max 0 : (rmiddle - rmiddlein) / STROKE
 			local rHookY : RHOOK * rHookMultiplier + STROKE * rHookSwMultiplier
-			return : object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY
+			return : object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY hookSuperness
 
 		define [StandardLowerRShape df md doTopSerif doBottomSerif] : glyph-construction
-			define [object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY] : RDim md
+			define [object rbar rBottomSerif rTopSerif fine rmiddle skew rHookX rHookY hookSuperness] : RDim md
 			include : dispiro
 				widths.lhs
 				g4.up.start rHookX (XH - rHookY - STROKE * 0.5) [heading UPWARD]
-				arcvh nothing 2.35
+				arcvh nothing hookSuperness
 				g4.left.mid (rmiddle - CORRECTION_OMIDS * [linreg 72 0.75 108 1 STROKE]) XO [widths.heading STROKE 0 {.y (-1) .x (-skew)}]
-				archv nothing 2.35
+				archv
 				straight.down.end (rbar - fine * HVCONTRAST) (XH * 0.53 + (SMALLSMOOTH - SMALLSMOOTHA)) [widths.heading fine 0 DOWNWARD]
 			include : VBarRight rbar 0 XH
 			set-anchor 'overlay' BASE (rbar - STROKE * 0.25) (XH * 0.5)
