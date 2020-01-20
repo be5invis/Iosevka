@@ -157,13 +157,6 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 
 # GPOS
 define [buildGPOS para glyphs glyphList markGlyphs] : begin
-	local lookup_mark
-		.type 'gpos_mark_to_base'
-		.subtables {}
-	local lookup_mkmk
-		.type 'gpos_mark_to_mark'
-		.subtables {}
-
 	# mark and mkmk
 	define [createBaseInfo g th px py] : begin
 		local res {.}
@@ -175,7 +168,7 @@ define [buildGPOS para glyphs glyphList markGlyphs] : begin
 			set pushed true
 		return : if pushed res nothing
 
-	define [createMTSSubtable lookup anchorClasses] : begin
+	define [createMTLookup lookupType anchorClasses] : begin
 		local subtable {.marks {.} .bases {.}}
 		local th {.}
 		foreach [ac : items-of anchorClasses] : set th.(ac) true
@@ -195,17 +188,23 @@ define [buildGPOS para glyphs glyphList markGlyphs] : begin
 						class markKey
 						x glyph.anchors.(markKey).x
 						y glyph.anchors.(markKey).y
-					if (lookup == lookup_mkmk) : begin
+					if (lookupType == 'gpos_mark_to_mark'): begin
 						local r : createBaseInfo glyph th 'mbx' 'mby'
 						if r : set subtable.bases.(glyph.name) r
-				: else : if (lookup == lookup_mark) : begin
+				: else : if (lookupType == 'gpos_mark_to_base') : begin
 					local r : createBaseInfo glyph th 'x' 'y'
 					if r : set subtable.bases.(glyph.name) r
-		lookup.subtables.push subtable
+		return {.type lookupType .subtables {subtable}}
+
+	local lookupSet {.}
+	local markLookupNames {}
+	local mkmkLookupNames {}
 
 	foreach [marktag : items-of {'above' 'below' 'overlay' 'slash' 'topright' 'bottomright' 'trailing' 'lf'}] : begin
-		createMTSSubtable lookup_mark {marktag}
-		createMTSSubtable lookup_mkmk {marktag}
+		set lookupSet.('lookup_mark_' + marktag) : createMTLookup 'gpos_mark_to_base' {marktag}
+		set lookupSet.('lookup_mkmk_' + marktag) : createMTLookup 'gpos_mark_to_mark' {marktag}
+		markLookupNames.push ('lookup_mark_' + marktag)
+		mkmkLookupNames.push ('lookup_mkmk_' + marktag)
 
 	return : object
 		languages
@@ -214,11 +213,9 @@ define [buildGPOS para glyphs glyphList markGlyphs] : begin
 			.grek_DFLT {.features {'mark0', 'mkmk0'}}
 			.cyrl_DFLT {.features {'mark0', 'mkmk0'}}
 		features
-			.mark0 {'l_mark'}
-			.mkmk0 {'l_mkmk'}
-		lookups
-			.l_mark lookup_mark
-			.l_mkmk lookup_mkmk
+			.mark0 markLookupNames
+			.mkmk0 mkmkLookupNames
+		lookups lookupSet
 
 # GDEF
 define [buildGDEF para glyphs glyphList markGlyphs] : begin
