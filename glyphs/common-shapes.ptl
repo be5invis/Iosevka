@@ -775,4 +775,27 @@ export : define [apply] : begin
 		include : difference background [union.apply null candidates]
 		include overlay
 
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor]
+	define [CreateWaveShape dist sw] : begin
+		define WaveResolution 8
+		define WaveMagnitude : dist * (3 / 4) - sw / 2
+		define WaveAdj : TANSLANT * WaveMagnitude * (-0.75)
+		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin] : glyph-construction
+			local resolution : Math.ceil (WaveResolution * (te - ts))
+			local knots {}
+			foreach [pr : range 0 till resolution] : begin
+				local theta : [mix ts te (pr / resolution)] * Math.PI * 2
+				local waveRelY : (-1) * [Math.sin theta] - 0.075 * [Math.sin (theta * 3)]
+				local flat : [Math.abs ([mix ts te (pr / resolution)] * 2 % 1)] < 1 / WaveResolution
+				knots.push : g2
+					(WaveAdj * waveRelY) + [mix left right (pr / resolution)]
+					symbolMid + WaveMagnitude * waveRelY
+			include : dispiro
+				widths.center sw
+				if (xsJoin !== nothing) {[straight.right.start xsJoin symbolMid]} {}
+				begin knots
+				if (xfJoin !== nothing) {[straight.right.end   xfJoin symbolMid]} {}
+
+		define [WaveShape] : params [left right xsJoin xfJoin [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * 2) (2 + right * 2) xsJoin xfJoin
+		return WaveShape
+
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape]
