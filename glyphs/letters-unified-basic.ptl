@@ -644,7 +644,7 @@ export : define [apply] : begin
 
 		define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
 			local df : DivFrame div
-			local fine : [if barStraight VShapeFineStraight VShapeFine] * sw / STROKE
+			local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 			local sbCor : (CAP / top) * OX
 			local dgCor : diagCor top (WIDTH / 2) 0 (sw * 2)
 			if barStraight : begin
@@ -770,7 +770,7 @@ export : define [apply] : begin
 		list VShape VShapeOutline
 
 	### A
-	do "A and related ============================================================================="
+	define { LambdaShape AMaskShape DeltaShape } : do "A and related =============================="
 		define [AMaskShape top sw barStraight div] : create-glyph : glyph-construction
 			include : VShapeOutline top sw barStraight div
 			include : FlipAround ([DivFrame div].width / 2) (top / 2)
@@ -808,6 +808,52 @@ export : define [apply] : begin
 		turned 'turnA.straight' nothing 'A.straight' MIDDLE (CAP / 2)
 		turned 'turnA.curly'    nothing 'A.curly' MIDDLE (CAP / 2)
 		select-variant 'turnA' 0x2C6F (follow -- 'A')
+
+		# Lambda
+		define [LambdaShape top sw barStraight div] : glyph-construction
+			local df : DivFrame [fallback div 1]
+			include : VShape top sw barStraight div
+			include : FlipAround df.middle (top / 2)
+			if SLAB : begin
+				include : CenterBottomSerif (SB + sw / 2 * HVCONTRAST) 0 JUT
+				tag-contour 'serif'
+				include : CenterBottomSerif (RIGHTSB - sw / 2 * HVCONTRAST) 0 JUT
+				tag-contour 'serif'
+
+		sketch # Lambda
+			include markset.capital
+			branch
+				include : LambdaShape CAP STROKE true
+				save 'Lambda.straight'
+				save 'latinLambda.straight'
+			branch
+				include : LambdaShape CAP STROKE false
+				save 'Lambda.curly'
+				save 'latinLambda.curly'
+
+		select-variant 'Lambda' 0x39B
+		select-variant 'latinLambda' 0x245 (follow -- 'Lambda')
+
+		# Delta
+		define [DeltaShape top sw barStraight div] : glyph-construction
+			include : LambdaShape top sw barStraight div
+			eject-contour 'serif'
+			include : intersection
+				HBarBottom 0 WIDTH 0 sw
+				AMaskShape top sw barStraight div
+
+		sketch # Delta
+			include markset.capital
+			branch
+				include : DeltaShape CAP STROKE true
+				save 'Delta.straight'
+			branch
+				include : DeltaShape CAP STROKE false
+				save 'Delta.curly'
+
+		select-variant 'Delta' 0x394
+
+		list LambdaShape AMaskShape DeltaShape
 
 	### a
 	do "a and related ============================================================================="
@@ -4349,4 +4395,4 @@ export : define [apply] : begin
 			eject-contour 'serifRB'
 			save 'zcurlytail' 0x291
 
-	return [object ISerifShape IotaShape LShape VShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline]
+	return [object ISerifShape IotaShape LShape VShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline LambdaShape AMaskShape DeltaShape]

@@ -33,20 +33,48 @@ export : define [apply] : begin
 			save 'emsp' 0x2003
 
 	do 'Brackets'
+		define [ParenDim delta] : object
+			outside : [mix SB RIGHTSB designParameters.parenOutside] - delta
+			inside  : mix SB RIGHTSB designParameters.parenInside
+			bottom  : [mix symbolMid parenBot (1 + designParameters.parenOvershoot)] - delta
+			top     : [mix symbolMid parenTop (1 + designParameters.parenOvershoot)] + delta
+			mid       symbolMid
+		define [ParenShape sw] : let [dim : ParenDim 0] : dispiro
+			widths.lhs sw
+			g4 dim.inside dim.top
+			quadcontrols 1 (1 - designParameters.parenCurliness)
+			g4 dim.outside dim.mid
+			quadcontrols 0 designParameters.parenCurliness
+			g4 dim.inside dim.bottom
+
+		define [ParenShapeMask delta] : let [dim : ParenDim delta] : spiro-outline
+			corner dim.inside dim.top
+			quadcontrols 1 (1 - designParameters.parenCurliness)
+			g4 dim.outside dim.mid
+			quadcontrols 0 designParameters.parenCurliness
+			corner dim.inside dim.bottom
+
 		sketch # parenLeft
-			include : dispiro
-				widths.lhs
-				g4 [mix SB RIGHTSB designParameters.parenInside] [mix symbolMid parenTop (1 + designParameters.parenOvershoot)]
-				quadcontrols 1 (1 - designParameters.parenCurliness)
-				g4 [mix SB RIGHTSB designParameters.parenOutside] symbolMid
-				quadcontrols 0 designParameters.parenCurliness
-				g4 [mix SB RIGHTSB designParameters.parenInside] [mix symbolMid parenBot (1 + designParameters.parenOvershoot)]
+			include : ParenShape STROKE
 			save 'parenLeft' '('
 
 		sketch # parenRight
 			include glyphs.parenLeft
 			include : FlipAround MIDDLE symbolMid
 			save 'parenRight' ')'
+
+		sketch # zNotationParenLeft
+			local dim : ParenDim 0
+			include : ParenShape OPERATORSTROKE
+			include : intersection
+				VBarRight dim.inside dim.bottom dim.top OPERATORSTROKE
+				ParenShapeMask O
+			save 'zNotationParenLeft' 0x2987
+
+		sketch # zNotationParenRight
+			include glyphs.zNotationParenLeft
+			include : FlipAround MIDDLE symbolMid
+			save 'zNotationParenRight' 0x2988
 
 		sketch # bracketLeft
 			local l : mix SB RIGHTSB designParameters.bracketOutside
@@ -61,6 +89,40 @@ export : define [apply] : begin
 			include glyphs.bracketLeft
 			include : FlipAround MIDDLE symbolMid
 			save 'bracketRight' ']'
+
+		sketch # dblBracketLeft
+			local l : mix SB RIGHTSB designParameters.bracketOutside
+			local r : mix SB RIGHTSB designParameters.bracketInside
+			local sw : Math.min ((r - l) / 5) [adviceBlackness 4]
+
+			include : union
+				HBarBottom l r parenBot
+				HBarTop    l r parenTop
+				VBarLeft   l parenBot parenTop sw
+				VBar       [mix l r (1 / 2)] parenBot parenTop sw
+			save 'dblBracketLeft' 0x27E6
+
+		sketch # dblBracketRight
+			include glyphs.dblBracketLeft
+			include : FlipAround MIDDLE symbolMid
+			save 'dblBracketRight' 0x27E7
+
+		sketch # bracketBarLeft
+			local l : mix SB RIGHTSB designParameters.bracketOutside
+			local r : mix SB RIGHTSB designParameters.bracketInside
+			local sw : Math.min ((r - l) / 5) [adviceBlackness 4]
+
+			include : union
+				HBarBottom l r parenBot
+				HBarTop    l r parenTop
+				HBar       l r [mix parenBot parenTop 0.5]
+				VBarLeft   l parenBot parenTop sw
+			save 'bracketBarLeft' 0x2045
+
+		sketch # bracketBarRight
+			include glyphs.bracketBarLeft
+			include : FlipAround MIDDLE symbolMid
+			save 'bracketBarRight' 0x2046
 
 		sketch # braceLeft.straight
 			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
@@ -117,7 +179,7 @@ export : define [apply] : begin
 
 		composite 'braceRight.straight' glyphs.'braceLeft.straight' [FlipAround MIDDLE symbolMid]
 		composite 'braceRight.curly' glyphs.'braceLeft.curly' [FlipAround MIDDLE symbolMid]
-		
+
 		select-variant 'braceLeft' '{'
 		select-variant 'braceRight' '}'
 
@@ -158,10 +220,20 @@ export : define [apply] : begin
 			include : Ring (PERIODSIZE - O) O (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
 			save 'period' '.'
 
-		sketch # xhdot
+		sketch # baselineDot
+			set-width WIDTH
+			include : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			save 'baselineDot'
+
+		sketch # xhPeriod
 			set-width WIDTH
 			include : Ring (XH - O) (XH - PERIODSIZE + O) (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
-			save 'xhdot'
+			save 'xhPeriod'
+
+		sketch # xhPeriod
+			set-width WIDTH
+			include : Ring (XH - O) (XH - DOTSIZE + O) (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			save 'xhDot'
 
 		sketch # comma
 			set-width WIDTH
@@ -191,7 +263,7 @@ export : define [apply] : begin
 		sketch # colon
 			set-width WIDTH
 			include glyphs.period
-			include glyphs.xhdot
+			include glyphs.xhPeriod
 			save 'colon' ':'
 			save 'colon.dmid'
 
@@ -209,7 +281,7 @@ export : define [apply] : begin
 
 		sketch # semicolon
 			include glyphs.comma
-			include glyphs.xhdot
+			include glyphs.xhPeriod
 			save 'semicolon' ';'
 			save 'greekquestion' 0x37E
 
@@ -443,13 +515,13 @@ export : define [apply] : begin
 				g4 (m2 - sw * TANSLANT) (obot + O) [heading RIGHTWARD]
 				archv
 				straight.up.end (m1 - (sw * (1 - shrink) * HVCONTRAST)) (obot + sma) [widths.heading (sw * shrink) 0 UPWARD]
-			
+
 			include : dispiro
 				widths.lhs sw
 				corner m1 (atTurnBot + sma) [heading UPWARD]
 				corner m1 (otop - smb) [heading UPWARD]
 				corner m1 otop [widths.heading (sw * shrink) 0 UPWARD]
-			
+
 			include : dispiro
 				widths.lhs (sw * shrink)
 				straight.down.start (m1 - sw * shrink * HVCONTRAST) (atTurnBot + sma) [heading DOWNWARD]
@@ -462,7 +534,7 @@ export : define [apply] : begin
 				g4 SB (top - HOOK)
 
 			save 'at.short'
-		
+
 		select-variant 'at' '@'
 
 		sketch # paragraph
@@ -587,7 +659,7 @@ export : define [apply] : begin
 				include : SlashShape (l + x - w) (l + x + w) nsTop nsBot fine
 				include : SlashShape (r - x - w) (r - x + w) nsTop nsBot fine
 				save 'numbersign.slanted'
-			
+
 			select-variant 'numbersign' '#'
 
 		sketch # slash
@@ -1001,7 +1073,7 @@ export : define [apply] : begin
 				flat l 0 [heading UPWARD]
 				curl [mix l r pFine] [mix 0 CAP pFine] [widths.heading (fine * cor) 0 UPWARD]
 			save 'percent.rings'
-		
+
 		sketch # permille.rings, basepoint.rings
 			local width : WIDTH * para.diversityM
 			local rightSB : width - SB
@@ -1054,7 +1126,7 @@ export : define [apply] : begin
 				include : OShape otop  0  l2 r2 swp smap smbp
 				include : OShape otop  0  l3 r3 swp smap smbp
 				save 'basepoint.rings'
-		
+
 		select-variant 'percent' '%'
 		select-variant 'permille' 0x2030
 		select-variant 'basepoint' 0x2031
