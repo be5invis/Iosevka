@@ -124,7 +124,7 @@ export : define [apply] : begin
 			local halfBarWidth : headLen / 3
 			local headWidth : halfBarWidth * 2
 
-			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.4)
+			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.6)
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - fine) / mag
 			local p2 : (mag - fine * [Math.sqrt 13] / 2) / mag
@@ -751,19 +751,34 @@ export : define [apply] : begin
 			save [MangleName 'bigblackcircle'] [MangleUnicode 0x2B24]
 
 		let
-		: configurations : list
+		: cfg : list
 			* {.sides 5 .skip 2 .name 'blackstar' .unicode 0x2605 .overflow 1.1 .phase 0}
 			* {.sides 5 .skip 1 .name 'blackpentagon' .unicode 0x2B1F .overflow 1.05 .phase 0}
 			* {.sides 6 .skip 1 .name 'blackhexagon' .unicode 0x2B22 .overflow 1.05 .phase 0}
 			* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
 			* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
-		: foreach [{.sides sides .skip skip .name name .unicode unicode .overflow overflow .phase phase} : items-of configurations] : sketch
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
 			include markset.plus
 			foreach [j : range 0 sides] : begin
 				local angle : 2 * Math.PI * j * skip / sides + phase
 				currentGlyph.([if j 'line-to' 'start-from'])
 					mix left right (0.5 - 0.5 * overflow * [Math.sin angle])
 					symbolMid + squareRadius * [Math.cos angle] * overflow
+			save [MangleName "hw\(name)"]
+			include FullWidthify
+			save [MangleName name] [MangleUnicode unicode]
+
+		let
+		: cfg : list
+			* {.sides 6 .skip 1 .name 'SixPointedBlackStar' .unicode 0x2736 .overflow 1.05 .phase 0}
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
+			include markset.plus
+			foreach [j : range 0 (2 * sides)] : begin
+				local angle : Math.PI * j * skip / sides + phase
+				local mag : [if (j % 2) 0.5 1.0] * overflow
+				currentGlyph.([if j 'line-to' 'start-from'])
+					mix left right (0.5 - 0.5 * mag * [Math.sin angle])
+					symbolMid + squareRadius * mag * [Math.cos angle]
 			save [MangleName "hw\(name)"]
 			include FullWidthify
 			save [MangleName name] [MangleUnicode unicode]

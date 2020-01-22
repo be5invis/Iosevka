@@ -113,13 +113,12 @@ export : define [apply] : begin
 		sketch # bracketBarLeft
 			local l : mix SB RIGHTSB designParameters.bracketOutside
 			local r : mix SB RIGHTSB designParameters.bracketInside
-			local sw : Math.min ((r - l) / 5) [adviceBlackness 4]
 
 			include : union
 				HBarBottom l r parenBot
 				HBarTop    l r parenTop
 				HBar       l r [mix parenBot parenTop 0.5]
-				VBarLeft   l parenBot parenTop sw
+				VBarLeft   l parenBot parenTop
 			save 'bracketBarLeft' 0x2045
 
 		sketch # bracketBarRight
@@ -150,34 +149,38 @@ export : define [apply] : begin
 				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] symbolMid [heading LEFTWARD]
 			save 'braceLeft.straight'
 
-		sketch # braceLeft.curly
-			local xIns : mix SB RIGHTSB [mix designParameters.braceOutside designParameters.braceInside 1]
-			local xOus : mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 1]
+		define [CurlyBraceShape sw] : glyph-construction
+			local hs : sw / 2
+			local xIns : mix SB RIGHTSB designParameters.braceInside
+			local xOus : mix SB RIGHTSB designParameters.braceOutside
 			local m1   : mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside designParameters.braceCurlyM1]
 			local m2   : mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside designParameters.braceCurlyM2]
-			local braceRadiusLowLimit : (parenTop - symbolMid - STROKE) * (1 / 3) + HALFSTROKE
+			local braceRadiusLowLimit : (parenTop - symbolMid - sw) * (1 / 3) + hs
 			local radius1 : Math.min (xIns - m1) braceRadiusLowLimit
-			local radius2 : [Math.min (m2 - xOus) braceRadiusLowLimit] - HALFSTROKE
-			local ess : mix STROKE ESS 0.25
+			local radius2 : [Math.min (m2 - xOus) braceRadiusLowLimit] - hs
+			local ess : mix sw (ESS * sw / STROKE) 0.25
 			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
 			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
 			include : dispiro
-				straight.left.start xIns (top - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				straight.left.start xIns (top - hs) [widths.heading hs hs LEFTWARD]
 				archv
 				g4.down.mid m1 (top - radius1) [heading DOWNWARD]
 				alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
-				g4.down.mid m2 (symbolMid + radius2) [widths.heading HALFSTROKE HALFSTROKE DOWNWARD]
+				g4.down.mid m2 (symbolMid + radius2) [widths.heading hs hs DOWNWARD]
 				arcvh
 				straight.left.end xOus symbolMid [heading LEFTWARD]
 
 			include : dispiro
-				straight.left.start xIns (bot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				straight.left.start xIns (bot + hs) [widths.heading hs hs LEFTWARD]
 				archv
 				g4.up.mid m1 (bot + radius1) [heading UPWARD]
 				alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
-				g4.up.mid m2 (symbolMid - radius2) [widths.heading HALFSTROKE HALFSTROKE UPWARD]
+				g4.up.mid m2 (symbolMid - radius2) [widths.heading hs hs UPWARD]
 				arcvh
 				straight.left.end xOus symbolMid [heading LEFTWARD]
+
+		sketch # braceLeft.curly
+			include : CurlyBraceShape STROKE
 			save 'braceLeft.curly'
 
 		composite 'braceRight.straight' glyphs.'braceLeft.straight' [FlipAround MIDDLE symbolMid]
@@ -186,24 +189,51 @@ export : define [apply] : begin
 		select-variant 'braceLeft' '{'
 		select-variant 'braceRight' '}'
 
+		sketch # whiteBraceLeft
+			local fine : adviceBlackness 4
+			local xIns : mix SB RIGHTSB designParameters.braceInside
+			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
+			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
+			include : CurlyBraceShape fine
+			include : VBarRight xIns (bot + fine / 2) (top - fine / 2) fine
+			save 'whiteBraceLeft' 0x2983
+
+		sketch # whiteBraceRight
+			include glyphs.whiteBraceLeft
+			include : FlipAround MIDDLE symbolMid
+			save 'whiteBraceRight' 0x2984
+
+		define [AngleLeftShape outside inside sw] : begin
+			local fatten : Math.hypot 1 ((inside - outside - O) / (parenTop - symbolMid))
+			return : union
+				dispiro
+					widths.lhs sw
+					flat inside parenTop
+					curl (outside + O) symbolMid [widths.heading (sw * fatten) 0 DOWNWARD]
+				dispiro
+					widths.rhs sw
+					flat inside parenBot
+					curl (outside + O) symbolMid [widths.heading 0 (sw * fatten) UPWARD]
+
 		sketch # angleLeft
-			local fatten : Math.hypot 1 (([mix SB RIGHTSB : designParameters.parenInside - designParameters.parenOutside] - O) / (parenTop - symbolMid))
-			include : dispiro
-				widths.lhs OPERATORSTROKE
-				flat [mix SB RIGHTSB designParameters.parenInside] parenTop
-				curl ([mix SB RIGHTSB designParameters.parenOutside] + O) symbolMid [widths.heading (OPERATORSTROKE * fatten) 0 DOWNWARD]
-			include : dispiro
-				widths.rhs OPERATORSTROKE
-				flat [mix SB RIGHTSB designParameters.parenInside] parenBot
-				curl ([mix SB RIGHTSB designParameters.parenOutside] + O) symbolMid [widths.heading 0 (OPERATORSTROKE * fatten) UPWARD]
+			define dim : ParenDim 0
+			include : AngleLeftShape dim.outside dim.inside OPERATORSTROKE
 			save 'angleLeft' 0x2329
-		alias 'mangleLeft' 0x27E8 'angleLeft'
+			save 'mathAngleLeft' 0x27E8
+
+		sketch # dblAngleLeft
+			define dim : ParenDim 0
+			define fine : Math.min OPERATORSTROKE [adviceBlackness 3]
+			define farOutside : dim.outside / 2
+			define middle : mix farOutside dim.inside 0.5
+			include : AngleLeftShape farOutside middle fine
+			include : AngleLeftShape middle dim.inside fine
+			save 'dblAngleLeft' 0x27EA
 
 		turned 'angleRight' 0x232A 'angleLeft' MIDDLE symbolMid
-		alias 'mangleRight' 0x27E9 'angleRight'
+		alias 'mathAngleRight' 0x27E9 'angleRight'
 
-		dual 'dblangleLeft' 0x27EA 'angleLeft' (WIDTH * 0.35)
-		dual 'dblangleRight' 0x27EB 'angleRight' (WIDTH * 0.35)
+		turned 'dblAngleRight' 0x27EB 'dblAngleLeft' MIDDLE symbolMid
 
 		sketch # ceilingLeft
 			include : HBarTop    [mix SB RIGHTSB designParameters.bracketOutside] [mix SB RIGHTSB designParameters.bracketInside] parenTop
@@ -220,22 +250,22 @@ export : define [apply] : begin
 	do 'Small Punctuations'
 		sketch # period
 			set-width WIDTH
-			include : Ring (PERIODSIZE - O) O (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
+			include : DotAt MIDDLE PERIODRADIUS (PERIODRADIUS - O)
 			save 'period' '.'
 
 		sketch # baselineDot
 			set-width WIDTH
-			include : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			include : DotAt MIDDLE DOTRADIUS (DOTRADIUS - O)
 			save 'baselineDot'
 
 		sketch # xhPeriod
 			set-width WIDTH
-			include : Ring (XH - O) (XH - PERIODSIZE + O) (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
+			include : DotAt MIDDLE (XH - PERIODRADIUS) (PERIODRADIUS - O)
 			save 'xhPeriod'
 
 		sketch # xhPeriod
 			set-width WIDTH
-			include : Ring (XH - O) (XH - DOTSIZE + O) (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			include : DotAt MIDDLE (XH - DOTRADIUS) (DOTRADIUS - O)
 			save 'xhDot'
 
 		sketch # comma
@@ -292,18 +322,19 @@ export : define [apply] : begin
 		local questionBottom : Math.max (CAP * 0.3) (DOTSIZE * 1.5)
 
 		define [QuestionShape top questionBottom left right] : glyph-construction
+			define strokeEndCor : Math.hypot 1 TANSLANT
 			include : dispiro
 				widths.rhs
 				g4 left (top - HOOK)
 				hookstart (top - O)
 				g4 right (top - SMOOTHB * 0.9)
 				alsothru 0.5 0.45 [widths.center ESSQUESTION]
-				straight.down.end ([mix left right 0.5] - HALFSTROKE * HVCONTRAST) questionBottom [widths STROKE 0]
+				straight.down.end ([mix left right 0.5] - HALFSTROKE * HVCONTRAST * strokeEndCor) questionBottom [widths.heading (STROKE * strokeEndCor) 0 DOWNWARD]
 
 		sketch # question
 			set-width WIDTH
 			include : QuestionShape CAP questionBottom SB RIGHTSB
-			include : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			include : DotAt MIDDLE DOTRADIUS (DOTRADIUS - O)
 			save 'question' '?'
 
 		sketch # interrobang
@@ -317,7 +348,7 @@ export : define [apply] : begin
 			include : Translate (-MIDDLE) (-DOTRADIUS)
 			include : Rotate (1.2 * angle)
 			include : Translate MIDDLE DOTRADIUS
-			include : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			include : DotAt MIDDLE DOTRADIUS (DOTRADIUS - O)
 			save 'interrobang' 0x203D
 
 		sketch # gnaborretni
@@ -336,8 +367,9 @@ export : define [apply] : begin
 			set-width WIDTH
 			include markset.capital
 			include : VBar MIDDLE [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
-			include : Ring (DOTSIZE - O) O (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
+			include : DotAt MIDDLE DOTRADIUS (DOTRADIUS - O)
 			save 'exclam' '!'
+			save 'alveolarclick' 0x1C3
 
 		sketch # exclamDown
 			set-width WIDTH
@@ -360,16 +392,22 @@ export : define [apply] : begin
 			include : VBar MIDDLE parenBot parenTop
 			save 'bar' '|'
 
+		sketch # parallel
+			set-width WIDTH
+			set currentGlyph.anchors.above {.type BASE .x MIDDLE .y parenTop}
+			set currentGlyph.anchors.below {.type BASE .x MIDDLE .y parenBot}
+			local sw : adviceBlackness 3.5
+			include : VBar (MIDDLE - WIDTH * 0.175) parenBot parenTop sw
+			include : VBar (MIDDLE + WIDTH * 0.175) parenBot parenTop sw
+			save 'parallel' 0x2225
+			save 'dentalclick' 0x1C0
+			save 'alveolarlateralclick' 0x1C1
+
 		sketch # brokenbar
 			local breakDist : Math.max STROKE (CAP / 8)
 			include : VBar MIDDLE (symbolMid + breakDist / 2) parenTop
 			include : VBar MIDDLE parenBot (symbolMid - breakDist / 2)
 			save 'brokenbar' 0xA6
-
-		# Click symbols
-		alias 'dentalclick' 0x1C0 'bar'
-		dual 'alveolarlateralclick' 0x1C1 'bar' (WIDTH * 0.35)
-		alias 'alveolarclick' 0x1C3 'exclam'
 
 		sketch # palatoalveolarclick
 			include glyphs.bar AS_BASE
@@ -750,7 +788,7 @@ export : define [apply] : begin
 	do 'Interpuncts'
 		sketch # interpunct
 			set-width FULLWIDTH3
-			include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (FULLWIDTH3 / 2 - PERIODRADIUS + O) (FULLWIDTH3 / 2 + PERIODRADIUS - O) true
+			include : DotAt (FULLWIDTH3 / 2) symbolMid (PERIODRADIUS - O)
 			save 'period.center'
 			save 'interpunct' 0xB7
 			save 'greekbullet' 0x387
@@ -760,11 +798,10 @@ export : define [apply] : begin
 		sketch # whitebullet
 			set-width FULLWIDTH
 			local s : [adviceBlackness 5] * 0.75
-			include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (FWMIDDLE - PERIODRADIUS + O) (FWMIDDLE + PERIODRADIUS - O) true
-			include : Ring (symbolMid + PERIODRADIUS - O - s) (symbolMid - PERIODRADIUS + O + s) (FWMIDDLE - PERIODRADIUS + O + s) (FWMIDDLE + PERIODRADIUS - O - s) true
-			reverse-last
+			include : difference
+				DotAt FWMIDDLE symbolMid (PERIODRADIUS - O)
+				DotAt FWMIDDLE symbolMid (PERIODRADIUS - O - s)
 			save 'whitebullet' 0x25E6
-
 
 	do 'Quotes and Primes'
 		local quoteTop (CAP * 1.05)
@@ -972,34 +1009,60 @@ export : define [apply] : begin
 			include : HBar SB RIGHTSB [mix parenTop parenBot 0.67]
 			save 'doubledagger' 0x2021
 
-	do 'Ellipsis'
+	define WidthKinds {{'.hwid' WIDTH WIDTH} {'.fwid' FULLWIDTH0 (FULLWIDTH0 / 2)}}
+
+	foreach {suffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do 'Ellipsis'
+		define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH) unicode nothing
+		define [MangleName name] : name + suffix
+		define [DotRadius darkness space] : begin
+			return : 0.5 * [adviceBlackness darkness (space / WIDTH)] * PERIODSIZE / STROKE
+
 		sketch # onedotLeader
-			set-width FULLWIDTH
-			local radius : Math.min PERIODRADIUS
-				linreg WIDTH (0.5 * [adviceBlackness 3.5] * PERIODSIZE / STROKE) UPM PERIODRADIUS FULLWIDTH
-			include : Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
-			save 'onedotLeader' 0x2024
+			set-width MosaicWidth
+			local radius : DotRadius 3.5 MosaicWidth
+			include : DotAt (MosaicWidth / 2) radius (radius - O)
+			save [MangleName 'onedotLeader'] [MangleUnicode 0x2024]
 
 		sketch # twodotsLEader
-			set-width FULLWIDTH
-			local radius : Math.min PERIODRADIUS
-				linreg WIDTH (0.5 * [adviceBlackness 3.5] * PERIODSIZE / STROKE) UPM PERIODRADIUS FULLWIDTH
-			local left : mix 0 FULLWIDTH (1 / 4)
-			local right : mix 0 FULLWIDTH (3 / 4)
-			include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
-			include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
-			save 'twodotsLEader' 0x2025
+			set-width MosaicWidth
+			local radius : DotRadius 3.5 MosaicWidth
+			local left : mix 0 MosaicWidth (1 / 4)
+			local right : mix 0 MosaicWidth (3 / 4)
+			include : DotAt left radius (radius - O)
+			include : DotAt right radius (radius - O)
+			save [MangleName 'twodotsLEader'] [MangleUnicode 0x2025]
 
 		sketch # ellipsis
-			set-width FULLWIDTH
-			local radius : Math.min PERIODRADIUS
-				linreg WIDTH (0.5 * [adviceBlackness 5] * PERIODSIZE / STROKE) UPM PERIODRADIUS FULLWIDTH
-			local left : mix 0 FULLWIDTH (1 / 6)
-			local right : mix 0 FULLWIDTH (5 / 6)
-			include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
-			include : Ring (radius * 2 - O) O (FULLWIDTH / 2 - radius + O) (FULLWIDTH / 2 + radius - O) true
-			include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
-			save 'ellipsis' 0x2026
+			set-width MosaicWidth
+			local radius : DotRadius 5 MosaicWidth
+			local left : mix 0 MosaicWidth (1 / 6)
+			local right : mix 0 MosaicWidth (5 / 6)
+			include : DotAt left radius (radius - O)
+			include : DotAt (MosaicWidth / 2) radius (radius - O)
+			include : DotAt right radius (radius - O)
+			save [MangleName 'ellipsis'] [MangleUnicode 0x2026]
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - radius)
+			apply-transform : Italify
+			save [MangleName 'mathCDots'] [MangleUnicode 0x22EF]
+
+		define [TriColonShape x bottom top] : glyph-construction
+			local radius : DotRadius 5 (top - bottom)
+			local mid : mix bottom top 0.5
+			include : DotAt x (bottom + radius) (radius - O)
+			include : DotAt x mid (radius - O)
+			include : DotAt x (top - radius) (radius - O)
+
+		sketch # tricolon
+			set-width MosaicWidth
+			include : TriColonShape (MosaicWidth / 2) 0 XH
+			save [MangleName 'tricolon'] [MangleUnicode 0x205D]
+
+		sketch # mathCVDots
+			set-width MosaicWidth
+			include : TriColonShape (MosaicWidth / 2) operBot operTop
+			save [MangleName 'mathCVDots'] [MangleUnicode 0x22EE]
 
 	do 'Percentages'
 		sketch # percent.dots
@@ -1156,3 +1219,14 @@ export : define [apply] : begin
 		alias 'mdfRevComma' 0x2BD 'revertSingleQuote'
 		alias 'mdfStress' 0x2C8 'singleQuote'
 		turned 'mdfSecondaryStress' 0x2CC 'singleQuote' MIDDLE (XH / 2)
+
+	do "Ties"
+		sketch
+			include : dispiro
+				widths.lhs OPERATORSTROKE
+				g4 (SB + OX) 0
+				quadcontrols  0.5 1
+				g4.right.mid  MIDDLE (DESCENDER / 3) [heading RIGHTWARD]
+				quadcontrols  0.5 0
+				g4 (RIGHTSB - OX) 0
+			save "undertie" 0x203F

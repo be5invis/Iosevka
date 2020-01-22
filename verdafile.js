@@ -479,6 +479,7 @@ const TTCArchiveFile = file.make(
 		// Note: this target does NOT depend on the font files.
 		await target.need(de`${dir}`);
 		await target.need(CollectionFontsOf(cid));
+		await rm(full);
 		await cd(`${DIST}/collections/${cid}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],

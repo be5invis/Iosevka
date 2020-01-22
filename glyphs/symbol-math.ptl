@@ -6,6 +6,9 @@ import [designParameters] from '../meta/aesthetics'
 
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks letterBasic letterExt
+
+	# Equation parameters
+
 	do "Letter-like"
 		sketch # micro
 			include glyphs.mu AS_BASE
@@ -95,54 +98,109 @@ export : define [apply] : begin
 
 	do "Frames"
 		local sw GEOMETRYSTROKE
-		local k : 2 / 3
-		local top : symbolMid + (RIGHTSB - SB) * 0.5 + sw * k
-		local bottom : symbolMid - (RIGHTSB - SB) * 0.5 - sw * k
-		local left : SB - sw * k
-		local right : RIGHTSB + sw * k
+		local kBox : 2 / 3
+		local leftBox : SB * kBox
+		local rightBox : WIDTH - SB * kBox
+		local radiusBox : (rightBox - leftBox) / 2
+		local topBox : symbolMid + radiusBox
+		local bottomBox : symbolMid - radiusBox
+
+
+		local kCircle : 2 / 3
+		local leftCircle : SB * kCircle
+		local rightCircle : WIDTH - SB * kCircle
+		local radiusCircle : (rightCircle - leftCircle) / 2
+
+		local radiusBig : (tackTop - tackBot) / 2
+		local leftBig : MIDDLE - radiusBig
+		local rightBig : MIDDLE + radiusBig
 
 		sketch # mathO
-			include glyphs.'whitecircle.hwid'
+			include : dispiro
+				widths.lhs GEOMETRYSTROKE
+				g4 MIDDLE (symbolMid + radiusCircle - O)
+				archv nothing 2
+				g4 (leftCircle + O) symbolMid
+				arcvh nothing 2
+				g4 MIDDLE (symbolMid - radiusCircle + O)
+				archv nothing 2
+				g4 (rightCircle - O) symbolMid
+				arcvh nothing 2
+				close
 			save 'mathO'
 		sketch # mathO-outline
-			include glyphs.'blackcircleO.hwid'
+			include : spiro-outline
+				g4 MIDDLE (symbolMid + radiusCircle)
+				archv nothing 2
+				g4 (leftCircle) symbolMid
+				arcvh nothing 2
+				g4 MIDDLE (symbolMid - radiusCircle)
+				archv nothing 2
+				g4 (rightCircle) symbolMid
+				arcvh nothing 2
+				close
 			save 'mathOOutline'
+		sketch # mathOBig
+			include : dispiro
+				widths.lhs GEOMETRYSTROKE
+				g4 MIDDLE (symbolMid + radiusBig - O)
+				archv nothing 2
+				g4 (leftBig + O) symbolMid
+				arcvh nothing 2
+				g4 MIDDLE (symbolMid - radiusBig + O)
+				archv nothing 2
+				g4 (rightBig - O) symbolMid
+				arcvh nothing 2
+				close
+			save 'mathOBig'
+		sketch # mathO-outline
+			include : spiro-outline
+				g4 MIDDLE (symbolMid + radiusBig)
+				archv nothing 2
+				g4 (leftBig) symbolMid
+				arcvh nothing 2
+				g4 MIDDLE (symbolMid - radiusBig)
+				archv nothing 2
+				g4 (rightBig) symbolMid
+				arcvh nothing 2
+				close
+			save 'mathOOutlineBig'
 		sketch # mathBoxOutline
 			include : spiro-outline
-				corner left top
-				corner left bottom
-				corner right bottom
-				corner right top
+				corner leftBox topBox
+				corner leftBox bottomBox
+				corner rightBox bottomBox
+				corner rightBox topBox
 			save 'mathBoxOutline'
 		sketch # mathBox
 			include : intersection glyphs.mathBoxOutline : union
-				dispiro [widths.lhs sw] [flat left top] [curl left bottom]
-				dispiro [widths.lhs sw] [flat left bottom] [curl right bottom]
-				dispiro [widths.lhs sw] [flat right bottom] [curl right top]
-				dispiro [widths.lhs sw] [flat right top] [curl left top]
+				dispiro [widths.lhs sw] [flat leftBox topBox] [curl leftBox bottomBox]
+				dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+				dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
+				dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox topBox]
 			save 'mathBox'
 
 		do "Geometry"
 			sketch
 				include : intersection
 					spiro-outline
-						corner left bottom
-						corner right bottom
-						corner right top
+						corner leftBox bottomBox
+						corner rightBox bottomBox
+						corner rightBox topBox
 					union
-						dispiro [widths.lhs sw] [flat left bottom] [curl right bottom]
-						dispiro [widths.lhs sw] [flat right bottom] [curl right top]
-						dispiro [widths.lhs sw] [flat right top] [curl left bottom]
+						dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+						dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
+						dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox bottomBox]
 				save 'mathRightTriangle' 0x22BF
 			sketch
 				include : intersection
 					spiro-outline
-						corner left bottom
-						corner right bottom
-						corner right top
+						corner leftBox bottomBox
+						corner rightBox bottomBox
+						corner rightBox topBox
 					union
-						dispiro [widths.lhs sw] [flat left bottom] [curl right bottom]
-						dispiro [widths.lhs sw] [flat right top] [curl left bottom]
+						dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+						dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox bottomBox]
 				save 'angle' 0x2220
 
 	do "Arith"
@@ -193,6 +251,20 @@ export : define [apply] : begin
 			save 'minus' 0x2212
 			include : DotAt MIDDLE plusTop DOTRADIUS
 			save 'minusDot' 0x2238
+
+		sketch # colon-equal
+			include glyphs.'baselineDot'
+			include glyphs.'xhDot'
+
+			local sbSquash 0.5
+
+			local delta : Math.max 0 : WIDTH / 2 - DOTRADIUS - SB * sbSquash
+			apply-transform : Upright
+			apply-transform : Translate (+delta) (symbolMid - XH / 2)
+			apply-transform : Italify
+
+			include : HBar (SB * sbSquash) (RIGHTSB - DOTSIZE) symbolMid OPERATORSTROKE
+			save 'minusColon' 0x2239
 
 		sketch # innerMinus
 			include markset.plus
@@ -259,105 +331,38 @@ export : define [apply] : begin
 
 			save 'divide' 0xF7
 
-	local equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
-	do "Equality"
+		do
+			define fine : adviceBlackness 5.5
+			define radius : Math.max ((RIGHTSB - SB) / 12) (fine / 2)
+			define barOffset : fine * 1.5 + radius * 2
+			define dotCenterOffset : OX + fine + radius
+			sketch
+				include markset.plus
+				include : union
+					HBar (SB + barOffset) (RIGHTSB - barOffset) symbolMid OPERATORSTROKE
+					DotAt (RIGHTSB - dotCenterOffset) symbolMid (radius + fine)
+					difference
+						DotAt (SB + dotCenterOffset) symbolMid (radius + fine)
+						DotAt (SB + dotCenterOffset) symbolMid radius
+				save 'originalOf' 0x22b6
+			sketch
+				include markset.plus
+				include : union
+					HBar (SB + barOffset) (RIGHTSB - barOffset) symbolMid OPERATORSTROKE
+					DotAt (SB + dotCenterOffset) symbolMid (radius + fine)
+					difference
+						DotAt (RIGHTSB - dotCenterOffset) symbolMid (radius + fine)
+						DotAt (RIGHTSB - dotCenterOffset) symbolMid radius
+				save 'imageOf' 0x22b7
+			sketch
+				include markset.plus
+				include : union
+					HBar SB (RIGHTSB - barOffset) symbolMid OPERATORSTROKE
+					difference
+						DotAt (RIGHTSB - dotCenterOffset) symbolMid (radius + fine)
+						DotAt (RIGHTSB - dotCenterOffset) symbolMid radius
+				save 'multimap' 0x22b8
 
-		define [EqualShape left right] : union
-			HBar left right (symbolMid + equalHalfSpace) OPERATORSTROKE
-			HBar left right (symbolMid - equalHalfSpace) OPERATORSTROKE
-
-		define [EqualHole x] : VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
-
-		define [IdentShape left right] : union
-			HBar left right (symbolMid + equalHalfSpace * 1.5) OPERATORSTROKE
-			HBar left right symbolMid OPERATORSTROKE
-			HBar left right (symbolMid - equalHalfSpace * 1.5) OPERATORSTROKE
-		define [IdentHole x] : VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
-
-		sketch # equal
-			include markset.plus
-			include : EqualShape SB RIGHTSB
-			save 'equal' '='
-
-			branch
-				include : DotAt [mix SB RIGHTSB (1/6)] (symbolMid + equalHalfSpace * 2.5) DOTRADIUS
-				include : DotAt [mix SB RIGHTSB (5/6)] (symbolMid - equalHalfSpace * 2.5) DOTRADIUS
-				save 'twodotapproxeq' 0x2252
-
-		sketch # colon-equal
-			include glyphs.'baselineDot'
-			include glyphs.'xhDot'
-
-			local sbSquash 0.5
-
-			local delta : Math.max 0 : WIDTH / 2 - DOTRADIUS - SB * sbSquash
-			apply-transform : Upright
-			apply-transform : Translate (-delta) (symbolMid - XH / 2)
-			apply-transform : Italify
-
-			include : EqualShape (SB + PERIODSIZE) (WIDTH - SB * sbSquash)
-			save 'colonEq' 0x2254
-
-		# Ligation glyphs
-		sketch # equal.fc
-			include markset.plus
-			include : difference
-				EqualShape SB (WIDTH - O)
-				EqualHole WIDTH
-			save 'equal.fc'
-
-		sketch # equal.cf
-			include markset.plus
-			include : difference
-				EqualShape O RIGHTSB
-				EqualHole 0
-			save 'equal.cf'
-
-		sketch # equal.jf
-			include markset.plus
-			include : difference
-				EqualShape (RIGHTSB - WIDTH + O) RIGHTSB
-				EqualHole 0
-			save 'equal.jf'
-
-		sketch # equal.cc
-			include markset.plus
-			include : difference
-				EqualShape O (WIDTH - O)
-				union
-					EqualHole 0
-					EqualHole WIDTH
-			save 'equal.cc'
-
-		sketch # ident.fc
-			include markset.plus
-			include : difference
-				IdentShape SB (WIDTH - O)
-				IdentHole WIDTH
-			save 'ident.fc'
-
-		sketch # ident.cf
-			include markset.plus
-			include : difference
-				IdentShape O RIGHTSB
-				IdentHole 0
-			save 'ident.cf'
-
-		sketch # ident.jf
-			include markset.plus
-			include : difference
-				IdentShape (RIGHTSB - WIDTH + O) RIGHTSB
-				IdentHole 0
-			save 'ident.jf'
-
-		sketch # ident.cc
-			include markset.plus
-			include : difference
-				IdentShape O (WIDTH - O)
-				union
-					IdentHole 0
-					IdentHole WIDTH
-			save 'ident.cc'
 
 	do "Dots and Colon-likes"
 		local radius1 PERIODRADIUS
@@ -402,6 +407,9 @@ export : define [apply] : begin
 		composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerMultiply] [into-unicode 0x2297]
 		composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerMultiplyStroke1] [into-unicode 0x2298]
 		composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.mathcdot] [into-unicode 0x2299]
+		composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.mathcdot] [into-unicode 0x2A00]
+		composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.innerPlus] [into-unicode 0x2A01]
+		composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.innerMultiply] [into-unicode 0x2A02]
 		composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.'smallwhitecircle.hwid'] [into-unicode 0x229A]
 		composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.mathAsterisk] [into-unicode 0x229B]
 		composite
@@ -438,6 +446,19 @@ export : define [apply] : begin
 				curl MIDDLE operBot [heading DOWNWARD]
 			save 'vee' 0x2228
 		turned 'wedge' 0x2227 'vee' MIDDLE symbolMid
+
+		sketch # curlyVee
+			local fine : CTHIN * OPERATORSTROKE
+			include : dispiro
+				g4 SB operTop [widths.center OPERATORSTROKE]
+				straight.down.end (MIDDLE - OPERATORSTROKE / 2 * HVCONTRAST) operBot [widths.heading fine 0 DOWNWARD]
+
+			include : dispiro
+				widths.center OPERATORSTROKE
+				g4 RIGHTSB operTop [widths.center OPERATORSTROKE]
+				straight.down.end (MIDDLE + OPERATORSTROKE / 2 * HVCONTRAST) operBot [widths.heading 0 fine DOWNWARD]
+			save 'curlyVee' 0x22CE
+		turned 'curlyWedge' 0x22CF 'curlyVee' MIDDLE symbolMid
 
 		sketch # doubleVee
 			define sw : adviceBlackness 6
@@ -489,7 +510,6 @@ export : define [apply] : begin
 			save 'squareCap' 0x2293
 		turned 'squareCup' 0x2294 'squareCap' MIDDLE symbolMid
 
-	### Logicals
 	do "Logicals"
 		sketch # negate
 			include glyphs.minus
@@ -558,11 +578,124 @@ export : define [apply] : begin
 			include : Rect tackTop tackBot SB RIGHTSB
 			save 'endOfProof' 0x220E
 
-	do "Comparison"
-		# Less and Greater
+
+
+	do "Relation"
+		define equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 		define lessSlantness : (4 / 13) * (operTop - operBot) / (RIGHTSB - SB)
 		define dH : lessSlantness * (RIGHTSB - SB)
 		define lessEqDist : Math.max [adviceBlackness 4] (XH * 0.16)
+
+		define [EqualShape left right] : union
+			HBar left right (symbolMid + equalHalfSpace) OPERATORSTROKE
+			HBar left right (symbolMid - equalHalfSpace) OPERATORSTROKE
+
+		define [EqualHole x] : VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
+
+		define [IdentShape left right] : union
+			HBar left right (symbolMid + equalHalfSpace * 1.5) OPERATORSTROKE
+			HBar left right symbolMid OPERATORSTROKE
+			HBar left right (symbolMid - equalHalfSpace * 1.5) OPERATORSTROKE
+		define [IdentHole x] : VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
+
+
+		sketch # equal
+			include markset.plus
+			include : EqualShape SB RIGHTSB
+			save 'equal' '='
+
+			branch
+				include : DotAt [mix SB RIGHTSB (1/6)] (symbolMid + equalHalfSpace * 2.5) DOTRADIUS
+				include : DotAt [mix SB RIGHTSB (5/6)] (symbolMid - equalHalfSpace * 2.5) DOTRADIUS
+				save 'twodotapproxeq' 0x2252
+
+		sketch # colon-equal
+			include glyphs.'baselineDot'
+			include glyphs.'xhDot'
+
+			local sbSquash 0.5
+
+			local delta : Math.max 0 : WIDTH / 2 - DOTRADIUS - SB * sbSquash
+			apply-transform : Upright
+			apply-transform : Translate (-delta) (symbolMid - XH / 2)
+			apply-transform : Italify
+
+			include : EqualShape (SB + DOTSIZE) (WIDTH - SB * sbSquash)
+			save 'colonEq' 0x2254
+
+		# Ligation glyphs
+		sketch # equal.fc
+			include markset.plus
+			include : difference
+				EqualShape SB (WIDTH - O)
+				EqualHole WIDTH
+			save 'equal.fc'
+
+		sketch # equal.cf
+			include markset.plus
+			include : difference
+				EqualShape O RIGHTSB
+				EqualHole 0
+			save 'equal.cf'
+
+		sketch # equal.jf
+			include markset.plus
+			include : difference
+				EqualShape (RIGHTSB - WIDTH + O) RIGHTSB
+				EqualHole 0
+			save 'equal.jf'
+
+		sketch # equal.cc
+			include markset.plus
+			include : difference
+				EqualShape O (WIDTH - O)
+				union
+					EqualHole 0
+					EqualHole WIDTH
+			save 'equal.cc'
+
+		sketch # ident
+			include markset.plus
+			include : IdentShape SB RIGHTSB
+			save 'ident' 0x2261
+
+		sketch # iiiident
+			include markset.plus
+			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace * 2.25) OPERATORSTROKE
+			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace * 0.75) OPERATORSTROKE
+			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 0.75) OPERATORSTROKE
+			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 2.25) OPERATORSTROKE
+			save 'iiiident' 0x2263
+
+		sketch # ident.fc
+			include markset.plus
+			include : difference
+				IdentShape SB (WIDTH - O)
+				IdentHole WIDTH
+			save 'ident.fc'
+
+		sketch # ident.cf
+			include markset.plus
+			include : difference
+				IdentShape O RIGHTSB
+				IdentHole 0
+			save 'ident.cf'
+
+		sketch # ident.jf
+			include markset.plus
+			include : difference
+				IdentShape (RIGHTSB - WIDTH + O) RIGHTSB
+				IdentHole 0
+			save 'ident.jf'
+
+		sketch # ident.cc
+			include markset.plus
+			include : difference
+				IdentShape O (WIDTH - O)
+				union
+					IdentHole 0
+					IdentHole WIDTH
+			save 'ident.cc'
 
 		define [LessShapeA top bot l r s] : begin
 			local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
@@ -856,22 +989,8 @@ export : define [apply] : begin
 			include : symWave symbolMid (-1)
 			save 'flipsym' 0x223D
 
-		sketch # ident
-			include markset.plus
-			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace * 1.5) OPERATORSTROKE
-			include : HBar SB RIGHTSB symbolMid OPERATORSTROKE
-			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 1.5) OPERATORSTROKE
-			save 'ident' 0x2261
-
-		sketch # iiiident
-			include markset.plus
-			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace * 2.25) OPERATORSTROKE
-			include : HBar SB RIGHTSB (symbolMid + equalHalfSpace * 0.75) OPERATORSTROKE
-			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 0.75) OPERATORSTROKE
-			include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 2.25) OPERATORSTROKE
-			save 'iiiident' 0x2263
-
 		vdual 'approx' 0x2248 'sym' approxDist
+
 		sketch # aapprox
 			include markset.plus
 			include : symWave (symbolMid + approxDist) 1
@@ -882,6 +1001,7 @@ export : define [apply] : begin
 			branch
 				include : HBar SB RIGHTSB (symbolMid - approxDist) OPERATORSTROKE
 				save 'approxBar' 0x224A
+
 		sketch # symbar
 			include glyphs.sym AS_BASE
 			include : Upright
@@ -1251,7 +1371,6 @@ export : define [apply] : begin
 	alias 'mathbullet' 0x2219 'bullet'
 	alias 'mathbar' 0x2223 'bar'
 	notGlyph 0x2224 'mathbar' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0.1
-	dual 'parallel' 0x2225 'bar' (WIDTH * 0.35)
 	notGlyph 0x2226 'parallel' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0
 	alias 'mathsmallcircle' 0x2218 'smallwhitecircle.hwid'
 	alias 'whiteDiamondOperator' 0x22C4 'whitediamond.hwid'
