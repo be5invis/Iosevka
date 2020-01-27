@@ -600,7 +600,7 @@ export : define [apply] : begin
 			save 'looprevesh' 0x1AA
 
 	### V and v
-	define { VShape } : do "V, v and related ======================================================"
+	define { VShape VShapeOutline } : do "V, v and related ========================================"
 		define cornerdist : HALFSTROKE * HVCONTRAST * 1.15
 		define vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
 		define VShapeFine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
@@ -608,49 +608,82 @@ export : define [apply] : begin
 		define VShapeMiddleWidth : adviceBlackness 3
 		define pInktrap 0.5
 
-		define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
+		define [VShapeOutline] : params [top [sw STROKE] barStraight div] : glyph-construction
 			local df : DivFrame div
 			local fine : [if barStraight VShapeFineStraight VShapeFine] * sw / STROKE
 			local sbCor : (CAP / top) * OX
 			local dgCor : diagCor top (WIDTH / 2) 0 (sw * 2)
+			local clearance : 0 - OX
+
 			if barStraight : begin
-				local vxStart : SB + sbCor
-				local vxEnd : df.middle - cornerdist
+				local vxStartL : df.leftSB + sbCor + clearance
+				local vxEndL : df.middle - cornerdist + clearance
+				local vxStartR : df.rightSB - sbCor - clearance
+				local vxEndR : df.middle + cornerdist - clearance
+				include : spiro-outline
+					flat [mix vxStartL vxEndL 0] [mix top 0 0]
+					curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap]
+					corner [mix vxStartL vxEndL 1] [mix top 0 1]
+					corner [mix vxStartR vxEndR 1] [mix top 0 1]
+					flat [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap]
+					curl [mix vxStartR vxEndR 0] [mix top 0 0]
+			: else : begin
+				local vxStartL : df.leftSB + clearance
+				local vxEndL : df.middle - cornerdist + clearance
+				local vxStartR : df.rightSB - clearance
+				local vxEndR : df.middle + cornerdist - clearance
+				include : spiro-outline
+					flat vxStartL top
+					curl vxStartL (top * 0.9)
+					quadcontrols 0 vcurviness 9 unimportant
+					corner vxEndL 0
+					corner vxEndR 0
+					quadcontrols 1 (1 - vcurviness) 9 unimportant
+					flat vxStartR (top * 0.9)
+					curl vxStartR top
+
+		define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
+			local df : DivFrame div
+			local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
+			local sbCor : (CAP / top) * OX
+			local dgCor : diagCor top (WIDTH / 2) 0 (sw * 2)
+			if barStraight : begin
+				local vxStartL : SB + sbCor
+				local vxEndL : df.middle - cornerdist
+				local vxStartR : df.rightSB - sbCor
+				local vxEndR : df.middle + cornerdist
 				local midSW : VShapeMiddleWidth / STROKE * sw
 				include : dispiro
 					widths.lhs (sw * dgCor)
-					flat [mix vxStart vxEnd 0] [mix top 0 0] [heading DOWNWARD]
-					curl [mix vxStart vxEnd pInktrap] [mix top 0 pInktrap] [widths.lhs midSW]
-					g4   [mix vxStart vxEnd 1] [mix top 0 1] [widths.lhs fine]
+					flat [mix vxStartL vxEndL 0] [mix top 0 0] [heading DOWNWARD]
+					curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs midSW]
+					g4   [mix vxStartL vxEndL 1] [mix top 0 1] [widths.lhs fine]
+				include : dispiro
+					widths.rhs (sw * dgCor)
+					flat [mix vxStartR vxEndR 0] [mix top 0 0] [heading DOWNWARD]
+					curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs midSW]
+					g4   [mix vxStartR vxEndR 1] [mix top 0 1] [widths.rhs fine]
+				tag-contour 'strokeUp'
 			: else : begin
 				include : dispiro
 					widths.lhs sw
-					flat SB top [heading DOWNWARD]
-					curl SB (top * 0.9) [heading DOWNWARD]
+					flat df.leftSB top [heading DOWNWARD]
+					curl df.leftSB (top * 0.9) [heading DOWNWARD]
 					quadcontrols 0 vcurviness 9 unimportant
-					g4   (df.middle - cornerdist) 0 [widths.lhs fine]
+					g4 (df.middle - cornerdist) 0 [widths.lhs fine]
+				include : dispiro
+					widths.rhs sw
+					flat df.rightSB top [heading DOWNWARD]
+					curl df.rightSB (top * 0.9) [heading DOWNWARD]
+					quadcontrols 0 vcurviness 9 unimportant
+					g4 (df.middle + cornerdist) 0 [widths.rhs fine]
+				tag-contour 'strokeUp'
 
 			#bottom cap
 			start-from (df.middle + cornerdist) 0
 			line-to (df.middle - cornerdist) 0
 			line-to df.middle fine
 
-			if barStraight : begin
-				local vxStart : df.rightSB - sbCor
-				local vxEnd : df.middle + cornerdist
-				include : dispiro
-					widths.rhs (sw * dgCor)
-					flat [mix vxStart vxEnd 0] [mix top 0 0] [heading DOWNWARD]
-					curl [mix vxStart vxEnd pInktrap] [mix top 0 pInktrap] [widths.rhs midSW]
-					g4   [mix vxStart vxEnd 1] [mix top 0 1] [widths.rhs fine]
-			: else : begin
-				include : dispiro
-					widths.rhs sw
-					flat df.rightSB top [heading DOWNWARD]
-					curl df.rightSB (top * 0.9) [heading DOWNWARD]
-					quadcontrols 0 vcurviness 9 unimportant
-					g4   (df.middle + cornerdist) 0 [widths.rhs fine]
-			tag-contour 'strokeUp'
 			include : AIVSerifs top
 
 		sketch # V
@@ -734,20 +767,13 @@ export : define [apply] : begin
 				g4   xmid 0
 
 			save 'nu' 0x3BD
-		list VShape
+		list VShape VShapeOutline
 
 	### A
-	do "A and related ============================================================================="
-		define [AMaskShape top sw barStraight div] : begin
-			local df : DivFrame [fallback div 1]
-			local sbCor : if barStraight ((top / CAP) * (OX * [if SLAB 1 4])) 0
-			local ptOffset : if barStraight 0 (top * 0.15)
-			return : spiro-outline
-				corner (SB + sbCor + 1) 0
-				corner (SB + sbCor + 1) ptOffset
-				corner df.middle CAP
-				corner (df.rightSB - sbCor - 1) ptOffset
-				corner (df.rightSB - sbCor - 1) 0
+	define { LambdaShape AMaskShape DeltaShape } : do "A and related =============================="
+		define [AMaskShape top sw barStraight div] : create-glyph : glyph-construction
+			include : VShapeOutline top sw barStraight div
+			include : FlipAround ([DivFrame div].width / 2) (top / 2)
 
 		sketch # A
 			set-width WIDTH
@@ -760,6 +786,7 @@ export : define [apply] : begin
 				include : intersection
 					HBarTop 0 WIDTH (XH / 2)
 					AMaskShape CAP STROKE true 1
+				# include : AMaskShape CAP STROKE true 1
 				save 'A.straight'
 				save 'Alpha.straight'
 				save 'cyrA.straight'
@@ -781,6 +808,52 @@ export : define [apply] : begin
 		turned 'turnA.straight' nothing 'A.straight' MIDDLE (CAP / 2)
 		turned 'turnA.curly'    nothing 'A.curly' MIDDLE (CAP / 2)
 		select-variant 'turnA' 0x2C6F (follow -- 'A')
+
+		# Lambda
+		define [LambdaShape top sw barStraight div] : glyph-construction
+			local df : DivFrame [fallback div 1]
+			include : VShape top sw barStraight div
+			include : FlipAround df.middle (top / 2)
+			if SLAB : begin
+				include : CenterBottomSerif (SB + sw / 2 * HVCONTRAST) 0 JUT
+				tag-contour 'serif'
+				include : CenterBottomSerif (RIGHTSB - sw / 2 * HVCONTRAST) 0 JUT
+				tag-contour 'serif'
+
+		sketch # Lambda
+			include markset.capital
+			branch
+				include : LambdaShape CAP STROKE true
+				save 'Lambda.straight'
+				save 'latinLambda.straight'
+			branch
+				include : LambdaShape CAP STROKE false
+				save 'Lambda.curly'
+				save 'latinLambda.curly'
+
+		select-variant 'Lambda' 0x39B
+		select-variant 'latinLambda' 0x245 (follow -- 'Lambda')
+
+		# Delta
+		define [DeltaShape top sw barStraight div] : glyph-construction
+			include : LambdaShape top sw barStraight div
+			eject-contour 'serif'
+			include : intersection
+				HBarBottom 0 WIDTH 0 sw
+				AMaskShape top sw barStraight div
+
+		sketch # Delta
+			include markset.capital
+			branch
+				include : DeltaShape CAP STROKE true
+				save 'Delta.straight'
+			branch
+				include : DeltaShape CAP STROKE false
+				save 'Delta.curly'
+
+		select-variant 'Delta' 0x394
+
+		list LambdaShape AMaskShape DeltaShape
 
 	### a
 	do "a and related ============================================================================="
@@ -1472,9 +1545,9 @@ export : define [apply] : begin
 
 	### K and k
 	do "k and related ============================================================================"
-		local [KBalance straightBar] : if straightBar [if SLAB (WIDTH / 16) (WIDTH / 32)] 0
-		local [KBalanceRight straightBar] : if straightBar [if SLAB (-WIDTH / 32) (WIDTH / 32)] 0
-		local [KBalanceRightCursive straightBar] : if straightBar [if SLAB (WIDTH / 16) (WIDTH / 32)] 0
+		local [KBalance straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
+		local [KBalanceRight straightBar] : if SLAB (-WIDTH / 32) : if straightBar (WIDTH / 32) 0
+		local [KBalanceRightCursive straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
 		define [KLegShape top straightBar] : glyph-construction
 			local turn (top * 0.99)
 			local fine : adviceBlackness 3.5
@@ -1511,12 +1584,12 @@ export : define [apply] : begin
 				local attach2 [if SLAB [mix kshLeft kshRight 0.48] MIDDLE]
 				include : dispiro
 					g4.down.start (kshRight) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
-					bezcontrols 0 [if SLAB 0.1 0.2] 0.5 [if SLAB 0.55 0.65] 8
+					bezcontrols 0 0.2 0.5 0.65 8
 					g4 (kshLeft + STROKE) attach [widths 0 fine]
 				include : dispiro
 					widths.center
 					g4.up.start (kshRight - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
-					quadcontrols 0 [if SLAB 0.125 0.25] 8
+					quadcontrols 0 0.25 8
 					g4 attach2 (top * 0.61) [widths.center fine]
 
 			if SLAB : do
@@ -2136,9 +2209,9 @@ export : define [apply] : begin
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
 
-		define [RShape straightBar top] : glyph-construction
-			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
-			include : PShape top (mul -- 1) (bp -- m) (overshoot -- O)
+		define [RShape] : params [straightBar top [slab SLAB]] : glyph-construction
+			local m : if slab (0.5 + HALFSTROKE / CAP) PBARPOS
+			include : PShape top (mul -- 1) (bp -- m) (overshoot -- O) (slab -- slab)
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
 			include : RLegShape right 0 ((top - STROKE) * m) top SLAB straightBar STROKE 0
 
@@ -2148,12 +2221,18 @@ export : define [apply] : begin
 				include : RShape true CAP
 				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
 				save 'R.straight'
+			branch
+				include : RShape true CAP (slab -- false)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.straight'
 			branch
 				include : RShape false CAP
 				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
 				save 'R.curly'
+			branch
+				include : RShape false CAP (slab -- false)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.curly'
 
@@ -2162,11 +2241,15 @@ export : define [apply] : begin
 			branch
 				include : RShape true XH
 				save 'smcpR.straight'
+			branch
+				include : RShape true XH (slab -- false)
 				eject-contour 'strokeL'
 				save 'rrotunda.straight'
 			branch
 				include : RShape false XH
 				save 'smcpR.curly'
+			branch
+				include : RShape false XH (slab -- false)
 				eject-contour 'strokeL'
 				save 'rrotunda.curly'
 
@@ -2833,6 +2916,24 @@ export : define [apply] : begin
 			save 'o' 'o'
 			save 'omicron' 0x3BF
 			save 'cyro' 0x43e
+
+		sketch
+			include markset.capital
+			include : HornBaseAnchor RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
+			include : difference
+				HornShape RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
+				OShapeOutline (CAP + O) (0 - O) (SB - O) (RIGHTSB + O) nothing SMOOTHA SMOOTHB
+			include glyphs.O
+			save 'OHorn' 0x01A0
+
+		sketch
+			include markset.e
+			include : HornBaseAnchor RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
+			include : difference
+				HornShape RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
+				OShapeOutline (XH + O) (0 - O) (SB - O) (RIGHTSB + O) nothing nothing nothing true
+			include glyphs.o
+			save 'oHorn' 0x01A1
 
 		sketch # Oslash
 
@@ -4294,4 +4395,4 @@ export : define [apply] : begin
 			eject-contour 'serifRB'
 			save 'zcurlytail' 0x291
 
-	return [object ISerifShape IotaShape LShape VShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline]
+	return [object ISerifShape IotaShape LShape VShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline LambdaShape AMaskShape DeltaShape]

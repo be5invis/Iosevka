@@ -8,13 +8,12 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry commonShapes overmarks
 
-	define WidthKinds {{'.hwid' WIDTH}}
-	if (para.spacing > 0) : WidthKinds.push {'.fwid' FULLWIDTH0}
+	define WidthKinds {{'.hwid' WIDTH WIDTH} {'.fwid' FULLWIDTH0 (FULLWIDTH0 / 2)}}
 
 	local exportArrowShape nothing
 
 	### Arrowheads
-	foreach {suffix MosaicWidth} [items-of WidthKinds] : do 'Arrows'
+	foreach {suffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do 'Arrows'
 		define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH2) unicode nothing
 		define [MangleName name] : name + suffix
 
@@ -125,7 +124,7 @@ export : define [apply] : begin
 			local halfBarWidth : headLen / 3
 			local headWidth : halfBarWidth * 2
 
-			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.4)
+			local fine : Math.min [adviceBlackness 5] (halfBarWidth * 0.6)
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
 			local p : (mag - fine) / mag
 			local p2 : (mag - fine * [Math.sqrt 13] / 2) / mag
@@ -257,6 +256,45 @@ export : define [apply] : begin
 		arrow [HalfArrowShape LHSHalfArrowHead] [MangleName 'arrowdownHL']  [MangleUnicode 0x21C2] arrowMidX arrowTop arrowMidX arrowBot
 		arrow [HalfArrowShape RHSHalfArrowHead] [MangleName 'arrowdownHR']  [MangleUnicode 0x21C3] arrowMidX arrowTop arrowMidX arrowBot
 
+		do "Wave arrows"
+			define WaveShape : CreateWaveShape
+				doubleArrowStemWidth / 2
+				Math.min OPERATORSTROKE (doubleArrowStemWidth / 3)
+			define rightTBias : (MosaicWidth / MosaicUnitWidth) - 1
+			define freeCoT      : arrowSB / MosaicWidth
+			define connectedCoT : (arrowSB / MosaicWidth) + (11 / 32)
+			sketch
+				set-width MosaicWidth
+				include : WaveShape
+					left -- (-connectedCoT)
+					right -- (rightTBias - connectedCoT)
+					xsJoin -- (arrowSB - o)
+					xfJoin -- (arrowRSB + o)
+					unitWidth -- MosaicUnitWidth
+				include : ArrowHead arrowSB symbolMid arrowRSB symbolMid
+				include : ArrowHead arrowRSB symbolMid arrowSB symbolMid
+				save [MangleName 'waveArrowLeftRight'] [MangleUnicode 0x21AD]
+
+			sketch
+				set-width MosaicWidth
+				include : WaveShape
+					left -- (-connectedCoT)
+					right -- (rightTBias - freeCoT)
+					xsJoin -- (arrowSB - o)
+					unitWidth -- MosaicUnitWidth
+				include : ArrowHead arrowRSB symbolMid arrowSB symbolMid
+				save [MangleName 'waveArrowLeft'] [MangleUnicode 0x219C]
+
+			sketch
+				set-width MosaicWidth
+				include : WaveShape
+					left -- (-freeCoT)
+					right -- (rightTBias - connectedCoT)
+					xfJoin -- (arrowRSB + o)
+					unitWidth -- MosaicUnitWidth
+				include : ArrowHead arrowSB symbolMid arrowRSB symbolMid
+				save [MangleName 'waveArrowRight'] [MangleUnicode 0x219D]
+
 		arrow [ThickArrowShape 'white'] [MangleName 'uni21E6'] [MangleUnicode 0x21E6] arrowRSB symbolMid arrowSB symbolMid
 		arrow [ThickArrowShape 'white'] [MangleName 'uni21E7'] [MangleUnicode 0x21E7] arrowMidX arrowBot arrowMidX arrowTop
 		arrow [ThickArrowShape 'white'] [MangleName 'uni21E8'] [MangleUnicode 0x21E8] arrowSB symbolMid arrowRSB symbolMid
@@ -352,6 +390,9 @@ export : define [apply] : begin
 			vcombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowbarright'] [MangleName 'arrowbarleft'] (arrowSize * 1.75)
 
 		if (MosaicWidth == FULLWIDTH2) : set exportArrowShape ArrowShape
+
+	alias 'longArrowLeft'  0x27F5 'arrowleft.fwid'
+	alias 'longArrowRight' 0x27F6 'arrowright.fwid'
 
 	### Standard geometric shapes
 	foreach {suffix MosaicWidth} [items-of WidthKinds] : do 'Geometric'
@@ -710,19 +751,34 @@ export : define [apply] : begin
 			save [MangleName 'bigblackcircle'] [MangleUnicode 0x2B24]
 
 		let
-		: configurations : list
+		: cfg : list
 			* {.sides 5 .skip 2 .name 'blackstar' .unicode 0x2605 .overflow 1.1 .phase 0}
 			* {.sides 5 .skip 1 .name 'blackpentagon' .unicode 0x2B1F .overflow 1.05 .phase 0}
 			* {.sides 6 .skip 1 .name 'blackhexagon' .unicode 0x2B22 .overflow 1.05 .phase 0}
 			* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
 			* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
-		: foreach [{.sides sides .skip skip .name name .unicode unicode .overflow overflow .phase phase} : items-of configurations] : sketch
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
 			include markset.plus
 			foreach [j : range 0 sides] : begin
 				local angle : 2 * Math.PI * j * skip / sides + phase
 				currentGlyph.([if j 'line-to' 'start-from'])
 					mix left right (0.5 - 0.5 * overflow * [Math.sin angle])
 					symbolMid + squareRadius * [Math.cos angle] * overflow
+			save [MangleName "hw\(name)"]
+			include FullWidthify
+			save [MangleName name] [MangleUnicode unicode]
+
+		let
+		: cfg : list
+			* {.sides 6 .skip 1 .name 'SixPointedBlackStar' .unicode 0x2736 .overflow 1.05 .phase 0}
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
+			include markset.plus
+			foreach [j : range 0 (2 * sides)] : begin
+				local angle : Math.PI * j * skip / sides + phase
+				local mag : [if (j % 2) 0.5 1.0] * overflow
+				currentGlyph.([if j 'line-to' 'start-from'])
+					mix left right (0.5 - 0.5 * mag * [Math.sin angle])
+					symbolMid + squareRadius * mag * [Math.cos angle]
 			save [MangleName "hw\(name)"]
 			include FullWidthify
 			save [MangleName name] [MangleUnicode unicode]

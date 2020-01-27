@@ -44,11 +44,11 @@ export : define [apply] : begin
 			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
 			apply-transform : Italify
 			set currentGlyph.cmpPriority 12
-			refair this
+			refair currentGlyph
 			set-width 0
 		return lg
 
-	define [CircCrowd digits width] : 5 + [AdjustDigitCount digits width]
+	define [CircCrowd digits width] : 2 + 2 * [AdjustDigitCount digits width]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
 
 	define [circleDimens digits dscale w m] : begin
@@ -74,10 +74,11 @@ export : define [apply] : begin
 	define [CircledMiniatureFont digits width records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		return : Miniature
-			glyphs -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
-			crowd  -- [CircCrowd digits width]
-			scale  -- [CircScale digits width]
-			unfair -- true
+			glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
+			crowd   -- [CircCrowd digits width]
+			scale   -- [CircScale digits width]
+			unfair  -- true
+			sbscale -- 1
 
 	define [CircName prefix digits parts suffix] : suggestName : prefix + '-' + digits + '-' + [parts.join '_'] + '.' + suffix
 
@@ -183,19 +184,40 @@ export : define [apply] : begin
 		define pscale : linreg WIDTH 0.6 UPM 0.75 width
 		define sw0 : [EnclosureStrokeScale dscale digits width] * [adviceBlackness [BraceCrowd digits width]] / [BraceScale digits width]
 		define sw : Math.min STROKE sw0
-		define l : [Math.max (SB + O * 3) (width / 2 - CAP / 2 * dscale - sw0 * 2.5)] + OX
+		define l : Math.max (SB + O * 3) (width / 2 - [Math.max (WIDTH * digits) CAP] / 2)
 		define r : width - l
 		return : object width sw dscale pscale l r
 
 	define [createBracedGlyphs digits records] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local pendingGlyphs : records.map : [record] => record.1
-			local miniatureFont : Miniature
+			define pendingGlyphs : records.map : [record] => record.1
+			define miniatureFont : Miniature
 				glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 				crowd   -- [BraceCrowd digits ww]
 				scale   -- [BraceScale digits ww]
 				sbscale -- 1
 				unfair  -- true
+
+			define gnb : CircName '.braced-brace' digits {} suffix
+			define braceGlyph : create-glyph gnb : glyph-construction
+				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
+				local s : TANSLANT * symbolMid / 2
+				set-width width
+				include : dispiro
+					widths.lhs sw
+					g4 ([mix l r 0.15] - s) (parenTop * pscale)
+					g4.down.mid (l - s + O) (symbolMid * pscale)
+					g4 ([mix l r 0.15] - s) (parenBot * pscale)
+
+				include : dispiro
+					widths.rhs sw
+					g4 ([mix r l 0.15] + s) (parenTop * pscale)
+					g4.down.mid (r + s - O) (symbolMid * pscale)
+					g4 ([mix r l 0.15] + s) (parenBot * pscale)
+
+				include : Upright
+				include : Translate 0 (symbolMid - symbolMid * pscale)
+				include : Italify
 
 			foreach {unicode parts w bal baly} [items-of records] : do
 				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
@@ -227,31 +249,16 @@ export : define [apply] : begin
 						if bal : set shift : CAP / 2 - [mix baly gMiddleY bal]
 						: else : set shift : CAP / 2 - gMiddleY
 
-					apply-transform : Translate (width / 2) (symbolMid * pscale - (CAP / 2 - shift) * dscale)
+					apply-transform : Translate (width / 2) (symbolMid - (CAP / 2 - shift) * dscale)
 					apply-transform : Italify
 					set currentGlyph.cmpPriority 11
-					refair this
+					refair currentGlyph
 					set-width 0
 
 				sketch
-					local s : TANSLANT * symbolMid
 					set-width width
 					include lg
-					include : dispiro
-						widths.lhs sw
-						g4 ([mix l r 0.15] - s) (parenTop * pscale)
-						g4.down.mid (l - s + O) (symbolMid * pscale)
-						g4 ([mix l r 0.15] - s) (parenBot * pscale)
-
-					include : dispiro
-						widths.rhs sw
-						g4 ([mix r l 0.15] + s) (parenTop * pscale)
-						g4.down.mid (r + s - O) (symbolMid * pscale)
-						g4 ([mix r l 0.15] + s) (parenBot * pscale)
-
-					include : Upright
-					include : Translate 0 (symbolMid - symbolMid * pscale)
-					include : Italify
+					include braceGlyph
 
 					if (w == ww) : save gn unicode
 					: else : save gn
@@ -381,7 +388,6 @@ export : define [apply] : begin
 
 	if [not recursive] : do "Single-digit braced"
 		local compositions {}
-		compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2474 + j - 1
 			digitGlyphNames j
@@ -392,7 +398,6 @@ export : define [apply] : begin
 
 	if [not recursive] : do "Double-digit braced"
 		local compositions {}
-		compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2474 + j - 1
 			digitGlyphNames j
