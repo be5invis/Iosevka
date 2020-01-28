@@ -1479,14 +1479,16 @@ export : define [apply] : begin
 			include markset.p
 			branch
 				include : [GenSmallYShape true].SmallYShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'y.straight'
 				save 'cyru.straight'
 			branch
 				include : [GenSmallYShape false].SmallYShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'y.curly'
 				save 'cyru.curly'
 
-		sketch # y.curly
+		sketch # y.cursive
 			include markset.p
 			include : nShoulder
 				left -- (SB + STROKE * HVCONTRAST)
@@ -1501,6 +1503,7 @@ export : define [apply] : begin
 				g4 SB (DESCENDER + SHOOK)
 			if SLAB : begin
 				include : LeftwardTopSerif SB XH SIDEJUT
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
 			save 'y.cursive'
 			save 'cyru.cursive'
 
@@ -1512,18 +1515,22 @@ export : define [apply] : begin
 			include markset.p
 			branch
 				include : [GenSmallYShape true].SmallYHookTopShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'yhooktop.straight'
 			branch
 				include : [GenSmallYShape false].SmallYHookTopShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'yhooktop.curly'
 
 		sketch # cyrU
 			include markset.capital
 			branch
 				include : [GenSmallYShape true].SmallYShape CAP 0
+				set-anchor "overlay" BASE MIDDLE (XH / 2 - DESCENDER)
 				save 'cyrU.straight'
 			branch
 				include : [GenSmallYShape false].SmallYShape CAP 0
+				set-anchor "overlay" BASE MIDDLE (XH / 2 - DESCENDER)
 				save 'cyrU.curly'
 
 		select-variant 'yhooktop' 0x1B4
@@ -1536,6 +1543,7 @@ export : define [apply] : begin
 		sketch # lambda
 			include markset.b
 			include : [GenSmallYShape false].SmallLambdaShape CAP 0
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
 			save 'lambda' 0x3BB
 
 		sketch # lambdaslash
@@ -2209,30 +2217,30 @@ export : define [apply] : begin
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
 
+		define [RBarPos slab] :  if slab (0.5 + HALFSTROKE / CAP) BARPOS
 		define [RShape] : params [straightBar top [slab SLAB]] : glyph-construction
-			local m : if slab (0.5 + HALFSTROKE / CAP) PBARPOS
-			include : PShape top (mul -- 1) (bp -- m) (overshoot -- O) (slab -- slab)
+			include : PShape top (mul -- 1) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
-			include : RLegShape right 0 ((top - STROKE) * m) top SLAB straightBar STROKE 0
+			include : RLegShape right 0 ((top - STROKE) * [RBarPos slab]) top SLAB straightBar STROKE 0
 
 		sketch # R
 			include markset.capital
 			branch
 				include : RShape true CAP
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos SLAB] - HALFSTROKE)
 				save 'R.straight'
 			branch
 				include : RShape true CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos 0] - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.straight'
 			branch
 				include : RShape false CAP
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos SLAB] - HALFSTROKE)
 				save 'R.curly'
 			branch
 				include : RShape false CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos 0] - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.curly'
 
@@ -2277,8 +2285,7 @@ export : define [apply] : begin
 
 		define [CyrYaShape straightBar top] : glyph-construction
 			local bowlTop (top * 1)
-			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
-			local bowlBottom ((top - STROKE) * m - HALFSTROKE)
+			local bowlBottom ((top - STROKE) * [RBarPos SLAB] - HALFSTROKE)
 			local turn : mix bowlTop bowlBottom (SMOOTHA / (SMOOTHA + SMOOTHB))
 			local turnRadius : (bowlTop - bowlBottom) * 0.45
 			local barright : WIDTH - SB * 1.25
@@ -2296,13 +2303,13 @@ export : define [apply] : begin
 
 			if straightBar : then : include : dispiro
 				widths.center (STROKE * [diagCor top (WIDTH - STROKE * 2)])
-				corner MIDDLE ((top - STROKE) * m) [heading DOWNWARD]
+				corner MIDDLE ((top - STROKE) * [RBarPos SLAB]) [heading DOWNWARD]
 				corner (left + OX * 2 + HALFSTROKE * HVCONTRAST) 0 [heading DOWNWARD]
 			: else : include : dispiro
 				widths.center
 				g4.up.start (left + HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
 				quadcontrols 0 [if SLAB 0.3 0.4] 8
-				g4 MIDDLE ((top - STROKE) * m)
+				g4 MIDDLE ((top - STROKE) * [RBarPos SLAB])
 
 			if SLAB : begin
 				include : RightwardTopSerif barright top SIDEJUT
