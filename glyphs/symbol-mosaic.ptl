@@ -10,12 +10,15 @@ export : define [apply] : begin
 	define WidthKinds {{'.hwid' WIDTH}}
 	if (para.spacing > 0) : WidthKinds.push {'.fwid' FULLWIDTH0}
 
+	define MosaicTop    font.OS_2.sTypoAscender
+	define MosaicBottom font.OS_2.sTypoDescender
+
 	foreach {suffix MosaicWidth} [items-of WidthKinds] : do
 		define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH) unicode nothing
 		define [MangleName name] : name + suffix
 
-		define top     font.OS_2.usWinAscent
-		define bottom  (-font.OS_2.usWinDescent)
+		define top     MosaicTop
+		define bottom  MosaicBottom
 		define left    0
 		define right   MosaicWidth
 
@@ -72,7 +75,7 @@ export : define [apply] : begin
 				if (bits.length > 0) : include : union
 					BlockMosaicTile w h bits.0
 					BlockMosaicPattern w h : bits.slice 1
-				
+
 			define [BlockMosaic23 unicode pattern] : sketch
 				set-width MosaicWidth
 				include : ForceUpright
@@ -149,7 +152,7 @@ export : define [apply] : begin
 			BlockMosaic 0x1FB95 4 4 {0 2 5 7 8 10 13 15}
 			BlockMosaic 0x1FB96 4 4 {1 3 4 6 9 11 12 14}
 			BlockMosaic 0x1FB97 4 4 {4 5 6 7 12 13 14 15}
-		
+
 		do "Smooth Mosaic" : begin
 
 
@@ -159,7 +162,7 @@ export : define [apply] : begin
 				define corners : [pattern.split ''].map : x => [PatternCorner23 (x - 0)]
 				include : spiro-outline corners
 				save [MangleName ('blockMosaicSmooth23/' + pattern)] [MangleUnicode unicode]
-			
+
 			SmoothMosaic23 0x1FB3C '689'
 			SmoothMosaic23 0x1FB3D '680'
 			SmoothMosaic23 0x1FB3E '489'
@@ -211,7 +214,7 @@ export : define [apply] : begin
 				define corners : [pattern.split ''].map : x => [PatternCorner22 (x - 0)]
 				include : spiro-outline corners
 				save [MangleName ('blockMosaicSmooth22/' + pattern)] [MangleUnicode unicode]
-			
+
 			SmoothMosaic22 0x1FB68 '15793'
 			SmoothMosaic22 0x1FB69 '17935'
 			SmoothMosaic22 0x1FB6A '17953'
@@ -232,7 +235,7 @@ export : define [apply] : begin
 				corner [mix left right hStart] [mix bottom top vEnd]
 				corner [mix left right hEnd] [mix bottom top vEnd]
 				corner [mix left right hEnd] [mix bottom top vStart]
-			
+
 			define [BlockElementGlyph unicode hStart hEnd vStart vEnd] : sketch
 				set-width MosaicWidth
 				include : ForceUpright
@@ -281,7 +284,7 @@ export : define [apply] : begin
 			define FillLight  (1 / 8)
 			define FillMedium (1 / 4)
 			define FillHeavy  (1 / 2)
-			
+
 			sketch # lightShade
 				set-width MosaicWidth
 				include : Shade 4 FillLight
@@ -291,13 +294,15 @@ export : define [apply] : begin
 				set-width MosaicWidth
 				include : Shade 8 FillMedium : PatternPolygon22 bits
 				save [BEGlyphName unicode] [MangleUnicode unicode]
-			define [InverseMediumShade unicode bits coBits] : sketch
+
+			define [InverseMediumShade unicode bits] : sketch
 				set-width MosaicWidth
 				include : Shade (-8) (1 - FillMedium) : PatternPolygon22 bits
 				include : difference
 					FillBlock 0 1 0 1
 					PatternPolygon22 bits
 				save [BEGlyphName unicode] [MangleUnicode unicode]
+
 			MediumShade 0x2592  {1 3 9 7}
 			MediumShade 0x1FB8C {1 2 8 7}
 			MediumShade 0x1FB8D {2 3 9 8}
@@ -322,6 +327,7 @@ export : define [apply] : begin
 				set-width MosaicWidth
 				include : Shade (-4) FillHeavy
 				save [MangleName 'upperLeftToLowerRightFill'] [MangleUnicode 0x1FB98]
+
 			sketch # upperRightToLowerLeftFill
 				set-width MosaicWidth
 				include : Shade 4 FillHeavy
@@ -506,8 +512,8 @@ export : define [apply] : begin
 			define [vDashed unicode segments weight] : sketch
 				set-width MosaicWidth
 				include : ForceUpright
-				foreach j [range 0 segments] : include : VBar 
-					begin midx 
+				foreach j [range 0 segments] : include : VBar
+					begin midx
 					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.2
 					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.8
 					begin weight
@@ -601,3 +607,151 @@ export : define [apply] : begin
 				include glyphs.([BdGlyphName 0x2571])
 				include glyphs.([BdGlyphName 0x2572])
 				save [BdGlyphName 0x2573] [MangleUnicode 0x2573]
+
+		do "Powerline Mosaics"
+			define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH3) unicode nothing
+			define [MangleName name] : name + suffix
+
+			local pwlMidOrig : (MosaicTop + MosaicBottom) / 2
+			local pwlTop : (MosaicTop - pwlMidOrig) * para.powerlineScaleY + para.powerlineShiftY + pwlMidOrig
+			local pwlBot : (MosaicBottom - pwlMidOrig) * para.powerlineScaleY + para.powerlineShiftY + pwlMidOrig
+			local pwlMid : mix pwlBot pwlTop (1 / 2)
+			local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
+			local pwlFar : MosaicWidth * para.powerlineScaleX + para.powerlineShiftX
+
+			sketch # pwlTriangleRight
+				set-width MosaicWidth
+				include : ForceUpright
+				start-from (pwlNear + O) pwlTop
+				line-to    pwlNear pwlTop
+				line-to    pwlFar pwlMid
+				line-to    pwlNear pwlBot
+				line-to    (pwlNear + O) pwlBot
+				save [MangleName 'pwlTriangleRight'] [MangleUnicode 0xE0B0]
+
+			sketch # pwlAngleRight
+				set-width MosaicWidth
+				include : ForceUpright
+				local fine : adviceBlackness 4
+				include : intersection
+					spiro-outline
+						corner (pwlNear - MosaicWidth) pwlTop
+						corner pwlNear pwlTop
+						corner pwlFar pwlMid
+						corner pwlNear pwlBot
+						corner (pwlNear - MosaicWidth) pwlBot
+					union
+						dispiro
+							widths.rhs fine
+							flat pwlNear pwlTop
+							curl pwlFar pwlMid
+						dispiro
+							widths.rhs fine
+							flat pwlFar pwlMid
+							curl pwlNear pwlBot
+				save [MangleName 'pwlAngleRight'] [MangleUnicode 0xE0B1]
+
+			sketch # pwlTriangleLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlTriangleRight']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlTriangleLeft'] [MangleUnicode 0xE0B2]
+
+			sketch # pwlAngleLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlAngleRight']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlAngleLeft'] [MangleUnicode 0xE0B3]
+
+			sketch # pwlUnderline
+				set-width MosaicWidth
+				include : ForceUpright
+				local fine : adviceBlackness 4
+				include : HBarBottom 0 MosaicWidth pwlBot
+				save [MangleName 'pwlUnderline'] [MangleUnicode 0xE0AE]
+
+			sketch # pwlOverline
+				set-width MosaicWidth
+				include : ForceUpright
+				local fine : adviceBlackness 4
+				include : HBarTop 0 MosaicWidth pwlTop
+				save [MangleName 'pwlOverline'] [MangleUnicode 0xE0AF]
+
+			sketch # pwlCornerBottomLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				start-from (pwlNear + O) pwlTop
+				line-to    pwlNear pwlTop
+				line-to    pwlFar pwlBot
+				line-to    (pwlNear + O) pwlBot
+				save [MangleName 'pwlCornerBottomLeft'] [MangleUnicode 0xE0B8]
+
+			sketch # pwlSlashBottomLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				local fine : adviceBlackness 4
+				include : dispiro
+					widths.rhs fine
+					flat pwlNear pwlTop
+					curl pwlFar pwlBot
+				save [MangleName 'pwlSlashBottomLeft'] [MangleUnicode 0xE0B9]
+
+			sketch # pwlCornerTopLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				start-from (pwlNear + O) pwlTop
+				line-to    pwlNear pwlTop
+				line-to    pwlFar pwlTop
+				line-to    (pwlNear + O) pwlBot
+				save [MangleName 'pwlCornerTopLeft'] [MangleUnicode 0xE0BC]
+
+			sketch # pwlSlashTopLeft
+				set-width MosaicWidth
+				include : ForceUpright
+				local fine : adviceBlackness 4
+				include : dispiro
+					widths.rhs fine
+					flat pwlNear pwlBot
+					curl pwlFar pwlTop
+				save [MangleName 'pwlSlashTopLeft'] [MangleUnicode 0xE0BD]
+
+			sketch # pwlCornerBottomRight
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlCornerTopLeft']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlCornerBottomRight'] [MangleUnicode 0xE0BA]
+
+			sketch # pwlSlashBottomRight
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlSlashTopLeft']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlSlashBottomRight'] [MangleUnicode 0xE0BB]
+
+			sketch # pwlCornerTopRight
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlCornerBottomLeft']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlCornerTopRight'] [MangleUnicode 0xE0BE]
+
+			sketch # pwlSlashTopRight
+				set-width MosaicWidth
+				include : ForceUpright
+				include glyphs.[MangleName 'pwlSlashBottomLeft']
+				include : FlipAround (MosaicWidth / 2) pwlMid
+				save [MangleName 'pwlSlashTopRight'] [MangleUnicode 0xE0BF]
+
+	sketch # .notdef
+		include : union
+			intersection
+				glyph-construction : include glyphs.'be2592.hwid'
+				Rect CAP 0 SB RIGHTSB
+			difference
+				Rect CAP 0 SB RIGHTSB
+				Rect (CAP - STROKE) (0 + STROKE) (SB + STROKE) (RIGHTSB - STROKE)
+		set currentGlyph.cmpPriority (9999)
+		save '.notdef'

@@ -9,7 +9,9 @@ module.exports = function(output, family, hs, formats) {
 		ans += `
 @font-face {
 	font-family: '${family + " Web"}';
+	font-display: swap;
 	font-weight: ${term.cssWeight};
+	font-stretch: ${term.cssStretch};
 	font-style: ${term.cssStyle};
 	src: ${src};
 }
@@ -19,7 +21,9 @@ module.exports = function(output, family, hs, formats) {
 			ans += `
 @font-face {
 	font-family: '${family + " Web Oblique"}';
+	font-display: swap;
 	font-weight: ${term.cssWeight};
+	font-stretch: ${term.cssStretch};
 	src: ${src};
 }
 `;

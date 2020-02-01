@@ -9,27 +9,29 @@ import [designParameters] from '../meta/aesthetics'
 export : define [apply] : begin
 	glyph-module-entry
 	###### COMMON GLYPH CONSTRUCTIONS
-	define [queryFeatureSelector name para alias] : begin
+	define [queryFeatureSelector follow para name] : begin
 		local fs {.}
 		local introduced false
-		foreach [{k h} : pairs-of para.variants] : if (h.(name) && h.__cvmap && h.__cvmap.(name)) : begin
-			local tag h.__cvmap.(name)
-			set fs.(tag) ([fallback alias name] + '.' + h.(name))
+		foreach [{k h} : pairs-of para.variants] : if (h.(follow) && h.__cvmap && h.__cvmap.(follow)) : begin
+			local tag h.__cvmap.(follow)
+			set fs.(tag) ([fallback name follow] + '.' + h.(follow))
 			set introduced true
 		return : if introduced fs null
 
 	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
+
 		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
+
 		if (transform && transform.(variant)) : set variant transform.(variant)
 		local chosenGlyph glyphs.((name + '.' + variant))
 
 		create-glyph [fallback to-name name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector name para
+			set currentGlyph.featureSelector : queryFeatureSelector follow para name
 			set this.cmpPriority chosenGlyph.cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
@@ -99,7 +101,7 @@ export : define [apply] : begin
 		apply-transform : Translate 0 (spacing / 2)
 		apply-transform : Italify
 	define [vdual newid unicode id spacing] : vcombine [fallback newid : 'double' + id] unicode id id spacing
-	
+
 	# Full-width derivatives
 	define [fwl newid unicode id shift wk] : create-glyph [fallback newid : 'fwl' + id] : glyph-construction
 		if unicode : assign-unicode unicode
@@ -142,7 +144,7 @@ export : define [apply] : begin
 			begin [lambda : set this.gizmo currentGlyph.gizmo]
 			corner l d
 			corner l u
-			corner u u
+			corner r u
 			corner r d
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
@@ -386,26 +388,24 @@ export : define [apply] : begin
 		local ax : Math.max 0 : [Math.abs dx] - [fallback dxt 0]
 		return : [Math.hypot ay ax] / ay
 
-	define [halfXStrand _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
-		local sbCor : if para.straightBar ((OX * 4) * ([Math.abs  (lefty - righty)] / CAP)) 0
+	define [halfXStrand stb _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
+		local sbCor : if stb ((OX * 4) * ([Math.abs  (lefty - righty)] / CAP)) 0
 		local leftx : _leftx + ((HALFSTROKE * HVCONTRAST + sbCor) * [if (rightx > _leftx) 1 (-1)])
 		local fine  : (_fine || STROKE) * 0.5
-		
+
 		local turnyleft : mix lefty righty turn
 		local cyleft : mix turnyleft righty tension
-		
+
 		local straightxleft : mix leftx rightx straight
 		local straightyleft : mix cyleft righty straight
-		
-		if para.straightBar : begin
-			local cor : diagCor (righty - lefty) (rightx - leftx)
-			local hst : HALFSTROKE * [mix 1 cor [linreg 18 1 126 0 STROKE]]
-			local hse : HALFSTROKE * ([adviceBlackness 3] / STROKE)
+
+		if stb : begin
+			local hst : HALFSTROKE * [diagCor (righty - lefty) (rightx - leftx) 0 STROKE]
+			local hse : HALFSTROKE * ([adviceBlackness 3.5] / STROKE)
 			include : dispiro
-				widths.center
 				corner leftx lefty [widths.heading hst hst [if (lefty < righty) UPWARD DOWNWARD]]
 				corner rightx righty [widths hse hse]
-				end [function : set this.cleanmore true]
+
 		: else : begin
 			include : dispiro
 				widths.center
@@ -414,14 +414,13 @@ export : define [apply] : begin
 				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
 				flat straightxleft straightyleft
 				curl rightx righty
-				end [function : set this.cleanmore true]
 
-	define [xStrand _leftx lefty _rightx righty turn straight tension] : glyph-construction
+	define [xStrand stb _leftx lefty _rightx righty turn straight tension] : glyph-construction
 		local middlex : mix _leftx _rightx 0.5
 		local middley : mix lefty righty 0.5
-		
-		include : halfXStrand _leftx lefty middlex middley turn straight tension
-		include : halfXStrand _rightx righty middlex middley turn straight tension
+
+		include : halfXStrand stb _leftx lefty middlex middley turn straight tension
+		include : halfXStrand stb _rightx righty middlex middley turn straight tension
 
 	define [nShoulderKnots] : params [left right [fine SHOULDERFINE] [top XH] [bottom 0] [sma SMALLSMOOTHA] [smb SMALLSMOOTHB] [stroke STROKE]] : begin
 		local slope : shoulderMidSlope fine stroke
@@ -447,16 +446,16 @@ export : define [apply] : begin
 		include : spiro-outline
 			corner (right - width * HVCONTRAST) bottom
 			curl   (right - width * HVCONTRAST) (top - sm + fix)
-			arcvh 8 'no-tiny'
+			arcvh 8
 			g2     [mix left (right - width * HVCONTRAST) 0.5] (top - O - width)
-			archv 8 'no-tiny'
+			archv 8
 			flat   left (top - sm - fix)
 			corner left (top - sm - fix - 1)
 			corner (left - fine) (top - sm - 1)
 			curl   (left - fine) (top - sm)
-			arcvh 8 'no-tiny'
+			arcvh 8
 			g2     [mix (left - fine * HVCONTRAST) right 0.5] (top - O)
-			archv 8 'no-tiny'
+			archv 8
 			flat   right (top - sm)
 			corner right bottom
 			close
@@ -543,7 +542,7 @@ export : define [apply] : begin
 			curl m1 wide [heading RIGHTWARD]
 			archv 8
 			g4   right (wide + rinner - O / 2) [widths.heading 0 fine {.x (-HVCONTRAST) .y ((wide - fine) / (wide + rinner * 2 - O))}]
-			arcvh 8 
+			arcvh 8
 			g4.left.mid   mid (wide + rinner * 2 - O) [heading LEFTWARD]
 			quadcontrols ((x1 - mid) / (x2 - mid)) 0 8
 			g4   x2 y2
@@ -554,61 +553,90 @@ export : define [apply] : begin
 			curl (middlex + LONGJUT * [fallback kx 0.8]) (middle + LONGJUT * [fallback ky 0.4])
 
 	# Spiro shapes
-	define [determineMixR w v u sw] : begin
+	define [determineMixR w v u sw swash] : begin
+		if (!swash && w < v) : return : 1 - [determineMixR v w u sw swash]
+		local superness SUPERNESS
 		local r : piecewise
 			(w <= v)   0.5
-			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) SUPERNESS]) (1 / SUPERNESS)] + 1)
-		local idepth : w - sw
-		local iwidth : u * r - sw
-		if (iwidth > 0 && idepth > 0 && iwidth / idepth >= 2) : begin
-			local adjust : clamp 0.975 1 (1 - (iwidth / idepth - 2) * 0.0125)
-			#console.log iwidth idepth (iwidth / idepth) adjust
-			r = r * adjust
+			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
+		if swash : begin
+			local idepth : w - sw
+			local iwidth : u * r - sw
+			if (iwidth > 0 && idepth > 0 && iwidth / idepth >= 2) : begin
+				local adjust : clamp 0.975 1 (1 - (iwidth / idepth - 2) * 0.0125)
+				#console.log iwidth idepth (iwidth / idepth) adjust
+				r = r * adjust
 		if (r < 0.5) : set r 0.5
 		return r
 
 	define nHookSegments 12
-	define [HookShape toStraight toFinish isStart y tight s kkaf dontadjust] : begin
+	define [HookShape toStraight toFinish isStart y tight _sw _swItalicAdj] : begin
 		local atBottom : toStraight.y > y
-		local sw : fallback s STROKE
+		local sw : fallback _sw STROKE
+		local swItalicAdj : fallback _swItalicAdj sw
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
-		
-		if [not dontadjust] : begin
-			toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
-			if (atBottom && ltr && !isStart) : begin
-				toFinish.x = toFinish.x + TAILADJX * TANSLANT
-				toFinish.y = toFinish.y - TAILADJY * TANSLANT
+		local doSwash : !tight && para.isItalic && ltr && atBottom && !isStart
+		local superness : if tight para.tightHookSuperness SUPERNESS
 
+		# Adjust terminal's position if necessary
+		toFinish.x = toFinish.x + OXHOOK * [if ltr (-1) 1] * [if isStart (-1) 1]
+		if (doSwash) : begin
+			toFinish.x = toFinish.x + TAILADJX * TANSLANT
+			toFinish.y = toFinish.y - TAILADJY * TANSLANT
+
+		# Compute key middle knot
 		local w : Math.abs (toStraight.y - y)
 		local v : Math.abs (toFinish.y - y)
 		local u : Math.abs (toFinish.x - toStraight.x)
-		local mixr : determineMixR w v u sw
-		local mx ([mix toStraight.x toFinish.x mixr] + ([if (tight && tight.shift) tight.shift (1 - (tight || 0))] * [if atBottom 1 (-1)] * CORRECTION_OMIDX) * sw)
-		local keyKnot : g4.[if ltr "right" "left"].mid mx y [fallback kkaf : if tight [let [s : if ltr RIGHTWARD LEFTWARD] [heading {.x (s.x * [fallback tight.skew 1]) .y s.y}]] nothing]
-		
-		local faf toFinish.af
-		set toFinish.af : lambda [] : begin
-			local rad : Math.min w (mixr * u)
-			local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixr * u / w)] - 1) * 0.5
+		local mixRatio : determineMixR w v u sw doSwash
+		local mxSwMultiplier : [if (tight && tight.shift) tight.shift (1 - (tight || 0))] * [if atBottom 1 (-1)]
+		local mx : [mix toStraight.x toFinish.x mixRatio] + mxSwMultiplier * CORRECTION_OMIDX * swItalicAdj
+		local keyKnot : g4.[if ltr "right" "left"].mid
+			begin mx
+			begin y
+			if [not tight] nothing : let [s : if ltr RIGHTWARD LEFTWARD]
+				heading {.x (s.x * [fallback tight.skew 1]) .y s.y}
+
+		# Adjust terminal's direction
+		do "Adjust terminal's direction"
+			local rad : Math.min w (mixRatio * u)
+			local skew0 : [clamp 0 w (w - v)] / rad + ([clamp 1 1.5 (mixRatio * u / w)] - 1) * 0.5
 			local depth : v + skew0 * sw - sw
-			local shallowLimit (sw * 0.5)
+			local shallowLimit : sw / 2
 			local skew : clamp 0 (1 / 2) : skew0 + [clamp 0 shallowLimit (shallowLimit - depth)] / rad
-			if faf : faf.apply this arguments
-			this.heads-to {
-				.x (CONTRAST / [Math.sqrt : 1 + skew * skew] * [if dtu (-1) 1])
-				.y (skew / [Math.sqrt : 1 + skew * skew] * [if ltr 1 (-1)])
-			}
-		
+			local faf toFinish.af
+			set toFinish.af : lambda [] : begin
+				if faf : faf.apply this arguments
+				if this.heads-to : this.heads-to : if doSwash
+					then : begin {
+						.x (CONTRAST / [Math.sqrt : 1 + skew * skew] * [if dtu (-1) 1])
+						.y (skew / [Math.sqrt : 1 + skew * skew] * [if ltr 1 (-1)])
+					}
+					else : begin {
+						.x (CONTRAST * [if dtu (-1) 1])
+						.y 0
+					}
+			if [not doSwash] : set toFinish.y : toFinish.y + skew * sw * [if (y > toFinish.y) (-1) (+1)]
+
+		# Create the arc knots
 		local segBefore {}
 		local segAfter {}
 		foreach [j : range 1 nHookSegments] : begin
 			local fraction : j / nHookSegments
-			local fractionAfter : fraction * (1 - mixr) / mixr
-			local myfinal : superxy ((1 - mixr) / mixr)
-			segBefore.push : g4 [mix mx toStraight.x fraction] [mix y toStraight.y (1 - [superxy fraction])] unimportant
-			segAfter.push : g4 [mix mx toFinish.x fraction] [mix y toFinish.y ((1 - [superxy fractionAfter]) / (1 - myfinal))] unimportant
-			if (!tight && w < u * mixr) : set segAfter {}
+			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 : if tight 0 (1 / 8)] * (mixRatio - (1 / 2))
+			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
+			local myfinal : superxy ((1 - mixRatioAdjust) / mixRatioAdjust) superness
+			segBefore.push : g4
+				mix mx toStraight.x fraction
+				mix y toStraight.y (1 - [superxy fraction superness])
+				begin unimportant
+			segAfter.push : g4
+				mix mx toFinish.x fraction
+				mix y toFinish.y ((1 - [superxy fractionAfter superness]) / (1 - myfinal))
+				begin unimportant
+			# if (!tight && w < u * mixRatio) : set segAfter {}
+
 		if isStart
 		: then : return : list
 			segAfter.reverse
@@ -619,13 +647,13 @@ export : define [apply] : begin
 			* keyKnot
 			* segAfter
 
-	define [hookstart] : params [y tight sw kkaf dontadjust] : return {
+	define [hookstart] : params [y tight sw swItalicAdj] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape after before true y tight sw kkaf dontadjust]]
+		.af [lambda [before after] [HookShape after before true y tight sw swItalicAdj]]
 	}
-	define [hookend] : params [y tight sw kkaf dontadjust] : return {
+	define [hookend] : params [y tight sw swItalicAdj] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape before after false y tight sw kkaf dontadjust]]
+		.af [lambda [before after] [HookShape before after false y tight sw swItalicAdj]]
 	}
 
 	define [CyrDescender x shift connex] : glyph-construction
@@ -652,12 +680,12 @@ export : define [apply] : begin
 				if dependencyProfile.(glyphid) : foreach [k : items-of dependencyProfile.(glyphid)] : if [not sbh.(k)] : begin
 					set sbh.(k) PENDING
 					set found true
-		
+
 		local shouldBuildList : Object.keys sbh :.filter ([x] => [not [not x]])
 		#console.log shouldBuildList
 		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphs.(x) && glyphs.(x).unicode) glyphs.(x).unicode.0 nothing])
 			:.filter ([x] => [not [not x]])
-		
+
 		local p {.}
 		foreach [{k v} : pairs-of all ps] : set p.(k) v
 		try : begin
@@ -716,10 +744,10 @@ export : define [apply] : begin
 		apply-transform : Translate (-x) (-y)
 		apply-transform : Translate sx sy
 		apply-transform : Italify
-	
+
 	define [ForceUpright] : glyph-construction
 		set this.gizmo : Translate 0 0
-	
+
 	define [Overlay overlay background] : glyph-construction
 		define sw : [adviceBlackness 6] / 2
 		local candidates {}
@@ -733,7 +761,7 @@ export : define [apply] : begin
 				if background.anchors : include {.anchors background.anchors}
 				include overlay
 				apply-transform : Translate dx dy
-		
+
 		foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
 			define x z.x
 			define y z.y
@@ -743,8 +771,31 @@ export : define [apply] : begin
 				line-to    (x + sw) (y - sw)
 				line-to    (x + sw) (y + sw)
 				line-to    (x - sw) (y + sw)
-		
+
 		include : difference background [union.apply null candidates]
 		include overlay
-	
-	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR HookShape hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor]
+
+	define [CreateWaveShape dist sw] : begin
+		define WaveResolution 8
+		define WaveMagnitude : dist * (3 / 4) - sw / 2
+		define WaveAdj : TANSLANT * WaveMagnitude * (-0.75)
+		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin] : glyph-construction
+			local resolution : Math.ceil (WaveResolution * (te - ts))
+			local knots {}
+			foreach [pr : range 0 till resolution] : begin
+				local theta : [mix ts te (pr / resolution)] * Math.PI * 2
+				local waveRelY : (-1) * [Math.sin theta] - 0.075 * [Math.sin (theta * 3)]
+				local flat : [Math.abs ([mix ts te (pr / resolution)] * 2 % 1)] < 1 / WaveResolution
+				knots.push : g2
+					(WaveAdj * waveRelY) + [mix left right (pr / resolution)]
+					symbolMid + WaveMagnitude * waveRelY
+			include : dispiro
+				widths.center sw
+				if (xsJoin !== nothing) {[straight.right.start xsJoin symbolMid]} {}
+				begin knots
+				if (xfJoin !== nothing) {[straight.right.end   xfJoin symbolMid]} {}
+
+		define [WaveShape] : params [left right xsJoin xfJoin [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * 2) (2 + right * 2) xsJoin xfJoin
+		return WaveShape
+
+	return [object queryFeatureSelector select-variant italic-variant alias composite into-unicode turned dual hcombine vdual vcombine fwl fwr dwl dwr dwc Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender refair Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape]

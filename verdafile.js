@@ -2,7 +2,7 @@
 
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
-const { de, fu } = build.rules;
+const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm } = build.actions;
 const { FileList } = build.predefinedFuncs;
 module.exports = build;
@@ -17,10 +17,16 @@ const BUILD = "build";
 const DIST = "dist";
 const ARCHIVE_DIR = "release-archives";
 
+const OTF2OTC = "otf2otc";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
+const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
 const GENERATE = ["node", "gen/generator"];
 const GC = ["node", "gen/gc"];
-const webfontFormats = [["woff2", "woff2"], ["woff", "woff"], ["ttf", "truetype"]];
+const webfontFormats = [
+	["woff2", "woff2"],
+	["woff", "woff"],
+	["ttf", "truetype"]
+];
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
 const PRIVATE_BUILD_PLANS = path.relative(
@@ -37,26 +43,33 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const Version = oracle(`version`, async () => {
+const Version = oracle(`metadata:version`, async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
 });
 
-const RawPlans = oracle(`raw-plans`, async target => {
-	await target.need(fu(BUILD_PLANS));
-	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
-		await target.need(fu(PRIVATE_BUILD_PLANS));
-	}
-
-	const t = toml.parse(fs.readFileSync(BUILD_PLANS, "utf-8"));
-	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
-		Object.assign(
-			t.buildPlans,
-			toml.parse(fs.readFileSync(PRIVATE_BUILD_PLANS, "utf-8")).buildPlans
+async function tryParseToml(str) {
+	try {
+		return toml.parse(fs.readFileSync(str, "utf-8"));
+	} catch (e) {
+		throw new Error(
+			`Failed to parse configuration file ${str}.\n` +
+				`Please validate whether there's syntax error.\n` +
+				`${e}`
 		);
 	}
-	for (const prefix in t.buildPlans) {
-		const plan = t.buildPlans[prefix];
+}
+
+const RawPlans = oracle(`metadata:raw-plans`, async target => {
+	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
+
+	const bp = await tryParseToml(BUILD_PLANS);
+	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
+		const privateBP = await tryParseToml(PRIVATE_BUILD_PLANS);
+		Object.assign(bp.buildPlans, privateBP.buildPlans);
+	}
+	for (const prefix in bp.buildPlans) {
+		const plan = bp.buildPlans[prefix];
 		plan.prefix = prefix;
 
 		// Style groups
@@ -73,71 +86,94 @@ const RawPlans = oracle(`raw-plans`, async target => {
 		if (!plan.post.oblique) plan.post.oblique = [];
 		if (!plan.post.italic) plan.post.italic = [];
 	}
-	for (const prefix in t.collectPlans) {
-		t.collectPlans[prefix].prefix = prefix;
+	for (const prefix in bp.collectPlans) {
+		bp.collectPlans[prefix].prefix = prefix;
 	}
-	return t;
+	return bp;
 });
 
-const BuildPlans = computed("build-plans", async target => {
+const BuildPlans = computed("metadata:build-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.buildPlans;
 });
-const ExportPlans = computed("export-plans", async target => {
+const ExportPlans = computed("metadata:export-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.exportPlans;
 });
-const RawCollectPlans = computed("raw-collect-plans", async target => {
+const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
 });
-const Weights = computed("weights", async target => {
+const Weights = computed("metadata:global-weights", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.weights;
 });
-const Slants = computed("slants", async target => {
+const Slants = computed("metadata:global-slants", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.slants;
 });
+const Widths = computed("metadata:global-widths", async target => {
+	const [rp] = await target.need(RawPlans);
+	return rp.widths;
+});
+const CollectConfig = computed("metadata:collect-config", async target => {
+	const [rp] = await target.need(RawPlans);
+	return rp.collectConfig;
+});
 
-function getSuffixSet(weights, slants) {
+function makeSuffix(w, wd, s, fallback) {
+	return (
+		(wd === "normal" ? "" : wd) + (w === "regular" ? "" : w) + (s === "upright" ? "" : s) ||
+		fallback
+	);
+}
+
+function getSuffixSet(weights, slants, widths) {
 	const mapping = {};
 	for (const w in weights) {
 		for (const s in slants) {
-			const suffix =
-				(w === "regular" ? (s === "upright" ? "regular" : "") : w) +
-				(s === "upright" ? "" : s);
-			mapping[suffix] = {
-				hives: [`w-${weights[w].shape}`, `s-${s}`],
-				weight: w,
-				cssWeight: weights[w].css || w,
-				menuWeight: weights[w].menu || weights[w].css || w,
-				slant: s,
-				cssStyle: slants[s] || s,
-				menuStyle: slants[s] || s
-			};
+			for (const wd in widths) {
+				const suffix = makeSuffix(w, wd, s, "regular");
+				mapping[suffix] = {
+					hives: [`w-${weights[w].shape}`, `s-${s}`, `wd-${widths[wd].shape}`],
+					weight: w,
+					cssWeight: weights[w].css || w,
+					menuWeight: weights[w].menu || weights[w].css || w,
+					width: wd,
+					cssStretch: widths[wd].css || wd,
+					menuWidth: widths[wd].menu || widths[wd].css || wd,
+					slant: s,
+					cssStyle: slants[s] || s,
+					menuStyle: slants[s] || s
+				};
+			}
 		}
 	}
 	return mapping;
 }
 
-const Suffixes = computed(`suffixes`, async target => {
-	const [weights, slants] = await target.need(Weights, Slants);
-	return getSuffixSet(weights, slants);
+const Suffixes = computed(`metadata:suffixes`, async target => {
+	const [weights, slants, widths] = await target.need(Weights, Slants, Widths);
+	return getSuffixSet(weights, slants, widths);
 });
 
-const FontBuildingParameters = computed(`font-building-parameters`, async target => {
-	const [buildPlans, defaultWeights, defaultSlants] = await target.need(
+const FontBuildingParameters = computed(`metadata:font-building-parameters`, async target => {
+	const [buildPlans, defaultWeights, defaultSlants, defaultWidths] = await target.need(
 		BuildPlans,
 		Weights,
-		Slants
+		Slants,
+		Widths
 	);
 	const fontInfos = {};
 	const bp = {};
 	for (const p in buildPlans) {
-		const { pre, post, prefix, family, weights, slants, hintParams } = buildPlans[p];
+		const { pre, post, prefix, family, weights, slants, widths, hintParams } = buildPlans[p];
 		const targets = [];
-		const suffixMapping = getSuffixSet(weights || defaultWeights, slants || defaultSlants);
+		const suffixMapping = getSuffixSet(
+			weights || defaultWeights,
+			slants || defaultSlants,
+			widths || defaultWidths
+		);
 		for (const suffix in suffixMapping) {
 			if (weights && !weights[suffixMapping[suffix].weight]) continue;
 			if (slants && !slants[suffixMapping[suffix].slant]) continue;
@@ -149,8 +185,10 @@ const FontBuildingParameters = computed(`font-building-parameters`, async target
 				family,
 				hives: ["iosevka", ...preHives, ...suffixMapping[suffix].hives, ...postHives],
 				menuWeight: suffixMapping[suffix].menuWeight,
+				menuWidth: suffixMapping[suffix].menuWidth,
 				menuStyle: suffixMapping[suffix].menuStyle,
 				cssWeight: suffixMapping[suffix].cssWeight,
+				cssStretch: suffixMapping[suffix].cssStretch,
 				cssStyle: suffixMapping[suffix].cssStyle,
 				hintParams: hintParams || []
 			};
@@ -165,44 +203,81 @@ const FontBuildingParameters = computed(`font-building-parameters`, async target
 	return { fontInfos, buildPlans: bp };
 });
 
-const CollectPlans = computed(`collect-plans`, async target => {
-	const [rawCollectPlans, suffixMapping] = await target.need(RawCollectPlans, Suffixes);
+async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
 	const composition = {},
 		groups = {};
 	for (const gid in rawCollectPlans) {
-		groups[gid] = [];
+		const groupFileList = new Set();
 		const collect = rawCollectPlans[gid];
-		for (const suffix in suffixMapping) {
-			const fileName = `${collect.prefix}-${suffix}`;
-			composition[fileName] = [];
-			for (const prefix of collect.from) {
-				composition[fileName].push({
-					dir: prefix,
-					file: `${prefix}-${suffix}`
-				});
+		if (!collect || !collect.from || !collect.from.length) continue;
+
+		for (const prefix of collect.from) {
+			const [gri] = await target.need(GroupInfo(prefix));
+			const ttfFileNameSet = new Set(gri.targets);
+			for (const suffix in suffixMapping) {
+				const gr = suffixMapping[suffix];
+				const ttcFileName = fnFileName(
+					config,
+					collect.prefix,
+					gr.weight,
+					gr.width,
+					gr.slant
+				);
+				const ttfTargetName = `${prefix}-${suffix}`;
+
+				if (!ttfFileNameSet.has(ttfTargetName)) continue;
+				if (!composition[ttcFileName]) composition[ttcFileName] = [];
+				composition[ttcFileName].push({ dir: prefix, file: ttfTargetName });
+				groupFileList.add(ttcFileName);
 			}
-			groups[gid].push(fileName);
 		}
+		groups[gid] = [...groupFileList];
 	}
 	return { composition, groups };
+}
+function fnStandardTtc(collectConfig, prefix, w, wd, s) {
+	const ttcSuffix = makeSuffix(
+		collectConfig.distinguishWeights ? w : "regular",
+		collectConfig.distinguishWidths ? wd : "normal",
+		collectConfig.distinguishSlant ? s : "upright",
+		"regular"
+	);
+	return `${prefix}-${ttcSuffix}`;
+}
+
+const CollectPlans = computed(`metadata:collect-plans`, async target => {
+	const [rawCollectPlans, suffixMapping, collectConfig] = await target.need(
+		RawCollectPlans,
+		Suffixes,
+		CollectConfig
+	);
+	return await getCollectPlans(
+		target,
+		rawCollectPlans,
+		suffixMapping,
+		collectConfig,
+		fnStandardTtc
+	);
 });
 
-const HivesOf = computed.group("hives-of", async (target, gid) => {
+const HivesOf = computed.group("metadata:hives-of", async (target, gid) => {
 	const [{ fontInfos }] = await target.need(FontBuildingParameters);
-	return fontInfos[gid];
+	const hvs = fontInfos[gid];
+	if (!hvs) throw new Error(`Build plan for ${gid} not found.`);
+	return hvs;
 });
 
-const GroupInfo = computed.group("group-info", async (target, gid) => {
+const GroupInfo = computed.group("metadata:group-info", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(FontBuildingParameters);
 	return buildPlans[gid];
 });
 
-const GroupFontsOf = computed.group("group-fonts-of", async (target, gid) => {
+const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gid) => {
 	const [plan] = await target.need(GroupInfo(gid));
 	return plan.targets;
 });
 
-const CollectionPartsOf = computed.group("collection-parts-of", async (target, id) => {
+const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (target, id) => {
 	const [{ composition }] = await target.need(CollectPlans);
 	return composition[id];
 });
@@ -214,7 +289,7 @@ const CollectionPartsOf = computed.group("collection-parts-of", async (target, i
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, _gr, fn) => {
-		const [{ hives, family, menuWeight, menuStyle }, version] = await target.need(
+		const [{ hives, family, menuWeight, menuStyle, menuWidth }, version] = await target.need(
 			HivesOf(fn),
 			Version
 		);
@@ -231,6 +306,7 @@ const BuildTTF = file.make(
 			["--ver", version],
 			["--menu-weight", menuWeight],
 			["--menu-slant", menuStyle],
+			["--menu-width", menuWidth],
 			hives
 		);
 		await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
@@ -286,13 +362,33 @@ const DistWoff2 = file.make(
 // TTC
 const DistTTC = file.make(
 	(gr, f) => `${DIST}/collections/${gr}/${f}.ttc`,
-	async (target, { full, dir }, gr, f) => {
+	async (target, out, gr, f) => {
 		const [parts] = await target.need(CollectionPartsOf(f));
-		await target.need(de`${dir}`);
-		const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-		await run(`otfcc-ttcize`, ttfs.map(p => p.full), "-o", full, "-h", "--common-width=500");
+		await buildTtcForFile(target, parts, out, false);
 	}
 );
+const SuperTTC = file.make(
+	f => `${DIST}/super-ttc/${f}.ttc`,
+	async (target, out, f) => {
+		await target.need(de(out.dir));
+		const [inputs] = await target.need(CollectionFontsOf(f));
+		await run(
+			OTF2OTC,
+			["-o", out.full],
+			inputs.map(f => f.full)
+		);
+	}
+);
+async function buildTtcForFile(target, parts, out, xMode) {
+	await target.need(de`${out.dir}`);
+	const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
+	await run(
+		TTCIZE,
+		ttfs.map(p => p.full),
+		["-o", out.full],
+		[xMode ? "-x" : "-h", "--common-width=500"]
+	);
+}
 
 // Group-level
 const GroupTTFs = task.group("ttf", async (target, gid) => {
@@ -374,7 +470,8 @@ const GroupArchives = task.group(`archive`, async (target, gid) => {
 // Collection-level
 const CollectionFontsOf = task.group("collection-fonts", async (target, cid) => {
 	const [{ groups }] = await target.need(CollectPlans);
-	await target.need(groups[cid].map(file => DistTTC(cid, file)));
+	const [files] = await target.need(groups[cid].map(file => DistTTC(cid, file)));
+	return files;
 });
 const TTCArchiveFile = file.make(
 	(cid, version) => `${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`,
@@ -382,6 +479,7 @@ const TTCArchiveFile = file.make(
 		// Note: this target does NOT depend on the font files.
 		await target.need(de`${dir}`);
 		await target.need(CollectionFontsOf(cid));
+		await rm(full);
 		await cd(`${DIST}/collections/${cid}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
@@ -451,6 +549,35 @@ const AllArchives = task(`all:archives`, async target => {
 	);
 });
 
+const AllTtfArchives = task(`all:ttf`, async target => {
+	const [exportPlans] = await target.need(ExportPlans);
+	await target.need(Object.keys(exportPlans).map(GroupArchives));
+});
+
+const AllTtcArchives = task(`all:ttc`, async target => {
+	const [collectPlans] = await target.need(CollectPlans);
+	await target.need(Object.keys(collectPlans.groups).map(CollectionArchive));
+});
+
+const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
+	await target.need(SuperTTC(gr));
+});
+const AllSuperTtc = task(`all:super-ttc`, async target => {
+	const [collectPlans] = await target.need(CollectPlans);
+	await target.need(Object.keys(collectPlans.groups).map(gr => SuperTTC(gr)));
+});
+
+const ChangeFileList = oracle.make(
+	() => `release:change-file-list`,
+	target => FileList({ under: "changes", pattern: "*.md" })(target)
+);
+const ReleaseNotes = task(`release:release-note`, async target => {
+	const [version] = await target.need(Version);
+	const [changeFiles] = await target.need(ChangeFileList());
+	await target.need(changeFiles.map(fu));
+	await run("node", "utility/generate-release-note", version);
+});
+
 phony(`clean`, async () => {
 	await rm(`build`);
 	await rm(`dist`);
@@ -458,8 +585,9 @@ phony(`clean`, async () => {
 	build.deleteJournal(); // Disable journal
 });
 phony(`release`, async target => {
-	await target.need(AllArchives);
+	await target.need(AllArchives, AllSuperTtc);
 	await target.need(SampleImages, Pages);
+	await target.need(ReleaseNotes);
 });
 
 ///////////////////////////////////////////////////////////
@@ -499,9 +627,9 @@ const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, p
 	}
 });
 const Scripts = task("scripts", async target => {
+	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`empty-font.toml`);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
-	await target.need(fu`parameters.toml`, fu`variants.toml`, fu`emptyfont.toml`);
 });

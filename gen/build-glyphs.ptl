@@ -39,7 +39,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 		if para.verbose : console.log "    \(font.name.uniqueSubFamily) : Done \(status)"
 		#suggestGC
 		return nothing
-	
+
 	define metrics : calculateMetrics para
 	define [object globalTransform UPM MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER MVERTSTROKE_D symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness] metrics
 
@@ -81,7 +81,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 				* [mix a.anchors.below.y a.anchors.above.y 0.5]
 				* BASE
 			return a
-		
+
 		object
 			capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
 			b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
@@ -167,7 +167,7 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 			g.assign-unicode unicode
 			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
 		return g
-	
+
 	define [save-glyph name unicode g] : $save$.call g name unicode
 
 	### Spiro constructions
@@ -179,35 +179,22 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	assignFontNames para metrics font
 	setFontMetrics para metrics font
 
-	# Necessary notdef, .null and nonmarkingreturn glyph
-	sketch # .notdef
-		start-from SB 0
-		line-to    SB CAP
-		line-to    RIGHTSB CAP
-		line-to    RIGHTSB 0
-
-		start-from (SB + STROKE) STROKE
-		line-to    (RIGHTSB - STROKE) STROKE
-		line-to    (RIGHTSB - STROKE) (CAP - STROKE)
-		line-to    (SB + STROKE) (CAP - STROKE)
-		set currentGlyph.cmpPriority (9999)
-		save '.notdef'
 	sketch # .null
 		set-width 0
 		set currentGlyph.cmpPriority (9998)
 		save '.null'
+
 	sketch # nonmarkingreturn
 		set-width WIDTH
 		set currentGlyph.cmpPriority (-1)
 		save 'nonmarkingreturn' 0x000D
 
-	# Space
 	sketch # space
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include df.markSet.e
 		save 'space' ' '
-	
+
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
 	define capture : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector font glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns markset MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildFont newtemp tagged TempFont includeGlyphPart compsiteMarkSet MarksetDiv DivFrame
 
@@ -230,11 +217,17 @@ export as build : define [buildFont para recursive recursiveCodes] : begin
 	[import '../glyphs/symbol-braille.js'].apply.call capture
 	[import '../glyphs/symbol-mosaic.js'].apply.call capture
 	[import '../glyphs/symbol-other.js'].apply.call capture
-	
+
 	# Autobuilds
-	[import '../glyphs/autobuilds.js'].apply.call capture
+	[import '../glyphs/autobuild-accents.js'].apply.call capture
+	[import '../glyphs/autobuild-enclosure.js'].apply.call capture
+	[import '../glyphs/autobuild-transformed.js'].apply.call capture
 
 	if [not recursive] : begin
+		if (para.spacing == 0) : begin
+			set font.glyf : font.glyf.filter [lambda [g] : g.advanceWidth <= WIDTH]
+			set glyphList.length font.glyf.length
+			for [local j 0] (j < font.glyf.length) [inc j] : set glyphList.(j) font.glyf.(j)
 		set {.GSUB font.GSUB .GPOS font.GPOS .GDEF font.GDEF} : Features.apply para glyphs glyphList unicodeGlyphs
 
 	set font.glyfMap glyphs

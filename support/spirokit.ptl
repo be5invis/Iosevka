@@ -1,9 +1,9 @@
-import 'libspiro-js' as libspiro
+import 'spiro' as SpiroJs
 import './spiroexpand' as SpiroExpansionContext
 import './fairify' as fairify
 import 'caryll-shapeops' as ShapeOps
 
-import './transform' as Transform 
+import './transform' as Transform
 
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define [mix a b p] : a + (b - a) * p
@@ -21,9 +21,9 @@ export : define [SetupBuilders args] : begin
 	define [curl x y f] {.x x .y y .type 'right' .af f}
 	define [close f] {.type 'close' .af f}
 	define [end f] {.type 'end' .af f}
-	
+
 	define straight {.l flat .r curl}
-	
+
 	#derived knots
 	#"ai" knots, used for left and right edges of letters `o`, and similar letters
 	define flat.ai : if para.isItalic g4 flat
@@ -40,7 +40,7 @@ export : define [SetupBuilders args] : begin
 					set kt.(d.name).(a.name) : lambda [x y f] : list
 						[fallback kt.l kt] (x + d.x * a.l) (y + d.y * a.l) f
 						[fallback kt.r kt] (x + d.x * a.r) (y + d.y * a.r) f
-	
+
 	# Aux functions
 	define [widths l r] : lambda [] : this.set-width l r
 	define [widths.lhs w] : widths [fallback w STROKE] 0
@@ -50,17 +50,25 @@ export : define [SetupBuilders args] : begin
 	# Gizmo handler
 	define [disable-gizmo] : lambda [] : set this.gizmo [Transform.Id]
 	define [disable-contrast] : lambda [] : set this.contrast 1
-	
-	define [heading d] : lambda [] : this.heads-to d
-	define [widths.heading l r d] : lambda [] : begin [this.set-width l r] [this.heads-to d]
-	define [widths.lhs.heading w d] : lambda [] : begin [this.set-width [fallback w STROKE] 0] [this.heads-to d]
-	define [widths.rhs.heading w d] : lambda [] : begin [this.set-width 0 [fallback w STROKE]] [this.heads-to d]
-	define [widths.center.heading w d] : lambda [] : begin [this.set-width ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)] [this.heads-to d]
+
+	define [heading d] : lambda [] : if (this.heads-to) : this.heads-to d
+	define [widths.heading l r d] : lambda [] : begin
+		if this.set-width : this.set-width l r
+		if this.heads-to : this.heads-to d
+	define [widths.lhs.heading w d] : lambda [] : begin
+		if this.set-width : this.set-width [fallback w STROKE] 0
+		if this.heads-to : this.heads-to d
+	define [widths.rhs.heading w d] : lambda [] : begin
+		if this.set-width : this.set-width 0 [fallback w STROKE]
+		if this.heads-to : this.heads-to d
+	define [widths.center.heading w d] : lambda [] : begin
+		if this.set-width : this.set-width ([fallback w STROKE] / 2) ([fallback w STROKE] / 2)
+		if this.heads-to : this.heads-to d
 	define [unimportant] : begin
 		if (this.points && this.points.length && this.points.(this.points.length - 1)) : this.points.(this.points.length - 1).subdivided = true
 		if (this.controlKnots && this.controlKnots.length && this.controlKnots.(this.controlKnots.length - 1)) : this.controlKnots.(this.controlKnots.length - 1).unimportant = true
 	define [important] nothing
-	
+
 	# Interpolation pesudoknots
 	define [afInterpolate before after args] : g4
 		mix before.x after.x args.rx
@@ -83,7 +91,7 @@ export : define [SetupBuilders args] : begin
 			bez3 0 y1 y2 1 (j / samples)
 		alsothruthem rs raf ty
 	define [quadcontrols x1 y1 samples raf ty] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf ty
-	
+
 	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
 		local samples : fallback _samples 3
 		local rs {}
@@ -95,26 +103,29 @@ export : define [SetupBuilders args] : begin
 
 	define DEFAULT_STEPS 6
 	define {jhv, jvh} : let [cache {}] : begin
-		local [build samples] : begin
+		local [build samples _superness] : begin
+			local superness : fallback _superness SUPERNESS
 			local hv {}
 			local vh {}
 			foreach [j : range 1 samples] : begin
 				local theta : j / samples * Math.PI / 2
-				local c : Math.pow [Math.cos theta] (2 / SUPERNESS)
-				local s : Math.pow [Math.sin theta] (2 / SUPERNESS)
+				local c : Math.pow [Math.cos theta] (2 / superness)
+				local s : Math.pow [Math.sin theta] (2 / superness)
 				hv.push {s (1 - c)}
 				vh.push {(1 - c) s}
-			cache.(samples) = {.hv hv .vh vh}
-		local [hv samples] : begin
-			if [not cache.(samples)] : build samples
+			return {.hv hv .vh vh}
+		local [hv samples _superness] : begin
+			if (_superness) : return [build samples _superness].hv
+			if (!cache.(samples)) : set cache.(samples) : build samples _superness
 			return cache.(samples).hv
-		local [vh samples] : begin
-			if [not cache.(samples)] : build samples
+		local [vh samples _superness] : begin
+			if (_superness) : return [build samples _superness].vh
+			if (!cache.(samples)) : set cache.(samples) : build samples _superness
 			return cache.(samples).vh
 		list hv vh
-	define [archv samples notiny k raf] : alsothruthem [jhv [fallback samples DEFAULT_STEPS]] raf
-	define [arcvh samples notiny k raf] : alsothruthem [jvh [fallback samples DEFAULT_STEPS]] raf
-	
+	define [archv samples superness] : alsothruthem [jhv [fallback samples DEFAULT_STEPS] superness]
+	define [arcvh samples superness] : alsothruthem [jvh [fallback samples DEFAULT_STEPS] superness]
+
 	define [complexThru] : begin
 		local a : {}.slice.call arguments
 		return {.type 'interpolate' .af [lambda [before after args] : begin \\
@@ -145,7 +156,7 @@ export : define [SetupBuilders args] : begin
 			set knots.(j) : knots.(j).af.call s knots.(j - 1) knots.(j + 1) knots.(j)
 		if closed : knots.pop
 		return {.knots [flatten knots] .closed closed .lastafs lastafs}
-	
+
 	define QUAD false
 	define PRECISION 0.5
 	define [dispiro] : let [args : {}.slice.call arguments 0] : lambda [dontinc] : begin
@@ -156,46 +167,46 @@ export : define [SetupBuilders args] : begin
 			set knot.af : lambda [] : begin
 				this.set-type ty
 				if af : af.apply this args
-		libspiro.spiroToBezierOnContext knots closed s
+		SpiroJs.spiroToBezierOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
-		
+
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast CONTRAST]
 		if closed : then
 			local g : new Glyph
-			libspiro.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
 			local lhsContour g.contours.0
 			set g.contours {}
-			libspiro.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
 			local rhsContour g.contours.0
 			set g.contours {[lhsContour.concat rhsContour]}
 		: else
 			local g : new Glyph
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
-			libspiro.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
+			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
 		if ([not s.unfair] && [not para.unfair]) : foreach [j : range 0 g.contours.length] : begin
 			set g.contours.(j) : fairify g.contours.(j) globalTransform
 		set g.knots knots
-		set g.lhsknots lhs
-		set g.rhsknots rhs
+		set g.lhsKnots lhs
+		set g.rhsKnots rhs
 		if [not dontinc] : this.include g
 		return g
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
 		local g : new Glyph
-		set g.gizmo : this.gizmo || globalTransform 
+		set g.gizmo : this.gizmo || globalTransform
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
-		libspiro.spiroToBezierOnContext knots closed g QUAD PRECISION
+		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
 		foreach af [items-of lastafs] : if af : af.call g
 		if [not para.unfair] : foreach [j : range 0 g.contours.length] : begin
 			set g.contours.(j) : fairify g.contours.(j) (g.fairGizmo || g.gizmo)
 		if [not dontinc] : this.include g
 		return g
-	
+
 	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
 		local g : new Glyph
 		set g.gizmo : this.gizmo || globalTransform
 		if (k.length == 0) : return g
-		
+
 		g.include k.0
 		set g.contours : g.contours.map Glyph.contourToStandardCubic
 		foreach [item : items-of : k.slice 1] : begin
@@ -207,11 +218,11 @@ export : define [SetupBuilders args] : begin
 			set g.contours : c1.map : lambda [c] : [Glyph.contourToStandardCubic c].reverse
 		if [not dontinc] : this.include g
 		return g
-	
+
 	define union : Boole ShapeOps.ops.union
 	define intersection : Boole ShapeOps.ops.intersection
 	define difference : Boole ShapeOps.ops.difference
-	
+
 	return [object
 		g4 g2 corner flat curl close end straight
 		widths disable-gizmo disable-contrast heading unimportant important
