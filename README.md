@@ -1,5 +1,4 @@
-# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg) [![Patreon](https://img.shields.io/badge/donate-patreon-red.svg)](https://www.patreon.com/user?u=5787198) [![Donate](https://img.shields.io/badge/donate-alipay-orange.svg)](http://7xpdnl.dl1.z0.glb.clouddn.com/T1v4huXnleXXXXXXXX.png)
-
+# Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg)
 Coders’ typeface, built from code.
 
 ![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
