@@ -126,27 +126,36 @@ export : define [apply] : begin
 			include : FlipAround MIDDLE symbolMid
 			save 'bracketBarRight' 0x2046
 
-		sketch # braceLeft.straight
+		define [BraceUpperShape top bottom] : glyph-construction
 			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
 			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+
+			include : dispiro
+				straight.left.start [mix SB RIGHTSB designParameters.braceInside] top [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				archv
+				flat parenCenter (top - radius) [heading DOWNWARD]
+				curl parenCenter (bottom + radius) [heading DOWNWARD]
+				arcvh
+				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] bottom [heading LEFTWARD]
+
+		define [BraceLowerShape top bottom] : glyph-construction
+			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
+			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+			include : dispiro
+				straight.left.start [mix SB RIGHTSB designParameters.braceInside] bottom [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				archv
+				flat parenCenter (bottom + radius) [heading UPWARD]
+				curl parenCenter (top - radius) [heading UPWARD]
+				arcvh
+				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] top [heading LEFTWARD]
+
+		sketch # braceLeft.straight
 			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
 			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
 
-			include : dispiro
-				straight.left.start [mix SB RIGHTSB designParameters.braceInside] (top - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-				archv
-				flat parenCenter (top - radius) [heading DOWNWARD]
-				curl parenCenter (symbolMid + radius) [heading DOWNWARD]
-				arcvh
-				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] symbolMid [heading LEFTWARD]
+			include : BraceUpperShape (top - HALFSTROKE) symbolMid
+			include : BraceLowerShape (symbolMid) (bot + HALFSTROKE)
 
-			include : dispiro
-				straight.left.start [mix SB RIGHTSB designParameters.braceInside] (bot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-				archv
-				flat parenCenter (bot + radius) [heading UPWARD]
-				curl parenCenter (symbolMid - radius) [heading UPWARD]
-				arcvh
-				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] symbolMid [heading LEFTWARD]
 			save 'braceLeft.straight'
 
 		define [CurlyBraceShape sw] : glyph-construction
@@ -188,6 +197,16 @@ export : define [apply] : begin
 
 		select-variant 'braceLeft' '{'
 		select-variant 'braceRight' '}'
+
+		sketch
+			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
+			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
+			branch
+				include : BraceUpperShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				save nothing 0x23B0
+			branch
+				include : BraceLowerShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				save nothing 0x23B1
 
 		sketch # whiteBraceLeft
 			local fine : adviceBlackness 4
@@ -400,6 +419,7 @@ export : define [apply] : begin
 			include : VBar (MIDDLE - WIDTH * 0.175) parenBot parenTop sw
 			include : VBar (MIDDLE + WIDTH * 0.175) parenBot parenTop sw
 			save 'parallel' 0x2225
+			save 'doubleBar' 0x2016
 			save 'dentalclick' 0x1C0
 			save 'alveolarlateralclick' 0x1C1
 
