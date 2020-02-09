@@ -26,13 +26,13 @@ export : define [apply] : begin
 		define hwArrowMidX : WIDTH / 2
 		define o : O * 2
 
-		local arrowSize : (RIGHTSB - arrowSB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
-		local halfstroke : OPERATORSTROKE / 2
-		local fine : adviceBlackness 4
-		local terminal : adviceBlackness 6
-		local arrowTop : [mix operBot operTop (1 / 2)] + arrowHeight / 2
-		local arrowBot : [mix operBot operTop (1 / 2)] - arrowHeight / 2
-		local doubleArrowStemWidth : arrowSize * 1.1
+		define arrowSize : (WIDTH - SB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
+		define halfstroke : OPERATORSTROKE / 2
+		define fine : adviceBlackness 3.5
+		define terminal : adviceBlackness 5
+		define arrowTop : [mix operBot operTop (1 / 2)] + arrowHeight / 2
+		define arrowBot : [mix operBot operTop (1 / 2)] - arrowHeight / 2
+		define doubleArrowStemWidth : arrowSize * 1.1
 
 		define [ArrowBar x1 y1 x2 y2 halfstroke w] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
@@ -258,18 +258,20 @@ export : define [apply] : begin
 
 		do "Wave arrows"
 			define WaveShape : CreateWaveShape
-				doubleArrowStemWidth / 2
+				doubleArrowStemWidth * 0.4
 				Math.min OPERATORSTROKE (doubleArrowStemWidth / 3)
 			define rightTBias : (MosaicWidth / MosaicUnitWidth) - 1
 			define freeCoT      : arrowSB / MosaicWidth
 			define connectedCoT : (arrowSB / MosaicWidth) + (11 / 32)
+			local mag : arrowRSB - arrowSB
+			local p : (mag - o - halfstroke * 1.1) / mag
 			sketch
 				set-width MosaicWidth
 				include : WaveShape
 					left -- (-connectedCoT)
 					right -- (rightTBias - connectedCoT)
-					xsJoin -- (arrowSB - o)
-					xfJoin -- (arrowRSB + o)
+					xsJoin -- [mix arrowSB arrowRSB (1 - p)]
+					xfJoin -- [mix arrowSB arrowRSB (p)]
 					unitWidth -- MosaicUnitWidth
 				include : ArrowHead arrowSB symbolMid arrowRSB symbolMid
 				include : ArrowHead arrowRSB symbolMid arrowSB symbolMid
@@ -280,7 +282,7 @@ export : define [apply] : begin
 				include : WaveShape
 					left -- (-connectedCoT)
 					right -- (rightTBias - freeCoT)
-					xsJoin -- (arrowSB - o)
+					xsJoin -- [mix arrowSB arrowRSB (1 - p)]
 					unitWidth -- MosaicUnitWidth
 				include : ArrowHead arrowRSB symbolMid arrowSB symbolMid
 				save [MangleName 'waveArrowLeft'] [MangleUnicode 0x219C]
@@ -290,7 +292,7 @@ export : define [apply] : begin
 				include : WaveShape
 					left -- (-freeCoT)
 					right -- (rightTBias - connectedCoT)
-					xfJoin -- (arrowRSB + o)
+					xfJoin -- [mix arrowSB arrowRSB (p)]
 					unitWidth -- MosaicUnitWidth
 				include : ArrowHead arrowSB symbolMid arrowRSB symbolMid
 				save [MangleName 'waveArrowRight'] [MangleUnicode 0x219D]
