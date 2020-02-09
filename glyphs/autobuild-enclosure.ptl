@@ -60,6 +60,10 @@ export : define [apply] : begin
 		define sw : Math.max sw0 [fallback m 0]
 		define top : CAP * dscale + [Math.max (CAP * spatt) (sw * 3)]
 		define bot : 0 - [Math.max (CAP * spatt) (sw * 3)]
+		define mosaicLeft 0
+		define mosaicRight width
+		define mosaicBot font.OS_2.sTypoDescender
+		define mosaicTop font.OS_2.sTypoAscender
 		define left : Math.max
 			SB + O * 3
 			Math.min
@@ -70,7 +74,7 @@ export : define [apply] : begin
 			Math.max
 				width / 2 + (top - bot) / 2
 				width / 2 + CAP / 2 * dscale + sw * 2.5
-		return : object width dscale sw0 sw top bot left right
+		return : object width dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight
 
 	define [CircledMiniatureFont digits width records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -151,6 +155,29 @@ export : define [apply] : begin
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 					apply-transform : Italify
+
+	define [createInsetMosaicGlyphs digits records] : begin
+		foreach {suffix ww} [items-of circleWidthClasses] : do
+			local miniatureFont : CircledMiniatureFont digits ww records
+			foreach {unicode parts w bal baly} [items-of records] : do
+				define [object width dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits dscale ww
+				create-glyph [CircName 'inset-mosaic' digits parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : difference
+						glyph-construction
+							include : ForceUpright
+							include : spiro-outline
+								corner mosaicLeft  mosaicTop
+								corner mosaicLeft  mosaicBot
+								corner mosaicRight mosaicBot
+								corner mosaicRight mosaicTop
+								close
+						glyph-construction
+							include : circleInner dscale miniatureFont unicode parts width bal baly
+							apply-transform : Upright
+							apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+							apply-transform : Italify
 
 	define [createDoubleCircledGlyphs digits records] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
@@ -356,16 +383,23 @@ export : define [apply] : begin
 			begin FULLWIDTH1
 		createInsetCircledGlyphs 2 compositions
 
-	if [not recursive] : do
+	if [not recursive] : do "boxed"
 		local compositions {}
 		compositions.push { null {'space'} FULLWIDTH1 }
 		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
 		createBoxedGlyphs 1 compositions
 
-	if [not recursive] : do
+	if [not recursive] : do "inset boxed"
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
 		createInsetBoxedGlyphs 1 compositions
+
+	if [not recursive] : do "inset mosaic"
+		local compositions {}
+		compositions.push { 0x1FBB1 { unicodeGlyphs.(0x2714).name } FULLWIDTH }
+		compositions.push { 0x1FBB4 { unicodeGlyphs.(0x21B2).name } FULLWIDTH }
+		compositions.push { 0x1FBC4 { unicodeGlyphs.(0x003F).name } FULLWIDTH }
+		createInsetMosaicGlyphs 1 compositions
 
 	if [not recursive] : do "Single-digit double circled"
 		local compositions {}
@@ -419,4 +453,3 @@ export : define [apply] : begin
 			digitGlyphNames j
 			begin FULLWIDTH1
 		createDottedGlyphs 2 compositions
-
