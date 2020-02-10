@@ -72,6 +72,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
    # Override default building weights
    # When buildPlans.<plan name>.weights is absent
    # All weights would built and mapped to default shape/CSS
+   # IMPORTANT : Currently "shape" property only support 100, 200, 300, 400, 500, 600, 700, 800, 900.
    [buildPlans.iosevka-custom.weights.regular]
    shape = 400                            # Weight for glyph shapes
    menu  = 400                            # Weight for menu name
