@@ -39,7 +39,7 @@ function getParameters(argv) {
 	);
 	const variantData = tryParseToml(VARIANTS_TOML);
 
-	const para = parameters.build(parametersData, argv._);
+	const para = parameters.build(parametersData, argv._, { "shape-weight": argv["shape-weight"] });
 	const variantsData = formVariantData(variantData, para);
 	para.variants = variantsData;
 	para.variantSelector = parameters.build(variantsData, ["default", ...argv._]);
