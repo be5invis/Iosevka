@@ -128,6 +128,25 @@ function makeSuffix(w, wd, s, fallback) {
 	);
 }
 
+function nValidate(key, v, f) {
+	if (typeof v !== "number" || !isFinite(v) || (f && !f(v))) {
+		throw new TypeError(`${key} = "${v}" is not a valid number.`);
+	}
+	return v;
+}
+function vlShapeWeight(x) {
+	return x >= 100 && x <= 900;
+}
+function vlMenuWeight(x) {
+	return x >= 100 && x <= 900 && x % 100 === 0;
+}
+function vlShapeWidth(x) {
+	return x === 3 || x === 5 || x === 7;
+}
+function vlMenuWidth(x) {
+	return x >= 1 && x <= 9 && x % 1 === 0;
+}
+
 function getSuffixSet(weights, slants, widths) {
 	const mapping = {};
 	for (const w in weights) {
@@ -135,13 +154,15 @@ function getSuffixSet(weights, slants, widths) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`w-${weights[w].shape}`, `s-${s}`, `wd-${widths[wd].shape}`],
+					hives: [`shape-weight`, `s-${s}`, `wd-${widths[wd].shape}`],
 					weight: w,
-					cssWeight: weights[w].css || w,
-					menuWeight: weights[w].menu || weights[w].css || w,
+					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
+					cssWeight: nValidate("CSS weight of " + w, weights[w].css),
+					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
 					width: wd,
+					shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, vlShapeWidth),
 					cssStretch: widths[wd].css || wd,
-					menuWidth: widths[wd].menu || widths[wd].css || wd,
+					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
 					slant: s,
 					cssStyle: slants[s] || s,
 					menuStyle: slants[s] || s
@@ -184,6 +205,8 @@ const FontBuildingParameters = computed(`metadata:font-building-parameters`, asy
 				name: fileName,
 				family,
 				hives: ["iosevka", ...preHives, ...suffixMapping[suffix].hives, ...postHives],
+				shapeWeight: suffixMapping[suffix].shapeWeight,
+				shapeWidth: suffixMapping[suffix].shapeWidth,
 				menuWeight: suffixMapping[suffix].menuWeight,
 				menuWidth: suffixMapping[suffix].menuWidth,
 				menuStyle: suffixMapping[suffix].menuStyle,
@@ -289,10 +312,10 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, _gr, fn) => {
-		const [{ hives, family, menuWeight, menuStyle, menuWidth }, version] = await target.need(
-			HivesOf(fn),
-			Version
-		);
+		const [
+			{ hives, family, shapeWeight, menuWeight, menuStyle, menuWidth },
+			version
+		] = await target.need(HivesOf(fn), Version);
 		const otd = output.dir + "/" + output.name + ".otd";
 		const ttfTmp = output.dir + "/" + output.name + ".tmp.ttf";
 		const otdTmp = output.dir + "/" + output.name + ".tmp.otd";
@@ -304,6 +327,7 @@ const BuildTTF = file.make(
 			["--charmap", charmap],
 			["--family", family],
 			["--ver", version],
+			["--shape-weight", shapeWeight],
 			["--menu-weight", menuWeight],
 			["--menu-slant", menuStyle],
 			["--menu-width", menuWidth],
