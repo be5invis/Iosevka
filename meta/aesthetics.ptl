@@ -1,6 +1,8 @@
 import '../support/point' as Point
 import '../support/transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
 import [mix linreg clamp fallback] from '../support/utils'
+import '../support/anchor' as Anchor
+import [compsiteMarkSet] from '../support/utils'
 
 # Parameter generation
 export : define [calculateMetrics para] : begin
@@ -177,7 +179,7 @@ export : define [calculateMetrics para] : begin
 		WHITENESS adviceBlackness adviceBlackness2 MVERTSTROKE MVERTSTROKE_D OVERLAYSTROKE OPERATORSTROKE GEOMETRYSTROKE SHOULDERFINE SUPERNESS superxy
 		adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope]
 
-export : define [setFontMetrics para metrics font] : begin
+export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP DESCENDER XH WIDTH] metrics
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
@@ -185,22 +187,68 @@ export : define [setFontMetrics para metrics font] : begin
 	define desc : para.leading * DESCENDER / (CAP - DESCENDER)
 	define descenderPad : fallback para.descenderPad 0
 
-	set font.OS_2.xAvgCharWidth     WIDTH
-	set font.head.unitsPerEm        1000
-	set font.hhea.ascender          asc
-	set font.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
-	set font.OS_2.sTypoAscender     asc
+	set fm.OS_2.xAvgCharWidth     WIDTH
+	set fm.head.unitsPerEm        1000
+	set fm.hhea.ascender          asc
+	set fm.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
+	set fm.OS_2.sTypoAscender     asc
 
-	set font.hhea.descender         (DESCENDER - descenderPad)
-	set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
-	set font.OS_2.sTypoDescender    (desc - descenderPad)
+	set fm.hhea.descender         (DESCENDER - descenderPad)
+	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set fm.OS_2.sTypoDescender    (desc - descenderPad)
 
-	set font.hhea.lineGap           (para.leading - asc + DESCENDER)
-	set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
+	set fm.hhea.lineGap           (para.leading - asc + DESCENDER)
+	set fm.OS_2.sTypoLineGap      (para.leading - asc + desc)
 
-	set font.OS_2.sxHeight          XH
-	set font.OS_2.sCapHeight        CAP
-	set font.post.italicAngle       (0 - para.slantAngle)
+	set fm.OS_2.sxHeight          XH
+	set fm.OS_2.sCapHeight        CAP
+	set fm.post.italicAngle       (0 - para.slantAngle)
+
+export : define [MarksetDiv p me] : begin
+	define [object MARK BASE] Anchor
+	define middle : p * me.MIDDLE
+	define rightSB : me.WIDTH * p - me.SB
+	define [ta anchor] : return : new Anchor
+		* (anchor.x * me.globalTransform.xx + anchor.y * me.TANSLANT + me.globalTransform.x)
+		* (anchor.x * me.globalTransform.xy + anchor.y * me.globalTransform.yy + me.globalTransform.y)
+		* anchor.type
+
+	define markAboveLower       {.anchors {.above       [ta : new Anchor middle  me.XH        BASE]}}
+	define markAboveOper        {.anchors {.above       [ta : new Anchor middle  me.operTop   BASE]}}
+	define markAboveTack        {.anchors {.above       [ta : new Anchor middle  me.tackTop   BASE]}}
+	define markAbovePlus        {.anchors {.above       [ta : new Anchor middle  me.plusTop   BASE]}}
+	define markAboveCap         {.anchors {.above       [ta : new Anchor middle  me.CAP       BASE]}}
+	define markBelowLower       {.anchors {.below       [ta : new Anchor middle  me.DESCENDER BASE]}}
+	define markBelowTack        {.anchors {.below       [ta : new Anchor middle  me.tackBot   BASE]}}
+	define markBelowOper        {.anchors {.below       [ta : new Anchor middle  me.operBot   BASE]}}
+	define markBelowPlus        {.anchors {.below       [ta : new Anchor middle  me.plusBot   BASE]}}
+	define markBelowZero        {.anchors {.below       [ta : new Anchor middle  0            BASE]}}
+	define markToprightLower    {.anchors {.topright    [ta : new Anchor rightSB me.XH        BASE]}}
+	define markToprightCap      {.anchors {.topright    [ta : new Anchor rightSB me.CAP       BASE]}}
+	define markBottomrightLower {.anchors {.bottomright [ta : new Anchor rightSB me.DESCENDER BASE]}}
+	define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor rightSB 0            BASE]}}
+
+	define [buildStandardMarkSet] : begin
+		local a : compsiteMarkSet.apply null arguments
+		set a.anchors.overlay : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x me.OVERLAYPOS]
+			* [mix a.anchors.below.y a.anchors.above.y me.OVERLAYPOS]
+			* BASE
+		set a.anchors.slash : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x 0.5]
+			* [mix a.anchors.below.y a.anchors.above.y 0.5]
+			* BASE
+		return a
+
+	return : object
+		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero
+		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero
+		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero
+		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero
+		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower
+		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower
 
 export : define designParameters : object
 	equal_wideness      0.075

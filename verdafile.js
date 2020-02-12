@@ -651,7 +651,7 @@ const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, p
 	}
 });
 const Scripts = task("scripts", async target => {
-	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`empty-font.toml`);
+	await target.need(sfu`parameters.toml`, sfu`variants.toml`);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
