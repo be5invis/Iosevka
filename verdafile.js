@@ -137,8 +137,11 @@ function nValidate(key, v, f) {
 function vlShapeWeight(x) {
 	return x >= 100 && x <= 900;
 }
+function vlCssWeight(x) {
+	return x >= 0 && x <= 1000;
+}
 function vlMenuWeight(x) {
-	return x >= 100 && x <= 900 && x % 100 === 0;
+	return (x >= 100 && x <= 900 && x % 100 === 0) || x === 450;
 }
 function vlShapeWidth(x) {
 	return x === 3 || x === 5 || x === 7;
@@ -157,7 +160,7 @@ function getSuffixSet(weights, slants, widths) {
 					hives: [`shape-weight`, `s-${s}`, `wd-${widths[wd].shape}`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
-					cssWeight: nValidate("CSS weight of " + w, weights[w].css),
+					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
 					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
 					width: wd,
 					shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, vlShapeWidth),
