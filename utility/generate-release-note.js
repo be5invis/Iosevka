@@ -98,7 +98,7 @@ const PackageShapes = {
 const PackageSpacings = {
 	// spacingDesc, ligation, spacingNameSuffix
 	"": ["Default", true, ""],
-	term: ["Terminal", false, "Type"],
+	term: ["Terminal", false, "Term"],
 	type: ["Typesetting", true, "Type"],
 	"term-lig": ["Terminal-Ligature", true, "TermLig"]
 };
