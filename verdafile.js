@@ -141,7 +141,7 @@ function vlCssWeight(x) {
 	return x >= 0 && x <= 1000;
 }
 function vlMenuWeight(x) {
-	return (x >= 100 && x <= 900 && x % 100 === 0) || x === 450;
+	return vlShapeWeight && (x % 100 === 0 || x === 450);
 }
 function vlShapeWidth(x) {
 	return x === 3 || x === 5 || x === 7;
