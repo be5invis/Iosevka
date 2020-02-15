@@ -5,6 +5,7 @@ const quadify = require("primitive-quadify-off-curves");
 
 const ANGLES = 12;
 const SMALL = 1e-4;
+
 function solveTS(a, b, c, out, flag) {
 	const delta = b * b - 4 * a * c;
 	if (delta > 0) {
@@ -32,15 +33,7 @@ function findExtrema(z1, z2, z3, z4, out) {
 	const c = 3 * (z2.y - z1.y);
 	solveTS(a, b, c, out);
 }
-// function findInflections(z1, z2, z3, z4, out) {
-// 	const ax = z2.x - z1.x;
-// 	const ay = z2.y - z1.y;
-// 	const bx = z3.x - z2.x - ax;
-// 	const by = z3.y - z2.y - ay;
-// 	const cx = z4.x - z3.x - ax - 2 * bx;
-// 	const cy = z4.y - z3.y - ay - 2 * by;
-// 	solveTS(bx * cy - by * cx, ax * cy - ay * cx, ax * by - ay * bx, out, true);
-// }
+
 function rotate(z, angle) {
 	const c = Math.cos(angle),
 		s = Math.sin(angle);
@@ -125,34 +118,7 @@ function splitAtExtrema(z1, z2, z3, z4, angles, curve) {
 		}
 	}
 }
-// function splitSegment(z1, z2, z3, z4, angles, curve) {
-// 	let ts = [];
-// 	let inflectAtEnd = false;
-// 	// findInflections(z1, z2, z3, z4, ts);
-// 	// ts = ts.sort(ASCEND);
-// 	if (ts[0] < SMALL) {
-// 		ts[0] = 0;
-// 		curve[curve.length - 1].inflect = true;
-// 	} else {
-// 		ts.unshift(0);
-// 	}
-// 	if (ts[ts.length - 1] > 1 - SMALL) {
-// 		inflectAtEnd = true;
-// 		ts[ts.length - 1] = 1;
-// 	} else {
-// 		ts.push(1);
-// 	}
-// 	for (let k = 0; k < ts.length; k++) {
-// 		if (k > 0) {
-// 			const t1 = ts[k - 1];
-// 			const t2 = ts[k];
-// 			const bef = splitBefore(z1, z2, z3, z4, t2);
-// 			const seg = splitAfter(bef[0], bef[1], bef[2], bef[3], t1 / t2);
-// 			splitAtExtrema(seg[0], seg[1], seg[2], seg[3], angles, curve);
-// 			if (t2 < 1 || inflectAtEnd) curve[curve.length - 1].inflect = true;
-// 		}
-// 	}
-// }
+
 function veryClose(z1, z2) {
 	return (z1.x - z2.x) * (z1.x - z2.x) + (z1.y - z2.y) * (z1.y - z2.y) <= SMALL;
 }
@@ -245,16 +211,18 @@ class BezierCurveCluster {
 					z4 = zs[j];
 				const z2 = mix(z1, z4, 1 / 3);
 				const z3 = mix(z1, z4, 2 / 3);
-				segments.push(new quadify.CubicBezierCurve(z1, z2, z3, z4));
-				lengths.push(Math.hypot(z4.x - z1.x, z4.y - z1.y));
+				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				segments.push(seg);
+				lengths.push(this.measureLength(seg));
 				last = z4;
 			} else if (zs[j].cubic) {
 				const z1 = last,
 					z2 = zs[j],
 					z3 = zs[j + 1],
 					z4 = zs[j + 2];
-				segments.push(new quadify.CubicBezierCurve(z1, z2, z3, z4));
-				lengths.push(Math.hypot(z4.x - z1.x, z4.y - z1.y));
+				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				segments.push(seg);
+				lengths.push(this.measureLength(seg));
 				last = z4;
 				j += 2;
 			} else {
@@ -263,8 +231,9 @@ class BezierCurveCluster {
 					z4 = zs[j + 1];
 				const z2 = mix(zm, z1, 1 / 3);
 				const z3 = mix(zm, z4, 1 / 3);
-				segments.push(new quadify.CubicBezierCurve(z1, z2, z3, z4));
-				lengths.push(Math.hypot(z4.x - z1.x, z4.y - z1.y));
+				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				segments.push(seg);
+				lengths.push(this.measureLength(seg));
 				last = z4;
 				j += 1;
 			}
@@ -280,8 +249,17 @@ class BezierCurveCluster {
 		}
 		this.segments = segments;
 		this.lengths = lengths;
-		// console.log(this.eval(0), this.eval(1 / 2), this.eval(1));
-		// console.log(this.derivative(0), this.derivative(1 / 2), this.derivative(1));
+	}
+	measureLength(c) {
+		const N = 16;
+		let z0 = c.eval(0);
+		let d = 0;
+		for (let t = 1; t <= N; t++) {
+			const z = c.eval(t / N);
+			d += Math.hypot(z.x - z0.x, z.y - z0.y);
+			z0 = z;
+		}
+		return d;
 	}
 	getIndex(t) {
 		let j = this.lengths.length - 1;
@@ -300,18 +278,31 @@ class BezierCurveCluster {
 		const tBefore = this.lengths[j];
 		const tNext = j < this.lengths.length - 1 ? this.lengths[j + 1] : 1;
 		const tRelative = (t - tBefore) / (tNext - tBefore);
-		// console.log(
-		// 	t,
-		// 	tRelative,
-		// 	tNext,
-		// 	tBefore,
-		// 	tNext - tBefore,
-		// 	this.segments[j].derivative(tRelative)
-		// );
 		const d = this.segments[j].derivative(tRelative);
 		d.x /= tNext - tBefore;
 		d.y /= tNext - tBefore;
 		return d;
+	}
+
+	inRange(err, a, b, c) {
+		if (a <= c) return b >= a - err && b <= c + err;
+		else return b >= c - err && b <= a + err;
+	}
+	colinear(err, a, b, c) {
+		if (!this.inRange(err, a.x, b.x, c.x)) return false;
+		if (!this.inRange(err, a.y, b.y, c.y)) return false;
+		const det = (b.y - a.y) * (c.x - b.x) - (c.y - b.y) * (b.x - a.x);
+		return det < err * err && det > -err * err;
+	}
+	isAlmostLinear(err) {
+		const N = 16;
+		let z0 = this.eval(0);
+		let z1 = this.eval(1);
+		for (let k = 1; k < N; k++) {
+			const zt = this.eval(k / N);
+			if (!this.colinear(err, z0, zt, z1)) return false;
+		}
+		return true;
 	}
 }
 
@@ -329,6 +320,7 @@ function buildCurve(curve) {
 		}
 		if (nPtsOffPoints > 0) {
 			const curve = new BezierCurveCluster(pts);
+			if (curve.isAlmostLinear(1)) continue;
 			const offPoints = quadify.autoQuadify(curve, 1 / 4);
 			if (!offPoints) continue;
 			for (let k = 0; k < offPoints.length; k++) {
@@ -358,7 +350,7 @@ module.exports = function(sourceCurve, gizmo) {
 	for (let j = 0; j < sourceCurve.length; j++) {
 		if (!isFinite(sourceCurve[j].x)) sourceCurve[j].x = 0;
 		if (!isFinite(sourceCurve[j].y)) sourceCurve[j].y = 0;
-		sourceCurve[j] = Transform.untransform(gizmo, sourceCurve[j]);
+		sourceCurve[j] = Transform.unTransform(gizmo, sourceCurve[j]);
 	}
 	const curve = splitCurve(sourceCurve);
 	markCorners(curve);
