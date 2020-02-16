@@ -43,9 +43,7 @@ function rankOf(initialChar) {
 }
 
 function getSsData(variants, cvData) {
-	const body =
-		`@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) }\n` +
-		`ABCDEFG HIJKLMN OPQRST UVWXYZ 0123456789`;
+	const body = `@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ`;
 
 	const result = [{ tag: "off", description: "Default", bodyUpright: body, bodyItalic: body }];
 	for (const tag in variants.composite) {
