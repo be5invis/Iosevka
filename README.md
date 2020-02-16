@@ -205,8 +205,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-t-standard` : Standard `t` shape (default).
     * `v-t-cross` : Futura-like `t` shape.
   * Styles for letter `Q`:
-    * `v-q-taily` : `Q` with a curly tail (default).
-    * `v-q-straight` : `Q` with a straight tail in the old versions.
+    * `v-capital-q-taily` : `Q` with a curly tail (default).
+    * `v-capital-q-straight` : `Q` with a straight tail in the old versions.
   * Styles for letter `y`:
     * `v-y-straight`: More-straight letter `y`.
     * `v-y-curly`: More curly letter `y`, like Iosevka 2.x.
@@ -273,7 +273,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for letter `R`:
     * `v-capital-r-straight`: Standard, straight `R` (default).
     * `v-capital-r-curly`: Slightly curly `R`, like Iosevka 2.x.
-  * Styles for letter `Y`, `У`:
+  * Styles for letter `Y`:
     * `v-capital-y-straight`: Standard, straight `Y` (default).
     * `v-capital-y-curly`: Slightly curly `Y`, like Iosevka 2.x. 
   * Styles for letter `A`, `Λ`, `Δ`:

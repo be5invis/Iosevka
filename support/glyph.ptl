@@ -76,10 +76,6 @@ export all : class Glyph
 	public curveTo : public curve-to
 
 	public [cubic-to x1 y1 x2 y2 x y] : begin
-		#local lastContour this.contours.(this.contours.length - 1)
-		#local lastPoint : utp this.gizmo lastContour.(lastContour.length - 1)
-		#local segments : bezierCubic2Q2 lastPoint {.x x1 .y y1} {.x x2 .y y2} {.x x .y y}
-		#foreach {p0 {.x xc .y yc} {.x xf .y yf}} [items-of segments] : lastContour.push [Point.transformed this.gizmo xc yc false] [Point.transformed this.gizmo xf yf true]
 		this.contours.((this.contours.length - 1)).push
 			Point.transformed this.gizmo x1 y1 false true
 			Point.transformed this.gizmo x2 y2 false true
@@ -182,74 +178,37 @@ export all : class Glyph
 			this.start-from mbx mby
 		return this
 
-	static [contourToSVGPath contour delta] : if (contour && contour.length) : begin
-		local lx contour.0.x
-		local ly contour.0.y
-		local buf : if delta "" "M \[cov lx] \[cov ly]"
-		for [local j 1] (j < contour.length) [inc j] : begin
-			local point contour.(j)
-			piecewise
-				point.on : begin
-					if delta
-					: then : set buf : buf + "l \[cov : point.x - lx] \[cov : point.y - ly]"
-					: else : set buf : buf + "L \[cov point.x] \[cov point.y]"
-					set {.x lx .y ly} point
-				point.cubic : begin
-					local z1 point
-					local z2 contour.(j + 1)
-					local z3 contour.(j + 2)
-					if delta
-					: then : set buf : buf + "c \[cov : z1.x - lx] \[cov : z1.y - ly] \[cov : z2.x - lx] \[cov : z2.y - ly] \[cov : z3.x - lx] \[cov : z3.y - ly]"
-					: else : set buf : buf + "C \[cov z1.x] \[cov z1.y] \[cov z2.x] \[cov z2.y] \[cov z3.x] \[cov z3.y]"
-					set {.x lx .y ly} z3
-					set j : j + 2
-				true : begin
-					local zc point
-					local zf : if contour.(j + 1) contour.(j + 1) contour.0
-					local x1 : mix lx zc.x (2 / 3)
-					local y1 : mix ly zc.y (2 / 3)
-					local x2 : mix zf.x zc.x (2 / 3)
-					local y2 : mix zf.y zc.y (2 / 3)
-					if delta
-					: then : set buf : buf + "c \[cov : x1 - lx] \[cov : y1 - ly] \[cov : x2 - lx] \[cov : y2 - ly] \[cov : zf.x - lx] \[cov : zf.y - ly]"
-					: else : set buf : buf + "C \[cov x1] \[cov y1] \[cov x2] \[cov y2] \[cov zf.x] \[cov zf.y]"
-					set {.x lx .y ly} zf
-					inc j
-		set buf : buf + " Z\n"
-		return buf
-	
 	static [contourToStandardCubic contour] : begin
 		local c {}
 		if (!contour || !contour.length) : return c
 
-		local lx contour.0.x
-		local ly contour.0.y
-		c.push {.x lx .y ly .on true}
+		local z0 contour.0
+		c.push : new Point z0.x z0.y true false false
 		for [local j 1] (j < contour.length) [inc j] : begin
 			local point contour.(j)
 			piecewise
 				point.on : begin
-					c.push {.x point.x .y point.y .on true}
-					set {.x lx .y ly} point
+					c.push : new Point point.x point.y true false false
+					set z0 point
 				point.cubic : begin
 					local z1 point
 					local z2 contour.(j + 1)
 					local z3 contour.(j + 2)
-					c.push : new Point z1.x z1.y false true false
-					c.push : new Point z2.x z2.y false true false
-					c.push : new Point z3.x z3.y true false false
-					set {.x lx .y ly} z3
+					c.push : new Point z1.x z1.y false true  false
+					c.push : new Point z2.x z2.y false true  false
+					c.push : new Point z3.x z3.y true  false false
+					set z0 z3
 					set j : j + 2
 				true : begin
 					local zc point
 					local zf : if contour.(j + 1) contour.(j + 1) contour.0
-					local x1 : mix lx zc.x (2 / 3)
-					local y1 : mix ly zc.y (2 / 3)
+					local x1 : mix z0.x zc.x (2 / 3)
+					local y1 : mix z0.y zc.y (2 / 3)
 					local x2 : mix zf.x zc.x (2 / 3)
 					local y2 : mix zf.y zc.y (2 / 3)
-					c.push : new Point x1   y1 false true false
-					c.push : new Point x2   y2 false true false
-					c.push : new Point zf.x zf.y true false false
-					set {.x lx .y ly} zf
+					c.push : new Point x1   y1   false true  false
+					c.push : new Point x2   y2   false true  false
+					c.push : new Point zf.x zf.y true  false false
+					set z0 zf
 					inc j
 		return c

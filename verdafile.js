@@ -137,8 +137,11 @@ function nValidate(key, v, f) {
 function vlShapeWeight(x) {
 	return x >= 100 && x <= 900;
 }
+function vlCssWeight(x) {
+	return x >= 0 && x <= 1000;
+}
 function vlMenuWeight(x) {
-	return x >= 100 && x <= 900 && x % 100 === 0;
+	return vlShapeWeight && (x % 100 === 0 || x === 450);
 }
 function vlShapeWidth(x) {
 	return x === 3 || x === 5 || x === 7;
@@ -157,7 +160,7 @@ function getSuffixSet(weights, slants, widths) {
 					hives: [`shape-weight`, `s-${s}`, `wd-${widths[wd].shape}`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
-					cssWeight: nValidate("CSS weight of " + w, weights[w].css),
+					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
 					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
 					width: wd,
 					shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, vlShapeWidth),
@@ -531,17 +534,23 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	const [sans, slab] = await target.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
+		SnapShotCSS,
+		SnapShotHtml,
 		de`images`
 	);
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
+const SnapShotHtml = file(`snapshot/index.html`, async target => {
+	await target.need(sfu`variants.toml`, UtilScripts);
+	await run(`node`, `utility/generate-snapshot-page/index.js`);
+});
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
-	await target.need(fu`snapshot/index.styl`);
+	await target.need(sfu`snapshot/index.styl`);
 	await run(`npm`, `run`, `stylus`, `snapshot/index.styl`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
-	await target.need(SampleImagesPre, SnapShotCSS);
+	await target.need(SampleImagesPre);
 	await cd(`snapshot`).run("npx", "electron", "get-snap.js", ["--dir", "../images"]);
 });
 const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
@@ -553,14 +562,11 @@ const SampleImages = task(`sample-images`, async target => {
 	await target.need(TakeSampleImages);
 	await target.need(
 		ScreenShot`images/charvars.png`,
-		ScreenShot`images/download-options.png`,
-		ScreenShot`images/family.png`,
 		ScreenShot`images/languages.png`,
 		ScreenShot`images/ligations.png`,
 		ScreenShot`images/matrix.png`,
 		ScreenShot`images/preview-all.png`,
 		ScreenShot`images/stylesets.png`,
-		ScreenShot`images/variants.png`,
 		ScreenShot`images/weights.png`
 	);
 });
@@ -596,7 +602,7 @@ const ChangeFileList = oracle.make(
 	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
 const ReleaseNotes = task(`release:release-note`, async target => {
-	const [version] = await target.need(Version);
+	const [version] = await target.need(Version, UtilScriptFiles);
 	const [changeFiles] = await target.need(ChangeFileList());
 	await target.need(changeFiles.map(fu));
 	await run("node", "utility/generate-release-note", version);
@@ -623,6 +629,14 @@ const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
 );
+const UtilScriptFiles = computed("util-script-files", async target => {
+	const [js, ejs, md] = await target.need(
+		ScriptsUnder("js", "utility"),
+		ScriptsUnder("ejs", "utility"),
+		ScriptsUnder("md", "utility")
+	);
+	return [...js, ...ejs, ...md];
+});
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const [gen, meta, glyphs, support] = await target.need(
 		ScriptsUnder(ext, `gen`),
@@ -656,4 +670,8 @@ const Scripts = task("scripts", async target => {
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
+});
+const UtilScripts = task("util-scripts", async target => {
+	const [files] = await target.need(UtilScriptFiles);
+	await target.need(files.map(f => fu`${f}`));
 });
