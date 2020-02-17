@@ -619,6 +619,7 @@ glyph-block Symbol-Math-Logicals : begin
 glyph-block Symbol-Math-Relation : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks : TildeShape
+	glyph-block-export dH lessSlantness LigationLessShape LigationGreaterShape
 
 	define equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 	define lessSlantness : (4 / 13) * (operTop - operBot) / (RIGHTSB - SB)
@@ -629,13 +630,15 @@ glyph-block Symbol-Math-Relation : begin
 		HBar left right (symbolMid + equalHalfSpace) OPERATORSTROKE
 		HBar left right (symbolMid - equalHalfSpace) OPERATORSTROKE
 
-	define [EqualHole x] : VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
+	define [EqualHole x]
+		VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
 
 	define [IdentShape left right] : union
 		HBar left right (symbolMid + equalHalfSpace * 1.5) OPERATORSTROKE
 		HBar left right symbolMid OPERATORSTROKE
 		HBar left right (symbolMid - equalHalfSpace * 1.5) OPERATORSTROKE
-	define [IdentHole x] : VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
+	define [IdentHole x]
+		VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
 
 	sketch # equal
 		include MarkSet.plus
@@ -735,26 +738,37 @@ glyph-block Symbol-Math-Relation : begin
 				IdentHole WIDTH
 		save 'ident.cc'
 
+	define [LessGreaterExpansion top bot l r]
+		Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+
+	define [LessMaskShape top bot l r] : spiro-outline
+		corner r top
+		corner r bot
+		corner l [mix bot top 0.5]
+	define [GreaterMaskShape top bot l r] : spiro-outline
+		corner l top
+		corner l bot
+		corner r [mix bot top 0.5]
 	define [LessShapeA top bot l r s] : begin
-		local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+		local exp : LessGreaterExpansion top bot l r
 		return : dispiro
 			widths.center s
 			flat r top
 			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) LEFTWARD]
 	define [LessShapeB top bot l r s] : begin
-		local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+		local exp : LessGreaterExpansion top bot l r
 		return : dispiro
 			widths.center s
 			flat r bot
 			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) LEFTWARD]
 	define [GreaterShapeA top bot l r s] : begin
-		local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+		local exp : LessGreaterExpansion top bot l r
 		return : dispiro
 			widths.center s
 			flat l top
 			curl r [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) RIGHTWARD]
 	define [GreaterShapeB top bot l r s] : begin
-		local exp : Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+		local exp : LessGreaterExpansion top bot l r
 		return : dispiro
 			widths.center s
 			flat l bot
@@ -764,9 +778,39 @@ glyph-block Symbol-Math-Relation : begin
 		LessShapeA top bot l r [fallback s OPERATORSTROKE]
 		LessShapeB top bot l r [fallback s OPERATORSTROKE]
 
+	define [LigationLessShape top bot l r s gap] : union
+		intersection
+			Rect [mix bot top 2] [mix top bot 2] [mix r l 2] r
+			union
+				LessShapeA top bot l r [fallback s OPERATORSTROKE]
+				LessShapeB top bot l r [fallback s OPERATORSTROKE]
+		intersection
+			LessMaskShape top bot l r
+			difference
+				dispiro
+					widths.lhs [fallback s OPERATORSTROKE]
+					corner r bot
+					corner r top
+				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
+
 	define [GreaterShape top bot l r s] : union
 		GreaterShapeA top bot l r [fallback s OPERATORSTROKE]
 		GreaterShapeB top bot l r [fallback s OPERATORSTROKE]
+
+	define [LigationGreaterShape top bot l r s gap] : union
+		intersection
+			Rect [mix bot top 2] [mix top bot 2] [mix l r 2] l
+			union
+				GreaterShapeA top bot l r [fallback s OPERATORSTROKE]
+				GreaterShapeB top bot l r [fallback s OPERATORSTROKE]
+		intersection
+			GreaterMaskShape top bot l r
+			difference
+				dispiro
+					widths.rhs [fallback s OPERATORSTROKE]
+					corner l bot
+					corner l top
+				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
 
 	# Sym parameters
 	local approxDist : equalHalfSpace * 1.75
