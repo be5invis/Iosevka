@@ -542,8 +542,9 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(sfu`variants.toml`, UtilScripts);
+	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
 	await run(`node`, `utility/generate-snapshot-page/index.js`);
+	await run(`node`, `utility/amend-readme/index`);
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(sfu`snapshot/index.styl`);
@@ -665,7 +666,7 @@ const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, p
 	}
 });
 const Scripts = task("scripts", async target => {
-	await target.need(sfu`parameters.toml`, sfu`variants.toml`);
+	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`ligation-set.toml`);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));

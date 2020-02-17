@@ -9,7 +9,12 @@ module.exports = async function() {
 	const cvData = getCvData(variants);
 	const ssData = getSsData(variants, cvData);
 
-	return { cvData, ssData };
+	return {
+		cvData,
+		ssData,
+		default: variants.default,
+		slabDefaultOverride: variants.composite.slab
+	};
 };
 
 function getCvData(variants) {

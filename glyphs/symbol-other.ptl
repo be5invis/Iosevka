@@ -967,45 +967,50 @@ glyph-block Symbol-Other-I-Ching : begin
 
 glyph-block Symbol-Other-Ligation : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Symbol-Math-Relation : dH lessSlantness
+	glyph-block-import Symbol-Math-Relation : LigationLessShape LigationGreaterShape
 
 	local arrowheadsKern : (2 / 3) * [clamp 0 (WIDTH * 0.4) (WIDTH - OPERATORSTROKE * 3)]
 
-	# arrows
-	# ->
-	define lessSlantness : (4 / 13) * (operTop - operBot) / (RIGHTSB - SB)
-	define dH : lessSlantness * (RIGHTSB - SB)
-
 	define arrowheadSlope : 1 / lessSlantness
-	define [ArrowBarConfig extend kern join] : let [cleft O] [cright (WIDTH - O)] [arrowr : WIDTH + extend] [arrowl : 0 - extend] : list
-		list 'fr' SB arrowr
-		list 'lf' arrowl RIGHTSB
-		list 'cr' cleft arrowr
-		list 'lc' arrowl cright
-		list 'lxc' [mix arrowl 0 0.5] cright
-		list 'fr1' SB (arrowr + kern)
-		list 'l1f' (arrowl - kern) RIGHTSB
-		list 'cr1' cleft (arrowr + kern)
-		list 'l1c' (arrowl - kern) cright
-		list 'fr2' SB (arrowr + kern * 2)
-		list 'l2f' (arrowl - kern * 2) RIGHTSB
-		list 'cr2' cleft (arrowr + kern * 2)
-		list 'l2c' (arrowl - kern * 2) cright
-		list 'cf' cleft RIGHTSB
-		list 'fc' SB cright
-		list 'jf' (-join) RIGHTSB
-		list 'fj' SB (WIDTH + join)
-		list 'jr' (-join) arrowr
-		list 'jc' (-join) cright
-		list 'lj' arrowl (WIDTH + join)
-		list 'cj' cleft (WIDTH + join)
-		list 'j1f' (-join - kern) RIGHTSB
-		list 'fj1' SB (WIDTH + join + kern)
-		list 'lr' arrowl arrowr
-		list 'cc' cleft cright
-		list 'zf' (cleft - WIDTH + RIGHTSB) RIGHTSB
-		list 'zc' (cleft - WIDTH + RIGHTSB) cright
-		list 'fz' SB (cright + SB)
-		list 'cz' cleft (cright + SB)
+	define [ArrowBarConfig extend kern join] : begin
+		define cleft O
+		define cright (WIDTH - O)
+		define arrowr : WIDTH + extend
+		define arrowl : 0 - extend
+		define zleft : cleft - WIDTH + RIGHTSB
+		define zright : cright + SB
+		define sleft : -WIDTH + RIGHTSB - OPERATORSTROKE * HVCONTRAST
+		define sright : WIDTH + SB + OPERATORSTROKE * HVCONTRAST
+		define lk : object
+			f    SB
+			l    arrowl
+			l1 : arrowl - kern
+			l2 : arrowl - kern * 2
+			c    cleft
+			j    (-join)
+			j1   (-join - kern)
+			z    zleft
+			s    sleft
+			s1 : sleft - kern
+			lx : mix arrowl 0 0.5
+
+		define rk : object
+			f    RIGHTSB
+			r    arrowr
+			r1 : arrowr + kern
+			r2 : arrowr + kern * 2
+			c    cright
+			j    (WIDTH + join)
+			j1   (WIDTH + join + kern)
+			z    zright
+			s    sright
+			s1 : sright + kern
+
+		define result {}
+		foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
+			result.push { (l + r) lk.(l) rk.(r) }
+		return result
 
 	local arrowExtend [clamp 0 WIDTH (RIGHTSB - OPERATORSTROKE / 2 * arrowheadSlope)]
 	local arrowJ : clamp 0 WIDTH (SB + OPERATORSTROKE / 2 * arrowheadSlope)
@@ -1026,6 +1031,18 @@ glyph-block Symbol-Other-Ligation : begin
 		include : HBarBottom left right (symbolMid - dblArrowD) dblArrowSw
 		set currentGlyph.cmpPriority (-3)
 		save ('ligequal.' + subclass)
+
+	sketch
+		include : LigationLessShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE (dblArrowD * 2 - dblArrowSw * 2)
+		save 'ligless.dblhead'
+		include : Translate (-arrowheadsKern) 0
+		save 'ligless.dblhead.shift1'
+
+	sketch
+		include : LigationGreaterShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE (dblArrowD * 2 - dblArrowSw * 2)
+		save 'liggreater.dblhead'
+		include : Translate (+arrowheadsKern) 0
+		save 'liggreater.dblhead.shift1'
 
 	sketch
 		include glyphs.exclam
