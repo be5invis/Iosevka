@@ -8,6 +8,7 @@ const buildGlyphs = require("./build-glyphs.js");
 const EmptyFont = require("./empty-font.js");
 const parameters = require("../support/parameters");
 const formVariantData = require("../support/variant-data");
+const formLigationData = require("../support/ligation-data");
 const regulateGlyphs = require("../support/regulate-glyph");
 const toml = require("toml");
 
@@ -20,6 +21,7 @@ function objHashNonEmpty(obj) {
 const PARAMETERS_TOML = path.resolve(__dirname, "../parameters.toml");
 const PRIVATE_TOML = path.resolve(__dirname, "../private.toml");
 const VARIANTS_TOML = path.resolve(__dirname, "../variants.toml");
+const LIGATIONS_TOML = path.resolve(__dirname, "../ligation-set.toml");
 
 function tryParseToml(str) {
 	try {
@@ -37,13 +39,19 @@ function getParameters(argv) {
 		tryParseToml(PARAMETERS_TOML),
 		fs.existsSync(PRIVATE_TOML) ? tryParseToml(PRIVATE_TOML) : []
 	);
-	const variantData = tryParseToml(VARIANTS_TOML);
+	const rawVariantsData = tryParseToml(VARIANTS_TOML);
+	const rawLigationData = tryParseToml(LIGATIONS_TOML);
 
 	const para = parameters.build(parametersData, argv._, { "shape-weight": argv["shape-weight"] });
-	const variantsData = formVariantData(variantData, para);
+
+	const variantsData = formVariantData(rawVariantsData, para);
 	para.variants = variantsData;
 	para.variantSelector = parameters.build(variantsData, ["default", ...argv._]);
 	para.defaultVariant = variantsData.default;
+
+	const ligationData = formLigationData(rawLigationData, para);
+	para.defaultBuildup = ligationData.defaultBuildup;
+	para.ligation = parameters.build(ligationData.hives, ["default", ...argv._]);
 
 	para.naming = {
 		family: argv.family,

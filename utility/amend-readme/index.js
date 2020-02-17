@@ -2,6 +2,7 @@ const ejs = require("ejs");
 const fs = require("fs-extra");
 const path = require("path");
 const parseVariantsData = require("../generate-snapshot-page/parse-variants-data");
+const parseLigationData = require("../generate-snapshot-page/ligation-data");
 
 main().catch(e => {
 	console.error(e);
@@ -13,6 +14,8 @@ async function main() {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
 	readme = (await processCv()).apply(readme);
+	readme = (await processLigSetCherryPicking()).apply(readme);
+	readme = (await processLigSetPreDef()).apply(readme);
 	await fs.writeFile(readmePath, readme);
 }
 
@@ -119,4 +122,28 @@ function figureOutDefaults(variantsData, gr) {
 				if (config.selector === selector) dc.result = config.selector;
 	}
 	return defaultConfigs;
+}
+
+async function processLigSetCherryPicking() {
+	const ligData = await parseLigationData();
+	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
+	md.log(`* Styles for further customizing default (\`calt\`) ligation sets:`);
+	for (const gr in ligData.cherry) {
+		md.log(`  * \`${gr}\`: ${ligData.cherry[gr].desc}.`);
+	}
+	return md;
+}
+
+async function processLigSetPreDef() {
+	const ligData = await parseLigationData();
+	const md = new MdCol("Section-Cherry-Picking-Predefined");
+	md.log(`* Styles for ligation sets, include:`);
+	for (const gr in ligData.rawSets) {
+		if (ligData.rawSets[gr].disableHives) continue;
+		const longDesc =
+			ligData.rawSets[gr].longDesc ||
+			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;
+		md.log(`  * \`${gr}\`: ${longDesc}.`);
+	}
+	return md;
 }

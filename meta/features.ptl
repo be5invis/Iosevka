@@ -1,7 +1,8 @@
 import 'topsort' as topsort
+import 'object-assign' as objectAssign
 import '../support/glyph' as Glyph
 import '../support/transform' as Transform
-import [progLigNameMap buildLigations] from './feature/ligation'
+import [buildLigations] from './feature/ligation'
 import './feature/opbd' as buildOPBD
 import './feature/ccmp' as buildCCMP
 import [BuildCompatLigatures] from './feature/compat-ligature'
@@ -92,8 +93,9 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 
 	# Ligation
 	if para.enableLigation : do
-		define plm : progLigNameMap
-		set plm.calt : para.customLigSet || plm.(para.defLigSet) || plm.calt
+		define plm : objectAssign {.} para.defaultBuildup
+		if (para.ligation.caltBuildup && para.ligation.caltBuildup.length) : begin
+			set plm.calt para.ligation.caltBuildup
 		buildLigations chain-rule lookupOrder commonList features lookups plm glyphs
 
 	# CVxx/SSxx

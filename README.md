@@ -121,43 +121,53 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
   * `cv01`~`cv53` : Standalone character variants.
 
+<!-- BEGIN Section-Cherry-Picking-Predefined -->
+
 * Styles for ligation sets, include:
   * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
   * `ligset-php`: Default ligation set would be assigned to PHP.
+  * `ligset-ml`: Default ligation set would be assigned to ML.
+  * `ligset-fsharp`: Default ligation set would be assigned to F#.
+  * `ligset-fstar`: Default ligation set would be assigned to F*.
   * `ligset-haskell`: Default ligation set would be assigned to Haskell.
   * `ligset-idris`: Default ligation set would be assigned to Idris.
-  * `ligset-coq`: Default ligation set would be assigned to Coq.
   * `ligset-elm`: Default ligation set would be assigned to Elm.
-  * `ligset-ml`: Default ligation set would be assigned to ML.
-  * `ligset-fs`: Default ligation set would be assigned to F#.
-  * `ligset-fstar`: Default ligation set would be assigned to F\*.
-  * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
-  * `ligset-matlab`: Default ligation set would be assigned to MatLab.
+  * `ligset-patel`: Default ligation set would be assigned to PatEL.
+  * `ligset-swift`: Default ligation set would be assigned to Swift.
+  * `ligset-coq`: Default ligation set would be assigned to Coq.
+  * `ligset-matlab`: Default ligation set would be assigned to Matlab.
 
-* Styles for further customizing default (`calt`) ligation sets. When any of these styles present in your configuration, the `ligset-*` styles would be overridden.
-  * `calt-clear`: Clear the `calt` ligation set.
-  * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`);
-  * `calt-arrow`: Enable ligation set that forms arrows;
-  * `calt-arrow2`: Enable ligation for more arrows, like `>>=`;
-  * `calt-html-comment`: Enable ligation for `<!--` and `<!---`;
-  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only;
-  * `calt-eqeq`: Enable ligation for `==` and `===`;
-  * `calt-ineq`: Enable ligation for `<=` and `>=`;
-  * `calt-arrowZALE`: Enable ligation for `<=` to form a left double arrow;
-  * `calt-arrowZAGE`: Enable ligation for `>=` to form a right inverse double arrow;
-  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only;
-  * `calt-exeq`: Enable ligation for `!=` and `!==`;
-  * `calt-tildeeq`: Enable ligation for `~=` as inequality;
-  * `calt-slasheqeq`: Enable special triple-line ligation for `/==` only;
-  * `calt-slasheq`: Enable ligation for `/=` and `/==` as inequality;
-  * `calt-plusplus`: Enable ligation for `++` and further plus-chaining;
-  * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining;
-  * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols;
-  * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering;
-  * `calt-brst`: Center asterisk in `(*` and `*)`;
-  * `calt-logic`: Enable ligation for `/\` and `\/`;
-  * `calt-colons`: Enable ligation for `::` and `:::` ;
+<!-- END Section-Cherry-Picking-Predefined -->
+
+<!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
+
+* Styles for further customizing default (`calt`) ligation sets:
+  * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
+  * `calt-arrow`: Enable ligation set that forms arrows.
+  * `calt-arrow2`: Enable ligation for more arrows, like `>>=`.
+  * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
+  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only.
+  * `calt-eqeq`: Enable ligation for `==` and `===`.
+  * `calt-ineq`: Enable ligation for `<=` and `>=`.
+  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only.
+  * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
+  * `calt-exeq`: Enable ligation for `!=` and `!==`.
+  * `calt-tildeeq`: Enable ligation for `~=` as inequality.
+  * `calt-slasheqeq`: Enable special triple-line ligation for `=/=` as inequality.
+  * `calt-slasheq`: Enable ligation for `/=` and `=/=` as inequality.
+  * `calt-ltgt`: Enable ligation for `<>` as inequality.
+  * `calt-brst`: Center asterisk in `(*` and `*)`.
+  * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
+  * `calt-colons`: Enable ligation for `::` and `:::`.
+  * `calt-logic`: Enable ligation for `/\` and `\/`.
+  * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
+  * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering.
+  * `calt-arrowZALE`: Treat `<=` as arrow.
+  * `calt-arrowZAGE`: Treat `>=` as co-arrow.
+  * `calt-html-comment`: Enable ligation for `<!--` and `<!---`.
+
+<!-- END Section-Cherry-Picking-Ligation-Sets -->
 
 * Styles for changing the line space (leading):
   * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
@@ -168,13 +178,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.
   * `powerline-shift-y-n500`, `powerline-shift-y-n450`, `powerline-shift-y-n400`, `powerline-shift-y-n350`, `powerline-shift-y-n300`, `powerline-shift-y-n250`, `powerline-shift-y-n200`, `powerline-shift-y-n150`, `powerline-shift-y-n100`, `powerline-shift-y-n50`, `powerline-shift-y-0`, `powerline-shift-y-p50`, `powerline-shift-y-p100`, `powerline-shift-y-p150`, `powerline-shift-y-p200`, `powerline-shift-y-p250`, `powerline-shift-y-p300`, `powerline-shift-y-p350`, `powerline-shift-y-p400`, `powerline-shift-y-p450`, `powerline-shift-y-p500`: Shift the Powerline symbols vertically, from -0.5em to +0.5em.
   * `powerline-shift-x-n500`, `powerline-shift-x-n450`, `powerline-shift-x-n400`, `powerline-shift-x-n350`, `powerline-shift-x-n300`, `powerline-shift-x-n250`, `powerline-shift-x-n200`, `powerline-shift-x-n150`, `powerline-shift-x-n100`, `powerline-shift-x-n50`, `powerline-shift-x-0`, `powerline-shift-x-p50`, `powerline-shift-x-p100`, `powerline-shift-x-p150`, `powerline-shift-x-p200`, `powerline-shift-x-p250`, `powerline-shift-x-p300`, `powerline-shift-x-p350`, `powerline-shift-x-p400`, `powerline-shift-x-p450`, `powerline-shift-x-p500`: Shift the Powerline symbols horizontally, from -0.5em to +0.5em.
-
-* Styles for changing the width:
-  * `extended`: Expand the width by 10%;
-  * `menu-subfamily-extended`: Add “Extended” to font menu subfamily;
-  * `compressed`: Compress the width by 10%.
-  * `menu-subfamily-condensed`: Add “Condensed” into font menu subfamily;
-  * NOTE: these styles are highly experimental. Handle with extreme care.
 
 * Symbol exclusion:
   * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.

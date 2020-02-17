@@ -12,12 +12,11 @@ main().catch(e => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function main() {
-	const variantsData = await parseVariantsData();
 	const weightGrades = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 	const templatePath = path.join(__dirname, "templates/index.ejs");
 	const html = await ejs.renderFile(templatePath, {
-		...variantsData,
-		ligation: getLigationData(),
+		...(await parseVariantsData()),
+		ligation: await getLigationData(),
 		weights: weightGrades
 	});
 	await fs.writeFile(path.join(__dirname, "../../snapshot/index.html"), html);

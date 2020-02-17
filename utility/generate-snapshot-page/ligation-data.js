@@ -1,116 +1,149 @@
-function TAG(ltag) {
+const fs = require("fs-extra");
+const path = require("path");
+const toml = require("toml");
+
+function TAG(...ltag) {
 	return function(s) {
-		return { ltag: ltag, s: s };
+		return { tags: ltag, s: s };
 	};
 }
-const arw2 = TAG("arrow2");
+const arrow = TAG("arrow");
+const arrow2 = TAG("arrow2");
+const centerOps = TAG("center-ops");
+const eqeq = TAG("eqeq");
+const exeq = TAG("exeq");
+const eqeqeq = TAG("eqeq", "eqeqeq");
+const exeqeq = TAG("exeq", "exeqeq");
+const eqexeq = TAG("eqexeq", "eqexeq");
+const slasheqeq = TAG("slasheq", "slasheqeq");
+const slasheq = TAG("slasheq");
+const tildeeq = TAG("tildeeq");
+const ineq = TAG("ineq");
 const logc = TAG("logic");
-const calt = TAG("calt");
 const brst = TAG("brst");
-const dopr = TAG("dotoper");
+const trig = TAG("trig");
+const ltgt = TAG("ltgt");
+const dotOper = TAG("dotoper");
+const colons = TAG("colons");
+const htmlComment = TAG("html-comment");
+const plusplus = TAG("plusplus");
 
 const ligationSamples = [
 	[
-		arw2("-<<"),
-		arw2("-<"),
-		arw2("-<-"),
-		calt("<--"),
-		calt("<---"),
-		arw2("<<-"),
-		calt("<-"),
-		calt("->"),
-		arw2("->>"),
-		calt("-->"),
-		calt("--->"),
-		arw2("->-"),
-		arw2(">-"),
-		arw2(">>-"),
-		calt("<->"),
-		calt("<-->"),
-		calt("<--->"),
-		calt("<---->"),
-		calt("<!--")
+		arrow2("-<<"),
+		arrow2("-<"),
+		arrow2("-<-"),
+		arrow("<--"),
+		arrow("<---"),
+		arrow("<<-"),
+		arrow("<-"),
+		arrow("->"),
+		arrow("->>"),
+		arrow("-->"),
+		arrow("--->"),
+		arrow2("->-"),
+		arrow2(">-"),
+		arrow2(">>-"),
+		arrow("<->"),
+		arrow("<-->"),
+		arrow("<--->"),
+		arrow("<---->"),
+		htmlComment("<!--")
 	],
 	[
-		arw2("=<<"),
-		arw2("=<"),
-		arw2("=<="),
-		calt("<=="),
-		calt("<==="),
-		arw2("<<="),
-		calt("<="),
-		calt("=>"),
-		arw2("=>>"),
-		calt("==>"),
-		calt("===>"),
-		arw2("=>="),
-		calt(">="),
-		arw2(">>="),
-		calt("<=>"),
-		calt("<==>"),
-		calt("<===>"),
-		calt("<====>"),
-		calt("<!---")
+		arrow2("=<<"),
+		arrow2("=<"),
+		arrow2("=<="),
+		arrow("<=="),
+		arrow("<==="),
+		arrow("<<="),
+		ineq("<="),
+		arrow("=>"),
+		arrow("=>>"),
+		arrow("==>"),
+		arrow("===>"),
+		arrow2("=>="),
+		ineq(">="),
+		arrow2(">>="),
+		arrow("<=>"),
+		arrow("<==>"),
+		arrow("<===>"),
+		arrow("<====>"),
+		htmlComment("<!---")
 	],
 	[
-		calt("<----------------"),
-		calt("---------------->"),
-		calt("<===============>"),
-		calt("a:b"),
-		calt("a::b"),
-		calt("a:::b"),
-		logc("a\\/b"),
-		logc("a/\\b")
+		arrow("<------"),
+		arrow("------>"),
+		arrow("<=====>"),
+		arrow("<~~"),
+		arrow("<~"),
+		arrow("~>"),
+		arrow("~~>"),
+		colons("::"),
+		colons(":::"),
+		logc("\\/"),
+		logc("/\\"),
+		eqeq("=="),
+		exeq("!="),
+		slasheq("/="),
+		tildeeq(`~=`),
+		ltgt(`<>`),
+		eqeqeq("==="),
+		exeqeq("!=="),
+		slasheqeq("=/="),
+		eqexeq("=!=")
 	],
 	[
-		calt(":="),
-		calt(":-"),
-		calt(":+"),
-		calt("<*"),
-		calt("<*>"),
-		calt("*>"),
-		calt("<|"),
-		calt("<|>"),
-		calt("|>"),
-		dopr("<."),
-		dopr("<.>"),
-		dopr(".>"),
-		calt("+:"),
-		calt("-:"),
-		calt("=:"),
-		calt("<******>"),
+		centerOps(":="),
+		centerOps(":-"),
+		centerOps(":+"),
+		centerOps("<*"),
+		centerOps("<*>"),
+		centerOps("*>"),
+		trig("<|"),
+		trig("<|>"),
+		trig("|>"),
+		dotOper("<."),
+		dotOper("<.>"),
+		dotOper(".>"),
+		centerOps("+:"),
+		centerOps("-:"),
+		centerOps("=:"),
+		centerOps("<******>"),
 		brst("(* comm *)"),
-		calt("=="),
-		calt("!="),
-		calt("==="),
-		calt("!==")
+		plusplus("++"),
+		plusplus("+++"),
+		logc("|-"),
+		logc("-|")
 	]
 ];
-const ligationSets = [
-	{ tag: "calt", switch: "off", desc: "Ligation Off", group: [] },
-	{ tag: "calt", desc: "Default setting in text editors", group: ["calt"] },
-	{ tag: "XJS0", tagName: "XJS0, XPHP", desc: "JavaScript, PHP", group: ["calt", "eeeq"] },
-	{
-		tag: "XFST",
-		tagName: "XML0, XFS0, XFST",
-		desc: "ML, OCaml, F#, F*",
-		group: ["calt", "brst", "logic", "ml"]
-	},
-	{ tag: "SWFT", tagName: "SWFT, XPTL", desc: "Swift, PatEL", group: ["arrow2"] },
-	{
-		tag: "XHS0",
-		tagName: "XHS0, XIDR, XELM, PURS",
-		desc: "Haskell, Idris, Elm, PureScript",
-		group: ["calt", "arrow2", "dotoper", "logic"]
-	},
-	{
-		tag: "XV00",
-		tagName: "XV00",
-		desc: "Coq",
-		group: ["calt", "arrow2", "dotoper", "logic", "brst"]
-	}
-];
 
-module.exports = function getLigationData() {
-	return { samples: ligationSamples, sets: ligationSets };
+module.exports = async function getLigationData() {
+	const ligToml = await fs.readFile(path.join(__dirname, "../../ligation-set.toml"), "utf8");
+	const ligData = toml.parse(ligToml);
+
+	const ligationSets = new Map();
+	for (const sel in ligData.composite) {
+		const comp = ligData.composite[sel];
+		if (!comp.tag) continue;
+		const key = comp.buildup.join(",");
+		let item = ligationSets.get(key);
+		if (!item) {
+			item = { tag: comp.tag, buildup: comp.buildup, tagName: comp.tag, desc: comp.desc };
+			ligationSets.set(key, item);
+		} else {
+			item.tagName += ", " + comp.tag;
+			item.desc += ", " + comp.desc;
+		}
+	}
+
+	return {
+		samples: ligationSamples,
+		cherry: ligData.simple,
+		rawSets: ligData.composite,
+		sets: [
+			{ tag: "calt", switch: "off", desc: "Ligation Off", buildup: [] },
+			...ligationSets.values()
+		]
+	};
 };
