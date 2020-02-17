@@ -542,9 +542,14 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	const [cm] = await target.need(
+		DistCharMaps("iosevka", "iosevka-regular"),
+		sfu`variants.toml`,
+		sfu`ligation-set.toml`,
+		UtilScripts
+	);
 	await run(`node`, `utility/generate-snapshot-page/index.js`);
-	await run(`node`, `utility/amend-readme/index`);
+	await run(`node`, `utility/amend-readme/index`, cm.full);
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(sfu`snapshot/index.styl`);

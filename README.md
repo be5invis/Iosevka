@@ -27,6 +27,15 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 
 ![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
+<!-- BEGIN Section-Language-List -->
+
+159 Supported Languages: 
+
+Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
+
+<!-- END Section-Language-List -->
+
+
 Iosevka supports accessing all letter variants using OpenType features.
 
 ![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/stylesets.png)
@@ -104,10 +113,12 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 The current available styles for `design`/`upright`/`italic`/`oblique` options are:
 
 * Styles for general shape:
+
   * `sans` : Sans serif (default).
   * `slab` : Slab serif.
 
 * Styles related to ligations and spacing:
+
   - `term` : Disable ligations and exact monospace.
     - The font built will not contain ligatures.
     - All glyphs wider than one letter would be deleted.
@@ -117,13 +128,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
   - `type` : Make some symbols, like arrows (`→`) full-width.
 
-* All registered `ss##` and `cv##` feature tags, including:
-  * `ss01`~`ss10` : Predefined stylistic sets based on other Monospace fonts.
-  * `cv01`~`cv53` : Standalone character variants.
-
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 
 * Styles for ligation sets, include:
+
   * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
   * `ligset-php`: Default ligation set would be assigned to PHP.
   * `ligset-ml`: Default ligation set would be assigned to ML.
@@ -143,6 +151,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
 
 * Styles for further customizing default (`calt`) ligation sets:
+
   * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
   * `calt-arrow`: Enable ligation set that forms arrows.
   * `calt-arrow2`: Enable ligation for more arrows, like `>>=`.
@@ -170,143 +179,168 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
 * Styles for changing the line space (leading):
+
   * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
   * `win-metric-pad-0`, `win-metric-pad-50`, `win-metric-pad-100`, `win-metric-pad-150`, `win-metric-pad-200`, `win-metric-pad-250`, `win-metric-pad-300`: Add extra space to [OS/2 table’s Win metrics](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#uswinascent) to avoid clipping in certain legacy software.
 
 * Styles for changing Powerline symbols' position:
+
   * `powerline-scale-y-750`, `powerline-scale-y-875`, `powerline-scale-y-1000`, `powerline-scale-y-1125`, `powerline-scale-y-1250`, `powerline-scale-y-1375`, `powerline-scale-y-1500`: Resize the Powerline symbols vertically, from 75% to 150%.
   * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.
   * `powerline-shift-y-n500`, `powerline-shift-y-n450`, `powerline-shift-y-n400`, `powerline-shift-y-n350`, `powerline-shift-y-n300`, `powerline-shift-y-n250`, `powerline-shift-y-n200`, `powerline-shift-y-n150`, `powerline-shift-y-n100`, `powerline-shift-y-n50`, `powerline-shift-y-0`, `powerline-shift-y-p50`, `powerline-shift-y-p100`, `powerline-shift-y-p150`, `powerline-shift-y-p200`, `powerline-shift-y-p250`, `powerline-shift-y-p300`, `powerline-shift-y-p350`, `powerline-shift-y-p400`, `powerline-shift-y-p450`, `powerline-shift-y-p500`: Shift the Powerline symbols vertically, from -0.5em to +0.5em.
   * `powerline-shift-x-n500`, `powerline-shift-x-n450`, `powerline-shift-x-n400`, `powerline-shift-x-n350`, `powerline-shift-x-n300`, `powerline-shift-x-n250`, `powerline-shift-x-n200`, `powerline-shift-x-n150`, `powerline-shift-x-n100`, `powerline-shift-x-n50`, `powerline-shift-x-0`, `powerline-shift-x-p50`, `powerline-shift-x-p100`, `powerline-shift-x-p150`, `powerline-shift-x-p200`, `powerline-shift-x-p250`, `powerline-shift-x-p300`, `powerline-shift-x-p350`, `powerline-shift-x-p400`, `powerline-shift-x-p450`, `powerline-shift-x-p500`: Shift the Powerline symbols horizontally, from -0.5em to +0.5em.
 
 * Symbol exclusion:
+
   * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.
+
+<!-- BEGIN Section-Stylistic-Sets -->
+
+* Styles as stylistic sets:
+
+  * `ss01`: Set character variant to “Andale Mono Style”.
+  * `ss02`: Set character variant to “Anonymous Pro Style”.
+  * `ss03`: Set character variant to “Consolas Style”.
+  * `ss04`: Set character variant to “Menlo Style”.
+  * `ss05`: Set character variant to “Fira Mono Style”.
+  * `ss06`: Set character variant to “Liberation Mono Style”.
+  * `ss07`: Set character variant to “Monaco Style”.
+  * `ss08`: Set character variant to “Pragmata Pro Style”.
+  * `ss09`: Set character variant to “Source Code Pro Style”.
+  * `ss10`: Set character variant to “Envy Code R Style”.
+  * `ss11`: Set character variant to “X Window Style”.
+  * `ss12`: Set character variant to “Ubuntu Mono Style”.
+  * `ss13`: Set character variant to “Lucida Style”.
+  * `ss20`: Set character variant to “Curly Style”.
+
+<!-- END Section-Stylistic-Sets -->
 
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
+
   * Styles for `A`, `Λ`, `Δ`:
-    * `v-turn-v-straight` (`cv73`): Standard, straight `A`, `Λ`, `Δ` (default).
-    * `v-turn-v-curly` (`cv74`): Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+    * `v-turn-v-straight`, `cv73`: Standard, straight `A`, `Λ`, `Δ` (default).
+    * `v-turn-v-curly`, `cv74`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
   * Styles for `Q`:
-    * `v-capital-q-taily` (`cv42`): `Q` with a curly tail (default).
-    * `v-capital-q-straight` (`cv43`): `Q` with a straight tail like in the old versions.
+    * `v-capital-q-taily`, `cv42`: `Q` with a curly tail (default).
+    * `v-capital-q-straight`, `cv43`: `Q` with a straight tail like in the old versions.
   * Styles for `Y`:
-    * `v-capital-y-straight` (`cv80`): Standard, straight `Y` (default).
-    * `v-capital-y-curly` (`cv81`): Slightly curly `Y`, like Iosevka 2.x.
+    * `v-capital-y-straight`, `cv80`: Standard, straight `Y` (default).
+    * `v-capital-y-curly`, `cv81`: Slightly curly `Y`, like Iosevka 2.x.
   * Styles for `R`:
-    * `v-capital-r-straight` (`cv82`): Standard, straight-leg `R` (default).
-    * `v-capital-r-curly` (`cv83`):  Slightly curly-legged `R`, like Iosevka 2.x.
+    * `v-capital-r-straight`, `cv82`: Standard, straight-leg `R` (default).
+    * `v-capital-r-curly`, `cv83`:  Slightly curly-legged `R`, like Iosevka 2.x.
   * Styles for `a`:
-    * `v-a-doublestorey` (`cv01`): Double-storey `a` (default for Upright).
-    * `v-a-singlestorey` (`cv02`): Single-storey `a` (default for Italic).
+    * `v-a-doublestorey`, `cv01`: Double-storey `a` (default for Upright).
+    * `v-a-singlestorey`, `cv02`: Single-storey `a` (default for Italic).
   * Styles for `f`:
-    * `v-f-straight` (`cv52`): `f` without bottom hook (default for Sans Upright).
-    * `v-f-tailed` (`cv53`): `f` with a leftward bottom hook (default for Italic).
-    * `v-f-serifed` (`cv84`): `f` with bottom serif (default for Slab Upright).
+    * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
+    * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
+    * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
   * Styles for `g`:
-    * `v-g-doublestorey` (`cv11`): Double-storey `g`.
-    * `v-g-singlestorey` (`cv12`): Single-storey `g` (default).
-    * `v-g-opendoublestorey` (`cv24`): Open Double-storey `g`, like Trebuchet MS or Fira Code.
+    * `v-g-doublestorey`, `cv11`: Double-storey `g`.
+    * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
+    * `v-g-opendoublestorey`, `cv24`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
   * Styles for `i`:
-    * `v-i-serifed` (`cv03`): Serifed `i` (default for Upright).
-    * `v-i-italic` (`cv04`): Italic `i` (default for Italic).
-    * `v-i-hooky` (`cv05`): Hooky `i`.
-    * `v-i-zshaped` (`cv06`): Z-shaped `i`.
-    * `v-i-line` (`cv56`): `i` like a straight line.
-    * `v-i-tailed` (`cv88`): Tailed `i`.
+    * `v-i-serifed`, `cv03`: Serifed `i` (default for Upright).
+    * `v-i-italic`, `cv04`: Italic `i` (default for Italic).
+    * `v-i-hooky`, `cv05`: Hooky `i`.
+    * `v-i-zshaped`, `cv06`: Z-shaped `i`.
+    * `v-i-line`, `cv56`: `i` like a straight line.
+    * `v-i-tailed`, `cv88`: Tailed `i`.
   * Styles for `j`:
-    * `v-j-line` (`cv57`): `j` like a straight line.
-    * `v-j-serifed` (`cv58`): `j` with top serif (default).
+    * `v-j-line`, `cv57`: `j` like a straight line.
+    * `v-j-serifed`, `cv58`: `j` with top serif (default).
   * Styles for `l`:
-    * `v-l-serifed` (`cv07`): Serifed `l` (default for Upright).
-    * `v-l-italic` (`cv08`): Italic, cursive `l` (default for Italic).
-    * `v-l-hooky` (`cv09`): Hooky `l`.
-    * `v-l-zshaped` (`cv10`): Z-shaped `i`.
-    * `v-l-tailed` (`cv27`): `l` with a curved tail.
-    * `v-l-hookybottom` (`cv28`): `l` with a straight tail.
-    * `v-l-line` (`cv59`): `l` like a straight line.
+    * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
+    * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
+    * `v-l-hooky`, `cv09`: Hooky `l`.
+    * `v-l-zshaped`, `cv10`: Z-shaped `i`.
+    * `v-l-tailed`, `cv27`: `l` with a curved tail.
+    * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
+    * `v-l-line`, `cv59`: `l` like a straight line.
   * Styles for `k`, `K`:
-    * `v-k-straight` (`cv68`): `k` with standard shape (default for Upright).
-    * `v-k-curly` (`cv69`): Slightly curly `k`, like Iosevka 2.x.
-    * `v-k-cursive` (`cv70`): `k` with a cursive loop (default for Italic).
+    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
+    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
+    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
   * Styles for `m`:
-    * `v-m-normal` (`cv25`): `m` with normal middle leg, touching the baseline (default).
-    * `v-m-shortleg` (`cv26`): `m` with shorter middle leg, like Ubuntu Mono.
+    * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
+    * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
   * Styles for `r`:
-    * `v-r-straight` (`cv85`): Straight, serif-less `r` (default for Sans).
-    * `v-r-serifed` (`cv86`): `r` with serif at both top and bottom (default for Slab Upright).
-    * `v-r-top-serifed` (`cv87`): `r` with serifs at top-left only (default for Slab Italic).
+    * `v-r-straight`, `cv85`: Straight, serif-less `r` (default for Sans).
+    * `v-r-serifed`, `cv86`: `r` with serif at both top and bottom (default for Slab Upright).
+    * `v-r-top-serifed`, `cv87`: `r` with serifs at top-left only (default for Slab Italic).
   * Styles for `t`:
-    * `v-t-standard` (`cv40`): Standard `t` shape (default).
-    * `v-t-cross` (`cv41`): Futura-like `t` shape.
+    * `v-t-standard`, `cv40`: Standard `t` shape (default).
+    * `v-t-cross`, `cv41`: Futura-like `t` shape.
   * Styles for `v`:
-    * `v-v-straight` (`cv71`): Standard, straight `V` and `v` (default).
-    * `v-v-curly` (`cv72`):  Slightly curly `V` and `v`, like Iosevka 2.x.
+    * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
+    * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.
   * Styles for `w`, `W`:
-    * `v-w-straight` (`cv75`): Standard, straight `W` and `w` (default).
-    * `v-w-curly` (`cv76`): Slightly curly `W` and `w`, like Iosevka 2.x.
+    * `v-w-straight`, `cv75`: Standard, straight `W` and `w` (default).
+    * `v-w-curly`, `cv76`: Slightly curly `W` and `w`, like Iosevka 2.x.
   * Styles for `x`, `X`:
-    * `v-x-straight` (`cv77`): Standard, straight `X` and `x` (default).
-    * `v-x-curly` (`cv78`): Slightly curly `X` and `x`, like Iosevka 2.x.
+    * `v-x-straight`, `cv77`: Standard, straight `X` and `x` (default).
+    * `v-x-curly`, `cv78`: Slightly curly `X` and `x`, like Iosevka 2.x.
   * Styles for `y`:
-    * `v-y-straight` (`cv48`): More-straight letter `y` (default for Upright).
-    * `v-y-cursive` (`cv49`): Cursive-like `y` (default for Italic).
-    * `v-y-curly` (`cv79`): More curly letter `y`, like Iosevka 2.x.
+    * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
+    * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
+    * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
   * Styles for `ß`:
-    * `v-eszet-traditional` (`cv34`): Traditional, Fraktur-like Eszet.
-    * `v-eszet-sulzbacher` (`cv35`): A more modern, beta-like Eszet (default).
+    * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
+    * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
   * Styles for `0`:
-    * `v-zero-slashed` (`cv13`): Slashed Zero `0` (default).
-    * `v-zero-dotted` (`cv14`): Dotted Zero `0`.
-    * `v-zero-unslashed` (`cv15`): O-like `0`.
+    * `v-zero-slashed`, `cv13`: Slashed Zero `0` (default).
+    * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
+    * `v-zero-unslashed`, `cv15`: O-like `0`.
   * Styles for `1`:
-    * `v-one-nobase` (`cv50`): `1` with bottom serif (default for Sans).
-    * `v-one-base` (`cv51`): `1` without bottom serif (default for Slab).
+    * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
+    * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).
   * Styles for `3`:
-    * `v-three-flattop` (`cv46`): Flat top `3` (Like Museo Sans / Montserrat).
-    * `v-three-twoarcs` (`cv47`): Arched top `3` (default).
+    * `v-three-flattop`, `cv46`: Flat top `3` (Like Museo Sans / Montserrat).
+    * `v-three-twoarcs`, `cv47`: Arched top `3` (default).
   * Styles for `7`:
-    * `v-seven-noserif` (`cv64`): `7` without serif (default for Sans).
-    * `v-seven-serifed` (`cv65`): `7` with initial serif (default for Slab).
+    * `v-seven-noserif`, `cv64`: `7` without serif (default for Sans).
+    * `v-seven-serifed`, `cv65`: `7` with initial serif (default for Slab).
   * Styles for `~`:
-    * `v-tilde-high` (`cv16`): Higher tilde `~`.
-    * `v-tilde-low` (`cv17`): Lower tilde `~` (default).
+    * `v-tilde-high`, `cv16`: Higher tilde `~`.
+    * `v-tilde-low`, `cv17`: Lower tilde `~` (default).
   * Styles for `*`:
-    * `v-asterisk-high` (`cv18`): Higher five-pointed asterisk `*` (default).
-    * `v-asterisk-low` (`cv19`): Lower five-pointed asterisk `*`.
-    * `v-asterisk-hexhigh` (`cv60`): Higher six-pointed asterisk `*`.
-    * `v-asterisk-hexlow` (`cv61`): Lower six-pointed asterisk `*`.
+    * `v-asterisk-high`, `cv18`: Higher five-pointed asterisk `*` (default).
+    * `v-asterisk-low`, `cv19`: Lower five-pointed asterisk `*`.
+    * `v-asterisk-hexhigh`, `cv60`: Higher six-pointed asterisk `*`.
+    * `v-asterisk-hexlow`, `cv61`: Lower six-pointed asterisk `*`.
   * Styles for `_`:
-    * `v-underscore-high` (`cv20`): Higher underscore `_`, at baseline (default).
-    * `v-underscore-low` (`cv21`): Lower underscore `_`, below baseline.
+    * `v-underscore-high`, `cv20`: Higher underscore `_`, at baseline (default).
+    * `v-underscore-low`, `cv21`: Lower underscore `_`, below baseline.
   * Styles for `¶`:
-    * `v-paragraph-high` (`cv22`): Higher paragraph symbol `¶` (default).
-    * `v-paragraph-low` (`cv23`): Lower paragraph symbol `¶`.
+    * `v-paragraph-high`, `cv22`: Higher paragraph symbol `¶` (default).
+    * `v-paragraph-low`, `cv23`: Lower paragraph symbol `¶`.
   * Styles for `^`:
-    * `v-caret-high` (`cv29`): Higher circumflex `^` (default).
-    * `v-caret-low` (`cv30`): Lower circumflex `^`.
+    * `v-caret-high`, `cv29`: Higher circumflex `^` (default).
+    * `v-caret-low`, `cv30`: Lower circumflex `^`.
   * Styles for `@`:
-    * `v-at-threefold` (`cv31`): The long, three-fold At symbol (`@`) (default).
-    * `v-at-fourfold` (`cv32`): The traditional, four-fold At symbol (`@`).
-    * `v-at-short` (`cv33`): The shorter, Fira-like At symbol (`@`).
+    * `v-at-threefold`, `cv31`: The long, three-fold At symbol (`@`) (default).
+    * `v-at-fourfold`, `cv32`: The traditional, four-fold At symbol (`@`).
+    * `v-at-short`, `cv33`: The shorter, Fira-like At symbol (`@`).
   * Styles for `{`, `}`:
-    * `v-brace-straight` (`cv36`): More straight braces.
-    * `v-brace-curly` (`cv37`): More curly braces (default).
+    * `v-brace-straight`, `cv36`: More straight braces.
+    * `v-brace-curly`, `cv37`: More curly braces (default).
   * Styles for `$`:
-    * `v-dollar-open` (`cv38`): Dollar symbol with open contour.
-    * `v-dollar-through` (`cv39`): Dollar symbol with strike-through vertical bar (default).
-    * `v-dollar-opencap` (`cv54`): Dollar symbol with open contour, not exceeding baseline and ascender.
-    * `v-dollar-throughcap` (`cv55`): Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
+    * `v-dollar-open`, `cv38`: Dollar symbol with open contour.
+    * `v-dollar-through`, `cv39`: Dollar symbol with strike-through vertical bar (default).
+    * `v-dollar-opencap`, `cv54`: Dollar symbol with open contour, not exceeding baseline and ascender.
+    * `v-dollar-throughcap`, `cv55`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
   * Styles for `#`:
-    * `v-numbersign-upright` (`cv44`): Number sign with vertical bars (default).
-    * `v-numbersign-slanted` (`cv45`): Number sign with slanted bars.
+    * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
+    * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
   * Styles for `%`:
-    * `v-percent-dots` (`cv62`): Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
-    * `v-percent-rings` (`cv63`): Percent `%`, Per-mille `‰` and basis point `‱` using rings (default).
+    * `v-percent-dots`, `cv62`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
+    * `v-percent-rings`, `cv63`: Percent `%`, Per-mille `‰` and basis point `‱` using rings (default).
   * Styles for `<=`, `>=`:
-    * `v-lig-ltgteq-flat` (`cv66`): The lower bar of `<=` and `>=` ligation is flat (default).
-    * `v-lig-ltgteq-slanted` (`cv67`): The lower bar of `<=` and `>=` ligation is slanted.
+    * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
+    * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
 
 <!-- END Section-Cherry-Picking-Styles -->
 

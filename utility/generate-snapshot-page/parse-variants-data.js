@@ -50,7 +50,15 @@ function rankOf(initialChar) {
 function getSsData(variants, cvData) {
 	const body = `@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ`;
 
-	const result = [{ tag: "off", description: "Default", bodyUpright: body, bodyItalic: body }];
+	const result = [
+		{
+			tag: "off",
+			effective: false,
+			description: "Default",
+			bodyUpright: body,
+			bodyItalic: body
+		}
+	];
 	for (const tag in variants.composite) {
 		if (!/^ss\d\d$/.test(tag)) continue;
 		const composition = variants.composite[tag];
@@ -69,6 +77,7 @@ function getSsData(variants, cvData) {
 		}
 		result.push({
 			tag,
+			effective: true,
 			description: composition.description,
 			bodyUpright: buildSsHtml(body, hotCharSetUpright),
 			bodyItalic: buildSsHtml(body, hotCharSetItalic)
