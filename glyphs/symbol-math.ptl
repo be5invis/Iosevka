@@ -235,46 +235,20 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 
 glyph-block Symbol-Math-Arith : begin
 	glyph-block-import CommonShapes
+	glyph-block-export PlusShape
+
+	define [PlusShape left right s sw] : union
+		HBar left right symbolMid [fallback sw OPERATORSTROKE]
+		VBar (MIDDLE + [fallback s 0]) plusTop plusBot [fallback sw OPERATORSTROKE]
+
 	sketch # plus
 		include MarkSet.plus
-		include : HBar SB RIGHTSB symbolMid OPERATORSTROKE
-		include : VBar MIDDLE plusTop plusBot OPERATORSTROKE
+		include : PlusShape SB RIGHTSB
 		save 'plus' '+'
 	sketch # plus
 		include MarkSet.plus
-		include : HBar SB RIGHTSB symbolMid GEOMETRYSTROKE
-		include : VBar MIDDLE plusTop plusBot GEOMETRYSTROKE
+		include : PlusShape SB RIGHTSB 0 GEOMETRYSTROKE
 		save 'innerPlus'
-	sketch # ligplus.lc
-		include MarkSet.plus
-		include : HBar SB (WIDTH - O) symbolMid OPERATORSTROKE
-		include : VBar MIDDLE plusTop plusBot OPERATORSTROKE
-		save 'ligplus.lc'
-	sketch # ligplus.lc.s
-		include MarkSet.plus
-		include : HBar SB (WIDTH - O) symbolMid OPERATORSTROKE
-		include : VBar (MIDDLE + SB) plusTop plusBot OPERATORSTROKE
-		save 'ligplus.lc.s'
-	sketch # ligplus.cc
-		include MarkSet.plus
-		include : HBar O (WIDTH - O) symbolMid OPERATORSTROKE
-		include : VBar MIDDLE plusTop plusBot OPERATORSTROKE
-		save 'ligplus.cc'
-	sketch # ligplus.cr
-		include MarkSet.plus
-		include : HBar O RIGHTSB symbolMid OPERATORSTROKE
-		include : VBar MIDDLE plusTop plusBot OPERATORSTROKE
-		save 'ligplus.cr'
-	sketch # ligplus.cr.s
-		include MarkSet.plus
-		include : HBar O RIGHTSB symbolMid OPERATORSTROKE
-		include : VBar (MIDDLE - SB) plusTop plusBot OPERATORSTROKE
-		save 'ligplus.cr.s'
-	sketch # ligplus.jr
-		include MarkSet.plus
-		include : HBar (-SB + O) RIGHTSB symbolMid OPERATORSTROKE
-		include : VBar MIDDLE plusTop plusBot OPERATORSTROKE
-		save 'ligplus.jr'
 
 	sketch # minus
 		include MarkSet.plus
@@ -619,7 +593,9 @@ glyph-block Symbol-Math-Logicals : begin
 glyph-block Symbol-Math-Relation : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks : TildeShape
-	glyph-block-export dH lessSlantness LigationLessShape LigationGreaterShape
+	glyph-block-export dH lessSlantness
+	glyph-block-export LessShape GreaterShape LigationLessShape LigationGreaterShape
+	glyph-block-export EqualShape EqualHole IdentShape IdentHole
 
 	define equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 	define lessSlantness : (4 / 13) * (operTop - operBot) / (RIGHTSB - SB)
@@ -664,37 +640,6 @@ glyph-block Symbol-Math-Relation : begin
 		include : EqualShape (SB + DOTSIZE) (WIDTH - SB * sbSquash)
 		save 'colonEq' 0x2254
 
-	# Ligation glyphs
-	sketch # equal.fc
-		include MarkSet.plus
-		include : difference
-			EqualShape SB (WIDTH - O)
-			EqualHole WIDTH
-		save 'equal.fc'
-
-	sketch # equal.cf
-		include MarkSet.plus
-		include : difference
-			EqualShape O RIGHTSB
-			EqualHole 0
-		save 'equal.cf'
-
-	sketch # equal.jf
-		include MarkSet.plus
-		include : difference
-			EqualShape (RIGHTSB - WIDTH + O) RIGHTSB
-			EqualHole 0
-		save 'equal.jf'
-
-	sketch # equal.cc
-		include MarkSet.plus
-		include : difference
-			EqualShape O (WIDTH - O)
-			union
-				EqualHole 0
-				EqualHole WIDTH
-		save 'equal.cc'
-
 	sketch # ident
 		include MarkSet.plus
 		include : IdentShape SB RIGHTSB
@@ -707,36 +652,6 @@ glyph-block Symbol-Math-Relation : begin
 		include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 0.75) OPERATORSTROKE
 		include : HBar SB RIGHTSB (symbolMid - equalHalfSpace * 2.25) OPERATORSTROKE
 		save 'iiiident' 0x2263
-
-	sketch # ident.fc
-		include MarkSet.plus
-		include : difference
-			IdentShape SB (WIDTH - O)
-			IdentHole WIDTH
-		save 'ident.fc'
-
-	sketch # ident.cf
-		include MarkSet.plus
-		include : difference
-			IdentShape O RIGHTSB
-			IdentHole 0
-		save 'ident.cf'
-
-	sketch # ident.jf
-		include MarkSet.plus
-		include : difference
-			IdentShape (RIGHTSB - WIDTH + O) RIGHTSB
-			IdentHole 0
-		save 'ident.jf'
-
-	sketch # ident.cc
-		include MarkSet.plus
-		include : difference
-			IdentShape O (WIDTH - O)
-			union
-				IdentHole 0
-				IdentHole WIDTH
-		save 'ident.cc'
 
 	define [LessGreaterExpansion top bot l r]
 		Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
@@ -838,24 +753,6 @@ glyph-block Symbol-Math-Relation : begin
 		include glyphs.less AS_BASE
 		include : FlipAround MIDDLE symbolMid
 		save 'greater' '>'
-
-	do "<| and |>"
-		local trigLeft : mix SB RIGHTSB (1/6)
-		local trigRight : WIDTH * 1.5 - OPERATORSTROKE * 1.5 * HVCONTRAST
-		local dHTriangle : lessSlantness * (trigRight - trigLeft)
-		sketch # ligless.trig
-			include MarkSet.plus
-			include : LessShape (symbolMid + dHTriangle) (symbolMid - dHTriangle) trigLeft trigRight
-			save 'ligless.trig'
-
-		sketch # ligbar.trig
-			include : VBar MIDDLE (symbolMid + dHTriangle + OPERATORSTROKE) (symbolMid - dHTriangle - OPERATORSTROKE) OPERATORSTROKE
-			save 'ligbar.trig'
-
-		sketch # liggreater.trig
-			include glyphs.'ligless.trig' AS_BASE
-			include : FlipAround MIDDLE symbolMid
-			save 'liggreater.trig'
 
 	sketch # lesseq
 		include MarkSet.plus
@@ -1245,13 +1142,6 @@ glyph-block Symbol-Math-Negation : begin
 	notGlyph 0x2278 'lessgreater'
 	notGlyph 0x2279 'greaterless'
 	notGlyph.right 0x2204 'exists' (CAP - DESCENDER / 2) (DESCENDER / 2) 0.4
-
-	notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 0.5) 'equal.fc.neg'
-	notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.0) 'equal.fc.neg3'
-	notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.5) 'equal.fc.neg4'
-	notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 0.5) 'ident.fc.neg'
-	notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.0) 'ident.fc.neg3'
-	notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.5) 'ident.fc.neg4'
 
 glyph-block Symbol-Math-Large-Operators : begin
 	glyph-block-import CommonShapes

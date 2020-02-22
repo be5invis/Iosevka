@@ -15,14 +15,14 @@ const exeq = TAG("exeq");
 const eqeqeq = TAG("eqeq", "eqeqeq");
 const exeqeq = TAG("exeq", "exeqeq");
 const eqexeq = TAG("eqexeq", "eqexeq");
-const slasheqeq = TAG("slasheq", "slasheqeq");
+const eqslasheq = TAG("slasheq", "eqslasheq");
 const slasheq = TAG("slasheq");
 const tildeeq = TAG("tildeeq");
 const ineq = TAG("ineq");
 const logc = TAG("logic");
 const brst = TAG("brst");
 const trig = TAG("trig");
-const ltgt = TAG("ltgt");
+const ltgt = TAG("ltgt-diamond", "ltgt-ne");
 const dotOper = TAG("dotoper");
 const colons = TAG("colons");
 const htmlComment = TAG("html-comment");
@@ -90,7 +90,7 @@ const ligationSamples = [
 		ltgt(`<>`),
 		eqeqeq("==="),
 		exeqeq("!=="),
-		slasheqeq("=/="),
+		eqslasheq("=/="),
 		eqexeq("=!=")
 	],
 	[
