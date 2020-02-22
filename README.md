@@ -163,9 +163,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
   * `calt-exeq`: Enable ligation for `!=` and `!==`.
   * `calt-tildeeq`: Enable ligation for `~=` as inequality.
-  * `calt-slasheqeq`: Enable special triple-line ligation for `=/=` as inequality.
+  * `calt-eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   * `calt-slasheq`: Enable ligation for `/=` and `=/=` as inequality.
-  * `calt-ltgt`: Enable ligation for `<>` as inequality.
+  * `calt-ltgt-ne`: Enable ligation for `<>` as inequality.
+  * `calt-ltgt-diamond`: Enable ligation for `<>` as diamond.
   * `calt-brst`: Center asterisk in `(*` and `*)`.
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
   * `calt-colons`: Enable ligation for `::` and `:::`.
