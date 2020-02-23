@@ -17,7 +17,14 @@ async function main() {
 	const html = await ejs.renderFile(templatePath, {
 		...(await parseVariantsData()),
 		ligation: await getLigationData(),
-		weights: weightGrades
+		weights: weightGrades,
+		buildSsHtml(body, hc) {
+			const hcs = new Set(hc);
+			return [...body]
+				.map(ch => (hcs.has(ch) ? `<b>${ch}</b>` : ch))
+				.join("")
+				.replace(/\n/g, "<br/>");
+		}
 	});
 	await fs.writeFile(path.join(__dirname, "../../snapshot/index.html"), html);
 }
