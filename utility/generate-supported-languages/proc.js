@@ -57,5 +57,15 @@ module.exports = async function(charMapPath) {
 		if (displayName) supportLangSet.add(displayName);
 	}
 
-	return Array.from(supportLangSet).sort();
+	const unicodeCoverage = new Map();
+	for (const [gn, codes, cl] of charMap) for (const u of codes) unicodeCoverage.set(u, cl);
+
+	return {
+		stats: {
+			glyphCount: charMap.length,
+			codePointCount: unicodeCoverage.size
+		},
+		unicodeCoverage: Array.from(unicodeCoverage).sort((a, b) => a[0] - b[0]),
+		languages: Array.from(supportLangSet).sort()
+	};
 };

@@ -118,32 +118,146 @@ const ligationSamples = [
 	]
 ];
 
+const ligationSamplesNarrow = [
+	[
+		arrow("<--"),
+		arrow("<---"),
+		arrow("<<-"),
+		arrow("<-"),
+		arrow("<->"),
+		arrow("->"),
+		arrow("->>"),
+		arrow("-->"),
+		arrow("--->"),
+		htmlComment("<!--")
+	],
+	[
+		arrow2("-<<"),
+		arrow2("-<"),
+		arrow2("-<-"),
+		arrow2("->-"),
+		arrow2(">-"),
+		arrow2(">>-"),
+		arrow("<-->"),
+		arrow("<--->"),
+		arrow("<---->")
+	],
+	[
+		arrow("<=="),
+		arrow("<==="),
+		arrow("<<="),
+		ineq("<="),
+		arrow("<=>"),
+		arrow("=>"),
+		arrow("=>>"),
+		arrow("==>"),
+		arrow("===>"),
+		htmlComment("<!---")
+	],
+	[
+		arrow2("=<<"),
+		arrow2("=<"),
+		arrow2("=<="),
+		arrow2("=>="),
+		ineq(">="),
+		arrow2(">>="),
+		arrow("<==>"),
+		arrow("<===>"),
+		arrow("<====>")
+	],
+	[
+		arrow("<-------"),
+		arrow("------->"),
+		arrow("<======>"),
+		arrow("<~~"),
+		arrow("<~"),
+		arrow("~>"),
+		arrow("~~>")
+	],
+	[
+		logc("\\/"),
+		logc("/\\"),
+		eqeq("=="),
+		exeq("!="),
+		slasheq("/="),
+		tildeeq(`~=`),
+		ltgt(`<>`),
+		eqeqeq("==="),
+		exeqeq("!=="),
+		eqslasheq("=/="),
+		eqexeq("=!=")
+	],
+	[
+		centerOps(":="),
+		centerOps(":-"),
+		centerOps(":+"),
+		centerOps("<*"),
+		centerOps("<*>"),
+		centerOps("*>"),
+		trig("<|"),
+		trig("<|>"),
+		trig("|>"),
+		centerOps("+:"),
+		centerOps("-:"),
+		centerOps("=:")
+	],
+	[
+		colons("::"),
+		colons(":::"),
+		dotOper("<."),
+		dotOper("<.>"),
+		dotOper(".>"),
+		brst("(* comm *)"),
+		plusplus("++"),
+		plusplus("+++"),
+		logc("|-"),
+		logc("-|")
+	]
+];
+
 module.exports = async function getLigationData() {
 	const ligToml = await fs.readFile(path.join(__dirname, "../../ligation-set.toml"), "utf8");
 	const ligData = toml.parse(ligToml);
 
-	const ligationSets = new Map();
+	const ligationSets = buildLigationSet(ligData, comp => comp.buildup.join(","));
+	const nonMergeLigationSets = buildLigationSet(
+		ligData,
+		comp => comp.tag + comp.buildup.join(",")
+	);
+
+	return {
+		samples: ligationSamples,
+		samplesNarrow: ligationSamplesNarrow,
+		cherry: ligData.simple,
+		rawSets: ligData.composite,
+		sets: [...ligationSets.values()],
+		nonMergeSets: [...nonMergeLigationSets.values()]
+	};
+};
+
+function buildLigationSet(ligData, getKey) {
+	const ligationSets = new Map([
+		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", buildup: [] }]
+	]);
 	for (const sel in ligData.composite) {
 		const comp = ligData.composite[sel];
 		if (!comp.tag) continue;
-		const key = comp.buildup.join(",");
+		const key = getKey(comp);
 		let item = ligationSets.get(key);
 		if (!item) {
-			item = { tag: comp.tag, buildup: comp.buildup, tagName: comp.tag, desc: comp.desc };
+			item = {
+				tag: comp.tag,
+				buildup: comp.buildup,
+				tagName: comp.tag,
+				desc: comp.desc,
+				brief: comp.brief || comp.desc
+			};
 			ligationSets.set(key, item);
 		} else {
 			item.tagName += ", " + comp.tag;
 			item.desc += ", " + comp.desc;
+			item.brief += ", " + comp.brief;
 		}
 	}
-
-	return {
-		samples: ligationSamples,
-		cherry: ligData.simple,
-		rawSets: ligData.composite,
-		sets: [
-			{ tag: "calt", switch: "off", desc: "Ligation Off", buildup: [] },
-			...ligationSets.values()
-		]
-	};
-};
+	return ligationSets;
+}

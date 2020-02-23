@@ -28,7 +28,14 @@ function getCvData(variants) {
 			gr = { configs: [] };
 			samplerGroups.set(config.sampler, gr);
 		}
-		gr.configs.push(config);
+		gr.configs.push({
+			selector,
+			tag: config.tag || null,
+			tagUpright: config.tagUpright || null,
+			tagItalic: config.tagItalic || null,
+			sampler: config.sampler,
+			description: config.description
+		});
 	}
 
 	for (const [sampler, gr] of samplerGroups) {
