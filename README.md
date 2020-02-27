@@ -69,37 +69,43 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 
 2. Add a build plan into `private-build-plans.toml`, following this format:
 
-   ```toml
-   [buildPlans.iosevka-custom]            # <iosevka-custom> is your plan name
-   family = "Iosevka Custom"              # Font menu family name
-   design = ["common styles"]             # Common styles
-   upright = ["upright-only", "styles"]   # Upright-only styles
-   italic = ["italic-only", "styles"]     # Italic-only styles
-   oblique = ["oblique-only", "styles"]   # Oblique-only styles
-   hintParams = ["-a", "sss"]             # Optional custom parameters for ttfautohint
+	```toml
+	[buildPlans.iosevka-custom]            # <iosevka-custom> is your plan name
+	family = "Iosevka Custom"              # Font menu family name
+	design = ["common styles"]             # Common styles
+	upright = ["upright-only", "styles"]   # Upright-only styles
+	italic = ["italic-only", "styles"]     # Italic-only styles
+	oblique = ["oblique-only", "styles"]   # Oblique-only styles
+	hintParams = ["-a", "sss"]             # Optional custom parameters for ttfautohint
 
-   # Override default building weights
-   # When buildPlans.<plan name>.weights is absent
-   # All weights would built and mapped to default shape/CSS
-   # IMPORTANT : Currently "menu" property only support 100, 200, 300, 400, 450, 500, 600, 700, 800, 900.
-   #              and "shape" properly only supports number between 100 and 900 (inclusive).
-   shape = 400                            # Weight for glyph shapes
-   menu  = 400                            # Weight for menu name
-   css   = 400                            # Weight for WebFont CSS
-   
-   [buildPlans.iosevka-custom.weights.bold]
-   shape = 700
-   menu  = 700
-   css   = 700
-   
-   # Override default building slant sets
-   # Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-   # When this section is absent, all slants would be built.
-   [buildPlans.iosevka-custom.slants]
-   upright = "normal"
-   italic = "italic"
-   oblique = "oblique"
-   ```
+	# Override default building weights
+	# When buildPlans.<plan name>.weights is absent
+	# All weights would built and mapped to default shape/CSS
+	# IMPORTANT : Currently "menu" property only support 100, 200, 300, 400, 450, 500, 600, 700, 800, 900.
+	#              and "shape" properly only supports number between 100 and 900 (inclusive).
+	[buildPlans.iosevka-custom.weights.regular]
+	shape = 400  # Weight for glyph shapes
+	menu  = 400  # Weight for menu name
+	css   = 400  # Weight for webfont CSS
+
+	[buildPlans.iosevka-custom.weights.book]
+	shape = 450
+	menu  = 450  # Use 450 here to name the font's weight "Book"
+	css   = 450
+
+	[buildPlans.iosevka-custom.weights.bold]
+	shape = 700
+	menu  = 700
+	css   = 700
+	
+	# Override default building slant sets
+	# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
+	# When this section is absent, all slants would be built.
+	[buildPlans.iosevka-custom.slants]
+	upright = "normal"
+	italic = "italic"
+	oblique = "oblique"
+	```
 
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
