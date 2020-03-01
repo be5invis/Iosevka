@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const parseVariantsData = require("../generate-snapshot-page/parse-variants-data");
 const parseLigationData = require("../generate-snapshot-page/ligation-data");
-const getSupportedLanguageList = require("../generate-supported-languages/proc");
+const getCharMapAndSupportedLanguageList = require("../generate-supported-languages/proc");
 
 const charMapPath = process.argv[2];
 main().catch(e => {
@@ -162,9 +162,9 @@ async function processLigSetPreDef() {
 }
 
 async function processLangList() {
-	const langs = await getSupportedLanguageList(charMapPath);
+	const cl = await getCharMapAndSupportedLanguageList(charMapPath);
 	const md = new MdCol("Section-Language-List");
-	md.log(`${langs.length} Supported Languages: \n`);
-	md.log(langs.join(", "));
+	md.log(`${cl.languages.length} Supported Languages: \n`);
+	md.log(cl.languages.join(", "));
 	return md;
 }

@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
 
-const ChangeFileDir = path.join(__dirname, "../changes");
+const ChangeFileDir = path.join(__dirname, "../../changes");
 const ModifiedSinceVersion = "2.x";
 const Version = process.argv[2];
 
@@ -24,9 +24,9 @@ async function main() {
 	await GeneratePackageList(out);
 	await CopyMarkdown(out, "style-set-sample-image.md");
 	await CopyMarkdown(out, "deprecated-packages.md");
-	await fs.ensureDir(path.join(__dirname, `../release-archives/`));
+	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
 	await fs.writeFile(
-		path.join(__dirname, `../release-archives/release-notes-${Version}.md`),
+		path.join(__dirname, `../../release-archives/release-notes-${Version}.md`),
 		out.buffer
 	);
 }

@@ -71,9 +71,8 @@ glyph-block Symbol-Math-Letter-Like : begin
 		save 'increment' 0x2206
 	turned 'nabla' 0x2207 'increment' MIDDLE (CAP / 2)
 
-	if [not recursive] : do
-		local fullWidth FULLWIDTH2
-		local s : (RIGHTSB - SB - O * 4 + (fullWidth - WIDTH) * 0.5) / CAP
+	if [not recursive] : for-width-kinds FULLWIDTH2 : do
+		local s : (RIGHTSB - SB - O * 4 + (MosaicWidth - WIDTH) * 0.5) / CAP
 		local df : Miniature
 			glyphs     -- {'eight' 'rotetedpropto'}
 			crowd      -- 4
@@ -82,26 +81,26 @@ glyph-block Symbol-Math-Letter-Like : begin
 			unfair     -- true
 
 		sketch # infty
-			set-width fullWidth
+			set-width MosaicWidth
 			include df.eight
-			apply-transform : Translate (-(fullWidth / 2)) (-CAP / 2)
+			apply-transform : Translate (-(WIDTH / 2)) (-CAP / 2)
 			apply-transform : Rotate (Math.PI / 2)
 			apply-transform : Scale s
-			apply-transform : Translate (fullWidth / 2) symbolMid
+			apply-transform : Translate (MosaicWidth / 2) symbolMid
 			apply-transform : Italify
 			refair currentGlyph
-			save 'infty' 0x221E
+			save [MangleName 'infty'] [MangleUnicode 0x221E]
 
 		sketch # propto
-			set-width fullWidth
+			set-width MosaicWidth
 			include df.rotetedpropto
-			apply-transform : Translate (-(fullWidth / 2)) (-CAP / 2)
+			apply-transform : Translate (-(WIDTH / 2)) (-CAP / 2)
 			apply-transform : Rotate (Math.PI / 2)
 			apply-transform : Scale s
-			apply-transform : Translate (fullWidth / 2) symbolMid
+			apply-transform : Translate (MosaicWidth / 2) symbolMid
 			apply-transform : Italify
 			refair currentGlyph
-			save 'propto' 0x221D
+			save [MangleName 'propto'] [MangleUnicode 0x221D]
 
 	sketch # partial
 		include MarkSet.b
@@ -664,46 +663,50 @@ glyph-block Symbol-Math-Relation : begin
 		corner l top
 		corner l bot
 		corner r [mix bot top 0.5]
-	define [LessShapeA top bot l r s] : begin
-		local exp : LessGreaterExpansion top bot l r
+	define [LessShapeA top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
 		return : dispiro
 			widths.center s
-			flat r top
+			flat [mix l r pp] [mix [mix top bot 0.5] top pp]
 			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) LEFTWARD]
-	define [LessShapeB top bot l r s] : begin
-		local exp : LessGreaterExpansion top bot l r
+	define [LessShapeB top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
 		return : dispiro
 			widths.center s
-			flat r bot
+			flat [mix l r pp] [mix [mix top bot 0.5] bot pp]
 			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) LEFTWARD]
-	define [GreaterShapeA top bot l r s] : begin
-		local exp : LessGreaterExpansion top bot l r
+	define [GreaterShapeA top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
 		return : dispiro
 			widths.center s
-			flat l top
+			flat [mix r l pp] [mix [mix top bot 0.5] top pp]
 			curl r [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) RIGHTWARD]
-	define [GreaterShapeB top bot l r s] : begin
-		local exp : LessGreaterExpansion top bot l r
+	define [GreaterShapeB top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
 		return : dispiro
 			widths.center s
-			flat l bot
+			flat [mix r l pp] [mix [mix top bot 0.5] bot pp]
 			curl r [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) RIGHTWARD]
 
 	define [LessShape top bot l r s] : union
 		LessShapeA top bot l r [fallback s OPERATORSTROKE]
 		LessShapeB top bot l r [fallback s OPERATORSTROKE]
 
-	define [LigationLessShape top bot l r s gap] : union
+	define [LigationLessShape top bot l r s t gap] : union
 		intersection
 			Rect [mix bot top 2] [mix top bot 2] [mix r l 2] r
 			union
-				LessShapeA top bot l r [fallback s OPERATORSTROKE]
-				LessShapeB top bot l r [fallback s OPERATORSTROKE]
+				LessShapeA top bot l r [fallback s OPERATORSTROKE] 2
+				LessShapeB top bot l r [fallback s OPERATORSTROKE] 2
 		intersection
 			LessMaskShape top bot l r
 			difference
 				dispiro
-					widths.lhs [fallback s OPERATORSTROKE]
+					widths.lhs [fallback t OPERATORSTROKE]
 					corner r bot
 					corner r top
 				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
@@ -712,17 +715,17 @@ glyph-block Symbol-Math-Relation : begin
 		GreaterShapeA top bot l r [fallback s OPERATORSTROKE]
 		GreaterShapeB top bot l r [fallback s OPERATORSTROKE]
 
-	define [LigationGreaterShape top bot l r s gap] : union
+	define [LigationGreaterShape top bot l r s t gap] : union
 		intersection
 			Rect [mix bot top 2] [mix top bot 2] [mix l r 2] l
 			union
-				GreaterShapeA top bot l r [fallback s OPERATORSTROKE]
-				GreaterShapeB top bot l r [fallback s OPERATORSTROKE]
+				GreaterShapeA top bot l r [fallback s OPERATORSTROKE] 2
+				GreaterShapeB top bot l r [fallback s OPERATORSTROKE] 2
 		intersection
 			GreaterMaskShape top bot l r
 			difference
 				dispiro
-					widths.rhs [fallback s OPERATORSTROKE]
+					widths.rhs [fallback t OPERATORSTROKE]
 					corner l bot
 					corner l top
 				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)

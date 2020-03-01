@@ -28,7 +28,14 @@ function getCvData(variants) {
 			gr = { configs: [] };
 			samplerGroups.set(config.sampler, gr);
 		}
-		gr.configs.push(config);
+		gr.configs.push({
+			selector,
+			tag: config.tag || null,
+			tagUpright: config.tagUpright || null,
+			tagItalic: config.tagItalic || null,
+			sampler: config.sampler,
+			description: config.description
+		});
 	}
 
 	for (const [sampler, gr] of samplerGroups) {
@@ -48,15 +55,15 @@ function rankOf(initialChar) {
 }
 
 function getSsData(variants, cvData) {
-	const body = `@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ`;
-
 	const result = [
 		{
 			tag: "off",
 			effective: false,
 			description: "Default",
-			bodyUpright: body,
-			bodyItalic: body
+			uprightComposition: [],
+			italicComposition: [],
+			hotCharSetUpright: [],
+			hotCharSetItalic: []
 		}
 	];
 	for (const tag in variants.composite) {
@@ -79,16 +86,11 @@ function getSsData(variants, cvData) {
 			tag,
 			effective: true,
 			description: composition.description,
-			bodyUpright: buildSsHtml(body, hotCharSetUpright),
-			bodyItalic: buildSsHtml(body, hotCharSetItalic)
+			uprightComposition: Array.from(uprightCfg),
+			italicComposition: Array.from(italicCfg),
+			hotCharSetUpright: Array.from(hotCharSetUpright),
+			hotCharSetItalic: Array.from(hotCharSetItalic)
 		});
 	}
 	return result;
-}
-
-function buildSsHtml(body, hc) {
-	return [...body]
-		.map(ch => (hc.has(ch) ? `<b>${ch}</b>` : ch))
-		.join("")
-		.replace(/\n/g, "<br/>");
 }

@@ -1,5 +1,6 @@
 "use strict";
 
+const fs = require("fs");
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
@@ -9,7 +10,6 @@ module.exports = build;
 
 ///////////////////////////////////////////////////////////
 
-const fs = require("fs");
 const path = require("path");
 const toml = require("toml");
 
@@ -524,10 +524,46 @@ const CollectionArchive = task.group(`collection-archive`, async (target, cid) =
 //////                  Root Tasks                   //////
 ///////////////////////////////////////////////////////////
 
+const PagesDir = oracle(`pages-dir-path`, async target => {
+	const pagesDir = path.resolve(__dirname, "../Iosevka-Pages");
+	if (!fs.existsSync(pagesDir)) {
+		return "";
+	} else {
+		return pagesDir;
+	}
+});
+
+const PagesDataExport = task(`pages:data-export`, async target => {
+	target.is.volatile();
+	const [version, pagesDir] = await target.need(Version, PagesDir);
+	if (!pagesDir) return;
+	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	const [cm] = await target.need(DistCharMaps("iosevka", "iosevka-regular"));
+	await run(
+		`node`,
+		`utility/export-data/index`,
+		cm.full,
+		path.resolve(pagesDir, "shared/data-import/iosevka.json")
+	);
+});
+
+const PagesFontExport = task(`pages:font-export`, async target => {
+	const [pagesDir] = await target.need(PagesDir);
+	if (!pagesDir) return;
+	const dirs = await target.need(
+		GroupContents`iosevka`,
+		GroupContents`iosevka-slab`,
+		GroupContents`iosevka-aile`,
+		GroupContents`iosevka-etoile`,
+		GroupContents`iosevka-sparkle`
+	);
+	for (const dir of dirs) {
+		await cp(`${DIST}/${dir}`, path.resolve(pagesDir, "shared/font-import", dir));
+	}
+});
+
 const Pages = task(`pages`, async target => {
-	const [sans, slab] = await target.need(GroupContents`iosevka`, GroupContents`iosevka-slab`);
-	await cp(`${DIST}/${sans}`, `pages/${sans}`);
-	await cp(`${DIST}/${slab}`, `pages/${slab}`);
+	await target.need(PagesDataExport, PagesFontExport);
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
@@ -608,10 +644,10 @@ const ChangeFileList = oracle.make(
 	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
 const ReleaseNotes = task(`release:release-note`, async target => {
-	const [version] = await target.need(Version, UtilScriptFiles);
+	const [version] = await target.need(Version, UtilScripts);
 	const [changeFiles] = await target.need(ChangeFileList());
 	await target.need(changeFiles.map(fu));
-	await run("node", "utility/generate-release-note", version);
+	await run("node", "utility/generate-release-note/index", version);
 });
 
 phony(`clean`, async () => {
