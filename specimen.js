@@ -259,9 +259,9 @@ var sampleSentences = [
 	},
 	{
 		code: "es",
-		lang: "Spainish",
+		lang: "Spanish",
 		sample:
-			"Benjamín pidió una bebida de kiwi y fresa; Noé, sin vergüenza, la más exquisita champaña del menú."
+			"Benjamín pidió una bebida de kiwi y fresa; Noé, sinvergüenza, la más exquisita champaña del menú."
 	},
 	{ code: "tr", lang: "Turkish", sample: "Pijamalı hasta yağız şoföre çabucak güvendi." },
 	{
