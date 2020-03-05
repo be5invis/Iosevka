@@ -1,8 +1,10 @@
-### Deprecated Series
+### Packaging Reorganization
 
-The “CC” series, which is intended to made width-compatible with legacy East Asian fonts from Iosevka 2.x is considered deprecated and will be removed soon. The variants include:
+Since Iosevka 3.0.0-rc.1, the following packaging reorganization is introduced:
 
-* `iosevka-cc-DEPRECATED-<version>`
-* `iosevka-cc-slab-DEPRECATED-<version>`
-* `iosevka-cc-curly-DEPRECATED-<version>`
-* `iosevka-cc-curly-slab-DEPRECATED-<version>`
+ * `Iosevka Term` → `Iosevka Fixed`.
+ * `Iosevka TermLig` → `Iosevka Term`.
+ * `Iosevka Type` → Removed.
+ * `Iosevka CC` → Removed.
+
+The default Iosevka family's spacing is also updated to focus on code editing solely.

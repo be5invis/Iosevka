@@ -3,10 +3,9 @@
 Iosevka provides a large variety of variants. Prebuilt variants are described below.
 
 - **Spacing** : How wide some specific characters are.
-  - _Default_: The default variant with ligatures and semantic full-width glyphs.
-  - _Terminal_ (“Term”): Exact monospaced font without ligatures and full-width glyphs. Since some environments cannot interpret Iosevka as monospaced, and have difficulties with ligatures included, you can use Iosevka Term as an alternative.
-  - _Terminal-Ligature_ (“TermLig”)：Exact monospaced font with ligatures.
-  - _Typesetting_ (“Type”): Similar to _Default_, but more mathematical symbols are wider.
+  - _Default_: The default variant with ligatures. Various symbols, like arrows and geometric, are wide (2-column).
+  - _Terminal_ (“Term”)：A narrower variant focusing terminal uses. Arrows and geometric symbols will be narrow ti follow typical terminal usages.
+  - _Fixed_: Exact monospace font without ligatures and wide glyphs. Since some environments cannot interpret Iosevka as monospace, and have difficulties with ligatures included, you can use Iosevka Term as an alternative.
 - **Shape** : Key shape parameters:
   - *Slab*: Letters will contain slab serif.
   - *Curly*: Letters like `k`, `x`, `v`, `A`, `R` will have curly leg shapes.

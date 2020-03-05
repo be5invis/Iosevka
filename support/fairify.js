@@ -3,7 +3,6 @@
 const Transform = require("./transform.js");
 const quadify = require("primitive-quadify-off-curves");
 
-const ANGLES = 12;
 const SMALL = 1e-4;
 
 function solveTS(a, b, c, out, flag) {
@@ -28,33 +27,20 @@ function solveTS(a, b, c, out, flag) {
 	}
 }
 function findExtrema(z1, z2, z3, z4, out) {
-	const a = 3 * (-z1.y + 3 * z2.y - 3 * z3.y + z4.y);
-	const b = 6 * (z1.y - 2 * z2.y + z3.y);
-	const c = 3 * (z2.y - z1.y);
+	const a = 3 * (-z1 + 3 * z2 - 3 * z3 + z4);
+	const b = 6 * (z1 - 2 * z2 + z3);
+	const c = 3 * (z2 - z1);
 	solveTS(a, b, c, out);
 }
 
-function rotate(z, angle) {
-	const c = Math.cos(angle),
-		s = Math.sin(angle);
-	return {
-		x: c * z.x + s * z.y,
-		y: -s * z.x + c * z.y
-	};
-}
 function ASCEND(a, b) {
 	return a - b;
 }
-function fineAllExtrema(z1, z2, z3, z4, angles) {
+function fineAllExtrema(z1, z2, z3, z4) {
 	let exs = [];
-	// findInflections(z1, z2, z3, z4, exs);
-	for (let a = 0; a < angles; a += 1) {
-		findExtrema(z1, z2, z3, z4, exs);
-		z1 = rotate(z1, Math.PI / angles);
-		z2 = rotate(z2, Math.PI / angles);
-		z3 = rotate(z3, Math.PI / angles);
-		z4 = rotate(z4, Math.PI / angles);
-	}
+	findExtrema(z1.x, z2.x, z3.x, z4.x, exs);
+	findExtrema(z1.y, z2.y, z3.y, z4.y, exs);
+
 	return exs.sort(ASCEND);
 }
 function mix(z1, z2, t) {
@@ -93,8 +79,8 @@ function splitBefore(z1, z2, z3, z4, t) {
 function splitAfter(z1, z2, z3, z4, t) {
 	return [bez3(z1, z2, z3, z4, t), bez2(z2, z3, z4, t), mix(z3, z4, t), z4];
 }
-function splitAtExtrema(z1, z2, z3, z4, angles, curve) {
-	const ts = fineAllExtrema(z1, z2, z3, z4, angles);
+function splitAtExtrema(z1, z2, z3, z4, curve) {
+	const ts = fineAllExtrema(z1, z2, z3, z4);
 	if (ts[0] < SMALL) {
 		ts[0] = 0;
 	} else {
@@ -143,7 +129,7 @@ function splitCurve(sourceCurve) {
 				z3 = sourceCurve[j + 1],
 				z4 = sourceCurve[j + 2];
 			if (!(veryClose(z1, z2) && veryClose(z2, z3) && veryClose(z3, z4))) {
-				splitAtExtrema(z1, z2, z3, z4, ANGLES, curve);
+				splitAtExtrema(z1, z2, z3, z4, curve);
 				last = z4;
 			}
 			j += 2;
@@ -154,7 +140,7 @@ function splitCurve(sourceCurve) {
 			if (!(veryClose(z1, zm) && veryClose(zm, z4))) {
 				const z2 = mix(zm, z1, 1 / 3);
 				const z3 = mix(zm, z4, 1 / 3);
-				splitAtExtrema(z1, z2, z3, z4, ANGLES, curve);
+				splitAtExtrema(z1, z2, z3, z4, curve);
 				last = z4;
 			}
 			j += 1;

@@ -34,26 +34,27 @@ function regulateGlyph(g, skew) {
 			offJ = p + 1;
 		}
 	}
-	const cSimple = [];
-	const cFill = [];
-	for (let k = 0; k < g.contours.length; k++) {
-		const contour = g.contours[k];
-		if (contour.length <= 2) cSimple.push(Glyph.contourToStandardCubic(contour));
-		else cFill.push(Glyph.contourToStandardCubic(contour));
-	}
 
-	// De-overlap
-	g.contours = [...cSimple, ...caryllShapeOps.removeOverlap(cFill, 1, 2048, true)];
-	// g.contours = [...cSimple, ...cFill];
-
-	// Finalize
-	g.contours = c2q.contours(g.contours);
+	g.contours = simplifyContours(g.contours);
 	for (let k = 0; k < g.contours.length; k++) {
 		const contour = g.contours[k];
 		for (let p = 0; p < contour.length; p++) {
 			contour[p].x -= contour[p].y * skew;
 		}
 	}
+}
+
+function simplifyContours(contours) {
+	const source = [];
+	for (const contour of contours) {
+		if (contour.length > 2) source.push(Glyph.contourToStandardCubic(contour));
+	}
+	const simplified = c2q.contours(caryllShapeOps.removeOverlap(source, 1, 1 << 17, true));
+	const result = [];
+	for (const contour of simplified) {
+		if (contour.length > 2) result.push(contour);
+	}
+	return result;
 }
 
 function byGlyphPriority(a, b) {
