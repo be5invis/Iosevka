@@ -1305,32 +1305,34 @@ glyph-block LetterUnified-Basic : begin
 	### y
 	do "y and related ============================================================================"
 		define [GenSmallYShape straightBar] : begin
+			local useStraightBottom : !SLAB && straightBar
 			local useCurlyBottom : SLAB || straightBar
 			local px1 0.84
 			local py1 : linreg 18 0.8 126 0.76 STROKE
 			local px2 0.95
 			local py20 0.88
-			local py2 : if useCurlyBottom 0.97 py20
+			local py2 : if (useStraightBottom || useCurlyBottom) 0.97 py20
 			local pds 0.05
 			local pds2 0.01
 			local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
 			local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
-			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if useCurlyBottom (2 / 3) (1 / 3)])
+			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
 			local ySbCor : (XH / CAP) * (OX * [if SLAB 1 4])
 			local yrstroker : RIGHTSB - [if straightBar ySbCor 0]
 			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
-			local slabysize : JUT * (WIDTH / UPM) + STROKE
+			local yBottomJut : JUT * 1.25
+			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE
 			local slabyvx 0.7
 
 			define [CalcDS top bottom] : begin
 				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
+				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				return {ds ds2}
 
 			define [yTopKnots x top ds dir dx dy] : begin
-				local hs : HALFSTROKE * [diagCor dy dx 0 (STROKE * 2)]
+				local hs : HALFSTROKE * [if straightBar [diagCor dy dx 0 (STROKE * 2)] 1]
 				local hl : hs - hs * dir
 				local hr : hs + hs * dir
 				if straightBar : return : list
@@ -1341,7 +1343,11 @@ glyph-block LetterUnified-Basic : begin
 					quadcontrols 0 dpy1 16
 
 			define [yBaseKnots top bottom shrink hooktop] : begin
+				local cor : diagCor (top - bottom) WIDTH 0 (STROKE * 2)
 				local {ds ds2} : CalcDS top bottom
+				define joinX : mix yrstrokel yrstroker (1 - px2)
+				define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
+				define [ConnectZ shrink] : curl joinX joinY [widths.rhs : STROKE * shrink]
 				return : list
 					if (straightBar && (! hooktop))
 						then : list
@@ -1349,18 +1355,17 @@ glyph-block LetterUnified-Basic : begin
 							flat
 								mix yrstrokel yrstroker px1
 								mix (bottom + ds2) (top - ds) py1
-					curl
-						mix yrstrokel yrstroker (1 - px2)
-						mix (bottom + ds2) (top - ds) (1 - py2)
-						widths.rhs : STROKE * [if useCurlyBottom shrink 1]
 
-					if useCurlyBottom
-						then : list
+					piecewise
+						useStraightBottom : list
+							ConnectZ shrink
+							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * cor) DOWNWARD]
+						useCurlyBottom : list
+							ConnectZ shrink
 							flat (yrstrokel - slabysize) bottom [widths.rhs]
-							curl
-								Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - STROKE - JUT)
-								begin bottom
-						else : list
+							curl [Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - STROKE - yBottomJut)] bottom
+						true : list
+							ConnectZ 1
 							quadcontrols 1 (1 - dpy2) 16
 							flat yrstrokel (bottom + ds2) [widths.heading 0 STROKE DOWNWARD]
 							curl yrstrokel bottom [widths.heading 0 STROKE DOWNWARD]
@@ -1426,7 +1431,7 @@ glyph-block LetterUnified-Basic : begin
 
 			define [SmallYHookTopShape top bottom] : glyph-construction
 				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
+				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				local joinHeight : yJoinHeight ds ds2 top bottom true
 
 				include : intersection
