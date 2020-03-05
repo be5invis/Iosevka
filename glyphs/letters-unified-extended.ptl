@@ -342,19 +342,18 @@ glyph-block LetterUnified-Extended : begin
 		save 'Xi' 0x39E
 
 	glyph-block-export PiShape
-	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noserif [endShrink 0] [div 1]] : glyph-construction
-		local df : DivFrame (div || 1)
+	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noserif [endShrink 0] [df : DivFrame 1]] : glyph-construction
 		local fine : fallback _fine STROKE
-		local shrink : if (!noserif && SLAB) 0 (shrinkrate * (df.rightSB - SB))
-		local endexpand : if (!noserif && SLAB) 0 (- endShrink * (df.rightSB - SB) || shrink / 2)
-		include : HBarTop (SB - endexpand) (df.rightSB + endexpand) top fine
-		include : VBarLeft (SB + shrink) bottom (top - fine / 2) fine
+		local shrink : if (!noserif && SLAB) 0 (shrinkrate * (df.rightSB - df.leftSB))
+		local endexpand : if (!noserif && SLAB) 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
+		include : VBarLeft (df.leftSB + shrink) bottom (top - fine / 2) fine
 		include : VBarRight (df.rightSB - shrink) bottom (top - fine / 2) fine
 
 		if (!noserif && SLAB) : begin
-			include : CenterBottomSerif (SB + shrink + fine * 0.5 * HVCONTRAST) bottom JUT fine
+			include : CenterBottomSerif (df.leftSB + shrink + fine * 0.5 * HVCONTRAST) bottom JUT fine
 			include : CenterBottomSerif (df.rightSB - shrink - fine * 0.5 * HVCONTRAST) bottom JUT fine
-			include : CenterTopSerif (SB + shrink + fine * 0.5 * HVCONTRAST) top JUT fine
+			include : CenterTopSerif (df.leftSB + shrink + fine * 0.5 * HVCONTRAST) top JUT fine
 			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVCONTRAST) top JUT fine
 
 	sketch # Pi
@@ -380,20 +379,18 @@ glyph-block LetterUnified-Extended : begin
 		save 'pi' 0x3C0
 
 	glyph-block-export SigmaShape
-	define [SigmaShape top bottom _fine div] : glyph-construction
-		local cor 1.15
-		local fine : fallback _fine STROKE
-		local df : DivFrame (div || 1)
+	define [SigmaShape df top bottom fine] : glyph-construction
+		local cor : [Math.hypot (top - bottom) (df.rightSB - df.leftSB)] / (top - bottom)
 
-		include : HBarTop SB df.rightSB top fine
-		include : HBarBottom SB df.rightSB bottom fine
+		include : HBarTop df.leftSB df.rightSB top fine
+		include : HBarBottom df.leftSB df.rightSB bottom fine
 
-		local midx : mix SB df.rightSB 0.4
-		start-from SB (bottom + fine)
-		line-to (SB + fine * cor) (bottom + fine)
+		local midx : df.middle - fine / 2
+		start-from df.leftSB (bottom + fine)
+		line-to (df.leftSB + fine * cor) (bottom + fine)
 		line-to (midx + fine * cor) [mix bottom top 0.5]
-		line-to (SB + fine * cor) (top - fine)
-		line-to SB (top - fine)
+		line-to (df.leftSB + fine * cor) (top - fine)
+		line-to df.leftSB (top - fine)
 		line-to midx [mix bottom top 0.5]
 		reverse-last
 
@@ -405,12 +402,9 @@ glyph-block LetterUnified-Extended : begin
 		set-width WIDTH
 		include MarkSet.capital
 
-		include : SigmaShape CAP 0
+		include : SigmaShape [DivFrame 1] CAP 0 STROKE
 		save 'Sigma' 0x3A3
 		save 'latinSigma' 0x1A9
-
-	list SigmaShape
-
 
 	sketch # Phi
 		local df : DivFrame para.diversityM 3
