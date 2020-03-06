@@ -26,7 +26,6 @@ glyph-block Symbol-Math-Letter-Like : begin
 
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import LetterUnified-Extended : SigmaShape PiShape
 	glyph-block-import LetterUnified-Basic : LambdaShape AMaskShape DeltaShape
 	sketch # micro
 		include glyphs.mu AS_BASE
@@ -1141,22 +1140,50 @@ glyph-block Symbol-Math-Negation : begin
 	notGlyph 0x2279 'greaterless'
 	notGlyph.right 0x2204 'exists' (CAP - DESCENDER / 2) (DESCENDER / 2) 0.4
 
-glyph-block Symbol-Math-Large-Operators : begin
+glyph-block Symbol-Math-Large-Operators : for-width-kinds WIDE-WIDTH-1
 	glyph-block-import CommonShapes
 	glyph-block-import LetterUnified-Basic : LongSShape UShape
 	glyph-block-import LetterUnified-Extended : SigmaShape PiShape
+
+	define diversityLargeOperators : Math.max para.diversityM (MosaicWidth / WIDTH)
+	define df : DivFrame diversityLargeOperators 0 [if FMosaifWide diversityLargeOperators 1]
+
 	sketch # sum
-		local df : DivFrame para.diversityM
 		set-width df.width
-		include : SigmaShape bgopTop bgopBot OPERATORSTROKE para.diversityM
-		save 'sum' 0x2211
+		include : SigmaShape df bgopTop bgopBot OPERATORSTROKE
+		save [MangleName 'sum'] [MangleUnicode 0x2211]
 
 	sketch # product
-		local df : DivFrame para.diversityM
 		set-width df.width
-		include : PiShape bgopTop bgopBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE) (div -- para.diversityM)
-		save 'product' 0x220F
-	turned 'coproduct' 0x2210 'product' (MIDDLE * para.diversityM) symbolMid
+		include : PiShape bgopTop bgopBot (shrinkrate -- 0) (_fine -- OPERATORSTROKE) (df -- df)
+		save [MangleName 'product'] [MangleUnicode 0x220F]
+
+	turned [MangleName 'coproduct'] [MangleUnicode 0x2210] [MangleName 'product'] df.middle symbolMid
+
+	sketch # Vee
+		set-width df.width
+		include : dispiro
+			widths.center OPERATORSTROKE
+			flat df.leftSB bgopTop
+			curl df.middle bgopBot [heading DOWNWARD]
+		include : dispiro
+			widths.center OPERATORSTROKE
+			flat df.rightSB bgopTop
+			curl df.middle bgopBot [heading DOWNWARD]
+		save [MangleName 'Vee'] [MangleUnicode 0x22C1]
+
+	turned [MangleName 'Wedge'] [MangleUnicode 0x22C0] [MangleName 'Vee'] df.middle symbolMid
+
+	sketch # Cup
+		set-width df.width
+		include : UShape df bgopTop bgopBot OPERATORSTROKE true
+		save [MangleName 'Cup'] [MangleUnicode 0x22C3]
+
+	turned [MangleName 'Cap'] [MangleUnicode 0x22C2] [MangleName 'Cup'] df.middle symbolMid
+
+glyph-block Symbol-Math-Integrals : begin
+	glyph-block-import CommonShapes
+	glyph-block-import LetterUnified-Basic : LongSShape
 
 	sketch # integrate
 		include : LongSShape bgopTop bgopBot HOOK (HOOK * 0.75) OPERATORSTROKE
@@ -1176,24 +1203,6 @@ glyph-block Symbol-Math-Large-Operators : begin
 		include glyphs.integrate
 		include : OShape (symbolMid + (RIGHTSB - SB) / 2) (symbolMid - (RIGHTSB - SB) / 2) SB RIGHTSB OPERATORSTROKE
 		save 'ringintegrate' 0x222E
-
-	sketch # Vee
-		include : dispiro
-			widths.center OPERATORSTROKE
-			flat SB bgopTop
-			curl MIDDLE bgopBot [heading DOWNWARD]
-
-		include : dispiro
-			widths.center OPERATORSTROKE
-			flat RIGHTSB bgopTop
-			curl MIDDLE bgopBot [heading DOWNWARD]
-		save 'Vee' 0x22C1
-	turned 'Wedge' 0x22C0 'Vee' MIDDLE symbolMid
-
-	sketch # Cup
-		include : UShape bgopTop bgopBot OPERATORSTROKE true
-		save 'Cup' 0x22C3
-	turned 'Cap' 0x22C2 'Cup' MIDDLE symbolMid
 
 glyph-block Symbol-Math-APL : begin
 	glyph-block-import CommonShapes
