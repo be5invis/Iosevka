@@ -125,14 +125,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles related to ligations and spacing:
 
-  - `term` : Disable ligations and exact monospace.
-    - The font built will not contain ligatures.
-    - All glyphs wider than one letter would be deleted.
-    - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
-  - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
+  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `sp-fixed` : Apply `sp-term` and further:
+    - Completely disable `fwid` feature. All non-combining glyphs will be exactly the same width.
+	- Ligation will be removed.
   - `no-ligation` : Disable ligation only.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
-  - `type` : Make some symbols, like arrows (`→`) full-width.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 
