@@ -49,7 +49,7 @@ function getCvData(variants) {
 
 function rankOf(initialChar) {
 	if ("A" <= initialChar && initialChar <= "Z") return 3;
-	if (("a" <= initialChar && initialChar <= "z") || initialChar === "ß") return 2;
+	if ("a" <= initialChar && initialChar <= "z") return 2;
 	if ("0" <= initialChar && initialChar <= "9") return 1;
 	return 0;
 }
