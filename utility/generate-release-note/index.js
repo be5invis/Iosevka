@@ -90,6 +90,8 @@ const PackageShapes = {
 	ss10: ["Envy Code R Style", "SS10"],
 	ss11: ["X Windows Fixed Style", "SS11"],
 	ss12: ["Ubuntu Mono Style", "SS12"],
+	ss13: ["Lucida Style", "SS13"],
+	ss14: ["JetBrains Mono Style", "SS14"],
 	aile: ["Quasi-proportional", "Aile", false, false, true],
 	etoile: ["Quasi-proportional slab-serif", "Etoile", false, false, true],
 	sparkle: ["Quasi-proportional family — like iA Writer’s Duo.", "Sparkle", false, false, true]

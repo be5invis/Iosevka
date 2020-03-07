@@ -126,14 +126,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles related to ligations and spacing:
 
-  - `term` : Disable ligations and exact monospace.
-    - The font built will not contain ligatures.
-    - All glyphs wider than one letter would be deleted.
-    - In case of your OS or editor cannot handle ligatures correctly, you can disable ligations with it.
-  - `termlig` : Similar to `term`, the font is exact monospace to make `fontconfig` happy, while ligations are still present.
+  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `sp-fixed` : Apply `sp-term` and further:
+    - Completely disable `fwid` feature. All non-combining glyphs will be exactly the same width.
+	- Ligation will be removed.
   - `no-ligation` : Disable ligation only.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
-  - `type` : Make some symbols, like arrows (`→`) full-width.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 
@@ -219,6 +217,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss11`: Set character variant to “X Window Style”.
   * `ss12`: Set character variant to “Ubuntu Mono Style”.
   * `ss13`: Set character variant to “Lucida Style”.
+  * `ss14`: Set character variant to “JetBrains Mono Style”.
   * `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
@@ -282,6 +281,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `t`:
     * `v-t-standard`, `cv40`: Standard `t` shape (default).
     * `v-t-cross`, `cv41`: Futura-like `t` shape.
+  * Styles for `u`:
+    * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default).
+    * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
   * Styles for `v`:
     * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
     * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.
@@ -295,9 +297,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
     * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
     * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
-  * Styles for `ß`:
-    * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
-    * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
   * Styles for `0`:
     * `v-zero-slashed`, `cv13`: Slashed Zero `0` (default).
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
@@ -349,6 +348,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
+  * Styles for `ß`:
+    * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
+    * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
 
 <!-- END Section-Cherry-Picking-Styles -->
 
