@@ -3,8 +3,12 @@ $$include '../meta/macros.ptl'
 
 import [linreg clamp fallback] from '../support/utils'
 
-export : define [apply] : begin
-	glyph-module-entry commonShapes overmarks
+glyph-module
+
+glyph-block Autobuild-Transformed : begin
+
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
 
 	define [suggestName _name] : begin
 		local name _name
@@ -22,6 +26,7 @@ export : define [apply] : begin
 			scale  -- 0.7
 			unfair -- true
 			mono   -- true
+			sbscale -- 1
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
 			local middle : miniatureFont.(glyphid).advanceWidth / 2
@@ -32,7 +37,7 @@ export : define [apply] : begin
 			apply-transform [Translate middle (CAP + ACCENT / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
-			refair this
+			refair currentGlyph
 
 	define [createSubscripts records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -42,6 +47,7 @@ export : define [apply] : begin
 			scale  -- 0.7
 			unfair -- true
 			mono   -- true
+			sbscale -- 1
 		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
 			if unicode : assign-unicode unicode
 			local middle : miniatureFont.(glyphid).advanceWidth / 2
@@ -52,7 +58,7 @@ export : define [apply] : begin
 			apply-transform [Translate middle (DESCENDER / 2)] true
 			apply-transform [Italify] true
 			if pri : set currentGlyph.cmpPriority pri
-			refair this
+			refair currentGlyph
 
 	define [createSMCPs records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -75,10 +81,11 @@ export : define [apply] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
-			crowd  -- 4
-			scale  -- 0.7
+			crowd  -- 7
+			scale  -- 0.4
 			unfair -- true
 			mono   -- true
+			sbscale -- 1
 		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
 			set-width 0
 			if unicode : assign-unicode unicode
@@ -89,7 +96,7 @@ export : define [apply] : begin
 			apply-transform : Scale 0.4
 			apply-transform : Translate markMiddle aboveMarkBot
 			apply-transform : Italify
-			refair this
+			refair currentGlyph
 			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 
 	if [not recursive] : createSuperscripts : list
@@ -375,7 +382,7 @@ export : define [apply] : begin
 					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
 					apply-transform : Translate MIDDLE (symbolMid + dist / 2)
 					apply-transform : Italify
-					refair this
+					refair currentGlyph
 
 			if [not glyphs.(denid + suffix +  ".denpart")] : begin
 				save-glyph (denid + suffix +  ".denpart") null : sketch
@@ -385,7 +392,7 @@ export : define [apply] : begin
 					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
 					apply-transform : Translate MIDDLE (symbolMid - CAP * scaleFactor - dist / 2)
 					apply-transform : Italify
-					refair this
+					refair currentGlyph
 
 		foreach {unicode numid denid height} [items-of records] : do
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
@@ -417,6 +424,7 @@ export : define [apply] : begin
 		list 0x215E 'seven' 'eight'
 		list 0x2189 'zero' 'three'
 		# care-of
+		list 0x2100 'largescripta' 'C'
 		list 0x2105 'C' 'O'
 		list 0x2106 'C' 'U'
 		# fraction bar
@@ -466,7 +474,7 @@ export : define [apply] : begin
 					include : Translate (targetW / 2) 0
 					include : Italify
 
-					if mark : include [MarksetDiv para.diversityM].(mark)
+					if mark : include [DivFrame para.diversityM].markSet.(mark)
 					save glyphName unicode
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
@@ -499,3 +507,42 @@ export : define [apply] : begin
 	if [not recursive] : createLigatures 0.7 0.8 0.75 0.9 : list
 		list 0x2103 'degree' 'C'
 		list 0x2109 'degree' 'F'
+
+
+	define [createAccentedEquals crowd scale records] : begin
+		local pendingGlyphs : records.map : [record] => record.2
+		local miniatureFont : Miniature
+			glyphs -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
+			crowd  -- crowd
+			scale  -- scale
+			unfair -- true
+			mono   -- true
+		foreach {unicode base upper} [items-of records] : do
+			local innerGlyphName : suggestName : "inner_" + base + "_" + [upper.join "_"]
+			local fullGlyphName  : suggestName : "comb_" + base + "_" + [upper.join "_"]
+			create-glyph innerGlyphName : glyph-construction
+				local totalWidth 0
+				foreach [glyphid : items-of upper] : begin
+					local subGlyph miniatureFont.(glyphid)
+					include subGlyph
+					apply-transform : Translate (-subGlyph.advanceWidth) 0
+					set totalWidth : totalWidth + subGlyph.advanceWidth
+
+				apply-transform : Upright
+				apply-transform : Translate (totalWidth / 2) 0
+				apply-transform : Scale scale
+				apply-transform : Translate MIDDLE aboveMarkBot
+				apply-transform : Italify
+				refair currentGlyph
+
+			create-glyph fullGlyphName : glyph-construction
+				if unicode : assign-unicode unicode
+				include glyphs.(innerGlyphName)
+				include glyphs.(base)
+
+	if [not recursive] : createAccentedEquals 7 0.4 : list
+		list 0x2257 "equal" {"o"}
+		list 0x225e "equal" {"m"}
+		list 0x225F "equal" {"question"}
+	if [not recursive] : createAccentedEquals 8 0.3 : list
+		list 0x225d "equal" {"d" "e" "f"}

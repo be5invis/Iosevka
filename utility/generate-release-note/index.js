@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
 
-const ChangeFileDir = path.join(__dirname, "../changes");
+const ChangeFileDir = path.join(__dirname, "../../changes");
 const ModifiedSinceVersion = "2.x";
 const Version = process.argv[2];
 
@@ -24,9 +24,9 @@ async function main() {
 	await GeneratePackageList(out);
 	await CopyMarkdown(out, "style-set-sample-image.md");
 	await CopyMarkdown(out, "deprecated-packages.md");
-	await fs.ensureDir(path.join(__dirname, `../release-archives/`));
+	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
 	await fs.writeFile(
-		path.join(__dirname, `../release-archives/release-notes-${Version}.md`),
+		path.join(__dirname, `../../release-archives/release-notes-${Version}.md`),
 		out.buffer
 	);
 }
@@ -90,6 +90,8 @@ const PackageShapes = {
 	ss10: ["Envy Code R Style", "SS10"],
 	ss11: ["X Windows Fixed Style", "SS11"],
 	ss12: ["Ubuntu Mono Style", "SS12"],
+	ss13: ["Lucida Style", "SS13"],
+	ss14: ["JetBrains Mono Style", "SS14"],
 	aile: ["Quasi-proportional", "Aile", false, false, true],
 	etoile: ["Quasi-proportional slab-serif", "Etoile", false, false, true],
 	sparkle: ["Quasi-proportional family — like iA Writer’s Duo.", "Sparkle", false, false, true]
@@ -98,9 +100,8 @@ const PackageShapes = {
 const PackageSpacings = {
 	// spacingDesc, ligation, spacingNameSuffix
 	"": ["Default", true, ""],
-	term: ["Terminal", false, "Type"],
-	type: ["Typesetting", true, "Type"],
-	"term-lig": ["Terminal-Ligature", true, "TermLig"]
+	fixed: ["Fixed", false, "Fixed"],
+	term: ["Terminal", true, "Term"]
 };
 
 async function GeneratePackageList(out) {

@@ -44,17 +44,8 @@ function captureElement(options, callback) {
 window.onload = function() {
 	var snapshotTasks = [
 		{
-			el: document.querySelector("#downloadoptions"),
-			name: "download-options",
-			doubleTrim: "white"
-		},
-		{
 			el: document.querySelector("#languages"),
 			name: "languages"
-		},
-		{
-			el: document.querySelector("#variants"),
-			name: "variants"
 		},
 		{
 			el: document.querySelector("#stylesets"),
@@ -67,10 +58,6 @@ window.onload = function() {
 		{
 			el: document.querySelector("#matrix"),
 			name: "matrix"
-		},
-		{
-			el: document.querySelector("#family"),
-			name: "family"
 		},
 		{
 			el: document.querySelector("#previews"),
