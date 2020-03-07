@@ -1,12 +1,12 @@
 const { app, BrowserWindow } = require("electron");
-var argv = require("yargs").argv;
-var fs = require("fs");
-var cp = require("child_process");
+let argv = require("yargs").argv;
+let fs = require("fs");
+let cp = require("child_process");
 
-var mainWindow = null;
-var allWindowClosed = false;
-var pendingTasks = 0;
-var zoom = 2;
+let mainWindow = null;
+let allWindowClosed = false;
+let pendingTasks = 0;
+let zoom = 2;
 
 function checkQuit() {
 	if (allWindowClosed && pendingTasks == 0) app.quit();
@@ -18,7 +18,7 @@ app.on("window-all-closed", function() {
 });
 
 function combineImages(images, outfile, width, height, doubleTrim) {
-	var command =
+	let command =
 		"magick " +
 		images.join(" ") +
 		" -append -crop " +
@@ -39,11 +39,11 @@ function combineImages(images, outfile, width, height, doubleTrim) {
 	});
 }
 
-var ipc = require("electron").ipcMain;
+let ipc = require("electron").ipcMain;
 function GOTO(phase) {
 	currentPhase = phase;
 }
-var phases = {
+const phases = {
 	prepare: function(event, arg) {
 		console.log(arg);
 		GOTO(phases["receive-rect"]);
@@ -52,17 +52,17 @@ var phases = {
 		pendingTasks += 1;
 		console.log("Received rect.");
 		rect = JSON.parse(JSON.stringify(rect));
-		var file = argv.dir + "/" + rect.name + ".png";
-		var j = 0;
-		var totalFiles = Math.ceil(rect.height / rect.windowHeight);
-		var pendingFiles = totalFiles;
+		let file = argv.dir + "/" + rect.name + ".png";
+		let j = 0;
+		let totalFiles = Math.ceil(rect.height / rect.windowHeight);
+		let pendingFiles = totalFiles;
 		step();
 
 		function doneFileWrite() {
 			pendingFiles -= 1;
 			if (pendingFiles <= 0) {
-				var images = [];
-				for (var k = 0; k < j; k++) {
+				let images = [];
+				for (let k = 0; k < j; k++) {
 					images.push(argv.dir + "/" + rect.name + "." + k + ".png");
 				}
 				combineImages(
@@ -96,7 +96,7 @@ var phases = {
 		}
 	}
 };
-var currentPhase = phases["prepare"];
+let currentPhase = phases["prepare"];
 ipc.on("snapshot", function() {
 	currentPhase.apply(this, arguments);
 });

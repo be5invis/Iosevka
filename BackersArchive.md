@@ -1,6 +1,6 @@
-# Backers
+# Backers Archive
 
-You can join them in supporting Iosevka development by [pledging on Patreon](https://www.patreon.com/user?u=5787198). Backers in the same pledge level appear in the order of pledge date.
+This is an archive of former backers that sponsored Iosevka’s development during 0.x–2.x period. Iosevka will continue evolving, and thank you for your support.
 
 ## Generous Backers
 

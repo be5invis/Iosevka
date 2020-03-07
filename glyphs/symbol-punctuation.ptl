@@ -4,33 +4,12 @@ $$include '../meta/macros.ptl'
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 
-export : define [apply] : begin
-	glyph-module-entry commonShapes overmarks letterBasic
-	# spaces
-	# we set the width of emquad to 1000mem (1em) and the width of emspace to WIDTH (0.5em)
-	do 'Spaces'
-		alias 'enquad' 0x2000 'space'
-		alias 'ensp' 0x2002 'space'
-		alias 'threePerEmsp' 0x2004 'space'
-		alias 'fourPerEmsp' 0x2005 'space'
-		alias 'sixPerEmsp' 0x2006 'space'
-		alias 'fgsp' 0x2007 'space'
+glyph-module
 
-		sketch # zwsp
-			set-width 0
-			set currentGlyph.cmpPriority (-9999)
-			save 'zwsp' 0x200B
+glyph-block Symbol-Punctuation : begin
 
-		sketch # nbsp
-			include glyphs.space
-			include markset.e
-			set currentGlyph.cmpPriority (-100)
-			save 'nbsp' 0xA0
-
-		sketch # em-space
-			set-width FULLWIDTH
-			save 'emquad' 0x2001
-			save 'emsp' 0x2003
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
 
 	do 'Brackets'
 		define [ParenDim delta] : object
@@ -126,27 +105,36 @@ export : define [apply] : begin
 			include : FlipAround MIDDLE symbolMid
 			save 'bracketBarRight' 0x2046
 
-		sketch # braceLeft.straight
+		define [BraceUpperShape top bottom] : glyph-construction
 			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
 			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+
+			include : dispiro
+				straight.left.start [mix SB RIGHTSB designParameters.braceInside] top [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				archv
+				flat parenCenter (top - radius) [heading DOWNWARD]
+				curl parenCenter (bottom + radius) [heading DOWNWARD]
+				arcvh
+				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] bottom [heading LEFTWARD]
+
+		define [BraceLowerShape top bottom] : glyph-construction
+			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
+			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+			include : dispiro
+				straight.left.start [mix SB RIGHTSB designParameters.braceInside] bottom [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
+				archv
+				flat parenCenter (bottom + radius) [heading UPWARD]
+				curl parenCenter (top - radius) [heading UPWARD]
+				arcvh
+				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] top [heading LEFTWARD]
+
+		sketch # braceLeft.straight
 			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
 			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
 
-			include : dispiro
-				straight.left.start [mix SB RIGHTSB designParameters.braceInside] (top - HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-				archv
-				flat parenCenter (top - radius) [heading DOWNWARD]
-				curl parenCenter (symbolMid + radius) [heading DOWNWARD]
-				arcvh
-				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] symbolMid [heading LEFTWARD]
+			include : BraceUpperShape (top - HALFSTROKE) symbolMid
+			include : BraceLowerShape (symbolMid) (bot + HALFSTROKE)
 
-			include : dispiro
-				straight.left.start [mix SB RIGHTSB designParameters.braceInside] (bot + HALFSTROKE) [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
-				archv
-				flat parenCenter (bot + radius) [heading UPWARD]
-				curl parenCenter (symbolMid - radius) [heading UPWARD]
-				arcvh
-				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] symbolMid [heading LEFTWARD]
 			save 'braceLeft.straight'
 
 		define [CurlyBraceShape sw] : glyph-construction
@@ -188,6 +176,16 @@ export : define [apply] : begin
 
 		select-variant 'braceLeft' '{'
 		select-variant 'braceRight' '}'
+
+		sketch
+			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
+			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
+			branch
+				include : BraceUpperShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				save nothing 0x23B0
+			branch
+				include : BraceLowerShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				save nothing 0x23B1
 
 		sketch # whiteBraceLeft
 			local fine : adviceBlackness 4
@@ -312,6 +310,17 @@ export : define [apply] : begin
 				apply-transform : Translate (-2 * delta) 0
 				save 'colon.dleft'
 
+		sketch # holowColon
+			define sw : adviceBlackness 5
+			define dotRadius : Math.max PERIODRADIUS (XH / 8)
+			include : difference
+				DotAt MIDDLE dotRadius (dotRadius - O + sw / 2)
+				DotAt MIDDLE dotRadius (dotRadius - O - sw / 2)
+			include : difference
+				DotAt MIDDLE (XH - dotRadius) (dotRadius - O + sw / 2)
+				DotAt MIDDLE (XH - dotRadius) (dotRadius - O - sw / 2)
+			save 'hollowColon' 0x2982
+
 		sketch # semicolon
 			include glyphs.comma
 			include glyphs.xhPeriod
@@ -328,7 +337,7 @@ export : define [apply] : begin
 				g4 left (top - HOOK)
 				hookstart (top - O)
 				g4 right (top - SMOOTHB * 0.9)
-				alsothru 0.5 0.45 [widths.center ESSQUESTION]
+				alsothru.g2 0.5 0.45 [widths.center ESSQUESTION]
 				straight.down.end ([mix left right 0.5] - HALFSTROKE * HVCONTRAST * strokeEndCor) questionBottom [widths.heading (STROKE * strokeEndCor) 0 DOWNWARD]
 
 		sketch # question
@@ -365,7 +374,7 @@ export : define [apply] : begin
 
 		sketch # exclam
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : VBar MIDDLE [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
 			include : DotAt MIDDLE DOTRADIUS (DOTRADIUS - O)
 			save 'exclam' '!'
@@ -400,6 +409,7 @@ export : define [apply] : begin
 			include : VBar (MIDDLE - WIDTH * 0.175) parenBot parenTop sw
 			include : VBar (MIDDLE + WIDTH * 0.175) parenBot parenTop sw
 			save 'parallel' 0x2225
+			save 'doubleBar' 0x2016
 			save 'dentalclick' 0x1C0
 			save 'alveolarlateralclick' 0x1C1
 
@@ -654,7 +664,7 @@ export : define [apply] : begin
 			composite (name + '.' + low) glyphs.(name + '.' + high)
 				Upright
 				Translate 0 (symbolMid - asteriskCenterY)
-				begin markset.plus
+				begin MarkSet.plus
 				Italify
 
 		select-variant 'asterisk' '*'
@@ -773,13 +783,13 @@ export : define [apply] : begin
 			save 'enDash' 0x2013
 
 		sketch # emDash
-			set-width FULLWIDTH
-			include : HBar 0 FULLWIDTH symbolMid
+			set-width WIDE-WIDTH-1
+			include : HBar 0 WIDE-WIDTH-1 symbolMid
 			save 'emDash' 0x2014
 
 		sketch # doubleEmDash
-			set-width (FULLWIDTH * 2)
-			include : HBar 0 (FULLWIDTH * 2) symbolMid
+			set-width (WIDE-WIDTH-1 * 2)
+			include : HBar 0 (WIDE-WIDTH-1 * 2) symbolMid
 			save 'doubleEmDash'
 
 		alias 'horizontalBar' 0x2015 'emDash'
@@ -787,8 +797,7 @@ export : define [apply] : begin
 
 	do 'Interpuncts'
 		sketch # interpunct
-			set-width FULLWIDTH3
-			include : DotAt (FULLWIDTH3 / 2) symbolMid (PERIODRADIUS - O)
+			include : DotAt MIDDLE symbolMid (PERIODRADIUS - O)
 			save 'period.center'
 			save 'interpunct' 0xB7
 			save 'greekbullet' 0x387
@@ -796,7 +805,7 @@ export : define [apply] : begin
 			save 'hyphenpoint' 0x2027
 
 		sketch # whitebullet
-			set-width FULLWIDTH
+			set-width WIDE-WIDTH-1
 			local s : [adviceBlackness 5] * 0.75
 			include : difference
 				DotAt FWMIDDLE symbolMid (PERIODRADIUS - O)
@@ -833,24 +842,24 @@ export : define [apply] : begin
 		sketch # lowSingleQuote
 			include glyphs.comma
 			include : FlipAround MIDDLE 0 ratio ratio
-			save 'lowSingleQuote'
+			save 'lowSingleQuote' 0x201A
 
 		sketch # openSingleQuote
 			include glyphs.lowSingleQuote
 			include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
-			save 'openSingleQuote'
+			save 'openSingleQuote' 0x2018
 
 		sketch # closeSingleQuote
 			include glyphs.openSingleQuote
 			include : FlipAround MIDDLE yCurlyQuotes
-			save 'closeSingleQuote'
+			save 'closeSingleQuote' 0x2019
 
 		sketch # revertSingleQuote
 			include glyphs.invertComma
 			include : FlipAround MIDDLE 0 ratio ratio
 			include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
 			include : FlipAround MIDDLE yCurlyQuotes
-			save 'revertSingleQuote'
+			save 'revertSingleQuote' 0x201B
 
 		sketch # lowDoubleQuote
 			local dist : WIDTH * 0.225
@@ -858,17 +867,17 @@ export : define [apply] : begin
 			apply-transform : Translate (-dist * 2) 0
 			include glyphs.lowSingleQuote
 			apply-transform : Translate dist 0
-			save 'lowDoubleQuote'
+			save 'lowDoubleQuote' 0x201E
 
 		sketch # openDoubleQuote
 			include glyphs.lowDoubleQuote
 			include : FlipAround MIDDLE [mix [mix PERIODSIZE commaLow 0.5] yCurlyQuotes 0.5]
-			save 'openDoubleQuote'
+			save 'openDoubleQuote' 0x201C
 
 		sketch # closeDoubleQuote
 			include glyphs.openDoubleQuote
 			include : FlipAround MIDDLE yCurlyQuotes
-			save 'closeDoubleQuote'
+			save 'closeDoubleQuote' 0x201D
 
 		sketch # revertDoubleQuote
 			local dist : WIDTH * 0.225
@@ -876,16 +885,7 @@ export : define [apply] : begin
 			apply-transform : Translate (-dist * 2) 0
 			include glyphs.revertSingleQuote
 			apply-transform : Translate dist 0
-			save 'revertDoubleQuote'
-
-		fwr nothing 0x201A 'lowSingleQuote' 0 FULLWIDTH3
-		fwr nothing 0x2018 'openSingleQuote' 0 FULLWIDTH3
-		fwl nothing 0x2019 'closeSingleQuote' 0 FULLWIDTH3
-		fwr nothing 0x201B 'revertSingleQuote' 0 FULLWIDTH3
-		fwr nothing 0x201E 'lowDoubleQuote' 0 FULLWIDTH3
-		fwr nothing 0x201C 'openDoubleQuote' 0 FULLWIDTH3
-		fwl nothing 0x201D 'closeDoubleQuote' 0 FULLWIDTH3
-		fwr nothing 0x201F 'revertDoubleQuote' 0 FULLWIDTH3
+			save 'revertDoubleQuote' 0x201F
 
 		sketch # prime
 			local wide : WIDTH * 0.1
@@ -1009,11 +1009,7 @@ export : define [apply] : begin
 			include : HBar SB RIGHTSB [mix parenTop parenBot 0.67]
 			save 'doubledagger' 0x2021
 
-	define WidthKinds {{'.hwid' WIDTH WIDTH} {'.fwid' FULLWIDTH0 (FULLWIDTH0 / 2)}}
-
-	foreach {suffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do 'Ellipsis'
-		define [MangleUnicode unicode] : if (MosaicWidth == FULLWIDTH) unicode nothing
-		define [MangleName name] : name + suffix
+	for-width-kinds WIDE-WIDTH-1 "Ellipsis"
 		define [DotRadius darkness space] : begin
 			return : 0.5 * [adviceBlackness darkness (space / WIDTH)] * PERIODSIZE / STROKE
 
@@ -1205,9 +1201,9 @@ export : define [apply] : begin
 			apply-transform : Translate (MIDDLE) (XH + ACCENT)
 			apply-transform : Italify
 
-		composite 'asciitilde.low' glyphs.'asciitilde.high' [Upright] [Translate 0 (symbolMid - XH - ACCENT)] [Italify] markset.plus
+		composite 'asciitilde.low' glyphs.'asciitilde.high' [Upright] [Translate 0 (symbolMid - XH - ACCENT)] [Italify] MarkSet.plus
 		select-variant 'asciitilde' '~'
-		composite 'asciicaret.low' glyphs.'asciicaret.high' [Upright] [Translate 0 (symbolMid - XH - ACCENT)] [Italify] markset.plus
+		composite 'asciicaret.low' glyphs.'asciicaret.high' [Upright] [Translate 0 (symbolMid - XH - ACCENT)] [Italify] MarkSet.plus
 		select-variant 'asciicaret' '^'
 
 		composite 'degree' glyphs.space glyphs.ringAbove MarkZoom [into-unicode 0xB0]

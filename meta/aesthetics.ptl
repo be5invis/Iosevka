@@ -1,6 +1,8 @@
 import '../support/point' as Point
-import '../support/transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
+import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
 import [mix linreg clamp fallback] from '../support/utils'
+import '../support/anchor' as Anchor
+import [compsiteMarkSet] from '../support/utils'
 
 # Parameter generation
 export : define [calculateMetrics para] : begin
@@ -74,7 +76,6 @@ export : define [calculateMetrics para] : begin
 	define PERIODSIZE : fallback para.periodsize DOTSIZE
 	define BARPOS : fallback para.barpos 0.5
 	define GBARPOS : fallback para.gbarpos 0.5
-	define PBARPOS : fallback para.pbarpos 0.5
 	define EBARPOS : fallback para.ebarpos BARPOS
 	define OVERLAYPOS para.overlaypos
 	define FIVEBARPOS para.fivebarpos
@@ -105,12 +106,10 @@ export : define [calculateMetrics para] : begin
 	define ONEBALANCE : fallback para.onebalance 0
 
 	# derived metrics
-	define NO_DIVERSITY : para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1
-	define FULLWIDTH0 : if NO_DIVERSITY (WIDTH * 2) UPM
-	define FULLWIDTH : if (para.spacing >= 2) FULLWIDTH0 WIDTH
-	define FULLWIDTH1 : if (para.spacing >= 1) FULLWIDTH0 WIDTH
-	define FULLWIDTH2 : if (para.spacing >= 2) FULLWIDTH0 WIDTH
-	define FULLWIDTH3 : if (para.spacing >= 3) FULLWIDTH0 WIDTH
+	define MONOSPACE : para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1
+	define WIDE-WIDTH-0 : if MONOSPACE (WIDTH * 2) UPM
+	define WIDE-WIDTH-1 : if (para.spacing >= 1) WIDE-WIDTH-0 WIDTH
+	define WIDE-WIDTH-2 : if (para.spacing >= 2) WIDE-WIDTH-0 WIDTH
 
 	define OXE : OX - O
 	define ESS : STROKE * [fallback para.essx CONTRAST]
@@ -119,9 +118,9 @@ export : define [calculateMetrics para] : begin
 	define CAPO : CAP - O
 	define HALFSTROKE : STROKE / 2
 	define RIGHTSB : WIDTH - SB
-	define FWRSB : FULLWIDTH - SB
+	define FWRSB : WIDE-WIDTH-1 - SB
 	define MIDDLE : WIDTH / 2
-	define FWMIDDLE : FULLWIDTH / 2
+	define FWMIDDLE : WIDE-WIDTH-1 / 2
 	define CAPMIDDLE : CAP / 2
 	define CAP_SMOOTH : CAP - SMOOTH
 	define DOTRADIUS : DOTSIZE / 2
@@ -133,7 +132,7 @@ export : define [calculateMetrics para] : begin
 	define SMALLSMOOTHA : SMALLSMOOTH - TANSLANT * para.smoothadjust
 	define SMALLSMOOTHB : SMALLSMOOTH + TANSLANT * para.smoothadjust
 
-	define CORRECTION_OMIDX : TANSLANT * [linreg 18 1.3 126 0.9 STROKE]
+	define CORRECTION_OMIDX : TANSLANT * 0.9 * [linreg 18 1.3 126 0.9 STROKE]
 	define CORRECTION_OMIDS : STROKE * CORRECTION_OMIDX
 
 	# Blackness parameters
@@ -159,11 +158,22 @@ export : define [calculateMetrics para] : begin
 	define [superxy x superness] : Math.pow (1 - [Math.pow x [fallback superness SUPERNESS]]) (1 / [fallback superness SUPERNESS])
 
 	define [adviceSSmooth y sign _stroke] : begin
+		# Handle with extreme care.
 		local stroke : fallback _stroke STROKE
-		local ss : y * 0.21 + stroke * 0.22 * [clamp 1 2 : linreg 126 1 137 1.025 stroke] + 0.04 * (RIGHTSB - SB)
-		return : ss + sign * TANSLANT * para.smoothadjust * (ss / SMALLSMOOTH)
-	define [adviceGlottalStopSmooth y sign] : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * TANSLANT * para.smoothadjust
-	define [shoulderMidSlope _fine _stroke _dir] : 0.5 * HVCONTRAST * ([fallback _stroke STROKE] - [fallback _fine SHOULDERFINE]) / [fallback _stroke STROKE] + [fallback _dir 1] * TANSLANT
+		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke]
+		local widthFactor : RIGHTSB - SB
+		local widthFactor2 : WIDTH - UPM / 2
+		local ss : y * 0.21 + 0.4 * strokeFactor + 0.035 * widthFactor
+		return : ss + sign * TANSLANT * (para.smoothadjust + 0.75 * stroke)
+
+	define [adviceGlottalStopSmooth y sign] : begin
+		return : ((y - STROKE) * 0.24 + STROKE * 0.625) + sign * TANSLANT * para.smoothadjust
+
+	define [shoulderMidSlope _fine _stroke _dir] : begin
+		local stroke : fallback _stroke STROKE
+		local fine : fallback _fine SHOULDERFINE
+		local dir : fallback _dir 1
+		return : 0.5 * HVCONTRAST * (stroke - fine) / stroke + dir * TANSLANT
 
 	return [object
 		UPM WIDTH SB CAP XH DESCENDER CONTRAST
@@ -171,14 +181,14 @@ export : define [calculateMetrics para] : begin
 		TANSLANT SINSLANT COSSLANT HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD
 		Upward Downward Leftward Rightward
 		O OX OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE
-		BARPOS GBARPOS PBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
+		BARPOS GBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
 		TAILADJX TAILADJY LBALANCE IBALANCE LBALANCE2 IBALANCE2 JBALANCE JBALANCE2 TBALANCE TBALANCE2 RBALANCE RBALANCE2
-		FBALANCE ONEBALANCE FULLWIDTH FULLWIDTH0 FULLWIDTH1 FULLWIDTH2 FULLWIDTH3 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB
+		FBALANCE ONEBALANCE WIDE-WIDTH-0 WIDE-WIDTH-1 WIDE-WIDTH-2 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB
 		MIDDLE FWMIDDLE CAPMIDDLE CAP_SMOOTH DOTRADIUS PERIODRADIUS SIDEJUT SMOOTHA SMOOTHB SMALLSMOOTHA SMALLSMOOTHB CORRECTION_OMIDX CORRECTION_OMIDS
 		WHITENESS adviceBlackness adviceBlackness2 MVERTSTROKE MVERTSTROKE_D OVERLAYSTROKE OPERATORSTROKE GEOMETRYSTROKE SHOULDERFINE SUPERNESS superxy
 		adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope]
 
-export : define [setFontMetrics para metrics font] : begin
+export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP DESCENDER XH WIDTH] metrics
 	# Metric metadata
 	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
@@ -186,29 +196,75 @@ export : define [setFontMetrics para metrics font] : begin
 	define desc : para.leading * DESCENDER / (CAP - DESCENDER)
 	define descenderPad : fallback para.descenderPad 0
 
-	set font.OS_2.xAvgCharWidth     WIDTH
-	set font.head.unitsPerEm        1000
-	set font.hhea.ascender          asc
-	set font.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
-	set font.OS_2.sTypoAscender     asc
+	set fm.OS_2.xAvgCharWidth     WIDTH
+	set fm.head.unitsPerEm        1000
+	set fm.hhea.ascender          asc
+	set fm.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
+	set fm.OS_2.sTypoAscender     asc
 
-	set font.hhea.descender         (DESCENDER - descenderPad)
-	set font.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
-	set font.OS_2.sTypoDescender    (desc - descenderPad)
+	set fm.hhea.descender         (DESCENDER - descenderPad)
+	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set fm.OS_2.sTypoDescender    (desc - descenderPad)
 
-	set font.hhea.lineGap           (para.leading - asc + DESCENDER)
-	set font.OS_2.sTypoLineGap      (para.leading - asc + desc)
+	set fm.hhea.lineGap           (para.leading - asc + DESCENDER)
+	set fm.OS_2.sTypoLineGap      (para.leading - asc + desc)
 
-	set font.OS_2.sxHeight          XH
-	set font.OS_2.sCapHeight        CAP
-	set font.post.italicAngle       (0 - para.slantAngle)
+	set fm.OS_2.sxHeight          XH
+	set fm.OS_2.sCapHeight        CAP
+	set fm.post.italicAngle       (0 - para.slantAngle)
+
+export : define [MarksetDiv p me] : begin
+	define [object MARK BASE] Anchor
+	define middle : p * me.MIDDLE
+	define rightSB : me.WIDTH * p - me.SB
+	define [ta anchor] : return : new Anchor
+		* (anchor.x * me.globalTransform.xx + anchor.y * me.TANSLANT + me.globalTransform.x)
+		* (anchor.x * me.globalTransform.xy + anchor.y * me.globalTransform.yy + me.globalTransform.y)
+		* anchor.type
+
+	define markAboveLower       {.anchors {.above       [ta : new Anchor middle  me.XH        BASE]}}
+	define markAboveOper        {.anchors {.above       [ta : new Anchor middle  me.operTop   BASE]}}
+	define markAboveTack        {.anchors {.above       [ta : new Anchor middle  me.tackTop   BASE]}}
+	define markAbovePlus        {.anchors {.above       [ta : new Anchor middle  me.plusTop   BASE]}}
+	define markAboveCap         {.anchors {.above       [ta : new Anchor middle  me.CAP       BASE]}}
+	define markBelowLower       {.anchors {.below       [ta : new Anchor middle  me.DESCENDER BASE]}}
+	define markBelowTack        {.anchors {.below       [ta : new Anchor middle  me.tackBot   BASE]}}
+	define markBelowOper        {.anchors {.below       [ta : new Anchor middle  me.operBot   BASE]}}
+	define markBelowPlus        {.anchors {.below       [ta : new Anchor middle  me.plusBot   BASE]}}
+	define markBelowZero        {.anchors {.below       [ta : new Anchor middle  0            BASE]}}
+	define markToprightLower    {.anchors {.topright    [ta : new Anchor rightSB me.XH        BASE]}}
+	define markToprightCap      {.anchors {.topright    [ta : new Anchor rightSB me.CAP       BASE]}}
+	define markBottomrightLower {.anchors {.bottomright [ta : new Anchor rightSB me.DESCENDER BASE]}}
+	define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor rightSB 0            BASE]}}
+
+	define [buildStandardMarkSet] : begin
+		local a : compsiteMarkSet.apply null arguments
+		set a.anchors.overlay : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x me.OVERLAYPOS]
+			* [mix a.anchors.below.y a.anchors.above.y me.OVERLAYPOS]
+			* BASE
+		set a.anchors.slash : new Anchor
+			* [mix a.anchors.below.x a.anchors.above.x 0.5]
+			* [mix a.anchors.below.y a.anchors.above.y 0.5]
+			* BASE
+		return a
+
+	return : object
+		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
+		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero
+		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero
+		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero
+		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero
+		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower
+		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower
 
 export : define designParameters : object
 	equal_wideness      0.075
 	logic_narrow_shrink 0.75
-	geometric_large_x   (1 + 2 / 3)
+	GeometricLargeX     : lambda [mw uw] : (mw + uw / 2) / mw
 	geometric_small_x   (4 / 7)
-	arrow_size          (3 / 8)
+	arrow_size          (3 / 7)
 	# ()
 	parenOutside        0.2
 	parenInside         0.9
@@ -223,3 +279,17 @@ export : define designParameters : object
 	braceCurlyM1        0.6
 	braceCurlyM2        0.45
 	braceOvershoot      0.02
+
+export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
+	local div : fallback _div 1
+	local hPack : Math.max 2 [fallback _hPack 0]
+	local sbMul : fallback _sbMul : Math.min 1 : (metrics.WIDTH * div - hPack * [metrics.adviceBlackness hPack div]) / (2 * hPack * metrics.SB)
+	return : object
+		div div
+		width : metrics.WIDTH * div
+		middle : metrics.MIDDLE * div
+		sb : metrics.SB * sbMul
+		leftSB : metrics.SB * sbMul
+		rightSB : metrics.WIDTH * div - metrics.SB * sbMul
+		mvs : metrics.MVERTSTROKE_D div
+		markSet: MarksetDiv div metrics

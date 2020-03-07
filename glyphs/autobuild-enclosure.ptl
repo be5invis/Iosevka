@@ -3,21 +3,25 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../support/utils'
 
-export : define [apply] : begin
-	glyph-module-entry commonShapes overmarks
+glyph-module
 
-	define [suggestName _name] : begin
-		local name _name
+glyph-block AutoBuild-Enclosure : begin
+
+	glyph-block-import CommonShapes
+
+	define [CircName prefix digits parts suffix] : begin
+		local baseName : prefix + '-' + digits + '-' + [parts.join '_']
+		local name : baseName + "." + suffix
 		if glyphs.(name) : begin
 			local j 2
-			while glyphs.(name + j) : inc j
-			set name (name + j)
+			while glyphs.(baseName + "." + j + "." + suffix) : inc j
+			set name (baseName + "." + j + "." + suffix)
 		return name
 
 	# Build miniature glyphs : circled, superscripts, subscripts...
 	# Circled
 
-	define circleWidthClasses {{'hwid' WIDTH 0.12} {'fwid' FULLWIDTH0 0.08}}
+	define circleWidthClasses {{'hwid' WIDTH 0.12} {'fwid' WIDE-WIDTH-0 0.08}}
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * WIDTH / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
@@ -59,6 +63,10 @@ export : define [apply] : begin
 		define sw : Math.max sw0 [fallback m 0]
 		define top : CAP * dscale + [Math.max (CAP * spatt) (sw * 3)]
 		define bot : 0 - [Math.max (CAP * spatt) (sw * 3)]
+		define mosaicLeft 0
+		define mosaicRight width
+		define mosaicBot fontMetrics.OS_2.sTypoDescender
+		define mosaicTop fontMetrics.OS_2.sTypoAscender
 		define left : Math.max
 			SB + O * 3
 			Math.min
@@ -69,7 +77,7 @@ export : define [apply] : begin
 			Math.max
 				width / 2 + (top - bot) / 2
 				width / 2 + CAP / 2 * dscale + sw * 2.5
-		return : object width dscale sw0 sw top bot left right
+		return : object width dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight
 
 	define [CircledMiniatureFont digits width records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -79,8 +87,6 @@ export : define [apply] : begin
 			scale   -- [CircScale digits width]
 			unfair  -- true
 			sbscale -- 1
-
-	define [CircName prefix digits parts suffix] : suggestName : prefix + '-' + digits + '-' + [parts.join '_'] + '.' + suffix
 
 	define [createCircledGlyphs digits records] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
@@ -152,6 +158,29 @@ export : define [apply] : begin
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 					apply-transform : Italify
+
+	define [createInsetMosaicGlyphs digits records] : begin
+		foreach {suffix ww} [items-of circleWidthClasses] : do
+			local miniatureFont : CircledMiniatureFont digits ww records
+			foreach {unicode parts w bal baly} [items-of records] : do
+				define [object width dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits dscale ww
+				create-glyph [CircName 'inset-mosaic' digits parts suffix] : glyph-construction
+					set-width width
+					if (w == ww && unicode) : assign-unicode unicode
+					include : difference
+						glyph-construction
+							include : ForceUpright
+							include : spiro-outline
+								corner mosaicLeft  mosaicTop
+								corner mosaicLeft  mosaicBot
+								corner mosaicRight mosaicBot
+								corner mosaicRight mosaicTop
+								close
+						glyph-construction
+							include : circleInner dscale miniatureFont unicode parts width bal baly
+							apply-transform : Upright
+							apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+							apply-transform : Italify
 
 	define [createDoubleCircledGlyphs digits records] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
@@ -304,45 +333,45 @@ export : define [apply] : begin
 
 	if [not recursive] : do "Single-digit circled"
 		local compositions : list
-			list 0xA9    {'C'}     FULLWIDTH2
-			list 0x1F12F {'turnC'} FULLWIDTH2
-			list 0xAE    {'R'}     FULLWIDTH2
-			list 0x2117  {'P'}     FULLWIDTH2
-			list 0x24EA  {'zero'}  FULLWIDTH1
-		compositions.push { null {'space'} FULLWIDTH1 }
+			list 0xA9    {'C'}     WIDE-WIDTH-2
+			list 0x1F12F {'turnC'} WIDE-WIDTH-2
+			list 0xAE    {'R'}     WIDE-WIDTH-2
+			list 0x2117  {'P'}     WIDE-WIDTH-2
+			list 0x24EA  {'zero'}  WIDE-WIDTH-1
+		compositions.push { null {'space'} WIDE-WIDTH-1 }
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2460 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
-		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
-		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} FULLWIDTH1 0.5 (XH/2)}
+			begin WIDE-WIDTH-1
+		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
+		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} WIDE-WIDTH-1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit circled"
 		local compositions : list
-		compositions.push { null {'space'} FULLWIDTH1 }
+		compositions.push { null {'space'} WIDE-WIDTH-1 }
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2460 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		foreach [j : range 21 till 35] : compositions.push : list
 			0x3251 + j - 21
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		foreach [j : range 36 till 50] : compositions.push : list
 			0x32B1 + j - 36
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createCircledGlyphs 2 compositions
 
 	if [not recursive] : do "Single-digit inset circled"
 		local compositions : list
-			list 0x24FF {'zero'} FULLWIDTH1
+			list 0x24FF {'zero'} WIDE-WIDTH-1
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2776 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
-		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+			begin WIDE-WIDTH-1
+		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createInsetCircledGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit inset circled"
@@ -350,40 +379,47 @@ export : define [apply] : begin
 		foreach [j : range 10 till 10] : compositions.push : list
 			0x2776 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		foreach [j : range 11 till 20] : compositions.push : list
 			0x24EB + j - 11
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createInsetCircledGlyphs 2 compositions
 
-	if [not recursive] : do
+	if [not recursive] : do "boxed"
 		local compositions {}
-		compositions.push { null {'space'} FULLWIDTH1 }
-		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		compositions.push { null {'space'} WIDE-WIDTH-1 }
+		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createBoxedGlyphs 1 compositions
 
-	if [not recursive] : do
+	if [not recursive] : do "inset boxed"
 		local compositions {}
-		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createInsetBoxedGlyphs 1 compositions
+
+	if [not recursive] : do "inset mosaic"
+		local compositions {}
+		compositions.push { 0x1FBB1 { unicodeGlyphs.(0x2714).name } WIDE-WIDTH-1 }
+		compositions.push { 0x1FBB4 { unicodeGlyphs.(0x21B2).name } WIDE-WIDTH-1 }
+		compositions.push { 0x1FBC4 { unicodeGlyphs.(0x003F).name } WIDE-WIDTH-1 }
+		createInsetMosaicGlyphs 1 compositions
 
 	if [not recursive] : do "Single-digit double circled"
 		local compositions {}
-		compositions.push { null {'space'} FULLWIDTH1 }
+		compositions.push { null {'space'} WIDE-WIDTH-1 }
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x24F5 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createDoubleCircledGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit double circled"
 		local compositions {}
-		compositions.push { null {'space'} FULLWIDTH1 }
+		compositions.push { null {'space'} WIDE-WIDTH-1 }
 		foreach [j : range 10 till 10] : compositions.push : list
 			0x24F5 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createDoubleCircledGlyphs 2 compositions
 
 	if [not recursive] : do "Single-digit braced"
@@ -391,9 +427,9 @@ export : define [apply] : begin
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2474 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
-		foreach [j : range 0 26] : compositions.push {(0x249C + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} FULLWIDTH1 0.5 (XH/2)}
-		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} FULLWIDTH1}
+			begin WIDE-WIDTH-1
+		foreach [j : range 0 26] : compositions.push {(0x249C + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} WIDE-WIDTH-1 0.5 (XH/2)}
+		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createBracedGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit braced"
@@ -401,16 +437,16 @@ export : define [apply] : begin
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2474 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createBracedGlyphs 2 compositions
 
 	if [not recursive] : do "Single-digit dotted"
 		local compositions : list
-			list 0x1F100 {'zero'} FULLWIDTH1
+			list 0x1F100 {'zero'} WIDE-WIDTH-1
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2488 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createDottedGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit dotted"
@@ -418,6 +454,5 @@ export : define [apply] : begin
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2488 + j - 1
 			digitGlyphNames j
-			begin FULLWIDTH1
+			begin WIDE-WIDTH-1
 		createDottedGlyphs 2 compositions
-

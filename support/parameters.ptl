@@ -1,17 +1,24 @@
-export : define [build parametersData styles] : begin
+import "./param-blend" as paramBlend
+
+export : define [build parametersData styles blendParams] : begin
 	local param {.}
-	
+
 	define [introStyle style] : begin
 		local hive parametersData.(style)
 		if (!hive) : return nothing
+
 		if hive.inherits : foreach [h : items-of hive.inherits] : introStyle h
-		foreach [k : items-of : Object.keys hive] : set param.(k) hive.(k)
-		if hive.multiplies : foreach [k : items-of : Object.keys hive.multiplies] : begin
-			set param.(k) : param.(k) * hive.multiplies.(k)
-		if hive.adds : foreach [k : items-of : Object.keys hive.adds] : begin
-			set param.(k) : param.(k) + hive.adds.(k)
-		if hive.appends : foreach [k : items-of : Object.keys hive.appends] : begin
-			set param.(k) : (param.(k) || {}).concat(hive.appends.(k))
-	
+
+		foreach [k : items-of : Object.keys hive] : piecewise
+			(k === "multiplies") : foreach [k : items-of : Object.keys hive.multiplies] : begin
+				set param.(k) : param.(k) * hive.multiplies.(k)
+			(k === "adds") : foreach [k : items-of : Object.keys hive.adds] : begin
+				set param.(k) : param.(k) + hive.adds.(k)
+			(k === "appends") : foreach [k : items-of : Object.keys hive.appends] : begin
+				set param.(k) : (param.(k) || {}).concat(hive.appends.(k))
+			true : set param.(k) hive.(k)
+
+		paramBlend style hive blendParams param
+
 	foreach [style : items-of styles] : introStyle style
 	return param

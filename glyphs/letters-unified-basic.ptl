@@ -4,14 +4,17 @@
 
 $$include '../meta/macros.ptl'
 
-import '../support/transform' as : Transform && [object [transformPoint tp] [untransform utp] inverse]
+import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 
-export : define [apply] : begin
-	glyph-module-entry commonShapes overmarks
+glyph-module
 
-	### I
+glyph-block LetterUnified-Basic : begin
+
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
 	define { ISerifShape } : do "I and related ===================================================="
 		sketch # I.straight
 			local df : DivFrame para.diversityI
@@ -58,7 +61,6 @@ export : define [apply] : begin
 		list ISerifShape
 
 	### dotless i, i and iota
-	# iota
 	define { IotaShape TailedIShape } : do "i and related ========================================="
 		define [IotaShape top] : glyph-construction
 			local df : DivFrame para.diversityI
@@ -196,7 +198,7 @@ export : define [apply] : begin
 				composite fs_i.(k) glyphs.(gid) glyphs.dotAbove
 			set glyphs.i.featureSelector fs_i
 		alias 'cyrUkrainiani' 0x456 'i'
-		turned nothing 0x1D09 'i' (MIDDLE * para.diversityI) (XH / 2) markset.p
+		turned nothing 0x1D09 'i' (MIDDLE * para.diversityI) (XH / 2) MarkSet.p
 
 		list IotaShape TailedIShape
 
@@ -204,7 +206,7 @@ export : define [apply] : begin
 	do "J and related ============================================================================="
 		sketch # J.straight
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			set-anchor 'above' BASE (RIGHTSB - STROKE * HVCONTRAST * 0.75 - JBALANCE2) CAP
 			set-anchor 'overlay' BASE (RIGHTSB - STROKE * HVCONTRAST * 0.75 - JBALANCE2) (CAP * OVERLAYPOS)
 
@@ -225,7 +227,7 @@ export : define [apply] : begin
 
 		sketch # J.shorthook
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 
 			local slope (STROKE * 0.00092)
 			local expand 0.35
@@ -256,7 +258,7 @@ export : define [apply] : begin
 	### j and dotless j
 	do "j and related ============================================================================="
 		sketch # dotlessj.straight
-			include markset.p
+			include MarkSet.p
 			local center : MIDDLE + JBALANCE + HALFSTROKE * HVCONTRAST
 			set-anchor 'above' BASE (center - HVCONTRAST * HALFSTROKE) XH
 			set-anchor 'overlay' BASE (center - HVCONTRAST * HALFSTROKE) (XH / 2)
@@ -272,12 +274,12 @@ export : define [apply] : begin
 			save 'dotlessj.straight'
 
 		sketch # dotlessj.line
-			include markset.p
+			include MarkSet.p
 			include : VBar MIDDLE DESCENDER XH
 			save 'dotlessj.line'
 
 		sketch # dotlessj.serifed
-			include markset.p
+			include MarkSet.p
 			include glyphs.'dotlessj.straight' AS_BASE
 			include : LeftwardTopSerif (MIDDLE + JBALANCE) XH LONGJUT
 
@@ -340,7 +342,7 @@ export : define [apply] : begin
 		alias "cyrje" 0x458 'j'
 
 		sketch # jcurlytail
-			include markset.p
+			include MarkSet.p
 			set-anchor 'above' BASE (MIDDLE + JBALANCE) XH
 			local fine : adviceBlackness 3.5
 			local rinner : LONGJUT / 2 - fine / 2
@@ -368,7 +370,7 @@ export : define [apply] : begin
 
 		sketch # L
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : LShape CAP
 
 			save 'L' 'L'
@@ -404,7 +406,7 @@ export : define [apply] : begin
 			save 'Lbar' 0x23D
 
 		sketch # smcpL
-			include markset.e
+			include MarkSet.e
 			include : LShape XH
 			save 'smcpL' 0x29F
 
@@ -511,7 +513,7 @@ export : define [apply] : begin
 
 		select-variant 'l' 'l'
 		alias 'palochka' 0x4CF 'l'
-		turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) markset.p
+		turned 'turnl' 0xA781 'l' MIDDLE (XH / 2) MarkSet.p
 
 		sketch # ldot
 			include glyphs.l AS_BASE
@@ -530,7 +532,7 @@ export : define [apply] : begin
 			save 'lrtail' 0x26D
 
 		sketch # lcurlytail
-			include markset.b
+			include MarkSet.b
 			local fine : adviceBlackness 3.5
 			local rinner : LONGJUT / 2 - fine / 2
 			local m1 : MIDDLE + HALFSTROKE * HVCONTRAST
@@ -581,7 +583,7 @@ export : define [apply] : begin
 			save 'lbeltrtail' 0xA78E
 
 		sketch # looprevesh
-			include markset.if
+			include MarkSet.if
 			local fine : adviceBlackness 4
 			include : dispiro
 				widths.center fine
@@ -600,10 +602,13 @@ export : define [apply] : begin
 			save 'looprevesh' 0x1AA
 
 	### V and v
+	glyph-block-export VShape
 	define { VShape VShapeOutline } : do "V, v and related ========================================"
 		define cornerdist : HALFSTROKE * HVCONTRAST * 1.15
 		define vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
-		define VShapeFine : STROKE * [fallback para.vtipfine : if SLAB 0.9 0.8]
+		define VShapeFine : Math.max
+			STROKE * [if SLAB para.vtipfineSlab para.vtipfine]
+			cornerdist * 1.2
 		define VShapeFineStraight : Math.max [adviceBlackness 7] [STROKE * 0.66]
 		define VShapeMiddleWidth : adviceBlackness 3
 		define pInktrap 0.5
@@ -688,7 +693,7 @@ export : define [apply] : begin
 
 		sketch # V
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : VShape CAP STROKE true
 				save 'V.straight'
@@ -697,7 +702,7 @@ export : define [apply] : begin
 				save 'V.curly'
 
 		sketch # v
-			include markset.e
+			include MarkSet.e
 			branch
 				include : VShape XH STROKE true
 				save 'v.straight'
@@ -718,7 +723,7 @@ export : define [apply] : begin
 				g4   (MIDDLE + cornerdist) 0 [widths.rhs VShapeFine]
 
 		sketch # vhooktop
-			include markset.e
+			include MarkSet.e
 			branch
 				include : VHooktopShape XH STROKE true
 				save 'vhooktop.straight'
@@ -730,7 +735,7 @@ export : define [apply] : begin
 
 
 		sketch # cyrIzhitsa
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : VHooktopShape CAP STROKE true
 				save 'cyrIzhitsa.straight'
@@ -750,7 +755,7 @@ export : define [apply] : begin
 		select-variant 'turnv' 0x474 (follow -- 'Lambda')
 
 		sketch # nu
-			include markset.e
+			include MarkSet.e
 
 			local xmid : MIDDLE + HALFSTROKE * 0.75
 
@@ -770,6 +775,7 @@ export : define [apply] : begin
 		list VShape VShapeOutline
 
 	### A
+	glyph-block-export LambdaShape AMaskShape DeltaShape
 	define { LambdaShape AMaskShape DeltaShape } : do "A and related =============================="
 		define [AMaskShape top sw barStraight div] : create-glyph : glyph-construction
 			include : VShapeOutline top sw barStraight div
@@ -777,7 +783,7 @@ export : define [apply] : begin
 
 		sketch # A
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 
 			branch
@@ -821,7 +827,7 @@ export : define [apply] : begin
 				tag-contour 'serif'
 
 		sketch # Lambda
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : LambdaShape CAP STROKE true
 				save 'Lambda.straight'
@@ -843,7 +849,7 @@ export : define [apply] : begin
 				AMaskShape top sw barStraight div
 
 		sketch # Delta
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : DeltaShape CAP STROKE true
 				save 'Delta.straight'
@@ -859,7 +865,7 @@ export : define [apply] : begin
 	do "a and related ============================================================================="
 		sketch # a.doublestorey
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 			local stroke : adviceBlackness2 2.875 2 XH
 			local bartop (XH * OVERLAYPOS * 1.02 + stroke / 2)
@@ -889,7 +895,7 @@ export : define [apply] : begin
 
 		sketch # a.singlestorey
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 			include : OBarRightShape
 			if SLAB
@@ -910,7 +916,7 @@ export : define [apply] : begin
 		alias 'cyra' 0x430 'a'
 
 		sketch # turnlargescripta
-			include markset.capital
+			include MarkSet.capital
 			include : OBarRightShape CAP
 			start-from RIGHTSB 0
 			line-to    (RIGHTSB - STROKE * HVCONTRAST) 0
@@ -921,7 +927,7 @@ export : define [apply] : begin
 			save 'turnlargescripta' 0x2C70
 
 		sketch # scripta
-			include markset.e
+			include MarkSet.e
 			include : OBarRightShape
 			start-from RIGHTSB 0
 			line-to    (RIGHTSB - STROKE * HVCONTRAST) 0
@@ -1150,7 +1156,7 @@ export : define [apply] : begin
 	do "X, x and related =========================================================================="
 		sketch # X
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 
 			branch
 				include : xStrand true SB 0 RIGHTSB CAP 0.1 0.4 0.28
@@ -1175,7 +1181,7 @@ export : define [apply] : begin
 					save 'cyrHadescender.curly'
 
 		sketch # x
-			include markset.e
+			include MarkSet.e
 			local TURN (XH * 0.1)
 
 			branch
@@ -1199,7 +1205,7 @@ export : define [apply] : begin
 
 		sketch # chi
 			set-width WIDTH
-			include markset.p
+			include MarkSet.p
 
 			branch
 				include : xStrand true SB DESCENDER RIGHTSB XH 0.05 0.4 0.11
@@ -1236,7 +1242,7 @@ export : define [apply] : begin
 				include : CenterBottomSerif MIDDLE [fallback bot 0] JUT
 
 		sketch # Y
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : YShape true CAP
 				save 'Y.straight'
@@ -1263,7 +1269,7 @@ export : define [apply] : begin
 				end [function : set this.loose true]
 
 		sketch # Yhooktop
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : YHookTopShape true
 				save 'Yhooktop.straight'
@@ -1272,7 +1278,7 @@ export : define [apply] : begin
 				save 'Yhooktop.curly'
 
 		sketch # cyrue
-			include markset.p
+			include MarkSet.p
 			branch
 				include : YShape true XH DESCENDER
 				save 'cyrue.straight'
@@ -1281,7 +1287,7 @@ export : define [apply] : begin
 				save 'cyrue.curly'
 
 		sketch # smcpY
-			include markset.e
+			include MarkSet.e
 			branch
 				include : YShape true XH
 				save 'smcpY.straight'
@@ -1299,32 +1305,34 @@ export : define [apply] : begin
 	### y
 	do "y and related ============================================================================"
 		define [GenSmallYShape straightBar] : begin
-			local useCurlyBottom : para.isItalic || SLAB || straightBar
+			local useStraightBottom : !SLAB && straightBar
+			local useCurlyBottom : SLAB || straightBar
 			local px1 0.84
 			local py1 : linreg 18 0.8 126 0.76 STROKE
 			local px2 0.95
 			local py20 0.88
-			local py2 : if useCurlyBottom 0.97 py20
+			local py2 : if (useStraightBottom || useCurlyBottom) 0.97 py20
 			local pds 0.05
 			local pds2 0.01
 			local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
 			local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
-			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if useCurlyBottom (2 / 3) (1 / 3)])
+			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
 			local ySbCor : (XH / CAP) * (OX * [if SLAB 1 4])
 			local yrstroker : RIGHTSB - [if straightBar ySbCor 0]
 			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
-			local slabysize : JUT * (WIDTH / UPM) + STROKE
+			local yBottomJut : JUT * 1.25
+			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE
 			local slabyvx 0.7
 
 			define [CalcDS top bottom] : begin
 				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
+				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				return {ds ds2}
 
 			define [yTopKnots x top ds dir dx dy] : begin
-				local hs : HALFSTROKE * [diagCor dy dx 0 (STROKE * 2)]
+				local hs : HALFSTROKE * [if straightBar [diagCor dy dx 0 (STROKE * 2)] 1]
 				local hl : hs - hs * dir
 				local hr : hs + hs * dir
 				if straightBar : return : list
@@ -1335,7 +1343,11 @@ export : define [apply] : begin
 					quadcontrols 0 dpy1 16
 
 			define [yBaseKnots top bottom shrink hooktop] : begin
+				local cor : diagCor (top - bottom) WIDTH 0 (STROKE * 2)
 				local {ds ds2} : CalcDS top bottom
+				define joinX : mix yrstrokel yrstroker (1 - px2)
+				define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
+				define [ConnectZ shrink] : curl joinX joinY [widths.rhs : STROKE * shrink]
 				return : list
 					if (straightBar && (! hooktop))
 						then : list
@@ -1343,18 +1355,17 @@ export : define [apply] : begin
 							flat
 								mix yrstrokel yrstroker px1
 								mix (bottom + ds2) (top - ds) py1
-					curl
-						mix yrstrokel yrstroker (1 - px2)
-						mix (bottom + ds2) (top - ds) (1 - py2)
-						widths.rhs : STROKE * [if useCurlyBottom shrink 1]
 
-					if useCurlyBottom
-						then : list
+					piecewise
+						useStraightBottom : list
+							ConnectZ shrink
+							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * cor) DOWNWARD]
+						useCurlyBottom : list
+							ConnectZ shrink
 							flat (yrstrokel - slabysize) bottom [widths.rhs]
-							curl
-								Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - STROKE - JUT)
-								begin bottom
-						else : list
+							curl [Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - STROKE - yBottomJut)] bottom
+						true : list
+							ConnectZ 1
 							quadcontrols 1 (1 - dpy2) 16
 							flat yrstrokel (bottom + ds2) [widths.heading 0 STROKE DOWNWARD]
 							curl yrstrokel bottom [widths.heading 0 STROKE DOWNWARD]
@@ -1420,7 +1431,7 @@ export : define [apply] : begin
 
 			define [SmallYHookTopShape top bottom] : glyph-construction
 				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2 + [if useCurlyBottom (slabysize * slabyvx) 0]
+				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				local joinHeight : yJoinHeight ds ds2 top bottom true
 
 				include : intersection
@@ -1476,18 +1487,20 @@ export : define [apply] : begin
 			return : object SmallYShape SmallYHookTopShape SmallLambdaShape
 
 		sketch # y.straight
-			include markset.p
+			include MarkSet.p
 			branch
 				include : [GenSmallYShape true].SmallYShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'y.straight'
 				save 'cyru.straight'
 			branch
 				include : [GenSmallYShape false].SmallYShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'y.curly'
 				save 'cyru.curly'
 
-		sketch # y.curly
-			include markset.p
+		sketch # y.cursive
+			include MarkSet.p
 			include : nShoulder
 				left -- (SB + STROKE * HVCONTRAST)
 				right -- RIGHTSB
@@ -1501,6 +1514,7 @@ export : define [apply] : begin
 				g4 SB (DESCENDER + SHOOK)
 			if SLAB : begin
 				include : LeftwardTopSerif SB XH SIDEJUT
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
 			save 'y.cursive'
 			save 'cyru.cursive'
 
@@ -1509,33 +1523,38 @@ export : define [apply] : begin
 
 
 		sketch # yhooktop
-			include markset.p
+			include MarkSet.p
 			branch
 				include : [GenSmallYShape true].SmallYHookTopShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'yhooktop.straight'
 			branch
 				include : [GenSmallYShape false].SmallYHookTopShape XH DESCENDER
+				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'yhooktop.curly'
 
 		sketch # cyrU
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : [GenSmallYShape true].SmallYShape CAP 0
+				set-anchor "overlay" BASE MIDDLE (XH / 2 - DESCENDER)
 				save 'cyrU.straight'
 			branch
 				include : [GenSmallYShape false].SmallYShape CAP 0
+				set-anchor "overlay" BASE MIDDLE (XH / 2 - DESCENDER)
 				save 'cyrU.curly'
 
 		select-variant 'yhooktop' 0x1B4
 		select-variant 'cyrU' 0x423 (follow -- 'yhooktop')
 
-		turned 'turny.straight' nothing 'y.straight' MIDDLE (XH / 2) markset.b
-		turned 'turny.curly'    nothing 'y.curly' MIDDLE (XH / 2) markset.b
+		turned 'turny.straight' nothing 'y.straight' MIDDLE (XH / 2) MarkSet.b
+		turned 'turny.curly'    nothing 'y.curly' MIDDLE (XH / 2) MarkSet.b
 		select-variant 'turny' 0x28E (follow -- 'yhooktop')
 
 		sketch # lambda
-			include markset.b
+			include MarkSet.b
 			include : [GenSmallYShape false].SmallLambdaShape CAP 0
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
 			save 'lambda' 0x3BB
 
 		sketch # lambdaslash
@@ -1654,7 +1673,7 @@ export : define [apply] : begin
 
 		sketch # K
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : KShape true
 			branch
 				save 'K.straight'
@@ -1666,7 +1685,7 @@ export : define [apply] : begin
 
 		sketch # K
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : KShape false
 			branch
 				save 'K.curly'
@@ -1698,19 +1717,19 @@ export : define [apply] : begin
 
 		sketch # k.straight
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : LowerKShape true
 			save 'k.straight'
 
 		sketch # k.curly
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : LowerKShape false
 			save 'k.curly'
 
 		sketch # k
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : LowerKCursiveShape true
 			save 'k.cursive'
 
@@ -1724,13 +1743,13 @@ export : define [apply] : begin
 
 		sketch # kappa
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			include : LowerKappaShape true
 			save 'kappa.straight'
 
 		sketch # kappa
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			include : LowerKappaShape false
 			save 'kappa.curly'
 
@@ -1745,7 +1764,7 @@ export : define [apply] : begin
 
 		sketch # cyrka
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			include : LowerCyrKaShape true
 			branch
 				save 'cyrka.straight'
@@ -1756,7 +1775,7 @@ export : define [apply] : begin
 
 		sketch # cyrka
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			include : LowerCyrKaShape false
 			branch
 				save 'cyrka.curly'
@@ -1774,11 +1793,11 @@ export : define [apply] : begin
 			include : VBarLeft (SB + [KBalance straightBar]) 0 (CAP - HOOK - HALFSTROKE)
 			include : VerticalHook (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 		sketch # Khooktop
-			include markset.capital
+			include MarkSet.capital
 			include : KHookTopShape true
 			save 'Khooktop.straight'
 		sketch # Khooktop
-			include markset.capital
+			include MarkSet.capital
 			include : KHookTopShape false
 			save 'Khooktop.curly'
 		select-variant 'Khooktop' 0x198 (follow -- 'K')
@@ -1788,11 +1807,11 @@ export : define [apply] : begin
 			include : VBarLeft (SB + [KBalance straightBar]) 0 (CAP - HOOK - HALFSTROKE)
 			include : VerticalHook (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
 		sketch # khooktop.straight
-			include markset.b
+			include MarkSet.b
 			include : LowerKHookTopShape true
 			save 'khooktop.straight'
 		sketch # khooktop.curly
-			include markset.b
+			include MarkSet.b
 			include : LowerKHookTopShape true
 			save 'khooktop.curly'
 		select-variant 'khooktop' 0x199 (follow -- 'K')
@@ -1801,15 +1820,15 @@ export : define [apply] : begin
 		turned 'turnK.curly'    nothing 'K.curly' MIDDLE (CAP / 2)
 		select-variant 'turnK' 0xA7B0 (follow -- 'K')
 
-		turned 'turnk.straight' nothing 'k.straight' MIDDLE (XH / 2) markset.p
-		turned 'turnk.curly' nothing 'k.curly' MIDDLE (XH / 2) markset.p
-		turned 'turnk.cursive' nothing 'k.cursive' MIDDLE (XH / 2) markset.p
+		turned 'turnk.straight' nothing 'k.straight' MIDDLE (XH / 2) MarkSet.p
+		turned 'turnk.curly' nothing 'k.curly' MIDDLE (XH / 2) MarkSet.p
+		turned 'turnk.cursive' nothing 'k.cursive' MIDDLE (XH / 2) MarkSet.p
 		select-variant 'turnk' 0x29E (follow -- 'k')
 
 	### B
 	do "B and related ============================================================================="
 		define [BShape top] : glyph-construction
-			local stroke : adviceBlackness2 2.875 2 XH
+			local stroke : adviceBlackness2 2.875 2 top
 			local bowl : top * 0.52 + stroke / 2
 			local barleft SB
 			local curvleft : RIGHTSB - SB * 0.5 - (top - (bowl - stroke)) * 0.45
@@ -1843,7 +1862,7 @@ export : define [apply] : begin
 
 		sketch # B
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : BShape CAP
 			save 'B' 'B'
 			save 'Beta' 0x392
@@ -1881,29 +1900,28 @@ export : define [apply] : begin
 				flat MIDDLE (midy + stroke / 2)
 				curl mid (midy + stroke / 2) [heading LEFTWARD]
 		sketch # cyrve.italic
-			include markset.e
+			include MarkSet.e
 			include : ItalicCyrveShape XH
 			save 'cyrve.italic'
 			save 'closeturnepsilon' 0x25E
 		sketch # cyrve.BGR
-			include markset.e
+			include MarkSet.e
 			include : ItalicCyrveShape CAP
 			save 'cyrve.BGR'
 		sketch # cyrve.upright
-			include markset.e
+			include MarkSet.e
 			include : BShape XH
 			save 'cyrve.upright'
 			save 'smcpB' 0x299
 		italic-variant 'cyrve' 0x432
 
 		sketch # Bbar
-
 			include glyphs.B AS_BASE
 			include : HOverlayBar [mix SB 0 0.7] [mix SB RIGHTSB 0.5] [mix 0 CAP 0.3] [Math.min ((CAP - STROKE * 3) / 4) OVERLAYSTROKE]
 			save 'Bbar' 0x243
 
 		sketch # beta
-			include markset.if
+			include MarkSet.if
 			local ymiddle : [mix 0 CAP 0.55] - HALFSTROKE
 			local fine : STROKE * CTHIN
 			include : dispiro
@@ -1932,7 +1950,7 @@ export : define [apply] : begin
 	do "b and related ============================================================================="
 		sketch # b
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 
 			include : OBarLeftShape
 			include : VBarLeft SB 0 CAP
@@ -1945,7 +1963,7 @@ export : define [apply] : begin
 			save 'b' 'b'
 
 		sketch # bhooktop
-			include markset.b
+			include MarkSet.b
 			include : OBarLeftShape
 			include : HooktopLeftBar
 			if SLAB : begin
@@ -1989,7 +2007,7 @@ export : define [apply] : begin
 	do "D and related ============================================================================="
 		sketch # D
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 
 			local dsmooth : Math.min (CAP * 0.499) (SMOOTH * 1.35)
 			local bsmooth : Math.min ((WIDTH - SB * 2) * 0.75) (SMOOTH * 1.1)
@@ -2032,7 +2050,7 @@ export : define [apply] : begin
 	do "d and related ============================================================================="
 		sketch # d
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 
 			include : OBarRightShape
 			include : VBarRight RIGHTSB 0 CAP
@@ -2054,7 +2072,7 @@ export : define [apply] : begin
 			apply-transform : Translate (WIDTH + (RIGHTSB - SB) / 2 + markExtend / 2) 0
 			local f : Widen {'d'} 0.95 1
 			include f.d
-			include markset.b
+			include MarkSet.b
 
 			save 'dcaron' 0x10F
 
@@ -2065,7 +2083,7 @@ export : define [apply] : begin
 			local m1 : Math.min RIGHTSB (WIDTH - rinner * 2 - fine - OX)
 			local x2 : mix SB m1 0.5
 			local y2 : 0 - fine - rinner *  1.25
-			include markset.e
+			include MarkSet.e
 			include : OBarRightShape XH m1
 			include : dispiro
 				widths.rhs
@@ -2078,7 +2096,7 @@ export : define [apply] : begin
 			save 'dcurlytail' 0x221
 
 		sketch # dhooktop
-			include markset.b
+			include MarkSet.b
 			include : OBarRightShape
 			include : VBarRight RIGHTSB 0 XH
 			include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
@@ -2101,6 +2119,7 @@ export : define [apply] : begin
 			save 'latinde' 0x18C
 
 	### P
+	glyph-block-export PShape PShapeOutline
 	define { PShape PShapeOutline } : do "P and related =========================================="
 		define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
 			local bowlTop (top * 1 - offset)
@@ -2139,7 +2158,7 @@ export : define [apply] : begin
 
 		sketch # P
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : PShape CAP
 			save 'P' 'P'
 			save 'Rho' 0x3A1
@@ -2158,7 +2177,7 @@ export : define [apply] : begin
 	do "p and related ============================================================================="
 		sketch # p
 			set-width WIDTH
-			include markset.p
+			include MarkSet.p
 
 			include : tagged 'bowl' : OBarLeftShape
 			include : VBarLeft SB DESCENDER XH
@@ -2172,7 +2191,7 @@ export : define [apply] : begin
 			save 'cyrer' 0x440
 
 		sketch # phooktop
-			include markset.if
+			include MarkSet.if
 			include : OBarLeftShape
 			include : HooktopLeftBar nothing DESCENDER
 			if SLAB : begin
@@ -2182,12 +2201,13 @@ export : define [apply] : begin
 			save 'phooktop' 0x1A5
 		### rho
 		sketch # rho
-			include markset.p
+			include MarkSet.p
 			include : OShape XH 0 (SB - OX + O) RIGHTSB
 			include : VBar (SB + HALFSTROKE * HVCONTRAST + O) DESCENDER SMALLSMOOTHB
 			save 'rho' 0x3C1
 
 	### R and CyrYa
+	glyph-block-export RLegShape RLegTerminalX
 	define { RLegShape RLegTerminalX } : do "R and related ====================================="
 		define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVCONTRAST
 		define [RLegShape right bottom top charTop slab straight sw extraShift] : glyph-construction
@@ -2209,35 +2229,35 @@ export : define [apply] : begin
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
 
+		define [RBarPos slab] :  if slab (0.5 + HALFSTROKE / CAP) BARPOS
 		define [RShape] : params [straightBar top [slab SLAB]] : glyph-construction
-			local m : if slab (0.5 + HALFSTROKE / CAP) PBARPOS
-			include : PShape top (mul -- 1) (bp -- m) (overshoot -- O) (slab -- slab)
+			include : PShape top (mul -- 1) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
-			include : RLegShape right 0 ((top - STROKE) * m) top SLAB straightBar STROKE 0
+			include : RLegShape right 0 ((top - STROKE) * [RBarPos slab]) top SLAB straightBar STROKE 0
 
 		sketch # R
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : RShape true CAP
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos SLAB] - HALFSTROKE)
 				save 'R.straight'
 			branch
 				include : RShape true CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos 0] - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.straight'
 			branch
 				include : RShape false CAP
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos SLAB] - HALFSTROKE)
 				save 'R.curly'
 			branch
 				include : RShape false CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * PBARPOS - HALFSTROKE)
+				set-anchor 'overlay' BASE (SB + STROKE * HVCONTRAST) (CAP * [RBarPos 0] - HALFSTROKE)
 				eject-contour 'strokeL'
 				save 'Rrotunda.curly'
 
 		sketch # smcpR
-			include markset.e
+			include MarkSet.e
 			branch
 				include : RShape true XH
 				save 'smcpR.straight'
@@ -2259,7 +2279,7 @@ export : define [apply] : begin
 		select-variant 'rrotunda' 0xA75B (follow -- 'R')
 
 		sketch # Yr
-			include markset.if
+			include MarkSet.if
 			local top : CAP * 0.85
 			local bp 0.45
 			include : PShape top (mul -- 1) (bp -- bp)
@@ -2277,8 +2297,7 @@ export : define [apply] : begin
 
 		define [CyrYaShape straightBar top] : glyph-construction
 			local bowlTop (top * 1)
-			local m : if SLAB (0.5 + HALFSTROKE / CAP) PBARPOS
-			local bowlBottom ((top - STROKE) * m - HALFSTROKE)
+			local bowlBottom ((top - STROKE) * [RBarPos SLAB] - HALFSTROKE)
 			local turn : mix bowlTop bowlBottom (SMOOTHA / (SMOOTHA + SMOOTHB))
 			local turnRadius : (bowlTop - bowlBottom) * 0.45
 			local barright : WIDTH - SB * 1.25
@@ -2296,13 +2315,13 @@ export : define [apply] : begin
 
 			if straightBar : then : include : dispiro
 				widths.center (STROKE * [diagCor top (WIDTH - STROKE * 2)])
-				corner MIDDLE ((top - STROKE) * m) [heading DOWNWARD]
+				corner MIDDLE ((top - STROKE) * [RBarPos SLAB]) [heading DOWNWARD]
 				corner (left + OX * 2 + HALFSTROKE * HVCONTRAST) 0 [heading DOWNWARD]
 			: else : include : dispiro
 				widths.center
 				g4.up.start (left + HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
 				quadcontrols 0 [if SLAB 0.3 0.4] 8
-				g4 MIDDLE ((top - STROKE) * m)
+				g4 MIDDLE ((top - STROKE) * [RBarPos SLAB])
 
 			if SLAB : begin
 				include : RightwardTopSerif barright top SIDEJUT
@@ -2310,7 +2329,7 @@ export : define [apply] : begin
 				include : LeftwardBottomSerif (SB + JUT / 8) 0 (SIDEJUT + JUT / 8)
 
 		sketch # cyrYa
-			include markset.capital
+			include MarkSet.capital
 			branch
 				include : CyrYaShape true CAP
 				save 'cyrYa.straight'
@@ -2318,7 +2337,7 @@ export : define [apply] : begin
 				include : CyrYaShape false CAP
 				save 'cyrYa.curly'
 		sketch # cyrya
-			include markset.e
+			include MarkSet.e
 			branch
 				include : CyrYaShape true XH
 				save 'cyrya.straight'
@@ -2561,7 +2580,8 @@ export : define [apply] : begin
 		select-variant 'rflap' 0x27E (follow -- 'r')
 
 	### C and c, also cyre
-	define {CShape CShapeOutline} : do "C, c nad related ========================================"
+	glyph-block-export CShape CShapeOutline
+	define { CShape CShapeOutline } : do "C, c nad related ======================================="
 		define [CShape top bot sw] : glyph-construction
 			include : dispiro
 				widths.lhs sw
@@ -2584,7 +2604,7 @@ export : define [apply] : begin
 
 		sketch # C
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : CShape CAP 0
 			save 'C' 'C'
 			save 'cyrEs' 0x421
@@ -2592,7 +2612,7 @@ export : define [apply] : begin
 
 		sketch # c
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 
 			include : dispiro
 				widths.lhs
@@ -2617,7 +2637,7 @@ export : define [apply] : begin
 
 		sketch # strenchedC
 			set-width WIDTH
-			include markset.p
+			include MarkSet.p
 			include : CShape XH DESCENDER
 
 			save 'strenchedC' 0x297
@@ -2649,7 +2669,7 @@ export : define [apply] : begin
 			save 'cbar' 0xA793
 
 		sketch # ccurlytail
-			include markset.e
+			include MarkSet.e
 			local stroke : adviceBlackness2 2.875 2 XH
 			local fine : adviceBlackness 3
 			local rinner : ((XH * 0.45) - fine * 1.5) / 2
@@ -2671,7 +2691,7 @@ export : define [apply] : begin
 			save 'ccurlytail' 0x255
 
 		sketch # cyrE
-			include markset.capital
+			include MarkSet.capital
 			include glyphs.C
 			include : FlipAround MIDDLE (CAP / 2)
 			include : HBar [mix SB RIGHTSB 0.25] RIGHTSB (CAP / 2)
@@ -2679,7 +2699,7 @@ export : define [apply] : begin
 			save 'cyrE' 0x42D
 
 		sketch # cyre
-			include markset.e
+			include MarkSet.e
 			include glyphs.c
 			include : FlipAround MIDDLE (XH / 2)
 			include : HBar [mix SB RIGHTSB 0.25] RIGHTSB (XH / 2)
@@ -2687,21 +2707,21 @@ export : define [apply] : begin
 			save 'cyre' 0x44D
 
 		sketch # cyrYe
-			include markset.capital
+			include MarkSet.capital
 			include glyphs.C
 			include : HBar SB [mix RIGHTSB SB 0.25] (CAP / 2) [adviceBlackness2 4 2 CAP]
 
 			save 'cyrYe' 0x404
 
 		sketch # cyrye
-			include markset.e
+			include MarkSet.e
 			include glyphs.c
 			include : HBar SB [mix RIGHTSB SB 0.25] (XH / 2) [adviceBlackness2 4 2 XH]
 
 			save 'cyrye' 0x454
 
 		sketch # sigma
-			include markset.e
+			include MarkSet.e
 			start-from (RIGHTSB + 0.25 * SB) XH
 			line-to    (RIGHTSB + 0.25 * SB) (XH - STROKE)
 			line-to    MIDDLE  (XH - STROKE - O * 1.5)
@@ -2724,7 +2744,7 @@ export : define [apply] : begin
 			save 'sigma' 0x3C3
 
 		sketch # sigmafinal
-			include markset.p
+			include MarkSet.p
 			include : dispiro
 				widths.lhs
 				g4 RIGHTSB (XH - HOOK)
@@ -2764,12 +2784,12 @@ export : define [apply] : begin
 
 		sketch # G
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : GShape CAP SMOOTHA SMOOTHB
 			save 'G' 'G'
 
 		sketch # smcpG
-			include markset.e
+			include MarkSet.e
 			include : GShape XH SMOOTHA SMOOTHB
 
 			save 'smcpG' 0x262
@@ -2796,7 +2816,7 @@ export : define [apply] : begin
 	### g
 	do "g and related ============================================================================="
 		sketch # g.doublestorey
-			include markset.p
+			include MarkSet.p
 			local obot : XH * GBARPOS - O - STROKE * 0.4
 			include : OShape XH obot SB (RIGHTSB - 0.3 * SB)
 
@@ -2827,7 +2847,7 @@ export : define [apply] : begin
 			save 'g.doublestorey'
 
 		sketch # g.opendoublestorey
-			include markset.p
+			include MarkSet.p
 			local obot : XH * GBARPOS - O - STROKE * 0.4
 			include : OShape XH obot SB (RIGHTSB - 0.3 * SB)
 
@@ -2854,7 +2874,7 @@ export : define [apply] : begin
 			save 'g.opendoublestorey'
 
 		sketch # g.singlestorey
-			include markset.p
+			include MarkSet.p
 			include : OBarRightShape
 			include : dispiro
 				widths.rhs
@@ -2902,7 +2922,7 @@ export : define [apply] : begin
 	### O and o
 	do "O and o ==================================================================================="
 		sketch
-			include markset.capital
+			include MarkSet.capital
 			include : OShape CAP 0 SB RIGHTSB nothing SMOOTHA SMOOTHB
 
 			save 'O' 'O'
@@ -2911,14 +2931,14 @@ export : define [apply] : begin
 
 		sketch # o
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			include : OShape XH 0 SB RIGHTSB nothing nothing nothing true
 			save 'o' 'o'
 			save 'omicron' 0x3BF
 			save 'cyro' 0x43e
 
 		sketch
-			include markset.capital
+			include MarkSet.capital
 			include : HornBaseAnchor RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
 			include : difference
 				HornShape RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
@@ -2927,7 +2947,7 @@ export : define [apply] : begin
 			save 'OHorn' 0x01A0
 
 		sketch
-			include markset.e
+			include MarkSet.e
 			include : HornBaseAnchor RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
 			include : difference
 				HornShape RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
@@ -2978,7 +2998,7 @@ export : define [apply] : begin
 			save 'bulleye' 0x298
 
 		sketch # oupperhalf
-			include markset.e
+			include MarkSet.e
 			include : dispiro
 				widths.rhs
 				flat (SB + OX) (XH / 2) [heading UPWARD]
@@ -2991,7 +3011,7 @@ export : define [apply] : begin
 			save 'oupperhalf' 0x1D16
 
 		sketch # olowerhalf
-			include markset.e
+			include MarkSet.e
 			include : dispiro
 				widths.lhs
 				flat (SB + OX) (XH / 2) [heading DOWNWARD]
@@ -3036,7 +3056,7 @@ export : define [apply] : begin
 	do "q and related ============================================================================="
 		sketch # q
 			set-width WIDTH
-			include markset.p
+			include MarkSet.p
 
 			include : OBarRightShape
 			include : VBarRight RIGHTSB DESCENDER XH
@@ -3048,7 +3068,7 @@ export : define [apply] : begin
 			save 'cyrqa' 0x51B
 
 		sketch # Qrtail
-			include markset.capital
+			include MarkSet.capital
 			include : OBarRightShape CAP
 			include : VBarRight RIGHTSB 0 CAP
 			include : create-glyph : glyph-construction
@@ -3063,7 +3083,7 @@ export : define [apply] : begin
 			save 'Qrtail' 0x24A
 
 		sketch # qrtail
-			include markset.e
+			include MarkSet.e
 			include : OBarRightShape
 			include : VBarRight RIGHTSB 0 XH
 			include : create-glyph : glyph-construction
@@ -3078,7 +3098,7 @@ export : define [apply] : begin
 			save 'qrtail' 0x24B
 
 		sketch # qhooktop
-			include markset.p
+			include MarkSet.p
 			include glyphs.q
 			eject-contour 'serifRT'
 			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) XH HOOKX (-HOOK)
@@ -3086,6 +3106,7 @@ export : define [apply] : begin
 
 
 	### N
+	glyph-block-export NShape
 	define { NShape } : do "N and related"
 		define [NShape top left right coward diagcoward xn] : glyph-construction
 			local topstroke : adviceBlackness [fallback diagcoward 4]
@@ -3107,13 +3128,13 @@ export : define [apply] : begin
 
 		sketch # N
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : NShape CAP SB RIGHTSB
 			save 'N' 'N'
 			save 'Nu' 0x39D
 
 		sketch # smcpN
-			include markset.e
+			include MarkSet.e
 			include : NShape XH SB RIGHTSB 3 3.5
 
 			save 'smcpN' 0x274
@@ -3130,7 +3151,7 @@ export : define [apply] : begin
 	do "n and related"
 		sketch # n
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 
 			include : nShoulder
 				left -- (SB + STROKE * HVCONTRAST)
@@ -3157,7 +3178,7 @@ export : define [apply] : begin
 			save 'napostrophe' 0x149
 
 		sketch # eng
-			include markset.p
+			include MarkSet.p
 			include glyphs.n false
 			eject-contour 'serifRB'
 			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 (-HOOKX) HOOK
@@ -3165,7 +3186,7 @@ export : define [apply] : begin
 			save 'eng' 0x14B
 
 		sketch # Eng
-			include markset.capital
+			include MarkSet.capital
 
 			include : nShoulder
 				left -- (SB + STROKE)
@@ -3193,7 +3214,7 @@ export : define [apply] : begin
 			local m1 : Math.min RIGHTSB (WIDTH - rinner * 2 - fine - OX)
 			local x2 : mix SB m1 0.5
 			local y2 : -fine
-			include markset.e
+			include MarkSet.e
 			include : VBarLeft SB 0 XH wide
 			include : dispiro
 				nShoulderKnots
@@ -3214,7 +3235,7 @@ export : define [apply] : begin
 			save 'ncurlytail' 0x235
 		# eta
 		sketch # eta
-			include markset.p
+			include MarkSet.p
 			set-anchor 'lf' BASE (SB + HALFSTROKE) 0
 
 			include : nShoulder
@@ -3229,7 +3250,7 @@ export : define [apply] : begin
 			save 'eta' 0x3B7
 
 		sketch # latinEta
-			include markset.if
+			include MarkSet.if
 			set-anchor 'lf' BASE (SB + HALFSTROKE) 0
 
 			include : nShoulder
@@ -3251,7 +3272,7 @@ export : define [apply] : begin
 			save 'latinEta' 0x220
 
 		sketch # latineta
-			include markset.p
+			include MarkSet.p
 			set-anchor 'lf' BASE (SB + HALFSTROKE) 0
 
 			include : nShoulder
@@ -3271,38 +3292,35 @@ export : define [apply] : begin
 			save 'latineta' 0x19E
 
 	### U
-	define { UShape } : do "U and related"
-		define [UShape top bottom stroke oper] : glyph-construction
+	do "U and related"
+		glyph-block-export UShape
+		define [UShape df top bottom stroke oper] : glyph-construction
 			include : dispiro
 				widths.lhs stroke
-				flat SB top [heading DOWNWARD]
-				curl SB (bottom + SMOOTHB)
+				flat df.leftSB top [heading DOWNWARD]
+				curl df.leftSB (bottom + SMOOTHB * [Math.sqrt df.div])
 				arcvh
-				g4   (MIDDLE + CORRECTION_OMIDS) (bottom + O)
+				g4   (df.middle + CORRECTION_OMIDS) (bottom + O)
 				archv
-				flat RIGHTSB (bottom + SMOOTHA)
-				curl RIGHTSB top [heading UPWARD]
+				flat df.rightSB (bottom + SMOOTHA * [Math.sqrt df.div])
+				curl df.rightSB top [heading UPWARD]
 			if [not oper] : include : AIVSerifs top
 
 		sketch # U
-			set-width WIDTH
-			include markset.capital
-			include : UShape CAP 0
-
+			include MarkSet.capital
+			include : UShape [DivFrame 1] CAP 0
 			save 'U' 'U'
 
 		sketch # smcpU
-			include markset.e
-			include : UShape XH 0
-
+			include MarkSet.e
+			include : UShape [DivFrame 1] XH 0
 			save 'smcpU' 0x1D1C
-		list UShape
 
 	### u
 	do "u and related"
 		sketch # u
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 			set-anchor 'trailing' BASE (RIGHTSB - markHalfStroke) 0
 			include glyphs.n
 			eject-contour 'serifRB'
@@ -3314,10 +3332,10 @@ export : define [apply] : begin
 				include : LeftwardTopSerif (RIGHTSB - STROKE * HVCONTRAST) XH SIDEJUT
 				include : LeftwardTopSerif SB XH SIDEJUT
 
-			save 'u' 'u'
+			save 'u.withBar'
 		# upsilon
 		sketch # upsilon
-			include markset.e
+			include MarkSet.e
 			include : dispiro
 				widths.lhs
 				flat (SB + OX - O) XH [heading DOWNWARD]
@@ -3329,6 +3347,10 @@ export : define [apply] : begin
 				curl (RIGHTSB - OX + O) XH [heading UPWARD]
 
 			save 'upsilon' 0x3C5
+			save 'u.withoutBar'
+
+		select-variant 'u' 'u'
+
 		define [LatinUpsilon2Shape top sma smb] : glyph-construction
 			include : dispiro
 				widths.lhs
@@ -3342,13 +3364,13 @@ export : define [apply] : begin
 			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) (top - HOOK - HALFSTROKE) (-(RIGHTSB - HALFSTROKE * HVCONTRAST - MIDDLE)) (-HOOK)
 
 		sketch # latinUpsilon2
-			include markset.e
+			include MarkSet.e
 			include : LatinUpsilon2Shape CAP SMOOTHA SMOOTHB
 
 			save 'latinUpsilon2' 0x1B2
 
 		sketch # latinupsilon2
-			include markset.e
+			include MarkSet.e
 			include : LatinUpsilon2Shape XH SMALLSMOOTHA SMALLSMOOTHB
 			save 'latinupsilon2' 0x28B
 
@@ -3465,7 +3487,7 @@ export : define [apply] : begin
 			eject-contour 'serifMB'
 			save 'm.shortleg'
 		select-variant 'm' 'm'
-		composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender (WIDTH * para.diversityM - SB)] markset.e
+		composite 'cyrtedescender.italic' glyphs.'cyrte.italic' [CyrDescender (WIDTH * para.diversityM - SB)] MarkSet.e
 
 		sketch # mltail
 			local df : dfM
@@ -3505,7 +3527,7 @@ export : define [apply] : begin
 
 		sketch # H
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : HShape CAP
 			save 'H' 'H'
 			save 'Eta' 0x397
@@ -3513,7 +3535,7 @@ export : define [apply] : begin
 		composite glyphs.cyrEn [CyrDescender RIGHTSB] [into-unicode 0x4A2]
 
 		sketch # cyren
-			include markset.e
+			include MarkSet.e
 			include : HShape XH
 			save 'cyren' 0x43D
 			save 'smcpH' 0x29C
@@ -3528,7 +3550,7 @@ export : define [apply] : begin
 	do "h and related"
 		sketch # h
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 
 			include : nShoulder
 				left -- (SB + STROKE * HVCONTRAST)
@@ -3547,7 +3569,7 @@ export : define [apply] : begin
 			save 'cyrshha' 0x4BB
 
 		sketch # hhooktop
-			include markset.b
+			include MarkSet.b
 			include : nShoulder
 				left -- (SB + STROKE * HVCONTRAST)
 				right -- RIGHTSB
@@ -3564,7 +3586,7 @@ export : define [apply] : begin
 			save 'hhooktop' 0x266
 
 		sketch # hhooktopltail
-			include markset.p
+			include MarkSet.p
 			include glyphs.hhooktop
 			eject-contour 'serifRB'
 			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 (-HOOKX) HOOK
@@ -3572,13 +3594,13 @@ export : define [apply] : begin
 			save 'hhooktopltail' 0x267
 
 		sketch # hltail
-			include markset.p
+			include MarkSet.p
 			include glyphs.h
 			eject-contour 'serifRB'
 			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) 0 (-HOOKX) HOOK
 
 			save 'hltail' 0xA727
-		turned nothing 0x265 'h' MIDDLE (XH / 2) markset.p
+		turned nothing 0x265 'h' MIDDLE (XH / 2) MarkSet.p
 
 		sketch # hookturnh
 			include : nShoulder
@@ -3592,7 +3614,7 @@ export : define [apply] : begin
 				apply-transform : Translate RIGHTSB (HOOK + HALFSTROKE)
 				apply-transform : Italify
 			include : FlipAround MIDDLE (XH / 2)
-			include markset.p
+			include MarkSet.p
 			if SLAB : begin
 				include : LeftwardTopSerif (RIGHTSB - STROKE * HVCONTRAST) XH SIDEJUT
 				include : CenterBottomSerif (RIGHTSB - HALFSTROKE * HVCONTRAST) DESCENDER JUT
@@ -3616,7 +3638,7 @@ export : define [apply] : begin
 				apply-transform : Upright
 				apply-transform : Translate RIGHTSB 0
 				apply-transform : Italify
-			include markset.p
+			include MarkSet.p
 			if SLAB : begin
 				include : LeftwardTopSerif (RIGHTSB - STROKE * HVCONTRAST) XH SIDEJUT
 
@@ -3629,6 +3651,7 @@ export : define [apply] : begin
 			save 'cyrtshe' 0x45B
 
 	### F
+	glyph-block-export FShape
 	define { FShape } : do "F and related"
 		define [FShape top y noserif] : glyph-construction
 			local stroke : adviceBlackness2 2.875 2 CAP
@@ -3643,7 +3666,7 @@ export : define [apply] : begin
 
 		sketch # F
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : FShape
 
 			save 'F' 'F'
@@ -3657,12 +3680,13 @@ export : define [apply] : begin
 		list FShape
 
 	### long s, and f
+	glyph-block-export LongSShape
 	define { LongSShape } : do "long-s and f related"
 		define fovershoot : fallback para.fovershoot (O * 6)
 
 		sketch # longs.straight
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : dispiro
 				widths.center
 				flat (MIDDLE - FBALANCE) 0 [heading UPWARD]
@@ -3677,7 +3701,7 @@ export : define [apply] : begin
 			save 'longs.straight'
 
 		sketch # longs.upright
-			include markset.b
+			include MarkSet.b
 			local m : MIDDLE - JBALANCE - HALFSTROKE * HVCONTRAST
 			local r : m + (WIDTH * 0.5) + STROKE * HVCONTRAST - OXHOOK
 			include : dispiro
@@ -3702,7 +3726,7 @@ export : define [apply] : begin
 				straight.right.end (MIDDLE + hookx) (top - w / 2 - fovershoot)
 
 		sketch 'esh'
-			include markset.if
+			include MarkSet.if
 			include : LongSShape CAP (-HOOK) HOOKX HOOK
 
 			branch
@@ -3722,7 +3746,7 @@ export : define [apply] : begin
 			save 'longs' 0x17F
 
 		sketch # eshcurlytail
-			include markset.if
+			include MarkSet.if
 			local fine : adviceBlackness 3.5
 			local rinner : LONGJUT / 2 - fine / 2
 			local m1 : MIDDLE - HALFSTROKE * HVCONTRAST - FBALANCE
@@ -3745,7 +3769,7 @@ export : define [apply] : begin
 			save 'eshcurlytail' 0x286
 
 		sketch # ifishhook
-			include markset.p
+			include MarkSet.p
 			include : VBar MIDDLE DESCENDER (XH - HOOK)
 			include : VerticalHook MIDDLE (XH - HOOK) (-LONGJUT + LBALANCE) (-HOOK + HALFSTROKE)
 			apply-transform : Translate LBALANCE 0
@@ -3755,7 +3779,7 @@ export : define [apply] : begin
 			save 'ifishhook' 0x27F
 
 		sketch # iviby
-			include markset.p
+			include MarkSet.p
 			include : VBar MIDDLE 0 (XH - HOOK - HALFSTROKE)
 			include : VerticalHook MIDDLE (XH - HOOK - HALFSTROKE) (-LONGJUT) (-HOOK)
 			include : VerticalHook MIDDLE 0 LONGJUT HOOK
@@ -3765,7 +3789,7 @@ export : define [apply] : begin
 		define fbar : XH * para.fbarpos + STROKE * para.fbarStrokeAdj
 		sketch # f.straight
 			local fovershoot2 (O * 2)
-			include markset.b
+			include MarkSet.b
 			local barleft : [mix SB RIGHTSB 0.35] - STROKE * 0.25 * HVCONTRAST
 			include : dispiro
 				widths.lhs
@@ -3822,10 +3846,10 @@ export : define [apply] : begin
 
 		select-variant 'f' 'f'
 
-		turned 'turnf.straight' nothing 'f.straight' MIDDLE (XH / 2) markset.p
-		turned 'turnf.serifed' nothing 'f.serifed' MIDDLE (XH / 2) markset.p
+		turned 'turnf.straight' nothing 'f.straight' MIDDLE (XH / 2) MarkSet.p
+		turned 'turnf.serifed' nothing 'f.serifed' MIDDLE (XH / 2) MarkSet.p
 		turned 'turnf.narrow' nothing 'f.narrow' dfNarrowF.middle (XH / 2) dfNarrowF.markSet.p
-		turned 'turnf.tailed' nothing 'f.tailed' MIDDLE (XH / 2) markset.p
+		turned 'turnf.tailed' nothing 'f.tailed' MIDDLE (XH / 2) MarkSet.p
 		select-variant 'turnf' 0x25F (follow -- 'f')
 
 		do "f ligatures"
@@ -3834,7 +3858,7 @@ export : define [apply] : begin
 			local hbarleft (SB + shift + STROKE * [if para.slantAngle 0.5 0.25])
 
 			sketch # f_i
-				include markset.b
+				include MarkSet.b
 				include : create-glyph : glyph-construction
 					include glyphs.longs
 					apply-transform : Translate shift 0
@@ -3878,6 +3902,7 @@ export : define [apply] : begin
 		list LongSShape
 
 	### E
+	glyph-block-export EShape
 	define { EShape } : do "E and related"
 		define [EShape top] : glyph-construction
 			local stroke : adviceBlackness2 2.875 2 CAP
@@ -3893,7 +3918,7 @@ export : define [apply] : begin
 
 		sketch # turnE
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			include : EShape CAP
 			save 'E' 'E'
 			save 'Epsilon' 0x395
@@ -3903,7 +3928,7 @@ export : define [apply] : begin
 			save 'turnE' 0x18E
 
 		sketch # smcpturnE
-			include markset.e
+			include MarkSet.e
 			include : EShape XH
 			include : FlipAround MIDDLE (XH / 2)
 			save 'smcpturnE' 0x2C7B
@@ -3911,6 +3936,7 @@ export : define [apply] : begin
 		list EShape
 
 	### e
+	glyph-block-export SmallEShape RevSmallEShape
 	define { SmallEShape RevSmallEShape } : do "e and related"
 		define [SmallEShape top stroke barpos curly] : glyph-construction
 			local barbottom : top * [fallback barpos EBARPOS] - (stroke / 2)
@@ -3931,7 +3957,7 @@ export : define [apply] : begin
 			include : HBarBottom (SB + (stroke / 2) + OX) (RIGHTSB - (stroke / 2) - OX) barbottom stroke
 
 		sketch # cyrie
-			include markset.e
+			include MarkSet.e
 			include : SmallEShape XH [adviceBlackness2 2.875 2 XH]
 			save 'e' 'e'
 			save 'cyrie' 0x435
@@ -3942,7 +3968,7 @@ export : define [apply] : begin
 			save 'cyrschwa' 0x4D9
 
 		sketch # cyrSchwa
-			include markset.capital
+			include MarkSet.capital
 			include : SmallEShape CAP [adviceBlackness2 2.875 2 CAP]
 			include : FlipAround MIDDLE (CAP / 2)
 			save 'Schwa' 0x18F
@@ -3967,7 +3993,7 @@ export : define [apply] : begin
 			include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
 
 		sketch # reve
-			include markset.e
+			include MarkSet.e
 			include : RevSmallEShape XH [adviceBlackness2 2.875 2 XH]
 			save 'reve' 0x258
 
@@ -3988,7 +4014,7 @@ export : define [apply] : begin
 				include : tagged 'serifRB' : LeftwardBottomSerif MIDDLE 0 (LONGJUT * 0.6)
 
 		sketch # cyrTe
-			include markset.capital
+			include MarkSet.capital
 			set-anchor 'bottomright' BASE (MIDDLE + HALFSTROKE * HVCONTRAST) 0
 			include : TShape CAP
 
@@ -3998,7 +4024,7 @@ export : define [apply] : begin
 
 			branch
 				include [CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)]
-				include markset.if
+				include MarkSet.if
 				save 'cyrTedescender' 0x4AC
 
 			branch
@@ -4016,18 +4042,18 @@ export : define [apply] : begin
 				save 'Thookleft' 0x1AC
 
 		sketch # cyrtedescender.upright
-			include markset.e
+			include MarkSet.e
 			include : TShape XH
 			save 'cyrte.upright'
 
 			include [CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)]
-			include markset.p
+			include MarkSet.p
 			save 'cyrtedescender.upright'
 
 		italic-variant 'cyrtedescender' 0x4AD
 
 		sketch # tau
-			include markset.e
+			include MarkSet.e
 			include : HBar SB RIGHTSB (XH - HALFSTROKE)
 			include : VBar MIDDLE 0 XH
 			save 'tau' 0x3C4
@@ -4057,7 +4083,7 @@ export : define [apply] : begin
 
 		sketch # t.standard
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : SmallTShape CAP 0
 			save 't.standard'
 		sketch # t.narrow
@@ -4083,19 +4109,19 @@ export : define [apply] : begin
 			save 't.narrow'
 		sketch # t.cross
 			set-width WIDTH
-			include markset.b
+			include MarkSet.b
 			include : VBar MIDDLE 0 CAP
 			include : HBarTop (MIDDLE - LONGJUT) (MIDDLE + LONGJUT) XH
 			save 't.cross'
 		select-variant 't' 't'
 
-		turned 'turnt.standard' nothing 't.standard' MIDDLE (XH / 2) markset.p
-		turned 'turnt.cross' nothing 't.cross' MIDDLE (XH / 2) markset.p
+		turned 'turnt.standard' nothing 't.standard' MIDDLE (XH / 2) MarkSet.p
+		turned 'turnt.cross' nothing 't.cross' MIDDLE (XH / 2) MarkSet.p
 		turned 'turnt.narrow' nothing 't.narrow' dfNarrowT.middle (XH / 2) dfNarrowT.markSet.p
 		select-variant 'turnt' 0x287 (follow -- 't')
 
 		sketch # tltail
-			include markset.if
+			include MarkSet.if
 			include glyphs.('t.standard')
 			local attach : utp currentGlyph.gizmo glyphs.('t.standard').anchors.bottomright
 			include : VBarRight attach.x 0 attach.y
@@ -4103,18 +4129,18 @@ export : define [apply] : begin
 			save 'tltail' 0x1AB
 
 		sketch # thooktop
-			include markset.e
+			include MarkSet.e
 			include : SmallTShape (XH - HALFSTROKE) 0
 			include : VerticalHook (tcenter + HALFSTROKE * HVCONTRAST) XH HOOKX (-HOOK)
 			save 'thooktop' 0x1AD
 
 		sketch # trtail
-			include markset.if
+			include MarkSet.if
 			include : SmallTShape CAP DESCENDER
 			save 'trtail' 0x288
 
 		sketch # tcurlytail
-			include markset.b
+			include MarkSet.b
 			local fine : adviceBlackness 3.5
 			local rinner : LONGJUT / 2 - fine / 2
 			local x2 : mix SB tcenter 0.4
@@ -4135,9 +4161,14 @@ export : define [apply] : begin
 
 	### S and s
 	do "s and related"
+		define [SNeck] : params [[stroke STROKE] [slantCoeff 0]] : begin
+			define strokeCoeff : linreg 18 0 126 1 stroke
+			define tension : 0.46 - 0.005 * strokeCoeff + slantCoeff * TANSLANT
+			return : alsothruthem {{0.4 tension} {0.6 (1 - tension)}} [widths.center stroke]
+
 		sketch # S
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 			local stroke : adviceBlackness2 2.875 2 CAP
 			local ess : ESS * stroke / STROKE
 			define smooth : adviceSSmooth CAP (-1) stroke
@@ -4146,7 +4177,7 @@ export : define [apply] : begin
 				g4   RIGHTSB (CAP - HOOK)
 				hookstart CAPO (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   SB (CAP - smooth)
-				alsothru 0.5 0.5 [widths.center ess]
+				alsothru.g2 0.5 0.5 [widths.center ess]
 				g4   RIGHTSB smooth [widths 0 stroke]
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   SB HOOK
@@ -4155,33 +4186,34 @@ export : define [apply] : begin
 
 		sketch # s
 			set-width WIDTH
-			include markset.e
-			local stroke : adviceBlackness2 2.875 2 XH
-			local ess : ESS * stroke / STROKE
-			define smooth : adviceSSmooth XH (-1 - [linreg 18 0 126 1 stroke] * (3 - (WIDTH / 500) * 2.5 * [linreg 18 0 126 1 stroke])) stroke
+			include MarkSet.e
+			define stroke : adviceBlackness2 2.875 2 XH
+			define ess : mix stroke (ESS * stroke / STROKE) 0.5
+			define strokeCoeff : linreg 18 0 126 1 stroke
+			define smooth : adviceSSmooth XH (-1) stroke
 			include : dispiro
 				widths.lhs stroke
 				g4   (RIGHTSB + OX / 4) (XH - SHOOK)
 				hookstart XO (sw -- stroke) (swItalicAdj -- STROKE)
-				g4.down.mid   (SB + OX / 8) (XH - smooth)
-				alsothru 0.5 0.5 [widths.center ess]
-				g4.down.mid   (RIGHTSB - OX / 8) (smooth) [widths 0 stroke]
+				g4   (SB + OX / 8) (XH - smooth)
+				SNeck stroke (slantCoeff -- -0.01)
+				g4   (RIGHTSB - OX / 8) (smooth) [widths 0 stroke]
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   (SB - OX / 4) SHOOK
 			save 's' 's'
 			save 'cyrdze' 0x455
 
 		sketch # revS
-			include markset.capital
+			include MarkSet.capital
 			local stroke : adviceBlackness2 2.875 2 CAP
 			local ess : ESS * stroke / STROKE
-			local smooth : adviceSSmooth CAP 1 stroke
+			local smooth : adviceSSmooth CAP 0.5 stroke
 			include : dispiro
 				widths.rhs stroke
 				g4   SB (CAP - HOOK)
 				hookstart CAPO (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   RIGHTSB (CAP - smooth)
-				alsothru 0.5 0.5 [widths.center ess]
+				alsothru.g2 0.5 0.5 [widths.center ess]
 				g4   SB smooth [widths stroke 0]
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   RIGHTSB HOOK
@@ -4189,16 +4221,17 @@ export : define [apply] : begin
 			save 'revS' 0x1A7
 
 		sketch # revs
-			include markset.e
-			local stroke : adviceBlackness2 2.875 2 XH
-			local ess : ESS * stroke / STROKE
-			local smooth : adviceSSmooth XH (1 + [linreg 18 0 126 1 stroke] * (3.25 - (WIDTH / 500) * 2 * [linreg 18 0 126 1 stroke])) stroke
+			include MarkSet.e
+			define stroke : adviceBlackness2 2.875 2 XH
+			define ess : ESS * stroke / STROKE
+			define strokeCoeff : linreg 18 0 126 1 stroke
+			define smooth : adviceSSmooth XH 1 stroke
 			include : dispiro
 				widths.rhs stroke
 				g4   SB (XH - SHOOK)
 				hookstart XO (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   RIGHTSB (XH - smooth)
-				alsothru 0.5 0.5 [widths.center ess]
+				SNeck stroke (slantCoeff -- 0.01)
 				g4   SB (smooth) [widths stroke 0]
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   RIGHTSB SHOOK
@@ -4212,14 +4245,14 @@ export : define [apply] : begin
 			apply-transform : Upright
 			apply-transform : Translate (SB + stroke * HVCONTRAST + OXHOOK) 0
 			apply-transform : Italify
-			include markset.p
+			include MarkSet.p
 			include glyphs.s
 			include : VBarLeft (SB + OXHOOK) 0 SHOOK
 
 			save 'srtail' 0x282
 
 		sketch # Sswash
-			include markset.if
+			include MarkSet.if
 			include glyphs.S
 			local stroke : adviceBlackness2 2.875 2 CAP
 			include : dispiro
@@ -4232,7 +4265,7 @@ export : define [apply] : begin
 			save 'Sswash' 0x2C7E
 
 		sketch # sswash
-			include markset.p
+			include MarkSet.p
 			include glyphs.s
 			local stroke : adviceBlackness2 2.875 2 XH
 			include : dispiro
@@ -4247,7 +4280,7 @@ export : define [apply] : begin
 	do "Z, z and related"
 		sketch # Z
 			set-width WIDTH
-			include markset.capital
+			include MarkSet.capital
 
 			local cor : 1.15 * HVCONTRAST
 
@@ -4271,7 +4304,7 @@ export : define [apply] : begin
 
 		sketch # z
 			set-width WIDTH
-			include markset.e
+			include MarkSet.e
 
 			local cor : 1.2 * HVCONTRAST
 
@@ -4319,7 +4352,7 @@ export : define [apply] : begin
 			save 'zdtail' 0x225
 
 		sketch # Zswash
-			include markset.if
+			include MarkSet.if
 			local cor 1.15
 
 			include : HBarTop SB RIGHTSB CAP
@@ -4342,7 +4375,7 @@ export : define [apply] : begin
 			save 'Zswash' 0x2C7F
 
 		sketch # zswash
-			include markset.p
+			include MarkSet.p
 
 			include : HBarTop SB RIGHTSB XH
 
@@ -4380,7 +4413,7 @@ export : define [apply] : begin
 			save 'zdesc' 0x2C6C
 
 		sketch # zcurlytail
-			include markset.e
+			include MarkSet.e
 
 			local fine : adviceBlackness 4
 			local rinner : Math.max (XH * 0.04) (fine * 0.3)
@@ -4394,5 +4427,3 @@ export : define [apply] : begin
 			eject-contour 'strokeBottom'
 			eject-contour 'serifRB'
 			save 'zcurlytail' 0x291
-
-	return [object ISerifShape IotaShape LShape VShape PShape PShapeOutline RLegShape RLegTerminalX NShape UShape FShape LongSShape EShape SmallEShape RevSmallEShape CShape CShapeOutline LambdaShape AMaskShape DeltaShape]
