@@ -217,7 +217,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss11`: Set character variant to “X Window Style”.
   * `ss12`: Set character variant to “Ubuntu Mono Style”.
   * `ss13`: Set character variant to “Lucida Style”.
-  * `ss14`: Set character variant to “Jetbrains Mono Style”.
+  * `ss14`: Set character variant to “JetBrains Mono Style”.
   * `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
