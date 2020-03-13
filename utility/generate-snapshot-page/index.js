@@ -1,8 +1,8 @@
 const ejs = require("ejs");
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("./parse-variants-data");
-const getLigationData = require("./ligation-data");
+const parseVariantsData = require("../export-data/parse-variants-data");
+const getLigationData = require("../export-data/ligation-data");
 
 main().catch(e => {
 	console.error(e);
