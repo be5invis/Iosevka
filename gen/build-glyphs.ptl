@@ -8,8 +8,6 @@ import '../support/fairify' as fairify
 
 import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet] from '../support/utils'
 import [calculateMetrics setFontMetrics MarksetDiv GenDivFrame] from '../meta/aesthetics'
-import [assignFontNames] from '../meta/naming'
-import '../meta/features' as Features
 
 $$include '../meta/macros.ptl'
 
@@ -25,7 +23,7 @@ define [tagged tag component] : begin
 	set component.tag tag
 	return component
 
-define [buildGlyphs para recursive recursiveCodes] : begin
+export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define variantSelector para.variantSelector
 	local glyphList {}
 	local glyphs {.}
@@ -144,22 +142,3 @@ define [buildGlyphs para recursive recursiveCodes] : begin
 
 	return : object metrics glyphs glyphList unicodeGlyphs
 
-# Main build procedure
-export as build : define [buildFont font para] : begin
-
-	define gs : buildGlyphs para
-
-	assignFontNames para gs.metrics font
-	setFontMetrics para gs.metrics font
-
-	local otl : Features.apply para gs.glyphs gs.glyphList gs.unicodeGlyphs
-	set font.GSUB otl.GSUB
-	set font.GPOS otl.GPOS
-	set font.GDEF otl.GDEF
-
-	if (para.forceMonospace && para.spacing == 0) : begin
-		set gs.glyphList : gs.glyphList.filter [lambda [g] : g.advanceWidth <= para.width]
-
-	set font.glyfMap gs.glyphs
-	set font.glyf gs.glyphList
-	return font

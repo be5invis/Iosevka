@@ -1,3 +1,5 @@
+import [add-common-feature add-feature ChainRuleBuilder] from "./table-util"
+
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
@@ -7,7 +9,9 @@ define [just s] : lambda [t] : t.map : lambda [x] s
 define preserved null
 define advance : lambda [t] : t.map : lambda [x] x
 
-export : define [buildLigations chain-rule lookupOrder commonList features lookups plm glyphs] : foreach [ ligationFeatureName : items-of : Object.keys plm] : do
+export : define [buildLigations sink plm glyphs] : foreach [ {featureName mappedFeature} : pairs-of plm] : do
+
+	define chain-rule : ChainRuleBuilder sink
 
 	define arrowStick  {'hyphen' 'equal'}
 	define [stick style] : {'hyphen' 'equal'} ~> [lsx style]
@@ -59,8 +63,7 @@ export : define [buildLigations chain-rule lookupOrder commonList features looku
 					g.push v
 		* g
 
-	local mappedFeature : plm.(ligationFeatureName) || {}
-	local ligationLookupName : 'lig_' + ligationFeatureName + '-' + mappedFeature
+	local ligationLookupName : 'lig_' + featureName + '-' + mappedFeature
 
 	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
 
@@ -76,26 +79,23 @@ export : define [buildLigations chain-rule lookupOrder commonList features looku
 			(f <@ Function) : f left
 			true : return f
 
-	commonList.push ligationFeatureName
+	define feature : add-common-feature sink : add-feature sink featureName
 
-	local featLookups {}
 	local lastLookupName null
-
 	local [dedup ln0 obj] : begin
 		local h : JSON.stringify obj
-		foreach [{name lookup} : pairs-of lookups] : begin
+		foreach [{name lookup} : pairs-of sink.lookups] : begin
 			local h1 : JSON.stringify lookup
 			if (h == h1) : return name
 		return ln0
 
 	local [includeLookup obj] : begin
-		local ln : dedup (ligationLookupName + featLookups.length) obj
-		if [not lookups.(ln)] : set lookups.(ln) obj
-		featLookups.push ln
-		if lastLookupName : lookupOrder.push {lastLookupName ln}
+		local ln : dedup (ligationLookupName + feature.lookups.length) obj
+		if [not sink.lookups.(ln)] : set sink.lookups.(ln) obj
+		feature.lookups.push ln
+		if lastLookupName : sink.lookupDep.push {lastLookupName ln}
 		set lastLookupName ln
 
-	set features.(ligationFeatureName) featLookups
 
 	do "Operator centering" : if [hasLG "center-ops"] : begin
 		define centerizeGroups : { asterisk_center caret_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
