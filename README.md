@@ -285,21 +285,21 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
     * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
     * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
-  * Styles for `G`:
-    * `v-capital-g-tooth`, `cv91`: Toothed G (default).
-    * `v-capital-g-toothless`, `cv92`: Toothless G.
   * Styles for `A`, `Λ`, `Δ`:
     * `v-turn-v-straight`, `cv73`: Standard, straight `A`, `Λ`, `Δ` (default).
     * `v-turn-v-curly`, `cv74`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  * Styles for `G`:
+    * `v-capital-g-tooth`, `cv91`: Toothed G (default).
+    * `v-capital-g-toothless`, `cv92`: Toothless G.
   * Styles for `Q`:
     * `v-capital-q-taily`, `cv42`: `Q` with a curly tail (default).
     * `v-capital-q-straight`, `cv43`: `Q` with a straight tail like in the old versions.
-  * Styles for `Y`:
-    * `v-capital-y-straight`, `cv80`: Standard, straight `Y` (default).
-    * `v-capital-y-curly`, `cv81`: Slightly curly `Y`, like Iosevka 2.x.
   * Styles for `R`:
     * `v-capital-r-straight`, `cv82`: Standard, straight-leg `R` (default).
     * `v-capital-r-curly`, `cv83`:  Slightly curly-legged `R`, like Iosevka 2.x.
+  * Styles for `Y`:
+    * `v-capital-y-straight`, `cv80`: Standard, straight `Y` (default).
+    * `v-capital-y-curly`, `cv81`: Slightly curly `Y`, like Iosevka 2.x.
   * Styles for `0`:
     * `v-zero-slashed`, `cv13`: Slashed Zero `0` (default).
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
