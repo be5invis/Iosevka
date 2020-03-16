@@ -2764,54 +2764,88 @@ glyph-block LetterUnified-Basic : begin
 
 	### G
 	do "G and related ============================================================================="
-		define [GShape top sma smb] : glyph-construction
+		define [GShape fTooth top sma smb] : glyph-construction
 			local yBar : top * 0.52 + STROKE * 0.25
 			local fine SHOULDERFINE
 			local sb : shoulderMidSlope fine nothing (-1)
-			include : dispiro
+
+			local knots : list
 				widths.lhs
 				g4   RIGHTSB (top - HOOK)
 				hookstart (top - O)
 				flat (SB + OX) (top - sma)
 				curl (SB + OX) smb
 				arcvh
+
+			if fTooth
+			: then : knots.push
 				g4.right.mid (MIDDLE + (CORRECTION_OMIDX - sb) * STROKE) O [widths.heading STROKE 0 {.y (1) .x (sb)}]
 				archv
 				straight.up.end (RIGHTSB - (STROKE - fine) * HVCONTRAST) sma [widths.heading fine 0 UPWARD]
-			include : HBarTop MIDDLE RIGHTSB yBar
-			include : VBarRight RIGHTSB sma yBar
-			include : VBarRight RIGHTSB sma 0 (STROKE - fine / 2)
+			: else : knots.push
+				g4   (MIDDLE + CORRECTION_OMIDS) O
+				flat RIGHTSB sma
+				curl RIGHTSB yBar [heading UPWARD]
+
+			include : union
+				dispiro.apply null knots
+				HBarTop MIDDLE RIGHTSB yBar
+				if fTooth
+					then : union
+						VBarRight RIGHTSB sma yBar
+						VBarRight RIGHTSB sma 0 (STROKE - fine / 2)
+					else : glyph-construction
+
+		define [HookTopShapeOfG top] : union
+			VBarRight (RIGHTSB - OXHOOK) (top - HOOK) top
+			VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST - OXHOOK) top HOOKX (-HOOK) nothing O
+
+		define [OverlayBarOfG top] : HOverlayBar [mix SB RIGHTSB 0.5] [mix RIGHTSB WIDTH 0.7] [mix 0 (top / 2) 0.55]
 
 		sketch # G
-			set-width WIDTH
 			include MarkSet.capital
-			include : GShape CAP SMOOTHA SMOOTHB
-			save 'G' 'G'
+			branch
+				include : GShape true CAP SMOOTHA SMOOTHB
+				save 'G.toothed'
+				branch
+					include : HookTopShapeOfG CAP
+					save 'Ghooktop.toothed'
+				branch
+					include : OverlayBarOfG CAP
+					save 'Gbar.toothed'
+
+			branch
+				include : GShape false CAP SMOOTHA SMOOTHB
+				save 'G.toothless'
+				branch
+					include : HookTopShapeOfG CAP
+					save 'Ghooktop.toothless'
+				branch
+					include : OverlayBarOfG CAP
+					save 'Gbar.toothless'
+
 
 		sketch # smcpG
 			include MarkSet.e
-			include : GShape XH SMOOTHA SMOOTHB
+			branch
+				include : GShape true XH SMOOTHA SMOOTHB
+				save 'smcpG.toothed'
+				branch
+					include : HookTopShapeOfG CAP
+					save 'smcpGhooktop.toothed'
 
-			save 'smcpG' 0x262
+			branch
+				include : GShape false XH SMOOTHA SMOOTHB
+				save 'smcpG.toothless'
+				branch
+					include : HookTopShapeOfG CAP
+					save 'smcpGhooktop.toothless'
 
-		sketch # Ghooktop
-			include glyphs.G AS_BASE
-			include : VBarRight (RIGHTSB - OXHOOK) (CAP - HOOK) CAP
-			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST - OXHOOK) CAP HOOKX (-HOOK) nothing O
-
-			save 'Ghooktop' 0x193
-
-		sketch # smcpGhooktop
-			include glyphs.smcpG AS_BASE
-			include : VBarRight (RIGHTSB - OXHOOK) (XH - HOOK) XH
-			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST - OXHOOK) XH HOOKX (-HOOK) nothing O
-
-			save 'smcpGhooktop' 0x29B
-
-		sketch # Gbar
-			include glyphs.G AS_BASE
-			include : HOverlayBar [mix SB RIGHTSB 0.5] [mix RIGHTSB WIDTH 0.7] [mix 0 CAPMIDDLE 0.55]
-			save 'Gbar' 0x1E4
+		select-variant 'G' 'G'
+		select-variant 'smcpG' 0x262 (follow -- 'G')
+		select-variant 'Ghooktop' 0x193 (follow -- 'G')
+		select-variant 'smcpGhooktop' 0x29B (follow -- 'G')
+		select-variant 'Gbar' 0x1E4 (follow -- 'G')
 
 	### g
 	do "g and related ============================================================================="

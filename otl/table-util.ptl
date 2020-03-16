@@ -1,0 +1,103 @@
+export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.}}
+
+export : define [pick-language sink tag] : begin
+	if sink.languages.(tag) : return sink.languages.(tag)
+	define lang {.features {}}
+	set sink.languages.(tag) lang
+	return lang
+
+export : define [copy-language sink tag tagFrom] : begin
+	define langFrom : pick-language sink tagFrom
+	define langTo : pick-language sink tag
+	foreach [feat : items-of langFrom.features] : langTo.features.push feat
+	return langTo
+
+export : define [add-lang-feature lang fea] : begin
+	define index : lang.features.indexOf fea.name
+	if (index < 0) : lang.features.push fea.name
+
+export : define [add-feature sink tag] : begin
+	define lookupArray {}
+	local n 0
+	while true : begin
+		if [not sink.features.(tag + '_' + n)] : begin
+			set sink.features.(tag + '_' + n) lookupArray
+			return {.name (tag + '_' + n) .lookups lookupArray}
+		set n : n + 1
+
+export : define [pick-feature sink name] : begin
+	if sink.features.(name) : return { .name name .lookups sink.features.(name) }
+	define featObj { .name name .lookups {} }
+	set sink.features.(name) featObj.lookups
+	return featObj
+
+export : define [add-feature-lookup fea lookupName] : begin
+	define index : fea.lookups.indexOf lookupName
+	if (index < 0) : fea.lookups.push lookupName
+
+export : define [add-lookup sink data] : begin
+	local n 0
+	while true : begin
+		if [not sink.lookups.('_lut_' + n)] : begin
+			set sink.lookups.('_lut_' + n) data
+			return ('_lut_' + n)
+		set n : n + 1
+
+export : define [pick-lookup sink name fallback] : begin
+	if sink.lookups.(name) : return sink.lookups.(name)
+	set sink.lookups.(name) fallback
+	return sink.lookups.(name)
+
+export : define [add-common-feature sink fea] : begin
+	define dfltDflt : pick-language sink 'dflt_DFLT'
+	define latnDflt : pick-language sink 'latn_DFLT'
+	define grekDflt : pick-language sink 'grek_DFLT'
+	define cyrlDflt : pick-language sink 'cyrl_DFLT'
+
+	add-lang-feature dfltDflt fea
+	add-lang-feature latnDflt fea
+	add-lang-feature grekDflt fea
+	add-lang-feature cyrlDflt fea
+
+	return fea
+
+export : define [ChainRuleBuilder sink] : begin
+	define [lookup-single f t] : begin
+		local subtable {.}
+		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
+		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}}
+
+	define [getsublookup left right] : piecewise
+		[not right] null
+		([typeof right] === "string") right
+		(right <@ Function) : getsublookup left [right left]
+		true : begin
+			local found null
+			foreach [{name lookup} : pairs-of sink.lookups] : match lookup
+				{.type "gsub_single" .subtables {st}} : begin
+					local check true
+					foreach [j : range 0 left.length] : if (st.(left.(j)) !== right.(j)) : set check false
+					if check : set found name
+			if found : return found
+
+			return : lookup-single left right
+
+	define [chain-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+		local subtable {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+		local foundi false
+		local founde false
+		foreach [j : range 0 terms.length] : if (!foundi && terms.(j).right) : begin
+			set subtable.inputBegins j
+			set foundi true
+		foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).right) : begin
+			set subtable.inputEnds (j + 1)
+			set founde true
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			subtable.match.push term.left
+			local lutn : getsublookup term.left term.right
+			if lutn : subtable.apply.push {.at j .lookup lutn}
+		return subtable
+
+	return chain-rule

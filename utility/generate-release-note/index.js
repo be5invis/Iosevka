@@ -19,11 +19,13 @@ class Output {
 
 async function main() {
 	const out = new Output();
-	await GenerateChangeList(out);
+
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(out);
 	await CopyMarkdown(out, "style-set-sample-image.md");
-	await CopyMarkdown(out, "deprecated-packages.md");
+	await CopyMarkdown(out, "package-reorg.md");
+	await GenerateChangeList(out);
+
 	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
 	await fs.writeFile(
 		path.join(__dirname, `../../release-archives/release-notes-${Version}.md`),

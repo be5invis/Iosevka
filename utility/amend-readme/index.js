@@ -1,8 +1,8 @@
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../generate-snapshot-page/parse-variants-data");
-const parseLigationData = require("../generate-snapshot-page/ligation-data");
-const getCharMapAndSupportedLanguageList = require("../generate-supported-languages/proc");
+const parseVariantsData = require("../export-data/parse-variants-data");
+const parseLigationData = require("../export-data/ligation-data");
+const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
 
 const charMapPath = process.argv[2];
 main().catch(e => {

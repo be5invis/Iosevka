@@ -1,0 +1,37 @@
+import [add-common-feature add-feature add-lookup ChainRuleBuilder] from "./table-util"
+
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
+
+export : define [buildCCMP sink markGlyphs] : begin
+	define ccmp : add-feature sink 'ccmp'
+	define chain-rule : ChainRuleBuilder sink
+
+	define groupA {'A' 'a' 'u' 'cyrA' 'cyra'}
+	define lookupCcmp1 : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule
+				{'i' 'cyrUkrainiani' 'j' 'cyrje' 'iogonekBelow'} ~> {'dotlessi' 'dotlessi' 'dotlessj' 'dotlessj' 'iogonek.dotless'}
+				markGlyphs.above ~> null
+			chain-rule {'eta'} ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule {'eta'} markGlyphs.all markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
+			chain-rule groupA ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule groupA markGlyphs.all markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+
+	define lookupCcmp2 : add-lookup sink : object
+		.type 'gsub_ligature'
+		.subtables : list : object
+			psilivaria {'commaAbove' 'graveAbove'}
+			psilioxia {'commaAbove' 'acuteAbove'}
+			psiliperispomeni {'commaAbove' 'perispomeniAbove'}
+			dasiavaria {'revCommaAbove' 'graveAbove'}
+			dasiaoxia {'revCommaAbove' 'acuteAbove'}
+			dasiaperispomeni {'revCommaAbove' 'perispomeniAbove'}
+
+	ccmp.lookups.push lookupCcmp1 lookupCcmp2
+	add-common-feature sink ccmp

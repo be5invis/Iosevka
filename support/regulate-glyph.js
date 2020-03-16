@@ -75,17 +75,18 @@ function byGlyphPriority(a, b) {
 	return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
 }
 
-module.exports = function(font, skew) {
+module.exports = function(gs, skew) {
 	const excludeUnicode = new Set();
 	excludeUnicode.add(0x80);
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicode.add(c);
 
 	// autoref
-	font.glyf = font.glyf.map((g, j) => ((g.glyphOrder = j), g)).sort(byGlyphPriority);
-	autoRef(font.glyf, excludeUnicode);
+	gs = gs.map((g, j) => ((g.glyphOrder = j), g)).sort(byGlyphPriority);
+	autoRef(gs, excludeUnicode);
+
 	// regulate
-	for (let g of font.glyf) regulateGlyph(g, skew);
+	for (let g of gs) regulateGlyph(g, skew);
 
 	// reorder
-	font.glyf = font.glyf.sort((a, b) => a.glyphOrder - b.glyphOrder);
+	return gs.sort((a, b) => a.glyphOrder - b.glyphOrder);
 };
