@@ -67,11 +67,11 @@ function unlinkRef(g, dx, dy, glyf) {
 	return contours;
 }
 
-function autoref(glyf, excludeUnicodes) {
-	suppressNaN(glyf);
+function autoref(gs, excludeUnicodeSet) {
+	suppressNaN(gs);
 
-	for (let j = 0; j < glyf.length; j++) {
-		const g = glyf[j];
+	for (let j = 0; j < gs.length; j++) {
+		const g = gs[j];
 		if (g.contours) {
 			for (let k = 0; k < g.contours.length; k++) {
 				const contour = g.contours[k];
@@ -81,44 +81,44 @@ function autoref(glyf, excludeUnicodes) {
 	}
 
 	// Refl-referencify, forward.
-	for (let j = 0; j < glyf.length; j++) {
-		if (!glyf[j].contours.length || (glyf[j].references && glyf[j].references.length)) continue;
-		for (let k = j + 1; k < glyf.length; k++) {
-			if (glyf[j].contours.length === glyf[k].contours.length) {
-				match(glyf[j], glyf[k], j);
+	for (let j = 0; j < gs.length; j++) {
+		if (!gs[j].contours.length || (gs[j].references && gs[j].references.length)) continue;
+		for (let k = j + 1; k < gs.length; k++) {
+			if (gs[j].contours.length === gs[k].contours.length) {
+				match(gs[j], gs[k], j);
 			}
 		}
 	}
 
 	// referencify, backward
-	for (let j = 0; j < glyf.length; j++) {
-		if (glyf[j].cmpPriority < 0) continue;
-		if (!glyf[j].contours.length) continue;
-		if (glyf[j].references && glyf[j].references.length) continue;
-		for (let k = glyf.length - 1; k >= 0; k--) {
-			if (glyf[j].contours.length > glyf[k].contours.length) continue;
+	for (let j = 0; j < gs.length; j++) {
+		if (gs[j].cmpPriority < 0) continue;
+		if (!gs[j].contours.length) continue;
+		if (gs[j].references && gs[j].references.length) continue;
+		for (let k = gs.length - 1; k >= 0; k--) {
+			if (gs[j].contours.length > gs[k].contours.length) continue;
 			if (
-				glyf[j].contours.length === glyf[k].contours.length &&
-				!(glyf[k].references && glyf[k].references.length)
+				gs[j].contours.length === gs[k].contours.length &&
+				!(gs[k].references && gs[k].references.length)
 			) {
 				continue;
 			}
-			while (match(glyf[j], glyf[k], j)) "pass";
+			while (match(gs[j], gs[k], j)) "pass";
 		}
 	}
 
 	// unlink composite
-	for (let j = 0; j < glyf.length; j++) {
-		if (!glyf[j].references || glyf[j].references.length === 0) continue;
+	for (let j = 0; j < gs.length; j++) {
+		if (!gs[j].references || gs[j].references.length === 0) continue;
 		if (
-			!glyf[j].flatten &&
-			glyf[j].contours.length === 0 &&
-			!(glyf[j].unicode && excludeUnicodes.has(glyf[j].unicode[0]))
+			!gs[j].flatten &&
+			gs[j].contours.length === 0 &&
+			!(gs[j].unicode && excludeUnicodeSet.has(gs[j].unicode[0]))
 		) {
 			continue;
 		}
-		glyf[j].contours = unlinkRef(glyf[j], 0, 0, glyf);
-		glyf[j].references = [];
+		gs[j].contours = unlinkRef(gs[j], 0, 0, gs);
+		gs[j].references = [];
 	}
 }
 

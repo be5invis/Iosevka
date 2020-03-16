@@ -1,7 +1,7 @@
 const fs = require("fs-extra");
-const parseVariantsData = require("../generate-snapshot-page/parse-variants-data");
-const parseLigationData = require("../generate-snapshot-page/ligation-data");
-const getCharMapAndSupportedLanguageList = require("../generate-supported-languages/proc");
+const parseVariantsData = require("./parse-variants-data");
+const parseLigationData = require("./ligation-data");
+const getCharMapAndSupportedLanguageList = require("./supported-languages");
 
 const version = require("../../package.json").version;
 

@@ -682,8 +682,9 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const [gen, meta, glyphs, support] = await target.need(
 		ScriptsUnder(ext, `gen`),
-		ScriptsUnder(ext, `meta`),
 		ScriptsUnder(ext, `glyphs`),
+		ScriptsUnder(ext, `meta`),
+		ScriptsUnder(ext, `otl`),
 		ScriptsUnder(ext, `support`)
 	);
 	return [...gen, ...meta, ...glyphs, ...support];
@@ -693,7 +694,7 @@ const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-const ScriptJS = file.glob(`{gen|glyphs|support|meta}/**/*.js`, async (target, path) => {
+const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
