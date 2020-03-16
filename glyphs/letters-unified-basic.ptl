@@ -60,6 +60,13 @@ glyph-block LetterUnified-Basic : begin
 
 		list ISerifShape
 
+	define [CreateDottedComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
+		lambda [src sel] : glyph-construction
+			include glyphs.(src) AS_BASE
+			include glyphs.dotAbove
+			set currentGlyph.dotlessGlyph src
+			if [not sel] : assign-unicode unicode
+
 	### dotless i, i and iota
 	define { IotaShape TailedIShape } : do "i and related ========================================="
 		define [IotaShape top] : glyph-construction
@@ -189,15 +196,9 @@ glyph-block LetterUnified-Basic : begin
 			include glyphs.ogonekBelow
 			save 'iogonek.dotless'
 
+		CreateDottedComposition 'dotlessi' 'i' 'i'
+		CreateDottedComposition 'dotlessi' 'cyrUkrainiani' 0x456
 
-		composite 'i' glyphs.dotlessi glyphs.dotAbove [into-unicode 'i']
-		if (glyphs.i && glyphs.dotlessi) : begin
-			local fs : queryFeatureSelector 'dotlessi' para
-			local fs_i : queryFeatureSelector 'dotlessi' para 'i'
-			foreach [{k gid} : pairs-of fs] : begin
-				composite fs_i.(k) glyphs.(gid) glyphs.dotAbove
-			set glyphs.i.featureSelector fs_i
-		alias 'cyrUkrainiani' 0x456 'i'
 		turned nothing 0x1D09 'i' (MIDDLE * para.diversityI) (XH / 2) MarkSet.p
 
 		list IotaShape TailedIShape
@@ -331,15 +332,9 @@ glyph-block LetterUnified-Basic : begin
 
 		select-variant 'dotlessj' 0x237
 
-		composite 'j' glyphs.dotlessj glyphs.dotAbove [into-unicode 'j']
-		if (glyphs.j && glyphs.dotlessj) : begin
-			local fs : queryFeatureSelector 'dotlessj' para
-			local fs_j : queryFeatureSelector 'dotlessj' para 'j'
-			foreach [{k gid} : pairs-of fs] : begin
-				composite fs_j.(k) glyphs.(gid) glyphs.dotAbove
-			set glyphs.j.featureSelector fs_j
-		alias "grkj" 0x3F3 'j'
-		alias "cyrje" 0x458 'j'
+		CreateDottedComposition 'dotlessj' 'j' 'j'
+		CreateDottedComposition 'dotlessj' 'grkj' 0x3F3
+		CreateDottedComposition 'dotlessj' 'cyrje' 0x458
 
 		sketch # jcurlytail
 			include MarkSet.p
@@ -2831,14 +2826,14 @@ glyph-block LetterUnified-Basic : begin
 				include : GShape true XH SMOOTHA SMOOTHB
 				save 'smcpG.toothed'
 				branch
-					include : HookTopShapeOfG CAP
+					include : HookTopShapeOfG XH
 					save 'smcpGhooktop.toothed'
 
 			branch
 				include : GShape false XH SMOOTHA SMOOTHB
 				save 'smcpG.toothless'
 				branch
-					include : HookTopShapeOfG CAP
+					include : HookTopShapeOfG XH
 					save 'smcpGhooktop.toothless'
 
 		select-variant 'G' 'G'
@@ -2958,7 +2953,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch
 			include MarkSet.capital
 			include : OShape CAP 0 SB RIGHTSB nothing SMOOTHA SMOOTHB
-
+			set-anchor 'trailing' BASE MIDDLE 0
 			save 'O' 'O'
 			save 'Omicron' 0x39F
 			save 'cyrO' 0x41E
@@ -2967,6 +2962,7 @@ glyph-block LetterUnified-Basic : begin
 			set-width WIDTH
 			include MarkSet.e
 			include : OShape XH 0 SB RIGHTSB nothing nothing nothing true
+			set-anchor 'trailing' BASE MIDDLE 0
 			save 'o' 'o'
 			save 'omicron' 0x3BF
 			save 'cyro' 0x43e
@@ -3343,6 +3339,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch # U
 			include MarkSet.capital
 			include : UShape [DivFrame 1] CAP 0
+			set-anchor 'trailing' BASE MIDDLE 0
 			save 'U' 'U'
 
 		sketch # smcpU
@@ -3370,6 +3367,7 @@ glyph-block LetterUnified-Basic : begin
 		# upsilon
 		sketch # upsilon
 			include MarkSet.e
+			set-anchor 'trailing' BASE MIDDLE 0
 			include : dispiro
 				widths.lhs
 				flat (SB + OX - O) XH [heading DOWNWARD]

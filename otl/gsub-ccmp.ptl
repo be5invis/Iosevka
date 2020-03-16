@@ -3,25 +3,36 @@ import [add-common-feature add-feature add-lookup ChainRuleBuilder] from "./tabl
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
-export : define [buildCCMP sink markGlyphs] : begin
+export : define [buildCCMP sink glyphs markGlyphs] : begin
 	define ccmp : add-feature sink 'ccmp'
 	define chain-rule : ChainRuleBuilder sink
 
-	define groupA {'A' 'a' 'u' 'cyrA' 'cyra'}
+	define groupTR {}
+	define groupLF {}
+	define dotlessFrom {}
+	define dotlessTo   {}
+	foreach [{gid, g} : pairs-of glyphs] : if (gid.(0) !== ".") : begin
+		if g.anchors.trailing : groupTR.push gid
+		if g.anchors.lf       : groupLF.push gid
+		if g.dotlessGlyph : begin
+			dotlessFrom.push gid
+			dotlessTo.push   g.dotlessGlyph
+
+	define [IotaLF]         : {'iotaBelow'} ~> {'iotaLF'}
+	define [OgonekTrailing] : {'ogonekBelow'} ~> {'ogonekTR'}
+
 	define lookupCcmp1 : add-lookup sink : object
 		.type 'gsub_chaining'
 		.subtables : list
-			chain-rule
-				{'i' 'cyrUkrainiani' 'j' 'cyrje' 'iogonekBelow'} ~> {'dotlessi' 'dotlessi' 'dotlessj' 'dotlessj' 'iogonek.dotless'}
-				markGlyphs.above ~> null
-			chain-rule {'eta'} ({'iotaBelow'} ~> {'iotaLF'})
-			chain-rule {'eta'} markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
-			chain-rule {'eta'} markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
-			chain-rule {'eta'} markGlyphs.all markGlyphs.all markGlyphs.all ({'iotaBelow'} ~> {'iotaLF'})
-			chain-rule groupA ({'ogonekBelow'} ~> {'ogonekTR'})
-			chain-rule groupA markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
-			chain-rule groupA markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
-			chain-rule groupA markGlyphs.all markGlyphs.all markGlyphs.all ({'ogonekBelow'} ~> {'ogonekTR'})
+			chain-rule (dotlessFrom ~> dotlessTo) (markGlyphs.above ~> null)
+			chain-rule groupLF [IotaLF]
+			chain-rule groupLF markGlyphs.all [IotaLF]
+			chain-rule groupLF markGlyphs.all markGlyphs.all [IotaLF]
+			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
+			chain-rule groupTR [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
 
 	define lookupCcmp2 : add-lookup sink : object
 		.type 'gsub_ligature'
