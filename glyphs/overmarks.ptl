@@ -1,7 +1,10 @@
 $$include '../meta/macros.ptl'
 
+import '../support/transform' as : Transform && [object [transformPoint tp]]
+import [curveToContour OffsetCurve] from '../support/curve-util'
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
+import [CubicBezierCurve autoQuadify] from "primitive-quadify-off-curves"
 
 glyph-module
 
@@ -202,14 +205,16 @@ glyph-block Overmarks : begin
 		local tildeWave : [linreg hsvhThin 2.925 hsvhHeav 2.375 hsvh] * [linreg defaultHvc 1 4.35 1.1 hvc]
 		local tildeWaveX 0.51
 
-		include : dispiro
-			widths.center (hs * 2 / CONTRAST)
-			g2 leftEnd tbot
-			bezcontrols.absolute
-				* [mix leftEnd rightEnd tildeWaveX]; * [mix tbot ttop tildeWave]
-				* [mix leftEnd rightEnd (1 - tildeWaveX)]; * [mix tbot ttop (1 - tildeWave)]
-				* 256; * important; * g2
-			g2 rightEnd ttop
+		define z1 : tp currentGlyph.gizmo : object [x leftEnd] [y tbot]
+		define z2 : tp currentGlyph.gizmo : object [x : mix leftEnd rightEnd tildeWaveX] [y : mix tbot ttop tildeWave]
+		define z3 : tp currentGlyph.gizmo : object [x : mix leftEnd rightEnd (1 - tildeWaveX)] [y : mix tbot ttop (1 - tildeWave)]
+		define z4 : tp currentGlyph.gizmo : object [x rightEnd] [y ttop]
+		define bone : new CubicBezierCurve z1 z2 z3 z4
+
+		define inner : curveToContour [new OffsetCurve bone (+hs) HVCONTRAST] (1 / 256)
+		define outer : curveToContour [new OffsetCurve bone (-hs) HVCONTRAST] (1 / 256)
+
+		currentGlyph.contours.push : inner.concat [outer.reverse]
 
 	sketch # tildeAbove
 		set-width 0
@@ -611,15 +616,11 @@ glyph-block Overmarks : begin
 
 		save 'cedillaBelow' 0x327
 
-	sketch # ogonekBelow
-		set-width 0
-
+	define [OgonekBelowShape] : glyph-construction
 		local fine : markHalfStroke * [linreg 16 1 90 0.25 (markHalfStroke * 2)]
 		local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress * 2
 		local ogonekLeft : markMiddle + ogonekBot * 0.5
 		local ogonekRight : markMiddle + markExtend * 0.85
-		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
-
 		include : dispiro
 			g4.left.start markMiddle O [widths 0 (fine * 2)]
 			#archv
@@ -628,7 +629,18 @@ glyph-block Overmarks : begin
 			flat          (markMiddle + markExtend * 0.25) ogonekBot [widths 0 (markStress * 2)]
 			curl          ogonekRight ogonekBot [heading RIGHTWARD]
 
+	sketch # ogonekBelow
+		set-width 0
+		include : OgonekBelowShape
+		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
 		save 'ogonekBelow' 0x328
+
+	sketch # ogonekAbove
+		set-width 0
+		include : OgonekBelowShape
+		include : FlipAround markMiddle (XH / 2)
+		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+		save 'ogonekAbove' 0x1DCE
 
 	sketch # ogonekTR
 		set-width 0
@@ -1315,7 +1327,7 @@ glyph-block Overmarks : begin
 			save id
 
 		sketch # Spaced double mark
-			include glyphs.space AS_BASE
+			include glyphs.markBaseSpace AS_BASE
 			include glyphs.(id)
 			save ('spaced' + id) unicode
 
@@ -1342,7 +1354,7 @@ glyph-block Overmarks : begin
 		save 'psiliperispomeni'
 
 	sketch # spaced_psiliperispomeni
-		include glyphs.space AS_BASE
+		include glyphs.markBaseSpace AS_BASE
 		include glyphs.psiliperispomeni
 
 		save 'spaced_psiliperispomeni' 0x1FCF
@@ -1363,7 +1375,7 @@ glyph-block Overmarks : begin
 		save 'dasiaperispomeni'
 
 	sketch # spaced_dasiaperispomeni
-		include glyphs.space AS_BASE
+		include glyphs.markBaseSpace AS_BASE
 		include glyphs.dasiaperispomeni
 		save 'spaced_dasiaperispomeni' 0x1FDF
 

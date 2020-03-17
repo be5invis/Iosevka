@@ -680,14 +680,14 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 	return [...js, ...ejs, ...md];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
-	const [gen, meta, glyphs, support] = await target.need(
+	const ss = await target.need(
 		ScriptsUnder(ext, `gen`),
 		ScriptsUnder(ext, `glyphs`),
 		ScriptsUnder(ext, `meta`),
 		ScriptsUnder(ext, `otl`),
 		ScriptsUnder(ext, `support`)
 	);
-	return [...gen, ...meta, ...glyphs, ...support];
+	return ss.reduce((a, b) => [...a, ...b]);
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles("ptl"));

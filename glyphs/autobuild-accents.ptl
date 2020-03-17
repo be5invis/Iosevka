@@ -17,8 +17,9 @@ glyph-block AutoBuild-Accents : begin
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
 
 		# replace dotted-i and dotted-j with dotless equalivents
-		if (hasMarkAbove && parts.0.dotlessGlyph && glyphs.(parts.0.dotlessGlyph)) : begin
-			set parts.0 glyphs.(parts.0.dotlessGlyph)
+		if (hasMarkAbove && parts.0.related && parts.0.related.dotless) : begin
+			local dotless glyphs.(parts.0.related.dotless)
+			if dotless : set parts.0 dotless
 
 		# replace below marks with trailing marks
 		if parts.0.anchors.lf : parts.forEach iotaBelowToLF
@@ -60,6 +61,7 @@ glyph-block AutoBuild-Accents : begin
 			set glyphName (glyphName + j)
 		if (glyphName.length > 27) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
 		return glyphName
+
 	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
 		local str : String.fromCharCode code
 		local nfd : fallback customDecompositions.(str) : unorm.nfd str
@@ -80,35 +82,71 @@ glyph-block AutoBuild-Accents : begin
 	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
 	suggestGC
 
-	local {glyphName code parts} {}
+	local s_code  nothing
+	local s_parts nothing
 	define construction : glyph-construction
-		if code : assign-unicode code
-		include parts.0 AS_BASE
-		set-width parts.0.advanceWidth
+		if s_code : assign-unicode s_code
+		include s_parts.0 AS_BASE
+		set-width s_parts.0.advanceWidth
 
-		local names {parts.0.name}
-		foreach part [items-of : parts.slice 1] : if part : begin
+		local names {s_parts.0.name}
+		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
 			names.push part.name
 			if (part.name === 'rtailBR') : eject-contour 'serifRB'
 
-	define [cfv glyphName _pa] : if (!recursive && _pa.0.featureSelector) : begin
+	define [GlyphProcShared origGlyphName relation parts] : begin
+		local base parts.0
+		local origBase base
+		local marks : parts.slice 1
+		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
+		if (relation && base.related && base.related.(relation))
+			set base glyphs.(base.related.(relation))
+
+		return { origBase base marks targetGlyphName }
+
+	define [RootGlyphProc origGlyphName relation code parts] : begin
+		local { origBase base marks targetGlyphName } : GlyphProcShared origGlyphName relation parts
+		if (relation && base === origBase) : return nothing
+
+		set s_code : if relation null code
+		set s_parts { base :: marks }
+		create-glyph targetGlyphName construction
+
+	define [VariantGlyphProc origGlyphName relation _pa] : if (!recursive) : begin
+		local { origBase base marks targetGlyphName } : GlyphProcShared origGlyphName relation parts
+		if (relation && base === origBase) : return nothing
+
+		if [not base.featureSelector] : return nothing
 		local h {.}
-		foreach [feature : items-of : Object.keys _pa.0.featureSelector] : begin
-			local variant _pa.0.featureSelector.(feature)
+		foreach [feature : items-of : Object.keys base.featureSelector] : begin
+			local variant base.featureSelector.(feature)
 			local variantRoot glyphs.(variant)
 			if variantRoot : begin
-				set parts {variantRoot :: [_pa.slice 1]}
-				set code null
-				create-glyph (glyphName + '.' + feature) construction
+				set s_code null
+				set s_parts { variantRoot :: marks }
+				create-glyph (targetGlyphName + '.' + feature) construction
 
-				set h.(feature) (glyphName + '.' + feature)
-		if glyphs.(glyphName) : set glyphs.(glyphName).featureSelector h
+				set h.(feature) (targetGlyphName + '.' + feature)
+
+		if glyphs.(targetGlyphName) : set glyphs.(targetGlyphName).featureSelector h
+
+	define [LinkRelatedGlyph origGlyphName relation] : begin
+		if [not relation] : return nothing
+		if [not glyphs.(origGlyphName)] : return nothing
+
+		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
+		if [not glyphs.(targetGlyphName)] : return nothing
+
+		if [not glyphs.(origGlyphName).related] : set glyphs.(origGlyphName).related {.}
+		set glyphs.(origGlyphName).related.(relation) targetGlyphName
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
-		set {glyphName code parts} foundDecompositions.(_id)
-		create-glyph glyphName construction
-		cfv glyphName parts
+		local {glyphName code parts} foundDecompositions.(_id)
+		foreach [relation : items-of {null 'dotless'}] : begin
+			RootGlyphProc    glyphName relation code parts
+			VariantGlyphProc glyphName relation      parts
+			LinkRelatedGlyph glyphName relation
 
 	suggestGC
 
@@ -196,48 +234,48 @@ define customDecompositions : object
 	."\u04AB" "\u0441\u0327"
 
 	# Spacing modifers
-	."\u02CB" " \u0300"
-	."\u02CA" " \u0301"
-	."\u02C6" " \u0302"
-	."\u02DC" " \u0303"
-	."\u00AF" " \u0304"
-	."\u02C9" " \u0304"
-	."\u02D8" " \u0306"
-	."\u02D9" " \u0307"
-	."\u00A8" " \u0308"
-	."\u02DA" " \u030A"
-	."\u02C7" " \u030C"
-	."\u00B8" " \u0327"
-	."\u02CD" " \u0331"
-	."\u02CE" " \u0316"
-	."\u02CF" " \u0317"
-	."\u02D2" " \u0339"
-	."\u02D3" " \u031C"
-	."\u02D4" " \u031D"
-	."\u02D5" " \u031E"
-	."\u02D6" " \u031F"
-	."\u02D7" " \u0320"
-	."\u02DB" " \u0328"
-	."\u02DD" " \u030B"
-	."\u02DF" " \u033D"
-	."\u02EC" " \u032C"
-	."\u02ED" " \u033F"
-	."\u02F3" " \u0325"
-	."\u02F7" " \u0330"
+	."\u02CB" "\uE09D\u0300"
+	."\u02CA" "\uE09D\u0301"
+	."\u02C6" "\uE09D\u0302"
+	."\u02DC" "\uE09D\u0303"
+	."\u00AF" "\uE09D\u0304"
+	."\u02C9" "\uE09D\u0304"
+	."\u02D8" "\uE09D\u0306"
+	."\u02D9" "\uE09D\u0307"
+	."\u00A8" "\uE09D\u0308"
+	."\u02DA" "\uE09D\u030A"
+	."\u02C7" "\uE09D\u030C"
+	."\u00B8" "\uE09D\u0327"
+	."\u02CD" "\uE09D\u0331"
+	."\u02CE" "\uE09D\u0316"
+	."\u02CF" "\uE09D\u0317"
+	."\u02D2" "\uE09D\u0339"
+	."\u02D3" "\uE09D\u031C"
+	."\u02D4" "\uE09D\u031D"
+	."\u02D5" "\uE09D\u031E"
+	."\u02D6" "\uE09D\u031F"
+	."\u02D7" "\uE09D\u0320"
+	."\u02DB" "\uE09D\u0328"
+	."\u02DD" "\uE09D\u030B"
+	."\u02DF" "\uE09D\u033D"
+	."\u02EC" "\uE09D\u032C"
+	."\u02ED" "\uE09D\u033F"
+	."\u02F3" "\uE09D\u0325"
+	."\u02F7" "\uE09D\u0330"
 
-	."\u1FED" " \u0308\u0300"
-	."\u1FEE" " \u0308\u0301"
-	."\u1FEF" " \u0300"
-	."\u1FFD" " \u0301"
-	."\u1FFE" " \u0314"
-	."\u1FBD" " \u0313"
-	."\u1FBE" " \u0345"
-	."\u1FBF" " \u0313"
-	."\u1FC0" " \u0342"
-	."\u1FC1" " \u0308\u0342"
-	."\u0384" " \u0301"
-	."\u0385" " \u0308\u0301"
-	."\u037A" " \u0345"
+	."\u1FED" "\uE09D\u0308\u0300"
+	."\u1FEE" "\uE09D\u0308\u0301"
+	."\u1FEF" "\uE09D\u0300"
+	."\u1FFD" "\uE09D\u0301"
+	."\u1FFE" "\uE09D\u0314"
+	."\u1FBD" "\uE09D\u0313"
+	."\u1FBE" "\uE09D\u0345"
+	."\u1FBF" "\uE09D\u0313"
+	."\u1FC0" "\uE09D\u0342"
+	."\u1FC1" "\uE09D\u0308\u0342"
+	."\u0384" "\uE09D\u0301"
+	."\u0385" "\uE09D\u0308\u0301"
+	."\u037A" "\uE09D\u0345"
 
 	# Suppress incorrect slashed arrows... so far
 	."\u219A" ""
