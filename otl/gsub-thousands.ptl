@@ -1,0 +1,52 @@
+import [add-common-feature add-feature add-lookup ChainRuleBuilder] from "./table-util"
+
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
+
+export : define [buildGsubThousands sink glyphs] : begin
+	define Thousand : add-feature sink 'THND'
+	define chain-rule : ChainRuleBuilder sink
+	define numberEntries {
+		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
+		'five.lnum' 'six.lnum' 'seven.lnum' 'eight.lnum' 'nine.lnum'
+	}
+	define numberGlyphIDs {}
+	foreach [gid : items-of numberEntries] : if glyphs.(gid) : begin
+		numberGlyphIDs.push gid
+		if glyphs.(gid).featureSelector : begin
+			foreach [{k v} : pairs-of glyphs.(gid).featureSelector] : begin
+				numberGlyphIDs.push v
+
+	define [nd s] : numberGlyphIDs.map : lambda [x] "\(x).nd\(s)"
+
+	define lookupThousand1 : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule ({'period'} ~> null) (numberGlyphIDs ~> [nd 2]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
+			chain-rule ([nd 2] ~> null) (numberGlyphIDs ~> [nd 1])
+			chain-rule ([nd 1] ~> null) (numberGlyphIDs ~> [nd 6])
+			chain-rule ([nd 6] ~> null) (numberGlyphIDs ~> [nd 5])
+			chain-rule ([nd 5] ~> null) (numberGlyphIDs ~> [nd 4])
+			chain-rule ([nd 4] ~> null) (numberGlyphIDs ~> [nd 3])
+			chain-rule ([nd 3] ~> null) (numberGlyphIDs ~> [nd 2])
+
+	define lookupThousand2 : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule (numberGlyphIDs ~> [nd 0]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
+			chain-rule ([nd 0] ~> null) (numberGlyphIDs ~> [nd 0])
+
+	define lookupThousand3 : add-lookup sink : object
+		.type 'gsub_reverse'
+		.subtables : list
+			object [match {[nd 0] [nd 0]}] [to [nd 1]] [inputIndex 0]
+			object [match {[nd 0] [nd 1]}] [to [nd 2]] [inputIndex 0]
+			object [match {[nd 0] [nd 2]}] [to [nd 3]] [inputIndex 0]
+			object [match {[nd 0] [nd 3]}] [to [nd 4]] [inputIndex 0]
+			object [match {[nd 0] [nd 4]}] [to [nd 5]] [inputIndex 0]
+			object [match {[nd 0] [nd 5]}] [to [nd 6]] [inputIndex 0]
+			object [match {[nd 0] [nd 6]}] [to [nd 1]] [inputIndex 0]
+
+
+	Thousand.lookups.push lookupThousand1 lookupThousand2 lookupThousand3
+	add-common-feature sink Thousand
