@@ -11,6 +11,10 @@ glyph-block Symbol-Punctuation : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
+	define MosaicTop    fontMetrics.OS_2.sTypoAscender
+	define MosaicBottom fontMetrics.OS_2.sTypoDescender
+	define MosaicHeight : MosaicTop - MosaicBottom
+
 	do 'Brackets'
 		define [ParenDim delta] : object
 			outside : [mix SB RIGHTSB designParameters.parenOutside] - delta
@@ -18,11 +22,29 @@ glyph-block Symbol-Punctuation : begin
 			bottom  : [mix symbolMid parenBot (1 + designParameters.parenOvershoot)] - delta
 			top     : [mix symbolMid parenTop (1 + designParameters.parenOvershoot)] + delta
 			mid       symbolMid
+
 		define [ParenShape sw] : let [dim : ParenDim 0] : dispiro
 			widths.lhs sw
 			g4 dim.inside dim.top
 			quadcontrols 1 (1 - designParameters.parenCurliness)
 			g4 dim.outside dim.mid
+			quadcontrols 0 designParameters.parenCurliness
+			g4 dim.inside dim.bottom
+
+		define [ParenUpperShape sw] : let [dim : ParenDim 0] : dispiro
+			widths.lhs sw
+			g4 dim.inside dim.top
+			quadcontrols 1 (1 - designParameters.parenCurliness)
+			g4.down.end dim.outside MosaicBottom [heading DOWNWARD]
+
+		define [ParenExtensionShape sw] : let [dim : ParenDim 0] : dispiro
+			widths.lhs sw
+			g4.down.start dim.outside MosaicTop [heading DOWNWARD]
+			g4.down.end dim.outside MosaicBottom [heading DOWNWARD]
+
+		define [ParenLowerShape sw] : let [dim : ParenDim 0] : dispiro
+			widths.lhs sw
+			g4.down.start dim.outside MosaicTop [heading DOWNWARD]
 			quadcontrols 0 designParameters.parenCurliness
 			g4 dim.inside dim.bottom
 
@@ -36,11 +58,26 @@ glyph-block Symbol-Punctuation : begin
 		sketch # parenLeft
 			include : ParenShape STROKE
 			save 'parenLeft' '('
-
-		sketch # parenRight
-			include glyphs.parenLeft
 			include : FlipAround MIDDLE symbolMid
 			save 'parenRight' ')'
+
+		sketch # parenLeftUpper
+			include : ParenUpperShape STROKE
+			save 'parenLeftUpper' 0x239B
+			include : FlipAround MIDDLE symbolMid
+			save 'parenRightLower' 0x23A0
+
+		sketch # parenLeftUpper
+			include : ParenExtensionShape STROKE
+			save 'parenLeftExtension' 0x239C
+			include : FlipAround MIDDLE symbolMid
+			save 'parenRightExtension' 0x239F
+
+		sketch # parenLeftLower
+			include : ParenLowerShape STROKE
+			save 'parenLeftLower' 0x239D
+			include : FlipAround MIDDLE symbolMid
+			save 'parenRightupper' 0x239E
 
 		sketch # zNotationParenLeft
 			local dim : ParenDim 0
@@ -52,25 +89,45 @@ glyph-block Symbol-Punctuation : begin
 						VBarRight dim.inside dim.bottom dim.top OPERATORSTROKE
 						ParenShapeMask O
 			save 'zNotationParenLeft' 0x2987
-
-		sketch # zNotationParenRight
-			include glyphs.zNotationParenLeft
 			include : FlipAround MIDDLE symbolMid
 			save 'zNotationParenRight' 0x2988
 
-		sketch # bracketLeft
+		define [BracketMask] : Rect MosaicTop MosaicBottom (-WIDTH) (2 * WIDTH)
+
+		define [BracketShape top bottom] : glyph-construction
 			local l : mix SB RIGHTSB designParameters.bracketOutside
 			local r : mix SB RIGHTSB designParameters.bracketInside
 
-			include : HBarBottom l r parenBot
-			include : HBarTop    l r parenTop
-			include : VBarLeft   l parenBot parenTop
-			save 'bracketLeft' '['
+			include : HBarBottom l r bottom
+			include : HBarTop    l r top
+			include : VBarLeft   l bottom top
 
-		sketch # bracketRight
-			include glyphs.bracketLeft
+		sketch # bracketLeft
+			include : BracketShape parenTop parenBot
+			save 'bracketLeft' '['
 			include : FlipAround MIDDLE symbolMid
 			save 'bracketRight' ']'
+
+		sketch # bracketLeftUpper, bracketRightLower
+			include : intersection [BracketMask]
+				BracketShape parenTop (parenBot - MosaicHeight)
+			save 'bracketLeftUpper' 0x23A1
+			include : FlipAround MIDDLE symbolMid
+			save 'bracketRightLower' 0x23A6
+
+		sketch # bracketLeftExtension, bracketRightExtension
+			include : intersection [BracketMask]
+				BracketShape (parenTop + MosaicHeight) (parenBot - MosaicHeight)
+			save 'bracketLeftExtension' 0x23A2
+			include : FlipAround MIDDLE symbolMid
+			save 'bracketRightExtension' 0x23A5
+
+		sketch # bracketLeftUpper, bracketRightLower
+			include : intersection [BracketMask]
+				BracketShape (parenTop + MosaicHeight) parenBot
+			save 'bracketLeftLower' 0x23A3
+			include : FlipAround MIDDLE symbolMid
+			save 'bracketRightUpper' 0x23A4
 
 		sketch # dblBracketLeft
 			local l : mix SB RIGHTSB designParameters.bracketOutside
@@ -105,10 +162,13 @@ glyph-block Symbol-Punctuation : begin
 			include : FlipAround MIDDLE symbolMid
 			save 'bracketBarRight' 0x2046
 
-		define [BraceUpperShape top bottom] : glyph-construction
+		define [BraceDim] : begin
 			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
 			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+			return : object parenCenter radius
 
+		define [BraceUpperHalfShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
 			include : dispiro
 				straight.left.start [mix SB RIGHTSB designParameters.braceInside] top [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
 				archv
@@ -117,9 +177,13 @@ glyph-block Symbol-Punctuation : begin
 				arcvh
 				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] bottom [heading LEFTWARD]
 
-		define [BraceLowerShape top bottom] : glyph-construction
-			local parenCenter [mix SB RIGHTSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
-			local radius    : [mix SB RIGHTSB designParameters.braceInside] - parenCenter
+		define [BraceUpperThirdShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
+			include : intersection [BracketMask]
+				BraceUpperHalfShape top (bottom - MosaicHeight)
+
+		define [BraceLowerHalfShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
 			include : dispiro
 				straight.left.start [mix SB RIGHTSB designParameters.braceInside] bottom [widths.heading HALFSTROKE HALFSTROKE LEFTWARD]
 				archv
@@ -128,14 +192,56 @@ glyph-block Symbol-Punctuation : begin
 				arcvh
 				straight.left.end [mix SB RIGHTSB designParameters.braceOutside] top [heading LEFTWARD]
 
+		define [BraceLowerThirdShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
+			include : intersection [BracketMask]
+				BraceLowerHalfShape (top + MosaicHeight) bottom
+
+		define [BraceCenterThirdShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
+			include : intersection [BracketMask]
+				union
+					BraceUpperHalfShape (top + MosaicHeight) [mix bottom top 0.5]
+					BraceLowerHalfShape [mix bottom top 0.5] (bottom - MosaicHeight)
+
+		define [BraceExtensionShape top bottom] : glyph-construction
+			define [object parenCenter radius] : BraceDim
+			include : intersection [BracketMask]
+				union
+					BraceUpperHalfShape (top + MosaicHeight) (bottom - MosaicHeight)
+
 		sketch # braceLeft.straight
-			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
-			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
+			local top : [mix symbolMid parenTop (1 + designParameters.braceOvershoot)] - HALFSTROKE
+			local bot : [mix symbolMid parenBot (1 + designParameters.braceOvershoot)] + HALFSTROKE
 
-			include : BraceUpperShape (top - HALFSTROKE) symbolMid
-			include : BraceLowerShape (symbolMid) (bot + HALFSTROKE)
+			branch
+				include : BraceUpperHalfShape top symbolMid
+				include : BraceLowerHalfShape symbolMid bot
+				save 'braceLeft.straight'
+				include : FlipAround MIDDLE symbolMid
+				save 'braceRight.straight'
 
-			save 'braceLeft.straight'
+			branch
+				include : BraceUpperThirdShape top bot
+				save 'braceLeftUpper' 0x23A7
+				include : FlipAround MIDDLE symbolMid
+				save 'braceRightLower' 0x23AD
+
+			branch
+				include : BraceLowerThirdShape top bot
+				save 'braceLeftLower' 0x23A9
+				include : FlipAround MIDDLE symbolMid
+				save 'braceRightUpper' 0x23AB
+
+			branch
+				include : BraceCenterThirdShape top bot
+				save 'braceLeftMiddle' 0x23A8
+				include : FlipAround MIDDLE symbolMid
+				save 'braceRightMiddle' 0x23AC
+
+			branch
+				include : BraceExtensionShape top bot
+				save 'braceExtension' 0x23AA
 
 		define [CurlyBraceShape sw] : glyph-construction
 			local hs : sw / 2
@@ -170,9 +276,8 @@ glyph-block Symbol-Punctuation : begin
 		sketch # braceLeft.curly
 			include : CurlyBraceShape STROKE
 			save 'braceLeft.curly'
-
-		composite 'braceRight.straight' glyphs.'braceLeft.straight' [FlipAround MIDDLE symbolMid]
-		composite 'braceRight.curly' glyphs.'braceLeft.curly' [FlipAround MIDDLE symbolMid]
+			include : FlipAround MIDDLE symbolMid
+			save 'braceRight.curly'
 
 		select-variant 'braceLeft' '{'
 		select-variant 'braceRight' '}'
@@ -181,10 +286,10 @@ glyph-block Symbol-Punctuation : begin
 			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
 			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
 			branch
-				include : BraceUpperShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				include : BraceUpperHalfShape (top - HALFSTROKE) (bot + HALFSTROKE)
 				save nothing 0x23B0
 			branch
-				include : BraceLowerShape (top - HALFSTROKE) (bot + HALFSTROKE)
+				include : BraceLowerHalfShape (top - HALFSTROKE) (bot + HALFSTROKE)
 				save nothing 0x23B1
 
 		sketch # whiteBraceLeft
