@@ -1,5 +1,5 @@
-function maskBit(x, y) {
-	return x & (1 << y);
-}
+"use strict";
 
-module.exports = maskBit;
+module.exports = function maskBit(x, y) {
+	return x & (1 << y);
+};

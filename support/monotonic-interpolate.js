@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function(xs, ys) {
 	let i,
 		length = xs.length;

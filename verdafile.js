@@ -21,7 +21,6 @@ const OTF2OTC = "otf2otc";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
 const GENERATE = ["node", "gen/generator"];
-const GC = ["node", "gen/gc"];
 const webfontFormats = [
 	["woff2", "woff2"],
 	["woff", "woff"],
@@ -319,8 +318,6 @@ const BuildTTF = file.make(
 			{ hives, family, shapeWeight, menuWeight, menuStyle, menuWidth },
 			version
 		] = await target.need(HivesOf(fn), Version);
-		const otd = output.dir + "/" + output.name + ".otd";
-		const ttfTmp = output.dir + "/" + output.name + ".tmp.ttf";
 		const otdTmp = output.dir + "/" + output.name + ".tmp.otd";
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
@@ -336,12 +333,13 @@ const BuildTTF = file.make(
 			["--menu-width", menuWidth],
 			hives
 		);
-		await run("otfccbuild", otdTmp, "-o", ttfTmp, "-O3", "--keep-average-char-width");
-		await run(GC, ["-i", ttfTmp], ["-o", otd]);
-		await run("otfccbuild", otd, "-o", output.full, "-O3", "--keep-average-char-width", "-q");
+		await run(
+			"otfccbuild",
+			otdTmp,
+			["-o", output.full],
+			["-O3", "--keep-average-char-width", "-q"]
+		);
 		await rm(otdTmp);
-		await rm(ttfTmp);
-		await rm(otd);
 	}
 );
 const BuildCM = file.make(

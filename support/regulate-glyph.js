@@ -1,7 +1,9 @@
+"use strict";
+
 const Glyph = require("./glyph");
 const autoRef = require("./autoref");
 const caryllShapeOps = require("caryll-shapeops");
-const c2q = require("megaminx").geometry.c2q;
+const curveUtil = require("./curve-util");
 
 function regulateGlyph(g, skew) {
 	if (!g.contours) return;
@@ -47,9 +49,11 @@ function regulateGlyph(g, skew) {
 function simplifyContours(contours) {
 	const source = [];
 	for (const contour of contours) {
-		if (contour.length > 2) source.push(Glyph.contourToStandardCubic(contour));
+		if (contour.length > 2) source.push(curveUtil.convertContourToCubic(contour));
 	}
-	const simplified = c2q.contours(caryllShapeOps.removeOverlap(source, 1, 1 << 17, true));
+	const simplified = curveUtil.convertContourListToTt(
+		caryllShapeOps.removeOverlap(source, 1, 1 << 17, true)
+	);
 	const result = [];
 	for (const contour of simplified) {
 		if (contour.length > 2) result.push(contour);

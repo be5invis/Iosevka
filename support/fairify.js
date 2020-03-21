@@ -1,7 +1,7 @@
 "use strict";
 
 const Transform = require("./transform.js");
-const quadify = require("primitive-quadify-off-curves");
+const typoGeom = require("typo-geom");
 
 const SMALL = 1e-4;
 
@@ -197,7 +197,7 @@ class BezierCurveCluster {
 					z4 = zs[j];
 				const z2 = mix(z1, z4, 1 / 3);
 				const z3 = mix(z1, z4, 2 / 3);
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				const seg = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -206,7 +206,7 @@ class BezierCurveCluster {
 					z2 = zs[j],
 					z3 = zs[j + 1],
 					z4 = zs[j + 2];
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				const seg = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -217,7 +217,7 @@ class BezierCurveCluster {
 					z4 = zs[j + 1];
 				const z2 = mix(zm, z1, 1 / 3);
 				const z3 = mix(zm, z4, 1 / 3);
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				const seg = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -307,7 +307,7 @@ function buildCurve(curve) {
 		if (nPtsOffPoints > 0) {
 			const curve = new BezierCurveCluster(pts);
 			if (curve.isAlmostLinear(1)) continue;
-			const offPoints = quadify.autoQuadify(curve, 1 / 4);
+			const offPoints = typoGeom.Quadify.auto(curve, 1 / 4);
 			if (!offPoints) continue;
 			for (let k = 0; k < offPoints.length; k++) {
 				const z = offPoints[k];
