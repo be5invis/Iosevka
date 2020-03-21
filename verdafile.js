@@ -644,7 +644,7 @@ const ChangeFileList = oracle.make(
 	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
 const ReleaseNotes = task(`release:release-note`, async target => {
-	const [version] = await target.need(Version, UtilScripts);
+	const [version] = await target.need(Version, UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await target.need(ChangeFileList());
 	await target.need(changeFiles.map(fu));
 	await run("node", "utility/generate-release-note/index", version);
