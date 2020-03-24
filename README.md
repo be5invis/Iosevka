@@ -304,6 +304,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-slashed`, `cv13`: Slashed Zero `0` (default).
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
     * `v-zero-unslashed`, `cv15`: O-like `0`.
+    * `v-zero-reverse-slashed`, `cv93`: Reverse-slashed `0`.
   * Styles for `1`:
     * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
     * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).

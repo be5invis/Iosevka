@@ -92,43 +92,49 @@ function removeMids(contour) {
 		contour = contour.filter(x => !x.rem);
 
 		last = contour.length - 1;
-		for (let j = 1; j < contour.length - 1; j++) {
-			if (!contour[j - 1].on && contour[j].on && !contour[j + 1].on) {
-				const mx = contour[j - 1].x + contour[j + 1].x;
-				const my = contour[j - 1].y + contour[j + 1].y;
-				const dy = contour[j - 1].y - contour[j + 1].y;
-				if (
-					Math.abs(dy) >= 1 &&
-					Math.abs(contour[j].x * 2 - mx) < 1 &&
-					Math.abs(contour[j].y * 2 - my) < 1
-				) {
-					contour[j].rem = true;
+		let zPre, z, zPost;
+		for (let j = 1; j < contour.length; j++) {
+			if (j < contour.length - 1) {
+				zPre = contour[j - 1];
+				z = contour[j];
+				zPost = contour[j + 1];
+			} else {
+				zPre = contour[last];
+				z = contour[0];
+				zPost = contour[1];
+			}
+			// if (!zPre || !zPost) continue;
+			const mx = zPre.x + zPost.x;
+			const my = zPre.y + zPost.y;
+			const dx = zPre.x - zPost.x;
+			const dy = zPre.y - zPost.y;
+
+			if (!zPre.on && z.on && !zPost.on) {
+				if (Math.abs(dy) >= 1 && Math.abs(z.x * 2 - mx) < 1 && Math.abs(z.y * 2 - my) < 1) {
+					z.rem = true;
+				}
+			} else if (!zPre.rem && zPre.on && z.on && !zPost.rem && zPost.on) {
+				if (Math.abs(dy) >= 1 && Math.abs(z.x * 2 - mx) < 1 && Math.abs(dx) < 1) {
+					z.rem = true;
+				} else if (Math.abs(dx) >= 1 && Math.abs(z.y * 2 - my) < 1 && Math.abs(dy) < 1) {
+					z.rem = true;
 				}
 			}
 		}
-		if (!contour[last].rem && !contour[last].on && contour[0].on && !contour[1].on) {
-			const mx = contour[last].x + contour[1].x;
-			const my = contour[last].y + contour[1].y;
-			if (Math.abs(contour[0].x * 2 - mx) < 1 && Math.abs(contour[0].y * 2 - my) < 1) {
-				contour[0].rem = true;
-			}
-		}
+
 		contour = contour.filter(x => !x.rem);
 		const n = contour.length;
 		if (n >= n0) break;
 	}
 	return contour;
 }
+
 function extPrior(a, b) {
 	return a.y < b.y || (a.y === b.y && ((a.on && !b.on) || (a.on === b.on && a.x < b.x)));
 }
 
 function canonicalStart(_points) {
-	const points = _points.reverse().map(z => {
-		z.x = Math.round(z.x * 1024) / 1024;
-		z.y = Math.round(z.y * 1024) / 1024;
-		return z;
-	});
+	const points = _points.reverse();
 	let jm = 0;
 	for (var j = 0; j < points.length * 2; j++) {
 		if (extPrior(points[j % points.length], points[jm])) {
@@ -138,93 +144,8 @@ function canonicalStart(_points) {
 	return points.slice(jm).concat(points.slice(0, jm));
 }
 
-function colinear(x1, y1, x2, y2, x3, y3, err) {
-	const det = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2);
-	return det <= err && det >= -err;
-}
-
-function inspan(a, b, c) {
-	if (a > c) return inspan(c, b, a);
-	return a <= b && b <= c;
-}
-
-function handle(z1, z2, z3, z4, err) {
-	if (
-		colinear(z1.x, z1.y, z2.x, z2.y, z4.x, z4.y, err) &&
-		colinear(z1.x, z1.y, z3.x, z3.y, z4.x, z4.y, err) &&
-		inspan(z1.x, z2.x, z4.x) &&
-		inspan(z1.y, z2.y, z4.y) &&
-		inspan(z1.x, z3.x, z4.x) &&
-		inspan(z1.y, z3.y, z4.y)
-	) {
-		return [];
-	}
-
-	const curve = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
-	const offPoints = typoGeom.Quadify.auto(curve, err);
-	const ans = [];
-	for (const z of offPoints) {
-		ans.push(Point.offFrom(z));
-	}
-	return ans;
-}
-
-function convertContourToTt(contour, err) {
-	if (contour.length === 0) return [];
-	if (contour.length === 1) return [contour[0]];
-	err = err || 1 / 4;
-
-	const newContour = [];
-	let z0 = contour[0];
-	newContour.push(Point.cornerFrom(z0));
-
-	for (let j = 1; j < contour.length; j++) {
-		const z = contour[j];
-		if (z.on) {
-			newContour.push(Point.cornerFrom(z));
-			z0 = z;
-		} else if (z.cubic) {
-			const z1 = z;
-			const z2 = contour[j + 1];
-			const z3 = contour[j + 2];
-			const quadZs = handle(z0, z1, z2, z3, err);
-			for (const z of quadZs) newContour.push(z);
-			newContour.push(Point.cornerFrom(z3));
-			z0 = z3;
-			j += 2;
-		} else {
-			const zc = z;
-			let zf = contour[j + 1] ? contour[j + 1] : contour[0];
-			if (!zf.on) {
-				zf = Point.cornerFromXY(mix(zc.x, zf.x, 0.5), mix(zc.y, zf.y, 0.5));
-			}
-			newContour.push(Point.offFrom(zc));
-			newContour.push(Point.cornerFrom(zf));
-			z0 = zf;
-			j++;
-		}
-	}
-	return newContour;
-}
-
-function byFirstPointCoord(a, b) {
-	if (!a.length) return -1;
-	if (!b.length) return 1;
-	let z1 = a[0];
-	let z2 = b[0];
-	return z1.y !== z2.y
-		? z1.y - z2.y
-		: z1.x !== z2.x
-		? z1.x - z2.x
-		: byFirstPointCoord(a.slice(1), b.slice(1));
-}
-function convertContourListToTt(contours, err) {
-	err = err || 1 / 4;
-	let ans = [];
-	for (let c of contours) {
-		ans.push(canonicalStart(removeMids(convertContourToTt(c, err))));
-	}
-	return ans.sort(byFirstPointCoord);
+function cleanupQuadContour(c) {
+	return canonicalStart(removeMids(c));
 }
 
 function convertContourToCubic(contour) {
@@ -243,34 +164,67 @@ function convertContourToCubic(contour) {
 			const z1 = z;
 			const z2 = contour[j + 1];
 			const z3 = contour[j + 2];
+
 			newContour.push(Point.cubicOffFrom(z1));
 			newContour.push(Point.cubicOffFrom(z2));
 			newContour.push(Point.cornerFrom(z3));
+
 			z0 = z3;
 			j += 2;
 		} else {
 			const zc = z;
-			let zf = contour[j + 1] ? contour[j + 1] : contour[0];
-			if (!zf.on) {
-				zf = Point.cornerFromXY(mix(zc.x, zf.x, 0.5), mix(zc.y, zf.y, 0.5));
-			}
+			let zf = contour[j + 1] || contour[0];
+			const zfIsCorner = zf.on;
+			if (!zfIsCorner) zf = Point.cornerFrom(zc).mix(0.5, zf);
 
-			const x1 = mix(z0.x, zc.x, 2 / 3);
-			const y1 = mix(z0.y, zc.y, 2 / 3);
-			const x2 = mix(zf.x, zc.x, 2 / 3);
-			const y2 = mix(zf.y, zc.y, 2 / 3);
-
-			newContour.push(Point.cubicOffFromXY(x1, y1));
-			newContour.push(Point.cubicOffFromXY(x2, y2));
+			newContour.push(Point.cubicOffFrom(z0).mix(2 / 3, zc));
+			newContour.push(Point.cubicOffFrom(zf).mix(2 / 3, zc));
 			newContour.push(Point.cornerFrom(zf));
+
 			z0 = zf;
-			j++;
+			if (zfIsCorner) j++;
 		}
 	}
 
 	return newContour;
 }
 
-exports.convertContourToTt = convertContourToTt;
+function autoCubify(arc, err) {
+	const MaxSegments = 16;
+	const Hits = 64;
+	let offPoints = [];
+	for (let nSeg = 1; nSeg <= MaxSegments; nSeg++) {
+		const perSegHits = Math.ceil(Hits / nSeg);
+		offPoints.length = 0;
+		let good = true;
+		out: for (let s = 0; s < nSeg; s++) {
+			const tBefore = s / nSeg;
+			const tAfter = (s + 1) / nSeg;
+			const z0 = Point.cornerFrom(arc.eval(tBefore));
+			const z3 = Point.cornerFrom(arc.eval(tAfter));
+			const z1 = Point.cubicOffFrom(z0).addScale(1 / (3 * nSeg), arc.derivative(tBefore));
+			const z2 = Point.cubicOffFrom(z3).addScale(-1 / (3 * nSeg), arc.derivative(tAfter));
+
+			if (s > 0) offPoints.push(z0);
+			offPoints.push(z1, z2);
+
+			const bezArc = new typoGeom.Curve.Bez3(z0, z1, z2, z3);
+
+			for (let k = 1; k < perSegHits; k++) {
+				const tk = k / perSegHits;
+				const zTest = arc.eval(mix(tBefore, tAfter, tk));
+				const zBez = bezArc.eval(tk);
+				if (Math.hypot(zTest.x - zBez.x, zTest.y - zBez.y) > err) {
+					good = false;
+					break out;
+				}
+			}
+		}
+		if (good) break;
+	}
+	return offPoints;
+}
+
+exports.cleanupQuadContour = cleanupQuadContour;
 exports.convertContourToCubic = convertContourToCubic;
-exports.convertContourListToTt = convertContourListToTt;
+exports.autoCubify = autoCubify;
