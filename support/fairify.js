@@ -299,7 +299,7 @@ const QuadBuilder = {
 			sink.push(Transform.transformPoint(gizmo, Point.offFrom(z)).round(1024));
 		}
 	},
-	split: false,
+	split: true,
 	canonicalStart: true,
 	duplicateStart: true
 };
