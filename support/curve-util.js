@@ -225,6 +225,23 @@ function autoCubify(arc, err) {
 	return offPoints;
 }
 
+function fixedCubify(arc, nSeg) {
+	let offPoints = [];
+	for (let s = 0; s < nSeg; s++) {
+		const tBefore = s / nSeg;
+		const tAfter = (s + 1) / nSeg;
+		const z0 = Point.cornerFrom(arc.eval(tBefore));
+		const z3 = Point.cornerFrom(arc.eval(tAfter));
+		const z1 = Point.cubicOffFrom(z0).addScale(1 / (3 * nSeg), arc.derivative(tBefore));
+		const z2 = Point.cubicOffFrom(z3).addScale(-1 / (3 * nSeg), arc.derivative(tAfter));
+
+		if (s > 0) offPoints.push(z0);
+		offPoints.push(z1, z2);
+	}
+	return offPoints;
+}
+
 exports.cleanupQuadContour = cleanupQuadContour;
 exports.convertContourToCubic = convertContourToCubic;
 exports.autoCubify = autoCubify;
+exports.fixedCubify = fixedCubify;

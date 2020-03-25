@@ -310,7 +310,7 @@ const SpiroBuilder = {
 	},
 	arc(sink, gizmo, arc) {
 		if (arc.isAlmostLinear(1 / 4)) return;
-		const offPoints = curveUtil.autoCubify(arc, 1 / 4);
+		const offPoints = curveUtil.fixedCubify(arc, 12);
 		for (const z of offPoints) {
 			sink.push(Transform.transformPoint(gizmo, z));
 		}
