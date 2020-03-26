@@ -73,10 +73,12 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		close
 
 	save-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape 0 0 0
-	save-glyph 'whiteHeartSuit' 0x2661 : wrap : difference glyphs.heartSuit [HeartInnerShape sw 1.75 0.8]
+
+	save-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit'] [HeartInnerShape sw 1.75 0.8]
+
 	save-glyph 'spadeSuit' 0x2660 : wrap : union
 		sketch
-			include glyphs.heartSuit
+			include : refer-glyph "heartSuit"
 			apply-transform : Upright
 			apply-transform : Translate (-df.middle) (-heartBot)
 			apply-transform : Scale 1 (-0.75)
@@ -85,7 +87,7 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
 		VBar df.middle heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)] sw
 
-	save-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference glyphs.spadeSuit : sketch
+	save-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference [refer-glyph 'spadeSuit'] : sketch
 		include : HeartInnerShape sw 2 0
 		apply-transform : Upright
 		apply-transform : Translate (-df.middle) (-heartBot)
@@ -110,7 +112,9 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		include : VBar df.middle heartBot [mix heartBot heartTop 0.45] sw
 
 	local circleRadius : (heartTop - heartBot) * 0.18
+
 	save-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
+
 	save-glyph 'whiteClubSuit' 0x2667 : wrap : sketch
 		local ro : circleRadius + sw / 2
 		local ri : circleRadius - sw / 2
@@ -122,7 +126,7 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		line-to    df.middle heartBot
 		line-to    (heartLeft + O) symbolMid
 
-	save-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection glyphs.diamondSuit
+	save-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection [refer-glyph 'diamondSuit']
 		union
 			dispiro [widths.rhs sw] [flat df.middle heartTop] [curl (heartRight - O) symbolMid]
 			dispiro [widths.rhs sw] [flat (heartRight - O) symbolMid] [curl df.middle heartBot]
@@ -171,9 +175,11 @@ glyph-block Symbol-Other-Musical : begin
 		include : new Transform 1 0 0.15 1 0 0
 		include : Translate x y
 		include : Italify
+
 	save-glyph 'crotchet' 0x2669 : union
 		MusicalNoteAt noteSize (MIDDLE + noteSize / 6 + fine / 2 * HVCONTRAST) commonNoteBottom
 		VBar (MIDDLE + noteSize / 6) commonNoteBottom pictTop fine
+
 	save-glyph 'quaver' 0x266A : sketch
 		local x3 : mix MIDDLE RIGHTSB 0.35
 		local y3 : mix pictBot pictTop 0.25
@@ -192,6 +198,7 @@ glyph-block Symbol-Other-Musical : begin
 		local deltaY : noteCompress * noteSize / 2
 		local lb1 : pictBot + noteCompress / 2 * noteSize
 		local bandWidth : noteSize * noteCompress * 0.75
+
 		save-glyph 'beamQuaver' 0x266B : difference
 			union
 				MusicalNoteAt noteSize x1 commonNoteBottom
@@ -210,13 +217,15 @@ glyph-block Symbol-Other-Musical : begin
 				x1 - fine * HVCONTRAST
 				x2 + 0
 				0 + bandWidth
-		save-glyph 'beamSemiQuaver' 0x266C : union glyphs.beamQuaver
+
+		save-glyph 'beamSemiQuaver' 0x266C : union [refer-glyph 'beamQuaver']
 			BandShape
 				object [x x1] [y : pictTop - deltaY - 1.5 * bandWidth]
 				object [x x2] [y : pictTop - 1.5 * bandWidth]
 				x1 - fine * HVCONTRAST
 				x2 + 0
 				0 - bandWidth
+
 	do "sharp, flat and neutral"
 		local nsTop pictTop
 		local nsBot pictBot
@@ -226,6 +235,7 @@ glyph-block Symbol-Other-Musical : begin
 		local r : RIGHTSB + fine * 0
 		local hsp : ((r - l) - (fine * 2 * HVCONTRAST)) * 0.3
 		local skew 0.2
+
 		save-glyph 'sharpTone' 0x266F : sketch
 			include : dispiro
 				widths.center
@@ -237,6 +247,7 @@ glyph-block Symbol-Other-Musical : begin
 				curl r ([mix nsTop nsBot 0.7] - (MIDDLE - r) * skew) [heading RIGHTWARD]
 			include : VBarLeft  (l + hsp) (nsBot - (MIDDLE - l - hsp) * skew) (nsTop - (MIDDLE - l - hsp) * skew) fine
 			include : VBarRight (r - hsp) (nsBot - (MIDDLE - r + hsp) * skew) (nsTop - (MIDDLE - r + hsp) * skew) fine
+
 		save-glyph 'flatTone' 0x266D : sketch
 			local yTerminal : mix nsBot nsTop 0.55
 			local curly 0.65
@@ -472,7 +483,7 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 
 		save 'pwlLock' 0xE0A2
 
-	for-width-kinds WIDE-WIDTH-1
+	for-width-kinds WIDE-WIDTH-2
 		do "arrowheadShapedPointer"
 			define scaffold : object
 			set scaffold.top : mix uiFigBot uiFigTop 0.85
@@ -1098,13 +1109,13 @@ glyph-block Symbol-Other-Ligation : begin
 			save 'greater.lig.dblhead.shift1'
 
 		sketch
-			include glyphs.exclam
+			include : refer-glyph "exclam"
 			include : Translate (((RIGHTSB - WIDTH) + (WIDTH - arrowExtend / 2)) / 2 - MIDDLE) 0
 			include : HBar (-arrowExtend) (RIGHTSB - WIDTH) symbolMid OPERATORSTROKE
 			save 'exclam.lig.htmlcommentstart'
 		# Right-shifted >
 		sketch
-			include glyphs.greater AS_BASE ALSO_METRICS
+			include [refer-glyph 'greater'] AS_BASE ALSO_METRICS
 			save 'greater.lig.shift0'
 			include : Translate (arrowheadsKern / 2) 0
 			save 'greater.lig.shift0h'
@@ -1117,7 +1128,7 @@ glyph-block Symbol-Other-Ligation : begin
 
 		# Left-shifted >
 		sketch
-			include glyphs.greater AS_BASE ALSO_METRICS
+			include [refer-glyph 'greater'] AS_BASE ALSO_METRICS
 			save 'greater.lig.shiftN0'
 			include : Translate (-arrowheadsKern / 2) 0
 			save 'greater.lig.shiftN0h'
@@ -1130,7 +1141,7 @@ glyph-block Symbol-Other-Ligation : begin
 
 		# Left-shifted <
 		sketch
-			include glyphs.less AS_BASE ALSO_METRICS
+			include [refer-glyph 'less'] AS_BASE ALSO_METRICS
 			save 'less.lig.shift0'
 			include : Translate (-arrowheadsKern / 2) 0
 			save 'less.lig.shift0h'
@@ -1143,7 +1154,7 @@ glyph-block Symbol-Other-Ligation : begin
 
 		# Right-shifted <
 		sketch
-			include glyphs.less AS_BASE ALSO_METRICS
+			include [refer-glyph 'less'] AS_BASE ALSO_METRICS
 			save 'less.lig.shiftN0'
 			include : Translate (arrowheadsKern / 2) 0
 			save 'less.lig.shiftN0h'
@@ -1158,25 +1169,25 @@ glyph-block Symbol-Other-Ligation : begin
 
 		sketch
 			include : difference
-				glyph-construction : include glyphs.less
+				glyph-construction : include : refer-glyph "less"
 				ArrowHeadHole
 			save 'less.lig.hole'
 
 		sketch
 			include : difference
-				glyph-construction : include glyphs.greater
+				glyph-construction : include : refer-glyph "greater"
 				ArrowHeadHole
 			save 'greater.lig.hole'
 
 		sketch
 			include : difference
-				glyph-construction : include glyphs.'less.lig.shiftN1'
+				glyph-construction : include : refer-glyph "less.lig.shiftN1"
 				ArrowHeadHole
 			save 'less.lig.shiftN1.hole'
 
 		sketch
 			include : difference
-				glyph-construction : include glyphs.'greater.lig.shiftN1'
+				glyph-construction : include : refer-glyph "greater.lig.shiftN1"
 				ArrowHeadHole
 			save 'greater.lig.shiftN1.hole'
 

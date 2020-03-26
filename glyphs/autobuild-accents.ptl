@@ -7,18 +7,19 @@ import [fallback suggestGC] from '../support/utils'
 glyph-module
 
 glyph-block AutoBuild-Accents : begin
+	glyph-block-import CommonShapes : query-glyph refer-glyph
 
 	# Build accented glyphs
 	define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
-	define [iotaBelowToLF p j parts] : if (p === glyphs.iotaBelow) : set parts.(j) glyphs.iotaLF
-	define [ogonekBelowToTR p j parts] : if (p === glyphs.ogonekBelow) : set parts.(j) glyphs.ogonekTR
+	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : set parts.(j) [query-glyph 'iotaLF']
+	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : set parts.(j) [query-glyph 'ogonekTR']
 	define [subParts parts] : begin
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
 
 		# replace dotted-i and dotted-j with dotless equalivents
 		if (hasMarkAbove && parts.0.related && parts.0.related.dotless) : begin
-			local dotless glyphs.(parts.0.related.dotless)
+			local dotless [query-glyph parts.0.related.dotless]
 			if dotless : set parts.0 dotless
 
 		# replace below marks with trailing marks
@@ -27,22 +28,22 @@ glyph-block AutoBuild-Accents : begin
 
 		# composite greek Overmarks
 		for [local j 0] (j < parts.length) [inc j] : piecewise
-			(parts.(j) === glyphs.commaAbove) : begin
+			(parts.(j) === [query-glyph 'commaAbove']) : begin
 				piecewise
-					(parts.(j + 1) === glyphs.graveAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.psilivaria
-					(parts.(j + 1) === glyphs.acuteAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.psilioxia
-					(parts.(j + 1) === glyphs.perispomeniAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.psiliperispomeni
-			(parts.(j) === glyphs.revCommaAbove) : begin
+					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilivaria']
+					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilioxia']
+					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psiliperispomeni']
+			(parts.(j) === [query-glyph 'revCommaAbove']) : begin
 				piecewise
-					(parts.(j + 1) === glyphs.graveAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.dasiavaria
-					(parts.(j + 1) === glyphs.acuteAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.dasiaoxia
-					(parts.(j + 1) === glyphs.perispomeniAbove) : begin
-						set parts.(j) null; set parts.(j + 1) glyphs.dasiaperispomeni
+					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiavaria']
+					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaoxia']
+					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaperispomeni']
 		return parts
 
 	define [pad _s n] : begin
@@ -101,7 +102,7 @@ glyph-block AutoBuild-Accents : begin
 		local marks : parts.slice 1
 		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
 		if (relation && base.related && base.related.(relation))
-			set base glyphs.(base.related.(relation))
+			set base [query-glyph base.related.(relation)]
 
 		return { origBase base marks targetGlyphName }
 
@@ -121,7 +122,7 @@ glyph-block AutoBuild-Accents : begin
 		local h {.}
 		foreach [feature : items-of : Object.keys base.featureSelector] : begin
 			local variant base.featureSelector.(feature)
-			local variantRoot glyphs.(variant)
+			local variantRoot [query-glyph variant]
 			if variantRoot : begin
 				set s_code null
 				set s_parts { variantRoot :: marks }
@@ -129,17 +130,17 @@ glyph-block AutoBuild-Accents : begin
 
 				set h.(feature) (targetGlyphName + '.' + feature)
 
-		if glyphs.(targetGlyphName) : set glyphs.(targetGlyphName).featureSelector h
+		if [query-glyph targetGlyphName] : set [query-glyph targetGlyphName].featureSelector h
 
 	define [LinkRelatedGlyph origGlyphName relation] : begin
 		if [not relation] : return nothing
-		if [not glyphs.(origGlyphName)] : return nothing
+		if [not [query-glyph origGlyphName]] : return nothing
 
 		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
-		if [not glyphs.(targetGlyphName)] : return nothing
+		if [not [query-glyph targetGlyphName]] : return nothing
 
-		if [not glyphs.(origGlyphName).related] : set glyphs.(origGlyphName).related {.}
-		set glyphs.(origGlyphName).related.(relation) targetGlyphName
+		if [not [query-glyph origGlyphName].related] : set [query-glyph origGlyphName].related {.}
+		set [query-glyph origGlyphName].related.(relation) targetGlyphName
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
 		local {glyphName code parts} foundDecompositions.(_id)

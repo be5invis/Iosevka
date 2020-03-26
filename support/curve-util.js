@@ -30,41 +30,11 @@ exports.OffsetCurve = class OffsetCurve {
 	}
 };
 
-exports.curveToContour = function(curve, err) {
-	let exitPoints = [];
+exports.curveToContour = function(curve, segments) {
 	const z0 = curve.eval(0);
 	const z1 = curve.eval(1);
-	exitPoints.push({
-		x: z0.x,
-		y: z0.y,
-		cubic: false,
-		on: true
-	});
-	const offPoints = typoGeom.Quadify.auto(curve, err || 1);
-	for (let k = 0; k < offPoints.length; k++) {
-		const z = offPoints[k];
-		if (k > 0) {
-			const z0 = offPoints[k - 1];
-			exitPoints.push({
-				x: (z.x + z0.x) / 2,
-				y: (z.y + z0.y) / 2,
-				on: true
-			});
-		}
-		exitPoints.push({
-			x: z.x,
-			y: z.y,
-			cubic: false,
-			on: false
-		});
-	}
-	exitPoints.push({
-		x: z1.x,
-		y: z1.y,
-		cubic: false,
-		on: true
-	});
-	return exitPoints;
+	const offPoints = fixedCubify(curve, segments || 16);
+	return [Point.cornerFrom(z0), ...offPoints, Point.cornerFrom(z1)];
 };
 
 function removeMids(contour) {
