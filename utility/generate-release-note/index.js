@@ -7,6 +7,7 @@ const semver = require("semver");
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const ModifiedSinceVersion = "2.x";
 const Version = process.argv[2];
+const outputPath = process.argv[3];
 
 class Output {
 	constructor() {
@@ -27,10 +28,7 @@ async function main() {
 	await GenerateChangeList(out);
 
 	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
-	await fs.writeFile(
-		path.join(__dirname, `../../release-archives/release-notes-${Version}.md`),
-		out.buffer
-	);
+	await fs.writeFile(outputPath, out.buffer);
 }
 
 main().catch(e => {
