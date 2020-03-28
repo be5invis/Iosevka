@@ -137,6 +137,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles for ligation sets, include:
 
+  * `ligset-dlig`: Default ligation set would be assigned to Discretionary ligatures.
   * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
   * `ligset-php`: Default ligation set would be assigned to PHP.
   * `ligset-ml`: Default ligation set would be assigned to ML.
