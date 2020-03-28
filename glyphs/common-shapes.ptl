@@ -1,7 +1,6 @@
 $$include '../meta/macros.ptl'
 
 import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
-import '../support/fairify' as fairify
 
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
@@ -9,13 +8,16 @@ import [designParameters] from '../meta/aesthetics'
 glyph-module
 
 glyph-block CommonShapes : begin
-	define [queryFeatureSelector follow para name] : begin
+	define [queryFeatureSelector follow para name transform] : begin
 		local fs {.}
 		local introduced false
-		foreach [{k h} : pairs-of para.variants] : if (h.(follow) && h.__cvmap && h.__cvmap.(follow)) : begin
-			local tag h.__cvmap.(follow)
-			set fs.(tag) ([fallback name follow] + '.' + h.(follow))
-			set introduced true
+		foreach [{k h} : pairs-of para.variants] : begin
+			local suffix h.(follow)
+			if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
+			if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
+				local tag h.__cvmap.(follow)
+				set fs.(tag) ([fallback name follow] + '.' + suffix)
+				set introduced true
 		return : if introduced fs null
 
 	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
@@ -26,27 +28,20 @@ glyph-block CommonShapes : begin
 			throw : new Error "Variant for \(name) is not assigned."
 
 		if (transform && transform.(variant)) : set variant transform.(variant)
-		local chosenGlyph glyphs.((name + '.' + variant))
+		local chosenGlyph glyphMap.(name + '.' + variant)
 
 		create-glyph [fallback to-name name] : glyph-construction
 			include chosenGlyph AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector follow para name
+			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform
+			if (follow !== name) : set currentGlyph.featureSelectorFollows follow
 			set this.cmpPriority chosenGlyph.cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
-		define base : if para.isItalic glyphs.(name + '.italic') glyphs.(name + '.upright')
+		define base : if para.isItalic glyphMap.(name + '.italic') glyphMap.(name + '.upright')
 		include base AS_BASE
 		set-width base.advanceWidth
 		if unicode : assign-unicode unicode
-
-	define [alias newid unicode oldid] : begin
-		create-glyph newid : glyph-construction
-			if unicode : assign-unicode unicode
-			include glyphs.(oldid) AS_BASE
-			set-width glyphs.(oldid).advanceWidth
-			set this.featureSelector glyphs.(oldid).featureSelector
-			set this.cmpPriority glyphs.(oldid).cmpPriority
 
 	define [composite _newid] : begin
 		local parts null
@@ -61,42 +56,67 @@ glyph-block CommonShapes : begin
 		return : create-glyph newid : glyph-construction
 			local first true
 			foreach [part : items-of parts] : begin
-				include part first
-				if first : set-width part.advanceWidth
+				include part first first
 				set first false
 
-	define [into-unicode code] : glyph-construction
-		if code : assign-unicode code
+	define [refer-glyph id] : lambda [copyAnchors copyWidth] : this.includeGlyph glyphMap.(id) copyAnchors copyWidth
+	define [query-glyph id] : return glyphMap.(id)
+	define [into-unicode code] : glyph-construction : if code : assign-unicode code
 
-	# Transformation variants
-	define [turned newid unicode id x y mark] : create-glyph [fallback newid : 'turn' + id] : glyph-construction
-		if unicode : assign-unicode unicode
-		include glyphs.(id) [if mark false AS_BASE]
-		set-width glyphs.(id).advanceWidth
-		if mark : include mark
-		include : FlipAround x y
+
+	define [WithDerivatives sourceGid dstGid Fn] : if glyphMap.(sourceGid) : begin
+		local glyphSrc glyphMap.(sourceGid)
+		create-glyph dstGid : glyph-construction : include : Fn sourceGid null
+
+		local glyphDst glyphMap.(dstGid)
+		if glyphDst : begin
+			set glyphDst.featureSelectorFollows sourceGid
+
+			local fsFollow : glyphSrc.featureSelectorFollows || sourceGid
+			local fs : queryFeatureSelector fsFollow para sourceGid
+			local fs_i : queryFeatureSelector fsFollow para dstGid
+
+			if (fs && fs_i) : foreach [{k gid} : pairs-of fs] : begin
+				create-glyph fs_i.(k) : glyph-construction : include : Fn gid k
+				if [not glyphDst.featureSelector] : set glyphDst.featureSelector {.}
+				set glyphDst.featureSelector.(k) fs_i.(k)
+
+	define [alias newid unicode id] : WithDerivatives id [fallback newid ('.alias' + [newtemp])]
+		lambda [src sel] : glyph-construction
+			if (unicode && !sel) : assign-unicode unicode
+			include [refer-glyph src] AS_BASE ALSO_METRICS
+			set currentGlyph.cmpPriority [query-glyph src].cmpPriority
+
+	define [turned newid unicode id _x _y mark] : WithDerivatives id [fallback newid ('turn' + id)]
+		lambda [src sel] : glyph-construction
+			if (unicode && !sel) : assign-unicode unicode
+			include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
+			if mark : include mark
+			define x : if (_x <@ Function) [_x.call currentGlyph] _x
+			define y : if (_y <@ Function) [_y.call currentGlyph] _y
+			include : FlipAround x y
+			set currentGlyph.cmpPriority [query-glyph src].cmpPriority
 
 	# Dual derivatives
 	define [hcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'hcombine_' + id1 + '_' + id2] : glyph-construction
 		if unicode : assign-unicode unicode
-		include glyphs.(id1) AS_BASE
-		set-width glyphs.(id1).advanceWidth
+		include [refer-glyph id1] AS_BASE ALSO_METRICS
 		apply-transform : Translate (-spacing) 0
-		include glyphs.(id2)
+		include [refer-glyph id2]
 		apply-transform : Translate (spacing / 2) 0
 	define [HDual newid unicode id spacing] : hcombine [fallback newid : 'double' + id] unicode id id spacing
 
 	define [vcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] : glyph-construction
 		if unicode : assign-unicode unicode
-		set-width glyphs.(id1).advanceWidth
-		depends-on glyphs.(id1)
-		depends-on glyphs.(id2)
+		set-width [query-glyph id1].advanceWidth
+		depends-on [query-glyph id1]
+		depends-on [query-glyph id2]
 		include : create-glyph : glyph-construction
-			include glyphs.(id2)
+			include [refer-glyph id2]
 			apply-transform : Upright
 		apply-transform : Translate 0 (-spacing)
 		include : create-glyph : glyph-construction
-			include glyphs.(id1)
+			include [refer-glyph id1]
 			apply-transform : Upright
 		apply-transform : Translate 0 (spacing / 2)
 		apply-transform : Italify
@@ -646,7 +666,7 @@ glyph-block CommonShapes : begin
 
 		local shouldBuildList : Object.keys sbh :.filter ([x] => [not [not x]])
 		#console.log shouldBuildList
-		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphs.(x) && glyphs.(x).unicode) glyphs.(x).unicode.0 nothing])
+		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphMap.(x) && glyphMap.(x).unicode) glyphMap.(x).unicode.0 nothing])
 			:.filter ([x] => [not [not x]])
 
 		local p {.}
@@ -707,10 +727,13 @@ glyph-block CommonShapes : begin
 	define [ForceUpright] : glyph-construction
 		set this.gizmo : Translate 0 0
 
-	define [Overlay overlay background] : glyph-construction
+	define [Overlay fnOverlay fnBackground] : glyph-construction
 		define sw : [adviceBlackness 6] / 2
 		local candidates {}
 		define segs 3
+
+		define overlay    : create-glyph : glyph-construction : include fnOverlay    AS_BASE ALSO_METRICS
+		define background : create-glyph : glyph-construction : include fnBackground AS_BASE ALSO_METRICS
 		if background.anchors : include {.anchors background.anchors}
 
 		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
@@ -766,24 +789,13 @@ glyph-block CommonShapes : begin
 		local giz this.gizmo
 		local g : create-glyph : glyph-construction
 			set this.gizmo : Translate 0 0
-			local {.x xo .y yo} : tp giz {.x x1 .y y1}
-			local {.x xt .y yt} : tp giz {.x x2 .y y2}
+			local {.x xo .y yo} : tp [Transform.Id] {.x x1 .y y1}
+			local {.x xt .y yt} : tp [Transform.Id] {.x x2 .y y2}
 			local mag : Math.hypot (yo - yt) (xo - xt)
 			include [G mag]
 			apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
 			apply-transform : Translate xt yt
+			apply-transform   giz
 		include g
 
-	define [WithDerivatives sourceGid dstGid Fn] : if glyphs.(sourceGid) : begin
-		create-glyph dstGid : glyph-construction : include : Fn sourceGid null
-		if (glyphs.(sourceGid) && glyphs.(dstGid)) : begin
-			local glyphDst glyphs.(dstGid)
-			local fs : queryFeatureSelector sourceGid para
-			local fs_i : queryFeatureSelector sourceGid para dstGid
-
-			foreach [{k gid} : pairs-of fs] : begin
-				create-glyph fs_i.(k) : glyph-construction : include : Fn gid k
-				if [not glyphDst.featureSelector] : set glyphDst.featureSelector {.}
-				set glyphDst.featureSelector.(k) fs_i.(k)
-
-	glyph-block-export queryFeatureSelector select-variant italic-variant alias composite into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives
+	glyph-block-export queryFeatureSelector select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives

@@ -1,4 +1,4 @@
-import [add-common-feature add-feature ChainRuleBuilder] from "./table-util"
+import [add-common-feature add-feature ChainRuleBuilder query-related-glyphs] from "./table-util"
 
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
@@ -9,7 +9,7 @@ define [just s] : lambda [t] : t.map : lambda [x] s
 define preserved null
 define advance : lambda [t] : t.map : lambda [x] x
 
-export : define [buildLigations sink plm glyphs] : foreach [ {featureName mappedFeature} : pairs-of plm] : do
+export : define [buildLigations sink para plm glyphs] : foreach [ {featureName mappedFeature} : pairs-of plm] : do
 
 	define chain-rule : ChainRuleBuilder sink
 
@@ -30,7 +30,7 @@ export : define [buildLigations sink plm glyphs] : foreach [ {featureName mapped
 	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
 
 	define [waveClass cl] : [just ('wave.' + cl)] anyWave
-	define alphabetRaw {
+	define alphabet : query-related-glyphs glyphs para {
 		'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm'
 		'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'
 		'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M'
@@ -42,27 +42,17 @@ export : define [buildLigations sink plm glyphs] : foreach [ {featureName mapped
 		'eight.lnum' 'eight.onum' 'nine.lnum' 'nine.onum'
 	}
 
-
 	define [acops]  {'less' 'greater' 'hyphen' 'equal' 'plus'}
 	define [acskip] {
 		'slash' 'bar' 'at' 'ampersand' 'percent'
 		'numbersign' 'numbersign.upright' 'numbersign.slanted'
 	}
-	define [asterisk_center] ({'asterisk' 'asterisk.high' 'asterisk.low' 'asterisk.hexhigh' 'asterisk.hexlow'} ~> {'asterisk.dfltlow' 'asterisk.low' 'asterisk.low' 'asterisk.hexlow' 'asterisk.hexlow'})
-	define [colon_center]    ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
-	define [caret_center]    ({'asciicaret' 'asciicaret.high' 'asciicaret.low'} ~> {'asciicaret.low' 'asciicaret.low' 'asciicaret.low'})
-	define [tilde_center]    ({'asciitilde' 'asciitilde.high' 'asciitilde.low'} ~> {'asciitilde.low' 'asciitilde.low' 'asciitilde.low'})
-	define [period_center]   ({'period'} ~> {'period.center'})
-	define [no_period_center] ({'period.center'} ~> {'period'})
-
-	local alphabet : do
-		local g {}
-		foreach [gid : items-of alphabetRaw] : begin
-			g.push gid
-			if (glyphs.(gid) && glyphs.(gid).featureSelector) : begin
-				foreach [{k v} : pairs-of glyphs.(gid).featureSelector] : begin
-					g.push v
-		* g
+	define [asterisk_center]  ({'asterisk'}          ~> {'asterisk.dfltlow'})
+	define [colon_center]     ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
+	define [caret_center]     ({'asciicaret'}        ~> {'asciicaret.low'})
+	define [tilde_center]     ({'asciitilde'}        ~> {'asciitilde.low'})
+	define [period_center]    ({'period'}            ~> {'period.center'})
+	define [no_period_center] ({'period.center'}     ~> {'period'})
 
 	local ligationLookupName : 'lig_' + featureName + '-' + mappedFeature
 

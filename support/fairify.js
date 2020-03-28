@@ -1,9 +1,11 @@
 "use strict";
 
-const Transform = require("./transform.js");
-const quadify = require("primitive-quadify-off-curves");
+const Transform = require("./transform");
+const typoGeom = require("typo-geom");
+const Point = require("./point");
+const curveUtil = require("./curve-util");
 
-const SMALL = 1e-4;
+const SMALL = 1e-6;
 
 function solveTS(a, b, c, out, flag) {
 	const delta = b * b - 4 * a * c;
@@ -43,7 +45,7 @@ function fineAllExtrema(z1, z2, z3, z4) {
 
 	return exs.sort(ASCEND);
 }
-function mix(z1, z2, t) {
+function bez1(z1, z2, t) {
 	if (t <= 0) return z1;
 	if (t >= 1) return z2;
 	let x = (1 - t) * z1.x + t * z2.x,
@@ -74,10 +76,10 @@ function bez3(z1, z2, z3, z4, t) {
 	};
 }
 function splitBefore(z1, z2, z3, z4, t) {
-	return [z1, mix(z1, z2, t), bez2(z1, z2, z3, t), bez3(z1, z2, z3, z4, t)];
+	return [z1, bez1(z1, z2, t), bez2(z1, z2, z3, t), bez3(z1, z2, z3, z4, t)];
 }
 function splitAfter(z1, z2, z3, z4, t) {
-	return [bez3(z1, z2, z3, z4, t), bez2(z2, z3, z4, t), mix(z3, z4, t), z4];
+	return [bez3(z1, z2, z3, z4, t), bez2(z2, z3, z4, t), bez1(z3, z4, t), z4];
 }
 function splitAtExtrema(z1, z2, z3, z4, curve) {
 	const ts = fineAllExtrema(z1, z2, z3, z4);
@@ -109,41 +111,33 @@ function veryClose(z1, z2) {
 	return (z1.x - z2.x) * (z1.x - z2.x) + (z1.y - z2.y) * (z1.y - z2.y) <= SMALL;
 }
 
-function splitCurve(sourceCurve) {
+function toSpansForm(sourceCurve, fSplit) {
 	const curve = [sourceCurve[0]];
 	let last = sourceCurve[0];
 	for (let j = 1; j < sourceCurve.length; j++) {
 		if (sourceCurve[j].on) {
 			const z1 = last,
 				z4 = sourceCurve[j];
-			//	const z2 = mix(z1, z4, 1 / 3);
-			//const z3 = mix(z1, z4, 2 / 3);
 			if (!veryClose(z1, z4)) {
 				curve.push(z4);
-				//	splitAtExtrema(z1, z2, z3, z4, ANGLES, curve);
 				last = z4;
 			}
 		} else if (sourceCurve[j].cubic) {
 			const z1 = last,
 				z2 = sourceCurve[j],
-				z3 = sourceCurve[j + 1],
-				z4 = sourceCurve[j + 2];
+				z3 = sourceCurve[(j + 1) % sourceCurve.length],
+				z4 = sourceCurve[(j + 2) % sourceCurve.length];
 			if (!(veryClose(z1, z2) && veryClose(z2, z3) && veryClose(z3, z4))) {
-				splitAtExtrema(z1, z2, z3, z4, curve);
+				if (fSplit) {
+					splitAtExtrema(z1, z2, z3, z4, curve);
+				} else {
+					curve.push(z2, z3, z4);
+				}
 				last = z4;
 			}
 			j += 2;
 		} else {
-			const z1 = last,
-				zm = sourceCurve[j],
-				z4 = sourceCurve[j + 1];
-			if (!(veryClose(z1, zm) && veryClose(zm, z4))) {
-				const z2 = mix(zm, z1, 1 / 3);
-				const z3 = mix(zm, z4, 1 / 3);
-				splitAtExtrema(z1, z2, z3, z4, curve);
-				last = z4;
-			}
-			j += 1;
+			throw new Error("Unreachable.");
 		}
 	}
 	return curve;
@@ -157,33 +151,45 @@ function dot(z1, z2, z3) {
 }
 
 function markCorners(curve) {
+	for (const z of curve) z.mark = 0;
 	for (let j = 0; j < curve.length; j++) {
 		if (!curve[j].on) continue;
 		const z1 = curve[j],
 			z0 = curve[(j - 1 + curve.length) % curve.length],
 			z2 = curve[(j + 1) % curve.length];
-		if (Math.abs(cross(z1, z0, z2)) < 1e-6) {
+
+		const almostLinear = Math.abs(cross(z1, z0, z2)) < SMALL;
+		const inBetween = dot(z1, z0, z2) < 0;
+		if (z0.on && z2.on && almostLinear && inBetween) {
+			z1.mark = 0;
+		} else if (z0.on || z2.on) {
+			z1.mark = 1;
+		} else if (almostLinear && inBetween) {
 			// Z0 -- Z1 -- Z2 are linear
-			if (!z0.on && !z2.on && dot(z1, z0, z2) < 0) {
-				const angle0 = Math.atan2(z2.y - z0.y, z2.x - z0.x);
-				const angle = Math.abs(((angle0 / Math.PI) * 2) % 1);
-				if (
-					Math.abs(Math.abs(angle0) - Math.PI / 2) <= SMALL ||
-					angle <= SMALL ||
-					angle >= 1 - SMALL
-				) {
-					z1.mark = true; // curve extremum
-				}
-			} else if (z0.on && z2.on && dot(z1, z0, z2) < 0) {
-				// Colinear on-knots
-				// Remove
-			} else {
-				z1.mark = true; // also corner
+			const angle = Math.abs(Math.atan2(z2.y - z0.y, z2.x - z0.x)) % Math.PI;
+			if (Math.abs(angle) <= SMALL || Math.abs(angle - Math.PI) <= SMALL) {
+				z1.mark = 4;
+			} else if (Math.abs(angle - Math.PI / 2) <= SMALL) {
+				z1.mark = 2;
 			}
 		} else {
-			z1.mark = true; // corner
+			z1.mark = 1;
 		}
 	}
+}
+
+function canonicalStart(curve) {
+	let jm = 0,
+		rank = 0;
+	for (let j = 0; j < curve.length; j++) {
+		const zRank = (curve[j].on ? 1 : 0) + (2 * curve[j].mark || 0);
+		if (zRank > rank) {
+			jm = j;
+			rank = zRank;
+		}
+	}
+
+	return toSpansForm(curve.slice(jm).concat(curve.slice(0, jm)), false);
 }
 
 class BezierCurveCluster {
@@ -195,9 +201,7 @@ class BezierCurveCluster {
 			if (zs[j].on) {
 				const z1 = last,
 					z4 = zs[j];
-				const z2 = mix(z1, z4, 1 / 3);
-				const z3 = mix(z1, z4, 2 / 3);
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				const seg = new typoGeom.Curve.StraightSegment(z1, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -206,22 +210,13 @@ class BezierCurveCluster {
 					z2 = zs[j],
 					z3 = zs[j + 1],
 					z4 = zs[j + 2];
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
+				const seg = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
 				j += 2;
 			} else {
-				const z1 = last,
-					zm = zs[j],
-					z4 = zs[j + 1];
-				const z2 = mix(zm, z1, 1 / 3);
-				const z3 = mix(zm, z4, 1 / 3);
-				const seg = new quadify.CubicBezierCurve(z1, z2, z3, z4);
-				segments.push(seg);
-				lengths.push(this.measureLength(seg));
-				last = z4;
-				j += 1;
+				throw new Error("Unreachable.");
 			}
 		}
 
@@ -281,7 +276,7 @@ class BezierCurveCluster {
 		return det < err * err && det > -err * err;
 	}
 	isAlmostLinear(err) {
-		const N = 16;
+		const N = 64;
 		let z0 = this.eval(0);
 		let z1 = this.eval(1);
 		for (let k = 1; k < N; k++) {
@@ -292,60 +287,72 @@ class BezierCurveCluster {
 	}
 }
 
-function buildCurve(curve) {
-	let exitPoints = [];
+const QuadBuilder = {
+	corner(sink, gizmo, z) {
+		sink.push(Transform.transformPoint(gizmo, Point.cornerFrom(z)).round(1024));
+	},
+	arc(sink, gizmo, arc) {
+		if (arc.isAlmostLinear(1 / 4)) return;
+		const offPoints = typoGeom.Quadify.auto(arc, 1 / 4);
+		if (!offPoints) return;
+		for (const z of offPoints) {
+			sink.push(Transform.transformPoint(gizmo, Point.offFrom(z)).round(1024));
+		}
+	},
+	split: true,
+	canonicalStart: true,
+	duplicateStart: true
+};
+
+const SpiroBuilder = {
+	corner(sink, gizmo, z) {
+		sink.push(Transform.transformPoint(gizmo, Point.cornerFrom(z)));
+	},
+	arc(sink, gizmo, arc) {
+		if (arc.isAlmostLinear(1 / 4)) return;
+		const offPoints = curveUtil.fixedCubify(arc, 12);
+		for (const z of offPoints) {
+			sink.push(Transform.transformPoint(gizmo, z));
+		}
+	},
+	split: true,
+	canonicalStart: false,
+	duplicateStart: false
+};
+
+function buildCurve(curve, gizmo, builder) {
+	let sink = [];
 	for (let j = 0; j < curve.length; j++) {
 		if (!curve[j].mark) continue;
+		builder.corner(sink, gizmo, curve[j]);
+
 		let k = j;
 		for (; k < curve.length && (k === j || !curve[k].mark); k++);
-		exitPoints.push(curve[j]);
 		const pts = curve.slice(j, k + 1);
-		let nPtsOffPoints = 0;
-		for (const z of pts) {
-			if (!z.on) nPtsOffPoints += 1;
-		}
-		if (nPtsOffPoints > 0) {
-			const curve = new BezierCurveCluster(pts);
-			if (curve.isAlmostLinear(1)) continue;
-			const offPoints = quadify.autoQuadify(curve, 1 / 4);
-			if (!offPoints) continue;
-			for (let k = 0; k < offPoints.length; k++) {
-				const z = offPoints[k];
-				if (k > 0) {
-					const z0 = offPoints[k - 1];
-					exitPoints.push({
-						x: (z.x + z0.x) / 2,
-						y: (z.y + z0.y) / 2,
-						on: true
-					});
-				}
-				exitPoints.push({
-					x: z.x,
-					y: z.y,
-					cubic: false,
-					on: false
-				});
-			}
-		}
+		if (pts.length > 1) builder.arc(sink, gizmo, new BezierCurveCluster(pts));
 		j = k - 1;
 	}
-	return exitPoints;
+	return sink;
 }
 
-module.exports = function(sourceCurve, gizmo) {
-	for (let j = 0; j < sourceCurve.length; j++) {
-		if (!isFinite(sourceCurve[j].x)) sourceCurve[j].x = 0;
-		if (!isFinite(sourceCurve[j].y)) sourceCurve[j].y = 0;
-		sourceCurve[j] = Transform.unTransform(gizmo, sourceCurve[j]);
+function fairifyImpl(sourceCubicContour, gizmo, builder) {
+	for (let j = 0; j < sourceCubicContour.length; j++) {
+		if (!isFinite(sourceCubicContour[j].x)) sourceCubicContour[j].x = 0;
+		if (!isFinite(sourceCubicContour[j].y)) sourceCubicContour[j].y = 0;
+		sourceCubicContour[j] = Transform.unTransform(gizmo, sourceCubicContour[j]);
 	}
-	const curve = splitCurve(sourceCurve);
-	markCorners(curve);
-	const builtCurve = buildCurve(curve);
-	const ans = [];
-	for (let j = 0; j < builtCurve.length; j++) {
-		if (builtCurve[j] && !builtCurve[j].remove) {
-			ans.push(Transform.transformPoint(gizmo, builtCurve[j]));
-		}
+	let splitContour = toSpansForm(sourceCubicContour, builder.split);
+	markCorners(splitContour);
+	if (builder.canonicalStart) {
+		splitContour = canonicalStart(splitContour);
+		markCorners(splitContour);
 	}
-	return ans;
+	return buildCurve(splitContour, gizmo, builder);
+}
+
+exports.fairifyQuad = function(sourceCubicContour, gizmo) {
+	return fairifyImpl(sourceCubicContour, gizmo, QuadBuilder);
+};
+exports.fairifySpiro = function(sourceCubicContour, gizmo) {
+	return fairifyImpl(sourceCubicContour, gizmo, SpiroBuilder);
 };

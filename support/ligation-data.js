@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function formVariantData(data, para) {
 	const defaultBuildup = {};
 

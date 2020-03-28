@@ -12,9 +12,9 @@ glyph-block Autobuild-Transformed : begin
 
 	define [suggestName _name] : begin
 		local name _name
-		if glyphs.(name) : begin
+		if [query-glyph name] : begin
 			local j 2
-			while glyphs.(name + j) : inc j
+			while [query-glyph (name + j)] : inc j
 			set name (name + j)
 		return name
 
@@ -219,7 +219,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal' (-11)
 		list 0x207D 'parenLeft' (-11)
 		list 0x207E 'parenRight' (-11)
-	if [not recursive] : let [df : Miniature {'a' 'o'} 3.5 0.7] : begin
+
+	if [not recursive] : let [df : Miniature {'a' 'o'} 4 0.7] : begin
 		sketch # ordfeminine
 			include df.a
 			include : HBarBottom SB RIGHTSB DESCENDER
@@ -368,7 +369,7 @@ glyph-block Autobuild-Transformed : begin
 		foreach {unicode numid denid height} [items-of records] : do
 			local dist : XH * (1 - scaleFactor - closing)
 
-			if [not glyphs.(numid + suffix + ".numpart")] : begin
+			if [not : query-glyph (numid + suffix + ".numpart")] : begin
 				save-glyph (numid + suffix +  ".numpart") null : sketch
 					include miniatureFont.(numid)
 					apply-transform : Upright
@@ -377,7 +378,7 @@ glyph-block Autobuild-Transformed : begin
 					apply-transform : Translate MIDDLE (symbolMid + dist / 2)
 					apply-transform : Italify
 
-			if [not glyphs.(denid + suffix +  ".denpart")] : begin
+			if [not : query-glyph (denid + suffix +  ".denpart")] : begin
 				save-glyph (denid + suffix +  ".denpart") null : sketch
 					include miniatureFont.(denid)
 					apply-transform : Upright
@@ -388,8 +389,8 @@ glyph-block Autobuild-Transformed : begin
 
 		foreach {unicode numid denid height} [items-of records] : do
 			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include glyphs.(numid + suffix +  ".numpart")
-				include glyphs.(denid + suffix +  ".denpart")
+				include : refer-glyph (numid + suffix +  ".numpart")
+				include : refer-glyph (denid + suffix +  ".denpart")
 				if fine : include : HBar SB RIGHTSB symbolMid (fine * 0.75)
 
 	define [createFractions records] : createFracImpl '.frac' records [adviceBlackness 3] 0.55 0.05
@@ -440,9 +441,9 @@ glyph-block Autobuild-Transformed : begin
 
 		foreach [{unicode c1 c2 mark} : items-of records] : begin
 			local glyphName "\(c1)_\(c2)"
-			if glyphs.(glyphName) : begin
+			if [query-glyph glyphName] : begin
 				local j 2
-				while glyphs.(glyphName + j) : inc j
+				while [query-glyph (glyphName + j)] : inc j
 				set glyphName (glyphName + j)
 			if wide : begin
 				sketch
@@ -527,8 +528,8 @@ glyph-block Autobuild-Transformed : begin
 
 			create-glyph fullGlyphName : glyph-construction
 				if unicode : assign-unicode unicode
-				include glyphs.(innerGlyphName)
-				include glyphs.(base)
+				include : refer-glyph innerGlyphName
+				include : refer-glyph base
 
 	if [not recursive] : createAccentedEquals 7 0.4 : list
 		list 0x2257 "equal" {"o"}
@@ -539,20 +540,20 @@ glyph-block Autobuild-Transformed : begin
 
 	define [createGroupedDigits shrink crowd numberEntries] : begin
 		define numberGlyphIDs {}
-		foreach [gid : items-of numberEntries] : if glyphs.(gid) : begin
+		foreach [gid : items-of numberEntries] : if [query-glyph gid] : begin
 			numberGlyphIDs.push gid
-			if glyphs.(gid).featureSelector : begin
-				foreach [{k v} : pairs-of glyphs.(gid).featureSelector] : begin
+			if [query-glyph gid].featureSelector : begin
+				foreach [{k v} : pairs-of [query-glyph gid].featureSelector] : begin
 					numberGlyphIDs.push v
 
 		local derivedFont : Thinner numberGlyphIDs shrink crowd
 		foreach [gid : items-of numberGlyphIDs] : foreach [nd : items-of {0 1 2 3 4 5 6}]
 			create-glyph (gid + ".nd" + nd) : glyph-construction
-				include glyphs.(gid)
+				include : refer-glyph gid
 				if (nd >= 3 && nd <= 5) : include : intersection
 					HBarBottom 0 WIDTH (DESCENDER * 0.75) [adviceBlackness 4]
 					glyph-construction
-						include glyphs.'denseShade.fwid'
+						include : refer-glyph "denseShade.fwid"
 						apply-transform : Translate (-WIDTH / 2) 0
 
 	if [not recursive] : createGroupedDigits 0.9 3.0 {

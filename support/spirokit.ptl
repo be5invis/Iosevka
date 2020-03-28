@@ -1,7 +1,7 @@
 import 'spiro' as SpiroJs
 import './spiroexpand' as SpiroExpansionContext
-import './fairify' as fairify
 import 'caryll-shapeops' as ShapeOps
+import './curve-util' as CurveUtil
 
 import './transform' as Transform
 
@@ -188,12 +188,10 @@ export : define [SetupBuilders args] : begin
 			local g : new Glyph
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
-		foreach [j : range 0 g.contours.length] : begin
-			set g.contours.(j) : fairify g.contours.(j) globalTransform
 		set g.knots knots
 		set g.lhsKnots lhs
 		set g.rhsKnots rhs
-		if [not dontinc] : this.include g
+		this.includeGlyph g
 		return g
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
@@ -202,9 +200,7 @@ export : define [SetupBuilders args] : begin
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
 		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
 		foreach af [items-of lastafs] : if af : af.call g
-		foreach [j : range 0 g.contours.length] : begin
-			set g.contours.(j) : fairify g.contours.(j) (g.fairGizmo || g.gizmo)
-		if [not dontinc] : this.include g
+		this.includeGlyph g
 		return g
 
 	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
@@ -213,15 +209,15 @@ export : define [SetupBuilders args] : begin
 		if (k.length == 0) : return g
 
 		g.include k.0
-		set g.contours : g.contours.map Glyph.contourToStandardCubic
+		set g.contours : g.contours.map CurveUtil.convertContourToCubic
 		foreach [item : items-of : k.slice 1] : begin
 			local g1 : new Glyph
 			set g1.gizmo : this.gizmo || globalTransform
 			g1.include item
-			set g1.contours : g1.contours.map Glyph.contourToStandardCubic
+			set g1.contours : g1.contours.map CurveUtil.convertContourToCubic
 			local c1 : ShapeOps.boole operator g.contours g1.contours ShapeOps.fillRules.nonzero ShapeOps.fillRules.nonzero 16384
-			set g.contours : c1.map : lambda [c] : [Glyph.contourToStandardCubic c].reverse
-		if [not dontinc] : this.include g
+			set g.contours : c1.map : lambda [c] : [CurveUtil.convertContourToCubic c].reverse
+		this.includeGlyph g
 		return g
 
 	define union : Boole ShapeOps.ops.union

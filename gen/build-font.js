@@ -1,3 +1,5 @@
+"use strict";
+
 const EmptyFont = require("./empty-font.js");
 const buildGlyphs = require("./build-glyphs.js");
 
@@ -6,6 +8,7 @@ const { assignFontNames } = require("../meta/naming");
 const { setFontMetrics } = require("../meta/aesthetics");
 
 const regulateGlyphs = require("../support/regulate-glyph");
+const gcFont = require("./gc");
 
 module.exports = function(para) {
 	const font = EmptyFont();
@@ -38,6 +41,8 @@ module.exports = function(para) {
 	const { glyf, cmap } = extractGlyfAndCmap(glyphList, excludedCodePoints);
 	font.glyf = glyf;
 	font.cmap = cmap;
+
+	gcFont(font);
 
 	return font;
 };

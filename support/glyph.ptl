@@ -105,22 +105,12 @@ export all : class Glyph
 			glyph.name : this.dependencies.push glyph.name
 			glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
 		return this
-	public [include component copyAnchors copyWidth] : begin
-		piecewise
-			(component <@ Function) : begin
-				local t this.defaultTag
-				if component.tag : set this.defaultTag component.tag
-				component.call this
-				set this.defaultTag t
-				return this
-			(component <@ Transform) : return : this.apply-transform component copyAnchors
-			(component <@ Array) : begin
-				local contours component
-				local glyph {.contours contours}
-			true : begin
-				local contours component.contours
-				local glyph component
 
+	public [includeGlyph glyph copyAnchors copyWidth] : begin
+		if (glyph <@ Function) : begin
+			throw "\(this.name): Cannot include a function using includeGlyph. Use include instead."
+
+		local contours glyph.contours
 		local shiftx 0
 		local shifty 0
 		local t this
@@ -147,7 +137,7 @@ export all : class Glyph
 			local newcontours {}
 			foreach [contour : items-of contours] : begin
 				local c {}
-				set c.tag : contour.tag || component.tag || t.defaultTag
+				set c.tag : contour.tag || glyph.tag || t.defaultTag
 				foreach [point : items-of contour] : begin
 					c.push : new Point (point.x + shiftx) (point.y + shifty) point.on point.cubic point.subdivided
 				newcontours.push c
@@ -155,10 +145,23 @@ export all : class Glyph
 		if (([not contours] || copyAnchors) && glyph.anchors) : begin
 			foreach [k : items-of : Object.keys glyph.anchors] : set this.anchors.(k) glyph.anchors.(k)
 		if (glyph.advanceWidth >= 0 && copyWidth) : set this.advanceWidth glyph.advanceWidth
-		piecewise
-			glyph.name : this.dependencies.push glyph.name
-			glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
+		if glyph.name : this.dependencies.push glyph.name
+		if glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
 		return this
+
+	public [include component copyAnchors copyWidth] : begin
+		piecewise
+			(component <@ Function) : begin
+				local t this.defaultTag
+				if component.tag : set this.defaultTag component.tag
+				component.call this copyAnchors copyWidth
+				set this.defaultTag t
+				return this
+			(component <@ Transform) : return : this.apply-transform component copyAnchors
+			(component <@ Array) : begin
+				return : this.includeGlyph {.contours component} copyAnchors copyWidth
+			true : begin
+				return : this.includeGlyph component copyAnchors copyWidth
 
 	public [apply-transform transform alsoAnchors] : begin
 		foreach [c : items-of this.contours] : foreach [j : range 0 c.length] : set c.(j) : tp transform c.(j)
@@ -177,38 +180,3 @@ export all : class Glyph
 			this.start-from x y
 			this.start-from mbx mby
 		return this
-
-	static [contourToStandardCubic contour] : begin
-		local c {}
-		if (!contour || !contour.length) : return c
-
-		local z0 contour.0
-		c.push : new Point z0.x z0.y true false false
-		for [local j 1] (j < contour.length) [inc j] : begin
-			local point contour.(j)
-			piecewise
-				point.on : begin
-					c.push : new Point point.x point.y true false false
-					set z0 point
-				point.cubic : begin
-					local z1 point
-					local z2 contour.(j + 1)
-					local z3 contour.(j + 2)
-					c.push : new Point z1.x z1.y false true  false
-					c.push : new Point z2.x z2.y false true  false
-					c.push : new Point z3.x z3.y true  false false
-					set z0 z3
-					set j : j + 2
-				true : begin
-					local zc point
-					local zf : if contour.(j + 1) contour.(j + 1) contour.0
-					local x1 : mix z0.x zc.x (2 / 3)
-					local y1 : mix z0.y zc.y (2 / 3)
-					local x2 : mix zf.x zc.x (2 / 3)
-					local y2 : mix zf.y zc.y (2 / 3)
-					c.push : new Point x1   y1   false true  false
-					c.push : new Point x2   y2   false true  false
-					c.push : new Point zf.x zf.y true  false false
-					set z0 zf
-					inc j
-		return c

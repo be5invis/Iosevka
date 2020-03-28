@@ -15,8 +15,8 @@ glyph-block Symbol-Arrow : begin
 
 	### Arrowheads
 	for-width-kinds WIDE-WIDTH-1
-		define arrowHeight : para.arrowHeight * (WIDTH - SB) * [Math.pow (MosaicWidth / MosaicUnitWidth) (1 / 3)]
-		define arrowWidth  : Math.min (MosaicWidth - SB) arrowHeight
+		define arrowHeight : para.arrowHeight * (WIDTH - SB / 2) * [Math.pow (MosaicWidth / MosaicUnitWidth) (1 / 3)]
+		define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
 		define arrowMidX : MosaicWidth / 2
 		define arrowSB : (MosaicWidth - arrowWidth) / 2
 		define arrowRSB : MosaicWidth - arrowSB
@@ -24,46 +24,47 @@ glyph-block Symbol-Arrow : begin
 		define hwArrowMidX : WIDTH / 2
 		define o : O * 2
 
-		define arrowSize : (WIDTH - SB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4]
+		define arrowSize : (WIDTH - SB) * designParameters.arrow_size * [Math.pow (arrowWidth / WIDTH) 0.4] - [adviceBlackness 5] / 4
 		define halfstroke : OPERATORSTROKE / 2
 		define fine : adviceBlackness 3.5
 		define terminal : adviceBlackness 5
 		define arrowTop : [mix operBot operTop (1 / 2)] + arrowHeight / 2
 		define arrowBot : [mix operBot operTop (1 / 2)] - arrowHeight / 2
 		define doubleArrowStemWidth : arrowSize * 1.1
+		define waveArrowAmplitude : (WIDTH - SB) * designParameters.arrow_size * 1.1
 
 		define [ArrowBar x1 y1 x2 y2 halfstroke w] : glyph-construction
-			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
-			include : dispiro
-				widths.center (halfstroke * 2)
-				flat x1 y1
-				curl [mix x1 x2 p] [mix y1 y2 p]
-				end : function [set this.contrast 1]
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+				dispiro
+					widths.center (halfstroke * 2)
+					flat (mag * (1 - p)) 0
+					curl mag 0
+					end : function [set this.contrast 1]
 
 		define [DashArrowBar x1 y1 x2 y2 halfstroke gap stop w] : glyph-construction
-			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
-			local deltaT : (gap + stop) / mag
-			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
-				widths.center (halfstroke * 2)
-				flat [mix x1 x2 t] [mix y1 y2 t]
-				curl [mix x1 x2 : Math.min p (t + stop / mag)] [mix y1 y2 : Math.min p (t + stop / mag)]
-				end : function [set this.contrast 1]
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-construction
+				local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+				local deltaT : (gap + stop) / mag
+				for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
+					widths.center (halfstroke * 2)
+					flat [mix (mag * (1 - p)) mag t] 0
+					curl [mix (mag * (1 - p)) mag : Math.min p (t + stop / mag)] 0
+					end : function [set this.contrast 1]
 
 		define [HookArrowBar x1 y1 x2 y2 halfstroke s w] : glyph-construction
-			local mag : Math.hypot (y2 - y1) (x2 - x1)
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
-			include : dispiro
-				widths.center (halfstroke * 2)
-				g4 (mag - [Math.abs s] / 2 - 0.1) s
-				g4 (mag - [Math.abs s] / 2) s
-				archv
-				g4 (mag - O) (s / 2)
-				arcvh
-				flat (mag - [Math.abs s] / 2) 0
-				curl [mix mag 0 p] 0
-				end : function [set this.contrast 1]
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+				local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+				dispiro
+					widths.center (halfstroke * 2)
+					g4 (mag - [Math.abs s] / 2 - 0.1) s
+					g4 (mag - [Math.abs s] / 2) s
+					archv
+					g4 (mag - O) (s / 2)
+					arcvh
+					flat (mag - [Math.abs s] / 2) 0
+					curl [mix mag 0 p] 0
+					end : function [set this.contrast 1]
 
 		define [ArrowHead x1 y1 x2 y2 _size] : create-glyph : glyph-construction
 			include : LHSHalfArrowHead x1 y1 x2 y2 0 _size
@@ -107,8 +108,7 @@ glyph-block Symbol-Arrow : begin
 
 		define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
-			include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
-				HookArrowBar x1 y1 x2 y2 halfstroke (arrowSize * mul)
+			include : HookArrowBar x1 y1 x2 y2 halfstroke (arrowSize * mul)
 
 		define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : glyph-construction
 			local headLen : WIDTH * 0.4
@@ -129,10 +129,10 @@ glyph-block Symbol-Arrow : begin
 			if (color == "white") : include : difference
 				union
 					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
-					ArrowBar x1 y1 x2 y2 halfBarWidth 2
+					ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
 				union
 					TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
-					ArrowBar x1a y1a x2a y2a (halfBarWidth - fine) 2
+					ArrowBar x1a y1a x2a y2a (halfBarWidth - fine / 2) 2
 
 			if (color == "black") : include : union
 				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
@@ -140,42 +140,28 @@ glyph-block Symbol-Arrow : begin
 
 		define [HalfArrowShape side] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : side x1 y1 x2 y2 (halfstroke * 2) size
-			include : ArrowBar x1 y1 x2 y2 halfstroke 1.5
+			include : ArrowBar x1 y1 x2 y2 halfstroke 1.75
+
+		define [DoubleArrowBarShape w x1 y1 x2 y2] : glyph-construction
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-construction
+				local p : (mag - o - w / 2 + O) / mag
+				local fine : Math.min (w / 3) (halfstroke * 2)
+				local coFine : w / 2 - fine / 2
+
+				include : dispiro
+					widths.center fine
+					flat (mag * (1 - p)) (+coFine)
+					curl mag (+coFine)
+					end : function [set this.contrast 1]
+				include : dispiro
+					widths.center fine
+					flat (mag * (1 - p)) (-coFine)
+					curl mag (-coFine)
+					end : function [set this.contrast 1]
 
 		define [DoubleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-construction
 			include : ArrowHead x1 y1 x2 y2 size
-
-			local giz this.gizmo
-			local {.x xo .y yo} : tp giz {.x x1 .y y1}
-			local {.x xt .y yt} : tp giz {.x x2 .y y2}
-
-			local mag : Math.hypot (yt - yo) (xt - xo)
-			local p : (mag - o - w / 2 + O) / mag
-
-			local fine : Math.min (w / 3) (halfstroke * 2)
-			local coFine : w / 2 - fine / 2
-
-			local G : dispiro
-				disable-gizmo
-				disable-contrast
-				widths.center fine
-				# begin
-				flat xo yo
-				curl [mix xo xt p] [mix yo yt p]
-				end
-			local g : G.call currentGlyph "don't include"
-			# double arrowstick
-			g.include : Translate (-xo) (-yo)
-			g.include : Rotate (- [Math.atan2 (yt - yo) (xt - xo)])
-			include : Translate (-xo) (-yo)
-			include : Rotate (- [Math.atan2 (yt - yo) (xt - xo)])
-			include : Translate 0 (-coFine)
-			include g
-			include : Translate 0 (2 * coFine)
-			include g
-			include : Translate 0 (-coFine)
-			include : Rotate [Math.atan2 (yt - yo) (xt - xo)]
-			include : Translate xo yo
+			include : DoubleArrowBarShape w x1 y1 x2 y2
 
 		define [dhArrowShape x1 y1 x2 y2 size] : glyph-construction
 			local mag : Math.hypot (y2 - y1) (x2 - x1)
@@ -196,7 +182,7 @@ glyph-block Symbol-Arrow : begin
 			include : shape x1 y1 x2 y2 arrowSize
 			save id unicode
 
-		define [doublearrow shape id unicode x1 y1 x2 y2] : sketch
+		define [DoubleArrow shape id unicode x1 y1 x2 y2] : sketch
 			set-width MosaicWidth
 			set-anchor "slash" BASE [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
 			local xm : mix x1 x2 0.5
@@ -249,11 +235,11 @@ glyph-block Symbol-Arrow : begin
 
 		do "Wave arrows"
 			define WaveShape : CreateWaveShape
-				doubleArrowStemWidth * 0.4
-				Math.min OPERATORSTROKE (doubleArrowStemWidth / 3)
+				waveArrowAmplitude * 0.4
+				Math.min OPERATORSTROKE (waveArrowAmplitude / 3)
 			define rightTBias : (MosaicWidth / MosaicUnitWidth) - 1
 			define freeCoT      : arrowSB / MosaicWidth
-			define connectedCoT : (arrowSB / MosaicWidth) + (11 / 32)
+			define connectedCoT : (arrowSB / MosaicWidth) + (9 / 32)
 			local mag : arrowRSB - arrowSB
 			local p : (mag - o - halfstroke * 1.1) / mag
 			sketch
@@ -317,16 +303,14 @@ glyph-block Symbol-Arrow : begin
 		arrow ArrowShape [MangleName 'arrowdownSK']   null arrowMidX (arrowTop - fine / 2) arrowMidX arrowBot
 		arrow ArrowShape [MangleName 'arrowupleftTK'] null arrowRSB arrowBot arrowSB (arrowTop - [Math.max (arrowWidth / 8) (fine * 1.5)])
 
-		composite [MangleName 'arrowbarleft'] glyphs.[MangleName 'arrowleftK'] [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21E4]
-		composite [MangleName 'arrowbarright'] glyphs.[MangleName 'arrowrightK'] [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21E5]
-		composite [MangleName 'arrowbarup'] glyphs.[MangleName 'arrowupK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode : MangleUnicode 0x2912]
-		composite [MangleName 'arrowbardown'] glyphs.[MangleName 'arrowdownK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode : MangleUnicode 0x2913]
-		composite [MangleName 'bararrowleft'] glyphs.[MangleName 'arrowleftSK'] [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21A4]
-		composite [MangleName 'bararrowright'] glyphs.[MangleName 'arrowrightSK'] [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21A6]
-		composite [MangleName 'bararrowup'] glyphs.[MangleName 'arrowupSK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode : MangleUnicode 0x21A5]
-		composite [MangleName 'bararrowdown'] glyphs.[MangleName 'arrowdownSK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode : MangleUnicode 0x21A7]
-
-		composite [MangleName 'uni21B8'] glyphs.[MangleName 'arrowupleftTK'] [HBar (arrowSB - arrowSize / 2) (arrowRSB + arrowSize / 2) arrowTop fine] [into-unicode : MangleUnicode 0x21B8]
+		composite [MangleName 'arrowbarleft'] [refer-glyph : MangleName 'arrowleftK'] [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21E4]
+		composite [MangleName 'arrowbarright'] [refer-glyph : MangleName 'arrowrightK'] [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21E5]
+		composite [MangleName 'arrowbarup'] [refer-glyph : MangleName 'arrowupK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode : MangleUnicode 0x2912]
+		composite [MangleName 'arrowbardown'] [refer-glyph : MangleName 'arrowdownK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode : MangleUnicode 0x2913]
+		composite [MangleName 'bararrowleft'] [refer-glyph : MangleName 'arrowleftSK'] [VBar arrowRSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21A4]
+		composite [MangleName 'bararrowright'] [refer-glyph : MangleName 'arrowrightSK'] [VBar arrowSB (symbolMid - arrowSize) (symbolMid + arrowSize) fine] [into-unicode : MangleUnicode 0x21A6]
+		composite [MangleName 'bararrowup'] [refer-glyph : MangleName 'arrowupSK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine] [into-unicode : MangleUnicode 0x21A5]
+		composite [MangleName 'bararrowdown'] [refer-glyph : MangleName 'arrowdownSK'] [HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine] [into-unicode : MangleUnicode 0x21A7]
 
 		let [dasw doubleArrowStemWidth] : do
 			arrow [DoubleArrowShape dasw] [MangleName 'dblarrowleft']       [MangleUnicode 0x21D0] arrowRSB symbolMid arrowSB symbolMid
@@ -338,14 +322,14 @@ glyph-block Symbol-Arrow : begin
 			arrow [DoubleArrowShape dasw] [MangleName 'dblarrowdownright']  [MangleUnicode 0x21D8] arrowSB arrowTop arrowRSB arrowBot
 			arrow [DoubleArrowShape dasw] [MangleName 'dblarrowdownleft']   [MangleUnicode 0x21D9] arrowRSB arrowTop arrowSB arrowBot
 
-		doublearrow ArrowShape [MangleName 'arrowleftright'] [MangleUnicode 0x2194] arrowSB symbolMid arrowRSB symbolMid
-		doublearrow ArrowShape [MangleName 'arrowupdown'] [MangleUnicode 0x2195] arrowMidX arrowTop arrowMidX arrowBot
-		doublearrow ArrowShape [MangleName 'arrowupleftdownright'] [MangleUnicode 0x2921] arrowSB arrowTop arrowRSB arrowBot
-		doublearrow ArrowShape [MangleName 'arrowuprightdownleft'] [MangleUnicode 0x2922] arrowRSB arrowTop arrowSB arrowBot
+		DoubleArrow ArrowShape [MangleName 'arrowleftright'] [MangleUnicode 0x2194] arrowSB symbolMid arrowRSB symbolMid
+		DoubleArrow ArrowShape [MangleName 'arrowupdown'] [MangleUnicode 0x2195] arrowMidX arrowTop arrowMidX arrowBot
+		DoubleArrow ArrowShape [MangleName 'arrowupleftdownright'] [MangleUnicode 0x2921] arrowSB arrowTop arrowRSB arrowBot
+		DoubleArrow ArrowShape [MangleName 'arrowuprightdownleft'] [MangleUnicode 0x2922] arrowRSB arrowTop arrowSB arrowBot
 
 		let [dasw doubleArrowStemWidth] : do
-			doublearrow [DoubleArrowShape dasw] [MangleName 'dblarrowleftright'] [MangleUnicode 0x21D4] arrowSB symbolMid arrowRSB symbolMid
-			doublearrow [DoubleArrowShape dasw] [MangleName 'dblarrowupdown'] [MangleUnicode 0x21D5] arrowMidX arrowTop arrowMidX arrowBot
+			DoubleArrow [DoubleArrowShape dasw] [MangleName 'dblarrowleftright'] [MangleUnicode 0x21D4] arrowSB symbolMid arrowRSB symbolMid
+			DoubleArrow [DoubleArrowShape dasw] [MangleName 'dblarrowupdown'] [MangleUnicode 0x21D5] arrowMidX arrowTop arrowMidX arrowBot
 
 		arrow dhArrowShape [MangleName 'dharrowleft'] [MangleUnicode 0x219E] arrowRSB symbolMid arrowSB symbolMid
 		arrow dhArrowShape [MangleName 'dharrowright'] [MangleUnicode 0x21A0] arrowSB symbolMid arrowRSB symbolMid
@@ -355,23 +339,23 @@ glyph-block Symbol-Arrow : begin
 		arrow htArrowShape [MangleName 'htarrowleft'] [MangleUnicode 0x21A2] arrowRSB symbolMid arrowSB symbolMid
 		arrow htArrowShape [MangleName 'htarrowright'] [MangleUnicode 0x21A3] arrowSB symbolMid arrowRSB symbolMid
 
-		composite [MangleName 'uni219A'] glyphs.[MangleName 'arrowleft'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x219A]
-		composite [MangleName 'uni219B'] glyphs.[MangleName 'arrowright'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x219B]
-		composite [MangleName 'uni21AE'] glyphs.[MangleName 'arrowleftright'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x21AE]
-		composite [MangleName 'uni21F7'] glyphs.[MangleName 'arrowleft'] glyphs.arrVStrokeOver [into-unicode : MangleUnicode 0x21F7]
-		composite [MangleName 'uni21F8'] glyphs.[MangleName 'arrowright'] glyphs.arrVStrokeOver [into-unicode : MangleUnicode 0x21F8]
-		composite [MangleName 'uni21F9'] glyphs.[MangleName 'arrowleftright'] glyphs.arrVStrokeOver [into-unicode : MangleUnicode 0x21F9]
-		composite [MangleName 'uni21FA'] glyphs.[MangleName 'arrowleft'] glyphs.arrDblVStrokeOver [into-unicode : MangleUnicode 0x21FA]
-		composite [MangleName 'uni21FB'] glyphs.[MangleName 'arrowright'] glyphs.arrDblVStrokeOver [into-unicode : MangleUnicode 0x21FB]
-		composite [MangleName 'uni21FC'] glyphs.[MangleName 'arrowleftright'] glyphs.arrDblVStrokeOver [into-unicode : MangleUnicode 0x21FC]
-		composite [MangleName 'uni21CD'] glyphs.[MangleName 'dblarrowleft'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x21CD]
-		composite [MangleName 'uni21CE'] glyphs.[MangleName 'dblarrowleftright'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x21CE]
-		composite [MangleName 'uni21CF'] glyphs.[MangleName 'dblarrowright'] glyphs.arrSlashOver [into-unicode : MangleUnicode 0x21CF]
-		composite [MangleName 'uni2908'] glyphs.[MangleName 'arrowdown'] glyphs.arrHStrokeOver [into-unicode : MangleUnicode 0x2908]
-		composite [MangleName 'uni2909'] glyphs.[MangleName 'arrowup'] glyphs.arrHStrokeOver [into-unicode : MangleUnicode 0x2909]
-		composite [MangleName 'uni21DF'] glyphs.[MangleName 'arrowdown'] glyphs.arrDblHStrokeOver [into-unicode : MangleUnicode 0x21DF]
-		composite [MangleName 'uni21DE'] glyphs.[MangleName 'arrowup'] glyphs.arrDblHStrokeOver [into-unicode : MangleUnicode 0x21DE]
+		composite [MangleName 'uni219A'] [refer-glyph : MangleName 'arrowleft'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x219A]
+		composite [MangleName 'uni219B'] [refer-glyph : MangleName 'arrowright'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x219B]
+		composite [MangleName 'uni21AE'] [refer-glyph : MangleName 'arrowleftright'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x21AE]
+		composite [MangleName 'uni21F7'] [refer-glyph : MangleName 'arrowleft'] [refer-glyph 'arrVStrokeOver'] [into-unicode : MangleUnicode 0x21F7]
+		composite [MangleName 'uni21F8'] [refer-glyph : MangleName 'arrowright'] [refer-glyph 'arrVStrokeOver'] [into-unicode : MangleUnicode 0x21F8]
+		composite [MangleName 'uni21F9'] [refer-glyph : MangleName 'arrowleftright'] [refer-glyph 'arrVStrokeOver'] [into-unicode : MangleUnicode 0x21F9]
+		composite [MangleName 'uni21FA'] [refer-glyph : MangleName 'arrowleft'] [refer-glyph 'arrDblVStrokeOver'] [into-unicode : MangleUnicode 0x21FA]
+		composite [MangleName 'uni21FB'] [refer-glyph : MangleName 'arrowright'] [refer-glyph 'arrDblVStrokeOver'] [into-unicode : MangleUnicode 0x21FB]
+		composite [MangleName 'uni21FC'] [refer-glyph : MangleName 'arrowleftright'] [refer-glyph 'arrDblVStrokeOver'] [into-unicode : MangleUnicode 0x21FC]
+		composite [MangleName 'uni21CD'] [refer-glyph : MangleName 'dblarrowleft'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x21CD]
+		composite [MangleName 'uni21CE'] [refer-glyph : MangleName 'dblarrowleftright'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x21CE]
+		composite [MangleName 'uni21CF'] [refer-glyph : MangleName 'dblarrowright'] [refer-glyph 'arrSlashOver'] [into-unicode : MangleUnicode 0x21CF]
 
+		composite [MangleName 'uni2908'] [refer-glyph : MangleName 'arrowdown'] [refer-glyph 'arrHStrokeOver'] [into-unicode : MangleUnicode 0x2908]
+		composite [MangleName 'uni2909'] [refer-glyph : MangleName 'arrowup'] [refer-glyph 'arrHStrokeOver'] [into-unicode : MangleUnicode 0x2909]
+		composite [MangleName 'uni21DF'] [refer-glyph : MangleName 'arrowdown'] [refer-glyph 'arrDblHStrokeOver'] [into-unicode : MangleUnicode 0x21DF]
+		composite [MangleName 'uni21DE'] [refer-glyph : MangleName 'arrowup'] [refer-glyph 'arrDblHStrokeOver'] [into-unicode : MangleUnicode 0x21DE]
 
 		do
 			local hcDist : Math.max (halfstroke * 5) (arrowWidth / 2)
@@ -386,6 +370,65 @@ glyph-block Symbol-Arrow : begin
 			vcombine [MangleName 'uni21CB'] [MangleUnicode 0x21CB] [MangleName 'arrowleftHR'] [MangleName 'arrowrightHR'] (arrowSize)
 			vcombine [MangleName 'uni21CC'] [MangleUnicode 0x21CC] [MangleName 'arrowrightHL'] [MangleName 'arrowleftHL'] (arrowSize)
 			vcombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowbarright'] [MangleName 'arrowbarleft'] (arrowSize * 1.75)
+
+		do "Legacy computing arrows"
+			define bodyWidth : Math.min arrowWidth (arrowHeight * 0.6)
+			sketch
+				set-width MosaicWidth
+				define x1 : arrowMidX + bodyWidth / 2
+				define y1 : arrowTop - bodyWidth
+				define x2 : arrowMidX - bodyWidth / 2
+				define y2 : arrowTop + 0
+				include : ArrowHead x1 y1 x2 y2
+				include : intersection
+					Rect arrowTop arrowBot 0 x1
+					ArrowBar x1 y1 x2 y2 halfstroke
+				include : intersection
+					VBarRight x1 arrowBot arrowTop (halfstroke * 2)
+					spiro-outline
+						corner x1 y1
+						corner x2 y2
+						corner x2 arrowBot
+						corner x1 arrowBot
+				save [MangleName 'arrowUpThenNW'] [MangleUnicode 0x1F8B0]
+
+			sketch
+				set-width MosaicWidth
+				define x1 : arrowMidX + bodyWidth / 2
+				define y1 : arrowBot + bodyWidth
+				define x2 : arrowMidX - bodyWidth / 2
+				define y2 : arrowBot + 0
+				include : ArrowHead x1 y1 x2 y2
+				include : intersection
+					Rect [mix y1 y2 (1 / 2)] arrowBot 0 x1
+					ArrowBar x1 y1 x2 y2 halfstroke
+				include : intersection
+					Rect [mix y1 y2 1] arrowTop x2 x1
+					dispiro
+						widths halfstroke halfstroke
+						flat x2 y2
+						curl [mix x2 x1 (2/3)] [mix y2 y1 (2/3)]
+						g4.up.mid
+							x1 - halfstroke * HVCONTRAST
+							[mix y2 (arrowTop - halfstroke) 0.75] - halfstroke * 0.6
+						arcvh
+						flat [mix x2 (x1 - halfstroke * HVCONTRAST) 0.5] (arrowTop - halfstroke)
+						curl x2 (arrowTop - halfstroke) [heading LEFTWARD]
+				save [MangleName 'arrowRightThenCurlbSW'] [MangleUnicode 0x1F8B1]
+
+			sketch
+				set-width MosaicWidth
+				define totalHeight : bodyWidth * 1.2 + OPERATORSTROKE
+				define x1 : arrowMidX + bodyWidth / 2
+				define y1 : symbolMid - totalHeight / 2
+				define x2 : arrowMidX - bodyWidth / 2
+				define y2 : symbolMid - totalHeight / 2 + bodyWidth
+
+				include : ArrowShape x1 y1 x2 y2
+				include : HBar x1 x2 (symbolMid + totalHeight / 2) OPERATORSTROKE
+
+				save [MangleName 'uni21B8'] [MangleUnicode 0x21B8]
+
 
 		if (MosaicWidth == WIDE-WIDTH-1) : set exportArrowShape ArrowShape
 
