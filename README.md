@@ -315,6 +315,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `7`:
     * `v-seven-noserif`, `cv64`: `7` without serif (default for Sans).
     * `v-seven-serifed`, `cv65`: `7` with initial serif (default for Slab).
+  * Styles for `ß`:
+    * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
+    * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
+  * Styles for `λ`:
+    * `v-lambda-straight`, `cv94`: More-straight letter `λ` (default).
+    * `v-lambda-curly`, `cv95`: More curly letter `λ`, like Iosevka 2.x.
   * Styles for `~`:
     * `v-tilde-high`, `cv16`: Higher tilde `~`.
     * `v-tilde-low`, `cv17`: Lower tilde `~` (default).
@@ -353,9 +359,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
-  * Styles for `ß`:
-    * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
-    * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
 
 <!-- END Section-Cherry-Picking-Styles -->
 

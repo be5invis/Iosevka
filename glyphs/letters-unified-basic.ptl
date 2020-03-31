@@ -1306,9 +1306,10 @@ glyph-block LetterUnified-Basic : begin
 
 	### y
 	do "y and related ============================================================================"
-		define [GenSmallYShape straightBar] : begin
-			local useStraightBottom : !SLAB && straightBar
-			local useCurlyBottom : SLAB || straightBar
+		define [GenSmallYShape straightBar serifless] : begin
+			local slab : if serifless false SLAB
+			local useStraightBottom : !slab && straightBar
+			local useCurlyBottom : slab || straightBar
 			local px1 0.84
 			local py1 : linreg 18 0.8 126 0.76 STROKE
 			local px2 0.95
@@ -1321,8 +1322,9 @@ glyph-block LetterUnified-Basic : begin
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
 			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
-			local ySbCor : (XH / CAP) * (OX * [if SLAB 1 4])
-			local yrstroker : RIGHTSB - [if straightBar ySbCor 0]
+			local ySbCor : (XH / CAP) * (OX * [if slab 1 4])
+			local sbScalar : if (straightBar && SLAB && !slab) 1.5 1
+			local yrstroker : WIDTH - SB * sbScalar - [if straightBar ySbCor 0]
 			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
 			local yBottomJut : JUT * 1.25
 			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE
@@ -1428,7 +1430,7 @@ glyph-block LetterUnified-Basic : begin
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
 
-				if SLAB : begin
+				if slab : begin
 					include : AIVSerifs top
 
 			define [SmallYHookTopShape top bottom] : glyph-construction
@@ -1457,34 +1459,20 @@ glyph-block LetterUnified-Basic : begin
 						yJoinKnots ds ds2 top bottom true
 					SmallYStrokeSplitMask top bottom true (-1)
 
-				if SLAB : begin
+				if slab : begin
 					include : AIVSerifs top
 					eject-contour 'serifRT'
 
 			define [SmallLambdaShape top bottom] : glyph-construction
-				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2
-				local left    yrstrokel0
-				local right : yrstroker - HALFSTROKE * HVCONTRAST
-
-				include : dispiro
-					widths.center
-					flat right bottom [heading UPWARD]
-					curl right (bottom + ds) [heading UPWARD]
-					quadcontrols 0 dpy1 16
-					flat [mix right left (1 - px1)] [mix (top - ds2) (bottom + ds) py1]
-					curl [mix right left px2] [mix (top - ds2) (bottom + ds) (1 - py20)]
-					quadcontrols 1 (1 - dpy20) 16
-					flat left (top - ds2) [heading UPWARD]
-					curl left top [heading UPWARD]
-
-				include : dispiro
-					widths.center
-					flat (WIDTH - right) bottom [heading UPWARD]
-					curl (WIDTH - right) (bottom + ds) [heading UPWARD]
-					quadcontrols 0 dpy1 16
-					flat [mix (WIDTH - left) (WIDTH - right) px1] [mix (top - ds2) (bottom + ds) py1]
-					curl MIDDLE [mix (top - ds2) (bottom + ds) [linreg (1 - px2) (1 - py20) px1 py1 ((MIDDLE - left) / (right - left))]]
+				set currentGlyph.gizmo : Italify (-para.slantAngle)
+				include : SmallYShape top bottom
+				set currentGlyph.gizmo : Italify (+para.slantAngle)
+				# apply-transform : Upright
+				apply-transform : Translate 0 (-[mix bottom top 0.5])
+				apply-transform : Scale 1 (-1)
+				apply-transform : Translate 0 (+[mix bottom top 0.5])
+				# apply-transform : Italify
+				currentGlyph.reverse-all
 
 			return : object SmallYShape SmallYHookTopShape SmallLambdaShape
 
@@ -1553,16 +1541,26 @@ glyph-block LetterUnified-Basic : begin
 		turned 'turny.curly'    nothing 'y.curly' MIDDLE (XH / 2) MarkSet.b
 		select-variant 'turny' 0x28E (follow -- 'yhooktop')
 
-		sketch # lambda
-			include MarkSet.b
-			include : [GenSmallYShape false].SmallLambdaShape CAP 0
-			set-anchor "overlay" BASE MIDDLE (XH / 2)
-			save 'lambda' 0x3BB
+		define [LambdaBarOverlayShape] : FlatSlashShape ([tp [Upright] [query-glyph 'l.serifed'].anchors.above].x / para.diversityI) [mix 0 CAP 0.7] (OVERLAYSTROKE / 2)
 
-		sketch # lambdaslash
-			include [refer-glyph 'lambda'] AS_BASE
-			include : FlatSlashShape ([tp [Upright] [query-glyph 'l.serifed'].anchors.above].x / para.diversityI) [mix 0 CAP 0.7] (OVERLAYSTROKE / 2)
-			save 'lambdaslash' 0x19B
+		sketch # lambda.straight
+			include MarkSet.b
+			include : [GenSmallYShape true  true].SmallLambdaShape CAP 0
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
+			save 'lambda.straight'
+			include : LambdaBarOverlayShape
+			save 'lambdaSlash.straight'
+
+		sketch # lambda.curly
+			include MarkSet.b
+			include : [GenSmallYShape false true].SmallLambdaShape CAP 0
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
+			save 'lambda.curly'
+			include : LambdaBarOverlayShape
+			save 'lambdaSlash.curly'
+
+		select-variant 'lambda' 0x3BB
+		select-variant 'lambdaSlash' 0x19B (follow -- 'lambda')
 
 	### K and k
 	do "k and related ============================================================================"
