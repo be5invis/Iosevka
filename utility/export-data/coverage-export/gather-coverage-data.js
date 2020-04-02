@@ -4,12 +4,15 @@ const ugc = require("unicode-13.0.0/General_Category");
 
 module.exports = function(rawCov) {
 	const result = [];
-	const inFontCharSet = new Set(rawCov.keys());
+	const glyphNameMap = new Map();
+	for (const [lchFont, [gn, ck]] of rawCov) {
+		glyphNameMap.set(lchFont, gn);
+	}
 	for (const [[lchBlockStart, lchBlockEnd], block] of blockData) {
 		let blockResults = [];
 		let processed = new Set();
 
-		for (const [lchFont, [gn, ck]] of rawCov) {
+		for (const [lchFont, [_gn, ck]] of rawCov) {
 			if (lchFont < 0x20 || lchFont < lchBlockStart || lchFont > lchBlockEnd) continue;
 			const lchStart = (lchFont >>> 4) << 4;
 			const lchEnd = lchStart + 0x10;
@@ -19,11 +22,10 @@ module.exports = function(rawCov) {
 				const gc = ugc.get(lch);
 				blockResults.push({
 					lch,
-					charName: chName,
-					glyphName: inFontCharSet.has(lch) ? gn : undefined,
 					gc,
-					ck,
-					inFont: inFontCharSet.has(lch)
+					charName: chName,
+					glyphName: glyphNameMap.get(lch),
+					inFont: glyphNameMap.has(lch)
 				});
 				processed.add(lch);
 			}

@@ -209,6 +209,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D3D 'OU'
 		list 0x1D3E 'P'
 		list 0x1D3F 'R'
+		list null   'C' # there is no superscript C in unicode, but is is used for the MC symbol
 		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 		list 0x1D40 'T'
 		list 0x1D41 'U'
@@ -378,6 +379,18 @@ glyph-block Autobuild-Transformed : begin
 			include : DoubleSuperscript [refer-glyph 'supS'] [refer-glyph 'supM']
 			save 'serviceMark' 0x2120
 
+		sketch # raisedMC
+			include : DoubleSuperscript [refer-glyph 'supM'] [refer-glyph 'supC']
+			save 'raisedMC' 0x1F16A
+
+		sketch # raisedMD
+			include : DoubleSuperscript [refer-glyph 'supM'] [refer-glyph 'supD']
+			save 'raisedMD' 0x1F16B
+
+		sketch # raisedMR
+			include : DoubleSuperscript [refer-glyph 'supM'] [refer-glyph 'supR']
+			save 'raisedMR' 0x1F16C
+
 	define [createFracImpl suffix records fine scaleFactor closing] : begin
 		local pendingGlyphs : [records.map : [record] => record.1].concat : records.map : [record] => record.2
 		local miniatureFont : Miniature
@@ -464,7 +477,7 @@ glyph-block Autobuild-Transformed : begin
 		local df1 : Thinner pendingGlyphs1 shrink1
 		local df2 : Thinner pendingGlyphs2 shrink2
 
-		foreach [{unicode c1 c2} : items-of records] : begin
+		foreach [{unicode c1 c2 desiredWidth} : items-of records] : begin
 			local glyphName : MangleName "\(c1)_\(c2)"
 			if [query-glyph glyphName] : begin
 				local j 2
@@ -476,7 +489,7 @@ glyph-block Autobuild-Transformed : begin
 				include df2.(c2)
 				include : Translate df1.(c1).advanceWidth 0
 				include df1.(c1)
-				save glyphName [MangleUnicode unicode]
+				save glyphName [MangleUnicode unicode desiredWidth]
 			: else : sketch
 				set-width ww
 				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
@@ -491,7 +504,7 @@ glyph-block Autobuild-Transformed : begin
 				include : Scale [clamp 0 1 ((ww - SB * 1.25) / (ww - SB * 2) * ww / refW)] 1
 				include : Translate (ww / 2) 0
 				include : Italify
-				save glyphName [MangleUnicode unicode]
+				save glyphName [MangleUnicode unicode desiredWidth]
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
 	if [not recursive] : createLigatures stdShrink stdShrink 1 1 : list
@@ -524,6 +537,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x2047 'question' 'question'
 		list 0x2048 'question' 'exclam'
 		list 0x2049 'exclam' 'question'
+		list 0x1F190 'D' 'J' WIDE-WIDTH-1
 	if [not recursive] : createLigatures 0.7 0.8 0.75 0.9 : list
 		list 0x2103 'degree' 'C'
 		list 0x2109 'degree' 'F'
