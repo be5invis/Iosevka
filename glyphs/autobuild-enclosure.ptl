@@ -95,7 +95,7 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : circleInner dscale miniatureFont unicode parts width bal baly
-					include : OShape top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					include : OShape top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -129,7 +129,7 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : difference
-						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 						circleInner dscale miniatureFont unicode parts width bal baly
 
 					apply-transform : Upright
@@ -190,15 +190,15 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : circleInner dscale miniatureFont unicode parts width bal baly
-					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 					include : OShape
 						top - sw + sw1
 						bot + sw - sw1
 						left + sw * HVCONTRAST - sw1 * HVCONTRAST
 						right - sw * HVCONTRAST + sw1 * HVCONTRAST
 						begin sw1
-						SMALLSMOOTHA * width / WIDTH - sw + sw1
-						SMALLSMOOTHB * width / WIDTH - sw + sw1
+						SMALLSMOOTHA * width / HALF-UPM - sw + sw1
+						SMALLSMOOTHB * width / HALF-UPM - sw + sw1
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -288,13 +288,14 @@ glyph-block AutoBuild-Enclosure : begin
 					if (w == ww) : save gn unicode
 					: else : save gn
 
-	define [createDottedGlyphs digits records] : begin
+	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
+	define [createDottedGlyphs digits gidDot records] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local pendingGlyphs : records.map : [record] => record.1
 			local miniatureFont : Miniature
-				glyphs  -- [[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {'period'}]
+				glyphs  -- [[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {gidDot}]
 				crowd   -- [BraceCrowd digits ww]
-				scale   -- [BraceScale digits ww]
+				scale   -- [DottedScale digits ww]
 				sbscale -- 1
 
 			foreach {unicode parts w} [items-of records] : do
@@ -303,7 +304,7 @@ glyph-block AutoBuild-Enclosure : begin
 				sketch
 					set-width width
 					local tw 0
-					foreach [glyphid : items-of : parts.concat {'period'}] : begin
+					foreach [glyphid : items-of : parts.concat {gidDot}] : begin
 						local g miniatureFont.(glyphid)
 						if tw : begin # Add a little kern
 							set tw : tw - SB
@@ -442,7 +443,15 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2488 + j - 1
 			digitGlyphNames j
 			begin WIDE-WIDTH-1
-		createDottedGlyphs 1 compositions
+		createDottedGlyphs 1 'period' compositions
+
+	if [not recursive] : do "Single-digit comma"
+		local compositions {}
+		foreach [j : range 0 till 9] : compositions.push : list
+			0x1F101 + j
+			digitGlyphNames j
+			begin WIDE-WIDTH-1
+		createDottedGlyphs 1 'comma' compositions
 
 	if [not recursive] : do "Double-digit dotted"
 		local compositions : list
@@ -450,4 +459,4 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2488 + j - 1
 			digitGlyphNames j
 			begin WIDE-WIDTH-1
-		createDottedGlyphs 2 compositions
+		createDottedGlyphs 2 'period' compositions

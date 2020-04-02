@@ -1,6 +1,6 @@
 const cldr = require("cldr");
 const fs = require("fs-extra");
-const path = require("path");
+const gatherCov = require("./coverage-export/gather-coverage-data");
 
 module.exports = async function(charMapPath) {
 	const charMap = await fs.readJson(charMapPath);
@@ -57,15 +57,15 @@ module.exports = async function(charMapPath) {
 		if (displayName) supportLangSet.add(displayName);
 	}
 
-	const unicodeCoverage = new Map();
-	for (const [gn, codes, cl] of charMap) for (const u of codes) unicodeCoverage.set(u, cl);
+	const rawCoverage = new Map();
+	for (const [gn, codes, cl] of charMap) for (const u of codes) rawCoverage.set(u, [gn, cl]);
 
 	return {
 		stats: {
 			glyphCount: charMap.length,
-			codePointCount: unicodeCoverage.size
+			codePointCount: rawCoverage.size
 		},
-		unicodeCoverage: Array.from(unicodeCoverage).sort((a, b) => a[0] - b[0]),
+		unicodeCoverage: gatherCov(rawCoverage),
 		languages: Array.from(supportLangSet).sort()
 	};
 };

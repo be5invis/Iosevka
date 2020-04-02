@@ -491,20 +491,13 @@ glyph-block Symbol-Punctuation : begin
 			include : FlipAround MIDDLE (XH / 2)
 			save 'exclamDown' 0xA1
 
-		sketch # doubleexclam
-			local d : 0.25 * WIDTH
-			include : refer-glyph "exclam"
-			apply-transform : Translate (-d * 2) 0
-			include : refer-glyph "exclam"
-			apply-transform : Translate d 0
-			save 'doubleexclam' 0x203C
-
 		sketch # bar
 			set-width WIDTH
 			set currentGlyph.anchors.above {.type BASE .x MIDDLE .y parenTop}
 			set currentGlyph.anchors.below {.type BASE .x MIDDLE .y parenBot}
 			include : VBar MIDDLE parenBot parenTop
 			save 'bar' '|'
+			save 'dentalclick' 0x1C0
 
 		sketch # parallel
 			set-width WIDTH
@@ -515,7 +508,6 @@ glyph-block Symbol-Punctuation : begin
 			include : VBar (MIDDLE + WIDTH * 0.175) parenBot parenTop sw
 			save 'parallel' 0x2225
 			save 'doubleBar' 0x2016
-			save 'dentalclick' 0x1C0
 			save 'alveolarlateralclick' 0x1C1
 
 		sketch # brokenbar
@@ -822,6 +814,8 @@ glyph-block Symbol-Punctuation : begin
 			include : SlashShape slashDefautLeft slashDefaultRight
 			save 'slash' '/'
 			save 'solidus' 0x2044
+			save 'mathDivSlash' 0x2215
+
 		sketch # doubleSlash
 			define w : adviceBlackness 3
 			define b : Math.max w (WIDTH * 0.15)
@@ -845,6 +839,7 @@ glyph-block Symbol-Punctuation : begin
 		sketch # backslash
 			include : BackslashShape (MIDDLE - backslashWidth / 2) (MIDDLE + backslashWidth / 2)
 			save 'backslash' "\\"
+			save 'mathBackslash' 0x2216
 		sketch # backslash.left
 			include : BackslashShape (MIDDLE - backslashWidth / 2) WIDTH
 			save 'backslash.left'
@@ -855,34 +850,47 @@ glyph-block Symbol-Punctuation : begin
 
 	do 'Dashes'
 		do 'underscore'
+			define openBoxGap : STROKE + [Math.max STROKE (XH / 6)]
 			define [OpenBoxSide y] : begin
-				local height : STROKE + [Math.max STROKE (XH / 6)]
 				return : union
-					VBarLeft  SB      y (y + height)
-					VBarRight RIGHTSB y (y + height)
+					VBarLeft  SB      y (y + openBoxGap)
+					VBarRight RIGHTSB y (y + openBoxGap)
 			sketch # underscore.high
 				set-width WIDTH
 				include : HBarBottom SB RIGHTSB 0
 				save 'underscore.high'
-				include : OpenBoxSide 0
-				save 'openBox.high'
+				branch
+					include : HBarBottom SB RIGHTSB (-openBoxGap)
+					save 'doubleUnderscore.high'
+				branch
+					include : OpenBoxSide 0
+					save 'openBox.high'
 
 			sketch # underscore.belowBaseline
 				set-width WIDTH
 				include : HBarTop SB RIGHTSB 0
 				save 'underscore.belowBaseline'
-				include : OpenBoxSide (-STROKE)
-				save 'openBox.belowBaseline'
+				branch
+					include : HBarTop SB RIGHTSB (-openBoxGap)
+					save 'doubleUnderscore.belowBaseline'
+				branch
+					include : OpenBoxSide (-STROKE)
+					save 'openBox.belowBaseline'
 
 			sketch # underscore.low
 				set-width WIDTH
 				include : HBarTop SB RIGHTSB (DESCENDER * 0.9)
 				save 'underscore.low'
-				include : OpenBoxSide (DESCENDER * 0.9)
-				save 'openBox.low'
+				branch
+					include : HBarTop SB RIGHTSB (DESCENDER * 0.9 - openBoxGap)
+					save 'doubleUnderscore.low'
+				branch
+					include : OpenBoxSide (DESCENDER * 0.9)
+					save 'openBox.low'
 
-			select-variant 'underscore' '_'
-			select-variant 'openBox'    0x2423 (follow -- 'underscore')
+			select-variant 'underscore'       '_'
+			select-variant 'openBox'          0x2423 (follow -- 'underscore')
+			select-variant 'doubleUnderscore' 0x2017 (follow -- 'underscore')
 
 		sketch # overline
 			include : HBarTop SB RIGHTSB CAP
@@ -927,13 +935,24 @@ glyph-block Symbol-Punctuation : begin
 			save 'bullet' 0x2022
 			save 'hyphenpoint' 0x2027
 
-		sketch # whitebullet
-			set-width WIDE-WIDTH-1
-			local s : [adviceBlackness 5] * 0.75
-			include : difference
-				DotAt FWMIDDLE symbolMid (PERIODRADIUS - O)
-				DotAt FWMIDDLE symbolMid (PERIODRADIUS - O - s)
-			save 'whitebullet' 0x25E6
+		for-width-kinds WIDE-WIDTH-1
+			local radius : PERIODRADIUS * [Math.sqrt MosaicWidthScalar]
+			sketch # whiteBullet
+				set-width MosaicWidth
+				local s : [adviceBlackness 5] * 0.75
+				include : difference
+					DotAt MosaicMiddle symbolMid (radius - O)
+					DotAt MosaicMiddle symbolMid (radius - O - s)
+				save [MangleName 'whiteBullet'] [MangleUnicode 0x25E6]
+
+			sketch # triangularBullet
+				set-width MosaicWidth
+				include : spiro-outline
+					corner (MosaicMiddle + radius - O) symbolMid
+					corner (MosaicMiddle - radius / 2) (symbolMid - radius / 2 * [Math.sqrt 3])
+					corner (MosaicMiddle - radius / 2) (symbolMid + radius / 2 * [Math.sqrt 3])
+				save [MangleName 'triangularBullet'] [MangleUnicode 0x2023]
+
 
 	do 'Quotes and Primes'
 		local quoteTop (CAP * 1.05)
