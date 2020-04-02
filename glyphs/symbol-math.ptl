@@ -126,10 +126,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 	local rightCircle : WIDTH - SB * kCircle
 	local radiusCircle : (rightCircle - leftCircle) / 2
 
-	local radiusBig : (tackTop - tackBot) / 2
-	local leftBig : MIDDLE - radiusBig
-	local rightBig : MIDDLE + radiusBig
-
 	sketch # mathO
 		include : dispiro
 			widths.lhs GEOMETRYSTROKE
@@ -155,31 +151,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			arcvh nothing 2
 			close
 		save 'mathOOutline'
-	sketch # mathOBig
-		include : dispiro
-			widths.lhs GEOMETRYSTROKE
-			g4 MIDDLE (symbolMid + radiusBig - O)
-			archv nothing 2
-			g4 (leftBig + O) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig + O)
-			archv nothing 2
-			g4 (rightBig - O) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOBig'
-	sketch # mathO-outline
-		include : spiro-outline
-			g4 MIDDLE (symbolMid + radiusBig)
-			archv nothing 2
-			g4 (leftBig) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig)
-			archv nothing 2
-			g4 (rightBig) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOOutlineBig'
 	sketch # mathBoxOutline
 		include : spiro-outline
 			corner leftBox topBox
@@ -194,6 +165,38 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
 			dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox topBox]
 		save 'mathBox'
+
+	for-width-kinds WIDE-WIDTH-1
+		local radiusBig : (tackTop - tackBot) / 2 * [Math.sqrt MosaicWidthScalar]
+		local leftBig : MosaicMiddle - radiusBig
+		local rightBig : MosaicMiddle + radiusBig
+		sketch # mathOBig
+			set-width MosaicWidth
+			include : dispiro
+				widths.lhs GEOMETRYSTROKE
+				g4 MosaicMiddle (symbolMid + radiusBig - O)
+				archv nothing 2
+				g4 (leftBig + O) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig + O)
+				archv nothing 2
+				g4 (rightBig - O) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOBig']
+		sketch # mathOOutlineBig
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + radiusBig)
+				archv nothing 2
+				g4 (leftBig) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig)
+				archv nothing 2
+				g4 (rightBig) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOOutlineBig']
 
 	do "Geometry"
 		sketch
@@ -396,6 +399,44 @@ glyph-block Symbol-Math-Dots-And-Colons : begin
 		include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
 		save 'mathcdot'
 
+	for-width-kinds WIDE-WIDTH-1
+		sketch # mathcdot
+			set-width MosaicWidth
+			include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MosaicMiddle - PERIODRADIUS + O) (MosaicMiddle + PERIODRADIUS - O) true
+			save [MangleName 'mathcdotBig']
+
+		sketch # plus
+			set-width MosaicWidth
+			include : union
+				HBar SB (MosaicWidth - SB) symbolMid GEOMETRYSTROKE
+				VBar MosaicMiddle [mix symbolMid plusTop MosaicWidthScalar] [mix symbolMid plusBot MosaicWidthScalar] GEOMETRYSTROKE
+			save : MangleName 'innerPlusBig'
+
+		sketch # innerMultiplyStroke1Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle - radius) (symbolMid - radius)
+				curl (MosaicMiddle + radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke1Big'
+
+		sketch # innerMultiplyStroke2Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle + radius) (symbolMid - radius)
+				curl (MosaicMiddle - radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke2Big'
+
+		sketch # innerMultiplyBig
+			set-width MosaicWidth
+			include : refer-glyph : MangleName "innerMultiplyStroke1Big"
+			include : refer-glyph : MangleName "innerMultiplyStroke2Big"
+			save : MangleName 'innerMultiplyBig'
+
+
 	composite 'mathAsterisk' [refer-glyph 'opAsterisk.low'] [into-unicode 0x2217]
 
 glyph-block Symbol-Math-Circled : begin
@@ -405,11 +446,13 @@ glyph-block Symbol-Math-Circled : begin
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiply']] [into-unicode 0x2297]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiplyStroke1']] [into-unicode 0x2298]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathcdot']] [into-unicode 0x2299]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'mathcdot']] [into-unicode 0x2A00]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'innerPlus']] [into-unicode 0x2A01]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'innerMultiply']] [into-unicode 0x2A02]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'smallwhitecircle.hwid']] [into-unicode 0x229A]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathAsterisk']] [into-unicode 0x229B]
+
+	for-width-kinds WIDE-WIDTH-1
+		composite [MangleName 'uni2A00'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'mathcdotBig']] [into-unicode : MangleUnicode 0x2A00]
+		composite [MangleName 'uni2A01'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerPlusBig']] [into-unicode : MangleUnicode 0x2A01]
+		composite [MangleName 'uni2A02'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerMultiplyBig']] [into-unicode : MangleUnicode 0x2A02]
 
 	composite
 		refer-glyph 'mathO'

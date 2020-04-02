@@ -560,8 +560,20 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 	}
 });
 
+const PagesFastFontExport = task(`pages:fast-font-export`, async target => {
+	const [pagesDir] = await target.need(PagesDir);
+	if (!pagesDir) return;
+	const dirs = await target.need(GroupContents`iosevka`);
+	for (const dir of dirs) {
+		await cp(`${DIST}/${dir}`, path.resolve(pagesDir, "shared/font-import", dir));
+	}
+});
+
 const Pages = task(`pages`, async target => {
 	await target.need(PagesDataExport, PagesFontExport);
+});
+const PagesFast = task(`pages-fast`, async target => {
+	await target.need(PagesDataExport, PagesFastFontExport);
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
