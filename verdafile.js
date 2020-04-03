@@ -607,7 +607,7 @@ const SnapShotHtml = file(`snapshot/index.html`, async target => {
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(sfu`snapshot/index.styl`);
-	await run(`npm`, `run`, `stylus`, `snapshot/index.styl`, `-c`);
+	await run(`npx`, `stylus`, `snapshot/index.styl`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
