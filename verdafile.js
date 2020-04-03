@@ -4,7 +4,7 @@ const fs = require("fs");
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm } = build.actions;
+const { run, node, cd, cp, rm, fail } = build.actions;
 const { FileList } = build.predefinedFuncs;
 module.exports = build;
 
@@ -288,14 +288,22 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 const HivesOf = computed.group("metadata:hives-of", async (target, gid) => {
 	const [{ fontInfos }] = await target.need(FontBuildingParameters);
 	const hvs = fontInfos[gid];
-	if (!hvs) throw new Error(`Build plan for ${gid} not found.`);
+	if (!hvs) fail(`Build plan for '${gid}' not found.` + whyBuildPlanIsnNotThere(gid));
 	return hvs;
 });
 
 const GroupInfo = computed.group("metadata:group-info", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(FontBuildingParameters);
-	return buildPlans[gid];
+	const plan = buildPlans[gid];
+	if (!plan) fail(`Build plan for '${gid}' not found.` + whyBuildPlanIsnNotThere(gid));
+	return plan;
 });
+
+function whyBuildPlanIsnNotThere(gid) {
+	if (!fs.existsSync(PRIVATE_BUILD_PLANS))
+		return "\n        -- Possible reason: Config file 'private-build-plans.toml' does not exist.";
+	return "";
+}
 
 const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gid) => {
 	const [plan] = await target.need(GroupInfo(gid));
