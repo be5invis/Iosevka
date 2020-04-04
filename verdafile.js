@@ -137,7 +137,7 @@ function vlShapeWeight(x) {
 	return x >= 100 && x <= 900;
 }
 function vlCssWeight(x) {
-	return x >= 0 && x <= 1000;
+	return x > 0 && x < 1000;
 }
 function vlMenuWeight(x) {
 	return vlCssWeight(x);
