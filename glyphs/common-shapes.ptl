@@ -8,19 +8,20 @@ import [designParameters] from '../meta/aesthetics'
 glyph-module
 
 glyph-block CommonShapes : begin
-	define [queryFeatureSelector follow para name transform] : begin
+	define [queryFeatureSelector follow para name transform omit] : begin
 		local fs {.}
 		local introduced false
 		foreach [{k h} : pairs-of para.variants] : begin
 			local suffix h.(follow)
-			if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
-			if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
-				local tag h.__cvmap.(follow)
-				set fs.(tag) ([fallback name follow] + '.' + suffix)
-				set introduced true
+			if (suffix && !(omit && omit.(k))) : begin
+				if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
+				if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
+					local tag h.__cvmap.(follow)
+					set fs.(tag) ([fallback name follow] + '.' + suffix)
+					set introduced true
 		return : if introduced fs null
 
-	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
+	define [select-variant] : params [name unicode [to-name name] transform omit [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
 
 		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
@@ -28,14 +29,13 @@ glyph-block CommonShapes : begin
 			throw : new Error "Variant for \(name) is not assigned."
 
 		if (transform && transform.(variant)) : set variant transform.(variant)
-		local chosenGlyph glyphMap.(name + '.' + variant)
 
 		create-glyph [fallback to-name name] : glyph-construction
-			include chosenGlyph AS_BASE ALSO_METRICS
+			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform
+			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform omit
 			if (follow !== name) : set currentGlyph.featureSelectorFollows follow
-			set this.cmpPriority chosenGlyph.cmpPriority
+			set this.cmpPriority [query-glyph (name + '.' + variant)].cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
 		define base : if para.isItalic glyphMap.(name + '.italic') glyphMap.(name + '.upright')
