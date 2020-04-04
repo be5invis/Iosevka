@@ -16,6 +16,13 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 	define arrowStick  {'hyphen' 'equal'}
 	define [stick style] : {'hyphen' 'equal'} ~> [lsx style]
 	define [stickClass style] : [lsx style] {'hyphen' 'equal'}
+	define [anyStartingWith names] : begin
+		local result {}
+		foreach [name : items-of names] : begin
+			local re : new RegExp "^\(name)(?:\.|$)"
+			foreach [name : items-of : Object.keys glyphs]
+				if [re.test name] : result.push name
+		return result
 
 	define less {'less'}
 	define hyphen {'hyphen'}
@@ -47,6 +54,33 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 		'slash' 'bar' 'at' 'ampersand' 'percent'
 		'numbersign' 'numbersign.upright' 'numbersign.slanted'
 	}
+	define dottyPunctuations : list
+		* "colon"
+		* "semicolon"
+		* "period"
+		* "period.center"
+		* "comma"
+		* "question"
+		* "exclam"
+	define widePunctuation : list
+		* 'parenLeft'
+		* 'parenRight'
+		* 'bracketLeft'
+		* 'bracketRight'
+		* 'braceLeft'
+		* 'braceRight'
+		* 'equal'
+		* 'hyphen'
+		* 'plus'
+		* 'less'
+		* 'greater'
+		* 'numbersign'
+		* 'slash'
+		* 'ampersand'
+		* 'asterisk'
+		* 'asciicaret'
+		* 'asciitilde'
+
 	define [asterisk_center]  ({'asterisk'}          ~> {'asterisk.dfltlow'})
 	define [colon_center]     ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
 	define [caret_center]     ({'asciicaret'}        ~> {'asciicaret.low'})
@@ -172,20 +206,47 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 				chain-rule alphabet [no_period_center]
 				chain-rule [no_period_center] alphabet
 
-	do "Colon chains" : includeLookup
-		.type 'gsub_chaining'
-		.subtables : list
-			# Colon chains
-			chain-rule
-				{'colon.dright' 'colon.dmid'} ~> preserved
-				{'colon'} ~> [only 'colons' {'colon.dmid'}]
-				{'colon'} ~> preserved
-			chain-rule
-				{'colon.dright' 'colon.dmid'} ~> preserved
-				{'colon'} ~> [only 'colons' {'colon.dleft'}]
-			chain-rule
-				{'colon'} ~> [only 'colons' {'colon.dright'}]
-				{'colon'} ~> preserved
+	do "Colon chains" : begin
+		define dLeft      : [lsx 'dLeft'] dottyPunctuations
+		define dRight     : [lsx 'dRight'] dottyPunctuations
+		define dLeftHalf  : [lsx 'dLeftHalf'] dottyPunctuations
+		define dRightHalf : [lsx 'dRightHalf'] dottyPunctuations
+		define dMid       : [lsx 'dMid'] dottyPunctuations
+		define boundary   : anyStartingWith widePunctuation
+
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				# Colon chains
+				chain-rule
+					[dRight.concat dMid] ~> preserved
+					dottyPunctuations ~> [only 'colons' dMid]
+					dottyPunctuations ~> preserved
+				chain-rule
+					[dRight.concat dMid] ~> preserved
+					dottyPunctuations ~> [only 'colons' dLeft]
+				chain-rule
+					dottyPunctuations ~> [only 'colons' dRight]
+					dottyPunctuations ~> preserved
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				# Colon chains
+				chain-rule
+					boundary             ~> preserved
+					dRight               ~> [only 'colons' dMid]
+					[dMid.concat dLeft]  ~> preserved
+				chain-rule
+					[dMid.concat dRight] ~> preserved
+					dLeft                ~> [only 'colons' dMid]
+					boundary             ~> preserved
+		includeLookup
+			.type 'gsub_chaining'
+			.subtables : list
+				# Colon chains
+				chain-rule
+					dRight ~> [only 'colons' dRightHalf]
+					dLeft  ~> [only 'colons' dLeftHalf]
 
 	do "Plus chains" : begin
 		includeLookup
