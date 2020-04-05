@@ -346,6 +346,80 @@ glyph-block Symbol-Other-Metric-Marks : begin
 		include : HBar 0 MIDDLE parenBot SHOULDERFINE
 		save 'metmark' 0xE09F
 
+	define MosaicTop      fontMetrics.OS_2.sTypoAscender
+	define MosaicBottom   fontMetrics.OS_2.sTypoDescender
+	define MarkerSize     (UPM / 12)
+	define MarkerBarWidth (UPM / 50)
+
+	sketch # boxMarkLeft
+		set-width 0
+		include : spiro-outline
+			corner 0 parenTop
+			corner 0 (parenTop + MarkerSize * 1.5)
+			corner (-MarkerSize * 1.5) parenTop
+		include : spiro-outline
+			corner 0 parenBot
+			corner 0 (parenBot - MarkerSize * 1.5)
+			corner (-MarkerSize * 1.5) parenBot
+		save 'boxMarkLeft' 0xE096
+
+	sketch # boxMarkRight
+		set-width 0
+		include : spiro-outline
+			corner 0 parenTop
+			corner 0 (parenTop + MarkerSize * 1.5)
+			corner (+MarkerSize * 1.5) parenTop
+		include : spiro-outline
+			corner 0 parenBot
+			corner 0 (parenBot - MarkerSize * 1.5)
+			corner (+MarkerSize * 1.5) parenBot
+		save 'boxMarkRight' 0xE097
+
+	sketch # mosaicMarkLeft
+		set-width 0
+		include : spiro-outline
+			corner 0 MosaicTop
+			corner 0 (MosaicTop + MarkerSize * 1.5)
+			corner (-MarkerSize * 1.5) MosaicTop
+		include : spiro-outline
+			corner 0 MosaicBottom
+			corner 0 (MosaicBottom - MarkerSize * 1.5)
+			corner (-MarkerSize * 1.5) MosaicBottom
+		save 'mosaicMarkLeft' 0xE098
+
+	sketch # mosaicMarkRight
+		set-width 0
+		include : spiro-outline
+			corner 0 MosaicTop
+			corner 0 (MosaicTop + MarkerSize * 1.5)
+			corner (+MarkerSize * 1.5) MosaicTop
+		include : spiro-outline
+			corner 0 MosaicBottom
+			corner 0 (MosaicBottom - MarkerSize * 1.5)
+			corner (+MarkerSize * 1.5) MosaicBottom
+		save 'mosaicMarkRight' 0xE099
+
+	sketch # baselineMarkUnder
+		set-width 0
+		include : HBar (-WIDTH * 2) (WIDTH * 2) 0 MarkerBarWidth
+		save 'baselineMarkUnder' 0xE09A
+
+	sketch # baselineMarkLeft
+		set-width 0
+		include : spiro-outline
+			corner 0 0
+			corner (-MarkerSize * 1.5) (+MarkerSize * 1.5)
+			corner (-MarkerSize * 1.5) (-MarkerSize * 1.5)
+		save 'baselineMarkLeft' 0xE09B
+
+	sketch # baselineMarkRight
+		set-width 0
+		include : spiro-outline
+			corner 0 0
+			corner (+MarkerSize * 1.5) (+MarkerSize * 1.5)
+			corner (+MarkerSize * 1.5) (-MarkerSize * 1.5)
+		save 'baselineMarkRight' 0xE09C
+
 glyph-block Symbol-Other-Fags : begin
 	glyph-block-import CommonShapes
 
@@ -433,6 +507,69 @@ glyph-block Symbol-Other-Typographic : begin
 		line-to (r + sw * kInside) (symbolMid + sw)
 		line-to (l + sw * kOutside) (symbolMid + sw)
 		save 'boltSymbol' 0x26A1
+
+glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
+	glyph-block-import CommonShapes
+
+	define leftFW : 0 + SB * MosaicWidthScalar
+	define rightFW : MosaicWidth - SB * MosaicWidthScalar
+	define squareRadiusFW : (rightFW - leftFW) / (2 * [Math.pow MosaicWidthScalar 0.3])
+	define topFW : symbolMid + squareRadiusFW
+	define bottomFW : symbolMid - squareRadiusFW
+
+	define df : DivFrame MosaicWidthScalar
+	define gap : Math.max (squareRadiusFW / 8 * MosaicWidthScalar) GEOMETRYSTROKE
+
+	sketch
+		set-width df.width
+		include : RingStrokeAt df.middle symbolMid squareRadiusFW GEOMETRYSTROKE
+		save [MangleName 'powerOff'] [MangleUnicode 0x2B58]
+
+	sketch
+		set-width df.width
+		include : Rect
+			symbolMid + squareRadiusFW
+			symbolMid - squareRadiusFW
+			df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
+			df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+		save [MangleName 'powerOn'] [MangleUnicode 0x23FD]
+
+	sketch
+		set-width df.width
+		include : refer-glyph [MangleName 'powerOff']
+		include : Rect
+			symbolMid + squareRadiusFW - GEOMETRYSTROKE - gap
+			symbolMid - squareRadiusFW + GEOMETRYSTROKE + gap
+			df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
+			df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+		save [MangleName 'powerOnOff'] [MangleUnicode 0x23FC]
+
+	sketch
+		set-width df.width
+		include : union
+			difference
+				refer-glyph [MangleName 'powerOff']
+				spiro-outline
+					corner df.middle symbolMid
+					corner (df.middle - gap * 2 - GEOMETRYSTROKE * HVCONTRAST) (symbolMid + squareRadiusFW * 2)
+					corner (df.middle + gap * 2 + GEOMETRYSTROKE * HVCONTRAST) (symbolMid + squareRadiusFW * 2)
+			Rect
+				symbolMid + 1.5 * squareRadiusFW
+				symbolMid - 0.0 * squareRadiusFW
+				df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
+				df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+		save [MangleName 'powerStandby'] [MangleUnicode 0x23FB]
+
+	sketch
+		set-width df.width
+		include : difference
+			CircleRingAt df.middle symbolMid squareRadiusFW
+			CircleRingAt
+				df.middle + squareRadiusFW * 0.5
+				symbolMid + squareRadiusFW * 0.35
+				squareRadiusFW * 1.1
+		apply-transform : Translate (squareRadiusFW * 0.15) 0
+		save [MangleName 'powerSleep'] [MangleUnicode 0x23FE]
 
 glyph-block Symbol-Other-Powerline-And-GUI : begin
 	glyph-block-import CommonShapes
@@ -1051,7 +1188,7 @@ glyph-block Symbol-Other-Ligation : begin
 	# =>
 	# local dblArrowD : XH * [linreg 18 0.15 126 0.275 STROKE]
 	local dblArrowD  : (parenTop - parenBot) * designParameters.equal_wideness + OPERATORSTROKE * 0.75
-	local dblArrowSw : Math.min OPERATORSTROKE (dblArrowD * 2 / 3)
+	local dblArrowSw : Math.min OPERATORSTROKE (dblArrowD * 3 / 4)
 	local dblExtend : clamp 0 WIDTH (RIGHTSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 	local dblArrowJ : clamp 0 WIDTH (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 
@@ -1064,9 +1201,10 @@ glyph-block Symbol-Other-Ligation : begin
 	do "Waves"
 		define WaveShape : CreateWaveShape dblArrowD dblArrowSw
 
-		define LR (3  / 16)
-		define Z  (1  / 4)
-		define F  (-1 / 4)
+		define LR  (2  / 32)
+		define LR1 (9  / 32)
+		define Z   (1  / 4)
+		define F   (-1 / 4)
 
 		sketch
 			include : WaveShape LR LR (xsJoin -- (-arrowExtend)) (xfJoin -- (WIDTH + arrowExtend))
@@ -1074,6 +1212,9 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include : WaveShape LR F (xsJoin -- (-arrowExtend))
 			save 'wave.lf'
+		sketch
+			include : WaveShape LR1 F (xsJoin -- (-arrowExtend - arrowheadsKern))
+			save 'wave.l1f'
 		sketch
 			include : WaveShape LR Z (xsJoin -- (-arrowExtend))
 			save 'wave.lz'
@@ -1083,6 +1224,9 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include : WaveShape F LR (xfJoin -- (WIDTH + arrowExtend))
 			save 'wave.fr'
+		sketch
+			include : WaveShape F LR1 (xfJoin -- (WIDTH + arrowExtend + arrowheadsKern))
+			save 'wave.fr1'
 		sketch
 			include : WaveShape Z LR (xfJoin -- (WIDTH + arrowExtend))
 			save 'wave.zr'
@@ -1193,32 +1337,32 @@ glyph-block Symbol-Other-Ligation : begin
 
 	do "Equal and Inequal" : if [not recursive] : begin
 		glyph-block-import Symbol-Math-Relation : EqualShape EqualHole IdentShape IdentHole
-
+		define joiningOverlap (OX * 3)
 		sketch # equal.fc
 			include MarkSet.plus
 			include : difference
-				EqualShape SB (WIDTH - O)
+				EqualShape SB (WIDTH - joiningOverlap)
 				EqualHole WIDTH
 			save 'equal.fc'
 
 		sketch # equal.cf
 			include MarkSet.plus
 			include : difference
-				EqualShape O RIGHTSB
+				EqualShape joiningOverlap RIGHTSB
 				EqualHole 0
 			save 'equal.cf'
 
 		sketch # equal.jf
 			include MarkSet.plus
 			include : difference
-				EqualShape (RIGHTSB - WIDTH + O) RIGHTSB
+				EqualShape (RIGHTSB - WIDTH + joiningOverlap) RIGHTSB
 				EqualHole 0
 			save 'equal.jf'
 
 		sketch # equal.cc
 			include MarkSet.plus
 			include : difference
-				EqualShape O (WIDTH - O)
+				EqualShape joiningOverlap (WIDTH - joiningOverlap)
 				union
 					EqualHole 0
 					EqualHole WIDTH
@@ -1227,27 +1371,27 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch # ident.fc
 			include MarkSet.plus
 			include : difference
-				IdentShape SB (WIDTH - O)
+				IdentShape SB (WIDTH - joiningOverlap)
 				IdentHole WIDTH
 			save 'ident.fc'
 
 		sketch # ident.cf
 			include MarkSet.plus
 			include : difference
-				IdentShape O RIGHTSB
+				IdentShape joiningOverlap RIGHTSB
 				IdentHole 0
 			save 'ident.cf'
 
 		sketch # ident.jf
 			include MarkSet.plus
 			include : difference
-				IdentShape (RIGHTSB - WIDTH + O) RIGHTSB
+				IdentShape (RIGHTSB - WIDTH + joiningOverlap) RIGHTSB
 				IdentHole 0
 			save 'ident.jf'
 		sketch # ident.cc
 			include MarkSet.plus
 			include : difference
-				IdentShape O (WIDTH - O)
+				IdentShape joiningOverlap (WIDTH - joiningOverlap)
 				union
 					IdentHole 0
 					IdentHole WIDTH

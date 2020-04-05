@@ -1,3 +1,5 @@
+import [fallback] from '../support/utils'
+
 define COPYRIGHT             0
 define FAMILY                1
 define STYLE                 2
@@ -65,7 +67,7 @@ define weightToMenuStyleMapShort : object
 	600 "SmBd"
 	700 "Bd"
 	800 "XBd"
-	900 "Xv"
+	900 "Hv"
 define widthToMenuStyleMapShort : object
 	1 "UltCn"
 	2 "XCn"
@@ -81,9 +83,19 @@ define slantToMenuStyleMapShort : object
 	italic  "It"
 	oblique "Obl"
 
-define [getStyle weight width slant] : [[(weightToMenuStyleMap.(weight) + " " + widthToMenuStyleMap.(width) + " " + slantToMenuStyleMap.(slant)).replace [regex ' +' 'g'] ' '].trim] || "Regular"
+define [getStyle weight width slant] : begin
+	define weightPart : fallback weightToMenuStyleMap.(weight) ('W' + weight)
+	define widthPart    widthToMenuStyleMap.(width)
+	define slantPart    slantToMenuStyleMap.(slant)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slantPart
+	return : [[rawName.replace [regex ' +' 'g'] ' '].trim] || "Regular"
 
-define [getShortStyle weight width slant] : [(weightToMenuStyleMapShort.(weight) + " " + widthToMenuStyleMapShort.(width) + " " + slantToMenuStyleMapShort.(slant)).replace [regex ' ' 'g'] ''] || "Regular"
+define [getShortStyle weight width slant] : begin
+	define weightPart : fallback weightToMenuStyleMapShort.(weight) ('W' + weight)
+	define widthPart    widthToMenuStyleMapShort.(width)
+	define slantPart    slantToMenuStyleMapShort.(slant)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slantPart
+	return : [rawName.replace [regex ' ' 'g'] ''] || "Regular"
 
 define [isRBIBI weight slant] : (weight == 400 || weight == 700) && (slant == "normal" || slant == "italic")
 

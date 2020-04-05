@@ -26,7 +26,7 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
+		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : glyphid + '+sup'] : glyph-construction
 			if unicode : assign-unicode unicode
 			local middle : miniatureFont.(glyphid).advanceWidth / 2
 			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
@@ -45,7 +45,7 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
+		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : glyphid + '+sub'] : glyph-construction
 			if unicode : assign-unicode unicode
 			local middle : miniatureFont.(glyphid).advanceWidth / 2
 			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
@@ -209,6 +209,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D3D 'OU'
 		list 0x1D3E 'P'
 		list 0x1D3F 'R'
+		list null   'C' # there is no superscript C in unicode, but is is used for the MC symbol
 		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 		list 0x1D40 'T'
 		list 0x1D41 'U'
@@ -359,6 +360,37 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DF3 'odieresis'
 		list 0x1DF4 'udieresis'
 
+	do "Composite superscripts and subscripts"
+		define [DoubleSuperscript a b] : glyph-construction
+			include a
+			apply-transform : Translate (-WIDTH * 0.6) 0
+			include b
+			apply-transform : Upright
+			apply-transform : Translate (-WIDTH * 0.2) (-CAP)
+			apply-transform : Scale 0.8
+			apply-transform : Translate MIDDLE CAP
+			apply-transform : Italify
+
+		sketch # tradeMark
+			include : DoubleSuperscript [refer-glyph 'T+sup'] [refer-glyph 'M+sup']
+			save 'tradeMark' 0x2122
+
+		sketch # serviceMark
+			include : DoubleSuperscript [refer-glyph 'S+sup'] [refer-glyph 'M+sup']
+			save 'serviceMark' 0x2120
+
+		sketch # raisedMC
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'C+sup']
+			save 'raisedMC' 0x1F16A
+
+		sketch # raisedMD
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'D+sup']
+			save 'raisedMD' 0x1F16B
+
+		sketch # raisedMR
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'R+sup']
+			save 'raisedMR' 0x1F16C
+
 	define [createFracImpl suffix records fine scaleFactor closing] : begin
 		local pendingGlyphs : [records.map : [record] => record.1].concat : records.map : [record] => record.2
 		local miniatureFont : Miniature
@@ -388,7 +420,7 @@ glyph-block Autobuild-Transformed : begin
 					apply-transform : Italify
 
 		foreach {unicode numid denid height} [items-of records] : do
-			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
+			save-glyph [suggestName : numid + '.over.' + denid + suffix] unicode : glyph-construction
 				include : refer-glyph (numid + suffix +  ".numpart")
 				include : refer-glyph (denid + suffix +  ".denpart")
 				if fine : include : HBar SB RIGHTSB symbolMid (fine * 0.75)
@@ -418,6 +450,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x2189 'zero.lnum' 'three.lnum'
 		# care-of
 		list 0x2100 'largescripta' 'C'
+		list 0x2101 'largescripta' 'S'
+		list 0x214D 'A' 'S'
 		list 0x2105 'C' 'O'
 		list 0x2106 'C' 'U'
 		# fraction bar
@@ -428,47 +462,49 @@ glyph-block Autobuild-Transformed : begin
 		list 0xE0A1 'L' 'N'
 		list 0xE0A3 'C' 'N'
 
-
 	# Unicode Ligatures
-	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : begin
+	define circleWidthClasses {
+		{'hwid' (WIDTH * para.diversityM) WIDTH}
+		{'fwid' WIDE-WIDTH-0              WIDE-WIDTH-0}
+	}
+
+	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : for-width-kinds WIDE-WIDTH-2
+		local ww : if FMosaicWide (MosaicWidth * para.diversityM) MosaicWidth
 		local pendingGlyphs1 : records.map : [record] => record.1
 		local pendingGlyphs2 : records.map : [record] => record.2
-		local wide : para.spaing > 1 || para.diversityM > 1
-		local shrink1 : if (wide) 1 [clamp 0 1 (_shrink1 * para.diversityM)]
-		local shrink2 : if (wide) 1 [clamp 0 1 (_shrink2 * para.diversityM)]
+		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / WIDTH)]
+		local shrink2 : if FMosaicWide 1 [clamp 0 1 (_shrink2 * ww / WIDTH)]
 		local df1 : Thinner pendingGlyphs1 shrink1
 		local df2 : Thinner pendingGlyphs2 shrink2
 
-		foreach [{unicode c1 c2 mark} : items-of records] : begin
-			local glyphName "\(c1)_\(c2)"
+		foreach [{unicode c1 c2 desiredWidth} : items-of records] : begin
+			local glyphName : MangleName "\(c1)_\(c2)"
 			if [query-glyph glyphName] : begin
 				local j 2
 				while [query-glyph (glyphName + j)] : inc j
 				set glyphName (glyphName + j)
-			if wide : begin
-				sketch
-					include df2.(c2)
-					include : Translate df1.(c1).advanceWidth 0
-					include df1.(c1)
-					set-width (df1.(c1).advanceWidth + df2.(c2).advanceWidth)
-					save glyphName unicode
-			: else
-				local kern : SB * 7/8 * (shrink1 + shrink2)
-				local refW : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
-				local targetW : WIDTH * para.diversityM
-				sketch
-					include df2.(c2)
-					include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
-					include df1.(c1)
-					include : Translate (-WIDTH * shrink1 * (1 - wadj1) / 2) 0
-					include : Upright
-					include : Translate (-refW / 2) 0
-					include : Scale ((targetW - SB * 1.25) / (targetW - SB * 2) * targetW / refW) 1
-					include : Translate (targetW / 2) 0
-					include : Italify
 
-					if mark : include [DivFrame para.diversityM].markSet.(mark)
-					save glyphName unicode
+			if FMosaicWide : sketch
+				set-width (df1.(c1).advanceWidth + df2.(c2).advanceWidth)
+				include df2.(c2)
+				include : Translate df1.(c1).advanceWidth 0
+				include df1.(c1)
+				save glyphName [MangleUnicode unicode desiredWidth]
+			: else : sketch
+				set-width ww
+				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
+				local kern : if FMosaicWide 0 : Math.max 0 (SB * 7/8 * (shrink1 + shrink2) - [Math.max 0 (ww - sumChildrenWidth)])
+				local refW : sumChildrenWidth - kern
+				include df2.(c2)
+				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+				include df1.(c1)
+				# include : Translate (-df1.(c1).advanceWidth * (1 - wadj1) / 2) 0
+				include : Upright
+				include : Translate (-refW / 2) 0
+				include : Scale [clamp 0 1 ((ww - SB * 1.25) / (ww - SB * 2) * ww / refW)] 1
+				include : Translate (ww / 2) 0
+				include : Italify
+				save glyphName [MangleUnicode unicode desiredWidth]
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
 	if [not recursive] : createLigatures stdShrink stdShrink 1 1 : list
@@ -497,6 +533,11 @@ glyph-block Autobuild-Transformed : begin
 		list 0x479 'o' 'y' 'p'
 		list 0x20A7 'P' 's'
 		list 0x20A8 'R' 's'
+		list 0x203c 'exclam' 'exclam'
+		list 0x2047 'question' 'question'
+		list 0x2048 'question' 'exclam'
+		list 0x2049 'exclam' 'question'
+		list 0x1F190 'D' 'J' WIDE-WIDTH-1
 	if [not recursive] : createLigatures 0.7 0.8 0.75 0.9 : list
 		list 0x2103 'degree' 'C'
 		list 0x2109 'degree' 'F'

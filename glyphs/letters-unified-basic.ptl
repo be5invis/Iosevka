@@ -754,7 +754,7 @@ glyph-block LetterUnified-Basic : begin
 
 		turned 'turnv.straight' nothing 'v.straight' MIDDLE (XH / 2)
 		turned 'turnv.curly' nothing 'v.curly' MIDDLE (XH / 2)
-		select-variant 'turnv' 0x474 (follow -- 'Lambda')
+		select-variant 'turnv' 0x28C (follow -- 'Lambda')
 
 		sketch # nu
 			include MarkSet.e
@@ -1306,9 +1306,10 @@ glyph-block LetterUnified-Basic : begin
 
 	### y
 	do "y and related ============================================================================"
-		define [GenSmallYShape straightBar] : begin
-			local useStraightBottom : !SLAB && straightBar
-			local useCurlyBottom : SLAB || straightBar
+		define [GenSmallYShape straightBar serifless] : begin
+			local slab : if serifless false SLAB
+			local useStraightBottom : !slab && straightBar
+			local useCurlyBottom : slab || straightBar
 			local px1 0.84
 			local py1 : linreg 18 0.8 126 0.76 STROKE
 			local px2 0.95
@@ -1321,8 +1322,9 @@ glyph-block LetterUnified-Basic : begin
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
 			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
-			local ySbCor : (XH / CAP) * (OX * [if SLAB 1 4])
-			local yrstroker : RIGHTSB - [if straightBar ySbCor 0]
+			local ySbCor : (XH / CAP) * (OX * [if slab 1 4])
+			local sbScalar : if (straightBar && SLAB && !slab) 1.5 1
+			local yrstroker : WIDTH - SB * sbScalar - [if straightBar ySbCor 0]
 			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
 			local yBottomJut : JUT * 1.25
 			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE
@@ -1428,7 +1430,7 @@ glyph-block LetterUnified-Basic : begin
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
 
-				if SLAB : begin
+				if slab : begin
 					include : AIVSerifs top
 
 			define [SmallYHookTopShape top bottom] : glyph-construction
@@ -1457,34 +1459,20 @@ glyph-block LetterUnified-Basic : begin
 						yJoinKnots ds ds2 top bottom true
 					SmallYStrokeSplitMask top bottom true (-1)
 
-				if SLAB : begin
+				if slab : begin
 					include : AIVSerifs top
 					eject-contour 'serifRT'
 
 			define [SmallLambdaShape top bottom] : glyph-construction
-				local ds : (top - bottom) * pds
-				local ds2 : (top - bottom) * pds2
-				local left    yrstrokel0
-				local right : yrstroker - HALFSTROKE * HVCONTRAST
-
-				include : dispiro
-					widths.center
-					flat right bottom [heading UPWARD]
-					curl right (bottom + ds) [heading UPWARD]
-					quadcontrols 0 dpy1 16
-					flat [mix right left (1 - px1)] [mix (top - ds2) (bottom + ds) py1]
-					curl [mix right left px2] [mix (top - ds2) (bottom + ds) (1 - py20)]
-					quadcontrols 1 (1 - dpy20) 16
-					flat left (top - ds2) [heading UPWARD]
-					curl left top [heading UPWARD]
-
-				include : dispiro
-					widths.center
-					flat (WIDTH - right) bottom [heading UPWARD]
-					curl (WIDTH - right) (bottom + ds) [heading UPWARD]
-					quadcontrols 0 dpy1 16
-					flat [mix (WIDTH - left) (WIDTH - right) px1] [mix (top - ds2) (bottom + ds) py1]
-					curl MIDDLE [mix (top - ds2) (bottom + ds) [linreg (1 - px2) (1 - py20) px1 py1 ((MIDDLE - left) / (right - left))]]
+				set currentGlyph.gizmo : Italify (-para.slantAngle)
+				include : SmallYShape top bottom
+				set currentGlyph.gizmo : Italify (+para.slantAngle)
+				# apply-transform : Upright
+				apply-transform : Translate 0 (-[mix bottom top 0.5])
+				apply-transform : Scale 1 (-1)
+				apply-transform : Translate 0 (+[mix bottom top 0.5])
+				# apply-transform : Italify
+				currentGlyph.reverse-all
 
 			return : object SmallYShape SmallYHookTopShape SmallLambdaShape
 
@@ -1535,6 +1523,25 @@ glyph-block LetterUnified-Basic : begin
 				set-anchor "overlay" BASE MIDDLE (XH / 2)
 				save 'yhooktop.curly'
 
+		sketch # y.cursive
+			include MarkSet.p
+			include : nShoulder
+				left -- (SB + STROKE * HVCONTRAST)
+				right -- RIGHTSB
+				fine -- SHOULDERFINE
+			include : FlipAround MIDDLE (XH / 2)
+			include : dispiro
+				widths.rhs
+				flat RIGHTSB (XH - HOOK - HALFSTROKE) [heading DOWNWARD]
+				curl RIGHTSB (DESCENDER + SMALLSMOOTHA)
+				hookend (DESCENDER + O)
+				g4 SB (DESCENDER + SHOOK)
+			include : VerticalHook (RIGHTSB - HALFSTROKE * HVCONTRAST) (XH - HOOK - HALFSTROKE) HOOKX (-HOOK)
+			if SLAB : begin
+				include : LeftwardTopSerif SB XH SIDEJUT
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
+			save 'yhooktop.cursive'
+
 		sketch # cyrU
 			include MarkSet.capital
 			branch
@@ -1546,78 +1553,95 @@ glyph-block LetterUnified-Basic : begin
 				set-anchor "overlay" BASE MIDDLE (XH / 2 - DESCENDER)
 				save 'cyrU.curly'
 
-		select-variant 'yhooktop' 0x1B4
-		select-variant 'cyrU' 0x423 (follow -- 'yhooktop')
+		select-variant 'yhooktop' 0x1B4 (follow -- 'y')
+		select-variant 'cyrU' 0x423 (omit -- {.v-y-cursive true .cv49 true})
 
-		turned 'turny.straight' nothing 'y.straight' MIDDLE (XH / 2) MarkSet.b
-		turned 'turny.curly'    nothing 'y.curly' MIDDLE (XH / 2) MarkSet.b
-		select-variant 'turny' 0x28E (follow -- 'yhooktop')
+		turned 'turny' 0x28E 'y' MIDDLE (XH / 2) MarkSet.b
 
-		sketch # lambda
+		define [LambdaBarOverlayShape] : FlatSlashShape [mix SB RIGHTSB 0.45] [mix 0 CAP 0.8] (OVERLAYSTROKE / 2)
+
+		sketch # lambda.straight
 			include MarkSet.b
-			include : [GenSmallYShape false].SmallLambdaShape CAP 0
+			include : [GenSmallYShape true  true].SmallLambdaShape CAP 0
 			set-anchor "overlay" BASE MIDDLE (XH / 2)
-			save 'lambda' 0x3BB
+			save 'lambda.straight'
+			include : LambdaBarOverlayShape
+			save 'lambdaSlash.straight'
 
-		sketch # lambdaslash
-			include [refer-glyph 'lambda'] AS_BASE
-			include : FlatSlashShape ([tp [Upright] [query-glyph 'l.serifed'].anchors.above].x / para.diversityI) [mix 0 CAP 0.7] (OVERLAYSTROKE / 2)
-			save 'lambdaslash' 0x19B
+		sketch # lambda.curly
+			include MarkSet.b
+			include : [GenSmallYShape false true].SmallLambdaShape CAP 0
+			set-anchor "overlay" BASE MIDDLE (XH / 2)
+			save 'lambda.curly'
+			include : LambdaBarOverlayShape
+			save 'lambdaSlash.curly'
+
+		select-variant 'lambda' 0x3BB
+		select-variant 'lambdaSlash' 0x19B (follow -- 'lambda')
 
 	### K and k
 	do "k and related ============================================================================"
 		local [KBalance straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
 		local [KBalanceRight straightBar] : if SLAB (-WIDTH / 32) : if straightBar (WIDTH / 32) 0
 		local [KBalanceRightCursive straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
-		define [KLegShape top straightBar] : glyph-construction
+
+		define [KLegShape left right top straightBar _stroke] : glyph-construction
+			local stroke : fallback _stroke STROKE
 			local turn (top * 0.99)
 			local fine : adviceBlackness 3.5
 			local Ok 0
 			local OkSerif 0
-			local kshLeft : SB + [KBalance straightBar]
-			local kshRight : RIGHTSB + [KBalanceRight straightBar]
+			local kshLeft : left + [KBalance straightBar]
+			local kshRight : right + [KBalanceRight straightBar]
 
 			if straightBar : do
-				local attach (top * 0.42 - STROKE)
-				local attach2 (top * 0.72 + STROKE)
-				set Ok : ([if SLAB (0) (-4)] * OX - STROKE / 3) * (XH / top)
+				local attach (top * 0.42 - stroke)
+				local attach2 (top * 0.72 + stroke)
+				set Ok : ([if SLAB (0) (-4)] * OX - stroke / 3) * (XH / top)
 				set OkSerif : if SLAB 0 Ok
 				include : intersection
 					Rect top 0 0 UPM
 					dispiro
-						widths.rhs
+						widths.rhs stroke
 						flat (kshRight - Ok) top
-						curl (kshLeft + STROKE) attach [widths 0 fine]
+						curl (kshLeft + stroke) attach [widths 0 fine]
 
 				include : intersection
 					spiro-outline
-						corner (kshLeft + STROKE) 0
-						corner (kshLeft + STROKE) (attach + 1)
+						corner (kshLeft + stroke) 0
+						corner (kshLeft + stroke) (attach + 1)
 						corner (kshRight - Ok - 1) top
 						corner (kshRight - Ok) top
 						corner (kshRight - Ok) 0
 					dispiro
-						widths.lhs
+						widths.lhs stroke
 						flat (kshRight - Ok) 0
-						curl (kshLeft + STROKE) attach2
+						curl (kshLeft + stroke) attach2
 			: else : do
 				local attach (top * [if SLAB 0.325 0.375])
 				local attach2 [if SLAB [mix kshLeft kshRight 0.48] MIDDLE]
 				include : dispiro
-					g4.down.start (kshRight) top [widths.heading 0 (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
+					g4.down.start (kshRight) top [widths.heading 0 (stroke * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM)) DOWNWARD]
 					bezcontrols 0 0.2 0.5 0.65 8
-					g4 (kshLeft + STROKE) attach [widths 0 fine]
-				include : dispiro
-					widths.center
-					g4.up.start (kshRight - O - HALFSTROKE * HVCONTRAST) 0 [heading UPWARD]
-					quadcontrols 0 0.25 8
-					g4 attach2 (top * 0.61) [widths.center fine]
+					g4 (kshLeft + stroke) attach [widths 0 fine]
+				include : difference
+					dispiro
+						widths.center
+						g4.up.start (kshRight - O - stroke / 2 * HVCONTRAST) 0 [heading UPWARD]
+						quadcontrols 0 0.25 8
+						g4 attach2 (top * 0.61) [widths.center fine]
+					spiro-outline
+						corner.down.start kshRight top
+						bezcontrols 0 0.2 0.5 0.65 8
+						corner (kshLeft + stroke) attach
+						corner kshLeft 0
+						corner kshLeft top
 
 			if SLAB : do
-				local topSerifX : kshRight - OkSerif - (STROKE * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - HALFSTROKE) * HVCONTRAST * [if para.isItalic 1 0] - HALFSTROKE * 0.5 * HVCONTRAST
+				local topSerifX : kshRight - OkSerif - (stroke * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - stroke / 2) * HVCONTRAST * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVCONTRAST
 				local bottomSerifX : kshRight - OkSerif - O * [if para.isItalic 1 0]
 
-				include : RightwardTopSerif topSerifX top (SIDEJUT + HALFSTROKE * 0.5 * HVCONTRAST)
+				include : RightwardTopSerif topSerifX top (SIDEJUT + stroke / 2 * 0.5 * HVCONTRAST)
 				include : RightwardBottomSerif bottomSerifX 0 SIDEJUT
 
 		define [KCurlyLoopAndLegShape top straightBar] : glyph-construction
@@ -1668,7 +1692,7 @@ glyph-block LetterUnified-Basic : begin
 
 		define [KShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
-			include : KLegShape CAP straightBar
+			include : KLegShape SB RIGHTSB CAP straightBar
 			if SLAB : begin
 				include : CenterTopSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) CAP JUT
 				include : CenterBottomSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) 0 JUT
@@ -1704,7 +1728,7 @@ glyph-block LetterUnified-Basic : begin
 
 		define [LowerKShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
-			include : KLegShape XH straightBar
+			include : KLegShape SB RIGHTSB XH straightBar
 			if SLAB : begin
 				include : LeftwardTopSerif (SB + [KBalance straightBar]) CAP SIDEJUT
 				if (!para.isItalic) : begin
@@ -1739,7 +1763,7 @@ glyph-block LetterUnified-Basic : begin
 
 		define [LowerKappaShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 XH
-			include : KLegShape XH straightBar
+			include : KLegShape SB RIGHTSB XH straightBar
 			if SLAB : begin
 				include : LeftwardTopSerif (SB + [KBalance straightBar]) XH SIDEJUT
 
@@ -1759,7 +1783,7 @@ glyph-block LetterUnified-Basic : begin
 
 		define [LowerCyrKaShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 XH
-			include : KLegShape XH straightBar
+			include : KLegShape SB RIGHTSB XH straightBar
 			if SLAB : begin
 				include : CenterBottomSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) 0 JUT
 				include : CenterTopSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) XH JUT
@@ -1791,9 +1815,12 @@ glyph-block LetterUnified-Basic : begin
 		select-variant 'cyrkaDescender' 0x49B (follow -- 'K')
 
 		define [KHookTopShape straightBar] : glyph-construction
-			include : KLegShape CAP straightBar
+			include : KLegShape SB RIGHTSB CAP straightBar
 			include : VBarLeft (SB + [KBalance straightBar]) 0 (CAP - HOOK - HALFSTROKE)
 			include : VerticalHook (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+			if SLAB : begin
+				include : CenterBottomSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) 0 JUT
+
 		sketch # Khooktop
 			include MarkSet.capital
 			include : KHookTopShape true
@@ -1805,16 +1832,20 @@ glyph-block LetterUnified-Basic : begin
 		select-variant 'Khooktop' 0x198 (follow -- 'K')
 
 		define [LowerKHookTopShape straightBar] : glyph-construction
-			include : KLegShape XH straightBar
+			include : KLegShape SB RIGHTSB XH straightBar
 			include : VBarLeft (SB + [KBalance straightBar]) 0 (CAP - HOOK - HALFSTROKE)
 			include : VerticalHook (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) (CAP - HOOK - HALFSTROKE) HOOKX (-HOOK)
+			if (SLAB && !para.isItalic) : begin
+				include : CenterBottomSerif (SB + [KBalance straightBar] + HALFSTROKE * HVCONTRAST) 0 JUT
+				tag-contour 'serifLB'
+
 		sketch # khooktop.straight
 			include MarkSet.b
 			include : LowerKHookTopShape true
 			save 'khooktop.straight'
 		sketch # khooktop.curly
 			include MarkSet.b
-			include : LowerKHookTopShape true
+			include : LowerKHookTopShape false
 			save 'khooktop.curly'
 		select-variant 'khooktop' 0x199 (follow -- 'K')
 
@@ -1826,6 +1857,39 @@ glyph-block LetterUnified-Basic : begin
 		turned 'turnk.curly' nothing 'k.curly' MIDDLE (XH / 2) MarkSet.p
 		turned 'turnk.cursive' nothing 'k.cursive' MIDDLE (XH / 2) MarkSet.p
 		select-variant 'turnk' 0x29E (follow -- 'k')
+
+		define [BashkirKaShape top straightBar] : glyph-construction
+			local left : if SLAB ([mix SB RIGHTSB 0.35] - MVERTSTROKE / 2 * HVCONTRAST) [mix SB RIGHTSB 0.2]
+			local leftNB : left - [KBalance straightBar]
+			local barleft : mix 0 SB [if SLAB 0.25 0.375]
+			local sw : adviceBlackness 3
+
+			include : HBarTop barleft (STROKE * 0.1 + left) top
+			include : VBarLeft left 0 top sw
+			include : KLegShape leftNB RIGHTSB top straightBar sw
+			if SLAB : begin
+				include : CenterBottomSerif (left + HALFSTROKE * HVCONTRAST) 0 JUT
+				include : DownwardLeftSerif barleft top VJUT (MVERTSTROKE / HVCONTRAST)
+		sketch # cyrBashkirUpperKa.straight
+			include MarkSet.capital
+			include : BashkirKaShape CAP true
+			save 'cyrBashkirUpperKa.straight'
+		sketch # cyrBashkirUpperKa.curly
+			include MarkSet.capital
+			include : BashkirKaShape CAP false
+			save 'cyrBashkirUpperKa.curly'
+		sketch # cyrBashkirKa.straight
+			include MarkSet.e
+			include : BashkirKaShape XH true
+			save 'cyrBashkirKa.straight'
+		sketch # cyrBashkirKa.curly
+			include MarkSet.e
+			include : BashkirKaShape XH false
+			save 'cyrBashkirKa.curly'
+
+		select-variant 'cyrBashkirUpperKa' 0x4A0 (follow -- 'K')
+		select-variant 'cyrBashkirKa'      0x4A1 (follow -- 'K')
+
 
 	### B
 	do "B and related ============================================================================="
@@ -2848,6 +2912,7 @@ glyph-block LetterUnified-Basic : begin
 		select-variant 'Ghooktop' 0x193 (follow -- 'G')
 		select-variant 'smcpGhooktop' 0x29B (follow -- 'G')
 		select-variant 'Gbar' 0x1E4 (follow -- 'G')
+		turned 'turnG' 0x2141 'G' MIDDLE (CAP / 2)
 
 	### g
 	do "g and related ============================================================================="
@@ -3524,7 +3589,7 @@ glyph-block LetterUnified-Basic : begin
 			local df : dfM
 			set-width df.width
 			include df.markSet.e
-			include : SmallMShape XH 0 [XH * 0.2] df
+			include : SmallMShape XH 0 ((XH - df.mvs) * 0.45) df
 			eject-contour 'serifMB'
 			save 'm.shortleg'
 		select-variant 'm' 'm'
@@ -3538,7 +3603,7 @@ glyph-block LetterUnified-Basic : begin
 			include : VerticalHook (df.rightSB - df.mvs / 2 * HVCONTRAST) 0 (-HOOKX) HOOK df.mvs
 			save 'mltail' 0x271
 
-		turned nothing 0x26F 'm' [dfM].middle (XH / 2)
+		turned 'turnm' 0x26F 'm.normal' [dfM].middle (XH / 2)
 
 		sketch # capitalTurnm
 			local df : dfM
@@ -3552,7 +3617,7 @@ glyph-block LetterUnified-Basic : begin
 			local df : dfM
 			set-width df.width
 			include df.markSet.p
-			include : refer-glyph "m"
+			include : refer-glyph "m.normal"
 			eject-contour 'serifLT'
 			include : FlipAround df.middle (XH / 2)
 			include : VBarRight df.rightSB DESCENDER 0 df.mvs

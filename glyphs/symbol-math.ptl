@@ -126,10 +126,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 	local rightCircle : WIDTH - SB * kCircle
 	local radiusCircle : (rightCircle - leftCircle) / 2
 
-	local radiusBig : (tackTop - tackBot) / 2
-	local leftBig : MIDDLE - radiusBig
-	local rightBig : MIDDLE + radiusBig
-
 	sketch # mathO
 		include : dispiro
 			widths.lhs GEOMETRYSTROKE
@@ -155,31 +151,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			arcvh nothing 2
 			close
 		save 'mathOOutline'
-	sketch # mathOBig
-		include : dispiro
-			widths.lhs GEOMETRYSTROKE
-			g4 MIDDLE (symbolMid + radiusBig - O)
-			archv nothing 2
-			g4 (leftBig + O) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig + O)
-			archv nothing 2
-			g4 (rightBig - O) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOBig'
-	sketch # mathO-outline
-		include : spiro-outline
-			g4 MIDDLE (symbolMid + radiusBig)
-			archv nothing 2
-			g4 (leftBig) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig)
-			archv nothing 2
-			g4 (rightBig) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOOutlineBig'
 	sketch # mathBoxOutline
 		include : spiro-outline
 			corner leftBox topBox
@@ -194,6 +165,38 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
 			dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox topBox]
 		save 'mathBox'
+
+	for-width-kinds WIDE-WIDTH-1
+		local radiusBig : (tackTop - tackBot) / 2 * [Math.sqrt MosaicWidthScalar]
+		local leftBig : MosaicMiddle - radiusBig
+		local rightBig : MosaicMiddle + radiusBig
+		sketch # mathOBig
+			set-width MosaicWidth
+			include : dispiro
+				widths.lhs GEOMETRYSTROKE
+				g4 MosaicMiddle (symbolMid + radiusBig - O)
+				archv nothing 2
+				g4 (leftBig + O) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig + O)
+				archv nothing 2
+				g4 (rightBig - O) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOBig']
+		sketch # mathOOutlineBig
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + radiusBig)
+				archv nothing 2
+				g4 (leftBig) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig)
+				archv nothing 2
+				g4 (rightBig) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOOutlineBig']
 
 	do "Geometry"
 		sketch
@@ -396,6 +399,44 @@ glyph-block Symbol-Math-Dots-And-Colons : begin
 		include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
 		save 'mathcdot'
 
+	for-width-kinds WIDE-WIDTH-1
+		sketch # mathcdot
+			set-width MosaicWidth
+			include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MosaicMiddle - PERIODRADIUS + O) (MosaicMiddle + PERIODRADIUS - O) true
+			save [MangleName 'mathcdotBig']
+
+		sketch # plus
+			set-width MosaicWidth
+			include : union
+				HBar SB (MosaicWidth - SB) symbolMid GEOMETRYSTROKE
+				VBar MosaicMiddle [mix symbolMid plusTop MosaicWidthScalar] [mix symbolMid plusBot MosaicWidthScalar] GEOMETRYSTROKE
+			save : MangleName 'innerPlusBig'
+
+		sketch # innerMultiplyStroke1Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle - radius) (symbolMid - radius)
+				curl (MosaicMiddle + radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke1Big'
+
+		sketch # innerMultiplyStroke2Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle + radius) (symbolMid - radius)
+				curl (MosaicMiddle - radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke2Big'
+
+		sketch # innerMultiplyBig
+			set-width MosaicWidth
+			include : refer-glyph : MangleName "innerMultiplyStroke1Big"
+			include : refer-glyph : MangleName "innerMultiplyStroke2Big"
+			save : MangleName 'innerMultiplyBig'
+
+
 	composite 'mathAsterisk' [refer-glyph 'opAsterisk.low'] [into-unicode 0x2217]
 
 glyph-block Symbol-Math-Circled : begin
@@ -405,11 +446,13 @@ glyph-block Symbol-Math-Circled : begin
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiply']] [into-unicode 0x2297]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiplyStroke1']] [into-unicode 0x2298]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathcdot']] [into-unicode 0x2299]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'mathcdot']] [into-unicode 0x2A00]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'innerPlus']] [into-unicode 0x2A01]
-	composite [refer-glyph 'mathOBig'] [intersection [refer-glyph 'mathOOutlineBig'] [refer-glyph 'innerMultiply']] [into-unicode 0x2A02]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'smallwhitecircle.hwid']] [into-unicode 0x229A]
 	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathAsterisk']] [into-unicode 0x229B]
+
+	for-width-kinds WIDE-WIDTH-1
+		composite [MangleName 'uni2A00'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'mathcdotBig']] [into-unicode : MangleUnicode 0x2A00]
+		composite [MangleName 'uni2A01'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerPlusBig']] [into-unicode : MangleUnicode 0x2A01]
+		composite [MangleName 'uni2A02'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerMultiplyBig']] [into-unicode : MangleUnicode 0x2A02]
 
 	composite
 		refer-glyph 'mathO'
@@ -1140,7 +1183,7 @@ glyph-block Symbol-Math-Relation : begin
 glyph-block Symbol-Math-Complement : begin
 	glyph-block-import LetterUnified-Basic : CShape
 	sketch # complement
-		include : CShape operTop operBot OPERATORSTROKE
+		include : CShape [mix symbolMid operTop 1.1] [mix symbolMid operBot 1.1] OPERATORSTROKE
 		save 'complement' 0x2201
 
 glyph-block Symbol-Math-Negation : begin
@@ -1183,7 +1226,7 @@ glyph-block Symbol-Math-Large-Operators : for-width-kinds WIDE-WIDTH-1
 	glyph-block-import LetterUnified-Extended : SigmaShape PiShape
 
 	define diversityLargeOperators : Math.max para.diversityM (MosaicWidth / WIDTH)
-	define df : DivFrame diversityLargeOperators 0 [if FMosaifWide diversityLargeOperators 1]
+	define df : DivFrame diversityLargeOperators 0 [if FMosaicWide diversityLargeOperators 1]
 
 	sketch # sum
 		set-width df.width
@@ -1336,36 +1379,36 @@ glyph-block Symbol-Math-APL : begin
 		include : intersection [refer-glyph 'aplsquareShadow'] shape
 		include : ScaleAround MIDDLE symbolMid aplBoxInnerScale
 
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'equal'] [into-unicode 0x2338]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'divide'] [into-unicode 0x2339]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'whitediamond.hwid'] [into-unicode 0x233A]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'smallwhitecircle.hwid'] [into-unicode 0x233B]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'whitecircle.hwid'] [into-unicode 0x233C]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'aplbar'] [refer-glyph 'whitecircle.hwid']] [into-unicode 0x233D]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'equal'] [into-unicode 0x2338]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'divide'] [into-unicode 0x2339]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whitediamond.hwid'] [into-unicode 0x233A]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'smallwhitecircle.hwid'] [into-unicode 0x233B]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whitecircle.hwid'] [into-unicode 0x233C]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbar'] [refer-glyph 'whitecircle.hwid']] [into-unicode 0x233D]
 	composite [refer-glyph 'whitecircle.hwid'] [refer-glyph 'smallwhitecircle.hwid'] [into-unicode 0x233E]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'slash']] [into-unicode 0x233F]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'backslash']] [into-unicode 0x2340]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'slash'] [into-unicode 0x2341]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'backslash'] [into-unicode 0x2342]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'less'] [into-unicode 0x2343]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'greater'] [into-unicode 0x2344]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'arrowleft.hwid'] [refer-glyph 'aplbar']] [into-unicode 0x2345]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'arrowright.hwid'] [refer-glyph 'aplbar']] [into-unicode 0x2346]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'arrowleft.hwid'] [into-unicode 0x2347]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'arrowright.hwid'] [into-unicode 0x2348]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'aplbackslash'] [refer-glyph 'whitecircle.hwid']] [into-unicode 0x2349]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'slash']] [into-unicode 0x233F]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'backslash']] [into-unicode 0x2340]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'slash'] [into-unicode 0x2341]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'backslash'] [into-unicode 0x2342]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'less'] [into-unicode 0x2343]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'greater'] [into-unicode 0x2344]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowleft.hwid'] [refer-glyph 'aplbar']] [into-unicode 0x2345]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowright.hwid'] [refer-glyph 'aplbar']] [into-unicode 0x2346]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowleft.hwid'] [into-unicode 0x2347]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowright.hwid'] [into-unicode 0x2348]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbackslash'] [refer-glyph 'whitecircle.hwid']] [into-unicode 0x2349]
 	composite [refer-glyph 'bot'] [refer-glyph 'underlineBelow'] [into-unicode 0x234A]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'increment'] [refer-glyph 'aplLongBar']] [into-unicode 0x234B]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'vee'] [into-unicode 0x234C]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'increment'] [into-unicode 0x234D]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'arrowup.hwid'] [refer-glyph 'minus']] [into-unicode 0x234F]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'arrowup.hwid'] [into-unicode 0x2350]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'increment'] [refer-glyph 'aplLongBar']] [into-unicode 0x234B]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'vee'] [into-unicode 0x234C]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'increment'] [into-unicode 0x234D]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowup.hwid'] [refer-glyph 'minus']] [into-unicode 0x234F]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowup.hwid'] [into-unicode 0x2350]
 	composite [refer-glyph 'top'] [refer-glyph 'overlineAbove'] [into-unicode 0x2351]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'nabla'] [refer-glyph 'aplLongBar']] [into-unicode 0x2352]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'wedge'] [into-unicode 0x2353]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'nabla'] [into-unicode 0x2354]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'arrowdown.hwid'] [refer-glyph 'minus']] [into-unicode 0x2356]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'arrowdown.hwid'] [into-unicode 0x2357]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'nabla'] [refer-glyph 'aplLongBar']] [into-unicode 0x2352]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'wedge'] [into-unicode 0x2353]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'nabla'] [into-unicode 0x2354]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowdown.hwid'] [refer-glyph 'minus']] [into-unicode 0x2356]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowdown.hwid'] [into-unicode 0x2357]
 	composite [refer-glyph 'singleQuote'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x2358]
 	composite [refer-glyph 'increment'] [refer-glyph 'underlineBelow'] [into-unicode 0x2359]
 	composite [refer-glyph 'whitediamond.hwid'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x235A]
@@ -1378,27 +1421,27 @@ glyph-block Symbol-Math-APL : begin
 		UShape operTop operBot [adviceBlackness 5] true
 		FlipAround MIDDLE symbolMid
 		into-unicode 0x235D
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'singleQuote'] [into-unicode 0x235E]
-	composite [refer-glyph 'space'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO'] [into-unicode 0x235F]
-	composite [refer-glyph 'space'] [aplBoxed : composite [refer-glyph 'colon'] [Realign MIDDLE (XH/2) MIDDLE symbolMid]] [into-unicode 0x2360]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'singleQuote'] [into-unicode 0x235E]
+	composite [refer-glyph 'enquad'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO'] [into-unicode 0x235F]
+	composite [refer-glyph 'enquad'] [aplBoxed : composite [refer-glyph 'colon'] [Realign MIDDLE (XH/2) MIDDLE symbolMid]] [into-unicode 0x2360]
 	composite [refer-glyph 'top'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2361]
 	composite [refer-glyph 'nabla'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2362]
 	composite [refer-glyph 'asterisk.low'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2363]
 	composite [refer-glyph 'smallwhitecircle.hwid'] MarkSet.plus [refer-glyph 'dieresisAbove'] [into-unicode 0x2364]
 	composite [refer-glyph 'whitecircle.hwid'] MarkSet.plus [refer-glyph 'dieresisAbove'] [into-unicode 0x2365]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'cup'] [refer-glyph 'aplbar']] [into-unicode 0x2366]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'subst'] [refer-glyph 'aplbar']] [into-unicode 0x2367]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'cup'] [refer-glyph 'aplbar']] [into-unicode 0x2366]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'subst'] [refer-glyph 'aplbar']] [into-unicode 0x2367]
 	composite [refer-glyph 'asciitilde.low'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2368]
 	composite [refer-glyph 'greater.narrow'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2369]
 	composite [refer-glyph 'minus'] [refer-glyph 'comma'] [into-unicode 0x236A]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'nabla']] [into-unicode 0x236B]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'zero.lnum.unslashed']] [into-unicode 0x236C]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'bar']] [into-unicode 0x236D]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'semicolon'] [refer-glyph 'underscore.belowBaseline']] [into-unicode 0x236E]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'notequal'] [into-unicode 0x236F]
-	composite [refer-glyph 'space'] [aplBoxed : refer-glyph 'question'] [into-unicode 0x2370]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'vee']] [into-unicode 0x2371]
-	composite [refer-glyph 'space'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'wedge']] [into-unicode 0x2372]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'nabla']] [into-unicode 0x236B]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'zero.lnum.unslashed']] [into-unicode 0x236C]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'bar']] [into-unicode 0x236D]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'semicolon'] [refer-glyph 'underscore.belowBaseline']] [into-unicode 0x236E]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'notequal'] [into-unicode 0x236F]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'question'] [into-unicode 0x2370]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'vee']] [into-unicode 0x2371]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'wedge']] [into-unicode 0x2372]
 	alias 'apliota'  0x2373 'iota'
 	alias 'aplrho'   0x2374 'rho'
 	alias 'aplomega' 0x2375 'omega'

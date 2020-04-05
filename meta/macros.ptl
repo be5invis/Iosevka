@@ -142,15 +142,15 @@ define-macro glyph-block-import : syntax-rules
 		define allExports : object
 			CommonShapes `[queryFeatureSelector select-variant italic-variant alias composite
 			refer-glyph query-glyph into-unicode turned hcombine vcombine HDual VDual Rect Ring
-			RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape
-			OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif
-			RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif
-			UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs
-			AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar
-			HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook
-			HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend
-			CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign
-			ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives]
+			RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt
+			OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif
+			RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif
+			DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs
+			AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder
+			mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook
+			LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR
+			hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround
+			Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives]
 
 			Overmarks `[markExtend markHalfStroke markStress markFine markMiddle markDotsRadius
 			aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot
@@ -178,10 +178,12 @@ define-macro for-width-kinds : syntax-rules
 			{0 '.hwid' $Capture$.metrics.WIDTH $Capture$.metrics.WIDTH}
 			{1 '.fwid' $Capture$.metrics.WIDE-WIDTH-0 ($Capture$.metrics.WIDE-WIDTH-0 / 2)}
 		}
-		foreach {FMosaifWide MosaicNameSuffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do
+		foreach {FMosaicWide MosaicNameSuffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do
+			define MosaicDesiredWidth @[formOf _desired]
 			define MosaicMiddle : MosaicWidth / 2
 			define MosaicWidthScalar : MosaicWidth / MosaicUnitWidth
-			define [MangleUnicode unicode] : if (MosaicWidth == @[formOf _desired]) unicode nothing
+			define [MangleUnicode unicode _desiredOverride]
+				if (MosaicWidth == (_desiredOverride || MosaicDesiredWidth)) unicode nothing
 			define [MangleName name] : name + MosaicNameSuffix
 			begin @::[_body.map formOf]
 	]
@@ -220,15 +222,15 @@ define-macro glyph-block : syntax-rules
 			save-glyph spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile
 			getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet
 			DivFrame fontMetrics]
-		define metricImports `[UPM WIDTH SB CAP XH DESCENDER CONTRAST symbolMid parenTop parenBot
-			operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot Italify
-			Upright Scale Translate Rotate globalTransform TANSLANT SINSLANT COSSLANT HVCONTRAST
-			UPWARD DOWNWARD RIGHTWARD LEFTWARD Upward Downward Leftward Rightward O OX OXHOOK HOOK
-			AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE PERIODSIZE BARPOS
-			GBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX CTHIN CTHINB SLAB
-			TAILADJX TAILADJY LBALANCE IBALANCE LBALANCE2 IBALANCE2 JBALANCE JBALANCE2 TBALANCE
-			TBALANCE2 RBALANCE RBALANCE2 FBALANCE ONEBALANCE WIDE-WIDTH-0 WIDE-WIDTH-1
-			WIDE-WIDTH-2 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB MIDDLE
+		define metricImports `[UPM HALF-UPM WIDTH SB CAP XH DESCENDER CONTRAST symbolMid parenTop
+			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
+			Italify Upright Scale Translate Rotate globalTransform TANSLANT SINSLANT COSSLANT
+			HVCONTRAST UPWARD DOWNWARD RIGHTWARD LEFTWARD Upward Downward Leftward Rightward O OX
+			OXHOOK HOOK AHOOK SHOOK RHOOK JHOOK FHOOK HOOKX SMOOTH SMALLSMOOTH STROKE DOTSIZE
+			PERIODSIZE BARPOS GBARPOS EBARPOS OVERLAYPOS FIVEBARPOS LONGJUT JUT VJUT ACCENT ACCENTX
+			CTHIN CTHINB SLAB TAILADJX TAILADJY LBALANCE IBALANCE LBALANCE2 IBALANCE2 JBALANCE
+			JBALANCE2 TBALANCE TBALANCE2 RBALANCE RBALANCE2 FBALANCE ONEBALANCE WIDE-WIDTH-0
+			WIDE-WIDTH-1 WIDE-WIDTH-2 OXE ESS ESSQUESTION XO CAPO HALFSTROKE RIGHTSB FWRSB MIDDLE
 			FWMIDDLE CAPMIDDLE CAP_SMOOTH DOTRADIUS PERIODRADIUS SIDEJUT SMOOTHA SMOOTHB
 			SMALLSMOOTHA SMALLSMOOTHB CORRECTION_OMIDX CORRECTION_OMIDS adviceBlackness
 			adviceBlackness2 MVERTSTROKE MVERTSTROKE_D OVERLAYSTROKE OPERATORSTROKE GEOMETRYSTROKE

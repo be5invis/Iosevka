@@ -12,7 +12,7 @@ const formLigationData = require("../support/ligation-data");
 const regulateGlyphs = require("../support/regulate-glyph");
 const toml = require("toml");
 
-main().catch(e => {
+main().catch((e) => {
 	console.error(e);
 	process.exit(1);
 });
@@ -57,7 +57,7 @@ async function getParameters(argv) {
 		version: argv.ver,
 		weight: argv["menu-weight"] - 0,
 		width: argv["menu-width"] - 0,
-		slant: argv["menu-slant"]
+		slant: argv["menu-slant"],
 	};
 
 	return para;
@@ -94,11 +94,21 @@ async function saveCharMap(font) {
 	for (const gid in font.glyf) {
 		const glyph = font.glyf[gid];
 		if (!glyph) continue;
-		const isSpace = glyph.contours && glyph.contours.length;
+
+		const glyphIsHidden = /^\./.test(gid);
+		const typographicFeatures = [];
+		if (!glyphIsHidden) {
+			if (/\.hwid$/.test(gid) || /\.fwid$/.test(gid))
+				typographicFeatures.push("hwid", "fwid");
+			if (/\.lnum$/.test(gid) || /\.onum$/.test(gid))
+				typographicFeatures.push("lnum", "onum");
+		}
+
 		charMap.push([
 			glyph.name,
 			glyph.unicode,
-			glyph.advanceWidth === 0 ? (objHashNonEmpty(glyph.anchors) ? 1 : isSpace ? 2 : 0) : 0
+			typographicFeatures,
+			glyph.featureSelector ? Object.keys(glyph.featureSelector) : [],
 		]);
 	}
 	await fs.writeFile(argv.charmap, JSON.stringify(charMap), "utf8");

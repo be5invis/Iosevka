@@ -8,19 +8,20 @@ import [designParameters] from '../meta/aesthetics'
 glyph-module
 
 glyph-block CommonShapes : begin
-	define [queryFeatureSelector follow para name transform] : begin
+	define [queryFeatureSelector follow para name transform omit] : begin
 		local fs {.}
 		local introduced false
 		foreach [{k h} : pairs-of para.variants] : begin
 			local suffix h.(follow)
-			if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
-			if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
-				local tag h.__cvmap.(follow)
-				set fs.(tag) ([fallback name follow] + '.' + suffix)
-				set introduced true
+			if (suffix && !(omit && omit.(k))) : begin
+				if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
+				if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
+					local tag h.__cvmap.(follow)
+					set fs.(tag) ([fallback name follow] + '.' + suffix)
+					set introduced true
 		return : if introduced fs null
 
-	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
+	define [select-variant] : params [name unicode [to-name name] transform omit [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
 
 		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
@@ -28,14 +29,13 @@ glyph-block CommonShapes : begin
 			throw : new Error "Variant for \(name) is not assigned."
 
 		if (transform && transform.(variant)) : set variant transform.(variant)
-		local chosenGlyph glyphMap.(name + '.' + variant)
 
 		create-glyph [fallback to-name name] : glyph-construction
-			include chosenGlyph AS_BASE ALSO_METRICS
+			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform
+			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform omit
 			if (follow !== name) : set currentGlyph.featureSelectorFollows follow
-			set this.cmpPriority chosenGlyph.cmpPriority
+			set this.cmpPriority [query-glyph (name + '.' + variant)].cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
 		define base : if para.isItalic glyphMap.(name + '.italic') glyphMap.(name + '.upright')
@@ -59,7 +59,9 @@ glyph-block CommonShapes : begin
 				include part first first
 				set first false
 
-	define [refer-glyph id] : lambda [copyAnchors copyWidth] : this.includeGlyph glyphMap.(id) copyAnchors copyWidth
+	define [refer-glyph id] : lambda [copyAnchors copyWidth] : begin
+		if [not glyphMap.(id)] : throw : new Error "Cannot find glyph '\(id)'"
+		this.includeGlyph glyphMap.(id) copyAnchors copyWidth
 	define [query-glyph id] : return glyphMap.(id)
 	define [into-unicode code] : glyph-construction : if code : assign-unicode code
 
@@ -137,6 +139,7 @@ glyph-block CommonShapes : begin
 		if transformShiftOnly : begin
 			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
 			apply-transform : Translate (mx1 - mx) (my1 - my)
+
 	define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
 		local my ((u + d) / 2)
 		local mx ((l + r) / 2)
@@ -157,6 +160,28 @@ glyph-block CommonShapes : begin
 			apply-transform : Translate (mx1 - mx) (my1 - my)
 	define [RingAt x y r] : Ring (y + r) (y - r) (x - r) (x + r)
 	define [DotAt x y r] : Ring (y + r) (y - r) (x - r) (x + r) true
+
+	define [RingStroke u d l r s transformShiftOnly] : create-glyph : glyph-construction
+		local my ((u + d) / 2)
+		local mx ((l + r) / 2)
+		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] globalTransform]
+		include : dispiro
+			begin [lambda : set this.gizmo currentGlyph.gizmo]
+			widths.rhs [fallback s STROKE]
+			g4 mx d [heading LEFTWARD]
+			archv
+			g4 l my
+			arcvh
+			g4 mx u [heading RIGHTWARD]
+			archv
+			g4 r my
+			arcvh
+			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
+		if transformShiftOnly : begin
+			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			apply-transform : Translate (mx1 - mx) (my1 - my)
+	define [RingStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s
+	define [DotStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s true
 
 	define [CircleRing u d l r transformShiftOnly] : create-glyph : glyph-construction
 		local my ((u + d) / 2)
@@ -758,7 +783,7 @@ glyph-block CommonShapes : begin
 		include overlay
 
 	define [CreateWaveShape dist sw] : begin
-		define WaveResolution 8
+		define WaveResolution 64
 		define WaveMagnitude : dist * (3 / 4) - sw / 2
 		define WaveAdj : TANSLANT * WaveMagnitude * (-0.75)
 		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin] : glyph-construction
@@ -767,7 +792,6 @@ glyph-block CommonShapes : begin
 			foreach [pr : range 0 till resolution] : begin
 				local theta : [mix ts te (pr / resolution)] * Math.PI * 2
 				local waveRelY : (-1) * [Math.sin theta] - 0.075 * [Math.sin (theta * 3)]
-				local flat : [Math.abs ([mix ts te (pr / resolution)] * 2 % 1)] < 1 / WaveResolution
 				knots.push : g2
 					(WaveAdj * waveRelY) + [mix left right (pr / resolution)]
 					symbolMid + WaveMagnitude * waveRelY
@@ -777,7 +801,7 @@ glyph-block CommonShapes : begin
 				begin knots
 				if (xfJoin !== nothing) {[straight.right.end   xfJoin symbolMid]} {}
 
-		define [WaveShape] : params [left right xsJoin xfJoin [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * 2) (2 + right * 2) xsJoin xfJoin
+		define [WaveShape] : params [left right xsJoin xfJoin [waveCount 1] [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * waveCount) ((1 + right) * waveCount) xsJoin xfJoin
 		return WaveShape
 
 	define [NameUni unicode] : begin
@@ -798,4 +822,4 @@ glyph-block CommonShapes : begin
 			apply-transform   giz
 		include g
 
-	glyph-block-export queryFeatureSelector select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives
+	glyph-block-export queryFeatureSelector select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives

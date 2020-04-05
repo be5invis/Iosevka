@@ -30,19 +30,21 @@ glyph-block AutoBuild-Enclosure : begin
 		if [query-glyph gni] : return [query-glyph gni]
 		define lg : create-glyph gni : glyph-construction
 			local tw 0
+			local firstDerivedGyph null
 			foreach [glyphid : items-of parts] : begin
-				local g miniatureFont.(glyphid)
-				include g
-				apply-transform : Translate (-g.advanceWidth) 0
-				set tw : tw + g.advanceWidth
+				local derivedGlyph miniatureFont.(glyphid)
+				include derivedGlyph
+				if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
+				apply-transform : Translate (-derivedGlyph.advanceWidth) 0
+				set tw : tw + derivedGlyph.advanceWidth
 			apply-transform : Translate tw 0
 			apply-transform : Upright
 			apply-transform : Scale [Math.min 1 (width / tw)] 1
 			set tw : Math.min width tw
 			local shift 0
-			if (g.anchors.above && g.anchors.below) : begin
-				if bal : set shift : CAP / 2 - [mix baly [mix g.anchors.above.y g.anchors.below.y 0.5] bal]
-				: else : set shift : CAP / 2 - [mix g.anchors.above.y g.anchors.below.y 0.5]
+			if (firstDerivedGyph && firstDerivedGyph.anchors.above && firstDerivedGyph.anchors.below) : begin
+				if bal : set shift : CAP / 2 - [mix baly [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5] bal]
+				: else : set shift : CAP / 2 - [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5]
 			apply-transform : Translate (-tw / 2) (-CAP / 2 + shift)
 			apply-transform : Scale dscale
 			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
@@ -60,8 +62,8 @@ glyph-block AutoBuild-Enclosure : begin
 		define spatt  : linreg WIDTH 0.175 UPM 0.27 width
 		define sw0 : [EnclosureStrokeScale dscale digits width] * [adviceBlackness [CircCrowd digits width]] / [CircScale digits width]
 		define sw : Math.max sw0 [fallback m 0]
-		define top : CAP * dscale + [Math.max (CAP * spatt) (sw * 3)]
-		define bot : 0 - [Math.max (CAP * spatt) (sw * 3)]
+		define top : CAP * dscale + (CAP * spatt)
+		define bot : 0 - (CAP * spatt)
 		define mosaicLeft 0
 		define mosaicRight width
 		define mosaicBot fontMetrics.OS_2.sTypoDescender
@@ -95,7 +97,7 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : circleInner dscale miniatureFont unicode parts width bal baly
-					include : OShape top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					include : OShape top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -129,7 +131,7 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : difference
-						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 						circleInner dscale miniatureFont unicode parts width bal baly
 
 					apply-transform : Upright
@@ -190,15 +192,15 @@ glyph-block AutoBuild-Enclosure : begin
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : circleInner dscale miniatureFont unicode parts width bal baly
-					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / WIDTH) (SMALLSMOOTHB * width / WIDTH)
+					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 					include : OShape
 						top - sw + sw1
 						bot + sw - sw1
 						left + sw * HVCONTRAST - sw1 * HVCONTRAST
 						right - sw * HVCONTRAST + sw1 * HVCONTRAST
 						begin sw1
-						SMALLSMOOTHA * width / WIDTH - sw + sw1
-						SMALLSMOOTHB * width / WIDTH - sw + sw1
+						SMALLSMOOTHA * width / HALF-UPM - sw + sw1
+						SMALLSMOOTHB * width / HALF-UPM - sw + sw1
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -288,13 +290,14 @@ glyph-block AutoBuild-Enclosure : begin
 					if (w == ww) : save gn unicode
 					: else : save gn
 
-	define [createDottedGlyphs digits records] : begin
+	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
+	define [createDottedGlyphs digits gidDot records] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local pendingGlyphs : records.map : [record] => record.1
 			local miniatureFont : Miniature
-				glyphs  -- [[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {'period'}]
+				glyphs  -- [[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {gidDot}]
 				crowd   -- [BraceCrowd digits ww]
-				scale   -- [BraceScale digits ww]
+				scale   -- [DottedScale digits ww]
 				sbscale -- 1
 
 			foreach {unicode parts w} [items-of records] : do
@@ -303,7 +306,7 @@ glyph-block AutoBuild-Enclosure : begin
 				sketch
 					set-width width
 					local tw 0
-					foreach [glyphid : items-of : parts.concat {'period'}] : begin
+					foreach [glyphid : items-of : parts.concat {gidDot}] : begin
 						local g miniatureFont.(glyphid)
 						if tw : begin # Add a little kern
 							set tw : tw - SB
@@ -344,7 +347,10 @@ glyph-block AutoBuild-Enclosure : begin
 
 	if [not recursive] : do "Double-digit circled"
 		local compositions : list
-		compositions.push { null {'markBaseSpace'} WIDE-WIDTH-1 }
+			list null    {'markBaseSpace'} WIDE-WIDTH-1
+			list 0x1F16D {'C' 'C'} WIDE-WIDTH-1
+			list 0x1F12D {'C' 'D'} WIDE-WIDTH-1
+			list 0x1F12E {'W' 'z'} WIDE-WIDTH-1
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2460 + j - 1
 			digitGlyphNames j
@@ -387,16 +393,56 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createBoxedGlyphs 1 compositions
 
+	if [not recursive] : do "double-digit boxed"
+		local compositions : list
+			list null    {'markBaseSpace'} WIDE-WIDTH-1
+			list 0x1F14A {'H' 'V'} WIDE-WIDTH-1
+			list 0x1F14B {'M' 'V'} WIDE-WIDTH-1
+			list 0x1F14C {'S' 'D'} WIDE-WIDTH-1
+			list 0x1F14D {'S' 'S'} WIDE-WIDTH-1
+			list 0x1F14F {'W' 'C'} WIDE-WIDTH-1
+			list 0x1F191 {'C' 'L'} WIDE-WIDTH-1
+			list 0x1F194 {'I' 'D'} WIDE-WIDTH-1
+			list 0x1F196 {'N' 'G'} WIDE-WIDTH-1
+			list 0x1F197 {'O' 'K'} WIDE-WIDTH-1
+			list 0x1F19A {'V' 'S'} WIDE-WIDTH-1
+		createBoxedGlyphs 2 compositions
+
+	if [not recursive] : do "triple-digit boxed"
+		local compositions : list
+			list null    {'markBaseSpace'} WIDE-WIDTH-1
+			list 0x1F14E {'P' 'P' 'V'} WIDE-WIDTH-1
+			list 0x1F195 {'N' 'E' 'W'} WIDE-WIDTH-1
+			list 0x1F198 {'S' 'O' 'S'} WIDE-WIDTH-1
+			list 0x1F199 {'U' 'P' 'exclam'} WIDE-WIDTH-1
+		createBoxedGlyphs 3 compositions
+
+	if [not recursive] : do "quad-digit boxed"
+		local compositions : list
+			list null    {'markBaseSpace'} WIDE-WIDTH-1
+			list 0x1F192 {'C' 'O' 'O' 'L'} WIDE-WIDTH-1
+			list 0x1F193 {'F' 'R' 'E' 'E'} WIDE-WIDTH-1
+		createBoxedGlyphs 4 compositions
+
 	if [not recursive] : do "inset boxed"
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WIDE-WIDTH-1}
 		createInsetBoxedGlyphs 1 compositions
 
+	if [not recursive] : do "double-digit inset boxed"
+		local compositions : list
+			list 0x1F18B {'I' 'C'} WIDE-WIDTH-1
+			list 0x1F18C {'P' 'A'} WIDE-WIDTH-1
+			list 0x1F18D {'S' 'A'} WIDE-WIDTH-1
+			list 0x1F18E {'A' 'B'} WIDE-WIDTH-1
+			list 0x1F18F {'W' 'C'} WIDE-WIDTH-1
+		createInsetBoxedGlyphs 1 compositions
+
 	if [not recursive] : do "inset mosaic"
 		local compositions {}
-		compositions.push { 0x1FBB1 { unicodeGlyphs.(0x2714).name } WIDE-WIDTH-2 }
-		compositions.push { 0x1FBB4 { unicodeGlyphs.(0x21B2).name } WIDE-WIDTH-2 }
-		compositions.push { 0x1FBC4 { unicodeGlyphs.(0x003F).name } WIDE-WIDTH-2 }
+		compositions.push { 0x1FBB1 { [unicodeGlyphs.(0x2714).name.replace [regex '.fwid$'] ".hwid"] } WIDE-WIDTH-2 }
+		compositions.push { 0x1FBB4 { [unicodeGlyphs.(0x21B2).name.replace [regex '.fwid$'] ".hwid"] } WIDE-WIDTH-2 }
+		compositions.push { 0x1FBC4 { [unicodeGlyphs.(0x003F).name.replace [regex '.fwid$'] ".hwid"] } WIDE-WIDTH-2 }
 		createInsetMosaicGlyphs 1 compositions
 
 	if [not recursive] : do "Single-digit double circled"
@@ -442,7 +488,15 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2488 + j - 1
 			digitGlyphNames j
 			begin WIDE-WIDTH-1
-		createDottedGlyphs 1 compositions
+		createDottedGlyphs 1 'period' compositions
+
+	if [not recursive] : do "Single-digit comma"
+		local compositions {}
+		foreach [j : range 0 till 9] : compositions.push : list
+			0x1F101 + j
+			digitGlyphNames j
+			begin WIDE-WIDTH-1
+		createDottedGlyphs 1 'comma' compositions
 
 	if [not recursive] : do "Double-digit dotted"
 		local compositions : list
@@ -450,4 +504,4 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2488 + j - 1
 			digitGlyphNames j
 			begin WIDE-WIDTH-1
-		createDottedGlyphs 2 compositions
+		createDottedGlyphs 2 'period' compositions
