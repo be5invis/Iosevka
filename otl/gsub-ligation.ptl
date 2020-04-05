@@ -56,9 +56,10 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 	}
 	define dottyPunctuations : list
 		* "colon"
+		* "colon.mid"
 		* "semicolon"
 		* "period"
-		* "period.center"
+		* "period.mid"
 		* "comma"
 		* "question"
 		* "exclam"
@@ -85,8 +86,8 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 	define [colon_center]     ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
 	define [caret_center]     ({'asciicaret'}        ~> {'asciicaret.low'})
 	define [tilde_center]     ({'asciitilde'}        ~> {'asciitilde.low'})
-	define [period_center]    ({'period'}            ~> {'period.center'})
-	define [no_period_center] ({'period.center'}     ~> {'period'})
+	define [period_center]    ({'period'}            ~> {'period.mid'})
+	define [no_period_center] ({'period.mid'}     ~> {'period'})
 
 	local ligationLookupName : 'lig_' + featureName + '-' + mappedFeature
 
@@ -220,13 +221,13 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 				# Colon chains
 				chain-rule
 					[dRight.concat dMid] ~> preserved
-					dottyPunctuations ~> [only 'colons' dMid]
+					dottyPunctuations ~> [only 'kern-dotty' dMid]
 					dottyPunctuations ~> preserved
 				chain-rule
 					[dRight.concat dMid] ~> preserved
-					dottyPunctuations ~> [only 'colons' dLeft]
+					dottyPunctuations ~> [only 'kern-dotty' dLeft]
 				chain-rule
-					dottyPunctuations ~> [only 'colons' dRight]
+					dottyPunctuations ~> [only 'kern-dotty' dRight]
 					dottyPunctuations ~> preserved
 		includeLookup
 			.type 'gsub_chaining'
@@ -234,19 +235,24 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 				# Colon chains
 				chain-rule
 					boundary             ~> preserved
-					dRight               ~> [only 'colons' dMid]
+					dRight               ~> [only 'kern-dotty' dMid]
 					[dMid.concat dLeft]  ~> preserved
 				chain-rule
+					boundary             ~> preserved
+					dRight               ~> advance
+					dLeft                ~> advance
+					boundary             ~> preserved
+				chain-rule
 					[dMid.concat dRight] ~> preserved
-					dLeft                ~> [only 'colons' dMid]
+					dLeft                ~> [only 'kern-dotty' dMid]
 					boundary             ~> preserved
 		includeLookup
 			.type 'gsub_chaining'
 			.subtables : list
 				# Colon chains
 				chain-rule
-					dRight ~> [only 'colons' dRightHalf]
-					dLeft  ~> [only 'colons' dLeftHalf]
+					dRight ~> [only 'kern-dotty' dRightHalf]
+					dLeft  ~> [only 'kern-dotty' dLeftHalf]
 
 	do "Plus chains" : begin
 		includeLookup
