@@ -175,7 +175,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-ltgt-diamond`: Enable ligation for `<>` as diamond.
   * `calt-brst`: Center asterisk in `(*` and `*)`.
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
-  * `calt-colons`: Enable ligation for `::` and `:::`.
+  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`..
   * `calt-logic`: Enable ligation for `/\` and `\/`.
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering.
@@ -315,6 +315,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `7`:
     * `v-seven-noserif`, `cv64`: `7` without serif (default for Sans).
     * `v-seven-serifed`, `cv65`: `7` with initial serif (default for Slab).
+  * Styles for `9`:
+    * `v-nine-closed-contour`, `cv96`: `9` with a more closed (default).
+    * `v-nine-turned-six`, `cv97`: `9` with a more open contour like a turned `6`.
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
@@ -341,6 +344,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `{`, `}`:
     * `v-brace-straight`, `cv36`: More straight braces.
     * `v-brace-curly`, `cv37`: More curly braces (default).
+  * Styles for `#`:
+    * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
+    * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
   * Styles for `@`:
     * `v-at-threefold`, `cv31`: The long, three-fold At symbol (`@`) (default).
     * `v-at-fourfold`, `cv32`: The traditional, four-fold At symbol (`@`).
@@ -350,9 +356,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-dollar-through`, `cv39`: Dollar symbol with strike-through vertical bar (default).
     * `v-dollar-opencap`, `cv54`: Dollar symbol with open contour, not exceeding baseline and ascender.
     * `v-dollar-throughcap`, `cv55`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
-  * Styles for `#`:
-    * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
-    * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
   * Styles for `%`:
     * `v-percent-dots`, `cv62`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
     * `v-percent-rings`, `cv63`: Percent `%`, Per-mille `‰` and basis point `‱` using rings (default).
