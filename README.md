@@ -24,7 +24,7 @@ The typeface contains 9 weights (Thin to Heavy) alongside with both italic and o
 
 ![Weights sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
 
-All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen.html).
+All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen).
 
 ![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
