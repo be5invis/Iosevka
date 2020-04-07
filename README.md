@@ -71,25 +71,23 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 2. Add a build plan into `private-build-plans.toml`, following this format:
 
 	```toml
-	[buildPlans.iosevka-custom]            # <iosevka-custom> is your plan name
-	family = "Iosevka Custom"              # Font menu family name
-	design = ["common styles"]             # Common styles
-	upright = ["upright-only", "styles"]   # Upright-only styles
-	italic = ["italic-only", "styles"]     # Italic-only styles
-	oblique = ["oblique-only", "styles"]   # Oblique-only styles
-	hintParams = ["-a", "sss"]             # Optional custom parameters for ttfautohint
+	[buildPlans.iosevka-custom]                         # <iosevka-custom> is your plan name
+	family = "Iosevka Custom"                           # Font menu family name
+	design = ["leading-1500", "v-i-hooky", "v-l-hooky"] # Customize styles
+	hintParams = ["-a", "sss"]                          # Optional custom parameters for ttfautohint
+
 
 	# Override default building weights
-	# When buildPlans.<plan name>.weights is absent
-	# All weights would built and mapped to default shape/CSS
+	# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
+	# default values.
 	# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
 	#             and "shape" properly only supports number between 100 and 900 (inclusive).
 	#             If you decide to use custom weights you have to define all the weights you
 	#             plan to use otherwise they will not be built.
 	[buildPlans.iosevka-custom.weights.regular]
-	shape = 400  # Weight for glyph shapes
-	menu  = 400  # Weight for menu name
-	css   = 400  # Weight for webfont CSS
+	shape = 400  # Weight for glyph shapes.
+	menu  = 400  # Weight for the font's names.
+	css   = 400  # Weight for webfont CSS.
 
 	[buildPlans.iosevka-custom.weights.book]
 	shape = 450
@@ -100,7 +98,9 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 	shape = 700
 	menu  = 700
 	css   = 700
-	
+	# End weight section
+
+
 	# Override default building slant sets
 	# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
 	# When this section is absent, all slants would be built.
@@ -108,6 +108,27 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 	upright = "normal"
 	italic = "italic"
 	oblique = "oblique"
+	# End slant section
+	
+
+	# Override default building widths
+	# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
+	# default values.
+	# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
+	#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
+	#             If you decide to use custom weights you have to define all the weights you
+	#             plan to use otherwise they will not be built.
+	[buildPlans.iosevka-custom.widths.normal]
+	shape = 5          # Width of glyph shapes.
+	menu  = 5          # Width for the font's names.
+	css   = "normal"   # "font-stretch' property of webfont CSS.
+
+
+	[buildPlans.iosevka-custom.widths.extended]
+	shape = 7
+	menu  = 7
+	css   = "expanded"
+	# End width section
 	```
 
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
