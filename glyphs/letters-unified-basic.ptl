@@ -492,6 +492,21 @@ glyph-block LetterUnified-Basic : begin
 				set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
 			save 'l.italic'
 
+		sketch # l.phoneticLeft
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			define middle : SB + STROKE * HVCONTRAST
+			include : dispiro
+				widths.center
+				flat middle CAP [heading DOWNWARD]
+				curl middle HOOK
+				arcvh
+				flat (middle + HOOK - HALFSTROKE) HALFSTROKE
+				curl [Math.max RIGHTSB (middle + [Math.max HOOKX (LONGJUT * 1.05 * df.div)])] HALFSTROKE [heading RIGHTWARD]
+			set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
+			save 'l.phoneticLeft'
+
 		sketch # l.tailed
 			local df : DivFrame para.diversityI
 			set-width df.width
@@ -4194,27 +4209,46 @@ glyph-block LetterUnified-Basic : begin
 			include MarkSet.b
 			include : SmallTShape CAP 0
 			save 't.standard'
+
+		define [TFlatShape df m ext] : glyph-construction
+			local crossLeft : mix 0 SB m
+			local crossRight : mix df.width df.rightSB m
+			local barleft : [mix crossLeft crossRight 0.42] - STROKE * 0.375 * HVCONTRAST
+			local tTurn : Math.max (HOOK * 0.9) (STROKE * 1.375) : Math.min HOOK (STROKE * 1.75)
+			include : union
+				dispiro
+					widths.rhs
+					flat (crossRight + ext) 0
+					curl [Math.min (barleft + tTurn) (crossRight - 1)] 0
+					archv
+					flat barleft tTurn
+					curl barleft CAP [heading UPWARD]
+				dispiro
+					widths.rhs
+					flat (crossLeft - HALFSTROKE * TANSLANT) XH
+					curl (crossRight - HALFSTROKE * TANSLANT) XH
+			set-anchor 'topright' BASE crossRight  CAP
+
 		sketch # t.narrow
 			local df : DivFrame para.diversityF
 			set-width df.width
 			include df.markSet.b
-			local crossLeft : mix 0 SB (1 / 2)
-			local crossRight : mix df.width df.rightSB (1 / 2)
-			local barleft : [mix crossLeft crossRight 0.42] - STROKE * 0.375 * HVCONTRAST
-			local tTurn : Math.max (HOOK * 0.9) (STROKE * 1.375) : Math.min HOOK (STROKE * 1.75)
-			include : dispiro
-				widths.rhs
-				flat crossRight 0
-				curl [Math.min (barleft + tTurn) (crossRight - 1)] 0
-				archv
-				flat barleft tTurn
-				curl barleft CAP [heading UPWARD]
-			include : dispiro
-				widths.rhs
-				flat (crossLeft - HALFSTROKE * TANSLANT) XH
-				curl (crossRight - HALFSTROKE * TANSLANT) XH
-			set-anchor 'topright' BASE crossRight  CAP
+			include : TFlatShape df 0.5 0
 			save 't.narrow'
+		sketch # t.phoneticLeft
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			include : TFlatShape df 1 0
+			save 't.phoneticLeft'
+		sketch # t.phoneticLeft.extended
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			include : intersection
+				TFlatShape df 1 WIDTH
+				Rect CAP 0 SB (MIDDLE + WIDTH)
+			save 't.phoneticLeft.extended'
 		sketch # t.cross
 			set-width WIDTH
 			include MarkSet.b
@@ -4317,6 +4351,22 @@ glyph-block LetterUnified-Basic : begin
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   (SB - OX / 4) SHOOK
 
+		define [sStrokePhoneticRight] : begin
+			define stroke : adviceBlackness2 2.875 2 XH
+			define ess : mix stroke (ESS * stroke / STROKE) 0.5
+			define strokeCoeff : linreg 18 0 126 1 stroke
+			define smooth : adviceSSmooth XH (-1) stroke
+			return : dispiro
+				widths.lhs stroke
+				g4   (RIGHTSB + OX / 4) (XH - SHOOK)
+				hookstart XO (sw -- stroke) (swItalicAdj -- STROKE)
+				g4   (SB + OX / 8) (XH - smooth)
+				SNeck stroke (slantCoeff -- -0.01)
+				g4   (RIGHTSB - OX / 8) (smooth) [widths 0 stroke]
+				arcvh
+				flat (MIDDLE - CORRECTION_OMIDS) 0 [widths 0 STROKE]
+				curl SB 0
+
 		define [RevsStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
 			define ess : ESS * stroke / STROKE
@@ -4343,6 +4393,11 @@ glyph-block LetterUnified-Basic : begin
 			include : sStroke
 			save 's' 's'
 			save 'cyrdze' 0x455
+
+		sketch # s
+			include MarkSet.e
+			include : sStrokePhoneticRight
+			save 's.phoneticRight'
 
 		sketch # revS
 			include MarkSet.capital
