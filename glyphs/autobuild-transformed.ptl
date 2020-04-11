@@ -550,22 +550,33 @@ glyph-block Autobuild-Transformed : begin
 		local df1 : Thinner pendingGlyphs1 shrink1
 		local df2 : Thinner pendingGlyphs2 shrink2
 
-		foreach [{unicode c1 c2 desiredWidth} : items-of records] : begin
+		foreach [{unicode c1 c2} : items-of records] : begin
 			local glyphName "\(c1)_\(c2)"
 			if [query-glyph glyphName] : begin
 				local j 2
 				while [query-glyph (glyphName + j)] : inc j
 				set glyphName (glyphName + j)
 
+			define [maskOut] : create-glyph : glyph-construction
+				local s    0
+				local step (-OX)
+				local dist (STROKE * 2)
+				while (s < dist) : begin
+					include df2.(c2)
+					apply-transform : Translate step 0
+					set s : s + step
+				apply-transform : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+
 			sketch
 				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
 				local refW : sumChildrenWidth - kern
 				include df2.(c2)
 				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
-				include : intersection
-					Rect (CAP * 2) (DESCENDER * 2) (-WIDTH) (df1.(c1).advanceWidth * wadj1 - kern + df2.(c2).advanceWidth * wadj2 / 2)
-					glyph-construction : include df1.(c1)
-				# include : Translate (-df1.(c1).advanceWidth * (1 - wadj1) / 2) 0
+				include : difference
+					intersection
+						Rect (CAP * 2) (DESCENDER * 2) (-WIDTH) (df1.(c1).advanceWidth * wadj1 - kern + df2.(c2).advanceWidth * wadj2 / 2)
+						glyph-construction : include df1.(c1)
+					maskOut
 				include : Upright
 				include : Translate (-refW / 2) 0
 				include : Scale [clamp 0 1 ((WIDTH - SB * 1.25) / (WIDTH - SB * 2) * WIDTH / refW)] 1
