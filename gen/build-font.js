@@ -10,7 +10,7 @@ const { setFontMetrics } = require("../meta/aesthetics");
 const regulateGlyphs = require("../support/regulate-glyph");
 const gcFont = require("./gc");
 
-module.exports = function(para) {
+module.exports = function (para) {
 	const font = EmptyFont();
 	const gs = buildGlyphs(para);
 

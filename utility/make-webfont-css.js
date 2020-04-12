@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-module.exports = function(output, family, hs, formats) {
+module.exports = function (output, family, hs, formats) {
 	let ans = ``;
 	for (const term of hs) {
 		let src = formats

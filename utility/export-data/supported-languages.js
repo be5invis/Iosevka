@@ -18,7 +18,7 @@ module.exports = async function (charMapPath) {
 			...(exemplar.auxiliary || []),
 			...(exemplar.index || []),
 			...(exemplar.numbers || []),
-			...(exemplar.punctuation || []),
+			...(exemplar.punctuation || [])
 		].join("");
 
 		let fullSupport = true;
@@ -64,9 +64,9 @@ module.exports = async function (charMapPath) {
 	return {
 		stats: {
 			glyphCount: charMap.length,
-			codePointCount: rawCoverage.size,
+			codePointCount: rawCoverage.size
 		},
 		unicodeCoverage: gatherCov(rawCoverage),
-		languages: Array.from(supportLangSet).sort(),
+		languages: Array.from(supportLangSet).sort()
 	};
 };

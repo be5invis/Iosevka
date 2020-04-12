@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function() {
+module.exports = function () {
 	return {
 		head: {
 			checkSumAdjustment: 369537602,
