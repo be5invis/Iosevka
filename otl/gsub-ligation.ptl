@@ -11,8 +11,11 @@ define [just s] : lambda [t] : t.map : lambda [x] s
 define preserved null
 define advance : lambda [t] : t.map : lambda [x] x
 
-export : define [buildLigations sink para plm glyphs] : foreach [ {featureName mappedFeature} : pairs-of plm] : do
+export : define [buildLigations sink para plm glyphs] : begin
+	local rankedLookups {}
+	foreach [ {featureName mappedFeature} : pairs-of plm] : buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups
 
+define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups] : begin
 	define chain-rule : ChainRuleBuilder sink
 
 	define arrowStick  {'hyphen' 'equal'}
@@ -95,7 +98,7 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 	define [period_center]    ({'period'}            ~> {'period.mid'})
 	define [no_period_center] ({'period.mid'}     ~> {'period'})
 
-	local ligationLookupName : 'lig_' + featureName + '-' + mappedFeature
+	local ligationLookupName : 'lig_' + featureName + '{' + mappedFeature + '}'
 
 	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
 
@@ -114,78 +117,95 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 	define feature : add-common-feature sink : add-feature sink featureName
 
 	local lastLookupName null
-	local [dedup ln0 obj] : begin
+	local lookupRank 0
+	local [dedup ln0 rank obj] : begin
 		local h : JSON.stringify obj
-		foreach [{name lookup} : pairs-of sink.lookups] : begin
+		foreach [{name lookup} : items-of rankedLookups.(rank)] : begin
 			local h1 : JSON.stringify lookup
-			if (h == h1) : return name
-		return ln0
+			if (h == h1) : return {name false}
+		return {ln0 true}
 
-	local [includeLookup obj] : begin
-		local ln : dedup (ligationLookupName + feature.lookups.length) obj
+	local [AddRankedLookup obj] : begin
+		if [not rankedLookups.(lookupRank)] : set rankedLookups.(lookupRank) {}
+		local sameRankLookupBlob rankedLookups.(lookupRank)
+
+		local {ln unique} : dedup (ligationLookupName + feature.lookups.length) lookupRank obj
 		if [not sink.lookups.(ln)] : set sink.lookups.(ln) obj
 		feature.lookups.push ln
+
+		# In-feature ordering
 		if lastLookupName : sink.lookupDep.push {lastLookupName ln}
 		set lastLookupName ln
 
-	define [CreateLigationLookup rules] : includeLookup
-		.type 'gsub_chaining'
-		.subtables rules
+		# Cross-feature ordering
+		if unique : begin
+			if sameRankLookupBlob.length : begin
+				local lastSameRank (sameRankLookupBlob.(sameRankLookupBlob.length - 1).0)
+				if (lastSameRank != ln) : sink.lookupDep.push {lastSameRank ln}
+			sameRankLookupBlob.push {ln obj}
 
-	do "Operator centering" : if [hasLG "center-ops"] : begin
+	define [keep-if lg x] : if [hasLG lg] x null
+
+	define [CreateLigationLookup rules] : begin
+		if (rules && rules.length) : AddRankedLookup
+			.type 'gsub_chaining'
+			.subtables rules
+		set lookupRank : lookupRank + 1
+
+	define [CreateReverseLigationLookup rules] : begin
+		if (rules && rules.length) : AddRankedLookup
+			.type 'gsub_reverse'
+			.subtables rules
+		set lookupRank : lookupRank + 1
+
+	do "Operator centering"
 		define centerizeGroups : { asterisk_center caret_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
 
-		define [centerize-standard g] : CreateLigationLookup : list
-			chain-rule [g] [g] [acskip] [acskip] [acops] # ::+
-			chain-rule [g] [g] [acskip] [acops]          # ::+
-			chain-rule [g] [g] [acops]                   # ::+
-			chain-rule [g] [acskip] [acskip] [acops]     # :+
-			chain-rule [g] [acskip] [acops]              # :+
-			chain-rule [g] [acops]                       # :+
-			chain-rule [acops] [acskip] [acskip] [g]     # +:
-			chain-rule [acops] [acskip] [g]              # +:
-			chain-rule [acops] [g]                       # +:
+		do "Bracket-star"
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule # (*
+					{'parenLeft'}  ~> preserved
+					{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
+				chain-rule # *)
+					{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
+					{'parenRight'} ~> preserved
 
-		define [centerize-cross g1 g2] : CreateLigationLookup : list
-			chain-rule [g1] [g1] [g2]                    # ::*
-			chain-rule [g1] [g2]                         # :*
+		do "Bracket-colon"
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule # (:
+					{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> preserved
+					colon_center
+				chain-rule # :)
+					colon_center
+					{'parenRight' 'bracketRight' 'braceRight'} ~> preserved
 
-		CreateLigationLookup : list
-			chain-rule # (*
-				{'parenLeft'}  ~> preserved
-				{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
-			chain-rule # *)
-				{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
-				{'parenRight'} ~> preserved
-		# Smiley :)
-		CreateLigationLookup  : list
-			chain-rule # (:
-				{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> preserved
-				colon_center
-			chain-rule # :)
-				colon_center
-				{'parenRight' 'bracketRight' 'braceRight'} ~> preserved
+		do "Operator Centering"
+			local startRules {}
+			foreach [g : items-of centerizeGroups] : begin
+				startRules.push : chain-rule [g] [g] [acskip] [acskip] [acops] # ::+
+				startRules.push : chain-rule [g] [g] [acskip] [acops]          # ::+
+				startRules.push : chain-rule [g] [g] [acops]                   # ::+
+				startRules.push : chain-rule [g] [acskip] [acskip] [acops]     # :+
+				startRules.push : chain-rule [g] [acskip] [acops]              # :+
+				startRules.push : chain-rule [g] [acops]                       # :+
+				startRules.push : chain-rule [acops] [acskip] [acskip] [g]     # +:
+				startRules.push : chain-rule [acops] [acskip] [g]              # +:
+				startRules.push : chain-rule [acops] [g]                       # +:
+			CreateLigationLookup : keep-if 'center-ops' startRules
 
-		# Operator centering
-		foreach [g : items-of centerizeGroups] : begin
-			centerize-standard g
-			# foreach [g2 : items-of centerizeGroups] : if (g != g2) : centerize-cross g g2
+		do "Operator centering : Trailing"
+			local centerizeL : centerizeGroups.map : x => [x].left.0
+			local centerizeR : centerizeGroups.map : lambda [x] : begin
+				local left [x].left
+				local right [x].right
+				while (right <@ Function) : set right [right left]
+				return : if right (right.0 || left.0) (left.0)
 
-		# Operator centering : Trailing
-		local centerizeL : centerizeGroups.map : x => [x].left.0
-		local centerizeR : centerizeGroups.map : lambda [x] : begin
-			local left [x].left
-			local right [x].right
-			while (right <@ Function) : set right [right left]
-			return : if right (right.0 || left.0) (left.0)
-
-		CreateLigationLookup : list
-			chain-rule centerizeR [acskip] [acskip] (centerizeL ~> centerizeR)
-			chain-rule centerizeR [acskip] (centerizeL ~> centerizeR)
-			chain-rule centerizeR (centerizeL ~> centerizeR)
-		includeLookup
-			.type 'gsub_reverse'
-			.subtables : list
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule centerizeR [acskip] [acskip] (centerizeL ~> centerizeR)
+				chain-rule centerizeR [acskip] (centerizeL ~> centerizeR)
+				chain-rule centerizeR (centerizeL ~> centerizeR)
+			CreateReverseLigationLookup : keep-if 'center-ops' : list
 				object
 					match      {centerizeL [acskip] [acskip] centerizeR}
 					to         centerizeR
@@ -199,10 +219,10 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 					to         centerizeR
 					inputIndex 0
 
-		# Operator centering : Avoid "letter-point" being centered
-		CreateLigationLookup : list
-			chain-rule alphabet [no_period_center]
-			chain-rule [no_period_center] alphabet
+		do "Operator centering : Avoid 'letter-point' being centered"
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule alphabet [no_period_center]
+				chain-rule [no_period_center] alphabet
 
 	do "Colon chains" : begin
 		define dLeft      : [lsx 'dLeft'] dottyPunctuations
@@ -283,13 +303,11 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 			chain-rule # <||||
 				[[lsx 'trig'] {'bar'}] ~> preserved
 				{'bar'}                ~> [only 'trig' : lsx 'trig']
-		includeLookup
-			.type 'gsub_reverse'
-			.subtables : list
-				object # ||||>
-					match      {{'bar'} [[lsx 'trig'] {'bar'}]}
-					to         [[lsx 'trig'] {'bar'}]
-					inputIndex 0
+		CreateReverseLigationLookup : list
+			object # ||||>
+				match      {{'bar'} [[lsx 'trig'] {'bar'}]}
+				to         [[lsx 'trig'] {'bar'}]
+				inputIndex 0
 
 	do "Arrows"
 		define ArrowFormationConfig : list
@@ -479,17 +497,15 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 				foreach [rc : items-of {'r' 'r1' 'j' 'j1' 'c' 'z'}] : begin
 					set stickTerminals : stickTerminals.concat [[CBar "f\(rc)"] barCls]
 
-				includeLookup
-					.type 'gsub_reverse'
-					.subtables : list
-						object
-							match      {anyBar barCls stickTerminals}
-							to         [[CBar 'jz'] barCls]
-							inputIndex 1
-						object
-							match      {barCls stickTerminals}
-							to         [[CBar 'fz'] barCls]
-							inputIndex 0
+				CreateReverseLigationLookup : list
+					object
+						match      {anyBar barCls stickTerminals}
+						to         [[CBar 'jz'] barCls]
+						inputIndex 1
+					object
+						match      {barCls stickTerminals}
+						to         [[CBar 'fz'] barCls]
+						inputIndex 0
 
 				# <--------------------, <------------------->
 				local gapFillingRules {}
@@ -741,3 +757,4 @@ export : define [buildLigations sink para plm glyphs] : foreach [ {featureName m
 		chain-rule
 			{'greater'} ~> [only 'ineq' {'greater.lig2'}]
 			equal       ~> [only 'ineq' {'eq.at-gteq.lig2'}]
+
