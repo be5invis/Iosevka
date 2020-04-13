@@ -16,7 +16,7 @@ export : define [buildLigations sink para plm glyphs] : begin
 	foreach [ {featureName mappedFeature} : pairs-of plm] : buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups
 
 define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups] : begin
-	define chain-rule : ChainRuleBuilder sink
+	define {chain-rule reverse-rule} : ChainRuleBuilder sink
 
 	define arrowStick  {'hyphen' 'equal'}
 	define [stickClass style] : [lsx style] {'hyphen' 'equal'}
@@ -206,18 +206,18 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				chain-rule centerizeR [acskip] (centerizeL ~> centerizeR)
 				chain-rule centerizeR (centerizeL ~> centerizeR)
 			CreateReverseLigationLookup : keep-if 'center-ops' : list
-				object
-					match      {centerizeL [acskip] [acskip] centerizeR}
-					to         centerizeR
-					inputIndex 0
-				object
-					match      {centerizeL [acskip] centerizeR}
-					to         centerizeR
-					inputIndex 0
-				object
-					match      {centerizeL centerizeR}
-					to         centerizeR
-					inputIndex 0
+				reverse-rule
+					centerizeL ~> centerizeR
+					[acskip]   ~> preserved
+					[acskip]   ~> preserved
+					centerizeR ~> preserved
+				reverse-rule
+					centerizeL ~> centerizeR
+					[acskip]   ~> preserved
+					centerizeR ~> preserved
+				reverse-rule
+					centerizeL ~> centerizeR
+					centerizeR ~> preserved
 
 		do "Operator centering : Avoid 'letter-point' being centered"
 			CreateLigationLookup : keep-if 'center-ops' : list
@@ -304,10 +304,9 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				[[lsx 'trig'] {'bar'}] ~> preserved
 				{'bar'}                ~> [only 'trig' : lsx 'trig']
 		CreateReverseLigationLookup : list
-			object # ||||>
-				match      {{'bar'} [[lsx 'trig'] {'bar'}]}
-				to         [[lsx 'trig'] {'bar'}]
-				inputIndex 0
+			reverse-rule
+				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
+				[[lsx 'trig'] {'bar'}] ~> preserved
 
 	do "Arrows"
 		define ArrowFormationConfig : list
@@ -495,17 +494,17 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				# --------------------->
 				local stickTerminals {}
 				foreach [rc : items-of {'r' 'r1' 'j' 'j1' 'c' 'z'}] : begin
-					set stickTerminals : stickTerminals.concat [[CBar "f\(rc)"] barCls]
+					local curCls : [CBar "f\(rc)"] barCls
+					foreach [g : items-of curCls] : if glyphs.(g) : stickTerminals.push g
 
 				CreateReverseLigationLookup : list
-					object
-						match      {anyBar barCls stickTerminals}
-						to         [[CBar 'jz'] barCls]
-						inputIndex 1
-					object
-						match      {barCls stickTerminals}
-						to         [[CBar 'fz'] barCls]
-						inputIndex 0
+					reverse-rule
+						anyBar         ~> preserved
+						barCls         ~> [CBar 'jz']
+						stickTerminals ~> preserved
+					reverse-rule
+						barCls         ~> [CBar 'fz']
+						stickTerminals ~> preserved
 
 				# <--------------------, <------------------->
 				local gapFillingRules {}

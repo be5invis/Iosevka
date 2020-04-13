@@ -1,5 +1,7 @@
 export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.}}
 
+extern Map
+
 export : define [pick-language sink tag] : begin
 	if sink.languages.(tag) : return sink.languages.(tag)
 	define lang {.features {}}
@@ -100,7 +102,33 @@ export : define [ChainRuleBuilder sink] : begin
 			if lutn : subtable.apply.push {.at j .lookup lutn}
 		return subtable
 
-	return chain-rule
+	define [reverse-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+		local subtable {.match {} .to {} .inputIndex 0}
+		local foundi false
+
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			local subst : new Map
+			foreach [g : items-of term.left] : subst.set g g
+
+			if term.right : begin
+				if foundi : throw : new Error "Duplicate substitutions in one reverse rule"
+				set foundi true
+				set subtable.inputIndex j
+				local toGlyphs : piecewise
+					(term.right <@ Function) [term.right term.left]
+					true                     term.right
+				foreach [k : range 0 term.left.length]
+					subst.set term.left.(k) (toGlyphs.(k) || term.left.(k))
+
+				set subtable.to : Array.from [subst.values]
+
+			set subtable.match.(j) : Array.from [subst.keys]
+
+		return subtable
+
+	return {chain-rule reverse-rule}
 
 export : define [query-related-glyphs glyphs para entries] : begin
 	define sink {}
