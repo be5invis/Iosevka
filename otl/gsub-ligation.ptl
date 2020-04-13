@@ -307,15 +307,44 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			reverse-rule
 				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
 				[[lsx 'trig'] {'bar'}] ~> preserved
+	do "HTML Comment"
+		CreateLigationLookup : list
+			chain-rule # <!---
+				less   ~> preserved
+				exclam ~> [only 'html-comment' : lsx 'htmlcommentstart']
+				hyphen ~> [only 'html-comment' : lsx 'lxc']
+				hyphen ~> [only 'html-comment' : lsx 'cc']
+				hyphen ~> [only 'html-comment' : lsx 'cf']
+			chain-rule # <!--
+				less   ~> preserved
+				exclam ~> [only 'html-comment' : lsx 'htmlcommentstart']
+				hyphen ~> [only 'html-comment' : lsx 'lxc']
+				hyphen ~> [only 'html-comment' : lsx 'cf']
 
 	do "Arrows"
-		define ArrowFormationConfig : list
-			#    rod      dbl ltgt  html FBarCls
-			list equal    1   1     0    lsx
-			list hyphen   0   0     1    lsx
-			list anyWave  0   0     0    [lambda [k] [just "wave.\(k)"]]
+		define singular : hyphen.concat anyWave
+		define [CBarSingular k] : begin
+			local hyphenSet : new Set hyphen
+			local fHyphen : lsx k
+			local fWave   : just "wave.\(k)"
+			return : lambda [t] : begin
+				local hyphenResults : fHyphen t
+				local waveResults   : fWave   t
+				return : t.map : lambda [x j]
+					if [hyphenSet.has x] hyphenResults.(j) waveResults.(j)
 
-		foreach [{barCls dbl ltgt html CBar} : items-of ArrowFormationConfig] : begin
+		define ArrowFormationConfig : list
+			#    rod      dbl  ltgt  FBarCls
+			list equal    1    1     lsx
+			list singular 0    0     CBarSingular
+
+		define ArrowExtensionConfig : list
+			#    rod      FBarCls
+			list equal    lsx
+			list hyphen   lsx
+			list anyWave  [lambda [k] [just "wave.\(k)"]]
+
+		foreach [{barCls dbl ltgt CBar} : items-of ArrowFormationConfig] : do
 			define heads {}
 			define rods  {}
 
@@ -490,43 +519,52 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			CreateLigationLookup heads
 			CreateLigationLookup rods
 
+		foreach [{barCls CBar} : items-of ArrowExtensionConfig] : do
 			do "Extended arrow sticks"
-				# --------------------->
-				local stickTerminals {}
+				# Extension
+				local stickTermLeft  {}
+				local stickConnLeft  {}
+				foreach [lc : items-of {'l' 'l1' 'j' 'j1' 'c' 'z'}] : begin
+					local freeCls : [CBar "\(lc)f"] barCls
+					foreach [g : items-of freeCls] : if glyphs.(g) : stickTermLeft.push g
+					local connCls : [CBar "\(lc)c"] barCls
+					foreach [g : items-of connCls] : if glyphs.(g) : stickConnLeft.push g
+
+				local stickTermRight {}
+				local stickConnRight {}
 				foreach [rc : items-of {'r' 'r1' 'j' 'j1' 'c' 'z'}] : begin
-					local curCls : [CBar "f\(rc)"] barCls
-					foreach [g : items-of curCls] : if glyphs.(g) : stickTerminals.push g
+					local freeCls : [CBar "f\(rc)"] barCls
+					foreach [g : items-of freeCls] : if glyphs.(g) : stickTermRight.push g
+					local connCls : [CBar "c\(rc)"] barCls
+					foreach [g : items-of connCls] : if glyphs.(g) : stickConnRight.push g
+
+				CreateLigationLookup : list
+					chain-rule
+						stickTermLeft  ~> preserved
+						barCls         ~> [CBar 'zj']
+						anyBar         ~> preserved
+					chain-rule
+						stickTermLeft  ~> preserved
+						barCls         ~> [CBar 'zf']
 
 				CreateReverseLigationLookup : list
 					reverse-rule
 						anyBar         ~> preserved
 						barCls         ~> [CBar 'jz']
-						stickTerminals ~> preserved
+						stickTermRight ~> preserved
 					reverse-rule
 						barCls         ~> [CBar 'fz']
-						stickTerminals ~> preserved
+						stickTermRight ~> preserved
 
-				# <--------------------, <------------------->
-				local gapFillingRules {}
-				local extensionRules  {}
+				# Gap filling
+				CreateLigationLookup : list
+					chain-rule
+						stickTermLeft  ~> stickConnLeft
+						stickTermRight ~> stickConnRight
 
-				foreach [lc : items-of {'l' 'l1' 'j' 'j1' 'c' 'z'}] : begin
-					foreach [rc : items-of {'r' 'r1' 'j' 'j1' 'c' 'z'}] : begin
-						gapFillingRules.push : chain-rule
-							[[CBar "\(lc)f"] barCls] ~> [[CBar "\(lc)c"] barCls]
-							[[CBar "f\(rc)"] barCls] ~> [[CBar "c\(rc)"] barCls]
-
-					extensionRules.push : chain-rule
-						[[CBar "\(lc)f"] barCls] ~> preserved
-						barCls                   ~> [CBar 'zj']
-						anyBar                   ~> preserved
-
-					extensionRules.push : chain-rule
-						[[CBar "\(lc)f"] barCls] ~> preserved
-						barCls                   ~> [CBar 'zf']
-
-				CreateLigationLookup gapFillingRules
-				CreateLigationLookup extensionRules
+		foreach [{barCls dbl ltgt CBar} : items-of ArrowFormationConfig] : do
+			define [CJoinHeadForce]         : if dbl [lsx 'dblhead']        [lsx 'shift0']
+			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
 
 			do "Ambiguous rods"
 				define ambiguousRods {}
@@ -553,19 +591,6 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 						barCls     ~> [only 'arrow2' : CBar 'jf']
 
 				CreateLigationLookup ambiguousRods
-
-			if html : CreateLigationLookup : list
-				chain-rule # <!---
-					less       ~> preserved
-					exclam     ~> [only 'html-comment' : CBar 'htmlcommentstart']
-					barCls     ~> [only 'html-comment' : CBar 'lxc']
-					barCls     ~> [only 'html-comment' : CBar 'cc']
-					barCls     ~> [only 'html-comment' : CBar 'cf']
-				chain-rule # <!--
-					less       ~> preserved
-					exclam     ~> [only 'html-comment' : CBar 'htmlcommentstart']
-					barCls     ~> [only 'html-comment' : CBar 'lxc']
-					barCls     ~> [only 'html-comment' : CBar 'cf']
 
 	# <<, >>, <<<, >>>
 	do "Less/Greater Chaining"
