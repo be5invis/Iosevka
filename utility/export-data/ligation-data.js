@@ -23,6 +23,7 @@ const logc = TAG("logic");
 const brst = TAG("brst");
 const trig = TAG("trig");
 const ltgt = TAG("ltgt-diamond", "ltgt-ne");
+const llggeq = TAG("llggeq");
 const dotOper = TAG("dotoper");
 const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
@@ -56,7 +57,7 @@ const ligationSamples = [
 		arrow2("=<="),
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq("<<="),
 		ineq("<="),
 		arrow("=>"),
 		arrow("=>>"),
@@ -64,7 +65,7 @@ const ligationSamples = [
 		arrow("===>"),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq(">>="),
 		arrow("<=>"),
 		arrow("<==>"),
 		arrow("<===>"),
@@ -145,7 +146,7 @@ const ligationSamplesNarrow = [
 	[
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq("<<="),
 		ineq("<="),
 		arrow("<=>"),
 		arrow("=>"),
@@ -160,7 +161,7 @@ const ligationSamplesNarrow = [
 		arrow2("=<="),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq(">>="),
 		arrow("<==>"),
 		arrow("<===>"),
 		arrow("<====>")
