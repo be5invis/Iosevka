@@ -152,7 +152,7 @@ async function processLigSetPreDef() {
 	const md = new MdCol("Section-Cherry-Picking-Predefined");
 	md.log(`* Styles for ligation sets, include:\n`);
 	for (const gr in ligData.rawSets) {
-		if (ligData.rawSets[gr].disableHives) continue;
+		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =
 			ligData.rawSets[gr].longDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;

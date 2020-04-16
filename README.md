@@ -161,6 +161,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 * Styles for ligation sets, include:
 
   * `ligset-dlig`: Default ligation set would be assigned to Discretionary ligatures.
+  * `ligset-clike`: Default ligation set would be assigned to C-Like.
   * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
   * `ligset-php`: Default ligation set would be assigned to PHP.
   * `ligset-ml`: Default ligation set would be assigned to ML.
@@ -170,7 +171,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-idris`: Default ligation set would be assigned to Idris.
   * `ligset-elm`: Default ligation set would be assigned to Elm.
   * `ligset-purescript`: Default ligation set would be assigned to PureScript.
-  * `ligset-patel`: Default ligation set would be assigned to PatEL.
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-coq`: Default ligation set would be assigned to Coq.
   * `ligset-matlab`: Default ligation set would be assigned to Matlab.
@@ -201,6 +201,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`..
   * `calt-logic`: Enable ligation for `/\` and `\/`.
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
+  * `calt-llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
   * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering.
   * `calt-arrowZALE`: Treat `<=` as arrow.
   * `calt-arrowZAGE`: Treat `>=` as co-arrow.
