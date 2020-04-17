@@ -2,6 +2,9 @@ const cldr = require("cldr");
 const fs = require("fs-extra");
 const gatherCov = require("./coverage-export/gather-coverage-data");
 
+// List all the languages that Iosevka supports, but cannot inferred from CLDR data.
+const overrideSupportedLanguages = [];
+
 module.exports = async function (charMapPath) {
 	const charMap = await fs.readJson(charMapPath);
 
@@ -44,7 +47,7 @@ module.exports = async function (charMapPath) {
 			}
 		}
 	}
-	const supportLangSet = new Set();
+	const supportLangSet = new Set(overrideSupportedLanguages);
 	for (const loc of supportLocaleSet) {
 		const seg = loc.split("_");
 		let displayName = null;
