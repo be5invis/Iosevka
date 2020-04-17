@@ -66,7 +66,8 @@ class MdCol {
 	apply(s) {
 		return s.replace(this.matchRegex, () => {
 			return (
-				`<!-- BEGIN ${this.sectionName} -->\n\n` +
+				`<!-- BEGIN ${this.sectionName} -->\n` +
+				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
 				this.data +
 				`\n<!-- END ${this.sectionName} -->\n`
 			);
