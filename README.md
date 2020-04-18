@@ -29,6 +29,7 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 ![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
 
 <!-- BEGIN Section-Language-List -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 159 Supported Languages: 
 
@@ -157,6 +158,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 * Styles for ligation sets, include:
 
@@ -178,6 +180,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- END Section-Cherry-Picking-Predefined -->
 
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 * Styles for further customizing default (`calt`) ligation sets:
 
@@ -226,6 +229,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.
 
 <!-- BEGIN Section-Stylistic-Sets -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 * Styles as stylistic sets:
 
@@ -248,6 +252,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- END Section-Stylistic-Sets -->
 
 <!-- BEGIN Section-Cherry-Picking-Styles -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 * Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
 
