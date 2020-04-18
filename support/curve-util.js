@@ -30,7 +30,7 @@ exports.OffsetCurve = class OffsetCurve {
 	}
 };
 
-exports.curveToContour = function(curve, segments) {
+exports.curveToContour = function (curve, segments) {
 	const z0 = curve.eval(0);
 	const z1 = curve.eval(1);
 	const offPoints = fixedCubify(curve, segments || 16);

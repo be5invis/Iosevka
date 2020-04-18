@@ -1,5 +1,8 @@
 export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.}}
 
+extern Map
+extern Set
+
 export : define [pick-language sink tag] : begin
 	if sink.languages.(tag) : return sink.languages.(tag)
 	define lang {.features {}}
@@ -35,12 +38,13 @@ export : define [add-feature-lookup fea lookupName] : begin
 	define index : fea.lookups.indexOf lookupName
 	if (index < 0) : fea.lookups.push lookupName
 
-export : define [add-lookup sink data] : begin
+export : define [add-lookup sink data _prefix] : begin
+	local prefix : _prefix || '_lut_'
 	local n 0
 	while true : begin
-		if [not sink.lookups.('_lut_' + n)] : begin
-			set sink.lookups.('_lut_' + n) data
-			return ('_lut_' + n)
+		if [not sink.lookups.(prefix + n)] : begin
+			set sink.lookups.(prefix + n) data
+			return (prefix + n)
 		set n : n + 1
 
 export : define [pick-lookup sink name fallback] : begin
@@ -62,25 +66,39 @@ export : define [add-common-feature sink fea] : begin
 	return fea
 
 export : define [ChainRuleBuilder sink] : begin
-	define [lookup-single f t] : begin
+	define utilityLookupPrefix '.utility-single.'
+
+	define [createNewLookup f t] : begin
 		local subtable {.}
 		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
-		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}}
+		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}} utilityLookupPrefix
 
-	define [getsublookup left right] : piecewise
+	define [getSubLookup left right] : piecewise
 		[not right] null
 		([typeof right] === "string") right
-		(right <@ Function) : getsublookup left [right left]
+		(right <@ Function) : getSubLookup left [right left]
 		true : begin
-			local found null
-			foreach [{name lookup} : pairs-of sink.lookups] : match lookup
-				{.type "gsub_single" .subtables {st}} : begin
-					local check true
-					foreach [j : range 0 left.length] : if (st.(left.(j)) !== right.(j)) : set check false
-					if check : set found name
-			if found : return found
+			local found    null
+			local maxMatch 0
+			local lookupKeys : [Object.keys sink.lookups].reverse
+			foreach [name : items-of lookupKeys] : begin
+				local st sink.lookups.(name).subtables.0
+				if ([name.slice 0 utilityLookupPrefix.length] === utilityLookupPrefix) : begin
+					local compatible true
+					local matchCount 0
+					foreach [j : range 0 left.length] : begin
+						if (st.(left.(j)) && st.(left.(j)) !== right.(j)) : set compatible false
+						if (st.(left.(j)) === right.(j)) : inc matchCount
+					if (compatible && (!found || matchCount > maxMatch)) : begin
+						set found    name
+						set maxMatch matchCount
 
-			return : lookup-single left right
+			if found : begin
+				local st sink.lookups.(found).subtables.0
+				foreach [j : range 0 left.length] : set st.(left.(j)) right.(j)
+				return found
+
+			return : createNewLookup left right
 
 	define [chain-rule] : begin
 		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
@@ -95,12 +113,38 @@ export : define [ChainRuleBuilder sink] : begin
 			set founde true
 		foreach [j : range 0 terms.length] : begin
 			local term terms.(j)
-			subtable.match.push term.left
-			local lutn : getsublookup term.left term.right
+			subtable.match.push : Array.from : new Set term.left
+			local lutn : getSubLookup term.left term.right
 			if lutn : subtable.apply.push {.at j .lookup lutn}
 		return subtable
 
-	return chain-rule
+	define [reverse-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+		local subtable {.match {} .to {} .inputIndex 0}
+		local foundi false
+
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			local subst : new Map
+			foreach [g : items-of term.left] : subst.set g g
+
+			if term.right : begin
+				if foundi : throw : new Error "Duplicate substitutions in one reverse rule"
+				set foundi true
+				set subtable.inputIndex j
+				local toGlyphs : piecewise
+					(term.right <@ Function) [term.right term.left]
+					true                     term.right
+				foreach [k : range 0 term.left.length]
+					subst.set term.left.(k) (toGlyphs.(k) || term.left.(k))
+
+				set subtable.to : Array.from [subst.values]
+
+			set subtable.match.(j) : Array.from [subst.keys]
+
+		return subtable
+
+	return {chain-rule reverse-rule}
 
 export : define [query-related-glyphs glyphs para entries] : begin
 	define sink {}

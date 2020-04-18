@@ -492,6 +492,21 @@ glyph-block LetterUnified-Basic : begin
 				set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
 			save 'l.italic'
 
+		sketch # l.phoneticLeft
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			define middle : SB + STROKE * HVCONTRAST
+			include : dispiro
+				widths.center
+				flat middle CAP [heading DOWNWARD]
+				curl middle HOOK
+				arcvh
+				flat (middle + HOOK - HALFSTROKE) HALFSTROKE
+				curl [Math.max RIGHTSB (middle + [Math.max HOOKX (LONGJUT * 1.05 * df.div)])] HALFSTROKE [heading RIGHTWARD]
+			set-anchor 'topright' BASE (df.middle + RIGHTSB - MIDDLE) CAP
+			save 'l.phoneticLeft'
+
 		sketch # l.tailed
 			local df : DivFrame para.diversityI
 			set-width df.width
@@ -919,28 +934,48 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # turnlargescripta
 			include MarkSet.capital
-			include : OBarRightShape CAP
-			start-from RIGHTSB 0
-			line-to    (RIGHTSB - STROKE * HVCONTRAST) 0
-			line-to    (RIGHTSB - STROKE * HVCONTRAST) (CAP - STROKE / 2)
-			line-to    RIGHTSB (CAP - O)
+			include : union
+				OBarRightShape CAP
+				spiro-outline
+					corner RIGHTSB 0
+					corner (RIGHTSB - STROKE * HVCONTRAST) 0
+					corner (RIGHTSB - STROKE * HVCONTRAST) (CAP - STROKE / 2)
+					corner RIGHTSB (CAP - O)
 			save 'largescripta' 0x2C6D
 			include : FlipAround MIDDLE (CAP / 2)
 			save 'turnlargescripta' 0x2C70
 
 		sketch # scripta
 			include MarkSet.e
-			include : OBarRightShape
-			start-from RIGHTSB 0
-			line-to    (RIGHTSB - STROKE * HVCONTRAST) 0
-			line-to    (RIGHTSB - STROKE * HVCONTRAST) (XH - STROKE / 2)
-			line-to    RIGHTSB (XH - O)
+			include : union
+				OBarRightShape
+				spiro-outline
+					corner RIGHTSB 0
+					corner (RIGHTSB - STROKE * HVCONTRAST) 0
+					corner (RIGHTSB - STROKE * HVCONTRAST) (XH - STROKE / 2)
+					corner RIGHTSB (XH - O)
 			if SLAB : begin
 				include : RightwardBottomSerif RIGHTSB 0 SIDEJUT
 				tag-contour 'serifRB'
 			save 'scripta' 0x0251
+			include : FlipAround MIDDLE (XH / 2)
+			save 'turnscripta' 0x252
+
+		sketch # invLatinAlpha
+			include MarkSet.e
+			include : union
+				OBarRightShape
+				spiro-outline
+					corner RIGHTSB XH
+					corner (RIGHTSB - STROKE * HVCONTRAST) XH
+					corner (RIGHTSB - STROKE * HVCONTRAST) (STROKE / 2)
+					corner RIGHTSB O
+			if SLAB : begin
+				include : RightwardTopSerif RIGHTSB XH SIDEJUT
+				tag-contour 'serifRT'
+			save 'invLatinAlpha' 0xAB64
+
 		turned 'turna' 0x250 'a.doublestorey' MIDDLE (XH / 2)
-		turned nothing 0x252 'scripta' MIDDLE (XH / 2)
 
 		sketch # artail
 			include [refer-glyph 'a.doublestorey'] AS_BASE
@@ -1947,39 +1982,74 @@ glyph-block LetterUnified-Basic : begin
 			local midy : top * BARPOS
 			local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHA / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
 			local sma : [mix (stroke + O) (midy - stroke / 2) (SMOOTHA / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * stroke
+			local fine : stroke * CTHIN
 			include : dispiro
-				widths.lhs
-				flat mid (midy - stroke / 2) [heading RIGHTWARD]
-				curl MIDDLE (midy - stroke / 2)
+				widths.lhs fine
+				flat mid (midy - (stroke - fine) / 2) [heading RIGHTWARD]
+				curl MIDDLE (midy - (stroke - fine) / 2) [heading RIGHTWARD]
 				archv
-				g4   (RIGHTSB + O) (top - smb)
+				g4   (RIGHTSB - OXE) (top - smb) [widths.lhs stroke]
 				arcvh
 				g4   (MIDDLE - CORRECTION_OMIDS) (top - O)
 				archv
-				flat.ai (SB + O) (top - SMALLSMOOTHA)
-				curl.ai (SB + O) SMALLSMOOTHB
+				flat (SB + O) (top - SMALLSMOOTHA)
+				curl (SB + O) SMALLSMOOTHB
 				arcvh
 				g4   (MIDDLE + CORRECTION_OMIDS) O
 				archv
-				g4   (RIGHTSB - O) (sma)
+				g4   (RIGHTSB - OXE - O * 2) (sma)
 				arcvh
-				flat MIDDLE (midy + stroke / 2)
-				curl mid (midy + stroke / 2) [heading LEFTWARD]
+				flat MIDDLE (midy + (stroke - fine) / 2) [widths.heading fine 0 LEFTWARD]
+				curl mid (midy + (stroke - fine) / 2) [widths.heading fine 0 LEFTWARD]
+
+		define [ClosedEpsilonShape top] : glyph-construction
+			local stroke : adviceBlackness2 2.875 2 top
+			local mid : mix SB RIGHTSB 0.65
+			local midy : top * BARPOS
+			local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SMOOTHB / (SMOOTHA + SMOOTHB))] - TANSLANT * HVCONTRAST * STROKE
+			local smb : [mix (STROKE + O) (midy - stroke / 2) (SMOOTHB / (SMOOTHA + SMOOTHB))] + TANSLANT * HVCONTRAST * stroke
+			local fine : stroke * CTHIN
+			include : dispiro
+				widths.rhs fine
+				flat mid (midy - (stroke - fine) / 2) [heading LEFTWARD]
+				curl MIDDLE (midy - (stroke - fine) / 2) [heading LEFTWARD]
+				archv
+				g4   (SB + OXE) (top - sma) [widths.rhs stroke]
+				arcvh
+				g4   (MIDDLE - CORRECTION_OMIDS) (top - O)
+				archv
+				flat (RIGHTSB - O) (top - SMALLSMOOTHB)
+				curl (RIGHTSB - O) SMALLSMOOTHA
+				arcvh
+				g4   (MIDDLE + CORRECTION_OMIDS) O
+				archv
+				g4   (SB + OXE + O * 2) (smb)
+				arcvh
+				flat MIDDLE (midy + (stroke - fine) / 2) [widths.heading 0 fine RIGHTWARD]
+				curl mid (midy + (stroke - fine) / 2) [widths.heading 0 fine RIGHTWARD]
+
 		sketch # cyrve.italic
 			include MarkSet.e
 			include : ItalicCyrveShape XH
 			save 'cyrve.italic'
 			save 'closeturnepsilon' 0x25E
+
 		sketch # cyrve.BGR
 			include MarkSet.e
 			include : ItalicCyrveShape CAP
 			save 'cyrve.BGR'
+
 		sketch # cyrve.upright
 			include MarkSet.e
 			include : BShape XH
 			save 'cyrve.upright'
 			save 'smcpB' 0x299
 		italic-variant 'cyrve' 0x432
+
+		sketch # closedepsilon
+			include MarkSet.e
+			include : ClosedEpsilonShape XH
+			save 'closeepsilon' 0x29A
 
 		sketch # Bbar
 			include [refer-glyph 'B'] AS_BASE
@@ -2684,8 +2754,8 @@ glyph-block LetterUnified-Basic : begin
 				widths.lhs
 				g4 RIGHTSB (XH - HOOK)
 				hookstart XO
-				flat.ai (SB + OX) (XH - SMALLSMOOTHA)
-				curl.ai (SB + OX) (0 + SMALLSMOOTHB)
+				flat (SB + OX) (XH - SMALLSMOOTHA)
+				curl (SB + OX) (0 + SMALLSMOOTHB)
 				hookend O
 				g4 RIGHTSB HOOK
 			save 'c' 'c'
@@ -2746,8 +2816,8 @@ glyph-block LetterUnified-Basic : begin
 				widths.lhs stroke
 				g4 RIGHTSB (XH - HOOK)
 				hookstart XH
-				flat.ai (SB + OX) (XH - SMALLSMOOTHA)
-				curl.ai (SB + OX) SMALLSMOOTHB
+				flat (SB + OX) (XH - SMALLSMOOTHA)
+				curl (SB + OX) SMALLSMOOTHB
 				arcvh
 				CurlyTail fine rinner m1 0 RIGHTSB x2 y2
 					linreg 500 (0.5) 375 (-0.25) : Math.min WIDTH 500
@@ -2797,13 +2867,13 @@ glyph-block LetterUnified-Basic : begin
 				flat (MIDDLE + 1) (XH - O)
 				curl MIDDLE (XH - O)
 				archv
-				flat.ai (SB + OX) (XH - SMALLSMOOTHA)
-				curl.ai (SB + OX) SMALLSMOOTHB
+				flat (SB + OX) (XH - SMALLSMOOTHA)
+				curl (SB + OX) SMALLSMOOTHB
 				arcvh
 				g4   (MIDDLE + CORRECTION_OMIDS) O
 				archv
-				flat.ai (RIGHTSB - OX * 0.5) SMALLSMOOTHA
-				curl.ai (RIGHTSB - OX * 0.5) (XH - SMALLSMOOTHB)
+				flat (RIGHTSB - OX * 0.5) SMALLSMOOTHA
+				curl (RIGHTSB - OX * 0.5) (XH - SMALLSMOOTHB)
 				arcvh
 				flat MIDDLE (XH - HALFSTROKE - O) [widths HALFSTROKE 0]
 				curl (MIDDLE - 1) (XH - HALFSTROKE - O)
@@ -2815,8 +2885,8 @@ glyph-block LetterUnified-Basic : begin
 				widths.lhs
 				g4 RIGHTSB (XH - HOOK)
 				hookstart XH
-				flat.ai (SB + OX) (XH - SMALLSMOOTHA)
-				curl.ai (SB + OX) SMALLSMOOTHB
+				flat (SB + OX) (XH - SMALLSMOOTHA)
+				curl (SB + OX) SMALLSMOOTHB
 				arcvh
 				g4 (MIDDLE + CORRECTION_OMIDS) 0
 				alsothru 0.5 0.1353
@@ -3033,7 +3103,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch # o
 			set-width WIDTH
 			include MarkSet.e
-			include : OShape XH 0 SB RIGHTSB nothing nothing nothing true
+			include : OShape XH 0 SB RIGHTSB nothing nothing nothing
 			set-anchor 'trailing' BASE MIDDLE 0
 			save 'o' 'o'
 			save 'omicron' 0x3BF
@@ -3053,7 +3123,7 @@ glyph-block LetterUnified-Basic : begin
 			include : HornBaseAnchor RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
 			include : difference
 				HornShape RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
-				OShapeOutline (XH + O) (0 - O) (SB - O) (RIGHTSB + O) nothing nothing nothing true
+				OShapeOutline (XH + O) (0 - O) (SB - O) (RIGHTSB + O) nothing nothing nothing
 			include : refer-glyph "o"
 			save 'oHorn' 0x01A1
 
@@ -3904,21 +3974,33 @@ glyph-block LetterUnified-Basic : begin
 				hookstart (CAP - O - fovershoot2) (tight -- true)
 				flat barleft (CAP - SMOOTHA * 0.8 - fovershoot2)
 				curl barleft 0 [heading DOWNWARD]
-			include : dispiro
-				widths.rhs
-				flat ([mix SB RIGHTSB 0] - HALFSTROKE * TANSLANT) fbar
-				curl ([mix SB RIGHTSB 0.95] - HALFSTROKE * TANSLANT) fbar
-
-			branch
-				save 'f.straight'
-				save 'lenisf' 0xAB35
 
 			branch
 				include : dispiro
-					widths.lhs
-					flat ([mix SB RIGHTSB 0.02] + HALFSTROKE * TANSLANT) 0
-					curl ([mix SB RIGHTSB 0.875] + HALFSTROKE * TANSLANT) 0
-				save 'f.serifed'
+					widths.rhs
+					flat ([mix SB RIGHTSB 0] - HALFSTROKE * TANSLANT) fbar
+					curl ([mix SB RIGHTSB 0.95] - HALFSTROKE * TANSLANT) fbar
+
+				branch
+					save 'f.straight'
+					save 'lenisf' 0xAB35
+
+				branch
+					include : dispiro
+						widths.lhs
+						flat ([mix SB RIGHTSB 0.02] + HALFSTROKE * TANSLANT) 0
+						curl ([mix SB RIGHTSB 0.875] + HALFSTROKE * TANSLANT) 0
+					save 'f.serifed'
+
+			branch
+				include : dispiro
+					widths.rhs
+					flat ([mix SB RIGHTSB 0] - HALFSTROKE * TANSLANT) fbar
+					curl (RIGHTSB - HALFSTROKE * TANSLANT) fbar
+
+				branch
+					save 'f.phoneticLeft'
+
 
 		define dfNarrowF : DivFrame para.diversityF
 		sketch # f.narrow
@@ -4058,8 +4140,8 @@ glyph-block LetterUnified-Basic : begin
 				arcvh
 				g4 (MIDDLE - CORRECTION_OMIDS) (top - O)
 				archv
-				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (SB + OX) (top - SMALLSMOOTHA)
-				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (SB + OX) (0 + SMALLSMOOTHB)
+				flat (SB + OX) (top - SMALLSMOOTHA)
+				curl (SB + OX) (0 + SMALLSMOOTHB)
 				hookend O (sw -- stroke)
 				g4 (RIGHTSB - OX * [if para.isItalic 0 0.5]) hook
 			include : HBarBottom (SB + (stroke / 2) + OX) (RIGHTSB - (stroke / 2) - OX) barbottom stroke
@@ -4094,8 +4176,8 @@ glyph-block LetterUnified-Basic : begin
 				arcvh
 				g4   MIDDLE (top - O)
 				archv
-				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (RIGHTSB - OX) (top - SMALLSMOOTHB)
-				[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (RIGHTSB - OX) SMALLSMOOTHA
+				flat (RIGHTSB - OX) (top - SMALLSMOOTHB)
+				curl (RIGHTSB - OX) SMALLSMOOTHA
 				hookend O (sw -- stroke)
 				g4 (SB + O) AHOOK
 			include : HBarBottom (SB + (stroke / 2)) (RIGHTSB - (stroke / 2)) barbottom stroke
@@ -4194,27 +4276,46 @@ glyph-block LetterUnified-Basic : begin
 			include MarkSet.b
 			include : SmallTShape CAP 0
 			save 't.standard'
+
+		define [TFlatShape df m ext] : glyph-construction
+			local crossLeft : mix 0 SB m
+			local crossRight : mix df.width df.rightSB m
+			local barleft : [mix crossLeft crossRight 0.42] - STROKE * 0.375 * HVCONTRAST
+			local tTurn : Math.max (HOOK * 0.9) (STROKE * 1.375) : Math.min HOOK (STROKE * 1.75)
+			include : union
+				dispiro
+					widths.rhs
+					flat (crossRight) 0
+					curl [Math.min (barleft + tTurn) (crossRight - 1)] 0
+					archv
+					flat barleft tTurn
+					curl barleft CAP [heading UPWARD]
+				dispiro
+					widths.rhs
+					flat (crossLeft - HALFSTROKE * TANSLANT) XH
+					curl (crossRight - HALFSTROKE * TANSLANT + ext) XH
+			set-anchor 'topright' BASE crossRight  CAP
+
 		sketch # t.narrow
 			local df : DivFrame para.diversityF
 			set-width df.width
 			include df.markSet.b
-			local crossLeft : mix 0 SB (1 / 2)
-			local crossRight : mix df.width df.rightSB (1 / 2)
-			local barleft : [mix crossLeft crossRight 0.42] - STROKE * 0.375 * HVCONTRAST
-			local tTurn : Math.max (HOOK * 0.9) (STROKE * 1.375) : Math.min HOOK (STROKE * 1.75)
-			include : dispiro
-				widths.rhs
-				flat crossRight 0
-				curl [Math.min (barleft + tTurn) (crossRight - 1)] 0
-				archv
-				flat barleft tTurn
-				curl barleft CAP [heading UPWARD]
-			include : dispiro
-				widths.rhs
-				flat (crossLeft - HALFSTROKE * TANSLANT) XH
-				curl (crossRight - HALFSTROKE * TANSLANT) XH
-			set-anchor 'topright' BASE crossRight  CAP
+			include : TFlatShape df 0.5 0
 			save 't.narrow'
+		sketch # t.phoneticLeft
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			include : TFlatShape df 1 0
+			save 't.phoneticLeft'
+		sketch # t.phoneticLeft.extended
+			local df : DivFrame 1
+			set-width df.width
+			include df.markSet.b
+			include : intersection
+				TFlatShape df 1 WIDTH
+				Rect CAP 0 SB (MIDDLE + WIDTH)
+			save 't.phoneticLeft.extended'
 		sketch # t.cross
 			set-width WIDTH
 			include MarkSet.b
@@ -4317,6 +4418,22 @@ glyph-block LetterUnified-Basic : begin
 				hookend O (sw -- stroke) (swItalicAdj -- STROKE)
 				g4   (SB - OX / 4) SHOOK
 
+		define [sStrokePhoneticRight] : begin
+			define stroke : adviceBlackness2 2.875 2 XH
+			define ess : mix stroke (ESS * stroke / STROKE) 0.5
+			define strokeCoeff : linreg 18 0 126 1 stroke
+			define smooth : adviceSSmooth XH (-1) stroke
+			return : dispiro
+				widths.lhs stroke
+				g4   (RIGHTSB + OX / 4) (XH - SHOOK)
+				hookstart XO (sw -- stroke) (swItalicAdj -- STROKE)
+				g4   (SB + OX / 8) (XH - smooth)
+				SNeck stroke (slantCoeff -- -0.01)
+				g4   (RIGHTSB - OX / 8) (smooth) [widths 0 stroke]
+				arcvh
+				flat (MIDDLE - CORRECTION_OMIDS) 0 [widths 0 STROKE]
+				curl SB 0
+
 		define [RevsStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
 			define ess : ESS * stroke / STROKE
@@ -4343,6 +4460,11 @@ glyph-block LetterUnified-Basic : begin
 			include : sStroke
 			save 's' 's'
 			save 'cyrdze' 0x455
+
+		sketch # s
+			include MarkSet.e
+			include : sStrokePhoneticRight
+			save 's.phoneticRight'
 
 		sketch # revS
 			include MarkSet.capital

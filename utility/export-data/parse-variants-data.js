@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const toml = require("toml");
 
-module.exports = async function() {
+module.exports = async function () {
 	const variantsToml = await fs.readFile(path.join(__dirname, "../../variants.toml"), "utf8");
 	const variants = toml.parse(variantsToml);
 

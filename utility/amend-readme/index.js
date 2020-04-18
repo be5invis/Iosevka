@@ -66,7 +66,8 @@ class MdCol {
 	apply(s) {
 		return s.replace(this.matchRegex, () => {
 			return (
-				`<!-- BEGIN ${this.sectionName} -->\n\n` +
+				`<!-- BEGIN ${this.sectionName} -->\n` +
+				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
 				this.data +
 				`\n<!-- END ${this.sectionName} -->\n`
 			);
@@ -152,7 +153,7 @@ async function processLigSetPreDef() {
 	const md = new MdCol("Section-Cherry-Picking-Predefined");
 	md.log(`* Styles for ligation sets, include:\n`);
 	for (const gr in ligData.rawSets) {
-		if (ligData.rawSets[gr].disableHives) continue;
+		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =
 			ligData.rawSets[gr].longDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;

@@ -1139,39 +1139,35 @@ glyph-block Symbol-Other-Ligation : begin
 	local arrowheadsKern : (2 / 3) * [clamp 0 (WIDTH * 0.4) (WIDTH - OPERATORSTROKE * 3)]
 
 	define arrowheadSlope : 1 / lessSlantness
-	define [ArrowBarConfig extend kern join] : begin
+	define [ArrowBarConfig extend kern join doubleBar] : begin
 		define cleft O
 		define cright (WIDTH - O)
-		define arrowr : WIDTH + extend
-		define arrowl : 0 - extend
+		define arrowr : if doubleBar
+			WIDTH + SB + OPERATORSTROKE * HVCONTRAST
+			WIDTH + extend
+		define arrowl : if doubleBar
+			-WIDTH + RIGHTSB - OPERATORSTROKE * HVCONTRAST
+			0 - extend
 		define zleft : cleft - WIDTH + RIGHTSB
 		define zright : cright + SB
-		define sleft : -WIDTH + RIGHTSB - OPERATORSTROKE * HVCONTRAST
-		define sright : WIDTH + SB + OPERATORSTROKE * HVCONTRAST
 		define lk : object
 			f    SB
 			l    arrowl
 			l1 : arrowl - kern
-			l2 : arrowl - kern * 2
 			c    cleft
 			j    (-join)
 			j1   (-join - kern)
 			z    zleft
-			s    sleft
-			s1 : sleft - kern
 			lx : mix arrowl 0 0.5
 
 		define rk : object
 			f    RIGHTSB
 			r    arrowr
 			r1 : arrowr + kern
-			r2 : arrowr + kern * 2
 			c    cright
 			j    (WIDTH + join)
 			j1   (WIDTH + join + kern)
 			z    zright
-			s    sright
-			s1 : sright + kern
 
 		define result {}
 		foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
@@ -1180,7 +1176,7 @@ glyph-block Symbol-Other-Ligation : begin
 
 	local arrowExtend [clamp 0 WIDTH (RIGHTSB - OPERATORSTROKE / 2 * arrowheadSlope)]
 	local arrowJ : clamp 0 WIDTH (SB + OPERATORSTROKE / 2 * arrowheadSlope)
-	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ]] : sketch
+	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : sketch
 		include : HBar left right symbolMid OPERATORSTROKE
 		set currentGlyph.cmpPriority (-3)
 		save ('hyphen.lig.' + subclass)
@@ -1192,50 +1188,52 @@ glyph-block Symbol-Other-Ligation : begin
 	local dblExtend : clamp 0 WIDTH (RIGHTSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 	local dblArrowJ : clamp 0 WIDTH (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 
-	foreach [{subclass left right} : items-of [ArrowBarConfig dblExtend arrowheadsKern dblArrowJ]] : sketch
+	foreach [{subclass left right} : items-of [ArrowBarConfig dblExtend arrowheadsKern dblArrowJ true]] : sketch
 		include : HBarTop left right (symbolMid + dblArrowD) dblArrowSw
 		include : HBarBottom left right (symbolMid - dblArrowD) dblArrowSw
 		set currentGlyph.cmpPriority (-3)
 		save ('equal.lig.' + subclass)
 
 	do "Waves"
-		define WaveShape : CreateWaveShape dblArrowD dblArrowSw
+		define WaveShape : CreateWaveShape dblArrowD dblArrowSw (-1 / 4)
 
 		define LR  (2  / 32)
 		define LR1 (9  / 32)
 		define Z   (1  / 4)
 		define F   (-1 / 4)
+		define C   0
+		define J   (-1 / 8)
 
-		sketch
-			include : WaveShape LR LR (xsJoin -- (-arrowExtend)) (xfJoin -- (WIDTH + arrowExtend))
-			save 'wave.lr'
-		sketch
-			include : WaveShape LR F (xsJoin -- (-arrowExtend))
-			save 'wave.lf'
-		sketch
-			include : WaveShape LR1 F (xsJoin -- (-arrowExtend - arrowheadsKern))
-			save 'wave.l1f'
-		sketch
-			include : WaveShape LR Z (xsJoin -- (-arrowExtend))
-			save 'wave.lz'
-		sketch
-			include : WaveShape Z F
-			save 'wave.zf'
-		sketch
-			include : WaveShape F LR (xfJoin -- (WIDTH + arrowExtend))
-			save 'wave.fr'
-		sketch
-			include : WaveShape F LR1 (xfJoin -- (WIDTH + arrowExtend + arrowheadsKern))
-			save 'wave.fr1'
-		sketch
-			include : WaveShape Z LR (xfJoin -- (WIDTH + arrowExtend))
-			save 'wave.zr'
-		sketch
-			include : WaveShape F Z
-			save 'wave.fz'
-		sketch
-			include : WaveShape Z Z
-			save 'wave.zz'
+		define lk : object
+			l    { LR   (-arrowExtend)                           false }
+			l1   { LR1  (-arrowExtend - arrowheadsKern)          false }
+			f    { F    nothing                                  false }
+			z    { Z    nothing                                  false }
+			c    { C    nothing                                  false }
+			j    { J    (-arrowJ)                                 true }
+			j1   { J    (-arrowJ - arrowheadsKern)                true }
+
+		define rk : object
+			r    { LR   (WIDTH + arrowExtend)                    false }
+			r1   { LR1  (WIDTH + arrowExtend + arrowheadsKern)   false }
+			f    { F    nothing                                  false }
+			z    { Z    nothing                                  false }
+			c    { C    nothing                                  false }
+			j    { J    (WIDTH + arrowJ)                          true }
+			j1   { J    (WIDTH + arrowJ + arrowheadsKern)         true }
+
+		foreach [lS : items-of : Object.keys lk] : foreach [rS : items-of : Object.keys rk] : sketch
+			local {tL jL djL} lk.(lS)
+			local {tR jR djR} rk.(rS)
+			include : WaveShape
+				left  -- tL
+				right -- tR
+				xsJoin -- jL
+				xfJoin -- jR
+				diagJoinS -- djL
+				diagJoinF -- djR
+
+			save "wave.\(lS)\(rS)"
 
 	do "Arrowheads"
 		glyph-block-import Symbol-Math-Relation : dH LigationLessShape LigationGreaterShape
@@ -1243,12 +1241,14 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include : LigationLessShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			save 'less.lig.dblhead'
+			save 'less.lig.dblhead.mid'
 			include : Translate (-arrowheadsKern) 0
 			save 'less.lig.dblhead.shift1'
 
 		sketch
 			include : LigationGreaterShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			save 'greater.lig.dblhead'
+			save 'greater.lig.dblhead.mid'
 			include : Translate (+arrowheadsKern) 0
 			save 'greater.lig.dblhead.shift1'
 
@@ -1261,6 +1261,8 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include [refer-glyph 'greater'] AS_BASE ALSO_METRICS
 			save 'greater.lig.shift0'
+			save 'greater.lig.shift0.mid'
+			save 'greater.lig.shift0.anti'
 			include : Translate (arrowheadsKern / 2) 0
 			save 'greater.lig.shift0h'
 			include : Translate (arrowheadsKern / 2) 0
@@ -1274,6 +1276,7 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include [refer-glyph 'greater'] AS_BASE ALSO_METRICS
 			save 'greater.lig.shiftN0'
+			save 'greater.lig.shiftN0.mid'
 			include : Translate (-arrowheadsKern / 2) 0
 			save 'greater.lig.shiftN0h'
 			include : Translate (-arrowheadsKern / 2) 0
@@ -1287,6 +1290,8 @@ glyph-block Symbol-Other-Ligation : begin
 		sketch
 			include [refer-glyph 'less'] AS_BASE ALSO_METRICS
 			save 'less.lig.shift0'
+			save 'less.lig.shift0.mid'
+			save 'less.lig.shift0.anti'
 			include : Translate (-arrowheadsKern / 2) 0
 			save 'less.lig.shift0h'
 			include : Translate (-arrowheadsKern / 2) 0
@@ -1327,13 +1332,13 @@ glyph-block Symbol-Other-Ligation : begin
 			include : difference
 				glyph-construction : include : refer-glyph "less.lig.shiftN1"
 				ArrowHeadHole
-			save 'less.lig.shiftN1.hole'
+			save 'less.lig.hole.shiftN1'
 
 		sketch
 			include : difference
 				glyph-construction : include : refer-glyph "greater.lig.shiftN1"
 				ArrowHeadHole
-			save 'greater.lig.shiftN1.hole'
+			save 'greater.lig.hole.shiftN1'
 
 	do "Equal and Inequal" : if [not recursive] : begin
 		glyph-block-import Symbol-Math-Relation : EqualShape EqualHole IdentShape IdentHole

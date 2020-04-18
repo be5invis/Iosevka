@@ -23,6 +23,7 @@ const logc = TAG("logic");
 const brst = TAG("brst");
 const trig = TAG("trig");
 const ltgt = TAG("ltgt-diamond", "ltgt-ne");
+const llggeq = TAG("llggeq");
 const dotOper = TAG("dotoper");
 const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
@@ -48,7 +49,7 @@ const ligationSamples = [
 		arrow("<-->"),
 		arrow("<--->"),
 		arrow("<---->"),
-		htmlComment("<!--"),
+		htmlComment("<!--")
 	],
 	[
 		arrow2("=<<"),
@@ -56,7 +57,7 @@ const ligationSamples = [
 		arrow2("=<="),
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq("<<="),
 		ineq("<="),
 		arrow("=>"),
 		arrow("=>>"),
@@ -64,12 +65,12 @@ const ligationSamples = [
 		arrow("===>"),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq(">>="),
 		arrow("<=>"),
 		arrow("<==>"),
 		arrow("<===>"),
 		arrow("<====>"),
-		htmlComment("<!---"),
+		htmlComment("<!---")
 	],
 	[
 		arrow("<------"),
@@ -91,7 +92,7 @@ const ligationSamples = [
 		eqeqeq("==="),
 		exeqeq("!=="),
 		eqslasheq("=/="),
-		eqexeq("=!="),
+		eqexeq("=!=")
 	],
 	[
 		centerOps(":="),
@@ -114,8 +115,8 @@ const ligationSamples = [
 		plusplus("++"),
 		plusplus("+++"),
 		logc("|-"),
-		logc("-|"),
-	],
+		logc("-|")
+	]
 ];
 
 const ligationSamplesNarrow = [
@@ -129,7 +130,7 @@ const ligationSamplesNarrow = [
 		arrow("->>"),
 		arrow("-->"),
 		arrow("--->"),
-		htmlComment("<!--"),
+		htmlComment("<!--")
 	],
 	[
 		arrow2("-<<"),
@@ -140,19 +141,19 @@ const ligationSamplesNarrow = [
 		arrow2(">>-"),
 		arrow("<-->"),
 		arrow("<--->"),
-		arrow("<---->"),
+		arrow("<---->")
 	],
 	[
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq("<<="),
 		ineq("<="),
 		arrow("<=>"),
 		arrow("=>"),
 		arrow("=>>"),
 		arrow("==>"),
 		arrow("===>"),
-		htmlComment("<!---"),
+		htmlComment("<!---")
 	],
 	[
 		arrow2("=<<"),
@@ -160,10 +161,10 @@ const ligationSamplesNarrow = [
 		arrow2("=<="),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq(">>="),
 		arrow("<==>"),
 		arrow("<===>"),
-		arrow("<====>"),
+		arrow("<====>")
 	],
 	[
 		arrow("<-------"),
@@ -172,7 +173,7 @@ const ligationSamplesNarrow = [
 		arrow("<~~"),
 		arrow("<~"),
 		arrow("~>"),
-		arrow("~~>"),
+		arrow("~~>")
 	],
 	[
 		logc("\\/"),
@@ -185,7 +186,7 @@ const ligationSamplesNarrow = [
 		eqeqeq("==="),
 		exeqeq("!=="),
 		eqslasheq("=/="),
-		eqexeq("=!="),
+		eqexeq("=!=")
 	],
 	[
 		centerOps(":="),
@@ -199,7 +200,7 @@ const ligationSamplesNarrow = [
 		trig("|>"),
 		centerOps("+:"),
 		centerOps("-:"),
-		centerOps("=:"),
+		centerOps("=:")
 	],
 	[
 		kernDotty("::"),
@@ -211,18 +212,18 @@ const ligationSamplesNarrow = [
 		plusplus("++"),
 		plusplus("+++"),
 		logc("|-"),
-		logc("-|"),
-	],
+		logc("-|")
+	]
 ];
 
 module.exports = async function getLigationData() {
 	const ligToml = await fs.readFile(path.join(__dirname, "../../ligation-set.toml"), "utf8");
 	const ligData = toml.parse(ligToml);
 
-	const ligationSets = buildLigationSet(ligData, (comp) => comp.buildup.join(","));
+	const ligationSets = buildLigationSet(ligData, comp => comp.buildup.join(","));
 	const nonMergeLigationSets = buildLigationSet(
 		ligData,
-		(comp) => comp.tag + comp.buildup.join(",")
+		comp => comp.tag + comp.buildup.join(",")
 	);
 
 	return {
@@ -231,13 +232,13 @@ module.exports = async function getLigationData() {
 		cherry: ligData.simple,
 		rawSets: ligData.composite,
 		sets: [...ligationSets.values()],
-		nonMergeSets: [...nonMergeLigationSets.values()],
+		nonMergeSets: [...nonMergeLigationSets.values()]
 	};
 };
 
 function buildLigationSet(ligData, getKey) {
 	const ligationSets = new Map([
-		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", buildup: [] }],
+		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", buildup: [] }]
 	]);
 	for (const sel in ligData.composite) {
 		const comp = ligData.composite[sel];
@@ -250,7 +251,7 @@ function buildLigationSet(ligData, getKey) {
 				buildup: comp.buildup,
 				tagName: comp.tag,
 				desc: comp.desc,
-				brief: comp.brief || comp.desc,
+				brief: comp.brief || comp.desc
 			};
 			ligationSets.set(key, item);
 		} else {

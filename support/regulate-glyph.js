@@ -62,7 +62,7 @@ function byGlyphPriority(a, b) {
 	return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
 }
 
-module.exports = function(gs, skew) {
+module.exports = function (gs, skew) {
 	const excludeUnicode = new Set();
 	excludeUnicode.add(0x80);
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicode.add(c);

@@ -1,7 +1,8 @@
 "use strict";
 
 module.exports = function formVariantData(data, para) {
-	const defaultBuildup = {};
+	const optInBuildup = {};
+	const optOutBuildup = {};
 
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
@@ -11,11 +12,15 @@ module.exports = function formVariantData(data, para) {
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
 		if (!comp.tag) continue;
-		defaultBuildup[comp.tag] = comp.buildup;
-		if (!comp.disableHives) {
+		if (comp.isOptOut) {
+			optOutBuildup[comp.tag] = comp.buildup;
+		} else {
+			optInBuildup[comp.tag] = comp.buildup;
+		}
+		if (!comp.isOptOut) {
 			hives[gr] = { caltBuildup: [...comp.buildup] };
 		}
 	}
 
-	return { defaultBuildup, hives };
+	return { defaultBuildup: { ...optInBuildup, ...optOutBuildup }, hives };
 };

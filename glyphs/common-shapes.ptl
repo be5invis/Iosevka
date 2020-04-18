@@ -200,7 +200,7 @@ glyph-block CommonShapes : begin
 	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
 	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
 
-	define [OShape u d l r _width _sma _smb ai] : glyph-construction
+	define [OShape u d l r _width _sma _smb] : glyph-construction
 		local middle : (l + r) / 2
 		local width : fallback _width STROKE
 		local sma : fallback _sma SMALLSMOOTHA
@@ -211,13 +211,13 @@ glyph-block CommonShapes : begin
 				widths width 0
 				g4 (middle - mc) (u - O)
 				archv
-				[if ai flat.ai flat] (l + OX) (u - sma)
-				[if ai curl.ai curl] (l + OX) (d + smb)
+				flat (l + OX) (u - sma)
+				curl (l + OX) (d + smb)
 				arcvh
 				g4 (middle + mc) (d + O)
 				archv
-				[if ai flat.ai flat] (r - OX) (d + sma)
-				[if ai curl.ai curl] (r - OX) (u - smb)
+				flat (r - OX) (d + sma)
+				curl (r - OX) (u - smb)
 				arcvh
 				close
 		: else : begin
@@ -234,7 +234,7 @@ glyph-block CommonShapes : begin
 				g4 (r - OX) ymiddleb
 				arcvh
 				close
-	define [OShapeOutline u d l r _width _sma _smb ai] : glyph-construction
+	define [OShapeOutline u d l r _width _sma _smb] : glyph-construction
 		local middle : (l + r) / 2
 		local width : fallback _width STROKE
 		local sma : fallback _sma SMALLSMOOTHA
@@ -244,13 +244,13 @@ glyph-block CommonShapes : begin
 			include : spiro-outline
 				g4 (middle - mc) (u - O)
 				archv
-				[if ai flat.ai flat] (l + OX) (u - sma)
-				[if ai curl.ai curl] (l + OX) (d + smb)
+				flat (l + OX) (u - sma)
+				curl (l + OX) (d + smb)
 				arcvh
 				g4 (middle + mc) (d + O)
 				archv
-				[if ai flat.ai flat] (r - OX) (d + sma)
-				[if ai curl.ai curl] (r - OX) (u - smb)
+				flat (r - OX) (d + sma)
+				curl (r - OX) (u - smb)
 				arcvh
 				close
 		: else : begin
@@ -280,8 +280,8 @@ glyph-block CommonShapes : begin
 			arcvh
 			g4   (mb) O [widths.heading STROKE 0 {.y (1) .x (-sb)}]
 			archv
-			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) flat.ai flat] (RIGHTSB - OX) (0 + SMALLSMOOTHA)
-			[if ((SMALLSMOOTHA + SMALLSMOOTHB) / top > 0.75) curl.ai curl] (RIGHTSB - OX) (top - SMALLSMOOTHB)
+			flat (RIGHTSB - OX) (0 + SMALLSMOOTHA)
+			curl (RIGHTSB - OX) (top - SMALLSMOOTHB)
 			arcvh
 			g4   (mt) (top - O) [widths.heading STROKE 0 {.y (-1) .x (-st)}]
 			archv
@@ -782,26 +782,31 @@ glyph-block CommonShapes : begin
 		include : difference background [union.apply null candidates]
 		include overlay
 
-	define [CreateWaveShape dist sw] : begin
+	define [CreateWaveShape dist sw _phaesShift] : begin
 		define WaveResolution 64
 		define WaveMagnitude : dist * (3 / 4) - sw / 2
 		define WaveAdj : TANSLANT * WaveMagnitude * (-0.75)
-		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin] : glyph-construction
+		define phaseShift : fallback _phaesShift 0
+		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin diagJoinS diagJoinF] : glyph-construction
 			local resolution : Math.ceil (WaveResolution * (te - ts))
 			local knots {}
 			foreach [pr : range 0 till resolution] : begin
-				local theta : [mix ts te (pr / resolution)] * Math.PI * 2
+				local theta : (phaseShift + [mix ts te (pr / resolution)]) * Math.PI * 2
 				local waveRelY : (-1) * [Math.sin theta] - 0.075 * [Math.sin (theta * 3)]
 				knots.push : g2
 					(WaveAdj * waveRelY) + [mix left right (pr / resolution)]
 					symbolMid + WaveMagnitude * waveRelY
 			include : dispiro
 				widths.center sw
-				if (xsJoin !== nothing) {[straight.right.start xsJoin symbolMid]} {}
+				if (xsJoin === nothing) {} :  if diagJoinS
+					list [g2                   xsJoin symbolMid]
+					list [straight.right.start xsJoin symbolMid]
 				begin knots
-				if (xfJoin !== nothing) {[straight.right.end   xfJoin symbolMid]} {}
+				if (xfJoin === nothing) {} :  if diagJoinF
+					list [g2                   xfJoin symbolMid]
+					list [straight.right.end   xfJoin symbolMid]
 
-		define [WaveShape] : params [left right xsJoin xfJoin [waveCount 1] [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * waveCount) ((1 + right) * waveCount) xsJoin xfJoin
+		define [WaveShape] : params [left right xsJoin xfJoin diagJoinS diagJoinF [waveCount 1] [unitWidth WIDTH]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * waveCount) ((1 + right) * waveCount) xsJoin xfJoin diagJoinS diagJoinF
 		return WaveShape
 
 	define [NameUni unicode] : begin

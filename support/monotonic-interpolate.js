@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function(xs, ys) {
+module.exports = function (xs, ys) {
 	let i,
 		length = xs.length;
 
@@ -9,7 +9,7 @@ module.exports = function(xs, ys) {
 		throw "Need an equal count of xs and ys.";
 	}
 	if (length === 0) {
-		return function() {
+		return function () {
 			return 0;
 		};
 	}
@@ -17,7 +17,7 @@ module.exports = function(xs, ys) {
 		// Impl: Precomputing the result prevents problems if ys is mutated later and allows garbage collection of ys
 		// Impl: Unary plus properly converts values to numbers
 		let result = +ys[0];
-		return function() {
+		return function () {
 			return result;
 		};
 	}
@@ -27,7 +27,7 @@ module.exports = function(xs, ys) {
 	for (i = 0; i < length; i++) {
 		indexes.push(i);
 	}
-	indexes.sort(function(a, b) {
+	indexes.sort(function (a, b) {
 		return xs[a] < xs[b] ? -1 : 1;
 	});
 	let oldXs = xs,
@@ -82,7 +82,7 @@ module.exports = function(xs, ys) {
 	}
 
 	// Return interpolant function
-	return function(x) {
+	return function (x) {
 		// The rightmost point in the dataset should give an exact result
 		let i = xs.length - 1;
 		if (x == xs[i]) {

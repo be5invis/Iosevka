@@ -12,7 +12,7 @@ const formLigationData = require("../support/ligation-data");
 const regulateGlyphs = require("../support/regulate-glyph");
 const toml = require("toml");
 
-main().catch((e) => {
+main().catch(e => {
 	console.error(e);
 	process.exit(1);
 });
@@ -57,7 +57,7 @@ async function getParameters(argv) {
 		version: argv.ver,
 		weight: argv["menu-weight"] - 0,
 		width: argv["menu-width"] - 0,
-		slant: argv["menu-slant"],
+		slant: argv["menu-slant"]
 	};
 
 	return para;
@@ -108,7 +108,7 @@ async function saveCharMap(font) {
 			glyph.name,
 			glyph.unicode,
 			typographicFeatures,
-			glyph.featureSelector ? Object.keys(glyph.featureSelector) : [],
+			glyph.featureSelector ? Object.keys(glyph.featureSelector) : []
 		]);
 	}
 	await fs.writeFile(argv.charmap, JSON.stringify(charMap), "utf8");

@@ -350,9 +350,9 @@ function fairifyImpl(sourceCubicContour, gizmo, builder) {
 	return buildCurve(splitContour, gizmo, builder);
 }
 
-exports.fairifyQuad = function(sourceCubicContour, gizmo) {
+exports.fairifyQuad = function (sourceCubicContour, gizmo) {
 	return fairifyImpl(sourceCubicContour, gizmo, QuadBuilder);
 };
-exports.fairifySpiro = function(sourceCubicContour, gizmo) {
+exports.fairifySpiro = function (sourceCubicContour, gizmo) {
 	return fairifyImpl(sourceCubicContour, gizmo, SpiroBuilder);
 };
