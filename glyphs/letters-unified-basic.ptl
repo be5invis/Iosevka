@@ -1370,8 +1370,10 @@ glyph-block LetterUnified-Basic : begin
 				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				return {ds ds2}
 
-			define [yTopKnots x top ds dir dx dy] : begin
-				local hs : HALFSTROKE * [if straightBar [diagCor dy dx 0 (STROKE * 2)] 1]
+			define [yDiagCor dy] : diagCor dy (yrstroker - yrstrokel) 0 STROKE
+
+			define [yTopKnots x top bottom ds dir] : begin
+				local hs : HALFSTROKE * [if straightBar [yDiagCor (top - bottom)] 1]
 				local hl : hs - hs * dir
 				local hr : hs + hs * dir
 				if straightBar : return : list
@@ -1382,7 +1384,6 @@ glyph-block LetterUnified-Basic : begin
 					quadcontrols 0 dpy1 16
 
 			define [yBaseKnots top bottom shrink hooktop] : begin
-				local cor : diagCor (top - bottom) WIDTH 0 (STROKE * 2)
 				local {ds ds2} : CalcDS top bottom
 				define joinX : mix yrstrokel yrstroker (1 - px2)
 				define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
@@ -1398,7 +1399,7 @@ glyph-block LetterUnified-Basic : begin
 					piecewise
 						useStraightBottom : list
 							ConnectZ shrink
-							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * cor) DOWNWARD]
+							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * [yDiagCor (top - bottom)]) DOWNWARD]
 						useCurlyBottom : list
 							ConnectZ shrink
 							flat (yrstrokel - slabysize) bottom [widths.rhs]
@@ -1450,18 +1451,18 @@ glyph-block LetterUnified-Basic : begin
 				include : intersection
 					SmallYStrokeSplitMask top bottom false 1
 					dispiro
-						yTopKnots yrstroker top ds 1 WIDTH (top - bottom)
+						yTopKnots yrstroker top bottom ds 1
 						yBaseKnots top bottom 1
 
 				include : difference
 					dispiro
-						yTopKnots yrstroker top ds 1 WIDTH (top - bottom)
+						yTopKnots yrstroker top bottom ds 1
 						yBaseKnots top bottom yshrink
 					SmallYStrokeSplitMask top bottom false 1 1
 
 				include : difference
 					dispiro
-						yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
+						yTopKnots (WIDTH - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
 
@@ -1490,7 +1491,7 @@ glyph-block LetterUnified-Basic : begin
 				include : difference
 					dispiro
 						widths.center
-						yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
+						yTopKnots (WIDTH - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom true
 					SmallYStrokeSplitMask top bottom true (-1)
 
