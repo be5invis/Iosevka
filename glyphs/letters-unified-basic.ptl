@@ -1370,8 +1370,10 @@ glyph-block LetterUnified-Basic : begin
 				local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 				return {ds ds2}
 
-			define [yTopKnots x top ds dir dx dy] : begin
-				local hs : HALFSTROKE * [if straightBar [diagCor dy dx 0 (STROKE * 2)] 1]
+			define [yDiagCor dy] : diagCor dy (yrstroker - yrstrokel) 0 STROKE
+
+			define [yTopKnots x top bottom ds dir] : begin
+				local hs : HALFSTROKE * [if straightBar [yDiagCor (top - bottom)] 1]
 				local hl : hs - hs * dir
 				local hr : hs + hs * dir
 				if straightBar : return : list
@@ -1382,7 +1384,6 @@ glyph-block LetterUnified-Basic : begin
 					quadcontrols 0 dpy1 16
 
 			define [yBaseKnots top bottom shrink hooktop] : begin
-				local cor : diagCor (top - bottom) WIDTH 0 (STROKE * 2)
 				local {ds ds2} : CalcDS top bottom
 				define joinX : mix yrstrokel yrstroker (1 - px2)
 				define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
@@ -1398,7 +1399,7 @@ glyph-block LetterUnified-Basic : begin
 					piecewise
 						useStraightBottom : list
 							ConnectZ shrink
-							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * cor) DOWNWARD]
+							curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (STROKE * [yDiagCor (top - bottom)]) DOWNWARD]
 						useCurlyBottom : list
 							ConnectZ shrink
 							flat (yrstrokel - slabysize) bottom [widths.rhs]
@@ -1450,18 +1451,18 @@ glyph-block LetterUnified-Basic : begin
 				include : intersection
 					SmallYStrokeSplitMask top bottom false 1
 					dispiro
-						yTopKnots yrstroker top ds 1 WIDTH (top - bottom)
+						yTopKnots yrstroker top bottom ds 1
 						yBaseKnots top bottom 1
 
 				include : difference
 					dispiro
-						yTopKnots yrstroker top ds 1 WIDTH (top - bottom)
+						yTopKnots yrstroker top bottom ds 1
 						yBaseKnots top bottom yshrink
 					SmallYStrokeSplitMask top bottom false 1 1
 
 				include : difference
 					dispiro
-						yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
+						yTopKnots (WIDTH - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
 
@@ -1490,7 +1491,7 @@ glyph-block LetterUnified-Basic : begin
 				include : difference
 					dispiro
 						widths.center
-						yTopKnots (WIDTH - yrstroker) top ds (-1) WIDTH (top - bottom)
+						yTopKnots (WIDTH - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom true
 					SmallYStrokeSplitMask top bottom true (-1)
 
@@ -2366,8 +2367,8 @@ glyph-block LetterUnified-Basic : begin
 					include : RightwardBottomSerif right bottom (SIDEJUT + JUT / 8)
 
 		define [RBarPos slab] :  if slab (0.5 + HALFSTROKE / CAP) BARPOS
-		define [RShape] : params [straightBar top [slab SLAB]] : glyph-construction
-			include : PShape top (mul -- 1) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
+		define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
+			include : PShape top (mul -- mul) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
 			local right (RIGHTSB - O - [if SLAB (JUT / 8) 0])
 			include : RLegShape right 0 ((top - STROKE) * [RBarPos slab]) top SLAB straightBar STROKE 0
 
@@ -2413,6 +2414,11 @@ glyph-block LetterUnified-Basic : begin
 		select-variant 'Rrotunda' 0xA75A (follow -- 'R')
 		select-variant 'smcpR' 0x280 (follow -- 'R')
 		select-variant 'rrotunda' 0xA75B (follow -- 'R')
+
+		WithDerivatives 'R' 'Rbar' : lambda [src sel] : glyph-construction
+			if [not sel] : assign-unicode 0x24C
+			include [refer-glyph src] AS_BASE ALSO_METRICS
+			include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - STROKE) * [RBarPos SLAB])
 
 		sketch # Yr
 			include MarkSet.if
@@ -3309,7 +3315,6 @@ glyph-block LetterUnified-Basic : begin
 		sketch # smcpN
 			include MarkSet.e
 			include : NShape XH SB RIGHTSB 3 3.5
-
 			save 'smcpN' 0x274
 
 		sketch # Nltail
@@ -3590,6 +3595,7 @@ glyph-block LetterUnified-Basic : begin
 			set-width df.width
 			include : MShape XH df.div
 			save 'cyrem' 0x43C
+			save 'smcpM'
 
 	### m
 	do "m and related ============================================================================"
@@ -3723,6 +3729,13 @@ glyph-block LetterUnified-Basic : begin
 			include : HOverlayBar [mix SB 0 0.7] [mix RIGHTSB WIDTH 0.7] [mix CAPMIDDLE CAP 0.45]
 			save 'Hbar' 0x126
 
+		sketch # HCedilla
+			include [refer-glyph 'cedillaBelow']
+			apply-transform : Translate (WIDTH + SB - MIDDLE + HALFSTROKE * HVCONTRAST) 0
+			include [refer-glyph 'H']
+			include MarkSet.if
+			save 'HCedilla' 0x1E28
+
 	### h
 	do "h and related"
 		sketch # h
@@ -3744,6 +3757,13 @@ glyph-block LetterUnified-Basic : begin
 					tag-contour 'serifLB'
 			save 'h' 'h'
 			save 'cyrshha' 0x4BB
+
+		sketch # hCedilla
+			include [refer-glyph 'cedillaBelow']
+			apply-transform : Translate (WIDTH + SB - MIDDLE + HALFSTROKE * HVCONTRAST) 0
+			include [refer-glyph 'h']
+			include MarkSet.if
+			save 'hCedilla' 0x1E29
 
 		sketch # hhooktop
 			include MarkSet.b

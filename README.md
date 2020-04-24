@@ -152,7 +152,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
   - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
   - `sp-fixed` : Apply `sp-term` and further:
-    - Completely disable `fwid` feature. All non-combining glyphs will be exactly the same width.
+    - Completely disable `WWID` feature. All non-combining glyphs will be exactly the same width.
 	- Ligation will be removed.
   - `no-ligation` : Disable ligation only.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.

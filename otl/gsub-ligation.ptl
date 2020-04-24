@@ -553,34 +553,40 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 					barCls  ~> preserved
 
 			# Rod transformer
-			define [kindLeftMid fMid]  : list
-				list 'l'  :                              CollectApply less    : list CJoinHeadForce CJoinHeadMid
-				list 'l1' :                              CollectApply less    : list CJoinHeadForceShift1
-				list 'j'  : [if fMid anyBar {}].concat : CollectApply greater : list CAntiHeadForce CJoinHeadMid
-				list 'j1' :                              CollectApply greater : list CAntiHeadForceShiftN1
-			define [kindRightMid fMid] : list
-				list 'r'  :                              CollectApply greater : list CJoinHeadForce CJoinHeadMid
-				list 'r1' :                              CollectApply greater : list CJoinHeadForceShift1
-				list 'j'  : [if fMid anyBar {}].concat : CollectApply less    : list CAntiHeadForce CJoinHeadMid
-				list 'j1' :                              CollectApply less    : list CAntiHeadForceShiftN1
+			define kindLeftMid  : list
+				list false 'l'  : CollectApply less    : list CJoinHeadForce CJoinHeadMid
+				list false 'l1' : CollectApply less    : list CJoinHeadForceShift1
+				list false 'j'  : CollectApply greater : list CAntiHeadForce CJoinHeadMid
+				list true  'j'    anyBar
+				list false 'j1' : CollectApply greater : list CAntiHeadForceShiftN1
+			define kindRightMid : list
+				list false 'r'  : CollectApply greater : list CJoinHeadForce CJoinHeadMid
+				list false 'r1' : CollectApply greater : list CJoinHeadForceShift1
+				list false 'j'  : CollectApply less    : list CAntiHeadForce CJoinHeadMid
+				list true  'j'    anyBar
+				list false 'j1' : CollectApply less    : list CAntiHeadForceShiftN1
 
 			# console.log featureName barCls kindLeftMid kindRightMid
 
-			foreach [{ kl envL } : items-of [kindLeftMid 1]] : foreach [{ kr envR } : items-of [kindRightMid 1]] : begin
-				rods.push : chain-rule	# < - >
-					envL   ~> preserved
-					barCls ~> [CBar "\(kl)\(kr)"]
-					envR   ~> preserved
+			foreach [{ lBar kl envL } : items-of kindLeftMid] : begin
+				foreach [{ rBar kr envR } : items-of kindRightMid] : begin
+					if (!lBar || !rBar) : begin
+						rods.push : chain-rule	# < - >
+							envL   ~> preserved
+							barCls ~> [CBar "\(kl)\(kr)"]
+							envR   ~> preserved
 
-			foreach [{ kl envL } : items-of [kindLeftMid 0]] : begin
-				rods.push : chain-rule	# < -
-					envL   ~> preserved
-					barCls ~> [CBar "\(kl)f"]
+			foreach [{ lBar kl envL } : items-of kindLeftMid] : begin
+				if (!lBar) : begin
+					rods.push : chain-rule	# < -
+						envL   ~> preserved
+						barCls ~> [CBar "\(kl)f"]
 
-			foreach [{ kr envR } : items-of [kindRightMid 0]] : begin
-				rods.push : chain-rule	# - >
-					barCls ~> [CBar "f\(kr)"]
-					envR   ~> preserved
+			foreach [{ rBar kr envR } : items-of kindRightMid] : begin
+				if (!rBar) : begin
+					rods.push : chain-rule	# - >
+						barCls ~> [CBar "f\(kr)"]
+						envR   ~> preserved
 
 			CreateLigationLookup heads
 			CreateLigationLookup rods
