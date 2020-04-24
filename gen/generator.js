@@ -98,8 +98,8 @@ async function saveCharMap(font) {
 		const glyphIsHidden = /^\./.test(gid);
 		const typographicFeatures = [];
 		if (!glyphIsHidden) {
-			if (/\.hwid$/.test(gid) || /\.fwid$/.test(gid))
-				typographicFeatures.push("hwid", "fwid");
+			if (/\.NWID$/.test(gid) || /\.WWID$/.test(gid))
+				typographicFeatures.push("NWID", "WWID");
 			if (/\.lnum$/.test(gid) || /\.onum$/.test(gid))
 				typographicFeatures.push("lnum", "onum");
 		}
