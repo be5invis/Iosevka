@@ -3,28 +3,18 @@
 const fs = require("fs-extra");
 const path = require("path");
 
-const argv = require("yargs").argv;
 const buildFont = require("./build-font.js");
-const EmptyFont = require("./empty-font.js");
 const parameters = require("../support/parameters");
 const formVariantData = require("../support/variant-data");
 const formLigationData = require("../support/ligation-data");
-const regulateGlyphs = require("../support/regulate-glyph");
 const toml = require("toml");
 
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-async function main() {
+module.exports = async function main(argv) {
 	const para = await getParameters(argv);
 	const font = buildFont(para);
-	if (argv.charmap) await saveCharMap(font);
-	if (argv.o) await saveOtd(font);
-}
+	if (argv.charmap) await saveCharMap(argv, font);
+	if (argv.o) await saveOtd(argv, font);
+};
 
 // Parameter preparation
 async function getParameters(argv) {
@@ -41,23 +31,23 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	const para = parameters.build(parametersData, argv._, { "shape-weight": argv["shape-weight"] });
+	const para = parameters.build(parametersData, argv.hives, { shapeWeight: argv.shapeWeight });
 
 	const variantsData = formVariantData(rawVariantsData, para);
 	para.variants = variantsData;
-	para.variantSelector = parameters.build(variantsData, ["default", ...argv._]);
+	para.variantSelector = parameters.build(variantsData, ["default", ...argv.hives]);
 	para.defaultVariant = variantsData.default;
 
 	const ligationData = formLigationData(rawLigationData, para);
 	para.defaultBuildup = ligationData.defaultBuildup;
-	para.ligation = parameters.build(ligationData.hives, ["default", ...argv._]);
+	para.ligation = parameters.build(ligationData.hives, ["default", ...argv.hives]);
 
 	para.naming = {
 		family: argv.family,
-		version: argv.ver,
-		weight: argv["menu-weight"] - 0,
-		width: argv["menu-width"] - 0,
-		slant: argv["menu-slant"]
+		version: argv.version,
+		weight: argv.menuWeight - 0,
+		width: argv.menuWidth - 0,
+		slant: argv.menuSlant
 	};
 
 	return para;
@@ -74,7 +64,7 @@ async function tryParseToml(str) {
 }
 
 // Save OTD
-async function saveOtd(font) {
+async function saveOtd(argv, font) {
 	if (argv.o === "|") {
 		process.stdout.write(JSON.stringify(font));
 	} else {
@@ -89,7 +79,7 @@ function objHashNonEmpty(obj) {
 	return false;
 }
 
-async function saveCharMap(font) {
+async function saveCharMap(argv, font) {
 	let charMap = [];
 	for (const gid in font.glyf) {
 		const glyph = font.glyf[gid];

@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require("electron");
-let argv = require("yargs").argv;
+let argDir = process.argv[2];
 let fs = require("fs");
 let cp = require("child_process");
 
@@ -12,7 +12,7 @@ function checkQuit() {
 	if (allWindowClosed && pendingTasks == 0) app.quit();
 }
 
-app.on("window-all-closed", function() {
+app.on("window-all-closed", function () {
 	allWindowClosed = true;
 	checkQuit();
 });
@@ -29,9 +29,9 @@ function combineImages(images, outfile, width, height, doubleTrim) {
 		(doubleTrim ? "-bordercolor " + doubleTrim + " -trim " : "") +
 		outfile;
 	console.log(command);
-	cp.exec(command, function(err, stdout, stderr) {
+	cp.exec(command, function (err, stdout, stderr) {
 		if (err) console.log(err);
-		images.forEach(function(file) {
+		images.forEach(function (file) {
 			fs.unlinkSync(file);
 		});
 		pendingTasks -= 1;
@@ -44,15 +44,15 @@ function GOTO(phase) {
 	currentPhase = phase;
 }
 const phases = {
-	prepare: function(event, arg) {
+	prepare: function (event, arg) {
 		console.log(arg);
 		GOTO(phases["receive-rect"]);
 	},
-	"receive-rect": function(event, rect) {
+	"receive-rect": function (event, rect) {
 		pendingTasks += 1;
 		console.log("Received rect.");
 		rect = JSON.parse(JSON.stringify(rect));
-		let file = argv.dir + "/" + rect.name + ".png";
+		let file = argDir + "/" + rect.name + ".png";
 		let j = 0;
 		let totalFiles = Math.ceil(rect.height / rect.windowHeight);
 		let pendingFiles = totalFiles;
@@ -63,7 +63,7 @@ const phases = {
 			if (pendingFiles <= 0) {
 				let images = [];
 				for (let k = 0; k < j; k++) {
-					images.push(argv.dir + "/" + rect.name + "." + k + ".png");
+					images.push(argDir + "/" + rect.name + "." + k + ".png");
 				}
 				combineImages(
 					images,
@@ -76,10 +76,10 @@ const phases = {
 		}
 		function step() {
 			event.sender.send("scroll", rect.y + j * rect.windowHeight);
-			GOTO(function(event) {
-				mainWindow.capturePage().then(function(image) {
+			GOTO(function (event) {
+				mainWindow.capturePage().then(function (image) {
 					fs.writeFile(
-						argv.dir + "/" + rect.name + "." + j + ".png",
+						argDir + "/" + rect.name + "." + j + ".png",
 						image.toPNG(),
 						doneFileWrite
 					);
@@ -97,14 +97,14 @@ const phases = {
 	}
 };
 let currentPhase = phases["prepare"];
-ipc.on("snapshot", function() {
+ipc.on("snapshot", function () {
 	currentPhase.apply(this, arguments);
 });
-ipc.on("log", function(event, arg) {
+ipc.on("log", function (event, arg) {
 	console.log(arg);
 });
 
-app.on("ready", function() {
+app.on("ready", function () {
 	mainWindow = new BrowserWindow({
 		width: 64 * 16 * zoom,
 		height: 1024 * zoom,

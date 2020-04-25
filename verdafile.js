@@ -24,7 +24,7 @@ const GENERATE = ["node", "gen/generator"];
 const webfontFormats = [
 	["woff2", "woff2"],
 	["woff", "woff"],
-	["ttf", "truetype"],
+	["ttf", "truetype"]
 ];
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
@@ -59,7 +59,7 @@ async function tryParseToml(str) {
 	}
 }
 
-const RawPlans = oracle(`metadata:raw-plans`, async (target) => {
+const RawPlans = oracle(`metadata:raw-plans`, async target => {
 	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
 
 	const bp = await tryParseToml(BUILD_PLANS);
@@ -91,31 +91,31 @@ const RawPlans = oracle(`metadata:raw-plans`, async (target) => {
 	return bp;
 });
 
-const BuildPlans = computed("metadata:build-plans", async (target) => {
+const BuildPlans = computed("metadata:build-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.buildPlans;
 });
-const ExportPlans = computed("metadata:export-plans", async (target) => {
+const ExportPlans = computed("metadata:export-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.exportPlans;
 });
-const RawCollectPlans = computed("metadata:raw-collect-plans", async (target) => {
+const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
 });
-const Weights = computed("metadata:global-weights", async (target) => {
+const Weights = computed("metadata:global-weights", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.weights;
 });
-const Slants = computed("metadata:global-slants", async (target) => {
+const Slants = computed("metadata:global-slants", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.slants;
 });
-const Widths = computed("metadata:global-widths", async (target) => {
+const Widths = computed("metadata:global-widths", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.widths;
 });
-const CollectConfig = computed("metadata:collect-config", async (target) => {
+const CollectConfig = computed("metadata:collect-config", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectConfig;
 });
@@ -158,7 +158,7 @@ const recommendedMenuWeights = {
 	semibold: 600,
 	bold: 700,
 	extrabold: 800,
-	heavy: 900,
+	heavy: 900
 };
 function validateRecommendedWeight(w, value, label) {
 	if (recommendedMenuWeights[w] && recommendedMenuWeights[w] !== value) {
@@ -178,7 +178,7 @@ function getSuffixSet(weights, slants, widths) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`shape-weight`, `s-${s}`, `wd-${widths[wd].shape}`],
+					hives: [`shapeWeight`, `s-${s}`, `wd-${widths[wd].shape}`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
 					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
@@ -189,7 +189,7 @@ function getSuffixSet(weights, slants, widths) {
 					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
 					slant: s,
 					cssStyle: slants[s] || s,
-					menuStyle: slants[s] || s,
+					menuSlant: slants[s] || s
 				};
 			}
 		}
@@ -197,12 +197,12 @@ function getSuffixSet(weights, slants, widths) {
 	return mapping;
 }
 
-const Suffixes = computed(`metadata:suffixes`, async (target) => {
+const Suffixes = computed(`metadata:suffixes`, async target => {
 	const [weights, slants, widths] = await target.need(Weights, Slants, Widths);
 	return getSuffixSet(weights, slants, widths);
 });
 
-const FontBuildingParameters = computed(`metadata:font-building-parameters`, async (target) => {
+const FontBuildingParameters = computed(`metadata:font-building-parameters`, async target => {
 	const [buildPlans, defaultWeights, defaultSlants, defaultWidths] = await target.need(
 		BuildPlans,
 		Weights,
@@ -233,18 +233,18 @@ const FontBuildingParameters = computed(`metadata:font-building-parameters`, asy
 				shapeWidth: suffixMapping[suffix].shapeWidth,
 				menuWeight: suffixMapping[suffix].menuWeight,
 				menuWidth: suffixMapping[suffix].menuWidth,
-				menuStyle: suffixMapping[suffix].menuStyle,
+				menuSlant: suffixMapping[suffix].menuSlant,
 				cssWeight: suffixMapping[suffix].cssWeight,
 				cssStretch: suffixMapping[suffix].cssStretch,
 				cssStyle: suffixMapping[suffix].cssStyle,
-				hintParams: hintParams || [],
+				hintParams: hintParams || []
 			};
 			targets.push(fileName);
 		}
 		bp[prefix] = {
 			family,
 			prefix,
-			targets,
+			targets
 		};
 	}
 	return { fontInfos, buildPlans: bp };
@@ -292,7 +292,7 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	return `${prefix}-${ttcSuffix}`;
 }
 
-const CollectPlans = computed(`metadata:collect-plans`, async (target) => {
+const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	const [rawCollectPlans, suffixMapping, collectConfig] = await target.need(
 		RawCollectPlans,
 		Suffixes,
@@ -345,24 +345,23 @@ const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, _gr, fn) => {
 		const [
-			{ hives, family, shapeWeight, menuWeight, menuStyle, menuWidth },
-			version,
+			{ hives, family, shapeWeight, menuWeight, menuSlant, menuWidth },
+			version
 		] = await target.need(HivesOf(fn), Version);
 		const otdTmp = output.dir + "/" + output.name + ".tmp.otd";
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
-		await run(
-			GENERATE,
-			["-o", otdTmp],
-			["--charmap", charmap],
-			["--family", family],
-			["--ver", version],
-			["--shape-weight", shapeWeight],
-			["--menu-weight", menuWeight],
-			["--menu-slant", menuStyle],
-			["--menu-width", menuWidth],
+		await node("gen/index", {
+			o: otdTmp,
+			charmap,
+			family,
+			version,
+			shapeWeight,
+			menuWeight,
+			menuSlant,
+			menuWidth,
 			hives
-		);
+		});
 		await run(
 			"otfccbuild",
 			otdTmp,
@@ -423,23 +422,23 @@ const DistTTC = file.make(
 	}
 );
 const SuperTTC = file.make(
-	(f) => `${DIST}/super-ttc/${f}.ttc`,
+	f => `${DIST}/super-ttc/${f}.ttc`,
 	async (target, out, f) => {
 		await target.need(de(out.dir));
 		const [inputs] = await target.need(CollectionFontsOf(f));
 		await run(
 			OTF2OTC,
 			["-o", out.full],
-			inputs.map((f) => f.full)
+			inputs.map(f => f.full)
 		);
 	}
 );
 async function buildTtcForFile(target, parts, out, xMode) {
 	await target.need(de`${out.dir}`);
-	const [ttfs] = await target.need(parts.map((part) => DistHintedTTF(part.dir, part.file)));
+	const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
 	await run(
 		TTCIZE,
-		ttfs.map((p) => p.full),
+		ttfs.map(p => p.full),
 		["-o", out.full],
 		[xMode ? "-x" : "-h", "--common-width=500"]
 	);
@@ -448,36 +447,27 @@ async function buildTtcForFile(target, parts, out, xMode) {
 // Group-level
 const GroupTTFs = task.group("ttf", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map((tn) => DistHintedTTF(gid, tn)));
+	await target.need(ts.map(tn => DistHintedTTF(gid, tn)));
 });
 const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map((tn) => DistUnhintedTTF(gid, tn)));
+	await target.need(ts.map(tn => DistUnhintedTTF(gid, tn)));
 });
 const GroupWoffs = task.group("woff", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map((tn) => DistWoff(gid, tn)));
+	await target.need(ts.map(tn => DistWoff(gid, tn)));
 });
 const GroupWoff2s = task.group("woff2", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map((tn) => DistWoff2(gid, tn)));
+	await target.need(ts.map(tn => DistWoff2(gid, tn)));
 });
 const GroupFonts = task.group("fonts", async (target, gid) => {
 	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoffs(gid), GroupWoff2s(gid));
 });
 
-// Charmap (for specimen)
-const DistCharMaps = file.make(
-	(gid, suffix) => `${DIST}/${gid}/${suffix}.charmap`,
-	async (target, { full, dir }, gid, suffix) => {
-		const [src] = await target.need(BuildCM(gid, suffix), de`${dir}`);
-		await cp(src.full, full);
-	}
-);
-
 // Webfont CSS
 const DistWebFontCSS = file.make(
-	(gid) => `${DIST}/${gid}/webfont.css`,
+	gid => `${DIST}/${gid}/webfont.css`,
 	async (target, { dir }, gid) => {
 		// Note: this target does NOT depend on the font files.
 		const [gr, ts] = await target.need(GroupInfo(gid), GroupFontsOf(gid), de(dir));
@@ -493,12 +483,7 @@ const DistWebFontCSS = file.make(
 );
 
 const GroupContents = task.group("contents", async (target, gid) => {
-	const [gr] = await target.need(GroupInfo(gid));
-	await target.need(
-		GroupFonts(gid),
-		DistWebFontCSS(gid),
-		DistCharMaps(gid, `${gr.prefix}-regular`)
-	);
+	await target.need(GroupFonts(gid), DistWebFontCSS(gid));
 	return gid;
 });
 
@@ -525,7 +510,7 @@ const GroupArchives = task.group(`archive`, async (target, gid) => {
 // Collection-level
 const CollectionFontsOf = task.group("collection-fonts", async (target, cid) => {
 	const [{ groups }] = await target.need(CollectPlans);
-	const [files] = await target.need(groups[cid].map((file) => DistTTC(cid, file)));
+	const [files] = await target.need(groups[cid].map(file => DistTTC(cid, file)));
 	return files;
 });
 const TTCArchiveFile = file.make(
@@ -552,7 +537,7 @@ const CollectionArchive = task.group(`collection-archive`, async (target, cid) =
 //////                  Root Tasks                   //////
 ///////////////////////////////////////////////////////////
 
-const PagesDir = oracle(`pages-dir-path`, async (target) => {
+const PagesDir = oracle(`pages-dir-path`, async target => {
 	const pagesDir = path.resolve(__dirname, "../Iosevka-Pages");
 	if (!fs.existsSync(pagesDir)) {
 		return "";
@@ -561,12 +546,12 @@ const PagesDir = oracle(`pages-dir-path`, async (target) => {
 	}
 });
 
-const PagesDataExport = task(`pages:data-export`, async (target) => {
+const PagesDataExport = task(`pages:data-export`, async target => {
 	target.is.volatile();
 	const [version, pagesDir] = await target.need(Version, PagesDir);
 	if (!pagesDir) return;
 	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
-	const [cm] = await target.need(DistCharMaps("iosevka", "iosevka-regular"));
+	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	await run(
 		`node`,
 		`utility/export-data/index`,
@@ -575,7 +560,7 @@ const PagesDataExport = task(`pages:data-export`, async (target) => {
 	);
 });
 
-const PagesFontExport = task(`pages:font-export`, async (target) => {
+const PagesFontExport = task(`pages:font-export`, async target => {
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
 	const dirs = await target.need(
@@ -590,7 +575,7 @@ const PagesFontExport = task(`pages:font-export`, async (target) => {
 	}
 });
 
-const PagesFastFontExport = task(`pages:fast-font-export`, async (target) => {
+const PagesFastFontExport = task(`pages:fast-font-export`, async target => {
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
 	const dirs = await target.need(GroupContents`iosevka`);
@@ -599,14 +584,14 @@ const PagesFastFontExport = task(`pages:fast-font-export`, async (target) => {
 	}
 });
 
-const Pages = task(`pages`, async (target) => {
+const Pages = task(`pages`, async target => {
 	await target.need(PagesDataExport, PagesFontExport);
 });
-const PagesFast = task(`pages-fast`, async (target) => {
+const PagesFast = task(`pages-fast`, async target => {
 	await target.need(PagesDataExport, PagesFastFontExport);
 });
 
-const SampleImagesPre = task(`sample-images:pre`, async (target) => {
+const SampleImagesPre = task(`sample-images:pre`, async target => {
 	const [sans, slab] = await target.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
@@ -617,9 +602,9 @@ const SampleImagesPre = task(`sample-images:pre`, async (target) => {
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
-const SnapShotHtml = file(`snapshot/index.html`, async (target) => {
+const SnapShotHtml = file(`snapshot/index.html`, async target => {
 	const [cm] = await target.need(
-		DistCharMaps("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-regular"),
 		sfu`variants.toml`,
 		sfu`ligation-set.toml`,
 		UtilScripts
@@ -627,20 +612,20 @@ const SnapShotHtml = file(`snapshot/index.html`, async (target) => {
 	await run(`node`, `utility/generate-snapshot-page/index.js`);
 	await run(`node`, `utility/amend-readme/index`, cm.full);
 });
-const SnapShotCSS = file(`snapshot/index.css`, async (target) => {
+const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(sfu`snapshot/index.styl`);
 	await run(`npx`, `stylus`, `snapshot/index.styl`, `-c`);
 });
-const TakeSampleImages = task(`sample-images:take`, async (target) => {
+const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
-	await cd(`snapshot`).run("npx", "electron", "get-snap.js", ["--dir", "../images"]);
+	await cd(`snapshot`).run("npx", "electron", "get-snap.js", "../images");
 });
 const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 	await target.need(TakeSampleImages);
 	await run("optipng", full);
 });
 
-const SampleImages = task(`sample-images`, async (target) => {
+const SampleImages = task(`sample-images`, async target => {
 	await target.need(TakeSampleImages);
 	await target.need(
 		ScreenShot`images/charvars.png`,
@@ -653,7 +638,7 @@ const SampleImages = task(`sample-images`, async (target) => {
 	);
 });
 
-const AllArchives = task(`all:archives`, async (target) => {
+const AllArchives = task(`all:archives`, async target => {
 	const [exportPlans, collectPlans] = await target.need(ExportPlans, CollectPlans);
 	await target.need(
 		Object.keys(exportPlans).map(GroupArchives),
@@ -661,12 +646,12 @@ const AllArchives = task(`all:archives`, async (target) => {
 	);
 });
 
-const AllTtfArchives = task(`all:ttf`, async (target) => {
+const AllTtfArchives = task(`all:ttf`, async target => {
 	const [exportPlans] = await target.need(ExportPlans);
 	await target.need(Object.keys(exportPlans).map(GroupArchives));
 });
 
-const AllTtcArchives = task(`all:ttc`, async (target) => {
+const AllTtcArchives = task(`all:ttc`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
 	await target.need(Object.keys(collectPlans.groups).map(CollectionArchive));
 });
@@ -674,17 +659,17 @@ const AllTtcArchives = task(`all:ttc`, async (target) => {
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
 	await target.need(SuperTTC(gr));
 });
-const AllSuperTtc = task(`all:super-ttc`, async (target) => {
+const AllSuperTtc = task(`all:super-ttc`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
-	await target.need(Object.keys(collectPlans.groups).map((gr) => SuperTTC(gr)));
+	await target.need(Object.keys(collectPlans.groups).map(gr => SuperTTC(gr)));
 });
 
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
-	(target) => FileList({ under: "changes", pattern: "*.md" })(target)
+	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
 const ReleaseNotesFile = file.make(
-	(version) => `${ARCHIVE_DIR}/release-notes-${version}.md`,
+	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
 	async (t, out, version) => {
 		await t.need(UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles] = await t.need(ChangeFileList());
@@ -692,7 +677,7 @@ const ReleaseNotesFile = file.make(
 		await run("node", "utility/generate-release-note/index", version, out.full);
 	}
 );
-const ReleaseNotes = task(`release:release-note`, async (t) => {
+const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
 	await t.need(ReleaseNotesFile(version));
 });
@@ -703,7 +688,7 @@ phony(`clean`, async () => {
 	await rm(`release-archives`);
 	build.deleteJournal(); // Disable journal
 });
-phony(`release`, async (target) => {
+phony(`release`, async target => {
 	await target.need(AllArchives, AllSuperTtc);
 	await target.need(SampleImages, Pages);
 	await target.need(ReleaseNotes);
@@ -718,7 +703,7 @@ const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
 );
-const UtilScriptFiles = computed("util-script-files", async (target) => {
+const UtilScriptFiles = computed("util-script-files", async target => {
 	const [js, ejs, md] = await target.need(
 		ScriptsUnder("js", "utility"),
 		ScriptsUnder("ejs", "utility"),
@@ -736,9 +721,9 @@ const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	);
 	return ss.reduce((a, b) => [...a, ...b]);
 });
-const JavaScriptFromPtl = computed("scripts-js-from-ptl", async (target) => {
+const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles("ptl"));
-	return ptl.map((x) => x.replace(/\.ptl$/g, ".js"));
+	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
 const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (target, path) => {
@@ -754,14 +739,14 @@ const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (targe
 		await target.need(fu`${path.full}`);
 	}
 });
-const Scripts = task("scripts", async (target) => {
+const Scripts = task("scripts", async target => {
 	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`ligation-set.toml`);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
 	await target.need(js.map(ScriptJS));
 });
-const UtilScripts = task("util-scripts", async (target) => {
+const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
-	await target.need(files.map((f) => fu`${f}`));
+	await target.need(files.map(f => fu`${f}`));
 });
