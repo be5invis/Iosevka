@@ -20,7 +20,6 @@ const ARCHIVE_DIR = "release-archives";
 const OTF2OTC = "otf2otc";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
-const GENERATE = ["node", "gen/generator"];
 const webfontFormats = [
 	["woff2", "woff2"],
 	["woff", "woff"],
@@ -251,8 +250,9 @@ const FontBuildingParameters = computed(`metadata:font-building-parameters`, asy
 });
 
 async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
-	const composition = {},
-		groups = {};
+	const ttcComposition = {},
+		ttcContents = {},
+		groupDecomposition = {};
 	for (const gid in rawCollectPlans) {
 		const groupFileList = new Set();
 		const collect = rawCollectPlans[gid];
@@ -273,14 +273,15 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 				const ttfTargetName = `${prefix}-${suffix}`;
 
 				if (!ttfFileNameSet.has(ttfTargetName)) continue;
-				if (!composition[ttcFileName]) composition[ttcFileName] = [];
-				composition[ttcFileName].push({ dir: prefix, file: ttfTargetName });
+				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
+				ttcComposition[ttcFileName].push({ dir: prefix, file: ttfTargetName });
 				groupFileList.add(ttcFileName);
 			}
 		}
-		groups[gid] = [...groupFileList];
+		ttcContents[gid] = [...groupFileList];
+		groupDecomposition[gid] = [...collect.from];
 	}
-	return { composition, groups };
+	return { ttcComposition, ttcContents, groupDecomposition };
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
@@ -333,8 +334,8 @@ const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gi
 });
 
 const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (target, id) => {
-	const [{ composition }] = await target.need(CollectPlans);
-	return composition[id];
+	const [{ ttcComposition }] = await target.need(CollectPlans);
+	return ttcComposition[id];
 });
 
 ///////////////////////////////////////////////////////////
@@ -413,37 +414,6 @@ const DistWoff2 = file.make(
 	}
 );
 
-// TTC
-const DistTTC = file.make(
-	(gr, f) => `${DIST}/collections/${gr}/${f}.ttc`,
-	async (target, out, gr, f) => {
-		const [parts] = await target.need(CollectionPartsOf(f));
-		await buildTtcForFile(target, parts, out, false);
-	}
-);
-const SuperTTC = file.make(
-	f => `${DIST}/super-ttc/${f}.ttc`,
-	async (target, out, f) => {
-		await target.need(de(out.dir));
-		const [inputs] = await target.need(CollectionFontsOf(f));
-		await run(
-			OTF2OTC,
-			["-o", out.full],
-			inputs.map(f => f.full)
-		);
-	}
-);
-async function buildTtcForFile(target, parts, out, xMode) {
-	await target.need(de`${out.dir}`);
-	const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-	await run(
-		TTCIZE,
-		ttfs.map(p => p.full),
-		["-o", out.full],
-		[xMode ? "-x" : "-h", "--common-width=500"]
-	);
-}
-
 // Group-level
 const GroupTTFs = task.group("ttf", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
@@ -467,18 +437,12 @@ const GroupFonts = task.group("fonts", async (target, gid) => {
 
 // Webfont CSS
 const DistWebFontCSS = file.make(
-	gid => `${DIST}/${gid}/webfont.css`,
-	async (target, { dir }, gid) => {
+	gid => `${DIST}/${gid}/${gid}.css`,
+	async (target, out, gid) => {
 		// Note: this target does NOT depend on the font files.
-		const [gr, ts] = await target.need(GroupInfo(gid), GroupFontsOf(gid), de(dir));
+		const [gr, ts] = await target.need(GroupInfo(gid), GroupFontsOf(gid), de(out.dir));
 		const hs = await target.need(...ts.map(HivesOf));
-		await node(
-			"utility/make-webfont-css.js",
-			`${DIST}/${gid}/webfont.css`,
-			gr.family,
-			hs,
-			webfontFormats
-		);
+		await node("utility/make-webfont-css.js", out.full, gr.family, hs, webfontFormats);
 	}
 );
 
@@ -487,8 +451,74 @@ const GroupContents = task.group("contents", async (target, gid) => {
 	return gid;
 });
 
-// Archive
-const ArchiveFile = file.make(
+// TTC
+const ExportTtcSet = task.group("collection-fonts", async (target, cid) => {
+	const [{ ttcContents }] = await target.need(CollectPlans);
+	const [files] = await target.need(ttcContents[cid].map(file => ExportTtc(cid, file)));
+	return files;
+});
+const ExportSuperTtc = file.make(
+	f => `${DIST}/super-ttc/${f}.ttc`,
+	async (target, out, f) => {
+		await target.need(de(out.dir));
+		const [inputs] = await target.need(ExportTtcSet(f));
+		await run(
+			OTF2OTC,
+			["-o", out.full],
+			inputs.map(f => f.full)
+		);
+	}
+);
+const ExportTtc = file.make(
+	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
+	async (target, out, gr, f) => {
+		const [parts] = await target.need(CollectionPartsOf(f));
+		await buildTtcForFile(target, parts, out, false);
+	}
+);
+async function buildTtcForFile(target, parts, out, xMode) {
+	await target.need(de`${out.dir}`);
+	const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
+	await run(
+		TTCIZE,
+		ttfs.map(p => p.full),
+		["-o", out.full],
+		[xMode ? "-x" : "-h", "--common-width=500"]
+	);
+}
+
+// Collection Export
+const CollectionExport = task.group("collection-export", async (target, gr) => {
+	// Note: this target does NOT depend on the font files.
+	const [collectPlans] = await target.need(CollectPlans);
+	const sourceGroups = collectPlans.groupDecomposition[gr];
+	await target.need(
+		de`${DIST}/export/${gr}`,
+		sourceGroups.map(g => GroupContents(g)),
+		ExportTtcSet(gr)
+	);
+	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
+});
+const CollectionArchiveFile = file.make(
+	(gr, version) => `${ARCHIVE_DIR}/ttc-${gr}-${version}.zip`,
+	async (target, out, gr) => {
+		await target.need(de`${out.dir}`, CollectionExport(gr));
+		await rm(out.full);
+		await cd(`${DIST}/export/${gr}`).run(
+			["7z", "a"],
+			["-tzip", "-r", "-mx=9"],
+			`../../../${full}`,
+			`./`
+		);
+	}
+);
+const CollectionArchive = task.group(`collection-archive`, async (target, cid) => {
+	const [version] = await target.need(Version);
+	await target.need(CollectionArchiveFile(cid, version));
+});
+
+// Single-group export
+const GroupArchiveFile = file.make(
 	(gid, version) => `${ARCHIVE_DIR}/${gid}-${version}.zip`,
 	async (target, { dir, full }, gid, version) => {
 		// Note: this target does NOT depend on the font files.
@@ -502,35 +532,9 @@ const ArchiveFile = file.make(
 		);
 	}
 );
-const GroupArchives = task.group(`archive`, async (target, gid) => {
+const GroupArchive = task.group(`archive`, async (target, gid) => {
 	const [version] = await target.need(Version);
-	await target.need(ArchiveFile(gid, version));
-});
-
-// Collection-level
-const CollectionFontsOf = task.group("collection-fonts", async (target, cid) => {
-	const [{ groups }] = await target.need(CollectPlans);
-	const [files] = await target.need(groups[cid].map(file => DistTTC(cid, file)));
-	return files;
-});
-const TTCArchiveFile = file.make(
-	(cid, version) => `${ARCHIVE_DIR}/ttc-${cid}-${version}.zip`,
-	async (target, { dir, full }, cid) => {
-		// Note: this target does NOT depend on the font files.
-		await target.need(de`${dir}`);
-		await target.need(CollectionFontsOf(cid));
-		await rm(full);
-		await cd(`${DIST}/collections/${cid}`).run(
-			["7z", "a"],
-			["-tzip", "-r", "-mx=9"],
-			`../../../${full}`,
-			`./`
-		);
-	}
-);
-const CollectionArchive = task.group(`collection-archive`, async (target, cid) => {
-	const [version] = await target.need(Version);
-	await target.need(TTCArchiveFile(cid, version));
+	await target.need(GroupArchiveFile(gid, version));
 });
 
 ///////////////////////////////////////////////////////////
@@ -641,14 +645,14 @@ const SampleImages = task(`sample-images`, async target => {
 const AllArchives = task(`all:archives`, async target => {
 	const [exportPlans, collectPlans] = await target.need(ExportPlans, CollectPlans);
 	await target.need(
-		Object.keys(exportPlans).map(GroupArchives),
+		Object.keys(exportPlans).map(GroupArchive),
 		Object.keys(collectPlans.groups).map(CollectionArchive)
 	);
 });
 
 const AllTtfArchives = task(`all:ttf`, async target => {
 	const [exportPlans] = await target.need(ExportPlans);
-	await target.need(Object.keys(exportPlans).map(GroupArchives));
+	await target.need(Object.keys(exportPlans).map(GroupArchive));
 });
 
 const AllTtcArchives = task(`all:ttc`, async target => {
@@ -657,11 +661,11 @@ const AllTtcArchives = task(`all:ttc`, async target => {
 });
 
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
-	await target.need(SuperTTC(gr));
+	await target.need(ExportSuperTtc(gr));
 });
 const AllSuperTtc = task(`all:super-ttc`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
-	await target.need(Object.keys(collectPlans.groups).map(gr => SuperTTC(gr)));
+	await target.need(Object.keys(collectPlans.groups).map(gr => ExportSuperTtc(gr)));
 });
 
 const ChangeFileList = oracle.make(
