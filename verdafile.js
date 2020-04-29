@@ -507,7 +507,7 @@ const CollectionArchiveFile = file.make(
 		await cd(`${DIST}/export/${gr}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
-			`../../../${full}`,
+			`../../../${out.full}`,
 			`./`
 		);
 	}
