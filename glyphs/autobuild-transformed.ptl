@@ -18,7 +18,35 @@ glyph-block Autobuild-Transformed : begin
 			set name (name + j)
 		return name
 
-	define [createSuperscripts records] : begin
+	define TrackingRelations { 'dotless' }
+	define [extendRelatedGlyphs records relations suffix] : begin
+		local relatedRecords {}
+		local relMap         {.}
+		local targetNameMap  {.}
+		foreach [rel : items-of relations] : set relMap.(rel) {.}
+		foreach [record : items-of records] : begin
+			local srcName record.1
+			set targetNameMap.(srcName) : suggestName (srcName + '+' + suffix)
+			local g : query-glyph srcName
+			if (g && g.related) : foreach [rel : items-of relations] : if (g.related.(rel)) : begin
+				local relSourceName g.related.(rel)
+				set targetNameMap.(relSourceName) : suggestName (relSourceName + '+' + suffix)
+				local relatedRecord : record.slice 0
+				set relatedRecord.0 null
+				set relatedRecord.1 relSourceName
+				relatedRecords.push relatedRecord
+				set relMap.(rel).(srcName) relSourceName
+		return {[records.concat relatedRecords] relMap targetNameMap}
+
+	define [apply-relations g gn relMap targetNameMap] : begin
+		foreach [{rel rm} : pairs-of relMap] : begin
+			local relSrc rm.(gn)
+			if relSrc : begin
+				if [not g.related] : set g.related {.}
+				set g.related.(rel) targetNameMap.(relSrc)
+
+	define [createSuperscripts _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sup'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -26,18 +54,21 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : glyphid + '+sup'] : glyph-construction
-			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
-			apply-transform [Upright] true
-			apply-transform [Translate (-middle) (-CAP)] true
-			apply-transform [Scale 0.7] true
-			apply-transform [Translate middle (CAP + ACCENT / 2)] true
-			apply-transform [Italify] true
-			if pri : set currentGlyph.cmpPriority pri
+		foreach {unicode glyphid pri} [items-of records]
+			create-glyph (targetNameMap.(glyphid)) : glyph-construction
+				if unicode : assign-unicode unicode
+				local middle : miniatureFont.(glyphid).advanceWidth / 2
+				include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
+				apply-transform [Upright] true
+				apply-transform [Translate (-middle) (-CAP)] true
+				apply-transform [Scale 0.7] true
+				apply-transform [Translate middle (CAP + ACCENT / 2)] true
+				apply-transform [Italify] true
+				if pri : set currentGlyph.cmpPriority pri
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
-	define [createSubscripts records] : begin
+	define [createSubscripts _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sub'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -45,18 +76,21 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : glyphid + '+sub'] : glyph-construction
-			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
-			apply-transform [Upright] true
-			apply-transform [Translate (-middle) 0] true
-			apply-transform [Scale 0.7] true
-			apply-transform [Translate middle (DESCENDER / 2)] true
-			apply-transform [Italify] true
-			if pri : set currentGlyph.cmpPriority pri
+		foreach {unicode glyphid pri} [items-of records]
+			create-glyph (targetNameMap.(glyphid)) : glyph-construction
+				if unicode : assign-unicode unicode
+				local middle : miniatureFont.(glyphid).advanceWidth / 2
+				include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
+				apply-transform [Upright] true
+				apply-transform [Translate (-middle) 0] true
+				apply-transform [Scale 0.7] true
+				apply-transform [Translate middle (DESCENDER / 2)] true
+				apply-transform [Italify] true
+				if pri : set currentGlyph.cmpPriority pri
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
-	define [createSMCPs records] : begin
+	define [createSMCPs _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'smcp'
 		local pendingGlyphs : records.map : [record] => record.1
 		local forkedParams : Object.create para
 		set forkedParams.cap0 para.cap
@@ -67,11 +101,12 @@ glyph-block Autobuild-Transformed : begin
 		set forkedParams.diversityI 1
 		set forkedParams.diversityII 1
 		local sf : Fork pendingGlyphs forkedParams
-		foreach {unicode glyphid tfm} [items-of records] : create-glyph [suggestName : 'smcp' + glyphid] : glyph-construction
-			if unicode : assign-unicode unicode
-			include sf.(glyphid) AS_BASE
-			set-width sf.(glyphid).advanceWidth
-			if tfm : include tfm
+		foreach {unicode glyphid} [items-of records]
+			create-glyph targetNameMap.(glyphid) : glyph-construction
+				if unicode : assign-unicode unicode
+				include sf.(glyphid) AS_BASE
+				set-width sf.(glyphid).advanceWidth
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
 	define [createMedievalCombs records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -299,7 +334,6 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D15 'OU'
 		list 0x1D18 'P'
 		list 0x1D19 'cyrYa'
-		list 0x1D1A 'R' [FlipAround MIDDLE (XH / 2)]
 		list 0x1D1B 'T'
 		list 0x1D20 'V'
 		list 0x1D21 'W'

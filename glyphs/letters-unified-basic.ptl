@@ -337,7 +337,7 @@ glyph-block LetterUnified-Basic : begin
 		CreateDottedComposition 'dotlessj' 'grkj' 0x3F3
 		CreateDottedComposition 'dotlessj' 'cyrje' 0x458
 
-		sketch # jcurlytail
+		sketch # dotlessjCurlyTail
 			include MarkSet.p
 			set-anchor 'above' BASE (MIDDLE + JBALANCE) XH
 			local fine : adviceBlackness 3.5
@@ -351,7 +351,13 @@ glyph-block LetterUnified-Basic : begin
 				flat m1 XH [heading DOWNWARD]
 				curl m1 (DESCENDER + fine + rinner * 2)
 				CurlyTail fine rinner m1 DESCENDER (m1 - LONGJUT) x2 y2
+			save 'dotlessjCurlyTail'
+
+		sketch # jcurlytail
+			include [refer-glyph 'dotlessjCurlyTail'] AS_BASE ALSO_METRICS
 			include : refer-glyph "dotAbove"
+			if [not currentGlyph.related] : set currentGlyph.related {.}
+			set currentGlyph.related.dotless 'dotlessjCurlyTail'
 			save 'jcurlytail' 0x29D
 
 	### L
@@ -1203,7 +1209,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'Chi.straight' 0x3A7
 				save 'cyrHa.straight' 0x425
 				branch
-					include : CyrDescender RIGHTSB
+					include : CyrDescender RIGHTSB (connex -- 0.5)
 					save 'cyrHadescender.straight'
 
 			branch
@@ -1228,7 +1234,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'x.straight' 'x'
 				save 'cyrha.straight' 0x445
 				branch
-					include : CyrDescender RIGHTSB
+					include : CyrDescender RIGHTSB (connex -- 0.5)
 					save 'cyrhadescender.straight'
 			branch
 				include : xStrand false SB 0 RIGHTSB XH 0.02 0.4 0.14
@@ -1620,21 +1626,19 @@ glyph-block LetterUnified-Basic : begin
 		local [KBalance straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
 		local [KBalanceRight straightBar] : if SLAB (-WIDTH / 32) : if straightBar (WIDTH / 32) 0
 		local [KBalanceRightCursive straightBar] : if SLAB (WIDTH / 16) : if straightBar (WIDTH / 32) 0
+		local [KO straightBar top stroke] : if straightBar (([if SLAB (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
 		define [KLegShape left right top straightBar _stroke] : glyph-construction
 			local stroke : fallback _stroke STROKE
 			local turn (top * 0.99)
 			local fine : adviceBlackness 3.5
-			local Ok 0
-			local OkSerif 0
+			local Ok : KO straightBar top stroke
 			local kshLeft : left + [KBalance straightBar]
 			local kshRight : right + [KBalanceRight straightBar]
 
 			if straightBar : do
 				local attach (top * 0.42 - stroke)
 				local attach2 (top * 0.72 + stroke)
-				set Ok : ([if SLAB (0) (-4)] * OX - stroke / 3) * (XH / top)
-				set OkSerif : if SLAB 0 Ok
 				include : intersection
 					Rect top 0 0 UPM
 					dispiro
@@ -1674,8 +1678,8 @@ glyph-block LetterUnified-Basic : begin
 						corner kshLeft top
 
 			if SLAB : do
-				local topSerifX : kshRight - OkSerif - (stroke * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - stroke / 2) * HVCONTRAST * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVCONTRAST
-				local bottomSerifX : kshRight - OkSerif - O * [if para.isItalic 1 0]
+				local topSerifX : kshRight - (stroke * [if SLAB 1.15 1.05] * (WIDTH * 2 / UPM) / 2 - stroke / 2) * HVCONTRAST * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVCONTRAST
+				local bottomSerifX : kshRight - O * [if para.isItalic 1 0]
 
 				include : RightwardTopSerif topSerifX top (SIDEJUT + stroke / 2 * 0.5 * HVCONTRAST)
 				include : RightwardBottomSerif bottomSerifX 0 SIDEJUT
@@ -1684,7 +1688,6 @@ glyph-block LetterUnified-Basic : begin
 			define kshLeft : SB + [KBalance straightBar]
 			define kshRight : RIGHTSB + [KBalanceRightCursive straightBar] + 0.2 * STROKE
 
-			define Ok 0
 			define arcFine SHOULDERFINE
 			define arcStroke : adviceBlackness2 2 3 top
 			define arcTerminalFine : adviceBlackness2 3 4 top
@@ -1698,12 +1701,11 @@ glyph-block LetterUnified-Basic : begin
 			define arcEndPropY  : 0.45 + 0.2 * (arcStroke / WIDTH)
 
 			define arcStartX    : kshLeft + HVCONTRAST * (STROKE - arcFine)
-			define arcMaxX      : kshRight * 0.9 - Ok
+			define arcMaxX      : kshRight * 0.9
 			define arcTopY      : top - O
 
 			define arcTerminalX : mix arcStartX kshRight arcEndPropX
 			define arcTerminalY : mix 0 top arcEndPropY
-			define barEndX      : kshRight - Ok
 
 			include : difference
 				dispiro
@@ -1718,13 +1720,13 @@ glyph-block LetterUnified-Basic : begin
 					corner 0 0
 					corner 0 arcTerminalY
 					corner arcTerminalX arcTerminalY
-					corner barEndX 0
+					corner kshRight 0
 
 			include : intersection
 				Rect [mix 0 top arcEndPropY] 0 0 UPM
 				dispiro
 					flat arcTerminalX arcTerminalY [widths.lhs]
-					curl barEndX 0 [widths.rhs]
+					curl kshRight 0 [widths.rhs]
 
 		define [KShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
@@ -1742,7 +1744,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'Kappa.straight'
 				save 'cyrKa.straight'
 			branch
-				include : CyrDescender (RIGHTSB - O)
+				include : CyrDescender (RIGHTSB + [KBalanceRight true] - [KO true CAP STROKE]) (connex -- 1)
 				save 'cyrKaDescender.straight'
 
 		sketch # K
@@ -1754,7 +1756,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'Kappa.curly'
 				save 'cyrKa.curly'
 			branch
-				include : CyrDescender (RIGHTSB - O)
+				include : CyrDescender (RIGHTSB + [KBalanceRight false] - [KO false CAP STROKE])
 				save 'cyrKaDescender.curly'
 
 		select-variant 'K' 'K'
@@ -1832,7 +1834,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'cyrka.straight'
 				save 'latinkappa.straight'
 			branch
-				include : CyrDescender (RIGHTSB - O)
+				include : CyrDescender (RIGHTSB + [KBalanceRight true] - [KO true XH STROKE]) (connex -- 1)
 				save 'cyrkaDescender.straight'
 
 		sketch # cyrka
@@ -1843,7 +1845,7 @@ glyph-block LetterUnified-Basic : begin
 				save 'cyrka.curly'
 				save 'latinkappa.curly'
 			branch
-				include : CyrDescender (RIGHTSB - O)
+				include : CyrDescender (RIGHTSB + [KBalanceRight false] - [KO false XH STROKE])
 				save 'cyrkaDescender.curly'
 
 		select-variant 'cyrka' 0x43A (follow -- 'K')
@@ -2419,6 +2421,11 @@ glyph-block LetterUnified-Basic : begin
 			if [not sel] : assign-unicode 0x24C
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - STROKE) * [RBarPos SLAB])
+
+		WithDerivatives 'smcpR' 'turnSmcpR' : lambda [src sel] : glyph-construction
+			if [not sel] : assign-unicode 0x1D1A
+			include [refer-glyph src] AS_BASE ALSO_METRICS
+			include : FlipAround MIDDLE (XH / 2)
 
 		sketch # Yr
 			include MarkSet.if
@@ -3595,7 +3602,7 @@ glyph-block LetterUnified-Basic : begin
 			set-width df.width
 			include : MShape XH df.div
 			save 'cyrem' 0x43C
-			save 'smcpM'
+			save 'smcpM' 0x1D0D
 
 	### m
 	do "m and related ============================================================================"
@@ -4233,7 +4240,7 @@ glyph-block LetterUnified-Basic : begin
 			save 'cyrTe' 0x422
 
 			branch
-				include [CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)]
+				include : CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)
 				include MarkSet.if
 				save 'cyrTedescender' 0x4AC
 
@@ -4256,7 +4263,7 @@ glyph-block LetterUnified-Basic : begin
 			include : TShape XH
 			save 'cyrte.upright'
 
-			include [CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)]
+			include : CyrDescender (MIDDLE + HALFSTROKE * HVCONTRAST)
 			include MarkSet.p
 			save 'cyrtedescender.upright'
 
