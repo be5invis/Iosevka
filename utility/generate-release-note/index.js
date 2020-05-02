@@ -100,43 +100,45 @@ const PackageShapes = {
 const PackageSpacings = {
 	// spacingDesc, ligation, spacingNameSuffix
 	"": ["Default", true, ""],
-	fixed: ["Fixed", false, "Fixed"],
-	term: ["Terminal", true, "Term"]
+	term: ["Terminal", true, "Term"],
+	fixed: ["Fixed", false, "Fixed"]
 };
 
 async function GeneratePackageList(out) {
 	let nr = 1;
 	out.log(`### Packages`);
-	out.log(`| Package | Description |\n| --- | --- |`);
+	out.log(`| Package | ${[...Object.entries(PackageSpacings)].map(x => x[1][0]).join(" | ")} |`);
+	out.log(`| --- | ${[...Object.entries(PackageSpacings)].map(x => "---").join(" | ")} |`);
 	for (let shape in PackageShapes) {
 		const [shapeDesc, shapeNameSuffix, , count, nospace] = PackageShapes[shape];
+		let line = "";
+		const familyName = buildName("\u00a0", "Iosevka", shapeNameSuffix);
+		const fileName = buildName("-", "pkg", "iosevka", shape, Version);
+		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+
+		const desc = `_${shapeDesc}_`;
+		line += `|**[${familyName}](${downloadLink})**<br/>${desc}|`;
 		for (let spacing in PackageSpacings) {
-			if (nospace && spacing) continue;
+			if (nospace) {
+				line += " ———— |";
+				continue;
+			}
 			const [spacingDesc, ligation, spacingNameSuffix] = PackageSpacings[spacing];
-			const fileName = buildName(
-				"-",
-				count ? pad(nr, 2, "0") : "",
-				"iosevka",
-				spacing,
-				shape,
-				Version
-			);
-			const familyName = buildName(" ", "Iosevka", spacingNameSuffix, shapeNameSuffix);
-			const desc = nospace
-				? `_${shapeDesc}_`
-				: `**Shape**: _${shapeDesc}_; **Spacing**: _${spacingDesc}_ <br/>` +
-				  `**Ligation**: ${flag(ligation)}`;
-			if (count) nr++;
-			out.log(`| \`${fileName}\`<br/>**Menu Name**: \`${familyName}\` | ${desc} |`);
+			const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
+			const familyName = buildName("\u00a0", "Iosevka", spacingNameSuffix, shapeNameSuffix);
+			const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+			const desc =
+				noBreak(`**Spacing**: _${spacingDesc}_<br/>`) +
+				noBreak(`**Ligatures**: _${flag(ligation)}_`);
+			line += `**[${familyName}](${downloadLink})**<br/>${desc}|`;
 		}
+		out.log(line);
 	}
 	out.log();
 }
 
-function pad(s, n, p) {
-	s = "" + s;
-	while (s.length < n) s = p + s;
-	return s;
+function noBreak(s) {
+	return s.replace(/ /g, "\u00a0");
 }
 
 function buildName(j, ...parts) {

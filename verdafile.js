@@ -26,6 +26,9 @@ const webfontFormats = [
 	["ttf", "truetype"]
 ];
 
+const SINGLE_GROUP_EXPORT_PREFIX = `ttf`;
+const COLLECTION_EXPORT_PREFIX = `pkg`;
+
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
 const PRIVATE_BUILD_PLANS = path.relative(
 	__dirname,
@@ -95,8 +98,12 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	return rp.buildPlans;
 });
 const ExportPlans = computed("metadata:export-plans", async target => {
-	const [rp] = await target.need(RawPlans);
-	return rp.exportPlans;
+	const [rp] = await target.need(RawCollectPlans);
+	let result = {};
+	for (const collection in rp) {
+		for (const s of rp[collection].from) result[s] = s;
+	}
+	return result;
 });
 const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
@@ -500,7 +507,7 @@ const CollectionExport = task.group("collection-export", async (target, gr) => {
 	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
 });
 const CollectionArchiveFile = file.make(
-	(gr, version) => `${ARCHIVE_DIR}/ttc-${gr}-${version}.zip`,
+	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
 		await target.need(de`${out.dir}`, CollectionExport(gr));
 		await rm(out.full);
@@ -519,9 +526,8 @@ const CollectionArchive = task.group(`collection-archive`, async (target, cid) =
 
 // Single-group export
 const GroupArchiveFile = file.make(
-	(gid, version) => `${ARCHIVE_DIR}/${gid}-${version}.zip`,
+	(gid, version) => `${ARCHIVE_DIR}/${SINGLE_GROUP_EXPORT_PREFIX}-${gid}-${version}.zip`,
 	async (target, { dir, full }, gid, version) => {
-		// Note: this target does NOT depend on the font files.
 		const [exportPlans] = await target.need(ExportPlans, de`${dir}`);
 		await target.need(GroupContents(exportPlans[gid]));
 		await cd(`${DIST}/${exportPlans[gid]}`).run(
