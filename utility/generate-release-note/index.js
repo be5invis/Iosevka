@@ -74,27 +74,27 @@ async function GenerateChangeList(out) {
 
 const PackageShapes = {
 	// shapeDesc, shapeNameSuffix, slab, count, nospace
-	"": ["Default", "", false, true],
-	slab: ["Slab", "Slab", true, true],
-	curly: ["Curly", "Curly", false, true],
-	"curly-slab": ["Curly Slab", "Curly Slab", true, true],
-	ss01: ["Andale Mono Style", "SS01"],
-	ss02: ["Anonymous Pro Style", "SS02"],
-	ss03: ["Consolas Style", "SS03"],
-	ss04: ["Menlo Style", "SS04"],
-	ss05: ["Fira Mono Style", "SS05"],
-	ss06: ["Liberation Mono Style", "SS06"],
-	ss07: ["Monaco Style", "SS07"],
-	ss08: ["Pragmata Pro Style", "SS08"],
-	ss09: ["Source Code Pro Style", "SS09"],
-	ss10: ["Envy Code R Style", "SS10"],
-	ss11: ["X Windows Fixed Style", "SS11"],
-	ss12: ["Ubuntu Mono Style", "SS12"],
-	ss13: ["Lucida Style", "SS13"],
-	ss14: ["JetBrains Mono Style", "SS14"],
-	aile: ["Quasi-proportional", "Aile", false, false, true],
-	etoile: ["Quasi-proportional slab-serif", "Etoile", false, false, true],
-	sparkle: ["Quasi-proportional family — like iA Writer’s Duo.", "Sparkle", false, false, true]
+	"": ["Monospace, Default", "", false, true],
+	slab: ["Monospace, Slab", "Slab", true, true],
+	curly: ["Monospace, Curly", "Curly", false, true],
+	"curly-slab": ["Monospace, Curly Slab", "Curly Slab", true, true],
+	ss01: ["Monospace, Andale Mono Style", "SS01"],
+	ss02: ["Monospace, Anonymous Pro Style", "SS02"],
+	ss03: ["Monospace, Consolas Style", "SS03"],
+	ss04: ["Monospace, Menlo Style", "SS04"],
+	ss05: ["Monospace, Fira Mono Style", "SS05"],
+	ss06: ["Monospace, Liberation Mono Style", "SS06"],
+	ss07: ["Monospace, Monaco Style", "SS07"],
+	ss08: ["Monospace, Pragmata Pro Style", "SS08"],
+	ss09: ["Monospace, Source Code Pro Style", "SS09"],
+	ss10: ["Monospace, Envy Code R Style", "SS10"],
+	ss11: ["Monospace, X Windows Fixed Style", "SS11"],
+	ss12: ["Monospace, Ubuntu Mono Style", "SS12"],
+	ss13: ["Monospace, Lucida Style", "SS13"],
+	ss14: ["Monospace, JetBrains Mono Style", "SS14"],
+	aile: ["Quasi-proportional, Sans-serif", "Aile", false, false, true],
+	etoile: ["Quasi-proportional, Slab-serif", "Etoile", false, false, true],
+	sparkle: ["Quasi-proportional Hybrid, like iA Writer’s Duo.", "Sparkle", false, false, true]
 };
 
 const PackageSpacings = {
@@ -105,36 +105,34 @@ const PackageSpacings = {
 };
 
 async function GeneratePackageList(out) {
-	let nr = 1;
-	out.log(`### Packages`);
-	out.log(`| Package | ${[...Object.entries(PackageSpacings)].map(x => x[1][0]).join(" | ")} |`);
-	out.log(`| --- | ${[...Object.entries(PackageSpacings)].map(x => "---").join(" | ")} |`);
+	out.log(`<table>`);
 	for (let shape in PackageShapes) {
 		const [shapeDesc, shapeNameSuffix, , count, nospace] = PackageShapes[shape];
-		let line = "";
 		const familyName = buildName("\u00a0", "Iosevka", shapeNameSuffix);
 		const fileName = buildName("-", "pkg", "iosevka", shape, Version);
 		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
 
-		const desc = `_${shapeDesc}_`;
-		line += `|**[${familyName}](${downloadLink})**<br/>${desc}|`;
-		for (let spacing in PackageSpacings) {
-			if (nospace) {
-				line += " ———— |";
-				continue;
+		const desc = `<i>${shapeDesc}</i>`;
+		out.log(
+			`<tr><td colspan="4"><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td></tr>`
+		);
+		if (!nospace) {
+			out.log(`<tr><td> </td>`);
+			for (let spacing in PackageSpacings) {
+				const [spacingDesc, ligation, spacingNameSuffix] = PackageSpacings[spacing];
+				const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
+				const familyName = buildName(" ", "Iosevka", spacingNameSuffix, shapeNameSuffix);
+				const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+				const desc =
+					noBreak(`<b>Spacing</b>: <i>${spacingDesc}</i><br/>`) +
+					noBreak(`<b>Ligatures</b>: <i>${flag(ligation)}</i>`);
+				const download = `<b><a href="${downloadLink}">${noBreak(familyName)}</a></b>`;
+				out.log(`<td>${download}<br/>${desc}</td>`);
 			}
-			const [spacingDesc, ligation, spacingNameSuffix] = PackageSpacings[spacing];
-			const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
-			const familyName = buildName("\u00a0", "Iosevka", spacingNameSuffix, shapeNameSuffix);
-			const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
-			const desc =
-				noBreak(`**Spacing**: _${spacingDesc}_<br/>`) +
-				noBreak(`**Ligatures**: _${flag(ligation)}_`);
-			line += `**[${familyName}](${downloadLink})**<br/>${desc}|`;
+			out.log(`</tr>`);
 		}
-		out.log(line);
 	}
-	out.log();
+	out.log(`</table>`);
 }
 
 function noBreak(s) {
@@ -146,5 +144,5 @@ function buildName(j, ...parts) {
 }
 
 function flag(f) {
-	return f ? "**Yes**" : "No";
+	return f ? "<b>Yes</b>" : "No";
 }
