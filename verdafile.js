@@ -349,18 +349,17 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+const BuildOTD = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.otd`,
 	async (target, output, _gr, fn) => {
 		const [
 			{ hives, family, shapeWeight, menuWeight, menuSlant, menuWidth },
 			version
 		] = await target.need(HivesOf(fn), Version);
-		const otdTmp = output.dir + "/" + output.name + ".tmp.otd";
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
 		await node("gen/index", {
-			o: otdTmp,
+			o: output.full,
 			charmap,
 			family,
 			version,
@@ -370,19 +369,26 @@ const BuildTTF = file.make(
 			menuWidth,
 			hives
 		});
-		await run(
-			"otfccbuild",
-			otdTmp,
-			["-o", output.full],
-			["-O3", "--keep-average-char-width", "-q"]
-		);
-		await rm(otdTmp);
 	}
 );
+
+const BuildTTF = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+	async (target, output, gr, fn) => {
+		const [otd] = await target.need(BuildOTD(gr, fn), de`${output.dir}`);
+		await run(
+			"otfccbuild",
+			otd.full,
+			["-o", `${output.full}`],
+			["-O3", "--keep-average-char-width", "-q"]
+		);
+	}
+);
+
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
 	async (target, output, gr, f) => {
-		await target.need(BuildTTF(gr, f));
+		await target.need(BuildOTD(gr, f));
 	}
 );
 
@@ -480,18 +486,17 @@ const ExportTtc = file.make(
 	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
 	async (target, out, gr, f) => {
 		const [parts] = await target.need(CollectionPartsOf(f));
-		await buildTtcForFile(target, parts, out, false);
+		await buildTtcForFile(target, parts, out);
 	}
 );
-async function buildTtcForFile(target, parts, out, xMode) {
+async function buildTtcForFile(target, parts, out) {
 	await target.need(de`${out.dir}`);
-	const [ttfs] = await target.need(parts.map(part => DistHintedTTF(part.dir, part.file)));
-	await run(
-		TTCIZE,
-		ttfs.map(p => p.full),
-		["-o", out.full],
-		[xMode ? "-x" : "-h", "--common-width=500"]
-	);
+	const [ttfs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
+	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
+	const ttfInputPaths = ttfs.map(p => p.full);
+	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc]);
+	await run("ttfautohint", tmpTtc, out.full);
+	await rm(tmpTtc);
 }
 
 // Collection Export
