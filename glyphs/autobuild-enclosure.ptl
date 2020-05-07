@@ -25,7 +25,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * WIDTH / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
-	define [circleInner dscale miniatureFont unicode parts width bal baly] : begin
+	define [circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly] : begin
 		define gni : '.ci.' + [parts.join '_'] + '.' + [{dscale width bal baly}.join '.']
 		if [query-glyph gni] : return [query-glyph gni]
 		define lg : create-glyph gni : glyph-construction
@@ -39,8 +39,8 @@ glyph-block AutoBuild-Enclosure : begin
 				set tw : tw + derivedGlyph.advanceWidth
 			apply-transform : Translate tw 0
 			apply-transform : Upright
-			apply-transform : Scale [Math.min 1 (width / tw)] 1
-			set tw : Math.min width tw
+			apply-transform : Scale [Math.min 1 (mockInnerWidth / tw)] 1
+			set tw : Math.min mockInnerWidth tw
 			local shift 0
 			if (firstDerivedGyph && firstDerivedGyph.anchors.above && firstDerivedGyph.anchors.below) : begin
 				if bal : set shift : CAP / 2 - [mix baly [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5] bal]
@@ -53,7 +53,7 @@ glyph-block AutoBuild-Enclosure : begin
 			set-width 0
 		return lg
 
-	define [CircCrowd digits width] : 2 + 2 * [AdjustDigitCount digits width]
+	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] 0.5]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
 
 	define [circleDimens digits dscale w m] : begin
@@ -78,7 +78,8 @@ glyph-block AutoBuild-Enclosure : begin
 			Math.max
 				width / 2 + (top - bot) / 2
 				width / 2 + CAP / 2 * dscale + sw * 2.5
-		return : object width dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight
+		define mockInnerWidth : width + 2 * (STROKE - sw) * dscale
+		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight
 
 	define [CircledMiniatureFont digits width records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -92,11 +93,11 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw top bot left right] : circleDimens digits dscale ww
+				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits dscale ww
 				create-glyph [CircName 'circle' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 					include : OShape top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 
 					apply-transform : Upright
@@ -107,11 +108,11 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw top bot left right] : circleDimens digits dscale ww
+				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits dscale ww
 				create-glyph [CircName 'boxed' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 					include : union
 						HBarTop    left right top sw
 						HBarBottom left right bot sw
@@ -126,13 +127,13 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw top bot left right] : circleDimens digits dscale ww
+				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits dscale ww
 				create-glyph [CircName 'inset-circle' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
 					include : difference
 						OShapeOutline top bot left right sw (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
-						circleInner dscale miniatureFont unicode parts width bal baly
+						circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -142,7 +143,7 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw top bot left right] : circleDimens digits dscale ww
+				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits dscale ww
 				create-glyph [CircName 'inset-boxed' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
@@ -153,7 +154,7 @@ glyph-block AutoBuild-Enclosure : begin
 							corner right bot
 							corner right top
 							close
-						circleInner dscale miniatureFont unicode parts width bal baly
+						circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
@@ -163,7 +164,7 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits dscale ww
+				define [object width mockInnerWidth dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits dscale ww
 				create-glyph [CircName 'inset-mosaic' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
@@ -177,7 +178,7 @@ glyph-block AutoBuild-Enclosure : begin
 								corner mosaicRight mosaicTop
 								close
 						glyph-construction
-							include : circleInner dscale miniatureFont unicode parts width bal baly
+							include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 							apply-transform : Upright
 							apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 							apply-transform : Italify
@@ -186,12 +187,12 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width dscale sw0 sw top bot left right] : circleDimens digits dscale ww (ww * gap)
+				define [object width mockInnerWidth dscale sw0 sw top bot left right] : circleDimens digits dscale ww (ww * gap)
 				define sw1 : Math.min sw0 (sw / 3)
 				create-glyph [CircName 'double-circle' digits parts suffix] : glyph-construction
 					set-width width
 					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width bal baly
+					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 					include : OShape top bot left right sw1 (SMALLSMOOTHA * width / HALF-UPM) (SMALLSMOOTHB * width / HALF-UPM)
 					include : OShape
 						top - sw + sw1
