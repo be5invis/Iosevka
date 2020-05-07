@@ -3,16 +3,16 @@
 const fs = require("fs-extra");
 const path = require("path");
 
-const buildFont = require("./build-font.js");
-const parameters = require("../support/parameters");
-const formVariantData = require("../support/variant-data");
-const formLigationData = require("../support/ligation-data");
-const toml = require("toml");
+const BuildFont = require("./build-font.js");
+const Parameters = require("../support/parameters");
+const FormVariantData = require("../support/variant-data");
+const FormLigationData = require("../support/ligation-data");
+const Toml = require("toml");
 
 module.exports = async function main(argv) {
 	const para = await getParameters(argv);
-	const font = buildFont(para);
-	if (argv.charmap) await saveCharMap(argv, font);
+	const font = BuildFont(para);
+	if (argv.oCharMap) await saveCharMap(argv, font);
 	if (argv.o) await saveOtd(argv, font);
 };
 
@@ -31,23 +31,27 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	const para = parameters.build(parametersData, argv.hives, { shapeWeight: argv.shapeWeight });
+	const para = Parameters.build(parametersData, argv.hives, { shapeWeight: argv.shape.weight });
 
-	const variantsData = formVariantData(rawVariantsData, para);
+	const variantsData = FormVariantData(rawVariantsData, para);
 	para.variants = variantsData;
-	para.variantSelector = parameters.build(variantsData, ["default", ...argv.hives]);
+	para.variantSelector = Parameters.build(variantsData, ["default", ...argv.hives]);
 	para.defaultVariant = variantsData.default;
 
-	const ligationData = formLigationData(rawLigationData, para);
+	const ligationData = FormLigationData(rawLigationData, para);
 	para.defaultBuildup = ligationData.defaultBuildup;
-	para.ligation = parameters.build(ligationData.hives, ["default", ...argv.hives]);
+	para.ligation = Parameters.build(ligationData.hives, ["default", ...argv.hives]);
+
+	if (argv.excludedCharRanges) para.excludedCodePointRanges = argv.excludedCharRanges;
+	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
+	if (argv.metricOverride) Parameters.applymetricOverride(para, argv.metricOverride);
 
 	para.naming = {
-		family: argv.family,
-		version: argv.version,
-		weight: argv.menuWeight - 0,
-		width: argv.menuWidth - 0,
-		slant: argv.menuSlant
+		family: argv.menu.family,
+		version: argv.menu.version,
+		weight: argv.menu.weight - 0,
+		width: argv.menu.width - 0,
+		slant: argv.menu.slant
 	};
 
 	return para;
@@ -55,7 +59,7 @@ async function getParameters(argv) {
 
 async function tryParseToml(str) {
 	try {
-		return toml.parse(await fs.readFile(str, "utf-8"));
+		return Toml.parse(await fs.readFile(str, "utf-8"));
 	} catch (e) {
 		throw new Error(
 			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`
@@ -101,5 +105,5 @@ async function saveCharMap(argv, font) {
 			glyph.featureSelector ? Object.keys(glyph.featureSelector) : []
 		]);
 	}
-	await fs.writeFile(argv.charmap, JSON.stringify(charMap), "utf8");
+	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
 }
