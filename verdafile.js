@@ -632,14 +632,6 @@ const SampleImages = task(`sample-images`, async target => {
 	);
 });
 
-const AllArchives = task(`all:archives`, async target => {
-	const [exportPlans, collectPlans] = await target.need(ExportPlans, CollectPlans);
-	await target.need(
-		Object.keys(exportPlans).map(GroupArchive),
-		Object.keys(collectPlans.groups).map(CollectionArchive)
-	);
-});
-
 const AllTtfArchives = task(`all:ttf`, async target => {
 	const [exportPlans] = await target.need(ExportPlans);
 	await target.need(Object.keys(exportPlans).map(GroupArchive));
@@ -647,7 +639,7 @@ const AllTtfArchives = task(`all:ttf`, async target => {
 
 const AllTtcArchives = task(`all:ttc`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
-	await target.need(Object.keys(collectPlans.groups).map(CollectionArchive));
+	await target.need(Object.keys(collectPlans.groupDecomposition).map(CollectionArchive));
 });
 
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
@@ -680,12 +672,11 @@ phony(`clean`, async () => {
 	await rm(`build`);
 	await rm(`dist`);
 	await rm(`release-archives`);
-	build.deleteJournal(); // Disable journal
+	build.deleteJournal();
 });
 phony(`release`, async target => {
-	await target.need(AllArchives, AllSuperTtc);
-	await target.need(SampleImages, Pages);
-	await target.need(ReleaseNotes);
+	await target.need(AllTtfArchives, AllTtcArchives, AllSuperTtc);
+	await target.need(SampleImages, Pages, ReleaseNotes);
 });
 
 ///////////////////////////////////////////////////////////
