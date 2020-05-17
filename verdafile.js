@@ -645,10 +645,6 @@ const AllTtcArchives = task(`all:ttc`, async target => {
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
 	await target.need(ExportSuperTtc(gr));
 });
-const AllSuperTtc = task(`all:super-ttc`, async target => {
-	const [collectPlans] = await target.need(CollectPlans);
-	await target.need(Object.keys(collectPlans.groups).map(gr => ExportSuperTtc(gr)));
-});
 
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
@@ -675,7 +671,7 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	await target.need(AllTtfArchives, AllTtcArchives, AllSuperTtc);
+	await target.need(AllTtfArchives, AllTtcArchives);
 	await target.need(SampleImages, Pages, ReleaseNotes);
 });
 
