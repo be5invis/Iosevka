@@ -601,14 +601,12 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	const [cm] = await target.need(
-		BuildCM("iosevka", "iosevka-regular"),
-		sfu`variants.toml`,
-		sfu`ligation-set.toml`,
-		UtilScripts
-	);
+	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
+	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
+	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
 	await run(`node`, `utility/generate-snapshot-page/index.js`);
-	await run(`node`, `utility/amend-readme/index`, cm.full);
+	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
 });
 const SnapShotCSS = file(`snapshot/index.css`, async target => {
 	await target.need(sfu`snapshot/index.styl`);
