@@ -5,12 +5,27 @@ const gatherCov = require("./coverage-export/gather-coverage-data");
 // List all the languages that Iosevka supports, but cannot inferred from CLDR data.
 const overrideSupportedLanguages = [];
 
-module.exports = async function (charMapPath) {
+module.exports = async function (charMapPath, charMapItalicPath, charMapObliquePath) {
 	const charMap = await fs.readJson(charMapPath);
+	const charMapItalic = await fs.readJson(charMapItalicPath);
+	const charMapOblique = await fs.readJson(charMapObliquePath);
 
+	const rawCoverage = getRawCoverage(charMap);
+	const rawCoverageItalic = getRawCoverage(charMapItalic);
+	const rawCoverageOblique = getRawCoverage(charMapOblique);
+
+	return {
+		stats: {
+			glyphCount: charMap.length,
+			codePointCount: rawCoverage.size
+		},
+		unicodeCoverage: gatherCov(rawCoverage, rawCoverageItalic, rawCoverageOblique),
+		languages: Array.from(getSupportedLanguageSet(rawCoverage)).sort()
+	};
+};
+
+function getSupportedLanguageSet(rawCoverage) {
 	const supportLocaleSet = new Set();
-	const codePointSet = new Set();
-	for (const ch of charMap) for (const unicode of ch[1]) codePointSet.add(unicode);
 
 	for (const locale of cldr.localeIds) {
 		const exemplar = cldr.extractCharacters(locale).exemplar;
@@ -27,10 +42,10 @@ module.exports = async function (charMapPath) {
 		let fullSupport = true;
 		let basicSupport = true;
 		for (const ch of basicChars) {
-			if (!codePointSet.has(ch.codePointAt(0))) basicSupport = false;
+			if (!rawCoverage.has(ch.codePointAt(0))) basicSupport = false;
 		}
 		for (const ch of fullChars) {
-			if (!codePointSet.has(ch.codePointAt(0))) fullSupport = false;
+			if (!rawCoverage.has(ch.codePointAt(0))) fullSupport = false;
 		}
 
 		if (basicSupport) {
@@ -60,16 +75,12 @@ module.exports = async function (charMapPath) {
 		if (displayName) supportLangSet.add(displayName);
 	}
 
+	return supportLangSet;
+}
+
+function getRawCoverage(charMap) {
 	const rawCoverage = new Map();
 	for (const [gn, codes, tv, cv] of charMap)
 		for (const u of codes) rawCoverage.set(u, [gn, tv, cv]);
-
-	return {
-		stats: {
-			glyphCount: charMap.length,
-			codePointCount: rawCoverage.size
-		},
-		unicodeCoverage: gatherCov(rawCoverage),
-		languages: Array.from(supportLangSet).sort()
-	};
-};
+	return rawCoverage;
+}

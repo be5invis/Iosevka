@@ -547,17 +547,14 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
+	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
 	await run(
 		`node`,
 		`utility/export-data/index`,
 		cm.full,
-		path.resolve(pagesDir, "shared/data-import/iosevka.json")
-	);
-	await run(
-		`node`,
-		`utility/export-data/index`,
 		cmi.full,
-		path.resolve(pagesDir, "shared/data-import/iosevka-italic.json")
+		cmo.full,
+		path.resolve(pagesDir, "shared/data-import/iosevka.json")
 	);
 });
 
