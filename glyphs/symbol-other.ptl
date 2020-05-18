@@ -29,11 +29,55 @@ glyph-block Symbol-Other-Phonetic : begin
 		line-to    (MIDDLE + triangleSize * 1.35) XH
 		save 'halftrianglecolon' 0x2D1
 
+	define [yOfTone tone] : mix (OPERATORSTROKE / 2) (CAP - OPERATORSTROKE / 2) (tone / 4)
+
 	foreach tone [range 4 downtill 0] : begin
 		create-glyph ('tone' + tone) : glyph-construction
 			assign-unicode (0x2E5 + 4 - tone)
 			include : VBarRight [mix SB RIGHTSB 0.9] 0 CAP OPERATORSTROKE
-			include : HBar [mix SB RIGHTSB 0.1] ([mix SB RIGHTSB 0.9] - 1) [mix (OPERATORSTROKE / 2) (CAP - OPERATORSTROKE / 2) (tone / 4)] OPERATORSTROKE
+			include : HBar [mix SB RIGHTSB 0.1] ([mix SB RIGHTSB 0.9] - 1) [yOfTone tone] OPERATORSTROKE
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneStart' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 WIDTH
+				dispiro
+					widths.center OPERATORSTROKE
+					corner (WIDTH / 2) [yOfTone toneStart]
+					corner (WIDTH + WIDTH / 2) [yOfTone toneEnd]
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneEnd' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 MIDDLE
+				dispiro
+					widths.center OPERATORSTROKE
+					corner (0 - WIDTH / 2)         [yOfTone toneStart]
+					corner (WIDTH + WIDTH / 2)     [yOfTone : mix toneStart toneEnd 2]
+			include : VBar MIDDLE 0 CAP OPERATORSTROKE
+
+	foreach toneStart [range 4 downtill 0] : foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneMid' + toneStart + toneMid + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 WIDTH
+				union
+					intersection
+						dispiro
+							widths.center OPERATORSTROKE
+							corner (0 - WIDTH / 2)     [yOfTone toneStart]
+							corner (WIDTH + WIDTH / 2) [yOfTone : mix toneStart toneMid 2]
+						dispiro
+							widths.center OPERATORSTROKE
+							corner (0 - WIDTH / 2)     [yOfTone : mix toneEnd toneMid 2]
+							corner (WIDTH + WIDTH / 2) [yOfTone toneEnd]
+					dispiro
+						widths.center OPERATORSTROKE
+						corner (0 - WIDTH / 2) [yOfTone toneStart]
+						corner (WIDTH / 2)     [yOfTone toneMid]
+					dispiro
+						widths.center OPERATORSTROKE
+						corner (WIDTH / 2)         [yOfTone toneMid]
+						corner (WIDTH + WIDTH / 2) [yOfTone toneEnd]
 
 glyph-block Symbol-Other-Suit-Cards : begin
 	glyph-block-import CommonShapes

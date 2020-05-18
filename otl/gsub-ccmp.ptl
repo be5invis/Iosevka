@@ -21,6 +21,38 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 	define [IotaLF]         : {'iotaBelow'} ~> {'iotaLF'}
 	define [OgonekTrailing] : {'ogonekBelow'} ~> {'ogonekTR'}
 
+	define [ToneToToneStart toneEnd] : begin
+		local f {}
+		local e {}
+		foreach toneStart [range 4 downtill 0] : begin
+			f.push ('tone' + toneStart)
+			e.push ('toneStart' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [ToneToToneEnd toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('tone' + toneEnd)
+			e.push ('toneEnd' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [toneStartOrMidAt y]: begin
+		local f {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneStart' + y + toneEnd)
+		foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneMid' + toneStart + y + toneEnd)
+		return f
+
+	define [ToneStartToToneMid toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneStart' + toneMid + toneEnd)
+			e.push ('toneMid' + toneStart + toneMid + toneEnd)
+		return (f ~> e)
+
 	define lookupCcmp1 : add-lookup sink : object
 		.type 'gsub_chaining'
 		.subtables : list
@@ -60,5 +92,33 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 			object [from {'revCommaAbove' 'acuteAbove'}] [to 'dasiaoxia']
 			object [from {'revCommaAbove' 'perispomeniAbove'}] [to 'dasiaperispomeni']
 
+	define lookupCcmp-ToneStart : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneToToneStart 0] {'tone0'}
+			chain-rule [ToneToToneStart 1] {'tone1'}
+			chain-rule [ToneToToneStart 2] {'tone2'}
+			chain-rule [ToneToToneStart 3] {'tone3'}
+			chain-rule [ToneToToneStart 4] {'tone4'}
+
+	define lookupCcmp-ToneMid : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [toneStartOrMidAt 0] [ToneStartToToneMid 0]
+			chain-rule [toneStartOrMidAt 1] [ToneStartToToneMid 1]
+			chain-rule [toneStartOrMidAt 2] [ToneStartToToneMid 2]
+			chain-rule [toneStartOrMidAt 3] [ToneStartToToneMid 3]
+			chain-rule [toneStartOrMidAt 4] [ToneStartToToneMid 4]
+
+	define lookupCcmp-ToneEnd : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [toneStartOrMidAt 0] [ToneToToneEnd 0]
+			chain-rule [toneStartOrMidAt 1] [ToneToToneEnd 1]
+			chain-rule [toneStartOrMidAt 2] [ToneToToneEnd 2]
+			chain-rule [toneStartOrMidAt 3] [ToneToToneEnd 3]
+			chain-rule [toneStartOrMidAt 4] [ToneToToneEnd 4]
+
 	ccmp.lookups.push lookupCcmp1 lookupCcmp2
+	ccmp.lookups.push lookupCcmp-ToneStart lookupCcmp-ToneMid lookupCcmp-ToneEnd
 	add-common-feature sink ccmp
