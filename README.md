@@ -72,12 +72,15 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 2. Add a build plan into `private-build-plans.toml`, following this format:
 
 	```toml
-	[buildPlans.iosevka-custom]                         # <iosevka-custom> is your plan name
-	family = "Iosevka Custom"                           # Font menu family name
-	design = ["leading-1500", "v-i-hooky", "v-l-hooky"] # Customize styles
-	hintParams = ["-a", "sss"]                          # Optional custom parameters for ttfautohint
-
-
+	[buildPlans.iosevka-custom]               # <iosevka-custom> is your plan name
+	family = "Iosevka Custom"                 # Font menu family name
+	design = ["v-i-hooky", "v-l-hooky"]       # Customize styles
+	# upright = ["upright-styles"]            # Uncomment this line to set styles for upright only
+	# italic = ["italic-styles"]              # Uncomment this line to set styles for italic only
+	# oblique = ["oblique-styles"]            # Uncomment this line to set styles for oblique only
+	hintParams = ["-a", "sss"]                # Optional custom parameters for ttfautohint
+	
+	###################################################################################################
 	# Override default building weights
 	# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
 	# default values.
@@ -99,19 +102,24 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 	shape = 700
 	menu  = 700
 	css   = 700
+
 	# End weight section
+	###################################################################################################
 
-
+	###################################################################################################
 	# Override default building slant sets
 	# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
 	# When this section is absent, all slants would be built.
+
 	[buildPlans.iosevka-custom.slants]
 	upright = "normal"
 	italic = "italic"
 	oblique = "oblique"
-	# End slant section
-	
 
+	# End slant section
+	###################################################################################################
+
+	###################################################################################################
 	# Override default building widths
 	# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
 	# default values.
@@ -119,17 +127,62 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 	#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
 	#             If you decide to use custom weights you have to define all the weights you
 	#             plan to use otherwise they will not be built.
+
 	[buildPlans.iosevka-custom.widths.normal]
 	shape = 5          # Width of glyph shapes.
 	menu  = 5          # Width for the font's names.
 	css   = "normal"   # "font-stretch' property of webfont CSS.
 
-
 	[buildPlans.iosevka-custom.widths.extended]
 	shape = 7
 	menu  = 7
 	css   = "expanded"
+
 	# End width section
+	###################################################################################################
+
+	###################################################################################################
+	# Character Exclusion
+	# Specify character ranges in the section below to exclude certain characters from the font being
+	# built. Remove this section when this feature is not needed.
+
+	[buildPlans.iosevka-custom.exclude-chars]
+	ranges = [[10003, 10008]]
+
+	# End character exclusion
+	###################################################################################################
+
+	###################################################################################################
+	# Compatibility Ligatures
+	# Certain applications like Emacs does not support proper programming liagtures provided by
+	# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
+	# following section to build PUA characters that are generated from the OpenType ligatures.
+	# Remove this section when compatibility ligatures are not needed.
+
+	[[buildPlans.iosevka-custom.compatibility-ligatures]]
+	unicode = 57600 # 0xE100
+	featureTag = 'calt'
+	sequence = '<*>'
+
+	# End compatibility ligatures section
+	###################################################################################################
+
+	###################################################################################################
+	# Metric overrides
+	# Certain metrics like line height (leading) could be overridden in your build plan file.
+	# Edit the values to change the metrics. Remove this section when overriding is not needed.
+
+	[buildPlans.iosevka-custom.metric-override]
+	leading = 1250
+	winMetricAscenderPad = 0
+	winMetricDescenderPad = 0
+	powerlineScaleY = 1
+	powerlineScaleX = 1
+	powerlineShiftY = 0
+	powerlineShiftX = 0
+
+	# End metric override section
+	###################################################################################################
 	```
 
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
@@ -211,22 +264,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-html-comment`: Enable ligation for `<!--` and `<!---`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
-
-* Styles for changing the line space (leading):
-
-  * `leading-750`, `leading-1000`, `leading-1250`, `leading-1500`, `leading-1750`, `leading-2000`: Change the line space. Default is `leading-1250`.
-  * `win-metric-pad-0`, `win-metric-pad-50`, `win-metric-pad-100`, `win-metric-pad-150`, `win-metric-pad-200`, `win-metric-pad-250`, `win-metric-pad-300`: Add extra space to [OS/2 table’s Win metrics](https://docs.microsoft.com/en-us/typography/opentype/spec/os2#uswinascent) to avoid clipping in certain legacy software.
-
-* Styles for changing Powerline symbols' position:
-
-  * `powerline-scale-y-750`, `powerline-scale-y-875`, `powerline-scale-y-1000`, `powerline-scale-y-1125`, `powerline-scale-y-1250`, `powerline-scale-y-1375`, `powerline-scale-y-1500`: Resize the Powerline symbols vertically, from 75% to 150%.
-  * `powerline-scale-x-750`, `powerline-scale-x-875`, `powerline-scale-x-1000`, `powerline-scale-x-1125`, `powerline-scale-x-1250`, `powerline-scale-x-1375`, `powerline-scale-x-1500`: Resize the Powerline symbols horizontally, from 75% to 150%.
-  * `powerline-shift-y-n500`, `powerline-shift-y-n450`, `powerline-shift-y-n400`, `powerline-shift-y-n350`, `powerline-shift-y-n300`, `powerline-shift-y-n250`, `powerline-shift-y-n200`, `powerline-shift-y-n150`, `powerline-shift-y-n100`, `powerline-shift-y-n50`, `powerline-shift-y-0`, `powerline-shift-y-p50`, `powerline-shift-y-p100`, `powerline-shift-y-p150`, `powerline-shift-y-p200`, `powerline-shift-y-p250`, `powerline-shift-y-p300`, `powerline-shift-y-p350`, `powerline-shift-y-p400`, `powerline-shift-y-p450`, `powerline-shift-y-p500`: Shift the Powerline symbols vertically, from -0.5em to +0.5em.
-  * `powerline-shift-x-n500`, `powerline-shift-x-n450`, `powerline-shift-x-n400`, `powerline-shift-x-n350`, `powerline-shift-x-n300`, `powerline-shift-x-n250`, `powerline-shift-x-n200`, `powerline-shift-x-n150`, `powerline-shift-x-n100`, `powerline-shift-x-n50`, `powerline-shift-x-0`, `powerline-shift-x-p50`, `powerline-shift-x-p100`, `powerline-shift-x-p150`, `powerline-shift-x-p200`, `powerline-shift-x-p250`, `powerline-shift-x-p300`, `powerline-shift-x-p350`, `powerline-shift-x-p400`, `powerline-shift-x-p450`, `powerline-shift-x-p500`: Shift the Powerline symbols horizontally, from -0.5em to +0.5em.
-
-* Symbol exclusion:
-
-  * `exclude-check-and-cross-symbol`: Exclude `✓✔✕✖✗✘` (U+2713 – U+2718) from the font.
 
 <!-- BEGIN Section-Stylistic-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->

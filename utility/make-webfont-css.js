@@ -10,20 +10,20 @@ module.exports = function (output, family, hs, formats) {
 @font-face {
 	font-family: '${family + " Web"}';
 	font-display: swap;
-	font-weight: ${term.cssWeight};
-	font-stretch: ${term.cssStretch};
-	font-style: ${term.cssStyle};
+	font-weight: ${term.css.weight};
+	font-stretch: ${term.css.stretch};
+	font-style: ${term.css.style};
 	src: ${src};
 }
 `;
-		if (term.cssStyle === "oblique") {
+		if (term.css.style === "oblique") {
 			// CHROME hates a family with both Italic and Oblique
 			ans += `
 @font-face {
 	font-family: '${family + " Web Oblique"}';
 	font-display: swap;
-	font-weight: ${term.cssWeight};
-	font-stretch: ${term.cssStretch};
+	font-weight: ${term.css.weight};
+	font-stretch: ${term.css.stretch};
 	src: ${src};
 }
 `;

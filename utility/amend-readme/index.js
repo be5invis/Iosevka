@@ -5,6 +5,8 @@ const parseLigationData = require("../export-data/ligation-data");
 const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
 
 const charMapPath = process.argv[2];
+const charMapItalicPath = process.argv[3];
+const charMapObliquePath = process.argv[4];
 main().catch(e => {
 	console.error(e);
 	process.exit(1);
@@ -163,7 +165,11 @@ async function processLigSetPreDef() {
 }
 
 async function processLangList() {
-	const cl = await getCharMapAndSupportedLanguageList(charMapPath);
+	const cl = await getCharMapAndSupportedLanguageList(
+		charMapPath,
+		charMapItalicPath,
+		charMapObliquePath
+	);
 	const md = new MdCol("Section-Language-List");
 	md.log(`${cl.languages.length} Supported Languages: \n`);
 	md.log(cl.languages.join(", "));
