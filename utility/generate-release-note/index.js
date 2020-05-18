@@ -132,7 +132,7 @@ async function GeneratePackageList(out) {
 			out.log(`</tr>`);
 		}
 	}
-	out.log(`</table>`);
+	out.log(`</table>\n`);
 }
 
 function noBreak(s) {
