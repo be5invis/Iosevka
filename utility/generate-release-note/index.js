@@ -23,7 +23,7 @@ async function main() {
 
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(out);
-	await CopyMarkdown(out, "style-set-sample-image.md");
+	await GenerateStyleSetImage(out);
 	await CopyMarkdown(out, "package-reorg.md");
 	await GenerateChangeList(out);
 
@@ -132,7 +132,13 @@ async function GeneratePackageList(out) {
 			out.log(`</tr>`);
 		}
 	}
-	out.log(`</table>`);
+	out.log(`</table>\n\n`);
+}
+
+async function GenerateStyleSetImage(out) {
+	out.log(
+		`![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images/stylesets.png)\n\n`
+	);
 }
 
 function noBreak(s) {

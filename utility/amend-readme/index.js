@@ -21,6 +21,7 @@ async function main() {
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
 	readme = (await processLangList()).apply(readme);
+	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
 }
 
@@ -54,25 +55,34 @@ async function processCv() {
 	return md;
 }
 
+async function processPrivateBuildPlans() {
+	const md = new MdCol("Section-Private-Build-Plan-Sample");
+	const tomlPath = path.resolve(__dirname, "../../private-build-plans.sample.toml");
+	const toml = await fs.readFile(tomlPath, "utf-8");
+	md.log(toml.replace(/^/gm, "\t"));
+	return md;
+}
+
 class MdCol {
 	constructor(sectionName) {
 		this.data = "";
 		this.sectionName = sectionName;
 		this.matchRegex = new RegExp(
-			`<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`
+			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
+			`m`
 		);
 	}
 	log(...s) {
 		this.data += s.join("") + "\n";
 	}
 	apply(s) {
-		return s.replace(this.matchRegex, () => {
+		return s.replace(this.matchRegex, (m, $1) => {
 			return (
 				`<!-- BEGIN ${this.sectionName} -->\n` +
 				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
 				this.data +
 				`\n<!-- END ${this.sectionName} -->\n`
-			);
+			).replace(/^/gm, $1);
 		});
 	}
 }

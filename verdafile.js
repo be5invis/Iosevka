@@ -28,6 +28,7 @@ const webfontFormats = [
 
 const SINGLE_GROUP_EXPORT_PREFIX = `ttf`;
 const COLLECTION_EXPORT_PREFIX = `pkg`;
+const TTC_ONLY_COLLECTION_EXPORT_PREFIX = `ttc`;
 
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
 const PRIVATE_BUILD_PLANS = path.relative(
@@ -341,33 +342,29 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildOTD = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.otd`,
+const BuildTTF = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
 		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
-		await node("gen/index", { o: output.full, oCharMap: charmap, ...fi });
-	}
-);
 
-const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
-	async (target, output, gr, fn) => {
-		const [otd] = await target.need(BuildOTD(gr, fn), de`${output.dir}`);
+		const otdPath = `${output.dir}/${output.name}.otd`;
+		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
 		await run(
 			"otfccbuild",
-			otd.full,
+			otdPath,
 			["-o", `${output.full}`],
 			["-O3", "--keep-average-char-width", "-q"]
 		);
+		await rm(otdPath);
 	}
 );
 
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
 	async (target, output, gr, f) => {
-		await target.need(BuildOTD(gr, f));
+		await target.need(BuildTTF(gr, f));
 	}
 );
 
@@ -503,9 +500,26 @@ const CollectionArchiveFile = file.make(
 		);
 	}
 );
+const TtcOnlyCollectionArchiveFile = file.make(
+	(gr, version) => `${ARCHIVE_DIR}/${TTC_ONLY_COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
+	async (target, out, gr) => {
+		await target.need(de`${out.dir}`, CollectionExport(gr));
+		await rm(out.full);
+		await cd(`${DIST}/export/${gr}/ttc`).run(
+			["7z", "a"],
+			["-tzip", "-r", "-mx=9"],
+			`../../../../${out.full}`,
+			`./`
+		);
+	}
+);
 const CollectionArchive = task.group(`collection-archive`, async (target, cid) => {
 	const [version] = await target.need(Version);
 	await target.need(CollectionArchiveFile(cid, version));
+});
+const TtcOnlyCollectionArchive = task.group(`ttc-only-collection-archive`, async (target, cid) => {
+	const [version] = await target.need(Version);
+	await target.need(TtcOnlyCollectionArchiveFile(cid, version));
 });
 
 // Single-group export
@@ -639,9 +653,14 @@ const AllTtfArchives = task(`all:ttf`, async target => {
 	await target.need(Object.keys(exportPlans).map(GroupArchive));
 });
 
-const AllTtcArchives = task(`all:ttc`, async target => {
+const CollectionArchives = task(`all:pkg`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
 	await target.need(Object.keys(collectPlans.groupDecomposition).map(CollectionArchive));
+});
+
+const AllTtcArchives = task(`all:ttc`, async target => {
+	const [collectPlans] = await target.need(CollectPlans);
+	await target.need(Object.keys(collectPlans.groupDecomposition).map(TtcOnlyCollectionArchive));
 });
 
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
@@ -673,7 +692,7 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	await target.need(AllTtfArchives, AllTtcArchives);
+	await target.need(AllTtfArchives, CollectionArchives, AllTtcArchives);
 	await target.need(SampleImages, Pages, ReleaseNotes);
 });
 
