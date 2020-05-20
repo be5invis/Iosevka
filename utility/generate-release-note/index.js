@@ -132,6 +132,7 @@ async function GeneratePackageList(out) {
 			out.log(`</tr>`);
 		}
 	}
+	out.log(`</table>\n`);
 }
 
 async function GenerateStyleSetImage(out) {
