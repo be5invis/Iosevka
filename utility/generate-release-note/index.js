@@ -65,7 +65,7 @@ async function GenerateChangeList(out) {
 	out.log(`## Modifications since version ${ModifiedSinceVersion}`);
 	for (const [version, notes] of sortedFragments) {
 		out.log(` * **${version}**`);
-		out.log((notes.trim() + "\n").replace(/^/gm, "   "));
+		out.log((notes.trimEnd() + "\n").replace(/^/gm, "   "));
 	}
 }
 
