@@ -604,15 +604,42 @@ const PagesFast = task(`pages-fast`, async target => {
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
-	const [sans, slab] = await target.need(
+	const [sans, slab, aile, etoile, sparkle] = await target.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
+		GroupContents`iosevka-aile`,
+		GroupContents`iosevka-etoile`,
+		GroupContents`iosevka-sparkle`,
+		SnapShotJson,
 		SnapShotCSS,
 		SnapShotHtml,
 		de`images`
 	);
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
+	await cp(`${DIST}/${aile}`, `snapshot/${aile}`);
+	await cp(`${DIST}/${etoile}`, `snapshot/${etoile}`);
+	await cp(`${DIST}/${sparkle}`, `snapshot/${sparkle}`);
+});
+
+const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
+	const [plan] = await target.need(BuildPlans);
+	const cfg = [];
+	for (const key in plan.buildPlans) {
+		const p = plan.buildPlans[key];
+		if (!p || !p.snapshotFamily) continue;
+		cfg.push({
+			el: "#packaging-sampler",
+			applyClass: p.snapshotFamily,
+			applyFeature: p.snapshotFeature,
+			name: key
+		});
+	}
+	return cfg;
+});
+const SnapShotJson = file(`snapshot/packaging-tasks.json`, async (target, out) => {
+	const [cfg] = await target.need(PackageSnapshotConfig);
+	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
 	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
@@ -636,7 +663,7 @@ const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 });
 
 const SampleImages = task(`sample-images`, async target => {
-	await target.need(TakeSampleImages);
+	const [cfg] = await target.need(PackageSnapshotConfig, TakeSampleImages);
 	await target.need(
 		ScreenShot`images/charvars.png`,
 		ScreenShot`images/languages.png`,
@@ -644,7 +671,8 @@ const SampleImages = task(`sample-images`, async target => {
 		ScreenShot`images/matrix.png`,
 		ScreenShot`images/preview-all.png`,
 		ScreenShot`images/stylesets.png`,
-		ScreenShot`images/weights.png`
+		ScreenShot`images/weights.png`,
+		cfg.map(opt => ScreenShot`images/${opt.name}.png`)
 	);
 });
 

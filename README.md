@@ -189,7 +189,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-		
+								
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -323,6 +323,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `j`:
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
+    * `v-j-straight`, `cv98`: `j` without serif.
   * Styles for `l`:
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
