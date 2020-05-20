@@ -38,6 +38,7 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 <!-- END Section-Language-List -->
 
 
+
 Iosevka supports accessing all letter variants using OpenType features.
 
 ![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/stylesets.png)
@@ -71,120 +72,125 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 
 2. Add a build plan into `private-build-plans.toml`, following this format:
 
-	```toml
-	[buildPlans.iosevka-custom]               # <iosevka-custom> is your plan name
-	family = "Iosevka Custom"                 # Font menu family name
-	design = ["v-i-hooky", "v-l-hooky"]       # Customize styles
-	# upright = ["upright-styles"]            # Uncomment this line to set styles for upright only
-	# italic = ["italic-styles"]              # Uncomment this line to set styles for italic only
-	# oblique = ["oblique-styles"]            # Uncomment this line to set styles for oblique only
-	hintParams = ["-a", "sss"]                # Optional custom parameters for ttfautohint
+	<!-- BEGIN Section-Private-Build-Plan-Sample -->
+	<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 	
-	###################################################################################################
-	# Override default building weights
-	# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
-	# default values.
-	# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
-	#             and "shape" properly only supports number between 100 and 900 (inclusive).
-	#             If you decide to use custom weights you have to define all the weights you
-	#             plan to use otherwise they will not be built.
-	[buildPlans.iosevka-custom.weights.regular]
-	shape = 400  # Weight for glyph shapes.
-	menu  = 400  # Weight for the font's names.
-	css   = 400  # Weight for webfont CSS.
-
-	[buildPlans.iosevka-custom.weights.book]
-	shape = 450
-	menu  = 450  # Use 450 here to name the font's weight "Book"
-	css   = 450
-
-	[buildPlans.iosevka-custom.weights.bold]
-	shape = 700
-	menu  = 700
-	css   = 700
-
-	# End weight section
-	###################################################################################################
-
-	###################################################################################################
-	# Override default building slant sets
-	# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-	# When this section is absent, all slants would be built.
-
-	[buildPlans.iosevka-custom.slants]
-	upright = "normal"
-	italic = "italic"
-	oblique = "oblique"
-
-	# End slant section
-	###################################################################################################
-
-	###################################################################################################
-	# Override default building widths
-	# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
-	# default values.
-	# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
-	#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
-	#             If you decide to use custom weights you have to define all the weights you
-	#             plan to use otherwise they will not be built.
-
-	[buildPlans.iosevka-custom.widths.normal]
-	shape = 5          # Width of glyph shapes.
-	menu  = 5          # Width for the font's names.
-	css   = "normal"   # "font-stretch' property of webfont CSS.
-
-	[buildPlans.iosevka-custom.widths.extended]
-	shape = 7
-	menu  = 7
-	css   = "expanded"
-
-	# End width section
-	###################################################################################################
-
-	###################################################################################################
-	# Character Exclusion
-	# Specify character ranges in the section below to exclude certain characters from the font being
-	# built. Remove this section when this feature is not needed.
-
-	[buildPlans.iosevka-custom.exclude-chars]
-	ranges = [[10003, 10008]]
-
-	# End character exclusion
-	###################################################################################################
-
-	###################################################################################################
-	# Compatibility Ligatures
-	# Certain applications like Emacs does not support proper programming liagtures provided by
-	# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
-	# following section to build PUA characters that are generated from the OpenType ligatures.
-	# Remove this section when compatibility ligatures are not needed.
-
-	[[buildPlans.iosevka-custom.compatibility-ligatures]]
-	unicode = 57600 # 0xE100
-	featureTag = 'calt'
-	sequence = '<*>'
-
-	# End compatibility ligatures section
-	###################################################################################################
-
-	###################################################################################################
-	# Metric overrides
-	# Certain metrics like line height (leading) could be overridden in your build plan file.
-	# Edit the values to change the metrics. Remove this section when overriding is not needed.
-
-	[buildPlans.iosevka-custom.metric-override]
-	leading = 1250
-	winMetricAscenderPad = 0
-	winMetricDescenderPad = 0
-	powerlineScaleY = 1
-	powerlineScaleX = 1
-	powerlineShiftY = 0
-	powerlineShiftX = 0
-
-	# End metric override section
-	###################################################################################################
-	```
-
+		[buildPlans.iosevka-custom]               # <iosevka-custom> is your plan name
+		family = "Iosevka Custom"                 # Font menu family name
+		design = ["v-i-hooky", "v-l-hooky"]       # Customize styles
+		# upright = ["upright-styles"]            # Uncomment this line to set styles for upright only
+		# italic = ["italic-styles"]              # Uncomment this line to set styles for italic only
+		# oblique = ["oblique-styles"]            # Uncomment this line to set styles for oblique only
+		hintParams = ["-a", "sss"]                # Optional custom parameters for ttfautohint
+		
+		###################################################################################################
+		# Override default building weights
+		# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
+		# default values.
+		# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
+		#             and "shape" properly only supports number between 100 and 900 (inclusive).
+		#             If you decide to use custom weights you have to define all the weights you
+		#             plan to use otherwise they will not be built.
+		[buildPlans.iosevka-custom.weights.regular]
+		shape = 400  # Weight for glyph shapes.
+		menu  = 400  # Weight for the font's names.
+		css   = 400  # Weight for webfont CSS.
+		
+		[buildPlans.iosevka-custom.weights.book]
+		shape = 450
+		menu  = 450  # Use 450 here to name the font's weight "Book"
+		css   = 450
+		
+		[buildPlans.iosevka-custom.weights.bold]
+		shape = 700
+		menu  = 700
+		css   = 700
+		
+		# End weight section
+		###################################################################################################
+		
+		###################################################################################################
+		# Override default building slant sets
+		# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
+		# When this section is absent, all slants would be built.
+		
+		[buildPlans.iosevka-custom.slants]
+		upright = "normal"
+		italic = "italic"
+		oblique = "oblique"
+		
+		# End slant section
+		###################################################################################################
+		
+		###################################################################################################
+		# Override default building widths
+		# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
+		# default values.
+		# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
+		#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
+		#             If you decide to use custom widths you have to define all the widths you
+		#             plan to use otherwise they will not be built.
+		
+		[buildPlans.iosevka-custom.widths.normal]
+		shape = 5          # Width of glyph shapes.
+		menu  = 5          # Width for the font's names.
+		css   = "normal"   # "font-stretch' property of webfont CSS.
+		
+		[buildPlans.iosevka-custom.widths.extended]
+		shape = 7
+		menu  = 7
+		css   = "expanded"
+		
+		# End width section
+		###################################################################################################
+		
+		###################################################################################################
+		# Character Exclusion
+		# Specify character ranges in the section below to exclude certain characters from the font being
+		# built. Remove this section when this feature is not needed.
+		
+		[buildPlans.iosevka-custom.exclude-chars]
+		ranges = [[10003, 10008]]
+		
+		# End character exclusion
+		###################################################################################################
+		
+		###################################################################################################
+		# Compatibility Ligatures
+		# Certain applications like Emacs does not support proper programming liagtures provided by
+		# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
+		# following section to build PUA characters that are generated from the OpenType ligatures.
+		# Remove this section when compatibility ligatures are not needed.
+		
+		[[buildPlans.iosevka-custom.compatibility-ligatures]]
+		unicode = 57600 # 0xE100
+		featureTag = 'calt'
+		sequence = '<*>'
+		
+		# End compatibility ligatures section
+		###################################################################################################
+		
+		###################################################################################################
+		# Metric overrides
+		# Certain metrics like line height (leading) could be overridden in your build plan file.
+		# Edit the values to change the metrics. Remove this section when overriding is not needed.
+		
+		[buildPlans.iosevka-custom.metric-override]
+		leading = 1250
+		winMetricAscenderPad = 0
+		winMetricDescenderPad = 0
+		powerlineScaleY = 1
+		powerlineScaleX = 1
+		powerlineShiftY = 0
+		powerlineShiftX = 0
+		
+		# End metric override section
+		###################################################################################################
+		
+	
+	<!-- END Section-Private-Build-Plan-Sample -->
+		
+	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
    1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
@@ -232,6 +238,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 <!-- END Section-Cherry-Picking-Predefined -->
 
+
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
@@ -265,6 +272,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
+
 <!-- BEGIN Section-Stylistic-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
@@ -287,6 +295,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
+
 
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -430,6 +439,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
 
 <!-- END Section-Cherry-Picking-Styles -->
+
 
 ## For Chinese and Japanese users...
 
