@@ -128,7 +128,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		# default values.
 		# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
 		#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
-		#             If you decide to use custom weights you have to define all the weights you
+		#             If you decide to use custom widths you have to define all the widths you
 		#             plan to use otherwise they will not be built.
 		
 		[buildPlans.iosevka-custom.widths.normal]
@@ -189,7 +189,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-	
+		
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
