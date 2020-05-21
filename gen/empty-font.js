@@ -1,4 +1,6 @@
-module.exports = function() {
+"use strict";
+
+module.exports = function () {
 	return {
 		head: {
 			checkSumAdjustment: 369537602,
@@ -108,6 +110,23 @@ module.exports = function() {
 			postoints: 65411,
 			underlinePosition: -50,
 			underlineThickness: 50
+		},
+		maxp: {
+			version: 1.0,
+			numGlyphs: 0,
+			maxPoints: 0,
+			maxContours: 0,
+			maxCompositePoints: 0,
+			maxCompositeContours: 0,
+			maxZones: 2,
+			maxTwilightPoints: 0,
+			maxStorage: 0,
+			maxFunctionDefs: 0,
+			maxInstructionDefs: 0,
+			maxStackElements: 0,
+			maxSizeOfInstructions: 0,
+			maxComponentElements: 0,
+			maxComponentDepth: 0
 		}
 	};
 };

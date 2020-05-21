@@ -1,7 +1,7 @@
 ###### Automatic builds
 $$include '../meta/macros.ptl'
 
-import [linreg clamp fallback] from '../support/utils'
+import [linreg clamp mix fallback] from '../support/utils'
 
 glyph-module
 
@@ -12,55 +12,85 @@ glyph-block Autobuild-Transformed : begin
 
 	define [suggestName _name] : begin
 		local name _name
-		if glyphs.(name) : begin
+		if [query-glyph name] : begin
 			local j 2
-			while glyphs.(name + j) : inc j
+			while [query-glyph (name + j)] : inc j
 			set name (name + j)
 		return name
 
-	define [createSuperscripts records] : begin
+	define TrackingRelations { 'dotless' }
+	define [extendRelatedGlyphs records relations suffix] : begin
+		local relatedRecords {}
+		local relMap         {.}
+		local targetNameMap  {.}
+		foreach [rel : items-of relations] : set relMap.(rel) {.}
+		foreach [record : items-of records] : begin
+			local srcName record.1
+			set targetNameMap.(srcName) : suggestName (srcName + '+' + suffix)
+			local g : query-glyph srcName
+			if (g && g.related) : foreach [rel : items-of relations] : if (g.related.(rel)) : begin
+				local relSourceName g.related.(rel)
+				set targetNameMap.(relSourceName) : suggestName (relSourceName + '+' + suffix)
+				local relatedRecord : record.slice 0
+				set relatedRecord.0 null
+				set relatedRecord.1 relSourceName
+				relatedRecords.push relatedRecord
+				set relMap.(rel).(srcName) relSourceName
+		return {[records.concat relatedRecords] relMap targetNameMap}
+
+	define [apply-relations g gn relMap targetNameMap] : begin
+		foreach [{rel rm} : pairs-of relMap] : begin
+			local relSrc rm.(gn)
+			if relSrc : begin
+				if [not g.related] : set g.related {.}
+				set g.related.(rel) targetNameMap.(relSrc)
+
+	define [createSuperscripts _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sup'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
 			crowd  -- 4
 			scale  -- 0.7
-			unfair -- true
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sup' + glyphid] : glyph-construction
-			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
-			apply-transform [Upright] true
-			apply-transform [Translate (-middle) (-CAP)] true
-			apply-transform [Scale 0.7] true
-			apply-transform [Translate middle (CAP + ACCENT / 2)] true
-			apply-transform [Italify] true
-			if pri : set currentGlyph.cmpPriority pri
-			refair currentGlyph
+		foreach {unicode glyphid pri} [items-of records]
+			create-glyph (targetNameMap.(glyphid)) : glyph-construction
+				if unicode : assign-unicode unicode
+				local middle : miniatureFont.(glyphid).advanceWidth / 2
+				include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
+				apply-transform [Upright] true
+				apply-transform [Translate (-middle) (-CAP)] true
+				apply-transform [Scale 0.7] true
+				apply-transform [Translate middle (CAP + ACCENT / 2)] true
+				apply-transform [Italify] true
+				if pri : set currentGlyph.cmpPriority pri
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
-	define [createSubscripts records] : begin
+	define [createSubscripts _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sub'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
 			crowd  -- 4
 			scale  -- 0.7
-			unfair -- true
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid pri} [items-of records] : create-glyph [suggestName : 'sub' + glyphid] : glyph-construction
-			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
-			apply-transform [Upright] true
-			apply-transform [Translate (-middle) 0] true
-			apply-transform [Scale 0.7] true
-			apply-transform [Translate middle (DESCENDER / 2)] true
-			apply-transform [Italify] true
-			if pri : set currentGlyph.cmpPriority pri
-			refair currentGlyph
+		foreach {unicode glyphid pri} [items-of records]
+			create-glyph (targetNameMap.(glyphid)) : glyph-construction
+				if unicode : assign-unicode unicode
+				local middle : miniatureFont.(glyphid).advanceWidth / 2
+				include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
+				apply-transform [Upright] true
+				apply-transform [Translate (-middle) 0] true
+				apply-transform [Scale 0.7] true
+				apply-transform [Translate middle (DESCENDER / 2)] true
+				apply-transform [Italify] true
+				if pri : set currentGlyph.cmpPriority pri
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
-	define [createSMCPs records] : begin
+	define [createSMCPs _records] : begin
+		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'smcp'
 		local pendingGlyphs : records.map : [record] => record.1
 		local forkedParams : Object.create para
 		set forkedParams.cap0 para.cap
@@ -71,11 +101,12 @@ glyph-block Autobuild-Transformed : begin
 		set forkedParams.diversityI 1
 		set forkedParams.diversityII 1
 		local sf : Fork pendingGlyphs forkedParams
-		foreach {unicode glyphid tfm} [items-of records] : create-glyph [suggestName : 'smcp' + glyphid] : glyph-construction
-			if unicode : assign-unicode unicode
-			include sf.(glyphid) AS_BASE
-			set-width sf.(glyphid).advanceWidth
-			if tfm : include tfm
+		foreach {unicode glyphid} [items-of records]
+			create-glyph targetNameMap.(glyphid) : glyph-construction
+				if unicode : assign-unicode unicode
+				include sf.(glyphid) AS_BASE
+				set-width sf.(glyphid).advanceWidth
+				apply-relations currentGlyph glyphid relMap targetNameMap
 
 	define [createMedievalCombs records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -83,7 +114,6 @@ glyph-block Autobuild-Transformed : begin
 			glyphs -- pendingGlyphs
 			crowd  -- 7
 			scale  -- 0.4
-			unfair -- true
 			mono   -- true
 			sbscale -- 1
 		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
@@ -96,20 +126,19 @@ glyph-block Autobuild-Transformed : begin
 			apply-transform : Scale 0.4
 			apply-transform : Translate markMiddle aboveMarkBot
 			apply-transform : Italify
-			refair currentGlyph
 			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 
 	if [not recursive] : createSuperscripts : list
-		list 0x2070 'zero'
-		list 0x00B9 'one'
-		list 0x00B2 'two'
-		list 0x00B3 'three'
-		list 0x2074 'four'
-		list 0x2075 'five'
-		list 0x2076 'six'
-		list 0x2077 'seven'
-		list 0x2078 'eight'
-		list 0x2079 'nine'
+		list 0x2070 'zero.lnum'
+		list 0x00B9 'one.lnum'
+		list 0x00B2 'two.lnum'
+		list 0x00B3 'three.lnum'
+		list 0x2074 'four.lnum'
+		list 0x2075 'five.lnum'
+		list 0x2076 'six.lnum'
+		list 0x2077 'seven.lnum'
+		list 0x2078 'eight.lnum'
+		list 0x2079 'nine.lnum'
 		list 0x02B0 'h'
 		list 0x02B1 'hhooktop'
 		list 0x02B2 'j'
@@ -137,7 +166,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D49 'e'
 		list 0x1D4A 'turne'
 		list 0x1D4B 'epsilon'
-		list 0x1D4C 'cyrze'
+		list 0x1D4C 'turnepsilon'
 		list 0x1D4D 'g'
 		list 0x1D4E 'turni'
 		list 0x1D4F 'k'
@@ -215,6 +244,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D3D 'OU'
 		list 0x1D3E 'P'
 		list 0x1D3F 'R'
+		list null   'C' # there is no superscript C in unicode, but is is used for the MC symbol
 		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
 		list 0x1D40 'T'
 		list 0x1D41 'U'
@@ -225,7 +255,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal' (-11)
 		list 0x207D 'parenLeft' (-11)
 		list 0x207E 'parenRight' (-11)
-	if [not recursive] : let [df : Miniature {'a' 'o'} 3.5 0.7] : begin
+
+	if [not recursive] : let [df : Miniature {'a' 'o'} 4 0.7] : begin
 		sketch # ordfeminine
 			include df.a
 			include : HBarBottom SB RIGHTSB DESCENDER
@@ -247,16 +278,16 @@ glyph-block Autobuild-Transformed : begin
 			save 'ordmasculine' 0xBA
 
 	if [not recursive] : createSubscripts : list
-		list 0x2080 'zero'
-		list 0x2081 'one'
-		list 0x2082 'two'
-		list 0x2083 'three'
-		list 0x2084 'four'
-		list 0x2085 'five'
-		list 0x2086 'six'
-		list 0x2087 'seven'
-		list 0x2088 'eight'
-		list 0x2089 'nine'
+		list 0x2080 'zero.lnum'
+		list 0x2081 'one.lnum'
+		list 0x2082 'two.lnum'
+		list 0x2083 'three.lnum'
+		list 0x2084 'four.lnum'
+		list 0x2085 'five.lnum'
+		list 0x2086 'six.lnum'
+		list 0x2087 'seven.lnum'
+		list 0x2088 'eight.lnum'
+		list 0x2089 'nine.lnum'
 		list 0x2090 'a'
 		list 0x2091 'e'
 		list 0x2092 'o'
@@ -294,18 +325,15 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D05 'D'
 		list 0x1D06 'Dcroat'
 		list 0x1D07 'E'
-		list 0x1D08 'cyrZe'
 		list 0x1D0A 'J'
 		list 0x1D0B 'K'
 		list 0x1D0C 'Lslash'
-		list 0x1D0D 'M'
 		list 0x1D0E 'cyrI'
 		list 0x1D0F 'O'
 		list 0x1D10 'turnC'
 		list 0x1D15 'OU'
 		list 0x1D18 'P'
 		list 0x1D19 'cyrYa'
-		list 0x1D1A 'R' [FlipAround MIDDLE (XH / 2)]
 		list 0x1D1B 'T'
 		list 0x1D20 'V'
 		list 0x1D21 'W'
@@ -339,30 +367,61 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DD8 'cyrde.italic'
 		list 0x1DD9 'eth'
 		list 0x1DDA 'g'
-		list 0x1DDB 'G'
+		list 0x1DDB 'smcpG'
 		list 0x1DDC 'k'
 		list 0x1DDD 'l'
-		list 0x1DDE 'L'
-		list 0x1DDF 'M'
+		list 0x1DDE 'smcpL'
+		list 0x1DDF 'smcpM'
 		list 0x1DE0 'n'
-		list 0x1DE1 'N'
-		list 0x1DE2 'R'
+		list 0x1DE1 'smcpN'
+		list 0x1DE2 'smcpR'
 		list 0x1DE3 'rrotunda'
 		list 0x1DE4 's'
 		list 0x1DE5 'longs'
 		list 0x1DE6 'z'
-		list 0x1DE7 'alpha'
+		list 0x1DE7 'scripta'
 		list 0x1DE8 'b'
 		list 0x1DE9 'beta'
 		list 0x1DEA 'turne'
 		list 0x1DEB 'f'
 		list 0x1DEE 'p'
 		list 0x1DEF 'esh'
-		list 0x1DF0 'mu'
+		list 0x1DF0 'uWithLightCentralizationStroke'
 		list 0x1DF1 'w'
 		list 0x1DF2 'adieresis'
 		list 0x1DF3 'odieresis'
 		list 0x1DF4 'udieresis'
+
+	do "Composite superscripts and subscripts"
+		define [DoubleSuperscript a b] : glyph-construction
+			include a
+			apply-transform : Translate (-WIDTH * 0.6) 0
+			include b
+			apply-transform : Upright
+			apply-transform : Translate (-WIDTH * 0.2) (-CAP)
+			apply-transform : Scale 0.8
+			apply-transform : Translate MIDDLE CAP
+			apply-transform : Italify
+
+		sketch # tradeMark
+			include : DoubleSuperscript [refer-glyph 'T+sup'] [refer-glyph 'M+sup']
+			save 'tradeMark' 0x2122
+
+		sketch # serviceMark
+			include : DoubleSuperscript [refer-glyph 'S+sup'] [refer-glyph 'M+sup']
+			save 'serviceMark' 0x2120
+
+		sketch # raisedMC
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'C+sup']
+			save 'raisedMC' 0x1F16A
+
+		sketch # raisedMD
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'D+sup']
+			save 'raisedMD' 0x1F16B
+
+		sketch # raisedMR
+			include : DoubleSuperscript [refer-glyph 'M+sup'] [refer-glyph 'R+sup']
+			save 'raisedMR' 0x1F16C
 
 	define [createFracImpl suffix records fine scaleFactor closing] : begin
 		local pendingGlyphs : [records.map : [record] => record.1].concat : records.map : [record] => record.2
@@ -370,11 +429,11 @@ glyph-block Autobuild-Transformed : begin
 			glyphs -- pendingGlyphs
 			crowd  -- 4
 			scale  -- (scaleFactor + 0.05)
-			unfair -- true
+
 		foreach {unicode numid denid height} [items-of records] : do
 			local dist : XH * (1 - scaleFactor - closing)
 
-			if [not glyphs.(numid + suffix + ".numpart")] : begin
+			if [not : query-glyph (numid + suffix + ".numpart")] : begin
 				save-glyph (numid + suffix +  ".numpart") null : sketch
 					include miniatureFont.(numid)
 					apply-transform : Upright
@@ -382,9 +441,8 @@ glyph-block Autobuild-Transformed : begin
 					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
 					apply-transform : Translate MIDDLE (symbolMid + dist / 2)
 					apply-transform : Italify
-					refair currentGlyph
 
-			if [not glyphs.(denid + suffix +  ".denpart")] : begin
+			if [not : query-glyph (denid + suffix +  ".denpart")] : begin
 				save-glyph (denid + suffix +  ".denpart") null : sketch
 					include miniatureFont.(denid)
 					apply-transform : Upright
@@ -392,90 +450,93 @@ glyph-block Autobuild-Transformed : begin
 					apply-transform : Scale (CAP / [fallback height CAP] * scaleFactor)
 					apply-transform : Translate MIDDLE (symbolMid - CAP * scaleFactor - dist / 2)
 					apply-transform : Italify
-					refair currentGlyph
 
 		foreach {unicode numid denid height} [items-of records] : do
-			save-glyph [suggestName : numid + 'over' + denid] unicode : glyph-construction
-				include glyphs.(numid + suffix +  ".numpart")
-				include glyphs.(denid + suffix +  ".denpart")
+			save-glyph [suggestName : numid + '.over.' + denid + suffix] unicode : glyph-construction
+				include : refer-glyph (numid + suffix +  ".numpart")
+				include : refer-glyph (denid + suffix +  ".denpart")
 				if fine : include : HBar SB RIGHTSB symbolMid (fine * 0.75)
 
 	define [createFractions records] : createFracImpl '.frac' records [adviceBlackness 3] 0.55 0.05
 	define [createPowerlineStacks records] : createFracImpl '.pwlStack' records 0 0.6 0.15
 
 	if [not recursive] : createFractions : list
-		list 0x00BC 'one' 'four'
-		list 0x00BD 'one' 'two'
-		list 0x00BE 'three' 'four'
-		list 0x2150 'one' 'seven'
-		list 0x2151 'one' 'nine'
-		list 0x2152 'one' 'ten'
-		list 0x2153 'one' 'three'
-		list 0x2154 'two' 'three'
-		list 0x2155 'one' 'five'
-		list 0x2156 'two' 'five'
-		list 0x2157 'three' 'five'
-		list 0x2158 'four' 'five'
-		list 0x2159 'one' 'six'
-		list 0x215A 'five' 'six'
-		list 0x215B 'one' 'eight'
-		list 0x215C 'three' 'eight'
-		list 0x215D 'five' 'eight'
-		list 0x215E 'seven' 'eight'
-		list 0x2189 'zero' 'three'
+		list 0x00BC 'one.lnum' 'four.lnum'
+		list 0x00BD 'one.lnum' 'two.lnum'
+		list 0x00BE 'three.lnum' 'four.lnum'
+		list 0x2150 'one.lnum' 'seven.lnum'
+		list 0x2151 'one.lnum' 'nine.lnum'
+		list 0x2152 'one.lnum' 'ten'
+		list 0x2153 'one.lnum' 'three.lnum'
+		list 0x2154 'two.lnum' 'three.lnum'
+		list 0x2155 'one.lnum' 'five.lnum'
+		list 0x2156 'two.lnum' 'five.lnum'
+		list 0x2157 'three.lnum' 'five.lnum'
+		list 0x2158 'four.lnum' 'five.lnum'
+		list 0x2159 'one.lnum' 'six.lnum'
+		list 0x215A 'five.lnum' 'six.lnum'
+		list 0x215B 'one.lnum' 'eight.lnum'
+		list 0x215C 'three.lnum' 'eight.lnum'
+		list 0x215D 'five.lnum' 'eight.lnum'
+		list 0x215E 'seven.lnum' 'eight.lnum'
+		list 0x2189 'zero.lnum' 'three.lnum'
 		# care-of
 		list 0x2100 'largescripta' 'C'
+		list 0x2101 'largescripta' 'S'
+		list 0x214D 'A' 'S'
 		list 0x2105 'C' 'O'
 		list 0x2106 'C' 'U'
 		# fraction bar
-		list null 'space' 'space'
+		list null 'markBaseSpace' 'markBaseSpace'
 
 	if [not recursive] : createPowerlineStacks : list
 		# Powerline LN symbol
 		list 0xE0A1 'L' 'N'
 		list 0xE0A3 'C' 'N'
 
-
 	# Unicode Ligatures
-	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : begin
+	define circleWidthClasses {
+		{'NWID' (WIDTH * para.diversityM) WIDTH}
+		{'WWID' WIDE-WIDTH-0              WIDE-WIDTH-0}
+	}
+
+	define [createLigatures _shrink1 _shrink2 wadj1 wadj2 records] : for-width-kinds WIDE-WIDTH-2
+		local ww : if FMosaicWide (MosaicWidth * para.diversityM) MosaicWidth
 		local pendingGlyphs1 : records.map : [record] => record.1
 		local pendingGlyphs2 : records.map : [record] => record.2
-		local wide : para.spaing > 1 || para.diversityM > 1
-		local shrink1 : if (wide) 1 [clamp 0 1 (_shrink1 * para.diversityM)]
-		local shrink2 : if (wide) 1 [clamp 0 1 (_shrink2 * para.diversityM)]
+		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / WIDTH)]
+		local shrink2 : if FMosaicWide 1 [clamp 0 1 (_shrink2 * ww / WIDTH)]
 		local df1 : Thinner pendingGlyphs1 shrink1
 		local df2 : Thinner pendingGlyphs2 shrink2
 
-		foreach [{unicode c1 c2 mark} : items-of records] : begin
-			local glyphName "\(c1)_\(c2)"
-			if glyphs.(glyphName) : begin
+		foreach [{unicode c1 c2 desiredWidth} : items-of records] : begin
+			local glyphName : MangleName "\(c1)_\(c2)"
+			if [query-glyph glyphName] : begin
 				local j 2
-				while glyphs.(glyphName + j) : inc j
+				while [query-glyph (glyphName + j)] : inc j
 				set glyphName (glyphName + j)
-			if wide : begin
-				sketch
-					include df2.(c2)
-					include : Translate df1.(c1).advanceWidth 0
-					include df1.(c1)
-					set-width (df1.(c1).advanceWidth + df2.(c2).advanceWidth)
-					save glyphName unicode
-			: else
-				local kern : SB * 7/8 * (shrink1 + shrink2)
-				local refW : WIDTH * (shrink1 * wadj1 + shrink2 * wadj2) - kern
-				local targetW : WIDTH * para.diversityM
-				sketch
-					include df2.(c2)
-					include : Translate (WIDTH * shrink1 * wadj1 - kern) 0
-					include df1.(c1)
-					include : Translate (-WIDTH * shrink1 * (1 - wadj1) / 2) 0
-					include : Upright
-					include : Translate (-refW / 2) 0
-					include : Scale ((targetW - SB * 1.25) / (targetW - SB * 2) * targetW / refW) 1
-					include : Translate (targetW / 2) 0
-					include : Italify
 
-					if mark : include [DivFrame para.diversityM].markSet.(mark)
-					save glyphName unicode
+			if FMosaicWide : sketch
+				set-width (df1.(c1).advanceWidth + df2.(c2).advanceWidth)
+				include df2.(c2)
+				include : Translate df1.(c1).advanceWidth 0
+				include df1.(c1)
+				save glyphName [MangleUnicode unicode desiredWidth]
+			: else : sketch
+				set-width ww
+				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
+				local kern : if FMosaicWide 0 : Math.max 0 (SB * 7/8 * (shrink1 + shrink2) - [Math.max 0 (ww - sumChildrenWidth)])
+				local refW : sumChildrenWidth - kern
+				include df2.(c2)
+				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+				include df1.(c1)
+				# include : Translate (-df1.(c1).advanceWidth * (1 - wadj1) / 2) 0
+				include : Upright
+				include : Translate (-refW / 2) 0
+				include : Scale [clamp 0 1 ((ww - SB * 1.25) / (ww - SB * 2) * ww / refW)] 1
+				include : Translate (ww / 2) 0
+				include : Italify
+				save glyphName [MangleUnicode unicode desiredWidth]
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 STROKE
 	if [not recursive] : createLigatures stdShrink stdShrink 1 1 : list
@@ -488,25 +549,85 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1CA 'N' 'J'
 		list 0x1CB 'N' 'j'
 		list 0x1CC 'n' 'j'
-		list 0x2A3 'd' 'z'
 		list 0x1F1 'D' 'Z'
 		list 0x1F2 'D' 'z'
 		list 0x1F3 'd' 'z'
-		list 0x2A4 'd' 'ezh'
-		list 0x2A5 'd' 'zcurlytail'
-		list 0x2A6 't' 's'
-		list 0x2A7 't' 'esh'
-		list 0x2A8 't' 'ccurlytail'
-		list 0x2A9 'f' 'eng'
-		list 0x2AA 'l' 's'
-		list 0x2AB 'l' 'z'
-		list 0x478 'O' 'y' 'if'
-		list 0x479 'o' 'y' 'p'
+		list 0x478 'O' 'y'
+		list 0x479 'o' 'y'
 		list 0x20A7 'P' 's'
 		list 0x20A8 'R' 's'
+		list 0x203c 'exclam' 'exclam'
+		list 0x2047 'question' 'question'
+		list 0x2048 'question' 'exclam'
+		list 0x2049 'exclam' 'question'
+		list 0x1F190 'D' 'J' WIDE-WIDTH-1
 	if [not recursive] : createLigatures 0.7 0.8 0.75 0.9 : list
 		list 0x2103 'degree' 'C'
 		list 0x2109 'degree' 'F'
+
+	define [createPhoneticLigatures _shrink1 _shrink2 wadj1 wadj2 records] : begin
+		local pendingGlyphs1 : records.map : [record] => record.1
+		local pendingGlyphs2 : records.map : [record] => record.2
+		local shrink1 : clamp 0 1 _shrink1
+		local shrink2 : clamp 0 1 _shrink2
+		local kern : SB * shrink1 + SB * shrink2 + 0.5 * STROKE * [mix shrink1 shrink2 0.5] - OX * 2
+		local antiScale : (WIDTH * shrink1 + WIDTH * shrink2 - kern) / WIDTH
+		foreach [cycle : range 0 4] : begin
+			set kern : SB * shrink1 + SB * shrink2 + 0.5 * STROKE * [mix shrink1 shrink2 0.5] - OX * 2
+			local tmp-shrink1 : (shrink1 * WIDTH + kern * shrink1 / (shrink1 + shrink2)) / (WIDTH * shrink1 + WIDTH * shrink2 - kern) * antiScale
+			local tmp-shrink2 : (shrink2 * WIDTH + kern * shrink2 / (shrink1 + shrink2)) / (WIDTH * shrink1 + WIDTH * shrink2 - kern) * antiScale
+			set shrink1 : clamp 0 1 tmp-shrink1
+			set shrink2 : clamp 0 1 tmp-shrink2
+
+		local df1 : Thinner pendingGlyphs1 shrink1
+		local df2 : Thinner pendingGlyphs2 shrink2
+
+		foreach [{unicode c1 c2} : items-of records] : begin
+			local glyphName "\(c1)_\(c2)"
+			if [query-glyph glyphName] : begin
+				local j 2
+				while [query-glyph (glyphName + j)] : inc j
+				set glyphName (glyphName + j)
+
+			define [maskOut] : create-glyph : glyph-construction
+				local s    0
+				local step (-OX)
+				local dist (STROKE * 2)
+				while (s < dist) : begin
+					include df2.(c2)
+					apply-transform : Translate step 0
+					set s : s + step
+				apply-transform : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+
+			sketch
+				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
+				local refW : sumChildrenWidth - kern
+				include df2.(c2)
+				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+				include : difference
+					intersection
+						Rect (CAP * 2) (DESCENDER * 2) (-WIDTH) (df1.(c1).advanceWidth * wadj1 - kern + df2.(c2).advanceWidth * wadj2 / 2)
+						glyph-construction : include df1.(c1)
+					maskOut
+				include : Upright
+				include : Translate (-refW / 2) 0
+				include : Scale [clamp 0 1 ((WIDTH - SB * 1.25) / (WIDTH - SB * 2) * WIDTH / refW)] 1
+				include : Translate (WIDTH / 2) 0
+				include : Italify
+				save glyphName unicode
+
+	if [not recursive] : createPhoneticLigatures stdShrink stdShrink 1 1 : list
+		list 0x02A3 'd'                       'z'
+		list 0x02A4 'd'                       'ezh'
+		list 0x02A5 'd'                       'zcurlytail'
+		list 0x02A6 't.phoneticLeft'          's.phoneticRight'
+		list 0x02A7 't.phoneticLeft.extended' 'esh'
+		list 0x02A8 't.phoneticLeft'          'ccurlytail'
+		list 0x02A9 'f.phoneticLeft'          'eng'
+		list 0x02AA 'l.phoneticLeft'          's.phoneticRight'
+		list 0x02AB 'l.phoneticLeft'          'z'
+		list 0xAB66 'd'                       'zrtailBR'
+		list 0xAB67 't.phoneticLeft'          'srtail'
 
 
 	define [createAccentedEquals crowd scale records] : begin
@@ -515,7 +636,6 @@ glyph-block Autobuild-Transformed : begin
 			glyphs -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 			crowd  -- crowd
 			scale  -- scale
-			unfair -- true
 			mono   -- true
 		foreach {unicode base upper} [items-of records] : do
 			local innerGlyphName : suggestName : "inner_" + base + "_" + [upper.join "_"]
@@ -533,12 +653,11 @@ glyph-block Autobuild-Transformed : begin
 				apply-transform : Scale scale
 				apply-transform : Translate MIDDLE aboveMarkBot
 				apply-transform : Italify
-				refair currentGlyph
 
 			create-glyph fullGlyphName : glyph-construction
 				if unicode : assign-unicode unicode
-				include glyphs.(innerGlyphName)
-				include glyphs.(base)
+				include : refer-glyph innerGlyphName
+				include : refer-glyph base
 
 	if [not recursive] : createAccentedEquals 7 0.4 : list
 		list 0x2257 "equal" {"o"}
@@ -546,3 +665,26 @@ glyph-block Autobuild-Transformed : begin
 		list 0x225F "equal" {"question"}
 	if [not recursive] : createAccentedEquals 8 0.3 : list
 		list 0x225d "equal" {"d" "e" "f"}
+
+	define [createGroupedDigits shrink crowd numberEntries] : begin
+		define numberGlyphIDs {}
+		foreach [gid : items-of numberEntries] : if [query-glyph gid] : begin
+			numberGlyphIDs.push gid
+			if [query-glyph gid].featureSelector : begin
+				foreach [{k v} : pairs-of [query-glyph gid].featureSelector] : begin
+					numberGlyphIDs.push v
+
+		local derivedFont : Thinner numberGlyphIDs shrink crowd
+		foreach [gid : items-of numberGlyphIDs] : foreach [nd : items-of {0 1 2 3 4 5 6}]
+			create-glyph (gid + ".nd" + nd) : glyph-construction
+				include : refer-glyph gid
+				if (nd >= 3 && nd <= 5) : include : intersection
+					HBarBottom 0 WIDTH (DESCENDER * 0.75) [adviceBlackness 4]
+					glyph-construction
+						include : refer-glyph "denseShade.WWID"
+						apply-transform : Translate (-WIDTH / 2) 0
+
+	if [not recursive] : createGroupedDigits 0.9 3.0 {
+		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
+		'five.lnum' 'six.lnum' 'seven.lnum' 'eight.lnum' 'nine.lnum'
+	}

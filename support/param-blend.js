@@ -1,6 +1,8 @@
+"use strict";
+
 const blend = require("./monotonic-interpolate");
 
-module.exports = function(aspect, hive, params, sink) {
+module.exports = function (aspect, hive, params, sink) {
 	if (!hive || !hive.blend || !params) return;
 
 	const block = hive.blend;

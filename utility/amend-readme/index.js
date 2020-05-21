@@ -1,10 +1,12 @@
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../generate-snapshot-page/parse-variants-data");
-const parseLigationData = require("../generate-snapshot-page/ligation-data");
-const getCharMapAndSupportedLanguageList = require("../generate-supported-languages/proc");
+const parseVariantsData = require("../export-data/parse-variants-data");
+const parseLigationData = require("../export-data/ligation-data");
+const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
 
 const charMapPath = process.argv[2];
+const charMapItalicPath = process.argv[3];
+const charMapObliquePath = process.argv[4];
 main().catch(e => {
 	console.error(e);
 	process.exit(1);
@@ -19,6 +21,7 @@ async function main() {
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
 	readme = (await processLangList()).apply(readme);
+	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
 }
 
@@ -52,24 +55,34 @@ async function processCv() {
 	return md;
 }
 
+async function processPrivateBuildPlans() {
+	const md = new MdCol("Section-Private-Build-Plan-Sample");
+	const tomlPath = path.resolve(__dirname, "../../private-build-plans.sample.toml");
+	const toml = await fs.readFile(tomlPath, "utf-8");
+	md.log(toml.replace(/^/gm, "\t"));
+	return md;
+}
+
 class MdCol {
 	constructor(sectionName) {
 		this.data = "";
 		this.sectionName = sectionName;
 		this.matchRegex = new RegExp(
-			`<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`
+			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
+			`m`
 		);
 	}
 	log(...s) {
 		this.data += s.join("") + "\n";
 	}
 	apply(s) {
-		return s.replace(this.matchRegex, () => {
+		return s.replace(this.matchRegex, (m, $1) => {
 			return (
-				`<!-- BEGIN ${this.sectionName} -->\n\n` +
+				`<!-- BEGIN ${this.sectionName} -->\n` +
+				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
 				this.data +
 				`\n<!-- END ${this.sectionName} -->\n`
-			);
+			).replace(/^/gm, $1);
 		});
 	}
 }
@@ -152,7 +165,7 @@ async function processLigSetPreDef() {
 	const md = new MdCol("Section-Cherry-Picking-Predefined");
 	md.log(`* Styles for ligation sets, include:\n`);
 	for (const gr in ligData.rawSets) {
-		if (ligData.rawSets[gr].disableHives) continue;
+		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =
 			ligData.rawSets[gr].longDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;
@@ -162,7 +175,11 @@ async function processLigSetPreDef() {
 }
 
 async function processLangList() {
-	const cl = await getCharMapAndSupportedLanguageList(charMapPath);
+	const cl = await getCharMapAndSupportedLanguageList(
+		charMapPath,
+		charMapItalicPath,
+		charMapObliquePath
+	);
 	const md = new MdCol("Section-Language-List");
 	md.log(`${cl.languages.length} Supported Languages: \n`);
 	md.log(cl.languages.join(", "));

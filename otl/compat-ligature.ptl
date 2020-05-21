@@ -1,5 +1,5 @@
-import '../../support/glyph' as Glyph
-import '../../support/transform' as Transform
+import '../support/glyph' as Glyph
+import '../support/transform' as Transform
 
 define GDEF_SIMPLE 1
 define GDEF_LIGATURE 2
@@ -9,7 +9,7 @@ define GDEF_MARK 3
 define [interpretLookups gs lutns lookups] : begin
 	foreach [lutn : items-of lutns] : begin
 		local lut lookups.(lutn)
-		interpretLookup gs lut lookups
+		if lut : interpretLookup gs lut lookups
 
 define [interpretLookup gs lut lookups] : match lut.type
 	"gsub_chaining" : begin
@@ -59,15 +59,20 @@ export : define [BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF c
 	foreach [cldef : items-of config] : do
 		if [not cldef.unicode] : break nothing
 		if [not cldef.featureTag] : break nothing
-		if [not GSUB.features.(cldef.featureTag)] : break nothing
 		if [not cldef.sequence] : break nothing
+
+		local feature null
+		foreach [fn : items-of GSUB.languages.'DFLT_DFLT'.features]
+			if (cldef.featureTag === [fn.slice 0 4]) : set feature GSUB.features.(fn)
+
+		if [not feature] : break nothing
 
 		local gnames {}
 		for [local j 0] [j < cldef.sequence.length] [inc j] : begin
 			if [not unicodeGlyphs.[cldef.sequence.charCodeAt j]] : break nothing
 			gnames.push unicodeGlyphs.[cldef.sequence.charCodeAt j].name
 
-		interpretLookups gnames GSUB.features.(cldef.featureTag) GSUB.lookups
+		interpretLookups gnames feature GSUB.lookups
 
 		local g1 : new Glyph ('$clig.' + cldef.unicode)
 		set g1.advanceWidth 0
@@ -76,7 +81,7 @@ export : define [BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF c
 		foreach [gn : items-of gnames] : begin
 			local g glyphs.(gn)
 			g1.apply-transform : new Transform 1 0 0 1 (-g1.advanceWidth) 0
-			g1.include g
+			g1.includeGlyph g
 			g1.apply-transform : new Transform 1 0 0 1 (g1.advanceWidth) 0
 			set g1.advanceWidth : g1.advanceWidth + g.advanceWidth
 
@@ -84,4 +89,3 @@ export : define [BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF c
 		set unicodeGlyphs.(cldef.unicode) g1
 		glyphList.push g1
 		set GDEF.glyphClassDef.(g1.name) GDEF_LIGATURE
-

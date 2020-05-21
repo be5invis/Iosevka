@@ -3,7 +3,7 @@ const path = require("path");
 const toml = require("toml");
 
 function TAG(...ltag) {
-	return function(s) {
+	return function (s) {
 		return { tags: ltag, s: s };
 	};
 }
@@ -23,8 +23,10 @@ const logc = TAG("logic");
 const brst = TAG("brst");
 const trig = TAG("trig");
 const ltgt = TAG("ltgt-diamond", "ltgt-ne");
+const llggeq_a = TAG("arrow", "llggeq");
+const llggeq_b = TAG("arrow2", "llggeq");
 const dotOper = TAG("dotoper");
-const colons = TAG("colons");
+const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
 const plusplus = TAG("plusplus");
 
@@ -56,7 +58,7 @@ const ligationSamples = [
 		arrow2("=<="),
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq_a("<<="),
 		ineq("<="),
 		arrow("=>"),
 		arrow("=>>"),
@@ -64,7 +66,7 @@ const ligationSamples = [
 		arrow("===>"),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq_b(">>="),
 		arrow("<=>"),
 		arrow("<==>"),
 		arrow("<===>"),
@@ -79,8 +81,8 @@ const ligationSamples = [
 		arrow("<~"),
 		arrow("~>"),
 		arrow("~~>"),
-		colons("::"),
-		colons(":::"),
+		kernDotty("::"),
+		kernDotty(":::"),
 		logc("\\/"),
 		logc("/\\"),
 		eqeq("=="),
@@ -145,7 +147,7 @@ const ligationSamplesNarrow = [
 	[
 		arrow("<=="),
 		arrow("<==="),
-		arrow("<<="),
+		llggeq_a("<<="),
 		ineq("<="),
 		arrow("<=>"),
 		arrow("=>"),
@@ -160,7 +162,7 @@ const ligationSamplesNarrow = [
 		arrow2("=<="),
 		arrow2("=>="),
 		ineq(">="),
-		arrow2(">>="),
+		llggeq_b(">>="),
 		arrow("<==>"),
 		arrow("<===>"),
 		arrow("<====>")
@@ -202,8 +204,8 @@ const ligationSamplesNarrow = [
 		centerOps("=:")
 	],
 	[
-		colons("::"),
-		colons(":::"),
+		kernDotty("::"),
+		kernDotty(":::"),
 		dotOper("<."),
 		dotOper("<.>"),
 		dotOper(".>"),

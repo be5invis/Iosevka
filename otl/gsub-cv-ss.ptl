@@ -1,0 +1,28 @@
+import [add-common-feature pick-feature add-feature-lookup pick-lookup] from "./table-util"
+
+define [FeatureName tag] : tag + '_cvss'
+define [LookupName tag]  : 'lookup_cvss_' + tag
+
+export : define [buildCVSS sink para glyphList] : begin
+	if [not para.enableCvSs] : return nothing
+
+	# cvxx
+	foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
+		local fs glyph.featureSelector
+		foreach [{tag to} : pairs-of fs] : begin
+			local feature : pick-feature sink [FeatureName tag]
+			add-common-feature sink feature
+
+			local lookup : pick-lookup sink [LookupName tag] {.type 'gsub_single' .subtables{{.}}}
+			add-feature-lookup feature [LookupName tag]
+
+			set lookup.subtables.0.(glyph.name) to
+
+	# ssxx
+	foreach [{name composition} : pairs-of para.variants] : begin
+		if (name.length === 4 && composition.__isComposite && [name.slice 0 2] === 'ss') : begin
+			local feature : pick-feature sink [FeatureName name]
+			add-common-feature sink feature
+
+			foreach [{ch tag} : pairs-of composition.__cvmap]
+				add-feature-lookup feature [LookupName tag]

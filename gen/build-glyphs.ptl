@@ -4,12 +4,9 @@ import '../support/spirokit' as spirokit
 import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
 import '../support/anchor' as Anchor
 import '../support/monotonic-interpolate' as smoothreg
-import '../support/fairify' as fairify
 
 import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet] from '../support/utils'
 import [calculateMetrics setFontMetrics MarksetDiv GenDivFrame] from '../meta/aesthetics'
-import [assignFontNames] from '../meta/naming'
-import '../meta/features' as Features
 
 $$include '../meta/macros.ptl'
 
@@ -25,10 +22,10 @@ define [tagged tag component] : begin
 	set component.tag tag
 	return component
 
-define [buildGlyphs para recursive recursiveCodes] : begin
+export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define variantSelector para.variantSelector
 	local glyphList {}
-	local glyphs {.}
+	local glyphMap {.}
 	local unicodeGlyphs {}
 
 	define metrics : calculateMetrics para
@@ -70,7 +67,7 @@ define [buildGlyphs para recursive recursiveCodes] : begin
 			if para.verbose : console.log name
 			local glyphObject [new Glyph name]
 			glyphList.push glyphObject
-			glyphs.(name) = glyphObject
+			glyphMap.(name) = glyphObject
 			glyphObject.set-width WIDTH
 			glyphObject.gizmo = globalTransform
 
@@ -100,6 +97,7 @@ define [buildGlyphs para recursive recursiveCodes] : begin
 				set g.shortName    t.shortName
 				set g.cmpPriority  t.cmpPriority
 				set g.flatten      t.flatten
+				set g.related      t.related
 			if name : set dependencyProfile.(name) : getDependencyProfile g
 		if (g && unicode) : begin
 			g.assign-unicode unicode
@@ -113,7 +111,7 @@ define [buildGlyphs para recursive recursiveCodes] : begin
 	define spirofns : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphs glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet DivFrame fontMetrics
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet DivFrame fontMetrics
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
@@ -142,24 +140,5 @@ define [buildGlyphs para recursive recursiveCodes] : begin
 	run-glyph-module '../glyphs/autobuild-enclosure.js'
 	run-glyph-module '../glyphs/autobuild-transformed.js'
 
-	return : object metrics glyphs glyphList unicodeGlyphs
+	return : object metrics [glyphs glyphMap] glyphList unicodeGlyphs
 
-# Main build procedure
-export as build : define [buildFont font para] : begin
-
-	define gs : buildGlyphs para
-
-	assignFontNames para gs.metrics font
-	setFontMetrics para gs.metrics font
-
-	local otl : Features.apply para gs.glyphs gs.glyphList gs.unicodeGlyphs
-	set font.GSUB otl.GSUB
-	set font.GPOS otl.GPOS
-	set font.GDEF otl.GDEF
-
-	if (para.forceMonospace && para.spacing == 0) : begin
-		set gs.glyphList : gs.glyphList.filter [lambda [g] : g.advanceWidth <= para.width]
-
-	set font.glyfMap gs.glyphs
-	set font.glyf gs.glyphList
-	return font

@@ -1,13 +1,31 @@
 const cldr = require("cldr");
 const fs = require("fs-extra");
-const path = require("path");
+const gatherCov = require("./coverage-export/gather-coverage-data");
 
-module.exports = async function(charMapPath) {
+// List all the languages that Iosevka supports, but cannot inferred from CLDR data.
+const overrideSupportedLanguages = [];
+
+module.exports = async function (charMapPath, charMapItalicPath, charMapObliquePath) {
 	const charMap = await fs.readJson(charMapPath);
+	const charMapItalic = await fs.readJson(charMapItalicPath);
+	const charMapOblique = await fs.readJson(charMapObliquePath);
 
+	const rawCoverage = getRawCoverage(charMap);
+	const rawCoverageItalic = getRawCoverage(charMapItalic);
+	const rawCoverageOblique = getRawCoverage(charMapOblique);
+
+	return {
+		stats: {
+			glyphCount: charMap.length,
+			codePointCount: rawCoverage.size
+		},
+		unicodeCoverage: gatherCov(rawCoverage, rawCoverageItalic, rawCoverageOblique),
+		languages: Array.from(getSupportedLanguageSet(rawCoverage)).sort()
+	};
+};
+
+function getSupportedLanguageSet(rawCoverage) {
 	const supportLocaleSet = new Set();
-	const codePointSet = new Set();
-	for (const ch of charMap) for (const unicode of ch[1]) codePointSet.add(unicode);
 
 	for (const locale of cldr.localeIds) {
 		const exemplar = cldr.extractCharacters(locale).exemplar;
@@ -24,10 +42,10 @@ module.exports = async function(charMapPath) {
 		let fullSupport = true;
 		let basicSupport = true;
 		for (const ch of basicChars) {
-			if (!codePointSet.has(ch.codePointAt(0))) basicSupport = false;
+			if (!rawCoverage.has(ch.codePointAt(0))) basicSupport = false;
 		}
 		for (const ch of fullChars) {
-			if (!codePointSet.has(ch.codePointAt(0))) fullSupport = false;
+			if (!rawCoverage.has(ch.codePointAt(0))) fullSupport = false;
 		}
 
 		if (basicSupport) {
@@ -44,7 +62,7 @@ module.exports = async function(charMapPath) {
 			}
 		}
 	}
-	const supportLangSet = new Set();
+	const supportLangSet = new Set(overrideSupportedLanguages);
 	for (const loc of supportLocaleSet) {
 		const seg = loc.split("_");
 		let displayName = null;
@@ -57,15 +75,12 @@ module.exports = async function(charMapPath) {
 		if (displayName) supportLangSet.add(displayName);
 	}
 
-	const unicodeCoverage = new Map();
-	for (const [gn, codes, cl] of charMap) for (const u of codes) unicodeCoverage.set(u, cl);
+	return supportLangSet;
+}
 
-	return {
-		stats: {
-			glyphCount: charMap.length,
-			codePointCount: unicodeCoverage.size
-		},
-		unicodeCoverage: Array.from(unicodeCoverage).sort((a, b) => a[0] - b[0]),
-		languages: Array.from(supportLangSet).sort()
-	};
-};
+function getRawCoverage(charMap) {
+	const rawCoverage = new Map();
+	for (const [gn, codes, tv, cv] of charMap)
+		for (const u of codes) rawCoverage.set(u, [gn, tv, cv]);
+	return rawCoverage;
+}

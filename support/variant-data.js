@@ -1,3 +1,5 @@
+"use strict";
+
 const objectAssign = require("object-assign");
 
 function mergeVSHive(_target, source) {

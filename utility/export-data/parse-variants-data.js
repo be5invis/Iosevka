@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const toml = require("toml");
 
-module.exports = async function() {
+module.exports = async function () {
 	const variantsToml = await fs.readFile(path.join(__dirname, "../../variants.toml"), "utf8");
 	const variants = toml.parse(variantsToml);
 
@@ -48,8 +48,8 @@ function getCvData(variants) {
 }
 
 function rankOf(initialChar) {
-	if ("A" <= initialChar && initialChar <= "Z") return 3;
-	if ("a" <= initialChar && initialChar <= "z") return 2;
+	if ("a" <= initialChar && initialChar <= "z") return 3;
+	if ("A" <= initialChar && initialChar <= "Z") return 2;
 	if ("0" <= initialChar && initialChar <= "9") return 1;
 	return 0;
 }

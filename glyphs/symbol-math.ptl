@@ -7,11 +7,12 @@ import [designParameters] from '../meta/aesthetics'
 glyph-module
 
 glyph-block NotGlyphFn : begin
+	glyph-block-import CommonShapes
 	glyph-block-export notGlyph
 	define [notGlyph unicode oldid top bot prop shift newid]
 		create-glyph [fallback newid ('not' + oldid)] : glyph-construction
 			if unicode : assign-unicode unicode
-			include glyphs.(oldid)
+			include [refer-glyph oldid]
 			include : dispiro
 				widths.center [adviceBlackness 4]
 				flat ([fallback shift 0] + [mix SB RIGHTSB [fallback prop 0.25]]) [fallback bot bgopBot]
@@ -28,7 +29,7 @@ glyph-block Symbol-Math-Letter-Like : begin
 	glyph-block-import Overmarks
 	glyph-block-import LetterUnified-Basic : LambdaShape AMaskShape DeltaShape
 	sketch # micro
-		include glyphs.mu AS_BASE
+		include [refer-glyph 'mu'] AS_BASE
 		if SLAB : if (!para.isItalic) : begin
 			include : CenterBottomSerif (SB + HALFSTROKE * HVCONTRAST) DESCENDER JUT
 			tag-contour 'serifLB'
@@ -73,21 +74,19 @@ glyph-block Symbol-Math-Letter-Like : begin
 	if [not recursive] : for-width-kinds WIDE-WIDTH-1 : do
 		local s : (RIGHTSB - SB - O * 4 + (MosaicWidth - WIDTH) * 0.5) / CAP
 		local df : Miniature
-			glyphs     -- {'eight' 'rotetedpropto'}
+			glyphs     -- {'eight.lnum' 'rotetedpropto'}
 			crowd      -- 4
 			scale      -- s
 			slantAngle -- 0
-			unfair     -- true
 
 		sketch # infty
 			set-width MosaicWidth
-			include df.eight
+			include df.'eight.lnum'
 			apply-transform : Translate (-(WIDTH / 2)) (-CAP / 2)
 			apply-transform : Rotate (Math.PI / 2)
 			apply-transform : Scale s
 			apply-transform : Translate (MosaicWidth / 2) symbolMid
 			apply-transform : Italify
-			refair currentGlyph
 			save [MangleName 'infty'] [MangleUnicode 0x221E]
 
 		sketch # propto
@@ -98,7 +97,6 @@ glyph-block Symbol-Math-Letter-Like : begin
 			apply-transform : Scale s
 			apply-transform : Translate (MosaicWidth / 2) symbolMid
 			apply-transform : Italify
-			refair currentGlyph
 			save [MangleName 'propto'] [MangleUnicode 0x221D]
 
 	sketch # partial
@@ -128,10 +126,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 	local rightCircle : WIDTH - SB * kCircle
 	local radiusCircle : (rightCircle - leftCircle) / 2
 
-	local radiusBig : (tackTop - tackBot) / 2
-	local leftBig : MIDDLE - radiusBig
-	local rightBig : MIDDLE + radiusBig
-
 	sketch # mathO
 		include : dispiro
 			widths.lhs GEOMETRYSTROKE
@@ -157,31 +151,6 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			arcvh nothing 2
 			close
 		save 'mathOOutline'
-	sketch # mathOBig
-		include : dispiro
-			widths.lhs GEOMETRYSTROKE
-			g4 MIDDLE (symbolMid + radiusBig - O)
-			archv nothing 2
-			g4 (leftBig + O) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig + O)
-			archv nothing 2
-			g4 (rightBig - O) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOBig'
-	sketch # mathO-outline
-		include : spiro-outline
-			g4 MIDDLE (symbolMid + radiusBig)
-			archv nothing 2
-			g4 (leftBig) symbolMid
-			arcvh nothing 2
-			g4 MIDDLE (symbolMid - radiusBig)
-			archv nothing 2
-			g4 (rightBig) symbolMid
-			arcvh nothing 2
-			close
-		save 'mathOOutlineBig'
 	sketch # mathBoxOutline
 		include : spiro-outline
 			corner leftBox topBox
@@ -190,12 +159,44 @@ glyph-block Symbol-Math-Frame-And-Geometry : begin
 			corner rightBox topBox
 		save 'mathBoxOutline'
 	sketch # mathBox
-		include : intersection glyphs.mathBoxOutline : union
+		include : intersection [refer-glyph 'mathBoxOutline'] : union
 			dispiro [widths.lhs sw] [flat leftBox topBox] [curl leftBox bottomBox]
 			dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
 			dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
 			dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox topBox]
 		save 'mathBox'
+
+	for-width-kinds WIDE-WIDTH-1
+		local radiusBig : (tackTop - tackBot) / 2 * [Math.sqrt MosaicWidthScalar]
+		local leftBig : MosaicMiddle - radiusBig
+		local rightBig : MosaicMiddle + radiusBig
+		sketch # mathOBig
+			set-width MosaicWidth
+			include : dispiro
+				widths.lhs GEOMETRYSTROKE
+				g4 MosaicMiddle (symbolMid + radiusBig - O)
+				archv nothing 2
+				g4 (leftBig + O) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig + O)
+				archv nothing 2
+				g4 (rightBig - O) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOBig']
+		sketch # mathOOutlineBig
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + radiusBig)
+				archv nothing 2
+				g4 (leftBig) symbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (symbolMid - radiusBig)
+				archv nothing 2
+				g4 (rightBig) symbolMid
+				arcvh nothing 2
+				close
+			save [MangleName 'mathOOutlineBig']
 
 	do "Geometry"
 		sketch
@@ -256,8 +257,8 @@ glyph-block Symbol-Math-Arith : begin
 		save 'minusDot' 0x2238
 
 	sketch # colon-equal
-		include glyphs.'baselineDot'
-		include glyphs.'xhDot'
+		include : refer-glyph "baselineDot"
+		include : refer-glyph "xhDot"
 
 		local sbSquash 0.5
 
@@ -277,7 +278,7 @@ glyph-block Symbol-Math-Arith : begin
 	sketch # plusminus
 		include MarkSet.plus
 		include : HBarBottom SB RIGHTSB 0 OPERATORSTROKE
-		include glyphs.plus
+		include : refer-glyph "plus"
 		save 'plusminus' 0xB1
 	turned 'minusplus' 0x2213 'plusminus' MIDDLE symbolMid
 
@@ -316,19 +317,19 @@ glyph-block Symbol-Math-Arith : begin
 
 	sketch # multiply
 		include MarkSet.plus
-		include glyphs.multiplyStroke1
-		include glyphs.multiplyStroke2
+		include : refer-glyph "multiplyStroke1"
+		include : refer-glyph "multiplyStroke2"
 		save 'multiply' 0xD7
 
 	sketch # innerMultiply
 		include MarkSet.plus
-		include glyphs.innerMultiplyStroke1
-		include glyphs.innerMultiplyStroke2
+		include : refer-glyph "innerMultiplyStroke1"
+		include : refer-glyph "innerMultiplyStroke2"
 		save 'innerMultiply'
 
 	sketch # divide
 		include MarkSet.plus
-		include glyphs.minus
+		include : refer-glyph "minus"
 		local radius : (RIGHTSB - SB) / 2
 		include : Ring (symbolMid + radius + DOTRADIUS) (symbolMid + radius - DOTRADIUS) (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
 		include : Ring (symbolMid - radius + DOTRADIUS) (symbolMid - radius - DOTRADIUS) (MIDDLE - DOTRADIUS + O) (MIDDLE + DOTRADIUS - O) true
@@ -398,41 +399,83 @@ glyph-block Symbol-Math-Dots-And-Colons : begin
 		include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MIDDLE - PERIODRADIUS + O) (MIDDLE + PERIODRADIUS - O) true
 		save 'mathcdot'
 
-	composite 'mathAsterisk' glyphs.'opAsterisk.low' [into-unicode 0x2217]
+	for-width-kinds WIDE-WIDTH-1
+		sketch # mathcdot
+			set-width MosaicWidth
+			include : Ring (symbolMid + PERIODRADIUS - O) (symbolMid - PERIODRADIUS + O) (MosaicMiddle - PERIODRADIUS + O) (MosaicMiddle + PERIODRADIUS - O) true
+			save [MangleName 'mathcdotBig']
+
+		sketch # plus
+			set-width MosaicWidth
+			include : union
+				HBar SB (MosaicWidth - SB) symbolMid GEOMETRYSTROKE
+				VBar MosaicMiddle [mix symbolMid plusTop MosaicWidthScalar] [mix symbolMid plusBot MosaicWidthScalar] GEOMETRYSTROKE
+			save : MangleName 'innerPlusBig'
+
+		sketch # innerMultiplyStroke1Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle - radius) (symbolMid - radius)
+				curl (MosaicMiddle + radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke1Big'
+
+		sketch # innerMultiplyStroke2Big
+			set-width MosaicWidth
+			local radius : (RIGHTSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GEOMETRYSTROKE
+				flat (MosaicMiddle + radius) (symbolMid - radius)
+				curl (MosaicMiddle - radius) (symbolMid + radius)
+			save : MangleName 'innerMultiplyStroke2Big'
+
+		sketch # innerMultiplyBig
+			set-width MosaicWidth
+			include : refer-glyph : MangleName "innerMultiplyStroke1Big"
+			include : refer-glyph : MangleName "innerMultiplyStroke2Big"
+			save : MangleName 'innerMultiplyBig'
+
+
+	composite 'mathAsterisk' [refer-glyph 'opAsterisk.low'] [into-unicode 0x2217]
 
 glyph-block Symbol-Math-Circled : begin
 	glyph-block-import CommonShapes
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerPlus] [into-unicode 0x2295]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerMinus] [into-unicode 0x2296]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerMultiply] [into-unicode 0x2297]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.innerMultiplyStroke1] [into-unicode 0x2298]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.mathcdot] [into-unicode 0x2299]
-	composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.mathcdot] [into-unicode 0x2A00]
-	composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.innerPlus] [into-unicode 0x2A01]
-	composite glyphs.mathOBig [intersection glyphs.mathOOutlineBig glyphs.innerMultiply] [into-unicode 0x2A02]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.'smallwhitecircle.hwid'] [into-unicode 0x229A]
-	composite glyphs.mathO [intersection glyphs.mathOOutline glyphs.mathAsterisk] [into-unicode 0x229B]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerPlus']] [into-unicode 0x2295]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMinus']] [into-unicode 0x2296]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiply']] [into-unicode 0x2297]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'innerMultiplyStroke1']] [into-unicode 0x2298]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathcdot']] [into-unicode 0x2299]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'smallwhitecircle.NWID']] [into-unicode 0x229A]
+	composite [refer-glyph 'mathO'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'mathAsterisk']] [into-unicode 0x229B]
+
+	for-width-kinds WIDE-WIDTH-1
+		composite [MangleName 'uni2A00'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'mathcdotBig']] [into-unicode : MangleUnicode 0x2A00]
+		composite [MangleName 'uni2A01'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerPlusBig']] [into-unicode : MangleUnicode 0x2A01]
+		composite [MangleName 'uni2A02'] [refer-glyph : MangleName 'mathOBig'] [intersection [refer-glyph : MangleName 'mathOOutlineBig'] [refer-glyph : MangleName 'innerMultiplyBig']] [into-unicode : MangleUnicode 0x2A02]
+
 	composite
-		begin glyphs.mathO
+		refer-glyph 'mathO'
 		intersection
-			begin glyphs.mathOOutline
+			refer-glyph 'mathOOutline'
 			HBar (SB + GEOMETRYSTROKE) (RIGHTSB - GEOMETRYSTROKE) symbolMid GEOMETRYSTROKE
 		into-unicode 0x229D
 
 	local eqS : Math.min GEOMETRYSTROKE ((RIGHTSB - SB) / 8)
 	local eqD : Math.max eqS ((RIGHTSB - SB) / 6)
-	composite glyphs.mathO
-		intersection glyphs.mathOOutline : union
+	composite
+		refer-glyph 'mathO'
+		intersection [refer-glyph 'mathOOutline'] : union
 			HBar (SB + eqS) (RIGHTSB - eqS) (symbolMid + eqD) eqS
 			HBar (SB + eqS) (RIGHTSB - eqS) (symbolMid - eqD) eqS
 		into-unicode 0x229C
 
 glyph-block Symbol-Math-Boxed : begin
 	glyph-block-import CommonShapes
-	composite glyphs.mathBox [intersection glyphs.mathBoxOutline glyphs.innerPlus] [into-unicode 0x229E]
-	composite glyphs.mathBox [intersection glyphs.mathBoxOutline glyphs.innerMinus] [into-unicode 0x229F]
-	composite glyphs.mathBox [intersection glyphs.mathBoxOutline glyphs.innerMultiply] [into-unicode 0x22A0]
-	composite glyphs.mathBox [intersection glyphs.mathBoxOutline glyphs.mathcdot] [into-unicode 0x22A1]
+	composite [refer-glyph 'mathBox'] [intersection [refer-glyph 'mathBoxOutline'] [refer-glyph 'innerPlus']] [into-unicode 0x229E]
+	composite [refer-glyph 'mathBox'] [intersection [refer-glyph 'mathBoxOutline'] [refer-glyph 'innerMinus']] [into-unicode 0x229F]
+	composite [refer-glyph 'mathBox'] [intersection [refer-glyph 'mathBoxOutline'] [refer-glyph 'innerMultiply']] [into-unicode 0x22A0]
+	composite [refer-glyph 'mathBox'] [intersection [refer-glyph 'mathBoxOutline'] [refer-glyph 'mathcdot']] [into-unicode 0x22A1]
 
 glyph-block Symbol-Math-VAndCup : begin
 	glyph-block-import CommonShapes
@@ -501,11 +544,13 @@ glyph-block Symbol-Math-VAndCup : begin
 	turned 'doubleWedge' 0x2A53 'doubleVee' MIDDLE symbolMid
 
 	sketch # cup
-		include : UShape operTop operBot OPERATORSTROKE true
+		include : UShape [DivFrame 1] operTop operBot OPERATORSTROKE true
 		save 'cup' 0x222A
+
 		branch
 			include : DotAt MIDDLE (operBot + SMOOTH) [Math.min DOTRADIUS ((RIGHTSB - SB - OPERATORSTROKE * HVCONTRAST * 2) * (1 / 3))]
-			save 'cupDot' 0x228E
+			save 'cupDot' 0x228D
+
 	turned 'cap' 0x2229 'cup' MIDDLE symbolMid
 	turned 'capDot' 0x2A40 'cupDot' MIDDLE symbolMid
 
@@ -517,7 +562,7 @@ glyph-block Symbol-Math-VAndCup : begin
 glyph-block Symbol-Math-Logicals : begin
 	glyph-block-import CommonShapes
 	sketch # negate
-		include glyphs.minus
+		include : refer-glyph "minus"
 		include : VBarRight RIGHTSB (symbolMid - (RIGHTSB - SB) * 0.55) symbolMid OPERATORSTROKE
 
 		save 'negate' 0xAC
@@ -557,12 +602,47 @@ glyph-block Symbol-Math-Logicals : begin
 		include : VBarLeft l top bot OPERATORSTROKE
 		save 'tautology' 0x22A8
 
+	sketch # forces
+		include MarkSet.tack
+		local l : mix MIDDLE SB 1
+		local r : mix MIDDLE RIGHTSB 1
+		local vs : adviceBlackness 4
+		local m : mix l (r - vs) (3 / 5)
+		include : HBar m r symbolMid OPERATORSTROKE
+		include : VBarLeft l top bot vs
+		include : VBar     m top bot vs
+		save 'forces' 0x22A9
+
+	sketch # tripleBarForces
+		include MarkSet.tack
+		local l : mix MIDDLE SB 1
+		local r : mix MIDDLE RIGHTSB 1
+		local vs : adviceBlackness 5
+		local m : mix l (r - vs) (3 / 4)
+		include : HBar m r symbolMid OPERATORSTROKE
+		include : VBarLeft l top bot vs
+		include : VBar     m top bot vs
+		include : VBar     ([mix l m (1/2)] + vs / 4 * HVCONTRAST) top bot vs
+		save 'tripleBarForces' 0x22AA
+
+	sketch # doubleForces
+		include MarkSet.tack
+		local l : mix MIDDLE SB 1
+		local r : mix MIDDLE RIGHTSB 1
+		local vs : adviceBlackness 4
+		local m : mix l (r - vs) (3 / 5)
+		include : HBar m r [mix symbolMid top (1 / 3)] OPERATORSTROKE
+		include : HBar m r [mix symbolMid bot (1 / 3)] OPERATORSTROKE
+		include : VBarLeft l top bot vs
+		include : VBar     m top bot vs
+		save 'doubleForces' 0x22AB
+
 	sketch # top
 		include MarkSet.tack
 		include : HBarTop SB RIGHTSB top OPERATORSTROKE
 		include : VBar MIDDLE top bot OPERATORSTROKE
 		save 'top' 0x22A4
-	composite 'bot' glyphs.top [FlipAround MIDDLE symbolMid] [into-unicode 0x22A5]
+	composite 'bot' [refer-glyph 'top'] [FlipAround MIDDLE symbolMid] [into-unicode 0x22A5]
 	sketch # topring
 		define mid : mix bot (top - OPERATORSTROKE / 2) 0.5
 		define w : (RIGHTSB - SB) * 0.4
@@ -573,7 +653,7 @@ glyph-block Symbol-Math-Logicals : begin
 		include : VBar MIDDLE (mid + w) (mid - w) fine
 		include : OShape (mid + w) (mid - w) (MIDDLE - w) (MIDDLE + w) fine
 		save 'topring' 0x2355
-	composite 'botring' glyphs.topring [FlipAround MIDDLE symbolMid] [into-unicode 0x234E]
+	composite 'botring' [refer-glyph 'topring'] [FlipAround MIDDLE symbolMid] [into-unicode 0x234E]
 	sketch # perp
 		include MarkSet.tack
 		include : HBarBottom SB RIGHTSB 0 OPERATORSTROKE
@@ -620,8 +700,8 @@ glyph-block Symbol-Math-Relation : begin
 			save 'twodotapproxeq' 0x2252
 
 	sketch # colon-equal
-		include glyphs.'baselineDot'
-		include glyphs.'xhDot'
+		include : refer-glyph "baselineDot"
+		include : refer-glyph "xhDot"
 
 		local sbSquash 0.5
 
@@ -747,7 +827,7 @@ glyph-block Symbol-Math-Relation : begin
 		save 'less' '<'
 
 	sketch # greater
-		include glyphs.less AS_BASE
+		include [refer-glyph 'less'] AS_BASE
 		include : FlipAround MIDDLE symbolMid
 		save 'greater' '>'
 
@@ -975,7 +1055,7 @@ glyph-block Symbol-Math-Relation : begin
 		include : symWave symbolMid (-1)
 		save 'flipsym' 0x223D
 
-	vdual 'approx' 0x2248 'sym' approxDist
+	VDual 'approx' 0x2248 'sym' approxDist
 
 	sketch # aapprox
 		include MarkSet.plus
@@ -989,7 +1069,7 @@ glyph-block Symbol-Math-Relation : begin
 			save 'approxBar' 0x224A
 
 	sketch # symbar
-		include glyphs.sym AS_BASE
+		include [refer-glyph 'sym'] AS_BASE
 		include : Upright
 		include : Translate 0 (approxDist / 2)
 		include : Italify
@@ -998,7 +1078,7 @@ glyph-block Symbol-Math-Relation : begin
 
 	sketch # symBarBar
 		local sympShift : approxDist + equalHalfSpace * 1.5
-		include glyphs.sym AS_BASE
+		include [refer-glyph 'sym'] AS_BASE
 		include : Upright
 		include : Translate 0 (sympShift / 2)
 		include : Italify
@@ -1008,7 +1088,7 @@ glyph-block Symbol-Math-Relation : begin
 
 	sketch # flipsymBarBar
 		local sympShift : approxDist + equalHalfSpace * 1.5
-		include glyphs.flipsym AS_BASE
+		include [refer-glyph 'flipsym'] AS_BASE
 		include : Upright
 		include : Translate 0 (sympShift / 2)
 		include : Italify
@@ -1071,7 +1151,7 @@ glyph-block Symbol-Math-Relation : begin
 	turned nothing 0x220B 'element' MIDDLE symbolMid
 
 	sketch # small element
-		include glyphs.subst AS_BASE
+		include [refer-glyph 'subst'] AS_BASE
 		include : HBar (SB + HALFSTROKE) RIGHTSB symbolMid OPERATORSTROKE
 		save 'smallElement' 0x220A
 	turned nothing 0x220D 'smallElement' MIDDLE symbolMid
@@ -1100,12 +1180,12 @@ glyph-block Symbol-Math-Relation : begin
 			include : BarNegator (symbolMid - dH) lessEqDist
 			save nothing 0x22E5
 
-	composite glyphs.element glyphs.underlineBelow [into-unicode 0x22F8]
+	composite [refer-glyph 'element'] [refer-glyph 'underlineBelow'] [into-unicode 0x22F8]
 
 glyph-block Symbol-Math-Complement : begin
 	glyph-block-import LetterUnified-Basic : CShape
 	sketch # complement
-		include : CShape operTop operBot OPERATORSTROKE
+		include : CShape [mix symbolMid operTop 1.1] [mix symbolMid operBot 1.1] OPERATORSTROKE
 		save 'complement' 0x2201
 
 glyph-block Symbol-Math-Negation : begin
@@ -1114,6 +1194,8 @@ glyph-block Symbol-Math-Negation : begin
 	notGlyph 0x2262 'ident'
 	notGlyph 0x22AC 'vdash'
 	notGlyph 0x22AD 'tautology'
+	notGlyph 0x22AE 'forces'
+	notGlyph 0x22AF 'doubleForces'
 	notGlyph.left 0x226E 'less'
 	notGlyph.right 0x226F 'greater'
 	notGlyph.left 0x2280 'precedes'
@@ -1146,7 +1228,7 @@ glyph-block Symbol-Math-Large-Operators : for-width-kinds WIDE-WIDTH-1
 	glyph-block-import LetterUnified-Extended : SigmaShape PiShape
 
 	define diversityLargeOperators : Math.max para.diversityM (MosaicWidth / WIDTH)
-	define df : DivFrame diversityLargeOperators 0 [if FMosaifWide diversityLargeOperators 1]
+	define df : DivFrame diversityLargeOperators 0 [if FMosaicWide diversityLargeOperators 1]
 
 	sketch # sum
 		set-width df.width
@@ -1185,10 +1267,33 @@ glyph-block Symbol-Math-Integrals : begin
 	glyph-block-import CommonShapes
 	glyph-block-import LetterUnified-Basic : LongSShape
 
+	define MosaicTop    fontMetrics.OS_2.sTypoAscender
+	define MosaicBottom fontMetrics.OS_2.sTypoDescender
+	define MosaicHeight : MosaicTop - MosaicBottom
+
 	sketch # integrate
 		include : LongSShape bgopTop bgopBot HOOK (HOOK * 0.75) OPERATORSTROKE
 		save 'integrate' 0x222B
-	dual 'doubleintegrate' 0x222C 'integrate' (0.5 * WIDTH)
+	HDual 'doubleintegrate' 0x222C 'integrate' (0.5 * WIDTH)
+
+	sketch
+		include : intersection
+			Rect MosaicTop MosaicBottom (-WIDTH) (2 * WIDTH)
+			LongSShape bgopTop (bgopBot - MosaicHeight * 2) HOOK (HOOK * 0.75) OPERATORSTROKE
+		save 'integralUpper' 0x2320
+
+	sketch
+		include : intersection
+			Rect MosaicTop MosaicBottom (-WIDTH) (2 * WIDTH)
+			LongSShape (bgopTop + MosaicHeight) (bgopBot - MosaicHeight) HOOK (HOOK * 0.75) OPERATORSTROKE
+		save 'integralExtension' 0x23AE
+
+	sketch
+		include : intersection
+			Rect MosaicTop MosaicBottom (-WIDTH) (2 * WIDTH)
+			LongSShape (bgopTop + MosaicHeight * 2) bgopBot HOOK (HOOK * 0.75) OPERATORSTROKE
+		save 'integralLower' 0x2321
+
 	sketch
 		define [shape] : LongSShape bgopTop bgopBot HOOK (HOOK * 0.75) [adviceBlackness 3.75]
 		include [shape]
@@ -1200,7 +1305,7 @@ glyph-block Symbol-Math-Integrals : begin
 		save 'tripleintegrate' 0x222D
 
 	sketch # ringintegrate
-		include glyphs.integrate
+		include : refer-glyph "integrate"
 		include : OShape (symbolMid + (RIGHTSB - SB) / 2) (symbolMid - (RIGHTSB - SB) / 2) SB RIGHTSB OPERATORSTROKE
 		save 'ringintegrate' 0x222E
 
@@ -1272,80 +1377,80 @@ glyph-block Symbol-Math-APL : begin
 			curl RIGHTSB  operBot
 		save 'aplbackslash'
 
-	define [aplBoxed shape] : Overlay glyphs.aplsquare : glyph-construction
-		include : intersection glyphs.aplsquareShadow shape
+	define [aplBoxed shape] : Overlay [refer-glyph 'aplsquare'] : glyph-construction
+		include : intersection [refer-glyph 'aplsquareShadow'] shape
 		include : ScaleAround MIDDLE symbolMid aplBoxInnerScale
 
-	composite glyphs.space [aplBoxed glyphs.equal] [into-unicode 0x2338]
-	composite glyphs.space [aplBoxed glyphs.divide] [into-unicode 0x2339]
-	composite glyphs.space [aplBoxed glyphs.'whitediamond.hwid'] [into-unicode 0x233A]
-	composite glyphs.space [aplBoxed glyphs.'smallwhitecircle.hwid'] [into-unicode 0x233B]
-	composite glyphs.space [aplBoxed glyphs.'whitecircle.hwid'] [into-unicode 0x233C]
-	composite glyphs.space [Overlay glyphs.aplbar glyphs.'whitecircle.hwid'] [into-unicode 0x233D]
-	composite glyphs.'whitecircle.hwid' glyphs.'smallwhitecircle.hwid' [into-unicode 0x233E]
-	composite glyphs.space [Overlay glyphs.aplminus glyphs.slash] [into-unicode 0x233F]
-	composite glyphs.space [Overlay glyphs.aplminus glyphs.backslash] [into-unicode 0x2340]
-	composite glyphs.space [aplBoxed glyphs.slash] [into-unicode 0x2341]
-	composite glyphs.space [aplBoxed glyphs.backslash] [into-unicode 0x2342]
-	composite glyphs.space [aplBoxed glyphs.less] [into-unicode 0x2343]
-	composite glyphs.space [aplBoxed glyphs.greater] [into-unicode 0x2344]
-	composite glyphs.space [Overlay glyphs."arrowleft.hwid" glyphs.aplbar] [into-unicode 0x2345]
-	composite glyphs.space [Overlay glyphs."arrowright.hwid" glyphs.aplbar] [into-unicode 0x2346]
-	composite glyphs.space [aplBoxed glyphs."arrowleft.hwid"] [into-unicode 0x2347]
-	composite glyphs.space [aplBoxed glyphs."arrowright.hwid"] [into-unicode 0x2348]
-	composite glyphs.space [Overlay glyphs.aplbackslash glyphs.'whitecircle.hwid'] [into-unicode 0x2349]
-	composite glyphs.bot glyphs.underlineBelow [into-unicode 0x234A]
-	composite glyphs.space [Overlay glyphs.increment glyphs.aplLongBar] [into-unicode 0x234B]
-	composite glyphs.space [aplBoxed glyphs.vee] [into-unicode 0x234C]
-	composite glyphs.space [aplBoxed glyphs.increment] [into-unicode 0x234D]
-	composite glyphs.space [Overlay glyphs."arrowup.hwid" glyphs.minus] [into-unicode 0x234F]
-	composite glyphs.space [aplBoxed glyphs."arrowup.hwid"] [into-unicode 0x2350]
-	composite glyphs.top glyphs.overlineAbove [into-unicode 0x2351]
-	composite glyphs.space [Overlay glyphs.nabla glyphs.aplLongBar] [into-unicode 0x2352]
-	composite glyphs.space [aplBoxed glyphs.wedge] [into-unicode 0x2353]
-	composite glyphs.space [aplBoxed glyphs.nabla] [into-unicode 0x2354]
-	composite glyphs.space [Overlay glyphs."arrowdown.hwid" glyphs.minus] [into-unicode 0x2356]
-	composite glyphs.space [aplBoxed glyphs."arrowdown.hwid"] [into-unicode 0x2357]
-	composite glyphs.singleQuote MarkSet.plus glyphs.underlineBelow [into-unicode 0x2358]
-	composite glyphs.increment glyphs.underlineBelow [into-unicode 0x2359]
-	composite glyphs.'whitediamond.hwid' MarkSet.plus glyphs.underlineBelow [into-unicode 0x235A]
-	composite glyphs.'smallwhitecircle.hwid' MarkSet.plus glyphs.underlineBelow [into-unicode 0x235B]
-	composite glyphs.'whitecircle.hwid' MarkSet.plus glyphs.underlineBelow [into-unicode 0x235C]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'equal'] [into-unicode 0x2338]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'divide'] [into-unicode 0x2339]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whitediamond.NWID'] [into-unicode 0x233A]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'smallwhitecircle.NWID'] [into-unicode 0x233B]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whitecircle.NWID'] [into-unicode 0x233C]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbar'] [refer-glyph 'whitecircle.NWID']] [into-unicode 0x233D]
+	composite [refer-glyph 'whitecircle.NWID'] [refer-glyph 'smallwhitecircle.NWID'] [into-unicode 0x233E]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'slash']] [into-unicode 0x233F]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'backslash']] [into-unicode 0x2340]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'slash'] [into-unicode 0x2341]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'backslash'] [into-unicode 0x2342]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'less'] [into-unicode 0x2343]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'greater'] [into-unicode 0x2344]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowleft.NWID'] [refer-glyph 'aplbar']] [into-unicode 0x2345]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowright.NWID'] [refer-glyph 'aplbar']] [into-unicode 0x2346]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowleft.NWID'] [into-unicode 0x2347]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowright.NWID'] [into-unicode 0x2348]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbackslash'] [refer-glyph 'whitecircle.NWID']] [into-unicode 0x2349]
+	composite [refer-glyph 'bot'] [refer-glyph 'underlineBelow'] [into-unicode 0x234A]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'increment'] [refer-glyph 'aplLongBar']] [into-unicode 0x234B]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'vee'] [into-unicode 0x234C]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'increment'] [into-unicode 0x234D]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowup.NWID'] [refer-glyph 'minus']] [into-unicode 0x234F]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowup.NWID'] [into-unicode 0x2350]
+	composite [refer-glyph 'top'] [refer-glyph 'overlineAbove'] [into-unicode 0x2351]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'nabla'] [refer-glyph 'aplLongBar']] [into-unicode 0x2352]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'wedge'] [into-unicode 0x2353]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'nabla'] [into-unicode 0x2354]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowdown.NWID'] [refer-glyph 'minus']] [into-unicode 0x2356]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowdown.NWID'] [into-unicode 0x2357]
+	composite [refer-glyph 'singleQuote'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x2358]
+	composite [refer-glyph 'increment'] [refer-glyph 'underlineBelow'] [into-unicode 0x2359]
+	composite [refer-glyph 'whitediamond.NWID'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x235A]
+	composite [refer-glyph 'smallwhitecircle.NWID'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x235B]
+	composite [refer-glyph 'whitecircle.NWID'] MarkSet.plus [refer-glyph 'underlineBelow'] [into-unicode 0x235C]
 	composite
-		begin glyphs.'smallwhitecircle.hwid'
+		refer-glyph 'smallwhitecircle.NWID'
 		ScaleAround MIDDLE symbolMid 0.75
 		Realign MIDDLE symbolMid MIDDLE (operBot + SMOOTH)
 		UShape operTop operBot [adviceBlackness 5] true
 		FlipAround MIDDLE symbolMid
 		into-unicode 0x235D
-	composite glyphs.space [aplBoxed glyphs.singleQuote] [into-unicode 0x235E]
-	composite glyphs.space [intersection glyphs.mathOOutline glyphs.'opAsterisk.low'] glyphs.mathO [into-unicode 0x235F]
-	composite glyphs.space [aplBoxed : composite glyphs.colon [Realign MIDDLE (XH/2) MIDDLE symbolMid]] [into-unicode 0x2360]
-	composite glyphs.top glyphs.dieresisAbove [into-unicode 0x2361]
-	composite glyphs.nabla glyphs.dieresisAbove [into-unicode 0x2362]
-	composite glyphs.'asterisk.low' glyphs.dieresisAbove [into-unicode 0x2363]
-	composite glyphs.'smallwhitecircle.hwid' MarkSet.plus glyphs.dieresisAbove [into-unicode 0x2364]
-	composite glyphs.'whitecircle.hwid' MarkSet.plus glyphs.dieresisAbove [into-unicode 0x2365]
-	composite glyphs.space [Overlay glyphs.cup glyphs.aplbar] [into-unicode 0x2366]
-	composite glyphs.space [Overlay glyphs.subst glyphs.aplbar] [into-unicode 0x2367]
-	composite glyphs.'asciitilde.low' glyphs.dieresisAbove [into-unicode 0x2368]
-	composite glyphs.'greater.narrow' glyphs.dieresisAbove [into-unicode 0x2369]
-	composite glyphs.minus glyphs.comma [into-unicode 0x236A]
-	composite glyphs.space [Overlay glyphs.overlaytilde glyphs.nabla] [into-unicode 0x236B]
-	composite glyphs.space [Overlay glyphs.overlaytilde glyphs.'zero.lnum.unslashed'] [into-unicode 0x236C]
-	composite glyphs.space [Overlay glyphs.overlaytilde glyphs.bar] [into-unicode 0x236D]
-	composite glyphs.space [Overlay glyphs.semicolon glyphs."underscore.belowBaseline"] [into-unicode 0x236E]
-	composite glyphs.space [aplBoxed glyphs.notequal] [into-unicode 0x236F]
-	composite glyphs.space [aplBoxed glyphs.question] [into-unicode 0x2370]
-	composite glyphs.space [Overlay glyphs.overlaytilde glyphs.vee] [into-unicode 0x2371]
-	composite glyphs.space [Overlay glyphs.overlaytilde glyphs.wedge] [into-unicode 0x2372]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'singleQuote'] [into-unicode 0x235E]
+	composite [refer-glyph 'enquad'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO'] [into-unicode 0x235F]
+	composite [refer-glyph 'enquad'] [aplBoxed : composite [refer-glyph 'colon'] [Realign MIDDLE (XH/2) MIDDLE symbolMid]] [into-unicode 0x2360]
+	composite [refer-glyph 'top'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2361]
+	composite [refer-glyph 'nabla'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2362]
+	composite [refer-glyph 'asterisk.low'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2363]
+	composite [refer-glyph 'smallwhitecircle.NWID'] MarkSet.plus [refer-glyph 'dieresisAbove'] [into-unicode 0x2364]
+	composite [refer-glyph 'whitecircle.NWID'] MarkSet.plus [refer-glyph 'dieresisAbove'] [into-unicode 0x2365]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'cup'] [refer-glyph 'aplbar']] [into-unicode 0x2366]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'subst'] [refer-glyph 'aplbar']] [into-unicode 0x2367]
+	composite [refer-glyph 'asciitilde.low'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2368]
+	composite [refer-glyph 'greater.narrow'] [refer-glyph 'dieresisAbove'] [into-unicode 0x2369]
+	composite [refer-glyph 'minus'] [refer-glyph 'comma'] [into-unicode 0x236A]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'nabla']] [into-unicode 0x236B]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'zero.lnum.unslashed']] [into-unicode 0x236C]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'bar']] [into-unicode 0x236D]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'semicolon'] [refer-glyph 'underscore.belowBaseline']] [into-unicode 0x236E]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'notequal'] [into-unicode 0x236F]
+	composite [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'question'] [into-unicode 0x2370]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'vee']] [into-unicode 0x2371]
+	composite [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlaytilde'] [refer-glyph 'wedge']] [into-unicode 0x2372]
 	alias 'apliota'  0x2373 'iota'
 	alias 'aplrho'   0x2374 'rho'
 	alias 'aplomega' 0x2375 'omega'
-	composite glyphs.alpha glyphs.underlineBelow [into-unicode 0x2376]
-	composite glyphs.smallElement glyphs.underlineBelow [into-unicode 0x2377]
-	composite glyphs.iota glyphs.underlineBelow [into-unicode 0x2378]
-	composite glyphs.omega glyphs.underlineBelow [into-unicode 0x2379]
+	composite [refer-glyph 'alpha'] [refer-glyph 'underlineBelow'] [into-unicode 0x2376]
+	composite [refer-glyph 'smallElement'] [refer-glyph 'underlineBelow'] [into-unicode 0x2377]
+	composite [refer-glyph 'iota'] [refer-glyph 'underlineBelow'] [into-unicode 0x2378]
+	composite [refer-glyph 'omega'] [refer-glyph 'underlineBelow'] [into-unicode 0x2379]
 	alias 'aplalpha' 0x237A 'alpha'
 
 glyph-block Symbol-Math-Other : begin
@@ -1356,9 +1461,9 @@ glyph-block Symbol-Math-Other : begin
 	alias 'mathbar' 0x2223 'bar'
 	notGlyph 0x2224 'mathbar' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0.1
 	notGlyph 0x2226 'parallel' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0
-	alias 'mathsmallcircle' 0x2218 'smallwhitecircle.hwid'
-	alias 'whiteDiamondOperator' 0x22C4 'whitediamond.hwid'
-	alias 'mathstar' 0x22C6 'blackstar.hwid'
+	alias 'mathsmallcircle' 0x2218 'smallwhitecircle.NWID'
+	alias 'whiteDiamondOperator' 0x22C4 'whitediamond.NWID'
+	alias 'mathstar' 0x22C6 'blackstar.NWID'
 	turned 'amalg' 0x2A3F 'Pi' MIDDLE (CAP / 2)
 	turned 'turnAmpersand' 0x214B 'ampersand' MIDDLE (CAP / 2)
 	turned nothing 0x22DC 'greatereq' MIDDLE symbolMid
