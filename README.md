@@ -51,7 +51,7 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
-Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS0`.
+Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `CLIK`.
 
 ## Building from Source
 
