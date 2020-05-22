@@ -187,9 +187,17 @@ glyph-block LetterUnified-Basic : begin
 		sketch # dotlessi.tailed
 			local df : DivFrame para.diversityI
 			set-width df.width
-			include df.markSet.b
+			include df.markSet.e
 			include : TailedIShape df XH
 			save 'dotlessi.tailed'
+
+		sketch # dotlessi.tailed
+			local df : DivFrame para.diversityI
+			set-width df.width
+			include df.markSet.e
+			include : VBar (df.middle) 0 XH
+			include : RightwardBottomSerif df.middle 0 (LONGJUT * df.div)
+			save 'dotlessi.hookybottom'
 
 		select-variant 'dotlessi' 0x131
 		sketch # iogonek.dotless
@@ -636,17 +644,18 @@ glyph-block LetterUnified-Basic : begin
 		define VShapeMiddleWidth : adviceBlackness 3
 		define pInktrap 0.5
 
+		define StraightSbShrink : mix 1 designParameters.straightVShapeSbShrink : if SLAB 0.75 1
+
 		define [VShapeOutline] : params [top [sw STROKE] barStraight div] : glyph-construction
 			local df : DivFrame div
 			local fine : [if barStraight VShapeFineStraight VShapeFine] * sw / STROKE
-			local sbCor : (CAP / top) * OX
 			local dgCor : diagCor top (WIDTH / 2) 0 (sw * 2)
 			local clearance : 0 - OX
 
 			if barStraight : begin
-				local vxStartL : df.leftSB + sbCor + clearance
+				local vxStartL : df.leftSB * StraightSbShrink + clearance
 				local vxEndL : df.middle - cornerdist + clearance
-				local vxStartR : df.rightSB - sbCor - clearance
+				local vxStartR : df.width - df.leftSB * StraightSbShrink - clearance
 				local vxEndR : df.middle + cornerdist - clearance
 				include : spiro-outline
 					flat [mix vxStartL vxEndL 0] [mix top 0 0]
@@ -658,7 +667,7 @@ glyph-block LetterUnified-Basic : begin
 			: else : begin
 				local vxStartL : df.leftSB + clearance
 				local vxEndL : df.middle - cornerdist + clearance
-				local vxStartR : df.rightSB - clearance
+				local vxStartR : df.width - df.leftSB - clearance
 				local vxEndR : df.middle + cornerdist - clearance
 				include : spiro-outline
 					flat vxStartL top
@@ -673,12 +682,11 @@ glyph-block LetterUnified-Basic : begin
 		define [VShape] : params [top [sw STROKE] barStraight div] : glyph-construction
 			local df : DivFrame div
 			local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
-			local sbCor : (CAP / top) * OX
 			local dgCor : diagCor (2 * top) WIDTH 0 (2 * sw)
 			if barStraight : begin
-				local vxStartL : SB + sbCor
+				local vxStartL : df.leftSB * StraightSbShrink
 				local vxEndL : df.middle - cornerdist
-				local vxStartR : df.rightSB - sbCor
+				local vxStartR : df.width - df.leftSB * StraightSbShrink
 				local vxEndR : df.middle + cornerdist
 				local midSW : VShapeMiddleWidth / STROKE * sw
 				include : dispiro
@@ -1363,9 +1371,7 @@ glyph-block LetterUnified-Basic : begin
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
 			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
-			local ySbCor : (XH / CAP) * (OX * [if slab 1 4])
-			local sbScalar : if (straightBar && SLAB && !slab) 1.5 1
-			local yrstroker : WIDTH - SB * sbScalar - [if straightBar ySbCor 0]
+			local yrstroker : WIDTH - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if (straightBar && !slab) designParameters.straightSmallYShapeSbShrink 1]
 			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
 			local yBottomJut : JUT * 1.25
 			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE

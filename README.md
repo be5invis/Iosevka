@@ -189,7 +189,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-								
+																					
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -320,10 +320,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-i-zshaped`, `cv06`: Z-shaped `i`.
     * `v-i-line`, `cv56`: `i` like a straight line.
     * `v-i-tailed`, `cv88`: Tailed `i`.
+    * `v-i-hookybottom`, `CVAA`: `i` with a straight tail.
   * Styles for `j`:
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
     * `v-j-straight`, `cv98`: `j` without serif.
+  * Styles for `k`, `K`:
+    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
+    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
+    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
   * Styles for `l`:
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
@@ -332,10 +337,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
-  * Styles for `k`, `K`:
-    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
-    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
-    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
@@ -409,8 +410,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-asterisk-hexhigh`, `cv60`: Higher six-pointed asterisk `*`.
     * `v-asterisk-hexlow`, `cv61`: Lower six-pointed asterisk `*`.
   * Styles for `_`:
-    * `v-underscore-high`, `cv20`: Higher underscore `_`, at baseline (default).
-    * `v-underscore-low`, `cv21`: Lower underscore `_`, below baseline.
+    * `v-underscore-high`, `cv20`: Higher underscore `_`, placed right below baseline (default).
+    * `v-underscore-low`, `cv21`: Lower underscore `_`, placed right above descender line.
+    * `v-underscore-above-baseline`, `cv99`: Extra-high `_`, placed right below baseline.
   * Styles for `¶`:
     * `v-paragraph-high`, `cv22`: Higher paragraph symbol `¶` (default).
     * `v-paragraph-low`, `cv23`: Lower paragraph symbol `¶`.
