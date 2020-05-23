@@ -317,17 +317,21 @@ glyph-block CommonShapes : begin
 			flat (x - sw / 2 * HVCONTRAST) y [widths.heading sw 0 RIGHTWARD]
 			curl (x + length + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
-	define [CenterTopSerif x y length _sw] : glyph-construction
-		local sw : fallback _sw STROKE
-		include : dispiro
-			flat (x + length - TANSLANT * (sw * SERIF_SHIFT_X)) y [widths sw 0]
-			curl (x - length - TANSLANT * (sw * SERIF_SHIFT_X)) y
+	define [CenterTopSerif x y length _sw] : CenterTopSerifAsymmetric x y length length _sw
 
-	define [CenterBottomSerif x y length _sw] : glyph-construction
+	define [CenterBottomSerif x y length _sw] : CenterBottomSerifAsymmetric x y length length _sw
+
+	define [CenterTopSerifAsymmetric x y l r _sw] : begin
 		local sw : fallback _sw STROKE
-		include : dispiro
-			flat (x + length + TANSLANT * (sw * SERIF_SHIFT_X)) y [widths 0 sw]
-			curl (x - length + TANSLANT * (sw * SERIF_SHIFT_X)) y
+		return : dispiro
+			flat (x + r - TANSLANT * (sw * SERIF_SHIFT_X)) y [widths sw 0]
+			curl (x - l - TANSLANT * (sw * SERIF_SHIFT_X)) y
+
+	define [CenterBottomSerifAsymmetric x y l r _sw] : begin
+		local sw : fallback _sw STROKE
+		return : dispiro
+			flat (x + r + TANSLANT * (sw * SERIF_SHIFT_X)) y [widths 0 sw]
+			curl (x - l + TANSLANT * (sw * SERIF_SHIFT_X)) y
 
 	define [DownwardRightSerif x y length sw] : glyph-construction
 		include : dispiro
@@ -351,21 +355,26 @@ glyph-block CommonShapes : begin
 			curl x (y + length) [heading UPWARD]
 
 	define sideSerifK 0.5
+	define [JutIn left right] : Math.min JUT (HALFSTROKE + [Math.max (HALFSTROKE * TANSLANT) ((right - left - STROKE * 2 * HVCONTRAST) / 4)])
 	define [AIVSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RIGHTSB
+		local jutIn : JutIn left right
 		if SLAB : begin
-			include : CenterTopSerif (left + STROKE * sideSerifK * HVCONTRAST) top JUT
+			include : CenterTopSerifAsymmetric (left + STROKE * sideSerifK * HVCONTRAST) top JUT jutIn
 			tag-contour 'serifLT'
-			include : CenterTopSerif (right - STROKE * sideSerifK * HVCONTRAST) top JUT
+			include : CenterTopSerifAsymmetric (right - STROKE * sideSerifK * HVCONTRAST) top jutIn JUT
 			tag-contour 'serifRT'
 	define [AIHSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RIGHTSB
+		local jutIn : JutIn left right
 		if SLAB : begin
 			include : AIVSerifs top _left _right
-			include : CenterBottomSerif (left + STROKE * sideSerifK * HVCONTRAST) 0 JUT
-			include : CenterBottomSerif (right - STROKE * sideSerifK * HVCONTRAST) 0 JUT
+			include : CenterBottomSerifAsymmetric (left + STROKE * sideSerifK * HVCONTRAST) 0 JUT jutIn
+			tag-contour 'serifLB'
+			include : CenterBottomSerifAsymmetric (right - STROKE * sideSerifK * HVCONTRAST) 0 jutIn JUT
+			tag-contour 'serifRB'
 	define [AINSerifs top _left _right sw xn] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RIGHTSB
@@ -373,6 +382,7 @@ glyph-block CommonShapes : begin
 		if SLAB : begin
 			include : LeftwardTopSerif (left + sw * (sideSerifK - 0.5) * HVCONTRAST) top (jut - sw / 2 * HVCONTRAST)
 			include : CenterTopSerif (right - sw * sideSerifK * HVCONTRAST) top jut
+			tag-contour 'serifRB'
 			include : CenterBottomSerif (left + sw * sideSerifK * HVCONTRAST) 0 jut
 			tag-contour 'serifLB'
 			#include : CenterdBottomSerif (right - STROKE * (sideSerifK - 0.5) * HVCONTRAST) 0 (JUT / 2)
