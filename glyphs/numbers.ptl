@@ -19,7 +19,7 @@ glyph-block Numbers : begin
 	define [ZeroSlashShape top] : begin
 		local fine : 0.5 * OVERLAYSTROKE
 		return : intersection
-			OShapeOutline (top + O) (0 - O) (SB - O) (RIGHTSB + O)
+			OShapeOutline.NoOvershoot top 0 SB RIGHTSB
 			dispiro
 				flat 0 (top * (1 - 0.77)) [widths fine fine]
 				curl WIDTH (top * 0.77)
@@ -27,14 +27,21 @@ glyph-block Numbers : begin
 	define [ZeroReverseSlashShape top] : begin
 		local fine : 0.5 * OVERLAYSTROKE
 		return : intersection
-			OShapeOutline (top + O) (0 - O) (SB - O) (RIGHTSB + O)
+			OShapeOutline.NoOvershoot top 0 SB RIGHTSB
 			dispiro
 				flat 0 (top * 0.77) [widths fine fine]
 				curl WIDTH (top * (1 - 0.77))
 
 	define [ZeroDotShape top] : begin
-		local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
-		return : Ring (top / 2 + radius) (top / 2 - radius) (MIDDLE + radius) (MIDDLE - radius)
+		local halfDotWidth : Math.min DOTRADIUS ((RIGHTSB - SB - HVCONTRAST * STROKE * 2) / 4)
+		return : OShapeOutline.NoOvershoot
+			top / 2 + DOTRADIUS
+			top / 2 - DOTRADIUS
+			MIDDLE + halfDotWidth
+			MIDDLE - halfDotWidth
+			STROKE * halfDotWidth * 2 / WIDTH
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
 
 	sketch # zero.lnum.unslashed
 		include MarkSet.capital
@@ -314,24 +321,25 @@ glyph-block Numbers : begin
 	select-variant 'seven.onum' (follow -- 'seven')
 
 
-	local EightPr : StrokeWidthBlend 0.85 0.975
+	local EightPr : StrokeWidthBlend 0.85 (0.925 * [Math.pow (WIDTH / UPM * 2) 0.33])
 	define [EightShape top] : begin
+		local stroke : adviceBlackness2 2.875 2 CAP
 		local p 0.96
 		local l (SB + OX)
 		local r (RIGHTSB - OX)
 		return : dispiro
-			widths.rhs
+			widths.rhs stroke
 			g4.right.mid (MIDDLE - CORRECTION_OMIDS) (top - O)
 			archv
-			g4 [mix l r p] (top - SMOOTHB * EightPr * p)
-			alsothru.g2 0.5 0.5 [widths.center]
-			g4 (l) (SMOOTHB * EightPr) [widths.lhs]
+			g4 [mix l r p] (top - [SmoothBOf (SMOOTH * EightPr) WIDTH])
+			alsothru.g2 0.5 0.5 [widths.center stroke]
+			g4 (l) (SMOOTHB * EightPr) [widths.lhs stroke]
 			arcvh
 			g4.right.mid (MIDDLE + CORRECTION_OMIDS) (O)
 			archv
-			g4 (r) (SMOOTHA * EightPr) [widths.lhs]
-			alsothru.g2 0.5 0.5 [widths.center]
-			g4 [mix r l p] (top - SMOOTHA * EightPr * p) [widths.rhs]
+			g4 (r) (SMOOTHA * EightPr) [widths.lhs stroke]
+			alsothru.g2 0.5 0.5 [widths.center stroke]
+			g4 [mix r l p] (top - [SmoothAOf (SMOOTH * EightPr) WIDTH]) [widths.rhs stroke]
 			arcvh
 			close
 

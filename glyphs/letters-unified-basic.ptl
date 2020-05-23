@@ -3141,7 +3141,7 @@ glyph-block LetterUnified-Basic : begin
 			include : HornBaseAnchor RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
 			include : difference
 				HornShape RIGHTSB CAP (WIDTH / 2) (SMOOTHB) (-1)
-				OShapeOutline (CAP + O) (0 - O) (SB - O) (RIGHTSB + O) nothing SMOOTHA SMOOTHB
+				OShapeOutline.NoOvershoot CAP 0 SB RIGHTSB nothing SMOOTHA SMOOTHB
 			include : refer-glyph "O"
 			save 'OHorn' 0x01A0
 
@@ -3150,7 +3150,7 @@ glyph-block LetterUnified-Basic : begin
 			include : HornBaseAnchor RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
 			include : difference
 				HornShape RIGHTSB XH (WIDTH / 2) (SMOOTHB) (-1)
-				OShapeOutline (XH + O) (0 - O) (SB - O) (RIGHTSB + O) nothing nothing nothing
+				OShapeOutline.NoOvershoot XH 0 SB RIGHTSB nothing nothing nothing
 			include : refer-glyph "o"
 			save 'oHorn' 0x01A1
 
@@ -3191,8 +3191,16 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # bulleye
 			include [refer-glyph 'O'] AS_BASE
-			local radius : Math.min DOTRADIUS ((RIGHTSB - SB - STROKE * 2) / 4)
-			include : Ring (CAPMIDDLE + radius) (CAPMIDDLE - radius) (MIDDLE + radius) (MIDDLE - radius)
+			local halfDotWidth  : Math.min DOTRADIUS ((RIGHTSB - SB - HVCONTRAST * STROKE * 2) / 4)
+			local halfDotHeight : Math.min DOTRADIUS (halfDotWidth * 1.5)
+			include : OShapeOutline.NoOvershoot
+				CAP / 2 + halfDotHeight
+				CAP / 2 - halfDotHeight
+				MIDDLE + halfDotWidth
+				MIDDLE - halfDotWidth
+				STROKE * halfDotWidth * 2 / WIDTH
+				SmoothAOf halfDotWidth (halfDotWidth * 2)
+				SmoothBOf halfDotWidth (halfDotWidth * 2)
 
 			save 'bulleye' 0x298
 
@@ -4440,11 +4448,6 @@ glyph-block LetterUnified-Basic : begin
 
 	### S and s
 	do "s and related"
-		define [SNeck] : params [[stroke STROKE] [slantCoeff 0]] : begin
-			define strokeCoeff : StrokeWidthBlend 0 1 stroke
-			define tension : 0.46 - 0.005 * strokeCoeff + slantCoeff * TANSLANT
-			return : alsothruthem {{0.4 tension} {0.6 (1 - tension)}} [widths.center stroke]
-
 		define [SStroke] : begin
 			local stroke : adviceBlackness2 2.875 2 CAP
 			local ess : ESS * stroke / STROKE
