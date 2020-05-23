@@ -412,7 +412,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `_`:
     * `v-underscore-high`, `cv20`: Higher underscore `_`, placed right below baseline (default).
     * `v-underscore-low`, `cv21`: Lower underscore `_`, placed right above descender line.
-    * `v-underscore-above-baseline`, `cv99`: Extra-high `_`, placed right below baseline.
+    * `v-underscore-above-baseline`, `cv99`: Extra-high underscore `_`, placed right above baseline.
   * Styles for `¶`:
     * `v-paragraph-high`, `cv22`: Higher paragraph symbol `¶` (default).
     * `v-paragraph-low`, `cv23`: Lower paragraph symbol `¶`.
