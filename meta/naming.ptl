@@ -1,4 +1,5 @@
 import [fallback] from '../support/utils'
+import 'semver' as semver
 
 define COPYRIGHT             0
 define FAMILY                1
@@ -185,6 +186,12 @@ export : define [assignFontNames para metrics font] : begin
 	set font.head.macStyle          : object
 		bold          : not : not isBold
 		italic        : not : not (isItalic || isOblique)
+
+	define majorVersion : semver.major para.naming.version
+	define minorVersion : semver.minor para.naming.version
+	define patchVersion : semver.patch para.naming.version
+	if (minorVersion > 99 || patchVersion > 9) : throw : new Error "Version number overflow"
+	set font.head.fontRevision : majorVersion + (minorVersion * 10 + patchVersion) / 1000
 
 	if (para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1) : begin
 		set font.OS_2.panose.3          9 # Monospaced
