@@ -8,6 +8,7 @@ module.exports = function (aspect, hive, params, sink) {
 	const block = hive.blend;
 	let keys = new Set();
 	for (const grade in block) {
+		sink[grade] = block[grade];
 		if (!isFinite(parseFloat(grade))) continue;
 		for (const key in block[grade]) {
 			if (block[grade][key] == null) continue;

@@ -44,7 +44,7 @@ async function getParameters(argv) {
 
 	if (argv.excludedCharRanges) para.excludedCodePointRanges = argv.excludedCharRanges;
 	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-	if (argv.metricOverride) Parameters.applymetricOverride(para, argv.metricOverride);
+	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 
 	para.naming = {
 		family: argv.menu.family,

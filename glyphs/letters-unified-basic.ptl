@@ -149,7 +149,7 @@ glyph-block LetterUnified-Basic : begin
 			if para.isItalic
 			: then : begin
 				local shift : (1 - df.div) * 0.2
-				local left : [mix SB df.rightSB ([linreg 18 0.42 126 0.46 STROKE] - shift)] - HALFSTROKE * HVCONTRAST
+				local left : [mix SB df.rightSB ([StrokeWidthBlend 0.42 0.46] - shift)] - HALFSTROKE * HVCONTRAST
 				local right : mix SB df.rightSB (1.1 - shift)
 				local rightTerm : Math.max right (left + HOOKX + STROKE)
 				local middle : mix left right (0.55 * df.div)
@@ -158,11 +158,11 @@ glyph-block LetterUnified-Basic : begin
 					flat left XH [heading DOWNWARD]
 					curl left (SMALLSMOOTHB * 0.8)
 					hookend O
-					g4   rightTerm (HOOK * [linreg 18 0.85 126 1 STROKE] * df.div)
+					g4   rightTerm (HOOK * [StrokeWidthBlend 0.85 1] * df.div)
 				include : dispiro
 					flat (left - (LONGJUT * df.div) + HALFSTROKE * HVCONTRAST) XH [widths 0 STROKE]
 					curl left XH
-				set-anchor 'above' BASE (left + HALFSTROKE * HVCONTRAST + [linreg 18 0.25 126 0 STROKE] * TANSLANT * df.width) XH
+				set-anchor 'above' BASE (left + HALFSTROKE * HVCONTRAST + [StrokeWidthBlend 0.25 0] * TANSLANT * df.width) XH
 				set-anchor 'below' BASE middle 0
 			: else : begin
 				include : IotaShape XH
@@ -493,7 +493,7 @@ glyph-block LetterUnified-Basic : begin
 					flat left CAP [heading DOWNWARD]
 					curl left (SMALLSMOOTHB * 0.85)
 					hookend O
-					g4   rightTerm (HOOK * [linreg 18 0.85 126 1 STROKE] * df.div)
+					g4   rightTerm (HOOK * [StrokeWidthBlend 0.85 1] * df.div)
 				include : tagged 'serifLT': dispiro
 					flat (left - (LONGJUT * df.div) + HALFSTROKE * HVCONTRAST) CAP [widths 0 STROKE]
 					curl left CAP
@@ -644,7 +644,7 @@ glyph-block LetterUnified-Basic : begin
 		define VShapeMiddleWidth : adviceBlackness 3
 		define pInktrap 0.5
 
-		define StraightSbShrink : mix 1 designParameters.straightVShapeSbShrink : if SLAB 0.75 1
+		define StraightSbShrink : mix 1 (designParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.25]) : if SLAB 0.75 1
 
 		define [VShapeOutline] : params [top [sw STROKE] barStraight div] : glyph-construction
 			local df : DivFrame div
@@ -906,7 +906,7 @@ glyph-block LetterUnified-Basic : begin
 			include : dispiro
 				widths.lhs stroke
 				flat RIGHTSB 0 [heading UPWARD]
-				curl RIGHTSB (XH - SMOOTHB * [linreg 18 0.9 126 0.81 stroke])
+				curl RIGHTSB (XH - SMOOTHB * [StrokeWidthBlend 0.9 0.81 stroke])
 				hookend XO
 				g4 (SB - OXHOOK / 2) (XH - AHOOK)
 			include : dispiro
@@ -1205,13 +1205,15 @@ glyph-block LetterUnified-Basic : begin
 
 	### X and x
 	do "X, x and related =========================================================================="
+		define [WithXMask s] : if SLAB [intersection [Rect CAP DESCENDER SB RIGHTSB] s] s
 		sketch # X
 			set-width WIDTH
 			include MarkSet.capital
 
 			branch
-				include : xStrand true SB 0 RIGHTSB CAP 0.1 0.4 0.28
-				include : xStrand true SB CAP RIGHTSB 0 0.1 0.4 0.28
+				include : WithXMask : union
+					xStrand true SB 0 RIGHTSB CAP 0.1 0.4 0.28
+					xStrand true SB CAP RIGHTSB 0 0.1 0.4 0.28
 				include : AIHSerifs CAP
 				save 'X.straight' 'X'
 				save 'Chi.straight' 0x3A7
@@ -1221,8 +1223,9 @@ glyph-block LetterUnified-Basic : begin
 					save 'cyrHadescender.straight'
 
 			branch
-				include : xStrand false SB 0 RIGHTSB CAP 0.1 0.4 0.28
-				include : xStrand false SB CAP RIGHTSB 0 0.1 0.4 0.28
+				include : WithXMask : union
+					xStrand false SB 0 RIGHTSB CAP 0.1 0.4 0.28
+					xStrand false SB CAP RIGHTSB 0 0.1 0.4 0.28
 				include : AIHSerifs CAP
 				save 'X.curly' 'X'
 				save 'Chi.curly' 0x3A7
@@ -1236,8 +1239,9 @@ glyph-block LetterUnified-Basic : begin
 			local TURN (XH * 0.1)
 
 			branch
-				include : xStrand true SB 0 RIGHTSB XH 0.02 0.4 0.14
-				include : xStrand true SB XH RIGHTSB 0 0.02 0.4 0.14
+				include : WithXMask : union
+					xStrand true SB 0 RIGHTSB XH 0.02 0.4 0.14
+					xStrand true SB XH RIGHTSB 0 0.02 0.4 0.14
 				include : AIHSerifs XH
 				save 'x.straight' 'x'
 				save 'cyrha.straight' 0x445
@@ -1245,8 +1249,9 @@ glyph-block LetterUnified-Basic : begin
 					include : CyrDescender RIGHTSB (connex -- 0.5)
 					save 'cyrhadescender.straight'
 			branch
-				include : xStrand false SB 0 RIGHTSB XH 0.02 0.4 0.14
-				include : xStrand false SB XH RIGHTSB 0 0.02 0.4 0.14
+				include : WithXMask : union
+					xStrand false SB 0 RIGHTSB XH 0.02 0.4 0.14
+					xStrand false SB XH RIGHTSB 0 0.02 0.4 0.14
 				include : AIHSerifs XH
 				save 'x.curly' 'x'
 				save 'cyrha.curly' 0x445
@@ -1259,13 +1264,15 @@ glyph-block LetterUnified-Basic : begin
 			include MarkSet.p
 
 			branch
-				include : xStrand true SB DESCENDER RIGHTSB XH 0.05 0.4 0.11
-				include : xStrand true SB XH RIGHTSB DESCENDER 0.05 0.4 0.11
+				include : WithXMask : union
+					xStrand true SB DESCENDER RIGHTSB XH 0.05 0.4 0.11
+					xStrand true SB XH RIGHTSB DESCENDER 0.05 0.4 0.11
 				save 'chi.straight' 0x3C7
 				save 'latinchi.straight' 0xAB53
 			branch
-				include : xStrand false SB DESCENDER RIGHTSB XH 0.05 0.4 0.11
-				include : xStrand false SB XH RIGHTSB DESCENDER 0.05 0.4 0.11
+				include : WithXMask : union
+					xStrand false SB DESCENDER RIGHTSB XH 0.05 0.4 0.11
+					xStrand false SB XH RIGHTSB DESCENDER 0.05 0.4 0.11
 				save 'chi.curly' 0x3C7
 				save 'latinchi.curly' 0xAB53
 
@@ -1281,11 +1288,13 @@ glyph-block LetterUnified-Basic : begin
 
 	### Y
 	do "Y and related ============================================================================"
+		define [WithYMask s] : if SLAB [intersection [Rect CAP DESCENDER SB RIGHTSB] s] s
 		define [YShape straightBar top bot] : glyph-construction
 			local cross : mix [fallback bot 0] top 0.4
-			include : halfXStrand straightBar SB top MIDDLE cross 0.1 0.4 0.28
-			include : halfXStrand straightBar RIGHTSB top MIDDLE cross 0.1 0.4 0.28
-			tag-contour 'strokeRT'
+			include : WithYMask
+				halfXStrand straightBar SB top MIDDLE cross 0.1 0.4 0.28
+			include : tagged 'strokeRT' : WithYMask
+				halfXStrand straightBar RIGHTSB top MIDDLE cross 0.1 0.4 0.28
 			include : VBar MIDDLE [fallback bot 0] (cross + HALFSTROKE)
 			set-anchor 'overlay' BASE MIDDLE cross
 			if SLAB : begin
@@ -1360,7 +1369,7 @@ glyph-block LetterUnified-Basic : begin
 			local useStraightBottom : !slab && straightBar
 			local useCurlyBottom : slab || straightBar
 			local px1 0.84
-			local py1 : linreg 18 0.8 126 0.76 STROKE
+			local py1 : StrokeWidthBlend 0.8 0.76
 			local px2 0.95
 			local py20 0.88
 			local py2 : if (useStraightBottom || useCurlyBottom) 0.97 py20
@@ -1371,8 +1380,8 @@ glyph-block LetterUnified-Basic : begin
 			local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 			local yrstrokel0 : MIDDLE - WIDTH * 0.1
 			local yrstrokel : MIDDLE - WIDTH * 0.1 + (STROKE * HVCONTRAST * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
-			local yrstroker : WIDTH - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if (straightBar && !slab) designParameters.straightSmallYShapeSbShrink 1]
-			local yshrink : [linreg 18 1 126 0.85 STROKE] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
+			local yrstroker : WIDTH - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if (straightBar) designParameters.straightSmallYShapeSbShrink 1]
+			local yshrink : [StrokeWidthBlend 1 0.85] * [if straightBar ([adviceBlackness 3.25] / STROKE) 1]
 			local yBottomJut : JUT * 1.25
 			local slabysize : JUT * 1.0625 * (WIDTH / UPM) + STROKE
 			local slabyvx 0.7
@@ -1477,6 +1486,7 @@ glyph-block LetterUnified-Basic : begin
 						yTopKnots (WIDTH - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
+					Rect (bottom + HALFSTROKE) bottom 0 WIDTH
 
 				if slab : begin
 					include : AIVSerifs top
@@ -2909,7 +2919,7 @@ glyph-block LetterUnified-Basic : begin
 				arcvh
 				g4 (MIDDLE + CORRECTION_OMIDS) 0
 				alsothru 0.5 0.1353
-				g4.down.mid (RIGHTSB - STROKE * HVCONTRAST + OX) [mix DESCENDER STROKE [linreg 18 0.5 126 0.49 STROKE]] [heading DOWNWARD]
+				g4.down.mid (RIGHTSB - STROKE * HVCONTRAST + OX) [mix DESCENDER STROKE : StrokeWidthBlend 0.5 0.49] [heading DOWNWARD]
 				arcvh
 				flat (RIGHTSB - HOOKX + OX) (DESCENDER + STROKE) [heading LEFTWARD]
 				curl [Math.min (RIGHTSB - STROKE * HVCONTRAST * 1.5) (RIGHTSB - HOOKX + OX - 1)] (DESCENDER + STROKE) [heading LEFTWARD]
@@ -3219,7 +3229,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch # Q.straight
 			set-width WIDTH
 			include [refer-glyph 'O'] AS_BASE
-			local shift : linreg 18 0 126 0.25 STROKE
+			local shift : StrokeWidthBlend 0 0.25
 			include : dispiro
 				widths.rhs
 				flat (MIDDLE + WIDTH * 0.075 - STROKE * HVCONTRAST * shift) (-CAP * 0.2) [heading UPWARD]
@@ -3228,7 +3238,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch # Q.taily
 			set-width WIDTH
 			include [refer-glyph 'O'] AS_BASE
-			local shift : linreg 18 0.5 126 0.6 STROKE
+			local shift : StrokeWidthBlend 0.5 0.6
 			local startx : MIDDLE + (STROKE * shift) * HVCONTRAST
 			local terminalx : MIDDLE + HOOKX
 			include : dispiro
@@ -4327,7 +4337,7 @@ glyph-block LetterUnified-Basic : begin
 				g4 hookx (bot + HOOK)
 			local g : G.call currentGlyph # Not using include
 			set-anchor 'bottomright' BASE g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
-			set-anchor 'below' BASE [mix tcenter g.knots.(g.knots.length - 1).x : linreg 18 0.375 126 0.5 STROKE] bot
+			set-anchor 'below' BASE [mix tcenter g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
 			include : dispiro
 				widths.rhs
 				flat (tcenter + HALFSTROKE - LONGJUT + TBALANCE2 - HALFSTROKE * TANSLANT) XH
@@ -4433,7 +4443,7 @@ glyph-block LetterUnified-Basic : begin
 	### S and s
 	do "s and related"
 		define [SNeck] : params [[stroke STROKE] [slantCoeff 0]] : begin
-			define strokeCoeff : linreg 18 0 126 1 stroke
+			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define tension : 0.46 - 0.005 * strokeCoeff + slantCoeff * TANSLANT
 			return : alsothruthem {{0.4 tension} {0.6 (1 - tension)}} [widths.center stroke]
 
@@ -4468,7 +4478,7 @@ glyph-block LetterUnified-Basic : begin
 		define [sStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
 			define ess : mix stroke (ESS * stroke / STROKE) 0.5
-			define strokeCoeff : linreg 18 0 126 1 stroke
+			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define smooth : adviceSSmooth XH (-1) stroke
 			return : dispiro
 				widths.lhs stroke
@@ -4483,7 +4493,7 @@ glyph-block LetterUnified-Basic : begin
 		define [sStrokePhoneticRight] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
 			define ess : mix stroke (ESS * stroke / STROKE) 0.5
-			define strokeCoeff : linreg 18 0 126 1 stroke
+			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define smooth : adviceSSmooth XH (-1) stroke
 			return : dispiro
 				widths.lhs stroke
@@ -4499,7 +4509,7 @@ glyph-block LetterUnified-Basic : begin
 		define [RevsStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
 			define ess : ESS * stroke / STROKE
-			define strokeCoeff : linreg 18 0 126 1 stroke
+			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define smooth : adviceSSmooth XH 1 stroke
 			return : dispiro
 				widths.rhs stroke
