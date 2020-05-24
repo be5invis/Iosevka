@@ -1,6 +1,7 @@
 ###### Automatic builds
 $$include '../meta/macros.ptl'
 
+import [Dotless AnyCv] from "../support/gr"
 import 'unorm' as unorm
 import [fallback suggestGC] from '../support/utils'
 
@@ -18,8 +19,8 @@ glyph-block AutoBuild-Accents : begin
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
 
 		# replace dotted-i and dotted-j with dotless equalivents
-		if (hasMarkAbove && parts.0.related && parts.0.related.dotless) : begin
-			local dotless [query-glyph parts.0.related.dotless]
+		if (hasMarkAbove && [Dotless.get parts.0]) : begin
+			local dotless [query-glyph : Dotless.get parts.0]
 			if dotless : set parts.0 dotless
 
 		# replace below marks with trailing marks
@@ -100,9 +101,9 @@ glyph-block AutoBuild-Accents : begin
 		local base parts.0
 		local origBase base
 		local marks : parts.slice 1
-		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
-		if (relation && base.related && base.related.(relation))
-			set base [query-glyph base.related.(relation)]
+		local targetGlyphName : if relation [relation.amendName origGlyphName] origGlyphName
+		if (relation && [relation.get base])
+			set base [query-glyph : relation.get base]
 
 		return { origBase base marks targetGlyphName }
 
@@ -114,37 +115,31 @@ glyph-block AutoBuild-Accents : begin
 		set s_parts { base :: marks }
 		create-glyph targetGlyphName construction
 
-	define [VariantGlyphProc origGlyphName relation _pa] : if (!recursive) : begin
+	define [VariantGlyphProc origGlyphName relation _pa] : begin
 		local { origBase base marks targetGlyphName } : GlyphProcShared origGlyphName relation parts
 		if (relation && base === origBase) : return nothing
 
-		if [not base.featureSelector] : return nothing
-		local h {.}
-		foreach [feature : items-of : Object.keys base.featureSelector] : begin
-			local variant base.featureSelector.(feature)
-			local variantRoot [query-glyph variant]
+		local originalGlyph : query-glyph targetGlyphName
+		foreach [gr : items-of : AnyCv.query base] : begin
+			local variantRoot : query-glyph : gr.get base
 			if variantRoot : begin
 				set s_code null
 				set s_parts { variantRoot :: marks }
-				create-glyph (targetGlyphName + '.' + feature) construction
-
-				set h.(feature) (targetGlyphName + '.' + feature)
-
-		if [query-glyph targetGlyphName] : set [query-glyph targetGlyphName].featureSelector h
+				create-glyph [gr.amendName targetGlyphName] construction
+				if originalGlyph : gr.set originalGlyph [gr.amendName targetGlyphName]
 
 	define [LinkRelatedGlyph origGlyphName relation] : begin
 		if [not relation] : return nothing
 		if [not [query-glyph origGlyphName]] : return nothing
 
-		local targetGlyphName : origGlyphName + [if relation ("." + relation) ""]
+		local targetGlyphName : relation.amendName origGlyphName
 		if [not [query-glyph targetGlyphName]] : return nothing
 
-		if [not [query-glyph origGlyphName].related] : set [query-glyph origGlyphName].related {.}
-		set [query-glyph origGlyphName].related.(relation) targetGlyphName
+		relation.set [query-glyph origGlyphName] targetGlyphName
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
 		local {glyphName code parts} foundDecompositions.(_id)
-		foreach [relation : items-of {null 'dotless'}] : begin
+		foreach [relation : items-of {null Dotless}] : begin
 			RootGlyphProc    glyphName relation code parts
 			VariantGlyphProc glyphName relation      parts
 			LinkRelatedGlyph glyphName relation

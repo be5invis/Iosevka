@@ -7,6 +7,7 @@ const BuildFont = require("./build-font.js");
 const Parameters = require("../support/parameters");
 const FormVariantData = require("../support/variant-data");
 const FormLigationData = require("../support/ligation-data");
+const { AnyCv } = require("../support/gr");
 const Toml = require("toml");
 
 module.exports = async function main(argv) {
@@ -102,7 +103,7 @@ async function saveCharMap(argv, font) {
 			glyph.name,
 			glyph.unicode,
 			typographicFeatures,
-			glyph.featureSelector ? Object.keys(glyph.featureSelector) : []
+			AnyCv.query(glyph).map(gr => gr.tag)
 		]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");

@@ -3,23 +3,20 @@ $$include '../meta/macros.ptl'
 import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
 
 import [mix linreg clamp fallback] from '../support/utils'
+import [Cv AnyCv] from '../support/gr'
 import [designParameters] from '../meta/aesthetics'
 
 glyph-module
 
 glyph-block CommonShapes : begin
-	define [queryFeatureSelector follow para name transform omit] : begin
-		local fs {.}
-		local introduced false
+	define [ApplyCv g follow para name transform omit] : begin
 		foreach [{k h} : pairs-of para.variants] : begin
 			local suffix h.(follow)
 			if (suffix && !(omit && omit.(k))) : begin
 				if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
 				if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
 					local tag h.__cvmap.(follow)
-					set fs.(tag) ([fallback name follow] + '.' + suffix)
-					set introduced true
-		return : if introduced fs null
+					[Cv tag].set g ([fallback name follow] + '.' + suffix)
 
 	define [select-variant] : params [name unicode [to-name name] transform omit [follow name]] : begin
 		if (pickHash && [not pickHash.(name)]) : return nothing
@@ -33,8 +30,7 @@ glyph-block CommonShapes : begin
 		create-glyph [fallback to-name name] : glyph-construction
 			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
-			set currentGlyph.featureSelector : queryFeatureSelector follow para name transform omit
-			if (follow !== name) : set currentGlyph.featureSelectorFollows follow
+			ApplyCv currentGlyph follow para name transform omit
 			set this.cmpPriority [query-glyph (name + '.' + variant)].cmpPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
@@ -71,17 +67,9 @@ glyph-block CommonShapes : begin
 		create-glyph dstGid : glyph-construction : include : Fn sourceGid null
 
 		local glyphDst glyphMap.(dstGid)
-		if glyphDst : begin
-			set glyphDst.featureSelectorFollows sourceGid
-
-			local fsFollow : glyphSrc.featureSelectorFollows || sourceGid
-			local fs : queryFeatureSelector fsFollow para sourceGid
-			local fs_i : queryFeatureSelector fsFollow para dstGid
-
-			if (fs && fs_i) : foreach [{k gid} : pairs-of fs] : begin
-				create-glyph fs_i.(k) : glyph-construction : include : Fn gid k
-				if [not glyphDst.featureSelector] : set glyphDst.featureSelector {.}
-				set glyphDst.featureSelector.(k) fs_i.(k)
+		if glyphDst : foreach [gr : items-of : AnyCv.query glyphSrc] : begin
+			create-glyph [gr.amendName dstGid] : glyph-construction : include : Fn [gr.get glyphSrc] gr.tag
+			gr.set glyphDst [gr.amendName dstGid]
 
 	define [alias newid unicode id] : WithDerivatives id [fallback newid ('.alias' + [newtemp])]
 		lambda [src sel] : glyph-construction
@@ -850,4 +838,4 @@ glyph-block CommonShapes : begin
 		define tension : tensionCoeff * (0.46 - 0.005 * strokeCoeff + slantCoeff * TanSlope)
 		return : alsothruthem {{0.4 tension} {0.6 (1 - tension)}} [widths.center stroke]
 
-	glyph-block-export queryFeatureSelector select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck
+	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck

@@ -3,6 +3,8 @@ $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../support/utils'
 
+extern Set
+
 glyph-module
 
 glyph-block AutoBuild-Enclosure : begin
@@ -83,6 +85,20 @@ glyph-block AutoBuild-Enclosure : begin
 		define smoothB : SmoothBOf (SmallSmooth * (right - left) / (RightSB - SB)) width
 		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight smoothA smoothB
 
+	define [PowerSet s] : begin
+		if [not s.length] : return {}
+		local withoutFirst : PowerSet [s.slice 1]
+		local includeFirst : [PowerSet [s.slice 1]].map : lambda [x] : {s.0}.concat x
+		return : withoutFirst.concat includeFirst
+
+	define [CollectRelatedGlyphs records] : begin
+		foreach [record : items-of records] : begin
+			local parts record.1
+			local variantSelectors : new Set
+			foreach [srcName : items-of parts] : begin
+				local g : query-glyph srcName
+				if (g && g.featureSelector) : console.log g.featureSelector
+
 	define [CircledMiniatureFont digits width records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		return : Miniature
@@ -93,6 +109,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createCircledGlyphs digits records] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
+			CollectRelatedGlyphs records
 			local miniatureFont : CircledMiniatureFont digits ww records
 			foreach {unicode parts w bal baly} [items-of records] : do
 				define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww

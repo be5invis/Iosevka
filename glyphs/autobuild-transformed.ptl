@@ -2,6 +2,7 @@
 $$include '../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../support/utils'
+import [AnyCv AnyRelated DotlessOrNot getGrTree] from "../support/gr"
 
 glyph-module
 
@@ -18,35 +19,42 @@ glyph-block Autobuild-Transformed : begin
 			set name (name + j)
 		return name
 
-	define TrackingRelations { 'dotless' }
-	define [extendRelatedGlyphs records relations suffix] : begin
+	define [suggestMappedName map key name] : begin
+		if map.(key) : return map.(key)
+		local amended : suggestName name
+		set map.(key) amended
+		return amended
+
+	define [extendRelatedGlyphs records suffix] : begin
 		local relatedRecords {}
-		local relMap         {.}
+		local relSets        {}
 		local targetNameMap  {.}
-		foreach [rel : items-of relations] : set relMap.(rel) {.}
+
 		foreach [record : items-of records] : begin
 			local srcName record.1
-			set targetNameMap.(srcName) : suggestName (srcName + '+' + suffix)
-			local g : query-glyph srcName
-			if (g && g.related) : foreach [rel : items-of relations] : if (g.related.(rel)) : begin
-				local relSourceName g.related.(rel)
-				set targetNameMap.(relSourceName) : suggestName (relSourceName + '+' + suffix)
+			suggestMappedName targetNameMap srcName (srcName + '+' + suffix)
+
+			local dstName : srcName + '+' + suffix
+			local tree : getGrTree srcName {DotlessOrNot AnyCv} query-glyph
+			foreach [{gr origSrcName relSrcName} : items-of tree] : if [query-glyph relSrcName] : begin
+				local origDstName : suggestMappedName targetNameMap origSrcName (origSrcName + '+' + suffix)
+				local relDstName  : suggestMappedName targetNameMap relSrcName  (relSrcName + '+' + suffix)
+
 				local relatedRecord : record.slice 0
 				set relatedRecord.0 null
-				set relatedRecord.1 relSourceName
+				set relatedRecord.1 relSrcName
 				relatedRecords.push relatedRecord
-				set relMap.(rel).(srcName) relSourceName
-		return {[records.concat relatedRecords] relMap targetNameMap}
 
-	define [apply-relations g gn relMap targetNameMap] : begin
-		foreach [{rel rm} : pairs-of relMap] : begin
-			local relSrc rm.(gn)
-			if relSrc : begin
-				if [not g.related] : set g.related {.}
-				set g.related.(rel) targetNameMap.(relSrc)
+				relSets.push {gr origDstName relDstName}
+
+		return {[records.concat relatedRecords] relSets targetNameMap}
+
+	define [link-relations relSets] : foreach [{gr origDstName relDstName} : items-of relSets]
+		if [query-glyph origDstName] : gr.set [query-glyph origDstName] relDstName
+
 
 	define [createSuperscripts _records] : begin
-		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sup'
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sup'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -57,6 +65,7 @@ glyph-block Autobuild-Transformed : begin
 		foreach {unicode glyphid pri} [items-of records]
 			create-glyph (targetNameMap.(glyphid)) : glyph-construction
 				if unicode : assign-unicode unicode
+				if [not miniatureFont.(glyphid)] : throw : new Error "Cannot find glyph \(glyphid)"
 				local middle : miniatureFont.(glyphid).advanceWidth / 2
 				include miniatureFont.(glyphid) AS_BASE ALSO_METRICS
 				apply-transform [Upright] true
@@ -65,10 +74,10 @@ glyph-block Autobuild-Transformed : begin
 				apply-transform [Translate middle (CAP + Accent / 2)] true
 				apply-transform [Italify] true
 				if pri : set currentGlyph.cmpPriority pri
-				apply-relations currentGlyph glyphid relMap targetNameMap
+		link-relations relSets
 
 	define [createSubscripts _records] : begin
-		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'sub'
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sub'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -87,10 +96,10 @@ glyph-block Autobuild-Transformed : begin
 				apply-transform [Translate middle (Descender / 2)] true
 				apply-transform [Italify] true
 				if pri : set currentGlyph.cmpPriority pri
-				apply-relations currentGlyph glyphid relMap targetNameMap
+		link-relations relSets
 
 	define [createSMCPs _records] : begin
-		local {records relMap targetNameMap} : extendRelatedGlyphs _records TrackingRelations 'smcp'
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'smcp'
 		local pendingGlyphs : records.map : [record] => record.1
 		local forkedParams : Object.create para
 		set forkedParams.cap0 para.cap
@@ -106,7 +115,7 @@ glyph-block Autobuild-Transformed : begin
 				if unicode : assign-unicode unicode
 				include sf.(glyphid) AS_BASE
 				set-width sf.(glyphid).advanceWidth
-				apply-relations currentGlyph glyphid relMap targetNameMap
+		link-relations relSets
 
 	define [createMedievalCombs records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -670,9 +679,9 @@ glyph-block Autobuild-Transformed : begin
 		define numberGlyphIDs {}
 		foreach [gid : items-of numberEntries] : if [query-glyph gid] : begin
 			numberGlyphIDs.push gid
-			if [query-glyph gid].featureSelector : begin
-				foreach [{k v} : pairs-of [query-glyph gid].featureSelector] : begin
-					numberGlyphIDs.push v
+			local g : query-glyph gid
+			foreach [gr : items-of : AnyCv.query g] : begin
+				numberGlyphIDs.push : gr.get g
 
 		local derivedFont : Thinner numberGlyphIDs shrink crowd
 		foreach [gid : items-of numberGlyphIDs] : foreach [nd : items-of {0 1 2 3 4 5 6}]
