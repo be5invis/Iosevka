@@ -31,9 +31,9 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-159 Supported Languages: 
+160 Supported Languages: 
 
-Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
+Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
 
 <!-- END Section-Language-List -->
 
@@ -189,7 +189,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																					
+																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -242,7 +242,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles for further customizing default (`calt`) ligation sets:
+* Styles for customizing the default (`calt`) ligation set. By choosing one or multiple items listed below, the ligation set of `calt` will *only* contain the corresponded ligations of the selectors you used.
 
   * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
   * `calt-arrow`: Enable ligation set that forms arrows.
@@ -261,7 +261,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-ltgt-diamond`: Enable ligation for `<>` as diamond.
   * `calt-brst`: Center asterisk in `(*` and `*)`.
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
-  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`..
+  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
   * `calt-logic`: Enable ligation for `/\` and `\/`.
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   * `calt-llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
@@ -333,7 +333,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
     * `v-l-hooky`, `cv09`: Hooky `l`.
-    * `v-l-zshaped`, `cv10`: Z-shaped `i`.
+    * `v-l-zshaped`, `cv10`: Z-shaped `l`.
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
@@ -383,6 +383,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
     * `v-zero-unslashed`, `cv15`: O-like `0`.
     * `v-zero-reverse-slashed`, `cv93`: Reverse-slashed `0`.
+    * `v-zero-long-dotted`, `CVAB`: Long-dotted Zero `0` like Hack.
   * Styles for `1`:
     * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
     * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).
@@ -398,6 +399,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
+    * `v-eszet-longs-s-lig`, `CVAC`: A more modern, beta-like Eszet.
   * Styles for `λ`:
     * `v-lambda-straight`, `cv94`: More-straight letter `λ` (default).
     * `v-lambda-curly`, `cv95`: More curly letter `λ`, like Iosevka 2.x.
@@ -412,7 +414,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `_`:
     * `v-underscore-high`, `cv20`: Higher underscore `_`, placed right below baseline (default).
     * `v-underscore-low`, `cv21`: Lower underscore `_`, placed right above descender line.
-    * `v-underscore-above-baseline`, `cv99`: Extra-high underscore `_`, placed right above baseline.
+    * `v-underscore-above-baseline`, `cv99`: Extra-high `_`, placed right below baseline.
   * Styles for `¶`:
     * `v-paragraph-high`, `cv22`: Higher paragraph symbol `¶` (default).
     * `v-paragraph-low`, `cv23`: Lower paragraph symbol `¶`.
