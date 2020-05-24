@@ -153,7 +153,11 @@ function figureOutDefaults(variantsData, gr) {
 async function processLigSetCherryPicking() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
-	md.log(`* Styles for further customizing default (\`calt\`) ligation sets:\n`);
+	md.log(
+		`* Styles for customizing default (\`calt\`) ligation sets. By picking them, ` +
+			`the default ligation set will be cleared and only includes the ligation selected ` +
+			`by the selectors listed below:\n`
+	);
 	for (const gr in ligData.cherry) {
 		md.log(`  * \`${gr}\`: ${ligData.cherry[gr].desc}.`);
 	}
