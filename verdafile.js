@@ -6,6 +6,8 @@ const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm, fail, echo } = build.actions;
 const { FileList } = build.predefinedFuncs;
+const which = require("which");
+
 module.exports = build;
 
 ///////////////////////////////////////////////////////////
@@ -18,6 +20,8 @@ const DIST = "dist";
 const ARCHIVE_DIR = "release-archives";
 
 const OTF2OTC = "otf2otc";
+const OTFCC_BUILD = "otfccbuild";
+const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
 const webfontFormats = [
@@ -45,9 +49,18 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const Version = oracle(`metadata:version`, async () => {
+const Version = oracle(`oracle:version`, async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
+});
+
+const HasTtx = oracle(`oracle:has-ttx`, async () => {
+	try {
+		const cmd = await which(TTX);
+		return !!cmd;
+	} catch (e) {
+		return false;
+	}
 });
 
 async function tryParseToml(str) {
@@ -66,13 +79,19 @@ const RawPlans = oracle(`metadata:raw-plans`, async target => {
 	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
 
 	const bp = await tryParseToml(BUILD_PLANS);
+	bp.buildOptions = bp.buildOptions || {};
+
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
 		const privateBP = await tryParseToml(PRIVATE_BUILD_PLANS);
 		Object.assign(bp.buildPlans, privateBP.buildPlans);
+		Object.assign(bp.buildOptions, privateBP.buildOptions || {});
 	}
 	return bp;
 });
-
+const OptimizeWithTtx = computed("metadata:optimize-with-ttx", async target => {
+	const [hasTtx, rp] = await target.need(HasTtx, RawPlans);
+	return hasTtx && !!rp.buildOptions.optimizeWithTtx;
+});
 const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
@@ -345,21 +364,31 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
-		const [fi] = await target.need(FontInfoOf(fn), Version);
+		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
 
 		const otdPath = `${output.dir}/${output.name}.otd`;
 		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
-		await run(
-			"otfccbuild",
-			otdPath,
-			["-o", `${output.full}`],
-			["-O3", "--keep-average-char-width", "-q"]
-		);
+		if (useTtx) {
+			const tempOtfPath = `${output.dir}/${output.name}.temp.otf`;
+			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
+
+			await optimizedOtfcc(otdPath, tempOtfPath);
+			await run(TTX, "-q", ["-o", ttxPath], tempOtfPath);
+			await run(TTX, "-q", ["-o", output.full], ttxPath);
+			await rm(tempOtfPath);
+			await rm(ttxPath);
+		} else {
+			await optimizedOtfcc(otdPath, output.full);
+		}
 		await rm(otdPath);
 	}
 );
+
+function optimizedOtfcc(from, to) {
+	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
+}
 
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
@@ -466,11 +495,11 @@ const ExportTtc = file.make(
 	}
 );
 async function buildTtcForFile(target, parts, out) {
-	await target.need(de`${out.dir}`);
-	const [ttfs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
+	const [useTtx] = await target.need(OptimizeWithTtx, de`${out.dir}`);
+	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
-	const ttfInputPaths = ttfs.map(p => p.full);
-	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc]);
+	const ttfInputPaths = ttfInputs.map(p => p.full);
+	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc], useTtx ? "--ttx-loop" : null);
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
