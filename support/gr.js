@@ -48,6 +48,7 @@ const DotlessOrNot = {
 };
 
 const AnyCv = {
+	optional: false,
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
@@ -56,14 +57,6 @@ const AnyCv = {
 				if (rel.get(glyph)) ret.push(rel);
 			}
 		}
-		return ret;
-	}
-};
-
-const AnyRelated = {
-	query(glyph) {
-		let ret = [...AnyCv.query(glyph)];
-		if (Dotless.get(glyph)) ret.push(Dotless);
 		return ret;
 	}
 };
@@ -87,6 +80,7 @@ function getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink) {
 	}
 }
 function getGrTree(gid, grSetList, fnGidToGlyph) {
+	if (typeof gid !== "string") throw new TypeError("Must supply a GID");
 	let sink = [];
 	getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink);
 	return sink;
@@ -102,6 +96,5 @@ function getMesh(glyphs, grs) {
 exports.Dotless = Dotless;
 exports.Cv = Cv;
 exports.AnyCv = AnyCv;
-exports.AnyRelated = AnyRelated;
 exports.DotlessOrNot = DotlessOrNot;
 exports.getGrTree = getGrTree;

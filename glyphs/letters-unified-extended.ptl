@@ -1527,36 +1527,42 @@ glyph-block LetterUnified-Extended : begin
 		sketch # eszet.longsslig
 			include MarkSet.capital
 
-			define stroke : adviceBlackness 3.5
-			define ess : mix stroke (Ess * stroke / Stroke) 0.5
-			define strokeCoeff : StrokeWidthBlend 0 1 stroke
-			define smooth : SmoothBOf [adviceSSmooth XH (-1) stroke] Width
-			define sTopY : CAP * 0.76 + stroke / 4
-			define sEndX : SB + stroke * HVContrast + (RightSB - SB) * 0.1
+			define swOuter : adviceBlackness2 3 3 CAP
+			define strokeCoeff : StrokeWidthBlend 0 1 swInner
+			define sEndX : Math.max
+				SB + swOuter * HVContrast + (RightSB - SB - Stroke) * 0.1
+				mix SB RightSB 0.3
+			define widthInner : Width - swOuter * HVContrast - (RightSB - SB - Stroke) * 0.1
+			define swInner : adviceBlackness2 3 2 XH (widthInner / Width)
+			define sTopY : XH + swInner / 8
+			define smooth : SmoothBOf (swInner + (widthInner / Width) * ([adviceSSmooth XH (-1) swInner] - swInner)) widthInner
 			define sTurnX : Math.max sEndX [mix SB RightSB 0.3]
 			define sBotX : Math.max (sEndX + 1) [mix sEndX RightSB 0.30]
 			define sTopX : sTurnX + (RightSB - sBotX)
-			define sTopHookX : sTopX + 0.5 * stroke * HVContrast
+			define sTopHookX : sTopX + 0.5 * swInner * HVContrast
 
 			include : dispiro
-				widths.rhs stroke
+				widths.rhs swOuter
 				flat SB 0 [heading Upward]
 				curl SB XH
 				arcvh
-				g4 ([mix SB sTopHookX 0.5] - CorrectionOMidX * stroke) (CAP - O)
-				archv
-				g4 sTopHookX (sTopY - stroke - O) [heading Downward]
+				g4 ([mix SB sTopHookX 0.52] - CorrectionOMidX * swOuter) (CAP - O) [widths.rhs Stroke]
+				straight.down.end sTopHookX (sTopY - swInner - O) [widths.heading 0 swInner Downward]
 
 			include : dispiro
-				widths.lhs stroke
-				straight.left.start sTopX (sTopY - O) [widths.heading stroke 0 Leftward]
+				widths.lhs swInner
+				straight.left.start sTopX (sTopY - O) [widths.heading swInner 0 Leftward]
 				archv
-				g4   sTurnX (sTopY - smooth)
-				SNeck stroke (slantCoeff -- -0.01) (tensionCoeff -- [StrokeWidthBlend 0.95 0.85])
-				g4   (RightSB - OX) (smooth) [widths 0 stroke]
-				arcvh
-				flat sBotX 0
-				curl sEndX 0 [heading Leftward]
+				g4   sTurnX (XH - smooth)
+				SNeck swInner (slantCoeff -- 0.02) (tensionCoeff -- [StrokeWidthBlend 0.99 0.975]) (dist -- 0.025)
+				g4   (RightSB - OX) (smooth) [widths 0 swInner]
+				hookend O (sw -- swInner) (swItalicAdj -- swInner)
+				g4 (sEndX + OX) SHook
+
+			piecewise
+				para.isItalic : include : VerticalHook (SB + HALF-Stroke * HVContrast) 0 (-Hook * 1.2) Hook swOuter
+				SLAB : include : LeftwardBottomSerif SB 0 SideJut
+
 			save 'eszet.longsslig'
 
 		select-variant 'eszet' 0xDF

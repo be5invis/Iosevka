@@ -1,7 +1,7 @@
 ###### Automatic builds
 $$include '../meta/macros.ptl'
 
-import [Dotless AnyCv] from "../support/gr"
+import [Dotless AnyCv DotlessOrNot getGrTree] from "../support/gr"
 import 'unorm' as unorm
 import [fallback suggestGC] from '../support/utils'
 
@@ -9,6 +9,20 @@ glyph-module
 
 glyph-block AutoBuild-Accents : begin
 	glyph-block-import CommonShapes : query-glyph refer-glyph
+
+	define [suggestName _name] : begin
+		local name _name
+		if [query-glyph name] : begin
+			local j 2
+			while [query-glyph (name + j)] : inc j
+			set name (name + j)
+		return name
+
+	define [suggestMappedName map key name] : begin
+		if map.(key) : return map.(key)
+		local amended : suggestName name
+		set map.(key) amended
+		return amended
 
 	# Build accented glyphs
 	define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
@@ -91,58 +105,32 @@ glyph-block AutoBuild-Accents : begin
 		include s_parts.0 AS_BASE
 		set-width s_parts.0.advanceWidth
 
-		local names {s_parts.0.name}
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
-			names.push part.name
 			if (part.name === 'rtailBR') : eject-contour 'serifRB'
 
-	define [GlyphProcShared origGlyphName relation parts] : begin
-		local base parts.0
-		local origBase base
-		local marks : parts.slice 1
-		local targetGlyphName : if relation [relation.amendName origGlyphName] origGlyphName
-		if (relation && [relation.get base])
-			set base [query-glyph : relation.get base]
-
-		return { origBase base marks targetGlyphName }
-
-	define [RootGlyphProc origGlyphName relation code parts] : begin
-		local { origBase base marks targetGlyphName } : GlyphProcShared origGlyphName relation parts
-		if (relation && base === origBase) : return nothing
-
-		set s_code : if relation null code
-		set s_parts { base :: marks }
-		create-glyph targetGlyphName construction
-
-	define [VariantGlyphProc origGlyphName relation _pa] : begin
-		local { origBase base marks targetGlyphName } : GlyphProcShared origGlyphName relation parts
-		if (relation && base === origBase) : return nothing
-
-		local originalGlyph : query-glyph targetGlyphName
-		foreach [gr : items-of : AnyCv.query base] : begin
-			local variantRoot : query-glyph : gr.get base
-			if variantRoot : begin
-				set s_code null
-				set s_parts { variantRoot :: marks }
-				create-glyph [gr.amendName targetGlyphName] construction
-				if originalGlyph : gr.set originalGlyph [gr.amendName targetGlyphName]
-
-	define [LinkRelatedGlyph origGlyphName relation] : begin
-		if [not relation] : return nothing
-		if [not [query-glyph origGlyphName]] : return nothing
-
-		local targetGlyphName : relation.amendName origGlyphName
-		if [not [query-glyph targetGlyphName]] : return nothing
-
-		relation.set [query-glyph origGlyphName] targetGlyphName
+	define [RootGlyphProc goalName code parts] : begin
+		set s_code   code
+		set s_parts  parts
+		create-glyph goalName construction
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
 		local {glyphName code parts} foundDecompositions.(_id)
-		foreach [relation : items-of {null Dotless}] : begin
-			RootGlyphProc    glyphName relation code parts
-			VariantGlyphProc glyphName relation      parts
-			LinkRelatedGlyph glyphName relation
+		RootGlyphProc glyphName code parts
+
+		if(parts.0 != [query-glyph parts.0.name]) : throw : new Error "Unreachable"
+		local dstTree {}
+		local targetNameMap  {.}
+		set targetNameMap.(parts.0.name) glyphName
+		local tree : getGrTree parts.0.name {DotlessOrNot AnyCv} query-glyph
+		foreach [{gr origBase relBase} : items-of tree] : begin
+			local origGN targetNameMap.(origBase)
+			if [not origGN] : throw : new Error 'Unreachable'
+			local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
+			local parts1 : parts.slice 0
+			set parts1.0 : query-glyph relBase
+			RootGlyphProc relGN null parts1
+			if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
 
 	suggestGC
 
