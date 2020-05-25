@@ -27,33 +27,49 @@ glyph-block AutoBuild-Enclosure : begin
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * Width / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
-	define [circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly] : begin
-		define gni : '.ci.' + [parts.join '_'] + '.' + [{dscale width bal baly}.join '.']
-		if [query-glyph gni] : return [query-glyph gni]
-		define lg : create-glyph gni : glyph-construction
+	define [circleInner dscale miniatureFont parts width mockInnerWidth bal baly] : begin
+		console.log 'Start data collect' parts
+		local totalWidth 0
+		local firstDerivedGyph null
+		local shift 0
+		foreach [gidPart : items-of parts] : do
+			local derivedGlyph miniatureFont.(gidPart)
+			if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
+			set totalWidth : totalWidth + derivedGlyph.advanceWidth
+		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
+		set totalWidth : Math.min mockInnerWidth totalWidth
+		if (firstDerivedGyph && firstDerivedGyph.anchors.above && firstDerivedGyph.anchors.below) : begin
+			if bal : set shift : CAP / 2 - [mix baly [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5] bal]
+			: else : set shift : CAP / 2 - [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5]
+		console.log 'End data collect' parts
+
+		console.log 'Start part prepare' parts
+		foreach [gidPart : items-of parts] : do
+			define gniPart : '.ci.' + gidPart + '@' + [{parts.length dscale width xCompress bal baly}.join '/']
+			if [not : query-glyph gniPart] : begin
+				console.log 'Add new used part' gidPart '->' gniPart
+				create-glyph gniPart : glyph-construction
+					include miniatureFont.(gidPart)
+					apply-transform : Upright
+					apply-transform : Scale (dscale * xCompress) dscale
+					apply-transform : Translate 0 (dscale * (-CAP / 2 + shift))
+					apply-transform : Translate 0 (CAP / 2 * dscale)
+					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+					apply-transform : Italify
+		console.log 'End part prepare' parts
+
+		return : create-glyph : glyph-construction
 			local tw 0
-			local firstDerivedGyph null
-			foreach [glyphid : items-of parts] : begin
-				local derivedGlyph miniatureFont.(glyphid)
-				include derivedGlyph
-				if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
-				apply-transform : Translate (-derivedGlyph.advanceWidth) 0
-				set tw : tw + derivedGlyph.advanceWidth
-			apply-transform : Translate tw 0
-			apply-transform : Upright
-			apply-transform : Scale [Math.min 1 (mockInnerWidth / tw)] 1
-			set tw : Math.min mockInnerWidth tw
-			local shift 0
-			if (firstDerivedGyph && firstDerivedGyph.anchors.above && firstDerivedGyph.anchors.below) : begin
-				if bal : set shift : CAP / 2 - [mix baly [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5] bal]
-				: else : set shift : CAP / 2 - [mix firstDerivedGyph.anchors.above.y firstDerivedGyph.anchors.below.y 0.5]
-			apply-transform : Translate (-tw / 2) (-CAP / 2 + shift)
-			apply-transform : Scale dscale
-			apply-transform : Translate (width / 2) (CAP / 2 * dscale)
-			apply-transform : Italify
-			set currentGlyph.cmpPriority 12
-			set-width 0
-		return lg
+			console.log 'Start' parts
+			foreach [gidPart : items-of parts] : do
+				define gniPart : '.ci.' + gidPart + '@' + [{parts.length dscale width xCompress bal baly}.join '/']
+				local part : query-glyph gniPart
+				include part
+				apply-transform : Translate (-part.advanceWidth * dscale * xCompress) 0
+				set tw : tw + part.advanceWidth * dscale * xCompress
+			apply-transform : Translate (tw / 2) 0
+			apply-transform : Translate (width / 2) 0
+			console.log 'End' parts '->' currentGlyph.contours.length 'contours'
 
 	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] 0.5]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -64,8 +80,8 @@ glyph-block AutoBuild-Enclosure : begin
 		define spatt  : [linreg HalfUPM 0.22 UPM 0.27 width] * (Width / HalfUPM)
 		define sw0 : [EnclosureStrokeScale dscale digits width] * [adviceBlackness [CircCrowd digits width]] / [CircScale digits width]
 		define sw : Math.max sw0 [fallback m 0]
-		define top : CAP * dscale + (CAP * spatt)
-		define bot : 0 - (CAP * spatt)
+		define top : symbolMid + CAP * dscale / 2 + (CAP * spatt)
+		define bot : symbolMid - CAP * dscale / 2 - (CAP * spatt)
 		define mosaicLeft 0
 		define mosaicRight width
 		define mosaicBot fontMetrics.OS_2.sTypoDescender
@@ -126,12 +142,8 @@ glyph-block AutoBuild-Enclosure : begin
 		create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
-			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 			include : OShape top bot left right sw smoothA smoothB
-
-			apply-transform : Upright
-			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-			apply-transform : Italify
 
 	define [createBoxedGlyphs digits demands] : EnclosureT 'boxed' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
@@ -139,16 +151,12 @@ glyph-block AutoBuild-Enclosure : begin
 		create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
-			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 			include : union
 				HBarTop    left right top sw
 				HBarBottom left right bot sw
 				VBarLeft   left bot top   sw
 				VBarRight  right bot top  sw
-
-			apply-transform : Upright
-			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-			apply-transform : Italify
 
 	define [createInsetCircledGlyphs digits demands] : EnclosureT 'inset-circle' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
@@ -158,11 +166,7 @@ glyph-block AutoBuild-Enclosure : begin
 			if (w == ww && unicode) : assign-unicode unicode
 			include : difference
 				OShapeOutline top bot left right sw smoothA smoothB
-				circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-
-			apply-transform : Upright
-			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-			apply-transform : Italify
+				circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 
 	define [createInsetBoxedGlyphs digits demands] : EnclosureT 'inset-boxed' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
@@ -177,11 +181,7 @@ glyph-block AutoBuild-Enclosure : begin
 					corner right bot
 					corner right top
 					close
-				circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-
-			apply-transform : Upright
-			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-			apply-transform : Italify
+				circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 
 	define [createInsetMosaicGlyphs digits demands] : EnclosureT 'inset-mosaic' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
@@ -199,10 +199,7 @@ glyph-block AutoBuild-Enclosure : begin
 						corner mosaicRight mosaicTop
 						close
 				glyph-construction
-					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-					apply-transform : Upright
-					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-					apply-transform : Italify
+					include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 
 	define [createDoubleCircledGlyphs digits demands] : EnclosureT 'double-circle' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
@@ -211,7 +208,7 @@ glyph-block AutoBuild-Enclosure : begin
 		create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
-			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 			include : OShape top bot left right sw1 smoothA smoothB
 			include : OShape
 				top - sw + sw1
@@ -222,10 +219,6 @@ glyph-block AutoBuild-Enclosure : begin
 				smoothA - sw + sw1
 				smoothB - sw + sw1
 
-			apply-transform : Upright
-			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-			apply-transform : Italify
-
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
 	define [BraceScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
 	define [bracedDottdeDimens digits width] : begin
@@ -235,7 +228,8 @@ glyph-block AutoBuild-Enclosure : begin
 		define sw : Math.min Stroke sw0
 		define l : Math.max (SB + O * 3) (width / 2 - [Math.max (Width * digits) CAP] / 2)
 		define r : width - l
-		return : object width sw dscale pscale l r
+		define mockInnerWidth : width + 2 * (Stroke - sw) * dscale
+		return : object width sw dscale pscale l r mockInnerWidth
 
 	define [createBracedGlyphs digits demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
@@ -269,42 +263,10 @@ glyph-block AutoBuild-Enclosure : begin
 				include : Italify
 
 			foreach {gn unicode parts w bal baly} [items-of jobs] : do
-				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
-				local gni : '.braced-inner{' + gn + '}'
-
-				local lg : create-glyph gni : glyph-construction
-					local tw 0
-					local lastg null
-					foreach [glyphid : items-of parts] : begin
-						local g miniatureFont.(glyphid)
-						if tw : begin # Add a little kern
-							set tw : tw - SB
-							apply-transform : Translate SB 0
-						include g
-						apply-transform : Translate (-g.advanceWidth) 0
-						set tw : tw + g.advanceWidth
-						set lastg g
-					apply-transform : Translate tw 0
-					apply-transform : Upright
-					apply-transform : Scale [Math.min 1 (width / tw)] 1
-					set tw : Math.min width tw
-					apply-transform : Translate (-tw / 2) 0
-					apply-transform : Scale dscale
-
-					local shift 0
-					if (lastg.anchors.above && lastg.anchors.below) : begin
-						local gMiddleY [mix lastg.anchors.above.y lastg.anchors.below.y 0.5]
-						if bal : set shift : CAP / 2 - [mix baly gMiddleY bal]
-						: else : set shift : CAP / 2 - gMiddleY
-
-					apply-transform : Translate (width / 2) (symbolMid - (CAP / 2 - shift) * dscale)
-					apply-transform : Italify
-					set currentGlyph.cmpPriority 11
-					set-width 0
-
+				define [object width dscale pscale sw l r mockInnerWidth] : bracedDottdeDimens digits ww
 				sketch
 					set-width width
-					include lg
+					include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
 					include braceGlyph
 
 					if (w == ww) : save gn unicode
@@ -528,3 +490,5 @@ glyph-block AutoBuild-Enclosure : begin
 			digitGlyphNames j
 			begin WideWidth1
 		createDottedGlyphs 2 'period' compositions
+
+	if [not recursive] : console.log '* End enclosure build.'
