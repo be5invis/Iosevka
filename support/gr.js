@@ -86,11 +86,66 @@ function getGrTree(gid, grSetList, fnGidToGlyph) {
 	return sink;
 }
 
-function getMesh(glyphs, grs) {
-	if (typeof glyphs === "string" || !Array.isArray(glyphs))
+function gidListSame(a, b) {
+	for (let j = 0; j < a.length; j++) {
+		if (a[j] !== b[j]) return false;
+	}
+	return true;
+}
+function gidListMap(gidList, gr, fnGidToGlyph) {
+	let effective = false;
+	const gidList1 = gidList.slice(0);
+	for (let j = 0; j < gidList1.length; j++) {
+		const g = fnGidToGlyph(gidList[j]);
+		if (g && gr.get(g)) {
+			gidList1[j] = gr.get(g);
+			effective = true;
+		}
+	}
+	if (effective) return gidList1;
+	else return null;
+}
+
+function collectGidLists(gidListOrig, gidList, grl, excluded, fnGidToGlyph, sink) {
+	if (!grl.length) {
+		sink.push(gidList);
+		return;
+	} else {
+		const gr = grl[0],
+			grlRest = grl.slice(1);
+		collectGidLists(gidListOrig, gidList, grlRest, excluded, fnGidToGlyph, sink);
+		if (gr !== excluded) {
+			const gidList1 = gidListMap(gidList, gr, fnGidToGlyph);
+			if (gidList1 && !gidListSame(gidList, gidList1))
+				collectGidLists(gidListOrig, gidList1, grlRest, excluded, fnGidToGlyph, sink);
+		}
+	}
+}
+
+function getGrMesh(gidList, grq, fnGidToGlyph) {
+	if (typeof gidList === "string" || !Array.isArray(gidList))
 		throw new TypeError(`glyphs must be a glyph array!`);
-	const relSet = new Set();
-	for (const g of glyphs) for (const gr of grs.query(g)) relSet.add(gr);
+
+	const allGrSet = new Set();
+	for (const g of gidList) {
+		for (const gr of grq.query(fnGidToGlyph(g))) allGrSet.add(gr);
+	}
+
+	const allGrList = Array.from(allGrSet);
+	let ret = [];
+	for (const gr of allGrList) {
+		const col = [];
+		collectGidLists(gidList, gidList, allGrList, gr, fnGidToGlyph, col);
+		if (!col.length) continue;
+		for (const from of col) {
+			const to = gidListMap(from, gr, fnGidToGlyph);
+			if (to && !gidListSame(from, to)) {
+				ret.push([gr, from, to]);
+			}
+		}
+	}
+
+	return ret;
 }
 
 exports.Dotless = Dotless;
@@ -98,3 +153,4 @@ exports.Cv = Cv;
 exports.AnyCv = AnyCv;
 exports.DotlessOrNot = DotlessOrNot;
 exports.getGrTree = getGrTree;
+exports.getGrMesh = getGrMesh;

@@ -2,8 +2,7 @@
 $$include '../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../support/utils'
-
-extern Set
+import [getGrMesh AnyCv] from "../support/gr"
 
 glyph-module
 
@@ -11,13 +10,14 @@ glyph-block AutoBuild-Enclosure : begin
 
 	glyph-block-import CommonShapes
 
-	define [CircName prefix digits parts suffix] : begin
-		local baseName : prefix + '-' + digits + '-' + [parts.join '_']
+	define [CircNameNoCheck unicode prefix digits parts suffix] : begin
+		local baseName : prefix + '-' + unicode + '-' + digits + '-' + [parts.join '_']
 		local name : baseName + "." + suffix
+		return name
+	define [CircName unicode prefix digits parts suffix] : begin
+		local name : CircNameNoCheck unicode prefix digits parts suffix
 		if [query-glyph name] : begin
-			local j 2
-			while [query-glyph (baseName + "." + j + "." + suffix)] : inc j
-			set name (baseName + "." + j + "." + suffix)
+			throw : new Error "Glyph exists : \(prefix) \(digits) \(parts) \(suffix)"
 		return name
 
 	# Build miniature glyphs : circled, superscripts, subscripts...
@@ -85,146 +85,146 @@ glyph-block AutoBuild-Enclosure : begin
 		define smoothB : SmoothBOf (SmallSmooth * (right - left) / (RightSB - SB)) width
 		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight smoothA smoothB
 
-	define [PowerSet s] : begin
-		if [not s.length] : return {}
-		local withoutFirst : PowerSet [s.slice 1]
-		local includeFirst : [PowerSet [s.slice 1]].map : lambda [x] : {s.0}.concat x
-		return : withoutFirst.concat includeFirst
+	define [CollectRelatedGlyphs prefix suffix digits demands] : begin
+		local jobs {}
+		local relApplications {}
+		foreach {unicode parts w bal baly} [items-of demands] : do
+			local origJobGlyphGn : CircName unicode prefix digits parts suffix
+			jobs.push { origJobGlyphGn unicode parts w bal baly }
 
-	define [CollectRelatedGlyphs records] : begin
-		foreach [record : items-of records] : begin
-			local parts record.1
-			local variantSelectors : new Set
-			foreach [srcName : items-of parts] : begin
-				local g : query-glyph srcName
-				if (g && g.featureSelector) : console.log g.featureSelector
+			local mesh : getGrMesh parts AnyCv query-glyph
+			foreach {gr fromParts toParts} [items-of mesh] : do
+				local fromGn : CircNameNoCheck unicode prefix digits fromParts suffix
+				local toGn   : CircName        unicode prefix digits toParts   suffix
+				jobs.push { toGn null toParts w bal baly }
+				relApplications.push : list gr fromGn toGn
+		return { jobs relApplications }
 
-	define [CircledMiniatureFont digits width records] : begin
-		local pendingGlyphs : records.map : [record] => record.1
+	define [CircApplyRelations relApplications] : begin
+		foreach {gr f t} [items-of relApplications] : begin
+			if [query-glyph f] : gr.set [query-glyph f] t
+
+	define [CircledMiniatureFont digits width jobs] : begin
+		local pendingGlyphs : jobs.map : [job] => job.2
 		return : Miniature
 			glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 			crowd   -- [CircCrowd digits width]
 			scale   -- [CircScale digits width]
 			sbscale -- 1
 
-	define [createCircledGlyphs digits records] : begin
-		foreach {suffix ww} [items-of circleWidthClasses] : do
-			CollectRelatedGlyphs records
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
-				create-glyph [CircName 'circle' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-					include : OShape top bot left right sw smoothA smoothB
-
-					apply-transform : Upright
-					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-					apply-transform : Italify
-
-	define [createBoxedGlyphs digits records] : begin
-		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
-				create-glyph [CircName 'boxed' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-					include : union
-						HBarTop    left right top sw
-						HBarBottom left right bot sw
-						VBarLeft   left bot top   sw
-						VBarRight  right bot top  sw
-
-					apply-transform : Upright
-					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-					apply-transform : Italify
-
-	define [createInsetCircledGlyphs digits records] : begin
-		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
-				create-glyph [CircName 'inset-circle' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : difference
-						OShapeOutline top bot left right sw smoothA smoothB
-						circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-
-					apply-transform : Upright
-					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-					apply-transform : Italify
-
-	define [createInsetBoxedGlyphs digits records] : begin
-		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
-				create-glyph [CircName 'inset-boxed' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : difference
-						spiro-outline
-							corner left  top
-							corner left  bot
-							corner right bot
-							corner right top
-							close
-						circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-
-					apply-transform : Upright
-					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-					apply-transform : Italify
-
-	define [createInsetMosaicGlyphs digits records] : begin
-		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits ww
-				create-glyph [CircName 'inset-mosaic' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : difference
-						glyph-construction
-							include : ForceUpright
-							include : spiro-outline
-								corner mosaicLeft  mosaicTop
-								corner mosaicLeft  mosaicBot
-								corner mosaicRight mosaicBot
-								corner mosaicRight mosaicTop
-								close
-						glyph-construction
-							include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-							apply-transform : Upright
-							apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
-							apply-transform : Italify
-
-	define [createDoubleCircledGlyphs digits records] : begin
+	define [EnclosureT prefix digits demands fn] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
-			local miniatureFont : CircledMiniatureFont digits ww records
-			foreach {unicode parts w bal baly} [items-of records] : do
-				define [object width mockInnerWidth dscale sw0 sw top bot left right smoothA smoothB] : circleDimens digits ww (ww * gap)
-				define sw1 : Math.min sw0 (sw / 3)
-				create-glyph [CircName 'double-circle' digits parts suffix] : glyph-construction
-					set-width width
-					if (w == ww && unicode) : assign-unicode unicode
-					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
-					include : OShape top bot left right sw1 smoothA smoothB
-					include : OShape
-						top - sw + sw1
-						bot + sw - sw1
-						left + sw * HVContrast - sw1 * HVContrast
-						right - sw * HVContrast + sw1 * HVContrast
-						begin sw1
-						smoothA - sw + sw1
-						smoothB - sw + sw1
+			define { jobs ra } : CollectRelatedGlyphs prefix suffix digits demands
+			local miniatureFont : CircledMiniatureFont digits ww jobs
+			foreach job [items-of jobs] : do
+				fn ww gap job miniatureFont
+			CircApplyRelations ra
 
+	define [createCircledGlyphs digits demands] : EnclosureT 'circle' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : OShape top bot left right sw smoothA smoothB
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+			apply-transform : Italify
+
+	define [createBoxedGlyphs digits demands] : EnclosureT 'boxed' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : union
+				HBarTop    left right top sw
+				HBarBottom left right bot sw
+				VBarLeft   left bot top   sw
+				VBarRight  right bot top  sw
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+			apply-transform : Italify
+
+	define [createInsetCircledGlyphs digits demands] : EnclosureT 'inset-circle' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : difference
+				OShapeOutline top bot left right sw smoothA smoothB
+				circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+			apply-transform : Italify
+
+	define [createInsetBoxedGlyphs digits demands] : EnclosureT 'inset-boxed' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : difference
+				spiro-outline
+					corner left  top
+					corner left  bot
+					corner right bot
+					corner right top
+					close
+				circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+			apply-transform : Italify
+
+	define [createInsetMosaicGlyphs digits demands] : EnclosureT 'inset-mosaic' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits ww
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : difference
+				glyph-construction
+					include : ForceUpright
+					include : spiro-outline
+						corner mosaicLeft  mosaicTop
+						corner mosaicLeft  mosaicBot
+						corner mosaicRight mosaicBot
+						corner mosaicRight mosaicTop
+						close
+				glyph-construction
+					include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
 					apply-transform : Upright
 					apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
 					apply-transform : Italify
+
+	define [createDoubleCircledGlyphs digits demands] : EnclosureT 'double-circle' digits demands : lambda [ww gap job miniatureFont] : begin
+		define { gn unicode parts w bal baly } job
+		define [object width mockInnerWidth dscale sw0 sw top bot left right smoothA smoothB] : circleDimens digits ww (ww * gap)
+		define sw1 : Math.min sw0 (sw / 3)
+		create-glyph gn : glyph-construction
+			set-width width
+			if (w == ww && unicode) : assign-unicode unicode
+			include : circleInner dscale miniatureFont unicode parts width mockInnerWidth bal baly
+			include : OShape top bot left right sw1 smoothA smoothB
+			include : OShape
+				top - sw + sw1
+				bot + sw - sw1
+				left + sw * HVContrast - sw1 * HVContrast
+				right - sw * HVContrast + sw1 * HVContrast
+				begin sw1
+				smoothA - sw + sw1
+				smoothB - sw + sw1
+
+			apply-transform : Upright
+			apply-transform : Translate 0 (symbolMid - CAP * dscale / 2)
+			apply-transform : Italify
 
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
 	define [BraceScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -237,16 +237,17 @@ glyph-block AutoBuild-Enclosure : begin
 		define r : width - l
 		return : object width sw dscale pscale l r
 
-	define [createBracedGlyphs digits records] : begin
+	define [createBracedGlyphs digits demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
-			define pendingGlyphs : records.map : [record] => record.1
+			define { jobs ra } : CollectRelatedGlyphs 'braced' suffix digits demands
+			define pendingGlyphs : jobs.map : [record] => record.2
 			define miniatureFont : Miniature
 				glyphs  -- [pendingGlyphs.reduce : [a b] => [a.concat b]]
 				crowd   -- [BraceCrowd digits ww]
 				scale   -- [BraceScale digits ww]
 				sbscale -- 1
 
-			define gnb : CircName '.braced-brace' digits {} suffix
+			define gnb : CircName null '.braced-brace' digits {} suffix
 			define braceGlyph : create-glyph gnb : glyph-construction
 				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
 				local s : TanSlope * symbolMid / 2
@@ -267,10 +268,9 @@ glyph-block AutoBuild-Enclosure : begin
 				include : Translate 0 (symbolMid - symbolMid * pscale)
 				include : Italify
 
-			foreach {unicode parts w bal baly} [items-of records] : do
+			foreach {gn unicode parts w bal baly} [items-of jobs] : do
 				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
-				local gn : CircName 'braced' digits parts suffix
-				local gni : CircName '.braced-inner' digits parts suffix
+				local gni : '.braced-inner{' + gn + '}'
 
 				local lg : create-glyph gni : glyph-construction
 					local tw 0
@@ -309,19 +309,21 @@ glyph-block AutoBuild-Enclosure : begin
 
 					if (w == ww) : save gn unicode
 					: else : save gn
+			CircApplyRelations ra
 
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
-	define [createDottedGlyphs digits gidDot records] : begin
+	define [createDottedGlyphs digits gidDot demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
-			local pendingGlyphs : records.map : [record] => record.1
+			define { jobs ra } : CollectRelatedGlyphs 'dotted' suffix digits demands
+
+			local pendingGlyphs : jobs.map : [record] => record.2
 			local miniatureFont : Miniature
 				glyphs  -- [[pendingGlyphs.reduce : [a b] => [a.concat b]].concat {gidDot}]
 				crowd   -- [BraceCrowd digits ww]
 				scale   -- [DottedScale digits ww]
 				sbscale -- 1
 
-			foreach {unicode parts w} [items-of records] : do
-				local gn : CircName 'dotted' digits parts suffix
+			foreach {gn unicode parts w} [items-of jobs] : do
 				define [object width dscale pscale sw l r] : bracedDottdeDimens 1 ww
 				sketch
 					set-width width
@@ -345,6 +347,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 					if (w == ww) : save gn unicode
 					: else : save gn
+			CircApplyRelations ra
 
 	# Circled & Braced
 	define [digitGlyphNames j] : [(j+'').split ''].map: c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
