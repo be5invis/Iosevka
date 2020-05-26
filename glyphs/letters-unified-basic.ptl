@@ -1953,24 +1953,31 @@ glyph-block LetterUnified-Basic : begin
 			local curvleftTop : Math.min curvleft (RightSB - SB * 0.5 - OX - stroke * 1.375)
 			local fine : stroke * CThin
 
+			local sma : SmoothAOf (Smooth * 0.9) Width
+			local smb : SmoothBOf (Smooth * 0.9) Width
+			local smaTop : SmoothAOf (Smooth * 0.9 - (curvleft - curvleftTop)) Width
+			local smbTop : SmoothBOf (Smooth * 0.9 - (curvleft - curvleftTop)) Width
+
 			include : dispiro
 				widths.rhs stroke
 				flat (barleft - O) top [heading Rightward]
 				curl (curvleftTop - CorrectionOMidS) top
 				archv
-				g4 (RightSB - SB * 0.5 - OX * 2) [mix top (bowl - stroke) (SmoothB / (SmoothA + SmoothB))]
+				straight.down.mid (RightSB - SB * 0.5 - OX * 2) [mix top (bowl - stroke) (smbTop / (smaTop + smbTop))]
 				arcvh
 				flat (curvleftTop + CorrectionOMidS) (bowl - fine) [widths.rhs fine]
 				curl (barleft - O) (bowl - fine) [heading Leftward]
+
 			include : dispiro
 				widths.rhs fine
 				flat (barleft - O) (bowl - stroke + fine) [heading Rightward]
 				curl (curvleft - CorrectionOMidS) (bowl - stroke + fine)
 				archv
-				g4 (RightSB - OX * 2) [mix bowl 0 (SmoothB / (SmoothA + SmoothB))] [widths.rhs stroke]
+				straight.down.mid (RightSB - OX * 2) [mix bowl 0 (smb / (sma + smb))] [widths.rhs stroke]
 				arcvh
 				flat (curvleft + CorrectionOMidS) 0
 				curl (barleft - O) 0 [heading Leftward]
+
 			include : VBarLeft barleft 0 top stroke
 			if SLAB : begin
 				include : LeftwardTopSerif barleft top SideJut
@@ -2163,7 +2170,7 @@ glyph-block LetterUnified-Basic : begin
 			set-width Width
 			include MarkSet.capital
 
-			local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.35)
+			local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.1)
 			local bsmooth : Math.min ((Width - SB * 2) * 0.75) (Smooth * 1.1)
 
 			local barleft SB
@@ -2277,25 +2284,39 @@ glyph-block LetterUnified-Basic : begin
 	define { PShape PShapeOutline } : do "P and related =========================================="
 		define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
 			local bowlTop (top * 1 - offset)
-			local bowlBottom ((top - sw) * bp - sw / 2 + offset)
-			local turn : mix bowlTop bowlBottom (SmoothB / (SmoothA + SmoothB))
+			local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
 			local turnRadius : (bowlTop - bowlBottom) * 0.45
+			local sma : SmoothAOf (Smooth * 0.9) Width
+			local smb : SmoothBOf (Smooth * 0.9) Width
 			local right : RightSB - offset
 
-			list
-				flat (SB * mul - O) bowlTop [heading Rightward]
-				curl (right - turnRadius - CorrectionOMidS) bowlTop
-				archv
-				g4 (right - overshoot) turn
-				arcvh
-				flat (right - turnRadius + CorrectionOMidS) bowlBottom
-				curl (SB * mul - O) bowlBottom [heading Leftward]
+			if (bowlTop - bowlBottom <= sma + smb) : begin
+				local turn : mix bowlTop bowlBottom (smb / (sma + smb))
+				return : list
+					flat (SB * mul - O) bowlTop [heading Rightward]
+					curl (right - turnRadius - CorrectionOMidS) bowlTop
+					archv
+					straight.down.mid (right - overshoot) turn
+					arcvh
+					flat (right - turnRadius + CorrectionOMidS) bowlBottom
+					curl (SB * mul - O) bowlBottom [heading Leftward]
+			: else : begin
+				return : list
+					flat (SB * mul - O) bowlTop [heading Rightward]
+					curl (right - turnRadius - CorrectionOMidS) bowlTop
+					archv
+					flat (right - overshoot) (bowlTop - smb)
+					curl (right - overshoot) (bowlBottom + sma)
+					arcvh
+					flat (right - turnRadius + CorrectionOMidS) bowlBottom
+					curl (SB * mul - O) bowlBottom [heading Leftward]
 
-		define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp HBarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-construction
+
+		define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-construction
 			include : spiro-outline
 				PShapeOutlineKnots top mul bp overshoot sw offset
 
-		define [PShape] : params [top [mul PShape.defaultMul] [bp HBarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
+		define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
 			include : dispiro
 				widths.rhs sw
 				PShapeOutlineKnots top mul bp overshoot sw 0
@@ -2309,6 +2330,8 @@ glyph-block LetterUnified-Basic : begin
 
 		set PShape.defaultMul 1.25
 		set PShape.defaultOvershoot (OX * 2)
+		set PShape.BarPos (1 - HBarPos)
+		set PShape.SwBelowBar 0.25
 
 		sketch # P
 			set-width Width
@@ -2383,7 +2406,7 @@ glyph-block LetterUnified-Basic : begin
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
-		define [RBarPos slab] :  if slab (0.5 + HalfStroke / CAP) HBarPos
+		define [RBarPos slab] : if slab (0.5 + Stroke * (1 - PShape.SwBelowBar) / CAP) PShape.BarPos
 		define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
 			include : PShape top (mul -- mul) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
 			local right (RightSB - O - [if SLAB (Jut / 8) 0])
@@ -2954,7 +2977,7 @@ glyph-block LetterUnified-Basic : begin
 				if fTooth
 					then : union
 						VBarRight RightSB sma yBar
-						VBarRight RightSB sma 0 (Stroke - fine / 2)
+						VBarRight RightSB sma 0 [Math.max [adviceBlackness 5] (Stroke - fine / 2)]
 					else : glyph-construction
 
 		define [HookTopShapeOfG top] : union
