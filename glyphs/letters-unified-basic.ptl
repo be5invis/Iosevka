@@ -2070,7 +2070,8 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # Bbar
 			include [refer-glyph 'B'] AS_BASE
-			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix 0 CAP 0.3] [Math.min ((CAP - Stroke * 3) / 4) OverlayStroke]
+			local stroke : adviceBlackness2 2.875 2 CAP
+			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix 0 (CAP * 0.52 + stroke / 2) 0.5] [Math.min ((CAP - Stroke * 3) / 4) OverlayStroke]
 			save 'Bbar' 0x243
 
 		sketch # beta
@@ -2834,7 +2835,7 @@ glyph-block LetterUnified-Basic : begin
 		sketch # ccurlytail
 			include MarkSet.e
 			local stroke : adviceBlackness2 2.875 2 XH
-			local fine : adviceBlackness 3
+			local fine : adviceBlackness2 3 3 XH
 			local rinner : ((XH * 0.45) - fine * 1.5) / 2
 			local m1 : SB + O + stroke * HVContrast
 			local x2 : SB + stroke * 0.3
@@ -2847,9 +2848,6 @@ glyph-block LetterUnified-Basic : begin
 				curl (SB + OX) SmallSmoothB
 				arcvh
 				CurlyTail fine rinner m1 0 RightSB x2 y2
-					linreg 500 (0.5) 375 (-0.25) : Math.min Width 500
-					begin nothing
-					linreg 500 (0) 375 (1) : Math.min Width 500
 
 			save 'ccurlytail' 0x255
 
@@ -4478,7 +4476,7 @@ glyph-block LetterUnified-Basic : begin
 
 		define [sStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
-			define ess : mix stroke (Ess * stroke / Stroke) 0.5
+			define ess : adviceBlackness2 3.2 2.2 XH
 			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define smooth : adviceSSmooth XH (-1) stroke
 			return : dispiro
@@ -4486,14 +4484,14 @@ glyph-block LetterUnified-Basic : begin
 				g4   (RightSB + OX / 4) (XH - SHook)
 				hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 				g4   (SB + OX / 8) (XH - smooth)
-				SNeck stroke (slantCoeff -- -0.01)
+				SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])]) (tensionCoeff -- [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5])
 				g4   (RightSB - OX / 8) (smooth) [widths 0 stroke]
 				hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 				g4   (SB - OX / 4) SHook
 
 		define [sStrokePhoneticRight] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
-			define ess : mix stroke (Ess * stroke / Stroke) 0.5
+			define ess : adviceBlackness2 3.2 2.2 XH
 			define strokeCoeff : StrokeWidthBlend 0 1 stroke
 			define smooth : adviceSSmooth XH (-1) stroke
 			return : dispiro
@@ -4501,7 +4499,7 @@ glyph-block LetterUnified-Basic : begin
 				g4   (RightSB + OX / 4) (XH - SHook)
 				hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 				g4   (SB + OX / 8) (XH - smooth)
-				SNeck stroke (slantCoeff -- -0.01)
+				SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])]) (tensionCoeff -- [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5])
 				g4   (RightSB - OX / 8) (smooth) [widths 0 stroke]
 				arcvh
 				flat (Middle - CorrectionOMidS) 0 [widths 0 Stroke]
@@ -4509,15 +4507,15 @@ glyph-block LetterUnified-Basic : begin
 
 		define [RevsStroke] : begin
 			define stroke : adviceBlackness2 2.875 2 XH
-			define ess : Ess * stroke / Stroke
+			define ess : adviceBlackness2 3.2 2.2 XH
 			define strokeCoeff : StrokeWidthBlend 0 1 stroke
-			define smooth : adviceSSmooth XH 1 stroke
+			define smooth : adviceSSmooth XH 0.75 stroke
 			return : dispiro
 				widths.rhs stroke
 				g4   SB (XH - SHook)
 				hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 				g4   RightSB (XH - smooth)
-				SNeck stroke (slantCoeff -- 0.01)
+				SNeck (stroke -- ess) (slantCoeff -- 0.02) (dist -- [Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])]) (tensionCoeff -- [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5])
 				g4   SB (smooth) [widths stroke 0]
 				hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 				g4   RightSB SHook
@@ -4736,8 +4734,8 @@ glyph-block LetterUnified-Basic : begin
 		sketch # zcurlytail
 			include MarkSet.e
 
-			local fine : adviceBlackness 4
-			local rinner : Math.max (XH * 0.04) (fine * 0.3)
+			local fine : adviceBlackness2 5 4 XH
+			local rinner : Math.max (XH * 0.04) (fine * 0.1)
 			local x2 : mix (SB + Stroke) RightSB 0.3
 			local x1 : mix x2 (RightSB - fine - rinner * 1.5) 0.45
 			local y2 : -XH * 0.2

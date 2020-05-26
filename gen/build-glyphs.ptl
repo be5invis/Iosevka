@@ -63,7 +63,6 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
 		`[@name @actions] : begin
 			if (pickHash && [not pickHash.(name)]) : return nothing
-
 			if para.verbose : console.log name
 			local glyphObject [new Glyph name]
 			glyphList.push glyphObject
@@ -72,6 +71,8 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			glyphObject.gizmo = globalTransform
 
 			actions.call glyphObject
+			local complexity : [(glyphObject.contours || {}).map (x => x.length)].reduce ([a b] => (a + b)) 0
+			if (complexity > 0x7fff) : console.log 'Possible broken shape found in' name 'Complexity' complexity
 
 			set dependencyProfile.(name) : getDependencyProfile glyphObject
 			dec nPending

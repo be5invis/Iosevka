@@ -264,7 +264,7 @@ function vlMenuWeight(x) {
 	return vlCssWeight(x);
 }
 function vlShapeWidth(x) {
-	return x === 3 || x === 5 || x === 7;
+	return x >= 3 && x <= 9 && x % 1 === 0;
 }
 function vlMenuWidth(x) {
 	return x >= 1 && x <= 9 && x % 1 === 0;

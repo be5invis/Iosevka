@@ -1556,7 +1556,7 @@ glyph-block LetterUnified-Extended : begin
 				g4   sTurnX (XH - smooth)
 				SNeck swInner (slantCoeff -- 0.02) (tensionCoeff -- [StrokeWidthBlend 0.99 0.975]) (dist -- 0.025)
 				g4   (RightSB - OX) (smooth) [widths 0 swInner]
-				hookend O (sw -- swInner) (swItalicAdj -- swInner)
+				hookend O (sw -- swInner) (swItalicAdj -- swOuter)
 				g4 (sEndX + OX) SHook
 
 			piecewise
@@ -1670,20 +1670,23 @@ glyph-block LetterUnified-Extended : begin
 		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] -  stroke * TanSlope
 		local barbottom (XH * EBarPos - stroke / 2)
 
-		local sma : SmallSmoothA * 0.6 * df.div
-		local smb : SmallSmoothB * 0.6 * df.div
-		include : dispiro
-			widths.lhs stroke
-			flat (df.rightSB - OX * 2) barbottom [heading Upward]
-			curl (df.rightSB - OX * 2) (XH - smb)
-			arcvh
-			g4   eMiddle (XH - O)
-			archv
-			flat eLeft (XH - sma)
-			curl eLeft smb
-			hookend O (tight -- true) (sw -- stroke)
-			g4 (df.rightSB - OX * 2) (AHook + stroke * TanSlope) [heading Upward]
-		include : HBarBottom (eLeft +  stroke / 2) (df.rightSB - OX * 2 -  stroke / 2) barbottom stroke
+		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		include : difference
+			union
+				dispiro
+					widths.lhs stroke
+					flat (df.rightSB - OX * 2) barbottom [heading Upward]
+					curl (df.rightSB - OX * 2) (XH - smb)
+					arcvh
+					g4   eMiddle (XH - O)
+					archv
+					flat eLeft (XH - sma)
+					curl eLeft smb
+					hookend O (tight -- true) (sw -- stroke)
+					g4 (df.rightSB - OX * 2) (AHook + stroke * TanSlope) [heading Upward]
+				HBarBottom (eLeft +  stroke / 2) (df.rightSB - OX * 2 -  stroke / 2) barbottom stroke
+			Rect barbottom (barbottom - XH * 0.05) eMiddle df.width
 
 	define [aeapart df] : glyph-construction
 		local stroke : adviceBlackness2 2.875 3 XH df.div
@@ -1692,8 +1695,8 @@ glyph-block LetterUnified-Extended : begin
 		local lowmiddle : mix (df.leftSB + OX * 2) abarRight 0.5
 		local barsmooth : mix df.leftSB abarRight 0.7
 
-		local sma : SmallSmoothA * 0.6 * df.div
-		local smb : SmallSmoothB * 0.6 * df.div
+		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
 
 		include : dispiro
 			widths.rhs stroke
@@ -1712,7 +1715,10 @@ glyph-block LetterUnified-Extended : begin
 	define [oeopart df] : glyph-construction
 		local stroke : adviceBlackness2 2.875 3 XH df.div
 		local abarRight : df.middle + stroke / 2 * HVContrast
-		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) stroke (SmallSmoothA * 0.6 * df.div) (SmallSmoothB * 0.6 * df.div)
+		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+
+		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) stroke sma smb
 
 	sketch # ae
 		local df : DivFrame para.diversityM 3
@@ -1927,7 +1933,7 @@ glyph-block LetterUnified-Extended : begin
 		include MarkSet.e
 		local p (SmallSmoothB / (SmallSmoothA + SmallSmoothB))
 		include : EzhShape XH Descender nothing nothing p
-		local fine : adviceBlackness 3
+		local fine : adviceBlackness2 5 3 (XH - Descender)
 		local rinner : (XH * 0.4 - fine * 1.5) / 2
 		local m1 : RightSB - Stroke * HVContrast - OX
 		local x2 : RightSB - HALF-Stroke
@@ -2158,12 +2164,14 @@ glyph-block LetterUnified-Extended : begin
 		set-width df.width
 		include df.markSet.capital
 		local abarRight : df.middle + df.mvs / 2 * HVContrast
-		include : OShape CAP 0 df.leftSB abarRight df.mvs (SmallSmoothA * df.div * 0.6) (SmallSmoothB * df.div * 0.6)
+		local sma : SmoothAOf [Math.max (df.mvs * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (df.mvs * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		include : OShape CAP 0 df.leftSB abarRight df.mvs sma smb
 		include : VBarRight (df.rightSB - O) Descender CAP df.mvs
 		include : dispiro
 			widths.lhs df.mvs
-			flat df.middle (CAP - SmallSmoothB * 0.6 * df.div) [heading Rightward]
-			curl (df.middle + 1) (CAP - SmallSmoothB * 0.6 * df.div) [heading Rightward]
+			flat df.middle (CAP - smb) [heading Rightward]
+			curl (df.middle + 1) (CAP - smb) [heading Rightward]
 			alsothru 0.5 0.15
 			g4   (df.rightSB - O - df.mvs * HVContrast) CAP [widths 0 df.mvs]
 		save 'Gha' 0x1A2
@@ -2173,12 +2181,14 @@ glyph-block LetterUnified-Extended : begin
 		set-width df.width
 		include df.markSet.p
 		local abarRight : df.middle + df.mvs / 2 * HVContrast
-		include : OShape XH 0 df.leftSB abarRight df.mvs (SmallSmoothA * df.div * 0.6) (SmallSmoothB * df.div * 0.6)
+		local sma : SmoothAOf [Math.max (df.mvs * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (df.mvs * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		include : OShape XH 0 df.leftSB abarRight df.mvs sma smb
 		include : VBarRight (df.rightSB - O) Descender XH df.mvs
 		include : dispiro
 			widths.lhs df.mvs
-			flat df.middle (XH - SmallSmoothB * 0.6 * df.div) [heading Rightward]
-			curl (df.middle + 1) (XH - SmallSmoothB * 0.6 * df.div) [heading Rightward]
+			flat df.middle (XH - smb) [heading Rightward]
+			curl (df.middle + 1) (XH - smb) [heading Rightward]
 			alsothru 0.5 0.15
 			g4   (df.rightSB - O - df.mvs * HVContrast) XH [widths 0 df.mvs]
 		save 'gha' 0x1A3
@@ -2192,8 +2202,8 @@ glyph-block LetterUnified-Extended : begin
 			alsothru 0.55 0.85
 			g4 Middle (top - O) [widths.heading 0 Stroke Rightward]
 			archv
-			g4 (RightSB - O) [mix bot top 0.7]
-			alsothru 0.25 0.45
+			g4 (RightSB - O) (top - [SmoothBOf (0.3 * (top - bot)) Width])
+			alsothru 0.25 0.45 important
 			g4 (SB + Stroke * HVContrast) [mix bot top 0.1]
 
 	sketch # Wynn
