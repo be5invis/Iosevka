@@ -170,7 +170,7 @@ glyph-block Symbol-Punctuation : begin
 		define [BraceUpperHalfShape top bottom] : glyph-construction
 			define [object parenCenter radius] : BraceDim
 			include : dispiro
-				straight.left.start [mix SB RightSB designParameters.braceInside] top [widths.heading HALF-Stroke HALF-Stroke Leftward]
+				straight.left.start [mix SB RightSB designParameters.braceInside] top [widths.heading HalfStroke HalfStroke Leftward]
 				archv
 				flat parenCenter (top - radius) [heading Downward]
 				curl parenCenter (bottom + radius) [heading Downward]
@@ -185,7 +185,7 @@ glyph-block Symbol-Punctuation : begin
 		define [BraceLowerHalfShape top bottom] : glyph-construction
 			define [object parenCenter radius] : BraceDim
 			include : dispiro
-				straight.left.start [mix SB RightSB designParameters.braceInside] bottom [widths.heading HALF-Stroke HALF-Stroke Leftward]
+				straight.left.start [mix SB RightSB designParameters.braceInside] bottom [widths.heading HalfStroke HalfStroke Leftward]
 				archv
 				flat parenCenter (bottom + radius) [heading Upward]
 				curl parenCenter (top - radius) [heading Upward]
@@ -211,8 +211,8 @@ glyph-block Symbol-Punctuation : begin
 					BraceUpperHalfShape (top + MosaicHeight) (bottom - MosaicHeight)
 
 		sketch # braceLeft.straight
-			local top : [mix symbolMid parenTop (1 + designParameters.braceOvershoot)] - HALF-Stroke
-			local bot : [mix symbolMid parenBot (1 + designParameters.braceOvershoot)] + HALF-Stroke
+			local top : [mix symbolMid parenTop (1 + designParameters.braceOvershoot)] - HalfStroke
+			local bot : [mix symbolMid parenBot (1 + designParameters.braceOvershoot)] + HalfStroke
 
 			branch
 				include : BraceUpperHalfShape top symbolMid
@@ -259,7 +259,7 @@ glyph-block Symbol-Punctuation : begin
 				straight.left.start xIns (top - hs) [widths.heading hs hs Leftward]
 				archv
 				g4.down.mid m1 (top - radius1) [heading Downward]
-				alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
+				alsoThru 0.5 0.5 [widths (ess / 2) (ess / 2)]
 				g4.down.mid m2 (symbolMid + radius2) [widths.heading hs hs Downward]
 				arcvh
 				straight.left.end xOus symbolMid [heading Leftward]
@@ -268,7 +268,7 @@ glyph-block Symbol-Punctuation : begin
 				straight.left.start xIns (bot + hs) [widths.heading hs hs Leftward]
 				archv
 				g4.up.mid m1 (bot + radius1) [heading Upward]
-				alsothru 0.5 0.5 [widths (ess / 2) (ess / 2)]
+				alsoThru 0.5 0.5 [widths (ess / 2) (ess / 2)]
 				g4.up.mid m2 (symbolMid - radius2) [widths.heading hs hs Upward]
 				arcvh
 				straight.left.end xOus symbolMid [heading Leftward]
@@ -286,10 +286,10 @@ glyph-block Symbol-Punctuation : begin
 			local top : mix symbolMid parenTop (1 + designParameters.braceOvershoot)
 			local bot : mix symbolMid parenBot (1 + designParameters.braceOvershoot)
 			branch
-				include : BraceUpperHalfShape (top - HALF-Stroke) (bot + HALF-Stroke)
+				include : BraceUpperHalfShape (top - HalfStroke) (bot + HalfStroke)
 				save nothing 0x23B0
 			branch
-				include : BraceLowerHalfShape (top - HALF-Stroke) (bot + HALF-Stroke)
+				include : BraceLowerHalfShape (top - HalfStroke) (bot + HalfStroke)
 				save nothing 0x23B1
 
 		sketch # whiteBraceLeft
@@ -435,8 +435,8 @@ glyph-block Symbol-Punctuation : begin
 				g4 left (top - Hook)
 				hookstart (top - O)
 				g4 right (top - SmoothB * 0.9)
-				alsothru.g2 0.5 0.45 [widths.center EssQuestion]
-				straight.down.end ([mix left right 0.5] - HALF-Stroke * HVContrast * strokeEndCor) questionBottom [widths.heading (Stroke * strokeEndCor) 0 Downward]
+				alsoThru.g2 0.5 0.45 [widths.center EssQuestion]
+				straight.down.end ([mix left right 0.5] - HalfStroke * HVContrast * strokeEndCor) questionBottom [widths.heading (Stroke * strokeEndCor) 0 Downward]
 
 		sketch # question
 			set-width Width
@@ -519,7 +519,8 @@ glyph-block Symbol-Punctuation : begin
 		sketch # ampersand
 			set-width Width
 
-			local fine : adviceBlackness 3
+			local sw : adviceBlackness2 3 3 CAP
+			local fine : adviceBlackness 3.5
 			local p 0.875
 			local l 0.05
 			local pr [linreg 500 0.82 700 0.85 Width]
@@ -527,22 +528,26 @@ glyph-block Symbol-Punctuation : begin
 			local q 0.45
 			local r 1.1
 
-			include : dispiro
-				widths.rhs fine
-				flat (RightSB - O) CapMiddle [heading Downward]
-				curl (RightSB - O) SmoothA
-				arcvh
-				g4   (Middle + CorrectionOMidX * fine) O
-				archv
-				g4   (SB + O) SmoothB
-				alsothru 0.5 0.5 [widths.center fine]
-				g4   [mix SB RightSB p] (CAP - SmoothB * pr) [widths.lhs fine]
-				arcvh
-				g4   ([mix SB RightSB [mix p l 0.5]] - CorrectionOMidX * fine) (CAP - O)
-				archv
-				g4   [mix SB RightSB l] (CAP - SmoothA * pr)
-				alsothru 0.5 0.5 [widths.center fine]
-				g4.down.end [mix SB RightSB r] 0 [widths.heading 0 fine Downward]
+			local endX : [mix SB RightSB r] - sw * HVContrast
+
+			include : difference
+				dispiro
+					widths.rhs fine
+					flat (RightSB - O) CapMiddle [heading Downward]
+					curl (RightSB - O) SmoothA
+					arcvh
+					g4   (Middle + CorrectionOMidX * sw) O [widths.rhs sw]
+					archv
+					g4   (SB + O) SmoothB
+					alsoThru 0.5 0.5 [widths.center sw]
+					g4   [mix SB RightSB p] (CAP - SmoothB * pr) [widths.lhs sw]
+					arcvh
+					g4   ([mix SB RightSB [mix p l 0.5]] - CorrectionOMidX * sw) (CAP - O)
+					archv
+					g4   [mix SB RightSB l] (CAP - SmoothA * pr)
+					flat [mix SB endX 0.5] [mix 0 (CAP - SmoothA * pr) 0.5]
+					curl [mix SB endX 2] (- CAP + SmoothA * pr)
+				Rect 0 (-CAP * 2) endX (Width * 2)
 			save 'ampersand' '&'
 
 		sketch # at.threefold
@@ -579,7 +584,7 @@ glyph-block Symbol-Punctuation : begin
 				curl SB (bot + SmoothB)
 				arcvh
 				flat (Middle + CorrectionOMidS) (bot + O) [widths Stroke 0 ]
-				curl (RightSB - HALF-Stroke + TanSlope * sw) (bot + O)
+				curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
 			save 'at.threefold'
 
 		sketch # at.fourfold
@@ -625,7 +630,7 @@ glyph-block Symbol-Punctuation : begin
 				curl left (bot + SmoothB * div)
 				arcvh
 				flat (middle + CorrectionOMidS) (bot + O) [widths swh 0 ]
-				curl (right - HALF-Stroke + TanSlope * sw) (bot + O)
+				curl (right - HalfStroke + TanSlope * sw) (bot + O)
 			save 'at.fourfold'
 
 		sketch # at.short
@@ -721,7 +726,7 @@ glyph-block Symbol-Punctuation : begin
 				g4 RightSB (top - Hook)
 				hookstart top
 				g4 SB (top - sma)
-				alsothru 0.5 0.5 [widths HALF-Stroke HALF-Stroke]
+				alsoThru 0.5 0.5 [widths HalfStroke HalfStroke]
 				g4 RightSB [mix bot top 0.501] [widths 0 Stroke]
 				g4 RightSB [mix bot top 0.5] [widths 0 Stroke]
 				g4 [mix SB RightSB 0.6] [mix bot top : [StrokeWidthBlend 0.325 0.3] * (1 - TanSlope * 0.1)]
@@ -763,8 +768,8 @@ glyph-block Symbol-Punctuation : begin
 			transform -- {.high 'low' .hexhigh 'hexlow'}
 
 	do "Slashes and numbersign"
-		define slashDefautLeft   : SB + HALF-Stroke
-		define slashDefaultRight : RightSB - HALF-Stroke
+		define slashDefautLeft   : SB + HalfStroke
+		define slashDefaultRight : RightSB - HalfStroke
 		define [SlashShape l r _t _b _w] : glyph-construction
 			local w : fallback _w Stroke
 			local t : fallback _t parenTop
@@ -959,7 +964,7 @@ glyph-block Symbol-Punctuation : begin
 			include : dispiro
 				widths.center (Stroke * 1.1)
 				g4.down.start Middle quoteTop [heading Downward]
-				g4 Middle quoteBottom [widths.heading (HALF-Stroke * 0.95) (HALF-Stroke * 0.95) Downward]
+				g4 Middle quoteBottom [widths.heading (HalfStroke * 0.95) (HalfStroke * 0.95) Downward]
 			save 'singleQuote' 0x27
 
 		sketch # doubleQuote
@@ -1029,7 +1034,7 @@ glyph-block Symbol-Punctuation : begin
 			include : dispiro
 				widths.center (Stroke * 1.2)
 				flat (Middle + wide) quoteTop [heading Downward]
-				curl (Middle - wide) quoteBottom [widths.heading HALF-Stroke HALF-Stroke Downward]
+				curl (Middle - wide) quoteBottom [widths.heading HalfStroke HalfStroke Downward]
 			save 'prime' 0x2032
 
 		sketch # doubleprime
@@ -1063,7 +1068,7 @@ glyph-block Symbol-Punctuation : begin
 			include : dispiro
 				widths.center (Stroke * 1.2)
 				flat (Middle + wide) quoteTop [heading Downward]
-				curl (Middle - wide) quoteBottom [widths.heading HALF-Stroke HALF-Stroke Downward]
+				curl (Middle - wide) quoteBottom [widths.heading HalfStroke HalfStroke Downward]
 			save 'revprime' 0x2035
 
 		sketch # revdoubleprime
