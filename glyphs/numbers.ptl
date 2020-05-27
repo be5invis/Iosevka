@@ -3,6 +3,7 @@ $$include '../meta/macros.ptl'
 import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
+import [AnyCv getGrMesh] from "../support/gr"
 
 glyph-module
 
@@ -446,12 +447,36 @@ glyph-block Numbers : begin
 	select-variant 'nine.lnum' '9' (follow -- 'nine')
 	select-variant 'nine.onum' (follow -- 'nine')
 
+	do "Ten"
+		define GnOne  'one.lnum'
+		define GnZero 'zero.lnum'
 
-	sketch # ten
-		include MarkSet.capital
-		set-width : Width * 2
-		include : refer-glyph "one.lnum"
-		apply-transform : Translate (-Width) 0
-		include : refer-glyph "zero.lnum"
-		apply-transform : Translate Width 0
-		save 'ten'
+		local [GlyphNameOfTen a b]       : begin "numbers/ten{\(a)}{\(b)}"
+		define [glyphNameIsNotUsed name] : begin
+			if [query-glyph name] : throw : new Error "Glyph \(name) already exists!"
+			return name
+
+		define [BuildTen gn gnOne gnZero] : if [not : query-glyph gn] : begin
+			create-glyph gn : glyph-construction
+				include MarkSet.capital
+				set-width : Width * 2
+				include : refer-glyph gnOne
+				apply-transform : Translate (-Width) 0
+				include : refer-glyph gnZero
+				apply-transform : Translate Width 0
+
+		define [applyRelations relApplications] : begin
+			foreach {gr f t} [items-of relApplications] : begin
+				if [query-glyph f] : gr.set [query-glyph f] t
+
+		if ([query-glyph GnOne] && [query-glyph GnZero]) : begin
+			BuildTen [GlyphNameOfTen GnOne GnZero] GnOne GnZero
+			local ra {}
+			local meshTen : getGrMesh { GnOne GnZero } AnyCv query-glyph
+			foreach {gr {fromOne fromZero} {toOne toZero}} [items-of meshTen] : begin
+				local fromGn : GlyphNameOfTen fromOne fromZero
+				local toGn   : GlyphNameOfTen toOne   toZero
+				BuildTen toGn toOne toZero
+				ra.push { gr fromGn toGn }
+
+			applyRelations ra

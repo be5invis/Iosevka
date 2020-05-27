@@ -132,7 +132,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createCircledGlyphs digits demands] : EnclosureT 'circle' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
@@ -141,7 +141,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createBoxedGlyphs digits demands] : EnclosureT 'boxed' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
@@ -154,7 +154,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createInsetCircledGlyphs digits demands] : EnclosureT 'inset-circle' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw top bot left right smoothA smoothB] : circleDimens digits ww
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : difference
@@ -164,7 +164,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createInsetBoxedGlyphs digits demands] : EnclosureT 'inset-boxed' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw top bot left right] : circleDimens digits ww
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : difference
@@ -179,7 +179,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createInsetMosaicGlyphs digits demands] : EnclosureT 'inset-mosaic' digits demands : lambda [ww gap job miniatureFont] : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits ww
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : difference
@@ -198,7 +198,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define { gn unicode parts w bal baly } job
 		define [object width mockInnerWidth dscale sw0 sw top bot left right smoothA smoothB] : circleDimens digits ww (ww * gap)
 		define sw1 : Math.min sw0 (sw / 3)
-		create-glyph gn : glyph-construction
+		if [not : query-glyph gn] : create-glyph gn : glyph-construction
 			set-width width
 			if (w == ww && unicode) : assign-unicode unicode
 			include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
@@ -235,7 +235,7 @@ glyph-block AutoBuild-Enclosure : begin
 				sbscale -- 1
 
 			define gnb : CircName null '.braced-brace' digits {} suffix
-			define braceGlyph : create-glyph gnb : glyph-construction
+			if [not : query-glyph gnb] : create-glyph gnb : glyph-construction
 				define [object width dscale pscale sw l r] : bracedDottdeDimens digits ww
 				local s : TanSlope * symbolMid / 2
 				set-width width
@@ -257,13 +257,13 @@ glyph-block AutoBuild-Enclosure : begin
 
 			foreach {gn unicode parts w bal baly} [items-of jobs] : do
 				define [object width dscale pscale sw l r mockInnerWidth] : bracedDottdeDimens digits ww
-				sketch
+				if [not : query-glyph gn] : create-glyph gn : glyph-construction
 					set-width width
-					include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
-					include braceGlyph
+					if (w == ww) : assign-unicode unicode
 
-					if (w == ww) : save gn unicode
-					: else : save gn
+					include : circleInner dscale miniatureFont parts width mockInnerWidth bal baly
+					include : refer-glyph gnb
+
 			CircApplyRelations ra
 
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -280,8 +280,10 @@ glyph-block AutoBuild-Enclosure : begin
 
 			foreach {gn unicode parts w} [items-of jobs] : do
 				define [object width dscale pscale sw l r] : bracedDottdeDimens 1 ww
-				sketch
+				if [not : query-glyph gn] : create-glyph gn : glyph-construction
 					set-width width
+					if (w == ww) : assign-unicode unicode
+
 					local tw 0
 					foreach [glyphid : items-of : parts.concat {gidDot}] : begin
 						local g miniatureFont.(glyphid)
@@ -300,8 +302,6 @@ glyph-block AutoBuild-Enclosure : begin
 					apply-transform : Italify
 					set currentGlyph.cmpPriority 11
 
-					if (w == ww) : save gn unicode
-					: else : save gn
 			CircApplyRelations ra
 
 	# Circled & Braced
