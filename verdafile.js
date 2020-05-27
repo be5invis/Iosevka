@@ -75,7 +75,7 @@ async function tryParseToml(str) {
 	}
 }
 
-const RawPlans = oracle(`metadata:raw-plans`, async target => {
+const RawPlans = computed(`metadata:raw-plans`, async target => {
 	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
 
 	const bp = await tryParseToml(BUILD_PLANS);
