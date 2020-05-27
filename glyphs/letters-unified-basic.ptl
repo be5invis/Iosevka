@@ -375,7 +375,8 @@ glyph-block LetterUnified-Basic : begin
 			include : HBarBottom (SB * 1.5 - O) (RightSB - OX) 0
 			if SLAB : begin
 				include : LeftwardBottomSerif (SB * 1.5) 0 SideJut
-				include : CenterTopSerif (SB * 1.5 + HVContrast * HalfStroke) top Jut
+				include : LeftwardTopSerif (SB * 1.5 + HVContrast * HalfStroke) top Jut
+				include : RightwardTopSerif (SB * 1.5 + HVContrast * HalfStroke) top MidJutSide
 				include : UpwardRightSerif (RightSB - OX) 0 VJut
 
 		sketch # L
@@ -817,11 +818,13 @@ glyph-block LetterUnified-Basic : begin
 			include MarkSet.capital
 			set-anchor 'trailing' BASE (RightSB - markHalfStroke) 0
 
+			local ABarPosition : mix [if SLAB Stroke 0] CAP (XH / 2 / CAP)
+
 			branch
 				include : VShape CAP Stroke true
 				include : FlipAround Middle (CAP / 2)
 				include : intersection
-					HBarTop 0 Width (XH / 2)
+					HBarTop 0 Width ABarPosition
 					AMaskShape CAP Stroke true 1
 				# include : AMaskShape CAP Stroke true 1
 				save 'A.straight'
@@ -832,7 +835,7 @@ glyph-block LetterUnified-Basic : begin
 				include : VShape CAP Stroke false
 				include : FlipAround Middle (CAP / 2)
 				include : intersection
-					HBarTop 0 Width (XH / 2)
+					HBarTop 0 Width ABarPosition
 					AMaskShape CAP Stroke false 1
 				save 'A.curly'
 				save 'Alpha.curly'
@@ -1016,7 +1019,8 @@ glyph-block LetterUnified-Basic : begin
 			local fineOffsetInner : hwCO * HVContrast
 			local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
 			local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
-			local wMidHeight : if barStraight (top * [Math.min 1 (df.div * 0.9)]) (top * 0.6)
+			local topWithoutSerif : if SLAB (top - Stroke) top
+			local wMidHeight : if barStraight (topWithoutSerif * [Math.min 1 (df.div * 0.9)]) (top * 0.6)
 
 			if barStraight : begin
 				include : dispiro
@@ -1297,7 +1301,7 @@ glyph-block LetterUnified-Basic : begin
 			set-anchor 'overlay' BASE Middle cross
 			if SLAB : begin
 				include : AIVSerifs top
-				include : CenterBottomSerif Middle [fallback bot 0] Jut
+				include : CenterBottomSerif Middle [fallback bot 0] MidJutSide
 
 		sketch # Y
 			include MarkSet.capital
@@ -2337,6 +2341,7 @@ glyph-block LetterUnified-Basic : begin
 			set-width Width
 			include MarkSet.capital
 			include : PShape CAP
+			include : RightwardBottomSerif (SB * PShape.defaultMul + HalfStroke * HVContrast) 0 MidJutSide
 			save 'P' 'P'
 			save 'Rho' 0x3A1
 			save 'cyrEr' 0x420
@@ -2359,10 +2364,10 @@ glyph-block LetterUnified-Basic : begin
 			include : tagged 'bowl' : OBarLeftShape
 			include : VBarLeft SB Descender XH
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SideJut
-				tag-contour 'serifLT'
-				include : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
-				tag-contour 'serifLB'
+				include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+				include : tagged 'serifLB' : union
+					LeftwardBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
+					RightwardBottomSerif (SB + HalfStroke * HVContrast) Descender MidJutSide
 			set-anchor 'overlay' BASE Middle (XH / 2)
 			save 'p' 'p'
 			save 'cyrer' 0x440
@@ -2406,7 +2411,7 @@ glyph-block LetterUnified-Basic : begin
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
-		define [RBarPos slab] : if slab (0.5 + Stroke * (1 - PShape.SwBelowBar) / CAP) PShape.BarPos
+		define [RBarPos slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / CAP) PShape.BarPos
 		define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
 			include : PShape top (mul -- mul) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
 			local right (RightSB - O - [if SLAB (Jut / 8) 0])
@@ -3291,7 +3296,8 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB : begin
 				include : RightwardTopSerif RightSB XH SideJut
 				tag-contour 'serifRT'
-				include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
+				include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
+				include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
 			save 'q' 'q'
 			save 'cyrqa' 0x51B
 
@@ -3931,12 +3937,14 @@ glyph-block LetterUnified-Basic : begin
 	define { FShape } : do "F and related"
 		define [FShape top y noserif] : glyph-construction
 			local stroke : adviceBlackness2 2.875 2 CAP
-			include : VBarLeft (SB * 1.5) 0 [fallback top CAP] stroke
-			include : HBarTop (SB * 1.5 - O) RightSB [fallback top CAP] stroke
-			include : HBar (SB * 1.5 - O) (RightSB - [Math.max HalfStroke ((RightSB - SB) * 0.15)] - [if SLAB (Stroke * 0.25) 0]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]]) stroke
+			local FBarLeft : SB * 1.5
+			include : VBarLeft (FBarLeft) 0 [fallback top CAP] stroke
+			include : HBarTop (FBarLeft - O) RightSB [fallback top CAP] stroke
+			include : HBar (FBarLeft - O) (RightSB - [Math.max HalfStroke ((RightSB - SB) * 0.15)] - [if SLAB (Stroke * 0.25) 0]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]]) stroke
 			if (SLAB && !noserif) : begin
-				include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SideJut
-				include : CenterBottomSerif (SB * 1.5 + HalfStroke * HVContrast) 0 Jut
+				include : LeftwardTopSerif FBarLeft [fallback top CAP] SideJut
+				include : LeftwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 Jut
+				include : RightwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 MidJutSide
 				tag-contour 'serifBottom'
 				include : DownwardRightSerif RightSB [fallback top CAP] VJut
 
@@ -4299,8 +4307,8 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB : begin
 				include : tagged 'serifRT' : DownwardRightSerif r top VJut MVertStroke
 				include : tagged 'serifLT' : DownwardLeftSerif l top VJut MVertStroke
-				include : tagged 'serifRB' : RightwardBottomSerif Middle 0 (LongJut * 0.6)
-				include : tagged 'serifRB' : LeftwardBottomSerif Middle 0 (LongJut * 0.6)
+				include : tagged 'serifRB' : RightwardBottomSerif Middle 0 MidJutCenter
+				include : tagged 'serifRB' : LeftwardBottomSerif Middle 0 MidJutCenter
 
 		sketch # cyrTe
 			include MarkSet.capital
