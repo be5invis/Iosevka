@@ -64,6 +64,17 @@ To build Iosevka you should:
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
+### Using a Docker container
+
+A Docker container will ensure that you have all of the correct build tools installed without cluttering your system.
+
+Assuming you have Docker installed on your computer, to create a containarized build environment, run
+```sh
+docker build -t iosevka_build .
+```
+
+You can also include optional build arguments when building the container. For a list of build arguments, search for the `ARG` lines in the Dockerfile. The build arguments are only used to download specific versions of the build tools.
+
 ## Build Your Own Style
 
 Since version 2.0, Iosevka would no longer support building via `makefile`. To initialize a custom build, you need:
@@ -440,6 +451,19 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 <!-- END Section-Cherry-Picking-Styles -->
 
+### Using Docker
+
+Place `private-build-plans.toml` in a subfolder called, for example, `build_dir`. Build the font with
+```sh
+docker run -v ./build_dir:/build iosevka_build
+```
+Use the environment variable `FONT_VERSION` to specify the font version that you want to build. Otherwise the latest font version is built. You can also specify custom build options. For example, to only build the TTF files of version 3.0.1, you would run
+```sh
+docker run -e FONT_VERSION=3.0.1 -v ./build_dir:/build iosevka_build ttf::iosevka-custom
+```
+If no custom build arguments are provided, the first build plan in `private-build-plans.toml` is used. Otherwise, you must specify everything you would normally put after `npm run build --`
+
+Once the built is finished, the folder `dist` with the fonts will be placed inside `build_dir`.
 
 ## For Chinese and Japanese users...
 
