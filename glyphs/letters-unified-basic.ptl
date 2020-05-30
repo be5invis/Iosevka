@@ -3982,7 +3982,9 @@ glyph-block LetterUnified-Basic : begin
 				include : CenterBottomSerif (Middle - FBalance) 0 Jut
 				tag-contour 'serifMB'
 
-			save 'longs.straight'
+			branch
+				save 'longs.straight'
+
 
 		sketch # longs.upright
 			include MarkSet.b
@@ -3997,8 +3999,14 @@ glyph-block LetterUnified-Basic : begin
 			set-anchor 'overlay' BASE (m + Stroke * 0.65 * HVContrast) (CAP * OverlayPos)
 			if SLAB : begin
 				include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
-
-			save 'longs.upright'
+			branch
+				save 'longs.upright'
+			branch
+				include : HOverlayBar
+					m + HalfStroke * HVContrast - LongJut * 0.75
+					m + HalfStroke * HVContrast + LongJut * 0.75
+					[mix (XH - Stroke) CAP 0.5] - HalfStroke
+				save 'longsbar.upright'
 
 		define [LongSShape top bottom hookx hooky fine] : glyph-construction
 			local w [fallback fine Stroke]
@@ -4018,16 +4026,26 @@ glyph-block LetterUnified-Basic : begin
 				save 'esh' 0x283
 
 			branch
-				include : HOverlayBar (Middle - LongJut * 0.6) (Middle + LongJut * 0.6) (XH * 0.25)
+				include : HOverlayBar (Middle - LongJut * 0.75) (Middle + LongJut * 0.75) (XH * 0.25)
 				save 'eshbar' 0x284
 
-		sketch # longs
-			set-width Width
+			branch
+				include : HOverlayBar
+					Middle - LongJut * 0.75
+					Middle + LongJut * 0.75
+					[mix (XH - Stroke) CAP 0.5] - HalfStroke
+				save 'longsbar.italic'
 
+
+		create-glyph 'longs' 0x17F : glyph-construction
 			if (para.isItalic)
-				then : include [refer-glyph 'longs.italic'] AS_BASE
-				else : include [refer-glyph 'longs.upright'] AS_BASE
-			save 'longs' 0x17F
+				then : include [refer-glyph 'longs.italic'] AS_BASE ALSO_METRICS
+				else : include [refer-glyph 'longs.upright'] AS_BASE ALSO_METRICS
+
+		create-glyph 'longsbar' 0x1E9D : glyph-construction
+			if (para.isItalic)
+				then : include [refer-glyph 'longsbar.italic'] AS_BASE ALSO_METRICS
+				else : include [refer-glyph 'longsbar.upright'] AS_BASE ALSO_METRICS
 
 		sketch # eshcurlytail
 			include MarkSet.if
