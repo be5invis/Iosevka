@@ -2285,7 +2285,7 @@ glyph-block LetterUnified-Basic : begin
 
 	### P
 	glyph-block-export PShape PShapeOutline
-	define { PShape PShapeOutline } : do "P and related =========================================="
+	define { PShape RevPShape PShapeOutline } : do "P and related ================================"
 		define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
 			local bowlTop (top * 1 - offset)
 			local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
@@ -2315,6 +2315,34 @@ glyph-block LetterUnified-Basic : begin
 					flat (right - turnRadius + CorrectionOMidS) bowlBottom
 					curl (SB * mul - O) bowlBottom [heading Leftward]
 
+		define [RevPshapeOutlineKnots top mul bp overshoot sw offset] : begin
+			local bowlTop (top * 1 - offset)
+			local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
+			local turnRadius : (bowlTop - bowlBottom) * 0.45
+			local sma : SmoothAOf (Smooth * 0.9) Width
+			local smb : SmoothBOf (Smooth * 0.9) Width
+			local left : SB + offset
+
+			if (bowlTop - bowlBottom <= sma + smb) : begin
+				local turn : mix bowlTop bowlBottom (sma / (sma + smb))
+				return : list
+					flat (Width - SB * mul + O) bowlTop [heading Leftward]
+					curl (left + turnRadius - CorrectionOMidS) bowlTop
+					archv
+					straight.down.mid (left + overshoot) turn
+					arcvh
+					flat (left + turnRadius + CorrectionOMidS) bowlBottom
+					curl (Width - SB * mul + O) bowlBottom [heading Rightward]
+			: else : begin
+				return : list
+					flat (Width - SB * mul + O) bowlTop [heading Leftward]
+					curl (left + turnRadius - CorrectionOMidS) bowlTop
+					archv
+					flat (left + overshoot) (bowlTop - sma)
+					curl (left + overshoot) (bowlBottom + smb)
+					arcvh
+					flat (left + turnRadius + CorrectionOMidS) bowlBottom
+					curl (Width - SB * mul + O) bowlBottom [heading Rightward]
 
 		define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-construction
 			include : spiro-outline
@@ -2331,6 +2359,18 @@ glyph-block LetterUnified-Basic : begin
 				include : LeftwardTopSerif (SB * mul) top SideJut sw
 				tag-contour 'serifLT'
 				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
+
+		define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
+			include : tagged 'bowl' : dispiro
+				widths.lhs sw
+				RevPshapeOutlineKnots top mul bp overshoot sw 0
+			include : tagged 'strokeR' : VBarRight (Width - SB * mul) 0 top sw
+
+			if slab : begin
+				include : tagged 'serifRT'
+					RightwardTopSerif (Width - SB * mul) top SideJut sw
+				include : tagged 'serifRB'
+					CenterBottomSerif (Width - SB * mul - HalfStroke * HVContrast) 0 Jut sw
 
 		set PShape.defaultMul 1.25
 		set PShape.defaultOvershoot (OX * 2)
@@ -2353,7 +2393,7 @@ glyph-block LetterUnified-Basic : begin
 
 			save 'Phookleft' 0x1A4
 
-		list PShape PShapeOutline
+		list PShape RevPShape PShapeOutline
 
 	### p
 	do "p and related ============================================================================="
@@ -2403,38 +2443,67 @@ glyph-block LetterUnified-Basic : begin
 				if slab : begin
 					include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
 			: else : begin
-				include : dispiro
-					widths.center sw
-					g4.up.start xRightBottom bottom [heading Upward]
-					quadcontrols 0 [if slab 0.3 0.4] 8
-					g4 Middle top
+				include : intersection
+					Rect top 0 (-Width) (2 * Width)
+					dispiro
+						widths.center sw
+						g4.up.start xRightBottom bottom [heading Upward]
+						quadcontrols 0 [if slab 0.3 0.4] 8
+						g4 Middle top
 				if slab : begin
 					include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
-		define [RBarPos slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / CAP) PShape.BarPos
+		define [RevRLegTerminalX straight left sw] : left + [if straight (OX * 2) 0] + sw / 2 * HVContrast
+		define [RevRLegShape left bottom top charTop slab straight sw extraShift] : glyph-construction
+			local xLeftBottom : RevRLegTerminalX straight left sw
+			if straight : do
+				local shift : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
+				include : dispiro
+					widths.center (sw * [diagCor charTop (Width - extraShift * 2) 0 (sw * 2)])
+					corner (Middle + extraShift + shift / 2) top [heading Downward]
+					corner (xLeftBottom + shift) bottom [heading Downward]
+				if slab : begin
+					include : LeftwardBottomSerif (xLeftBottom + shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+			: else : begin
+				include : intersection
+					Rect top 0 (-Width) (2 * Width)
+					dispiro
+						widths.center sw
+						g4.up.start xLeftBottom bottom [heading Upward]
+						quadcontrols 0 [if slab 0.3 0.4] 8
+						g4 Middle top
+				if slab : begin
+					include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
+
+		define [RBarPos charTop slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / charTop) PShape.BarPos
+		define [RBarTop charTop stroke straightBar slab] : (charTop - Stroke) * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
 		define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
-			include : PShape top (mul -- mul) (bp -- [RBarPos slab]) (overshoot -- O) (slab -- slab)
+			include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 			local right (RightSB - O - [if SLAB (Jut / 8) 0])
-			include : RLegShape right 0 ((top - Stroke) * [RBarPos slab]) top SLAB straightBar Stroke 0
+			include : RLegShape right 0 [RBarTop top Stroke straightBar slab] top slab straightBar Stroke 0
+		define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
+			include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
+			local left (SB + O + [if SLAB (Jut / 8) 0])
+			include : RevRLegShape left 0 [RBarTop top Stroke straightBar slab] top slab straightBar Stroke 0
 
 		sketch # R
 			include MarkSet.capital
 			branch
 				include : RShape true CAP
-				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos SLAB] - HalfStroke)
+				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos CAP SLAB] - HalfStroke)
 				save 'R.straight'
 			branch
 				include : RShape true CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos 0] - HalfStroke)
+				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos CAP 0] - HalfStroke)
 				eject-contour 'strokeL'
 				save 'Rrotunda.straight'
 			branch
 				include : RShape false CAP
-				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos SLAB] - HalfStroke)
+				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos CAP SLAB] - HalfStroke)
 				save 'R.curly'
 			branch
 				include : RShape false CAP (slab -- false)
-				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos 0] - HalfStroke)
+				set-anchor 'overlay' BASE (SB + Stroke * HVContrast) (CAP * [RBarPos CAP 0] - HalfStroke)
 				eject-contour 'strokeL'
 				save 'Rrotunda.curly'
 
@@ -2487,54 +2556,21 @@ glyph-block LetterUnified-Basic : begin
 
 		select-variant 'Yr' 0x1A6 (follow -- 'R')
 
-		define [CyrYaShape straightBar top] : glyph-construction
-			local bowlTop (top * 1)
-			local bowlBottom ((top - Stroke) * [RBarPos SLAB] - HalfStroke)
-			local turn : mix bowlTop bowlBottom (SmoothA / (SmoothA + SmoothB))
-			local turnRadius : (bowlTop - bowlBottom) * 0.45
-			local barright : Width - SB * 1.25
-			include : dispiro
-				widths.lhs
-				flat (barright - HalfStroke * 0.1) bowlTop [heading Leftward]
-				curl (SB + turnRadius - CorrectionOMidS) bowlTop
-				archv
-				g4 (SB + O) turn
-				arcvh
-				flat (SB + turnRadius + CorrectionOMidS) bowlBottom
-				curl    (barright - HalfStroke * 0.1) bowlBottom [heading Rightward]
-			include : VBarRight barright 0 top
-			local left (SB + O + [if SLAB (Jut / 8) 0])
-
-			if straightBar : then : include : dispiro
-				widths.center (Stroke * [diagCor top (Width - Stroke * 2)])
-				corner Middle ((top - Stroke) * [RBarPos SLAB]) [heading Downward]
-				corner (left + OX * 2 + HalfStroke * HVContrast) 0 [heading Downward]
-			: else : include : dispiro
-				widths.center
-				g4.up.start (left + HalfStroke * HVContrast) 0 [heading Upward]
-				quadcontrols 0 [if SLAB 0.3 0.4] 8
-				g4 Middle ((top - Stroke) * [RBarPos SLAB])
-
-			if SLAB : begin
-				include : RightwardTopSerif barright top SideJut
-				include : CenterBottomSerif (barright - HalfStroke * HVContrast) 0 Jut
-				include : LeftwardBottomSerif (SB + Jut / 8) 0 (SideJut + Jut / 8)
-
 		sketch # cyrYa
 			include MarkSet.capital
 			branch
-				include : CyrYaShape true CAP
+				include : RevRShape true CAP
 				save 'cyrYa.straight'
 			branch
-				include : CyrYaShape false CAP
+				include : RevRShape false CAP
 				save 'cyrYa.curly'
 		sketch # cyrya
 			include MarkSet.e
 			branch
-				include : CyrYaShape true XH
+				include : RevRShape true XH
 				save 'cyrya.straight'
 			branch
-				include : CyrYaShape false XH
+				include : RevRShape false XH
 				save 'cyrya.curly'
 
 		select-variant 'cyrYa' 0x42F (follow -- 'R')
