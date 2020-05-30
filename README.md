@@ -404,7 +404,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
-    * `v-eszet-longs-s-lig`, `VXAC`: A more modern, beta-like Eszet.
+    * `v-eszet-longs-s-lig`, `VXAC`: An Eszet shown as a ligature of long-S (`ſ`) and `s`.
   * Styles for `λ`:
     * `v-lambda-straight`, `cv94`: More-straight letter `λ` (default).
     * `v-lambda-curly`, `cv95`: More curly letter `λ`, like Iosevka 2.x.
