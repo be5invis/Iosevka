@@ -64,6 +64,10 @@ To build Iosevka you should:
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
+### Using a Docker container
+
+Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method)
+
 ## Build Your Own Style
 
 Since version 2.0, Iosevka would no longer support building via `makefile`. To initialize a custom build, you need:
@@ -446,6 +450,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 <!-- END Section-Cherry-Picking-Styles -->
 
+### Using Docker
+
+Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method-1)
 
 ## For Chinese and Japanese users...
 
