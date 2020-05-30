@@ -3,7 +3,7 @@ import 'object-assign' as objectAssign
 import '../support/glyph' as Glyph
 import '../support/transform' as Transform
 
-import [CreateEmptyTable] from "./table-util"
+import [CreateEmptyTable finalizeTable MoveBackUtilityLookups] from "./table-util"
 
 import [buildLigations] from './gsub-ligation'
 import [buildCCMP] from './gsub-ccmp'
@@ -23,11 +23,14 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 	define gsub : CreateEmptyTable
 	set gsub.lookupDep {}
 
+	# lnum / onum
 	buildPairFeature gsub 'lnum' 'onum' glyphs glyphList
+
+	# NWID / WWID
 	if (!para.forceMonospace || para.spacing > 0) : begin
 		buildPairFeature gsub 'NWID' 'WWID' glyphs glyphList
 
-	# CCMP
+	# ccmp
 	buildCCMP gsub glyphs markGlyphs
 
 	# Ligation
@@ -37,18 +40,26 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 			set plm.calt para.ligation.caltBuildup
 		buildLigations gsub para plm glyphs
 
+	# cv##, ss##
 	buildCVSS gsub para glyphList
+
+	# THND
 	buildGsubThousands gsub para glyphs
 
+	# locl
+	# Builds last, but the lookups are added into the beginning of the lookup list
 	buildLOCL gsub para
 
+	MoveBackUtilityLookups gsub
 	set gsub.lookupOrder : topsort gsub.lookupDep
+	finalizeTable gsub
 	return gsub
 
 # GPOS
 define [buildGPOS para glyphs glyphList markGlyphs] : begin
 	define gpos : CreateEmptyTable
 	buildMarkMkmk gpos glyphList
+	finalizeTable gpos
 	return gpos
 
 # GDEF

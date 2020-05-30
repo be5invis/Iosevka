@@ -1,4 +1,4 @@
-import [add-common-feature add-feature ChainRuleBuilder query-related-glyphs] from "./table-util"
+import [add-common-feature add-feature ChainRuleBuilder query-related-glyphs BeginLookupBlock EndLookupBlock] from "./table-util"
 
 extern Set
 
@@ -12,8 +12,10 @@ define preserved null
 define advance : lambda [t] : t.map : lambda [x] x
 
 export : define [buildLigations sink para plm glyphs] : begin
+	local rec : BeginLookupBlock sink
 	local rankedLookups {}
 	foreach [ {featureName mappedFeature} : pairs-of plm] : buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups
+	EndLookupBlock rec sink
 
 define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups] : begin
 	define {chain-rule reverse-rule} : ChainRuleBuilder sink
@@ -609,20 +611,28 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				CreateLigationLookup : list
 					chain-rule
 						stickTermLeft  ~> preserved
-						barCls         ~> [CBar 'zj']
-						anyBar         ~> preserved
-					chain-rule
-						stickTermLeft  ~> preserved
 						barCls         ~> [CBar 'zf']
 
 				CreateReverseLigationLookup : list
 					reverse-rule
-						anyBar         ~> preserved
-						barCls         ~> [CBar 'jz']
-						stickTermRight ~> preserved
-					reverse-rule
 						barCls         ~> [CBar 'fz']
 						stickTermRight ~> preserved
+
+				# Fix for Apple : arrow bar at line start won't join with the rest (#548)
+				CreateLigationLookup : list
+					chain-rule
+						barCls         ~> [CBar 'fz']
+						stickTermRight ~> preserved
+
+				CreateLigationLookup : list
+					chain-rule
+						stickTermLeft        ~> preserved
+						[[CBar 'zf'] barCls] ~> [[CBar 'zj'] barCls]
+						anyBar               ~> preserved
+					chain-rule
+						anyBar               ~> preserved
+						[[CBar 'fz'] barCls] ~> [[CBar 'jz'] barCls]
+						stickTermRight       ~> preserved
 
 				# Gap filling
 				CreateLigationLookup : list

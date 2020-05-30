@@ -3,7 +3,10 @@ const path = require("path");
 const toml = require("toml");
 
 module.exports = async function () {
-	const variantsToml = await fs.readFile(path.join(__dirname, "../../variants.toml"), "utf8");
+	const variantsToml = await fs.readFile(
+		path.join(__dirname, "../../params/variants.toml"),
+		"utf8"
+	);
 	const variants = toml.parse(variantsToml);
 
 	const cvData = getCvData(variants);
@@ -41,7 +44,13 @@ function getCvData(variants) {
 	for (const [sampler, gr] of samplerGroups) {
 		gr.ligatureSampler = / /.test(sampler);
 		gr.descSampleText = gr.ligatureSampler ? sampler.split(" ") : [...sampler];
-		gr.configs.sort((a, b) => (a.tag < b.tag ? -1 : a.tag > b.tag ? 1 : 0));
+		gr.configs.sort((a, b) => {
+			const ta = (a.tag || a.tagUpright || a.tagItalic || "").toLowerCase();
+			const tb = (b.tag || b.tagUpright || b.tagItalic || "").toLowerCase();
+			if (ta < tb) return -1;
+			if (ta > tb) return 1;
+			return 0;
+		});
 		gr.rank = rankOf(gr.descSampleText[0][0]);
 	}
 	return [...samplerGroups.values()].sort((a, b) => b.rank - a.rank);

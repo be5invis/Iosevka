@@ -6,6 +6,8 @@ const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm, fail, echo } = build.actions;
 const { FileList } = build.predefinedFuncs;
+const which = require("which");
+
 module.exports = build;
 
 ///////////////////////////////////////////////////////////
@@ -18,6 +20,8 @@ const DIST = "dist";
 const ARCHIVE_DIR = "release-archives";
 
 const OTF2OTC = "otf2otc";
+const OTFCC_BUILD = "otfccbuild";
+const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
 const webfontFormats = [
@@ -45,9 +49,18 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const Version = oracle(`metadata:version`, async () => {
+const Version = oracle(`oracle:version`, async () => {
 	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
 	return package_json.version;
+});
+
+const HasTtx = oracle(`oracle:has-ttx`, async () => {
+	try {
+		const cmd = await which(TTX);
+		return !!cmd;
+	} catch (e) {
+		return false;
+	}
 });
 
 async function tryParseToml(str) {
@@ -62,17 +75,23 @@ async function tryParseToml(str) {
 	}
 }
 
-const RawPlans = oracle(`metadata:raw-plans`, async target => {
+const RawPlans = computed(`metadata:raw-plans`, async target => {
 	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
 
 	const bp = await tryParseToml(BUILD_PLANS);
+	bp.buildOptions = bp.buildOptions || {};
+
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
 		const privateBP = await tryParseToml(PRIVATE_BUILD_PLANS);
 		Object.assign(bp.buildPlans, privateBP.buildPlans);
+		Object.assign(bp.buildOptions, privateBP.buildOptions || {});
 	}
 	return bp;
 });
-
+const OptimizeWithTtx = computed("metadata:optimize-with-ttx", async target => {
+	const [hasTtx, rp] = await target.need(HasTtx, RawPlans);
+	return hasTtx && !!rp.buildOptions.optimizeWithTtx;
+});
 const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
@@ -245,7 +264,7 @@ function vlMenuWeight(x) {
 	return vlCssWeight(x);
 }
 function vlShapeWidth(x) {
-	return x === 3 || x === 5 || x === 7;
+	return x >= 3 && x <= 9 && x % 1 === 0;
 }
 function vlMenuWidth(x) {
 	return x >= 1 && x <= 9 && x % 1 === 0;
@@ -345,21 +364,31 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
-		const [fi] = await target.need(FontInfoOf(fn), Version);
+		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
 		const charmap = output.dir + "/" + output.name + ".charmap";
-		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
+		await target.need(Scripts, Parameters, de`${output.dir}`);
 
 		const otdPath = `${output.dir}/${output.name}.otd`;
 		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
-		await run(
-			"otfccbuild",
-			otdPath,
-			["-o", `${output.full}`],
-			["-O3", "--keep-average-char-width", "-q"]
-		);
+		if (useTtx) {
+			const tempOtfPath = `${output.dir}/${output.name}.temp.otf`;
+			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
+
+			await optimizedOtfcc(otdPath, tempOtfPath);
+			await run(TTX, "-q", ["-o", ttxPath], tempOtfPath);
+			await run(TTX, "-q", ["-o", output.full], ttxPath);
+			await rm(tempOtfPath);
+			await rm(ttxPath);
+		} else {
+			await optimizedOtfcc(otdPath, output.full);
+		}
 		await rm(otdPath);
 	}
 );
+
+function optimizedOtfcc(from, to) {
+	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
+}
 
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
@@ -466,11 +495,11 @@ const ExportTtc = file.make(
 	}
 );
 async function buildTtcForFile(target, parts, out) {
-	await target.need(de`${out.dir}`);
-	const [ttfs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
+	const [useTtx] = await target.need(OptimizeWithTtx, de`${out.dir}`);
+	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
-	const ttfInputPaths = ttfs.map(p => p.full);
-	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc]);
+	const ttfInputPaths = ttfInputs.map(p => p.full);
+	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc], useTtx ? "--ttx-loop" : null);
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
@@ -558,7 +587,7 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 	target.is.volatile();
 	const [version, pagesDir] = await target.need(Version, PagesDir);
 	if (!pagesDir) return;
-	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	await target.need(Parameters, UtilScripts);
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
@@ -604,18 +633,45 @@ const PagesFast = task(`pages-fast`, async target => {
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
-	const [sans, slab] = await target.need(
+	const [sans, slab, aile, etoile, sparkle] = await target.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
+		GroupContents`iosevka-aile`,
+		GroupContents`iosevka-etoile`,
+		GroupContents`iosevka-sparkle`,
+		SnapShotJson,
 		SnapShotCSS,
 		SnapShotHtml,
 		de`images`
 	);
 	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
 	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
+	await cp(`${DIST}/${aile}`, `snapshot/${aile}`);
+	await cp(`${DIST}/${etoile}`, `snapshot/${etoile}`);
+	await cp(`${DIST}/${sparkle}`, `snapshot/${sparkle}`);
+});
+
+const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
+	const [plan] = await target.need(BuildPlans);
+	const cfg = [];
+	for (const key in plan.buildPlans) {
+		const p = plan.buildPlans[key];
+		if (!p || !p.snapshotFamily) continue;
+		cfg.push({
+			el: "#packaging-sampler",
+			applyClass: p.snapshotFamily,
+			applyFeature: p.snapshotFeature,
+			name: key
+		});
+	}
+	return cfg;
+});
+const SnapShotJson = file(`snapshot/packaging-tasks.json`, async (target, out) => {
+	const [cfg] = await target.need(PackageSnapshotConfig);
+	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	await target.need(Parameters, UtilScripts);
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
@@ -636,7 +692,7 @@ const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 });
 
 const SampleImages = task(`sample-images`, async target => {
-	await target.need(TakeSampleImages);
+	const [cfg] = await target.need(PackageSnapshotConfig, TakeSampleImages);
 	await target.need(
 		ScreenShot`images/charvars.png`,
 		ScreenShot`images/languages.png`,
@@ -644,7 +700,8 @@ const SampleImages = task(`sample-images`, async target => {
 		ScreenShot`images/matrix.png`,
 		ScreenShot`images/preview-all.png`,
 		ScreenShot`images/stylesets.png`,
-		ScreenShot`images/weights.png`
+		ScreenShot`images/weights.png`,
+		cfg.map(opt => ScreenShot`images/${opt.name}.png`)
 	);
 });
 
@@ -742,7 +799,7 @@ const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (targe
 	}
 });
 const Scripts = task("scripts", async target => {
-	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`ligation-set.toml`);
+	await target.need(Parameters);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
@@ -751,4 +808,12 @@ const Scripts = task("scripts", async target => {
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
 	await target.need(files.map(f => fu`${f}`));
+});
+const Parameters = task(`meta:parameters`, async target => {
+	await target.need(
+		sfu`params/parameters.toml`,
+		ofu`params/private-parameters.toml`,
+		sfu`params/variants.toml`,
+		sfu`params/ligation-set.toml`
+	);
 });

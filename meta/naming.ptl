@@ -1,4 +1,5 @@
 import [fallback] from '../support/utils'
+import 'semver' as semver
 
 define COPYRIGHT             0
 define FAMILY                1
@@ -43,15 +44,15 @@ define weightToMenuStyleMap : object
 	800 "Extrabold"
 	900 "Heavy"
 define widthToMenuStyleMap : object
-	1 "Ultra-condensed"
-	2 "Extra-condensed"
+	1 "Ultra-Condensed"
+	2 "Extra-Condensed"
 	3 "Condensed"
-	4 "Semi-condensed"
+	4 "Semi-Condensed"
 	5 ""
-	6 "Semi-extended"
+	6 "Semi-Extended"
 	7 "Extended"
-	8 "Extra-extended"
-	9 "Ultra-extended"
+	8 "Extra-Extended"
+	9 "Ultra-Extended"
 define slantToMenuStyleMap : object
 	normal  ""
 	italic  "Italic"
@@ -185,6 +186,14 @@ export : define [assignFontNames para metrics font] : begin
 	set font.head.macStyle          : object
 		bold          : not : not isBold
 		italic        : not : not (isItalic || isOblique)
+		condensed     : not : not (para.naming.width < 5)
+		extended      : not : not (para.naming.width > 5)
+
+	define majorVersion : semver.major para.naming.version
+	define minorVersion : semver.minor para.naming.version
+	define patchVersion : semver.patch para.naming.version
+	if (minorVersion > 99 || patchVersion > 9) : throw : new Error "Version number overflow"
+	set font.head.fontRevision : majorVersion + (minorVersion * 10 + patchVersion) / 1000
 
 	if (para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1) : begin
 		set font.OS_2.panose.3          9 # Monospaced

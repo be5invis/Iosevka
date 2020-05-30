@@ -11,29 +11,103 @@ glyph-module
 glyph-block Symbol-Other-Phonetic : begin
 	glyph-block-import CommonShapes
 
-	local triangleSize : Math.min (PERIODRADIUS) (XH / 5)
+	local triangleSize : Math.min (PeriodRadius) (XH / 5)
 
 	sketch # trianglecolon
-		start-from (MIDDLE - triangleSize * 1.35) XH
-		line-to    MIDDLE (XH - triangleSize * 2.75)
-		line-to    (MIDDLE + triangleSize * 1.35) XH
-		start-from (MIDDLE - triangleSize * 1.35) 0
-		line-to    MIDDLE (0 + triangleSize * 2.75)
-		line-to    (MIDDLE + triangleSize * 1.35) 0
+		start-from (Middle - triangleSize * 1.35) XH
+		line-to    Middle (XH - triangleSize * 2.75)
+		line-to    (Middle + triangleSize * 1.35) XH
+		start-from (Middle - triangleSize * 1.35) 0
+		line-to    Middle (0 + triangleSize * 2.75)
+		line-to    (Middle + triangleSize * 1.35) 0
 
 		save 'trianglecolon' 0x2D0
 
 	sketch # halftrianglecolon
-		start-from (MIDDLE - triangleSize * 1.35) XH
-		line-to    MIDDLE (XH - triangleSize * 2.75)
-		line-to    (MIDDLE + triangleSize * 1.35) XH
+		start-from (Middle - triangleSize * 1.35) XH
+		line-to    Middle (XH - triangleSize * 2.75)
+		line-to    (Middle + triangleSize * 1.35) XH
 		save 'halftrianglecolon' 0x2D1
+
+	define [yOfTone tone] : mix (OperatorStroke / 2) (CAP - OperatorStroke / 2) (tone / 4)
+	define [yOfToneNeutral tone] : mix DotRadius (CAP - DotRadius) (tone / 4)
 
 	foreach tone [range 4 downtill 0] : begin
 		create-glyph ('tone' + tone) : glyph-construction
 			assign-unicode (0x2E5 + 4 - tone)
-			include : VBarRight [mix SB RIGHTSB 0.9] 0 CAP OPERATORSTROKE
-			include : HBar [mix SB RIGHTSB 0.1] ([mix SB RIGHTSB 0.9] - 1) [mix (OPERATORSTROKE / 2) (CAP - OPERATORSTROKE / 2) (tone / 4)] OPERATORSTROKE
+			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
+			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+		create-glyph ('toneSandhi' + tone) : glyph-construction
+			assign-unicode (0xA712 + 4 - tone)
+			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
+			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+		create-glyph ('toneNeutral' + tone) : glyph-construction
+			assign-unicode (0xA708 + 4 - tone)
+			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
+			include : DotAt ([mix SB RightSB 0.1] + DotRadius) [yOfToneNeutral tone] DotRadius
+		create-glyph ('toneSandhiNeutral' + tone) : glyph-construction
+			assign-unicode (0xA70D + 4 - tone)
+			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
+			include : DotAt ([mix SB RightSB 0.9] - DotRadius) [yOfToneNeutral tone] DotRadius
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneStart' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 Middle Width
+				dispiro
+					widths.center OperatorStroke
+					corner (Width / 2) [yOfTone toneStart]
+					corner (Width + Width / 2) [yOfTone toneEnd]
+		create-glyph ('toneSandhiStart' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 Middle Width
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2) [yOfTone : mix toneEnd toneStart 2]
+					corner (Width + Width / 2) [yOfTone toneEnd]
+			include : VBar Middle 0 CAP OperatorStroke
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneEnd' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 Middle
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2)         [yOfTone toneStart]
+					corner (Width + Width / 2)     [yOfTone : mix toneStart toneEnd 2]
+			include : VBar Middle 0 CAP OperatorStroke
+		create-glyph ('toneSandhiEnd' + toneStart + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 Width
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2) [yOfTone toneStart]
+					corner (Width / 2) [yOfTone toneEnd]
+
+	foreach toneStart [range 4 downtill 0] : foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneMid' + toneStart + toneMid + toneEnd) : glyph-construction
+			include : intersection
+				Rect CAP 0 0 Width
+				union
+					intersection
+						dispiro
+							widths.center OperatorStroke
+							corner (0 - Width / 2)     [yOfTone toneStart]
+							corner (Width + Width / 2) [yOfTone : mix toneStart toneMid 2]
+						dispiro
+							widths.center OperatorStroke
+							corner (0 - Width / 2)     [yOfTone : mix toneEnd toneMid 2]
+							corner (Width + Width / 2) [yOfTone toneEnd]
+					dispiro
+						widths.center OperatorStroke
+						corner (0 - Width / 2) [yOfTone toneStart]
+						corner (Width / 2)     [yOfTone toneMid]
+					dispiro
+						widths.center OperatorStroke
+						corner (Width / 2)         [yOfTone toneMid]
+						corner (Width + Width / 2) [yOfTone toneEnd]
+		create-glyph ('toneSandhiMid' + toneStart + toneMid + toneEnd) : glyph-construction
+			include [refer-glyph ('toneMid' + toneStart + toneMid + toneEnd)] AS_BASE ALSO_METRICS
 
 glyph-block Symbol-Other-Suit-Cards : begin
 	glyph-block-import CommonShapes
@@ -41,7 +115,7 @@ glyph-block Symbol-Other-Suit-Cards : begin
 	local df : DivFrame para.diversityM
 	local heartTop : mix symbolMid pictTop 0.75
 	local heartBot : mix symbolMid pictBot 0.75
-	local heartRight : df.middle + [mix RIGHTSB WIDTH (1 / 2)] - MIDDLE
+	local heartRight : df.middle + [mix RightSB Width (1 / 2)] - Middle
 	local heartLeft : df.middle - (heartRight - df.middle)
 	local sw : adviceBlackness 4.25
 
@@ -72,11 +146,11 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		quadcontrols 0 (1 / 3)
 		close
 
-	save-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape 0 0 0
+	create-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape 0 0 0
 
-	save-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit'] [HeartInnerShape sw 1.75 0.8]
+	create-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit'] [HeartInnerShape sw 1.75 0.8]
 
-	save-glyph 'spadeSuit' 0x2660 : wrap : union
+	create-glyph 'spadeSuit' 0x2660 : wrap : union
 		sketch
 			include : refer-glyph "heartSuit"
 			apply-transform : Upright
@@ -87,7 +161,7 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
 		VBar df.middle heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)] sw
 
-	save-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference [refer-glyph 'spadeSuit'] : sketch
+	create-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference [refer-glyph 'spadeSuit'] : sketch
 		include : HeartInnerShape sw 2 0
 		apply-transform : Upright
 		apply-transform : Translate (-df.middle) (-heartBot)
@@ -113,20 +187,20 @@ glyph-block Symbol-Other-Suit-Cards : begin
 
 	local circleRadius : (heartTop - heartBot) * 0.18
 
-	save-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
+	create-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
 
-	save-glyph 'whiteClubSuit' 0x2667 : wrap : sketch
+	create-glyph 'whiteClubSuit' 0x2667 : wrap : sketch
 		local ro : circleRadius + sw / 2
 		local ri : circleRadius - sw / 2
 		include : difference [ClubShape ro] [ClubTriangles ri]
 
-	save-glyph 'diamondSuit' 0x2666 : wrap : sketch
+	create-glyph 'diamondSuit' 0x2666 : wrap : sketch
 		start-from df.middle heartTop
 		line-to    (heartRight - O) symbolMid
 		line-to    df.middle heartBot
 		line-to    (heartLeft + O) symbolMid
 
-	save-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection [refer-glyph 'diamondSuit']
+	create-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection [refer-glyph 'diamondSuit']
 		union
 			dispiro [widths.rhs sw] [flat df.middle heartTop] [curl (heartRight - O) symbolMid]
 			dispiro [widths.rhs sw] [flat (heartRight - O) symbolMid] [curl df.middle heartBot]
@@ -139,25 +213,25 @@ glyph-block Symbol-Other-Planets : begin
 	glyph-block-import Symbol-Arrow : ArrowShape
 
 	sketch # venus
-		local obot : pictTop - RIGHTSB + SB
-		include : OShape pictTop obot SB RIGHTSB OPERATORSTROKE
-		include : VBar MIDDLE pictBot obot OPERATORSTROKE
-		include : HBar SB RIGHTSB [mix pictBot (obot + OPERATORSTROKE) 0.5] OPERATORSTROKE
+		local obot : pictTop - RightSB + SB
+		include : OShape pictTop obot SB RightSB OperatorStroke
+		include : VBar Middle pictBot obot OperatorStroke
+		include : HBar SB RightSB [mix pictBot (obot + OperatorStroke) 0.5] OperatorStroke
 
 		save 'venus' 0x2640
-	turned 'earth' 0x2641 'venus' MIDDLE symbolMid
+	turned 'earth' 0x2641 'venus' Middle symbolMid
 
 	sketch # mars
-		local otop : pictBot + RIGHTSB - SB
-		include : OShape otop pictBot SB RIGHTSB OPERATORSTROKE
-		include : ArrowShape MIDDLE (otop - OPERATORSTROKE / 3) MIDDLE pictTop ((RIGHTSB - SB) * 0.4)
+		local otop : pictBot + RightSB - SB
+		include : OShape otop pictBot SB RightSB OperatorStroke
+		include : ArrowShape Middle (otop - OperatorStroke / 3) Middle pictTop ((RightSB - SB) * 0.4)
 		save 'mars' 0x2642
 
 glyph-block Symbol-Other-Musical : begin
 	glyph-block-import CommonShapes
 
 	define fine : adviceBlackness 6
-	define noteSize : WIDTH * 0.4 + fine / 2
+	define noteSize : Width * 0.4 + fine / 2
 	define noteCompress 0.8
 	define commonNoteBottom : pictBot + noteCompress / 2 * noteSize
 	define [BandShape z1 z2 l r h] : begin
@@ -169,37 +243,38 @@ glyph-block Symbol-Other-Musical : begin
 			corner r yr
 			corner r (yr + h)
 			corner l (yl + h)
-	define [MusicalNoteAt size x y] : sketch
+	define [MusicalNoteAt size x y] : glyph-construction
 		include : Ring (- noteCompress / 2 * size) (noteCompress / 2 * size) (-size) 0
 		include : Upright
 		include : new Transform 1 0 0.15 1 0 0
 		include : Translate x y
 		include : Italify
 
-	save-glyph 'crotchet' 0x2669 : union
-		MusicalNoteAt noteSize (MIDDLE + noteSize / 6 + fine / 2 * HVCONTRAST) commonNoteBottom
-		VBar (MIDDLE + noteSize / 6) commonNoteBottom pictTop fine
+	create-glyph 'crotchet' 0x2669 : union
+		MusicalNoteAt noteSize (Middle + noteSize / 6 + fine / 2 * HVContrast) commonNoteBottom
+		VBar (Middle + noteSize / 6) commonNoteBottom pictTop fine
 
-	save-glyph 'quaver' 0x266A : sketch
-		local x3 : mix MIDDLE RIGHTSB 0.35
+	create-glyph 'quaver' 0x266A : glyph-construction
+		local x3 : mix Middle RightSB 0.35
 		local y3 : mix pictBot pictTop 0.25
 		local y2 : mix y3 pictTop 0.25
 		include : union
-			MusicalNoteAt noteSize MIDDLE commonNoteBottom
-			VBarRight MIDDLE commonNoteBottom pictTop fine
+			MusicalNoteAt noteSize Middle commonNoteBottom
+			VBarRight Middle commonNoteBottom pictTop fine
 			dispiro
 				widths.rhs fine
-				g4.down.start MIDDLE pictTop
-				g4.down.mid RIGHTSB y2
+				g4.down.start Middle pictTop
+				g4.down.mid RightSB y2
 				g4 x3 y3
+
 	do "Beamed Notes"
-		local x1 : MIDDLE - noteSize / 6
+		local x1 : Middle - noteSize / 6
 		local x2 : x1 + noteSize * 7 / 6
 		local deltaY : noteCompress * noteSize / 2
 		local lb1 : pictBot + noteCompress / 2 * noteSize
 		local bandWidth : noteSize * noteCompress * 0.75
 
-		save-glyph 'beamQuaver' 0x266B : difference
+		create-glyph 'beamQuaver' 0x266B : difference
 			union
 				MusicalNoteAt noteSize x1 commonNoteBottom
 				VBarRight x1 commonNoteBottom (pictTop - deltaY) fine
@@ -208,21 +283,21 @@ glyph-block Symbol-Other-Musical : begin
 				BandShape
 					object [x x1] [y : pictTop - deltaY]
 					object [x x2] [y pictTop]
-					x1 - fine * HVCONTRAST
+					x1 - fine * HVContrast
 					x2 + 0
 					0 - bandWidth
 			BandShape
 				object [x x1] [y : pictTop - deltaY]
 				object [x x2] [y pictTop]
-				x1 - fine * HVCONTRAST
+				x1 - fine * HVContrast
 				x2 + 0
 				0 + bandWidth
 
-		save-glyph 'beamSemiQuaver' 0x266C : union [refer-glyph 'beamQuaver']
+		create-glyph 'beamSemiQuaver' 0x266C : union [refer-glyph 'beamQuaver']
 			BandShape
 				object [x x1] [y : pictTop - deltaY - 1.5 * bandWidth]
 				object [x x2] [y : pictTop - 1.5 * bandWidth]
-				x1 - fine * HVCONTRAST
+				x1 - fine * HVContrast
 				x2 + 0
 				0 - bandWidth
 
@@ -232,64 +307,64 @@ glyph-block Symbol-Other-Musical : begin
 		local fine : adviceBlackness 3.5
 		local fine2 : adviceBlackness 4
 		local l : SB - fine * 0
-		local r : RIGHTSB + fine * 0
-		local hsp : ((r - l) - (fine * 2 * HVCONTRAST)) * 0.3
+		local r : RightSB + fine * 0
+		local hsp : ((r - l) - (fine * 2 * HVContrast)) * 0.3
 		local skew 0.2
 
-		save-glyph 'sharpTone' 0x266F : sketch
+		create-glyph 'sharpTone' 0x266F : glyph-construction
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.3] - (MIDDLE - l) * skew) [heading RIGHTWARD]
-				curl r ([mix nsTop nsBot 0.3] - (MIDDLE - r) * skew) [heading RIGHTWARD]
+				flat l ([mix nsTop nsBot 0.3] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.3] - (Middle - r) * skew) [heading Rightward]
 			include : dispiro
 				widths.center
-				flat l ([mix nsTop nsBot 0.7] - (MIDDLE - l) * skew) [heading RIGHTWARD]
-				curl r ([mix nsTop nsBot 0.7] - (MIDDLE - r) * skew) [heading RIGHTWARD]
-			include : VBarLeft  (l + hsp) (nsBot - (MIDDLE - l - hsp) * skew) (nsTop - (MIDDLE - l - hsp) * skew) fine
-			include : VBarRight (r - hsp) (nsBot - (MIDDLE - r + hsp) * skew) (nsTop - (MIDDLE - r + hsp) * skew) fine
+				flat l ([mix nsTop nsBot 0.7] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.7] - (Middle - r) * skew) [heading Rightward]
+			include : VBarLeft  (l + hsp) (nsBot - (Middle - l - hsp) * skew) (nsTop - (Middle - l - hsp) * skew) fine
+			include : VBarRight (r - hsp) (nsBot - (Middle - r + hsp) * skew) (nsTop - (Middle - r + hsp) * skew) fine
 
-		save-glyph 'flatTone' 0x266D : sketch
+		create-glyph 'flatTone' 0x266D : glyph-construction
 			local yTerminal : mix nsBot nsTop 0.55
 			local curly 0.65
 			local curly2 1.1
 			local curly3 0.3
-			local l [mix SB RIGHTSB 0.07]
-			local r [mix RIGHTSB SB 0.07]
+			local l [mix SB RightSB 0.07]
+			local r [mix RightSB SB 0.07]
 			include : difference
 				union
 					VBarLeft l nsBot nsTop fine
 					dispiro
 						widths.lhs fine
 						g4 l (nsBot - 1)
-						alsothru 0.5 curly3
-						g4.up.mid (r - O + 1) ([mix nsBot yTerminal curly] + (r - l) * skew - TANSLANT * para.smoothadjust) [widths.lhs (fine + 1)]
-						g4.left.mid ([mix l r 0.5] - CORRECTION_OMIDX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2 + 1)
+						alsoThru 0.5 curly3
+						g4.up.mid (r - O + 1) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust) [widths.lhs (fine + 1)]
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2 + 1)
 						g4 l (yTerminal + 1)
 				difference
 					spiro-outline
 						corner l (nsBot - UPM)
 						corner l nsBot
-						alsothru 0.5 curly3
-						g4.up.mid (r - O) ([mix nsBot yTerminal curly] + (r - l) * skew - TANSLANT * para.smoothadjust)
-						g4.left.mid ([mix l r 0.5] - CORRECTION_OMIDX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2)
+						alsoThru 0.5 curly3
+						g4.up.mid (r - O) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust)
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2)
 						corner l yTerminal
 						corner l (yTerminal + 1)
 						corner l nsTop
-						corner WIDTH nsTop
-						corner WIDTH (nsBot - UPM)
+						corner Width nsTop
+						corner Width (nsBot - UPM)
 					spiro-outline
 						corner 0 yTerminal
 						corner 0 nsTop
-						corner (l + fine * HVCONTRAST) nsTop
-						corner (l + fine * HVCONTRAST) yTerminal
+						corner (l + fine * HVContrast) nsTop
+						corner (l + fine * HVContrast) yTerminal
 				spiro-outline
 					corner l (nsBot - UPM)
 					corner l nsTop
 					corner (l - UPM) nsTop
 					corner (l - UPM) (nsBot - UPM)
 
-		save-glyph 'neutralTone' 0x266E : sketch
-			local k : 0.25 - (STROKE * 0.25 / (nsTop - nsBot))
+		create-glyph 'neutralTone' 0x266E : glyph-construction
+			local k : 0.25 - (Stroke * 0.25 / (nsTop - nsBot))
 			local kr 0.5
 			local ll (l + hsp * kr)
 			local rr (r - hsp * kr)
@@ -336,14 +411,14 @@ glyph-block Symbol-Other-Metric-Marks : begin
 	glyph-block-import CommonShapes
 
 	sketch # metmark
-		include : VBar MIDDLE (-fontMetrics.OS_2.usWinDescent) (fontMetrics.OS_2.usWinAscent) SHOULDERFINE
-		include : HBar MIDDLE WIDTH 0 SHOULDERFINE
-		include : HBar MIDDLE WIDTH CAP SHOULDERFINE
-		include : HBar MIDDLE WIDTH XH SHOULDERFINE
-		include : HBar MIDDLE WIDTH DESCENDER SHOULDERFINE
-		include : HBar 0 MIDDLE symbolMid SHOULDERFINE
-		include : HBar 0 MIDDLE parenTop SHOULDERFINE
-		include : HBar 0 MIDDLE parenBot SHOULDERFINE
+		include : VBar Middle (-fontMetrics.OS_2.usWinDescent) (fontMetrics.OS_2.usWinAscent) ShoulderFine
+		include : HBar Middle Width 0 ShoulderFine
+		include : HBar Middle Width CAP ShoulderFine
+		include : HBar Middle Width XH ShoulderFine
+		include : HBar Middle Width Descender ShoulderFine
+		include : HBar 0 Middle symbolMid ShoulderFine
+		include : HBar 0 Middle parenTop ShoulderFine
+		include : HBar 0 Middle parenBot ShoulderFine
 		save 'metmark' 0xE09F
 
 	define MosaicTop      fontMetrics.OS_2.sTypoAscender
@@ -401,7 +476,7 @@ glyph-block Symbol-Other-Metric-Marks : begin
 
 	sketch # baselineMarkUnder
 		set-width 0
-		include : HBar (-WIDTH * 2) (WIDTH * 2) 0 MarkerBarWidth
+		include : HBar (-Width * 2) (Width * 2) 0 MarkerBarWidth
 		save 'baselineMarkUnder' 0xE09A
 
 	sketch # baselineMarkLeft
@@ -432,43 +507,43 @@ glyph-block Symbol-Other-Fags : begin
 		include : spiro-outline
 			corner SB pictTop
 			curl (SB + delta) pictTop
-			alsothru 0.5 (1 - curliness)
-			g4 MIDDLE (pictTop - flagDown / 2)
-			alsothru 0.5 curliness
-			flat (RIGHTSB - delta) (pictTop - flagDown)
-			corner RIGHTSB (pictTop - flagDown)
-			corner RIGHTSB (symbolMid - flagDown)
-			curl (RIGHTSB - delta) (symbolMid - flagDown)
-			alsothru 0.5 (1 - curliness)
-			g4 MIDDLE (symbolMid - flagDown / 2)
-			alsothru 0.5 curliness
+			alsoThru 0.5 (1 - curliness)
+			g4 Middle (pictTop - flagDown / 2)
+			alsoThru 0.5 curliness
+			flat (RightSB - delta) (pictTop - flagDown)
+			corner RightSB (pictTop - flagDown)
+			corner RightSB (symbolMid - flagDown)
+			curl (RightSB - delta) (symbolMid - flagDown)
+			alsoThru 0.5 (1 - curliness)
+			g4 Middle (symbolMid - flagDown / 2)
+			alsoThru 0.5 curliness
 			flat (SB + delta) symbolMid
 			corner SB symbolMid
 			close
-		include : Translate (sw / 2 * HVCONTRAST) 0
+		include : Translate (sw / 2 * HVContrast) 0
 		include : FlagBar
 		save 'blackflag' 0x2691
 	sketch # White flag
-		include : VBarRight RIGHTSB (symbolMid - flagDown) (pictTop - flagDown) sw
+		include : VBarRight RightSB (symbolMid - flagDown) (pictTop - flagDown) sw
 		include : dispiro
 			widths.rhs sw
-			flat SB pictTop [heading RIGHTWARD]
-			curl (SB + delta) pictTop [heading RIGHTWARD]
-			alsothru 0.5 (1 - curliness)
-			g4 MIDDLE (pictTop - flagDown / 2)
-			alsothru 0.5 curliness
-			flat (RIGHTSB - delta) (pictTop - flagDown) [heading RIGHTWARD]
-			curl RIGHTSB (pictTop - flagDown) [heading RIGHTWARD]
+			flat SB pictTop [heading Rightward]
+			curl (SB + delta) pictTop [heading Rightward]
+			alsoThru 0.5 (1 - curliness)
+			g4 Middle (pictTop - flagDown / 2)
+			alsoThru 0.5 curliness
+			flat (RightSB - delta) (pictTop - flagDown) [heading Rightward]
+			curl RightSB (pictTop - flagDown) [heading Rightward]
 		include : dispiro
 			widths.rhs sw
-			flat RIGHTSB ((symbolMid - sw / 2) - flagDown) [heading LEFTWARD]
-			curl (RIGHTSB - delta) ((symbolMid - sw / 2) - flagDown) [heading LEFTWARD]
-			alsothru 0.5 (1 - curliness)
-			g4 MIDDLE ((symbolMid - sw / 2) - flagDown / 2)
-			alsothru 0.5 curliness
-			flat (SB + delta) (symbolMid - sw / 2) [heading LEFTWARD]
-			curl SB (symbolMid - sw / 2) [heading LEFTWARD]
-		include : Translate (sw / 2 * HVCONTRAST) 0
+			flat RightSB ((symbolMid - sw / 2) - flagDown) [heading Leftward]
+			curl (RightSB - delta) ((symbolMid - sw / 2) - flagDown) [heading Leftward]
+			alsoThru 0.5 (1 - curliness)
+			g4 Middle ((symbolMid - sw / 2) - flagDown / 2)
+			alsoThru 0.5 curliness
+			flat (SB + delta) (symbolMid - sw / 2) [heading Leftward]
+			curl SB (symbolMid - sw / 2) [heading Leftward]
+		include : Translate (sw / 2 * HVContrast) 0
 		include : FlagBar
 		save 'whiteflag' 0x2690
 
@@ -476,30 +551,30 @@ glyph-block Symbol-Other-Typographic : begin
 	glyph-block-import CommonShapes
 	sketch # Kome
 		local sw : adviceBlackness 3.75
-		local radius : (RIGHTSB - SB) / 2
+		local radius : (RightSB - SB) / 2
 		include : dispiro
 			widths.center sw
-			flat (MIDDLE - radius) (symbolMid - radius)
-			curl (MIDDLE + radius) (symbolMid + radius)
+			flat (Middle - radius) (symbolMid - radius)
+			curl (Middle + radius) (symbolMid + radius)
 
 		include : dispiro
 			widths.center sw
-			flat (MIDDLE + radius) (symbolMid - radius)
-			curl (MIDDLE - radius) (symbolMid + radius)
-		local r0 : Math.min ((RIGHTSB - SB + (sw / [Math.sqrt 2]) - sw * 3) / 4) DOTRADIUS
+			flat (Middle + radius) (symbolMid - radius)
+			curl (Middle - radius) (symbolMid + radius)
+		local r0 : Math.min ((RightSB - SB + (sw / [Math.sqrt 2]) - sw * 3) / 4) DotRadius
 		local r  : radius - r0 + (sw / 2 / [Math.sqrt 2])
-		include : RingAt (MIDDLE + r) symbolMid r0
-		include : RingAt (MIDDLE - r) symbolMid r0
-		include : RingAt MIDDLE (symbolMid + r) r0
-		include : RingAt MIDDLE (symbolMid - r) r0
+		include : RingAt (Middle + r) symbolMid r0
+		include : RingAt (Middle - r) symbolMid r0
+		include : RingAt Middle (symbolMid + r) r0
+		include : RingAt Middle (symbolMid - r) r0
 		save 'kome' 0x203B
 
 	sketch
 		local sw : [adviceBlackness 3] / 2
 		local kInside 0.5
 		local kOutside 2.5
-		local l : mix SB RIGHTSB 0.1
-		local r : mix RIGHTSB SB 0.1
+		local l : mix SB RightSB 0.1
+		local r : mix RightSB SB 0.1
 		start-from [mix l r 0.6] pictTop
 		line-to (l - sw * kInside) (symbolMid - sw)
 		line-to (r - sw * kOutside) (symbolMid - sw)
@@ -508,7 +583,7 @@ glyph-block Symbol-Other-Typographic : begin
 		line-to (l + sw * kOutside) (symbolMid + sw)
 		save 'boltSymbol' 0x26A1
 
-glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
+glyph-block Symbol-Other-IEC-Power-And-Playback : for-width-kinds WideWidth1 : begin
 	glyph-block-import CommonShapes
 
 	define leftFW : 0 + SB * MosaicWidthScalar
@@ -518,11 +593,11 @@ glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
 	define bottomFW : symbolMid - squareRadiusFW
 
 	define df : DivFrame MosaicWidthScalar
-	define gap : Math.max (squareRadiusFW / 8 * MosaicWidthScalar) GEOMETRYSTROKE
+	define gap : Math.max (squareRadiusFW / 8 * MosaicWidthScalar) GeometryStroke
 
 	sketch
 		set-width df.width
-		include : RingStrokeAt df.middle symbolMid squareRadiusFW GEOMETRYSTROKE
+		include : RingStrokeAt df.middle symbolMid squareRadiusFW GeometryStroke
 		save [MangleName 'powerOff'] [MangleUnicode 0x2B58]
 
 	sketch
@@ -530,18 +605,18 @@ glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
 		include : Rect
 			symbolMid + squareRadiusFW
 			symbolMid - squareRadiusFW
-			df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
-			df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+			df.middle - GeometryStroke / 2 * HVContrast
+			df.middle + GeometryStroke / 2 * HVContrast
 		save [MangleName 'powerOn'] [MangleUnicode 0x23FD]
 
 	sketch
 		set-width df.width
 		include : refer-glyph [MangleName 'powerOff']
 		include : Rect
-			symbolMid + squareRadiusFW - GEOMETRYSTROKE - gap
-			symbolMid - squareRadiusFW + GEOMETRYSTROKE + gap
-			df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
-			df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+			symbolMid + squareRadiusFW - GeometryStroke - gap
+			symbolMid - squareRadiusFW + GeometryStroke + gap
+			df.middle - GeometryStroke / 2 * HVContrast
+			df.middle + GeometryStroke / 2 * HVContrast
 		save [MangleName 'powerOnOff'] [MangleUnicode 0x23FC]
 
 	sketch
@@ -551,13 +626,13 @@ glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
 				refer-glyph [MangleName 'powerOff']
 				spiro-outline
 					corner df.middle symbolMid
-					corner (df.middle - gap * 2 - GEOMETRYSTROKE * HVCONTRAST) (symbolMid + squareRadiusFW * 2)
-					corner (df.middle + gap * 2 + GEOMETRYSTROKE * HVCONTRAST) (symbolMid + squareRadiusFW * 2)
+					corner (df.middle - gap * 2 - GeometryStroke * HVContrast) (symbolMid + squareRadiusFW * 2)
+					corner (df.middle + gap * 2 + GeometryStroke * HVContrast) (symbolMid + squareRadiusFW * 2)
 			Rect
 				symbolMid + 1.5 * squareRadiusFW
 				symbolMid - 0.0 * squareRadiusFW
-				df.middle - GEOMETRYSTROKE / 2 * HVCONTRAST
-				df.middle + GEOMETRYSTROKE / 2 * HVCONTRAST
+				df.middle - GeometryStroke / 2 * HVContrast
+				df.middle + GeometryStroke / 2 * HVContrast
 		save [MangleName 'powerStandby'] [MangleUnicode 0x23FB]
 
 	sketch
@@ -570,6 +645,53 @@ glyph-block Symbol-Other-IecPower : for-width-kinds WIDE-WIDTH-1 : begin
 				squareRadiusFW * 1.1
 		apply-transform : Translate (squareRadiusFW * 0.15) 0
 		save [MangleName 'powerSleep'] [MangleUnicode 0x23FE]
+
+	sketch
+		set-width df.width
+		include : RingAt df.middle symbolMid squareRadiusFW GeometryStroke
+		save [MangleName 'playback/record'] [MangleUnicode 0x23FA]
+
+	sketch
+		set-width df.width
+		include : Rect (symbolMid + squareRadiusFW) (symbolMid - squareRadiusFW) (df.middle - squareRadiusFW) (df.middle + squareRadiusFW)
+		save [MangleName 'playback/stop'] [MangleUnicode 0x23F9]
+
+	sketch
+		set-width df.width
+		include : Rect (symbolMid + squareRadiusFW) (symbolMid - squareRadiusFW) (df.middle - squareRadiusFW) (df.middle - squareRadiusFW / 3)
+		include : Rect (symbolMid + squareRadiusFW) (symbolMid - squareRadiusFW) (df.middle + squareRadiusFW / 3) (df.middle + squareRadiusFW)
+		save [MangleName 'playback/pause'] [MangleUnicode 0x23F8]
+
+	local trigRad : squareRadiusFW + O * 2
+	sketch
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad) (symbolMid + trigRad / 2)
+			corner (df.middle + trigRad) (symbolMid + trigRad / 2)
+			corner (df.middle)           (symbolMid - trigRad / 2)
+		save [MangleName 'playback/down'] [MangleUnicode 0x23F7]
+	sketch
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad) (symbolMid - trigRad / 2)
+			corner (df.middle + trigRad) (symbolMid - trigRad / 2)
+			corner (df.middle)           (symbolMid + trigRad / 2)
+		save [MangleName 'playback/up'] [MangleUnicode 0x23F6]
+	sketch
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad / 2) (symbolMid - trigRad)
+			corner (df.middle - trigRad / 2) (symbolMid + trigRad)
+			corner (df.middle + trigRad / 2) (symbolMid)
+		save [MangleName 'playback/right'] [MangleUnicode 0x23F5]
+	sketch
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle + trigRad / 2) (symbolMid - trigRad)
+			corner (df.middle + trigRad / 2) (symbolMid + trigRad)
+			corner (df.middle - trigRad / 2) (symbolMid)
+		save [MangleName 'playback/left'] [MangleUnicode 0x23F4]
+
 
 glyph-block Symbol-Other-Powerline-And-GUI : begin
 	glyph-block-import CommonShapes
@@ -584,17 +706,17 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 		include : VBarLeft SB uiFigBot uiFigTop fine
 		include : dispiro
 			widths.rhs fine
-			flat RIGHTSB y1
-			curl RIGHTSB [mix y1 y2 0.4]
-			g4 (SB + fine * HVCONTRAST) y2 [heading LEFTWARD]
-		include : DotAt (RIGHTSB - fine * HVCONTRAST / 2) y1 [Math.max (fine * 1.5) PERIODRADIUS]
+			flat RightSB y1
+			curl RightSB [mix y1 y2 0.4]
+			g4 (SB + fine * HVContrast) y2 [heading Leftward]
+		include : DotAt (RightSB - fine * HVContrast / 2) y1 [Math.max (fine * 1.5) PeriodRadius]
 		save 'branch' 0xE0A0
 
 	sketch # pwlLock
 		local fine : adviceBlackness 3.5
 		local lockTop : mix uiFigBot uiFigTop 0.6
 		local lockLeft : SB / 2
-		local lockRight : WIDTH - SB / 2
+		local lockRight : Width - SB / 2
 		local lockHoleWidth : 1 / 5
 		local lockHoleLeft : mix lockLeft lockRight (1 / 2 - lockHoleWidth / 2)
 		local lockHoleRight : mix lockLeft lockRight (1 / 2 + lockHoleWidth / 2)
@@ -604,11 +726,11 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			intersection
 				spiro-outline
 					corner 0 (2 * uiFigTop)
-					corner WIDTH (2 * uiFigTop)
-					corner WIDTH (lockTop - 1)
+					corner Width (2 * uiFigTop)
+					corner Width (lockTop - 1)
 					corner 0 (lockTop - 1)
 					close
-				OShape uiFigTop uiFigBot SB RIGHTSB fine (SMALLSMOOTHA) (SMALLSMOOTHB)
+				OShape uiFigTop uiFigBot SB RightSB fine (SmallSmoothA) (SmallSmoothB)
 			difference
 				spiro-outline
 					corner lockLeft lockTop
@@ -616,16 +738,16 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 					corner lockRight uiFigBot
 					corner lockLeft uiFigBot
 					close
-				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SMALLSMOOTHA * lockHoleWidth) (SMALLSMOOTHB * lockHoleWidth)
+				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SmallSmoothA * lockHoleWidth) (SmallSmoothB * lockHoleWidth)
 
 		save 'pwlLock' 0xE0A2
 
-	for-width-kinds WIDE-WIDTH-2
+	for-width-kinds WideWidth2
 		do "arrowheadShapedPointer"
 			define scaffold : object
 			set scaffold.top : mix uiFigBot uiFigTop 0.85
 			set scaffold.bot : mix uiFigBot uiFigTop 0.15
-			set scaffold.width   : (MIDDLE - SB) * 2 * [Math.pow (MosaicWidth / WIDTH) 0.3]
+			set scaffold.width   : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.3]
 			set scaffold.xMiddle : MosaicWidth / 2
 			set scaffold.xLeft : scaffold.xMiddle - scaffold.width / 2
 			set scaffold.xRight : scaffold.xMiddle + scaffold.width / 2
@@ -660,9 +782,9 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 				local right : mRight + MosaicWidth * (n - 1)
 				include : dispiro
 					widths.center sw
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (v2 > v1) UPWARD DOWNWARD]
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (v2 > v1) Upward Downward]
 					arcvh
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (h2 > h1) RIGHTWARD LEFTWARD]
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (h2 > h1) Rightward Leftward]
 					end : function [set this.contrast 1]
 				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
 				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
@@ -673,9 +795,9 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 				local right : mRight + MosaicWidth * (n - 1)
 				include : dispiro
 					widths.center sw
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (h2 > h1) RIGHTWARD LEFTWARD]
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (h2 > h1) Rightward Leftward]
 					archv
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (v2 > v1) UPWARD DOWNWARD]
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (v2 > v1) Upward Downward]
 					end : function [set this.contrast 1]
 				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
 				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
@@ -701,8 +823,8 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			define Box2       : BoxW 2
 			define Circ2      : CircW 2
 			define RoundSeg3  : RoundSegW 3 Nop Nop
-			define RoundSeg3H : RoundSegW 3 [heading RIGHTWARD] [heading RIGHTWARD]
-			define RoundSeg3V : RoundSegW 3 [heading DOWNWARD] [heading DOWNWARD]
+			define RoundSeg3H : RoundSegW 3 [heading Rightward] [heading Rightward]
+			define RoundSeg3V : RoundSegW 3 [heading Downward] [heading Downward]
 			define ArcVH3     : ArcVHW 3
 			define ArcHV3     : ArcHVW 3
 			define Box3       : BoxW 3
@@ -826,8 +948,8 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			set scaffold.bot       uiFigBot
 			set scaffold.xMiddle  : MosaicWidth / 2
 			set scaffold.headSize : (uiFigTop - uiFigBot) / 2.5
-			set scaffold.legSize  : (MIDDLE - SB) * 2
-			set scaffold.armSize  : (MIDDLE - SB / 2) * 2
+			set scaffold.legSize  : (Middle - SB) * 2
+			set scaffold.armSize  : (Middle - SB / 2) * 2
 			set scaffold.stroke   : adviceBlackness 3.5
 			set scaffold.armRaiseK  0.4
 			set scaffold.yPelvis    : scaffold.bot + scaffold.legSize / 2
@@ -920,7 +1042,7 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			set scaffold.top : mix uiFigBot uiFigTop 0.85
 			set scaffold.bot : mix uiFigBot uiFigTop 0.15
 			set scaffold.slope 0.6
-			set scaffold.width   : (MIDDLE - SB) * 2 * [Math.pow (MosaicWidth / WIDTH) 0.5]
+			set scaffold.width   : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.5]
 			set scaffold.stroke  : adviceBlackness 3.5
 			set scaffold.xMiddle : MosaicWidth / 2
 			set scaffold.xLeft : scaffold.xMiddle - scaffold.width / 2
@@ -969,12 +1091,12 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 
 		do "Segmented digits"
 			define scaffold : object
-			set scaffold.gap : WIDTH / 16
+			set scaffold.gap : Width / 16
 			set scaffold.stroke : [adviceBlackness 2] / 2
 			set scaffold.top   : [mix uiFigBot uiFigTop 0.9] - scaffold.stroke
 			set scaffold.mid   : mix uiFigBot uiFigTop 0.5
 			set scaffold.bot   : [mix uiFigBot uiFigTop 0.1] + scaffold.stroke
-			set scaffold.width : (MIDDLE - SB) * 2 * [Math.pow (MosaicWidth / WIDTH) 0.5]
+			set scaffold.width : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.5]
 			set scaffold.left  : (MosaicWidth / 2) - scaffold.width / 2 + scaffold.stroke / 2
 			set scaffold.right : (MosaicWidth / 2) + scaffold.width / 2 - scaffold.stroke / 2
 			define [StrokeV x yt yb] : spiro-outline
@@ -1017,7 +1139,7 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			sketch
 				set-width MosaicWidth
 				local sw : adviceBlackness 4
-				local gap : [Math.max (WIDTH / 8) (WIDTH / 6 - sw / 2) ([adviceBlackness 3] - sw / 2)] / 2
+				local gap : [Math.max (Width / 8) (Width / 6 - sw / 2) ([adviceBlackness 3] - sw / 2)] / 2
 				local mid : MosaicWidth / 2
 				local size : [Math.min (MosaicWidth - SB * 2) (uiFigTop - uiFigBot)] / 2
 				include : union
@@ -1036,56 +1158,56 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 glyph-block Symbol-Other-Checking-Marks : begin
 	glyph-block-import CommonShapes
 	local light : adviceBlackness 4.5
-	local medium : Math.max (light * 1.75) (WIDTH * 0.2)
-	local heavy : Math.max (light * 2.5) (WIDTH * 0.3)
+	local medium : Math.max (light * 1.75) (Width * 0.2)
+	local heavy : Math.max (light * 2.5) (Width * 0.3)
 	local shapesize 0.8
 	local shapesizeCheck : shapesize * 1.1
 	foreach [{unicode sw} : items-of {{0x2713 light} {0x2714 medium}}] : sketch
 		include : dispiro
 			widths.center sw
 			g4 SB [mix symbolMid [mix pictBot pictTop 0.46] shapesizeCheck]
-			alsothru 0.5 0.4
-			g4 [mix SB RIGHTSB 0.4] [mix symbolMid [mix pictBot pictTop 0.05] shapesizeCheck] [heading DOWNWARD]
+			alsoThru 0.5 0.4
+			g4 [mix SB RightSB 0.4] [mix symbolMid [mix pictBot pictTop 0.05] shapesizeCheck] [heading Downward]
 		include : dispiro
 			widths.center sw
-			g4 [mix SB RIGHTSB 0.4] [mix symbolMid [mix pictBot pictTop 0.05] shapesizeCheck] [heading UPWARD]
-			alsothru 0.5 0.6
-			g4 RIGHTSB [mix symbolMid [mix pictBot pictTop 0.9] shapesizeCheck]
+			g4 [mix SB RightSB 0.4] [mix symbolMid [mix pictBot pictTop 0.05] shapesizeCheck] [heading Upward]
+			alsoThru 0.5 0.6
+			g4 RightSB [mix symbolMid [mix pictBot pictTop 0.9] shapesizeCheck]
 		save [NameUni unicode] unicode
 
 	foreach [{unicode sw} : items-of {{0x271A medium}} ] : sketch
 		include : dispiro
 			widths.center sw
-			g4 [mix WIDTH RIGHTSB 0.5] symbolMid
+			g4 [mix Width RightSB 0.5] symbolMid
 			g4 [mix 0 SB 0.5] symbolMid
 		include : dispiro
 			widths.center sw
-			g4 MIDDLE [mix symbolMid pictTop (0.8 * shapesize * 7/8)]
-			g4 MIDDLE [mix symbolMid pictBot (0.9 * shapesize * 7/8)]
+			g4 Middle [mix symbolMid pictTop (0.8 * shapesize * 7/8)]
+			g4 Middle [mix symbolMid pictBot (0.9 * shapesize * 7/8)]
 		save [NameUni unicode] unicode
 
 	foreach [{unicode sw} : items-of {{0x2715 light} {0x2716 medium}} ] : sketch
 		include : dispiro
 			widths.center sw
-			g4 RIGHTSB [mix symbolMid pictTop (0.8 * shapesize)]
+			g4 RightSB [mix symbolMid pictTop (0.8 * shapesize)]
 			g4 SB [mix symbolMid pictBot (0.9 * shapesize)]
 		include : dispiro
 			widths.center sw
 			g4 SB [mix symbolMid pictTop (0.8 * shapesize)]
-			g4 RIGHTSB [mix symbolMid pictBot (0.9 * shapesize)]
+			g4 RightSB [mix symbolMid pictBot (0.9 * shapesize)]
 		save [NameUni unicode] unicode
 
 	foreach [{unicode sw} : items-of {{0x2717 light} {0x2718 medium}} ] : sketch
 		include : dispiro
 			widths.center sw
-			g4 RIGHTSB [mix symbolMid [mix pictBot pictTop 0.9] shapesize]
-			alsothru 0.53 0.45
+			g4 RightSB [mix symbolMid [mix pictBot pictTop 0.9] shapesize]
+			alsoThru 0.53 0.45
 			g4 SB [mix symbolMid pictBot (1.05 * shapesize)]
 		include : dispiro
 			widths.center sw
-			g4 [mix SB RIGHTSB 0.1] [mix symbolMid [mix pictBot pictTop 0.86] shapesize]
-			alsothru 0.47 0.5
-			g4 [mix SB RIGHTSB 0.9] [mix symbolMid [mix pictBot pictTop 0.05] shapesize]
+			g4 [mix SB RightSB 0.1] [mix symbolMid [mix pictBot pictTop 0.86] shapesize]
+			alsoThru 0.47 0.5
+			g4 [mix SB RightSB 0.9] [mix symbolMid [mix pictBot pictTop 0.05] shapesize]
 		save [NameUni unicode] unicode
 	foreach [{unicode sw op} : items-of {
 		{ 0x276C light 1 }
@@ -1097,9 +1219,9 @@ glyph-block Symbol-Other-Checking-Marks : begin
 	}] : sketch
 		include : dispiro
 			widths.center sw
-			corner [mix (SB + sw / 2) (RIGHTSB - sw / 2) op] pictTop [heading DOWNWARD]
-			corner [mix (SB + sw / 2) (RIGHTSB - sw / 2) (1 - op)] symbolMid [heading DOWNWARD]
-			corner [mix (SB + sw / 2) (RIGHTSB - sw / 2) op] pictBot [heading DOWNWARD]
+			corner [mix (SB + sw / 2) (RightSB - sw / 2) op] pictTop [heading Downward]
+			corner [mix (SB + sw / 2) (RightSB - sw / 2) (1 - op)] symbolMid [heading Downward]
+			corner [mix (SB + sw / 2) (RightSB - sw / 2) op] pictBot [heading Downward]
 		save [NameUni unicode] unicode
 
 glyph-block Symbol-Other-I-Ching : begin
@@ -1111,15 +1233,15 @@ glyph-block Symbol-Other-I-Ching : begin
 		local startY : symbolMid - offsetY * (n - 1) / 2
 		local bar : adviceBlackness n
 		local fine : adviceBlackness 5
-		local gap : Math.max (WIDTH / 8) (fine)
-		include : HBar SB (MIDDLE - gap / 2 * HVCONTRAST) (startY + offsetY * m) bar
-		include : HBar (MIDDLE + gap / 2 * HVCONTRAST) RIGHTSB (startY + offsetY * m) bar
+		local gap : Math.max (Width / 8) (fine)
+		include : HBar SB (Middle - gap / 2 * HVContrast) (startY + offsetY * m) bar
+		include : HBar (Middle + gap / 2 * HVContrast) RightSB (startY + offsetY * m) bar
 
 	define [yang m n] : glyph-construction
 		local offsetY : (2 / 3) * (operBot - pictTop) / n
 		local startY : symbolMid - offsetY * (n - 1) / 2
 		local bar : adviceBlackness n
-		include : HBar SB RIGHTSB (startY + offsetY * m) bar
+		include : HBar SB RightSB (startY + offsetY * m) bar
 
 	define [patterns n su] : foreach [offset: range 0 [Math.pow 2 n]] : sketch
 		foreach [bit : range 0 n] : begin
@@ -1136,19 +1258,19 @@ glyph-block Symbol-Other-Ligation : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Symbol-Math-Relation : lessSlantness
 
-	local arrowheadsKern : (2 / 3) * [clamp 0 (WIDTH * 0.4) (WIDTH - OPERATORSTROKE * 3)]
+	local arrowheadsKern : (2 / 3) * [clamp 0 (Width * 0.4) (Width - OperatorStroke * 3)]
 
 	define arrowheadSlope : 1 / lessSlantness
 	define [ArrowBarConfig extend kern join doubleBar] : begin
 		define cleft O
-		define cright (WIDTH - O)
+		define cright (Width - O)
 		define arrowr : if doubleBar
-			WIDTH + SB + OPERATORSTROKE * HVCONTRAST
-			WIDTH + extend
+			Width + SB + OperatorStroke * HVContrast
+			Width + extend
 		define arrowl : if doubleBar
-			-WIDTH + RIGHTSB - OPERATORSTROKE * HVCONTRAST
+			-Width + RightSB - OperatorStroke * HVContrast
 			0 - extend
-		define zleft : cleft - WIDTH + RIGHTSB
+		define zleft : cleft - Width + RightSB
 		define zright : cright + SB
 		define lk : object
 			f    SB
@@ -1161,12 +1283,12 @@ glyph-block Symbol-Other-Ligation : begin
 			lx : mix arrowl 0 0.5
 
 		define rk : object
-			f    RIGHTSB
+			f    RightSB
 			r    arrowr
 			r1 : arrowr + kern
 			c    cright
-			j    (WIDTH + join)
-			j1   (WIDTH + join + kern)
+			j    (Width + join)
+			j1   (Width + join + kern)
 			z    zright
 
 		define result {}
@@ -1174,19 +1296,18 @@ glyph-block Symbol-Other-Ligation : begin
 			result.push { (l + r) lk.(l) rk.(r) }
 		return result
 
-	local arrowExtend [clamp 0 WIDTH (RIGHTSB - OPERATORSTROKE / 2 * arrowheadSlope)]
-	local arrowJ : clamp 0 WIDTH (SB + OPERATORSTROKE / 2 * arrowheadSlope)
+	local arrowExtend [clamp 0 Width (RightSB - OperatorStroke / 2 * arrowheadSlope)]
+	local arrowJ : clamp 0 Width (SB + OperatorStroke / 2 * arrowheadSlope)
 	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : sketch
-		include : HBar left right symbolMid OPERATORSTROKE
+		include : HBar left right symbolMid OperatorStroke
 		set currentGlyph.cmpPriority (-3)
 		save ('hyphen.lig.' + subclass)
 
 	# =>
-	# local dblArrowD : XH * [linreg 18 0.15 126 0.275 STROKE]
-	local dblArrowD  : (parenTop - parenBot) * designParameters.equal_wideness + OPERATORSTROKE * 0.75
-	local dblArrowSw : Math.min OPERATORSTROKE (dblArrowD * 3 / 4)
-	local dblExtend : clamp 0 WIDTH (RIGHTSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
-	local dblArrowJ : clamp 0 WIDTH (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
+	local dblArrowD  : (parenTop - parenBot) * designParameters.equal_wideness + OperatorStroke * 0.75
+	local dblArrowSw : Math.min OperatorStroke (dblArrowD * 3 / 4)
+	local dblExtend : clamp 0 Width (RightSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
+	local dblArrowJ : clamp 0 Width (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 
 	foreach [{subclass left right} : items-of [ArrowBarConfig dblExtend arrowheadsKern dblArrowJ true]] : sketch
 		include : HBarTop left right (symbolMid + dblArrowD) dblArrowSw
@@ -1214,13 +1335,13 @@ glyph-block Symbol-Other-Ligation : begin
 			j1   { J    (-arrowJ - arrowheadsKern)                true }
 
 		define rk : object
-			r    { LR   (WIDTH + arrowExtend)                    false }
-			r1   { LR1  (WIDTH + arrowExtend + arrowheadsKern)   false }
+			r    { LR   (Width + arrowExtend)                    false }
+			r1   { LR1  (Width + arrowExtend + arrowheadsKern)   false }
 			f    { F    nothing                                  false }
 			z    { Z    nothing                                  false }
 			c    { C    nothing                                  false }
-			j    { J    (WIDTH + arrowJ)                          true }
-			j1   { J    (WIDTH + arrowJ + arrowheadsKern)         true }
+			j    { J    (Width + arrowJ)                          true }
+			j1   { J    (Width + arrowJ + arrowheadsKern)         true }
 
 		foreach [lS : items-of : Object.keys lk] : foreach [rS : items-of : Object.keys rk] : sketch
 			local {tL jL djL} lk.(lS)
@@ -1239,14 +1360,14 @@ glyph-block Symbol-Other-Ligation : begin
 		glyph-block-import Symbol-Math-Relation : dH LigationLessShape LigationGreaterShape
 
 		sketch
-			include : LigationLessShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
+			include : LigationLessShape (symbolMid + dH) (symbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			save 'less.lig.dblhead'
 			save 'less.lig.dblhead.mid'
 			include : Translate (-arrowheadsKern) 0
 			save 'less.lig.dblhead.shift1'
 
 		sketch
-			include : LigationGreaterShape (symbolMid + dH) (symbolMid - dH) SB RIGHTSB OPERATORSTROKE dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
+			include : LigationGreaterShape (symbolMid + dH) (symbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			save 'greater.lig.dblhead'
 			save 'greater.lig.dblhead.mid'
 			include : Translate (+arrowheadsKern) 0
@@ -1254,8 +1375,8 @@ glyph-block Symbol-Other-Ligation : begin
 
 		sketch
 			include : refer-glyph "exclam"
-			include : Translate (((RIGHTSB - WIDTH) + (WIDTH - arrowExtend / 2)) / 2 - MIDDLE) 0
-			include : HBar (-arrowExtend) (RIGHTSB - WIDTH) symbolMid OPERATORSTROKE
+			include : Translate (((RightSB - Width) + (Width - arrowExtend / 2)) / 2 - Middle) 0
+			include : HBar (-arrowExtend) (RightSB - Width) symbolMid OperatorStroke
 			save 'exclam.lig.htmlcommentstart'
 		# Right-shifted >
 		sketch
@@ -1314,7 +1435,7 @@ glyph-block Symbol-Other-Ligation : begin
 			include : Translate (arrowheadsKern / 2) 0
 			save 'less.lig.shiftN2'
 
-		define [ArrowHeadHole] : Rect (symbolMid + dblArrowD - dblArrowSw) (symbolMid - dblArrowD + dblArrowSw) (-WIDTH) (2 * WIDTH)
+		define [ArrowHeadHole] : Rect (symbolMid + dblArrowD - dblArrowSw) (symbolMid - dblArrowD + dblArrowSw) (-Width) (2 * Width)
 
 		sketch
 			include : difference
@@ -1342,90 +1463,90 @@ glyph-block Symbol-Other-Ligation : begin
 
 	do "Equal and Inequal" : if [not recursive] : begin
 		glyph-block-import Symbol-Math-Relation : EqualShape EqualHole IdentShape IdentHole
-		define joiningOverlap (OX * 3)
+		define joiningOverlap (-Width / 6)
 		sketch # equal.fc
 			include MarkSet.plus
 			include : difference
-				EqualShape SB (WIDTH - joiningOverlap)
-				EqualHole WIDTH
+				EqualShape SB (Width - joiningOverlap)
+				EqualHole Width
 			save 'equal.fc'
 
 		sketch # equal.cf
 			include MarkSet.plus
 			include : difference
-				EqualShape joiningOverlap RIGHTSB
+				EqualShape joiningOverlap RightSB
 				EqualHole 0
 			save 'equal.cf'
 
 		sketch # equal.jf
 			include MarkSet.plus
 			include : difference
-				EqualShape (RIGHTSB - WIDTH + joiningOverlap) RIGHTSB
+				EqualShape (RightSB - Width + joiningOverlap) RightSB
 				EqualHole 0
 			save 'equal.jf'
 
 		sketch # equal.cc
 			include MarkSet.plus
 			include : difference
-				EqualShape joiningOverlap (WIDTH - joiningOverlap)
+				EqualShape joiningOverlap (Width - joiningOverlap)
 				union
 					EqualHole 0
-					EqualHole WIDTH
+					EqualHole Width
 			save 'equal.cc'
 
 		sketch # ident.fc
 			include MarkSet.plus
 			include : difference
-				IdentShape SB (WIDTH - joiningOverlap)
-				IdentHole WIDTH
+				IdentShape SB (Width - joiningOverlap)
+				IdentHole Width
 			save 'ident.fc'
 
 		sketch # ident.cf
 			include MarkSet.plus
 			include : difference
-				IdentShape joiningOverlap RIGHTSB
+				IdentShape joiningOverlap RightSB
 				IdentHole 0
 			save 'ident.cf'
 
 		sketch # ident.jf
 			include MarkSet.plus
 			include : difference
-				IdentShape (RIGHTSB - WIDTH + joiningOverlap) RIGHTSB
+				IdentShape (RightSB - Width + joiningOverlap) RightSB
 				IdentHole 0
 			save 'ident.jf'
 		sketch # ident.cc
 			include MarkSet.plus
 			include : difference
-				IdentShape joiningOverlap (WIDTH - joiningOverlap)
+				IdentShape joiningOverlap (Width - joiningOverlap)
 				union
 					IdentHole 0
-					IdentHole WIDTH
+					IdentHole Width
 			save 'ident.cc'
 
 		glyph-block-import NotGlyphFn : notGlyph
-		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 0.5) 'equal.fc.neg'
-		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.0) 'equal.fc.neg3'
-		notGlyph null 'equal.fc' nothing nothing nothing (WIDTH * 1.5) 'equal.fc.neg4'
-		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 0.5) 'ident.fc.neg'
-		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.0) 'ident.fc.neg3'
-		notGlyph null 'ident.fc' nothing nothing nothing (WIDTH * 1.5) 'ident.fc.neg4'
+		notGlyph null 'equal.fc' nothing nothing nothing (Width * 0.5) 'equal.fc.neg'
+		notGlyph null 'equal.fc' nothing nothing nothing (Width * 1.0) 'equal.fc.neg3'
+		notGlyph null 'equal.fc' nothing nothing nothing (Width * 1.5) 'equal.fc.neg4'
+		notGlyph null 'ident.fc' nothing nothing nothing (Width * 0.5) 'ident.fc.neg'
+		notGlyph null 'ident.fc' nothing nothing nothing (Width * 1.0) 'ident.fc.neg3'
+		notGlyph null 'ident.fc' nothing nothing nothing (Width * 1.5) 'ident.fc.neg4'
 
 	do "<| , |> and <>"
 		glyph-block-import Symbol-Math-Relation : LessShape GreaterShape
 
-		local trigLeft : mix SB RIGHTSB (1/6)
-		local trigRight : WIDTH * 1.5 - OPERATORSTROKE * 1.5 * HVCONTRAST
+		local trigLeft : mix SB RightSB (1/6)
+		local trigRight : Width * 1.5 - OperatorStroke * 1.5 * HVContrast
 		local dHTriangle : lessSlantness * (trigRight - trigLeft)
 
 		define [TrigLeftShape shift] : LessShape (symbolMid + dHTriangle) (symbolMid - dHTriangle) (trigLeft + shift) (trigRight + shift)
-		define [TrigRightShape shift] : GreaterShape (symbolMid + dHTriangle) (symbolMid - dHTriangle) (WIDTH - trigRight + shift) (WIDTH - trigLeft + shift)
+		define [TrigRightShape shift] : GreaterShape (symbolMid + dHTriangle) (symbolMid - dHTriangle) (Width - trigRight + shift) (Width - trigLeft + shift)
 
 		sketch # ligless.trig
 			include : TrigLeftShape 0
 			save 'less.lig.trig'
 
 		sketch # ligbar.trig
-			include : VBar MIDDLE (symbolMid + dHTriangle + OPERATORSTROKE) (symbolMid - dHTriangle - OPERATORSTROKE) OPERATORSTROKE
+			include : VBar Middle (symbolMid + dHTriangle + OperatorStroke) (symbolMid - dHTriangle - OperatorStroke) OperatorStroke
 			save 'bar.lig.trig'
 
 		sketch # liggreater.trig
@@ -1436,16 +1557,16 @@ glyph-block Symbol-Other-Ligation : begin
 			include : intersection
 				TrigLeftShape 0
 				union
-					Rect parenTop parenBot 0 WIDTH
-					TrigRightShape WIDTH
+					Rect parenTop parenBot 0 Width
+					TrigRightShape Width
 			save 'less.lig.diamond'
 
 		sketch # liggreater.diamond
 			include : intersection
 				TrigRightShape 0
 				union
-					Rect parenTop parenBot 0 WIDTH
-					TrigLeftShape (-WIDTH)
+					Rect parenTop parenBot 0 Width
+					TrigLeftShape (-Width)
 			save 'greater.lig.diamond'
 
 	do "Chaining Plus"
@@ -1453,25 +1574,25 @@ glyph-block Symbol-Other-Ligation : begin
 
 		sketch # plus.lig.lc
 			include MarkSet.plus
-			include : PlusShape SB (WIDTH - O)
+			include : PlusShape SB (Width - O)
 			save 'plus.lig.lc'
 		sketch # plus.lig.lc.s
 			include MarkSet.plus
-			include : PlusShape SB (WIDTH - O) SB
+			include : PlusShape SB (Width - O) SB
 			save 'plus.lig.lc.s'
 		sketch # plus.lig.cc
 			include MarkSet.plus
-			include : PlusShape O (WIDTH - O)
+			include : PlusShape O (Width - O)
 			save 'plus.lig.cc'
 		sketch # plus.lig.cr
 			include MarkSet.plus
-			include : PlusShape O RIGHTSB
+			include : PlusShape O RightSB
 			save 'plus.lig.cr'
 		sketch # plus.lig.cr.s
 			include MarkSet.plus
-			include : PlusShape O RIGHTSB (-SB)
+			include : PlusShape O RightSB (-SB)
 			save 'plus.lig.cr.s'
 		sketch # plus.lig.jr
 			include MarkSet.plus
-			include : PlusShape (-SB + O) RIGHTSB
+			include : PlusShape (-SB + O) RightSB
 			save 'plus.lig.jr'

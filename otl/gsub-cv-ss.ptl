@@ -1,4 +1,5 @@
-import [add-common-feature pick-feature add-feature-lookup pick-lookup] from "./table-util"
+import [add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
+import [AnyCv] from "../support/gr"
 
 define [FeatureName tag] : tag + '_cvss'
 define [LookupName tag]  : 'lookup_cvss_' + tag
@@ -6,17 +7,19 @@ define [LookupName tag]  : 'lookup_cvss_' + tag
 export : define [buildCVSS sink para glyphList] : begin
 	if [not para.enableCvSs] : return nothing
 
+	local rec : BeginLookupBlock sink
+
 	# cvxx
-	foreach [glyph : items-of glyphList] : if glyph.featureSelector : begin
-		local fs glyph.featureSelector
-		foreach [{tag to} : pairs-of fs] : begin
-			local feature : pick-feature sink [FeatureName tag]
+	foreach [glyph : items-of glyphList]
+		foreach [gr : items-of : AnyCv.query glyph] : if gr.tag : begin
+			local feature : pick-feature sink [FeatureName gr.tag]
 			add-common-feature sink feature
 
-			local lookup : pick-lookup sink [LookupName tag] {.type 'gsub_single' .subtables{{.}}}
-			add-feature-lookup feature [LookupName tag]
+			local lookup : pick-lookup sink [LookupName gr.tag]
+				begin {.type 'gsub_single' .subtables {{.}}}
+			add-feature-lookup feature [LookupName gr.tag]
 
-			set lookup.subtables.0.(glyph.name) to
+			set lookup.subtables.0.(glyph.name) [gr.get glyph]
 
 	# ssxx
 	foreach [{name composition} : pairs-of para.variants] : begin
@@ -26,3 +29,5 @@ export : define [buildCVSS sink para glyphList] : begin
 
 			foreach [{ch tag} : pairs-of composition.__cvmap]
 				add-feature-lookup feature [LookupName tag]
+
+	EndLookupBlock rec sink

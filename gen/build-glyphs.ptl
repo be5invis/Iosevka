@@ -29,7 +29,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	local unicodeGlyphs {}
 
 	define metrics : calculateMetrics para
-	define [object globalTransform UPM MIDDLE CAP XH SB RIGHTSB CONTRAST STROKE SUPERNESS WIDTH TANSLANT OVERLAYPOS DESCENDER MVERTSTROKE_D symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness] metrics
+	define [object globalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Superness Width TanSlope OverlayPos Descender symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness MVertStrokeD] metrics
 
 	define fontMetrics {.head {.} .hhea {.} .OS_2 {.} .post {.}}
 	setFontMetrics para metrics fontMetrics
@@ -60,31 +60,40 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
 		return dp
 
-	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
-		`[@name @actions] : begin
-			if (pickHash && [not pickHash.(name)]) : return nothing
+	define [createAndSaveGlyphImpl saveGlyphName unicode actions] : begin
+		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
 
-			if para.verbose : console.log name
-			local glyphObject [new Glyph name]
+		local ensuredGlyphName : if saveGlyphName saveGlyphName ('.temp-' + [newtemp])
+		if para.verbose : console.log ensuredGlyphName
+
+		local glyphObject [new Glyph ensuredGlyphName]
+		glyphObject.set-width Width
+		glyphObject.gizmo = globalTransform
+
+		if saveGlyphName : begin
 			glyphList.push glyphObject
-			glyphMap.(name) = glyphObject
-			glyphObject.set-width WIDTH
-			glyphObject.gizmo = globalTransform
+			if (saveGlyphName.0 != '.' && glyphMap.(saveGlyphName))
+				throw : new Error "Glyph \(saveGlyphName) already exists"
+			glyphMap.(saveGlyphName) = glyphObject
+			if unicode : begin
+				glyphObject.assign-unicode unicode
+				set unicodeGlyphs.(unicode) glyphObject
 
-			actions.call glyphObject
+		actions.call glyphObject
 
-			set dependencyProfile.(name) : getDependencyProfile glyphObject
+		local complexity : [(glyphObject.contours || {}).map (x => x.length)].reduce ([a b] => (a + b)) 0
+		if (complexity > 0x7fff) : console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
+
+		if saveGlyphName : begin
+			set dependencyProfile.(saveGlyphName) : getDependencyProfile glyphObject
 			dec nPending
-			return glyphObject
 
-		`[@actions] : begin
-			local glyphName ('.temp-' + [newtemp])
-			if para.verbose : console.log glyphName
-			local glyphObject [new Glyph glyphName]
-			glyphObject.set-width WIDTH
-			glyphObject.gizmo = globalTransform
-			actions.call glyphObject
-			return glyphObject
+		return glyphObject
+
+	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
+		`[@name @unicode @actions] : return : createAndSaveGlyphImpl name unicode actions
+		`[@name @actions]          : return : createAndSaveGlyphImpl name null    actions
+		`[@actions]                : return : createAndSaveGlyphImpl null null    actions
 
 	define [$save$ _name unicode] : begin
 		define t this
@@ -104,14 +113,12 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
 		return g
 
-	define [save-glyph name unicode g] : $save$.call g name unicode
-
 	### Spiro constructions
 	# Basic knots
-	define spirofns : spirokit.SetupBuilders : object globalTransform CONTRAST STROKE Glyph para SUPERNESS
+	define spirofns : spirokit.SetupBuilders : object globalTransform Contrast Stroke Glyph para Superness
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ save-glyph spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet DivFrame fontMetrics
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet DivFrame fontMetrics
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'

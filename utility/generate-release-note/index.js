@@ -65,7 +65,7 @@ async function GenerateChangeList(out) {
 	out.log(`## Modifications since version ${ModifiedSinceVersion}`);
 	for (const [version, notes] of sortedFragments) {
 		out.log(` * **${version}**`);
-		out.log((notes.trim() + "\n").replace(/^/gm, "   "));
+		out.log((notes.trimEnd() + "\n").replace(/^/gm, "   "));
 	}
 }
 
@@ -104,17 +104,21 @@ const PackageSpacings = {
 	fixed: ["Fixed", false, "Fixed"]
 };
 
+const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
+
 async function GeneratePackageList(out) {
 	out.log(`<table>`);
 	for (let shape in PackageShapes) {
 		const [shapeDesc, shapeNameSuffix, , count, nospace] = PackageShapes[shape];
 		const familyName = buildName("\u00a0", "Iosevka", shapeNameSuffix);
+		const imageName = buildName("-", "iosevka", shape);
 		const fileName = buildName("-", "pkg", "iosevka", shape, Version);
 		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
 
 		const desc = `<i>${shapeDesc}</i>`;
+		const img = `<img src="${imagePrefix}/${imageName}.png" width="720"/>`;
 		out.log(
-			`<tr><td colspan="4"><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td></tr>`
+			`<tr><td colspan="4">${img}<br/><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td></tr>`
 		);
 		if (!nospace) {
 			out.log(`<tr><td> </td>`);
@@ -132,13 +136,11 @@ async function GeneratePackageList(out) {
 			out.log(`</tr>`);
 		}
 	}
-	out.log(`</table>\n\n`);
+	out.log(`</table>\n`);
 }
 
 async function GenerateStyleSetImage(out) {
-	out.log(
-		`![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images/stylesets.png)\n\n`
-	);
+	out.log(`![Style Sets](${imagePrefix}/stylesets.png)\n\n`);
 }
 
 function noBreak(s) {

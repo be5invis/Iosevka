@@ -1,9 +1,13 @@
-import [add-common-feature add-feature add-lookup ChainRuleBuilder] from "./table-util"
+import [add-common-feature add-feature add-lookup ChainRuleBuilder BeginLookupBlock EndLookupBlock] from "./table-util"
+import [Dotless] from "../support/gr"
+extern Set
 
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
 export : define [buildCCMP sink glyphs markGlyphs] : begin
+	local rec : BeginLookupBlock sink
+
 	define ccmp : add-feature sink 'ccmp'
 	define {chain-rule} : ChainRuleBuilder sink
 
@@ -14,12 +18,76 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 	foreach [{gid, g} : pairs-of glyphs] : if (gid.(0) !== ".") : begin
 		if g.anchors.trailing : groupTR.push gid
 		if g.anchors.lf       : groupLF.push gid
-		if (g.related && g.related.dotless) : begin
+		if [Dotless.get g] : begin
 			dotlessFrom.push gid
-			dotlessTo.push   g.related.dotless
+			dotlessTo.push   [Dotless.get g]
 
 	define [IotaLF]         : {'iotaBelow'} ~> {'iotaLF'}
 	define [OgonekTrailing] : {'ogonekBelow'} ~> {'ogonekTR'}
+
+	define [ToneToToneStart toneEnd] : begin
+		local f {}
+		local e {}
+		foreach toneStart [range 4 downtill 0] : begin
+			f.push ('tone' + toneStart)
+			e.push ('toneStart' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [ToneToToneEnd toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('tone' + toneEnd)
+			e.push ('toneEnd' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [ToneStartOrMidAt y]: begin
+		local f {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneStart' + y + toneEnd)
+		foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneMid' + toneStart + y + toneEnd)
+		return f
+
+	define [ToneStartToToneMid toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneStart' + toneMid + toneEnd)
+			e.push ('toneMid' + toneStart + toneMid + toneEnd)
+		return (f ~> e)
+
+	define [ToneSandhiToToneStart toneEnd] : begin
+		local f {}
+		local e {}
+		foreach toneStart [range 4 downtill 0] : begin
+			f.push ('toneSandhi' + toneStart)
+			e.push ('toneSandhiStart' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [ToneSandhiToToneEnd toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneSandhi' + toneEnd)
+			e.push ('toneSandhiEnd' + toneStart + toneEnd)
+		return (f ~> e)
+
+	define [ToneSandhiStartOrMidAt y]: begin
+		local f {}
+		foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneSandhiStart' + y + toneEnd)
+		foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneSandhiMid' + toneStart + y + toneEnd)
+		return f
+
+	define [ToneSandhiStartToToneMid toneStart] : begin
+		local f {}
+		local e {}
+		foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+			f.push ('toneSandhiStart' + toneMid + toneEnd)
+			e.push ('toneSandhiMid' + toneStart + toneMid + toneEnd)
+		return (f ~> e)
 
 	define lookupCcmp1 : add-lookup sink : object
 		.type 'gsub_chaining'
@@ -60,5 +128,67 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 			object [from {'revCommaAbove' 'acuteAbove'}] [to 'dasiaoxia']
 			object [from {'revCommaAbove' 'perispomeniAbove'}] [to 'dasiaperispomeni']
 
+	define lookupCcmp-ToneStart : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneToToneStart 0] {'tone0'}
+			chain-rule [ToneToToneStart 1] {'tone1'}
+			chain-rule [ToneToToneStart 2] {'tone2'}
+			chain-rule [ToneToToneStart 3] {'tone3'}
+			chain-rule [ToneToToneStart 4] {'tone4'}
+
+	define lookupCcmp-ToneMid : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneStartOrMidAt 0] [ToneStartToToneMid 0]
+			chain-rule [ToneStartOrMidAt 1] [ToneStartToToneMid 1]
+			chain-rule [ToneStartOrMidAt 2] [ToneStartToToneMid 2]
+			chain-rule [ToneStartOrMidAt 3] [ToneStartToToneMid 3]
+			chain-rule [ToneStartOrMidAt 4] [ToneStartToToneMid 4]
+
+	define lookupCcmp-ToneEnd : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneStartOrMidAt 0] [ToneToToneEnd 0]
+			chain-rule [ToneStartOrMidAt 1] [ToneToToneEnd 1]
+			chain-rule [ToneStartOrMidAt 2] [ToneToToneEnd 2]
+			chain-rule [ToneStartOrMidAt 3] [ToneToToneEnd 3]
+			chain-rule [ToneStartOrMidAt 4] [ToneToToneEnd 4]
+
+	define lookupCcmp-ToneSandhiStart : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneSandhiToToneStart 0] {'toneSandhi0'}
+			chain-rule [ToneSandhiToToneStart 1] {'toneSandhi1'}
+			chain-rule [ToneSandhiToToneStart 2] {'toneSandhi2'}
+			chain-rule [ToneSandhiToToneStart 3] {'toneSandhi3'}
+			chain-rule [ToneSandhiToToneStart 4] {'toneSandhi4'}
+
+	define lookupCcmp-ToneSandhiMid : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiStartToToneMid 0]
+			chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiStartToToneMid 1]
+			chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiStartToToneMid 2]
+			chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiStartToToneMid 3]
+			chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiStartToToneMid 4]
+
+	define lookupCcmp-ToneSandhiEnd : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiToToneEnd 0]
+			chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiToToneEnd 1]
+			chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiToToneEnd 2]
+			chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiToToneEnd 3]
+			chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiToToneEnd 4]
+
 	ccmp.lookups.push lookupCcmp1 lookupCcmp2
+	ccmp.lookups.push lookupCcmp-ToneStart lookupCcmp-ToneMid lookupCcmp-ToneEnd
+	sink.lookupDep.push {lookupCcmp-ToneStart lookupCcmp-ToneMid}
+	sink.lookupDep.push {lookupCcmp-ToneMid lookupCcmp-ToneEnd}
+	ccmp.lookups.push lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd
+	sink.lookupDep.push {lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid}
+	sink.lookupDep.push {lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd}
 	add-common-feature sink ccmp
+
+	EndLookupBlock rec sink

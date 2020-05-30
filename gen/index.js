@@ -7,6 +7,7 @@ const BuildFont = require("./build-font.js");
 const Parameters = require("../support/parameters");
 const FormVariantData = require("../support/variant-data");
 const FormLigationData = require("../support/ligation-data");
+const { AnyCv } = require("../support/gr");
 const Toml = require("toml");
 
 module.exports = async function main(argv) {
@@ -18,10 +19,10 @@ module.exports = async function main(argv) {
 
 // Parameter preparation
 async function getParameters(argv) {
-	const PARAMETERS_TOML = path.resolve(__dirname, "../parameters.toml");
-	const PRIVATE_TOML = path.resolve(__dirname, "../private.toml");
-	const VARIANTS_TOML = path.resolve(__dirname, "../variants.toml");
-	const LIGATIONS_TOML = path.resolve(__dirname, "../ligation-set.toml");
+	const PARAMETERS_TOML = path.resolve(__dirname, "../params/parameters.toml");
+	const PRIVATE_TOML = path.resolve(__dirname, "../params/private-parameters.toml");
+	const VARIANTS_TOML = path.resolve(__dirname, "../params/variants.toml");
+	const LIGATIONS_TOML = path.resolve(__dirname, "../params/ligation-set.toml");
 
 	const parametersData = Object.assign(
 		{},
@@ -44,7 +45,7 @@ async function getParameters(argv) {
 
 	if (argv.excludedCharRanges) para.excludedCodePointRanges = argv.excludedCharRanges;
 	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-	if (argv.metricOverride) Parameters.applymetricOverride(para, argv.metricOverride);
+	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 
 	para.naming = {
 		family: argv.menu.family,
@@ -102,7 +103,7 @@ async function saveCharMap(argv, font) {
 			glyph.name,
 			glyph.unicode,
 			typographicFeatures,
-			glyph.featureSelector ? Object.keys(glyph.featureSelector) : []
+			AnyCv.query(glyph).map(gr => gr.tag)
 		]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");

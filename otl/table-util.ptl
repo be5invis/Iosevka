@@ -1,5 +1,6 @@
-export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.}}
+import [AnyCv] from "../support/gr"
 
+export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.}}
 extern Map
 extern Set
 
@@ -47,17 +48,6 @@ export : define [add-lookup sink data _prefix] : begin
 			return (prefix + n)
 		set n : n + 1
 
-set add-lookup.front : lambda [sink data _prefix] : begin
-	local prefix : _prefix || '_lut_'
-	local n 0
-	while true : begin
-		if [not sink.lookups.(prefix + n)] : begin
-			if sink.lookupDep : foreach [{key lookup} : pairs-of sink.lookups] : begin
-				sink.lookupDep.push {(prefix + n) key}
-			set sink.lookups.(prefix + n) data
-			return (prefix + n)
-		set n : n + 1
-
 export : define [pick-lookup sink name fallback] : begin
 	if sink.lookups.(name) : return sink.lookups.(name)
 	set sink.lookups.(name) fallback
@@ -76,13 +66,37 @@ export : define [add-common-feature sink fea] : begin
 
 	return fea
 
-export : define [ChainRuleBuilder sink] : begin
-	define utilityLookupPrefix '.utility-single.'
+define UtilityLookupPrefix '.utility-single.'
 
+export : define [BeginLookupBlock sink] : begin
+	return : object
+		existingLookupNames : new Set : Object.keys sink.lookups
+
+define [IsUtilityLookupId name] : [name.slice 0 UtilityLookupPrefix.length] === UtilityLookupPrefix
+
+export : define [EndLookupBlock rec sink] : begin
+	local currentLookupNames : new Set : Object.keys sink.lookups
+	foreach existing rec.existingLookupNames : foreach current currentLookupNames
+		if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+			sink.lookupDep.push { existing current }
+
+set EndLookupBlock.Front : lambda [rec sink] : begin
+	local currentLookupNames : new Set : Object.keys sink.lookups
+	foreach existing rec.existingLookupNames : foreach current currentLookupNames
+		if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+			sink.lookupDep.push { current existing }
+
+export : define [MoveBackUtilityLookups sink] : begin
+	local lns : new Set : Object.keys sink.lookups
+	foreach [front lns] : foreach [rear lns]
+		if (![IsUtilityLookupId front] && [IsUtilityLookupId rear])
+			sink.lookupDep.push { front rear }
+
+export : define [ChainRuleBuilder sink] : begin
 	define [createNewLookup f t] : begin
 		local subtable {.}
 		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
-		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}} utilityLookupPrefix
+		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}} UtilityLookupPrefix
 
 	define [getSubLookup left right] : piecewise
 		[not right] null
@@ -94,7 +108,7 @@ export : define [ChainRuleBuilder sink] : begin
 			local lookupKeys : [Object.keys sink.lookups].reverse
 			foreach [name : items-of lookupKeys] : begin
 				local st sink.lookups.(name).subtables.0
-				if ([name.slice 0 utilityLookupPrefix.length] === utilityLookupPrefix) : begin
+				if [IsUtilityLookupId name] : begin
 					local compatible true
 					local matchCount 0
 					foreach [j : range 0 left.length] : begin
@@ -161,7 +175,10 @@ export : define [query-related-glyphs glyphs para entries] : begin
 	define sink {}
 	foreach [gid : items-of entries] : if glyphs.(gid) : begin
 		sink.push gid
-		if para.enableCvSs : if glyphs.(gid).featureSelector : begin
-			foreach [{k v} : pairs-of glyphs.(gid).featureSelector] : begin
-				sink.push v
+		if para.enableCvSs : foreach [gr : items-of : AnyCv.query glyphs.(gid)] : begin
+			sink.push : gr.get glyphs.(gid)
 	return sink
+
+export : define [finalizeTable table] : begin
+	foreach [{key lang} : pairs-of table.languages] : begin
+		if lang.features : lang.features.sort
