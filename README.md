@@ -126,14 +126,14 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		# Override default building widths
 		# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
 		# default values.
-		# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
-		#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
+		# IMPORTANT : Currently "shape" property only supports integers between 3 and 9 (inclusive), while
+		#             "menu" only supports integers between 1 and 9 (inclusive).
 		#             If you decide to use custom widths you have to define all the widths you
 		#             plan to use otherwise they will not be built.
 		
 		[buildPlans.iosevka-custom.widths.normal]
-		shape = 5          # Width of glyph shapes.
-		menu  = 5          # Width for the font's names.
+		shape = 5          # Width grade of glyph shapes. NOT actual character width.
+		menu  = 5          # Width grade for the font's names. NOT actual character width.
 		css   = "normal"   # "font-stretch' property of webfont CSS.
 		
 		[buildPlans.iosevka-custom.widths.extended]
@@ -189,7 +189,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																						
+																							
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -309,6 +309,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
+    * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -320,7 +321,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-i-zshaped`, `cv06`: Z-shaped `i`.
     * `v-i-line`, `cv56`: `i` like a straight line.
     * `v-i-tailed`, `cv88`: Tailed `i`.
-    * `v-i-hookybottom`, `CVAA`: `i` with a straight tail.
+    * `v-i-hookybottom`, `VXAA`: `i` with a straight tail.
   * Styles for `j`:
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
@@ -383,7 +384,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
     * `v-zero-unslashed`, `cv15`: O-like `0`.
     * `v-zero-reverse-slashed`, `cv93`: Reverse-slashed `0`.
-    * `v-zero-long-dotted`, `CVAB`: Long-dotted Zero `0` like Hack.
+    * `v-zero-long-dotted`, `VXAB`: Long-dotted Zero `0` like Hack.
   * Styles for `1`:
     * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
     * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).
@@ -399,7 +400,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
-    * `v-eszet-longs-s-lig`, `CVAC`: A more modern, beta-like Eszet.
+    * `v-eszet-longs-s-lig`, `VXAC`: A more modern, beta-like Eszet.
   * Styles for `λ`:
     * `v-lambda-straight`, `cv94`: More-straight letter `λ` (default).
     * `v-lambda-curly`, `cv95`: More curly letter `λ`, like Iosevka 2.x.

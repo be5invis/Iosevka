@@ -19,10 +19,10 @@ module.exports = async function main(argv) {
 
 // Parameter preparation
 async function getParameters(argv) {
-	const PARAMETERS_TOML = path.resolve(__dirname, "../parameters.toml");
-	const PRIVATE_TOML = path.resolve(__dirname, "../private.toml");
-	const VARIANTS_TOML = path.resolve(__dirname, "../variants.toml");
-	const LIGATIONS_TOML = path.resolve(__dirname, "../ligation-set.toml");
+	const PARAMETERS_TOML = path.resolve(__dirname, "../params/parameters.toml");
+	const PRIVATE_TOML = path.resolve(__dirname, "../params/private-parameters.toml");
+	const VARIANTS_TOML = path.resolve(__dirname, "../params/variants.toml");
+	const LIGATIONS_TOML = path.resolve(__dirname, "../params/ligation-set.toml");
 
 	const parametersData = Object.assign(
 		{},

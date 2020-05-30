@@ -218,7 +218,10 @@ const ligationSamplesNarrow = [
 ];
 
 module.exports = async function getLigationData() {
-	const ligToml = await fs.readFile(path.join(__dirname, "../../ligation-set.toml"), "utf8");
+	const ligToml = await fs.readFile(
+		path.join(__dirname, "../../params/ligation-set.toml"),
+		"utf8"
+	);
 	const ligData = toml.parse(ligToml);
 
 	const ligationSets = buildLigationSet(ligData, comp => comp.buildup.join(","));

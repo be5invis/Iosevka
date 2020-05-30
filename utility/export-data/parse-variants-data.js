@@ -3,7 +3,10 @@ const path = require("path");
 const toml = require("toml");
 
 module.exports = async function () {
-	const variantsToml = await fs.readFile(path.join(__dirname, "../../variants.toml"), "utf8");
+	const variantsToml = await fs.readFile(
+		path.join(__dirname, "../../params/variants.toml"),
+		"utf8"
+	);
 	const variants = toml.parse(variantsToml);
 
 	const cvData = getCvData(variants);

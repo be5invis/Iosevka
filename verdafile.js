@@ -366,7 +366,7 @@ const BuildTTF = file.make(
 	async (target, output, gr, fn) => {
 		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
 		const charmap = output.dir + "/" + output.name + ".charmap";
-		await target.need(Scripts, fu`parameters.toml`, de`${output.dir}`);
+		await target.need(Scripts, Parameters, de`${output.dir}`);
 
 		const otdPath = `${output.dir}/${output.name}.otd`;
 		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
@@ -587,7 +587,7 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 	target.is.volatile();
 	const [version, pagesDir] = await target.need(Version, PagesDir);
 	if (!pagesDir) return;
-	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	await target.need(Parameters, UtilScripts);
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
@@ -671,7 +671,7 @@ const SnapShotJson = file(`snapshot/packaging-tasks.json`, async (target, out) =
 	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
 });
 const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(sfu`variants.toml`, sfu`ligation-set.toml`, UtilScripts);
+	await target.need(Parameters, UtilScripts);
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
@@ -799,7 +799,7 @@ const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (targe
 	}
 });
 const Scripts = task("scripts", async target => {
-	await target.need(sfu`parameters.toml`, sfu`variants.toml`, sfu`ligation-set.toml`);
+	await target.need(Parameters);
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	await target.need(jsFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
@@ -808,4 +808,12 @@ const Scripts = task("scripts", async target => {
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
 	await target.need(files.map(f => fu`${f}`));
+});
+const Parameters = task(`meta:parameters`, async target => {
+	await target.need(
+		sfu`params/parameters.toml`,
+		ofu`params/private-parameters.toml`,
+		sfu`params/variants.toml`,
+		sfu`params/ligation-set.toml`
+	);
 });
