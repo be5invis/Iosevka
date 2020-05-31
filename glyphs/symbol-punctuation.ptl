@@ -526,13 +526,23 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 
 	local sw : adviceBlackness2 3 3 CAP
 	local fine : adviceBlackness 3.5
-	local p 0.875
-	local l 0.05
-	local pr [linreg 500 0.82 700 0.85 Width]
+	local pxUpperLoopRight 0.875
+	local pxUpperLoopLeft  0.05
 	local rr 0.95
 	local q 0.45
 	local r 1.1
-	local endX : [mix SB RightSB r] - sw * HVContrast
+	local xTerminal : [mix SB RightSB r] - sw * HVContrast
+	local pStraightBar 0.4
+
+	local smaUpperLoop : SmoothAOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
+	local smbUpperLoop : SmoothBOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
+
+	local xUpperLoopLeft : mix SB RightSB pxUpperLoopLeft
+	local yUpperLoopLeft : CAP - smaUpperLoop
+	local xUpperLoopRight : mix SB RightSB pxUpperLoopRight
+	local yUpperLoopRight : CAP - smbUpperLoop
+	local xUpperLoopTop : mix xUpperLoopLeft xUpperLoopRight 0.5
+	local yMockUpperLoopLeftBottom : CAP - smaUpperLoop - smbUpperLoop * 0.3
 
 	create-glyph 'ampersand.closed' : difference
 		dispiro
@@ -544,14 +554,14 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 			archv
 			g4   (SB + O) SmoothB
 			alsoThru 0.5 0.5 [widths.center sw]
-			g4   [mix SB RightSB p] (CAP - SmoothB * pr) [widths.lhs sw]
+			g4   xUpperLoopRight yUpperLoopRight [widths.lhs sw]
 			arcvh
-			g4   ([mix SB RightSB [mix p l 0.5]] - CorrectionOMidX * sw) (CAP - O)
+			g4   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
 			archv
-			g4   [mix SB RightSB l] (CAP - SmoothA * pr)
-			flat [mix SB endX 0.5] [mix 0 (CAP - SmoothA * pr) 0.5]
-			curl [mix SB endX 2] (- CAP + SmoothA * pr)
-		Rect 0 (-CAP * 2) endX (Width * 2)
+			g4   xUpperLoopLeft yUpperLoopLeft
+			flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
+			curl [mix xUpperLoopLeft xTerminal 2] (-yMockUpperLoopLeftBottom)
+		Rect 0 (-CAP * 2) xTerminal (Width * 2)
 
 	create-glyph 'ampersand.open' : union
 		difference
@@ -564,26 +574,29 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 				archv
 				g4   (SB + O) SmoothB
 				alsoThru 0.5 0.5 [widths.center sw]
-				g4   [mix SB RightSB p] (CAP - SmoothB * pr) [widths.lhs sw]
+				g4   xUpperLoopRight yUpperLoopRight [widths.lhs sw]
+			Rect (CAP * 2) yUpperLoopRight 0 Width
 			Rect (CAP * 2) CapMiddle Middle Width
 			intersection
 				Rect (CAP * 2) SmoothA 0 (RightSB - fine * HVContrast)
 				WithTransform [Translate (-O) 0] : spiro-outline
-					g4   ([mix SB RightSB [mix p l 0.5]] - CorrectionOMidX * sw) (CAP - O)
+					g4.left.start   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
 					archv
-					g4   [mix SB RightSB l] (CAP - SmoothA * pr)
-					flat [mix SB endX 0.5] [mix 0 (CAP - SmoothA * pr) 0.5]
-					corner [mix SB endX 2] (- CAP + SmoothA * pr)
-					corner ([mix SB endX 2] + Width * 2) (- CAP + SmoothA * pr)
-					corner ([mix SB endX 2] + Width * 2) (CAP - O)
+					g4   xUpperLoopLeft yUpperLoopLeft
+					flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
+					corner [mix xUpperLoopLeft xTerminal 2] (- yMockUpperLoopLeftBottom)
+					corner ([mix xUpperLoopLeft xTerminal 2] + Width * 2) (- yMockUpperLoopLeftBottom)
+					corner ([mix xUpperLoopLeft xTerminal 2] + Width * 2) (CAP - O)
 		difference
 			dispiro
-				g4   [mix SB RightSB p] (CAP - SmoothB * pr) [widths.lhs sw]
-				hookstart CAP
-				g4   [mix SB RightSB l] (CAP - SmoothA * pr)
-				flat [mix SB endX 0.5] [mix 0 (CAP - SmoothA * pr) 0.5]
-				curl [mix SB endX 2] (- CAP + SmoothA * pr)
-			Rect 0 (-CAP * 2) endX (Width * 2)
+				g4.up.start xUpperLoopRight yUpperLoopRight [widths.heading sw 0 Upward]
+				arcvh
+				g4   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
+				archv
+				g4  xUpperLoopLeft yUpperLoopLeft
+				flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
+				curl [mix xUpperLoopLeft xTerminal 2] (- yMockUpperLoopLeftBottom)
+			Rect 0 (-CAP * 2) xTerminal (Width * 2)
 
 	select-variant 'ampersand' '&'
 
