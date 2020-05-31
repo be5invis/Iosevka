@@ -524,29 +524,27 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
-	local sw : adviceBlackness2 3 3 CAP
-	local fine : adviceBlackness 3.5
-	local pxUpperLoopRight 0.875
-	local pxUpperLoopLeft  0.05
-	local rr 0.95
-	local q 0.45
-	local r 1.1
-	local xTerminal : [mix SB RightSB r] - sw * HVContrast
-	local pStraightBar 0.4
+	define sw : adviceBlackness2 3 3 CAP
+	define fineAmp : adviceBlackness 3.5
+	define pxUpperLoopRight 0.875
+	define pxUpperLoopLeft  0.05
+	define pXTerminal 1.1
+	define pStraightBar 0.4
 
-	local smaUpperLoop : SmoothAOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
-	local smbUpperLoop : SmoothBOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
+	define smaUpperLoop : SmoothAOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
+	define smbUpperLoop : SmoothBOf (Smooth * (pxUpperLoopRight - pxUpperLoopLeft)) Width
 
-	local xUpperLoopLeft : mix SB RightSB pxUpperLoopLeft
-	local yUpperLoopLeft : CAP - smaUpperLoop
-	local xUpperLoopRight : mix SB RightSB pxUpperLoopRight
-	local yUpperLoopRight : CAP - smbUpperLoop
-	local xUpperLoopTop : mix xUpperLoopLeft xUpperLoopRight 0.5
-	local yMockUpperLoopLeftBottom : CAP - smaUpperLoop - smbUpperLoop * 0.3
+	define xTerminal : [mix SB RightSB pXTerminal] - sw * HVContrast
+	define xUpperLoopLeft : mix SB RightSB pxUpperLoopLeft
+	define yUpperLoopLeft : CAP - smaUpperLoop
+	define xUpperLoopRight : mix SB RightSB pxUpperLoopRight
+	define yUpperLoopRight : CAP - smbUpperLoop
+	define xUpperLoopTop : mix xUpperLoopLeft xUpperLoopRight 0.5
+	define yMockUpperLoopLeftBottom : CAP - smaUpperLoop - smbUpperLoop * 0.3
 
 	create-glyph 'ampersand.closed' : difference
 		dispiro
-			widths.rhs fine
+			widths.rhs fineAmp
 			flat (RightSB - O) CapMiddle [heading Downward]
 			curl (RightSB - O) SmoothA
 			arcvh
@@ -566,7 +564,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	create-glyph 'ampersand.open' : union
 		difference
 			dispiro
-				widths.rhs fine
+				widths.rhs fineAmp
 				flat (RightSB - O) CapMiddle [heading Downward]
 				curl (RightSB - O) SmoothA
 				arcvh
@@ -578,7 +576,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 			Rect (CAP * 2) yUpperLoopRight 0 Width
 			Rect (CAP * 2) CapMiddle Middle Width
 			intersection
-				Rect (CAP * 2) SmoothA 0 (RightSB - fine * HVContrast)
+				Rect (CAP * 2) SmoothA 0 (RightSB - fineAmp * HVContrast)
 				WithTransform [Translate (-O) 0] : spiro-outline
 					g4.left.start   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
 					archv
@@ -597,6 +595,33 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 				flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
 				curl [mix xUpperLoopLeft xTerminal 2] (- yMockUpperLoopLeftBottom)
 			Rect 0 (-CAP * 2) xTerminal (Width * 2)
+
+	define yEtMiddle : CAP * OverlayPos
+	define smaEt : CAP - [mix (yEtMiddle + sw / 2) (CAP - O - sw) (SmoothB / (SmoothA + SmoothB))] - TanSlope * HVContrast * sw
+	define smbEt : [mix (sw + O) (yEtMiddle - sw / 2) (SmoothB / (SmoothA + SmoothB))] + TanSlope * HVContrast * sw
+	define fineEt : sw * CThin
+	define xEtLeft SB
+	define xEtRight : mix xUpperLoopRight RightSB 0.5
+	define xEtMiddle : mix xEtRight Width 0.5
+
+	create-glyph 'ampersand.et' : union
+		dispiro
+			g4 (xEtRight + O) (CAP - SHook) [widths.lhs]
+			hookstart (CAP - O)
+			g4 xEtLeft (CAP - smaEt)
+			arcvh
+			flat Middle (yEtMiddle - (fineEt - sw / 2)) [widths.heading fineEt 0 Rightward]
+			curl xEtMiddle (yEtMiddle - (fineEt - sw / 2)) [heading Rightward]
+		dispiro
+			flat xEtMiddle (yEtMiddle + (fineEt - sw / 2)) [widths.heading fineEt 0 Leftward]
+			curl Middle (yEtMiddle + (fineEt - sw / 2)) [heading Leftward]
+			archv
+			g4 (xEtLeft + O * 2) smbEt [widths.lhs]
+			arcvh
+			g4   ([mix xEtLeft xEtRight 0.5] + CorrectionOMidS) O
+			archv
+			flat (xEtRight - O) smaEt
+			curl (xEtRight - O) [mix (yEtMiddle + sw / 2) (CAP - SHook) 0.375] [heading Upward]
 
 	select-variant 'ampersand' '&'
 
