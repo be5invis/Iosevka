@@ -292,11 +292,10 @@ glyph-block Numbers : begin
 		include : FiveShape XH FiveBarPos
 		save 'zhuangtonefive' 0x1BD
 
-	sketch # six
-		include MarkSet.capital
-		local top (CAP * 0.6)
-		local ymiddlea : (top - SmallSmoothA + SmallSmoothB) / 2
-		local ymiddleb : (top - SmallSmoothB + SmallSmoothA) / 2
+	define [OpenContourSixShape charTop] : glyph-construction
+		local oTop (charTop * 0.6)
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
 		local fine   : adviceBlackness 5.5
 		local coFine : adviceBlackness 3.5
 		include : dispiro
@@ -305,7 +304,7 @@ glyph-block Numbers : begin
 			archv
 			g4 (SB + OX + (Stroke - fine) * HVContrast) ymiddlea
 			arcvh
-			g4 (Middle - CorrectionOMidS) (top - O) [widths.rhs]
+			g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
 			archv
 			g4.down.mid (RightSB - OX) ymiddleb
 			arcvh
@@ -313,10 +312,47 @@ glyph-block Numbers : begin
 			archv
 			g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
 			quadcontrols 0 0.85
-			g4 ([mix SB RightSB 0.85] - 0.25 * Stroke * HVContrast) CAP [widths.rhs]
-		save 'six.lnum' '6'
-		save 'six.onum'
+			g4 ([mix SB RightSB 0.85] - 0.25 * Stroke * HVContrast) charTop [widths.rhs]
 
+	define [ClosedContourNineShape top] : glyph-construction
+		local u top
+		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.425 - HalfStroke)
+		local l (SB + OX)
+		local r (RightSB - OX)
+		local ymiddlea : mix u d 0.5
+		include : dispiro
+			widths.rhs (Stroke * CThinB)
+			flat (r - Stroke * (1 - CThinB) * HVContrast) ymiddlea
+			curl (r - Stroke * (1 - CThinB) * HVContrast) (d + SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] + CorrectionOMidS) (d + O) [widths 0 Stroke]
+			archv
+			flat l (d + SmallSmoothB)
+			curl l (u - SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] - CorrectionOMidS) (u - O)
+			archv
+			flat r ymiddlea
+			curl r SmallSmoothA
+			hookend O
+			g4 SB Hook
+
+	sketch # six
+		include MarkSet.capital
+		include : OpenContourSixShape CAP
+		save 'six.lnum.openContour'
+		save 'six.onum.openContour'
+
+	sketch # six
+		include MarkSet.capital
+		include : ClosedContourNineShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+
+		save 'six.lnum.closedContour'
+		save 'six.onum.closedContour'
+
+	select-variant 'six.lnum' '6' (follow -- 'six')
+	select-variant 'six.onum' (follow -- 'six')
 
 	define [SevenShape top] : glyph-construction
 		include : HBarTop (SB + (OX - O)) RightSB top
@@ -398,51 +434,30 @@ glyph-block Numbers : begin
 			straight.down.end l 0 [widths.heading Stroke 0 Downward]
 		save 'rotetedpropto'
 
-	define [NineShape top] : begin
-		local u top
-		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.425 - HalfStroke)
-		local l (SB + OX)
-		local r (RightSB - OX)
-		local ymiddlea : mix u d 0.5
-		return : dispiro
-			widths.rhs (Stroke * CThinB)
-			flat (r - Stroke * (1 - CThinB) * HVContrast) ymiddlea
-			curl (r - Stroke * (1 - CThinB) * HVContrast) (d + SmallSmoothA)
-			arcvh
-			g4   ([mix l r 0.5] + CorrectionOMidS) (d + O) [widths 0 Stroke]
-			archv
-			flat l (d + SmallSmoothB)
-			curl l (u - SmallSmoothA)
-			arcvh
-			g4   ([mix l r 0.5] - CorrectionOMidS) (u - O)
-			archv
-			flat r ymiddlea
-			curl r SmallSmoothA
-			hookend O
-			g4 SB Hook
+
 
 	sketch
 		include MarkSet.capital
-		include : NineShape CAP
+		include : ClosedContourNineShape CAP
 		save 'nine.lnum.closedContour'
 
 	sketch
 		include MarkSet.p
-		include : NineShape (XH - Descender)
+		include : ClosedContourNineShape (XH - Descender)
 		include : ShiftDown
 		save 'nine.onum.closedContour'
 
 	sketch
 		include MarkSet.capital
-		include : refer-glyph 'six.lnum'
+		include : OpenContourSixShape CAP
 		include : FlipAround (Middle) (CAP / 2)
-		save 'nine.lnum.turnedSix'
+		save 'nine.lnum.openContour'
 
 	sketch
 		include MarkSet.p
-		include : refer-glyph 'six.onum'
+		include : OpenContourSixShape CAP
 		include : FlipAround (Middle) (XH / 2)
-		save 'nine.onum.turnedSix'
+		save 'nine.onum.openContour'
 
 	select-variant 'nine.lnum' '9' (follow -- 'nine')
 	select-variant 'nine.onum' (follow -- 'nine')
