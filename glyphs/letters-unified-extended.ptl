@@ -1825,7 +1825,7 @@ glyph-block LetterUnified-Extended : begin
 		save 'ij' 0x133
 
 	glyph-block-export EzhShape
-	define [EzhShape top bot pleft pright hookless] : glyph-construction
+	define [EzhShape] : params [top bot pleft pright hookless] : glyph-construction
 		local cor : 1.2 * HVContrast
 		local yMidBar : mix bot top 0.6
 		local ezhLeft : mix SB RightSB [fallback pleft 0.2]
@@ -1847,8 +1847,7 @@ glyph-block LetterUnified-Extended : begin
 			archv
 			if hookless
 			: then : list
-				g4   (RightSB - OX) [mix yMidBar bot hookless] [heading Downward]
-				g4   (RightSB - OX) ([mix yMidBar bot hookless] - 1) [heading Downward]
+				g4.down.mid  (RightSB - OX) [mix yMidBar bot hookless] [heading Downward]
 			: else : list
 				g4   (RightSB - OX) [mix yMidBar bot : SmallSmoothB / (SmallSmoothA + SmallSmoothB)]
 				hookend bot
@@ -1857,11 +1856,12 @@ glyph-block LetterUnified-Extended : begin
 		if SLAB : begin
 			include : DownwardLeftSerif SB top VJut
 
-	define [RevEzhShape top bot pleft pright hookless] : glyph-construction
-		local cor : 1.2 * HVContrast
-		local yMidBar : mix bot top 0.6
-		local ezhRight : mix RightSB SB [fallback pleft 0.2]
-		local ezhLeft : mix RightSB SB [fallback pright 0.925]
+	glyph-block-export RevEzhShape
+	define [RevEzhShape] : params [top bot pleft pright hookless [sma SmallSmoothA] [smb SmallSmoothB] [diagCoeff 1.2] [pyBar 0.6]] : glyph-construction
+		local cor : diagCoeff * HVContrast
+		local yMidBar : RevEzhShape.yMidBar top bot pyBar
+		local ezhRight : mix SB RightSB [fallback pright 0.8]
+		local ezhLeft : mix SB RightSB [fallback pleft 0.075]
 		include : HBarTop ezhLeft RightSB top
 
 		include : spiro-outline
@@ -1876,12 +1876,18 @@ glyph-block LetterUnified-Extended : begin
 			flat ezhRight yMidBar [heading Leftward]
 			curl (Middle + CorrectionOMidS) yMidBar
 			archv
-			g4   (SB + OX) [mix yMidBar bot (SmallSmoothA / (SmallSmoothA + SmallSmoothB))] [if [not hookless] important [heading Downward]]
-			if hookless {} : list
+			if hookless
+			: then : list
+				g4.down.mid (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar sma smb]
+			: else : list
+				g4   (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar sma smb]
 				hookend bot
 				g4 RightSB (bot + Hook * ((top - bot) / CAP))
 		if SLAB : begin
 			include : DownwardRightSerif RightSB top VJut
+	set RevEzhShape.yMidBar : lambda [top bot pyBar] : mix bot top pyBar
+	set RevEzhShape.yLoopLeft : lambda [top bot pyBar sma smb]
+		mix [RevEzhShape.yMidBar top bot pyBar] bot (sma / (sma + smb))
 
 	sketch # Ezh
 		set-width Width
