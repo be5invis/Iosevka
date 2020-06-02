@@ -31,8 +31,7 @@ glyph-block Symbol-Math-Letter-Like : begin
 	sketch # micro
 		include [refer-glyph 'mu'] AS_BASE
 		if SLAB : if (!para.isItalic) : begin
-			include : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
-			tag-contour 'serifLB'
+			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
 		save 'micro' 0xB5
 
 	sketch # forall
@@ -281,6 +280,14 @@ glyph-block Symbol-Math-Arith : begin
 		include : refer-glyph "plus"
 		save 'plusminus' 0xB1
 	turned 'minusplus' 0x2213 'plusminus' Middle symbolMid
+	create-glyph 'dotplus' 0x2214 : glyph-construction
+		include MarkSet.plus
+		local gap : adviceBlackness 12
+		include : union
+			DotAt Middle (symbolMid * 2 - OperatorStroke / 2) DotRadius
+			difference
+				refer-glyph 'plus'
+				DotAt Middle (symbolMid * 2 - OperatorStroke / 2) (DotRadius + gap)
 
 	sketch # multiply
 		include MarkSet.plus
@@ -339,33 +346,33 @@ glyph-block Symbol-Math-Arith : begin
 	do
 		define fine : adviceBlackness 5.5
 		define radius : Math.max ((RightSB - SB) / 12) (fine / 2)
-		define barOffset : fine * 1.5 + radius * 2
+		define barOffset radius
 		define dotCenterOffset : OX + fine + radius
 		sketch
 			include MarkSet.plus
-			include : union
-				HBar (SB + barOffset) (RightSB - barOffset) symbolMid OperatorStroke
-				DotAt (RightSB - dotCenterOffset) symbolMid (radius + fine)
-				difference
+			include : difference
+				union
+					HBar (SB + barOffset) (RightSB - barOffset) symbolMid OperatorStroke
 					DotAt (SB + dotCenterOffset) symbolMid (radius + fine)
-					DotAt (SB + dotCenterOffset) symbolMid radius
+					DotAt (RightSB - dotCenterOffset) symbolMid (radius + fine)
+				DotAt (SB + dotCenterOffset) symbolMid radius
 			save 'originalOf' 0x22b6
 		sketch
 			include MarkSet.plus
-			include : union
-				HBar (SB + barOffset) (RightSB - barOffset) symbolMid OperatorStroke
-				DotAt (SB + dotCenterOffset) symbolMid (radius + fine)
-				difference
+			include : difference
+				union
+					HBar (SB + barOffset) (RightSB - barOffset) symbolMid OperatorStroke
+					DotAt (SB + dotCenterOffset) symbolMid (radius + fine)
 					DotAt (RightSB - dotCenterOffset) symbolMid (radius + fine)
-					DotAt (RightSB - dotCenterOffset) symbolMid radius
+				DotAt (RightSB - dotCenterOffset) symbolMid radius
 			save 'imageOf' 0x22b7
 		sketch
 			include MarkSet.plus
-			include : union
-				HBar SB (RightSB - barOffset) symbolMid OperatorStroke
-				difference
+			include : difference
+				union
+					HBar SB (RightSB - barOffset) symbolMid OperatorStroke
 					DotAt (RightSB - dotCenterOffset) symbolMid (radius + fine)
-					DotAt (RightSB - dotCenterOffset) symbolMid radius
+				DotAt (RightSB - dotCenterOffset) symbolMid radius
 			save 'multimap' 0x22b8
 
 glyph-block Symbol-Math-Dots-And-Colons : begin
@@ -481,6 +488,8 @@ glyph-block Symbol-Math-VAndCup : begin
 	glyph-block-import CommonShapes
 	glyph-block-import LetterUnified-Basic : UShape
 	glyph-block-import LetterUnified-Extended : PiShape
+	glyph-block-import Symbol-Arrow : ArrowShape
+
 	sketch # vee
 		include : dispiro
 			widths.center OperatorStroke
@@ -551,11 +560,41 @@ glyph-block Symbol-Math-VAndCup : begin
 			include : DotAt Middle (operBot + Smooth) [Math.min DotRadius ((RightSB - SB - OperatorStroke * HVContrast * 2) * (1 / 3))]
 			save 'cupDot' 0x228D
 
+		branch
+			local mockUpscale : OperatorStroke / [adviceBlackness 6]
+			local arrowLength : mockUpscale * [Math.min (RightSB - SB - OperatorStroke * HVContrast * 2) (Width * 0.6)]
+			include : create-glyph : glyph-construction
+				include : ArrowShape
+					Middle + arrowLength / 2
+					operBot + Smooth
+					Middle - arrowLength / 2
+					operBot + Smooth
+					arrowLength * 0.5
+				include : Upright
+				include : Translate (-Middle) (-operBot - Smooth)
+				include : Scale (1 / mockUpscale) (1 / mockUpscale)
+				include : Translate Middle (operBot + Smooth)
+				include : Italify
+			save 'cupArrowLeft' 0x228C
+
+		branch
+			local sw : adviceBlackness 6
+			local size : Math.min (RightSB - SB - OperatorStroke * HVContrast * (2 + 0.5 * sw / OperatorStroke)) ((RightSB - SB) * 0.8)
+			include : dispiro
+				widths.center sw
+				corner (Middle - size / 2) (operBot + Smooth)
+				corner (Middle + size / 2) (operBot + Smooth)
+			include : dispiro
+				widths.center sw
+				corner Middle (operBot + Smooth - size / 2)
+				corner Middle (operBot + Smooth + size / 2)
+			save 'cupPlus' 0x228E
+
 	turned 'cap' 0x2229 'cup' Middle symbolMid
 	turned 'capDot' 0x2A40 'cupDot' Middle symbolMid
 
 	sketch # squareCap
-		include : PiShape operTop operBot (shrinkrate -- 0) (_fine -- OperatorStroke) (div -- 1)
+		include : PiShape operTop operBot (shrinkrate -- 0) (_fine -- OperatorStroke) (div -- 1) (noserif -- true)
 		save 'squareCap' 0x2293
 	turned 'squareCup' 0x2294 'squareCap' Middle symbolMid
 
@@ -1330,10 +1369,11 @@ glyph-block Symbol-Math-APL : begin
 	sketch # aplsquareShadow
 		local l [mix 0 SB (1 / 3)]
 		local r [mix Width RightSB (1 / 3)]
-		start-from l aplBoxTop
-		line-to r aplBoxTop
-		line-to r aplBoxBot
-		line-to l aplBoxBot
+		include : spiro-outline
+			corner l aplBoxTop
+			corner r aplBoxTop
+			corner r aplBoxBot
+			corner l aplBoxBot
 		save 'aplsquareShadow'
 	sketch # aplibar
 		local l [mix 0 SB (1 / 3)]

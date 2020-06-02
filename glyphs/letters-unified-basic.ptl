@@ -703,36 +703,35 @@ glyph-block LetterUnified-Basic : begin
 				local vxStartR : df.width - df.leftSB * StraightSbShrink
 				local vxEndR : df.middle + cornerdist
 				local midSW : VShapeMiddleWidth / Stroke * sw
-				include : dispiro
+				include : tagged 'strokeDown' : dispiro
 					widths.lhs (sw * dgCor)
 					flat [mix vxStartL vxEndL 0] [mix top 0 0] [heading Downward]
 					curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs midSW]
 					g4   [mix vxStartL vxEndL 1] [mix top 0 1] [widths.lhs fine]
-				include : dispiro
+				include : tagged 'strokeUp' : dispiro
 					widths.rhs (sw * dgCor)
 					flat [mix vxStartR vxEndR 0] [mix top 0 0] [heading Downward]
 					curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs midSW]
 					g4   [mix vxStartR vxEndR 1] [mix top 0 1] [widths.rhs fine]
-				tag-contour 'strokeUp'
 			: else : begin
-				include : dispiro
+				include : tagged 'strokeDown' : dispiro
 					widths.lhs sw
 					flat df.leftSB top [heading Downward]
 					curl df.leftSB (top * 0.9) [heading Downward]
 					quadcontrols 0 vcurviness 9 unimportant
 					g4 (df.middle - cornerdist) 0 [widths.lhs fine]
-				include : dispiro
+				include : tagged 'strokeUp' : dispiro
 					widths.rhs sw
 					flat df.rightSB top [heading Downward]
 					curl df.rightSB (top * 0.9) [heading Downward]
 					quadcontrols 0 vcurviness 9 unimportant
 					g4 (df.middle + cornerdist) 0 [widths.rhs fine]
-				tag-contour 'strokeUp'
 
 			#bottom cap
-			start-from (df.middle + cornerdist) 0
-			line-to (df.middle - cornerdist) 0
-			line-to df.middle fine
+			include : spiro-outline
+				corner (df.middle + cornerdist) 0
+				corner (df.middle - cornerdist) 0
+				corner df.middle fine
 
 			include : AIVSerifs top
 
@@ -868,10 +867,8 @@ glyph-block LetterUnified-Basic : begin
 			include : VShape top sw barStraight div
 			include : FlipAround df.middle (top / 2)
 			if SLAB : begin
-				include : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
-				tag-contour 'serif'
-				include : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
-				tag-contour 'serif'
+				include : tagged 'serif' : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
+				include : tagged 'serif' : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
 
 		sketch # Lambda
 			include MarkSet.capital
@@ -948,8 +945,7 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB
 			: then : begin
 				include : VBarRight RightSB 0 XH
-				include : RightwardBottomSerif RightSB 0 SideJut
-				tag-contour 'serifRB'
+				include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 			: else : begin
 				include : dispiro
 					widths.rhs
@@ -984,9 +980,7 @@ glyph-block LetterUnified-Basic : begin
 					corner (RightSB - Stroke * HVContrast) 0
 					corner (RightSB - Stroke * HVContrast) (XH - Stroke / 2)
 					corner RightSB (XH - O)
-			if SLAB : begin
-				include : RightwardBottomSerif RightSB 0 SideJut
-				tag-contour 'serifRB'
+			if SLAB : include : tagged 'serifRB' RightwardBottomSerif RightSB 0 SideJut
 			save 'scripta' 0x0251
 			include : FlipAround Middle (XH / 2)
 			save 'turnscripta' 0x252
@@ -1000,9 +994,7 @@ glyph-block LetterUnified-Basic : begin
 					corner (RightSB - Stroke * HVContrast) XH
 					corner (RightSB - Stroke * HVContrast) (Stroke / 2)
 					corner RightSB O
-			if SLAB : begin
-				include : RightwardTopSerif RightSB XH SideJut
-				tag-contour 'serifRT'
+			if SLAB : include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 			save 'invLatinAlpha' 0xAB64
 
 		turned 'turna' 0x250 'a.doublestorey' Middle (XH / 2)
@@ -1501,7 +1493,7 @@ glyph-block LetterUnified-Basic : begin
 						yTopKnots (Width - yrstroker) top bottom ds (-1)
 						yJoinKnots ds ds2 top bottom
 					SmallYStrokeSplitMask top bottom false (-1)
-					Rect (bottom + HalfStroke) bottom 0 Width
+					Rect (bottom + HalfStroke) (bottom - top) 0 Width
 
 				if slab : begin
 					include : AIVSerifs top
@@ -1536,7 +1528,7 @@ glyph-block LetterUnified-Basic : begin
 					include : AIVSerifs top
 					eject-contour 'serifRT'
 
-			define [SmallLambdaShape top bottom] : glyph-construction
+			define [SmallLambdaShape top bottom] : ReverseContours : glyph-construction
 				set currentGlyph.gizmo : Italify (-para.slantAngle)
 				include : SmallYShape top bottom
 				set currentGlyph.gizmo : Italify (+para.slantAngle)
@@ -1545,7 +1537,6 @@ glyph-block LetterUnified-Basic : begin
 				apply-transform : Scale 1 (-1)
 				apply-transform : Translate 0 (+[mix bottom top 0.5])
 				# apply-transform : Italify
-				currentGlyph.reverse-all
 
 			return : object SmallYShape SmallYHookTopShape SmallLambdaShape
 
@@ -1801,8 +1792,8 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB : begin
 				include : LeftwardTopSerif (SB + [KBalance straightBar]) CAP SideJut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + [KBalance straightBar] + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB'
+						CenterBottomSerif (SB + [KBalance straightBar] + HalfStroke * HVContrast) 0 Jut
 
 		define [LowerKCursiveShape straightBar] : glyph-construction
 			include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
@@ -1905,8 +1896,8 @@ glyph-block LetterUnified-Basic : begin
 			include : VBarLeft (SB + [KBalance straightBar]) 0 (CAP - Hook - HalfStroke)
 			include : VerticalHook (SB + [KBalance straightBar] + HalfStroke * HVContrast) (CAP - Hook - HalfStroke) HookX (-Hook)
 			if (SLAB && !para.isItalic) : begin
-				include : CenterBottomSerif (SB + [KBalance straightBar] + HalfStroke * HVContrast) 0 Jut
-				tag-contour 'serifLB'
+				include : tagged 'serifLB'
+					CenterBottomSerif (SB + [KBalance straightBar] + HalfStroke * HVContrast) 0 Jut
 
 		sketch # khooktop.straight
 			include MarkSet.b
@@ -1997,10 +1988,8 @@ glyph-block LetterUnified-Basic : begin
 
 			include : VBarLeft barleft 0 top stroke
 			if SLAB : begin
-				include : LeftwardTopSerif barleft top SideJut
-				tag-contour 'serifLT'
-				include : LeftwardBottomSerif barleft 0 SideJut
-				tag-contour 'serifLB'
+				include : tagged 'serifLT' : LeftwardTopSerif barleft top SideJut
+				include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
 
 		sketch # B
 			set-width Width
@@ -2133,10 +2122,8 @@ glyph-block LetterUnified-Basic : begin
 			include : OBarLeftShape
 			include : VBarLeft SB 0 CAP
 			if SLAB : begin
-				include : LeftwardTopSerif SB CAP SideJut
-				tag-contour 'serifLT'
-				include : LeftwardBottomSerif SB 0 SideJut
-				tag-contour 'serifLB'
+				include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+				include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
 			save 'b' 'b'
 
@@ -2145,8 +2132,7 @@ glyph-block LetterUnified-Basic : begin
 			include : OBarLeftShape
 			include : HooktopLeftBar
 			if SLAB : begin
-				include : LeftwardBottomSerif SB 0 SideJut
-				tag-contour 'serifLB'
+				include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
 
 			save 'bhooktop' 0x253
@@ -2173,12 +2159,12 @@ glyph-block LetterUnified-Basic : begin
 			include [refer-glyph 'b'] AS_BASE
 			eject-contour 'serifLT'
 			local s : Math.max (XH * 0.1) Stroke
-			start-from (SB - O) CAP
-			line-to    SB CAP
-			line-to    (SB - s) (CAP - s)
-			line-to    SB (CAP - s * 2)
-			line-to    (SB - O) (CAP - s * 2)
-			reverse-last
+			include : ReverseContours : spiro-outline
+				corner (SB - O) CAP
+				corner  SB CAP
+				corner (SB - s) (CAP - s)
+				corner  SB (CAP - s * 2)
+				corner (SB - O) (CAP - s * 2)
 			save 'zhuangtonesix' 0x185
 
 	### D
@@ -2205,10 +2191,8 @@ glyph-block LetterUnified-Basic : begin
 				flat (RightSB - bsmooth) 0
 				curl (barleft - O) 0 [heading Leftward]
 			if SLAB : begin
-				include : LeftwardTopSerif barleft CAP SideJut
-				tag-contour 'serifLT'
-				include : LeftwardBottomSerif barleft 0 SideJut
-				tag-contour 'serifLB'
+				include : tagged 'serifLT' : LeftwardTopSerif barleft CAP SideJut
+				include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
 			save 'D' 'D'
 
 		sketch # arficanD
@@ -2233,8 +2217,7 @@ glyph-block LetterUnified-Basic : begin
 			include : OBarRightShape
 			include : VBarRight RightSB 0 CAP
 			if SLAB : begin
-				include : RightwardBottomSerif RightSB 0 SideJut
-				tag-contour 'serifRB'
+				include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
 
 			save 'd' 'd'
@@ -2277,8 +2260,7 @@ glyph-block LetterUnified-Basic : begin
 			include MarkSet.b
 			include : OBarRightShape
 			include : VBarRight RightSB 0 XH
-			include : RightwardBottomSerif RightSB 0 SideJut
-			tag-contour 'serifRB'
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 			include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)
 
 			save 'dhooktop' 0x257
@@ -2365,12 +2347,10 @@ glyph-block LetterUnified-Basic : begin
 			include : dispiro
 				widths.rhs sw
 				PShapeOutlineKnots top mul bp overshoot sw 0
-			include : VBarLeft (SB * mul) 0 top sw
-			tag-contour 'strokeL'
+			include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
 
 			if slab : begin
-				include : LeftwardTopSerif (SB * mul) top SideJut sw
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
 				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
 
 		define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
@@ -2430,8 +2410,7 @@ glyph-block LetterUnified-Basic : begin
 			include : OBarLeftShape
 			include : HooktopLeftBar nothing Descender
 			if SLAB : begin
-				include : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
-				tag-contour 'serifLB'
+				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
 
 			save 'phooktop' 0x1A5
 		### rho
@@ -2545,7 +2524,7 @@ glyph-block LetterUnified-Basic : begin
 		WithDerivatives 'R' 'Rbar' : lambda [src sel] : glyph-construction
 			if [not sel] : assign-unicode 0x24C
 			include [refer-glyph src] AS_BASE ALSO_METRICS
-			include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos SLAB])
+			include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP CAP SLAB] + Stroke * 0.25)
 
 		WithDerivatives 'smcpR' 'turnSmcpR' : lambda [src sel] : glyph-construction
 			if [not sel] : assign-unicode 0x1D1A
@@ -2755,9 +2734,9 @@ glyph-block LetterUnified-Basic : begin
 			select-variant 'smallLetterTurnedRWithTail' 0x2C79 (follow -- 'r')
 
 		do
-			define [TurnRRTailShape F mode] : glyph-construction
+			define [TurnRRTailShape F mode doBottomSerif] : glyph-construction
 				define [object rbar] : RDim mode
-				include : F dfR mode 0 0
+				include : F dfR mode 0 doBottomSerif
 				eject-contour 'serifLT'
 				include : FlipAround dfR.middle (XH / 2)
 				include : create-glyph : glyph-construction
@@ -2769,16 +2748,16 @@ glyph-block LetterUnified-Basic : begin
 				set-width dfR.width
 				include dfR.markSet.p
 				branch
-					include : TurnRRTailShape StandardLowerRShape rStraight
+					include : TurnRRTailShape StandardLowerRShape rStraight 0
 					save 'turnrrtail.straight'
 				branch
-					include : TurnRRTailShape StandardLowerRShape rSerifed
+					include : TurnRRTailShape StandardLowerRShape rSerifed 1
 					save 'turnrrtail.serifed'
 				branch
-					include : TurnRRTailShape StandardLowerRShape rSerifed
+					include : TurnRRTailShape StandardLowerRShape rSerifed 0
 					save 'turnrrtail.top-serifed'
 				branch
-					include : TurnRRTailShape NarrowLowerRshape rNarrow
+					include : TurnRRTailShape NarrowLowerRshape rNarrow 0
 					save 'turnrrtail.narrow'
 
 			select-variant 'turnrrtail' 0x27B (follow -- 'r')
@@ -2960,10 +2939,11 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # sigma
 			include MarkSet.e
-			start-from (RightSB + 0.25 * SB) XH
-			line-to    (RightSB + 0.25 * SB) (XH - Stroke)
-			line-to    Middle  (XH - Stroke - O * 1.5)
-			line-to    Middle  (XH - O)
+			include : spiro-outline
+				corner (RightSB + 0.25 * SB) XH
+				corner (RightSB + 0.25 * SB) (XH - Stroke)
+				corner Middle                (XH - Stroke - O * 1.5)
+				corner Middle                (XH - O)
 			include : dispiro
 				widths.lhs
 				flat (Middle + 1) (XH - O)
@@ -3111,10 +3091,11 @@ glyph-block LetterUnified-Basic : begin
 				arcvh
 				g4 [mix SB RightSB 0.435] groundy [heading Rightward]
 			local gm : mix SB (RightSB - 0.3 * SB) 0.5
-			start-from (RightSB + 0.25 * SB - OX) XH
-			line-to    (RightSB + 0.25 * SB - OX) (XH - Stroke)
-			line-to    gm  (XH - Stroke - O)
-			line-to    gm  XH
+			include : spiro-outline
+				corner (RightSB + 0.25 * SB - OX) XH
+				corner (RightSB + 0.25 * SB - OX) (XH - Stroke)
+				corner gm  (XH - Stroke - O)
+				corner gm  XH
 
 			set-anchor 'overlay' BASE Middle [mix (Descender + O) groundy 0.5]
 			save 'g.doublestorey'
@@ -3138,10 +3119,11 @@ glyph-block LetterUnified-Basic : begin
 				hookend (Descender + O)
 				g4 gleftx [mix (Descender + O) groundy (1.06 * SmallSmoothB / (SmallSmoothA + SmallSmoothB))]
 			local gm : mix SB (RightSB - 0.3 * SB) 0.5
-			start-from (RightSB + 0.25 * SB - OX) XH
-			line-to    (RightSB + 0.25 * SB - OX) (XH - Stroke)
-			line-to    gm  (XH - Stroke - O)
-			line-to    gm  XH
+			include : spiro-outline
+				corner (RightSB + 0.25 * SB - OX) XH
+				corner (RightSB + 0.25 * SB - OX) (XH - Stroke)
+				corner gm  (XH - Stroke - O)
+				corner gm  XH
 
 			set-anchor 'overlay' BASE Middle [mix (Descender + O) groundy 0.5]
 			save 'g.opendoublestorey'
@@ -3156,8 +3138,7 @@ glyph-block LetterUnified-Basic : begin
 				hookend (Descender + O)
 				g4 SB (Descender + SHook)
 			if SLAB : begin
-				include : RightwardTopSerif RightSB XH SideJut
-				tag-contour 'serifRT'
+				include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 			set-anchor "overlay" BASE Middle (XH / 2)
 			save 'g.singlestorey'
 			save 'scriptg' 0x261
@@ -3343,8 +3324,7 @@ glyph-block LetterUnified-Basic : begin
 			include : OBarRightShape
 			include : VBarRight RightSB Descender XH
 			if SLAB : begin
-				include : RightwardTopSerif RightSB XH SideJut
-				tag-contour 'serifRT'
+				include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 				include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
 				include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
 			save 'q' 'q'
@@ -3360,8 +3340,7 @@ glyph-block LetterUnified-Basic : begin
 				apply-transform : Translate RightSB 0
 				apply-transform : Italify
 			if SLAB : begin
-				include : RightwardTopSerif RightSB CAP SideJut
-				tag-contour 'serifRT'
+				include : tagged 'serifRT' : RightwardTopSerif RightSB CAP SideJut
 
 			save 'Qrtail' 0x24A
 
@@ -3375,8 +3354,7 @@ glyph-block LetterUnified-Basic : begin
 				apply-transform : Translate RightSB 0
 				apply-transform : Italify
 			if SLAB : begin
-				include : RightwardTopSerif RightSB XH SideJut
-				tag-contour 'serifRT'
+				include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 
 			save 'qrtail' 0x24B
 
@@ -3443,8 +3421,7 @@ glyph-block LetterUnified-Basic : begin
 			include : VBarLeft SB 0 XH
 
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SideJut
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 				if (para.isItalic)
 				: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 				: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
@@ -3514,11 +3491,9 @@ glyph-block LetterUnified-Basic : begin
 				CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
 
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SideJut
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 
 			save 'ncurlytail' 0x235
 		# eta
@@ -3532,8 +3507,7 @@ glyph-block LetterUnified-Basic : begin
 				bottom -- Descender
 			include : VBarLeft SB 0 XH
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SideJut
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 
 			save 'eta' 0x3B7
 
@@ -3548,14 +3522,12 @@ glyph-block LetterUnified-Basic : begin
 				bottom -- Descender
 			include : VBar (SB + HalfStroke * HVContrast) 0 CAP
 			if SLAB : begin
-				include : LeftwardTopSerif SB CAP SideJut
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 				if (para.isItalic)
 				: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB Descender SideJut
 				: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 
 			save 'latinEta' 0x220
 
@@ -3569,14 +3541,12 @@ glyph-block LetterUnified-Basic : begin
 				bottom -- Descender
 			include : VBarLeft SB 0 XH
 			if SLAB : begin
-				include : LeftwardTopSerif SB XH SideJut
-				tag-contour 'serifLT'
+				include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 				if (para.isItalic)
 				: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB Descender SideJut
 				: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 			save 'latineta' 0x19E
 
 	### U
@@ -3614,7 +3584,7 @@ glyph-block LetterUnified-Basic : begin
 			include : refer-glyph "n"
 			eject-contour 'serifRB'
 			eject-contour 'serifLB'
-			retag-contour 'serifLT' 'serifRB'
+			currentGlyph.retag-contour 'serifLT' 'serifRB'
 			include : FlipAround Middle (XH / 2)
 
 			if SLAB : begin
@@ -3732,36 +3702,29 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB : begin
 				local jut : Jut * df.mvs / Stroke + O
 				if (df.width > jut * 7) : begin
-					include : intersection
+					include : tagged 'serifLT' : intersection
 						CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
 						spiro-outline
 							corner SB bot
 							corner SB top
 							corner 0 top
 							corner 0 bot
-					tag-contour 'serifLT'
 					if (!para.isItalic) : begin
-						include : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) bot jut df.mvs
-						tag-contour 'serifLB'
-						include : CenterBottomSerif df.middle bot jut df.mvs
-						tag-contour 'serifMB'
-						include : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) bot jut df.mvs
-						tag-contour 'serifRB'
+						include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) bot jut df.mvs
+						include : tagged 'serifMB' : CenterBottomSerif df.middle bot jut df.mvs
+						include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) bot jut df.mvs
 					: else : begin
-						include : intersection
+						include : tagged 'serifRB' : intersection
 							RightwardBottomSerif (df.rightSB + O) bot (jut / 2) df.mvs
 							spiro-outline
 								corner (df.rightSB + O) bot
 								corner (df.rightSB + O) top
 								corner df.width top
 								corner df.width bot
-						tag-contour 'serifRB'
 				: else : begin
-					include : LeftwardTopSerif df.leftSB top SideJut df.mvs
-					tag-contour 'serifLT'
+					include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
 					if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB bot SideJut df.mvs
-					include : RightwardBottomSerif df.rightSB bot SideJut df.mvs
-					tag-contour 'serifRB'
+					include : tagged 'serifRB' : RightwardBottomSerif df.rightSB bot SideJut df.mvs
 
 		sketch # m.normal
 			local df : dfM
@@ -3883,12 +3846,10 @@ glyph-block LetterUnified-Basic : begin
 			if SLAB : begin
 				include : LeftwardTopSerif SB CAP SideJut
 				if (para.isItalic)
-				: then : include : RightwardBottomSerif RightSB 0 SideJut
-				: else : include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
-				tag-contour 'serifRB'
+				: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+				: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 			save 'h' 'h'
 			save 'cyrshha' 0x4BB
 
@@ -3907,12 +3868,10 @@ glyph-block LetterUnified-Basic : begin
 			include : HooktopLeftBar
 			if SLAB : begin
 				if (para.isItalic)
-				: then : include : RightwardBottomSerif RightSB 0 SideJut
-				: else : include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
-				tag-contour 'serifRB'
+				: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+				: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
 				if (!para.isItalic) : begin
-					include : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-					tag-contour 'serifLB'
+					include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 
 			save 'hhooktop' 0x266
 
@@ -3993,8 +3952,7 @@ glyph-block LetterUnified-Basic : begin
 			if (SLAB && !noserif) : begin
 				include : LeftwardTopSerif FBarLeft [fallback top CAP] SideJut
 				include : LeftwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 Jut
-				include : RightwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 MidJutSide
-				tag-contour 'serifBottom'
+				include : tagged 'serifBottom' : RightwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 MidJutSide
 				include : DownwardRightSerif RightSB [fallback top CAP] VJut
 
 		sketch # F
@@ -4028,8 +3986,7 @@ glyph-block LetterUnified-Basic : begin
 				straight.right.end (Middle - FBalance + HookX) (CAP - HalfStroke - fovershoot)
 			set-anchor 'overlay' BASE (Middle - FBalance + Stroke * 0.5 * HVContrast) (CAP * OverlayPos)
 			if SLAB : begin
-				include : CenterBottomSerif (Middle - FBalance) 0 Jut
-				tag-contour 'serifMB'
+				include : tagged 'serifMB' : CenterBottomSerif (Middle - FBalance) 0 Jut
 
 			branch
 				save 'longs.straight'
@@ -4280,8 +4237,7 @@ glyph-block LetterUnified-Basic : begin
 			include : HBarBottom (SB * 1.5 - O) RightSB 0 stroke
 			if SLAB : begin
 				include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SideJut
-				include : CenterBottomSerif (SB * 1.5 + HalfStroke * HVContrast) 0 Jut
-				tag-contour 'serifBottom'
+				include : tagged 'serifBottom' : CenterBottomSerif (SB * 1.5 + HalfStroke * HVContrast) 0 Jut
 				include : DownwardRightSerif RightSB [fallback top CAP] VJut
 				include : LeftwardBottomSerif (SB * 1.5) 0 SideJut
 				include : UpwardRightSerif RightSB 0 VJut
@@ -4710,19 +4666,17 @@ glyph-block LetterUnified-Basic : begin
 
 			include : HBarTop SB RightSB CAP
 
-			start-from SB Stroke
-			line-to (SB + Stroke * cor) Stroke
-			line-to RightSB (CAP - Stroke)
-			line-to (RightSB - Stroke * cor) (CAP - Stroke)
-			reverse-last
+			include : ReverseContours : spiro-outline
+				corner SB Stroke
+				corner (SB + Stroke * cor) Stroke
+				corner RightSB (CAP - Stroke)
+				corner (RightSB - Stroke * cor) (CAP - Stroke)
 
-			include : HBarBottom SB RightSB 0
-			tag-contour 'strokeBottom'
+			include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 
 			if SLAB : begin
 				include : DownwardLeftSerif SB CAP VJut
-				include : UpwardRightSerif RightSB 0 VJut
-				tag-contour 'serifRB'
+				include : tagged 'serifRB' : UpwardRightSerif RightSB 0 VJut
 			save 'Z' 'Z'
 			save 'Zeta' 0x396
 
@@ -4734,18 +4688,16 @@ glyph-block LetterUnified-Basic : begin
 
 			include : HBarTop SB RightSB XH
 
-			start-from SB Stroke
-			line-to (SB + Stroke * cor) Stroke
-			line-to RightSB (XH - Stroke)
-			line-to (RightSB - Stroke * cor) (XH - Stroke)
-			reverse-last
+			include : ReverseContours : spiro-outline
+				corner SB Stroke
+				corner (SB + Stroke * cor) Stroke
+				corner RightSB (XH - Stroke)
+				corner (RightSB - Stroke * cor) (XH - Stroke)
 
-			include : HBarBottom SB RightSB 0
-			tag-contour 'strokeBottom'
+			include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 			if SLAB : begin
 				include : DownwardLeftSerif SB XH VJut
-				include : UpwardRightSerif RightSB 0 VJut
-				tag-contour 'serifRB'
+				include : tagged 'serifRB' : UpwardRightSerif RightSB 0 VJut
 
 			save 'z' 'z'
 
@@ -4777,15 +4729,15 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # Zswash
 			include MarkSet.if
-			local cor 1.15
+			local cor : 1.15 * HVContrast
 
 			include : HBarTop SB RightSB CAP
 
-			start-from SB 0
-			line-to (SB + Stroke * cor) 0
-			line-to RightSB (CAP - Stroke)
-			line-to (RightSB - Stroke * cor) (CAP - Stroke)
-			reverse-last
+			include : ReverseContours : spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (CAP - Stroke)
+				corner (RightSB - Stroke * cor) (CAP - Stroke)
 
 			include : dispiro
 				widths.lhs
@@ -4800,15 +4752,15 @@ glyph-block LetterUnified-Basic : begin
 
 		sketch # zswash
 			include MarkSet.p
+			local cor : 1.2 * HVContrast
 
 			include : HBarTop SB RightSB XH
 
-			local cor 1.2
-			start-from SB 0
-			line-to (SB + Stroke * cor) 0
-			line-to RightSB (XH - Stroke)
-			line-to (RightSB - Stroke * cor) (XH - Stroke)
-			reverse-last
+			include : ReverseContours : spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (XH - Stroke)
+				corner (RightSB - Stroke * cor) (XH - Stroke)
 
 			include : dispiro
 				widths.lhs

@@ -352,30 +352,28 @@ glyph-block CommonShapes : begin
 		local right : fallback _right RightSB
 		local jutIn : JutIn left right
 		if SLAB : begin
-			include : CenterTopSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) top Jut jutIn
-			tag-contour 'serifLT'
-			include : CenterTopSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) top jutIn Jut
-			tag-contour 'serifRT'
+			include : tagged 'serifLT' : CenterTopSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) top Jut jutIn
+			include : tagged 'serifRT' : CenterTopSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) top jutIn Jut
 	define [AIHSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
 		local jutIn : JutIn left right
 		if SLAB : begin
 			include : AIVSerifs top _left _right
-			include : CenterBottomSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) 0 Jut jutIn
-			tag-contour 'serifLB'
-			include : CenterBottomSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) 0 jutIn Jut
-			tag-contour 'serifRB'
+			include : tagged 'serifLB'
+				CenterBottomSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) 0 Jut jutIn
+			include : tagged 'serifRB'
+				CenterBottomSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) 0 jutIn Jut
 	define [AINSerifs top _left _right sw xn] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
 		local jut : Jut * [fallback xn 1]
 		if SLAB : begin
 			include : LeftwardTopSerif (left + sw * (sideSerifK - 0.5) * HVContrast) top (jut - sw / 2 * HVContrast)
-			include : CenterTopSerif (right - sw * sideSerifK * HVContrast) top jut
-			tag-contour 'serifRB'
-			include : CenterBottomSerif (left + sw * sideSerifK * HVContrast) 0 jut
-			tag-contour 'serifLB'
+			include : tagged 'serifRB'
+				CenterTopSerif (right - sw * sideSerifK * HVContrast) top jut
+			include : tagged 'serifLB'
+				CenterBottomSerif (left + sw * sideSerifK * HVContrast) 0 jut
 			#include : CenterdBottomSerif (right - Stroke * (sideSerifK - 0.5) * HVContrast) 0 (Jut / 2)
 	define [AICyrISerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
@@ -384,8 +382,8 @@ glyph-block CommonShapes : begin
 			include : LeftwardBottomSerif left 0 SideJut
 			include : RightwardTopSerif right top SideJut
 			include : CenterTopSerif (left + Stroke * sideSerifK * HVContrast) top Jut
-			include : CenterBottomSerif (right - Stroke * sideSerifK * HVContrast) 0 Jut
-			tag-contour 'serifRB'
+			include : tagged 'serifRB'
+				CenterBottomSerif (right - Stroke * sideSerifK * HVContrast) 0 Jut
 	define [AIMSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
@@ -780,10 +778,11 @@ glyph-block CommonShapes : begin
 			define y z.y
 			candidates.push : glyph-construction
 				set this.gizmo : Translate 0 0
-				start-from (x - sw) (y - sw)
-				line-to    (x + sw) (y - sw)
-				line-to    (x + sw) (y + sw)
-				line-to    (x - sw) (y + sw)
+				include : spiro-outline
+					corner (x - sw) (y - sw)
+					corner (x + sw) (y - sw)
+					corner (x + sw) (y + sw)
+					corner (x - sw) (y + sw)
 
 		include : difference background [union.apply null candidates]
 		include overlay
@@ -842,4 +841,10 @@ glyph-block CommonShapes : begin
 		include gr
 		apply-transform tfm
 
-	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform
+	define [ReverseContours gr] : begin
+		local g : create-glyph gr
+		if g.contours : foreach contour [items-of g.contours]
+			contour.reverse
+		return g
+
+	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform ReverseContours

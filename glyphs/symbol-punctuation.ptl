@@ -80,12 +80,13 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	sketch # zNotationParenLeft
 		local dim : ParenDim 0
+		local fine : adviceBlackness 4
 		include : intersection
 			Rect [mix dim.bottom dim.top 2] [mix dim.top dim.bottom 2] 0 dim.inside
 			union
-				ParenShape OperatorStroke
+				ParenShape fine
 				intersection
-					VBarRight dim.inside dim.bottom dim.top OperatorStroke
+					VBarRight dim.inside dim.bottom dim.top fine
 					ParenShapeMask O
 		save 'zNotationParenLeft' 0x2987
 		include : FlipAround Middle symbolMid
@@ -325,7 +326,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	sketch # dblAngleLeft
 		define dim : ParenDim 0
-		define fine : Math.min OperatorStroke [adviceBlackness 3]
+		define fine : Math.min OperatorStroke [adviceBlackness 3.5]
 		define farOutside : dim.outside / 2
 		define middle : mix farOutside dim.inside 0.5
 		include : AngleLeftShape farOutside middle fine
@@ -933,11 +934,11 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		local t : fallback _t parenTop
 		local b : fallback _b parenBot
 		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (t - b)) 2])]
-		start-from (l - w * cor) b
-		line-to    (l + w * cor) b
-		line-to    (r + w * cor) t
-		line-to    (r - w * cor) t
-		reverse-last
+		include : ReverseContours : spiro-outline
+			corner (l - w * cor) b
+			corner (l + w * cor) b
+			corner (r + w * cor) t
+			corner (r - w * cor) t
 
 	sketch # slash
 		include : SlashShape slashDefautLeft slashDefaultRight
@@ -958,13 +959,14 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		include : SlashShape 0 slashDefaultRight
 		save 'slash.right'
 
+	local backslashWidth : (slashDefaultRight - slashDefautLeft) * (1 + TanSlope * 2)
 	define [BackslashShape l r] : glyph-construction
 		local cor : (1 / 2) * HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - Stroke) / (parenTop - parenBot)) 2])]
-		start-from (l - Stroke * cor) parenTop
-		line-to    (l + Stroke * cor) parenTop
-		line-to    (r + Stroke * cor) parenBot
-		line-to    (r - Stroke * cor) parenBot
-	local backslashWidth : (slashDefaultRight - slashDefautLeft) * (1 + TanSlope * 2)
+		include : spiro-outline
+			corner (l - Stroke * cor) parenTop
+			corner (l + Stroke * cor) parenTop
+			corner (r + Stroke * cor) parenBot
+			corner (r - Stroke * cor) parenBot
 	sketch # backslash
 		include : BackslashShape (Middle - backslashWidth / 2) (Middle + backslashWidth / 2)
 		save 'backslash' "\\"
@@ -1378,12 +1380,13 @@ glyph-block Symbol-Punctuation-Percentages : begin
 	glyph-block-import Overmarks
 
 	define [PercentBarCor df sw] : HVContrast / [Math.sqrt (1 - [Math.pow ((df.rightSB - df.leftSB - sw) / (CAP - 0)) 2])]
-	define [PercentBarShape df sw] : glyph-construction
+	define [PercentBarShape df sw] : begin
 		local cor : PercentBarCor df sw
-		start-from df.leftSB 0
-		line-to (df.rightSB - sw * cor) CAP
-		line-to df.rightSB CAP
-		line-to (df.leftSB + sw * cor) 0
+		return : spiro-outline
+			corner df.leftSB 0
+			corner (df.rightSB - sw * cor) CAP
+			corner df.rightSB CAP
+			corner (df.leftSB + sw * cor) 0
 
 	sketch # percent.dots
 		set-width Width

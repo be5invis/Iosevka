@@ -1,6 +1,5 @@
 import 'spiro' as SpiroJs
 import './spiroexpand' as SpiroExpansionContext
-import 'caryll-shapeops' as ShapeOps
 import './curve-util' as CurveUtil
 
 import './transform' as Transform
@@ -9,7 +8,6 @@ define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (argumen
 define [mix a b p] : a + (b - a) * p
 define [bez2 a b c t] : (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c
 define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b + 3 * t * t * (1 - t) * c + t * t * t * d
-
 
 export : define [SetupBuilders args] : begin
 	define [object para Glyph Contrast globalTransform Stroke Superness] args
@@ -199,29 +197,8 @@ export : define [SetupBuilders args] : begin
 		this.includeGlyph g
 		return g
 
-	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
-		local g : new Glyph
-		set g.gizmo : this.gizmo || globalTransform
-		if (k.length == 0) : return g
-
-		g.include k.0
-		set g.contours : g.contours.map CurveUtil.convertContourToCubic
-		foreach [item : items-of : k.slice 1] : begin
-			local g1 : new Glyph
-			set g1.gizmo : this.gizmo || globalTransform
-			g1.include item
-			set g1.contours : g1.contours.map CurveUtil.convertContourToCubic
-			local c1 : ShapeOps.boole operator g.contours g1.contours ShapeOps.fillRules.nonzero ShapeOps.fillRules.nonzero 16384
-			set g.contours : c1.map : lambda [c] : [CurveUtil.convertContourToCubic c].reverse
-		this.includeGlyph g
-		return g
-
-	define union : Boole ShapeOps.ops.union
-	define intersection : Boole ShapeOps.ops.intersection
-	define difference : Boole ShapeOps.ops.difference
-
 	return [object
 		g4 g2 corner flat curl close end straight
 		widths disable-gizmo disable-contrast heading unimportant important
 		alsoThru alsoThruThem bezcontrols quadcontrols archv arcvh complexThru
-		dispiro spiro-outline union intersection difference]
+		dispiro spiro-outline]

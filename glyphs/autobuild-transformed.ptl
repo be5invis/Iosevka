@@ -676,7 +676,7 @@ glyph-block Autobuild-Ligatures : begin
 		list 0xAB67 't.phoneticLeft'          'srtail'
 
 	define [accentedEqualGlyphName prefix base upper]
-		glyphNameIsNotUsed "\(prefix){\(base)_\[upper.join '_']"
+		glyphNameIsNotUsed "\(prefix){\(base)_\[upper.join '_']}"
 
 	define [getAccentedEqualJobs demands] : begin
 		local jobs            { }
@@ -694,7 +694,7 @@ glyph-block Autobuild-Ligatures : begin
 				jobs.push { toGni toGnc null base t }
 		return { jobs relApplications }
 
-	define [createAccentedEquals crowd scale demands] : begin
+	define [createAccentedEquals crowd scale shiftX shiftY demands] : begin
 		local { jobs ra } : getAccentedEqualJobs demands
 		local pendingGlyphs : jobs.map : [job] => job.4
 		local miniatureFont : Miniature
@@ -714,7 +714,7 @@ glyph-block Autobuild-Ligatures : begin
 				apply-transform : Upright
 				apply-transform : Translate (totalWidth / 2) 0
 				apply-transform : Scale scale
-				apply-transform : Translate Middle aboveMarkBot
+				apply-transform : Translate (Middle + shiftX) shiftY
 				apply-transform : Italify
 
 			create-glyph gnc : glyph-construction
@@ -723,11 +723,14 @@ glyph-block Autobuild-Ligatures : begin
 				include : refer-glyph base
 		applyRelations ra
 
-	if [not recursive] : createAccentedEquals 7 0.4 : list
+	if [not recursive] : createAccentedEquals 7 0.4 0 aboveMarkBot : list
 		list 0x2257 "equal" {"o"}
 		list 0x225e "equal" {"m"}
 		list 0x225F "equal" {"question"}
-	if [not recursive] : createAccentedEquals 8 0.3 : list
+	if [not recursive] : createAccentedEquals 5 0.5 (-Width / 4) [mix operBot operTop 0.6] : list
+		list 0x221b "sqrt" {"three.lnum"}
+		list 0x221c "sqrt" {"four.lnum"}
+	if [not recursive] : createAccentedEquals 8 0.3 0 aboveMarkBot : list
 		list 0x225d "equal" {"d" "e" "f"}
 
 glyph-block Autobuild-Grouped-Digits : begin
