@@ -116,64 +116,65 @@ glyph-block Symbol-Other-Suit-Cards : begin
 	glyph-block-import CommonShapes
 
 	local df : DivFrame para.diversityM
-	local heartTop : mix symbolMid pictTop 0.75
-	local heartBot : mix symbolMid pictBot 0.75
-	local heartRight : df.middle + [mix RightSB Width (1 / 2)] - Middle
-	local heartLeft : df.middle - (heartRight - df.middle)
+	local suitTop : mix symbolMid pictTop 0.75
+	local suitBot : mix symbolMid pictBot 0.75
+	local suitRight : df.middle + [mix RightSB Width (1 / 2)] - Middle
+	local suitLeft : df.middle - (suitRight - df.middle)
 	local sw : adviceBlackness 4.25
 
-	local y1 : mix heartBot heartTop 0.5
-	local y2 : mix heartBot heartTop 0.75
-	local y3 : mix heartBot heartTop 0.75
 
 	define [wrap g] : glyph-construction
 		set-width df.width
 		include g AS_BASE
 
-	define [HeartInnerShape sw tip ext] : spiro-outline
-		corner df.middle (heartBot + sw * tip)
-		quadcontrols 1 (2 / 3)
-		g4 (heartRight - O - sw) y2
-		arcvh
-		g4 [mix df.middle heartRight 0.5] (heartTop - sw * tip / 1.75)
-		archv
-		if sw
-		: then : list
-			corner (df.middle + sw / 3) (y3 - sw * ext)
-			corner (df.middle - sw / 3) (y3 - sw * ext)
-		: else : corner df.middle (y3 - sw)
-		arcvh
-		g4 [mix df.middle heartLeft 0.5] (heartTop - sw * tip / 1.75)
-		archv
-		g4 (heartLeft + O + sw) y2
-		quadcontrols 0 (1 / 3)
-		close
+	define heartTop : mix suitBot suitTop 0.975
+	define [HeartInnerShape top sw tip ext] : begin
+		local y2 : mix suitBot top 0.75
+		local y3 : mix suitBot top 0.75
+		return : spiro-outline
+			corner df.middle (suitBot + sw * tip)
+			quadcontrols 1 (2 / 3)
+			g4 (suitRight - O - sw) y2
+			arcvh
+			g4 [mix df.middle suitRight 0.5] (top - sw * tip / 1.75)
+			archv
+			if sw
+			: then : list
+				corner (df.middle + sw / 3) (y3 - sw * ext)
+				corner (df.middle - sw / 3) (y3 - sw * ext)
+			: else : corner df.middle (y3 - sw)
+			arcvh
+			g4 [mix df.middle suitLeft 0.5] (top - sw * tip / 1.75)
+			archv
+			g4 (suitLeft + O + sw) y2
+			quadcontrols 0 (1 / 3)
+			close
 
-	create-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape 0 0 0
+	create-glyph 'heartSuit' 0x2665 : wrap : HeartInnerShape heartTop 0 0 0
 
-	create-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit'] [HeartInnerShape sw 1.75 0.8]
+	create-glyph 'whiteHeartSuit' 0x2661 : wrap : difference [refer-glyph 'heartSuit'] [HeartInnerShape heartTop sw 1.75 0.8]
 
 	create-glyph 'spadeSuit' 0x2660 : wrap : union
 		sketch
-			include : refer-glyph "heartSuit"
+			include : HeartInnerShape suitTop 0 0 0
 			apply-transform : Upright
-			apply-transform : Translate (-df.middle) (-heartBot)
+			apply-transform : Translate (-df.middle) (-suitBot)
 			apply-transform : Scale 1 (-0.75)
-			apply-transform : Translate df.middle heartTop
+			apply-transform : Translate df.middle suitTop
 			apply-transform : Italify
-		HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
-		VBar df.middle heartBot [mix heartBot heartTop (1 - 0.75 * 0.75)] sw
+		HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] suitBot sw
+		VBar df.middle suitBot [mix suitBot suitTop (1 - 0.75 * 0.75)] sw
 
 	create-glyph 'whiteSpadeSuit' 0x2664 : wrap : difference [refer-glyph 'spadeSuit'] : sketch
-		include : HeartInnerShape sw 2 0
+		include : HeartInnerShape suitTop sw 2 0
 		apply-transform : Upright
-		apply-transform : Translate (-df.middle) (-heartBot)
+		apply-transform : Translate (-df.middle) (-suitBot)
 		apply-transform : Scale 1 (-0.75)
-		apply-transform : Translate df.middle heartTop
+		apply-transform : Translate df.middle suitTop
 		apply-transform : Italify
 
-	local clubTopY : mix heartTop heartBot 0.22
-	local clubTriangleHeight : (heartTop - heartBot) * 0.3
+	local clubTopY : mix suitTop suitBot 0.22
+	local clubTriangleHeight : (suitTop - suitBot) * 0.3
 	define [ClubTriangles r] : union
 		RingAt df.middle clubTopY r
 		RingAt (df.middle - clubTriangleHeight / [Math.sqrt 3]) (clubTopY - clubTriangleHeight) r
@@ -185,10 +186,10 @@ glyph-block Symbol-Other-Suit-Cards : begin
 
 	define [ClubShape r] : sketch
 		include : ClubTriangles r
-		include : HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] heartBot sw
-		include : VBar df.middle heartBot [mix heartBot heartTop 0.45] sw
+		include : HBarBottom [mix SB df.rightSB 0.25] [mix df.rightSB SB 0.25] suitBot sw
+		include : VBar df.middle suitBot [mix suitBot suitTop 0.45] sw
 
-	local circleRadius : (heartTop - heartBot) * 0.18
+	local circleRadius : (suitTop - suitBot) * 0.18
 
 	create-glyph 'clubSuit' 0x2663 : wrap : ClubShape circleRadius
 
@@ -198,17 +199,17 @@ glyph-block Symbol-Other-Suit-Cards : begin
 		include : difference [ClubShape ro] [ClubTriangles ri]
 
 	create-glyph 'diamondSuit' 0x2666 : wrap : spiro-outline
-		corner df.middle heartTop
-		corner (heartRight - O) symbolMid
-		corner df.middle heartBot
-		corner (heartLeft + O) symbolMid
+		corner df.middle suitTop
+		corner (suitRight - O) symbolMid
+		corner df.middle suitBot
+		corner (suitLeft + O) symbolMid
 
 	create-glyph 'whiteDiamondSuit' 0x2662 : wrap : intersection [refer-glyph 'diamondSuit']
 		union
-			dispiro [widths.rhs sw] [flat df.middle heartTop] [curl (heartRight - O) symbolMid]
-			dispiro [widths.rhs sw] [flat (heartRight - O) symbolMid] [curl df.middle heartBot]
-			dispiro [widths.rhs sw] [flat df.middle heartBot] [curl (heartLeft + O) symbolMid]
-			dispiro [widths.rhs sw] [flat (heartLeft + O) symbolMid] [curl df.middle heartTop]
+			dispiro [widths.rhs sw] [flat df.middle suitTop] [curl (suitRight - O) symbolMid]
+			dispiro [widths.rhs sw] [flat (suitRight - O) symbolMid] [curl df.middle suitBot]
+			dispiro [widths.rhs sw] [flat df.middle suitBot] [curl (suitLeft + O) symbolMid]
+			dispiro [widths.rhs sw] [flat (suitLeft + O) symbolMid] [curl df.middle suitTop]
 
 
 glyph-block Symbol-Other-Planets : begin
