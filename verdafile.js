@@ -4,7 +4,7 @@ const fs = require("fs");
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, fail, echo } = build.actions;
+const { run, node, cd, cp, rm, mv, fail, echo } = build.actions;
 const { FileList } = build.predefinedFuncs;
 const which = require("which");
 
@@ -361,28 +361,35 @@ const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+const BuildRawTtf = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
 		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
 		const charmap = output.dir + "/" + output.name + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
-
 		const otdPath = `${output.dir}/${output.name}.otd`;
 		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
-		if (useTtx) {
-			const tempOtfPath = `${output.dir}/${output.name}.temp.otf`;
-			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
+		await optimizedOtfcc(otdPath, output.full);
+		await rm(otdPath);
+	}
+);
 
-			await optimizedOtfcc(otdPath, tempOtfPath);
-			await run(TTX, "-q", ["-o", ttxPath], tempOtfPath);
+const BuildTTF = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+	async (target, output, gr, fn) => {
+		const [useTtx] = await target.need(OptimizeWithTtx, de`${output.dir}`);
+		await target.needed(FontInfoOf(fn), Version, Scripts, Parameters);
+
+		const [rawTtf] = await target.order(BuildRawTtf(gr, fn));
+		if (useTtx) {
+			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
+			await run(TTX, "-q", ["-o", ttxPath], rawTtf.full);
+			await rm(rawTtf.full);
 			await run(TTX, "-q", ["-o", output.full], ttxPath);
-			await rm(tempOtfPath);
 			await rm(ttxPath);
 		} else {
-			await optimizedOtfcc(otdPath, output.full);
+			await mv(rawTtf.full, output.full);
 		}
-		await rm(otdPath);
 	}
 );
 
