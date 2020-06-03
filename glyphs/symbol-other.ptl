@@ -587,6 +587,43 @@ glyph-block Symbol-Other-Typographic : begin
 			corner (l + sw * kOutside) (symbolMid + sw)
 		save 'boltSymbol' 0x26A1
 
+	for-width-kinds WideWidth1
+		define faceTop : mix symbolMid pictTop 0.75
+		define faceBot : mix symbolMid pictBot 0.75
+		define faceWidth : Math.min (MosaicWidth - SB * 2) (faceTop - faceBot)
+		define faceMiddle : MosaicWidth / 2
+		define faceLeft : faceMiddle - faceWidth / 2
+		define faceRight : faceMiddle + faceWidth / 2
+		define faceSma : SmoothAOf (SmallSmooth * MosaicWidthScalar) MosaicWidth
+		define faceSmb : SmoothBOf (SmallSmooth * MosaicWidthScalar) MosaicWidth
+
+		define faceStroke : adviceBlackness 5 ((faceWidth + SB * 2) / Width)
+		define faceInnerStroke : adviceBlackness 8 ((faceWidth + SB * 2) / Width)
+		define eyeRadius : DotRadius / Stroke * faceInnerStroke
+		define eyeHeight    0.625
+		define mouthDepth : 0.025 * [Math.sqrt MosaicWidthScalar]
+
+		define [FaceRing F] : F faceTop faceBot faceLeft faceRight faceStroke faceSma faceSmb
+		define [SmileFace width] : union
+			DotAt (faceMiddle - width / 2 + eyeRadius / 2) [mix faceBot faceTop eyeHeight] eyeRadius
+			DotAt (faceMiddle + width / 2 - eyeRadius / 2) [mix faceBot faceTop eyeHeight] eyeRadius
+			dispiro
+				widths.center faceInnerStroke
+				g4 (faceMiddle - width / 2) [mix faceBot faceTop (1 - eyeHeight + mouthDepth)]
+				g4 (faceMiddle)             [mix faceBot faceTop (1 - eyeHeight - mouthDepth)]
+				g4 (faceMiddle + width / 2) [mix faceBot faceTop (1 - eyeHeight + mouthDepth)]
+
+		create-glyph [MangleName 'whiteSmileFace'] [MangleUnicode 0x263a] : glyph-construction
+			set-width MosaicWidth
+			include : FaceRing OShape
+			include : SmileFace : 0.6 * (faceWidth - faceStroke * 2)
+
+		create-glyph [MangleName 'blackSmileFace'] [MangleUnicode 0x263B] : glyph-construction
+			set-width MosaicWidth
+			include : FaceRing OShapeOutline
+			include : SmileFace : 0.6 * (faceWidth - faceStroke * 2)
+
+
 glyph-block Symbol-Other-IEC-Power-And-Playback : for-width-kinds WideWidth1 : begin
 	glyph-block-import CommonShapes
 
@@ -1055,27 +1092,30 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 			set scaffold.xRight2 : scaffold.xMiddle + scaffold.width
 			set scaffold.slopeRise : scaffold.slope * scaffold.width / 2
 
-			sketch
-				set-width MosaicWidth
-				include : intersection
-					spiro-outline
+			define [ChevronUpperHalf flat] : intersection
+				spiro-outline
+					corner scaffold.xMiddle scaffold.top
+					corner scaffold.xLeft   (scaffold.top - scaffold.slopeRise)
+					corner scaffold.xLeft   (scaffold.bot + scaffold.stroke)
+					if flat {} : list
+						corner scaffold.xMiddle (scaffold.bot + scaffold.stroke + scaffold.slopeRise)
+					corner scaffold.xRight  (scaffold.bot + scaffold.stroke)
+					corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
+				union
+					VBarLeft scaffold.xLeft scaffold.bot scaffold.top scaffold.stroke
+					VBarRight scaffold.xRight scaffold.bot scaffold.top scaffold.stroke
+					dispiro
+						widths.lhs scaffold.stroke
 						corner scaffold.xMiddle scaffold.top
 						corner scaffold.xLeft   (scaffold.top - scaffold.slopeRise)
-						corner scaffold.xLeft   (scaffold.bot + scaffold.stroke)
-						corner scaffold.xMiddle (scaffold.bot + scaffold.stroke + scaffold.slopeRise)
-						corner scaffold.xRight  (scaffold.bot + scaffold.stroke)
+					dispiro
+						widths.rhs scaffold.stroke
+						corner scaffold.xMiddle scaffold.top
 						corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
-					union
-						VBarLeft scaffold.xLeft scaffold.bot scaffold.top scaffold.stroke
-						VBarRight scaffold.xRight scaffold.bot scaffold.top scaffold.stroke
-						dispiro
-							widths.lhs scaffold.stroke
-							corner scaffold.xMiddle scaffold.top
-							corner scaffold.xLeft   (scaffold.top - scaffold.slopeRise)
-						dispiro
-							widths.rhs scaffold.stroke
-							corner scaffold.xMiddle scaffold.top
-							corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
+
+			sketch
+				set-width MosaicWidth
+				include : ChevronUpperHalf false
 				include : intersection
 					spiro-outline
 						corner scaffold.xLeft   scaffold.top
@@ -1092,6 +1132,12 @@ glyph-block Symbol-Other-Powerline-And-GUI : begin
 							corner scaffold.xMiddle (scaffold.bot + scaffold.slopeRise + scaffold.stroke)
 							corner scaffold.xRight2 (scaffold.bot - scaffold.slopeRise + scaffold.stroke)
 				save [MangleName "upPointingChevron"] [MangleUnicode 0x1FBCA]
+
+			sketch
+				set-width MosaicWidth
+				include : ChevronUpperHalf true
+				include : HBarBottom scaffold.xLeft scaffold.xRight scaffold.stroke
+				save [MangleName "upPointingHouse"] [MangleUnicode 0x2302]
 
 		do "Segmented digits"
 			define scaffold : object
