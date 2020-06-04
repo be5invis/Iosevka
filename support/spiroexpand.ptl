@@ -1,5 +1,6 @@
 import './monotonic-interpolate' as smooth
 import './transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
+import './point' as Point
 
 define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
 define [linreg x0 y0 x1 y1 x] : y0 + (x - x0) * (y1 - y0) / (x1 - x0)
@@ -17,7 +18,7 @@ define-macro xytransform : syntax-rules
 define [normalY angle] : Math.sin angle
 define [normalX angle vex] : [Math.cos angle] * vex
 
-export all : class SpiroExpansionContext
+class SpiroExpansionContext
 	public [new] : begin
 		set this.gizmo [Transform.Id]
 		set this.controlKnots {}
@@ -96,7 +97,6 @@ export all : class SpiroExpansionContext
 		local fd2 : smooth js d2s
 		local fdx : smooth js dxs
 		local fdy : smooth js dys
-	#	console.log deltaAngles
 
 		# interpolate important knots
 		foreach j [range 0 this.controlKnots.length] : begin
@@ -149,3 +149,36 @@ export all : class SpiroExpansionContext
 						"right" "left"
 						type type
 		return {.lhs lhs .rhs rhs}
+
+class SpiroContourContext
+	public [new gizmo] : begin
+		set this.gizmo    (gizmo || [Transform.Id])
+		set this.contours { }
+		set this.defaultTag null
+
+	public [moveTo x y] : begin
+		local contour {[Point.transformed this.gizmo x y true]}
+		set contour.tag this.defaultTag
+		this.contours.push contour
+		return this
+
+	public [lineTo x y] : begin
+		this.contours.((this.contours.length - 1)).push
+			Point.transformed this.gizmo x y true
+		return this
+
+	public [curveTo xc yc x y] : begin
+		this.contours.((this.contours.length - 1)).push
+			Point.transformed this.gizmo xc yc false
+			Point.transformed this.gizmo x  y  true
+		return this
+
+	public [cubicTo x1 y1 x2 y2 x y] : begin
+		this.contours.((this.contours.length - 1)).push
+			Point.transformed this.gizmo x1 y1 false true
+			Point.transformed this.gizmo x2 y2 false true
+			Point.transformed this.gizmo x  y  true
+		return this
+
+export SpiroExpansionContext
+export SpiroContourContext
