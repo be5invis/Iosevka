@@ -50,44 +50,49 @@ export all : class Glyph
 			glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
 		return this
 
+	public [includeGeometry geom shiftx shifty] : begin
+		if (!geom || !geom.contours) : return nothing
+		foreach [contour : items-of geom.contours] : begin
+			local c {}
+			set c.tag : contour.tag || geom.tag || this.defaultTag
+			foreach [point : items-of contour] : begin
+				c.push : new Point (point.x + shiftx) (point.y + shifty) point.on point.cubic point.subdivided
+			this.contours.push c
+
+	public [combineAnchor markid shift anchorThis anchorThat] : begin
+		if (!anchorThis || !anchorThat || anchorThat.type !== Anchor.MARK) : return nothing
+		if (anchorThis.type === Anchor.BASE) : begin
+			set shift.x : anchorThis.x - anchorThat.x
+			set shift.y : anchorThis.y - anchorThat.y
+			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing)
+				set this.anchors.(markid) : new Anchor
+					* (anchorThis.x + anchorThat.mbx - anchorThat.x)
+					* (anchorThis.y + anchorThat.mby - anchorThat.y)
+					* Anchor.BASE
+		: else : if (anchorThis.mbx !== nothing && anchorThis.mby !== nothing) : begin
+			set shift.x : anchorThis.mbx - anchorThat.x
+			set shift.y : anchorThis.mby - anchorThat.y
+			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing)
+				set this.anchors.(markid) : new Anchor
+					* anchorThis.x
+					* anchorThis.y
+					* anchorThis.type
+					* (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
+					* (anchorThis.mby + anchorThat.mby - anchorThat.y)
+
 	public [includeGlyph glyph copyAnchors copyWidth] : begin
 		if (glyph <@ Function) : begin
 			throw "\(this.name): Cannot include a function using includeGlyph. Use include instead."
 
-		local contours glyph.contours
-		local shiftx 0
-		local shifty 0
-		local t this
-		if (this.anchors && glyph.anchors) : foreach markid [items-of [Object.keys this.anchors]] : begin
-			local anchorThis this.anchors.(markid)
+		local shift {.x 0 .y 0}
+		if glyph.anchors : foreach { markid anchorThis } [pairs-of this.anchors] : begin
 			local anchorThat glyph.anchors.(markid)
-			if (   anchorThis && (anchorThis.type === Anchor.BASE || anchorThis.mbx !== nothing && anchorThis.mby !== nothing)
-				&& anchorThat && anchorThat.type === Anchor.MARK) : begin
-				set shiftx : [fallback anchorThis.mbx anchorThis.x] - anchorThat.x
-				set shifty : [fallback anchorThis.mby anchorThis.y] - anchorThat.y
-				# we have a mark-to-mark position
-				if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing) : if (anchorThis.type === Anchor.BASE)
-					then : set this.anchors.(markid) : new Anchor
-						* (anchorThis.x + anchorThat.mbx - anchorThat.x)
-						* (anchorThis.y + anchorThat.mby - anchorThat.y)
-						* Anchor.BASE
-					else : set this.anchors.(markid) : new Anchor
-						* anchorThis.x
-						* anchorThis.y
-						* anchorThis.type
-						* (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
-						* (anchorThis.mby + anchorThat.mby - anchorThat.y)
-		if contours : begin
-			local newcontours {}
-			foreach [contour : items-of contours] : begin
-				local c {}
-				set c.tag : contour.tag || glyph.tag || t.defaultTag
-				foreach [point : items-of contour] : begin
-					c.push : new Point (point.x + shiftx) (point.y + shifty) point.on point.cubic point.subdivided
-				newcontours.push c
-			set this.contours : this.contours.concat newcontours
-		if (([not contours] || copyAnchors) && glyph.anchors) : begin
-			foreach [k : items-of : Object.keys glyph.anchors] : set this.anchors.(k) glyph.anchors.(k)
+			this.combineAnchor markid shift anchorThis anchorThat
+
+		this.includeGeometry glyph shift.x shift.y
+		if ((copyAnchors || glyph.isMarkSet) && glyph.anchors) : begin
+			foreach [k : items-of : Object.keys glyph.anchors] : begin
+				set this.anchors.(k) glyph.anchors.(k)
 		if (glyph.advanceWidth >= 0 && copyWidth) : set this.advanceWidth glyph.advanceWidth
 		if glyph.name : this.dependencies.push glyph.name
 		if glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
