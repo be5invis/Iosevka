@@ -106,7 +106,7 @@ function extPrior(a, b) {
 function canonicalStart(_points) {
 	const points = _points.reverse();
 	let jm = 0;
-	for (var j = 0; j < points.length * 2; j++) {
+	for (let j = 0; j < points.length * 2; j++) {
 		if (extPrior(points[j % points.length], points[jm])) {
 			jm = j % points.length;
 		}
