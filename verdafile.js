@@ -365,7 +365,7 @@ const BuildRawTtf = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
 		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
-		const charmap = output.dir + "/" + output.name + ".charmap";
+		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
 		const otdPath = `${output.dir}/${output.name}.otd`;
 		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });

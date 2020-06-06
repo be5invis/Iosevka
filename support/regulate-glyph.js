@@ -6,6 +6,7 @@ const caryllShapeOps = require("caryll-shapeops");
 const curveUtil = require("./curve-util");
 const { fairifyQuad } = require("./fairify");
 const Transform = require("./transform");
+const { AnyCv } = require("./gr");
 
 function regulateGlyph(g, skew) {
 	if (!g.contours) return;
@@ -45,21 +46,17 @@ function simplifyContours(contours) {
 }
 
 function byGlyphPriority(a, b) {
-	const pri1 = a.cmpPriority || 0;
-	const pri2 = b.cmpPriority || 0;
+	const pri1 = a.autoRefPriority || 0;
+	const pri2 = b.autoRefPriority || 0;
 	if (pri1 > pri2) return -1;
 	if (pri1 < pri2) return 1;
 	if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
 	if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
-	if (a.advanceWidth < b.advanceWidth) return -1;
-	if (a.advanceWidth > b.advanceWidth) return 1;
-	if ((a.unicode && a.unicode[0] && !b.unicode) || !b.unicode[0]) return -1;
-	if ((b.unicode && b.unicode[0] && !a.unicode) || !a.unicode[0]) return +1;
-	if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] < b.unicode[0])
-		return -1;
-	if (a.unicode && a.unicode[0] && b.unicode && b.unicode[0] && a.unicode[0] > b.unicode[0])
-		return +1;
-	return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+	return 0;
+}
+
+function byRank(a, b) {
+	return (b.glyphRank || 0) - (a.glyphRank || 0) || (a.glyphOrder || 0) - (b.glyphOrder || 0);
 }
 
 module.exports = function (gs, skew) {
@@ -68,12 +65,21 @@ module.exports = function (gs, skew) {
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicode.add(c);
 
 	// autoref
-	gs = gs.map((g, j) => ((g.glyphOrder = j), g)).sort(byGlyphPriority);
+	for (let j = 0; j < gs.length; j++) {
+		gs[j].glyphOrder = j;
+		if (AnyCv.query(gs[j]).length) gs[j].autoRefPriority = -1;
+		if (gs[j].unicode) {
+			for (const u of gs[j].unicode) {
+				if (excludeUnicode.has(u)) gs[j].avoidBeingComposite = true;
+			}
+		}
+	}
+	gs.sort(byGlyphPriority);
 	autoRef(gs, excludeUnicode);
 
 	// regulate
 	for (let g of gs) regulateGlyph(g, skew);
 
 	// reorder
-	return gs.sort((a, b) => a.glyphOrder - b.glyphOrder);
+	return gs.sort(byRank);
 };
