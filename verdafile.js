@@ -309,7 +309,8 @@ const StandardSuffixes = computed(`metadata:standard-suffixes`, async target => 
 });
 
 async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
-	const ttcComposition = {},
+	const glyfTtcComposition = {},
+		ttcComposition = {},
 		ttcContents = {},
 		groupDecomposition = {};
 	for (const collectPrefix in rawCollectPlans) {
@@ -329,18 +330,29 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 					gr.width,
 					gr.slant
 				);
-				const ttfTargetName = `${prefix}-${suffix}`;
+				const glyfTtcFileName = fnFileName(
+					{ ...config, distinguishWidths: true },
+					collectPrefix,
+					gr.weight,
+					gr.width,
+					gr.slant
+				);
 
+				const ttfTargetName = `${prefix}-${suffix}`;
 				if (!ttfFileNameSet.has(ttfTargetName)) continue;
+
+				if (!glyfTtcComposition[glyfTtcFileName]) glyfTtcComposition[glyfTtcFileName] = [];
+				glyfTtcComposition[glyfTtcFileName].push({ dir: prefix, file: ttfTargetName });
 				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
-				ttcComposition[ttcFileName].push({ dir: prefix, file: ttfTargetName });
+				ttcComposition[ttcFileName].push(glyfTtcFileName);
+
 				groupFileList.add(ttcFileName);
 			}
 		}
 		ttcContents[collectPrefix] = [...groupFileList];
 		groupDecomposition[collectPrefix] = [...collect.from];
 	}
-	return { ttcComposition, ttcContents, groupDecomposition };
+	return { glyfTtcComposition, ttcComposition, ttcContents, groupDecomposition };
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
@@ -351,11 +363,6 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	);
 	return `${prefix}-${ttcSuffix}`;
 }
-
-const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (target, id) => {
-	const [{ ttcComposition }] = await target.need(CollectPlans);
-	return ttcComposition[id];
-});
 
 ///////////////////////////////////////////////////////////
 //////                Font Building                  //////
@@ -471,37 +478,38 @@ const DistWebFontCSS = file.make(
 	}
 );
 
-const GroupContents = task.group("contents", async (target, gid) => {
-	await target.need(GroupFonts(gid), DistWebFontCSS(gid));
-	return gid;
+const GroupContents = task.group("contents", async (target, gr) => {
+	await target.need(GroupFonts(gr), DistWebFontCSS(gr));
+	return gr;
 });
 
 // TTC
-const ExportTtcSet = task.group("collection-fonts", async (target, cid) => {
-	const [{ ttcContents }] = await target.need(CollectPlans);
-	const [files] = await target.need(ttcContents[cid].map(file => ExportTtc(cid, file)));
-	return files;
-});
-const ExportSuperTtc = file.make(
-	f => `${DIST}/super-ttc/${f}.ttc`,
-	async (target, out, f) => {
-		await target.need(de(out.dir));
-		const [inputs] = await target.need(ExportTtcSet(f));
-		await run(
-			OTF2OTC,
-			["-o", out.full],
-			inputs.map(f => f.full)
-		);
-	}
-);
 const ExportTtc = file.make(
 	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
 	async (target, out, gr, f) => {
-		const [parts] = await target.need(CollectionPartsOf(f));
-		await buildTtcForFile(target, parts, out);
+		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
+		const parts = Array.from(new Set(cp.ttcComposition[f]));
+		const [inputs] = await target.need(parts.map(pt => glyfTtc(gr, pt)));
+		await buildCompositeTtc(out, inputs);
 	}
 );
-async function buildTtcForFile(target, parts, out) {
+const glyfTtc = file.make(
+	(gr, f) => `${BUILD}/glyf-ttc/${gr}/${f}.ttc`,
+	async (target, out, gr, f) => {
+		const [cp] = await target.need(CollectPlans);
+		const parts = cp.glyfTtcComposition[f];
+		await buildGlyfTtc(target, parts, out);
+	}
+);
+
+async function buildCompositeTtc(out, inputs) {
+	await run(
+		OTF2OTC,
+		["-o", out.full],
+		inputs.map(f => f.full)
+	);
+}
+async function buildGlyfTtc(target, parts, out) {
 	const [useTtx] = await target.need(OptimizeWithTtx, de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
@@ -514,15 +522,24 @@ async function buildTtcForFile(target, parts, out) {
 // Collection Export
 const CollectionExport = task.group("collection-export", async (target, gr) => {
 	// Note: this target does NOT depend on the font files.
-	const [collectPlans] = await target.need(CollectPlans);
+	const [collectPlans] = await target.need(CollectPlans, de`${DIST}/export/${gr}`);
 	const sourceGroups = collectPlans.groupDecomposition[gr];
-	await target.need(
-		de`${DIST}/export/${gr}`,
-		sourceGroups.map(g => GroupContents(g)),
-		ExportTtcSet(gr)
-	);
+	// TTF, etc
+	await target.need(sourceGroups.map(g => GroupContents(g)));
 	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
+	// TTC
+	const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+	await target.need(ttcFiles.map(pt => ExportTtc(gr, pt)));
 });
+const ExportSuperTtc = file.make(
+	gr => `${DIST}/super-ttc/${gr}.ttc`,
+	async (target, out, gr) => {
+		const [cp] = await target.need(CollectPlans, de(out.dir));
+		const parts = Array.from(new Set(cp.ttcContents[gr]));
+		const [inputs] = await target.need(parts.map(pt => ExportTtc(gr, pt)));
+		await buildCompositeTtc(out, inputs);
+	}
+);
 const CollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
