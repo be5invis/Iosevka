@@ -15,19 +15,19 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define MosaicBottom fontMetrics.OS_2.sTypoDescender
 	define MosaicHeight : MosaicTop - MosaicBottom
 
-	define [ParenDim delta] : object
-		outside : [mix SB RightSB designParameters.parenOutside] - delta
-		inside  : mix SB RightSB designParameters.parenInside
-		bottom  : [mix symbolMid parenBot (1 + designParameters.parenOvershoot)] - delta
-		top     : [mix symbolMid parenTop (1 + designParameters.parenOvershoot)] + delta
+	define [ParenDim] : params [[delta 0] [dp designParameters]] : object
+		outside : [mix SB RightSB dp.parenOutside] - delta
+		inside  : mix SB RightSB dp.parenInside
+		bottom  : [mix symbolMid parenBot (1 + dp.parenOvershoot)] - delta
+		top     : [mix symbolMid parenTop (1 + dp.parenOvershoot)] + delta
 		mid       symbolMid
 
-	define [ParenShape sw] : let [dim : ParenDim 0] : dispiro
+	define [ParenShape] : params [sw [dp designParameters]] : let [dim : ParenDim 0 dp] : dispiro
 		widths.lhs sw
 		g4 dim.inside dim.top
-		quadcontrols 1 (1 - designParameters.parenCurliness)
+		quadcontrols 1 (1 - dp.parenCurliness)
 		g4 dim.outside dim.mid
-		quadcontrols 0 designParameters.parenCurliness
+		quadcontrols 0 dp.parenCurliness
 		g4 dim.inside dim.bottom
 
 	define [ParenUpperShape sw] : let [dim : ParenDim 0] : dispiro
@@ -54,11 +54,25 @@ glyph-block Symbol-Punctuation-Brackets : begin
 		quadcontrols 0 designParameters.parenCurliness
 		corner dim.inside dim.bottom
 
-	sketch # parenLeft
+	sketch
 		include : ParenShape Stroke
-		save 'parenLeft' '('
+		save 'parenLeft.normal'
 		include : FlipAround Middle symbolMid
-		save 'parenRight' ')'
+		save 'parenRight.normal'
+
+	sketch
+		local dp : object
+			parenOutside        (0.25 * designParameters.parenOutside)
+			parenInside         designParameters.parenInside
+			parenCurliness      [mix 1 designParameters.parenCurliness 0.5]
+			parenOvershoot      designParameters.parenOvershoot
+		include : ParenShape Stroke dp
+		save 'parenLeft.largeContour'
+		include : FlipAround Middle symbolMid
+		save 'parenRight.largeContour'
+
+	select-variant 'parenLeft'  '('
+	select-variant 'parenRight' ')'
 
 	sketch # parenLeftUpper
 		include : ParenUpperShape Stroke
@@ -319,13 +333,13 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				curl (outside + O) symbolMid [widths.heading 0 (sw * fatten) Upward]
 
 	sketch # angleLeft
-		define dim : ParenDim 0
+		define dim : ParenDim (delta -- 0)
 		include : AngleLeftShape dim.outside dim.inside OperatorStroke
 		save 'angleLeft' 0x2329
 		save 'mathAngleLeft' 0x27E8
 
 	sketch # dblAngleLeft
-		define dim : ParenDim 0
+		define dim : ParenDim (delta -- 0)
 		define fine : Math.min OperatorStroke [adviceBlackness 3.5]
 		define farOutside : dim.outside / 2
 		define middle : mix farOutside dim.inside 0.5

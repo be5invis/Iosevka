@@ -159,6 +159,10 @@ function convertContourToCubic(contour) {
 	return newContour;
 }
 
+function convertContourToCubicRev(contour) {
+	return convertContourToCubic(contour).reverse();
+}
+
 function autoCubify(arc, err) {
 	const MaxSegments = 16;
 	const Hits = 64;
@@ -213,5 +217,6 @@ function fixedCubify(arc, nSeg) {
 
 exports.cleanupQuadContour = cleanupQuadContour;
 exports.convertContourToCubic = convertContourToCubic;
+exports.convertContourToCubicRev = convertContourToCubicRev;
 exports.autoCubify = autoCubify;
 exports.fixedCubify = fixedCubify;
