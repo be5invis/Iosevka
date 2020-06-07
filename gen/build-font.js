@@ -24,7 +24,8 @@ module.exports = function (para) {
 
 	// Filtering
 	if (para.forceMonospace && para.spacing == 0) {
-		gs.glyphList = gs.glyphList.filter(g => !(g.advanceWidth > para.width));
+		for (const g of gs.glyphList) g.advanceWidth = Math.round(g.advanceWidth || 0);
+		gs.glyphList = gs.glyphList.filter(g => !(g.advanceWidth > Math.round(para.width)));
 	}
 
 	// Regulate
