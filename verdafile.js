@@ -213,13 +213,18 @@ function getSuffixMapping(weights, slants, widths) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`shapeWeight`, `s-${s}`, `wd-${widths[wd].shape}`],
+					hives: [`shapeWeight`, `s-${s}`, `shapeWidth`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
 					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
 					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
 					width: wd,
-					shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, vlShapeWidth),
+					shapeWidth: nValidate(
+						"Shape width of " + wd,
+						widths[wd].shape,
+						vlShapeWidth,
+						fixShapeWidth
+					),
 					cssStretch: widths[wd].css || wd,
 					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
 					slant: s,
@@ -248,9 +253,10 @@ function validateRecommendedWeight(w, value, label) {
 	}
 }
 
-function nValidate(key, v, f) {
+function nValidate(key, v, f, ft) {
+	if (ft) v = ft(v);
 	if (typeof v !== "number" || !isFinite(v) || (f && !f(v))) {
-		throw new TypeError(`${key} = "${v}" is not a valid number.`);
+		throw new TypeError(`${key} = ${v} is not a valid number.`);
 	}
 	return v;
 }
@@ -263,8 +269,23 @@ function vlCssWeight(x) {
 function vlMenuWeight(x) {
 	return vlCssWeight(x);
 }
+const g_widthFixupMemory = new Map();
+function fixShapeWidth(x) {
+	if (x >= 3 && x <= 9) {
+		if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
+		const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
+		echo.warn(
+			`The build plan is using legacy width grade ${x}. ` +
+				`Converting to unit width ${xCorrected}.`
+		);
+		g_widthFixupMemory.set(x, xCorrected);
+		return xCorrected;
+	} else {
+		return x;
+	}
+}
 function vlShapeWidth(x) {
-	return x >= 3 && x <= 9 && x % 1 === 0;
+	return x >= 433 && x <= 665;
 }
 function vlMenuWidth(x) {
 	return x >= 1 && x <= 9 && x % 1 === 0;

@@ -32,7 +32,10 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	const para = Parameters.build(parametersData, argv.hives, { shapeWeight: argv.shape.weight });
+	const para = Parameters.build(parametersData, argv.hives, {
+		shapeWeight: argv.shape.weight,
+		shapeWidth: argv.shape.width
+	});
 
 	const variantsData = FormVariantData(rawVariantsData, para);
 	para.variants = variantsData;
