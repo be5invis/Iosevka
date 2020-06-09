@@ -39,7 +39,7 @@ glyph-block Overmarks : begin
 		set-width 0
 		currentGlyph.shortName = 'dot'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
-		include : Ring (XH + Accent + DotRadius) (XH + Accent - DotRadius) (markMiddle - DotRadius) (markMiddle + DotRadius) true
+		include : DotAt markMiddle (XH + Accent) DotRadius
 
 		save 'dotAbove' 0x307
 
@@ -47,36 +47,35 @@ glyph-block Overmarks : begin
 		set-width 0
 		currentGlyph.shortName = 'dieresis'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
-		include : Ring (XH + Accent + markDotsRadius) (XH + Accent - markDotsRadius) (markMiddle - markDotsRadius - markExtend) (markMiddle + markDotsRadius - markExtend) true
-		include : Ring (XH + Accent + markDotsRadius) (XH + Accent - markDotsRadius) (markMiddle - markDotsRadius + markExtend) (markMiddle + markDotsRadius + markExtend) true
+		include : DotAt (markMiddle - markExtend) (XH + Accent) markDotsRadius
+		include : DotAt (markMiddle + markExtend) (XH + Accent) markDotsRadius
 
 		save 'dieresisAbove' 0x308
 
-	sketch # ringAbove
+	define [RingDims] : begin
+		local radiusIn  : Accent * 0.24
+		local radiusOut : radiusIn + markFine * [linreg 16 2 90 1.75 (markHalfStroke * 2)]
+		return [object radiusIn radiusOut]
+
+	create-glyph 'ringAbove' 0x30A : glyph-construction # ringAbove
 		set-width 0
 		currentGlyph.shortName = 'ring'
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
-
-		local radiusIn  : Accent * 0.24
-		local radiusOut : radiusIn + markFine * [linreg 16 2 90 1.75 (markHalfStroke * 2)]
+		local [object radiusIn radiusOut] : RingDims
 		include : difference
-			Ring (XH + Accent + radiusOut) (XH + Accent - radiusOut) (markMiddle - radiusOut) (markMiddle + radiusOut) true
-			Ring (XH + Accent + radiusIn) (XH + Accent - radiusIn) (markMiddle - radiusIn) (markMiddle + radiusIn) true
+			DotAt markMiddle (XH + Accent) radiusOut
+			DotAt markMiddle (XH + Accent) radiusIn
 		apply-transform : Upright
 		apply-transform : Translate 0 (-markFine * 0.75)
 		apply-transform : Italify
 
-		save 'ringAbove' 0x30A
-
-		local g [branch]
-		branch
-			set currentGlyph.anchors {.}
-			local k : 2 * (radiusOut - (radiusOut - radiusIn) * 0.25)
-			apply-transform : Translate k 0
-			include g
-			include : Translate (-k / 2) 0
-			set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
-			save 'dblRingAbove' 0x1AB2
+	create-glyph 'dblRingAbove' 0x1AB2 : glyph-construction
+		set-width 0
+		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
+		local [object radiusIn radiusOut] : RingDims
+		local k : 2 * (radiusOut - (radiusOut - radiusIn) * 0.25)
+		include : WithTransform [Translate (+k / 2) 0] : refer-glyph 'ringAbove'
+		include : WithTransform [Translate (-k / 2) 0] : refer-glyph 'ringAbove'
 
 	sketch # graveAbove
 		set-width 0
@@ -835,7 +834,6 @@ glyph-block Overmarks : begin
 			arcvh
 			g4.right.end  markMiddle belowMarkBot [heading Rightward]
 		apply-transform : Translate ((belowMarkTop - belowMarkBot) / 4) 0
-
 		save 'leftHalfCircleBelow' 0x31C
 
 	sketch # rightHalfCircleBelow
@@ -843,7 +841,6 @@ glyph-block Overmarks : begin
 		include : refer-glyph "leftHalfCircleBelow"
 		include : FlipAround markMiddle [mix belowMarkTop belowMarkBot 0.5]
 		set-anchor 'below' MARK markMiddle 0 markMiddle belowMarkBot
-
 		save 'rightHalfCircleBelow' 0x339
 
 	sketch # leftHalfCircleAbove
@@ -851,7 +848,6 @@ glyph-block Overmarks : begin
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		include : refer-glyph "rightHalfCircleBelow"
 		include : FlipAround markMiddle (XH / 2)
-
 		save 'leftHalfCircleAbove' 0x351
 
 	sketch # rightHalfCircleAbove
@@ -859,8 +855,8 @@ glyph-block Overmarks : begin
 		set-anchor 'above' MARK markMiddle XH markMiddle aboveMarkTop
 		include : refer-glyph "leftHalfCircleBelow"
 		include : FlipAround markMiddle (XH / 2)
-
 		save 'rightHalfCircleAbove' 0x357
+
 	# Turned below marks
 	sketch # graveBelow
 		set-width 0
