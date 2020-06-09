@@ -667,7 +667,7 @@ glyph-block Letter-Latin-V : begin
 	glyph-block-export VShape VShapeOutline
 
 	define cornerdist : HalfStroke * HVContrast * 1.15
-	define vcurviness : if (SLAB && !para.isItalic) 0.15 0.3
+	define VCurviness   0.3
 	define VShapeFine : Math.max
 		Stroke * [if SLAB para.vtipfineSlab para.vtipfine]
 		cornerdist * 1.2
@@ -676,6 +676,7 @@ glyph-block Letter-Latin-V : begin
 	define pInktrap 0.5
 
 	define StraightSbShrink : mix 1 (designParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.25]) : if SLAB 0.75 1
+	define [VShapeTopFlat top] : if SLAB [Math.min (top - Stroke) (top * 0.9)] (top * 0.9)
 
 	define [VShapeOutline] : params [top [sw Stroke] barStraight div] : glyph-construction
 		local df : DivFrame div
@@ -702,12 +703,12 @@ glyph-block Letter-Latin-V : begin
 			local vxEndR : df.middle + cornerdist - clearance
 			include : spiro-outline
 				flat vxStartL top
-				curl vxStartL (top * 0.9)
-				quadcontrols 0 vcurviness 9 unimportant
+				curl vxStartL [VShapeTopFlat top]
+				quadcontrols 0 VCurviness 9 unimportant
 				corner vxEndL 0
 				corner vxEndR 0
-				quadcontrols 1 (1 - vcurviness) 9 unimportant
-				flat vxStartR (top * 0.9)
+				quadcontrols 1 (1 - VCurviness) 9 unimportant
+				flat vxStartR [VShapeTopFlat top]
 				curl vxStartR top
 
 	define [VShape] : params [top [sw Stroke] barStraight div] : glyph-construction
@@ -734,14 +735,14 @@ glyph-block Letter-Latin-V : begin
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs sw
 				flat df.leftSB top [heading Downward]
-				curl df.leftSB (top * 0.9) [heading Downward]
-				quadcontrols 0 vcurviness 9 unimportant
+				curl df.leftSB [VShapeTopFlat top] [heading Downward]
+				quadcontrols 0 VCurviness 9 unimportant
 				g4 (df.middle - cornerdist) 0 [widths.lhs fine]
 			include : tagged 'strokeUp' : dispiro
 				widths.rhs sw
 				flat df.rightSB top [heading Downward]
-				curl df.rightSB (top * 0.9) [heading Downward]
-				quadcontrols 0 vcurviness 9 unimportant
+				curl df.rightSB [VShapeTopFlat top] [heading Downward]
+				quadcontrols 0 VCurviness 9 unimportant
 				g4 (df.middle + cornerdist) 0 [widths.rhs fine]
 
 		#bottom cap
@@ -1235,6 +1236,41 @@ glyph-block Letter-Latin-W : begin
 glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-export HalfXStrand XStrand
+
+	define [HalfXStrand stb slab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-construction
+		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
+		local leftx : _leftx + ((HalfStroke * HVContrast + sbCor) * [if (rightx > _leftx) 1 (-1)])
+		local fine  : (_fine || Stroke) * 0.5
+
+		if stb : begin
+			local hst : HalfStroke * [diagCor (righty - lefty) (rightx - leftx) 0 HalfStroke]
+			local hse : HalfStroke * [Math.min 0.97 ([adviceBlackness 3.5] / Stroke)]
+			include : dispiro
+				corner leftx lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
+				corner rightx righty [widths hse hse]
+
+		: else : begin
+			local height : Math.abs (lefty - righty)
+			local slabClearance : if slab [adviceBlackness2 3 2 height] 0
+			local turnyleft : mix lefty righty [if slab [Math.max turn (slabClearance / height)] turn]
+			local cyleft : mix turnyleft righty tension
+			local straightxleft : mix leftx rightx pStraight
+			local straightyleft : mix cyleft righty pStraight
+			include : dispiro
+				widths.center
+				flat leftx lefty [heading [if (lefty < righty) Upward Downward]]
+				curl leftx turnyleft [heading [if (lefty < righty) Upward Downward]]
+				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
+				flat straightxleft straightyleft
+				curl rightx righty
+
+	define [XStrand stb slab _leftx lefty _rightx righty turn pStraight tension] : glyph-construction
+		local middlex : mix _leftx _rightx 0.5
+		local middley : mix lefty righty 0.5
+
+		include : HalfXStrand stb slab _leftx lefty middlex middley turn pStraight tension
+		include : HalfXStrand stb slab _rightx righty middlex middley turn pStraight tension
 
 	sketch # X
 		set-width Width
@@ -1242,8 +1278,8 @@ glyph-block Letter-Latin-X : begin
 
 		branch
 			include : WithAIHSerifsMask CAP 0 SB RightSB : union
-				xStrand true SB 0 RightSB CAP 0.1 0.4 0.28
-				xStrand true SB CAP RightSB 0 0.1 0.4 0.28
+				XStrand true SLAB SB 0 RightSB CAP 0.1 0.4 0.28
+				XStrand true SLAB SB CAP RightSB 0 0.1 0.4 0.28
 			include : AIHSerifs CAP
 			save 'X.straight' 'X'
 			save 'Chi.straight' 0x3A7
@@ -1254,8 +1290,8 @@ glyph-block Letter-Latin-X : begin
 
 		branch
 			include : WithAIHSerifsMask CAP 0 SB RightSB : union
-				xStrand false SB 0 RightSB CAP 0.1 0.4 0.28
-				xStrand false SB CAP RightSB 0 0.1 0.4 0.28
+				XStrand false SLAB SB 0 RightSB CAP 0.1 0.4 0.28
+				XStrand false SLAB SB CAP RightSB 0 0.1 0.4 0.28
 			include : AIHSerifs CAP
 			save 'X.curly' 'X'
 			save 'Chi.curly' 0x3A7
@@ -1266,12 +1302,13 @@ glyph-block Letter-Latin-X : begin
 
 	sketch # x
 		include MarkSet.e
-		local TURN (XH * 0.1)
+		local turn    : if SLAB 0.1  0.02
+		local tension : if SLAB 0.24 0.14
 
 		branch
 			include : WithAIHSerifsMask XH 0 SB RightSB : union
-				xStrand true SB 0 RightSB XH 0.02 0.4 0.14
-				xStrand true SB XH RightSB 0 0.02 0.4 0.14
+				XStrand true SLAB SB 0 RightSB XH turn 0.4 tension
+				XStrand true SLAB SB XH RightSB 0 turn 0.4 tension
 			include : AIHSerifs XH
 			save 'x.straight' 'x'
 			save 'cyrha.straight' 0x445
@@ -1280,8 +1317,8 @@ glyph-block Letter-Latin-X : begin
 				save 'cyrhadescender.straight'
 		branch
 			include : WithAIHSerifsMask XH 0 SB RightSB : union
-				xStrand false SB 0 RightSB XH 0.02 0.4 0.14
-				xStrand false SB XH RightSB 0 0.02 0.4 0.14
+				XStrand false SLAB SB 0 RightSB XH turn 0.4 tension
+				XStrand false SLAB SB XH RightSB 0 turn 0.4 tension
 			include : AIHSerifs XH
 			save 'x.curly' 'x'
 			save 'cyrha.curly' 0x445
@@ -1295,16 +1332,16 @@ glyph-block Letter-Latin-X : begin
 
 		branch
 			include : union
-				xStrand true SB Descender RightSB XH 0.05 0.4 0.11
-				xStrand true SB XH RightSB Descender 0.05 0.4 0.11
-			save 'chi.straight' 0x3C7
-			save 'latinchi.straight' 0xAB53
+				XStrand true false SB Descender RightSB XH 0.05 0.4 0.11
+				XStrand true false SB XH RightSB Descender 0.05 0.4 0.11
+			save 'chi.straight'
+			save 'latinchi.straight'
 		branch
 			include : union
-				xStrand false SB Descender RightSB XH 0.05 0.4 0.11
-				xStrand false SB XH RightSB Descender 0.05 0.4 0.11
-			save 'chi.curly' 0x3C7
-			save 'latinchi.curly' 0xAB53
+				XStrand false false SB Descender RightSB XH 0.05 0.4 0.11
+				XStrand false false SB XH RightSB Descender 0.05 0.4 0.11
+			save 'chi.curly'
+			save 'latinchi.curly'
 
 	select-variant 'X' 'X'
 	select-variant 'Chi' 0x3A7 (follow -- 'X')
@@ -1319,13 +1356,14 @@ glyph-block Letter-Latin-X : begin
 glyph-block Letter-Latin-Upper-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-X : HalfXStrand
 
 	define [YShape straightBar top bot] : glyph-construction
 		local cross : mix [fallback bot 0] top 0.4
 		include : WithAIHSerifsMask CAP 0 SB RightSB
-			halfXStrand straightBar SB top Middle cross 0.1 0.4 0.28
+			HalfXStrand straightBar SLAB SB top Middle cross 0.1 0.4 0.28
 		include : tagged 'strokeRT' : WithAIHSerifsMask CAP 0 SB RightSB
-			halfXStrand straightBar RightSB top Middle cross 0.1 0.4 0.28
+			HalfXStrand straightBar SLAB RightSB top Middle cross 0.1 0.4 0.28
 		include : VBar Middle [fallback bot 0] (cross + HalfStroke)
 		set-anchor 'overlay' BASE Middle cross
 		if SLAB : begin
@@ -1402,8 +1440,8 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local slab : if serifless false SLAB
 		local useStraightBottom : !slab && straightBar
 		local useCurlyBottom : slab || straightBar
-		local px1 0.84
-		local py1 : StrokeWidthBlend 0.8 0.76
+		local px1   0.84
+		local py1 : [StrokeWidthBlend 0.8 0.76] * [if slab [StrokeWidthBlend 1 0.9] 1]
 		local px2 0.95
 		local py20 0.88
 		local py2 : if (useStraightBottom || useCurlyBottom) 0.97 py20
@@ -1413,7 +1451,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 		local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 		local yrstrokel0 : Middle - Width * 0.1
-		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)])
+		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if (useStraightBottom || useCurlyBottom) (2 / 3) (1 / 3)] * [if slab [StrokeWidthBlend 0.95 0.97] 1])
 		local yrstroker : Width - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if (straightBar) designParameters.straightSmallYShapeSbShrink 1]
 		local yshrink : [StrokeWidthBlend 1 0.85] * [if straightBar ([adviceBlackness 3.25] / Stroke) 1]
 		local yBottomJut : Jut * 1.25
@@ -1421,7 +1459,8 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local slabyvx 0.7
 
 		define [CalcDS top bottom] : begin
-			local ds : (top - bottom) * pds
+			local ds0 : (top - bottom) * pds
+			local ds  : if slab [Math.max Stroke ds0] ds0
 			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useCurlyBottom) (slabysize * slabyvx) 0]
 			return {ds ds2}
 
