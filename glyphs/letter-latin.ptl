@@ -711,7 +711,7 @@ glyph-block Letter-Latin-V : begin
 				flat vxStartR [VShapeTopFlat top]
 				curl vxStartR top
 
-	define [VShape] : params [top [sw Stroke] barStraight div] : glyph-construction
+	define [VShape] : params [top [sw Stroke] barStraight div [slab SLAB]] : glyph-construction
 		local df : DivFrame div
 		local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 		local dgCor : diagCor (2 * top) Width 0 (2 * sw)
@@ -751,7 +751,7 @@ glyph-block Letter-Latin-V : begin
 			corner (df.middle - cornerdist) 0
 			corner df.middle fine
 
-		include : AIVSerifs top
+		if slab : include : AIVSerifs top
 
 	sketch # V
 		set-width Width
@@ -882,11 +882,11 @@ glyph-block Letter-Latin-Upper-A : begin
 	select-variant 'turnA' 0x2C6F (follow -- 'A')
 
 	# Lambda
-	define [LambdaShape top sw barStraight div] : glyph-construction
+	define [LambdaShape] : params [top sw barStraight div [slab SLAB]] : glyph-construction
 		local df : DivFrame [fallback div 1]
-		include : VShape top sw barStraight div
+		include : VShape top sw barStraight div (slab -- false)
 		include : FlipAround df.middle (top / 2)
-		if SLAB : begin
+		if slab : begin
 			include : tagged 'serif' : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
 			include : tagged 'serif' : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
 
@@ -905,13 +905,16 @@ glyph-block Letter-Latin-Upper-A : begin
 	select-variant 'latinLambda' 0x245 (follow -- 'Lambda')
 
 	# Delta
-	define [DeltaShape top sw barStraight div] : glyph-construction
-		include : LambdaShape top sw barStraight div
-		eject-contour 'serif'
-		include : intersection
+	define [DeltaShape top sw barStraight div] : union
+		LambdaShape top sw barStraight div (slab -- false)
+		intersection
 			HBarBottom 0 Width 0 sw
 			AMaskShape top sw barStraight div
-
+		if [not SLAB] [glyph-construction] : difference
+			union
+				LeftwardBottomSerif SB 0 SideJut
+				RightwardBottomSerif RightSB 0 SideJut
+			AMaskShape top sw barStraight div
 	sketch # Delta
 		include MarkSet.capital
 		branch
@@ -2026,12 +2029,13 @@ glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
-	define [BShape top] : glyph-construction
+	define [BShape] : params [top [barPos 0.52] [topArcShift 0]] : glyph-construction
 		local stroke : adviceBlackness2 2.875 2 top
-		local bowl : top * 0.52 + stroke / 2
+		local bowl : top * barPos + stroke * (1 - barPos)
 		local barleft SB
-		local curvleft : RightSB - SB * 0.5 - (top - (bowl - stroke)) * 0.45
-		local curvleftTop : Math.min curvleft (RightSB - SB * 0.5 - OX - stroke * 1.375)
+		local curvleft : RightSB - SB * 0.5 - (top - (bowl - stroke)) * 0.45 + topArcShift
+		local curvleftTop : Math.min curvleft (RightSB - SB * 0.5 - OX - stroke * 1.375 + topArcShift)
+		local xTopArcRight : [mix SB RightSB 0.93] - OX * 2 + topArcShift
 		local fine : stroke * CThin
 
 		local sma : SmoothAOf (Smooth * 0.9) Width
@@ -2044,7 +2048,7 @@ glyph-block Letter-Latin-Upper-B : begin
 			flat (barleft - O) top [heading Rightward]
 			curl (curvleftTop - CorrectionOMidS) top
 			archv
-			straight.down.mid ([mix SB RightSB 0.93] - OX * 2) [mix top (bowl - stroke) (smbTop / (smaTop + smbTop))]
+			straight.down.mid xTopArcRight [mix top (bowl - stroke) (smbTop / (smaTop + smbTop))]
 			arcvh
 			flat (curvleftTop + CorrectionOMidS) (bowl - fine) [widths.rhs fine]
 			curl (barleft - O) (bowl - fine) [heading Leftward]
@@ -2064,13 +2068,19 @@ glyph-block Letter-Latin-Upper-B : begin
 			include : tagged 'serifLT' : LeftwardTopSerif barleft top SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
 
-	sketch # B
+	create-glyph 'B.standard' : glyph-construction
 		set-width Width
 		include MarkSet.capital
 		include : BShape CAP
-		save 'B' 'B'
-		save 'Beta' 0x392
-		save 'cyrVe' 0x412
+
+	create-glyph 'B.moreAsymmetric' : glyph-construction
+		set-width Width
+		include MarkSet.capital
+		include : BShape CAP (barPos -- 0.6) (topArcShift -- -(RightSB - SB) * 0.05)
+
+	select-variant 'B' 'B'
+	alias 'Beta' 0x392 'B'
+	alias 'cyrVe' 0x412 'B'
 
 	sketch # Bhookleft
 		include [refer-glyph 'B'] AS_BASE
