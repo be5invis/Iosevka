@@ -1317,50 +1317,51 @@ glyph-block Overmarks : begin
 			curl (RightSB + O * 3 - fine - Width) (XH * 0.5 + CAP * 0.6)
 		save 'longSlashOver' 0x338
 
-	local tieLeft [mix 0 markMiddle 1.25]
+	define aboveTieBase     aboveMarkTop
+	define aboveTieTop    : mix XH aboveMarkTop 2
+	define aboveTieBottom : aboveTieTop - (aboveMarkTop - aboveMarkBot) * 0.875
+
+	local tieLeft [mix 0 markMiddle 1.5]
 	local tieRight (-tieLeft)
-	sketch # tieAbove
-		set-width 0
-		include : dispiro
-			widths.rhs (markHalfStroke * 2)
-			g4 tieLeft aboveMarkBot
-			quadcontrols  0.5 1
-			g4.right.mid  0 aboveMarkTop [heading Rightward]
-			quadcontrols  0.5 0
-			g4 tieRight aboveMarkBot
-		apply-transform : Upright
-		apply-transform : Translate 0 (CAP - XH)
-		apply-transform : Italify
-		save 'tieAbove' 0x361
 
-	sketch # turnTieAbove
-		set-width 0
-		include : dispiro
-			widths.lhs (markHalfStroke * 2)
-			g4 tieLeft aboveMarkTop
-			quadcontrols  0.5 1
-			g4.right.mid  0 aboveMarkBot [heading Rightward]
-			quadcontrols  0.5 0
-			g4 tieRight aboveMarkTop
-		apply-transform : Upright
-		apply-transform : Translate 0 (CAP - XH)
-		apply-transform : Italify
-		save 'turnTieAbove' 0x35D
-	turned 'tieBelow' 0x35C 'tieAbove' 0 (XH / 2)
-
-	sketch # overlineTieAbove
+	create-glyph 'tieAbove' 0x361 : glyph-construction
 		set-width 0
 		include : dispiro
 			widths.center (markHalfStroke * 2)
-			flat tieLeft (XH + Accent)
-			curl tieRight (XH + Accent)
-		apply-transform : Upright
-		apply-transform : Translate 0 (CAP - XH)
-		apply-transform : Italify
-		save 'overlineTieAbove' 0x35E
-	composite 'underlineTieBelow' [refer-glyph 'overlineTieAbove'] [FlipAround 0 (XH / 2)] [into-unicode 0x35F]
+			g4 tieLeft aboveTieBottom
+			quadcontrols  0.5 1
+			g4.right.mid  0 aboveTieTop [heading Rightward]
+			quadcontrols  0.5 0
+			g4 tieRight aboveTieBottom
 
-	sketch # arrowTieBelow
+	create-glyph 'turnTieAbove' 0x35D : glyph-construction
+		set-width 0
+		include : dispiro
+			widths.center (markHalfStroke * 2)
+			g4 tieLeft aboveTieTop
+			quadcontrols  0.5 1
+			g4.right.mid  0 aboveTieBottom [heading Rightward]
+			quadcontrols  0.5 0
+			g4 tieRight aboveTieTop
+
+	create-glyph 'tieBelow' 0x35C : glyph-construction
+		set-width 0
+		include [refer-glyph 'tieAbove']
+		include : FlipAround 0 (XH / 2)
+
+	create-glyph 'overlineTieAbove' 0x35E : glyph-construction
+		set-width 0
+		include : dispiro
+			widths.center (markHalfStroke * 2)
+			flat tieLeft (aboveTieBase + Accent)
+			curl tieRight (aboveTieBase + Accent)
+
+	create-glyph 'underlineTieBelow' 0x35F : glyph-construction
+		set-width 0
+		include [refer-glyph 'overlineTieAbove']
+		include : FlipAround 0 (XH / 2)
+
+	create-glyph 'arrowTieBelow' 0x362 : glyph-construction
 		set-width 0
 		local fine markFine
 		local h : branch
@@ -1380,18 +1381,15 @@ glyph-block Overmarks : begin
 
 		include h
 		include : HBar tieLeft tieRight (Descender - Accent) (fine * 2)
-		save 'arrowTieBelow' 0x362
 
-	sketch # tildeTieAbove
+	create-glyph 'tildeTieAbove' 0x360 : glyph-construction
 		set-width 0
 		include : TildeShape
-			ttop -- aboveMarkTop + (CAP - XH)
-			tbot -- aboveMarkBot + (CAP - XH)
+			ttop -- aboveTieTop
+			tbot -- aboveTieBottom
 			leftEnd -- tieLeft
 			rightEnd -- tieRight
 			hs -- markHalfStroke
-
-		save 'tildeTieAbove' 0x360
 
 	define [GreekLRDoubleMark id unicode leftGlyph rightGlyph] : begin
 		sketch # Combining double mark
