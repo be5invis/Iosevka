@@ -174,21 +174,21 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : IotaShape XH
 		save 'dotlessi.italic'
 
-	define [TailedIShape df top] : glyph-construction
-		local middle : df.middle - LBalance2
-		local x0 : HalfStroke + (Hook - Stroke + 1) * 0.85 * df.div + LBalance2
-		local x1 : [Math.max (Hook - HalfStroke + 1) (LongJut * df.div)] + LBalance2
+	define [TailedIShape] : params [df top [xMiddle (df.middle - LBalance2)] [setMarks true] [hookScale 1]] : glyph-construction
+		local x0 : mix HalfStroke (HalfStroke + (Hook - Stroke + 1) * 0.85 * df.div + LBalance2) hookScale
+		local x1 : mix HalfStroke ([Math.max (Hook - HalfStroke + 1) (LongJut * df.div)] + LBalance2) hookScale
 		include : dispiro
 			widths.center
-			flat middle top [heading Downward]
-			curl middle Hook
+			flat xMiddle top [heading Downward]
+			curl xMiddle [mix Stroke Hook hookScale]
 			arcvh
-			g4.right.mid (middle + x0) (HalfStroke + O) [heading Rightward]
-			g4 (middle + x1) (HalfStroke - O) [heading Rightward]
-		set-anchor 'above' BASE middle top
-		set-anchor 'below' BASE middle 0
-		set-anchor 'overlay' BASE middle (top * OverlayPos)
-		set-anchor 'topright' BASE (middle + RightSB - Middle) top
+			g4.right.mid (xMiddle + x0) (HalfStroke + O) [heading Rightward]
+			g4 (xMiddle + x1) (HalfStroke + (1 - 2 * hookScale) * O) [heading Rightward]
+		if setMarks : begin
+			set-anchor 'above' BASE xMiddle top
+			set-anchor 'below' BASE xMiddle 0
+			set-anchor 'overlay' BASE xMiddle (top * OverlayPos)
+			set-anchor 'topright' BASE (xMiddle + RightSB - Middle) top
 
 	sketch # dotlessi.tailed
 		local df : DivFrame para.diversityI
@@ -2352,8 +2352,8 @@ glyph-block Letter-Latin-Lower-D : begin
 		include MarkSet.b
 		include : OBarRightShape
 		include : VBarRight RightSB 0 XH
-		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
 		save 'dhooktop' 0x257
 
@@ -3426,8 +3426,9 @@ glyph-block Letter-Latin-Upper-Q : begin
 glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-Lower-I : TailedIShape
 
-	sketch # q
+	create-glyph 'q.straight' : glyph-construction
 		set-width Width
 		include MarkSet.p
 
@@ -3437,8 +3438,25 @@ glyph-block Letter-Latin-Lower-Q : begin
 			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 			include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
 			include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
-		save 'q' 'q'
-		save 'cyrqa' 0x51B
+
+	create-glyph 'q.tailed' : glyph-construction
+		set-width Width
+		include MarkSet.p
+
+		include : OBarRightShape
+		include : create-glyph : glyph-construction
+			include : TailedIShape [DivFrame 1] (XH - Descender)
+				xMiddle -- RightSB - HalfStroke * HVContrast
+				setMarks -- false
+				hookScale -- 0.5
+			include : Upright
+			include : Translate 0 Descender
+			include : Italify
+		if SLAB : begin
+			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	select-variant 'q' 'q'
+	alias 'cyrqa' 0x51B 'q'
 
 	sketch # Qrtail
 		include MarkSet.capital
@@ -3469,7 +3487,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 		save 'qrtail' 0x24B
 
 	sketch # qhooktop
-		include [refer-glyph "q"] AS_BASE
+		include [refer-glyph "q.straight"] AS_BASE
 		eject-contour 'serifRT'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)
 		save 'qhooktop' 0x2A0
