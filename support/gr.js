@@ -16,6 +16,33 @@ const Dotless = {
 	}
 };
 
+const TieMark = {
+	tag: "TMRK",
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.TieMark;
+		else return null;
+	},
+	set(glyph, toGid) {
+		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.TieMark = toGid;
+	},
+	amendName(name) {
+		return `TieMark{${name}}`;
+	}
+};
+
+const TieGlyph = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.TieMark;
+		else return null;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.TieMark = true;
+	}
+};
+
 const CvTagCache = new Map();
 function Cv(tag) {
 	if (CvTagCache.has(tag)) return CvTagCache.get(tag);
@@ -154,3 +181,5 @@ exports.AnyCv = AnyCv;
 exports.DotlessOrNot = DotlessOrNot;
 exports.getGrTree = getGrTree;
 exports.getGrMesh = getGrMesh;
+exports.TieMark = TieMark;
+exports.TieGlyph = TieGlyph;

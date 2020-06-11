@@ -5,6 +5,7 @@ import [curveToContour OffsetCurve] from '../support/curve-util'
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
 import [Curve Quadify] from "typo-geom"
+import [TieMark TieGlyph] from "../support/gr"
 
 glyph-module
 
@@ -1320,12 +1321,16 @@ glyph-block Overmarks : begin
 	define aboveTieBase     aboveMarkTop
 	define aboveTieTop    : mix XH aboveMarkTop 2
 	define aboveTieBottom : aboveTieTop - (aboveMarkTop - aboveMarkBot) * 0.875
+	define belowTieBase     Descender
+	define belowTieBottom : Descender - (0 - belowMarkBot)
 
 	local tieLeft [mix 0 markMiddle 1.5]
 	local tieRight (-tieLeft)
 
 	create-glyph 'tieAbove' 0x361 : glyph-construction
 		set-width 0
+		set-anchor 'tieAbove' MARK 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
 			g4 tieLeft aboveTieBottom
@@ -1336,6 +1341,8 @@ glyph-block Overmarks : begin
 
 	create-glyph 'turnTieAbove' 0x35D : glyph-construction
 		set-width 0
+		set-anchor 'tieAbove' MARK 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
 			g4 tieLeft aboveTieTop
@@ -1346,11 +1353,15 @@ glyph-block Overmarks : begin
 
 	create-glyph 'tieBelow' 0x35C : glyph-construction
 		set-width 0
+		set-anchor 'tieBelow' MARK 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
 		include [refer-glyph 'tieAbove']
 		include : FlipAround 0 (XH / 2)
 
 	create-glyph 'overlineTieAbove' 0x35E : glyph-construction
 		set-width 0
+		set-anchor 'tieAbove' MARK 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
 			flat tieLeft (aboveTieBase + Accent)
@@ -1358,11 +1369,15 @@ glyph-block Overmarks : begin
 
 	create-glyph 'underlineTieBelow' 0x35F : glyph-construction
 		set-width 0
+		set-anchor 'tieBelow' MARK 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
 		include [refer-glyph 'overlineTieAbove']
 		include : FlipAround 0 (XH / 2)
 
 	create-glyph 'arrowTieBelow' 0x362 : glyph-construction
 		set-width 0
+		set-anchor 'tieBelow' MARK 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
 		local fine markFine
 		local h : branch
 			local top (Descender - Accent + (belowMarkTop - belowMarkBot) / 2 * 1.5)
@@ -1384,6 +1399,8 @@ glyph-block Overmarks : begin
 
 	create-glyph 'tildeTieAbove' 0x360 : glyph-construction
 		set-width 0
+		set-anchor 'tieAbove' MARK 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
 		include : TildeShape
 			ttop -- aboveTieTop
 			tbot -- aboveTieBottom
@@ -1460,5 +1477,21 @@ glyph-block Overmarks : begin
 		set-width [query-glyph 'markBaseSpace'].advanceWidth
 		include : refer-glyph "dasiaperispomeni"
 		save 'spaced_dasiaperispomeni' 0x1FDF
+
+	if [not recursive] : begin
+		define AnchorMap : list
+			list 'above' 'tieAbove'
+			list 'below' 'tieBelow'
+		foreach { gn g } [pairs-of glyphMap] : begin
+			local handled false
+			foreach {akFrom akTo} [items-of AnchorMap] : begin
+				if (!handled && g.anchors && g.anchors.(akFrom) && g.anchors.(akFrom).type == 'mark') : begin
+					set handled true
+					local toGN : TieMark.amendName gn
+					create-glyph toGN : glyph-construction
+						include g AS_BASE ALSO_METRICS
+						set currentGlyph.anchors.(akTo) currentGlyph.anchors.(akFrom)
+						currentGlyph.delete-anchor akFrom
+					TieMark.set g toGN
 
 	glyph-block-export markExtend markHalfStroke markStress markFine markMiddle markDotsRadius aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot commaOvershoot2 commaAboveRadius TildeShape HornShape HornMarkAnchor HornBaseAnchor
