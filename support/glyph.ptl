@@ -21,7 +21,8 @@ export all : class Glyph
 		set this.contours {}
 		set this.advanceWidth 500
 		set this.autoRefPriority 0
-		set this.anchors {.}
+		set this.markAnchors {.}
+		set this.baseAnchors {.}
 		set this.gizmo : Transform.Id
 		set this.dependencies {}
 		set this.defaultTag null
@@ -58,40 +59,32 @@ export all : class Glyph
 			foreach [point : items-of contour] : c.push : Point.translated point shiftx shifty
 			this.contours.push c
 
-	public [combineAnchor markid shift anchorThis anchorThat] : begin
-		if (!anchorThis || !anchorThat || anchorThat.type !== Anchor.MARK) : return nothing
-		if (anchorThis.type === Anchor.BASE) : begin
-			set shift.x : anchorThis.x - anchorThat.x
-			set shift.y : anchorThis.y - anchorThat.y
-			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing)
-				set this.anchors.(markid) : new Anchor
-					* (anchorThis.x + anchorThat.mbx - anchorThat.x)
-					* (anchorThis.y + anchorThat.mby - anchorThat.y)
-					* Anchor.BASE
-		: else : if (anchorThis.mbx !== nothing && anchorThis.mby !== nothing) : begin
-			set shift.x : anchorThis.mbx - anchorThat.x
-			set shift.y : anchorThis.mby - anchorThat.y
-			if (anchorThat.mbx !== nothing && anchorThat.mby !== nothing)
-				set this.anchors.(markid) : new Anchor
-					* anchorThis.x
-					* anchorThis.y
-					* anchorThis.type
-					* (anchorThis.mbx + anchorThat.mbx - anchorThat.x)
-					* (anchorThis.mby + anchorThat.mby - anchorThat.y)
+	public [combineAnchor markCls shift baseThis markThat baseThat] : begin
+		if (!baseThis || !markThat) : return nothing
+		set shift.x : baseThis.x - markThat.x
+		set shift.y : baseThis.y - markThat.y
+		if (baseThat) : set this.baseAnchors.(markCls) : new Anchor
+			* (baseThis.x + baseThat.x - markThat.x)
+			* (baseThis.y + baseThat.y - markThat.y)
+			* Anchor.BASE
 
 	public [includeGlyph glyph copyAnchors copyWidth] : begin
 		if (glyph <@ Function) : begin
 			throw "\(this.name): Cannot include a function using includeGlyph. Use include instead."
 
 		local shift {.x 0 .y 0}
-		if glyph.anchors : foreach { markid anchorThis } [pairs-of this.anchors] : begin
-			local anchorThat glyph.anchors.(markid)
-			this.combineAnchor markid shift anchorThis anchorThat
+		if glyph.markAnchors : foreach { markid baseThis } [pairs-of this.baseAnchors] : begin
+			local markThat glyph.markAnchors.(markid)
+			local baseThat glyph.baseAnchors.(markid)
+			this.combineAnchor markid shift baseThis markThat baseThat
 
 		this.includeGeometry glyph shift.x shift.y
-		if ((copyAnchors || glyph.isMarkSet) && glyph.anchors) : begin
-			foreach [k : items-of : Object.keys glyph.anchors] : begin
-				set this.anchors.(k) glyph.anchors.(k)
+		if ((copyAnchors || glyph.isMarkSet) && glyph.markAnchors) : begin
+			foreach [k : items-of : Object.keys glyph.markAnchors] : begin
+				set this.markAnchors.(k) glyph.markAnchors.(k)
+		if ((copyAnchors || glyph.isMarkSet) && glyph.baseAnchors) : begin
+			foreach [k : items-of : Object.keys glyph.baseAnchors] : begin
+				set this.baseAnchors.(k) glyph.baseAnchors.(k)
 		if (glyph.advanceWidth >= 0 && copyWidth) : set this.advanceWidth glyph.advanceWidth
 		if glyph.name : this.dependencies.push glyph.name
 		if glyph.dependencies : this.dependencies = [this.dependencies.concat glyph.dependencies]
@@ -113,21 +106,34 @@ export all : class Glyph
 
 	public [apply-transform transform alsoAnchors] : begin
 		foreach [c : items-of this.contours] : foreach [j : range 0 c.length] : set c.(j) : tp transform c.(j)
-		if alsoAnchors : foreach key [items-of [Object.keys this.anchors]] : begin
-			set this.anchors.(key) : Anchor.transform transform this.anchors.(key)
+		if alsoAnchors : begin
+			foreach key [items-of [Object.keys this.baseAnchors]] : begin
+				set this.baseAnchors.(key) : Anchor.transform transform this.baseAnchors.(key)
+			foreach key [items-of [Object.keys this.markAnchors]] : begin
+				set this.markAnchors.(key) : Anchor.transform transform this.markAnchors.(key)
 		return this
 
-	public [set-anchor id type x y mbx mby] : begin
+	public [set-base-anchor id x y] : begin
 		xytransform this.gizmo x y
-		if (mbx !== nothing && mby !== nothing)
-		: then : begin
-			xytransform this.gizmo mbx mby
-			set this.anchors.(id) : new Anchor x y type mbx mby
-		: else : set this.anchors.(id) : new Anchor x y type
+		set this.baseAnchors.(id) : new Anchor x y
 		return this
 
-	public [delete-anchor id] : begin
-		local anchors : this.anchors || {.}
-		local newAnchors {}
+	public [set-mark-anchor id x y mbx mby] : begin
+		xytransform this.gizmo x y
+		set this.markAnchors.(id) : new Anchor x y
+		if (mbx !== nothing && mby !== nothing) : begin
+			xytransform this.gizmo mbx mby
+			set this.baseAnchors.(id) : new Anchor mbx mby
+		return this
+
+	public [delete-base-anchor id] : begin
+		local anchors : this.baseAnchors || {.}
+		local newAnchors {.}
 		foreach {k v} [pairs-of anchors] : if (k !== id) : set newAnchors.(k) v
-		set this.anchors newAnchors
+		set this.baseAnchors newAnchors
+
+	public [delete-mark-anchor id] : begin
+		local anchors : this.markAnchors || {.}
+		local newAnchors {.}
+		foreach {k v} [pairs-of anchors] : if (k !== id) : set newAnchors.(k) v
+		set this.markAnchors newAnchors

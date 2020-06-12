@@ -188,7 +188,7 @@ export : define [calculateMetrics para] : begin
 		IBalance LBalance2 IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2
 		FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 Ess EssQuestion
 		HalfStroke RightSB Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA
-		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS compsiteMarkSet
+		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS compositeBaseAnchors
 		adviceBlackness adviceBlackness2 MVertStroke MVertStrokeD OverlayStroke OperatorStroke
 		GeometryStroke ShoulderFine Superness superXY adviceSSmooth adviceGlottalStopSmooth
 		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter]
@@ -219,49 +219,45 @@ export : define [setFontMetrics para metrics fm] : begin
 	set fm.post.italicAngle       (0 - para.slantAngle)
 
 
-export : define [compsiteMarkSet] : begin
+export : define [compositeBaseAnchors] : begin
 	local h {.}
-	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.anchors]] : begin
-		set h.(k) : new Anchor a.anchors.(k).x a.anchors.(k).y a.anchors.(k).type a.anchors.(k).mbx a.anchors.(k).mby
-	return {.anchors h .isMarkSet true}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.baseAnchors]] : begin
+		set h.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
+	return {.baseAnchors h .isMarkSet true}
 
 export : define [MarksetDiv p me] : begin
-	define [object MARK BASE] Anchor
 	define width : p * me.Width
 	define middle : p * me.Middle
 	define rightSB : me.Width * p - me.SB
 	define [ta anchor] : return : new Anchor
 		* (anchor.x * me.globalTransform.xx + anchor.y * me.TanSlope + me.globalTransform.x)
 		* (anchor.x * me.globalTransform.xy + anchor.y * me.globalTransform.yy + me.globalTransform.y)
-		* anchor.type
 
-	define markAboveLower       {.anchors {.above       [ta : new Anchor middle  me.XH                       BASE]}}
-	define markAboveOper        {.anchors {.above       [ta : new Anchor middle  me.operTop                  BASE]}}
-	define markAboveTack        {.anchors {.above       [ta : new Anchor middle  me.tackTop                  BASE]}}
-	define markAbovePlus        {.anchors {.above       [ta : new Anchor middle  me.plusTop                  BASE]}}
-	define markAboveCap         {.anchors {.above       [ta : new Anchor middle  me.CAP                      BASE]}}
-	define markBelowLower       {.anchors {.below       [ta : new Anchor middle  me.Descender                BASE]}}
-	define markBelowTack        {.anchors {.below       [ta : new Anchor middle  me.tackBot                  BASE]}}
-	define markBelowOper        {.anchors {.below       [ta : new Anchor middle  me.operBot                  BASE]}}
-	define markBelowPlus        {.anchors {.below       [ta : new Anchor middle  me.plusBot                  BASE]}}
-	define markBelowZero        {.anchors {.below       [ta : new Anchor middle  0                           BASE]}}
-	define markToprightLower    {.anchors {.topright    [ta : new Anchor rightSB me.XH                       BASE]}}
-	define markToprightCap      {.anchors {.topright    [ta : new Anchor rightSB me.CAP                      BASE]}}
-	define markBottomrightLower {.anchors {.bottomright [ta : new Anchor rightSB me.Descender                BASE]}}
-	define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor rightSB 0                           BASE]}}
-	define markTieAbove         {.anchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)  BASE]}}
-	define markTieBelow         {.anchors {.tieBelow    [ta : new Anchor width   me.Descender                BASE]}}
+	define markAboveLower       {.baseAnchors {.above       [ta : new Anchor middle  me.XH                     ]}}
+	define markAboveOper        {.baseAnchors {.above       [ta : new Anchor middle  me.operTop                ]}}
+	define markAboveTack        {.baseAnchors {.above       [ta : new Anchor middle  me.tackTop                ]}}
+	define markAbovePlus        {.baseAnchors {.above       [ta : new Anchor middle  me.plusTop                ]}}
+	define markAboveCap         {.baseAnchors {.above       [ta : new Anchor middle  me.CAP                    ]}}
+	define markBelowLower       {.baseAnchors {.below       [ta : new Anchor middle  me.Descender              ]}}
+	define markBelowTack        {.baseAnchors {.below       [ta : new Anchor middle  me.tackBot                ]}}
+	define markBelowOper        {.baseAnchors {.below       [ta : new Anchor middle  me.operBot                ]}}
+	define markBelowPlus        {.baseAnchors {.below       [ta : new Anchor middle  me.plusBot                ]}}
+	define markBelowZero        {.baseAnchors {.below       [ta : new Anchor middle  0                         ]}}
+	define markToprightLower    {.baseAnchors {.topright    [ta : new Anchor rightSB me.XH                     ]}}
+	define markToprightCap      {.baseAnchors {.topright    [ta : new Anchor rightSB me.CAP                    ]}}
+	define markBottomrightLower {.baseAnchors {.bottomright [ta : new Anchor rightSB me.Descender              ]}}
+	define markBottomrightZero  {.baseAnchors {.bottomright [ta : new Anchor rightSB 0                         ]}}
+	define markTieAbove         {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
+	define markTieBelow         {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
 
 	define [buildStandardMarkSet] : begin
-		local a : compsiteMarkSet.apply null arguments
-		set a.anchors.overlay : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x me.OverlayPos]
-			* [mix a.anchors.below.y a.anchors.above.y me.OverlayPos]
-			* BASE
-		set a.anchors.slash : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x 0.5]
-			* [mix a.anchors.below.y a.anchors.above.y 0.5]
-			* BASE
+		local a : compositeBaseAnchors.apply null arguments
+		set a.baseAnchors.overlay : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x me.OverlayPos]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y me.OverlayPos]
+		set a.baseAnchors.slash : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x 0.5]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
 		return a
 
 	return : object
