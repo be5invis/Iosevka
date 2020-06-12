@@ -256,23 +256,24 @@ glyph-block Numbers : begin
 		if SLAB : begin
 			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
 
-	define [FourOpenShape top] : glyph-construction
-		local bar (top * 0.4)
-		local vert0 : mix SB RightSB 0.825
-		local p 1
+	define [FourOpenShape top crossing] : glyph-construction
+		local yBar (top * 0.4)
 		local fine : adviceBlackness 3
 
-		include : HBarTop SB RightSB bar
-		include : VBarRight vert0 0 [mix (bar - Stroke) top 0.75]
-		include : VBarLeft SB bar top
+		define xVertBar : mix SB RightSB [if crossing 0.825 0.9125]
+		define xHBarTerminal : if crossing RightSB xVertBar
+
+		include : HBarTop SB xHBarTerminal yBar
+		include : VBarRight xVertBar 0 [mix (yBar - Stroke) top 0.75]
+		include : VBarLeft SB yBar top
 		if SLAB : begin
-			include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
 
 	create-glyph 'four.lnum.closed' : glyph-construction
 		include MarkSet.capital
 		include : FourStdShape CAP false true
 
-	create-glyph 'four.lnum.openNonCrossing' : glyph-construction
+	create-glyph 'four.lnum.closedNonCrossing' : glyph-construction
 		include MarkSet.capital
 		include : FourStdShape CAP false false
 
@@ -286,14 +287,18 @@ glyph-block Numbers : begin
 
 	create-glyph 'four.lnum.open' : glyph-construction
 		include MarkSet.capital
-		include : FourOpenShape CAP
+		include : FourOpenShape CAP true
+
+	create-glyph 'four.lnum.openNonCrossing' : glyph-construction
+		include MarkSet.capital
+		include : FourOpenShape CAP false
 
 	create-glyph 'four.onum.closed' : glyph-construction
 		include MarkSet.p
 		include : FourStdShape (XH - Descender) false true
 		include : ShiftDown
 
-	create-glyph 'four.onum.openNonCrossing' : glyph-construction
+	create-glyph 'four.onum.closedNonCrossing' : glyph-construction
 		include MarkSet.capital
 		include : FourStdShape  (XH - Descender) false false
 		include : ShiftDown
@@ -310,7 +315,12 @@ glyph-block Numbers : begin
 
 	create-glyph 'four.onum.open' : glyph-construction
 		include MarkSet.p
-		include : FourOpenShape (XH - Descender)
+		include : FourOpenShape (XH - Descender) true
+		include : ShiftDown
+
+	create-glyph 'four.onum.openNonCrossing' : glyph-construction
+		include MarkSet.p
+		include : FourOpenShape (XH - Descender) false
 		include : ShiftDown
 
 	select-variant 'four.lnum' '4' (follow -- 'four')
@@ -361,11 +371,11 @@ glyph-block Numbers : begin
 		save 'zhuangtonefive' 0x1BD
 
 	define [OpenContourSixShape charTop] : glyph-construction
-		local oTop (charTop * 0.6)
+		local oTop : charTop * 0.55 + Stroke / 2
 		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
 		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
-		local fine   : adviceBlackness 5.5
-		local coFine : adviceBlackness 3.5
+		local fine   : Stroke * CThinB
+		local coFine : Math.max [adviceBlackness 3.5] (Stroke - fine / 2)
 		include : dispiro
 			widths.rhs fine
 			g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine)
@@ -384,7 +394,7 @@ glyph-block Numbers : begin
 
 	define [ClosedContourNineShape top] : glyph-construction
 		local u top
-		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.425 - HalfStroke)
+		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.45 - HalfStroke)
 		local l (SB + OX)
 		local r (RightSB - OX)
 		local ymiddlea : mix u d 0.5
@@ -405,6 +415,35 @@ glyph-block Numbers : begin
 			hookend O
 			g4 SB Hook
 
+	define [StraightBarSixShape charTop] : begin
+		local oTop : charTop * 0.55 + Stroke / 2
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
+		local fine   : Stroke * CThinB
+		local coFine : Math.max [adviceBlackness 3.5] (Stroke - fine / 2)
+
+		local xTerminal : [mix SB RightSB 0.6] - 0.5 * Stroke * HVContrast
+		local xMockBarStart   0
+		local yMockBarStart : ymiddlea + Stroke * 0.3
+		local pStraightBarStart : 0.75 - (Stroke / charTop)
+		return : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				widths.rhs fine
+				g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine)
+				archv
+				g4 (SB + OX + (Stroke - fine) * HVContrast) ymiddlea
+				arcvh
+				g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
+				archv
+				g4.down.mid (RightSB - OX) ymiddleb
+				arcvh
+				g4.left.mid (Middle + CorrectionOMidS) (O)
+				archv
+				g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
+				flat [mix xMockBarStart xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs]
+				curl [mix xMockBarStart xTerminal 2]                 [mix yMockBarStart charTop 2]
+
 	sketch # six
 		include MarkSet.capital
 		include : OpenContourSixShape CAP
@@ -418,6 +457,12 @@ glyph-block Numbers : begin
 
 		save 'six.lnum.closedContour'
 		save 'six.onum.closedContour'
+
+	sketch # six
+		include MarkSet.capital
+		include : StraightBarSixShape CAP
+		save 'six.lnum.straightBar'
+		save 'six.onum.straightBar'
 
 	select-variant 'six.lnum' '6' (follow -- 'six')
 	select-variant 'six.onum' (follow -- 'six')
@@ -549,6 +594,18 @@ glyph-block Numbers : begin
 		include : OpenContourSixShape CAP
 		include : FlipAround (Middle) (XH / 2)
 		save 'nine.onum.openContour'
+
+	sketch
+		include MarkSet.capital
+		include : StraightBarSixShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+		save 'nine.lnum.straightBar'
+
+	sketch
+		include MarkSet.p
+		include : StraightBarSixShape CAP
+		include : FlipAround (Middle) (XH / 2)
+		save 'nine.onum.straightBar'
 
 	select-variant 'nine.lnum' '9' (follow -- 'nine')
 	select-variant 'nine.onum' (follow -- 'nine')
