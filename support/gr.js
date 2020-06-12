@@ -43,6 +43,17 @@ const TieGlyph = {
 	}
 };
 
+const DoNotDeriveVariants = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.DoNotDeriveVariants;
+		else return null;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.DoNotDeriveVariants = true;
+	}
+};
+
 const CvTagCache = new Map();
 function Cv(tag) {
 	if (CvTagCache.has(tag)) return CvTagCache.get(tag);
@@ -79,6 +90,20 @@ const AnyCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
+			for (const tag in glyph.related.cv) {
+				const rel = Cv(tag);
+				if (rel.get(glyph)) ret.push(rel);
+			}
+		}
+		return ret;
+	}
+};
+
+const AnyDerivingCv = {
+	optional: false,
+	query(glyph) {
+		let ret = [];
+		if (glyph && !DoNotDeriveVariants.get(glyph) && glyph.related && glyph.related.cv) {
 			for (const tag in glyph.related.cv) {
 				const rel = Cv(tag);
 				if (rel.get(glyph)) ret.push(rel);
@@ -183,3 +208,5 @@ exports.getGrTree = getGrTree;
 exports.getGrMesh = getGrMesh;
 exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
+exports.DoNotDeriveVariants = DoNotDeriveVariants;
+exports.AnyDerivingCv = AnyDerivingCv;
