@@ -89,8 +89,8 @@ glyph-block AutoBuild-Enclosure : begin
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * Width / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
-	define [EnsureInnerSubGlyphImpl miniatureFont digits finalPlacement dscale xCompress shift] : lambda [gidPart] : begin
-		define gniPart : '.ci.' + gidPart + '@' + [{ digits finalPlacement dscale xCompress shift }.join '/']
+	define [EnsureInnerSubGlyphImpl miniatureFont prefix finalPlacement dscale xCompress shift] : lambda [gidPart] : begin
+		define gniPart : '.ci.' + gidPart + '@' + [{ prefix finalPlacement dscale xCompress shift }.join '/']
 		if [not : query-glyph gniPart] : create-glyph gniPart : glyph-construction
 			set-width 0
 			include miniatureFont.(gidPart)
@@ -103,7 +103,10 @@ glyph-block AutoBuild-Enclosure : begin
 			apply-transform : Translate finalPlacement 0
 		return gniPart
 
-	define [EnsureInnerSubGlyphSeq miniatureFont digits dscale parts width mockInnerWidth bal baly] : begin
+	define [EnsureInnerSubGlyphSeq miniatureFont prefix job dimens] : begin
+		define { gn unicode parts w bal baly }      job
+		define [object width mockInnerWidth dscale] dimens
+
 		local totalWidth 0
 		local firstDerivedGyph null
 		local shift 0
@@ -122,13 +125,15 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach partIndex [range 0 parts.length] : do
 			define gidPart parts.(partIndex)
 			define finalPlacement : accumulatedAdvanceSoFar - width / 2 - totalWidth * dscale / 2
-			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont digits finalPlacement dscale xCompress shift
+			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont prefix finalPlacement dscale xCompress shift
 			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + miniatureFont.(gidPart).advanceWidth * dscale * xCompress
 
 		return finalParts
 
-	define [EnclosureInner gnEnclosure miniatureFont digits dscale parts width mockInnerWidth bal baly] : begin
-		local finalParts : EnsureInnerSubGlyphSeq miniatureFont digits dscale parts width mockInnerWidth bal baly
+	define [EnclosureInner gnEnclosure miniatureFont prefix job dimens] : begin
+		define { gn unicode parts w bal baly }      job
+		define [object width mockInnerWidth dscale] dimens
+		local finalParts : EnsureInnerSubGlyphSeq miniatureFont prefix job dimens
 		local inner : create-glyph : glyph-construction
 			foreach [gidPart : items-of finalParts] : include [refer-glyph gidPart]
 			apply-transform : Translate width 0
@@ -178,8 +183,8 @@ glyph-block AutoBuild-Enclosure : begin
 			define miniatureFont : CreateDerivedFontFromJobs jobs {} : CircledMiniatureFont digits ww
 			define gnEnclosure : CircName null (prefix + digits + '.enclosure') {} suffix
 			if [not : query-glyph gnEnclosure] : create-glyph gnEnclosure : fnEnclosure ww gap
-			foreach job [items-of jobs.decomposableJobs] : fn ww gap job miniatureFont gnEnclosure true
-			foreach job [items-of jobs.nonDecomposable]  : fn ww gap job miniatureFont gnEnclosure false
+			foreach job [items-of jobs.decomposableJobs] : fn (prefix + digits) ww gap job miniatureFont gnEnclosure true
+			foreach job [items-of jobs.nonDecomposable]  : fn (prefix + digits) ww gap job miniatureFont gnEnclosure false
 			applyRelations jobs.relApplications
 
 	define [createCircledGlyphs digits demands] : EnclosureT 'circle' DECOMPOSABLE digits demands
@@ -187,13 +192,14 @@ glyph-block AutoBuild-Enclosure : begin
 			define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 			set-width width
 			include : OShape top bot left right sw smoothA smoothB
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
-				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 				include : refer-glyph gnEnclosure
 
 	define [createBoxedGlyphs digits demands] : EnclosureT 'boxed' DECOMPOSABLE digits demands
@@ -205,13 +211,14 @@ glyph-block AutoBuild-Enclosure : begin
 				HBarBottom left right bot sw
 				VBarLeft   left bot top   sw
 				VBarRight  right bot top  sw
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
-				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 				include : refer-glyph gnEnclosure
 
 	define [createInsetCircledGlyphs digits demands] : EnclosureT 'inset-circle' NON-DECOMPOSABLE digits demands
@@ -219,15 +226,16 @@ glyph-block AutoBuild-Enclosure : begin
 			define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 			set-width width
 			include : OShapeOutline top bot left right sw smoothA smoothB
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
 				include : difference
 					refer-glyph gnEnclosure
-					EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+					EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 
 	define [createInsetBoxedGlyphs digits demands] : EnclosureT 'inset-boxed' NON-DECOMPOSABLE digits demands
 		lambda [ww gap] : glyph-construction
@@ -239,15 +247,16 @@ glyph-block AutoBuild-Enclosure : begin
 				corner right bot
 				corner right top
 				close
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
 				include : difference
 					refer-glyph gnEnclosure
-					EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+					EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 
 	define [createInsetMosaicGlyphs digits demands] : EnclosureT 'inset-mosaic' NON-DECOMPOSABLE digits demands
 		lambda [ww gap] : glyph-construction
@@ -260,15 +269,16 @@ glyph-block AutoBuild-Enclosure : begin
 				corner mosaicRight mosaicBot
 				corner mosaicRight mosaicTop
 				close
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
 				include : difference
 					refer-glyph gnEnclosure
-					EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+					EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 
 	define [createDoubleCircledGlyphs digits demands] : EnclosureT 'double-circle' DECOMPOSABLE digits demands
 		lambda [ww gap] : glyph-construction
@@ -284,13 +294,14 @@ glyph-block AutoBuild-Enclosure : begin
 				begin sw1
 				smoothA - sw + sw1
 				smoothB - sw + sw1
-		lambda [ww gap job miniatureFont gnEnclosure decomposable] : begin
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
-			define [object width mockInnerWidth dscale] : circleDimens digits ww (ww * gap)
+			define dimens : circleDimens digits ww (ww * gap)
+			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn : glyph-construction
 				set-width width
 				if (w == ww && unicode) : assign-unicode unicode
-				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 				include : refer-glyph gnEnclosure
 
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
@@ -307,7 +318,8 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createBracedGlyphs digits demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
-			define jobs : CollectJobs DECOMPOSABLE ('braced' + digits) suffix demands
+			define prefix ('braced' + digits)
+			define jobs : CollectJobs DECOMPOSABLE prefix suffix demands
 			define miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature
 				glyphs  -- gs
 				crowd   -- [BraceCrowd digits ww]
@@ -339,11 +351,12 @@ glyph-block AutoBuild-Enclosure : begin
 			define [CreateGlyphImpl jobDecomposable job] : begin
 				local {gn unicode parts w bal baly} job
 				if [not : query-glyph gn] : create-glyph gn : glyph-construction
-					define [object width mockInnerWidth dscale] : bracedDottdeDimens digits ww
+					define dimens : bracedDottdeDimens digits ww
+					define [object width mockInnerWidth dscale] dimens
 					set-width width
 					if (w == ww) : assign-unicode unicode
 					include : refer-glyph gnb
-					include : EnclosureInner [if jobDecomposable gnb null] miniatureFont digits dscale parts width mockInnerWidth bal baly
+					include : EnclosureInner [if jobDecomposable gnb null] miniatureFont prefix job dimens
 
 			foreach job [items-of jobs.decomposableJobs] : CreateGlyphImpl true job
 			foreach job [items-of jobs.nonDecomposable]  : CreateGlyphImpl false job
