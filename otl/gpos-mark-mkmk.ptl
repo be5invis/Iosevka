@@ -3,7 +3,7 @@ extern Set
 
 define MarkClasses {
 	'above' 'below' 'overlay' 'slash' 'topright' 'bottomright'
-	'trailing' 'lf' 'tieAbove' 'tieBelow'
+	'trailing' 'lf' 'tieAbove' 'tieBelow' 'aboveBrace' 'belowBrace'
 }
 
 export : define [buildMarkMkmk sink glyphList] : begin
@@ -16,16 +16,32 @@ export : define [buildMarkMkmk sink glyphList] : begin
 	local mkmkLookupNames {}
 
 	foreach markCls [items-of MarkClasses] : begin
-		local markLookup : add-lookup sink : createMTLookup glyphList 'gpos_mark_to_base' { markCls }
-		mark.lookups.push    markLookup
-		markLookupNames.push markLookup
+		local [object markSubtable mkmkSubtable] : createMTSubtables glyphList { markCls }
+		if ([objectIsNotEmpty markSubtable.marks] && [objectIsNotEmpty markSubtable.bases]) : begin
+			local markLookup : add-lookup sink {.type 'gpos_mark_to_base' .subtables { markSubtable }}
+			mark.lookups.push    markLookup
+			markLookupNames.push markLookup
 
-		local mkmkLookup : add-lookup sink : createMTLookup glyphList 'gpos_mark_to_mark' { markCls }
-		mkmk.lookups.push    mkmkLookup
-		mkmkLookupNames.push mkmkLookup
+		if ([objectIsNotEmpty mkmkSubtable.marks] && [objectIsNotEmpty mkmkSubtable.bases]) : begin
+			local mkmkLookup : add-lookup sink {.type 'gpos_mark_to_mark' .subtables { mkmkSubtable }}
+			mkmk.lookups.push    mkmkLookup
+			mkmkLookupNames.push mkmkLookup
 
 	foreach markLookup [items-of markLookupNames] : foreach mkmkLookup [items-of mkmkLookupNames]
 		sink.lookupDep.push { markLookup mkmkLookup }
+
+define [createMTSubtables glyphList markClasses] : begin
+	local markSubtable {.marks {.} .bases {.}}
+	local mkmkSubtable {.marks {.} .bases {.}}
+	local allowMarkClsSet : new Set markClasses
+	foreach glyph [items-of glyphList] : begin
+		createMarkInfo markSubtable.marks glyph allowMarkClsSet
+		createMarkInfo mkmkSubtable.marks glyph allowMarkClsSet
+		local isMark : objectIsNotEmpty glyph.markAnchors
+		if isMark
+			createBaseInfo mkmkSubtable.bases glyph allowMarkClsSet
+			createBaseInfo markSubtable.bases glyph allowMarkClsSet
+	return : object markSubtable mkmkSubtable
 
 define [createBaseInfo sink glyph allowMarkClsSet] : begin
 	local res {.}
@@ -43,11 +59,4 @@ define [createMarkInfo sink glyph allowMarkClsSet] : begin
 	if m : set sink.(glyph.name) m
 	return m
 
-define [createMTLookup glyphList lookupType markClasses] : begin
-	local subtable {.marks {.} .bases {.}}
-	local allowMarkClsSet : new Set markClasses
-	foreach glyph [items-of glyphList] : begin
-		local markRecord : createMarkInfo subtable.marks glyph allowMarkClsSet
-		if ((lookupType == 'gpos_mark_to_base') != !(!markRecord)) : begin
-			createBaseInfo subtable.bases glyph allowMarkClsSet
-	return {.type lookupType .subtables {subtable}}
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

@@ -111,12 +111,14 @@ function markLookups(gsub, sink) {
 function markSubtable(sink, type, st, cfg) {
 	switch (type) {
 		case "gsub_single":
-		case "gsub_multi":
 			for (const k in st) if (sink.has(k) && st[k]) sink.add(st[k]);
+			break;
+		case "gsub_multiple":
+			for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 			break;
 		case "gsub_alternate":
 			if (!cfg || !cfg.ignoreAltSub) {
-				for (const k in st) if (sink.has(k) && st[k]) sink.add(st[k]);
+				for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 			}
 			break;
 		case "gsub_ligature":

@@ -1,32 +1,49 @@
-import [add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
-import [AnyCv] from "../support/gr"
+import [add-lookup add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
+import [AnyCv CvDecompose] from "../support/gr"
+extern Set
 
 define [FeatureName tag] : tag + '_cvss'
 define [LookupName tag]  : 'lookup_cvss_' + tag
 
-export : define [buildCVSS sink para glyphList] : begin
+export : define [buildCVSS sink para glyphs glyphList] : begin
 	if [not para.enableCvSs] : return nothing
 
 	local rec : BeginLookupBlock sink
+	local cvLookupNameSet : new Set
+
+	# Decomposition of enclosures
+	define decompositions {.}
+	foreach {gid g} [pairs-of glyphs] : begin
+		local parts : CvDecompose.get g
+		if (parts && parts.length) : set decompositions.(gid) parts
+
+	define lookupCvDecompose : add-lookup sink : object
+		.type 'gsub_multiple'
+		.subtables : list decompositions
 
 	# cvxx
 	foreach [glyph : items-of glyphList]
 		foreach [gr : items-of : AnyCv.query glyph] : if gr.tag : begin
-			local feature : pick-feature sink [FeatureName gr.tag]
-			add-common-feature sink feature
+			local lookupName : LookupName gr.tag
+			if [not : cvLookupNameSet.has lookupName] : begin
+				local feature : pick-feature sink [FeatureName gr.tag]
+				add-common-feature sink feature
 
-			local lookup : pick-lookup sink [LookupName gr.tag]
-				begin {.type 'gsub_single' .subtables {{.}}}
-			add-feature-lookup feature [LookupName gr.tag]
+				local lookup : pick-lookup sink lookupName
+					begin {.type 'gsub_single' .subtables {{.}}}
+				add-feature-lookup feature lookupCvDecompose
+				add-feature-lookup feature lookupName
+				sink.lookupDep.push { lookupCvDecompose lookupName }
+				cvLookupNameSet.add lookupName
 
-			set lookup.subtables.0.(glyph.name) [gr.get glyph]
+			set [pick-lookup sink lookupName].subtables.0.(glyph.name) [gr.get glyph]
 
 	# ssxx
 	foreach [{name composition} : pairs-of para.variants] : begin
 		if (name.length === 4 && composition.__isComposite && [name.slice 0 2] === 'ss') : begin
 			local feature : pick-feature sink [FeatureName name]
 			add-common-feature sink feature
-
+			add-feature-lookup feature lookupCvDecompose
 			foreach [{ch tag} : pairs-of composition.__cvmap]
 				add-feature-lookup feature [LookupName tag]
 

@@ -16,6 +16,30 @@ const Dotless = {
 	}
 };
 
+const CvDecompose = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.CvDecompose;
+		else return null;
+	},
+	set(glyph, composition) {
+		if (!Array.isArray(composition)) throw new Error("Must supply a GID array");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.CvDecompose = composition;
+	}
+};
+
+const CcmpDecompose = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.CcmpDecompose;
+		else return null;
+	},
+	set(glyph, composition) {
+		if (!Array.isArray(composition)) throw new Error("Must supply a GID array");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.CcmpDecompose = composition;
+	}
+};
+
 const TieMark = {
 	tag: "TMRK",
 	get(glyph) {
@@ -210,3 +234,5 @@ exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
 exports.DoNotDeriveVariants = DoNotDeriveVariants;
 exports.AnyDerivingCv = AnyDerivingCv;
+exports.CcmpDecompose = CcmpDecompose;
+exports.CvDecompose = CvDecompose;

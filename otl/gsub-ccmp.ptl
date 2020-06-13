@@ -1,5 +1,5 @@
 import [add-common-feature add-feature add-lookup ChainRuleBuilder BeginLookupBlock EndLookupBlock] from "./table-util"
-import [Dotless TieMark TieGlyph] from "../support/gr"
+import [Dotless TieMark TieGlyph CcmpDecompose] from "../support/gr"
 extern Set
 
 define-operator "~>" 880 'right' : syntax-rules
@@ -203,6 +203,7 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 			chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiToToneEnd 3]
 			chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiToToneEnd 4]
 
+
 	ccmp.lookups.push lookupCcmp1 lookupCcmp2 lookupCcmp-TieMarkContextual
 	ccmp.lookups.push lookupCcmp-ToneStart lookupCcmp-ToneMid lookupCcmp-ToneEnd
 	sink.lookupDep.push {lookupCcmp-ToneStart lookupCcmp-ToneMid}
@@ -210,6 +211,20 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 	ccmp.lookups.push lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd
 	sink.lookupDep.push {lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid}
 	sink.lookupDep.push {lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd}
-	add-common-feature sink ccmp
 
+	# CCMP decomposition
+	define decompositions {.}
+	foreach {gid g} [pairs-of glyphs] : begin
+		local parts : CcmpDecompose.get g
+		if (parts && parts.length) : set decompositions.(gid) parts
+
+	if [objectIsNotEmpty decompositions] : begin
+		ccmp.lookups.push lookupCcmp-Decompose
+		define lookupCcmp-Decompose : add-lookup sink : object
+			.type 'gsub_multiple'
+			.subtables : list decompositions
+
+	add-common-feature sink ccmp
 	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

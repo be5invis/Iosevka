@@ -59,14 +59,14 @@ export all : class Glyph
 			foreach [point : items-of contour] : c.push : Point.translated point shiftx shifty
 			this.contours.push c
 
-	public [combineAnchor markCls shift baseThis markThat baseThat] : begin
+	public [combineAnchor markCls shift baseThis markThat basesThat] : begin
 		if (!baseThis || !markThat) : return nothing
 		set shift.x : baseThis.x - markThat.x
 		set shift.y : baseThis.y - markThat.y
-		if (baseThat) : set this.baseAnchors.(markCls) : new Anchor
-			* (baseThis.x + baseThat.x - markThat.x)
-			* (baseThis.y + baseThat.y - markThat.y)
-			* Anchor.BASE
+		if basesThat : foreach {bk baseThat} [pairs-of basesThat] : begin
+			set this.baseAnchors.(bk) : new Anchor
+				* (shift.x + baseThat.x)
+				* (shift.y + baseThat.y)
 
 	public [includeGlyph glyph copyAnchors copyWidth] : begin
 		if (glyph <@ Function) : begin
@@ -75,8 +75,7 @@ export all : class Glyph
 		local shift {.x 0 .y 0}
 		if glyph.markAnchors : foreach { markid baseThis } [pairs-of this.baseAnchors] : begin
 			local markThat glyph.markAnchors.(markid)
-			local baseThat glyph.baseAnchors.(markid)
-			this.combineAnchor markid shift baseThis markThat baseThat
+			this.combineAnchor markid shift baseThis markThat glyph.baseAnchors
 
 		this.includeGeometry glyph shift.x shift.y
 		if ((copyAnchors || glyph.isMarkSet) && glyph.markAnchors) : begin
