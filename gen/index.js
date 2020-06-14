@@ -46,7 +46,7 @@ async function getParameters(argv) {
 	para.defaultBuildup = ligationData.defaultBuildup;
 	para.ligation = Parameters.build(ligationData.hives, ["default", ...argv.hives]);
 
-	if (argv.excludedCharRanges) para.excludedCodePointRanges = argv.excludedCharRanges;
+	if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
 	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 

@@ -1,12 +1,12 @@
 "use strict";
 
-const Glyph = require("./glyph");
 const autoRef = require("./autoref");
 const caryllShapeOps = require("caryll-shapeops");
-const curveUtil = require("./curve-util");
-const { fairifyQuad } = require("./fairify");
-const Transform = require("./transform");
-const { AnyCv } = require("./gr");
+const curveUtil = require("../../support/curve-util");
+const { fairifyQuad } = require("../../support/fairify");
+const Transform = require("../../support/transform");
+const { AnyCv } = require("../../support/gr");
+const gcFont = require("./gc");
 
 function regulateGlyph(g, skew) {
 	if (!g.contours) return;
@@ -15,7 +15,7 @@ function regulateGlyph(g, skew) {
 	for (let k = 0; k < g.contours.length; k++) {
 		const contour = g.contours[k];
 		for (let p = 0; p < contour.length; p++) {
-			contour[p].x += contour[p].y * skew;
+			contour[p].x -= contour[p].y * skew;
 		}
 	}
 
@@ -24,7 +24,7 @@ function regulateGlyph(g, skew) {
 	for (let k = 0; k < g.contours.length; k++) {
 		const contour = g.contours[k];
 		for (let p = 0; p < contour.length; p++) {
-			contour[p].x -= contour[p].y * skew;
+			contour[p].x += contour[p].y * skew;
 		}
 	}
 }
@@ -59,7 +59,9 @@ function byRank(a, b) {
 	return (b.glyphRank || 0) - (a.glyphRank || 0) || (a.glyphOrder || 0) - (b.glyphOrder || 0);
 }
 
-module.exports = function (gs, skew) {
+function regulateGlyphList(para, gs) {
+	const skew = Math.tan(((para.italicAngle || 0) / 180) * Math.PI);
+
 	const excludeUnicode = new Set();
 	excludeUnicode.add(0x80);
 	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicode.add(c);
@@ -82,4 +84,33 @@ module.exports = function (gs, skew) {
 
 	// reorder
 	return gs.sort(byRank);
+}
+
+function filterWideGlyphs(para, glyphList) {
+	if (para.forceMonospace && para.spacing == 0) {
+		for (const g of glyphList) g.advanceWidth = Math.round(g.advanceWidth || 0);
+		return glyphList.filter(g => !(g.advanceWidth > Math.round(para.width)));
+	}
+	return glyphList;
+}
+
+function extractGlyfCmap(glyphList, font) {
+	const glyf = {};
+	const cmap = {};
+	for (let g of glyphList) {
+		glyf[g.name] = g;
+
+		if (!g.unicode) continue;
+		for (let u of g.unicode) {
+			if (isFinite(u - 0)) cmap[u] = g.name;
+		}
+	}
+	font.glyf = glyf;
+	font.cmap = cmap;
+}
+
+module.exports = function finalizeFont(para, rawGlyphList, excludedCodePoints, font) {
+	const glyphList = filterWideGlyphs(para, rawGlyphList);
+	gcFont(glyphList, excludedCodePoints, font, {});
+	extractGlyfCmap(regulateGlyphList(para, glyphList), font);
 };

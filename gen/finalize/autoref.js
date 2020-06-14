@@ -1,6 +1,6 @@
 "use strict";
 
-const Point = require("./point");
+const Point = require("../../support/point");
 
 function delta(a, b) {
 	return Math.round((a - b) * 32);
