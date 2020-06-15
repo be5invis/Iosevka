@@ -182,7 +182,7 @@ function autoCubify(arc, err) {
 			if (s > 0) offPoints.push(z0);
 			offPoints.push(z1, z2);
 
-			const bezArc = new typoGeom.Curve.Bez3(z0, z1, z2, z3);
+			const bezArc = new typoGeom.Arc.Bez3(z0, z1, z2, z3);
 
 			for (let k = 1; k < perSegHits; k++) {
 				const tk = k / perSegHits;

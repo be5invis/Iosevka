@@ -201,7 +201,7 @@ class BezierCurveCluster {
 			if (zs[j].on) {
 				const z1 = last,
 					z4 = zs[j];
-				const seg = new typoGeom.Curve.StraightSegment(z1, z4);
+				const seg = new typoGeom.Arc.StraightSegment(z1, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -210,7 +210,7 @@ class BezierCurveCluster {
 					z2 = zs[j],
 					z3 = zs[j + 1],
 					z4 = zs[j + 2];
-				const seg = new typoGeom.Curve.Bez3(z1, z2, z3, z4);
+				const seg = new typoGeom.Arc.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
