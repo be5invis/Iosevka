@@ -730,23 +730,23 @@ glyph-block CommonShapes : begin
 		define overlay    : create-glyph : glyph-construction : include fnOverlay    AS_BASE ALSO_METRICS
 		define background : create-glyph : glyph-construction : include fnBackground AS_BASE ALSO_METRICS
 
+		candidates.push : glyph-construction
+			set this.gizmo : Translate 0 0
+			foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
+				define x z.x
+				define y z.y
+				include : spiro-outline
+					corner (x - sw) (y - sw)
+					corner (x + sw) (y - sw)
+					corner (x + sw) (y + sw)
+					corner (x - sw) (y + sw)
+
 		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
 			define dx : r / segs * sw
 			define dy : c / segs * sw
 			candidates.push : glyph-construction
 				include overlay
 				apply-transform : Translate dx dy
-
-		foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
-			define x z.x
-			define y z.y
-			candidates.push : glyph-construction
-				set this.gizmo : Translate 0 0
-				include : spiro-outline
-					corner (x - sw) (y - sw)
-					corner (x + sw) (y - sw)
-					corner (x + sw) (y + sw)
-					corner (x - sw) (y + sw)
 
 		include : difference background [union.apply null candidates]
 		include overlay

@@ -1,12 +1,12 @@
 "use strict";
 
 const autoRef = require("./autoref");
-const caryllShapeOps = require("caryll-shapeops");
-const curveUtil = require("../../support/curve-util");
+const TypoGeom = require("typo-geom");
+const CurveUtil = require("../../support/curve-util");
 const { fairifyQuad } = require("../../support/fairify");
-const Transform = require("../../support/transform");
 const { AnyCv } = require("../../support/gr");
 const gcFont = require("./gc");
+const { SpiroContourContext } = require("../../support/spiroexpand");
 
 function regulateGlyph(g, skew) {
 	if (!g.contours) return;
@@ -29,18 +29,20 @@ function regulateGlyph(g, skew) {
 	}
 }
 
-function simplifyContours(contours) {
-	const gizmo = Transform.Id();
-	const source = [];
-	for (const contour of contours) {
-		if (contour.length > 2) source.push(curveUtil.convertContourToCubic(contour));
-	}
-	const simplified = caryllShapeOps.removeOverlap(source, 1, 1 << 17, true);
+function simplifyContours(source) {
+	const simplifiedArcs = TypoGeom.Boolean.removeOverlap(
+		CurveUtil.convertShapeToArcs(source),
+		TypoGeom.Boolean.PolyFillType.pftNonZero,
+		1 << 17
+	);
+
+	const sc = new SpiroContourContext();
+	TypoGeom.transferBezArcShape(simplifiedArcs, sc);
 
 	const result = [];
-	for (const contour of simplified) {
+	for (const contour of sc.contours) {
 		if (contour.length <= 2) continue;
-		result.push(curveUtil.cleanupQuadContour(fairifyQuad(contour, gizmo)));
+		result.push(CurveUtil.cleanupQuadContour(fairifyQuad(contour)));
 	}
 	return result;
 }
@@ -99,8 +101,8 @@ function extractGlyfCmap(glyphList, font) {
 	const cmap = {};
 	for (let g of glyphList) {
 		glyf[g.name] = g;
-
 		if (!g.unicode) continue;
+
 		for (let u of g.unicode) {
 			if (isFinite(u - 0)) cmap[u] = g.name;
 		}

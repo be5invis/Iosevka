@@ -1,6 +1,6 @@
 "use strict";
 
-const typoGeom = require("typo-geom");
+const TypoGeom = require("typo-geom");
 const Point = require("./point");
 const { mix } = require("./utils");
 
@@ -182,7 +182,7 @@ function autoCubify(arc, err) {
 			if (s > 0) offPoints.push(z0);
 			offPoints.push(z1, z2);
 
-			const bezArc = new typoGeom.Arc.Bez3(z0, z1, z2, z3);
+			const bezArc = new TypoGeom.Arcs.Bez3(z0, z1, z2, z3);
 
 			for (let k = 1; k < perSegHits; k++) {
 				const tk = k / perSegHits;
@@ -215,8 +215,65 @@ function fixedCubify(arc, nSeg) {
 	return offPoints;
 }
 
+function convertContourToArcs(contour) {
+	if (!contour || !contour.length) return [];
+
+	const newContour = [];
+	let z0 = Point.cornerFrom(contour[0]);
+
+	for (let j = 1; j < contour.length; j++) {
+		const z = contour[j];
+		if (z.on) {
+			newContour.push(
+				TypoGeom.Arcs.Bez3.fromStraightSegment(
+					new TypoGeom.Arcs.StraightSegment(z0, Point.cornerFrom(z))
+				)
+			);
+			z0 = z;
+		} else if (z.cubic) {
+			const z1 = z;
+			const z2 = contour[j + 1];
+			const z3 = contour[j + 2];
+			newContour.push(
+				new TypoGeom.Arcs.Bez3(
+					z0,
+					Point.cubicOffFrom(z1),
+					Point.cubicOffFrom(z2),
+					Point.cornerFrom(z3)
+				)
+			);
+			z0 = z3;
+			j += 2;
+		} else {
+			const zc = z;
+			let zf = contour[j + 1] || contour[0];
+			const zfIsCorner = zf.on;
+			if (!zfIsCorner) zf = Point.cornerFrom(zc).mix(0.5, zf);
+
+			newContour.push(
+				new TypoGeom.Arcs.Bez3(
+					z0,
+					Point.cubicOffFrom(z0).mix(2 / 3, zc),
+					Point.cubicOffFrom(zf).mix(2 / 3, zc),
+					Point.cornerFrom(zf)
+				)
+			);
+
+			z0 = zf;
+			if (zfIsCorner) j++;
+		}
+	}
+
+	return newContour;
+}
+
+function convertShapeToArcs(shape) {
+	return shape.map(convertContourToArcs);
+}
+
 exports.cleanupQuadContour = cleanupQuadContour;
 exports.convertContourToCubic = convertContourToCubic;
 exports.convertContourToCubicRev = convertContourToCubicRev;
 exports.autoCubify = autoCubify;
 exports.fixedCubify = fixedCubify;
+exports.convertShapeToArcs = convertShapeToArcs;

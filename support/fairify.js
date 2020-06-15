@@ -1,9 +1,7 @@
 "use strict";
 
-const Transform = require("./transform");
 const typoGeom = require("typo-geom");
 const Point = require("./point");
-const curveUtil = require("./curve-util");
 
 const SMALL = 1e-6;
 
@@ -201,7 +199,7 @@ class BezierCurveCluster {
 			if (zs[j].on) {
 				const z1 = last,
 					z4 = zs[j];
-				const seg = new typoGeom.Arc.StraightSegment(z1, z4);
+				const seg = new typoGeom.Arcs.StraightSegment(z1, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -210,7 +208,7 @@ class BezierCurveCluster {
 					z2 = zs[j],
 					z3 = zs[j + 1],
 					z4 = zs[j + 2];
-				const seg = new typoGeom.Arc.Bez3(z1, z2, z3, z4);
+				const seg = new typoGeom.Arcs.Bez3(z1, z2, z3, z4);
 				segments.push(seg);
 				lengths.push(this.measureLength(seg));
 				last = z4;
@@ -288,15 +286,15 @@ class BezierCurveCluster {
 }
 
 const QuadBuilder = {
-	corner(sink, gizmo, z) {
-		sink.push(Transform.transformPoint(gizmo, Point.cornerFrom(z)).round(1024));
+	corner(sink, z) {
+		sink.push(Point.cornerFrom(z).round(1024));
 	},
-	arc(sink, gizmo, arc) {
+	arc(sink, arc) {
 		if (arc.isAlmostLinear(1 / 4)) return;
 		const offPoints = typoGeom.Quadify.auto(arc, 1 / 4);
 		if (!offPoints) return;
 		for (const z of offPoints) {
-			sink.push(Transform.transformPoint(gizmo, Point.offFrom(z)).round(1024));
+			sink.push(Point.offFrom(z).round(1024));
 		}
 	},
 	split: true,
@@ -304,55 +302,31 @@ const QuadBuilder = {
 	duplicateStart: true
 };
 
-const SpiroBuilder = {
-	corner(sink, gizmo, z) {
-		sink.push(Transform.transformPoint(gizmo, Point.cornerFrom(z)));
-	},
-	arc(sink, gizmo, arc) {
-		if (arc.isAlmostLinear(1 / 4)) return;
-		const offPoints = curveUtil.fixedCubify(arc, 12);
-		for (const z of offPoints) {
-			sink.push(Transform.transformPoint(gizmo, z));
-		}
-	},
-	split: true,
-	canonicalStart: false,
-	duplicateStart: false
-};
-
-function buildCurve(curve, gizmo, builder) {
+function buildCurve(curve, builder) {
 	let sink = [];
 	for (let j = 0; j < curve.length; j++) {
 		if (!curve[j].mark) continue;
-		builder.corner(sink, gizmo, curve[j]);
+		builder.corner(sink, curve[j]);
 
 		let k = j;
 		for (; k < curve.length && (k === j || !curve[k].mark); k++);
 		const pts = curve.slice(j, k + 1);
-		if (pts.length > 1) builder.arc(sink, gizmo, new BezierCurveCluster(pts));
+		if (pts.length > 1) builder.arc(sink, new BezierCurveCluster(pts));
 		j = k - 1;
 	}
 	return sink;
 }
 
-function fairifyImpl(sourceCubicContour, gizmo, builder) {
-	for (let j = 0; j < sourceCubicContour.length; j++) {
-		if (!isFinite(sourceCubicContour[j].x)) sourceCubicContour[j].x = 0;
-		if (!isFinite(sourceCubicContour[j].y)) sourceCubicContour[j].y = 0;
-		sourceCubicContour[j] = Transform.unTransform(gizmo, sourceCubicContour[j]);
-	}
+function fairifyImpl(sourceCubicContour, builder) {
 	let splitContour = toSpansForm(sourceCubicContour, builder.split);
 	markCorners(splitContour);
 	if (builder.canonicalStart) {
 		splitContour = canonicalStart(splitContour);
 		markCorners(splitContour);
 	}
-	return buildCurve(splitContour, gizmo, builder);
+	return buildCurve(splitContour, builder);
 }
 
-exports.fairifyQuad = function (sourceCubicContour, gizmo) {
-	return fairifyImpl(sourceCubicContour, gizmo, QuadBuilder);
-};
-exports.fairifySpiro = function (sourceCubicContour, gizmo) {
-	return fairifyImpl(sourceCubicContour, gizmo, SpiroBuilder);
+exports.fairifyQuad = function (sourceCubicContour) {
+	return fairifyImpl(sourceCubicContour, QuadBuilder);
 };
