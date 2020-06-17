@@ -2,67 +2,43 @@
 
 const autoRef = require("./autoref");
 const TypoGeom = require("typo-geom");
+const Point = require("../../support/point");
+
 const CurveUtil = require("../../support/curve-util");
-const { fairifyQuad } = require("../../support/fairify");
 const { AnyCv } = require("../../support/gr");
 const gcFont = require("./gc");
-const { SpiroContourContext } = require("../../support/spiroexpand");
 
-function regulateGlyph(g, skew) {
-	if (!g.contours) return;
+module.exports = function finalizeFont(para, rawGlyphList, excludedCodePoints, font) {
+	const glyphList = filterWideGlyphs(para, rawGlyphList);
+	gcFont(glyphList, excludedCodePoints, font, {});
+	extractGlyfCmap(regulateGlyphList(para, glyphList), font);
+};
 
-	// Regulate
-	for (let k = 0; k < g.contours.length; k++) {
-		const contour = g.contours[k];
-		for (let p = 0; p < contour.length; p++) {
-			contour[p].x -= contour[p].y * skew;
+function filterWideGlyphs(para, glyphList) {
+	if (para.forceMonospace && para.spacing == 0) {
+		for (const g of glyphList) g.advanceWidth = Math.round(g.advanceWidth || 0);
+		return glyphList.filter(g => !(g.advanceWidth > Math.round(para.width)));
+	}
+	return glyphList;
+}
+
+function extractGlyfCmap(glyphList, font) {
+	const glyf = {};
+	const cmap = {};
+	for (let g of glyphList) {
+		glyf[g.name] = g;
+		if (!g.unicode) continue;
+
+		for (let u of g.unicode) {
+			if (isFinite(u - 0)) cmap[u] = g.name;
 		}
 	}
-
-	g.contours = simplifyContours(g.contours);
-
-	for (let k = 0; k < g.contours.length; k++) {
-		const contour = g.contours[k];
-		for (let p = 0; p < contour.length; p++) {
-			contour[p].x += contour[p].y * skew;
-		}
-	}
-}
-
-function simplifyContours(source) {
-	const simplifiedArcs = TypoGeom.Boolean.removeOverlap(
-		CurveUtil.convertShapeToArcs(source),
-		TypoGeom.Boolean.PolyFillType.pftNonZero,
-		1 << 17
-	);
-
-	const sc = new SpiroContourContext();
-	TypoGeom.transferBezArcShape(simplifiedArcs, sc);
-
-	const result = [];
-	for (const contour of sc.contours) {
-		if (contour.length <= 2) continue;
-		result.push(CurveUtil.cleanupQuadContour(fairifyQuad(contour)));
-	}
-	return result;
-}
-
-function byGlyphPriority(a, b) {
-	const pri1 = a.autoRefPriority || 0;
-	const pri2 = b.autoRefPriority || 0;
-	if (pri1 > pri2) return -1;
-	if (pri1 < pri2) return 1;
-	if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
-	if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
-	return 0;
-}
-
-function byRank(a, b) {
-	return (b.glyphRank || 0) - (a.glyphRank || 0) || (a.glyphOrder || 0) - (b.glyphOrder || 0);
+	font.glyf = glyf;
+	font.cmap = cmap;
 }
 
 function regulateGlyphList(para, gs) {
-	const skew = Math.tan(((para.italicAngle || 0) / 180) * Math.PI);
+	const skew = Math.tan(((para.slantAngle || 0) / 180) * Math.PI);
 
 	const excludeUnicode = new Set();
 	excludeUnicode.add(0x80);
@@ -88,31 +64,103 @@ function regulateGlyphList(para, gs) {
 	return gs.sort(byRank);
 }
 
-function filterWideGlyphs(para, glyphList) {
-	if (para.forceMonospace && para.spacing == 0) {
-		for (const g of glyphList) g.advanceWidth = Math.round(g.advanceWidth || 0);
-		return glyphList.filter(g => !(g.advanceWidth > Math.round(para.width)));
-	}
-	return glyphList;
+function byGlyphPriority(a, b) {
+	const pri1 = a.autoRefPriority || 0;
+	const pri2 = b.autoRefPriority || 0;
+	if (pri1 > pri2) return -1;
+	if (pri1 < pri2) return 1;
+	if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
+	if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
+	return 0;
 }
 
-function extractGlyfCmap(glyphList, font) {
-	const glyf = {};
-	const cmap = {};
-	for (let g of glyphList) {
-		glyf[g.name] = g;
-		if (!g.unicode) continue;
+function byRank(a, b) {
+	return (b.glyphRank || 0) - (a.glyphRank || 0) || (a.glyphOrder || 0) - (b.glyphOrder || 0);
+}
 
-		for (let u of g.unicode) {
-			if (isFinite(u - 0)) cmap[u] = g.name;
+function regulateGlyph(g, skew) {
+	if (!g.contours || !g.contours.length) return;
+	for (const contour of g.contours) for (const z of contour) z.x -= z.y * skew;
+	g.contours = simplifyContours(g.contours);
+	for (const contour of g.contours) for (const z of contour) z.x += z.y * skew;
+}
+
+function simplifyContours(source) {
+	const sink = new FairizedShapeSink();
+
+	TypoGeom.transferGenericShape(
+		TypoGeom.Fairize.fairizeBezierShape(
+			TypoGeom.Boolean.removeOverlap(
+				CurveUtil.convertShapeToArcs(source),
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				1 << 17
+			)
+		),
+		sink,
+		FINAL_SIMPLIFY_TOLERANCE
+	);
+
+	return sink.contours;
+}
+
+const FINAL_SIMPLIFY_RESOLUTION = 16;
+const FINAL_SIMPLIFY_TOLERANCE = 2 / FINAL_SIMPLIFY_RESOLUTION;
+
+class FairizedShapeSink {
+	constructor() {
+		this.contours = [];
+		this.lastContour = [];
+	}
+	beginShape() {}
+	endShape() {
+		if (this.lastContour.length > 2) {
+			const zFirst = this.lastContour[0],
+				zLast = this.lastContour[this.lastContour.length - 1];
+			if (zFirst.on && zLast.on && zFirst.x === zLast.x && zFirst.y === zLast.y) {
+				this.lastContour.pop();
+			}
+			this.contours.push(this.lastContour);
+			this.lastContour = [];
 		}
 	}
-	font.glyf = glyf;
-	font.cmap = cmap;
+	moveTo(x, y) {
+		this.endShape();
+		this.lineTo(x, y);
+	}
+	lineTo(x, y) {
+		const z = Point.cornerFromXY(x, y).round(FINAL_SIMPLIFY_RESOLUTION);
+		if (this.lastContour.length >= 2) {
+			const a = this.lastContour[this.lastContour.length - 2],
+				b = this.lastContour[this.lastContour.length - 1];
+			if (isLineExtend(a, b, z)) {
+				this.lastContour.pop();
+				this.lastContour.push(z);
+				return;
+			}
+		}
+		this.lastContour.push(z);
+	}
+	arcTo(arc, x, y) {
+		const offPoints = TypoGeom.Quadify.auto(arc, FINAL_SIMPLIFY_TOLERANCE);
+		if (offPoints) {
+			for (const z of offPoints)
+				this.lastContour.push(Point.offFrom(z).round(FINAL_SIMPLIFY_RESOLUTION));
+		}
+		this.lineTo(x, y);
+	}
 }
-
-module.exports = function finalizeFont(para, rawGlyphList, excludedCodePoints, font) {
-	const glyphList = filterWideGlyphs(para, rawGlyphList);
-	gcFont(glyphList, excludedCodePoints, font, {});
-	extractGlyfCmap(regulateGlyphList(para, glyphList), font);
-};
+function isLineExtend(a, b, c) {
+	return (
+		a.on &&
+		b.on &&
+		c.on &&
+		((aligned(a.x, b.x, c.x) && between(a.y, b.y, c.y)) ||
+			(aligned(a.y, b.y, c.y) && between(a.x, b.x, c.x)))
+	);
+}
+function aligned(a, b, c) {
+	return a === b && b === c;
+}
+function between(a, b, c) {
+	return (a <= b && b <= c) || (a >= b && b >= c);
+}
