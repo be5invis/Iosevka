@@ -80,9 +80,7 @@ define-macro depends-on : syntax-rules
 define-macro eject-contour : syntax-rules
 	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
 define-macro assign-unicode : syntax-rules
-	`[assign-unicode @code] {".syntactic-closure" `[begin \\
-		currentGlyph.assign-unicode @code
-		set $Capture$.unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
+	`[assign-unicode @code] {".syntactic-closure" `[$assignUnicodeImpl$ currentGlyph @code
 	] env}
 
 ###### Canvas-based mechanism
@@ -202,14 +200,14 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph]
+		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph $assignUnicodeImpl$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
 			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$
 			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
-			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics]
+			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$]
 		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop
 			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
 			Italify Upright Scale Translate Rotate globalTransform TanSlope

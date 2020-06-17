@@ -1130,6 +1130,10 @@ glyph-block Letter-Latin-W : begin
 	set WShape.m1S   0.235
 	set WShape.m2S : 1 - WShape.m1S
 
+	define [WonOverlay df] : glyph-construction
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
+
 	sketch # W
 		local df : DivFrame para.diversityM 3
 		set-width df.width
@@ -1138,10 +1142,16 @@ glyph-block Letter-Latin-W : begin
 			include : WShape CAP true df
 			save 'W.straight'
 			save 'cyrWe.straight'
+			branch
+				include : WonOverlay df
+				save 'symbol/currency/wonSign.straight'
 		branch
 			include : WShape CAP false df
 			save 'W.curly'
 			save 'cyrWe.curly'
+			branch
+				include : WonOverlay df
+				save 'symbol/currency/wonSign.curly'
 
 	sketch # w
 		local df : DivFrame para.diversityM 3
@@ -1155,8 +1165,6 @@ glyph-block Letter-Latin-W : begin
 			include : WShape XH false df
 			save 'w.curly'
 			save 'cyrwe.curly'
-
-
 
 	define [WHooktopShape top barStraight df] : glyph-construction
 		local fineOuter : if barStraight
@@ -1227,6 +1235,7 @@ glyph-block Letter-Latin-W : begin
 	select-variant 'W' 'W'
 	select-variant 'cyrWe' 0x51C (follow -- 'W')
 	select-variant 'Whooktop' 0x2C72 (follow -- 'W')
+	select-variant 'symbol/currency/wonSign' 0x20A9 (follow -- 'W')
 	select-variant 'w' 'w'
 	select-variant 'cyrwe' 0x51D (follow -- 'w')
 	select-variant 'ww' 0x2AC (follow -- 'w')
@@ -1373,6 +1382,10 @@ glyph-block Letter-Latin-Upper-Y : begin
 			include : AIVSerifs top
 			include : CenterBottomSerif Middle [fallback bot 0] MidJutSide
 
+	define [YOverlayShape] : glyph-construction
+		include : HOverlayBar SB RightSB (CAP * 0.45)
+		include : HOverlayBar SB RightSB (CAP * 0.25)
+
 	sketch # Y
 		include MarkSet.capital
 		branch
@@ -1380,11 +1393,17 @@ glyph-block Letter-Latin-Upper-Y : begin
 			save 'Y.straight'
 			save 'Upsilon.straight'
 			save 'cyrUe.straight'
+			branch
+				include : YOverlayShape
+				save 'symbol/currency/yenSign.straight'
 		branch
 			include : YShape false CAP
 			save 'Y.curly'
 			save 'Upsilon.curly'
 			save 'cyrUe.curly'
+			branch
+				include : YOverlayShape
+				save 'symbol/currency/yenSign.curly'
 
 	define [YHookTopShape straightBar] : glyph-construction
 		include : YShape straightBar CAP
@@ -1433,7 +1452,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 	select-variant 'Upsilon' 0x3A5 (follow -- 'Y')
 	select-variant 'cyrUe' 0x4AE (follow -- 'Y')
 	select-variant 'cyrue' 0x4AF (follow -- 'Y')
-
+	select-variant 'symbol/currency/yenSign' 0xA5 (follow -- 'Y')
 
 glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
@@ -2374,11 +2393,12 @@ glyph-block Letter-Latin-Lower-D : begin
 glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-export PShape PShapeOutline RevPShape
+	glyph-block-export PShape PShapeOutline RevPShape PBarPosY
 
+	define [PBarPosY top sw bp] : (top - sw) * bp - sw * PShape.SwBelowBar
 	define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
 		local bowlTop (top * 1 - offset)
-		local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
+		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : (bowlTop - bowlBottom) * 0.45
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
@@ -2438,15 +2458,15 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : spiro-outline
 			PShapeOutlineKnots top mul bp overshoot sw offset
 
-	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
+	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [withBar true]] : glyph-construction
 		include : dispiro
 			widths.rhs sw
 			PShapeOutlineKnots top mul bp overshoot sw 0
-		include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
-
-		if slab : begin
-			include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
-			include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
+		if withBar : begin
+			include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
+			if slab : begin
+				include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
+				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
 
 	define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-construction
 		include : tagged 'bowl' : dispiro
@@ -2481,6 +2501,11 @@ glyph-block Letter-Latin-Upper-P : begin
 
 		save 'Phookleft' 0x1A4
 
+	create-glyph 'symbol/currency/rubleSign' 0x20BD : glyph-construction
+		include [refer-glyph 'P'] AS_BASE ALSO_METRICS
+		define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
+		include : HOverlayBar [mix SB 0 0.7] (SB + HalfStroke * HVContrast) bar1pos
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.8] [mix 0 (bar1pos - Stroke) (3 / 4)]
 
 glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import CommonShapes
@@ -2520,18 +2545,18 @@ glyph-block Letter-Latin-Lower-P : begin
 glyph-block Letter-Latin-Upper-R : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape
+	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY
 
 	### R and CyrYa
 	glyph-block-export RLegShape RLegTerminalX
 	define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVContrast
-	define [RLegShape right bottom top charTop slab straight sw extraShift] : glyph-construction
+	define [RLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-construction
 		local xRightBottom : RLegTerminalX straight right sw
 		if straight : do
 			local shift : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
 			include : dispiro
-				widths.center (sw * [diagCor charTop (Width - extraShift * 2) 0 (sw * 2)])
-				corner (Middle + extraShift + shift / 2) top [heading Downward]
+				widths.center (sw * [diagCor (top - bottom) (right - left - extraShift) 0 sw])
+				corner (left + extraShift + shift / 2) top [heading Downward]
 				corner (xRightBottom + shift) bottom [heading Downward]
 			if slab : begin
 				include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
@@ -2542,18 +2567,18 @@ glyph-block Letter-Latin-Upper-R : begin
 					widths.center sw
 					g4.up.start xRightBottom bottom [heading Upward]
 					quadcontrols 0 [if slab 0.3 0.4] 8
-					g4 Middle top
+					g4 left top
 			if slab : begin
 				include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
 	define [RevRLegTerminalX straight left sw] : left + [if straight (OX * 2) 0] + sw / 2 * HVContrast
-	define [RevRLegShape left bottom top charTop slab straight sw extraShift] : glyph-construction
+	define [RevRLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-construction
 		local xLeftBottom : RevRLegTerminalX straight left sw
 		if straight : do
 			local shift : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
 			include : dispiro
-				widths.center (sw * [diagCor charTop (Width - extraShift * 2) 0 (sw * 2)])
-				corner (Middle + extraShift + shift / 2) top [heading Downward]
+				widths.center (sw * [diagCor (top - bottom) (right - left - extraShift) 0 sw])
+				corner (right + extraShift + shift / 2) top [heading Downward]
 				corner (xLeftBottom + shift) bottom [heading Downward]
 			if slab : begin
 				include : LeftwardBottomSerif (xLeftBottom + shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
@@ -2564,7 +2589,7 @@ glyph-block Letter-Latin-Upper-R : begin
 					widths.center sw
 					g4.up.start xLeftBottom bottom [heading Upward]
 					quadcontrols 0 [if slab 0.3 0.4] 8
-					g4 Middle top
+					g4 right top
 			if slab : begin
 				include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
 
@@ -2573,32 +2598,56 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
 		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape right 0 [RBarTop top Stroke straightBar slab] top slab straightBar Stroke 0
+		include : RLegShape [RBarTop top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
 	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-construction
 		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 		local left (SB + O + [if SLAB (Jut / 8) 0])
-		include : RevRLegShape left 0 [RBarTop top Stroke straightBar slab] top slab straightBar Stroke 0
+		include : RevRLegShape [RBarTop top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
 
 	sketch # R
 		include MarkSet.capital
 		branch
 			include : RShape true CAP
-			set-base-anchor 'overlay' (SB + Stroke * HVContrast) (CAP * [RBarPos CAP SLAB] - HalfStroke)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP SLAB
 			save 'R.straight'
 		branch
 			include : RShape true CAP (slab -- false)
-			set-base-anchor 'overlay' (SB + Stroke * HVContrast) (CAP * [RBarPos CAP 0] - HalfStroke)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP 0
 			eject-contour 'strokeL'
 			save 'Rrotunda.straight'
 		branch
 			include : RShape false CAP
-			set-base-anchor 'overlay' (SB + Stroke * HVContrast) (CAP * [RBarPos CAP SLAB] - HalfStroke)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP SLAB
 			save 'R.curly'
 		branch
 			include : RShape false CAP (slab -- false)
-			set-base-anchor 'overlay' (SB + Stroke * HVContrast) (CAP * [RBarPos CAP 0] - HalfStroke)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP 0
 			eject-contour 'strokeL'
 			save 'Rrotunda.curly'
+
+	define [IndianRupeeShape suffix straightBar] : glyph-construction
+		define bp : RBarPos CAP 0
+		include : intersection
+			Rect CAP 0 SB Width
+			WithTransform [Translate (-Width / 8) 0]
+				PShape CAP (bp -- bp) (slab -- false) (withBar -- false)
+		local right : RightSB - O - [if straightBar 0 (Width / 16)]
+		include : RLegShape [RBarTop CAP Stroke straightBar false] 0 (Width * 0.375) right CAP false straightBar Stroke 0
+
+		define sw : adviceBlackness2 2 4 CAP
+		include : HBarTop SB RightSB CAP sw
+		include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
+
+	create-glyph 'symbol/currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' true
+	create-glyph 'symbol/currency/indianRupeeSign.curly' : IndianRupeeShape 'curly' false
 
 	sketch # smcpR
 		include MarkSet.e
@@ -2619,6 +2668,7 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	select-variant 'R' 'R'
 	select-variant 'Rrotunda' 0xA75A (follow -- 'R')
+	select-variant 'symbol/currency/indianRupeeSign' 0x20B9 (follow -- 'R')
 	select-variant 'smcpR' 0x280 (follow -- 'R')
 	select-variant 'rrotunda' 0xA75B (follow -- 'R')
 
@@ -2641,10 +2691,10 @@ glyph-block Letter-Latin-Upper-R : begin
 
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
 		branch
-			include : RLegShape right Descender ((top - Stroke) * bp) (top - Descender) SLAB true Stroke 0
+			include : RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB true Stroke 0
 			save 'Yr.straight'
 		branch
-			include : RLegShape right Descender ((top - Stroke) * bp) (top - Descender) SLAB false Stroke 0
+			include : RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB false Stroke 0
 			save 'Yr.curly'
 
 	select-variant 'Yr' 0x1A6 (follow -- 'R')
@@ -2935,6 +2985,11 @@ glyph-block Letter-Latin-C : begin
 		save 'cyrEs' 0x421
 		save 'lunateSigma' 0x3F9
 
+	create-glyph 'symbol/currency/euroSign' 0x20AC : glyph-construction
+		include [refer-glyph "C"] AS_BASE ALSO_METRICS
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.4)
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.6)
+
 	sketch # c
 		set-width Width
 		include MarkSet.e
@@ -2950,6 +3005,19 @@ glyph-block Letter-Latin-C : begin
 		save 'c' 'c'
 		save 'cyres' 0x441
 		save 'lunatesigma' 0x3F2
+
+	create-glyph 'symbol/currency/centSign' 0xA2 : glyph-construction
+		define fine : adviceBlackness 4
+		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center
+			flat Middle (XH - HalfStroke)
+			curl Middle (XH - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center
+			flat Middle (Descender / 2) [heading Upward]
+			curl Middle HalfStroke
+		include : VBar Middle (XH - HalfStroke) (0 + HalfStroke) fine
 
 	turned 'turnC' 0x186 'C' Middle (CAP / 2)
 	turned 'turnc' 0x254 'c' Middle (XH / 2)
@@ -3529,13 +3597,18 @@ glyph-block Letter-Latin-Upper-N : begin
 		include : NShape XH SB RightSB 3 3.5
 		save 'smcpN' 0x274
 
+	create-glyph 'symbol/currency/nairaSign' 0x20A6 : glyph-construction
+		include : NShape CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
+		define sw : adviceBlackness2 2 4 CAP
+		define gap : Math.max (CAP / 6) sw
+		include : HBarBottom [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
+		include : HBarTop    [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
+
 	sketch # Nltail
 		include [refer-glyph 'N'] AS_BASE
 		eject-contour 'serifLB'
 		include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
-
 		save 'Nltail' 0x19D
-
 
 glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import CommonShapes
@@ -4111,20 +4184,19 @@ glyph-block Letter-Latin-Upper-F : begin
 			include : tagged 'serifBottom' : RightwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 MidJutSide
 			include : DownwardRightSerif RightSB [fallback top CAP] VJut
 
-	sketch # F
+	create-glyph 'F' 'F' : glyph-construction
 		set-width Width
 		include MarkSet.capital
 		include : FShape
 
-		save 'F' 'F'
+	create-glyph 'symbol/currency/frenchFrancSign' 0x20A3 : glyph-construction
+		include : refer-glyph "F"
+		include : HOverlayBar (SB * 0.5) (SB * 3 + Stroke * HVContrast) [mix 0 XH 0.4]
 
-	sketch # Fltail
+	create-glyph 'Fltail' 0x191 : glyph-construction
 		include [refer-glyph 'F'] AS_BASE
 		eject-contour 'serifBottom'
 		include : VerticalHook (SB * 1.5 + HalfStroke * HVContrast) 0 (-HookX) Hook
-
-		save 'Fltail' 0x191
-
 
 glyph-block Letter-Latin-Lower-F : begin
 	glyph-block-import CommonShapes
@@ -4830,6 +4902,65 @@ glyph-block Letter-Latin-S : begin
 			curl RightSB Descender
 		save 'sswash' 0x23F
 
+	sketch # dollar.through
+		include MarkSet.capital
+		define top : CAP * 0.95
+		define bot : CAP * 0.05
+		define w : adviceBlackness 3.5
+		define fine : adviceBlackness 4
+		define smooth : adviceSSmooth (top - bot) (-1) w
+		include : dispiro
+			widths.lhs w
+			g4   RightSB (top - Hook)
+			hookstart (top - O)
+			g4   SB (top - smooth)
+			SNeck w
+			g4   RightSB (bot + smooth) [widths 0 w]
+			hookend (bot + O)
+			g4   SB (bot + Hook)
+		include : dispiro
+			widths.center w
+			flat Middle (top - HalfStroke)
+			curl Middle (CAP - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center w
+			flat Middle (Descender / 2) [heading Upward]
+			curl Middle (bot + HalfStroke)
+		save 'dollar.open'
+
+		include : VBar Middle (bot + HalfStroke) (top - HalfStroke) fine
+		save 'dollar.through'
+
+	sketch # dollar.throughcap
+		include MarkSet.capital
+		define top : CAP * 0.88
+		define bot : CAP * 0.12
+		define w : adviceBlackness 3.5
+		define fine : adviceBlackness 4
+		define smooth : adviceSSmooth (top - bot) (-1) w
+		include : dispiro
+			widths.lhs w
+			g4   RightSB (top - Hook)
+			hookstart (top - O)
+			g4   SB (top - smooth)
+			SNeck w
+			g4   RightSB (bot + smooth) [widths 0 w]
+			hookend (bot + O)
+			g4   SB (bot + Hook)
+		include : dispiro
+			widths.center w
+			flat Middle (top - HalfStroke)
+			curl Middle (CAP) [heading Upward]
+		include : dispiro
+			widths.center w
+			flat Middle (0) [heading Upward]
+			curl Middle (bot + HalfStroke)
+		save 'dollar.opencap'
+
+		include : VBar Middle (bot + HalfStroke) (top - HalfStroke) fine
+		save 'dollar.throughcap'
+
+	select-variant 'dollar' '$'
 
 glyph-block Letter-Latin-Z : begin
 	glyph-block-import CommonShapes

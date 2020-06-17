@@ -75,9 +75,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			if (saveGlyphName.0 != '.' && glyphMap.(saveGlyphName))
 				throw : new Error "Glyph \(saveGlyphName) already exists"
 			glyphMap.(saveGlyphName) = glyphObject
-			if unicode : begin
-				glyphObject.assign-unicode unicode
-				set unicodeGlyphs.(unicode) glyphObject
+			if unicode : $assignUnicodeImpl$ glyphObject unicode
 
 		actions.call glyphObject
 
@@ -95,6 +93,10 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		`[@name @actions]          : return : createAndSaveGlyphImpl name null    actions
 		`[@actions]                : return : createAndSaveGlyphImpl null null    actions
 
+	define [$assignUnicodeImpl$ g unicode] : begin
+		g.assign-unicode unicode
+		set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+
 	define [$save$ _name unicode] : begin
 		define t this
 		define name : if [not _name] ('--autoname-' + [newtemp]) _name
@@ -109,9 +111,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 				set g.avoidBeingComposite t.avoidBeingComposite
 				set g.related             t.related
 			if name : set dependencyProfile.(name) : getDependencyProfile g
-		if (g && unicode) : begin
-			g.assign-unicode unicode
-			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+		if (g && unicode) : $assignUnicodeImpl$ g unicode
 		return g
 
 	### Spiro constructions
@@ -120,7 +120,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define booleFns : BooleKit.SetupBuilders : object globalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
