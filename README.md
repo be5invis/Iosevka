@@ -215,12 +215,14 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles related to ligations and spacing:
 
-  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
-  - `sp-fixed` : Apply `sp-term` and further:
-    - Completely disable `WWID` feature. All non-combining glyphs will be exactly the same width.
-	- Ligation will be removed.
-  - `no-ligation` : Disable ligation only.
+  - `no-ligation` : Disable ligations.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
+  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `sp-force-monospace`: Apply `sp-term` and further:
+    - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
+	- Remove `NWID` and `WWID` OpenType feature.
+	- Recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
+  - `sp-fixed` : Apply `sp-force-monospace` and `no-ligation` together.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->

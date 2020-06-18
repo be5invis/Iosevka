@@ -7,7 +7,7 @@ const BuildFont = require("./build-font.js");
 const Parameters = require("../support/parameters");
 const FormVariantData = require("../support/variant-data");
 const FormLigationData = require("../support/ligation-data");
-const { AnyCv } = require("../support/gr");
+const { AnyCv, CvDecompose } = require("../support/gr");
 const Toml = require("toml");
 
 module.exports = async function main(argv) {
@@ -102,12 +102,23 @@ async function saveCharMap(argv, font) {
 				typographicFeatures.push("lnum", "onum");
 		}
 
-		charMap.push([
-			glyph.name,
-			glyph.unicode,
-			typographicFeatures,
-			AnyCv.query(glyph).map(gr => gr.tag)
-		]);
+		let variantFeatures;
+		if (CvDecompose.get(glyph)) {
+			const variantFeatureSet = new Set();
+			const decomposition = CvDecompose.get(glyph);
+			for (const gn of decomposition) {
+				const component = font.glyf[gn];
+				if (!component) continue;
+				for (const cv of AnyCv.query(component)) variantFeatureSet.add(cv.tag);
+			}
+			variantFeatures = Array.from(variantFeatureSet).sort();
+		} else {
+			variantFeatures = AnyCv.query(glyph)
+				.map(gr => gr.tag)
+				.sort();
+		}
+
+		charMap.push([glyph.name, glyph.unicode, typographicFeatures, variantFeatures]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
 }

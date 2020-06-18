@@ -8,18 +8,23 @@ const CurveUtil = require("../../support/curve-util");
 const { AnyCv } = require("../../support/gr");
 const gcFont = require("./gc");
 
-module.exports = function finalizeFont(para, rawGlyphList, excludedCodePoints, font) {
-	const glyphList = filterWideGlyphs(para, rawGlyphList);
+module.exports = function finalizeFont(para, glyphList, excludedCodePoints, font) {
+	forceMonospaceIfNeeded(para, glyphList);
 	gcFont(glyphList, excludedCodePoints, font, {});
 	extractGlyfCmap(regulateGlyphList(para, glyphList), font);
 };
 
-function filterWideGlyphs(para, glyphList) {
-	if (para.forceMonospace && para.spacing == 0) {
-		for (const g of glyphList) g.advanceWidth = Math.round(g.advanceWidth || 0);
-		return glyphList.filter(g => !(g.advanceWidth > Math.round(para.width)));
+function forceMonospaceIfNeeded(para, glyphList) {
+	if (!para.forceMonospace || para.spacing > 0) return;
+	const unitWidth = Math.round(para.width);
+	let i = 0,
+		j = 0;
+	for (; i < glyphList.length; i++) {
+		const g = glyphList[i];
+		g.advanceWidth = Math.round(g.advanceWidth || 0);
+		if (g.advanceWidth === 0 || g.advanceWidth === unitWidth) glyphList[j++] = g;
 	}
-	return glyphList;
+	glyphList.length = j;
 }
 
 function extractGlyfCmap(glyphList, font) {

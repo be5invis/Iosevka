@@ -28,6 +28,6 @@ module.exports = function (para) {
 		}
 	}
 
-	finalizeFont(para, gs.glyphList, excludeChars, font);
+	finalizeFont(para, [...gs.glyphList], excludeChars, font);
 	return font;
 };
