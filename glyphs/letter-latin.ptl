@@ -3792,7 +3792,7 @@ glyph-block Letter-Latin-Lower-U : begin
 		include : refer-glyph "n"
 		eject-contour 'serifRB'
 		eject-contour 'serifLB'
-		currentGlyph.retag-contour 'serifLT' 'serifRB'
+		currentGlyph.reTagContour 'serifLT' 'serifRB'
 		include : FlipAround Middle (XH / 2)
 
 		if SLAB : begin
@@ -5271,6 +5271,7 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 	glyph-block-import Overmarks
 
 	sketch # AE
+		define eBarPos : if SLAB 0.52 0.54
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.capital
@@ -5295,7 +5296,7 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		# E half
 		include : VBarLeft eleft 0 CAP df.mvs
 		include : HBarTop (eleft - O) df.rightSB CAP
-		include : HBar (eleft - O) (df.rightSB - df.mvs / 4) (CAP * 0.54)
+		include : HBar (eleft - O) (df.rightSB - df.mvs / 4) (CAP * eBarPos)
 		include : HBarBottom (eleft - O) df.rightSB 0
 		if SLAB : begin
 			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVContrast) 0 Jut df.mvs
@@ -5305,12 +5306,12 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		save 'cyrAE' 0x4D4
 
 	define [OEShape top df] : glyph-construction
-		local eleft df.middle
-
+		define eleft df.middle
+		define eBarPos : if SLAB 0.52 0.54
+		define sw : adviceBlackness2 designParameters.lllcrowdedness 3 top df.div
 		# O half
-
 		include : dispiro
-			widths.lhs df.mvs 0
+			widths.lhs sw 0
 			straight.left.start eleft top [heading Leftward]
 			archv
 			flat  df.leftSB (top - SmoothA)
@@ -5319,14 +5320,19 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 			straight.right.end eleft 0 [heading Rightward]
 
 		# E half
-		include : VBarLeft eleft 0 top df.mvs
-		include : HBarTop (eleft - O) df.rightSB top
-		include : HBar (eleft - O) (df.rightSB - df.mvs / 4) (top * 0.54)
-		include : HBarBottom (eleft - O) df.rightSB 0
+		include : VBarLeft  eleft 0 top (sw / 2)
+		include : VBarRight eleft sw (top - sw / 2) (sw / 2)
+		include : HBarTop (eleft - O) df.rightSB top sw
+		include : HBar (eleft - O) (df.rightSB - sw / 4) (top * 0.54) sw
+		include : HBarBottom (eleft - O) df.rightSB 0 sw
 
 		if SLAB : begin
-			include : DownwardRightSerif df.rightSB top VJut df.mvs
-			include : UpwardRightSerif df.rightSB 0 VJut df.mvs
+			local jutTop : Math.min VJut
+				top - [mix (top - sw) (top * eBarPos + sw / 2) 0.5]
+			local jutBot : Math.min VJut
+				mix sw (top * eBarPos + sw / 2) 0.5
+			include : DownwardRightSerif df.rightSB top jutTop sw
+			include : UpwardRightSerif df.rightSB 0 jutBot sw
 
 	sketch # OE
 		local df : DivFrame para.diversityM 3
