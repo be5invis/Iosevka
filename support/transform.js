@@ -20,6 +20,12 @@ module.exports = class Transform {
 			y: pt.x * this.xy + pt.y * this.yy + this.y
 		};
 	}
+	applyOffset(delta) {
+		return {
+			x: delta.x * this.xx + delta.y * this.yx,
+			y: delta.x * this.xy + delta.y * this.yy
+		};
+	}
 	unapply(pt) {
 		const xx = pt.x - this.x;
 		const yy = pt.y - this.y;

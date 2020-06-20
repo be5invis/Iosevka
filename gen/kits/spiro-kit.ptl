@@ -1,13 +1,8 @@
 import 'spiro' as SpiroJs
-import './spiroexpand' as [object SpiroExpansionContext SpiroContourContext]
-import './curve-util' as CurveUtil
-
-import './transform' as Transform
-
-define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
-define [mix a b p] : a + (b - a) * p
-define [bez2 a b c t] : (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c
-define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b + 3 * t * t * (1 - t) * c + t * t * t * d
+import '../../support/spiro-expand' as SpiroExpansionContext
+import '../../support/curve-util' as CurveUtil
+import '../../support/transform' as Transform
+import '../../support/utils' as [object fallback mix bez2 bez3]
 
 export : define [SetupBuilders args] : begin
 	define [object para Glyph Contrast globalTransform Stroke Superness] args
@@ -166,12 +161,12 @@ export : define [SetupBuilders args] : begin
 			set knot.af : lambda [] : begin
 				this.setType ty
 				if af : af.apply this args
-		SpiroJs.spiroToBezierOnContext knots closed s
+		SpiroJs.spiroToArcsOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
 
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 		if closed : then
-			local g : new SpiroContourContext
+			local g : new CurveUtil.ArcFlattener
 			SpiroJs.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
 			local lhsContour g.contours.0
 			set g.contours {}
@@ -179,7 +174,7 @@ export : define [SetupBuilders args] : begin
 			local rhsContour g.contours.0
 			set g.contours {[lhsContour.concat rhsContour]}
 		: else : begin
-			local g : new SpiroContourContext
+			local g : new CurveUtil.ArcFlattener
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
 
@@ -190,7 +185,7 @@ export : define [SetupBuilders args] : begin
 		return g
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
-		local g : new SpiroContourContext (this.gizmo || globalTransform)
+		local g : new CurveUtil.ArcFlattener (this.gizmo || globalTransform)
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
 		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
 		foreach af [items-of lastafs] : if af : af.call g

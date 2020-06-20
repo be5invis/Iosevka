@@ -3,6 +3,7 @@
 const TypoGeom = require("typo-geom");
 const Point = require("./point");
 const { mix } = require("./utils");
+const Transform = require("./transform");
 
 exports.OffsetCurve = class OffsetCurve {
 	constructor(bone, offset, contrast) {
@@ -195,3 +196,34 @@ exports.convertContourToCubicRev = convertContourToCubicRev;
 exports.autoCubify = autoCubify;
 exports.fixedCubify = fixedCubify;
 exports.convertShapeToArcs = convertShapeToArcs;
+
+exports.ArcFlattener = class ArcFlattener {
+	constructor(gizmo) {
+		this.gizmo = gizmo || Transform.Id();
+		this.contours = [];
+		this.lastContour = [];
+	}
+	beginShape() {}
+	endShape() {
+		if (this.lastContour.length) {
+			this.contours.push(this.lastContour);
+		}
+		this.lastContour = [];
+	}
+	moveTo(x, y) {
+		this.endShape();
+		this.lastContour.push(Point.transformedXY(this.gizmo, x, y, true));
+	}
+	lineTo(x, y) {
+		this.lastContour.push(Point.transformedXY(this.gizmo, x, y, true));
+	}
+	curveTo(xc, yc, x, y) {
+		this.lastContour.push(Point.transformedXY(this.gizmo, xc, yc, false, false));
+		this.lastContour.push(Point.transformedXY(this.gizmo, x, y, true));
+	}
+	cubicTo(x1, y1, x2, y2, x, y) {
+		this.lastContour.push(Point.transformedXY(this.gizmo, x1, y1, false, true));
+		this.lastContour.push(Point.transformedXY(this.gizmo, x2, y2, false, true));
+		this.lastContour.push(Point.transformedXY(this.gizmo, x, y, true));
+	}
+};

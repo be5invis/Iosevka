@@ -125,8 +125,8 @@ class FairizedShapeSink {
 				this.lastContour.pop();
 			}
 			this.contours.push(this.lastContour);
-			this.lastContour = [];
 		}
+		this.lastContour = [];
 	}
 	moveTo(x, y) {
 		this.endShape();
