@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
 const path = require("path");
-const toml = require("toml");
+const toml = require("@iarna/toml");
 
 module.exports = async function () {
 	const variantsToml = await fs.readFile(
@@ -75,31 +75,59 @@ function getSsData(variants, cvData) {
 			hotCharSetItalic: []
 		}
 	];
+	const defaultUpright = buildupComposite(
+		cvData,
+		...variants.default.design,
+		...variants.default.upright
+	);
+	const defaultItalic = buildupComposite(
+		cvData,
+		...variants.default.design,
+		...variants.default.italic
+	);
 	for (const tag in variants.composite) {
 		if (!/^ss\d\d$/.test(tag)) continue;
 		const composition = variants.composite[tag];
-		const uprightCfg = new Set([...(composition.design || []), ...(composition.upright || [])]);
-		const italicCfg = new Set([...(composition.design || []), ...(composition.italic || [])]);
-		const hotCharSetUpright = new Set();
-		const hotCharSetItalic = new Set();
-		for (const gr of cvData) {
-			if (gr.ligatureSampler) continue;
-			for (const config of gr.configs) {
-				if (uprightCfg.has(config.selector))
-					for (const ch of gr.descSampleText) hotCharSetUpright.add(ch);
-				if (italicCfg.has(config.selector))
-					for (const ch of gr.descSampleText) hotCharSetItalic.add(ch);
-			}
-		}
+		const upright = buildupComposite(
+			cvData,
+			...(composition.design || []),
+			...(composition.upright || [])
+		);
+		const italic = buildupComposite(
+			cvData,
+			...(composition.design || []),
+			...(composition.italic || [])
+		);
 		result.push({
 			tag,
 			effective: true,
 			description: composition.description,
-			uprightComposition: Array.from(uprightCfg),
-			italicComposition: Array.from(italicCfg),
-			hotCharSetUpright: Array.from(hotCharSetUpright),
-			hotCharSetItalic: Array.from(hotCharSetItalic)
+			uprightComposition: Array.from(upright.composition),
+			italicComposition: Array.from(italic.composition),
+			hotCharSetUpright: Array.from(uniqueHotChars(defaultUpright, upright.hotChars)),
+			hotCharSetItalic: Array.from(uniqueHotChars(defaultItalic, italic.hotChars))
 		});
 	}
 	return result;
+}
+function buildupComposite(cvData, ..._cfg) {
+	const hch = new Map();
+	const cfg = new Set(_cfg);
+	for (const gr of cvData) {
+		if (gr.ligatureSampler) continue;
+		for (const config of gr.configs) {
+			if (cfg.has(config.selector)) {
+				for (const ch of gr.descSampleText) hch.set(ch, config.selector);
+			}
+		}
+	}
+	return {
+		composition: [...cfg],
+		hotChars: hch
+	};
+}
+function* uniqueHotChars(cfgDefault, cfgSS) {
+	for (const [hc, v] of cfgSS) {
+		if (cfgDefault.hotChars.get(hc) !== v) yield hc;
+	}
 }

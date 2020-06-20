@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
 const path = require("path");
-const toml = require("toml");
+const toml = require("@iarna/toml");
 
 function TAG(...ltag) {
 	return function (s) {

@@ -13,7 +13,7 @@ module.exports = build;
 ///////////////////////////////////////////////////////////
 
 const path = require("path");
-const toml = require("toml");
+const toml = require("@iarna/toml");
 
 const BUILD = "build";
 const DIST = "dist";

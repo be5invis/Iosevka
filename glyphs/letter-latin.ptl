@@ -1457,23 +1457,22 @@ glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
-	define [GenSmallYShape straightBar serifless] : begin
+	define [GenSmallYShape straightBar useTurnBottom serifless] : begin
 		local slab : if serifless false SLAB
-		local useStraightBottom : !slab && straightBar
-		local useTurnBotton : slab || straightBar
+		local useStraightBottom : straightBar && !useTurnBottom
 		local slabCurly : slab && !straightBar
 		local px1   0.84
 		local py1  : [StrokeWidthBlend 0.8 0.76] * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
 		local px2 0.95
 		local py20 : 0.88 * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
-		local py2 : if (useStraightBottom || useTurnBotton) 0.97 py20
+		local py2 : if (useStraightBottom || useTurnBottom) 0.97 py20
 		local pds 0.1
 		local pds2 0.01
 		local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
 		local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 		local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 		local yrstrokel0 : Middle - Width * 0.1
-		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if (useStraightBottom || useTurnBotton) (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1])
+		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if (useStraightBottom || useTurnBottom) (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1])
 		local yrstroker : Width - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if straightBar designParameters.straightSmallYShapeSbShrink 1]
 		local yshrink : [StrokeWidthBlend 1 0.85] * [if straightBar ([adviceBlackness 3.25] / Stroke) 1]
 		local yBottomJut : Jut * 1.25
@@ -1483,7 +1482,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 		define [CalcDS top bottom] : begin
 			local ds0 : (top - bottom) * pds
 			local ds  : if slabCurly [Math.max [adviceBlackness2 3 6 (top - bottom)] ds0] ds0
-			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBotton) (slabysize * slabyvx) 0]
+			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
 			return {ds ds2}
 
 		define [yDiagCor dy] : diagCor dy (yrstroker - yrstrokel) 0 Stroke
@@ -1516,7 +1515,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 					useStraightBottom : list
 						ConnectZ shrink
 						curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (Stroke * [yDiagCor (top - bottom)]) Downward]
-					useTurnBotton : list
+					useTurnBottom : list
 						ConnectZ shrink
 						flat (yrstrokel - slabysize) bottom [widths.rhs]
 						curl [Math.min (yrstrokel - slabysize - 0.1) (yrstrokel - Stroke - yBottomJut)] bottom
@@ -1525,6 +1524,18 @@ glyph-block Letter-Latin-Lower-Y : begin
 						quadcontrols 1 (1 - dpy2) 16
 						flat yrstrokel (bottom + ds2) [widths.heading 0 Stroke Downward]
 						curl yrstrokel bottom [widths.heading 0 Stroke Downward]
+
+		define [yBaseSerif top bottom] : glyph-construction
+			local {ds ds2} : CalcDS top bottom
+			define joinX : mix yrstrokel yrstroker (1 - px2)
+			define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
+
+			if (!useTurnBottom) : begin
+				if (useStraightBottom) : begin
+					local xBaseKnot : mix yrstroker joinX ((top - bottom) / (top - joinY))
+					include : LeftwardBottomSerif (xBaseKnot - HalfStroke * HVContrast) bottom yBottomJut
+				: else : begin
+					include : LeftwardBottomSerif (yrstroker - HalfStroke * HVContrast) bottom yBottomJut
 
 		define [yJoinProportion hooktop x] : linreg
 			1 - px2
@@ -1585,10 +1596,11 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 			if slab : begin
 				include : AIVSerifs top
+				include : yBaseSerif top bottom
 
 		define [SmallYHookTopShape top bottom] : glyph-construction
 			local ds : (top - bottom) * pds
-			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBotton) (slabysize * slabyvx) 0]
+			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
 			local joinHeight : yJoinHeight ds ds2 top bottom true
 
 			include : intersection
@@ -1615,6 +1627,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			if slab : begin
 				include : AIVSerifs top
 				eject-contour 'serifRT'
+				include : yBaseSerif top bottom
 
 		define [SmallLambdaShape top bottom] : ReverseContours : glyph-construction
 			set currentGlyph.gizmo : Italify (-para.slantAngle)
@@ -1631,12 +1644,17 @@ glyph-block Letter-Latin-Lower-Y : begin
 	sketch # y.straight
 		include MarkSet.p
 		branch
-			include : [GenSmallYShape true].SmallYShape XH Descender
+			include : [GenSmallYShape true false].SmallYShape XH Descender
 			set-base-anchor 'overlay' Middle (XH / 2)
 			save 'y.straight'
 			save 'cyru.straight'
 		branch
-			include : [GenSmallYShape false].SmallYShape XH Descender
+			include : [GenSmallYShape true true].SmallYShape XH Descender
+			set-base-anchor 'overlay' Middle (XH / 2)
+			save 'y.straightTurn'
+			save 'cyru.straightTurn'
+		branch
+			include : [GenSmallYShape false SLAB].SmallYShape XH Descender
 			set-base-anchor 'overlay' Middle (XH / 2)
 			save 'y.curly'
 			save 'cyru.curly'
@@ -1667,11 +1685,15 @@ glyph-block Letter-Latin-Lower-Y : begin
 	sketch # yhooktop
 		include MarkSet.p
 		branch
-			include : [GenSmallYShape true].SmallYHookTopShape XH Descender
+			include : [GenSmallYShape true false].SmallYHookTopShape XH Descender
 			set-base-anchor 'overlay' Middle (XH / 2)
 			save 'yhooktop.straight'
 		branch
-			include : [GenSmallYShape false].SmallYHookTopShape XH Descender
+			include : [GenSmallYShape true true].SmallYHookTopShape XH Descender
+			set-base-anchor 'overlay' Middle (XH / 2)
+			save 'yhooktop.straightTurn'
+		branch
+			include : [GenSmallYShape false SLAB].SmallYHookTopShape XH Descender
 			set-base-anchor 'overlay' Middle (XH / 2)
 			save 'yhooktop.curly'
 
@@ -1697,11 +1719,15 @@ glyph-block Letter-Latin-Lower-Y : begin
 	sketch # cyrU
 		include MarkSet.capital
 		branch
-			include : [GenSmallYShape true].SmallYShape CAP 0
+			include : [GenSmallYShape true false].SmallYShape CAP 0
 			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 			save 'cyrU.straight'
 		branch
-			include : [GenSmallYShape false].SmallYShape CAP 0
+			include : [GenSmallYShape true true].SmallYShape CAP 0
+			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
+			save 'cyrU.straightTurn'
+		branch
+			include : [GenSmallYShape false SLAB].SmallYShape CAP 0
 			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 			save 'cyrU.curly'
 
@@ -1714,7 +1740,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	sketch # lambda.straight
 		include MarkSet.b
-		include : [GenSmallYShape true  true].SmallLambdaShape CAP 0
+		include : [GenSmallYShape true  false true].SmallLambdaShape CAP 0
 		set-base-anchor 'overlay' Middle (XH / 2)
 		save 'lambda.straight'
 		include : LambdaBarOverlayShape
@@ -1722,7 +1748,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	sketch # lambda.curly
 		include MarkSet.b
-		include : [GenSmallYShape false true].SmallLambdaShape CAP 0
+		include : [GenSmallYShape false false true].SmallLambdaShape CAP 0
 		set-base-anchor 'overlay' Middle (XH / 2)
 		save 'lambda.curly'
 		include : LambdaBarOverlayShape

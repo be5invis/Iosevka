@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																													
+																																			
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -372,9 +372,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-x-straight`, `cv77`: Standard, straight `X` and `x` (default).
     * `v-x-curly`, `cv78`: Slightly curly `X` and `x`, like Iosevka 2.x.
   * Styles for `y`:
-    * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
+    * `v-y-straight`, `cv48`: Letter `y` that is fully straight (default for Sans Upright).
     * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
     * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
+    * `v-y-straight-turn`, `VXBF`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
   * Styles for `z`:
     * `v-z-standard`, `VXBD`: Standard `Z` and `z` (default).
     * `v-z-with-crossbar`, `VXBE`: `Z` and `z` with a cross bar for better dsitinction with `2`.
@@ -417,7 +418,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-four-open`, `VXAV`: `4` with open contour.
     * `v-four-open-non-crossing`, `VXAW`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
   * Styles for `6`:
-    * `v-six-closed-contour`, `VXAE`: `6` with a more closed contour.
+    * `v-six-closed-contour`, `VXAE`: `6` with a more closed.
     * `v-six-open-contour`, `VXAF`: `6` with a more open contour.
     * `v-six-straight-bar`, `VXBB`: `6` with a straight bar (default).
   * Styles for `7`:
@@ -426,7 +427,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-seven-crossbar`, `VXAX`: `7` with crossbar.
     * `v-seven-crossbar-serifed`, `VXAY`: `7` with crossbar and initial serif.
   * Styles for `9`:
-    * `v-nine-closed-contour`, `cv96`: `9` with a more closed contour.
+    * `v-nine-closed-contour`, `cv96`: `9` with a more closed.
     * `v-nine-open-contour`, `cv97`: `9` with a more open contour.
     * `v-nine-straight-bar`, `VXBC`: `9` with a straight bar (default).
   * Styles for `ß`:
