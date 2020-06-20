@@ -1,62 +1,45 @@
 "use strict";
 
-module.exports = function gcFont(font, cfg) {
-	markSweepOtl(font.GSUB);
-	markSweepOtl(font.GPOS);
-	const sink = mark(font, cfg);
-	sweep(font, sink);
+module.exports = function gcFont(gs, excludedChars, restFont, cfg) {
+	markSweepOtl(restFont.GSUB);
+	markSweepOtl(restFont.GPOS);
+	const sink = mark(gs, excludedChars, restFont, cfg);
+	sweep(gs, restFont, sink);
 };
 
-function mark(font, cfg) {
+function mark(gs, excludedChars, restFont, cfg) {
+	const sink = markInitial(gs, excludedChars);
+	while (markStep(sink, restFont, cfg));
+	return sink;
+}
+
+function markInitial(gs, excludedChars) {
 	let sink = new Set();
-	let glyphCount = 0;
-
-	sink.add(".notdef");
-	if (font.glyph_order) {
-		for (let idx = 0; idx < font.glyph_order.length; idx++) {
-			const g = font.glyph_order[idx];
-			if (idx === 0 || /\.notdef$/.test(g)) sink.add(g);
-		}
+	for (const g of gs) {
+		if (g.glyphRank > 0) sink.add(g.name);
+		if (!g || !g.unicode) continue;
+		for (const u of g.unicode) if (!excludedChars.has(u)) sink.add(g.name);
 	}
+	return sink;
+}
 
-	if (font.cmap) {
-		for (const k in font.cmap) {
-			if (font.cmap[k]) sink.add(font.cmap[k]);
-		}
-	}
-	if (font.cmap_uvs) {
-		for (const k in font.cmap_uvs) {
-			if (font.cmap_uvs[k]) sink.add(font.cmap_uvs[k]);
-		}
-	}
+function markStep(sink, restFont, cfg) {
+	const glyphCount = sink.size;
 
-	do {
-		glyphCount = sink.size;
-
-		if (font.GSUB) {
-			for (const l in font.GSUB.lookups) {
-				const lookup = font.GSUB.lookups[l];
-				if (!lookup || !lookup.subtables) continue;
-				if (lookup && lookup.subtables) {
-					for (let st of lookup.subtables) {
-						markSubtable(sink, lookup.type, st, cfg);
-					}
+	if (restFont.GSUB) {
+		for (const l in restFont.GSUB.lookups) {
+			const lookup = restFont.GSUB.lookups[l];
+			if (!lookup || !lookup.subtables) continue;
+			if (lookup && lookup.subtables) {
+				for (let st of lookup.subtables) {
+					markSubtable(sink, lookup.type, st, cfg);
 				}
 			}
 		}
+	}
 
-		if (font.glyf) {
-			for (const g in font.glyf) {
-				const glyph = font.glyf[g];
-				if (!glyph || !glyph.references) continue;
-				for (const ref of glyph.references) if (ref && ref.glyph) sink.add(ref.glyph);
-			}
-		}
-
-		let glyphCount1 = sink.size;
-		if (glyphCount1 === glyphCount) break;
-	} while (true);
-	return sink;
+	const glyphCount1 = sink.size;
+	return glyphCount1 > glyphCount;
 }
 
 function markSweepOtl(table) {
@@ -111,12 +94,14 @@ function markLookups(gsub, sink) {
 function markSubtable(sink, type, st, cfg) {
 	switch (type) {
 		case "gsub_single":
-		case "gsub_multi":
 			for (const k in st) if (sink.has(k) && st[k]) sink.add(st[k]);
+			break;
+		case "gsub_multiple":
+			for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 			break;
 		case "gsub_alternate":
 			if (!cfg || !cfg.ignoreAltSub) {
-				for (const k in st) if (sink.has(k) && st[k]) sink.add(st[k]);
+				for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 			}
 			break;
 		case "gsub_ligature":
@@ -139,20 +124,9 @@ function markSubtable(sink, type, st, cfg) {
 	}
 }
 
-function sweep(font, sink) {
-	// glyf
-	if (font.glyf) {
-		const filteredGlyf = {};
-		for (const key in font.glyf) {
-			if (sink.has(key)) filteredGlyf[key] = font.glyf[key];
-		}
-		font.glyf = filteredGlyf;
-	} else {
-		font.glyf = {};
-	}
-
-	// GSUB
-	sweepOtl(font.GSUB, sink);
+function sweep(gs, restFont, sink) {
+	filterInPlace(gs, g => sink.has(g.name));
+	sweepOtl(restFont.GSUB, sink);
 }
 
 function sweepOtl(gsub, sink) {
@@ -187,4 +161,18 @@ function sweepSubtable(st, type, sink) {
 			return true;
 		}
 	}
+}
+
+function filterInPlace(a, condition) {
+	let i = 0,
+		j = 0;
+
+	while (i < a.length) {
+		const val = a[i];
+		if (condition(val, i, a)) a[j++] = val;
+		i++;
+	}
+
+	a.length = j;
+	return a;
 }

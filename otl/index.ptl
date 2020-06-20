@@ -21,7 +21,6 @@ define GDEF_MARK 3
 # GSUB
 define [buildGSUB para glyphs glyphList markGlyphs] : begin
 	define gsub : CreateEmptyTable
-	set gsub.lookupDep {}
 
 	# lnum / onum
 	buildPairFeature gsub 'lnum' 'onum' glyphs glyphList
@@ -41,7 +40,7 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 		buildLigations gsub para plm glyphs
 
 	# cv##, ss##
-	buildCVSS gsub para glyphList
+	buildCVSS gsub para glyphs glyphList
 
 	# THND
 	buildGsubThousands gsub para glyphs
@@ -51,7 +50,6 @@ define [buildGSUB para glyphs glyphList markGlyphs] : begin
 	buildLOCL gsub para
 
 	MoveBackUtilityLookups gsub
-	set gsub.lookupOrder : topsort gsub.lookupDep
 	finalizeTable gsub
 	return gsub
 
@@ -67,8 +65,8 @@ define [buildGDEF para glyphs glyphList markGlyphs] : begin
 	local GDEF {.glyphClassDef {.}}
 	foreach glyph [items-of glyphList] : begin
 		set GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] GDEF_LIGATURE GDEF_SIMPLE
-		if (glyph.anchors && [begin [local anchorKeys : Object.keys glyph.anchors] anchorKeys.length]) : begin
-			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
+		if (glyph.markAnchors && [begin [local anchorKeys : Object.keys glyph.markAnchors] anchorKeys.length]) : begin
+			foreach key [items-of anchorKeys] : begin
 				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
 				markGlyphs.(key).push glyph.name
 				markGlyphs.all.push glyph.name

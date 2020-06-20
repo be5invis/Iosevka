@@ -34,15 +34,14 @@ module.exports = function formVariantData(data, para) {
 	const vs = {};
 	// simple selector
 	for (let k in data.simple) {
-		const hive = objectAssign({}, data.simple[k]);
+		const varDef = data.simple[k];
+		if (!varDef.variant) throw new Error("Unreachable! Variant definition is invalid");
+		const hive = { ...varDef.variant };
 		vs[k] = hive;
 
-		const tag = hive.tag;
-		delete hive.tag;
-		const tagUpright = hive.tagUpright;
-		delete hive.tagUpright;
-		const tagItalic = hive.tagItalic;
-		delete hive.tagItalic;
+		const tag = varDef.tag;
+		const tagUpright = varDef.tagUpright;
+		const tagItalic = varDef.tagItalic;
 		if (tag) {
 			let __cvmap = {};
 			for (let k in hive) __cvmap[k] = tag;

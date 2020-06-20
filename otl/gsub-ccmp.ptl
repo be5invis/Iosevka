@@ -1,5 +1,5 @@
 import [add-common-feature add-feature add-lookup ChainRuleBuilder BeginLookupBlock EndLookupBlock] from "./table-util"
-import [Dotless] from "../support/gr"
+import [Dotless TieMark TieGlyph CcmpDecompose] from "../support/gr"
 extern Set
 
 define-operator "~>" 880 'right' : syntax-rules
@@ -15,12 +15,19 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 	define groupLF {}
 	define dotlessFrom {}
 	define dotlessTo   {}
-	foreach [{gid, g} : pairs-of glyphs] : if (gid.(0) !== ".") : begin
-		if g.anchors.trailing : groupTR.push gid
-		if g.anchors.lf       : groupLF.push gid
+	define TieMarkFrom {}
+	define TieMarkTo   {}
+	define TieGlyphs   {}
+	foreach [{gid g} : pairs-of glyphs] : if (gid.(0) !== ".") : begin
+		if g.baseAnchors.trailing : groupTR.push gid
+		if g.baseAnchors.lf       : groupLF.push gid
 		if [Dotless.get g] : begin
 			dotlessFrom.push gid
 			dotlessTo.push   [Dotless.get g]
+		if [TieGlyph.get g] : TieGlyphs.push gid
+		if [TieMark.get g] : begin
+			TieMarkFrom.push gid
+			TieMarkTo.push   [TieMark.get g]
 
 	define [IotaLF]         : {'iotaBelow'} ~> {'iotaLF'}
 	define [OgonekTrailing] : {'ogonekBelow'} ~> {'ogonekTR'}
@@ -128,6 +135,20 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 			object [from {'revCommaAbove' 'acuteAbove'}] [to 'dasiaoxia']
 			object [from {'revCommaAbove' 'perispomeniAbove'}] [to 'dasiaperispomeni']
 
+
+	define lookupCcmp-TieMarkLigature : add-lookup sink : object
+		.type 'gsub_ligature'
+		.subtables : list : object : substitutions : TieMarkFrom.map : lambda [gnFrom idx]
+			object [from {'cgj' gnFrom}] [to TieMarkTo.(idx)]
+
+	define lookupCcmp-TieMarkContextual : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list : object
+			match {[TieGlyphs.concat TieMarkTo] {'cgj'} TieMarkFrom}
+			inputBegins 1
+			inputEnds 3
+			apply {{.at 1 .lookup lookupCcmp-TieMarkLigature}}
+
 	define lookupCcmp-ToneStart : add-lookup sink : object
 		.type 'gsub_chaining'
 		.subtables : list
@@ -182,13 +203,28 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 			chain-rule [ToneSandhiStartOrMidAt 3] [ToneSandhiToToneEnd 3]
 			chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiToToneEnd 4]
 
-	ccmp.lookups.push lookupCcmp1 lookupCcmp2
+
+	ccmp.lookups.push lookupCcmp1 lookupCcmp2 lookupCcmp-TieMarkContextual
 	ccmp.lookups.push lookupCcmp-ToneStart lookupCcmp-ToneMid lookupCcmp-ToneEnd
 	sink.lookupDep.push {lookupCcmp-ToneStart lookupCcmp-ToneMid}
 	sink.lookupDep.push {lookupCcmp-ToneMid lookupCcmp-ToneEnd}
 	ccmp.lookups.push lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd
 	sink.lookupDep.push {lookupCcmp-ToneSandhiStart lookupCcmp-ToneSandhiMid}
 	sink.lookupDep.push {lookupCcmp-ToneSandhiMid lookupCcmp-ToneSandhiEnd}
-	add-common-feature sink ccmp
 
+	# CCMP decomposition
+	define decompositions {.}
+	foreach {gid g} [pairs-of glyphs] : begin
+		local parts : CcmpDecompose.get g
+		if (parts && parts.length) : set decompositions.(gid) parts
+
+	if [objectIsNotEmpty decompositions] : begin
+		ccmp.lookups.push lookupCcmp-Decompose
+		define lookupCcmp-Decompose : add-lookup sink : object
+			.type 'gsub_multiple'
+			.subtables : list decompositions
+
+	add-common-feature sink ccmp
 	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

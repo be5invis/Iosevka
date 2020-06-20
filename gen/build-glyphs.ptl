@@ -1,11 +1,11 @@
 import '../support/glyph' as Glyph
 import '../support/point' as Point
-import '../support/spirokit' as spirokit
-import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
+import './kits/spiro-kit' as spirokit
+import './kits/boole-kit' as BooleKit
 import '../support/anchor' as Anchor
 import '../support/monotonic-interpolate' as smoothreg
 
-import [mix linreg clamp fallback TempFont includeGlyphPart compsiteMarkSet] from '../support/utils'
+import [mix linreg clamp fallback] from '../support/utils'
 import [calculateMetrics setFontMetrics MarksetDiv GenDivFrame] from '../meta/aesthetics'
 
 $$include '../meta/macros.ptl'
@@ -35,7 +35,6 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	setFontMetrics para metrics fontMetrics
 
 	# Anchor parameters
-	define [object MARK BASE] Anchor
 	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
 	define MarkSet : MarksetDiv 1 metrics
@@ -67,7 +66,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		if para.verbose : console.log ensuredGlyphName
 
 		local glyphObject [new Glyph ensuredGlyphName]
-		glyphObject.set-width Width
+		glyphObject.setWidth Width
 		glyphObject.gizmo = globalTransform
 
 		if saveGlyphName : begin
@@ -75,9 +74,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			if (saveGlyphName.0 != '.' && glyphMap.(saveGlyphName))
 				throw : new Error "Glyph \(saveGlyphName) already exists"
 			glyphMap.(saveGlyphName) = glyphObject
-			if unicode : begin
-				glyphObject.assign-unicode unicode
-				set unicodeGlyphs.(unicode) glyphObject
+			if unicode : $assignUnicodeImpl$ glyphObject unicode
 
 		actions.call glyphObject
 
@@ -95,6 +92,10 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		`[@name @actions]          : return : createAndSaveGlyphImpl name null    actions
 		`[@actions]                : return : createAndSaveGlyphImpl null null    actions
 
+	define [$assignUnicodeImpl$ g unicode] : begin
+		g.assignUnicode unicode
+		set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+
 	define [$save$ _name unicode] : begin
 		define t this
 		define name : if [not _name] ('--autoname-' + [newtemp]) _name
@@ -102,23 +103,23 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		if g : begin
 			g.include t AS_BASE
 			if (t <@ Glyph) : begin
-				set g.advanceWidth t.advanceWidth
-				set g.shortName    t.shortName
-				set g.cmpPriority  t.cmpPriority
-				set g.flatten      t.flatten
-				set g.related      t.related
+				set g.advanceWidth        t.advanceWidth
+				set g.shortName           t.shortName
+				set g.autoRefPriority     t.autoRefPriority
+				set g.glyphRank           t.glyphRank
+				set g.avoidBeingComposite t.avoidBeingComposite
+				set g.related             t.related
 			if name : set dependencyProfile.(name) : getDependencyProfile g
-		if (g && unicode) : begin
-			g.assign-unicode unicode
-			set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+		if (g && unicode) : $assignUnicodeImpl$ g unicode
 		return g
 
 	### Spiro constructions
 	# Basic knots
 	define spirofns : spirokit.SetupBuilders : object globalTransform Contrast Stroke Glyph para Superness
+	define booleFns : BooleKit.SetupBuilders : object globalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet DivFrame fontMetrics
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
@@ -126,8 +127,9 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	run-glyph-module '../glyphs/overmarks.js'
 
 	# Unified letters
-	run-glyph-module '../glyphs/letters-unified-basic.js'
-	run-glyph-module '../glyphs/letters-unified-extended.js'
+	run-glyph-module '../glyphs/letter-latin.js'
+	run-glyph-module '../glyphs/letter-greek.js'
+	run-glyph-module '../glyphs/letter-cyrillic.js'
 
 	# Numbers
 	run-glyph-module '../glyphs/numbers.js'
@@ -144,7 +146,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 	# Autobuilds
 	run-glyph-module '../glyphs/autobuild-accents.js'
-	run-glyph-module '../glyphs/autobuild-enclosure.js'
+	run-glyph-module '../glyphs/autobuild-composite.js'
 	run-glyph-module '../glyphs/autobuild-transformed.js'
 
 	return : object metrics [glyphs glyphMap] glyphList unicodeGlyphs

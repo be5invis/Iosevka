@@ -130,18 +130,20 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		# Override default building widths
 		# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
 		# default values.
-		# IMPORTANT : Currently "shape" property only supports integers between 3 and 9 (inclusive), while
-		#             "menu" only supports integers between 1 and 9 (inclusive).
-		#             If you decide to use custom widths you have to define all the widths you
-		#             plan to use otherwise they will not be built.
+		# IMPORTANT : Currently "shape" property only supports numbers between 434 and 664 (inclusive),
+		#             while "menu" only supports integers between 1 and 9 (inclusive).
+		#             The "shape" parameter specifies the unit width, measured in 1/1000 em. The glyphs'
+		#             width are equal to, or a simple multiple of the unit width.
+		#             If you decide to use custom widths you have to define all the widths you plan to use,
+		#             otherwise they will not be built.
 		
 		[buildPlans.iosevka-custom.widths.normal]
-		shape = 5          # Width grade of glyph shapes. NOT actual character width.
-		menu  = 5          # Width grade for the font's names. NOT actual character width.
+		shape = 500        # Unit Width, measured in 1/1000 em.
+		menu  = 5          # Width grade for the font's names.
 		css   = "normal"   # "font-stretch' property of webfont CSS.
 		
 		[buildPlans.iosevka-custom.widths.extended]
-		shape = 7
+		shape = 576
 		menu  = 7
 		css   = "expanded"
 		
@@ -193,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																										
+																																					
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -213,12 +215,14 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles related to ligations and spacing:
 
-  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
-  - `sp-fixed` : Apply `sp-term` and further:
-    - Completely disable `WWID` feature. All non-combining glyphs will be exactly the same width.
-	- Ligation will be removed.
-  - `no-ligation` : Disable ligation only.
+  - `no-ligation` : Disable ligations.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
+  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `sp-force-monospace`: Apply `sp-term` and further:
+    - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
+	- Remove `NWID` and `WWID` OpenType feature.
+	- Recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
+  - `sp-fixed` : Apply `sp-force-monospace` and `no-ligation` together.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -345,6 +349,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
+  * Styles for `q`:
+    * `v-q-straight`, `VXAZ`: `q` with straight bar (default).
+    * `v-q-tailed`, `VXBA`: `q` with tail.
   * Styles for `r`:
     * `v-r-straight`, `cv85`: Straight, serif-less `r` (default for Sans).
     * `v-r-serifed`, `cv86`: `r` with serif at both top and bottom (default for Slab Upright).
@@ -365,12 +372,19 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-x-straight`, `cv77`: Standard, straight `X` and `x` (default).
     * `v-x-curly`, `cv78`: Slightly curly `X` and `x`, like Iosevka 2.x.
   * Styles for `y`:
-    * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
+    * `v-y-straight`, `cv48`: Letter `y` that is fully straight (default for Sans Upright).
     * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
     * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
+    * `v-y-straight-turn`, `VXBF`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
+  * Styles for `z`:
+    * `v-z-standard`, `VXBD`: Standard `Z` and `z` (default).
+    * `v-z-with-crossbar`, `VXBE`: `Z` and `z` with a cross bar for better dsitinction with `2`.
   * Styles for `A`, `Λ`, `Δ`:
     * `v-turn-v-straight`, `cv73`: Standard, straight `A`, `Λ`, `Δ` (default).
     * `v-turn-v-curly`, `cv74`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  * Styles for `B`:
+    * `v-capital-b-standard`, `VXAP`: Standard `B` (default).
+    * `v-capital-b-more-asymmetric`, `VXAQ`: More asymmetric `B` to differentiate with `8`.
   * Styles for `G`:
     * `v-capital-g-tooth`, `cv91`: Toothed G (default).
     * `v-capital-g-toothless`, `cv92`: Toothless G.
@@ -392,15 +406,30 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `1`:
     * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
     * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).
+    * `v-one-line`, `VXAM`: `1` drawn just like a straight line.
   * Styles for `3`:
     * `v-three-flattop`, `cv46`: Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarcs`, `cv47`: Arched top `3` (default).
+  * Styles for `4`:
+    * `v-four-closed`, `VXAR`: `4` with closed contour (default).
+    * `v-four-closed-non-crossing`, `VXAS`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
+    * `v-four-semi-open`, `VXAT`: `4` with semi-open contour.
+    * `v-four-semi-open-non-crossing`, `VXAU`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
+    * `v-four-open`, `VXAV`: `4` with open contour.
+    * `v-four-open-non-crossing`, `VXAW`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
+  * Styles for `6`:
+    * `v-six-closed-contour`, `VXAE`: `6` with a more closed contour.
+    * `v-six-open-contour`, `VXAF`: `6` with a more open contour.
+    * `v-six-straight-bar`, `VXBB`: `6` with a straight bar (default).
   * Styles for `7`:
     * `v-seven-noserif`, `cv64`: `7` without serif (default for Sans).
     * `v-seven-serifed`, `cv65`: `7` with initial serif (default for Slab).
+    * `v-seven-crossbar`, `VXAX`: `7` with crossbar.
+    * `v-seven-crossbar-serifed`, `VXAY`: `7` with crossbar and initial serif.
   * Styles for `9`:
-    * `v-nine-closed-contour`, `cv96`: `9` with a more closed (default).
-    * `v-nine-turned-six`, `cv97`: `9` with a more open contour like a turned `6`.
+    * `v-nine-closed-contour`, `cv96`: `9` with a more closed contour.
+    * `v-nine-open-contour`, `cv97`: `9` with a more open contour.
+    * `v-nine-straight-bar`, `VXBC`: `9` with a straight bar (default).
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
@@ -426,12 +455,22 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `^`:
     * `v-caret-high`, `cv29`: Higher circumflex `^` (default).
     * `v-caret-low`, `cv30`: Lower circumflex `^`.
+  * Styles for `(`, `)`:
+    * `v-paren-normal`, `VXAN`: Parenthesis with normal contour (default).
+    * `v-paren-large-contour`, `VXAO`: Parenthesis with larger contour, like that in Monaco.
   * Styles for `{`, `}`:
     * `v-brace-straight`, `cv36`: More straight braces.
     * `v-brace-curly`, `cv37`: More curly braces (default).
   * Styles for `#`:
     * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
     * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
+  * Styles for `&`:
+    * `v-ampersand-closed`, `VXAG`: Ampersand (`&`) with a closed contour (default).
+    * `v-ampersand-upper-open`, `VXAH`: Ampersand (`&`) with an open contour at upper half.
+    * `v-ampersand-lower-open`, `VXAI`: Ampersand (`&`) with an open contour at lower half.
+    * `v-ampersand-et`, `VXAJ`: Ampersand (`&`) drawn like a ligature of Ɛ and t.
+    * `v-ampersand-et-toothed`, `VXAK`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
+    * `v-ampersand-flat-top`, `VXAL`: Ampersand (`&`) drawn with a flat top.
   * Styles for `@`:
     * `v-at-threefold`, `cv31`: The long, three-fold At symbol (`@`) (default).
     * `v-at-fourfold`, `cv32`: The traditional, four-fold At symbol (`@`).

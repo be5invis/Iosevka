@@ -1,0 +1,819 @@
+$$include '../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../support/utils'
+import [designParameters] from '../meta/aesthetics'
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Yeri : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	glyph-block-export CyrYeriShape
+	define [CyrYeriShape top _left _right _fine _jut] : glyph-construction
+		local fine : fallback _fine Stroke
+		local left : fallback _left SB
+		local right : fallback _right RightSB
+		local jut : fallback _jut Jut
+
+		local bowl : top * 0.55 + HalfStroke
+		local turnRadius : bowl * 0.45
+		local turnbottom : mix 0 bowl (SmoothA / (SmoothA + SmoothB))
+		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		include : dispiro
+			widths.lhs fine
+			flat (left + Stroke * 0.2) 0 [heading Rightward]
+			curl ([Math.max (left + fine * HVContrast) (right - turnRadius * trShrink)] + CorrectionOMidX * fine) 0
+			archv 8
+			g4   (right - OX) turnbottom
+			arcvh 8
+			flat ([Math.max (left + fine * HVContrast) (right - turnRadius * trShrink)] - CorrectionOMidX * fine) bowl
+			curl (left + Stroke * 0.2) bowl [heading Leftward]
+		include : VBarLeft left 0 top fine
+		if SLAB : begin
+			include : tagged 'serifYeriLB' : LeftwardBottomSerif left 0 (jut - fine / 2 * HVContrast)
+			include : tagged 'serifYeriLT' : CenterTopSerif (left + fine / 2 * HVContrast) top jut
+
+	define [RevCyrYeriShape top _left _right _fine _jut] : glyph-construction
+		local fine : fallback _fine Stroke
+		local left : fallback _left SB
+		local right : fallback _right RightSB
+		local jut : fallback _jut Jut
+
+		local bowl : top * 0.55 + HalfStroke
+
+		local turnRadius : bowl * 0.45
+		local turnbottom : mix 0 bowl (SmoothB / (SmoothA + SmoothB))
+		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		include : dispiro
+			widths.rhs
+			flat (right - Stroke * 0.2) 0 [heading Leftward]
+			curl (left + turnRadius * trShrink + CorrectionOMidX * fine) 0
+			archv
+			g4   (left + O) turnbottom [widths.rhs fine]
+			arcvh
+			flat (left + turnRadius * trShrink - CorrectionOMidX * fine) bowl [widths.rhs]
+			curl (right - Stroke * 0.2) bowl [heading Rightward]
+		include : VBarRight right 0 top fine
+		if SLAB : begin
+			include : tagged 'serifYeriRB' : RightwardBottomSerif right 0 (jut - fine / 2 * HVContrast)
+			include : tagged 'serifYeriRT' : CenterTopSerif (right - fine / 2 * HVContrast) top jut
+
+	sketch # cyrYeri
+		include MarkSet.capital
+		include : CyrYeriShape CAP SB RightSB
+
+		save 'cyrYeri' 0x42C
+
+	sketch # cyryeri
+		include MarkSet.e
+		include : CyrYeriShape XH SB RightSB
+
+		save 'cyryeri' 0x44C
+
+	sketch # cyrBe
+		include [refer-glyph 'cyrYeri'] AS_BASE
+		include : HBar SB [mix SB RightSB 0.9] (CAP - HalfStroke)
+		if SLAB : begin
+			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
+		save 'cyrBe' 0x411
+		save 'latinBe' 0x182
+
+	sketch # ZhuangToneSix
+		include [refer-glyph 'cyrYeri'] AS_BASE
+		eject-contour 'serifYeriLT'
+		local s : Math.max Stroke (XH * 0.1)
+		include : ReverseContours : spiro-outline
+			corner (SB - O) CAP
+			corner  SB CAP
+			corner (SB - s) (CAP - s)
+			corner  SB (CAP - s * 2)
+			corner (SB - O) (CAP - s * 2)
+		save 'ZhuangToneSix' 0x184
+
+	sketch # latinDe
+		include MarkSet.capital
+		include : RevCyrYeriShape CAP
+		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
+		if SLAB : begin
+			include : DownwardLeftSerif [mix RightSB SB 0.9] CAP VJut
+		save 'latinDe' 0x18B
+
+	define [CyrYerShape top] : glyph-construction
+		local left : if SLAB ([mix SB RightSB 0.35] - MVertStroke / 2 * HVContrast) [mix SB RightSB 0.2]
+		local barleft : mix 0 SB [if SLAB 0.25 0.375]
+		include : CyrYeriShape top left (RightSB - O * 2)
+		include : HBarTop barleft (Stroke * 0.1 + left) top
+		if SLAB : begin
+			include : DownwardLeftSerif barleft top VJut (MVertStroke / HVContrast)
+
+	sketch # cyrYer
+		include MarkSet.capital
+		include : CyrYerShape CAP
+		save 'cyrYer' 0x42A
+
+	sketch # cyryer
+		include MarkSet.e
+		include : CyrYerShape XH
+		save 'cyryer' 0x44A
+
+	define [CyrYeryShape top df] : glyph-construction
+		local overshoot : O * 2
+		include : CyrYeriShape top (df.leftSB + overshoot) [mix (df.rightSB - df.mvs * HVContrast) (Middle + df.mvs / 2 * HVContrast) (0.75 / df.div)] df.mvs (Jut * 0.75)
+		include : VBarRight (df.rightSB - overshoot) 0 top df.mvs
+		if SLAB : begin
+			include : CenterTopSerif (df.rightSB - overshoot - df.mvs / 2 * HVContrast) top (Jut * 0.75)
+			include : CenterBottomSerif (df.rightSB - overshoot - df.mvs / 2 * HVContrast) 0 (Jut * 0.75)
+
+	sketch # cyrYery
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrYeryShape CAP df
+		save 'cyrYery' 0x42B
+	sketch # cyryery
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrYeryShape XH df
+		save 'cyryery' 0x44B
+
+
+glyph-block Letter-Cyrillic-I : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrIShape top] : glyph-construction
+		local topstroke : adviceBlackness 4
+		local halftopstroke : topstroke / 2
+		include : dispiro
+			widths.lhs
+			flat RightSB 0 [heading Upward]
+			curl RightSB (top * 0.4) [heading Upward]
+			straight.up.end RightSB top [widths.heading topstroke 0 Upward]
+		include : dispiro
+			widths.lhs
+			flat SB top [heading Downward]
+			curl SB (top * 0.6) [heading Downward]
+			straight.down.end SB 0 [widths.heading topstroke 0 Downward]
+		include : dispiro
+			flat (RightSB - halftopstroke) top [widths.heading 0 topstroke Downward]
+			curl (SB + halftopstroke) 0 [widths.heading topstroke 0 Downward]
+		include : AICyrISerifs top
+
+	sketch # cyrI
+		include MarkSet.capital
+		include : CyrIShape CAP
+
+		save 'cyrI' 0x418
+
+	sketch # cyri.upright
+		include MarkSet.e
+		include : CyrIShape XH
+
+		save 'cyri.upright'
+
+	sketch # cyri.italic
+		include [refer-glyph 'u'] AS_BASE
+
+		save 'cyri.italic'
+
+	italic-variant 'cyri' 0x438
+
+	sketch # cyri.BGR
+		include [refer-glyph 'u.withBar'] AS_BASE ALSO_METRICS
+		save 'cyri.BGR'
+
+	sketch # cyribreve.BGR
+		include [refer-glyph 'u.withBar'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'breveAbove']
+		save 'cyribreve.BGR'
+
+	sketch # cyrigrave.BGR
+		include [refer-glyph 'u.withBar'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'graveAbove']
+		save 'cyrigrave.BGR'
+
+glyph-block Letter-Cyrillic-Tse : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrTseShape top] : glyph-construction
+		include : VBarLeft SB 0 top
+		include : HBarBottom SB RightSB 0
+		include : VBarRight RightSB 0 top
+		include : CyrDescender RightSB (shift -- 0.05)
+		if SLAB : begin
+			include : AIVSerifs top
+			include : LeftwardBottomSerif SB 0 SideJut
+			include : RightwardBottomSerif RightSB 0 SideJut
+
+	sketch # cyrTse
+		include MarkSet.capital
+		include : CyrTseShape CAP
+
+		save 'cyrTse' 0x426
+
+	sketch # cyrtse.upright
+		include MarkSet.e
+		include : CyrTseShape XH
+		save 'cyrtse.upright'
+
+	sketch # cyrtse.italic
+		include [refer-glyph "u"] AS_BASE
+		eject-contour 'serifLT'
+		include : CyrDescender RightSB (shift -- 0.05)
+		save 'cyrtse.italic'
+
+	italic-variant 'cyrtse' 0x446
+
+
+glyph-block Letter-Cyrillic-Dzhe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrDzheShape top] : glyph-construction
+		include : VBarLeft SB 0 top
+		include : HBarBottom SB RightSB 0
+		include : VBarRight RightSB 0 top
+		include : VBar Middle Descender Stroke
+		if SLAB : begin
+			include : AIVSerifs top
+			include : LeftwardBottomSerif SB 0 SideJut
+			include : RightwardBottomSerif RightSB 0 SideJut
+
+	sketch # cyrDzhe
+		include MarkSet.if
+		include : CyrDzheShape CAP
+
+		save 'cyrDzhe' 0x40F
+
+	sketch # cyrdzhe.upright
+		include MarkSet.p
+		include : CyrDzheShape XH
+		save 'cyrdzhe.upright'
+
+	sketch # cyrdzhe.italic
+		include [refer-glyph 'u'] AS_BASE
+		include : refer-glyph "barBelow"
+		save 'cyrdzhe.italic'
+
+	italic-variant 'cyrdzhe' 0x45F
+
+
+glyph-block Letter-Cyrillic-De : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-X : HalfXStrand
+
+	define [CyrDeShape top] : glyph-construction
+		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * 0.075)
+		local cutleft SB
+		local cutright RightSB
+		local topleft : mix cutleft cutright 0.15
+		include : HBarBottom (cutleft - descenderOverflow) (cutright + descenderOverflow) 0
+		include : VBarRight cutright 0 top
+		include : HalfXStrand false false (topleft + Stroke * HVContrast) top (cutleft + HalfStroke * HVContrast * 0.8) HalfStroke 0.1 0.75 0.5
+		include : VBarLeft (cutleft - descenderOverflow) (-LongJut + HalfStroke) 0
+		include : VBarRight (cutright + descenderOverflow) (-LongJut + HalfStroke) 0
+
+		if SLAB : then
+			include : dispiro
+				widths.rhs
+				flat (topleft - descenderOverflow) top
+				curl (cutright + descenderOverflow) top
+		: else
+			include : HBarTop topleft cutright top
+
+	sketch # cyrDe
+		include MarkSet.if
+		include : CyrDeShape CAP
+
+		save 'cyrDe' 0x414
+
+	sketch # cyrde.upright
+		include MarkSet.e
+		include : CyrDeShape XH
+
+		save 'cyrde.upright'
+
+	sketch # cyrde.italic
+		include MarkSet.b
+		include : dispiro
+			widths.lhs (Stroke * CThinB)
+			flat (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) SmallSmoothA
+			curl (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) (XH - SmallSmoothB)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP * 0.7 - O) [widths.lhs]
+			archv
+			flat (SB + OX) (XH - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4 (Middle + CorrectionOMidS) O
+			archv
+			flat (RightSB - OX) SmallSmoothA
+			curl (RightSB - OX) (XH - SmallSmoothB)
+			quadcontrols 0 0.8
+			g4 (SB + Stroke * 1.1) CAP
+
+		save 'cyrde.italic'
+
+	italic-variant 'cyrde' 0x434
+
+	sketch # cyrde.BGR
+		include [refer-glyph 'g.singlestorey'] AS_BASE ALSO_METRICS
+		save 'cyrde.BGR'
+
+glyph-block Letter-Cyrillic-El : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrElShape top] : glyph-construction
+		local cutleft : mix SB RightSB 0.135
+		local cutleft2 : mix SB RightSB 0.075
+		local cutright : mix SB RightSB 1
+		include : VBarRight cutright 0 top
+		include : HBar cutleft cutright (top - HalfStroke)
+		include : LegShape
+			ztop -- (cutleft        <> top)
+			zbot -- ([mix SB 0 [if SLAB 1 0.75]] <> 0)
+			xb -- cutleft2
+		if SLAB : begin
+			include : RightwardTopSerif cutright top SideJut
+			include : LeftwardTopSerif cutleft top SideJut
+			include : CenterBottomSerif (cutright - HalfStroke * HVContrast) 0 Jut
+
+	sketch # cyrEl
+		include MarkSet.capital
+		include : CyrElShape CAP
+
+		save 'cyrEl' 0x41B
+
+	sketch # cyrel
+		include MarkSet.e
+		include : CyrElShape XH
+		save 'cyrel' 0x43B
+
+
+glyph-block Letter-Cyrillic-Zhe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrZheShape top midtop df] : glyph-construction
+		local fine : adviceBlackness 3.3 df.div
+		local midx : mix df.leftSB df.middle 0.3
+		define [CyrAngleShape] : glyph-construction
+			local cor HVContrast
+			local overshoot : O * 3 * df.div
+			include : ReverseContours : spiro-outline
+				corner (df.leftSB + overshoot) 0
+				corner (df.leftSB + fine * cor + overshoot) 0
+				corner (midx + fine * cor) (top / 2)
+				corner (df.leftSB + fine * cor + overshoot) top
+				corner (df.leftSB + overshoot) top
+				corner midx (top / 2)
+		include : CyrAngleShape
+		include : FlipAround df.middle (top / 2)
+		include : CyrAngleShape
+		include : VBar df.middle 0 midtop fine
+		include : HBar midx (df.width - midx) (top / 2) fine
+		if SLAB : begin
+			define fineK 0.1
+			include : LeftwardTopSerif     (df.leftSB + fine * fineK) top SideJut
+			include : LeftwardBottomSerif  (df.leftSB + fine * fineK) 0 SideJut
+			include : RightwardTopSerif    (df.rightSB - fine * fineK) top SideJut
+			include : RightwardBottomSerif (df.rightSB - fine * fineK) 0 SideJut
+
+	sketch # cyrZhe
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrZheShape CAP CAP df
+		save 'cyrZhe' 0x416
+
+	composite [refer-glyph 'cyrZhe']
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) (connex -- 0.5)
+		into-unicode 0x496
+
+	sketch # cyrzhe
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrZheShape XH XH df
+		save 'cyrzhe' 0x436
+
+	composite [refer-glyph 'cyrzhe']
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) (connex -- 0.5)
+		into-unicode 0x497
+
+	sketch # cyrzhe.BGR
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrZheShape XH CAP df
+		save 'cyrzhe.BGR'
+
+
+glyph-block Letter-Cyrillic-BigYus : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrBigYusShape top yp df] : glyph-construction
+		local fine : adviceBlackness 3.3 df.div
+		local cor HVContrast
+		local midx : mix df.leftSB df.middle 0.3
+		local midx2 : Math.min (df.middle - fine * cor) [mix df.leftSB df.middle 0.75]
+		local yb : top * yp
+		local tovershoot 2
+
+		include : union
+			spiro-outline
+				corner (df.leftSB + O * 2) 0
+				corner (df.leftSB + fine * cor + O * 2) 0
+				corner (midx + fine * cor) yb
+				corner midx yb
+			spiro-outline
+				corner (midx2 + fine * cor) yb
+				corner (df.leftSB + fine * cor + O * tovershoot) top
+				corner (df.leftSB + O * tovershoot) top
+				corner midx2 yb
+			spiro-outline
+				corner (df.width - df.leftSB - O * 2) 0
+				corner (df.width - df.leftSB - fine * cor - O * 2) 0
+				corner (df.width - midx - fine * cor) yb
+				corner (df.width - midx) yb
+			spiro-outline
+				corner (df.width - midx2 - fine * cor) yb
+				corner (df.width - df.leftSB - fine * cor - O * tovershoot) top
+				corner (df.width - df.leftSB - O * tovershoot) top
+				corner (df.width - midx2) yb
+			VBar df.middle 0 yb fine
+			HBarTop midx (df.width - midx) yb fine
+			HBarTop
+				df.leftSB + O * tovershoot + HVContrast * fine * 0.99
+				df.rightSB - O * tovershoot - HVContrast * fine * 0.99
+				begin top
+				begin fine
+
+	sketch # cyrbigYus
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrBigYusShape CAP 0.575 df
+		save 'cyrbigYus' 0x46A
+	sketch # cyrbigyus
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrBigYusShape XH 0.55 df
+		save 'cyrbigyus' 0x46B
+
+glyph-block Letter-Cyrillic-SmallYus : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-V : VShape
+
+	define [CyrSmallYusShape top df straightBar] : glyph-construction
+		local fine : adviceBlackness 3.3 df.div
+		include : VShape top fine straightBar df.div
+		eject-contour 'serifLT'
+		eject-contour 'serifRT'
+		include : FlipAround df.middle (top / 2)
+		local p : if straightBar
+			StrokeWidthBlend 0.24 0.24
+			StrokeWidthBlend 0.16 0.16
+		local bary (top / 2)
+		if (SLAB && !para.isItalic) : set p : p * 1.33
+		include : HBarTop [mix df.leftSB df.rightSB p] [mix df.rightSB df.leftSB p] bary fine
+		include : VBar df.middle bary 0 fine
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut
+			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SideJut
+
+	sketch # cyrsmallYus
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		branch
+			include : CyrSmallYusShape CAP df true
+			save 'cyrsmallYus.straight'
+		branch
+			include : CyrSmallYusShape CAP df false
+			save 'cyrsmallYus.curly'
+	sketch # cyrsmallyus
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		branch
+			include : CyrSmallYusShape XH df true
+			save 'cyrsmallyus.straight'
+		branch
+			include : CyrSmallYusShape XH df false
+			save 'cyrsmallyus.curly'
+	select-variant 'cyrsmallYus' 0x466 (follow -- 'Delta')
+	select-variant 'cyrsmallyus' 0x467 (follow -- 'Delta')
+
+
+glyph-block Letter-Cyrillic-Sha : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrShaShape top df] : glyph-construction
+		include : union
+			HBarBottom df.leftSB df.rightSB 0
+			VBarLeft df.leftSB 0 top df.mvs
+			VBarRight df.rightSB 0 top df.mvs
+			VBar df.middle 0 top df.mvs
+
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut
+			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SideJut
+
+			local jut : Jut * df.mvs / Stroke + O
+			if (df.width > jut * 7) : begin
+				include : tagged 'serifLT'
+					CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
+				include : tagged 'serifMT'
+					CenterTopSerif df.middle top jut df.mvs
+				include : tagged 'serifRT'
+					CenterTopSerif (df.rightSB - 0.5 * df.mvs * HVContrast) top jut df.mvs
+			: else : begin
+				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
+				include : tagged 'serifRT' : RightwardTopSerif df.rightSB top SideJut
+
+	sketch # cyrSha
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrShaShape CAP df
+
+		save 'cyrSha' 0x428
+
+	sketch # cyrsha.upright
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrShaShape XH df
+		save 'cyrsha.upright'
+
+	turned 'cyrsha.italic' null 'm.normal' [DivFrame para.diversityM 3].middle (XH / 2)
+	italic-variant 'cyrsha' 0x448
+
+	define [CyrShchaShape top df] : glyph-construction
+		include : CyrShaShape top df
+		#eject-contour 'serifRB'
+		include : CyrDescender df.rightSB (shift -- 0.05)
+
+	sketch # cyrShcha
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrShchaShape CAP df
+
+		save 'cyrShcha' 0x429
+
+	sketch # cyrshcha.upright
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrShchaShape XH df
+		save 'cyrshcha.upright'
+
+	sketch # cyrshcha.italic
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include [refer-glyph "cyrsha.italic"] AS_BASE
+		include : CyrDescender df.rightSB (shift -- 0.05)
+		save 'cyrshcha.italic'
+
+	italic-variant 'cyrshcha' 0x449
+
+	# Serbian pe and te
+	sketch # cyrte.SRB
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include [refer-glyph 'cyrsha.italic'] AS_BASE
+		include : refer-glyph "macronAbove"
+		save 'cyrte.SRB'
+
+	italic-variant 'cyrte' 0x442
+
+
+glyph-block Letter-Cyrillic-Che : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrCheShape top _barp] : glyph-construction
+		local bar : top * [fallback _barp 0.5]
+		include : VBarRight RightSB 0 top
+		include : dispiro
+			widths.lhs
+			flat SB top [heading Downward]
+			curl SB (bar + SmoothB - HalfStroke)
+			arcvh
+			flat Middle (bar - HalfStroke)
+			curl (RightSB - 1) (bar - HalfStroke) [heading Rightward]
+		if SLAB : begin
+			include : CenterTopSerif (RightSB - HalfStroke * HVContrast) top Jut
+			include : CenterTopSerif (SB + HalfStroke * HVContrast) top Jut
+			include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+
+	sketch # cyrChe
+		include MarkSet.capital
+		include : CyrCheShape CAP [if SLAB 0.45 0.35]
+		save 'cyrChe' 0x427
+	composite [refer-glyph 'cyrChe'] [CyrDescender RightSB] [into-unicode 0x4B6]
+
+	sketch # cyrche
+		include MarkSet.e
+		include : CyrCheShape XH [if SLAB 0.45 0.4]
+		save 'cyrche' 0x447
+	composite [refer-glyph 'cyrche'] [CyrDescender RightSB] [into-unicode 0x4B7]
+
+	turned 'cyrShha' 0x4BA 'cyrChe' Middle (CAP / 2)
+
+	sketch # cyrChevbar
+		include [refer-glyph 'cyrChe'] AS_BASE
+		local yc (CAP * [if SLAB 0.45 0.35] + Stroke * 0.1)
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke
+		save 'cyrChevbar' 0x4B8
+
+	sketch # cyrchevbar
+		include [refer-glyph 'cyrche'] AS_BASE
+		local yc (XH * [if SLAB 0.45 0.35] + Stroke * 0.1)
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke
+		save 'cyrchevbar' 0x4B9
+
+
+glyph-block Letter-Cyrillic-Yu : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	define [CyrYuShape top xtop sma smb div] : glyph-construction
+		local df : DivFrame div 3
+		local xm : barmixL df.leftSB df.rightSB (df.mvs * HVContrast) [StrokeWidthBlend 0.4 0.45]
+		include : VBarLeft df.leftSB 0 xtop df.mvs
+		include : OShape top 0 xm df.rightSB df.mvs (sma * 0.7 * df.div) (smb * 0.7 * df.div)
+		include : HBar (df.leftSB + 1) xm (top / 2)
+
+		if SLAB : begin
+			include : CenterTopSerif (df.leftSB + df.mvs / 2 * HVContrast) xtop (Jut * 0.75)
+			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVContrast) 0 (Jut * 0.75)
+
+	sketch # cyrYu
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrYuShape CAP CAP SmoothA SmoothB df.div
+		save 'cyrYu' 0x42E
+
+	sketch # cyryu
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrYuShape XH XH SmallSmoothA SmallSmoothB df.div
+		save 'cyryu' 0x44E
+
+	sketch # cyryu.BGR
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.b
+		include : CyrYuShape XH CAP SmallSmoothA SmallSmoothB df.div
+		save 'cyryu.BGR'
+
+
+glyph-block Letter-Cyrillic-Lje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+	glyph-block-import Letter-Cyrillic-Yeri : CyrYeriShape
+
+	define [CyrLjeShape top df] : glyph-construction
+		local rightSB : df.width - df.leftSB
+		local l : df.leftSB + O
+		local r : rightSB - O
+		local middle : df.width / 2
+		local xlefttop : mix l r 0.075
+		local jut : Jut * 0.72
+		set-width df.width
+		include : LegShape
+			ztop -- (xlefttop                      <> top)
+			zbot -- ([mix l 0 [if SLAB 1 0.75]] <> 0)
+			xb -- [mix l r 0.025]
+			fine -- MVertStroke
+		include : CyrYeriShape top (middle - MVertStroke / 2 * HVContrast) (r - O) MVertStroke jut
+		include : HBarTop xlefttop middle top
+		if SLAB : begin
+			include : LeftwardTopSerif xlefttop top (jut - MVertStroke / 2 * HVContrast)
+
+	sketch # cyrLje
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrLjeShape CAP df
+		save 'cyrLje' 0x409
+
+	sketch # cyrlje
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrLjeShape XH df
+		save 'cyrlje' 0x459
+
+
+glyph-block Letter-Cyrillic-Nje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+	glyph-block-import Letter-Cyrillic-Yeri : CyrYeriShape
+
+	define [CyrNjeShape top df] : glyph-construction
+		local rightSB : df.width - df.leftSB
+		local xlefttop : mix df.leftSB df.rightSB 0.075
+		local jut : Jut * 0.72
+		local l : df.leftSB + O
+		local r : rightSB - O
+		local middle : df.width / 2
+		set-width df.width
+		include : VBarLeft l 0 top MVertStroke
+		include : CyrYeriShape top (middle - MVertStroke / 2 * HVContrast) (r - O) MVertStroke jut
+		include : HBar (df.leftSB + MVertStroke * 0.1) middle (top / 2)
+		if SLAB : begin
+			include : CenterTopSerif (l + MVertStroke / 2 * HVContrast) top jut
+			include : CenterBottomSerif (l + MVertStroke / 2 * HVContrast) 0 jut
+
+	sketch # cyrNje
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.capital
+		include : CyrNjeShape CAP df
+		save 'cyrNje' 0x40A
+
+	sketch # cyrnje
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : CyrNjeShape XH df
+		save 'cyrnje' 0x45A
+
+
+glyph-block Letter-Cyrillic-Tshe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	sketch # cyrTshe
+		include MarkSet.capital
+
+		local left : [mix SB RightSB 0.15] + OX
+		local right : RightSB - OX
+
+		include : nShoulder
+			left -- (left + Stroke * HVContrast)
+			right -- right
+		include : VBarLeft left 0 CAP
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) CAP
+			curl [mix left RightSB 0.475] CAP
+
+		if SLAB : begin
+			include : CenterBottomSerif (left + HVContrast * HalfStroke) 0 Jut
+			include : CenterBottomSerif (right - HVContrast * HalfStroke) 0 Jut
+
+		save 'cyrTshe' 0x40B
+
+
+glyph-block Letter-Cyrillic-Dje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Overmarks
+
+	sketch # cyrDje
+		include MarkSet.capital
+
+		local left : [mix SB RightSB 0.15] + OX
+		local right: RightSB - OX * 1.5
+
+		include : nShoulder
+			left -- (left + Stroke * HVContrast)
+			right -- right
+			top -- XH
+			bottom -- (Hook + HalfStroke + O)
+			sma -- SmoothA
+			smb -- SmoothB
+		include : VBarLeft left 0 CAP
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) CAP
+			curl [mix left RightSB 0.475] CAP
+		include : VerticalHook (right - HalfStroke * HVContrast) (Hook + HalfStroke + O) [Math.max ((left - right) / 2 + HalfStroke) (-Hook * 1.2)] Hook
+
+		if SLAB : begin
+			include : LeftwardBottomSerif left 0 SideJut
+
+		save 'cyrDje' 0x402
+
+	sketch # cyrdje
+		include MarkSet.if
+		include : refer-glyph "cyrtshe"
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+		save 'cyrdje' 0x452
+

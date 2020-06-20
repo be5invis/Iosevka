@@ -1,6 +1,6 @@
 "use strict";
 
-const Point = require("./point");
+const Point = require("../../support/point");
 
 function delta(a, b) {
 	return Math.round((a - b) * 32);
@@ -92,7 +92,7 @@ function autoref(gs, excludeUnicodeSet) {
 
 	// referencify, backward
 	for (let j = 0; j < gs.length; j++) {
-		if (gs[j].cmpPriority < 0) continue;
+		if (gs[j].autoRefPriority < 0) continue;
 		if (!gs[j].contours.length) continue;
 		if (gs[j].references && gs[j].references.length) continue;
 		for (let k = gs.length - 1; k >= 0; k--) {
@@ -110,13 +110,7 @@ function autoref(gs, excludeUnicodeSet) {
 	// unlink composite
 	for (let j = 0; j < gs.length; j++) {
 		if (!gs[j].references || gs[j].references.length === 0) continue;
-		if (
-			!gs[j].flatten &&
-			gs[j].contours.length === 0 &&
-			!(gs[j].unicode && excludeUnicodeSet.has(gs[j].unicode[0]))
-		) {
-			continue;
-		}
+		if (!gs[j].avoidBeingComposite && gs[j].contours.length === 0) continue;
 		gs[j].contours = unlinkRef(gs[j], 0, 0, gs);
 		gs[j].references = [];
 	}

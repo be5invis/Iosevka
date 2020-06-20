@@ -4,7 +4,7 @@ const fs = require("fs");
 const build = require("verda").create();
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, fail, echo } = build.actions;
+const { run, node, cd, cp, rm, mv, fail, echo } = build.actions;
 const { FileList } = build.predefinedFuncs;
 const which = require("which");
 
@@ -13,7 +13,7 @@ module.exports = build;
 ///////////////////////////////////////////////////////////
 
 const path = require("path");
-const toml = require("toml");
+const toml = require("@iarna/toml");
 
 const BUILD = "build";
 const DIST = "dist";
@@ -213,13 +213,18 @@ function getSuffixMapping(weights, slants, widths) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`shapeWeight`, `s-${s}`, `wd-${widths[wd].shape}`],
+					hives: [`shapeWeight`, `s-${s}`, `shapeWidth`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
 					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
 					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
 					width: wd,
-					shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, vlShapeWidth),
+					shapeWidth: nValidate(
+						"Shape width of " + wd,
+						widths[wd].shape,
+						vlShapeWidth,
+						fixShapeWidth
+					),
 					cssStretch: widths[wd].css || wd,
 					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
 					slant: s,
@@ -248,9 +253,10 @@ function validateRecommendedWeight(w, value, label) {
 	}
 }
 
-function nValidate(key, v, f) {
+function nValidate(key, v, f, ft) {
+	if (ft) v = ft(v);
 	if (typeof v !== "number" || !isFinite(v) || (f && !f(v))) {
-		throw new TypeError(`${key} = "${v}" is not a valid number.`);
+		throw new TypeError(`${key} = ${v} is not a valid number.`);
 	}
 	return v;
 }
@@ -263,8 +269,23 @@ function vlCssWeight(x) {
 function vlMenuWeight(x) {
 	return vlCssWeight(x);
 }
+const g_widthFixupMemory = new Map();
+function fixShapeWidth(x) {
+	if (x >= 3 && x <= 9) {
+		if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
+		const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
+		echo.warn(
+			`The build plan is using legacy width grade ${x}. ` +
+				`Converting to unit width ${xCorrected}.`
+		);
+		g_widthFixupMemory.set(x, xCorrected);
+		return xCorrected;
+	} else {
+		return x;
+	}
+}
 function vlShapeWidth(x) {
-	return x >= 3 && x <= 9 && x % 1 === 0;
+	return x >= 433 && x <= 665;
 }
 function vlMenuWidth(x) {
 	return x >= 1 && x <= 9 && x % 1 === 0;
@@ -309,7 +330,8 @@ const StandardSuffixes = computed(`metadata:standard-suffixes`, async target => 
 });
 
 async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
-	const ttcComposition = {},
+	const glyfTtcComposition = {},
+		ttcComposition = {},
 		ttcContents = {},
 		groupDecomposition = {};
 	for (const collectPrefix in rawCollectPlans) {
@@ -329,18 +351,29 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 					gr.width,
 					gr.slant
 				);
-				const ttfTargetName = `${prefix}-${suffix}`;
+				const glyfTtcFileName = fnFileName(
+					{ ...config, distinguishWidths: true },
+					collectPrefix,
+					gr.weight,
+					gr.width,
+					gr.slant
+				);
 
+				const ttfTargetName = `${prefix}-${suffix}`;
 				if (!ttfFileNameSet.has(ttfTargetName)) continue;
+
+				if (!glyfTtcComposition[glyfTtcFileName]) glyfTtcComposition[glyfTtcFileName] = [];
+				glyfTtcComposition[glyfTtcFileName].push({ dir: prefix, file: ttfTargetName });
 				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
-				ttcComposition[ttcFileName].push({ dir: prefix, file: ttfTargetName });
+				ttcComposition[ttcFileName].push(glyfTtcFileName);
+
 				groupFileList.add(ttcFileName);
 			}
 		}
 		ttcContents[collectPrefix] = [...groupFileList];
 		groupDecomposition[collectPrefix] = [...collect.from];
 	}
-	return { ttcComposition, ttcContents, groupDecomposition };
+	return { glyfTtcComposition, ttcComposition, ttcContents, groupDecomposition };
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
@@ -352,37 +385,39 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	return `${prefix}-${ttcSuffix}`;
 }
 
-const CollectionPartsOf = computed.group("metadata:collection-parts-of", async (target, id) => {
-	const [{ ttcComposition }] = await target.need(CollectPlans);
-	return ttcComposition[id];
-});
-
 ///////////////////////////////////////////////////////////
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
+const BuildRawTtf = file.make(
+	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
+	async (target, output, gr, fn) => {
+		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
+		const charmap = output.dir + "/" + fn + ".charmap";
+		await target.need(Scripts, Parameters, de`${output.dir}`);
+		const otdPath = `${output.dir}/${output.name}.otd`;
+		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
+		await optimizedOtfcc(otdPath, output.full);
+		await rm(otdPath);
+	}
+);
+
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
-		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
-		const charmap = output.dir + "/" + output.name + ".charmap";
-		await target.need(Scripts, Parameters, de`${output.dir}`);
+		const [useTtx] = await target.need(OptimizeWithTtx, de`${output.dir}`);
+		await target.needed(FontInfoOf(fn), Version, Scripts, Parameters);
 
-		const otdPath = `${output.dir}/${output.name}.otd`;
-		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
+		const [rawTtf] = await target.order(BuildRawTtf(gr, fn));
 		if (useTtx) {
-			const tempOtfPath = `${output.dir}/${output.name}.temp.otf`;
 			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
-
-			await optimizedOtfcc(otdPath, tempOtfPath);
-			await run(TTX, "-q", ["-o", ttxPath], tempOtfPath);
+			await run(TTX, "-q", ["-o", ttxPath], rawTtf.full);
+			await rm(rawTtf.full);
 			await run(TTX, "-q", ["-o", output.full], ttxPath);
-			await rm(tempOtfPath);
 			await rm(ttxPath);
 		} else {
-			await optimizedOtfcc(otdPath, output.full);
+			await mv(rawTtf.full, output.full);
 		}
-		await rm(otdPath);
 	}
 );
 
@@ -464,37 +499,38 @@ const DistWebFontCSS = file.make(
 	}
 );
 
-const GroupContents = task.group("contents", async (target, gid) => {
-	await target.need(GroupFonts(gid), DistWebFontCSS(gid));
-	return gid;
+const GroupContents = task.group("contents", async (target, gr) => {
+	await target.need(GroupFonts(gr), DistWebFontCSS(gr));
+	return gr;
 });
 
 // TTC
-const ExportTtcSet = task.group("collection-fonts", async (target, cid) => {
-	const [{ ttcContents }] = await target.need(CollectPlans);
-	const [files] = await target.need(ttcContents[cid].map(file => ExportTtc(cid, file)));
-	return files;
-});
-const ExportSuperTtc = file.make(
-	f => `${DIST}/super-ttc/${f}.ttc`,
-	async (target, out, f) => {
-		await target.need(de(out.dir));
-		const [inputs] = await target.need(ExportTtcSet(f));
-		await run(
-			OTF2OTC,
-			["-o", out.full],
-			inputs.map(f => f.full)
-		);
-	}
-);
 const ExportTtc = file.make(
 	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
 	async (target, out, gr, f) => {
-		const [parts] = await target.need(CollectionPartsOf(f));
-		await buildTtcForFile(target, parts, out);
+		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
+		const parts = Array.from(new Set(cp.ttcComposition[f]));
+		const [inputs] = await target.need(parts.map(pt => glyfTtc(gr, pt)));
+		await buildCompositeTtc(out, inputs);
 	}
 );
-async function buildTtcForFile(target, parts, out) {
+const glyfTtc = file.make(
+	(gr, f) => `${BUILD}/glyf-ttc/${gr}/${f}.ttc`,
+	async (target, out, gr, f) => {
+		const [cp] = await target.need(CollectPlans);
+		const parts = cp.glyfTtcComposition[f];
+		await buildGlyfTtc(target, parts, out);
+	}
+);
+
+async function buildCompositeTtc(out, inputs) {
+	await run(
+		OTF2OTC,
+		["-o", out.full],
+		inputs.map(f => f.full)
+	);
+}
+async function buildGlyfTtc(target, parts, out) {
 	const [useTtx] = await target.need(OptimizeWithTtx, de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
@@ -507,15 +543,24 @@ async function buildTtcForFile(target, parts, out) {
 // Collection Export
 const CollectionExport = task.group("collection-export", async (target, gr) => {
 	// Note: this target does NOT depend on the font files.
-	const [collectPlans] = await target.need(CollectPlans);
+	const [collectPlans] = await target.need(CollectPlans, de`${DIST}/export/${gr}`);
 	const sourceGroups = collectPlans.groupDecomposition[gr];
-	await target.need(
-		de`${DIST}/export/${gr}`,
-		sourceGroups.map(g => GroupContents(g)),
-		ExportTtcSet(gr)
-	);
+	// TTF, etc
+	await target.need(sourceGroups.map(g => GroupContents(g)));
 	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
+	// TTC
+	const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+	await target.need(ttcFiles.map(pt => ExportTtc(gr, pt)));
 });
+const ExportSuperTtc = file.make(
+	gr => `${DIST}/super-ttc/${gr}.ttc`,
+	async (target, out, gr) => {
+		const [cp] = await target.need(CollectPlans, de(out.dir));
+		const parts = Array.from(new Set(cp.ttcContents[gr]));
+		const [inputs] = await target.need(parts.map(pt => ExportTtc(gr, pt)));
+		await buildCompositeTtc(out, inputs);
+	}
+);
 const CollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {

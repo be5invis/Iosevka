@@ -1,0 +1,29 @@
+import 'typo-geom' as TypoGeom
+import '../../support/curve-util' as CurveUtil
+
+export : define [SetupBuilders args] : begin
+	define [object Glyph globalTransform] args
+	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
+		local g : new Glyph
+		set g.gizmo : this.gizmo || globalTransform
+		if (k.length == 0) : return g
+
+		g.include k.0
+		set g.contours : g.contours.map CurveUtil.convertContourToCubic
+		foreach [item : items-of : k.slice 1] : begin
+			local g1 : new Glyph
+			set g1.gizmo : this.gizmo || globalTransform
+			g1.include item
+			set g1.contours : g1.contours.map CurveUtil.convertContourToCubic
+			local c1 : TypoGeom.Boolean.combine operator [CurveUtil.convertShapeToArcs g.contours] [CurveUtil.convertShapeToArcs g1.contours] TypoGeom.Boolean.PolyFillType.pftNonZero TypoGeom.Boolean.PolyFillType.pftNonZero 16384
+			local ctx : new CurveUtil.ArcFlattener
+			TypoGeom.transferBezArcShape c1 ctx
+			set g.contours ctx.contours
+		this.includeGlyph g
+		return g
+
+	define union : Boole TypoGeom.Boolean.ClipType.ctUnion
+	define intersection : Boole TypoGeom.Boolean.ClipType.ctIntersection
+	define difference : Boole TypoGeom.Boolean.ClipType.ctDifference
+
+	return [object union intersection difference]

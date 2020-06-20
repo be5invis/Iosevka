@@ -1,8 +1,7 @@
 import '../support/point' as Point
-import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
+import '../support/transform' as Transform
 import [mix linreg clamp fallback] from '../support/utils'
 import '../support/anchor' as Anchor
-import [compsiteMarkSet] from '../support/utils'
 
 # Parameter generation
 export : define [calculateMetrics para] : begin
@@ -10,7 +9,7 @@ export : define [calculateMetrics para] : begin
 	define HalfUPM : UPM / 2
 
 	# Key metrics
-	define Width para.width
+	define Width : Math.round para.width
 	define SB para.sb
 	define CAP para.cap
 	define XH para.xheight
@@ -152,7 +151,7 @@ export : define [calculateMetrics para] : begin
 	define [adviceBlackness2 cowX cowY refH div] : Math.min
 		adviceBlackness cowX (refH / DarknessMockWidth2)
 		adviceBlackness cowY div
-	define [MVertStrokeD div] : adviceBlackness [fallback para.lllcrowdedness (3 + 1 / 3)] div
+	define [MVertStrokeD div] : adviceBlackness designParameters.lllcrowdedness div
 	define MVertStroke : MVertStrokeD 1
 	define OverlayStroke : adviceBlackness 3.75
 	define OperatorStroke : adviceBlackness 3.125
@@ -165,10 +164,9 @@ export : define [calculateMetrics para] : begin
 	define [adviceSSmooth y sign _stroke] : begin
 		# Handle with extreme care.
 		local stroke : fallback _stroke Stroke
-		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke]
+		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke] * [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5]
 		local widthFactor : RightSB - SB
-		local widthFactor2 : Width - UPM / 2
-		local ss : y * 0.21 + 0.4 * strokeFactor + 0.035 * widthFactor
+		local ss : y * 0.21 + 0.375 * strokeFactor + 0.035 * widthFactor
 		return : ss + sign * TanSlope * (SmoothAdjust + 0.75 * stroke)
 
 	define [adviceGlottalStopSmooth y sign] : begin
@@ -190,7 +188,7 @@ export : define [calculateMetrics para] : begin
 		IBalance LBalance2 IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2
 		FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 Ess EssQuestion
 		HalfStroke RightSB Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA
-		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS
+		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS compositeBaseAnchors
 		adviceBlackness adviceBlackness2 MVertStroke MVertStrokeD OverlayStroke OperatorStroke
 		GeometryStroke ShoulderFine Superness superXY adviceSSmooth adviceGlottalStopSmooth
 		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter]
@@ -220,51 +218,57 @@ export : define [setFontMetrics para metrics fm] : begin
 	set fm.OS_2.sCapHeight        CAP
 	set fm.post.italicAngle       (0 - para.slantAngle)
 
+
+export : define [compositeBaseAnchors] : begin
+	local h {.}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.baseAnchors]] : begin
+		set h.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
+	return {.baseAnchors h .isMarkSet true}
+
 export : define [MarksetDiv p me] : begin
-	define [object MARK BASE] Anchor
+	define width : p * me.Width
 	define middle : p * me.Middle
 	define rightSB : me.Width * p - me.SB
 	define [ta anchor] : return : new Anchor
 		* (anchor.x * me.globalTransform.xx + anchor.y * me.TanSlope + me.globalTransform.x)
 		* (anchor.x * me.globalTransform.xy + anchor.y * me.globalTransform.yy + me.globalTransform.y)
-		* anchor.type
 
-	define markAboveLower       {.anchors {.above       [ta : new Anchor middle  me.XH        BASE]}}
-	define markAboveOper        {.anchors {.above       [ta : new Anchor middle  me.operTop   BASE]}}
-	define markAboveTack        {.anchors {.above       [ta : new Anchor middle  me.tackTop   BASE]}}
-	define markAbovePlus        {.anchors {.above       [ta : new Anchor middle  me.plusTop   BASE]}}
-	define markAboveCap         {.anchors {.above       [ta : new Anchor middle  me.CAP       BASE]}}
-	define markBelowLower       {.anchors {.below       [ta : new Anchor middle  me.Descender BASE]}}
-	define markBelowTack        {.anchors {.below       [ta : new Anchor middle  me.tackBot   BASE]}}
-	define markBelowOper        {.anchors {.below       [ta : new Anchor middle  me.operBot   BASE]}}
-	define markBelowPlus        {.anchors {.below       [ta : new Anchor middle  me.plusBot   BASE]}}
-	define markBelowZero        {.anchors {.below       [ta : new Anchor middle  0            BASE]}}
-	define markToprightLower    {.anchors {.topright    [ta : new Anchor rightSB me.XH        BASE]}}
-	define markToprightCap      {.anchors {.topright    [ta : new Anchor rightSB me.CAP       BASE]}}
-	define markBottomrightLower {.anchors {.bottomright [ta : new Anchor rightSB me.Descender BASE]}}
-	define markBottomrightZero  {.anchors {.bottomright [ta : new Anchor rightSB 0            BASE]}}
+	define markAboveLower       {.baseAnchors {.above       [ta : new Anchor middle  me.XH                     ]}}
+	define markAboveOper        {.baseAnchors {.above       [ta : new Anchor middle  me.operTop                ]}}
+	define markAboveTack        {.baseAnchors {.above       [ta : new Anchor middle  me.tackTop                ]}}
+	define markAbovePlus        {.baseAnchors {.above       [ta : new Anchor middle  me.plusTop                ]}}
+	define markAboveCap         {.baseAnchors {.above       [ta : new Anchor middle  me.CAP                    ]}}
+	define markBelowLower       {.baseAnchors {.below       [ta : new Anchor middle  me.Descender              ]}}
+	define markBelowTack        {.baseAnchors {.below       [ta : new Anchor middle  me.tackBot                ]}}
+	define markBelowOper        {.baseAnchors {.below       [ta : new Anchor middle  me.operBot                ]}}
+	define markBelowPlus        {.baseAnchors {.below       [ta : new Anchor middle  me.plusBot                ]}}
+	define markBelowZero        {.baseAnchors {.below       [ta : new Anchor middle  0                         ]}}
+	define markToprightLower    {.baseAnchors {.topright    [ta : new Anchor rightSB me.XH                     ]}}
+	define markToprightCap      {.baseAnchors {.topright    [ta : new Anchor rightSB me.CAP                    ]}}
+	define markBottomrightLower {.baseAnchors {.bottomright [ta : new Anchor rightSB me.Descender              ]}}
+	define markBottomrightZero  {.baseAnchors {.bottomright [ta : new Anchor rightSB 0                         ]}}
+	define markTieAbove         {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
+	define markTieBelow         {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
 
 	define [buildStandardMarkSet] : begin
-		local a : compsiteMarkSet.apply null arguments
-		set a.anchors.overlay : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x me.OverlayPos]
-			* [mix a.anchors.below.y a.anchors.above.y me.OverlayPos]
-			* BASE
-		set a.anchors.slash : new Anchor
-			* [mix a.anchors.below.x a.anchors.above.x 0.5]
-			* [mix a.anchors.below.y a.anchors.above.y 0.5]
-			* BASE
+		local a : compositeBaseAnchors.apply null arguments
+		set a.baseAnchors.overlay : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x me.OverlayPos]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y me.OverlayPos]
+		set a.baseAnchors.slash : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x 0.5]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
 		return a
 
 	return : object
-		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
-		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero
-		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero
-		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero
-		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero
-		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero
-		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower
-		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower
+		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
+		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
+		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero markTieAbove markTieBelow
+		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero markTieAbove markTieBelow
+		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero markTieAbove markTieBelow
+		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero markTieAbove markTieBelow
+		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower markTieAbove markTieBelow
+		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower markTieAbove markTieBelow
 
 export : define designParameters : object
 	# V shape
@@ -290,6 +294,8 @@ export : define designParameters : object
 	braceCurlyM1        0.6
 	braceCurlyM2        0.45
 	braceOvershoot      0.02
+
+	lllcrowdedness      (3 + 1 / 3)
 
 export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
 	local div : fallback _div 1

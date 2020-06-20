@@ -66,35 +66,19 @@ define-macro glyph-construction : syntax-rules
 	]] env}
 # Remap Glyph's methods to macros in order to simplify writing
 define-macro set-width : syntax-rules
-	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.set-width @::args] env}
-define-macro start-from : syntax-rules
-	`[start-from @::args] {'.syntactic-closure' `[currentGlyph.start-from @::args] env}
-define-macro line-to : syntax-rules
-	`[line-to @::args] {'.syntactic-closure' `[currentGlyph.line-to @::args] env}
-define-macro curve-to : syntax-rules
-	`[curve-to @::args] {'.syntactic-closure' `[currentGlyph.curve-to @::args] env}
-define-macro cubic-to : syntax-rules
-	`[cubic-to @::args] {'.syntactic-closure' `[currentGlyph.cubic-to @::args] env}
+	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.setWidth @::args] env}
 define-macro include : syntax-rules
 	`[include @::args] {'.syntactic-closure' `[currentGlyph.include @::args] env}
-define-macro set-anchor : syntax-rules
-	`[set-anchor @::args] {'.syntactic-closure' `[currentGlyph.set-anchor @::args] env}
+define-macro set-mark-anchor : syntax-rules
+	`[set-mark-anchor @::args] {'.syntactic-closure' `[currentGlyph.setMarkAnchor @::args] env}
+define-macro set-base-anchor : syntax-rules
+	`[set-base-anchor @::args] {'.syntactic-closure' `[currentGlyph.setBaseAnchor @::args] env}
 define-macro apply-transform : syntax-rules
-	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.apply-transform @::args] env}
-define-macro reverse-last : syntax-rules
-	`[reverse-last @::args] {'.syntactic-closure' `[currentGlyph.reverse-last @::args] env}
-define-macro depends-on : syntax-rules
-	`[depends-on @::args] {'.syntactic-closure' `[currentGlyph.depends-on @::args] env}
+	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.applyTransform @::args] env}
 define-macro eject-contour : syntax-rules
-	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.eject-contour @::args] env}
-define-macro tag-contour : syntax-rules
-	`[tag-contour @::args] {'.syntactic-closure' `[currentGlyph.tag-contour @::args] env}
-define-macro retag-contour : syntax-rules
-	`[retag-contour @::args] {'.syntactic-closure' `[currentGlyph.retag-contour @::args] env}
+	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.ejectContour @::args] env}
 define-macro assign-unicode : syntax-rules
-	`[assign-unicode @code] {".syntactic-closure" `[begin \\
-		currentGlyph.assign-unicode @code
-		set $Capture$.unicodeGlyphs.(currentGlyph.unicode.((currentGlyph.unicode.length - 1))) currentGlyph
+	`[assign-unicode @code] {".syntactic-closure" `[$assignUnicodeImpl$ currentGlyph @code
 	] env}
 
 ###### Canvas-based mechanism
@@ -146,12 +130,12 @@ define-macro glyph-block-import : syntax-rules
 			OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif
 			RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif
 			DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs
-			AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder
+			AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder
 			mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook
 			LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR
 			hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround
 			Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives
-			WithAIHSerifsMask SNeck]
+			WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors]
 
 			Overmarks `[markExtend markHalfStroke markStress markFine markMiddle markDotsRadius
 			aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot
@@ -214,15 +198,14 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph]
+		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph $assignUnicodeImpl$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
 			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$
-			spirofns MarkSet MARK BASE AS_BASE ALSO_METRICS pickHash dependencyProfile
-			getDependencyProfile buildGlyphs newtemp tagged includeGlyphPart compsiteMarkSet
-			DivFrame fontMetrics ensure-glyph]
+			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
+			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$]
 		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop
 			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
 			Italify Upright Scale Translate Rotate globalTransform TanSlope
@@ -236,15 +219,17 @@ define-macro glyph-block : syntax-rules
 			SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS adviceBlackness
 			adviceBlackness2 MVertStroke OverlayStroke OperatorStroke GeometryStroke ShoulderFine
 			Superness superXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope StrokeWidthBlend
-			SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter]
+			SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter compositeBaseAnchors]
 		define spiroFnImports `[g4 g2 corner flat curl close end straight widths disable-gizmo
 			disable-contrast heading unimportant important alsoThru alsoThruThem bezcontrols
-			quadcontrols archv arcvh complexThru dispiro spiro-outline union intersection difference]
+			quadcontrols archv arcvh complexThru dispiro spiro-outline]
+		define booleFnImports `[union intersection difference]
 
 		define defaultImports `[begin \\
 			define [object @::[captureImports.filter : lambda [x] variableSet.(x)]] $Capture$
 			define [object @::[metricImports.filter  : lambda [x] variableSet.(x)]] $Capture$.metrics
 			define [object @::[spiroFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.spirofns
+			define [object @::[booleFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.booleFns
 		]
 
 		dirty `[$GlyphBlocks$.push : lambda [$Capture$] : begin \\

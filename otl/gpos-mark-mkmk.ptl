@@ -1,42 +1,10 @@
 import [add-common-feature add-feature add-lookup] from "./table-util"
+extern Set
 
-define [createBaseInfo g th px py] : begin
-	local res {.}
-	local pushed false
-	foreach key [items-of : Object.keys g.anchors] : if (!th || th.(key)) : begin
-		set res.(key) : object
-			.x g.anchors.(key).(px || 'x')
-			.y g.anchors.(key).(py || 'y')
-		set pushed true
-	return : if pushed res nothing
-
-define [createMTLookup glyphList lookupType anchorClasses] : begin
-	local subtable {.marks {.} .bases {.}}
-	local th {.}
-	foreach [ac : items-of anchorClasses] : set th.(ac) true
-	foreach glyph [items-of glyphList] : if glyph.anchors : begin
-		local anchorKeys : Object.keys glyph.anchors
-		local hasAnchor false
-		foreach [key : items-of anchorKeys] : if th.(key) : set hasAnchor true
-		if hasAnchor : begin
-			local isMarkGlyph false
-			local markKey nothing
-			foreach key [items-of anchorKeys] : if (glyph.anchors.(key).type == 'mark') : begin
-				set isMarkGlyph true
-				set markKey key
-			if isMarkGlyph
-			: then : begin
-				set subtable.marks.(glyph.name) : object
-					class markKey
-					x glyph.anchors.(markKey).x
-					y glyph.anchors.(markKey).y
-				if (lookupType == 'gpos_mark_to_mark'): begin
-					local r : createBaseInfo glyph th 'mbx' 'mby'
-					if r : set subtable.bases.(glyph.name) r
-			: else : if (lookupType == 'gpos_mark_to_base') : begin
-				local r : createBaseInfo glyph th 'x' 'y'
-				if r : set subtable.bases.(glyph.name) r
-	return {.type lookupType .subtables {subtable}}
+define MarkClasses {
+	'above' 'below' 'overlay' 'slash' 'topright' 'bottomright'
+	'trailing' 'lf' 'tieAbove' 'tieBelow' 'aboveBrace' 'belowBrace'
+}
 
 export : define [buildMarkMkmk sink glyphList] : begin
 	define mark : add-feature sink 'mark'
@@ -47,8 +15,48 @@ export : define [buildMarkMkmk sink glyphList] : begin
 	local markLookupNames {}
 	local mkmkLookupNames {}
 
-	foreach [marktag : items-of {'above' 'below' 'overlay' 'slash' 'topright' 'bottomright' 'trailing' 'lf'}] : begin
-		define lookupNameMark : 'lookup_mark_' + marktag
-		define lookupNameMkmk : 'lookup_mkmk_' + marktag
-		mark.lookups.push : add-lookup sink : createMTLookup glyphList 'gpos_mark_to_base' {marktag}
-		mkmk.lookups.push : add-lookup sink : createMTLookup glyphList 'gpos_mark_to_mark' {marktag}
+	foreach markCls [items-of MarkClasses] : begin
+		local [object markSubtable mkmkSubtable] : createMTSubtables glyphList { markCls }
+		if ([objectIsNotEmpty markSubtable.marks] && [objectIsNotEmpty markSubtable.bases]) : begin
+			local markLookup : add-lookup sink {.type 'gpos_mark_to_base' .subtables { markSubtable }}
+			mark.lookups.push    markLookup
+			markLookupNames.push markLookup
+
+		if ([objectIsNotEmpty mkmkSubtable.marks] && [objectIsNotEmpty mkmkSubtable.bases]) : begin
+			local mkmkLookup : add-lookup sink {.type 'gpos_mark_to_mark' .subtables { mkmkSubtable }}
+			mkmk.lookups.push    mkmkLookup
+			mkmkLookupNames.push mkmkLookup
+
+	foreach markLookup [items-of markLookupNames] : foreach mkmkLookup [items-of mkmkLookupNames]
+		sink.lookupDep.push { markLookup mkmkLookup }
+
+define [createMTSubtables glyphList markClasses] : begin
+	local markSubtable {.marks {.} .bases {.}}
+	local mkmkSubtable {.marks {.} .bases {.}}
+	local allowMarkClsSet : new Set markClasses
+	foreach glyph [items-of glyphList] : begin
+		createMarkInfo markSubtable.marks glyph allowMarkClsSet
+		createMarkInfo mkmkSubtable.marks glyph allowMarkClsSet
+		local isMark : objectIsNotEmpty glyph.markAnchors
+		if isMark
+			createBaseInfo mkmkSubtable.bases glyph allowMarkClsSet
+			createBaseInfo markSubtable.bases glyph allowMarkClsSet
+	return : object markSubtable mkmkSubtable
+
+define [createBaseInfo sink glyph allowMarkClsSet] : begin
+	local res {.}
+	local pushed false
+	foreach { markCls anchor } [pairs-of glyph.baseAnchors] : if [allowMarkClsSet.has markCls] : begin
+		set pushed true
+		set res.(markCls) {.x anchor.x .y anchor.y}
+	if pushed : set sink.(glyph.name) res
+	return pushed
+
+define [createMarkInfo sink glyph allowMarkClsSet] : begin
+	local m null
+	foreach { markCls anchor } [pairs-of glyph.markAnchors] : if [allowMarkClsSet.has markCls] : begin
+		set m {.class markCls .x anchor.x .y anchor.y}
+	if m : set sink.(glyph.name) m
+	return m
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

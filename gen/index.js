@@ -7,8 +7,8 @@ const BuildFont = require("./build-font.js");
 const Parameters = require("../support/parameters");
 const FormVariantData = require("../support/variant-data");
 const FormLigationData = require("../support/ligation-data");
-const { AnyCv } = require("../support/gr");
-const Toml = require("toml");
+const { AnyCv, CvDecompose } = require("../support/gr");
+const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {
 	const para = await getParameters(argv);
@@ -32,7 +32,10 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	const para = Parameters.build(parametersData, argv.hives, { shapeWeight: argv.shape.weight });
+	const para = Parameters.build(parametersData, argv.hives, {
+		shapeWeight: argv.shape.weight,
+		shapeWidth: argv.shape.width
+	});
 
 	const variantsData = FormVariantData(rawVariantsData, para);
 	para.variants = variantsData;
@@ -43,7 +46,7 @@ async function getParameters(argv) {
 	para.defaultBuildup = ligationData.defaultBuildup;
 	para.ligation = Parameters.build(ligationData.hives, ["default", ...argv.hives]);
 
-	if (argv.excludedCharRanges) para.excludedCodePointRanges = argv.excludedCharRanges;
+	if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
 	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 
@@ -99,12 +102,23 @@ async function saveCharMap(argv, font) {
 				typographicFeatures.push("lnum", "onum");
 		}
 
-		charMap.push([
-			glyph.name,
-			glyph.unicode,
-			typographicFeatures,
-			AnyCv.query(glyph).map(gr => gr.tag)
-		]);
+		let variantFeatures;
+		if (CvDecompose.get(glyph)) {
+			const variantFeatureSet = new Set();
+			const decomposition = CvDecompose.get(glyph);
+			for (const gn of decomposition) {
+				const component = font.glyf[gn];
+				if (!component) continue;
+				for (const cv of AnyCv.query(component)) variantFeatureSet.add(cv.tag);
+			}
+			variantFeatures = Array.from(variantFeatureSet).sort();
+		} else {
+			variantFeatures = AnyCv.query(glyph)
+				.map(gr => gr.tag)
+				.sort();
+		}
+
+		charMap.push([glyph.name, glyph.unicode, typographicFeatures, variantFeatures]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
 }

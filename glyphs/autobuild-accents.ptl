@@ -1,9 +1,9 @@
 ###### Automatic builds
 $$include '../meta/macros.ptl'
 
-import [Dotless AnyCv DotlessOrNot getGrTree] from "../support/gr"
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree] from "../support/gr"
 import 'unorm' as unorm
-import [fallback suggestGC] from '../support/utils'
+import [fallback] from '../support/utils'
 
 glyph-module
 
@@ -25,7 +25,7 @@ glyph-block AutoBuild-Accents : begin
 		return amended
 
 	# Build accented glyphs
-	define [isAboveMark mark] : mark && mark.anchors && mark.anchors.above && mark.anchors.above.type === MARK
+	define [isAboveMark mark] : mark && mark.markAnchors && mark.markAnchors.above
 	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : set parts.(j) [query-glyph 'iotaLF']
 	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : set parts.(j) [query-glyph 'ogonekTR']
 	define [subParts parts] : begin
@@ -38,8 +38,8 @@ glyph-block AutoBuild-Accents : begin
 			if dotless : set parts.0 dotless
 
 		# replace below marks with trailing marks
-		if parts.0.anchors.lf : parts.forEach iotaBelowToLF
-		if parts.0.anchors.trailing : parts.forEach ogonekBelowToTR
+		if parts.0.baseAnchors.lf : parts.forEach iotaBelowToLF
+		if parts.0.baseAnchors.trailing : parts.forEach ogonekBelowToTR
 
 		# composite greek Overmarks
 		for [local j 0] (j < parts.length) [inc j] : piecewise
@@ -96,14 +96,12 @@ glyph-block AutoBuild-Accents : begin
 
 	if recursiveCodes : recursiveCodes.forEach buildForCode
 	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
-	suggestGC
 
 	local s_code  nothing
 	local s_parts nothing
 	define construction : glyph-construction
 		if s_code : assign-unicode s_code
-		include s_parts.0 AS_BASE
-		set-width s_parts.0.advanceWidth
+		include s_parts.0 AS_BASE ALSO_METRICS
 
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
@@ -122,7 +120,7 @@ glyph-block AutoBuild-Accents : begin
 		local dstTree {}
 		local targetNameMap  {.}
 		set targetNameMap.(parts.0.name) glyphName
-		local tree : getGrTree parts.0.name {DotlessOrNot AnyCv} query-glyph
+		local tree : getGrTree parts.0.name { DotlessOrNot AnyDerivingCv } query-glyph
 		foreach [{gr origBase relBase} : items-of tree] : begin
 			local origGN targetNameMap.(origBase)
 			if [not origGN] : throw : new Error 'Unreachable'
@@ -131,8 +129,6 @@ glyph-block AutoBuild-Accents : begin
 			set parts1.0 : query-glyph relBase
 			if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
 			if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
-
-	suggestGC
 
 define customDecompositions : object
 	# Latvians use comma instead of cedillas in several letters.
@@ -155,8 +151,6 @@ define customDecompositions : object
 	."\u0249" "j\u0335"
 	."\u0268" "i\u0335"
 	."\u024D" "r\u0335"
-	."\u01B5" "Z\u0335"
-	."\u01B6" "z\u0335"
 	."\u1D7B" "\u026A\u0335"
 	."\u1D7C" "\u0269\u0335"
 
@@ -190,7 +184,6 @@ define customDecompositions : object
 	."\u1D8F" "a\u0322"
 	."\u1D90" "\u0251\u0322"
 	."\u1D91" "\u0257\u0322"
-	."\u1D99" "u\u0322"
 
 	."\u1E10" "D\u0326"
 	."\u1E11" "d\u0326"
@@ -244,6 +237,16 @@ define customDecompositions : object
 	."\u02ED" "\uE09D\u033F"
 	."\u02F3" "\uE09D\u0325"
 	."\u02F7" "\uE09D\u0330"
+	."\u02BE" "\uE09D\u0357"
+	."\u02BF" "\uE09D\u0351"
+	."\u02C2" "\uE09D\u1DFE"
+	."\u02C3" "\uE09D\u0350"
+	."\u02C4" "\uE09D\uE092"
+	."\u02C5" "\uE09D\uE093"
+	."\u02EF" "\uE09D\uE095"
+	."\u02F0" "\uE09D\uE094"
+	."\u02F1" "\uE09D\u0354"
+	."\u02F2" "\uE09D\u0355"
 
 	."\u1FED" "\uE09D\u0308\u0300"
 	."\u1FEE" "\uE09D\u0308\u0301"

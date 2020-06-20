@@ -1,9 +1,9 @@
 $$include '../meta/macros.ptl'
 
-import '../support/transform' as : Transform && [object [transformPoint tp] [unTransform utp] inverse]
+import '../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../support/utils'
-import [Cv AnyCv] from '../support/gr'
+import [Cv AnyDerivingCv] from '../support/gr'
 import [designParameters] from '../meta/aesthetics'
 
 glyph-module
@@ -31,7 +31,7 @@ glyph-block CommonShapes : begin
 			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
 			if unicode : assign-unicode unicode
 			ApplyCv currentGlyph follow para name transform omit
-			set this.cmpPriority [query-glyph (name + '.' + variant)].cmpPriority
+			set this.autoRefPriority [query-glyph (name + '.' + variant)].autoRefPriority
 
 	define [italic-variant name unicode] : create-glyph name : glyph-construction
 		define base : if para.isItalic glyphMap.(name + '.italic') glyphMap.(name + '.upright')
@@ -61,13 +61,12 @@ glyph-block CommonShapes : begin
 	define [query-glyph id] : return glyphMap.(id)
 	define [into-unicode code] : glyph-construction : if code : assign-unicode code
 
-
 	define [WithDerivatives sourceGid dstGid Fn] : if glyphMap.(sourceGid) : begin
 		local glyphSrc glyphMap.(sourceGid)
 		create-glyph dstGid : glyph-construction : include : Fn sourceGid null
 
 		local glyphDst glyphMap.(dstGid)
-		if glyphDst : foreach [gr : items-of : AnyCv.query glyphSrc] : begin
+		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
 			create-glyph [gr.amendName dstGid] : glyph-construction : include : Fn [gr.get glyphSrc] gr.tag
 			gr.set glyphDst [gr.amendName dstGid]
 
@@ -75,7 +74,7 @@ glyph-block CommonShapes : begin
 		lambda [src sel] : glyph-construction
 			if (unicode && !sel) : assign-unicode unicode
 			include [refer-glyph src] AS_BASE ALSO_METRICS
-			set currentGlyph.cmpPriority [query-glyph src].cmpPriority
+			set currentGlyph.autoRefPriority [query-glyph src].autoRefPriority
 
 	define [turned newid unicode id _x _y mark] : WithDerivatives id [fallback newid ('turn' + id)]
 		lambda [src sel] : glyph-construction
@@ -85,7 +84,7 @@ glyph-block CommonShapes : begin
 			define x : if (_x <@ Function) [_x.call currentGlyph] _x
 			define y : if (_y <@ Function) [_y.call currentGlyph] _y
 			include : FlipAround x y
-			set currentGlyph.cmpPriority [query-glyph src].cmpPriority
+			set currentGlyph.autoRefPriority [query-glyph src].autoRefPriority
 
 	# Dual derivatives
 	define [hcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'hcombine_' + id1 + '_' + id2] : glyph-construction
@@ -99,8 +98,8 @@ glyph-block CommonShapes : begin
 	define [vcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] : glyph-construction
 		if unicode : assign-unicode unicode
 		set-width [query-glyph id1].advanceWidth
-		depends-on [query-glyph id1]
-		depends-on [query-glyph id2]
+		currentGlyph.dependsOn [query-glyph id1]
+		currentGlyph.dependsOn [query-glyph id2]
 		include : create-glyph : glyph-construction
 			include [refer-glyph id2]
 			apply-transform : Upright
@@ -125,7 +124,7 @@ glyph-block CommonShapes : begin
 			corner r d
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
-			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
 			apply-transform : Translate (mx1 - mx) (my1 - my)
 
 	define [Ring u d l r transformShiftOnly] : create-glyph : glyph-construction
@@ -144,7 +143,7 @@ glyph-block CommonShapes : begin
 			arcvh
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
-			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
 			apply-transform : Translate (mx1 - mx) (my1 - my)
 	define [RingAt x y r] : Ring (y + r) (y - r) (x - r) (x + r)
 	define [DotAt x y r] : Ring (y + r) (y - r) (x - r) (x + r) true
@@ -166,7 +165,7 @@ glyph-block CommonShapes : begin
 			arcvh
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
-			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
 			apply-transform : Translate (mx1 - mx) (my1 - my)
 	define [RingStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s
 	define [DotStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s true
@@ -183,7 +182,7 @@ glyph-block CommonShapes : begin
 			g4 r my
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
-			local {.x mx1 .y my1} [tp globalTransform {.x mx .y my}]
+			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
 			apply-transform : Translate (mx1 - mx) (my1 - my)
 	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
 	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
@@ -352,30 +351,28 @@ glyph-block CommonShapes : begin
 		local right : fallback _right RightSB
 		local jutIn : JutIn left right
 		if SLAB : begin
-			include : CenterTopSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) top Jut jutIn
-			tag-contour 'serifLT'
-			include : CenterTopSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) top jutIn Jut
-			tag-contour 'serifRT'
+			include : tagged 'serifLT' : CenterTopSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) top Jut jutIn
+			include : tagged 'serifRT' : CenterTopSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) top jutIn Jut
 	define [AIHSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
 		local jutIn : JutIn left right
 		if SLAB : begin
 			include : AIVSerifs top _left _right
-			include : CenterBottomSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) 0 Jut jutIn
-			tag-contour 'serifLB'
-			include : CenterBottomSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) 0 jutIn Jut
-			tag-contour 'serifRB'
+			include : tagged 'serifLB'
+				CenterBottomSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) 0 Jut jutIn
+			include : tagged 'serifRB'
+				CenterBottomSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) 0 jutIn Jut
 	define [AINSerifs top _left _right sw xn] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
 		local jut : Jut * [fallback xn 1]
 		if SLAB : begin
 			include : LeftwardTopSerif (left + sw * (sideSerifK - 0.5) * HVContrast) top (jut - sw / 2 * HVContrast)
-			include : CenterTopSerif (right - sw * sideSerifK * HVContrast) top jut
-			tag-contour 'serifRB'
-			include : CenterBottomSerif (left + sw * sideSerifK * HVContrast) 0 jut
-			tag-contour 'serifLB'
+			include : tagged 'serifRB'
+				CenterTopSerif (right - sw * sideSerifK * HVContrast) top jut
+			include : tagged 'serifLB'
+				CenterBottomSerif (left + sw * sideSerifK * HVContrast) 0 jut
 			#include : CenterdBottomSerif (right - Stroke * (sideSerifK - 0.5) * HVContrast) 0 (Jut / 2)
 	define [AICyrISerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
@@ -384,8 +381,8 @@ glyph-block CommonShapes : begin
 			include : LeftwardBottomSerif left 0 SideJut
 			include : RightwardTopSerif right top SideJut
 			include : CenterTopSerif (left + Stroke * sideSerifK * HVContrast) top Jut
-			include : CenterBottomSerif (right - Stroke * sideSerifK * HVContrast) 0 Jut
-			tag-contour 'serifRB'
+			include : tagged 'serifRB'
+				CenterBottomSerif (right - Stroke * sideSerifK * HVContrast) 0 Jut
 	define [AIMSerifs top _left _right] : glyph-construction
 		local left : fallback _left SB
 		local right : fallback _right RightSB
@@ -406,40 +403,6 @@ glyph-block CommonShapes : begin
 		local ay : Math.max 0 : [Math.abs dy] - [fallback dyt 0]
 		local ax : Math.max 0 : [Math.abs dx] - [fallback dxt 0]
 		return : [Math.hypot ay ax] / ay
-
-	define [halfXStrand stb _leftx lefty rightx righty turn straight tension _fine] : glyph-construction
-		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
-		local leftx : _leftx + ((HalfStroke * HVContrast + sbCor) * [if (rightx > _leftx) 1 (-1)])
-		local fine  : (_fine || Stroke) * 0.5
-
-		local turnyleft : mix lefty righty turn
-		local cyleft : mix turnyleft righty tension
-
-		local straightxleft : mix leftx rightx straight
-		local straightyleft : mix cyleft righty straight
-
-		if stb : begin
-			local hst : HalfStroke * [diagCor (righty - lefty) (rightx - leftx) 0 HalfStroke]
-			local hse : HalfStroke * [Math.min 0.97 ([adviceBlackness 3.5] / Stroke)]
-			include : dispiro
-				corner leftx lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
-				corner rightx righty [widths hse hse]
-
-		: else : begin
-			include : dispiro
-				widths.center
-				flat leftx lefty [heading [if (lefty < righty) Upward Downward]]
-				curl leftx turnyleft [heading [if (lefty < righty) Upward Downward]]
-				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
-				flat straightxleft straightyleft
-				curl rightx righty
-
-	define [xStrand stb _leftx lefty _rightx righty turn straight tension] : glyph-construction
-		local middlex : mix _leftx _rightx 0.5
-		local middley : mix lefty righty 0.5
-
-		include : halfXStrand stb _leftx lefty middlex middley turn straight tension
-		include : halfXStrand stb _rightx righty middlex middley turn straight tension
 
 	define [nShoulderKnots] : params [left right [fine ShoulderFine] [top XH] [bottom 0] [sma SmallSmoothA] [smb SmallSmoothB] [stroke Stroke]] : begin
 		local slope : shoulderMidSlope fine stroke
@@ -628,7 +591,7 @@ glyph-block CommonShapes : begin
 			local faf toFinish.af
 			set toFinish.af : lambda [] : begin
 				if faf : faf.apply this arguments
-				if this.heads-to : this.heads-to : if doSwash
+				if this.headsTo : this.headsTo : if doSwash
 					then : begin {
 						.x (Contrast / [Math.sqrt : 1 + skew * skew] * [if dtu (-1) 1])
 						.y (skew / [Math.sqrt : 1 + skew * skew] * [if ltr 1 (-1)])
@@ -676,8 +639,8 @@ glyph-block CommonShapes : begin
 		.af [lambda [before after] [HookShape before after false y tight sw swItalicAdj]]
 	}
 
-	define [CyrDescender] : params [x [shift 0.1] [connex 0]] : glyph-construction
-		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * shift)
+	define [CyrDescender] : params [x [shift 0.1] [connex 0] [sideJut SideJut]] : glyph-construction
+		local descenderOverflow : if SLAB sideJut ((RightSB - SB) * shift)
 		include : VBarRight (x + descenderOverflow + 0.25 * Stroke) (HalfStroke - LongJut) Stroke
 		if (!SLAB && descenderOverflow > Stroke * 0.75 || connex) : include : HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 
@@ -765,25 +728,24 @@ glyph-block CommonShapes : begin
 
 		define overlay    : create-glyph : glyph-construction : include fnOverlay    AS_BASE ALSO_METRICS
 		define background : create-glyph : glyph-construction : include fnBackground AS_BASE ALSO_METRICS
-		if background.anchors : include {.anchors background.anchors}
+
+		candidates.push : glyph-construction
+			set this.gizmo : Translate 0 0
+			foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
+				define x z.x
+				define y z.y
+				include : spiro-outline
+					corner (x - sw) (y - sw)
+					corner (x + sw) (y - sw)
+					corner (x + sw) (y + sw)
+					corner (x - sw) (y + sw)
 
 		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
 			define dx : r / segs * sw
 			define dy : c / segs * sw
 			candidates.push : glyph-construction
-				if background.anchors : include {.anchors background.anchors}
 				include overlay
 				apply-transform : Translate dx dy
-
-		foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
-			define x z.x
-			define y z.y
-			candidates.push : glyph-construction
-				set this.gizmo : Translate 0 0
-				start-from (x - sw) (y - sw)
-				line-to    (x + sw) (y - sw)
-				line-to    (x + sw) (y + sw)
-				line-to    (x - sw) (y + sw)
 
 		include : difference background [union.apply null candidates]
 		include overlay
@@ -824,8 +786,8 @@ glyph-block CommonShapes : begin
 		local giz this.gizmo
 		local g : create-glyph : glyph-construction
 			set this.gizmo : Translate 0 0
-			local {.x xo .y yo} : tp [Transform.Id] {.x x1 .y y1}
-			local {.x xt .y yt} : tp [Transform.Id] {.x x2 .y y2}
+			local {.x xo .y yo} : [Transform.Id].apply {.x x1 .y y1}
+			local {.x xt .y yt} : [Transform.Id].apply {.x x2 .y y2}
 			local mag : Math.hypot (yo - yt) (xo - xt)
 			include [G mag]
 			apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
@@ -838,4 +800,18 @@ glyph-block CommonShapes : begin
 		define tension : tensionCoeff * (0.5 - 0.4 * dist - 0.005 * strokeCoeff + slantCoeff * TanSlope)
 		return : alsoThruThem {{(0.5 - dist) tension} {(0.5 + dist) (1 - tension)}} [widths.center stroke]
 
-	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs halfXStrand xStrand nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck
+	define [WithTransform tfm gr] : create-glyph : glyph-construction
+		include gr
+		apply-transform tfm
+
+	define [ReverseContours gr] : begin
+		local g : create-glyph gr
+		if g.contours : foreach contour [items-of g.contours]
+			contour.reverse
+		return g
+
+	define [clear-anchors] : glyph-construction
+		set currentGlyph.markAnchors {.}
+		set currentGlyph.markBnchors {.}
+
+	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors

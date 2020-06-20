@@ -1,15 +1,8 @@
 import 'spiro' as SpiroJs
-import './spiroexpand' as SpiroExpansionContext
-import 'caryll-shapeops' as ShapeOps
-import './curve-util' as CurveUtil
-
-import './transform' as Transform
-
-define [fallback] : for [local j 0] (j < arguments.length) [inc j] : if (arguments.(j) !== nothing) : return arguments.(j)
-define [mix a b p] : a + (b - a) * p
-define [bez2 a b c t] : (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c
-define [bez3 a b c d t] : (1 - t) * (1 - t) * (1 - t) * a + 3 * (1 - t) * (1 - t) * t * b + 3 * t * t * (1 - t) * c + t * t * t * d
-
+import '../../support/spiro-expand' as SpiroExpansionContext
+import '../../support/curve-util' as CurveUtil
+import '../../support/transform' as Transform
+import '../../support/utils' as [object fallback mix bez2 bez3]
 
 export : define [SetupBuilders args] : begin
 	define [object para Glyph Contrast globalTransform Stroke Superness] args
@@ -38,7 +31,7 @@ export : define [SetupBuilders args] : begin
 						[fallback kt.r kt] (x + d.x * a.r) (y + d.y * a.r) f
 
 	# Aux functions
-	define [widths l r] : lambda [] : this.set-width l r
+	define [widths l r] : lambda [] : if this.setWidth : this.setWidth l r
 	define [widths.lhs w] : widths [fallback w Stroke] 0
 	define [widths.rhs w] : widths 0 [fallback w Stroke]
 	define [widths.center w] : widths ([fallback w Stroke] / 2) ([fallback w Stroke] / 2)
@@ -47,19 +40,19 @@ export : define [SetupBuilders args] : begin
 	define [disable-gizmo] : lambda [] : set this.gizmo [Transform.Id]
 	define [disable-contrast] : lambda [] : set this.contrast 1
 
-	define [heading d] : lambda [] : if (this.heads-to) : this.heads-to d
+	define [heading d] : lambda [] : if (this.headsTo) : this.headsTo d
 	define [widths.heading l r d] : lambda [] : begin
-		if this.set-width : this.set-width l r
-		if this.heads-to : this.heads-to d
+		if this.setWidth : this.setWidth l r
+		if this.headsTo : this.headsTo d
 	define [widths.lhs.heading w d] : lambda [] : begin
-		if this.set-width : this.set-width [fallback w Stroke] 0
-		if this.heads-to : this.heads-to d
+		if this.setWidth : this.setWidth [fallback w Stroke] 0
+		if this.headsTo : this.headsTo d
 	define [widths.rhs.heading w d] : lambda [] : begin
-		if this.set-width : this.set-width 0 [fallback w Stroke]
-		if this.heads-to : this.heads-to d
+		if this.setWidth : this.setWidth 0 [fallback w Stroke]
+		if this.headsTo : this.headsTo d
 	define [widths.center.heading w d] : lambda [] : begin
-		if this.set-width : this.set-width ([fallback w Stroke] / 2) ([fallback w Stroke] / 2)
-		if this.heads-to : this.heads-to d
+		if this.setWidth : this.setWidth ([fallback w Stroke] / 2) ([fallback w Stroke] / 2)
+		if this.headsTo : this.headsTo d
 	define [unimportant] : begin
 		if (this.points && this.points.length && this.points.(this.points.length - 1)) : this.points.(this.points.length - 1).subdivided = true
 		if (this.controlKnots && this.controlKnots.length && this.controlKnots.(this.controlKnots.length - 1)) : this.controlKnots.(this.controlKnots.length - 1).unimportant = true
@@ -166,62 +159,41 @@ export : define [SetupBuilders args] : begin
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call args 0] s
 		foreach knot [items-of knots] : let [ty knot.type] [af knot.af] : begin
 			set knot.af : lambda [] : begin
-				this.set-type ty
+				this.setType ty
 				if af : af.apply this args
-		SpiroJs.spiroToBezierOnContext knots closed s
+		SpiroJs.spiroToArcsOnContext knots closed s
 		foreach af [items-of lastafs] : if af : af.call s
 
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 		if closed : then
-			local g : new Glyph
+			local g : new CurveUtil.ArcFlattener
 			SpiroJs.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
 			local lhsContour g.contours.0
 			set g.contours {}
 			SpiroJs.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
 			local rhsContour g.contours.0
 			set g.contours {[lhsContour.concat rhsContour]}
-		: else
-			local g : new Glyph
+		: else : begin
+			local g : new CurveUtil.ArcFlattener
 			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
 			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
+
 		set g.knots knots
 		set g.lhsKnots lhs
 		set g.rhsKnots rhs
-		this.includeGlyph g
+		this.includeGeometry g 0 0
 		return g
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
-		local g : new Glyph
-		set g.gizmo : this.gizmo || globalTransform
+		local g : new CurveUtil.ArcFlattener (this.gizmo || globalTransform)
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
 		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
 		foreach af [items-of lastafs] : if af : af.call g
-		this.includeGlyph g
+		this.includeGeometry g 0 0
 		return g
-
-	define [Boole operator] : lambda [] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
-		local g : new Glyph
-		set g.gizmo : this.gizmo || globalTransform
-		if (k.length == 0) : return g
-
-		g.include k.0
-		set g.contours : g.contours.map CurveUtil.convertContourToCubic
-		foreach [item : items-of : k.slice 1] : begin
-			local g1 : new Glyph
-			set g1.gizmo : this.gizmo || globalTransform
-			g1.include item
-			set g1.contours : g1.contours.map CurveUtil.convertContourToCubic
-			local c1 : ShapeOps.boole operator g.contours g1.contours ShapeOps.fillRules.nonzero ShapeOps.fillRules.nonzero 16384
-			set g.contours : c1.map : lambda [c] : [CurveUtil.convertContourToCubic c].reverse
-		this.includeGlyph g
-		return g
-
-	define union : Boole ShapeOps.ops.union
-	define intersection : Boole ShapeOps.ops.intersection
-	define difference : Boole ShapeOps.ops.difference
 
 	return [object
 		g4 g2 corner flat curl close end straight
 		widths disable-gizmo disable-contrast heading unimportant important
 		alsoThru alsoThruThem bezcontrols quadcontrols archv arcvh complexThru
-		dispiro spiro-outline union intersection difference]
+		dispiro spiro-outline]

@@ -1,7 +1,10 @@
 "use strict";
 
 const which = require("which");
-const colors = require("colors/safe");
+const FgRed = "\x1b[31m";
+const FgGreen = "\x1b[32m";
+const FgYellow = "\x1b[33m";
+const Reset = "\x1b[0m";
 
 console.log("Checking External Dependencies");
 check("otfccdump");
@@ -13,16 +16,16 @@ checkOptional("ttx");
 function check(util) {
 	try {
 		which.sync(util);
-		console.error(colors.green(` * External dependency <${util}> is present.`));
+		console.error(FgGreen + ` * External dependency <${util}> is present.` + Reset);
 	} catch (e) {
-		console.error(colors.red(` * External dependency <${util}> is not found.`));
+		console.error(FgRed + ` * External dependency <${util}> is not found.` + Reset);
 	}
 }
 function checkOptional(util) {
 	try {
 		which.sync(util);
-		console.error(colors.green(` * Optional external dependency <${util}> is present.`));
+		console.error(FgGreen + ` * Optional external dependency <${util}> is present.` + Reset);
 	} catch (e) {
-		console.error(colors.yellow(` * Optional external dependency <${util}> is not found.`));
+		console.error(FgYellow + ` * Optional external dependency <${util}> is not found.` + Reset);
 	}
 }

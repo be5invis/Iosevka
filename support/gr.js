@@ -16,6 +16,68 @@ const Dotless = {
 	}
 };
 
+const CvDecompose = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.CvDecompose;
+		else return null;
+	},
+	set(glyph, composition) {
+		if (!Array.isArray(composition)) throw new Error("Must supply a GID array");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.CvDecompose = composition;
+	}
+};
+
+const CcmpDecompose = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.CcmpDecompose;
+		else return null;
+	},
+	set(glyph, composition) {
+		if (!Array.isArray(composition)) throw new Error("Must supply a GID array");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.CcmpDecompose = composition;
+	}
+};
+
+const TieMark = {
+	tag: "TMRK",
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.TieMark;
+		else return null;
+	},
+	set(glyph, toGid) {
+		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.TieMark = toGid;
+	},
+	amendName(name) {
+		return `TieMark{${name}}`;
+	}
+};
+
+const TieGlyph = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.TieMark;
+		else return null;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.TieMark = true;
+	}
+};
+
+const DoNotDeriveVariants = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.DoNotDeriveVariants;
+		else return null;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.DoNotDeriveVariants = true;
+	}
+};
+
 const CvTagCache = new Map();
 function Cv(tag) {
 	if (CvTagCache.has(tag)) return CvTagCache.get(tag);
@@ -52,6 +114,20 @@ const AnyCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
+			for (const tag in glyph.related.cv) {
+				const rel = Cv(tag);
+				if (rel.get(glyph)) ret.push(rel);
+			}
+		}
+		return ret;
+	}
+};
+
+const AnyDerivingCv = {
+	optional: false,
+	query(glyph) {
+		let ret = [];
+		if (glyph && !DoNotDeriveVariants.get(glyph) && glyph.related && glyph.related.cv) {
 			for (const tag in glyph.related.cv) {
 				const rel = Cv(tag);
 				if (rel.get(glyph)) ret.push(rel);
@@ -154,3 +230,9 @@ exports.AnyCv = AnyCv;
 exports.DotlessOrNot = DotlessOrNot;
 exports.getGrTree = getGrTree;
 exports.getGrMesh = getGrMesh;
+exports.TieMark = TieMark;
+exports.TieGlyph = TieGlyph;
+exports.DoNotDeriveVariants = DoNotDeriveVariants;
+exports.AnyDerivingCv = AnyDerivingCv;
+exports.CcmpDecompose = CcmpDecompose;
+exports.CvDecompose = CvDecompose;

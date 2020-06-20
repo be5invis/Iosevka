@@ -2,13 +2,11 @@
 
 const EmptyFont = require("./empty-font.js");
 const buildGlyphs = require("./build-glyphs.js");
+const finalizeFont = require("./finalize/index");
 
 const { buildOtl } = require("../otl/index");
 const { assignFontNames } = require("../meta/naming");
 const { setFontMetrics } = require("../meta/aesthetics");
-
-const regulateGlyphs = require("../support/regulate-glyph");
-const gcFont = require("./gc");
 
 module.exports = function (para) {
 	const font = EmptyFont();
@@ -22,42 +20,14 @@ module.exports = function (para) {
 	font.GPOS = otl.GPOS;
 	font.GDEF = otl.GDEF;
 
-	// Filtering
-	if (para.forceMonospace && para.spacing == 0) {
-		gs.glyphList = gs.glyphList.filter(g => !(g.advanceWidth > para.width));
-	}
-
 	// Regulate
-	const skew = Math.tan(((font.post.italicAngle || 0) / 180) * Math.PI);
-	const glyphList = regulateGlyphs(gs.glyphList, skew);
-
-	// finalize
-	const excludedCodePoints = new Set();
-	if (para.excludedCodePointRanges) {
-		for (const [start, end] of para.excludedCodePointRanges) {
-			for (let p = start; p <= end; p++) excludedCodePoints.add(p);
+	const excludeChars = new Set();
+	if (para.excludedCharRanges) {
+		for (const [start, end] of para.excludedCharRanges) {
+			for (let p = start; p <= end; p++) excludeChars.add(p);
 		}
 	}
-	const { glyf, cmap } = extractGlyfAndCmap(glyphList, excludedCodePoints);
-	font.glyf = glyf;
-	font.cmap = cmap;
 
-	gcFont(font);
-
+	finalizeFont(para, [...gs.glyphList], excludeChars, font);
 	return font;
 };
-
-function extractGlyfAndCmap(glyphList, excludedCodePoints) {
-	const glyf = {};
-	const cmap = {};
-	for (let g of glyphList) {
-		glyf[g.name] = g;
-
-		if (!g.unicode) continue;
-		for (let u of g.unicode) {
-			if (!excludedCodePoints.has(u - 0)) cmap[u] = g.name;
-		}
-	}
-
-	return { glyf, cmap };
-}
