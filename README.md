@@ -417,7 +417,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-four-open`, `VXAV`: `4` with open contour.
     * `v-four-open-non-crossing`, `VXAW`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
   * Styles for `6`:
-    * `v-six-closed-contour`, `VXAE`: `6` with a more closed.
+    * `v-six-closed-contour`, `VXAE`: `6` with a more closed contour.
     * `v-six-open-contour`, `VXAF`: `6` with a more open contour.
     * `v-six-straight-bar`, `VXBB`: `6` with a straight bar (default).
   * Styles for `7`:
@@ -426,7 +426,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-seven-crossbar`, `VXAX`: `7` with crossbar.
     * `v-seven-crossbar-serifed`, `VXAY`: `7` with crossbar and initial serif.
   * Styles for `9`:
-    * `v-nine-closed-contour`, `cv96`: `9` with a more closed.
+    * `v-nine-closed-contour`, `cv96`: `9` with a more closed contour.
     * `v-nine-open-contour`, `cv97`: `9` with a more open contour.
     * `v-nine-straight-bar`, `VXBC`: `9` with a straight bar (default).
   * Styles for `ß`:
