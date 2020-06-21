@@ -12,14 +12,26 @@ glyph-module
 
 glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
-	glyph-block-export CreateDottedComposition
 
+	glyph-block-export CreateDottedComposition
 	define [CreateDottedComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
 		lambda [src sel] : glyph-construction
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			include : refer-glyph "dotAbove"
 			Dotless.set currentGlyph src
 			if [not sel] : assign-unicode unicode
+
+	glyph-block-export CreateCommaCaronComposition
+	define [CreateCommaCaronComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
+		lambda [src sel] : glyph-construction
+			if [not sel] : assign-unicode unicode
+			define srcGlyph : query-glyph src
+			define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
+			include : refer-glyph "commaTR"
+			include : Upright
+			include : Translate commaOffset 0
+			include : Italify
+			include srcGlyph AS_BASE ALSO_METRICS
 
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
@@ -443,6 +455,7 @@ glyph-block Letter-Latin-Lower-L : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Lower-I : IotaShape TailedIShape
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 
 	sketch # l.hooky
 		local df : DivFrame para.diversityI
@@ -559,6 +572,8 @@ glyph-block Letter-Latin-Lower-L : begin
 	select-variant 'l' 'l'
 	alias 'palochka' 0x4CF 'l'
 	turned 'turnl' 0xA781 'l' Middle (XH / 2) MarkSet.p
+
+	CreateCommaCaronComposition 'l' 'lcaron' 0x13E
 
 	local LDotOptions : list
 		list 'hooky'       0
@@ -4651,6 +4666,7 @@ glyph-block Letter-Latin-Upper-T : begin
 glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 
 	define tcenter : Middle - TBalance - Stroke * 0.5 * HVContrast
 	define dfNarrowT : DivFrame para.diversityF
@@ -4730,6 +4746,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	turned 'turnt.cross' nothing 't.cross' Middle (XH / 2) MarkSet.p
 	turned 'turnt.narrow' nothing 't.narrow' dfNarrowT.middle (XH / 2) dfNarrowT.markSet.p
 	select-variant 'turnt' 0x287 (follow -- 't')
+
+	CreateCommaCaronComposition 't' 'tcaron' 0x165
 
 	sketch # tltail
 		include MarkSet.if
