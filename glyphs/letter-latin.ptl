@@ -12,14 +12,26 @@ glyph-module
 
 glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
-	glyph-block-export CreateDottedComposition
 
+	glyph-block-export CreateDottedComposition
 	define [CreateDottedComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
 		lambda [src sel] : glyph-construction
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			include : refer-glyph "dotAbove"
 			Dotless.set currentGlyph src
 			if [not sel] : assign-unicode unicode
+
+	glyph-block-export CreateCommaCaronComposition
+	define [CreateCommaCaronComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
+		lambda [src sel] : glyph-construction
+			if [not sel] : assign-unicode unicode
+			define srcGlyph : query-glyph src
+			define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
+			include : refer-glyph "commaTR"
+			include : Upright
+			include : Translate commaOffset 0
+			include : Italify
+			include srcGlyph AS_BASE ALSO_METRICS
 
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
@@ -443,6 +455,7 @@ glyph-block Letter-Latin-Lower-L : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Lower-I : IotaShape TailedIShape
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 
 	sketch # l.hooky
 		local df : DivFrame para.diversityI
@@ -559,6 +572,8 @@ glyph-block Letter-Latin-Lower-L : begin
 	select-variant 'l' 'l'
 	alias 'palochka' 0x4CF 'l'
 	turned 'turnl' 0xA781 'l' Middle (XH / 2) MarkSet.p
+
+	CreateCommaCaronComposition 'l' 'lcaron' 0x13E
 
 	local LDotOptions : list
 		list 'hooky'       0
@@ -2700,7 +2715,7 @@ glyph-block Letter-Latin-Upper-R : begin
 	WithDerivatives 'R' 'Rbar' : lambda [src sel] : glyph-construction
 		if [not sel] : assign-unicode 0x24C
 		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP CAP SLAB] + Stroke * 0.25)
+		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP SLAB] + Stroke * 0.25)
 
 	WithDerivatives 'smcpR' 'turnSmcpR' : lambda [src sel] : glyph-construction
 		if [not sel] : assign-unicode 0x1D1A
@@ -3264,12 +3279,12 @@ glyph-block Letter-Latin-Lower-G : begin
 
 	sketch # g.doublestorey
 		include MarkSet.p
-		local obot : XH * GBarPos - O - Stroke * 0.4
+		local obot : XH * designParameters.gBarPos - O - Stroke * 0.4
 		include : OShape XH obot SB (RightSB - 0.3 * SB)
 
 		local gleftx  ([mix 0 SB 0.85] + OX)
 		local grightx ([mix Width RightSB 0.825] - OX)
-		local groundy : Math.round : [mix Descender (XH * GBarPos) 0.64] + HalfStroke
+		local groundy : Math.round : [mix Descender (XH * designParameters.gBarPos) 0.64] + HalfStroke
 		local gtipy : [mix groundy (obot + Stroke + O) 1.005] - Stroke * CThin
 		include : dispiro
 			g4.left.start [mix SB RightSB 0.4] gtipy [widths 0 (Stroke * CThin)]
@@ -3296,12 +3311,12 @@ glyph-block Letter-Latin-Lower-G : begin
 
 	sketch # g.opendoublestorey
 		include MarkSet.p
-		local obot : XH * GBarPos - O - Stroke * 0.4
+		local obot : XH * designParameters.gBarPos - O - Stroke * 0.4
 		include : OShape XH obot SB (RightSB - 0.3 * SB)
 
 		local gleftx  ([mix 0 SB 0.85] + OX)
 		local grightx ([mix Width RightSB 0.825] - OX)
-		local groundy : Math.round : [mix Descender (XH * GBarPos) 0.64] + HalfStroke
+		local groundy : Math.round : [mix Descender (XH * designParameters.gBarPos) 0.64] + HalfStroke
 		local gtipy : [mix groundy (obot + Stroke + O) 1.005] - Stroke * CThin
 		include : dispiro
 			g4.left.start [mix SB RightSB 0.4] gtipy [widths 0 (Stroke * CThin)]
@@ -4193,24 +4208,47 @@ glyph-block Letter-Latin-Lower-H : begin
 glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-export FShape
+	glyph-block-export FShape RevFShape EFVJutLength
 
-	define [FShape top y noserif] : glyph-construction
-		local stroke : adviceBlackness2 2.875 2 CAP
-		local FBarLeft : SB * 1.5
-		include : VBarLeft (FBarLeft) 0 [fallback top CAP] stroke
-		include : HBarTop (FBarLeft - O) RightSB [fallback top CAP] stroke
-		include : HBar (FBarLeft - O) (RightSB - [Math.max HalfStroke ((RightSB - SB) * 0.15)] - [if SLAB (Stroke * 0.25) 0]) ([fallback top CAP] * [fallback y [if SLAB 0.52 0.54]]) stroke
-		if (SLAB && !noserif) : begin
-			include : LeftwardTopSerif FBarLeft [fallback top CAP] SideJut
-			include : LeftwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 Jut
-			include : tagged 'serifBottom' : RightwardBottomSerif (FBarLeft + HalfStroke * HVContrast) 0 MidJutSide
-			include : DownwardRightSerif RightSB [fallback top CAP] VJut
+	define [xMidBarShrink] : [Math.max HalfStroke ((RightSB - SB) * 0.15)] + [if SLAB (Stroke * 0.25) 0]
+	define [yMidBar top y] : top * [fallback y : designParameters.upperEBarPos SLAB]
+	define [EFVJutLength top pyBar stroke] : begin
+		local jutTop : Math.min VJut
+			top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
+		local jutBot : Math.min VJut
+			mix stroke ([yMidBar top pyBar] - stroke / 2) 0.5
+		return { jutTop jutBot }
+
+	define [FShape] : params [top pyBar noSerif] : glyph-construction
+		define stroke : adviceBlackness2 2.875 2 CAP
+		define xFBarLeft : SB * 1.5
+		include : VBarLeft (xFBarLeft) 0 top stroke
+		include : HBarTop (xFBarLeft - O) RightSB top stroke
+		include : HBar (xFBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
+		if (SLAB && !noSerif) : begin
+			include : LeftwardTopSerif xFBarLeft top SideJut
+			include : tagged 'serifBottom' : LeftwardBottomSerif xFBarLeft 0 SideJut
+			include : tagged 'serifBottom' : RightwardBottomSerif (xFBarLeft + HalfStroke * HVContrast) 0 MidJutSide
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardRightSerif RightSB top jutTop
+
+	define [RevFShape] : params [top pyBar noSerif] : glyph-construction
+		define stroke : adviceBlackness2 2.875 2 CAP
+		define xFBarRight : Width - SB * 1.5
+		include : VBarRight (xFBarRight) 0 top stroke
+		include : HBarTop SB (xFBarRight + O) top stroke
+		include : HBar (SB + [xMidBarShrink]) (xFBarRight + O) [yMidBar top pyBar] stroke
+		if (SLAB && !noSerif) : begin
+			include : RightwardTopSerif xFBarRight top SideJut
+			include : tagged 'serifBottom' : RightwardBottomSerif xFBarRight 0 SideJut
+			include : tagged 'serifBottom' : LeftwardBottomSerif (xFBarRight - HalfStroke * HVContrast) 0 MidJutSide
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardLeftSerif SB top jutTop
 
 	create-glyph 'F' 'F' : glyph-construction
 		set-width Width
 		include MarkSet.capital
-		include : FShape
+		include : FShape CAP
 
 	create-glyph 'symbol/currency/frenchFrancSign' 0x20A3 : glyph-construction
 		include : refer-glyph "F"
@@ -4348,7 +4386,7 @@ glyph-block Letter-Latin-Lower-F : begin
 
 		save 'iviby' 0x285
 
-	define fbar : XH * para.fbarpos + Stroke * para.fbarStrokeAdj
+	define fbar : XH * designParameters.fBarPos + Stroke * para.fbarStrokeAdj
 	sketch # f.straight
 		local fovershoot2 (O * 2)
 		include MarkSet.b
@@ -4487,19 +4525,33 @@ glyph-block Letter-Latin-Lower-F : begin
 glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Latin-Upper-F : FShape
+	glyph-block-import Letter-Latin-Upper-F : FShape RevFShape EFVJutLength
 
 	glyph-block-export EShape
-	define [EShape top] : glyph-construction
-		local stroke : adviceBlackness2 2.875 2 CAP
-		include : FShape top nothing true
-		include : HBarBottom (SB * 1.5 - O) RightSB 0 stroke
-		if SLAB : begin
-			include : LeftwardTopSerif (SB * 1.5) [fallback top CAP] SideJut
-			include : tagged 'serifBottom' : CenterBottomSerif (SB * 1.5 + HalfStroke * HVContrast) 0 Jut
-			include : DownwardRightSerif RightSB [fallback top CAP] VJut
-			include : LeftwardBottomSerif (SB * 1.5) 0 SideJut
-			include : UpwardRightSerif RightSB 0 VJut
+	define [EShape] : params [top pyBar noSerif] : glyph-construction
+		define stroke : adviceBlackness2 2.875 2 CAP
+		define xEBarLeft : SB * 1.5
+		include : FShape top pyBar true
+		include : HBarBottom (xEBarLeft - O) RightSB 0 stroke
+		if (SLAB && !noSerif) : begin
+			include : LeftwardTopSerif xEBarLeft top SideJut
+			include : LeftwardBottomSerif xEBarLeft 0 SideJut
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardRightSerif RightSB top jutTop
+			include : UpwardRightSerif RightSB 0 jutBot
+
+	glyph-block-export RevEShape
+	define [RevEShape] : params [top pyBar noSerif] : glyph-construction
+		define stroke : adviceBlackness2 2.875 2 CAP
+		define xEBarRight : Width - SB * 1.5
+		include : RevFShape top pyBar true
+		include : HBarBottom SB (xEBarRight + O) 0 stroke
+		if (SLAB && !noSerif) : begin
+			include : RightwardTopSerif xEBarRight top SideJut
+			include : RightwardBottomSerif xEBarRight 0 SideJut
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardLeftSerif SB top jutTop
+			include : UpwardLeftSerif SB 0 jutBot
 
 	sketch # turnE
 		set-width Width
@@ -4510,7 +4562,10 @@ glyph-block Letter-Latin-Upper-E : begin
 		save 'Epsilon' 0x395
 		save 'cyrIe' 0x415
 
-		include : FlipAround Middle (CAP / 2)
+	create-glyph 'revE' 0x18E : glyph-construction
+		set-width Width
+		include MarkSet.capital
+		include : RevEShape CAP
 		save 'turnE' 0x18E
 
 	sketch # smcpturnE
@@ -4526,7 +4581,7 @@ glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-export SmallEShape RevSmallEShape
 
 	define [SmallEShape top stroke barpos curly] : glyph-construction
-		local barbottom : top * [fallback barpos EBarPos] - (stroke / 2)
+		local barbottom : top * [fallback barpos designParameters.eBarPos] - (stroke / 2)
 		local hookx (RightSB - OXHook + TailAdjX * TanSlope)
 		local hookmiddle : [mix (SB + O) hookx 0.55] + CorrectionOMidS
 		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
@@ -4562,7 +4617,7 @@ glyph-block Letter-Latin-Lower-E : begin
 		save 'cyrSchwa' 0x4D8
 
 	define [RevSmallEShape top stroke barpos] : glyph-construction
-		local barbottom (top * [fallback barpos EBarPos] - HalfStroke)
+		local barbottom (top * [fallback barpos designParameters.eBarPos] - HalfStroke)
 		local hookx SB
 		local hookmiddle : [mix (RightSB - O) hookx 0.55] + CorrectionOMidS
 
@@ -4651,6 +4706,7 @@ glyph-block Letter-Latin-Upper-T : begin
 glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 
 	define tcenter : Middle - TBalance - Stroke * 0.5 * HVContrast
 	define dfNarrowT : DivFrame para.diversityF
@@ -4730,6 +4786,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	turned 'turnt.cross' nothing 't.cross' Middle (XH / 2) MarkSet.p
 	turned 'turnt.narrow' nothing 't.narrow' dfNarrowT.middle (XH / 2) dfNarrowT.markSet.p
 	select-variant 'turnt' 0x287 (follow -- 't')
+
+	CreateCommaCaronComposition 't' 'tcaron' 0x165
 
 	sketch # tltail
 		include MarkSet.if
@@ -5297,46 +5355,62 @@ glyph-block Letter-Latin-Eszet : begin
 glyph-block Letter-Latin-Upper-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 
 	sketch # AE
-		define eBarPos : if SLAB 0.52 0.54
-		local df : DivFrame para.diversityM 3
+		define df : DivFrame para.diversityM 3
+		define eBarPos : designParameters.upperEBarPos SLAB
+		define sw : adviceBlackness2 designParameters.lllcrowdedness 3 CAP df.div
+		define eleft : df.middle - sw * 0.25 * HVContrast
+		define fine : adviceBlackness2 4 3 CAP df.div
+		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
+
 		set-width df.width
 		include df.markSet.capital
 
-		local eleft : df.middle - df.mvs * 0.25
 		local turn : XH * 0.1
 
 		# A half
 		include : dispiro
-			widths.rhs df.mvs
+			widths.rhs sw
 			flat df.leftSB 0 [heading Upward]
 			curl df.leftSB (CAP * 0.1) [heading Upward]
 			quadcontrols 0 0.3 6 unimportant
-			g4   (eleft - HalfStroke) CAP [widths.rhs (df.mvs * 0.8)]
+			g4   (eleft - HalfStroke) CAP [widths.rhs fine]
 
 		include : spiro-outline
 			corner (eleft - HalfStroke) CAP
 			corner eleft CAP
-			corner eleft (CAP - df.mvs)
-		include : HBarTop  ([mix df.leftSB (eleft - HalfStroke) (1/6)] + df.mvs * 0.5 * HVContrast)  (eleft + df.mvs / 2) (XH / 2) df.mvs
+			corner eleft (CAP - sw)
+		include : intersection
+			WithTransform [Translate (-O) 0] : spiro-outline
+				corner df.leftSB 0 [heading Upward]
+				curl   df.leftSB (CAP * 0.1) [heading Upward]
+				quadcontrols 0 0.3 6 unimportant
+				corner   (eleft - HalfStroke) CAP [widths.rhs fine]
+				corner eleft CAP
+				corner eleft 0
+			HBarTop 0 eleft (XH / 2) sw
 
 		# E half
-		include : VBarLeft eleft 0 CAP df.mvs
+		include : VBarLeft eleft 0 CAP sw
 		include : HBarTop (eleft - O) df.rightSB CAP
-		include : HBar (eleft - O) (df.rightSB - df.mvs / 4) (CAP * eBarPos)
+		include : HBar (eleft - O) (df.rightSB - sw / 4) (CAP * eBarPos)
 		include : HBarBottom (eleft - O) df.rightSB 0
 		if SLAB : begin
-			include : CenterBottomSerif (df.leftSB + df.mvs / 2 * HVContrast) 0 Jut df.mvs
-			include : DownwardRightSerif df.rightSB CAP VJut df.mvs
-			include : UpwardRightSerif df.rightSB 0 VJut df.mvs
+			local { jutTop jutBot } : EFVJutLength CAP eBarPos sw
+			include : CenterBottomSerif (df.leftSB + sw / 2 * HVContrast) 0 Jut sw
+			include : DownwardRightSerif df.rightSB CAP jutTop swVJut
+			include : UpwardRightSerif df.rightSB 0 jutBot swVJut
 		save 'AE' 0xC6
 		save 'cyrAE' 0x4D4
 
 	define [OEShape top df] : glyph-construction
-		define eleft df.middle
-		define eBarPos : if SLAB 0.52 0.54
+		define eBarPos : designParameters.upperEBarPos SLAB
 		define sw : adviceBlackness2 designParameters.lllcrowdedness 3 top df.div
+		define eleft : df.middle - sw * [if SLAB (1 / 3) (1 / 4)] * HVContrast
+		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
+
 		# O half
 		include : dispiro
 			widths.lhs sw 0
@@ -5348,19 +5422,15 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 			straight.right.end eleft 0 [heading Rightward]
 
 		# E half
-		include : VBarLeft  eleft 0 top (sw / 2)
-		include : VBarRight eleft sw (top - sw / 2) (sw / 2)
+		include : VBarLeft eleft 0 top sw
 		include : HBarTop (eleft - O) df.rightSB top sw
 		include : HBar (eleft - O) (df.rightSB - sw / 4) (top * 0.54) sw
 		include : HBarBottom (eleft - O) df.rightSB 0 sw
 
 		if SLAB : begin
-			local jutTop : Math.min VJut
-				top - [mix (top - sw) (top * eBarPos + sw / 2) 0.5]
-			local jutBot : Math.min VJut
-				mix sw (top * eBarPos + sw / 2) 0.5
-			include : DownwardRightSerif df.rightSB top jutTop sw
-			include : UpwardRightSerif df.rightSB 0 jutBot sw
+			local { jutTop jutBot } : EFVJutLength top eBarPos sw
+			include : DownwardRightSerif df.rightSB top jutTop swVJut
+			include : UpwardRightSerif df.rightSB 0 jutBot swVJut
 
 	sketch # OE
 		local df : DivFrame para.diversityM 3
@@ -5385,7 +5455,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local stroke : adviceBlackness2 2.875 3 XH df.div
 		local eLeft : df.middle - stroke / 2 * HVContrast + 0.1
 		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] -  stroke * TanSlope
-		local barbottom (XH * EBarPos - stroke / 2)
+		local barbottom (XH * designParameters.eBarPos - stroke / 2)
 
 		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
 		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
