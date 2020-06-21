@@ -92,6 +92,10 @@ const OptimizeWithTtx = computed("metadata:optimize-with-ttx", async target => {
 	const [hasTtx, rp] = await target.need(HasTtx, RawPlans);
 	return hasTtx && !!rp.buildOptions.optimizeWithTtx;
 });
+const OptimizeWithFilter = computed("metadata:optimize-with-filter", async target => {
+	const [rp] = await target.need(RawPlans);
+	return rp.buildOptions.optimizeWithFilter;
+});
 const RawCollectPlans = computed("metadata:raw-collect-plans", async target => {
 	const [rp] = await target.need(RawPlans);
 	return rp.collectPlans;
@@ -392,7 +396,12 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 const BuildRawTtf = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
-		const [fi, useTtx] = await target.need(FontInfoOf(fn), OptimizeWithTtx, Version);
+		const [fi] = await target.need(
+			FontInfoOf(fn),
+			Version,
+			OptimizeWithFilter,
+			OptimizeWithTtx
+		);
 		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
 		const otdPath = `${output.dir}/${output.name}.otd`;
@@ -405,11 +414,18 @@ const BuildRawTtf = file.make(
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
-		const [useTtx] = await target.need(OptimizeWithTtx, de`${output.dir}`);
+		const [useFilter, useTtx] = await target.need(
+			OptimizeWithFilter,
+			OptimizeWithTtx,
+			de`${output.dir}`
+		);
 		await target.needed(FontInfoOf(fn), Version, Scripts, Parameters);
-
 		const [rawTtf] = await target.order(BuildRawTtf(gr, fn));
-		if (useTtx) {
+		if (useFilter) {
+			const filterArgs = useFilter.split(/ +/g);
+			await run(filterArgs, rawTtf.full, output.full);
+			await rm(rawTtf.full);
+		} else if (useTtx) {
 			const ttxPath = `${output.dir}/${output.name}.temp.ttx`;
 			await run(TTX, "-q", ["-o", ttxPath], rawTtf.full);
 			await rm(rawTtf.full);
@@ -531,11 +547,16 @@ async function buildCompositeTtc(out, inputs) {
 	);
 }
 async function buildGlyfTtc(target, parts, out) {
-	const [useTtx] = await target.need(OptimizeWithTtx, de`${out.dir}`);
+	const [useFilter, useTtx] = await target.need(
+		OptimizeWithFilter,
+		OptimizeWithTtx,
+		de`${out.dir}`
+	);
 	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
-	await run(TTCIZE, ttfInputPaths, ["-o", tmpTtc], useTtx ? "--ttx-loop" : null);
+	const optimization = useFilter ? ["--filter-loop", useFilter] : useTtx ? ["--ttx-loop"] : [];
+	await run(TTCIZE, optimization, ["-o", tmpTtc], ttfInputPaths);
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
