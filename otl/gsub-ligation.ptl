@@ -1,5 +1,4 @@
-import [add-common-feature add-feature ChainRuleBuilder query-related-glyphs BeginLookupBlock EndLookupBlock] from "./table-util"
-
+import [add-common-feature add-feature ChainRuleBuilder BeginLookupBlock EndLookupBlock] from "./table-util"
 extern Set
 
 define-operator "~>" 880 'right' : syntax-rules
@@ -8,8 +7,9 @@ define-operator "~>" 880 'right' : syntax-rules
 define [lsx s] : lambda [t] : t.map : lambda [x] "\(x).lig.\(s)"
 define [csx s] : lambda [t] : t.map : lambda [x] "\(x).\(s)"
 define [just s] : lambda [t] : t.map : lambda [x] s
-define preserved null
-define advance : lambda [t] : t.map : lambda [x] x
+define look-around null
+define advance : lambda [t] null
+define ident : lambda [t] : t.map : lambda [x] x
 
 export : define [buildLigations sink para plm glyphs] : begin
 	local rec : BeginLookupBlock sink
@@ -27,14 +27,6 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 	define [waveClass cl] : [just ('wave.' + cl)] anyWave
 	define [waveTf cl] : anyWave ~> [waveClass cl]
 
-	define [anyStartingWith names] : begin
-		local result {}
-		foreach [name : items-of names] : begin
-			local re : new RegExp "^\(name)(?:\.|$)"
-			foreach [name : items-of : Object.keys glyphs]
-				if [re.test name] : result.push name
-		return result
-
 	define less {'less'}
 	define lessAndEquiv {'less' 'less.lig.shift0' 'less.lig.shift0.anti'}
 	define hyphen {'hyphen'}
@@ -48,7 +40,7 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 	define bar {'bar'}
 	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
 
-	define alphabet : query-related-glyphs glyphs para {
+	define alphabet {
 		'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm'
 		'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'
 		'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M'
@@ -104,18 +96,6 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 
 	define [hasLG ln] : [mappedFeature.indexOf ln] >= 0
 
-	define [only ln f g] : lambda [left] : begin
-		if [not : hasLG ln]
-		: then : begin
-			if g
-			: then : piecewise
-				(g <@ Function) : g left
-				true : return g
-			: else : return null
-		: else : piecewise
-			(f <@ Function) : f left
-			true : return f
-
 	define feature : add-common-feature sink : add-feature sink featureName
 
 	local lastLookupName null
@@ -148,13 +128,21 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 
 	define [keep-if lg x] : if [hasLG lg] x null
 
-	define [CreateLigationLookup rules] : begin
+	define [filterNulls _rules] : begin
+		if [not _rules] : return {}
+		define rules {}
+		foreach [rule : items-of _rules] : if rule : rules.push rule
+		return rules
+
+	define [CreateLigationLookup _rules] : begin
+		define rules : filterNulls _rules
 		if (rules && rules.length) : AddRankedLookup
 			.type 'gsub_chaining'
 			.subtables rules
 		set lookupRank : lookupRank + 1
 
-	define [CreateReverseLigationLookup rules] : begin
+	define [CreateReverseLigationLookup _rules] : begin
+		define rules : filterNulls _rules
 		if (rules && rules.length) : AddRankedLookup
 			.type 'gsub_reverse'
 			.subtables rules
@@ -164,22 +152,22 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 		define centerizeGroups : { asterisk_center caret_center tilde_center colon_center [if [hasLG 'dotoper'] period_center nothing]}.filter (x => x)
 
 		do "Bracket-star"
-			CreateLigationLookup : keep-if 'center-ops' : list
+			CreateLigationLookup : keep-if 'brst' : list
 				chain-rule # (*
-					{'parenLeft'}  ~> preserved
-					{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
+					{'parenLeft'}  ~> look-around
+					{'asterisk'}   ~> {'asterisk.dfltlow'}
 				chain-rule # *)
-					{'asterisk'}   ~> [only 'brst' {'asterisk.dfltlow'}]
-					{'parenRight'} ~> preserved
+					{'asterisk'}   ~> {'asterisk.dfltlow'}
+					{'parenRight'} ~> look-around
 
 		do "Bracket-colon"
 			CreateLigationLookup : keep-if 'center-ops' : list
 				chain-rule # (:
-					{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> preserved
+					{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> look-around
 					colon_center
 				chain-rule # :)
 					colon_center
-					{'parenRight' 'bracketRight' 'braceRight'} ~> preserved
+					{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
 
 		do "Operator Centering"
 			local startRules {}
@@ -210,16 +198,16 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			CreateReverseLigationLookup : keep-if 'center-ops' : list
 				reverse-rule
 					centerizeL ~> centerizeR
-					[acskip]   ~> preserved
-					[acskip]   ~> preserved
-					centerizeR ~> preserved
+					[acskip]   ~> look-around
+					[acskip]   ~> look-around
+					centerizeR ~> look-around
 				reverse-rule
 					centerizeL ~> centerizeR
-					[acskip]   ~> preserved
-					centerizeR ~> preserved
+					[acskip]   ~> look-around
+					centerizeR ~> look-around
 				reverse-rule
 					centerizeL ~> centerizeR
-					centerizeR ~> preserved
+					centerizeR ~> look-around
 
 		do "Operator centering : Avoid 'letter-point' being centered"
 			CreateLigationLookup : keep-if 'center-ops' : list
@@ -232,33 +220,33 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 		define dLeftHalf  : [lsx 'dLeftHalf'] dottyPunctuations
 		define dRightHalf : [lsx 'dRightHalf'] dottyPunctuations
 		define dMid       : [lsx 'dMid'] dottyPunctuations
-		define boundary   : anyStartingWith widePunctuation
+		define boundary   widePunctuation
 
 		CreateLigationLookup : keep-if 'kern-dotty' : list
 			chain-rule
-				[dRight.concat dMid] ~> preserved
+				[dRight.concat dMid] ~> look-around
 				dottyPunctuations ~> dMid
-				dottyPunctuations ~> preserved
+				dottyPunctuations ~> look-around
 			chain-rule
-				[dRight.concat dMid] ~> preserved
+				[dRight.concat dMid] ~> look-around
 				dottyPunctuations ~> dLeft
 			chain-rule
 				dottyPunctuations ~> dRight
-				dottyPunctuations ~> preserved
+				dottyPunctuations ~> look-around
 		CreateLigationLookup : keep-if 'kern-dotty' : list
 			chain-rule
-				boundary             ~> preserved
+				boundary             ~> look-around
 				dRight               ~> dMid
 				dLeft                ~> dMid
-				boundary             ~> preserved
+				boundary             ~> look-around
 			chain-rule
-				boundary             ~> preserved
+				boundary             ~> look-around
 				dRight               ~> dMid
-				[dMid.concat dLeft]  ~> preserved
+				[dMid.concat dLeft]  ~> look-around
 			chain-rule
-				[dMid.concat dRight] ~> preserved
+				[dMid.concat dRight] ~> look-around
 				dLeft                ~> dMid
-				boundary             ~> preserved
+				boundary             ~> look-around
 		CreateLigationLookup : keep-if 'kern-dotty' : list
 			chain-rule
 				dRight ~> dRightHalf
@@ -268,7 +256,7 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 		CreateLigationLookup : keep-if 'plusplus' : list
 			# +++++++++
 			chain-rule
-				{'plus.lig.cr' 'plus.lig.jr'} ~> preserved
+				{'plus.lig.cr' 'plus.lig.jr'} ~> look-around
 				{'plus'} ~> [lsx 'jr']
 			chain-rule
 				{'plus'} ~> [lsx 'lc']
@@ -285,7 +273,7 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 		CreateLigationLookup : keep-if 'plusplus' : list
 			chain-rule # +++
 				{'plus.lig.lc'} ~> {'plus.lig.lc.s'}
-				{'plus.lig.cc'} ~> preserved
+				{'plus.lig.cc'} ~> look-around
 				{'plus.lig.cr'} ~> {'plus.lig.cr.s'}
 			chain-rule # ++
 				{'plus.lig.lc'} ~> {'plus.lig.lc.s'}
@@ -300,91 +288,91 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				{'bar'} ~> [lsx 'trig']
 				greater ~> [lsx 'trig']
 			chain-rule # |>
-				[[lsx 'trig'] {'bar'}] ~> preserved
+				[[lsx 'trig'] {'bar'}] ~> look-around
 				greater                ~> [lsx 'trig']
 			chain-rule # <||||
-				[[lsx 'trig'] {'bar'}] ~> preserved
+				[[lsx 'trig'] {'bar'}] ~> look-around
 				{'bar'}                ~> [lsx 'trig']
 		CreateReverseLigationLookup : keep-if 'trig' : list
 			reverse-rule
 				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
-				[[lsx 'trig'] {'bar'}] ~> preserved
+				[[lsx 'trig'] {'bar'}] ~> look-around
 
 	do "shift-eq operators (<<= and >>=)"
 		CreateLigationLookup : keep-if "llggeq" : list
 			chain-rule # =<<<=
-				equal      ~> preserved
+				equal      ~> look-around
 				less       ~> advance
 				less       ~> advance
 				less       ~> advance
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # <<<==
 				less       ~> advance
 				less       ~> advance
 				less       ~> advance
-				equal      ~> preserved
-				equal      ~> preserved
+				equal      ~> look-around
+				equal      ~> look-around
 			chain-rule # <<<=
 				less       ~> [lsx 'shiftN0h']
-				less       ~> preserved
+				less       ~> look-around
 				less       ~> [lsx 'shift0h']
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # =>>>=
-				equal      ~> preserved
+				equal      ~> look-around
 				greater    ~> advance
 				greater    ~> advance
 				greater    ~> advance
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # >>>==
 				greater    ~> advance
 				greater    ~> advance
 				greater    ~> advance
-				equal      ~> preserved
-				equal      ~> preserved
+				equal      ~> look-around
+				equal      ~> look-around
 			chain-rule # >>>=
 				greater    ~> [lsx 'shift0h']
-				greater    ~> preserved
+				greater    ~> look-around
 				greater    ~> [lsx 'shiftN0h']
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # =<<=
-				equal      ~> preserved
+				equal      ~> look-around
 				less       ~> advance
 				less       ~> advance
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # <<==
 				less       ~> advance
 				less       ~> advance
-				equal      ~> preserved
-				equal      ~> preserved
+				equal      ~> look-around
+				equal      ~> look-around
 			chain-rule # <<=
 				less       ~> [lsx 'shiftN0h']
 				less       ~> [lsx 'shift0h']
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # =>>=
-				equal      ~> preserved
+				equal      ~> look-around
 				greater    ~> advance
 				greater    ~> advance
-				equal      ~> preserved
+				equal      ~> look-around
 			chain-rule # >>==
 				greater    ~> advance
 				greater    ~> advance
-				equal      ~> preserved
-				equal      ~> preserved
+				equal      ~> look-around
+				equal      ~> look-around
 			chain-rule # >>=
 				greater    ~> [lsx 'shift0h']
 				greater    ~> [lsx 'shiftN0h']
-				equal      ~> preserved
+				equal      ~> look-around
 
 	do "HTML Comment"
 		CreateLigationLookup : keep-if 'html-comment' : list
 			chain-rule # <!---
-				less   ~> preserved
+				less   ~> look-around
 				exclam ~> [lsx 'htmlcommentstart']
 				hyphen ~> [lsx 'lxc']
 				hyphen ~> [lsx 'cc']
 				hyphen ~> [lsx 'cf']
 			chain-rule # <!--
-				less   ~> preserved
+				less   ~> look-around
 				exclam ~> [lsx 'htmlcommentstart']
 				hyphen ~> [lsx 'lxc']
 				hyphen ~> [lsx 'cf']
@@ -418,21 +406,21 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 
 			# Disable regular expression lookaheads
 			heads.push : chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 			heads.push : chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 			heads.push : chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 
@@ -442,13 +430,13 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
 			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1']
 
-			define [TJoinHeadForce]         : only 'arrow'  : CJoinHeadForce
-			define [TJoinHeadAmbig]         : if [not ltgt] [TJoinHeadForce] advance
-			define [TJoinHeadForceShift1]   : only 'arrow'  : CJoinHeadForceShift1
-			define [TMiddleHead]            : only 'arrow2' [CJoinHeadMid] [TJoinHeadForce]
-			define [TAntiHeadForce]         : only 'arrow2' : CAntiHeadForce
-			define [TAntiHeadAmbig]         : if [not ltgt] [TAntiHeadForce] advance
-			define [TAntiHeadForceShiftN1]  : only 'arrow2' : CAntiHeadForceShiftN1
+			define [TJoinHeadForce]         : if [hasLG 'arrow']  [CJoinHeadForce]        advance
+			define [TJoinHeadAmbig]         : if [not ltgt]       [TJoinHeadForce]        advance
+			define [TJoinHeadForceShift1]   : if [hasLG 'arrow']  [CJoinHeadForceShift1]  advance
+			define [TMiddleHead]            : if [hasLG 'arrow2'] [CJoinHeadMid]          [TJoinHeadForce]
+			define [TAntiHeadForce]         : if [hasLG 'arrow2'] [CAntiHeadForce]        advance
+			define [TAntiHeadAmbig]         : if [not ltgt]       [TAntiHeadForce]        advance
+			define [TAntiHeadForceShiftN1]  : if [hasLG 'arrow2'] [CAntiHeadForceShiftN1] advance
 
 			define [CollectApply ck fns] : begin
 				local a : new Set
@@ -459,100 +447,100 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 						a.add g
 				return : Array.from a
 
-			local arrowIndicator : anyBar.concat : CollectApply [less.concat greater] : list [lambda [] advance] CJoinHeadForce CJoinHeadForceShift1 CAntiHeadForce CAntiHeadForceShiftN1 CJoinHeadMid
+			local arrowIndicator : anyBar.concat : CollectApply [less.concat greater] : list [lambda [] ident] CJoinHeadForce CJoinHeadForceShift1 CAntiHeadForce CAntiHeadForceShiftN1 CJoinHeadMid
 
 			# Arrow head identifier
 			begin "Central"
 				heads.push : chain-rule # = > > =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					greater ~> [TJoinHeadForceShift1]
 					greater ~> [TAntiHeadForce]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = < < =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					less    ~> [TAntiHeadForce]
 					less    ~> [TJoinHeadForceShift1]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = > < =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					greater ~> [TJoinHeadForce]
 					less    ~> [TJoinHeadForce]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = < > =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					less    ~> [TAntiHeadForce]
 					greater ~> [TAntiHeadForce]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = > =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					greater ~> [TMiddleHead]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = < =
-					barCls  ~> preserved
+					barCls  ~> look-around
 					less    ~> [TMiddleHead]
-					barCls  ~> preserved
+					barCls  ~> look-around
 			begin "Boundary"
 				heads.push : chain-rule # = > >
-					barCls  ~> preserved
+					barCls  ~> look-around
 					greater ~> [TJoinHeadForceShift1]
-					greater ~> preserved
+					greater ~> look-around
 				heads.push : chain-rule # = < <
-					barCls  ~> preserved
+					barCls  ~> look-around
 					less    ~> [TAntiHeadForceShiftN1]
-					less    ~> preserved
+					less    ~> look-around
 				heads.push : chain-rule # > > =
-					greater ~> preserved
+					greater ~> look-around
 					greater ~> [TAntiHeadForceShiftN1]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # < < =
-					less    ~> preserved
+					less    ~> look-around
 					less    ~> [TJoinHeadForceShift1]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # = = >
-					barCls  ~> preserved
-					barCls  ~> preserved
+					barCls  ~> look-around
+					barCls  ~> look-around
 					greater ~> [TJoinHeadForce]
 				heads.push : chain-rule # = = <
-					barCls  ~> preserved
-					barCls  ~> preserved
+					barCls  ~> look-around
+					barCls  ~> look-around
 					less    ~> [TAntiHeadForce]
 				heads.push : chain-rule # > = =
 					greater ~> [TAntiHeadForce]
-					barCls  ~> preserved
-					barCls  ~> preserved
+					barCls  ~> look-around
+					barCls  ~> look-around
 				heads.push : chain-rule # < = =
 					less    ~> [TJoinHeadForce]
-					barCls  ~> preserved
-					barCls  ~> preserved
+					barCls  ~> look-around
+					barCls  ~> look-around
 				heads.push : chain-rule # * = >
-					arrowIndicator ~> preserved
-					barCls  ~> preserved
+					arrowIndicator ~> look-around
+					barCls  ~> look-around
 					greater ~> [TJoinHeadForce]
 				heads.push : chain-rule # * = <
-					arrowIndicator ~> preserved
-					barCls  ~> preserved
+					arrowIndicator ~> look-around
+					barCls  ~> look-around
 					less    ~> [TAntiHeadForce]
 				heads.push : chain-rule # > = *
 					greater ~> [TAntiHeadForce]
-					barCls  ~> preserved
-					arrowIndicator ~> preserved
+					barCls  ~> look-around
+					arrowIndicator ~> look-around
 				heads.push : chain-rule # < = *
 					less    ~> [TJoinHeadForce]
-					barCls  ~> preserved
-					arrowIndicator ~> preserved
+					barCls  ~> look-around
+					arrowIndicator ~> look-around
 			begin "Ambiguous"
 				heads.push : chain-rule # = >
-					barCls  ~> preserved
+					barCls  ~> look-around
 					greater ~> [TJoinHeadAmbig]
 				heads.push : chain-rule # = <
-					barCls  ~> preserved
+					barCls  ~> look-around
 					less    ~> [TAntiHeadAmbig]
 				heads.push : chain-rule # > =
 					greater ~> [TAntiHeadAmbig]
-					barCls  ~> preserved
+					barCls  ~> look-around
 				heads.push : chain-rule # < =
 					less    ~> [TJoinHeadAmbig]
-					barCls  ~> preserved
+					barCls  ~> look-around
 
 			# Rod transformer
 			define kindLeftMid  : list
@@ -574,21 +562,21 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				foreach [{ rBar kr envR } : items-of kindRightMid] : begin
 					if (!lBar || !rBar) : begin
 						rods.push : chain-rule	# < - >
-							envL   ~> preserved
+							envL   ~> look-around
 							barCls ~> [CBar "\(kl)\(kr)"]
-							envR   ~> preserved
+							envR   ~> look-around
 
 			foreach [{ lBar kl envL } : items-of kindLeftMid] : begin
 				if (!lBar) : begin
 					rods.push : chain-rule	# < -
-						envL   ~> preserved
+						envL   ~> look-around
 						barCls ~> [CBar "\(kl)f"]
 
 			foreach [{ rBar kr envR } : items-of kindRightMid] : begin
 				if (!rBar) : begin
 					rods.push : chain-rule	# - >
 						barCls ~> [CBar "f\(kr)"]
-						envR   ~> preserved
+						envR   ~> look-around
 
 			CreateLigationLookup heads
 			CreateLigationLookup rods
@@ -610,29 +598,29 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 
 				CreateLigationLookup : list
 					chain-rule
-						stickTermLeft  ~> preserved
+						stickTermLeft  ~> look-around
 						barCls         ~> [CBar 'zf']
 
 				CreateReverseLigationLookup : list
 					reverse-rule
 						barCls         ~> [CBar 'fz']
-						stickTermRight ~> preserved
+						stickTermRight ~> look-around
 
 				# Fix for Apple : arrow bar at line start won't join with the rest (#548)
 				CreateLigationLookup : list
 					chain-rule
 						barCls         ~> [CBar 'fz']
-						stickTermRight ~> preserved
+						stickTermRight ~> look-around
 
 				CreateLigationLookup : list
 					chain-rule
-						stickTermLeft        ~> preserved
+						stickTermLeft        ~> look-around
 						[[CBar 'zf'] barCls] ~> [[CBar 'zj'] barCls]
-						anyBar               ~> preserved
+						anyBar               ~> look-around
 					chain-rule
-						anyBar               ~> preserved
+						anyBar               ~> look-around
 						[[CBar 'fz'] barCls] ~> [[CBar 'jz'] barCls]
-						stickTermRight       ~> preserved
+						stickTermRight       ~> look-around
 
 				# Gap filling
 				CreateLigationLookup : list
@@ -647,26 +635,26 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			do "Ambiguous rods"
 				define ambiguousRods {}
 				ambiguousRods.push : chain-rule # =>
-					barCls     ~> [only 'arrow' : CBar 'fr']
-					greater    ~> [only 'arrow' : CJoinHeadForce]
+					barCls     ~> [if [hasLG 'arrow'] [CBar 'fr'] advance]
+					greater    ~> [if [hasLG 'arrow'] [CJoinHeadForce] advance]
 				if ltgt
 					ambiguousRods.push : chain-rule # <=
-						less       ~> [only 'arrowZALE' : CJoinHeadForce]
-						barCls     ~> [only 'arrowZALE' : CBar 'lf']
+						less       ~> [if [hasLG 'arrowZALE'] [CJoinHeadForce] advance]
+						barCls     ~> [if [hasLG 'arrowZALE'] [CBar 'lf'] advance]
 					ambiguousRods.push : chain-rule # <-
-						less       ~> [only 'arrow' : CJoinHeadForce]
-						barCls     ~> [only 'arrow' : CBar 'lf']
+						less       ~> [if [hasLG 'arrow'] [CJoinHeadForce] advance]
+						barCls     ~> [if [hasLG 'arrow'] [CBar 'lf'] advance]
 
 				ambiguousRods.push : chain-rule # =<
-					barCls     ~> [only 'arrow2' : CBar 'fj']
-					less       ~> [only 'arrow2' : CAntiHeadForce]
+					barCls     ~> [if [hasLG 'arrow2'] [CBar 'fj'] advance]
+					less       ~> [if [hasLG 'arrow2'] [CAntiHeadForce] advance]
 				if ltgt
 					ambiguousRods.push : chain-rule # >=
-						greater    ~> [only 'arrowZAGE' : CAntiHeadForce]
-						barCls     ~> [only 'arrowZAGE' : CBar 'jf']
+						greater    ~> [if [hasLG 'arrowZAGE'] [CAntiHeadForce] advance]
+						barCls     ~> [if [hasLG 'arrowZAGE'] [CBar 'jf'] advance]
 					ambiguousRods.push : chain-rule # >-
-						greater    ~> [only 'arrow2' : CAntiHeadForce]
-						barCls     ~> [only 'arrow2' : CBar 'jf']
+						greater    ~> [if [hasLG 'arrow2'] [CAntiHeadForce] advance]
+						barCls     ~> [if [hasLG 'arrow2'] [CBar 'jf'] advance]
 
 				CreateLigationLookup ambiguousRods
 
@@ -674,30 +662,30 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 	do "Less/Greater Chaining"
 		CreateLigationLookup : keep-if 'llgg' : list
 			chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 			chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 			chain-rule
-				{'parenLeft'} ~> preserved
-				{'question'}  ~> preserved
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 			chain-rule # <<<
 				less       ~> [lsx 'shiftN0h']
-				less       ~> preserved
+				less       ~> look-around
 				less       ~> [lsx 'shift0h']
 			chain-rule # >>>
 				greater    ~> [lsx 'shift0h']
-				greater    ~> preserved
+				greater    ~> look-around
 				greater    ~> [lsx 'shiftN0h']
 			chain-rule # <<
 				less       ~> [lsx 'shiftN0h']
@@ -718,12 +706,12 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				lgAll ~> lgNeut
 				lgAll ~> lgNeut
 				lgAll ~> lgNeut
-				lgAll ~> preserved
+				lgAll ~> look-around
 		CreateLigationLookup : keep-if 'llgg' : list
 			chain-rule
-				lgAll ~> preserved
-				lgAll ~> preserved
-				lgAll ~> preserved
+				lgAll ~> look-around
+				lgAll ~> look-around
+				lgAll ~> look-around
 				lgAll ~> lgNeut
 		CreateLigationLookup : keep-if 'llgg' : list
 			chain-rule
@@ -752,107 +740,127 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			backslash     ~> [csx 'left']
 			slash         ~> [csx 'right']
 		chain-rule
-			bar           ~> preserved
+			bar           ~> look-around
 			hyphen        ~> [lsx 'jf']
 		chain-rule
 			hyphen        ~> [lsx 'fj']
-			bar           ~> preserved
+			bar           ~> look-around
 
 	# == and !=, and other related
-	do "equals" : CreateLigationLookup : list
-		# Disable regular expression lookaheads
-		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'equal.cf' 'equal.jf'} ~> preserved
-			equal       ~> [only 'eqeq' {'equal.jf'}]
-		chain-rule
-			exclam      ~> [only 'exeq' {'equal.fc.neg4'}]
-			equal       ~> [only 'exeq' {'equal.cc'}]
-			equal       ~> [only 'exeq' {'equal.cc'}]
-			equal       ~> [only 'exeq' {'equal.cf'}]
-		chain-rule
-			equal       ~> [only 'eqeq' {'equal.fc'}]
-			equal       ~> [only 'eqeq' {'equal.cc'}]
-			equal       ~> [only 'eqeq' {'equal.cc'}]
-			equal       ~> [only 'eqeq' {'equal.cf'}]
-		chain-rule
-			exclam      ~> [only 'exeqeq' {'ident.fc.neg3'} : only 'exeq' {'equal.fc.neg3'}]
-			equal       ~> [only 'exeqeq' {'ident.cc'} : only 'exeq' {'equal.cc'}]
-			equal       ~> [only 'exeqeq' {'ident.cf'} : only 'exeq' {'equal.cf'}]
-		chain-rule
-			equal       ~> [only 'eqexeq' {'ident.fc.neg3'}]
-			exclam      ~> [only 'eqexeq' {'ident.cc'}]
-			equal       ~> [only 'eqexeq' {'ident.cf'}]
-		chain-rule
-			equal       ~> [only 'eqslasheq' {'ident.fc.neg3'} : only 'slasheq' {'equal.fc.neg3'}]
-			slash       ~> [only 'eqslasheq' {'ident.cc'} : only 'slasheq' {'equal.cc'}]
-			equal       ~> [only 'eqslasheq' {'ident.cf'} : only 'slasheq' {'equal.cf'}]
-		chain-rule
-			equal       ~> [only 'eqeqeq' {'ident.fc'} : only 'eqeq' {'equal.fc'}]
-			equal       ~> [only 'eqeqeq' {'ident.cc'} : only 'eqeq' {'equal.cc'}]
-			equal       ~> [only 'eqeqeq' {'ident.cf'} : only 'eqeq' {'equal.cf'}]
-		chain-rule
-			exclam      ~> [only 'exeq' {'equal.fc.neg'}]
-			equal       ~> [only 'exeq' {'equal.cf'}]
-		chain-rule
-			anyWave     ~> [only 'tildeeq' : just 'equal.fc.neg']
-			equal       ~> [only 'tildeeq' {'equal.cf'}]
-		chain-rule
-			slash       ~> [only 'slasheq' {'equal.fc.neg'}]
-			equal       ~> [only 'slasheq' {'equal.cf'}]
-		chain-rule
-			lessAndEquiv    ~> [only 'ltgt-diamond' [just 'less.lig.diamond'] : only 'ltgt-ne' [just 'equal.fc.neg']]
-			greaterAndEquiv ~> [only 'ltgt-diamond' [just 'greater.lig.diamond'] : only 'ltgt-ne' [just 'equal.cf']]
-		chain-rule
-			equal       ~> [only 'eqeq' {'equal.fc'}]
-			equal       ~> [only 'eqeq' {'equal.cf'}]
+	do "equals" : begin
+		CreateLigationLookup : list
+			# Disable regular expression lookaheads
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					{'equal.cf' 'equal.jf'} ~> look-around
+					equal                   ~> {'equal.jf'}
+			piecewise
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'equal.fc.neg4'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> {'equal.fc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'exeqeq'] : chain-rule
+					exclam      ~> {'ident.fc.neg3'}
+					equal       ~> {'ident.cc'}
+					equal       ~> {'ident.cf'}
+				[hasLG 'eqexeq'] : chain-rule
+					equal       ~> {'ident.fc.neg3'}
+					exclam      ~> {'ident.cc'}
+					equal       ~> {'ident.cf'}
+				[hasLG 'eqslasheq'] : chain-rule
+					equal       ~> {'ident.fc.neg3'}
+					slash       ~> {'ident.cc'}
+					equal       ~> {'ident.cf'}
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'equal.fc.neg3'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+				[hasLG 'slasheq'] : chain-rule
+					equal       ~> {'equal.fc.neg3'}
+					slash       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'eqeqeq'] : chain-rule
+					equal       ~> {'ident.fc'}
+					equal       ~> {'ident.cc'}
+					equal       ~> {'ident.cf'}
+			piecewise
+				[hasLG 'tildeeq'] : chain-rule
+					anyWave     ~> [just 'equal.fc.neg']
+					equal       ~> {'equal.cf'}
+				[hasLG 'slasheq'] : chain-rule
+					slash       ~> {'equal.fc.neg'}
+					equal       ~> {'equal.cf'}
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'equal.fc.neg'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'ltgt-diamond'] : chain-rule
+					lessAndEquiv ~> [just 'less.lig.diamond']
+					greaterAndEquiv ~> [just 'greater.lig.diamond']
+				[hasLG 'ltgt-ne'] : chain-rule
+					lessAndEquiv ~> [just 'equal.fc.neg']
+					greaterAndEquiv ~> [just 'equal.cf']
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> {'equal.fc'}
+					equal       ~> {'equal.cf'}
 
 	# <= and >=
 	do "inequals" : CreateLigationLookup : keep-if 'ineq' : list
 		# Disable regular expression lookaheads
 		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
+			{'parenLeft'} ~> look-around
+			{'question'}  ~> look-around
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
+			{'parenLeft'} ~> look-around
+			{'question'}  ~> look-around
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 		chain-rule
-			{'parenLeft'} ~> preserved
-			{'question'}  ~> preserved
+			{'parenLeft'} ~> look-around
+			{'question'}  ~> look-around
 			regexLookAround ~> advance
 			regexLookAround ~> advance
 		chain-rule
-			[acops]            ~> preserved
+			[acops]            ~> look-around
 			{'less' 'greater'} ~> advance
 			equal              ~> advance
 		chain-rule
 			{'less' 'greater'} ~> advance
 			equal              ~> advance
-			[acops]            ~> preserved
+			[acops]            ~> look-around
 		chain-rule
 			{'less'}    ~> {'less.lig2'}
 			equal       ~> {'eq.at-lteq.lig2'}

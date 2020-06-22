@@ -7,41 +7,6 @@ module.exports = function gcFont(gs, excludedChars, restFont, cfg) {
 	sweep(gs, restFont, sink);
 };
 
-function mark(gs, excludedChars, restFont, cfg) {
-	const sink = markInitial(gs, excludedChars);
-	while (markStep(sink, restFont, cfg));
-	return sink;
-}
-
-function markInitial(gs, excludedChars) {
-	let sink = new Set();
-	for (const g of gs) {
-		if (g.glyphRank > 0) sink.add(g.name);
-		if (!g || !g.unicode) continue;
-		for (const u of g.unicode) if (!excludedChars.has(u)) sink.add(g.name);
-	}
-	return sink;
-}
-
-function markStep(sink, restFont, cfg) {
-	const glyphCount = sink.size;
-
-	if (restFont.GSUB) {
-		for (const l in restFont.GSUB.lookups) {
-			const lookup = restFont.GSUB.lookups[l];
-			if (!lookup || !lookup.subtables) continue;
-			if (lookup && lookup.subtables) {
-				for (let st of lookup.subtables) {
-					markSubtable(sink, lookup.type, st, cfg);
-				}
-			}
-		}
-	}
-
-	const glyphCount1 = sink.size;
-	return glyphCount1 > glyphCount;
-}
-
 function markSweepOtl(table) {
 	if (!table || !table.features || !table.lookups) return;
 	const accessibleLookupsIds = new Set();
@@ -89,6 +54,39 @@ function markLookups(gsub, sink) {
 		loop++;
 		lookupSetChanged = sizeBefore !== sink.size;
 	} while (loop < 0xff && lookupSetChanged);
+}
+
+function mark(gs, excludedChars, restFont, cfg) {
+	const sink = markInitial(gs, excludedChars);
+	while (markStep(sink, restFont, cfg));
+	return sink;
+}
+
+function markInitial(gs, excludedChars) {
+	let sink = new Set();
+	for (const g of gs) {
+		if (g.glyphRank > 0) sink.add(g.name);
+		if (!g || !g.unicode) continue;
+		for (const u of g.unicode) if (!excludedChars.has(u)) sink.add(g.name);
+	}
+	return sink;
+}
+
+function markStep(sink, restFont, cfg) {
+	const glyphCount = sink.size;
+
+	if (restFont.GSUB) {
+		for (const l in restFont.GSUB.lookups) {
+			const lookup = restFont.GSUB.lookups[l];
+			if (!lookup || !lookup.subtables) continue;
+			for (let st of lookup.subtables) {
+				markSubtable(sink, lookup.type, st, cfg);
+			}
+		}
+	}
+
+	const glyphCount1 = sink.size;
+	return glyphCount1 > glyphCount;
 }
 
 function markSubtable(sink, type, st, cfg) {
@@ -155,6 +153,22 @@ function sweepSubtable(st, type, sink) {
 				if (include) newSubst.push(rule);
 			}
 			st.substitutions = newSubst;
+			return true;
+		}
+		case "gsub_reverse": {
+			const newMatch = [],
+				newTo = [];
+			for (let j = 0; j < st.match.length; j++) {
+				newMatch[j] = [];
+				for (let k = 0; k < st.match[j].length; k++) {
+					const gidFrom = st.match[j][k];
+					if (sink.has(gidFrom)) newMatch[j].push(gidFrom);
+					if (j === st.inputIndex) newTo.push(st.to[k]);
+				}
+				if (!newMatch[j].length) return false;
+			}
+			st.match = newMatch;
+			st.to = newTo;
 			return true;
 		}
 		default: {
