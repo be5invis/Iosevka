@@ -937,3 +937,30 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0x02AB 'l.phoneticLeft'          'z'
 		list 0xAB66 'd'                       'zrtailBR'
 		list 0xAB67 't.phoneticLeft'          'srtail'
+
+glyph-block Autobuild-Grouped-Digits : begin
+	glyph-block-import CommonShapes
+
+	define [createGroupedDigits shrink crowd numberGlyphIDs] : begin
+		create-glyph '.nd-shade' : glyph-construction
+			include : intersection
+				HBarBottom 0 Width (Descender * 0.75) [adviceBlackness 4]
+				glyph-construction
+					include : refer-glyph "denseShade.WWID"
+					apply-transform : Translate (-Width / 2) 0
+			apply-transform : Translate (-Width) 0
+			set-width 0
+
+		foreach [gid : items-of numberGlyphIDs] : foreach [nd : items-of {0 1 2 3 4 5 6}]
+			create-glyph (gid + ".nd" + nd) : glyph-construction
+				include : refer-glyph gid
+				if (nd >= 3 && nd <= 5) : begin
+					include : WithTransform [Translate Width 0] : refer-glyph '.nd-shade'
+					CvDecompose.set currentGlyph { gid '.nd-shade' }
+				: else : begin
+					CvDecompose.set currentGlyph { gid }
+
+	if [not recursive] : createGroupedDigits 0.9 3.0 {
+		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
+		'five.lnum' 'six.lnum' 'seven.lnum' 'eight.lnum' 'nine.lnum'
+	}
