@@ -2317,45 +2317,66 @@ glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
-	sketch # D
-		set-width Width
-		include MarkSet.capital
-
-		local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.1)
-		local bsmooth : Math.min ((Width - SB * 2) * 0.75) (Smooth * 1.1)
-
+	define [DShape fRound] : glyph-construction
 		local barleft SB
-
 		include : VBarLeft barleft 0 CAP
 
-		include : dispiro
+		local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.1)
+		local bsmooth : Math.min (Width - SB * 2 - Stroke) (Smooth * 1.1)
+		local bsmoothRd : Math.min (Width - SB * 2 - Stroke) (Smooth * 1.25)
+
+		local sma : SmoothAOf dsmooth Width
+		local smb : SmoothBOf dsmooth Width
+
+		if (fRound) : include : dispiro
 			widths.rhs
 			flat (barleft - O) CAP [heading Rightward]
-			curl (RightSB - bsmooth) CAP
+			curl (RightSB - bsmoothRd - CorrectionOMidS) CAP
 			archv
-			flat (RightSB - OX) (CAP - dsmooth - (SmoothB - Smooth))
-			curl (RightSB - OX) (dsmooth + (SmoothA - Smooth))
+			straight.down.mid (RightSB - OX) [mix 0 CAP (sma / (sma + smb))]
 			arcvh
-			flat (RightSB - bsmooth) 0
+			flat (RightSB - bsmoothRd + CorrectionOMidS) 0
 			curl (barleft - O) 0 [heading Leftward]
+		: else : include : dispiro
+			widths.rhs
+			flat (barleft - O) CAP [heading Rightward]
+			curl (RightSB - bsmooth - CorrectionOMidS) CAP
+			archv
+			flat (RightSB - OX) (CAP - smb)
+			curl (RightSB - OX) (0 + sma)
+			arcvh
+			flat (RightSB - bsmooth + CorrectionOMidS) 0
+			curl (barleft - O) 0 [heading Leftward]
+
 		if SLAB : begin
 			include : tagged 'serifLT' : LeftwardTopSerif barleft CAP SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
-		save 'D' 'D'
 
-	sketch # arficanD
-		include [refer-glyph 'D'] AS_BASE
+	create-glyph 'D.standard' : glyph-construction
+		set-width Width
+		include MarkSet.capital
+		include : DShape false
+
+	create-glyph 'D.moreRounded' : glyph-construction
+		set-width Width
+		include MarkSet.capital
+		include : DShape true
+
+	select-variant 'D' 'D'
+
+	WithDerivatives 'D' 'Eth' : lambda [src sel] : glyph-construction
+		if [not sel] : assign-unicode 0xD0
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
-		save 'Eth' 0xD0
-		save 'Dcroat' 0x110
-		save 'arficanD' 0x189
 
-	sketch # Dhookleft
-		include [refer-glyph 'D'] AS_BASE
-		eject-contour "serifLT"
+	alias 'Dcroat' 0x110 'Eth'
+	alias 'arficanD' 0x189 'Eth'
+
+	WithDerivatives 'D' 'Dhookleft' : lambda [src sel] : glyph-construction
+		if [not sel] : assign-unicode 0x18a
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'serifLT'
 		include : LeftHook SB CAP
-		save 'Dhookleft' 0x18A
-
 
 glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import CommonShapes
