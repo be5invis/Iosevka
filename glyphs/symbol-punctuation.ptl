@@ -1010,29 +1010,54 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		save 'backslash.right'
 
 	do "numbersign"
-		local nsTop : mix symbolMid parenTop 0.85
-		local nsBot : mix symbolMid parenBot 0.85
-		local fine : adviceBlackness 3.5
-		local l : SB - fine / 2
-		local r : RightSB + fine / 2
-		local hsp : ((r - l) - (fine * 2 * HVContrast)) * 0.3
+		define nsTop : mix symbolMid parenTop 0.85
+		define nsBot : mix symbolMid parenBot 0.85
+		define fine : adviceBlackness 3.5
 
-		sketch # numbersign.upright
-			include : HBar l r [mix nsTop nsBot 0.3]
-			include : HBar l r [mix nsTop nsBot 0.7]
-			include : VBarLeft  (l + hsp) nsBot nsTop fine
-			include : VBarRight (r - hsp) nsBot nsTop fine
-			save 'numbersign.upright'
+		define pFineOpen (1 / 8)
+		define l : SB - fine / 2
+		define r : RightSB + fine / 2
+		define hsp : ((r - l) - (fine * 2 * HVContrast)) * 0.3
 
-		sketch # numbersign.slanted
-			local x : hsp + fine / 2 * HVContrast
-			local w : (r - l) * 0.15
-			local shift : w / 3
-			include : HBar (l + shift) (r + shift) [mix nsTop nsBot 0.3]
-			include : HBar (l - shift) (r - shift) [mix nsTop nsBot 0.7]
-			include : SlashShape (l + x - w) (l + x + w) nsTop nsBot fine
-			include : SlashShape (r - x - w) (r - x + w) nsTop nsBot fine
-			save 'numbersign.slanted'
+		define [UprightHBars] : union
+			HBar l r [mix nsTop nsBot 0.3]
+			HBar l r [mix nsTop nsBot 0.7]
+		define [UprightVBars p] : union
+			VBarLeft  (l + hsp + p * fine) nsBot nsTop fine
+			VBarRight (r - hsp - p * fine) nsBot nsTop fine
+
+
+		create-glyph 'numbersign.upright' : union
+			UprightHBars
+			UprightVBars 0
+
+		create-glyph 'numbersign.uprightOpen' : union
+			UprightVBars pFineOpen
+			difference
+				UprightHBars
+				Rect nsTop nsBot (l + hsp + fine * (0.5 + pFineOpen)) (r - hsp - fine * (0.5 + pFineOpen))
+
+		define x : hsp + fine / 2 * HVContrast
+		define w : (r - l) * 0.15
+		define shift : w / 3
+		define [SlantedHBars] : union
+			HBar (l + shift) (r + shift) [mix nsTop nsBot 0.3]
+			HBar (l - shift) (r - shift) [mix nsTop nsBot 0.7]
+		define [SlantedVBars p] : union
+			SlashShape (l + x - w + p * fine) (l + x + w + p * fine) nsTop nsBot fine
+			SlashShape (r - x - w - p * fine) (r - x + w - p * fine) nsTop nsBot fine
+
+		create-glyph 'numbersign.slanted' : union [SlantedHBars] [SlantedVBars 0]
+		create-glyph 'numbersign.slantedOpen' : union
+			SlantedVBars pFineOpen
+			difference
+				SlantedHBars
+				spiro-outline
+					corner (l + x + w + pFineOpen * fine) nsTop
+					corner (r - x + w - pFineOpen * fine) nsTop
+					corner (r - x - w - pFineOpen * fine) nsBot
+					corner (l + x - w + pFineOpen * fine) nsBot
+
 
 		select-variant 'numbersign' '#'
 
