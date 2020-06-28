@@ -3528,6 +3528,19 @@ glyph-block Letter-Latin-O : begin
 			curl (RightSB - OX) (XH / 2) [heading Upward]
 		save 'olowerhalf' 0x1D17
 
+	create-glyph 'oWithLightCentralizationStroke' : glyph-construction
+		include MarkSet.p
+		include : refer-glyph "o"
+		local fine      : adviceBlackness 4
+		local outStand  : SB * 0.75 + fine * 0.25
+		local outStandY : SmallSmoothB / 2 - Descender * 0.6
+		local yTurn     : SmallSmoothB / 2
+		include : difference
+			dispiro
+				widths.lhs fine
+				corner Middle          (yTurn + outStandY)
+				corner (SB - outStand) (yTurn - outStandY)
+			OShapeOutline.NoOvershoot XH 0 SB RightSB nothing nothing nothing
 
 glyph-block Letter-Latin-Upper-Q : begin
 	glyph-block-import CommonShapes
@@ -3916,6 +3929,28 @@ glyph-block Letter-Latin-Lower-U : begin
 		include : LatinUpsilon2Shape XH SmallSmoothA SmallSmoothB
 		save 'latinupsilon2' 0x28B
 
+	create-glyph 'uWithLightCentralizationStroke' : glyph-construction
+		include MarkSet.p
+		include : refer-glyph "u.withBar"
+		local fine      : adviceBlackness 4
+		local outStand  : SB * 0.75 + fine * 0.25
+		local outStandY : SmallSmoothB / 2 - Descender * 0.6
+		local yTurn     : SmallSmoothB / 2
+		include : difference
+			dispiro
+				widths.lhs fine
+				corner (SB + outStand) (yTurn + outStandY)
+				corner (SB - outStand) (yTurn - outStandY)
+			spiro-outline
+				corner (SB - O) XH
+				curl (SB - O) SmallSmoothB
+				arcvh
+				g4   (Middle + CorrectionOMidS) (-O)
+				archv
+				flat (RightSB + O) SmallSmoothA
+				corner (RightSB + O) XH
+		if SLAB : begin
+			include : LeftwardTopSerif SB XH SideJut
 
 glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
@@ -5481,14 +5516,18 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
+	define [GetSm df stroke] : begin
+		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		return { sma smb }
+
 	define [aeepart df] : glyph-construction
 		local stroke : adviceBlackness2 2.875 3 XH df.div
 		local eLeft : df.middle - stroke / 2 * HVContrast + 0.1
 		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] -  stroke * TanSlope
 		local barbottom (XH * designParameters.eBarPos - stroke / 2)
+		local { sma smb } : GetSm df stroke
 
-		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
-		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
 		include : difference
 			union
 				dispiro
@@ -5511,9 +5550,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local abarRight : df.middle + stroke / 2 * HVContrast - 0.1
 		local lowmiddle : mix (df.leftSB + OX * 2) abarRight 0.5
 		local barsmooth : mix df.leftSB abarRight 0.7
-
-		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
-		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local { sma smb } : GetSm df stroke
 
 		include : dispiro
 			widths.rhs stroke
@@ -5532,17 +5569,29 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	define [oeopart df] : glyph-construction
 		local stroke : adviceBlackness2 2.875 3 XH df.div
 		local abarRight : df.middle + stroke / 2 * HVContrast
-		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
-		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
+		local { sma smb } : GetSm df stroke
 
 		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) stroke sma smb
+
+	define [ueupart df] : glyph-construction
+		local stroke : adviceBlackness2 2.875 3 XH df.div
+		local abarRight : df.middle + stroke / 2 * HVContrast
+		local { sma smb } : GetSm df stroke
+
+		include : nShoulder
+			left -- abarRight
+			right -- (df.rightSB - OX)
+			stroke -- stroke
+			sma -- smb
+			smb -- smb
+		include : FlipAround (df.width / 2) (XH / 2)
 
 	sketch # ae
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : aeepart df
 		include : aeapart df
+		include : aeepart df
 		save 'ae' 0xE6
 		save 'cyrae' 0x4D5
 	turned nothing 0x1D02 'ae' [DivFrame para.diversityM].middle (XH / 2)
@@ -5551,10 +5600,18 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include df.markSet.e
-		include : aeepart df
 		include : oeopart df
+		include : aeepart df
 		save 'oe' 0x153
 	turned nothing 0x1D14 'oe' [DivFrame para.diversityM].middle (XH / 2)
+
+	create-glyph 'ue' 0x1D6B : glyph-construction
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include df.markSet.e
+		include : create-glyph : glyph-construction
+			include : ueupart df
+		include : aeepart df
 
 	sketch # db
 		local df : DivFrame para.diversityM 3
