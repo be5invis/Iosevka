@@ -122,12 +122,13 @@ function markSubtable(sink, type, st, cfg) {
 function sweep(gs, restFont, sink) {
 	filterInPlace(gs, g => sink.has(g.name));
 	sweepOtl(restFont.GSUB, sink);
+	sweepOtl(restFont.GPOS, sink);
 }
 
-function sweepOtl(gsub, sink) {
-	if (!gsub || !gsub.lookups) return;
-	for (const lid in gsub.lookups) {
-		const lookup = gsub.lookups[lid];
+function sweepOtl(table, sink) {
+	if (!table || !table.lookups) return;
+	for (const lid in table.lookups) {
+		const lookup = table.lookups[lid];
 		if (!lookup.subtables) continue;
 		const newSubtables = [];
 		for (const st of lookup.subtables) {
@@ -143,6 +144,7 @@ function sweepSubtable(st, type, gs) {
 		case "gsub_single":
 			return sweep_GsubSingle(st, gs);
 		case "gsub_multiple":
+		case "gsub_alternate":
 			return sweep_GsubMultiple(st, gs);
 		case "gsub_ligature":
 			return sweep_GsubLigature(st, gs);
@@ -150,6 +152,9 @@ function sweepSubtable(st, type, gs) {
 			return sweep_GsubChaining(st, gs);
 		case "gsub_reverse":
 			return sweep_gsubReverse(st, gs);
+		case "gpos_mark_to_base":
+		case "gpos_mark_to_mark":
+			return sweep_gposMark(st, gs);
 		default:
 			return true;
 	}
@@ -241,6 +246,31 @@ function sweep_gsubReverse(st, gs) {
 	st.match = newMatch;
 	st.to = newTo;
 	return true;
+}
+
+function sweep_gposMark(st, gs) {
+	let marks = st.marks || {},
+		newMarks = {},
+		hasMarks = false;
+	let bases = st.bases || {},
+		newBases = {},
+		hasBases = true;
+
+	for (const gid in marks) {
+		if (gs.has(gid) && marks[gid]) {
+			newMarks[gid] = marks[gid];
+			hasMarks = true;
+		}
+	}
+	for (const gid in bases) {
+		if (gs.has(gid) && bases[gid]) {
+			newBases[gid] = bases[gid];
+			hasBases = true;
+		}
+	}
+	st.marks = newMarks;
+	st.bases = newBases;
+	return hasMarks && hasBases;
 }
 
 function filterInPlace(a, condition) {
