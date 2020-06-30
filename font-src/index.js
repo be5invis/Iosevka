@@ -3,11 +3,11 @@
 const fs = require("fs-extra");
 const path = require("path");
 
-const BuildFont = require("./build-font.js");
-const Parameters = require("../support/parameters");
-const FormVariantData = require("../support/variant-data");
-const FormLigationData = require("../support/ligation-data");
-const { AnyCv, CvDecompose } = require("../support/gr");
+const BuildFont = require("./gen/build-font.js");
+const Parameters = require("./support/parameters");
+const FormVariantData = require("./support/variant-data");
+const FormLigationData = require("./support/ligation-data");
+const { AnyCv, CvDecompose } = require("./support/gr");
 const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {

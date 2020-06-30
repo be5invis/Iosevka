@@ -400,7 +400,7 @@ const BuildRawTtf = file.make(
 		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
 		const otdPath = `${output.dir}/${output.name}.otd`;
-		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
+		await node("font-src/index", { o: otdPath, oCharMap: charmap, ...fi });
 		await optimizedOtfcc(otdPath, output.full);
 		await rm(otdPath);
 	}
@@ -833,11 +833,11 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const ss = await target.need(
-		ScriptsUnder(ext, `gen`),
-		ScriptsUnder(ext, `glyphs`),
-		ScriptsUnder(ext, `meta`),
-		ScriptsUnder(ext, `otl`),
-		ScriptsUnder(ext, `support`)
+		ScriptsUnder(ext, `font-src/gen`),
+		ScriptsUnder(ext, `font-src/glyphs`),
+		ScriptsUnder(ext, `font-src/meta`),
+		ScriptsUnder(ext, `font-src/otl`),
+		ScriptsUnder(ext, `font-src/support`)
 	);
 	return ss.reduce((a, b) => [...a, ...b]);
 });
@@ -846,7 +846,7 @@ const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (target, path) => {
+const ScriptJS = file.glob(`font-src/*/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
