@@ -68,32 +68,32 @@ export : define [SetupBuilders args] : begin
 		mix before.y after.y args.ry
 		fallback args.raf unimportant
 	define [afInterpolateThem before after args] : begin
-		local knots {}
-		foreach {rx ry preserve} [items-of args.rs] : knots.push : [fallback args.ty g2] [mix before.x after.x rx] [mix before.y after.y ry] : fallback args.raf : match preserve
-			1 before.af
-			2 after.af
-			otherwise unimportant
-		return knots
+		local innerKnots {}
+		foreach {rx ry rt} [items-of args.rs] : innerKnots.push : [fallback args.ty g2]
+			mix before.x after.x rx
+			mix before.y after.y ry
+			piecewise
+				(args.raf && args.raf.blend && (rt != nothing)) [args.raf.blend rt]
+				args.raf                                        args.raf
+				true                                            unimportant
+		return innerKnots
+
 	define [alsoThru rx ry raf] {.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolate}
 	set alsoThru.g2 : lambda [rx ry raf] {.type 'interpolate' .rx rx .ry ry .raf raf .af afInterpolateG2}
 	define [alsoThruThem rs raf ty] {.type 'interpolate' .rs rs .raf raf .ty ty .af afInterpolateThem}
-	define [bezcontrols x1 y1 x2 y2 _samples raf ty] : begin
-		local samples : fallback _samples 3
+	define [bezControlsImpl x1 y1 x2 y2 samples raf ty] : begin
 		local rs {}
 		foreach j [range 1 samples] : rs.push : list
 			bez3 0 x1 x2 1 (j / samples)
 			bez3 0 y1 y2 1 (j / samples)
-		alsoThruThem rs raf ty
-	define [quadcontrols x1 y1 samples raf ty] : bezcontrols (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] samples raf ty
-
-	define [bezcontrols.absolute x1 y1 x2 y2 _samples raf ty] : object [type 'interpolate'] : af : lambda [before after] : begin
-		local samples : fallback _samples 3
-		local rs {}
-		foreach j [range 1 samples] : rs.push : [fallback ty g4]
-			bez3 before.x x1 x2 after.x (j / samples)
-			bez3 before.y y1 y2 after.y (j / samples)
-			fallback raf unimportant
-		return rs
+			j / samples
+		alsoThruThem rs raf
+	define [bezcontrols x1 y1 x2 y2 _samples raf]
+		bezControlsImpl x1 y1 x2 y2 [fallback _samples 3] raf
+	define [quadcontrols x1 y1 _samples raf]
+		bezControlsImpl (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] [fallback _samples 3] raf
+	set quadcontrols.g4 : lambda [x1 y1 _samples raf]
+		bezControlsImpl (x1 * 2 / 3) (y1 * 2 / 3) [mix 1 x1 (2 / 3)] [mix 1 y1 (2 / 3)] [fallback _samples 3] raf g4
 
 	define DEFAULT_STEPS 6
 	define {jhv, jvh} : let [cache {}] : begin
@@ -105,8 +105,8 @@ export : define [SetupBuilders args] : begin
 				local theta : j / samples * Math.PI / 2
 				local c : Math.pow [Math.cos theta] (2 / superness)
 				local s : Math.pow [Math.sin theta] (2 / superness)
-				hv.push {s (1 - c)}
-				vh.push {(1 - c) s}
+				hv.push { s (1 - c) }
+				vh.push { (1 - c) s }
 			return {.hv hv .vh vh}
 		local [hv samples _superness] : begin
 			if (_superness) : return [build samples _superness].hv
