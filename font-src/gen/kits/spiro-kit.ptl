@@ -151,9 +151,12 @@ export : define [SetupBuilders args] : begin
 		if closed : knots.pop
 		return {.knots [flatten knots] .closed closed .lastafs lastafs}
 
-	define QUAD false
-	define PRECISION 0.5
+	define [convertSpiroToBezier knots closed ctx] : begin
+		define CUBIC                false
+		return : SpiroJs.spiroToBezierOnContext knots closed ctx CUBIC CurveUtil.GEOMETRY_PRECISION
+
 	define [dispiro] : let [args : {}.slice.call arguments 0] : lambda [dontinc] : begin
+		define CLOSED true
 		local s : new SpiroExpansionContext
 		set s.gizmo : this.gizmo || globalTransform
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call args 0] s
@@ -167,16 +170,16 @@ export : define [SetupBuilders args] : begin
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 		if closed : then
 			local g : new CurveUtil.BezToContoursSink
-			SpiroJs.spiroToBezierOnContext [lhs.slice 0 (-1)] true g QUAD PRECISION
-			local lhsContour g.contours.0
-			set g.contours {}
-			SpiroJs.spiroToBezierOnContext [rhs.reverse :.slice 0 (-1)] true g QUAD PRECISION
-			local rhsContour g.contours.0
-			set g.contours {[lhsContour.concat rhsContour]}
+			# CurveUtil.BezToContoursSink::beginShape won't clear the contours
+			# We will get two contours at last
+			convertSpiroToBezier [lhs.slice 0 (-1)] CLOSED g
+			convertSpiroToBezier [rhs.reverse :.slice 0 (-1)] CLOSED g
+			set g.contours { [g.contours.0.concat g.contours.1] }
 		: else : begin
 			local g : new CurveUtil.BezToContoursSink
-			lhs.0.type = rhs.0.type = lhs.(lhs.length - 1).type = rhs.(rhs.length - 1).type = 'corner'
-			SpiroJs.spiroToBezierOnContext [lhs.concat : rhs.reverse] true g QUAD PRECISION
+			lhs.0.type = lhs.(lhs.length - 1).type = 'corner'
+			rhs.0.type = rhs.(rhs.length - 1).type = 'corner'
+			convertSpiroToBezier [lhs.concat : rhs.reverse] CLOSED g
 
 		set g.knots knots
 		set g.lhsKnots lhs
@@ -187,7 +190,7 @@ export : define [SetupBuilders args] : begin
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
 		local g : new CurveUtil.BezToContoursSink (this.gizmo || globalTransform)
 		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
-		SpiroJs.spiroToBezierOnContext knots closed g QUAD PRECISION
+		convertSpiroToBezier knots closed g
 		foreach af [items-of lastafs] : if af : af.call g
 		this.includeGeometry g 0 0
 		return g

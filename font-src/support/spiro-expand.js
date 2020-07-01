@@ -116,11 +116,6 @@ module.exports = class SpiroExpansionContext {
 		}
 	}
 };
-function zeroes(n) {
-	let a = new Array(n);
-	for (let i = 0; i < n; ++i) a[i] = 0;
-	return a;
-}
 function normalX(angle, contrast) {
 	return Math.cos(angle) * contrast;
 }

@@ -2,8 +2,11 @@
 
 const TypoGeom = require("typo-geom");
 const Point = require("./point");
-const { mix } = require("./utils");
 const Transform = require("./transform");
+
+exports.GEOMETRY_PRECISION = 1 / 4;
+exports.RECIP_GEOMETRY_PRECISION = 4;
+exports.BOOLE_RESOLUTION = 0x4000;
 
 exports.OffsetCurve = class OffsetCurve {
 	constructor(bone, offset, contrast) {
@@ -31,7 +34,7 @@ exports.OffsetCurve = class OffsetCurve {
 	}
 };
 
-function convertContourToCubic(contour) {
+exports.convertContourToCubic = function convertContourToCubic(contour) {
 	if (!contour || !contour.length) return [];
 
 	const newContour = [];
@@ -70,7 +73,11 @@ function convertContourToCubic(contour) {
 	}
 
 	return newContour;
-}
+};
+
+exports.convertShapeToArcs = function convertShapeToArcs(shape) {
+	return shape.map(convertContourToArcs);
+};
 
 function convertContourToArcs(contour) {
 	if (!contour || !contour.length) return [];
@@ -123,13 +130,6 @@ function convertContourToArcs(contour) {
 
 	return newContour;
 }
-
-function convertShapeToArcs(shape) {
-	return shape.map(convertContourToArcs);
-}
-
-exports.convertContourToCubic = convertContourToCubic;
-exports.convertShapeToArcs = convertShapeToArcs;
 
 exports.BezToContoursSink = class BezToContoursSink {
 	constructor(gizmo) {

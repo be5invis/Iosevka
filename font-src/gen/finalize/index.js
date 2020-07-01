@@ -98,18 +98,15 @@ function simplifyContours(source) {
 			TypoGeom.Boolean.removeOverlap(
 				CurveUtil.convertShapeToArcs(source),
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				1 << 17
+				CurveUtil.BOOLE_RESOLUTION
 			)
 		),
 		sink,
-		FINAL_SIMPLIFY_TOLERANCE
+		CurveUtil.GEOMETRY_PRECISION
 	);
 
 	return sink.contours;
 }
-
-const FINAL_SIMPLIFY_RESOLUTION = 16;
-const FINAL_SIMPLIFY_TOLERANCE = 2 / FINAL_SIMPLIFY_RESOLUTION;
 
 class FairizedShapeSink {
 	constructor() {
@@ -133,7 +130,7 @@ class FairizedShapeSink {
 		this.lineTo(x, y);
 	}
 	lineTo(x, y) {
-		const z = Point.cornerFromXY(x, y).round(FINAL_SIMPLIFY_RESOLUTION);
+		const z = Point.cornerFromXY(x, y).round(CurveUtil.RECIP_GEOMETRY_PRECISION);
 		while (this.lastContour.length >= 2) {
 			const a = this.lastContour[this.lastContour.length - 2],
 				b = this.lastContour[this.lastContour.length - 1];
@@ -146,10 +143,10 @@ class FairizedShapeSink {
 		this.lastContour.push(z);
 	}
 	arcTo(arc, x, y) {
-		const offPoints = TypoGeom.Quadify.auto(arc, FINAL_SIMPLIFY_TOLERANCE);
+		const offPoints = TypoGeom.Quadify.auto(arc, CurveUtil.GEOMETRY_PRECISION);
 		if (offPoints) {
 			for (const z of offPoints)
-				this.lastContour.push(Point.offFrom(z).round(FINAL_SIMPLIFY_RESOLUTION));
+				this.lastContour.push(Point.offFrom(z).round(CurveUtil.RECIP_GEOMETRY_PRECISION));
 		}
 		this.lineTo(x, y);
 	}
@@ -162,8 +159,14 @@ function isLineExtend(a, b, c) {
 			(aligned(a.y, b.y, c.y) && between(a.x, b.x, c.x)))
 	);
 }
+function geometryPrecisionEqual(a, b) {
+	return (
+		Math.round(a * CurveUtil.RECIP_GEOMETRY_PRECISION) ===
+		Math.round(b * CurveUtil.RECIP_GEOMETRY_PRECISION)
+	);
+}
 function aligned(a, b, c) {
-	return Math.round(a) === Math.round(b) && Math.round(b) === Math.round(c);
+	return geometryPrecisionEqual(a, b) && geometryPrecisionEqual(b, c);
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);
