@@ -1,9 +1,9 @@
 $$include '../meta/macros.ptl'
 
-import [curveToContour OffsetCurve] from '../support/curve-util'
+import [OffsetCurve ArcFlattener] from '../support/curve-util'
 import [mix linreg clamp fallback] from '../support/utils'
 import [designParameters] from '../meta/aesthetics'
-import [Arcs Quadify] from "typo-geom"
+import [Arcs Quadify transferGenericShapeAsBezier] from "typo-geom"
 import [TieMark TieGlyph] from "../support/gr"
 
 glyph-module
@@ -226,10 +226,12 @@ glyph-block Overmarks : begin
 		define z4 : currentGlyph.gizmo.apply : object [x rightEnd] [y ttop]
 		define bone : new Arcs.Bez3 z1 z2 z3 z4
 
-		define inner : curveToContour [new OffsetCurve bone (+hs) HVContrast] 32
-		define outer : curveToContour [new OffsetCurve bone (-hs) HVContrast] 32
+		define inner : new OffsetCurve bone (+hs) HVContrast
+		define outer : new Arcs.Reverted : new OffsetCurve bone (-hs) HVContrast
 
-		currentGlyph.contours.push : inner.concat [outer.reverse]
+		define cs : new ArcFlattener
+		transferGenericShapeAsBezier {{inner outer}} cs (1 / 4)
+		include cs
 
 	sketch # tildeAbove
 		set-width 0

@@ -31,13 +31,6 @@ exports.OffsetCurve = class OffsetCurve {
 	}
 };
 
-exports.curveToContour = function (curve, segments) {
-	const z0 = curve.eval(0);
-	const z1 = curve.eval(1);
-	const offPoints = fixedCubify(curve, segments || 16);
-	return [Point.cornerFrom(z0), ...offPoints, Point.cornerFrom(z1)];
-};
-
 function convertContourToCubic(contour) {
 	if (!contour || !contour.length) return [];
 
@@ -77,62 +70,6 @@ function convertContourToCubic(contour) {
 	}
 
 	return newContour;
-}
-
-function convertContourToCubicRev(contour) {
-	return convertContourToCubic(contour).reverse();
-}
-
-function autoCubify(arc, err) {
-	const MaxSegments = 16;
-	const Hits = 64;
-	let offPoints = [];
-	for (let nSeg = 1; nSeg <= MaxSegments; nSeg++) {
-		const perSegHits = Math.ceil(Hits / nSeg);
-		offPoints.length = 0;
-		let good = true;
-		out: for (let s = 0; s < nSeg; s++) {
-			const tBefore = s / nSeg;
-			const tAfter = (s + 1) / nSeg;
-			const z0 = Point.cornerFrom(arc.eval(tBefore));
-			const z3 = Point.cornerFrom(arc.eval(tAfter));
-			const z1 = Point.cubicOffFrom(z0).addScale(1 / (3 * nSeg), arc.derivative(tBefore));
-			const z2 = Point.cubicOffFrom(z3).addScale(-1 / (3 * nSeg), arc.derivative(tAfter));
-
-			if (s > 0) offPoints.push(z0);
-			offPoints.push(z1, z2);
-
-			const bezArc = new TypoGeom.Arcs.Bez3(z0, z1, z2, z3);
-
-			for (let k = 1; k < perSegHits; k++) {
-				const tk = k / perSegHits;
-				const zTest = arc.eval(mix(tBefore, tAfter, tk));
-				const zBez = bezArc.eval(tk);
-				if (Math.hypot(zTest.x - zBez.x, zTest.y - zBez.y) > err) {
-					good = false;
-					break out;
-				}
-			}
-		}
-		if (good) break;
-	}
-	return offPoints;
-}
-
-function fixedCubify(arc, nSeg) {
-	let offPoints = [];
-	for (let s = 0; s < nSeg; s++) {
-		const tBefore = s / nSeg;
-		const tAfter = (s + 1) / nSeg;
-		const z0 = Point.cornerFrom(arc.eval(tBefore));
-		const z3 = Point.cornerFrom(arc.eval(tAfter));
-		const z1 = Point.cubicOffFrom(z0).addScale(1 / (3 * nSeg), arc.derivative(tBefore));
-		const z2 = Point.cubicOffFrom(z3).addScale(-1 / (3 * nSeg), arc.derivative(tAfter));
-
-		if (s > 0) offPoints.push(z0);
-		offPoints.push(z1, z2);
-	}
-	return offPoints;
 }
 
 function convertContourToArcs(contour) {
@@ -192,9 +129,6 @@ function convertShapeToArcs(shape) {
 }
 
 exports.convertContourToCubic = convertContourToCubic;
-exports.convertContourToCubicRev = convertContourToCubicRev;
-exports.autoCubify = autoCubify;
-exports.fixedCubify = fixedCubify;
 exports.convertShapeToArcs = convertShapeToArcs;
 
 exports.ArcFlattener = class ArcFlattener {

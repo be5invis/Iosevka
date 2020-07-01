@@ -134,13 +134,13 @@ class FairizedShapeSink {
 	}
 	lineTo(x, y) {
 		const z = Point.cornerFromXY(x, y).round(FINAL_SIMPLIFY_RESOLUTION);
-		if (this.lastContour.length >= 2) {
+		while (this.lastContour.length >= 2) {
 			const a = this.lastContour[this.lastContour.length - 2],
 				b = this.lastContour[this.lastContour.length - 1];
 			if (isLineExtend(a, b, z)) {
 				this.lastContour.pop();
-				this.lastContour.push(z);
-				return;
+			} else {
+				break;
 			}
 		}
 		this.lastContour.push(z);
@@ -157,14 +157,13 @@ class FairizedShapeSink {
 function isLineExtend(a, b, c) {
 	return (
 		a.on &&
-		b.on &&
 		c.on &&
 		((aligned(a.x, b.x, c.x) && between(a.y, b.y, c.y)) ||
 			(aligned(a.y, b.y, c.y) && between(a.x, b.x, c.x)))
 	);
 }
 function aligned(a, b, c) {
-	return a === b && b === c;
+	return Math.round(a) === Math.round(b) && Math.round(b) === Math.round(c);
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);
