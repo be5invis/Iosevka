@@ -131,7 +131,7 @@ function convertShapeToArcs(shape) {
 exports.convertContourToCubic = convertContourToCubic;
 exports.convertShapeToArcs = convertShapeToArcs;
 
-exports.ArcFlattener = class ArcFlattener {
+exports.BezToContoursSink = class BezToContoursSink {
 	constructor(gizmo) {
 		this.gizmo = gizmo || Transform.Id();
 		this.contours = [];
