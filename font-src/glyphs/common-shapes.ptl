@@ -278,10 +278,9 @@ glyph-block CommonShapes : begin
 			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA) [widths fine 0]
 			curl (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
 
-	define [OBarLeftToothlessShape _top _left _hBlend _rise _mBlend] : glyph-construction
+	define [OBarLeftToothlessShape _top _left _rise _mBlend] : glyph-construction
 		local top : fallback _top XH
 		local left : fallback _left SB
-		local hBlend : fallback _hBlend 0.5
 		local rise : fallback _rise SHook
 		local mBlend : fallback _mBlend [Math.sqrt (1 / 2)]
 		local fine ShoulderFine
@@ -302,9 +301,89 @@ glyph-block CommonShapes : begin
 			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA) [widths fine 0]
 			curl (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
 
-	define [OBarRightShape top right] : glyph-construction
-		include : create-glyph [OBarLeftShape top (Width - [fallback right RightSB])]
-		include : FlipAround Middle ([fallback top XH] / 2)
+	define [OBarLeftRoundedShape _top _left _yTerminal] : glyph-construction
+		local top : fallback _top XH
+		local left : fallback _left SB
+		local yTerminal : fallback _yTerminal CAP
+		local fine ShoulderFine
+		local st : shoulderMidSlope fine nothing 1
+		local sb : shoulderMidSlope fine nothing (-1)
+		local mt : [mix left RightSB 0.5] + (st - CorrectionOMidX) * Stroke
+		local mb : [mix left RightSB 0.5] + CorrectionOMidX * Stroke
+		include : dispiro
+			flat left yTerminal [widths.lhs.heading Stroke Downward]
+			curl left SmallSmoothB
+			arcvh
+			g4.right.mid mb O
+			archv
+			flat (RightSB - OX) (0 + SmallSmoothA)
+			curl (RightSB - OX) (top - SmallSmoothB)
+			arcvh
+			g4   (mt) (top - O) [widths.heading Stroke 0 {.y (-1) .x (-st)}]
+			archv
+			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA) [widths fine 0]
+			curl (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
+
+	define [OBarLeftToothlessTopShape _top _left _rise _mBlend] : glyph-construction
+		local top : fallback _top XH
+		local left : fallback _left SB
+		local rise : fallback _rise SHook
+		local mBlend : fallback _mBlend [Math.sqrt (1 / 2)]
+		local fine ShoulderFine
+		local st : shoulderMidSlope fine nothing 1
+		local sb : shoulderMidSlope fine nothing (-1)
+		local mt : [mix left RightSB 0.5] - CorrectionOMidX * Stroke
+		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * Stroke
+		include : dispiro
+			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
+			curl (left + (Stroke - fine) * HVContrast) (0 + SmallSmoothB) [widths fine 0]
+			arcvh
+			g4   (mb) O [widths.heading Stroke 0 {.y (1) .x (-sb)}]
+			archv
+			flat (RightSB - OX) (0 + SmallSmoothA)
+			curl (RightSB - OX) (top - SmallSmoothB)
+			arcvh
+			g4   mt (top - O) [widths.lhs Stroke]
+			alsoThru.g2 0.5 (1 - mBlend) important
+			g4 left (top - rise) [widths.lhs Stroke]
+
+	define [OBarLeftRoundedTopShape _top _left _yTerminal] : glyph-construction
+		local top : fallback _top XH
+		local left : fallback _left SB
+		local yTerminal : fallback _yTerminal Descender
+		local fine ShoulderFine
+		local st : shoulderMidSlope fine nothing 1
+		local sb : shoulderMidSlope fine nothing (-1)
+		local mt : [mix left RightSB 0.5] - CorrectionOMidX * Stroke
+		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * Stroke
+		include : dispiro
+			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
+			curl (left + (Stroke - fine) * HVContrast) (0 + SmallSmoothB) [widths fine 0]
+			arcvh
+			g4   (mb) O [widths.heading Stroke 0 {.y (1) .x (-sb)}]
+			archv
+			flat (RightSB - OX) (0 + SmallSmoothA)
+			curl (RightSB - OX) (top - SmallSmoothB)
+			arcvh
+			g4   mt (top - O) [widths.lhs Stroke]
+			archv
+			flat left (top - SmallSmoothA)
+			curl left yTerminal [widths.lhs.heading Stroke Downward]
+
+	define [OBarRightShape _top _right] : create-glyph : glyph-construction
+		include : OBarLeftShape _top (Width - [fallback _right RightSB])
+		include : FlipAround Middle ([fallback _top XH] / 2)
+
+	define [OBarRightToothlessShape _top _right _rise _mBlend] : create-glyph : glyph-construction
+		include : OBarLeftToothlessTopShape _top (Width - [fallback _right RightSB]) _rise _mBlend
+		include : FlipAround Middle ([fallback _top XH] / 2)
+
+	define [OBarRightRoundedShape _top _right _yTerminal] : create-glyph : glyph-construction
+		local top : fallback _top XH
+		local right : fallback right RightSB
+		local yTerminal : fallback _yTerminal CAP
+		include : OBarLeftRoundedTopShape top (Width - right) (top - yTerminal)
+		include : FlipAround Middle (top / 2)
 
 	define SERIF_SHIFT_X 0.6
 	define [LeftwardTopSerif x y length _sw] : glyph-construction
@@ -838,4 +917,4 @@ glyph-block CommonShapes : begin
 		set currentGlyph.markAnchors {.}
 		set currentGlyph.markBnchors {.}
 
-	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors OBarLeftToothlessShape
+	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder mShoulderSpiro HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape

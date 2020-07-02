@@ -2268,7 +2268,6 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define BToothlessRise : Hook * 0.375 + Stroke / 16
-	define BHBlend          0.475
 	define BMBlend          0.80
 
 	create-glyph 'b.toothed' : glyph-construction
@@ -2281,12 +2280,20 @@ glyph-block Letter-Latin-Lower-B : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'b.toothless' : glyph-construction
+	create-glyph 'b.toothlessCorner' : glyph-construction
 		set-width Width
 		include MarkSet.b
 
-		include : OBarLeftToothlessShape XH SB BHBlend BToothlessRise BMBlend
+		include : OBarLeftToothlessShape XH SB BToothlessRise BMBlend
 		include : VBarLeft SB BToothlessRise CAP
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	create-glyph 'b.toothlessRounded' : glyph-construction
+		set-width Width
+		include MarkSet.b
+
+		include : OBarLeftRoundedShape XH SB CAP
 		if SLAB : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 
@@ -2299,10 +2306,15 @@ glyph-block Letter-Latin-Lower-B : begin
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'bhooktop.toothless' : glyph-construction
+	create-glyph 'bhooktop.toothlessCorner' : glyph-construction
 		include MarkSet.b
-		include : OBarLeftToothlessShape XH SB BHBlend BToothlessRise BMBlend
+		include : OBarLeftToothlessShape XH SB BToothlessRise BMBlend
 		include : HooktopLeftBar (bottom -- BToothlessRise)
+
+	create-glyph 'bhooktop.toothlessRounded' : glyph-construction
+		include MarkSet.b
+		include : OBarLeftRoundedShape XH SB XH
+		include : HooktopLeftBar (bottom -- SmallSmoothB)
 
 	select-variant 'bhooktop' 0x253 (follow -- 'b')
 
@@ -2400,33 +2412,44 @@ glyph-block Letter-Latin-Upper-D : begin
 glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared : CreateDerivedLetter
 
-	sketch # d
-		set-width Width
+	define DToothlessRise : Hook * 0.375 + Stroke / 16
+	define DMBlend          0.80
+
+	create-glyph 'd.toothed' : glyph-construction
 		include MarkSet.b
-
 		include : OBarRightShape
 		include : VBarRight RightSB 0 CAP
 		if SLAB : begin
 			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
 
-		save 'd' 'd'
+	create-glyph 'd.toothlessCorner' : glyph-construction
+		include MarkSet.b
+		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : VBarRight RightSB DToothlessRise CAP
+		if SLAB : begin
+			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
 
-	sketch # dcroat
-		include [refer-glyph 'd'] AS_BASE
+	create-glyph 'd.toothlessRounded' : glyph-construction
+		include MarkSet.b
+		include : OBarRightRoundedShape XH RightSB CAP
+		if SLAB : begin
+			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	select-variant 'd' 'd'
+
+	CreateDerivedLetter 'd' 'dcroat' 0x111 : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		include : HBar [mix (SB + Stroke) (RightSB - Stroke) 0.5] [mix RightSB Width 0.7] [mix XH CAP 0.45] OverlayStroke
 
-		save 'dcroat' 0x111
-
-	sketch # dcaron
+	CreateDerivedLetter 'd' 'dcaron' 0x10f : lambda [src sel] : glyph-construction
 		include : refer-glyph "commaAbove"
 		apply-transform : Translate (Width + (RightSB - SB) / 2 + markExtend / 2) 0
-		local f : Widen {'d'} 0.95 1
-		include f.d
+		local f : Widen {src} 0.95 1
+		include f.(src)
 		include MarkSet.b
-
-		save 'dcaron' 0x10F
 
 	sketch # dcurlytail
 		local fine : adviceBlackness 4
@@ -2447,28 +2470,39 @@ glyph-block Letter-Latin-Lower-D : begin
 
 		save 'dcurlytail' 0x221
 
-	sketch # dhooktop
+	define yDHookTopConnect : CAP - Hook - HalfStroke
+	create-glyph 'dhooktop.toothed' : glyph-construction
 		include MarkSet.b
 		include : OBarRightShape
-		include : VBarRight RightSB 0 XH
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)
+		include : VBarRight RightSB 0 yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
 		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
-		save 'dhooktop' 0x257
+	create-glyph 'dhooktop.toothlessCorner' : glyph-construction
+		include MarkSet.b
+		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : VBarRight RightSB DToothlessRise yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
-	sketch # ddot
+	create-glyph 'dhooktop.toothlessRounded' : glyph-construction
+		include MarkSet.b
+		include : OBarRightRoundedShape XH RightSB yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	select-variant 'dhooktop' 0x257 (follow -- 'd')
+
+	CreateDerivedLetter 'd' 'ddot' 0x1E0B : lambda [src sel] : glyph-construction
 		include : refer-glyph "dotAbove"
 		apply-transform : Translate (Width - HalfStroke) 0
-		include [refer-glyph 'd'] AS_BASE
-		save 'ddot' 0x1E0B
+		include [refer-glyph src] AS_BASE
 
-	sketch # latinde
-		include [refer-glyph 'd'] AS_BASE
+	CreateDerivedLetter 'd' 'latinde' 0x18C : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
 		if SLAB : begin
 			include : DownwardLeftSerif [mix RightSB SB 0.9] CAP VJut
-		save 'latinde' 0x18C
-
 
 glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import CommonShapes
