@@ -33,6 +33,12 @@ glyph-block Letter-Shared : begin
 			include : Italify
 			include srcGlyph AS_BASE ALSO_METRICS
 
+	glyph-block-export CreateDerivedLetter
+	define [CreateDerivedLetter gnFrom gnTo unicode f]
+		WithDerivatives gnFrom gnTo : lambda [src sel] : glyph-construction
+			if [not sel] : assign-unicode unicode
+			include [f src sel] AS_BASE ALSO_METRICS
+
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
@@ -2259,8 +2265,13 @@ glyph-block Letter-Latin-Upper-B : begin
 glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared : CreateDerivedLetter
 
-	sketch # b
+	define BToothlessRise : Hook * 0.375 + Stroke / 16
+	define BHBlend          0.475
+	define BMBlend          0.80
+
+	create-glyph 'b.toothed' : glyph-construction
 		set-width Width
 		include MarkSet.b
 
@@ -2270,38 +2281,48 @@ glyph-block Letter-Latin-Lower-B : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-		save 'b' 'b'
+	create-glyph 'b.toothless' : glyph-construction
+		set-width Width
+		include MarkSet.b
 
-	sketch # bhooktop
+		include : OBarLeftToothlessShape XH SB BHBlend BToothlessRise BMBlend
+		include : VBarLeft SB BToothlessRise CAP
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	select-variant 'b' 'b'
+
+	create-glyph 'bhooktop.toothed' : glyph-construction
 		include MarkSet.b
 		include : OBarLeftShape
 		include : HooktopLeftBar
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
+	create-glyph 'bhooktop.toothless' : glyph-construction
+		include MarkSet.b
+		include : OBarLeftToothlessShape XH SB BHBlend BToothlessRise BMBlend
+		include : HooktopLeftBar (bottom -- BToothlessRise)
 
-		save 'bhooktop' 0x253
+	select-variant 'bhooktop' 0x253 (follow -- 'b')
 
-	sketch # bbar
-		include [refer-glyph 'b'] AS_BASE
+	CreateDerivedLetter 'b' 'bbar' 0x180 : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
-		save 'bbar' 0x180
 
-	sketch # bdot
+	CreateDerivedLetter 'b' 'bdot' 0x1E03 : lambda [src sel] : glyph-construction
 		include : refer-glyph "dotAbove"
 		apply-transform : Translate (Width + HalfStroke) 0
-		include [refer-glyph 'b'] AS_BASE
-		save 'bdot' 0x1E03
+		include [refer-glyph src] AS_BASE
 
-	sketch # latinbe
-		include [refer-glyph 'b'] AS_BASE
+	CreateDerivedLetter 'b' 'latinbe' 0x183 : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		include : HBarTop (SB - O) [mix SB RightSB 0.9] CAP
 		if SLAB : begin
 			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
-		save 'latinbe' 0x183
 
-	sketch # zhuangtonesix
-		include [refer-glyph 'b'] AS_BASE
+	CreateDerivedLetter 'b' 'zhuangtonesix' 0x185 : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		eject-contour 'serifLT'
 		local s : Math.max (XH * 0.1) Stroke
 		include : ReverseContours : spiro-outline
@@ -2310,8 +2331,6 @@ glyph-block Letter-Latin-Lower-B : begin
 			corner (SB - s) (CAP - s)
 			corner  SB (CAP - s * 2)
 			corner (SB - O) (CAP - s * 2)
-		save 'zhuangtonesix' 0x185
-
 
 glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import CommonShapes
