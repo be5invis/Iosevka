@@ -35,8 +35,17 @@ module.exports = function formVariantData(data, para) {
 	// simple selector
 	for (let k in data.simple) {
 		const varDef = data.simple[k];
-		if (!varDef.variant) throw new Error("Unreachable! Variant definition is invalid");
-		const hive = { ...varDef.variant };
+		let hive;
+		if (varDef.variant) {
+			hive = { ...varDef.variant };
+		} else if (varDef.variantUpright && !para.isItalic) {
+			hive = { ...varDef.variantUpright };
+		} else if (varDef.variantItalic && para.isItalic) {
+			hive = { ...varDef.variantItalic };
+		} else {
+			hive = {};
+		}
+
 		vs[k] = hive;
 
 		const tag = varDef.tag;
