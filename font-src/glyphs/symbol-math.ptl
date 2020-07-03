@@ -9,19 +9,32 @@ glyph-module
 glyph-block NotGlyphFn : begin
 	glyph-block-import CommonShapes
 	glyph-block-export notGlyph
-	define [notGlyph unicode oldid top bot prop shift newid]
-		create-glyph [fallback newid ('not' + oldid)] : glyph-construction
-			if unicode : assign-unicode unicode
-			include [refer-glyph oldid]
-			include : dispiro
-				widths.center [adviceBlackness 4]
-				flat ([fallback shift 0] + [mix SB RightSB [fallback prop 0.25]]) [fallback bot bgopBot]
-				curl ([fallback shift 0] + [mix RightSB SB [fallback prop 0.25]]) [fallback top bgopTop]
 
-	define [notGlyph.right unicode oldid top bot prop shift]
-		notGlyph unicode oldid top bot prop (-OperatorStroke * 0.5)
-	define [notGlyph.left unicode oldid top bot prop shift]
-		notGlyph unicode oldid top bot prop (OperatorStroke * 0.5)
+	define [notGlyphGeneric newid unicode oldid top bot prop shift F] : begin
+		create-glyph (newid || 'not' + oldid) : glyph-construction
+			if unicode : assign-unicode unicode
+			include : refer-glyph oldid
+			include : F
+				fallback top bgopTop
+				fallback bot bgopBot
+				mix SB RightSB [fallback prop 0.25]
+				mix RightSB SB [fallback prop 0.25]
+				adviceBlackness 4
+				fallback shift 0
+
+	define [notGlyph] : params [newid unicode oldid top bot prop shift] : begin
+		notGlyphGeneric newid unicode oldid top bot prop shift
+			lambda [t b l r sw sh] : dispiro
+				widths.center sw
+				flat (sh + l) b
+				curl (sh + r) t
+
+	define [notGlyph.right] : params [newid unicode oldid top bot prop shift] : begin
+		notGlyph newid unicode oldid top bot prop (-OperatorStroke * 0.5)
+	define [notGlyph.left] : params [newid unicode oldid top bot prop shift] : begin
+		notGlyph newid unicode oldid top bot prop (OperatorStroke * 0.5)
+	define [notGlyph.generic] : params [newid unicode oldid top bot prop shift F] : begin
+		notGlyphGeneric newid unicode oldid top bot prop shift F
 
 glyph-block Symbol-Math-Letter-Like : begin
 
@@ -683,34 +696,34 @@ glyph-block Symbol-Math-Relation : begin
 	glyph-block-import Overmarks : TildeShape
 	glyph-block-export dH lessSlantness
 	glyph-block-export LessShape GreaterShape LigationLessShape LigationGreaterShape
-	glyph-block-export EqualShape EqualHole IdentShape IdentHole
+	glyph-block-export EqualShape EqualHole IdentShape IdentHole EqualHalfSpace
 
-	define equalHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
+	define EqualHalfSpace : (operTop - operBot) * 2 * designParameters.equal_wideness
 	define lessSlantness : (4 / 13) * (operTop - operBot) / (RightSB - SB)
 	define dH : lessSlantness * (RightSB - SB)
 	define lessEqDist : Math.max [adviceBlackness 4] (XH * 0.16)
 
 	define [EqualShape left right] : union
-		HBar left right (symbolMid + equalHalfSpace) OperatorStroke
-		HBar left right (symbolMid - equalHalfSpace) OperatorStroke
+		HBar left right (symbolMid + EqualHalfSpace) OperatorStroke
+		HBar left right (symbolMid - EqualHalfSpace) OperatorStroke
 
 	define [EqualHole x]
-		VBar x (symbolMid - equalHalfSpace) (symbolMid + equalHalfSpace) [adviceBlackness 6]
+		VBar x (symbolMid - EqualHalfSpace) (symbolMid + EqualHalfSpace) [adviceBlackness 6]
 
 	define [IdentShape left right] : union
-		HBar left right (symbolMid + equalHalfSpace * 1.5) OperatorStroke
+		HBar left right (symbolMid + EqualHalfSpace * 1.5) OperatorStroke
 		HBar left right symbolMid OperatorStroke
-		HBar left right (symbolMid - equalHalfSpace * 1.5) OperatorStroke
+		HBar left right (symbolMid - EqualHalfSpace * 1.5) OperatorStroke
 	define [IdentHole x]
-		VBar x (symbolMid - equalHalfSpace * 1.5) (symbolMid + equalHalfSpace * 1.5) [adviceBlackness 6]
+		VBar x (symbolMid - EqualHalfSpace * 1.5) (symbolMid + EqualHalfSpace * 1.5) [adviceBlackness 6]
 
 	sketch # equal
 		include : EqualShape SB RightSB
 		save 'equal' '='
 
 		branch
-			include : DotAt [mix SB RightSB (1/6)] (symbolMid + equalHalfSpace * 2.5) DotRadius
-			include : DotAt [mix SB RightSB (5/6)] (symbolMid - equalHalfSpace * 2.5) DotRadius
+			include : DotAt [mix SB RightSB (1/6)] (symbolMid + EqualHalfSpace * 2.5) DotRadius
+			include : DotAt [mix SB RightSB (5/6)] (symbolMid - EqualHalfSpace * 2.5) DotRadius
 			save 'twodotapproxeq' 0x2252
 
 	sketch # colon-equal
@@ -732,10 +745,10 @@ glyph-block Symbol-Math-Relation : begin
 		save 'ident' 0x2261
 
 	sketch # iiiident
-		include : HBar SB RightSB (symbolMid + equalHalfSpace * 2.25) OperatorStroke
-		include : HBar SB RightSB (symbolMid + equalHalfSpace * 0.75) OperatorStroke
-		include : HBar SB RightSB (symbolMid - equalHalfSpace * 0.75) OperatorStroke
-		include : HBar SB RightSB (symbolMid - equalHalfSpace * 2.25) OperatorStroke
+		include : HBar SB RightSB (symbolMid + EqualHalfSpace * 2.25) OperatorStroke
+		include : HBar SB RightSB (symbolMid + EqualHalfSpace * 0.75) OperatorStroke
+		include : HBar SB RightSB (symbolMid - EqualHalfSpace * 0.75) OperatorStroke
+		include : HBar SB RightSB (symbolMid - EqualHalfSpace * 2.25) OperatorStroke
 		save 'iiiident' 0x2263
 
 	define [LessGreaterExpansion top bot l r]
@@ -817,7 +830,7 @@ glyph-block Symbol-Math-Relation : begin
 				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
 
 	# Sym parameters
-	local approxDist : equalHalfSpace * 1.75
+	local approxDist : EqualHalfSpace * 1.75
 	local symMag : (operTop - symbolMid) * 0.17
 	define [symWave height mul] : TildeShape
 		ttop -- height + symMag * mul
@@ -1074,22 +1087,22 @@ glyph-block Symbol-Math-Relation : begin
 		save 'symBar' 0x2243
 
 	sketch # symBarBar
-		local sympShift : approxDist + equalHalfSpace * 1.5
+		local sympShift : approxDist + EqualHalfSpace * 1.5
 		include [refer-glyph 'sym'] AS_BASE
 		include : Upright
 		include : Translate 0 (sympShift / 2)
 		include : Italify
-		include : HBar SB RightSB (symbolMid - sympShift / 2 + equalHalfSpace * 1.5) OperatorStroke
+		include : HBar SB RightSB (symbolMid - sympShift / 2 + EqualHalfSpace * 1.5) OperatorStroke
 		include : HBar SB RightSB (symbolMid - sympShift / 2) OperatorStroke
 		save 'symBarBar' 0x2245
 
 	sketch # flipsymBarBar
-		local sympShift : approxDist + equalHalfSpace * 1.5
+		local sympShift : approxDist + EqualHalfSpace * 1.5
 		include [refer-glyph 'flipsym'] AS_BASE
 		include : Upright
 		include : Translate 0 (sympShift / 2)
 		include : Italify
-		include : HBar SB RightSB (symbolMid - sympShift / 2 + equalHalfSpace * 1.5) OperatorStroke
+		include : HBar SB RightSB (symbolMid - sympShift / 2 + EqualHalfSpace * 1.5) OperatorStroke
 		include : HBar SB RightSB (symbolMid - sympShift / 2) OperatorStroke
 		save 'flipsymBarBar' 0x224C
 
@@ -1180,37 +1193,37 @@ glyph-block Symbol-Math-Complement : begin
 
 glyph-block Symbol-Math-Negation : begin
 	glyph-block-import NotGlyphFn : notGlyph
-	notGlyph 0x2260 'equal'
-	notGlyph 0x2262 'ident'
-	notGlyph 0x22AC 'vdash'
-	notGlyph 0x22AD 'tautology'
-	notGlyph 0x22AE 'forces'
-	notGlyph 0x22AF 'doubleForces'
-	notGlyph.left 0x226E 'less'
-	notGlyph.right 0x226F 'greater'
-	notGlyph.left 0x2280 'precedes'
-	notGlyph.right 0x2281 'succeeds'
-	notGlyph 0x2241 'sym' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
-	notGlyph 0x2244 'symBar' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
-	notGlyph 0x2247 'symBarBar'
-	notGlyph 0x2249 'approx' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
-	notGlyph.left 0x2284 'subst'
-	notGlyph.right 0x2285 'supst'
-	notGlyph.left 0x2288 'substBar'
-	notGlyph.right 0x2289 'supstBar'
-	notGlyph.left 0x22E2 'prefixBar'
-	notGlyph.right 0x22E3 'suffixBar'
-	notGlyph.left 0x2209 'element'
-	notGlyph.right 0x220C 'turnelement'
-	notGlyph.left 0x2270 'lesseq'
-	notGlyph.right 0x2271 'greatereq'
-	notGlyph.left 0x2274 'lesssym'
-	notGlyph.right 0x2275 'greatersym'
-	notGlyph.left 0x22E0 'precedeseqslant'
-	notGlyph.right 0x22E1 'succeedseqslant'
-	notGlyph 0x2278 'lessgreater'
-	notGlyph 0x2279 'greaterless'
-	notGlyph.right 0x2204 'exists' (CAP - Descender / 2) (Descender / 2) 0.4
+	notGlyph       null 0x2260 'equal'
+	notGlyph       null 0x2262 'ident'
+	notGlyph       null 0x22AC 'vdash'
+	notGlyph       null 0x22AD 'tautology'
+	notGlyph       null 0x22AE 'forces'
+	notGlyph       null 0x22AF 'doubleForces'
+	notGlyph.left  null 0x226E 'less'
+	notGlyph.right null 0x226F 'greater'
+	notGlyph.left  null 0x2280 'precedes'
+	notGlyph.right null 0x2281 'succeeds'
+	notGlyph       null 0x2241 'sym' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
+	notGlyph       null 0x2244 'symBar' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
+	notGlyph       null 0x2247 'symBarBar'
+	notGlyph       null 0x2249 'approx' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
+	notGlyph.left  null 0x2284 'subst'
+	notGlyph.right null 0x2285 'supst'
+	notGlyph.left  null 0x2288 'substBar'
+	notGlyph.right null 0x2289 'supstBar'
+	notGlyph.left  null 0x22E2 'prefixBar'
+	notGlyph.right null 0x22E3 'suffixBar'
+	notGlyph.left  null 0x2209 'element'
+	notGlyph.right null 0x220C 'turnelement'
+	notGlyph.left  null 0x2270 'lesseq'
+	notGlyph.right null 0x2271 'greatereq'
+	notGlyph.left  null 0x2274 'lesssym'
+	notGlyph.right null 0x2275 'greatersym'
+	notGlyph.left  null 0x22E0 'precedeseqslant'
+	notGlyph.right null 0x22E1 'succeedseqslant'
+	notGlyph       null 0x2278 'lessgreater'
+	notGlyph       null 0x2279 'greaterless'
+	notGlyph.right null 0x2204 'exists' (CAP - Descender / 2) (Descender / 2) 0.4
 
 glyph-block Symbol-Math-Large-Operators : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
@@ -1452,8 +1465,8 @@ glyph-block Symbol-Math-Other : begin
 
 	alias 'mathbullet' 0x2219 'bullet'
 	alias 'mathbar' 0x2223 'bar'
-	notGlyph 0x2224 'mathbar' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0.1
-	notGlyph 0x2226 'parallel' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0
+	notGlyph null 0x2224 'mathbar' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0.1
+	notGlyph null 0x2226 'parallel' [mix symbolMid bgopTop 0.5] [mix symbolMid bgopBot 0.5] 0
 	alias 'mathsmallcircle' 0x2218 'smallwhitecircle.NWID'
 	alias 'whiteDiamondOperator' 0x22C4 'whitediamond.NWID'
 	alias 'mathstar' 0x22C6 'blackstar.NWID'

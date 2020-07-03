@@ -12,15 +12,26 @@ module.exports = function formVariantData(data, para) {
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
 		if (!comp.tag) continue;
+
+		const ligSets = createBuildup(data.simple, comp.buildup);
 		if (comp.isOptOut) {
-			optOutBuildup[comp.tag] = comp.buildup;
+			optOutBuildup[comp.tag] = ligSets;
 		} else {
-			optInBuildup[comp.tag] = comp.buildup;
+			optInBuildup[comp.tag] = ligSets;
 		}
 		if (!comp.isOptOut) {
-			hives[gr] = { caltBuildup: [...comp.buildup] };
+			hives[gr] = { caltBuildup: ligSets };
 		}
 	}
 
 	return { defaultBuildup: { ...optInBuildup, ...optOutBuildup }, hives };
 };
+
+function createBuildup(simple, buildup) {
+	let ligSet = new Set();
+	for (const s of buildup) {
+		if (!simple[s]) throw new Error("Cannot find simple ligation group " + s);
+		ligSet.add(simple[s].ligGroup);
+	}
+	return Array.from(ligSet);
+}

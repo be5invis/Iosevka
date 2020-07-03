@@ -1513,7 +1513,7 @@ glyph-block Symbol-Other-Ligation : begin
 			save 'greater.lig.hole.shiftN1'
 
 	do "Equal and Inequal" : if [not recursive] : begin
-		glyph-block-import Symbol-Math-Relation : EqualShape EqualHole IdentShape IdentHole
+		glyph-block-import Symbol-Math-Relation : EqualShape EqualHole IdentShape IdentHole EqualHalfSpace
 		define joiningOverlap (-Width / 6)
 		sketch # equal.fc
 			include : difference
@@ -1567,12 +1567,33 @@ glyph-block Symbol-Other-Ligation : begin
 			save 'ident.cc'
 
 		glyph-block-import NotGlyphFn : notGlyph
-		notGlyph null 'equal.fc' nothing nothing nothing (Width * 0.5) 'equal.fc.neg'
-		notGlyph null 'equal.fc' nothing nothing nothing (Width * 1.0) 'equal.fc.neg3'
-		notGlyph null 'equal.fc' nothing nothing nothing (Width * 1.5) 'equal.fc.neg4'
-		notGlyph null 'ident.fc' nothing nothing nothing (Width * 0.5) 'ident.fc.neg'
-		notGlyph null 'ident.fc' nothing nothing nothing (Width * 1.0) 'ident.fc.neg3'
-		notGlyph null 'ident.fc' nothing nothing nothing (Width * 1.5) 'ident.fc.neg4'
+
+		define [slash t b l r sw sh] : dispiro
+			widths.center OperatorStroke
+			flat (sh + l) b
+			curl (sh + r) t
+
+		define [exSlash2 t b l r sw sh] : begin
+			local dr : PeriodRadius / Stroke * OperatorStroke
+			union
+				DotAt (sh + l + dr * (r - l) / (t - b)) (b + dr) dr
+				intersection
+					Rect (symbolMid + t) [Math.min (b + dr * 3.5) (symbolMid - EqualHalfSpace)] (-Width * 4) (Width * 4)
+					dispiro
+						widths.center OperatorStroke
+						flat (sh + l) b
+						curl (sh + r) t
+
+		notGlyph.generic 'equal.fc.neg'  null 'equal.fc' (shift -- (Width * 0.5)) (F -- slash)
+		notGlyph.generic 'equal.fc.neg3' null 'equal.fc' (shift -- (Width * 1.0)) (F -- slash)
+		notGlyph.generic 'equal.fc.neg4' null 'equal.fc' (shift -- (Width * 1.5)) (F -- slash)
+		notGlyph.generic 'ident.fc.neg'  null 'ident.fc' (shift -- (Width * 0.5)) (F -- slash)
+		notGlyph.generic 'ident.fc.neg3' null 'ident.fc' (shift -- (Width * 1.0)) (F -- slash)
+		notGlyph.generic 'ident.fc.neg4' null 'ident.fc' (shift -- (Width * 1.5)) (F -- slash)
+
+		notGlyph.generic 'equal.fc.neg-alt-1'  null 'equal.fc' (shift -- (Width * 0.5)) (F -- exSlash2)
+		notGlyph.generic 'equal.fc.neg3-alt-1' null 'equal.fc' (shift -- (Width * 1.0)) (F -- exSlash2)
+		notGlyph.generic 'equal.fc.neg4-alt-1' null 'equal.fc' (shift -- (Width * 1.5)) (F -- exSlash2)
 
 	do "<| , |> and <>"
 		glyph-block-import Symbol-Math-Relation : LessShape GreaterShape
