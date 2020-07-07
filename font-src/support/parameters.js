@@ -2,12 +2,11 @@
 
 const monotonicInterpolate = require("./monotonic-interpolate");
 
-function build(parametersData, styles, blendArgs) {
-	const sink = {};
+function apply(sink, parametersData, styles, blendArgs) {
+	if (!styles) return;
 	for (const item of styles) intro(parametersData, item, blendArgs, sink);
-	return sink;
 }
-exports.build = build;
+exports.apply = apply;
 
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
@@ -33,7 +32,8 @@ function intro(source, style, blendArgs, sink) {
 		for (const k in mu) sink[k] = [...(sink[k] || []), ...mu[k]];
 		delete hive.appends;
 	}
-	hive = hiveBlend(hive, getBlendArg(blendArgs, style), sink);
+
+	hive = hiveBlend(hive, getBlendArg(blendArgs, style));
 	for (const k in hive) sink[k] = hive[k];
 }
 
@@ -42,14 +42,13 @@ function getBlendArg(blendArgs, style) {
 	return blendArgs[style];
 }
 
-function hiveBlend(hive, value, sink) {
+function hiveBlend(hive, value) {
 	if (!hive || !hive.blend || value == null) return hive;
 
 	const generatedHive = {};
 	const block = hive.blend;
 	let keys = new Set();
 	for (const grade in block) {
-		sink[grade] = block[grade];
 		if (!isFinite(parseFloat(grade))) continue;
 		for (const key in block[grade]) {
 			if (block[grade][key] == null) continue;

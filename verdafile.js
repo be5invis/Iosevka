@@ -184,11 +184,16 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	const postHives = [...bp.post.design, ...bp.post[sfi.slant]];
 	return {
 		name: fileName,
-		hives: ["iosevka", ...preHives, ...sfi.hives, ...postHives],
+		// Hives
+		preHives,
+		// Shape
 		shape: {
 			weight: sfi.shapeWeight,
-			width: sfi.shapeWidth
+			slant: sfi.slant,
+			width: sfi.shapeWidth,
+			quasiProportionalDiversity: bp["quasiProportionalDiversity"] || 0
 		},
+		// Menu
 		menu: {
 			family: bp.family,
 			version: version,
@@ -196,6 +201,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			slant: sfi.menuSlant,
 			weight: sfi.menuWeight
 		},
+		// CSS
 		css: {
 			weight: sfi.cssWeight,
 			stretch: sfi.cssStretch,
@@ -217,7 +223,6 @@ function getSuffixMapping(weights, slants, widths) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`shapeWeight`, `s-${s}`, `shapeWidth`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
 					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
@@ -832,21 +837,15 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 	return [...js, ...ejs, ...md];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
-	const ss = await target.need(
-		ScriptsUnder(ext, `font-src/gen`),
-		ScriptsUnder(ext, `font-src/glyphs`),
-		ScriptsUnder(ext, `font-src/meta`),
-		ScriptsUnder(ext, `font-src/otl`),
-		ScriptsUnder(ext, `font-src/support`)
-	);
-	return ss.reduce((a, b) => [...a, ...b]);
+	const [ss] = await target.need(ScriptsUnder(ext, `font-src`));
+	return ss;
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles("ptl"));
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-const ScriptJS = file.glob(`font-src/*/**/*.js`, async (target, path) => {
+const ScriptJS = file.glob(`font-src/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
@@ -873,6 +872,8 @@ const UtilScripts = task("util-scripts", async target => {
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
 		sfu`params/parameters.toml`,
+		sfu`params/shape-weight.toml`,
+		sfu`params/shape-width.toml`,
 		ofu`params/private-parameters.toml`,
 		sfu`params/variants.toml`,
 		sfu`params/ligation-set.toml`
