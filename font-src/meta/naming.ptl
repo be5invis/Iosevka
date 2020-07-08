@@ -53,7 +53,7 @@ define widthToMenuStyleMap : object
 	7 "Extended"
 	8 "Extra-Extended"
 	9 "Ultra-Extended"
-define slantToMenuStyleMap : object
+define slopeToMenuStyleMap : object
 	normal  ""
 	italic  "Italic"
 	oblique "Oblique"
@@ -79,33 +79,33 @@ define widthToMenuStyleMapShort : object
 	7 "Ex"
 	8 "XEx"
 	9 "UltEx"
-define slantToMenuStyleMapShort : object
+define slopeToMenuStyleMapShort : object
 	normal  ""
 	italic  "It"
 	oblique "Obl"
 
-define [getStyle weight width slant] : begin
+define [getStyle weight width slope] : begin
 	define weightPart : fallback weightToMenuStyleMap.(weight) ('W' + weight)
 	define widthPart    widthToMenuStyleMap.(width)
-	define slantPart    slantToMenuStyleMap.(slant)
-	define rawName    : weightPart + ' ' + widthPart + ' ' + slantPart
+	define slopePart    slopeToMenuStyleMap.(slope)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slopePart
 	return : [[rawName.replace [regex ' +' 'g'] ' '].trim] || "Regular"
 
-define [getShortStyle weight width slant] : begin
+define [getShortStyle weight width slope] : begin
 	define weightPart : fallback weightToMenuStyleMapShort.(weight) ('W' + weight)
 	define widthPart    widthToMenuStyleMapShort.(width)
-	define slantPart    slantToMenuStyleMapShort.(slant)
-	define rawName    : weightPart + ' ' + widthPart + ' ' + slantPart
+	define slopePart    slopeToMenuStyleMapShort.(slope)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slopePart
 	return : [rawName.replace [regex ' ' 'g'] ''] || "Regular"
 
-define [isRBIBI weight slant] : (weight == 400 || weight == 700) && (slant == "normal" || slant == "italic")
+define [isRBIBI weight slope] : (weight == 400 || weight == 700) && (slope == "normal" || slope == "italic")
 
-define [getStyleLinkedStyles weight width slant] : begin
+define [getStyleLinkedStyles weight width slope] : begin
 	local linkWeight       weight
-	local linkSlant        slant
+	local linkSlope        slope
 	local nameSuffixWeight 400
 	local nameSuffixWidth  width
-	local nameSuffixSlant  "normal"
+	local nameSuffixSlope  "normal"
 
 	# Not regular or bold
 	if (linkWeight != 400 && linkWeight != 700) : begin
@@ -113,14 +113,14 @@ define [getStyleLinkedStyles weight width slant] : begin
 		linkWeight = 400
 
 	# Not "normal" or italic
-	if (linkSlant != "normal" && linkSlant != "italic") : begin
-		nameSuffixSlant = linkSlant
-		linkSlant = "normal"
+	if (linkSlope != "normal" && linkSlope != "italic") : begin
+		nameSuffixSlope = linkSlope
+		linkSlope = "normal"
 
 	return : list
-		getStyle linkWeight 5 linkSlant
-		getStyle nameSuffixWeight nameSuffixWidth nameSuffixSlant
-		getShortStyle nameSuffixWeight nameSuffixWidth nameSuffixSlant
+		getStyle linkWeight 5 linkSlope
+		getStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
+		getShortStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
 
 
 
@@ -128,11 +128,11 @@ export : define [assignFontNames para metrics font] : begin
 	set font.name {}
 
 	define family  : para.naming.family.trim
-	define style   : getStyle para.naming.weight para.naming.width para.naming.slant
+	define style   : getStyle para.naming.weight para.naming.width para.naming.slope
 	define version : "Version " + para.naming.version
 
-	define isItalic  : para.naming.slant == "italic"
-	define isOblique : para.naming.slant == "oblique"
+	define isItalic  : para.naming.slope == "italic"
+	define isOblique : para.naming.slope == "oblique"
 	define isBold    : para.naming.weight > 650
 
 	nameFont font PREFERRED_FAMILY family # Preferred Family
@@ -143,7 +143,7 @@ export : define [assignFontNames para metrics font] : begin
 	set font.name.preferredFamily     family
 	set font.name.preferredSubFamily  style
 
-	local {compatStyle compatFamilySuffix shortCompatFamilySuffix} : getStyleLinkedStyles para.naming.weight para.naming.width para.naming.slant
+	local {compatStyle compatFamilySuffix shortCompatFamilySuffix} : getStyleLinkedStyles para.naming.weight para.naming.width para.naming.slope
 	local compatFamily family
 	if (compatFamilySuffix != "Regular") : set compatFamily : family + ' ' + compatFamilySuffix
 	if (compatFamily.length >= 31) : set compatFamily : family + ' ' + shortCompatFamilySuffix
@@ -171,7 +171,7 @@ export : define [assignFontNames para metrics font] : begin
 		if (a.languageID != b.languageID) : return : a.languageID - b.languageID
 		return : a.nameID - b.nameID
 
-	# Weight, width and slantness
+	# Weight, width and slope
 	set font.OS_2.usWeightClass     para.naming.weight
 	set font.OS_2.usWidthClass      para.naming.width
 	set font.OS_2.panose.2          : 1 + para.naming.weight / 100

@@ -121,14 +121,17 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	const fileNameToBpMap = {};
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
-		shimBuildPlans(bp, rp.weights, rp.slants, rp.widths);
+		validateAndShimBuildPlans(prefix, bp, rp.weights, rp.slopes, rp.widths);
 
 		bp.targets = [];
-		const suffixMapping = getSuffixMapping(bp.weights, bp.slants, bp.widths);
+		const weights = bp.weights,
+			slopes = bp.slopes,
+			widths = bp.widths;
+		const suffixMapping = getSuffixMapping(weights, slopes, widths);
 		for (const suffix in suffixMapping) {
 			const sfi = suffixMapping[suffix];
-			if (bp.weights && !bp.weights[sfi.weight]) continue;
-			if (bp.slants && !bp.slants[sfi.slant]) continue;
+			if (weights && !weights[sfi.weight]) continue;
+			if (slopes && !slopes[sfi.slope]) continue;
 			const fileName = [prefix, suffix].join("-");
 			bp.targets.push(fileName);
 			fileNameToBpMap[fileName] = { prefix, suffix };
@@ -138,7 +141,17 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	return { fileNameToBpMap, buildPlans: returnBuildPlans };
 });
 
-function shimBuildPlans(bp, dWeights, dSlants, dWidths) {
+function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
+	if (!bp.family) {
+		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	}
+	if (!bp.slopes && bp.slants) {
+		echo.warn(
+			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
+				`Use "slopes" instead.`
+		);
+	}
+
 	if (!bp.pre) bp.pre = {};
 	if (!bp.post) bp.post = {};
 
@@ -153,7 +166,7 @@ function shimBuildPlans(bp, dWeights, dSlants, dWidths) {
 	if (!bp.post.italic) bp.post.italic = [];
 
 	bp.weights = bp.weights || dWeights;
-	bp.slants = bp.slants || dSlants;
+	bp.slopes = bp.slopes || bp.slants || dSlopes;
 	bp.widths = bp.widths || dWidths;
 }
 
@@ -179,9 +192,9 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	const bp = buildPlans[fi0.prefix];
 	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
 
-	const sfi = getSuffixMapping(bp.weights, bp.slants, bp.widths)[fi0.suffix];
-	const preHives = [...bp.pre.design, ...bp.pre[sfi.slant]];
-	const postHives = [...bp.post.design, ...bp.post[sfi.slant]];
+	const sfi = getSuffixMapping(bp.weights, bp.slopes, bp.widths)[fi0.suffix];
+	const preHives = [...bp.pre.design, ...bp.pre[sfi.slope]];
+
 	return {
 		name: fileName,
 		// Hives
@@ -189,7 +202,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		// Shape
 		shape: {
 			weight: sfi.shapeWeight,
-			slant: sfi.slant,
+			slope: sfi.slope,
 			width: sfi.shapeWidth,
 			quasiProportionalDiversity: bp["quasiProportionalDiversity"] || 0
 		},
@@ -198,7 +211,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			family: bp.family,
 			version: version,
 			width: sfi.menuWidth,
-			slant: sfi.menuSlant,
+			slope: sfi.menuSlope,
 			weight: sfi.menuWeight
 		},
 		// CSS
@@ -214,12 +227,12 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	};
 });
 
-function getSuffixMapping(weights, slants, widths) {
+function getSuffixMapping(weights, slopes, widths) {
 	const mapping = {};
 	for (const w in weights) {
 		validateRecommendedWeight(w, weights[w].menu, "Menu");
 		validateRecommendedWeight(w, weights[w].css, "CSS");
-		for (const s in slants) {
+		for (const s in slopes) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
@@ -236,9 +249,9 @@ function getSuffixMapping(weights, slants, widths) {
 					),
 					cssStretch: widths[wd].css || wd,
 					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
-					slant: s,
-					cssStyle: slants[s] || s,
-					menuSlant: slants[s] || s
+					slope: s,
+					cssStyle: slopes[s] || s,
+					menuSlope: slopes[s] || s
 				};
 			}
 		}
@@ -335,7 +348,7 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 
 const StandardSuffixes = computed(`metadata:standard-suffixes`, async target => {
 	const [rp] = await target.need(RawPlans);
-	return getSuffixMapping(rp.weights, rp.slants, rp.widths);
+	return getSuffixMapping(rp.weights, rp.slopes, rp.widths);
 });
 
 async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
@@ -352,20 +365,20 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 			const [gri] = await target.need(BuildPlanOf(prefix));
 			const ttfFileNameSet = new Set(gri.targets);
 			for (const suffix in suffixMapping) {
-				const gr = suffixMapping[suffix];
+				const sfi = suffixMapping[suffix];
 				const ttcFileName = fnFileName(
 					config,
 					collectPrefix,
-					gr.weight,
-					gr.width,
-					gr.slant
+					sfi.weight,
+					sfi.width,
+					sfi.slope
 				);
 				const glyfTtcFileName = fnFileName(
 					{ ...config, distinguishWidths: true },
 					collectPrefix,
-					gr.weight,
-					gr.width,
-					gr.slant
+					sfi.weight,
+					sfi.width,
+					sfi.slope
 				);
 
 				const ttfTargetName = `${prefix}-${suffix}`;
@@ -388,7 +401,7 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
 		collectConfig.distinguishWeights ? w : "regular",
 		collectConfig.distinguishWidths ? wd : "normal",
-		collectConfig.distinguishSlant ? s : "upright",
+		collectConfig.distinguishSlope ? s : "upright",
 		"regular"
 	);
 	return `${prefix}-${ttcSuffix}`;

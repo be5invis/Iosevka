@@ -114,16 +114,16 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		###################################################################################################
 		
 		###################################################################################################
-		# Override default building slant sets
+		# Override default building slope sets
 		# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-		# When this section is absent, all slants would be built.
+		# When this section is absent, all slopes would be built.
 		
-		[buildPlans.iosevka-custom.slants]
+		[buildPlans.iosevka-custom.slopes]
 		upright = "normal"
 		italic = "italic"
 		oblique = "oblique"
 		
-		# End slant section
+		# End slope section
 		###################################################################################################
 		
 		###################################################################################################
@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																								
+																																									
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 

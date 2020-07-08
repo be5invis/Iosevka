@@ -41,7 +41,7 @@ async function getParameters(argv) {
 	Parameters.apply(para, parametersData, argv.preHives);
 	Parameters.apply(para, parametersData, ["shapeWeight"], { shapeWeight: argv.shape.weight });
 	Parameters.apply(para, parametersData, ["shapeWidth"], { shapeWidth: argv.shape.width });
-	Parameters.apply(para, parametersData, [`s-${argv.shape.slant}`]);
+	Parameters.apply(para, parametersData, [`s-${argv.shape.slope}`]);
 	Parameters.apply(para, parametersData, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
 
 	const variantsData = FormVariantData(rawVariantsData, para);
@@ -65,7 +65,7 @@ async function getParameters(argv) {
 		version: argv.menu.version,
 		weight: argv.menu.weight - 0,
 		width: argv.menu.width - 0,
-		slant: argv.menu.slant
+		slope: argv.menu.slope
 	};
 	return para;
 }

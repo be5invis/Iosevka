@@ -43,7 +43,7 @@ function extractGlyfCmap(glyphList, font) {
 }
 
 function regulateGlyphList(para, gs) {
-	const skew = Math.tan(((para.slantAngle || 0) / 180) * Math.PI);
+	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
 
 	const excludeUnicode = new Set();
 	excludeUnicode.add(0x80);
