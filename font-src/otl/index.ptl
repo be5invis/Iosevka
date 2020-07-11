@@ -1,0 +1,86 @@
+import 'toposort' as toposort
+import 'object-assign' as objectAssign
+import '../support/glyph' as Glyph
+import '../support/transform' as Transform
+
+import [CreateEmptyTable finalizeTable MoveBackUtilityLookups] from "./table-util"
+
+import [buildLigations] from './gsub-ligation'
+import [buildCCMP] from './gsub-ccmp'
+import [buildPairFeature] from './gsub-pairing'
+import [buildCVSS] from './gsub-cv-ss'
+import [buildLOCL] from './gsub-locl'
+import [buildGsubThousands] from './gsub-thousands'
+import [buildMarkMkmk] from "./gpos-mark-mkmk"
+import [BuildCompatLigatures] from './compat-ligature'
+
+define GDEF_SIMPLE 1
+define GDEF_LIGATURE 2
+define GDEF_MARK 3
+
+# GSUB
+define [buildGSUB para glyphs glyphList markGlyphs] : begin
+	define gsub : CreateEmptyTable
+
+	# lnum / onum
+	buildPairFeature gsub 'lnum' 'onum' glyphs glyphList true
+
+	# NWID / WWID
+	if (!para.forceMonospace || para.spacing > 0) : begin
+		buildPairFeature gsub 'NWID' 'WWID' glyphs glyphList true
+
+	# ccmp
+	buildCCMP gsub glyphs markGlyphs
+
+	# Ligation
+	if para.enableLigation : do
+		define plm : objectAssign {.} para.defaultBuildup
+		if (para.ligation.caltBuildup && para.ligation.caltBuildup.length) : begin
+			set plm.calt para.ligation.caltBuildup
+		buildLigations gsub para plm glyphs
+
+	# THND
+	buildGsubThousands gsub para glyphs
+
+	# cv##, ss##
+	buildCVSS gsub para glyphs glyphList
+
+	# locl
+	# Builds last, but the lookups are added into the beginning of the lookup list
+	buildLOCL gsub para
+
+	MoveBackUtilityLookups gsub
+	finalizeTable gsub
+	return gsub
+
+# GPOS
+define [buildGPOS para glyphs glyphList markGlyphs] : begin
+	define gpos : CreateEmptyTable
+	buildMarkMkmk gpos glyphList
+	finalizeTable gpos
+	return gpos
+
+# GDEF
+define [buildGDEF para glyphs glyphList markGlyphs] : begin
+	local GDEF {.glyphClassDef {.}}
+	foreach glyph [items-of glyphList] : begin
+		set GDEF.glyphClassDef.(glyph.name) : if [[regex '_'].test glyph.name] GDEF_LIGATURE GDEF_SIMPLE
+		if (glyph.markAnchors && [begin [local anchorKeys : Object.keys glyph.markAnchors] anchorKeys.length]) : begin
+			foreach key [items-of anchorKeys] : begin
+				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
+				markGlyphs.(key).push glyph.name
+				markGlyphs.all.push glyph.name
+				set GDEF.glyphClassDef.(glyph.name) GDEF_MARK
+	return GDEF
+
+export : define [buildOtl para glyphs glyphList unicodeGlyphs] : begin
+	local markGlyphs {.all {} }
+	local GPOS : buildGPOS para glyphs glyphList markGlyphs
+	local GDEF : buildGDEF para glyphs glyphList markGlyphs
+	local GSUB : buildGSUB para glyphs glyphList markGlyphs
+
+	# Build compatibility ligatures
+	if (para.spacing > 0 && para.compLig) : begin
+		BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF para.compLig
+
+	return [object GSUB GPOS GDEF]

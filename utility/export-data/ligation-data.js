@@ -242,7 +242,7 @@ module.exports = async function getLigationData() {
 
 function buildLigationSet(ligData, getKey) {
 	const ligationSets = new Map([
-		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", buildup: [] }]
+		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", ligSets: [] }]
 	]);
 	for (const sel in ligData.composite) {
 		const comp = ligData.composite[sel];
@@ -250,9 +250,13 @@ function buildLigationSet(ligData, getKey) {
 		const key = getKey(comp);
 		let item = ligationSets.get(key);
 		if (!item) {
+			let ligSets = new Set();
+			for (const s of comp.buildup) {
+				ligSets.add(ligData.simple[s].ligGroup);
+			}
 			item = {
 				tag: comp.tag,
-				buildup: comp.buildup,
+				ligSets: [...ligSets],
 				tagName: comp.tag,
 				desc: comp.desc,
 				brief: comp.brief || comp.desc

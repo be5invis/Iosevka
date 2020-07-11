@@ -1,0 +1,203 @@
+import [fallback] from '../support/utils'
+import 'semver' as semver
+
+define COPYRIGHT             0
+define FAMILY                1
+define STYLE                 2
+define UNIQUE_NAME           3
+define FULL_NAME             4
+define VERSION               5
+define POSTSCRIPT            6
+define TRADEMARK             7
+define MANUFACTURER          8
+define DESIGNER              9
+define DESCRIPTION          10
+define LICENCE              13
+define PREFERRED_FAMILY     16
+define PREFERRED_STYLE      17
+define WWS_PREFERRED_FAMILY 21
+define WWS_PREFERRED_STYLE  22
+
+define [nameFont font nameid str] : begin
+	font.name.push : object # Mac Roman
+		platformID 1
+		encodingID 0
+		languageID 0
+		nameID nameid
+		nameString str
+	font.name.push : object # Windows Unicode English
+		platformID 3
+		encodingID 1
+		languageID 1033
+		nameID nameid
+		nameString str
+
+define weightToMenuStyleMap : object
+	100 "Thin"
+	200 "Extralight"
+	300 "Light"
+	400 ""
+	450 "Book"
+	500 "Medium"
+	600 "Semibold"
+	700 "Bold"
+	800 "Extrabold"
+	900 "Heavy"
+define widthToMenuStyleMap : object
+	1 "Ultra-Condensed"
+	2 "Extra-Condensed"
+	3 "Condensed"
+	4 "Semi-Condensed"
+	5 ""
+	6 "Semi-Extended"
+	7 "Extended"
+	8 "Extra-Extended"
+	9 "Ultra-Extended"
+define slopeToMenuStyleMap : object
+	normal  ""
+	italic  "Italic"
+	oblique "Oblique"
+
+define weightToMenuStyleMapShort : object
+	100 "Th"
+	200 "XLt"
+	300 "Lt"
+	400 ""
+	450 "Bk"
+	500 "Md"
+	600 "SmBd"
+	700 "Bd"
+	800 "XBd"
+	900 "Hv"
+define widthToMenuStyleMapShort : object
+	1 "UltCn"
+	2 "XCn"
+	3 "Cn"
+	4 "SmCn"
+	5 ""
+	6 "SmEx"
+	7 "Ex"
+	8 "XEx"
+	9 "UltEx"
+define slopeToMenuStyleMapShort : object
+	normal  ""
+	italic  "It"
+	oblique "Obl"
+
+define [getStyle weight width slope] : begin
+	define weightPart : fallback weightToMenuStyleMap.(weight) ('W' + weight)
+	define widthPart    widthToMenuStyleMap.(width)
+	define slopePart    slopeToMenuStyleMap.(slope)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slopePart
+	return : [[rawName.replace [regex ' +' 'g'] ' '].trim] || "Regular"
+
+define [getShortStyle weight width slope] : begin
+	define weightPart : fallback weightToMenuStyleMapShort.(weight) ('W' + weight)
+	define widthPart    widthToMenuStyleMapShort.(width)
+	define slopePart    slopeToMenuStyleMapShort.(slope)
+	define rawName    : weightPart + ' ' + widthPart + ' ' + slopePart
+	return : [rawName.replace [regex ' ' 'g'] ''] || "Regular"
+
+define [isRBIBI weight slope] : (weight == 400 || weight == 700) && (slope == "normal" || slope == "italic")
+
+define [getStyleLinkedStyles weight width slope] : begin
+	local linkWeight       weight
+	local linkSlope        slope
+	local nameSuffixWeight 400
+	local nameSuffixWidth  width
+	local nameSuffixSlope  "normal"
+
+	# Not regular or bold
+	if (linkWeight != 400 && linkWeight != 700) : begin
+		nameSuffixWeight = linkWeight
+		linkWeight = 400
+
+	# Not "normal" or italic
+	if (linkSlope != "normal" && linkSlope != "italic") : begin
+		nameSuffixSlope = linkSlope
+		linkSlope = "normal"
+
+	return : list
+		getStyle linkWeight 5 linkSlope
+		getStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
+		getShortStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
+
+
+
+export : define [assignFontNames para metrics font] : begin
+	set font.name {}
+
+	define family  : para.naming.family.trim
+	define style   : getStyle para.naming.weight para.naming.width para.naming.slope
+	define version : "Version " + para.naming.version
+
+	define isItalic  : para.naming.slope == "italic"
+	define isOblique : para.naming.slope == "oblique"
+	define isBold    : para.naming.weight > 650
+
+	nameFont font PREFERRED_FAMILY family # Preferred Family
+	nameFont font PREFERRED_STYLE style  # Preferred Style
+	nameFont font WWS_PREFERRED_FAMILY family # WWS Preferred Family
+	nameFont font WWS_PREFERRED_STYLE style  # WWS Preferred Style
+
+	set font.name.preferredFamily     family
+	set font.name.preferredSubFamily  style
+
+	local {compatStyle compatFamilySuffix shortCompatFamilySuffix} : getStyleLinkedStyles para.naming.weight para.naming.width para.naming.slope
+	local compatFamily family
+	if (compatFamilySuffix != "Regular") : set compatFamily : family + ' ' + compatFamilySuffix
+	if (compatFamily.length >= 31) : set compatFamily : family + ' ' + shortCompatFamilySuffix
+
+	nameFont font FAMILY compatFamily # Family
+	nameFont font STYLE compatStyle  # Style
+
+	nameFont font UNIQUE_NAME "\(family) \(style) \(version)" # Unique Name
+
+	local fontfullName : if (style != 'Regular') (family + ' ' + style) family
+	nameFont font FULL_NAME fontfullName # Full Name
+	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
+
+	nameFont font VERSION version # Version
+
+	nameFont font COPYRIGHT    para.naming.copyright    # Copyright
+	nameFont font MANUFACTURER para.naming.manufacturer # Manufacturer
+	nameFont font DESIGNER     para.naming.designer     # Designer
+	nameFont font DESCRIPTION  para.naming.description  # Description
+	nameFont font LICENCE      para.naming.licence      # Licence
+
+	set font.name : font.name.sort : lambda [a b] : begin
+		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
+		if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
+		if (a.languageID != b.languageID) : return : a.languageID - b.languageID
+		return : a.nameID - b.nameID
+
+	# Weight, width and slope
+	set font.OS_2.usWeightClass     para.naming.weight
+	set font.OS_2.usWidthClass      para.naming.width
+	set font.OS_2.panose.2          : 1 + para.naming.weight / 100
+	set font.OS_2.fsSelection       : object
+		oblique        : not : not isOblique
+		bold           : not : not isBold
+		italic         : not : not (isItalic || isOblique)
+		regular        : not : not ([not isBold] && [not isItalic] && [not isOblique])
+		useTypoMetrics true
+	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
+	set font.OS_2.xAvgCharWidth     : Math.round para.width
+	set font.head.macStyle          : object
+		bold          : not : not isBold
+		italic        : not : not (isItalic || isOblique)
+		condensed     : not : not (para.naming.width < 5)
+		extended      : not : not (para.naming.width > 5)
+
+	define majorVersion : semver.major para.naming.version
+	define minorVersion : semver.minor para.naming.version
+	define patchVersion : semver.patch para.naming.version
+	if (minorVersion > 99 || patchVersion > 9) : throw : new Error "Version number overflow"
+	set font.head.fontRevision : majorVersion + (minorVersion * 10 + patchVersion) / 1000
+
+	if (para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1) : begin
+		set font.OS_2.panose.3          9 # Monospaced
+		set font.post.isFixedPitch      true
+	: else : begin
+		set font.OS_2.panose.3          0
+		set font.post.isFixedPitch      false

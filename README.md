@@ -85,7 +85,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		# upright = ["upright-styles"]            # Uncomment this line to set styles for upright only
 		# italic = ["italic-styles"]              # Uncomment this line to set styles for italic only
 		# oblique = ["oblique-styles"]            # Uncomment this line to set styles for oblique only
-		hintParams = ["-a", "sss"]                # Optional custom parameters for ttfautohint
+		# hintParams = ["-a", "sss"]              # Optional custom parameters for ttfautohint
 		
 		###################################################################################################
 		# Override default building weights
@@ -114,16 +114,16 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		###################################################################################################
 		
 		###################################################################################################
-		# Override default building slant sets
+		# Override default building slope sets
 		# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-		# When this section is absent, all slants would be built.
+		# When this section is absent, all slopes would be built.
 		
-		[buildPlans.iosevka-custom.slants]
+		[buildPlans.iosevka-custom.slopes]
 		upright = "normal"
 		italic = "italic"
 		oblique = "oblique"
 		
-		# End slant section
+		# End slope section
 		###################################################################################################
 		
 		###################################################################################################
@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																							
+																																										
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -262,6 +262,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-exeqeq`: Enable special triple-line ligation for `!==` only.
   * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
   * `calt-exeq`: Enable ligation for `!=` and `!==`.
+  * `calt-exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   * `calt-tildeeq`: Enable ligation for `~=` as inequality.
   * `calt-eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   * `calt-slasheq`: Enable ligation for `/=` and `=/=` as inequality.
@@ -318,6 +319,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
     * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
+  * Styles for `b`:
+    * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
+    * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
+    * `v-b-toothless-rounded`, `VXBM`: `b` without botton-left tooth, with a rounded transition.
+  * Styles for `d`:
+    * `v-d-toothed`, `VXBN`: `d` with bottom-right tooth (default).
+    * `v-d-toothless-corner`, `VXBO`: `d` without botton-right tooth, with a corner transition.
+    * `v-d-toothless-rounded`, `VXBP`: `d` without botton-right tooth, with a rounded transition.
+    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -335,9 +345,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
     * `v-j-straight`, `cv98`: `j` without serif.
   * Styles for `k`, `K`:
-    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
-    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
-    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
+    * `v-k-straight`, `cv68`: `k` and `K` with standard shape (default for Upright).
+    * `v-k-curly`, `cv69`: Slightly curly `k` and `K`, like Iosevka 2.x.
+    * `v-k-cursive`, `cv70`: `k` with a cursive loop, and `K` with standard shape (default for Italic).
+    * `v-k-curly-cursive`, `VXBR`: `k` with a cursive loop, and `K` with curly shape.
   * Styles for `l`:
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
@@ -385,6 +396,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `B`:
     * `v-capital-b-standard`, `VXAP`: Standard `B` (default).
     * `v-capital-b-more-asymmetric`, `VXAQ`: More asymmetric `B` to differentiate with `8`.
+  * Styles for `D`:
+    * `v-capital-d-standard`, `VXBG`: Standard `D` (default).
+    * `v-capital-d-more-rounded`, `VXBH`: More rounded `D` to differentiate with `O`.
   * Styles for `G`:
     * `v-capital-g-tooth`, `cv91`: Toothed G (default).
     * `v-capital-g-toothless`, `cv92`: Toothless G.
@@ -464,6 +478,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `#`:
     * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
     * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
+    * `v-numbersign-upright-open`, `VXBI`: Number sign with vertical bars and open inner.
+    * `v-numbersign-slanted-open`, `VXBJ`: Number sign with slanted bars and open inner.
   * Styles for `&`:
     * `v-ampersand-closed`, `VXAG`: Ampersand (`&`) with a closed contour (default).
     * `v-ampersand-upper-open`, `VXAH`: Ampersand (`&`) with an open contour at upper half.

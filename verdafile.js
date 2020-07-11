@@ -121,14 +121,17 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	const fileNameToBpMap = {};
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
-		shimBuildPlans(bp, rp.weights, rp.slants, rp.widths);
+		validateAndShimBuildPlans(prefix, bp, rp.weights, rp.slopes, rp.widths);
 
 		bp.targets = [];
-		const suffixMapping = getSuffixMapping(bp.weights, bp.slants, bp.widths);
+		const weights = bp.weights,
+			slopes = bp.slopes,
+			widths = bp.widths;
+		const suffixMapping = getSuffixMapping(weights, slopes, widths);
 		for (const suffix in suffixMapping) {
 			const sfi = suffixMapping[suffix];
-			if (bp.weights && !bp.weights[sfi.weight]) continue;
-			if (bp.slants && !bp.slants[sfi.slant]) continue;
+			if (weights && !weights[sfi.weight]) continue;
+			if (slopes && !slopes[sfi.slope]) continue;
 			const fileName = [prefix, suffix].join("-");
 			bp.targets.push(fileName);
 			fileNameToBpMap[fileName] = { prefix, suffix };
@@ -138,7 +141,17 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	return { fileNameToBpMap, buildPlans: returnBuildPlans };
 });
 
-function shimBuildPlans(bp, dWeights, dSlants, dWidths) {
+function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
+	if (!bp.family) {
+		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	}
+	if (!bp.slopes && bp.slants) {
+		echo.warn(
+			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
+				`Use "slopes" instead.`
+		);
+	}
+
 	if (!bp.pre) bp.pre = {};
 	if (!bp.post) bp.post = {};
 
@@ -153,7 +166,7 @@ function shimBuildPlans(bp, dWeights, dSlants, dWidths) {
 	if (!bp.post.italic) bp.post.italic = [];
 
 	bp.weights = bp.weights || dWeights;
-	bp.slants = bp.slants || dSlants;
+	bp.slopes = bp.slopes || bp.slants || dSlopes;
 	bp.widths = bp.widths || dWidths;
 }
 
@@ -179,23 +192,29 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	const bp = buildPlans[fi0.prefix];
 	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
 
-	const sfi = getSuffixMapping(bp.weights, bp.slants, bp.widths)[fi0.suffix];
-	const preHives = [...bp.pre.design, ...bp.pre[sfi.slant]];
-	const postHives = [...bp.post.design, ...bp.post[sfi.slant]];
+	const sfi = getSuffixMapping(bp.weights, bp.slopes, bp.widths)[fi0.suffix];
+	const preHives = [...bp.pre.design, ...bp.pre[sfi.slope]];
+
 	return {
 		name: fileName,
-		hives: ["iosevka", ...preHives, ...sfi.hives, ...postHives],
+		// Hives
+		preHives,
+		// Shape
 		shape: {
 			weight: sfi.shapeWeight,
-			width: sfi.shapeWidth
+			slope: sfi.slope,
+			width: sfi.shapeWidth,
+			quasiProportionalDiversity: bp["quasiProportionalDiversity"] || 0
 		},
+		// Menu
 		menu: {
 			family: bp.family,
 			version: version,
 			width: sfi.menuWidth,
-			slant: sfi.menuSlant,
+			slope: sfi.menuSlope,
 			weight: sfi.menuWeight
 		},
+		// CSS
 		css: {
 			weight: sfi.cssWeight,
 			stretch: sfi.cssStretch,
@@ -208,16 +227,15 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	};
 });
 
-function getSuffixMapping(weights, slants, widths) {
+function getSuffixMapping(weights, slopes, widths) {
 	const mapping = {};
 	for (const w in weights) {
 		validateRecommendedWeight(w, weights[w].menu, "Menu");
 		validateRecommendedWeight(w, weights[w].css, "CSS");
-		for (const s in slants) {
+		for (const s in slopes) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, "regular");
 				mapping[suffix] = {
-					hives: [`shapeWeight`, `s-${s}`, `shapeWidth`],
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
 					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
@@ -231,9 +249,9 @@ function getSuffixMapping(weights, slants, widths) {
 					),
 					cssStretch: widths[wd].css || wd,
 					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
-					slant: s,
-					cssStyle: slants[s] || s,
-					menuSlant: slants[s] || s
+					slope: s,
+					cssStyle: slopes[s] || s,
+					menuSlope: slopes[s] || s
 				};
 			}
 		}
@@ -330,7 +348,7 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 
 const StandardSuffixes = computed(`metadata:standard-suffixes`, async target => {
 	const [rp] = await target.need(RawPlans);
-	return getSuffixMapping(rp.weights, rp.slants, rp.widths);
+	return getSuffixMapping(rp.weights, rp.slopes, rp.widths);
 });
 
 async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
@@ -347,20 +365,20 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 			const [gri] = await target.need(BuildPlanOf(prefix));
 			const ttfFileNameSet = new Set(gri.targets);
 			for (const suffix in suffixMapping) {
-				const gr = suffixMapping[suffix];
+				const sfi = suffixMapping[suffix];
 				const ttcFileName = fnFileName(
 					config,
 					collectPrefix,
-					gr.weight,
-					gr.width,
-					gr.slant
+					sfi.weight,
+					sfi.width,
+					sfi.slope
 				);
 				const glyfTtcFileName = fnFileName(
 					{ ...config, distinguishWidths: true },
 					collectPrefix,
-					gr.weight,
-					gr.width,
-					gr.slant
+					sfi.weight,
+					sfi.width,
+					sfi.slope
 				);
 
 				const ttfTargetName = `${prefix}-${suffix}`;
@@ -383,7 +401,7 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
 		collectConfig.distinguishWeights ? w : "regular",
 		collectConfig.distinguishWidths ? wd : "normal",
-		collectConfig.distinguishSlant ? s : "upright",
+		collectConfig.distinguishSlope ? s : "upright",
 		"regular"
 	);
 	return `${prefix}-${ttcSuffix}`;
@@ -396,16 +414,11 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 const BuildRawTtf = file.make(
 	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
-		const [fi] = await target.need(
-			FontInfoOf(fn),
-			Version,
-			OptimizeWithFilter,
-			OptimizeWithTtx
-		);
+		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
 		const otdPath = `${output.dir}/${output.name}.otd`;
-		await node("gen/index", { o: otdPath, oCharMap: charmap, ...fi });
+		await node("font-src/index", { o: otdPath, oCharMap: charmap, ...fi });
 		await optimizedOtfcc(otdPath, output.full);
 		await rm(otdPath);
 	}
@@ -837,21 +850,15 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 	return [...js, ...ejs, ...md];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
-	const ss = await target.need(
-		ScriptsUnder(ext, `gen`),
-		ScriptsUnder(ext, `glyphs`),
-		ScriptsUnder(ext, `meta`),
-		ScriptsUnder(ext, `otl`),
-		ScriptsUnder(ext, `support`)
-	);
-	return ss.reduce((a, b) => [...a, ...b]);
+	const [ss] = await target.need(ScriptsUnder(ext, `font-src`));
+	return ss;
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles("ptl"));
 	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
 });
 
-const ScriptJS = file.glob(`{gen|glyphs|meta|otl|support}/**/*.js`, async (target, path) => {
+const ScriptJS = file.glob(`font-src/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
@@ -878,6 +885,8 @@ const UtilScripts = task("util-scripts", async target => {
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
 		sfu`params/parameters.toml`,
+		sfu`params/shape-weight.toml`,
+		sfu`params/shape-width.toml`,
 		ofu`params/private-parameters.toml`,
 		sfu`params/variants.toml`,
 		sfu`params/ligation-set.toml`

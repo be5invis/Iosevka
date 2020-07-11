@@ -1,0 +1,317 @@
+import '../support/point' as Point
+import '../support/transform' as Transform
+import [mix linreg clamp fallback] from '../support/utils'
+import '../support/anchor' as Anchor
+
+# Parameter generation
+export : define [calculateMetrics para] : begin
+	define UPM 1000
+	define HalfUPM : UPM / 2
+
+	# Key metrics
+	define Width : Math.round para.width
+	define SB para.sb
+	define CAP para.cap
+	define XH para.xheight
+	define Descender : fallback para.descender (XH - CAP)
+	define Contrast : fallback para.contrast 1
+	# Key metrics for symbols
+	define symbolMid : fallback para.symbolMid (XH * 0.65)
+	define parenTop : symbolMid + para.parenSize / 2
+	define parenBot : symbolMid - para.parenSize / 2
+
+	define operTop : symbolMid + para.operSize * (Width - SB * 2)
+	define operBot : symbolMid - para.operSize * (Width - SB * 2)
+	define tackTop : symbolMid + para.tackSize * (Width - SB * 2)
+	define tackBot : symbolMid - para.tackSize * (Width - SB * 2)
+	define plusTop : symbolMid + para.plusSize * (Width - SB * 2)
+	define plusBot : symbolMid - para.plusSize * (Width - SB * 2)
+	define pictTop : symbolMid + para.pictSize * (Width - SB * 2)
+	define pictBot : symbolMid - para.pictSize * (Width - SB * 2)
+	define bgopTop : symbolMid + para.bgopSize * (Width - SB * 2)
+	define bgopBot : symbolMid - para.bgopSize * (Width - SB * 2)
+
+
+	# Transform constructors
+	define [Italify angle shift] : begin
+		local slope [Math.tan ([fallback angle para.slopeAngle] / 180 * Math.PI)]
+		return : new Transform 1 slope 0 1 [fallback shift : -slope * symbolMid] 0
+	define [Upright angle shift] [Italify angle shift :.inverse]
+	define [Scale sx sy] : new Transform sx 0 0 [fallback sy sx] 0 0
+	define [Translate x y] : new Transform 1 0 0 1 x y
+	define [Rotate angle] : new Transform [Math.cos angle] (-[Math.sin angle]) [Math.sin angle] [Math.cos angle] 0 0
+
+	define globalTransform : Italify para.slopeAngle
+	define TanSlope   globalTransform.yx
+	define SinSlope : Math.sin (para.slopeAngle / 180 * Math.PI)
+	define CosSlope : Math.cos (para.slopeAngle / 180 * Math.PI)
+	define HVContrast : Contrast * CosSlope + SinSlope * TanSlope
+
+	# Orient parameters
+	define Upward    : new Point (-HVContrast)  0
+	define Downward  : new Point HVContrast  0
+	define Rightward : new Point TanSlope  1
+	define Leftward  : new Point (- TanSlope) (-1)
+
+	define [UpwardT]    : new Point (-HVContrast)  0
+	define [DownwardT]  : new Point HVContrast  0
+	define [RightwardT] : new Point this.gizmo.yx  1
+	define [LeftwardT]  : new Point (- this.gizmo.yx) (-1)
+
+	# Style parameters
+	define O para.overshoot
+	define OX para.overshootx
+	define OXHook para.oxhook
+	define Hook para.hook
+	define AHook para.ahook
+	define SHook para.shook
+	define RHook para.rhook
+	define JHook para.jhook
+	define FHook para.fhook
+	define HookX para.hookx
+	define Smooth para.smooth
+	define SmallSmooth para.smallsmooth
+	define Stroke para.stroke
+	define DotSize : fallback para.dotsize Stroke
+	define PeriodSize : fallback para.periodsize DotSize
+	define HBarPos : designParameters.hBarPos - 0.09 * Stroke / CAP
+	define OverlayPos designParameters.overlayPos
+	define Jut para.jut
+	define LongJut para.longjut
+	define MidJutSide   : Math.max Jut : mix (0.5 * Stroke * HVContrast) LongJut 0.5
+	define MidJutCenter : Math.max Jut : mix (0.5 * Stroke * HVContrast) LongJut 0.6
+	define VJut para.vjut
+	define Accent para.accent
+	define AccentX para.accentx
+
+	define CThin : fallback para.cthin 0.75
+	define CThinB : fallback para.cthinb 0.5
+
+	define SLAB para.slab
+
+	define TailAdjX : Width * 0.2
+	define TailAdjY : XH * 0.25
+	define LBalance : LongJut * 0.04
+	define IBalance : fallback para.ibalance (LongJut * 0.04)
+	define LBalance2 : LongJut * 0.14
+	define IBalance2 : fallback para.ibalance (LongJut * 0.14)
+	define JBalance : fallback para.jbalance 0
+	define JBalance2 : fallback para.jbalance2 (Stroke * 0.25 + LBalance)
+	define TBalance : fallback para.tbalance JBalance
+	define TBalance2 : fallback para.tbalance2 TBalance
+	define RBalance : fallback para.rbalance (JBalance * 0.3)
+	define RBalance2 : fallback para.rbalance2 0
+	define FBalance : fallback para.fbalance 0
+	define OneBalance : fallback para.onebalance 0
+
+	# derived metrics
+	define MONOSPACE : para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1
+	define WideWidth0 : if MONOSPACE (Width * 2) UPM
+	define WideWidth1 : if (para.spacing >= 1) WideWidth0 Width
+	define WideWidth2 : if (para.spacing >= 2) WideWidth0 Width
+
+	define Ess : Stroke * [fallback para.essx Contrast]
+	define EssQuestion : Stroke * [fallback para.essxq Contrast]
+	define HalfStroke : Stroke / 2
+	define RightSB : Width - SB
+	define Middle : Width / 2
+	define CapMiddle : CAP / 2
+	define DotRadius : DotSize / 2
+	define PeriodRadius : PeriodSize / 2
+	define SideJut : Jut - HalfStroke * HVContrast
+
+	define [StrokeWidthBlend min max sw] : linreg 18 min 126 max [fallback sw Stroke]
+
+	define SmoothAdjust : StrokeWidthBlend 80 144
+	define [SmoothAOf smooth width] : smooth - TanSlope * SmoothAdjust / Width * width
+	define [SmoothBOf smooth width] : smooth + TanSlope * SmoothAdjust / Width * width
+	define SmoothA : Smooth - TanSlope * SmoothAdjust
+	define SmoothB : Smooth + TanSlope * SmoothAdjust
+	define SmallSmoothA : SmallSmooth - TanSlope * SmoothAdjust
+	define SmallSmoothB : SmallSmooth + TanSlope * SmoothAdjust
+
+
+	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
+	define CorrectionOMidS : Stroke * CorrectionOMidX
+
+	# Blackness parameters
+	# We will estimate blackness using lower-case 'e'
+	local DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.pow (Width / HalfUPM) 0.5]) Width
+	local DarknessMockWidth2 : HalfUPM * [Math.pow (Width / HalfUPM) 0.5]
+	define [WHITENESS div] : begin
+		local w : DarknessMockWidth * [fallback div 1] - SB * 2
+		return : ((XH - Stroke * 3) * w * (1 / 3)) / (XH * w)
+	define [adviceBlackness crowdedness div mul] : begin
+		local gap : DarknessMockWidth * [fallback div 1] - SB * 2
+		local shrink : (1 - [WHITENESS 1]) / (crowdedness * HVContrast)
+		return : Math.min Stroke ([fallback mul 1] * gap * shrink)
+	define [adviceBlackness2 cowX cowY refH div] : Math.min
+		adviceBlackness cowX (refH / DarknessMockWidth2)
+		adviceBlackness cowY div
+	define [MVertStrokeD div] : adviceBlackness designParameters.lllcrowdedness div
+	define MVertStroke : MVertStrokeD 1
+	define OverlayStroke : adviceBlackness 3.75
+	define OperatorStroke : adviceBlackness 3.125
+	define GeometryStroke : adviceBlackness 4.5
+	define ShoulderFine : Math.min (Stroke * para.shoulderfineMin) [adviceBlackness 16]
+
+	define Superness : fallback para.superness 2
+	define [superXY x superness] : Math.pow (1 - [Math.pow x [fallback superness Superness]]) (1 / [fallback superness Superness])
+
+	define [adviceSSmooth y sign _stroke] : begin
+		# Handle with extreme care.
+		local stroke : fallback _stroke Stroke
+		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke] * [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5]
+		local widthFactor : RightSB - SB
+		local ss : y * 0.21 + 0.375 * strokeFactor + 0.035 * widthFactor
+		return : ss + sign * TanSlope * (SmoothAdjust + 0.75 * stroke)
+
+	define [adviceGlottalStopSmooth y sign] : begin
+		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
+
+	define [shoulderMidSlope _fine _stroke _dir] : begin
+		local stroke : fallback _stroke Stroke
+		local fine : fallback _fine ShoulderFine
+		local dir : fallback _dir 1
+		return : 0.5 * HVContrast * (stroke - fine) / stroke + dir * TanSlope
+
+	return [object
+		UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop parenBot operTop operBot
+		tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot Italify Upright Scale
+		Translate Rotate globalTransform TanSlope HVContrast Upward Downward Rightward Leftward
+		UpwardT DownwardT LeftwardT RightwardT O OX OXHook Hook AHook SHook RHook JHook FHook HookX
+		Smooth SmallSmooth Stroke DotSize PeriodSize HBarPos OverlayPos
+		LongJut Jut VJut Accent AccentX CThin CThinB SLAB TailAdjX TailAdjY LBalance
+		IBalance LBalance2 IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2
+		FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 Ess EssQuestion
+		HalfStroke RightSB Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA
+		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS compositeBaseAnchors
+		adviceBlackness adviceBlackness2 MVertStroke MVertStrokeD OverlayStroke OperatorStroke
+		GeometryStroke ShoulderFine Superness superXY adviceSSmooth adviceGlottalStopSmooth
+		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter]
+
+export : define [setFontMetrics para metrics fm] : begin
+	define [object CAP Descender XH Width] metrics
+	# Metric metadata
+	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
+	define asc : para.leading * CAP / (CAP - Descender)
+	define desc : para.leading * Descender / (CAP - Descender)
+	define descenderPad : fallback para.descenderPad 0
+
+	set fm.OS_2.xAvgCharWidth     Width
+	set fm.head.unitsPerEm        1000
+	set fm.hhea.ascender          asc
+	set fm.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
+	set fm.OS_2.sTypoAscender     asc
+
+	set fm.hhea.descender         (Descender - descenderPad)
+	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set fm.OS_2.sTypoDescender    (desc - descenderPad)
+
+	set fm.hhea.lineGap           (para.leading - asc + Descender)
+	set fm.OS_2.sTypoLineGap      (para.leading - asc + desc)
+
+	set fm.OS_2.sxHeight          XH
+	set fm.OS_2.sCapHeight        CAP
+	set fm.post.italicAngle       (0 - para.slopeAngle)
+
+
+export : define [compositeBaseAnchors] : begin
+	local h {.}
+	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.baseAnchors]] : begin
+		set h.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
+	return {.baseAnchors h .isMarkSet true}
+
+export : define [MarksetDiv p me] : begin
+	define width : p * me.Width
+	define middle : p * me.Middle
+	define rightSB : me.Width * p - me.SB
+	define [ta anchor] : return : new Anchor
+		* (anchor.x * me.globalTransform.xx + anchor.y * me.TanSlope + me.globalTransform.x)
+		* (anchor.x * me.globalTransform.xy + anchor.y * me.globalTransform.yy + me.globalTransform.y)
+
+	define markAboveLower       {.baseAnchors {.above       [ta : new Anchor middle  me.XH                     ]}}
+	define markAboveOper        {.baseAnchors {.above       [ta : new Anchor middle  me.operTop                ]}}
+	define markAboveTack        {.baseAnchors {.above       [ta : new Anchor middle  me.tackTop                ]}}
+	define markAbovePlus        {.baseAnchors {.above       [ta : new Anchor middle  me.plusTop                ]}}
+	define markAboveCap         {.baseAnchors {.above       [ta : new Anchor middle  me.CAP                    ]}}
+	define markBelowLower       {.baseAnchors {.below       [ta : new Anchor middle  me.Descender              ]}}
+	define markBelowTack        {.baseAnchors {.below       [ta : new Anchor middle  me.tackBot                ]}}
+	define markBelowOper        {.baseAnchors {.below       [ta : new Anchor middle  me.operBot                ]}}
+	define markBelowPlus        {.baseAnchors {.below       [ta : new Anchor middle  me.plusBot                ]}}
+	define markBelowZero        {.baseAnchors {.below       [ta : new Anchor middle  0                         ]}}
+	define markToprightLower    {.baseAnchors {.topright    [ta : new Anchor rightSB me.XH                     ]}}
+	define markToprightCap      {.baseAnchors {.topright    [ta : new Anchor rightSB me.CAP                    ]}}
+	define markBottomrightLower {.baseAnchors {.bottomright [ta : new Anchor rightSB me.Descender              ]}}
+	define markBottomrightZero  {.baseAnchors {.bottomright [ta : new Anchor rightSB 0                         ]}}
+	define markTieAbove         {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
+	define markTieBelow         {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
+
+	define [buildStandardMarkSet] : begin
+		local a : compositeBaseAnchors.apply null arguments
+		set a.baseAnchors.overlay : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x me.OverlayPos]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y me.OverlayPos]
+		set a.baseAnchors.slash : new Anchor
+			* [mix a.baseAnchors.below.x a.baseAnchors.above.x 0.5]
+			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
+		return a
+
+	return : object
+		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
+		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
+		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero markTieAbove markTieBelow
+		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero markTieAbove markTieBelow
+		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero markTieAbove markTieBelow
+		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero markTieAbove markTieBelow
+		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower markTieAbove markTieBelow
+		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower markTieAbove markTieBelow
+
+export : define designParameters : object
+	# V shape
+	straightVShapeSbShrink      0.8
+	straightSmallYShapeSbShrink 0.8
+	#
+	equal_wideness      0.075
+	logic_narrow_shrink 0.75
+	GeometricLargeX     : lambda [mw uw] : (mw + uw / 2) / mw
+	geometric_small_x   (4 / 7)
+	arrow_size          0.45
+	# ()
+	parenOutside        0.2
+	parenInside         0.9
+	parenCurliness      0.7
+	parenOvershoot      0.0375
+	# []
+	bracketOutside      0.1
+	bracketInside       0.95
+	# {}
+	braceOutside        0.05
+	braceInside         0.95
+	braceCurlyM1        0.6
+	braceCurlyM2        0.45
+	braceOvershoot      0.02
+	# Crosdedness
+	lllcrowdedness      (3 + 1 / 3)
+	# Bar position
+	hBarPos             0.525
+	eBarPos             0.5
+	fiveBarPos          0.64
+	overlayPos          0.52
+	fBarPos             0.91
+	gBarPos             0.42
+	upperEBarPos        : lambda [slab] : if slab 0.52 0.53
+
+export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
+	local div : fallback _div 1
+	local hPack : Math.max 2 [fallback _hPack 0]
+	local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * [metrics.adviceBlackness hPack div]) / (2 * hPack * metrics.SB)
+	return : object
+		div div
+		width : metrics.Width * div
+		middle : metrics.Middle * div
+		sb : metrics.SB * sbMul
+		leftSB : metrics.SB * sbMul
+		rightSB : metrics.Width * div - metrics.SB * sbMul
+		mvs : metrics.MVertStrokeD div
+		markSet: MarksetDiv div metrics

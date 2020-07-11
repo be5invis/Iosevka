@@ -23,7 +23,6 @@ async function main() {
 
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(out);
-	await GenerateStyleSetImage(out);
 	await CopyMarkdown(out, "package-reorg.md");
 	await GenerateChangeList(out);
 
@@ -137,10 +136,6 @@ async function GeneratePackageList(out) {
 		}
 	}
 	out.log(`</table>\n`);
-}
-
-async function GenerateStyleSetImage(out) {
-	out.log(`![Style Sets](${imagePrefix}/stylesets.png)\n\n`);
 }
 
 function noBreak(s) {

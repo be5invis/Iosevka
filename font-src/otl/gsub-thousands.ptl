@@ -1,0 +1,49 @@
+import [add-common-feature add-feature add-lookup ChainRuleBuilder query-related-glyphs BeginLookupBlock EndLookupBlock] from "./table-util"
+
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
+
+export : define [buildGsubThousands sink para glyphs] : begin
+	local rec : BeginLookupBlock sink
+
+	define Thousand : add-feature sink 'THND'
+	define {chain-rule reverse-rule} : ChainRuleBuilder sink
+	define numberGlyphIDs {
+		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
+		'five.lnum' 'six.lnum' 'seven.lnum' 'eight.lnum' 'nine.lnum'
+	}
+
+	define [nd s] : numberGlyphIDs.map : lambda [x] "\(x).nd\(s)"
+
+	define lookupThousand1 : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule ({'period'} ~> null) (numberGlyphIDs ~> [nd 2]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
+			chain-rule ([nd 2] ~> null) (numberGlyphIDs ~> [nd 1])
+			chain-rule ([nd 1] ~> null) (numberGlyphIDs ~> [nd 6])
+			chain-rule ([nd 6] ~> null) (numberGlyphIDs ~> [nd 5])
+			chain-rule ([nd 5] ~> null) (numberGlyphIDs ~> [nd 4])
+			chain-rule ([nd 4] ~> null) (numberGlyphIDs ~> [nd 3])
+			chain-rule ([nd 3] ~> null) (numberGlyphIDs ~> [nd 2])
+
+	define lookupThousand2 : add-lookup sink : object
+		.type 'gsub_chaining'
+		.subtables : list
+			chain-rule (numberGlyphIDs ~> [nd 0]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
+			chain-rule ([nd 0] ~> null) (numberGlyphIDs ~> [nd 0])
+
+	define lookupThousand3 : add-lookup sink : object
+		.type 'gsub_reverse'
+		.subtables : list
+			reverse-rule ([nd 0] ~> [nd 1]) ([nd 0] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 2]) ([nd 1] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 3]) ([nd 2] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 4]) ([nd 3] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 5]) ([nd 4] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 6]) ([nd 5] ~>  null)
+			reverse-rule ([nd 0] ~> [nd 1]) ([nd 6] ~>  null)
+
+
+	Thousand.lookups.push lookupThousand1 lookupThousand2 lookupThousand3
+	add-common-feature sink Thousand
+	EndLookupBlock rec sink
