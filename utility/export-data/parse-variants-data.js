@@ -36,6 +36,7 @@ function getCvData(variants) {
 			tag: config.tag || null,
 			tagUpright: config.tagUpright || null,
 			tagItalic: config.tagItalic || null,
+			slopeHetero: !config.variant,
 			sampler: config.sampler,
 			description: config.description
 		});
