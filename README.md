@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																	
+																																																			
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -314,11 +314,6 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `a`:
     * `v-a-doublestorey`, `cv01`: Double-storey `a` (default for Upright).
     * `v-a-singlestorey`, `cv02`: Single-storey `a` (default for Italic).
-  * Styles for `f`:
-    * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
-    * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
-    * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
-    * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
   * Styles for `b`:
     * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
     * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
@@ -328,6 +323,11 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-d-toothless-corner`, `VXBO`: `d` without botton-right tooth, with a corner transition.
     * `v-d-toothless-rounded`, `VXBP`: `d` without botton-right tooth, with a rounded transition.
     * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail.
+  * Styles for `f`:
+    * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
+    * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
+    * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
+    * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).

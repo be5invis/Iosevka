@@ -54,13 +54,21 @@ function getCvData(variants) {
 		});
 		gr.rank = rankOf(gr.descSampleText[0][0]);
 	}
-	return [...samplerGroups.values()].sort((a, b) => b.rank - a.rank);
+	return [...samplerGroups.values()].sort(compareSamplerGr);
 }
 
 function rankOf(initialChar) {
 	if ("a" <= initialChar && initialChar <= "z") return 3;
 	if ("A" <= initialChar && initialChar <= "Z") return 2;
 	if ("0" <= initialChar && initialChar <= "9") return 1;
+	return 0;
+}
+function compareSamplerGr(a, b) {
+	if (b.rank !== a.rank) return b.rank - a.rank;
+	if (a.rank) {
+		if (a.descSampleText[0][0] < b.descSampleText[0][0]) return -1;
+		if (a.descSampleText[0][0] > b.descSampleText[0][0]) return +1;
+	}
 	return 0;
 }
 
