@@ -70,30 +70,39 @@ function hiveBlend(hive, value) {
 	return generatedHive;
 }
 
-function numericConfigExists(x) {
-	return x != null && isFinite(x);
+function numericFieldHandler(sink, key, x) {
+	if (x != null && isFinite(x)) sink[key] = x;
+}
+function subObjectHandler(sink, key, obj) {
+	sink[key] = {};
+	createMetricDataSet(sink[key], obj);
+}
+const metricOverrideHandlers = {
+	cap: numericFieldHandler,
+	xheight: numericFieldHandler,
+	sb: numericFieldHandler,
+	leading: numericFieldHandler,
+	winMetricAscenderPad: numericFieldHandler,
+	winMetricDescenderPad: numericFieldHandler,
+	powerlineScaleY: numericFieldHandler,
+	powerlineScaleX: numericFieldHandler,
+	powerlineShiftY: numericFieldHandler,
+	powerlineShiftX: numericFieldHandler,
+	multiplies: subObjectHandler,
+	adds: subObjectHandler
+};
+function createMetricDataSet(sink, mo) {
+	for (const key in mo) {
+		if (metricOverrideHandlers[key]) {
+			metricOverrideHandlers[key](sink, key, mo[key]);
+		} else {
+			console.error(`Metric override key ${key} is not supported. Skipping it.`);
+		}
+	}
 }
 function applyMetricOverride(para, mo) {
-	if (numericConfigExists(mo.leading)) {
-		para.leading = mo.leading;
-	}
-	if (numericConfigExists(mo.winMetricAscenderPad)) {
-		para.winMetricAscenderPad = mo.winMetricAscenderPad;
-	}
-	if (numericConfigExists(mo.winMetricDescenderPad)) {
-		para.winMetricDescenderPad = mo.winMetricDescenderPad;
-	}
-	if (numericConfigExists(mo.powerlineScaleY)) {
-		para.powerlineScaleY = mo.powerlineScaleY;
-	}
-	if (numericConfigExists(mo.powerlineScaleX)) {
-		para.powerlineScaleX = mo.powerlineScaleX;
-	}
-	if (numericConfigExists(mo.powerlineShiftY)) {
-		para.powerlineShiftY = mo.powerlineShiftY;
-	}
-	if (numericConfigExists(mo.powerlineShiftX)) {
-		para.powerlineShiftX = mo.powerlineShiftX;
-	}
+	const overrideObj = { metricOverride: {} };
+	createMetricDataSet(overrideObj.metricOverride, mo);
+	apply(para, overrideObj, ["metricOverride"]);
 }
 exports.applyMetricOverride = applyMetricOverride;

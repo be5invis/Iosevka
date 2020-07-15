@@ -153,17 +153,11 @@ function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
 	}
 
 	if (!bp.pre) bp.pre = {};
-	if (!bp.post) bp.post = {};
 
 	if (!bp.pre.design) bp.pre.design = bp.design || [];
 	if (!bp.pre.upright) bp.pre.upright = bp.upright || [];
 	if (!bp.pre.oblique) bp.pre.oblique = bp.oblique || [];
 	if (!bp.pre.italic) bp.pre.italic = bp.italic || [];
-
-	if (!bp.post.design) bp.post.design = [];
-	if (!bp.post.upright) bp.post.upright = [];
-	if (!bp.post.oblique) bp.post.oblique = [];
-	if (!bp.post.italic) bp.post.italic = [];
 
 	bp.weights = bp.weights || dWeights;
 	bp.slopes = bp.slopes || bp.slants || dSlopes;
