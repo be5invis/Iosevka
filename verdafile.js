@@ -830,7 +830,7 @@ phony(`release`, async target => {
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
-const MARCOS = [fu`meta/macros.ptl`];
+const MARCOS = [fu`font-src/meta/macros.ptl`];
 const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
@@ -856,7 +856,7 @@ const ScriptJS = file.glob(`font-src/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
-		if (/^glyphs\//.test(path.full)) {
+		if (/\/glyphs\//.test(path.full)) {
 			await target.need(MARCOS);
 		}
 		await target.need(fu`${ptl}`);

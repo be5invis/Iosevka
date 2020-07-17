@@ -293,44 +293,77 @@ glyph-block Symbol-Math-Arith : begin
 				refer-glyph 'plus'
 				DotAt Middle (symbolMid * 2 - OperatorStroke / 2) (DotRadius + gap)
 
-	sketch # multiply
-		local radius : (RightSB - SB) / 2
-		include : dispiro
-			widths.center OperatorStroke
-			flat (Middle - radius) (symbolMid - radius)
-			curl (Middle + radius) (symbolMid + radius)
-		save 'multiplyStroke1'
-	sketch # multiply
-		local radius : (RightSB - SB) / 2
-		include : dispiro
-			widths.center OperatorStroke
-			flat (Middle + radius) (symbolMid - radius)
-			curl (Middle - radius) (symbolMid + radius)
-		save 'multiplyStroke2'
-	sketch # multiply
-		local radius : (RightSB - SB) / 2
-		include : dispiro
-			widths.center GeometryStroke
-			flat (Middle - radius) (symbolMid - radius)
-			curl (Middle + radius) (symbolMid + radius)
-		save 'innerMultiplyStroke1'
-	sketch # multiply
-		local radius : (RightSB - SB) / 2
-		include : dispiro
-			widths.center GeometryStroke
-			flat (Middle + radius) (symbolMid - radius)
-			curl (Middle - radius) (symbolMid + radius)
-		save 'innerMultiplyStroke2'
+	define MultiplyHalfHeight : (RightSB - SB) / 2
+	define swBowtie : adviceBlackness 4
+	define [MultiplyMask p1 p2] : spiro-outline
+		corner (Middle - p1 * MultiplyHalfHeight) (symbolMid - p1 * MultiplyHalfHeight)
+		corner (Middle + p2 * MultiplyHalfHeight) (symbolMid + p2 * MultiplyHalfHeight)
+		corner (Middle + p2 * MultiplyHalfHeight) (symbolMid - p2 * MultiplyHalfHeight)
+		corner (Middle - p1 * MultiplyHalfHeight) (symbolMid + p1 * MultiplyHalfHeight)
 
-	sketch # multiply
-		include : refer-glyph "multiplyStroke1"
-		include : refer-glyph "multiplyStroke2"
-		save 'multiply' 0xD7
+	define [MultiplyStroke1Shape s p1 p2] : dispiro
+		widths.center s
+		flat (Middle - p1 * MultiplyHalfHeight) (symbolMid - p1 * MultiplyHalfHeight)
+		curl (Middle + p2 * MultiplyHalfHeight) (symbolMid + p2 * MultiplyHalfHeight)
 
-	sketch # innerMultiply
-		include : refer-glyph "innerMultiplyStroke1"
-		include : refer-glyph "innerMultiplyStroke2"
-		save 'innerMultiply'
+	define [MultiplyStroke2Shape s p1 p2] : dispiro
+		widths.center s
+		flat (Middle - p1 * MultiplyHalfHeight) (symbolMid + p1 * MultiplyHalfHeight)
+		curl (Middle + p2 * MultiplyHalfHeight) (symbolMid - p2 * MultiplyHalfHeight)
+
+	create-glyph 'multiply' 0xD7 : glyph-construction
+		include : MultiplyStroke1Shape OperatorStroke 1 1
+		include : MultiplyStroke2Shape OperatorStroke 1 1
+
+	create-glyph 'bowtie' 0x22C8 : glyph-construction
+		include : union
+			intersection
+				MultiplyMask 1 1
+				union
+					VBarLeft SB (symbolMid - MultiplyHalfHeight) (symbolMid + MultiplyHalfHeight) swBowtie
+					VBarRight RightSB (symbolMid - MultiplyHalfHeight) (symbolMid + MultiplyHalfHeight) swBowtie
+			intersection
+				Rect parenTop parenBot SB RightSB
+				union
+					MultiplyStroke1Shape swBowtie 1 1
+					MultiplyStroke2Shape swBowtie 1 1
+
+	create-glyph 'bowtieLeft' 0x22C9 : glyph-construction
+		include : union
+			intersection
+				MultiplyMask 1 1
+				VBarLeft SB (symbolMid - MultiplyHalfHeight) (symbolMid + MultiplyHalfHeight) swBowtie
+			intersection
+				Rect parenTop parenBot SB [mix SB RightSB 2]
+				union
+					MultiplyStroke1Shape swBowtie 1 1
+					MultiplyStroke2Shape swBowtie 1 1
+
+	create-glyph 'bowtieRight' 0x22CA : glyph-construction
+		include : union
+			intersection
+				MultiplyMask 1 1
+				VBarRight RightSB (symbolMid - MultiplyHalfHeight) (symbolMid + MultiplyHalfHeight) swBowtie
+			intersection
+				Rect parenTop parenBot [mix RightSB SB 2] RightSB
+				union
+					MultiplyStroke1Shape swBowtie 1 1
+					MultiplyStroke2Shape swBowtie 1 1
+
+	create-glyph 'leftSemidirectProduct' 0x22CB : glyph-construction
+		include : MultiplyStroke1Shape OperatorStroke 1 0
+		include : MultiplyStroke2Shape OperatorStroke 1 1
+
+	create-glyph 'rightSemidirectProduct' 0x22CC : glyph-construction
+		include : MultiplyStroke1Shape OperatorStroke 1 1
+		include : MultiplyStroke2Shape OperatorStroke 0 1
+
+	create-glyph 'innerMultiplyStroke1' : glyph-construction
+		include : MultiplyStroke1Shape GeometryStroke 1 1
+
+	create-glyph 'innerMultiply' : glyph-construction
+		include : MultiplyStroke1Shape GeometryStroke 1 1
+		include : MultiplyStroke2Shape GeometryStroke 1 1
 
 	sketch # divide
 		include : refer-glyph "minus"
@@ -810,6 +843,8 @@ glyph-block Symbol-Math-Relation : begin
 					corner r top
 				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
 
+	define [NormalSubsetShape top bot l r s] : LigationLessShape top bot l r s s 0
+
 	define [GreaterShape top bot l r s] : union
 		GreaterShapeA top bot l r [fallback s OperatorStroke]
 		GreaterShapeB top bot l r [fallback s OperatorStroke]
@@ -829,6 +864,8 @@ glyph-block Symbol-Math-Relation : begin
 					corner l top
 				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
 
+	define [NormalSupersetShape top bot l r s] : LigationGreaterShape top bot l r s s 0
+
 	# Sym parameters
 	local approxDist : EqualHalfSpace * 1.75
 	local symMag : (operTop - symbolMid) * 0.17
@@ -846,14 +883,17 @@ glyph-block Symbol-Math-Relation : begin
 			flat (Middle + dist) (symbolBottom - dist + swo) [heading Downward]
 			flat (Middle - dist) (symbolBottom - dist - swo) [heading Downward]
 
-	sketch # less
+	create-glyph 'less' '<' : glyph-construction
 		include : LessShape (symbolMid + dH) (symbolMid - dH) SB RightSB
-		save 'less' '<'
 
-	sketch # greater
-		include [refer-glyph 'less'] AS_BASE
-		include : FlipAround Middle symbolMid
-		save 'greater' '>'
+	create-glyph 'normalSubsetOf' 0x22B2 : glyph-construction
+		include : NormalSubsetShape (symbolMid + dH) (symbolMid - dH) SB RightSB
+
+	create-glyph 'greater' '>' : glyph-construction
+		include : GreaterShape (symbolMid + dH) (symbolMid - dH) SB RightSB
+
+	create-glyph 'normalSupersetOf' 0x22B3 : glyph-construction
+		include : NormalSupersetShape (symbolMid + dH) (symbolMid - dH) SB RightSB
 
 	sketch # lesseq
 		include : LessShape (symbolMid + dH + lessEqDist) (symbolMid - dH + lessEqDist) SB RightSB
@@ -876,6 +916,10 @@ glyph-block Symbol-Math-Relation : begin
 			include : LessShapeB (symbolMid + dH - lessEqDist) (symbolMid - dH - lessEqDist) SB RightSB OperatorStroke
 			save 'lesseqslant' 0x2A7D
 
+	create-glyph 'normalSubsetEq' 0x22B4 : glyph-construction
+		include : NormalSubsetShape (symbolMid + dH + lessEqDist) (symbolMid - dH + lessEqDist) SB RightSB
+		include : HBar SB RightSB (symbolMid - dH - lessEqDist) OperatorStroke
+
 	sketch # greatereq
 		include : GreaterShape (symbolMid + dH + lessEqDist) (symbolMid - dH + lessEqDist) SB RightSB
 		branch
@@ -896,6 +940,10 @@ glyph-block Symbol-Math-Relation : begin
 		branch
 			include : GreaterShapeB (symbolMid + dH - lessEqDist) (symbolMid - dH - lessEqDist) SB RightSB OperatorStroke
 			save 'greatereqslant' 0x2A7E
+
+	create-glyph 'normalSupersetEq' 0x22B5 : glyph-construction
+		include : NormalSupersetShape (symbolMid + dH + lessEqDist) (symbolMid - dH + lessEqDist) SB RightSB
+		include : HBar SB RightSB (symbolMid - dH - lessEqDist) OperatorStroke
 
 	# Ligation
 	sketch
@@ -1201,6 +1249,8 @@ glyph-block Symbol-Math-Negation : begin
 	notGlyph       null 0x22AF 'doubleForces'
 	notGlyph.left  null 0x226E 'less'
 	notGlyph.right null 0x226F 'greater'
+	notGlyph.left  null 0x22EA 'normalSubsetOf'
+	notGlyph.right null 0x22EB 'normalSupersetOf'
 	notGlyph.left  null 0x2280 'precedes'
 	notGlyph.right null 0x2281 'succeeds'
 	notGlyph       null 0x2241 'sym' [mix symbolMid bgopTop 0.75] [mix symbolMid bgopBot 0.75]
@@ -1219,6 +1269,8 @@ glyph-block Symbol-Math-Negation : begin
 	notGlyph.right null 0x2271 'greatereq'
 	notGlyph.left  null 0x2274 'lesssym'
 	notGlyph.right null 0x2275 'greatersym'
+	notGlyph.left  null 0x22EC 'normalSubsetEq'
+	notGlyph.right null 0x22ED 'normalSupersetEq'
 	notGlyph.left  null 0x22E0 'precedeseqslant'
 	notGlyph.right null 0x22E1 'succeedseqslant'
 	notGlyph       null 0x2278 'lessgreater'
