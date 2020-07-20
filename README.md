@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																			
+																																																				
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -314,6 +314,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `a`:
     * `v-a-doublestorey`, `cv01`: Double-storey `a` (default for Upright).
     * `v-a-singlestorey`, `cv02`: Single-storey `a` (default for Italic).
+    * `v-a-singlestorey-tailed`, `VXBS`: Single-storey `a` with curly tail.
   * Styles for `b`:
     * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
     * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
@@ -373,6 +374,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `u`:
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
+    * `v-u-tailed`, `VXBT`: `u` with right bar and a slightly curly tail.
   * Styles for `v`, `V`:
     * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
     * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.
