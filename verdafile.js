@@ -153,17 +153,11 @@ function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
 	}
 
 	if (!bp.pre) bp.pre = {};
-	if (!bp.post) bp.post = {};
 
 	if (!bp.pre.design) bp.pre.design = bp.design || [];
 	if (!bp.pre.upright) bp.pre.upright = bp.upright || [];
 	if (!bp.pre.oblique) bp.pre.oblique = bp.oblique || [];
 	if (!bp.pre.italic) bp.pre.italic = bp.italic || [];
-
-	if (!bp.post.design) bp.post.design = [];
-	if (!bp.post.upright) bp.post.upright = [];
-	if (!bp.post.oblique) bp.post.oblique = [];
-	if (!bp.post.italic) bp.post.italic = [];
 
 	bp.weights = bp.weights || dWeights;
 	bp.slopes = bp.slopes || bp.slants || dSlopes;
@@ -836,7 +830,7 @@ phony(`release`, async target => {
 //////               Script Building                 //////
 ///////////////////////////////////////////////////////////
 
-const MARCOS = [fu`meta/macros.ptl`];
+const MARCOS = [fu`font-src/meta/macros.ptl`];
 const ScriptsUnder = oracle.make(
 	(ext, dir) => `${ext}-scripts-under::${dir}`,
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
@@ -862,7 +856,7 @@ const ScriptJS = file.glob(`font-src/**/*.js`, async (target, path) => {
 	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
 	if (jsFromPtl.indexOf(path.full) >= 0) {
 		const ptl = path.full.replace(/\.js$/g, ".ptl");
-		if (/^glyphs\//.test(path.full)) {
+		if (/\/glyphs\//.test(path.full)) {
 			await target.need(MARCOS);
 		}
 		await target.need(fu`${ptl}`);

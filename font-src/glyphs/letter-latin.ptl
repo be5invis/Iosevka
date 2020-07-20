@@ -39,6 +39,15 @@ glyph-block Letter-Shared : begin
 			if [not sel] : assign-unicode unicode
 			include [f src sel] AS_BASE ALSO_METRICS
 
+glyph-block Letter-Shared-Shapes : begin
+	glyph-block-import CommonShapes
+
+	glyph-block-export RightwardTailedBar
+	define [RightwardTailedBar low high] : dispiro
+		flat RightSB high [widths.rhs.heading Stroke Downward]
+		curl RightSB (low + Hook * 0.5 + Stroke + O * 2)
+		g4   (RightSB + Hook * 0.25) (low + Stroke * 0.75 + O * 2)
+
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
@@ -949,6 +958,7 @@ glyph-block Letter-Latin-Upper-A : begin
 glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
 	sketch # a.doublestorey
 		set-width Width
@@ -997,6 +1007,14 @@ glyph-block Letter-Latin-Lower-A : begin
 				g4 [mix SB RightSB (1 + 0.4 * TanSlope)] 0 [heading Downward]
 			set-base-anchor 'bottomright' [mix SB RightSB 1.075] 0
 		save 'a.singlestorey'
+
+	sketch # a.singlestoreyTailed
+		set-width Width
+		include MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarRightShape
+		include : RightwardTailedBar 0 XH
+		save 'a.singlestoreyTailed'
 
 	select-variant 'a' 'a'
 	alias 'cyra' 0x430 'a'
@@ -3918,22 +3936,32 @@ glyph-block Letter-Latin-Upper-U : begin
 glyph-block Letter-Latin-Lower-U : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
 	sketch # u
 		set-width Width
 		include MarkSet.e
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
-		include : refer-glyph "n"
-		eject-contour 'serifRB'
-		eject-contour 'serifLB'
-		currentGlyph.reTagContour 'serifLT' 'serifRB'
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			fine -- ShoulderFine
 		include : FlipAround Middle (XH / 2)
 
-		if SLAB : begin
-			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
-			include : LeftwardTopSerif SB XH SideJut
+		branch
+			include : VBarRight RightSB 0 XH
+			if SLAB : begin
+				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
+				include : LeftwardTopSerif SB XH SideJut
+				include : RightwardBottomSerif RightSB 0 SideJut
+			save 'u.withBar'
 
-		save 'u.withBar'
+		branch
+			include : RightwardTailedBar 0 XH
+			if SLAB : begin
+				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
+				include : LeftwardTopSerif SB XH SideJut
+			save 'u.tailed'
 
 	create-glyph 'upsilon' 0x3C5 : glyph-construction
 		include MarkSet.e
