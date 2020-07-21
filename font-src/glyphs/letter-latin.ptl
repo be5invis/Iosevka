@@ -960,21 +960,22 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
-	sketch # a.doublestorey
-		set-width Width
-		include MarkSet.e
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
-		local stroke : adviceBlackness2 2.875 2 XH
+	define ADoubleStoreyStroke : adviceBlackness2 2.875 2 XH
+	define ADoubleStoreySmoothB : SmoothB * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]
+	define [ADoubleStoreyHookAndBar y0] : glyph-construction
+		local stroke ADoubleStoreyStroke
+		include : dispiro
+			widths.lhs stroke
+			flat RightSB y0 [heading Upward]
+			curl RightSB (XH - ADoubleStoreySmoothB)
+			hookend (XH - O)
+			g4 (SB - OXHook) (XH - AHook)
+	define [ADoubleStoreyArc] : glyph-construction
+		local stroke ADoubleStoreyStroke
 		local bartop (XH * OverlayPos * 1.02 + stroke * 0.425)
 		local lowslope : shoulderMidSlope ShoulderFine nothing (-1)
 		local lowmiddle : [mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]] + CorrectionOMidS * 0.5
 		local barsmooth : mix SB RightSB 0.55
-		include : dispiro
-			widths.lhs stroke
-			flat RightSB 0 [heading Upward]
-			curl RightSB (XH - SmoothB * [StrokeWidthBlend 0.9 0.81 stroke])
-			hookend (XH - O)
-			g4 (SB - OXHook) (XH - AHook)
 		include : dispiro
 			widths.lhs stroke
 			flat (RightSB + O) bartop [heading Leftward]
@@ -985,12 +986,27 @@ glyph-block Letter-Latin-Lower-A : begin
 			g4   (lowmiddle + (-lowslope) * stroke) O [heading {.y 1 .x lowslope}]
 			archv 16
 			straight.up.end   (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) (SmallSmoothB * 0.9) [widths.lhs ShoulderFine]
+
+	create-glyph 'a.doublestorey' : glyph-construction
+		set-width Width
+		include MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar 0
+			ADoubleStoreyArc
 		if SLAB : begin
 			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
-		save 'a.doublestorey'
+	create-glyph 'a.doublestoreyTailed' : glyph-construction
+		set-width Width
+		include MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar (XH - ADoubleStoreySmoothB + O)
+			ADoubleStoreyArc
+			RightwardTailedBar 0 (XH - ADoubleStoreySmoothB)
 
-	sketch # a.singlestorey
+	create-glyph 'a.singlestorey' : glyph-construction
 		set-width Width
 		include MarkSet.e
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
@@ -1006,15 +1022,13 @@ glyph-block Letter-Latin-Lower-A : begin
 				curl RightSB SmoothA [heading Downward]
 				g4 [mix SB RightSB (1 + 0.4 * TanSlope)] 0 [heading Downward]
 			set-base-anchor 'bottomright' [mix SB RightSB 1.075] 0
-		save 'a.singlestorey'
 
-	sketch # a.singlestoreyTailed
+	create-glyph 'a.singlestoreyTailed' : glyph-construction
 		set-width Width
 		include MarkSet.e
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 		include : OBarRightShape
 		include : RightwardTailedBar 0 XH
-		save 'a.singlestoreyTailed'
 
 	select-variant 'a' 'a'
 	alias 'cyra' 0x430 'a'
