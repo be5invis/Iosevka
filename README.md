@@ -31,9 +31,9 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-159 Supported Languages: 
+160 Supported Languages: 
 
-Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
+Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
 
 <!-- END Section-Language-List -->
 
@@ -51,7 +51,7 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
-Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `XHS0`.
+Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `CLIK`.
 
 ## Building from Source
 
@@ -63,6 +63,10 @@ To build Iosevka you should:
 
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
+
+### Using a Docker container
+
+Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method)
 
 ## Build Your Own Style
 
@@ -81,7 +85,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		# upright = ["upright-styles"]            # Uncomment this line to set styles for upright only
 		# italic = ["italic-styles"]              # Uncomment this line to set styles for italic only
 		# oblique = ["oblique-styles"]            # Uncomment this line to set styles for oblique only
-		hintParams = ["-a", "sss"]                # Optional custom parameters for ttfautohint
+		# hintParams = ["-a", "sss"]              # Optional custom parameters for ttfautohint
 		
 		###################################################################################################
 		# Override default building weights
@@ -110,34 +114,36 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		###################################################################################################
 		
 		###################################################################################################
-		# Override default building slant sets
+		# Override default building slope sets
 		# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-		# When this section is absent, all slants would be built.
+		# When this section is absent, all slopes would be built.
 		
-		[buildPlans.iosevka-custom.slants]
+		[buildPlans.iosevka-custom.slopes]
 		upright = "normal"
 		italic = "italic"
 		oblique = "oblique"
 		
-		# End slant section
+		# End slope section
 		###################################################################################################
 		
 		###################################################################################################
 		# Override default building widths
 		# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
 		# default values.
-		# IMPORTANT : Currently "shape" property only support 3, 5, and 7, while "menu" only
-		#             support 1, 2, 3, 4, 5, 6, 7, 8, 9.
-		#             If you decide to use custom widths you have to define all the widths you
-		#             plan to use otherwise they will not be built.
+		# IMPORTANT : Currently "shape" property only supports numbers between 434 and 664 (inclusive),
+		#             while "menu" only supports integers between 1 and 9 (inclusive).
+		#             The "shape" parameter specifies the unit width, measured in 1/1000 em. The glyphs'
+		#             width are equal to, or a simple multiple of the unit width.
+		#             If you decide to use custom widths you have to define all the widths you plan to use,
+		#             otherwise they will not be built.
 		
 		[buildPlans.iosevka-custom.widths.normal]
-		shape = 5          # Width of glyph shapes.
-		menu  = 5          # Width for the font's names.
+		shape = 500        # Unit Width, measured in 1/1000 em.
+		menu  = 5          # Width grade for the font's names.
 		css   = "normal"   # "font-stretch' property of webfont CSS.
 		
 		[buildPlans.iosevka-custom.widths.extended]
-		shape = 7
+		shape = 576
 		menu  = 7
 		css   = "expanded"
 		
@@ -189,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-		
+																																																				
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -209,12 +215,14 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 * Styles related to ligations and spacing:
 
-  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
-  - `sp-fixed` : Apply `sp-term` and further:
-    - Completely disable `WWID` feature. All non-combining glyphs will be exactly the same width.
-	- Ligation will be removed.
-  - `no-ligation` : Disable ligation only.
+  - `no-ligation` : Disable ligations.
   - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
+  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `sp-force-monospace`: Apply `sp-term` and further:
+    - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
+	- Remove `NWID` and `WWID` OpenType feature.
+	- Recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
+  - `sp-fixed` : Apply `sp-force-monospace` and `no-ligation` together.
 
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -242,7 +250,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles for further customizing default (`calt`) ligation sets:
+* Styles for customizing the default (`calt`) ligation set. By choosing one or multiple items listed below, the ligation set of `calt` will *only* contain the corresponded ligations of the selectors you used.
 
   * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
   * `calt-arrow`: Enable ligation set that forms arrows.
@@ -254,6 +262,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-exeqeq`: Enable special triple-line ligation for `!==` only.
   * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
   * `calt-exeq`: Enable ligation for `!=` and `!==`.
+  * `calt-exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   * `calt-tildeeq`: Enable ligation for `~=` as inequality.
   * `calt-eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   * `calt-slasheq`: Enable ligation for `/=` and `=/=` as inequality.
@@ -261,7 +270,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-ltgt-diamond`: Enable ligation for `<>` as diamond.
   * `calt-brst`: Center asterisk in `(*` and `*)`.
   * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
-  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`..
+  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
   * `calt-logic`: Enable ligation for `/\` and `\/`.
   * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   * `calt-llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
@@ -305,10 +314,21 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `a`:
     * `v-a-doublestorey`, `cv01`: Double-storey `a` (default for Upright).
     * `v-a-singlestorey`, `cv02`: Single-storey `a` (default for Italic).
+    * `v-a-singlestorey-tailed`, `VXBS`: Single-storey `a` with curly tail.
+  * Styles for `b`:
+    * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
+    * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
+    * `v-b-toothless-rounded`, `VXBM`: `b` without botton-left tooth, with a rounded transition.
+  * Styles for `d`:
+    * `v-d-toothed`, `VXBN`: `d` with bottom-right tooth (default).
+    * `v-d-toothless-corner`, `VXBO`: `d` without botton-right tooth, with a corner transition.
+    * `v-d-toothless-rounded`, `VXBP`: `d` without botton-right tooth, with a rounded transition.
+    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail.
   * Styles for `f`:
     * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
+    * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -320,24 +340,30 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-i-zshaped`, `cv06`: Z-shaped `i`.
     * `v-i-line`, `cv56`: `i` like a straight line.
     * `v-i-tailed`, `cv88`: Tailed `i`.
+    * `v-i-hookybottom`, `VXAA`: `i` with a straight tail.
   * Styles for `j`:
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
+    * `v-j-straight`, `cv98`: `j` without serif.
+  * Styles for `k`, `K`:
+    * `v-k-straight`, `cv68`: `k` and `K` with standard shape (default for Upright).
+    * `v-k-curly`, `cv69`: Slightly curly `k` and `K`, like Iosevka 2.x.
+    * `v-k-cursive`, `cv70`: `k` with a cursive loop, and `K` with standard shape (default for Italic).
+    * `v-k-curly-cursive`, `VXBR`: `k` with a cursive loop, and `K` with curly shape.
   * Styles for `l`:
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
     * `v-l-hooky`, `cv09`: Hooky `l`.
-    * `v-l-zshaped`, `cv10`: Z-shaped `i`.
+    * `v-l-zshaped`, `cv10`: Z-shaped `l`.
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
-  * Styles for `k`, `K`:
-    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
-    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
-    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
+  * Styles for `q`:
+    * `v-q-straight`, `VXAZ`: `q` with straight bar (default).
+    * `v-q-tailed`, `VXBA`: `q` with tail.
   * Styles for `r`:
     * `v-r-straight`, `cv85`: Straight, serif-less `r` (default for Sans).
     * `v-r-serifed`, `cv86`: `r` with serif at both top and bottom (default for Slab Upright).
@@ -348,6 +374,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `u`:
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
+    * `v-u-tailed`, `VXBT`: `u` with right bar and a slightly curly tail.
   * Styles for `v`, `V`:
     * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
     * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.
@@ -358,12 +385,22 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-x-straight`, `cv77`: Standard, straight `X` and `x` (default).
     * `v-x-curly`, `cv78`: Slightly curly `X` and `x`, like Iosevka 2.x.
   * Styles for `y`:
-    * `v-y-straight`, `cv48`: More-straight letter `y` (default for Upright).
+    * `v-y-straight`, `cv48`: Letter `y` that is fully straight (default for Sans Upright).
     * `v-y-cursive`, `cv49`: Cursive-like `y` (default for Italic).
     * `v-y-curly`, `cv79`: More curly letter `y`, like Iosevka 2.x.
+    * `v-y-straight-turn`, `VXBF`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
+  * Styles for `z`:
+    * `v-z-standard`, `VXBD`: Standard `Z` and `z` (default).
+    * `v-z-with-crossbar`, `VXBE`: `Z` and `z` with a cross bar for better dsitinction with `2`.
   * Styles for `A`, `Λ`, `Δ`:
     * `v-turn-v-straight`, `cv73`: Standard, straight `A`, `Λ`, `Δ` (default).
     * `v-turn-v-curly`, `cv74`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  * Styles for `B`:
+    * `v-capital-b-standard`, `VXAP`: Standard `B` (default).
+    * `v-capital-b-more-asymmetric`, `VXAQ`: More asymmetric `B` to differentiate with `8`.
+  * Styles for `D`:
+    * `v-capital-d-standard`, `VXBG`: Standard `D` (default).
+    * `v-capital-d-more-rounded`, `VXBH`: More rounded `D` to differentiate with `O`.
   * Styles for `G`:
     * `v-capital-g-tooth`, `cv91`: Toothed G (default).
     * `v-capital-g-toothless`, `cv92`: Toothless G.
@@ -381,21 +418,38 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-zero-dotted`, `cv14`: Dotted Zero `0`.
     * `v-zero-unslashed`, `cv15`: O-like `0`.
     * `v-zero-reverse-slashed`, `cv93`: Reverse-slashed `0`.
+    * `v-zero-long-dotted`, `VXAB`: Long-dotted Zero `0` like Hack.
   * Styles for `1`:
     * `v-one-nobase`, `cv50`: `1` with bottom serif (default for Sans).
     * `v-one-base`, `cv51`: `1` without bottom serif (default for Slab).
+    * `v-one-line`, `VXAM`: `1` drawn just like a straight line.
   * Styles for `3`:
     * `v-three-flattop`, `cv46`: Flat top `3` (Like Museo Sans / Montserrat).
     * `v-three-twoarcs`, `cv47`: Arched top `3` (default).
+  * Styles for `4`:
+    * `v-four-closed`, `VXAR`: `4` with closed contour (default).
+    * `v-four-closed-non-crossing`, `VXAS`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
+    * `v-four-semi-open`, `VXAT`: `4` with semi-open contour.
+    * `v-four-semi-open-non-crossing`, `VXAU`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
+    * `v-four-open`, `VXAV`: `4` with open contour.
+    * `v-four-open-non-crossing`, `VXAW`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
+  * Styles for `6`:
+    * `v-six-closed-contour`, `VXAE`: `6` with a more closed contour.
+    * `v-six-open-contour`, `VXAF`: `6` with a more open contour.
+    * `v-six-straight-bar`, `VXBB`: `6` with a straight bar (default).
   * Styles for `7`:
     * `v-seven-noserif`, `cv64`: `7` without serif (default for Sans).
     * `v-seven-serifed`, `cv65`: `7` with initial serif (default for Slab).
+    * `v-seven-crossbar`, `VXAX`: `7` with crossbar.
+    * `v-seven-crossbar-serifed`, `VXAY`: `7` with crossbar and initial serif.
   * Styles for `9`:
-    * `v-nine-closed-contour`, `cv96`: `9` with a more closed (default).
-    * `v-nine-turned-six`, `cv97`: `9` with a more open contour like a turned `6`.
+    * `v-nine-closed-contour`, `cv96`: `9` with a more closed contour.
+    * `v-nine-open-contour`, `cv97`: `9` with a more open contour.
+    * `v-nine-straight-bar`, `VXBC`: `9` with a straight bar (default).
   * Styles for `ß`:
     * `v-eszet-traditional`, `cv34`: Traditional, Fraktur-like Eszet.
     * `v-eszet-sulzbacher`, `cv35`: A more modern, beta-like Eszet (default).
+    * `v-eszet-longs-s-lig`, `VXAC`: An Eszet shown as a ligature of long-S (`ſ`) and `s`.
   * Styles for `λ`:
     * `v-lambda-straight`, `cv94`: More-straight letter `λ` (default).
     * `v-lambda-curly`, `cv95`: More curly letter `λ`, like Iosevka 2.x.
@@ -408,20 +462,33 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-asterisk-hexhigh`, `cv60`: Higher six-pointed asterisk `*`.
     * `v-asterisk-hexlow`, `cv61`: Lower six-pointed asterisk `*`.
   * Styles for `_`:
-    * `v-underscore-high`, `cv20`: Higher underscore `_`, at baseline (default).
-    * `v-underscore-low`, `cv21`: Lower underscore `_`, below baseline.
+    * `v-underscore-high`, `cv20`: Higher underscore `_`, placed right below baseline (default).
+    * `v-underscore-low`, `cv21`: Lower underscore `_`, placed right above descender line.
+    * `v-underscore-above-baseline`, `cv99`: Extra-high `_`, placed right below baseline.
   * Styles for `¶`:
     * `v-paragraph-high`, `cv22`: Higher paragraph symbol `¶` (default).
     * `v-paragraph-low`, `cv23`: Lower paragraph symbol `¶`.
   * Styles for `^`:
     * `v-caret-high`, `cv29`: Higher circumflex `^` (default).
     * `v-caret-low`, `cv30`: Lower circumflex `^`.
+  * Styles for `(`, `)`:
+    * `v-paren-normal`, `VXAN`: Parenthesis with normal contour (default).
+    * `v-paren-large-contour`, `VXAO`: Parenthesis with larger contour, like that in Monaco.
   * Styles for `{`, `}`:
     * `v-brace-straight`, `cv36`: More straight braces.
     * `v-brace-curly`, `cv37`: More curly braces (default).
   * Styles for `#`:
     * `v-numbersign-upright`, `cv44`: Number sign with vertical bars (default).
     * `v-numbersign-slanted`, `cv45`: Number sign with slanted bars.
+    * `v-numbersign-upright-open`, `VXBI`: Number sign with vertical bars and open inner.
+    * `v-numbersign-slanted-open`, `VXBJ`: Number sign with slanted bars and open inner.
+  * Styles for `&`:
+    * `v-ampersand-closed`, `VXAG`: Ampersand (`&`) with a closed contour (default).
+    * `v-ampersand-upper-open`, `VXAH`: Ampersand (`&`) with an open contour at upper half.
+    * `v-ampersand-lower-open`, `VXAI`: Ampersand (`&`) with an open contour at lower half.
+    * `v-ampersand-et`, `VXAJ`: Ampersand (`&`) drawn like a ligature of Ɛ and t.
+    * `v-ampersand-et-toothed`, `VXAK`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
+    * `v-ampersand-flat-top`, `VXAL`: Ampersand (`&`) drawn with a flat top.
   * Styles for `@`:
     * `v-at-threefold`, `cv31`: The long, three-fold At symbol (`@`) (default).
     * `v-at-fourfold`, `cv32`: The traditional, four-fold At symbol (`@`).
@@ -440,6 +507,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
 <!-- END Section-Cherry-Picking-Styles -->
 
+### Using Docker
+
+Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method-1)
 
 ## For Chinese and Japanese users...
 

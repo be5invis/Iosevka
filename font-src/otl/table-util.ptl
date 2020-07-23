@@ -1,0 +1,186 @@
+import [AnyCv] from "../support/gr"
+import 'toposort' as toposort
+
+export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.} .lookupDep {}}
+extern Map
+extern Set
+
+export : define [pick-language sink tag] : begin
+	if sink.languages.(tag) : return sink.languages.(tag)
+	define lang {.features {}}
+	set sink.languages.(tag) lang
+	return lang
+
+export : define [copy-language sink tag tagFrom] : begin
+	define langFrom : pick-language sink tagFrom
+	define langTo : pick-language sink tag
+	foreach [feat : items-of langFrom.features] : langTo.features.push feat
+	return langTo
+
+export : define [add-lang-feature lang fea] : begin
+	define index : lang.features.indexOf fea.name
+	if (index < 0) : lang.features.push fea.name
+
+export : define [add-feature sink tag] : begin
+	define lookupArray {}
+	local n 0
+	while true : begin
+		if [not sink.features.(tag + '_' + n)] : begin
+			set sink.features.(tag + '_' + n) lookupArray
+			return {.name (tag + '_' + n) .lookups lookupArray}
+		set n : n + 1
+
+export : define [pick-feature sink name] : begin
+	if sink.features.(name) : return { .name name .lookups sink.features.(name) }
+	define featObj { .name name .lookups {} }
+	set sink.features.(name) featObj.lookups
+	return featObj
+
+export : define [add-feature-lookup fea lookupName] : begin
+	define index : fea.lookups.indexOf lookupName
+	if (index < 0) : fea.lookups.push lookupName
+
+export : define [add-lookup sink data _prefix] : begin
+	local prefix : _prefix || '_lut_'
+	local n 0
+	while true : begin
+		if [not sink.lookups.(prefix + n)] : begin
+			set sink.lookups.(prefix + n) data
+			return (prefix + n)
+		set n : n + 1
+
+export : define [pick-lookup sink name fallback] : begin
+	if sink.lookups.(name) : return sink.lookups.(name)
+	set sink.lookups.(name) fallback
+	return sink.lookups.(name)
+
+export : define [add-common-feature sink fea] : begin
+	define dfltDflt : pick-language sink 'DFLT_DFLT'
+	define latnDflt : pick-language sink 'latn_DFLT'
+	define grekDflt : pick-language sink 'grek_DFLT'
+	define cyrlDflt : pick-language sink 'cyrl_DFLT'
+
+	add-lang-feature dfltDflt fea
+	add-lang-feature latnDflt fea
+	add-lang-feature grekDflt fea
+	add-lang-feature cyrlDflt fea
+
+	return fea
+
+define UtilityLookupPrefix '.utility-single.'
+
+export : define [BeginLookupBlock sink] : begin
+	return : object
+		existingLookupNames : new Set : Object.keys sink.lookups
+
+define [IsUtilityLookupId name] : [name.slice 0 UtilityLookupPrefix.length] === UtilityLookupPrefix
+
+export : define [EndLookupBlock rec sink] : begin
+	local currentLookupNames : new Set : Object.keys sink.lookups
+	foreach existing rec.existingLookupNames : foreach current currentLookupNames
+		if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+			sink.lookupDep.push { existing current }
+
+set EndLookupBlock.Front : lambda [rec sink] : begin
+	local currentLookupNames : new Set : Object.keys sink.lookups
+	foreach existing rec.existingLookupNames : foreach current currentLookupNames
+		if (![IsUtilityLookupId existing] && ![IsUtilityLookupId current] && ![rec.existingLookupNames.has current])
+			sink.lookupDep.push { current existing }
+
+export : define [MoveBackUtilityLookups sink] : begin
+	local lns : new Set : Object.keys sink.lookups
+	foreach [front lns] : foreach [rear lns]
+		if (![IsUtilityLookupId front] && [IsUtilityLookupId rear])
+			sink.lookupDep.push { front rear }
+
+export : define [ChainRuleBuilder sink] : begin
+	define [createNewLookup f t] : begin
+		local subtable {.}
+		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
+		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}} UtilityLookupPrefix
+
+	define [getSubLookup left right] : piecewise
+		[not right] null
+		([typeof right] === "string") right
+		(right <@ Function) : getSubLookup left [right left]
+		true : begin
+			local found    null
+			local maxMatch 0
+			local lookupKeys : [Object.keys sink.lookups].reverse
+			foreach [name : items-of lookupKeys] : begin
+				local st sink.lookups.(name).subtables.0
+				if [IsUtilityLookupId name] : begin
+					local compatible true
+					local matchCount 0
+					foreach [j : range 0 left.length] : begin
+						if (st.(left.(j)) && st.(left.(j)) !== right.(j)) : set compatible false
+						if (st.(left.(j)) === right.(j)) : inc matchCount
+					if (compatible && (!found || matchCount > maxMatch)) : begin
+						set found    name
+						set maxMatch matchCount
+
+			if found : begin
+				local st sink.lookups.(found).subtables.0
+				foreach [j : range 0 left.length] : set st.(left.(j)) right.(j)
+				return found
+
+			return : createNewLookup left right
+
+	define [chain-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+		local subtable {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+		local foundi false
+		local founde false
+		foreach [j : range 0 terms.length] : if (!foundi && terms.(j).right) : begin
+			set subtable.inputBegins j
+			set foundi true
+		foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).right) : begin
+			set subtable.inputEnds (j + 1)
+			set founde true
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			subtable.match.push : Array.from : new Set term.left
+			local lutn : getSubLookup term.left term.right
+			if lutn : subtable.apply.push {.at j .lookup lutn}
+		return subtable
+
+	define [reverse-rule] : begin
+		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
+		local subtable {.match {} .to {} .inputIndex 0}
+		local foundi false
+
+		foreach [j : range 0 terms.length] : begin
+			local term terms.(j)
+			local subst : new Map
+			foreach [g : items-of term.left] : subst.set g g
+
+			if term.right : begin
+				if foundi : throw : new Error "Duplicate substitutions in one reverse rule"
+				set foundi true
+				set subtable.inputIndex j
+				local toGlyphs : piecewise
+					(term.right <@ Function) [term.right term.left]
+					true                     term.right
+				foreach [k : range 0 term.left.length]
+					subst.set term.left.(k) (toGlyphs.(k) || term.left.(k))
+
+				set subtable.to : Array.from [subst.values]
+
+			set subtable.match.(j) : Array.from [subst.keys]
+
+		return subtable
+
+	return {chain-rule reverse-rule}
+
+export : define [query-related-glyphs glyphs para entries] : begin
+	define sink {}
+	foreach [gid : items-of entries] : if glyphs.(gid) : begin
+		sink.push gid
+		if para.enableCvSs : foreach [gr : items-of : AnyCv.query glyphs.(gid)] : begin
+			sink.push : gr.get glyphs.(gid)
+	return sink
+
+export : define [finalizeTable table] : begin
+	set table.lookupOrder : toposort table.lookupDep
+	foreach [{key lang} : pairs-of table.languages] : begin
+		if lang.features : lang.features.sort

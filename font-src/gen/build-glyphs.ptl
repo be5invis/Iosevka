@@ -1,0 +1,152 @@
+import '../support/glyph' as Glyph
+import '../support/point' as Point
+import './kits/spiro-kit' as spirokit
+import './kits/boole-kit' as BooleKit
+import '../support/anchor' as Anchor
+
+import [mix linreg clamp fallback] from '../support/utils'
+import [calculateMetrics setFontMetrics MarksetDiv GenDivFrame] from '../meta/aesthetics'
+
+$$include '../meta/macros.ptl'
+
+define [$NamedParameterPair$ l r] : begin
+	set this.left l
+	set this.right r
+	return this
+
+define [$donothing$] nothing
+
+# contour tagging
+define [tagged tag component] : begin
+	set component.tag tag
+	return component
+
+export all : define [buildGlyphs para recursive recursiveCodes] : begin
+	define variantSelector para.variantSelector
+	local glyphList {}
+	local glyphMap {.}
+	local unicodeGlyphs {}
+
+	define metrics : calculateMetrics para
+	define [object globalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Superness Width TanSlope OverlayPos Descender symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness MVertStrokeD] metrics
+
+	define fontMetrics {.head {.} .hhea {.} .OS_2 {.} .post {.}}
+	setFontMetrics para metrics fontMetrics
+
+	# Anchor parameters
+	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
+
+	define MarkSet : MarksetDiv 1 metrics
+	define DivFrame : GenDivFrame metrics
+
+	### Glyph slots and dependency profile generation (used for recursive subfonts)
+	local dependencyProfile {.}
+	local nTemp 0
+	define [newtemp] : set nTemp (nTemp + 1)
+	local nPending 0
+	local pickHash : if recursive
+		then : let [h {.}] : begin
+			foreach j [items-of recursive] : set h.(j) j
+			set nPending recursive.length
+			* h
+		else nothing
+
+	define [getDependencyProfile glyph] : begin
+		local dp {}
+		foreach d [items-of glyph.dependencies] : begin
+			dp.push d
+			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
+		return dp
+
+	define [createAndSaveGlyphImpl saveGlyphName unicode actions] : begin
+		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
+
+		local ensuredGlyphName : if saveGlyphName saveGlyphName ('.temp-' + [newtemp])
+		if para.verbose : console.log ensuredGlyphName
+
+		local glyphObject [new Glyph ensuredGlyphName]
+		glyphObject.setWidth Width
+		glyphObject.gizmo = globalTransform
+
+		if saveGlyphName : begin
+			glyphList.push glyphObject
+			if (saveGlyphName.0 != '.' && glyphMap.(saveGlyphName))
+				throw : new Error "Glyph \(saveGlyphName) already exists"
+			glyphMap.(saveGlyphName) = glyphObject
+			if unicode : $assignUnicodeImpl$ glyphObject unicode
+
+		actions.call glyphObject
+
+		local complexity : [(glyphObject.contours || {}).map (x => x.length)].reduce ([a b] => (a + b)) 0
+		if (complexity > 0x7fff) : console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
+
+		if saveGlyphName : begin
+			set dependencyProfile.(saveGlyphName) : getDependencyProfile glyphObject
+			dec nPending
+
+		return glyphObject
+
+	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
+		`[@name @unicode @actions] : return : createAndSaveGlyphImpl name unicode actions
+		`[@name @actions]          : return : createAndSaveGlyphImpl name null    actions
+		`[@actions]                : return : createAndSaveGlyphImpl null null    actions
+
+	define [$assignUnicodeImpl$ g unicode] : begin
+		g.assignUnicode unicode
+		set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
+
+	define [$save$ _name unicode] : begin
+		define t this
+		define name : if [not _name] ('--autoname-' + [newtemp]) _name
+		local g : create-glyph name [lambda]
+		if g : begin
+			g.include t AS_BASE
+			if (t <@ Glyph) : begin
+				set g.advanceWidth        t.advanceWidth
+				set g.shortName           t.shortName
+				set g.autoRefPriority     t.autoRefPriority
+				set g.glyphRank           t.glyphRank
+				set g.avoidBeingComposite t.avoidBeingComposite
+				set g.related             t.related
+			if name : set dependencyProfile.(name) : getDependencyProfile g
+		if (g && unicode) : $assignUnicodeImpl$ g unicode
+		return g
+
+	### Spiro constructions
+	# Basic knots
+	define spirofns : spirokit.SetupBuilders : object globalTransform Contrast Stroke Glyph para Superness
+	define booleFns : BooleKit.SetupBuilders : object globalTransform Glyph
+
+	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
+
+	### HERE WE GO
+	run-glyph-module '../glyphs/common-shapes.js'
+	run-glyph-module '../glyphs/space.js'
+	run-glyph-module '../glyphs/overmarks.js'
+
+	# Unified letters
+	run-glyph-module '../glyphs/letter-latin.js'
+	run-glyph-module '../glyphs/letter-greek.js'
+	run-glyph-module '../glyphs/letter-cyrillic.js'
+
+	# Numbers
+	run-glyph-module '../glyphs/numbers.js'
+
+	# Symbols
+	run-glyph-module '../glyphs/symbol-punctuation.js'
+	run-glyph-module '../glyphs/symbol-arrow.js'
+	run-glyph-module '../glyphs/symbol-geometric.js'
+	run-glyph-module '../glyphs/symbol-math.js'
+	run-glyph-module '../glyphs/symbol-letter.js'
+	run-glyph-module '../glyphs/symbol-braille.js'
+	run-glyph-module '../glyphs/symbol-mosaic.js'
+	run-glyph-module '../glyphs/symbol-other.js'
+
+	# Autobuilds
+	run-glyph-module '../glyphs/autobuild-accents.js'
+	run-glyph-module '../glyphs/autobuild-composite.js'
+	run-glyph-module '../glyphs/autobuild-transformed.js'
+
+	return : object metrics [glyphs glyphMap] glyphList unicodeGlyphs
+

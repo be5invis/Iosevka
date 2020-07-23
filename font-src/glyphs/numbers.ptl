@@ -1,0 +1,647 @@
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../support/utils'
+import [designParameters] from '../meta/aesthetics'
+import [AnyCv getGrMesh] from "../support/gr"
+
+glyph-module
+
+glyph-block Numbers : begin
+
+	glyph-block-import CommonShapes
+	glyph-block-import Letter-Latin-Ezh : EzhShape
+
+	define [ShiftDown] : glyph-construction
+		include : Upright
+		include : Translate 0 Descender
+		include : Italify
+
+	define [ZeroSlashShape top] : begin
+		local fine : 0.5 * OverlayStroke
+		return : intersection
+			OShapeOutline.NoOvershoot top 0 SB RightSB
+			dispiro
+				flat 0 (top * (1 - 0.77)) [widths fine fine]
+				curl Width (top * 0.77)
+
+	define [ZeroReverseSlashShape top] : begin
+		local fine : 0.5 * OverlayStroke
+		return : intersection
+			OShapeOutline.NoOvershoot top 0 SB RightSB
+			dispiro
+				flat 0 (top * 0.77) [widths fine fine]
+				curl Width (top * (1 - 0.77))
+
+	define [ZeroDotShape top] : begin
+		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
+		return : OShapeOutline.NoOvershoot
+			top / 2 + DotRadius
+			top / 2 - DotRadius
+			Middle + halfDotWidth
+			Middle - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
+
+	define [ZeroLongDotShape top] : begin
+		local circleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
+		local halfDotWidth : Math.min HalfStroke (circleInnerWidth / 4)
+		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (circleInnerWidth - halfDotWidth * 2)) / 2)
+		return : OShapeOutline.NoOvershoot
+			top / 2 + halfDotHeight
+			top / 2 - halfDotHeight
+			Middle + halfDotWidth
+			Middle - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
+
+	sketch # zero.lnum.unslashed
+		include MarkSet.capital
+		include : OShape CAP 0 SB RightSB
+		save 'zero.lnum.unslashed'
+
+	sketch # zero.lnum.slashed
+		include MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroSlashShape CAP
+		save 'zero.lnum.slashed'
+
+	sketch # zero.lnum.reverse-slashed
+		include MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroReverseSlashShape CAP
+		save 'zero.lnum.reverse-slashed'
+
+	sketch # zero.lnum.dotted
+		include MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroDotShape CAP
+		save 'zero.lnum.dotted'
+
+	sketch # zero.lnum.longDotted
+		include MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroLongDotShape CAP
+		save 'zero.lnum.longDotted'
+
+	sketch # zero.onum.unslashed
+		include MarkSet.e
+		include : OShape XH 0 SB RightSB
+		save 'zero.onum.unslashed'
+
+	sketch # zero.onum.slashed
+		include MarkSet.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroSlashShape XH
+		save 'zero.onum.slashed'
+
+	sketch # zero.onum.reverse-slashed
+		include MarkSet.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroReverseSlashShape XH
+		save 'zero.onum.reverse-slashed'
+
+	sketch # zero.onum.dotted
+		include MarkSet.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroDotShape XH
+		save 'zero.onum.dotted'
+
+	sketch # zero.onum.longDotted
+		include MarkSet.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroLongDotShape XH
+		save 'zero.onum.longDotted'
+
+	select-variant 'zero.lnum' '0' (follow -- 'zero')
+	select-variant 'zero.onum' (follow -- 'zero')
+
+	define [OneShape top balance] : glyph-construction
+		define topSW : adviceBlackness 3.5
+		include : VBar (Middle + balance) 0 top
+		include : dispiro
+			flat (Middle - HalfStroke * HVContrast + balance) top [widths topSW 0]
+			curl (Middle - Stroke / 8 * HVContrast - HookX * 1.25 + balance) (top - Stroke / 8 - Hook * 0.75 * (top / CAP))
+
+
+	sketch # one.lnum.nobase
+		include MarkSet.capital
+		include : OneShape CAP OneBalance
+		save 'one.lnum.nobase'
+
+	sketch # one.lnum.base
+		include MarkSet.capital
+		include : OneShape CAP (OneBalance / 4)
+		include : CenterBottomSerif Middle 0 LongJut
+		save 'one.lnum.base'
+
+	sketch # one.lnum.line
+		include MarkSet.capital
+		include : VBar Middle 0 CAP
+		set currentGlyph.autoRefPriority (-2)
+		save 'one.lnum.line'
+
+	sketch # one.onum.nobase
+		include MarkSet.e
+		include : OneShape XH OneBalance
+		save 'one.onum.nobase'
+
+	sketch # one.onum.base
+		include MarkSet.capital
+		include : OneShape XH (OneBalance / 4)
+		include : CenterBottomSerif Middle 0 LongJut
+		save 'one.onum.base'
+
+	sketch # one.lnum.line
+		include MarkSet.capital
+		include : VBar Middle 0 XH
+		set currentGlyph.autoRefPriority (-2)
+		save 'one.onum.line'
+
+	select-variant 'one.lnum' '1' (follow -- 'one')
+	select-variant 'one.onum' (follow -- 'one')
+
+
+	define [TwoShape top] : glyph-construction
+		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
+		include : dispiro
+			widths.rhs
+			g4 SB (top - Hook)
+			hookstart (top - O)
+			g4.down.mid (RightSB - OX / 2) (top - smooth)
+			alsoThru.g2 0.5 ([StrokeWidthBlend 0.425 0.4] * [linreg 500 1 700 0.95 Width]) [widths.center]
+			flat SB 1 [widths.heading Stroke 0 Downward]
+			curl SB 0 [heading Downward]
+
+		include : HBarBottom  (SB + HalfStroke) RightSB 0
+		if SLAB : begin
+			include : UpwardRightSerif RightSB 0 VJut
+
+	sketch # two.lnum
+		include MarkSet.capital
+		include : TwoShape CAP
+		save 'two.lnum' '2'
+
+	sketch # two.onum
+		include MarkSet.e
+		include : TwoShape XH
+		save 'two.onum'
+
+	turned nothing 0x218A 'two.lnum' Middle (CAP / 2)
+
+	define [ThreeShape top] : glyph-construction
+		local barcenter : top * HBarPos
+		local threeRadius : ((top / 2) + HalfStroke - Smooth) * 1.25
+		local fine : Stroke * CThin
+
+		include : dispiro
+			widths.rhs
+			g4 (SB - O) (top - Hook)
+			hookstart (top - O)
+			g4 (RightSB) (top - (SmoothB * (top - barcenter) / (top / 2)))
+			flat (RightSB - threeRadius + 0.01) (barcenter - (fine - HalfStroke)) [widths.heading 0 fine Leftward]
+			curl (RightSB - threeRadius) (barcenter - (fine - HalfStroke)) [heading Leftward]
+		include : dispiro
+			widths.lhs
+			g4 (SB + O) Hook
+			hookstart O
+			g4 (RightSB - O * 2) (SmoothA * barcenter / (top / 2))
+			flat (RightSB - threeRadius + 0.01) (barcenter + (fine - HalfStroke)) [widths.heading fine 0 Leftward]
+			curl (RightSB - threeRadius) (barcenter + (fine - HalfStroke)) [heading Leftward]
+
+	sketch # three.lnum
+		include MarkSet.capital
+		include : ThreeShape CAP
+		save 'three.lnum.twoarcs'
+	sketch
+		include MarkSet.capital
+		include : EzhShape CAP 0 0.25 0.975
+		save 'three.lnum.flattop'
+	sketch # three.lnum
+		include MarkSet.p
+		include : ThreeShape (XH - Descender)
+		include : ShiftDown
+		save 'three.onum.twoarcs'
+	sketch
+		include MarkSet.p
+		include : EzhShape (XH - Descender) 0 0.25 0.975
+		include : ShiftDown
+		save 'three.onum.flattop'
+
+	select-variant 'three.lnum' '3' (follow -- 'three')
+	select-variant 'three.onum' (follow -- 'three')
+
+	turned nothing 0x218B 'three.lnum' Middle (CAP / 2)
+
+	define [FourStdShape top open crossing] : glyph-construction
+		local yBar (top * 0.4)
+		local fine : adviceBlackness 3
+
+		define xVertBar : mix SB RightSB [if crossing 0.825 0.9125]
+		define xHBarTerminal : if crossing RightSB xVertBar
+		define xSlopeTop : xVertBar - Stroke * HVContrast - fine * HVContrast * [if crossing 0.25 0.5]
+
+		include : HBarTop (SB + OX) xHBarTerminal yBar
+		include : VBarRight xVertBar 0 [mix (yBar - Stroke) top [if open 0.5 1]]
+		include : intersection
+			if open
+				Rect top yBar 0 Width
+				Rect top yBar 0 xVertBar
+			dispiro
+				widths.rhs fine
+				g4 (SB + OX) yBar
+				g4 [mix (SB + OX) xSlopeTop 2] [mix yBar top 2]
+		if SLAB : begin
+			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
+
+	define [FourOpenShape top crossing] : glyph-construction
+		local yBar (top * 0.4)
+		local fine : adviceBlackness 3
+
+		define xVertBar : mix SB RightSB [if crossing 0.825 0.9125]
+		define xHBarTerminal : if crossing RightSB xVertBar
+
+		include : HBarTop SB xHBarTerminal yBar
+		include : VBarRight xVertBar 0 [mix (yBar - Stroke) top 0.75]
+		include : VBarLeft SB yBar top
+		if SLAB : begin
+			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
+
+	create-glyph 'four.lnum.closed' : glyph-construction
+		include MarkSet.capital
+		include : FourStdShape CAP false true
+
+	create-glyph 'four.lnum.closedNonCrossing' : glyph-construction
+		include MarkSet.capital
+		include : FourStdShape CAP false false
+
+	create-glyph 'four.lnum.semiOpen' : glyph-construction
+		include MarkSet.capital
+		include : FourStdShape CAP true true
+
+	create-glyph 'four.lnum.semiOpenNonCrossing' : glyph-construction
+		include MarkSet.capital
+		include : FourStdShape CAP true false
+
+	create-glyph 'four.lnum.open' : glyph-construction
+		include MarkSet.capital
+		include : FourOpenShape CAP true
+
+	create-glyph 'four.lnum.openNonCrossing' : glyph-construction
+		include MarkSet.capital
+		include : FourOpenShape CAP false
+
+	create-glyph 'four.onum.closed' : glyph-construction
+		include MarkSet.p
+		include : FourStdShape (XH - Descender) false true
+		include : ShiftDown
+
+	create-glyph 'four.onum.closedNonCrossing' : glyph-construction
+		include MarkSet.capital
+		include : FourStdShape  (XH - Descender) false false
+		include : ShiftDown
+
+	create-glyph 'four.onum.semiOpen' : glyph-construction
+		include MarkSet.p
+		include : FourStdShape (XH - Descender) true true
+		include : ShiftDown
+
+	create-glyph 'four.onum.semiOpenNonCrossing' : glyph-construction
+		include MarkSet.p
+		include : FourStdShape (XH - Descender) true false
+		include : ShiftDown
+
+	create-glyph 'four.onum.open' : glyph-construction
+		include MarkSet.p
+		include : FourOpenShape (XH - Descender) true
+		include : ShiftDown
+
+	create-glyph 'four.onum.openNonCrossing' : glyph-construction
+		include MarkSet.p
+		include : FourOpenShape (XH - Descender) false
+		include : ShiftDown
+
+	select-variant 'four.lnum' '4' (follow -- 'four')
+	select-variant 'four.onum' (follow -- 'four')
+
+	define [FiveShape top bp] : glyph-construction
+		local t1 : top * bp * 0.8
+		local t2 : top * bp
+		local ycurly : mix 0 t2 (SmoothA / (SmoothA + SmoothB))
+		local xleft : mix SB RightSB 0.025
+		local xright : [mix RightSB SB 0.05] - (OX - O)
+
+		include : difference
+			glyph-construction
+				local FiveStroke : dispiro
+					widths.rhs
+					g4 xleft (t2 - AHook * top / CAP)
+					hookstart (t2 - O)
+					g4 (RightSB - OX) ycurly
+					hookend O
+					g4 SB (Hook * top / CAP)
+				local fiveStroke : FiveStroke.call currentGlyph
+				local firstKnot : currentGlyph.gizmo.unapply fiveStroke.rhsKnots.(fiveStroke.rhsKnots.length - 1)
+				include : VBarRight firstKnot.x firstKnot.y top
+				include : HBarTop xleft xright top
+				if SLAB : begin
+					include : DownwardRightSerif xright top VJut
+			Rect (t2 / 2 + top * 0.015) (t2 / 2 - top * 0.015) 0 Middle
+
+	sketch # five.lnum
+		include MarkSet.capital
+		include : FiveShape CAP designParameters.fiveBarPos
+		save 'five.lnum' '5'
+	sketch # five.onum
+		include MarkSet.p
+		include : FiveShape (XH - Descender) designParameters.fiveBarPos
+		include : ShiftDown
+		save 'five.onum'
+
+	sketch # zhuangToneFive
+		include MarkSet.capital
+		include : FiveShape CAP designParameters.fiveBarPos
+		save 'zhuangToneFive' 0x1BC
+
+	sketch # zhuangtonefive
+		include MarkSet.e
+		include : FiveShape XH designParameters.fiveBarPos
+		save 'zhuangtonefive' 0x1BD
+
+	define [OpenContourSixShape charTop] : glyph-construction
+		local oTop : charTop * 0.55 + Stroke / 2
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
+		local fine   : Stroke * CThinB
+		local coFine : Math.max [adviceBlackness 3.5] (Stroke - fine / 2)
+		include : dispiro
+			widths.rhs fine
+			g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine)
+			archv
+			g4 (SB + OX + (Stroke - fine) * HVContrast) ymiddlea
+			arcvh
+			g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
+			archv
+			g4.down.mid (RightSB - OX) ymiddleb
+			arcvh
+			g4.left.mid (Middle + CorrectionOMidS) (O)
+			archv
+			g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
+			quadcontrols 0 0.85
+			g4 ([mix SB RightSB 0.85] - 0.25 * Stroke * HVContrast) (charTop - O) [widths.rhs]
+
+	define [ClosedContourNineShape top] : glyph-construction
+		local u top
+		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.45 - HalfStroke)
+		local l (SB + OX)
+		local r (RightSB - OX)
+		local ymiddlea : mix u d 0.5
+		include : dispiro
+			widths.rhs (Stroke * CThinB)
+			flat (r - Stroke * (1 - CThinB) * HVContrast) ymiddlea
+			curl (r - Stroke * (1 - CThinB) * HVContrast) (d + SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] + CorrectionOMidS) (d + O) [widths 0 Stroke]
+			archv
+			flat l (d + SmallSmoothB)
+			curl l (u - SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] - CorrectionOMidS) (u - O)
+			archv
+			flat r ymiddlea
+			curl r SmallSmoothA
+			hookend O
+			g4 SB Hook
+
+	define [StraightBarSixShape charTop] : begin
+		local oTop : charTop * 0.55 + Stroke / 2
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
+		local fine   : Stroke * CThin
+		local coFine : Math.max (Stroke * CThin) (Stroke - fine / 2)
+
+		local xTerminal : [mix SB RightSB 0.6] - 0.5 * Stroke * HVContrast
+		local xMockBarStart   0
+		local yMockBarStart : ymiddlea + Stroke * 0.3
+		local pStraightBarStart : 0.75 - (Stroke / charTop)
+		return : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				widths.rhs fine
+				g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine)
+				archv
+				g4 (SB + OX + (Stroke - fine) * HVContrast) ymiddlea
+				arcvh
+				g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
+				archv
+				g4.down.mid (RightSB - OX) ymiddleb
+				arcvh
+				g4.left.mid (Middle + CorrectionOMidS) (O)
+				archv
+				g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
+				flat [mix xMockBarStart xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs]
+				curl [mix xMockBarStart xTerminal 2]                 [mix yMockBarStart charTop 2]
+
+	sketch # six
+		include MarkSet.capital
+		include : OpenContourSixShape CAP
+		save 'six.lnum.openContour'
+		save 'six.onum.openContour'
+
+	sketch # six
+		include MarkSet.capital
+		include : ClosedContourNineShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+
+		save 'six.lnum.closedContour'
+		save 'six.onum.closedContour'
+
+	sketch # six
+		include MarkSet.capital
+		include : StraightBarSixShape CAP
+		save 'six.lnum.straightBar'
+		save 'six.onum.straightBar'
+
+	select-variant 'six.lnum' '6' (follow -- 'six')
+	select-variant 'six.onum' (follow -- 'six')
+
+	define SevenXLeft : mix SB RightSB 0.28
+	define [SevenSwCor top] : [Math.hypot 1 ((RightSB - SevenXLeft - HalfStroke) / (top - Stroke))] * HVContrast
+	define [SevenShape top] : glyph-construction
+		local cor : SevenSwCor top
+		include : union
+			HBarTop (SB + (OX - O)) RightSB top
+			spiro-outline
+				corner (SevenXLeft - Stroke * cor / 2) 0
+				corner (SevenXLeft + Stroke * cor / 2) 0
+				corner RightSB (top - Stroke)
+				corner (RightSB - Stroke * cor) (top - Stroke)
+	define [SevenCrossbarShape top] : glyph-construction
+		local cor : SevenSwCor top
+		local m : mix SevenXLeft (RightSB - HalfStroke * cor) 0.5
+		include : HBar
+			m - Stroke * cor * 0.25 - LongJut * 0.8
+			m + Stroke * cor * 0.25 + LongJut * 0.7
+			mix 0 (top - Stroke * 0.25) 0.5
+
+	sketch # seven.lnum
+		include MarkSet.capital
+		include : SevenShape CAP
+		branch
+			save 'seven.lnum.noserif'
+		branch
+			include : SevenCrossbarShape CAP
+			save 'seven.lnum.crossbar'
+		branch
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+			save 'seven.lnum.serifed'
+		branch
+			include : SevenCrossbarShape CAP
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+			save 'seven.lnum.crossbarSerifed'
+	sketch # seven.onum
+		include MarkSet.p
+		include : SevenShape (XH - Descender)
+		branch
+			include : ShiftDown
+			save 'seven.onum.noserif'
+		branch
+			include : SevenCrossbarShape (XH - Descender)
+			include : ShiftDown
+			save 'seven.onum.crossbar'
+		branch
+			include : DownwardLeftSerif (SB + (OX - O)) (XH - Descender) VJut
+			include : ShiftDown
+			save 'seven.onum.serifed'
+		branch
+			include : SevenCrossbarShape (XH - Descender)
+			include : DownwardLeftSerif (SB + (OX - O)) (XH - Descender) VJut
+			include : ShiftDown
+			save 'seven.onum.crossbarSerifed'
+
+	select-variant 'seven.lnum' '7' (follow -- 'seven')
+	select-variant 'seven.onum' (follow -- 'seven')
+
+
+	local EightPr : StrokeWidthBlend 0.85 0.925
+	define [EightShape top] : begin
+		local stroke : adviceBlackness2 2.875 2 CAP
+		local p 0.96
+		local l (SB + OX)
+		local r (RightSB - OX)
+		return : dispiro
+			widths.rhs stroke
+			g4.right.mid (Middle - CorrectionOMidS) (top - O)
+			archv
+			g4 [mix l r p] (top - [SmoothBOf (Smooth * EightPr) Width])
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 (l) [SmoothBOf (Smooth * EightPr) Width] [widths.lhs stroke]
+			arcvh
+			g4.right.mid (Middle + CorrectionOMidS) (O)
+			archv
+			g4 (r) [SmoothAOf (Smooth * EightPr) Width] [widths.lhs stroke]
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 [mix r l p] (top - [SmoothAOf (Smooth * EightPr) Width]) [widths.rhs stroke]
+			arcvh
+			close
+
+	sketch # eight
+		include MarkSet.capital
+		include : EightShape CAP
+		save 'eight.lnum' '8'
+		save 'eight.onum'
+
+
+	# There is an "eight without lower contour" shape used for /propto
+	sketch # rotetedpropto
+		local p 0.96
+		local py 0.4
+		local l (SB + OX)
+		local r (RightSB - OX)
+		include : dispiro
+			widths.lhs
+			straight.up.start r 0 [heading Upward]
+			alsoThru 0.5 (1 - py) [widths (Stroke * py) (Stroke * (1 - py))]
+			g4 [mix r l p] (CAP - SmoothA * p * EightPr) [widths.rhs]
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP - O)
+			archv
+			g4 [mix l r p] (CAP - SmoothB * p * EightPr)
+			alsoThru 0.5 py [widths (Stroke * py) (Stroke * (1 - py))]
+			straight.down.end l 0 [widths.heading Stroke 0 Downward]
+		save 'rotetedpropto'
+
+
+
+	sketch
+		include MarkSet.capital
+		include : ClosedContourNineShape CAP
+		save 'nine.lnum.closedContour'
+
+	sketch
+		include MarkSet.p
+		include : ClosedContourNineShape (XH - Descender)
+		include : ShiftDown
+		save 'nine.onum.closedContour'
+
+	sketch
+		include MarkSet.capital
+		include : OpenContourSixShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+		save 'nine.lnum.openContour'
+
+	sketch
+		include MarkSet.p
+		include : OpenContourSixShape CAP
+		include : FlipAround (Middle) (XH / 2)
+		save 'nine.onum.openContour'
+
+	sketch
+		include MarkSet.capital
+		include : StraightBarSixShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+		save 'nine.lnum.straightBar'
+
+	sketch
+		include MarkSet.p
+		include : StraightBarSixShape CAP
+		include : FlipAround (Middle) (XH / 2)
+		save 'nine.onum.straightBar'
+
+	select-variant 'nine.lnum' '9' (follow -- 'nine')
+	select-variant 'nine.onum' (follow -- 'nine')
+
+	do "Ten"
+		define GnOne  'one.lnum'
+		define GnZero 'zero.lnum'
+
+		local [GlyphNameOfTen a b]       : begin "numbers/ten{\(a)}{\(b)}"
+		define [glyphNameIsNotUsed name] : begin
+			if [query-glyph name] : throw : new Error "Glyph \(name) already exists!"
+			return name
+
+		define [BuildTen gn gnOne gnZero] : if [not : query-glyph gn] : begin
+			create-glyph gn : glyph-construction
+				include MarkSet.capital
+				set-width : Width * 2
+				include : refer-glyph gnOne
+				apply-transform : Translate (-Width) 0
+				include : refer-glyph gnZero
+				apply-transform : Translate Width 0
+
+		define [applyRelations relApplications] : begin
+			foreach {gr f t} [items-of relApplications] : begin
+				if [query-glyph f] : gr.set [query-glyph f] t
+
+		if ([query-glyph GnOne] && [query-glyph GnZero]) : begin
+			BuildTen [GlyphNameOfTen GnOne GnZero] GnOne GnZero
+			local ra {}
+			local meshTen : getGrMesh { GnOne GnZero } AnyCv query-glyph
+			foreach {gr {fromOne fromZero} {toOne toZero}} [items-of meshTen] : begin
+				local fromGn : GlyphNameOfTen fromOne fromZero
+				local toGn   : GlyphNameOfTen toOne   toZero
+				BuildTen toGn toOne toZero
+				ra.push { gr fromGn toGn }
+
+			applyRelations ra

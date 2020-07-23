@@ -1,0 +1,842 @@
+###### GEOMETRIC SHAPES
+$$include '../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../support/utils'
+import [designParameters] from '../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Geometric : begin
+	glyph-block-import CommonShapes
+
+	### Standard geometric shapes
+	for-width-kinds WideWidth1
+		define leftFW : 0 + SB * MosaicWidthScalar
+		define rightFW : MosaicWidth - SB * MosaicWidthScalar
+		define squareRadiusFW : (rightFW - leftFW) / 2
+		define topFW : symbolMid + squareRadiusFW
+		define bottomFW : symbolMid - squareRadiusFW
+
+		define scaffold : DivFrame MosaicWidthScalar
+
+		define [hollowScale w s] : (w - [fallback s GeometryStroke]) / w
+
+		define [hollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
+			set-width MosaicWidth
+			currentGlyph.dependsOn : query-glyph oldid
+			local zoom : hollowScale squareRadiusFW
+			include : difference
+				create-glyph : glyph-construction
+					include : refer-glyph oldid
+				create-glyph : glyph-construction
+					include : refer-glyph oldid
+					include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] [fallback zx zoom] [fallback zy zx zoom]
+			include : into-unicode unicode
+
+		define [hollowWithCenter newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
+			set-width MosaicWidth
+			currentGlyph.dependsOn : query-glyph oldid
+			local zoom : hollowScale squareRadiusFW
+			local zx1 : mix [fallback zx zoom] 1 0.25
+			local zx2 : mix zx1 0 0.5
+			local zy1 : mix [fallback zy zx zoom] 1 0.25
+			local zy2 : mix zy1 0 0.5
+			include : union
+				difference
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+						include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] zx1 zy1
+				create-glyph : glyph-construction
+					include : refer-glyph oldid
+					include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] zx2 zy2
+			include : into-unicode unicode
+
+		define [doubleHollow newid unicode oldid zx zy cx cy] : create-glyph newid : glyph-construction
+			set-width MosaicWidth
+			currentGlyph.dependsOn : query-glyph oldid
+			local zoom : hollowScale squareRadiusFW
+			local zx1 : mix [fallback zx zoom] 1 0.25
+			local zx2 : [mix zx1 0 0.5] + (1 - zx1) / 2
+			local zx3 : zx2 - (1 - zx1)
+			local zy1 : mix [fallback zy zx zoom] 1 0.25
+			local zy2 : [mix zy1 0 0.5] + (1 - zy1) / 2
+			local zy3 : zy2 - (1 - zy1)
+			include : union
+				difference
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+						include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] zx1 zy1
+				difference
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+						include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] zx2 zy2
+					create-glyph : glyph-construction
+						include : refer-glyph oldid
+						include : FlipAround [fallback cx MosaicMiddle] [fallback cy symbolMid] zx3 zy3
+			include : into-unicode unicode
+
+		define [resized newid unicode id x y s sy] : create-glyph newid : glyph-construction
+			set-width MosaicWidth
+			include [refer-glyph id] AS_BASE
+			include : FlipAround x y s [fallback sy s]
+			include : into-unicode unicode
+
+		define [UpperHalfMask] : Rect (symbolMid + squareRadiusFW * 2) symbolMid 0 MosaicWidth
+		define [LowerHalfMask] : Rect symbolMid (symbolMid - squareRadiusFW * 2) 0 MosaicWidth
+		define [LeftHalfMask]  : Rect (symbolMid + squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2) 0 MosaicMiddle
+		define [RightHalfMask] : Rect (symbolMid + squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2) MosaicMiddle MosaicWidth
+		define [UpperLeftQuarterMark]  : intersection [UpperHalfMask] [LeftHalfMask]
+		define [UpperRightQuarterMark] : intersection [UpperHalfMask] [RightHalfMask]
+		define [LowerLeftQuarterMark]  : intersection [LowerHalfMask] [LeftHalfMask]
+		define [LowerRightQuarterMark] : intersection [LowerHalfMask] [RightHalfMask]
+		define [UpperLeftHalfMark]  : spiro-outline
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+		define [LowerRightHalfMark] : spiro-outline
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+		define [UpperRightHalfMark]  : spiro-outline
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+		define [LowerLeftHalfMark] : spiro-outline
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+			corner  (MosaicMiddle - squareRadiusFW * 2) (symbolMid + squareRadiusFW * 2)
+			corner  (MosaicMiddle + squareRadiusFW * 2) (symbolMid - squareRadiusFW * 2)
+
+		sketch # blacksquare
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid - squareRadiusFW)
+				corner leftFW (symbolMid - squareRadiusFW)
+			save [MangleName 'blacksquare'] [MangleUnicode 0x25A0]
+		sketch # smallblacksquare
+			set-width MosaicWidth
+			local r : squareRadiusFW * designParameters.geometric_small_x
+			include : spiro-outline
+				corner (MosaicMiddle - r) (symbolMid + r)
+				corner (MosaicMiddle + r) (symbolMid + r)
+				corner (MosaicMiddle + r) (symbolMid - r)
+				corner (MosaicMiddle - r) (symbolMid - r)
+			save [MangleName 'smallblacksquare'] [MangleUnicode 0x25AA]
+		sketch # blacktrianglerb
+			set-width MosaicWidth
+			include : spiro-outline
+				corner rightFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid - squareRadiusFW)
+				corner leftFW (symbolMid - squareRadiusFW)
+			save [MangleName 'blacktrianglerb'] [MangleUnicode 0x25E2]
+		sketch # blacktrianglelb
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid - squareRadiusFW)
+				corner leftFW (symbolMid - squareRadiusFW)
+			save [MangleName 'blacktrianglelb'] [MangleUnicode 0x25E3]
+		sketch # blacktrianglelt
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid + squareRadiusFW)
+				corner leftFW (symbolMid - squareRadiusFW)
+			save [MangleName 'blacktrianglelt'] [MangleUnicode 0x25E4]
+		sketch # blacktrianglert
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid + squareRadiusFW)
+				corner rightFW (symbolMid - squareRadiusFW)
+			save [MangleName 'blacktrianglert'] [MangleUnicode 0x25E5]
+		sketch # blackrectangle
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW / 1.5)
+				corner rightFW (symbolMid + squareRadiusFW / 1.5)
+				corner rightFW (symbolMid - squareRadiusFW / 1.5)
+				corner leftFW (symbolMid - squareRadiusFW / 1.5)
+			save [MangleName 'blackrectangle'] [MangleUnicode 0x25AC]
+		sketch # blackparallelogram
+			set-width MosaicWidth
+			define skew : squareRadiusFW * 1 / 4
+			include : spiro-outline
+				corner (leftFW + skew) (symbolMid + squareRadiusFW / 1.5)
+				corner (rightFW + skew) (symbolMid + squareRadiusFW / 1.5)
+				corner (rightFW - skew) (symbolMid - squareRadiusFW / 1.5)
+				corner (leftFW - skew) (symbolMid - squareRadiusFW / 1.5)
+			save [MangleName 'blackparallelogram'] [MangleUnicode 0x25B0]
+
+		sketch # whiteparallelogram
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'blackparallelogram'
+				glyph-construction
+					define skew : squareRadiusFW * 1 / 4
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat (leftFW + skew) (symbolMid + squareRadiusFW / 1.5)
+						curl (rightFW + skew) (symbolMid + squareRadiusFW / 1.5)
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat (rightFW + skew) (symbolMid + squareRadiusFW / 1.5)
+						curl (rightFW - skew) (symbolMid - squareRadiusFW / 1.5)
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat (rightFW - skew) (symbolMid - squareRadiusFW / 1.5)
+						curl (leftFW - skew) (symbolMid - squareRadiusFW / 1.5)
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat (leftFW - skew) (symbolMid - squareRadiusFW / 1.5)
+						curl (leftFW + skew) (symbolMid + squareRadiusFW / 1.5)
+
+			save [MangleName 'whiteparallelogram'] [MangleUnicode 0x25B1]
+
+		sketch # blacklongrectangle
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW (symbolMid + squareRadiusFW * 1.5)
+				corner rightFW (symbolMid + squareRadiusFW * 1.5)
+				corner rightFW (symbolMid - squareRadiusFW * 1.5)
+				corner leftFW (symbolMid - squareRadiusFW * 1.5)
+			save [MangleName 'blacklongrectangle'] [MangleUnicode 0x25AE]
+
+
+		define triangleOvershoot : 2 / [Math.sqrt 3]
+		sketch # blacktriangleup
+			set-width MosaicWidth
+			include : spiro-outline
+				corner MosaicMiddle (symbolMid + squareRadiusFW)
+				corner [mix MosaicMiddle rightFW triangleOvershoot] (symbolMid - squareRadiusFW)
+				corner [mix MosaicMiddle leftFW triangleOvershoot] (symbolMid - squareRadiusFW)
+			save [MangleName 'blacktriangleup'] [MangleUnicode 0x25B2]
+
+		sketch # blacktriangledown
+			set-width MosaicWidth
+			include : spiro-outline
+				corner MosaicMiddle (symbolMid - squareRadiusFW)
+				corner [mix MosaicMiddle leftFW triangleOvershoot] (symbolMid + squareRadiusFW)
+				corner [mix MosaicMiddle rightFW triangleOvershoot] (symbolMid + squareRadiusFW)
+			save [MangleName 'blacktriangledown'] [MangleUnicode 0x25BC]
+
+		sketch # blacktriangleleft
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW symbolMid
+				corner rightFW (symbolMid - squareRadiusFW * triangleOvershoot)
+				corner rightFW (symbolMid + squareRadiusFW * triangleOvershoot)
+			save [MangleName 'blacktriangleleft'] [MangleUnicode 0x25C0]
+
+		sketch # blacktriangleright
+			set-width MosaicWidth
+			include : spiro-outline
+				corner rightFW symbolMid
+				corner leftFW (symbolMid + squareRadiusFW * triangleOvershoot)
+				corner leftFW (symbolMid - squareRadiusFW * triangleOvershoot)
+			save [MangleName 'blacktriangleright'] [MangleUnicode 0x25B6]
+
+		sketch # thinblacktriangleleft
+			set-width MosaicWidth
+			include : spiro-outline
+				corner leftFW symbolMid
+				corner rightFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+				corner rightFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+			save [MangleName 'thinblacktriangleleft'] [MangleUnicode 0x25C4]
+
+		sketch # thinwhitetriangleleft
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'thinblacktriangleleft'
+				union
+					dispiro
+						widths.lhs GeometryStroke
+						corner leftFW symbolMid
+						corner rightFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+					dispiro
+						widths.lhs GeometryStroke
+						corner rightFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+						corner rightFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+					dispiro
+						widths.lhs GeometryStroke
+						corner rightFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+						corner leftFW symbolMid
+			save [MangleName 'thinwhitetriangleleft'] [MangleUnicode 0x25C5]
+
+		sketch # thinblacktriangleright
+			set-width MosaicWidth
+			include : spiro-outline
+				corner rightFW symbolMid
+				corner leftFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+				corner leftFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+			save [MangleName 'thinblacktriangleright'] [MangleUnicode 0x25BA]
+
+		sketch # thinwhitetriangleright
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'thinblacktriangleright'
+				union
+					dispiro
+						widths.rhs GeometryStroke
+						corner rightFW symbolMid
+						corner leftFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+					dispiro
+						widths.rhs GeometryStroke
+						corner leftFW (symbolMid - squareRadiusFW * triangleOvershoot * 0.618)
+						corner leftFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+					dispiro
+						widths.rhs GeometryStroke
+						corner leftFW (symbolMid + squareRadiusFW * triangleOvershoot * 0.618)
+						corner rightFW symbolMid
+			save [MangleName 'thinwhitetriangleright'] [MangleUnicode 0x25BB]
+
+		sketch # blackdiamond
+			set-width MosaicWidth
+			include : spiro-outline
+				corner MosaicMiddle (symbolMid + squareRadiusFW)
+				corner rightFW symbolMid
+				corner MosaicMiddle (symbolMid - squareRadiusFW)
+				corner leftFW symbolMid
+			save [MangleName 'blackdiamond'] [MangleUnicode 0x25C6]
+
+		sketch # blackLonzenge
+			set-width MosaicWidth
+			include : spiro-outline
+				corner MosaicMiddle (symbolMid + squareRadiusFW)
+				corner [mix MosaicMiddle rightFW (2 / 3)] symbolMid
+				corner MosaicMiddle (symbolMid - squareRadiusFW)
+				corner [mix MosaicMiddle leftFW (2 / 3)] symbolMid
+			save [MangleName 'blackLonzenge'] [MangleUnicode 0x29EB]
+
+		sketch # whiteLonzenge
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'blackLonzenge'
+				create-glyph : glyph-construction
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat MosaicMiddle (symbolMid + squareRadiusFW)
+						curl [mix MosaicMiddle rightFW (2 / 3)] symbolMid
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat [mix MosaicMiddle rightFW (2 / 3)] symbolMid
+						curl MosaicMiddle (symbolMid - squareRadiusFW)
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat MosaicMiddle (symbolMid - squareRadiusFW)
+						curl [mix MosaicMiddle leftFW (2 / 3)] symbolMid
+					include : dispiro
+						widths.rhs GeometryStroke
+						flat [mix MosaicMiddle leftFW (2 / 3)] symbolMid
+						curl MosaicMiddle (symbolMid + squareRadiusFW)
+			save [MangleName 'whiteLonzenge'] [MangleUnicode 0x25CA]
+
+		sketch # blackcircle
+			set-width MosaicWidth
+			include scaffold.markSet.plus
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + squareRadiusFW + O)
+				g4 (leftFW - O) symbolMid
+				g4 MosaicMiddle (symbolMid - squareRadiusFW - O)
+				g4 (rightFW + O) symbolMid
+				close
+			save [MangleName 'blackcircleO']
+
+		sketch # blackcircle
+			set-width MosaicWidth
+			include scaffold.markSet.plus
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + squareRadiusFW)
+				g4 leftFW symbolMid
+				g4 MosaicMiddle (symbolMid - squareRadiusFW)
+				g4 rightFW symbolMid
+				close
+			save [MangleName 'blackcircle'] [MangleUnicode 0x25CF]
+
+		sketch # leftblackcircle
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'blackcircle'
+				spiro-outline
+					corner (0 - MosaicWidth) (symbolMid - squareRadiusFW * 2)
+					corner (MosaicWidth / 2) (symbolMid - squareRadiusFW * 2)
+					corner (MosaicWidth / 2) (symbolMid + squareRadiusFW * 2)
+					corner (0 - MosaicWidth) (symbolMid + squareRadiusFW * 2)
+			save [MangleName 'leftblackcircle'] [MangleUnicode 0x25D6]
+
+		sketch # rightblackcircle
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'blackcircle'
+				spiro-outline
+					corner (MosaicWidth * 2) (symbolMid - squareRadiusFW * 2)
+					corner (MosaicWidth / 2) (symbolMid - squareRadiusFW * 2)
+					corner (MosaicWidth / 2) (symbolMid + squareRadiusFW * 2)
+					corner (MosaicWidth * 2) (symbolMid + squareRadiusFW * 2)
+			save [MangleName 'rightblackcircle'] [MangleUnicode 0x25D7]
+
+		sketch # smallblackcircle
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + squareRadiusFW * designParameters.geometric_small_x)
+				g4 (MosaicMiddle - squareRadiusFW * designParameters.geometric_small_x) symbolMid
+				g4 MosaicMiddle (symbolMid - squareRadiusFW * designParameters.geometric_small_x)
+				g4 (MosaicMiddle + squareRadiusFW * designParameters.geometric_small_x) symbolMid
+				close
+			save [MangleName 'smallblackcircle']
+
+		sketch # bigblackcircle
+			set-width MosaicWidth
+			define scale : designParameters.GeometricLargeX MosaicWidth MosaicUnitWidth
+			include : spiro-outline
+				g4 MosaicMiddle (symbolMid + squareRadiusFW * scale)
+				g4 (MosaicMiddle - squareRadiusFW * scale) symbolMid
+				g4 MosaicMiddle (symbolMid - squareRadiusFW * scale)
+				g4 (MosaicMiddle + squareRadiusFW * scale) symbolMid
+				close
+			save [MangleName 'bigblackcircle'] [MangleUnicode 0x2B24]
+
+		let
+		: cfg : list
+			* {.sides 5 .skip 2 .name 'blackstar' .unicode 0x2605 .overflow 1.1 .phase 0}
+			* {.sides 5 .skip 1 .name 'blackpentagon' .unicode 0x2B1F .overflow 1.05 .phase 0}
+			* {.sides 6 .skip 1 .name 'blackhexagon' .unicode 0x2B22 .overflow 1.05 .phase 0}
+			* {.sides 5 .skip 1 .name 'rhblackpentagon' .unicode 0x2B53 .overflow 1.05 .phase (-Math.PI / 2)}
+			* {.sides 6 .skip 1 .name 'hblackhexagon' .unicode 0x2B23 .overflow 1.05 .phase (Math.PI / 2)}
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
+			set-width MosaicWidth
+			local corners {}
+			foreach [j : range 0 sides] : begin
+				local angle : 2 * Math.PI * j * skip / sides + phase
+				corners.push : corner
+					mix leftFW rightFW (0.5 - 0.5 * overflow * [Math.sin angle])
+					symbolMid + squareRadiusFW * [Math.cos angle] * overflow
+			include : spiro-outline corners
+			save [MangleName name] [MangleUnicode unicode]
+
+		let
+		: cfg : list
+			* {.sides 6 .skip 1 .name 'SixPointedBlackStar' .unicode 0x2736 .overflow 1.05 .phase 0}
+		: foreach [[object sides skip name unicode overflow phase] : items-of cfg] : sketch
+			set-width MosaicWidth
+			local corners {}
+			foreach [j : range 0 (2 * sides)] : begin
+				local angle : Math.PI * j * skip / sides + phase
+				local mag : [if (j % 2) 0.5 1.0] * overflow
+				corners.push : corner
+					mix leftFW rightFW (0.5 - 0.5 * mag * [Math.sin angle])
+					symbolMid + squareRadiusFW * mag * [Math.cos angle]
+			include : spiro-outline corners
+			save [MangleName name] [MangleUnicode unicode]
+
+		sketch # dottedcircle
+			set-width MosaicWidth
+			local n : 12 * [Math.ceil MosaicWidthScalar]
+			local fine : adviceBlackness 10
+			foreach j [range 0 n] : begin
+				local angle : Math.PI * 2 * j / n
+				local cx : MosaicMiddle + (rightFW - MosaicMiddle) * [Math.cos angle]
+				local cy : symbolMid + (rightFW - MosaicMiddle) * [Math.sin angle]
+				include : spiro-outline
+					g4 cx (cy + fine)
+					g4 (cx + fine) cy
+					g4 cx (cy - fine)
+					g4 (cx - fine) cy
+					close
+
+			include scaffold.markSet.plus
+			save [MangleName 'dottedcircle'] [MangleUnicode 0x25CC]
+
+		hollow [MangleName 'whitesquare'] [MangleUnicode 0x25A1] [MangleName 'blacksquare']
+		hollowWithCenter [MangleName 'whitesquareWithCenter'] [MangleUnicode 0x25A3] [MangleName 'blacksquare']
+		hollow [MangleName 'whitehexagon'] [MangleUnicode 0x2B21] [MangleName 'blackhexagon']
+		hollow [MangleName 'whitepentagon'] [MangleUnicode 0x2B20] [MangleName 'blackpentagon']
+		hollow [MangleName 'rhwhitepentagon'] [MangleUnicode 0x2B54] [MangleName 'rhblackpentagon']
+		hollow [MangleName 'whiterectangle'] [MangleUnicode 0x25AD] [MangleName 'blackrectangle'] [hollowScale squareRadiusFW] [hollowScale (squareRadiusFW / 1.5)]
+		hollow [MangleName 'whitelongrectangle'] [MangleUnicode 0x25AF] [MangleName 'blacklongrectangle'] [hollowScale squareRadiusFW] [hollowScale (squareRadiusFW * 1.5)]
+
+		hollow [MangleName 'whitecircle'] [MangleUnicode 0x25CB] [MangleName 'blackcircle']
+		hollowWithCenter [MangleName 'whitecircleWithCenter'] [MangleUnicode 0x25C9] [MangleName 'blackcircle']
+		doubleHollow [MangleName 'doubleWhitecircle'] [MangleUnicode 0x25CE] [MangleName 'blackcircle']
+		hollow [MangleName 'bigwhitecircle'] [MangleUnicode 0x25EF] [MangleName 'bigblackcircle'] [hollowScale : squareRadiusFW * [designParameters.GeometricLargeX MosaicWidth MosaicUnitWidth]]
+		hollow [MangleName 'smallwhitecircle'] null [MangleName 'smallblackcircle'] [hollowScale : squareRadiusFW * designParameters.geometric_small_x]
+		hollow [MangleName 'smallwhitesquare'] [MangleUnicode 0x25AB] [MangleName 'smallblacksquare'] [hollowScale : squareRadiusFW * designParameters.geometric_small_x]
+		do
+			define s : hollowScale squareRadiusFW (GeometryStroke * [Math.sqrt 2])
+			hollow [MangleName 'whitediamond'] [MangleUnicode 0x25C7] [MangleName 'blackdiamond'] s
+			hollowWithCenter [MangleName 'whitediamondWithCenter'] [MangleUnicode 0x25C8] [MangleName 'blackdiamond'] s
+
+			resized [MangleName 'smallblacktriangleup'] [MangleUnicode 0x25B4] [MangleName 'blacktriangleup'] MosaicMiddle symbolMid 0.75
+			resized [MangleName 'smallblacktriangleright'] [MangleUnicode 0x25B8] [MangleName 'blacktriangleright'] MosaicMiddle symbolMid 0.75
+			resized [MangleName 'smallblacktriangledown'] [MangleUnicode 0x25BE] [MangleName 'blacktriangledown'] MosaicMiddle symbolMid 0.75
+			resized [MangleName 'smallblacktriangleleft'] [MangleUnicode 0x25C2] [MangleName 'blacktriangleleft'] MosaicMiddle symbolMid 0.75
+
+			define sts 0.75
+			define sl : hollowScale (squareRadiusFW * 2 / [Math.sqrt 3]) (GeometryStroke * [Math.sqrt 3])
+			define spt : hollowScale (squareRadiusFW * 2 / [Math.sqrt 5]) ([adviceBlackness 5 scaffold.div] * [Math.sqrt 5])
+			define slt : hollowScale (squareRadiusFW * 2 / [Math.sqrt 3]) (GeometryStroke * [Math.sqrt 3])
+			define ss : hollowScale (squareRadiusFW * sts * 2 / [Math.sqrt 3]) (GeometryStroke * [Math.sqrt 3])
+
+			hollow [MangleName 'whitetriangleup'] [MangleUnicode 0x25B3] [MangleName 'blacktriangleup'] sl nothing MosaicMiddle (symbolMid - squareRadiusFW / 3)
+			hollow [MangleName 'whitetriangledown'] [MangleUnicode 0x25BD] [MangleName 'blacktriangledown'] sl nothing MosaicMiddle (symbolMid + squareRadiusFW / 3)
+			hollow [MangleName 'whitetriangleleft'] [MangleUnicode 0x25C1] [MangleName 'blacktriangleleft'] sl nothing [mix MosaicMiddle rightFW (1 / 3)] symbolMid
+			hollow [MangleName 'whitetriangleright'] [MangleUnicode 0x25B7] [MangleName 'blacktriangleright'] sl nothing [mix MosaicMiddle leftFW (1 / 3)] symbolMid
+			hollow [MangleName 'smallwhitetriangleup'] [MangleUnicode 0x25B5] [MangleName 'smallblacktriangleup'] ss nothing MosaicMiddle (symbolMid - squareRadiusFW / 3 * sts)
+			hollow [MangleName 'smallwhitetriangledown'] [MangleUnicode 0x25BF] [MangleName 'smallblacktriangledown'] ss nothing MosaicMiddle (symbolMid + squareRadiusFW / 3 * sts)
+			hollow [MangleName 'smallwhitetriangleleft'] [MangleUnicode 0x25C3] [MangleName 'smallblacktriangleleft'] ss nothing [mix MosaicMiddle rightFW (sts / 3)] symbolMid
+			hollow [MangleName 'smallwhitetriangleright'] [MangleUnicode 0x25B9] [MangleName 'smallblacktriangleright'] ss nothing [mix MosaicMiddle leftFW (sts / 3)] symbolMid
+			hollow [MangleName 'whitestar'] [MangleUnicode 0x2606] [MangleName 'blackstar'] spt
+
+		# Rounded
+		sketch # roundwhitesquare, U+25A2
+			set-width MosaicWidth
+			define cr : squareRadiusFW - GeometryStroke * 2
+			include : dispiro
+				widths.lhs GeometryStroke
+				flat (MosaicMiddle + 1) (symbolMid + squareRadiusFW) [heading Leftward]
+				curl (MosaicMiddle - cr) (symbolMid + squareRadiusFW) [heading Leftward]
+				archv
+				flat (MosaicMiddle - squareRadiusFW) (symbolMid + cr) [heading Downward]
+				curl (MosaicMiddle - squareRadiusFW) (symbolMid - cr) [heading Downward]
+				arcvh
+				flat (MosaicMiddle - cr) (symbolMid - squareRadiusFW) [heading Rightward]
+				curl (MosaicMiddle + cr) (symbolMid - squareRadiusFW) [heading Rightward]
+				archv
+				flat (MosaicMiddle + squareRadiusFW) (symbolMid - cr) [heading Upward]
+				curl (MosaicMiddle + squareRadiusFW) (symbolMid + cr) [heading Upward]
+				arcvh
+				flat (MosaicMiddle + cr) (symbolMid + squareRadiusFW) [heading Leftward]
+				curl (MosaicMiddle - 1) (symbolMid + squareRadiusFW) [heading Leftward]
+			save [MangleName 'roundwhitesquare'] [MangleUnicode 0x25A2]
+
+		define [ThickRoundedArrowBar x1 y1 x2 y2 r w] : glyph-construction
+			include : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
+				g4 (-r) 0
+				arcvh
+				flat 0 r
+				curl mag r
+				archv
+				g4 (mag + r) 0
+				arcvh
+				flat mag (-r)
+				curl 0 (-r)
+				archv
+				close
+
+		sketch
+			set-width MosaicWidth
+			local inner : [Math.max [adviceBlackness 3] (Width / 8)] / 2
+			local thick : adviceBlackness 4
+			local left : leftFW + (inner + thick)
+			local right : rightFW - (inner + thick)
+			local bot : bottomFW + (inner + thick)
+			local top : topFW - (inner + thick)
+			include : difference
+				union
+					ThickRoundedArrowBar left top right bot (inner + thick) 0
+					ThickRoundedArrowBar right top left bot (inner + thick) 0
+				union
+					ThickRoundedArrowBar left top right bot inner 0
+					ThickRoundedArrowBar right top left bot inner 0
+			save [MangleName "whiteHeavySaltireWithRoundedCorners"] [MangleUnicode 0x1FBC0 WideWidth2]
+
+		# Shaded hollow squares
+		define [HShadeShape] : begin
+			define lineWidth : Math.min GeometryStroke ((squareRadiusFW * 2 - GeometryStroke * 2) * 1 / 11)
+			define top : symbolMid + squareRadiusFW - GeometryStroke + lineWidth / 2
+			define bot : symbolMid - (top - symbolMid)
+			return : union
+				dispiro
+					widths.center lineWidth
+					flat leftFW [mix top bot 0.25] [heading Rightward]
+					curl rightFW [mix top bot 0.25] [heading Rightward]
+				dispiro
+					widths.center lineWidth
+					flat leftFW [mix top bot 0.5] [heading Rightward]
+					curl rightFW [mix top bot 0.5] [heading Rightward]
+				dispiro
+					widths.center lineWidth
+					flat leftFW [mix top bot 0.75] [heading Rightward]
+					curl rightFW [mix top bot 0.75] [heading Rightward]
+
+		sketch # hshadesquare, U+25A4
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					HShadeShape
+			save [MangleName 'hshadesquare'] [MangleUnicode 0x25A4]
+
+		define [VShadeShape] : begin
+			define lineWidth : Math.min GeometryStroke ((squareRadiusFW * 2 - GeometryStroke * 2) * 1 / 11)
+			define r : MosaicWidth / 2 + squareRadiusFW - GeometryStroke + lineWidth / 2
+			define l : MosaicWidth / 2 - (r - MosaicWidth / 2)
+			return : union
+				dispiro
+					widths.center lineWidth
+					flat [mix l r 0.25] topFW [heading Downward]
+					curl [mix l r 0.25] bottomFW [heading Downward]
+				dispiro
+					widths.center lineWidth
+					flat [mix l r 0.5] topFW [heading Downward]
+					curl [mix l r 0.5] bottomFW [heading Downward]
+				dispiro
+					widths.center lineWidth
+					flat [mix l r 0.75] topFW [heading Downward]
+					curl [mix l r 0.75] bottomFW [heading Downward]
+
+		define [VBarShadeShape] : begin
+			define lineWidth : Math.min GeometryStroke ((squareRadiusFW * 2 - GeometryStroke * 2) * 1 / 11)
+			define r : MosaicWidth / 2 + squareRadiusFW - GeometryStroke + lineWidth / 2
+			define l : MosaicWidth / 2 - (r - MosaicWidth / 2)
+			return : union
+				dispiro
+					widths.center lineWidth
+					flat [mix l r 0.5] topFW [heading Downward]
+					curl [mix l r 0.5] bottomFW [heading Downward]
+
+		sketch # vshadesquare, U+25A5
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					VShadeShape
+			save [MangleName 'vshadesquare'] [MangleUnicode 0x25A5]
+
+		sketch # vBarSquare, U+25EB
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					VBarShadeShape
+			save [MangleName 'vBarSquare'] [MangleUnicode 0x25EB]
+
+		sketch # hvshadesquare, U+25A6
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'hshadesquare'
+				refer-glyph : MangleName 'vshadesquare'
+			save [MangleName 'hvshadesquare'] [MangleUnicode 0x25A6]
+
+		define [DDiagShadeShape] : begin
+			define lineWidth : Math.min GeometryStroke ((squareRadiusFW * 2 - GeometryStroke * 2) * 1 / 11)
+			define top : symbolMid + squareRadiusFW
+			define bot : symbolMid - (top - symbolMid)
+			return : glyph-construction
+				foreach [j : range (-10) till 10] : include : dispiro
+					widths.center lineWidth
+					flat leftFW [mix top bot (j / 4)] [heading Rightward]
+					curl rightFW [mix top bot (j / 4 + 1)] [heading Rightward]
+
+		define [UDiagShadeShape] : begin
+			define lineWidth : Math.min GeometryStroke ((squareRadiusFW * 2 - GeometryStroke * 2) * 1 / 11)
+			define top : symbolMid + squareRadiusFW
+			define bot : symbolMid - (top - symbolMid)
+			return : glyph-construction
+				foreach [j : range (-10) till 10] : include : dispiro
+					widths.center lineWidth
+					flat leftFW [mix top bot (j / 4)] [heading Rightward]
+					curl rightFW [mix top bot (j / 4 - 1)] [heading Rightward]
+
+		sketch # ddiagshadesquare, U+25A7
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					DDiagShadeShape
+			save [MangleName 'ddiagshadesquare'] [MangleUnicode 0x25A7]
+
+		sketch # udiagshadesquare, U+25A8
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					UDiagShadeShape
+			save [MangleName 'udiagshadesquare'] [MangleUnicode 0x25A8]
+
+		sketch # uddiagshadesquare, U+25A9
+			set-width MosaicWidth
+			include : union [refer-glyph : MangleName 'ddiagshadesquare'] [refer-glyph : MangleName 'udiagshadesquare']
+			save [MangleName 'uddiagshadesquare'] [MangleUnicode 0x25A9]
+
+		define [CircleMarkShape] : begin
+			define r : squareRadiusFW - GeometryStroke / 2
+			return : spiro-outline
+				g4 MosaicMiddle (symbolMid + r)
+				g4 (MosaicMiddle - r) symbolMid
+				g4 MosaicMiddle (symbolMid - r)
+				g4 (MosaicMiddle + r) symbolMid
+				close
+		sketch # vshadeCircle, U+25A5
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitecircle'
+				intersection [CircleMarkShape] [VShadeShape]
+			save [MangleName 'vshadeCircle'] [MangleUnicode 0x25CD]
+
+		# partial circles
+		define partialCircleQuarters : list
+			list 0x25D0 1 1 0 0
+			list 0x25D1 0 0 1 1
+			list 0x25D2 0 1 0 1
+			list 0x25D3 1 0 1 0
+			list 0x25D4 0 0 1 0
+			list 0x25D5 0 1 1 1
+		foreach [{u LT LB RT RB} : items-of partialCircleQuarters] : sketch
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitecircle'
+				intersection
+					CircleMarkShape
+					create-glyph : glyph-construction
+						if LT : include : UpperLeftQuarterMark
+						if LB : include : LowerLeftQuarterMark
+						if RT : include : UpperRightQuarterMark
+						if RB : include : LowerRightQuarterMark
+			save [MangleName ('uni' + u)] [MangleUnicode u]
+
+		define arcQuarters : list
+			list 0x25DC 1 0 0 0
+			list 0x25DD 0 0 1 0
+			list 0x25DE 0 0 0 1
+			list 0x25DF 0 1 0 0
+			list 0x25E0 1 0 1 0
+			list 0x25E1 0 1 0 1
+		foreach [{u LT LB RT RB} : items-of arcQuarters] : sketch
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'whitecircle'
+				create-glyph : glyph-construction
+					if LT : include : UpperLeftQuarterMark
+					if LB : include : LowerLeftQuarterMark
+					if RT : include : UpperRightQuarterMark
+					if RB : include : LowerRightQuarterMark
+			save [MangleName ('uni' + u)] [MangleUnicode u]
+
+		# Partial square
+		define squareParts : list
+			list 0x25E7 1 1 0 0 0 0 0 0
+			list 0x25E8 0 0 1 1 0 0 0 0
+			list 0x25E9 0 0 0 0 1 0 0 0
+			list 0x2B14 0 0 0 0 0 0 1 0
+			list 0x2B15 0 0 0 0 0 1 0 0
+			list 0x25EA 0 0 0 0 0 0 0 1
+		foreach [{u LT LB RT RB LTh LBh RTh RBh} : items-of squareParts] : sketch
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitesquare'
+				intersection
+					refer-glyph : MangleName 'blacksquare'
+					create-glyph : glyph-construction
+						if LT : include : UpperLeftQuarterMark
+						if LB : include : LowerLeftQuarterMark
+						if RT : include : UpperRightQuarterMark
+						if RB : include : LowerRightQuarterMark
+						if LTh : include : UpperLeftHalfMark
+						if LBh : include : LowerLeftHalfMark
+						if RTh : include : UpperRightHalfMark
+						if RBh : include : LowerRightHalfMark
+			save [MangleName ('uni' + u)] [MangleUnicode u]
+
+		# Partial diamond
+		define diamondParts : list
+			list 0x2B16 1 1 0 0
+			list 0x2B17 0 0 1 1
+			list 0x2B18 1 0 1 0
+			list 0x2B19 0 1 0 1
+		foreach [{u LT LB RT RB LTh LBh RTh RBh} : items-of diamondParts] : sketch
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitediamond'
+				intersection
+					refer-glyph : MangleName 'blackdiamond'
+					create-glyph : glyph-construction
+						if LT : include : UpperLeftQuarterMark
+						if LB : include : LowerLeftQuarterMark
+						if RT : include : UpperRightQuarterMark
+						if RB : include : LowerRightQuarterMark
+			save [MangleName ('uni' + u)] [MangleUnicode u]
+
+		# Partial triangle
+		define triangleParts : list
+			list 0x25ED 1 1 0 0
+			list 0x25EE 0 0 1 1
+		foreach [{u LT LB RT RB LTh RBh} : items-of triangleParts] : sketch
+			set-width MosaicWidth
+			include : union
+				refer-glyph : MangleName 'whitetriangleup'
+				intersection
+					refer-glyph : MangleName 'blacktriangleup'
+					create-glyph : glyph-construction
+						if LT : include : UpperLeftQuarterMark
+						if LB : include : LowerLeftQuarterMark
+						if RT : include : UpperRightQuarterMark
+						if RB : include : LowerRightQuarterMark
+						if LTh : include : UpperLeftHalfMark
+						if RBh : include : LowerRightHalfMark
+			save [MangleName ('uni' + u)] [MangleUnicode u]
+
+		sketch
+			set-width MosaicWidth
+			include : refer-glyph : MangleName 'whitetriangleup'
+			include : CircleDotAt MosaicMiddle (symbolMid - squareRadiusFW / 3) [Math.max (Width / 6) GeometryStroke]
+			save [MangleName 'dottedWhiteTriangle'] [MangleUnicode 0x25EC]
+
+		sketch
+			set-width MosaicWidth
+			include : difference
+				refer-glyph : MangleName 'blacklongrectangle'
+				refer-glyph : MangleName 'blackcircle'
+			save [MangleName 'uni25D8'] [MangleUnicode 0x25D8]
+
+		sketch
+			set-width MosaicWidth
+			include : difference
+				refer-glyph : MangleName 'blacklongrectangle'
+				refer-glyph : MangleName 'whitecircle'
+			save [MangleName 'uni25D9'] [MangleUnicode 0x25D9]
+
+		sketch
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'uni25D9'
+				UpperHalfMask
+			save [MangleName 'uni25DA'] [MangleUnicode 0x25DA]
+
+		sketch
+			set-width MosaicWidth
+			include : intersection
+				refer-glyph : MangleName 'uni25D9'
+				LowerHalfMask
+			save [MangleName 'uni25DB'] [MangleUnicode 0x25DB]
+
+		sketch # blackSunWithRays, whiteSunWithRays
+			set-width MosaicWidth
+			local dotRadius : squareRadiusFW * 0.44
+			local rayInnerRadius : squareRadiusFW * 0.56
+			local rayWidth : adviceBlackness 8 MosaicWidthScalar
+			foreach [n : range 0 8] : begin
+				local theta : n / 8 * Math.PI * 2
+				local c : Math.cos theta
+				local s : Math.sin theta
+				include : dispiro
+					widths.center rayWidth
+					corner (MosaicMiddle + c * rayInnerRadius) (symbolMid + s * rayInnerRadius)
+					corner (MosaicMiddle + c * squareRadiusFW) (symbolMid + s * squareRadiusFW)
+
+			branch
+				include : RingAt MosaicMiddle symbolMid dotRadius
+				save [MangleName 'blackSunWithRays'] [MangleUnicode 0x2600]
+			branch
+				include : RingStrokeAt MosaicMiddle symbolMid dotRadius rayWidth
+				save [MangleName 'whiteSunWithRays'] [MangleUnicode 0x263C]

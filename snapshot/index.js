@@ -1,31 +1,37 @@
-console.log("I AN IN ELECTRON");
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
-var dpi = window.devicePixelRatio;
-var ipc = require("electron").ipcRenderer;
+/* eslint-env node, browser */
 
-var onScroll = function() {};
-ipc.on("scroll", function() {
+const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
+const dpi = window.devicePixelRatio;
+const ipc = require("electron").ipcRenderer;
+const packagingTasks = require("./packaging-tasks.json");
+
+let onScroll = function () {};
+ipc.on("scroll", function () {
 	onScroll.apply(this, arguments);
-	setTimeout(function() {
+	setTimeout(function () {
 		ipc.send("snapshot", "scroll-done");
 	}, 500);
 });
-var onComplete = function() {};
-ipc.on("complete", function() {
+let onComplete = function () {};
+ipc.on("complete", function () {
 	onComplete.apply(this, arguments);
 });
 
 function captureElement(options, callback) {
 	window.scroll(0, 0);
-	setTimeout(function() {
-		var rect = options.el.getBoundingClientRect();
-		onScroll = function(event, arg) {
+	setTimeout(function () {
+		const element = document.querySelector(options.el);
+		if (options.applyClass) element.className = options.applyClass;
+		if (options.applyFeature) element.style = "font-feature-settings:" + options.applyFeature;
+
+		const rect = element.getBoundingClientRect();
+		onScroll = function (event, arg) {
 			window.scrollTo(0, arg);
 		};
-		onComplete = function() {
+		onComplete = function () {
 			if (callback) callback();
-			onComplete = function() {};
+			onComplete = function () {};
 		};
 		ipc.send("snapshot", {
 			name: options.name,
@@ -41,49 +47,27 @@ function captureElement(options, callback) {
 	}, 10);
 }
 
-window.onload = function() {
-	var snapshotTasks = [
-		{
-			el: document.querySelector("#languages"),
-			name: "languages"
-		},
-		{
-			el: document.querySelector("#stylesets"),
-			name: "stylesets"
-		},
-		{
-			el: document.querySelector("#charvars"),
-			name: "charvars"
-		},
-		{
-			el: document.querySelector("#matrix"),
-			name: "matrix"
-		},
-		{
-			el: document.querySelector("#previews"),
-			name: "preview-all"
-		},
-		{
-			el: document.querySelector("#weights"),
-			name: "weights"
-		},
-		{
-			el: document.querySelector("#ligations"),
-			name: "ligations",
-			doubleTrim: "white"
-		}
+window.onload = function () {
+	const snapshotTasks = [
+		{ el: "#languages", name: "languages" },
+		{ el: "#stylesets", name: "stylesets" },
+		{ el: "#charvars", name: "charvars" },
+		{ el: "#matrix", name: "matrix" },
+		{ el: "#previews", name: "preview-all" },
+		{ el: "#weights", name: "weights" },
+		{ el: "#ligations", name: "ligations", doubleTrim: "white" },
+		...packagingTasks
 	];
-	var current = 0;
-	var step = function() {
-		var doit = function() {
-			captureElement(snapshotTasks[current], function() {
+	let current = 0;
+	const step = function () {
+		const doit = function () {
+			captureElement(snapshotTasks[current], function () {
 				current += 1;
 				if (current >= snapshotTasks.length) window.close();
 				else setTimeout(step, 100);
 			});
 		};
-		if (snapshotTasks[current].prepare) snapshotTasks[current].prepare(doit);
-		else setTimeout(doit, 100);
+		setTimeout(doit, 100);
 	};
 	ipc.send("snapshot", "i am ready");
 	console.log("I AM READY");

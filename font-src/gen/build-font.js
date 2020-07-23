@@ -1,0 +1,33 @@
+"use strict";
+
+const EmptyFont = require("./empty-font.js");
+const buildGlyphs = require("./build-glyphs.js");
+const finalizeFont = require("./finalize/index");
+
+const { buildOtl } = require("../otl/index");
+const { assignFontNames } = require("../meta/naming");
+const { setFontMetrics } = require("../meta/aesthetics");
+
+module.exports = function (para) {
+	const font = EmptyFont();
+	const gs = buildGlyphs(para);
+
+	assignFontNames(para, gs.metrics, font);
+	setFontMetrics(para, gs.metrics, font);
+
+	const otl = buildOtl(para, gs.glyphs, gs.glyphList, gs.unicodeGlyphs);
+	font.GSUB = otl.GSUB;
+	font.GPOS = otl.GPOS;
+	font.GDEF = otl.GDEF;
+
+	// Regulate
+	const excludeChars = new Set();
+	if (para.excludedCharRanges) {
+		for (const [start, end] of para.excludedCharRanges) {
+			for (let p = start; p <= end; p++) excludeChars.add(p);
+		}
+	}
+
+	finalizeFont(para, [...gs.glyphList], excludeChars, font);
+	return font;
+};
