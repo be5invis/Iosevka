@@ -43,10 +43,16 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
 
 	glyph-block-export RightwardTailedBar
-	define [RightwardTailedBar low high] : dispiro
-		flat RightSB high [widths.rhs.heading Stroke Downward]
-		curl RightSB (low + Hook * 0.5 + Stroke + O * 2)
-		g4   (RightSB + Hook * 0.25) (low + Stroke * 0.75 + O * 2)
+	define [RightwardTailedBar] : params [x low high [sw Stroke]] : begin
+		local hookDepth : Math.max SideJut [adviceBlackness 8] (SB * 0.625)
+		local hookTurn  : Math.max [adviceBlackness 16] (hookDepth - [adviceBlackness 16])
+		local overshoot : O * 1
+		return : dispiro
+			flat (x - HVContrast * sw) high [widths.lhs.heading sw Downward]
+			curl (x - HVContrast * sw) (low + overshoot + sw + hookTurn) [heading Downward]
+			arcvh
+			flat (x + hookTurn)  (low + overshoot) [heading Rightward]
+			curl (x + hookDepth) (low + overshoot) [heading Rightward]
 
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
@@ -1004,7 +1010,7 @@ glyph-block Letter-Latin-Lower-A : begin
 		include : union
 			ADoubleStoreyHookAndBar (XH - ADoubleStoreySmoothB + O)
 			ADoubleStoreyArc
-			RightwardTailedBar 0 (XH - ADoubleStoreySmoothB)
+			RightwardTailedBar RightSB 0 (XH - ADoubleStoreySmoothB)
 
 	create-glyph 'a.singlestorey' : glyph-construction
 		set-width Width
@@ -1028,7 +1034,7 @@ glyph-block Letter-Latin-Lower-A : begin
 		include MarkSet.e
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 		include : OBarRightShape
-		include : RightwardTailedBar 0 XH
+		include : RightwardTailedBar RightSB 0 XH
 
 	select-variant 'a' 'a'
 	alias 'cyra' 0x430 'a'
@@ -2445,6 +2451,7 @@ glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared : CreateDerivedLetter
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
 	define DToothlessRise : Hook * 0.375 + Stroke / 16
 	define DMBlend          0.80
@@ -2460,10 +2467,7 @@ glyph-block Letter-Latin-Lower-D : begin
 	create-glyph 'd.tailed' : glyph-construction
 		include MarkSet.b
 		include : OBarRightShape
-		include : dispiro
-			flat RightSB CAP [widths.rhs.heading Stroke Downward]
-			curl RightSB (Hook * 0.5 + Stroke + O * 2)
-			g4   (RightSB + Hook * 0.25) (Stroke * 0.75 + O * 2)
+		include : RightwardTailedBar RightSB 0 CAP
 		if SLAB : begin
 			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
 
@@ -3671,6 +3675,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Lower-I : TailedIShape
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
 	create-glyph 'q.straight' : glyph-construction
 		set-width Width
@@ -3688,11 +3693,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 		include MarkSet.p
 
 		include : OBarRightShape
-		include : dispiro
-			widths.rhs
-			flat RightSB XH
-			curl RightSB (Descender + Hook * 0.5 + Stroke + O * 2)
-			g4   (RightSB + Hook * 0.25) (Descender + Stroke * 0.75 + O * 2)
+		include : RightwardTailedBar RightSB Descender XH
 		if SLAB : begin
 			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 
@@ -3787,16 +3788,18 @@ glyph-block Letter-Latin-Upper-N : begin
 glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared : CreateDerivedLetter
 
-	sketch # n
+	create-glyph 'n.straight' : glyph-construction
 		set-width Width
 		include MarkSet.e
 
+		include : VBarLeft SB 0 XH
 		include : nShoulder
 			left -- (SB + Stroke * HVContrast)
 			right -- RightSB
 			fine -- ShoulderFine
-		include : VBarLeft SB 0 XH
 
 		if SLAB : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
@@ -3806,19 +3809,36 @@ glyph-block Letter-Latin-Lower-N : begin
 			if (!para.isItalic) : begin
 				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
-		save 'n' 'n'
-		save 'cyrpe.italic'
 
-	sketch # napostrophe
+	create-glyph 'n.tailed' : glyph-construction
+		set-width Width
+		include MarkSet.e
+
+		include : VBarLeft SB 0 XH
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+			fine -- ShoulderFine
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+			if (!para.isItalic) : begin
+				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	select-variant 'n' 'n'
+	alias 'cyrpe.italic' null 'n.straight'
+
+	CreateDerivedLetter 'n' 'nApostrophe' 0x149 : lambda [src srl] : glyph-construction
 		include : refer-glyph "commaAbove"
 		apply-transform : Translate (Width + SB - Middle) 0
-		include [refer-glyph 'n'] AS_BASE
-
-		save 'napostrophe' 0x149
+		include [refer-glyph src] AS_BASE
 
 	sketch # eng
 		include MarkSet.p
-		include [refer-glyph 'n'] false
+		include [refer-glyph 'n.straight'] false
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
@@ -3843,12 +3863,10 @@ glyph-block Letter-Latin-Lower-N : begin
 
 		save 'Eng' 0x14A
 
-	sketch # nltail
-		include [refer-glyph 'n'] AS_BASE
+	CreateDerivedLetter 'n' 'nltail' 0x272 : lambda [src srl] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		eject-contour 'serifLB'
 		include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
-
-		save 'nltail' 0x272
 
 	sketch # ncurlytail
 		local fine : adviceBlackness 4
@@ -3874,6 +3892,7 @@ glyph-block Letter-Latin-Lower-N : begin
 				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 
 		save 'ncurlytail' 0x235
+
 	# eta
 	sketch # eta
 		include MarkSet.p
@@ -3926,7 +3945,6 @@ glyph-block Letter-Latin-Lower-N : begin
 			if (!para.isItalic) : begin
 				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 		save 'latineta' 0x19E
-
 
 glyph-block Letter-Latin-Upper-U : begin
 	glyph-block-import CommonShapes
@@ -3981,7 +3999,7 @@ glyph-block Letter-Latin-Lower-U : begin
 			save 'u.withBar'
 
 		branch
-			include : RightwardTailedBar 0 XH
+			include : RightwardTailedBar RightSB 0 XH
 			if SLAB : begin
 				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
 				include : LeftwardTopSerif SB XH SideJut
@@ -4103,12 +4121,34 @@ glyph-block Letter-Latin-Upper-M : begin
 glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared : CreateDerivedLetter
+
+	define [SmallMShoulderSpiro] : params [left right top bottom width fine diversity] : glyph-construction
+		local fix : TanSlope * Stroke * HVContrast * width / Stroke
+		local sm : SmallSmooth * 0.7 * [fallback diversity 1]
+		include : spiro-outline
+			corner (right - width * HVContrast) bottom
+			curl   (right - width * HVContrast) (top - sm + fix)
+			arcvh 8
+			g2     [mix left (right - width * HVContrast) 0.5] (top - O - width)
+			archv 8
+			flat   left (top - sm - fix)
+			corner left (top - sm - fix - 1)
+			corner (left - fine) (top - sm - 1)
+			curl   (left - fine) (top - sm)
+			arcvh 8
+			g2     [mix (left - fine * HVContrast) right 0.5] (top - O)
+			archv 8
+			flat   right (top - sm)
+			corner right bottom
+			close
 
 	define [dfM] : DivFrame para.diversityM 3
-	define [SmallMShape top bot mbot df] : glyph-construction
+	define [SmallMShape top bot mbot df tailed] : glyph-construction
 		local m1 : mix df.leftSB (df.middle + df.mvs / 2 * HVContrast) 0.5
 		local m2 : mix df.rightSB (df.middle - df.mvs / 2 * HVContrast) 0.5
-		include : mShoulderSpiro
+		include : SmallMShoulderSpiro
 			left      -- (df.leftSB + df.mvs * HVContrast)
 			right     -- (df.middle + df.mvs / 2 * HVContrast)
 			top       -- top
@@ -4116,7 +4156,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 			diversity -- df.div
-		include : mShoulderSpiro
+		include : SmallMShoulderSpiro
 			left      -- (df.middle + df.mvs * 0.5 * HVContrast)
 			right     -- df.rightSB
 			top       -- top
@@ -4124,7 +4164,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 			diversity -- df.div
-		include : VBarLeft df.leftSB bot top df.mvs
+		include : VBarLeft df.leftSB 0 top df.mvs
 		if SLAB : begin
 			local jut : Jut * df.mvs / Stroke + O
 			if (df.width > jut * 7) : begin
@@ -4138,9 +4178,11 @@ glyph-block Letter-Latin-Lower-M : begin
 				if (!para.isItalic) : begin
 					include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) bot jut df.mvs
 					include : tagged 'serifMB' : CenterBottomSerif df.middle bot jut df.mvs
-					include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) bot jut df.mvs
+					if [not tailed] : begin
+						include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) bot jut df.mvs
 				: else : begin
-					include : tagged 'serifRB' : intersection
+					if [not tailed] : begin
+						include : tagged 'serifRB' : intersection
 						RightwardBottomSerif (df.rightSB + O) bot (jut / 2) df.mvs
 						spiro-outline
 							corner (df.rightSB + O) bot
@@ -4150,29 +4192,47 @@ glyph-block Letter-Latin-Lower-M : begin
 			: else : begin
 				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
 				if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB bot SideJut df.mvs
-				include : tagged 'serifRB' : RightwardBottomSerif df.rightSB bot SideJut df.mvs
+				if [not tailed] : begin
+					include : tagged 'serifRB' : RightwardBottomSerif df.rightSB bot SideJut df.mvs
 
-	sketch # m.normal
+	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
+	define [SmallMSmoothHeight df] : XH - SmallSmoothB * 0.7 * df.div
+
+	create-glyph 'm.normal' : glyph-construction
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
 		include : SmallMShape XH 0 0 df
-		save 'm.normal'
-		save 'cyrte.italic'
-	sketch # m.shortleg
+
+	create-glyph 'm.tailed' : glyph-construction
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
-		include : SmallMShape XH 0 ((XH - df.mvs) * 0.45) df
+		include : SmallMShape XH ([SmallMSmoothHeight df] + O) 0 df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.shortleg' : glyph-construction
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : SmallMShape XH 0 [SmallMShortLegHeight df] df
 		eject-contour 'serifMB'
-		save 'm.shortleg'
+
+	create-glyph 'm.shortlegTailed' : glyph-construction
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : SmallMShape XH ([SmallMSmoothHeight df] + O) [SmallMShortLegHeight df] df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
 	select-variant 'm' 'm'
+	alias 'cyrte.italic' null 'm.normal'
 	composite 'cyrtedescender.italic' [refer-glyph 'cyrte.italic'] [CyrDescender (Width * para.diversityM - SB)] MarkSet.e
 
 	sketch # mltail
 		local df : dfM
 		include df.markSet.p
-		include : refer-glyph "m"
+		include : refer-glyph "m.normal"
 		eject-contour 'serifRB'
 		include : VerticalHook (df.rightSB - df.mvs / 2 * HVContrast) 0 (-HookX) Hook df.mvs
 		save 'mltail' 0x271
@@ -4196,7 +4256,6 @@ glyph-block Letter-Latin-Lower-M : begin
 		include : FlipAround df.middle (XH / 2)
 		include : VBarRight df.rightSB Descender 0 df.mvs
 		save 'turnmleg' 0x270
-
 
 glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import CommonShapes
@@ -4266,63 +4325,83 @@ glyph-block Letter-Latin-Upper-H : begin
 glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared : CreateDerivedLetter
 
-	sketch # h
+	define [SmallHSerifs tailed] : glyph-construction
+		include : LeftwardTopSerif SB CAP SideJut
+		if [not tailed]
+			if (para.isItalic)
+			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+			: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+		if (!para.isItalic) : begin
+			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+
+	create-glyph 'h.straight' : glyph-construction
 		set-width Width
 		include MarkSet.b
 
+		include : VBarLeft SB 0 CAP
 		include : nShoulder
 			left -- (SB + Stroke * HVContrast)
 			right -- RightSB
-		include : VBarLeft SB 0 CAP
-		if SLAB : begin
-			include : LeftwardTopSerif SB CAP SideJut
-			if (para.isItalic)
-			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
-			: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
-			if (!para.isItalic) : begin
-				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
-		save 'h' 'h'
-		save 'cyrshha' 0x4BB
+		if SLAB : include [SmallHSerifs false]
 
-	sketch # hCedilla
+	create-glyph 'h.tailed' : glyph-construction
+		set-width Width
+		include MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		if SLAB : include [SmallHSerifs true]
+
+	select-variant 'h' 'h'
+	alias 'cyrshha' 0x4BB 'h.straight'
+
+	CreateDerivedLetter 'h' 'hCedilla' 0x1E29 : lambda [src sel] : glyph-construction
 		include [refer-glyph 'cedillaBelow']
 		apply-transform : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
-		include [refer-glyph 'h']
+		include [refer-glyph src]
 		include MarkSet.if
-		save 'hCedilla' 0x1E29
 
-	sketch # hhooktop
+	create-glyph 'hhooktop.straight' : glyph-construction
 		include MarkSet.b
+		include : HooktopLeftBar
 		include : nShoulder
 			left -- (SB + Stroke * HVContrast)
 			right -- RightSB
+		if SLAB : include [SmallHSerifs false]
+
+	create-glyph 'hhooktop.tailed' : glyph-construction
+		include MarkSet.b
 		include : HooktopLeftBar
-		if SLAB : begin
-			if (para.isItalic)
-			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
-			: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
-			if (!para.isItalic) : begin
-				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		if SLAB : include [SmallHSerifs false]
 
-		save 'hhooktop' 0x266
+	select-variant 'hhooktop' 0x266 (follow -- 'h')
 
-	sketch # hhooktopltail
+	create-glyph 'hhooktopltail' 0x267 : glyph-construction
 		include MarkSet.p
-		include : refer-glyph "hhooktop"
+		include : refer-glyph "hhooktop.straight"
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-		save 'hhooktopltail' 0x267
 
-	sketch # hltail
+	create-glyph 'hltail' 0xA727 : glyph-construction
 		include MarkSet.p
-		include : refer-glyph "h"
+		include : refer-glyph "h.straight"
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-		save 'hltail' 0xA727
-	turned nothing 0x265 'h' Middle (XH / 2) MarkSet.p
+	turned 'turnh' 0x265 'h.straight' Middle (XH / 2) MarkSet.p
 
 	sketch # hookturnh
 		include : nShoulder
@@ -4366,12 +4445,11 @@ glyph-block Letter-Latin-Lower-H : begin
 
 		save 'hookturnhrtail' 0x2AF
 
-	sketch # hbar
-		include [refer-glyph 'h'] AS_BASE
+	CreateDerivedLetter 'h' 'hbar' 0x127 : lambda [src sel] : glyph-construction
+		include [refer-glyph src] AS_BASE
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
-		save 'hbar' 0x127
-		save 'cyrtshe' 0x45B
 
+	alias 'cyrtshe' 0x45B 'hbar'
 
 glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import CommonShapes
