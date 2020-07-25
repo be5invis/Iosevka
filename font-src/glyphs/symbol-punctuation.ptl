@@ -1513,13 +1513,49 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local m   : mix l r (1 / 2)
 		local sma  : SmoothA * 0.5
 		local smb  : SmoothB * 0.5
+		local swRing : adviceBlackness 4
+		local swBar  : adviceBlackness 4
+		local fineBar : adviceBlackness 5
+		local halfGapRing : [adviceBlackness 6] / 2
+		local cor : 1 / [Math.sqrt (1 - [Math.pow ((r - l) / (CAP - 0)) 2])]
+
+		include : OShape CAP (CAP / 2 + halfGapRing) l (m - halfGapRing) swRing sma smb
+		include : OShape (CAP / 2 - halfGapRing)  0  (m + halfGapRing) r swRing sma smb
+		include : dispiro
+			corner r CAP [widths.rhs.heading (swBar * cor) Downward]
+			corner [mix r l 0.5] [mix CAP 0 0.5] [widths.center.heading (fineBar * cor) Downward]
+			corner l 0 [widths.lhs.heading (swBar * cor) Downward]
+
+		save 'percent.ringsConnected'
+
+		local perMilleOffset : Width + l - halfGapRing * 1.5 - m
+		branch
+			set-width WideWidth0
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + perMilleOffset) (r + perMilleOffset) swRing sma smb
+			apply-transform : Translate ((WideWidth0 - r - perMilleOffset) / 2) 0
+			save 'permille.WWID'
+		branch
+			set-width WideWidth0
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + perMilleOffset) (r + perMilleOffset) swRing sma smb
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + 2 * perMilleOffset) (r + 2 * perMilleOffset) swRing sma smb
+			apply-transform : Translate ((WideWidth0 - r - 2 * perMilleOffset) / 2) 0
+			save 'basepoint.WWID'
+
+	sketch # percent.rings
+		set-width Width
+		local l   : SB / 2
+		local r   : Width - l
+		local m   : mix l r (1 / 2)
+		local sma  : SmoothA * 0.5
+		local smb  : SmoothB * 0.5
 		local sw   : adviceBlackness 4
 		local fine : adviceBlackness 5
 		local cor : HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - sw) / (CAP - 0)) 2])]
 		local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
 		local pFine : 1 / 2 - [Math.max (CAP / 10) (Stroke / 2)] / [Math.hypot CAP (r - l)]
 
-
+		include : OShape CAP (CAP / 2) l m sw sma smb
+		include : OShape (CAP / 2)  0  m r sw sma smb
 		include : dispiro
 			widths.rhs (sw * cor)
 			flat r CAP [heading Downward]
@@ -1530,21 +1566,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			flat l 0 [heading Upward]
 			curl [mix l r pFine] [mix 0 CAP pFine] [widths.heading (fine * cor) 0 Upward]
 
-		include : OShape CAP (CAP / 2) l m sw sma smb
-		include : OShape (CAP / 2)  0  m r sw sma smb
 		save 'percent.rings'
-		branch
-			set-width WideWidth0
-			include : OShape (CAP / 2) 0 (Width + l) (Width + m) sw sma smb
-			apply-transform : Translate (Width / 4) 0
-			save 'permille.WWID'
-		branch
-			set-width WideWidth0
-			local dx : ((Width + l) - r) / 2
-			include : OShape (CAP / 2) 0 (Width + l - dx / 2) (Width + m - dx / 2) sw sma smb
-			include : OShape (CAP / 2) 0 (Width + m + dx) (Width + r + dx) sw sma smb
-			apply-transform : Translate (-dx / 2) 0
-			save 'basepoint.WWID'
 
 	sketch # permille.rings, basepoint.rings
 		local width : Width * para.diversityM
@@ -1599,6 +1621,9 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			include : OShape otop  0  l2 r2 swp smap smbp
 			include : OShape otop  0  l3 r3 swp smap smbp
 			save 'basepoint.NWID.rings'
+
+	alias 'permille.NWID.ringsConnected' null 'permille.NWID.rings'
+	alias 'basepoint.NWID.ringsConnected' null 'basepoint.NWID.rings'
 
 	select-variant 'percent' '%'
 	select-variant 'permille.NWID' 0x2030 (follow -- 'percent')
