@@ -1109,7 +1109,10 @@ glyph-block Letter-Latin-W : begin
 		local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
 		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 		local topWithoutSerif : if SLAB (top - Stroke) top
-		local wMidHeight : if barStraight (topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)]) (top * 0.6)
+		local wMidHeight : match barStraight
+			2 topWithoutSerif
+			1 (topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)])
+			0 (top * 0.6)
 
 		if barStraight : begin
 			include : tagged 'strokeDown1' : dispiro
@@ -1197,14 +1200,21 @@ glyph-block Letter-Latin-W : begin
 		set-width df.width
 		include df.markSet.capital
 		branch
-			include : WShape CAP true df
+			include : WShape CAP 2 df
+			save 'W.straightFlatTop'
+			save 'cyrWe.straightFlatTop'
+			branch
+				include : WonOverlay df
+				save 'symbol/currency/wonSign.straightFlatTop'
+		branch
+			include : WShape CAP 1 df
 			save 'W.straight'
 			save 'cyrWe.straight'
 			branch
 				include : WonOverlay df
 				save 'symbol/currency/wonSign.straight'
 		branch
-			include : WShape CAP false df
+			include : WShape CAP 0 df
 			save 'W.curly'
 			save 'cyrWe.curly'
 			branch
@@ -1216,11 +1226,15 @@ glyph-block Letter-Latin-W : begin
 		set-width df.width
 		include df.markSet.e
 		branch
-			include : WShape XH true df
+			include : WShape XH 2 df
+			save 'w.straightFlatTop'
+			save 'cyrwe.straightFlatTop'
+		branch
+			include : WShape XH 1 df
 			save 'w.straight'
 			save 'cyrwe.straight'
 		branch
-			include : WShape XH false df
+			include : WShape XH 0 df
 			save 'w.curly'
 			save 'cyrwe.curly'
 
@@ -1256,10 +1270,13 @@ glyph-block Letter-Latin-W : begin
 		set-width df.width
 		include df.markSet.capital
 		branch
-			include : WHooktopShape CAP true df
+			include : WHooktopShape CAP 2 df
+			save 'Whooktop.straightFlatTop'
+		branch
+			include : WHooktopShape CAP 1 df
 			save 'Whooktop.straight'
 		branch
-			include : WHooktopShape CAP false df
+			include : WHooktopShape CAP 0 df
 			save 'Whooktop.curly'
 
 	sketch # whooktop
@@ -1267,10 +1284,13 @@ glyph-block Letter-Latin-W : begin
 		set-width df.width
 		include df.markSet.e
 		branch
-			include : WHooktopShape XH true df
+			include : WHooktopShape XH 2 df
+			save 'whooktop.straightFlatTop'
+		branch
+			include : WHooktopShape XH 1 df
 			save 'whooktop.straight'
 		branch
-			include : WHooktopShape XH false df
+			include : WHooktopShape XH 0 df
 			save 'whooktop.curly'
 
 	define [LowerWWShape df straightBar] : glyph-construction
@@ -1284,10 +1304,13 @@ glyph-block Letter-Latin-W : begin
 		set-width df.width
 		include df.markSet.capital
 		branch
-			include : LowerWWShape df true
+			include : LowerWWShape df 2
+			save 'ww.straightFlatTop'
+		branch
+			include : LowerWWShape df 1
 			save 'ww.straight'
 		branch
-			include : LowerWWShape df false
+			include : LowerWWShape df 0
 			save 'ww.curly'
 
 	select-variant 'W' 'W'
@@ -1299,9 +1322,7 @@ glyph-block Letter-Latin-W : begin
 	select-variant 'ww' 0x2AC (follow -- 'w')
 	select-variant 'whooktop' 0x2C73 (follow -- 'w')
 
-	turned 'turnw.straight' nothing 'w.straight' (Middle * para.diversityM) (XH / 2)
-	turned 'turnw.curly'    nothing 'w.curly'    (Middle * para.diversityM) (XH / 2)
-	select-variant 'turnw' 0x28D (follow -- 'w')
+	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)
 
 glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
@@ -4077,45 +4098,59 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 
-	define [MShape top _div] : glyph-construction
-		local div : fallback _div 1
-		local df : DivFrame div 3
-		local topstroke : adviceBlackness 5 div
-		local halftopstroke : topstroke / 2
-		local middleY : top * 0.3 / div
+	define [MShape top df fHanging] : glyph-construction
+		local swSideBot : if fHanging Stroke : adviceBlackness 3.5 df.div
+		local swSideTop : adviceBlackness [if fHanging 5 4] df.div
+		local halfSwMiddle : swSideTop / 2
+		local middleY : if fHanging
+			top * 0.3 / df.div
+			if SLAB Stroke 0
 
 		include : dispiro
-			flat df.leftSB 0 [widths.heading 0 Stroke Upward]
+			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
 			curl df.leftSB (top * 0.2) [heading Upward]
-			straight.up.end df.leftSB top [widths.heading 0 topstroke Upward]
+			straight.up.end df.leftSB top [widths.heading 0 swSideTop Upward]
 		include : dispiro
-			flat df.rightSB 0 [widths.heading Stroke 0 Upward]
+			flat df.rightSB 0 [widths.heading swSideBot 0 Upward]
 			curl df.rightSB (top * 0.2) [heading Upward]
-			straight.up.end df.rightSB top [widths.heading topstroke 0 Upward]
+			straight.up.end df.rightSB top [widths.heading swSideTop 0 Upward]
 		include : dispiro
-			flat (df.leftSB + halftopstroke) top [widths.heading topstroke 0 Downward]
-			curl df.middle middleY [widths.heading (topstroke / 2) (topstroke / 2) Downward]
+			flat (df.leftSB + halfSwMiddle) top [widths.heading swSideTop 0 Downward]
+			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
 		include : dispiro
-			flat (df.rightSB - halftopstroke) top [widths.heading 0 topstroke Downward]
-			curl df.middle middleY [widths.heading (topstroke / 2) (topstroke / 2) Downward]
+			flat (df.rightSB - halfSwMiddle) top [widths.heading 0 swSideTop Downward]
+			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
 		include : AIMSerifs top df.leftSB df.rightSB
 
 	sketch # M
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		include df.markSet.capital
 		set-width df.width
-		include : MShape CAP df.div
-		save 'M' 'M'
-		save 'Mu' 0x39C
-		save 'cyrEm' 0x41C
+
+		branch
+			include : MShape CAP df true
+			save 'M.hanging'
+		branch
+			include : MShape CAP df false
+			save 'M.flatBottom'
 
 	sketch # cyrem
-		local df : DivFrame para.diversityM
+		local df : DivFrame para.diversityM 3
 		include df.markSet.e
 		set-width df.width
-		include : MShape XH df.div
-		save 'cyrem' 0x43C
-		save 'smcpM' 0x1D0D
+
+		branch
+			include : MShape XH df true
+			save 'smcpM.hanging'
+		branch
+			include : MShape XH df false
+			save 'smcpM.flatBottom'
+
+	select-variant 'M' 'M'
+	select-variant 'smcpM' 0x1D0D (follow -- 'M')
+	alias 'cyrem' 0x43C 'smcpM'
+	alias 'Mu' 0x39C 'M'
+	alias 'cyrEm' 0x41C 'M'
 
 
 glyph-block Letter-Latin-Lower-M : begin
@@ -4145,7 +4180,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			close
 
 	define [dfM] : DivFrame para.diversityM 3
-	define [SmallMShape top bot mbot df tailed] : glyph-construction
+	define [SmallMShape top lbot mbot rbot df tailed] : glyph-construction
 		local m1 : mix df.leftSB (df.middle + df.mvs / 2 * HVContrast) 0.5
 		local m2 : mix df.rightSB (df.middle - df.mvs / 2 * HVContrast) 0.5
 		include : SmallMShoulderSpiro
@@ -4160,40 +4195,39 @@ glyph-block Letter-Latin-Lower-M : begin
 			left      -- (df.middle + df.mvs * 0.5 * HVContrast)
 			right     -- df.rightSB
 			top       -- top
-			bottom    -- bot
+			bottom    -- rbot
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 			diversity -- df.div
-		include : VBarLeft df.leftSB 0 top df.mvs
+		include : VBarLeft df.leftSB lbot top df.mvs
 		if SLAB : begin
 			local jut : Jut * df.mvs / Stroke + O
 			if (df.width > jut * 7) : begin
 				include : tagged 'serifLT' : intersection
 					CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
 					spiro-outline
-						corner SB bot
+						corner SB lbot
 						corner SB top
 						corner 0 top
-						corner 0 bot
+						corner 0 lbot
 				if (!para.isItalic) : begin
-					include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) bot jut df.mvs
-					include : tagged 'serifMB' : CenterBottomSerif df.middle bot jut df.mvs
+					include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot jut df.mvs
+					include : tagged 'serifMB' : CenterBottomSerif df.middle mbot jut df.mvs
 					if [not tailed] : begin
-						include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) bot jut df.mvs
-				: else : begin
-					if [not tailed] : begin
-						include : tagged 'serifRB' : intersection
-						RightwardBottomSerif (df.rightSB + O) bot (jut / 2) df.mvs
-						spiro-outline
-							corner (df.rightSB + O) bot
-							corner (df.rightSB + O) top
-							corner df.width top
-							corner df.width bot
+						include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
+				: else : if [not tailed] : begin
+					include : tagged 'serifRB' : intersection
+					RightwardBottomSerif (df.rightSB + O) rbot (jut / 2) df.mvs
+					spiro-outline
+						corner (df.rightSB + O) lbot
+						corner (df.rightSB + O) top
+						corner df.width top
+						corner df.lwidth lbot
 			: else : begin
 				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
-				if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB bot SideJut df.mvs
+				if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
 				if [not tailed] : begin
-					include : tagged 'serifRB' : RightwardBottomSerif df.rightSB bot SideJut df.mvs
+					include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
 
 	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
 	define [SmallMSmoothHeight df] : XH - SmallSmoothB * 0.7 * df.div
@@ -4202,27 +4236,27 @@ glyph-block Letter-Latin-Lower-M : begin
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
-		include : SmallMShape XH 0 0 df
+		include : SmallMShape XH 0 0 0 df
 
 	create-glyph 'm.tailed' : glyph-construction
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
-		include : SmallMShape XH ([SmallMSmoothHeight df] + O) 0 df true
+		include : SmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
 		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
 
 	create-glyph 'm.shortleg' : glyph-construction
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
-		include : SmallMShape XH 0 [SmallMShortLegHeight df] df
+		include : SmallMShape XH 0 [SmallMShortLegHeight df] 0 df
 		eject-contour 'serifMB'
 
 	create-glyph 'm.shortlegTailed' : glyph-construction
 		local df : dfM
 		set-width df.width
 		include df.markSet.e
-		include : SmallMShape XH ([SmallMSmoothHeight df] + O) [SmallMShortLegHeight df] df true
+		include : SmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
 		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
 
 	select-variant 'm' 'm'
@@ -4243,7 +4277,7 @@ glyph-block Letter-Latin-Lower-M : begin
 		local df : dfM
 		set-width df.width
 		include df.markSet.capital
-		include : SmallMShape CAP 0 0 df
+		include : SmallMShape CAP 0 0 0 df
 		include : FlipAround df.middle (CAP / 2)
 		save 'capitalTurnm' 0x19C
 
