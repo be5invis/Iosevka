@@ -224,6 +224,68 @@ function getGrMesh(gidList, grq, fnGidToGlyph) {
 	return ret;
 }
 
+function createGrDisplaySheet(font, gid) {
+	const glyph = font.glyf[gid];
+	if (!glyph) return [];
+
+	// Query selected typographic features -- mostly NWID and WWID
+	let typographicFeatures = [];
+	queryPairFeatureTags(gid, "NWID", "WWID", typographicFeatures);
+	queryPairFeatureTags(gid, "lnum", "onum", typographicFeatures);
+
+	let charVariantFeatures = [];
+	const decomposition = CvDecompose.get(glyph);
+	if (decomposition) {
+		const variantFeatureSet = new Set();
+		for (const componentGn of decomposition) {
+			const component = font.glyf[componentGn];
+			if (!component) continue;
+			const cvRow = queryCvFeatureTagsOf(componentGn, component, variantFeatureSet);
+			if (cvRow.length) charVariantFeatures.push(cvRow);
+		}
+	} else {
+		const cvRow = queryCvFeatureTagsOf(gid, glyph, null);
+		if (cvRow.length) charVariantFeatures.push(cvRow);
+	}
+
+	return [typographicFeatures, charVariantFeatures];
+}
+function queryPairFeatureTags(gid, f1, f2, sink) {
+	const glyphIsHidden = /^\./.test(gid);
+	if (!glyphIsHidden) {
+		const re1 = new RegExp(`\\.${f1}$`),
+			re2 = new RegExp(`\\.${f2}$`);
+		if (re1.test(gid) || re2.test(gid)) {
+			sink.push(f1, f2);
+		}
+	}
+}
+function byTagPreference(a, b) {
+	const ua = a.tag.toUpperCase(),
+		ub = b.tag.toUpperCase();
+	if (ua < ub) return -1;
+	if (ua > ub) return 1;
+	return 0;
+}
+function queryCvFeatureTagsOf(gid, glyph, vfs) {
+	const cvs = AnyCv.query(glyph).sort(byTagPreference);
+	let results = [];
+	let existingGlyphs = new Set();
+	for (const gr of cvs) {
+		const tag = gr.tag;
+		const target = gr.get(glyph);
+		if (target === gid) continue;
+		if (existingGlyphs.has(target)) continue;
+		existingGlyphs.add(target);
+		if (!vfs) results.push(tag);
+		else if (!vfs.has(tag)) {
+			results.push(tag);
+			vfs.add(tag);
+		}
+	}
+	return results;
+}
+
 exports.Dotless = Dotless;
 exports.Cv = Cv;
 exports.AnyCv = AnyCv;
@@ -236,3 +298,4 @@ exports.DoNotDeriveVariants = DoNotDeriveVariants;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
+exports.createGrDisplaySheet = createGrDisplaySheet;
