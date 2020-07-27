@@ -119,7 +119,8 @@ glyph-block Autobuild-Transformed : begin
 					set-width sf.(glyphid).advanceWidth
 		link-relations relSets
 
-	define [createMedievalCombs defaultLow defaultHigh records] : begin
+	define [createMedievalCombs defaultLow defaultHigh _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalAbove'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -127,28 +128,33 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.4
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
-			set-width 0
-			if unicode : assign-unicode unicode
-			local derived miniatureFont.(glyphid)
-			local low defaultLow
-			local high defaultHigh
-			if (derived && derived.baseAnchors.above && derived.baseAnchors.below) : begin
-				set low derived.baseAnchors.below.y
-				set high derived.baseAnchors.above.y
 
-			local middle : derived.advanceWidth / 2
-			include derived
-			apply-transform : Upright
-			apply-transform : Translate (-middle) (-low)
-			apply-transform : Scale 0.4
-			apply-transform : Translate markMiddle aboveMarkBot
-			apply-transform : Italify
-			local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
-			set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
-			set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
+		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
+			create-glyph targetNameMap.(glyphid) : glyph-construction
+				set-width 0
+				if unicode : assign-unicode unicode
+				local derived miniatureFont.(glyphid)
+				local low defaultLow
+				local high defaultHigh
+				if (derived && derived.baseAnchors.above && derived.baseAnchors.below) : begin
+					set low derived.baseAnchors.below.y
+					set high derived.baseAnchors.above.y
 
-	define [createMedievalBelowCombs records] : begin
+				local middle : derived.advanceWidth / 2
+				include derived
+				apply-transform : Upright
+				apply-transform : Translate (-middle) (-low)
+				apply-transform : Scale 0.4
+				apply-transform : Translate markMiddle aboveMarkBot
+				apply-transform : Italify
+				local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
+				set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
+				set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
+
+		link-relations relSets
+
+	define [createMedievalBelowCombs _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalBelow'
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -156,18 +162,21 @@ glyph-block Autobuild-Transformed : begin
 			scale  -- 0.4
 			mono   -- true
 			sbscale -- 1
-		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
-			set-width 0
-			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid)
-			apply-transform : Upright
-			apply-transform : Translate (-middle) (-XH)
-			apply-transform : Scale 0.4
-			apply-transform : Translate markMiddle belowMarkTop
-			apply-transform : Italify
-			set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
-			set-base-anchor 'belowBrace' markMiddle (belowMarkTop - XH * 0.2)
+		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
+			create-glyph targetNameMap.(glyphid) : glyph-construction
+				set-width 0
+				if unicode : assign-unicode unicode
+				local middle : miniatureFont.(glyphid).advanceWidth / 2
+				include miniatureFont.(glyphid)
+				apply-transform : Upright
+				apply-transform : Translate (-middle) (-XH)
+				apply-transform : Scale 0.4
+				apply-transform : Translate markMiddle belowMarkTop
+				apply-transform : Italify
+				set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
+				set-base-anchor 'belowBrace' markMiddle (belowMarkTop - XH * 0.2)
+
+		link-relations relSets
 
 	if [not recursive] : createSuperscripts : list
 		list 0x2070 'zero.lnum'
