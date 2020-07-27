@@ -23,11 +23,6 @@ module.exports = function (covUpright, covItalic, covOblique) {
 					const [glyphName, typographicVariants, charVariantsUpright] = cdUpright;
 					const [, , charVariantsItalic] = cdItalic;
 					const [, , charVariantsOblique] = cdOblique;
-					const interleaved = interleaveCharacterVariants(
-						new Set(charVariantsUpright),
-						new Set(charVariantsItalic),
-						new Set(charVariantsOblique)
-					);
 					blockResults.push({
 						lch,
 						gc,
@@ -35,10 +30,9 @@ module.exports = function (covUpright, covItalic, covOblique) {
 						inFont: true,
 						glyphName: glyphName,
 						typographicVariants: typographicVariants,
-						charVariants: interleaved.common,
-						charVariantsUpright: interleaved.uprightSpecific,
-						charVariantsItalic: interleaved.italicSpecific,
-						charVariantsOblique: interleaved.obliqueSpecific
+						charVariantsUpright,
+						charVariantsItalic,
+						charVariantsOblique
 					});
 				} else {
 					blockResults.push({
@@ -46,12 +40,7 @@ module.exports = function (covUpright, covItalic, covOblique) {
 						gc,
 						charName: chName,
 						inFont: false,
-						glyphName: undefined,
-						typographicVariants: undefined,
-						charVariants: undefined,
-						charVariantsUpright: undefined,
-						charVariantsItalic: undefined,
-						charVariantsOblique: undefined
+						glyphName: undefined
 					});
 				}
 				processed.add(lch);
@@ -66,23 +55,3 @@ module.exports = function (covUpright, covItalic, covOblique) {
 	}
 	return result;
 };
-
-function interleaveCharacterVariants(up, it, ob) {
-	const common = new Set();
-	for (const cv of up) {
-		if (it.has(cv) && ob.has(cv)) common.add(cv);
-	}
-	const upS = new Set(),
-		itS = new Set(),
-		obS = new Set();
-	for (const cv of up) if (!common.has(cv)) upS.add(cv);
-	for (const cv of it) if (!common.has(cv)) itS.add(cv);
-	for (const cv of ob) if (!common.has(cv)) obS.add(cv);
-
-	return {
-		common: [...common],
-		uprightSpecific: [...upS],
-		italicSpecific: [...itS],
-		obliqueSpecific: [...obS]
-	};
-}
