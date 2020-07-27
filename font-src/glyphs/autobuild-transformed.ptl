@@ -119,7 +119,7 @@ glyph-block Autobuild-Transformed : begin
 					set-width sf.(glyphid).advanceWidth
 		link-relations relSets
 
-	define [createMedievalCombs records] : begin
+	define [createMedievalCombs defaultLow defaultHigh records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -130,15 +130,23 @@ glyph-block Autobuild-Transformed : begin
 		foreach {unicode glyphid} [items-of records] : create-glyph [suggestName : 'comb' + glyphid] : glyph-construction
 			set-width 0
 			if unicode : assign-unicode unicode
-			local middle : miniatureFont.(glyphid).advanceWidth / 2
-			include miniatureFont.(glyphid)
+			local derived miniatureFont.(glyphid)
+			local low defaultLow
+			local high defaultHigh
+			if (derived && derived.baseAnchors.above && derived.baseAnchors.below) : begin
+				set low derived.baseAnchors.below.y
+				set high derived.baseAnchors.above.y
+
+			local middle : derived.advanceWidth / 2
+			include derived
 			apply-transform : Upright
-			apply-transform : Translate (-middle) 0
+			apply-transform : Translate (-middle) (-low)
 			apply-transform : Scale 0.4
 			apply-transform : Translate markMiddle aboveMarkBot
 			apply-transform : Italify
-			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
-			set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + XH * 0.2)
+			local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
+			set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
+			set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
 
 	define [createMedievalBelowCombs records] : begin
 		local pendingGlyphs : records.map : [record] => record.1
@@ -379,10 +387,9 @@ glyph-block Autobuild-Transformed : begin
 		list 0xA731 'S'
 		list 0xA7AF 'Q'
 
-	if [not recursive] : createMedievalCombs : list
+	if [not recursive] : createMedievalCombs 0 XH : list
 		list 0x363 'a'
 		list 0x364 'e'
-		list 0x365 'i'
 		list 0x366 'o'
 		list 0x367 'u'
 		list 0x368 'c'
@@ -390,17 +397,11 @@ glyph-block Autobuild-Transformed : begin
 		list 0x36A 'h'
 		list 0x36B 'm'
 		list 0x36C 'r'
-		list 0x36D 't'
 		list 0x36E 'v'
 		list 0x36F 'x'
 		list 0x1DD4 'ae'
-		list 0x1DD7 'ccedillaBelow'
 		list 0x1DD8 'cyrl/de.italic'
-		list 0x1DD9 'eth'
-		list 0x1DDA 'g'
 		list 0x1DDB 'smcpG'
-		list 0x1DDC 'k'
-		list 0x1DDD 'l'
 		list 0x1DDE 'smcpL'
 		list 0x1DDF 'smcpM'
 		list 0x1DE0 'n'
@@ -408,21 +409,34 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DE2 'smcpR'
 		list 0x1DE3 'rrotunda'
 		list 0x1DE4 's'
-		list 0x1DE5 'longs'
 		list 0x1DE6 'z'
 		list 0x1DE7 'scripta'
-		list 0x1DE8 'b'
-		list 0x1DE9 'beta'
 		list 0x1DEA 'turne'
-		list 0x1DEB 'f'
 		list 0x1DED 'oWithLightCentralizationStroke'
-		list 0x1DEE 'p'
-		list 0x1DEF 'esh'
 		list 0x1DF0 'uWithLightCentralizationStroke'
 		list 0x1DF1 'w'
+
+	if [not recursive] : createMedievalCombs 0 CAP : list
+		list 0x365 'i'
+		list 0x36D 't'
+		list 0x1DD9 'eth'
+		list 0x1DDC 'k'
+		list 0x1DDD 'l'
+		list 0x1DE8 'b'
 		list 0x1DF2 'adieresis'
 		list 0x1DF3 'odieresis'
 		list 0x1DF4 'udieresis'
+
+	if [not recursive] : createMedievalCombs Descender XH : list
+		list 0x1DDA 'g'
+		list 0x1DD7 'ccedillaBelow'
+		list 0x1DE9 'beta'
+		list 0x1DEE 'p'
+
+	if [not recursive] : createMedievalCombs Descender CAP : list
+		list 0x1DEB 'f'
+		list 0x1DE5 'longs'
+		list 0x1DEF 'esh'
 
 	if [not recursive] : createMedievalBelowCombs : list
 		list 0x0359 'asterisk.midXH'
