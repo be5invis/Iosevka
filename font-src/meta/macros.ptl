@@ -58,12 +58,13 @@ define-operator "<>" 800 "never" : begin
 
 ### Necessary macros
 # A glyph construction is a function which "modifies" a glyph.
-define-macro glyph-construction : syntax-rules
-	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
+define-macro glyph-proc : syntax-rules
+	`[glyph-proc @::steps] {'.syntactic-closure' `[lambda [] [begin \\
 		local currentGlyph this
 		begin @::[steps.map formOf]
 		return nothing
 	]] env}
+
 # Remap Glyph's methods to macros in order to simplify writing
 define-macro set-width : syntax-rules
 	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.setWidth @::args] env}
@@ -82,40 +83,37 @@ define-macro assign-unicode : syntax-rules
 	] env}
 
 ###### Canvas-based mechanism
-define-macro sketch : syntax-rules
-	`[sketch @::steps] : begin
+define-macro new-glyph : syntax-rules
+	`[new-glyph @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ null null @[formOf body]]
+
+define-macro create-glyph : syntax-rules
+	`[create-glyph @body] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [] [begin \\
-			local currentGlyph this
-			if [not currentGlyph] : return nothing
-			if [$Capture$.glyphList.($Capture$.glyphList.length - 1).name === @tcn]
-				$Capture$.glyphList.pop
-			begin @::[steps.map formOf]
-			set $Capture$.dependencyProfile.(currentGlyph.name) : $Capture$.getDependencyProfile currentGlyph
-			return currentGlyph
-		]].call [create-glyph @tcn $donothing$]]
+		dirty `[$createAndSaveGlyphImpl$ @tcn null @[formOf body]]
+	`[create-glyph @name @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] null @[formOf body]]
+	`[create-glyph @name @code @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] @[formOf body]]
 
-define-macro branch : syntax-rules
-	`[branch @::steps] : begin
+define-macro create-derived : syntax-rules
+	`[create-derived @body] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [] [begin \\
-			local currentGlyph this
-			if [not currentGlyph] : return nothing
-			if [$Capture$.glyphList.($Capture$.glyphList.length - 1).name === @tcn]
-				$Capture$.glyphList.pop
-			begin @::[steps.map formOf]
-			set $Capture$.dependencyProfile.(currentGlyph.name) : $Capture$.getDependencyProfile currentGlyph
-			return currentGlyph
-		]].call [create-glyph @tcn [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
+		dirty `[$createAndSaveGlyphImpl$ @tcn null [lambda : begin [this.include currentGlyph true true] [this.include @[formOf body]]]]
+	`[create-derived @name @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] null [lambda : begin [this.include currentGlyph true true] [this.include @[formOf body]]]]
+	`[create-derived @name @code @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin [this.include currentGlyph true true] [this.include @[formOf body]]]]
 
-define-macro save : syntax-rules
-	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
+define-macro save-as : syntax-rules
+	`[save-as @name]       : dirty `[$save$ currentGlyph @[formOf name] null]
+	`[save-as @name @code] : dirty `[$save$ currentGlyph @[formOf name] @[formOf code]]
 
 define-macro run-glyph-module : syntax-rules
 	`[run-glyph-module @path] : dirty `[[import @path].apply.call $$Capture$$]
@@ -199,13 +197,13 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph $assignUnicodeImpl$]
+		traceBody `[$save$ $NamedParameterPair$ $donothing$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
-			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$
-			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
+			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs $createAndSaveGlyphImpl$
+			$save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
 			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$]
 		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop
 			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
