@@ -99,6 +99,14 @@ define-macro create-glyph : syntax-rules
 	`[create-glyph @name @code @body] : begin
 		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] @[formOf body]]
 
+define-macro create-aliased : syntax-rules
+	`[create-aliased @name] : begin
+		dirty `[create-aliased @[formOf name] null]
+	`[create-aliased @name @code] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin
+			[this.include currentGlyph true true]
+			[this.cloneRankFromGlyph currentGlyph] ]]
+
 define-macro create-derived : syntax-rules
 	`[create-derived @body] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
@@ -113,10 +121,6 @@ define-macro create-derived : syntax-rules
 			[this.include currentGlyph true true]
 			[this.cloneRankFromGlyph currentGlyph]
 			[this.include @[formOf body]] ]]
-
-define-macro save-as : syntax-rules
-	`[save-as @name]       : dirty `[$save$ currentGlyph @[formOf name] null]
-	`[save-as @name @code] : dirty `[$save$ currentGlyph @[formOf name] @[formOf code]]
 
 define-macro run-glyph-module : syntax-rules
 	`[run-glyph-module @path] : dirty `[[import @path].apply.call $$Capture$$]
@@ -200,13 +204,13 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$save$ $NamedParameterPair$ $donothing$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$]
+		traceBody `[$NamedParameterPair$ $donothing$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
 			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs $createAndSaveGlyphImpl$
-			$save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
+			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
 			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$]
 		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop
 			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
