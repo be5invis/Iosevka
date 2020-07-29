@@ -81,6 +81,20 @@ module.exports = class Glyph {
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
 		this.dependsOn(g);
 	}
+	cloneFromGlyph(g) {
+		this.includeGlyph(g, true, true);
+		this.cloneRelationFromGlyph(g);
+		this.cloneRankFromGlyph(g);
+	}
+	cloneRelationFromGlyph(g) {
+		this.shortName = g.shortName;
+		this.related = g.related;
+	}
+	cloneRankFromGlyph(g) {
+		this.autoRefPriority = g.autoRefPriority;
+		this.glyphRank = g.glyphRank;
+		this.avoidBeingComposite = g.avoidBeingComposite;
+	}
 	includeGeometry(geom, shiftX, shiftY) {
 		if (!geom || !geom.contours) return;
 		for (const contour of geom.contours) {
