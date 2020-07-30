@@ -433,32 +433,53 @@ glyph-block Symbol-Punctuation-Emotion : begin
 		include : refer-glyph "exclam"
 		include : FlipAround Middle (XH / 2)
 
-	create-glyph 'bar' '|' : glyph-proc
-		set-width Width
+
+glyph-block Symbol-Punctuation-Bar : begin
+	glyph-block-import CommonShapes
+
+	define [BarShape] : glyph-proc
 		set-base-anchor 'above' Middle parenTop
 		set-base-anchor 'below' Middle parenBot
 		include : VBar Middle parenBot parenTop
-		create-aliased 'dentalclick' 0x1C0
 
-	create-glyph 'parallel' 0x2225 : glyph-proc
-		set-width Width
+	create-glyph 'bar.naturalSlope' : BarShape
+	create-glyph 'bar.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : BarShape
+
+	define [DoubleBarShape] : glyph-proc
 		set-base-anchor 'above' Middle parenTop
 		set-base-anchor 'below' Middle parenBot
 		local sw : adviceBlackness 3.5
 		include : VBar (Middle - Width * 0.175) parenBot parenTop sw
 		include : VBar (Middle + Width * 0.175) parenBot parenTop sw
-		create-aliased 'doubleBar' 0x2016
-		create-aliased 'alveolarlateralclick' 0x1C1
 
-	create-glyph 'brokenbar' 0xA6 : glyph-proc
+	create-glyph 'parallel.naturalSlope' : DoubleBarShape
+	create-glyph 'parallel.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : DoubleBarShape
+
+	define [BrokenBarShape] : glyph-proc
 		local breakDist : Math.max Stroke (CAP / 8)
 		include : VBar Middle (symbolMid + breakDist / 2) parenTop
 		include : VBar Middle parenBot (symbolMid - breakDist / 2)
 
+	create-glyph 'brokenBar.naturalSlope' : BrokenBarShape
+	create-glyph 'brokenBar.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : BrokenBarShape
+
 	create-glyph 'palatoalveolarclick' 0x1C2 : glyph-proc
-		include [refer-glyph 'bar'] AS_BASE
+		include [refer-glyph 'bar.naturalSlope'] AS_BASE
 		include : HBarBottom SB RightSB (symbolMid + XH * 0.1) OperatorStroke
 		include : HBarTop SB RightSB (symbolMid - XH * 0.1) OperatorStroke
+
+	select-variant 'bar' '|'
+	select-variant 'parallel' 0x2225 (follow -- 'bar')
+	select-variant 'brokenBar' 0xA6 (follow -- 'bar')
+	alias 'dentalclick' 0x1C0 'bar.naturalSlope'
+	alias 'doubleBar' 0x2016 'parallel'
+	alias 'alveolarlateralclick' 0x1C1 'parallel.naturalSlope'
 
 
 glyph-block Symbol-Punctuation-Ampersand : begin
