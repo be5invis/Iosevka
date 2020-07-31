@@ -59,10 +59,12 @@ module.exports = class Glyph {
 			return;
 		} else if (component instanceof Transform) {
 			this.applyTransform(component, copyAnchors);
-		} else if (component instanceof Array) {
-			throw new Error("Attempt to include an array.");
-		} else {
+		} else if (component.isMarkSet) {
+			this.copyAnchors(component);
+		} else if (component instanceof Glyph) {
 			this.includeGlyph(component, copyAnchors, copyWidth);
+		} else {
+			throw new Error("Invalid component to be introduced.");
 		}
 	}
 	includeGlyph(g, copyAnchors, copyWidth) {

@@ -14,30 +14,24 @@ glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 
 	glyph-block-export CreateDottedComposition
-	define [CreateDottedComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
-		lambda [src sel] : glyph-proc
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			include : refer-glyph "dotAbove"
-			Dotless.set currentGlyph src
-			if [not sel] : assign-unicode unicode
+	define [CreateDottedComposition sourceGid dstGid unicode]
+		with-related-glyphs sourceGid dstGid unicode
+			lambda [src sel] : glyph-proc
+				include [refer-glyph src] AS_BASE ALSO_METRICS
+				include : refer-glyph "dotAbove"
+				Dotless.set currentGlyph src
 
 	glyph-block-export CreateCommaCaronComposition
-	define [CreateCommaCaronComposition sourceGid dstGid unicode] : WithDerivatives sourceGid dstGid
-		lambda [src sel] : glyph-proc
-			if [not sel] : assign-unicode unicode
-			define srcGlyph : query-glyph src
-			define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
-			include : refer-glyph "commaTR"
-			include : Upright
-			include : Translate commaOffset 0
-			include : Italify
-			include srcGlyph AS_BASE ALSO_METRICS
-
-	glyph-block-export CreateDerivedLetter
-	define [CreateDerivedLetter gnFrom gnTo unicode f]
-		WithDerivatives gnFrom gnTo : lambda [src sel] : glyph-proc
-			if [not sel] : assign-unicode unicode
-			include [f src sel] AS_BASE ALSO_METRICS
+	define [CreateCommaCaronComposition sourceGid dstGid unicode]
+		with-related-glyphs sourceGid dstGid unicode
+			lambda [src sel] : glyph-proc
+				define srcGlyph : query-glyph src
+				define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
+				include : refer-glyph "commaTR"
+				include : Upright
+				include : Translate commaOffset 0
+				include : Italify
+				include srcGlyph AS_BASE ALSO_METRICS
 
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
@@ -409,7 +403,7 @@ glyph-block Letter-Latin-Upper-L : begin
 
 	create-glyph 'Lcaron' 0x13D : glyph-proc
 		include : refer-glyph "commaAbove"
-		apply-transform : Translate (Width + (RightSB - SB) * 0.375) 0
+		include : Translate (Width + (RightSB - SB) * 0.375) 0
 		include [refer-glyph 'L'] AS_BASE
 
 	create-glyph 'Lslash' 0x141 : glyph-proc
@@ -425,9 +419,9 @@ glyph-block Letter-Latin-Upper-L : begin
 		include [refer-glyph 'L'] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeAboveOverlay"
-			apply-transform : Upright
-			apply-transform : Translate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
-			apply-transform : Italify
+			include : Upright
+			include : Translate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
+			include : Italify
 
 	create-glyph 'Ldot' 0x13F : glyph-proc
 		include [refer-glyph 'L'] AS_BASE
@@ -581,8 +575,8 @@ glyph-block Letter-Latin-Lower-L : begin
 			local df : DivFrame para.diversityI
 			set-width df.width
 			include [refer-glyph ('l.' + suffix)] AS_BASE
-			apply-transform : Translate (df.width / 2 - [query-glyph ('l.' + suffix)].advanceWidth / 2) 0
-			apply-transform : Translate (-DotRadius / 2) 0
+			include : Translate (df.width / 2 - [query-glyph ('l.' + suffix)].advanceWidth / 2) 0
+			include : Translate (-DotRadius / 2) 0
 			include : RingAt [Math.max (df.middle + HalfStroke + DotRadius) (df.rightSB - DotRadius)] [mix y0 CAP 0.5] DotRadius
 
 	select-variant 'ldot' 0x140 (follow -- 'l')
@@ -590,7 +584,7 @@ glyph-block Letter-Latin-Lower-L : begin
 	create-glyph 'lrtail' 0x26D : glyph-proc
 		local df : DivFrame para.diversityI
 		include : refer-glyph "rtailBR"
-		apply-transform : Translate (df.middle + LBalance2 + HalfStroke * HVContrast) 0
+		include : Translate (df.middle + LBalance2 + HalfStroke * HVContrast) 0
 		include : refer-glyph "l.hooky"
 		include df.markSet.if
 
@@ -613,9 +607,9 @@ glyph-block Letter-Latin-Lower-L : begin
 		include [refer-glyph 'l.serifed'] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeAboveOverlay"
-			apply-transform : Upright
-			apply-transform : Translate (df.middle - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
-			apply-transform : Italify
+			include : Upright
+			include : Translate (df.middle - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
+			include : Italify
 
 	define [Belt middle] : glyph-proc
 		local fine : adviceBlackness 4.5
@@ -1040,7 +1034,6 @@ glyph-block Letter-Latin-Lower-A : begin
 glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	### W and w
 	define [WShape top barStraight df] : glyph-proc
@@ -1208,9 +1201,9 @@ glyph-block Letter-Latin-W : begin
 
 	define [LowerWWShape df straightBar] : glyph-proc
 		include : WShape (CAP / 2) straightBar df
-		apply-transform : Upright
-		apply-transform : Translate 0 (CAP / 2)
-		apply-transform : Italify
+		include : Upright
+		include : Translate 0 (CAP / 2)
+		include : Italify
 		include : WShape (CAP / 2) straightBar df
 	create-glyph : glyph-proc
 		local df : DivFrame 1 3
@@ -1229,7 +1222,7 @@ glyph-block Letter-Latin-W : begin
 	alias 'cyrl/we' 0x51D 'w'
 	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)
 
-	CreateDerivedLetter 'W' 'symbols/currency/wonSign' 0x20A9 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'W' 'symbols/currency/wonSign' 0x20A9 : lambda [src sel] : glyph-proc
 		local df : DivFrame para.diversityM 3
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include [WonOverlay df]
@@ -1238,7 +1231,6 @@ glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-export HalfXStrand XStrand
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define [HalfXStrand stb slab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
 		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
@@ -1328,11 +1320,11 @@ glyph-block Letter-Latin-X : begin
 	alias 'cyrl/ha' 0x445 'x'
 	alias 'latinchi' 0xAB53 'chi'
 
-	CreateDerivedLetter 'X' 'cyrl/Hadescender' 0x4B2 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'X' 'cyrl/Hadescender' 0x4B2 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : CyrDescender RightSB (connex -- 0.5)
 
-	CreateDerivedLetter 'x' 'cyrl/hadescender' 0x4B3 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'x' 'cyrl/hadescender' 0x4B3 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : CyrDescender RightSB (connex -- 0.5)
 
@@ -1341,7 +1333,6 @@ glyph-block Letter-Latin-Upper-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-X : HalfXStrand
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define [YShape straightBar top bot] : glyph-proc
 		local cross : mix [fallback bot 0] top 0.4
@@ -1400,7 +1391,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	alias 'Upsilon' 0x3A5 'Y'
 	alias 'cyrl/Ue' 0x4AE 'Y'
-	CreateDerivedLetter 'Y' 'symbol/currency/yenSign' 0xA5 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'Y' 'symbol/currency/yenSign' 0xA5 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : YOverlayShape
 
@@ -1584,11 +1575,11 @@ glyph-block Letter-Latin-Lower-Y : begin
 			set currentGlyph.gizmo : Italify (-para.slopeAngle)
 			include : SmallYShape top bottom
 			set currentGlyph.gizmo : Italify (+para.slopeAngle)
-			# apply-transform : Upright
-			apply-transform : Translate 0 (-[mix bottom top 0.5])
-			apply-transform : Scale 1 (-1)
-			apply-transform : Translate 0 (+[mix bottom top 0.5])
-			# apply-transform : Italify
+			# include : Upright
+			include : Translate 0 (-[mix bottom top 0.5])
+			include : Scale 1 (-1)
+			include : Translate 0 (+[mix bottom top 0.5])
+			# include : Italify
 
 		return : object SmallYShape SmallYHookTopShape SmallLambdaShape
 
@@ -1973,7 +1964,6 @@ glyph-block Letter-Latin-K : begin
 glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define [BShape] : params [top [barPos 0.52] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
 		local stroke : adviceBlackness2 2.875 2 top
@@ -2028,7 +2018,7 @@ glyph-block Letter-Latin-Upper-B : begin
 	alias 'Beta' 0x392 'B'
 	alias 'cyrl/Ve' 0x412 'B'
 
-	CreateDerivedLetter 'B' 'Bhookleft' 0x181 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'B' 'Bhookleft' 0x181 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour "serifLT"
 		include : LeftHook SB CAP
@@ -2143,7 +2133,6 @@ glyph-block Letter-Latin-Upper-B : begin
 glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
 	create-glyph 'b.toothed' : glyph-proc
@@ -2194,22 +2183,22 @@ glyph-block Letter-Latin-Lower-B : begin
 
 	select-variant 'bhooktop' 0x253 (follow -- 'b')
 
-	CreateDerivedLetter 'b' 'bbar' 0x180 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'b' 'bbar' 0x180 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
 
-	CreateDerivedLetter 'b' 'bdot' 0x1E03 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'b' 'bdot' 0x1E03 : lambda [src sel] : glyph-proc
 		include : refer-glyph "dotAbove"
-		apply-transform : Translate (Width + HalfStroke) 0
+		include : Translate (Width + HalfStroke) 0
 		include [refer-glyph src] AS_BASE
 
-	CreateDerivedLetter 'b' 'latinbe' 0x183 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'b' 'latinbe' 0x183 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HBarTop (SB - O) [mix SB RightSB 0.9] CAP
 		if SLAB : begin
 			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
 
-	CreateDerivedLetter 'b' 'zhuangtonesix' 0x185 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'b' 'zhuangtonesix' 0x185 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		eject-contour 'serifLT'
 		local s : Math.max (XH * 0.1) Stroke
@@ -2271,16 +2260,14 @@ glyph-block Letter-Latin-Upper-D : begin
 
 	select-variant 'D' 'D'
 
-	WithDerivatives 'D' 'Eth' : lambda [src sel] : glyph-proc
-		if [not sel] : assign-unicode 0xD0
+	with-related-glyphs 'D' 'Eth' 0xD0 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
 
 	alias 'Dcroat' 0x110 'Eth'
 	alias 'arficanD' 0x189 'Eth'
 
-	WithDerivatives 'D' 'Dhookleft' : lambda [src sel] : glyph-proc
-		if [not sel] : assign-unicode 0x18a
+	with-related-glyphs 'D' 'Dhookleft' 0x18a : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour 'serifLT'
 		include : LeftHook SB CAP
@@ -2288,7 +2275,6 @@ glyph-block Letter-Latin-Upper-D : begin
 glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 
 	create-glyph 'd.toothed' : glyph-proc
@@ -2321,13 +2307,13 @@ glyph-block Letter-Latin-Lower-D : begin
 
 	select-variant 'd' 'd'
 
-	CreateDerivedLetter 'd' 'dcroat' 0x111 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'd' 'dcroat' 0x111 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HBar [mix (SB + Stroke) (RightSB - Stroke) 0.5] [mix RightSB Width 0.7] [mix XH CAP 0.45] OverlayStroke
 
-	CreateDerivedLetter 'd' 'dcaron' 0x10f : lambda [src sel] : glyph-proc
+	with-related-glyphs 'd' 'dcaron' 0x10f : lambda [src sel] : glyph-proc
 		include : refer-glyph "commaAbove"
-		apply-transform : Translate (Width + (RightSB - SB) / 2 + markExtend / 2) 0
+		include : Translate (Width + (RightSB - SB) / 2 + markExtend / 2) 0
 		local f : Widen {src} 0.95 1
 		include f.(src)
 		include MarkSet.b
@@ -2382,12 +2368,12 @@ glyph-block Letter-Latin-Lower-D : begin
 
 	select-variant 'dhooktop' 0x257 (follow -- 'd')
 
-	CreateDerivedLetter 'd' 'ddot' 0x1E0B : lambda [src sel] : glyph-proc
+	with-related-glyphs 'd' 'ddot' 0x1E0B : lambda [src sel] : glyph-proc
 		include : refer-glyph "dotAbove"
-		apply-transform : Translate (Width - HalfStroke) 0
+		include : Translate (Width - HalfStroke) 0
 		include [refer-glyph src] AS_BASE
 
-	CreateDerivedLetter 'd' 'latinde' 0x18C : lambda [src sel] : glyph-proc
+	with-related-glyphs 'd' 'latinde' 0x18C : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
 		if SLAB : begin
@@ -2668,13 +2654,11 @@ glyph-block Letter-Latin-Upper-R : begin
 	select-variant 'smcpR' 0x280 (follow -- 'R')
 	select-variant 'rrotunda' 0xA75B (follow -- 'R')
 
-	WithDerivatives 'R' 'Rbar' : lambda [src sel] : glyph-proc
-		if [not sel] : assign-unicode 0x24C
+	with-related-glyphs 'R' 'Rbar' 0x24C : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP SLAB] + Stroke * 0.25)
 
-	WithDerivatives 'smcpR' 'turnSmcpR' : lambda [src sel] : glyph-proc
-		if [not sel] : assign-unicode 0x1D1A
+	with-related-glyphs 'smcpR' 'turnSmcpR' 0x1D1A : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : FlipAround Middle (XH / 2)
 
@@ -2833,9 +2817,9 @@ glyph-block Letter-Latin-Lower-R : begin
 			eject-contour 'serifLB'
 			include : new-glyph : glyph-proc
 				include : refer-glyph "rtailBR"
-				apply-transform : Upright
-				apply-transform : Translate rbar 0
-				apply-transform : Italify
+				include : Upright
+				include : Translate rbar 0
+				include : Italify
 		create-glyph : glyph-proc
 			set-width dfR.width
 			include dfR.markSet.p
@@ -2860,9 +2844,9 @@ glyph-block Letter-Latin-Lower-R : begin
 			include : FlipAround dfR.middle (XH / 2)
 			include : new-glyph : glyph-proc
 				include : refer-glyph "rtailBR"
-				apply-transform : Upright
-				apply-transform : Translate (dfR.rightSB - rbar + dfR.leftSB + Stroke * HVContrast) 0
-				apply-transform : Italify
+				include : Upright
+				include : Translate (dfR.rightSB - rbar + dfR.leftSB + Stroke * HVContrast) 0
+				include : Italify
 		create-glyph : glyph-proc
 			set-width dfR.width
 			include dfR.markSet.p
@@ -3518,9 +3502,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 		include : VBarRight RightSB 0 CAP
 		include : new-glyph : glyph-proc
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate RightSB 0
-			apply-transform : Italify
+			include : Upright
+			include : Translate RightSB 0
+			include : Italify
 		if SLAB : begin
 			include : tagged 'serifRT' : RightwardTopSerif RightSB CAP SideJut
 
@@ -3530,9 +3514,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 		include : VBarRight RightSB 0 XH
 		include : new-glyph : glyph-proc
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate RightSB 0
-			apply-transform : Italify
+			include : Upright
+			include : Translate RightSB 0
+			include : Italify
 		if SLAB : begin
 			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
 
@@ -3594,7 +3578,6 @@ glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	create-glyph 'n.straight' : glyph-proc
 		set-width Width
@@ -3637,9 +3620,9 @@ glyph-block Letter-Latin-Lower-N : begin
 	alias 'cyrl/pe.italicStraight' null 'n.straight'
 	alias 'cyrl/pe.italicTailed' null 'n.tailed'
 
-	CreateDerivedLetter 'n' 'nApostrophe' 0x149 : lambda [src srl] : glyph-proc
+	with-related-glyphs 'n' 'nApostrophe' 0x149 : lambda [src srl] : glyph-proc
 		include : refer-glyph "commaAbove"
-		apply-transform : Translate (Width + SB - Middle) 0
+		include : Translate (Width + SB - Middle) 0
 		include [refer-glyph src] AS_BASE
 
 	create-glyph 'eng' 0x14B : glyph-proc
@@ -3665,7 +3648,7 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) (Hook + HalfStroke + O) [Math.max ((SB - RightSB) / 2 + HalfStroke) (-HookX)] Hook
 		include : VBar (SB + HalfStroke * HVContrast) 0 CAP
 
-	CreateDerivedLetter 'n' 'nltail' 0x272 : lambda [src srl] : glyph-proc
+	with-related-glyphs 'n' 'nltail' 0x272 : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		eject-contour 'serifLB'
 		include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
@@ -3915,7 +3898,6 @@ glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define [SmallMShoulderSpiro] : params [left right top bottom width fine diversity] : glyph-proc
 		local fix : TanSlope * Stroke * HVContrast * width / Stroke
@@ -4104,7 +4086,7 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	create-glyph 'HCedilla' 0x1E28 : glyph-proc
 		include [refer-glyph 'cedillaBelow']
-		apply-transform : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
+		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
 		include [refer-glyph 'H']
 		include MarkSet.if
 
@@ -4112,7 +4094,6 @@ glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
-	glyph-block-import Letter-Shared : CreateDerivedLetter
 
 	define [SmallHSerifs tailed] : glyph-proc
 		include : LeftwardTopSerif SB CAP SideJut
@@ -4148,9 +4129,9 @@ glyph-block Letter-Latin-Lower-H : begin
 	select-variant 'h' 'h'
 	alias 'cyrl/shha' 0x4BB 'h.straight'
 
-	CreateDerivedLetter 'h' 'hCedilla' 0x1E29 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'h' 'hCedilla' 0x1E29 : lambda [src sel] : glyph-proc
 		include [refer-glyph 'cedillaBelow']
-		apply-transform : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
+		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
 		include [refer-glyph src]
 		include MarkSet.if
 
@@ -4197,9 +4178,9 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : VBarLeft SB 0 CAP
 		include : new-glyph : glyph-proc
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate RightSB (Hook + HalfStroke)
-			apply-transform : Italify
+			include : Upright
+			include : Translate RightSB (Hook + HalfStroke)
+			include : Italify
 		include : FlipAround Middle (XH / 2)
 		include MarkSet.p
 		if SLAB : begin
@@ -4214,20 +4195,20 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : VBarLeft SB 0 (XH - 1)
 		include : new-glyph : glyph-proc
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate RightSB (Hook + HalfStroke)
-			apply-transform : Italify
+			include : Upright
+			include : Translate RightSB (Hook + HalfStroke)
+			include : Italify
 		include : FlipAround Middle (XH / 2)
 		include : new-glyph : glyph-proc
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate RightSB 0
-			apply-transform : Italify
+			include : Upright
+			include : Translate RightSB 0
+			include : Italify
 		include MarkSet.p
 		if SLAB : begin
 			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
 
-	CreateDerivedLetter 'h' 'hbar' 0x127 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'h' 'hbar' 0x127 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
 
@@ -4384,7 +4365,7 @@ glyph-block Letter-Latin-Lower-F : begin
 		include MarkSet.p
 		include : VBar Middle Descender (XH - Hook)
 		include : VerticalHook Middle (XH - Hook) (-LongJut + LBalance) (-Hook + HalfStroke)
-		apply-transform : Translate LBalance 0
+		include : Translate LBalance 0
 		if SLAB : begin
 			include : CenterBottomSerif Middle Descender Jut
 
@@ -4480,7 +4461,7 @@ glyph-block Letter-Latin-Lower-F : begin
 			include MarkSet.b
 			include : new-glyph : glyph-proc
 				include : refer-glyph "longs"
-				apply-transform : Translate shift 0
+				include : Translate shift 0
 			include : VBarRight barr 0 fbar
 			include : HBarTop hbarleft barr fbar
 			if SLAB : begin
@@ -4508,7 +4489,7 @@ glyph-block Letter-Latin-Lower-F : begin
 		create-glyph 'f_l.italic' : glyph-proc
 			include : new-glyph : glyph-proc
 				include [refer-glyph 'longs.italic'] AS_BASE
-				apply-transform : Translate shift 0
+				include : Translate shift 0
 			include : VBarRight barr 0 CAP
 			include : HBarTop hbarleft [mix SB barr 0.65] fbar
 			if SLAB : include : tagged 'serifRB' : RightwardBottomSerif barr 0 SideJut
@@ -4916,9 +4897,9 @@ glyph-block Letter-Latin-S : begin
 		include : new-glyph : glyph-proc
 			local sw : adviceBlackness2 2.875 2 XH
 			include : refer-glyph "rtailBR"
-			apply-transform : Upright
-			apply-transform : Translate (start.x + sw * HVContrast) 0
-			apply-transform : Italify
+			include : Upright
+			include : Translate (start.x + sw * HVContrast) 0
+			include : Italify
 
 		include : VBarLeft start.x 0 start.y
 
@@ -5544,21 +5525,21 @@ glyph-block Letter-Latin-IJ : begin
 		include MarkSet.capital
 		include : new-glyph : glyph-proc
 			include : refer-glyph "I.straight"
-			apply-transform : Translate (SB - Middle + HalfStroke * HVContrast) 0
+			include : Translate (SB - Middle + HalfStroke * HVContrast) 0
 		include : new-glyph : glyph-proc
 			include : refer-glyph "J.shorthook"
-			apply-transform : Translate JBalance2 0
+			include : Translate JBalance2 0
 
 	create-glyph 'ij' 0x133 : glyph-proc
 		include MarkSet.if
 		include : new-glyph : glyph-proc
 			include [refer-glyph 'dotlessi.straight'] AS_BASE
 			include : refer-glyph "dotAbove"
-			apply-transform : Translate (SB * 1.5 - Middle + HalfStroke * HVContrast) 0
+			include : Translate (SB * 1.5 - Middle + HalfStroke * HVContrast) 0
 		include : new-glyph : glyph-proc
 			include [refer-glyph 'dotlessj.straight'] AS_BASE
 			include : refer-glyph "dotAbove"
-			apply-transform : Translate (RightSB - SB * 0.5 - Middle - JBalance - HalfStroke * HVContrast) 0
+			include : Translate (RightSB - SB * 0.5 - Middle - JBalance - HalfStroke * HVContrast) 0
 
 
 glyph-block Letter-Latin-Ezh : begin
@@ -6091,7 +6072,7 @@ glyph-block Letter-Latin-Bidental-Percussive : begin
 			include : VBarLeft SB (CAP * 0.1) (CAP * 0.4)
 			include : VBarRight RightSB (CAP * 0.1) (CAP * 0.4)
 		include g
-		apply-transform : Upright
-		apply-transform : Translate 0 (CAP / 2)
-		apply-transform : Italify
+		include : Upright
+		include : Translate 0 (CAP / 2)
+		include : Italify
 		include g

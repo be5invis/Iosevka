@@ -27,17 +27,15 @@ glyph-block CommonShapes : begin
 
 		if (transform && transform.(variant)) : set variant transform.(variant)
 
-		create-glyph [fallback to-name name] : glyph-proc
+		create-glyph [fallback to-name name] unicode : glyph-proc
 			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
-			if unicode : assign-unicode unicode
 			ApplyCv currentGlyph follow para name transform omit
 			set this.autoRefPriority [query-glyph (name + '.' + variant)].autoRefPriority
 
-	define [italic-variant name unicode] : create-glyph name : glyph-proc
+	define [italic-variant name unicode] : create-glyph name unicode : glyph-proc
 		define base : if para.isItalic glyphMap.(name + '.italic') glyphMap.(name + '.upright')
 		include base AS_BASE
 		set-width base.advanceWidth
-		if unicode : assign-unicode unicode
 
 	define [composite _newid] : begin
 		local parts null
@@ -59,56 +57,56 @@ glyph-block CommonShapes : begin
 		if [not glyphMap.(id)] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph glyphMap.(id) copyAnchors copyWidth
 	define [query-glyph id] : return glyphMap.(id)
-	define [into-unicode code] : glyph-proc : if code : assign-unicode code
+	define [into-unicode code] : glyph-proc : if code : $assignUnicodeImpl$ currentGlyph code
 
-	define [WithDerivatives sourceGid dstGid Fn] : if glyphMap.(sourceGid) : begin
+	define [with-related-glyphs sourceGid dstGid unicode Fn] : if glyphMap.(sourceGid) : begin
 		local glyphSrc glyphMap.(sourceGid)
-		create-glyph dstGid : glyph-proc : include : Fn sourceGid null
+		create-glyph dstGid unicode : glyph-proc : include : Fn sourceGid null
 
 		local glyphDst glyphMap.(dstGid)
 		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
 			create-glyph [gr.amendName dstGid] : glyph-proc : include : Fn [gr.get glyphSrc] gr.tag
 			gr.set glyphDst [gr.amendName dstGid]
 
-	define [alias newid unicode id] : WithDerivatives id [fallback newid ('.alias' + [newtemp])]
-		lambda [src sel] : glyph-proc
-			if (unicode && !sel) : assign-unicode unicode
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			currentGlyph.cloneRankFromGlyph [query-glyph src]
+	define [alias newid unicode id]
+		with-related-glyphs id [fallback newid ('.alias' + [newtemp])] unicode
+			lambda [src sel] : glyph-proc
+				include [refer-glyph src] AS_BASE ALSO_METRICS
+				currentGlyph.cloneRankFromGlyph [query-glyph src]
 
-	define [turned newid unicode id _x _y mark] : WithDerivatives id [fallback newid ('turn' + id)]
-		lambda [src sel] : glyph-proc
-			if (unicode && !sel) : assign-unicode unicode
-			include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
-			if mark : include mark
-			define x : if (_x <@ Function) [_x.call currentGlyph] _x
-			define y : if (_y <@ Function) [_y.call currentGlyph] _y
-			include : FlipAround x y
-			set currentGlyph.autoRefPriority [query-glyph src].autoRefPriority
+	define [turned newid unicode id _x _y mark]
+		with-related-glyphs id [fallback newid ('turn' + id)] unicode
+			lambda [src sel] : glyph-proc
+				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
+				if mark : include mark
+				define x : if (_x <@ Function) [_x.call currentGlyph] _x
+				define y : if (_y <@ Function) [_y.call currentGlyph] _y
+				include : FlipAround x y
+				set currentGlyph.autoRefPriority [query-glyph src].autoRefPriority
 
 	# Dual derivatives
-	define [hcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'hcombine_' + id1 + '_' + id2] : glyph-proc
-		if unicode : assign-unicode unicode
-		include [refer-glyph id1] AS_BASE ALSO_METRICS
-		apply-transform : Translate (-spacing) 0
-		include [refer-glyph id2]
-		apply-transform : Translate (spacing / 2) 0
+	define [hcombine newid unicode id1 id2 spacing] : begin
+		create-glyph [fallback newid : 'hcombine_' + id1 + '_' + id2] unicode : glyph-proc
+			include [refer-glyph id1] AS_BASE ALSO_METRICS
+			include : Translate (-spacing) 0
+			include [refer-glyph id2]
+			include : Translate (spacing / 2) 0
 	define [HDual newid unicode id spacing] : hcombine [fallback newid : 'double' + id] unicode id id spacing
 
-	define [vcombine newid unicode id1 id2 spacing] : create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] : glyph-proc
-		if unicode : assign-unicode unicode
-		set-width [query-glyph id1].advanceWidth
-		currentGlyph.dependsOn [query-glyph id1]
-		currentGlyph.dependsOn [query-glyph id2]
-		include : new-glyph : glyph-proc
-			include [refer-glyph id2]
-			apply-transform : Upright
-		apply-transform : Translate 0 (-spacing)
-		include : new-glyph : glyph-proc
-			include [refer-glyph id1]
-			apply-transform : Upright
-		apply-transform : Translate 0 (spacing / 2)
-		apply-transform : Italify
+	define [vcombine newid unicode id1 id2 spacing] : begin
+		create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] unicode : glyph-proc
+			set-width [query-glyph id1].advanceWidth
+			currentGlyph.dependsOn [query-glyph id1]
+			currentGlyph.dependsOn [query-glyph id2]
+			include : new-glyph : glyph-proc
+				include [refer-glyph id2]
+				include : Upright
+			include : Translate 0 (-spacing)
+			include : new-glyph : glyph-proc
+				include [refer-glyph id1]
+				include : Upright
+			include : Translate 0 (spacing / 2)
+			include : Italify
 	define [VDual newid unicode id spacing] : vcombine [fallback newid : 'double' + id] unicode id id spacing
 
 	###### COMMON SHAPES
@@ -125,7 +123,7 @@ glyph-block CommonShapes : begin
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
 			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
-			apply-transform : Translate (mx1 - mx) (my1 - my)
+			include : Translate (mx1 - mx) (my1 - my)
 
 	define [Ring u d l r transformShiftOnly] : new-glyph : glyph-proc
 		local my ((u + d) / 2)
@@ -144,7 +142,7 @@ glyph-block CommonShapes : begin
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
 			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
-			apply-transform : Translate (mx1 - mx) (my1 - my)
+			include : Translate (mx1 - mx) (my1 - my)
 	define [RingAt x y r] : Ring (y + r) (y - r) (x - r) (x + r)
 	define [DotAt x y r] : Ring (y + r) (y - r) (x - r) (x + r) true
 
@@ -166,7 +164,7 @@ glyph-block CommonShapes : begin
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
 			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
-			apply-transform : Translate (mx1 - mx) (my1 - my)
+			include : Translate (mx1 - mx) (my1 - my)
 	define [RingStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s
 	define [DotStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s true
 
@@ -183,7 +181,7 @@ glyph-block CommonShapes : begin
 			close [lambda : begin [set this.angles 4] [set this.fairGizmo currentGlyph.gizmo]]
 		if transformShiftOnly : begin
 			local {.x mx1 .y my1} : globalTransform.apply {.x mx .y my}
-			apply-transform : Translate (mx1 - mx) (my1 - my)
+			include : Translate (mx1 - mx) (my1 - my)
 	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
 	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
 
@@ -787,18 +785,18 @@ glyph-block CommonShapes : begin
 
 	# Composite transformations
 	define [FlipAround x y sx sy] : glyph-proc
-		apply-transform : Upright
-		apply-transform : Translate (-x) (-y)
-		apply-transform : Scale [fallback sx (-1)] [fallback sy sx (-1)]
-		apply-transform : Translate x y
-		apply-transform : Italify
+		include : Upright
+		include : Translate (-x) (-y)
+		include : Scale [fallback sx (-1)] [fallback sy sx (-1)]
+		include : Translate x y
+		include : Italify
 	define ScaleAround FlipAround
 
 	define [Realign x y sx sy] : glyph-proc
-		apply-transform : Upright
-		apply-transform : Translate (-x) (-y)
-		apply-transform : Translate sx sy
-		apply-transform : Italify
+		include : Upright
+		include : Translate (-x) (-y)
+		include : Translate sx sy
+		include : Italify
 
 	define [ForceUpright] : glyph-proc
 		set this.gizmo : Translate 0 0
@@ -827,7 +825,7 @@ glyph-block CommonShapes : begin
 			define dy : c / segs * sw
 			candidates.push : new-glyph : glyph-proc
 				include overlay
-				apply-transform : Translate dx dy
+				include : Translate dx dy
 
 		include : difference background corners [union.apply null candidates]
 		include overlay
@@ -872,9 +870,9 @@ glyph-block CommonShapes : begin
 			local {.x xt .y yt} : [Transform.Id].apply {.x x2 .y y2}
 			local mag : Math.hypot (yo - yt) (xo - xt)
 			include [G mag]
-			apply-transform : Rotate : Math.atan2 (yo - yt) (xo - xt)
-			apply-transform : Translate xt yt
-			apply-transform   giz
+			include : Rotate : Math.atan2 (yo - yt) (xo - xt)
+			include : Translate xt yt
+			include   giz
 		include g
 
 	define [SNeck] : params [[stroke Stroke] [slantCoeff 0] [tensionCoeff 1] [dist 0.1]] : begin
@@ -884,7 +882,7 @@ glyph-block CommonShapes : begin
 
 	define [WithTransform tfm gr] : new-glyph : glyph-proc
 		include gr
-		apply-transform tfm
+		include tfm
 
 	define [ReverseContours gr] : begin
 		local g : create-glyph gr
@@ -896,4 +894,4 @@ glyph-block CommonShapes : begin
 		set currentGlyph.markAnchors {.}
 		set currentGlyph.markBnchors {.}
 
-	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape
+	glyph-block-export select-variant italic-variant alias composite refer-glyph query-glyph into-unicode turned HDual hcombine VDual vcombine Rect Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright Overlay diagCor CreateWaveShape NameUni PointingTo with-related-glyphs WithAIHSerifsMask SNeck WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape
