@@ -12,6 +12,7 @@ glyph-module
 
 glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 
 	glyph-block-export CreateDottedComposition
 	define [CreateDottedComposition sourceGid dstGid unicode]
@@ -35,6 +36,7 @@ glyph-block Letter-Shared : begin
 
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 
 	glyph-block-export RightwardTailedBar
 	define [RightwardTailedBar] : params [x low high [sw Stroke]] : begin
@@ -53,8 +55,60 @@ glyph-block Letter-Shared-Shapes : begin
 	define DToothlessRise : Hook * 0.375 + Stroke / 16
 	define DMBlend          0.80
 
+	glyph-block-export CurlyTail
+	define [CurlyTail] : params [fine rinner xleft bottom right x2 y2 [adj 0.4] [adj2 0.4] [adj3 0]] : begin
+		local ltr : right > xleft
+		set right : right - fine * [if ltr 1 (-1)]
+		local mid : mix [mix xleft right 0.5] (right - rinner * [if ltr 1 (-1)]) adj
+		local midu : mix [mix xleft right 0.5] (right - rinner * [if ltr 1 (-1)]) adj2
+		return : list
+			g4.[if ltr 'right' 'left'].mid (mid + CorrectionOMidX * fine * adj3 * [if ltr 1 (-1)]) (bottom + fine + O) [widths [if ltr 0 fine] [if ltr fine 0]]
+			archv 2
+			g4   right (bottom + fine + rinner - 0.1)
+			g4   right (bottom + fine + rinner + 0.1)
+			arcvh 2
+			g4   mid (bottom + fine + rinner * 2 - O)
+			alsoThruThem {{0.25 0.06} {0.52 0.25}} important
+			g4   x2 y2
+
+	glyph-block-export HCurlyTail
+	define [HCurlyTail fine wide rinner left m1 _right x1 x2 y2] : glyph-proc
+		local right : _right - fine
+		local mid : right - rinner + O
+		include : dispiro
+			widths.rhs wide
+			flat left wide [heading Rightward]
+			curl m1 wide [heading Rightward]
+			archv 8
+			g4   right (wide + rinner - O / 2) [widths.heading 0 fine {.x (-HVContrast) .y ((wide - fine) / (wide + rinner * 2 - O))}]
+			arcvh 8
+			g4.left.mid   mid (wide + rinner * 2 - O) [heading Leftward]
+			quadcontrols ((x1 - mid) / (x2 - mid)) 0 8
+			g4   x2 y2
+
+	glyph-block-export nShoulderKnots
+	define [nShoulderKnots] : params [left right [fine ShoulderFine] [top XH] [bottom 0] [sma SmallSmoothA] [smb SmallSmoothB] [stroke Stroke]] : begin
+		local slope : shoulderMidSlope fine stroke
+		local middle : [mix (left - stroke * HVContrast) right 0.5] + (slope - CorrectionOMidX) * stroke
+		return : list
+			flat left (top - sma - 2) [widths fine 0]
+			curl left (top - sma)
+			arcvh
+			g4   middle (top - O) [widths.heading 0 stroke {.y (1) .x (slope)}]
+			archv
+			flat right (top - smb)
+			curl right bottom [heading Downward]
+
+	glyph-block-export nShoulder
+	define [nShoulder] : begin
+		local a arguments
+		glyph-proc
+			include : dispiro : nShoulderKnots.apply null a
+
+
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'I.straight' : glyph-proc
@@ -97,6 +151,7 @@ glyph-block Letter-Latin-Upper-I : begin
 
 glyph-block Letter-Latin-Lower-I : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared : CreateDottedComposition
 	glyph-block-export IotaShape TailedIShape
@@ -234,6 +289,7 @@ glyph-block Letter-Latin-Lower-I : begin
 
 glyph-block Letter-Latin-Upper-J : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'J.serifless' : glyph-proc
@@ -283,8 +339,10 @@ glyph-block Letter-Latin-Upper-J : begin
 
 glyph-block Letter-Latin-Lower-J : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared : CreateDottedComposition
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	### j and dotless j
 	create-glyph 'dotlessj.straight' : glyph-proc
@@ -381,8 +439,8 @@ glyph-block Letter-Latin-Lower-J : begin
 		set currentGlyph.related.dotless 'dotlessjCurlyTail'
 
 glyph-block Letter-Latin-Upper-L : begin
-
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [LShape top] : glyph-proc
@@ -437,9 +495,11 @@ glyph-block Letter-Latin-Upper-L : begin
 
 glyph-block Letter-Latin-Lower-L : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Lower-I : IotaShape TailedIShape
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	create-glyph 'l.hooky' : glyph-proc
 		local df : DivFrame para.diversityI
@@ -655,6 +715,7 @@ glyph-block Letter-Latin-Lower-L : begin
 
 glyph-block Letter-Latin-V : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export VShape VShapeOutline
 
@@ -808,6 +869,7 @@ glyph-block Letter-Latin-V : begin
 
 glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape
 	glyph-block-export LambdaShape AMaskShape DeltaShape
@@ -879,6 +941,7 @@ glyph-block Letter-Latin-Upper-A : begin
 
 glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 
@@ -1033,6 +1096,7 @@ glyph-block Letter-Latin-Lower-A : begin
 
 glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	### W and w
@@ -1229,6 +1293,7 @@ glyph-block Letter-Latin-W : begin
 
 glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export HalfXStrand XStrand
 
@@ -1331,6 +1396,7 @@ glyph-block Letter-Latin-X : begin
 
 glyph-block Letter-Latin-Upper-Y : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-X : HalfXStrand
 
@@ -1397,7 +1463,9 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : nShoulder
 
 	define [GenSmallYShape straightBar useTurnBottom serifless] : begin
 		local slab : if serifless false SLAB
@@ -1683,6 +1751,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 glyph-block Letter-Latin-K : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	local [KBalance straightBar] : if SLAB (Width / 16) : if straightBar (Width / 32) 0
@@ -1963,6 +2032,7 @@ glyph-block Letter-Latin-K : begin
 
 glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [BShape] : params [top [barPos 0.52] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
@@ -2132,6 +2202,7 @@ glyph-block Letter-Latin-Upper-B : begin
 
 glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
@@ -2211,6 +2282,7 @@ glyph-block Letter-Latin-Lower-B : begin
 
 glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [DShape fRound] : glyph-proc
@@ -2274,8 +2346,11 @@ glyph-block Letter-Latin-Upper-D : begin
 
 glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
+	glyph-block-import Recursive-Build : Widen
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	create-glyph 'd.toothed' : glyph-proc
 		include MarkSet.b
@@ -2381,6 +2456,7 @@ glyph-block Letter-Latin-Lower-D : begin
 
 glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export PShape PShapeOutline RevPShape PBarPosY
 
@@ -2486,6 +2562,7 @@ glyph-block Letter-Latin-Upper-P : begin
 
 glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
@@ -2534,6 +2611,7 @@ glyph-block Letter-Latin-Lower-P : begin
 
 glyph-block Letter-Latin-Upper-R : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY
 
@@ -2696,6 +2774,7 @@ glyph-block Letter-Latin-Upper-R : begin
 
 glyph-block Letter-Latin-Lower-R : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	local dfR : DivFrame para.diversityF
@@ -2892,8 +2971,10 @@ glyph-block Letter-Latin-Lower-R : begin
 
 glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export CShape CShapeOutline
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	define [CShape top bot sw] : glyph-proc
 		include : dispiro
@@ -2959,12 +3040,16 @@ glyph-block Letter-Latin-C : begin
 
 	turned 'turnC' 0x186 'C' Middle (CAP / 2)
 	turned 'turnc' 0x254 'c' Middle (XH / 2)
-	composite [refer-glyph 'turnc'] [into-unicode 0x037B]
-	composite [refer-glyph 'turnC'] [into-unicode 0x03FD]
-	composite [refer-glyph 'c'] [DotAt (Middle + HalfStroke / 4) (XH/2) DotRadius] [into-unicode 0x037C]
-	composite [refer-glyph 'turnc'] [DotAt (Middle - HalfStroke / 4) (XH/2) DotRadius] [into-unicode 0x037D]
-	composite [refer-glyph 'C'] [DotAt (Middle + HalfStroke / 4) (CAP/2) DotRadius] [into-unicode 0x03FE]
-	composite [refer-glyph 'turnC'] [DotAt (Middle - HalfStroke / 4) (CAP/2) DotRadius] [into-unicode 0x03FF]
+	create-glyph 0x37B : composite-proc [refer-glyph 'turnc']
+	create-glyph 0x3FD : composite-proc [refer-glyph 'turnC']
+	create-glyph 0x37C : composite-proc [refer-glyph 'c']
+		DotAt (Middle + HalfStroke / 4) (XH/2) DotRadius
+	create-glyph 0x37D : composite-proc [refer-glyph 'turnc']
+		DotAt (Middle - HalfStroke / 4) (XH/2) DotRadius
+	create-glyph 0x3FE : composite-proc [refer-glyph 'C']
+		DotAt (Middle + HalfStroke / 4) (CAP/2) DotRadius
+	create-glyph 0x3FF : composite-proc [refer-glyph 'turnC']
+		DotAt (Middle - HalfStroke / 4) (CAP/2) DotRadius
 
 	create-glyph 'strenchedC' 0x297 : glyph-proc
 		set-width Width
@@ -3066,6 +3151,7 @@ glyph-block Letter-Latin-C : begin
 
 glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [GShape fTooth top sma smb] : glyph-proc
@@ -3138,6 +3224,7 @@ glyph-block Letter-Latin-Upper-G : begin
 
 glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
@@ -3274,6 +3361,7 @@ glyph-block Letter-Latin-Lower-G : begin
 
 glyph-block Letter-Latin-O : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'O' 'O' : glyph-proc
@@ -3390,6 +3478,7 @@ glyph-block Letter-Latin-O : begin
 
 glyph-block Letter-Latin-Upper-Q : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'Q.straight' : glyph-proc
@@ -3432,6 +3521,7 @@ glyph-block Letter-Latin-Upper-Q : begin
 
 glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Lower-I : TailedIShape
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
@@ -3527,6 +3617,7 @@ glyph-block Letter-Latin-Lower-Q : begin
 
 glyph-block Letter-Latin-Upper-N : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export NShape
 
@@ -3576,8 +3667,9 @@ glyph-block Letter-Latin-Upper-N : begin
 
 glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CurlyTail nShoulder nShoulderKnots
 
 	create-glyph 'n.straight' : glyph-proc
 		set-width Width
@@ -3726,6 +3818,7 @@ glyph-block Letter-Latin-Lower-N : begin
 
 glyph-block Letter-Latin-Upper-U : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export UShape
 
@@ -3753,8 +3846,9 @@ glyph-block Letter-Latin-Upper-U : begin
 
 glyph-block Letter-Latin-Lower-U : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder
 
 	create-glyph : glyph-proc
 		set-width Width
@@ -3846,6 +3940,7 @@ glyph-block Letter-Latin-Lower-U : begin
 
 glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [MShape top df fHanging] : glyph-proc
@@ -3896,6 +3991,7 @@ glyph-block Letter-Latin-Upper-M : begin
 
 glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
 
@@ -4003,7 +4099,10 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'm' 'm'
 	alias 'cyrl/te.italicNormal' null 'm.normal'
 	alias 'cyrl/te.italicTailed' null 'm.tailed'
-	composite 'cyrl/tedescender.italic' [refer-glyph 'm.normal'] [CyrDescender (Width * para.diversityM - SB)] MarkSet.e
+	create-glyph 'cyrl/tedescender.italic' : composite-proc
+		begin MarkSet.e
+		refer-glyph 'm.normal'
+		CyrDescender (Width * para.diversityM - SB)
 
 	create-glyph 'mltail' 0x271 : glyph-proc
 		local df : dfM
@@ -4032,6 +4131,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [HShape top] : glyph-proc
@@ -4054,8 +4154,8 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	alias 'cyrl/en' 0x43D 'smcpH'
 
-	composite [refer-glyph 'cyrl/En'] [CyrDescender RightSB] [into-unicode 0x4A2]
-	composite [refer-glyph 'cyrl/en'] [CyrDescender RightSB] [into-unicode 0x4A3]
+	create-glyph 0x4A2 : composite-proc [refer-glyph 'cyrl/En'] [CyrDescender RightSB]
+	create-glyph 0x4A3 : composite-proc [refer-glyph 'cyrl/en'] [CyrDescender RightSB]
 
 	define [EnGheShape top] : glyph-proc
 		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
@@ -4092,8 +4192,9 @@ glyph-block Letter-Latin-Upper-H : begin
 
 glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder
 
 	define [SmallHSerifs tailed] : glyph-proc
 		include : LeftwardTopSerif SB CAP SideJut
@@ -4216,6 +4317,7 @@ glyph-block Letter-Latin-Lower-H : begin
 
 glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-export FShape RevFShape EFVJutLength
 
@@ -4270,9 +4372,9 @@ glyph-block Letter-Latin-Upper-F : begin
 
 glyph-block Letter-Latin-Lower-F : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
-
-	glyph-block-export LongSShape
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	define fovershoot : fallback para.fovershoot (O * 6)
 
@@ -4309,6 +4411,7 @@ glyph-block Letter-Latin-Lower-F : begin
 				m + HalfStroke * HVContrast + LongJut * 0.75
 				[mix (XH - Stroke) CAP 0.5] - HalfStroke
 
+	glyph-block-export LongSShape
 	define [LongSShape top bottom hookx hooky fine] : glyph-proc
 		local w [fallback fine Stroke]
 		include : dispiro
@@ -4499,6 +4602,7 @@ glyph-block Letter-Latin-Lower-F : begin
 
 glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Upper-F : FShape RevFShape EFVJutLength
 
@@ -4549,6 +4653,7 @@ glyph-block Letter-Latin-Upper-E : begin
 
 glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	glyph-block-export SmallEShape RevSmallEShape
@@ -4611,6 +4716,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [TShape top] : glyph-proc
@@ -4664,8 +4770,10 @@ glyph-block Letter-Latin-Upper-T : begin
 
 glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	define tcenter : Middle - TBalance - Stroke * 0.5 * HVContrast
 	define dfNarrowT : DivFrame para.diversityF
@@ -4783,11 +4891,18 @@ glyph-block Letter-Latin-Lower-T : begin
 
 glyph-block Letter-Latin-S : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define SOBot OX
 	define [SmallSTensionCoeff stroke] : mix [StrokeWidthBlend 1 0.375 stroke] 1 : clamp 0 1 : Math.pow (Width / (UPM * 0.55)) 0.5
 	define [SmallSDistCoeff] : Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])
+
+	glyph-block-export SNeck
+	define [SNeck] : params [[stroke Stroke] [slantCoeff 0] [tensionCoeff 1] [dist 0.1]] : begin
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define tension : tensionCoeff * (0.5 - 0.4 * dist - 0.005 * strokeCoeff + slantCoeff * TanSlope)
+		return : alsoThruThem {{(0.5 - dist) tension} {(0.5 + dist) (1 - tension)}} [widths.center stroke]
 
 	define [SStroke] : begin
 		local stroke : adviceBlackness2 2.875 2 CAP
@@ -4989,7 +5104,9 @@ glyph-block Letter-Latin-S : begin
 
 glyph-block Letter-Latin-Z : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : HCurlyTail
 
 	create-glyph 'Z.standard' : glyph-proc
 		set-width Width
@@ -5139,7 +5256,9 @@ glyph-block Letter-Latin-Z : begin
 
 glyph-block Letter-Latin-Eszet : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Latin-S : SNeck
 
 	local ymiddle : [mix 0 CAP 0.5] - HalfStroke
 	local ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
@@ -5270,6 +5389,7 @@ glyph-block Letter-Latin-Eszet : begin
 
 glyph-block Letter-Latin-Upper-AE-OE : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 
@@ -5363,7 +5483,9 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 
 glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : nShoulder
 
 	define [GetSm df stroke] : begin
 		local sma : SmoothAOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
@@ -5487,6 +5609,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 glyph-block Letter-Latin-OU : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'OU' 0x222 : glyph-proc
@@ -5519,6 +5642,7 @@ glyph-block Letter-Latin-OU : begin
 
 glyph-block Letter-Latin-IJ : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'IJ' 0x132 : glyph-proc
@@ -5544,7 +5668,9 @@ glyph-block Letter-Latin-IJ : begin
 
 glyph-block Letter-Latin-Ezh : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	glyph-block-export EzhShape
 	define [EzhShape] : params [top bot pleft pright hookless] : glyph-proc
@@ -5672,6 +5798,7 @@ glyph-block Letter-Latin-Ezh : begin
 
 glyph-block Letter-Latin-Glottal-Stop : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'glottalstop' 0x294 : glyph-proc
@@ -5770,6 +5897,7 @@ glyph-block Letter-Latin-Glottal-Stop : begin
 
 glyph-block Letter-Latin-Eth : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'eth' 0xF0 : glyph-proc
@@ -5791,6 +5919,7 @@ glyph-block Letter-Latin-Eth : begin
 
 glyph-block Letter-Latin-Thorn : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'Thorn' 0xDE : glyph-proc
@@ -5844,7 +5973,9 @@ glyph-block Letter-Latin-Thorn : begin
 
 glyph-block Letter-Latin-Hwair : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
 
 	create-glyph 'Hwair' 0x1F6 : glyph-proc
 		local df : DivFrame para.diversityM 3
@@ -5889,6 +6020,7 @@ glyph-block Letter-Latin-Hwair : begin
 
 glyph-block Letter-Latin-Gha : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'Gha' 0x1A2 : glyph-proc
@@ -5926,6 +6058,7 @@ glyph-block Letter-Latin-Gha : begin
 
 glyph-block Letter-Latin-Wynn : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [WynnShape bot top] : glyph-proc
@@ -5951,6 +6084,7 @@ glyph-block Letter-Latin-Wynn : begin
 
 glyph-block Letter-Latin-Yogh : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [YoghShape top bot] : glyph-proc
@@ -5979,6 +6113,7 @@ glyph-block Letter-Latin-Yogh : begin
 
 glyph-block Letter-Latin-RamsHorn : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	define [RamsHornShape bottom top] : glyph-proc
@@ -6038,6 +6173,7 @@ glyph-block Letter-Latin-RamsHorn : begin
 
 glyph-block Letter-Latin-Rhotic : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	glyph-block-export ErTail
@@ -6064,6 +6200,7 @@ glyph-block Letter-Latin-Rhotic : begin
 
 glyph-block Letter-Latin-Bidental-Percussive : begin
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
 
 	create-glyph 'bidentalPercussive' 0x2AD : glyph-proc

@@ -60,10 +60,26 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
 		return dp
 
-	define [$createAndSaveGlyphImpl$ saveGlyphName unicode actions] : begin
-		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
+	define [$createAndSaveGlyphImpl$ _1 _2 actions] : begin
+		local saveGlyphName    null
+		local ensuredGlyphName null
+		local unicode          null
 
-		local ensuredGlyphName : if saveGlyphName saveGlyphName ('.temp-' + [newtemp])
+		piecewise
+			([typeof _1] === 'number' && _1) : begin
+				set saveGlyphName : 'uni' + [_1.toString 16 :.padStart 4 '0' :.toUpperCase]
+				set ensuredGlyphName saveGlyphName
+				set unicode          _1
+			([typeof _1] === 'string' && _1) : begin
+				set saveGlyphName    _1
+				set ensuredGlyphName saveGlyphName
+				set unicode          _2
+			true : begin
+				set saveGlyphName    null
+				set ensuredGlyphName ('.temp-' + [newtemp])
+				set unicode          null
+
+		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
 		if para.verbose : console.log ensuredGlyphName
 
 		local glyphObject [new Glyph saveGlyphName]
@@ -110,6 +126,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
+	run-glyph-module '../glyphs/common-derivatives.js'
 	run-glyph-module '../glyphs/space.js'
 	run-glyph-module '../glyphs/overmarks.js'
 
