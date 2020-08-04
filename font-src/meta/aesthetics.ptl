@@ -138,13 +138,11 @@ export : define [calculateMetrics para] : begin
 	# We will estimate blackness using lower-case 'e'
 	define DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.pow (Width / HalfUPM) 0.5]) Width
 	define DarknessMockWidth2 : HalfUPM * [Math.pow (Width / HalfUPM) 0.5]
-	define [BrightnessOfDiv div] : begin
-		local w : DarknessMockWidth * [fallback div 1] - SB * 2
-		return : ((XH - Stroke * 3) * w * (1 / 3)) / (XH * w)
-	define Brightness1 : BrightnessOfDiv 1
+	define BaseFillRate : 1 / 2 + Stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
+	define [CrowdednessAdjust c] : c * HVContrast
 	define [adviceBlackness crowdedness div mul] : begin
 		local gap : DarknessMockWidth * [fallback div 1] - SB * 2
-		local shrink : (1 - Brightness1) / (crowdedness * HVContrast)
+		local shrink : BaseFillRate / [CrowdednessAdjust crowdedness]
 		return : Math.min Stroke ([fallback mul 1] * gap * shrink)
 	define [adviceBlackness2 cowX cowY refH div] : Math.min
 		adviceBlackness cowX (refH / DarknessMockWidth2)
