@@ -69,12 +69,23 @@ const TieGlyph = {
 
 const DoNotDeriveVariants = {
 	get(glyph) {
-		if (glyph && glyph.related) return glyph.related.DoNotDeriveVariants;
-		else return null;
+		if (glyph && glyph.related) return !!glyph.related.DoNotDeriveVariants;
+		else return false;
 	},
 	set(glyph) {
 		if (!glyph.related) glyph.related = {};
 		glyph.related.DoNotDeriveVariants = true;
+	}
+};
+
+const Radical = {
+	get(glyph) {
+		if (glyph && glyph.related) return !!glyph.related.radical;
+		else return false;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.radical = true;
 	}
 };
 
@@ -295,6 +306,7 @@ exports.getGrMesh = getGrMesh;
 exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
 exports.DoNotDeriveVariants = DoNotDeriveVariants;
+exports.Radical = Radical;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
