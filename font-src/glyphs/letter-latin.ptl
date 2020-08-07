@@ -378,36 +378,11 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-base-anchor 'above' (Middle + JBalance - Stroke * 0.166 * HVContrast) XH
 		set-base-anchor 'overlay' (Middle + JBalance - Stroke * 0.166 * HVContrast) (XH / 2)
 
-	create-glyph 'dotlessj.narrow' : glyph-proc
-		local df : DivFrame para.diversityII
-		set-width df.width
-		include df.markSet.p
-		local crossLeft : mix 0 SB (1 / 2)
-		local crossRight : mix df.width df.rightSB (1 / 2)
+	define [FlatHookDotlessJShape] : params [df crossLeft crossRight barCenter serif] : glyph-proc
 		local terminal : crossLeft - OX * 2
-		local bar : df.middle + HalfStroke * HVContrast
-		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.5) : Math.min Hook (Stroke * 1.75)
-		include : dispiro
-			widths.lhs
-			flat [Math.min terminal (bar - tTurn - [Math.max (Stroke / 3) (df.width / 6)])] Descender
-			curl (bar - tTurn) Descender
-			archv
-			flat bar (Descender + tTurn)
-			curl bar XH [heading Upward]
-		set-base-anchor 'above' (df.middle) XH
-		set-base-anchor 'overlay' (df.middle) (XH / 2)
-
-	create-glyph 'dotlessj.narrow-serifed' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include df.markSet.p
-		local crossLeft : mix 0 SB (1 / 2)
-		local crossRight : mix df.width df.rightSB (1 / 2)
-		local terminal : crossLeft - OX * 2
-		local barCenter : df.middle + JBalance * df.div
 		local bar : barCenter + HalfStroke * HVContrast
 		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.5) : Math.min Hook (Stroke * 1.75)
-		include : LeftwardTopSerif barCenter XH (LongJut * df.div)
+		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
 		include : dispiro
 			widths.lhs
 			flat [Math.min terminal (bar - tTurn - [Math.max (Stroke / 3) (df.width / 6)])] Descender
@@ -417,6 +392,46 @@ glyph-block Letter-Latin-Lower-J : begin
 			curl bar XH [heading Upward]
 		set-base-anchor 'above' barCenter XH
 		set-base-anchor 'overlay' barCenter (XH / 2)
+
+	create-glyph 'dotlessj.flatHookSerifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include df.markSet.p
+		include :  FlatHookDotlessJShape df
+			crossLeft -- df.leftSB
+			crossRight -- df.rightSB
+			barCenter -- [df.middle + JBalance * df.div]
+			serif -- true
+
+	create-glyph 'dotlessj.flatHookSerifless' : glyph-proc
+		local df : DivFrame para.diversityII
+		set-width df.width
+		include df.markSet.p
+		include : FlatHookDotlessJShape df
+			crossLeft -- df.leftSB
+			crossRight -- df.rightSB
+			barCenter -- [df.middle + 0.5 * JBalance * df.div]
+
+	create-glyph 'dotlessj.narrow' : glyph-proc
+		local df : DivFrame para.diversityII
+		set-width df.width
+		include df.markSet.p
+		include : FlatHookDotlessJShape df
+			crossLeft -- [mix 0 SB (1 / 2)]
+			crossRight -- [mix df.width df.rightSB (1 / 2)]
+			barCenter -- df.middle
+			serif -- false
+
+	create-glyph 'dotlessj.narrowSerifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include df.markSet.p
+		include : FlatHookDotlessJShape df
+			crossLeft -- [mix 0 SB (1 / 2)]
+			crossRight -- [mix df.width df.rightSB (1 / 2)]
+			barCenter -- [df.middle + JBalance * df.div]
+			serif -- true
+
 
 	select-variant 'dotlessj' 0x237
 
@@ -4526,25 +4541,31 @@ glyph-block Letter-Latin-Lower-F : begin
 				curl (RightSB - HalfStroke * TanSlope) fbar
 
 	define dfNarrowF : DivFrame para.diversityF
-	create-glyph 'f.narrow' : glyph-proc
-		local df : DivFrame para.diversityF
-		set-width df.width
-		include df.markSet.b
-		local crossLeft : mix 0 SB (1 / 2)
-		local crossRight : mix df.width df.rightSB (1 / 2)
-		local barleft : [mix crossLeft crossRight 0.42] - Stroke * 0.375 * HVContrast
+	define [NarrowFShape df m] : glyph-proc
+		local crossLeft : mix 0 SB m
+		local crossRight : mix df.width df.rightSB m
+		local barLeft : [mix crossLeft crossRight 0.42] - Stroke * 0.375 * HVContrast + df.width / 32
 		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.375) : Math.min Hook (Stroke * 1.75)
 		include : dispiro
 			widths.lhs
 			flat crossRight CAP
-			curl [Math.min (barleft + tTurn) (crossRight - 1)] CAP
+			curl [Math.min (barLeft + tTurn) (crossRight - 1)] CAP
 			archv
-			flat barleft [Math.max XH (CAP - tTurn)]
-			curl barleft 0 [heading Downward]
+			flat barLeft [Math.max XH (CAP - tTurn)]
+			curl barLeft 0 [heading Downward]
 		include : dispiro
 			widths.rhs
 			flat (crossLeft - HalfStroke * TanSlope) fbar
 			curl (crossRight - HalfStroke * TanSlope) fbar
+
+	create-glyph 'f.narrow' : glyph-proc
+		set-width dfNarrowF.width
+		include   dfNarrowF.markSet.b
+		include : NarrowFShape dfNarrowF 1
+
+	create-glyph 'f.flatHook' : glyph-proc
+		include   MarkSet.b
+		include : NarrowFShape [DivFrame 1] 1
 
 	create-glyph 'f.tailed' : glyph-proc
 		include [refer-glyph 'longs.italic'] AS_BASE
@@ -4558,8 +4579,8 @@ glyph-block Letter-Latin-Lower-F : begin
 	turned 'turnf.straight' nothing 'f.straight' Middle (XH / 2) MarkSet.p
 	turned 'turnf.serifed' nothing 'f.serifed' Middle (XH / 2) MarkSet.p
 	turned 'turnf.straightTailed' nothing 'f.straightTailed' Middle (XH / 2) MarkSet.p
-	turned 'turnf.narrow' nothing 'f.narrow' dfNarrowF.middle (XH / 2) dfNarrowF.markSet.p
 	turned 'turnf.tailed' nothing 'f.tailed' Middle (XH / 2) MarkSet.p
+	turned 'turnf.flatHook' nothing 'f.flatHook' dfNarrowF.middle (XH / 2) dfNarrowF.markSet.p
 	select-variant 'turnf' 0x25F (follow -- 'f')
 
 	do "f ligatures"
@@ -4783,7 +4804,6 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
 	define tcenter : Middle - TBalance - Stroke * 0.5 * HVContrast
-	define dfNarrowT : DivFrame para.diversityF
 	define [SmallTShape top bot] : glyph-proc
 		local hookx : tcenter + (Width - SB * 2) * 0.8 + Stroke * 0.25 * HVContrast
 		local turn : [mix tcenter hookx 0.5] + CorrectionOMidS
@@ -4827,11 +4847,15 @@ glyph-block Letter-Latin-Lower-T : begin
 				curl (crossRight - HalfStroke * TanSlope + ext) XH
 		set-base-anchor 'topright' crossRight  CAP
 
+	create-glyph 't.flatHook' : glyph-proc
+		include MarkSet.b
+		include : TFlatShape [DivFrame 1] 1 0
+
+	define dfNarrowT : DivFrame para.diversityF
 	create-glyph 't.narrow' : glyph-proc
-		local df : DivFrame para.diversityF
-		set-width df.width
-		include df.markSet.b
-		include : TFlatShape df 0.5 0
+		set-width dfNarrowT.width
+		include dfNarrowT.markSet.b
+		include : TFlatShape dfNarrowT 0.5 0
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
@@ -4857,6 +4881,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	turned 'turnt.standard' nothing 't.standard' Middle (XH / 2) MarkSet.p
 	turned 'turnt.cross' nothing 't.cross' Middle (XH / 2) MarkSet.p
+	turned 'turnt.flatHook' nothing 't.flatHook' Middle (XH / 2) MarkSet.p
 	turned 'turnt.narrow' nothing 't.narrow' dfNarrowT.middle (XH / 2) dfNarrowT.markSet.p
 	select-variant 'turnt' 0x287 (follow -- 't')
 
