@@ -1,5 +1,7 @@
 "use strict";
 
+const { Radical } = require("../../support/gr");
+
 module.exports = function gcFont(gs, excludedChars, restFont, cfg) {
 	markSweepOtl(restFont.GSUB);
 	markSweepOtl(restFont.GPOS);
@@ -64,9 +66,14 @@ function mark(gs, excludedChars, restFont, cfg) {
 function markInitial(gs, excludedChars) {
 	let sink = new Set();
 	for (const g of gs) {
+		if (!g) continue;
 		if (g.glyphRank > 0) sink.add(g.name);
-		if (!g || !g.unicode) continue;
-		for (const u of g.unicode) if (!excludedChars.has(u)) sink.add(g.name);
+		if (Radical.get(g)) sink.add(g.name);
+		if (g.unicode) {
+			for (const u of g.unicode) {
+				if (!excludedChars.has(u)) sink.add(g.name);
+			}
+		}
 	}
 	return sink;
 }

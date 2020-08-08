@@ -4,6 +4,8 @@ import './kits/spiro-kit' as spirokit
 import './kits/boole-kit' as BooleKit
 import '../support/anchor' as Anchor
 
+extern isFinite
+
 import [mix linreg clamp fallback] from '../support/utils'
 import [calculateMetrics setFontMetrics MarksetDiv GenDivFrame] from '../meta/aesthetics'
 
@@ -28,7 +30,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	local unicodeGlyphs {}
 
 	define metrics : calculateMetrics para
-	define [object globalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Superness Width TanSlope OverlayPos Descender symbolMid parenTop parenBot operTop operBot plusTop plusBot tackTop tackBot adviceBlackness MVertStrokeD] metrics
+	define [object GlobalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Superness Width TanSlope OverlayPos Descender SymbolMid ParenTop ParenBot OperTop OperBot PlusTop PlusBot TackTop TackBot adviceBlackness MVertStrokeD] metrics
 
 	define fontMetrics {.head {.} .hhea {.} .OS_2 {.} .post {.}}
 	setFontMetrics para metrics fontMetrics
@@ -58,15 +60,33 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
 		return dp
 
-	define [createAndSaveGlyphImpl saveGlyphName unicode actions] : begin
-		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
+	define [$createAndSaveGlyphImpl$ _1 _2 actions] : begin
+		local saveGlyphName    null
+		local ensuredGlyphName null
+		local unicode          null
 
-		local ensuredGlyphName : if saveGlyphName saveGlyphName ('.temp-' + [newtemp])
+		piecewise
+			([typeof _1] === 'number' && _1) : begin
+				set saveGlyphName : 'uni' + [_1.toString 16 :.padStart 4 '0' :.toUpperCase]
+				set ensuredGlyphName saveGlyphName
+				set unicode          _1
+			([typeof _1] === 'string' && _1) : begin
+				set saveGlyphName    _1
+				set ensuredGlyphName saveGlyphName
+				set unicode          _2
+			true : begin
+				set saveGlyphName    null
+				set ensuredGlyphName ('.temp-' + [newtemp])
+				set unicode          null
+
+		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
 		if para.verbose : console.log ensuredGlyphName
 
-		local glyphObject [new Glyph ensuredGlyphName]
+		local glyphObject [new Glyph saveGlyphName]
 		glyphObject.setWidth Width
-		glyphObject.gizmo = globalTransform
+		glyphObject.gizmo = GlobalTransform
+		glyphObject.include actions true true
+		warnAboutBrokenGlyph glyphObject ensuredGlyphName
 
 		if saveGlyphName : begin
 			glyphList.push glyphObject
@@ -74,54 +94,39 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 				throw : new Error "Glyph \(saveGlyphName) already exists"
 			glyphMap.(saveGlyphName) = glyphObject
 			if unicode : $assignUnicodeImpl$ glyphObject unicode
-
-		actions.call glyphObject
-
-		local complexity : [(glyphObject.contours || {}).map (x => x.length)].reduce ([a b] => (a + b)) 0
-		if (complexity > 0x7fff) : console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
-
-		if saveGlyphName : begin
 			set dependencyProfile.(saveGlyphName) : getDependencyProfile glyphObject
 			dec nPending
 
 		return glyphObject
 
-	define [create-glyph] : match [Array.prototype.slice.call arguments 0]
-		`[@name @unicode @actions] : return : createAndSaveGlyphImpl name unicode actions
-		`[@name @actions]          : return : createAndSaveGlyphImpl name null    actions
-		`[@actions]                : return : createAndSaveGlyphImpl null null    actions
+	define [warnAboutBrokenGlyph g ensuredGlyphName] : begin
+		local complexity 0
+		local broken false
+		if g.contours : begin
+			foreach [c : items-of g.contours] : foreach [z : items-of c] : begin
+				inc complexity
+				if [not : isFinite z.x] : set broken true
+				if [not : isFinite z.y] : set broken true
+
+		if ([not recursive] && (broken || complexity > 0x7fff)) : begin
+			console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
+			console.log 'Family' para.naming.family para.naming.weight para.naming.width para.naming.slope
 
 	define [$assignUnicodeImpl$ g unicode] : begin
 		g.assignUnicode unicode
 		set unicodeGlyphs.(g.unicode.((g.unicode.length - 1))) g
 
-	define [$save$ _name unicode] : begin
-		define t this
-		define name : if [not _name] ('--autoname-' + [newtemp]) _name
-		local g : create-glyph name [lambda]
-		if g : begin
-			g.include t AS_BASE
-			if (t <@ Glyph) : begin
-				set g.advanceWidth        t.advanceWidth
-				set g.shortName           t.shortName
-				set g.autoRefPriority     t.autoRefPriority
-				set g.glyphRank           t.glyphRank
-				set g.avoidBeingComposite t.avoidBeingComposite
-				set g.related             t.related
-			if name : set dependencyProfile.(name) : getDependencyProfile g
-		if (g && unicode) : $assignUnicodeImpl$ g unicode
-		return g
-
 	### Spiro constructions
 	# Basic knots
-	define spirofns : spirokit.SetupBuilders : object globalTransform Contrast Stroke Glyph para Superness
-	define booleFns : BooleKit.SetupBuilders : object globalTransform Glyph
+	define spirofns : spirokit.SetupBuilders : object GlobalTransform Contrast Stroke Glyph para Superness
+	define booleFns : BooleKit.SetupBuilders : object GlobalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
+	run-glyph-module '../glyphs/common-derivatives.js'
 	run-glyph-module '../glyphs/space.js'
 	run-glyph-module '../glyphs/overmarks.js'
 

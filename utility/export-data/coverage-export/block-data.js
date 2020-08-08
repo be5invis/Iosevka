@@ -7,7 +7,7 @@ module.exports = [
 	[[0x02b0, 0x02ff], "Spacing Modifier Letters"],
 	[[0x0300, 0x036f], "Combining Diacritical Marks"],
 	[[0x0370, 0x03ff], "Greek and Coptic"],
-	[[0x0400, 0x04ff], "Cyrillic"],
+	[[0x0400, 0x04ff], "cyrl/illic"],
 	[[0x0500, 0x052f], "Cyrillic Supplement"],
 	[[0x0530, 0x058f], "Armenian"],
 	[[0x0590, 0x05ff], "Hebrew"],

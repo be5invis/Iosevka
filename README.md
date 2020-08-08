@@ -31,9 +31,9 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-160 Supported Languages: 
+162 Supported Languages: 
 
-Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
+Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, Nigerian Pidgin, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Prussian, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Sundanese, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Volapük, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
 
 <!-- END Section-Language-List -->
 
@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																				
+																																																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -313,26 +313,37 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 
   * Styles for `a`:
     * `v-a-doublestorey`, `cv01`: Double-storey `a` (default for Upright).
-    * `v-a-singlestorey`, `cv02`: Single-storey `a` (default for Italic).
-    * `v-a-singlestorey-tailed`, `VXBS`: Single-storey `a` with curly tail.
+    * `v-a-singlestorey`, `cv02`: Single-storey `a`.
+    * `v-a-singlestorey-tailed`, `VXBS`: Single-storey `a` with curly tail (default for Italic).
+    * `v-a-doublestorey-tailed`, `VXBU`: Double-storey `a` with curly tail.
+    * `v-a-singlestorey-earless-corner`, `VXCL`: Earless (cornered top-right) single-storey `a`.
+    * `v-a-singlestorey-earless-corner-tailed`, `VXCM`: Earless (cornered top-right) single-storey `a` with curly tail.
+    * `v-a-singlestorey-earless-rounded`, `VXCN`: Earless (rounded top-right) single-storey `a`.
+    * `v-a-singlestorey-earless-rounded-tailed`, `VXCO`: Earless (rounded top-right) single-storey `a` with curly tail.
   * Styles for `b`:
     * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
     * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
     * `v-b-toothless-rounded`, `VXBM`: `b` without botton-left tooth, with a rounded transition.
   * Styles for `d`:
-    * `v-d-toothed`, `VXBN`: `d` with bottom-right tooth (default).
+    * `v-d-toothed`, `VXBN`: `d` with bottom-right tooth (default for Upright).
     * `v-d-toothless-corner`, `VXBO`: `d` without botton-right tooth, with a corner transition.
     * `v-d-toothless-rounded`, `VXBP`: `d` without botton-right tooth, with a rounded transition.
-    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail.
+    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail (default for Italic).
   * Styles for `f`:
     * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
     * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
+    * `v-f-flat-hook`, `VXDD`: `f` with flat hook.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
     * `v-g-opendoublestorey`, `cv24`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
+    * `v-g-earless-corner`, `VXCW`: Earless (cornered top-right) single-storey `g`.
+    * `v-g-earless-rounded`, `VXCX`: Earless (rounded top-right) single-storey `g`.
+  * Styles for `h`:
+    * `v-h-straight`, `VXCB`: `h` with straight ending (default).
+    * `v-h-tailed`, `VXCC`: `h` with curly tailed ending.
   * Styles for `i`:
     * `v-i-serifed`, `cv03`: Serifed `i` (default for Upright).
     * `v-i-italic`, `cv04`: Italic `i` (default for Italic).
@@ -345,6 +356,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
     * `v-j-straight`, `cv98`: `j` without serif.
+    * `v-j-flat-hook-serifed`, `VXDE`: undefined.
+    * `v-j-flat-hook-serifless`, `VXDF`: undefined.
   * Styles for `k`, `K`:
     * `v-k-straight`, `cv68`: `k` and `K` with standard shape (default for Upright).
     * `v-k-curly`, `cv69`: Slightly curly `k` and `K`, like Iosevka 2.x.
@@ -358,12 +371,26 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
+    * `v-l-serifed-asymmetric`, `VXDA`: Serifed `l` with shorter top serif.
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
+    * `v-m-tailed`, `VXCD`: `m` with normal middle leg, touching the baseline, and a curly tail.
+    * `v-m-shortleg-tailed`, `VXCE`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
+  * Styles for `n`:
+    * `v-n-straight`, `VXCF`: `n` straight ending (default).
+    * `v-n-tailed`, `VXCG`: `n` a curly tail.
+  * Styles for `p`:
+    * `v-p-eared`, `VXCP`: `p` with top-left ear (default).
+    * `v-p-earless-corner`, `VXCQ`: `p` without top-left ear (corner).
+    * `v-p-earless-rounded`, `VXCR`: `p` without top-left ear (rounded).
   * Styles for `q`:
     * `v-q-straight`, `VXAZ`: `q` with straight bar (default).
     * `v-q-tailed`, `VXBA`: `q` with tail.
+    * `v-q-earless-corner`, `VXCS`: Earless (cornered top-left) single-storey `q`.
+    * `v-q-earless-corner-tailed`, `VXCT`: Earless (cornered top-left) single-storey `q` with curly tail.
+    * `v-q-earless-rounded`, `VXCU`: Earless (rounded top-left) single-storey `q`.
+    * `v-q-earless-rounded-tailed`, `VXCV`: Earless (rounded top-left) single-storey `q` with curly tail.
   * Styles for `r`:
     * `v-r-straight`, `cv85`: Straight, serif-less `r` (default for Sans).
     * `v-r-serifed`, `cv86`: `r` with serif at both top and bottom (default for Slab Upright).
@@ -371,16 +398,18 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `t`:
     * `v-t-standard`, `cv40`: Standard `t` shape (default).
     * `v-t-cross`, `cv41`: Futura-like `t` shape.
+    * `v-t-flat-hook`, `VXDC`: `t` with flat hook.
   * Styles for `u`:
-    * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default).
+    * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default for Upright).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
-    * `v-u-tailed`, `VXBT`: `u` with right bar and a slightly curly tail.
+    * `v-u-tailed`, `VXBT`: `u` with right bar and a slightly curly tail (default for Italic).
   * Styles for `v`, `V`:
     * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
     * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.
   * Styles for `w`, `W`:
     * `v-w-straight`, `cv75`: Standard, straight `W` and `w` (default).
     * `v-w-curly`, `cv76`: Slightly curly `W` and `w`, like Iosevka 2.x.
+    * `v-w-straight-flat-top`, `VXCH`: Standard, straight `W` and `w`, and the middle is forced to be aligned the top.
   * Styles for `x`, `X`:
     * `v-x-straight`, `cv77`: Standard, straight `X` and `x` (default).
     * `v-x-curly`, `cv78`: Slightly curly `X` and `x`, like Iosevka 2.x.
@@ -391,7 +420,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-y-straight-turn`, `VXBF`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
   * Styles for `z`:
     * `v-z-standard`, `VXBD`: Standard `Z` and `z` (default).
-    * `v-z-with-crossbar`, `VXBE`: `Z` and `z` with a cross bar for better dsitinction with `2`.
+    * `v-z-with-crossbar`, `VXBE`: `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
+    * `v-z-with-horizontal-crossbar`, `VXBX`: `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
   * Styles for `A`, `Λ`, `Δ`:
     * `v-turn-v-straight`, `cv73`: Standard, straight `A`, `Λ`, `Δ` (default).
     * `v-turn-v-curly`, `cv74`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
@@ -404,9 +434,18 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `G`:
     * `v-capital-g-tooth`, `cv91`: Toothed G (default).
     * `v-capital-g-toothless`, `cv92`: Toothless G.
+  * Styles for `J`:
+    * `v-capital-j-serifless`, `VXBY`: J without top serif.
+    * `v-capital-j-serifed`, `VXBZ`: J with top serif at left side (default).
+    * `v-capital-j-serifed-both-sides`, `VXDA`: J with symmetric at both sides.
+    * `v-capital-j-serifed-symmetric`, `VXDB`: J with symmetric at both sides and is symmetric.
+  * Styles for `M`:
+    * `v-capital-m-hanging`, `VXCI`: `M` with middle being hanging off baseline (default).
+    * `v-capital-m-flat-bottom`, `VXCJ`: `M` with middle aligned to baseline.
   * Styles for `Q`:
     * `v-capital-q-taily`, `cv42`: `Q` with a curly tail (default).
     * `v-capital-q-straight`, `cv43`: `Q` with a straight tail like in the old versions.
+    * `v-capital-q-crossing`, `VXCA`: `Q` with a tail crossing the ring.
   * Styles for `R`:
     * `v-capital-r-straight`, `cv82`: Standard, straight-leg `R` (default).
     * `v-capital-r-curly`, `cv83`:  Slightly curly-legged `R`, like Iosevka 2.x.
@@ -461,6 +500,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-asterisk-low`, `cv19`: Lower five-pointed asterisk `*`.
     * `v-asterisk-hexhigh`, `cv60`: Higher six-pointed asterisk `*`.
     * `v-asterisk-hexlow`, `cv61`: Lower six-pointed asterisk `*`.
+    * `v-asterisk-flip-penta-high`, `VXBV`: Higher five-pointed and turned asterisk `*`.
+    * `v-asterisk-flip-penta-low`, `VXBW`: Lower five-pointed and turned asterisk `*`.
   * Styles for `_`:
     * `v-underscore-high`, `cv20`: Higher underscore `_`, placed right below baseline (default).
     * `v-underscore-low`, `cv21`: Lower underscore `_`, placed right above descender line.
@@ -500,7 +541,11 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-dollar-throughcap`, `cv55`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
   * Styles for `%`:
     * `v-percent-dots`, `cv62`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
-    * `v-percent-rings`, `cv63`: Percent `%`, Per-mille `‰` and basis point `‱` using rings (default).
+    * `v-percent-rings`, `cv63`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
+    * `v-percent-rings-connected`, `VXCK`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
+  * Styles for `|`:
+    * `v-bar-natural-slope`, `VXCY`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
+    * `v-bar-force-upright`, `VXCZ`: Bar punctuations (`|`) is forced upright under italics and oblique.
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.

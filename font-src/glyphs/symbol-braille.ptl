@@ -13,17 +13,13 @@ glyph-block Symbol-Braille : begin
 	if recursive : return nothing
 
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 
 	local left : Middle - (0.25 * Width)
 	local right : Middle + (0.25 * Width)
-	local offsetY : 0.3 * (symbolMid - pictTop)
+	local offsetY : 0.3 * (SymbolMid - PictTop)
 	local stress : 0.5 * [adviceBlackness 3.375]
 	local dotRadius : PeriodRadius * [Math.min 1 (stress / HalfStroke)]
-
-	### Blank
-	sketch # brailleBlank
-		set-width Width
-		save 'brailleBlank' 0x2800
 
 	### Computed Braille Patterns
 	###
@@ -33,23 +29,23 @@ glyph-block Symbol-Braille : begin
 	###   2  5
 	###   6  7
 	###
-	foreach [byte : range 1 256] : sketch
+	foreach [byte : range 1 256] : begin
 		local dots {}
-		local [y-coord y] (symbolMid + y * offsetY)
-		# Is there a way to directly use (byte & (1 << bit)) here?
-		foreach [bit : range 0 8] : if [maskBit byte bit] : begin
-			include : match bit
-				0 : DotAt left  [y-coord (-3)] dotRadius
-				1 : DotAt left  [y-coord (-1)] dotRadius
-				2 : DotAt left  [y-coord   1 ] dotRadius
-				3 : DotAt right [y-coord (-3)] dotRadius
-				4 : DotAt right [y-coord (-1)] dotRadius
-				5 : DotAt right [y-coord   1 ] dotRadius
-				6 : DotAt left  [y-coord   3 ] dotRadius
-				7 : DotAt right [y-coord   3 ] dotRadius
-			dots.push (bit + 1) # Match numerals in Unicode spec
-		set currentGlyph.autoRefPriority (-101)
-		save ("braille" + [dots.join '']) (0x2800 + byte)
+		foreach [bit : range 0 8] : if [maskBit byte bit] : dots.push (bit + 1)
+		create-glyph ("braille" + [dots.join '']) (0x2800 + byte) : glyph-proc
+			set currentGlyph.autoRefPriority (-101)
+			local [y-coord y] (SymbolMid + y * offsetY)
+			# Is there a way to directly use (byte & (1 << bit)) here?
+			foreach [bit : range 0 8] : if [maskBit byte bit] : begin
+				include : match bit
+					0 : DotAt left  [y-coord (-3)] dotRadius
+					1 : DotAt left  [y-coord (-1)] dotRadius
+					2 : DotAt left  [y-coord   1 ] dotRadius
+					3 : DotAt right [y-coord (-3)] dotRadius
+					4 : DotAt right [y-coord (-1)] dotRadius
+					5 : DotAt right [y-coord   1 ] dotRadius
+					6 : DotAt left  [y-coord   3 ] dotRadius
+					7 : DotAt right [y-coord   3 ] dotRadius
 
 	if [query-glyph 'braille7'] : set [query-glyph 'braille7'].autoRefPriority             101
 	if [query-glyph 'braille37'] : set [query-glyph 'braille37'].autoRefPriority           102

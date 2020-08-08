@@ -9,6 +9,7 @@ glyph-block Symbol-Mosaic : begin
 	if recursive : return nothing
 
 	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 
 	define MosaicTop    fontMetrics.OS_2.sTypoAscender
 	define MosaicBottom fontMetrics.OS_2.sTypoDescender
@@ -59,7 +60,7 @@ glyph-block Symbol-Mosaic : begin
 
 		### Block mosaic
 		do "Block Mosaic" : begin
-			define [BlockMosaicTile w h id] : glyph-construction
+			define [BlockMosaicTile w h id] : glyph-proc
 				local column : id % w
 				local row : Math.floor (id / w)
 				define cw : (right - left) / w
@@ -70,22 +71,22 @@ glyph-block Symbol-Mosaic : begin
 					corner ((column + 1) * cw) (top - (row + 1) * ch)
 					corner (column * cw) (top - (row + 1) * ch)
 
-			define [BlockMosaicPattern w h bits] : glyph-construction
+			define [BlockMosaicPattern w h bits] : glyph-proc
 				if (bits.length > 0) : include : union
 					BlockMosaicTile w h bits.0
 					BlockMosaicPattern w h : bits.slice 1
 
-			define [BlockMosaic23 unicode pattern] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				include : BlockMosaicPattern 2 3 : [pattern.split ''].map : x => x - 1
-				save [BMGlyphName unicode] [MangleUnicode unicode]
+			define [BlockMosaic23 unicode pattern] : begin
+				create-glyph [BMGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					include : BlockMosaicPattern 2 3 : [pattern.split ''].map : x => x - 1
 
-			define [BlockMosaic unicode w h pattern] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				include : BlockMosaicPattern w h pattern
-				save [BMGlyphName unicode] [MangleUnicode unicode]
+			define [BlockMosaic unicode w h pattern] : begin
+				create-glyph [BMGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					include : BlockMosaicPattern w h pattern
 
 			BlockMosaic23 0x1FB00 '1'
 			BlockMosaic23 0x1FB01 '2'
@@ -153,12 +154,12 @@ glyph-block Symbol-Mosaic : begin
 			BlockMosaic 0x1FB97 4 4 {4 5 6 7 12 13 14 15}
 
 		do "Smooth Mosaic" : begin
-			define [SmoothMosaic23 unicode pattern] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				define corners : [pattern.split ''].map : x => [PatternCorner23 (x - 0)]
-				include : spiro-outline corners
-				save [MangleName ('blockMosaicSmooth23/' + pattern)] [MangleUnicode unicode]
+			define [SmoothMosaic23 unicode pattern] : begin
+				create-glyph [MangleName ('blockMosaicSmooth23/' + pattern)] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					define corners : [pattern.split ''].map : x => [PatternCorner23 (x - 0)]
+					include : spiro-outline corners
 
 			SmoothMosaic23 0x1FB3C '689'
 			SmoothMosaic23 0x1FB3D '680'
@@ -205,12 +206,12 @@ glyph-block Symbol-Mosaic : begin
 			SmoothMosaic23 0x1FB66 '230'
 			SmoothMosaic23 0x1FB67 '1473'
 
-			define [SmoothMosaic22 unicode pattern] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				define corners : [pattern.split ''].map : x => [PatternCorner22 (x - 0)]
-				include : spiro-outline corners
-				save [MangleName ('blockMosaicSmooth22/' + pattern)] [MangleUnicode unicode]
+			define [SmoothMosaic22 unicode pattern] : begin
+				create-glyph [MangleName ('blockMosaicSmooth22/' + pattern)] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					define corners : [pattern.split ''].map : x => [PatternCorner22 (x - 0)]
+					include : spiro-outline corners
 
 			SmoothMosaic22 0x1FB68 '15793'
 			SmoothMosaic22 0x1FB69 '17935'
@@ -231,19 +232,19 @@ glyph-block Symbol-Mosaic : begin
 				corner [mix left right hEnd] [mix bottom top vEnd]
 				corner [mix left right hEnd] [mix bottom top vStart]
 
-			define [BlockElementGlyph unicode hStart hEnd vStart vEnd] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				include : FillBlock hStart hEnd vStart vEnd
-				save [BEGlyphName unicode] [MangleUnicode unicode]
+			define [BlockElementGlyph unicode hStart hEnd vStart vEnd] : begin
+				create-glyph [BEGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					include : FillBlock hStart hEnd vStart vEnd
 
-			define [BlockElementGlyph2 unicode hStart1 hEnd1 vStart1 vEnd1 hStart2 hEnd2 vStart2 vEnd2] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				include : union
-					FillBlock hStart1 hEnd1 vStart1 vEnd1
-					FillBlock hStart2 hEnd2 vStart2 vEnd2
-				save [BEGlyphName unicode] [MangleUnicode unicode]
+			define [BlockElementGlyph2 unicode hStart1 hEnd1 vStart1 vEnd1 hStart2 hEnd2 vStart2 vEnd2] : begin
+				create-glyph [BEGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					include : union
+						FillBlock hStart1 hEnd1 vStart1 vEnd1
+						FillBlock hStart2 hEnd2 vStart2 vEnd2
 
 			BlockElementGlyph 0x2588  0 1 0 1
 			BlockElementGlyph 0x1FB86 0 1 (1 / 8) 1
@@ -273,7 +274,7 @@ glyph-block Symbol-Mosaic : begin
 			BlockElementGlyph2 0x1FB7E     (7 / 8) 1 0 1    0 1 (7 / 8) 1
 			BlockElementGlyph2 0x1FB7F     (7 / 8) 1 0 1    0 1 0 (1 / 8)
 			BlockElementGlyph2 0x1FB80     0 1 (7 / 8) 1    0 1 0 (1 / 8)
-			sketch
+			create-glyph [BEGlyphName 0x1FB81] [MangleUnicode 0x1FB81] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : union
@@ -281,52 +282,46 @@ glyph-block Symbol-Mosaic : begin
 					FillBlock 0 1 (5 / 8) (6 / 8)
 					FillBlock 0 1 (3 / 8) (4 / 8)
 					FillBlock 0 1 0 (1 / 8)
-				save [BEGlyphName 0x1FB81] [MangleUnicode 0x1FB81]
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBB5] [MangleUnicode 0x1FBB5] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : MangleName "arrowleft"
 				include : refer-glyph : BEGlyphName 0x1FB80
-				save [BEGlyphName 0x1FBB5] [MangleUnicode 0x1FBB5]
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBB6] [MangleUnicode 0x1FBB6] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : MangleName "arrowright"
 				include : refer-glyph : BEGlyphName 0x1FB80
-				save [BEGlyphName 0x1FBB6] [MangleUnicode 0x1FBB6]
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBB7] [MangleUnicode 0x1FBB7] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : MangleName "arrowdown"
 				include : refer-glyph : BEGlyphName 0x2595
-				save [BEGlyphName 0x1FBB7] [MangleUnicode 0x1FBB7]
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBB8] [MangleUnicode 0x1FBB8] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : MangleName "arrowup"
 				include : refer-glyph : BEGlyphName 0x2595
-				save [BEGlyphName 0x1FBB8] [MangleUnicode 0x1FBB8]
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBBC] [MangleUnicode 0x1FBBC] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : MangleName "smallblackcircle"
 				include : refer-glyph : BEGlyphName 0x2595
 				include : refer-glyph : BEGlyphName 0x1FB80
-				save [BEGlyphName 0x1FBBC] [MangleUnicode 0x1FBBC]
 
-			define [Shade _steps fill box] : glyph-construction
+			define [Shade _steps fill box] : glyph-proc
 				local steps : Math.abs _steps
 				local sign : if (_steps >= 0) 1 (-1)
 				local sw : (top - bottom) / steps * fill
 				local skew : [Math.round (MosaicWidth / Width)] * (top - bottom) / 2
 				include : ForceUpright
 				include : intersection
-					glyph-construction
+					glyph-proc
 						foreach j [range (-steps * 4 - 2) (steps * 4 + 2)] : begin
 							local y0 : mix top bottom (j / steps)
 							local y1 : y0 + sign * skew
@@ -341,28 +336,26 @@ glyph-block Symbol-Mosaic : begin
 			define FillMedium (1 / 4)
 			define FillHeavy  (1 / 2)
 
-			sketch # lightShade
+			create-glyph [MangleName 'lightShade'] [MangleUnicode 0x2591] : glyph-proc
 				set-width MosaicWidth
 				include : Shade 4 FillLight
-				save [MangleName 'lightShade'] [MangleUnicode 0x2591]
 
-			sketch # denseShade
+			create-glyph [MangleName 'denseShade'] : glyph-proc
 				set-width MosaicWidth
 				include : Shade 16 FillHeavy
-				save [MangleName 'denseShade']
 
-			define [MediumShade unicode bits] : sketch
-				set-width MosaicWidth
-				include : Shade 8 FillMedium : PatternPolygon22 bits
-				save [BEGlyphName unicode] [MangleUnicode unicode]
+			define [MediumShade unicode bits] : begin
+				create-glyph [BEGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : Shade 8 FillMedium : PatternPolygon22 bits
 
-			define [InverseMediumShade unicode bits] : sketch
-				set-width MosaicWidth
-				include : Shade (-8) (1 - FillMedium) : PatternPolygon22 bits
-				include : difference
-					FillBlock 0 1 0 1
-					PatternPolygon22 bits
-				save [BEGlyphName unicode] [MangleUnicode unicode]
+			define [InverseMediumShade unicode bits] : begin
+				create-glyph [BEGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : Shade (-8) (1 - FillMedium) : PatternPolygon22 bits
+					include : difference
+						FillBlock 0 1 0 1
+						PatternPolygon22 bits
 
 			MediumShade 0x2592  {1 3 9 7}
 			MediumShade 0x1FB8C {1 2 8 7}
@@ -379,20 +372,17 @@ glyph-block Symbol-Mosaic : begin
 			MediumShade 0x1FB9E {3 7 9}
 			MediumShade 0x1FB9F {1 7 9}
 
-			sketch # heavyShade
+			create-glyph [MangleName 'heavyShade'] [MangleUnicode 0x2593] : glyph-proc
 				set-width MosaicWidth
 				include : Shade 8 FillHeavy
-				save [MangleName 'heavyShade'] [MangleUnicode 0x2593]
 
-			sketch # upperLeftToLowerRightFill
+			create-glyph [MangleName 'upperLeftToLowerRightFill'] [MangleUnicode 0x1FB98] : glyph-proc
 				set-width MosaicWidth
 				include : Shade (-4) FillHeavy
-				save [MangleName 'upperLeftToLowerRightFill'] [MangleUnicode 0x1FB98]
 
-			sketch # upperRightToLowerLeftFill
+			create-glyph [MangleName 'upperRightToLowerLeftFill'] [MangleUnicode 0x1FB99] : glyph-proc
 				set-width MosaicWidth
 				include : Shade 4 FillHeavy
-				save [MangleName 'upperRightToLowerLeftFill'] [MangleUnicode 0x1FB99]
 
 			define filldata : list
 				list 0x2596 0 0 1 0
@@ -405,36 +395,36 @@ glyph-block Symbol-Mosaic : begin
 				list 0x259D 0 1 0 0
 				list 0x259E 0 1 1 0
 				list 0x259F 0 1 1 1
-			foreach [{unicode lt rt lb rb} : items-of filldata] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				define t top
-				define b bottom
-				define l 0
-				define r MosaicWidth
-				local mx : mix l r 0.5
-				local my : mix b t 0.5
-				if lt : include : spiro-outline
-					corner l  t
-					corner l my
-					corner mx my
-					corner mx t
-				if rt : include : spiro-outline
-					corner mx t
-					corner mx my
-					corner r  my
-					corner r  t
-				if lb : include : spiro-outline
-					corner l  my
-					corner l  b
-					corner mx b
-					corner mx my
-				if rb : include : spiro-outline
-					corner mx my
-					corner mx b
-					corner r  b
-					corner r my
-				save [BEGlyphName unicode] [MangleUnicode unicode]
+			foreach [{unicode lt rt lb rb} : items-of filldata] : begin
+				create-glyph [BEGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					define t top
+					define b bottom
+					define l 0
+					define r MosaicWidth
+					local mx : mix l r 0.5
+					local my : mix b t 0.5
+					if lt : include : spiro-outline
+						corner l  t
+						corner l my
+						corner mx my
+						corner mx t
+					if rt : include : spiro-outline
+						corner mx t
+						corner mx my
+						corner r  my
+						corner r  t
+					if lb : include : spiro-outline
+						corner l  my
+						corner l  b
+						corner mx b
+						corner mx my
+					if rb : include : spiro-outline
+						corner mx my
+						corner mx b
+						corner r  b
+						corner r my
 
 		### Box drawing glyphs
 		do "Box Drawing"
@@ -448,43 +438,41 @@ glyph-block Symbol-Mosaic : begin
 			local boty : mix top bottom verticalOvershoot
 			local midy : mix boty topy 0.5
 
-			define [boxdraw unicode u d l r] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				local stopH : [Math.max u d] / 2
-				local stopV : [Math.max l r] / 2
-				if l : include : HBar 0 (midx + stopH) midy l
-				if r : include : HBar (midx - stopH) MosaicWidth midy r
-				if d : include : VBar midx boty (midy + stopV) d
-				if u : include : VBar midx (midy - stopV) topy u
+			define [boxdraw unicode u d l r] : begin
+				create-glyph [BdGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					local stopH : [Math.max u d] / 2
+					local stopV : [Math.max l r] / 2
+					if l : include : HBar 0 (midx + stopH) midy l
+					if r : include : HBar (midx - stopH) MosaicWidth midy r
+					if d : include : VBar midx boty (midy + stopV) d
+					if u : include : VBar midx (midy - stopV) topy u
 
-				save [BdGlyphName unicode] [MangleUnicode unicode]
-
-			define [dlboxdraw unicode u d l r] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				local stopH : [Math.max u d] - light * 1 - light * 0.5 * HVContrast
-				local stopV : [Math.max l r] - light * 1.5
-				local capH  : [Math.max u d] - light * 1
-				local capV  : [Math.max l r] - light * 1
-				if l : begin
-					include : HBar 0 (midx - stopH) (midy + (l - light)) light
-					if (l > light) : include : HBar 0 (midx - stopH) (midy - (l - light)) light
-				if r : begin
-					include : HBar (midx + stopH) MosaicWidth (midy + (r - light)) light
-					if (r > light) : include : HBar (midx + stopH) MosaicWidth (midy - (r - light)) light
-				if d : begin
-					include : VBar (midx + (d - light)) boty (midy - stopV) light
-					if (d > light) : include : VBar (midx - (d - light)) boty (midy - stopV) light
-				if u : begin
-					include : VBar (midx + (u - light)) (midy + stopV) topy light
-					if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) topy light
-				if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light * HVContrast) (midx + stopH + light * HVContrast) (midy + capV) light
-				if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light * HVContrast) (midx + stopH + light * HVContrast) (midy - capV) light
-				if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
-				if (stopV > 0 && [not r]) : include : VBar (midx + capH) (midy - stopV - light) (midy + stopV + light) light
-
-				save [BdGlyphName unicode] [MangleUnicode unicode]
+			define [dlboxdraw unicode u d l r] : begin
+				create-glyph [BdGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					local stopH : [Math.max u d] - light * 1 - light * 0.5 * HVContrast
+					local stopV : [Math.max l r] - light * 1.5
+					local capH  : [Math.max u d] - light * 1
+					local capV  : [Math.max l r] - light * 1
+					if l : begin
+						include : HBar 0 (midx - stopH) (midy + (l - light)) light
+						if (l > light) : include : HBar 0 (midx - stopH) (midy - (l - light)) light
+					if r : begin
+						include : HBar (midx + stopH) MosaicWidth (midy + (r - light)) light
+						if (r > light) : include : HBar (midx + stopH) MosaicWidth (midy - (r - light)) light
+					if d : begin
+						include : VBar (midx + (d - light)) boty (midy - stopV) light
+						if (d > light) : include : VBar (midx - (d - light)) boty (midy - stopV) light
+					if u : begin
+						include : VBar (midx + (u - light)) (midy + stopV) topy light
+						if (u > light) : include : VBar (midx - (u - light)) (midy + stopV) topy light
+					if (stopH > 0 && [not u]) : include : HBar (midx - stopH - light * HVContrast) (midx + stopH + light * HVContrast) (midy + capV) light
+					if (stopH > 0 && [not d]) : include : HBar (midx - stopH - light * HVContrast) (midx + stopH + light * HVContrast) (midy - capV) light
+					if (stopV > 0 && [not l]) : include : VBar (midx - capH) (midy - stopV - light) (midy + stopV + light) light
+					if (stopV > 0 && [not r]) : include : VBar (midx + capH) (midy - stopV - light) (midy + stopV + light) light
 
 			define [complexBoxDraw unicodeStart U D L R fn dl] : begin
 				local order {
@@ -562,23 +550,21 @@ glyph-block Symbol-Mosaic : begin
 			complexBoxDraw 0x256A 1 1 1 1 dlboxdraw 1
 
 			# Dashed
-			define [hDashed unicode segments weight] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				foreach j [range 0 segments] : include : HBar [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.2] [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.8] midy weight
+			define [hDashed unicode segments weight] : begin
+				create-glyph [BdGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					foreach j [range 0 segments] : include : HBar [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.2] [mix (MosaicWidth * j / segments) (MosaicWidth * (j + 1) / segments) 0.8] midy weight
 
-				save [BdGlyphName unicode] [MangleUnicode unicode]
-
-			define [vDashed unicode segments weight] : sketch
-				set-width MosaicWidth
-				include : ForceUpright
-				foreach j [range 0 segments] : include : VBar
-					begin midx
-					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.2
-					mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.8
-					begin weight
-
-				save [BdGlyphName unicode] [MangleUnicode unicode]
+			define [vDashed unicode segments weight] : begin
+				create-glyph [BdGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					include : ForceUpright
+					foreach j [range 0 segments] : include : VBar
+						begin midx
+						mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.2
+						mix [mix boty topy (j / segments)] [mix boty topy ((j + 1) / segments)] 0.8
+						begin weight
 
 			hDashed 0x2504 3 light
 			hDashed 0x2505 3 heavy
@@ -595,7 +581,7 @@ glyph-block Symbol-Mosaic : begin
 
 			# Arcs
 			local bdArcRadius : Math.min (midx + O * 2) ((midy - boty) / 2)
-			sketch # bd256D
+			create-glyph [BdGlyphName 0x256D] [MangleUnicode 0x256D] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
@@ -605,9 +591,8 @@ glyph-block Symbol-Mosaic : begin
 					arcvh
 					flat (midx + bdArcRadius) midy [heading Rightward]
 					curl MosaicWidth midy                [heading Rightward]
-				save [BdGlyphName 0x256D] [MangleUnicode 0x256D]
 
-			sketch # bd256E
+			create-glyph [BdGlyphName 0x256E] [MangleUnicode 0x256E] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
@@ -617,9 +602,8 @@ glyph-block Symbol-Mosaic : begin
 					arcvh
 					flat (midx - bdArcRadius) midy [heading Leftward]
 					curl 0 midy                    [heading Leftward]
-				save [BdGlyphName 0x256E] [MangleUnicode 0x256E]
 
-			sketch # bd256F
+			create-glyph [BdGlyphName 0x256F] [MangleUnicode 0x256F] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
@@ -629,9 +613,8 @@ glyph-block Symbol-Mosaic : begin
 					arcvh
 					flat (midx - bdArcRadius) midy [heading Leftward]
 					curl 0 midy                    [heading Leftward]
-				save [BdGlyphName 0x256F] [MangleUnicode 0x256F]
 
-			sketch # bd2570
+			create-glyph [BdGlyphName 0x2570] [MangleUnicode 0x2570] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
@@ -641,32 +624,28 @@ glyph-block Symbol-Mosaic : begin
 					arcvh
 					flat (midx + bdArcRadius) midy [heading Rightward]
 					curl MosaicWidth midy                [heading Rightward]
-				save [BdGlyphName 0x2570] [MangleUnicode 0x2570]
 
-			sketch # bd2571
+			create-glyph [BdGlyphName 0x2571] [MangleUnicode 0x2571] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
 					widths.center light
 					flat MosaicWidth topy
 					curl 0 boty
-				save [BdGlyphName 0x2571] [MangleUnicode 0x2571]
 
-			sketch # bd2572
+			create-glyph [BdGlyphName 0x2572] [MangleUnicode 0x2572] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : dispiro
 					widths.center light
 					flat 0 topy
 					curl MosaicWidth boty
-				save [BdGlyphName 0x2572] [MangleUnicode 0x2572]
 
-			sketch # bd2573
+			create-glyph [BdGlyphName 0x2573] [MangleUnicode 0x2573] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : refer-glyph : BdGlyphName 0x2571
 				include : refer-glyph : BdGlyphName 0x2572
-				save [BdGlyphName 0x2573] [MangleUnicode 0x2573]
 
 			# Diamond
 			define [DiamondBarRaw hStart vStart hEnd vEnd] : begin
@@ -685,19 +664,19 @@ glyph-block Symbol-Mosaic : begin
 				corner [mix left right 1] [mix bottom top 1]
 				corner [mix left right 1] [mix bottom top 0]
 
-			define [DiamondBoxDrawing unicode a b c d] : sketch
-				local candidates {}
-				if a : candidates.push [DiamondBarRaw 0.5 1  0 0.5]
-				if b : candidates.push [DiamondBarRaw 1 0.5  0.5 1]
-				if c : candidates.push [DiamondBarRaw 0 0.5  0.5 0]
-				if d : candidates.push [DiamondBarRaw 0.5 0  1 0.5]
+			define [DiamondBoxDrawing unicode a b c d] : begin
+				create-glyph [BdGlyphName unicode] [MangleUnicode unicode] : glyph-proc
+					local candidates {}
+					if a : candidates.push [DiamondBarRaw 0.5 1  0 0.5]
+					if b : candidates.push [DiamondBarRaw 1 0.5  0.5 1]
+					if c : candidates.push [DiamondBarRaw 0 0.5  0.5 0]
+					if d : candidates.push [DiamondBarRaw 0.5 0  1 0.5]
 
-				set-width MosaicWidth
-				include : ForceUpright
-				include : intersection
-					DiamondMask
-					union.apply null candidates
-				save [BdGlyphName unicode] [MangleUnicode unicode]
+					set-width MosaicWidth
+					include : ForceUpright
+					include : intersection
+						DiamondMask
+						union.apply null candidates
 
 			DiamondBoxDrawing 0x1FBA0 1 0 0 0
 			DiamondBoxDrawing 0x1FBA1 0 1 0 0
@@ -716,40 +695,38 @@ glyph-block Symbol-Mosaic : begin
 			DiamondBoxDrawing 0x1FBAE 1 1 1 1
 
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBBD] [MangleUnicode 0x1FBBD] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : difference
-					glyph-construction : include : refer-glyph : BEGlyphName 0x2588
-					glyph-construction : include : refer-glyph : BdGlyphName 0x2573
-				save [BEGlyphName 0x1FBBD] [MangleUnicode 0x1FBBD]
+					glyph-proc : include : refer-glyph : BEGlyphName 0x2588
+					glyph-proc : include : refer-glyph : BdGlyphName 0x2573
 
-			sketch
+			create-glyph [BEGlyphName 0x1FBBE] [MangleUnicode 0x1FBBE] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : difference
-					glyph-construction : include : refer-glyph : BEGlyphName 0x2588
-					glyph-construction : include : refer-glyph : BdGlyphName 0x1FBA3
-				save [BEGlyphName 0x1FBBE] [MangleUnicode 0x1FBBE]
+					glyph-proc : include : refer-glyph : BEGlyphName 0x2588
+					glyph-proc : include : refer-glyph : BdGlyphName 0x1FBA3
 
-			sketch
+			create-glyph [BdGlyphName 0x1FBBF] [MangleUnicode 0x1FBBF] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : difference
-					glyph-construction : include : refer-glyph : BEGlyphName 0x2588
-					glyph-construction : include : refer-glyph : BdGlyphName 0x1FBAE
-				save [BdGlyphName 0x1FBBF] [MangleUnicode 0x1FBBF]
+					glyph-proc : include : refer-glyph : BEGlyphName 0x2588
+					glyph-proc : include : refer-glyph : BdGlyphName 0x1FBAE
 
-			sketch
+			create-glyph [BdGlyphName 0x1FBAF] [MangleUnicode 0x1FBAF] : glyph-proc
 				set-width MosaicWidth
 				include : ForceUpright
 				include : intersection
-					glyph-construction : include : refer-glyph : BdGlyphName 0x253C
+					glyph-proc : include : refer-glyph : BdGlyphName 0x253C
 					Rect [mix bottom top 0.35] [mix bottom top 0.65] 0 MosaicWidth
-				save [BdGlyphName 0x1FBAF] [MangleUnicode 0x1FBAF]
+
 
 glyph-block Symbol-Mosaic-Powerline : begin
-	glyph-block-import CommonShapes : refer-glyph ForceUpright FlipAround HBarBottom HBarTop
+	glyph-block-import CommonShapes : ForceUpright FlipAround HBarBottom HBarTop
+	glyph-block-import Common-Derivatives : refer-glyph
 
 	define MosaicTop    fontMetrics.OS_2.sTypoAscender
 	define MosaicBottom fontMetrics.OS_2.sTypoDescender
@@ -762,7 +739,14 @@ glyph-block Symbol-Mosaic-Powerline : begin
 		local pwlNear : 0 * para.powerlineScaleX + para.powerlineShiftX
 		local pwlFar : MosaicWidth * para.powerlineScaleX + para.powerlineShiftX
 
-		sketch # pwlTriangleRight
+		define [RotatedPowerline gidNew unicodeNew gidSource] : begin
+			create-glyph [MangleName gidNew] [MangleUnicode unicodeNew] : glyph-proc
+				set-width MosaicWidth
+				include : ForceUpright
+				include : refer-glyph [MangleName gidSource]
+				include : FlipAround (MosaicWidth / 2) pwlMid
+
+		create-glyph [MangleName 'powerline/triangleRight'] [MangleUnicode 0xE0B0] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			include : spiro-outline
@@ -771,9 +755,8 @@ glyph-block Symbol-Mosaic-Powerline : begin
 				corner pwlFar pwlMid
 				corner pwlNear pwlBot
 				corner (pwlNear + O) pwlBot
-			save [MangleName 'pwlTriangleRight'] [MangleUnicode 0xE0B0]
 
-		sketch # pwlAngleRight
+		create-glyph [MangleName 'powerline/angleRight'] [MangleUnicode 0xE0B1] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			local fine : adviceBlackness 4
@@ -793,37 +776,48 @@ glyph-block Symbol-Mosaic-Powerline : begin
 						widths.rhs fine
 						flat pwlFar pwlMid
 						curl pwlNear pwlBot
-			save [MangleName 'pwlAngleRight'] [MangleUnicode 0xE0B1]
 
-		sketch # pwlTriangleLeft
+		RotatedPowerline 'powerline/triangleLeft' 0xE0B2 'powerline/triangleRight'
+		RotatedPowerline 'powerline/angleLeft' 0xE0B3 'powerline/angleRight'
+
+		create-glyph [MangleName 'powerline/hemiCircleRight'] [MangleUnicode 0xE0B4] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlTriangleRight'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlTriangleLeft'] [MangleUnicode 0xE0B2]
+			include : spiro-outline
+				corner (pwlNear + O) pwlTop
+				g4 pwlNear pwlTop
+				g4.down.mid pwlFar pwlMid
+				g4 pwlNear pwlBot
+				corner (pwlNear + O) pwlBot
 
-		sketch # pwlAngleLeft
+		create-glyph [MangleName 'powerline/arcRight'] [MangleUnicode 0xE0B5] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlAngleRight'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlAngleLeft'] [MangleUnicode 0xE0B3]
+			local fine : adviceBlackness 4
+			include : dispiro
+				widths.rhs fine
+				corner (pwlNear + O) pwlTop [heading Rightward]
+				g4 pwlNear pwlTop [heading Rightward]
+				g4.down.mid pwlFar pwlMid [heading Downward]
+				g4 pwlNear pwlBot [heading Leftward]
+				corner (pwlNear + O) pwlBot  [heading Leftward]
 
-		sketch # pwlUnderline
+		RotatedPowerline 'powerline/hemiCircleLeft' 0xE0B6 'powerline/hemiCircleRight'
+		RotatedPowerline 'powerline/arcLeft' 0xE0B7 'powerline/arcRight'
+
+		create-glyph [MangleName 'powerline/underline'] [MangleUnicode 0xE0AE] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			local fine : adviceBlackness 4
 			include : HBarBottom 0 MosaicWidth pwlBot
-			save [MangleName 'pwlUnderline'] [MangleUnicode 0xE0AE]
 
-		sketch # pwlOverline
+		create-glyph [MangleName 'powerline/overline'] [MangleUnicode 0xE0AF] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			local fine : adviceBlackness 4
 			include : HBarTop 0 MosaicWidth pwlTop
-			save [MangleName 'pwlOverline'] [MangleUnicode 0xE0AF]
 
-		sketch # pwlCornerBottomLeft
+		create-glyph [MangleName 'powerline/cornerBottomLeft'] [MangleUnicode 0xE0B8] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			include : spiro-outline
@@ -831,9 +825,8 @@ glyph-block Symbol-Mosaic-Powerline : begin
 				corner pwlNear pwlTop
 				corner pwlFar pwlBot
 				corner (pwlNear + O) pwlBot
-			save [MangleName 'pwlCornerBottomLeft'] [MangleUnicode 0xE0B8]
 
-		sketch # pwlSlashBottomLeft
+		create-glyph [MangleName 'powerline/slashBottomLeft'] [MangleUnicode 0xE0B9] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			local fine : adviceBlackness 4
@@ -841,9 +834,8 @@ glyph-block Symbol-Mosaic-Powerline : begin
 				widths.rhs fine
 				flat pwlNear pwlTop
 				curl pwlFar pwlBot
-			save [MangleName 'pwlSlashBottomLeft'] [MangleUnicode 0xE0B9]
 
-		sketch # pwlCornerTopLeft
+		create-glyph [MangleName 'powerline/cornerTopLeft'] [MangleUnicode 0xE0BC] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			include : spiro-outline
@@ -851,9 +843,8 @@ glyph-block Symbol-Mosaic-Powerline : begin
 				corner pwlNear pwlTop
 				corner pwlFar pwlTop
 				corner (pwlNear + O) pwlBot
-			save [MangleName 'pwlCornerTopLeft'] [MangleUnicode 0xE0BC]
 
-		sketch # pwlSlashTopLeft
+		create-glyph [MangleName 'powerline/slashTopLeft'] [MangleUnicode 0xE0BD] : glyph-proc
 			set-width MosaicWidth
 			include : ForceUpright
 			local fine : adviceBlackness 4
@@ -861,48 +852,25 @@ glyph-block Symbol-Mosaic-Powerline : begin
 				widths.rhs fine
 				flat pwlNear pwlBot
 				curl pwlFar pwlTop
-			save [MangleName 'pwlSlashTopLeft'] [MangleUnicode 0xE0BD]
 
-		sketch # pwlCornerBottomRight
-			set-width MosaicWidth
-			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlCornerTopLeft'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlCornerBottomRight'] [MangleUnicode 0xE0BA]
+		RotatedPowerline 'powerline/cornerBottomRight' 0xE0BA 'powerline/cornerTopLeft'
+		RotatedPowerline 'powerline/slashBottomRight' 0xE0BB 'powerline/slashTopLeft'
+		RotatedPowerline 'powerline/cornerTopRight' 0xE0BE 'powerline/cornerBottomLeft'
+		RotatedPowerline 'powerline/slashTopRight' 0xE0BF 'powerline/slashBottomLeft'
 
-		sketch # pwlSlashBottomRight
-			set-width MosaicWidth
-			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlSlashTopLeft'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlSlashBottomRight'] [MangleUnicode 0xE0BB]
-
-		sketch # pwlCornerTopRight
-			set-width MosaicWidth
-			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlCornerBottomLeft'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlCornerTopRight'] [MangleUnicode 0xE0BE]
-
-		sketch # pwlSlashTopRight
-			set-width MosaicWidth
-			include : ForceUpright
-			include : refer-glyph : MangleName 'pwlSlashBottomLeft'
-			include : FlipAround (MosaicWidth / 2) pwlMid
-			save [MangleName 'pwlSlashTopRight'] [MangleUnicode 0xE0BF]
 
 glyph-block Symbol-Mosaic-NotDef : begin
-	glyph-block-import CommonShapes : refer-glyph Rect
+	glyph-block-import CommonShapes : Rect
+	glyph-block-import Common-Derivatives : refer-glyph
 
-	sketch # .notdef
+	create-glyph '.notdef' : glyph-proc
 		define sw : adviceBlackness 8
 		include : union
 			intersection
-				glyph-construction : include : refer-glyph "be2592.NWID"
+				glyph-proc : include : refer-glyph "be2592.NWID"
 				Rect CAP 0 SB RightSB
 			difference
 				Rect CAP 0 SB RightSB
 				Rect (CAP - sw) (0 + sw) (SB + sw) (RightSB - sw)
 		set currentGlyph.autoRefPriority (-9999)
 		set currentGlyph.glyphRank   (9999)
-		save '.notdef'

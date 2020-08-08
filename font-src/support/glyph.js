@@ -59,10 +59,12 @@ module.exports = class Glyph {
 			return;
 		} else if (component instanceof Transform) {
 			this.applyTransform(component, copyAnchors);
-		} else if (component instanceof Array) {
-			throw new Error("Attempt to include an array.");
-		} else {
+		} else if (component.isMarkSet) {
+			this.copyAnchors(component);
+		} else if (component instanceof Glyph) {
 			this.includeGlyph(component, copyAnchors, copyWidth);
+		} else {
+			throw new Error("Invalid component to be introduced.");
 		}
 	}
 	includeGlyph(g, copyAnchors, copyWidth) {
@@ -80,6 +82,20 @@ module.exports = class Glyph {
 		if (copyAnchors || g.isMarkSet) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
 		this.dependsOn(g);
+	}
+	cloneFromGlyph(g) {
+		this.includeGlyph(g, true, true);
+		this.cloneRelationFromGlyph(g);
+		this.cloneRankFromGlyph(g);
+	}
+	cloneRelationFromGlyph(g) {
+		this.shortName = g.shortName;
+		this.related = g.related;
+	}
+	cloneRankFromGlyph(g) {
+		this.autoRefPriority = g.autoRefPriority;
+		this.glyphRank = g.glyphRank;
+		this.avoidBeingComposite = g.avoidBeingComposite;
 	}
 	includeGeometry(geom, shiftX, shiftY) {
 		if (!geom || !geom.contours) return;
