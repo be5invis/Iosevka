@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																					
+																																																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -334,6 +334,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
     * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
+    * `v-f-flat-hook`, `VXDD`: `f` with flat hook.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -355,6 +356,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
     * `v-j-straight`, `cv98`: `j` without serif.
+    * `v-j-flat-hook-serifed`, `VXDE`: undefined.
+    * `v-j-flat-hook-serifless`, `VXDF`: undefined.
   * Styles for `k`, `K`:
     * `v-k-straight`, `cv68`: `k` and `K` with standard shape (default for Upright).
     * `v-k-curly`, `cv69`: Slightly curly `k` and `K`, like Iosevka 2.x.
@@ -368,6 +371,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
+    * `v-l-serifed-asymmetric`, `VXDA`: Serifed `l` with shorter top serif.
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
@@ -394,6 +398,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `t`:
     * `v-t-standard`, `cv40`: Standard `t` shape (default).
     * `v-t-cross`, `cv41`: Futura-like `t` shape.
+    * `v-t-flat-hook`, `VXDC`: `t` with flat hook.
   * Styles for `u`:
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default for Upright).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
@@ -431,7 +436,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-capital-g-toothless`, `cv92`: Toothless G.
   * Styles for `J`:
     * `v-capital-j-serifless`, `VXBY`: J without top serif.
-    * `v-capital-j-serifed`, `VXBZ`: J with top serif (default).
+    * `v-capital-j-serifed`, `VXBZ`: J with top serif at left side (default).
+    * `v-capital-j-serifed-both-sides`, `VXDA`: J with symmetric at both sides.
+    * `v-capital-j-serifed-symmetric`, `VXDB`: J with symmetric at both sides and is symmetric.
   * Styles for `M`:
     * `v-capital-m-hanging`, `VXCI`: `M` with middle being hanging off baseline (default).
     * `v-capital-m-flat-bottom`, `VXCJ`: `M` with middle aligned to baseline.
@@ -537,8 +544,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-percent-rings`, `cv63`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
     * `v-percent-rings-connected`, `VXCK`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
   * Styles for `|`:
-    * `v-bar-natural-slope`, `VXCY`: Bar pubctuations (`|`) has a natural slope under italics and oblique (default).
-    * `v-bar-force-upright`, `VXCZ`: Bar pubctuations (`|`) is forced upright under italics and oblique.
+    * `v-bar-natural-slope`, `VXCY`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
+    * `v-bar-force-upright`, `VXCZ`: Bar punctuations (`|`) is forced upright under italics and oblique.
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
