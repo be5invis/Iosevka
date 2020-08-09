@@ -741,14 +741,14 @@ glyph-block Letter-Latin-V : begin
 	glyph-block-import Overmarks
 	glyph-block-export VShape VShapeOutline
 
-	define cornerdist : HalfStroke * HVContrast * 1.15
+	define VCornerHalfWidth : HalfStroke * HVContrast * 1.15
 	define VCurviness   0.3
 	define VShapeFine : Math.max
 		Stroke * [if SLAB para.vtipfineSlab para.vtipfine]
-		cornerdist * 1.2
-	define VShapeFineStraight : Math.max [adviceBlackness 7] [Stroke * 0.66]
-	define VShapeMiddleWidth : adviceBlackness 3
-	define pInktrap 0.5
+		VCornerHalfWidth * 1.2
+	define VShapeFineStraight : Stroke * CThin * 1.15
+	define pInktrap : 2 / 3
+	define VShapeMiddleWidth : Math.min [mix Stroke VShapeFineStraight pInktrap] [adviceBlackness 3]
 
 	define StraightSbShrink : mix 1 (designParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.25]) : if SLAB 0.75 1
 	define [VShapeTopFlat top] : if SLAB [Math.min (top - Stroke) (top * 0.9)] (top * 0.9)
@@ -761,9 +761,9 @@ glyph-block Letter-Latin-V : begin
 
 		if barStraight : begin
 			local vxStartL : df.leftSB * StraightSbShrink + clearance
-			local vxEndL : df.middle - cornerdist + clearance
+			local vxEndL : df.middle - VCornerHalfWidth + clearance
 			local vxStartR : df.width - df.leftSB * StraightSbShrink - clearance
-			local vxEndR : df.middle + cornerdist - clearance
+			local vxEndR : df.middle + VCornerHalfWidth - clearance
 			include : spiro-outline
 				flat [mix vxStartL vxEndL 0] [mix top 0 0]
 				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap]
@@ -773,9 +773,9 @@ glyph-block Letter-Latin-V : begin
 				curl [mix vxStartR vxEndR 0] [mix top 0 0]
 		: else : begin
 			local vxStartL : df.leftSB + clearance
-			local vxEndL : df.middle - cornerdist + clearance
+			local vxEndL : df.middle - VCornerHalfWidth + clearance
 			local vxStartR : df.width - df.leftSB - clearance
-			local vxEndR : df.middle + cornerdist - clearance
+			local vxEndR : df.middle + VCornerHalfWidth - clearance
 			include : spiro-outline
 				flat vxStartL top
 				curl vxStartL [VShapeTopFlat top]
@@ -792,39 +792,39 @@ glyph-block Letter-Latin-V : begin
 		local dgCor : diagCor (2 * top) Width 0 (2 * sw)
 		if barStraight : begin
 			local vxStartL : df.leftSB * StraightSbShrink
-			local vxEndL : df.middle - cornerdist
+			local vxEndL : df.middle - VCornerHalfWidth
 			local vxStartR : df.width - df.leftSB * StraightSbShrink
-			local vxEndR : df.middle + cornerdist
-			local midSW : VShapeMiddleWidth / Stroke * sw
+			local vxEndR : df.middle + VCornerHalfWidth
+			local midSW : dgCor * VShapeMiddleWidth / Stroke * sw
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs (sw * dgCor)
 				flat [mix vxStartL vxEndL 0] [mix top 0 0] [heading Downward]
-				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs midSW]
-				g4   [mix vxStartL vxEndL 1] [mix top 0 1] [widths.lhs fine]
+				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap] [widths.lhs.heading midSW Downward]
+				g4   [mix vxStartL vxEndL 1] [mix top 0 1] [widths.lhs.heading fine Downward]
 			include : tagged 'strokeUp' : dispiro
 				widths.rhs (sw * dgCor)
 				flat [mix vxStartR vxEndR 0] [mix top 0 0] [heading Downward]
-				curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs midSW]
-				g4   [mix vxStartR vxEndR 1] [mix top 0 1] [widths.rhs fine]
+				curl [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap] [widths.rhs.heading midSW Downward]
+				g4   [mix vxStartR vxEndR 1] [mix top 0 1] [widths.rhs.heading fine Downward]
 		: else : begin
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs sw
 				flat df.leftSB top [heading Downward]
 				curl df.leftSB [VShapeTopFlat top] [heading Downward]
 				quadcontrols 0 VCurviness 9 unimportant
-				g4 (df.middle - cornerdist) 0 [widths.lhs fine]
+				g4 (df.middle - VCornerHalfWidth) 0 [widths.lhs fine]
 			include : tagged 'strokeUp' : dispiro
 				widths.rhs sw
 				flat df.rightSB top [heading Downward]
 				curl df.rightSB [VShapeTopFlat top] [heading Downward]
 				quadcontrols 0 VCurviness 9 unimportant
-				g4 (df.middle + cornerdist) 0 [widths.rhs fine]
+				g4 (df.middle + VCornerHalfWidth) 0 [widths.rhs fine]
 
-		#bottom cap
-		include : spiro-outline
-			corner (df.middle + cornerdist) 0
-			corner (df.middle - cornerdist) 0
-			corner df.middle fine
+			#bottom cap
+			include : spiro-outline
+				corner (df.middle + VCornerHalfWidth) 0
+				corner (df.middle - VCornerHalfWidth) 0
+				corner df.middle fine
 
 		if slab : include : AIVSerifs top
 
@@ -849,7 +849,7 @@ glyph-block Letter-Latin-V : begin
 			straight.left.start (RightSB + HookX / 3) (top - Stroke)
 			g4 (RightSB - HookX / 3) (top - HalfStroke - Hook)
 			quadcontrols 0.4 0.75 64 unimportant
-			g4   (Middle + cornerdist) 0 [widths.rhs VShapeFine]
+			g4   (Middle + VCornerHalfWidth) 0 [widths.rhs VShapeFine]
 
 	create-glyph : glyph-proc
 		include MarkSet.e
@@ -5057,8 +5057,8 @@ glyph-block Letter-Latin-S : begin
 		include MarkSet.capital
 		define top : CAP * 0.95
 		define bot : CAP * 0.05
-		define w : adviceBlackness 3.5
-		define fine : adviceBlackness 4
+		define w : adviceBlackness 3
+		define fine : adviceBlackness 3.5
 		define smooth : adviceSSmooth (top - bot) (-1) w
 		include : dispiro
 			widths.lhs w
@@ -5084,8 +5084,8 @@ glyph-block Letter-Latin-S : begin
 		include MarkSet.capital
 		define top : CAP * 0.88
 		define bot : CAP * 0.12
-		define w : adviceBlackness 3.5
-		define fine : adviceBlackness 4
+		define w : adviceBlackness 3
+		define fine : adviceBlackness 3.5
 		define smooth : adviceSSmooth (top - bot) (-1) w
 		include : dispiro
 			widths.lhs w
