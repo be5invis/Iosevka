@@ -106,6 +106,7 @@ const PackageSpacings = {
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
 
 async function GeneratePackageList(out) {
+	const packageSpacingKeys = Object.keys(PackageSpacings);
 	out.log(`<table>`);
 	for (let shape in PackageShapes) {
 		const [shapeDesc, shapeNameSuffix, , count, nospace] = PackageShapes[shape];
@@ -115,25 +116,42 @@ async function GeneratePackageList(out) {
 		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
 
 		const desc = `<i>${shapeDesc}</i>`;
-		const img = `<img src="${imagePrefix}/${imageName}.png" width="720"/>`;
+		const img = `<img src="${imagePrefix}/${imageName}.png" width="540"/>`;
+		const ttfPackageCount = packageSpacingKeys.length;
 		out.log(
-			`<tr><td colspan="4">${img}<br/><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td></tr>`
+			`<tr>`,
+			`<td colspan="3"><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td>`,
+			`<td rowspan="${nospace ? 2 : 3 + ttfPackageCount}">${img}<br/></td>`,
+			`</tr>`
 		);
+
 		if (!nospace) {
-			out.log(`<tr><td> </td>`);
-			for (let spacing in PackageSpacings) {
+			out.log(
+				`<tr>`,
+				`<td><b>\u2002└ TTF Package</b></td>`,
+				`<td><b>Spacing</b></td>`,
+				`<td><b>Ligatures</b></td>`,
+				`</tr>`
+			);
+			for (let spacing of packageSpacingKeys) {
 				const [spacingDesc, ligation, spacingNameSuffix] = PackageSpacings[spacing];
 				const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
 				const familyName = buildName(" ", "Iosevka", spacingNameSuffix, shapeNameSuffix);
 				const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
-				const desc =
-					noBreak(`<b>Spacing</b>: <i>${spacingDesc}</i><br/>`) +
-					noBreak(`<b>Ligatures</b>: <i>${flag(ligation)}</i>`);
 				const download = `<b><a href="${downloadLink}">${noBreak(familyName)}</a></b>`;
-				out.log(`<td>${download}<br/>${desc}</td>`);
+				const leader =
+					"\u2002\u2002" +
+					(spacing === packageSpacingKeys[packageSpacingKeys.length - 1] ? "└" : "├");
+				out.log(
+					`<tr>`,
+					`<td>${leader} ${download}</td>`,
+					`<td>${spacingDesc}</td>`,
+					`<td>${flag(ligation)}</td>`,
+					`</tr>`
+				);
 			}
-			out.log(`</tr>`);
 		}
+		out.log(`<tr>`, `<td colspan="3"> </td>`, `<tr/>`);
 	}
 	out.log(`</table>\n`);
 }
