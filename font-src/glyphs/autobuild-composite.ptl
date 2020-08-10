@@ -95,7 +95,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define gniPart : '.ci.' + gidPart + '@' + [{ prefix finalPlacement dscale xCompress shift }.join '/']
 		if [not : query-glyph gniPart] : create-glyph gniPart : glyph-proc
 			set-width 0
-			include miniatureFont.(gidPart)
+			include : miniatureFont.queryByName gidPart
 			include : Upright
 			include : Scale (dscale * xCompress) dscale
 			include : Translate 0 (dscale * (-CAP / 2 + shift))
@@ -113,7 +113,7 @@ glyph-block AutoBuild-Enclosure : begin
 		local firstDerivedGyph null
 		local shift 0
 		foreach [gidPart : items-of parts] : do
-			local derivedGlyph miniatureFont.(gidPart)
+			local derivedGlyph : miniatureFont.queryByName gidPart
 			if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
 			set totalWidth : totalWidth + derivedGlyph.advanceWidth
 		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
@@ -128,7 +128,7 @@ glyph-block AutoBuild-Enclosure : begin
 			define gidPart parts.(partIndex)
 			define finalPlacement : accumulatedAdvanceSoFar - width / 2 - totalWidth * dscale / 2
 			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont prefix finalPlacement dscale xCompress shift
-			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + miniatureFont.(gidPart).advanceWidth * dscale * xCompress
+			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + [miniatureFont.queryByName gidPart].advanceWidth * dscale * xCompress
 
 		return finalParts
 
@@ -375,7 +375,7 @@ glyph-block AutoBuild-Enclosure : begin
 				if [query-glyph gniPart] : return gniPart
 				create-glyph gniPart : glyph-proc
 					set-width 0
-					include miniatureFont.(gidPart)
+					include : miniatureFont.queryByName gidPart
 					include : Upright
 					include : Translate offset 0
 					include : Scale xCompress 1
@@ -394,7 +394,7 @@ glyph-block AutoBuild-Enclosure : begin
 					local gidPart partsWithDot.(j)
 					if j : set totalWidth : totalWidth - SB
 					set offsets.(j) totalWidth
-					set totalWidth : totalWidth + miniatureFont.(gidPart).advanceWidth
+					set totalWidth : totalWidth + [miniatureFont.queryByName gidPart].advanceWidth
 				set totalWidth : totalWidth - SB
 				local xCompress : if (totalWidth > width) (width / totalWidth) 1
 				local xTranslate : [if (totalWidth > width) 0 (width / 2 - totalWidth / 2)] - width
@@ -423,7 +423,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	# Circled & Braced
 	define [digitGlyphNames j] : begin
-		return : [(j+'').split ''].map: c => unicodeGlyphs.(['0'.charCodeAt 0] + (c - 0)).name
+		return : [(j+'').split ''].map: c => [glyphStore.queryNameOfUnicode (['0'.charCodeAt 0] + (c - 0))]
 
 	if [not recursive] : do "Single-digit circled"
 		local compositions : list
@@ -436,8 +436,8 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2460 + j - 1
 			digitGlyphNames j
 			begin WideWidth1
-		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WideWidth1}
-		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} WideWidth1 0.5 (XH/2)}
+		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
+		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit circled"
@@ -467,7 +467,7 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2776 + j - 1
 			digitGlyphNames j
 			begin WideWidth1
-		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WideWidth1}
+		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit inset circled"
@@ -485,7 +485,7 @@ glyph-block AutoBuild-Enclosure : begin
 	if [not recursive] : do "boxed"
 		local compositions {}
 		compositions.push { null {'markBaseSpace'} WideWidth1 }
-		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WideWidth1}
+		foreach [j : range 0 26] : compositions.push {(0x1F130 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createBoxedGlyphs 1 compositions
 
 	if [not recursive] : do "double-digit boxed"
@@ -521,7 +521,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	if [not recursive] : do "inset boxed"
 		local compositions {}
-		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WideWidth1}
+		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetBoxedGlyphs 1 compositions
 
 	if [not recursive] : do "double-digit inset boxed"
@@ -535,9 +535,9 @@ glyph-block AutoBuild-Enclosure : begin
 
 	if [not recursive] : do "inset mosaic"
 		local compositions {}
-		compositions.push { 0x1FBB1 { [unicodeGlyphs.(0x2714).name.replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
-		compositions.push { 0x1FBB4 { [unicodeGlyphs.(0x21B2).name.replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
-		compositions.push { 0x1FBC4 { [unicodeGlyphs.(0x003F).name.replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
+		compositions.push { 0x1FBB1 { [[glyphStore.queryNameOfUnicode (0x2714)].replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
+		compositions.push { 0x1FBB4 { [[glyphStore.queryNameOfUnicode (0x21B2)].replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
+		compositions.push { 0x1FBC4 { [[glyphStore.queryNameOfUnicode (0x003F)].replace [regex '.WWID$'] ".NWID"] } WideWidth2 }
 		createInsetMosaicGlyphs 1 compositions
 
 	if [not recursive] : do "Single-digit double circled"
@@ -564,8 +564,8 @@ glyph-block AutoBuild-Enclosure : begin
 			0x2474 + j - 1
 			digitGlyphNames j
 			begin WideWidth1
-		foreach [j : range 0 26] : compositions.push {(0x249C + j) {unicodeGlyphs.(['a'.charCodeAt 0] + j).name} WideWidth1 0.5 (XH/2)}
-		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {unicodeGlyphs.(['A'.charCodeAt 0] + j).name} WideWidth1}
+		foreach [j : range 0 26] : compositions.push {(0x249C + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
+		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createBracedGlyphs 1 compositions
 
 	if [not recursive] : do "Double-digit braced"
@@ -621,11 +621,12 @@ glyph-block Autobuild-Fractions : begin
 		define [numeratorImpl numid] : begin
 			local gnn ".frac-num-\(prefix){\(numid)}"
 			if [not : query-glyph gnn] : create-glyph gnn : glyph-proc
+				define mfNumGlyph : miniatureFont.queryByName numid
+
 				set-width 0
-				if [not miniatureFont.(numid)] : console.log numid
-				include miniatureFont.(numid)
+				include mfNumGlyph
 				include : Upright
-				include : Translate (- miniatureFont.(numid).advanceWidth / 2) 0
+				include : Translate (- mfNumGlyph.advanceWidth / 2) 0
 				include : Scale scaleFactor
 				include : Translate Middle (SymbolMid + dist / 2)
 				include : Italify
@@ -635,10 +636,12 @@ glyph-block Autobuild-Fractions : begin
 		define [denumeratorImpl denid] : begin
 			local gnd ".frac-den-\(prefix){\(denid)}"
 			if [not : query-glyph gnd] : create-glyph gnd : glyph-proc
+				define mfDenGlyph : miniatureFont.queryByName denid
+
 				set-width 0
-				include miniatureFont.(denid)
+				include mfDenGlyph
 				include : Upright
-				include : Translate (- miniatureFont.(denid).advanceWidth / 2) 0
+				include : Translate (- mfDenGlyph.advanceWidth / 2) 0
 				include : Scale scaleFactor
 				include : Translate Middle (SymbolMid - CAP * scaleFactor - dist / 2)
 				include : Italify
@@ -721,7 +724,7 @@ glyph-block AutoBuild-Accented-Equal : begin
 			if [query-glyph gni] : return gni
 			create-glyph gni : glyph-proc
 				set-width 0
-				include dFont.(gidPart)
+				include : dFont.queryByName gidPart
 				include : Upright
 				include : Translate (-totalWidth / 2 + offset) 0
 				include : Scale scale
@@ -736,7 +739,7 @@ glyph-block AutoBuild-Accented-Equal : begin
 			foreach [j : range 0 parts.length] : begin
 				local gidPart parts.(j)
 				set offsets.(j)  totalWidth
-				set totalWidth : totalWidth + dFont.(gidPart).advanceWidth
+				set totalWidth : totalWidth + [dFont.queryByName gidPart].advanceWidth
 
 			if [not : query-glyph gn] : create-glyph gn unicode : glyph-proc
 				set-width Width
@@ -792,7 +795,7 @@ glyph-block Autobuild-Ligatures : begin
 			if [query-glyph gni] : return gni
 			create-glyph gni : glyph-proc
 				set-width aw
-				include df.(gidPart)
+				include : df.queryByName gidPart
 				include : Upright
 				include : Translate offset1 0
 				include : Scale compress 1
@@ -804,8 +807,8 @@ glyph-block Autobuild-Ligatures : begin
 			local { gn unicode { c1 c2 } desiredWidth } job
 			local ps {}
 
-			local dfg1 df1.(c1)
-			local dfg2 df2.(c2)
+			local dfg1 : df1.queryByName c1
+			local dfg2 : df2.queryByName c2
 
 			if FMosaicWide : begin
 				local aw : dfg1.advanceWidth + dfg2.advanceWidth
@@ -908,21 +911,25 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 				local s    0
 				local step (-OX)
 				local dist (Stroke * 2)
+				define dfg1 : df1.queryByName c1
+				define dfg2 : df2.queryByName c2
 				while (s < dist) : begin
-					include df2.(c2)
+					include dfg2
 					include : Translate step 0
 					set s : s + step
-				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 
 			create-glyph glyphName unicode : glyph-proc
-				local sumChildrenWidth : df1.(c1).advanceWidth * wadj1 + df2.(c2).advanceWidth * wadj2
+				define dfg1 : df1.queryByName c1
+				define dfg2 : df2.queryByName c2
+				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
 				local refW : sumChildrenWidth - kern
-				include df2.(c2)
-				include : Translate (df1.(c1).advanceWidth * wadj1 - kern) 0
+				include dfg2
+				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 				include : difference
 					intersection
-						Rect (CAP * 2) (Descender * 2) (-Width) (df1.(c1).advanceWidth * wadj1 - kern + df2.(c2).advanceWidth * wadj2 / 2)
-						glyph-proc : include df1.(c1)
+						Rect (CAP * 2) (Descender * 2) (-Width) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
+						glyph-proc : include dfg1
 					maskOut
 				include : Upright
 				include : Translate (-refW / 2) 0

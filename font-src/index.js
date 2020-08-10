@@ -12,8 +12,8 @@ const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {
 	const para = await getParameters(argv);
-	const font = BuildFont(para);
-	if (argv.oCharMap) await saveCharMap(argv, font);
+	const { font, glyphStore } = BuildFont(para);
+	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveOtd(argv, font);
 };
 
@@ -96,12 +96,14 @@ function objHashNonEmpty(obj) {
 	return false;
 }
 
-async function saveCharMap(argv, font) {
+async function saveCharMap(argv, glyphStore) {
 	let charMap = [];
-	for (const gid in font.glyf) {
-		const glyph = font.glyf[gid];
-		if (!glyph) continue;
-		charMap.push([glyph.name, glyph.unicode, ...createGrDisplaySheet(font, gid)]);
+	for (const [gn] of glyphStore.namedEntries()) {
+		charMap.push([
+			gn,
+			Array.from(glyphStore.queryUnicodeOfName(gn) || []),
+			...createGrDisplaySheet(glyphStore, gn)
+		]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
 }

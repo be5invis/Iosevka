@@ -67,57 +67,66 @@ glyph-block AutoBuild-Accents : begin
 		return s
 
 	local foundDecompositions {.}
-	define [decideName namingParts parts code] : begin
-		local baseName namingParts.0.name
+	define [decideName namingParts code] : begin
+		local baseName : glyphStore.queryNameOf namingParts.0
 		local glyphName baseName
-		foreach [part : namingParts.slice 1] : if part : glyphName = glyphName + [fallback part.shortName part.name]
+		foreach [part : namingParts.slice 1] : if part : begin
+			glyphName = glyphName + [fallback part.shortName : glyphStore.queryNameOf part]
+
 		if foundDecompositions.(glyphName) : begin
 			local j 2
 			while foundDecompositions.(glyphName + j) [inc j]
 			set glyphName (glyphName + j)
+
 		if (glyphName.length > 27) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
 		return glyphName
 
-	local [buildForCode code] : if [not unicodeGlyphs.(code)] : begin
+	local [buildForCode code] : if [not : glyphStore.queryByUnicode code] : begin
 		local str : String.fromCharCode code
 		local nfd : fallback customDecompositions.(str) : unorm.nfd str
 		if (nfd.length > 1) : begin
-			local parts {}
+			local parts     { }
 			local allFound true
 			foreach j [range 0 nfd.length] : begin
-				local part unicodeGlyphs.([nfd.charCodeAt j])
-				if [not part] : then : set allFound false
-				: else : set parts.(j) unicodeGlyphs.([nfd.charCodeAt j])
+				local part : glyphStore.queryByUnicode [nfd.charCodeAt j]
+				if [not part] : then
+					set allFound false
+				: else
+					set parts.(j)       part
+
 			if allFound : begin
-				local namingParts : parts.slice 0
+				local glyphName : decideName parts code
 				set parts : subParts parts
-				local glyphName : decideName namingParts parts code
-				set foundDecompositions.(glyphName) {glyphName code parts}
+				set foundDecompositions.(glyphName) { glyphName code parts }
 
 	if recursiveCodes : recursiveCodes.forEach buildForCode
 	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
 
-	local s_parts nothing
+	local s_parts     nothing
+
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
 
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
-			if (part.name === 'rtailBR') : eject-contour 'serifRB'
+			if (part.markAnchors && part.markAnchors.bottomright) : begin
+				eject-contour 'serifRB'
 
 	define [RootGlyphProc goalName code parts] : begin
 		set s_parts  parts
 		create-glyph goalName code construction
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : begin
-		local {glyphName code parts} foundDecompositions.(_id)
-		RootGlyphProc glyphName code parts
+		local { glyphName code parts } foundDecompositions.(_id)
 
-		if(parts.0 != [query-glyph parts.0.name]) : throw : new Error "Unreachable"
+		RootGlyphProc glyphName code parts
+		define part0Name : glyphStore.queryNameOf parts.0
+		if(parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
+
 		local dstTree {}
 		local targetNameMap  {.}
-		set targetNameMap.(parts.0.name) glyphName
-		local tree : getGrTree parts.0.name { DotlessOrNot AnyDerivingCv } query-glyph
+		set targetNameMap.(part0Name) glyphName
+		local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
 		foreach [{gr origBase relBase} : items-of tree] : begin
 			local origGN targetNameMap.(origBase)
 			if [not origGN] : throw : new Error 'Unreachable'

@@ -40,14 +40,15 @@ glyph-block Common-Derivatives : begin
 
 	define [glyph-is-needed name] : [not pickHash] || pickHash.(name)
 
-	define [query-glyph id] : return glyphMap.(id)
+	define [query-glyph id] : return : glyphStore.queryByName id
 
 	define [refer-glyph id] : lambda [copyAnchors copyWidth] : begin
-		if [not glyphMap.(id)] : throw : new Error "Cannot find glyph '\(id)'"
-		this.includeGlyph glyphMap.(id) copyAnchors copyWidth
+		local goal : query-glyph id
+		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
+		this.includeGlyph goal copyAnchors copyWidth
 
 	define [with-related-glyphs sourceGid dstGid unicode Fn] : if [glyph-is-needed sourceGid] : begin
-		local glyphSrc glyphMap.(sourceGid)
+		local glyphSrc : glyphStore.queryByName sourceGid
 		local glyphDst : create-glyph dstGid unicode : glyph-proc
 			include : Fn sourceGid null
 
@@ -120,14 +121,14 @@ glyph-block Recursive-Build : begin
 
 		local shouldBuildList : Object.keys sbh :.filter ([x] => [not [not x]])
 		#console.log shouldBuildList
-		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphMap.(x) && glyphMap.(x).unicode) glyphMap.(x).unicode.0 nothing])
+		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if ([glyphStore.queryByName x] && [glyphStore.queryUnicodeOfName x]) [glyphStore.queryUnicodeArrayOfName x].0 nothing])
 			:.filter ([x] => [not [not x]])
 
 		local p {.}
 		foreach [{k v} : pairs-of all ps] : set p.(k) v
 
 		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
-		return gs.glyphs
+		return gs.glyphStore
 
 	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false]] : begin
 		local forkedPara : Object.create para
