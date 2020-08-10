@@ -57,14 +57,16 @@ glyph-block Common-Derivatives : begin
 			create-glyph [gr.amendName dstGid] : glyph-proc
 				include : Fn [gr.get glyphSrc] gr.tag
 
-	define [alias newid unicode id]
-		with-related-glyphs id [fallback newid ('.alias' + [newtemp])] unicode
+	define [alias newid unicode id] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		with-related-glyphs id newid unicode
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] AS_BASE ALSO_METRICS
 				currentGlyph.cloneRankFromGlyph [query-glyph src]
 
-	define [turned newid unicode id _x _y mark]
-		with-related-glyphs id [fallback newid ('turn' + id)] unicode
+	define [turned newid unicode id _x _y mark] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		with-related-glyphs id newid unicode
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark
@@ -75,17 +77,20 @@ glyph-block Common-Derivatives : begin
 
 	# Dual derivatives
 	define [HCombine newid unicode id1 id2 spacing] : begin
-		create-glyph [fallback newid : 'hcombine{' + id1 + '}{' + id2 + '}'] unicode : glyph-proc
+		if [not newid] : throw : new Error "Target ID not specified"
+		create-glyph newid unicode : glyph-proc
 			include [refer-glyph id1] AS_BASE ALSO_METRICS
 			include : Translate (-spacing) 0
 			include [refer-glyph id2]
 			include : Translate (spacing / 2) 0
 
 	define [HDual newid unicode id spacing] : begin
-		return : HCombine [fallback newid : 'double' + id] unicode id id spacing
+		if [not newid] : throw : new Error "Target ID not specified"
+		return : HCombine newid unicode id id spacing
 
 	define [vcombine newid unicode id1 id2 spacing] : begin
-		create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] unicode : glyph-proc
+		if [not newid] : throw : new Error "Target ID not specified"
+		create-glyph newid unicode : glyph-proc
 			set-width [query-glyph id1].advanceWidth
 			currentGlyph.dependsOn [query-glyph id1]
 			currentGlyph.dependsOn [query-glyph id2]
@@ -98,7 +103,9 @@ glyph-block Common-Derivatives : begin
 				include : Upright
 			include : Translate 0 (spacing / 2)
 			include : Italify
-	define [VDual newid unicode id spacing] : vcombine [fallback newid : 'double' + id] unicode id id spacing
+	define [VDual newid unicode id spacing] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		return : vcombine newid unicode id id spacing
 
 	glyph-block-export select-variant italic-variant refer-glyph query-glyph with-related-glyphs
 	glyph-block-export alias turned HDual HCombine VDual vcombine glyph-is-needed

@@ -5,8 +5,8 @@ const Point = require("./point");
 const Anchor = require("./anchor");
 
 module.exports = class Glyph {
-	constructor(name) {
-		this._m_dependentName = name;
+	constructor(_identifier) {
+		this._m_identifier = _identifier;
 		this.contours = [];
 		this.advanceWidth = 500;
 		this.autoRefPriority = 0;
@@ -36,7 +36,7 @@ module.exports = class Glyph {
 	}
 	// Dependency
 	dependsOn(glyph) {
-		if (glyph._m_dependentName) this.dependencies.push(glyph._m_dependentName);
+		if (glyph._m_identifier) this.dependencies.push(glyph._m_identifier);
 		if (glyph.dependencies) for (const dep of glyph.dependencies) this.dependencies.push(dep);
 	}
 	// Contour Tagging
