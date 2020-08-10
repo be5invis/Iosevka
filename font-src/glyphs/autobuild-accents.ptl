@@ -25,9 +25,13 @@ glyph-block AutoBuild-Accents : begin
 		return amended
 
 	# Build accented glyphs
-	define [isAboveMark mark] : mark && mark.markAnchors && mark.markAnchors.above
-	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : set parts.(j) [query-glyph 'iotaLF']
-	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : set parts.(j) [query-glyph 'ogonekTR']
+	define [isAboveMark mark] : begin
+		return : mark && mark.markAnchors && mark.markAnchors.above
+	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : begin
+		set parts.(j) [query-glyph 'iotaLF']
+	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : begin
+		set parts.(j) [query-glyph 'ogonekTR']
+
 	define [subParts parts] : begin
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
@@ -78,10 +82,11 @@ glyph-block AutoBuild-Accents : begin
 			while foundDecompositions.(glyphName + j) [inc j]
 			set glyphName (glyphName + j)
 
-		if (glyphName.length > 27) : set glyphName ('uni' + [pad [[code.toString 16].toUpperCase] 4])
 		return glyphName
 
-	local [buildForCode code] : if [not : glyphStore.queryByUnicode code] : begin
+	# When recursively building, `recursiveCodes` contain an array of "needed" Unicode list
+	local goalCodes : recursiveCodes || [range 0x0000 0xFFFF]
+	foreach code goalCodes : if [not : glyphStore.queryByUnicode code] : do
 		local str : String.fromCharCode code
 		local nfd : fallback customDecompositions.(str) : unorm.nfd str
 		if (nfd.length > 1) : begin
@@ -92,21 +97,15 @@ glyph-block AutoBuild-Accents : begin
 				if [not part] : then
 					set allFound false
 				: else
-					set parts.(j)       part
-
+					set parts.(j) part
 			if allFound : begin
 				local glyphName : decideName parts code
 				set parts : subParts parts
 				set foundDecompositions.(glyphName) { glyphName code parts }
 
-	if recursiveCodes : recursiveCodes.forEach buildForCode
-	: else : foreach code [range 0x0000 0xFFFF] : buildForCode code
-
 	local s_parts     nothing
-
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
-
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
 			if (part.markAnchors && part.markAnchors.bottomright) : begin

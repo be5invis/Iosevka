@@ -40,10 +40,6 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define MarkSet : MarksetDiv 1 metrics
 	define DivFrame : GenDivFrame metrics
 
-	### Glyph slots and dependency profile generation (used for recursive subfonts)
-	local dependencyProfile {.}
-	local nTemp 0
-	define [newtemp] : set nTemp (nTemp + 1)
 	local nPending 0
 	local pickHash : if recursive
 		then : let [h {.}] : begin
@@ -51,13 +47,6 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			set nPending recursive.length
 			* h
 		else nothing
-
-	define [getDependencyProfile glyph] : begin
-		local dp {}
-		foreach d [items-of glyph.dependencies] : begin
-			dp.push d
-			if dependencyProfile.(d): foreach [k : items-of dependencyProfile.(d)] : dp.push k
-		return dp
 
 	define [$createAndSaveGlyphImpl$ _1 _2 actions] : begin
 		local saveGlyphName    null
@@ -75,7 +64,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 				set unicode          _2
 			true : begin
 				set saveGlyphName    null
-				set ensuredGlyphName ('.temp-' + [newtemp])
+				set ensuredGlyphName "Temporary Glyph"
 				set unicode          null
 
 		if (saveGlyphName && pickHash && [not pickHash.(saveGlyphName)]) : return nothing
@@ -93,7 +82,6 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			glyphStore.addGlyph saveGlyphName glyphObject
 			if unicode : $assignUnicodeImpl$ glyphObject unicode
 
-			set dependencyProfile.(saveGlyphName) : getDependencyProfile glyphObject
 			dec nPending
 
 		return glyphObject
@@ -123,7 +111,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	define booleFns : BooleKit.SetupBuilders : object GlobalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$
 
 	### HERE WE GO
 	run-glyph-module '../glyphs/common-shapes.js'
