@@ -15,8 +15,10 @@ module.exports = build;
 const path = require("path");
 const toml = require("@iarna/toml");
 
-const BUILD = "build";
+const BUILD = ".build";
 const DIST = "dist";
+const DIST_COLLECT = "dist/.collect";
+const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
 const OTF2OTC = "otf2otc";
@@ -406,7 +408,7 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 ///////////////////////////////////////////////////////////
 
 const BuildRawTtf = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
+	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
 		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + fn + ".charmap";
@@ -417,9 +419,12 @@ const BuildRawTtf = file.make(
 		await rm(otdPath);
 	}
 );
+function optimizedOtfcc(from, to) {
+	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
+}
 
 const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
 		const [useFilter, useTtx] = await target.need(
 			OptimizeWithFilter,
@@ -444,12 +449,8 @@ const BuildTTF = file.make(
 	}
 );
 
-function optimizedOtfcc(from, to) {
-	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
-}
-
 const BuildCM = file.make(
-	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap`,
 	async (target, output, gr, f) => {
 		await target.need(BuildTTF(gr, f));
 	}
@@ -528,8 +529,8 @@ const GroupContents = task.group("contents", async (target, gr) => {
 });
 
 // TTC
-const ExportTtc = file.make(
-	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
+const ExportTtcFile = file.make(
+	(gr, f) => `${BUILD}/ttc-collect/${gr}/ttc/${f}.ttc`,
 	async (target, out, gr, f) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const parts = Array.from(new Set(cp.ttcComposition[f]));
@@ -546,13 +547,6 @@ const glyfTtc = file.make(
 	}
 );
 
-async function buildCompositeTtc(out, inputs) {
-	await run(
-		OTF2OTC,
-		["-o", out.full],
-		inputs.map(f => f.full)
-	);
-}
 async function buildGlyfTtc(target, parts, out) {
 	const [useFilter, useTtx] = await target.need(
 		OptimizeWithFilter,
@@ -567,34 +561,43 @@ async function buildGlyfTtc(target, parts, out) {
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
+async function buildCompositeTtc(out, inputs) {
+	await run(
+		OTF2OTC,
+		["-o", out.full],
+		inputs.map(f => f.full)
+	);
+}
 
-// Collection Export
-const CollectionExport = task.group("collection-export", async (target, gr) => {
-	// Note: this target does NOT depend on the font files.
-	const [collectPlans] = await target.need(CollectPlans, de`${DIST}/export/${gr}`);
-	const sourceGroups = collectPlans.groupDecomposition[gr];
-	// TTF, etc
-	await target.need(sourceGroups.map(g => GroupContents(g)));
-	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
-	// TTC
-	const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
-	await target.need(ttcFiles.map(pt => ExportTtc(gr, pt)));
-});
 const ExportSuperTtc = file.make(
-	gr => `${DIST}/super-ttc/${gr}.ttc`,
+	gr => `${DIST_SUPER_TTC}/${gr}.ttc`,
 	async (target, out, gr) => {
 		const [cp] = await target.need(CollectPlans, de(out.dir));
 		const parts = Array.from(new Set(cp.ttcContents[gr]));
-		const [inputs] = await target.need(parts.map(pt => ExportTtc(gr, pt)));
+		const [inputs] = await target.need(parts.map(pt => ExportTtcFile(gr, pt)));
 		await buildCompositeTtc(out, inputs);
 	}
 );
 const CollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
-		await target.need(de`${out.dir}`, CollectionExport(gr));
+		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
+		const sourceGroups = collectPlans.groupDecomposition[gr];
+		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+		await target.need(sourceGroups.map(g => GroupContents(g)));
+		await target.need(ttcFiles.map(pt => ExportTtcFile(gr, pt)));
+
+		// Packaging
 		await rm(out.full);
-		await cd(`${DIST}/export/${gr}`).run(
+		for (const g of sourceGroups) {
+			await cd(`${DIST}/${g}`).run(
+				["7z", "a"],
+				["-tzip", "-r", "-mx=9"],
+				`../../${out.full}`,
+				`./`
+			);
+		}
+		await cd(`${BUILD}/ttc-collect/${gr}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
 			`../../../${out.full}`,
@@ -605,9 +608,13 @@ const CollectionArchiveFile = file.make(
 const TtcOnlyCollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${TTC_ONLY_COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
-		await target.need(de`${out.dir}`, CollectionExport(gr));
+		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
+		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+		await target.need(ttcFiles.map(pt => ExportTtcFile(gr, pt)));
+
+		// Packaging
 		await rm(out.full);
-		await cd(`${DIST}/export/${gr}/ttc`).run(
+		await cd(`${BUILD}/ttc-collect/${gr}/ttc`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
 			`../../../../${out.full}`,
