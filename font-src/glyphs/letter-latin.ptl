@@ -2457,7 +2457,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-export PShape PShapeOutline RevPShape PBarPosY
 
 	define [PBarPosY top sw bp] : (top - sw) * bp - sw * PShape.SwBelowBar
-	define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
+	define [PShapeOutlineKnots top mul bp overshoot sw offset endDist] : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : Math.max (sw * 1.5 * HVContrast)
@@ -2474,9 +2474,9 @@ glyph-block Letter-Latin-Upper-P : begin
 			straight.down.mid (right - overshoot) turn
 			arcvh
 			flat (right - turnRadius + CorrectionOMidS) bowlBottom
-			curl (SB * mul - O) bowlBottom [heading Leftward]
+			curl (SB * mul - O + endDist) bowlBottom [heading Leftward]
 
-	define [RevPshapeOutlineKnots top mul bp overshoot sw offset] : begin
+	define [RevPshapeOutlineKnots top mul bp overshoot sw offset endDist] : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
 		local turnRadius : Math.max (sw * 1.5 * HVContrast)
@@ -2492,27 +2492,27 @@ glyph-block Letter-Latin-Upper-P : begin
 			straight.down.mid (left + overshoot) turn
 			arcvh
 			flat (left + turnRadius + CorrectionOMidS) bowlBottom
-			curl (Width - SB * mul + O) bowlBottom [heading Rightward]
+			curl (Width - SB * mul + O - endDist) bowlBottom [heading Rightward]
 
 
-	define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-proc
+	define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0] [endDist 0]] : glyph-proc
 		include : spiro-outline
-			PShapeOutlineKnots top mul bp overshoot sw offset
+			PShapeOutlineKnots top mul bp overshoot sw offset endDist
 
-	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [withBar true]] : glyph-proc
+	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [withBar true] [endDist 0]] : glyph-proc
 		include : dispiro
 			widths.rhs sw
-			PShapeOutlineKnots top mul bp overshoot sw 0
+			PShapeOutlineKnots top mul bp overshoot sw 0 endDist
 		if withBar : begin
 			include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
 			if slab : begin
 				include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
 				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
 
-	define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-proc
+	define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [endDist 0]] : glyph-proc
 		include : tagged 'bowl' : dispiro
 			widths.lhs sw
-			RevPshapeOutlineKnots top mul bp overshoot sw 0
+			RevPshapeOutlineKnots top mul bp overshoot sw 0 endDist
 		include : tagged 'strokeR' : VBarRight (Width - SB * mul) 0 top sw
 
 		if slab : begin
@@ -2659,14 +2659,15 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	define [RBarPos charTop slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / charTop) PShape.BarPos
 	define [RBarTop charTop stroke straightBar slab] : (charTop - Stroke) * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
-	define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
-		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
+	define [RShape] : params [straightBar top [mul 1] [slab SLAB] [endDist 0]] : glyph-proc
+		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab) (endDist -- endDist)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape [RBarTop top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
-	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
-		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
+		include : RLegShape [RBarTop top Stroke straightBar slab] 0 [mix endDist Width 0.5] right top slab straightBar Stroke 0
+	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB] [endDist 0]] : glyph-proc
+		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab) (endDist -- endDist)
 		local left (SB + O + [if SLAB (Jut / 8) 0])
 		include : RevRLegShape [RBarTop top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
+	define pRRotunda : 1 / 6
 
 	create-glyph : glyph-proc
 		include MarkSet.capital
@@ -2676,7 +2677,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP SLAB
 		create-derived 'Rrotunda.straight' : glyph-proc
-			include : RShape true CAP (slab -- false)
+			include : RShape true CAP (slab -- false) (endDist -- (pRRotunda * (RightSB - SB)))
 			set-base-anchor 'overlay'
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP 0
@@ -2687,7 +2688,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP SLAB
 		create-derived 'Rrotunda.curly' : glyph-proc
-			include : RShape false CAP (slab -- false)
+			include : RShape false CAP (slab -- false) (endDist -- (pRRotunda * (RightSB - SB)))
 			set-base-anchor 'overlay'
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP 0
@@ -2714,12 +2715,12 @@ glyph-block Letter-Latin-Upper-R : begin
 		create-derived 'smcpR.straight' : glyph-proc
 			include : RShape true XH
 		create-derived 'rrotunda.straight' : glyph-proc
-			include : RShape true XH (slab -- false)
+			include : RShape true XH (slab -- false) (endDist -- (pRRotunda * (RightSB - SB)))
 			eject-contour 'strokeL'
 		create-derived 'smcpR.curly' : glyph-proc
 			include : RShape false XH
 		create-derived 'rrotunda.curly' : glyph-proc
-			include : RShape false XH (slab -- false)
+			include : RShape false XH (slab -- false) (endDist -- (pRRotunda * (RightSB - SB)))
 			eject-contour 'strokeL'
 
 	select-variant 'R' 'R'
