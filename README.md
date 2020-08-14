@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																													
+																																																																														
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -549,6 +549,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
+  * Styles for `'`:
+    * `v-ascii-quote-straight`, `VXDG`: Show ASCII quote (`'`) as short vertical straight bar. (default).
+    * `v-ascii-quote-raised-comma`, `VXDH`: Show ASCII quote (`'`) as raised comma..
+  * Styles for ```:
+    * `v-ascii-grave-straight`, `VXDI`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
+    * `v-ascii-grave-raised-inverse-comma`, `VXDJ`: Show ASCII grave (`` ` ``) as raised comma..
 
 <!-- END Section-Cherry-Picking-Styles -->
 

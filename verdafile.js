@@ -17,7 +17,7 @@ const toml = require("@iarna/toml");
 
 const BUILD = ".build";
 const DIST = "dist";
-const DIST_COLLECT = "dist/.collect";
+const SNAPSHOT_TMP = ".build/snapshot";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
@@ -719,16 +719,19 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		GroupContents`iosevka-aile`,
 		GroupContents`iosevka-etoile`,
 		GroupContents`iosevka-sparkle`,
+		SnapShotStatic("index.js"),
+		SnapShotStatic("get-snap.js"),
 		SnapShotJson,
 		SnapShotCSS,
 		SnapShotHtml,
-		de`images`
+		de`images`,
+		de(SNAPSHOT_TMP)
 	);
-	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
-	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
-	await cp(`${DIST}/${aile}`, `snapshot/${aile}`);
-	await cp(`${DIST}/${etoile}`, `snapshot/${etoile}`);
-	await cp(`${DIST}/${sparkle}`, `snapshot/${sparkle}`);
+	await cp(`${DIST}/${sans}`, `${SNAPSHOT_TMP}/${sans}`);
+	await cp(`${DIST}/${slab}`, `${SNAPSHOT_TMP}/${slab}`);
+	await cp(`${DIST}/${aile}`, `${SNAPSHOT_TMP}/${aile}`);
+	await cp(`${DIST}/${etoile}`, `${SNAPSHOT_TMP}/${etoile}`);
+	await cp(`${DIST}/${sparkle}`, `${SNAPSHOT_TMP}/${sparkle}`);
 });
 
 const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
@@ -746,25 +749,38 @@ const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async ta
 	}
 	return cfg;
 });
-const SnapShotJson = file(`snapshot/packaging-tasks.json`, async (target, out) => {
-	const [cfg] = await target.need(PackageSnapshotConfig);
+const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target, out) => {
+	const [cfg] = await target.need(PackageSnapshotConfig, de(out.dir));
 	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
 });
-const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(Parameters, UtilScripts);
+const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
+	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
-	await run(`node`, `utility/generate-snapshot-page/index.js`);
+	await run(
+		`node`,
+		`utility/generate-snapshot-page/index.js`,
+		"snapshot-src/templates",
+		out.full
+	);
 	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
 });
-const SnapShotCSS = file(`snapshot/index.css`, async target => {
-	await target.need(sfu`snapshot/index.styl`);
-	await run(`npx`, `stylus`, `snapshot/index.styl`, `-c`);
+const SnapShotStatic = file.make(
+	x => `${SNAPSHOT_TMP}/${x}`,
+	async (target, out) => {
+		const [$1] = await target.need(sfu`snapshot-src/${out.base}`, de(out.dir));
+		await cp($1.full, `${out.dir}/${$1.base}`);
+	}
+);
+const SnapShotCSS = file(`${SNAPSHOT_TMP}/index.css`, async (target, out) => {
+	const [$1] = await target.need(sfu`snapshot-src/index.styl`, de(out.dir));
+	await cp($1.full, `${out.dir}/${$1.base}`);
+	await run(`npx`, `stylus`, `${out.dir}/${$1.base}`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
-	await cd(`snapshot`).run("npx", "electron", "get-snap.js", "../images");
+	await cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images");
 });
 const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 	await target.need(TakeSampleImages);
@@ -823,9 +839,9 @@ const ReleaseNotes = task(`release:release-note`, async t => {
 });
 
 phony(`clean`, async () => {
-	await rm(`build`);
-	await rm(`dist`);
-	await rm(`release-archives`);
+	await rm(BUILD);
+	await rm(DIST);
+	await rm(ARCHIVE_DIR);
 	build.deleteJournal();
 });
 phony(`release`, async target => {
@@ -847,6 +863,14 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 		ScriptsUnder("js", "utility"),
 		ScriptsUnder("ejs", "utility"),
 		ScriptsUnder("md", "utility")
+	);
+	return [...js, ...ejs, ...md];
+});
+const SnapshotTemplateFiles = computed("snapshot-templates", async target => {
+	const [js, ejs, md] = await target.need(
+		ScriptsUnder("js", "snapshot-src"),
+		ScriptsUnder("ejs", "snapshot-src"),
+		ScriptsUnder("md", "snapshot-src")
 	);
 	return [...js, ...ejs, ...md];
 });
@@ -881,7 +905,11 @@ const Scripts = task("scripts", async target => {
 });
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
-	await target.need(files.map(f => fu`${f}`));
+	await target.need(files.map(fu));
+});
+const SnapshotTemplates = task("snapshot-templates", async target => {
+	const [files] = await target.need(SnapshotTemplateFiles);
+	await target.need(files.map(fu));
 });
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
