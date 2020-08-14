@@ -34,6 +34,14 @@ glyph-block Letter-Shared : begin
 				include : Italify
 				include srcGlyph AS_BASE ALSO_METRICS
 
+glyph-block Letter-Shared-Metrics : begin
+	glyph-block-export BowlXDepth
+	define [BowlXDepth top bottom left right sw] : begin
+		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		local turnRadius : Math.max (sw * 1.25 * HVContrast)
+			trShrink * [Math.min ((top - bottom) * 0.45) ((right - left + sw * HVContrast) * 0.5)]
+		return turnRadius
+
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -2030,12 +2038,14 @@ glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 
 	define [BShape] : params [top [barPos 0.52] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
 		local stroke : adviceBlackness2 2.875 2 top
 		local bowl : top * barPos + stroke * (1 - barPos)
 		local barleft SB
-		local curvleft : RightSB - SB * 0.5 - (top - (bowl - stroke)) * 0.45 + topArcInnerShift
+		local mockBowlDepth : BowlXDepth top (bowl - stroke) barleft RightSB stroke
+		local curvleft : RightSB - SB * 0.5 - mockBowlDepth + topArcInnerShift
 		local curvleftTop : Math.min curvleft (RightSB - SB * 0.5 - OX - stroke * 1.375 + topArcInnerShift)
 		local xTopArcRight : [mix SB RightSB 0.93] - OX * 2 + topArcShift
 		local fine : stroke * CThin
@@ -2048,21 +2058,21 @@ glyph-block Letter-Latin-Upper-B : begin
 		include : dispiro
 			widths.rhs stroke
 			flat (barleft - O) top [heading Rightward]
-			curl (curvleftTop - CorrectionOMidS) top
+			curl (curvleftTop - CorrectionOMidX * stroke) top
 			archv
-			straight.down.mid xTopArcRight [mix top (bowl - stroke) (smbTop / (smaTop + smbTop))]
+			g4 xTopArcRight [YSmoothMidR top (bowl - stroke) smaTop smbTop]
 			arcvh
-			flat (curvleftTop + CorrectionOMidS) (bowl - fine) [widths.rhs fine]
+			flat (curvleftTop + CorrectionOMidX * stroke) (bowl - fine) [widths.rhs fine]
 			curl (barleft - O) (bowl - fine) [heading Leftward]
 
 		include : dispiro
 			widths.rhs fine
 			flat (barleft - O) (bowl - stroke + fine) [heading Rightward]
-			curl (curvleft - CorrectionOMidS) (bowl - stroke + fine)
+			curl (curvleft - CorrectionOMidX * stroke) (bowl - stroke + fine)
 			archv
-			straight.down.mid (RightSB - OX * 2) [mix bowl 0 (smb / (sma + smb))] [widths.rhs stroke]
+			g4 (RightSB - OX * 2) [YSmoothMidR bowl 0 sma smb] [widths.rhs stroke]
 			arcvh
-			flat (curvleft + CorrectionOMidS) 0
+			flat (curvleft + CorrectionOMidX * stroke) 0
 			curl (barleft - O) 0 [heading Leftward]
 
 		include : VBarLeft barleft 0 top stroke
@@ -2297,7 +2307,7 @@ glyph-block Letter-Latin-Upper-D : begin
 			flat (barleft - O) CAP [heading Rightward]
 			curl (RightSB - bsmoothRd - CorrectionOMidS) CAP
 			archv
-			straight.down.mid (RightSB - OX) [mix 0 CAP (sma / (sma + smb))]
+			g4 (RightSB - OX) [YSmoothMidR CAP 0 sma smb]
 			arcvh
 			flat (RightSB - bsmoothRd + CorrectionOMidS) 0
 			curl (barleft - O) 0 [heading Leftward]
@@ -2454,6 +2464,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-export PShape PShapeOutline RevPShape PBarPosY PRotundaShape
 
 	define [PBarPosY top sw bp] : (top - sw) * bp - sw * PShape.SwBelowBar
@@ -2461,8 +2472,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	define [PRotundaOutlineKnots top mul bp overshoot sw offset endX hook] : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom : [PBarPosY top sw bp] + offset
-		local turnRadius : Math.max (sw * 1.5 * HVContrast)
-			Math.min ((bowlTop - bowlBottom) * 0.45) ((RightSB - SB + sw * HVContrast) * 0.5)
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local right : RightSB - offset
@@ -2470,7 +2480,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		return : list
 			g4 (SB * mul - O) (bowlTop - hook)
 			hookstart (bowlTop - O)
-			straight.down.mid (right - overshoot) turn
+			g4 (right - overshoot) turn
 			arcvh
 			flat ([Math.max (endX + 0.01 + sw / 2 * TanSlope) Middle] + CorrectionOMidX * sw * 0.5) bowlBottom
 			curl endX bowlBottom [heading Leftward]
@@ -2478,8 +2488,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom : [PBarPosY top sw bp] + offset
-		local turnRadius : Math.max (sw * 1.5 * HVContrast)
-			Math.min ((bowlTop - bowlBottom) * 0.45) ((RightSB - SB + sw * HVContrast) * 0.5)
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local right : RightSB - offset
@@ -2488,7 +2497,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			flat (SB * mul - O) bowlTop [heading Rightward]
 			curl (right - turnRadius - CorrectionOMidX * sw) bowlTop
 			archv
-			straight.down.mid (right - overshoot) turn
+			g4 (right - overshoot) turn
 			arcvh
 			flat (right - turnRadius + CorrectionOMidX * sw) bowlBottom
 			curl (SB * mul - O) bowlBottom [heading Leftward]
@@ -2496,8 +2505,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	define [RevPshapeOutlineKnots top mul bp overshoot sw offset] : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
-		local turnRadius : Math.max (sw * 1.5 * HVContrast)
-			Math.min ((bowlTop - bowlBottom) * 0.45) ((RightSB - SB + sw * HVContrast) * 0.5)
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local left : SB + offset
@@ -2506,7 +2514,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			flat (Width - SB * mul + O) bowlTop [heading Leftward]
 			curl (left + turnRadius - CorrectionOMidX * sw) bowlTop
 			archv
-			straight.down.mid (left + overshoot) turn
+			g4 (left + overshoot) turn
 			arcvh
 			flat (left + turnRadius + CorrectionOMidX * sw) bowlBottom
 			curl (Width - SB * mul + O) bowlBottom [heading Rightward]

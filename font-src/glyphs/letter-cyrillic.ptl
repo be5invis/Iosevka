@@ -9,6 +9,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Overmarks
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 
 	glyph-block-export CyrYeriShape
 	define [CyrYeriShape top _left _right _fine _jut] : glyph-proc
@@ -18,17 +19,18 @@ glyph-block Letter-Cyrillic-Yeri : begin
 		local jut : fallback _jut Jut
 
 		local bowl : top * 0.55 + HalfStroke
-		local turnRadius : bowl * 0.45
-		local turnbottom : mix 0 bowl (SmoothA / (SmoothA + SmoothB))
-		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		local turnRadius : BowlXDepth bowl 0 left right fine
+		local sma : SmoothAOf Smooth (right - left + SB * 2)
+		local smb : SmoothBOf Smooth (right - left + SB * 2)
+		local turnbottom : YSmoothMidR bowl 0 sma smb
 		include : dispiro
 			widths.lhs fine
 			flat (left + Stroke * 0.2) 0 [heading Rightward]
-			curl ([Math.max (left + fine * HVContrast) (right - turnRadius * trShrink)] + CorrectionOMidX * fine) 0
+			curl ([Math.max (left + fine * HVContrast) (right - turnRadius)] + CorrectionOMidX * fine) 0
 			archv 8
 			g4   (right - OX) turnbottom
 			arcvh 8
-			flat ([Math.max (left + fine * HVContrast) (right - turnRadius * trShrink)] - CorrectionOMidX * fine) bowl
+			flat ([Math.max (left + fine * HVContrast) (right - turnRadius)] - CorrectionOMidX * fine) bowl
 			curl (left + Stroke * 0.2) bowl [heading Leftward]
 		include : VBarLeft left 0 top fine
 		if SLAB : begin
