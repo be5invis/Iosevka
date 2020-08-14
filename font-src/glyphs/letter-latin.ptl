@@ -2466,14 +2466,13 @@ glyph-block Letter-Latin-Upper-P : begin
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local right : RightSB - offset
-
-		local turn : mix bowlTop bowlBottom (smb / (sma + smb))
+		local turn : YSmoothMidR bowlTop bowlBottom sma smb
 		return : list
 			g4 (SB * mul - O) (bowlTop - hook)
 			hookstart (bowlTop - O)
 			straight.down.mid (right - overshoot) turn
 			arcvh
-			flat ([Math.max (endX + 0.01) Middle] + CorrectionOMidX * sw * 0.5) bowlBottom [heading Leftward]
+			flat ([Math.max (endX + 0.01 + sw / 2 * TanSlope) Middle] + CorrectionOMidX * sw * 0.5) bowlBottom
 			curl endX bowlBottom [heading Leftward]
 
 	define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
@@ -2484,8 +2483,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local right : RightSB - offset
-
-		local turn : mix bowlTop bowlBottom (smb / (sma + smb))
+		local turn : YSmoothMidR bowlTop bowlBottom sma smb
 		return : list
 			flat (SB * mul - O) bowlTop [heading Rightward]
 			curl (right - turnRadius - CorrectionOMidX * sw) bowlTop
@@ -2503,7 +2501,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		local sma : SmoothAOf (Smooth * 0.9) Width
 		local smb : SmoothBOf (Smooth * 0.9) Width
 		local left : SB + offset
-		local turn : mix bowlTop bowlBottom (sma / (sma + smb))
+		local turn : YSmoothMidL bowlTop bowlBottom sma smb
 		return : list
 			flat (Width - SB * mul + O) bowlTop [heading Leftward]
 			curl (left + turnRadius - CorrectionOMidX * sw) bowlTop
@@ -2683,23 +2681,23 @@ glyph-block Letter-Latin-Upper-R : begin
 				include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
 
 	define [RBarPos charTop slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / charTop) PShape.BarPos
-	define [RBarTop charTop stroke straightBar slab] : (charTop - Stroke) * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
+	define [RBarTop p charTop stroke straightBar slab] : (charTop - Stroke) * [fallback p 1] * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
 
 	define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
 		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape [RBarTop top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
+		include : RLegShape [RBarTop 1 top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
 
-	define [RRotundaShape] : params [straightBar top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook]] : glyph-proc
+	define [RRotundaShape] : params [straightBar top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1]] : glyph-proc
 		local endX1 : endX - HalfStroke * HVContrast * 1.25 + [if straightBar [RSlabExtraShift SLAB Stroke] 0]
-		include : PRotundaShape top (mul -- mul) (bp -- [RBarPos top false]) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
+		include : PRotundaShape top (mul -- mul) (bp -- (pBar * [RBarPos top false])) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape [RBarTop top Stroke straightBar false] 0 endX right top SLAB straightBar Stroke 0
+		include : RLegShape [RBarTop pBar top Stroke straightBar SLAB] 0 endX right top SLAB straightBar Stroke 0
 
 	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
 		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 		local left (SB + O + [if SLAB (Jut / 8) 0])
-		include : RevRLegShape [RBarTop top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
+		include : RevRLegShape [RBarTop 1 top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
 
 	create-glyph : glyph-proc
 		include MarkSet.capital
@@ -2709,7 +2707,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP SLAB
 		create-derived 'Rrotunda.straight' : glyph-proc
-			include : RRotundaShape true CAP (hook -- Hook)
+			include : RRotundaShape true CAP (hook -- Hook) (pBar -- 0.9)
 			set-base-anchor 'overlay'
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP 0
@@ -2719,7 +2717,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP SLAB
 		create-derived 'Rrotunda.curly' : glyph-proc
-			include : RRotundaShape false CAP (hook -- Hook)
+			include : RRotundaShape false CAP (hook -- Hook) (pBar -- 0.9)
 			set-base-anchor 'overlay'
 				SB + Stroke * HVContrast
 				PBarPosY CAP Stroke : RBarPos CAP 0
@@ -2731,7 +2729,7 @@ glyph-block Letter-Latin-Upper-R : begin
 			WithTransform [Translate (-Width / 8) 0]
 				PShape CAP (bp -- bp) (slab -- false) (withBar -- false)
 		local right : RightSB - O - [if straightBar 0 (Width / 16)]
-		include : RLegShape [RBarTop CAP Stroke straightBar false] 0 (Width * 0.375) right CAP false straightBar Stroke 0
+		include : RLegShape [RBarTop 1 CAP Stroke straightBar false] 0 (Width * 0.375) right CAP false straightBar Stroke 0
 
 		define sw : adviceBlackness2 2 4 CAP
 		include : HBarTop SB RightSB CAP sw
