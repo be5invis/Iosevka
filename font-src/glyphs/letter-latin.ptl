@@ -2638,10 +2638,11 @@ glyph-block Letter-Latin-Upper-R : begin
 	### R and CyrYa
 	glyph-block-export RLegShape RLegTerminalX
 	define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVContrast
+	define [RSlabExtraShift slab sw] : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
 	define [RLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
 		local xRightBottom : RLegTerminalX straight right sw
 		if straight : do
-			local shift : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
+			local shift : RSlabExtraShift slab sw
 			include : dispiro
 				widths.center (sw * [diagCor (top - bottom) (right - left - extraShift) 0 sw])
 				corner (left + extraShift + shift / 2) top [heading Downward]
@@ -2663,7 +2664,7 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [RevRLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
 		local xLeftBottom : RevRLegTerminalX straight left sw
 		if straight : do
-			local shift : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
+			local shift : RSlabExtraShift slab sw
 			include : dispiro
 				widths.center (sw * [diagCor (top - bottom) (right - left - extraShift) 0 sw])
 				corner (right + extraShift + shift / 2) top [heading Downward]
@@ -2688,10 +2689,12 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
 		include : RLegShape [RBarTop top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
+
 	define [RRotundaShape] : params [straightBar top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook]] : glyph-proc
-		include : PRotundaShape top (mul -- mul) (bp -- [RBarPos top false]) (overshoot -- O) (slab -- false) (endX -- (endX - HalfStroke * HVContrast * 1.25)) (hook -- hook)
+		local endX1 : endX - HalfStroke * HVContrast * 1.25 + [if straightBar [RSlabExtraShift SLAB Stroke] 0]
+		include : PRotundaShape top (mul -- mul) (bp -- [RBarPos top false]) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape [RBarTop top Stroke straightBar false] 0 endX right top false straightBar Stroke 0
+		include : RLegShape [RBarTop top Stroke straightBar false] 0 endX right top SLAB straightBar Stroke 0
 
 	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
 		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
