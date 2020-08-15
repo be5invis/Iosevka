@@ -6,6 +6,8 @@ import [mix linreg clamp fallback] from '../support/utils'
 import [Cv AnyDerivingCv] from '../support/gr'
 import [designParameters] from '../meta/aesthetics'
 
+extern Map
+
 glyph-module
 
 glyph-block Common-Derivatives : begin
@@ -40,14 +42,15 @@ glyph-block Common-Derivatives : begin
 
 	define [glyph-is-needed name] : [not pickHash] || pickHash.(name)
 
-	define [query-glyph id] : return glyphMap.(id)
+	define [query-glyph id] : return : glyphStore.queryByName id
 
 	define [refer-glyph id] : lambda [copyAnchors copyWidth] : begin
-		if [not glyphMap.(id)] : throw : new Error "Cannot find glyph '\(id)'"
-		this.includeGlyph glyphMap.(id) copyAnchors copyWidth
+		local goal : query-glyph id
+		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
+		this.includeGlyph goal copyAnchors copyWidth
 
 	define [with-related-glyphs sourceGid dstGid unicode Fn] : if [glyph-is-needed sourceGid] : begin
-		local glyphSrc glyphMap.(sourceGid)
+		local glyphSrc : glyphStore.queryByName sourceGid
 		local glyphDst : create-glyph dstGid unicode : glyph-proc
 			include : Fn sourceGid null
 
@@ -56,14 +59,16 @@ glyph-block Common-Derivatives : begin
 			create-glyph [gr.amendName dstGid] : glyph-proc
 				include : Fn [gr.get glyphSrc] gr.tag
 
-	define [alias newid unicode id]
-		with-related-glyphs id [fallback newid ('.alias' + [newtemp])] unicode
+	define [alias newid unicode id] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		with-related-glyphs id newid unicode
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] AS_BASE ALSO_METRICS
 				currentGlyph.cloneRankFromGlyph [query-glyph src]
 
-	define [turned newid unicode id _x _y mark]
-		with-related-glyphs id [fallback newid ('turn' + id)] unicode
+	define [turned newid unicode id _x _y mark] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		with-related-glyphs id newid unicode
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark
@@ -74,17 +79,20 @@ glyph-block Common-Derivatives : begin
 
 	# Dual derivatives
 	define [HCombine newid unicode id1 id2 spacing] : begin
-		create-glyph [fallback newid : 'hcombine{' + id1 + '}{' + id2 + '}'] unicode : glyph-proc
+		if [not newid] : throw : new Error "Target ID not specified"
+		create-glyph newid unicode : glyph-proc
 			include [refer-glyph id1] AS_BASE ALSO_METRICS
 			include : Translate (-spacing) 0
 			include [refer-glyph id2]
 			include : Translate (spacing / 2) 0
 
 	define [HDual newid unicode id spacing] : begin
-		return : HCombine [fallback newid : 'double' + id] unicode id id spacing
+		if [not newid] : throw : new Error "Target ID not specified"
+		return : HCombine newid unicode id id spacing
 
 	define [vcombine newid unicode id1 id2 spacing] : begin
-		create-glyph [fallback newid : 'vcombine_' + id1 + '_' + id2] unicode : glyph-proc
+		if [not newid] : throw : new Error "Target ID not specified"
+		create-glyph newid unicode : glyph-proc
 			set-width [query-glyph id1].advanceWidth
 			currentGlyph.dependsOn [query-glyph id1]
 			currentGlyph.dependsOn [query-glyph id2]
@@ -97,7 +105,9 @@ glyph-block Common-Derivatives : begin
 				include : Upright
 			include : Translate 0 (spacing / 2)
 			include : Italify
-	define [VDual newid unicode id spacing] : vcombine [fallback newid : 'double' + id] unicode id id spacing
+	define [VDual newid unicode id spacing] : begin
+		if [not newid] : throw : new Error "Target ID not specified"
+		return : vcombine newid unicode id id spacing
 
 	glyph-block-export select-variant italic-variant refer-glyph query-glyph with-related-glyphs
 	glyph-block-export alias turned HDual HCombine VDual vcombine glyph-is-needed
@@ -105,29 +115,34 @@ glyph-block Common-Derivatives : begin
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin
 		# BFS construct ShouldBuildList
-		local sbh {.}
-		local found true
+		local sbh : new Map
 		local PENDING 1
 		local CHECKED 2
-		foreach [glyphid : items-of gs] : set sbh.(glyphid) PENDING
+		foreach [glyphid : items-of gs] : sbh.set glyphid PENDING
+
+		local found true
 		while found : begin
 			set found false
-			foreach [glyphid : items-of : Object.keys sbh] : if (sbh.(glyphid) === PENDING) : begin
-				set sbh.(glyphid) CHECKED
-				if dependencyProfile.(glyphid) : foreach [k : items-of dependencyProfile.(glyphid)] : if [not sbh.(k)] : begin
-					set sbh.(k) PENDING
-					set found true
+			foreach glyphid [sbh.keys] : if ([sbh.get glyphid] === PENDING) : begin
+				sbh.set glyphid CHECKED
+				local g : glyphStore.queryByName glyphid
+				if (g && g.dependencies) : foreach [k : items-of g.dependencies] : begin
+					if [not : sbh.has k] : begin
+						sbh.set k PENDING
+						set found true
 
-		local shouldBuildList : Object.keys sbh :.filter ([x] => [not [not x]])
-		#console.log shouldBuildList
-		local shouldBuildUnicodes : shouldBuildList.map ([x] => [if (glyphMap.(x) && glyphMap.(x).unicode) glyphMap.(x).unicode.0 nothing])
-			:.filter ([x] => [not [not x]])
+		local shouldBuildList     { }
+		local shouldBuildUnicodes { }
+		foreach gn [sbh.keys] : if gn : begin
+			shouldBuildList.push gn
+			if [glyphStore.queryUnicodeOfName gn] : begin
+				shouldBuildUnicodes.push [glyphStore.queryUnicodeArrayOfName gn].0
 
 		local p {.}
-		foreach [{k v} : pairs-of all ps] : set p.(k) v
+		foreach {k v} [pairs-of all ps] : set p.(k) v
 
 		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
-		return gs.glyphs
+		return gs.glyphStore
 
 	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false]] : begin
 		local forkedPara : Object.create para

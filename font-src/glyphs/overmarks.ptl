@@ -71,12 +71,12 @@ glyph-block Overmarks : begin
 
 	create-glyph 'dblRingAbove' 0x1AB2 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
-		set-base-anchor 'aboveBrace' markMiddle (XH + Accent)
 		local [object radiusIn radiusOut] : RingDims
 		local k : 2 * (radiusOut - (radiusOut - radiusIn) * 0.25)
 		include : WithTransform [Translate (+k / 2) 0] : refer-glyph 'ringAbove'
 		include : WithTransform [Translate (-k / 2) 0] : refer-glyph 'ringAbove'
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle (XH + Accent)
 
 	create-glyph 'graveAbove' 0x300 : glyph-proc
 		set-width 0
@@ -88,7 +88,7 @@ glyph-block Overmarks : begin
 			flat (markMiddle + markStress) aboveMarkBot [widths markFine markFine]
 			curl (markMiddle - markExtend) aboveMarkTop [widths markStress markStress]
 
-	create-glyph 'asciigrave' '`' : glyph-proc
+	create-glyph 'asciiGrave.straight' : glyph-proc
 		include : dispiro
 			flat (Middle + HalfStroke * 1.1 * asciiMarkZoom) [mix (XH + Accent) aboveMarkBot asciiMarkZoom] [widths.center : Stroke * 0.9]
 			curl (Middle - markExtend * asciiMarkZoom) [mix (XH + Accent) aboveMarkTop asciiMarkZoom] [widths.center : Stroke * 1.1]
@@ -498,6 +498,13 @@ glyph-block Overmarks : begin
 		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
 
 		include : VBar markMiddle aboveMarkBot aboveMarkTop (markHalfStroke * 2)
+
+	create-glyph 'ascenderBarAbove' : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+
+		include : VBar markMiddle [mix XH aboveMarkBot 0.5] CAP (markHalfStroke * 2)
 
 	create-glyph 'dblBarAbove' 0x30E : glyph-proc
 		set-width 0
@@ -978,6 +985,7 @@ glyph-block Overmarks : begin
 	TurnAboveMarkToBelow 'archBelow' 0x32F 'breveAbove'
 	TurnAboveMarkToBelow 'commaBelow' 0x326 'turnCommaAbove'
 	TurnAboveMarkToBelow 'barBelow' 0x329 'barAbove'
+	TurnAboveMarkToBelow 'descenderBarBelow' null 'ascenderBarAbove'
 	TurnAboveMarkToBelow 'dblBarBelow' 0x348 'dblBarAbove'
 	TurnAboveMarkToBelow 'crossBelow' 0x353 'crossAbove'
 	TurnAboveMarkToBelow 'lessBelow' 0x354  'greaterAbove'
@@ -990,10 +998,10 @@ glyph-block Overmarks : begin
 
 	create-glyph 'greaterAndUpArrowheadBelow' 0x0356 : glyph-proc
 		set-width 0
-		set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
-		set-base-anchor 'belowBrace' markMiddle belowMarkMid
 		include : WithTransform [Translate (-markExtend) 0] : refer-glyph 'greaterBelow'
 		include : WithTransform [Translate (+markExtend) 0] : refer-glyph 'upArrowHeadBelow'
+		set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
+		set-base-anchor 'belowBrace' markMiddle belowMarkMid
 
 	create-glyph 'braceBelow' 0x1ABD : glyph-proc
 		set-width 0
@@ -1365,7 +1373,7 @@ glyph-block Overmarks : begin
 		define AnchorMap : list
 			list 'above' 'tieAbove' 'aboveBrace'
 			list 'below' 'tieBelow' 'belowBrace'
-		foreach { gn g } [pairs-of glyphMap] : begin
+		foreach { gn g } [glyphStore.namedEntries] : begin
 			local handled false
 			foreach { akFrom akTo akBrace } [items-of AnchorMap] : begin
 				if (!handled && g.markAnchors && g.markAnchors.(akFrom)) : begin

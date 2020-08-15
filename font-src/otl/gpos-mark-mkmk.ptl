@@ -6,7 +6,7 @@ define MarkClasses {
 	'trailing' 'lf' 'tieAbove' 'tieBelow' 'aboveBrace' 'belowBrace'
 }
 
-export : define [buildMarkMkmk sink glyphList] : begin
+export : define [buildMarkMkmk sink glyphStore] : begin
 	define mark : add-feature sink 'mark'
 	define mkmk : add-feature sink 'mkmk'
 	add-common-feature sink mark
@@ -16,7 +16,7 @@ export : define [buildMarkMkmk sink glyphList] : begin
 	local mkmkLookupNames {}
 
 	foreach markCls [items-of MarkClasses] : begin
-		local [object markSubtable mkmkSubtable] : createMTSubtables glyphList { markCls }
+		local [object markSubtable mkmkSubtable] : createMTSubtables glyphStore { markCls }
 		if ([objectIsNotEmpty markSubtable.marks] && [objectIsNotEmpty markSubtable.bases]) : begin
 			local markLookup : add-lookup sink {.type 'gpos_mark_to_base' .subtables { markSubtable }}
 			mark.lookups.push    markLookup
@@ -30,33 +30,33 @@ export : define [buildMarkMkmk sink glyphList] : begin
 	foreach markLookup [items-of markLookupNames] : foreach mkmkLookup [items-of mkmkLookupNames]
 		sink.lookupDep.push { markLookup mkmkLookup }
 
-define [createMTSubtables glyphList markClasses] : begin
+define [createMTSubtables glyphStore markClasses] : begin
 	local markSubtable {.marks {.} .bases {.}}
 	local mkmkSubtable {.marks {.} .bases {.}}
 	local allowMarkClsSet : new Set markClasses
-	foreach glyph [items-of glyphList] : begin
-		createMarkInfo markSubtable.marks glyph allowMarkClsSet
-		createMarkInfo mkmkSubtable.marks glyph allowMarkClsSet
+	foreach { gn glyph } [glyphStore.namedEntries] : begin
+		createMarkInfo markSubtable.marks gn glyph allowMarkClsSet
+		createMarkInfo mkmkSubtable.marks gn glyph allowMarkClsSet
 		local isMark : objectIsNotEmpty glyph.markAnchors
 		if isMark
-			createBaseInfo mkmkSubtable.bases glyph allowMarkClsSet
-			createBaseInfo markSubtable.bases glyph allowMarkClsSet
+			createBaseInfo mkmkSubtable.bases gn glyph allowMarkClsSet
+			createBaseInfo markSubtable.bases gn glyph allowMarkClsSet
 	return : object markSubtable mkmkSubtable
 
-define [createBaseInfo sink glyph allowMarkClsSet] : begin
+define [createBaseInfo sink gn glyph allowMarkClsSet] : begin
 	local res {.}
 	local pushed false
 	foreach { markCls anchor } [pairs-of glyph.baseAnchors] : if [allowMarkClsSet.has markCls] : begin
 		set pushed true
 		set res.(markCls) {.x anchor.x .y anchor.y}
-	if pushed : set sink.(glyph.name) res
+	if pushed : set sink.(gn) res
 	return pushed
 
-define [createMarkInfo sink glyph allowMarkClsSet] : begin
+define [createMarkInfo sink gn glyph allowMarkClsSet] : begin
 	local m null
 	foreach { markCls anchor } [pairs-of glyph.markAnchors] : if [allowMarkClsSet.has markCls] : begin
 		set m {.class markCls .x anchor.x .y anchor.y}
-	if m : set sink.(glyph.name) m
+	if m : set sink.(gn) m
 	return m
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

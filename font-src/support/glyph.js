@@ -5,9 +5,8 @@ const Point = require("./point");
 const Anchor = require("./anchor");
 
 module.exports = class Glyph {
-	constructor(name) {
-		Object.defineProperty(this, "name", { value: name, writable: false });
-		this.unicode = [];
+	constructor(_identifier) {
+		this._m_identifier = _identifier;
 		this.contours = [];
 		this.advanceWidth = 500;
 		this.autoRefPriority = 0;
@@ -16,6 +15,15 @@ module.exports = class Glyph {
 		this.gizmo = Transform.Id();
 		this.dependencies = [];
 		this.defaultTag = null;
+	}
+	get name() {
+		throw new TypeError("Glyph::name has been deprecated");
+	}
+	get unicode() {
+		throw new TypeError("Glyph::unicode has been deprecated");
+	}
+	set unicode(x) {
+		throw new TypeError("Glyph::unicode has been deprecated");
 	}
 	// PTL pattern matching
 	static unapply(obj, arity) {
@@ -26,14 +34,9 @@ module.exports = class Glyph {
 	setWidth(w) {
 		this.advanceWidth = w;
 	}
-	// Encoding
-	assignUnicode(u) {
-		if (typeof u === "string") this.unicode.push(u.codePointAt(0));
-		else this.unicode.push(u);
-	}
 	// Dependency
 	dependsOn(glyph) {
-		if (glyph.name) this.dependencies.push(glyph.name);
+		if (glyph._m_identifier) this.dependencies.push(glyph._m_identifier);
 		if (glyph.dependencies) for (const dep of glyph.dependencies) this.dependencies.push(dep);
 	}
 	// Contour Tagging

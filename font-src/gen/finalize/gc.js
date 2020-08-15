@@ -2,11 +2,11 @@
 
 const { Radical } = require("../../support/gr");
 
-module.exports = function gcFont(gs, excludedChars, restFont, cfg) {
+module.exports = function gcFont(glyphStore, excludedChars, restFont, cfg) {
 	markSweepOtl(restFont.GSUB);
 	markSweepOtl(restFont.GPOS);
-	const sink = mark(gs, excludedChars, restFont, cfg);
-	sweep(gs, restFont, sink);
+	const sink = mark(glyphStore, excludedChars, restFont, cfg);
+	return sweep(glyphStore, restFont, sink);
 };
 
 function markSweepOtl(table) {
@@ -57,21 +57,22 @@ function markLookups(table, sink) {
 	} while (loop < 0xff && lookupSetChanged);
 }
 
-function mark(gs, excludedChars, restFont, cfg) {
-	const sink = markInitial(gs, excludedChars);
+function mark(glyphStore, excludedChars, restFont, cfg) {
+	const sink = markInitial(glyphStore, excludedChars);
 	while (markStep(sink, restFont, cfg));
 	return sink;
 }
 
-function markInitial(gs, excludedChars) {
+function markInitial(glyphStore, excludedChars) {
 	let sink = new Set();
-	for (const g of gs) {
+	for (const [gName, g] of glyphStore.namedEntries()) {
 		if (!g) continue;
-		if (g.glyphRank > 0) sink.add(g.name);
-		if (Radical.get(g)) sink.add(g.name);
-		if (g.unicode) {
-			for (const u of g.unicode) {
-				if (!excludedChars.has(u)) sink.add(g.name);
+		if (g.glyphRank > 0) sink.add(gName);
+		if (Radical.get(g)) sink.add(gName);
+		const unicodeSet = glyphStore.queryUnicodeOf(g);
+		if (unicodeSet) {
+			for (const u of unicodeSet) {
+				if (!excludedChars.has(u)) sink.add(gName);
 			}
 		}
 	}
@@ -126,52 +127,52 @@ function markSubtable(sink, type, st, cfg) {
 	}
 }
 
-function sweep(gs, restFont, sink) {
-	filterInPlace(gs, g => sink.has(g.name));
-	sweepOtl(restFont.GSUB, sink);
-	sweepOtl(restFont.GPOS, sink);
+function sweep(glyphStore, restFont, gnSet) {
+	sweepOtl(restFont.GSUB, gnSet);
+	sweepOtl(restFont.GPOS, gnSet);
+	return glyphStore.filterByName(gnSet);
 }
 
-function sweepOtl(table, sink) {
+function sweepOtl(table, gnSet) {
 	if (!table || !table.lookups) return;
 	for (const lid in table.lookups) {
 		const lookup = table.lookups[lid];
 		if (!lookup.subtables) continue;
 		const newSubtables = [];
 		for (const st of lookup.subtables) {
-			const keep = sweepSubtable(st, lookup.type, sink);
+			const keep = sweepSubtable(st, lookup.type, gnSet);
 			if (keep) newSubtables.push(st);
 		}
 		lookup.subtables = newSubtables;
 	}
 }
 
-function sweepSubtable(st, type, gs) {
+function sweepSubtable(st, type, gnSet) {
 	switch (type) {
 		case "gsub_single":
-			return sweep_GsubSingle(st, gs);
+			return sweep_GsubSingle(st, gnSet);
 		case "gsub_multiple":
 		case "gsub_alternate":
-			return sweep_GsubMultiple(st, gs);
+			return sweep_GsubMultiple(st, gnSet);
 		case "gsub_ligature":
-			return sweep_GsubLigature(st, gs);
+			return sweep_GsubLigature(st, gnSet);
 		case "gsub_chaining":
-			return sweep_GsubChaining(st, gs);
+			return sweep_GsubChaining(st, gnSet);
 		case "gsub_reverse":
-			return sweep_gsubReverse(st, gs);
+			return sweep_gsubReverse(st, gnSet);
 		case "gpos_mark_to_base":
 		case "gpos_mark_to_mark":
-			return sweep_gposMark(st, gs);
+			return sweep_gposMark(st, gnSet);
 		default:
 			return true;
 	}
 }
 
-function sweep_GsubSingle(st, gs) {
+function sweep_GsubSingle(st, gnSet) {
 	let nonEmpty = false;
 	let from = Object.keys(st);
 	for (const gidFrom of from) {
-		if (!gs.has(gidFrom) || !gs.has(st[gidFrom])) {
+		if (!gnSet.has(gidFrom) || !gnSet.has(st[gidFrom])) {
 			delete st[gidFrom];
 		} else {
 			nonEmpty = true;
@@ -180,14 +181,14 @@ function sweep_GsubSingle(st, gs) {
 	return nonEmpty;
 }
 
-function sweep_GsubMultiple(st, gs) {
+function sweep_GsubMultiple(st, gnSet) {
 	let nonEmpty = false;
 	let from = Object.keys(st);
 	for (const gidFrom of from) {
-		let include = gs.has(gidFrom);
+		let include = gnSet.has(gidFrom);
 		if (st[gidFrom]) {
 			for (const gidTo of st[gidFrom]) {
-				include = include && gs.has(gidTo);
+				include = include && gnSet.has(gidTo);
 			}
 		} else {
 			include = false;
@@ -201,26 +202,26 @@ function sweep_GsubMultiple(st, gs) {
 	return nonEmpty;
 }
 
-function sweep_GsubLigature(st, gs) {
+function sweep_GsubLigature(st, gnSet) {
 	if (!st.substitutions) return false;
 	let newSubst = [];
 	for (const rule of st.substitutions) {
 		let include = true;
-		if (!gs.has(rule.to)) include = false;
-		for (const from of rule.from) if (!gs.has(from)) include = false;
+		if (!gnSet.has(rule.to)) include = false;
+		for (const from of rule.from) if (!gnSet.has(from)) include = false;
 		if (include) newSubst.push(rule);
 	}
 	st.substitutions = newSubst;
 	return true;
 }
 
-function sweep_GsubChaining(st, gs) {
+function sweep_GsubChaining(st, gnSet) {
 	const newMatch = [];
 	for (let j = 0; j < st.match.length; j++) {
 		newMatch[j] = [];
 		for (let k = 0; k < st.match[j].length; k++) {
 			const gidFrom = st.match[j][k];
-			if (gs.has(gidFrom)) {
+			if (gnSet.has(gidFrom)) {
 				newMatch[j].push(gidFrom);
 			}
 		}
@@ -230,16 +231,16 @@ function sweep_GsubChaining(st, gs) {
 	return true;
 }
 
-function sweep_gsubReverse(st, gs) {
+function sweep_gsubReverse(st, gnSet) {
 	const newMatch = [],
 		newTo = [];
 	for (let j = 0; j < st.match.length; j++) {
 		newMatch[j] = [];
 		for (let k = 0; k < st.match[j].length; k++) {
 			const gidFrom = st.match[j][k];
-			let include = gs.has(gidFrom);
+			let include = gnSet.has(gidFrom);
 			if (j === st.inputIndex) {
-				include = include && gs.has(st.to[k]);
+				include = include && gnSet.has(st.to[k]);
 				if (include) {
 					newMatch[j].push(gidFrom);
 					newTo.push(st.to[k]);
@@ -255,7 +256,7 @@ function sweep_gsubReverse(st, gs) {
 	return true;
 }
 
-function sweep_gposMark(st, gs) {
+function sweep_gposMark(st, gnSet) {
 	let marks = st.marks || {},
 		newMarks = {},
 		hasMarks = false;
@@ -264,13 +265,13 @@ function sweep_gposMark(st, gs) {
 		hasBases = true;
 
 	for (const gid in marks) {
-		if (gs.has(gid) && marks[gid]) {
+		if (gnSet.has(gid) && marks[gid]) {
 			newMarks[gid] = marks[gid];
 			hasMarks = true;
 		}
 	}
 	for (const gid in bases) {
-		if (gs.has(gid) && bases[gid]) {
+		if (gnSet.has(gid) && bases[gid]) {
 			newBases[gid] = bases[gid];
 			hasBases = true;
 		}
@@ -278,18 +279,4 @@ function sweep_gposMark(st, gs) {
 	st.marks = newMarks;
 	st.bases = newBases;
 	return hasMarks && hasBases;
-}
-
-function filterInPlace(a, condition) {
-	let i = 0,
-		j = 0;
-
-	while (i < a.length) {
-		const val = a[i];
-		if (condition(val, i, a)) a[j++] = val;
-		i++;
-	}
-
-	a.length = j;
-	return a;
 }

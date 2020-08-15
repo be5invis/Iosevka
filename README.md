@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																													
+																																																																																
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -322,13 +322,13 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-a-singlestorey-earless-rounded-tailed`, `VXCO`: Earless (rounded top-right) single-storey `a` with curly tail.
   * Styles for `b`:
     * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
-    * `v-b-toothless-corner`, `VXBL`: `b` without botton-left tooth, with a corner transition.
-    * `v-b-toothless-rounded`, `VXBM`: `b` without botton-left tooth, with a rounded transition.
+    * `v-b-toothless-corner`, `VXBL`: `b` without bottom-left tooth, with a corner transition.
+    * `v-b-toothless-rounded`, `VXBM`: `b` without bottom-left tooth, with a rounded transition.
   * Styles for `d`:
     * `v-d-toothed`, `VXBN`: `d` with bottom-right tooth (default for Upright).
-    * `v-d-toothless-corner`, `VXBO`: `d` without botton-right tooth, with a corner transition.
-    * `v-d-toothless-rounded`, `VXBP`: `d` without botton-right tooth, with a rounded transition.
-    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail botton-right tail (default for Italic).
+    * `v-d-toothless-corner`, `VXBO`: `d` without bottom-right tooth, with a corner transition.
+    * `v-d-toothless-rounded`, `VXBP`: `d` without bottom-right tooth, with a rounded transition.
+    * `v-d-tailed`, `VXBQ`: `d` with a slightly tail bottom-right tail (default for Italic).
   * Styles for `f`:
     * `v-f-straight`, `cv52`: `f` without bottom hook (default for Sans Upright).
     * `v-f-tailed`, `cv53`: `f` with a leftward bottom hook (default for Italic).
@@ -549,6 +549,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `<=`, `>=`:
     * `v-lig-ltgteq-flat`, `cv66`: The lower bar of `<=` and `>=` ligation is flat (default).
     * `v-lig-ltgteq-slanted`, `cv67`: The lower bar of `<=` and `>=` ligation is slanted.
+  * Styles for `'`:
+    * `v-ascii-quote-straight`, `VXDG`: Show ASCII quote (`'`) as short vertical straight bar. (default).
+    * `v-ascii-quote-raised-comma`, `VXDH`: Show ASCII quote (`'`) as raised comma..
+  * Styles for ```:
+    * `v-ascii-grave-straight`, `VXDI`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
+    * `v-ascii-grave-raised-inverse-comma`, `VXDJ`: Show ASCII grave (`` ` ``) as raised comma..
 
 <!-- END Section-Cherry-Picking-Styles -->
 

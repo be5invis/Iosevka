@@ -15,8 +15,10 @@ module.exports = build;
 const path = require("path");
 const toml = require("@iarna/toml");
 
-const BUILD = "build";
+const BUILD = ".build";
 const DIST = "dist";
+const SNAPSHOT_TMP = ".build/snapshot";
+const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
 const OTF2OTC = "otf2otc";
@@ -406,7 +408,7 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 ///////////////////////////////////////////////////////////
 
 const BuildRawTtf = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.raw.ttf`,
+	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.raw.ttf`,
 	async (target, output, gr, fn) => {
 		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + fn + ".charmap";
@@ -417,9 +419,12 @@ const BuildRawTtf = file.make(
 		await rm(otdPath);
 	}
 );
+function optimizedOtfcc(from, to) {
+	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
+}
 
 const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/${gr}/${fn}.ttf`,
+	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
 	async (target, output, gr, fn) => {
 		const [useFilter, useTtx] = await target.need(
 			OptimizeWithFilter,
@@ -444,12 +449,8 @@ const BuildTTF = file.make(
 	}
 );
 
-function optimizedOtfcc(from, to) {
-	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
-}
-
 const BuildCM = file.make(
-	(gr, f) => `${BUILD}/${gr}/${f}.charmap`,
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap`,
 	async (target, output, gr, f) => {
 		await target.need(BuildTTF(gr, f));
 	}
@@ -528,8 +529,8 @@ const GroupContents = task.group("contents", async (target, gr) => {
 });
 
 // TTC
-const ExportTtc = file.make(
-	(gr, f) => `${DIST}/export/${gr}/ttc/${f}.ttc`,
+const ExportTtcFile = file.make(
+	(gr, f) => `${BUILD}/ttc-collect/${gr}/ttc/${f}.ttc`,
 	async (target, out, gr, f) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const parts = Array.from(new Set(cp.ttcComposition[f]));
@@ -546,13 +547,6 @@ const glyfTtc = file.make(
 	}
 );
 
-async function buildCompositeTtc(out, inputs) {
-	await run(
-		OTF2OTC,
-		["-o", out.full],
-		inputs.map(f => f.full)
-	);
-}
 async function buildGlyfTtc(target, parts, out) {
 	const [useFilter, useTtx] = await target.need(
 		OptimizeWithFilter,
@@ -567,34 +561,43 @@ async function buildGlyfTtc(target, parts, out) {
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
+async function buildCompositeTtc(out, inputs) {
+	await run(
+		OTF2OTC,
+		["-o", out.full],
+		inputs.map(f => f.full)
+	);
+}
 
-// Collection Export
-const CollectionExport = task.group("collection-export", async (target, gr) => {
-	// Note: this target does NOT depend on the font files.
-	const [collectPlans] = await target.need(CollectPlans, de`${DIST}/export/${gr}`);
-	const sourceGroups = collectPlans.groupDecomposition[gr];
-	// TTF, etc
-	await target.need(sourceGroups.map(g => GroupContents(g)));
-	for (const g of sourceGroups) await cp(`${DIST}/${g}`, `${DIST}/export/${gr}`);
-	// TTC
-	const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
-	await target.need(ttcFiles.map(pt => ExportTtc(gr, pt)));
-});
 const ExportSuperTtc = file.make(
-	gr => `${DIST}/super-ttc/${gr}.ttc`,
+	gr => `${DIST_SUPER_TTC}/${gr}.ttc`,
 	async (target, out, gr) => {
 		const [cp] = await target.need(CollectPlans, de(out.dir));
 		const parts = Array.from(new Set(cp.ttcContents[gr]));
-		const [inputs] = await target.need(parts.map(pt => ExportTtc(gr, pt)));
+		const [inputs] = await target.need(parts.map(pt => ExportTtcFile(gr, pt)));
 		await buildCompositeTtc(out, inputs);
 	}
 );
 const CollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
-		await target.need(de`${out.dir}`, CollectionExport(gr));
+		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
+		const sourceGroups = collectPlans.groupDecomposition[gr];
+		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+		await target.need(sourceGroups.map(g => GroupContents(g)));
+		await target.need(ttcFiles.map(pt => ExportTtcFile(gr, pt)));
+
+		// Packaging
 		await rm(out.full);
-		await cd(`${DIST}/export/${gr}`).run(
+		for (const g of sourceGroups) {
+			await cd(`${DIST}/${g}`).run(
+				["7z", "a"],
+				["-tzip", "-r", "-mx=9"],
+				`../../${out.full}`,
+				`./`
+			);
+		}
+		await cd(`${BUILD}/ttc-collect/${gr}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
 			`../../../${out.full}`,
@@ -605,9 +608,13 @@ const CollectionArchiveFile = file.make(
 const TtcOnlyCollectionArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/${TTC_ONLY_COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
 	async (target, out, gr) => {
-		await target.need(de`${out.dir}`, CollectionExport(gr));
+		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
+		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
+		await target.need(ttcFiles.map(pt => ExportTtcFile(gr, pt)));
+
+		// Packaging
 		await rm(out.full);
-		await cd(`${DIST}/export/${gr}/ttc`).run(
+		await cd(`${BUILD}/ttc-collect/${gr}/ttc`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
 			`../../../../${out.full}`,
@@ -712,16 +719,19 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		GroupContents`iosevka-aile`,
 		GroupContents`iosevka-etoile`,
 		GroupContents`iosevka-sparkle`,
+		SnapShotStatic("index.js"),
+		SnapShotStatic("get-snap.js"),
 		SnapShotJson,
 		SnapShotCSS,
 		SnapShotHtml,
-		de`images`
+		de`images`,
+		de(SNAPSHOT_TMP)
 	);
-	await cp(`${DIST}/${sans}`, `snapshot/${sans}`);
-	await cp(`${DIST}/${slab}`, `snapshot/${slab}`);
-	await cp(`${DIST}/${aile}`, `snapshot/${aile}`);
-	await cp(`${DIST}/${etoile}`, `snapshot/${etoile}`);
-	await cp(`${DIST}/${sparkle}`, `snapshot/${sparkle}`);
+	await cp(`${DIST}/${sans}`, `${SNAPSHOT_TMP}/${sans}`);
+	await cp(`${DIST}/${slab}`, `${SNAPSHOT_TMP}/${slab}`);
+	await cp(`${DIST}/${aile}`, `${SNAPSHOT_TMP}/${aile}`);
+	await cp(`${DIST}/${etoile}`, `${SNAPSHOT_TMP}/${etoile}`);
+	await cp(`${DIST}/${sparkle}`, `${SNAPSHOT_TMP}/${sparkle}`);
 });
 
 const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
@@ -739,25 +749,38 @@ const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async ta
 	}
 	return cfg;
 });
-const SnapShotJson = file(`snapshot/packaging-tasks.json`, async (target, out) => {
-	const [cfg] = await target.need(PackageSnapshotConfig);
+const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target, out) => {
+	const [cfg] = await target.need(PackageSnapshotConfig, de(out.dir));
 	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
 });
-const SnapShotHtml = file(`snapshot/index.html`, async target => {
-	await target.need(Parameters, UtilScripts);
+const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
+	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
 	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
 	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
 	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
-	await run(`node`, `utility/generate-snapshot-page/index.js`);
+	await run(
+		`node`,
+		`utility/generate-snapshot-page/index.js`,
+		"snapshot-src/templates",
+		out.full
+	);
 	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
 });
-const SnapShotCSS = file(`snapshot/index.css`, async target => {
-	await target.need(sfu`snapshot/index.styl`);
-	await run(`npx`, `stylus`, `snapshot/index.styl`, `-c`);
+const SnapShotStatic = file.make(
+	x => `${SNAPSHOT_TMP}/${x}`,
+	async (target, out) => {
+		const [$1] = await target.need(sfu`snapshot-src/${out.base}`, de(out.dir));
+		await cp($1.full, `${out.dir}/${$1.base}`);
+	}
+);
+const SnapShotCSS = file(`${SNAPSHOT_TMP}/index.css`, async (target, out) => {
+	const [$1] = await target.need(sfu`snapshot-src/index.styl`, de(out.dir));
+	await cp($1.full, `${out.dir}/${$1.base}`);
+	await run(`npx`, `stylus`, `${out.dir}/${$1.base}`, `-c`);
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
-	await cd(`snapshot`).run("npx", "electron", "get-snap.js", "../images");
+	await cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images");
 });
 const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
 	await target.need(TakeSampleImages);
@@ -816,9 +839,9 @@ const ReleaseNotes = task(`release:release-note`, async t => {
 });
 
 phony(`clean`, async () => {
-	await rm(`build`);
-	await rm(`dist`);
-	await rm(`release-archives`);
+	await rm(BUILD);
+	await rm(DIST);
+	await rm(ARCHIVE_DIR);
 	build.deleteJournal();
 });
 phony(`release`, async target => {
@@ -840,6 +863,14 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 		ScriptsUnder("js", "utility"),
 		ScriptsUnder("ejs", "utility"),
 		ScriptsUnder("md", "utility")
+	);
+	return [...js, ...ejs, ...md];
+});
+const SnapshotTemplateFiles = computed("snapshot-templates", async target => {
+	const [js, ejs, md] = await target.need(
+		ScriptsUnder("js", "snapshot-src"),
+		ScriptsUnder("ejs", "snapshot-src"),
+		ScriptsUnder("md", "snapshot-src")
 	);
 	return [...js, ...ejs, ...md];
 });
@@ -874,7 +905,11 @@ const Scripts = task("scripts", async target => {
 });
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
-	await target.need(files.map(f => fu`${f}`));
+	await target.need(files.map(fu));
+});
+const SnapshotTemplates = task("snapshot-templates", async target => {
+	const [files] = await target.need(SnapshotTemplateFiles);
+	await target.need(files.map(fu));
 });
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(

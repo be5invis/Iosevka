@@ -235,8 +235,8 @@ function getGrMesh(gidList, grq, fnGidToGlyph) {
 	return ret;
 }
 
-function createGrDisplaySheet(font, gid) {
-	const glyph = font.glyf[gid];
+function createGrDisplaySheet(glyphStore, gid) {
+	const glyph = glyphStore.queryByName(gid);
 	if (!glyph) return [];
 
 	// Query selected typographic features -- mostly NWID and WWID
@@ -249,7 +249,7 @@ function createGrDisplaySheet(font, gid) {
 	if (decomposition) {
 		const variantFeatureSet = new Set();
 		for (const componentGn of decomposition) {
-			const component = font.glyf[componentGn];
+			const component = glyphStore.queryByName(componentGn);
 			if (!component) continue;
 			const cvRow = queryCvFeatureTagsOf(componentGn, component, variantFeatureSet);
 			if (cvRow.length) charVariantFeatures.push(cvRow);
