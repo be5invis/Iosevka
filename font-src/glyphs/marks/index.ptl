@@ -1,30 +1,34 @@
-$$include '../meta/macros.ptl'
+$$include '../../meta/macros.ptl'
 
-import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from '../support/curve-util'
-import [mix linreg clamp fallback] from '../support/utils'
-import [designParameters] from '../meta/aesthetics'
 import [Arcs Quadify transferGenericShapeAsBezier] from "typo-geom"
-import [TieMark TieGlyph] from "../support/gr"
+import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from '../../support/curve-util'
+import [mix linreg clamp fallback] from '../../support/utils'
+import [designParameters] from '../../meta/aesthetics'
+import [TieMark TieGlyph] from "../../support/gr"
 
 glyph-module
 
-glyph-block Overmarks : begin
+glyph-block Marks : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
 	### Combining marks
+	glyph-block-export markExtend markHalfStroke markFine
 	local markExtend (AccentX * 0.5)
 	local markHalfStroke : 0.5 * [adviceBlackness2 3.5 3.375 XH]
 	local markStress : markHalfStroke * 1.1
 	local markFine : markHalfStroke * 0.9
 
+	glyph-block-export markMiddle
 	local markMiddle (-Middle)
 	local markDotsRadius : DotRadius * [Math.min 1 (markStress / HalfStroke)]
 
+	glyph-block-export aboveMarkTop aboveMarkBot aboveMarkMid
 	local aboveMarkTop (XH + Accent * 1.38)
 	local aboveMarkBot (XH + Accent * 0.35)
 	local aboveMarkMid [mix aboveMarkBot aboveMarkTop 0.5]
 
+	glyph-block-export belowMarkBot belowMarkTop belowMarkMid
 	local belowMarkBot (0 - Accent * 1.38)
 	local belowMarkTop (0 - Accent * 0.35)
 	local belowMarkMid [mix belowMarkBot belowMarkTop 0.5]
@@ -194,6 +198,7 @@ glyph-block Overmarks : begin
 			flat (markMiddle - markStress * HVContrast) (aboveMarkBot - markFine * 1.7 + markStress)
 			curl (markMiddle + markExtend * 1.5) (aboveMarkBot - markFine * 1.7 + markStress)
 
+	glyph-block-export TildeShape
 	define [TildeShape] : params [ttop tbot leftEnd rightEnd hs] : glyph-proc
 		local fine : hs * 8 / 9
 		local hsvh : hs * 2 / [Math.abs (ttop - tbot)]
@@ -1033,6 +1038,7 @@ glyph-block Overmarks : begin
 		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY yrP
 		set-mark-anchor 'topright' attX attY startX startY
 
+	glyph-block-export HornBaseAnchor
 	define [HornBaseAnchor attX attY overshootX overshootY yrP] : glyph-proc
 		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY yrP
 		set-base-anchor 'topright' startX startY
@@ -1387,5 +1393,3 @@ glyph-block Overmarks : begin
 						currentGlyph.deleteBaseAnchor akFrom
 						currentGlyph.deleteBaseAnchor akBrace
 					TieMark.set g toGN
-
-	glyph-block-export markExtend markHalfStroke markStress markFine markMiddle markDotsRadius aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot commaOvershoot2 commaAboveRadius TildeShape HornShape HornMarkAnchor HornBaseAnchor
