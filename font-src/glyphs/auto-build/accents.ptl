@@ -1,9 +1,9 @@
 ###### Automatic builds
-$$include '../meta/macros.ptl'
+$$include '../../meta/macros.ptl'
 
-import [Dotless AnyDerivingCv DotlessOrNot getGrTree] from "../support/gr"
 import 'unorm' as unorm
-import [fallback] from '../support/utils'
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose] from "../../support/gr"
+import [fallback] from '../../support/utils'
 
 glyph-module
 
@@ -45,7 +45,7 @@ glyph-block AutoBuild-Accents : begin
 		if parts.0.baseAnchors.lf : parts.forEach iotaBelowToLF
 		if parts.0.baseAnchors.trailing : parts.forEach ogonekBelowToTR
 
-		# composite greek Overmarks
+		# composite greek Marks
 		for [local j 0] (j < parts.length) [inc j] : piecewise
 			(parts.(j) === [query-glyph 'commaAbove']) : begin
 				piecewise
@@ -110,17 +110,20 @@ glyph-block AutoBuild-Accents : begin
 			include part
 			if (part.markAnchors && part.markAnchors.bottomright) : begin
 				eject-contour 'serifRB'
+		if [AnyDerivingCv.query s_parts.0] : begin
+			CvDecompose.set currentGlyph [s_parts.map : lambda [x] : glyphStore.queryNameOf x]
 
 	define [RootGlyphProc goalName code parts] : begin
 		set s_parts  parts
-		create-glyph goalName code construction
+		return : create-glyph goalName code construction
 
-	foreach [_id : items-of : Object.keys foundDecompositions] : begin
+	foreach [_id : items-of : Object.keys foundDecompositions] : do
 		local { glyphName code parts } foundDecompositions.(_id)
 
-		RootGlyphProc glyphName code parts
-		define part0Name : glyphStore.queryNameOf parts.0
-		if(parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
+		local result : RootGlyphProc glyphName code parts
+		if result : begin
+			define part0Name : glyphStore.queryNameOf parts.0
+			if (parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
 
 		local dstTree {}
 		local targetNameMap  {.}
