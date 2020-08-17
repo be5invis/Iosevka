@@ -28,6 +28,6 @@ module.exports = function (para) {
 		}
 	}
 
-	finalizeFont(para, gs.glyphStore, excludeChars, font);
-	return { font, glyphStore: gs.glyphStore };
+	const finalGs = finalizeFont(para, gs.glyphStore, excludeChars, font);
+	return { font, glyphStore: finalGs };
 };
