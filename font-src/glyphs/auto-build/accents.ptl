@@ -104,6 +104,15 @@ glyph-block AutoBuild-Accents : begin
 				set foundDecompositions.(glyphName) { glyphName code parts }
 
 	local s_parts     nothing
+
+	define [recursivelyDecompose g sink] : begin
+		local decomposition : CvDecompose.get g
+		if decomposition : foreach gnPart [items-of decomposition] : begin
+			local g : query-glyph gnPart
+			if g : recursivelyDecompose g sink
+		: else : begin
+			sink.push : glyphStore.queryNameOf g
+
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
 		foreach part [items-of : s_parts.slice 1] : if part : begin
@@ -111,7 +120,10 @@ glyph-block AutoBuild-Accents : begin
 			if (part.markAnchors && part.markAnchors.bottomright) : begin
 				eject-contour 'serifRB'
 		if [AnyDerivingCv.query s_parts.0] : begin
-			CvDecompose.set currentGlyph [s_parts.map : lambda [x] : glyphStore.queryNameOf x]
+			local decomposeParts { }
+			foreach part [items-of s_parts] : begin
+				recursivelyDecompose part decomposeParts
+			CvDecompose.set currentGlyph decomposeParts
 
 	define [RootGlyphProc goalName code parts] : begin
 		set s_parts  parts

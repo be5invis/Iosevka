@@ -10,7 +10,9 @@ const gcFont = require("./gc");
 module.exports = function finalizeFont(para, glyphStore, excludedCodePoints, font) {
 	glyphStore = forceMonospaceIfNeeded(para, glyphStore);
 	glyphStore = gcFont(glyphStore, excludedCodePoints, font, {});
-	extractGlyfCmap(regulateGlyphStore(para, glyphStore), font);
+	glyphStore = regulateGlyphStore(para, glyphStore);
+	extractGlyfCmap(glyphStore, font);
+	return glyphStore;
 };
 
 function forceMonospaceIfNeeded(para, glyphStore) {
