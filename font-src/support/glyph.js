@@ -54,7 +54,9 @@ module.exports = class Glyph {
 	}
 	// Inclusion
 	include(component, copyAnchors, copyWidth) {
-		if (component instanceof Function) {
+		if (!component) {
+			throw new Error("Unreachable: Attempt to include a Null or Undefined");
+		} else if (component instanceof Function) {
 			const t = this.defaultTag;
 			if (component.tag) this.defaultTag = component.tag;
 			component.call(this, copyAnchors, copyWidth);
