@@ -16,7 +16,7 @@ Quit your editor/program. Unzip and open the folder.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
-* **OpenBSD**: The font can be installed with `pkg_add iosevka-fonts-<variant>`. Run `pkg_info -Q iosevka-fonts` to see which variants are available.
+* **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
 ## Weights, Variants and OpenType features
 
