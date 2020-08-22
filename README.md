@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																					
+																																																																																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -337,6 +337,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
     * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
     * `v-f-flat-hook`, `VXDD`: `f` with flat hook.
+    * `v-f-flat-hook-crossbar-at-x-height`, `VXEG`: `f` with flat hook and crossbar placed right at X-height.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -420,6 +421,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-t-standard`, `cv40`: Standard `t` shape (default).
     * `v-t-cross`, `cv41`: Futura-like `t` shape.
     * `v-t-flat-hook`, `VXDC`: `t` with flat hook.
+    * `v-t-hookless-asymmetric`, `VXEH`: `t` without hook and ony half the cross bar.
+    * `v-t-flat-hook-short-neck`, `VXEI`: `t` with flat hook and a slightly shorter neck.
+    * `v-t-flat-hook-short-neck2`, `VXEJ`: `t` with flat hook and a more shorter neck.
   * Styles for `u`:
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default for Upright).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
