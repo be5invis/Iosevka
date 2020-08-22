@@ -226,6 +226,17 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : RightwardBottomSerif df.middle 0 (LongJut * df.div)
 		include : LeftwardBottomSerif df.middle 0 (LongJut * df.div)
 
+	create-glyph 'dotlessi.serifedAsymmetric' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include df.markSet.e
+		local balance : IBalance * df.div * df.div
+		include : VBar (df.middle + balance) 0 XH
+		include : LeftwardTopSerif (df.middle + balance) XH
+			mix Jut ((LongJut * df.div) - balance) 0.5
+		include : RightwardBottomSerif df.middle 0 (LongJut * df.div)
+		include : LeftwardBottomSerif df.middle 0 (LongJut * df.div)
+
 	create-glyph 'dotlessi.italic' : glyph-proc
 		local df : DivFrame para.diversityI
 		set-width df.width
@@ -951,7 +962,9 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 
 	define ADoubleStoreyStroke : adviceBlackness2 2.875 2 XH
-	define ADoubleStoreySmoothB : SmoothB * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]
+	define ADoubleStoreySmoothA : SmoothAOf (Smooth * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]) Width
+	define ADoubleStoreySmoothB : SmoothBOf (Smooth * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]) Width
+
 	define [ADoubleStoreyHookAndBar y0] : glyph-proc
 		local stroke ADoubleStoreyStroke
 		include : dispiro
@@ -960,22 +973,35 @@ glyph-block Letter-Latin-Lower-A : begin
 			curl RightSB (XH - ADoubleStoreySmoothB)
 			hookend (XH - O)
 			g4 (SB - OXHook) (XH - AHook)
-	define [ADoubleStoreyArc] : glyph-proc
+
+	define [ADoubleStoreyArc kind rise] : glyph-proc
 		local stroke ADoubleStoreyStroke
 		local bartop (XH * OverlayPos * 1.02 + stroke * 0.425)
-		local lowslope : shoulderMidSlope ShoulderFine nothing (-1)
-		local lowmiddle : [mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]] + CorrectionOMidS * 0.5
-		local barsmooth : mix SB RightSB 0.55
+		local bowlArcY1 : YSmoothMidL 0 bartop SmallSmoothA SmallSmoothB
+		local bowlArcY2 : YSmoothMidR 0 bartop SmallSmoothA SmallSmoothB
+		local lowSlope : shoulderMidSlope ShoulderFine nothing (-1)
+		local lowMiddle : mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]
+		local barSmooth : mix SB RightSB 0.55
 		include : dispiro
 			widths.lhs stroke
 			flat (RightSB + O) bartop [heading Leftward]
-			curl barsmooth bartop
+			curl barSmooth bartop
 			archv
-			g4   (SB + OX * 1.5) (bartop * 0.95 * (SmallSmoothB / (SmallSmoothA + SmallSmoothB)))
+			g4   (SB + OX * 1.5) bowlArcY1
 			arcvh
-			g4   (lowmiddle + (-lowslope) * stroke) O [heading {.y 1 .x lowslope}]
-			archv 16
-			straight.up.end   (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) (SmallSmoothB * 0.9) [widths.lhs ShoulderFine]
+			match kind
+				0 : list
+					g4   (lowMiddle + (-lowSlope) * stroke + CorrectionOMidX * stroke * 0.5) O [heading {.y 1 .x lowSlope}]
+					archv 16
+					straight.up.end   (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) (SmallSmoothB * 0.9) [widths.lhs ShoulderFine]
+				1 : list
+					g4  (Middle + CorrectionOMidX * stroke) O
+					g4  RightSB rise
+				2 : list
+					g4  (Middle + CorrectionOMidX * stroke) O
+					archv
+					flat RightSB bowlArcY2
+					curl RightSB ([Math.max bowlArcY2 rise] + stroke * TanSlope + 1) [heading Upward]
 
 	create-glyph 'a.doubleStorey' : glyph-proc
 		set-width Width
@@ -983,7 +1009,7 @@ glyph-block Letter-Latin-Lower-A : begin
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 		include : union
 			ADoubleStoreyHookAndBar 0
-			ADoubleStoreyArc
+			ADoubleStoreyArc        0
 		if SLAB : begin
 			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
@@ -993,8 +1019,28 @@ glyph-block Letter-Latin-Lower-A : begin
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 		include : union
 			ADoubleStoreyHookAndBar (XH - ADoubleStoreySmoothB + O)
-			ADoubleStoreyArc
+			ADoubleStoreyArc        0
 			RightwardTailedBar RightSB 0 (XH - ADoubleStoreySmoothB)
+
+	create-glyph 'a.doubleStoreyToothlessCorner' : glyph-proc
+		set-width Width
+		include MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar DToothlessRise
+			ADoubleStoreyArc        1 DToothlessRise
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.doubleStoreyToothlessRounded' : glyph-proc
+		set-width Width
+		include MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar ADoubleStoreySmoothA
+			ADoubleStoreyArc        2 ADoubleStoreySmoothA
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
 	create-glyph 'a.singleStorey' : glyph-proc
 		set-width Width
@@ -2791,18 +2837,20 @@ glyph-block Letter-Latin-Upper-R : begin
 glyph-block Letter-Latin-Lower-R : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
 	local dfR : DivFrame para.diversityF
 	local rStraight 0
 	local rSerifed  1
 	local rNarrow   2
+	local rEarless  3
 
 	define [RDim mode] : begin
-		local rBalanceMultiplier : match mode [0 1] [1 (4 / 3)] [2 (1 / 2)]
-		local rHookMultiplier    : match mode [0 1] [1 (2 / 3)] [2 1]
-		local rHookSwMultiplier  : match mode [0 0] [1 (1 / 4)] [2 0]
-		local rSerifLeftExtender : match mode [0 0] [1 (1 / 3)] [2 0]
-		local hookSuperness      : match mode [0 2.35] [1 2.75] [2 2.35]
+		local rBalanceMultiplier : match mode [0 1] [1 (4 / 3)] [2 (1 / 2)] [3 1]
+		local rHookMultiplier    : match mode [0 1] [1 (2 / 3)] [2 1]       [3 1]
+		local rHookSwMultiplier  : match mode [0 0] [1 (1 / 4)] [2 0]       [3 0]
+		local rSerifLeftExtender : match mode [0 0] [1 (1 / 3)] [2 0]       [3 0]
+		local hookSuperness      : match mode [0 2.35] [1 2.75] [2 2.35]    [3 2.35]
 
 		local rbar : SB + RBalance * rBalanceMultiplier + Stroke * HVContrast
 		local rSerifX : rbar - HalfStroke * HVContrast
@@ -2819,10 +2867,12 @@ glyph-block Letter-Latin-Lower-R : begin
 			0 : mix (rbar - fine) rHookX (0.54 + 2 * TanSlope * Stroke / Width)
 			1 : mix (rbar - fine) rHookX (0.59 + 2 * TanSlope * Stroke / Width)
 			2 : mix rHookX dfR.width (3 / 8)
+			3 : mix (rbar - Stroke * HVContrast) rHookX 0.5
 		local mixpin : match mode
 			0 : 0.65 + 4 * TanSlope * Stroke / Width
 			1 : 0.65 + 0.25 * Stroke / Width + 4 * TanSlope * Stroke / Width
 			2 : 0.65 + 4 * TanSlope * Stroke / Width
+			3 : 0.65 + 4 * TanSlope * Stroke / Width
 		local rmiddlein : [mix rbar (rHookX - Stroke * HVContrast * 1.05) mixpin] - CorrectionOMidS
 		local skew : Math.max 0 : (rmiddle - rmiddlein) / Stroke
 		local rHookY : RHook * rHookMultiplier + Stroke * rHookSwMultiplier
@@ -2843,7 +2893,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		if doTopSerif : include : rTopSerif XH
 
 	define [NarrowLowerRshape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object rbar fine rmiddle] : RDim rNarrow
+		define [object rbar fine rmiddle] : RDim md
 		include : dispiro
 			widths.lhs
 			g4.left.mid (rmiddle - CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]) (XH - O)
@@ -2852,12 +2902,35 @@ glyph-block Letter-Latin-Lower-R : begin
 		include : VBarRight rbar 0 XH
 		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
 
+	define [EarlessCornerLowerRShape df md doTopSerif doBottomSerif] : glyph-proc
+		define [object rbar rmiddle rHookX rHookY hookSuperness] : RDim md
+		include : dispiro
+			widths.lhs
+			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
+			arcvh nothing hookSuperness
+			g4.left.mid (rmiddle - CorrectionOMidS) (XH - O) [heading Leftward]
+			g4 (rbar - Stroke * HVContrast) (XH - DToothlessRise)
+		include : VBarRight rbar 0 (XH - DToothlessRise)
+		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
+
+	define [EarlessRoundedLowerRShape df md doTopSerif doBottomSerif] : glyph-proc
+		define [object rbar rmiddle rHookX rHookY hookSuperness] : RDim md
+		include : dispiro
+			widths.lhs
+			g4   rHookX (XH - rHookY)
+			hookstart (XH - O)
+			flat (rbar - Stroke * HVContrast) (XH - SmallSmoothA)
+			curl (rbar - Stroke * HVContrast) 0 [heading Downward]
+		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
+
 	create-glyph : glyph-proc
 		set-width dfR.width
 		include dfR.markSet.e
-		create-derived "r.straight" : StandardLowerRShape dfR rStraight 0 0
-		create-derived "r.serifed" : StandardLowerRShape dfR rSerifed 1 1
-		create-derived "r.top-serifed" : StandardLowerRShape dfR rSerifed 1 0
+		create-derived "r.straight"       : StandardLowerRShape       dfR rStraight 0 0
+		create-derived "r.serifed"        : StandardLowerRShape       dfR rSerifed  1 1
+		create-derived "r.top-serifed"    : StandardLowerRShape       dfR rSerifed  1 0
+		create-derived "r.earlessCorner"  : EarlessCornerLowerRShape  dfR rEarless  0 0
+		create-derived "r.earlessRounded" : EarlessRoundedLowerRShape dfR rEarless  0 0
 
 	create-glyph 'r.narrow' : glyph-proc
 		set-width dfR.width
@@ -2871,6 +2944,8 @@ glyph-block Letter-Latin-Lower-R : begin
 		turned 'turnr.straight' nothing 'r.straight' dfR.middle (XH / 2) [marks]
 		turned 'turnr.serifed' nothing 'r.serifed' dfR.middle (XH / 2) [marks]
 		turned 'turnr.top-serifed' nothing 'r.top-serifed' dfR.middle (XH / 2) [marks]
+		turned 'turnr.earlessCorner' nothing 'r.earlessCorner' dfR.middle (XH / 2) [marks]
+		turned 'turnr.earlessRounded' nothing 'r.earlessRounded' dfR.middle (XH / 2) [marks]
 		turned 'turnr.narrow' nothing 'r.narrow' dfR.middle (XH / 2) [marks]
 		select-variant 'turnr' 0x279 (follow -- 'r')
 
@@ -2886,13 +2961,17 @@ glyph-block Letter-Latin-Lower-R : begin
 			set-width dfR.width
 			include dfR.markSet.p
 			create-derived 'rlongleg.straight'
-				SmallRLongLegShape StandardLowerRShape rStraight 0
+				SmallRLongLegShape StandardLowerRShape       rStraight 0
 			create-derived 'rlongleg.serifed'
-				SmallRLongLegShape StandardLowerRShape rSerifed  1
+				SmallRLongLegShape StandardLowerRShape       rSerifed  1
 			create-derived 'rlongleg.top-serifed'
-				SmallRLongLegShape StandardLowerRShape rSerifed  1
+				SmallRLongLegShape StandardLowerRShape       rSerifed  1
+			create-derived 'rlongleg.earlessCorner'
+				SmallRLongLegShape EarlessCornerLowerRShape  rEarless  0
+			create-derived 'rlongleg.earlessRounded'
+				SmallRLongLegShape EarlessRoundedLowerRShape  rEarless  0
 			create-derived 'rlongleg.narrow'
-				SmallRLongLegShape NarrowLowerRshape   rNarrow 0
+				SmallRLongLegShape NarrowLowerRshape         rNarrow   0
 
 		select-variant 'rlongleg' 0x27C (follow -- 'r')
 
@@ -2901,6 +2980,8 @@ glyph-block Letter-Latin-Lower-R : begin
 		turned 'turnrlongleg.straight' nothing 'rlongleg.straight' dfR.middle (XH / 2) [marks]
 		turned 'turnrlongleg.serifed' nothing 'rlongleg.serifed' dfR.middle (XH / 2) [marks]
 		turned 'turnrlongleg.top-serifed' nothing 'rlongleg.top-serifed' dfR.middle (XH / 2) [marks]
+		turned 'turnrlongleg.earlessCorner' nothing 'rlongleg.earlessCorner' dfR.middle (XH / 2) [marks]
+		turned 'turnrlongleg.earlessRounded' nothing 'rlongleg.earlessRounded' dfR.middle (XH / 2) [marks]
 		turned 'turnrlongleg.narrow' nothing 'rlongleg.narrow' dfR.middle (XH / 2) [marks]
 		select-variant 'turnrlongleg' 0x27A (follow -- 'r')
 
@@ -2917,16 +2998,26 @@ glyph-block Letter-Latin-Lower-R : begin
 		create-glyph : glyph-proc
 			set-width dfR.width
 			include dfR.markSet.p
-			create-derived 'rrtail.straight' : SmallRRTailShape StandardLowerRShape rStraight 0
-			create-derived 'rrtail.serifed' : SmallRRTailShape StandardLowerRShape rSerifed  1
-			create-derived 'rrtail.top-serifed' : SmallRRTailShape StandardLowerRShape rSerifed  1
-			create-derived 'rrtail.narrow' : SmallRRTailShape NarrowLowerRshape   rNarrow   0
+			create-derived 'rrtail.straight'
+				SmallRRTailShape StandardLowerRShape       rStraight 0
+			create-derived 'rrtail.serifed'
+				SmallRRTailShape StandardLowerRShape       rSerifed  1
+			create-derived 'rrtail.top-serifed'
+				SmallRRTailShape StandardLowerRShape       rSerifed  1
+			create-derived 'rrtail.earlessCorner'
+				SmallRRTailShape EarlessCornerLowerRShape  rEarless  0
+			create-derived 'rrtail.earlessRounded'
+				SmallRRTailShape EarlessRoundedLowerRShape rEarless  0
+			create-derived 'rrtail.narrow'
+				SmallRRTailShape NarrowLowerRshape         rNarrow   0
 		select-variant 'rrtail' 0x27D (follow -- 'r')
 
 	do
 		turned 'smallLetterTurnedRWithTail.straight' nothing 'rrtail.straight' dfR.middle (XH / 2)
 		turned 'smallLetterTurnedRWithTail.serifed' nothing 'rrtail.serifed' dfR.middle (XH / 2)
 		turned 'smallLetterTurnedRWithTail.top-serifed' nothing 'rrtail.top-serifed' dfR.middle (XH / 2)
+		turned 'smallLetterTurnedRWithTail.earlessCorner' nothing 'rrtail.earlessCorner' dfR.middle (XH / 2)
+		turned 'smallLetterTurnedRWithTail.earlessRounded' nothing 'rrtail.earlessRounded' dfR.middle (XH / 2)
 		turned 'smallLetterTurnedRWithTail.narrow' nothing 'rrtail.narrow' dfR.middle (XH / 2)
 		select-variant 'smallLetterTurnedRWithTail' 0x2C79 (follow -- 'r')
 
@@ -2944,12 +3035,16 @@ glyph-block Letter-Latin-Lower-R : begin
 		create-glyph : glyph-proc
 			set-width dfR.width
 			include dfR.markSet.p
-			create-derived 'turnrrtail.straight' : TurnRRTailShape StandardLowerRShape rStraight 0
-			create-derived 'turnrrtail.serifed' : TurnRRTailShape StandardLowerRShape rSerifed 1
-			create-derived 'turnrrtail.top-serifed' : TurnRRTailShape StandardLowerRShape rSerifed 0
-			create-derived 'turnrrtail.narrow' : TurnRRTailShape NarrowLowerRshape rNarrow 0
+			create-derived 'turnrrtail.straight'
+				TurnRRTailShape StandardLowerRShape      rStraight 0
+			create-derived 'turnrrtail.serifed'
+				TurnRRTailShape StandardLowerRShape      rSerifed  1
+			create-derived 'turnrrtail.top-serifed'
+				TurnRRTailShape StandardLowerRShape      rSerifed  0
+			create-derived 'turnrrtail.narrow'
+				TurnRRTailShape NarrowLowerRshape        rNarrow   0
 
-		select-variant 'turnrrtail' 0x27B (follow -- 'r')
+		select-variant 'turnrrtail' 0x27B
 
 	create-glyph 'rflap.straight' : glyph-proc
 		set-width dfR.width
@@ -3681,6 +3776,17 @@ glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CurlyTail nShoulder nShoulderKnots
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+
+	define [NTopLeftSerif] : begin
+		tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+		glyph-proc
+	define [NBottomLeftSerif] : if (!para.isItalic)
+		tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+		glyph-proc
+	define [NBottomRightSerif] : if (para.isItalic)
+		tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+		tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
 
 	create-glyph 'n.straight' : glyph-proc
 		set-width Width
@@ -3693,12 +3799,9 @@ glyph-block Letter-Latin-Lower-N : begin
 			fine -- ShoulderFine
 
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
-			if (para.isItalic)
-			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
-			: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
-			if (!para.isItalic) : begin
-				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+			include : NTopLeftSerif
+			include : NBottomRightSerif
+			include : NBottomLeftSerif
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 	create-glyph 'n.tailed' : glyph-proc
@@ -3714,14 +3817,91 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
 
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
-			if (!para.isItalic) : begin
-				include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+			include : NTopLeftSerif
+			include : NBottomLeftSerif
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.earlessCornerStraight' : glyph-proc
+		set-width Width
+		include MarkSet.e
+
+		include : VBarLeft SB 0 (XH - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 SB (XH - DToothlessRise)
+			g4 (Middle - CorrectionOMidS) (XH - O)
+			archv
+			flat RightSB (XH - SmallSmoothB)
+			curl RightSB 0 [heading Downward]
+
+		if SLAB : begin
+			include : NBottomRightSerif
+			include : NBottomLeftSerif
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.earlessCornerTailed' : glyph-proc
+		set-width Width
+		include MarkSet.e
+
+		include : VBarLeft SB 0 (XH - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 SB (XH - DToothlessRise)
+			g4 (Middle - CorrectionOMidS) (XH - O)
+			archv
+			flat RightSB (XH - SmallSmoothB)
+			curl RightSB (XH - SmallSmoothB + O) [heading Downward]
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+
+		if SLAB : begin
+			include : NBottomLeftSerif
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.earlessRoundedStraight' : glyph-proc
+		set-width Width
+		include MarkSet.e
+
+		include : dispiro
+			widths.rhs
+			flat SB 0 [heading Upward]
+			curl SB (XH - SmallSmoothA)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (XH - O)
+			archv
+			flat RightSB (XH - SmallSmoothB)
+			curl RightSB 0 [heading Downward]
+
+		if SLAB : begin
+			include : NBottomRightSerif
+			include : NBottomLeftSerif
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.earlessRoundedTailed' : glyph-proc
+		set-width Width
+		include MarkSet.e
+
+		include : dispiro
+			widths.rhs
+			flat SB 0 [heading Upward]
+			curl SB (XH - SmallSmoothA)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (XH - O)
+			archv
+			flat RightSB (XH - SmallSmoothB)
+			curl RightSB (XH - SmallSmoothB + O) [heading Downward]
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+
+		if SLAB : begin
+			include : NBottomLeftSerif
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 	select-variant 'n' 'n'
 	alias 'cyrl/pe.italicStraight' null 'n.straight'
 	alias 'cyrl/pe.italicTailed' null 'n.tailed'
+	alias 'cyrl/pe.italicEarlessCornerStraight' null 'n.earlessCornerStraight'
+	alias 'cyrl/pe.italicEarlessCornerTailed' null 'n.earlessCornerTailed'
+	alias 'cyrl/pe.italicEarlessRoundedStraight' null 'n.earlessRoundedStraight'
+	alias 'cyrl/pe.italicEarlessRoundedTailed' null 'n.earlessRoundedTailed'
 
 	with-related-glyphs 'n' 'nApostrophe' 0x149 : lambda [src srl] : glyph-proc
 		include : refer-glyph "commaAbove"
@@ -4002,81 +4182,108 @@ glyph-block Letter-Latin-Upper-M : begin
 glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 
-	define [SmallMShoulderSpiro] : params [left right top bottom width fine diversity] : glyph-proc
+	define [SmallMSmooth df] : df.div * (0.5 * SmallSmooth + 0.375 * Stroke)
+	define [SmallMShoulderSpiro] : params [left right top bottom width fine df coBottom] : glyph-proc
 		local fix : TanSlope * Stroke * HVContrast * width / Stroke
-		local sm : SmallSmooth * 0.7 * [fallback diversity 1]
+		local sm : [SmallMSmooth df] + fix / 2
 		include : spiro-outline
-			corner (right - width * HVContrast) bottom
+			corner (right - width * HVContrast) [Math.min (top - sm - 0.1) bottom]
 			curl   (right - width * HVContrast) (top - sm + fix)
 			arcvh 8
 			g2     [mix left (right - width * HVContrast) 0.5] (top - O - width)
 			archv 8
 			flat   left (top - sm - fix)
 			corner left (top - sm - fix - 1)
+			if (coBottom != nothing)
+				list [corner left coBottom] [corner (left - fine) coBottom]
+				list
 			corner (left - fine) (top - sm - 1)
 			curl   (left - fine) (top - sm)
 			arcvh 8
 			g2     [mix (left - fine * HVContrast) right 0.5] (top - O)
 			archv 8
 			flat   right (top - sm)
-			corner right bottom
+			corner right [Math.min (top - sm - 0.1) bottom]
 			close
+
+	define [RevSmallMShoulderSpiro] : params [left right top bottom width fine df coBottom] : glyph-proc
+		local fix : TanSlope * Stroke * HVContrast * width / Stroke
+		local sm : [SmallMSmooth df] - fix / 2
+		include : spiro-outline
+			corner (left + width * HVContrast) [Math.min (top - sm - 0.1) bottom]
+			curl   (left + width * HVContrast) (top - sm - fix)
+			arcvh 8
+			g2     [mix right (left + width * HVContrast) 0.5] (top - O - width)
+			archv 8
+			flat   right (top - sm - fix)
+			corner right (top - sm - fix - 1)
+			if (coBottom != nothing)
+				list [corner right coBottom] [corner (right + fine) coBottom]
+				list
+			corner (right + fine) (top - sm - 1)
+			curl   (right + fine) (top - sm)
+			arcvh 8
+			g2     [mix (right + fine * HVContrast) left 0.5] (top - O)
+			archv 8
+			flat   left (top - sm)
+			corner left [Math.min (top - sm - 0.1) bottom]
+			close
+
+	define [SmallMSerifs top lbot mbot rbot df tailed earless] : glyph-proc
+		local jut : Jut * df.mvs / Stroke + O
+		if (df.width > jut * 7) : begin
+			if [not earless] : include : tagged 'serifLT' : intersection
+				CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
+				spiro-outline
+					corner SB lbot
+					corner SB top
+					corner 0 top
+					corner 0 lbot
+			if (!para.isItalic) : begin
+				include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot jut df.mvs
+				include : tagged 'serifMB' : CenterBottomSerif df.middle mbot jut df.mvs
+				if [not tailed] : begin
+					include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
+			: else : if [not tailed] : begin
+				include : tagged 'serifRB' : intersection
+				RightwardBottomSerif (df.rightSB + O) rbot (jut / 2) df.mvs
+				spiro-outline
+					corner (df.rightSB + O) lbot
+					corner (df.rightSB + O) top
+					corner df.width top
+					corner df.lwidth lbot
+		: else : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
+			if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
+			if [not tailed] : begin
+				include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
 
 	define [dfM] : DivFrame para.diversityM 3
 	define [SmallMShape top lbot mbot rbot df tailed] : glyph-proc
-		local m1 : mix df.leftSB (df.middle + df.mvs / 2 * HVContrast) 0.5
-		local m2 : mix df.rightSB (df.middle - df.mvs / 2 * HVContrast) 0.5
 		include : SmallMShoulderSpiro
+			df        -- df
 			left      -- (df.leftSB + df.mvs * HVContrast)
 			right     -- (df.middle + df.mvs / 2 * HVContrast)
 			top       -- top
 			bottom    -- mbot
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
-			diversity -- df.div
 		include : SmallMShoulderSpiro
+			df        -- df
 			left      -- (df.middle + df.mvs * 0.5 * HVContrast)
 			right     -- df.rightSB
 			top       -- top
 			bottom    -- rbot
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
-			diversity -- df.div
 		include : tagged 'barL' : VBarLeft df.leftSB lbot top df.mvs
-		if SLAB : begin
-			local jut : Jut * df.mvs / Stroke + O
-			if (df.width > jut * 7) : begin
-				include : tagged 'serifLT' : intersection
-					CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
-					spiro-outline
-						corner SB lbot
-						corner SB top
-						corner 0 top
-						corner 0 lbot
-				if (!para.isItalic) : begin
-					include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot jut df.mvs
-					include : tagged 'serifMB' : CenterBottomSerif df.middle mbot jut df.mvs
-					if [not tailed] : begin
-						include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
-				: else : if [not tailed] : begin
-					include : tagged 'serifRB' : intersection
-					RightwardBottomSerif (df.rightSB + O) rbot (jut / 2) df.mvs
-					spiro-outline
-						corner (df.rightSB + O) lbot
-						corner (df.rightSB + O) top
-						corner df.width top
-						corner df.lwidth lbot
-			: else : begin
-				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
-				if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
-				if [not tailed] : begin
-					include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
+		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
 
 	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
 	glyph-block-export SmallMSmoothHeight
-	define [SmallMSmoothHeight df] : XH - SmallSmoothB * 0.7 * df.div
+	define [SmallMSmoothHeight df] : XH - [SmallMSmooth df] - TanSlope * Stroke
 
 	create-glyph 'm.normal' : glyph-proc
 		local df : dfM
@@ -4103,6 +4310,139 @@ glyph-block Letter-Latin-Lower-M : begin
 		set-width df.width
 		include df.markSet.e
 		include : SmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+
+	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+		include : dispiro
+			widths.rhs df.mvs
+			g4 df.leftSB (top - DToothlessRise)
+			g4.right.mid [mix df.leftSB (df.middle + df.mvs / 2 * HVContrast) 0.5] (top - O) [heading Rightward]
+			g4 (df.middle + df.mvs / 2 * HVContrast) (top - DToothlessRise)
+		include : dispiro
+			widths.rhs df.mvs
+			g4 (df.middle - df.mvs / 2 * HVContrast) (top - DToothlessRise)
+			g4.right.mid [mix df.rightSB (df.middle - df.mvs / 2 * HVContrast) 0.5] (top - O) [heading Rightward]
+			archv
+			flat df.rightSB (top - [SmallMSmooth df]) [heading Downward]
+			curl df.rightSB rbot [heading Downward]
+
+		include : tagged 'barL' : VBarLeft df.leftSB lbot (top - DToothlessRise) df.mvs
+		include : tagged 'barM' : VBar     df.middle mbot (top - DToothlessRise) df.mvs
+
+	create-glyph 'm.earlessCornerDoubleArch' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessCornerDoubleArchSmallMShape XH 0 0 0 df
+
+	create-glyph 'm.earlessCornerDoubleArchShortleg' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessCornerDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
+
+	create-glyph 'm.earlessCornerDoubleArchTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessCornerDoubleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.earlessCornerDoubleArchShortlegTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessCornerDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	define [EarlessRoundedDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+		include : union
+			RevSmallMShoulderSpiro
+				df        -- df
+				left      -- df.leftSB
+				right     -- (df.middle - df.mvs / 2 * HVContrast)
+				top       -- top
+				bottom    -- lbot
+				coBottom  -- mbot
+				width     -- df.mvs
+				fine      -- (df.mvs * CThin)
+			SmallMShoulderSpiro
+				df        -- df
+				left      -- (df.middle + df.mvs * 0.5 * HVContrast)
+				right     -- df.rightSB
+				top       -- top
+				bottom    -- rbot
+				coBottom  -- mbot
+				width     -- df.mvs
+				fine      -- (df.mvs * CThin)
+
+		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
+
+	create-glyph 'm.earlessRoundedDoubleArch' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessRoundedDoubleArchSmallMShape XH 0 0 0 df
+
+	create-glyph 'm.earlessRoundedDoubleArchShortleg' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessRoundedDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
+
+	create-glyph 'm.earlessRoundedDoubleArchTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessRoundedDoubleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.earlessRoundedDoubleArchShortlegTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessRoundedDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+
+	define [EarlessSingleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+		include : tagged 'barL' : VBarLeft df.leftSB lbot (XH - DToothlessRise) df.mvs
+		include : tagged 'barM' : VBar df.middle mbot XH df.mvs
+		include : dispiro
+			widths.rhs df.mvs
+			g4 df.leftSB (XH - DToothlessRise)
+			g4 (df.middle - CorrectionOMidS) (XH - O)
+			archv
+			flat df.rightSB [Math.max (XH - [SmallMSmooth df]) (rbot + 0.1)]
+			curl df.rightSB rbot [heading Downward]
+
+		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
+
+	create-glyph 'm.earlessSingleArch' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessSingleArchSmallMShape XH 0 0 0 df
+
+	create-glyph 'm.earlessSingleArchShortleg' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessSingleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
+
+	create-glyph 'm.earlessSingleArchTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessSingleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.earlessSingleArchShortlegTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include df.markSet.e
+		include : EarlessSingleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
 		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
 
 	select-variant 'm' 'm'
@@ -4484,7 +4824,7 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : VerticalHook Middle 0 LongJut Hook
 
 
-	define fbar : XH * designParameters.fBarPos + Stroke * para.fbarStrokeAdj
+	define fbar : XH * designParameters.fBarPosToXH + Stroke * designParameters.fbarStrokeAdj
 	create-glyph : glyph-proc
 		local fovershoot2 (O * 2)
 		include MarkSet.b
@@ -4524,11 +4864,11 @@ glyph-block Letter-Latin-Lower-F : begin
 				curl (RightSB - HalfStroke * TanSlope) fbar
 
 	define dfNarrowF : DivFrame para.diversityF
-	define [NarrowFShape df m] : glyph-proc
+	define [NarrowFShape df m bh] : glyph-proc
 		local crossLeft : mix 0 SB m
 		local crossRight : mix df.width df.rightSB m
 		local barLeft : [mix crossLeft crossRight 0.42] - Stroke * 0.375 * HVContrast + df.width / 32
-		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.375) : Math.min Hook (Stroke * 1.75)
+		local tTurn : Math.max (Hook * [Math.min 1 : Math.sqrt df.div]) (Stroke * 1.375) : Math.min Hook (Stroke * 1.75)
 		include : dispiro
 			widths.lhs
 			flat crossRight CAP
@@ -4538,17 +4878,21 @@ glyph-block Letter-Latin-Lower-F : begin
 			curl barLeft 0 [heading Downward]
 		include : dispiro
 			widths.rhs
-			flat (crossLeft - HalfStroke * TanSlope) fbar
-			curl (crossRight - HalfStroke * TanSlope) fbar
+			flat (crossLeft - HalfStroke * TanSlope) bh
+			curl (crossRight - HalfStroke * TanSlope) bh
 
 	create-glyph 'f.narrow' : glyph-proc
 		set-width dfNarrowF.width
 		include   dfNarrowF.markSet.b
-		include : NarrowFShape dfNarrowF 0.5
+		include : NarrowFShape dfNarrowF 0.5 fbar
 
 	create-glyph 'f.flatHook' : glyph-proc
 		include   MarkSet.b
-		include : NarrowFShape [DivFrame 1] 1
+		include : NarrowFShape [DivFrame 1] 1 fbar
+
+	create-glyph 'f.flatHookCrossbarAtXHeight' : glyph-proc
+		include   MarkSet.b
+		include : NarrowFShape [DivFrame 1] 1 XH
 
 	create-glyph 'f.tailed' : glyph-proc
 		include [refer-glyph 'longs.italic'] AS_BASE
@@ -4564,6 +4908,7 @@ glyph-block Letter-Latin-Lower-F : begin
 	turned 'turnf.straightTailed' nothing 'f.straightTailed' Middle (XH / 2) MarkSet.p
 	turned 'turnf.tailed' nothing 'f.tailed' Middle (XH / 2) MarkSet.p
 	turned 'turnf.flatHook' nothing 'f.flatHook' Middle (XH / 2) MarkSet.p
+	turned 'turnf.flatHookCrossbarAtXHeight' nothing 'f.flatHookCrossbarAtXHeight' Middle (XH / 2) MarkSet.p
 	turned 'turnf.narrow' nothing 'f.narrow' dfNarrowF.middle (XH / 2) dfNarrowF.markSet.p
 	select-variant 'turnf' 0x25F (follow -- 'f')
 
@@ -4784,72 +5129,80 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
-	define tcenter : Middle - TBalance - Stroke * 0.5 * HVContrast
+	define xSmallTBarLeft : Middle - TBalance - Stroke * 0.5 * HVContrast
 	define [SmallTShape top bot] : glyph-proc
-		local hookx : tcenter + (Width - SB * 2) * 0.8 + Stroke * 0.25 * HVContrast
-		local turn : [mix tcenter hookx 0.5] + CorrectionOMidS
-		local smb  : Math.max Hook ((turn - tcenter) * 1.2)
+		local hookx : xSmallTBarLeft + (Width - SB * 2) * 0.8 + Stroke * 0.25 * HVContrast
+		local turn : [mix xSmallTBarLeft hookx 0.5] + CorrectionOMidS
+		local smb  : Math.max Hook ((turn - xSmallTBarLeft) * 1.2)
 
 		local G : dispiro
 			widths.lhs
-			flat tcenter top [heading Downward]
-			curl tcenter (bot + smb)
+			flat xSmallTBarLeft top [heading Downward]
+			curl xSmallTBarLeft (bot + smb)
 			hookend (bot + O) (tight -- !para.isItalic)
 			g4 hookx (bot + Hook)
 		local g : G.call currentGlyph # Not using include
 		set-base-anchor 'bottomright' g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
-		set-base-anchor 'below' [mix tcenter g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
+		set-base-anchor 'below' [mix xSmallTBarLeft g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
 		include : dispiro
 			widths.rhs
-			flat (tcenter + HalfStroke - LongJut + TBalance2 - HalfStroke * TanSlope) XH
-			curl (tcenter + HalfStroke + LongJut + TBalance2 - HalfStroke * TanSlope) XH
+			flat (xSmallTBarLeft + HalfStroke - LongJut + TBalance2 - HalfStroke * TanSlope) XH
+			curl (xSmallTBarLeft + HalfStroke + LongJut + TBalance2 - HalfStroke * TanSlope) XH
 
 	create-glyph 't.standard' : glyph-proc
 		set-width Width
 		include MarkSet.b
 		include : SmallTShape CAP 0
 
-	define [TFlatShape df m ext] : glyph-proc
-		local crossLeft : mix 0 SB m
-		local crossRight : mix df.width df.rightSB m
-		local barleft : [mix crossLeft crossRight 0.42] - Stroke * 0.375 * HVContrast
-		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.375) : Math.min Hook (Stroke * 1.75)
+	define [TFlatShape df top m ext] : glyph-proc
+		local xCrossLeft : mix 0 SB m
+		local xCrossRight : mix df.width df.rightSB m
+		local xBarLeft : [mix xCrossLeft xCrossRight 0.42] - Stroke * 0.375 * HVContrast
+		local tTurn : Math.max (Hook * [Math.min 1 : Math.sqrt df.div]) (Stroke * 1.375) : Math.min Hook (Stroke * 1.75)
 		include : union
 			dispiro
 				widths.rhs
-				flat (crossRight) 0
-				curl [Math.min (barleft + tTurn) (crossRight - 1)] 0
+				flat xCrossRight 0
+				curl [Math.min (xBarLeft + tTurn) (xCrossRight - 1)] 0
 				archv
-				flat barleft tTurn
-				curl barleft CAP [heading Upward]
+				flat xBarLeft tTurn
+				curl xBarLeft top [heading Upward]
 			dispiro
 				widths.rhs
-				flat (crossLeft - HalfStroke * TanSlope) XH
-				curl (crossRight - HalfStroke * TanSlope + ext) XH
-		set-base-anchor 'topright' crossRight  CAP
+				flat (xCrossLeft - HalfStroke * TanSlope) XH
+				curl (xCrossRight - HalfStroke * TanSlope + ext) XH
+		set-base-anchor 'topright' xCrossRight  CAP
 
 	create-glyph 't.flatHook' : glyph-proc
 		include MarkSet.b
-		include : TFlatShape [DivFrame 1] 1 0
+		include : TFlatShape [DivFrame 1] CAP 1 0
+
+	create-glyph 't.flatHookShortNeck' : glyph-proc
+		include MarkSet.b
+		include : TFlatShape [DivFrame 1] [Math.min CAP ([mix XH CAP 0.75] + Stroke * 0.25)] 1 0
+
+	create-glyph 't.flatHookShortNeck2' : glyph-proc
+		include MarkSet.b
+		include : TFlatShape [DivFrame 1] [Math.min CAP ([mix XH CAP 0.625] + Stroke * 0.25)] 1 0
 
 	define dfNarrowT : DivFrame para.diversityF
 	create-glyph 't.narrow' : glyph-proc
 		set-width dfNarrowT.width
 		include dfNarrowT.markSet.b
-		include : TFlatShape dfNarrowT 0.5 0
+		include : TFlatShape dfNarrowT CAP 0.5 0
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include df.markSet.b
-		include : TFlatShape df 1 0
+		include : TFlatShape df CAP 1 0
 
 	create-glyph 't.phoneticLeft.extended' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include df.markSet.b
 		include : intersection
-			TFlatShape df 1 Width
+			TFlatShape df CAP 1 Width
 			Rect CAP 0 SB (Middle + Width)
 
 	create-glyph 't.cross' : glyph-proc
@@ -4858,11 +5211,20 @@ glyph-block Letter-Latin-Lower-T : begin
 		include : VBar Middle 0 CAP
 		include : HBarTop (Middle - LongJut) (Middle + LongJut) XH
 
+	create-glyph 't.hooklessAsymmetric' : glyph-proc
+		set-width Width
+		include MarkSet.b
+		include : VBarLeft xSmallTBarLeft 0 CAP
+		include : HBarTop xSmallTBarLeft (Middle + LongJut) XH
+
 	select-variant 't' 't'
 
 	turned 'turnt.standard' nothing 't.standard' Middle (XH / 2) MarkSet.p
 	turned 'turnt.cross' nothing 't.cross' Middle (XH / 2) MarkSet.p
 	turned 'turnt.flatHook' nothing 't.flatHook' Middle (XH / 2) MarkSet.p
+	turned 'turnt.hooklessAsymmetric' nothing 't.hooklessAsymmetric' Middle (XH / 2) MarkSet.p
+	turned 'turnt.flatHookShortNeck' nothing 't.flatHookShortNeck' Middle (XH / 2) MarkSet.p
+	turned 'turnt.flatHookShortNeck2' nothing 't.flatHookShortNeck2' Middle (XH / 2) MarkSet.p
 	turned 'turnt.narrow' nothing 't.narrow' dfNarrowT.middle (XH / 2) dfNarrowT.markSet.p
 	select-variant 'turnt' 0x287 (follow -- 't')
 
@@ -4878,7 +5240,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	create-glyph 'thooktop' 0x1AD : glyph-proc
 		include MarkSet.e
 		include : SmallTShape (XH - HalfStroke) 0
-		include : VerticalHook (tcenter + HalfStroke * HVContrast) XH HookX (-Hook)
+		include : VerticalHook (xSmallTBarLeft + HalfStroke * HVContrast) XH HookX (-Hook)
 
 	create-glyph 'trtail' 0x288 : glyph-proc
 		include MarkSet.if
@@ -4888,14 +5250,14 @@ glyph-block Letter-Latin-Lower-T : begin
 		include MarkSet.b
 		local fine : adviceBlackness 3.5
 		local rinner : LongJut / 2 - fine / 2
-		local x2 : mix SB tcenter 0.4
+		local x2 : mix SB xSmallTBarLeft 0.4
 		local y2 : -fine
-		include : HBarTop (tcenter + HalfStroke - LongJut + TBalance2) (tcenter + HalfStroke + LongJut + TBalance2) XH
+		include : HBarTop (xSmallTBarLeft + HalfStroke - LongJut + TBalance2) (xSmallTBarLeft + HalfStroke + LongJut + TBalance2) XH
 		include : dispiro
 			widths.lhs
-			flat tcenter CAP [heading Downward]
-			curl tcenter (fine + rinner * 2)
-			CurlyTail fine rinner (tcenter+ Stroke * HVContrast) 0 (tcenter + Stroke * HVContrast + LongJut) x2 y2
+			flat xSmallTBarLeft CAP [heading Downward]
+			curl xSmallTBarLeft (fine + rinner * 2)
+			CurlyTail fine rinner (xSmallTBarLeft+ Stroke * HVContrast) 0 (xSmallTBarLeft + Stroke * HVContrast + LongJut) x2 y2
 
 	create-glyph 'tbar' 0x167 : glyph-proc
 		include [refer-glyph "t.standard"] AS_BASE

@@ -16,7 +16,7 @@ Quit your editor/program. Unzip and open the folder.
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
-* **OpenBSD**: The font can be installed with `pkg_add iosevka-fonts-<variant>`. Run `pkg_info -Q iosevka-fonts` to see which variants are available.
+* **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
 ## Weights, Variants and OpenType features
 
@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																		
+																																																																																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -320,6 +320,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-a-singlestorey-earless-corner-tailed`, `VXCM`: Earless (cornered top-right) single-storey `a` with curly tail.
     * `v-a-singlestorey-earless-rounded`, `VXCN`: Earless (rounded top-right) single-storey `a`.
     * `v-a-singlestorey-earless-rounded-tailed`, `VXCO`: Earless (rounded top-right) single-storey `a` with curly tail.
+    * `v-a-doublestorey-toothless-corner`, `VXDM`: Toothless (cornered bottom-right) double-storey `a`.
+    * `v-a-doublestorey-toothless-rounded`, `VXDN`: Toothless (rounded bottom-right) double-storey `a`.
   * Styles for `b`:
     * `v-b-toothed`, `VXBK`: `b` with bottom-left tooth (default).
     * `v-b-toothless-corner`, `VXBL`: `b` without bottom-left tooth, with a corner transition.
@@ -335,6 +337,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-serifed`, `cv84`: `f` with bottom serif (default for Slab Upright).
     * `v-f-straight-tailed`, `VXAD`: `f` with straight tail.
     * `v-f-flat-hook`, `VXDD`: `f` with flat hook.
+    * `v-f-flat-hook-crossbar-at-x-height`, `VXEG`: `f` with flat hook and crossbar placed right at X-height.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -352,6 +355,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-i-line`, `cv56`: `i` like a straight line.
     * `v-i-tailed`, `cv88`: Tailed `i`.
     * `v-i-hookybottom`, `VXAA`: `i` with a straight tail.
+    * `v-i-serifed-asymmetric`, `VXDK`: `i` with shorter top serif and full bottom serif.
   * Styles for `j`:
     * `v-j-line`, `cv57`: `j` like a straight line.
     * `v-j-serifed`, `cv58`: `j` with top serif (default).
@@ -371,15 +375,31 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-l-tailed`, `cv27`: `l` with a curved tail.
     * `v-l-hookybottom`, `cv28`: `l` with a straight tail.
     * `v-l-line`, `cv59`: `l` like a straight line.
-    * `v-l-serifed-asymmetric`, `VXDL`: Serifed `l` with shorter top serif.
+    * `v-l-serifed-asymmetric`, `VXDL`: `l` with shorter top serif and full bottom serif.
   * Styles for `m`:
     * `v-m-normal`, `cv25`: `m` with normal middle leg, touching the baseline (default).
     * `v-m-shortleg`, `cv26`: `m` with shorter middle leg, like Ubuntu Mono.
     * `v-m-tailed`, `VXCD`: `m` with normal middle leg, touching the baseline, and a curly tail.
     * `v-m-shortleg-tailed`, `VXCE`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
+    * `v-m-earless-corner-double-arch`, `VXDU`: Earless (corner top-left) `m` with normal middle leg touching baseline.
+    * `v-m-earless-corner-double-arch-shortleg`, `VXDV`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    * `v-m-earless-corner-double-arch-tailed`, `VXDW`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    * `v-m-earless-corner-double-arch-shortleg-tailed`, `VXDX`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    * `v-m-earless-rounded-double-arch`, `VXDY`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
+    * `v-m-earless-rounded-double-arch-shortleg`, `VXDZ`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    * `v-m-earless-rounded-double-arch-tailed`, `VXEA`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    * `v-m-earless-rounded-double-arch-shortleg-tailed`, `VXEB`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    * `v-m-earless-single-arch`, `VXEC`: Earless (single-arch) `m` with normal middle leg touching baseline.
+    * `v-m-earless-single-arch-shortleg`, `VXED`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
+    * `v-m-earless-single-arch-tailed`, `VXEE`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
+    * `v-m-earless-single-arch-shortleg-tailed`, `VXEF`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
   * Styles for `n`:
-    * `v-n-straight`, `VXCF`: `n` straight ending (default).
-    * `v-n-tailed`, `VXCG`: `n` a curly tail.
+    * `v-n-straight`, `VXCF`: `n` with straight ending (default).
+    * `v-n-tailed`, `VXCG`: `n` with a curly tail.
+    * `v-n-earless-corner-straight`, `VXDO`: Earless (corner top-left) `n` with straight ending.
+    * `v-n-earless-corner-tailed`, `VXDP`: Earless (corner top-left) `n` with a curly tail.
+    * `v-n-earless-rounded-straight`, `VXDQ`: Earless (rounded top-left) `n` with straight ending.
+    * `v-n-earless-rounded-tailed`, `VXDR`: Earless (rounded top-left) `n` with a curly tail.
   * Styles for `p`:
     * `v-p-eared`, `VXCP`: `p` with top-left ear (default).
     * `v-p-earless-corner`, `VXCQ`: `p` without top-left ear (corner).
@@ -395,10 +415,15 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-r-straight`, `cv85`: Straight, serif-less `r` (default for Sans).
     * `v-r-serifed`, `cv86`: `r` with serif at both top and bottom (default for Slab Upright).
     * `v-r-top-serifed`, `cv87`: `r` with serifs at top-left only (default for Slab Italic).
+    * `v-r-earless-corner`, `VXDS`: Earless (corner top-left), serif-less `r`.
+    * `v-r-earless-rounded`, `VXDT`: Earless (rounded top-left), serif-less `r`.
   * Styles for `t`:
     * `v-t-standard`, `cv40`: Standard `t` shape (default).
     * `v-t-cross`, `cv41`: Futura-like `t` shape.
     * `v-t-flat-hook`, `VXDC`: `t` with flat hook.
+    * `v-t-hookless-asymmetric`, `VXEH`: `t` without hook and ony half the cross bar.
+    * `v-t-flat-hook-short-neck`, `VXEI`: `t` with flat hook and a slightly shorter neck.
+    * `v-t-flat-hook-short-neck2`, `VXEJ`: `t` with flat hook and a more shorter neck.
   * Styles for `u`:
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default for Upright).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
