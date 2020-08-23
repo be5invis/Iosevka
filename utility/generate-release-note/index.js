@@ -126,7 +126,7 @@ async function GeneratePackageList(out) {
 		const img = `<img src="${imagePrefix}/${imageName}.png" width="540"/>`;
 		out.log(
 			`<tr>`,
-			`<td colspan="4"><b><a href="${downloadLink}">📦 ${familyName}</a></b> — ${desc}</td>`,
+			`<td colspan="4"><b><a href="${downloadLink}">&#x1F4E6; ${familyName}</a></b> — ${desc}</td>`,
 			`</tr>`
 		);
 
