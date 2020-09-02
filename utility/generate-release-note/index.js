@@ -103,7 +103,7 @@ const MonospaceSpacings = {
 	fixed: ["Fixed", false, "Fixed"]
 };
 const ProportionalSpacings = {
-	"": ["Default", true, ""]
+	"": ["Default", false, ""]
 };
 
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
