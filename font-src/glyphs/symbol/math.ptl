@@ -753,6 +753,7 @@ glyph-block Symbol-Math-Relation : begin
 	glyph-block-export dH LessSlope
 	glyph-block-export LessShape GreaterShape LigationLessShape LigationGreaterShape
 	glyph-block-export EqualShape EqualHole IdentShape IdentHole EqualHalfSpace
+	glyph-block-import Symbol-Arrow : ArrowShape
 
 	define EqualHalfSpace : (OperTop - OperBot) * 2 * designParameters.equal_wideness
 	define LessSlope : (4 / 13) * (OperTop - OperBot) / (RightSB - SB)
@@ -839,31 +840,38 @@ glyph-block Symbol-Math-Relation : begin
 			Rect SymbolMid ParenBot 0 Width
 			refer-glyph 'equal'
 
+	define ColonEqSbSquash 0.5
 	create-glyph 'eqColon' 0x2255 : glyph-proc
 		include : refer-glyph "baselineDot"
 		include : refer-glyph "xhDot"
 
-		local sbSquash 0.5
-
-		local delta : Math.max 0 : Width / 2 - DotRadius - SB * sbSquash
+		local delta : Math.max 0 : Width / 2 - DotRadius - SB * ColonEqSbSquash
 		include : Upright
 		include : Translate (+delta) (SymbolMid - XH / 2)
 		include : Italify
 
-		include : EqualShape (SB * sbSquash) (RightSB - DotSize)
+		include : EqualShape (SB * ColonEqSbSquash) (RightSB - DotSize)
 
-	create-glyph 'colonEq' 0x2254 : glyph-proc
+	define [ColonEqColonShape] : new-glyph : glyph-proc
 		include : refer-glyph "baselineDot"
 		include : refer-glyph "xhDot"
 
-		local sbSquash 0.5
-
-		local delta : Math.max 0 : Width / 2 - DotRadius - SB * sbSquash
+		local delta : Math.max 0 : Width / 2 - DotRadius - SB * ColonEqSbSquash
 		include : Upright
 		include : Translate (-delta) (SymbolMid - XH / 2)
 		include : Italify
 
-		include : EqualShape (SB + DotSize) (Width - SB * sbSquash)
+	create-glyph 'colonEq' 0x2254 : glyph-proc
+		include : ColonEqColonShape
+		include : EqualShape (SB + DotSize) (Width - SB * ColonEqSbSquash)
+
+	create-glyph 'colonArrow' 0x29F4 : glyph-proc
+		local barLeft : SB + DotSize
+		local barRight : Width - SB * ColonEqSbSquash
+		local arrowHeadSize : Math.min ((PlusTop - PlusBot) / 2) (0.75 * (barRight - barLeft))
+		include : ColonEqColonShape
+		include : HBar [mix SB barLeft 0.8] [mix barLeft barRight 0.5] SymbolMid OperatorStroke
+		include : ArrowShape barLeft SymbolMid barRight SymbolMid arrowHeadSize
 
 	create-glyph 'ident' 0x2261 : glyph-proc
 		include : IdentShape SB RightSB
@@ -1389,7 +1397,8 @@ glyph-block Symbol-Math-Integrals : begin
 	define MosaicHeight : MosaicTop - MosaicBottom
 
 	create-glyph 'integrate' 0x222B : glyph-proc
-		include : LongSShape BgOpTop BgOpBot Hook (Hook * 0.75) OperatorStroke
+		local hookY : Math.max (Hook * 0.75) (Stroke * 1.5)
+		include : LongSShape BgOpTop BgOpBot Hook hookY OperatorStroke
 
 	HDual 'doubleintegrate' 0x222C 'integrate' (0.5 * Width)
 
