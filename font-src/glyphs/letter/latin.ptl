@@ -3750,9 +3750,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CurlyTail nShoulder nShoulderKnots
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
 
-	define [NTopLeftSerif] : begin
-		tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
-		glyph-proc
+	define [NTopLeftSerif] : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 	define [NBottomLeftSerif] : if (!para.isItalic)
 		tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 		glyph-proc
@@ -4203,32 +4201,25 @@ glyph-block Letter-Latin-Lower-M : begin
 			corner left [Math.min (top - sm - 0.1) bottom]
 			close
 
-	define [SmallMSerifs top lbot mbot rbot df tailed earless] : glyph-proc
-		local jut : Jut * df.mvs / Stroke + O
+	define [SmallMSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		local jut : para.refJut + O
 		if (df.width > jut * 7) : begin
 			if [not earless] : include : tagged 'serifLT' : intersection
 				CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
-				spiro-outline
-					corner SB lbot
-					corner SB top
-					corner 0 top
-					corner 0 lbot
-			if (!para.isItalic) : begin
+				Rect top lbot 0 (df.leftSB - O)
+			if [not para.isItalic] : begin
 				include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot jut df.mvs
 				include : tagged 'serifMB' : CenterBottomSerif df.middle mbot jut df.mvs
 				if [not tailed] : begin
 					include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
 			: else : if [not tailed] : begin
 				include : tagged 'serifRB' : intersection
-				RightwardBottomSerif (df.rightSB + O) rbot (jut / 2) df.mvs
-				spiro-outline
-					corner (df.rightSB + O) lbot
-					corner (df.rightSB + O) top
-					corner df.width top
-					corner df.lwidth lbot
+					CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
+					Rect top rbot (df.rightSB + O) df.width
 		: else : begin
 			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
-			if (!para.isItalic) : include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
+			if [not para.isItalic] : begin
+				include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
 			if [not tailed] : begin
 				include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
 
@@ -4251,7 +4242,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 		include : tagged 'barL' : VBarLeft df.leftSB lbot top df.mvs
-		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
+		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed false
 
 	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
 	glyph-block-export SmallMSmoothHeight
@@ -4283,7 +4274,6 @@ glyph-block Letter-Latin-Lower-M : begin
 		include df.markSet.e
 		include : SmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
 		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
 
 	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
 		include : dispiro
@@ -4349,7 +4339,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				width     -- df.mvs
 				fine      -- (df.mvs * CThin)
 
-		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
+		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed true
 
 	create-glyph 'm.earlessRoundedDoubleArch' : glyph-proc
 		local df : dfM
@@ -4389,7 +4379,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			flat df.rightSB [Math.max (XH - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
 
-		if SLAB : include : SmallMSerifs top lbot mbot rbot df tailed true
+		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed true
 
 	create-glyph 'm.earlessSingleArch' : glyph-proc
 		local df : dfM
