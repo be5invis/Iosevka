@@ -10,7 +10,7 @@ Quit your editor/program. Unzip and open the folder.
 * **Instructions for Windows**: Download the fonts from the [Releases](https://github.com/be5invis/Iosevka/releases), select the font files and right click, then hit "Install".
   * On Windows 10 1809 or newer the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select "Install for all users" instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
 * **[Instructions for macOS](http://support.apple.com/kb/HT2509)**
-  * Standard distribution in Homebrew: `brew tap homebrew/cask-fonts && brew cask install font-iosevka && brew cask install font-iosevka-slab`. Search for other variants using `brew search iosevka` and install what you want.
+  * Standard distribution in Homebrew: `brew tap homebrew/cask-fonts && brew cask install font-iosevka && brew cask install font-iosevka-slab`. Search for other variants using `brew search font-iosevka` and install what you want.
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
