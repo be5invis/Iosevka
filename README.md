@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																									
+																																																																																											
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -243,6 +243,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-coq`: Default ligation set would be assigned to Coq.
   * `ligset-matlab`: Default ligation set would be assigned to Matlab.
+  * `ligset-wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
 
 <!-- END Section-Cherry-Picking-Predefined -->
 
@@ -256,11 +257,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrow`: Enable ligation set that forms arrows.
   * `calt-arrow2`: Enable ligation for more arrows, like `>>=`.
   * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
-  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only.
+  * `calt-eqeqeq`: Enable special ligation for `===` with triple lines.
   * `calt-eqeq`: Enable ligation for `==` and `===`.
   * `calt-ineq`: Enable ligation for `<=` and `>=`.
-  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only.
-  * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
+  * `calt-exeqeq`: Enable special ligation for `!==` with triple lines.
+  * `calt-eqexeq`: Enable special ligation for `=!=` with triple lines.
+  * `calt-eqexeq-dl`: Enable special ligation for `=!=` with double lines.
   * `calt-exeq`: Enable ligation for `!=` and `!==`.
   * `calt-exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   * `calt-tildeeq`: Enable ligation for `~=` as inequality.
@@ -278,6 +280,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrowZALE`: Treat `<=` as arrow.
   * `calt-arrowZAGE`: Treat `>=` as co-arrow.
   * `calt-html-comment`: Enable ligation for `<!--` and `<!---`.
+  * `calt-colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
