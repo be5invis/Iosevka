@@ -2630,6 +2630,13 @@ glyph-block Letter-Latin-Lower-P : begin
 				RightwardBottomSerif (SB + HalfStroke * HVContrast) Descender MidJutSide
 		set-base-anchor 'overlay' Middle (XH / 2)
 
+	create-glyph 'p.motionSerifed' : glyph-proc
+		include : MarkSet.p
+		include : tagged 'bowl' : OBarLeftShape
+		include : VBarLeft SB Descender XH
+		include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+		set-base-anchor 'overlay' Middle (XH / 2)
+
 	create-glyph 'p.earlessCorner' : glyph-proc
 		include : MarkSet.p
 		include : tagged 'bowl' : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
@@ -3754,9 +3761,9 @@ glyph-block Letter-Latin-Lower-N : begin
 	define [NBottomLeftSerif] : if (!para.isItalic)
 		tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 		glyph-proc
-	define [NBottomRightSerif] : if (para.isItalic)
-		tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+	define [NBottomRightSerif] : if (para.isItalic) [NBottomRightSerifItalic]
 		tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+	define [NBottomRightSerifItalic] : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
 	create-glyph 'n.straight' : glyph-proc
 		set-width Width
@@ -3789,6 +3796,35 @@ glyph-block Letter-Latin-Lower-N : begin
 		if SLAB : begin
 			include : NTopLeftSerif
 			include : NBottomLeftSerif
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.motionSerifedStraight' : glyph-proc
+		set-width Width
+		include : MarkSet.e
+
+		include : VBarLeft SB 0 XH
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			fine -- ShoulderFine
+
+		include : NTopLeftSerif
+		include : NBottomRightSerifItalic
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'n.motionSerifedTailed' : glyph-proc
+		set-width Width
+		include : MarkSet.e
+
+		include : VBarLeft SB 0 XH
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+			fine -- ShoulderFine
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+
+		include : NTopLeftSerif
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 	create-glyph 'n.earlessCornerStraight' : glyph-proc
@@ -3868,6 +3904,8 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'n' 'n'
 	alias 'cyrl/pe.italicStraight' null 'n.straight'
 	alias 'cyrl/pe.italicTailed' null 'n.tailed'
+	alias 'cyrl/pe.italicMotionSerifedStraight' null 'n.motionSerifedStraight'
+	alias 'cyrl/pe.italicMotionSerifedTailed' null 'n.motionSerifedTailed'
 	alias 'cyrl/pe.italicEarlessCornerStraight' null 'n.earlessCornerStraight'
 	alias 'cyrl/pe.italicEarlessCornerTailed' null 'n.earlessCornerTailed'
 	alias 'cyrl/pe.italicEarlessRoundedStraight' null 'n.earlessRoundedStraight'
@@ -3878,15 +3916,32 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : Translate (Width + SB - Middle) 0
 		include [refer-glyph src] AS_BASE
 
-	create-glyph 'eng' 0x14B : glyph-proc
+	# Eng
+	create-glyph 'eng.straight' : glyph-proc
 		include : MarkSet.p
 		include [refer-glyph 'n.straight'] false
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
-			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+	create-glyph 'eng.motionSerifedStraight' : glyph-proc
+		include : MarkSet.p
+		include [refer-glyph 'n.motionSerifedStraight'] false
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'eng.earlessCornerStraight' : glyph-proc
+		include : MarkSet.p
+		include [refer-glyph 'n.earlessCornerStraight'] false
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'eng.earlessRoundedStraight' : glyph-proc
+		include : MarkSet.p
+		include [refer-glyph 'n.earlessRoundedStraight'] false
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	select-variant 'eng' 0x14B
 
 	create-glyph 'Eng' 0x14A : glyph-proc
 		include : MarkSet.capital
@@ -4033,6 +4088,15 @@ glyph-block Letter-Latin-Lower-U : begin
 			if SLAB : begin
 				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
 				include : LeftwardTopSerif SB XH SideJut
+
+		create-derived 'u.motionSerifed' : glyph-proc
+			include : VBarRight RightSB 0 XH
+			include : LeftwardTopSerif SB XH SideJut
+			include : RightwardBottomSerif RightSB 0 SideJut
+
+		create-derived 'u.motionSerifedTailed' : glyph-proc
+			include : RightwardTailedBar RightSB 0 XH
+			include : LeftwardTopSerif SB XH SideJut
 
 	create-glyph 'grek/upsilon' 0x3C5 : glyph-proc
 		include : MarkSet.e
@@ -4201,30 +4265,54 @@ glyph-block Letter-Latin-Lower-M : begin
 			corner left [Math.min (top - sm - 0.1) bottom]
 			close
 
-	define [SmallMSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		local jut : para.refJut + O
-		if (df.width > jut * 7) : begin
-			if [not earless] : include : tagged 'serifLT' : intersection
-				CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
+	define [SmallMTopLeftSerif df top lbot] : glyph-proc
+		if (df.width > para.refJut * 7) : begin
+			include : tagged 'serifLT' : intersection
+				CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top Jut df.mvs
 				Rect top lbot 0 (df.leftSB - O)
-			if [not para.isItalic] : begin
-				include : tagged 'serifLB' : CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot jut df.mvs
-				include : tagged 'serifMB' : CenterBottomSerif df.middle mbot jut df.mvs
-				if [not tailed] : begin
-					include : tagged 'serifRB' : CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
-			: else : if [not tailed] : begin
-				include : tagged 'serifRB' : intersection
-					CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot jut df.mvs
-					Rect top rbot (df.rightSB + O) df.width
 		: else : begin
 			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
+
+	define [SmallMBottomLeftSerif df top lbot] : glyph-proc
+		if (df.width > para.refJut * 7) : begin
+			include : tagged 'serifLB' : begin
+				CenterBottomSerif (df.leftSB + 0.5 * df.mvs * HVContrast) lbot Jut df.mvs
+		: else : begin
+			include : tagged 'serifLB' : begin
+				LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
+
+	define [SmallMBottomMiddleSerif df top mbot] : glyph-proc
+		if (df.width > para.refJut * 7) : begin
+			include : tagged 'serifMB' : begin
+				CenterBottomSerif df.middle mbot Jut df.mvs
+
+	define [SmallMBottomRightSerif df top rbot] : glyph-proc
+		if (df.width > para.refJut * 7) : begin
 			if [not para.isItalic] : begin
-				include : LeftwardBottomSerif  df.leftSB lbot SideJut df.mvs
-			if [not tailed] : begin
-				include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
+				include : tagged 'serifRB' : intersection
+					CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot Jut df.mvs
+					Rect top rbot (df.rightSB + O) df.width
+			: else : begin
+				include : tagged 'serifRB' : begin
+					CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot Jut df.mvs
+		: else : begin
+			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
+
+	define [SmallMBottomMotionRightSerif df top rbot] : glyph-proc
+		if (df.width > para.refJut * 7) : begin
+			include : tagged 'serifRB' : begin
+				CenterBottomSerif (df.rightSB - 0.5 * df.mvs * HVContrast) rbot Jut df.mvs
+		: else : begin
+			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
+
+	define [SmallMSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		if [not earless] : include : SmallMTopLeftSerif df top lbot
+		if [not para.isItalic] : include : SmallMBottomLeftSerif df top lbot
+		if [not para.isItalic] : include : SmallMBottomMiddleSerif df top mbot
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot
 
 	define [dfM] : DivFrame para.diversityM 3
-	define [SmallMShape top lbot mbot rbot df tailed] : glyph-proc
+	define [SmallMArches top lbot mbot rbot df tailed] : glyph-proc
 		include : SmallMShoulderSpiro
 			df        -- df
 			left      -- (df.leftSB + df.mvs * HVContrast)
@@ -4242,10 +4330,18 @@ glyph-block Letter-Latin-Lower-M : begin
 			width     -- df.mvs
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 		include : tagged 'barL' : VBarLeft df.leftSB lbot top df.mvs
+
+	define [SmallMShape top lbot mbot rbot df tailed] : glyph-proc
+		include : SmallMArches top lbot mbot rbot df tailed
 		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed false
 
-	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
+	define [SmallMMotionSerifedShape top lbot mbot rbot df tailed] : glyph-proc
+		include : SmallMArches top lbot mbot rbot df tailed
+		include : SmallMTopLeftSerif df top lbot
+		if [not tailed] : include : SmallMBottomMotionRightSerif df top rbot
+
 	glyph-block-export SmallMSmoothHeight
+	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
 	define [SmallMSmoothHeight df] : XH - [SmallMSmooth df] - TanSlope * Stroke
 
 	create-glyph 'm.normal' : glyph-proc
@@ -4273,6 +4369,33 @@ glyph-block Letter-Latin-Lower-M : begin
 		set-width df.width
 		include : df.markSet.e
 		include : SmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.motionSerifed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include : df.markSet.e
+		include : SmallMMotionSerifedShape XH 0 0 0 df
+
+	create-glyph 'm.motionSerifedTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include : df.markSet.e
+		include : SmallMMotionSerifedShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
+		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+
+	create-glyph 'm.motionSerifedShortleg' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include : df.markSet.e
+		include : SmallMMotionSerifedShape XH 0 [SmallMShortLegHeight df] 0 df
+		eject-contour 'serifMB'
+
+	create-glyph 'm.motionSerifedShortlegTailed' : glyph-proc
+		local df : dfM
+		set-width df.width
+		include : df.markSet.e
+		include : SmallMMotionSerifedShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
 		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
 
 	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
@@ -4410,6 +4533,7 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'm' 'm'
 	alias 'cyrl/te.italicNormal' null 'm.normal'
 	alias 'cyrl/te.italicTailed' null 'm.tailed'
+	alias 'cyrl/te.italicMotionSerifed' null 'm.motionSerifed'
 	create-glyph 'cyrl/tedescender.italic' : composite-proc [MarkSet.e]
 		refer-glyph 'm.normal'
 		CyrDescender (Width * para.diversityM - SB)
@@ -4535,6 +4659,29 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
 		if SLAB : include [SmallHSerifs true]
 
+	create-glyph 'h.motionSerifedStraight' : glyph-proc
+		set-width Width
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+		include : LeftwardTopSerif SB CAP SideJut
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'h.motionSerifedTailed' : glyph-proc
+		set-width Width
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		include : LeftwardTopSerif SB CAP SideJut
+
 	select-variant 'h' 'h'
 	alias 'cyrl/shha' 0x4BB 'h.straight'
 
@@ -4562,14 +4709,13 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
 		if SLAB : include [SmallHSerifs false]
 
-	select-variant 'hhooktop' 0x266 (follow -- 'h')
+	select-variant 'hhooktop' 0x266
 
 	create-glyph 'hhooktopltail' 0x267 : glyph-proc
 		include : MarkSet.p
 		include : refer-glyph "hhooktop.straight"
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
-
 
 	create-glyph 'hltail' 0xA727 : glyph-proc
 		include : MarkSet.p
