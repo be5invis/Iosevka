@@ -243,25 +243,24 @@ export : define [MarksetDiv p me] : begin
 		* (anchor.x * me.GlobalTransform.xx + anchor.y * me.TanSlope + me.GlobalTransform.x)
 		* (anchor.x * me.GlobalTransform.xy + anchor.y * me.GlobalTransform.yy + me.GlobalTransform.y)
 
-	define markAboveLower       {.baseAnchors {.above       [ta : new Anchor middle  me.XH                     ]}}
-	define markAboveOper        {.baseAnchors {.above       [ta : new Anchor middle  me.OperTop                ]}}
-	define markAboveTack        {.baseAnchors {.above       [ta : new Anchor middle  me.TackTop                ]}}
-	define markAbovePlus        {.baseAnchors {.above       [ta : new Anchor middle  me.PlusTop                ]}}
-	define markAboveCap         {.baseAnchors {.above       [ta : new Anchor middle  me.CAP                    ]}}
-	define markBelowLower       {.baseAnchors {.below       [ta : new Anchor middle  me.Descender              ]}}
-	define markBelowTack        {.baseAnchors {.below       [ta : new Anchor middle  me.TackBot                ]}}
-	define markBelowOper        {.baseAnchors {.below       [ta : new Anchor middle  me.OperBot                ]}}
-	define markBelowPlus        {.baseAnchors {.below       [ta : new Anchor middle  me.PlusBot                ]}}
-	define markBelowZero        {.baseAnchors {.below       [ta : new Anchor middle  0                         ]}}
-	define markToprightLower    {.baseAnchors {.topright    [ta : new Anchor rightSB me.XH                     ]}}
-	define markToprightCap      {.baseAnchors {.topright    [ta : new Anchor rightSB me.CAP                    ]}}
-	define markBottomrightLower {.baseAnchors {.bottomright [ta : new Anchor rightSB me.Descender              ]}}
-	define markBottomrightZero  {.baseAnchors {.bottomright [ta : new Anchor rightSB 0                         ]}}
-	define markTieAbove         {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
-	define markTieBelow         {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
+	define [MarkAbove zone]        {.baseAnchors {.above       [ta : new Anchor middle  zone.top                  ]}}
+	define [MarkBelow zone]        {.baseAnchors {.below       [ta : new Anchor middle  zone.bot                  ]}}
+	define [MarkTopRight zone]     {.baseAnchors {.topright    [ta : new Anchor rightSB zone.top                  ]}}
+	define [MarkBottomRight zone]  {.baseAnchors {.bottomright [ta : new Anchor rightSB zone.bot                  ]}}
 
-	define [buildStandardMarkSet] : begin
-		local a : compositeBaseAnchors.apply null arguments
+	define markTieAbove            {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
+	define markTieBelow            {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
+
+	define [buildStandardMarkSet zone] : lambda [] : begin
+		if (this.baseAnchors) : begin
+			throw : new Error "A mark set is now a function. Please call it before inclusion"
+		local a : compositeBaseAnchors
+			MarkAbove       zone
+			MarkBelow       zone
+			MarkTopRight    zone
+			MarkBottomRight zone
+			begin markTieAbove
+			begin markTieBelow
 		set a.baseAnchors.overlay : new Anchor
 			* [mix a.baseAnchors.below.x a.baseAnchors.above.x me.OverlayPos]
 			* [mix a.baseAnchors.below.y a.baseAnchors.above.y me.OverlayPos]
@@ -270,15 +269,18 @@ export : define [MarksetDiv p me] : begin
 			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
 		return a
 
+
+
 	return : object
-		capital : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
-		b       : buildStandardMarkSet markAboveCap markBelowZero markToprightCap markBottomrightZero markTieAbove markTieBelow
-		e       : buildStandardMarkSet markAboveLower markBelowZero markToprightLower markBottomrightZero markTieAbove markTieBelow
-		oper    : buildStandardMarkSet markAboveOper markBelowOper markToprightLower markBottomrightZero markTieAbove markTieBelow
-		tack    : buildStandardMarkSet markAboveTack markBelowTack markToprightLower markBottomrightZero markTieAbove markTieBelow
-		plus    : buildStandardMarkSet markAbovePlus markBelowPlus markToprightLower markBottomrightZero markTieAbove markTieBelow
-		p       : buildStandardMarkSet markAboveLower markBelowLower markToprightLower markBottomrightLower markTieAbove markTieBelow
-		if      : buildStandardMarkSet markAboveCap markBelowLower markToprightCap markBottomrightLower markTieAbove markTieBelow
+		OfZone    buildStandardMarkSet
+		capital : buildStandardMarkSet {.top me.CAP     .bot 0}
+		b       : buildStandardMarkSet {.top me.CAP     .bot 0}
+		e       : buildStandardMarkSet {.top me.XH      .bot 0}
+		p       : buildStandardMarkSet {.top me.XH      .bot me.Descender}
+		oper    : buildStandardMarkSet {.top me.OperTop .bot me.OperBot}
+		tack    : buildStandardMarkSet {.top me.TackTop .bot me.TackBot}
+		plus    : buildStandardMarkSet {.top me.PlusTop .bot me.PlusBot}
+		if      : buildStandardMarkSet {.top me.CAP     .bot me.Descender}
 
 export : define designParameters : object
 	# V shape

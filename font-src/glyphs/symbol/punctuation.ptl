@@ -423,7 +423,7 @@ glyph-block Symbol-Punctuation-Emotion : begin
 
 	create-glyph 'exclam' '!' : glyph-proc
 		set-width Width
-		include MarkSet.capital
+		include : MarkSet.capital
 		include : VBar Middle [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
 		include : DotAt Middle DotRadius (DotRadius - O)
 
@@ -1080,25 +1080,30 @@ glyph-block Symbol-Punctuation-Interpuncts : begin
 	create-glyph 'period.mid' : DotAt Middle SymbolMid (PeriodRadius - O)
 	alias 'interpunct' 0xB7 'period.mid'
 	alias 'greekbullet' 0x387 'period.mid'
-	alias 'bullet' 0x2022 'period.mid'
 	alias 'hyphenpoint' 0x2027 'period.mid'
 	alias 'mathCDot' 0x22C5 'period.mid'
 
-	create-glyph 'triangularBullet' 0x2023 : glyph-proc
-		local radius : PeriodRadius * 1.5
-		include : spiro-outline
-			corner (Middle + radius - O) SymbolMid
-			corner (Middle - radius / 2) (SymbolMid - radius / 2 * [Math.sqrt 3])
-			corner (Middle - radius / 2) (SymbolMid + radius / 2 * [Math.sqrt 3])
+glyph-block Symbol-Punctuation-Bullets : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
 
-	for-width-kinds WideWidth1
-		local radius : PeriodRadius * [Math.sqrt MosaicWidthScalar]
-		create-glyph [MangleName 'whiteBullet'] [MangleUnicode 0x25E6] : glyph-proc
-			set-width MosaicWidth
-			local s : [adviceBlackness 5] * 0.75
-			include : difference
-				DotAt MosaicMiddle SymbolMid (radius - O)
-				DotAt MosaicMiddle SymbolMid (radius - O - s)
+	define BulletRadius : Math.max (Width * 2 / 7) [adviceBlackness 3]
+
+	create-glyph 'bullet' 0x2022 : DotAt Middle SymbolMid (BulletRadius - O)
+
+	create-glyph 'triangularBullet' 0x2023 : glyph-proc
+		local radius : BulletRadius * 1.5
+		local xMid : Middle - radius / 6
+		include : spiro-outline
+			corner (xMid + radius - O) SymbolMid
+			corner (xMid - radius / 2) (SymbolMid - radius / 2 * [Math.sqrt 3])
+			corner (xMid - radius / 2) (SymbolMid + radius / 2 * [Math.sqrt 3])
+
+	create-glyph 'whiteBullet' 0x25E6 : glyph-proc
+		local s : Math.min [adviceBlackness 5] (BulletRadius * 0.5)
+		include : difference
+			DotAt Middle SymbolMid (BulletRadius - O)
+			DotAt Middle SymbolMid (BulletRadius - O - s)
 
 
 glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
@@ -1524,19 +1529,19 @@ glyph-block Symbol-Punctuation-Ascii-Marks : begin
 		Upright
 		Translate 0 (SymbolMid - XH - Accent)
 		Italify
-		begin MarkSet.plus
+		MarkSet.plus
 	create-glyph 'asciiCaret.low' : composite-proc
 		refer-glyph 'asciiCaret.high'
 		Upright
 		Translate 0 (SymbolMid - XH)
 		Italify
-		begin MarkSet.plus
+		MarkSet.plus
 	create-glyph 'caretAtBaseline' 0x2038 : composite-proc
 		refer-glyph 'asciiCaret.high'
 		Upright
 		Translate 0 (0 - aboveMarkTop)
 		Italify
-		begin MarkSet.plus
+		MarkSet.plus
 
 	select-variant 'asciiTilde' '~'
 	select-variant 'asciiCaret' '^'

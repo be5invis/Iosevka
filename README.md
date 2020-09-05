@@ -195,7 +195,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																									
+																																																																																												
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -243,6 +243,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `ligset-swift`: Default ligation set would be assigned to Swift.
   * `ligset-coq`: Default ligation set would be assigned to Coq.
   * `ligset-matlab`: Default ligation set would be assigned to Matlab.
+  * `ligset-wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
 
 <!-- END Section-Cherry-Picking-Predefined -->
 
@@ -256,11 +257,12 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrow`: Enable ligation set that forms arrows.
   * `calt-arrow2`: Enable ligation for more arrows, like `>>=`.
   * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
-  * `calt-eqeqeq`: Enable special triple-line ligation for `===` only.
+  * `calt-eqeqeq`: Enable special ligation for `===` with triple lines.
   * `calt-eqeq`: Enable ligation for `==` and `===`.
   * `calt-ineq`: Enable ligation for `<=` and `>=`.
-  * `calt-exeqeq`: Enable special triple-line ligation for `!==` only.
-  * `calt-eqexeq`: Enable special triple-line ligation for `=!=` only.
+  * `calt-exeqeq`: Enable special ligation for `!==` with triple lines.
+  * `calt-eqexeq`: Enable special ligation for `=!=` with triple lines.
+  * `calt-eqexeq-dl`: Enable special ligation for `=!=` with double lines.
   * `calt-exeq`: Enable ligation for `!=` and `!==`.
   * `calt-exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   * `calt-tildeeq`: Enable ligation for `~=` as inequality.
@@ -278,6 +280,7 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * `calt-arrowZALE`: Treat `<=` as arrow.
   * `calt-arrowZAGE`: Treat `>=` as co-arrow.
   * `calt-html-comment`: Enable ligation for `<!--` and `<!---`.
+  * `calt-colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
@@ -347,6 +350,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
   * Styles for `h`:
     * `v-h-straight`, `VXCB`: `h` with straight ending (default).
     * `v-h-tailed`, `VXCC`: `h` with curly tailed ending.
+    * `v-h-motion-serifed-straight`, `VXEK`: `h` with straight ending.
+    * `v-h-motion-serifed-tailed`, `VXEL`: `h` with curly tailed ending.
   * Styles for `i`:
     * `v-i-serifed`, `cv03`: Serifed `i` (default for Upright).
     * `v-i-italic`, `cv04`: Italic `i` (default for Italic).
@@ -393,6 +398,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-m-earless-single-arch-shortleg`, `VXED`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
     * `v-m-earless-single-arch-tailed`, `VXEE`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
     * `v-m-earless-single-arch-shortleg-tailed`, `VXEF`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    * `v-m-motion-serifed`, `VXEM`: `m` with motion serifs, normal middle leg touching baseline.
+    * `v-m-motion-serifed-shortleg`, `VXEN`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
+    * `v-m-motion-serifed-tailed`, `VXEO`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
+    * `v-m-motion-serifed-shortleg-tailed`, `VXEP`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
   * Styles for `n`:
     * `v-n-straight`, `VXCF`: `n` with straight ending (default).
     * `v-n-tailed`, `VXCG`: `n` with a curly tail.
@@ -400,10 +409,13 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-n-earless-corner-tailed`, `VXDP`: Earless (corner top-left) `n` with a curly tail.
     * `v-n-earless-rounded-straight`, `VXDQ`: Earless (rounded top-left) `n` with straight ending.
     * `v-n-earless-rounded-tailed`, `VXDR`: Earless (rounded top-left) `n` with a curly tail.
+    * `v-n-motion-serifed-straight`, `VXEQ`: `n` with motion serifs and straight ending.
+    * `v-n-motion-serifed-tailed`, `VXER`: `n` with motion serifs and a curly tail.
   * Styles for `p`:
     * `v-p-eared`, `VXCP`: `p` with top-left ear (default).
     * `v-p-earless-corner`, `VXCQ`: `p` without top-left ear (corner).
     * `v-p-earless-rounded`, `VXCR`: `p` without top-left ear (rounded).
+    * `v-p-motion-serifed`, `VXES`: `p` with motion serifs.
   * Styles for `q`:
     * `v-q-straight`, `VXAZ`: `q` with straight bar (default).
     * `v-q-tailed`, `VXBA`: `q` with tail.
@@ -428,6 +440,8 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-u-with-bar`, `cv89`: Normal `u` with right bar (default for Upright).
     * `v-u-without-bar`, `cv90`: Normal `u` without right bar, like a smaller uppercase `U`.
     * `v-u-tailed`, `VXBT`: `u` with right bar and a slightly curly tail (default for Italic).
+    * `v-u-motion-serifed`, `VXET`: Normal `u` with right bar and motion serifs.
+    * `v-u-motion-serifed-tailed`, `VXEU`: `u` with right bar, motion serifs and a slightly curly tail.
   * Styles for `v`, `V`:
     * `v-v-straight`, `cv71`: Standard, straight `V` and `v` (default).
     * `v-v-curly`, `cv72`:  Slightly curly `V` and `v`, like Iosevka 2.x.

@@ -14,7 +14,7 @@ const eqeq = TAG("eqeq");
 const exeq = TAG("exeq");
 const eqeqeq = TAG("eqeq", "eqeqeq");
 const exeqeq = TAG("exeq", "exeqeq");
-const eqexeq = TAG("eqexeq", "eqexeq");
+const eqexeq = TAG("eqexeq", "eqexeq", "eqexeq-dl");
 const eqslasheq = TAG("slasheq", "eqslasheq");
 const slasheq = TAG("slasheq");
 const tildeeq = TAG("tildeeq");
@@ -28,7 +28,8 @@ const llggeq_b = TAG("arrow2", "llggeq");
 const dotOper = TAG("dotoper");
 const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
-const plusplus = TAG("plusplus");
+const plusPlus = TAG("plusplus");
+const colonGt = TAG("colon-greater");
 
 const ligationSamples = [
 	[
@@ -111,10 +112,11 @@ const ligationSamples = [
 		centerOps("+:"),
 		centerOps("-:"),
 		centerOps("=:"),
-		centerOps("<******>"),
+		centerOps("<***>"),
+		colonGt(":>"),
 		brst("(* comm *)"),
-		plusplus("++"),
-		plusplus("+++"),
+		plusPlus("++"),
+		plusPlus("+++"),
 		logc("|-"),
 		logc("-|")
 	]
@@ -209,9 +211,10 @@ const ligationSamplesNarrow = [
 		dotOper("<."),
 		dotOper("<.>"),
 		dotOper(".>"),
-		brst("(* comm *)"),
-		plusplus("++"),
-		plusplus("+++"),
+		brst("(* *)"),
+		colonGt(":>"),
+		plusPlus("++"),
+		plusPlus("+++"),
 		logc("|-"),
 		logc("-|")
 	]
