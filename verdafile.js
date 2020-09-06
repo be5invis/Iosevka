@@ -36,6 +36,11 @@ const SINGLE_GROUP_EXPORT_PREFIX = `ttf`;
 const COLLECTION_EXPORT_PREFIX = `pkg`;
 const TTC_ONLY_COLLECTION_EXPORT_PREFIX = `ttc`;
 
+const WIDTH_NORMAL = "normal";
+const WEIGHT_NORMAL = "regular";
+const SLOPE_NORMAL = "upright";
+const DEFAULT_SUBFAMILY = "regular";
+
 const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
 const PRIVATE_BUILD_PLANS = path.relative(
 	__dirname,
@@ -134,7 +139,7 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 			const sfi = suffixMapping[suffix];
 			if (weights && !weights[sfi.weight]) continue;
 			if (slopes && !slopes[sfi.slope]) continue;
-			const fileName = [prefix, suffix].join("-");
+			const fileName = makeFileName(prefix, suffix);
 			bp.targets.push(fileName);
 			fileNameToBpMap[fileName] = { prefix, suffix };
 		}
@@ -230,7 +235,7 @@ function getSuffixMapping(weights, slopes, widths) {
 		validateRecommendedWeight(w, weights[w].css, "CSS");
 		for (const s in slopes) {
 			for (const wd in widths) {
-				const suffix = makeSuffix(w, wd, s, "regular");
+				const suffix = makeSuffix(w, wd, s, DEFAULT_SUBFAMILY);
 				mapping[suffix] = {
 					weight: w,
 					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
@@ -255,10 +260,14 @@ function getSuffixMapping(weights, slopes, widths) {
 	return mapping;
 }
 
+function makeFileName(prefix, suffix) {
+	return prefix + "-" + suffix;
+}
 function makeSuffix(w, wd, s, fallback) {
 	return (
-		(wd === "normal" ? "" : wd) + (w === "regular" ? "" : w) + (s === "upright" ? "" : s) ||
-		fallback
+		(wd === WIDTH_NORMAL ? "" : wd) +
+			(w === WEIGHT_NORMAL ? "" : w) +
+			(s === SLOPE_NORMAL ? "" : s) || fallback
 	);
 }
 
@@ -377,7 +386,7 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 					sfi.slope
 				);
 
-				const ttfTargetName = `${prefix}-${suffix}`;
+				const ttfTargetName = makeFileName(prefix, suffix);
 				if (!ttfFileNameSet.has(ttfTargetName)) continue;
 
 				if (!glyfTtcComposition[glyfTtcFileName]) glyfTtcComposition[glyfTtcFileName] = [];
@@ -395,10 +404,10 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
-		collectConfig.distinguishWeights ? w : "regular",
-		collectConfig.distinguishWidths ? wd : "normal",
-		collectConfig.distinguishSlope ? s : "upright",
-		"regular"
+		collectConfig.distinguishWeights ? w : WEIGHT_NORMAL,
+		collectConfig.distinguishWidths ? wd : WIDTH_NORMAL,
+		collectConfig.distinguishSlope ? s : SLOPE_NORMAL,
+		DEFAULT_SUBFAMILY
 	);
 	return `${prefix}-${ttcSuffix}`;
 }
