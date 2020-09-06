@@ -1,7 +1,5 @@
 ﻿"use strict";
 
-const { z } = require("typo-geom");
-
 module.exports = class Point {
 	constructor(x, y, on, cubic) {
 		this.x = x;
