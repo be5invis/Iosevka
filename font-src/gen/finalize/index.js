@@ -5,82 +5,54 @@ const TypoGeom = require("typo-geom");
 const Point = require("../../support/point");
 
 const CurveUtil = require("../../support/curve-util");
-const { AnyCv } = require("../../support/gr");
 const gcFont = require("./gc");
 
-module.exports = function finalizeFont(para, glyphList, excludedCodePoints, font) {
-	forceMonospaceIfNeeded(para, glyphList);
-	gcFont(glyphList, excludedCodePoints, font, {});
-	extractGlyfCmap(regulateGlyphList(para, glyphList), font);
+module.exports = function finalizeFont(para, glyphStore, excludedCodePoints, font) {
+	glyphStore = forceMonospaceIfNeeded(para, glyphStore);
+	glyphStore = gcFont(glyphStore, excludedCodePoints, font, {});
+	glyphStore = regulateGlyphStore(para, glyphStore);
+	extractGlyfCmap(glyphStore, font);
+	return glyphStore;
 };
 
-function forceMonospaceIfNeeded(para, glyphList) {
-	if (!para.forceMonospace || para.spacing > 0) return;
+function forceMonospaceIfNeeded(para, glyphStore) {
 	const unitWidth = Math.round(para.width);
-	let i = 0,
-		j = 0;
-	for (; i < glyphList.length; i++) {
-		const g = glyphList[i];
-		g.advanceWidth = Math.round(g.advanceWidth || 0);
-		if (g.advanceWidth === 0 || g.advanceWidth === unitWidth) glyphList[j++] = g;
-	}
-	glyphList.length = j;
+	if (!para.forceMonospace || para.spacing > 0) return glyphStore;
+	return glyphStore.filterByGlyph({
+		has: g => {
+			const gw = Math.round(g.advanceWidth || 0);
+			return gw === 0 || gw === unitWidth;
+		}
+	});
 }
 
-function extractGlyfCmap(glyphList, font) {
+function extractGlyfCmap(glyphStore, font) {
 	const glyf = {};
 	const cmap = {};
-	for (let g of glyphList) {
-		glyf[g.name] = g;
-		if (!g.unicode) continue;
-
-		for (let u of g.unicode) {
-			if (isFinite(u - 0)) cmap[u] = g.name;
+	const sortedEntries = Array.from(glyphStore.indexedNamedEntries()).sort(byRank);
+	for (const [origIndex, name, g] of sortedEntries) {
+		glyf[name] = g;
+		const us = glyphStore.queryUnicodeOf(g);
+		if (us) {
+			for (const u of us) if (isFinite(u - 0) && u) cmap[u] = name;
 		}
 	}
 	font.glyf = glyf;
 	font.cmap = cmap;
 }
 
-function regulateGlyphList(para, gs) {
-	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
-
-	const excludeUnicode = new Set();
-	excludeUnicode.add(0x80);
-	for (let c = 0x2500; c <= 0x259f; c++) excludeUnicode.add(c);
-
-	// autoref
-	for (let j = 0; j < gs.length; j++) {
-		gs[j].glyphOrder = j;
-		if (AnyCv.query(gs[j]).length) gs[j].autoRefPriority = -1;
-		if (gs[j].unicode) {
-			for (const u of gs[j].unicode) {
-				if (excludeUnicode.has(u)) gs[j].avoidBeingComposite = true;
-			}
-		}
-	}
-	gs.sort(byGlyphPriority);
-	autoRef(gs, excludeUnicode);
+function regulateGlyphStore(para, glyphStore) {
+	autoRef(glyphStore);
 
 	// regulate
-	for (let g of gs) regulateGlyph(g, skew);
+	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
+	for (let g of glyphStore.glyphs()) regulateGlyph(g, skew);
 
-	// reorder
-	return gs.sort(byRank);
+	return glyphStore;
 }
 
-function byGlyphPriority(a, b) {
-	const pri1 = a.autoRefPriority || 0;
-	const pri2 = b.autoRefPriority || 0;
-	if (pri1 > pri2) return -1;
-	if (pri1 < pri2) return 1;
-	if (a.contours && b.contours && a.contours.length < b.contours.length) return 1;
-	if (a.contours && b.contours && a.contours.length > b.contours.length) return -1;
-	return 0;
-}
-
-function byRank(a, b) {
-	return (b.glyphRank || 0) - (a.glyphRank || 0) || (a.glyphOrder || 0) - (b.glyphOrder || 0);
+function byRank([ja, gna, a], [jb, gnb, b]) {
+	return (b.glyphRank || 0) - (a.glyphRank || 0) || (ja || 0) - (jb || 0);
 }
 
 function regulateGlyph(g, skew) {
@@ -143,7 +115,7 @@ class FairizedShapeSink {
 		this.lastContour.push(z);
 	}
 	arcTo(arc, x, y) {
-		const offPoints = TypoGeom.Quadify.auto(arc, CurveUtil.GEOMETRY_PRECISION);
+		const offPoints = TypoGeom.Quadify.auto(arc, 1, 16);
 		if (offPoints) {
 			for (const z of offPoints)
 				this.lastContour.push(Point.offFrom(z).round(CurveUtil.RECIP_GEOMETRY_PRECISION));

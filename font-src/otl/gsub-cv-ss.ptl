@@ -5,7 +5,7 @@ extern Set
 define [FeatureName tag] : tag + '_cvss'
 define [LookupName tag]  : 'lookup_cvss_' + tag
 
-export : define [buildCVSS sink para glyphs glyphList] : begin
+export : define [buildCVSS sink para glyphStore] : begin
 	if [not para.enableCvSs] : return nothing
 
 	local rec : BeginLookupBlock sink
@@ -13,7 +13,7 @@ export : define [buildCVSS sink para glyphs glyphList] : begin
 
 	# Decomposition of enclosures
 	define decompositions {.}
-	foreach {gid g} [pairs-of glyphs] : begin
+	foreach { gid g } [glyphStore.namedEntries] : begin
 		local parts : CvDecompose.get g
 		if (parts && parts.length) : set decompositions.(gid) parts
 
@@ -22,7 +22,7 @@ export : define [buildCVSS sink para glyphs glyphList] : begin
 		.subtables : list decompositions
 
 	# cvxx
-	foreach [glyph : items-of glyphList]
+	foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
 		foreach [gr : items-of : AnyCv.query glyph] : if gr.tag : begin
 			local lookupName : LookupName gr.tag
 			if [not : cvLookupNameSet.has lookupName] : begin
@@ -36,7 +36,7 @@ export : define [buildCVSS sink para glyphs glyphList] : begin
 				sink.lookupDep.push { lookupCvDecompose lookupName }
 				cvLookupNameSet.add lookupName
 
-			set [pick-lookup sink lookupName].subtables.0.(glyph.name) [gr.get glyph]
+			set [pick-lookup sink lookupName].subtables.0.(gn) [gr.get glyph]
 
 	# ssxx
 	foreach [{name composition} : pairs-of para.variants] : begin

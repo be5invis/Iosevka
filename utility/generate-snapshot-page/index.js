@@ -4,6 +4,9 @@ const path = require("path");
 const parseVariantsData = require("../export-data/parse-variants-data");
 const getLigationData = require("../export-data/ligation-data");
 
+const inputPath = process.argv[2];
+const outputPath = process.argv[3];
+
 main().catch(e => {
 	console.error(e);
 	process.exit(1);
@@ -13,7 +16,7 @@ main().catch(e => {
 
 async function main() {
 	const weightGrades = [100, 200, 300, 400, 500, 600, 700, 800, 900];
-	const templatePath = path.join(__dirname, "templates/index.ejs");
+	const templatePath = path.join(inputPath, "index.ejs");
 	const html = await ejs.renderFile(templatePath, {
 		...(await parseVariantsData()),
 		ligation: await getLigationData(),
@@ -26,5 +29,5 @@ async function main() {
 				.replace(/\n/g, "<br/>");
 		}
 	});
-	await fs.writeFile(path.join(__dirname, "../../snapshot/index.html"), html);
+	await fs.writeFile(outputPath, html);
 }

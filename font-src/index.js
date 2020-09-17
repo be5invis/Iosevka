@@ -7,13 +7,13 @@ const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
 const FormVariantData = require("./support/variant-data");
 const FormLigationData = require("./support/ligation-data");
-const { AnyCv, CvDecompose } = require("./support/gr");
+const { createGrDisplaySheet } = require("./support/gr");
 const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {
 	const para = await getParameters(argv);
-	const font = BuildFont(para);
-	if (argv.oCharMap) await saveCharMap(argv, font);
+	const { font, glyphStore } = BuildFont(para);
+	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveOtd(argv, font);
 };
 
@@ -96,38 +96,14 @@ function objHashNonEmpty(obj) {
 	return false;
 }
 
-async function saveCharMap(argv, font) {
+async function saveCharMap(argv, glyphStore) {
 	let charMap = [];
-	for (const gid in font.glyf) {
-		const glyph = font.glyf[gid];
-		if (!glyph) continue;
-
-		const glyphIsHidden = /^\./.test(gid);
-		const typographicFeatures = [];
-		if (!glyphIsHidden) {
-			if (/\.NWID$/.test(gid) || /\.WWID$/.test(gid))
-				typographicFeatures.push("NWID", "WWID");
-			if (/\.lnum$/.test(gid) || /\.onum$/.test(gid))
-				typographicFeatures.push("lnum", "onum");
-		}
-
-		let variantFeatures;
-		if (CvDecompose.get(glyph)) {
-			const variantFeatureSet = new Set();
-			const decomposition = CvDecompose.get(glyph);
-			for (const gn of decomposition) {
-				const component = font.glyf[gn];
-				if (!component) continue;
-				for (const cv of AnyCv.query(component)) variantFeatureSet.add(cv.tag);
-			}
-			variantFeatures = Array.from(variantFeatureSet).sort();
-		} else {
-			variantFeatures = AnyCv.query(glyph)
-				.map(gr => gr.tag)
-				.sort();
-		}
-
-		charMap.push([glyph.name, glyph.unicode, typographicFeatures, variantFeatures]);
+	for (const [gn] of glyphStore.namedEntries()) {
+		charMap.push([
+			gn,
+			Array.from(glyphStore.queryUnicodeOfName(gn) || []),
+			...createGrDisplaySheet(glyphStore, gn)
+		]);
 	}
 	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
 }

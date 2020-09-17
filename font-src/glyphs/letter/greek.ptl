@@ -1,0 +1,759 @@
+$$include '../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../support/utils'
+import [designParameters] from '../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Letter-Greek-Lower-Alpha : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	###########################################################################################
+	# UNIFIED LETTERFORMS : GREEK ORIGINALS
+	###########################################################################################
+	create-glyph 'grek/alpha' 0x3B1 : glyph-proc
+		include : MarkSet.e
+
+		local middle : mix SB RightSB 0.42
+		local fine   : adviceBlackness 3.25
+		local k1 0.25
+		local k2 0.5
+		local k3 0.35
+		include : dispiro
+			widths.rhs fine
+			g4   (RightSB - OX * 1.75) XH [heading Downward]
+			bezcontrols k1 k2 k3 1 6
+			g4.left.mid (middle + CorrectionOMidS) O [widths 0 Stroke]
+			archv
+			flat (SB + OX * 2) SmallSmoothB
+			curl (SB + OX * 2) (XH - SmallSmoothA)
+			arcvh
+			g4.right.mid (middle - CorrectionOMidS) (XH - O) [widths 0 Stroke]
+			bezcontrols (1 - k3) 0 (1 - k1) (1 - k2) 6
+			g4   (RightSB - OX * 2) 0 [widths.heading 0 fine Downward]
+
+		set-base-anchor 'overlay' (middle - OX) (XH * OverlayPos)
+
+glyph-block Letter-Greek-Upper-Gamma: begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : nShoulder
+
+	define GammaBarLeft (SB * 1.5)
+	define [GammaShape top] : glyph-proc
+		include : VBarLeft GammaBarLeft 0 top
+		include : HBarTop (GammaBarLeft - O) (RightSB - OX) top
+		if SLAB : begin
+			include : LeftwardTopSerif GammaBarLeft top SideJut
+			include : LeftwardBottomSerif (GammaBarLeft + HVContrast * HalfStroke) 0 Jut
+			include : RightwardBottomSerif (GammaBarLeft + HVContrast * HalfStroke) 0 MidJutSide
+			include : tagged 'serifRT' : DownwardRightSerif (RightSB - OX) top VJut
+
+	create-glyph 'grek/Gamma' 0x393 : glyph-proc
+		include : MarkSet.capital
+		include : GammaShape CAP
+
+	alias 'cyrl/Ghe' 0x413 'grek/Gamma'
+
+	create-glyph 'cyrl/GheHook' 0x494 : glyph-proc
+		include [refer-glyph 'cyrl/Ghe'] AS_BASE ALSO_METRICS
+		include : nShoulder
+			left   -- (GammaBarLeft + Stroke)
+			right  -- RightSB
+			top    -- CAP * HBarPos + Stroke / 4
+			bottom -- 0
+			sma    -- SmoothA
+			smb    -- SmoothB
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'cyrl/ghe.upright' : glyph-proc
+		include : MarkSet.e
+		include : GammaShape XH
+
+	create-glyph 'cyrl/gheHook' 0x495 : glyph-proc
+		include [refer-glyph 'cyrl/ghe.upright'] AS_BASE ALSO_METRICS
+		include : nShoulder
+			left   -- (GammaBarLeft + Stroke)
+			right  -- RightSB
+			top    -- XH * HBarPos + Stroke / 4
+			bottom -- 0
+			sma    -- SmoothA * [Math.pow HBarPos 0.3]
+			smb    -- SmoothB * [Math.pow HBarPos 0.3]
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'cyrl/ghe.SRB' : glyph-proc
+		include [refer-glyph 'dotlessi'] AS_BASE
+		include : refer-glyph "macronAbove"
+
+	italic-variant 'cyrl/ghe' 0x433
+
+	define [CyrGeShape top] : glyph-proc
+		include : GammaShape top
+		eject-contour 'serifRT'
+		include : VBarRight (RightSB - OX) top (top + Accent)
+
+	create-glyph 'cyrl/Ge' 0x490 : glyph-proc
+		include : MarkSet.capital
+		include : CyrGeShape CAP
+
+	create-glyph 'cyrl/ge' 0x491 : glyph-proc
+		include : MarkSet.e
+		include : CyrGeShape XH
+
+	create-glyph 'cyrl/Ghayn' 0x492 : glyph-proc
+		include [refer-glyph 'cyrl/Ghe'] AS_BASE
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * (1 - OverlayPos))
+
+	create-glyph 'cyrl/ghayn.upright' : glyph-proc
+		include [refer-glyph 'cyrl/ghe.upright'] AS_BASE
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (XH * (1 - OverlayPos))
+
+	create-glyph 'cyrl/ghayn.italic' : glyph-proc
+		include [refer-glyph 'cyrl/ghe.italic'] AS_BASE
+		include : FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
+
+	italic-variant 'cyrl/ghayn' 0x493
+
+glyph-block Letter-Greek-Lower-Gamma : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/gamma' 0x3B3 : glyph-proc
+		include : MarkSet.p
+
+		local xmid : [mix SB RightSB 0.46] + HalfStroke
+		include : dispiro
+			g4 (SB + 0.4 * Stroke * HVContrast) (XH - O) [widths.rhs]
+			bezcontrols 0.33 0.17 1 0.62 6 important
+			flat xmid 0
+			curl xmid Descender [heading Downward]
+
+		include : dispiro
+			widths.rhs
+			flat RightSB XH [heading Downward]
+			curl RightSB (XH * 0.9) [heading Downward]
+			quadcontrols 0 0.3 6
+			g4   xmid 0 [widths.rhs : Stroke * 0.9]
+
+glyph-block Letter-Greek-Lower-Delta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/delta' 0x3B4 : glyph-proc
+		include : MarkSet.b
+
+		local xNeck : mix SB RightSB 0.07
+		local bar : mix 0 XH 0.96
+		local xOTLeft : mix SB RightSB 0.5
+		local fine : Stroke * 0.5
+
+		local sma : SmallSmoothA * bar / XH
+		local smb : SmallSmoothB * bar / XH
+
+		include : dispiro
+			widths.rhs
+			g4   [mix Middle RightSB 0.85] ([mix XH CAP 0.8] - Stroke) [heading Leftward]
+			alsoThru 0.5 0.7
+			g4   Middle (CAP - O - Stroke)
+			archv 2
+			g4   (xNeck + Stroke) [mix (CAP - O - Stroke) bar 0.5]
+			arcvh 2
+			g4   xOTLeft bar [heading Rightward]
+			alsoThruThem : list {0.25 0.05} {0.5 0.13}
+			flat (RightSB - OX) (bar - smb)
+			curl (RightSB - OX) sma
+			arcvh
+			g4.left.mid (Middle + CorrectionOMidS) O
+			archv
+			flat (SB + OX) smb
+			curl (SB + OX) (bar - sma)
+			arcvh
+			g4   xOTLeft (bar - (Stroke - fine) / 2) [widths 0 fine]
+
+	alias 'cyrl/be.SRB' null 'grek/delta'
+	alias 'latindelta' 0x1E9F 'grek/delta'
+
+	turned 'turndelta' 0x18D 'grek/delta' Middle (XH / 2) [MarkSet.p]
+
+	create-glyph 'cyrl/be' 0x431 : glyph-proc
+		include : MarkSet.b
+		include : dispiro
+			widths.rhs (Stroke * CThinB)
+			flat (SB + OX + Stroke * (1 - CThinB) * HVContrast) SmallSmoothB
+			curl (SB + OX + Stroke * (1 - CThinB) * HVContrast) (XH - SmallSmoothA)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP * 0.7 - O) [widths.rhs Stroke]
+			archv
+			flat (RightSB - OX) (XH - SmallSmoothB)
+			curl (RightSB - OX) SmallSmoothA
+			arcvh
+			g4 (Middle + CorrectionOMidS) O
+			archv
+			flat (SB + OX) SmallSmoothB
+			curl (SB + OX) (XH - SmallSmoothA)
+			alsoThruThem [list {0.25 0.79} {0.5 0.87}] important
+			g4   (RightSB - HalfStroke * HVContrast) CAP
+
+
+glyph-block Letter-Greek-Lower-Epsilon : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define StdBlend 0.65
+
+	define [SmallEpsilonShapeDim top bot blend] : begin
+		local stroke : adviceBlackness2 2.875 2 (top - bot)
+		local midx : mix SB RightSB blend
+		local midy : mix bot top OverlayPos
+		local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothB / (SmoothA + SmoothB))] - TanSlope * HVContrast * stroke
+		local smb : [mix (stroke + O) (midy - stroke / 2) (SmoothB / (SmoothA + SmoothB))] + TanSlope * HVContrast * stroke
+		local fine : stroke * CThin
+		return : object stroke midx midy sma smb fine
+
+	define [SmallEpsilonUpperShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : SmallEpsilonShapeDim top bot blend
+		return : dispiro
+			g4 (RightSB + O) (top - hook) [widths.lhs]
+			hookstart (top - O)
+			g4 (SB + (OX - O)) (top - sma)
+			arcvh
+			flat Middle (midy - (fine - stroke / 2)) [widths.heading fine 0 Rightward]
+			curl midx (midy - (fine - stroke / 2)) [heading Rightward]
+
+	define [SmallEpsilonLowerShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : SmallEpsilonShapeDim top bot blend
+		return : dispiro
+			flat midx (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			curl Middle (midy + (fine - stroke / 2)) [heading Leftward]
+			archv
+			g4 (SB + (OX - O) + O * 2) (bot + smb) [widths.lhs]
+			hookend (bot + O)
+			g4 (RightSB - O) (bot + hook)
+
+	define [SmallEpsilonShape top bot blend hook] : union
+		SmallEpsilonUpperShape top bot blend hook
+		SmallEpsilonLowerShape top bot blend hook
+
+	create-glyph 'grek/epsilon' 0x3B5 : glyph-proc
+		include : MarkSet.e
+		include : SmallEpsilonShape XH 0 StdBlend SHook
+
+	alias 'latinepsilon' 0x25B 'grek/epsilon'
+	turned 'turnepsilon' 0x1D08 'grek/epsilon' Middle (XH / 2)
+
+	create-glyph 'latinEpsilon' 0x190 : glyph-proc
+		include : MarkSet.capital
+		include : SmallEpsilonShape CAP 0 StdBlend Hook
+
+	define [CyrZeShapeDim top bot blend] : begin
+		local stroke : adviceBlackness2 2.875 2 (top - bot)
+		local midx : mix RightSB SB blend
+		local midy : mix bot top OverlayPos
+		local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothA / (SmoothA + SmoothB))] + TanSlope * HVContrast * stroke
+		local sma : [mix (stroke + O) (midy - stroke / 2) (SmoothA / (SmoothA + SmoothB))] - TanSlope * HVContrast * stroke
+		local fine : stroke * CThin
+		return : object stroke midx midy sma smb fine
+
+	define [CyrZeUpperShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : CyrZeShapeDim top bot blend
+		return : dispiro
+			widths.rhs
+			g4 (SB - O) (top - hook)
+			hookstart (top - O)
+			g4 (RightSB - (OX - O)) (top - smb)
+			arcvh
+			flat Middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
+			curl midx (midy - (fine - stroke / 2)) [heading Leftward]
+
+	define [CyrZeLowerShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : CyrZeShapeDim top bot blend
+		return : dispiro
+			widths.lhs
+			g4 (SB + O) (bot + hook)
+			hookstart (bot + O)
+			g4 (RightSB - (OX - O) - O * 2) (bot + sma)
+			arcvh
+			flat Middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
+
+	define [CyrZeShape top bot blend hook] : union
+		CyrZeUpperShape top bot blend hook
+		CyrZeLowerShape top bot blend hook
+
+	create-glyph 'cyrl/Ze' 0x417 : glyph-proc
+		include : MarkSet.capital
+		include : CyrZeShape CAP 0 StdBlend Hook
+
+	create-glyph 'cyrl/ze.BGR' : glyph-proc
+		include : MarkSet.p
+		include : CyrZeShape CAP 0 StdBlend Hook
+		include : Upright
+		include : Translate 0 (XH - CAP)
+		include : Italify
+
+	create-glyph 'revLatinEpsilon' 0x25C : glyph-proc
+		include : MarkSet.e
+		include : CyrZeShape XH 0 StdBlend SHook
+
+	alias 'cyrl/ze' 0x437 'revLatinEpsilon'
+
+	create-glyph 'voicedlaryngenalspirant' 0x1D24 : glyph-proc
+		include : MarkSet.b
+		local blend 0.505
+		local midGap : Math.max [adviceBlackness2 3 12 CAP] (CAP / 8 - [adviceBlackness2 3 6 XH])
+		local strokeV : adviceBlackness 4
+		local dimUpper : CyrZeShapeDim         CAP            midGap blend
+		local dimLower : SmallEpsilonShapeDim  (CAP - midGap) 0      blend
+		include : union
+			CyrZeUpperShape        CAP            midGap blend Hook
+			SmallEpsilonLowerShape (CAP - midGap) 0      blend Hook
+			Rect (dimUpper.midy + dimUpper.stroke / 2) (dimLower.midy - dimLower.stroke / 2) (Middle - strokeV / 2 * HVContrast) (Middle + strokeV / 2 * HVContrast)
+
+glyph-block Letter-Greek-Theta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/Theta' 0x398 : glyph-proc
+		include : MarkSet.capital
+		include [refer-glyph 'O'] AS_BASE
+		include : HBar (SB + Stroke * HVContrast - O * 3) (RightSB - Stroke * HVContrast + O * 3) CapMiddle
+
+	create-glyph 'grek/theta' 0x3B8 : glyph-proc
+		include : MarkSet.b
+		include : OShape CAP 0 (SB - O) (RightSB + O) Stroke (SmallSmoothA * 100) (SmallSmoothB * 100)
+		include : HBar (SB + HalfStroke) (RightSB - HalfStroke) CapMiddle
+
+glyph-block Letter-Greek-Lower-Zeta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/zeta' 0x3B6 : glyph-proc
+		include : MarkSet.if
+		include : HBar SB (RightSB + O) (CAP - HalfStroke)
+		include : dispiro
+			widths.rhs
+			g4 (RightSB + O) (CAP - Stroke)
+			bezcontrols 0.7 0.35 1 0.64 12
+			g4.down.mid (SB + Stroke * HVContrast) [mix 0 CAP (0.54 * SmallSmoothB / (SmallSmoothA + SmallSmoothB))]
+			arcvh
+			g4 [mix SB RightSB 0.55] Stroke [heading Rightward]
+			archv 12
+			g4.down.mid RightSB [mix Descender Stroke 0.5] [heading Downward]
+			arcvh 12
+			flat (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender [heading Leftward]
+			curl [Math.min (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1 - 1) [mix SB RightSB 0.5]] Descender [heading Leftward]
+
+
+glyph-block Letter-Greek-Upper-Xi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/Xi' 0x39E : glyph-proc
+		include : MarkSet.capital
+		include : HBar [mix SB RightSB 0.125] [mix RightSB SB 0.125] [mix 0 CAP 0.54]
+		include : HBar (SB + OX) (RightSB - OX) (CAP - HalfStroke)
+		include : HBar (SB + OX) (RightSB - OX) (0 + HalfStroke)
+		if SLAB : begin
+			include : DownwardLeftSerif (SB + OX) CAP VJut
+			include : DownwardRightSerif (RightSB - OX) CAP VJut
+			include : UpwardLeftSerif (SB + OX) 0 VJut
+			include : UpwardRightSerif (RightSB - OX) 0 VJut
+
+
+glyph-block Letter-Greek-Lower-Xi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/xi' 0x3BE : glyph-proc
+		include : MarkSet.if
+		include : HBar SB (RightSB + O) (CAP - HalfStroke)
+
+		local xbar : mix SB RightSB 0.85
+		local ybar : mix 0 CAP 0.55
+		include : dispiro
+			widths.rhs
+			g4.left.start xbar (CAP - Stroke)
+			archv
+			g4 (SB - O * 2 + Stroke * HVContrast) [mix (CAP - Stroke) ybar 0.6]
+			arcvh
+			g4.right.end (xbar - HalfStroke * TanSlope) ybar [widths.rhs (Stroke * [mix CThin 1 0.5])]
+		include : dispiro
+			widths.rhs (Stroke * [mix CThin 1 0.5])
+			g4.left.start (xbar + HalfStroke * TanSlope) (ybar - Stroke)
+			bezcontrols 0.7 0 1 0.6
+			g4 (SB + Stroke * HVContrast) [mix 0 ybar 0.45] [widths.rhs]
+			arcvh
+			g4 [mix SB RightSB 0.5] Stroke
+			archv
+			g4.down.mid RightSB [mix Descender Stroke 0.5] [heading Downward]
+			arcvh
+			flat (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender [heading Leftward]
+			curl [Math.min (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1 - 1) [mix SB RightSB 0.5]] Descender [heading Leftward]
+
+
+glyph-block Letter-Greek-Lower-Mu : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	with-related-glyphs 'u' 'grek/mu' 0x3BC : lambda [src sel] : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph src
+		include : dispiro
+			widths.rhs
+			flat SB Descender [heading Upward]
+			curl SB (Descender / 2) [heading Upward]
+			straight.up.end SB SmallSmoothB [widths.heading 0 [adviceBlackness 4] Upward]
+		if SLAB : begin
+			include : LeftwardTopSerif SB XH SideJut
+
+
+glyph-block Letter-Greek-Lower-Nu : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/nu' 0x3BD : glyph-proc
+		include : MarkSet.e
+		local xmid : Middle + HalfStroke * 0.75
+		include : dispiro
+			g4 (SB + 0.4 * Stroke * HVContrast) (XH - O) [widths.rhs]
+			bezcontrols 0.33 0.2 1 0.76 6 important
+			g4.down.end xmid 0 [heading Downward]
+		include : dispiro
+			widths.rhs
+			flat RightSB XH [heading Downward]
+			curl RightSB (XH * 0.9) [heading Downward]
+			quadcontrols 0 0.3 6
+			g4   xmid 0
+
+glyph-block Letter-Greek-Pi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export PiShape
+	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noSerif [endShrink 0] [df : DivFrame 1]] : glyph-proc
+		local fine : fallback _fine Stroke
+		local shrink : if (!noSerif && SLAB) 0 (shrinkrate * (df.rightSB - df.leftSB))
+		local endexpand : if (!noSerif && SLAB) 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
+		include : VBarLeft (df.leftSB + shrink) bottom (top - fine / 2) fine
+		include : VBarRight (df.rightSB - shrink) bottom (top - fine / 2) fine
+
+		if (!noSerif && SLAB) : begin
+			include : CenterBottomSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) bottom Jut fine
+			include : CenterBottomSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) bottom Jut fine
+			include : CenterTopSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) top Jut fine
+			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) top Jut fine
+
+	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
+		include : MarkSet.capital
+		include : PiShape CAP 0 (shrinkrate -- 0)
+
+	create-glyph 'cyrl/pe.upright' : glyph-proc
+		include : MarkSet.e
+		include : PiShape XH 0 (shrinkrate -- 0.05) (endShrink -- 0.05)
+
+	create-glyph 'cyrl/pe.SRB': glyph-proc
+		include [refer-glyph 'u'] AS_BASE
+		include : refer-glyph "macronAbove"
+
+	alias 'cyrl/Pe' 0x41F 'grek/Pi'
+	select-variant 'cyrl/pe' 0x43f
+
+	create-glyph 'grek/pi' 0x3C0 : glyph-proc
+		include : MarkSet.e
+		include : PiShape XH 0 (noSerif -- true) (shrinkrate -- 0.06)
+
+
+glyph-block Letter-Greek-Upper-Sigma : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export SigmaShape
+	define [SigmaShape df top bottom fine] : glyph-proc
+		local cor : [Math.hypot (top - bottom) (df.rightSB - df.leftSB)] / (top - bottom)
+
+		include : HBarTop df.leftSB df.rightSB top fine
+		include : HBarBottom df.leftSB df.rightSB bottom fine
+
+		local midx : df.middle - fine / 2
+		include : ReverseContours : spiro-outline
+			corner df.leftSB (bottom + fine)
+			corner (df.leftSB + fine * cor) (bottom + fine)
+			corner (midx + fine * cor) [mix bottom top 0.5]
+			corner (df.leftSB + fine * cor) (top - fine)
+			corner df.leftSB (top - fine)
+			corner midx [mix bottom top 0.5]
+
+		if SLAB : begin
+			include : DownwardRightSerif df.rightSB top VJut
+			include : UpwardRightSerif df.rightSB bottom VJut
+
+	create-glyph 'grek/Sigma' 0x3A3 : glyph-proc
+		set-width Width
+		include : MarkSet.capital
+		include : SigmaShape [DivFrame 1] CAP 0 Stroke
+
+	alias 'latinSigma' 0x1A9 'grek/Sigma'
+
+
+glyph-block Letter-Greek-Phi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/Phi' 0x3A6 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+
+		local y1 : CAP * [if SLAB 0.175 0.125]
+		local y2 : CAP * [if SLAB 0.825 0.875]
+		include : VBar df.middle 0 (y1 + HalfStroke)
+		include : OShape y2 y1 (df.leftSB + O) (df.rightSB - O) df.mvs (SmoothA * df.div) (SmoothB * df.div)
+		include : VBar df.middle y1 y2 df.mvs
+		include : VBar df.middle (y2 - HalfStroke) CAP
+
+		if SLAB : begin
+			include : tagged 'serifMT' : CenterTopSerif df.middle CAP Jut
+			include : tagged 'serifMB' : CenterBottomSerif df.middle 0 Jut
+
+	alias 'cyrl/Ef' 0x424 'grek/Phi'
+
+	create-glyph 'taillessphi' 0x2C77 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+
+		local x0 : mix df.leftSB df.rightSB 0.1
+		local y1 : mix 0 XH 0.75
+		local x1 : df.leftSB + OX * 2
+		local y3 : XH * 0.66
+		local y4 : XH * 0.65
+		include : dispiro
+			widths.lhs df.mvs
+			g4 x0 XH
+			g4 x1 (XH * 0.55)
+			arcvh
+			g4 (df.middle + CorrectionOMidS) O
+			archv
+			g4 (df.width - x1) (XH * 0.55)
+			arcvh 8
+			g4.left.mid [mix (df.width - x1) (df.middle - df.mvs / 2 * HVContrast) 0.525] XH [heading Leftward]
+			archv
+			flat (df.middle - df.mvs / 2 * HVContrast) y3
+			curl (df.middle - df.mvs / 2 * HVContrast) (df.mvs * 0.2) [heading Downward]
+
+	create-glyph 'grek/phi' 0x3C6 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.p
+		include : refer-glyph "taillessphi"
+		include : VBar df.middle Descender (df.mvs * 0.2)
+
+	create-glyph 'grek/varphi' 0x3D5 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.if
+
+		local y1 0
+		local y2 XH
+		include : VBar df.middle Descender (y1 + HalfStroke)
+		include : OShape y2 y1 df.leftSB df.rightSB df.mvs (SmoothA * df.div) (SmoothB * df.div) nothing
+		include : VBar df.middle y1 y2 df.mvs
+		include : VBar df.middle (y2 - HalfStroke) CAP
+
+	create-glyph 'latinphi' 0x278 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		include [refer-glyph 'grek/varphi'] AS_BASE ALSO_METRICS
+		if SLAB : begin
+			include : tagged 'serifMT' : LeftwardTopSerif df.middle CAP Jut
+			include : tagged 'serifMB' : CenterBottomSerif df.middle Descender Jut
+
+	alias 'cyrl/ef' 0x444 'latinphi'
+
+glyph-block Letter-Greek-Psi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/Psi' 0x3A8 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+
+		local y : CAP * 0.2
+		local y2 : CAP * (1 - 0.2 / df.div)
+		include : dispiro
+			widths.lhs df.mvs
+			flat df.leftSB y2 [heading Downward]
+			curl df.leftSB (y + (SmoothB * df.div))
+			arcvh
+			g4   df.middle y [heading Rightward]
+			archv
+			flat df.rightSB (y + (SmoothA * df.div))
+			curl df.rightSB y2 [heading Upward]
+		include : VBar df.middle y CAP df.mvs
+		include : VBar df.middle 0 (y + HalfStroke)
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB y2 SideJut
+			include : tagged 'serifRT' : RightwardTopSerif df.rightSB y2 SideJut
+			include : tagged 'serifMT' : CenterTopSerif df.middle CAP Jut
+			include : tagged 'serifMB' : CenterBottomSerif df.middle 0 Jut
+
+	create-glyph 'smcpPsi' 0x1D2A : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+
+		local y : XH * 0.3
+		local y2 XH
+		include : dispiro
+			widths.lhs df.mvs
+			flat df.leftSB y2 [heading Downward]
+			curl df.leftSB (y + (SmoothB * df.div))
+			arcvh
+			g4   df.middle y [heading Rightward]
+			archv
+			flat df.rightSB (y + (SmoothA * df.div))
+			curl df.rightSB y2 [heading Upward]
+		include : VBar df.middle y XH df.mvs
+		include : VBar df.middle 0 (y + HalfStroke)
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB y2 SideJut
+			include : tagged 'serifRT' : RightwardTopSerif df.rightSB y2 SideJut
+			include : tagged 'serifMB' : CenterBottomSerif df.middle 0 Jut
+
+	create-glyph 'grek/psi' 0x3C8 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.if
+
+		include : dispiro
+			widths.lhs df.mvs
+			flat df.leftSB XH [heading Downward]
+			curl df.leftSB SmallSmoothB
+			arcvh
+			g4   df.middle O [heading Rightward]
+			archv
+			flat df.rightSB SmallSmoothA
+			curl df.rightSB XH [heading Upward]
+		include : VBar df.middle 0 CAP df.mvs
+		include : VBar df.middle Descender HalfStroke
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB XH SideJut
+			if (!para.isItalic) : begin
+				include : tagged 'serifRT' : RightwardTopSerif df.rightSB XH SideJut
+
+
+glyph-block Letter-Greek-Upper-Omega : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [OmegaShape top extend sma smb] : glyph-proc
+		local fine : Stroke * CThin
+		local x1 [mix SB RightSB 0.4]
+		local x2 (Width - x1)
+		local yattach : top * extend + Stroke
+		include : dispiro
+			g4   x1 (yattach - fine) [widths.heading 0 fine Leftward]
+			archv
+			flat SB (yattach - Stroke + smb) [widths 0 Stroke]
+			curl SB (top - sma)
+			arcvh
+			g4   (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat RightSB (top - smb)
+			curl RightSB (yattach - Stroke + sma)
+			arcvh
+			g4   x2 (yattach - fine) [widths.heading 0 fine Leftward]
+		include : VBarRight x1 0 (yattach) fine
+		include : HBar SB x1 HalfStroke
+		include : VBarLeft x2 0 (yattach) fine
+		include : HBar x2 RightSB HalfStroke
+
+	create-glyph 'grek/Omega' 0x3A9 : glyph-proc
+		include : MarkSet.capital
+		include : OmegaShape CAP 0.08 SmoothA SmoothB
+
+	create-glyph 'latinomega' 0xAB65 : glyph-proc
+		include : MarkSet.e
+		include : OmegaShape XH 0.08 SmallSmoothA SmallSmoothB
+
+	turned 'latinUpsilon1' 0x1B1 'grek/Omega' Middle (CAP / 2)
+	turned 'latinupsilon1' 0x28A 'latinomega' Middle (XH / 2)
+
+glyph-block Letter-Greek-Lower-Omega : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/omega' 0x3C9 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : [DivFrame df.div].markSet.e
+
+		local fine : adviceBlackness 3.25 df.div
+		local mfine : fine * CThin
+		local x0 : mix df.leftSB df.rightSB 0.1
+		local y0 : XH - Stroke * 0.2
+		local y1 : mix 0 XH 0.8
+		local x1 : df.leftSB + OX
+		local y3 : XH / 2
+		local y4 : XH * 0.65
+
+		include : dispiro
+			widths.lhs fine
+			g4 x0 y0
+			g4 x1 (XH / 2)
+			arcvh 8
+			g4 [mix x1 (df.middle + fine / 2 * HVContrast) 0.5] O [heading Rightward]
+			archv 8
+			flat (df.middle + (mfine - fine / 2) * HVContrast) y3 [widths.heading mfine 0 Upward]
+			curl (df.middle + (mfine - fine / 2) * HVContrast) y4 [heading Upward]
+			end [function : set this.angles 4]
+		include : dispiro
+			widths.rhs fine
+			g4 (df.width - x0) y0
+			g4 (df.width - x1) (XH / 2)
+			arcvh 8
+			g4 [mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] O [heading Leftward]
+			archv 8
+			flat (df.middle - (mfine - fine / 2) * HVContrast) y3 [widths.heading 0 mfine Upward]
+			curl (df.middle - (mfine - fine / 2) * HVContrast) y4 [heading Upward]
+			end [function : set this.angles 4]
+
+	create-glyph 'grek/pomega' 0x3D6 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+
+		include [refer-glyph 'grek/omega'] AS_BASE
+		include : HBar df.leftSB df.rightSB (XH - HalfStroke)
+
+	create-glyph 'closeomega' 0x277 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : [DivFrame df.div].markSet.e
+		local fine : adviceBlackness 3.25
+		local mfine : fine * CThin
+		local x0 : df.middle - CorrectionOMidS
+		local y0 : XH - O
+		local y1 : mix 0 XH 0.45
+		local x1 : df.leftSB + OX
+		local y3 : XH / 2
+		local y4 : XH * 0.65
+		include : dispiro
+			widths.rhs mfine
+			flat (df.middle + (mfine - fine / 2) * HVContrast) y4 [heading Downward]
+			curl (df.middle + (mfine - fine / 2) * HVContrast) y3 [heading Downward]
+			arcvh 8
+			g4 [mix x1 (df.middle + fine / 2 * HVContrast) 0.5] O [widths.heading 0 fine Leftward]
+			archv 8
+			g4 x1 y1
+			arcvh
+			g4 x0 y0
+			archv
+			g4 (df.width - x1) y1
+			arcvh 8
+			g4 [mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] O [heading Leftward]
+			archv 8
+			flat (df.middle - (mfine - fine / 2) * HVContrast) y3 [widths.heading 0 mfine Upward]
+			curl (df.middle - (mfine - fine / 2) * HVContrast) y4 [heading Upward]
+			end [function : set this.angles 4]

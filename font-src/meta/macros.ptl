@@ -31,39 +31,22 @@ define-macro params : syntax-rules
 		ps.push : formOf body
 		return : dirty ps
 
-### Point macro
-define-operator "<>" 800 "never" : begin
-	local tClass [definingEnv.newt 'class']
-	local m : syntax-rules
-		`(@x <> @y) `[new @tClass @x @y]
-
-	set coinit.initFn : lambda [m] : begin
-		set m.toPattern : lambda [form env wrapper] : match form
-			`(@x <> @y) : begin
-				local p1 [toPattern x env wrapper]
-				local p2 [toPattern y env wrapper]
-				object
-					whether : lambda [t] `(@t && @[p1.whether `(@t.x)] && @[p2.whether `(@t.y)])
-					assign : lambda [t locallyQ] : ex `[begin
-						@{".preserve" [p1.assign `(@t.x) locallyQ]}
-						@{".preserve" [p2.assign `(@t.y) locallyQ]}
-					] env
-
-	set coinit.injectForm `[define [@tClass x y] : begin \\
-		set this.x x
-		set this.y y
-		return nothing
-	]
-	return m
-
 ### Necessary macros
 # A glyph construction is a function which "modifies" a glyph.
-define-macro glyph-construction : syntax-rules
-	`[glyph-construction @::steps] {'.syntactic-closure' `[lambda [] [begin \\
+define-macro glyph-proc : syntax-rules
+	`[glyph-proc @::steps] {'.syntactic-closure' `[lambda [] [begin \\
 		local currentGlyph this
 		begin @::[steps.map formOf]
 		return nothing
 	]] env}
+
+define-macro composite-proc : syntax-rules
+	`[composite-proc @::steps] : dirty `[lambda [] [begin \\
+		local currentGlyph this
+		begin @::[steps.map : lambda [x j] : if j `[include @[formOf x]] `[include @[formOf x] true true]]
+		return nothing
+	]]
+
 # Remap Glyph's methods to macros in order to simplify writing
 define-macro set-width : syntax-rules
 	`[set-width @::args] {'.syntactic-closure' `[currentGlyph.setWidth @::args] env}
@@ -73,49 +56,48 @@ define-macro set-mark-anchor : syntax-rules
 	`[set-mark-anchor @::args] {'.syntactic-closure' `[currentGlyph.setMarkAnchor @::args] env}
 define-macro set-base-anchor : syntax-rules
 	`[set-base-anchor @::args] {'.syntactic-closure' `[currentGlyph.setBaseAnchor @::args] env}
-define-macro apply-transform : syntax-rules
-	`[apply-transform @::args] {'.syntactic-closure' `[currentGlyph.applyTransform @::args] env}
 define-macro eject-contour : syntax-rules
 	`[eject-contour @::args] {'.syntactic-closure' `[currentGlyph.ejectContour @::args] env}
-define-macro assign-unicode : syntax-rules
-	`[assign-unicode @code] {".syntactic-closure" `[$assignUnicodeImpl$ currentGlyph @code
-	] env}
 
 ###### Canvas-based mechanism
-define-macro sketch : syntax-rules
-	`[sketch @::steps] : begin
+define-macro new-glyph : syntax-rules
+	`[new-glyph @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ null null @[formOf body]]
+
+define-macro create-glyph : syntax-rules
+	`[create-glyph @body] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [] [begin \\
-			local currentGlyph this
-			if [not currentGlyph] : return nothing
-			if [$Capture$.glyphList.($Capture$.glyphList.length - 1).name === @tcn]
-				$Capture$.glyphList.pop
-			begin @::[steps.map formOf]
-			set $Capture$.dependencyProfile.(currentGlyph.name) : $Capture$.getDependencyProfile currentGlyph
-			return currentGlyph
-		]].call [create-glyph @tcn $donothing$]]
+		dirty `[$createAndSaveGlyphImpl$ @tcn null @[formOf body]]
+	`[create-glyph @name @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] null @[formOf body]]
+	`[create-glyph @name @code @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] @[formOf body]]
 
-define-macro branch : syntax-rules
-	`[branch @::steps] : begin
+define-macro create-aliased-glyph : syntax-rules
+	`[create-aliased-glyph @name] : begin
+		dirty `[create-aliased-glyph @[formOf name] null]
+	`[create-aliased-glyph @name @code] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin
+			[this.include currentGlyph true true]
+			[this.cloneRankFromGlyph currentGlyph] ]]
+
+define-macro create-derived : syntax-rules
+	`[create-derived @body] : begin
 		if [not externEnv.$nWFGlyphs$] : set externEnv.$nWFGlyphs$ 0
 		inc externEnv.$nWFGlyphs$
 		local f0 : '.' + [[env.macros.get 'input-path']].1 + '.'
 		local tcn {".quote" (".WF" + f0 + externEnv.$nWFGlyphs$)}
-		dirty `[[lambda [] [begin \\
-			local currentGlyph this
-			if [not currentGlyph] : return nothing
-			if [$Capture$.glyphList.($Capture$.glyphList.length - 1).name === @tcn]
-				$Capture$.glyphList.pop
-			begin @::[steps.map formOf]
-			set $Capture$.dependencyProfile.(currentGlyph.name) : $Capture$.getDependencyProfile currentGlyph
-			return currentGlyph
-		]].call [create-glyph @tcn [lambda : begin [this.include currentGlyph true] [set this.advanceWidth currentGlyph.advanceWidth]]]]
-
-define-macro save : syntax-rules
-	`[save @::args] : dirty `[$save$.call currentGlyph @::args]
+		dirty `[create-derived @tcn null @[formOf body]]
+	`[create-derived @name @body] : begin
+		dirty `[create-derived @[formOf name] null @[formOf body]]
+	`[create-derived @name @code @body] : begin
+		dirty `[$createAndSaveGlyphImpl$ @[formOf name] @[formOf code] [lambda : begin
+			[this.include currentGlyph true true]
+			[this.cloneRankFromGlyph currentGlyph]
+			[this.include @[formOf body]] ]]
 
 define-macro run-glyph-module : syntax-rules
 	`[run-glyph-module @path] : dirty `[[import @path].apply.call $$Capture$$]
@@ -124,23 +106,19 @@ define-macro glyph-block-import : syntax-rules
 	`[glyph-block-import @_blockName] : begin
 
 		define allExports : object
-			CommonShapes `[select-variant italic-variant alias composite
-			refer-glyph query-glyph into-unicode turned hcombine vcombine HDual VDual Rect Ring
-			RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt
-			OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif
-			RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif
-			DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs
-			AIHSerifs AINSerifs AICyrISerifs AIMSerifs nShoulderKnots nShoulder mShoulderSpiro HBar
-			HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook
-			HooktopLeftBar CurlyTail HCurlyTail FlatSlashShape determineMixR hookstart hookend
-			CyrDescender Fork Miniature Thinner Widen FlipAround ScaleAround Realign ForceUpright
-			Overlay diagCor CreateWaveShape NameUni PointingTo WithDerivatives WithAIHSerifsMask
-			SNeck WithTransform ReverseContours clear-anchors OBarLeftToothlessShape
-			OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape]
+			Common-Derivatives `[select-variant italic-variant refer-glyph query-glyph alias turned
+			HDual HCombine VDual vcombine with-related-glyphs glyph-is-needed]
 
-			Overmarks `[markExtend markHalfStroke markStress markFine markMiddle markDotsRadius
-			aboveMarkTop aboveMarkBot aboveMarkMid belowMarkBot belowMarkTop commaOvershoot
-			commaOvershoot2 commaAboveRadius TildeShape HornShape HornMarkAnchor HornBaseAnchor]
+			CommonShapes `[Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt
+			CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape
+			LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif
+			CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif
+			UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs HBar
+			HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook
+			HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender FlipAround ScaleAround
+			Realign ForceUpright diagCor CreateWaveShape NameUni PointingTo WithAIHSerifsMask
+			WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape
+			OBarRightToothlessShape OBarRightRoundedShape AsRadical]
 
 		define vartiableFilter : if externEnv.$glyphBlockVariableUsage$
 			lambda [x] externEnv.$glyphBlockVariableUsage$.(x)
@@ -199,17 +177,17 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$save$ $NamedParameterPair$ $donothing$ create-glyph $assignUnicodeImpl$]
+		traceBody `[$NamedParameterPair$ $donothing$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
-			recursiveCodes variantSelector glyphMap glyphList unicodeGlyphs create-glyph $save$
-			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash dependencyProfile
-			getDependencyProfile buildGlyphs newtemp tagged DivFrame fontMetrics $assignUnicodeImpl$]
-		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast symbolMid parenTop
-			parenBot operTop operBot tackTop tackBot plusTop plusBot pictTop pictBot bgopTop bgopBot
-			Italify Upright Scale Translate Rotate globalTransform TanSlope
+			recursiveCodes variantSelector glyphStore $createAndSaveGlyphImpl$
+			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash
+			buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$]
+		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast SymbolMid ParenTop
+			ParenBot OperTop OperBot TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop BgOpBot
+			Italify Upright Scale Translate Rotate GlobalTransform TanSlope
 			HVContrast Upward Downward Rightward Leftward UpwardT DownwardT LeftwardT RightwardT O OX
 			OXHook Hook AHook SHook RHook JHook FHook HookX Smooth SmallSmooth Stroke DotSize
 			PeriodSize HBarPos OverlayPos LongJut Jut VJut
@@ -219,8 +197,8 @@ define-macro glyph-block : syntax-rules
 			Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA SmoothB
 			SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS adviceBlackness
 			adviceBlackness2 MVertStroke OverlayStroke OperatorStroke GeometryStroke ShoulderFine
-			Superness superXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope StrokeWidthBlend
-			SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter compositeBaseAnchors]
+			superXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope StrokeWidthBlend
+			SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter compositeBaseAnchors YSmoothMidR YSmoothMidL]
 		define spiroFnImports `[g4 g2 corner flat curl close end straight widths disable-gizmo
 			disable-contrast heading unimportant important alsoThru alsoThruThem bezcontrols
 			quadcontrols archv arcvh complexThru dispiro spiro-outline]

@@ -1,0 +1,469 @@
+###### Automatic builds
+$$include '../../meta/macros.ptl'
+
+import [linreg clamp mix fallback] from '../../support/utils'
+import [AnyDerivingCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+
+glyph-module
+
+glyph-block Autobuild-Transformed : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Fork Miniature
+	glyph-block-import Marks : markMiddle aboveMarkBot aboveMarkTop belowMarkBot belowMarkTop
+
+	define [suggestName _name] : begin
+		local name _name
+		if [query-glyph name] : begin
+			local j 2
+			while [query-glyph (name + j)] : inc j
+			set name (name + j)
+		return name
+
+	define [suggestMappedName map key name] : begin
+		if map.(key) : return map.(key)
+		local amended : suggestName name
+		set map.(key) amended
+		return amended
+
+	define [extendRelatedGlyphs records suffix] : begin
+		local relatedRecords {}
+		local relSets        {}
+		local targetNameMap  {.}
+
+		foreach [record : items-of records] : begin
+			local srcName record.1
+			suggestMappedName targetNameMap srcName (srcName + '+' + suffix)
+
+			local dstName : srcName + '+' + suffix
+			local tree : getGrTree srcName {DotlessOrNot AnyDerivingCv} query-glyph
+			foreach [{gr origSrcName relSrcName} : items-of tree] : if [query-glyph relSrcName] : begin
+				local origDstName : suggestMappedName targetNameMap origSrcName (origSrcName + '+' + suffix)
+				local relDstName  : suggestMappedName targetNameMap relSrcName  (relSrcName + '+' + suffix)
+
+				local relatedRecord : record.slice 0
+				set relatedRecord.0 null
+				set relatedRecord.1 relSrcName
+				relatedRecords.push relatedRecord
+
+				relSets.push {gr origDstName relDstName}
+
+		return {[records.concat relatedRecords] relSets targetNameMap}
+
+	define [link-relations relSets] : foreach [{gr origDstName relDstName} : items-of relSets]
+		if [query-glyph origDstName] : gr.set [query-glyph origDstName] relDstName
+
+
+	define [createSuperscripts _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sup'
+		local pendingGlyphs : records.map : [record] => record.1
+		local miniatureFont : Miniature
+			glyphs -- pendingGlyphs
+			crowd  -- 4
+			scale  -- 0.7
+			mono   -- true
+			sbscale -- 1
+		foreach {unicode glyphid pri} [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)]
+				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
+					if [not : miniatureFont.queryByName glyphid] : begin
+						throw : new Error "Cannot find glyph \(glyphid)"
+					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
+					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
+					include [Upright] true
+					include [Translate (-middle) (-CAP)] true
+					include [Scale 0.7] true
+					include [Translate middle (CAP + Accent / 2)] true
+					include [Italify] true
+					if pri : set currentGlyph.autoRefPriority pri
+		link-relations relSets
+
+	define [createSubscripts _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sub'
+		local pendingGlyphs : records.map : [record] => record.1
+		local miniatureFont : Miniature
+			glyphs -- pendingGlyphs
+			crowd  -- 4
+			scale  -- 0.7
+			mono   -- true
+			sbscale -- 1
+		foreach {unicode glyphid pri} [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)]
+				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
+					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
+					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
+					include [Upright] true
+					include [Translate (-middle) 0] true
+					include [Scale 0.7] true
+					include [Translate middle (Descender / 2)] true
+					include [Italify] true
+					if pri : set currentGlyph.autoRefPriority pri
+		link-relations relSets
+
+	define [createSMCPs _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'smcp'
+		local pendingGlyphs : records.map : [record] => record.1
+		local forkedParams : Object.create para
+		set forkedParams.cap0 para.cap
+		set forkedParams.cap XH
+		set forkedParams.xheight (XH * XH / CAP)
+		set forkedParams.diversityM 1
+		set forkedParams.diversityF 1
+		set forkedParams.diversityI 1
+		set forkedParams.diversityII 1
+		local sf : Fork pendingGlyphs forkedParams
+		foreach {unicode glyphid} [items-of records] : begin
+			if [not : query-glyph targetNameMap.(glyphid)] : begin
+				create-glyph targetNameMap.(glyphid) unicode : glyph-proc
+					include [sf.queryByName glyphid] AS_BASE ALSO_METRICS
+		link-relations relSets
+
+	define [createMedievalCombs defaultLow defaultHigh _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalAbove'
+		local pendingGlyphs : records.map : [record] => record.1
+		local miniatureFont : Miniature
+			glyphs -- pendingGlyphs
+			crowd  -- 7
+			scale  -- 0.4
+			mono   -- true
+			sbscale -- 1
+
+		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
+			create-glyph targetNameMap.(glyphid) unicode : glyph-proc
+				set-width 0
+				local derived [miniatureFont.queryByName glyphid]
+				local low defaultLow
+				local high defaultHigh
+				if (derived && derived.baseAnchors.above && derived.baseAnchors.below) : begin
+					set low derived.baseAnchors.below.y
+					set high derived.baseAnchors.above.y
+
+				local middle : derived.advanceWidth / 2
+				include derived
+				include : Upright
+				include : Translate (-middle) (-low)
+				include : Scale 0.4
+				include : Translate markMiddle aboveMarkBot
+				include : Italify
+				local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
+				set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
+				set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
+
+		link-relations relSets
+
+	define [createMedievalBelowCombs _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalBelow'
+		local pendingGlyphs : records.map : [record] => record.1
+		local miniatureFont : Miniature
+			glyphs -- pendingGlyphs
+			crowd  -- 7
+			scale  -- 0.4
+			mono   -- true
+			sbscale -- 1
+		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
+			create-glyph targetNameMap.(glyphid) unicode : glyph-proc
+				set-width 0
+				local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
+				include [miniatureFont.queryByName glyphid]
+				include : Upright
+				include : Translate (-middle) (-XH)
+				include : Scale 0.4
+				include : Translate markMiddle belowMarkTop
+				include : Italify
+				set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
+				set-base-anchor 'belowBrace' markMiddle (belowMarkTop - XH * 0.2)
+
+		link-relations relSets
+
+	if [not recursive] : createSuperscripts : list
+		list 0x2070 'zero.lnum'
+		list 0x00B9 'one.lnum'
+		list 0x00B2 'two.lnum'
+		list 0x00B3 'three.lnum'
+		list 0x2074 'four.lnum'
+		list 0x2075 'five.lnum'
+		list 0x2076 'six.lnum'
+		list 0x2077 'seven.lnum'
+		list 0x2078 'eight.lnum'
+		list 0x2079 'nine.lnum'
+		list 0x02B0 'h'
+		list 0x02B1 'hhooktop'
+		list 0x02B2 'j'
+		list 0x02B3 'r'
+		list 0x02B4 'turnr'
+		list 0x02B5 'turnrrtail'
+		list 0x02B6 'invsmcpR'
+		list 0x02B7 'w'
+		list 0x02B8 'y'
+		list 0x02C0 'fineglottalstop'
+		list 0x02C1 'finerevglottalstop'
+		list 0x02E0 'latingamma'
+		list 0x02E1 'l'
+		list 0x02E2 's'
+		list 0x02E3 'x'
+		list 0x02E4 'revglottalstop'
+		list 0x2071 'i'
+		list 0x207F 'n'
+		list 0x1D43 'a'
+		list 0x1D44 'turna'
+		list 0x1D45 'scripta'
+		list 0x1D46 'turnae'
+		list 0x1D47 'b'
+		list 0x1D48 'd'
+		list 0x1D49 'e'
+		list 0x1D4A 'turne'
+		list 0x1D4B 'grek/epsilon'
+		list 0x1D4C 'turnepsilon'
+		list 0x1D4D 'g'
+		list 0x1D4E 'turni'
+		list 0x1D4F 'k'
+		list 0x1D50 'm'
+		list 0x1D51 'eng'
+		list 0x1D52 'o'
+		list 0x1D53 'turnc'
+		list 0x1D54 'oupperhalf'
+		list 0x1D55 'olowerhalf'
+		list 0x1D56 'p'
+		list 0x1D57 't'
+		list 0x1D58 'u'
+		list 0x1D5A 'turnm'
+		list 0x1D5B 'v'
+		list 0x1D5C 'latinAyin'
+		list 0x1D5D 'grek/beta'
+		list 0x1D5E 'grek/gamma'
+		list 0x1D5F 'grek/delta'
+		list 0x1D60 'grek/phi'
+		list 0x1D61 'grek/chi'
+		list 0x1D78 'smcpH'
+		list 0x1D9B 'turnscripta'
+		list 0x1D9C 'c'
+		list 0x1D9D 'ccurlytail'
+		list 0x1D9E 'eth'
+		list 0x1D9F 'revLatinEpsilon'
+		list 0x1DA0 'f'
+		list 0x1DA1 'turnf'
+		list 0x1DA2 'scriptg'
+		list 0x1DA3 'turnh'
+		list 0x1DA4 'ibarOver'
+		list 0x1DA5 'latiniota'
+		list 0x1DA6 'smcpI'
+		list 0x1DA7 'smcpIbarOver'
+		list 0x1DA8 'jcurlytail'
+		list 0x1DAB 'smcpL'
+		list 0x1DA9 'lrtail'
+		list 0x1DAC 'mltail'
+		list 0x1DAD 'turnmleg'
+		list 0x1DAE 'nltail'
+		list 0x1DAF 'nrtailBR'
+		list 0x1DB0 'smcpN'
+		list 0x1DB1 'obar'
+		list 0x1DB2 'latinphi'
+		list 0x1DB3 'srtail'
+		list 0x1DB4 'esh'
+		list 0x1DB5 'tltail'
+		list 0x1DB6 'ulongBarOver'
+		list 0x1DB7 'latinupsilon1'
+		list 0x1DB8 'smcpU'
+		list 0x1DB9 'latinupsilon2'
+		list 0x1DBA 'turnv'
+		list 0x1DBC 'zrtailBR'
+		list 0x1DBD 'zcurlytail'
+		list 0x1DBE 'ezh'
+		list 0x1DBF 'grek/theta'
+		list 0x1DBB 'z'
+		list 0x1D2C 'A'
+		list 0x1D2D 'AE'
+		list 0x1D2E 'B'
+		list 0x1D2F 'Bbar'
+		list 0x1D30 'D'
+		list 0x1D31 'E'
+		list 0x1D32 'revE'
+		list 0x1D33 'G'
+		list 0x1D34 'H'
+		list 0x1D35 'I'
+		list 0x1D36 'J'
+		list 0x1D37 'K'
+		list 0x1D38 'L'
+		list 0x1D39 'M'
+		list 0x1D3A 'N'
+		list 0x1D3B 'cyrl/I'
+		list 0x1D3C 'O'
+		list 0x1D3D 'OU'
+		list 0x1D3E 'P'
+		list 0x1D3F 'R'
+		list null   'C' # there is no superscript C in unicode, but is is used for the MC symbol
+		list null   'S' # there is no superscript S in unicode, but is is used for the SM symbol
+		list 0x1D40 'T'
+		list 0x1D41 'U'
+		list 0x1D42 'W'
+		list 0x2C7D 'V'
+		list 0x207A 'plus' (-11)
+		list 0x207B 'minus' (-11)
+		list 0x207C 'equal' (-11)
+		list 0x207D 'parenLeft' (-11)
+		list 0x207E 'parenRight' (-11)
+
+	if [not recursive] : let [df : Miniature {'a' 'o'} 4 0.7] : begin
+		create-glyph 'ordfeminine' 0xAA : glyph-proc
+			include : df.queryByName 'a'
+			include : HBarBottom SB RightSB Descender
+			include : Upright
+			include : Translate (-Middle) (-XH)
+			include : Scale 0.7
+			include : Translate Middle CAP
+			include : Italify
+
+		create-glyph 'ordmasculine' 0xBA : glyph-proc
+			include : df.queryByName 'o'
+			include : HBarBottom SB RightSB Descender
+			include : Upright
+			include : Translate (-Middle) (-XH)
+			include : Scale 0.7
+			include : Translate Middle CAP
+			include : Italify
+
+	if [not recursive] : createSubscripts : list
+		list 0x2080 'zero.lnum'
+		list 0x2081 'one.lnum'
+		list 0x2082 'two.lnum'
+		list 0x2083 'three.lnum'
+		list 0x2084 'four.lnum'
+		list 0x2085 'five.lnum'
+		list 0x2086 'six.lnum'
+		list 0x2087 'seven.lnum'
+		list 0x2088 'eight.lnum'
+		list 0x2089 'nine.lnum'
+		list 0x2090 'a'
+		list 0x2091 'e'
+		list 0x2092 'o'
+		list 0x2093 'x'
+		list 0x2094 'turne'
+		list 0x2095 'h'
+		list 0x2096 'k'
+		list 0x2097 'l'
+		list 0x2098 'm'
+		list 0x2099 'n'
+		list 0x209A 'p'
+		list 0x209B 's'
+		list 0x209C 't'
+		list 0x1D62 'i'
+		list 0x1D63 'r'
+		list 0x1D64 'u'
+		list 0x1D65 'v'
+		list 0x1D66 'grek/beta'
+		list 0x1D67 'grek/gamma'
+		list 0x1D68 'grek/rho'
+		list 0x1D69 'grek/phi'
+		list 0x1D6A 'grek/chi'
+		list 0x2C7C 'j'
+		list 0x208A 'plus' (-11)
+		list 0x208B 'minus' (-11)
+		list 0x208C 'equal' (-11)
+		list 0x208D 'parenLeft' (-11)
+		list 0x208E 'parenRight' (-11)
+
+	if [not recursive] : createSMCPs : list
+		list 0x1D00 'A'
+		list 0x1D01 'AE'
+		list 0x1D03 'Bbar'
+		list 0x1D04 'C'
+		list 0x1D05 'D'
+		list 0x1D06 'Dcroat'
+		list 0x1D07 'E'
+		list 0x1D0A 'J'
+		list 0x1D0B 'K'
+		list 0x1D0C 'Lslash'
+		list 0x1D0E 'cyrl/I'
+		list 0x1D0F 'O'
+		list 0x1D10 'turnC'
+		list 0x1D15 'OU'
+		list 0x1D18 'P'
+		list 0x1D19 'cyrl/Ya'
+		list 0x1D1B 'T'
+		list 0x1D20 'V'
+		list 0x1D21 'W'
+		list 0x1D22 'Z'
+		list 0x1D23 'Ezh'
+		list 0x1D26 'grek/Gamma'
+		list 0x1D27 'grek/Lambda'
+		list 0x1D28 'grek/Pi'
+		list 0x1D29 'grek/Rho'
+		list 0x1D2B 'cyrl/El'
+		list 0xA730 'F'
+		list 0xA731 'S'
+		list 0xA7AF 'Q'
+
+	if [not recursive] : createMedievalCombs 0 XH : list
+		list 0x363 'a'
+		list 0x364 'e'
+		list 0x366 'o'
+		list 0x367 'u'
+		list 0x368 'c'
+		list 0x369 'd'
+		list 0x36A 'h'
+		list 0x36B 'm'
+		list 0x36C 'r'
+		list 0x36E 'v'
+		list 0x36F 'x'
+		list 0x1DD4 'ae'
+		list 0x1DD8 'cyrl/de.italic'
+		list 0x1DDB 'smcpG'
+		list 0x1DDE 'smcpL'
+		list 0x1DDF 'smcpM'
+		list 0x1DE0 'n'
+		list 0x1DE1 'smcpN'
+		list 0x1DE2 'smcpR'
+		list 0x1DE3 'rrotunda'
+		list 0x1DE4 's'
+		list 0x1DE6 'z'
+		list 0x1DE7 'scripta'
+		list 0x1DEA 'turne'
+		list 0x1DED 'oWithLightCentralizationStroke'
+		list 0x1DF0 'uWithLightCentralizationStroke'
+		list 0x1DF1 'w'
+
+	if [not recursive] : createMedievalCombs 0 CAP : list
+		list 0x365 'i'
+		list 0x36D 't'
+		list 0x1DD9 'eth'
+		list 0x1DDC 'k'
+		list 0x1DDD 'l'
+		list 0x1DE8 'b'
+		list 0x1DF2 'adieresis'
+		list 0x1DF3 'odieresis'
+		list 0x1DF4 'udieresis'
+
+	if [not recursive] : createMedievalCombs Descender XH : list
+		list 0x1DDA 'g'
+		list 0x1DD7 'ccedillaBelow'
+		list 0x1DE9 'grek/beta'
+		list 0x1DEE 'p'
+
+	if [not recursive] : createMedievalCombs Descender CAP : list
+		list 0x1DEB 'f'
+		list 0x1DE5 'longs'
+		list 0x1DEF 'esh'
+
+	if [not recursive] : createMedievalBelowCombs : list
+		list 0x0359 'asterisk.midXH'
+		list 0x1ABF 'w'
+		list 0x1AC0 'turnw'
+		list 0x1DCA 'r'
+
+glyph-block Autobuild-Rhotic : begin
+	glyph-block-import Marks : markFine
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Widen
+	glyph-block-import Letter-Latin-Rhotic : ErTail
+
+	if [not recursive] : let [thinfont : Widen {'schwa' 'revLatinEpsilon'} 0.85 1] : begin
+		create-glyph 'er' 0x25A : glyph-proc # er
+			include : MarkSet.e
+			include : thinfont.queryByName 'schwa'
+			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+
+		create-glyph 'revlatinepsiloner' 0x25D : glyph-proc # revlatinepsiloner
+			include : MarkSet.e
+			include : thinfont.queryByName 'revLatinEpsilon'
+			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)

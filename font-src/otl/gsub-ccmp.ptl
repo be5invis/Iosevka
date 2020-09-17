@@ -1,11 +1,11 @@
 import [add-common-feature add-feature add-lookup ChainRuleBuilder BeginLookupBlock EndLookupBlock] from "./table-util"
-import [Dotless TieMark TieGlyph CcmpDecompose] from "../support/gr"
+import [AnyCv Dotless TieMark TieGlyph CcmpDecompose] from "../support/gr"
 extern Set
 
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
-export : define [buildCCMP sink glyphs markGlyphs] : begin
+export : define [buildCCMP sink glyphStore markGlyphs] : begin
 	local rec : BeginLookupBlock sink
 
 	define ccmp : add-feature sink 'ccmp'
@@ -18,7 +18,8 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 	define TieMarkFrom {}
 	define TieMarkTo   {}
 	define TieGlyphs   {}
-	foreach [{gid g} : pairs-of glyphs] : if (gid.(0) !== ".") : begin
+
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
 		if g.baseAnchors.trailing : groupTR.push gid
 		if g.baseAnchors.lf       : groupLF.push gid
 		if [Dotless.get g] : begin
@@ -214,7 +215,7 @@ export : define [buildCCMP sink glyphs markGlyphs] : begin
 
 	# CCMP decomposition
 	define decompositions {.}
-	foreach {gid g} [pairs-of glyphs] : begin
+	foreach { gid g } [glyphStore.namedEntries] : begin
 		local parts : CcmpDecompose.get g
 		if (parts && parts.length) : set decompositions.(gid) parts
 

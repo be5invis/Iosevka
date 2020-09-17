@@ -91,25 +91,16 @@ module.exports = function () {
 				ascii: true
 			}
 		},
-		name: {
-			fontFamily: "node-sfnt",
-			fontSubFamily: "regular",
-			fullName: "node-sfnt",
-			postScriptName: "node-sfnt",
-			uniqueSubFamily: "node-sfnt blank font",
-			version: "Version 1.0"
-		},
 		post: {
 			version: 2,
 			isFixedPitch: false,
 			italicAngle: 0,
-			maxMemType1: 1,
+			underlinePosition: -50,
+			underlineThickness: 50,
+			minMemType42: 0,
 			maxMemType42: 0,
 			minMemType1: 0,
-			minMemType42: 0,
-			postoints: 65411,
-			underlinePosition: -50,
-			underlineThickness: 50
+			maxMemType1: 0
 		},
 		maxp: {
 			version: 1.0,

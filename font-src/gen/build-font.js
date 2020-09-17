@@ -15,7 +15,7 @@ module.exports = function (para) {
 	assignFontNames(para, gs.metrics, font);
 	setFontMetrics(para, gs.metrics, font);
 
-	const otl = buildOtl(para, gs.glyphs, gs.glyphList, gs.unicodeGlyphs);
+	const otl = buildOtl(para, gs.glyphStore);
 	font.GSUB = otl.GSUB;
 	font.GPOS = otl.GPOS;
 	font.GDEF = otl.GDEF;
@@ -28,6 +28,6 @@ module.exports = function (para) {
 		}
 	}
 
-	finalizeFont(para, [...gs.glyphList], excludeChars, font);
-	return font;
+	const finalGs = finalizeFont(para, gs.glyphStore, excludeChars, font);
+	return { font, glyphStore: finalGs };
 };

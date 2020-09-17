@@ -11,19 +11,20 @@ define look-around null
 define advance : lambda [t] null
 define ident : lambda [t] : t.map : lambda [x] x
 
-export : define [buildLigations sink para plm glyphs] : begin
+export : define [buildLigations sink para plm] : begin
 	local rec : BeginLookupBlock sink
 	local rankedLookups {}
-	foreach [ {featureName mappedFeature} : pairs-of plm] : buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups
+	foreach [ {featureName mappedFeature} : pairs-of plm] : begin
+		buildLigationsImpl sink para featureName mappedFeature rankedLookups
 	EndLookupBlock rec sink
 
-define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLookups] : begin
+define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : begin
 	define {chain-rule reverse-rule} : ChainRuleBuilder sink
 
 	define arrowStick  {'hyphen' 'equal'}
 	define [stickClass style] : [lsx style] {'hyphen' 'equal'}
 	define [stickTf style] : {'hyphen' 'equal'} ~> [lsx style]
-	define anyWave {'asciitilde' 'asciitilde.low' 'asciitilde.high'}
+	define anyWave {'asciiTilde' 'asciiTilde.low' 'asciiTilde.high'}
 	define [waveClass cl] : [just ('wave.' + cl)] anyWave
 	define [waveTf cl] : anyWave ~> [waveClass cl]
 
@@ -82,15 +83,15 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 		* 'slash'
 		* 'ampersand'
 		* 'asterisk'
-		* 'asciicaret'
-		* 'asciitilde'
+		* 'asciiCaret'
+		* 'asciiTilde'
 
 	define [asterisk_center]  ({'asterisk'}          ~> {'asterisk.dfltlow'})
 	define [colon_center]     ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
-	define [caret_center]     ({'asciicaret'}        ~> {'asciicaret.low'})
-	define [tilde_center]     ({'asciitilde'}        ~> {'asciitilde.low'})
+	define [caret_center]     ({'asciiCaret'}        ~> {'asciiCaret.low'})
+	define [tilde_center]     ({'asciiTilde'}        ~> {'asciiTilde.low'})
 	define [period_center]    ({'period'}            ~> {'period.mid'})
-	define [no_period_center] ({'period.mid'}     ~> {'period'})
+	define [no_period_center] ({'period.mid'}        ~> {'period'})
 
 	local ligationLookupName : 'lig_' + featureName + '{' + mappedFeature + '}'
 
@@ -797,6 +798,10 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 				equal       ~> {'ident.fc.neg3'}
 				exclam      ~> {'ident.cc'}
 				equal       ~> {'ident.cf'}
+			[hasLG 'eqexeq-dl'] : chain-rule
+				equal       ~> {'equal.fc.neg3'}
+				exclam      ~> {'equal.cc'}
+				equal       ~> {'equal.cf'}
 			[hasLG 'exeq-alt-1'] : chain-rule
 				exclam      ~> {'equal.fc.neg3-alt-1'}
 				equal       ~> {'equal.cc'}
@@ -882,3 +887,8 @@ define [buildLigationsImpl sink para glyphs featureName mappedFeature rankedLook
 			{'greater'} ~> {'greater.lig2'}
 			equal       ~> {'eq.at-gteq.lig2'}
 
+	# :>
+	do "colon-less-greater" : CreateLigationLookup : keep-if 'colon-greater' : list
+		chain-rule
+			{'colon.mid'} ~> look-around
+			{'greater'}   ~> {'greaterArrow'}

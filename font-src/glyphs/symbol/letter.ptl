@@ -1,0 +1,263 @@
+###### Letter-like symbols
+
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [designParameters] from '../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Currency : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'currency' 0xA4 : glyph-proc
+		local sw : adviceBlackness 3.5
+		local radius : (RightSB - SB) / 2
+		include : OShape (SymbolMid + radius * 0.9) (SymbolMid - radius * 0.9) (Middle - radius * 0.9) (Middle + radius * 0.9) sw
+		foreach j [range 0 4] : begin
+			local angle : Math.PI * (j / 2 + 1 / 4)
+			include : dispiro
+				widths.center sw
+				flat (Middle + radius * 0.87 * [Math.cos angle]) (SymbolMid + radius * 0.87 * [Math.sin angle])
+				curl (Middle + radius * [Math.sqrt 2] * [Math.cos angle]) (SymbolMid + radius * [Math.sqrt 2] * [Math.sin angle])
+
+	define [SterlineBaseShape] : glyph-proc
+		local barLeft : mix SB RightSB 0.2
+		local hookEndX : Math.max (barLeft + Stroke * 2.5) [mix SB RightSB 0.95]
+		include : union
+			dispiro
+				widths.lhs
+				g4 hookEndX (CAP - Hook * 0.85)
+				hookstart (CAP - O) (tight -- true)
+				flat barLeft [CAP - SmoothA * 0.75]
+				curl barLeft [mix Stroke CAP 0.3]
+				g4   SB Stroke
+			HBarBottom SB RightSB 0
+
+	create-glyph 'symbol/currency/sterlingSign' 0xA3 : glyph-proc
+		set-width Width
+		include : SterlineBaseShape
+		include : HOverlayBar [mix SB RightSB 0.05] [mix SB RightSB 0.7] (CAP * 0.53)
+
+	create-glyph 'symbol/currency/liraSymbolSign' 0x20A4 : glyph-proc
+		set-width Width
+		include : SterlineBaseShape
+		include : HOverlayBar [mix SB RightSB 0.05] [mix SB RightSB 0.7] (CAP * 0.4)
+		include : HOverlayBar [mix SB RightSB 0.05] [mix SB RightSB 0.7] (CAP * 0.63)
+
+glyph-block Symbol-Letter : begin
+
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Upper-N : NShape
+	glyph-block-import Letter-Latin-X : XStrand
+
+	create-glyph 'numero' 0x2116 : glyph-proc
+		local fine : adviceBlackness 4.5
+		include : OShape XH [Math.max (fine * 2) (CAP * 0.1)] (Middle + [Math.max (fine / 2) ((RightSB - SB) * 0.1)]) [mix RightSB Width 0.5] fine (SmoothA * fine / Stroke) (SmoothB * fine / Stroke)
+		include : NShape CAP (SB / 2) Middle 4.5 5.5 0.7
+		include : HBarBottom (Middle + fine / 2) [mix RightSB Width 0.5] 0 fine
+
+	alias 'Ohm' 0x2126 'grek/Omega'
+	turned 'Mho' 0x2127 'Ohm' Middle (CAP / 2)
+
+	create-glyph 'ell' 0x2113 : glyph-proc
+		include : MarkSet.b
+		local fine : adviceBlackness 3.5
+		local radius : Math.max fine (Width * 0.15)
+		local middle : Middle - fine / 2
+		local left : middle - radius * 1.25
+		local right : middle + radius * 1.5
+		local sma : SmoothA * 0.6
+		local smb : SmoothB * 0.6
+		include : dispiro
+			widths.center fine
+			g2   left [mix 0 CAP 0.33]
+			quadcontrols 1 0.6
+			g2   right [mix 0 CAP 0.8]
+			arcvh
+			g2   [mix middle right 0.5] (CAP - O - fine / 2)
+			archv
+			flat middle (CAP - sma)
+			curl middle (SmoothB * 0.5 + fine / 2)
+			hookend (O + fine / 2)
+			g2   (middle + radius * 2) SHook
+
+	create-glyph 'estimated' 0x212E : glyph-proc
+		local fineArc : CAP * 0.0300
+		local fineBar : CAP * 0.0278
+		local thickBarWidth : (0.183 / [Math.sqrt 0.9]) * [Math.sqrt (CAP * (RightSB - SB))]
+		define smA : SmoothAOf (Smooth * (CAP / XH)) Width
+		define smB : SmoothBOf (Smooth * (CAP / XH)) Width
+		include : union
+			HBarBottom SB RightSB (CAP * 0.5) fineBar
+			difference
+				union
+					difference
+						OShapeOutline CAP 0 SB RightSB fineArc smA smB
+						OShapeOutline (CAP - fineArc) (0 + fineArc) [mix SB RightSB 0.077] [mix RightSB SB 0.077] fineArc (smA - fineArc) (smB - fineArc)
+					intersection
+						OShapeOutline.NoOvershoot CAP 0 SB RightSB fineArc smA smB
+						union
+							Rect CAP 0 SB (SB + thickBarWidth)
+							Rect CAP (CAP * 0.5) (RightSB - thickBarWidth) RightSB
+				Rect (CAP * 0.5) (CAP * 0.208) Middle Width
+
+	turned 'turniota' 0x2129 'grek/iota' Middle (XH / 2)
+
+	create-glyph 'mathAleph' 0x2135 : glyph-proc
+		define p 0.3
+		include : XStrand true false SB CAP RightSB 0 0.1 0.4 0.28
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.down.start RightSB CAP
+				g4 [mix SB RightSB p] 0
+			spiro-outline
+				corner SB CAP
+				corner RightSB CAP
+				corner RightSB 0
+		include : intersection
+			dispiro
+				widths.rhs
+				g4.up.start SB 0
+				g4 [mix SB RightSB (1 - p)] CAP
+			spiro-outline
+				corner SB 0
+				corner RightSB 0
+				corner SB CAP
+
+	create-glyph 'mathBeth' 0x2136 : glyph-proc
+		define pX 0.7
+		define pY 0.8
+		define turnX : mix SB RightSB pY
+		include : dispiro
+			widths.rhs
+			flat SB CAP
+			curl [Math.min (turnX - Stroke * 1.5 * HVContrast) [mix SB turnX pX]] CAP
+			archv
+			flat turnX [Math.min (CAP - Stroke * 1.5) [mix 0 CAP pY]]
+			curl turnX 0
+		include : HBarBottom SB RightSB 0
+
+
+glyph-block Symbol-BlackboardBold : begin
+
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define bbs : adviceBlackness 6
+	define bbd : clamp (Width / 5.5) (Width / 4) (bbs * 2.5)
+
+	create-glyph 'bbN' 0x2115 : glyph-proc
+		include : VBarLeft SB 0 CAP bbs
+		include : VBarRight RightSB 0 CAP bbs
+		include : intersection
+			Rect CAP 0 SB RightSB
+			union
+				dispiro
+					widths.center bbs
+					corner (SB + bbs * HVContrast) CAP
+					corner (RightSB - bbs * HVContrast / 2) (CAP / 5)
+				dispiro
+					widths.center bbs
+					corner (SB + bbs * HVContrast / 2) (CAP - (CAP / 5))
+					corner (RightSB - bbs * HVContrast) 0
+
+	create-glyph 'bbZ' 0x2124 : glyph-proc
+		include : HBarTop SB RightSB CAP bbs
+		include : HBarBottom SB RightSB 0 bbs
+		include : intersection
+			Rect CAP 0 SB RightSB
+			union
+				dispiro
+					widths.center bbs
+					corner SB (bbs / 2)
+					corner (RightSB - bbd) (CAP - bbs / 2)
+				dispiro
+					widths.center bbs
+					corner (SB + bbd) (bbs / 2)
+					corner RightSB (CAP - (bbs / 2))
+
+		include : intersection
+			union
+				VBarRight RightSB (CAP - bbs * 2) CAP bbs
+				VBarLeft  SB 0 (bbs * 2) bbs
+			spiro-outline
+				corner SB (bbs / 2)
+				corner (RightSB - bbd) (CAP - bbs / 2)
+				corner RightSB (CAP - (bbs / 2))
+				corner (SB + bbd) (bbs / 2)
+
+	glyph-block-import Letter-Latin-C : CShape CShapeOutline
+	create-glyph 'bbC' 0x2102 : glyph-proc
+		include : CShape CAP 0 bbs
+		include : intersection
+			CShapeOutline CAP 0
+			VBar (SB + bbd) 0 CAP bbs
+
+	glyph-block-import Letter-Latin-Upper-P : PShape PShapeOutline
+	define [BBPShape] : params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
+		define sb : SB * mul
+		include : difference
+			PShape CAP (sw -- bbs) (mul -- mul) (overshoot -- overshoot) (slab -- false)
+			Rect (CAP - bbs) 0 (sb + HVContrast * bbs / 2) (sb + bbd - HVContrast * bbs / 2)
+		include : VBarLeft sb 0 CAP bbs
+		include : VBar (sb + bbd) 0 CAP bbs
+		include : HBarBottom sb (sb + bbd) 0 bbs
+		include : intersection
+			PShapeOutline CAP (sw -- bbs) (mul -- mul) (overshoot -- overshoot) (offset -- 1)
+			VBar (RightSB - overshoot - bbd) 0 CAP bbs
+
+	create-glyph 'bbP' 0x2119 : BBPShape
+
+	glyph-block-import Letter-Latin-Upper-R : RLegShape RLegTerminalX
+	create-glyph 'bbR' 0x211D : glyph-proc
+		define [SingleLeg] : RLegShape ((CAP - bbs) * HBarPos) 0 Middle (RightSB - O) CAP false true bbs (bbd / 2)
+		define terminalX : RLegTerminalX true (RightSB - O) bbs
+		include : BBPShape (mul -- 1) (overshoot -- O)
+		include : difference
+			union
+				SingleLeg
+				new-glyph : glyph-proc
+					include : SingleLeg
+					include : Translate (bbs / 2 - bbd) 0
+				HBarBottom (terminalX + bbs / 2 - bbd) (terminalX - bbs / 2) 0 bbs
+			PShapeOutline CAP (sw -- bbs) (mul -- 1) (overshoot -- O) (offset -- 1)
+
+	create-glyph 'bbH' 0x210D : glyph-proc
+		include : VBarLeft  SB 0 CAP bbs
+		include : VBarRight RightSB 0 CAP bbs
+		include : VBar      (SB + bbd) 0 CAP bbs
+		include : VBar      (RightSB - bbd) 0 CAP bbs
+		include : HBar (SB + bbd) (RightSB - bbd)  (CAP * HBarPos) bbs
+		include : HBarTop SB (SB + bbd) CAP bbs
+		include : HBarTop (RightSB - bbd) RightSB CAP bbs
+		include : HBarBottom SB (SB + bbd) 0 bbs
+		include : HBarBottom (RightSB - bbd) RightSB 0 bbs
+
+	create-glyph 'bbQ' 0x211A : glyph-proc
+		define [QInner] : OShapeOutline.NoOvershoot CAP 0 SB RightSB bbs SmoothA SmoothB
+		include : OShape CAP 0 SB RightSB bbs SmoothA SmoothB
+		include : intersection
+			QInner
+			union
+				VBar (SB + bbd) 0 CAP bbs
+				VBar (RightSB - bbd) 0 CAP bbs
+
+		define terminalX : Middle + HookX
+		define tailDeltaX : bbd / 2 - bbs / 8 * HVContrast
+		define qTerminalY : bbs - Hook - bbd / 4
+		define [QTail x] : dispiro
+			widths.center bbs
+			flat (x) (CAP / 2)
+			curl (x) 0
+			arcvh
+			flat [Math.min (terminalX - 1) (x - qTerminalY)] qTerminalY
+			curl terminalX qTerminalY
+		include : difference
+			union
+				QTail (Middle - tailDeltaX)
+				QTail (Middle + tailDeltaX)
+			QInner

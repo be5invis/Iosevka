@@ -35,17 +35,10 @@ module.exports = function formVariantData(data, para) {
 	// simple selector
 	for (let k in data.simple) {
 		const varDef = data.simple[k];
-		let hive;
-		if (varDef.variant) {
-			hive = { ...varDef.variant };
-		} else if (varDef.variantUpright && !para.isItalic) {
-			hive = { ...varDef.variantUpright };
-		} else if (varDef.variantItalic && para.isItalic) {
-			hive = { ...varDef.variantItalic };
-		} else {
-			hive = {};
-		}
-
+		const hive = {
+			...varDef.variant,
+			...(para.isItalic ? varDef.variantItalic : varDef.variantUpright)
+		};
 		vs[k] = hive;
 
 		const tag = varDef.tag;

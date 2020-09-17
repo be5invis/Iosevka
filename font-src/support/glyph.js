@@ -5,9 +5,8 @@ const Point = require("./point");
 const Anchor = require("./anchor");
 
 module.exports = class Glyph {
-	constructor(name) {
-		Object.defineProperty(this, "name", { value: name, writable: false });
-		this.unicode = [];
+	constructor(_identifier) {
+		this._m_identifier = _identifier;
 		this.contours = [];
 		this.advanceWidth = 500;
 		this.autoRefPriority = 0;
@@ -16,6 +15,15 @@ module.exports = class Glyph {
 		this.gizmo = Transform.Id();
 		this.dependencies = [];
 		this.defaultTag = null;
+	}
+	get name() {
+		throw new TypeError("Glyph::name has been deprecated");
+	}
+	get unicode() {
+		throw new TypeError("Glyph::unicode has been deprecated");
+	}
+	set unicode(x) {
+		throw new TypeError("Glyph::unicode has been deprecated");
 	}
 	// PTL pattern matching
 	static unapply(obj, arity) {
@@ -26,14 +34,9 @@ module.exports = class Glyph {
 	setWidth(w) {
 		this.advanceWidth = w;
 	}
-	// Encoding
-	assignUnicode(u) {
-		if (typeof u === "string") this.unicode.push(u.codePointAt(0));
-		else this.unicode.push(u);
-	}
 	// Dependency
 	dependsOn(glyph) {
-		if (glyph.name) this.dependencies.push(glyph.name);
+		if (glyph._m_identifier) this.dependencies.push(glyph._m_identifier);
 		if (glyph.dependencies) for (const dep of glyph.dependencies) this.dependencies.push(dep);
 	}
 	// Contour Tagging
@@ -51,7 +54,9 @@ module.exports = class Glyph {
 	}
 	// Inclusion
 	include(component, copyAnchors, copyWidth) {
-		if (component instanceof Function) {
+		if (!component) {
+			throw new Error("Unreachable: Attempt to include a Null or Undefined");
+		} else if (component instanceof Function) {
 			const t = this.defaultTag;
 			if (component.tag) this.defaultTag = component.tag;
 			component.call(this, copyAnchors, copyWidth);
@@ -59,10 +64,12 @@ module.exports = class Glyph {
 			return;
 		} else if (component instanceof Transform) {
 			this.applyTransform(component, copyAnchors);
-		} else if (component instanceof Array) {
-			throw new Error("Attempt to include an array.");
-		} else {
+		} else if (component.isMarkSet) {
+			this.copyAnchors(component);
+		} else if (component instanceof Glyph) {
 			this.includeGlyph(component, copyAnchors, copyWidth);
+		} else {
+			throw new Error("Invalid component to be introduced.");
 		}
 	}
 	includeGlyph(g, copyAnchors, copyWidth) {
@@ -80,6 +87,20 @@ module.exports = class Glyph {
 		if (copyAnchors || g.isMarkSet) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
 		this.dependsOn(g);
+	}
+	cloneFromGlyph(g) {
+		this.includeGlyph(g, true, true);
+		this.cloneRelationFromGlyph(g);
+		this.cloneRankFromGlyph(g);
+	}
+	cloneRelationFromGlyph(g) {
+		this.shortName = g.shortName;
+		this.related = g.related;
+	}
+	cloneRankFromGlyph(g) {
+		this.autoRefPriority = g.autoRefPriority;
+		this.glyphRank = g.glyphRank;
+		this.avoidBeingComposite = g.avoidBeingComposite;
 	}
 	includeGeometry(geom, shiftX, shiftY) {
 		if (!geom || !geom.contours) return;

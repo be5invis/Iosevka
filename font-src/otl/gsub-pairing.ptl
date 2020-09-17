@@ -1,22 +1,22 @@
 import [add-common-feature add-feature add-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
 
 # Name-driven feature pairs
-export : define [buildPairFeature sink tag1 tag2 glyphs glyphList codedOnly] : begin
+export : define [buildPairFeature sink tag1 tag2 glyphStore codedOnly] : begin
 	local rec : BeginLookupBlock sink
 
 	local mapTag2 {.}
 	local mapTag1 {.}
 	define reHidden : regex "^\\."
 	define reTag1 : new RegExp ("\\." + tag1 + "$")
-	foreach [glyph : items-of glyphList] : begin
-		if ([reTag1.test glyph.name] && ![reHidden.test glyph.name]) : do
-			local gnTag2 : glyph.name.replace reTag1 ('.' + tag2)
-			local glyphTag2 glyphs.(gnTag2)
+	foreach { glyphName glyph } [glyphStore.namedEntries] : begin
+		if ([reTag1.test glyphName] && ![reHidden.test glyphName]) : do
+			local gnTag2    : glyphName.replace reTag1 ('.' + tag2)
+			local glyphTag2 : glyphStore.queryByName gnTag2
 			if (glyphTag2) : begin
-				if(!codedOnly || glyph.unicode && glyph.unicode.length > 0)
-					set mapTag2.(glyph.name) gnTag2
-				if(!codedOnly || glyphTag2.unicode && glyphTag2.unicode.length > 0)
-					set mapTag1.(gnTag2) glyph.name
+				if(!codedOnly || [glyphStore.queryUnicodeOf glyph])
+					set mapTag2.(glyphName) gnTag2
+				if(!codedOnly || [glyphStore.queryUnicodeOf glyphTag2])
+					set mapTag1.(gnTag2) glyphName
 
 	if [objectIsNotEmpty mapTag1] : begin
 		define lookup1 : add-lookup sink {.type 'gsub_single' .subtables {mapTag1}}

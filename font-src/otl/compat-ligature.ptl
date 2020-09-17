@@ -55,7 +55,7 @@ define [interpretLookupAt gs j lut] : match lut.type
 		if subtable.(gs.(j)) : begin
 			set gs.(j) subtable.(gs.(j))
 
-export : define [BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF config] : begin
+export : define [BuildCompatLigatures glyphStore GSUB GDEF config] : begin
 	foreach [cldef : items-of config] : do
 		if [not cldef.unicode] : break nothing
 		if [not cldef.featureTag] : break nothing
@@ -69,23 +69,22 @@ export : define [BuildCompatLigatures glyphs glyphList unicodeGlyphs GSUB GDEF c
 
 		local gnames {}
 		for [local j 0] [j < cldef.sequence.length] [inc j] : begin
-			if [not unicodeGlyphs.[cldef.sequence.charCodeAt j]] : break nothing
-			gnames.push unicodeGlyphs.[cldef.sequence.charCodeAt j].name
+			if [not : glyphStore.queryByUnicode : cldef.sequence.charCodeAt j] : break nothing
+			gnames.push : glyphStore.queryNameOfUnicode : cldef.sequence.charCodeAt j
 
 		interpretLookups gnames feature GSUB.lookups
 
-		local g1 : new Glyph ('$clig.' + cldef.unicode)
+		define g1Name : '$clig.' + cldef.unicode
+		local g1 : new Glyph g1Name
 		set g1.advanceWidth 0
 		set g1.autoRefPriority 1
-		set g1.unicode {cldef.unicode}
 		foreach [gn : items-of gnames] : begin
-			local g glyphs.(gn)
+			local g : glyphStore.queryByName gn
 			g1.applyTransform : new Transform 1 0 0 1 (-g1.advanceWidth) 0
 			g1.includeGlyph g
 			g1.applyTransform : new Transform 1 0 0 1 (g1.advanceWidth) 0
 			set g1.advanceWidth : g1.advanceWidth + g.advanceWidth
 
-		set glyphs.(g1.name) g1
-		set unicodeGlyphs.(cldef.unicode) g1
-		glyphList.push g1
-		set GDEF.glyphClassDef.(g1.name) GDEF_LIGATURE
+		glyphStore.addGlyph    g1Name        g1
+		glyphStore.encodeGlyph cldef.unicode g1
+		set GDEF.glyphClassDef.(g1Name) GDEF_LIGATURE

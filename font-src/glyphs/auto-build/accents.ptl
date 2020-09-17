@@ -1,0 +1,287 @@
+###### Automatic builds
+$$include '../../meta/macros.ptl'
+
+import 'unorm' as unorm
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose] from "../../support/gr"
+import [fallback] from '../../support/utils'
+
+glyph-module
+
+glyph-block AutoBuild-Accents : begin
+	glyph-block-import Common-Derivatives : query-glyph refer-glyph
+
+	define [suggestName _name] : begin
+		local name _name
+		if [query-glyph name] : begin
+			local j 2
+			while [query-glyph (name + j)] : inc j
+			set name (name + j)
+		return name
+
+	define [suggestMappedName map key name] : begin
+		if map.(key) : return map.(key)
+		local amended : suggestName name
+		set map.(key) amended
+		return amended
+
+	# Build accented glyphs
+	define [isAboveMark mark] : begin
+		return : mark && mark.markAnchors && mark.markAnchors.above
+	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : begin
+		set parts.(j) [query-glyph 'iotaLF']
+	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : begin
+		set parts.(j) [query-glyph 'ogonekTR']
+
+	define [subParts parts] : begin
+		local hasMarkAbove false
+		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
+
+		# replace dotted-i and dotted-j with dotless equalivents
+		if (hasMarkAbove && [Dotless.get parts.0]) : begin
+			local dotless [query-glyph : Dotless.get parts.0]
+			if dotless : set parts.0 dotless
+
+		# replace below marks with trailing marks
+		if parts.0.baseAnchors.lf : parts.forEach iotaBelowToLF
+		if parts.0.baseAnchors.trailing : parts.forEach ogonekBelowToTR
+
+		# composite greek Marks
+		for [local j 0] (j < parts.length) [inc j] : piecewise
+			(parts.(j) === [query-glyph 'commaAbove']) : begin
+				piecewise
+					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilivaria']
+					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilioxia']
+					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'psiliperispomeni']
+			(parts.(j) === [query-glyph 'revCommaAbove']) : begin
+				piecewise
+					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiavaria']
+					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaoxia']
+					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaperispomeni']
+		return parts
+
+	define [pad _s n] : begin
+		local s _s
+		while (s.length < n) : s = '0' + s
+		return s
+
+	local foundDecompositions {.}
+	define [decideName namingParts code] : begin
+		local baseName : glyphStore.queryNameOf namingParts.0
+		local glyphName baseName
+		foreach [part : namingParts.slice 1] : if part : begin
+			glyphName = glyphName + [fallback part.shortName : glyphStore.queryNameOf part]
+
+		if foundDecompositions.(glyphName) : begin
+			local j 2
+			while foundDecompositions.(glyphName + j) [inc j]
+			set glyphName (glyphName + j)
+
+		return glyphName
+
+	# When recursively building, `recursiveCodes` contain an array of "needed" Unicode list
+	local goalCodes : recursiveCodes || [range 0x0000 0xFFFF]
+	foreach code goalCodes : if [not : glyphStore.queryByUnicode code] : do
+		local str : String.fromCharCode code
+		local nfd : fallback customDecompositions.(str) : unorm.nfd str
+		if (nfd.length > 1) : begin
+			local parts     { }
+			local allFound true
+			foreach j [range 0 nfd.length] : begin
+				local part : glyphStore.queryByUnicode [nfd.charCodeAt j]
+				if [not part] : then
+					set allFound false
+				: else
+					set parts.(j) part
+			if allFound : begin
+				local glyphName : decideName parts code
+				set parts : subParts parts
+				set foundDecompositions.(glyphName) { glyphName code parts }
+
+	local s_parts     nothing
+
+	define [recursivelyDecompose g sink] : begin
+		local decomposition : CvDecompose.get g
+		if decomposition : foreach gnPart [items-of decomposition] : begin
+			local g : query-glyph gnPart
+			if g : recursivelyDecompose g sink
+		: else : begin
+			sink.push : glyphStore.queryNameOf g
+
+	define construction : glyph-proc
+		include s_parts.0 AS_BASE ALSO_METRICS
+		foreach part [items-of : s_parts.slice 1] : if part : begin
+			include part
+			if (part.markAnchors && part.markAnchors.bottomright) : begin
+				eject-contour 'serifRB'
+		if [AnyDerivingCv.query s_parts.0] : begin
+			local decomposeParts { }
+			foreach part [items-of s_parts] : begin
+				recursivelyDecompose part decomposeParts
+			CvDecompose.set currentGlyph decomposeParts
+
+	define [RootGlyphProc goalName code parts] : begin
+		set s_parts  parts
+		return : create-glyph goalName code construction
+
+	foreach [_id : items-of : Object.keys foundDecompositions] : do
+		local { glyphName code parts } foundDecompositions.(_id)
+
+		local result : RootGlyphProc glyphName code parts
+		if result : begin
+			define part0Name : glyphStore.queryNameOf parts.0
+			if (parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
+
+		local dstTree {}
+		local targetNameMap  {.}
+		set targetNameMap.(part0Name) glyphName
+		local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
+		foreach [{gr origBase relBase} : items-of tree] : begin
+			local origGN targetNameMap.(origBase)
+			if [not origGN] : throw : new Error 'Unreachable'
+			local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
+			local parts1 : parts.slice 0
+			set parts1.0 : query-glyph relBase
+			if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
+			if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
+
+define customDecompositions : object
+	# Latvians use comma instead of cedillas in several letters.
+	# Record them as custom decomposition.
+	."\u0156" "R\u0326"
+	."\u0157" "r\u0326"
+	."\u0136" "K\u0326"
+	."\u0137" "k\u0326"
+	."\u0145" "N\u0326"
+	."\u0146" "n\u0326"
+	."\u013B" "L\u0326"
+	."\u013C" "l\u0326"
+	."\u0122" "G\u0326"
+	."\u0123" "g\u0312"
+
+	# autobuild Latin glyphs
+	."\u0197" "I\u0335"
+	."\u019A" "l\u0335"
+	."\u0248" "J\u0335"
+	."\u0249" "j\u0335"
+	."\u0268" "i\u0335"
+	."\u024D" "r\u0335"
+	."\u1D7B" "\u026A\u0335"
+	."\u1D7C" "\u0269\u0335"
+
+	."\u1D7F" "\u028A\uE091"
+	."\u0289" "u\uE091"
+	."\u0244" "U\uE091"
+	."\u01E5" "g\uE091"
+	."\u01BB" "2\uE091"
+	."\u024E" "Y\uE091"
+	."\u04B0" "\u04AE\u0335"
+	."\u04B1" "\u04AF\u0335"
+	."\u024F" "y\uE091"
+	."\uAB30" "\uAB64\uE091"
+	."\u1D7D" "p\uE091"
+
+	."\u0142" "l\uE090"
+
+	."\u023A" "A\u0338"
+	."\u023B" "C\u0338"
+	."\u023C" "c\u0337"
+	."\u023E" "T\u0338"
+	."\u0246" "E\u0338"
+	."\u0247" "e\u0337"
+
+	."\u0290" "z\u0322"
+	."\u0256" "d\u0322"
+	."\u0273" "n\u0322"
+	."\u01AE" "T\u0322"
+	."\u1D8F" "a\u0322"
+	."\u1D90" "\u0251\u0322"
+	."\u1D91" "\u0257\u0322"
+
+	."\u1E10" "D\u0326"
+	."\u1E11" "d\u0326"
+
+	."\u1E9A" "a\u0357"
+	."\u1E9C" "\u017F\uE090"
+
+	."\u1EDC" "\u01A0\u0300"
+	."\u1EDD" "\u01A1\u0300"
+	."\u1EDA" "\u01A0\u0301"
+	."\u1EDB" "\u01A1\u0301"
+	."\u1EDE" "\u01A0\u0309"
+	."\u1EDF" "\u01A1\u0309"
+	."\u1EE0" "\u01A0\u0303"
+	."\u1EE1" "\u01A1\u0303"
+	."\u1EE2" "\u01A0\u0323"
+	."\u1EE3" "\u01A1\u0323"
+
+ 	# Cyrillic composite characters
+	."\u0498" "\u0417\u0327"
+	."\u0499" "\u0437\u0327"
+	."\u04AA" "\u0421\u0327"
+	."\u04AB" "\u0441\u0327"
+
+	# Spacing modifers
+	."\u02CB" "\uE09D\u0300"
+	."\u02CA" "\uE09D\u0301"
+	."\u02C6" "\uE09D\u0302"
+	."\u02DC" "\uE09D\u0303"
+	."\u00AF" "\uE09D\u0304"
+	."\u02C9" "\uE09D\u0304"
+	."\u02D8" "\uE09D\u0306"
+	."\u02D9" "\uE09D\u0307"
+	."\u00A8" "\uE09D\u0308"
+	."\u02DA" "\uE09D\u030A"
+	."\u02C7" "\uE09D\u030C"
+	."\u00B8" "\uE09D\u0327"
+	."\u02CD" "\uE09D\u0331"
+	."\u02CE" "\uE09D\u0316"
+	."\u02CF" "\uE09D\u0317"
+	."\u02D2" "\uE09D\u0339"
+	."\u02D3" "\uE09D\u031C"
+	."\u02D4" "\uE09D\u031D"
+	."\u02D5" "\uE09D\u031E"
+	."\u02D6" "\uE09D\u031F"
+	."\u02D7" "\uE09D\u0320"
+	."\u02DB" "\uE09D\u0328"
+	."\u02DD" "\uE09D\u030B"
+	."\u02DF" "\uE09D\u033D"
+	."\u02EC" "\uE09D\u032C"
+	."\u02ED" "\uE09D\u033F"
+	."\u02F3" "\uE09D\u0325"
+	."\u02F7" "\uE09D\u0330"
+	."\u02BE" "\uE09D\u0357"
+	."\u02BF" "\uE09D\u0351"
+	."\u02C2" "\uE09D\u1DFE"
+	."\u02C3" "\uE09D\u0350"
+	."\u02C4" "\uE09D\uE092"
+	."\u02C5" "\uE09D\uE093"
+	."\u02EF" "\uE09D\uE095"
+	."\u02F0" "\uE09D\uE094"
+	."\u02F1" "\uE09D\u0354"
+	."\u02F2" "\uE09D\u0355"
+
+	."\u1FED" "\uE09D\u0308\u0300"
+	."\u1FEE" "\uE09D\u0308\u0301"
+	."\u1FEF" "\uE09D\u0300"
+	."\u1FFD" "\uE09D\u0301"
+	."\u1FFE" "\uE09D\u0314"
+	."\u1FBD" "\uE09D\u0313"
+	."\u1FBE" "\uE09D\u0345"
+	."\u1FBF" "\uE09D\u0313"
+	."\u1FC0" "\uE09D\u0342"
+	."\u1FC1" "\uE09D\u0308\u0342"
+	."\u0384" "\uE09D\u0301"
+	."\u0385" "\uE09D\u0308\u0301"
+	."\u037A" "\uE09D\u0345"
+	."\uAB30" "\u0251\uE091"
+
+	# Suppress incorrect slashed arrows... so far
+	."\u219A" ""
+	."\u219B" ""
+	."\u21AE" ""
