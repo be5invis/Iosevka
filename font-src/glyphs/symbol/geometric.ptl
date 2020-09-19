@@ -827,6 +827,57 @@ glyph-block Symbol-Geometric : begin
 							if LTh : include : UpperLeftHalfMark
 							if RBh : include : LowerRightHalfMark
 
+		# Quarter-line square and circle
+		define quarterLineParts : list
+			list 0x25F0 'whiteSquare' 1 1 0 0
+			list 0x25F1 'whiteSquare' 0 1 1 0
+			list 0x25F2 'whiteSquare' 0 0 1 1
+			list 0x25F3 'whiteSquare' 1 0 0 1
+			list 0x25F4 'whiteCircle' 1 1 0 0
+			list 0x25F5 'whiteCircle' 0 1 1 0
+			list 0x25F6 'whiteCircle' 0 0 1 1
+			list 0x25F7 'whiteCircle' 1 0 0 1
+		foreach { u frame T L B R } [items-of quarterLineParts] : begin
+			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
+				local hh : GeometryStroke / 2 * HVContrast
+				local hv : GeometryStroke / 2
+				local s    GeometryStroke
+				set-width MosaicWidth
+				include : union
+					refer-glyph [MangleName frame]
+					if L [HBar (MosaicMiddle - squareRadiusFW + hh) (MosaicMiddle + hh) SymbolMid s] [glyph-proc]
+					if R [HBar (MosaicMiddle + squareRadiusFW - hh) (MosaicMiddle - hh) SymbolMid s] [glyph-proc]
+					if T [VBar MosaicMiddle (SymbolMid + squareRadiusFW - hv) (SymbolMid - hv) s]    [glyph-proc]
+					if B [VBar MosaicMiddle (SymbolMid - squareRadiusFW + hv) (SymbolMid + hv) s]    [glyph-proc]
+
+		# White diagonal-half square
+		define whiteHalfTriangleParts : list
+			list 0x25F8 1 0 0 0 1 0
+			list 0x25F9 0 1 0 0 0 1
+			list 0x25FA 0 0 1 0 0 1
+			list 0x25FF 0 0 0 1 1 0
+		foreach { u LT RT LB RB P Q } [items-of whiteHalfTriangleParts] : begin
+			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					intersection
+						refer-glyph [MangleName 'blackSquare']
+						union
+							if LT [UpperLeftHalfMark]  [glyph-proc]
+							if RT [UpperRightHalfMark] [glyph-proc]
+							if LB [LowerLeftHalfMark]  [glyph-proc]
+							if RB [LowerRightHalfMark] [glyph-proc]
+					union
+						refer-glyph [MangleName 'whiteSquare']
+						if [not P] [glyph-proc] : dispiro
+							widths.center (GeometryStroke * 2)
+							corner (MosaicMiddle - squareRadiusFW * 2) (SymbolMid - squareRadiusFW * 2)
+							corner (MosaicMiddle + squareRadiusFW * 2) (SymbolMid + squareRadiusFW * 2)
+						if [not Q] [glyph-proc] : dispiro
+							widths.center (GeometryStroke * 2)
+							corner (MosaicMiddle + squareRadiusFW * 2) (SymbolMid - squareRadiusFW * 2)
+							corner (MosaicMiddle - squareRadiusFW * 2) (SymbolMid + squareRadiusFW * 2)
+
 		create-glyph [MangleName 'dottedWhiteTriangle'] [MangleUnicode 0x25EC] : glyph-proc
 			set-width MosaicWidth
 			include : refer-glyph : MangleName 'whiteTriangleUp'
