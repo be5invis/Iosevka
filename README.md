@@ -223,6 +223,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
 	- Recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
   - `sp-fixed` : Apply `sp-force-monospace` and `no-ligation` together.
 
+* Style for controlling digits' (figures') style:
+  - `default-to-old-style-figures`, `default-to-old-style-digits`: Default digit figures to old-style.
+  - `default-to-lining-figures`, `default-to-lining-digits`: Default digit figures to lining.
+
 <!-- BEGIN Section-Cherry-Picking-Predefined -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
