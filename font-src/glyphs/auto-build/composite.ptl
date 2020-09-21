@@ -95,7 +95,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define gniPart : '.ci.' + gidPart + '@' + [{ prefix finalPlacement dscale xCompress shift }.join '/']
 		if [not : query-glyph gniPart] : create-glyph gniPart : glyph-proc
 			set-width 0
-			include : miniatureFont.queryByName gidPart
+			include : miniatureFont.queryByNameEnsured gidPart
 			include : Upright
 			include : Scale (dscale * xCompress) dscale
 			include : Translate 0 (dscale * (-CAP / 2 + shift))
@@ -113,7 +113,7 @@ glyph-block AutoBuild-Enclosure : begin
 		local firstDerivedGyph null
 		local shift 0
 		foreach [gidPart : items-of parts] : do
-			local derivedGlyph : miniatureFont.queryByName gidPart
+			local derivedGlyph : miniatureFont.queryByNameEnsured gidPart
 			if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
 			set totalWidth : totalWidth + derivedGlyph.advanceWidth
 		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
@@ -128,7 +128,7 @@ glyph-block AutoBuild-Enclosure : begin
 			define gidPart parts.(partIndex)
 			define finalPlacement : accumulatedAdvanceSoFar - width / 2 - totalWidth * dscale / 2
 			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont prefix finalPlacement dscale xCompress shift
-			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + [miniatureFont.queryByName gidPart].advanceWidth * dscale * xCompress
+			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + [miniatureFont.queryByNameEnsured gidPart].advanceWidth * dscale * xCompress
 
 		return finalParts
 
@@ -375,7 +375,7 @@ glyph-block AutoBuild-Enclosure : begin
 				if [query-glyph gniPart] : return gniPart
 				create-glyph gniPart : glyph-proc
 					set-width 0
-					include : miniatureFont.queryByName gidPart
+					include : miniatureFont.queryByNameEnsured gidPart
 					include : Upright
 					include : Translate offset 0
 					include : Scale xCompress 1
@@ -394,7 +394,7 @@ glyph-block AutoBuild-Enclosure : begin
 					local gidPart partsWithDot.(j)
 					if j : set totalWidth : totalWidth - SB
 					set offsets.(j) totalWidth
-					set totalWidth : totalWidth + [miniatureFont.queryByName gidPart].advanceWidth
+					set totalWidth : totalWidth + [miniatureFont.queryByNameEnsured gidPart].advanceWidth
 				set totalWidth : totalWidth - SB
 				local xCompress : if (totalWidth > width) (width / totalWidth) 1
 				local xTranslate : [if (totalWidth > width) 0 (width / 2 - totalWidth / 2)] - width
@@ -619,7 +619,7 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 		define [numeratorImpl numid] : begin
 			local gnn ".frac-num-\(prefix){\(numid)}"
 			if [not : query-glyph gnn] : create-glyph gnn : glyph-proc
-				define mfNumGlyph : miniatureFont.queryByName numid
+				define mfNumGlyph : miniatureFont.queryByNameEnsured numid
 
 				set-width 0
 				include mfNumGlyph
@@ -634,7 +634,7 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 		define [denumeratorImpl denid] : begin
 			local gnd ".frac-den-\(prefix){\(denid)}"
 			if [not : query-glyph gnd] : create-glyph gnd : glyph-proc
-				define mfDenGlyph : miniatureFont.queryByName denid
+				define mfDenGlyph : miniatureFont.queryByNameEnsured denid
 
 				set-width 0
 				include mfDenGlyph
@@ -722,7 +722,7 @@ glyph-block AutoBuild-Accented-Equal : if [not recursive] : begin
 			if [query-glyph gni] : return gni
 			create-glyph gni : glyph-proc
 				set-width 0
-				include : dFont.queryByName gidPart
+				include : dFont.queryByNameEnsured gidPart
 				include : Upright
 				include : Translate (-totalWidth / 2 + offset) 0
 				include : Scale scale
@@ -737,7 +737,7 @@ glyph-block AutoBuild-Accented-Equal : if [not recursive] : begin
 			foreach [j : range 0 parts.length] : begin
 				local gidPart parts.(j)
 				set offsets.(j)  totalWidth
-				set totalWidth : totalWidth + [dFont.queryByName gidPart].advanceWidth
+				set totalWidth : totalWidth + [dFont.queryByNameEnsured gidPart].advanceWidth
 
 			if [not : query-glyph gn] : create-glyph gn unicode : glyph-proc
 				set-width Width
@@ -780,6 +780,42 @@ glyph-block AutoBuild-Accented-Equal : if [not recursive] : begin
 		list 0x1F16A {"M" "C"}
 		list 0x1F16B {"M" "D"}
 		list 0x1F16C {"M" "R"}
+	createAccentedOp 'markDemoBaseSpace' 6.5 0.35 0 (SymbolMid - CAP / 2 * 0.35) : list
+		list 0x2400 {"N" "U" "L"}
+		list 0x2401 {"S" "O" "H"}
+		list 0x2402 {"S" "T" "X"}
+		list 0x2403 {"E" "T" "X"}
+		list 0x2404 {"E" "O" "T"}
+		list 0x2405 {"E" "N" "Q"}
+		list 0x2406 {"A" "C" "K"}
+		list 0x2407 {"B" "E" "L"}
+		list 0x2408 {"B" "S"}
+		list 0x2409 {"H" "T"}
+		list 0x240A {"L" "F"}
+		list 0x240B {"V" "T"}
+		list 0x240C {"F" "F"}
+		list 0x240D {"C" "R"}
+		list 0x240E {"S" "O"}
+		list 0x240F {"S" "I"}
+		list 0x2410 {"D" "L" "E"}
+		list 0x2411 {"D" "C" "L"}
+		list 0x2412 {"D" "C" "two.lnum"}
+		list 0x2413 {"D" "C" "three.lnum"}
+		list 0x2414 {"D" "C" "four.lnum"}
+		list 0x2415 {"N" "A" "K"}
+		list 0x2416 {"S" "Y" "N"}
+		list 0x2417 {"E" "T" "B"}
+		list 0x2418 {"C" "A" "N"}
+		list 0x2419 {"E" "M"}
+		list 0x241A {"S" "U" "B"}
+		list 0x241B {"E" "S" "C"}
+		list 0x241C {"F" "S"}
+		list 0x241D {"G" "S"}
+		list 0x241E {"R" "S"}
+		list 0x241F {"U" "S"}
+		list 0x2420 {"S" "P"}
+		list 0x2421 {"D" "E" "L"}
+		list 0x2424 {"N" "L"}
 
 glyph-block Autobuild-Ligatures : if [not recursive] : begin
 	glyph-block-import CommonShapes
@@ -800,7 +836,7 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 			if [query-glyph gni] : return gni
 			create-glyph gni : glyph-proc
 				set-width aw
-				include : df.queryByName gidPart
+				include : df.queryByNameEnsured gidPart
 				include : Upright
 				include : Translate offset1 0
 				include : Scale compress 1
@@ -812,8 +848,8 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 			local { gn unicode { c1 c2 } desiredWidth } job
 			local ps {}
 
-			local dfg1 : df1.queryByName c1
-			local dfg2 : df2.queryByName c2
+			local dfg1 : df1.queryByNameEnsured c1
+			local dfg2 : df2.queryByNameEnsured c2
 
 			if FMosaicWide : begin
 				local aw : dfg1.advanceWidth + dfg2.advanceWidth
@@ -915,8 +951,8 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 				local s    0
 				local step (-OX)
 				local dist (Stroke * 2)
-				define dfg1 : df1.queryByName c1
-				define dfg2 : df2.queryByName c2
+				define dfg1 : df1.queryByNameEnsured c1
+				define dfg2 : df2.queryByNameEnsured c2
 				while (s < dist) : begin
 					include dfg2
 					include : Translate step 0
@@ -924,8 +960,8 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 
 			create-glyph glyphName unicode : glyph-proc
-				define dfg1 : df1.queryByName c1
-				define dfg2 : df2.queryByName c2
+				define dfg1 : df1.queryByNameEnsured c1
+				define dfg2 : df2.queryByNameEnsured c2
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
 				local refW : sumChildrenWidth - kern
 				include dfg2
