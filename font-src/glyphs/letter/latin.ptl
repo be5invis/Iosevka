@@ -3062,19 +3062,27 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-export CShape CShapeOutline
 	glyph-block-import Letter-Shared-Shapes : CurlyTail
 
-	define [CShape top bot sw] : glyph-proc
-		include : dispiro
-			widths.lhs sw
-			g4 RightSB (top - Hook)
-			hookstart (top - O)
-			flat (SB + OX) (top - SmoothA)
-			curl (SB + OX) (bot + SmoothB)
-			hookend (bot + O)
-			g4 RightSB (bot + Hook)
+	define [CShape top bot sw] : dispiro
+		widths.lhs sw
+		g4 RightSB (top - Hook)
+		hookstart (top - O)
+		flat (SB + OX) (top - SmoothA)
+		curl (SB + OX) (bot + SmoothB)
+		hookend (bot + O)
+		g4 RightSB (bot + Hook)
 
-	define [CShapeOutline top bot _offset] : glyph-proc
+	define [RevCShape top bot sw] : dispiro
+		widths.rhs sw
+		g4 SB (top - Hook)
+		hookstart (top - O)
+		flat (RightSB - OX) (top - SmoothA)
+		curl (RightSB - OX) (bot + SmoothB)
+		hookend (bot + O)
+		g4 SB (bot + Hook)
+
+	define [CShapeOutline top bot _offset] : begin
 		define offset : fallback _offset 1
-		include : spiro-outline
+		return : spiro-outline
 			g4 RightSB (top - Hook)
 			hookstart (top - O - offset)
 			flat (SB + OX + offset) (top - SmoothA)
@@ -3087,6 +3095,10 @@ glyph-block Letter-Latin-C : begin
 		include : MarkSet.capital
 		include : CShape CAP 0
 
+	create-glyph 'revC' 0x2183 : glyph-proc
+		include : MarkSet.capital
+		include : RevCShape CAP 0
+
 	alias 'cyrl/Es' 0x421 'C'
 	alias 'grek/lunateSigma' 0x3F9 'C'
 
@@ -3098,7 +3110,6 @@ glyph-block Letter-Latin-C : begin
 	create-glyph 'c' 'c' : glyph-proc
 		set-width Width
 		include : MarkSet.e
-
 		include : dispiro
 			widths.lhs
 			g4 RightSB (XH - Hook)
@@ -3107,6 +3118,18 @@ glyph-block Letter-Latin-C : begin
 			curl (SB + OX) (0 + SmallSmoothB)
 			hookend O
 			g4 RightSB Hook
+
+	create-glyph 'revSmallC' 0x2184 : glyph-proc
+		set-width Width
+		include : MarkSet.e
+		include : dispiro
+			widths.rhs
+			g4 SB (XH - Hook)
+			hookstart (XH - O)
+			flat (RightSB - OX) (XH - SmallSmoothA)
+			curl (RightSB - OX) (0 + SmallSmoothB)
+			hookend O
+			g4 SB Hook
 
 	alias 'cyrl/es' 0x441 'c'
 	alias 'grek/lunatesigma' 0x3F2 'c'
@@ -4568,15 +4591,21 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Common-Derivatives
 
 	define [HShape top] : glyph-proc
-		include : VBarLeft SB 0 top
-		include : VBarRight RightSB 0 top
+		include : tagged 'strokeL' : VBarLeft SB 0 top
+		include : tagged 'strokeR' : VBarRight RightSB 0 top
 		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
 		include : AIHSerifs top
 
 	create-glyph 'H' 'H' : glyph-proc
-		set-width Width
 		include : MarkSet.capital
 		include : HShape CAP
+
+	create-glyph 'halfH' 0x2C75 : glyph-proc
+		include : MarkSet.capital
+		include : HShape CAP
+		eject-contour 'strokeR'
+		eject-contour 'serifRT'
+		eject-contour 'serifRB'
 
 	alias 'grek/Eta' 0x397 'H'
 	alias 'cyrl/En' 0x41D 'H'
@@ -4584,6 +4613,13 @@ glyph-block Letter-Latin-Upper-H : begin
 	create-glyph 'smcpH' 0x29C : glyph-proc
 		include : MarkSet.e
 		include : HShape XH
+
+	create-glyph 'halfSmcpH' 0x2C76 : glyph-proc
+		include : MarkSet.e
+		include : HShape XH
+		eject-contour 'strokeR'
+		eject-contour 'serifRT'
+		eject-contour 'serifRB'
 
 	alias 'cyrl/en' 0x43D 'smcpH'
 
@@ -4813,6 +4849,14 @@ glyph-block Letter-Latin-Upper-F : begin
 		set-width Width
 		include : MarkSet.capital
 		include : FShape CAP
+
+	create-glyph 'smcpF' 0xA730 : glyph-proc
+		set-width Width
+		include : MarkSet.e
+		include : FShape XH
+
+	turned 'turnF'     0x2132 'F'     Middle (CAP / 2)
+	turned 'turnSmcpF' 0x214E 'smcpF' Middle (XH / 2)
 
 	create-glyph 'symbol/currency/frenchFrancSign' 0x20A3 : glyph-proc
 		include : refer-glyph "F"
