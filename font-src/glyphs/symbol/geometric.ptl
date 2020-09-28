@@ -907,21 +907,33 @@ glyph-block Symbol-Geometric : begin
 				refer-glyph : MangleName 'uni25D9'
 				LowerHalfMask
 
-		create-glyph : glyph-proc
-			set-width MosaicWidth
-			local dotRadius : squareRadiusFW * 0.44
-			local rayInnerRadius : squareRadiusFW * 0.56
-			local rayWidth : adviceBlackness 8 MosaicWidthScalar
-			foreach [n : range 0 8] : begin
-				local theta : n / 8 * Math.PI * 2
-				local c : Math.cos theta
-				local s : Math.sin theta
-				include : dispiro
-					widths.center rayWidth
-					corner (MosaicMiddle + c * rayInnerRadius) (SymbolMid + s * rayInnerRadius)
-					corner (MosaicMiddle + c * squareRadiusFW) (SymbolMid + s * squareRadiusFW)
+		do "Sun and Gear"
+			define [EightPointingRaysShape r] : glyph-proc
+				foreach [n : range 0 8] : begin
+					local theta : n / 8 * Math.PI * 2
+					local c : Math.cos theta
+					local s : Math.sin theta
+					include : dispiro
+						widths.center rayWidth
+						corner (MosaicMiddle + c * r) (SymbolMid + s * r)
+						corner (MosaicMiddle + c * squareRadiusFW) (SymbolMid + s * squareRadiusFW)
 
-			create-derived [MangleName 'blackSunWithRays'] [MangleUnicode 0x2600]
-				RingAt MosaicMiddle SymbolMid dotRadius
-			create-derived [MangleName 'whiteSunWithRays'] [MangleUnicode 0x263C]
-				RingStrokeAt MosaicMiddle SymbolMid dotRadius rayWidth
+			define rayWidth : adviceBlackness 8 MosaicWidthScalar
+			define rayInnerRadius : squareRadiusFW * 0.56
+			define dotRadius : squareRadiusFW * 0.44
+
+			create-glyph [MangleName 'blackSunWithRays'] [MangleUnicode 0x2600] : glyph-proc
+				set-width MosaicWidth
+				include : EightPointingRaysShape rayInnerRadius
+				include : RingAt MosaicMiddle SymbolMid dotRadius
+			create-glyph [MangleName 'whiteSunWithRays'] [MangleUnicode 0x263C] : glyph-proc
+				set-width MosaicWidth
+				include : EightPointingRaysShape rayInnerRadius
+				include : RingStrokeAt MosaicMiddle SymbolMid dotRadius rayWidth
+			create-glyph [MangleName 'gear'] [MangleUnicode 0x2699] : glyph-proc
+				set-width MosaicWidth
+				local gearRingRad : mix rayInnerRadius squareRadiusFW 0.4
+				include : EightPointingRaysShape gearRingRad
+				include : RingStrokeAt MosaicMiddle SymbolMid gearRingRad rayWidth
+				include : RingAt MosaicMiddle SymbolMid (0.4 * (gearRingRad - rayWidth))
+
