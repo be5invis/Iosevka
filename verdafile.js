@@ -422,15 +422,9 @@ const BuildRawTtf = file.make(
 		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
-		const otdPath = `${output.dir}/${output.name}.otd`;
-		await node("font-src/index", { o: otdPath, oCharMap: charmap, ...fi });
-		await optimizedOtfcc(otdPath, output.full);
-		await rm(otdPath);
+		await node("font-src/index", { o: output.full, oCharMap: charmap, ...fi });
 	}
 );
-function optimizedOtfcc(from, to) {
-	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
-}
 
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
