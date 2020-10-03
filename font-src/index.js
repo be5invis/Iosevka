@@ -2,10 +2,8 @@
 
 const fs = require("fs-extra");
 const path = require("path");
-const child_process = require("child_process");
 
 const Toml = require("@iarna/toml");
-const which = require("which");
 
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
@@ -17,7 +15,7 @@ module.exports = async function main(argv) {
 	const para = await getParameters(argv);
 	const { font, glyphStore } = BuildFont(para);
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveTTF(argv, font);
+	if (argv.o) await saveOTD(argv, font);
 };
 
 // Parameter preparation
@@ -83,28 +81,9 @@ async function tryParseToml(str) {
 	}
 }
 
-// Save TTF
-async function saveTTF(argv, font) {
-	await otfccBuild(argv.o, JSON.stringify(font));
-}
-function otfccBuild(argvO, fontJson) {
-	const otfccOptions = ["-O3", "--keep-average-char-width", "-q"];
-	return new Promise((resolve, reject) => {
-		const otfccBuild = which.sync("otfccbuild");
-		const cp = child_process.spawn(otfccBuild, ["-o", argvO, ...otfccOptions]);
-		cp.stdout.on("data", data => {
-			console.log(`stdout: ${data}`);
-		});
-		cp.stderr.on("data", data => {
-			console.error(`stderr: ${data}`);
-		});
-		cp.on("close", code => {
-			if (code) reject(new Error("OTFCC returned with: " + code));
-			else resolve(0);
-		});
-		cp.stdin.write(fontJson);
-		cp.stdin.end();
-	});
+// Save OTD
+async function saveOTD(argv, font) {
+	await fs.writeJSON(argv.o, font);
 }
 
 // Save character map file
