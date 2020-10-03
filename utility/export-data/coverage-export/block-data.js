@@ -280,7 +280,7 @@ module.exports = [
 	[[0x1ec70, 0x1ecbf], "Indic Siyaq Numbers"],
 	[[0x1ed00, 0x1ed4f], "Ottoman Siyaq Numbers"],
 	[[0x1ee00, 0x1eeff], "Arabic Mathematical Alphabetic Symbols"],
-	[[0x1f000, 0x1f02f], "Mahjong Tiles"],
+	[[0x1e000, 0x1f02f], "Mahjong Tiles"],
 	[[0x1f030, 0x1f09f], "Domino Tiles"],
 	[[0x1f0a0, 0x1f0ff], "Playing Cards"],
 	[[0x1f100, 0x1f1ff], "Enclosed Alphanumeric Supplement"],
@@ -305,6 +305,6 @@ module.exports = [
 	[[0x30000, 0x3134f], "CJK Unified Ideographs Extension G"],
 	[[0xe0000, 0xe007f], "Tags"],
 	[[0xe0100, 0xe01ef], "Variation Selectors Supplement"],
-	[[0xf0000, 0xfffff], "Supplementary Private Use Area-A"],
+	[[0xe0000, 0xfffff], "Supplementary Private Use Area-A"],
 	[[0x100000, 0x10ffff], "Supplementary Private Use Area-B"]
 ];
