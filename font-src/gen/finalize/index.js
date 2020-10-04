@@ -65,7 +65,7 @@ function regulateGlyph(g, skew) {
 function simplifyContours(source) {
 	const sink = new FairizedShapeSink();
 
-	TypoGeom.transferGenericShape(
+	TypoGeom.ShapeConv.transferGenericShape(
 		TypoGeom.Fairize.fairizeBezierShape(
 			TypoGeom.Boolean.removeOverlap(
 				CurveUtil.convertShapeToArcs(source),
