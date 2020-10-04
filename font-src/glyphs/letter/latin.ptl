@@ -4719,7 +4719,7 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : LeftwardTopSerif SB CAP SideJut
 
 	select-variant 'h' 'h'
-	alias 'cyrl/shha' 0x4BB 'h.straight'
+	alias 'cyrl/shha' 0x4BB 'h'
 
 	with-related-glyphs 'h' 'hCedilla' 0x1E29 : lambda [src sel] : glyph-proc
 		include [refer-glyph 'cedillaBelow']
@@ -5541,6 +5541,12 @@ glyph-block Letter-Latin-S : begin
 		include : RevsStroke
 
 	alias 'cyrl/ghe.italic' null 'revs'
+
+	create-glyph 'cyrl/ge.italic' : glyph-proc
+		include : MarkSet.b
+		local stroke : [RevsStroke].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.0
+		include : VBarLeft start.x start.y (XH + Accent)
 
 	create-glyph 'srtail' 0x282 : glyph-proc
 		include : MarkSet.p
@@ -6736,3 +6742,69 @@ glyph-block Letter-Latin-Bidental-Percussive : begin
 		include : Translate 0 (CAP / 2)
 		include : Italify
 		include g
+
+glyph-block Letter-Latin-Egyptological : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [EgyptologicalYodComponent sw x bot top] : glyph-proc
+		local rad : (top - bot) / 2
+		local wid : rad * 1.2
+		local balance : wid * 0.55
+		include : dispiro
+			widths.rhs sw
+			g4.right.start (x - balance)       (top - O)         [heading Rightward]
+			archv
+			g4.down.mid    (x + wid - balance) [mix bot top 0.5] [heading Downward]
+			arcvh
+			g4.left.end    (x - balance)       (bot + O)         [heading Leftward]
+
+	define [EgyptologicalAyinComponent sw x bot top] : glyph-proc
+		local rad : (top - bot) / 2
+		local wid : rad * 1.2
+		local balance : wid * 0.55
+		include : dispiro
+			widths.lhs sw
+			g4.left.start (x + balance)       (top - O)         [heading Leftward]
+			archv
+			g4.down.mid   (x - wid + balance) [mix bot top 0.5] [heading Downward]
+			arcvh
+			g4.right.end  (x + balance)       (bot + O)         [heading Rightward]
+
+	define [EgyptologicalAlefShape bot top] : glyph-proc
+		local sw : adviceBlackness2 4 4 top
+		local gap : Math.max (sw / 2) (top / 12)
+		local rad : (top - gap) / 4
+		include : EgyptologicalYodComponent sw Middle (top - rad * 2) top
+		include : EgyptologicalYodComponent sw Middle bot (bot + rad * 2)
+
+	define [EgyptologicalAyinShape bot top] : glyph-proc
+		local sw : adviceBlackness2 4 4 top
+		local gap : Math.max (sw / 2) (top / 12)
+		local rad : (top + gap) / 4
+		include : EgyptologicalAyinComponent sw Middle (top - rad * 2) top
+
+	create-glyph 'EgyptologicalCapitalAlef' 0xA722 : glyph-proc
+		include : MarkSet.capital
+		include : EgyptologicalAlefShape 0 CAP
+
+	create-glyph 'EgyptologicalSmallAlef'   0xA723 : glyph-proc
+		include : MarkSet.capital
+		include : EgyptologicalAlefShape 0 XH # Per Unicode chart
+
+	create-glyph 'EgyptologicalCapitalAyin' 0xA724 : glyph-proc
+		include : MarkSet.capital
+		include : EgyptologicalAyinShape 0 CAP
+
+	create-glyph 'EgyptologicalSmallAyin'   0xA725 : glyph-proc
+		include : MarkSet.capital
+		include : EgyptologicalAyinShape 0 XH # Per Unicode chart
+
+	glyph-block-import Marks : markMiddle aboveMarkTop aboveMarkBot aboveMarkMid
+
+	create-glyph 'EgyptologicalYodAbove'    0xE010 : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		local fine : adviceBlackness 5
+		include : EgyptologicalYodComponent fine markMiddle aboveMarkBot aboveMarkTop

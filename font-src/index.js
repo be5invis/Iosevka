@@ -3,18 +3,19 @@
 const fs = require("fs-extra");
 const path = require("path");
 
+const Toml = require("@iarna/toml");
+
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
 const FormVariantData = require("./support/variant-data");
 const FormLigationData = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
-const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {
 	const para = await getParameters(argv);
 	const { font, glyphStore } = BuildFont(para);
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveOtd(argv, font);
+	if (argv.o) await saveOTD(argv, font);
 };
 
 // Parameter preparation
@@ -31,7 +32,7 @@ async function getParameters(argv) {
 		await tryParseToml(PARAMETERS_TOML),
 		await tryParseToml(WEIGHTS_TOML),
 		await tryParseToml(WIDTHS_TOML),
-		(await fs.exists(PRIVATE_TOML)) ? await tryParseToml(PRIVATE_TOML) : {}
+		fs.existsSync(PRIVATE_TOML) ? await tryParseToml(PRIVATE_TOML) : {}
 	);
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
@@ -81,21 +82,11 @@ async function tryParseToml(str) {
 }
 
 // Save OTD
-async function saveOtd(argv, font) {
-	if (argv.o === "|") {
-		process.stdout.write(JSON.stringify(font));
-	} else {
-		await fs.writeFile(argv.o, JSON.stringify(font, null, "    "));
-	}
+async function saveOTD(argv, font) {
+	await fs.writeJSON(argv.o, font);
 }
 
-// Save char map
-function objHashNonEmpty(obj) {
-	if (!obj) return false;
-	for (let k in obj) if (obj[k]) return true;
-	return false;
-}
-
+// Save character map file
 async function saveCharMap(argv, glyphStore) {
 	let charMap = [];
 	for (const [gn] of glyphStore.namedEntries()) {
