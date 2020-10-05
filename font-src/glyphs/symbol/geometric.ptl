@@ -442,18 +442,38 @@ glyph-block Symbol-Geometric : begin
 
 		let
 		: cfg : list
-			* {.sides 6 .skip 1 .name 'SixPointedBlackStar' .unicode 0x2736 .overflow 1.05 .phase 0}
-		: foreach [[object sides skip name unicode overflow phase] : items-of cfg]
+			* {.sides 6 .skip 1 .name 'sixPointedBlackStar' .unicode 0x2736 .overflow 1.05 .phase 0 .pShrink 0.4}
+			* {.sides 8 .skip 1 .name 'eightPointedBlackStar' .unicode 0x2734 .overflow 1.05 .phase 0 .pShrink 0.25}
+			* {.sides 8 .skip 1 .name 'eightPointedRectilinearBlackStar' .unicode 0x2737 .overflow 1.05 .phase (Math.PI / 8) .pShrink 0.4}
+			* {.sides 8 .skip 1 .name 'heavyEightPointedRectilinearBlackStar' .unicode 0x2738 .overflow 1.05 .phase (Math.PI / 8) .pShrink 0.5}
+			* {.sides 12 .skip 1 .name 'twelvePointedBlackStar' .unicode 0x2739 .overflow 1.05 .phase 0 .pShrink 0.5}
+		: foreach [[object sides skip name unicode overflow phase pShrink] : items-of cfg]
 			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 				set-width MosaicWidth
 				local corners {}
 				foreach [j : range 0 (2 * sides)] : begin
 					local angle : Math.PI * j * skip / sides + phase
-					local mag : [if (j % 2) 0.5 1.0] * overflow
+					local mag : [if (j % 2) pShrink 1] * overflow
 					corners.push : corner
 						mix leftFW rightFW (0.5 - 0.5 * mag * [Math.sin angle])
 						SymbolMid + squareRadiusFW * mag * [Math.cos angle]
 				include : spiro-outline corners
+
+		let
+		: cfg : list
+			* {.sides 8 .name 'eightSpokedAsterisk' .unicode 0x2733 .phase 0 .sw [adviceBlackness 7.5 : Math.sqrt MosaicWidthScalar]}
+			* {.sides 16 .name 'sixteenSpokedAsterisk' .unicode 0x273A .phase 0 .sw [adviceBlackness 8 : Math.sqrt MosaicWidthScalar]}
+		: foreach [[object sides name unicode phase sw] : items-of cfg]
+			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+				set-width MosaicWidth
+				foreach [j : range 0 sides] : begin
+					local angle : 2 * Math.PI * j / sides + phase
+					include : dispiro
+						corner MosaicMiddle SymbolMid [widths.center (sw * 0.75)]
+						corner
+							mix leftFW rightFW (0.5 - 0.5 * [Math.sin (angle + Math.PI)])
+							SymbolMid + squareRadiusFW * [Math.cos (angle + Math.PI)]
+							widths.center sw
 
 		create-glyph [MangleName 'dottedCircle'] [MangleUnicode 0x25CC] : glyph-proc
 			set-width MosaicWidth
