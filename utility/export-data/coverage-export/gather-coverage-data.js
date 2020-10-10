@@ -1,6 +1,6 @@
 const blockData = require("./block-data");
-const ucdNames = require("unicode-13.0.0/Names");
-const ugc = require("unicode-13.0.0/General_Category");
+const ucdNames = require("@unicode/unicode-13.0.0/Names");
+const ugc = require("@unicode/unicode-13.0.0/General_Category");
 
 module.exports = function (covUpright, covItalic, covOblique) {
 	const result = [];
