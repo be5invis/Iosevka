@@ -3,6 +3,8 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
 import [getGrMesh AnyDerivingCv CvDecompose] from "../../support/gr"
+extern Map
+extern Set
 
 glyph-module
 
@@ -27,12 +29,16 @@ glyph-block Autobuild-Enclosure-Shared : begin
 
 	glyph-block-export EnsureComponentGlyphT
 	define [EnsureComponentGlyphT gidPart fnBuildup] : begin
+		local rs : new Set
 		local gniPart : fnBuildup gidPart
 		local grs : AnyDerivingCv.query [query-glyph gidPart]
 		if grs : foreach gr [items-of grs] : begin
 			local relatedGidPart : gr.get [query-glyph gidPart]
 			local gniRelated : fnBuildup relatedGidPart
-			if [query-glyph gniPart] : gr.set [query-glyph gniPart] gniRelated
+			if [query-glyph gniPart] : begin
+				gr.set [query-glyph gniPart] gniRelated
+				if [query-glyph gniRelated] : begin
+					[query-glyph gniPart].tryBecomeMirrorOf [query-glyph gniRelated] rs
 		return gniPart
 
 	glyph-block-export CollectJobs
@@ -78,8 +84,11 @@ glyph-block Autobuild-Enclosure-Shared : begin
 
 	glyph-block-export applyRelations
 	define [applyRelations relApplications] : begin
+		local rs : new Set
 		foreach {gr f t} [items-of relApplications] : begin
-			if [query-glyph f] : gr.set [query-glyph f] t
+			if [query-glyph f] : begin
+				gr.set [query-glyph f] t
+				if [query-glyph t] : [query-glyph t].tryBecomeMirrorOf [query-glyph f] rs
 
 glyph-block AutoBuild-Enclosure : begin
 	glyph-block-import CommonShapes
@@ -91,18 +100,30 @@ glyph-block AutoBuild-Enclosure : begin
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * Width / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
+	define aliasableInnerSubGlyphMap : new Map
 	define [EnsureInnerSubGlyphImpl miniatureFont prefix finalPlacement dscale xCompress shift] : lambda [gidPart] : begin
+		define gniPartNoPlc : '.ci.' + gidPart + '@' + [{ prefix dscale xCompress shift }.join '/']
 		define gniPart : '.ci.' + gidPart + '@' + [{ prefix finalPlacement dscale xCompress shift }.join '/']
-		if [not : query-glyph gniPart] : create-glyph gniPart : glyph-proc
-			set-width 0
-			include : miniatureFont.queryByNameEnsured gidPart
-			include : Upright
-			include : Scale (dscale * xCompress) dscale
-			include : Translate 0 (dscale * (-CAP / 2 + shift))
-			include : Translate 0 (CAP / 2 * dscale)
-			include : Translate 0 (SymbolMid - CAP * dscale / 2)
-			include : Italify
-			include : Translate finalPlacement 0
+		define aliasGoal : aliasableInnerSubGlyphMap.get gniPartNoPlc
+		if [not : query-glyph gniPart] : begin
+			if aliasGoal : begin
+				create-glyph gniPart : composite-proc
+					refer-glyph aliasGoal.gn
+					Translate (finalPlacement - aliasGoal.placement) 0
+			: else : begin
+				create-glyph gniPart : glyph-proc
+					set-width 0
+					include : miniatureFont.queryByNameEnsured gidPart
+					include : Upright
+					include : Scale (dscale * xCompress) dscale
+					include : Translate 0 (dscale * (-CAP / 2 + shift))
+					include : Translate 0 (CAP / 2 * dscale)
+					include : Translate 0 (SymbolMid - CAP * dscale / 2)
+					include : Italify
+					include : Translate finalPlacement 0
+				aliasableInnerSubGlyphMap.set gniPartNoPlc : object
+					gn gniPart
+					placement finalPlacement
 		return gniPart
 
 	define [EnsureInnerSubGlyphSeq miniatureFont prefix job dimens] : begin
@@ -136,12 +157,13 @@ glyph-block AutoBuild-Enclosure : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
 		local finalParts : EnsureInnerSubGlyphSeq miniatureFont prefix job dimens
-		local inner : new-glyph : glyph-proc
+		if gnEnclosure : return : glyph-proc
 			foreach [gidPart : items-of finalParts] : include [refer-glyph gidPart]
 			include : Translate width 0
-		return : glyph-proc
-			include inner
-			if (gnEnclosure) : CvDecompose.set currentGlyph [{gnEnclosure}.concat finalParts]
+			CvDecompose.set currentGlyph [{gnEnclosure}.concat finalParts]
+		: else : return : new-glyph : glyph-proc
+			foreach [gidPart : items-of finalParts] : include [refer-glyph gidPart]
+			include : Translate width 0
 
 	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] 0.5] * [Math.max 1 (HalfUPM / Width)]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -350,8 +372,8 @@ glyph-block AutoBuild-Enclosure : begin
 					define dimens : bracedDottdeDimens digits ww
 					define [object width mockInnerWidth dscale] dimens
 					set-width width
-					include : refer-glyph gnb
 					include : EnclosureInner [if jobDecomposable gnb null] miniatureFont prefix job dimens
+					include : refer-glyph gnb
 
 			foreach job [items-of jobs.decomposableJobs] : CreateGlyphImpl true job
 			foreach job [items-of jobs.nonDecomposable]  : CreateGlyphImpl false job

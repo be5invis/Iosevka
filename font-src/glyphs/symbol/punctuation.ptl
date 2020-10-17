@@ -1135,27 +1135,17 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
 		include : FlipAround Middle yCurlyQuotes
 
-	create-glyph 'lowDoubleQuote' 0x201E : glyph-proc
+	define [DoubleQuoteProc gn] : glyph-proc
 		local dist : Width * 0.225
-		include : refer-glyph "lowSingleQuote"
+		include : refer-glyph gn
 		include : Translate (-dist * 2) 0
-		include : refer-glyph "lowSingleQuote"
+		include : refer-glyph gn
 		include : Translate dist 0
 
-	create-glyph 'openDoubleQuote' 0x201C : glyph-proc
-		include : refer-glyph "lowDoubleQuote"
-		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
-
-	create-glyph 'closeDoubleQuote' 0x201D : glyph-proc
-		include : refer-glyph "openDoubleQuote"
-		include : FlipAround Middle yCurlyQuotes
-
-	create-glyph 'revertDoubleQuote' 0x201F : glyph-proc
-		local dist : Width * 0.225
-		include : refer-glyph "revertSingleQuote"
-		include : Translate (-dist * 2) 0
-		include : refer-glyph "revertSingleQuote"
-		include : Translate dist 0
+	create-glyph 'lowDoubleQuote' 0x201E : DoubleQuoteProc 'lowSingleQuote'
+	create-glyph 'openDoubleQuote' 0x201C : DoubleQuoteProc 'openSingleQuote'
+	create-glyph 'closeDoubleQuote' 0x201D : DoubleQuoteProc 'closeSingleQuote'
+	create-glyph 'revertDoubleQuote' 0x201F : DoubleQuoteProc 'revertSingleQuote'
 
 	create-glyph 'prime' 0x2032 : glyph-proc
 		local wide : Width * 0.1
@@ -1592,15 +1582,18 @@ glyph-block Symbol-Punctuation-Ligation-Variants : begin
 		* "question"
 		* "exclam"
 
-	foreach [baseName : items-of dotLikePunctuations] : if [query-glyph baseName]
-		create-glyph : glyph-proc
-			include [refer-glyph baseName] AS_BASE ALSO_METRICS
-			local delta : Math.max 0 : Width / 2 - (XH - PeriodSize) / 2
-			create-derived (baseName + '.lig.dRight')     : Translate (delta *   1.0 ) 0
-			create-derived (baseName + '.lig.dRightHalf') : Translate (delta *   0.5 ) 0
-			create-derived (baseName + ".lig.dMid")       : Translate 0                0
-			create-derived (baseName + '.lig.dLeftHalf')  : Translate (delta * (-0.5)) 0
-			create-derived (baseName + '.lig.dLeft')      : Translate (delta * (-1.0)) 0
+	define [LigD baseName suffix pDelta] : if [query-glyph baseName] : begin
+		local delta : Math.max 0 : Width / 2 - (XH - PeriodSize) / 2
+		create-glyph (baseName + '.lig.' + suffix) : composite-proc
+			refer-glyph baseName
+			Translate (delta * pDelta ) 0
+
+	foreach [baseName : items-of dotLikePunctuations] : begin
+		LigD baseName 'dRight'       1.0
+		LigD baseName 'dRightHalf'   0.5
+		LigD baseName "dMid"         0
+		LigD baseName 'dLeftHalf'  (-0.5)
+		LigD baseName 'dLeft'      (-1.0)
 
 glyph-block Symbol-Other-Phonetic : begin
 	glyph-block-import CommonShapes

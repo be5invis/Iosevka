@@ -12,7 +12,7 @@ module.exports = build;
 
 ///////////////////////////////////////////////////////////
 
-const path = require("path");
+const Path = require("path");
 const toml = require("@iarna/toml");
 
 const BUILD = ".build";
@@ -21,11 +21,13 @@ const SNAPSHOT_TMP = ".build/snapshot";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
-const OTF2OTC = "otf2otc";
-const OTFCC_BUILD = "otfccbuild";
 const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
-const TTCIZE = ["node", "./node_modules/otfcc-ttcize/bin/_startup"];
+const TTCIZE = [
+	"node",
+	"--max-old-space-size=8192",
+	"node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"
+];
 const webfontFormats = [
 	["woff2", "woff2"],
 	["woff", "woff"],
@@ -41,11 +43,8 @@ const WEIGHT_NORMAL = "regular";
 const SLOPE_NORMAL = "upright";
 const DEFAULT_SUBFAMILY = "regular";
 
-const BUILD_PLANS = path.relative(__dirname, path.resolve(__dirname, "./build-plans.toml"));
-const PRIVATE_BUILD_PLANS = path.relative(
-	__dirname,
-	path.resolve(__dirname, "./private-build-plans.toml")
-);
+const BUILD_PLANS = "build-plans.toml";
+const PRIVATE_BUILD_PLANS = "private-build-plans.toml";
 
 // Save journal to build/
 build.setJournal(`${BUILD}/.verda-build-journal`);
@@ -56,8 +55,9 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const Version = oracle(`oracle:version`, async () => {
-	const package_json = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")));
+const Version = oracle(`oracle:version`, async target => {
+	const [pj] = await target.need(sfu`package.json`);
+	const package_json = JSON.parse(await fs.promises.readFile(pj.full, "utf-8"));
 	return package_json.version;
 });
 
@@ -422,15 +422,9 @@ const BuildRawTtf = file.make(
 		const [fi] = await target.need(FontInfoOf(fn), Version);
 		const charmap = output.dir + "/" + fn + ".charmap";
 		await target.need(Scripts, Parameters, de`${output.dir}`);
-		const otdPath = `${output.dir}/${output.name}.otd`;
-		await node("font-src/index", { o: otdPath, oCharMap: charmap, ...fi });
-		await optimizedOtfcc(otdPath, output.full);
-		await rm(otdPath);
+		await node("font-src/index", { o: output.full, oCharMap: charmap, ...fi });
 	}
 );
-function optimizedOtfcc(from, to) {
-	return run(OTFCC_BUILD, from, ["-o", `${to}`], ["-O3", "--keep-average-char-width", "-q"]);
-}
 
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
@@ -557,25 +551,17 @@ const glyfTtc = file.make(
 );
 
 async function buildGlyfTtc(target, parts, out) {
-	const [useFilter, useTtx] = await target.need(
-		OptimizeWithFilter,
-		OptimizeWithTtx,
-		de`${out.dir}`
-	);
+	await target.need(de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
-	const optimization = useFilter ? ["--filter-loop", useFilter] : useTtx ? ["--ttx-loop"] : [];
-	await run(TTCIZE, optimization, ["-o", tmpTtc], ttfInputPaths);
+	await run(TTCIZE, "-u", ["-o", tmpTtc], ttfInputPaths);
 	await run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
 async function buildCompositeTtc(out, inputs) {
-	await run(
-		OTF2OTC,
-		["-o", out.full],
-		inputs.map(f => f.full)
-	);
+	const inputPaths = inputs.map(f => f.full);
+	await run(TTCIZE, ["-o", out.full], inputPaths);
 }
 
 const ExportSuperTtc = file.make(
@@ -664,7 +650,7 @@ const GroupArchive = task.group(`archive`, async (target, gid) => {
 ///////////////////////////////////////////////////////////
 
 const PagesDir = oracle(`pages-dir-path`, async target => {
-	const pagesDir = path.resolve(__dirname, "../Iosevka-Pages");
+	const pagesDir = Path.resolve(__dirname, "../Iosevka-Pages");
 	if (!fs.existsSync(pagesDir)) {
 		return "";
 	} else {
@@ -686,7 +672,7 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 		cm.full,
 		cmi.full,
 		cmo.full,
-		path.resolve(pagesDir, "shared/data-import/iosevka.json")
+		Path.resolve(pagesDir, "shared/data-import/iosevka.json")
 	);
 });
 
@@ -701,7 +687,7 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 		GroupContents`iosevka-sparkle`
 	);
 	for (const dir of dirs) {
-		await cp(`${DIST}/${dir}`, path.resolve(pagesDir, "shared/font-import", dir));
+		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
 	}
 });
 
@@ -710,7 +696,7 @@ const PagesFastFontExport = task(`pages:fast-font-export`, async target => {
 	if (!pagesDir) return;
 	const dirs = await target.need(GroupContents`iosevka`);
 	for (const dir of dirs) {
-		await cp(`${DIST}/${dir}`, path.resolve(pagesDir, "shared/font-import", dir));
+		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
 	}
 });
 
@@ -889,28 +875,31 @@ const ScriptFiles = computed.group("script-files", async (target, ext) => {
 });
 const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	const [ptl] = await target.need(ScriptFiles("ptl"));
-	return ptl.map(x => x.replace(/\.ptl$/g, ".js"));
+	return ptl.map(x => replaceExt(".js", x));
 });
+function replaceExt(extNew, file) {
+	return Path.join(Path.dirname(file), Path.basename(file, Path.extname(file)) + extNew);
+}
 
-const ScriptJS = file.glob(`font-src/**/*.js`, async (target, path) => {
-	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
-	if (jsFromPtl.indexOf(path.full) >= 0) {
-		const ptl = path.full.replace(/\.js$/g, ".ptl");
-		if (/\/glyphs\//.test(path.full)) {
-			await target.need(MARCOS);
-		}
-		await target.need(fu`${ptl}`);
-		await run(PATEL_C, "--strict", ptl, "-o", path.full);
-	} else {
-		await target.need(fu`${path.full}`);
+const CompiledJs = file.make(
+	p => p,
+	async (target, out) => {
+		const ptl = replaceExt(".ptl", out.full);
+		if (/\/glyphs\//.test(out.full)) await target.need(MARCOS);
+		await target.need(sfu(ptl));
+		await run(PATEL_C, "--strict", ptl, "-o", out.full);
 	}
-});
+);
 const Scripts = task("scripts", async target => {
 	await target.need(Parameters);
-	const [jsFromPtl] = await target.need(JavaScriptFromPtl);
-	await target.need(jsFromPtl);
+	const [_jsFromPtl] = await target.need(JavaScriptFromPtl);
 	const [js] = await target.need(ScriptFiles("js"));
-	await target.need(js.map(ScriptJS));
+	const jsFromPtl = new Set(_jsFromPtl);
+
+	let subGoals = [];
+	for (const item of jsFromPtl) subGoals.push(CompiledJs(item));
+	for (const item of js) if (!jsFromPtl.has(js)) subGoals.push(sfu(item));
+	await target.need(subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);

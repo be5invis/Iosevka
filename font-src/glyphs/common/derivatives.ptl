@@ -90,27 +90,19 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : HCombine newid unicode id id spacing
 
-	define [vcombine newid unicode id1 id2 spacing] : begin
+	define [VCombine newid unicode id1 id2 spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
-			set-width [query-glyph id1].advanceWidth
-			currentGlyph.dependsOn [query-glyph id1]
-			currentGlyph.dependsOn [query-glyph id2]
-			include : new-glyph : glyph-proc
-				include [refer-glyph id2]
-				include : Upright
-			include : Translate 0 (-spacing)
-			include : new-glyph : glyph-proc
-				include [refer-glyph id1]
-				include : Upright
-			include : Translate 0 (spacing / 2)
-			include : Italify
+			include [refer-glyph id2] AS_BASE ALSO_METRICS
+			include : Translate (-spacing * TanSlope) (-spacing)
+			include [refer-glyph id1]
+			include : Translate (spacing * TanSlope / 2) (spacing / 2)
 	define [VDual newid unicode id spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
-		return : vcombine newid unicode id id spacing
+		return : VCombine newid unicode id id spacing
 
 	glyph-block-export select-variant italic-variant refer-glyph query-glyph with-related-glyphs
-	glyph-block-export alias turned HDual HCombine VDual vcombine glyph-is-needed
+	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin

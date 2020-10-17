@@ -46,4 +46,8 @@ module.exports = class Transform {
 			-(-this.x * this.xy + this.y * this.xx) / denom
 		);
 	}
+
+	static isTranslate(tfm) {
+		return tfm.xx === 1 && tfm.yy === 1 && tfm.xy === 0 && tfm.yx === 0;
+	}
 };

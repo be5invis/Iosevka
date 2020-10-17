@@ -2,6 +2,7 @@
 
 const fs = require("fs-extra");
 const path = require("path");
+const { FontIo } = require("ot-builder");
 
 const Toml = require("@iarna/toml");
 
@@ -15,7 +16,7 @@ module.exports = async function main(argv) {
 	const para = await getParameters(argv);
 	const { font, glyphStore } = BuildFont(para);
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveOTD(argv, font);
+	if (argv.o) await saveTTF(argv, font);
 };
 
 // Parameter preparation
@@ -81,9 +82,14 @@ async function tryParseToml(str) {
 	}
 }
 
-// Save OTD
-async function saveOTD(argv, font) {
-	await fs.writeJSON(argv.o, font);
+// Save TTF
+async function saveTTF(argv, font) {
+	const sfnt = FontIo.writeFont(font, {
+		glyphStore: { statOs2XAvgCharWidth: false },
+		generateDummyDigitalSignature: true
+	});
+	const buf = FontIo.writeSfntOtf(sfnt);
+	await fs.writeFile(argv.o, buf);
 }
 
 // Save character map file
