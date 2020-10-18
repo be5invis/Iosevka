@@ -243,6 +243,32 @@ glyph-block AutoBuild-Enclosure : begin
 				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 				include : refer-glyph gnEnclosure
 
+	define [createDashedBoxedGlyphs digits demands] : EnclosureT 'dashed-boxed' DECOMPOSABLE digits demands
+		lambda [ww gap] : glyph-proc
+			define [object width mockInnerWidth sw top bot left right] : circleDimens digits ww
+			set-width width
+			include : difference
+				union
+					HBarTop    left right top sw
+					HBarBottom left right bot sw
+					VBarLeft   left bot top   sw
+					VBarRight  right bot top  sw
+				union
+					VBar [mix left right 0.25] bot top sw
+					VBar [mix left right 0.5] bot top sw
+					VBar [mix left right 0.75] bot top sw
+					HBar left right [mix bot top 0.25] sw
+					HBar left right [mix bot top 0.50] sw
+					HBar left right [mix bot top 0.75] sw
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
+			define { gn unicode parts w bal baly } job
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
+			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
+				set-width width
+				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
+				include : refer-glyph gnEnclosure
+
 	define [createInsetCircledGlyphs digits demands] : EnclosureT 'inset-circle' NON-DECOMPOSABLE digits demands
 		lambda [ww gap] : glyph-proc
 			define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
@@ -530,7 +556,7 @@ glyph-block AutoBuild-Enclosure : begin
 		createBoxedGlyphs 1 compositions
 
 	if [not recursive] : do "double-digit boxed"
-		local compositions : list
+		createBoxedGlyphs 2 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F14A {'H' 'V'} WideWidth1
 			list 0x1F14B {'M' 'V'} WideWidth1
@@ -542,23 +568,25 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F196 {'N' 'G'} WideWidth1
 			list 0x1F197 {'O' 'K'} WideWidth1
 			list 0x1F19A {'V' 'S'} WideWidth1
-		createBoxedGlyphs 2 compositions
 
 	if [not recursive] : do "triple-digit boxed"
-		local compositions : list
+		createBoxedGlyphs 3 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F14E {'P' 'P' 'V'} WideWidth1
 			list 0x1F195 {'N' 'E' 'W'} WideWidth1
 			list 0x1F198 {'S' 'O' 'S'} WideWidth1
 			list 0x1F199 {'U' 'P' 'exclam'} WideWidth1
-		createBoxedGlyphs 3 compositions
 
 	if [not recursive] : do "quad-digit boxed"
-		local compositions : list
+		createBoxedGlyphs 4 : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F192 {'C' 'O' 'O' 'L'} WideWidth1
 			list 0x1F193 {'F' 'R' 'E' 'E'} WideWidth1
-		createBoxedGlyphs 4 compositions
+
+	if [not recursive] : do "triple-digit dashed-boxed"
+		createDashedBoxedGlyphs 3 : list
+			list 0x034F  {'C' 'G' 'J'} WideWidth1
+			list 0xFFFC  {'O' 'B' 'J'} WideWidth1
 
 	if [not recursive] : do "inset boxed"
 		local compositions {}
@@ -570,13 +598,12 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0xFFFD { 'question' } WideWidth2
 
 	if [not recursive] : do "double-digit inset boxed"
-		local compositions : list
+		createInsetBoxedGlyphs 2 : list
 			list 0x1F18B {'I' 'C'} WideWidth1
 			list 0x1F18C {'P' 'A'} WideWidth1
 			list 0x1F18D {'S' 'A'} WideWidth1
 			list 0x1F18E {'A' 'B'} WideWidth1
 			list 0x1F18F {'W' 'C'} WideWidth1
-		createInsetBoxedGlyphs 2 compositions
 
 	if [not recursive] : do "inset mosaic"
 		local compositions {}
