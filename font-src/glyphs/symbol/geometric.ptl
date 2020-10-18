@@ -401,12 +401,24 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 				local angle : Math.PI * 2 * j / n
 				local cx : MosaicMiddle + (Geom.Right - MosaicMiddle) * [Math.cos angle]
 				local cy : SymbolMid + (Geom.Right - MosaicMiddle) * [Math.sin angle]
-				include : spiro-outline
-					g4 cx (cy + fine)
-					g4 (cx + fine) cy
-					g4 cx (cy - fine)
-					g4 (cx - fine) cy
-					close
+				include : CircleRingAt cx cy fine
+
+		create-glyph [MangleName 'dottedSquare'] [MangleUnicode 0x2B1A] : glyph-proc
+			set-width MosaicWidth
+			include : [DivFrame MosaicWidthScalar].markSet.plus
+			local n : 4 * [Math.ceil MosaicWidthScalar]
+			local fine : adviceBlackness 10
+			local box : object
+				Left : Geom.Left + fine
+				Right : Geom.Right - fine
+				Top : Geom.Top - fine
+				Bot : Geom.Bot + fine
+			foreach j [range 0 n] : begin
+				local t : j / n
+				include : CircleRingAt box.Left [mix box.Bot box.Top t] fine
+				include : CircleRingAt [mix box.Left box.Right t] box.Top fine
+				include : CircleRingAt box.Right [mix box.Top box.Bot t] fine
+				include : CircleRingAt [mix box.Right box.Left t] box.Bot fine
 
 	do "Regular Polygon"
 		define [RegularPolygonFill sides skip overflow phase] : lambda [cx cy size] : begin
