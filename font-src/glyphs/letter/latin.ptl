@@ -1798,7 +1798,7 @@ glyph-block Letter-Latin-K : begin
 
 	local [KBalance straightBar] : if SLAB (Width / 16) : if straightBar (Width / 32) 0
 	local [KBalanceRight straightBar] : if SLAB (-Width / 32) : if straightBar (Width / 32) 0
-	local [KBalanceRightCursive straightBar] : if SLAB (Width / 16) : if straightBar (Width / 32) 0
+	local [KBalanceRightCursive straightBar] : if SLAB (Width / 32) : if straightBar (Width / 32) 0
 	local [KO straightBar top stroke] : if straightBar (([if SLAB (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
 	define [KLegShape left right top straightBar _stroke] : glyph-proc
@@ -1857,49 +1857,72 @@ glyph-block Letter-Latin-K : begin
 			include : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
 			include : RightwardBottomSerif bottomSerifX 0 SideJut
 
-	define [KCurlyLoopAndLegShape top straightBar] : glyph-proc
+	define [KCursiveLoopAndLegDimen top straightBar] : begin
 		define kshLeft : SB + [KBalance straightBar]
 		define kshRight : RightSB + [KBalanceRightCursive straightBar] + 0.2 * Stroke
 
-		define arcFine ShoulderFine
+		define arcFine : Stroke * CThin
 		define arcStroke : adviceBlackness2 2 3 top
 		define arcTerminalFine : adviceBlackness2 3 4 top
-		define st : shoulderMidSlope arcFine arcStroke 1
+		define expansion : Width / (UPM / 2) - 1
 
-		define arcMaxPropX  : 0.8 + 2 * (arcStroke / Width)
-		define startPropY   : 0.46 + 0.1 * (arcStroke / Width)
-		define arcTopPropX  : 0.56 + 0.2 * (arcStroke / Width)
-		define arcMaxXPropY : 0.6 - 1 * (arcStroke / Width)
-		define arcEndPropX  : 0.15 - 0.5 * (arcStroke / Width)
-		define arcEndPropY  : 0.45 + 0.2 * (arcStroke / Width)
+		define pArcStartY    : 0.46 + 0.1 * (arcStroke / Width)
+		define pArcTopX      : 0.625 - 0.05 * (arcStroke / Width) - 0 * expansion * (arcStroke / UPM)
+		define pArcRightX    : 0.95 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
+		define pArcRightY    : 0.575 - 0.625 * (arcStroke / Width) - 0.5 * expansion * (arcStroke / UPM)
+		define pArcTerminalX : 0.15 - 0.5 * (arcStroke / Width)
+		define pArcBottomX   : 0.15 + 0.5 * (arcStroke / Width)
+		define pArcBottomY   : 0.45 + 0.5 * (arcStroke / Width)
+
+		define arcRightSlope : 0.05 + 0.2 * (arcStroke / Width) + 1 * expansion * (arcStroke / UPM)
+		define arcTopSlope   : shoulderMidSlope arcFine arcStroke 1
 
 		define arcStartX    : kshLeft + HVContrast * (Stroke - arcFine)
-		define arcMaxX      : kshRight * 0.9
+		define arcStartY    : top * pArcStartY
+		define arcTerminalX : mix arcStartX kshRight pArcTerminalX
+		define arcBottomX   : mix arcStartX kshRight pArcBottomX
+		define arcBottomY   : mix 0 top pArcBottomY
+		define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
+		define arcRightX    : kshRight * pArcRightX
+		define arcRightY    : mix arcBottomY top pArcRightY
+		define arcTopX      : mix arcStartX arcRightX pArcTopX
 		define arcTopY      : top - O
 
-		define arcTerminalX : mix arcStartX kshRight arcEndPropX
-		define arcTerminalY : mix 0 top arcEndPropY
+		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight
 
+	define [KCursiveLoopAndLegShape top straightBar] : glyph-proc
+		define dim : KCursiveLoopAndLegDimen top straightBar
+		include : dispiro
+			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
+			arcvh 8 2.0
+			g4.right.mid dim.arcTopX dim.arcTopY
+				widths.rhs.heading dim.arcStroke {.y (+1) .x dim.arcTopSlope}
+			archv
+			g4.down.mid dim.arcRightX (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
+				heading {.y dim.arcRightSlope .x HVContrast}
+			arcvh
+			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
+			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
+
+		define slabStartX : dim.kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
 		include : difference
-			dispiro
-				g2.up.start arcStartX (top * startPropY) [widths.heading 0 arcFine Upward]
-				arcvh
-				g2.right.mid [mix arcStartX arcMaxX arcTopPropX] arcTopY [widths.heading 0 arcStroke {.y (+1) .x (+st)}]
-				archv
-				g2.down.mid arcMaxX [mix arcTerminalY top arcMaxXPropY] [heading Downward]
-				quadcontrols 0 0.7
-				g2 arcTerminalX arcTerminalY [widths arcTerminalFine 0]
+			intersection
+				Rect XH 0 0 [if SLAB (slabStartX + SideJut) (Width * 2)]
+				dispiro
+					flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
+					curl dim.kshRight 0 [widths.rhs]
 			spiro-outline
-				corner 0 0
-				corner 0 arcTerminalY
-				corner arcTerminalX arcTerminalY
-				corner kshRight 0
+				g4.up.start (dim.arcStartX - O) dim.arcStartY
+				arcvh 4 2.1
+				g4.right.mid dim.arcTopX (dim.arcTopY + O)
+				archv 4 2.2
+				g4.down.mid (dim.arcRightX + O) (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
+				arcvh
+				g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke - O)
+				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke - O)
 
-		include : intersection
-			Rect [mix 0 top arcEndPropY] 0 0 UPM
-			dispiro
-				flat arcTerminalX arcTerminalY [widths.lhs]
-				curl kshRight 0 [widths.rhs]
+		if SLAB : do
+			include : RightwardBottomSerif slabStartX 0 SideJut
 
 	define [KShape straightBar] : glyph-proc
 		include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
@@ -1938,9 +1961,12 @@ glyph-block Letter-Latin-K : begin
 
 	define [LowerKCursiveShape straightBar] : glyph-proc
 		include : VBarLeft (SB + [KBalance straightBar]) 0 CAP
-		include : KCurlyLoopAndLegShape XH straightBar
+		include : KCursiveLoopAndLegShape XH straightBar
 		if SLAB : begin
 			include : LeftwardTopSerif (SB + [KBalance straightBar]) CAP SideJut
+			if (!para.isItalic) : begin
+				include : tagged 'serifLB'
+					CenterBottomSerif (SB + [KBalance straightBar] + HalfStroke * HVContrast) 0 Jut
 
 	create-glyph 'k.straight' : glyph-proc
 		set-width Width
