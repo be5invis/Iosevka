@@ -278,6 +278,26 @@ glyph-block AutoBuild-Enclosure : begin
 					refer-glyph gnEnclosure
 					EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
 
+	define [createInsetDiamondGlyphs digits demands] : EnclosureT 'inset-diamond' NON-DECOMPOSABLE digits demands
+		lambda [ww gap] : glyph-proc
+			define [object width top bot left right] : circleDimens digits ww
+			set-width width
+			include : spiro-outline
+				corner (left + O)  [mix bot top 0.5]
+				corner [mix left right 0.5] (bot + O)
+				corner (right - O) [mix bot top 0.5]
+				corner [mix left right 0.5] (top - O)
+				close
+		lambda [prefix ww gap job miniatureFont gnEnclosure decomposable] : begin
+			define { gn unicode parts w bal baly } job
+			define dimens : circleDimens digits ww
+			define [object width mockInnerWidth dscale] dimens
+			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
+				set-width width
+				include : difference
+					refer-glyph gnEnclosure
+					EnclosureInner [if decomposable gnEnclosure null] miniatureFont prefix job dimens
+
 	define [createInsetMosaicGlyphs digits demands] : EnclosureT 'inset-mosaic' NON-DECOMPOSABLE digits demands
 		lambda [ww gap] : glyph-proc
 			define [object width mockInnerWidth mosaicTop mosaicBot mosaicLeft mosaicRight] : circleDimens digits ww
@@ -544,6 +564,10 @@ glyph-block AutoBuild-Enclosure : begin
 		local compositions {}
 		foreach [j : range 0 26] : compositions.push {(0x1F170 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetBoxedGlyphs 1 compositions
+
+	if [not recursive] : do "inset diamond"
+		createInsetDiamondGlyphs 1 : list
+			list 0xFFFD { 'question' } WideWidth2
 
 	if [not recursive] : do "double-digit inset boxed"
 		local compositions : list
