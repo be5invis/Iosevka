@@ -770,8 +770,7 @@ glyph-block Letter-Latin-V : begin
 	define StraightSbShrink : mix 1 (designParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.75]) : if SLAB 0.75 1
 	define [VShapeTopFlat top] : if SLAB [Math.min (top - Stroke) (top * 0.9)] (top * 0.9)
 
-	define [VShapeOutline] : params [top [sw Stroke] barStraight div] : glyph-proc
-		local df : DivFrame div
+	define [VShapeOutline] : params [df top [sw Stroke] barStraight] : glyph-proc
 		local fine : [if barStraight VShapeFineStraight VShapeFine] * sw / Stroke
 		local dgCor : diagCor top (Width / 2) 0 (sw * 2)
 		local clearance : 0 - OX
@@ -803,8 +802,7 @@ glyph-block Letter-Latin-V : begin
 				flat vxStartR [VShapeTopFlat top]
 				curl vxStartR top
 
-	define [VShape] : params [top [sw Stroke] barStraight div [slab SLAB]] : glyph-proc
-		local df : DivFrame div
+	define [VShape] : params [df top [sw Stroke] barStraight [slab SLAB]] : glyph-proc
 		local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 		local dgCor : diagCor (2 * top) Width 0 (2 * sw)
 		if barStraight : begin
@@ -848,16 +846,16 @@ glyph-block Letter-Latin-V : begin
 	create-glyph : glyph-proc
 		set-width Width
 		include : MarkSet.capital
-		create-derived 'V.straight' : VShape CAP Stroke true
-		create-derived 'V.curly' : VShape CAP Stroke false
+		create-derived 'V.straight' : VShape [DivFrame 1] CAP Stroke true
+		create-derived 'V.curly' : VShape [DivFrame 1] CAP Stroke false
 
 	create-glyph : glyph-proc
 		include : MarkSet.e
-		create-derived 'v.straight' : VShape XH Stroke true
-		create-derived 'v.curly' : VShape XH Stroke false
+		create-derived 'v.straight' : VShape [DivFrame 1] XH Stroke true
+		create-derived 'v.curly' : VShape [DivFrame 1] XH Stroke false
 
 	define [VHooktopShape top _stroke barStraight] : glyph-proc
-		include : VShape top [fallback _stroke Stroke] barStraight
+		include : VShape [DivFrame 1] top [fallback _stroke Stroke] barStraight
 		eject-contour 'serifRT'
 		eject-contour 'strokeUp'
 
@@ -896,9 +894,9 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape
 	glyph-block-export LambdaShape AMaskShape DeltaShape
 
-	define [AMaskShape top sw barStraight div] : new-glyph : glyph-proc
-		include : VShapeOutline top sw barStraight div
-		include : FlipAround ([DivFrame div].width / 2) (top / 2)
+	define [AMaskShape df top sw barStraight] : new-glyph : glyph-proc
+		include : VShapeOutline df top sw barStraight
+		include : FlipAround ([DivFrame df.div].width / 2) (top / 2)
 
 	create-glyph : glyph-proc
 		set-width Width
@@ -908,18 +906,18 @@ glyph-block Letter-Latin-Upper-A : begin
 		local ABarPosition : mix [if SLAB Stroke 0] CAP (XH / 2 / CAP)
 
 		create-derived 'A.straight' : glyph-proc
-			include : VShape CAP Stroke true
+			include : VShape [DivFrame 1] CAP Stroke true
 			include : FlipAround Middle (CAP / 2)
 			include : intersection
 				HBarTop 0 Width ABarPosition
-				AMaskShape CAP Stroke true 1
+				AMaskShape [DivFrame 1] CAP Stroke true
 
 		create-derived 'A.curly' : glyph-proc
-			include : VShape CAP Stroke false
+			include : VShape [DivFrame 1] CAP Stroke false
 			include : FlipAround Middle (CAP / 2)
 			include : intersection
 				HBarTop 0 Width ABarPosition
-				AMaskShape CAP Stroke false 1
+				AMaskShape [DivFrame 1] CAP Stroke false
 
 	select-variant 'A' 'A'
 	alias 'grek/Alpha' 0x391 'A'
@@ -927,36 +925,37 @@ glyph-block Letter-Latin-Upper-A : begin
 	turned 'turnA' 0x2C6F 'A' Middle (CAP / 2)
 
 	# Lambda
-	define [LambdaShape] : params [top sw barStraight div [slab SLAB]] : glyph-proc
-		local df : DivFrame [fallback div 1]
-		include : VShape top sw barStraight div (slab -- false)
+	define [LambdaShape] : params [df top sw barStraight [slab SLAB]] : glyph-proc
+		include : VShape df top sw barStraight (slab -- false)
 		include : FlipAround df.middle (top / 2)
 		if slab : begin
 			include : tagged 'serif' : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
 			include : tagged 'serif' : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
 
 	create-glyph 'grek/Lambda.straight' : composite-proc [MarkSet.capital]
-		LambdaShape CAP Stroke true
+		LambdaShape [DivFrame 1] CAP Stroke true
 	create-glyph 'grek/Lambda.curly' : composite-proc [MarkSet.capital]
-		LambdaShape CAP Stroke false
+		LambdaShape [DivFrame 1] CAP Stroke false
 
 	select-variant 'grek/Lambda' 0x39B
 	alias 'latinLambda' 0x245 'grek/Lambda'
 
 	# Delta
-	define [DeltaShape top sw barStraight div] : union
-		LambdaShape top sw barStraight div (slab -- false)
+	define [DeltaShape df top sw barStraight] : union
+		LambdaShape df top sw barStraight (slab -- false)
 		intersection
 			HBarBottom 0 Width 0 sw
-			AMaskShape top sw barStraight div
+			AMaskShape df top sw barStraight
 		if [not SLAB] [glyph-proc] : difference
 			union
 				LeftwardBottomSerif SB 0 SideJut
 				RightwardBottomSerif RightSB 0 SideJut
-			AMaskShape top sw barStraight div
+			AMaskShape df top sw barStraight
 
-	create-glyph 'grek/Delta.straight' : composite-proc [MarkSet.capital] [DeltaShape CAP Stroke true]
-	create-glyph 'grek/Delta.curly' : composite-proc [MarkSet.capital] [DeltaShape CAP Stroke false]
+	create-glyph 'grek/Delta.straight' : composite-proc [MarkSet.capital]
+		DeltaShape [DivFrame 1] CAP Stroke true
+	create-glyph 'grek/Delta.curly' : composite-proc [MarkSet.capital]
+		DeltaShape [DivFrame 1] CAP Stroke false
 
 	select-variant 'grek/Delta' 0x394
 
@@ -6049,7 +6048,7 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 	create-glyph 'AE' 0xC6 : glyph-proc
 		define df : DivFrame para.diversityM 3
 		define eBarPos : designParameters.upperEBarPos SLAB
-		define sw : adviceBlackness2 designParameters.lllcrowdedness 3 CAP df.div
+		define sw : Math.min df.mvs : adviceBlackness2 3 3 CAP df.div
 		define eleft : df.middle - sw * 0.25 * HVContrast
 		define fine : adviceBlackness2 4 3 CAP df.div
 		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
@@ -6096,7 +6095,7 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 
 	define [OEShape top df] : glyph-proc
 		define eBarPos : designParameters.upperEBarPos SLAB
-		define sw : adviceBlackness2 designParameters.lllcrowdedness 3 top df.div
+		define sw : Math.min df.mvs : adviceBlackness2 3 3 top df.div
 		define eleft : df.middle - sw * [if SLAB (1 / 3) (1 / 4)] * HVContrast
 		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
 
