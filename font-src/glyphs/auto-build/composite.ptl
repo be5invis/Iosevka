@@ -919,7 +919,7 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
 	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
-		local ww : if FMosaicWide (MosaicWidth * para.diversityM) MosaicWidth
+		local ww : if FMosaicWide MosaicWidth (MosaicWidth * para.diversityM)
 		local jobs : CollectJobs DECOMPOSABLE prefix MosaicNameSuffix demands
 		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / Width)]
 		local shrink2 : if FMosaicWide 1 [clamp 0 1 (_shrink2 * ww / Width)]
@@ -945,9 +945,9 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 
 			local dfg1 : df1.queryByNameEnsured c1
 			local dfg2 : df2.queryByNameEnsured c2
+			local aw : dfg1.advanceWidth + dfg2.advanceWidth
 
 			if FMosaicWide : begin
-				local aw : dfg1.advanceWidth + dfg2.advanceWidth
 				if [not : query-glyph gn] : begin
 					create-glyph gn [MangleUnicode unicode desiredWidth] : glyph-proc
 						set-width aw
@@ -960,12 +960,16 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 						if decomposable : CvDecompose.set currentGlyph { part1 part2 }
 			: else : begin
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
-				local kern : Math.max 0 (SB * 7/8 * (shrink1 + shrink2) - [Math.max 0 (ww - sumChildrenWidth)])
+				local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
+				local kern   0
 				local refW : sumChildrenWidth - kern
+				foreach [cycle : range 0 4] : begin
+					set kern : Math.max 0 : Math.min (SB * 7/8 * (shrink1 + shrink2)) (refW - compRefWw)
+					set refW : sumChildrenWidth - kern
 
 				local offset1Part1 : - refW / 2
 				local offset1Part2 : dfg1.advanceWidth * wadj1 - kern - refW / 2
-				local compress     : clamp 0 1 ((ww - SB * 1.25) / (ww - SB * 2) * ww / refW)
+				local compress     : clamp 0 1 (compRefWw / refW)
 				local offset2      : ww / 2
 
 				if [not : query-glyph gn] : begin
@@ -1023,23 +1027,24 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 	define [PhoneticLigatureGlyphName a b] : glyphNameIsNotUsed "phonetic{\(a)}{\(b)}"
 
 	define [createPhoneticLigatures _shrink1 _shrink2 wadj1 wadj2 records] : begin
-		local pendingGlyphs1 : records.map : [record] => record.1
-		local pendingGlyphs2 : records.map : [record] => record.2
+		define CWidth : Width * para.diversityM
+		define pendingGlyphs1 : records.map : [record] => record.1
+		define pendingGlyphs2 : records.map : [record] => record.2
 		local shrink1 : clamp 0 1 _shrink1
 		local shrink2 : clamp 0 1 _shrink2
 		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-		local antiScale : (Width * shrink1 + Width * shrink2 - kern) / Width
+		define antiScale : (CWidth * shrink1 + CWidth * shrink2 - kern) / CWidth
 		foreach [cycle : range 0 4] : begin
 			set kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-			local tmp-shrink1 : (shrink1 * Width + kern * shrink1 / (shrink1 + shrink2)) / (Width * shrink1 + Width * shrink2 - kern) * antiScale
-			local tmp-shrink2 : (shrink2 * Width + kern * shrink2 / (shrink1 + shrink2)) / (Width * shrink1 + Width * shrink2 - kern) * antiScale
+			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
+			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
 			set shrink1 : clamp 0 1 tmp-shrink1
 			set shrink2 : clamp 0 1 tmp-shrink2
 
-		local df1 : Thinner pendingGlyphs1 shrink1
-		local df2 : Thinner pendingGlyphs2 shrink2
+		define df1 : Thinner pendingGlyphs1 shrink1
+		define df2 : Thinner pendingGlyphs2 shrink2
 
-		foreach [{unicode c1 c2} : items-of records] : begin
+		foreach [{unicode c1 c2 mak} : items-of records] : begin
 			local glyphName : PhoneticLigatureGlyphName c1 c2
 
 			define [maskOut] : new-glyph : glyph-proc
@@ -1055,6 +1060,8 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 
 			create-glyph glyphName unicode : glyph-proc
+				set-width CWidth
+				include : [DivFrame (CWidth / Width)].markSet.(mak || 'if')
 				define dfg1 : df1.queryByNameEnsured c1
 				define dfg2 : df2.queryByNameEnsured c2
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
@@ -1063,28 +1070,28 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 				include : difference
 					intersection
-						Rect (CAP * 2) (Descender * 2) (-Width) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
+						Rect (CAP * 2) (Descender * 2) (-CWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
 						glyph-proc : include dfg1
 					maskOut
 				include : Upright
 				include : Translate (-refW / 2) 0
-				include : Scale [clamp 0 1 ((Width - SB * 1.25) / (Width - SB * 2) * Width / refW)] 1
-				include : Translate (Width / 2) 0
+				include : Scale [clamp 0 1 ((CWidth - SB * 1.25) / (CWidth - SB * 2) * CWidth / refW)] 1
+				include : Translate (CWidth / 2) 0
 				include : Italify
 
 	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 Stroke
 	createPhoneticLigatures stdShrink stdShrink 1 1 : list
-		list 0x02A3 'd'                       'z'
-		list 0x02A4 'd'                       'ezh'
-		list 0x02A5 'd'                       'zcurlytail'
-		list 0x02A6 't.phoneticLeft'          's.phoneticRight'
-		list 0x02A7 't.phoneticLeft.extended' 'esh'
-		list 0x02A8 't.phoneticLeft'          'ccurlytail'
-		list 0x02A9 'f.phoneticLeft'          'eng'
-		list 0x02AA 'l.phoneticLeft'          's.phoneticRight'
-		list 0x02AB 'l.phoneticLeft'          'z'
-		list 0xAB66 'd'                       'zrtailBR'
-		list 0xAB67 't.phoneticLeft'          'srtail'
+		list 0x02A3 'd'                       'z'                 'b'
+		list 0x02A4 'd'                       'ezh'               'if'
+		list 0x02A5 'd'                       'zcurlytail'        'if'
+		list 0x02A6 't.phoneticLeft'          's.phoneticRight'   'b'
+		list 0x02A7 't.phoneticLeft.extended' 'esh'               'if'
+		list 0x02A8 't.phoneticLeft'          'ccurlytail'        'b'
+		list 0x02A9 'f.phoneticLeft'          'eng'               'if'
+		list 0x02AA 'l.phoneticLeft'          's.phoneticRight'   'b'
+		list 0x02AB 'l.phoneticLeft'          'z'                 'b'
+		list 0xAB66 'd'                       'zrtailBR'          'if'
+		list 0xAB67 't.phoneticLeft'          'srtail'            'if'
 
 glyph-block Autobuild-Grouped-Digits : if [not recursive] : begin
 	glyph-block-import CommonShapes
