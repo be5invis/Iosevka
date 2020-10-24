@@ -3,11 +3,27 @@
 const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
+const execMain = require("../shared/execMain");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
-const ModifiedSinceVersion = "2.x";
 const Version = process.argv[2];
 const outputPath = process.argv[3];
+
+execMain(main);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+async function main() {
+	const out = new Output();
+
+	await GenerateChangeList(out);
+	await CopyMarkdown(out, "packages-desc.md");
+	await GeneratePackageList(out);
+	await CopyMarkdown(out, "package-reorg.md");
+
+	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
+	await fs.writeFile(outputPath, out.buffer);
+}
 
 class Output {
 	constructor() {
@@ -17,23 +33,6 @@ class Output {
 		this.buffer += s.join("") + "\n";
 	}
 }
-
-async function main() {
-	const out = new Output();
-
-	await CopyMarkdown(out, "packages-desc.md");
-	await GeneratePackageList(out);
-	await CopyMarkdown(out, "package-reorg.md");
-	await GenerateChangeList(out);
-
-	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
-	await fs.writeFile(outputPath, out.buffer);
-}
-
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown
@@ -61,11 +60,10 @@ async function GenerateChangeList(out) {
 	}
 	const sortedFragments = Array.from(fragments).sort((a, b) => semver.compare(b[0], a[0]));
 
-	out.log(`## Modifications since version ${ModifiedSinceVersion}`);
-	for (const [version, notes] of sortedFragments) {
-		out.log(` * **${version}**`);
-		out.log((notes.trimEnd() + "\n").replace(/^/gm, "   "));
-	}
+	const [version, notes] = sortedFragments[0];
+	out.log(``);
+	out.log(`## Changes of version ${version}`);
+	out.log(notes.trimEnd() + "\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

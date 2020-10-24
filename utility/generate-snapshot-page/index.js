@@ -1,16 +1,16 @@
+"use strict";
+
 const ejs = require("ejs");
 const fs = require("fs-extra");
 const path = require("path");
 const parseVariantsData = require("../export-data/parse-variants-data");
 const getLigationData = require("../export-data/ligation-data");
+const execMain = require("../shared/execMain");
 
 const inputPath = process.argv[2];
 const outputPath = process.argv[3];
 
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
+execMain(main);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 

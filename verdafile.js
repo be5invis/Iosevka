@@ -819,6 +819,11 @@ const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
 	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
+
+const ReleaseNotes = task(`release:release-note`, async t => {
+	const [version] = await t.need(Version);
+	await t.need(ReleaseNotesFile(version));
+});
 const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
 	async (t, out, version) => {
@@ -828,9 +833,16 @@ const ReleaseNotesFile = file.make(
 		await run("node", "utility/generate-release-note/index", version, out.full);
 	}
 );
-const ReleaseNotes = task(`release:release-note`, async t => {
+
+const ChangeLog = task(`release:change-log`, async t => {
+	await t.need(ChangeLogFile);
+});
+const ChangeLogFile = file(`CHANGELOG.md`, async (t, out) => {
 	const [version] = await t.need(Version);
-	await t.need(ReleaseNotesFile(version));
+	await t.need(UtilScripts, de(ARCHIVE_DIR));
+	const [changeFiles] = await t.need(ChangeFileList());
+	await t.need(changeFiles.map(fu));
+	await run("node", "utility/generate-change-log/index", version, out.full);
 });
 
 phony(`clean`, async () => {
@@ -841,7 +853,7 @@ phony(`clean`, async () => {
 });
 phony(`release`, async target => {
 	await target.need(AllTtfArchives, CollectionArchives, AllTtcArchives);
-	await target.need(SampleImages, Pages, ReleaseNotes);
+	await target.need(SampleImages, Pages, ReleaseNotes, ChangeLog);
 });
 
 ///////////////////////////////////////////////////////////
