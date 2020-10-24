@@ -3,6 +3,7 @@ $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../../support/utils'
 import [AnyDerivingCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+extern Set
 
 glyph-module
 
@@ -46,13 +47,17 @@ glyph-block Autobuild-Transformed : begin
 				set relatedRecord.1 relSrcName
 				relatedRecords.push relatedRecord
 
-				relSets.push {gr origDstName relDstName}
+				relSets.push { gr origDstName relDstName }
 
-		return {[records.concat relatedRecords] relSets targetNameMap}
+		return { [records.concat relatedRecords] relSets targetNameMap }
 
-	define [link-relations relSets] : foreach [{gr origDstName relDstName} : items-of relSets]
-		if [query-glyph origDstName] : gr.set [query-glyph origDstName] relDstName
-
+	define [link-relations relSets] : begin
+		local rs : new Set
+		foreach [{gr origDstName relDstName} : items-of relSets]
+			if [query-glyph origDstName] : begin
+				gr.set [query-glyph origDstName] relDstName
+				if [query-glyph relDstName] : begin
+					[query-glyph origDstName].tryBecomeMirrorOf [query-glyph relDstName] rs
 
 	define [createSuperscripts _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sup'
@@ -254,7 +259,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DAC 'mltail'
 		list 0x1DAD 'turnmleg'
 		list 0x1DAE 'nltail'
-		list 0x1DAF 'nrtailBR'
+		list 0x1DAF 'nHookBottom'
 		list 0x1DB0 'smcpN'
 		list 0x1DB1 'obar'
 		list 0x1DB2 'latinphi'
@@ -302,6 +307,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal' (-11)
 		list 0x207D 'parenLeft' (-11)
 		list 0x207E 'parenRight' (-11)
+		list 0xA7F8 'Hbar'
+		list 0xA7F9 'oe'
 
 	if [not recursive] : let [df : Miniature {'a' 'o'} 4 0.7] : begin
 		create-glyph 'ordfeminine' 0xAA : glyph-proc

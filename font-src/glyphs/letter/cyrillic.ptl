@@ -394,8 +394,8 @@ glyph-block Letter-Cyrillic-BigYus : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [CyrBigYusShape top yp df] : glyph-proc
-		local fine : adviceBlackness 3.3 df.div
+	define [CyrBigYusShape df top yp _fine] : glyph-proc
+		local fine : fallback _fine : adviceBlackness 3.3 df.div
 		local cor HVContrast
 		local midx : mix df.leftSB df.middle 0.3
 		local midx2 : Math.min (df.middle - fine * cor) [mix df.leftSB df.middle 0.75]
@@ -431,37 +431,62 @@ glyph-block Letter-Cyrillic-BigYus : begin
 				begin top
 				begin fine
 
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut
+			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SideJut
+
 	create-glyph 'cyrl/bigYus' 0x46A : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		include : CyrBigYusShape CAP 0.575 df
+		include : CyrBigYusShape df CAP 0.575
 
 	create-glyph 'cyrl/bigyus' 0x46B : glyph-proc
-		local df : DivFrame para.diversityM 3
+		local df : DivFrame 1 3
 		set-width df.width
 		include : df.markSet.e
-		include : CyrBigYusShape XH 0.55 df
+		include : CyrBigYusShape df XH 0.55
 
+	define [CyrIotifiedBigYusShape df top yp] : glyph-proc
+		local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
+		define divSub : (df.width - gap - df.mvs) / Width
+		define dfSub : DivFrame divSub 3
+		include : CyrBigYusShape dfSub top yp df.mvs
+		eject-contour 'serifLB'
+		eject-contour 'serifRB'
+		include : Translate (Width * (df.div - divSub)) 0
+		include : VBarLeft df.leftSB 0 top df.mvs
+		include : HBarTop (df.leftSB - O) [mix df.leftSB df.rightSB (2 / 3)] (top * yp) df.mvs
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut df.mvs
+			include : tagged 'serifRB' : LeftwardBottomSerif df.rightSB 0 SideJut df.mvs
+
+	create-glyph 'cyrl/iotifiedBigYus' 0x46C : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrIotifiedBigYusShape df CAP 0.575
+
+	create-glyph 'cyrl/iotifiedBigyus' 0x46D : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.e
+		include : CyrIotifiedBigYusShape df XH 0.55
 
 glyph-block Letter-Cyrillic-SmallYus : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-V : VShape
+	glyph-block-import Letter-Latin-Upper-A : LambdaShape AMaskShape
 
-	define [CyrSmallYusShape top df straightBar] : glyph-proc
-		local fine : adviceBlackness 3.3 df.div
-		include : VShape top fine straightBar df.div
-		eject-contour 'serifLT'
-		eject-contour 'serifRT'
-		include : FlipAround df.middle (top / 2)
-		local p : if straightBar
-			StrokeWidthBlend 0.24 0.24
-			StrokeWidthBlend 0.16 0.16
-		local bary (top / 2)
-		if (SLAB && !para.isItalic) : set p : p * 1.33
-		include : HBarTop [mix df.leftSB df.rightSB p] [mix df.rightSB df.leftSB p] bary fine
-		include : VBar df.middle bary 0 fine
+	define [CyrSmallYusShape df top straightBar _fine] : glyph-proc
+		local fine : fallback _fine : adviceBlackness 3.3 df.div
+		include : LambdaShape df top fine straightBar (slab -- false)
+		include : intersection
+			HBarTop df.leftSB df.rightSB (top / 2) fine
+			AMaskShape df top fine straightBar
+		include : VBar df.middle (top / 2) 0 fine
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut
 			include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SideJut
@@ -470,19 +495,51 @@ glyph-block Letter-Cyrillic-SmallYus : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		create-derived 'cyrl/smallYus.straight' : CyrSmallYusShape CAP df true
-		create-derived 'cyrl/smallYus.curly' : CyrSmallYusShape CAP df false
+		create-derived 'cyrl/smallYus.straight' : CyrSmallYusShape df CAP true
+		create-derived 'cyrl/smallYus.curly' : CyrSmallYusShape df CAP false
 
 	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
+		local df : DivFrame 1 3
 		set-width df.width
 		include : df.markSet.e
-		create-derived 'cyrl/smallyus.straight' : CyrSmallYusShape XH df true
-		create-derived 'cyrl/smallyus.curly' : CyrSmallYusShape XH df false
+		create-derived 'cyrl/smallyus.straight' : CyrSmallYusShape df XH true
+		create-derived 'cyrl/smallyus.curly' : CyrSmallYusShape df XH false
 
 	select-variant 'cyrl/smallYus' 0x466 (follow -- 'grek/Lambda')
 	select-variant 'cyrl/smallyus' 0x467 (follow -- 'grek/Lambda')
 
+	define [CyrIotifiedSmallYusShape df top straightBar] : glyph-proc
+		local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
+		define divSub : (df.width - gap - df.mvs) / Width
+		define dfSub : DivFrame divSub 3
+		include : CyrSmallYusShape dfSub top straightBar df.mvs
+		eject-contour 'serifLB'
+		eject-contour 'serifRB'
+		include : Translate (Width * (df.div - divSub)) 0
+		include : VBarLeft df.leftSB 0 top df.mvs
+		include : HBarTop (df.leftSB - O) [mix df.leftSB df.rightSB (2 / 3)] (top / 2) df.mvs
+		if SLAB : begin
+			include : tagged 'serifLT'
+				CenterTopSerif (df.leftSB + 0.5 * df.mvs * HVContrast) top Jut df.mvs
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut df.mvs
+			include : tagged 'serifRB' : LeftwardBottomSerif df.rightSB 0 SideJut df.mvs
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.capital
+		create-derived 'cyrl/iotifiedSmallYus.straight' : CyrIotifiedSmallYusShape df CAP true
+		create-derived 'cyrl/iotifiedSmallYus.curly' : CyrIotifiedSmallYusShape df CAP false
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.e
+		create-derived 'cyrl/iotifiedSmallyus.straight' : CyrIotifiedSmallYusShape df XH true
+		create-derived 'cyrl/iotifiedSmallyus.curly' : CyrIotifiedSmallYusShape df XH false
+
+	select-variant 'cyrl/iotifiedSmallYus' 0x468 (follow -- 'grek/Lambda')
+	select-variant 'cyrl/iotifiedSmallyus' 0x469 (follow -- 'grek/Lambda')
 
 glyph-block Letter-Cyrillic-Sha : begin
 	glyph-block-import CommonShapes
@@ -601,12 +658,14 @@ glyph-block Letter-Cyrillic-Che : begin
 		include : CyrCheShape CAP [if SLAB 0.45 0.35]
 
 	create-glyph 0x4B6 : composite-proc [refer-glyph 'cyrl/Che'] [CyrDescender RightSB]
+	create-glyph 0x4CB : composite-proc [refer-glyph 'cyrl/Che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
 
 	create-glyph 'cyrl/che' 0x447 : glyph-proc
 		include : MarkSet.e
 		include : CyrCheShape XH [if SLAB 0.45 0.4]
 
 	create-glyph 0x4B7 : composite-proc [refer-glyph 'cyrl/che'] [CyrDescender RightSB]
+	create-glyph 0x4CC : composite-proc [refer-glyph 'cyrl/che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
 
 	turned 'cyrl/Shha' 0x4BA 'cyrl/Che' Middle (CAP / 2)
 

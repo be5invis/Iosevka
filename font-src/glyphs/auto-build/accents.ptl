@@ -1,7 +1,6 @@
 ###### Automatic builds
 $$include '../../meta/macros.ptl'
 
-import 'unorm' as unorm
 import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose] from "../../support/gr"
 import [fallback] from '../../support/utils'
 
@@ -88,7 +87,7 @@ glyph-block AutoBuild-Accents : begin
 	local goalCodes : recursiveCodes || [range 0x0000 0xFFFF]
 	foreach code goalCodes : if [not : glyphStore.queryByUnicode code] : do
 		local str : String.fromCharCode code
-		local nfd : fallback customDecompositions.(str) : unorm.nfd str
+		local nfd : fallback customDecompositions.(str) : str.normalize 'NFD'
 		if (nfd.length > 1) : begin
 			local parts     { }
 			local allFound true
@@ -115,14 +114,15 @@ glyph-block AutoBuild-Accents : begin
 
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
+		local nonTrivial false
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
 			if (part.markAnchors && part.markAnchors.bottomright) : begin
 				eject-contour 'serifRB'
-		if [AnyDerivingCv.query s_parts.0] : begin
+				set nonTrivial true
+		if ([not nonTrivial] && [AnyDerivingCv.query s_parts.0]) : begin
 			local decomposeParts { }
-			foreach part [items-of s_parts] : begin
-				recursivelyDecompose part decomposeParts
+			foreach part [items-of s_parts] : recursivelyDecompose part decomposeParts
 			CvDecompose.set currentGlyph decomposeParts
 
 	define [RootGlyphProc goalName code parts] : begin
@@ -186,8 +186,6 @@ define customDecompositions : object
 	."\uAB30" "\uAB64\uE001"
 	."\u1D7D" "p\uE001"
 
-	."\u0142" "l\uE000"
-
 	."\u023A" "A\u0338"
 	."\u023B" "C\u0338"
 	."\u023C" "c\u0337"
@@ -196,12 +194,8 @@ define customDecompositions : object
 	."\u0247" "e\u0337"
 
 	."\u0290" "z\u0322"
-	."\u0256" "d\u0322"
-	."\u0273" "n\u0322"
 	."\u01AE" "T\u0322"
-	."\u1D8F" "a\u0322"
 	."\u1D90" "\u0251\u0322"
-	."\u1D91" "\u0257\u0322"
 
 	."\u1E10" "D\u0326"
 	."\u1E11" "d\u0326"

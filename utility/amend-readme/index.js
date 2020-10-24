@@ -1,16 +1,17 @@
+"use strict";
+
 const fs = require("fs-extra");
 const path = require("path");
 const parseVariantsData = require("../export-data/parse-variants-data");
 const parseLigationData = require("../export-data/ligation-data");
 const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
+const execMain = require("../shared/execMain");
 
 const charMapPath = process.argv[2];
 const charMapItalicPath = process.argv[3];
 const charMapObliquePath = process.argv[4];
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
+
+execMain(main);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 async function main() {

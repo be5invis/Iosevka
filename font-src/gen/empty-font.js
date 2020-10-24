@@ -76,20 +76,8 @@ module.exports = function () {
 			ySuperscriptXSize: 665,
 			ySuperscriptYOffset: 491,
 			ySuperscriptYSize: 716,
-			ulCodePageRange1: {
-				latin1: true,
-				latin2: true,
-				greek: true,
-				cyrillic: true,
-				turkish: true,
-				vietnamese: true,
-				macRoman: true
-			},
-			ulCodePageRange2: {
-				cp852: true,
-				cp850: true,
-				ascii: true
-			}
+			ulCodePageRange1: 0x2000011f,
+			ulCodePageRange2: 0xc4000000
 		},
 		post: {
 			version: 2,

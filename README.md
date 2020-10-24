@@ -57,7 +57,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0), [`ttfautohint`](http://www.freetype.org/ttfautohint/), [`otfcc`](https://github.com/caryll/otfcc) (≥ 0.10.3-alpha) and [`otf2otc`](https://github.com/adobe-type-tools/afdko) are present.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present.
 2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
 3. `npm run build -- contents::iosevka`.
 
@@ -194,7 +194,7 @@ Since version 2.0, Iosevka would no longer support building via `makefile`. To i
 		
 	
 	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																																	
+																																																																																																						
 	
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
 
@@ -346,6 +346,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-f-flat-hook-crossbar-at-x-height`, `VXEG`: `f` with flat hook and crossbar placed right at X-height.
     * `v-f-flat-hook-serifed`, `VXEV`: `f` with flat hook and bottom serif.
     * `v-f-flat-hook-serifed-crossbar-at-x-height`, `VXEW`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
+    * `v-f-flat-hook-round-tailed`, `VXEX`: `f` with flat hook.
+    * `v-f-flat-hook-round-tailed-crossbar-at-x-height`, `VXEY`: `f` with flat hook and crossbar placed right at X-height.
+    * `v-f-flat-hook-flat-tailed`, `VXEZ`: `f` with flat hook and bottom serif.
+    * `v-f-flat-hook-flat-tailed-crossbar-at-x-height`, `VXFA`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
   * Styles for `g`:
     * `v-g-doublestorey`, `cv11`: Double-storey `g`.
     * `v-g-singlestorey`, `cv12`: Single-storey `g` (default).
@@ -372,11 +376,10 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-j-straight`, `cv98`: `j` without serif.
     * `v-j-flat-hook-serifed`, `VXDE`: undefined.
     * `v-j-flat-hook-serifless`, `VXDF`: undefined.
-  * Styles for `k`, `K`:
-    * `v-k-straight`, `cv68`: `k` and `K` with standard shape (default for Upright).
-    * `v-k-curly`, `cv69`: Slightly curly `k` and `K`, like Iosevka 2.x.
-    * `v-k-cursive`, `cv70`: `k` with a cursive loop, and `K` with standard shape (default for Italic).
-    * `v-k-curly-cursive`, `VXBR`: `k` with a cursive loop, and `K` with curly shape.
+  * Styles for `k`:
+    * `v-k-straight`, `cv68`: `k` with standard shape (default for Upright).
+    * `v-k-curly`, `cv69`: Slightly curly `k`, like Iosevka 2.x.
+    * `v-k-cursive`, `cv70`: `k` with a cursive loop (default for Italic).
   * Styles for `l`:
     * `v-l-serifed`, `cv07`: Serifed `l` (default for Upright).
     * `v-l-italic`, `cv08`: Italic, cursive `l` (default for Italic).
@@ -483,6 +486,9 @@ The current available styles for `design`/`upright`/`italic`/`oblique` options a
     * `v-capital-j-serifed`, `VXBZ`: J with top serif at left side (default).
     * `v-capital-j-serifed-both-sides`, `VXDA`: J with symmetric at both sides.
     * `v-capital-j-serifed-symmetric`, `VXDB`: J with symmetric at both sides and is symmetric.
+  * Styles for `K`:
+    * `v-capital-k-straight`, `VXBR`: `K` with standard shape (default).
+    * `v-capital-k-curly`, `VXFB`: Slightly curly `K`, like Iosevka 2.x.
   * Styles for `M`:
     * `v-capital-m-hanging`, `VXCI`: `M` with middle being hanging off baseline (default).
     * `v-capital-m-flat-bottom`, `VXCJ`: `M` with middle aligned to baseline.
