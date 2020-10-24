@@ -777,22 +777,25 @@ const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
 	await cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images");
 });
-const ScreenShot = file.glob(`images/*.png`, async (target, { full }) => {
-	await target.need(TakeSampleImages);
-	await run("optipng", full);
-});
+const ScreenShot = file.make(
+	img => `images/${img}.png`,
+	async (target, { full }) => {
+		await target.need(TakeSampleImages);
+		await run("optipng", full);
+	}
+);
 
 const SampleImages = task(`sample-images`, async target => {
 	const [cfg] = await target.need(PackageSnapshotConfig, TakeSampleImages);
 	await target.need(
-		ScreenShot`images/charvars.png`,
-		ScreenShot`images/languages.png`,
-		ScreenShot`images/ligations.png`,
-		ScreenShot`images/matrix.png`,
-		ScreenShot`images/preview-all.png`,
-		ScreenShot`images/stylesets.png`,
-		ScreenShot`images/weights.png`,
-		cfg.map(opt => ScreenShot`images/${opt.name}.png`)
+		ScreenShot("charvars"),
+		ScreenShot("languages"),
+		ScreenShot("ligations"),
+		ScreenShot("matrix"),
+		ScreenShot("preview-all"),
+		ScreenShot("stylesets"),
+		ScreenShot("weights"),
+		cfg.map(opt => ScreenShot(opt.name))
 	);
 });
 
