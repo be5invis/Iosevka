@@ -205,28 +205,30 @@ export : define [calculateMetrics para] : begin
 
 export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP Descender XH Width] metrics
-	# Metric metadata
-	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
-	define asc : para.leading * CAP / (CAP - Descender)
-	define desc : para.leading * Descender / (CAP - Descender)
-	define descenderPad : fallback para.descenderPad 0
+
+	define leading      : Math.round para.leading
+	define asc          : Math.round : leading * CAP / (CAP - Descender)
+	define desc         : Math.round : leading * Descender / (CAP - Descender)
+	define descenderPad : Math.round : fallback para.descenderPad 0
+	define winMetricAscenderPad  : Math.round : fallback para.winMetricAscenderPad  0
+	define winMetricDescenderPad : Math.round : fallback para.winMetricDescenderPad 0
 
 	set fm.OS_2.xAvgCharWidth     Width
 	set fm.head.unitsPerEm        1000
 	set fm.hhea.ascender          asc
-	set fm.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
+	set fm.OS_2.usWinAscent       (asc + winMetricAscenderPad)
 	set fm.OS_2.sTypoAscender     asc
 
 	set fm.hhea.descender         (Descender - descenderPad)
-	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + winMetricDescenderPad)
 	set fm.OS_2.sTypoDescender    (desc - descenderPad)
 
-	set fm.hhea.lineGap           (para.leading - asc + Descender)
-	set fm.OS_2.sTypoLineGap      (para.leading - asc + desc)
+	set fm.hhea.lineGap           (leading - asc + Descender)
+	set fm.OS_2.sTypoLineGap      (leading - asc + desc)
 
 	set fm.OS_2.sxHeight          XH
 	set fm.OS_2.sCapHeight        CAP
-	set fm.post.italicAngle       (0 - para.slopeAngle)
+	set fm.post.italicAngle       [Math.round (0 - para.slopeAngle)]
 
 
 export : define [compositeBaseAnchors] : begin

@@ -42,7 +42,18 @@ module.exports = function () {
 		},
 		OS_2: {
 			achVendID: "BE5N",
-			panose: [2, 0, 5, 9, 0, 0, 0, 0, 0, 0],
+			panose: {
+				bFamilyType: 2,
+				bSerifStyle: 0,
+				bWeight: 5,
+				bProportion: 9,
+				bContrast: 3,
+				bStrokeVariation: 0,
+				bArmStyle: 0,
+				bLetterform: 0,
+				bMidline: 0,
+				bXHeight: 4
+			},
 			fsSelection: 192,
 			fsType: 0,
 			sCapHeight: 0,
