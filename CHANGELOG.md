@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 3.7.1
+
+ * Fix broken line height under Macintosh (#704).
+
+
 ### 3.7.0
 
  * Make `v-k-cursive` visible in Upright and Oblique; Split variant selectors for `k` and `K` (#700).
