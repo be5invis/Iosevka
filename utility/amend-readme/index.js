@@ -43,12 +43,19 @@ async function processCv() {
 		`* Styles for individual characters. They are easy-to-understand names of the \`cv##\` styles, including:\n`
 	);
 	for (const gr of variantsData.cvData) {
-		md.log(`  * Styles for ${gr.descSampleText.map(c => `\`${c}\``).join(", ")}:`);
+		const sampleText = gr.descSampleText
+			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
+			.join(", ");
+		md.log(`  * Styles for ${sampleText}:`);
 		const defaults = figureOutDefaults(variantsData, gr);
-		for (const config of gr.configs) {
-			const tag = config.tag || config.tagItalic;
+		for (const config of gr.variants) {
+			if (!config.rank) continue;
+			let selectorText = `\`${gr.key} = ${config.selector}\``;
+			if (gr.tag && config.rank) {
+				selectorText += `, \`${gr.tag} = ${config.rank}\``;
+			}
 			md.log(
-				`    * \`${config.selector}\`, \`${tag}\`: ` +
+				`    * ${selectorText}: ` +
 					`${config.description}${formatDefaults(config.selector, defaults)}.`
 			);
 		}
@@ -111,42 +118,32 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			selector: [...variantsData.default.design, ...variantsData.default.upright]
+			selector: [...variantsData.defaults.sansUpright.composition]
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			selector: [...variantsData.default.design, ...variantsData.default.italic]
+			selector: [...variantsData.defaults.sansItalic.composition]
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			selector: [
-				...variantsData.default.design,
-				...variantsData.default.upright,
-				...variantsData.slabDefaultOverride.design,
-				...variantsData.slabDefaultOverride.upright
-			]
+			selector: [...variantsData.defaults.slabUpright.composition]
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			selector: [
-				...variantsData.default.design,
-				...variantsData.default.italic,
-				...variantsData.slabDefaultOverride.design,
-				...variantsData.slabDefaultOverride.italic
-			]
+			selector: [...variantsData.defaults.slabItalic.composition]
 		}
 	];
 
-	for (const config of gr.configs) {
+	for (const variant of gr.variants) {
 		for (const dc of defaultConfigs)
 			for (const selector of dc.selector)
-				if (config.selector === selector) dc.result = config.selector;
+				if (variant.fullSelector === selector) dc.result = variant.selector;
 	}
 	return defaultConfigs;
 }

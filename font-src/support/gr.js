@@ -90,25 +90,27 @@ const Radical = {
 };
 
 const CvTagCache = new Map();
-function Cv(tag) {
-	if (CvTagCache.has(tag)) return CvTagCache.get(tag);
+function Cv(tag, rank) {
+	const key = tag + "#" + rank;
+	if (CvTagCache.has(key)) return CvTagCache.get(key);
 	const rel = {
 		tag,
+		rank,
 		get(glyph) {
-			if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv[tag];
+			if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv[key];
 			else return null;
 		},
 		set(glyph, toGid) {
 			if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
 			if (!glyph.related) glyph.related = {};
 			if (!glyph.related.cv) glyph.related.cv = {};
-			glyph.related.cv[tag] = toGid;
+			glyph.related.cv[key] = toGid;
 		},
 		amendName(name) {
-			return name + "." + tag;
+			return name + "." + key;
 		}
 	};
-	CvTagCache.set(tag, rel);
+	CvTagCache.set(key, rel);
 	return rel;
 }
 
@@ -125,8 +127,10 @@ const AnyCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
-			for (const tag in glyph.related.cv) {
-				const rel = Cv(tag);
+			for (const key in glyph.related.cv) {
+				const [tag, rankStr] = key.split("#");
+				const rank = parseInt(rankStr, 10);
+				const rel = Cv(tag, rank);
 				if (rel.get(glyph)) ret.push(rel);
 			}
 		}
@@ -139,8 +143,10 @@ const AnyDerivingCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && !DoNotDeriveVariants.get(glyph) && glyph.related && glyph.related.cv) {
-			for (const tag in glyph.related.cv) {
-				const rel = Cv(tag);
+			for (const key in glyph.related.cv) {
+				const [tag, rankStr] = key.split("#");
+				const rank = parseInt(rankStr, 10);
+				const rel = Cv(tag, rank);
 				if (rel.get(glyph)) ret.push(rel);
 			}
 		}

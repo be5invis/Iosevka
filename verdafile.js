@@ -194,14 +194,19 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
 
 	const sfi = getSuffixMapping(bp.weights, bp.slopes, bp.widths)[fi0.suffix];
-	const preHives = [...bp.pre.design, ...bp.pre[sfi.slope]];
 
 	return {
 		name: fileName,
-		// Hives
-		preHives,
+		variants: bp.variants || null,
+		featureControl: {
+			noCvSs: bp["no-cv-ss"] || false,
+			noLigation: bp["no-ligation"] || false
+		},
 		// Shape
 		shape: {
+			digitForm: bp["digit-form"] || "lining",
+			serifs: bp.serifs || null,
+			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
 			slope: sfi.slope,
 			width: sfi.shapeWidth,

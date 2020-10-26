@@ -2,11 +2,27 @@
 
 const monotonicInterpolate = require("./monotonic-interpolate");
 
+exports.init = initPara;
+function initPara(data, argv) {
+	let para = {};
+	apply(para, data, ["iosevka"]);
+	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
+	if (argv.shape.spacing) apply(para, data, ["spacing-" + argv.shape.spacing]);
+	if (argv.shape.digitForm) apply(para, data, ["digit-form-" + argv.shape.digitForm]);
+	apply(para, data, ["shapeWeight"], { shapeWeight: argv.shape.weight });
+	apply(para, data, ["shapeWidth"], { shapeWidth: argv.shape.width });
+	apply(para, data, [`s-${argv.shape.slope}`]);
+	apply(para, data, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
+	if (argv.featureControl.noCvSs) para.enableCvSs = false;
+	if (argv.featureControl.noLigation) para.enableLigation = false;
+	return para;
+}
+
+exports.apply = apply;
 function apply(sink, parametersData, styles, blendArgs) {
 	if (!styles) return;
 	for (const item of styles) intro(parametersData, item, blendArgs, sink);
 }
-exports.apply = apply;
 
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
@@ -70,6 +86,23 @@ function hiveBlend(hive, value) {
 	return generatedHive;
 }
 
+exports.applyMetricOverride = applyMetricOverride;
+function applyMetricOverride(para, mo) {
+	const overrideObj = { metricOverride: {} };
+	createMetricDataSet(overrideObj.metricOverride, mo);
+	apply(para, overrideObj, ["metricOverride"]);
+}
+
+function createMetricDataSet(sink, mo) {
+	for (const key in mo) {
+		if (metricOverrideHandlers[key]) {
+			metricOverrideHandlers[key](sink, key, mo[key]);
+		} else {
+			console.error(`Metric override key ${key} is not supported. Skipping it.`);
+		}
+	}
+}
+
 function numericFieldHandler(sink, key, x) {
 	if (x != null && isFinite(x)) sink[key] = x;
 }
@@ -91,18 +124,3 @@ const metricOverrideHandlers = {
 	multiplies: subObjectHandler,
 	adds: subObjectHandler
 };
-function createMetricDataSet(sink, mo) {
-	for (const key in mo) {
-		if (metricOverrideHandlers[key]) {
-			metricOverrideHandlers[key](sink, key, mo[key]);
-		} else {
-			console.error(`Metric override key ${key} is not supported. Skipping it.`);
-		}
-	}
-}
-function applyMetricOverride(para, mo) {
-	const overrideObj = { metricOverride: {} };
-	createMetricDataSet(overrideObj.metricOverride, mo);
-	apply(para, overrideObj, ["metricOverride"]);
-}
-exports.applyMetricOverride = applyMetricOverride;

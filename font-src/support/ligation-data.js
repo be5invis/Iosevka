@@ -1,6 +1,8 @@
 "use strict";
 
-module.exports = function formVariantData(data, para) {
+const Parameters = require("./parameters");
+
+module.exports = function applyLigationData(data, para, argv) {
 	const optInBuildup = {};
 	const optOutBuildup = {};
 
@@ -24,7 +26,11 @@ module.exports = function formVariantData(data, para) {
 		}
 	}
 
-	return { defaultBuildup: { ...optInBuildup, ...optOutBuildup }, hives };
+	para.ligation = {
+		defaultBuildup: { ...optInBuildup, ...optOutBuildup },
+		caltBuildup: []
+	};
+	if (argv.ligationBuildup) Parameters.apply(para.ligation, hives, [argv.ligationBuildup]);
 };
 
 function createBuildup(simple, buildup) {

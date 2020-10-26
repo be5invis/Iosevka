@@ -1,78 +1,66 @@
+"use strict";
+
 const fs = require("fs-extra");
 const path = require("path");
 const toml = require("@iarna/toml");
+
+const VariantDataParser = require("../../font-src/support/variant-data");
 
 module.exports = async function () {
 	const variantsToml = await fs.readFile(
 		path.join(__dirname, "../../params/variants.toml"),
 		"utf8"
 	);
-	const variants = toml.parse(variantsToml);
+	const varDatRaw = toml.parse(variantsToml);
+	const varDatParsed = VariantDataParser.parse(varDatRaw);
 
-	const cvData = getCvData(variants);
-	const ssData = getSsData(variants, cvData);
+	const cvData = getCvData(varDatParsed);
+	const ssData = getSsData(varDatParsed);
+	const defaultCompData = getDefaultCompData(varDatParsed);
 
 	return {
 		cvData,
 		ssData,
-		default: variants.default,
-		slabDefaultOverride: variants.composite.slab
+		defaults: defaultCompData
 	};
 };
 
-function getCvData(variants) {
+function getCvData(parsed) {
 	const samplerGroups = new Map();
-	for (const selector in variants.simple) {
-		let config = variants.simple[selector];
-		if (!config.sampler) continue;
-		config = { selector, ...config };
-		let gr = samplerGroups.get(config.sampler);
+	for (const [_keyPrime, prime] of parsed.primes) {
+		if (!prime.sampler) continue;
+		let gr = samplerGroups.get(prime.key);
 		if (!gr) {
-			gr = { configs: [] };
-			samplerGroups.set(config.sampler, gr);
+			gr = {
+				key: prime.key,
+				sampler: prime.sampler,
+				tag: prime.tag,
+				ligatureSampler: isLigatureSampler(prime),
+				descSampleText: isLigatureSampler(prime)
+					? prime.sampler.split(" ")
+					: [...prime.sampler],
+				variants: []
+			};
+			samplerGroups.set(prime.key, gr);
 		}
-		gr.configs.push({
-			selector,
-			tag: config.tag || null,
-			tagUpright: config.tagUpright || null,
-			tagItalic: config.tagItalic || null,
-			slopeHetero: !config.variant,
-			sampler: config.sampler,
-			description: config.description
-		});
+		for (const variant of prime.variants.values()) {
+			gr.variants.push({
+				selector: variant.key,
+				fullSelector: getSelectorKey(prime, variant),
+				rank: variant.rank,
+				description: variant.description
+			});
+		}
+		gr.variants.sort((a, b) => (a.rank || 0x7fffffff) - (b.rank || 0x7fffffff));
 	}
 
-	for (const [sampler, gr] of samplerGroups) {
-		gr.ligatureSampler = / /.test(sampler);
-		gr.descSampleText = gr.ligatureSampler ? sampler.split(" ") : [...sampler];
-		gr.configs.sort((a, b) => {
-			const ta = (a.tag || a.tagUpright || a.tagItalic || "").toLowerCase();
-			const tb = (b.tag || b.tagUpright || b.tagItalic || "").toLowerCase();
-			if (ta < tb) return -1;
-			if (ta > tb) return 1;
-			return 0;
-		});
-		gr.rank = rankOf(gr.descSampleText[0][0]);
-	}
-	return [...samplerGroups.values()].sort(compareSamplerGr);
+	return Array.from(samplerGroups.values());
 }
 
-function rankOf(initialChar) {
-	if ("a" <= initialChar && initialChar <= "z") return 3;
-	if ("A" <= initialChar && initialChar <= "Z") return 2;
-	if ("0" <= initialChar && initialChar <= "9") return 1;
-	return 0;
-}
-function compareSamplerGr(a, b) {
-	if (b.rank !== a.rank) return b.rank - a.rank;
-	if (a.rank) {
-		if (a.descSampleText[0][0] < b.descSampleText[0][0]) return -1;
-		if (a.descSampleText[0][0] > b.descSampleText[0][0]) return +1;
-	}
-	return 0;
-}
+const UPRIGHT = { isItalic: false };
+const ITALIC = { isItalic: true };
 
-function getSsData(variants, cvData) {
+function getSsData(variants) {
 	const result = [
 		{
 			tag: "off",
@@ -84,56 +72,66 @@ function getSsData(variants, cvData) {
 			hotCharSetItalic: []
 		}
 	];
-	const defaultUpright = buildupComposite(
-		cvData,
-		...variants.default.design,
-		...variants.default.upright
-	);
-	const defaultItalic = buildupComposite(
-		cvData,
-		...variants.default.design,
-		...variants.default.italic
-	);
-	for (const tag in variants.composite) {
-		if (!/^ss\d\d$/.test(tag)) continue;
-		const composition = variants.composite[tag];
-		const upright = buildupComposite(
-			cvData,
-			...(composition.design || []),
-			...(composition.upright || [])
-		);
-		const italic = buildupComposite(
-			cvData,
-			...(composition.design || []),
-			...(composition.italic || [])
-		);
+	const defaultUpright = buildupComposite(variants, UPRIGHT, variants.defaultComposite);
+	const defaultItalic = buildupComposite(variants, ITALIC, variants.defaultComposite);
+
+	for (const [key, composite] of variants.composites) {
+		if (!composite.tag) continue;
+		const upright = buildupComposite(variants, UPRIGHT, composite);
+		const italic = buildupComposite(variants, ITALIC, composite);
+
 		result.push({
-			tag,
+			tag: composite.tag,
 			effective: true,
-			description: composition.description,
-			uprightComposition: Array.from(upright.composition),
-			italicComposition: Array.from(italic.composition),
+			description: composite.description,
+			uprightComposition: upright.composition,
+			italicComposition: italic.composition,
 			hotCharSetUpright: Array.from(uniqueHotChars(defaultUpright, upright.hotChars)),
 			hotCharSetItalic: Array.from(uniqueHotChars(defaultItalic, italic.hotChars))
 		});
 	}
 	return result;
 }
-function buildupComposite(cvData, ..._cfg) {
-	const hch = new Map();
-	const cfg = new Set(_cfg);
-	for (const gr of cvData) {
-		if (gr.ligatureSampler) continue;
-		for (const config of gr.configs) {
-			if (cfg.has(config.selector)) {
-				for (const ch of gr.descSampleText) hch.set(ch, config.selector);
-			}
+
+function getDefaultCompData(variants) {
+	return {
+		sansUpright: buildupComposite(variants, UPRIGHT, variants.defaultComposite),
+		sansItalic: buildupComposite(variants, ITALIC, variants.defaultComposite),
+		slabUpright: buildupComposite(
+			variants,
+			UPRIGHT,
+			variants.defaultComposite,
+			variants.composites.get("slab")
+		),
+		slabItalic: buildupComposite(
+			variants,
+			ITALIC,
+			variants.defaultComposite,
+			variants.composites.get("slab")
+		)
+	};
+}
+
+function getSelectorKey(prime, variant) {
+	return prime.key + "#" + variant.key;
+}
+
+function isLigatureSampler(prime) {
+	return / /.test(prime.sampler);
+}
+
+function buildupComposite(variants, para, ...composites) {
+	let compositionMap = new Map();
+	let hotChars = new Map();
+	for (const composite of composites) {
+		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
+			if (!prime.sampler || isLigatureSampler(prime)) continue;
+			const key = getSelectorKey(prime, variant);
+			for (const ch of prime.sampler) hotChars.set(ch, key);
+			compositionMap.set(prime.key, key);
 		}
 	}
-	return {
-		composition: [...cfg],
-		hotChars: hch
-	};
+	return { composition: Array.from(compositionMap.values()), hotChars };
 }
 function* uniqueHotChars(cfgDefault, cfgSS) {
 	for (const [hc, v] of cfgSS) {
