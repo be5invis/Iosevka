@@ -1,7 +1,7 @@
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg)
 Coders’ typeface, built from code.
 
-![](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/preview-all.png)
+![](images/preview-all.png)
 
 ## Installation
 
@@ -22,11 +22,11 @@ Quit your editor/program. Unzip and open the folder.
 
 The typeface contains 9 weights (Thin to Heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
 
-![Weights sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/weights.png)
+![Weights sample](images/weights.png)
 
 All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen).
 
-![Languages Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/languages.png)
+![Languages Sample](images/languages.png)
 
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -41,13 +41,13 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 Iosevka supports accessing all letter variants using OpenType features.
 
-![Style Sets](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/stylesets.png)
+![Style Sets](images/stylesets.png)
 
-![Character Variants](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/charvars.png)
+![Character Variants](images/charvars.png)
 
 ### Ligations
 
-![Ligations Sample](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/ligations.png)
+![Ligations Sample](images/ligations.png)
 
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
@@ -69,568 +69,619 @@ Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/maste
 
 ## Build Your Own Style
 
-Since version 2.0, Iosevka would no longer support building via `makefile`. To initialize a custom build, you need:
+To create a custom build, you need:
 
-1. Create `private-build-plans.toml` file.
+1. Create `private-build-plans.toml` file if absent.
 
-2. Add a build plan into `private-build-plans.toml`, following this format:
+2. Add a build plan into `private-build-plans.toml`. The configurable properties are described in the following sections.
+    
+3. Run `npm run build -- contents::<your plan name>` and the built fonts would be available in `dist/`. Aside from `contents::<plan>`, other options are:
 
-	<!-- BEGIN Section-Private-Build-Plan-Sample -->
-	<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
-	
-		[buildPlans.iosevka-custom]      # <iosevka-custom> is your plan name
-		family = "Iosevka Custom"        # Font menu family name
-		spacing = "normal"               # Optional; Values: `normal`, `term`, `fontconfig-mono`, or `fixed`
-		serifs = "sans"                  # Optional; Values: `sans` or `slab`
-		digit-form = "lining"            # Optional; Values `lining` or `olt-style`
-		
-		###################################################################################################
-		# Configure variants
-		
-		# Optional; Whether to inherit a `ss##` variant
-		[buildPlans.iosevka-custom.variants]
-		inherits = ["ss01"]
-		
-		# Optional; Configure single character's variant
-		[buildPlans.iosevka-custom.variants.design]
-		g = 'singlestorey'
-		
-		# Optional; Configure single character's variant for Upright and Oblique; Overrides [design]
-		[buildPlans.iosevka-custom.variants.upright]
-		i = 'zshaped'
-		l = 'zshaped'
-		
-		# Optional; Configure single character's variant for Italic only; Overrides [design]
-		[buildPlans.iosevka-custom.variants.italic]
-		i = 'italic'
-		l = 'italic'
-		
-		# End variant section
-		###################################################################################################
-		
-		###################################################################################################
-		# Override default building weights
-		# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
-		# default values.
-		# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
-		#             and "shape" properly only supports number between 100 and 900 (inclusive).
-		#             If you decide to use custom weights you have to define all the weights you
-		#             plan to use otherwise they will not be built.
-		[buildPlans.iosevka-custom.weights.regular]
-		shape = 400  # Weight for glyph shapes.
-		menu  = 400  # Weight for the font's names.
-		css   = 400  # Weight for webfont CSS.
-		
-		[buildPlans.iosevka-custom.weights.book]
-		shape = 450
-		menu  = 450  # Use 450 here to name the font's weight "Book"
-		css   = 450
-		
-		[buildPlans.iosevka-custom.weights.bold]
-		shape = 700
-		menu  = 700
-		css   = 700
-		
-		# End weight section
-		###################################################################################################
-		
-		###################################################################################################
-		# Override default building slope sets
-		# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-		# When this section is absent, all slopes would be built.
-		
-		[buildPlans.iosevka-custom.slopes]
-		upright = "normal"
-		italic = "italic"
-		oblique = "oblique"
-		
-		# End slope section
-		###################################################################################################
-		
-		###################################################################################################
-		# Override default building widths
-		# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
-		# default values.
-		# IMPORTANT : Currently "shape" property only supports numbers between 434 and 664 (inclusive),
-		#             while "menu" only supports integers between 1 and 9 (inclusive).
-		#             The "shape" parameter specifies the unit width, measured in 1/1000 em. The glyphs'
-		#             width are equal to, or a simple multiple of the unit width.
-		#             If you decide to use custom widths you have to define all the widths you plan to use,
-		#             otherwise they will not be built.
-		
-		[buildPlans.iosevka-custom.widths.normal]
-		shape = 500        # Unit Width, measured in 1/1000 em.
-		menu  = 5          # Width grade for the font's names.
-		css   = "normal"   # "font-stretch' property of webfont CSS.
-		
-		[buildPlans.iosevka-custom.widths.extended]
-		shape = 576
-		menu  = 7
-		css   = "expanded"
-		
-		# End width section
-		###################################################################################################
-		
-		###################################################################################################
-		# Character Exclusion
-		# Specify character ranges in the section below to exclude certain characters from the font being
-		# built. Remove this section when this feature is not needed.
-		
-		[buildPlans.iosevka-custom.exclude-chars]
-		ranges = [[10003, 10008]]
-		
-		# End character exclusion
-		###################################################################################################
-		
-		###################################################################################################
-		# Compatibility Ligatures
-		# Certain applications like Emacs does not support proper programming liagtures provided by
-		# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
-		# following section to build PUA characters that are generated from the OpenType ligatures.
-		# Remove this section when compatibility ligatures are not needed.
-		
-		[[buildPlans.iosevka-custom.compatibility-ligatures]]
-		unicode = 57600 # 0xE100
-		featureTag = 'calt'
-		sequence = '<*>'
-		
-		# End compatibility ligatures section
-		###################################################################################################
-		
-		###################################################################################################
-		# Metric overrides
-		# Certain metrics like line height (leading) could be overridden in your build plan file.
-		# Edit the values to change the metrics. Remove this section when overriding is not needed.
-		
-		[buildPlans.iosevka-custom.metric-override]
-		leading = 1250
-		winMetricAscenderPad = 0
-		winMetricDescenderPad = 0
-		powerlineScaleY = 1
-		powerlineScaleX = 1
-		powerlineShiftY = 0
-		powerlineShiftX = 0
-		
-		# End metric override section
-		###################################################################################################
-		
-	
-	<!-- END Section-Private-Build-Plan-Sample -->
-																																																																																																																			
-	
-3. Run `npm run build -- contents::<your plan name>` and the built fonts would be avaliable in `dist/`. Aside from `contents::<plan>`, other options are:
-
-   1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Webfont CSS;
+   1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
    2. `ttf::<plan>` : TTF;
    3. `ttf-unhinted::<plan>` : Unhinted TTF only;
    4. `woff::<plan>` : TTF and WOFF only;
-   5. `woff2::<plan>` : TTF and WOFF2 only;
-      - Note: Since version 2.2.0, we are using two colons (`::`) in the build target names.
+   5. `woff2::<plan>` : TTF and WOFF2 only.
 
-The current available styles for `design`/`upright`/`italic`/`oblique` options are:
+### Configuring Custom Build
 
-* Styles for general shape:
+Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. Inside the plan, top-level properties include:
 
-  * `sans` : Sans serif (default).
-  * `slab` : Slab serif.
-
-* Styles related to ligations and spacing:
-
-  - `no-ligation` : Disable ligations.
-  - `no-cv-ss` : Prevent generation of `cv##` and `ss##` features.
-  - `sp-term` : Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
-  - `sp-force-monospace`: Apply `sp-term` and further:
+* `family`: String, defines the family name of your custom variant.
+* `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
+  - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols ill become narrower.
+  - `force-monospace`: Apply `term` spacing changes and further:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
-	- Remove `NWID` and `WWID` OpenType feature.
-	- Recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
-  - `sp-fixed` : Apply `sp-force-monospace` and `no-ligation` together.
+    - Remove `NWID` and `WWID` OpenType feature.
+    
+    This spacing is recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
+  - `fixed`: Apply `force-monospace` changes and remove ligations.
+* `serifs`: Optional, String, configures style of serifs.
+  - When set to `slab`, the font will be converted into slab-serif.
+  - Otherwise the font will be sans-serif.
+* `no-cv-ss`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
+* `no-ligation`: Optional, Boolean, disables ligations.
+* `digit-form`: Optional, String, configures the default form of digits (figures).
+  - When set to `old-style`, old-style digit figures will be used.
+  - When absent or set to `lining`, lining digit figures will be used.
 
-* Style for controlling digits' (figures') style:
-  - `default-to-old-style-figures`, `default-to-old-style-digits`: Default digit figures to old-style.
-  - `default-to-lining-figures`, `default-to-lining-digits`: Default digit figures to lining.
+Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
 
-<!-- BEGIN Section-Cherry-Picking-Predefined -->
+#### Configuring Ligations
+
+Subsection `ligations` is used to customize the ligation set assigned to `calt` OpenType feature. Properties include:
+
+<!-- BEGIN Section-Predefined-Ligation-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles for ligation sets, include:
+* `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
-  * `ligset-dlig`: Default ligation set would be assigned to Discretionary ligatures.
-  * `ligset-clike`: Default ligation set would be assigned to C-Like.
-  * `ligset-javascript`: Default ligation set would be assigned to JavaScript.
-  * `ligset-php`: Default ligation set would be assigned to PHP.
-  * `ligset-ml`: Default ligation set would be assigned to ML.
-  * `ligset-fsharp`: Default ligation set would be assigned to F#.
-  * `ligset-fstar`: Default ligation set would be assigned to F*.
-  * `ligset-haskell`: Default ligation set would be assigned to Haskell.
-  * `ligset-idris`: Default ligation set would be assigned to Idris.
-  * `ligset-elm`: Default ligation set would be assigned to Elm.
-  * `ligset-purescript`: Default ligation set would be assigned to PureScript.
-  * `ligset-swift`: Default ligation set would be assigned to Swift.
-  * `ligset-coq`: Default ligation set would be assigned to Coq.
-  * `ligset-matlab`: Default ligation set would be assigned to Matlab.
-  * `ligset-wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
+  - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
+  - `clike`: Default ligation set would be assigned to C-Like.
+  - `javascript`: Default ligation set would be assigned to JavaScript.
+  - `php`: Default ligation set would be assigned to PHP.
+  - `ml`: Default ligation set would be assigned to ML.
+  - `fsharp`: Default ligation set would be assigned to F#.
+  - `fstar`: Default ligation set would be assigned to F*.
+  - `haskell`: Default ligation set would be assigned to Haskell.
+  - `idris`: Default ligation set would be assigned to Idris.
+  - `elm`: Default ligation set would be assigned to Elm.
+  - `purescript`: Default ligation set would be assigned to PureScript.
+  - `swift`: Default ligation set would be assigned to Swift.
+  - `coq`: Default ligation set would be assigned to Coq.
+  - `matlab`: Default ligation set would be assigned to Matlab.
+  - `wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
 
-<!-- END Section-Cherry-Picking-Predefined -->
-
+<!-- END Section-Predefined-Ligation-Sets -->
 
 <!-- BEGIN Section-Cherry-Picking-Ligation-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles for customizing the default (`calt`) ligation set. By choosing one or multiple items listed below, the ligation set of `calt` will *only* contain the corresponded ligations of the selectors you used.
+* `disables` and `enables`: Optional, String Array, Cherry-picking ligation groups to be disabled or enabled. Valid values include:
 
-  * `calt-center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
-  * `calt-arrow`: Enable ligation set that forms arrows.
-  * `calt-arrow2`: Enable ligation for more arrows, like `>>=`.
-  * `calt-trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
-  * `calt-eqeqeq`: Enable special ligation for `===` with triple lines.
-  * `calt-eqeq`: Enable ligation for `==` and `===`.
-  * `calt-ineq`: Enable ligation for `<=` and `>=`.
-  * `calt-exeqeq`: Enable special ligation for `!==` with triple lines.
-  * `calt-eqexeq`: Enable special ligation for `=!=` with triple lines.
-  * `calt-eqexeq-dl`: Enable special ligation for `=!=` with double lines.
-  * `calt-exeq`: Enable ligation for `!=` and `!==`.
-  * `calt-exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
-  * `calt-tildeeq`: Enable ligation for `~=` as inequality.
-  * `calt-eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
-  * `calt-slasheq`: Enable ligation for `/=` and `=/=` as inequality.
-  * `calt-ltgt-ne`: Enable ligation for `<>` as inequality.
-  * `calt-ltgt-diamond`: Enable ligation for `<>` as diamond.
-  * `calt-brst`: Center asterisk in `(*` and `*)`.
-  * `calt-plusplus`: Enable ligation for `++` and further plus-chaining.
-  * `calt-kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
-  * `calt-logic`: Enable ligation for `/\` and `\/`.
-  * `calt-llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
-  * `calt-llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
-  * `calt-dotoper`: Treat dot (`.`) as operator and perform chained centering.
-  * `calt-arrowZALE`: Treat `<=` as arrow.
-  * `calt-arrowZAGE`: Treat `>=` as co-arrow.
-  * `calt-html-comment`: Enable ligation for `<!--` and `<!---`.
-  * `calt-colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
+  - `center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
+  - `arrow`: Enable ligation set that forms arrows.
+  - `arrow2`: Enable ligation for more arrows, like `>>=`.
+  - `trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
+  - `eqeqeq`: Enable special ligation for `===` with triple lines.
+  - `eqeq`: Enable ligation for `==` and `===`.
+  - `ineq`: Enable ligation for `<=` and `>=`.
+  - `exeqeq`: Enable special ligation for `!==` with triple lines.
+  - `eqexeq`: Enable special ligation for `=!=` with triple lines.
+  - `eqexeq-dl`: Enable special ligation for `=!=` with double lines.
+  - `exeq`: Enable ligation for `!=` and `!==`.
+  - `exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
+  - `tildeeq`: Enable ligation for `~=` as inequality.
+  - `eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
+  - `slasheq`: Enable ligation for `/=` and `=/=` as inequality.
+  - `ltgt-ne`: Enable ligation for `<>` as inequality.
+  - `ltgt-diamond`: Enable ligation for `<>` as diamond.
+  - `brst`: Center asterisk in `(*` and `*)`.
+  - `plusplus`: Enable ligation for `++` and further plus-chaining.
+  - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
+  - `logic`: Enable ligation for `/\` and `\/`.
+  - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
+  - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
+  - `dot-as-operator`: Treat dot (`.`) as operator and perform chained centering.
+  - `lteq-as-arrow`: Treat `<=` as arrow.
+  - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
+  - `html-comment`: Enable ligation for `<!--` and `<!---`.
+  - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
+#### Configuring Character Variants
+
+Subsection `variants` is used to configure character variants in the font. Properties include:
 
 <!-- BEGIN Section-Stylistic-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles as stylistic sets:
+* `inherits`: Optional, String, defines the inherited stylistic set. Valid options include:
 
-  * `ss01`: Set character variant to “Andale Mono Style”.
-  * `ss02`: Set character variant to “Anonymous Pro Style”.
-  * `ss03`: Set character variant to “Consolas Style”.
-  * `ss04`: Set character variant to “Menlo Style”.
-  * `ss05`: Set character variant to “Fira Mono Style”.
-  * `ss06`: Set character variant to “Liberation Mono Style”.
-  * `ss07`: Set character variant to “Monaco Style”.
-  * `ss08`: Set character variant to “Pragmata Pro Style”.
-  * `ss09`: Set character variant to “Source Code Pro Style”.
-  * `ss10`: Set character variant to “Envy Code R Style”.
-  * `ss11`: Set character variant to “X Window Style”.
-  * `ss12`: Set character variant to “Ubuntu Mono Style”.
-  * `ss13`: Set character variant to “Lucida Style”.
-  * `ss14`: Set character variant to “JetBrains Mono Style”.
-  * `ss20`: Set character variant to “Curly Style”.
+  - `ss01`: Set character variant to “Andale Mono Style”.
+  - `ss02`: Set character variant to “Anonymous Pro Style”.
+  - `ss03`: Set character variant to “Consolas Style”.
+  - `ss04`: Set character variant to “Menlo Style”.
+  - `ss05`: Set character variant to “Fira Mono Style”.
+  - `ss06`: Set character variant to “Liberation Mono Style”.
+  - `ss07`: Set character variant to “Monaco Style”.
+  - `ss08`: Set character variant to “Pragmata Pro Style”.
+  - `ss09`: Set character variant to “Source Code Pro Style”.
+  - `ss10`: Set character variant to “Envy Code R Style”.
+  - `ss11`: Set character variant to “X Window Style”.
+  - `ss12`: Set character variant to “Ubuntu Mono Style”.
+  - `ss13`: Set character variant to “Lucida Style”.
+  - `ss14`: Set character variant to “JetBrains Mono Style”.
+  - `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
-
 
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* Styles for individual characters. They are easy-to-understand names of the `cv##` styles, including:
+* `design`, `upright` and `italic`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS.The valid combinations include:
 
-  * Styles for `A`, `Λ`, `Δ`:
-    * `turn-v = straight`, `cv01 = 1`: Standard, straight `A`, `Λ`, `Δ` (default).
-    * `turn-v = curly`, `cv01 = 2`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
-  * Styles for `B`:
-    * `capital-b = standard`, `cv02 = 1`: Standard `B` (default).
-    * `capital-b = more-asymmetric`, `cv02 = 2`: More asymmetric `B` to differentiate with `8`.
-  * Styles for `D`:
-    * `capital-d = standard`, `cv03 = 1`: Standard `D` (default).
-    * `capital-d = more-rounded`, `cv03 = 2`: More rounded `D` to differentiate with `O`.
-  * Styles for `G`:
-    * `capital-g = toothed`, `cv04 = 1`: Toothed G (default).
-    * `capital-g = toothless`, `cv04 = 2`: Toothless G.
-  * Styles for `J`:
-    * `capital-j = serifless`, `cv05 = 1`: J without top serif.
-    * `capital-j = serifed`, `cv05 = 2`: J with top serif at left side (default).
-    * `capital-j = serifed-both-sides`, `cv05 = 3`: J with symmetric at both sides.
-    * `capital-j = serifed-symmetric`, `cv05 = 4`: J with symmetric at both sides and is symmetric.
-  * Styles for `K`:
-    * `capital-k = straight`, `cv06 = 1`: `K` with standard shape (default).
-    * `capital-k = curly`, `cv06 = 2`: Slightly curly `K`, like Iosevka 2.x.
-  * Styles for `M`:
-    * `capital-m = hanging`, `cv07 = 1`: `M` with middle being hanging off baseline (default).
-    * `capital-m = flat-bottom`, `cv07 = 2`: `M` with middle aligned to baseline.
-  * Styles for `Q`:
-    * `capital-q = taily`, `cv08 = 1`: `Q` with a curly tail (default).
-    * `capital-q = straight`, `cv08 = 2`: `Q` with a straight tail like in the old versions.
-    * `capital-q = crossing`, `cv08 = 3`: `Q` with a tail crossing the ring.
-  * Styles for `R`:
-    * `capital-r = straight`, `cv09 = 1`: Standard, straight-leg `R` (default).
-    * `capital-r = curly`, `cv09 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
-  * Styles for `Y`:
-    * `capital-y = straight`, `cv10 = 1`: Standard, straight `Y` (default).
-    * `capital-y = curly`, `cv10 = 2`: Slightly curly `Y`, like Iosevka 2.x.
-  * Styles for `a`:
-    * `a = doublestorey`, `cv11 = 1`: Double-storey `a` (default for Upright).
-    * `a = singlestorey`, `cv11 = 2`: Single-storey `a`.
-    * `a = singlestorey-tailed`, `cv11 = 3`: Single-storey `a` with curly tail (default for Italic).
-    * `a = doublestorey-tailed`, `cv11 = 4`: Double-storey `a` with curly tail.
-    * `a = singlestorey-earless-corner`, `cv11 = 5`: Earless (cornered top-right) single-storey `a`.
-    * `a = singlestorey-earless-corner-tailed`, `cv11 = 6`: Earless (cornered top-right) single-storey `a` with curly tail.
-    * `a = singlestorey-earless-rounded`, `cv11 = 7`: Earless (rounded top-right) single-storey `a`.
-    * `a = singlestorey-earless-rounded-tailed`, `cv11 = 8`: Earless (rounded top-right) single-storey `a` with curly tail.
-    * `a = doublestorey-toothless-corner`, `cv11 = 9`: Toothless (cornered bottom-right) double-storey `a`.
-    * `a = doublestorey-toothless-rounded`, `cv11 = 10`: Toothless (rounded bottom-right) double-storey `a`.
-  * Styles for `b`:
-    * `b = toothed`, `cv12 = 1`: `b` with bottom-left tooth (default).
-    * `b = toothless-corner`, `cv12 = 2`: `b` without bottom-left tooth, with a corner transition.
-    * `b = toothless-rounded`, `cv12 = 3`: `b` without bottom-left tooth, with a rounded transition.
-  * Styles for `d`:
-    * `d = toothed`, `cv13 = 1`: `d` with bottom-right tooth (default for Upright).
-    * `d = toothless-corner`, `cv13 = 2`: `d` without bottom-right tooth, with a corner transition.
-    * `d = toothless-rounded`, `cv13 = 3`: `d` without bottom-right tooth, with a rounded transition.
-    * `d = tailed`, `cv13 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
-  * Styles for `f`:
-    * `f = straight`, `cv14 = 1`: `f` without bottom hook (default for Sans Upright).
-    * `f = tailed`, `cv14 = 2`: `f` with a leftward bottom hook (default for Italic).
-    * `f = serifed`, `cv14 = 3`: `f` with bottom serif (default for Slab Upright).
-    * `f = straight-tailed`, `cv14 = 4`: `f` with straight tail.
-    * `f = flat-hook`, `cv14 = 5`: `f` with flat hook.
-    * `f = flat-hook-crossbar-at-x-height`, `cv14 = 6`: `f` with flat hook and crossbar placed right at X-height.
-    * `f = flat-hook-serifed`, `cv14 = 7`: `f` with flat hook and bottom serif.
-    * `f = flat-hook-serifed-crossbar-at-x-height`, `cv14 = 8`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
-    * `f = flat-hook-round-tailed`, `cv14 = 9`: `f` with flat hook.
-    * `f = flat-hook-round-tailed-crossbar-at-x-height`, `cv14 = 10`: `f` with flat hook and crossbar placed right at X-height.
-    * `f = flat-hook-flat-tailed`, `cv14 = 11`: `f` with flat hook and bottom serif.
-    * `f = flat-hook-flat-tailed-crossbar-at-x-height`, `cv14 = 12`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
-  * Styles for `g`:
-    * `g = singlestorey`, `cv15 = 1`: Single-storey `g` (default).
-    * `g = doublestorey`, `cv15 = 2`: Double-storey `g`.
-    * `g = opendoublestorey`, `cv15 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
-    * `g = earless-corner`, `cv15 = 4`: Earless (cornered top-right) single-storey `g`.
-    * `g = earless-rounded`, `cv15 = 5`: Earless (rounded top-right) single-storey `g`.
-  * Styles for `h`:
-    * `h = straight`, `cv16 = 1`: `h` with straight ending (default).
-    * `h = tailed`, `cv16 = 2`: `h` with curly tailed ending.
-    * `h = motion-serifed-straight`, `cv16 = 3`: `h` with straight ending.
-    * `h = motion-serifed-tailed`, `cv16 = 4`: `h` with curly tailed ending.
-  * Styles for `i`:
-    * `i = serifed`, `cv17 = 1`: Serifed `i` (default for Upright).
-    * `i = italic`, `cv17 = 2`: Italic `i` (default for Italic).
-    * `i = hooky`, `cv17 = 3`: Hooky `i`.
-    * `i = line`, `cv17 = 4`: `i` like a straight line.
-    * `i = zshaped`, `cv17 = 5`: Z-shaped `i`.
-    * `i = tailed`, `cv17 = 6`: Tailed `i`.
-    * `i = hookybottom`, `cv17 = 7`: `i` with a straight tail.
-    * `i = serifed-asymmetric`, `cv17 = 8`: `i` with shorter top serif and full bottom serif.
-  * Styles for `j`:
-    * `j = line`, `cv18 = 1`: `j` like a straight line.
-    * `j = serifed`, `cv18 = 2`: `j` with top serif (default).
-    * `j = straight`, `cv18 = 3`: `j` without serif.
-    * `j = flat-hook-serifed`, `cv18 = 4`: undefined.
-    * `j = flat-hook-serifless`, `cv18 = 5`: undefined.
-  * Styles for `k`:
-    * `k = straight`, `cv19 = 1`: `k` with standard shape (default for Upright).
-    * `k = curly`, `cv19 = 2`: Slightly curly `k`, like Iosevka 2.x.
-    * `k = cursive`, `cv19 = 3`: `k` with a cursive loop (default for Italic).
-  * Styles for `l`:
-    * `l = hooky`, `cv20 = 1`: Hooky `l`.
-    * `l = zshaped`, `cv20 = 2`: Z-shaped `l`.
-    * `l = serifed`, `cv20 = 3`: Serifed `l` (default for Upright).
-    * `l = italic`, `cv20 = 4`: Italic, cursive `l` (default for Italic).
-    * `l = line`, `cv20 = 5`: `l` like a straight line.
-    * `l = tailed`, `cv20 = 6`: `l` with a curved tail.
-    * `l = hookybottom`, `cv20 = 7`: `l` with a straight tail.
-    * `l = serifed-asymmetric`, `cv20 = 8`: `l` with shorter top serif and full bottom serif.
-  * Styles for `m`:
-    * `m = normal`, `cv21 = 1`: `m` with normal middle leg, touching the baseline (default).
-    * `m = shortleg`, `cv21 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
-    * `m = tailed`, `cv21 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
-    * `m = shortleg-tailed`, `cv21 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
-    * `m = earless-corner-double-arch`, `cv21 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
-    * `m = earless-corner-double-arch-shortleg`, `cv21 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    * `m = earless-corner-double-arch-tailed`, `cv21 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    * `m = earless-corner-double-arch-shortleg-tailed`, `cv21 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    * `m = earless-rounded-double-arch`, `cv21 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
-    * `m = earless-rounded-double-arch-shortleg`, `cv21 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    * `m = earless-rounded-double-arch-tailed`, `cv21 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    * `m = earless-rounded-double-arch-shortleg-tailed`, `cv21 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    * `m = earless-single-arch`, `cv21 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
-    * `m = earless-single-arch-shortleg`, `cv21 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
-    * `m = earless-single-arch-tailed`, `cv21 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
-    * `m = earless-single-arch-shortleg-tailed`, `cv21 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    * `m = motion-serifed`, `cv21 = 17`: `m` with motion serifs, normal middle leg touching baseline.
-    * `m = motion-serifed-shortleg`, `cv21 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
-    * `m = motion-serifed-tailed`, `cv21 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
-    * `m = motion-serifed-shortleg-tailed`, `cv21 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
-  * Styles for `n`:
-    * `n = straight`, `cv22 = 1`: `n` with straight ending (default).
-    * `n = tailed`, `cv22 = 2`: `n` with a curly tail.
-    * `n = earless-corner-straight`, `cv22 = 3`: Earless (corner top-left) `n` with straight ending.
-    * `n = earless-corner-tailed`, `cv22 = 4`: Earless (corner top-left) `n` with a curly tail.
-    * `n = earless-rounded-straight`, `cv22 = 5`: Earless (rounded top-left) `n` with straight ending.
-    * `n = earless-rounded-tailed`, `cv22 = 6`: Earless (rounded top-left) `n` with a curly tail.
-    * `n = motion-serifed-straight`, `cv22 = 7`: `n` with motion serifs and straight ending.
-    * `n = motion-serifed-tailed`, `cv22 = 8`: `n` with motion serifs and a curly tail.
-  * Styles for `p`:
-    * `p = eared`, `cv23 = 1`: `p` with top-left ear (default).
-    * `p = earless-corner`, `cv23 = 2`: `p` without top-left ear (corner).
-    * `p = earless-rounded`, `cv23 = 3`: `p` without top-left ear (rounded).
-    * `p = motion-serifed`, `cv23 = 4`: `p` with motion serifs.
-  * Styles for `q`:
-    * `q = straight`, `cv24 = 1`: `q` with straight bar (default).
-    * `q = tailed`, `cv24 = 2`: `q` with tail.
-    * `q = earless-corner`, `cv24 = 3`: Earless (cornered top-left) single-storey `q`.
-    * `q = earless-corner-tailed`, `cv24 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
-    * `q = earless-rounded`, `cv24 = 5`: Earless (rounded top-left) single-storey `q`.
-    * `q = earless-rounded-tailed`, `cv24 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
-  * Styles for `r`:
-    * `r = straight`, `cv25 = 1`: Straight, serif-less `r` (default for Sans).
-    * `r = serifed`, `cv25 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
-    * `r = top-serifed`, `cv25 = 3`: `r` with serifs at top-left only (default for Slab Italic).
-    * `r = earless-corner`, `cv25 = 4`: Earless (corner top-left), serif-less `r`.
-    * `r = earless-rounded`, `cv25 = 5`: Earless (rounded top-left), serif-less `r`.
-  * Styles for `t`:
-    * `t = standard`, `cv26 = 1`: Standard `t` shape (default).
-    * `t = cross`, `cv26 = 2`: Futura-like `t` shape.
-    * `t = flat-hook`, `cv26 = 3`: `t` with flat hook.
-    * `t = hookless-asymmetric`, `cv26 = 4`: `t` without hook and ony half the cross bar.
-    * `t = flat-hook-short-neck`, `cv26 = 5`: `t` with flat hook and a slightly shorter neck.
-    * `t = flat-hook-short-neck2`, `cv26 = 6`: `t` with flat hook and a more shorter neck.
-  * Styles for `u`:
-    * `u = with-bar`, `cv27 = 1`: Normal `u` with right bar (default for Upright).
-    * `u = without-bar`, `cv27 = 2`: Normal `u` without right bar, like a smaller uppercase `U`.
-    * `u = tailed`, `cv27 = 3`: `u` with right bar and a slightly curly tail (default for Italic).
-    * `u = motion-serifed`, `cv27 = 4`: Normal `u` with right bar and motion serifs.
-    * `u = motion-serifed-tailed`, `cv27 = 5`: `u` with right bar, motion serifs and a slightly curly tail.
-  * Styles for `v`, `V`:
-    * `v = straight`, `cv28 = 1`: Standard, straight `V` and `v` (default).
-    * `v = curly`, `cv28 = 2`:  Slightly curly `V` and `v`, like Iosevka 2.x.
-  * Styles for `w`, `W`:
-    * `w = straight`, `cv29 = 1`: Standard, straight `W` and `w` (default).
-    * `w = curly`, `cv29 = 2`: Slightly curly `W` and `w`, like Iosevka 2.x.
-    * `w = straight-flat-top`, `cv29 = 3`: Standard, straight `W` and `w`, and the middle is forced to be aligned the top.
-  * Styles for `x`, `X`:
-    * `x = straight`, `cv30 = 1`: Standard, straight `X` and `x` (default).
-    * `x = curly`, `cv30 = 2`: Slightly curly `X` and `x`, like Iosevka 2.x.
-  * Styles for `y`:
-    * `y = straight`, `cv31 = 1`: Letter `y` that is fully straight (default for Sans Upright).
-    * `y = straight-turn`, `cv31 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
-    * `y = curly`, `cv31 = 3`: More curly letter `y`, like Iosevka 2.x.
-    * `y = cursive`, `cv31 = 4`: Cursive-like `y` (default for Italic).
-  * Styles for `z`, `Z`:
-    * `z = standard`, `cv32 = 1`: Standard `Z` and `z` (default).
-    * `z = with-crossbar`, `cv32 = 2`: `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
-    * `z = with-horizontal-crossbar`, `cv32 = 3`: `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
-  * Styles for `ß`:
-    * `eszet = traditional`, `cv33 = 1`: Traditional, Fraktur-like Eszet.
-    * `eszet = sulzbacher`, `cv33 = 2`: A more modern, beta-like Eszet (default).
-    * `eszet = longs-s-lig`, `cv33 = 3`: An Eszet shown as a ligature of long-S (`ſ`) and `s`.
-  * Styles for `λ`:
-    * `lambda = straight`, `cv34 = 1`: More-straight letter `λ` (default).
-    * `lambda = curly`, `cv34 = 2`: More curly letter `λ`, like Iosevka 2.x.
-  * Styles for `0`:
-    * `zero = slashed`, `cv35 = 1`: Slashed Zero `0` (default).
-    * `zero = dotted`, `cv35 = 2`: Dotted Zero `0`.
-    * `zero = unslashed`, `cv35 = 3`: O-like `0`.
-    * `zero = reverse-slashed`, `cv35 = 4`: Reverse-slashed `0`.
-    * `zero = long-dotted`, `cv35 = 5`: Long-dotted Zero `0` like Hack.
-  * Styles for `1`:
-    * `one = nobase`, `cv36 = 1`: `1` with bottom serif (default for Sans).
-    * `one = base`, `cv36 = 2`: `1` without bottom serif (default for Slab).
-    * `one = line`, `cv36 = 3`: `1` drawn just like a straight line.
-  * Styles for `3`:
-    * `three = flattop`, `cv37 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
-    * `three = twoarcs`, `cv37 = 2`: Arched top `3` (default).
-  * Styles for `4`:
-    * `four = closed`, `cv38 = 1`: `4` with closed contour (default).
-    * `four = closed-non-crossing`, `cv38 = 2`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
-    * `four = semi-open`, `cv38 = 3`: `4` with semi-open contour.
-    * `four = semi-open-non-crossing`, `cv38 = 4`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
-    * `four = open`, `cv38 = 5`: `4` with open contour.
-    * `four = open-non-crossing`, `cv38 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
-  * Styles for `6`:
-    * `six = closed-contour`, `cv40 = 1`: `6` with a more closed contour.
-    * `six = open-contour`, `cv40 = 2`: `6` with a more open contour.
-    * `six = straight-bar`, `cv40 = 3`: `6` with a straight bar (default).
-  * Styles for `7`:
-    * `seven = noserif`, `cv41 = 1`: `7` without serif (default for Sans).
-    * `seven = serifed`, `cv41 = 2`: `7` with initial serif (default for Slab).
-    * `seven = crossbar`, `cv41 = 3`: `7` with crossbar.
-    * `seven = crossbar-serifed`, `cv41 = 4`: `7` with crossbar and initial serif.
-  * Styles for `9`:
-    * `nine = closed-contour`, `cv42 = 1`: `9` with a more closed contour.
-    * `nine = open-contour`, `cv42 = 2`: `9` with a more open contour.
-    * `nine = straight-bar`, `cv42 = 3`: `9` with a straight bar (default).
-  * Styles for `~`:
-    * `tilde = high`, `cv43 = 1`: Higher tilde `~`.
-    * `tilde = low`, `cv43 = 2`: Lower tilde `~` (default).
-  * Styles for `*`:
-    * `asterisk = high`, `cv44 = 1`: Higher five-pointed asterisk `*` (default).
-    * `asterisk = low`, `cv44 = 2`: Lower five-pointed asterisk `*`.
-    * `asterisk = hexhigh`, `cv44 = 3`: Higher six-pointed asterisk `*`.
-    * `asterisk = hexlow`, `cv44 = 4`: Lower six-pointed asterisk `*`.
-    * `asterisk = flip-penta-high`, `cv44 = 5`: Higher five-pointed and turned asterisk `*`.
-    * `asterisk = flip-penta-low`, `cv44 = 6`: Lower five-pointed and turned asterisk `*`.
-  * Styles for `_`:
-    * `underscore = high`, `cv45 = 1`: Higher underscore `_`, placed right below baseline (default).
-    * `underscore = low`, `cv45 = 2`: Lower underscore `_`, placed right above descender line.
-    * `underscore = above-baseline`, `cv45 = 3`: Extra-high `_`, placed right below baseline.
-  * Styles for `¶`:
-    * `paragraph-sign = high`, `cv46 = 1`: Higher paragraph sign `¶` (default).
-    * `paragraph-sign = low`, `cv46 = 2`: Lower paragraph sign `¶`.
-  * Styles for `^`:
-    * `caret = high`, `cv47 = 1`: Higher circumflex `^` (default).
-    * `caret = low`, `cv47 = 2`: Lower circumflex `^`.
-  * Styles for `(`, `)`:
-    * `paren = normal`, `cv48 = 1`: Parenthesis with normal contour.
-    * `paren = large-contour`, `cv48 = 2`: Parenthesis with larger contour, like that in Monaco.
-  * Styles for `{`, `}`:
-    * `brace = straight`, `cv49 = 1`: More straight braces.
-    * `brace = curly`, `cv49 = 2`: More curly braces.
-  * Styles for `#`:
-    * `number-sign = upright`, `cv50 = 1`: Number sign with vertical bars (default).
-    * `number-sign = slanted`, `cv50 = 2`: Number sign with slanted bars.
-    * `number-sign = upright-open`, `cv50 = 3`: Number sign with vertical bars and open inner.
-    * `number-sign = slanted-open`, `cv50 = 4`: Number sign with slanted bars and open inner.
-  * Styles for `&`:
-    * `ampersand = closed`, `cv51 = 1`: Ampersand (`&`) with a closed contour (default).
-    * `ampersand = upper-open`, `cv51 = 2`: Ampersand (`&`) with an open contour at upper half.
-    * `ampersand = lower-open`, `cv51 = 3`: Ampersand (`&`) with an open contour at lower half.
-    * `ampersand = et`, `cv51 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t.
-    * `ampersand = et-toothed`, `cv51 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
-    * `ampersand = flat-top`, `cv51 = 6`: Ampersand (`&`) drawn with a flat top.
-  * Styles for `@`:
-    * `at = threefold`, `cv52 = 1`: The long, three-fold At symbol (`@`) (default).
-    * `at = fourfold`, `cv52 = 2`: The traditional, four-fold At symbol (`@`).
-    * `at = short`, `cv52 = 3`: The shorter, Fira-like At symbol (`@`).
-  * Styles for `$`:
-    * `dollar = open`, `cv53 = 1`: Dollar symbol with open contour.
-    * `dollar = through`, `cv53 = 2`: Dollar symbol with strike-through vertical bar (default).
-    * `dollar = opencap`, `cv53 = 3`: Dollar symbol with open contour, not exceeding baseline and ascender.
-    * `dollar = throughcap`, `cv53 = 4`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
-  * Styles for `%`:
-    * `percent = dots`, `cv54 = 1`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
-    * `percent = rings`, `cv54 = 2`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
-    * `percent = rings-connected`, `cv54 = 3`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
-  * Styles for `|`:
-  * Styles for `<=`, `>=`:
-    * `lig-ltgteq = flat`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat.
-    * `lig-ltgteq = slanted`, `cv56 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
-  * Styles for `'`:
-    * `ascii-single-quote = straight`, `cv57 = 1`: Show ASCII quote (`'`) as short vertical straight bar. (default).
-    * `ascii-single-quote = raised-comma`, `cv57 = 2`: Show ASCII quote (`'`) as raised comma..
-  * Styles for `` ` ``:
-    * `ascii-grave = straight`, `cv58 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
-    * `ascii-grave = raised-inverse-comma`, `cv58 = 2`: Show ASCII grave (`` ` ``) as raised comma..
+  - Styles for `A`, `Λ`, `Δ`:
+    + `turn-v = 'straight'`, `cv01 = 1`: Standard, straight `A`, `Λ`, `Δ` (default).
+    + `turn-v = 'curly'`, `cv01 = 2`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+  - Styles for `B`:
+    + `capital-b = 'standard'`, `cv02 = 1`: Standard `B` (default).
+    + `capital-b = 'more-asymmetric'`, `cv02 = 2`: More asymmetric `B` to differentiate with `8`.
+  - Styles for `D`:
+    + `capital-d = 'standard'`, `cv03 = 1`: Standard `D` (default).
+    + `capital-d = 'more-rounded'`, `cv03 = 2`: More rounded `D` to differentiate with `O`.
+  - Styles for `G`:
+    + `capital-g = 'toothed'`, `cv04 = 1`: Toothed G (default).
+    + `capital-g = 'toothless'`, `cv04 = 2`: Toothless G.
+  - Styles for `J`:
+    + `capital-j = 'serifless'`, `cv05 = 1`: J without top serif.
+    + `capital-j = 'serifed'`, `cv05 = 2`: J with top serif at left side (default).
+    + `capital-j = 'serifed-both-sides'`, `cv05 = 3`: J with symmetric at both sides.
+    + `capital-j = 'serifed-symmetric'`, `cv05 = 4`: J with symmetric at both sides and is symmetric.
+  - Styles for `K`:
+    + `capital-k = 'straight'`, `cv06 = 1`: `K` with standard shape (default).
+    + `capital-k = 'curly'`, `cv06 = 2`: Slightly curly `K`, like Iosevka 2.x.
+  - Styles for `M`:
+    + `capital-m = 'hanging'`, `cv07 = 1`: `M` with middle being hanging off baseline (default).
+    + `capital-m = 'flat-bottom'`, `cv07 = 2`: `M` with middle aligned to baseline.
+  - Styles for `Q`:
+    + `capital-q = 'taily'`, `cv08 = 1`: `Q` with a curly tail (default).
+    + `capital-q = 'straight'`, `cv08 = 2`: `Q` with a straight tail like in the old versions.
+    + `capital-q = 'crossing'`, `cv08 = 3`: `Q` with a tail crossing the ring.
+  - Styles for `R`:
+    + `capital-r = 'straight'`, `cv09 = 1`: Standard, straight-leg `R` (default).
+    + `capital-r = 'curly'`, `cv09 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
+  - Styles for `Y`:
+    + `capital-y = 'straight'`, `cv10 = 1`: Standard, straight `Y` (default).
+    + `capital-y = 'curly'`, `cv10 = 2`: Slightly curly `Y`, like Iosevka 2.x.
+  - Styles for `a`:
+    + `a = 'doublestorey'`, `cv11 = 1`: Double-storey `a` (default for Upright).
+    + `a = 'singlestorey'`, `cv11 = 2`: Single-storey `a`.
+    + `a = 'singlestorey-tailed'`, `cv11 = 3`: Single-storey `a` with curly tail (default for Italic).
+    + `a = 'doublestorey-tailed'`, `cv11 = 4`: Double-storey `a` with curly tail.
+    + `a = 'singlestorey-earless-corner'`, `cv11 = 5`: Earless (cornered top-right) single-storey `a`.
+    + `a = 'singlestorey-earless-corner-tailed'`, `cv11 = 6`: Earless (cornered top-right) single-storey `a` with curly tail.
+    + `a = 'singlestorey-earless-rounded'`, `cv11 = 7`: Earless (rounded top-right) single-storey `a`.
+    + `a = 'singlestorey-earless-rounded-tailed'`, `cv11 = 8`: Earless (rounded top-right) single-storey `a` with curly tail.
+    + `a = 'doublestorey-toothless-corner'`, `cv11 = 9`: Toothless (cornered bottom-right) double-storey `a`.
+    + `a = 'doublestorey-toothless-rounded'`, `cv11 = 10`: Toothless (rounded bottom-right) double-storey `a`.
+  - Styles for `b`:
+    + `b = 'toothed'`, `cv12 = 1`: `b` with bottom-left tooth (default).
+    + `b = 'toothless-corner'`, `cv12 = 2`: `b` without bottom-left tooth, with a corner transition.
+    + `b = 'toothless-rounded'`, `cv12 = 3`: `b` without bottom-left tooth, with a rounded transition.
+  - Styles for `d`:
+    + `d = 'toothed'`, `cv13 = 1`: `d` with bottom-right tooth (default for Upright).
+    + `d = 'toothless-corner'`, `cv13 = 2`: `d` without bottom-right tooth, with a corner transition.
+    + `d = 'toothless-rounded'`, `cv13 = 3`: `d` without bottom-right tooth, with a rounded transition.
+    + `d = 'tailed'`, `cv13 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
+  - Styles for `f`:
+    + `f = 'straight'`, `cv14 = 1`: `f` without bottom hook (default for Sans Upright).
+    + `f = 'tailed'`, `cv14 = 2`: `f` with a leftward bottom hook (default for Italic).
+    + `f = 'serifed'`, `cv14 = 3`: `f` with bottom serif (default for Slab Upright).
+    + `f = 'straight-tailed'`, `cv14 = 4`: `f` with straight tail.
+    + `f = 'flat-hook'`, `cv14 = 5`: `f` with flat hook.
+    + `f = 'flat-hook-crossbar-at-x-height'`, `cv14 = 6`: `f` with flat hook and crossbar placed right at X-height.
+    + `f = 'flat-hook-serifed'`, `cv14 = 7`: `f` with flat hook and bottom serif.
+    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv14 = 8`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
+    + `f = 'flat-hook-round-tailed'`, `cv14 = 9`: `f` with flat hook.
+    + `f = 'flat-hook-round-tailed-crossbar-at-x-height'`, `cv14 = 10`: `f` with flat hook and crossbar placed right at X-height.
+    + `f = 'flat-hook-flat-tailed'`, `cv14 = 11`: `f` with flat hook and bottom serif.
+    + `f = 'flat-hook-flat-tailed-crossbar-at-x-height'`, `cv14 = 12`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
+  - Styles for `g`:
+    + `g = 'singlestorey'`, `cv15 = 1`: Single-storey `g` (default).
+    + `g = 'doublestorey'`, `cv15 = 2`: Double-storey `g`.
+    + `g = 'opendoublestorey'`, `cv15 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
+    + `g = 'earless-corner'`, `cv15 = 4`: Earless (cornered top-right) single-storey `g`.
+    + `g = 'earless-rounded'`, `cv15 = 5`: Earless (rounded top-right) single-storey `g`.
+  - Styles for `h`:
+    + `h = 'straight'`, `cv16 = 1`: `h` with straight ending (default).
+    + `h = 'tailed'`, `cv16 = 2`: `h` with curly tailed ending.
+    + `h = 'motion-serifed-straight'`, `cv16 = 3`: `h` with straight ending.
+    + `h = 'motion-serifed-tailed'`, `cv16 = 4`: `h` with curly tailed ending.
+  - Styles for `i`:
+    + `i = 'serifed'`, `cv17 = 1`: Serifed `i` (default for Upright).
+    + `i = 'italic'`, `cv17 = 2`: Italic `i` (default for Italic).
+    + `i = 'hooky'`, `cv17 = 3`: Hooky `i`.
+    + `i = 'line'`, `cv17 = 4`: `i` like a straight line.
+    + `i = 'zshaped'`, `cv17 = 5`: Z-shaped `i`.
+    + `i = 'tailed'`, `cv17 = 6`: Tailed `i`.
+    + `i = 'hookybottom'`, `cv17 = 7`: `i` with a straight tail.
+    + `i = 'serifed-asymmetric'`, `cv17 = 8`: `i` with shorter top serif and full bottom serif.
+  - Styles for `j`:
+    + `j = 'line'`, `cv18 = 1`: `j` like a straight line.
+    + `j = 'serifed'`, `cv18 = 2`: `j` with top serif (default).
+    + `j = 'straight'`, `cv18 = 3`: `j` without serif.
+    + `j = 'flat-hook-serifed'`, `cv18 = 4`: undefined.
+    + `j = 'flat-hook-serifless'`, `cv18 = 5`: undefined.
+  - Styles for `k`:
+    + `k = 'straight'`, `cv19 = 1`: `k` with standard shape (default for Upright).
+    + `k = 'curly'`, `cv19 = 2`: Slightly curly `k`, like Iosevka 2.x.
+    + `k = 'cursive'`, `cv19 = 3`: `k` with a cursive loop (default for Italic).
+  - Styles for `l`:
+    + `l = 'hooky'`, `cv20 = 1`: Hooky `l`.
+    + `l = 'zshaped'`, `cv20 = 2`: Z-shaped `l`.
+    + `l = 'serifed'`, `cv20 = 3`: Serifed `l` (default for Upright).
+    + `l = 'italic'`, `cv20 = 4`: Italic, cursive `l` (default for Italic).
+    + `l = 'line'`, `cv20 = 5`: `l` like a straight line.
+    + `l = 'tailed'`, `cv20 = 6`: `l` with a curved tail.
+    + `l = 'hookybottom'`, `cv20 = 7`: `l` with a straight tail.
+    + `l = 'serifed-asymmetric'`, `cv20 = 8`: `l` with shorter top serif and full bottom serif.
+  - Styles for `m`:
+    + `m = 'normal'`, `cv21 = 1`: `m` with normal middle leg, touching the baseline (default).
+    + `m = 'shortleg'`, `cv21 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
+    + `m = 'tailed'`, `cv21 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
+    + `m = 'shortleg-tailed'`, `cv21 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-corner-double-arch'`, `cv21 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
+    + `m = 'earless-corner-double-arch-shortleg'`, `cv21 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-corner-double-arch-tailed'`, `cv21 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-corner-double-arch-shortleg-tailed'`, `cv21 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-rounded-double-arch'`, `cv21 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
+    + `m = 'earless-rounded-double-arch-shortleg'`, `cv21 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-rounded-double-arch-tailed'`, `cv21 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-rounded-double-arch-shortleg-tailed'`, `cv21 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-single-arch'`, `cv21 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
+    + `m = 'earless-single-arch-shortleg'`, `cv21 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-single-arch-tailed'`, `cv21 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-single-arch-shortleg-tailed'`, `cv21 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'motion-serifed'`, `cv21 = 17`: `m` with motion serifs, normal middle leg touching baseline.
+    + `m = 'motion-serifed-shortleg'`, `cv21 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
+    + `m = 'motion-serifed-tailed'`, `cv21 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
+    + `m = 'motion-serifed-shortleg-tailed'`, `cv21 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
+  - Styles for `n`:
+    + `n = 'straight'`, `cv22 = 1`: `n` with straight ending (default).
+    + `n = 'tailed'`, `cv22 = 2`: `n` with a curly tail.
+    + `n = 'earless-corner-straight'`, `cv22 = 3`: Earless (corner top-left) `n` with straight ending.
+    + `n = 'earless-corner-tailed'`, `cv22 = 4`: Earless (corner top-left) `n` with a curly tail.
+    + `n = 'earless-rounded-straight'`, `cv22 = 5`: Earless (rounded top-left) `n` with straight ending.
+    + `n = 'earless-rounded-tailed'`, `cv22 = 6`: Earless (rounded top-left) `n` with a curly tail.
+    + `n = 'motion-serifed-straight'`, `cv22 = 7`: `n` with motion serifs and straight ending.
+    + `n = 'motion-serifed-tailed'`, `cv22 = 8`: `n` with motion serifs and a curly tail.
+  - Styles for `p`:
+    + `p = 'eared'`, `cv23 = 1`: `p` with top-left ear (default).
+    + `p = 'earless-corner'`, `cv23 = 2`: `p` without top-left ear (corner).
+    + `p = 'earless-rounded'`, `cv23 = 3`: `p` without top-left ear (rounded).
+    + `p = 'motion-serifed'`, `cv23 = 4`: `p` with motion serifs.
+  - Styles for `q`:
+    + `q = 'straight'`, `cv24 = 1`: `q` with straight bar (default).
+    + `q = 'tailed'`, `cv24 = 2`: `q` with tail.
+    + `q = 'earless-corner'`, `cv24 = 3`: Earless (cornered top-left) single-storey `q`.
+    + `q = 'earless-corner-tailed'`, `cv24 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
+    + `q = 'earless-rounded'`, `cv24 = 5`: Earless (rounded top-left) single-storey `q`.
+    + `q = 'earless-rounded-tailed'`, `cv24 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
+  - Styles for `r`:
+    + `r = 'straight'`, `cv25 = 1`: Straight, serif-less `r` (default for Sans).
+    + `r = 'serifed'`, `cv25 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
+    + `r = 'top-serifed'`, `cv25 = 3`: `r` with serifs at top-left only (default for Slab Italic).
+    + `r = 'earless-corner'`, `cv25 = 4`: Earless (corner top-left), serif-less `r`.
+    + `r = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left), serif-less `r`.
+  - Styles for `t`:
+    + `t = 'standard'`, `cv26 = 1`: Standard `t` shape (default).
+    + `t = 'cross'`, `cv26 = 2`: Futura-like `t` shape.
+    + `t = 'flat-hook'`, `cv26 = 3`: `t` with flat hook.
+    + `t = 'hookless-asymmetric'`, `cv26 = 4`: `t` without hook and ony half the cross bar.
+    + `t = 'flat-hook-short-neck'`, `cv26 = 5`: `t` with flat hook and a slightly shorter neck.
+    + `t = 'flat-hook-short-neck2'`, `cv26 = 6`: `t` with flat hook and a more shorter neck.
+  - Styles for `u`:
+    + `u = 'with-bar'`, `cv27 = 1`: Normal `u` with right bar (default for Upright).
+    + `u = 'without-bar'`, `cv27 = 2`: Normal `u` without right bar, like a smaller uppercase `U`.
+    + `u = 'tailed'`, `cv27 = 3`: `u` with right bar and a slightly curly tail (default for Italic).
+    + `u = 'motion-serifed'`, `cv27 = 4`: Normal `u` with right bar and motion serifs.
+    + `u = 'motion-serifed-tailed'`, `cv27 = 5`: `u` with right bar, motion serifs and a slightly curly tail.
+  - Styles for `v`, `V`:
+    + `v = 'straight'`, `cv28 = 1`: Standard, straight `V` and `v` (default).
+    + `v = 'curly'`, `cv28 = 2`:  Slightly curly `V` and `v`, like Iosevka 2.x.
+  - Styles for `w`, `W`:
+    + `w = 'straight'`, `cv29 = 1`: Standard, straight `W` and `w` (default).
+    + `w = 'curly'`, `cv29 = 2`: Slightly curly `W` and `w`, like Iosevka 2.x.
+    + `w = 'straight-flat-top'`, `cv29 = 3`: Standard, straight `W` and `w`, and the middle is forced to be aligned the top.
+  - Styles for `x`, `X`:
+    + `x = 'straight'`, `cv30 = 1`: Standard, straight `X` and `x` (default).
+    + `x = 'curly'`, `cv30 = 2`: Slightly curly `X` and `x`, like Iosevka 2.x.
+  - Styles for `y`:
+    + `y = 'straight'`, `cv31 = 1`: Letter `y` that is fully straight (default for Sans Upright).
+    + `y = 'straight-turn'`, `cv31 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
+    + `y = 'curly'`, `cv31 = 3`: More curly letter `y`, like Iosevka 2.x.
+    + `y = 'cursive'`, `cv31 = 4`: Cursive-like `y` (default for Italic).
+  - Styles for `z`, `Z`:
+    + `z = 'standard'`, `cv32 = 1`: Standard `Z` and `z` (default).
+    + `z = 'with-crossbar'`, `cv32 = 2`: `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'with-horizontal-crossbar'`, `cv32 = 3`: `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
+  - Styles for `ß`:
+    + `eszet = 'traditional'`, `cv33 = 1`: Traditional, Fraktur-like Eszet.
+    + `eszet = 'sulzbacher'`, `cv33 = 2`: A more modern, beta-like Eszet (default).
+    + `eszet = 'longs-s-lig'`, `cv33 = 3`: An Eszet shown as a ligature of long-S (`ſ`) and `s`.
+  - Styles for `λ`:
+    + `lambda = 'straight'`, `cv34 = 1`: More-straight letter `λ` (default).
+    + `lambda = 'curly'`, `cv34 = 2`: More curly letter `λ`, like Iosevka 2.x.
+  - Styles for `0`:
+    + `zero = 'slashed'`, `cv35 = 1`: Slashed Zero `0` (default).
+    + `zero = 'dotted'`, `cv35 = 2`: Dotted Zero `0`.
+    + `zero = 'unslashed'`, `cv35 = 3`: O-like `0`.
+    + `zero = 'reverse-slashed'`, `cv35 = 4`: Reverse-slashed `0`.
+    + `zero = 'long-dotted'`, `cv35 = 5`: Long-dotted Zero `0` like Hack.
+  - Styles for `1`:
+    + `one = 'nobase'`, `cv36 = 1`: `1` with bottom serif (default for Sans).
+    + `one = 'base'`, `cv36 = 2`: `1` without bottom serif (default for Slab).
+    + `one = 'line'`, `cv36 = 3`: `1` drawn just like a straight line.
+  - Styles for `3`:
+    + `three = 'flattop'`, `cv37 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
+    + `three = 'twoarcs'`, `cv37 = 2`: Arched top `3` (default).
+  - Styles for `4`:
+    + `four = 'closed'`, `cv38 = 1`: `4` with closed contour (default).
+    + `four = 'closed-non-crossing'`, `cv38 = 2`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
+    + `four = 'semi-open'`, `cv38 = 3`: `4` with semi-open contour.
+    + `four = 'semi-open-non-crossing'`, `cv38 = 4`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
+    + `four = 'open'`, `cv38 = 5`: `4` with open contour.
+    + `four = 'open-non-crossing'`, `cv38 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
+  - Styles for `6`:
+    + `six = 'closed-contour'`, `cv40 = 1`: `6` with a more closed contour.
+    + `six = 'open-contour'`, `cv40 = 2`: `6` with a more open contour.
+    + `six = 'straight-bar'`, `cv40 = 3`: `6` with a straight bar (default).
+  - Styles for `7`:
+    + `seven = 'noserif'`, `cv41 = 1`: `7` without serif (default for Sans).
+    + `seven = 'serifed'`, `cv41 = 2`: `7` with initial serif (default for Slab).
+    + `seven = 'crossbar'`, `cv41 = 3`: `7` with crossbar.
+    + `seven = 'crossbar-serifed'`, `cv41 = 4`: `7` with crossbar and initial serif.
+  - Styles for `9`:
+    + `nine = 'closed-contour'`, `cv42 = 1`: `9` with a more closed contour.
+    + `nine = 'open-contour'`, `cv42 = 2`: `9` with a more open contour.
+    + `nine = 'straight-bar'`, `cv42 = 3`: `9` with a straight bar (default).
+  - Styles for `~`:
+    + `tilde = 'high'`, `cv43 = 1`: Higher tilde `~`.
+    + `tilde = 'low'`, `cv43 = 2`: Lower tilde `~` (default).
+  - Styles for `*`:
+    + `asterisk = 'high'`, `cv44 = 1`: Higher five-pointed asterisk `*` (default).
+    + `asterisk = 'low'`, `cv44 = 2`: Lower five-pointed asterisk `*`.
+    + `asterisk = 'hexhigh'`, `cv44 = 3`: Higher six-pointed asterisk `*`.
+    + `asterisk = 'hexlow'`, `cv44 = 4`: Lower six-pointed asterisk `*`.
+    + `asterisk = 'flip-penta-high'`, `cv44 = 5`: Higher five-pointed and turned asterisk `*`.
+    + `asterisk = 'flip-penta-low'`, `cv44 = 6`: Lower five-pointed and turned asterisk `*`.
+  - Styles for `_`:
+    + `underscore = 'high'`, `cv45 = 1`: Higher underscore `_`, placed right below baseline (default).
+    + `underscore = 'low'`, `cv45 = 2`: Lower underscore `_`, placed right above descender line.
+    + `underscore = 'above-baseline'`, `cv45 = 3`: Extra-high `_`, placed right below baseline.
+  - Styles for `¶`:
+    + `paragraph-sign = 'high'`, `cv46 = 1`: Higher paragraph sign `¶` (default).
+    + `paragraph-sign = 'low'`, `cv46 = 2`: Lower paragraph sign `¶`.
+  - Styles for `^`:
+    + `caret = 'high'`, `cv47 = 1`: Higher circumflex `^` (default).
+    + `caret = 'low'`, `cv47 = 2`: Lower circumflex `^`.
+  - Styles for `(`, `)`:
+    + `paren = 'normal'`, `cv48 = 1`: Parenthesis with normal contour.
+    + `paren = 'large-contour'`, `cv48 = 2`: Parenthesis with larger contour, like that in Monaco.
+  - Styles for `{`, `}`:
+    + `brace = 'straight'`, `cv49 = 1`: More straight braces.
+    + `brace = 'curly'`, `cv49 = 2`: More curly braces.
+  - Styles for `#`:
+    + `number-sign = 'upright'`, `cv50 = 1`: Number sign with vertical bars (default).
+    + `number-sign = 'slanted'`, `cv50 = 2`: Number sign with slanted bars.
+    + `number-sign = 'upright-open'`, `cv50 = 3`: Number sign with vertical bars and open inner.
+    + `number-sign = 'slanted-open'`, `cv50 = 4`: Number sign with slanted bars and open inner.
+  - Styles for `&`:
+    + `ampersand = 'closed'`, `cv51 = 1`: Ampersand (`&`) with a closed contour (default).
+    + `ampersand = 'upper-open'`, `cv51 = 2`: Ampersand (`&`) with an open contour at upper half.
+    + `ampersand = 'lower-open'`, `cv51 = 3`: Ampersand (`&`) with an open contour at lower half.
+    + `ampersand = 'et'`, `cv51 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t.
+    + `ampersand = 'et-toothed'`, `cv51 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
+    + `ampersand = 'flat-top'`, `cv51 = 6`: Ampersand (`&`) drawn with a flat top.
+  - Styles for `@`:
+    + `at = 'threefold'`, `cv52 = 1`: The long, three-fold At symbol (`@`) (default).
+    + `at = 'fourfold'`, `cv52 = 2`: The traditional, four-fold At symbol (`@`).
+    + `at = 'short'`, `cv52 = 3`: The shorter, Fira-like At symbol (`@`).
+  - Styles for `$`:
+    + `dollar = 'open'`, `cv53 = 1`: Dollar symbol with open contour.
+    + `dollar = 'through'`, `cv53 = 2`: Dollar symbol with strike-through vertical bar (default).
+    + `dollar = 'opencap'`, `cv53 = 3`: Dollar symbol with open contour, not exceeding baseline and ascender.
+    + `dollar = 'throughcap'`, `cv53 = 4`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
+  - Styles for `%`:
+    + `percent = 'dots'`, `cv54 = 1`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
+    + `percent = 'rings'`, `cv54 = 2`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
+    + `percent = 'rings-connected'`, `cv54 = 3`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
+  - Styles for `|`:
+  - Styles for `<=`, `>=`:
+    + `lig-ltgteq = 'flat'`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat.
+    + `lig-ltgteq = 'slanted'`, `cv56 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
+  - Styles for `'`:
+    + `ascii-single-quote = 'straight'`, `cv57 = 1`: Show ASCII quote (`'`) as short vertical straight bar. (default).
+    + `ascii-single-quote = 'raised-comma'`, `cv57 = 2`: Show ASCII quote (`'`) as raised comma..
+  - Styles for `` ` ``:
+    + `ascii-grave = 'straight'`, `cv58 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
+    + `ascii-grave = 'raised-inverse-comma'`, `cv58 = 2`: Show ASCII grave (`` ` ``) as raised comma..
 
 <!-- END Section-Cherry-Picking-Styles -->
 
-### Using Docker
+#### Configuring Weights, Widths and Slopes
 
-Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method-1)
+Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
+
+* `shape`: Integer, configures the weight grade of the glyphs' shapes.
+* `menu`: Integer, configures the weight grade used when naming fonts.
+* `css`: Integer, configures the weight grade used in web font CSS.
+
+Subsection `widths` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
+
+* `shape`: Integer, configures the width of the glyphs' shapes, measured in 1/1000 em.
+* `menu`: Integer, configures the width grade used when naming fonts. The valid values are `1` to `9`, inclusive.
+* `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
+
+Subsection `slopes` is a simple string-to-string dictionary maps slopes (`upright`, `italic` or `oblique`) to [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) values, represented in string.
+
+#### Compatibility Ligatures
+
+Certain software, notably Emacs, relies on pre-encoded ligatures instead of OpenType to provide ligations. Iosevka could be configured with additional subsection `compatibility-ligatures`, being an array of records with following fields:
+
+* `unicode`: The PUA code point being assigned to.
+* `featureTag`: The feature tag to compute ligations.
+* `sequence`: The source character sequence.
+
+A sample of compatibility ligature config is:
+
+```toml
+[[buildPlans.iosevka-custom.compatibility-ligatures]]
+unicode = 57600 # 0xE100
+featureTag = 'calt'
+sequence = '<*>'
+```
+
+#### Sample Configuration
+
+A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml):
+
+<!-- BEGIN Section-Private-Build-Plan-Sample -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
+```toml
+[buildPlans.iosevka-custom]      # <iosevka-custom> is your plan name
+family = "Iosevka Custom"        # Font menu family name
+spacing = "normal"               # Optional; Values: `normal`, `term`, `fontconfig-mono`, or `fixed`
+serifs = "sans"                  # Optional; Values: `sans` or `slab`
+digit-form = "lining"            # Optional; Values `lining` or `old-style`
+
+###################################################################################################
+# Configure variants
+
+# Optional; Whether to inherit a `ss##` variant
+[buildPlans.iosevka-custom.variants]
+inherits = "ss01"
+
+# Optional; Configure single character's variant
+[buildPlans.iosevka-custom.variants.design]
+g = 'singlestorey'
+
+# Optional; Configure single character's variant for Upright and Oblique; Overrides [design]
+[buildPlans.iosevka-custom.variants.upright]
+i = 'zshaped'
+l = 'zshaped'
+
+# Optional; Configure single character's variant for Italic only; Overrides [design]
+[buildPlans.iosevka-custom.variants.italic]
+i = 'italic'
+l = 'italic'
+
+# End variant section
+###################################################################################################
+
+###################################################################################################
+# Configure ligations
+
+[buildPlans.iosevka-custom.ligations]
+inherits = "calt"   # Optional; inherits an existing ligation set
+disables = []       # Optional; disable specific ligation groups, overrides inherited ligation set
+enables  = []       # Optional; enable specific ligation groups, overrides inherited ligation set
+
+# End ligation section
+###################################################################################################
+
+
+###################################################################################################
+# Override default building weights
+# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
+# default values.
+# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
+#             and "shape" properly only supports number between 100 and 900 (inclusive).
+#             If you decide to use custom weights you have to define all the weights you
+#             plan to use otherwise they will not be built.
+[buildPlans.iosevka-custom.weights.regular]
+shape = 400  # Weight for glyph shapes.
+menu  = 400  # Weight for the font's names.
+css   = 400  # Weight for webfont CSS.
+
+[buildPlans.iosevka-custom.weights.book]
+shape = 450
+menu  = 450  # Use 450 here to name the font's weight "Book"
+css   = 450
+
+[buildPlans.iosevka-custom.weights.bold]
+shape = 700
+menu  = 700
+css   = 700
+
+# End weight section
+###################################################################################################
+
+###################################################################################################
+# Override default building slope sets
+# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
+# When this section is absent, all slopes would be built.
+
+[buildPlans.iosevka-custom.slopes]
+upright = "normal"
+italic = "italic"
+oblique = "oblique"
+
+# End slope section
+###################################################################################################
+
+###################################################################################################
+# Override default building widths
+# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
+# default values.
+# IMPORTANT : Currently "shape" property only supports numbers between 434 and 664 (inclusive),
+#             while "menu" only supports integers between 1 and 9 (inclusive).
+#             The "shape" parameter specifies the unit width, measured in 1/1000 em. The glyphs'
+#             width are equal to, or a simple multiple of the unit width.
+#             If you decide to use custom widths you have to define all the widths you plan to use,
+#             otherwise they will not be built.
+
+[buildPlans.iosevka-custom.widths.normal]
+shape = 500        # Unit Width, measured in 1/1000 em.
+menu  = 5          # Width grade for the font's names.
+css   = "normal"   # "font-stretch' property of webfont CSS.
+
+[buildPlans.iosevka-custom.widths.extended]
+shape = 576
+menu  = 7
+css   = "expanded"
+
+# End width section
+###################################################################################################
+
+###################################################################################################
+# Character Exclusion
+# Specify character ranges in the section below to exclude certain characters from the font being
+# built. Remove this section when this feature is not needed.
+
+[buildPlans.iosevka-custom.exclude-chars]
+ranges = [[10003, 10008]]
+
+# End character exclusion
+###################################################################################################
+
+###################################################################################################
+# Compatibility Ligatures
+# Certain applications like Emacs does not support proper programming liagtures provided by
+# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
+# following section to build PUA characters that are generated from the OpenType ligatures.
+# Remove this section when compatibility ligatures are not needed.
+
+[[buildPlans.iosevka-custom.compatibility-ligatures]]
+unicode = 57600 # 0xE100
+featureTag = 'calt'
+sequence = '<*>'
+
+# End compatibility ligatures section
+###################################################################################################
+
+###################################################################################################
+# Metric overrides
+# Certain metrics like line height (leading) could be overridden in your build plan file.
+# Edit the values to change the metrics. Remove this section when overriding is not needed.
+
+[buildPlans.iosevka-custom.metric-override]
+leading = 1250
+winMetricAscenderPad = 0
+winMetricDescenderPad = 0
+powerlineScaleY = 1
+powerlineScaleX = 1
+powerlineShiftY = 0
+powerlineShiftX = 0
+
+# End metric override section
+###################################################################################################
+```
+
+<!-- END Section-Private-Build-Plan-Sample -->
 
 ## For Chinese and Japanese users...
 
@@ -638,4 +689,4 @@ Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/maste
 
 ---
 
-![Family Matrix](https://raw.githubusercontent.com/be5invis/Iosevka/master/images/matrix.png)
+![Family Matrix](images/matrix.png)

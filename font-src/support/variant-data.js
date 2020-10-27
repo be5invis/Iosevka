@@ -88,10 +88,10 @@ class Composite {
 	}
 	resolve(para, selTree, catalog, vs) {
 		if (this.inherits) {
-			for (const item of this.inherits) {
-				if (!catalog.has(item)) throw new Error(`Cannot find composite variant: ${item}`);
-				catalog.get(item).resolve(para, selTree, catalog, vs);
+			if (!catalog.has(this.inherits)) {
+				throw new Error(`Cannot find composite variant: ${this.inherits}`);
 			}
+			catalog.get(this.inherits).resolve(para, selTree, catalog, vs);
 		}
 		for (const [prime, variant] of this.decompose(para, selTree)) {
 			variant.resolve(para, vs);

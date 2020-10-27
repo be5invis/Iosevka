@@ -48,6 +48,14 @@ function intro(source, style, blendArgs, sink) {
 		for (const k in mu) sink[k] = [...(sink[k] || []), ...mu[k]];
 		delete hive.appends;
 	}
+	if (hive.removes) {
+		const mu = hive.removes;
+		for (const k in mu) {
+			const s = new Set(mu[k]);
+			sink[k] = [...(sink[k] || [])].filter(x => !s.has(x));
+		}
+		delete hive.removes;
+	}
 
 	hive = hiveBlend(hive, getBlendArg(blendArgs, style));
 	for (const k in hive) sink[k] = hive[k];

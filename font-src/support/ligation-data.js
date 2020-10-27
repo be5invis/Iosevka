@@ -9,7 +9,8 @@ module.exports = function applyLigationData(data, para, argv) {
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
 	for (const gr in data.simple) {
-		hives[gr] = { appends: { caltBuildup: [data.simple[gr].ligGroup] } };
+		hives["enable-" + gr] = { appends: { caltBuildup: [data.simple[gr].ligGroup] } };
+		hives["disable-" + gr] = { removes: { caltBuildup: [data.simple[gr].ligGroup] } };
 	}
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
@@ -22,7 +23,7 @@ module.exports = function applyLigationData(data, para, argv) {
 			optInBuildup[comp.tag] = ligSets;
 		}
 		if (!comp.isOptOut) {
-			hives[gr] = { caltBuildup: ligSets };
+			hives["ligset-" + gr] = { caltBuildup: ligSets };
 		}
 	}
 
@@ -30,7 +31,22 @@ module.exports = function applyLigationData(data, para, argv) {
 		defaultBuildup: { ...optInBuildup, ...optOutBuildup },
 		caltBuildup: []
 	};
-	if (argv.ligationBuildup) Parameters.apply(para.ligation, hives, [argv.ligationBuildup]);
+	if (argv.ligations) {
+		if (argv.ligations.inherits)
+			Parameters.apply(para.ligation, hives, ["ligset-" + argv.ligations.inherits]);
+		if (argv.ligations.disables)
+			Parameters.apply(
+				para.ligation,
+				hives,
+				argv.ligations.disables.map(x => `disable-${x}`)
+			);
+		if (argv.ligations.enables)
+			Parameters.apply(
+				para.ligation,
+				hives,
+				argv.ligations.enables.map(x => `enable-${x}`)
+			);
+	}
 };
 
 function createBuildup(simple, buildup) {

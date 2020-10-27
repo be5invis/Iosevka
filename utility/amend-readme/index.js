@@ -29,10 +29,13 @@ async function main() {
 async function processSs() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
-	md.log(`* Styles as stylistic sets:\n`);
+	md.log(
+		`* \`inherits\`: Optional, String, defines the inherited stylistic set. ` +
+			`Valid options include:\n`
+	);
 	for (const gr of variantsData.ssData) {
 		if (!gr.effective) continue;
-		md.log(`  * \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
+		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
 	}
 	return md;
 }
@@ -40,22 +43,28 @@ async function processCv() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
 	md.log(
-		`* Styles for individual characters. They are easy-to-understand names of the \`cv##\` styles, including:\n`
+		`* \`design\`, \`upright\` and \`italic\`: Optional, Dictionary, ` +
+			`defines styles for individual characters. ` +
+			`The choices are organized in key-value pairs, ` +
+			`assigning a variant to a character group. ` +
+			`Alternatively, you could assign numbers to \`cv##\` tags, ` +
+			`like what you did when using OpenType in CSS.` +
+			`The valid combinations include:\n`
 	);
 	for (const gr of variantsData.cvData) {
 		const sampleText = gr.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
 			.join(", ");
-		md.log(`  * Styles for ${sampleText}:`);
+		md.log(`  - Styles for ${sampleText}:`);
 		const defaults = figureOutDefaults(variantsData, gr);
 		for (const config of gr.variants) {
 			if (!config.rank) continue;
-			let selectorText = `\`${gr.key} = ${config.selector}\``;
+			let selectorText = `\`${gr.key} = '${config.selector}'\``;
 			if (gr.tag && config.rank) {
 				selectorText += `, \`${gr.tag} = ${config.rank}\``;
 			}
 			md.log(
-				`    * ${selectorText}: ` +
+				`    + ${selectorText}: ` +
 					`${config.description}${formatDefaults(config.selector, defaults)}.`
 			);
 		}
@@ -67,7 +76,7 @@ async function processPrivateBuildPlans() {
 	const md = new MdCol("Section-Private-Build-Plan-Sample");
 	const tomlPath = path.resolve(__dirname, "../../private-build-plans.sample.toml");
 	const toml = await fs.readFile(tomlPath, "utf-8");
-	md.log(toml.replace(/^/gm, "\t"));
+	md.log("```toml\n" + toml + "```");
 	return md;
 }
 
@@ -152,26 +161,30 @@ async function processLigSetCherryPicking() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
 	md.log(
-		`* Styles for customizing the default (\`calt\`) ligation set. By choosing one or ` +
-			`multiple items listed below, the ligation set of \`calt\` will *only* contain the ` +
-			`corresponded ligations of the selectors you used.\n`
+		`* \`disables\` and \`enables\`: Optional, String Array, ` +
+			`Cherry-picking ligation groups to be disabled or enabled. ` +
+			`Valid values include:\n`
 	);
 	for (const gr in ligData.cherry) {
-		md.log(`  * \`${gr}\`: ${ligData.cherry[gr].desc}.`);
+		md.log(`  - \`${gr}\`: ${ligData.cherry[gr].desc}.`);
 	}
 	return md;
 }
 
 async function processLigSetPreDef() {
 	const ligData = await parseLigationData();
-	const md = new MdCol("Section-Cherry-Picking-Predefined");
-	md.log(`* Styles for ligation sets, include:\n`);
+	const md = new MdCol("Section-Predefined-Ligation-Sets");
+	md.log(
+		`* \`inherits\`: Optional, String, defines the inherited ligation set. ` +
+			`When absent, the ligation set will not inherit any other sets. ` +
+			`Valid values are:\n`
+	);
 	for (const gr in ligData.rawSets) {
 		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =
 			ligData.rawSets[gr].longDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;
-		md.log(`  * \`${gr}\`: ${longDesc}.`);
+		md.log(`  - \`${gr}\`: ${longDesc}.`);
 	}
 	return md;
 }

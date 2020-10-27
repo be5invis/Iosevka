@@ -11,7 +11,8 @@ const version = require("../../package.json").version;
 const charMapPath = process.argv[2];
 const charMapItalicPath = process.argv[3];
 const charMapObliquePath = process.argv[4];
-const exportPath = process.argv[5];
+const exportPathMeta = process.argv[5];
+const exportPathCov = process.argv[6];
 
 execMain(main);
 
@@ -24,5 +25,6 @@ async function main() {
 		charMapItalicPath,
 		charMapObliquePath
 	);
-	await fs.writeJson(exportPath, { version, variantsData, ligationData, ...cl }, { spaces: 2 });
+	await fs.writeJson(exportPathMeta, { version, variantsData, ligationData }, { spaces: 2 });
+	await fs.writeJson(exportPathCov, { version, ...cl }, { spaces: 2 });
 }

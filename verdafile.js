@@ -198,6 +198,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	return {
 		name: fileName,
 		variants: bp.variants || null,
+		ligations: bp["ligations"] || null,
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false
@@ -677,7 +678,8 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 		cm.full,
 		cmi.full,
 		cmo.full,
-		Path.resolve(pagesDir, "shared/data-import/iosevka.json")
+		Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
+		Path.resolve(pagesDir, "shared/data-import/raw/coverage.json")
 	);
 });
 
