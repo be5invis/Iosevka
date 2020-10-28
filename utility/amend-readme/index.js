@@ -52,13 +52,13 @@ async function processCv() {
 		const defaults = figureOutDefaults(variantsData, gr);
 		for (const config of gr.variants) {
 			if (!config.rank) continue;
-			let selectorText = `\`${gr.key} = '${config.selector}'\``;
+			let selectorText = `\`${gr.key} = '${config.key}'\``;
 			if (gr.tag && config.rank) {
 				selectorText += `, \`${gr.tag} = ${config.rank}\``;
 			}
 			md.log(
 				`    + ${selectorText}: ` +
-					`${config.description}${formatDefaults(config.selector, defaults)}.`
+					`${config.description}${formatDefaults(config.key, defaults)}.`
 			);
 		}
 	}
@@ -120,32 +120,32 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			selector: [...variantsData.defaults.sansUpright.composition]
+			keys: [...variantsData.defaults.sansUpright.composition]
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			selector: [...variantsData.defaults.sansItalic.composition]
+			keys: [...variantsData.defaults.sansItalic.composition]
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			selector: [...variantsData.defaults.slabUpright.composition]
+			keys: [...variantsData.defaults.slabUpright.composition]
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			selector: [...variantsData.defaults.slabItalic.composition]
+			keys: [...variantsData.defaults.slabItalic.composition]
 		}
 	];
 
 	for (const variant of gr.variants) {
 		for (const dc of defaultConfigs)
-			for (const selector of dc.selector)
-				if (variant.fullSelector === selector) dc.result = variant.selector;
+			for (const selector of dc.keys)
+				if (variant.fullKey === selector) dc.result = variant.key;
 	}
 	return defaultConfigs;
 }

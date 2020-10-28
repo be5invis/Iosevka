@@ -485,6 +485,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `percent = 'rings'`, `cv54 = 2`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
     + `percent = 'rings-connected'`, `cv54 = 3`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
   - Styles for `|`:
+    + `bar = 'natural-slope'`, `cv55 = 1`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
+    + `bar = 'force-upright'`, `cv55 = 2`: Bar punctuations (`|`) is forced upright under italics and oblique.
   - Styles for `<=`, `>=`:
     + `lig-ltgteq = 'flat'`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat.
     + `lig-ltgteq = 'slanted'`, `cv56 = 2`: The lower bar of `<=` and `>=` ligation is slanted.

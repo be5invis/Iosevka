@@ -45,8 +45,8 @@ function getCvData(parsed) {
 		}
 		for (const variant of prime.variants.values()) {
 			gr.variants.push({
-				selector: variant.key,
-				fullSelector: getSelectorKey(prime, variant),
+				key: variant.key,
+				fullKey: getSelectorKey(prime, variant),
 				rank: variant.rank,
 				description: variant.description
 			});
