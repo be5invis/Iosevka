@@ -2,7 +2,7 @@
 
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../export-data/parse-variants-data");
+const parseVariantsData = require("../export-data/variants-data");
 const parseLigationData = require("../export-data/ligation-data");
 const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
 const execMain = require("../shared/execMain");
@@ -29,10 +29,8 @@ async function main() {
 async function processSs() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
-	md.log(
-		`* \`inherits\`: Optional, String, defines the inherited stylistic set. ` +
-			`Valid options include:\n`
-	);
+	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
 	for (const gr of variantsData.ssData) {
 		if (!gr.effective) continue;
 		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
@@ -42,15 +40,10 @@ async function processSs() {
 async function processCv() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
-	md.log(
-		`* \`design\`, \`upright\` and \`italic\`: Optional, Dictionary, ` +
-			`defines styles for individual characters. ` +
-			`The choices are organized in key-value pairs, ` +
-			`assigning a variant to a character group. ` +
-			`Alternatively, you could assign numbers to \`cv##\` tags, ` +
-			`like what you did when using OpenType in CSS.` +
-			`The valid combinations include:\n`
-	);
+
+	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
+
 	for (const gr of variantsData.cvData) {
 		const sampleText = gr.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
@@ -160,11 +153,12 @@ function figureOutDefaults(variantsData, gr) {
 async function processLigSetCherryPicking() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
-	md.log(
-		`* \`disables\` and \`enables\`: Optional, String Array, ` +
-			`Cherry-picking ligation groups to be disabled or enabled. ` +
-			`Valid values include:\n`
+	const headerPath = path.resolve(
+		__dirname,
+		"fragments/description-cherry-picking-ligation-sets.md"
 	);
+	md.log(await fs.readFile(headerPath, "utf-8"));
+
 	for (const gr in ligData.cherry) {
 		md.log(`  - \`${gr}\`: ${ligData.cherry[gr].desc}.`);
 	}
@@ -174,11 +168,8 @@ async function processLigSetCherryPicking() {
 async function processLigSetPreDef() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Predefined-Ligation-Sets");
-	md.log(
-		`* \`inherits\`: Optional, String, defines the inherited ligation set. ` +
-			`When absent, the ligation set will not inherit any other sets. ` +
-			`Valid values are:\n`
-	);
+	const headerPath = path.resolve(__dirname, "fragments/description-predefined-ligation-sets.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
 	for (const gr in ligData.rawSets) {
 		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =

@@ -3,7 +3,7 @@
 const ejs = require("ejs");
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../export-data/parse-variants-data");
+const parseVariantsData = require("../export-data/variants-data");
 const getLigationData = require("../export-data/ligation-data");
 const execMain = require("../shared/execMain");
 

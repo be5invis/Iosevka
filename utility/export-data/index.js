@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs-extra");
-const parseVariantsData = require("./parse-variants-data");
+const parseVariantsData = require("./variants-data");
 const parseLigationData = require("./ligation-data");
 const getCharMapAndSupportedLanguageList = require("./supported-languages");
 const execMain = require("../shared/execMain");

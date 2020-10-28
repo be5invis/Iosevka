@@ -73,12 +73,18 @@ class Composite {
 		this.description = cfg.description;
 		this.inherits = cfg.inherits;
 		this.design = cfg.design;
-		this.upright = cfg.upright;
+		this.upright = cfg.upright || cfg["upright-oblique"];
+		this.oblique = cfg.oblique || cfg["upright-oblique"];
 		this.italic = cfg.italic;
 	}
+
 	decompose(para, selTree) {
 		const ans = [];
-		const cfg = Object.assign({}, this.design, para.isItalic ? this.italic : this.upright);
+		const cfg = Object.assign(
+			{},
+			this.design,
+			para.isItalic ? this.italic : para.isOblique ? this.oblique : this.upright
+		);
 		for (const [k, v] of Object.entries(cfg)) {
 			const pv = selTree.get(k, v);
 			if (!pv) throw new Error(`Composite ${this.key} cannot be resolved: ${[k, v]}.`);

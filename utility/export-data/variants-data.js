@@ -57,7 +57,8 @@ function getCvData(parsed) {
 	return Array.from(samplerGroups.values());
 }
 
-const UPRIGHT = { isItalic: false };
+const UPRIGHT = {};
+const OBLIQUE = { isOblique: true };
 const ITALIC = { isItalic: true };
 
 function getSsData(variants) {
@@ -68,16 +69,20 @@ function getSsData(variants) {
 			description: "Default",
 			uprightComposition: [],
 			italicComposition: [],
+			obliqueComposition: [],
 			hotCharSetUpright: [],
-			hotCharSetItalic: []
+			hotCharSetItalic: [],
+			hotCharSetOblique: []
 		}
 	];
 	const defaultUpright = buildupComposite(variants, UPRIGHT, variants.defaultComposite);
+	const defaultOblique = buildupComposite(variants, OBLIQUE, variants.defaultComposite);
 	const defaultItalic = buildupComposite(variants, ITALIC, variants.defaultComposite);
 
 	for (const [key, composite] of variants.composites) {
 		if (!composite.tag) continue;
 		const upright = buildupComposite(variants, UPRIGHT, composite);
+		const oblique = buildupComposite(variants, OBLIQUE, composite);
 		const italic = buildupComposite(variants, ITALIC, composite);
 
 		result.push({
@@ -86,8 +91,10 @@ function getSsData(variants) {
 			description: composite.description,
 			uprightComposition: upright.composition,
 			italicComposition: italic.composition,
+			obliqueComposition: oblique.composition,
 			hotCharSetUpright: Array.from(uniqueHotChars(defaultUpright, upright.hotChars)),
-			hotCharSetItalic: Array.from(uniqueHotChars(defaultItalic, italic.hotChars))
+			hotCharSetItalic: Array.from(uniqueHotChars(defaultItalic, italic.hotChars)),
+			hotCharSetOblique: Array.from(uniqueHotChars(defaultOblique, oblique.hotChars))
 		});
 	}
 	return result;
@@ -97,6 +104,7 @@ function getDefaultCompData(variants) {
 	return {
 		sansUpright: buildupComposite(variants, UPRIGHT, variants.defaultComposite),
 		sansItalic: buildupComposite(variants, ITALIC, variants.defaultComposite),
+		sansOblique: buildupComposite(variants, OBLIQUE, variants.defaultComposite),
 		slabUpright: buildupComposite(
 			variants,
 			UPRIGHT,
@@ -106,6 +114,12 @@ function getDefaultCompData(variants) {
 		slabItalic: buildupComposite(
 			variants,
 			ITALIC,
+			variants.defaultComposite,
+			variants.composites.get("slab")
+		),
+		slabOblique: buildupComposite(
+			variants,
+			OBLIQUE,
 			variants.defaultComposite,
 			variants.composites.get("slab")
 		)

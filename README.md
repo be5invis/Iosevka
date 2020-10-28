@@ -1,5 +1,5 @@
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg)
-Coders’ typeface, built from code.
+**Iosevka** is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
 
 ![](images/preview-all.png)
 
@@ -7,10 +7,16 @@ Coders’ typeface, built from code.
 
 Quit your editor/program. Unzip and open the folder.
 
-* **Instructions for Windows**: Download the fonts from the [Releases](https://github.com/be5invis/Iosevka/releases), select the font files and right click, then hit "Install".
-  * On Windows 10 1809 or newer the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select "Install for all users" instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
-* **[Instructions for macOS](http://support.apple.com/kb/HT2509)**
-  * Standard distribution in Homebrew: `brew tap homebrew/cask-fonts && brew cask install font-iosevka && brew cask install font-iosevka-slab`. Search for other variants using `brew search font-iosevka` and install what you want.
+* **Windows**: Download the fonts from the [Releases](https://github.com/be5invis/Iosevka/releases), select the font files and right click, then hit “Install”.  
+  
+  * On Windows 10 1809 or newer the default font installation is per-user, and it may cause compatibility issues for some applications, mostly written in Java. To cope with this, right click and select “Install for all users” instead. [Ref.](https://youtrack.jetbrains.com/issue/JRE-1166?p=IDEA-200145)
+* **[macOS](http://support.apple.com/kb/HT2509)**
+  * Standard distribution in Homebrew: 
+    ```bash
+    brew tap homebrew/cask-fonts
+    brew cask install font-iosevka
+    ```
+  *  Search for other variants using `brew search font-iosevka` and install what you want.
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
@@ -18,9 +24,9 @@ Quit your editor/program. Unzip and open the folder.
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
 * **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
-## Weights, Variants and OpenType features
+## Features
 
-The typeface contains 9 weights (Thin to Heavy) alongside with both italic and oblique versions, with the same metrics as the regular one. 
+In the official package, Iosevka provides 6 monospace subfamilies and 3 quasi-proportional subfamilies. In all the monospace subfamilies, 9 weights (Thin to Heavy), 2 widths (Normal and Extended), and 3 slopes (Upright, Italic and Oblique) are included. In the quasi-proportional subfamilies, the quantity of widths is reduced to 1.
 
 ![Weights sample](images/weights.png)
 
@@ -67,14 +73,14 @@ You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dis
 
 Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method)
 
-## Build Your Own Style
+## Customized Build
 
 To create a custom build, you need:
 
 1. Create `private-build-plans.toml` file if absent.
 
 2. Add a build plan into `private-build-plans.toml`. The configurable properties are described in the following sections.
-    
+   
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be available in `dist/`. Aside from `contents::<plan>`, other options are:
 
    1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
@@ -200,7 +206,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* `design`, `upright` and `italic`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS.The valid combinations include:
+* `design`, `upright`, `italic`, and `oblique`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS. Assignments under `design` will be applied to all the slopes, and `upright`, `italic`, and `oblique` will apply to corresponded slopes. The valid combinations include:
 
   - Styles for `A`, `Λ`, `Δ`:
     + `turn-v = 'straight'`, `cv01 = 1`: Standard, straight `A`, `Λ`, `Δ` (default).
@@ -526,162 +532,7 @@ sequence = '<*>'
 
 #### Sample Configuration
 
-A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml):
-
-<!-- BEGIN Section-Private-Build-Plan-Sample -->
-<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
-
-```toml
-[buildPlans.iosevka-custom]      # <iosevka-custom> is your plan name
-family = "Iosevka Custom"        # Font menu family name
-spacing = "normal"               # Optional; Values: `normal`, `term`, `fontconfig-mono`, or `fixed`
-serifs = "sans"                  # Optional; Values: `sans` or `slab`
-digit-form = "lining"            # Optional; Values `lining` or `old-style`
-
-###################################################################################################
-# Configure variants
-
-# Optional; Whether to inherit a `ss##` variant
-[buildPlans.iosevka-custom.variants]
-inherits = "ss01"
-
-# Optional; Configure single character's variant
-[buildPlans.iosevka-custom.variants.design]
-g = 'singlestorey'
-
-# Optional; Configure single character's variant for Upright and Oblique; Overrides [design]
-[buildPlans.iosevka-custom.variants.upright]
-i = 'zshaped'
-l = 'zshaped'
-
-# Optional; Configure single character's variant for Italic only; Overrides [design]
-[buildPlans.iosevka-custom.variants.italic]
-i = 'italic'
-l = 'italic'
-
-# End variant section
-###################################################################################################
-
-###################################################################################################
-# Configure ligations
-
-[buildPlans.iosevka-custom.ligations]
-inherits = "calt"   # Optional; inherits an existing ligation set
-disables = []       # Optional; disable specific ligation groups, overrides inherited ligation set
-enables  = []       # Optional; enable specific ligation groups, overrides inherited ligation set
-
-# End ligation section
-###################################################################################################
-
-
-###################################################################################################
-# Override default building weights
-# When buildPlans.<plan name>.weights is absent, all weights would built and mapped to
-# default values.
-# IMPORTANT : Currently "menu" and "css" property only support numbers between 0 and 1000.
-#             and "shape" properly only supports number between 100 and 900 (inclusive).
-#             If you decide to use custom weights you have to define all the weights you
-#             plan to use otherwise they will not be built.
-[buildPlans.iosevka-custom.weights.regular]
-shape = 400  # Weight for glyph shapes.
-menu  = 400  # Weight for the font's names.
-css   = 400  # Weight for webfont CSS.
-
-[buildPlans.iosevka-custom.weights.book]
-shape = 450
-menu  = 450  # Use 450 here to name the font's weight "Book"
-css   = 450
-
-[buildPlans.iosevka-custom.weights.bold]
-shape = 700
-menu  = 700
-css   = 700
-
-# End weight section
-###################################################################################################
-
-###################################################################################################
-# Override default building slope sets
-# Format: <upright|italic|oblique> = <"normal"|"italic"|"oblique">
-# When this section is absent, all slopes would be built.
-
-[buildPlans.iosevka-custom.slopes]
-upright = "normal"
-italic = "italic"
-oblique = "oblique"
-
-# End slope section
-###################################################################################################
-
-###################################################################################################
-# Override default building widths
-# When buildPlans.<plan name>.widths is absent, all widths would built and mapped to
-# default values.
-# IMPORTANT : Currently "shape" property only supports numbers between 434 and 664 (inclusive),
-#             while "menu" only supports integers between 1 and 9 (inclusive).
-#             The "shape" parameter specifies the unit width, measured in 1/1000 em. The glyphs'
-#             width are equal to, or a simple multiple of the unit width.
-#             If you decide to use custom widths you have to define all the widths you plan to use,
-#             otherwise they will not be built.
-
-[buildPlans.iosevka-custom.widths.normal]
-shape = 500        # Unit Width, measured in 1/1000 em.
-menu  = 5          # Width grade for the font's names.
-css   = "normal"   # "font-stretch' property of webfont CSS.
-
-[buildPlans.iosevka-custom.widths.extended]
-shape = 576
-menu  = 7
-css   = "expanded"
-
-# End width section
-###################################################################################################
-
-###################################################################################################
-# Character Exclusion
-# Specify character ranges in the section below to exclude certain characters from the font being
-# built. Remove this section when this feature is not needed.
-
-[buildPlans.iosevka-custom.exclude-chars]
-ranges = [[10003, 10008]]
-
-# End character exclusion
-###################################################################################################
-
-###################################################################################################
-# Compatibility Ligatures
-# Certain applications like Emacs does not support proper programming liagtures provided by
-# OpenType, but can support ligatures provided by PUA codepoints. Therefore you can edit the
-# following section to build PUA characters that are generated from the OpenType ligatures.
-# Remove this section when compatibility ligatures are not needed.
-
-[[buildPlans.iosevka-custom.compatibility-ligatures]]
-unicode = 57600 # 0xE100
-featureTag = 'calt'
-sequence = '<*>'
-
-# End compatibility ligatures section
-###################################################################################################
-
-###################################################################################################
-# Metric overrides
-# Certain metrics like line height (leading) could be overridden in your build plan file.
-# Edit the values to change the metrics. Remove this section when overriding is not needed.
-
-[buildPlans.iosevka-custom.metric-override]
-leading = 1250
-winMetricAscenderPad = 0
-winMetricDescenderPad = 0
-powerlineScaleY = 1
-powerlineScaleX = 1
-powerlineShiftY = 0
-powerlineShiftX = 0
-
-# End metric override section
-###################################################################################################
-```
-
-<!-- END Section-Private-Build-Plan-Sample -->
+A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml).
 
 ## For Chinese and Japanese users...
 
