@@ -31,7 +31,7 @@ async function processSs() {
 	const md = new MdCol("Section-Stylistic-Sets");
 	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
-	for (const gr of variantsData.ssData) {
+	for (const gr of variantsData.composites) {
 		if (!gr.effective) continue;
 		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
 	}
@@ -44,7 +44,7 @@ async function processCv() {
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 
-	for (const gr of variantsData.cvData) {
+	for (const gr of variantsData.primes) {
 		const sampleText = gr.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
 			.join(", ");

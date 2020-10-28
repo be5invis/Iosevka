@@ -66,6 +66,78 @@ class SelectorTree {
 	}
 }
 
+class Prime {
+	constructor(key, cfg) {
+		if (!cfg.variants) throw new Error(`Missing variants in ${key}`);
+		this.key = key;
+		this.sampler = cfg.sampler;
+		this.ligatureSampler = / /.test(cfg.sampler || "");
+		this.descSampleText = this.ligatureSampler
+			? cfg.sampler.split(" ")
+			: [...(cfg.sampler || "")];
+		this.tag = cfg.tag;
+		this.slopeDependent = !!cfg.slopeDependent;
+		this.variants = new Map();
+		for (const varKey in cfg.variants) {
+			const variant = cfg.variants[varKey];
+			this.variants.set(varKey, new PrimeVariant(varKey, cfg.tag, variant));
+		}
+	}
+	register(tree) {
+		for (const [k, v] of this.variants) tree.set(this.key, k, this, v);
+		if (this.tag) {
+			for (const v of this.variants.values()) if (v.rank) tree.set(this.tag, v.rank, this, v);
+		}
+	}
+
+	toJson() {
+		const gr = {
+			key: this.key,
+			sampler: this.sampler,
+			tag: this.tag,
+			slopeDependent: this.slopeDependent,
+			ligatureSampler: this.ligatureSampler,
+			descSampleText: this.descSampleText,
+			variants: []
+		};
+		for (const variant of this.variants.values()) {
+			gr.variants.push({
+				key: variant.key,
+				fullKey: this.key + "#" + variant.key,
+				rank: variant.rank,
+				description: variant.description
+			});
+		}
+		gr.variants.sort((a, b) => (a.rank || 0x7fffffff) - (b.rank || 0x7fffffff));
+		return gr;
+	}
+}
+
+class PrimeVariant {
+	constructor(key, tag, cfg) {
+		this.key = key;
+		this.tag = tag;
+		this.description = cfg.description;
+		this.rank = cfg.rank;
+		this.selector = cfg.selector;
+		this.selectorUpright = cfg.selectorUpright;
+		this.selectorItalic = cfg.selectorItalic;
+	}
+	resolveFor(para, gn) {
+		let vs = {};
+		this.resolve(para, vs);
+		return vs[gn];
+	}
+	resolve(para, vs) {
+		Object.assign(vs, this.selector);
+		if (para.isItalic) {
+			Object.assign(vs, this.selectorItalic);
+		} else {
+			Object.assign(vs, this.selectorUpright);
+		}
+	}
+}
+
 class Composite {
 	constructor(key, cfg) {
 		this.key = key;
@@ -101,51 +173,6 @@ class Composite {
 		}
 		for (const [prime, variant] of this.decompose(para, selTree)) {
 			variant.resolve(para, vs);
-		}
-	}
-}
-
-class Prime {
-	constructor(key, cfg) {
-		this.key = key;
-		this.sampler = cfg.sampler;
-		this.tag = cfg.tag;
-		if (!cfg.variants) throw new Error(`Missing variants in ${key}`);
-		this.variants = new Map();
-		for (const varKey in cfg.variants) {
-			const variant = cfg.variants[varKey];
-			this.variants.set(varKey, new PrimeVariant(varKey, cfg.tag, variant));
-		}
-	}
-	register(tree) {
-		for (const [k, v] of this.variants) tree.set(this.key, k, this, v);
-		if (this.tag) {
-			for (const v of this.variants.values()) if (v.rank) tree.set(this.tag, v.rank, this, v);
-		}
-	}
-}
-
-class PrimeVariant {
-	constructor(key, tag, cfg) {
-		this.key = key;
-		this.tag = tag;
-		this.description = cfg.description;
-		this.rank = cfg.rank;
-		this.selector = cfg.selector;
-		this.selectorUpright = cfg.selectorUpright;
-		this.selectorItalic = cfg.selectorItalic;
-	}
-	resolveFor(para, gn) {
-		let vs = {};
-		this.resolve(para, vs);
-		return vs[gn];
-	}
-	resolve(para, vs) {
-		Object.assign(vs, this.selector);
-		if (para.isItalic) {
-			Object.assign(vs, this.selectorItalic);
-		} else {
-			Object.assign(vs, this.selectorUpright);
 		}
 	}
 }

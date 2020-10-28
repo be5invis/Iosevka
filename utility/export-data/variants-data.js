@@ -14,14 +14,14 @@ module.exports = async function () {
 	const varDatRaw = toml.parse(variantsToml);
 	const varDatParsed = VariantDataParser.parse(varDatRaw);
 
-	const cvData = getCvData(varDatParsed);
-	const ssData = getSsData(varDatParsed);
-	const defaultCompData = getDefaultCompData(varDatParsed);
+	const primes = getCvData(varDatParsed);
+	const defaults = getDefaultCompData(varDatParsed);
+	const composites = getSsData(varDatParsed, defaults);
 
 	return {
-		cvData,
-		ssData,
-		defaults: defaultCompData
+		primes,
+		composites,
+		defaults: defaults
 	};
 };
 
@@ -29,31 +29,8 @@ function getCvData(parsed) {
 	const samplerGroups = new Map();
 	for (const [_keyPrime, prime] of parsed.primes) {
 		if (!prime.sampler) continue;
-		let gr = samplerGroups.get(prime.key);
-		if (!gr) {
-			gr = {
-				key: prime.key,
-				sampler: prime.sampler,
-				tag: prime.tag,
-				ligatureSampler: isLigatureSampler(prime),
-				descSampleText: isLigatureSampler(prime)
-					? prime.sampler.split(" ")
-					: [...prime.sampler],
-				variants: []
-			};
-			samplerGroups.set(prime.key, gr);
-		}
-		for (const variant of prime.variants.values()) {
-			gr.variants.push({
-				key: variant.key,
-				fullKey: getSelectorKey(prime, variant),
-				rank: variant.rank,
-				description: variant.description
-			});
-		}
-		gr.variants.sort((a, b) => (a.rank || 0x7fffffff) - (b.rank || 0x7fffffff));
+		samplerGroups.set(prime.key, prime.toJson());
 	}
-
 	return Array.from(samplerGroups.values());
 }
 
@@ -61,7 +38,7 @@ const UPRIGHT = {};
 const OBLIQUE = { isOblique: true };
 const ITALIC = { isItalic: true };
 
-function getSsData(variants) {
+function getSsData(variants, defaultCompData) {
 	const result = [
 		{
 			tag: "off",
@@ -75,9 +52,6 @@ function getSsData(variants) {
 			hotCharSetOblique: []
 		}
 	];
-	const defaultUpright = buildupComposite(variants, UPRIGHT, variants.defaultComposite);
-	const defaultOblique = buildupComposite(variants, OBLIQUE, variants.defaultComposite);
-	const defaultItalic = buildupComposite(variants, ITALIC, variants.defaultComposite);
 
 	for (const [key, composite] of variants.composites) {
 		if (!composite.tag) continue;
@@ -92,9 +66,9 @@ function getSsData(variants) {
 			uprightComposition: upright.composition,
 			italicComposition: italic.composition,
 			obliqueComposition: oblique.composition,
-			hotCharSetUpright: Array.from(uniqueHotChars(defaultUpright, upright.hotChars)),
-			hotCharSetItalic: Array.from(uniqueHotChars(defaultItalic, italic.hotChars)),
-			hotCharSetOblique: Array.from(uniqueHotChars(defaultOblique, oblique.hotChars))
+			hotCharSetUpright: uniqueHotChars(defaultCompData.sansUpright, upright.hotChars),
+			hotCharSetItalic: uniqueHotChars(defaultCompData.sansItalic, italic.hotChars),
+			hotCharSetOblique: uniqueHotChars(defaultCompData.sansOblique, oblique.hotChars)
 		});
 	}
 	return result;
@@ -147,8 +121,10 @@ function buildupComposite(variants, para, ...composites) {
 	}
 	return { composition: Array.from(compositionMap.values()), hotChars };
 }
-function* uniqueHotChars(cfgDefault, cfgSS) {
+function uniqueHotChars(cfgDefault, cfgSS) {
+	let s = new Set();
 	for (const [hc, v] of cfgSS) {
-		if (cfgDefault.hotChars.get(hc) !== v) yield hc;
+		if (cfgDefault.hotChars.get(hc) !== v) s.add(hc);
 	}
+	return Array.from(s);
 }

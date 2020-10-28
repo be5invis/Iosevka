@@ -25,6 +25,17 @@ async function main() {
 		charMapItalicPath,
 		charMapObliquePath
 	);
-	await fs.writeJson(exportPathMeta, { version, variantsData, ligationData }, { spaces: 2 });
+	await fs.writeJson(
+		exportPathMeta,
+		{
+			version,
+			variantsData,
+			ligationData: {
+				samplesNarrow: ligationData.samplesNarrow,
+				nonMergeSets: ligationData.nonMergeSets
+			}
+		},
+		{ spaces: 2 }
+	);
 	await fs.writeJson(exportPathCov, { version, ...cl }, { spaces: 2 });
 }
