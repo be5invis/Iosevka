@@ -103,7 +103,6 @@ class Prime {
 		for (const variant of this.variants.values()) {
 			gr.variants.push({
 				key: variant.key,
-				fullKey: this.key + "#" + variant.key,
 				rank: variant.rank,
 				description: variant.description
 			});

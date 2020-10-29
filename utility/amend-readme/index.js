@@ -120,32 +120,32 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			keys: [...variantsData.defaults.sansUpright.composition]
+			composition: { ...variantsData.defaults.sansUpright }
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			keys: [...variantsData.defaults.sansItalic.composition]
+			composition: { ...variantsData.defaults.sansItalic }
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			keys: [...variantsData.defaults.slabUpright.composition]
+			composition: { ...variantsData.defaults.slabUpright }
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			keys: [...variantsData.defaults.slabItalic.composition]
+			composition: { ...variantsData.defaults.slabItalic }
 		}
 	];
 
 	for (const variant of gr.variants) {
-		for (const dc of defaultConfigs)
-			for (const selector of dc.keys)
-				if (variant.fullKey === selector) dc.result = variant.key;
+		for (const dc of defaultConfigs) {
+			if (variant.key === dc.composition[gr.key]) dc.result = variant.key;
+		}
 	}
 	return defaultConfigs;
 }

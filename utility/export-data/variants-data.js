@@ -15,8 +15,8 @@ module.exports = async function () {
 	const varDatParsed = VariantDataParser.parse(varDatRaw);
 
 	const primes = getCvData(varDatParsed);
+	const composites = getSsData(varDatParsed);
 	const defaults = getDefaultCompData(varDatParsed);
-	const composites = getSsData(varDatParsed, defaults);
 
 	return {
 		primes,
@@ -38,20 +38,25 @@ const UPRIGHT = {};
 const OBLIQUE = { isOblique: true };
 const ITALIC = { isItalic: true };
 
-function getSsData(variants, defaultCompData) {
+function getSsData(variants) {
 	const result = [
 		{
+			key: "off",
 			tag: "off",
 			effective: false,
 			description: "Default",
-			uprightComposition: [],
-			italicComposition: [],
-			obliqueComposition: [],
+			uprightComposition: {},
+			italicComposition: {},
+			obliqueComposition: {},
 			hotCharSetUpright: [],
 			hotCharSetItalic: [],
 			hotCharSetOblique: []
 		}
 	];
+
+	const hcSansUpright = buildupComposite(variants, UPRIGHT, variants.defaultComposite).hotChars;
+	const hcSansItalic = buildupComposite(variants, ITALIC, variants.defaultComposite).hotChars;
+	const hcSansOblique = buildupComposite(variants, OBLIQUE, variants.defaultComposite).hotChars;
 
 	for (const [key, composite] of variants.composites) {
 		if (!composite.tag) continue;
@@ -60,15 +65,16 @@ function getSsData(variants, defaultCompData) {
 		const italic = buildupComposite(variants, ITALIC, composite);
 
 		result.push({
+			key,
 			tag: composite.tag,
 			effective: true,
 			description: composite.description,
 			uprightComposition: upright.composition,
 			italicComposition: italic.composition,
 			obliqueComposition: oblique.composition,
-			hotCharSetUpright: uniqueHotChars(defaultCompData.sansUpright, upright.hotChars),
-			hotCharSetItalic: uniqueHotChars(defaultCompData.sansItalic, italic.hotChars),
-			hotCharSetOblique: uniqueHotChars(defaultCompData.sansOblique, oblique.hotChars)
+			hotCharSetUpright: uniqueHotChars(hcSansUpright, upright.hotChars),
+			hotCharSetItalic: uniqueHotChars(hcSansItalic, italic.hotChars),
+			hotCharSetOblique: uniqueHotChars(hcSansOblique, oblique.hotChars)
 		});
 	}
 	return result;
@@ -76,27 +82,27 @@ function getSsData(variants, defaultCompData) {
 
 function getDefaultCompData(variants) {
 	return {
-		sansUpright: buildupComposite(variants, UPRIGHT, variants.defaultComposite),
-		sansItalic: buildupComposite(variants, ITALIC, variants.defaultComposite),
-		sansOblique: buildupComposite(variants, OBLIQUE, variants.defaultComposite),
+		sansUpright: buildupComposite(variants, UPRIGHT, variants.defaultComposite).composition,
+		sansItalic: buildupComposite(variants, ITALIC, variants.defaultComposite).composition,
+		sansOblique: buildupComposite(variants, OBLIQUE, variants.defaultComposite).composition,
 		slabUpright: buildupComposite(
 			variants,
 			UPRIGHT,
 			variants.defaultComposite,
 			variants.composites.get("slab")
-		),
+		).composition,
 		slabItalic: buildupComposite(
 			variants,
 			ITALIC,
 			variants.defaultComposite,
 			variants.composites.get("slab")
-		),
+		).composition,
 		slabOblique: buildupComposite(
 			variants,
 			OBLIQUE,
 			variants.defaultComposite,
 			variants.composites.get("slab")
-		)
+		).composition
 	};
 }
 
@@ -116,15 +122,15 @@ function buildupComposite(variants, para, ...composites) {
 			if (!prime.sampler || isLigatureSampler(prime)) continue;
 			const key = getSelectorKey(prime, variant);
 			for (const ch of prime.sampler) hotChars.set(ch, key);
-			compositionMap.set(prime.key, key);
+			compositionMap.set(prime.key, variant.key);
 		}
 	}
-	return { composition: Array.from(compositionMap.values()), hotChars };
+	return { composition: Object.fromEntries(compositionMap), hotChars };
 }
 function uniqueHotChars(cfgDefault, cfgSS) {
 	let s = new Set();
 	for (const [hc, v] of cfgSS) {
-		if (cfgDefault.hotChars.get(hc) !== v) s.add(hc);
+		if (cfgDefault.get(hc) !== v) s.add(hc);
 	}
 	return Array.from(s);
 }
