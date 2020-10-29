@@ -458,11 +458,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `caret = 'high'`, `cv47 = 1`: Higher circumflex `^` (default).
     + `caret = 'low'`, `cv47 = 2`: Lower circumflex `^`.
   - Styles for `(`, `)`:
-    + `paren = 'normal'`, `cv48 = 1`: Parenthesis with normal contour.
+    + `paren = 'normal'`, `cv48 = 1`: Parenthesis with normal contour (default).
     + `paren = 'large-contour'`, `cv48 = 2`: Parenthesis with larger contour, like that in Monaco.
   - Styles for `{`, `}`:
     + `brace = 'straight'`, `cv49 = 1`: More straight braces.
-    + `brace = 'curly'`, `cv49 = 2`: More curly braces.
+    + `brace = 'curly'`, `cv49 = 2`: More curly braces (default).
   - Styles for `#`:
     + `number-sign = 'upright'`, `cv50 = 1`: Number sign with vertical bars (default).
     + `number-sign = 'slanted'`, `cv50 = 2`: Number sign with slanted bars.
@@ -492,7 +492,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `bar = 'natural-slope'`, `cv55 = 1`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
     + `bar = 'force-upright'`, `cv55 = 2`: Bar punctuations (`|`) is forced upright under italics and oblique.
   - Styles for `<=`, `>=`:
-    + `lig-ltgteq = 'flat'`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat.
+    + `lig-ltgteq = 'flat'`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat (default).
     + `lig-ltgteq = 'slanted'`, `cv56 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
   - Styles for `'`:
     + `ascii-single-quote = 'straight'`, `cv57 = 1`: Show ASCII quote (`'`) as short vertical straight bar. (default).

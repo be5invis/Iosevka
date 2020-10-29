@@ -81,28 +81,15 @@ function getSsData(variants) {
 }
 
 function getDefaultCompData(variants) {
+	const cDefault = variants.defaultComposite;
+	const cSlab = variants.composites.get("slab");
 	return {
-		sansUpright: buildupComposite(variants, UPRIGHT, variants.defaultComposite).composition,
-		sansItalic: buildupComposite(variants, ITALIC, variants.defaultComposite).composition,
-		sansOblique: buildupComposite(variants, OBLIQUE, variants.defaultComposite).composition,
-		slabUpright: buildupComposite(
-			variants,
-			UPRIGHT,
-			variants.defaultComposite,
-			variants.composites.get("slab")
-		).composition,
-		slabItalic: buildupComposite(
-			variants,
-			ITALIC,
-			variants.defaultComposite,
-			variants.composites.get("slab")
-		).composition,
-		slabOblique: buildupComposite(
-			variants,
-			OBLIQUE,
-			variants.defaultComposite,
-			variants.composites.get("slab")
-		).composition
+		sansUpright: buildupComposite(variants, UPRIGHT, cDefault).composition,
+		sansItalic: buildupComposite(variants, ITALIC, cDefault).composition,
+		sansOblique: buildupComposite(variants, OBLIQUE, cDefault).composition,
+		slabUpright: buildupComposite(variants, UPRIGHT, cDefault, cSlab).composition,
+		slabItalic: buildupComposite(variants, ITALIC, cDefault, cSlab).composition,
+		slabOblique: buildupComposite(variants, OBLIQUE, cDefault, cSlab).composition
 	};
 }
 
@@ -119,7 +106,7 @@ function buildupComposite(variants, para, ...composites) {
 	let hotChars = new Map();
 	for (const composite of composites) {
 		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
-			if (!prime.sampler || isLigatureSampler(prime)) continue;
+			if (!prime.sampler) continue;
 			const key = getSelectorKey(prime, variant);
 			for (const ch of prime.sampler) hotChars.set(ch, key);
 			compositionMap.set(prime.key, variant.key);
