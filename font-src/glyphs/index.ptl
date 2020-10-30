@@ -74,7 +74,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		glyphObject.setWidth Width
 		glyphObject.gizmo = GlobalTransform
 		glyphObject.include actions true true
-		warnAboutBrokenGlyph glyphObject ensuredGlyphName
+		warnAboutBrokenGlyph glyphObject ensuredGlyphName saveGlyphName
 
 		if saveGlyphName : begin
 			if (saveGlyphName.0 != '.' && [glyphStore.queryByName saveGlyphName])
@@ -86,7 +86,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 		return glyphObject
 
-	define [warnAboutBrokenGlyph g ensuredGlyphName] : begin
+	define [warnAboutBrokenGlyph g ensuredGlyphName saveGlyphName] : begin
 		local complexity 0
 		local broken false
 		if g.contours : begin
@@ -95,9 +95,10 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 				if [not : isFinite z.x] : set broken true
 				if [not : isFinite z.y] : set broken true
 
-		if ([not recursive] && (broken || complexity > 0x7fff)) : begin
+		if ([not recursive] && (broken || complexity > 4096)) : begin
 			console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
 			console.log 'Family' para.naming.family para.naming.weight para.naming.width para.naming.slope
+			if saveGlyphName : throw : new Error "Overcomplicated \(saveGlyphName)"
 
 	define [$assignUnicodeImpl$ g unicode] : begin
 		local u unicode

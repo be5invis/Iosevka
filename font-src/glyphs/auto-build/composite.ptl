@@ -33,7 +33,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 		local rs : new Set
 		local gniPart : fnBuildup gidPart
 		local grs : AnyDerivingCv.query [query-glyph gidPart]
-		if grs : foreach gr [items-of grs] : begin
+		if (para.enableCvSs && grs) : foreach gr [items-of grs] : begin
 			local relatedGidPart : gr.get [query-glyph gidPart]
 			local gniRelated : fnBuildup relatedGidPart
 			if [query-glyph gniPart] : begin
@@ -54,7 +54,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			local restInfo : demand.slice 2
 			local origJobGlyphGn : CircName unicode prefix parts suffix
 
-			local demandDecomposable globallyDecomposable
+			local demandDecomposable : para.enableCvSs && globallyDecomposable
 			foreach part [items-of parts] : if [query-glyph part] : begin
 				local g : query-glyph part
 				local relatedGlyphs : AnyDerivingCv.query g
@@ -66,12 +66,14 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			local jobsRel  : if demandDecomposable decomposableRelJobs nonDecomposable
 
 			jobsOrig.push { origJobGlyphGn unicode parts :: restInfo }
-			local mesh : getGrMesh parts AnyDerivingCv query-glyph
-			foreach {gr fromParts toParts} [items-of mesh] : do
-				local fromGn : CircNameNoCheck unicode prefix fromParts suffix
-				local toGn   : CircName        unicode prefix toParts   suffix
-				jobsRel.push { toGn null toParts :: restInfo }
-				if [not demandDecomposable] : relApplications.push : list gr fromGn toGn
+			if para.enableCvSs : begin
+				local mesh : getGrMesh parts AnyDerivingCv query-glyph
+				foreach {gr fromParts toParts} [items-of mesh] : do
+					local fromGn : CircNameNoCheck unicode prefix fromParts suffix
+					local toGn   : CircName        unicode prefix toParts   suffix
+					jobsRel.push { toGn null toParts :: restInfo }
+					if [not demandDecomposable] : relApplications.push { gr fromGn toGn }
+
 		return : object nonDecomposable decomposableJobs decomposableRelJobs relApplications
 
 	glyph-block-export CreateDerivedFontFromJobs
@@ -1047,17 +1049,17 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 		foreach [{unicode c1 c2 mak} : items-of records] : begin
 			local glyphName : PhoneticLigatureGlyphName c1 c2
 
-			define [maskOut] : new-glyph : glyph-proc
-				local s    0
-				local step (-OX)
-				local dist (Stroke * 2)
-				define dfg1 : df1.queryByNameEnsured c1
-				define dfg2 : df2.queryByNameEnsured c2
-				while (s < dist) : begin
+			local maskOuts {}
+			local s    0
+			local step (-OX)
+			local dist (Stroke * 2)
+			while (s < dist) : do
+				maskOuts.push : new-glyph : glyph-proc
+					define dfg1 : df1.queryByNameEnsured c1
+					define dfg2 : df2.queryByNameEnsured c2
 					include dfg2
-					include : Translate step 0
-					set s : s + step
-				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
+					include : Translate (s + dfg1.advanceWidth * wadj1 - kern) 0
+				set s : s + step
 
 			create-glyph glyphName unicode : glyph-proc
 				set-width CWidth
@@ -1068,11 +1070,9 @@ glyph-block Autobuild-Pnonetic-Ligatures : if [not recursive] : begin
 				local refW : sumChildrenWidth - kern
 				include dfg2
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
-				include : difference
-					intersection
-						Rect (CAP * 2) (Descender * 2) (-CWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
-						glyph-proc : include dfg1
-					maskOut
+				local leftHalf : intersection dfg1
+					Rect (CAP * 2) (Descender * 2) (-CWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
+				include : difference.apply null { leftHalf :: maskOuts}
 				include : Upright
 				include : Translate (-refW / 2) 0
 				include : Scale [clamp 0 1 ((CWidth - SB * 1.25) / (CWidth - SB * 2) * CWidth / refW)] 1

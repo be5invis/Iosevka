@@ -15,9 +15,9 @@ glyph-block Marks : begin
 	### Combining marks
 	glyph-block-export markExtend markHalfStroke markFine
 	local markExtend (AccentX * 0.5)
-	local markHalfStroke : 0.5 * [adviceBlackness2 3.5 3.375 XH]
+	local markHalfStroke : 0.5 * [adviceBlackness2 3.375 3.5 XH]
 	local markStress : markHalfStroke * 1.1
-	local markFine : markHalfStroke * 0.9
+	local markFine : Math.min (markHalfStroke * 0.9) (0.5 * [adviceBlackness2 3.875 4.25 XH])
 
 	glyph-block-export markMiddle
 	local markMiddle (-Middle)
@@ -1045,16 +1045,17 @@ glyph-block Marks : begin
 
 	define [HornShape attX attY overshootX overshootY yrP] : glyph-proc
 		local [object radius hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY yrP
+		local swStart : Math.min (radius / 2) ShoulderFine
 		include : union
-			RingAt (startX - radius) startY (radius + OX / 2)
+			RingAt (startX - radius) startY (radius + OX)
 			dispiro
-				g4.down.start (startX + OX) (startY) [widths.rhs.heading [Math.min (radius / 2) ShoulderFine] Downward]
+				g4.down.start (startX + OX) (startY) [widths.rhs.heading swStart Downward]
 				arcvh
-				g4.left.mid (startX - radius) (startY - radius) [heading Leftward]
+				g4.left.mid (startX - radius) (startY - radius) [widths.rhs.heading [mix swStart hornFine 0.25] Leftward]
 				archv
-				g4.up.mid (startX - 2 * radius) (startY) [heading Upward]
+				g4.up.mid (startX - 2 * radius) (startY) [widths.rhs.heading [mix swStart hornFine 0.5] Upward]
 				arcvh
-				g4.right.mid (startX - radius) (startY + radius) [heading Rightward]
+				g4.right.mid (startX - radius) (startY + radius) [widths.rhs.heading [mix swStart hornFine 0.75] Rightward]
 				archv
 				g4.down.mid startX startY [widths.rhs.heading hornFine Downward]
 				quadcontrols.g4 0 0.75 16 : object : blend : lambda [t]
