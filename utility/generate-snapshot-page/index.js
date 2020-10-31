@@ -33,9 +33,37 @@ async function main() {
 		}
 	});
 	await fs.writeFile(outputPath, html);
+
+	let readmeSnapshotTasks = [
+		{ el: "#languages", name: "languages" },
+		{ el: "#charvars", name: "charvars" },
+		{ el: "#matrix", name: "matrix" },
+		{ el: "#previews", name: "preview-all" },
+		{ el: "#weights", name: "weights" }
+	];
+	for (const ls of ligationData.nonMergeSets) {
+		readmeSnapshotTasks.push({
+			el: "#ligation-sampler",
+			applyClass: "iosevka",
+			applyFeature: `'${ls.tag}' ${ls.rank}`,
+			name: `ligset-${ls.tag}-${ls.rank}`,
+			applyCallback: `cbAmendLigsetSamplerContents`,
+			applyCallbackArgs: ls
+		});
+	}
+	for (const ss of variationData.composites) {
+		readmeSnapshotTasks.push({
+			el: "#stylistic-set-sampler",
+			applyClass: "iosevka",
+			applyFeature: `'${ss.tag}' ${ss.rank}`,
+			name: `stylistic-set-${ss.tag}-${ss.rank}`,
+			applyCallback: `cbAmendStylisticSetContents`,
+			applyCallbackArgs: ss
+		});
+	}
 	await fs.writeJson(
 		outputDataPath,
-		{ ...variationData, ligation: ligationData },
+		{ readmeSnapshotTasks, ligationSamples: ligationData.samples },
 		{ spaces: "  " }
 	);
 }

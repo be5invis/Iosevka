@@ -737,7 +737,7 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 });
 
 const PackageSnapshotConfig = computed(`package-snapshot-config`, async target => {
-	const [plan, sh] = await target.need(BuildPlans, SnapShotHtml);
+	const [plan] = await target.need(BuildPlans);
 	const cfg = [];
 	for (const key in plan.buildPlans) {
 		const p = plan.buildPlans[key];
@@ -747,28 +747,6 @@ const PackageSnapshotConfig = computed(`package-snapshot-config`, async target =
 			applyClass: p.snapshotFamily,
 			applyFeature: p.snapshotFeature,
 			name: key
-		});
-	}
-
-	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
-	for (const ls of de.ligation.nonMergeSets) {
-		cfg.push({
-			el: "#ligation-sampler",
-			applyClass: "iosevka",
-			applyFeature: `'${ls.tag}' ${ls.rank}`,
-			name: `ligset-${ls.tag}-${ls.rank}`,
-			applyCallback: `cbAmendLigsetSamplerContents`,
-			applyCallbackArgs: ls
-		});
-	}
-	for (const ss of de.composites) {
-		cfg.push({
-			el: "#stylistic-set-sampler",
-			applyClass: "iosevka",
-			applyFeature: `'${ss.tag}' ${ss.rank}`,
-			name: `stylistic-set-${ss.tag}-${ss.rank}`,
-			applyCallback: `cbAmendStylisticSetContents`,
-			applyCallbackArgs: ss
 		});
 	}
 	return cfg;
@@ -818,14 +796,11 @@ const ScreenShot = file.make(
 );
 
 const SampleImages = task(`sample-images`, async target => {
-	const [cfg] = await target.need(PackageSnapshotConfig, TakeSampleImages);
+	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
+	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
 	await target.need(
-		ScreenShot("charvars"),
-		ScreenShot("languages"),
-		ScreenShot("matrix"),
-		ScreenShot("preview-all"),
-		ScreenShot("weights"),
-		cfg.map(opt => ScreenShot(opt.name))
+		cfgP.map(opt => ScreenShot(opt.name)),
+		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name))
 	);
 });
 

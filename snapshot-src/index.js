@@ -56,7 +56,7 @@ function cbAmendLigsetSamplerContents(element, p) {
 	else element.style.fontFeatureSettings = `'calt' off, '${p.tag}' ${p.rank}`;
 
 	const groupSet = new Set(p.ligSets);
-	for (const row of auxData.ligation.samples) {
+	for (const row of auxData.ligationSamples) {
 		const line = document.createElement("div");
 		element.appendChild(line);
 		for (let m = 0; m < row.length; m++) {
@@ -116,14 +116,7 @@ function captureElement(options, callback) {
 }
 
 window.onload = function () {
-	const snapshotTasks = [
-		{ el: "#languages", name: "languages" },
-		{ el: "#charvars", name: "charvars" },
-		{ el: "#matrix", name: "matrix" },
-		{ el: "#previews", name: "preview-all" },
-		{ el: "#weights", name: "weights" },
-		...packagingTasks
-	];
+	const snapshotTasks = [...auxData.readmeSnapshotTasks, ...packagingTasks];
 	let current = 0;
 	const step = function () {
 		const doit = function () {
