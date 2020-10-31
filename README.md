@@ -49,7 +49,7 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 ### Stylistic Sets
 
-Iosevka contains various stylistic sets to change the shape of certain characters. Enabling corresponded OpenType feature to enable.
+Monospace Iosevka contains various stylistic sets to change the shape of certain characters. Enabling corresponded OpenType feature to enable.
 
 <!-- BEGIN Section-OT-Stylistic-Sets -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -166,13 +166,13 @@ Iosevka contains various stylistic sets to change the shape of certain character
 
 ### Character Variants
 
-Alongside stylistic sets, Iosevka can also be configured to cherry-pick variants for each character using OpenType. The variants are shown below. To enable, assign the feature tag to the variant index. For example, setting `cv11` to `2` will enable single-storey `a`.
+Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pick variants for each character using OpenType. The variants are shown below. To enable, assign the feature tag to the variant index. For example, setting `cv11` to `2` will enable single-storey `a`.
 
 ![Character Variants](images/charvars.png)
 
 ### Ligations
 
-Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
+Monospace subfamilies support ligations. Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
 <!-- BEGIN Section-OT-Ligation-Tags-1 -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
