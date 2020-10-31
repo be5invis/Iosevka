@@ -33,5 +33,9 @@ async function main() {
 		}
 	});
 	await fs.writeFile(outputPath, html);
-	await fs.writeJson(outputDataPath, { ligation: ligationData }, { spaces: "  " });
+	await fs.writeJson(
+		outputDataPath,
+		{ ...variationData, ligation: ligationData },
+		{ spaces: "  " }
+	);
 }

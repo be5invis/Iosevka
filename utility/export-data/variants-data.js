@@ -43,7 +43,7 @@ function getSsData(variants) {
 		{
 			key: "off",
 			tag: "off",
-			effective: false,
+			rank: 0,
 			description: "Default",
 			uprightComposition: {},
 			italicComposition: {},
@@ -67,7 +67,7 @@ function getSsData(variants) {
 		result.push({
 			key,
 			tag: composite.tag,
-			effective: true,
+			rank: 1,
 			description: composite.description,
 			uprightComposition: upright.composition,
 			italicComposition: italic.composition,

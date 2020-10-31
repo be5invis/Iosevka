@@ -757,8 +757,18 @@ const PackageSnapshotConfig = computed(`package-snapshot-config`, async target =
 			applyClass: "iosevka",
 			applyFeature: `'${ls.tag}' ${ls.rank}`,
 			name: `ligset-${ls.tag}-${ls.rank}`,
-			applyCallback: `amend-ligset-sampler-contents`,
+			applyCallback: `cbAmendLigsetSamplerContents`,
 			applyCallbackArgs: ls
+		});
+	}
+	for (const ss of de.composites) {
+		cfg.push({
+			el: "#stylistic-set-sampler",
+			applyClass: "iosevka",
+			applyFeature: `'${ss.tag}' ${ss.rank}`,
+			name: `stylistic-set-${ss.tag}-${ss.rank}`,
+			applyCallback: `cbAmendStylisticSetContents`,
+			applyCallbackArgs: ss
 		});
 	}
 	return cfg;
@@ -769,9 +779,11 @@ const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target,
 });
 const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
-	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
-	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
-	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
+	const [cm, cmi, cmo] = await target.need(
+		BuildCM("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-italic"),
+		BuildCM("iosevka", "iosevka-oblique")
+	);
 	await run(
 		`node`,
 		`utility/generate-snapshot-page/index.js`,
@@ -812,7 +824,6 @@ const SampleImages = task(`sample-images`, async target => {
 		ScreenShot("languages"),
 		ScreenShot("matrix"),
 		ScreenShot("preview-all"),
-		ScreenShot("stylesets"),
 		ScreenShot("weights"),
 		cfg.map(opt => ScreenShot(opt.name))
 	);

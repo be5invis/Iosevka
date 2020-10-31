@@ -1,5 +1,7 @@
 /* eslint-env node, browser */
 
+"use strict";
+
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 const dpi = window.devicePixelRatio;
@@ -20,8 +22,34 @@ ipc.on("complete", function () {
 });
 
 const captureCallbacks = {
-	"amend-ligset-sampler-contents": cbAmendLigsetSamplerContents
+	cbAmendLigsetSamplerContents,
+	cbAmendStylisticSetContents
 };
+
+const ssString = "@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ";
+function cbAmendStylisticSetContents(element, p) {
+	element.innerHTML = "";
+	const cfg = [
+		["upright", "hotCharSetUpright"],
+		["italic", "hotCharSetItalic"]
+	];
+	for (const [cls, kHC] of cfg) {
+		const line = document.createElement("div");
+		line.className = cls;
+		element.appendChild(line);
+		const sHC = new Set(p[kHC]);
+		for (const lch of ssString) {
+			if (sHC.has(lch)) {
+				const b = document.createElement("b");
+				b.appendChild(document.createTextNode(lch));
+				line.appendChild(b);
+			} else {
+				line.append(document.createTextNode(lch));
+			}
+		}
+	}
+}
+
 function cbAmendLigsetSamplerContents(element, p) {
 	element.innerHTML = "";
 	if (p.tag === "calt") element.style.fontFeatureSettings = `'${p.tag}' ${p.rank}`;
@@ -90,12 +118,10 @@ function captureElement(options, callback) {
 window.onload = function () {
 	const snapshotTasks = [
 		{ el: "#languages", name: "languages" },
-		{ el: "#stylesets", name: "stylesets" },
 		{ el: "#charvars", name: "charvars" },
 		{ el: "#matrix", name: "matrix" },
 		{ el: "#previews", name: "preview-all" },
 		{ el: "#weights", name: "weights" },
-		// { el: "#ligations", name: "ligations", doubleTrim: "white" },
 		...packagingTasks
 	];
 	let current = 0;

@@ -18,6 +18,7 @@ execMain(main);
 async function main() {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
+	readme = (await processSsOt()).apply(readme);
 	readme = (await processCv()).apply(readme);
 	readme = (await processSs()).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
@@ -29,13 +30,36 @@ async function main() {
 	await fs.writeFile(readmePath, readme);
 }
 
+async function processSsOt() {
+	const variantsData = await parseVariantsData();
+	const md = new MdCol("Section-OT-Stylistic-Sets");
+	md.log(`<table>`);
+	for (const ss of variantsData.composites) {
+		if (!ss.rank) continue;
+		{
+			md.log(`<tr>`);
+			md.log(`<td><code>${ss.tag}</code></td>`);
+			md.log(`<td>${ss.description}</td>`);
+			md.log(`</tr>`);
+		}
+		{
+			md.log(`<tr>`);
+			md.log(
+				`<td colspan="2"><img src="images/stylistic-set-${ss.tag}-${ss.rank}.png"/></td>`
+			);
+			md.log(`</tr>`);
+		}
+	}
+	md.log(`</table>`);
+	return md;
+}
 async function processSs() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
 	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 	for (const gr of variantsData.composites) {
-		if (!gr.effective) continue;
+		if (!gr.rank) continue;
 		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
 	}
 	return md;

@@ -47,11 +47,126 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 <!-- END Section-Language-List -->
 
-### Stylistic Sets and Character Variants
+### Stylistic Sets
 
-Iosevka supports accessing all letter variants using OpenType features, including `ss##` for applying a stylistic set, or `cv##` to cherry-pick variants.
+Iosevka contains various stylistic sets to change the shape of certain characters. Enabling corresponded OpenType feature to enable.
 
-![Style Sets](images/stylesets.png)
+<!-- BEGIN Section-OT-Stylistic-Sets -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
+<table>
+<tr>
+<td><code>ss01</code></td>
+<td>Andale Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss01-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss02</code></td>
+<td>Anonymous Pro Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss02-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss03</code></td>
+<td>Consolas Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss03-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss04</code></td>
+<td>Menlo Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss04-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss05</code></td>
+<td>Fira Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss05-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss06</code></td>
+<td>Liberation Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss06-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss07</code></td>
+<td>Monaco Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss07-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss08</code></td>
+<td>Pragmata Pro Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss08-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss09</code></td>
+<td>Source Code Pro Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss09-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss10</code></td>
+<td>Envy Code R Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss10-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss11</code></td>
+<td>X Window Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss11-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss12</code></td>
+<td>Ubuntu Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss12-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss13</code></td>
+<td>Lucida Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss13-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss14</code></td>
+<td>JetBrains Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss14-1.png"/></td>
+</tr>
+<tr>
+<td><code>ss20</code></td>
+<td>Curly Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss20-1.png"/></td>
+</tr>
+</table>
+
+<!-- END Section-OT-Stylistic-Sets -->
+
+### Character Variants
+
+Alongside stylistic sets, Iosevka can also be configured to cherry-pick variants for each character using OpenType. The variants are shown below. To enable, assign the feature tag to the variant index. For example, setting `cv11` to `2` will enable single-storey `a`.
 
 ![Character Variants](images/charvars.png)
 
