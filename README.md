@@ -47,6 +47,8 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 <!-- END Section-Language-List -->
 
+### Stylistic Sets and Character Variants
+
 Iosevka supports accessing all letter variants using OpenType features, including `ss##` for applying a stylistic set, or `cv##` to cherry-pick variants.
 
 ![Style Sets](images/stylesets.png)
@@ -57,9 +59,31 @@ Iosevka supports accessing all letter variants using OpenType features, includin
 
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
+<!-- BEGIN Section-OT-Ligation-Tags-1 -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
+<table>
+<tr>
+<td><code>calt off</td>
+<td>Ligation Off</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-calt-0.png"/></td>
+</tr>
+<tr>
+<td><code>calt</code></td>
+<td>Default setting in text editors</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-calt-1.png"/></td>
+</tr>
+</table>
+
+<!-- END Section-OT-Ligation-Tags-1 -->
+
 Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags. To use them, you need to turn **off** `calt` and enable the corresponded feature. The feature list is:
 
-<!-- BEGIN Section-OT-Ligation-Tags -->
+<!-- BEGIN Section-OT-Ligation-Tags-2 -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
 <table>
@@ -135,7 +159,7 @@ Iosevka supports Language-Specific Ligations, which is the ligation set enabled 
 </tr>
 </table>
 
-<!-- END Section-OT-Ligation-Tags -->
+<!-- END Section-OT-Ligation-Tags-2 -->
 
 Please note that, due to the complex interactions when forming ligations, cherry-picking ligation groups will require a custom Iosevka build. The instructions could be seen below.
 

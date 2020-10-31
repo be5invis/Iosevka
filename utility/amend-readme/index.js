@@ -22,7 +22,8 @@ async function main() {
 	readme = (await processSs()).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
-	readme = (await processLigSetOt()).apply(readme);
+	readme = (await processLigSetOt(1, g => g.tag === "calt")).apply(readme);
+	readme = (await processLigSetOt(2, g => g.tag !== "calt")).apply(readme);
 	readme = (await processLangList()).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
@@ -158,19 +159,25 @@ async function processLigSetPreDef() {
 	return md;
 }
 
-async function processLigSetOt() {
+async function processLigSetOt(index, fn) {
 	const ligData = await parseLigationData();
-	const md = new MdCol("Section-OT-Ligation-Tags");
+	const md = new MdCol(`Section-OT-Ligation-Tags-${index}`);
 	md.log(`<table>`);
 	for (const ls of ligData.sets) {
-		if (!ls.rank || ls.tag === "calt") continue;
-		md.log(`<tr>`);
-		md.log(`<td>${ls.tagName.map(x => `<code>${x}</code>`).join("; ")}</td>`);
-		md.log(`<td>${ls.desc}</td>`);
-		md.log(`</tr>`);
-		md.log(`<tr>`);
-		md.log(`<td colspan="2"><img src="images/ligset-${ls.tag}-${ls.rank}.png"/></td>`);
-		md.log(`</tr>`);
+		if (!fn(ls)) continue;
+		{
+			md.log(`<tr>`);
+			if (ls.tagName)
+				md.log(`<td>${ls.tagName.map(x => `<code>${x}</code>`).join("; ")}</td>`);
+			else md.log(`<td><code>${ls.tag} off</td>`);
+			md.log(`<td>${ls.desc}</td>`);
+			md.log(`</tr>`);
+		}
+		{
+			md.log(`<tr>`);
+			md.log(`<td colspan="2"><img src="images/ligset-${ls.tag}-${ls.rank}.png"/></td>`);
+			md.log(`</tr>`);
+		}
 	}
 	md.log(`</table>`);
 	return md;
