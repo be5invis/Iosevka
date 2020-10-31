@@ -802,6 +802,11 @@ glyph-block Letter-Latin-V : begin
 				flat vxStartR [VShapeTopFlat top]
 				curl vxStartR top
 
+	define [VBottomCapShape df barStraight sw] : spiro-outline
+		corner (df.middle + VCornerHalfWidth) 0
+		corner (df.middle - VCornerHalfWidth) 0
+		corner df.middle [Math.min sw : if barStraight VShapeFineStraight VShapeFine]
+
 	define [VShape] : params [df top [sw Stroke] barStraight [slab SLAB]] : glyph-proc
 		local fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 		local dgCor : diagCor (2 * top) Width 0 (2 * sw)
@@ -836,10 +841,7 @@ glyph-block Letter-Latin-V : begin
 				g4 (df.middle + VCornerHalfWidth) 0 [widths.rhs fine]
 
 			#bottom cap
-			include : spiro-outline
-				corner (df.middle + VCornerHalfWidth) 0
-				corner (df.middle - VCornerHalfWidth) 0
-				corner df.middle fine
+			include : VBottomCapShape df barStraight sw
 
 		if slab : include : AIVSerifs top
 
@@ -854,11 +856,11 @@ glyph-block Letter-Latin-V : begin
 		create-derived 'v.straight' : VShape [DivFrame 1] XH Stroke true
 		create-derived 'v.curly' : VShape [DivFrame 1] XH Stroke false
 
-	define [VHooktopShape top _stroke barStraight] : glyph-proc
-		include : VShape [DivFrame 1] top [fallback _stroke Stroke] barStraight
+	define [VHooktopShape df barStraight top] : glyph-proc
+		include : VShape df top Stroke barStraight
 		eject-contour 'serifRT'
 		eject-contour 'strokeUp'
-
+		include : VBottomCapShape df barStraight Stroke
 		include : dispiro
 			widths.rhs
 			straight.left.start (RightSB + HookX / 3) (top - Stroke)
@@ -868,13 +870,13 @@ glyph-block Letter-Latin-V : begin
 
 	create-glyph : glyph-proc
 		include : MarkSet.e
-		create-derived 'vhooktop.straight' : VHooktopShape XH Stroke true
-		create-derived 'vhooktop.curly' : VHooktopShape XH Stroke false
+		create-derived 'vhooktop.straight' : VHooktopShape [DivFrame 1] true XH
+		create-derived 'vhooktop.curly' : VHooktopShape [DivFrame 1] false XH
 
 	create-glyph : glyph-proc
 		include : MarkSet.capital
-		create-derived 'cyrl/Izhitsa.straight' : VHooktopShape CAP Stroke true
-		create-derived 'cyrl/Izhitsa.curly' : VHooktopShape CAP Stroke false
+		create-derived 'cyrl/Izhitsa.straight' : VHooktopShape [DivFrame 1] true CAP
+		create-derived 'cyrl/Izhitsa.curly' : VHooktopShape [DivFrame 1] false CAP
 
 	select-variant 'V' 'V'
 	select-variant 'v' 'v'
@@ -983,7 +985,9 @@ glyph-block Letter-Latin-Lower-A : begin
 		local bartop (XH * OverlayPos * 1.02 + stroke * 0.425)
 		local bowlArcY1 : YSmoothMidL 0 bartop SmallSmoothA SmallSmoothB
 		local bowlArcY2 : YSmoothMidR 0 bartop SmallSmoothA SmallSmoothB
-		local lowSlope : shoulderMidSlope ShoulderFine nothing (-1)
+		local lowSlope  : shoulderMidSlope ShoulderFine nothing (-1)
+		local leftSlopeS : 0.1 * (Width / HalfUPM)
+		local leftSlope  : leftSlopeS - TanSlope
 		local lowMiddle : mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]
 		local barSmooth : mix SB RightSB 0.55
 		include : dispiro
@@ -991,7 +995,7 @@ glyph-block Letter-Latin-Lower-A : begin
 			flat (RightSB + O) bartop [heading Leftward]
 			curl barSmooth bartop
 			archv
-			g4   (SB + OX) bowlArcY1
+			g4 (SB + OX) (bowlArcY1 - Stroke * HVContrast * leftSlopeS) [heading {.x HVContrast .y leftSlope}]
 			arcvh
 			match kind
 				0 : list
