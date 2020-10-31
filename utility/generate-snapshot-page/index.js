@@ -9,6 +9,7 @@ const execMain = require("../shared/execMain");
 
 const inputPath = process.argv[2];
 const outputPath = process.argv[3];
+const outputDataPath = process.argv[4];
 
 execMain(main);
 
@@ -17,9 +18,11 @@ execMain(main);
 async function main() {
 	const weightGrades = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 	const templatePath = path.join(inputPath, "index.ejs");
+	const variationData = await await parseVariantsData();
+	const ligationData = await getLigationData();
 	const html = await ejs.renderFile(templatePath, {
-		...(await parseVariantsData()),
-		ligation: await getLigationData(),
+		...variationData,
+		ligation: ligationData,
 		weights: weightGrades,
 		buildSsHtml(body, hc) {
 			const hcs = new Set(hc);
@@ -30,4 +33,5 @@ async function main() {
 		}
 	});
 	await fs.writeFile(outputPath, html);
+	await fs.writeJson(outputDataPath, { ligation: ligationData }, { spaces: "  " });
 }

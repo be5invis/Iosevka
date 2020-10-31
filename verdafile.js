@@ -736,8 +736,8 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${sparkle}`, `${SNAPSHOT_TMP}/${sparkle}`);
 });
 
-const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
-	const [plan] = await target.need(BuildPlans);
+const PackageSnapshotConfig = computed(`package-snapshot-config`, async target => {
+	const [plan, sh] = await target.need(BuildPlans, SnapShotHtml);
 	const cfg = [];
 	for (const key in plan.buildPlans) {
 		const p = plan.buildPlans[key];
@@ -747,6 +747,18 @@ const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async ta
 			applyClass: p.snapshotFamily,
 			applyFeature: p.snapshotFeature,
 			name: key
+		});
+	}
+
+	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
+	for (const ls of de.ligation.nonMergeSets) {
+		cfg.push({
+			el: "#ligation-sampler",
+			applyClass: "iosevka",
+			applyFeature: `'${ls.tag}' ${ls.rank}`,
+			name: `ligset-${ls.tag}-${ls.rank}`,
+			applyCallback: `amend-ligset-sampler-contents`,
+			applyCallbackArgs: ls
 		});
 	}
 	return cfg;
@@ -764,7 +776,8 @@ const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 		`node`,
 		`utility/generate-snapshot-page/index.js`,
 		"snapshot-src/templates",
-		out.full
+		out.full,
+		`${out.dir}/${out.name}.data.json`
 	);
 	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
 });
@@ -797,7 +810,6 @@ const SampleImages = task(`sample-images`, async target => {
 	await target.need(
 		ScreenShot("charvars"),
 		ScreenShot("languages"),
-		ScreenShot("ligations"),
 		ScreenShot("matrix"),
 		ScreenShot("preview-all"),
 		ScreenShot("stylesets"),

@@ -161,13 +161,18 @@ async function processLigSetPreDef() {
 async function processLigSetOt() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-OT-Ligation-Tags");
-	const headerPath = path.resolve(__dirname, "fragments/description-ot-ligation-tags.md");
-	md.log(await fs.readFile(headerPath, "utf-8"));
-	for (const ls of ligData.nonMergeSets) {
+	md.log(`<table>`);
+	for (const ls of ligData.sets) {
 		if (!ls.rank || ls.tag === "calt") continue;
-		const longDesc = ls.desc;
-		md.log(`- \`${ls.tag}\`: ${longDesc}.`);
+		md.log(`<tr>`);
+		md.log(`<td>${ls.tagName.map(x => `<code>${x}</code>`).join("; ")}</td>`);
+		md.log(`<td>${ls.desc}</td>`);
+		md.log(`</tr>`);
+		md.log(`<tr>`);
+		md.log(`<td colspan="2"><img src="images/ligset-${ls.tag}-${ls.rank}.png"/></td>`);
+		md.log(`</tr>`);
 	}
+	md.log(`</table>`);
 	return md;
 }
 

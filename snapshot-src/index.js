@@ -5,6 +5,7 @@ const windowHeight = window.innerHeight;
 const dpi = window.devicePixelRatio;
 const ipc = require("electron").ipcRenderer;
 const packagingTasks = require("./packaging-tasks.json");
+const auxData = require("./index.data.json");
 
 let onScroll = function () {};
 ipc.on("scroll", function () {
@@ -18,13 +19,52 @@ ipc.on("complete", function () {
 	onComplete.apply(this, arguments);
 });
 
+const captureCallbacks = {
+	"amend-ligset-sampler-contents": cbAmendLigsetSamplerContents
+};
+function cbAmendLigsetSamplerContents(element, p) {
+	element.innerHTML = "";
+	if (p.tag === "calt") element.style.fontFeatureSettings = `'${p.tag}' ${p.rank}`;
+	else element.style.fontFeatureSettings = `'calt' off, '${p.tag}' ${p.rank}`;
+
+	const groupSet = new Set(p.ligSets);
+	for (const row of auxData.ligation.samples) {
+		const line = document.createElement("div");
+		element.appendChild(line);
+		for (let m = 0; m < row.length; m++) {
+			if (m > 0) line.appendChild(document.createTextNode(" "));
+			const item = row[m];
+			let rank = 0;
+			for (let k = item.tags.length; k-- > 0; ) {
+				if (groupSet.has(item.tags[k])) {
+					rank = k + 1;
+					break;
+				}
+			}
+			if (rank) {
+				const run = document.createElement("em");
+				run.appendChild(document.createTextNode(item.s));
+				run.className = `rank-${rank}`;
+				line.appendChild(run);
+			} else {
+				const run = document.createElement("s");
+				run.appendChild(document.createTextNode(item.s));
+				run.className = `rank-${rank}`;
+				line.appendChild(run);
+			}
+		}
+	}
+}
+
 function captureElement(options, callback) {
 	window.scroll(0, 0);
 	setTimeout(function () {
 		const element = document.querySelector(options.el);
 		if (options.applyClass) element.className = options.applyClass;
 		if (options.applyFeature) element.style = "font-feature-settings:" + options.applyFeature;
-
+		if (options.applyCallback) {
+			captureCallbacks[options.applyCallback](element, options.applyCallbackArgs);
+		}
 		const rect = element.getBoundingClientRect();
 		onScroll = function (event, arg) {
 			window.scrollTo(0, arg);
@@ -55,7 +95,7 @@ window.onload = function () {
 		{ el: "#matrix", name: "matrix" },
 		{ el: "#previews", name: "preview-all" },
 		{ el: "#weights", name: "weights" },
-		{ el: "#ligations", name: "ligations", doubleTrim: "white" },
+		// { el: "#ligations", name: "ligations", doubleTrim: "white" },
 		...packagingTasks
 	];
 	let current = 0;

@@ -57,32 +57,87 @@ Iosevka supports accessing all letter variants using OpenType features, includin
 
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
+Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags. To use them, you need to turn **off** `calt` and enable the corresponded feature. The feature list is:
+
 <!-- BEGIN Section-OT-Ligation-Tags -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags. To use them, you need to turn **off** `calt` and enable the corresponded feature. The feature list is:
-
-- `dlig`: Discretionary ligatures.
-- `CLIK`: C-Like.
-- `JSPT`: JavaScript.
-- `PHPX`: PHP.
-- `MLXX`: ML.
-- `FSHP`: F#.
-- `FSTA`: F*.
-- `HSKL`: Haskell.
-- `IDRS`: Idris.
-- `ELMX`: Elm.
-- `PURS`: PureScript.
-- `SWFT`: Swift.
-- `COQX`: Coq.
-- `MTLB`: Matlab.
-- `VRLG`: Verilog.
-- `WFLM`: Wolfram Language (Mathematica).
+<table>
+<tr>
+<td><code>dlig</code></td>
+<td>Discretionary ligatures</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-dlig-1.png"/></td>
+</tr>
+<tr>
+<td><code>CLIK</code>; <code>JSPT</code>; <code>PHPX</code></td>
+<td>C-Like, JavaScript, PHP</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-CLIK-1.png"/></td>
+</tr>
+<tr>
+<td><code>MLXX</code>; <code>FSHP</code></td>
+<td>ML, F#</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-MLXX-1.png"/></td>
+</tr>
+<tr>
+<td><code>FSTA</code></td>
+<td>F*</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-FSTA-1.png"/></td>
+</tr>
+<tr>
+<td><code>HSKL</code>; <code>IDRS</code>; <code>ELMX</code>; <code>PURS</code></td>
+<td>Haskell, Idris, Elm, PureScript</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-HSKL-1.png"/></td>
+</tr>
+<tr>
+<td><code>SWFT</code></td>
+<td>Swift</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-SWFT-1.png"/></td>
+</tr>
+<tr>
+<td><code>COQX</code></td>
+<td>Coq</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-COQX-1.png"/></td>
+</tr>
+<tr>
+<td><code>MTLB</code></td>
+<td>Matlab</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-MTLB-1.png"/></td>
+</tr>
+<tr>
+<td><code>VRLG</code></td>
+<td>Verilog</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-VRLG-1.png"/></td>
+</tr>
+<tr>
+<td><code>WFLM</code></td>
+<td>Wolfram Language (Mathematica)</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/ligset-WFLM-1.png"/></td>
+</tr>
+</table>
 
 <!-- END Section-OT-Ligation-Tags -->
 
-![Ligations Sample](images/ligations.png)
-
+Please note that, due to the complex interactions when forming ligations, cherry-picking ligation groups will require a custom Iosevka build. The instructions could be seen below.
 
 ## Building from Source
 

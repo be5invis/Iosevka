@@ -261,13 +261,13 @@ function buildLigationSet(ligData, getKey) {
 				tag: comp.tag,
 				rank: 1,
 				ligSets: [...ligSets],
-				tagName: comp.tag,
+				tagName: [comp.tag],
 				desc: comp.desc,
 				brief: comp.brief || comp.desc
 			};
 			ligationSets.set(key, item);
 		} else {
-			item.tagName += ", " + comp.tag;
+			item.tagName = [...item.tagName, comp.tag];
 			item.desc += ", " + comp.desc;
 			item.brief += ", " + comp.brief;
 		}
