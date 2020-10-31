@@ -47,9 +47,7 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 <!-- END Section-Language-List -->
 
-
-
-Iosevka supports accessing all letter variants using OpenType features.
+Iosevka supports accessing all letter variants using OpenType features, including `ss##` for applying a stylistic set, or `cv##` to cherry-pick variants.
 
 ![Style Sets](images/stylesets.png)
 
@@ -57,11 +55,34 @@ Iosevka supports accessing all letter variants using OpenType features.
 
 ### Ligations
 
-![Ligations Sample](images/ligations.png)
-
 Iosevka’s default ligation set is assigned to `calt` feature, though not all of them are enabled by default.
 
-Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags, like `CLIK`.
+<!-- BEGIN Section-OT-Ligation-Tags -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
+Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags. To use them, you need to turn **off** `calt` and enable the corresponded feature. The feature list is:
+
+- `dlig`: Discretionary ligatures.
+- `CLIK`: C-Like.
+- `JSPT`: JavaScript.
+- `PHPX`: PHP.
+- `MLXX`: ML.
+- `FSHP`: F#.
+- `FSTA`: F*.
+- `HSKL`: Haskell.
+- `IDRS`: Idris.
+- `ELMX`: Elm.
+- `PURS`: PureScript.
+- `SWFT`: Swift.
+- `COQX`: Coq.
+- `MTLB`: Matlab.
+- `VRLG`: Verilog.
+- `WFLM`: Wolfram Language (Mathematica).
+
+<!-- END Section-OT-Ligation-Tags -->
+
+![Ligations Sample](images/ligations.png)
+
 
 ## Building from Source
 
@@ -140,6 +161,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `swift`: Default ligation set would be assigned to Swift.
   - `coq`: Default ligation set would be assigned to Coq.
   - `matlab`: Default ligation set would be assigned to Matlab.
+  - `verilog`: Default ligation set would be assigned to Verilog.
   - `wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
 
 <!-- END Section-Predefined-Ligation-Sets -->

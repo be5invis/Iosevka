@@ -14,6 +14,7 @@ const charMapObliquePath = process.argv[4];
 execMain(main);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function main() {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
@@ -21,6 +22,7 @@ async function main() {
 	readme = (await processSs()).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
+	readme = (await processLigSetOt()).apply(readme);
 	readme = (await processLangList()).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
@@ -71,30 +73,6 @@ async function processPrivateBuildPlans() {
 	const toml = await fs.readFile(tomlPath, "utf-8");
 	md.log("```toml\n" + toml + "```");
 	return md;
-}
-
-class MdCol {
-	constructor(sectionName) {
-		this.data = "";
-		this.sectionName = sectionName;
-		this.matchRegex = new RegExp(
-			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
-			`m`
-		);
-	}
-	log(...s) {
-		this.data += s.join("") + "\n";
-	}
-	apply(s) {
-		return s.replace(this.matchRegex, (m, $1) => {
-			return (
-				`<!-- BEGIN ${this.sectionName} -->\n` +
-				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
-				this.data +
-				`\n<!-- END ${this.sectionName} -->\n`
-			).replace(/^/gm, $1);
-		});
-	}
 }
 
 function formatDefaults(selector, defaults) {
@@ -180,6 +158,19 @@ async function processLigSetPreDef() {
 	return md;
 }
 
+async function processLigSetOt() {
+	const ligData = await parseLigationData();
+	const md = new MdCol("Section-OT-Ligation-Tags");
+	const headerPath = path.resolve(__dirname, "fragments/description-ot-ligation-tags.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
+	for (const ls of ligData.nonMergeSets) {
+		if (!ls.rank || ls.tag === "calt") continue;
+		const longDesc = ls.desc;
+		md.log(`- \`${ls.tag}\`: ${longDesc}.`);
+	}
+	return md;
+}
+
 async function processLangList() {
 	const cl = await getCharMapAndSupportedLanguageList(
 		charMapPath,
@@ -190,4 +181,30 @@ async function processLangList() {
 	md.log(`${cl.languages.length} Supported Languages: \n`);
 	md.log(cl.languages.join(", "));
 	return md;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class MdCol {
+	constructor(sectionName) {
+		this.data = "";
+		this.sectionName = sectionName;
+		this.matchRegex = new RegExp(
+			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
+			`m`
+		);
+	}
+	log(...s) {
+		this.data += s.join("") + "\n";
+	}
+	apply(s) {
+		return s.replace(this.matchRegex, (m, $1) => {
+			return (
+				`<!-- BEGIN ${this.sectionName} -->\n` +
+				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
+				this.data +
+				`\n<!-- END ${this.sectionName} -->\n`
+			).replace(/^/gm, $1);
+		});
+	}
 }
