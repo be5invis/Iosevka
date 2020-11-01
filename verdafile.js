@@ -30,7 +30,6 @@ const TTCIZE = [
 ];
 const webfontFormats = [
 	["woff2", "woff2"],
-	["woff", "woff"],
 	["ttf", "truetype"]
 ];
 
@@ -509,16 +508,12 @@ const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
 	await target.need(ts.map(tn => DistUnhintedTTF(gid, tn)));
 });
-const GroupWoffs = task.group("woff", async (target, gid) => {
-	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistWoff(gid, tn)));
-});
 const GroupWoff2s = task.group("woff2", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
 	await target.need(ts.map(tn => DistWoff2(gid, tn)));
 });
 const GroupFonts = task.group("fonts", async (target, gid) => {
-	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoffs(gid), GroupWoff2s(gid));
+	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoff2s(gid));
 });
 
 // Webfont CSS
@@ -693,8 +688,13 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 		GroupContents`iosevka-etoile`,
 		GroupContents`iosevka-sparkle`
 	);
+
 	for (const dir of dirs) {
 		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
+		await mv(
+			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
+			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
+		);
 	}
 });
 
