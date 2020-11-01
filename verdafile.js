@@ -23,11 +23,7 @@ const ARCHIVE_DIR = "release-archives";
 
 const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
-const TTCIZE = [
-	"node",
-	"--max-old-space-size=8192",
-	"node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"
-];
+const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const webfontFormats = [
 	["woff2", "woff2"],
 	["ttf", "truetype"]
@@ -147,29 +143,6 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	return { fileNameToBpMap, buildPlans: returnBuildPlans };
 });
 
-function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
-	if (!bp.family) {
-		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
-	}
-	if (!bp.slopes && bp.slants) {
-		echo.warn(
-			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
-				`Use "slopes" instead.`
-		);
-	}
-
-	if (!bp.pre) bp.pre = {};
-
-	if (!bp.pre.design) bp.pre.design = bp.design || [];
-	if (!bp.pre.upright) bp.pre.upright = bp.upright || [];
-	if (!bp.pre.oblique) bp.pre.oblique = bp.oblique || [];
-	if (!bp.pre.italic) bp.pre.italic = bp.italic || [];
-
-	bp.weights = bp.weights || dWeights;
-	bp.slopes = bp.slopes || bp.slants || dSlopes;
-	bp.widths = bp.widths || dWidths;
-}
-
 const BuildPlanOf = computed.group("metadata:build-plan-of", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(BuildPlans);
 	const plan = buildPlans[gid];
@@ -241,28 +214,31 @@ function getSuffixMapping(weights, slopes, widths) {
 		for (const s in slopes) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, DEFAULT_SUBFAMILY);
-				mapping[suffix] = {
-					weight: w,
-					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
-					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
-					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
-					width: wd,
-					shapeWidth: nValidate(
-						"Shape width of " + wd,
-						widths[wd].shape,
-						vlShapeWidth,
-						fixShapeWidth
-					),
-					cssStretch: widths[wd].css || wd,
-					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
-					slope: s,
-					cssStyle: slopes[s] || s,
-					menuSlope: slopes[s] || s
-				};
+				mapping[suffix] = getSuffixMappingItem(weights, w, slopes, s, widths, wd);
 			}
 		}
 	}
 	return mapping;
+}
+function getSuffixMappingItem(weights, w, slopes, s, widths, wd) {
+	return {
+		// Weights
+		weight: w,
+		shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, VlShapeWeight),
+		cssWeight: nValidate("CSS weight of " + w, weights[w].css, VlCssWeight),
+		menuWeight: nValidate("Menu weight of " + w, weights[w].menu, VlMenuWeight),
+
+		// Widths
+		width: wd,
+		shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, VlShapeWidth),
+		cssStretch: widths[wd].css || wd,
+		menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, VlMenuWidth),
+
+		// Slopes
+		slope: s,
+		cssStyle: slopes[s] || s,
+		menuSlope: slopes[s] || s
+	};
 }
 
 function makeFileName(prefix, suffix) {
@@ -275,65 +251,6 @@ function makeSuffix(w, wd, s, fallback) {
 			(s === SLOPE_NORMAL ? "" : s) || fallback
 	);
 }
-
-function validateRecommendedWeight(w, value, label) {
-	if (recommendedMenuWeights[w] && recommendedMenuWeights[w] !== value) {
-		echo.warn(
-			`${label} weight settings of ${w} ( = ${value}) doesn't match ` +
-				`the recommended value ( = ${recommendedMenuWeights[w]}).`
-		);
-	}
-}
-
-function nValidate(key, v, f, ft) {
-	if (ft) v = ft(v);
-	if (typeof v !== "number" || !isFinite(v) || (f && !f(v))) {
-		throw new TypeError(`${key} = ${v} is not a valid number.`);
-	}
-	return v;
-}
-function vlShapeWeight(x) {
-	return x >= 100 && x <= 900;
-}
-function vlCssWeight(x) {
-	return x > 0 && x < 1000;
-}
-function vlMenuWeight(x) {
-	return vlCssWeight(x);
-}
-const g_widthFixupMemory = new Map();
-function fixShapeWidth(x) {
-	if (x >= 3 && x <= 9) {
-		if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
-		const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
-		echo.warn(
-			`The build plan is using legacy width grade ${x}. ` +
-				`Converting to unit width ${xCorrected}.`
-		);
-		g_widthFixupMemory.set(x, xCorrected);
-		return xCorrected;
-	} else {
-		return x;
-	}
-}
-function vlShapeWidth(x) {
-	return x >= 433 && x <= 665;
-}
-function vlMenuWidth(x) {
-	return x >= 1 && x <= 9 && x % 1 === 0;
-}
-const recommendedMenuWeights = {
-	thin: 100,
-	extralight: 200,
-	light: 300,
-	regular: 400,
-	book: 450,
-	medium: 500,
-	semibold: 600,
-	bold: 700,
-	extrabold: 800,
-	heavy: 900
-};
 
 function whyBuildPlanIsnNotThere(gid) {
 	if (!fs.existsSync(PRIVATE_BUILD_PLANS))
@@ -939,3 +856,79 @@ const Parameters = task(`meta:parameters`, async target => {
 		sfu`params/ligation-set.toml`
 	);
 });
+
+///////////////////////////////////////////////////////////
+//////              Config Validation                //////
+///////////////////////////////////////////////////////////
+
+// Build plan validation
+function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
+	if (!bp.family) {
+		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	}
+	if (!bp.slopes && bp.slants) {
+		echo.warn(
+			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
+				`Use "slopes" instead.`
+		);
+	}
+
+	bp.weights = bp.weights || dWeights;
+	bp.slopes = bp.slopes || bp.slants || dSlopes;
+	bp.widths = bp.widths || dWidths;
+}
+
+// Recommended weight validation
+function validateRecommendedWeight(w, value, label) {
+	const RecommendedMenuWeights = {
+		thin: 100,
+		extralight: 200,
+		light: 300,
+		regular: 400,
+		book: 450,
+		medium: 500,
+		semibold: 600,
+		bold: 700,
+		extrabold: 800,
+		heavy: 900
+	};
+	if (RecommendedMenuWeights[w] && RecommendedMenuWeights[w] !== value) {
+		echo.warn(
+			`${label} weight settings of ${w} ( = ${value}) doesn't match ` +
+				`the recommended value ( = ${RecommendedMenuWeights[w]}).`
+		);
+	}
+}
+
+// Value validation
+function nValidate(key, v, validator) {
+	if (validator.fixup) v = validator.fix(v);
+	if (typeof v !== "number" || !isFinite(v) || !validator.validate(v)) {
+		throw new TypeError(`${key} = ${v} is not a valid number.`);
+	}
+	return v;
+}
+
+const VlShapeWeight = { validate: x => x >= 100 && x <= 900 };
+const VlCssWeight = { validate: x => x > 0 && x < 1000 };
+const VlMenuWeight = VlCssWeight;
+
+const g_widthFixupMemory = new Map();
+const VlShapeWidth = {
+	validate: x => x >= 433 && x <= 665,
+	fix(x) {
+		if (x >= 3 && x <= 9) {
+			if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
+			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
+			echo.warn(
+				`The build plan is using legacy width grade ${x}. ` +
+					`Converting to unit width ${xCorrected}.`
+			);
+			g_widthFixupMemory.set(x, xCorrected);
+			return xCorrected;
+		} else {
+			return x;
+		}
+	}
+};
+const VlMenuWidth = { validate: x => x >= 1 && x <= 9 && x % 1 === 0 };
