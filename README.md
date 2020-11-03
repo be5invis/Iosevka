@@ -589,11 +589,12 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `t = 'flat-hook-short-neck'`, `cv26 = 5`: `t` with flat hook and a slightly shorter neck.
     + `t = 'flat-hook-short-neck2'`, `cv26 = 6`: `t` with flat hook and a more shorter neck.
   - Styles for `u`:
-    + `u = 'with-bar'`, `cv27 = 1`: Normal `u` with right bar (default for Upright).
-    + `u = 'without-bar'`, `cv27 = 2`: Normal `u` without right bar, like a smaller uppercase `U`.
-    + `u = 'tailed'`, `cv27 = 3`: `u` with right bar and a slightly curly tail (default for Italic).
-    + `u = 'motion-serifed'`, `cv27 = 4`: Normal `u` with right bar and motion serifs.
-    + `u = 'motion-serifed-tailed'`, `cv27 = 5`: `u` with right bar, motion serifs and a slightly curly tail.
+    + `u = 'toothed'`, `cv27 = 1`: Normal `u` with bottom-right tooth (default for Upright).
+    + `u = 'toothless-corner'`, `cv27 = 2`: Toothless (corner bottom-right) `u`.
+    + `u = 'toothless-rounded'`, `cv27 = 3`: Toothless (rounded) `u`, like a smaller uppercase `U`.
+    + `u = 'tailed'`, `cv27 = 4`: `u` with right bar and a slightly curly tail (default for Italic).
+    + `u = 'motion-serifed'`, `cv27 = 5`: Normal `u` with right bar and motion serifs.
+    + `u = 'motion-serifed-tailed'`, `cv27 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
   - Styles for `v`, `V`:
     + `v = 'straight'`, `cv28 = 1`: Standard, straight `V` and `v` (default).
     + `v = 'curly'`, `cv28 = 2`:  Slightly curly `V` and `v`, like Iosevka 2.x.
@@ -627,8 +628,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `zero = 'reverse-slashed'`, `cv35 = 4`: Reverse-slashed `0`.
     + `zero = 'long-dotted'`, `cv35 = 5`: Long-dotted Zero `0` like Hack.
   - Styles for `1`:
-    + `one = 'nobase'`, `cv36 = 1`: `1` with bottom serif (default for Sans).
-    + `one = 'base'`, `cv36 = 2`: `1` without bottom serif (default for Slab).
+    + `one = 'nobase'`, `cv36 = 1`: `1` without bottom serif (default for Sans).
+    + `one = 'base'`, `cv36 = 2`: `1` with bottom serif (default for Slab).
     + `one = 'line'`, `cv36 = 3`: `1` drawn just like a straight line.
   - Styles for `3`:
     + `three = 'flattop'`, `cv37 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
