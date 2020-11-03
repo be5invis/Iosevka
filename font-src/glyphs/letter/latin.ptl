@@ -4167,6 +4167,13 @@ glyph-block Letter-Latin-Lower-U : begin
 	glyph-block-import Marks : markHalfStroke
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder
 
+	define [UTopLeftSerif yTop]  : tagged 'serifLT'
+		LeftwardTopSerif SB yTop SideJut
+	define [UTopRightSerif yTop] : tagged 'serifRT'
+		LeftwardTopSerif (RightSB - Stroke * HVContrast) yTop SideJut
+	define [UBottomRightSerif yTop] : tagged 'serifRB'
+		RightwardBottomSerif RightSB 0 SideJut
+
 	create-glyph : glyph-proc
 		set-width Width
 		include : MarkSet.e
@@ -4177,27 +4184,27 @@ glyph-block Letter-Latin-Lower-U : begin
 			fine -- ShoulderFine
 		include : FlipAround Middle (XH / 2)
 
-		create-derived 'u.withBar' : glyph-proc
+		create-derived 'u.toothed' : glyph-proc
 			include : VBarRight RightSB 0 XH
 			if SLAB : begin
-				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
-				include : LeftwardTopSerif SB XH SideJut
-				include : RightwardBottomSerif RightSB 0 SideJut
+				include : UTopLeftSerif XH
+				include : UTopRightSerif XH
+				include : UBottomRightSerif XH
 
 		create-derived 'u.tailed' : glyph-proc
 			include : RightwardTailedBar RightSB 0 XH
 			if SLAB : begin
-				include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
-				include : LeftwardTopSerif SB XH SideJut
+				include : UTopLeftSerif XH
+				include : UBottomRightSerif XH
 
 		create-derived 'u.motionSerifed' : glyph-proc
 			include : VBarRight RightSB 0 XH
-			include : LeftwardTopSerif SB XH SideJut
-			include : RightwardBottomSerif RightSB 0 SideJut
+			include : UTopLeftSerif XH
+			include : UBottomRightSerif XH
 
 		create-derived 'u.motionSerifedTailed' : glyph-proc
 			include : RightwardTailedBar RightSB 0 XH
-			include : LeftwardTopSerif SB XH SideJut
+			include : UTopLeftSerif XH
 
 	create-glyph 'grek/upsilon' 0x3C5 : glyph-proc
 		include : MarkSet.e
@@ -4212,13 +4219,27 @@ glyph-block Letter-Latin-Lower-U : begin
 			flat (RightSB - OX + O) SmallSmoothA
 			curl (RightSB - OX + O) XH [heading Upward]
 
-	create-glyph 'u.withoutBar' : glyph-proc
+	create-glyph 'u.toothlessCorner' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' Middle 0
+		include [refer-glyph 'n.earlessCornerStraight']
+		eject-contour 'serifLT'
+		eject-contour 'serifLB'
+		eject-contour 'serifRB'
+		include : FlipAround Middle (XH / 2)
+		if SLAB : begin
+			include : UTopLeftSerif XH
+			include : UTopRightSerif XH
+
+	create-glyph 'u.toothlessRounded' : glyph-proc
 		include [refer-glyph 'grek/upsilon'] AS_BASE ALSO_METRICS
-		include : AIVSerifs XH
+		if SLAB : begin
+			include : UTopLeftSerif XH
+			include : UTopRightSerif XH
 
 	select-variant 'u' 'u'
 	create-glyph 'urtailBR' 0x1D99 : glyph-proc
-		include [refer-glyph 'u.withBar'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'u.toothed'] AS_BASE ALSO_METRICS
 		include [refer-glyph 'rtailBR']
 
 	define [LatinUpsilon2Shape top sma smb] : glyph-proc
@@ -4243,7 +4264,7 @@ glyph-block Letter-Latin-Lower-U : begin
 
 	create-glyph 'uWithLightCentralizationStroke' : glyph-proc
 		include : MarkSet.p
-		include : refer-glyph "u.withBar"
+		include : refer-glyph "u.toothed"
 		local fine      : adviceBlackness 4
 		local outStand  : SB * 0.75 + fine * 0.25
 		local outStandY : SmallSmoothB / 2 - Descender * 0.6
