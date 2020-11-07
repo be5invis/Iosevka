@@ -39,6 +39,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : nShoulder
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 
 	define GammaBarLeft (SB * 1.5)
 	define [GammaShape top] : glyph-proc
@@ -53,6 +54,11 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	create-glyph 'grek/Gamma' 0x393 : glyph-proc
 		include : MarkSet.capital
 		include : GammaShape CAP
+
+	create-glyph 'mathbb/grek/Gamma' 0x213E : glyph-proc
+		include : MarkSet.capital
+		include : BBBarLeft GammaBarLeft 0 CAP
+		include : HBarTop GammaBarLeft RightSB CAP BBS
 
 	alias 'cyrl/Ghe' 0x413 'grek/Gamma'
 
@@ -132,23 +138,50 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 glyph-block Letter-Greek-Lower-Gamma : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+
 
 	create-glyph 'grek/gamma' 0x3B3 : glyph-proc
 		include : MarkSet.p
 
-		local xmid : [mix SB RightSB 0.46] + HalfStroke
+		local xMid : [mix SB RightSB 0.46] + HalfStroke * HVContrast
+		local xStart : SB + 0.4 * Stroke * HVContrast
 		include : dispiro
-			g4 (SB + 0.4 * Stroke * HVContrast) (XH - O) [widths.rhs]
+			g4 xStart (XH - O) [widths.rhs]
 			bezcontrols 0.33 0.17 1 0.62 6 important
-			flat xmid 0
-			curl xmid Descender [heading Downward]
+			flat xMid 0
+			curl xMid Descender [heading Downward]
 
 		include : dispiro
 			widths.rhs
 			flat RightSB XH [heading Downward]
 			curl RightSB (XH * 0.9) [heading Downward]
 			quadcontrols 0 0.3 6
-			g4   xmid 0 [widths.rhs : Stroke * 0.9]
+			g4   xMid 0 [widths.rhs : Stroke * 0.9]
+
+	create-glyph 'mathbb/grek/gamma' 0x213D : glyph-proc
+		include : MarkSet.p
+
+		local cor : DiagCorDs (XH - Descender) (RightSB - SB) BBD
+		local swEqv : 2 * BBS + BBD
+		local xMid : [mix SB RightSB 0.46] + 0.46 * swEqv * HVContrast
+		local xStart : SB + 0.4 * swEqv * HVContrast
+
+		include : HBarTop    (xStart - BBD) (xStart + (cor - 1) * BBD) XH        BBS
+		include : HBarBottom (xMid - BBD)   (xMid)                     Descender BBS
+
+		foreach {ob ot} [items-of {{ 0 (cor - 1) } { (-1) (-1) }}] : include : dispiro
+			g4 (xStart + ot * BBD) XH [widths.rhs.heading BBS Downward]
+			bezcontrols 0.33 0.17 1 0.62 6 important
+			flat (xMid + ob * BBD) 0
+			curl (xMid + ob * BBD) Descender [heading Downward]
+
+		include : dispiro
+			widths.rhs BBS
+			flat RightSB XH [heading Downward]
+			curl RightSB (XH * 0.9) [heading Downward]
+			quadcontrols 0 0.3 6
+			g4   xMid 0 [widths.rhs : BBS * 0.9]
 
 glyph-block Letter-Greek-Lower-Delta : begin
 	glyph-block-import CommonShapes
@@ -443,11 +476,11 @@ glyph-block Letter-Greek-Lower-Nu : begin
 glyph-block Letter-Greek-Pi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
 
 	glyph-block-export PiShape
-	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noSerif [endShrink 0] [df : DivFrame 1]] : glyph-proc
-		local fine : fallback _fine Stroke
-		local shrink : if (!noSerif && SLAB) 0 (shrinkrate * (df.rightSB - df.leftSB))
+	define [PiShape] : params [df top bottom [shrinkRate 0.05] [fine Stroke] [noSerif false] [endShrink 0]] : glyph-proc
+		local shrink : if (!noSerif && SLAB) 0 (shrinkRate * (df.rightSB - df.leftSB))
 		local endexpand : if (!noSerif && SLAB) 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
 		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
 		include : VBarLeft (df.leftSB + shrink) bottom (top - fine / 2) fine
@@ -459,13 +492,24 @@ glyph-block Letter-Greek-Pi : begin
 			include : CenterTopSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) top Jut fine
 			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) top Jut fine
 
+	define [MathBBPiShape] : params [df top bottom [shrinkRate 0.05] [endShrink 0]] : glyph-proc
+		local shrink : shrinkRate * (df.rightSB - df.leftSB)
+		local endexpand : -endShrink * (df.rightSB - df.leftSB) || shrink / 2
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top BBS
+		include : BBBarLeft (df.leftSB + shrink) bottom top
+		include : BBBarRight (df.rightSB - shrink) bottom top
+
 	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
 		include : MarkSet.capital
-		include : PiShape CAP 0 (shrinkrate -- 0)
+		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
+
+	create-glyph 'mathbb/grek/Pi' 0x213F : glyph-proc
+		include : MarkSet.capital
+		include : MathBBPiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
 
 	create-glyph 'cyrl/pe.upright' : glyph-proc
 		include : MarkSet.e
-		include : PiShape XH 0 (shrinkrate -- 0.05) (endShrink -- 0.05)
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0.05) (endShrink -- 0.05)
 
 	create-glyph 'cyrl/pe.SRB': glyph-proc
 		include [refer-glyph 'u'] AS_BASE
@@ -476,7 +520,11 @@ glyph-block Letter-Greek-Pi : begin
 
 	create-glyph 'grek/pi' 0x3C0 : glyph-proc
 		include : MarkSet.e
-		include : PiShape XH 0 (noSerif -- true) (shrinkrate -- 0.06)
+		include : PiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)
+
+	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
+		include : MarkSet.e
+		include : MathBBPiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)
 
 
 glyph-block Letter-Greek-Upper-Sigma : begin
@@ -484,22 +532,22 @@ glyph-block Letter-Greek-Upper-Sigma : begin
 	glyph-block-import Common-Derivatives
 
 	glyph-block-export SigmaShape
-	define [SigmaShape df top bottom fine] : glyph-proc
-		local cor : [Math.hypot (top - bottom) (df.rightSB - df.leftSB)] / (top - bottom)
+	define [SigmaShape] : params [df top bottom fine [noSlab false] [offsetLeft 0]] : glyph-proc
+		local cor : DiagCor (top - bottom) (df.rightSB - df.leftSB)
 
-		include : HBarTop df.leftSB df.rightSB top fine
-		include : HBarBottom df.leftSB df.rightSB bottom fine
+		include : HBarTop (offsetLeft + df.leftSB) df.rightSB top fine
+		include : HBarBottom (offsetLeft + df.leftSB) df.rightSB bottom fine
 
 		local midx : df.middle - fine / 2
 		include : ReverseContours : spiro-outline
-			corner df.leftSB (bottom + fine)
-			corner (df.leftSB + fine * cor) (bottom + fine)
-			corner (midx + fine * cor) [mix bottom top 0.5]
-			corner (df.leftSB + fine * cor) (top - fine)
-			corner df.leftSB (top - fine)
-			corner midx [mix bottom top 0.5]
+			corner (df.leftSB + offsetLeft) (bottom + fine)
+			corner (df.leftSB + offsetLeft + fine * cor) (bottom + fine)
+			corner (midx + offsetLeft + fine * cor) [mix bottom top 0.5]
+			corner (df.leftSB + offsetLeft + fine * cor) (top - fine)
+			corner (df.leftSB + offsetLeft) (top - fine)
+			corner (midx + offsetLeft) [mix bottom top 0.5]
 
-		if SLAB : begin
+		if (!noSlab && SLAB) : begin
 			include : DownwardRightSerif df.rightSB top VJut
 			include : UpwardRightSerif df.rightSB bottom VJut
 
