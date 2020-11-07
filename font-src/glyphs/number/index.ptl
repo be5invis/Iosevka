@@ -121,6 +121,21 @@ glyph-block Digits-Zero : begin
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')
 
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/zero' 0x1D7D8 : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB BBS
+		include : intersection
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS
+			union
+				VBarLeft  (SB + OX + BBD)      0 CAP BBS
+				VBarRight (RightSB - OX - BBD) 0 CAP BBS
+				intersection
+					Rect CAP 0 (SB + BBD) (RightSB - BBD)
+					dispiro
+						flat 0 (CAP * (1 - 0.77)) [widths.center BBS]
+						curl Width (CAP * 0.77)
+
 glyph-block Digits-One : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -164,22 +179,43 @@ glyph-block Digits-One : begin
 	select-variant 'one.lnum' [CodeLnum '1'] (follow -- 'one')
 	select-variant 'one.onum' [CodeOnum '1'] (follow -- 'one')
 
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
+	create-glyph 'mathbb/one' 0x1D7D9 : glyph-proc
+		define barCenter : Middle + OneBalance / 2
+		define xSerifTerminal : barCenter - BBD / 8 * HVContrast - HookX * 1.25
+		define ySerifTerminal : CAP - BBD / 8 - Hook * 0.75
+		include : MarkSet.capital
+		include : intersection
+			BBBarCenter barCenter 0 CAP
+			spiro-outline
+				corner (barCenter + BBD / 2) CAP
+				corner Width CAP
+				corner Width 0
+				corner 0     0
+				corner xSerifTerminal ySerifTerminal
+		include : dispiro
+			widths.lhs BBS
+			corner (barCenter + BBD / 2) CAP
+			corner xSerifTerminal ySerifTerminal
+
 glyph-block Digits-Two : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
-	define [TwoShape top] : glyph-proc
+	define [TwoArcShapeT sink offset sw top] : begin
 		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
-		include : dispiro
-			widths.rhs
-			g4 SB (top - Hook)
-			hookstart (top - O)
-			g4.down.mid (RightSB - OX / 2) (top - smooth)
-			alsoThru.g2 0.5 ([StrokeWidthBlend 0.425 0.4] * [linreg 500 1 700 0.95 Width]) [widths.center]
-			flat SB 1 [widths.heading Stroke 0 Downward]
-			curl SB 0 [heading Downward]
+		return : sink
+			widths.rhs sw
+			g4 (SB + offset) (top - Hook)
+			hookstart (top - offset - O)
+			g4.down.mid (RightSB - offset - OX / 2) (top - smooth)
+			alsoThru.g2 0.5 ([StrokeWidthBlend 0.425 0.4 sw] * [linreg 500 1 700 0.95 Width]) [widths.center sw]
+			flat (SB - offset) 1 [widths.heading sw 0 Downward]
+			curl (SB - offset) 0 [heading Downward]
 
+	define [TwoShape top] : glyph-proc
+		include : TwoArcShapeT dispiro 0 Stroke top
 		include : HBarBottom  (SB + HalfStroke) RightSB 0
 		if SLAB : begin
 			include : UpwardRightSerif RightSB 0 VJut
@@ -194,31 +230,42 @@ glyph-block Digits-Two : begin
 
 	turned 'turnDigitTwo' 0x218A 'two.lnum' Middle (CAP / 2)
 
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/two' 0x1D7DA : glyph-proc
+		include : MarkSet.capital
+		include : TwoArcShapeT dispiro 0 BBS CAP
+		include : intersection
+			TwoArcShapeT spiro-outline 1 BBS CAP
+			VBarRight (RightSB - OX / 2 - BBD) 0 CAP BBS
+		include : HBarBottom (SB + BBS / 2 * HVContrast) RightSB 0 BBS
+
 glyph-block Digits-Three : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks ShiftDown CodeLnum CodeOnum
 	glyph-block-import Letter-Latin-Ezh : EzhShape
 
-	define [ThreeShape top] : glyph-proc
+	define [ThreeShapeT sink offset sw top] : glyph-proc
 		local barcenter : top * HBarPos
 		local threeRadius : ((top / 2) + HalfStroke - Smooth) * 1.25
-		local fine : Stroke * CThin
+		local fine : sw * CThin
 
-		include : dispiro
-			widths.rhs
-			g4 (SB - O) (top - Hook)
-			hookstart (top - O)
-			g4 (RightSB) (top - (SmoothB * (top - barcenter) / (top / 2)))
-			flat (RightSB - threeRadius + 0.01) (barcenter - (fine - HalfStroke)) [widths.heading 0 fine Leftward]
-			curl (RightSB - threeRadius) (barcenter - (fine - HalfStroke)) [heading Leftward]
-		include : dispiro
-			widths.lhs
-			g4 (SB + O) Hook
-			hookstart O
-			g4 (RightSB - O * 2) (SmoothA * barcenter / (top / 2))
-			flat (RightSB - threeRadius + 0.01) (barcenter + (fine - HalfStroke)) [widths.heading fine 0 Leftward]
-			curl (RightSB - threeRadius) (barcenter + (fine - HalfStroke)) [heading Leftward]
+		include : sink
+			widths.rhs sw
+			g4 (SB + offset - O) (top - Hook)
+			hookstart (top - offset - O)
+			g4 (RightSB - offset) (top - (SmoothB * (top - barcenter) / (top / 2)))
+			flat (RightSB - threeRadius + 0.01) (barcenter - (fine - sw / 2)) [widths.heading 0 fine Leftward]
+			curl (RightSB - threeRadius) (barcenter - (fine - sw / 2)) [heading Leftward]
+		include : sink
+			widths.lhs sw
+			g4 (SB + offset + O) Hook
+			hookstart (offset + O)
+			g4 (RightSB - offset - O * 2) (SmoothA * barcenter / (top / 2))
+			flat (RightSB - threeRadius + 0.01) (barcenter + (fine - sw / 2)) [widths.heading fine 0 Leftward]
+			curl (RightSB - threeRadius) (barcenter + (fine - sw / 2)) [heading Leftward]
+
+	define [ThreeShape top] : ThreeShapeT dispiro 0 Stroke top
 
 	create-glyph 'three.lnum.twoarcs' : glyph-proc
 		include : MarkSet.capital
@@ -240,30 +287,49 @@ glyph-block Digits-Three : begin
 
 	turned 'turnDigitThree' 0x218B 'three.lnum' Middle (CAP / 2)
 
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/three' 0x1D7DB : glyph-proc
+		include : MarkSet.capital
+		include : union
+			ThreeShapeT dispiro 0 BBS CAP
+			intersection
+				ThreeShapeT spiro-outline 1 BBS CAP
+				union
+					VBarRight (RightSB - BBD)         (CAP * HBarPos) CAP BBS
+					VBarRight (RightSB - BBD - O * 2) 0 (CAP * HBarPos)   BBS
+
 glyph-block Digits-Four : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
-	define [FourStdShape top open crossing] : glyph-proc
+	define [FourStdShape] : params [top open crossing [fine : adviceBlackness 3] [sw Stroke] [bbd 0]] : glyph-proc
 		local yBar (top * 0.4)
-		local fine : adviceBlackness 3
 
-		define xVertBar : mix SB RightSB [if crossing 0.825 0.9125]
+		define xVertBar : [mix SB RightSB [if crossing 0.825 0.9125]] - (bbd * 0.75)
+		define yVertBarTop : mix (yBar - sw) top [if open 0.5 1]
 		define xHBarTerminal : if crossing RightSB xVertBar
-		define xSlopeTop : xVertBar - Stroke * HVContrast - fine * HVContrast * [if crossing 0.25 0.5]
+		define xSlopeTop : xVertBar - sw * HVContrast - fine * HVContrast * [if crossing 0.25 0.5]
 
-		include : HBarTop (SB + OX) xHBarTerminal yBar
-		include : VBarRight xVertBar 0 [mix (yBar - Stroke) top [if open 0.5 1]]
-		include : intersection
-			if open
-				Rect top yBar 0 Width
-				Rect top yBar 0 xVertBar
-			dispiro
-				widths.rhs fine
-				g4 (SB + OX) yBar
-				g4 [mix (SB + OX) xSlopeTop 2] [mix yBar top 2]
-		if SLAB : begin
+		include : union
+			VBarRight xVertBar 0 yVertBarTop sw
+			difference
+				HBarTop (SB + OX) xHBarTerminal yBar sw
+				Rect CAP 0 xVertBar (xVertBar + bbd)
+			intersection
+				if open
+					Rect top yBar 0 Width
+					Rect top yBar 0 xVertBar
+				dispiro
+					widths.rhs fine
+					g4 (SB + OX) yBar
+					g4 [mix (SB + OX) xSlopeTop 2] [mix yBar top 2]
+
+		if bbd : begin
+			include : VBarRight (xVertBar + bbd) 0 yVertBarTop sw
+			include : HBarTop xVertBar (xVertBar + bbd) CAP sw
+			include : HBarBottom xVertBar (xVertBar + bbd) 0 sw
+		if (!bbd && SLAB) : begin
 			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
 
 	define [FourOpenShape top crossing] : glyph-proc
@@ -336,12 +402,18 @@ glyph-block Digits-Four : begin
 	select-variant 'four.lnum' [CodeLnum '4'] (follow -- 'four')
 	select-variant 'four.onum' [CodeOnum '4'] (follow -- 'four')
 
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
+	create-glyph 'mathbb/four' 0x1D7DC : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP false true (sw -- BBS) (bbd -- BBD) (fine -- BBS)
+
+
 glyph-block Digits-Five : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
-	define [FiveShape top bp] : glyph-proc
+	define [FiveShape] : params [top bp [sw Stroke] [bbd 0]] : glyph-proc
 		local t1 : top * bp * 0.8
 		local t2 : top * bp
 		local ycurly : YSmoothMidR t2 0 SmoothA SmoothB
@@ -351,18 +423,29 @@ glyph-block Digits-Five : begin
 		include : difference
 			glyph-proc
 				local FiveStroke : dispiro
-					widths.rhs
+					widths.rhs sw
 					g4 xleft (t2 - AHook * top / CAP)
 					hookstart (t2 - O)
 					g4 (RightSB - OX) ycurly
 					hookend O
 					g4 SB (Hook * top / CAP)
+
+				local FiveStrokeMask : spiro-outline
+					g4 (xleft + 1) (t2 - AHook * top / CAP)
+					hookstart (t2 - O - 1)
+					g4 (RightSB - OX - 1) ycurly
+					hookend (O + 1)
+					g4 (SB + 1) (Hook * top / CAP)
+
 				local fiveStroke : FiveStroke.call currentGlyph
 				local firstKnot : currentGlyph.gizmo.unapply fiveStroke.rhsKnots.(fiveStroke.rhsKnots.length - 1)
-				include : VBarRight firstKnot.x firstKnot.y top
-				include : HBarTop xleft xright top
-				if SLAB : begin
-					include : DownwardRightSerif xright top VJut
+				include : VBarRight firstKnot.x firstKnot.y top sw
+				include : HBarTop (firstKnot.x + O) xright top sw
+				if bbd : begin
+					include : intersection FiveStrokeMask [VBarRight (RightSB - OX - bbd) 0 CAP sw]
+					include : difference [VBarRight (firstKnot.x + bbd) 0 CAP sw] FiveStrokeMask
+
+				if (!bbd && SLAB) : include : DownwardRightSerif xright top VJut
 			Rect (t2 / 2 + top * 0.015) (t2 / 2 - top * 0.015) 0 Middle
 
 	create-glyph 'five.lnum' [CodeLnum '5'] : glyph-proc
@@ -381,6 +464,11 @@ glyph-block Digits-Five : begin
 	create-glyph 'zhuangtonefive' 0x1BD : glyph-proc
 		include : MarkSet.e
 		include : FiveShape XH designParameters.fiveBarPos
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/five' 0x1D7DD : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP designParameters.fiveBarPos (sw -- BBS) (bbd -- BBD)
 
 glyph-block Digits-Six : begin
 	glyph-block-import CommonShapes
@@ -435,34 +523,46 @@ glyph-block Digits-Six : begin
 			g4 SB Hook
 
 	glyph-block-export StraightBarSixShape
-	define [StraightBarSixShape charTop] : begin
-		local oTop : charTop * 0.55 + Stroke / 2
+	define [StraightBarSixShape] : params [charTop [sw Stroke] [bbd 0]] : glyph-proc
+		local oTop : charTop * 0.55 + sw / 2
 		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
 		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
-		local fine   : Stroke * CThin
-		local coFine : Math.max (Stroke * CThin) (Stroke - fine / 2)
+		local fine   : sw * CThin
+		local coFine : Math.max (sw * CThin) (sw - fine / 2)
 
-		local xTerminal : [mix SB RightSB 0.6] - 0.5 * Stroke * HVContrast
 		local xMockBarStart   0
-		local yMockBarStart : ymiddlea + Stroke * 0.3
-		local pStraightBarStart : 0.75 - (Stroke / charTop)
-		return : intersection
+		local yMockBarStart : ymiddlea + sw * 0.3
+		local xTerminal0 : [mix SB RightSB 0.6] - 0.5 * sw * HVContrast
+		local kDiagBbd : DiagCorDs (charTop - yMockBarStart) (xTerminal0 - xMockBarStart) bbd
+		local xTerminal : xTerminal0 + (kDiagBbd * bbd / 2)
+		local pStraightBarStart : 0.75 - (sw / charTop)
+		include : intersection
 			Rect charTop (-charTop) (-Width) (2 * Width)
 			dispiro
 				widths.rhs fine
-				g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine + 1/16)
+				g4.left.start (Middle + bbd / 2 + CorrectionOMidS - TanSlope * (sw - fine)) (O + sw - fine + 1/16)
 				archv
-				g4.up.mid (SB + OX + (Stroke - fine) * HVContrast + 1/16) ymiddlea
+				g4.up.mid (SB + bbd + OX + (sw - fine) * HVContrast + 1/16) ymiddlea
 				arcvh
-				g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
+				g4 (Middle + bbd / 2 - CorrectionOMidS) (oTop - O) [widths.rhs sw]
 				archv
 				g4.down.mid (RightSB - OX) ymiddleb
 				arcvh
-				g4.left.mid (Middle + CorrectionOMidS) (O)
+				g4.left.mid (Middle + bbd / 2 + CorrectionOMidS) (O)
 				archv
-				g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
-				flat [mix xMockBarStart xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs]
-				curl [mix xMockBarStart xTerminal 2]                 [mix yMockBarStart charTop 2]
+				g4.up.mid (SB + bbd + OX) (ymiddlea + sw * 0.3) [widths.rhs coFine]
+				flat [mix (xMockBarStart + bbd) xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs sw]
+				curl [mix (xMockBarStart + bbd) xTerminal 2]                 [mix yMockBarStart charTop 2]
+
+		if bbd : include : HBarTop (xTerminal - kDiagBbd * bbd) xTerminal charTop sw
+		if bbd : include : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				g4.left.mid (Middle + bbd / 2 + CorrectionOMidS) (O) [widths.rhs sw]
+				archv
+				g4.up.mid (SB + OX) (ymiddlea + sw * 0.3)
+				flat [mix xMockBarStart (xTerminal - kDiagBbd * bbd) pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart]
+				curl [mix xMockBarStart (xTerminal - kDiagBbd * bbd) 2]                 [mix yMockBarStart charTop 2]
 
 	create-glyph 'six.lnum.openContour' : glyph-proc
 		include : MarkSet.capital
@@ -480,6 +580,10 @@ glyph-block Digits-Six : begin
 	select-variant 'six.lnum' [CodeLnum '6'] (follow -- 'six')
 	alias          'six.onum' [CodeOnum '6'] 'six.lnum'
 
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/six' 0x1D7DE : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP (sw -- BBS) (bbd -- BBD)
 
 glyph-block Digits-Seven : begin
 	glyph-block-import CommonShapes
@@ -487,22 +591,21 @@ glyph-block Digits-Seven : begin
 	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
 
 	define SevenXLeft : mix SB RightSB 0.28
-	define [SevenSwCor top] : [Math.hypot 1 ((RightSB - SevenXLeft - HalfStroke) / (top - Stroke))] * HVContrast
 	define [SevenShape top] : glyph-proc
-		local cor : SevenSwCor top
 		include : union
-			HBarTop (SB + (OX - O)) RightSB top
-			spiro-outline
-				corner (SevenXLeft - Stroke * cor / 2) 0
-				corner (SevenXLeft + Stroke * cor / 2) 0
-				corner RightSB (top - Stroke)
-				corner (RightSB - Stroke * cor) (top - Stroke)
+			HBarTop SB RightSB top
+			intersection
+				Rect (top - Stroke) 0 SB RightSB
+				dispiro
+					widths.rhs
+					corner RightSB (top - Stroke)
+					corner [mix RightSB (SevenXLeft + 0.75 * Stroke * HVContrast) 2] [mix (top - Stroke) 0 2]
+
 	define [SevenCrossbarShape top] : glyph-proc
-		local cor : SevenSwCor top
-		local m : mix SevenXLeft (RightSB - HalfStroke * cor) 0.5
+		local m : mix SevenXLeft (RightSB - HalfStroke * HVContrast) 0.5
 		include : HBar
-			m - Stroke * cor * 0.25 - LongJut * 0.8
-			m + Stroke * cor * 0.25 + LongJut * 0.7
+			m - Stroke * HVContrast * 0.25 - LongJut * 0.8
+			m + Stroke * HVContrast * 0.25 + LongJut * 0.7
 			mix 0 (top - Stroke * 0.25) 0.5
 
 	create-glyph : glyph-proc
@@ -535,6 +638,21 @@ glyph-block Digits-Seven : begin
 
 	select-variant 'seven.lnum' [CodeLnum '7'] (follow -- 'seven')
 	select-variant 'seven.onum' [CodeOnum '7'] (follow -- 'seven')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/seven' 0x1D7DF : glyph-proc
+		local tr : RightSB - BBS / 2
+		local kDiag : DiagCorDs (CAP - BBS) (tr - SevenXLeft) (BBD * 0.75)
+		local xTerm : SevenXLeft - 0.25 * kDiag * BBD
+		include : union
+			HBarTop SB RightSB CAP BBS
+			intersection
+				Rect CAP 0 0 RightSB
+				union
+					HBarBottom xTerm (xTerm + kDiag * BBD) 0 BBS
+					ExtLineCenter 2 BBS tr         (CAP - BBS) (xTerm + kDiag * BBD) 0
+					ExtLineCenter 2 BBS (tr - BBD) (CAP - BBS) xTerm                 0
+
 
 glyph-block Digits-Eight : begin
 	glyph-block-import CommonShapes
@@ -587,6 +705,68 @@ glyph-block Digits-Eight : begin
 			alsoThru 0.5 py [widths (Stroke * py) (Stroke * (1 - py))]
 			straight.down.end l 0 [widths.heading Stroke 0 Downward]
 
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define [BBEightSd] : params [top swStart swEnd kTop sign OffsetLT OffsetRB OffsetC] : begin
+		define stroke : Math.max swStart swEnd
+		define fine   : Math.min swStart swEnd
+		define soStart : stroke - swStart
+		define soEnd   : stroke - swEnd
+		define bbOvershoot : BBD / 8
+		define xLeftTop  : [mix SB RightSB (1 - kTop)] - bbOvershoot
+		define xRightTop : mix SB RightSB kTop
+		define xLeftBot  : SB + OX
+		define xRightBot : RightSB - OX + bbOvershoot
+		define sma : SmoothAOf (Smooth * EightPr) Width
+		define smb : SmoothBOf (Smooth * EightPr) Width
+
+		define NcCenterX   : mix xLeftTop     xRightBot   0.5
+		define NcCenterY   : mix (top - sma)  (sma)       0.5
+
+		define [Center s] : object
+			x : mix (xLeftTop + [OffsetLT s].x) (xRightBot - [OffsetRB s].x) 0.5
+			y : mix (top - sma)                 (sma)                        0.5
+
+		return : dispiro
+			g2   ([Center 1].x + [OffsetC 1].x) ([Center 1].y + [OffsetC 1].y) [widths.center stroke]
+			g4   (xRightTop - HVContrast * soStart) (top - smb) [widths.lhs fine]
+			arcvh
+			g4   (Middle - CorrectionOMidX * stroke - bbOvershoot / 2) (top - O - soStart)
+			archv
+			g4   (xLeftTop + [OffsetLT sign].x) (top - sma + [OffsetLT sign].y)
+			g2   ([Center sign].x + [OffsetC sign].x) ([Center sign].y + [OffsetC sign].y) [widths.center stroke]
+			g4   (xRightBot - [OffsetRB sign].x) (sma + [OffsetRB sign].y) [widths.rhs fine]
+			arcvh
+			g4   (Middle + CorrectionOMidX * stroke + bbOvershoot / 2) (O + soEnd)
+			archv
+			g4   (xLeftBot + HVContrast * soEnd) smb [widths.rhs fine]
+			g2   ([Center (-1)].x + [OffsetC (-1)].x) ([Center (-1)].y + [OffsetC (-1)].y) [widths.center stroke]
+
+	create-glyph 'mathbb/eight' 0x1D7E0 : glyph-proc
+		include : MarkSet.capital
+		define theta : Math.PI / 4
+		foreach sign [items-of { 1 (-1) }] : begin
+			include : BBEightSd
+				top     -- CAP
+				swStart -- BBS * [if (sign > 0) CThin 1]
+				swEnd   -- BBS * [if (sign < 0) CThin 1]
+				kTop    -- 0.96
+				ess     -- BBD
+				sign    -- sign
+				OffsetC -- [lambda [s] {
+					.x (0.5 * s * BBD * [Math.sin theta])
+					.y (0.5 * s * BBD * [Math.cos theta])
+				}]
+				OffsetLT -- [lambda [s] {
+					.x [if (s > 0) (BBD / 2) 0]
+					.y ([if (s > 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]
+				OffsetRB -- [lambda [s] {
+					.x [if (s < 0) (BBD / 2) 0]
+					.y ([if (s < 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]
+
+
 glyph-block Digits-Nine : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -624,6 +804,12 @@ glyph-block Digits-Nine : begin
 
 	select-variant 'nine.lnum' [CodeLnum '9'] (follow -- 'nine')
 	select-variant 'nine.onum' [CodeOnum '9'] (follow -- 'nine')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/nine' 0x1D7E1 : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP (sw -- BBS) (bbd -- BBD)
+		include : FlipAround (Middle) (CAP / 2)
 
 glyph-block Digits-Ten : begin
 	glyph-block-import CommonShapes
