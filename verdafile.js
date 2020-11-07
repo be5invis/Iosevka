@@ -29,10 +29,6 @@ const webfontFormats = [
 	["ttf", "truetype"]
 ];
 
-const SINGLE_GROUP_EXPORT_PREFIX = `ttf`;
-const COLLECTION_EXPORT_PREFIX = `pkg`;
-const TTC_ONLY_COLLECTION_EXPORT_PREFIX = `ttc`;
-
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
 const SLOPE_NORMAL = "upright";
@@ -491,8 +487,14 @@ const ExportSuperTtc = file.make(
 		await buildCompositeTtc(out, inputs);
 	}
 );
+
+///////////////////////////////////////////////////////////
+//////                   Archives                    //////
+///////////////////////////////////////////////////////////
+
+// Collection Archives
 const CollectionArchiveFile = file.make(
-	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
+	(gr, version) => `${ARCHIVE_DIR}/pkg-${gr}-${version}.zip`,
 	async (target, out, gr) => {
 		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
 		const sourceGroups = collectPlans.groupDecomposition[gr];
@@ -519,7 +521,7 @@ const CollectionArchiveFile = file.make(
 	}
 );
 const TtcOnlyCollectionArchiveFile = file.make(
-	(gr, version) => `${ARCHIVE_DIR}/${TTC_ONLY_COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
+	(gr, version) => `${ARCHIVE_DIR}/ttc-${gr}-${version}.zip`,
 	async (target, out, gr) => {
 		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
@@ -544,23 +546,43 @@ const TtcOnlyCollectionArchive = task.group(`ttc-only-collection-archive`, async
 	await target.need(TtcOnlyCollectionArchiveFile(cid, version));
 });
 
-// Single-group export
-const GroupArchiveFile = file.make(
-	(gid, version) => `${ARCHIVE_DIR}/${SINGLE_GROUP_EXPORT_PREFIX}-${gid}-${version}.zip`,
-	async (target, { dir, full }, gid, version) => {
-		const [exportPlans] = await target.need(ExportPlans, de`${dir}`);
+// Single-group Archives
+async function CreateGroupArchiveFile(dir, out, ...files) {
+	const relOut = Path.relative(dir, out.full);
+	await rm(out.full);
+	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9"], relOut, ...files);
+}
+const GroupTtfArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/ttf-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
 		await target.need(GroupContents(exportPlans[gid]));
-		await cd(`${DIST}/${exportPlans[gid]}`).run(
-			["7z", "a"],
-			["-tzip", "-r", "-mx=9"],
-			`../../${full}`,
-			`./`
-		);
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}/ttf`, out, "*.ttf");
+	}
+);
+const GroupTtfUnhintedArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/ttf-unhinted-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
+		await target.need(GroupContents(exportPlans[gid]));
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}/ttf-unhinted`, out, "*.ttf");
+	}
+);
+const GroupWebArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/webfont-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
+		await target.need(GroupContents(exportPlans[gid]));
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}`, out, "*.css", "ttf", "woff2");
 	}
 );
 const GroupArchive = task.group(`archive`, async (target, gid) => {
 	const [version] = await target.need(Version);
-	await target.need(GroupArchiveFile(gid, version));
+	await target.need(
+		GroupTtfArchiveFile(gid, version),
+		GroupTtfUnhintedArchiveFile(gid, version),
+		GroupWebArchiveFile(gid, version)
+	);
 });
 
 ///////////////////////////////////////////////////////////
@@ -777,7 +799,7 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	await target.need(AllTtfArchives, CollectionArchives, AllTtcArchives);
+	await target.need(AllTtfArchives, /* CollectionArchives, */ AllTtcArchives);
 	await target.need(SampleImages, Pages, ReleaseNotes, ChangeLog);
 });
 
