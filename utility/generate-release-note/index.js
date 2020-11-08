@@ -19,7 +19,6 @@ async function main() {
 	await GenerateChangeList(out);
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(out);
-	await CopyMarkdown(out, "package-reorg.md");
 
 	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
 	await fs.writeFile(outputPath, out.buffer);
@@ -126,7 +125,6 @@ async function GeneratePackageList(out) {
 			`<tr>`,
 			`<td colspan="5"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
 			`<td><b><a href="${downloadLink}">TTC</b></td>`,
-			`<td rowspan="${3 + spacingKeys.length}">${img}<br/></td>`,
 			`</tr>`
 		);
 
@@ -161,11 +159,7 @@ async function GeneratePackageList(out) {
 			);
 		}
 
-		out.log(
-			`<tr>`,
-			`<td colspan="6">${`<br/>`.repeat(MockRows - spacingKeys.length)}</td>`,
-			`<tr/>`
-		);
+		out.log(`<tr>`, `<td colspan="6">${img}</td>`, `<tr/>`);
 	}
 	out.log(`</table>\n`);
 }
