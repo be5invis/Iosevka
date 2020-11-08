@@ -19,7 +19,6 @@ async function main() {
 	await GenerateChangeList(out);
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(out);
-	await CopyMarkdown(out, "package-reorg.md");
 
 	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
 	await fs.writeFile(outputPath, out.buffer);
@@ -107,7 +106,7 @@ const ProportionalSpacings = {
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
 
 async function GeneratePackageList(out) {
-	const MockRows = 8;
+	const MockRows = 4;
 
 	out.log(`<table>`);
 	for (let shape in PackageShapes) {
@@ -117,48 +116,50 @@ async function GeneratePackageList(out) {
 
 		const familyName = buildName("\u00a0", "Iosevka", shapeNameSuffix);
 		const imageName = buildName("-", "iosevka", shape);
-		const fileName = buildName("-", "pkg", "iosevka", shape, Version);
+		const fileName = buildName("-", "ttc", "iosevka", shape, Version);
 		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
 
 		const desc = `<i>${shapeDesc}</i>`;
-		const img = `<img src="${imagePrefix}/${imageName}.png" width="540"/>`;
+		const img = `<img src="${imagePrefix}/${imageName}.png"/>`;
 		out.log(
 			`<tr>`,
-			`<td colspan="4"><b><a href="${downloadLink}">&#x1F4E6; ${familyName}</a></b> — ${desc}</td>`,
+			`<td colspan="5"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
+			`<td><b><a href="${downloadLink}">TTC</b></td>`,
 			`</tr>`
 		);
 
 		out.log(
 			`<tr>`,
-			`<td><b>&nbsp;&nbsp;└ TTF Package</b></td>`,
+			`<td><b>&nbsp;&nbsp;└ Sub-packages</b></td>`,
 			`<td><b>Spacing</b></td>`,
 			`<td><b>Ligatures</b></td>`,
-			`<td rowspan="${2 + spacingKeys.length}">${img}<br/></td>`,
+			`<td colspan="3"><b>Downloads</b></td>`,
 			`</tr>`
 		);
 		for (let spacing of spacingKeys) {
 			const [spacingDesc, ligation, spacingNameSuffix] = spacings[spacing];
-			const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
 			const familyName = buildName(" ", "Iosevka", spacingNameSuffix, shapeNameSuffix);
-			const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
-			const download = `<b><a href="${downloadLink}">${noBreak(familyName)}</a></b>`;
+			const createLink = (label, prefix) => {
+				const fileName = buildName("-", prefix, "iosevka", spacing, shape, Version);
+				const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+				return `<b><a href="${downloadLink}">${label}</a></b>`;
+			};
 			const leader =
 				"&nbsp;&nbsp;&nbsp;&nbsp;" +
 				(spacing === spacingKeys[spacingKeys.length - 1] ? "└" : "├");
 			out.log(
 				`<tr>`,
-				`<td>${leader}&nbsp;${download}</td>`,
+				`<td>${leader}&nbsp;<b>${noBreak(familyName)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
+				`<td>${createLink("TTF", "ttf")}</td>`,
+				`<td>${createLink("Unhinted", "ttf-unhinted")}</td>`,
+				`<td>${createLink("WebFont", "webfont")}</td>`,
 				`</tr>`
 			);
 		}
 
-		out.log(
-			`<tr>`,
-			`<td colspan="3">${`<br/>`.repeat(MockRows - spacingKeys.length)}</td>`,
-			`<tr/>`
-		);
+		out.log(`<tr>`, `<td colspan="6">${img}</td>`, `<tr/>`);
 	}
 	out.log(`</table>\n`);
 }
