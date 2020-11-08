@@ -1,7 +1,3 @@
-This is the in-development branch of Iosevka 4. It is a major update and **does not preserve downward compatibility**.
-
--------------
-
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg)
 **Iosevka** is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
 
