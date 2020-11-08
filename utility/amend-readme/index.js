@@ -2,7 +2,7 @@
 
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../export-data/parse-variants-data");
+const parseVariantsData = require("../export-data/variants-data");
 const parseLigationData = require("../export-data/ligation-data");
 const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
 const execMain = require("../shared/execMain");
@@ -14,42 +14,78 @@ const charMapObliquePath = process.argv[4];
 execMain(main);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function main() {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
+	readme = (await processSsOt()).apply(readme);
 	readme = (await processCv()).apply(readme);
 	readme = (await processSs()).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
+	readme = (await processLigSetOt(1, g => g.tag === "calt")).apply(readme);
+	readme = (await processLigSetOt(2, g => g.tag !== "calt")).apply(readme);
 	readme = (await processLangList()).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
 }
 
+async function processSsOt() {
+	const variantsData = await parseVariantsData();
+	const md = new MdCol("Section-OT-Stylistic-Sets");
+	md.log(`<table>`);
+	for (const ss of variantsData.composites) {
+		if (!ss.rank) continue;
+		{
+			md.log(`<tr>`);
+			md.log(`<td><code>${ss.tag}</code></td>`);
+			md.log(`<td>${ss.description}</td>`);
+			md.log(`</tr>`);
+		}
+		{
+			md.log(`<tr>`);
+			md.log(
+				`<td colspan="2"><img src="images/stylistic-set-${ss.tag}-${ss.rank}.png"/></td>`
+			);
+			md.log(`</tr>`);
+		}
+	}
+	md.log(`</table>`);
+	return md;
+}
 async function processSs() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
-	md.log(`* Styles as stylistic sets:\n`);
-	for (const gr of variantsData.ssData) {
-		if (!gr.effective) continue;
-		md.log(`  * \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
+	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
+	for (const gr of variantsData.composites) {
+		if (!gr.rank) continue;
+		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
 	}
 	return md;
 }
 async function processCv() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
-	md.log(
-		`* Styles for individual characters. They are easy-to-understand names of the \`cv##\` styles, including:\n`
-	);
-	for (const gr of variantsData.cvData) {
-		md.log(`  * Styles for ${gr.descSampleText.map(c => `\`${c}\``).join(", ")}:`);
+
+	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
+
+	for (const gr of variantsData.primes) {
+		const sampleText = gr.descSampleText
+			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
+			.join(", ");
+		md.log(`  - Styles for ${sampleText}:`);
 		const defaults = figureOutDefaults(variantsData, gr);
-		for (const config of gr.configs) {
-			const tag = config.tag || config.tagItalic;
+		for (const config of gr.variants) {
+			if (!config.rank) continue;
+			let selectorText = `\`${gr.key} = '${config.key}'\``;
+			if (gr.tag && config.rank) {
+				selectorText += `, \`${gr.tag} = ${config.rank}\``;
+			}
 			md.log(
-				`    * \`${config.selector}\`, \`${tag}\`: ` +
-					`${config.description}${formatDefaults(config.selector, defaults)}.`
+				`    + ${selectorText}: ` +
+					`${config.description}${formatDefaults(config.key, defaults)}.`
 			);
 		}
 	}
@@ -60,32 +96,8 @@ async function processPrivateBuildPlans() {
 	const md = new MdCol("Section-Private-Build-Plan-Sample");
 	const tomlPath = path.resolve(__dirname, "../../private-build-plans.sample.toml");
 	const toml = await fs.readFile(tomlPath, "utf-8");
-	md.log(toml.replace(/^/gm, "\t"));
+	md.log("```toml\n" + toml + "```");
 	return md;
-}
-
-class MdCol {
-	constructor(sectionName) {
-		this.data = "";
-		this.sectionName = sectionName;
-		this.matchRegex = new RegExp(
-			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
-			`m`
-		);
-	}
-	log(...s) {
-		this.data += s.join("") + "\n";
-	}
-	apply(s) {
-		return s.replace(this.matchRegex, (m, $1) => {
-			return (
-				`<!-- BEGIN ${this.sectionName} -->\n` +
-				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
-				this.data +
-				`\n<!-- END ${this.sectionName} -->\n`
-			).replace(/^/gm, $1);
-		});
-	}
 }
 
 function formatDefaults(selector, defaults) {
@@ -111,42 +123,32 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			selector: [...variantsData.default.design, ...variantsData.default.upright]
+			composition: { ...variantsData.defaults.sansUpright }
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			selector: [...variantsData.default.design, ...variantsData.default.italic]
+			composition: { ...variantsData.defaults.sansItalic }
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			selector: [
-				...variantsData.default.design,
-				...variantsData.default.upright,
-				...variantsData.slabDefaultOverride.design,
-				...variantsData.slabDefaultOverride.upright
-			]
+			composition: { ...variantsData.defaults.slabUpright }
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			selector: [
-				...variantsData.default.design,
-				...variantsData.default.italic,
-				...variantsData.slabDefaultOverride.design,
-				...variantsData.slabDefaultOverride.italic
-			]
+			composition: { ...variantsData.defaults.slabItalic }
 		}
 	];
 
-	for (const config of gr.configs) {
-		for (const dc of defaultConfigs)
-			for (const selector of dc.selector)
-				if (config.selector === selector) dc.result = config.selector;
+	for (const variant of gr.variants) {
+		for (const dc of defaultConfigs) {
+			if (variant.key === dc.composition[gr.key]) dc.result = variant.key;
+		}
 	}
 	return defaultConfigs;
 }
@@ -154,28 +156,54 @@ function figureOutDefaults(variantsData, gr) {
 async function processLigSetCherryPicking() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
-	md.log(
-		`* Styles for customizing the default (\`calt\`) ligation set. By choosing one or ` +
-			`multiple items listed below, the ligation set of \`calt\` will *only* contain the ` +
-			`corresponded ligations of the selectors you used.\n`
+	const headerPath = path.resolve(
+		__dirname,
+		"fragments/description-cherry-picking-ligation-sets.md"
 	);
+	md.log(await fs.readFile(headerPath, "utf-8"));
+
 	for (const gr in ligData.cherry) {
-		md.log(`  * \`${gr}\`: ${ligData.cherry[gr].desc}.`);
+		md.log(`  - \`${gr}\`: ${ligData.cherry[gr].desc}.`);
 	}
 	return md;
 }
 
 async function processLigSetPreDef() {
 	const ligData = await parseLigationData();
-	const md = new MdCol("Section-Cherry-Picking-Predefined");
-	md.log(`* Styles for ligation sets, include:\n`);
+	const md = new MdCol("Section-Predefined-Ligation-Sets");
+	const headerPath = path.resolve(__dirname, "fragments/description-predefined-ligation-sets.md");
+	md.log(await fs.readFile(headerPath, "utf-8"));
 	for (const gr in ligData.rawSets) {
 		if (ligData.rawSets[gr].isOptOut) continue;
 		const longDesc =
 			ligData.rawSets[gr].longDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;
-		md.log(`  * \`${gr}\`: ${longDesc}.`);
+		md.log(`  - \`${gr}\`: ${longDesc}.`);
 	}
+	return md;
+}
+
+async function processLigSetOt(index, fn) {
+	const ligData = await parseLigationData();
+	const md = new MdCol(`Section-OT-Ligation-Tags-${index}`);
+	md.log(`<table>`);
+	for (const ls of ligData.sets) {
+		if (!fn(ls)) continue;
+		{
+			md.log(`<tr>`);
+			if (ls.tagName)
+				md.log(`<td>${ls.tagName.map(x => `<code>${x}</code>`).join("; ")}</td>`);
+			else md.log(`<td><code>${ls.tag} off</td>`);
+			md.log(`<td>${ls.desc}</td>`);
+			md.log(`</tr>`);
+		}
+		{
+			md.log(`<tr>`);
+			md.log(`<td colspan="2"><img src="images/ligset-${ls.tag}-${ls.rank}.png"/></td>`);
+			md.log(`</tr>`);
+		}
+	}
+	md.log(`</table>`);
 	return md;
 }
 
@@ -189,4 +217,30 @@ async function processLangList() {
 	md.log(`${cl.languages.length} Supported Languages: \n`);
 	md.log(cl.languages.join(", "));
 	return md;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class MdCol {
+	constructor(sectionName) {
+		this.data = "";
+		this.sectionName = sectionName;
+		this.matchRegex = new RegExp(
+			`^([ \\t]*)<!-- BEGIN ${sectionName} -->\\n[\\s\\S]*?<!-- END ${sectionName} -->\\n`,
+			`m`
+		);
+	}
+	log(...s) {
+		this.data += s.join("") + "\n";
+	}
+	apply(s) {
+		return s.replace(this.matchRegex, (m, $1) => {
+			return (
+				`<!-- BEGIN ${this.sectionName} -->\n` +
+				`<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->\n\n` +
+				this.data +
+				`\n<!-- END ${this.sectionName} -->\n`
+			).replace(/^/gm, $1);
+		});
+	}
 }

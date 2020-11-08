@@ -1,5 +1,19 @@
 ## Modifications since version 2.x
 
+### 4.0.0-alpha.1
+
+ * \[**Breaking**\] Change implementation of character variants to `cv##` and alternate substitutions (#572).
+ * \[**Breaking**\] Change the building configuration format -- now we use dicts instead of “array of styles”.
+ * \[**Breaking**\] Cleanup of weight levels and increase contrast under heavier weights.
+ * \[**Breaking**\] Removed WOFF 1 web font building.
+ * Fix the shape of hook-top V's.
+ * Add half-filled stars (`U+2BE8` ... `U+2BEB`, #708).
+ * Add ligation set for Verilog (#710).
+ * Correct description of `1` variants (#711).
+ * Add variant `u`/`toothless-corner` (#706).
+ * Add support for all double-struck Latin letters and Digits (#712).
+
+
 ### 3.7.1
 
  * Fix broken line height under Macintosh (#704).

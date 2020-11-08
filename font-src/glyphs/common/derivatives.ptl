@@ -12,19 +12,17 @@ glyph-module
 
 glyph-block Common-Derivatives : begin
 	glyph-block-import CommonShapes : FlipAround
-	define [ApplyCv g follow para name transform omit] : begin
-		foreach [{k h} : pairs-of para.variants] : begin
-			local suffix h.(follow)
-			if (suffix && !(omit && omit.(k))) : begin
-				if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
-				if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
-					local tag h.__cvmap.(follow)
-					[Cv tag].set g ([fallback name follow] + '.' + suffix)
+	define [ApplyCv g follow para name transform] : begin
+		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
+			local suffix : h.resolveFor para follow
+			if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
+			if (suffix && h.tag && h.rank) : begin
+				[Cv h.tag h.rank].set g ([fallback name follow] + '.' + suffix)
 
-	define [select-variant] : params [name unicode [to-name name] transform omit [follow name]] : begin
+	define [select-variant] : params [name unicode [to-name name] transform [follow name]] : begin
 		if [not : glyph-is-needed name] : return nothing
 
-		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
+		local variant para.variantSelector.(follow)
 		if [not variant] : begin
 			throw : new Error "Variant for \(name) is not assigned."
 
@@ -32,7 +30,7 @@ glyph-block Common-Derivatives : begin
 
 		create-glyph [fallback to-name name] unicode : glyph-proc
 			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
-			ApplyCv currentGlyph follow para name transform omit
+			ApplyCv currentGlyph follow para name transform
 			set this.autoRefPriority [query-glyph (name + '.' + variant)].autoRefPriority
 
 	define [italic-variant name unicode] : begin

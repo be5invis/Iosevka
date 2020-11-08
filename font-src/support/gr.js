@@ -90,25 +90,27 @@ const Radical = {
 };
 
 const CvTagCache = new Map();
-function Cv(tag) {
-	if (CvTagCache.has(tag)) return CvTagCache.get(tag);
+function Cv(tag, rank) {
+	const key = tag + "#" + rank;
+	if (CvTagCache.has(key)) return CvTagCache.get(key);
 	const rel = {
 		tag,
+		rank,
 		get(glyph) {
-			if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv[tag];
+			if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv[key];
 			else return null;
 		},
 		set(glyph, toGid) {
 			if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
 			if (!glyph.related) glyph.related = {};
 			if (!glyph.related.cv) glyph.related.cv = {};
-			glyph.related.cv[tag] = toGid;
+			glyph.related.cv[key] = toGid;
 		},
 		amendName(name) {
-			return name + "." + tag;
+			return name + "." + key;
 		}
 	};
-	CvTagCache.set(tag, rel);
+	CvTagCache.set(key, rel);
 	return rel;
 }
 
@@ -125,8 +127,10 @@ const AnyCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
-			for (const tag in glyph.related.cv) {
-				const rel = Cv(tag);
+			for (const key in glyph.related.cv) {
+				const [tag, rankStr] = key.split("#");
+				const rank = parseInt(rankStr, 10);
+				const rel = Cv(tag, rank);
 				if (rel.get(glyph)) ret.push(rel);
 			}
 		}
@@ -139,8 +143,10 @@ const AnyDerivingCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && !DoNotDeriveVariants.get(glyph) && glyph.related && glyph.related.cv) {
-			for (const tag in glyph.related.cv) {
-				const rel = Cv(tag);
+			for (const key in glyph.related.cv) {
+				const [tag, rankStr] = key.split("#");
+				const rank = parseInt(rankStr, 10);
+				const rel = Cv(tag, rank);
 				if (rel.get(glyph)) ret.push(rel);
 			}
 		}
@@ -247,11 +253,11 @@ function createGrDisplaySheet(glyphStore, gid) {
 	let charVariantFeatures = [];
 	const decomposition = CvDecompose.get(glyph);
 	if (decomposition) {
-		const variantFeatureSet = new Set();
+		const variantAssignmentSet = new Set();
 		for (const componentGn of decomposition) {
 			const component = glyphStore.queryByName(componentGn);
 			if (!component) continue;
-			const cvRow = queryCvFeatureTagsOf(componentGn, component, variantFeatureSet);
+			const cvRow = queryCvFeatureTagsOf(componentGn, component, variantAssignmentSet);
 			if (cvRow.length) charVariantFeatures.push(cvRow);
 		}
 	} else {
@@ -267,7 +273,7 @@ function queryPairFeatureTags(gid, f1, f2, sink) {
 		const re1 = new RegExp(`\\.${f1}$`),
 			re2 = new RegExp(`\\.${f2}$`);
 		if (re1.test(gid) || re2.test(gid)) {
-			sink.push(f1, f2);
+			sink.push(`'${f1}' 1`, `'${f2}' 1`);
 		}
 	}
 }
@@ -278,7 +284,7 @@ function byTagPreference(a, b) {
 	if (ua > ub) return 1;
 	return 0;
 }
-function queryCvFeatureTagsOf(gid, glyph, vfs) {
+function queryCvFeatureTagsOf(gid, glyph, variantAssignmentSet) {
 	const cvs = AnyCv.query(glyph).sort(byTagPreference);
 	let results = [];
 	let existingGlyphs = new Set();
@@ -288,10 +294,13 @@ function queryCvFeatureTagsOf(gid, glyph, vfs) {
 		if (target === gid) continue;
 		if (existingGlyphs.has(target)) continue;
 		existingGlyphs.add(target);
-		if (!vfs) results.push(tag);
-		else if (!vfs.has(tag)) {
-			results.push(tag);
-			vfs.add(tag);
+
+		const assignCss = `'${tag}' ${gr.rank}`;
+		if (!variantAssignmentSet) {
+			results.push(assignCss);
+		} else if (!variantAssignmentSet.has(assignCss)) {
+			results.push(assignCss);
+			variantAssignmentSet.add(assignCss);
 		}
 	}
 	return results;

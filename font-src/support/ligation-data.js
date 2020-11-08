@@ -1,13 +1,16 @@
 "use strict";
 
-module.exports = function formVariantData(data, para) {
+const Parameters = require("./parameters");
+
+module.exports = function applyLigationData(data, para, argv) {
 	const optInBuildup = {};
 	const optOutBuildup = {};
 
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
 	for (const gr in data.simple) {
-		hives[gr] = { appends: { caltBuildup: [data.simple[gr].ligGroup] } };
+		hives["enable-" + gr] = { appends: { caltBuildup: [data.simple[gr].ligGroup] } };
+		hives["disable-" + gr] = { removes: { caltBuildup: [data.simple[gr].ligGroup] } };
 	}
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
@@ -20,11 +23,30 @@ module.exports = function formVariantData(data, para) {
 			optInBuildup[comp.tag] = ligSets;
 		}
 		if (!comp.isOptOut) {
-			hives[gr] = { caltBuildup: ligSets };
+			hives["ligset-" + gr] = { caltBuildup: ligSets };
 		}
 	}
 
-	return { defaultBuildup: { ...optInBuildup, ...optOutBuildup }, hives };
+	para.ligation = {
+		defaultBuildup: { ...optInBuildup, ...optOutBuildup },
+		caltBuildup: []
+	};
+	if (argv.ligations) {
+		if (argv.ligations.inherits)
+			Parameters.apply(para.ligation, hives, ["ligset-" + argv.ligations.inherits]);
+		if (argv.ligations.disables)
+			Parameters.apply(
+				para.ligation,
+				hives,
+				argv.ligations.disables.map(x => `disable-${x}`)
+			);
+		if (argv.ligations.enables)
+			Parameters.apply(
+				para.ligation,
+				hives,
+				argv.ligations.enables.map(x => `enable-${x}`)
+			);
+	}
 };
 
 function createBuildup(simple, buildup) {

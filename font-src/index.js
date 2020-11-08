@@ -8,8 +8,8 @@ const Toml = require("@iarna/toml");
 
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
-const FormVariantData = require("./support/variant-data");
-const FormLigationData = require("./support/ligation-data");
+const VariantData = require("./support/variant-data");
+const ApplyLigationData = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
@@ -38,24 +38,9 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	let para = {};
-	Parameters.apply(para, parametersData, ["iosevka"]);
-	Parameters.apply(para, parametersData, argv.preHives);
-	Parameters.apply(para, parametersData, ["shapeWeight"], { shapeWeight: argv.shape.weight });
-	Parameters.apply(para, parametersData, ["shapeWidth"], { shapeWidth: argv.shape.width });
-	Parameters.apply(para, parametersData, [`s-${argv.shape.slope}`]);
-	Parameters.apply(para, parametersData, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
-
-	const variantsData = FormVariantData(rawVariantsData, para);
-	para.variants = variantsData;
-	para.variantSelector = {};
-	Parameters.apply(para.variantSelector, variantsData, ["default", ...argv.preHives]);
-	para.defaultVariant = variantsData.default;
-
-	const ligationData = FormLigationData(rawLigationData, para);
-	para.defaultBuildup = { ...ligationData.defaultBuildup };
-	para.ligation = {};
-	Parameters.apply(para.ligation, ligationData.hives, ["default", ...argv.preHives]);
+	let para = Parameters.init(parametersData, argv);
+	VariantData.apply(rawVariantsData, para, argv);
+	ApplyLigationData(rawLigationData, para, argv);
 
 	if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;

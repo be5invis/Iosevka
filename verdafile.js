@@ -23,20 +23,11 @@ const ARCHIVE_DIR = "release-archives";
 
 const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
-const TTCIZE = [
-	"node",
-	"--max-old-space-size=8192",
-	"node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"
-];
+const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const webfontFormats = [
 	["woff2", "woff2"],
-	["woff", "woff"],
 	["ttf", "truetype"]
 ];
-
-const SINGLE_GROUP_EXPORT_PREFIX = `ttf`;
-const COLLECTION_EXPORT_PREFIX = `pkg`;
-const TTC_ONLY_COLLECTION_EXPORT_PREFIX = `ttc`;
 
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
@@ -148,29 +139,6 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	return { fileNameToBpMap, buildPlans: returnBuildPlans };
 });
 
-function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
-	if (!bp.family) {
-		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
-	}
-	if (!bp.slopes && bp.slants) {
-		echo.warn(
-			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
-				`Use "slopes" instead.`
-		);
-	}
-
-	if (!bp.pre) bp.pre = {};
-
-	if (!bp.pre.design) bp.pre.design = bp.design || [];
-	if (!bp.pre.upright) bp.pre.upright = bp.upright || [];
-	if (!bp.pre.oblique) bp.pre.oblique = bp.oblique || [];
-	if (!bp.pre.italic) bp.pre.italic = bp.italic || [];
-
-	bp.weights = bp.weights || dWeights;
-	bp.slopes = bp.slopes || bp.slants || dSlopes;
-	bp.widths = bp.widths || dWidths;
-}
-
 const BuildPlanOf = computed.group("metadata:build-plan-of", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(BuildPlans);
 	const plan = buildPlans[gid];
@@ -194,14 +162,20 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
 
 	const sfi = getSuffixMapping(bp.weights, bp.slopes, bp.widths)[fi0.suffix];
-	const preHives = [...bp.pre.design, ...bp.pre[sfi.slope]];
 
 	return {
 		name: fileName,
-		// Hives
-		preHives,
+		variants: bp.variants || null,
+		ligations: bp["ligations"] || null,
+		featureControl: {
+			noCvSs: bp["no-cv-ss"] || false,
+			noLigation: bp["no-ligation"] || false
+		},
 		// Shape
 		shape: {
+			digitForm: bp["digit-form"] || "lining",
+			serifs: bp.serifs || null,
+			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
 			slope: sfi.slope,
 			width: sfi.shapeWidth,
@@ -236,28 +210,31 @@ function getSuffixMapping(weights, slopes, widths) {
 		for (const s in slopes) {
 			for (const wd in widths) {
 				const suffix = makeSuffix(w, wd, s, DEFAULT_SUBFAMILY);
-				mapping[suffix] = {
-					weight: w,
-					shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, vlShapeWeight),
-					cssWeight: nValidate("CSS weight of " + w, weights[w].css, vlCssWeight),
-					menuWeight: nValidate("Menu weight of " + w, weights[w].menu, vlMenuWeight),
-					width: wd,
-					shapeWidth: nValidate(
-						"Shape width of " + wd,
-						widths[wd].shape,
-						vlShapeWidth,
-						fixShapeWidth
-					),
-					cssStretch: widths[wd].css || wd,
-					menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, vlMenuWidth),
-					slope: s,
-					cssStyle: slopes[s] || s,
-					menuSlope: slopes[s] || s
-				};
+				mapping[suffix] = getSuffixMappingItem(weights, w, slopes, s, widths, wd);
 			}
 		}
 	}
 	return mapping;
+}
+function getSuffixMappingItem(weights, w, slopes, s, widths, wd) {
+	return {
+		// Weights
+		weight: w,
+		shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, VlShapeWeight),
+		cssWeight: nValidate("CSS weight of " + w, weights[w].css, VlCssWeight),
+		menuWeight: nValidate("Menu weight of " + w, weights[w].menu, VlMenuWeight),
+
+		// Widths
+		width: wd,
+		shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, VlShapeWidth),
+		cssStretch: widths[wd].css || wd,
+		menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, VlMenuWidth),
+
+		// Slopes
+		slope: s,
+		cssStyle: slopes[s] || s,
+		menuSlope: slopes[s] || s
+	};
 }
 
 function makeFileName(prefix, suffix) {
@@ -270,65 +247,6 @@ function makeSuffix(w, wd, s, fallback) {
 			(s === SLOPE_NORMAL ? "" : s) || fallback
 	);
 }
-
-function validateRecommendedWeight(w, value, label) {
-	if (recommendedMenuWeights[w] && recommendedMenuWeights[w] !== value) {
-		echo.warn(
-			`${label} weight settings of ${w} ( = ${value}) doesn't match ` +
-				`the recommended value ( = ${recommendedMenuWeights[w]}).`
-		);
-	}
-}
-
-function nValidate(key, v, f, ft) {
-	if (ft) v = ft(v);
-	if (typeof v !== "number" || !isFinite(v) || (f && !f(v))) {
-		throw new TypeError(`${key} = ${v} is not a valid number.`);
-	}
-	return v;
-}
-function vlShapeWeight(x) {
-	return x >= 100 && x <= 900;
-}
-function vlCssWeight(x) {
-	return x > 0 && x < 1000;
-}
-function vlMenuWeight(x) {
-	return vlCssWeight(x);
-}
-const g_widthFixupMemory = new Map();
-function fixShapeWidth(x) {
-	if (x >= 3 && x <= 9) {
-		if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
-		const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
-		echo.warn(
-			`The build plan is using legacy width grade ${x}. ` +
-				`Converting to unit width ${xCorrected}.`
-		);
-		g_widthFixupMemory.set(x, xCorrected);
-		return xCorrected;
-	} else {
-		return x;
-	}
-}
-function vlShapeWidth(x) {
-	return x >= 433 && x <= 665;
-}
-function vlMenuWidth(x) {
-	return x >= 1 && x <= 9 && x % 1 === 0;
-}
-const recommendedMenuWeights = {
-	thin: 100,
-	extralight: 200,
-	light: 300,
-	regular: 400,
-	book: 450,
-	medium: 500,
-	semibold: 600,
-	bold: 700,
-	extrabold: 800,
-	heavy: 900
-};
 
 function whyBuildPlanIsnNotThere(gid) {
 	if (!fs.existsSync(PRIVATE_BUILD_PLANS))
@@ -503,16 +421,12 @@ const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
 	await target.need(ts.map(tn => DistUnhintedTTF(gid, tn)));
 });
-const GroupWoffs = task.group("woff", async (target, gid) => {
-	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistWoff(gid, tn)));
-});
 const GroupWoff2s = task.group("woff2", async (target, gid) => {
 	const [ts] = await target.need(GroupFontsOf(gid));
 	await target.need(ts.map(tn => DistWoff2(gid, tn)));
 });
 const GroupFonts = task.group("fonts", async (target, gid) => {
-	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoffs(gid), GroupWoff2s(gid));
+	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoff2s(gid));
 });
 
 // Webfont CSS
@@ -573,8 +487,14 @@ const ExportSuperTtc = file.make(
 		await buildCompositeTtc(out, inputs);
 	}
 );
+
+///////////////////////////////////////////////////////////
+//////                   Archives                    //////
+///////////////////////////////////////////////////////////
+
+// Collection Archives
 const CollectionArchiveFile = file.make(
-	(gr, version) => `${ARCHIVE_DIR}/${COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
+	(gr, version) => `${ARCHIVE_DIR}/pkg-${gr}-${version}.zip`,
 	async (target, out, gr) => {
 		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
 		const sourceGroups = collectPlans.groupDecomposition[gr];
@@ -601,7 +521,7 @@ const CollectionArchiveFile = file.make(
 	}
 );
 const TtcOnlyCollectionArchiveFile = file.make(
-	(gr, version) => `${ARCHIVE_DIR}/${TTC_ONLY_COLLECTION_EXPORT_PREFIX}-${gr}-${version}.zip`,
+	(gr, version) => `${ARCHIVE_DIR}/ttc-${gr}-${version}.zip`,
 	async (target, out, gr) => {
 		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[gr]));
@@ -626,23 +546,43 @@ const TtcOnlyCollectionArchive = task.group(`ttc-only-collection-archive`, async
 	await target.need(TtcOnlyCollectionArchiveFile(cid, version));
 });
 
-// Single-group export
-const GroupArchiveFile = file.make(
-	(gid, version) => `${ARCHIVE_DIR}/${SINGLE_GROUP_EXPORT_PREFIX}-${gid}-${version}.zip`,
-	async (target, { dir, full }, gid, version) => {
-		const [exportPlans] = await target.need(ExportPlans, de`${dir}`);
+// Single-group Archives
+async function CreateGroupArchiveFile(dir, out, ...files) {
+	const relOut = Path.relative(dir, out.full);
+	await rm(out.full);
+	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9"], relOut, ...files);
+}
+const GroupTtfArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/ttf-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
 		await target.need(GroupContents(exportPlans[gid]));
-		await cd(`${DIST}/${exportPlans[gid]}`).run(
-			["7z", "a"],
-			["-tzip", "-r", "-mx=9"],
-			`../../${full}`,
-			`./`
-		);
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}/ttf`, out, "*.ttf");
+	}
+);
+const GroupTtfUnhintedArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/ttf-unhinted-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
+		await target.need(GroupContents(exportPlans[gid]));
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}/ttf-unhinted`, out, "*.ttf");
+	}
+);
+const GroupWebArchiveFile = file.make(
+	(gid, version) => `${ARCHIVE_DIR}/webfont-${gid}-${version}.zip`,
+	async (target, out, gid) => {
+		const [exportPlans] = await target.need(ExportPlans, de`${out.dir}`);
+		await target.need(GroupContents(exportPlans[gid]));
+		await CreateGroupArchiveFile(`${DIST}/${exportPlans[gid]}`, out, "*.css", "ttf", "woff2");
 	}
 );
 const GroupArchive = task.group(`archive`, async (target, gid) => {
 	const [version] = await target.need(Version);
-	await target.need(GroupArchiveFile(gid, version));
+	await target.need(
+		GroupTtfArchiveFile(gid, version),
+		GroupTtfUnhintedArchiveFile(gid, version),
+		GroupWebArchiveFile(gid, version)
+	);
 });
 
 ///////////////////////////////////////////////////////////
@@ -672,7 +612,8 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 		cm.full,
 		cmi.full,
 		cmo.full,
-		Path.resolve(pagesDir, "shared/data-import/iosevka.json")
+		Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
+		Path.resolve(pagesDir, "shared/data-import/raw/coverage.json")
 	);
 });
 
@@ -686,15 +627,20 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 		GroupContents`iosevka-etoile`,
 		GroupContents`iosevka-sparkle`
 	);
+
 	for (const dir of dirs) {
 		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
+		await mv(
+			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
+			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
+		);
 	}
 });
 
 const PagesFastFontExport = task(`pages:fast-font-export`, async target => {
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
-	const dirs = await target.need(GroupContents`iosevka`, GroupContents`iosevka-slab`);
+	const dirs = await target.need(GroupContents`iosevka`);
 	for (const dir of dirs) {
 		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
 	}
@@ -729,7 +675,7 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${sparkle}`, `${SNAPSHOT_TMP}/${sparkle}`);
 });
 
-const PackageSnapshotConfig = computed(`package-snapshot-image-config`, async target => {
+const PackageSnapshotConfig = computed(`package-snapshot-config`, async target => {
 	const [plan] = await target.need(BuildPlans);
 	const cfg = [];
 	for (const key in plan.buildPlans) {
@@ -750,14 +696,17 @@ const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target,
 });
 const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
-	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
-	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
-	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
+	const [cm, cmi, cmo] = await target.need(
+		BuildCM("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-italic"),
+		BuildCM("iosevka", "iosevka-oblique")
+	);
 	await run(
 		`node`,
 		`utility/generate-snapshot-page/index.js`,
 		"snapshot-src/templates",
-		out.full
+		out.full,
+		`${out.dir}/${out.name}.data.json`
 	);
 	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
 });
@@ -786,16 +735,11 @@ const ScreenShot = file.make(
 );
 
 const SampleImages = task(`sample-images`, async target => {
-	const [cfg] = await target.need(PackageSnapshotConfig, TakeSampleImages);
+	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
+	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
 	await target.need(
-		ScreenShot("charvars"),
-		ScreenShot("languages"),
-		ScreenShot("ligations"),
-		ScreenShot("matrix"),
-		ScreenShot("preview-all"),
-		ScreenShot("stylesets"),
-		ScreenShot("weights"),
-		cfg.map(opt => ScreenShot(opt.name))
+		cfgP.map(opt => ScreenShot(opt.name)),
+		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name))
 	);
 });
 
@@ -855,7 +799,7 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	await target.need(AllTtfArchives, CollectionArchives, AllTtcArchives);
+	await target.need(AllTtfArchives, /* CollectionArchives, */ AllTtcArchives);
 	await target.need(SampleImages, Pages, ReleaseNotes, ChangeLog);
 });
 
@@ -934,3 +878,79 @@ const Parameters = task(`meta:parameters`, async target => {
 		sfu`params/ligation-set.toml`
 	);
 });
+
+///////////////////////////////////////////////////////////
+//////              Config Validation                //////
+///////////////////////////////////////////////////////////
+
+// Build plan validation
+function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
+	if (!bp.family) {
+		fail(`Build plan for ${prefix} does not have a family name. Exit.`);
+	}
+	if (!bp.slopes && bp.slants) {
+		echo.warn(
+			`Build plan for ${prefix} uses legacy "slants" to define slopes. ` +
+				`Use "slopes" instead.`
+		);
+	}
+
+	bp.weights = bp.weights || dWeights;
+	bp.slopes = bp.slopes || bp.slants || dSlopes;
+	bp.widths = bp.widths || dWidths;
+}
+
+// Recommended weight validation
+function validateRecommendedWeight(w, value, label) {
+	const RecommendedMenuWeights = {
+		thin: 100,
+		extralight: 200,
+		light: 300,
+		regular: 400,
+		book: 450,
+		medium: 500,
+		semibold: 600,
+		bold: 700,
+		extrabold: 800,
+		heavy: 900
+	};
+	if (RecommendedMenuWeights[w] && RecommendedMenuWeights[w] !== value) {
+		echo.warn(
+			`${label} weight settings of ${w} ( = ${value}) doesn't match ` +
+				`the recommended value ( = ${RecommendedMenuWeights[w]}).`
+		);
+	}
+}
+
+// Value validation
+function nValidate(key, v, validator) {
+	if (validator.fixup) v = validator.fix(v);
+	if (typeof v !== "number" || !isFinite(v) || !validator.validate(v)) {
+		throw new TypeError(`${key} = ${v} is not a valid number.`);
+	}
+	return v;
+}
+
+const VlShapeWeight = { validate: x => x >= 100 && x <= 900 };
+const VlCssWeight = { validate: x => x > 0 && x < 1000 };
+const VlMenuWeight = VlCssWeight;
+
+const g_widthFixupMemory = new Map();
+const VlShapeWidth = {
+	validate: x => x >= 433 && x <= 665,
+	fix(x) {
+		if (x >= 3 && x <= 9) {
+			if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
+			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
+			echo.warn(
+				`The build plan is using legacy width grade ${x}. ` +
+					`Converting to unit width ${xCorrected}.`
+			);
+			g_widthFixupMemory.set(x, xCorrected);
+			return xCorrected;
+		} else {
+			return x;
+		}
+	}
+};
+const VlMenuWidth = { validate: x => x >= 1 && x <= 9 && x % 1 === 0 };

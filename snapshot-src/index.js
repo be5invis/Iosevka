@@ -1,10 +1,13 @@
 /* eslint-env node, browser */
 
+"use strict";
+
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 const dpi = window.devicePixelRatio;
 const ipc = require("electron").ipcRenderer;
 const packagingTasks = require("./packaging-tasks.json");
+const auxData = require("./index.data.json");
 
 let onScroll = function () {};
 ipc.on("scroll", function () {
@@ -18,13 +21,78 @@ ipc.on("complete", function () {
 	onComplete.apply(this, arguments);
 });
 
+const captureCallbacks = {
+	cbAmendLigsetSamplerContents,
+	cbAmendStylisticSetContents
+};
+
+const ssString = "@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ";
+function cbAmendStylisticSetContents(element, p) {
+	element.innerHTML = "";
+	const cfg = [
+		["upright", "hotCharSetUpright"],
+		["italic", "hotCharSetItalic"]
+	];
+	for (const [cls, kHC] of cfg) {
+		const line = document.createElement("div");
+		line.className = cls;
+		element.appendChild(line);
+		const sHC = new Set(p[kHC]);
+		for (const lch of ssString) {
+			if (sHC.has(lch)) {
+				const b = document.createElement("b");
+				b.appendChild(document.createTextNode(lch));
+				line.appendChild(b);
+			} else {
+				line.append(document.createTextNode(lch));
+			}
+		}
+	}
+}
+
+function cbAmendLigsetSamplerContents(element, p) {
+	element.innerHTML = "";
+	if (p.tag === "calt") element.style.fontFeatureSettings = `'${p.tag}' ${p.rank}`;
+	else element.style.fontFeatureSettings = `'calt' off, '${p.tag}' ${p.rank}`;
+
+	const groupSet = new Set(p.ligSets);
+	for (const row of auxData.ligationSamples) {
+		const line = document.createElement("div");
+		element.appendChild(line);
+		for (let m = 0; m < row.length; m++) {
+			if (m > 0) line.appendChild(document.createTextNode(" "));
+			const item = row[m];
+			let rank = 0;
+			for (let k = item.tags.length; k-- > 0; ) {
+				if (groupSet.has(item.tags[k])) {
+					rank = k + 1;
+					break;
+				}
+			}
+			if (rank) {
+				const run = document.createElement("em");
+				run.appendChild(document.createTextNode(item.s));
+				run.className = `rank-${rank}`;
+				line.appendChild(run);
+			} else {
+				const run = document.createElement("s");
+				run.appendChild(document.createTextNode(item.s));
+				run.className = `rank-${rank}`;
+				line.appendChild(run);
+			}
+		}
+	}
+}
+
 function captureElement(options, callback) {
 	window.scroll(0, 0);
 	setTimeout(function () {
 		const element = document.querySelector(options.el);
 		if (options.applyClass) element.className = options.applyClass;
 		if (options.applyFeature) element.style = "font-feature-settings:" + options.applyFeature;
-
+		if (options.applyCallback) {
+			captureCallbacks[options.applyCallback](element, options.applyCallbackArgs);
+		}
 		const rect = element.getBoundingClientRect();
 		onScroll = function (event, arg) {
 			window.scrollTo(0, arg);
@@ -48,16 +116,7 @@ function captureElement(options, callback) {
 }
 
 window.onload = function () {
-	const snapshotTasks = [
-		{ el: "#languages", name: "languages" },
-		{ el: "#stylesets", name: "stylesets" },
-		{ el: "#charvars", name: "charvars" },
-		{ el: "#matrix", name: "matrix" },
-		{ el: "#previews", name: "preview-all" },
-		{ el: "#weights", name: "weights" },
-		{ el: "#ligations", name: "ligations", doubleTrim: "white" },
-		...packagingTasks
-	];
+	const snapshotTasks = [...auxData.readmeSnapshotTasks, ...packagingTasks];
 	let current = 0;
 	const step = function () {
 		const doit = function () {
