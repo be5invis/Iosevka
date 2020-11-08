@@ -34,6 +34,11 @@ class GlyphStore {
 		if (!g) throw new Error(`Glyph ${name} doesn't exist.`);
 		return g;
 	}
+	ensureExists(name) {
+		const g = this.nameForward.get(name);
+		if (!g) throw new Error(`Glyph ${name} doesn't exist.`);
+		return name;
+	}
 	queryNameOf(g) {
 		return this.nameBackward.get(g);
 	}
