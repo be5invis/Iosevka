@@ -50,9 +50,11 @@ glyph-block Common-Derivatives : begin
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
-	define [with-related-glyphs sourceGid dstGid unicode Fn] : if [glyph-is-needed sourceGid] : begin
+	define [with-related-glyphs sourceGid dstGid dstUnicode Fn] : begin
+		if [not : glyph-is-needed sourceGid] : return nothing
+
 		local glyphSrc : glyphStore.queryByName sourceGid
-		local glyphDst : create-glyph dstGid unicode : glyph-proc
+		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
 			include : Fn sourceGid null
 
 		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
@@ -60,12 +62,16 @@ glyph-block Common-Derivatives : begin
 			create-glyph [gr.amendName dstGid] : glyph-proc
 				include : Fn [gr.get glyphSrc] gr.tag
 
-	define [alias newid unicode id] : begin
-		if [not newid] : throw : new Error "Target ID not specified"
-		with-related-glyphs id newid unicode
-			lambda [src sel] : glyph-proc
-				include [refer-glyph src] AS_BASE ALSO_METRICS
-				currentGlyph.cloneRankFromGlyph [query-glyph src]
+	define [alias dstGid dstUnicode sourceGid] : begin
+		if [not dstGid] : throw : new Error "Target ID not specified"
+		if [not : glyph-is-needed sourceGid] : return nothing
+
+		local glyphSrc : glyphStore.queryByNameEnsured sourceGid
+		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
+			include [refer-glyph sourceGid] AS_BASE ALSO_METRICS
+
+		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
+			gr.set glyphDst [gr.get glyphSrc]
 
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
