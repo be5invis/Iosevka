@@ -166,7 +166,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	return {
 		name: fileName,
 		variants: bp.variants || null,
-		ligations: bp["ligations"] || null,
+		derivingVariants: bp.derivingVariants,
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false

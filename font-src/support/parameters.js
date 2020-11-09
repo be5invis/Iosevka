@@ -24,6 +24,7 @@ function apply(sink, parametersData, styles, blendArgs) {
 	for (const item of styles) intro(parametersData, item, blendArgs, sink);
 }
 
+// eslint-disable-next-line complexity
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
 	if (!hive) return;

@@ -13,14 +13,14 @@ const ApplyLigationData = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
-	const para = await getParameters(argv);
-	const { font, glyphStore } = BuildFont(para);
+	const paraT = await getParameters();
+	const { font, glyphStore } = BuildFont(paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
 };
 
 // Parameter preparation
-async function getParameters(argv) {
+async function getParameters() {
 	const PARAMETERS_TOML = path.resolve(__dirname, "../params/parameters.toml");
 	const WEIGHTS_TOML = path.resolve(__dirname, "../params/shape-weight.toml");
 	const WIDTHS_TOML = path.resolve(__dirname, "../params/shape-width.toml");
@@ -38,23 +38,32 @@ async function getParameters(argv) {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	let para = Parameters.init(parametersData, argv);
-	VariantData.apply(rawVariantsData, para, argv);
-	ApplyLigationData(rawLigationData, para, argv);
+	function reinit(argv) {
+		let para = Parameters.init(parametersData, argv);
+		VariantData.apply(rawVariantsData, para, argv);
+		ApplyLigationData(rawLigationData, para, argv);
 
-	if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
-	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
+		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
+		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
+		if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 
-	para.naming = {
-		...para.naming,
-		family: argv.menu.family,
-		version: argv.menu.version,
-		weight: argv.menu.weight - 0,
-		width: argv.menu.width - 0,
-		slope: argv.menu.slope
-	};
-	return para;
+		para.naming = {
+			...para.naming,
+			family: argv.menu.family,
+			version: argv.menu.version,
+			weight: argv.menu.weight - 0,
+			width: argv.menu.width - 0,
+			slope: argv.menu.slope
+		};
+
+		para.reinit = function (tf) {
+			const argv1 = JSON.parse(JSON.stringify(argv));
+			tf(argv1, argv);
+			return reinit(argv1);
+		};
+		return para;
+	}
+	return reinit;
 }
 
 async function tryParseToml(str) {
