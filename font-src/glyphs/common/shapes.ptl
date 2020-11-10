@@ -4,7 +4,7 @@ import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
 import [Radical] from '../../support/gr'
-import [designParameters] from '../../meta/aesthetics'
+import [DesignParameters] from '../../meta/aesthetics'
 import '../../support/point' as Point
 
 glyph-module
@@ -454,14 +454,14 @@ glyph-block CommonShapes : begin
 			g4.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
 	define [LeftHook x y xextend] : glyph-proc
-		local fine : adviceBlackness 4.25
+		local fine : AdviceStroke 4.25
 		include : dispiro
 			widths.lhs fine
 			flat [fallback xextend : x + 1] y
 			curl x y
 			archv 8
 			g4.down.end (x - LeftHook.extension) (y - HookX) [heading Downward]
-	set LeftHook.extension [Math.max (Width * 0.15) ([adviceBlackness 4.25] * 1.5)]
+	set LeftHook.extension [Math.max (Width * 0.15) ([AdviceStroke 4.25] * 1.5)]
 
 	define [HooktopLeftBar] : params [stroke bottom] : glyph-proc
 		include : dispiro
@@ -479,7 +479,7 @@ glyph-block CommonShapes : begin
 	# Spiro shapes
 	define [determineMixR w v u sw swash] : begin
 		if (!swash && w < v) : return : 1 - [determineMixR v w u sw swash]
-		local superness designParameters.superness
+		local superness DesignParameters.superness
 		local r : piecewise
 			(w <= v)   0.5
 			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
@@ -502,7 +502,7 @@ glyph-block CommonShapes : begin
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
 		local doSwash : !tight && para.isItalic && ltr && atBottom && !isStart
-		local superness : if tight designParameters.tightHookSuperness designParameters.superness
+		local superness : if tight DesignParameters.tightHookSuperness DesignParameters.superness
 
 		# Adjust terminal's position if necessary
 		toFinish.x = toFinish.x + OXHook * [if ltr (-1) 1] * [if isStart (-1) 1]
@@ -552,14 +552,14 @@ glyph-block CommonShapes : begin
 			local fraction : j / nHookSegments
 			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 : if tight 0 (1 / 8)] * (mixRatio - (1 / 2))
 			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
-			local myfinal : superXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
+			local myfinal : _SuperXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
 			segBefore.push : g4
 				mix mx toStraight.x fraction
-				mix y toStraight.y (1 - [superXY fraction superness])
+				mix y toStraight.y (1 - [_SuperXY fraction superness])
 				begin unimportant
 			segAfter.push : g4
 				mix mx toFinish.x fraction
-				mix y toFinish.y ((1 - [superXY fractionAfter superness]) / (1 - myfinal))
+				mix y toFinish.y ((1 - [_SuperXY fractionAfter superness]) / (1 - myfinal))
 				begin unimportant
 			# if (!tight && w < u * mixRatio) : set segAfter {}
 
