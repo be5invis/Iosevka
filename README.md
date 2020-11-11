@@ -438,6 +438,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `G`:
     + `capital-g = 'toothed'`, `cv04 = 1`: Toothed G (default).
     + `capital-g = 'toothless'`, `cv04 = 2`: Toothless G.
+  - Styles for `I`:
+    + `capital-i = 'serifed'`, `cv59 = 1`: I with standard (long) serifs (default).
+    + `capital-i = 'serifless'`, `cv59 = 2`: I without serifs, like a straight bar.
+    + `capital-i = 'short-serifed'`, `cv59 = 3`: I with short serifs.
   - Styles for `J`:
     + `capital-j = 'serifless'`, `cv05 = 1`: J without top serif.
     + `capital-j = 'serifed'`, `cv05 = 2`: J with top serif at left side (default).
@@ -507,15 +511,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `i = 'serifed'`, `cv17 = 1`: Serifed `i` (default for Upright).
     + `i = 'italic'`, `cv17 = 2`: Italic `i` (default for Italic).
     + `i = 'hooky'`, `cv17 = 3`: Hooky `i`.
-    + `i = 'line'`, `cv17 = 4`: `i` like a straight line.
+    + `i = 'serifless'`, `cv17 = 4`: `i` like a straight line.
     + `i = 'zshaped'`, `cv17 = 5`: Z-shaped `i`.
     + `i = 'tailed'`, `cv17 = 6`: Tailed `i`.
     + `i = 'hookybottom'`, `cv17 = 7`: `i` with a straight tail.
     + `i = 'serifed-asymmetric'`, `cv17 = 8`: `i` with shorter top serif and full bottom serif.
   - Styles for `j`:
-    + `j = 'line'`, `cv18 = 1`: `j` like a straight line.
-    + `j = 'serifed'`, `cv18 = 2`: `j` with top serif (default).
-    + `j = 'straight'`, `cv18 = 3`: `j` without serif.
+    + `j = 'serifed'`, `cv18 = 1`: `j` with top serif (default).
+    + `j = 'serifless'`, `cv18 = 2`: `j` without serif.
+    + `j = 'straight-line'`, `cv18 = 3`: `j` like a straight line.
     + `j = 'flat-hook-serifed'`, `cv18 = 4`: undefined.
     + `j = 'flat-hook-serifless'`, `cv18 = 5`: undefined.
   - Styles for `k`:
@@ -527,7 +531,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'zshaped'`, `cv20 = 2`: Z-shaped `l`.
     + `l = 'serifed'`, `cv20 = 3`: Serifed `l` (default for Upright).
     + `l = 'italic'`, `cv20 = 4`: Italic, cursive `l` (default for Italic).
-    + `l = 'line'`, `cv20 = 5`: `l` like a straight line.
+    + `l = 'serifless'`, `cv20 = 5`: `l` like a straight line.
     + `l = 'tailed'`, `cv20 = 6`: `l` with a curved tail.
     + `l = 'hookybottom'`, `cv20 = 7`: `l` with a straight tail.
     + `l = 'serifed-asymmetric'`, `cv20 = 8`: `l` with shorter top serif and full bottom serif.
