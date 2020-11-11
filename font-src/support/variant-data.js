@@ -119,8 +119,6 @@ class PrimeVariant {
 		this.description = cfg.description;
 		this.rank = cfg.rank;
 		this.selector = cfg.selector;
-		this.selectorUpright = cfg.selectorUpright;
-		this.selectorItalic = cfg.selectorItalic;
 	}
 	resolveFor(para, gn) {
 		let vs = {};
@@ -129,11 +127,6 @@ class PrimeVariant {
 	}
 	resolve(para, vs) {
 		Object.assign(vs, this.selector);
-		if (para.isItalic) {
-			Object.assign(vs, this.selectorItalic);
-		} else {
-			Object.assign(vs, this.selectorUpright);
-		}
 	}
 }
 
