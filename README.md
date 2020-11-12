@@ -324,9 +324,6 @@ Configuration of build plans are organized under `[buildPlans.<plan name>]` sect
   - Otherwise the font will be sans-serif.
 * `no-cv-ss`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
 * `no-ligation`: Optional, Boolean, disables ligations.
-* `digit-form`: Optional, String, configures the default form of digits (figures).
-  - When set to `old-style`, old-style digit figures will be used.
-  - When absent or set to `lining`, lining digit figures will be used.
 
 Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
 
@@ -424,8 +421,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
 <!-- BEGIN Section-Cherry-Picking-Styles -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-* `design`, `upright`, `italic`, and `oblique`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS. Assignments under `design` will be applied to all the slopes, and `upright`, `italic`, and `oblique` will apply to corresponded slopes. The valid combinations include:
+* `design`, `upright`, `italic`, and `oblique`: Optional, Dictionary, defines styles for individual characters. The choices are organized in key-value pairs, assigning a variant to a character group. Alternatively, you could assign numbers to `cv##` tags, like what you did when using OpenType in CSS. Assignments under `design` will be applied to all the slopes, and `upright`, `italic`, and `oblique` will apply to corresponded slopes. 
 
+  In addition, style selector for default digit form also uses these dictionaries.
+  
+  The valid combinations include:
+
+  - Default digit form:
+    - `digit-form = 'lining'`: Lining (default).
+    - `digit-form = 'old-style'`: Old-style.
   - Styles for `A`, `Λ`, `Δ`:
     + `turn-v = 'straight'`, `cv01 = 1`: Standard, straight `A`, `Λ`, `Δ` (default).
     + `turn-v = 'curly'`, `cv01 = 2`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.

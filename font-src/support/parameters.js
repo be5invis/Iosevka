@@ -8,7 +8,6 @@ function initPara(data, argv) {
 	apply(para, data, ["iosevka"]);
 	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
 	if (argv.shape.spacing) apply(para, data, ["spacing-" + argv.shape.spacing]);
-	if (argv.shape.digitForm) apply(para, data, ["digit-form-" + argv.shape.digitForm]);
 	apply(para, data, ["shapeWeight"], { shapeWeight: argv.shape.weight });
 	apply(para, data, ["shapeWidth"], { shapeWidth: argv.shape.width });
 	apply(para, data, [`s-${argv.shape.slope}`]);
