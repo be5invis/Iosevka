@@ -173,7 +173,6 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		},
 		// Shape
 		shape: {
-			digitForm: bp["digit-form"] || "lining",
 			serifs: bp.serifs || null,
 			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
