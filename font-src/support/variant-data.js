@@ -12,7 +12,7 @@ function applyVariantData(data, para, argv) {
 
 	const variantSelector = {};
 	parsed.defaultComposite.resolve(para, parsed.selectorTree, parsed.composites, variantSelector);
-	if (argv.serif === "slab") {
+	if (argv.shape.serifs === "slab") {
 		const slabComp = parsed.composites.get("slab");
 		slabComp.resolve(para, parsed.selectorTree, parsed.composites, variantSelector);
 	}
