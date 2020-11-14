@@ -1,11 +1,26 @@
 ## Modifications since version 2.x
 
+### 4.0.0-beta.1
+
+ * [**Breaking**] Add shorter-serif variant for capital I (OpenType tags reordered compared to alpha.1; #709).
+ * Fix broken Bulgarian localized of Cyrillic Small Sha and Cyrillic Capital El (#716).
+ * Fix broken serif shapes in Italic Cyrillic Small I (#717).
+ * Make variant selectors for `m` and `u` have more effect on Cyrillic letters.
+ * Fix incorrect serifs of Greek Small Rho (#718).
+ * Add derived bold / italic / sans-serif / typewriter letters in Mathematical Alphanumeric Symbols block.
+ * Support slope-dependent digit form control (#724).
+ * Update `ss09` style for capital G to Toothless (#726).
+ * Character Addition:
+   - U+0462 CYRILLIC CAPITAL LETTER YAT and U+0463 CYRILLIC SMALL LETTER YAT (#727).
+
+
 ### 4.0.0-alpha.1
 
  * \[**Breaking**\] Change implementation of character variants to `cv##` and alternate substitutions (#572).
  * \[**Breaking**\] Change the building configuration format -- now we use dicts instead of “array of styles”.
  * \[**Breaking**\] Cleanup of weight levels and increase contrast under heavier weights.
  * \[**Breaking**\] Removed WOFF 1 web font building.
+ * \[**Breaking**\] Release packages will now be divided by formats.
  * Fix the shape of hook-top V's.
  * Add half-filled stars (`U+2BE8` ... `U+2BEB`, #708).
  * Add ligation set for Verilog (#710).

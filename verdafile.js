@@ -166,14 +166,13 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	return {
 		name: fileName,
 		variants: bp.variants || null,
-		ligations: bp["ligations"] || null,
+		derivingVariants: bp.derivingVariants,
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false
 		},
 		// Shape
 		shape: {
-			digitForm: bp["digit-form"] || "lining",
 			serifs: bp.serifs || null,
 			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
@@ -762,11 +761,6 @@ const SpecificSuperTtc = task.group(`super-ttc`, async (target, gr) => {
 	await target.need(ExportSuperTtc(gr));
 });
 
-const ChangeFileList = oracle.make(
-	() => `release:change-file-list`,
-	target => FileList({ under: "changes", pattern: "*.md" })(target)
-);
-
 const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
 	await t.need(ReleaseNotesFile(version));
@@ -775,12 +769,34 @@ const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
 	async (t, out, version) => {
 		await t.need(UtilScripts, de(ARCHIVE_DIR));
-		const [changeFiles] = await t.need(ChangeFileList());
+		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
 		await t.need(changeFiles.map(fu));
-		await run("node", "utility/generate-release-note/index", version, out.full);
+		await run("node", "utility/generate-release-note/index", version, rpFiles.full, out.full);
 	}
 );
-
+const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
+	const [collectPlans] = await t.need(CollectPlans);
+	const [{ buildPlans }] = await t.need(BuildPlans);
+	let releaseNoteGroups = {};
+	for (const [k, g] of Object.entries(collectPlans.groupDecomposition)) {
+		const primePlan = buildPlans[g[0]];
+		let subGroups = {};
+		for (const gr of g) {
+			const bp = buildPlans[gr];
+			subGroups[gr] = {
+				family: bp.family,
+				desc: bp.desc,
+				spacing: buildPlans[gr].spacing || "type"
+			};
+		}
+		releaseNoteGroups[k] = {
+			subGroups,
+			slab: primePlan.serifs === "slab",
+			quasiProportional: primePlan.quasiProportionalDiversity > 0
+		};
+	}
+	await fs.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
+});
 const ChangeLog = task(`release:change-log`, async t => {
 	await t.need(ChangeLogFile);
 });
@@ -791,6 +807,10 @@ const ChangeLogFile = file(`CHANGELOG.md`, async (t, out) => {
 	await t.need(changeFiles.map(fu));
 	await run("node", "utility/generate-change-log/index", version, out.full);
 });
+const ChangeFileList = oracle.make(
+	() => `release:change-file-list`,
+	target => FileList({ under: "changes", pattern: "*.md" })(target)
+);
 
 phony(`clean`, async () => {
 	await rm(BUILD);

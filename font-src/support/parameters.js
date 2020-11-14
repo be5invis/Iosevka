@@ -8,11 +8,11 @@ function initPara(data, argv) {
 	apply(para, data, ["iosevka"]);
 	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
 	if (argv.shape.spacing) apply(para, data, ["spacing-" + argv.shape.spacing]);
-	if (argv.shape.digitForm) apply(para, data, ["digit-form-" + argv.shape.digitForm]);
 	apply(para, data, ["shapeWeight"], { shapeWeight: argv.shape.weight });
 	apply(para, data, ["shapeWidth"], { shapeWidth: argv.shape.width });
 	apply(para, data, [`s-${argv.shape.slope}`]);
 	apply(para, data, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
+	para.quasiProportionalDiversity = argv.shape.quasiProportionalDiversity || 0;
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;
 	if (argv.featureControl.noLigation) para.enableLigation = false;
 	return para;
@@ -24,6 +24,7 @@ function apply(sink, parametersData, styles, blendArgs) {
 	for (const item of styles) intro(parametersData, item, blendArgs, sink);
 }
 
+// eslint-disable-next-line complexity
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
 	if (!hive) return;

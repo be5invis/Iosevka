@@ -71,6 +71,9 @@ async function processCv() {
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 
+	const cvDigitFormPath = path.resolve(__dirname, "fragments/special-variant-digit-form.md");
+	md.log(await fs.readFile(cvDigitFormPath, "utf-8"));
+
 	for (const gr of variantsData.primes) {
 		const sampleText = gr.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
