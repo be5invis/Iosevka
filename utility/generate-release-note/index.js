@@ -71,9 +71,9 @@ async function GenerateChangeList(out) {
 
 const Spacings = {
 	// spacingDesc, ligation, spacingNameSuffix
-	type: ["Default", true, ""],
-	term: ["Terminal", true, "Term"],
-	fixed: ["Fixed", false, "Fixed"]
+	type: ["Default", true],
+	term: ["Terminal", true],
+	fixed: ["Fixed", false]
 };
 
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
