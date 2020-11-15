@@ -229,6 +229,10 @@ module.exports = class Glyph {
 		];
 		rankSet.add(this);
 	}
+	clearGeometry() {
+		this.contours = [];
+		this.semanticInclusions = [];
+	}
 
 	// Anchors
 	setBaseAnchor(id, x, y) {
