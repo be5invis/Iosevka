@@ -488,18 +488,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `d = 'toothless-rounded'`, `cv14 = 3`: `d` without bottom-right tooth, with a rounded transition.
     + `d = 'tailed'`, `cv14 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
   - Styles for `f`:
-    + `f = 'straight'`, `cv15 = 1`: `f` without bottom hook (default for Sans Upright).
-    + `f = 'tailed'`, `cv15 = 2`: `f` with a leftward bottom hook (default for Italic).
-    + `f = 'serifed'`, `cv15 = 3`: `f` with bottom serif (default for Slab Upright).
-    + `f = 'straight-tailed'`, `cv15 = 4`: `f` with straight tail.
-    + `f = 'flat-hook'`, `cv15 = 5`: `f` with flat hook.
-    + `f = 'flat-hook-crossbar-at-x-height'`, `cv15 = 6`: `f` with flat hook and crossbar placed right at X-height.
-    + `f = 'flat-hook-serifed'`, `cv15 = 7`: `f` with flat hook and bottom serif.
-    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv15 = 8`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
-    + `f = 'flat-hook-round-tailed'`, `cv15 = 9`: `f` with flat hook.
-    + `f = 'flat-hook-round-tailed-crossbar-at-x-height'`, `cv15 = 10`: `f` with flat hook and crossbar placed right at X-height.
-    + `f = 'flat-hook-flat-tailed'`, `cv15 = 11`: `f` with flat hook and bottom serif.
-    + `f = 'flat-hook-flat-tailed-crossbar-at-x-height'`, `cv15 = 12`: `f` with flat hook, bottom serif, and crossbar placed right at X-height.
+    + `f = 'serifless'`, `cv15 = 1`: `f` without bottom serif, hook or exension (default for Sans Upright).
+    + `f = 'serifed'`, `cv15 = 2`: `f` with bottom serif (default for Slab Upright).
+    + `f = 'tailed'`, `cv15 = 3`: `f` with bottom hook.
+    + `f = 'extended'`, `cv15 = 4`: `f` with bar extended to descender.
+    + `f = 'serifless-crossbar-at-x-height'`, `cv15 = 5`: `f` without bottom serif, hook or exension; crossbar is placed right at X-height.
+    + `f = 'serifed-crossbar-at-x-height'`, `cv15 = 6`: `f` with bottom serif; crossbar is placed right at X-height.
+    + `f = 'tailed-crossbar-at-x-height'`, `cv15 = 7`: `f` with bottom hook; crossbar is placed right at X-height.
+    + `f = 'extended-crossbar-at-x-height'`, `cv15 = 8`: `f` with bar extended to descender; crossbar is placed right at X-height.
+    + `f = 'flat-hook'`, `cv15 = 9`: `f` with flat top hook, without bottom serif, hook or exension.
+    + `f = 'flat-hook-serifed'`, `cv15 = 10`: `f` with flat top hook and bottom serif.
+    + `f = 'flat-hook-tailed'`, `cv15 = 11`: `f` with flat top hook and bottom hook (default for Italic).
+    + `f = 'flat-hook-extended'`, `cv15 = 12`: `f` with flat top hook and bar extended to descender.
+    + `f = 'flat-hook-crossbar-at-x-height'`, `cv15 = 13`: `f` with flat top hook, without bottom serif, hook or exension; crossbar is placed right at X-height.
+    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv15 = 14`: `f` with flat top hook, bottom serif; crossbar is placed right at X-height.
+    + `f = 'flat-hook-tailed-crossbar-at-x-height'`, `cv15 = 15`: `f` with flat top hook, bottom hook; crossbar is placed right at X-height.
+    + `f = 'flat-hook-extended-crossbar-at-x-height'`, `cv15 = 16`: `f` with flat top hook, bar extended to descender; crossbar is placed right at X-height.
   - Styles for `g`:
     + `g = 'singlestorey'`, `cv16 = 1`: Single-storey `g` (default).
     + `g = 'doublestorey'`, `cv16 = 2`: Double-storey `g`.
@@ -513,13 +517,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `h = 'motion-serifed-tailed'`, `cv17 = 4`: `h` with curly tailed ending.
   - Styles for `i`:
     + `i = 'serifed'`, `cv18 = 1`: Serifed `i` (default for Upright).
-    + `i = 'italic'`, `cv18 = 2`: Italic `i` (default for Italic).
+    + `i = 'serifless'`, `cv18 = 2`: `i` like a straight line.
     + `i = 'hooky'`, `cv18 = 3`: Hooky `i`.
-    + `i = 'serifless'`, `cv18 = 4`: `i` like a straight line.
-    + `i = 'zshaped'`, `cv18 = 5`: Z-shaped `i`.
-    + `i = 'tailed'`, `cv18 = 6`: Tailed `i`.
-    + `i = 'hookybottom'`, `cv18 = 7`: `i` with a straight tail.
-    + `i = 'serifed-asymmetric'`, `cv18 = 8`: `i` with shorter top serif and full bottom serif.
+    + `i = 'zshaped'`, `cv18 = 4`: Z-shaped `i`.
+    + `i = 'hooky-bottom'`, `cv18 = 5`: `i` with a straight tail.
+    + `i = 'serifed-asymmetric'`, `cv18 = 6`: `i` with shorter top serif and full bottom serif.
+    + `i = 'tailed'`, `cv18 = 7`: `i` with curly tail.
+    + `i = 'serifed-tailed'`, `cv18 = 8`: `i` with curly tail and top serif (default for Italic).
+    + `i = 'flat-tailed'`, `cv18 = 9`: `i` with top serif and a curly-then-flat tail.
+    + `i = 'serifed-flat-tailed'`, `cv18 = 10`: `i` with top serif and a curly-then-flat tail.
   - Styles for `j`:
     + `j = 'serifed'`, `cv19 = 1`: `j` with top serif (default).
     + `j = 'serifless'`, `cv19 = 2`: `j` without serif.
@@ -531,14 +537,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `k = 'curly'`, `cv20 = 2`: Slightly curly `k`, like Iosevka 2.x.
     + `k = 'cursive'`, `cv20 = 3`: `k` with a cursive loop (default for Italic).
   - Styles for `l`:
-    + `l = 'hooky'`, `cv21 = 1`: Hooky `l`.
-    + `l = 'zshaped'`, `cv21 = 2`: Z-shaped `l`.
-    + `l = 'serifed'`, `cv21 = 3`: Serifed `l` (default for Upright).
-    + `l = 'italic'`, `cv21 = 4`: Italic, cursive `l` (default for Italic).
-    + `l = 'serifless'`, `cv21 = 5`: `l` like a straight line.
-    + `l = 'tailed'`, `cv21 = 6`: `l` with a curved tail.
-    + `l = 'hookybottom'`, `cv21 = 7`: `l` with a straight tail.
-    + `l = 'serifed-asymmetric'`, `cv21 = 8`: `l` with shorter top serif and full bottom serif.
+    + `l = 'serifed'`, `cv21 = 1`: Serifed `l` (default for Upright).
+    + `l = 'serifless'`, `cv21 = 2`: `l` like a straight line.
+    + `l = 'hooky'`, `cv21 = 3`: Hooky `l`.
+    + `l = 'zshaped'`, `cv21 = 4`: Z-shaped `l`.
+    + `l = 'hooky-bottom'`, `cv21 = 5`: `l` with a straight tail.
+    + `l = 'serifed-asymmetric'`, `cv21 = 6`: `l` with shorter top serif and full bottom serif.
+    + `l = 'tailed'`, `cv21 = 7`: `l` with curly tail.
+    + `l = 'serifed-tailed'`, `cv21 = 8`: `l` with top serif and curly tail (default for Italic).
+    + `l = 'flat-tailed'`, `cv21 = 9`: `l` with top serif and a curly-then-flat tail.
+    + `l = 'serifed-flat-tailed'`, `cv21 = 10`: `l` with top serif and a curly-then-flat tail.
   - Styles for `m`:
     + `m = 'normal'`, `cv22 = 1`: `m` with normal middle leg, touching the baseline (default).
     + `m = 'shortleg'`, `cv22 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
