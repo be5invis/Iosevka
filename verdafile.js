@@ -857,7 +857,7 @@ const JavaScriptFromPtl = computed("scripts-js-from-ptl", async target => {
 	return ptl.map(x => replaceExt(".js", x));
 });
 function replaceExt(extNew, file) {
-	return Path.join(Path.dirname(file), Path.basename(file, Path.extname(file)) + extNew);
+	return Path.posix.join(Path.dirname(file), Path.basename(file, Path.extname(file)) + extNew);
 }
 
 const CompiledJs = file.make(
@@ -871,13 +871,15 @@ const CompiledJs = file.make(
 );
 const Scripts = task("scripts", async target => {
 	await target.need(Parameters);
-	const [_jsFromPtl] = await target.need(JavaScriptFromPtl);
-	const [js] = await target.need(ScriptFiles("js"));
-	const jsFromPtl = new Set(_jsFromPtl);
+	const [jsFromPtlList] = await target.need(JavaScriptFromPtl);
+	const [jsList] = await target.need(ScriptFiles("js"));
+	const jsFromPtlSet = new Set(jsFromPtlList);
 
 	let subGoals = [];
-	for (const item of jsFromPtl) subGoals.push(CompiledJs(item));
-	for (const item of js) if (!jsFromPtl.has(js)) subGoals.push(sfu(item));
+	for (const js of jsList) {
+		if (jsFromPtlSet.has(js)) subGoals.push(CompiledJs(js));
+		else subGoals.push(sfu(js));
+	}
 	await target.need(subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
