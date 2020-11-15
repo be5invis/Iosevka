@@ -1,5 +1,21 @@
 ## Modifications since version 2.x
 
+### 4.0.0-beta.2
+
+ * [**Breaking**] Reorder and reorganize character variants of `i`, `l`, and `f`, including:
+   * The “italic” variants are removed, or renamed to reflect its shape;
+   * Reorder variants of `i` and `l` to let them get synchronized;
+   * Make `f`'s variant more matrix-like.
+ * Fix inconsistent italic serif of U+0463 CYRILLIC SMALL LETTER YAT (#729).
+ * Fix dotless form of mathematical derived letters if it ia aliased (#731).
+ * Fix inconsistent serif on Bulgarian U+044E CYRILLIC SMALL LETTER YU (#732).
+ * Fix variant selector of Cyrillic TE’s italics to better respect `m`’s tailed-ness (#734).
+ * Fix middle bar placement of U+2180 under quasi-proportional.
+ * Add Characters:
+   * U+1D6A4 MATHEMATICAL ITALIC SMALL DOTLESS I, U+1D6A5 MATHEMATICAL ITALIC SMALL DOTLESS J (#730).
+   * U+23CF EJECT SYMBOL (#728).
+
+
 ### 4.0.0-beta.1
 
  * [**Breaking**] Add shorter-serif variant for capital I (OpenType tags reordered compared to alpha.1; #709).
