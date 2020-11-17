@@ -313,12 +313,12 @@ Configuration of build plans are organized under `[buildPlans.<plan name>]` sect
 * `family`: String, defines the family name of your custom variant.
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
   - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols ill become narrower.
-  - `force-monospace`: Apply `term` spacing changes and further:
+  - `fontconfig-mono`: Apply `term` spacing changes and further:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
     - Remove `NWID` and `WWID` OpenType feature.
     
     This spacing is recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
-  - `fixed`: Apply `force-monospace` changes and remove ligations.
+  - `fixed`: Apply `fontconfig-mono` changes and remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
