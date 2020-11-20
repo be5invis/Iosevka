@@ -23,7 +23,7 @@ class LookupStore {
 		const dst = this.query(id);
 		const handler = this.m_handlers[otdLookup.type];
 		if (!dst || !handler) return;
-
+		if (otdLookup.subtables) throw new Error("Unreachable.");
 		handler.fill(dst, otdLookup, this);
 	}
 }
@@ -33,12 +33,11 @@ const GsubSingleHandler = {
 		return new Ot.Gsub.Single();
 	},
 	fill(dst, src, store) {
-		for (const st of src.subtables) {
-			for (const k in st) {
-				const from = store.glyphs.query(k);
-				const to = store.glyphs.query(st[k]);
-				if (from && to) dst.mapping.set(from, to);
-			}
+		const st = src.substitutions;
+		for (const k in st) {
+			const from = store.glyphs.query(k);
+			const to = store.glyphs.query(st[k]);
+			if (from && to) dst.mapping.set(from, to);
 		}
 	}
 };
@@ -47,13 +46,12 @@ const GsubMultipleHandler = {
 		return new Ot.Gsub.Multiple();
 	},
 	fill(dst, src, store) {
-		for (const st of src.subtables) {
-			out: for (const k in st) {
-				const from = store.glyphs.query(k);
-				const to = mapGlyphListAll(st[k], store);
-				if (!from || !to) continue out;
-				dst.mapping.set(from, to);
-			}
+		const st = src.substitutions;
+		for (const k in st) {
+			const from = store.glyphs.query(k);
+			const to = mapGlyphListAll(st[k], store);
+			if (!from || !to) continue;
+			dst.mapping.set(from, to);
 		}
 	}
 };
@@ -68,13 +66,12 @@ const GsubLigatureHandler = {
 		return new Ot.Gsub.Ligature();
 	},
 	fill(dst, src, store) {
-		for (const st of src.subtables) {
-			for (const { from: _from, to: _to } of st.substitutions) {
-				const to = store.glyphs.query(_to);
-				const from = mapGlyphListAll(_from, store);
-				if (!from || !to) continue;
-				dst.mapping.push({ from, to });
-			}
+		const st = src.substitutions;
+		for (const { from: _from, to: _to } of st) {
+			const to = store.glyphs.query(_to);
+			const from = mapGlyphListAll(_from, store);
+			if (!from || !to) continue;
+			dst.mapping.push({ from, to });
 		}
 	}
 };
@@ -84,7 +81,7 @@ const GsubChainingHandler = {
 		return new Ot.Gsub.Chaining();
 	},
 	fill(dst, src, store) {
-		out: for (const st of src.subtables) {
+		out: for (const st of src.rules) {
 			const match = [];
 			for (const m of st.match) {
 				const m1 = mapGlyphListSome(m, store);
@@ -109,7 +106,7 @@ const GsubReverseHandler = {
 		return new Ot.Gsub.ReverseSub();
 	},
 	fill(dst, src, store) {
-		out: for (const st of src.subtables) {
+		out: for (const st of src.rules) {
 			const match = [];
 			const doSubAt = st.inputIndex;
 			const replacement = new Map();
@@ -176,10 +173,9 @@ const GposMarkToBaseHandler = {
 		return new Ot.Gpos.MarkToBase();
 	},
 	fill(dst, src, store) {
-		const st = src.subtables[0];
-		const mm = collectClassMap(st.marks);
-		dst.marks = convertMarkRecords(st.marks, mm, store);
-		dst.bases = convertBaseRecords(st.bases, mm, store);
+		const mm = collectClassMap(src.marks);
+		dst.marks = convertMarkRecords(src.marks, mm, store);
+		dst.bases = convertBaseRecords(src.bases, mm, store);
 	}
 };
 const GposMarkToMarkHandler = {
@@ -187,10 +183,9 @@ const GposMarkToMarkHandler = {
 		return new Ot.Gpos.MarkToMark();
 	},
 	fill(dst, src, store) {
-		const st = src.subtables[0];
-		const mm = collectClassMap(st.marks);
-		dst.marks = convertMarkRecords(st.marks, mm, store);
-		dst.baseMarks = convertBaseRecords(st.bases, mm, store);
+		const mm = collectClassMap(src.marks);
+		dst.marks = convertMarkRecords(src.marks, mm, store);
+		dst.baseMarks = convertBaseRecords(src.bases, mm, store);
 	}
 };
 function collectClassMap(marks) {

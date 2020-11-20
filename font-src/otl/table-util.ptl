@@ -95,9 +95,9 @@ export : define [MoveBackUtilityLookups sink] : begin
 
 export : define [ChainRuleBuilder sink] : begin
 	define [createNewLookup f t] : begin
-		local subtable {.}
-		foreach [j : range 0 f.length] : set subtable.(f.(j)) t.(j)
-		return : add-lookup sink {.type 'gsub_single' .subtables {subtable}} UtilityLookupPrefix
+		local subst {.}
+		foreach [j : range 0 f.length] : set subst.(f.(j)) t.(j)
+		return : add-lookup sink {.type 'gsub_single' .substitutions subst} UtilityLookupPrefix
 
 	define [getSubLookup left right] : piecewise
 		[not right] null
@@ -108,7 +108,7 @@ export : define [ChainRuleBuilder sink] : begin
 			local maxMatch 0
 			local lookupKeys : [Object.keys sink.lookups].reverse
 			foreach [name : items-of lookupKeys] : begin
-				local st sink.lookups.(name).subtables.0
+				local st sink.lookups.(name).substitutions
 				if [IsUtilityLookupId name] : begin
 					local compatible true
 					local matchCount 0
@@ -120,7 +120,7 @@ export : define [ChainRuleBuilder sink] : begin
 						set maxMatch matchCount
 
 			if found : begin
-				local st sink.lookups.(found).subtables.0
+				local st sink.lookups.(found).substitutions
 				foreach [j : range 0 left.length] : set st.(left.(j)) right.(j)
 				return found
 
@@ -128,25 +128,25 @@ export : define [ChainRuleBuilder sink] : begin
 
 	define [chain-rule] : begin
 		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
-		local subtable {.match {} .apply {} .inputBegins 0 .inputEnds 0}
+		local rule {.match {} .apply {} .inputBegins 0 .inputEnds 0}
 		local foundi false
 		local founde false
 		foreach [j : range 0 terms.length] : if (!foundi && terms.(j).right) : begin
-			set subtable.inputBegins j
+			set rule.inputBegins j
 			set foundi true
 		foreach [j : range (terms.length - 1) downtill 0] : if (!founde && terms.(j).right) : begin
-			set subtable.inputEnds (j + 1)
+			set rule.inputEnds (j + 1)
 			set founde true
 		foreach [j : range 0 terms.length] : begin
 			local term terms.(j)
-			subtable.match.push : Array.from : new Set term.left
+			rule.match.push : Array.from : new Set term.left
 			local lutn : getSubLookup term.left term.right
-			if lutn : subtable.apply.push {.at j .lookup lutn}
-		return subtable
+			if lutn : rule.apply.push {.at j .lookup lutn}
+		return rule
 
 	define [reverse-rule] : begin
 		local terms : [{}.slice.call arguments 0].map (x -> [if x.left x {.left x .right null}])
-		local subtable {.match {} .to {} .inputIndex 0}
+		local rule {.match {} .to {} .inputIndex 0}
 		local foundi false
 
 		foreach [j : range 0 terms.length] : begin
@@ -157,18 +157,18 @@ export : define [ChainRuleBuilder sink] : begin
 			if term.right : begin
 				if foundi : throw : new Error "Duplicate substitutions in one reverse rule"
 				set foundi true
-				set subtable.inputIndex j
+				set rule.inputIndex j
 				local toGlyphs : piecewise
 					(term.right <@ Function) [term.right term.left]
 					true                     term.right
 				foreach [k : range 0 term.left.length]
 					subst.set term.left.(k) (toGlyphs.(k) || term.left.(k))
 
-				set subtable.to : Array.from [subst.values]
+				set rule.to : Array.from [subst.values]
 
-			set subtable.match.(j) : Array.from [subst.keys]
+			set rule.match.(j) : Array.from [subst.keys]
 
-		return subtable
+		return rule
 
 	return {chain-rule reverse-rule}
 

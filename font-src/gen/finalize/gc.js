@@ -26,9 +26,9 @@ function markLookups(table, sink) {
 		let sizeBefore = sink.size;
 		for (const l of Array.from(sink)) {
 			const lookup = table.lookups[l];
-			if (!lookup || !lookup.subtables) continue;
+			if (!lookup) continue;
 			if (lookup.type === "gsub_chaining" || lookup.type === "gpos_chaining") {
-				for (let st of lookup.subtables) {
+				for (let st of lookup.rules) {
 					if (!st || !st.apply) continue;
 					for (const app of st.apply) sink.add(app.lookup);
 				}
@@ -91,56 +91,60 @@ function markGlyphsStep(glyphStore, sink, restFont, cfg) {
 	if (restFont.GSUB) {
 		for (const l in restFont.GSUB.lookups) {
 			const lookup = restFont.GSUB.lookups[l];
-			if (!lookup || !lookup.subtables) continue;
-			for (let st of lookup.subtables) {
-				markGlyphsSubtable(sink, lookup.type, st, cfg);
-			}
+			if (!lookup) continue;
+			markGlyphsLookupImpl(sink, lookup, cfg);
 		}
 	}
 	const glyphCount1 = sink.size;
 	return glyphCount1 > glyphCount;
 }
 
-function markGlyphsSubtable(sink, type, st, cfg) {
-	switch (type) {
+function markGlyphsLookupImpl(sink, lookup, cfg) {
+	switch (lookup.type) {
 		case "gsub_single":
-			return markGlyphsGsubSingle(sink, st, cfg);
+			return markGlyphsGsubSingle(sink, lookup, cfg);
 		case "gsub_multiple":
-			return markGlyphsGsubMultiple(sink, st, cfg);
+			return markGlyphsGsubMultiple(sink, lookup, cfg);
 		case "gsub_alternate":
-			return markGlyphsGsubAlternate(sink, st, cfg);
+			return markGlyphsGsubAlternate(sink, lookup, cfg);
 		case "gsub_ligature":
-			return markGlyphsGsubLigature(sink, st, cfg);
+			return markGlyphsGsubLigature(sink, lookup, cfg);
 		case "gsub_chaining":
 			break;
 		case "gsub_reverse":
-			return markGlyphsGsubReverse(sink, st, cfg);
+			return markGlyphsGsubReverse(sink, lookup, cfg);
 	}
 }
 
-function markGlyphsGsubSingle(sink, st, cfg) {
+function markGlyphsGsubSingle(sink, lookup, cfg) {
+	const st = lookup.substitutions;
 	for (const k in st) if (sink.has(k) && st[k]) sink.add(st[k]);
 }
-function markGlyphsGsubMultiple(sink, st, cfg) {
+function markGlyphsGsubMultiple(sink, lookup, cfg) {
+	const st = lookup.substitutions;
 	for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 }
-function markGlyphsGsubAlternate(sink, st, cfg) {
+function markGlyphsGsubAlternate(sink, lookup, cfg) {
+	const st = lookup.substitutions;
 	if (!cfg || !cfg.ignoreAltSub) {
 		for (const k in st) if (sink.has(k) && st[k]) for (const g of st[k]) sink.add(g);
 	}
 }
-function markGlyphsGsubLigature(sink, st, cfg) {
-	for (const sub of st.substitutions) {
+function markGlyphsGsubLigature(sink, lookup, cfg) {
+	const st = lookup.substitutions;
+	for (const sub of st) {
 		let check = true;
 		for (const g of sub.from) if (!sink.has(g)) check = false;
 		if (check && sub.to) sink.add(sub.to);
 	}
 }
-function markGlyphsGsubReverse(sink, st, cfg) {
-	if (st.match && st.to) {
-		const matchCoverage = st.match[st.inputIndex];
-		for (let j = 0; j < matchCoverage.length; j++) {
-			if (sink.has(matchCoverage[j]) && st.to[j]) sink.add(st.to[j]);
+function markGlyphsGsubReverse(sink, lookup, cfg) {
+	for (const rule of lookup.rules) {
+		if (rule.match && rule.to) {
+			const matchCoverage = rule.match[rule.inputIndex];
+			for (let j = 0; j < matchCoverage.length; j++) {
+				if (sink.has(matchCoverage[j]) && rule.to[j]) sink.add(rule.to[j]);
+			}
 		}
 	}
 }
