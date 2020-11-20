@@ -3434,7 +3434,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
 
 	define [EarlessCornerLowerRShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object rbar rmiddle rHookX rHookY hookSuperness] : RDim df md
+		define [object rbar rmiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 		include : dispiro
 			widths.lhs
 			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
@@ -3442,10 +3442,11 @@ glyph-block Letter-Latin-Lower-R : begin
 			g4.left.mid (rmiddle - CorrectionOMidS) (XH - O) [heading Leftward]
 			g4 (rbar - Stroke * HVContrast) (XH - DToothlessRise)
 		include : VBarRight rbar 0 (XH - DToothlessRise)
+		if doBottomSerif : include : rBottomSerif 0
 		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
 
 	define [EarlessRoundedLowerRShape df md doTopSerif doBottomSerif] : glyph-proc
-		define [object rbar rmiddle rHookX rHookY hookSuperness] : RDim df md
+		define [object rbar rmiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
 		local hx : Math.max rHookX (rbar + 1.25 * Stroke)
 		include : dispiro
 			widths.lhs
@@ -3453,16 +3454,19 @@ glyph-block Letter-Latin-Lower-R : begin
 			hookstart (XH - O)
 			flat (rbar - Stroke * HVContrast) (XH - SmallSmoothA)
 			curl (rbar - Stroke * HVContrast) 0 [heading Downward]
+		if doBottomSerif : include : rBottomSerif 0
 		set-base-anchor 'overlay' (rbar - Stroke * 0.25) (XH * 0.5)
 
 	create-glyph : glyph-proc
 		set-width dfR.width
 		include : dfR.markSet.e
-		create-derived "r.straight"       : StandardLowerRShape       dfN rStraight 0 0
-		create-derived "r.serifed"        : StandardLowerRShape       dfN rSerifed  1 1
-		create-derived "r.top-serifed"    : StandardLowerRShape       dfN rSerifed  1 0
-		create-derived "r.earlessCorner"  : EarlessCornerLowerRShape  dfN rEarless  0 0
-		create-derived "r.earlessRounded" : EarlessRoundedLowerRShape dfN rEarless 0 0
+		create-derived "r.serifless"             : StandardLowerRShape       dfN rStraight 0 0
+		create-derived "r.serifed"               : StandardLowerRShape       dfN rSerifed  1 1
+		create-derived "r.top-serifed"           : StandardLowerRShape       dfN rSerifed  1 0
+		create-derived "r.earlessCorner"         : EarlessCornerLowerRShape  dfN rEarless  0 0
+		create-derived "r.earlessCornerSerifed"  : EarlessCornerLowerRShape  dfN rEarless  0 1
+		create-derived "r.earlessRounded"        : EarlessRoundedLowerRShape dfN rEarless  0 0
+		create-derived "r.earlessRoundedSerifed" : EarlessRoundedLowerRShape dfN rEarless  0 1
 
 	create-glyph 'r.narrow' : glyph-proc
 		set-width dfR.width
@@ -3498,27 +3502,31 @@ glyph-block Letter-Latin-Lower-R : begin
 	turned 'turnr' 0x279 'r' HalfAdvance (XH / 2) [TurnRMarks 'e']
 
 	do
-		define [SmallRLongLegShape F df mode doTopSerif] : glyph-proc
+		define [SmallRLongLegShape F df mode doTopSerif doBottomSerif] : glyph-proc
 			set-width df.width
 			include : df.markSet.p
 			define [object rbar rBottomSerif] : RDim df mode
 			include : F df mode doTopSerif 0
 			eject-contour 'serifLB'
 			include : VBarRight rbar Descender 0
-			if SLAB : include : rBottomSerif Descender
+			if doBottomSerif : include : rBottomSerif Descender
 
-		create-glyph 'rlongleg.straight'
-			SmallRLongLegShape StandardLowerRShape        dfN rStraight 0
+		create-glyph 'rlongleg.serifless'
+			SmallRLongLegShape StandardLowerRShape        dfN rStraight 0 0
 		create-glyph 'rlongleg.serifed'
-			SmallRLongLegShape StandardLowerRShape        dfN rSerifed  1
+			SmallRLongLegShape StandardLowerRShape        dfN rSerifed  1 1
 		create-glyph 'rlongleg.top-serifed'
-			SmallRLongLegShape StandardLowerRShape        dfN rSerifed  1
+			SmallRLongLegShape StandardLowerRShape        dfN rSerifed  1 0
 		create-glyph 'rlongleg.earlessCorner'
-			SmallRLongLegShape EarlessCornerLowerRShape   dfN rEarless  0
+			SmallRLongLegShape EarlessCornerLowerRShape   dfN rEarless  0 0
+		create-glyph 'rlongleg.earlessCornerSerifed'
+			SmallRLongLegShape EarlessCornerLowerRShape   dfN rEarless  0 1
 		create-glyph 'rlongleg.earlessRounded'
-			SmallRLongLegShape EarlessRoundedLowerRShape  dfN rEarless  0
+			SmallRLongLegShape EarlessRoundedLowerRShape  dfN rEarless  0 0
+		create-glyph 'rlongleg.earlessRoundedSerifed'
+			SmallRLongLegShape EarlessRoundedLowerRShape  dfN rEarless  0 1
 		create-glyph 'rlongleg.narrow'
-			SmallRLongLegShape NarrowLowerRshape          dfR rNarrow   0
+			SmallRLongLegShape NarrowLowerRshape          dfR rNarrow   0 0
 
 		select-variant 'rlongleg' 0x27C (follow -- 'r')
 
@@ -3536,10 +3544,8 @@ glyph-block Letter-Latin-Lower-R : begin
 				include : Upright
 				include : Translate rbar 0
 				include : Italify
-		create-glyph 'rrtail.straight'
+		create-glyph 'rrtail.serifless'
 			SmallRRTailShape StandardLowerRShape       dfN rStraight 0
-		create-glyph 'rrtail.serifed'
-			SmallRRTailShape StandardLowerRShape       dfN rSerifed  1
 		create-glyph 'rrtail.top-serifed'
 			SmallRRTailShape StandardLowerRShape       dfN rSerifed  1
 		create-glyph 'rrtail.earlessCorner'
@@ -3548,7 +3554,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			SmallRRTailShape EarlessRoundedLowerRShape dfN rEarless  0
 		create-glyph 'rrtail.narrow'
 			SmallRRTailShape NarrowLowerRshape         dfR rNarrow   0
-		select-variant 'rrtail' 0x27D (follow -- 'r')
+		select-variant 'rrtail' 0x27D
 
 	turned 'smallLetterTurnedRWithTail' 0x2C79 'rrtail' HalfAdvance (XH / 2) : glyph-proc
 		local df : DivFrame (currentGlyph.advanceWidth / Width)
@@ -3568,7 +3574,7 @@ glyph-block Letter-Latin-Lower-R : begin
 				include : Translate (df.rightSB - rbar + df.leftSB + Stroke * HVContrast) 0
 				include : Italify
 
-		create-glyph 'turnrrtail.straight'
+		create-glyph 'turnrrtail.serifless'
 			TurnRRTailShape StandardLowerRShape     dfN rStraight 0
 		create-glyph 'turnrrtail.serifed'
 			TurnRRTailShape StandardLowerRShape     dfN rSerifed  1
@@ -3576,10 +3582,9 @@ glyph-block Letter-Latin-Lower-R : begin
 			TurnRRTailShape StandardLowerRShape     dfN rSerifed  0
 		create-glyph 'turnrrtail.narrow'
 			TurnRRTailShape NarrowLowerRshape       dfR rNarrow   0
-
 		select-variant 'turnrrtail' 0x27B
 
-	create-glyph 'rflap.straight' : glyph-proc
+	create-glyph 'rflap.serifless' : glyph-proc
 		set-width dfN.width
 		include : dfN.markSet.e
 		define [object rBottomSerif] : RDim dfN rEarless

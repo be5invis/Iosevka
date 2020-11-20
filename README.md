@@ -590,11 +590,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left) single-storey `q`.
     + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
   - Styles for `r`:
-    + `r = 'straight'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
+    + `r = 'serifless'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
     + `r = 'serifed'`, `cv26 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
     + `r = 'top-serifed'`, `cv26 = 3`: `r` with serifs at top-left only (default for Slab Italic).
     + `r = 'earless-corner'`, `cv26 = 4`: Earless (corner top-left), serif-less `r`.
-    + `r = 'earless-rounded'`, `cv26 = 5`: Earless (rounded top-left), serif-less `r`.
+    + `r = 'earless-corner-serifed'`, `cv26 = 5`: Earless (corner top-left), serifed `r`.
+    + `r = 'earless-rounded'`, `cv26 = 6`: Earless (rounded top-left), serif-less `r`.
+    + `r = 'earless-rounded-serifed'`, `cv26 = 7`: Earless (rounded top-left), serifed `r`.
   - Styles for `t`:
     + `t = 'standard'`, `cv27 = 1`: Standard `t` shape (default).
     + `t = 'cross'`, `cv27 = 2`: Futura-like `t` shape.
