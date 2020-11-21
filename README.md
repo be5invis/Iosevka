@@ -368,8 +368,11 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `eqeq`: Enable ligation for `==` and `===`.
   - `ineq`: Enable ligation for `<=` and `>=`.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
+  - `exeqeq-alt-1`: Enable special ligation for `!==` with triple lines, and a dot at below for distinction.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
+  - `eqexeq-alt-1`: Enable special ligation for `=!=` with triple lines and a dot at below for distinction.
   - `eqexeq-dl`: Enable special ligation for `=!=` with double lines.
+  - `eqexeq-dl-alt-1`: Enable special ligation for `=!=` with double lines, and a dot at below for distinction.
   - `exeq`: Enable ligation for `!=` and `!==`.
   - `exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   - `tildeeq`: Enable ligation for `~=` as inequality.
