@@ -728,15 +728,15 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 				include : Translate (-Width) 0
 			return gnn
 
-		define [denumeratorImpl denid] : begin
-			local gnd ".frac-den-\(prefix){\(denid)}"
+		define [denumeratorImplT offset] : lambda [denid] : begin
+			local gnd ".frac-den-\(prefix){\(denid)}{\(offset)}"
 			if [not : query-glyph gnd] : create-glyph gnd : glyph-proc
 				define mfDenGlyph : miniatureFont.queryByNameEnsured denid
 
 				set-width 0
 				include mfDenGlyph
 				include : Upright
-				include : Translate (- mfDenGlyph.advanceWidth / 2) 0
+				include : Translate offset 0
 				include : Scale scaleFactor
 				include : Translate Middle (SymbolMid - CAP * scaleFactor - dist / 2)
 				include : Italify
@@ -744,15 +744,24 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 			return gnd
 
 		define [createFractionImpl job jobDecomposable] : begin
-				local {gnf unicode {numid denid}} job
+				local {gnf unicode {numid :: denidList}} job
 				local gnn : EnsureComponentGlyphT numid numeratorImpl
-				local gnd : EnsureComponentGlyphT denid denumeratorImpl
+				local gndList {}
+
+				local totalDenWidth 0
+				local offset        0
+				foreach denid [items-of denidList] : begin
+					set totalDenWidth : totalDenWidth + [miniatureFont.queryByNameEnsured denid].advanceWidth
+				foreach denid [items-of denidList] : begin
+					gndList.push : EnsureComponentGlyphT denid : denumeratorImplT (offset - totalDenWidth / 2)
+					set offset : offset + [miniatureFont.queryByNameEnsured denid].advanceWidth
+
 				if [not : query-glyph gnf] : create-glyph gnf unicode : glyph-proc
 					include : refer-glyph gnn
-					include : refer-glyph gnd
+					foreach gnd [items-of gndList] : include : refer-glyph gnd
 					include : Translate (Width) 0
 					include : refer-glyph gnFractionBar
-					if jobDecomposable : CvDecompose.set currentGlyph { gnFractionBar gnn gnd }
+					if jobDecomposable : CvDecompose.set currentGlyph { gnFractionBar gnn :: gndList }
 
 		create-glyph gnFractionBar : glyph-proc
 			set-width Width
@@ -772,7 +781,7 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 		list 0x00BE { 'three.lnum' 'four.lnum' }
 		list 0x2150 { 'one.lnum' 'seven.lnum' }
 		list 0x2151 { 'one.lnum' 'nine.lnum' }
-		list 0x2152 { 'one.lnum' 'numbers/ten{one.lnum}{zero.lnum}' }
+		list 0x2152 { 'one.lnum' 'one.lnum' 'zero.lnum' }
 		list 0x2153 { 'one.lnum' 'three.lnum' }
 		list 0x2154 { 'two.lnum' 'three.lnum' }
 		list 0x2155 { 'one.lnum' 'five.lnum' }

@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 4.0.0-beta.3
+
+ * \[**Breaking**\] Added variant `r/earless-corner-serifed` and `r/earless-rounded-serifed`; Reordered `r`'s variant ranking and renamed `r/straight` to `r/serifless` (#742).
+ * Fix variant application of fraction 1/10 (U+2152, #736).
+ * Make variant application effective on LATIN SMALL LETTER WITH STROKE (U+0167, #737).
+ * Updated readme to reflect change in spacing parameter `force-monospace` to `fontconfig-mono`.
+ * Made check and cross marks wide-aware.
+
+
 ### 4.0.0-beta.2
 
  * [**Breaking**] Reorder and reorganize character variants of `i`, `l`, and `f`, including:

@@ -313,12 +313,12 @@ Configuration of build plans are organized under `[buildPlans.<plan name>]` sect
 * `family`: String, defines the family name of your custom variant.
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
   - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols ill become narrower.
-  - `force-monospace`: Apply `term` spacing changes and further:
+  - `fontconfig-mono`: Apply `term` spacing changes and further:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
     - Remove `NWID` and `WWID` OpenType feature.
     
     This spacing is recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
-  - `fixed`: Apply `force-monospace` changes and remove ligations.
+  - `fixed`: Apply `fontconfig-mono` changes and remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
@@ -590,11 +590,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left) single-storey `q`.
     + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
   - Styles for `r`:
-    + `r = 'straight'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
+    + `r = 'serifless'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
     + `r = 'serifed'`, `cv26 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
     + `r = 'top-serifed'`, `cv26 = 3`: `r` with serifs at top-left only (default for Slab Italic).
     + `r = 'earless-corner'`, `cv26 = 4`: Earless (corner top-left), serif-less `r`.
-    + `r = 'earless-rounded'`, `cv26 = 5`: Earless (rounded top-left), serif-less `r`.
+    + `r = 'earless-corner-serifed'`, `cv26 = 5`: Earless (corner top-left), serifed `r`.
+    + `r = 'earless-rounded'`, `cv26 = 6`: Earless (rounded top-left), serif-less `r`.
+    + `r = 'earless-rounded-serifed'`, `cv26 = 7`: Earless (rounded top-left), serifed `r`.
   - Styles for `t`:
     + `t = 'standard'`, `cv27 = 1`: Standard `t` shape (default).
     + `t = 'cross'`, `cv27 = 2`: Futura-like `t` shape.

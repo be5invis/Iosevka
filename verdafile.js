@@ -876,10 +876,8 @@ const Scripts = task("scripts", async target => {
 	const jsFromPtlSet = new Set(jsFromPtlList);
 
 	let subGoals = [];
-	for (const js of jsList) {
-		if (jsFromPtlSet.has(js)) subGoals.push(CompiledJs(js));
-		else subGoals.push(sfu(js));
-	}
+	for (const js of jsFromPtlSet) subGoals.push(CompiledJs(js));
+	for (const js of jsList) if (!jsFromPtlSet.has(js)) subGoals.push(sfu(js));
 	await target.need(subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
