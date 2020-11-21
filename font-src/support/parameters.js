@@ -126,7 +126,7 @@ const metricOverrideHandlers = {
 	leading: numericFieldHandler,
 	winMetricAscenderPad: numericFieldHandler,
 	winMetricDescenderPad: numericFieldHandler,
-	SymbolMid: numericFieldHandler,
+	symbolMid: numericFieldHandler,
 	parenSize: numericFieldHandler,
 	powerlineScaleY: numericFieldHandler,
 	powerlineScaleX: numericFieldHandler,
