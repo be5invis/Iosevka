@@ -3,8 +3,7 @@
 const Parameters = require("./parameters");
 
 module.exports = function applyLigationData(data, para, argv) {
-	const optInBuildup = {};
-	const optOutBuildup = {};
+	const defaultBuildup = {};
 
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
@@ -17,18 +16,12 @@ module.exports = function applyLigationData(data, para, argv) {
 		if (!comp.tag) continue;
 
 		const ligSets = createBuildup(data.simple, comp.buildup);
-		if (comp.isOptOut) {
-			optOutBuildup[comp.tag] = ligSets;
-		} else {
-			optInBuildup[comp.tag] = ligSets;
-		}
-		if (!comp.isOptOut) {
-			hives["ligset-" + gr] = { caltBuildup: ligSets };
-		}
+		defaultBuildup[comp.tag] = ligSets;
+		hives["ligset-" + gr] = { caltBuildup: ligSets };
 	}
 
 	para.ligation = {
-		defaultBuildup: { ...optInBuildup, ...optOutBuildup },
+		defaultBuildup: defaultBuildup,
 		caltBuildup: []
 	};
 	if (argv.ligations) {
