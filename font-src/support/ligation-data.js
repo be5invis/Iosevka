@@ -21,7 +21,7 @@ module.exports = function applyLigationData(data, para, argv) {
 	}
 
 	para.ligation = {
-		defaultBuildup: defaultBuildup,
+		defaultBuildup,
 		caltBuildup: []
 	};
 	if (argv.ligations) {
