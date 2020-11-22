@@ -336,6 +336,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
+  - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
   - `clike`: Default ligation set would be assigned to C-Like.
   - `javascript`: Default ligation set would be assigned to JavaScript.
@@ -368,13 +369,13 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `eqeq`: Enable ligation for `==` and `===`.
   - `ineq`: Enable ligation for `<=` and `>=`.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
-  - `exeqeq-alt-1`: Enable special ligation for `!==` with triple lines, and a dot at below for distinction.
+  - `exeqeq-dotted`: Enable special ligation for `!==` with triple lines, and a dot at below for distinction.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
-  - `eqexeq-alt-1`: Enable special ligation for `=!=` with triple lines and a dot at below for distinction.
+  - `eqexeq-dotted`: Enable special ligation for `=!=` with triple lines and a dot at below for distinction.
   - `eqexeq-dl`: Enable special ligation for `=!=` with double lines.
-  - `eqexeq-dl-alt-1`: Enable special ligation for `=!=` with double lines, and a dot at below for distinction.
+  - `eqexeq-dl-dotted`: Enable special ligation for `=!=` with double lines, and a dot at below for distinction.
   - `exeq`: Enable ligation for `!=` and `!==`.
-  - `exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
+  - `exeq-dotted`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   - `tildeeq`: Enable ligation for `~=` as inequality.
   - `eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   - `slasheq`: Enable ligation for `/=` and `=/=` as inequality.
