@@ -177,10 +177,10 @@ async function processLigSetPreDef() {
 	const headerPath = path.resolve(__dirname, "fragments/description-predefined-ligation-sets.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 	for (const gr in ligData.rawSets) {
-		const longDesc =
-			ligData.rawSets[gr].longDesc ||
+		const readmeDesc =
+			ligData.rawSets[gr].readmeDesc ||
 			`Default ligation set would be assigned to ${ligData.rawSets[gr].desc}`;
-		md.log(`  - \`${gr}\`: ${longDesc}.`);
+		md.log(`  - \`${gr}\`: ${readmeDesc}.`);
 	}
 	return md;
 }
