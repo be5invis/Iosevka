@@ -8,9 +8,11 @@ extern Set
 
 glyph-module
 
-define DECOMPOSABLE     true
-define NON-DECOMPOSABLE false
-define SLOPE-INHERIT    nothing
+define DECOMPOSABLE      true
+define NON-DECOMPOSABLE  false
+define CENTERED          true
+define NOT-CENTERED      false
+define SLOPE-INHERIT     nothing
 
 glyph-block Autobuild-Enclosure-Shared : begin
 	glyph-block-import CommonShapes
@@ -42,8 +44,15 @@ glyph-block Autobuild-Enclosure-Shared : begin
 					[query-glyph gniPart].tryBecomeMirrorOf [query-glyph gniRelated] rs
 		return gniPart
 
+	glyph-block-export getGlyphDefaultShift
+	define [getGlyphDefaultShift bal baly g] : begin
+		if (g && g.baseAnchors.above && g.baseAnchors.below) : begin
+			if bal : return : CAP / 2 - [mix baly [mix g.baseAnchors.above.y g.baseAnchors.below.y 0.5] bal]
+			: else : return : CAP / 2 - [mix g.baseAnchors.above.y g.baseAnchors.below.y 0.5]
+		return 0
+
 	glyph-block-export CollectJobs
-	define [CollectJobs globallyDecomposable prefix suffix demands] : begin
+	define [CollectJobs globallyDecomposable centered prefix suffix demands] : begin
 		local nonDecomposable     { }
 		local decomposableJobs    { }
 		local decomposableRelJobs { }
@@ -60,6 +69,8 @@ glyph-block Autobuild-Enclosure-Shared : begin
 				local relatedGlyphs : AnyCv.query g
 				foreach gr [items-of relatedGlyphs] : if [query-glyph : gr.get g] : begin
 					if ([query-glyph : gr.get g].advanceWidth != g.advanceWidth)
+						set demandDecomposable false
+					if (centered && [getGlyphDefaultShift 0 0 : query-glyph : gr.get g] != [getGlyphDefaultShift 0 0 g])
 						set demandDecomposable false
 
 			local jobsOrig : if demandDecomposable decomposableJobs    nonDecomposable
@@ -97,7 +108,7 @@ glyph-block AutoBuild-Enclosure : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Miniature Thinner
-	glyph-block-import Autobuild-Enclosure-Shared : CircNameNoCheck CircName CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations
+	glyph-block-import Autobuild-Enclosure-Shared : CircNameNoCheck CircName CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations getGlyphDefaultShift
 
 	define circleWidthClasses {{'NWID' Width 0.12} {'WWID' WideWidth0 0.08}}
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * Width / width)
@@ -135,16 +146,13 @@ glyph-block AutoBuild-Enclosure : begin
 
 		local totalWidth 0
 		local firstDerivedGyph null
-		local shift 0
 		foreach [gidPart : items-of parts] : do
 			local derivedGlyph : miniatureFont.queryByNameEnsured gidPart
 			if [not firstDerivedGyph] : set firstDerivedGyph derivedGlyph
 			set totalWidth : totalWidth + derivedGlyph.advanceWidth
 		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
 		set totalWidth : Math.min mockInnerWidth totalWidth
-		if (firstDerivedGyph && firstDerivedGyph.baseAnchors.above && firstDerivedGyph.baseAnchors.below) : begin
-			if bal : set shift : CAP / 2 - [mix baly [mix firstDerivedGyph.baseAnchors.above.y firstDerivedGyph.baseAnchors.below.y 0.5] bal]
-			: else : set shift : CAP / 2 - [mix firstDerivedGyph.baseAnchors.above.y firstDerivedGyph.baseAnchors.below.y 0.5]
+		local shift : getGlyphDefaultShift bal baly firstDerivedGyph
 
 		local finalParts {}
 		local accumulatedAdvanceSoFar 0
@@ -207,7 +215,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [EnclosureT prefix builder slopeAngle digits demands fnEnclosure] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
-			define jobs : CollectJobs builder.decomposable (prefix + digits) suffix demands
+			define jobs : CollectJobs builder.decomposable CENTERED (prefix + digits) suffix demands
 			define miniatureFont : CreateDerivedFontFromJobs jobs {} : CircledMiniatureFont slopeAngle digits ww
 			define gnEnclosure : CircName null (prefix + digits + '.enclosure') {} suffix
 			if [not : query-glyph gnEnclosure] : create-glyph gnEnclosure : fnEnclosure digits ww gap
@@ -354,7 +362,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [BracedT rawPrefix digits demands fnBraceShape] : foreach {suffix ww} [items-of circleWidthClasses] : do
 		define prefix : rawPrefix + digits
-		define jobs : CollectJobs DECOMPOSABLE prefix suffix demands
+		define jobs : CollectJobs DECOMPOSABLE CENTERED prefix suffix demands
 		define miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature
 			glyphs  -- gs
 			crowd   -- [BraceCrowd digits ww]
@@ -444,7 +452,7 @@ glyph-block AutoBuild-Enclosure : begin
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
 	define [createDottedGlyphs digits gidDot demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
-			define jobs : CollectJobs DECOMPOSABLE ('dotted' + digits) suffix demands
+			define jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ('dotted' + digits) suffix demands
 
 			local miniatureFont : CreateDerivedFontFromJobs jobs {gidDot} : lambda  [gs]: Miniature
 				glyphs  -- gs
@@ -704,7 +712,7 @@ glyph-block Autobuild-Fractions : if [not recursive] : begin
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations
 
 	define [createFracImpl prefix demands fine scaleFactor closing] : begin
-		local jobs : CollectJobs DECOMPOSABLE prefix '' demands
+		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED prefix '' demands
 		define miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature
 			glyphs -- gs
 			crowd  -- 3.5
@@ -816,7 +824,7 @@ glyph-block AutoBuild-Accented-Equal : if [not recursive] : begin
 
 	define [createAccentedOp gnBase crowd scale shiftX shiftY demands] : begin
 		define prefix : 'accent-op{' + gnBase + '}{' + [{crowd scale shiftX shiftY}.join '-'] + '}'
-		local jobs : CollectJobs DECOMPOSABLE prefix '' demands
+		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED prefix '' demands
 		local dFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature
 			glyphs -- gs
 			crowd  -- crowd
@@ -931,7 +939,7 @@ glyph-block Autobuild-Ligatures : if [not recursive] : begin
 
 	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
 		local ww : if FMosaicWide MosaicWidth (MosaicWidth * para.diversityM)
-		local jobs : CollectJobs DECOMPOSABLE prefix MosaicNameSuffix demands
+		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED prefix MosaicNameSuffix demands
 		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / Width)]
 		local shrink2 : if FMosaicWide 1 [clamp 0 1 (_shrink2 * ww / Width)]
 		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1
