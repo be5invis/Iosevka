@@ -106,8 +106,8 @@ define-macro glyph-block-import : syntax-rules
 	`[glyph-block-import @_blockName] : begin
 
 		define allExports : object
-			Common-Derivatives `[select-variant italic-variant refer-glyph query-glyph alias turned
-			HDual HCombine VDual vcombine with-related-glyphs glyph-is-needed]
+			Common-Derivatives `[select-variant orthographic-italic refer-glyph query-glyph alias turned
+			HDual HCombine VDual VCombine with-related-glyphs glyph-is-needed]
 
 			CommonShapes `[Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt
 			CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape
@@ -115,10 +115,11 @@ define-macro glyph-block-import : syntax-rules
 			CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif
 			UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs HBar
 			HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook
-			HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender FlipAround ScaleAround
-			Realign ForceUpright diagCor CreateWaveShape NameUni PointingTo WithAIHSerifsMask
-			WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape
-			OBarRightToothlessShape OBarRightRoundedShape AsRadical]
+			HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender CyrLeftDescender FlipAround
+			ScaleAround Realign ForceUpright DiagCor CreateWaveShape NameUni PointingTo
+			WithAIHSerifsMask WithTransform ReverseContours clear-anchors OBarLeftToothlessShape
+			OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical
+			ExtLineCenter DiagCorDs HCrossBar]
 
 		define vartiableFilter : if externEnv.$glyphBlockVariableUsage$
 			lambda [x] externEnv.$glyphBlockVariableUsage$.(x)
@@ -139,13 +140,13 @@ define-macro glyph-block-export : syntax-rules
 define-macro for-width-kinds : syntax-rules
 	`[for-width-kinds @_desired @::_body] : dirty `[ do \\
 		define WidthKinds {
-			{0 '.NWID' $Capture$.metrics.Width $Capture$.metrics.Width}
-			{1 '.WWID' $Capture$.metrics.WideWidth0 ($Capture$.metrics.WideWidth0 / 2)}
+			{0 '.NWID' $Capture$.metrics.Width 1}
+			{1 '.WWID' $Capture$.metrics.WideWidth0 2}
 		}
-		foreach {FMosaicWide MosaicNameSuffix MosaicWidth MosaicUnitWidth} [items-of WidthKinds] : do
+		foreach {FMosaicWide MosaicNameSuffix MosaicWidth MosaicWidthScalar} [items-of WidthKinds] : do
 			define MosaicDesiredWidth @[formOf _desired]
 			define MosaicMiddle : MosaicWidth / 2
-			define MosaicWidthScalar : MosaicWidth / MosaicUnitWidth
+			define MosaicUnitWidth : MosaicWidth / MosaicWidthScalar
 			define [MangleUnicode unicode _desiredOverride]
 				if (MosaicWidth == (_desiredOverride || MosaicDesiredWidth)) unicode nothing
 			define [MangleName name] : name + MosaicNameSuffix
@@ -182,7 +183,7 @@ define-macro glyph-block : syntax-rules
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
 		define captureImports `[metrics $NamedParameterPair$ $donothing$ para recursive
-			recursiveCodes variantSelector glyphStore $createAndSaveGlyphImpl$
+			recursiveCodes glyphStore $createAndSaveGlyphImpl$
 			spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash
 			buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$]
 		define metricImports `[UPM HalfUPM Width SB CAP XH Descender Contrast SymbolMid ParenTop
@@ -195,9 +196,9 @@ define-macro glyph-block : syntax-rules
 			IBalance2 JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance OneBalance
 			WideWidth0 WideWidth1 WideWidth2 Ess EssQuestion HalfStroke RightSB
 			Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA SmoothB
-			SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS adviceBlackness
-			adviceBlackness2 MVertStroke OverlayStroke OperatorStroke GeometryStroke ShoulderFine
-			superXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope StrokeWidthBlend
+			SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS AdviceStroke
+			AdviceStroke2 MVertStroke OverlayStroke OperatorStroke GeometryStroke ShoulderFine
+			_SuperXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope StrokeWidthBlend
 			SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter compositeBaseAnchors YSmoothMidR YSmoothMidL]
 		define spiroFnImports `[g4 g2 corner flat curl close end straight widths disable-gizmo
 			disable-contrast heading unimportant important alsoThru alsoThruThem bezcontrols

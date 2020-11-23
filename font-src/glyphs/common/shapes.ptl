@@ -3,8 +3,8 @@ $$include '../../meta/macros.ptl'
 import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyDerivingCv Radical] from '../../support/gr'
-import [designParameters] from '../../meta/aesthetics'
+import [Radical] from '../../support/gr'
+import [DesignParameters] from '../../meta/aesthetics'
 import '../../support/point' as Point
 
 glyph-module
@@ -157,27 +157,24 @@ glyph-block CommonShapes : begin
 	set OShape.NoOvershoot : lambda [u d l r _width _sma _smb] : OShape (u + O) (d - O) (l - OX) (r + OX) _width _sma _smb
 	set OShapeOutline.NoOvershoot : lambda [u d l r _width _sma _smb] : OShapeOutline (u + O) (d - O) (l - OX) (r + OX) _width _sma _smb
 
-	define [OBarLeftShape _top _left] : glyph-proc
-		local top : fallback _top XH
-		local left : fallback _left SB
-		local fine ShoulderFine
+	define [OBarLeftShape] : params [[top XH] [left SB] [stroke Stroke] [fine ShoulderFine]] : begin
 		local st : shoulderMidSlope fine nothing 1
 		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left RightSB 0.5] + (st - CorrectionOMidX) * Stroke
-		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * Stroke
-		include : dispiro
-			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
-			curl (left + (Stroke - fine) * HVContrast) (0 + SmallSmoothB) [widths fine 0]
+		local mt : [mix left RightSB 0.5] + (st - CorrectionOMidX) * stroke
+		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * stroke
+		return : dispiro
+			flat (left + (stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
+			curl (left + (stroke - fine) * HVContrast) (0 + SmallSmoothB) [widths fine 0]
 			arcvh
-			g4   (mb) O [widths.heading Stroke 0 {.y (1) .x (-sb)}]
+			g4   (mb) O [widths.heading stroke 0 {.y (1) .x (-sb)}]
 			archv
 			flat (RightSB - OX) (0 + SmallSmoothA)
 			curl (RightSB - OX) (top - SmallSmoothB)
 			arcvh
-			g4   (mt) (top - O) [widths.heading Stroke 0 {.y (-1) .x (-st)}]
+			g4   (mt) (top - O) [widths.heading stroke 0 {.y (-1) .x (-st)}]
 			archv
-			flat (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA) [widths fine 0]
-			curl (left + (Stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
+			flat (left + (stroke - fine) * HVContrast) (top - SmallSmoothA) [widths fine 0]
+			curl (left + (stroke - fine) * HVContrast) (top - SmallSmoothA - 0.01) [widths fine 0]
 
 	define [OBarLeftToothlessShape _top _left _rise _mBlend] : glyph-proc
 		local top : fallback _top XH
@@ -271,9 +268,13 @@ glyph-block CommonShapes : begin
 			flat left (top - SmallSmoothA)
 			curl left yTerminal [widths.lhs.heading Stroke Downward]
 
-	define [OBarRightShape _top _right] : new-glyph : glyph-proc
-		include : OBarLeftShape _top (Width - [fallback _right RightSB])
-		include : FlipAround Middle ([fallback _top XH] / 2)
+	define [OBarRightShape] : params [[top XH] [right RightSB] [stroke Stroke] [fine ShoulderFine]] : new-glyph : glyph-proc
+		include : OBarLeftShape
+			top -- [fallback top XH]
+			left -- (Width - right)
+			stroke -- stroke
+			fine -- fine
+		include : FlipAround Middle (top / 2)
 
 	define [OBarRightToothlessShape _top _right _rise _mBlend] : new-glyph : glyph-proc
 		include : OBarLeftToothlessTopShape _top (Width - [fallback _right RightSB]) _rise _mBlend
@@ -377,7 +378,6 @@ glyph-block CommonShapes : begin
 				CenterTopSerif (right - sw * sideSerifK * HVContrast) top jut
 			include : tagged 'serifLB'
 				CenterBottomSerif (left + sw * sideSerifK * HVContrast) 0 jut
-			#include : CenterdBottomSerif (right - Stroke * (sideSerifK - 0.5) * HVContrast) 0 (Jut / 2)
 	define [AICyrISerifs top _left _right] : glyph-proc
 		local left : fallback _left SB
 		local right : fallback _right RightSB
@@ -403,10 +403,16 @@ glyph-block CommonShapes : begin
 			Rect top [mix top bottom 0.5] (leftCenter - Jut) (rightCenter + Jut - adj)
 			Rect [mix top bottom 0.5] bottom (leftCenter - Jut + adj) (rightCenter + Jut)
 
-	define [diagCor dy dx dyt dxt] : begin
+	define [DiagCor dy dx dyt dxt] : begin
 		local ay : Math.max 0 : [Math.abs dy] - [fallback dyt 0]
 		local ax : Math.max 0 : [Math.abs dx] - [fallback dxt 0]
 		return : [Math.hypot ay ax] / ay
+
+	define [DiagCorDs dy dx ds] : begin
+		local kDiag : DiagCor dy dx
+		for [local n 0] (n < 4) [inc n] : begin
+			set kDiag : DiagCor dy (dx - ds * kDiag)
+		return kDiag
 
 	define [HBar xleft xright y _fine] : glyph-proc
 		include : dispiro
@@ -420,6 +426,16 @@ glyph-block CommonShapes : begin
 		widths.center [fallback s OverlayStroke]
 		flat xleft y
 		curl xright y
+	define [HCrossBar xl xr y s] : dispiro
+		widths.center [fallback s OverlayStroke]
+		flat xl y
+		curl xr y
+	set HCrossBar.top : lambda [xl xr y _s] : begin
+		local s : fallback _s Stroke
+		return : HCrossBar (xl - 0 * s * TanSlope) (xr - 0 * s * TanSlope) (y - 0.5 * s) s
+	set HCrossBar.bottom : lambda [xl xr y _s] : begin
+		local s : fallback _s Stroke
+		return : HCrossBar (xl + 0 * s * TanSlope) (xr + 0 * s * TanSlope) (y + 0.5 * s) s
 	define [VBar x ydown yup _fine] : glyph-proc
 		local fine : fallback _fine Stroke
 		include : dispiro
@@ -448,14 +464,14 @@ glyph-block CommonShapes : begin
 			g4.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
 	define [LeftHook x y xextend] : glyph-proc
-		local fine : adviceBlackness 4.25
+		local fine : AdviceStroke 4.25
 		include : dispiro
 			widths.lhs fine
 			flat [fallback xextend : x + 1] y
 			curl x y
 			archv 8
 			g4.down.end (x - LeftHook.extension) (y - HookX) [heading Downward]
-	set LeftHook.extension [Math.max (Width * 0.15) ([adviceBlackness 4.25] * 1.5)]
+	set LeftHook.extension [Math.max (Width * 0.15) ([AdviceStroke 4.25] * 1.5)]
 
 	define [HooktopLeftBar] : params [stroke bottom] : glyph-proc
 		include : dispiro
@@ -473,7 +489,7 @@ glyph-block CommonShapes : begin
 	# Spiro shapes
 	define [determineMixR w v u sw swash] : begin
 		if (!swash && w < v) : return : 1 - [determineMixR v w u sw swash]
-		local superness designParameters.superness
+		local superness DesignParameters.superness
 		local r : piecewise
 			(w <= v)   0.5
 			true     : 1 / ([Math.pow (1 - [Math.pow (1 - v / w) superness]) (1 / superness)] + 1)
@@ -489,14 +505,14 @@ glyph-block CommonShapes : begin
 		return r
 
 	define nHookSegments 12
-	define [HookShape toStraight toFinish isStart y tight _sw _swItalicAdj] : begin
+	define [HookShape toStraight toFinish isStart y tight _sw _swItalicAdj noAdjTerminalY] : begin
 		local atBottom : toStraight.y > y
 		local sw : fallback _sw Stroke
 		local swItalicAdj : fallback _swItalicAdj sw
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
 		local doSwash : !tight && para.isItalic && ltr && atBottom && !isStart
-		local superness : if tight designParameters.tightHookSuperness designParameters.superness
+		local superness : if tight DesignParameters.tightHookSuperness DesignParameters.superness
 
 		# Adjust terminal's position if necessary
 		toFinish.x = toFinish.x + OXHook * [if ltr (-1) 1] * [if isStart (-1) 1]
@@ -536,7 +552,8 @@ glyph-block CommonShapes : begin
 						.x (Contrast * [if dtu (-1) 1])
 						.y 0
 					}
-			if [not doSwash] : set toFinish.y : toFinish.y + skew * sw * [if (y > toFinish.y) (-1) (+1)]
+			if ([not noAdjTerminalY] && [not doSwash]) : begin
+				set toFinish.y : toFinish.y + skew * sw * [if (y > toFinish.y) (-1) (+1)]
 
 		# Create the arc knots
 		local segBefore {}
@@ -545,14 +562,14 @@ glyph-block CommonShapes : begin
 			local fraction : j / nHookSegments
 			local mixRatioAdjust : Math.max (1 / 2) : (1 / 2) + [if doSwash 1 : if tight 0 (1 / 8)] * (mixRatio - (1 / 2))
 			local fractionAfter : fraction * (1 - mixRatioAdjust) / mixRatioAdjust
-			local myfinal : superXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
+			local myfinal : _SuperXY ((1 - mixRatioAdjust) / mixRatioAdjust) superness
 			segBefore.push : g4
 				mix mx toStraight.x fraction
-				mix y toStraight.y (1 - [superXY fraction superness])
+				mix y toStraight.y (1 - [_SuperXY fraction superness])
 				begin unimportant
 			segAfter.push : g4
 				mix mx toFinish.x fraction
-				mix y toFinish.y ((1 - [superXY fractionAfter superness]) / (1 - myfinal))
+				mix y toFinish.y ((1 - [_SuperXY fractionAfter superness]) / (1 - myfinal))
 				begin unimportant
 			# if (!tight && w < u * mixRatio) : set segAfter {}
 
@@ -566,19 +583,26 @@ glyph-block CommonShapes : begin
 			* keyKnot
 			* segAfter
 
-	define [hookstart] : params [y tight sw swItalicAdj] : return {
+	define [hookstart] : params [y tight sw swItalicAdj noAdjTerminalY] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape after before true y tight sw swItalicAdj]]
+		.af [lambda [before after] [HookShape after before true y tight sw swItalicAdj noAdjTerminalY]]
 	}
-	define [hookend] : params [y tight sw swItalicAdj] : return {
+	define [hookend] : params [y tight sw swItalicAdj noAdjTerminalY] : return {
 		.type 'interpolate'
-		.af [lambda [before after] [HookShape before after false y tight sw swItalicAdj]]
+		.af [lambda [before after] [HookShape before after false y tight sw swItalicAdj noAdjTerminalY]]
 	}
 
 	define [CyrDescender] : params [x [shift 0.1] [connex 0] [sideJut SideJut]] : glyph-proc
 		local descenderOverflow : if SLAB sideJut ((RightSB - SB) * shift)
 		include : VBarRight (x + descenderOverflow + 0.25 * Stroke) (HalfStroke - LongJut) Stroke
-		if (!SLAB && descenderOverflow > Stroke * 0.75 || connex) : include : HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
+		if (!SLAB && descenderOverflow > Stroke * 0.75 || connex) : begin
+			include : HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
+
+	define [CyrLeftDescender] : params [x [shift 0.1] [connex 0] [sideJut SideJut]] : glyph-proc
+		local descenderOverflow : if SLAB sideJut ((RightSB - SB) * shift)
+		include : VBarLeft (x - descenderOverflow - 0.25 * Stroke) (HalfStroke - LongJut) Stroke
+		if (!SLAB && descenderOverflow > Stroke * 0.75 || connex) : begin
+			include : HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
 
 	# Composite transformations
 	define [FlipAround x y sx sy] : glyph-proc
@@ -659,4 +683,9 @@ glyph-block CommonShapes : begin
 		Radical.set currentGlyph
 		include gr true true
 
-	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender FlipAround ScaleAround Realign ForceUpright diagCor CreateWaveShape NameUni PointingTo WithAIHSerifsMask WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical
+	define [ExtLineCenter k sw x1 y1 x2 y2] : dispiro
+		widths.center sw
+		corner [mix x1 x2 (-k)]  [mix y1 y2 (-k)]
+		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
+
+	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif AIVSerifs AIHSerifs AINSerifs AICyrISerifs AIMSerifs HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender CyrLeftDescender FlipAround ScaleAround Realign ForceUpright DiagCor CreateWaveShape NameUni PointingTo WithAIHSerifsMask WithTransform ReverseContours clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical ExtLineCenter DiagCorDs HCrossBar

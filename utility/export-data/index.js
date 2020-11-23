@@ -1,18 +1,20 @@
+"use strict";
+
 const fs = require("fs-extra");
-const parseVariantsData = require("./parse-variants-data");
+const parseVariantsData = require("./variants-data");
 const parseLigationData = require("./ligation-data");
 const getCharMapAndSupportedLanguageList = require("./supported-languages");
+const execMain = require("../shared/execMain");
 
 const version = require("../../package.json").version;
 
 const charMapPath = process.argv[2];
 const charMapItalicPath = process.argv[3];
 const charMapObliquePath = process.argv[4];
-const exportPath = process.argv[5];
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
+const exportPathMeta = process.argv[5];
+const exportPathCov = process.argv[6];
+
+execMain(main);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 async function main() {
@@ -23,5 +25,17 @@ async function main() {
 		charMapItalicPath,
 		charMapObliquePath
 	);
-	await fs.writeJson(exportPath, { version, variantsData, ligationData, ...cl }, { spaces: 2 });
+	await fs.writeJson(
+		exportPathMeta,
+		{
+			version,
+			variantsData,
+			ligationData: {
+				samplesNarrow: ligationData.samplesNarrow,
+				nonMergeSets: ligationData.nonMergeSets
+			}
+		},
+		{ spaces: 2 }
+	);
+	await fs.writeJson(exportPathCov, { version, ...cl }, { spaces: 2 });
 }

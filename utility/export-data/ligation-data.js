@@ -25,7 +25,7 @@ const trig = TAG("trig");
 const ltgt = TAG("ltgt-diamond", "ltgt-ne");
 const llggeq_a = TAG("arrow", "llggeq");
 const llggeq_b = TAG("arrow2", "llggeq");
-const dotOper = TAG("dotoper");
+const dotOper = TAG("dot-oper");
 const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
 const plusPlus = TAG("plusplus");
@@ -245,7 +245,7 @@ module.exports = async function getLigationData() {
 
 function buildLigationSet(ligData, getKey) {
 	const ligationSets = new Map([
-		["*off", { tag: "calt", switch: "off", desc: "Ligation Off", brief: "Off", ligSets: [] }]
+		["*off", { tag: "calt", rank: 0, desc: "Ligation Off", brief: "Off", ligSets: [] }]
 	]);
 	for (const sel in ligData.composite) {
 		const comp = ligData.composite[sel];
@@ -259,14 +259,15 @@ function buildLigationSet(ligData, getKey) {
 			}
 			item = {
 				tag: comp.tag,
+				rank: 1,
 				ligSets: [...ligSets],
-				tagName: comp.tag,
+				tagName: [comp.tag],
 				desc: comp.desc,
 				brief: comp.brief || comp.desc
 			};
 			ligationSets.set(key, item);
 		} else {
-			item.tagName += ", " + comp.tag;
+			item.tagName = [...item.tagName, comp.tag];
 			item.desc += ", " + comp.desc;
 			item.brief += ", " + comp.brief;
 		}

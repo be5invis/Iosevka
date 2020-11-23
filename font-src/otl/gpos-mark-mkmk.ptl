@@ -16,32 +16,32 @@ export : define [buildMarkMkmk sink glyphStore] : begin
 	local mkmkLookupNames {}
 
 	foreach markCls [items-of MarkClasses] : begin
-		local [object markSubtable mkmkSubtable] : createMTSubtables glyphStore { markCls }
-		if ([objectIsNotEmpty markSubtable.marks] && [objectIsNotEmpty markSubtable.bases]) : begin
-			local markLookup : add-lookup sink {.type 'gpos_mark_to_base' .subtables { markSubtable }}
-			mark.lookups.push    markLookup
-			markLookupNames.push markLookup
+		local [object markLookup mkmkLookup] : createMTLookups glyphStore { markCls }
+		if ([objectIsNotEmpty markLookup.marks] && [objectIsNotEmpty markLookup.bases]) : begin
+			local lidMark : add-lookup sink markLookup
+			mark.lookups.push    lidMark
+			markLookupNames.push lidMark
 
-		if ([objectIsNotEmpty mkmkSubtable.marks] && [objectIsNotEmpty mkmkSubtable.bases]) : begin
-			local mkmkLookup : add-lookup sink {.type 'gpos_mark_to_mark' .subtables { mkmkSubtable }}
-			mkmk.lookups.push    mkmkLookup
-			mkmkLookupNames.push mkmkLookup
+		if ([objectIsNotEmpty mkmkLookup.marks] && [objectIsNotEmpty mkmkLookup.bases]) : begin
+			local lidMkmk : add-lookup sink mkmkLookup
+			mkmk.lookups.push    lidMkmk
+			mkmkLookupNames.push lidMkmk
 
-	foreach markLookup [items-of markLookupNames] : foreach mkmkLookup [items-of mkmkLookupNames]
-		sink.lookupDep.push { markLookup mkmkLookup }
+	foreach lidMark [items-of markLookupNames] : foreach lidMkmk [items-of mkmkLookupNames]
+		sink.lookupDep.push { lidMark lidMkmk }
 
-define [createMTSubtables glyphStore markClasses] : begin
-	local markSubtable {.marks {.} .bases {.}}
-	local mkmkSubtable {.marks {.} .bases {.}}
+define [createMTLookups glyphStore markClasses] : begin
+	local markLookup {.type 'gpos_mark_to_base' .marks {.} .bases {.}}
+	local mkmkLookup {.type 'gpos_mark_to_mark' .marks {.} .bases {.}}
 	local allowMarkClsSet : new Set markClasses
 	foreach { gn glyph } [glyphStore.namedEntries] : begin
-		createMarkInfo markSubtable.marks gn glyph allowMarkClsSet
-		createMarkInfo mkmkSubtable.marks gn glyph allowMarkClsSet
+		createMarkInfo markLookup.marks gn glyph allowMarkClsSet
+		createMarkInfo mkmkLookup.marks gn glyph allowMarkClsSet
 		local isMark : objectIsNotEmpty glyph.markAnchors
 		if isMark
-			createBaseInfo mkmkSubtable.bases gn glyph allowMarkClsSet
-			createBaseInfo markSubtable.bases gn glyph allowMarkClsSet
-	return : object markSubtable mkmkSubtable
+			createBaseInfo mkmkLookup.bases gn glyph allowMarkClsSet
+			createBaseInfo markLookup.bases gn glyph allowMarkClsSet
+	return : object markLookup mkmkLookup
 
 define [createBaseInfo sink gn glyph allowMarkClsSet] : begin
 	local res {.}

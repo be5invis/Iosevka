@@ -2,15 +2,18 @@
 $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../../support/utils'
-import [AnyDerivingCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+extern Map
+extern Set
 
 glyph-module
 
-glyph-block Autobuild-Transformed : begin
+glyph-block Autobuild-Transformed-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Fork Miniature
-	glyph-block-import Marks : markMiddle aboveMarkBot aboveMarkTop belowMarkBot belowMarkTop
+
+	glyph-block-export wrapName
+	define [wrapName groupID baseName] "\(groupID){\(baseName)}"
 
 	define [suggestName _name] : begin
 		local name _name
@@ -20,46 +23,61 @@ glyph-block Autobuild-Transformed : begin
 			set name (name + j)
 		return name
 
+	glyph-block-export suggestMappedName
 	define [suggestMappedName map key name] : begin
 		if map.(key) : return map.(key)
 		local amended : suggestName name
 		set map.(key) amended
 		return amended
 
-	define [extendRelatedGlyphs records suffix] : begin
+	glyph-block-export extendRelatedGlyphs
+	define [extendRelatedGlyphs groupID records] : begin
 		local relatedRecords {}
 		local relSets        {}
 		local targetNameMap  {.}
 
 		foreach [record : items-of records] : begin
 			local srcName record.1
-			suggestMappedName targetNameMap srcName (srcName + '+' + suffix)
 
-			local dstName : srcName + '+' + suffix
-			local tree : getGrTree srcName {DotlessOrNot AnyDerivingCv} query-glyph
+			local dstName : wrapName groupID srcName
+			suggestMappedName targetNameMap srcName dstName
+
+			local tree : getGrTree srcName {DotlessOrNot AnyCv} query-glyph
 			foreach [{gr origSrcName relSrcName} : items-of tree] : if [query-glyph relSrcName] : begin
-				local origDstName : suggestMappedName targetNameMap origSrcName (origSrcName + '+' + suffix)
-				local relDstName  : suggestMappedName targetNameMap relSrcName  (relSrcName + '+' + suffix)
+				local origDstName : suggestMappedName targetNameMap origSrcName [wrapName groupID origSrcName]
+				local relDstName  : suggestMappedName targetNameMap relSrcName  [wrapName groupID relSrcName]
 
 				local relatedRecord : record.slice 0
 				set relatedRecord.0 null
 				set relatedRecord.1 relSrcName
 				relatedRecords.push relatedRecord
 
-				relSets.push {gr origDstName relDstName}
+				relSets.push { gr origDstName relDstName }
 
-		return {[records.concat relatedRecords] relSets targetNameMap}
+		return { [records.concat relatedRecords] relSets targetNameMap }
 
-	define [link-relations relSets] : foreach [{gr origDstName relDstName} : items-of relSets]
-		if [query-glyph origDstName] : gr.set [query-glyph origDstName] relDstName
+	glyph-block-export link-relations
+	define [link-relations relSets] : begin
+		local rs : new Set
+		foreach [{gr origDstName relDstName} : items-of relSets]
+			if [query-glyph origDstName] : begin
+				gr.set [query-glyph origDstName] relDstName
+				if [query-glyph relDstName] : begin
+					[query-glyph origDstName].tryBecomeMirrorOf [query-glyph relDstName] rs
 
+glyph-block Autobuild-Transformed : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Fork Miniature
+	glyph-block-import Marks : markMiddle aboveMarkBot aboveMarkTop belowMarkBot belowMarkTop
+	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
 
 	define [createSuperscripts _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sup'
+		local {records relSets targetNameMap} : extendRelatedGlyphs 'sup' _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
-			crowd  -- 4
+			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
@@ -79,11 +97,11 @@ glyph-block Autobuild-Transformed : begin
 		link-relations relSets
 
 	define [createSubscripts _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'sub'
+		local {records relSets targetNameMap} : extendRelatedGlyphs 'sub' _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
-			crowd  -- 4
+			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
 			sbscale -- 1
@@ -101,7 +119,7 @@ glyph-block Autobuild-Transformed : begin
 		link-relations relSets
 
 	define [createSMCPs _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs _records 'smcp'
+		local {records relSets targetNameMap} : extendRelatedGlyphs 'smcp' _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local forkedParams : Object.create para
 		set forkedParams.cap0 para.cap
@@ -119,7 +137,7 @@ glyph-block Autobuild-Transformed : begin
 		link-relations relSets
 
 	define [createMedievalCombs defaultLow defaultHigh _records] : begin
-		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalAbove'
+		local { records relSets targetNameMap } : extendRelatedGlyphs 'medievalAbove' _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -152,7 +170,7 @@ glyph-block Autobuild-Transformed : begin
 		link-relations relSets
 
 	define [createMedievalBelowCombs _records] : begin
-		local { records relSets targetNameMap } : extendRelatedGlyphs _records 'medievalBelow'
+		local { records relSets targetNameMap } : extendRelatedGlyphs 'medievalBelow' _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature
 			glyphs -- pendingGlyphs
@@ -254,7 +272,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DAC 'mltail'
 		list 0x1DAD 'turnmleg'
 		list 0x1DAE 'nltail'
-		list 0x1DAF 'nrtailBR'
+		list 0x1DAF 'nHookBottom'
 		list 0x1DB0 'smcpN'
 		list 0x1DB1 'obar'
 		list 0x1DB2 'latinphi'
@@ -302,6 +320,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal' (-11)
 		list 0x207D 'parenLeft' (-11)
 		list 0x207E 'parenRight' (-11)
+		list 0xA7F8 'Hbar'
+		list 0xA7F9 'oe'
 
 	if [not recursive] : let [df : Miniature {'a' 'o'} 4 0.7] : begin
 		create-glyph 'ordfeminine' 0xAA : glyph-proc
@@ -449,6 +469,125 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1ABF 'w'
 		list 0x1AC0 'turnw'
 		list 0x1DCA 'r'
+
+glyph-block Autobuild-Transformed-Mathematical : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Fork Miniature
+	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations wrapName
+
+	define [createMathDerivedSeriesImpl groupName tfm _records] : begin
+		local { records relSets targetNameMap } : extendRelatedGlyphs groupName _records
+		local pendingGlyphs : records.map : [record] => record.1
+		local forked : Fork pendingGlyphs [para.reinit tfm]
+		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
+			create-glyph targetNameMap.(glyphid) unicode : glyph-proc
+				include [forked.queryByName glyphid] AS_BASE ALSO_METRICS
+
+		link-relations relSets
+
+	define [boldGrade g] : begin
+		local pGrade : (900 - g) / 100
+		return : 900 - 100 * (2 / 25) * pGrade * pGrade
+	define [tfBold   a]     : begin [set a.shape.weight : boldGrade a.shape.weight]
+	define [tfItalic a]     : begin [set a.shape.slope 'italic']
+	define [tfSans   a]     : begin [set a.shape.serifs 'sans']
+	define [tfBoldItalic a] : begin [tfBold a] [tfItalic a]
+	define [tfSansBold   a]     : begin [tfSans a] [tfBold a]
+	define [tfSansItalic a]     : begin [tfSans a] [tfItalic a]
+	define [tfSansBoldItalic a] : begin [tfSans a] [tfBold a] [tfItalic a]
+	define [tfTypeWriter a] : begin
+		set a.shape.quasiProportionalDiversity 0
+		if (a.derivingVariants && a.derivingVariants.mathtt)
+			set a.variants a.derivingVariants.mathtt
+
+	define Digits      : Array.from '0123456789'
+	define UpperLatin  : Array.from 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	define LowerLatin  : Array.from 'abcdefghijklmnopqrstuvwxyz'
+	define LowerLatin2 : Array.from 'abcdefghijklmnopqrstuvwxyzıȷ'
+	define UpperGreek  : Array.from 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡϴΣΤΥΦΧΨΩ∇'
+	define LowerGreek  : Array.from 'αβγδεζηθικλμνξοπρςστυφχψω∂ϵϑϰϕϱϖ' # Some are missing though
+	define ObliqueBlackboardBolds : Array.from '𝔻𝕕𝕖𝕚𝕛'
+
+	define [CreateMathDerivatives groupName tfm base letters overrides] : begin
+		if recursive : return nothing
+		local jobs {}
+		local overrideMap : new Map (overrides || {})
+		foreach j [range 0 letters.length] : begin
+			local letter letters.(j)
+			local source : glyphStore.queryNameOfUnicode : letter.codePointAt 0
+			local dst : base + j
+			if [overrideMap.has letter] : set dst [overrideMap.get letter]
+			if source : jobs.push { dst source }
+
+		createMathDerivedSeriesImpl groupName tfm jobs
+
+	define [CreateMathAliasableImpl groupName altGroupName tfm base letters overrides] : begin
+		if recursive : return nothing
+		local overrideMap : new Map (overrides || {})
+		foreach j [range 0 letters.length] : begin
+			local letter letters.(j)
+			local source : glyphStore.queryNameOfUnicode : letter.codePointAt 0
+			if (source && altGroupName) : set source : wrapName altGroupName source
+			local uDst : base + j
+			if [overrideMap.has letter] : set uDst [overrideMap.get letter]
+			if source : alias [wrapName groupName source] uDst source
+
+	define [CreateMathAliasable cond groupName altGroupName tfm base letters overrides] : begin
+		if cond
+			CreateMathDerivatives   groupName              tfm base letters overrides
+			CreateMathAliasableImpl groupName altGroupName tfm base letters overrides
+
+	# Math bold
+	CreateMathDerivatives 'mathbf' tfBold 0x1D400 UpperLatin
+	CreateMathDerivatives 'mathbf' tfBold 0x1D41A LowerLatin
+	CreateMathDerivatives 'mathbf' tfBold 0x1D6A8 UpperGreek
+	CreateMathDerivatives 'mathbf' tfBold 0x1D6C2 LowerGreek
+	CreateMathDerivatives 'mathbf' tfBold 0x1D7CE Digits
+
+	# Math Italic
+	CreateMathDerivatives 'mathit' tfItalic 0x1D434 UpperLatin
+	CreateMathDerivatives 'mathit' tfItalic 0x1D44E LowerLatin2 : list
+		list 'h' 0x210E
+		list 'ı' 0x1D6A4
+		list 'ȷ' 0x1D6A5
+	CreateMathDerivatives 'mathit' tfItalic 0x1D6E2 UpperGreek
+	CreateMathDerivatives 'mathit' tfItalic 0x1D6FC LowerGreek
+
+
+	# Math Bold Italic
+	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D468 UpperLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D482 LowerLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D71C UpperGreek
+	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D736 LowerGreek
+
+	# Math Sans-serif
+	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5A0 UpperLatin
+	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5BA LowerLatin
+	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D7E2 Digits
+
+	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D608 UpperLatin
+	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D622 LowerLatin
+
+	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5D4 UpperLatin
+	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5EE LowerLatin
+	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D756 UpperGreek
+	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D770 LowerGreek
+	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D7EC Digits
+
+	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D63C UpperLatin
+	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D656 LowerLatin
+	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D790 UpperGreek
+	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D7AA LowerGreek
+
+	# Math Typewriter
+	local doTypewriter : para.quasiProportionalDiversity > 0
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D670 UpperLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D68A LowerLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D7F6 Digits
+
+	# Italic blackboard bold
+	CreateMathDerivatives 'mathit' tfItalic 0x2145  ObliqueBlackboardBolds
 
 glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Marks : markFine

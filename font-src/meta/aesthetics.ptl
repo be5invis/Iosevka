@@ -76,22 +76,23 @@ export : define [calculateMetrics para] : begin
 	# We will estimate blackness using lower-case 'e'
 	define DarknessMockWidth : if (Width < HalfUPM) (HalfUPM * [Math.pow (Width / HalfUPM) 0.5]) Width
 	define DarknessMockWidth2 : HalfUPM * [Math.pow (Width / HalfUPM) 0.5]
-	define BaseFillRate : 1 / 2 + para.stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
-	define [InverseCrowdedness c] : [Math.tanh c] / c
-	define [adviceBlackness crowdedness div mul] : begin
+	define [BaseFillRate con] : 1 / 2 + para.stroke / ([Math.max HalfUPM DarknessMockWidth2] - SB * 2)
+	define [InverseCrowdedness con cow] : [Math.tanh (cow * [Math.sqrt con])] / (cow * [Math.sqrt con])
+	define [adviceBlacknessImpl con cow div mul] : begin
 		local gap : DarknessMockWidth * [fallback div 1] - SB * 2
-		local shrink : BaseFillRate * [InverseCrowdedness crowdedness]
+		local shrink : [BaseFillRate con] * [InverseCrowdedness con cow]
 		return : Math.min para.stroke ([fallback mul 1] * gap * shrink)
-	define [adviceBlackness2 cowX cowY refH div] : Math.min
-		adviceBlackness cowX (refH / DarknessMockWidth2)
-		adviceBlackness cowY div
+	define [AdviceStroke cow div mul] : adviceBlacknessImpl HVContrast cow div mul
+	define [AdviceStroke2 cowX cowY refH div] : Math.min
+		adviceBlacknessImpl HVContrast cowX div
+		adviceBlacknessImpl 1          cowY (refH / DarknessMockWidth2)
 
 
-	define Stroke : adviceBlackness 2
+	define Stroke : AdviceStroke 2
 	define DotSize : fallback para.dotsize Stroke
 	define PeriodSize : fallback para.periodsize DotSize
-	define HBarPos : designParameters.hBarPos - 0.09 * Stroke / CAP
-	define OverlayPos designParameters.overlayPos
+	define HBarPos : DesignParameters.hBarPos - 0.09 * Stroke / CAP
+	define OverlayPos DesignParameters.overlayPos
 	define Jut para.jut
 	define LongJut para.longjut
 	define MidJutSide   : Math.max Jut : mix (0.5 * Stroke * HVContrast) LongJut 0.5
@@ -121,8 +122,7 @@ export : define [calculateMetrics para] : begin
 	define OneBalance : fallback para.onebalance 0
 
 	# derived metrics
-	define MONOSPACE : para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1
-	define WideWidth0 : if MONOSPACE (Width * 2) UPM
+	define WideWidth0 : if (para.quasiProportionalDiversity === 0) (Width * 2) UPM
 	define WideWidth1 : if (para.spacing >= 1) WideWidth0 Width
 	define WideWidth2 : if (para.spacing >= 2) WideWidth0 Width
 
@@ -162,14 +162,16 @@ export : define [calculateMetrics para] : begin
 	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
 	define CorrectionOMidS : Stroke * CorrectionOMidX
 
-	define [MVertStrokeD div] : adviceBlackness designParameters.lllcrowdedness div
-	define MVertStroke : MVertStrokeD 1
-	define OverlayStroke : adviceBlackness 3.75
-	define OperatorStroke : adviceBlackness 3
-	define GeometryStroke : adviceBlackness 4.5
-	define ShoulderFine : Math.min (Stroke * para.shoulderfineMin) [adviceBlackness 16]
+	define [MVertStrokeD hPack div] : AdviceStroke [Math.max DesignParameters.lllcrowdedness hPack] div
+	define MVertStroke : MVertStrokeD 3 1
+	define OverlayStroke : AdviceStroke 3.75
+	define OperatorStroke : AdviceStroke 3
+	define GeometryStroke : AdviceStroke 4.5
+	define ShoulderFine : Math.min (Stroke * para.shoulderfineMin) [AdviceStroke 16]
 
-	define [superXY x superness] : Math.pow (1 - [Math.pow x [fallback superness designParameters.superness]]) (1 / [fallback superness designParameters.superness])
+	define [_SuperXY x superness] : Math.pow
+		1 - [Math.pow x [fallback superness DesignParameters.superness]]
+		1 / [fallback superness DesignParameters.superness]
 
 	define [adviceSSmooth y sign _stroke] : begin
 		# Handle with extreme care.
@@ -199,34 +201,37 @@ export : define [calculateMetrics para] : begin
 		FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 Ess EssQuestion
 		HalfStroke RightSB Middle CapMiddle DotRadius PeriodRadius SideJut SmoothA
 		SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS compositeBaseAnchors
-		adviceBlackness adviceBlackness2 MVertStroke MVertStrokeD OverlayStroke OperatorStroke
-		GeometryStroke ShoulderFine superXY adviceSSmooth adviceGlottalStopSmooth
-		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter YSmoothMidR YSmoothMidL]
+		AdviceStroke AdviceStroke2 MVertStroke MVertStrokeD OverlayStroke OperatorStroke
+		GeometryStroke ShoulderFine _SuperXY adviceSSmooth adviceGlottalStopSmooth
+		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter
+		YSmoothMidR YSmoothMidL]
 
 export : define [setFontMetrics para metrics fm] : begin
 	define [object CAP Descender XH Width] metrics
-	# Metric metadata
-	# Note: we use 1000upm in design, and (1000 * upmsacle)upm in production, to avoid rounding error.
-	define asc : para.leading * CAP / (CAP - Descender)
-	define desc : para.leading * Descender / (CAP - Descender)
-	define descenderPad : fallback para.descenderPad 0
+
+	define leading      : Math.round para.leading
+	define asc          : Math.round : leading * CAP / (CAP - Descender)
+	define desc         : Math.round : leading * Descender / (CAP - Descender)
+	define descenderPad : Math.round : fallback para.descenderPad 0
+	define winMetricAscenderPad  : Math.round : fallback para.winMetricAscenderPad  0
+	define winMetricDescenderPad : Math.round : fallback para.winMetricDescenderPad 0
 
 	set fm.OS_2.xAvgCharWidth     Width
 	set fm.head.unitsPerEm        1000
 	set fm.hhea.ascender          asc
-	set fm.OS_2.usWinAscent       (asc + [fallback para.winMetricAscenderPad 0])
+	set fm.OS_2.usWinAscent       (asc + winMetricAscenderPad)
 	set fm.OS_2.sTypoAscender     asc
 
 	set fm.hhea.descender         (Descender - descenderPad)
-	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + [fallback para.winMetricDescenderPad 0])
+	set fm.OS_2.usWinDescent      ([Math.abs desc] + descenderPad + winMetricDescenderPad)
 	set fm.OS_2.sTypoDescender    (desc - descenderPad)
 
-	set fm.hhea.lineGap           (para.leading - asc + Descender)
-	set fm.OS_2.sTypoLineGap      (para.leading - asc + desc)
+	set fm.hhea.lineGap           (leading - asc + Descender)
+	set fm.OS_2.sTypoLineGap      (leading - asc + desc)
 
 	set fm.OS_2.sxHeight          XH
 	set fm.OS_2.sCapHeight        CAP
-	set fm.post.italicAngle       (0 - para.slopeAngle)
+	set fm.post.italicAngle       [Math.round (0 - para.slopeAngle)]
 
 
 export : define [compositeBaseAnchors] : begin
@@ -235,7 +240,7 @@ export : define [compositeBaseAnchors] : begin
 		set h.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
 	return {.baseAnchors h .isMarkSet true}
 
-export : define [MarksetDiv p me] : begin
+export : define [MarksetDiv p sbMul me] : begin
 	define width : p * me.Width
 	define middle : p * me.Middle
 	define rightSB : me.Width * p - me.SB
@@ -269,8 +274,6 @@ export : define [MarksetDiv p me] : begin
 			* [mix a.baseAnchors.below.y a.baseAnchors.above.y 0.5]
 		return a
 
-
-
 	return : object
 		OfZone    buildStandardMarkSet
 		capital : buildStandardMarkSet {.top me.CAP     .bot 0}
@@ -282,49 +285,52 @@ export : define [MarksetDiv p me] : begin
 		plus    : buildStandardMarkSet {.top me.PlusTop .bot me.PlusBot}
 		if      : buildStandardMarkSet {.top me.CAP     .bot me.Descender}
 
-export : define designParameters : object
+export : define DesignParameters : object
 	# V shape
 	straightVShapeSbShrink      0.8
 	straightSmallYShapeSbShrink 0.8
 	#
-	equal_wideness      0.075
-	logic_narrow_shrink 0.75
-	GeometricLargeX     : lambda [mw uw] : (mw + uw / 2) / mw
-	geometric_small_x   (4 / 7)
-	arrow_size          0.45
+	equal_wideness             0.075
+	logic_narrow_shrink        0.75
+	GeometricLargeX            : lambda [mw uw] : (mw + uw / 2) / mw
+	geometric_very_small_x     (2.5  / 7)
+	geometric_small_x          (4    / 7)
+	geometric_medium_small_x   (4.75 / 7)
+	geometric_medium_x         (5.5  / 7)
+	arrow_size                 0.45
 	# ()
-	parenOutside        0.2
-	parenInside         0.9
-	parenCurliness      0.7
-	parenOvershoot      0.0375
+	parenOutside               0.2
+	parenInside                0.9
+	parenCurliness             0.7
+	parenOvershoot             0.0375
 	# []
-	bracketOutside      0.1
-	bracketInside       0.95
+	bracketOutside             0.1
+	bracketInside              0.95
 	# {}
-	braceOutside        0.05
-	braceInside         0.95
-	braceCurlyM1        0.6
-	braceCurlyM2        0.45
-	braceOvershoot      0.02
+	braceOutside               0.05
+	braceInside                0.95
+	braceCurlyM1               0.6
+	braceCurlyM2               0.45
+	braceOvershoot             0.02
 	# Crosdedness
-	lllcrowdedness      (3 + 1 / 3)
+	lllcrowdedness             (3 + 1 / 3)
 	# Bar position
-	hBarPos             0.525
-	eBarPos             0.5
-	fiveBarPos          0.64
-	overlayPos          0.52
-	fBarPosToXH         0.91
-	gBarPos             0.42
-	upperEBarPos        : lambda [slab] : if slab 0.52 0.53
+	hBarPos                    0.525
+	eBarPos                    0.5
+	fiveBarPos                 0.64
+	overlayPos                 0.52
+	fBarPosToXH                0.91
+	gBarPos                    0.42
+	upperEBarPos               : lambda [slab] : if slab 0.52 0.53
 	# Fine adjustments
-	fbarStrokeAdj       0.25
-	superness           2.275
-	tightHookSuperness  2.30
+	fbarStrokeAdj              0.25
+	superness                  2.275
+	tightHookSuperness         2.30
 
 export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
 	local div : fallback _div 1
 	local hPack : Math.max 2 [fallback _hPack 0]
-	local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * [metrics.adviceBlackness hPack div]) / (2 * hPack * metrics.SB)
+	local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * [metrics.AdviceStroke hPack div]) / (2 * hPack * metrics.SB)
 	return : object
 		div div
 		width : metrics.Width * div
@@ -332,5 +338,5 @@ export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
 		sb : metrics.SB * sbMul
 		leftSB : metrics.SB * sbMul
 		rightSB : metrics.Width * div - metrics.SB * sbMul
-		mvs : metrics.MVertStrokeD div
-		markSet: MarksetDiv div metrics
+		mvs : metrics.MVertStrokeD hPack div
+		markSet : MarksetDiv div sbMul metrics

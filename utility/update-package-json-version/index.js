@@ -3,23 +3,23 @@
 const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
+const execMain = require("../shared/execMain");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const PackageJsonPath = path.join(__dirname, "../../package.json");
 
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
+execMain(main);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function main() {
-	const version = await GenerateChangeList();
+	const version = await GetLatestVersion();
 	const packageJson = await fs.readJson(PackageJsonPath);
 	packageJson.version = version;
 	await fs.writeJson(PackageJsonPath, packageJson, { spaces: 2 });
 }
 
-async function GenerateChangeList() {
+async function GetLatestVersion() {
 	const changeFiles = await fs.readdir(ChangeFileDir);
 	const versions = new Set();
 	for (const file of changeFiles) {

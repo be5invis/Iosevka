@@ -1,9 +1,10 @@
 import [add-lookup add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
-import [AnyCv CvDecompose] from "../support/gr"
+import [Cv AnyCv CvDecompose] from "../support/gr"
 extern Set
 
 define [FeatureName tag] : tag + '_cvss'
-define [LookupName tag]  : 'lookup_cvss_' + tag
+define [CvLookupName tag]  : 'lookup_cv_' + tag
+define [SsLookupName tag]  : 'lookup_ss_' + tag
 
 export : define [buildCVSS sink para glyphStore] : begin
 	if [not para.enableCvSs] : return nothing
@@ -17,34 +18,50 @@ export : define [buildCVSS sink para glyphStore] : begin
 		local parts : CvDecompose.get g
 		if (parts && parts.length) : set decompositions.(gid) parts
 
-	define lookupCvDecompose : add-lookup sink : object
+	define lookupNameCvDecompose : add-lookup sink : object
 		.type 'gsub_multiple'
-		.subtables : list decompositions
+		.substitutions decompositions
 
 	# cvxx
-	foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+	foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : do
 		foreach [gr : items-of : AnyCv.query glyph] : if gr.tag : begin
-			local lookupName : LookupName gr.tag
+			local lookupName : CvLookupName gr.tag
 			if [not : cvLookupNameSet.has lookupName] : begin
 				local feature : pick-feature sink [FeatureName gr.tag]
 				add-common-feature sink feature
 
 				local lookup : pick-lookup sink lookupName
-					begin {.type 'gsub_single' .subtables {{.}}}
-				add-feature-lookup feature lookupCvDecompose
+					begin {.type 'gsub_alternate' .substitutions {.}}
+				add-feature-lookup feature lookupNameCvDecompose
 				add-feature-lookup feature lookupName
-				sink.lookupDep.push { lookupCvDecompose lookupName }
+				sink.lookupDep.push { lookupNameCvDecompose lookupName }
 				cvLookupNameSet.add lookupName
 
-			set [pick-lookup sink lookupName].subtables.0.(gn) [gr.get glyph]
+			local st [pick-lookup sink lookupName].substitutions
+			if [not st.(gn)] : set st.(gn) { }
+			set st.(gn).(gr.rank - 1) : glyphStore.ensureExists : gr.get glyph
 
 	# ssxx
-	foreach [{name composition} : pairs-of para.variants] : begin
-		if (name.length === 4 && composition.__isComposite && [name.slice 0 2] === 'ss') : begin
-			local feature : pick-feature sink [FeatureName name]
-			add-common-feature sink feature
-			add-feature-lookup feature lookupCvDecompose
-			foreach [{ch tag} : pairs-of composition.__cvmap]
-				add-feature-lookup feature [LookupName tag]
+	foreach {name composition} para.variants.composites : if composition.tag : do
+		local feature : pick-feature sink [FeatureName composition.tag]
+		add-common-feature sink feature
+		add-feature-lookup feature lookupNameCvDecompose
+		local lookupNameSub : add-lookup sink {.type 'gsub_single' .substitutions {.}}
+		sink.lookupDep.push { lookupNameCvDecompose lookupNameSub }
+		add-feature-lookup feature lookupNameSub
+
+		define st [pick-lookup sink lookupNameSub].substitutions
+		local decomp : composition.decompose para para.variants.selectorTree
+		foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
+			local gr : Cv pv.tag pv.rank
+			foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
+				local substituted : gr.get glyph
+				if substituted : set st.(gn) substituted
+
+	# If there are holes in the alternates list, fill them
+	foreach lutn cvLookupNameSet : begin
+		local st [pick-lookup sink lutn].substitutions
+		foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
+			set v.(idx) k
 
 	EndLookupBlock rec sink

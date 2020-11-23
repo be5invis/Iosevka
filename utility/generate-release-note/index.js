@@ -3,11 +3,27 @@
 const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
+const execMain = require("../shared/execMain");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
-const ModifiedSinceVersion = "2.x";
 const Version = process.argv[2];
-const outputPath = process.argv[3];
+const releasePackagesJsonPath = process.argv[3];
+const outputPath = process.argv[4];
+
+execMain(main);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+async function main() {
+	const out = new Output();
+
+	await GenerateChangeList(out);
+	await CopyMarkdown(out, "packages-desc.md");
+	await GeneratePackageList(out);
+
+	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
+	await fs.writeFile(outputPath, out.buffer);
+}
 
 class Output {
 	constructor() {
@@ -17,23 +33,6 @@ class Output {
 		this.buffer += s.join("") + "\n";
 	}
 }
-
-async function main() {
-	const out = new Output();
-
-	await CopyMarkdown(out, "packages-desc.md");
-	await GeneratePackageList(out);
-	await CopyMarkdown(out, "package-reorg.md");
-	await GenerateChangeList(out);
-
-	await fs.ensureDir(path.join(__dirname, `../../release-archives/`));
-	await fs.writeFile(outputPath, out.buffer);
-}
-
-main().catch(e => {
-	console.error(e);
-	process.exit(1);
-});
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown
@@ -61,106 +60,78 @@ async function GenerateChangeList(out) {
 	}
 	const sortedFragments = Array.from(fragments).sort((a, b) => semver.compare(b[0], a[0]));
 
-	out.log(`## Modifications since version ${ModifiedSinceVersion}`);
-	for (const [version, notes] of sortedFragments) {
-		out.log(` * **${version}**`);
-		out.log((notes.trimEnd() + "\n").replace(/^/gm, "   "));
-	}
+	const [version, notes] = sortedFragments[0];
+	out.log(``);
+	out.log(`## Changes of version ${version}`);
+	out.log(notes.trimEnd() + "\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // PACKAGE LIST
 
-const PackageShapes = {
-	// shapeDesc, shapeNameSuffix, slab, count, nospace
-	"": ["Monospace, Default", "", false, true],
-	slab: ["Monospace, Slab", "Slab", true, true],
-	curly: ["Monospace, Curly", "Curly", false, true],
-	"curly-slab": ["Monospace, Curly Slab", "Curly Slab", true, true],
-	ss01: ["Monospace, Andale Mono Style", "SS01"],
-	ss02: ["Monospace, Anonymous Pro Style", "SS02"],
-	ss03: ["Monospace, Consolas Style", "SS03"],
-	ss04: ["Monospace, Menlo Style", "SS04"],
-	ss05: ["Monospace, Fira Mono Style", "SS05"],
-	ss06: ["Monospace, Liberation Mono Style", "SS06"],
-	ss07: ["Monospace, Monaco Style", "SS07"],
-	ss08: ["Monospace, Pragmata Pro Style", "SS08"],
-	ss09: ["Monospace, Source Code Pro Style", "SS09"],
-	ss10: ["Monospace, Envy Code R Style", "SS10"],
-	ss11: ["Monospace, X Windows Fixed Style", "SS11"],
-	ss12: ["Monospace, Ubuntu Mono Style", "SS12"],
-	ss13: ["Monospace, Lucida Style", "SS13"],
-	ss14: ["Monospace, JetBrains Mono Style", "SS14"],
-	aile: ["Quasi-proportional, Sans-serif", "Aile", false, false, true],
-	etoile: ["Quasi-proportional, Slab-serif", "Etoile", false, false, true],
-	sparkle: ["Quasi-proportional Hybrid, like iA Writer’s Duo.", "Sparkle", false, false, true]
-};
-
-const MonospaceSpacings = {
+const Spacings = {
 	// spacingDesc, ligation, spacingNameSuffix
-	"": ["Default", true, ""],
-	term: ["Terminal", true, "Term"],
-	fixed: ["Fixed", false, "Fixed"]
-};
-const ProportionalSpacings = {
-	"": ["Default", false, ""]
+	type: ["Default", true],
+	term: ["Terminal", true],
+	fixed: ["Fixed", false]
 };
 
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
 
 async function GeneratePackageList(out) {
-	const MockRows = 8;
+	const pkgShapesData = await fs.readJson(releasePackagesJsonPath);
 
 	out.log(`<table>`);
-	for (let shape in PackageShapes) {
-		const [shapeDesc, shapeNameSuffix, , count, proportional] = PackageShapes[shape];
-		const spacings = proportional ? ProportionalSpacings : MonospaceSpacings;
-		const spacingKeys = Object.keys(spacings);
+	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
+		const prime = gr.subGroups[groupID];
 
-		const familyName = buildName("\u00a0", "Iosevka", shapeNameSuffix);
-		const imageName = buildName("-", "iosevka", shape);
-		const fileName = buildName("-", "pkg", "iosevka", shape, Version);
+		const familyName = buildName("\u00a0", ...prime.family.split(" "));
+		const fileName = buildName("-", "ttc", groupID, Version);
 		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
 
-		const desc = `<i>${shapeDesc}</i>`;
-		const img = `<img src="${imagePrefix}/${imageName}.png" width="540"/>`;
+		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
+		const desc = `<i>${proportionPrefix}, ${prime.desc}</i>`;
+		const img = `<img src="${imagePrefix}/${groupID}.png"/>`;
 		out.log(
 			`<tr>`,
-			`<td colspan="4"><b><a href="${downloadLink}">&#x1F4E6; ${familyName}</a></b> — ${desc}</td>`,
+			`<td colspan="5"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
+			`<td><b><a href="${downloadLink}">TTC</b></td>`,
 			`</tr>`
 		);
 
 		out.log(
 			`<tr>`,
-			`<td><b>&nbsp;&nbsp;└ TTF Package</b></td>`,
+			`<td><b>&nbsp;&nbsp;└ Sub-packages</b></td>`,
 			`<td><b>Spacing</b></td>`,
 			`<td><b>Ligatures</b></td>`,
-			`<td rowspan="${2 + spacingKeys.length}">${img}<br/></td>`,
+			`<td colspan="3"><b>Downloads</b></td>`,
 			`</tr>`
 		);
-		for (let spacing of spacingKeys) {
-			const [spacingDesc, ligation, spacingNameSuffix] = spacings[spacing];
-			const fileName = buildName("-", "ttf", "iosevka", spacing, shape, Version);
-			const familyName = buildName(" ", "Iosevka", spacingNameSuffix, shapeNameSuffix);
-			const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
-			const download = `<b><a href="${downloadLink}">${noBreak(familyName)}</a></b>`;
-			const leader =
-				"&nbsp;&nbsp;&nbsp;&nbsp;" +
-				(spacing === spacingKeys[spacingKeys.length - 1] ? "└" : "├");
+		let lastSubGroupID = null;
+		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
+			lastSubGroupID = subGroupID;
+		}
+		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
+			const [spacingDesc, ligation] = Spacings[subGr.spacing];
+			const createLink = (label, prefix) => {
+				const fileName = buildName("-", prefix, subGroupID, Version);
+				const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+				return `<b><a href="${downloadLink}">${label}</a></b>`;
+			};
+			const leader = "&nbsp;&nbsp;&nbsp;&nbsp;" + (subGroupID === lastSubGroupID ? "└" : "├");
 			out.log(
 				`<tr>`,
-				`<td>${leader}&nbsp;${download}</td>`,
+				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
+				`<td>${createLink("TTF", "ttf")}</td>`,
+				`<td>${createLink("Unhinted", "ttf-unhinted")}</td>`,
+				`<td>${createLink("WebFont", "webfont")}</td>`,
 				`</tr>`
 			);
 		}
 
-		out.log(
-			`<tr>`,
-			`<td colspan="3">${`<br/>`.repeat(MockRows - spacingKeys.length)}</td>`,
-			`<tr/>`
-		);
+		out.log(`<tr>`, `<td colspan="6">${img}</td>`, `<tr/>`);
 	}
 	out.log(`</table>\n`);
 }

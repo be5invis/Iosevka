@@ -99,7 +99,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp1 : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			# Dot removal (max 6 middle marks are supported)
 			chain-rule (dotlessFrom ~> dotlessTo) (markGlyphs.above ~> null)
 			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all (markGlyphs.above ~> null)
@@ -128,7 +128,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp2 : add-lookup sink : object
 		.type 'gsub_ligature'
-		.subtables : list : object : substitutions : list
+		.substitutions : list
 			object [from {'commaAbove' 'graveAbove'}] [to 'psilivaria']
 			object [from {'commaAbove' 'acuteAbove'}] [to 'psilioxia']
 			object [from {'commaAbove' 'perispomeniAbove'}] [to 'psiliperispomeni']
@@ -136,23 +136,28 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			object [from {'revCommaAbove' 'acuteAbove'}] [to 'dasiaoxia']
 			object [from {'revCommaAbove' 'perispomeniAbove'}] [to 'dasiaperispomeni']
 
+	define gnCgjNwid 'dashed-boxed3{847}{C}{G}{J}.NWID'
+	define gnCgjWwid 'dashed-boxed3{847}{C}{G}{J}.WWID'
 
 	define lookupCcmp-TieMarkLigature : add-lookup sink : object
 		.type 'gsub_ligature'
-		.subtables : list : object : substitutions : TieMarkFrom.map : lambda [gnFrom idx]
-			object [from {'cgj' gnFrom}] [to TieMarkTo.(idx)]
+		.substitutions : {}.concat
+			TieMarkFrom.map : lambda [gnFrom idx]
+				object [from {gnCgjNwid gnFrom}] [to TieMarkTo.(idx)]
+			TieMarkFrom.map : lambda [gnFrom idx]
+				object [from {gnCgjWwid gnFrom}] [to TieMarkTo.(idx)]
 
 	define lookupCcmp-TieMarkContextual : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list : object
-			match {[TieGlyphs.concat TieMarkTo] {'cgj'} TieMarkFrom}
+		.rules : list : object
+			match {[TieGlyphs.concat TieMarkTo] {gnCgjNwid gnCgjWwid} TieMarkFrom}
 			inputBegins 1
 			inputEnds 3
 			apply {{.at 1 .lookup lookupCcmp-TieMarkLigature}}
 
 	define lookupCcmp-ToneStart : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneToToneStart 0] {'tone0'}
 			chain-rule [ToneToToneStart 1] {'tone1'}
 			chain-rule [ToneToToneStart 2] {'tone2'}
@@ -161,7 +166,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp-ToneMid : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneStartOrMidAt 0] [ToneStartToToneMid 0]
 			chain-rule [ToneStartOrMidAt 1] [ToneStartToToneMid 1]
 			chain-rule [ToneStartOrMidAt 2] [ToneStartToToneMid 2]
@@ -170,7 +175,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp-ToneEnd : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneStartOrMidAt 0] [ToneToToneEnd 0]
 			chain-rule [ToneStartOrMidAt 1] [ToneToToneEnd 1]
 			chain-rule [ToneStartOrMidAt 2] [ToneToToneEnd 2]
@@ -179,7 +184,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp-ToneSandhiStart : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneSandhiToToneStart 0] {'toneSandhi0'}
 			chain-rule [ToneSandhiToToneStart 1] {'toneSandhi1'}
 			chain-rule [ToneSandhiToToneStart 2] {'toneSandhi2'}
@@ -188,7 +193,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp-ToneSandhiMid : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiStartToToneMid 0]
 			chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiStartToToneMid 1]
 			chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiStartToToneMid 2]
@@ -197,7 +202,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 
 	define lookupCcmp-ToneSandhiEnd : add-lookup sink : object
 		.type 'gsub_chaining'
-		.subtables : list
+		.rules : list
 			chain-rule [ToneSandhiStartOrMidAt 0] [ToneSandhiToToneEnd 0]
 			chain-rule [ToneSandhiStartOrMidAt 1] [ToneSandhiToToneEnd 1]
 			chain-rule [ToneSandhiStartOrMidAt 2] [ToneSandhiToToneEnd 2]
@@ -223,7 +228,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		ccmp.lookups.push lookupCcmp-Decompose
 		define lookupCcmp-Decompose : add-lookup sink : object
 			.type 'gsub_multiple'
-			.subtables : list decompositions
+			.substitutions decompositions
 
 	add-common-feature sink ccmp
 	EndLookupBlock rec sink

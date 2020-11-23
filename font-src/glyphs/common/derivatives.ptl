@@ -3,8 +3,8 @@ $$include '../../meta/macros.ptl'
 import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyDerivingCv] from '../../support/gr'
-import [designParameters] from '../../meta/aesthetics'
+import [Cv AnyDerivingCv Dotless] from '../../support/gr'
+import [DesignParameters] from '../../meta/aesthetics'
 
 extern Map
 
@@ -12,33 +12,29 @@ glyph-module
 
 glyph-block Common-Derivatives : begin
 	glyph-block-import CommonShapes : FlipAround
-	define [ApplyCv g follow para name transform omit] : begin
-		foreach [{k h} : pairs-of para.variants] : begin
-			local suffix h.(follow)
-			if (suffix && !(omit && omit.(k))) : begin
-				if (suffix && transform && transform.(suffix)) : set suffix transform.(suffix)
-				if (suffix && h.__cvmap && h.__cvmap.(follow)) : begin
-					local tag h.__cvmap.(follow)
-					[Cv tag].set g ([fallback name follow] + '.' + suffix)
+	define [ApplyCv g follow para name] : begin
+		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
+			local suffix : h.resolveFor para follow
+			if suffix : begin
+				local dstName : [fallback name follow] + '.' + suffix
+				local dst : glyphStore.queryByName dstName
+				if dst : g.dependsOn dst
+				if (h.tag && h.rank) : [Cv h.tag h.rank].set g dstName
 
-	define [select-variant] : params [name unicode [to-name name] transform omit [follow name]] : begin
-		if [not : glyph-is-needed name] : return nothing
+	define [select-variant] : params [name unicode [shapeFrom name] [follow name]] : begin
+		if [not : glyph-is-needed shapeFrom] : return nothing
 
-		local variant : variantSelector.(follow) || para.defaultVariant.(follow)
-		if [not variant] : begin
-			throw : new Error "Variant for \(name) is not assigned."
+		local variant para.variantSelector.(follow)
+		if [not variant] : throw : new Error "Variant for \(name) is not assigned."
 
-		if (transform && transform.(variant)) : set variant transform.(variant)
+		create-glyph name unicode : glyph-proc
+			include [refer-glyph (shapeFrom + '.' + variant)] AS_BASE ALSO_METRICS
+			ApplyCv currentGlyph follow para shapeFrom
+			set this.autoRefPriority [query-glyph (shapeFrom + '.' + variant)].autoRefPriority
 
-		create-glyph [fallback to-name name] unicode : glyph-proc
-			include [refer-glyph (name + '.' + variant)] AS_BASE ALSO_METRICS
-			ApplyCv currentGlyph follow para name transform omit
-			set this.autoRefPriority [query-glyph (name + '.' + variant)].autoRefPriority
-
-	define [italic-variant name unicode] : begin
-		create-glyph name unicode : composite-proc : if para.isItalic
-			refer-glyph (name + '.italic')
-			refer-glyph (name + '.upright')
+	define [orthographic-italic name unicode] : if para.isItalic
+		alias name unicode (name + '.italic')
+		alias name unicode (name + '.upright')
 
 	define [glyph-is-needed name] : [not pickHash] || pickHash.(name)
 
@@ -49,9 +45,11 @@ glyph-block Common-Derivatives : begin
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
-	define [with-related-glyphs sourceGid dstGid unicode Fn] : if [glyph-is-needed sourceGid] : begin
+	define [with-related-glyphs sourceGid dstGid dstUnicode Fn] : begin
+		if [not : glyph-is-needed sourceGid] : return nothing
+
 		local glyphSrc : glyphStore.queryByName sourceGid
-		local glyphDst : create-glyph dstGid unicode : glyph-proc
+		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
 			include : Fn sourceGid null
 
 		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
@@ -59,12 +57,18 @@ glyph-block Common-Derivatives : begin
 			create-glyph [gr.amendName dstGid] : glyph-proc
 				include : Fn [gr.get glyphSrc] gr.tag
 
-	define [alias newid unicode id] : begin
-		if [not newid] : throw : new Error "Target ID not specified"
-		with-related-glyphs id newid unicode
-			lambda [src sel] : glyph-proc
-				include [refer-glyph src] AS_BASE ALSO_METRICS
-				currentGlyph.cloneRankFromGlyph [query-glyph src]
+	define [alias dstGid dstUnicode sourceGid] : begin
+		if [not dstGid] : throw : new Error "Target ID not specified"
+		if [not : glyph-is-needed sourceGid] : return nothing
+
+		local glyphSrc : glyphStore.queryByNameEnsured sourceGid
+		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
+			include [refer-glyph sourceGid] AS_BASE ALSO_METRICS
+
+		if glyphDst : begin
+			foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
+				gr.set glyphDst [gr.get glyphSrc]
+			if [Dotless.get glyphSrc] : Dotless.set glyphDst [Dotless.get glyphSrc]
 
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
@@ -90,27 +94,19 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : HCombine newid unicode id id spacing
 
-	define [vcombine newid unicode id1 id2 spacing] : begin
+	define [VCombine newid unicode id1 id2 spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
-			set-width [query-glyph id1].advanceWidth
-			currentGlyph.dependsOn [query-glyph id1]
-			currentGlyph.dependsOn [query-glyph id2]
-			include : new-glyph : glyph-proc
-				include [refer-glyph id2]
-				include : Upright
-			include : Translate 0 (-spacing)
-			include : new-glyph : glyph-proc
-				include [refer-glyph id1]
-				include : Upright
-			include : Translate 0 (spacing / 2)
-			include : Italify
+			include [refer-glyph id2] AS_BASE ALSO_METRICS
+			include : Translate (-spacing * TanSlope) (-spacing)
+			include [refer-glyph id1]
+			include : Translate (spacing * TanSlope / 2) (spacing / 2)
 	define [VDual newid unicode id spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
-		return : vcombine newid unicode id id spacing
+		return : VCombine newid unicode id id spacing
 
-	glyph-block-export select-variant italic-variant refer-glyph query-glyph with-related-glyphs
-	glyph-block-export alias turned HDual HCombine VDual vcombine glyph-is-needed
+	glyph-block-export select-variant orthographic-italic refer-glyph query-glyph with-related-glyphs
+	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin
@@ -146,7 +142,7 @@ glyph-block Recursive-Build : begin
 
 	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false]] : begin
 		local forkedPara : Object.create para
-		forkedPara.stroke = [adviceBlackness crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
+		forkedPara.stroke = [AdviceStroke crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
 		forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
 		forkedPara.dotsize = para.dotsize * forkedPara.stroke / para.stroke
 		forkedPara.periodsize = para.periodsize * forkedPara.stroke / para.stroke
@@ -158,7 +154,7 @@ glyph-block Recursive-Build : begin
 
 	define [Thinner glyphs p crowd] : begin
 		local forkedPara : Object.create para
-		forkedPara.stroke = [adviceBlackness : fallback crowd 1]
+		forkedPara.stroke = [AdviceStroke : fallback crowd 1]
 		forkedPara.width = Width * p
 		forkedPara.accentx = AccentX * p
 		forkedPara.jut = Jut * p

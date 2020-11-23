@@ -140,9 +140,6 @@ export : define [assignFontNames para metrics font] : begin
 	nameFont font WWS_PREFERRED_FAMILY family # WWS Preferred Family
 	nameFont font WWS_PREFERRED_STYLE style  # WWS Preferred Style
 
-	set font.name.preferredFamily     family
-	set font.name.preferredSubFamily  style
-
 	local {compatStyle compatFamilySuffix shortCompatFamilySuffix} : getStyleLinkedStyles para.naming.weight para.naming.width para.naming.slope
 	local compatFamily family
 	if (compatFamilySuffix != "Regular") : set compatFamily : family + ' ' + compatFamilySuffix
@@ -174,7 +171,7 @@ export : define [assignFontNames para metrics font] : begin
 	# Weight, width and slope
 	set font.OS_2.usWeightClass     para.naming.weight
 	set font.OS_2.usWidthClass      para.naming.width
-	set font.OS_2.panose.2          : 1 + para.naming.weight / 100
+	set font.OS_2.panose.bWeight    : 1 + para.naming.weight / 100
 	set font.OS_2.fsSelection       : object
 		oblique        : not : not isOblique
 		bold           : not : not isBold
@@ -195,9 +192,9 @@ export : define [assignFontNames para metrics font] : begin
 	if (minorVersion > 99 || patchVersion > 9) : throw : new Error "Version number overflow"
 	set font.head.fontRevision : majorVersion + (minorVersion * 10 + patchVersion) / 1000
 
-	if (para.diversityM == 1 && para.diversityF == 1 && para.diversityI == 1 && para.diversityII == 1) : begin
-		set font.OS_2.panose.3          9 # Monospaced
-		set font.post.isFixedPitch      true
+	if (para.quasiProportionalDiversity === 0) : begin
+		set font.OS_2.panose.bProportion 9 # Monospaced
+		set font.post.isFixedPitch       true
 	: else : begin
-		set font.OS_2.panose.3          0
-		set font.post.isFixedPitch      false
+		set font.OS_2.panose.bProportion 0
+		set font.post.isFixedPitch       false

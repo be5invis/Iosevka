@@ -42,7 +42,18 @@ module.exports = function () {
 		},
 		OS_2: {
 			achVendID: "BE5N",
-			panose: [2, 0, 5, 9, 0, 0, 0, 0, 0, 0],
+			panose: {
+				bFamilyType: 2,
+				bSerifStyle: 0,
+				bWeight: 5,
+				bProportion: 9,
+				bContrast: 3,
+				bStrokeVariation: 0,
+				bArmStyle: 0,
+				bLetterform: 0,
+				bMidline: 0,
+				bXHeight: 4
+			},
 			fsSelection: 192,
 			fsType: 0,
 			sCapHeight: 0,
@@ -76,20 +87,8 @@ module.exports = function () {
 			ySuperscriptXSize: 665,
 			ySuperscriptYOffset: 491,
 			ySuperscriptYSize: 716,
-			ulCodePageRange1: {
-				latin1: true,
-				latin2: true,
-				greek: true,
-				cyrillic: true,
-				turkish: true,
-				vietnamese: true,
-				macRoman: true
-			},
-			ulCodePageRange2: {
-				cp852: true,
-				cp850: true,
-				ascii: true
-			}
+			ulCodePageRange1: 0x2000011f,
+			ulCodePageRange2: 0xc4000000
 		},
 		post: {
 			version: 2,

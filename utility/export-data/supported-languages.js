@@ -25,6 +25,11 @@ module.exports = async function (charMapPath, charMapItalicPath, charMapObliqueP
 };
 
 function getSupportedLanguageSet(rawCoverage) {
+	const supportLocaleSet = getSupportLocaleSet(rawCoverage);
+	addSimilarLocales(supportLocaleSet);
+	return getSupportedLangs(supportLocaleSet);
+}
+function getSupportLocaleSet(rawCoverage) {
 	const supportLocaleSet = new Set();
 
 	for (const locale of cldr.localeIds) {
@@ -52,6 +57,9 @@ function getSupportedLanguageSet(rawCoverage) {
 			supportLocaleSet.add(locale);
 		}
 	}
+	return supportLocaleSet;
+}
+function addSimilarLocales(supportLocaleSet) {
 	for (const loc of supportLocaleSet) {
 		const seg = loc.split("_");
 		if (seg.length < 2) continue;
@@ -62,6 +70,8 @@ function getSupportedLanguageSet(rawCoverage) {
 			}
 		}
 	}
+}
+function getSupportedLangs(supportLocaleSet) {
 	const supportLangSet = new Set(overrideSupportedLanguages);
 	for (const loc of supportLocaleSet) {
 		const seg = loc.split("_");
@@ -74,7 +84,6 @@ function getSupportedLanguageSet(rawCoverage) {
 		}
 		if (displayName) supportLangSet.add(displayName);
 	}
-
 	return supportLangSet;
 }
 

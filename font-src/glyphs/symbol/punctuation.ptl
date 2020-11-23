@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [designParameters] from '../../meta/aesthetics'
+import [DesignParameters] from '../../meta/aesthetics'
 
 glyph-module
 
@@ -14,14 +14,14 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define MosaicBottom fontMetrics.OS_2.sTypoDescender
 	define MosaicHeight : MosaicTop - MosaicBottom
 
-	define [ParenDim] : params [[delta 0] [dp designParameters]] : object
+	define [ParenDim] : params [[delta 0] [dp DesignParameters]] : object
 		outside : [mix SB RightSB dp.parenOutside] - delta
 		inside  : mix SB RightSB dp.parenInside
 		bottom  : [mix SymbolMid ParenBot (1 + dp.parenOvershoot)] - delta
 		top     : [mix SymbolMid ParenTop (1 + dp.parenOvershoot)] + delta
 		mid       SymbolMid
 
-	define [ParenShape] : params [sw [dp designParameters]] : let [dim : ParenDim 0 dp] : dispiro
+	define [ParenShape] : params [sw [dp DesignParameters]] : let [dim : ParenDim 0 dp] : dispiro
 		widths.lhs sw
 		g4 dim.inside dim.top
 		quadcontrols 1 (1 - dp.parenCurliness)
@@ -32,7 +32,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define [ParenUpperShape sw] : let [dim : ParenDim 0] : dispiro
 		widths.lhs sw
 		g4 dim.inside dim.top
-		quadcontrols 1 (1 - designParameters.parenCurliness)
+		quadcontrols 1 (1 - DesignParameters.parenCurliness)
 		g4.down.end dim.outside MosaicBottom [heading Downward]
 
 	define [ParenExtensionShape sw] : let [dim : ParenDim 0] : dispiro
@@ -43,14 +43,14 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define [ParenLowerShape sw] : let [dim : ParenDim 0] : dispiro
 		widths.lhs sw
 		g4.down.start dim.outside MosaicTop [heading Downward]
-		quadcontrols 0 designParameters.parenCurliness
+		quadcontrols 0 DesignParameters.parenCurliness
 		g4 dim.inside dim.bottom
 
 	define [ParenShapeMask delta] : let [dim : ParenDim delta] : spiro-outline
 		corner dim.inside dim.top
-		quadcontrols 1 (1 - designParameters.parenCurliness)
+		quadcontrols 1 (1 - DesignParameters.parenCurliness)
 		g4 dim.outside dim.mid
-		quadcontrols 0 designParameters.parenCurliness
+		quadcontrols 0 DesignParameters.parenCurliness
 		corner dim.inside dim.bottom
 
 	create-glyph'parenLeft.normal' : glyph-proc
@@ -58,10 +58,10 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	create-glyph 'parenLeft.largeContour' : glyph-proc
 		local dp : object
-			parenOutside        (0.25 * designParameters.parenOutside)
-			parenInside         designParameters.parenInside
-			parenCurliness      [mix 1 designParameters.parenCurliness 0.5]
-			parenOvershoot      designParameters.parenOvershoot
+			parenOutside        (0.25 * DesignParameters.parenOutside)
+			parenInside         DesignParameters.parenInside
+			parenCurliness      [mix 1 DesignParameters.parenCurliness 0.5]
+			parenOvershoot      DesignParameters.parenOvershoot
 		include : ParenShape Stroke dp
 
 	turned 'parenRight.normal' null 'parenLeft.normal' Middle SymbolMid
@@ -85,7 +85,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	create-glyph 'zNotationParenLeft' 0x2987 : glyph-proc
 		local dim : ParenDim 0
-		local fine : adviceBlackness 4
+		local fine : AdviceStroke 4
 		include : intersection
 			Rect [mix dim.bottom dim.top 2] [mix dim.top dim.bottom 2] 0 dim.inside
 			union
@@ -99,8 +99,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define [BracketMask] : Rect MosaicTop MosaicBottom (-Width) (2 * Width)
 
 	define [BracketShape top bottom] : glyph-proc
-		local l : mix SB RightSB designParameters.bracketOutside
-		local r : mix SB RightSB designParameters.bracketInside
+		local l : mix SB RightSB DesignParameters.bracketOutside
+		local r : mix SB RightSB DesignParameters.bracketInside
 
 		include : HBarBottom l r bottom
 		include : HBarTop    l r top
@@ -122,9 +122,9 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			BracketShape (ParenTop + MosaicHeight) ParenBot
 
 	create-glyph 'dblBracketLeft' 0x27E6 : glyph-proc
-		local l : mix SB RightSB designParameters.bracketOutside
-		local r : mix SB RightSB designParameters.bracketInside
-		local sw : Math.min ((r - l) / 5) [adviceBlackness 4]
+		local l : mix SB RightSB DesignParameters.bracketOutside
+		local r : mix SB RightSB DesignParameters.bracketInside
+		local sw : Math.min ((r - l) / 5) [AdviceStroke 4]
 
 		include : union
 			HBarBottom l r ParenBot
@@ -133,8 +133,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			VBar       [mix l r (1 / 2)] ParenBot ParenTop sw
 
 	create-glyph 'bracketBarLeft' 0x2045 : glyph-proc
-		local l : mix SB RightSB designParameters.bracketOutside
-		local r : mix SB RightSB designParameters.bracketInside
+		local l : mix SB RightSB DesignParameters.bracketOutside
+		local r : mix SB RightSB DesignParameters.bracketInside
 
 		include : union
 			HBarBottom l r ParenBot
@@ -150,21 +150,21 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	turned 'bracketBarRight' 0x2046 'bracketBarLeft' Middle SymbolMid
 
 	define [BraceDim] : begin
-		local parenCenter [mix SB RightSB [mix designParameters.braceInside designParameters.braceOutside 0.5]]
+		local parenCenter [mix SB RightSB [mix DesignParameters.braceInside DesignParameters.braceOutside 0.5]]
 		local radius    : Math.min
-			[mix SB RightSB designParameters.braceInside] - parenCenter
+			[mix SB RightSB DesignParameters.braceInside] - parenCenter
 			(ParenTop - SymbolMid - Stroke * 1.5) / 2
 		return : object parenCenter radius
 
 	define [BraceUpperHalfShape top bottom] : glyph-proc
 		define [object parenCenter radius] : BraceDim
 		include : dispiro
-			straight.left.start [mix SB RightSB designParameters.braceInside] top [widths.heading HalfStroke HalfStroke Leftward]
+			straight.left.start [mix SB RightSB DesignParameters.braceInside] top [widths.heading HalfStroke HalfStroke Leftward]
 			archv
 			flat parenCenter (top - radius) [heading Downward]
 			curl parenCenter (bottom + radius) [heading Downward]
 			arcvh
-			straight.left.end [mix SB RightSB designParameters.braceOutside] bottom [heading Leftward]
+			straight.left.end [mix SB RightSB DesignParameters.braceOutside] bottom [heading Leftward]
 
 	define [BraceUpperThirdShape top bottom] : glyph-proc
 		define [object parenCenter radius] : BraceDim
@@ -174,12 +174,12 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define [BraceLowerHalfShape top bottom] : glyph-proc
 		define [object parenCenter radius] : BraceDim
 		include : dispiro
-			straight.left.start [mix SB RightSB designParameters.braceInside] bottom [widths.heading HalfStroke HalfStroke Leftward]
+			straight.left.start [mix SB RightSB DesignParameters.braceInside] bottom [widths.heading HalfStroke HalfStroke Leftward]
 			archv
 			flat parenCenter (bottom + radius) [heading Upward]
 			curl parenCenter (top - radius) [heading Upward]
 			arcvh
-			straight.left.end [mix SB RightSB designParameters.braceOutside] top [heading Leftward]
+			straight.left.end [mix SB RightSB DesignParameters.braceOutside] top [heading Leftward]
 
 	define [BraceLowerThirdShape top bottom] : glyph-proc
 		define [object parenCenter radius] : BraceDim
@@ -200,8 +200,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				BraceUpperHalfShape (top + MosaicHeight) (bottom - MosaicHeight)
 
 	do
-		local top : [mix SymbolMid ParenTop (1 + designParameters.braceOvershoot)] - HalfStroke
-		local bot : [mix SymbolMid ParenBot (1 + designParameters.braceOvershoot)] + HalfStroke
+		local top : [mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)] - HalfStroke
+		local bot : [mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)] + HalfStroke
 
 		create-glyph 'braceLeft.straight' : glyph-proc
 			include : BraceUpperHalfShape top SymbolMid
@@ -226,16 +226,16 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	define [CurlyBraceShape sw] : glyph-proc
 		local hs : sw / 2
-		local xIns : mix SB RightSB designParameters.braceInside
-		local xOus : mix SB RightSB designParameters.braceOutside
-		local m1   : mix SB RightSB [mix designParameters.braceInside designParameters.braceOutside designParameters.braceCurlyM1]
-		local m2   : mix SB RightSB [mix designParameters.braceInside designParameters.braceOutside designParameters.braceCurlyM2]
+		local xIns : mix SB RightSB DesignParameters.braceInside
+		local xOus : mix SB RightSB DesignParameters.braceOutside
+		local m1   : mix SB RightSB [mix DesignParameters.braceInside DesignParameters.braceOutside DesignParameters.braceCurlyM1]
+		local m2   : mix SB RightSB [mix DesignParameters.braceInside DesignParameters.braceOutside DesignParameters.braceCurlyM2]
 		local braceRadiusLowLimit : (ParenTop - SymbolMid - sw) * (1 / 3) + hs
 		local radius1 : (sw / 16) + [Math.min (xIns - m1) braceRadiusLowLimit]
 		local radius2 : (sw / 16) + [Math.min (m2 - xOus) braceRadiusLowLimit] - hs
 		local ess : mix sw (Ess * sw / Stroke) 0.25
-		local top : mix SymbolMid ParenTop (1 + designParameters.braceOvershoot)
-		local bot : mix SymbolMid ParenBot (1 + designParameters.braceOvershoot)
+		local top : mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)
+		local bot : mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)
 		include : dispiro
 			straight.left.start xIns (top - hs) [widths.heading hs hs Leftward]
 			archv
@@ -262,18 +262,18 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	select-variant 'braceRight' '}'
 
 	do
-		local top : mix SymbolMid ParenTop (1 + designParameters.braceOvershoot)
-		local bot : mix SymbolMid ParenBot (1 + designParameters.braceOvershoot)
+		local top : mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)
+		local bot : mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)
 		create-glyph 'upperLeftOrLowerRightfBrace' 0x23B0 : glyph-proc
 			include : BraceUpperHalfShape (top - HalfStroke) (bot + HalfStroke)
 		create-glyph 'upperRightOrLowerLeftfBrace' 0x23B1 : glyph-proc
 			include : BraceLowerHalfShape (top - HalfStroke) (bot + HalfStroke)
 
 	create-glyph 'whiteBraceLeft' 0x2983 : glyph-proc
-		local fine : adviceBlackness 4
-		local xIns : mix SB RightSB designParameters.braceInside
-		local top : mix SymbolMid ParenTop (1 + designParameters.braceOvershoot)
-		local bot : mix SymbolMid ParenBot (1 + designParameters.braceOvershoot)
+		local fine : AdviceStroke 4
+		local xIns : mix SB RightSB DesignParameters.braceInside
+		local top : mix SymbolMid ParenTop (1 + DesignParameters.braceOvershoot)
+		local bot : mix SymbolMid ParenBot (1 + DesignParameters.braceOvershoot)
 		include : CurlyBraceShape fine
 		include : VBarRight xIns (bot + fine / 2) (top - fine / 2) fine
 
@@ -297,7 +297,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 	create-glyph 'dblAngleLeft' 0x27EA : glyph-proc
 		define dim : ParenDim (delta -- 0)
-		define fine : Math.min OperatorStroke [adviceBlackness 3.5]
+		define fine : Math.min OperatorStroke [AdviceStroke 3.5]
 		define farOutside : dim.outside / 2
 		define middle : mix farOutside dim.inside 0.5
 		include : AngleLeftShape farOutside middle fine
@@ -309,12 +309,12 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	alias 'mathAngleRight' 0x27E9 'angleRight'
 
 	create-glyph 'ceilingLeft' 0x2308 : glyph-proc
-		include : HBarTop    [mix SB RightSB designParameters.bracketOutside] [mix SB RightSB designParameters.bracketInside] ParenTop
-		include : VBarLeft   [mix SB RightSB designParameters.bracketOutside] ParenBot ParenTop
+		include : HBarTop    [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenTop
+		include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
 
 	create-glyph 'floorLeft' 0x230A : glyph-proc
-		include : HBarBottom [mix SB RightSB designParameters.bracketOutside] [mix SB RightSB designParameters.bracketInside] ParenBot
-		include : VBarLeft   [mix SB RightSB designParameters.bracketOutside] ParenBot ParenTop
+		include : HBarBottom [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenBot
+		include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
 
 	turned 'floorRight' 0x230B 'ceilingLeft' Middle SymbolMid
 	turned 'ceilingRight' 0x2309 'floorLeft' Middle SymbolMid
@@ -361,7 +361,7 @@ glyph-block Symbol-Punctuation-Small : begin
 			include : Italify
 
 	create-glyph 'hollowColon' 0x2982 : glyph-proc
-		define sw : adviceBlackness 5
+		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
 		include : difference
 			DotAt Middle dotRadius (dotRadius - O + sw / 2)
@@ -444,20 +444,22 @@ glyph-block Symbol-Punctuation-Bar : begin
 		set-base-anchor 'below' Middle ParenBot
 		include : VBar Middle ParenBot ParenTop
 
-	create-glyph 'bar.naturalSlope' : BarShape
-	create-glyph 'bar.forceUpright' : glyph-proc
+	create-glyph 'bar.upright' : BarShape
+	create-glyph 'bar.italic.naturalSlope' : BarShape
+	create-glyph 'bar.italic.forceUpright' : glyph-proc
 		include : ForceUpright
 		include : BarShape
 
 	define [DoubleBarShape] : glyph-proc
 		set-base-anchor 'above' Middle ParenTop
 		set-base-anchor 'below' Middle ParenBot
-		local sw : adviceBlackness 3.5
+		local sw : AdviceStroke 3.5
 		include : VBar (Middle - Width * 0.175) ParenBot ParenTop sw
 		include : VBar (Middle + Width * 0.175) ParenBot ParenTop sw
 
-	create-glyph 'parallel.naturalSlope' : DoubleBarShape
-	create-glyph 'parallel.forceUpright' : glyph-proc
+	create-glyph 'parallel.upright'             : DoubleBarShape
+	create-glyph 'parallel.italic.naturalSlope' : DoubleBarShape
+	create-glyph 'parallel.italic.forceUpright' : glyph-proc
 		include : ForceUpright
 		include : DoubleBarShape
 
@@ -466,22 +468,26 @@ glyph-block Symbol-Punctuation-Bar : begin
 		include : VBar Middle (SymbolMid + breakDist / 2) ParenTop
 		include : VBar Middle ParenBot (SymbolMid - breakDist / 2)
 
-	create-glyph 'brokenBar.naturalSlope' : BrokenBarShape
-	create-glyph 'brokenBar.forceUpright' : glyph-proc
+	create-glyph 'brokenBar.upright'             : BrokenBarShape
+	create-glyph 'brokenBar.italic.naturalSlope' : BrokenBarShape
+	create-glyph 'brokenBar.italic.forceUpright' : glyph-proc
 		include : ForceUpright
 		include : BrokenBarShape
 
 	create-glyph 'palatoalveolarclick' 0x1C2 : glyph-proc
-		include [refer-glyph 'bar.naturalSlope'] AS_BASE
+		include [refer-glyph 'bar.upright'] AS_BASE
 		include : HBarBottom SB RightSB (SymbolMid + XH * 0.1) OperatorStroke
 		include : HBarTop SB RightSB (SymbolMid - XH * 0.1) OperatorStroke
 
-	select-variant 'bar' '|'
-	select-variant 'parallel' 0x2225 (follow -- 'bar')
-	select-variant 'brokenBar' 0xA6 (follow -- 'bar')
-	alias 'dentalclick' 0x1C0 'bar.naturalSlope'
+	select-variant 'bar.italic'
+	orthographic-italic 'bar' '|'
+	select-variant 'parallel.italic' (follow -- 'bar.italic')
+	orthographic-italic 'parallel' 0x2225
+	select-variant 'brokenBar.italic' (follow -- 'bar.italic')
+	orthographic-italic 'brokenBar' 0xA6
+	alias 'dentalclick' 0x1C0 'bar.upright'
 	alias 'doubleBar' 0x2016 'parallel'
-	alias 'alveolarlateralclick' 0x1C1 'parallel.naturalSlope'
+	alias 'alveolarlateralclick' 0x1C1 'parallel.upright'
 
 
 glyph-block Symbol-Punctuation-Ampersand : begin
@@ -489,8 +495,8 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-Ezh : RevEzhShape
 
-	define sw : adviceBlackness2 3 3 CAP
-	define fineAmp : adviceBlackness 3.5
+	define sw : AdviceStroke2 3 3 CAP
+	define fineAmp : AdviceStroke 3.5
 	define pxUpperLoopRight 0.875
 	define pxUpperLoopLeft  0.05
 	define pXTerminal 1.1
@@ -656,7 +662,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 			straight.up.end (xEtRight - (Stroke - ShoulderFine) * HVContrast) smaEt [widths.heading ShoulderFine 0 Upward]
 
 		VBarRight xEtRight (smaEt + O) yEtRightBarTop
-		VBarRight xEtRight smaEt 0 [Math.max [adviceBlackness 5] (Stroke - ShoulderFine / 2)]
+		VBarRight xEtRight smaEt 0 [Math.max [AdviceStroke 5] (Stroke - ShoulderFine / 2)]
 
 	define yEtFlatTopEnd : Math.max (SmoothA + fineAmp) (CAP * 0.4)
 	define yEtFlatTopBarPos : (OverlayPos * CAP + Stroke * 0.625) / CAP
@@ -688,7 +694,7 @@ glyph-block Symbol-Punctuation-At : begin
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
-		local sw : adviceBlackness 3.5
+		local sw : AdviceStroke 3.5
 		local m1 : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
 		local m2 : [mix m1 RightSB 0.52] + TanSlope * sw
 
@@ -725,8 +731,8 @@ glyph-block Symbol-Punctuation-At : begin
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
-		local sw : adviceBlackness 4 div
-		local swh : adviceBlackness 3.75 div
+		local sw : AdviceStroke 4 div
+		local swh : AdviceStroke 3.75 div
 		local left : SB * div - sw * HVContrast / 3
 		local right : (Width * div - SB * div) + sw * HVContrast / 3
 		local middle: Middle * div
@@ -768,7 +774,7 @@ glyph-block Symbol-Punctuation-At : begin
 		local obot 0
 		local otop [mix obot top 0.675]
 
-		local sw : adviceBlackness 3.5
+		local sw : AdviceStroke 3.5
 		local m1 : [mix (SB + sw) (RightSB - sw) 0.53] + sw / 2
 		local m2 : [mix SB m1 0.5] + TanSlope * sw
 
@@ -816,7 +822,7 @@ glyph-block Symbol-Punctuation-ParagraphAndSection : begin
 
 	create-glyph : glyph-proc
 		set-width Width
-		local sw : adviceBlackness 3.6
+		local sw : AdviceStroke 3.6
 		include : dispiro
 			widths.center sw
 			straight.left.start (Middle - sw / 4) (CAP - sw / 2) [heading Leftward]
@@ -866,17 +872,17 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	local asteriskCenterY : ParenTop - LongJut * 1.5
-	local asteriskKinds : list
-		list 5 1.2  0 Stroke         'asterisk'       'high'          'low'           'midXH'
-		list 5 0.85 0 Stroke         'smallasterisk'  'high'          'low'           ''
-		list 5 1    0 GeometryStroke 'opAsterisk'     'high'          'low'           ''
-		list 6 1.2  0 Stroke         'asterisk'       'hexhigh'       'hexlow'        ''
-		list 5 1.2  1 Stroke         'asterisk'       'turnPentaHigh' 'turnPentaLow'  ''
-	foreach [{sides size rot stroke name high low midXH} : items-of asteriskKinds] : begin
+	define asteriskCenterY : ParenTop - LongJut * 1.5
+	define asteriskKinds : list
+		list 5  1.2  0  0.4  Stroke         'asterisk'       'high'          'low'           'midXH'
+		list 5  0.85 0  0.4  Stroke         'smallasterisk'  'high'          'low'           ''
+		list 5  1    0  0.4  GeometryStroke 'opAsterisk'     'high'          'low'           ''
+		list 6  1.2  0  0.4  Stroke         'asterisk'       'hexhigh'       'hexlow'        ''
+		list 5  1.2  1  0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaLow'  ''
+	foreach [{sides size rot pFine stroke name high low midXH} : items-of asteriskKinds] : begin
 		create-glyph (name + '.' + high) : glyph-proc
 			local radius : LongJut * size
-			local fine : stroke * 0.4
+			local fine : stroke * pFine
 			local final : 0.5 * [Math.min stroke (radius * Math.PI / sides)]
 
 			foreach j [range 0 sides] : begin
@@ -899,9 +905,7 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 			Italify
 
 	select-variant 'asterisk' '*'
-	select-variant 'asterisk' nothing
-		to-name   -- 'asterisk.dfltlow'
-		transform -- { .high 'low' .hexhigh 'hexlow' .turnPentaHigh 'turnPentaLow' }
+	select-variant 'asterisk/lowered' (shapeFrom -- 'asterisk')
 
 
 glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
@@ -928,7 +932,7 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 	alias 'mathDivSlash' 0x2215 'slash'
 
 	create-glyph 'doubleSlash' 0x2AFD : glyph-proc
-		define w : adviceBlackness 3
+		define w : AdviceStroke 3
 		define b : Math.max w (Width * 0.15)
 		include : SlashShape (slashDefautLeft - b) (slashDefaultRight - b) nothing nothing w
 		include : SlashShape (slashDefautLeft + b) (slashDefaultRight + b) nothing nothing w
@@ -959,10 +963,10 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 	create-glyph 'backslash.right' : glyph-proc
 		include : BackslashShape 0 (Middle + backslashWidth / 2)
 
-	do "numbersign"
+	do "number sign"
 		define nsTop : mix SymbolMid ParenTop 0.85
 		define nsBot : mix SymbolMid ParenBot 0.85
-		define fine : adviceBlackness 3.5
+		define fine : AdviceStroke 3.5
 
 		define pFineOpen (1 / 8)
 		define l : SB - fine / 2
@@ -977,11 +981,11 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 			VBarRight (r - hsp - p * fine) nsBot nsTop fine
 
 
-		create-glyph 'numbersign.upright' : union
+		create-glyph 'numberSign.upright' : union
 			UprightHBars
 			UprightVBars 0
 
-		create-glyph 'numbersign.uprightOpen' : union
+		create-glyph 'numberSign.uprightOpen' : union
 			UprightVBars pFineOpen
 			difference
 				UprightHBars
@@ -997,8 +1001,8 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 			SlashShape (l + x - w + p * fine) (l + x + w + p * fine) nsTop nsBot fine
 			SlashShape (r - x - w - p * fine) (r - x + w - p * fine) nsTop nsBot fine
 
-		create-glyph 'numbersign.slanted' : union [SlantedHBars] [SlantedVBars 0]
-		create-glyph 'numbersign.slantedOpen' : union
+		create-glyph 'numberSign.slanted' : union [SlantedHBars] [SlantedVBars 0]
+		create-glyph 'numberSign.slantedOpen' : union
 			SlantedVBars pFineOpen
 			difference
 				SlantedHBars
@@ -1009,7 +1013,7 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 					corner (l + x - w + pFineOpen * fine) nsBot
 
 
-		select-variant 'numbersign' '#'
+		select-variant 'numberSign' '#'
 
 
 glyph-block Symbol-Punctuation-Dashes : begin
@@ -1087,7 +1091,7 @@ glyph-block Symbol-Punctuation-Bullets : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define BulletRadius : Math.max (Width * 2 / 7) [adviceBlackness 3]
+	define BulletRadius : Math.max (Width * 2 / 7) [AdviceStroke 3]
 
 	create-glyph 'bullet' 0x2022 : DotAt Middle SymbolMid (BulletRadius - O)
 
@@ -1100,7 +1104,7 @@ glyph-block Symbol-Punctuation-Bullets : begin
 			corner (xMid - radius / 2) (SymbolMid + radius / 2 * [Math.sqrt 3])
 
 	create-glyph 'whiteBullet' 0x25E6 : glyph-proc
-		local s : Math.min [adviceBlackness 5] (BulletRadius * 0.5)
+		local s : Math.min [AdviceStroke 5] (BulletRadius * 0.5)
 		include : difference
 			DotAt Middle SymbolMid (BulletRadius - O)
 			DotAt Middle SymbolMid (BulletRadius - O - s)
@@ -1135,27 +1139,17 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
 		include : FlipAround Middle yCurlyQuotes
 
-	create-glyph 'lowDoubleQuote' 0x201E : glyph-proc
+	define [DoubleQuoteProc gn] : glyph-proc
 		local dist : Width * 0.225
-		include : refer-glyph "lowSingleQuote"
+		include : refer-glyph gn
 		include : Translate (-dist * 2) 0
-		include : refer-glyph "lowSingleQuote"
+		include : refer-glyph gn
 		include : Translate dist 0
 
-	create-glyph 'openDoubleQuote' 0x201C : glyph-proc
-		include : refer-glyph "lowDoubleQuote"
-		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
-
-	create-glyph 'closeDoubleQuote' 0x201D : glyph-proc
-		include : refer-glyph "openDoubleQuote"
-		include : FlipAround Middle yCurlyQuotes
-
-	create-glyph 'revertDoubleQuote' 0x201F : glyph-proc
-		local dist : Width * 0.225
-		include : refer-glyph "revertSingleQuote"
-		include : Translate (-dist * 2) 0
-		include : refer-glyph "revertSingleQuote"
-		include : Translate dist 0
+	create-glyph 'lowDoubleQuote' 0x201E : DoubleQuoteProc 'lowSingleQuote'
+	create-glyph 'openDoubleQuote' 0x201C : DoubleQuoteProc 'openSingleQuote'
+	create-glyph 'closeDoubleQuote' 0x201D : DoubleQuoteProc 'closeSingleQuote'
+	create-glyph 'revertDoubleQuote' 0x201F : DoubleQuoteProc 'revertSingleQuote'
 
 	create-glyph 'prime' 0x2032 : glyph-proc
 		local wide : Width * 0.1
@@ -1174,7 +1168,7 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	create-glyph 'tripleprime' 0x2034 : glyph-proc
 		local wide : Width * 0.1
 		local d : Width * 0.3
-		local fine : 0.5 * [adviceBlackness 3.5]
+		local fine : 0.5 * [AdviceStroke 3.5]
 		include : dispiro
 			widths.center (fine * 2 * 1.2)
 			flat (Middle + wide) quoteTop [heading Downward]
@@ -1205,7 +1199,7 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	create-glyph 'revtripleprime' 0x2037 : glyph-proc
 		local wide : -Width * 0.1
 		local d : Width * 0.3
-		local fine : 0.5 * [adviceBlackness 3.5]
+		local fine : 0.5 * [AdviceStroke 3.5]
 		include : dispiro
 			widths.center (fine * 2 * 1.2)
 			flat (Middle + wide) quoteTop [heading Downward]
@@ -1250,7 +1244,7 @@ glyph-block Symbol-Punctuation-Guillemet : begin
 		local extension 0.55
 		local cor 1
 
-		local sw : adviceBlackness 3.5
+		local sw : AdviceStroke 3.5
 
 		include : dispiro
 			widths.center sw
@@ -1294,7 +1288,7 @@ glyph-block Symbol-Punctuation-Ellipsis : begin
 	glyph-block-import Common-Derivatives
 
 	define [EllipsisDotRadius darkness space] : begin
-		return : 0.5 * [adviceBlackness darkness (space / Width)] * PeriodSize / Stroke
+		return : 0.5 * [AdviceStroke darkness (space / Width)] * PeriodSize / Stroke
 
 	define [VerticalThreeDotsShape l r p bottom top] : glyph-proc
 		local radius : EllipsisDotRadius 5 (top - bottom)
@@ -1360,7 +1354,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 
 	create-glyph 'percent.dots' : glyph-proc
 		include : PercentBarShape [DivFrame 1] Stroke
-		local dotwidth ([adviceBlackness 4] * 1.5)
+		local dotwidth ([AdviceStroke 4] * 1.5)
 		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
 		include : VBarRight RightSB 0 [mix 0 CAP 0.3] dotwidth
 
@@ -1368,14 +1362,14 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		define df : DivFrame para.diversityM
 		set-width df.width
 
-		define refSw : adviceBlackness 4 df.div
+		define refSw : AdviceStroke 4 df.div
 
 		include : PercentBarShape df refSw
 		local dotwidth : refSw * 1.5
 		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
 
 		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor df refSw]
-		local lowerDotWidth : 1.5 * [adviceBlackness 3 (gap / Width)]
+		local lowerDotWidth : 1.5 * [AdviceStroke 3 (gap / Width)]
 		include : VBarRight (RightSB - gap * 0.45) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBarRight RightSB                0 [mix 0 CAP 0.3] lowerDotWidth
 
@@ -1384,14 +1378,14 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		define slopeDf : DivFrame (para.diversityM * 0.8)
 		set-width df.width
 
-		define refSw : adviceBlackness 5 df.div
+		define refSw : AdviceStroke 5 df.div
 
 		include : PercentBarShape slopeDf refSw
 		local dotwidth : refSw * 1.5
 		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
 
 		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor slopeDf refSw]
-		local lowerDotWidth : 1.5 * [adviceBlackness 4 (gap / Width)]
+		local lowerDotWidth : 1.5 * [AdviceStroke 4 (gap / Width)]
 		include : VBarRight (RightSB - gap * 0.6) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBarRight (RightSB - gap * 0.3) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBarRight RightSB                0 [mix 0 CAP 0.3] lowerDotWidth
@@ -1403,10 +1397,10 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local m   : mix l r (1 / 2)
 		local sma  : SmoothA * 0.5
 		local smb  : SmoothB * 0.5
-		local swRing : adviceBlackness 4
-		local swBar  : adviceBlackness 4
-		local fineBar : adviceBlackness 5
-		local halfGapRing : [adviceBlackness 6] / 2
+		local swRing : AdviceStroke 4
+		local swBar  : AdviceStroke 4
+		local fineBar : AdviceStroke 5
+		local halfGapRing : [AdviceStroke 6] / 2
 		local cor : 1 / [Math.sqrt (1 - [Math.pow ((r - l) / (CAP - 0)) 2])]
 
 		include : OShape CAP (CAP / 2 + halfGapRing) l (m - halfGapRing) swRing sma smb
@@ -1435,8 +1429,8 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local m   : mix l r (1 / 2)
 		local sma  : SmoothA * 0.5
 		local smb  : SmoothB * 0.5
-		local sw   : adviceBlackness 4
-		local fine : adviceBlackness 5
+		local sw   : AdviceStroke 4
+		local fine : AdviceStroke 5
 		local cor : HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - sw) / (CAP - 0)) 2])]
 		local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
 		local pFine : 1 / 2 - [Math.max (CAP / 10) (Stroke / 2)] / [Math.hypot CAP (r - l)]
@@ -1462,8 +1456,8 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		local m   : mix l r (1 / 2)
 		local sma  : SmoothA * 0.5 * para.diversityM
 		local smb  : SmoothB * 0.5 * para.diversityM
-		local sw   : adviceBlackness2 5 4 CAP para.diversityM
-		local fine : adviceBlackness2 5 5 CAP para.diversityM
+		local sw   : AdviceStroke2 4 5 CAP para.diversityM
+		local fine : AdviceStroke2 5 5 CAP para.diversityM
 		local cor : HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - sw) / (CAP - 0)) 2])]
 		local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
 		local pFine : 1 / 2 - (Stroke / 2) / [Math.hypot CAP (r - l)]
@@ -1485,7 +1479,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			local fill : ((r2 - l1) - gap) / 2
 			local r1 : l1 + fill
 			local l2 : r1 + gap
-			local swp : adviceBlackness 4
+			local swp : AdviceStroke2 4 5 CAP para.diversityM
 			include : OShape otop  0  l1 r1 swp sma smb
 			include : OShape otop  0  l2 r2 swp sma smb
 
@@ -1498,7 +1492,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			local l2 : r1 + gap
 			local r2 : l2 + fill
 			local l3 : r2 + gap
-			local swp : adviceBlackness2 5 6.5 CAP para.diversityM
+			local swp : AdviceStroke2 6 5 CAP para.diversityM
 			local smap : SmoothA * (1/3) * para.diversityM
 			local smbp : SmoothB * (1/3) * para.diversityM
 			include : OShape otop  0  l1 r1 swp smap smbp
@@ -1517,11 +1511,11 @@ glyph-block Symbol-Punctuation-Ascii-Marks : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : aboveMarkTop markExtend
 
-	define [MarkZoom] : glyph-proc
+	define [MarkZoom w] : glyph-proc
 		include : Upright
-		include : Translate (-Middle) (-XH - Accent)
+		include : Translate (-w / 2) (-XH - Accent)
 		include : Scale ((RightSB - SB) / (markExtend * 3))
-		include : Translate (Middle) (XH + Accent)
+		include : Translate (w / 2) (XH + Accent)
 		include : Italify
 
 	create-glyph 'asciiTilde.low' : composite-proc
@@ -1547,10 +1541,10 @@ glyph-block Symbol-Punctuation-Ascii-Marks : begin
 	select-variant 'asciiCaret' '^'
 	alias 'swungDash' 0x2053 'asciiTilde.low'
 
-	create-glyph 'degree' 0xB0 : composite-proc
-		refer-glyph 'markBaseSpace'
-		refer-glyph 'ringAbove'
-		MarkZoom
+	create-glyph 'degree' 0xB0 : glyph-proc
+		include [refer-glyph 'markBaseSpace'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ringAbove']
+		include : MarkZoom currentGlyph.advanceWidth
 
 	alias 'mdfPrime' 0x2B9 'prime'
 	alias 'mdfDoublePrime' 0x2BA 'doubleprime'
@@ -1578,6 +1572,43 @@ glyph-block Symbol-Punctuation-Ties : begin
 	create-glyph "invertedUnderTie" 0x2054 : TieShape 0 1
 	create-glyph "symbolMidTie" : TieShape (- Descender / 3) 2
 
+glyph-block Symbol-Punctuation-Joiners : do
+	glyph-block-import CommonShapes
+
+	define fine : AdviceStroke 6
+	define size : Width * 0.25
+
+	create-glyph 'zwj' 0x200D : glyph-proc
+		set-width 0
+		include : VBar 0 Descender CAP fine
+		include : dispiro
+			widths.center fine
+			corner (-size) (CAP)
+			corner (+size) (CAP + 2 * size)
+		include : dispiro
+			widths.center fine
+			corner (+size) (CAP)
+			corner (-size) (CAP + 2 * size)
+
+	create-glyph 'zwnj' 0x200C : glyph-proc
+		set-width 0
+		include : VBar 0 Descender CAP fine
+		define outerSize : size + 0.5 * fine * [Math.sqrt 2]
+		define innerSize : size - 0.5 * fine * [Math.sqrt 2]
+		include : difference
+			spiro-outline
+				widths.center fine
+				corner (-outerSize) (CAP + size)
+				corner           0  (CAP + size - outerSize)
+				corner (+outerSize) (CAP + size)
+				corner           0  (CAP + size + outerSize)
+			spiro-outline
+				widths.center fine
+				corner (-innerSize) (CAP + size)
+				corner           0  (CAP + size - innerSize)
+				corner (+innerSize) (CAP + size)
+				corner           0  (CAP + size + innerSize)
+
 glyph-block Symbol-Punctuation-Ligation-Variants : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -1592,15 +1623,18 @@ glyph-block Symbol-Punctuation-Ligation-Variants : begin
 		* "question"
 		* "exclam"
 
-	foreach [baseName : items-of dotLikePunctuations] : if [query-glyph baseName]
-		create-glyph : glyph-proc
-			include [refer-glyph baseName] AS_BASE ALSO_METRICS
-			local delta : Math.max 0 : Width / 2 - (XH - PeriodSize) / 2
-			create-derived (baseName + '.lig.dRight')     : Translate (delta *   1.0 ) 0
-			create-derived (baseName + '.lig.dRightHalf') : Translate (delta *   0.5 ) 0
-			create-derived (baseName + ".lig.dMid")       : Translate 0                0
-			create-derived (baseName + '.lig.dLeftHalf')  : Translate (delta * (-0.5)) 0
-			create-derived (baseName + '.lig.dLeft')      : Translate (delta * (-1.0)) 0
+	define [LigD baseName suffix pDelta] : if [query-glyph baseName] : begin
+		local delta : Math.max 0 : Width / 2 - (XH - PeriodSize) / 2
+		create-glyph (baseName + '.lig.' + suffix) : composite-proc
+			refer-glyph baseName
+			Translate (delta * pDelta ) 0
+
+	foreach [baseName : items-of dotLikePunctuations] : begin
+		LigD baseName 'dRight'       1.0
+		LigD baseName 'dRightHalf'   0.5
+		LigD baseName "dMid"         0
+		LigD baseName 'dLeftHalf'  (-0.5)
+		LigD baseName 'dLeft'      (-1.0)
 
 glyph-block Symbol-Other-Phonetic : begin
 	glyph-block-import CommonShapes

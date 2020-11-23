@@ -2,23 +2,25 @@
 
 const fs = require("fs-extra");
 const path = require("path");
+const { FontIo } = require("ot-builder");
+
+const Toml = require("@iarna/toml");
 
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
-const FormVariantData = require("./support/variant-data");
-const FormLigationData = require("./support/ligation-data");
+const VariantData = require("./support/variant-data");
+const ApplyLigationData = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
-const Toml = require("@iarna/toml");
 
 module.exports = async function main(argv) {
-	const para = await getParameters(argv);
-	const { font, glyphStore } = BuildFont(para);
+	const paraT = await getParameters();
+	const { font, glyphStore } = BuildFont(paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveOtd(argv, font);
+	if (argv.o) await saveTTF(argv, font);
 };
 
 // Parameter preparation
-async function getParameters(argv) {
+async function getParameters() {
 	const PARAMETERS_TOML = path.resolve(__dirname, "../params/parameters.toml");
 	const WEIGHTS_TOML = path.resolve(__dirname, "../params/shape-weight.toml");
 	const WIDTHS_TOML = path.resolve(__dirname, "../params/shape-width.toml");
@@ -31,43 +33,37 @@ async function getParameters(argv) {
 		await tryParseToml(PARAMETERS_TOML),
 		await tryParseToml(WEIGHTS_TOML),
 		await tryParseToml(WIDTHS_TOML),
-		(await fs.exists(PRIVATE_TOML)) ? await tryParseToml(PRIVATE_TOML) : {}
+		fs.existsSync(PRIVATE_TOML) ? await tryParseToml(PRIVATE_TOML) : {}
 	);
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	let para = {};
-	Parameters.apply(para, parametersData, ["iosevka"]);
-	Parameters.apply(para, parametersData, argv.preHives);
-	Parameters.apply(para, parametersData, ["shapeWeight"], { shapeWeight: argv.shape.weight });
-	Parameters.apply(para, parametersData, ["shapeWidth"], { shapeWidth: argv.shape.width });
-	Parameters.apply(para, parametersData, [`s-${argv.shape.slope}`]);
-	Parameters.apply(para, parametersData, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
+	function reinit(argv) {
+		let para = Parameters.init(parametersData, argv);
+		VariantData.apply(rawVariantsData, para, argv);
+		ApplyLigationData(rawLigationData, para, argv);
 
-	const variantsData = FormVariantData(rawVariantsData, para);
-	para.variants = variantsData;
-	para.variantSelector = {};
-	Parameters.apply(para.variantSelector, variantsData, ["default", ...argv.preHives]);
-	para.defaultVariant = variantsData.default;
+		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
+		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
+		if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
 
-	const ligationData = FormLigationData(rawLigationData, para);
-	para.defaultBuildup = { ...ligationData.defaultBuildup };
-	para.ligation = {};
-	Parameters.apply(para.ligation, ligationData.hives, ["default", ...argv.preHives]);
+		para.naming = {
+			...para.naming,
+			family: argv.menu.family,
+			version: argv.menu.version,
+			weight: argv.menu.weight - 0,
+			width: argv.menu.width - 0,
+			slope: argv.menu.slope
+		};
 
-	if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
-	if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-	if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
-
-	para.naming = {
-		...para.naming,
-		family: argv.menu.family,
-		version: argv.menu.version,
-		weight: argv.menu.weight - 0,
-		width: argv.menu.width - 0,
-		slope: argv.menu.slope
-	};
-	return para;
+		para.reinit = function (tf) {
+			const argv1 = JSON.parse(JSON.stringify(argv));
+			tf(argv1, argv);
+			return reinit(argv1);
+		};
+		return para;
+	}
+	return reinit;
 }
 
 async function tryParseToml(str) {
@@ -80,22 +76,17 @@ async function tryParseToml(str) {
 	}
 }
 
-// Save OTD
-async function saveOtd(argv, font) {
-	if (argv.o === "|") {
-		process.stdout.write(JSON.stringify(font));
-	} else {
-		await fs.writeFile(argv.o, JSON.stringify(font, null, "    "));
-	}
+// Save TTF
+async function saveTTF(argv, font) {
+	const sfnt = FontIo.writeFont(font, {
+		glyphStore: { statOs2XAvgCharWidth: false },
+		generateDummyDigitalSignature: true
+	});
+	const buf = FontIo.writeSfntOtf(sfnt);
+	await fs.writeFile(argv.o, buf);
 }
 
-// Save char map
-function objHashNonEmpty(obj) {
-	if (!obj) return false;
-	for (let k in obj) if (obj[k]) return true;
-	return false;
-}
-
+// Save character map file
 async function saveCharMap(argv, glyphStore) {
 	let charMap = [];
 	for (const [gn] of glyphStore.namedEntries()) {

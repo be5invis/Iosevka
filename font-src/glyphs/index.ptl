@@ -1,10 +1,10 @@
 import '../support/glyph' as Glyph
 import '../support/glyph-store' as GlyphStore
 import '../support/point' as Point
-import './kits/spiro-kit' as spirokit
-import './kits/boole-kit' as BooleKit
+import '../kits/spiro-kit' as spirokit
+import '../kits/boole-kit' as BooleKit
 import '../support/anchor' as Anchor
-import [ designParameters ] from "../meta/aesthetics"
+import [ DesignParameters ] from "../meta/aesthetics"
 
 extern isFinite
 
@@ -26,11 +26,10 @@ define [tagged tag component] : begin
 	return component
 
 export all : define [buildGlyphs para recursive recursiveCodes] : begin
-	define variantSelector para.variantSelector
 	local glyphStore : new GlyphStore
 
 	define metrics : calculateMetrics para
-	define [object GlobalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Width TanSlope OverlayPos Descender SymbolMid ParenTop ParenBot OperTop OperBot PlusTop PlusBot TackTop TackBot adviceBlackness MVertStrokeD] metrics
+	define [object GlobalTransform UPM Middle CAP XH SB RightSB Contrast Stroke Width TanSlope OverlayPos Descender SymbolMid ParenTop ParenBot OperTop OperBot PlusTop PlusBot TackTop TackBot AdviceStroke MVertStrokeD] metrics
 
 	define fontMetrics {.head {.} .hhea {.} .OS_2 {.} .post {.}}
 	setFontMetrics para metrics fontMetrics
@@ -38,8 +37,8 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	# Anchor parameters
 	define {AS_BASE ALSO_METRICS} {'AS-BASE' 'ALSO-METRICS'}
 
-	define MarkSet : MarksetDiv 1 metrics
 	define DivFrame : GenDivFrame metrics
+	define MarkSet    [DivFrame 1 2].markSet
 
 	local nPending 0
 	local pickHash : if recursive
@@ -75,7 +74,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 		glyphObject.setWidth Width
 		glyphObject.gizmo = GlobalTransform
 		glyphObject.include actions true true
-		warnAboutBrokenGlyph glyphObject ensuredGlyphName
+		warnAboutBrokenGlyph glyphObject ensuredGlyphName saveGlyphName
 
 		if saveGlyphName : begin
 			if (saveGlyphName.0 != '.' && [glyphStore.queryByName saveGlyphName])
@@ -87,7 +86,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 		return glyphObject
 
-	define [warnAboutBrokenGlyph g ensuredGlyphName] : begin
+	define [warnAboutBrokenGlyph g ensuredGlyphName saveGlyphName] : begin
 		local complexity 0
 		local broken false
 		if g.contours : begin
@@ -96,9 +95,10 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 				if [not : isFinite z.x] : set broken true
 				if [not : isFinite z.y] : set broken true
 
-		if ([not recursive] && (broken || complexity > 0x7fff)) : begin
+		if ([not recursive] && (broken || complexity > 4096)) : begin
 			console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
 			console.log 'Family' para.naming.family para.naming.weight para.naming.width para.naming.slope
+			if saveGlyphName : throw : new Error "Overcomplicated \(saveGlyphName)"
 
 	define [$assignUnicodeImpl$ g unicode] : begin
 		local u unicode
@@ -108,42 +108,42 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 	### Spiro constructions
 	# Basic knots
-	define spirofns : spirokit.SetupBuilders : object GlobalTransform Contrast Stroke Glyph para [superness designParameters.superness]
+	define spirofns : spirokit.SetupBuilders : object GlobalTransform Contrast Stroke Glyph para [superness DesignParameters.superness]
 	define booleFns : BooleKit.SetupBuilders : object GlobalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes variantSelector glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$
 
 	### HERE WE GO
-	run-glyph-module '../glyphs/common/shapes.js'
-	run-glyph-module '../glyphs/common/derivatives.js'
-	run-glyph-module '../glyphs/space/index.js'
-	run-glyph-module '../glyphs/marks/index.js'
+	run-glyph-module './common/shapes.js'
+	run-glyph-module './common/derivatives.js'
+	run-glyph-module './space/index.js'
+	run-glyph-module './marks/index.js'
 
 	# Unified letters
-	run-glyph-module '../glyphs/letter/latin.js'
-	run-glyph-module '../glyphs/letter/greek.js'
-	run-glyph-module '../glyphs/letter/cyrillic.js'
+	run-glyph-module './letter/latin.js'
+	run-glyph-module './letter/greek.js'
+	run-glyph-module './letter/cyrillic.js'
 
 	# Numbers
-	run-glyph-module '../glyphs/number/index.js'
+	run-glyph-module './number/index.js'
 
 	# Symbols
-	run-glyph-module '../glyphs/symbol/punctuation.js'
-	run-glyph-module '../glyphs/symbol/arrow.js'
-	run-glyph-module '../glyphs/symbol/geometric.js'
-	run-glyph-module '../glyphs/symbol/enclosure.js'
-	run-glyph-module '../glyphs/symbol/math.js'
-	run-glyph-module '../glyphs/symbol/letter.js'
-	run-glyph-module '../glyphs/symbol/braille.js'
-	run-glyph-module '../glyphs/symbol/mosaic.js'
-	run-glyph-module '../glyphs/symbol/pictograph.js'
-	run-glyph-module '../glyphs/symbol/ligation.js'
+	run-glyph-module './symbol/punctuation.js'
+	run-glyph-module './symbol/arrow.js'
+	run-glyph-module './symbol/geometric.js'
+	run-glyph-module './symbol/enclosure.js'
+	run-glyph-module './symbol/math.js'
+	run-glyph-module './symbol/letter.js'
+	run-glyph-module './symbol/braille.js'
+	run-glyph-module './symbol/mosaic.js'
+	run-glyph-module './symbol/pictograph.js'
+	run-glyph-module './symbol/ligation.js'
 
 	# Autobuilds
-	run-glyph-module '../glyphs/auto-build/accents.js'
-	run-glyph-module '../glyphs/auto-build/composite.js'
-	run-glyph-module '../glyphs/auto-build/transformed.js'
+	run-glyph-module './auto-build/accents.js'
+	run-glyph-module './auto-build/composite.js'
+	run-glyph-module './auto-build/transformed.js'
 
 	return : object metrics glyphStore
 

@@ -16,44 +16,42 @@ define [interpretLookup gs lut lookups] : match lut.type
 		local j 0
 		while (j < gs.length) : begin
 			local incN 1
-			do : foreach [subtable : items-of lut.subtables] : begin
-				local matchT subtable.match
-				local ib subtable.inputBegins
+			do : foreach [rule : items-of lut.rules] : begin
+				local matchT rule.match
+				local ib rule.inputBegins
 				local foundMatch true
 				for [local k 0] (foundMatch && k < matchT.length) [inc k] : begin
 					if [not gs.(j + k - ib)]
 					: then : set foundMatch false
 					: else : if ([matchT.(k).indexOf gs.(j + k - ib)] < 0) : set foundMatch false
 				if foundMatch : begin
-					foreach [app : items-of subtable.apply] : do
+					foreach [app : items-of rule.apply] : do
 						local aj : j - ib + app.at
 						local alut lookups.(app.lookup)
 						interpretLookupAt gs aj alut
-					set incN : incN + subtable.inputEnds - subtable.inputBegins
+					set incN : incN + rule.inputEnds - rule.inputBegins
 					break nothing
 			set j : j + incN
 	"gsub_reverse" : begin
 		local j (gs.length - 1)
 		while (j >= 0) : begin
-			do : foreach [subtable : items-of lut.subtables] : begin
-				local matchT subtable.match
-				local ib subtable.inputIndex
+			do : foreach [rule : items-of lut.rules] : begin
+				local matchT rule.match
+				local ib rule.inputIndex
 				local foundMatch true
 				for [local k 0] (foundMatch && k < matchT.length) [inc k] : begin
 					if [not gs.(j + k - ib)]
 					: then : set foundMatch false
 					: else : if ([matchT.(k).indexOf gs.(j + k - ib)] < 0) : set foundMatch false
 				if foundMatch : begin
-					set gs.(j) : subtable.to.[matchT.(ib).indexOf gs.(j)] || gs.(j)
+					set gs.(j) : rule.to.[matchT.(ib).indexOf gs.(j)] || gs.(j)
 			set j : j - 1
 	"gsub_single" : begin
 		for [local j 0] (j < gs.length) [inc j] : begin
 			interpretLookupAt gs j lut
 
 define [interpretLookupAt gs j lut] : match lut.type
-	"gsub_single" : foreach [subtable : items-of lut.subtables] : begin
-		if subtable.(gs.(j)) : begin
-			set gs.(j) subtable.(gs.(j))
+	"gsub_single" : if lut.substitutions.(gs.(j)) : set gs.(j) lut.substitutions.(gs.(j))
 
 export : define [BuildCompatLigatures glyphStore GSUB GDEF config] : begin
 	foreach [cldef : items-of config] : do

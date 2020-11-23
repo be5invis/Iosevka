@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix barmixL linreg clamp fallback] from '../../support/utils'
-import [designParameters] from '../../meta/aesthetics'
+import [DesignParameters] from '../../meta/aesthetics'
 
 glyph-module
 
@@ -16,7 +16,7 @@ glyph-block Letter-Greek-Lower-Alpha : begin
 		include : MarkSet.e
 
 		local middle : mix SB RightSB 0.42
-		local fine   : adviceBlackness 3.25
+		local fine   : AdviceStroke 3.25
 		local k1 0.25
 		local k2 0.5
 		local k3 0.35
@@ -39,6 +39,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : nShoulder
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 
 	define GammaBarLeft (SB * 1.5)
 	define [GammaShape top] : glyph-proc
@@ -53,6 +54,11 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	create-glyph 'grek/Gamma' 0x393 : glyph-proc
 		include : MarkSet.capital
 		include : GammaShape CAP
+
+	create-glyph 'mathbb/grek/Gamma' 0x213E : glyph-proc
+		include : MarkSet.capital
+		include : BBBarLeft GammaBarLeft 0 CAP
+		include : HBarTop GammaBarLeft RightSB CAP BBS
 
 	alias 'cyrl/Ghe' 0x413 'grek/Gamma'
 
@@ -86,7 +92,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include [refer-glyph 'dotlessi'] AS_BASE
 		include : refer-glyph "macronAbove"
 
-	italic-variant 'cyrl/ghe' 0x433
+	orthographic-italic 'cyrl/ghe' 0x433
 
 	define [CyrGeShape top] : glyph-proc
 		include : GammaShape top
@@ -97,7 +103,7 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include : MarkSet.capital
 		include : CyrGeShape CAP
 
-	create-glyph 'cyrl/ge' 0x491 : glyph-proc
+	create-glyph 'cyrl/ge.upright' : glyph-proc
 		include : MarkSet.e
 		include : CyrGeShape XH
 
@@ -113,28 +119,69 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 		include [refer-glyph 'cyrl/ghe.italic'] AS_BASE
 		include : FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
-	italic-variant 'cyrl/ghayn' 0x493
+	orthographic-italic 'cyrl/ge'    0x491
+	orthographic-italic 'cyrl/ghayn' 0x493
+
+	create-glyph 'cyrl/GheDescender' 0x4F6 : composite-proc
+		refer-glyph 'cyrl/Ghe'
+		CyrDescender (GammaBarLeft + Stroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+		MarkSet.if
+
+	create-glyph 'cyrl/gheDescender.upright' : composite-proc
+		refer-glyph 'cyrl/ghe'
+		CyrDescender (GammaBarLeft + Stroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+		MarkSet.p
+
+	orthographic-italic 'cyrl/gheDescender' 0x4F7
+
 
 glyph-block Letter-Greek-Lower-Gamma : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+
 
 	create-glyph 'grek/gamma' 0x3B3 : glyph-proc
 		include : MarkSet.p
 
-		local xmid : [mix SB RightSB 0.46] + HalfStroke
+		local xMid : [mix SB RightSB 0.46] + HalfStroke * HVContrast
+		local xStart : SB + 0.4 * Stroke * HVContrast
 		include : dispiro
-			g4 (SB + 0.4 * Stroke * HVContrast) (XH - O) [widths.rhs]
+			g4 xStart (XH - O) [widths.rhs]
 			bezcontrols 0.33 0.17 1 0.62 6 important
-			flat xmid 0
-			curl xmid Descender [heading Downward]
+			flat xMid 0
+			curl xMid Descender [heading Downward]
 
 		include : dispiro
 			widths.rhs
 			flat RightSB XH [heading Downward]
 			curl RightSB (XH * 0.9) [heading Downward]
 			quadcontrols 0 0.3 6
-			g4   xmid 0 [widths.rhs : Stroke * 0.9]
+			g4   xMid 0 [widths.rhs : Stroke * 0.9]
+
+	create-glyph 'mathbb/grek/gamma' 0x213D : glyph-proc
+		include : MarkSet.p
+
+		local cor : DiagCorDs (XH - Descender) (RightSB - SB) BBD
+		local swEqv : 2 * BBS + BBD
+		local xMid : [mix SB RightSB 0.46] + 0.46 * swEqv * HVContrast
+		local xStart : SB + 0.4 * swEqv * HVContrast
+
+		include : HBarTop    (xStart - BBD) (xStart + (cor - 1) * BBD) XH        BBS
+		include : HBarBottom (xMid - BBD)   (xMid)                     Descender BBS
+
+		foreach {ob ot} [items-of {{ 0 (cor - 1) } { (-1) (-1) }}] : include : dispiro
+			g4 (xStart + ot * BBD) XH [widths.rhs.heading BBS Downward]
+			bezcontrols 0.33 0.17 1 0.62 6 important
+			flat (xMid + ob * BBD) 0
+			curl (xMid + ob * BBD) Descender [heading Downward]
+
+		include : dispiro
+			widths.rhs BBS
+			flat RightSB XH [heading Downward]
+			curl RightSB (XH * 0.9) [heading Downward]
+			quadcontrols 0 0.3 6
+			g4   xMid 0 [widths.rhs : BBS * 0.9]
 
 glyph-block Letter-Greek-Lower-Delta : begin
 	glyph-block-import CommonShapes
@@ -203,7 +250,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	define StdBlend 0.65
 
 	define [SmallEpsilonShapeDim top bot blend] : begin
-		local stroke : adviceBlackness2 2.875 2 (top - bot)
+		local stroke : AdviceStroke2 2 3 (top - bot)
 		local midx : mix SB RightSB blend
 		local midy : mix bot top OverlayPos
 		local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothB / (SmoothA + SmoothB))] - TanSlope * HVContrast * stroke
@@ -247,7 +294,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 		include : SmallEpsilonShape CAP 0 StdBlend Hook
 
 	define [CyrZeShapeDim top bot blend] : begin
-		local stroke : adviceBlackness2 2.875 2 (top - bot)
+		local stroke : AdviceStroke2 2 3 (top - bot)
 		local midx : mix RightSB SB blend
 		local midy : mix bot top OverlayPos
 		local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothA / (SmoothA + SmoothB))] + TanSlope * HVContrast * stroke
@@ -301,8 +348,8 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	create-glyph 'voicedlaryngenalspirant' 0x1D24 : glyph-proc
 		include : MarkSet.b
 		local blend 0.505
-		local midGap : Math.max [adviceBlackness2 3 12 CAP] (CAP / 8 - [adviceBlackness2 3 6 XH])
-		local strokeV : adviceBlackness 4
+		local midGap : Math.max [AdviceStroke2 3 12 CAP] (CAP / 8 - [AdviceStroke2 3 6 XH])
+		local strokeV : AdviceStroke 4
 		local dimUpper : CyrZeShapeDim         CAP            midGap blend
 		local dimLower : SmallEpsilonShapeDim  (CAP - midGap) 0      blend
 		include : union
@@ -310,7 +357,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			SmallEpsilonLowerShape (CAP - midGap) 0      blend Hook
 			Rect (dimUpper.midy + dimUpper.stroke / 2) (dimLower.midy - dimLower.stroke / 2) (Middle - strokeV / 2 * HVContrast) (Middle + strokeV / 2 * HVContrast)
 
-glyph-block Letter-Greek-Theta : begin
+glyph-block Letter-Greek-Upper-Theta : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
@@ -319,10 +366,63 @@ glyph-block Letter-Greek-Theta : begin
 		include [refer-glyph 'O'] AS_BASE
 		include : HBar (SB + Stroke * HVContrast - O * 3) (RightSB - Stroke * HVContrast + O * 3) CapMiddle
 
+glyph-block Letter-Greek-Lower-Theta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
 	create-glyph 'grek/theta' 0x3B8 : glyph-proc
 		include : MarkSet.b
 		include : OShape CAP 0 (SB - O) (RightSB + O) Stroke (SmallSmoothA * 100) (SmallSmoothB * 100)
 		include : HBar (SB + HalfStroke) (RightSB - HalfStroke) CapMiddle
+
+glyph-block Letter-Greek-Lower-Theta-Var : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/thetaSymbol' 0x03D1 : glyph-proc
+		define pXTopLeft 0.2
+		define xTopLeft : mix SB RightSB pXTopLeft
+		define coXTopLeft : mix SB RightSB (2 - pXTopLeft)
+		define topSMA : SmoothAOf (SmallSmooth * (1 - pXTopLeft)) (Width * (1 - pXTopLeft))
+		define topSMB : SmoothBOf (SmallSmooth * (1 - pXTopLeft)) (Width * (1 - pXTopLeft))
+		define sw : AdviceStroke2 3 3 CAP
+		include : MarkSet.b
+		include : intersection
+			Rect (CAP * 2) Descender (-Width) [mix RightSB Width 0.5]
+			dispiro
+				flat (SB + OX) (0.45 * CAP) [widths.lhs.heading sw Downward]
+				curl (SB + OX) SmallSmoothB
+				arcvh
+				g4 (Middle + CorrectionOMidX * sw) O
+				archv
+				flat (RightSB - OX) SmallSmoothA
+				curl (RightSB - OX) (CAP - topSMB)
+				arcvh
+				g4 ([mix xTopLeft RightSB 0.5] - CorrectionOMidX * sw) (CAP - O)
+				g4 xTopLeft (CAP - topSMA)
+				g4 [mix xTopLeft RightSB 0.5] [mix (CAP - topSMA) (CAP / 2 - HalfStroke) 0.9]
+				g4 [mix RightSB Width 0.5] (CAP / 2 - HalfStroke)
+				g4 coXTopLeft (CAP - topSMA)
+
+	create-glyph 'partial' 0x2202 : glyph-proc
+		include : MarkSet.b
+		local yMid : CAP * 0.65
+		include : dispiro
+			flat (RightSB - OX - (1 - CThin) * Stroke * HVContrast) SmallSmoothA [widths.lhs : Stroke * CThin]
+			curl (RightSB - OX - (1 - CThin) * Stroke * HVContrast) (yMid - SmallSmoothB)
+			arcvh
+			g4 (Middle + CorrectionOMidS) (yMid - O) [widths.lhs]
+			archv
+			flat (SB + OX) (yMid - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4 (Middle - CorrectionOMidS) O
+			archv
+			flat (RightSB - OX) SmallSmoothA
+			curl (RightSB - OX) (CAP - SmallSmoothB)
+			hookend (CAP - O)
+			g4   SB (CAP - Hook)
+
 
 glyph-block Letter-Greek-Lower-Zeta : begin
 	glyph-block-import CommonShapes
@@ -403,7 +503,7 @@ glyph-block Letter-Greek-Lower-Mu : begin
 			widths.rhs
 			flat SB Descender [heading Upward]
 			curl SB (Descender / 2) [heading Upward]
-			straight.up.end SB SmallSmoothB [widths.heading 0 [adviceBlackness 4] Upward]
+			straight.up.end SB SmallSmoothB [widths.heading 0 [AdviceStroke 4] Upward]
 		if SLAB : begin
 			include : LeftwardTopSerif SB XH SideJut
 
@@ -429,11 +529,11 @@ glyph-block Letter-Greek-Lower-Nu : begin
 glyph-block Letter-Greek-Pi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
 
 	glyph-block-export PiShape
-	define [PiShape] : params [top bottom [shrinkrate 0.05] _fine noSerif [endShrink 0] [df : DivFrame 1]] : glyph-proc
-		local fine : fallback _fine Stroke
-		local shrink : if (!noSerif && SLAB) 0 (shrinkrate * (df.rightSB - df.leftSB))
+	define [PiShape] : params [df top bottom [shrinkRate 0.05] [fine Stroke] [noSerif false] [endShrink 0]] : glyph-proc
+		local shrink : if (!noSerif && SLAB) 0 (shrinkRate * (df.rightSB - df.leftSB))
 		local endexpand : if (!noSerif && SLAB) 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
 		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
 		include : VBarLeft (df.leftSB + shrink) bottom (top - fine / 2) fine
@@ -445,24 +545,39 @@ glyph-block Letter-Greek-Pi : begin
 			include : CenterTopSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) top Jut fine
 			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) top Jut fine
 
+	define [MathBBPiShape] : params [df top bottom [shrinkRate 0.05] [endShrink 0]] : glyph-proc
+		local shrink : shrinkRate * (df.rightSB - df.leftSB)
+		local endexpand : -endShrink * (df.rightSB - df.leftSB) || shrink / 2
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top BBS
+		include : BBBarLeft (df.leftSB + shrink) bottom top
+		include : BBBarRight (df.rightSB - shrink) bottom top
+
 	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
 		include : MarkSet.capital
-		include : PiShape CAP 0 (shrinkrate -- 0)
+		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
+
+	create-glyph 'mathbb/grek/Pi' 0x213F : glyph-proc
+		include : MarkSet.capital
+		include : MathBBPiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
 
 	create-glyph 'cyrl/pe.upright' : glyph-proc
 		include : MarkSet.e
-		include : PiShape XH 0 (shrinkrate -- 0.05) (endShrink -- 0.05)
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0.05) (endShrink -- 0.05)
 
-	create-glyph 'cyrl/pe.SRB': glyph-proc
-		include [refer-glyph 'u'] AS_BASE
+	with-related-glyphs 'u' 'cyrl/pe.SRB' null : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
 		include : refer-glyph "macronAbove"
 
 	alias 'cyrl/Pe' 0x41F 'grek/Pi'
-	select-variant 'cyrl/pe' 0x43f
+	orthographic-italic 'cyrl/pe' 0x43f
 
 	create-glyph 'grek/pi' 0x3C0 : glyph-proc
 		include : MarkSet.e
-		include : PiShape XH 0 (noSerif -- true) (shrinkrate -- 0.06)
+		include : PiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)
+
+	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
+		include : MarkSet.e
+		include : MathBBPiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)
 
 
 glyph-block Letter-Greek-Upper-Sigma : begin
@@ -470,22 +585,22 @@ glyph-block Letter-Greek-Upper-Sigma : begin
 	glyph-block-import Common-Derivatives
 
 	glyph-block-export SigmaShape
-	define [SigmaShape df top bottom fine] : glyph-proc
-		local cor : [Math.hypot (top - bottom) (df.rightSB - df.leftSB)] / (top - bottom)
+	define [SigmaShape] : params [df top bottom fine [noSerif false] [offsetLeft 0]] : glyph-proc
+		local cor : DiagCor (top - bottom) (df.rightSB - df.leftSB)
 
-		include : HBarTop df.leftSB df.rightSB top fine
-		include : HBarBottom df.leftSB df.rightSB bottom fine
+		include : HBarTop (offsetLeft + df.leftSB) df.rightSB top fine
+		include : HBarBottom (offsetLeft + df.leftSB) df.rightSB bottom fine
 
 		local midx : df.middle - fine / 2
 		include : ReverseContours : spiro-outline
-			corner df.leftSB (bottom + fine)
-			corner (df.leftSB + fine * cor) (bottom + fine)
-			corner (midx + fine * cor) [mix bottom top 0.5]
-			corner (df.leftSB + fine * cor) (top - fine)
-			corner df.leftSB (top - fine)
-			corner midx [mix bottom top 0.5]
+			corner (df.leftSB + offsetLeft) (bottom + fine)
+			corner (df.leftSB + offsetLeft + fine * cor) (bottom + fine)
+			corner (midx + offsetLeft + fine * cor) [mix bottom top 0.5]
+			corner (df.leftSB + offsetLeft + fine * cor) (top - fine)
+			corner (df.leftSB + offsetLeft) (top - fine)
+			corner (midx + offsetLeft) [mix bottom top 0.5]
 
-		if SLAB : begin
+		if (!noSerif && SLAB) : begin
 			include : DownwardRightSerif df.rightSB top VJut
 			include : UpwardRightSerif df.rightSB bottom VJut
 
@@ -690,7 +805,7 @@ glyph-block Letter-Greek-Lower-Omega : begin
 		set-width df.width
 		include : [DivFrame df.div].markSet.e
 
-		local fine : adviceBlackness 3.25 df.div
+		local fine : AdviceStroke 3.25 df.div
 		local mfine : fine * CThin
 		local x0 : mix df.leftSB df.rightSB 0.1
 		local y0 : XH - Stroke * 0.2
@@ -731,7 +846,7 @@ glyph-block Letter-Greek-Lower-Omega : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : [DivFrame df.div].markSet.e
-		local fine : adviceBlackness 3.25
+		local fine : AdviceStroke 3.25
 		local mfine : fine * CThin
 		local x0 : df.middle - CorrectionOMidS
 		local y0 : XH - O

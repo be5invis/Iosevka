@@ -1,3 +1,5 @@
+"use strict";
+
 const { app, BrowserWindow } = require("electron");
 let argDir = process.argv[2];
 let fs = require("fs");
