@@ -2,6 +2,19 @@
 define-operator "--" 890 'right' : syntax-rules
 	`(@l -- @r) [atom l] : dirty `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
 
+### Macro for identity match
+define-macro Just : begin
+	local m : syntax-rules
+		`[Just @x] : dirty x
+
+	set coinit.initFn : lambda [m] : begin
+		set m.toPattern : lambda [form env w] : match form
+			`[Just @x] : object
+				whether : lambda [t] : ex `(@t === @x) env
+				assign  : lambda [t locallyQ] : ex `[begin] env
+
+	return m
+
 define-macro params : syntax-rules
 	`[params @_pairs @body] : begin
 		local ta : env.newt
