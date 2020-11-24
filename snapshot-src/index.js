@@ -101,6 +101,12 @@ function captureElement(options, callback) {
 			if (callback) callback();
 			onComplete = function () {};
 		};
+		ipc.send("log", {
+			x: rect.left | 0,
+			y: rect.top | 0,
+			width: rect.width | 0,
+			height: rect.height | 0
+		});
 		ipc.send("snapshot", {
 			name: options.name,
 			windowWidth: windowWidth,
