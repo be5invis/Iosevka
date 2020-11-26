@@ -41,57 +41,11 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 	define bar {'bar'}
 	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
 
-	define alphabet {
-		'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm'
-		'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'
-		'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M'
-		'N' 'O' 'P' 'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z'
-		'zero.lnum' 'zero.onum' 'one.lnum' 'one.onum'
-		'two.lnum' 'two.onum' 'three.lnum' 'three.onum'
-		'four.lnum' 'four.onum' 'five.lnum' 'five.onum'
-		'six.lnum' 'six.onum' 'seven.lnum' 'seven.onum'
-		'eight.lnum' 'eight.onum' 'nine.lnum' 'nine.onum'
-	}
-
 	define [acops]  {'less' 'greater' 'hyphen' 'equal' 'plus'}
 	define [acskip] {
 		'slash' 'bar' 'at' 'ampersand' 'percent'
 		'numberSign' 'numberSign.upright' 'numberSign.slanted'
 	}
-	define dottyPunctuations : list
-		* "colon"
-		* "colon.mid"
-		* "semicolon"
-		* "period"
-		* "period.mid"
-		* "comma"
-		* "question"
-		* "exclam"
-	define widePunctuation : list
-		* 'parenLeft'
-		* 'parenRight'
-		* 'bracketLeft'
-		* 'bracketRight'
-		* 'braceLeft'
-		* 'braceRight'
-		* 'equal'
-		* 'hyphen'
-		* 'plus'
-		* 'less'
-		* 'greater'
-		* 'numberSign'
-		* 'slash'
-		* 'ampersand'
-		* 'asterisk'
-		* 'asciiCaret'
-		* 'asciiTilde'
-
-	define [asterisk_center]  ({'asterisk'}          ~> {'asterisk/lowered'})
-	define [colon_center]     ({'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'})
-	define [caret_center]     ({'asciiCaret'}        ~> {'asciiCaret.low'})
-	define [tilde_center]     ({'asciiTilde'}        ~> {'asciiTilde.low'})
-	define [period_center]    ({'period'}            ~> {'period.mid'})
-	define [no_period_center] ({'period.mid'}        ~> {'period'})
 
 	local ligationLookupName : 'lig_' + featureName + '{' + mappedFeature + '}'
 
@@ -150,24 +104,32 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		set lookupRank : lookupRank + 1
 
 	do "Operator centering"
-		define centerizeGroups : { asterisk_center caret_center tilde_center colon_center [if [hasLG 'dot-oper'] period_center nothing]}.filter (x => x)
+		define [centerAsterisk]   : {'asterisk'}          ~> {'asterisk/lowered'}
+		define [centerColon]      : {'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'}
+		define [centerCaret]      : {'asciiCaret'}        ~> {'asciiCaret.low'}
+		define [centerTilde]      : {'asciiTilde'}        ~> {'asciiTilde.low'}
+		define [centerPeriod]     : {'period'}            ~> {'period.mid'}
+		define [deCenterPeriod]   : {'period.mid'}        ~> {'period'}
+
+		define centerizeGroups : list centerAsterisk centerColon centerCaret centerTilde
+		if [hasLG 'dot-oper'] : centerizeGroups.push centerPeriod
 
 		do "Bracket-star"
 			CreateLigationLookup : keep-if 'brst' : list
 				chain-rule # (*
 					{'parenLeft'}  ~> look-around
-					{'asterisk'}   ~> {'asterisk/lowered'}
+					centerAsterisk
 				chain-rule # *)
-					{'asterisk'}   ~> {'asterisk/lowered'}
+					centerAsterisk
 					{'parenRight'} ~> look-around
 
 		do "Bracket-colon"
 			CreateLigationLookup : keep-if 'center-ops' : list
 				chain-rule # (:
-					{'parenLeft' 'bracketLeft' 'braceLeft'}  ~> look-around
-					colon_center
+					{'parenLeft' 'bracketLeft' 'braceLeft'}    ~> look-around
+					centerColon
 				chain-rule # :)
-					colon_center
+					centerColon
 					{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
 
 		do "Operator Centering"
@@ -210,48 +172,97 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					centerizeL ~> centerizeR
 					centerizeR ~> look-around
 
-		do "Operator centering : Avoid 'letter-point' being centered"
-			CreateLigationLookup : keep-if 'center-ops' : list
-				chain-rule alphabet [no_period_center]
-				chain-rule [no_period_center] alphabet
+		# Commented out this since it looks not very "necessary" if all dots are considered
+		# operators...
+		# define alphabet {
+		# 	'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm'
+		# 	'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'
+		# 	'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M'
+		# 	'N' 'O' 'P' 'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z'
+		# 	'zero.lnum' 'zero.onum' 'one.lnum' 'one.onum'
+		# 	'two.lnum' 'two.onum' 'three.lnum' 'three.onum'
+		# 	'four.lnum' 'four.onum' 'five.lnum' 'five.onum'
+		# 	'six.lnum' 'six.onum' 'seven.lnum' 'seven.onum'
+		# 	'eight.lnum' 'eight.onum' 'nine.lnum' 'nine.onum'
+		# }
+		# do "Operator centering : Avoid 'letter-point' being centered"
+		# 	CreateLigationLookup : keep-if 'center-ops' : keep-if 'dot-oper' : list
+		# 		chain-rule alphabet [deCenterPeriod]
+		# 		chain-rule [deCenterPeriod] alphabet
 
-	do "Colon chains" : begin
-		define dLeft      : [lsx 'dLeft'] dottyPunctuations
-		define dRight     : [lsx 'dRight'] dottyPunctuations
-		define dLeftHalf  : [lsx 'dLeftHalf'] dottyPunctuations
-		define dRightHalf : [lsx 'dRightHalf'] dottyPunctuations
-		define dMid       : [lsx 'dMid'] dottyPunctuations
-		define boundary   widePunctuation
 
-		CreateLigationLookup : keep-if 'kern-dotty' : list
-			chain-rule
-				[dRight.concat dMid] ~> look-around
-				dottyPunctuations ~> dMid
-				dottyPunctuations ~> look-around
-			chain-rule
-				[dRight.concat dMid] ~> look-around
-				dottyPunctuations ~> dLeft
-			chain-rule
-				dottyPunctuations ~> dRight
-				dottyPunctuations ~> look-around
-		CreateLigationLookup : keep-if 'kern-dotty' : list
-			chain-rule
-				boundary             ~> look-around
-				dRight               ~> dMid
-				dLeft                ~> dMid
-				boundary             ~> look-around
-			chain-rule
-				boundary             ~> look-around
-				dRight               ~> dMid
-				[dMid.concat dLeft]  ~> look-around
-			chain-rule
-				[dMid.concat dRight] ~> look-around
-				dLeft                ~> dMid
-				boundary             ~> look-around
-		CreateLigationLookup : keep-if 'kern-dotty' : list
-			chain-rule
-				dRight ~> dRightHalf
-				dLeft  ~> dLeftHalf
+	do "Kern Dotty"
+		define dottyPunctuationSets : list
+			list { "period" "period.mid" } { "colon" "colon.mid" "question" "exclam" }
+			list { "comma" }               { "semicolon" }
+		define dottyConnected : list
+			list
+				* 'equal'
+				* 'hyphen'
+				* 'plus'
+				* 'less'
+				* 'greater'
+				* 'asterisk'
+				* 'asciiTilde'
+				* 'asciiCaret'
+			list
+				* 'parenLeft'
+				* 'parenRight'
+				* 'bracketLeft'
+				* 'bracketRight'
+				* 'braceLeft'
+				* 'braceRight'
+				* 'numberSign'
+				* 'ampersand'
+				* 'slash'
+				* 'bar'
+
+		foreach { dpShort dpTall } [items-of dottyPunctuationSets] : begin
+			define dp : {}.concat dpShort dpTall
+			define dLeft      : [lsx 'dLeftHalf']  dp
+			define dRight     : [lsx 'dRightHalf'] dp
+			define dLeftHalf  : [lsx 'dLeftHalf']  dp
+			define dRightHalf : [lsx 'dRightHalf'] dp
+			define dMid       : [lsx 'dMid']       dp
+
+			CreateLigationLookup : keep-if 'kern-dotty' : list
+				chain-rule
+					[dRight.concat dMid] ~> look-around
+					dp ~> dMid
+					dp ~> look-around
+				chain-rule
+					[dRight.concat dMid] ~> look-around
+					dp ~> dLeft
+				chain-rule
+					dp ~> dRight
+					dp ~> look-around
+
+			foreach boundary [items-of dottyConnected] : do
+				define dg : if (boundary == dottyConnected.0) dp dpTall
+				define dgLeft      : [lsx 'dLeftHalf']  dg
+				define dgRight     : [lsx 'dRightHalf'] dg
+				define dgLeftHalf  : [lsx 'dLeftHalf']  dg
+				define dgRightHalf : [lsx 'dRightHalf'] dg
+				define dgMid       : [lsx 'dMid']       dg
+				CreateLigationLookup : keep-if 'kern-dotty' : list
+					chain-rule
+						boundary               ~> look-around
+						dgRight                ~> dgMid
+						dgLeft                 ~> dgMid
+						boundary               ~> look-around
+					chain-rule
+						boundary               ~> look-around
+						dgRight                ~> dgMid
+						[dgMid.concat dgLeft]  ~> look-around
+					chain-rule
+						[dgMid.concat dgRight] ~> look-around
+						dgLeft                 ~> dgMid
+						boundary               ~> look-around
+
+			CreateLigationLookup : keep-if 'kern-dotty' : list
+				chain-rule
+					dRight ~> dRightHalf
+					dLeft  ~> dLeftHalf
 
 	do "Plus chains" : begin
 		CreateLigationLookup : keep-if 'plusplus' : list
@@ -773,8 +784,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				{'equal.cf' 'equal.jf'} ~> look-around
 				equal                   ~> {'equal.jf'}
 		piecewise
-			[hasLG 'exeq-alt-1'] : chain-rule
-				exclam      ~> {'equal.fc.neg4-alt-1'}
+			[hasLG 'exeq-dotted'] : chain-rule
+				exclam      ~> {'equal.fc.neg4-dotted'}
 				equal       ~> {'equal.cc'}
 				equal       ~> {'equal.cc'}
 				equal       ~> {'equal.cf'}
@@ -790,20 +801,32 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				equal       ~> {'equal.cc'}
 				equal       ~> {'equal.cf'}
 		piecewise
+			[hasLG 'exeqeq-dotted'] : chain-rule
+				exclam      ~> {'ident.fc.neg3-dotted'}
+				equal       ~> {'ident.cc'}
+				equal       ~> {'ident.cf'}
 			[hasLG 'exeqeq'] : chain-rule
 				exclam      ~> {'ident.fc.neg3'}
 				equal       ~> {'ident.cc'}
+				equal       ~> {'ident.cf'}
+			[hasLG 'eqexeq-dotted'] : chain-rule
+				equal       ~> {'ident.fc.neg3-dotted'}
+				exclam      ~> {'ident.cc'}
 				equal       ~> {'ident.cf'}
 			[hasLG 'eqexeq'] : chain-rule
 				equal       ~> {'ident.fc.neg3'}
 				exclam      ~> {'ident.cc'}
 				equal       ~> {'ident.cf'}
+			[hasLG 'eqexeq-dl-dotted'] : chain-rule
+				equal       ~> {'equal.fc.neg3-dotted'}
+				exclam      ~> {'equal.cc'}
+				equal       ~> {'equal.cf'}
 			[hasLG 'eqexeq-dl'] : chain-rule
 				equal       ~> {'equal.fc.neg3'}
 				exclam      ~> {'equal.cc'}
 				equal       ~> {'equal.cf'}
-			[hasLG 'exeq-alt-1'] : chain-rule
-				exclam      ~> {'equal.fc.neg3-alt-1'}
+			[hasLG 'exeq-dotted'] : chain-rule
+				exclam      ~> {'equal.fc.neg3-dotted'}
 				equal       ~> {'equal.cc'}
 				equal       ~> {'equal.cf'}
 			[hasLG 'exeq'] : chain-rule
@@ -833,8 +856,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				slash       ~> {'equal.fc.neg'}
 				equal       ~> {'equal.cf'}
 		piecewise
-			[hasLG 'exeq-alt-1'] : chain-rule
-				exclam      ~> {'equal.fc.neg-alt-1'}
+			[hasLG 'exeq-dotted'] : chain-rule
+				exclam      ~> {'equal.fc.neg-dotted'}
 				equal       ~> {'equal.cf'}
 			[hasLG 'exeq'] : chain-rule
 				exclam      ~> {'equal.fc.neg'}

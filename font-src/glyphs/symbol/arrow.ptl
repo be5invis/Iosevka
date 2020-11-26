@@ -13,20 +13,19 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 
 	define arrowHeight : para.arrowHeight * (Width - SB / 2) * [Math.pow (MosaicWidth / MosaicUnitWidth) (1 / 3)]
 	define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
+	define arrowTop : [mix OperBot OperTop (1 / 2)] + arrowHeight / 2
+	define arrowBot : [mix OperBot OperTop (1 / 2)] - arrowHeight / 2
 	define arrowMidX : MosaicWidth / 2
 	define arrowSB : (MosaicWidth - arrowWidth) / 2
 	define arrowRSB : MosaicWidth - arrowSB
-	define hwArrowRSB : Width - arrowSB
-	define hwArrowMidX : Width / 2
 	define o : O * 2
 
-	define arrowSize : (Width - SB) * DesignParameters.arrow_size * [Math.pow (arrowWidth / Width) 0.4] - [AdviceStroke 5] / 4
-	define halfstroke : OperatorStroke / 2
+	define arrowHeadSize : (Width - SB) * DesignParameters.arrow_size * [Math.pow (arrowWidth / Width) 0.4] - [AdviceStroke 5] / 4
+	define arrowSw       OperatorStroke
+	define halfArrowSw : arrowSw / 2
 	define fine : AdviceStroke 3.5
 	define terminal : AdviceStroke 5
-	define arrowTop : [mix OperBot OperTop (1 / 2)] + arrowHeight / 2
-	define arrowBot : [mix OperBot OperTop (1 / 2)] - arrowHeight / 2
-	define doubleArrowStemWidth : arrowSize * 1.1
+	define doubleArrowStemWidth : arrowHeadSize * 1.1
 	define waveArrowAmplitude : (Width - SB) * DesignParameters.arrow_size * 1.1
 
 	# Diagonal arrow params
@@ -37,30 +36,30 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define arrowDiagBot : mix arrowMidX arrowBot diagPropY
 	define arrowDiagTop : mix arrowMidX arrowTop diagPropY
 
-	define [ArrowBar x1 y1 x2 y2 halfstroke w] : glyph-proc
+	define [ArrowBar x1 y1 x2 y2 halfSw w] : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
 			dispiro
-				widths.center (halfstroke * 2)
+				widths.center (halfSw * 2)
 				flat (mag * (1 - p)) 0
 				curl mag 0
 				end : function [set this.contrast 1]
 
-	define [DashArrowBar x1 y1 x2 y2 halfstroke gap stop w] : glyph-proc
+	define [DashArrowBar x1 y1 x2 y2 halfSw gap stop w] : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
 			local deltaT : (gap + stop) / mag
 			for [local t 0] (t < p) [set t : t + deltaT] : include : dispiro
-				widths.center (halfstroke * 2)
+				widths.center (halfSw * 2)
 				flat [mix (mag * (1 - p)) mag t] 0
 				curl [mix (mag * (1 - p)) mag : Math.min p (t + stop / mag)] 0
 				end : function [set this.contrast 1]
 
-	define [HookArrowBar x1 y1 x2 y2 halfstroke s w] : glyph-proc
+	define [HookArrowBar x1 y1 x2 y2 halfSw s w] : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
-			local p : (mag - o - halfstroke * [fallback w 1.1]) / mag
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
 			dispiro
-				widths.center (halfstroke * 2)
+				widths.center (halfSw * 2)
 				g4 (mag - [Math.abs s] / 2 - 0.1) s
 				g4 (mag - [Math.abs s] / 2) s
 				archv
@@ -75,7 +74,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		RHSHalfArrowHead x1 y1 x2 y2 0 _size
 
 	define [RHSHalfArrowHead x1 y1 x2 y2 width _size] : new-glyph : glyph-proc
-		local size : fallback _size arrowSize
+		local size : fallback _size arrowHeadSize
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
 			dispiro
 				function [set this.gizmo [Transform.Id]]
@@ -85,7 +84,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 				end : function [set this.contrast 1]
 
 	define [LHSHalfArrowHead x1 y1 x2 y2 width _size] : new-glyph : glyph-proc
-		local size : fallback _size arrowSize
+		local size : fallback _size arrowHeadSize
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
 			dispiro
 				function [set this.gizmo [Transform.Id]]
@@ -99,7 +98,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		LHSHalfArrowHeadMaskOut x1 y1 x2 y2 0 _size
 
 	define [RHSHalfArrowHeadMaskOut x1 y1 x2 y2 width _size] : new-glyph : glyph-proc
-		local size : fallback _size arrowSize
+		local size : fallback _size arrowHeadSize
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
 			function [set this.gizmo [Transform.Id]]
 			corner O (-width / 2)
@@ -108,7 +107,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			corner o (-width / 2)
 
 	define [LHSHalfArrowHeadMaskOut x1 y1 x2 y2 width _size] : new-glyph : glyph-proc
-		local size : fallback _size arrowSize
+		local size : fallback _size arrowHeadSize
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
 			function [set this.gizmo [Transform.Id]]
 			corner O (+width / 2)
@@ -125,16 +124,16 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 
 	define [ArrowShape x1 y1 x2 y2 size] : glyph-proc
 		include : ArrowHead x1 y1 x2 y2 size
-		include : ArrowBar x1 y1 x2 y2 halfstroke
+		include : ArrowBar x1 y1 x2 y2 halfArrowSw
 
 	define [DashArrowShape x1 y1 x2 y2 size] : glyph-proc
 		local gap : AdviceStroke 6
 		include : ArrowHead x1 y1 x2 y2 size
-		include : DashArrowBar x1 y1 x2 y2 halfstroke gap [Math.max (Width / 5) (gap * 3)]
+		include : DashArrowBar x1 y1 x2 y2 halfArrowSw gap [Math.max (Width / 5) (gap * 3)]
 
 	define [HookArrowShape mul] : lambda [x1 y1 x2 y2 size] : glyph-proc
 		include : ArrowHead x1 y1 x2 y2 size
-		include : HookArrowBar x1 y1 x2 y2 halfstroke (arrowSize * mul)
+		include : HookArrowBar x1 y1 x2 y2 halfArrowSw (arrowHeadSize * mul)
 
 	define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : glyph-proc
 		local headLen : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * 0.4
@@ -175,13 +174,13 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			ArrowBar x1 y1 x2 y2 halfBarWidth 2
 
 	define [HalfArrowShape side] : lambda [x1 y1 x2 y2 size] : glyph-proc
-		include : side x1 y1 x2 y2 (halfstroke * 2) size
-		include : ArrowBar x1 y1 x2 y2 halfstroke 1.75
+		include : side x1 y1 x2 y2 arrowSw size
+		include : ArrowBar x1 y1 x2 y2 halfArrowSw 1.75
 
 	define [DoubleArrowBarShape w x1 y1 x2 y2] : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
 			local p : (mag - o - w / 2 + O) / mag
-			local fine : Math.min (w / 3) (halfstroke * 2)
+			local fine : Math.min (w / 3) arrowSw
 			local coFine : w / 2 - fine / 2
 
 			include : dispiro
@@ -207,7 +206,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 
 	define [htArrowShape x1 y1 x2 y2 size] : glyph-proc
 		local mag : Math.hypot (y2 - y1) (x2 - x1)
-		local p1 : (size - o - halfstroke * 1.1) / mag
+		local p1 : (size - o - halfArrowSw * 1.1) / mag
 		local p2 : size / mag
 		include : ArrowShape [mix x1 x2 p1] [mix y1 y2 p1] x2 y2 size
 		include : ArrowHead x1 y1 [mix x1 x2 p2] [mix y1 y2 p2] size
@@ -216,7 +215,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		create-glyph id unicode : glyph-proc
 			set-width [fallback width MosaicWidth]
 			set-base-anchor 'slash' [mix x1 x2 (2/5)] [mix y1 y2 (2/5)]
-			include : shape x1 y1 x2 y2 arrowSize
+			include : shape x1 y1 x2 y2 arrowHeadSize
 
 	define [DoubleArrow shape id unicode x1 y1 x2 y2]
 		create-glyph id unicode : glyph-proc
@@ -224,8 +223,8 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			set-base-anchor 'slash' [mix x1 x2 (1/2)] [mix y1 y2 (1/2)]
 			local xm : mix x1 x2 0.5
 			local ym : mix y1 y2 0.5
-			include : shape xm ym x1 y1 arrowSize
-			include : shape xm ym x2 y2 arrowSize
+			include : shape xm ym x1 y1 arrowHeadSize
+			include : shape xm ym x2 y2 arrowHeadSize
 
 	define [MkAngleArrow shape bar id unicode x1 y1 x2 y2 x3 y3 size]
 		create-glyph id unicode : glyph-proc
@@ -258,8 +257,8 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow [HookArrowShape 1]    [MangleName 'hookarrowdownleft']  [MangleUnicode 0x2926] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 
 	do "Half Circle Arrow"
-		local arcSW : Math.min OperatorStroke [AdviceStroke 4 MosaicWidthScalar]
-		local headSize : mix arcSW arrowSize 0.5
+		local arcSW : Math.min arrowSw [AdviceStroke 4 MosaicWidthScalar]
+		local headSize : mix arcSW arrowHeadSize 0.5
 		local hsx0 : HVContrast * arcSW / 2
 		local hsx : hsx0 + headSize / 2
 		local hsx2 : hsx0 + (MosaicWidthScalar / 4) * headSize
@@ -318,18 +317,18 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			curl (arrowMidX + headSize) (arrowTop - hsy) [heading Rightward]
 
 	do "Bend and Angle arrows"
-		define bendSize : mix OperatorStroke arrowSize 0.75
+		define bendSize : mix arrowSw arrowHeadSize 0.75
 		define bendL : mix arrowMidX arrowSB [Math.max (bendSize / (arrowMidX - arrowSB)) : Math.pow 0.6 (2 /  MosaicWidthScalar)]
 		define bendR : mix arrowMidX arrowRSB [Math.max (bendSize / (arrowMidX - arrowSB)) : Math.pow 0.6 (2 /  MosaicWidthScalar)]
-		define [VBR x1 y1 x2 y2] : VBarRight x1 y1 y2 OperatorStroke
-		define [VBL x1 y1 x2 y2] : VBarLeft  x1 y1 y2 OperatorStroke
-		define [HBT x1 y1 x2 y2] : HBarTop   x1 x2 y1 OperatorStroke
+		define [VBR x1 y1 x2 y2] : VBarRight x1 y1 y2 arrowSw
+		define [VBL x1 y1 x2 y2] : VBarLeft  x1 y1 y2 arrowSw
+		define [HBT x1 y1 x2 y2] : HBarTop   x1 x2 y1 arrowSw
 		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-up-angle-bend-left'] [MangleUnicode 0x21b0] bendR arrowBot bendR (arrowTop - bendSize) bendL (arrowTop - bendSize) bendSize
 		MkAngleArrow ArrowShape VBL [MangleName 'MkArrow-up-angle-bend-right'] [MangleUnicode 0x21b1] bendL arrowBot bendL (arrowTop - bendSize) bendR (arrowTop - bendSize) bendSize
 		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-down-angle-bend-left'] [MangleUnicode 0x21b2] bendR arrowTop bendR (arrowBot + bendSize) bendL (arrowBot + bendSize) bendSize
 		MkAngleArrow ArrowShape VBL [MangleName 'MkArrow-down-angle-bend-right'] [MangleUnicode 0x21b3] bendL arrowTop bendL (arrowBot + bendSize) bendR (arrowBot + bendSize) bendSize
-		MkAngleArrow ArrowShape HBT [MangleName 'MkArrow-right-angle-down'] [MangleUnicode 0x21b4] arrowSB arrowTop (arrowRSB - arrowSize) arrowTop (arrowRSB - arrowSize) arrowBot arrowSize
-		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-down-angle-left'] [MangleUnicode 0x21b5] arrowRSB arrowTop arrowRSB (arrowBot + arrowSize) arrowSB (arrowBot + arrowSize) arrowSize
+		MkAngleArrow ArrowShape HBT [MangleName 'MkArrow-right-angle-down'] [MangleUnicode 0x21b4] arrowSB arrowTop (arrowRSB - arrowHeadSize) arrowTop (arrowRSB - arrowHeadSize) arrowBot arrowHeadSize
+		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-down-angle-left'] [MangleUnicode 0x21b5] arrowRSB arrowTop arrowRSB (arrowBot + arrowHeadSize) arrowSB (arrowBot + arrowHeadSize) arrowHeadSize
 
 	do "Half-head Arrows"
 		MkArrow [HalfArrowShape RHSHalfArrowHead] [MangleName 'arrowleftHR']  [MangleUnicode 0x21BC] arrowRSB SymbolMid arrowSB SymbolMid
@@ -342,7 +341,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow [HalfArrowShape RHSHalfArrowHead] [MangleName 'arrowdownHR']  [MangleUnicode 0x21C3] arrowMidX arrowTop arrowMidX arrowBot
 
 	do "Wave arrows"
-		define WaveSw : halfstroke * 2
+		define WaveSw  arrowSw
 		define WaveShape : CreateWaveShape
 			waveArrowAmplitude * 0.4 + WaveSw / 4 * MosaicWidthScalar
 			begin WaveSw
@@ -350,7 +349,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		define freeCoT      : arrowSB / MosaicWidth
 		define connectedCoT : (arrowSB / MosaicWidth) + (9 / 32) * MosaicWidthScalar
 		local mag : arrowRSB - arrowSB
-		local p : (mag - o - halfstroke * 1.1) / mag
+		local p : (mag - o - halfArrowSw * 1.1) / mag
 		create-glyph [MangleName 'waveArrowLeftRight'] [MangleUnicode 0x21AD] : glyph-proc
 			set-width MosaicWidth
 			include : WaveShape
@@ -428,39 +427,39 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 
 		create-glyph [MangleName 'arrowbarleft'] [MangleUnicode 0x21E4] : composite-proc
 			refer-glyph : MangleName 'arrowleftK'
-			VBar arrowSB (SymbolMid - arrowSize) (SymbolMid + arrowSize) fine
+			VBar arrowSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
 		create-glyph [MangleName 'arrowbarright'] [MangleUnicode 0x21E5] : composite-proc
 			refer-glyph : MangleName 'arrowrightK'
-			VBar arrowRSB (SymbolMid - arrowSize) (SymbolMid + arrowSize) fine
+			VBar arrowRSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
 		create-glyph [MangleName 'arrowbarup'] [MangleUnicode 0x2912] : composite-proc
 			refer-glyph : MangleName 'arrowupK'
-			HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine
+			HBar (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowTop fine
 		create-glyph [MangleName 'arrowbardown'] [MangleUnicode 0x2913] : composite-proc
 			refer-glyph : MangleName 'arrowdownK'
-			HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine
+			HBar (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowBot fine
 		create-glyph [MangleName 'bararrowleft'] [MangleUnicode 0x21A4] : composite-proc
 			refer-glyph : MangleName 'arrowleftSK'
-			VBar arrowRSB (SymbolMid - arrowSize) (SymbolMid + arrowSize) fine
+			VBar arrowRSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
 		create-glyph [MangleName 'bararrowright'] [MangleUnicode 0x21A6] : composite-proc
 			refer-glyph : MangleName 'arrowrightSK'
-			VBar arrowSB (SymbolMid - arrowSize) (SymbolMid + arrowSize) fine
+			VBar arrowSB (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
 		create-glyph [MangleName 'bararrowup'] [MangleUnicode 0x21A5] : composite-proc
 			refer-glyph : MangleName 'arrowupSK'
-			HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowBot fine
+			HBar (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowBot fine
 		create-glyph [MangleName 'bararrowdown'] [MangleUnicode 0x21A7] : composite-proc
 			refer-glyph : MangleName 'arrowdownSK'
-			HBar (arrowMidX - arrowSize) (arrowMidX + arrowSize) arrowTop fine
+			HBar (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowTop fine
 
 	do "Double-headed Arrows"
 		DoubleArrow ArrowShape [MangleName 'arrowleftright'] [MangleUnicode 0x2194] arrowSB SymbolMid arrowRSB SymbolMid
 		DoubleArrow ArrowShape [MangleName 'arrowupdown'] [MangleUnicode 0x2195] arrowMidX arrowTop arrowMidX arrowBot
-		DoubleArrow ArrowShape [MangleName 'arrowupdown.bottomSpaceLeft'] nothing arrowMidX arrowTop arrowMidX (arrowBot + OperatorStroke * 1.5)
+		DoubleArrow ArrowShape [MangleName 'arrowupdown.bottomSpaceLeft'] nothing arrowMidX arrowTop arrowMidX (arrowBot + arrowSw * 1.5)
 		DoubleArrow ArrowShape [MangleName 'arrowupleftdownright'] [MangleUnicode 0x2921] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
 		DoubleArrow ArrowShape [MangleName 'arrowuprightdownleft'] [MangleUnicode 0x2922] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 
 		create-glyph [MangleName 'arrowUpDownBar'] [MangleUnicode 0x21A8] : composite-proc
 			refer-glyph : MangleName 'arrowupdown.bottomSpaceLeft'
-			HBarBottom arrowSB arrowRSB arrowBot OperatorStroke
+			HBarBottom arrowSB arrowRSB arrowBot arrowSw
 	do "Double-line Double-headed Arrows"
 		define dasw doubleArrowStemWidth
 		DoubleArrow [DoubleArrowShape dasw] [MangleName 'dblarrowleftright'] [MangleUnicode 0x21D4] arrowSB SymbolMid arrowRSB SymbolMid
@@ -528,18 +527,18 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			refer-glyph 'arrDblHStrokeOver'
 
 	do "Stacked Arrows"
-		local hcDist : Math.max (halfstroke * 5) (arrowWidth / 2)
-		VCombine [MangleName 'uni21C4'] [MangleUnicode 0x21C4] [MangleName 'arrowright'] [MangleName 'arrowleft'] (arrowSize * 1.75)
+		local hcDist : Math.max (halfArrowSw * 5) (arrowWidth / 2)
+		VCombine [MangleName 'uni21C4'] [MangleUnicode 0x21C4] [MangleName 'arrowright'] [MangleName 'arrowleft'] (arrowHeadSize * 1.75)
 		HCombine [MangleName 'uni21C5'] [MangleUnicode 0x21C5] [MangleName 'arrowup'] [MangleName 'arrowdown'] hcDist
-		VCombine [MangleName 'uni21C6'] [MangleUnicode 0x21C6] [MangleName 'arrowleft'] [MangleName 'arrowright'] (arrowSize * 1.75)
-		VCombine [MangleName 'uni21C7'] [MangleUnicode 0x21C7] [MangleName 'arrowleft'] [MangleName 'arrowleft'] (arrowSize * 1.75)
+		VCombine [MangleName 'uni21C6'] [MangleUnicode 0x21C6] [MangleName 'arrowleft'] [MangleName 'arrowright'] (arrowHeadSize * 1.75)
+		VCombine [MangleName 'uni21C7'] [MangleUnicode 0x21C7] [MangleName 'arrowleft'] [MangleName 'arrowleft'] (arrowHeadSize * 1.75)
 		HCombine [MangleName 'uni21C8'] [MangleUnicode 0x21C8] [MangleName 'arrowup'] [MangleName 'arrowup'] hcDist
-		VCombine [MangleName 'uni21C9'] [MangleUnicode 0x21C9] [MangleName 'arrowright'] [MangleName 'arrowright'] (arrowSize * 1.75)
+		VCombine [MangleName 'uni21C9'] [MangleUnicode 0x21C9] [MangleName 'arrowright'] [MangleName 'arrowright'] (arrowHeadSize * 1.75)
 		HCombine [MangleName 'uni21CA'] [MangleUnicode 0x21CA] [MangleName 'arrowdown'] [MangleName 'arrowdown'] hcDist
 		HCombine [MangleName 'uni21F5'] [MangleUnicode 0x21F5] [MangleName 'arrowdown'] [MangleName 'arrowup'] hcDist
-		VCombine [MangleName 'uni21CB'] [MangleUnicode 0x21CB] [MangleName 'arrowleftHR'] [MangleName 'arrowrightHR'] (arrowSize)
-		VCombine [MangleName 'uni21CC'] [MangleUnicode 0x21CC] [MangleName 'arrowrightHL'] [MangleName 'arrowleftHL'] (arrowSize)
-		VCombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowbarleft'] [MangleName 'arrowbarright'] (arrowSize * 1.75)
+		VCombine [MangleName 'uni21CB'] [MangleUnicode 0x21CB] [MangleName 'arrowleftHR'] [MangleName 'arrowrightHR'] (arrowHeadSize)
+		VCombine [MangleName 'uni21CC'] [MangleUnicode 0x21CC] [MangleName 'arrowrightHL'] [MangleName 'arrowleftHL'] (arrowHeadSize)
+		VCombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowbarleft'] [MangleName 'arrowbarright'] (arrowHeadSize * 1.75)
 
 	do "Legacy computing arrows"
 		define bodyWidth : Math.min arrowWidth (arrowHeight * 0.6)
@@ -552,9 +551,9 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			include : ArrowHead x1 y1 x2 y2
 			include : intersection
 				Rect arrowTop arrowBot 0 x1
-				ArrowBar x1 y1 x2 y2 halfstroke
+				ArrowBar x1 y1 x2 y2 halfArrowSw
 			include : intersection
-				VBarRight x1 arrowBot arrowTop (halfstroke * 2)
+				VBarRight x1 arrowBot arrowTop arrowSw
 				spiro-outline
 					corner x1 y1
 					corner x2 y2
@@ -570,33 +569,34 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 			include : ArrowHead x1 y1 x2 y2
 			include : intersection
 				Rect [mix y1 y2 (1 / 2)] arrowBot 0 x1
-				ArrowBar x1 y1 x2 y2 halfstroke
+				ArrowBar x1 y1 x2 y2 halfArrowSw
 			include : intersection
 				Rect [mix y1 y2 1] arrowTop x2 x1
 				dispiro
-					widths halfstroke halfstroke
+					widths halfArrowSw halfArrowSw
 					flat x2 y2
 					curl [mix x2 x1 (2/3)] [mix y2 y1 (2/3)]
 					g4.up.mid
-						x1 - halfstroke * HVContrast
-						[mix y2 (arrowTop - halfstroke) 0.75] - halfstroke * 0.6
+						x1 - halfArrowSw * HVContrast
+						[mix y2 (arrowTop - halfArrowSw) 0.75] - halfArrowSw * 0.6
 					arcvh
-					flat [mix x2 (x1 - halfstroke * HVContrast) 0.5] (arrowTop - halfstroke)
-					curl x2 (arrowTop - halfstroke) [heading Leftward]
+					flat [mix x2 (x1 - halfArrowSw * HVContrast) 0.5] (arrowTop - halfArrowSw)
+					curl x2 (arrowTop - halfArrowSw) [heading Leftward]
 
 		create-glyph [MangleName 'uni21B8'] [MangleUnicode 0x21B8] : glyph-proc
 			set-width MosaicWidth
-			define totalHeight : bodyWidth * 1.2 + OperatorStroke
+			define totalHeight : bodyWidth * 1.2 + arrowSw
 			define x1 : arrowMidX + bodyWidth / 2
 			define y1 : SymbolMid - totalHeight / 2
 			define x2 : arrowMidX - bodyWidth / 2
 			define y2 : SymbolMid - totalHeight / 2 + bodyWidth
 
 			include : ArrowShape x1 y1 x2 y2
-			include : HBar x1 x2 (SymbolMid + totalHeight / 2) OperatorStroke
+			include : HBar x1 x2 (SymbolMid + totalHeight / 2) arrowSw
 
 	if (MosaicWidthScalar == 1) : begin
 		glyph-block-export ArrowShape
-	if (MosaicNameSuffix === '.WWID') : begin
+
+	if (!para.forceMonospace && MosaicNameSuffix === '.WWID') : begin
 		alias 'longArrowLeft'  0x27F5 'arrowleft.WWID'
 		alias 'longArrowRight' 0x27F6 'arrowright.WWID'

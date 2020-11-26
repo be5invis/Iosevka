@@ -171,6 +171,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			noCvSs: bp["no-cv-ss"] || false,
 			noLigation: bp["no-ligation"] || false
 		},
+		// Ligations
+		ligations: bp.ligations || null,
 		// Shape
 		shape: {
 			serifs: bp.serifs || null,
@@ -636,20 +638,26 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 	}
 });
 
-const PagesFastFontExport = task(`pages:fast-font-export`, async target => {
-	const [pagesDir] = await target.need(PagesDir);
-	if (!pagesDir) return;
-	const dirs = await target.need(GroupContents`iosevka`);
-	for (const dir of dirs) {
-		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
+const PagesFastFontExport = task.make(
+	g => `pages:fast-font-export:${g}`,
+	async (target, g) => {
+		const [pagesDir] = await target.need(PagesDir);
+		if (!pagesDir) return;
+		const dirs = await target.need(GroupContents(g));
+		for (const dir of dirs) {
+			await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
+		}
 	}
-});
+);
 
 const Pages = task(`pages`, async target => {
 	await target.need(PagesDataExport, PagesFontExport);
 });
 const PagesFast = task(`pages-fast`, async target => {
-	await target.need(PagesDataExport, PagesFastFontExport);
+	await target.need(PagesDataExport, PagesFastFontExport(`iosevka`));
+});
+const PagesFastSlab = task(`pages-fast-slab`, async target => {
+	await target.need(PagesDataExport, PagesFastFontExport(`iosevka-slab`));
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
