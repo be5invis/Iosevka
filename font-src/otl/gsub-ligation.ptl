@@ -58,32 +58,24 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		'slash' 'bar' 'at' 'ampersand' 'percent'
 		'numberSign' 'numberSign.upright' 'numberSign.slanted'
 	}
-	define dottyPunctuations : list
-		* "colon"
-		* "colon.mid"
-		* "semicolon"
-		* "period"
-		* "period.mid"
-		* "comma"
-		* "question"
-		* "exclam"
-	define widePunctuation : list
-		* 'parenLeft'
-		* 'parenRight'
-		* 'bracketLeft'
-		* 'bracketRight'
-		* 'braceLeft'
-		* 'braceRight'
+	define dottyPunctuationSets : list
+		list
+			* "period"
+			* "period.mid"
+			* "colon"
+			* "colon.mid"
+			* "question"
+			* "exclam"
+		list
+			* "comma"
+			* "semicolon"
+	define dottyConnectedOperators : list
 		* 'equal'
 		* 'hyphen'
 		* 'plus'
 		* 'less'
 		* 'greater'
-		* 'numberSign'
-		* 'slash'
-		* 'ampersand'
 		* 'asterisk'
-		* 'asciiCaret'
 		* 'asciiTilde'
 
 	define [asterisk_center]  ({'asterisk'}          ~> {'asterisk/lowered'})
@@ -215,25 +207,25 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				chain-rule alphabet [no_period_center]
 				chain-rule [no_period_center] alphabet
 
-	do "Colon chains" : begin
-		define dLeft      : [lsx 'dLeft'] dottyPunctuations
-		define dRight     : [lsx 'dRight'] dottyPunctuations
-		define dLeftHalf  : [lsx 'dLeftHalf'] dottyPunctuations
-		define dRightHalf : [lsx 'dRightHalf'] dottyPunctuations
-		define dMid       : [lsx 'dMid'] dottyPunctuations
-		define boundary   widePunctuation
+	do "Colon chains" : foreach dp [items-of dottyPunctuationSets] : begin
+		define dLeft      : [lsx 'dLeftHalf'] dp
+		define dRight     : [lsx 'dRightHalf'] dp
+		define dLeftHalf  : [lsx 'dLeftHalf'] dp
+		define dRightHalf : [lsx 'dRightHalf'] dp
+		define dMid       : [lsx 'dMid'] dp
+		define boundary   dottyConnectedOperators
 
 		CreateLigationLookup : keep-if 'kern-dotty' : list
 			chain-rule
 				[dRight.concat dMid] ~> look-around
-				dottyPunctuations ~> dMid
-				dottyPunctuations ~> look-around
+				dp ~> dMid
+				dp ~> look-around
 			chain-rule
 				[dRight.concat dMid] ~> look-around
-				dottyPunctuations ~> dLeft
+				dp ~> dLeft
 			chain-rule
-				dottyPunctuations ~> dRight
-				dottyPunctuations ~> look-around
+				dp ~> dRight
+				dp ~> look-around
 		CreateLigationLookup : keep-if 'kern-dotty' : list
 			chain-rule
 				boundary             ~> look-around
