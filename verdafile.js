@@ -496,8 +496,21 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 }
 
 ///////////////////////////////////////////////////////////
-//////                  Root Tasks                   //////
+//////                    Exports                    //////
 ///////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+// Sample Images
+
+const Pages = task(`pages`, async target => {
+	await target.need(PagesDataExport, PagesFontExport);
+});
+const PagesFast = task(`pages-fast`, async target => {
+	await target.need(PagesDataExport, PagesFastFontExport(`iosevka`));
+});
+const PagesFastSlab = task(`pages-fast-slab`, async target => {
+	await target.need(PagesDataExport, PagesFastFontExport(`iosevka-slab`));
+});
 
 const PagesDir = oracle(`pages-dir-path`, async target => {
 	const pagesDir = Path.resolve(__dirname, "../Iosevka-Pages");
@@ -559,14 +572,16 @@ const PagesFastFontExport = task.make(
 	}
 );
 
-const Pages = task(`pages`, async target => {
-	await target.need(PagesDataExport, PagesFontExport);
-});
-const PagesFast = task(`pages-fast`, async target => {
-	await target.need(PagesDataExport, PagesFastFontExport(`iosevka`));
-});
-const PagesFastSlab = task(`pages-fast-slab`, async target => {
-	await target.need(PagesDataExport, PagesFastFontExport(`iosevka-slab`));
+///////////////////////////////////////////////////////////
+// Sample Images
+
+const SampleImages = task(`sample-images`, async target => {
+	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
+	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
+	await target.need(
+		cfgP.map(opt => ScreenShot(opt.name)),
+		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name))
+	);
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
@@ -650,14 +665,8 @@ const ScreenShot = file.make(
 	}
 );
 
-const SampleImages = task(`sample-images`, async target => {
-	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
-	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
-	await target.need(
-		cfgP.map(opt => ScreenShot(opt.name)),
-		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name))
-	);
-});
+///////////////////////////////////////////////////////////
+// Release notes
 
 const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
@@ -709,6 +718,10 @@ const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
 	target => FileList({ under: "changes", pattern: "*.md" })(target)
 );
+
+///////////////////////////////////////////////////////////
+//////                   Entries                     //////
+///////////////////////////////////////////////////////////
 
 phony(`clean`, async () => {
 	await rm(BUILD);
