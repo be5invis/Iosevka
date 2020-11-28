@@ -258,6 +258,7 @@ function buildLigationSet(ligData, getKey) {
 				ligSets.add(ligData.simple[s].ligGroup);
 			}
 			item = {
+				selector: sel,
 				tag: comp.tag,
 				rank: 1,
 				ligSets: [...ligSets],
