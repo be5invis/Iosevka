@@ -313,8 +313,8 @@ To create a custom build, you need:
    1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
    2. `ttf::<plan>` : TTF;
    3. `ttf-unhinted::<plan>` : Unhinted TTF only;
-   4. `woff::<plan>` : TTF and WOFF only;
-   5. `woff2::<plan>` : TTF and WOFF2 only.
+   4. `webfont::<plan>` : Web fonts only (CSS + WOFF2);
+   5. `woff2::<plan>` : WOFF2 only.
 
 ### Configuring Custom Build
 

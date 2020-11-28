@@ -268,30 +268,34 @@ const GroupContents = task.group("contents", async (target, gr) => {
 
 // Webfont CSS
 const DistWebFontCSS = file.make(
-	gid => `${DIST}/${gid}/${gid}.css`,
-	async (target, out, gid) => {
+	gr => `${DIST}/${gr}/${gr}.css`,
+	async (target, out, gr) => {
 		// Note: this target does NOT depend on the font files.
-		const [gr, ts] = await target.need(BuildPlanOf(gid), GroupFontsOf(gid), de(out.dir));
+		const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr), de(out.dir));
 		const hs = await target.need(...ts.map(FontInfoOf));
-		await node("utility/make-webfont-css.js", out.full, gr.family, hs, webfontFormats);
+		await node("utility/make-webfont-css.js", out.full, bp.family, hs, webfontFormats);
 	}
 );
 
 // Content files
-const GroupTTFs = task.group("ttf", async (target, gid) => {
-	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistHintedTTF(gid, tn)));
+const GroupTTFs = task.group("ttf", async (target, gr) => {
+	const [ts] = await target.need(GroupFontsOf(gr));
+	await target.need(ts.map(tn => DistHintedTTF(gr, tn)));
 });
-const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gid) => {
-	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistUnhintedTTF(gid, tn)));
+const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
+	const [ts] = await target.need(GroupFontsOf(gr));
+	await target.need(ts.map(tn => DistUnhintedTTF(gr, tn)));
 });
-const GroupWoff2s = task.group("woff2", async (target, gid) => {
-	const [ts] = await target.need(GroupFontsOf(gid));
-	await target.need(ts.map(tn => DistWoff2(gid, tn)));
+const GroupWebFonts = task.group("webfont", async (target, gr) => {
+	const [ts] = await target.need(GroupFontsOf(gr));
+	await target.need(GroupWoff2s(gr), DistWebFontCSS(gr));
 });
-const GroupFonts = task.group("fonts", async (target, gid) => {
-	await target.need(GroupTTFs(gid), GroupUnhintedTTFs(gid), GroupWoff2s(gid));
+const GroupWoff2s = task.group("woff2", async (target, gr) => {
+	const [ts] = await target.need(GroupFontsOf(gr));
+	await target.need(ts.map(tn => DistWoff2(gr, tn)));
+});
+const GroupFonts = task.group("fonts", async (target, gr) => {
+	await target.need(GroupTTFs(gr), GroupUnhintedTTFs(gr), GroupWoff2s(gr));
 });
 
 // Per group file
