@@ -759,120 +759,108 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			bar           ~> look-around
 
 	# == and !=, and other related
-	do "equals" : CreateLigationLookup : list
-		# Disable regular expression lookaheads
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		piecewise
-			[hasLG 'eqeq'] : chain-rule
-				{'equal.cf' 'equal.jf'} ~> look-around
-				equal                   ~> {'equal.jf'}
-		piecewise
-			[hasLG 'exeq-dotted'] : chain-rule
-				exclam      ~> {'equal.fc.neg4-dotted'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-			[hasLG 'exeq'] : chain-rule
-				exclam      ~> {'equal.fc.neg4'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'eqeq'] : chain-rule
-				equal       ~> {'equal.fc'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'exeqeq-dotted'] : chain-rule
-				exclam      ~> {'ident.fc.neg3-dotted'}
-				equal       ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-			[hasLG 'exeqeq'] : chain-rule
-				exclam      ~> {'ident.fc.neg3'}
-				equal       ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-			[hasLG 'eqexeq-dotted'] : chain-rule
-				equal       ~> {'ident.fc.neg3-dotted'}
-				exclam      ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-			[hasLG 'eqexeq'] : chain-rule
-				equal       ~> {'ident.fc.neg3'}
-				exclam      ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-			[hasLG 'eqexeq-dl-dotted'] : chain-rule
-				equal       ~> {'equal.fc.neg3-dotted'}
-				exclam      ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-			[hasLG 'eqexeq-dl'] : chain-rule
-				equal       ~> {'equal.fc.neg3'}
-				exclam      ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-			[hasLG 'exeq-dotted'] : chain-rule
-				exclam      ~> {'equal.fc.neg3-dotted'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-			[hasLG 'exeq'] : chain-rule
-				exclam      ~> {'equal.fc.neg3'}
-				equal       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'eqslasheq'] : chain-rule
-				equal       ~> {'ident.fc.neg3'}
-				slash       ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-			[hasLG 'slasheq'] : chain-rule
-				equal       ~> {'equal.fc.neg3'}
-				slash       ~> {'equal.cc'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'eqeqeq'] : chain-rule
-				equal       ~> {'ident.fc'}
-				equal       ~> {'ident.cc'}
-				equal       ~> {'ident.cf'}
-		piecewise
-			[hasLG 'tildeeq'] : chain-rule
-				anyWave     ~> [just 'equal.fc.neg']
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'slasheq'] : chain-rule
-				slash       ~> {'equal.fc.neg'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'exeq-dotted'] : chain-rule
-				exclam      ~> {'equal.fc.neg-dotted'}
-				equal       ~> {'equal.cf'}
-			[hasLG 'exeq'] : chain-rule
-				exclam      ~> {'equal.fc.neg'}
-				equal       ~> {'equal.cf'}
-		piecewise
-			[hasLG 'ltgt-diamond'] : chain-rule
-				lessAndEquiv ~> [just 'less.lig.diamond']
-				greaterAndEquiv ~> [just 'greater.lig.diamond']
-			[hasLG 'ltgt-ne'] : chain-rule
-				lessAndEquiv ~> [just 'equal.fc.neg']
-				greaterAndEquiv ~> [just 'equal.cf']
-		piecewise
-			[hasLG 'eqeq'] : chain-rule
-				equal       ~> {'equal.fc'}
-				equal       ~> {'equal.cf'}
+	do "equals" : begin
+		define AnyEqualEnding {'equal' 'equal.cf' 'equal.jf' 'equal.fc+cf' 'ident.cf' 'ident.cc+cf'}
+		CreateLigationLookup : list
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					{'equal.cf' 'equal.jf'} ~> look-around
+					equal                   ~> {'equal.jf'}
+			piecewise
+				[hasLG 'eqexeq-dotted'] : chain-rule
+					equal       ~> {'ident.fc'}
+					exclam      ~> {'neq.1-dotted'}
+					equal       ~> {'ident.cc+cf'}
+				[hasLG 'eqexeq'] : chain-rule
+					equal       ~> {'ident.fc'}
+					exclam      ~> {'neq.1'}
+					equal       ~> {'ident.cc+cf'}
+				[hasLG 'eqexeq-dl-dotted'] : chain-rule
+					equal       ~> {'equal.fc'}
+					exclam      ~> {'neq.1-dotted'}
+					equal       ~> {'equal.cc+cf'}
+				[hasLG 'eqexeq-dl'] : chain-rule
+					equal       ~> {'equal.fc'}
+					exclam      ~> {'neq.1'}
+					equal       ~> {'equal.cc+cf'}
+				true : chain-rule
+					AnyEqualEnding ~> look-around
+					exclam         ~> advance
+					equal          ~> look-around
+			piecewise
+				[hasLG 'exeq-dotted'] : chain-rule
+					exclam      ~> {'neq.4-dotted'}
+					equal       ~> {'equal.fc+cc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.4'}
+					equal       ~> {'equal.fc+cc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> {'equal.fc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'exeqeq-dotted'] : chain-rule
+					exclam      ~> {'neq.3-dotted'}
+					equal       ~> {'ident.fc+cc'}
+					equal       ~> {'ident.cf'}
+				[hasLG 'exeqeq'] : chain-rule
+					exclam      ~> {'neq.3'}
+					equal       ~> {'ident.fc+cc'}
+					equal       ~> {'ident.cf'}
+				[hasLG 'exeq-dotted'] : chain-rule
+					exclam      ~> {'neq.3-dotted'}
+					equal       ~> {'equal.fc+cc'}
+					equal       ~> {'equal.cf'}
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.3'}
+					equal       ~> {'equal.fc+cc'}
+					equal       ~> {'equal.cf'}
+			piecewise
+				[hasLG 'eqslasheq'] : chain-rule
+					equal       ~> {'ident.fc'}
+					slash       ~> {'neq.1'}
+					equal       ~> {'ident.cc+cf'}
+				[hasLG 'slasheq'] : chain-rule
+					equal       ~> {'equal.fc'}
+					slash       ~> {'neq.1'}
+					equal       ~> {'equal.cc+cf'}
+			piecewise
+				[hasLG 'eqeqeq'] : chain-rule
+					equal       ~> {'ident.fc'}
+					equal       ~> {'ident.cc'}
+					equal       ~> {'ident.cf'}
+			piecewise
+				[hasLG 'tildeeq'] : chain-rule
+					anyWave     ~> [just 'neq.2']
+					equal       ~> {'equal.fc+cf'}
+			piecewise
+				[hasLG 'slasheq'] : chain-rule
+					slash       ~> {'neq.2'}
+					equal       ~> {'equal.fc+cf'}
+			piecewise
+				[hasLG 'exeq-dotted'] : chain-rule
+					exclam      ~> {'neq.2-dotted'}
+					equal       ~> {'equal.fc+cf'}
+				[hasLG 'exeq'] : chain-rule
+					exclam      ~> {'neq.2'}
+					equal       ~> {'equal.fc+cf'}
+			piecewise
+				[hasLG 'ltgt-diamond'] : chain-rule
+					lessAndEquiv ~> [just 'less.lig.diamond']
+					greaterAndEquiv ~> [just 'greater.lig.diamond']
+				[hasLG 'ltgt-ne'] : chain-rule
+					lessAndEquiv ~> [just 'neq.2']
+					greaterAndEquiv ~> [just 'equal.fc+cf']
+			piecewise
+				[hasLG 'eqeq'] : chain-rule
+					equal       ~> {'equal.fc'}
+					equal       ~> {'equal.cf'}
 
 	# <= and >=
 	do "inequals" : CreateLigationLookup : keep-if 'ineq' : list
