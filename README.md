@@ -281,8 +281,8 @@ Please note that, due to the complex interactions when forming ligations, cherry
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present.
-2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
+2. Run `npm install`. This command will install **all** the NPM dependenceis, and will also validate whether external dependencies are present.
 3. `npm run build -- contents::iosevka`.
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.

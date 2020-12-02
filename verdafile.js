@@ -2,18 +2,20 @@
 
 const fs = require("fs");
 const build = require("verda").create();
+const which = require("which");
+const Path = require("path");
+const toml = require("@iarna/toml");
+
+///////////////////////////////////////////////////////////
+
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, mv, fail, echo } = build.actions;
+const { run, node, cd, cp, rm, mv, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
-const which = require("which");
 
 module.exports = build;
 
 ///////////////////////////////////////////////////////////
-
-const Path = require("path");
-const toml = require("@iarna/toml");
 
 const BUILD = ".build";
 const DIST = "dist";
@@ -21,7 +23,6 @@ const SNAPSHOT_TMP = ".build/snapshot";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
-const TTX = "ttx";
 const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const webfontFormats = [
@@ -50,6 +51,14 @@ const Version = oracle(`oracle:version`, async target => {
 	const [pj] = await target.need(sfu`package.json`);
 	const package_json = JSON.parse(await fs.promises.readFile(pj.full, "utf-8"));
 	return package_json.version;
+});
+
+const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async target => {
+	try {
+		return await which("ttfautohint");
+	} catch (e) {
+		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
+	}
 });
 
 ///////////////////////////////////////////////////////////
@@ -309,9 +318,9 @@ const DistUnhintedTTF = file.make(
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
 	async (target, path, gr, f) => {
-		const [{ hintParams }] = await target.need(FontInfoOf(f));
+		const [{ hintParams }, hint] = await target.need(FontInfoOf(f), CheckTtfAutoHintExists);
 		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
-		await run("ttfautohint", hintParams, from.full, path.full);
+		await silently.run(hint, hintParams, from.full, path.full);
 	}
 );
 const DistWoff2 = file.make(
