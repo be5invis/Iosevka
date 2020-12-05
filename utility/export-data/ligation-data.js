@@ -124,63 +124,55 @@ const ligationSamples = [
 
 const ligationSamplesNarrow = [
 	[
+		arrow2("-<<"),
+		arrow2("-<"),
+		arrow2("-<-"),
 		arrow("<--"),
 		arrow("<---"),
 		arrow("<<-"),
 		arrow("<-"),
-		arrow("<->"),
 		arrow("->"),
 		arrow("->>"),
 		arrow("-->"),
 		arrow("--->"),
-		htmlComment("<!--")
-	],
-	[
-		arrow2("-<<"),
-		arrow2("-<"),
-		arrow2("-<-"),
 		arrow2("->-"),
 		arrow2(">-"),
-		arrow2(">>-"),
-		arrow("<-->"),
-		arrow("<--->"),
-		arrow("<---->")
-	],
-	[
-		arrow("<=="),
-		arrow("<==="),
-		llggeq_a("<<="),
-		ineq("<="),
-		arrow("<=>"),
-		arrow("=>"),
-		arrow("=>>"),
-		arrow("==>"),
-		arrow("===>"),
-		htmlComment("<!---")
+		arrow2(">>-")
 	],
 	[
 		arrow2("=<<"),
 		arrow2("=<"),
 		arrow2("=<="),
+		arrow("<=="),
+		arrow("<==="),
+		llggeq_a("<<="),
+		ineq("<="),
+		arrow("=>"),
+		arrow("=>>"),
+		arrow("==>"),
+		arrow("===>"),
 		arrow2("=>="),
 		ineq(">="),
-		llggeq_b(">>="),
-		arrow("<==>"),
-		arrow("<===>"),
-		arrow("<====>")
+		llggeq_b(">>=")
 	],
 	[
-		arrow("<-------"),
-		arrow("------->"),
-		arrow("<======>"),
+		arrow("<->"),
+		arrow("<-->"),
+		arrow("<--->"),
+		arrow("<---->"),
+		arrow("<=>"),
+		arrow("<==>"),
+		arrow("<===>"),
+		arrow("<====>"),
+		arrow("-------->")
+	],
+	[
 		arrow("<~~"),
 		arrow("<~"),
 		arrow("~>"),
-		arrow("~~>")
-	],
-	[
-		logc("\\/"),
-		logc("/\\"),
+		arrow("~~>"),
+		kernDotty("::"),
+		kernDotty(":::"),
 		eqeq("=="),
 		exeq("!="),
 		slasheq("/="),
@@ -201,22 +193,25 @@ const ligationSamplesNarrow = [
 		trig("<|"),
 		trig("<|>"),
 		trig("|>"),
-		centerOps("+:"),
-		centerOps("-:"),
-		centerOps("=:")
-	],
-	[
-		kernDotty("::"),
-		kernDotty(":::"),
 		dotOper("<."),
 		dotOper("<.>"),
 		dotOper(".>"),
-		brst("(* *)"),
-		colonGt(":>"),
+		centerOps("+:"),
+		centerOps("-:"),
+		centerOps("=:"),
+		colonGt(":>")
+	],
+	[
+		brst("(* comm *)"),
 		plusPlus("++"),
 		plusPlus("+++"),
+		logc("\\/"),
+		logc("/\\"),
 		logc("|-"),
-		logc("-|")
+		logc("-|"),
+		htmlComment("<!--"),
+		htmlComment("<!---"),
+		centerOps("<***>")
 	]
 ];
 
