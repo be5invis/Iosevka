@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 4.0.1
+
+ * Improve of component glyph coloring of non-equal ligation (like `!=`).
+ * Correct shape of `4` in SS14.
+ * Add Characters:
+   - Atom Symbol (`U+269B`).
+   - Black Slightly Small Circle Circle ... Very Heavy Eight-Spoked Asterisk (`U+1F784` ... `U+1F7BF`).
+
+
 ### 4.0.0
 
  * \[**Breaking**\] Change implementation of character variants to `cv##` and alternate substitutions (#572).

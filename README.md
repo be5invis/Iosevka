@@ -21,6 +21,7 @@ Quit your editor/program. Unzip and open the folder.
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
+  - Fedora Linux users can install the font(s) from the copr [here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
 * **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
@@ -280,8 +281,8 @@ Please note that, due to the complex interactions when forming ligations, cherry
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present.
-2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
+2. Run `npm install`. This command will install **all** the NPM dependenceis, and will also validate whether external dependencies are present.
 3. `npm run build -- contents::iosevka`.
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
@@ -313,12 +314,14 @@ To create a custom build, you need:
    1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
    2. `ttf::<plan>` : TTF;
    3. `ttf-unhinted::<plan>` : Unhinted TTF only;
-   4. `woff::<plan>` : TTF and WOFF only;
-   5. `woff2::<plan>` : TTF and WOFF2 only.
+   4. `webfont::<plan>` : Web fonts only (CSS + WOFF2);
+   5. `woff2::<plan>` : WOFF2 only.
 
 ### Configuring Custom Build
 
-Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. Inside the plan, top-level properties include:
+Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manulally edit them, following the instructions below.
+
+Inside the plan, top-level properties include:
 
 * `family`: String, defines the family name of your custom variant.
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:

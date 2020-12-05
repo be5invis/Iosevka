@@ -20,10 +20,15 @@ glyph-block Symbol-Geometric-Shared : begin
 			MidY    SymbolMid
 			Bot   : SymbolMid       - size
 
+	glyph-block-export UnicodeWeightGrade
+	define [UnicodeWeightGrade n s] : begin
+		define kAdj : GeometryStroke / Stroke
+		return : (0.6 * [Math.pow n ((3 / 8 + s / 8) * [StrokeWidthBlend 1.25 1])]) * kAdj * [AdviceStroke (9 - 0.5 * n) s]
+
 glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Geometric-Shared : GeometricDim
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade
 
 	define Geom : GeometricDim MosaicWidthScalar
 
@@ -62,21 +67,45 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 				Geom.Size * [fallback pp.size 1]
 				begin 0
 
-	define [StdWhiteShape fn name unicode props] : begin
+	define [StdWhiteShapeImpl fn s out in props] : begin
 		local pp : fallback props {.}
+		local sw : fallback pp.sw GeometryStroke
+		return : difference
+			fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				s * Geom.Size * [fallback pp.size 1] + out * sw
+				(-out) * sw
+			fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				s * Geom.Size * [fallback pp.size 1] - in * sw
+				in * sw
+
+	define [ConvexWhitePolygonImpl fn props] : begin
+		local pp : fallback props {.}
+		local sh : new-glyph : fn
+			fallback pp.cx Geom.MidX
+			fallback pp.cy Geom.MidY
+			Geom.Size * [fallback pp.size 1]
+			begin 0
+		local outlines : glyph-proc : begin
+			set this.gizmo : Translate 0 0
+			foreach c [items-of sh.contours] : foreach j [range 0 c.length] : begin
+				local a c.[if j (j - 1) (c.length - 1)]
+				local b c.(j)
+				include : dispiro
+					disable-contrast
+					widths.center ([fallback pp.sw GeometryStroke] * 2)
+					corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
+					corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
+
+		return : intersection sh outlines
+
+	define [StdWhiteShape fn name unicode props] : begin
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 			set-width Geom.Width
-			include : difference
-				fn
-					fallback pp.cx Geom.MidX
-					fallback pp.cy Geom.MidY
-					Geom.Size * [fallback pp.size 1]
-					begin 0
-				fn
-					fallback pp.cx Geom.MidX
-					fallback pp.cy Geom.MidY
-					Geom.Size * [fallback pp.size 1] - [fallback pp.sw GeometryStroke]
-					fallback pp.sw GeometryStroke
+			include : StdWhiteShapeImpl fn 1 0 1 props
 
 	define [StdWhiteContainingBlackShape fn name unicode props] : begin
 		local pp : fallback props {.}
@@ -86,19 +115,34 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			include : fn
 				fallback pp.cx Geom.MidX
 				fallback pp.cy Geom.MidY
-				0.5 * (Geom.Size * [fallback pp.size 1] - sw)
+				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
 				begin 0
-			include : difference
-				fn
-					fallback pp.cx Geom.MidX
-					fallback pp.cy Geom.MidY
-					Geom.Size * [fallback pp.size 1]
-					begin 0
-				fn
-					fallback pp.cx Geom.MidX
-					fallback pp.cy Geom.MidY
-					Geom.Size * [fallback pp.size 1] - sw
-					begin sw
+			include : StdWhiteShapeImpl fn 1 0 1 props
+
+	define [ConvexPolygonWhiteContainingBlackShape fn name unicode props] : begin
+		local pp : fallback props {.}
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			local sw : fallback pp.sw GeometryStroke
+			include : fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
+				begin 0
+			include : ConvexWhitePolygonImpl fn props
+
+	define [StdGeomTargetShape fn name unicode props] : begin
+		local pp : fallback props {.}
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			local sw : fallback pp.sw GeometryStroke
+			include : fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				[fallback pp.innerSize 0.25] * (Geom.Size * [fallback pp.size 1] - sw * 2)
+				begin 0
+			include : StdWhiteShapeImpl fn 1                                        0   1   props
+			include : StdWhiteShapeImpl fn [mix 1 [fallback pp.innerSize 0.25] 0.5] 0   1   props
 
 	define [StdDoubleWhite fn name unicode props] : begin
 		local pp : fallback props {.}
@@ -129,39 +173,28 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					begin sw
 
 	define [ConvexWhitePolygon fn name unicode props] : begin
-		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 			set-width Geom.Width
-			local sh : new-glyph : fn
-				fallback pp.cx Geom.MidX
-				fallback pp.cy Geom.MidY
-				Geom.Size * [fallback pp.size 1]
-				begin 0
-			local outlines : glyph-proc : begin
-				set this.gizmo : Translate 0 0
-				foreach c [items-of sh.contours] : foreach j [range 0 c.length] : begin
-					local a c.[if j (j - 1) (c.length - 1)]
-					local b c.(j)
-					include : dispiro
-						disable-contrast
-						widths.center ([fallback pp.sw GeometryStroke] * 2)
-						corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
-						corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
+			include : ConvexWhitePolygonImpl fn props
 
-			include : intersection sh outlines
+	define SizeLarge         {.size [DesignParameters.GeometricLargeX Geom.Width MosaicUnitWidth]}
+	define SizeMedium        {.size DesignParameters.geometric_medium_x}
+	define SizeMediumSmall   {.size DesignParameters.geometric_medium_small_x    .sw [Math.min GeometryStroke : AdviceStroke 5 Geom.Scalar]}
+	define SizeSmall         {.size DesignParameters.geometric_small_x           .sw [Math.min GeometryStroke : AdviceStroke 6 Geom.Scalar]}
+	define SizeSlightlySmall {.size DesignParameters.geometric_slightly_small_x  .sw [Math.min GeometryStroke : AdviceStroke 6.5 Geom.Scalar]}
+	define SizeVerySmall     {.size DesignParameters.geometric_very_small_x      .sw [Math.min GeometryStroke : AdviceStroke 7 Geom.Scalar]}
+	define SizeTiny          {.size DesignParameters.geometric_tiny_x            .sw [Math.min GeometryStroke : AdviceStroke 8 Geom.Scalar]}
 
-	define SizeLarge {.size [DesignParameters.GeometricLargeX Geom.Width MosaicUnitWidth]}
-	define SizeMedium {.size DesignParameters.geometric_medium_x}
-	define SizeMediumSmall {.size DesignParameters.geometric_medium_small_x  .sw [Math.min GeometryStroke : AdviceStroke 5 Geom.Scalar]}
-	define SizeSmall {.size DesignParameters.geometric_small_x  .sw [Math.min GeometryStroke : AdviceStroke 6 Geom.Scalar]}
-	define SizeVerySmall {.size DesignParameters.geometric_very_small_x  .sw [Math.min GeometryStroke : AdviceStroke 7 Geom.Scalar]}
+	define SizeOblique            { .sw [Math.min GeometryStroke : AdviceStroke 4.75 Geom.Scalar] }
+	define SizeMediumOblique      { .size DesignParameters.geometric_medium_x        .sw [Math.min GeometryStroke : AdviceStroke 4.75 Geom.Scalar] }
+	define SizeMediumSmallOblique { .size DesignParameters.geometric_medium_small_x  .sw [Math.min GeometryStroke : AdviceStroke 5.25 Geom.Scalar] }
+	define SizeSmallOblique       { .size DesignParameters.geometric_small_x         .sw [Math.min GeometryStroke : AdviceStroke 6.25 Geom.Scalar] }
+	define SizeVerySmallOblique   { .size DesignParameters.geometric_very_small_x    .sw [Math.min GeometryStroke : AdviceStroke 7.25 Geom.Scalar] }
+	define SizeTinyOblique        { .size DesignParameters.geometric_tiny_x          .sw [Math.min GeometryStroke : AdviceStroke 8.25 Geom.Scalar] }
 
-	define ObliqueSW : Math.min GeometryStroke : AdviceStroke 5.25 Geom.Scalar
-	define SmallObliqueSW : Math.min GeometryStroke : AdviceStroke 6.25 Geom.Scalar
-	define SizeOblique { .sw ObliqueSW }
-	define SizeMediumOblique { .size DesignParameters.geometric_medium_x  .sw SmallObliqueSW }
-	define SizeSmallOblique { .size DesignParameters.geometric_small_x  .sw SmallObliqueSW }
-
+	define TinyInner   { .innerSize (1 / 4) }
+	define SmallInner  { .innerSize (1 / 3) }
+	define MediumInner { .innerSize (2 / 3) }
 
 	do "Square and Half-square triangle"
 		define [SquareShape cx cy size] : spiro-outline
@@ -172,19 +205,34 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		StdBlackShape SquareShape 'blackSquare' 0x25A0
 		StdWhiteShape SquareShape 'whiteSquare' 0x25A1
-		StdWhiteContainingBlackShape SquareShape 'whiteSquareWithCenter' 0x25A3
+
+		StdWhiteShape SquareShape 'lightWhiteSquare'     0x1F78E {.sw [UnicodeWeightGrade 3 Geom.Scalar]}
+		StdWhiteShape SquareShape 'mediumWhiteSquare'    0x1F78F {.sw [UnicodeWeightGrade 5 Geom.Scalar]}
+		StdWhiteShape SquareShape 'boldWhiteSquare'      0x1F790 {.sw [UnicodeWeightGrade 7 Geom.Scalar]}
+		StdWhiteShape SquareShape 'heavyWhiteSquare'     0x1F791 {.sw [UnicodeWeightGrade 9 Geom.Scalar]}
+		StdWhiteShape SquareShape 'veryHeavyWhiteSquare' 0x1F792 {.sw [UnicodeWeightGrade 10 Geom.Scalar]}
+		StdWhiteShape SquareShape 'exHeavyWhiteSquare'   0x1F793 {.sw [UnicodeWeightGrade 11 Geom.Scalar]}
+
 		StdBlackShape SquareShape 'blackLargeSquare' 0x2B1B SizeLarge
-		StdWhiteShape SquareShape 'whiteLargeSquare' 0x2B1C SizeLarge
 		StdBlackShape SquareShape 'blackMediumSquare' 0x25FC SizeMedium
-		StdWhiteShape SquareShape 'whiteMediumSquare' 0x25FB SizeMedium
 		StdBlackShape SquareShape 'blackMediumSmallSquare' 0x25FE SizeMediumSmall
-		StdWhiteShape SquareShape 'whiteMediumSmallSquare' 0x25FD SizeMediumSmall
 		StdBlackShape SquareShape 'blackSmallSquare' 0x25AA SizeSmall
-		StdWhiteShape SquareShape 'whiteSmallSquare' 0x25AB SizeSmall
 		StdBlackShape SquareShape 'blackVerySmallSquare' 0x2B1D SizeVerySmall
-		StdWhiteShape SquareShape 'whiteVerySmallSquare' 0x2B1E SizeVerySmall
+		StdBlackShape SquareShape 'blackSlightlySmallSquare' 0x1F78D SizeSlightlySmall
+		StdBlackShape SquareShape 'blackTinySmallSquare' 0x1F78C SizeTiny
 		StdBlackShape SquareShape 'blackCenteredSquare' 0x2BC0
 
+		StdWhiteShape SquareShape 'whiteLargeSquare' 0x2B1C SizeLarge
+		StdWhiteShape SquareShape 'whiteMediumSquare' 0x25FB SizeMedium
+		StdWhiteShape SquareShape 'whiteMediumSmallSquare' 0x25FD SizeMediumSmall
+		StdWhiteShape SquareShape 'whiteSmallSquare' 0x25AB SizeSmall
+		StdWhiteShape SquareShape 'whiteVerySmallSquare' 0x2B1E SizeVerySmall
+
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareWithCenter' 0x25A3
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareContainingBlackVerySmallSquare' 0x1F794 TinyInner
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareContainingBlackMediumSquare' 0x1F795 MediumInner
+
+		StdGeomTargetShape SquareShape 'squareTarget' 0x1F796
 
 		define [TriangleRBFill cx cy size] : spiro-outline
 			corner (cx + size) (cy + size)
@@ -339,12 +387,23 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			corner (cx - size) cy
 
 		StdBlackShape DiamondFill 'blackDiamond' 0x25C6 SizeOblique
-		StdWhiteShape DiamondFill 'whiteDiamond' 0x25C7 SizeOblique
-		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondWithCenter' 0x25C8 SizeOblique
-		StdBlackShape DiamondFill 'blackMediumDiamond' 0x2B25 SizeMediumOblique
-		StdWhiteShape DiamondFill 'whiteMediumDiamond' 0x2B26 SizeMediumOblique
-		StdBlackShape DiamondFill 'blackSmallDiamond' 0x2B29 SizeSmallOblique
 		StdBlackShape DiamondFill 'blackCenteredDiamond' 0x2BC1 SizeOblique
+
+		StdWhiteShape DiamondFill 'whiteDiamond' 0x25C7 SizeOblique
+
+		StdBlackShape DiamondFill 'blackMediumDiamond' 0x2B25 SizeMediumOblique
+		StdBlackShape DiamondFill 'blackSmallDiamond' 0x2B29 SizeSmallOblique
+		StdBlackShape DiamondFill 'blackTinyDiamond' 0x1F797 SizeTinyOblique
+		StdBlackShape DiamondFill 'blackVerySmallDiamond' 0x1F798 SizeVerySmallOblique
+		StdBlackShape DiamondFill 'blackMediumSmallDiamond' 0x1F799 SizeMediumSmallOblique
+
+		StdWhiteShape DiamondFill 'whiteMediumDiamond' 0x2B26 SizeMediumOblique
+
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondWithCenter' 0x25C8 SizeOblique
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondContainingBlackVerySmallDiamond' 0x1F79A [Object.assign {.} TinyInner SizeOblique]
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondContainingBlackMediumDiamond' 0x1F79B [Object.assign {.} MediumInner SizeOblique]
+
+		StdGeomTargetShape DiamondFill 'diamondTarget' 0x1F79C SizeOblique
 
 	do "Lonzenge"
 		define [LonzengeFill cx cy size] : spiro-outline
@@ -355,30 +414,52 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		StdBlackShape LonzengeFill 'blackLonzenge' 0x29EB SizeOblique
 		ConvexWhitePolygon LonzengeFill 'whiteLonzenge' 0x25CA SizeOblique
+
 		StdBlackShape LonzengeFill 'blackMediumLonzenge' 0x2B27 SizeMediumOblique
-		ConvexWhitePolygon LonzengeFill 'whiteMediumLonzenge' 0x2B28 SizeMediumOblique
 		StdBlackShape LonzengeFill 'blackSmallLonzenge' 0x2B2A SizeSmallOblique
+
+		ConvexWhitePolygon LonzengeFill 'whiteMediumLonzenge' 0x2B28 SizeMediumOblique
 		ConvexWhitePolygon LonzengeFill 'whiteSmallLonzenge' 0x2B2B SizeSmallOblique
 
+		StdBlackShape LonzengeFill 'blackTinyLonzenge' 0x1F79D SizeTinyOblique
+		StdBlackShape LonzengeFill 'blackVerySmallLonzenge' 0x1F79E SizeVerySmallOblique
+		StdBlackShape LonzengeFill 'blackMediumSmallLonzenge' 0x1F79F SizeMediumSmallOblique
+
+		ConvexPolygonWhiteContainingBlackShape LonzengeFill 'whiteLozengeContainingBlackSmallLozenge' 0x1F7A0 [Object.assign {.} SmallInner SizeOblique]
+
 	do "Circle"
-		define [BlackCircleShape cx cy size] : spiro-outline
+		define [CircleShape cx cy size] : spiro-outline
 			g4 cx (cy + size)
 			g4 (cx - size) cy
 			g4 cx (cy - size)
 			g4 (cx + size) cy
 			close
 
-		StdBlackShape BlackCircleShape 'blackCircleO' null
-		StdBlackShape BlackCircleShape 'blackCircle' 0x25CF
-		StdWhiteShape BlackCircleShape 'whiteCircle' 0x25CB
-		StdWhiteContainingBlackShape BlackCircleShape 'whiteCircleWithCenter' 0x25C9
-		StdDoubleWhite BlackCircleShape 'doubleWhiteCircle' 0x25CE {.sw [Math.min GeometryStroke : AdviceStroke 4 Geom.Scalar]}
-		StdBlackShape BlackCircleShape 'blackSmallCircle' null SizeSmall
-		StdWhiteShape BlackCircleShape 'whiteSmallCircle' null SizeSmall
-		StdBlackShape BlackCircleShape 'blackMediumCircle' 0x26AB SizeMedium
-		StdWhiteShape BlackCircleShape 'whiteMediumCircle' 0x26AA SizeMedium
-		StdBlackShape BlackCircleShape 'blackLargeCircle' 0x2B24 SizeLarge
-		StdWhiteShape BlackCircleShape 'whiteLargeCircle' 0x25EF SizeLarge
+		StdBlackShape CircleShape 'blackCircleO' null
+		StdBlackShape CircleShape 'blackCircle' 0x25CF
+
+		StdWhiteShape CircleShape 'whiteCircle' 0x25CB
+		StdWhiteShape CircleShape 'mediumWhiteCircle'    0x1F785 {.sw [UnicodeWeightGrade 6 Geom.Scalar]}
+		StdWhiteShape CircleShape 'boldWhiteCircle'      0x1F786 {.sw [UnicodeWeightGrade 7 Geom.Scalar]}
+		StdWhiteShape CircleShape 'heavyWhiteCircle'     0x1F787 {.sw [UnicodeWeightGrade 9 Geom.Scalar]}
+		StdWhiteShape CircleShape 'veryHeavyWhiteCircle' 0x1F788 {.sw [UnicodeWeightGrade 10 Geom.Scalar]}
+		StdWhiteShape CircleShape 'exHeavyWhiteCircle'   0x1F789 {.sw [UnicodeWeightGrade 11 Geom.Scalar]}
+
+		StdBlackShape CircleShape 'blackSmallCircle' null SizeSmall
+		StdBlackShape CircleShape 'blackMediumCircle' 0x26AB SizeMedium
+		StdBlackShape CircleShape 'blackLargeCircle' 0x2B24 SizeLarge
+		StdBlackShape CircleShape 'blackSlightlySmallCircle' 0x1F784 SizeSlightlySmall
+
+		StdWhiteShape CircleShape 'whiteSmallCircle' null SizeSmall
+		StdWhiteShape CircleShape 'whiteMediumCircle' 0x26AA SizeMedium
+		StdWhiteShape CircleShape 'whiteLargeCircle' 0x25EF SizeLarge
+
+		StdDoubleWhite CircleShape 'doubleWhiteCircle' 0x25CE {.sw [Math.min GeometryStroke : AdviceStroke 4 Geom.Scalar]}
+
+		StdWhiteContainingBlackShape CircleShape 'whiteCircleWithCenter' 0x25C9
+		StdWhiteContainingBlackShape CircleShape 'whiteCircleContainingBlackSmallCircle' 0x1F78A SmallInner
+
+		StdGeomTargetShape CircleShape 'circleTarget' 0x1F78B
 
 		create-glyph [MangleName 'blackLeftHalfCircle'] [MangleUnicode 0x25D6] : glyph-proc
 			set-width Geom.Width
@@ -475,22 +556,65 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 						Geom.MidY + Geom.Size * mag * [Math.cos angle]
 				include : spiro-outline corners
 
-		define HeavySw : Math.max ([AdviceStroke 4.5 Geom.Scalar] * 1.5) (Width * 0.13 * [Math.sqrt Geom.Scalar])
+		define extThinSw    : UnicodeWeightGrade 1  Geom.Scalar
+		define extLightSw   : UnicodeWeightGrade 2  Geom.Scalar
+		define lightSw      : UnicodeWeightGrade 3  Geom.Scalar
+		define normalSw     : UnicodeWeightGrade 4  Geom.Scalar
+		define mediumSw     : UnicodeWeightGrade 5  Geom.Scalar
+		define semiBoldSw   : UnicodeWeightGrade 6  Geom.Scalar
+		define boldSw       : UnicodeWeightGrade 7  Geom.Scalar
+		define exBoldSw     : UnicodeWeightGrade 8  Geom.Scalar
+		define heavySw      : UnicodeWeightGrade 9  Geom.Scalar
+		define veryHeavySw  : UnicodeWeightGrade 10 Geom.Scalar
+		define exHeavySw    : UnicodeWeightGrade 11 Geom.Scalar
+
 		define AsteriskCfg : list
-			* {.sides 4 .name 'heavyGreekCross' .cThin 1 .unicode 0x271A .phase 0 .sw HeavySw .pMag 1}
-			* {.sides 6 .name 'heavyAsterisk' .cThin 0.9 .unicode 0x2731 .phase 0 .sw HeavySw .pMag 1}
-			* {.sides 8 .name 'eightSpokedAsterisk' .cThin 0.75 .unicode 0x2733 .phase 0 .sw [AdviceStroke 7.5 : Math.sqrt Geom.Scalar] .pMag 1}
-			* {.sides 16 .name 'sixteenSpokedAsterisk' .cThin 0.75 .unicode 0x273A .phase 0 .sw [AdviceStroke 8 : Math.sqrt Geom.Scalar] .pMag 1}
+			* {.sides  4 .name 'thinGreekCross'      .unicode 0x1F7A1 .phase 0 .sw extLightSw  .pMag 1}
+			* {.sides  4 .name 'lightGreekCross'     .unicode 0x1F7A2 .phase 0 .sw lightSw     .pMag 1}
+			* {.sides  4 .name 'mediumGreekCross'    .unicode 0x1F7A3 .phase 0 .sw mediumSw    .pMag 1}
+			* {.sides  4 .name 'boldGreekCross'      .unicode 0x1F7A4 .phase 0 .sw boldSw      .pMag 1}
+			* {.sides  4 .name 'exBoldGreekCross'    .unicode 0x1F7A5 .phase 0 .sw exBoldSw    .pMag 1}
+			* {.sides  4 .name 'veryHeavyGreekCross' .unicode 0x1F7A6 .phase 0 .sw veryHeavySw .pMag 1}
+			* {.sides  4 .name 'exHeavyGreekCross'   .unicode 0x1F7A7 .phase 0 .sw exHeavySw   .pMag 1}
+			* {.sides  4 .name 'thinSaltire'         .unicode 0x1F7A8 .phase (1/8) .sw extLightSw  .pMag 1}
+			* {.sides  4 .name 'lightSaltire'        .unicode 0x1F7A9 .phase (1/8) .sw lightSw     .pMag 1}
+			* {.sides  4 .name 'mediumSaltire'       .unicode 0x1F7AA .phase (1/8) .sw mediumSw    .pMag 1}
+			* {.sides  4 .name 'boldSaltire'         .unicode 0x1F7AB .phase (1/8) .sw boldSw      .pMag 1}
+			* {.sides  4 .name 'heavySaltire'        .unicode 0x1F7AC .phase (1/8) .sw heavySw     .pMag 1}
+			* {.sides  4 .name 'veryHeavySaltire'    .unicode 0x1F7AD .phase (1/8) .sw veryHeavySw .pMag 1}
+			* {.sides  4 .name 'exHeavySaltire'      .unicode 0x1F7AE .phase (1/8) .sw exHeavySw   .pMag 1}
+			* {.sides  5 .name 'lightAsterisk5'      .unicode 0x1F7AF .phase 0 .sw lightSw     .pMag 1}
+			* {.sides  5 .name 'mediumAsterisk5'     .unicode 0x1F7B0 .phase 0 .sw mediumSw    .pMag 1}
+			* {.sides  5 .name 'boldAsterisk5'       .unicode 0x1F7B1 .phase 0 .sw boldSw      .pMag 1}
+			* {.sides  5 .name 'heavyAsterisk5'      .unicode 0x1F7B2 .phase 0 .sw heavySw     .pMag 1}
+			* {.sides  5 .name 'veryHeavyAsterisk5'  .unicode 0x1F7B3 .phase 0 .sw veryHeavySw .pMag 1}
+			* {.sides  5 .name 'exHeavyAsterisk5'    .unicode 0x1F7B4 .phase 0 .sw exHeavySw   .pMag 1}
+			* {.sides  6 .name 'lightAsterisk6'      .unicode 0x1F7B5 .phase 0 .sw lightSw     .pMag 1}
+			* {.sides  6 .name 'mediumAsterisk6'     .unicode 0x1F7B6 .phase 0 .sw mediumSw    .pMag 1}
+			* {.sides  6 .name 'boldAsterisk6'       .unicode 0x1F7B7 .phase 0 .sw boldSw      .pMag 1}
+			* {.sides  6 .name 'heavyAsterisk6'      .unicode 0x1F7B8 .phase 0 .sw heavySw     .pMag 1}
+			* {.sides  6 .name 'veryHeavyAsterisk6'  .unicode 0x1F7B9 .phase 0 .sw veryHeavySw .pMag 1}
+			* {.sides  6 .name 'exHeavyAsterisk6'    .unicode 0x1F7BA .phase 0 .sw exHeavySw   .pMag 1}
+			* {.sides  8 .name 'lightAsterisk8'      .unicode 0x1F7BB .phase 0 .sw lightSw     .pMag 1}
+			* {.sides  8 .name 'mediumAsterisk8'     .unicode 0x1F7BC .phase 0 .sw mediumSw    .pMag 1}
+			* {.sides  8 .name 'boldAsterisk8'       .unicode 0x1F7BD .phase 0 .sw boldSw      .pMag 1}
+			* {.sides  8 .name 'heavyAsterisk8'      .unicode 0x1F7BE .phase 0 .sw heavySw     .pMag 1}
+			* {.sides  8 .name 'veryHeavyAsterisk8'  .unicode 0x1F7BF .phase 0 .sw veryHeavySw .pMag 1}
+
+			* {.sides  4 .name 'heavyGreekCross'     .unicode 0x271A  .phase 0 .sw heavySw     .pMag 1}
+			* {.sides  6 .name 'heavyAsterisk' .cThin 0.9 .unicode 0x2731 .phase 0 .sw heavySw .pMag 1}
+			* {.sides  8 .name 'eightSpokedAsterisk' .cThin 0.75 .unicode 0x2733 .phase 0 .sw normalSw .pMag 1}
+			* {.sides 16 .name 'sixteenSpokedAsterisk' .cThin 0.75 .unicode 0x273A .phase 0 .sw extLightSw .pMag 1}
 		foreach [[object sides name unicode phase sw cThin pMag] : items-of AsteriskCfg] : do
 			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
 				set-width Geom.Width
 				foreach [j : range 0 sides] : begin
-					local angle : 2 * Math.PI * j / sides + phase
+					local angle : 2 * Math.PI * (j / sides + phase)
 					include : dispiro
-						corner Geom.MidX Geom.MidY [widths.center (sw * cThin)]
+						corner Geom.MidX Geom.MidY [widths.center (sw * [fallback cThin 1])]
 						corner
-							Geom.MidX + pMag * Geom.Size * [Math.sin (angle + Math.PI)]
-							Geom.MidY + pMag * Geom.Size * [Math.cos (angle + Math.PI)]
+							Geom.MidX + pMag * Geom.Size * [Math.sin (-angle)]
+							Geom.MidY + pMag * Geom.Size * [Math.cos (-angle)]
 							widths.center sw
 
 	do "Dice"
