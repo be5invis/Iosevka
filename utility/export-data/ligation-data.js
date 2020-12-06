@@ -30,6 +30,8 @@ const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
 const plusPlus = TAG("plusplus");
 const colonGt = TAG("colon-greater");
+const brackBar = TAG("brack-bar");
+const braceBar = TAG("brace-bar");
 
 const ligationSamples = [
 	[
@@ -75,9 +77,12 @@ const ligationSamples = [
 		htmlComment("<!---")
 	],
 	[
-		arrow("<------"),
-		arrow("------>"),
-		arrow("<=====>"),
+		brackBar("[|"),
+		brackBar("|]"),
+		braceBar("{|"),
+		braceBar("|}"),
+		arrow2("<=<"),
+		arrow2(">=>"),
 		arrow("<~~"),
 		arrow("<~"),
 		arrow("~>"),
@@ -94,7 +99,8 @@ const ligationSamples = [
 		eqeqeq("==="),
 		exeqeq("!=="),
 		eqslasheq("=/="),
-		eqexeq("=!=")
+		eqexeq("=!="),
+		colonGt(":>")
 	],
 	[
 		centerOps(":="),
@@ -112,8 +118,7 @@ const ligationSamples = [
 		centerOps("+:"),
 		centerOps("-:"),
 		centerOps("=:"),
-		centerOps("<***>"),
-		colonGt(":>"),
+		centerOps("<******>"),
 		brst("(* comm *)"),
 		plusPlus("++"),
 		plusPlus("+++"),
@@ -202,7 +207,12 @@ const ligationSamplesNarrow = [
 		colonGt(":>")
 	],
 	[
-		brst("(* comm *)"),
+		brst("(*"),
+		brst("*)"),
+		brackBar("[|"),
+		brackBar("|]"),
+		braceBar("{|"),
+		braceBar("|}"),
 		plusPlus("++"),
 		plusPlus("+++"),
 		logc("\\/"),

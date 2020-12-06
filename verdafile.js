@@ -238,23 +238,13 @@ function whyBuildPlanIsnNotThere(gid) {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildRawTtf = file.make(
-	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.raw.ttf`,
-	async (target, output, gr, fn) => {
-		const [fi] = await target.need(FontInfoOf(fn), Version);
-		const charmap = output.dir + "/" + fn + ".charmap";
-		await target.need(Scripts, Parameters, de`${output.dir}`);
-		await node("font-src/index", { o: output.full, oCharMap: charmap, ...fi });
-	}
-);
-
 const BuildTTF = file.make(
 	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
-	async (target, output, gr, fn) => {
-		await target.need(de`${output.dir}`);
-		await target.needed(FontInfoOf(fn), Version, Scripts, Parameters);
-		const [rawTtf] = await target.order(BuildRawTtf(gr, fn));
-		await mv(rawTtf.full, output.full);
+	async (target, out, gr, fn) => {
+		const charmap = out.dir + "/" + fn + ".charmap";
+		const [fi] = await target.need(FontInfoOf(fn), de`${out.dir}`, Scripts);
+		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
+		await silently.node("font-src/index", { o: out.full, oCharMap: charmap, ...fi });
 	}
 );
 
@@ -282,7 +272,8 @@ const DistWebFontCSS = file.make(
 		// Note: this target does NOT depend on the font files.
 		const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr), de(out.dir));
 		const hs = await target.need(...ts.map(FontInfoOf));
-		await node("utility/make-webfont-css.js", out.full, bp.family, hs, webfontFormats);
+		echo.action(echo.hl.command(`Create WebFont CSS`), gr, echo.hl.operator("->"), out.full);
+		await silently.node("utility/make-webfont-css.js", out.full, bp.family, hs, webfontFormats);
 	}
 );
 
@@ -310,24 +301,26 @@ const GroupFonts = task.group("fonts", async (target, gr) => {
 // Per group file
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
-	async (target, path, gr, f) => {
-		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
-		await cp(from.full, path.full);
+	async (target, out, gr, f) => {
+		const [from] = await target.need(BuildTTF(gr, f), de`${out.dir}`);
+		await cp(from.full, out.full);
 	}
 );
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
-	async (target, path, gr, f) => {
+	async (target, out, gr, f) => {
 		const [{ hintParams }, hint] = await target.need(FontInfoOf(f), CheckTtfAutoHintExists);
-		const [from] = await target.need(BuildTTF(gr, f), de`${path.dir}`);
-		await silently.run(hint, hintParams, from.full, path.full);
+		const [from] = await target.need(BuildTTF(gr, f), de`${out.dir}`);
+		echo.action(echo.hl.command(`Hint TTF`), from.full, echo.hl.operator("->"), out.full);
+		await silently.run(hint, hintParams, from.full, out.full);
 	}
 );
 const DistWoff2 = file.make(
 	(gr, fn) => `${DIST}/${gr}/woff2/${fn}.woff2`,
-	async (target, path, group, f) => {
-		const [from] = await target.need(DistHintedTTF(group, f), de`${path.dir}`);
-		await node(`utility/ttf-to-woff2.js`, from.full, path.full);
+	async (target, out, group, f) => {
+		const [from] = await target.need(DistHintedTTF(group, f), de`${out.dir}`);
+		echo.action(echo.hl.command("Create WOFF2"), from.full, echo.hl.operator("->"), out.full);
+		await silently.node(`utility/ttf-to-woff2.js`, from.full, out.full);
 	}
 );
 
@@ -802,11 +795,11 @@ const CompiledJs = file.make(
 		const ptl = replaceExt(".ptl", out.full);
 		if (/\/glyphs\//.test(out.full)) await target.need(MARCOS);
 		await target.need(sfu(ptl));
-		await run(PATEL_C, "--strict", ptl, "-o", out.full);
+		echo.action(echo.hl.command("Compile Script"), ptl);
+		await silently.run(PATEL_C, "--strict", ptl, "-o", out.full);
 	}
 );
 const Scripts = task("scripts", async target => {
-	await target.need(Parameters);
 	const [jsFromPtlList] = await target.need(JavaScriptFromPtl);
 	const [jsList] = await target.need(ScriptFiles("js"));
 	const jsFromPtlSet = new Set(jsFromPtlList);
@@ -814,7 +807,7 @@ const Scripts = task("scripts", async target => {
 	let subGoals = [];
 	for (const js of jsFromPtlSet) subGoals.push(CompiledJs(js));
 	for (const js of jsList) if (!jsFromPtlSet.has(js)) subGoals.push(sfu(js));
-	await target.need(subGoals);
+	await target.need(Parameters, subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
@@ -826,6 +819,7 @@ const SnapshotTemplates = task("snapshot-templates", async target => {
 });
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
+		Version,
 		sfu`params/parameters.toml`,
 		sfu`params/shape-weight.toml`,
 		sfu`params/shape-width.toml`,

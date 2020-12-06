@@ -1,5 +1,13 @@
 ## Modifications since version 2.x
 
+### 4.0.2
+
+ * Add ligation group `brack-bar` and `brace-bar`, and enabled in `dlig` (#767).
+ * Add characters:
+   - Telephone Sign (`U+2121`) and Facsimile Sign (`U+213B`).
+   - Cross Mark (`U+274C`).
+
+
 ### 4.0.1
 
  * Improve of component glyph coloring of non-equal ligation (like `!=`).

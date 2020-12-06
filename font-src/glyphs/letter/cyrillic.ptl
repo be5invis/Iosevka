@@ -74,12 +74,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 		include [refer-glyph 'cyrl/Yeri'] AS_BASE
 		eject-contour 'serifYeriLT'
 		local s : Math.max Stroke (XH * 0.1)
-		include : ReverseContours : spiro-outline
-			corner (SB - O) CAP
+		include : spiro-outline
 			corner  SB CAP
-			corner (SB - s) (CAP - s)
-			corner  SB (CAP - s * 2)
+			corner (SB - O) CAP
 			corner (SB - O) (CAP - s * 2)
+			corner  SB (CAP - s * 2)
+			corner (SB - s) (CAP - s)
 
 	create-glyph 'latinDe' 0x18B : glyph-proc
 		include : MarkSet.capital
@@ -370,8 +370,8 @@ glyph-block Letter-Cyrillic-El : begin
 		include : VBarRight cutright 0 top
 		include : HBar cutleft cutright (top - HalfStroke)
 		include : LegShape
-			ztop -- [Point.cornerFromXY cutleft top]
-			zbot -- [Point.cornerFromXY [mix SB 0 [if SLAB 1 0.75]] 0]
+			ztop -- [Point.fromXY Point.Type.Corner cutleft top]
+			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 [if SLAB 1 0.75]] 0]
 			xb -- cutleft2
 		if SLAB : begin
 			include : RightwardTopSerif cutright top SideJut
@@ -396,21 +396,25 @@ glyph-block Letter-Cyrillic-Zhe : begin
 	define [CyrZheShape top midtop df] : glyph-proc
 		local fine : AdviceStroke 3.3 df.div
 		local midx : mix df.leftSB df.middle 0.3
-		define [CyrAngleShape] : glyph-proc
+		define [CyrAngleShape] : begin
 			local cor HVContrast
 			local overshoot : if SLAB 0 (O * 3 * df.div)
-			include : ReverseContours : spiro-outline
+			return : spiro-outline
 				corner (df.leftSB + overshoot) 0
 				corner (df.leftSB + fine * cor + overshoot) 0
 				corner (midx + fine * cor) (top / 2)
 				corner (df.leftSB + fine * cor + overshoot) top
 				corner (df.leftSB + overshoot) top
 				corner midx (top / 2)
-		include : CyrAngleShape
-		include : FlipAround df.middle (top / 2)
-		include : CyrAngleShape
-		include : VBar df.middle 0 midtop fine
-		include : HBar midx (df.width - midx) (top / 2) fine
+
+		include : union
+			new-glyph : glyph-proc
+				include : CyrAngleShape
+				include : FlipAround df.middle (top / 2)
+			CyrAngleShape
+			VBar df.middle 0 midtop fine
+			HBar midx (df.width - midx) (top / 2) fine
+
 		if SLAB : begin
 			define fineK 0.1
 			include : LeftwardTopSerif     (df.leftSB + fine * fineK) top SideJut
@@ -789,8 +793,8 @@ glyph-block Letter-Cyrillic-Lje : begin
 		local jut : Jut * 0.72
 		set-width df.width
 		include : LegShape
-			ztop -- [Point.cornerFromXY xlefttop top]
-			zbot -- [Point.cornerFromXY [mix l 0 [if SLAB 1 0.75]] 0]
+			ztop -- [Point.fromXY Point.Type.Corner xlefttop top]
+			zbot -- [Point.fromXY Point.Type.Corner [mix l 0 [if SLAB 1 0.75]] 0]
 			xb -- [mix l r 0.025]
 			fine -- MVertStroke
 		include : CyrYeriShape top

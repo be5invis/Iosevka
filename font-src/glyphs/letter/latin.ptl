@@ -1998,7 +1998,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				eject-contour 'serifRT'
 				include : yBaseSerif top bottom
 
-		define [SmallLambdaShape top bottom] : ReverseContours : glyph-proc
+		define [SmallLambdaShape top bottom] : union : glyph-proc
 			set currentGlyph.gizmo : Italify (-para.slopeAngle)
 			include : SmallYShape top bottom
 			set currentGlyph.gizmo : Italify (+para.slopeAngle)
@@ -2095,14 +2095,22 @@ glyph-block Letter-Latin-Lower-Y : begin
 	create-glyph 'grek/lambda.straight' : glyph-proc
 		include : MarkSet.b
 		include : [GenSmallYShape true  false true].SmallLambdaShape CAP 0
-		set-base-anchor 'overlay' Middle (XH / 2)
-		create-derived 'lambdaSlash.straight' : LambdaBarOverlayShape
 
 	create-glyph 'grek/lambda.curly' : glyph-proc
 		include : MarkSet.b
 		include : [GenSmallYShape false false true].SmallLambdaShape CAP 0
-		set-base-anchor 'overlay' Middle (XH / 2)
-		create-derived 'lambdaSlash.curly' : LambdaBarOverlayShape
+
+	create-glyph 'lambdaSlash.straight' : glyph-proc
+		include : MarkSet.b
+		include : union
+			refer-glyph 'grek/lambda.straight'
+			LambdaBarOverlayShape
+
+	create-glyph 'lambdaSlash.curly' : glyph-proc
+		include : MarkSet.b
+		include : union
+			refer-glyph 'grek/lambda.curly'
+			LambdaBarOverlayShape
 
 	select-variant 'grek/lambda' 0x3BB
 	select-variant 'lambdaSlash' 0x19B (follow -- 'grek/lambda')
@@ -2737,12 +2745,12 @@ glyph-block Letter-Latin-Lower-B : begin
 		include [refer-glyph src] AS_BASE
 		eject-contour 'serifLT'
 		local s : Math.max (XH * 0.1) Stroke
-		include : ReverseContours : spiro-outline
-			corner (SB - O) CAP
+		include : spiro-outline
 			corner  SB CAP
-			corner (SB - s) (CAP - s)
-			corner  SB (CAP - s * 2)
+			corner (SB - O) CAP
 			corner (SB - O) (CAP - s * 2)
+			corner  SB (CAP - s * 2)
+			corner (SB - s) (CAP - s)
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/b' 0x1D553 : glyph-proc
@@ -6791,11 +6799,11 @@ glyph-block Letter-Latin-Z : begin
 
 		include : tagged 'strokeTop' : HBarTop SB RightSB CAP
 
-		include : ReverseContours : spiro-outline
+		include : spiro-outline
 			corner SB Stroke
-			corner (SB + Stroke * cor) Stroke
-			corner RightSB (CAP - Stroke)
 			corner (RightSB - Stroke * cor) (CAP - Stroke)
+			corner RightSB (CAP - Stroke)
+			corner (SB + Stroke * cor) Stroke
 
 		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 
@@ -6814,11 +6822,11 @@ glyph-block Letter-Latin-Z : begin
 
 		include : tagged 'strokeTop' : HBarTop SB RightSB XH
 
-		include : ReverseContours : spiro-outline
+		include : spiro-outline
 			corner SB Stroke
-			corner (SB + Stroke * cor) Stroke
-			corner RightSB (XH - Stroke)
 			corner (RightSB - Stroke * cor) (XH - Stroke)
+			corner RightSB (XH - Stroke)
+			corner (SB + Stroke * cor) Stroke
 
 		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 		if SLAB : begin
@@ -6926,20 +6934,20 @@ glyph-block Letter-Latin-Z : begin
 		include : MarkSet.if
 		local cor : 1.15 * HVContrast
 
-		include : HBarTop SB RightSB CAP
+		include : union
+			HBarTop SB RightSB CAP
+			spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (CAP - Stroke)
+				corner (RightSB - Stroke * cor) (CAP - Stroke)
+			dispiro
+				widths.lhs
+				g4 SB 0
+				alsoThru 0.36 0.6 important
+				flat (RightSB - 1) Descender
+				curl RightSB Descender
 
-		include : ReverseContours : spiro-outline
-			corner SB 0
-			corner (SB + Stroke * cor) 0
-			corner RightSB (CAP - Stroke)
-			corner (RightSB - Stroke * cor) (CAP - Stroke)
-
-		include : dispiro
-			widths.lhs
-			g4 SB 0
-			alsoThru 0.36 0.6 important
-			flat (RightSB - 1) Descender
-			curl RightSB Descender
 		if SLAB : begin
 			include : DownwardLeftSerif SB CAP VJut
 
@@ -6947,20 +6955,19 @@ glyph-block Letter-Latin-Z : begin
 		include : MarkSet.p
 		local cor : 1.2 * HVContrast
 
-		include : HBarTop SB RightSB XH
-
-		include : ReverseContours : spiro-outline
-			corner SB 0
-			corner (SB + Stroke * cor) 0
-			corner RightSB (XH - Stroke)
-			corner (RightSB - Stroke * cor) (XH - Stroke)
-
-		include : dispiro
-			widths.lhs
-			g4 (SB - OXHook) 0
-			alsoThru 0.36 0.6 important
-			flat (RightSB - 1) Descender
-			curl RightSB Descender
+		include : union
+			HBarTop SB RightSB XH
+			spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (XH - Stroke)
+				corner (RightSB - Stroke * cor) (XH - Stroke)
+			dispiro
+				widths.lhs
+				g4 (SB - OXHook) 0
+				alsoThru 0.36 0.6 important
+				flat (RightSB - 1) Descender
+				curl RightSB Descender
 
 		if SLAB : begin
 			include : DownwardLeftSerif SB XH VJut
@@ -7406,27 +7413,26 @@ glyph-block Letter-Latin-Ezh : begin
 		local ezhLeft : mix SB RightSB [fallback pleft 0.2]
 		local ezhRight : mix SB RightSB [fallback pright 0.925]
 
-		include : HBarTop SB ezhRight top
-
-		include : ReverseContours : spiro-outline
-			corner ezhLeft yMidBar
-			corner (ezhLeft + Stroke * cor) (yMidBar - HalfStroke)
-			corner (ezhLeft + Stroke * cor) yMidBar
-			corner ezhRight (top - Stroke)
-			corner (ezhRight - Stroke * cor) (top - Stroke)
-
-		include : dispiro
-			widths.rhs
-			flat ezhLeft yMidBar [heading Rightward]
-			curl (Middle - CorrectionOMidS) yMidBar
-			archv
-			if hookless
-			: then : list
-				g4.down.mid  (RightSB - OX) [mix yMidBar bot hookless] [heading Downward]
-			: else : list
-				g4   (RightSB - OX) [mix yMidBar bot : SmallSmoothB / (SmallSmoothA + SmallSmoothB)]
-				hookend bot
-				g4 SB (bot + Hook * (top - bot) / [fallback para.cap0 CAP])
+		include : union
+			HBarTop SB ezhRight top
+			spiro-outline
+				corner ezhLeft yMidBar
+				corner (ezhLeft + Stroke * cor) (yMidBar - HalfStroke)
+				corner (ezhLeft + Stroke * cor) yMidBar
+				corner ezhRight (top - Stroke)
+				corner (ezhRight - Stroke * cor) (top - Stroke)
+			dispiro
+				widths.rhs
+				flat ezhLeft yMidBar [heading Rightward]
+				curl (Middle - CorrectionOMidS) yMidBar
+				archv
+				if hookless
+				: then : list
+					g4.down.mid  (RightSB - OX) [mix yMidBar bot hookless] [heading Downward]
+				: else : list
+					g4   (RightSB - OX) [mix yMidBar bot : SmallSmoothB / (SmallSmoothA + SmallSmoothB)]
+					hookend bot
+					g4 SB (bot + Hook * (top - bot) / [fallback para.cap0 CAP])
 
 		if SLAB : begin
 			include : DownwardLeftSerif SB top VJut

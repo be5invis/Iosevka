@@ -6,30 +6,36 @@ export : define [SetupBuilders args] : begin
 	define [Boole operator] : begin
 		define [BooleImplFn] : begin
 			define k : {}.slice.call arguments 0
-			define [BooleProc dontinc] : begin
+			return : lambda [dontinc] : begin
 				local g : new Glyph
 				set g.gizmo : this.gizmo || GlobalTransform
 				if (k.length == 0) : return g
 
-				g.include k.0
-				set g.contours : g.contours.map CurveUtil.convertContourToCubic
+				local contourArcs : getArcsFromProc this k.0
+				if (k.length === 1) : set contourArcs : TypoGeom.Boolean.removeOverlap
+					begin contourArcs
+					begin TypoGeom.Boolean.PolyFillType.pftNonZero
+					begin CurveUtil.BOOLE_RESOLUTION
+
 				foreach [item : items-of : k.slice 1] : begin
-					local g1 : new Glyph
-					set g1.gizmo : this.gizmo || GlobalTransform
-					g1.include item
-					set g1.contours : g1.contours.map CurveUtil.convertContourToCubic
-					local c1 : TypoGeom.Boolean.combine operator
-						CurveUtil.convertShapeToArcs g.contours
-						CurveUtil.convertShapeToArcs g1.contours
+					set contourArcs : TypoGeom.Boolean.combine operator
+						begin contourArcs
+						getArcsFromProc this item
 						begin TypoGeom.Boolean.PolyFillType.pftNonZero
 						begin TypoGeom.Boolean.PolyFillType.pftNonZero
 						begin CurveUtil.BOOLE_RESOLUTION
-					local ctx : new CurveUtil.BezToContoursSink
-					TypoGeom.ShapeConv.transferBezArcShape c1 ctx
-					set g.contours ctx.contours
+
+				local ctx : new CurveUtil.BezToContoursSink
+				TypoGeom.ShapeConv.transferBezArcShape contourArcs ctx
+				set g.contours ctx.contours
 				this.includeGlyph g
 				return g
-			return BooleProc
+
+	define [getArcsFromProc g p] : begin
+		local g1 : new Glyph
+		set g1.gizmo : g.gizmo || GlobalTransform
+		g1.include p
+		return : CurveUtil.convertShapeToArcs g1.contours
 
 	define union : Boole TypoGeom.Boolean.ClipType.ctUnion
 	define intersection : Boole TypoGeom.Boolean.ClipType.ctIntersection
