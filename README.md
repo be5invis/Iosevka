@@ -406,6 +406,8 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
   - `html-comment`: Enable ligation for `<!--` and `<!---`.
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
+  - `brace-bar`: Enable ligation for `{|` and `|}`.
+  - `brack-bar`: Enable ligation for `[|` and `|]`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
