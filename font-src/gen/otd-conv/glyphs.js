@@ -1,4 +1,5 @@
 const { Ot } = require("ot-builder");
+const Point = require("../../support/point");
 
 class NamedGlyphStore {
 	constructor() {
@@ -48,7 +49,9 @@ class NamedGlyphStore {
 					Ot.Glyph.Point.create(
 						z.x,
 						z.y,
-						z.on ? Ot.Glyph.PointType.Corner : Ot.Glyph.PointType.Quad
+						z.type === Point.Type.Quadratic
+							? Ot.Glyph.PointType.Quad
+							: Ot.Glyph.PointType.Corner
 					)
 				);
 			}

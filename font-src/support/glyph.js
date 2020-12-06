@@ -216,7 +216,7 @@ module.exports = class Glyph {
 			for (let k = 0; k < c1.length; k++) {
 				const z1 = c1[k],
 					z2 = c2[k];
-				if (z1.x !== z2.x || z1.y !== z2.y || z1.on !== z2.on) return;
+				if (z1.x !== z2.x || z1.y !== z2.y || z1.type !== z2.type) return;
 			}
 		}
 		this.semanticInclusions = [

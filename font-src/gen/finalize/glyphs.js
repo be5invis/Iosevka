@@ -63,7 +63,6 @@ function regulateSimpleGlyph(g, skew) {
 
 function simplifyContours(source) {
 	const sink = new FairizedShapeSink();
-
 	TypoGeom.ShapeConv.transferGenericShape(
 		TypoGeom.Fairize.fairizeBezierShape(
 			TypoGeom.Boolean.removeOverlap(
@@ -89,9 +88,7 @@ class FairizedShapeSink {
 		if (this.lastContour.length > 2) {
 			const zFirst = this.lastContour[0],
 				zLast = this.lastContour[this.lastContour.length - 1];
-			if (zFirst.on && zLast.on && zFirst.x === zLast.x && zFirst.y === zLast.y) {
-				this.lastContour.pop();
-			}
+			if (isOccurrent(zFirst, zLast)) this.lastContour.pop();
 			this.contours.push(this.lastContour);
 		}
 		this.lastContour = [];
@@ -101,7 +98,7 @@ class FairizedShapeSink {
 		this.lineTo(x, y);
 	}
 	lineTo(x, y) {
-		const z = Point.cornerFromXY(x, y).round(CurveUtil.RECIP_GEOMETRY_PRECISION);
+		const z = Point.fromXY(Point.Type.Corner, x, y).round(CurveUtil.RECIP_GEOMETRY_PRECISION);
 		while (this.lastContour.length >= 2) {
 			const a = this.lastContour[this.lastContour.length - 2],
 				b = this.lastContour[this.lastContour.length - 1];
@@ -117,15 +114,25 @@ class FairizedShapeSink {
 		const offPoints = TypoGeom.Quadify.auto(arc, 1, 16);
 		if (offPoints) {
 			for (const z of offPoints)
-				this.lastContour.push(Point.offFrom(z).round(CurveUtil.RECIP_GEOMETRY_PRECISION));
+				this.lastContour.push(
+					Point.from(Point.Type.Quadratic, z).round(CurveUtil.RECIP_GEOMETRY_PRECISION)
+				);
 		}
 		this.lineTo(x, y);
 	}
 }
+function isOccurrent(zFirst, zLast) {
+	return (
+		zFirst.type === Point.Type.Corner &&
+		zLast.type === Point.Type.Corner &&
+		zFirst.x === zLast.x &&
+		zFirst.y === zLast.y
+	);
+}
 function isLineExtend(a, b, c) {
 	return (
-		a.on &&
-		c.on &&
+		a.type === Point.Type.Corner &&
+		c.type === Point.Type.Corner &&
 		((aligned(a.x, b.x, c.x) && between(a.y, b.y, c.y)) ||
 			(aligned(a.y, b.y, c.y) && between(a.x, b.x, c.x)))
 	);
