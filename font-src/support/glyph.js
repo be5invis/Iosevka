@@ -116,7 +116,7 @@ module.exports = class Glyph {
 	includeGeometry(geom, shiftX, shiftY) {
 		if (!geom || !geom.contours || !geom.contours.length) return null;
 		if (this.includeGeometryAsTransparentReferences(geom, shiftX, shiftY)) return null;
-		return this.includeGeometryImpl(geom, shiftX, shiftY);
+		return this.includeContours(geom.contours, shiftX, shiftY);
 	}
 
 	isPureComposite() {
@@ -138,7 +138,7 @@ module.exports = class Glyph {
 		if (!geom.isPureComposite()) return false;
 
 		for (const sr of geom.semanticInclusions) {
-			const cs = this.includeGeometryImpl(sr.glyph, sr.x + shiftX, sr.y + shiftY);
+			const cs = this.includeContours(sr.glyph.contours, sr.x + shiftX, sr.y + shiftY);
 			if (cs) {
 				this.semanticInclusions.push({
 					glyph: sr.glyph,
@@ -150,11 +150,11 @@ module.exports = class Glyph {
 		}
 		return true;
 	}
-	includeGeometryImpl(geom, shiftX, shiftY) {
+	includeContours(contours, shiftX, shiftY) {
 		let newContours = [];
-		for (const contour of geom.contours) {
+		for (const contour of contours) {
 			let c = [];
-			c.tag = contour.tag || geom.tag || this.defaultTag;
+			c.tag = contour.tag || contours.tag || this.defaultTag;
 			for (const z of contour) c.push(Point.translated(z, shiftX, shiftY));
 			this.contours.push(c);
 			newContours.push(c);
