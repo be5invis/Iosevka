@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 4.0.3
+
+ * Fix operator centering chain propagation under Apple platform (#768).
+ * Fix Cyrillic Small ER's variant selection, always keeping ears (#769).
+
+
 ### 4.0.2
 
  * Add ligation group `brack-bar` and `brace-bar`, and enabled in `dlig` (#767).
