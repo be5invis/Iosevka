@@ -104,15 +104,24 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		set lookupRank : lookupRank + 1
 
 	do "Operator centering"
-		define [centerAsterisk]   : {'asterisk'}          ~> {'asterisk/lowered'}
-		define [centerColon]      : {'colon' 'colon.mid'} ~> {'colon.mid' 'colon.mid'}
-		define [centerCaret]      : {'asciiCaret'}        ~> {'asciiCaret.low'}
-		define [centerTilde]      : {'asciiTilde'}        ~> {'asciiTilde.low'}
-		define [centerPeriod]     : {'period'}            ~> {'period.mid'}
-		define [deCenterPeriod]   : {'period.mid'}        ~> {'period'}
+		define [centerAsterisk]   : {'asterisk'}    ~>  {'asterisk/lowered'}
+		define [centerColon]      : {'colon'}       ~>  {'colon.mid'}
+		define [centerCaret]      : {'asciiCaret'}  ~>  {'asciiCaret.low'}
+		define [centerTilde]      : {'asciiTilde'}  ~>  {'asciiTilde.low'}
+		define [centerPeriod]     : {'period'}      ~>  {'period.mid'}
+		define [deCenterPeriod]   : {'period.mid'}  ~>  {'period'}
 
 		define centerizeGroups : list centerAsterisk centerColon centerCaret centerTilde
 		if [hasLG 'dot-oper'] : centerizeGroups.push centerPeriod
+
+		define centerizeL : centerizeGroups.map : x => [x].left.0
+		define centerizeR : centerizeGroups.map : lambda [x] : begin
+			local left [x].left
+			local right [x].right
+			while (right <@ Function) : set right [right left]
+			return : if right (right.0 || left.0) (left.0)
+
+		define [Cg] : centerizeL ~> centerizeR
 
 		do "Bracket-star"
 			CreateLigationLookup : keep-if 'brst' : list
@@ -133,63 +142,35 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
 
 		do "Operator Centering"
-			local startRules {}
-			foreach [g : items-of centerizeGroups] : begin
-				startRules.push : chain-rule [g] [g] [acskip] [acskip] [acops] # ::+
-				startRules.push : chain-rule [g] [g] [acskip] [acops]          # ::+
-				startRules.push : chain-rule [g] [g] [acops]                   # ::+
-				startRules.push : chain-rule [g] [acskip] [acskip] [acops]     # :+
-				startRules.push : chain-rule [g] [acskip] [acops]              # :+
-				startRules.push : chain-rule [g] [acops]                       # :+
-				startRules.push : chain-rule [acops] [acskip] [acskip] [g]     # +:
-				startRules.push : chain-rule [acops] [acskip] [g]              # +:
-				startRules.push : chain-rule [acops] [g]                       # +:
-			CreateLigationLookup : keep-if 'center-ops' startRules
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule [Cg] [Cg] [acskip] [acskip] [acops] # ::+
+				chain-rule [Cg] [Cg] [acskip] [acops]          # ::+
+				chain-rule [Cg] [Cg] [acops]                   # ::+
+				chain-rule [Cg] [acskip] [acskip] [acops]      # :+
+				chain-rule [Cg] [acskip] [acops]               # :+
+				chain-rule [Cg] [acops]                        # :+
+				chain-rule [acops] [acskip] [acskip] [Cg]      # +:
+				chain-rule [acops] [acskip] [Cg]               # +:
+				chain-rule [acops] [Cg]                        # +:
 
 		do "Operator centering : Trailing"
-			local centerizeL : centerizeGroups.map : x => [x].left.0
-			local centerizeR : centerizeGroups.map : lambda [x] : begin
-				local left [x].left
-				local right [x].right
-				while (right <@ Function) : set right [right left]
-				return : if right (right.0 || left.0) (left.0)
-
 			CreateLigationLookup : keep-if 'center-ops' : list
-				chain-rule centerizeR [acskip] [acskip] (centerizeL ~> centerizeR)
-				chain-rule centerizeR [acskip] (centerizeL ~> centerizeR)
-				chain-rule centerizeR (centerizeL ~> centerizeR)
+				chain-rule centerizeR [acskip] [acskip] [Cg]
+				chain-rule centerizeR [acskip] [Cg]
+				chain-rule centerizeR [Cg]
+
 			CreateReverseLigationLookup : keep-if 'center-ops' : list
-				reverse-rule
-					centerizeL ~> centerizeR
-					[acskip]   ~> look-around
-					[acskip]   ~> look-around
-					centerizeR ~> look-around
-				reverse-rule
-					centerizeL ~> centerizeR
-					[acskip]   ~> look-around
-					centerizeR ~> look-around
-				reverse-rule
-					centerizeL ~> centerizeR
-					centerizeR ~> look-around
+				reverse-rule [Cg] [acskip] [acskip] centerizeR
+				reverse-rule [Cg] [acskip] centerizeR
+				reverse-rule [Cg] centerizeR
 
-		# Commented out this since it looks not very "necessary" if all dots are considered
-		# operators...
-		# define alphabet {
-		# 	'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm'
-		# 	'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z'
-		# 	'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M'
-		# 	'N' 'O' 'P' 'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z'
-		# 	'zero.lnum' 'zero.onum' 'one.lnum' 'one.onum'
-		# 	'two.lnum' 'two.onum' 'three.lnum' 'three.onum'
-		# 	'four.lnum' 'four.onum' 'five.lnum' 'five.onum'
-		# 	'six.lnum' 'six.onum' 'seven.lnum' 'seven.onum'
-		# 	'eight.lnum' 'eight.onum' 'nine.lnum' 'nine.onum'
-		# }
-		# do "Operator centering : Avoid 'letter-point' being centered"
-		# 	CreateLigationLookup : keep-if 'center-ops' : keep-if 'dot-oper' : list
-		# 		chain-rule alphabet [deCenterPeriod]
-		# 		chain-rule [deCenterPeriod] alphabet
-
+		do "Operator centering : Apple fix"
+			# Apple (still) have problem when dealing with reverse chaining lookup
+			# They give up at run beginning. Fix them.
+			CreateLigationLookup : keep-if 'center-ops' : list
+				chain-rule [Cg] [acskip] [acskip] centerizeR
+				chain-rule [Cg] [acskip] centerizeR
+				chain-rule [Cg] centerizeR
 
 	do "Kern Dotty"
 		define dottyPunctuationSets : list
@@ -307,6 +288,11 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				{'bar'}                ~> [lsx 'trig']
 		CreateReverseLigationLookup : keep-if 'trig' : list
 			reverse-rule
+				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
+				[[lsx 'trig'] {'bar'}] ~> look-around
+		# Apple fix
+		CreateLigationLookup : keep-if 'trig' : list
+			chain-rule
 				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
 				[[lsx 'trig'] {'bar'}] ~> look-around
 
