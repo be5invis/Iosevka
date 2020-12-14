@@ -1,57 +1,65 @@
 ## Modifications since version 2.x
 
-### 4.0.0-beta.3
+### 4.0.3
 
- * \[**Breaking**\] Added variant `r/earless-corner-serifed` and `r/earless-rounded-serifed`; Reordered `r`'s variant ranking and renamed `r/straight` to `r/serifless` (#742).
- * Fix variant application of fraction 1/10 (U+2152, #736).
- * Make variant application effective on LATIN SMALL LETTER WITH STROKE (U+0167, #737).
- * Updated readme to reflect change in spacing parameter `force-monospace` to `fontconfig-mono`.
- * Made check and cross marks wide-aware.
+ * Fix operator centering chain propagation under Apple platform (#768).
+ * Fix Cyrillic Small ER's variant selection, always keeping ears (#769).
 
 
-### 4.0.0-beta.2
+### 4.0.2
 
- * [**Breaking**] Reorder and reorganize character variants of `i`, `l`, and `f`, including:
-   * The “italic” variants are removed, or renamed to reflect its shape;
-   * Reorder variants of `i` and `l` to let them get synchronized;
-   * Make `f`'s variant more matrix-like.
- * Fix inconsistent italic serif of U+0463 CYRILLIC SMALL LETTER YAT (#729).
- * Fix dotless form of mathematical derived letters if it ia aliased (#731).
- * Fix inconsistent serif on Bulgarian U+044E CYRILLIC SMALL LETTER YU (#732).
- * Fix variant selector of Cyrillic TE’s italics to better respect `m`’s tailed-ness (#734).
- * Fix middle bar placement of U+2180 under quasi-proportional.
+ * Add ligation group `brack-bar` and `brace-bar`, and enabled in `dlig` (#767).
+ * Add characters:
+   - Telephone Sign (`U+2121`) and Facsimile Sign (`U+213B`).
+   - Cross Mark (`U+274C`).
+
+
+### 4.0.1
+
+ * Improve of component glyph coloring of non-equal ligation (like `!=`).
+ * Correct shape of `4` in SS14.
  * Add Characters:
-   * U+1D6A4 MATHEMATICAL ITALIC SMALL DOTLESS I, U+1D6A5 MATHEMATICAL ITALIC SMALL DOTLESS J (#730).
-   * U+23CF EJECT SYMBOL (#728).
+   - Atom Symbol (`U+269B`).
+   - Black Slightly Small Circle Circle ... Very Heavy Eight-Spoked Asterisk (`U+1F784` ... `U+1F7BF`).
 
 
-### 4.0.0-beta.1
-
- * [**Breaking**] Add shorter-serif variant for capital I (OpenType tags reordered compared to alpha.1; #709).
- * Fix broken Bulgarian localized of Cyrillic Small Sha and Cyrillic Capital El (#716).
- * Fix broken serif shapes in Italic Cyrillic Small I (#717).
- * Make variant selectors for `m` and `u` have more effect on Cyrillic letters.
- * Fix incorrect serifs of Greek Small Rho (#718).
- * Add derived bold / italic / sans-serif / typewriter letters in Mathematical Alphanumeric Symbols block.
- * Support slope-dependent digit form control (#724).
- * Update `ss09` style for capital G to Toothless (#726).
- * Character Addition:
-   - U+0462 CYRILLIC CAPITAL LETTER YAT and U+0463 CYRILLIC SMALL LETTER YAT (#727).
-
-
-### 4.0.0-alpha.1
+### 4.0.0
 
  * \[**Breaking**\] Change implementation of character variants to `cv##` and alternate substitutions (#572).
  * \[**Breaking**\] Change the building configuration format -- now we use dicts instead of “array of styles”.
  * \[**Breaking**\] Cleanup of weight levels and increase contrast under heavier weights.
- * \[**Breaking**\] Removed WOFF 1 web font building.
+ * \[**Breaking**\] Remove WOFF 1 web font building.
  * \[**Breaking**\] Release packages will now be divided by formats.
- * Fix the shape of hook-top V's.
- * Add half-filled stars (`U+2BE8` ... `U+2BEB`, #708).
+ * Add Characters:
+   - Derived bold, italic, sans-serif, typewriter, and double-struck letters / digits, in Mathematical Alphanumeric Symbols block (#444, #712).
+   - Half-filled stars (`U+2BE8` ... `U+2BEB`, #708).
+   - `U+0462` CYRILLIC CAPITAL LETTER YAT and `U+0463` CYRILLIC SMALL LETTER YAT (#727).
+   - `U+1D6A4` MATHEMATICAL ITALIC SMALL DOTLESS I, `U+1D6A5` MATHEMATICAL ITALIC SMALL DOTLESS J (#730).
+   - U+23CF EJECT SYMBOL (#728).
+ * Add Variants:
+   - `u`/`toothless-corner` (#706).
+   - Curly variants of `Z` / `z` (#362).
+   - Toothless-corner variant of `G` and Ampersand (`&`).
+ * Update `ss09` style for capital G to Toothless (#726).
  * Add ligation set for Verilog (#710).
+ * Add more alternative exclamation-related ligation sets (`exeqeq-dotted`, `eqexeq-dotted`, `eqexeq-dl-dotted`) (#748).
+ * Fix the shape of hook-top V's.
+ * Make check and cross marks wide-aware.
+ * Fix middle bar placement of `U+2180` under quasi-proportional.
  * Correct description of `1` variants (#711).
- * Add variant `u`/`toothless-corner` (#706).
- * Add support for all double-struck Latin letters and Digits (#712).
+ * Fix broken Bulgarian localization of Cyrillic Small Sha and Cyrillic Capital El (#716).
+ * Fix broken serif shapes in Italic Cyrillic Small I (#717).
+ * Fix incorrect serifs of Greek Small Rho (#718).
+ * Fix inconsistent italic serif of `U+0463` CYRILLIC SMALL LETTER YAT (#729).
+ * Fix inconsistent serif on Bulgarian `U+044E` CYRILLIC SMALL LETTER YU (#732).
+ * Fix variant application on italic Cyrillic Small Te and Cyrillic Small I (#734).
+ * Fix variant application on fraction 1/10 (`U+2152`, #736).
+ * Fix variant application on LATIN SMALL LETTER WITH STROKE (`U+0167`, #737).
+ * Fix centering of `Q` variants when occurred in enclosures (#751).
+ * Fix broken descender connection of `cyrl/tse` (U+0446) under Italic (#754).
+ * Fix missing serifs in earless-corner `m` variants (#752).
+ * Remove slight curvature of italic single-storey `a` (#755).
+ * Fix kerned dotty operators' placement when placed near brackets and commas (#757).
 
 
 ### 3.7.1
@@ -188,7 +196,7 @@
  * Add toothless variant of `b` and `d` (#462).
  * Fix italic Cyrillic I and Tse shape when `v-u-without-bar` is applied (#625).
  * Add `v-k-curly-cursive` combination (#627).
- * Add `calt-exeq-alt-1` as an alternative style of `!=` ligation (#608).
+ * Add `calt-exeq-dotted` as an alternative style of `!=` ligation (#608).
 
 
 ### 3.2.2

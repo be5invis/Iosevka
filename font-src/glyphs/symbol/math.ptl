@@ -3,6 +3,7 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
 import [DesignParameters] from '../../meta/aesthetics'
+import '../../support/point' as Point
 
 glyph-module
 
@@ -11,13 +12,15 @@ glyph-block NotGlyphFn : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-export notGlyph
 
+	define NotGlyphSw : AdviceStroke 4.5
+
 	define [notGlyphGeneric newid unicode oldid top bot prop shift F] : begin
 		local component : F
 			fallback top BgOpTop
 			fallback bot BgOpBot
 			mix SB RightSB [fallback prop 0.25]
 			mix RightSB SB [fallback prop 0.25]
-			AdviceStroke 4
+			begin NotGlyphSw
 			fallback shift 0
 		create-glyph (newid || 'not' + oldid) unicode : glyph-proc
 			include : refer-glyph oldid
@@ -35,9 +38,9 @@ glyph-block NotGlyphFn : begin
 				return : WithTransform [Translate sh 0] [refer-glyph slashBarName]
 
 	define [notGlyph.right] : params [newid unicode oldid top bot prop shift] : begin
-		notGlyph newid unicode oldid top bot prop (-OperatorStroke * 0.5)
+		notGlyph newid unicode oldid top bot prop (-NotGlyphSw * 0.5)
 	define [notGlyph.left] : params [newid unicode oldid top bot prop shift] : begin
-		notGlyph newid unicode oldid top bot prop (OperatorStroke * 0.5)
+		notGlyph newid unicode oldid top bot prop (NotGlyphSw * 0.5)
 	define [notGlyph.generic] : params [newid unicode oldid top bot prop shift F] : begin
 		notGlyphGeneric newid unicode oldid top bot prop shift F
 
@@ -1442,14 +1445,15 @@ glyph-block Symbol-Math-APL : begin
 
 		local corners : new-glyph : glyph-proc
 			set this.gizmo : Translate 0 0
-			foreach [c : items-of overlay.contours] : foreach [z : items-of c] : if z.on : do
-				define x z.x
-				define y z.y
-				include : spiro-outline
-					corner (x - sw) (y - sw)
-					corner (x + sw) (y - sw)
-					corner (x + sw) (y + sw)
-					corner (x - sw) (y + sw)
+			foreach [c : items-of overlay.contours] : foreach [z : items-of c] : do
+				if (z.type === Point.Type.Corner) : begin
+					define x z.x
+					define y z.y
+					include : spiro-outline
+						corner (x - sw) (y - sw)
+						corner (x + sw) (y - sw)
+						corner (x + sw) (y + sw)
+						corner (x - sw) (y + sw)
 
 		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
 			define dx : r / segs * sw

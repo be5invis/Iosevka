@@ -53,7 +53,7 @@ define [interpretLookup gs lut lookups] : match lut.type
 define [interpretLookupAt gs j lut] : match lut.type
 	"gsub_single" : if lut.substitutions.(gs.(j)) : set gs.(j) lut.substitutions.(gs.(j))
 
-export : define [BuildCompatLigatures glyphStore GSUB GDEF config] : begin
+export : define [BuildCompatLigatures para glyphStore GSUB GDEF config] : begin
 	foreach [cldef : items-of config] : do
 		if [not cldef.unicode] : break nothing
 		if [not cldef.featureTag] : break nothing
@@ -82,6 +82,9 @@ export : define [BuildCompatLigatures glyphStore GSUB GDEF config] : begin
 			g1.includeGlyph g
 			g1.applyTransform : new Transform 1 0 0 1 (g1.advanceWidth) 0
 			set g1.advanceWidth : g1.advanceWidth + g.advanceWidth
+
+		if(para.forceMonospace && [Math.round g1.advanceWidth] > [Math.round para.width])
+			throw : new Error "Compat ligature wider than one unit, conflicts with fontconfig-mono: \[cldef.unicode.toString 16]"
 
 		glyphStore.addGlyph    g1Name        g1
 		glyphStore.encodeGlyph cldef.unicode g1

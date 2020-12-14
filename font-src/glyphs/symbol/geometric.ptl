@@ -5,152 +5,201 @@ import [DesignParameters] from '../../meta/aesthetics'
 
 glyph-module
 
+glyph-block Symbol-Geometric-Shared : begin
+	glyph-block-export GeometricDim
+	define [GeometricDim s] : begin
+		local size : 0.5 * Width * s - 0.625 * SB * s * s
+		return : object
+			Scalar  s
+			Size    size
+			Width : Width * s
+			Left  : 0.5 * Width * s - size
+			MidX  : 0.5 * Width * s
+			Right : 0.5 * Width * s + size
+			Top   : SymbolMid       + size
+			MidY    SymbolMid
+			Bot   : SymbolMid       - size
+
+	glyph-block-export UnicodeWeightGrade
+	define [UnicodeWeightGrade n s] : begin
+		define kwPow 1
+		define kkw : 2 / [Math.pow 4 kwPow]
+		define kw : 10 - s - kkw * [Math.pow n kwPow]
+		define [mulPow ss pm] : (1 / 4 + ss / 8) * [StrokeWidthBlend 2 1]
+		define kMul : [Math.pow n : mulPow s] / [Math.pow 4 : mulPow 2]
+		define kAdj : GeometryStroke / [AdviceStroke 6]
+		return : kMul * kAdj * [AdviceStroke kw]
+
 glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade
 
-	define Geom : let [size (0.5 * MosaicWidth - 0.625 * SB * MosaicWidthScalar * MosaicWidthScalar)] : object
-		Left  : MosaicMiddle - size
-		Right : MosaicMiddle + size
-		Top   : SymbolMid    + size
-		Bot   : SymbolMid    - size
-		Size  : begin size
+	define Geom : GeometricDim MosaicWidthScalar
 
-	define [UpperHalfMask] : Rect (SymbolMid + Geom.Size * 2) SymbolMid 0 MosaicWidth
-	define [LowerHalfMask] : Rect SymbolMid (SymbolMid - Geom.Size * 2) 0 MosaicWidth
-	define [LeftHalfMask]  : Rect (SymbolMid + Geom.Size * 2) (SymbolMid - Geom.Size * 2) 0 MosaicMiddle
-	define [RightHalfMask] : Rect (SymbolMid + Geom.Size * 2) (SymbolMid - Geom.Size * 2) MosaicMiddle MosaicWidth
+	define [UpperHalfMask] : Rect (Geom.MidY + Geom.Size * 2) Geom.MidY 0 Geom.Width
+	define [LowerHalfMask] : Rect Geom.MidY (Geom.MidY - Geom.Size * 2) 0 Geom.Width
+	define [LeftHalfMask]  : Rect (Geom.MidY + Geom.Size * 2) (Geom.MidY - Geom.Size * 2) 0 Geom.MidX
+	define [RightHalfMask] : Rect (Geom.MidY + Geom.Size * 2) (Geom.MidY - Geom.Size * 2) Geom.MidX Geom.Width
 	define [UpperLeftQuarterMark]  : intersection [UpperHalfMask] [LeftHalfMask]
 	define [UpperRightQuarterMark] : intersection [UpperHalfMask] [RightHalfMask]
 	define [LowerLeftQuarterMark]  : intersection [LowerHalfMask] [LeftHalfMask]
 	define [LowerRightQuarterMark] : intersection [LowerHalfMask] [RightHalfMask]
 	define [UpperLeftHalfMark]  : spiro-outline
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid - Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
 	define [LowerRightHalfMark] : spiro-outline
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid - Geom.Size * 2)
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid - Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
 	define [UpperRightHalfMark]  : spiro-outline
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid - Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
 	define [LowerLeftHalfMark] : spiro-outline
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid - Geom.Size * 2)
-		corner  (MosaicMiddle - Geom.Size * 2) (SymbolMid + Geom.Size * 2)
-		corner  (MosaicMiddle + Geom.Size * 2) (SymbolMid - Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
+		corner  (Geom.MidX - Geom.Size * 2) (Geom.MidY + Geom.Size * 2)
+		corner  (Geom.MidX + Geom.Size * 2) (Geom.MidY - Geom.Size * 2)
 
 	define [StdBlackShape fn name unicode props] : begin
 		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : fn
-				fallback pp.cx MosaicMiddle
-				fallback pp.cy SymbolMid
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
 				Geom.Size * [fallback pp.size 1]
 				begin 0
 
-	define [StdWhiteShape fn name unicode props] : begin
+	define [StdWhiteShapeImpl fn s out in props] : begin
 		local pp : fallback props {.}
+		local sw : fallback pp.sw GeometryStroke
+		return : difference
+			fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				s * Geom.Size * [fallback pp.size 1] + out * sw
+				(-out) * sw
+			fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				s * Geom.Size * [fallback pp.size 1] - in * sw
+				in * sw
+
+	define [ConvexWhitePolygonImpl fn props] : begin
+		local pp : fallback props {.}
+		local sh : new-glyph : fn
+			fallback pp.cx Geom.MidX
+			fallback pp.cy Geom.MidY
+			Geom.Size * [fallback pp.size 1]
+			begin 0
+		local outlines : glyph-proc : begin
+			set this.gizmo : Translate 0 0
+			foreach c [items-of sh.contours] : foreach j [range 0 c.length] : begin
+				local a c.[if j (j - 1) (c.length - 1)]
+				local b c.(j)
+				include : dispiro
+					disable-contrast
+					widths.center ([fallback pp.sw GeometryStroke] * 2)
+					corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
+					corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
+
+		return : intersection sh outlines
+
+	define [StdWhiteShape fn name unicode props] : begin
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-			set-width MosaicWidth
-			include : difference
-				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
-					Geom.Size * [fallback pp.size 1]
-					begin 0
-				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
-					Geom.Size * [fallback pp.size 1] - [fallback pp.sw GeometryStroke]
-					fallback pp.sw GeometryStroke
+			set-width Geom.Width
+			include : StdWhiteShapeImpl fn 1 0 1 props
 
 	define [StdWhiteContainingBlackShape fn name unicode props] : begin
 		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			local sw : fallback pp.sw GeometryStroke
 			include : fn
-				fallback pp.cx MosaicMiddle
-				fallback pp.cy SymbolMid
-				0.5 * (Geom.Size * [fallback pp.size 1] - sw)
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
 				begin 0
-			include : difference
-				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
-					Geom.Size * [fallback pp.size 1]
-					begin 0
-				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
-					Geom.Size * [fallback pp.size 1] - sw
-					begin sw
+			include : StdWhiteShapeImpl fn 1 0 1 props
+
+	define [ConvexPolygonWhiteContainingBlackShape fn name unicode props] : begin
+		local pp : fallback props {.}
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			local sw : fallback pp.sw GeometryStroke
+			include : fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				[fallback pp.innerSize 0.5] * (Geom.Size * [fallback pp.size 1] - sw)
+				begin 0
+			include : ConvexWhitePolygonImpl fn props
+
+	define [StdGeomTargetShape fn name unicode props] : begin
+		local pp : fallback props {.}
+		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
+			set-width Geom.Width
+			local sw : fallback pp.sw GeometryStroke
+			include : fn
+				fallback pp.cx Geom.MidX
+				fallback pp.cy Geom.MidY
+				[fallback pp.innerSize 0.25] * (Geom.Size * [fallback pp.size 1] - sw * 2)
+				begin 0
+			include : StdWhiteShapeImpl fn 1                                        0   1   props
+			include : StdWhiteShapeImpl fn [mix 1 [fallback pp.innerSize 0.25] 0.5] 0   1   props
 
 	define [StdDoubleWhite fn name unicode props] : begin
 		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			local sw : fallback pp.sw GeometryStroke
 			include : difference
 				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
+					fallback pp.cx Geom.MidX
+					fallback pp.cy Geom.MidY
 					0.5 * (Geom.Size * [fallback pp.size 1] - sw)
 					begin 0
 				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
+					fallback pp.cx Geom.MidX
+					fallback pp.cy Geom.MidY
 					0.5 * (Geom.Size * [fallback pp.size 1] - sw) - sw
 					begin sw
 			include : difference
 				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
+					fallback pp.cx Geom.MidX
+					fallback pp.cy Geom.MidY
 					Geom.Size * [fallback pp.size 1]
 					begin 0
 				fn
-					fallback pp.cx MosaicMiddle
-					fallback pp.cy SymbolMid
+					fallback pp.cx Geom.MidX
+					fallback pp.cy Geom.MidY
 					Geom.Size * [fallback pp.size 1] - sw
 					begin sw
 
 	define [ConvexWhitePolygon fn name unicode props] : begin
-		local pp : fallback props {.}
 		create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-			set-width MosaicWidth
-			local sh : new-glyph : fn
-				fallback pp.cx MosaicMiddle
-				fallback pp.cy SymbolMid
-				Geom.Size * [fallback pp.size 1]
-				begin 0
-			local outlines : glyph-proc : begin
-				set this.gizmo : Translate 0 0
-				foreach c [items-of sh.contours] : foreach j [range 0 c.length] : begin
-					local a c.[if j (j - 1) (c.length - 1)]
-					local b c.(j)
-					include : dispiro
-						disable-contrast
-						widths.center ([fallback pp.sw GeometryStroke] * 2)
-						corner [mix a.x b.x (-2)] [mix a.y b.y (-2)]
-						corner [mix a.x b.x (+3)] [mix a.y b.y (+3)]
+			set-width Geom.Width
+			include : ConvexWhitePolygonImpl fn props
 
-			include : intersection sh outlines
+	define SizeLarge         {.size [DesignParameters.GeometricLargeX Geom.Width MosaicUnitWidth]}
+	define SizeMedium        {.size DesignParameters.geometric_medium_x}
+	define SizeMediumSmall   {.size DesignParameters.geometric_medium_small_x    .sw [Math.min GeometryStroke : AdviceStroke 5 Geom.Scalar]}
+	define SizeSmall         {.size DesignParameters.geometric_small_x           .sw [Math.min GeometryStroke : AdviceStroke 6 Geom.Scalar]}
+	define SizeSlightlySmall {.size DesignParameters.geometric_slightly_small_x  .sw [Math.min GeometryStroke : AdviceStroke 6.5 Geom.Scalar]}
+	define SizeVerySmall     {.size DesignParameters.geometric_very_small_x      .sw [Math.min GeometryStroke : AdviceStroke 7 Geom.Scalar]}
+	define SizeTiny          {.size DesignParameters.geometric_tiny_x            .sw [Math.min GeometryStroke : AdviceStroke 8 Geom.Scalar]}
 
-	define SizeLarge {.size [DesignParameters.GeometricLargeX MosaicWidth MosaicUnitWidth]}
-	define SizeMedium {.size DesignParameters.geometric_medium_x}
-	define SizeMediumSmall {.size DesignParameters.geometric_medium_small_x  .sw [Math.min GeometryStroke : AdviceStroke 5 MosaicWidthScalar]}
-	define SizeSmall {.size DesignParameters.geometric_small_x  .sw [Math.min GeometryStroke : AdviceStroke 6 MosaicWidthScalar]}
-	define SizeVerySmall {.size DesignParameters.geometric_very_small_x  .sw [Math.min GeometryStroke : AdviceStroke 7 MosaicWidthScalar]}
+	define SizeOblique            { .sw [Math.min GeometryStroke : AdviceStroke 4.75 Geom.Scalar] }
+	define SizeMediumOblique      { .size DesignParameters.geometric_medium_x        .sw [Math.min GeometryStroke : AdviceStroke 4.75 Geom.Scalar] }
+	define SizeMediumSmallOblique { .size DesignParameters.geometric_medium_small_x  .sw [Math.min GeometryStroke : AdviceStroke 5.25 Geom.Scalar] }
+	define SizeSmallOblique       { .size DesignParameters.geometric_small_x         .sw [Math.min GeometryStroke : AdviceStroke 6.25 Geom.Scalar] }
+	define SizeVerySmallOblique   { .size DesignParameters.geometric_very_small_x    .sw [Math.min GeometryStroke : AdviceStroke 7.25 Geom.Scalar] }
+	define SizeTinyOblique        { .size DesignParameters.geometric_tiny_x          .sw [Math.min GeometryStroke : AdviceStroke 8.25 Geom.Scalar] }
 
-	define ObliqueSW : Math.min GeometryStroke : AdviceStroke 5.25 MosaicWidthScalar
-	define SmallObliqueSW : Math.min GeometryStroke : AdviceStroke 6.25 MosaicWidthScalar
-	define SizeOblique { .sw ObliqueSW }
-	define SizeMediumOblique { .size DesignParameters.geometric_medium_x  .sw SmallObliqueSW }
-	define SizeSmallOblique { .size DesignParameters.geometric_small_x  .sw SmallObliqueSW }
-
+	define TinyInner   { .innerSize (1 / 4) }
+	define SmallInner  { .innerSize (1 / 3) }
+	define MediumInner { .innerSize (2 / 3) }
 
 	do "Square and Half-square triangle"
 		define [SquareShape cx cy size] : spiro-outline
@@ -161,19 +210,34 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		StdBlackShape SquareShape 'blackSquare' 0x25A0
 		StdWhiteShape SquareShape 'whiteSquare' 0x25A1
-		StdWhiteContainingBlackShape SquareShape 'whiteSquareWithCenter' 0x25A3
+
+		StdWhiteShape SquareShape 'lightWhiteSquare'     0x1F78E {.sw [UnicodeWeightGrade 3 Geom.Scalar]}
+		StdWhiteShape SquareShape 'mediumWhiteSquare'    0x1F78F {.sw [UnicodeWeightGrade 5 Geom.Scalar]}
+		StdWhiteShape SquareShape 'boldWhiteSquare'      0x1F790 {.sw [UnicodeWeightGrade 7 Geom.Scalar]}
+		StdWhiteShape SquareShape 'heavyWhiteSquare'     0x1F791 {.sw [UnicodeWeightGrade 9 Geom.Scalar]}
+		StdWhiteShape SquareShape 'veryHeavyWhiteSquare' 0x1F792 {.sw [UnicodeWeightGrade 10 Geom.Scalar]}
+		StdWhiteShape SquareShape 'exHeavyWhiteSquare'   0x1F793 {.sw [UnicodeWeightGrade 11 Geom.Scalar]}
+
 		StdBlackShape SquareShape 'blackLargeSquare' 0x2B1B SizeLarge
-		StdWhiteShape SquareShape 'whiteLargeSquare' 0x2B1C SizeLarge
 		StdBlackShape SquareShape 'blackMediumSquare' 0x25FC SizeMedium
-		StdWhiteShape SquareShape 'whiteMediumSquare' 0x25FB SizeMedium
 		StdBlackShape SquareShape 'blackMediumSmallSquare' 0x25FE SizeMediumSmall
-		StdWhiteShape SquareShape 'whiteMediumSmallSquare' 0x25FD SizeMediumSmall
 		StdBlackShape SquareShape 'blackSmallSquare' 0x25AA SizeSmall
-		StdWhiteShape SquareShape 'whiteSmallSquare' 0x25AB SizeSmall
 		StdBlackShape SquareShape 'blackVerySmallSquare' 0x2B1D SizeVerySmall
-		StdWhiteShape SquareShape 'whiteVerySmallSquare' 0x2B1E SizeVerySmall
+		StdBlackShape SquareShape 'blackSlightlySmallSquare' 0x1F78D SizeSlightlySmall
+		StdBlackShape SquareShape 'blackTinySmallSquare' 0x1F78C SizeTiny
 		StdBlackShape SquareShape 'blackCenteredSquare' 0x2BC0
 
+		StdWhiteShape SquareShape 'whiteLargeSquare' 0x2B1C SizeLarge
+		StdWhiteShape SquareShape 'whiteMediumSquare' 0x25FB SizeMedium
+		StdWhiteShape SquareShape 'whiteMediumSmallSquare' 0x25FD SizeMediumSmall
+		StdWhiteShape SquareShape 'whiteSmallSquare' 0x25AB SizeSmall
+		StdWhiteShape SquareShape 'whiteVerySmallSquare' 0x2B1E SizeVerySmall
+
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareWithCenter' 0x25A3
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareContainingBlackVerySmallSquare' 0x1F794 TinyInner
+		StdWhiteContainingBlackShape SquareShape 'whiteSquareContainingBlackMediumSquare' 0x1F795 MediumInner
+
+		StdGeomTargetShape SquareShape 'squareTarget' 0x1F796
 
 		define [TriangleRBFill cx cy size] : spiro-outline
 			corner (cx + size) (cy + size)
@@ -328,12 +392,23 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			corner (cx - size) cy
 
 		StdBlackShape DiamondFill 'blackDiamond' 0x25C6 SizeOblique
-		StdWhiteShape DiamondFill 'whiteDiamond' 0x25C7 SizeOblique
-		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondWithCenter' 0x25C8 SizeOblique
-		StdBlackShape DiamondFill 'blackMediumDiamond' 0x2B25 SizeMediumOblique
-		StdWhiteShape DiamondFill 'whiteMediumDiamond' 0x2B26 SizeMediumOblique
-		StdBlackShape DiamondFill 'blackSmallDiamond' 0x2B29 SizeSmallOblique
 		StdBlackShape DiamondFill 'blackCenteredDiamond' 0x2BC1 SizeOblique
+
+		StdWhiteShape DiamondFill 'whiteDiamond' 0x25C7 SizeOblique
+
+		StdBlackShape DiamondFill 'blackMediumDiamond' 0x2B25 SizeMediumOblique
+		StdBlackShape DiamondFill 'blackSmallDiamond' 0x2B29 SizeSmallOblique
+		StdBlackShape DiamondFill 'blackTinyDiamond' 0x1F797 SizeTinyOblique
+		StdBlackShape DiamondFill 'blackVerySmallDiamond' 0x1F798 SizeVerySmallOblique
+		StdBlackShape DiamondFill 'blackMediumSmallDiamond' 0x1F799 SizeMediumSmallOblique
+
+		StdWhiteShape DiamondFill 'whiteMediumDiamond' 0x2B26 SizeMediumOblique
+
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondWithCenter' 0x25C8 SizeOblique
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondContainingBlackVerySmallDiamond' 0x1F79A [Object.assign {.} TinyInner SizeOblique]
+		StdWhiteContainingBlackShape DiamondFill 'whiteDiamondContainingBlackMediumDiamond' 0x1F79B [Object.assign {.} MediumInner SizeOblique]
+
+		StdGeomTargetShape DiamondFill 'diamondTarget' 0x1F79C SizeOblique
 
 	do "Lonzenge"
 		define [LonzengeFill cx cy size] : spiro-outline
@@ -344,70 +419,92 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		StdBlackShape LonzengeFill 'blackLonzenge' 0x29EB SizeOblique
 		ConvexWhitePolygon LonzengeFill 'whiteLonzenge' 0x25CA SizeOblique
+
 		StdBlackShape LonzengeFill 'blackMediumLonzenge' 0x2B27 SizeMediumOblique
-		ConvexWhitePolygon LonzengeFill 'whiteMediumLonzenge' 0x2B28 SizeMediumOblique
 		StdBlackShape LonzengeFill 'blackSmallLonzenge' 0x2B2A SizeSmallOblique
+
+		ConvexWhitePolygon LonzengeFill 'whiteMediumLonzenge' 0x2B28 SizeMediumOblique
 		ConvexWhitePolygon LonzengeFill 'whiteSmallLonzenge' 0x2B2B SizeSmallOblique
 
+		StdBlackShape LonzengeFill 'blackTinyLonzenge' 0x1F79D SizeTinyOblique
+		StdBlackShape LonzengeFill 'blackVerySmallLonzenge' 0x1F79E SizeVerySmallOblique
+		StdBlackShape LonzengeFill 'blackMediumSmallLonzenge' 0x1F79F SizeMediumSmallOblique
+
+		ConvexPolygonWhiteContainingBlackShape LonzengeFill 'whiteLozengeContainingBlackSmallLozenge' 0x1F7A0 [Object.assign {.} SmallInner SizeOblique]
+
 	do "Circle"
-		define [BlackCircleShape cx cy size] : spiro-outline
+		define [CircleShape cx cy size] : spiro-outline
 			g4 cx (cy + size)
 			g4 (cx - size) cy
 			g4 cx (cy - size)
 			g4 (cx + size) cy
 			close
 
-		StdBlackShape BlackCircleShape 'blackCircleO' null
-		StdBlackShape BlackCircleShape 'blackCircle' 0x25CF
-		StdWhiteShape BlackCircleShape 'whiteCircle' 0x25CB
-		StdWhiteContainingBlackShape BlackCircleShape 'whiteCircleWithCenter' 0x25C9
-		StdDoubleWhite BlackCircleShape 'doubleWhiteCircle' 0x25CE {.sw [Math.min GeometryStroke : AdviceStroke 4 MosaicWidthScalar]}
-		StdBlackShape BlackCircleShape 'blackSmallCircle' null SizeSmall
-		StdWhiteShape BlackCircleShape 'whiteSmallCircle' null SizeSmall
-		StdBlackShape BlackCircleShape 'blackMediumCircle' 0x26AB SizeMedium
-		StdWhiteShape BlackCircleShape 'whiteMediumCircle' 0x26AA SizeMedium
-		StdBlackShape BlackCircleShape 'blackLargeCircle' 0x2B24 SizeLarge
-		StdWhiteShape BlackCircleShape 'whiteLargeCircle' 0x25EF SizeLarge
+		StdBlackShape CircleShape 'blackCircleO' null
+		StdBlackShape CircleShape 'blackCircle' 0x25CF
+
+		StdWhiteShape CircleShape 'whiteCircle' 0x25CB
+		StdWhiteShape CircleShape 'mediumWhiteCircle'    0x1F785 {.sw [UnicodeWeightGrade 6 Geom.Scalar]}
+		StdWhiteShape CircleShape 'boldWhiteCircle'      0x1F786 {.sw [UnicodeWeightGrade 7 Geom.Scalar]}
+		StdWhiteShape CircleShape 'heavyWhiteCircle'     0x1F787 {.sw [UnicodeWeightGrade 9 Geom.Scalar]}
+		StdWhiteShape CircleShape 'veryHeavyWhiteCircle' 0x1F788 {.sw [UnicodeWeightGrade 10 Geom.Scalar]}
+		StdWhiteShape CircleShape 'exHeavyWhiteCircle'   0x1F789 {.sw [UnicodeWeightGrade 11 Geom.Scalar]}
+
+		StdBlackShape CircleShape 'blackSmallCircle' null SizeSmall
+		StdBlackShape CircleShape 'blackMediumCircle' 0x26AB SizeMedium
+		StdBlackShape CircleShape 'blackLargeCircle' 0x2B24 SizeLarge
+		StdBlackShape CircleShape 'blackSlightlySmallCircle' 0x1F784 SizeSlightlySmall
+
+		StdWhiteShape CircleShape 'whiteSmallCircle' null SizeSmall
+		StdWhiteShape CircleShape 'whiteMediumCircle' 0x26AA SizeMedium
+		StdWhiteShape CircleShape 'whiteLargeCircle' 0x25EF SizeLarge
+
+		StdDoubleWhite CircleShape 'doubleWhiteCircle' 0x25CE {.sw [Math.min GeometryStroke : AdviceStroke 4 Geom.Scalar]}
+
+		StdWhiteContainingBlackShape CircleShape 'whiteCircleWithCenter' 0x25C9
+		StdWhiteContainingBlackShape CircleShape 'whiteCircleContainingBlackSmallCircle' 0x1F78A SmallInner
+
+		StdGeomTargetShape CircleShape 'circleTarget' 0x1F78B
 
 		create-glyph [MangleName 'blackLeftHalfCircle'] [MangleUnicode 0x25D6] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'blackCircle'
 				LeftHalfMask
 
 		create-glyph [MangleName 'blackRightHalfCircle'] [MangleUnicode 0x25D7] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'blackCircle'
 				RightHalfMask
 
 		create-glyph [MangleName 'blackUpperHalfCircle'] [MangleUnicode 0x2BCA] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'blackCircle'
 				UpperHalfMask
 
 		create-glyph [MangleName 'blackBottomHalfCircle'] [MangleUnicode 0x2BCB] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'blackCircle'
 				LowerHalfMask
 
 		create-glyph [MangleName 'dottedCircle'] [MangleUnicode 0x25CC] : glyph-proc
-			set-width MosaicWidth
-			include : [DivFrame MosaicWidthScalar].markSet.plus
-			local n : 12 * [Math.ceil MosaicWidthScalar]
+			set-width Geom.Width
+			include : [DivFrame Geom.Scalar].markSet.plus
+			local n : 12 * [Math.ceil Geom.Scalar]
 			local fine : AdviceStroke 10
 			foreach j [range 0 n] : begin
 				local angle : Math.PI * 2 * j / n
-				local cx : MosaicMiddle + (Geom.Right - MosaicMiddle) * [Math.cos angle]
-				local cy : SymbolMid + (Geom.Right - MosaicMiddle) * [Math.sin angle]
+				local cx : Geom.MidX + (Geom.Right - Geom.MidX) * [Math.cos angle]
+				local cy : Geom.MidY + (Geom.Right - Geom.MidX) * [Math.sin angle]
 				include : CircleRingAt cx cy fine
 
 		create-glyph [MangleName 'dottedSquare'] [MangleUnicode 0x2B1A] : glyph-proc
-			set-width MosaicWidth
-			include : [DivFrame MosaicWidthScalar].markSet.plus
-			local n : 4 * [Math.ceil MosaicWidthScalar]
+			set-width Geom.Width
+			include : [DivFrame Geom.Scalar].markSet.plus
+			local n : 4 * [Math.ceil Geom.Scalar]
 			local fine : AdviceStroke 10
 			local box : object
 				Left : Geom.Left + fine
@@ -443,7 +540,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 		StdBlackShape [RegularPolygonFill 8  1  1.05 0.128] 'blackOctagon' 0x2BC4
 		StdBlackShape [RegularPolygonFill 5  2  1.1  0] 'blackStar' 0x2605
 		StdWhiteShape [RegularPolygonFill 5  2  1.1  0] 'whiteStar' 0x2606
-			begin {.sw ([AdviceStroke 5.5 : Math.sqrt MosaicWidthScalar] * [Math.sqrt 5])}
+			begin {.sw ([AdviceStroke 5.5 : Math.sqrt Geom.Scalar] * [Math.sqrt 5])}
 
 	do "Stars and Asterisks"
 		define StarCfg : list
@@ -454,32 +551,77 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			* {.sides 12 .skip 1 .name 'twelvePointedBlackStar' .unicode 0x2739 .pMag 1.05 .phase 0 .pShrink 0.5}
 		foreach [[object sides skip name unicode pMag phase pShrink] : items-of StarCfg] : do
 			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				local corners {}
 				foreach [j : range 0 (2 * sides)] : begin
 					local angle : Math.PI * j * skip / sides + phase
 					local mag : [if (j % 2) pShrink 1] * pMag
 					corners.push : corner
-						MosaicMiddle + Geom.Size * mag * [Math.sin angle]
-						SymbolMid + Geom.Size * mag * [Math.cos angle]
+						Geom.MidX + Geom.Size * mag * [Math.sin angle]
+						Geom.MidY + Geom.Size * mag * [Math.cos angle]
 				include : spiro-outline corners
 
-		define HeavySw : Math.max ([AdviceStroke 4.5 MosaicWidthScalar] * 1.5) (Width * 0.13 * [Math.sqrt MosaicWidthScalar])
+		define extThinSw    : UnicodeWeightGrade 1    Geom.Scalar
+		define extLightSw   : UnicodeWeightGrade 2    Geom.Scalar
+		define lightSw      : UnicodeWeightGrade 3    Geom.Scalar
+		define semiLightSw  : UnicodeWeightGrade 3.5  Geom.Scalar
+		define normalSw     : UnicodeWeightGrade 4    Geom.Scalar
+		define mediumSw     : UnicodeWeightGrade 5    Geom.Scalar
+		define semiBoldSw   : UnicodeWeightGrade 6    Geom.Scalar
+		define boldSw       : UnicodeWeightGrade 7    Geom.Scalar
+		define exBoldSw     : UnicodeWeightGrade 8    Geom.Scalar
+		define heavySw      : UnicodeWeightGrade 9    Geom.Scalar
+		define veryHeavySw  : UnicodeWeightGrade 10   Geom.Scalar
+		define exHeavySw    : UnicodeWeightGrade 11   Geom.Scalar
+
 		define AsteriskCfg : list
-			* {.sides 4 .name 'heavyGreekCross' .cThin 1 .unicode 0x271A .phase 0 .sw HeavySw .pMag 1}
-			* {.sides 6 .name 'heavyAsterisk' .cThin 0.9 .unicode 0x2731 .phase 0 .sw HeavySw .pMag 1}
-			* {.sides 8 .name 'eightSpokedAsterisk' .cThin 0.75 .unicode 0x2733 .phase 0 .sw [AdviceStroke 7.5 : Math.sqrt MosaicWidthScalar] .pMag 1}
-			* {.sides 16 .name 'sixteenSpokedAsterisk' .cThin 0.75 .unicode 0x273A .phase 0 .sw [AdviceStroke 8 : Math.sqrt MosaicWidthScalar] .pMag 1}
+			* {.sides  4 .name 'thinGreekCross'      .unicode 0x1F7A1 .phase 0 .sw extLightSw }
+			* {.sides  4 .name 'lightGreekCross'     .unicode 0x1F7A2 .phase 0 .sw lightSw    }
+			* {.sides  4 .name 'mediumGreekCross'    .unicode 0x1F7A3 .phase 0 .sw mediumSw   }
+			* {.sides  4 .name 'boldGreekCross'      .unicode 0x1F7A4 .phase 0 .sw boldSw     }
+			* {.sides  4 .name 'exBoldGreekCross'    .unicode 0x1F7A5 .phase 0 .sw exBoldSw   }
+			* {.sides  4 .name 'veryHeavyGreekCross' .unicode 0x1F7A6 .phase 0 .sw veryHeavySw}
+			* {.sides  4 .name 'exHeavyGreekCross'   .unicode 0x1F7A7 .phase 0 .sw exHeavySw  }
+			* {.sides  4 .name 'thinSaltire'         .unicode 0x1F7A8 .phase (1/8) .sw extLightSw }
+			* {.sides  4 .name 'lightSaltire'        .unicode 0x1F7A9 .phase (1/8) .sw lightSw    }
+			* {.sides  4 .name 'mediumSaltire'       .unicode 0x1F7AA .phase (1/8) .sw mediumSw   }
+			* {.sides  4 .name 'boldSaltire'         .unicode 0x1F7AB .phase (1/8) .sw boldSw     }
+			* {.sides  4 .name 'heavySaltire'        .unicode 0x1F7AC .phase (1/8) .sw heavySw    }
+			* {.sides  4 .name 'veryHeavySaltire'    .unicode 0x1F7AD .phase (1/8) .sw veryHeavySw}
+			* {.sides  4 .name 'exHeavySaltire'      .unicode 0x1F7AE .phase (1/8) .sw exHeavySw  }
+			* {.sides  5 .name 'lightAsterisk5'      .unicode 0x1F7AF .phase 0 .sw lightSw    }
+			* {.sides  5 .name 'mediumAsterisk5'     .unicode 0x1F7B0 .phase 0 .sw mediumSw   }
+			* {.sides  5 .name 'boldAsterisk5'       .unicode 0x1F7B1 .phase 0 .sw boldSw     }
+			* {.sides  5 .name 'heavyAsterisk5'      .unicode 0x1F7B2 .phase 0 .sw heavySw    }
+			* {.sides  5 .name 'veryHeavyAsterisk5'  .unicode 0x1F7B3 .phase 0 .sw veryHeavySw}
+			* {.sides  5 .name 'exHeavyAsterisk5'    .unicode 0x1F7B4 .phase 0 .sw exHeavySw  }
+			* {.sides  6 .name 'lightAsterisk6'      .cThin 0.9  .unicode 0x1F7B5 .phase 0 .sw lightSw    }
+			* {.sides  6 .name 'mediumAsterisk6'     .cThin 0.9  .unicode 0x1F7B6 .phase 0 .sw mediumSw   }
+			* {.sides  6 .name 'boldAsterisk6'       .cThin 0.9  .unicode 0x1F7B7 .phase 0 .sw boldSw     }
+			* {.sides  6 .name 'heavyAsterisk6'      .cThin 0.9  .unicode 0x1F7B8 .phase 0 .sw heavySw    }
+			* {.sides  6 .name 'veryHeavyAsterisk6'  .cThin 0.9  .unicode 0x1F7B9 .phase 0 .sw veryHeavySw}
+			* {.sides  6 .name 'exHeavyAsterisk6'    .cThin 0.9  .unicode 0x1F7BA .phase 0 .sw exHeavySw  }
+			* {.sides  8 .name 'lightAsterisk8'      .cThin 0.75 .unicode 0x1F7BB .phase 0 .sw lightSw    }
+			* {.sides  8 .name 'mediumAsterisk8'     .cThin 0.75 .unicode 0x1F7BC .phase 0 .sw mediumSw   }
+			* {.sides  8 .name 'boldAsterisk8'       .cThin 0.75 .unicode 0x1F7BD .phase 0 .sw boldSw     }
+			* {.sides  8 .name 'heavyAsterisk8'      .cThin 0.75 .unicode 0x1F7BE .phase 0 .sw heavySw    }
+			* {.sides  8 .name 'veryHeavyAsterisk8'  .cThin 0.75 .unicode 0x1F7BF .phase 0 .sw veryHeavySw}
+
+			* {.sides  4 .name 'heavyGreekCross'     .unicode 0x271A  .phase 0 .sw heavySw    }
+			* {.sides  6 .name 'heavyAsterisk' .cThin 0.9 .unicode 0x2731 .phase 0 .sw heavySw}
+			* {.sides  8 .name 'eightSpokedAsterisk' .cThin 0.75 .unicode 0x2733 .phase 0 .sw normalSw}
+			* {.sides 16 .name 'sixteenSpokedAsterisk' .cThin 0.75 .unicode 0x273A .phase 0 .sw semiLightSw}
+			* {.sides  4 .name 'crossMark' .unicode 0x274C .phase (1/8) .sw normalSw}
 		foreach [[object sides name unicode phase sw cThin pMag] : items-of AsteriskCfg] : do
 			create-glyph [MangleName name] [MangleUnicode unicode] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				foreach [j : range 0 sides] : begin
-					local angle : 2 * Math.PI * j / sides + phase
+					local angle : 2 * Math.PI * (j / sides + phase)
 					include : dispiro
-						corner MosaicMiddle SymbolMid [widths.center (sw * cThin)]
+						corner Geom.MidX Geom.MidY [widths.center (sw * [fallback cThin 1])]
 						corner
-							MosaicMiddle + pMag * Geom.Size * [Math.sin (angle + Math.PI)]
-							SymbolMid + pMag * Geom.Size * [Math.cos (angle + Math.PI)]
+							Geom.MidX + Geom.Size * [Math.sin (-angle)]
+							Geom.MidY + Geom.Size * [Math.cos (-angle)]
 							widths.center sw
 
 	do "Dice"
@@ -494,11 +636,11 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 		foreach { unicode dots } [items-of diceCombinations] : begin
 			create-glyph [MangleName "dice_\(unicode)"] [MangleUnicode unicode] : glyph-proc
 				include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
-				define dr : DotRadius / Stroke * [AdviceStroke 7 MosaicWidthScalar]
-				define xLeftEx   : MosaicMiddle - Geom.Size + GeometryStroke
-				define xRightEx  : MosaicMiddle + Geom.Size - GeometryStroke
-				define yBottomEx : SymbolMid + Geom.Size - GeometryStroke
-				define yTopEx    : SymbolMid - Geom.Size + GeometryStroke
+				define dr : DotRadius / Stroke * [AdviceStroke 7 Geom.Scalar]
+				define xLeftEx   : Geom.MidX - Geom.Size + GeometryStroke
+				define xRightEx  : Geom.MidX + Geom.Size - GeometryStroke
+				define yBottomEx : Geom.MidY + Geom.Size - GeometryStroke
+				define yTopEx    : Geom.MidY - Geom.Size + GeometryStroke
 				define xLeft     : mix xLeftEx xRightEx (1 / 5)
 				define xRight    : mix xLeftEx xRightEx (4 / 5)
 				define yBottom   : mix yBottomEx yTopEx (1 / 5)
@@ -511,24 +653,24 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 	do "Rounded"
 		create-glyph [MangleName 'roundwhitesquare'] [MangleUnicode 0x25A2] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			define cr : Geom.Size - GeometryStroke * 2
 			include : dispiro
 				widths.lhs GeometryStroke
-				flat (MosaicMiddle + 1) (SymbolMid + Geom.Size) [heading Leftward]
-				curl (MosaicMiddle - cr) (SymbolMid + Geom.Size) [heading Leftward]
+				flat (Geom.MidX + 1) (Geom.MidY + Geom.Size) [heading Leftward]
+				curl (Geom.MidX - cr) (Geom.MidY + Geom.Size) [heading Leftward]
 				archv
-				flat (MosaicMiddle - Geom.Size) (SymbolMid + cr) [heading Downward]
-				curl (MosaicMiddle - Geom.Size) (SymbolMid - cr) [heading Downward]
+				flat (Geom.MidX - Geom.Size) (Geom.MidY + cr) [heading Downward]
+				curl (Geom.MidX - Geom.Size) (Geom.MidY - cr) [heading Downward]
 				arcvh
-				flat (MosaicMiddle - cr) (SymbolMid - Geom.Size) [heading Rightward]
-				curl (MosaicMiddle + cr) (SymbolMid - Geom.Size) [heading Rightward]
+				flat (Geom.MidX - cr) (Geom.MidY - Geom.Size) [heading Rightward]
+				curl (Geom.MidX + cr) (Geom.MidY - Geom.Size) [heading Rightward]
 				archv
-				flat (MosaicMiddle + Geom.Size) (SymbolMid - cr) [heading Upward]
-				curl (MosaicMiddle + Geom.Size) (SymbolMid + cr) [heading Upward]
+				flat (Geom.MidX + Geom.Size) (Geom.MidY - cr) [heading Upward]
+				curl (Geom.MidX + Geom.Size) (Geom.MidY + cr) [heading Upward]
 				arcvh
-				flat (MosaicMiddle + cr) (SymbolMid + Geom.Size) [heading Leftward]
-				curl (MosaicMiddle - 1) (SymbolMid + Geom.Size) [heading Leftward]
+				flat (Geom.MidX + cr) (Geom.MidY + Geom.Size) [heading Leftward]
+				curl (Geom.MidX - 1) (Geom.MidY + Geom.Size) [heading Leftward]
 
 		define [ThickRoundedArrowBar x1 y1 x2 y2 r w] : glyph-proc
 			include : PointingTo x1 y1 x2 y2 : lambda [mag] : spiro-outline
@@ -544,7 +686,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 				archv
 				close
 		create-glyph [MangleName "whiteHeavySaltireWithRoundedCorners"] [MangleUnicode 0x1FBC0 WideWidth2] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			local inner : [Math.max [AdviceStroke 3] (Width / 8)] / 2
 			local thick : AdviceStroke 4
 			local left : Geom.Left + (inner + thick)
@@ -562,8 +704,8 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 	do "Shaded hollow squares"
 		define [HShadeShape] : begin
 			define lineWidth : Math.min GeometryStroke ((Geom.Size * 2 - GeometryStroke * 2) * 1 / 11)
-			define top : SymbolMid + Geom.Size - GeometryStroke + lineWidth / 2
-			define bot : SymbolMid - (top - SymbolMid)
+			define top : Geom.MidY + Geom.Size - GeometryStroke + lineWidth / 2
+			define bot : Geom.MidY - (top - Geom.MidY)
 			return : union
 				dispiro
 					widths.center lineWidth
@@ -579,7 +721,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					curl Geom.Right [mix top bot 0.75] [heading Rightward]
 
 		create-glyph [MangleName 'hShadeSquare'] [MangleUnicode 0x25A4] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteSquare'
 				intersection
@@ -588,8 +730,8 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		define [VShadeShape] : begin
 			define lineWidth : Math.min GeometryStroke ((Geom.Size * 2 - GeometryStroke * 2) * 1 / 11)
-			define r : MosaicWidth / 2 + Geom.Size - GeometryStroke + lineWidth / 2
-			define l : MosaicWidth / 2 - (r - MosaicWidth / 2)
+			define r : Geom.Width / 2 + Geom.Size - GeometryStroke + lineWidth / 2
+			define l : Geom.Width / 2 - (r - Geom.Width / 2)
 			return : union
 				dispiro
 					widths.center lineWidth
@@ -605,9 +747,9 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					curl [mix l r 0.75] Geom.Bot [heading Downward]
 
 		define [VBarShadeShape] : begin
-			define lineWidth : Math.min GeometryStroke [AdviceStroke 5 MosaicWidthScalar]
-			define r : MosaicWidth / 2 + Geom.Size - GeometryStroke + lineWidth / 2
-			define l : MosaicWidth / 2 - (r - MosaicWidth / 2)
+			define lineWidth : Math.min GeometryStroke [AdviceStroke 5 Geom.Scalar]
+			define r : Geom.Width / 2 + Geom.Size - GeometryStroke + lineWidth / 2
+			define l : Geom.Width / 2 - (r - Geom.Width / 2)
 			return : union
 				dispiro
 					widths.center lineWidth
@@ -615,7 +757,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					curl [mix l r 0.5] Geom.Bot [heading Downward]
 
 		create-glyph [MangleName 'vShadeSquare'] [MangleUnicode 0x25A5] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteSquare'
 				intersection
@@ -623,7 +765,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					VShadeShape
 
 		create-glyph [MangleName 'vBarSquare'] [MangleUnicode 0x25EB] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteSquare'
 				intersection
@@ -631,15 +773,15 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					VBarShadeShape
 
 		create-glyph [MangleName 'hvShadeSquare'] [MangleUnicode 0x25A6] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'hShadeSquare'
 				refer-glyph : MangleName 'vShadeSquare'
 
 		define [DDiagShadeShape] : begin
 			define lineWidth : Math.min GeometryStroke ((Geom.Size * 2 - GeometryStroke * 2) * 1 / 11)
-			define top : SymbolMid + Geom.Size
-			define bot : SymbolMid - (top - SymbolMid)
+			define top : Geom.MidY + Geom.Size
+			define bot : Geom.MidY - (top - Geom.MidY)
 			return : glyph-proc
 				foreach [j : range (-10) till 10] : include : dispiro
 					widths.center lineWidth
@@ -648,8 +790,8 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		define [UDiagShadeShape] : begin
 			define lineWidth : Math.min GeometryStroke ((Geom.Size * 2 - GeometryStroke * 2) * 1 / 11)
-			define top : SymbolMid + Geom.Size
-			define bot : SymbolMid - (top - SymbolMid)
+			define top : Geom.MidY + Geom.Size
+			define bot : Geom.MidY - (top - Geom.MidY)
 			return : glyph-proc
 				foreach [j : range (-10) till 10] : include : dispiro
 					widths.center lineWidth
@@ -657,7 +799,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					curl Geom.Right [mix top bot (j / 4 - 1)] [heading Rightward]
 
 		create-glyph [MangleName 'dDiagShadeSquare'] [MangleUnicode 0x25A7] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteSquare'
 				intersection
@@ -665,7 +807,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					DDiagShadeShape
 
 		create-glyph [MangleName 'uDiagShadeSquare'] [MangleUnicode 0x25A8] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteSquare'
 				intersection
@@ -673,13 +815,13 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 					UDiagShadeShape
 
 		create-glyph [MangleName 'udDiagShadeSquare'] [MangleUnicode 0x25A9] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'dDiagShadeSquare'
 				refer-glyph : MangleName 'uDiagShadeSquare'
 
 		create-glyph [MangleName 'vShadeCircle'] [MangleUnicode 0x25CD] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : union
 				refer-glyph : MangleName 'whiteCircle'
 				intersection [refer-glyph : MangleName 'blackCircleO'] [VShadeShape]
@@ -694,7 +836,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			list 0x25D5 0 1 1 1
 		foreach [{u LT LB RT RB} : items-of partialCircleQuarters] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : union
 					refer-glyph : MangleName 'whiteCircle'
 					intersection
@@ -714,7 +856,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			list 0x25E1 0 1 0 1
 		foreach [{u LT LB RT RB} : items-of arcQuarters] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : intersection
 					refer-glyph : MangleName 'whiteCircle'
 					new-glyph : glyph-proc
@@ -733,7 +875,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			list 0x25EA 0 0 0 0 0 0 0 1
 		foreach [{u LT LB RT RB LTh LBh RTh RBh} : items-of squareParts] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : union
 					refer-glyph : MangleName 'whiteSquare'
 					intersection
@@ -756,7 +898,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			list 0x2B19 0 1 0 1
 		foreach [{u LT LB RT RB LTh LBh RTh RBh} : items-of diamondParts] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : union
 					refer-glyph : MangleName 'whiteDiamond'
 					intersection
@@ -775,7 +917,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 			list 0x29E9 0 1 0 1
 		foreach [{u UP DN LH RH} : items-of triangleParts] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : union
 					glyph-proc
 						if UP : include : refer-glyph : MangleName 'whiteTriangleUp'
@@ -797,7 +939,7 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 
 		foreach { u lh rh bord } [items-of starParts] : begin
 			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
-				set-width MosaicWidth
+				set-width Geom.Width
 				if bord : include [refer-glyph : MangleName 'whiteStar']
 				if lh : include : intersection [LeftHalfMask]  [refer-glyph : MangleName 'blackStar']
 				if rh : include : intersection [RightHalfMask] [refer-glyph : MangleName 'blackStar']
@@ -817,13 +959,13 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 				local hh : GeometryStroke / 2 * HVContrast
 				local hv : GeometryStroke / 2
 				local s    GeometryStroke
-				set-width MosaicWidth
+				set-width Geom.Width
 				include : union
 					refer-glyph [MangleName frame]
-					if L [HBar (MosaicMiddle - Geom.Size + hh) (MosaicMiddle + hh) SymbolMid s] [glyph-proc]
-					if R [HBar (MosaicMiddle + Geom.Size - hh) (MosaicMiddle - hh) SymbolMid s] [glyph-proc]
-					if T [VBar MosaicMiddle (SymbolMid + Geom.Size - hv) (SymbolMid - hv) s]    [glyph-proc]
-					if B [VBar MosaicMiddle (SymbolMid - Geom.Size + hv) (SymbolMid + hv) s]    [glyph-proc]
+					if L [HBar (Geom.MidX - Geom.Size + hh) (Geom.MidX + hh) Geom.MidY s] [glyph-proc]
+					if R [HBar (Geom.MidX + Geom.Size - hh) (Geom.MidX - hh) Geom.MidY s] [glyph-proc]
+					if T [VBar Geom.MidX (Geom.MidY + Geom.Size - hv) (Geom.MidY - hv) s]    [glyph-proc]
+					if B [VBar Geom.MidX (Geom.MidY - Geom.Size + hv) (Geom.MidY + hv) s]    [glyph-proc]
 
 	do "Sun and Gear"
 		define [EightPointingRaysShape r] : glyph-proc
@@ -833,55 +975,55 @@ glyph-block Symbol-Geometric : for-width-kinds WideWidth1
 				local s : Math.sin theta
 				include : dispiro
 					widths.center rayWidth
-					corner (MosaicMiddle + c * r) (SymbolMid + s * r)
-					corner (MosaicMiddle + c * Geom.Size) (SymbolMid + s * Geom.Size)
+					corner (Geom.MidX + c * r) (Geom.MidY + s * r)
+					corner (Geom.MidX + c * Geom.Size) (Geom.MidY + s * Geom.Size)
 
-		define rayWidth : AdviceStroke 8 MosaicWidthScalar
+		define rayWidth : AdviceStroke 8 Geom.Scalar
 		define rayInnerRadius : Geom.Size * 0.56
 		define dotRadius : Geom.Size * 0.44
 
 		create-glyph [MangleName 'blackSunWithRays'] [MangleUnicode 0x2600] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : EightPointingRaysShape rayInnerRadius
-			include : RingAt MosaicMiddle SymbolMid dotRadius
+			include : RingAt Geom.MidX Geom.MidY dotRadius
 		create-glyph [MangleName 'whiteSunWithRays'] [MangleUnicode 0x263C] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : EightPointingRaysShape rayInnerRadius
-			include : RingStrokeAt MosaicMiddle SymbolMid dotRadius rayWidth
+			include : RingStrokeAt Geom.MidX Geom.MidY dotRadius rayWidth
 		create-glyph [MangleName 'gear'] [MangleUnicode 0x2699] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			local gearRingRad : mix rayInnerRadius Geom.Size 0.4
 			include : EightPointingRaysShape (gearRingRad - rayWidth / 2)
-			include : RingStrokeAt MosaicMiddle SymbolMid gearRingRad rayWidth
-			include : RingAt MosaicMiddle SymbolMid (0.4 * (gearRingRad - rayWidth))
+			include : RingStrokeAt Geom.MidX Geom.MidY gearRingRad rayWidth
+			include : RingAt Geom.MidX Geom.MidY (0.4 * (gearRingRad - rayWidth))
 
 
 	do "Miscellaneous"
 		create-glyph [MangleName 'dottedWhiteTriangle'] [MangleUnicode 0x25EC] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : refer-glyph : MangleName 'whiteTriangleUp'
-			include : CircleDotAt MosaicMiddle (SymbolMid - Geom.Size / 3) [Math.min (MosaicWidth / 8	) PeriodRadius]
+			include : CircleDotAt Geom.MidX (Geom.MidY - Geom.Size / 3) [Math.min (Geom.Width / 8	) PeriodRadius]
 
 		create-glyph [MangleName 'uni25D8'] [MangleUnicode 0x25D8] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : difference
 				refer-glyph : MangleName 'blackLongRectangle'
 				refer-glyph : MangleName 'blackCircle'
 
 		create-glyph [MangleName 'uni25D9'] [MangleUnicode 0x25D9] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : difference
 				refer-glyph : MangleName 'blackLongRectangle'
 				refer-glyph : MangleName 'whiteCircle'
 
 		create-glyph [MangleName 'uni25DA'] [MangleUnicode 0x25DA] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'uni25D9'
 				UpperHalfMask
 
 		create-glyph [MangleName 'uni25DB'] [MangleUnicode 0x25DB] : glyph-proc
-			set-width MosaicWidth
+			set-width Geom.Width
 			include : intersection
 				refer-glyph : MangleName 'uni25D9'
 				LowerHalfMask

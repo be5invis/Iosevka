@@ -30,6 +30,8 @@ const kernDotty = TAG("kern-dotty");
 const htmlComment = TAG("html-comment");
 const plusPlus = TAG("plusplus");
 const colonGt = TAG("colon-greater");
+const brackBar = TAG("brack-bar");
+const braceBar = TAG("brace-bar");
 
 const ligationSamples = [
 	[
@@ -75,9 +77,12 @@ const ligationSamples = [
 		htmlComment("<!---")
 	],
 	[
-		arrow("<------"),
-		arrow("------>"),
-		arrow("<=====>"),
+		brackBar("[|"),
+		brackBar("|]"),
+		braceBar("{|"),
+		braceBar("|}"),
+		arrow2("<=<"),
+		arrow2(">=>"),
 		arrow("<~~"),
 		arrow("<~"),
 		arrow("~>"),
@@ -86,6 +91,93 @@ const ligationSamples = [
 		kernDotty(":::"),
 		logc("\\/"),
 		logc("/\\"),
+		eqeq("=="),
+		exeq("!="),
+		slasheq("/="),
+		tildeeq(`~=`),
+		ltgt(`<>`),
+		eqeqeq("==="),
+		exeqeq("!=="),
+		eqslasheq("=/="),
+		eqexeq("=!="),
+		colonGt(":>")
+	],
+	[
+		centerOps(":="),
+		centerOps(":-"),
+		centerOps(":+"),
+		centerOps("<*"),
+		centerOps("<*>"),
+		centerOps("*>"),
+		trig("<|"),
+		trig("<|>"),
+		trig("|>"),
+		dotOper("<."),
+		dotOper("<.>"),
+		dotOper(".>"),
+		centerOps("+:"),
+		centerOps("-:"),
+		centerOps("=:"),
+		centerOps("<******>"),
+		brst("(* comm *)"),
+		plusPlus("++"),
+		plusPlus("+++"),
+		logc("|-"),
+		logc("-|")
+	]
+];
+
+const ligationSamplesNarrow = [
+	[
+		arrow2("-<<"),
+		arrow2("-<"),
+		arrow2("-<-"),
+		arrow("<--"),
+		arrow("<---"),
+		arrow("<<-"),
+		arrow("<-"),
+		arrow("->"),
+		arrow("->>"),
+		arrow("-->"),
+		arrow("--->"),
+		arrow2("->-"),
+		arrow2(">-"),
+		arrow2(">>-")
+	],
+	[
+		arrow2("=<<"),
+		arrow2("=<"),
+		arrow2("=<="),
+		arrow("<=="),
+		arrow("<==="),
+		llggeq_a("<<="),
+		ineq("<="),
+		arrow("=>"),
+		arrow("=>>"),
+		arrow("==>"),
+		arrow("===>"),
+		arrow2("=>="),
+		ineq(">="),
+		llggeq_b(">>=")
+	],
+	[
+		arrow("<->"),
+		arrow("<-->"),
+		arrow("<--->"),
+		arrow("<---->"),
+		arrow("<=>"),
+		arrow("<==>"),
+		arrow("<===>"),
+		arrow("<====>"),
+		arrow("-------->")
+	],
+	[
+		arrow("<~~"),
+		arrow("<~"),
+		arrow("~>"),
+		arrow("~~>"),
+		kernDotty("::"),
+		kernDotty(":::"),
 		eqeq("=="),
 		exeq("!="),
 		slasheq("/="),
@@ -112,111 +204,24 @@ const ligationSamples = [
 		centerOps("+:"),
 		centerOps("-:"),
 		centerOps("=:"),
-		centerOps("<***>"),
-		colonGt(":>"),
-		brst("(* comm *)"),
+		colonGt(":>")
+	],
+	[
+		brst("(*"),
+		brst("*)"),
+		brackBar("[|"),
+		brackBar("|]"),
+		braceBar("{|"),
+		braceBar("|}"),
 		plusPlus("++"),
 		plusPlus("+++"),
-		logc("|-"),
-		logc("-|")
-	]
-];
-
-const ligationSamplesNarrow = [
-	[
-		arrow("<--"),
-		arrow("<---"),
-		arrow("<<-"),
-		arrow("<-"),
-		arrow("<->"),
-		arrow("->"),
-		arrow("->>"),
-		arrow("-->"),
-		arrow("--->"),
-		htmlComment("<!--")
-	],
-	[
-		arrow2("-<<"),
-		arrow2("-<"),
-		arrow2("-<-"),
-		arrow2("->-"),
-		arrow2(">-"),
-		arrow2(">>-"),
-		arrow("<-->"),
-		arrow("<--->"),
-		arrow("<---->")
-	],
-	[
-		arrow("<=="),
-		arrow("<==="),
-		llggeq_a("<<="),
-		ineq("<="),
-		arrow("<=>"),
-		arrow("=>"),
-		arrow("=>>"),
-		arrow("==>"),
-		arrow("===>"),
-		htmlComment("<!---")
-	],
-	[
-		arrow2("=<<"),
-		arrow2("=<"),
-		arrow2("=<="),
-		arrow2("=>="),
-		ineq(">="),
-		llggeq_b(">>="),
-		arrow("<==>"),
-		arrow("<===>"),
-		arrow("<====>")
-	],
-	[
-		arrow("<-------"),
-		arrow("------->"),
-		arrow("<======>"),
-		arrow("<~~"),
-		arrow("<~"),
-		arrow("~>"),
-		arrow("~~>")
-	],
-	[
 		logc("\\/"),
 		logc("/\\"),
-		eqeq("=="),
-		exeq("!="),
-		slasheq("/="),
-		tildeeq(`~=`),
-		ltgt(`<>`),
-		eqeqeq("==="),
-		exeqeq("!=="),
-		eqslasheq("=/="),
-		eqexeq("=!=")
-	],
-	[
-		centerOps(":="),
-		centerOps(":-"),
-		centerOps(":+"),
-		centerOps("<*"),
-		centerOps("<*>"),
-		centerOps("*>"),
-		trig("<|"),
-		trig("<|>"),
-		trig("|>"),
-		centerOps("+:"),
-		centerOps("-:"),
-		centerOps("=:")
-	],
-	[
-		kernDotty("::"),
-		kernDotty(":::"),
-		dotOper("<."),
-		dotOper("<.>"),
-		dotOper(".>"),
-		brst("(* *)"),
-		colonGt(":>"),
-		plusPlus("++"),
-		plusPlus("+++"),
 		logc("|-"),
-		logc("-|")
+		logc("-|"),
+		htmlComment("<!--"),
+		htmlComment("<!---"),
+		centerOps("<***>")
 	]
 ];
 
@@ -258,6 +263,7 @@ function buildLigationSet(ligData, getKey) {
 				ligSets.add(ligData.simple[s].ligGroup);
 			}
 			item = {
+				selector: sel,
 				tag: comp.tag,
 				rank: 1,
 				ligSets: [...ligSets],

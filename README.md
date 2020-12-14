@@ -21,6 +21,7 @@ Quit your editor/program. Unzip and open the folder.
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
   - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
+  - Fedora Linux users can install the font(s) from the copr [here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
 * **OpenBSD**: Run `pkg_info -Q iosevka` to see which Iosevka packages are available. Use `pkg_add` to install the chosen package(s).
 
@@ -280,15 +281,25 @@ Please note that, due to the complex interactions when forming ligations, cherry
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present.
-2. Install necessary libs by `npm install`. If you’ve installed them, upgrade to the latest.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
+2. Run `npm install`. This command will install **all** the NPM dependenceis, and will also validate whether external dependencies are present.
 3. `npm run build -- contents::iosevka`.
 
 You will find TTFs, as well as WOFF(2) web fonts and one Webfont CSS in the `dist/` directory.
 
 ### Using a Docker container
 
-Refer to these [instructions.](https://github.com/ejuarezg/containers/tree/master/iosevka_font#container-method)
+A Docker container handling the build environment for you can be found [here](https://github.com/avivace/fonts-iosevka).
+
+To pull it from Docker Hub and start a standard build of the latest released version, run
+
+```
+docker run -it -v $(pwd):/build avivace/iosevka-build
+```
+
+Fonts files will be placed in the `dist` folder.
+
+You can provide `private-build.plans.toml` for a customized build and/or specify the desired release appending `-e FONT_VERSION=X.X.X`. to the Docker command.
 
 ## Customized Build
 
@@ -303,22 +314,25 @@ To create a custom build, you need:
    1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
    2. `ttf::<plan>` : TTF;
    3. `ttf-unhinted::<plan>` : Unhinted TTF only;
-   4. `woff::<plan>` : TTF and WOFF only;
-   5. `woff2::<plan>` : TTF and WOFF2 only.
+   4. `webfont::<plan>` : Web fonts only (CSS + WOFF2);
+   5. `woff2::<plan>` : WOFF2 only.
 
 ### Configuring Custom Build
 
-Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. Inside the plan, top-level properties include:
+Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manulally edit them, following the instructions below.
+
+Inside the plan, top-level properties include:
 
 * `family`: String, defines the family name of your custom variant.
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
-  - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols ill become narrower.
-  - `fontconfig-mono`: Apply `term` spacing changes and further:
+  - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
+  - `fontconfig-mono`: Apply `term` spacing changes and further apply changes to be compatible with FontConfig's Mono spacing, which recognizes a font as monospace if and only if its every non-combining characters having the same width. The changes include:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
+      - As a consequence, the following characters will be **removed**:
+        - `U+27F5` LONG LEFTWARDS ARROW
+        - `U+27F6` LONG RIGHTWARDS ARROW
     - Remove `NWID` and `WWID` OpenType feature.
-    
-    This spacing is recommended for Linux users who customize for their terminal fonts: certain applications, including FontConfig, recognizes a font as monospace if and only if its every non-combining glyphs having the same width.
-  - `fixed`: Apply `fontconfig-mono` changes and remove ligations.
+  - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
@@ -336,6 +350,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
+  - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
   - `clike`: Default ligation set would be assigned to C-Like.
   - `javascript`: Default ligation set would be assigned to JavaScript.
@@ -368,10 +383,13 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `eqeq`: Enable ligation for `==` and `===`.
   - `ineq`: Enable ligation for `<=` and `>=`.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
+  - `exeqeq-dotted`: Enable special ligation for `!==` with triple lines, and a dot at below for distinction.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
+  - `eqexeq-dotted`: Enable special ligation for `=!=` with triple lines and a dot at below for distinction.
   - `eqexeq-dl`: Enable special ligation for `=!=` with double lines.
+  - `eqexeq-dl-dotted`: Enable special ligation for `=!=` with double lines, and a dot at below for distinction.
   - `exeq`: Enable ligation for `!=` and `!==`.
-  - `exeq-alt-1`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
+  - `exeq-dotted`: Enable ligation for `!=` and `!==` with a dot at below for distinction.
   - `tildeeq`: Enable ligation for `~=` as inequality.
   - `eqslasheq`: Enable special triple-line ligation for `=/=` as inequality.
   - `slasheq`: Enable ligation for `/=` and `=/=` as inequality.
@@ -388,6 +406,8 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
   - `html-comment`: Enable ligation for `<!--` and `<!---`.
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
+  - `brace-bar`: Enable ligation for `{|` and `|}`.
+  - `brack-bar`: Enable ligation for `[|` and `|]`.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
@@ -441,7 +461,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-d = 'more-rounded'`, `cv03 = 2`: More rounded `D` to differentiate with `O`.
   - Styles for `G`:
     + `capital-g = 'toothed'`, `cv04 = 1`: Toothed G (default).
-    + `capital-g = 'toothless'`, `cv04 = 2`: Toothless G.
+    + `capital-g = 'toothless-corner'`, `cv04 = 2`: Corner toothless G.
+    + `capital-g = 'toothless-rounded'`, `cv04 = 3`: Round toothless G.
   - Styles for `I`:
     + `capital-i = 'serifed'`, `cv05 = 1`: I with standard (long) serifs (default).
     + `capital-i = 'serifless'`, `cv05 = 2`: I without serifs, like a straight bar.
@@ -469,15 +490,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-y = 'curly'`, `cv11 = 2`: Slightly curly `Y`, like Iosevka 2.x.
   - Styles for `a`:
     + `a = 'doublestorey'`, `cv12 = 1`: Double-storey `a` (default for Upright).
-    + `a = 'singlestorey'`, `cv12 = 2`: Single-storey `a`.
-    + `a = 'singlestorey-tailed'`, `cv12 = 3`: Single-storey `a` with curly tail (default for Italic).
-    + `a = 'doublestorey-tailed'`, `cv12 = 4`: Double-storey `a` with curly tail.
-    + `a = 'singlestorey-earless-corner'`, `cv12 = 5`: Earless (cornered top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-corner-tailed'`, `cv12 = 6`: Earless (cornered top-right) single-storey `a` with curly tail.
-    + `a = 'singlestorey-earless-rounded'`, `cv12 = 7`: Earless (rounded top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-rounded-tailed'`, `cv12 = 8`: Earless (rounded top-right) single-storey `a` with curly tail.
-    + `a = 'doublestorey-toothless-corner'`, `cv12 = 9`: Toothless (cornered bottom-right) double-storey `a`.
-    + `a = 'doublestorey-toothless-rounded'`, `cv12 = 10`: Toothless (rounded bottom-right) double-storey `a`.
+    + `a = 'doublestorey-tailed'`, `cv12 = 2`: Double-storey `a` with curly tail.
+    + `a = 'doublestorey-toothless-corner'`, `cv12 = 3`: Toothless (cornered bottom-right) double-storey `a`.
+    + `a = 'doublestorey-toothless-rounded'`, `cv12 = 4`: Toothless (rounded bottom-right) double-storey `a`.
+    + `a = 'singlestorey'`, `cv12 = 5`: Single-storey `a`.
+    + `a = 'singlestorey-tailed'`, `cv12 = 6`: Single-storey `a` with curly tail (default for Italic).
+    + `a = 'singlestorey-earless-corner'`, `cv12 = 7`: Earless (cornered top-right) single-storey `a`.
+    + `a = 'singlestorey-earless-corner-tailed'`, `cv12 = 8`: Earless (cornered top-right) single-storey `a` with curly tail.
+    + `a = 'singlestorey-earless-rounded'`, `cv12 = 9`: Earless (rounded top-right) single-storey `a`.
+    + `a = 'singlestorey-earless-rounded-tailed'`, `cv12 = 10`: Earless (rounded top-right) single-storey `a` with curly tail.
   - Styles for `b`:
     + `b = 'toothed'`, `cv13 = 1`: `b` with bottom-left tooth (default).
     + `b = 'toothless-corner'`, `cv13 = 2`: `b` without bottom-left tooth, with a corner transition.
@@ -628,8 +649,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `y = 'cursive'`, `cv32 = 4`: Cursive-like `y` (default for Italic).
   - Styles for `z`, `Z`:
     + `z = 'standard'`, `cv33 = 1`: Standard `Z` and `z` (default).
-    + `z = 'with-crossbar'`, `cv33 = 2`: `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
-    + `z = 'with-horizontal-crossbar'`, `cv33 = 3`: `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'with-crossbar'`, `cv33 = 2`: Standard `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'with-horizontal-crossbar'`, `cv33 = 3`: Standard `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'curly'`, `cv33 = 4`: Curly `Z` and `z`.
+    + `z = 'curly-with-crossbar'`, `cv33 = 5`: Curly `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'curly-with-horizontal-crossbar'`, `cv33 = 6`: Curly `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
   - Styles for `ß`:
     + `eszet = 'traditional'`, `cv34 = 1`: Traditional, Fraktur-like Eszet.
     + `eszet = 'sulzbacher'`, `cv34 = 2`: A more modern, beta-like Eszet (default).
@@ -705,9 +729,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `ampersand = 'closed'`, `cv51 = 1`: Ampersand (`&`) with a closed contour (default).
     + `ampersand = 'upper-open'`, `cv51 = 2`: Ampersand (`&`) with an open contour at upper half.
     + `ampersand = 'lower-open'`, `cv51 = 3`: Ampersand (`&`) with an open contour at lower half.
-    + `ampersand = 'et'`, `cv51 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t.
-    + `ampersand = 'et-toothed'`, `cv51 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
-    + `ampersand = 'flat-top'`, `cv51 = 6`: Ampersand (`&`) drawn with a flat top.
+    + `ampersand = 'et-toothed'`, `cv51 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
+    + `ampersand = 'et-toothless-corner'`, `cv51 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (corner).
+    + `ampersand = 'et-toothless-rounded'`, `cv51 = 6`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (rounded).
+    + `ampersand = 'flat-top'`, `cv51 = 7`: Ampersand (`&`) drawn with a flat top.
   - Styles for `@`:
     + `at = 'threefold'`, `cv52 = 1`: The long, three-fold At symbol (`@`) (default).
     + `at = 'fourfold'`, `cv52 = 2`: The traditional, four-fold At symbol (`@`).
