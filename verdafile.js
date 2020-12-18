@@ -547,15 +547,12 @@ const PagesFontExport = task(`pages:font-export`, async t => {
 	for (const dir of dirs) exportFontDir(pagesDir, dir);
 });
 
-const PagesFastFontExport = task.make(
-	g => `pages:fast-font-export:${g}`,
-	async (target, g) => {
-		const [pagesDir] = await target.need(PagesDir);
-		if (!pagesDir) return;
-		const dirs = await target.need(GroupContents(g));
-		for (const dir of dirs) exportFontDir(pagesDir, dir);
-	}
-);
+const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, g) => {
+	const [pagesDir] = await target.need(PagesDir);
+	if (!pagesDir) return;
+	const dirs = await target.need(GroupContents(g));
+	for (const dir of dirs) exportFontDir(pagesDir, dir);
+});
 
 async function exportFontDir(pagesDir, dir) {
 	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
