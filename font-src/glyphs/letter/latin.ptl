@@ -2022,45 +2022,45 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : [GenSmallYShape false SLAB].SmallYShape XH Descender
 			set-base-anchor 'overlay' Middle (XH / 2)
 
-	define [SmallYCursiveArc] : new-glyph : glyph-proc
+	define [SmallYCursiveArc top bottom] : new-glyph : glyph-proc
 		include : nShoulder
+			top -- top
+			bottom -- bottom
 			left -- (SB + Stroke * HVContrast)
 			right -- RightSB
 			fine -- ShoulderFine
-		include : FlipAround Middle (XH / 2)
+		include : FlipAround Middle [mix bottom top 0.5]
 
-	define [SmallYCusriveHook y0] : dispiro
+	define [SmallYCusriveHook y0 bottom] : dispiro
 		widths.rhs
 		flat RightSB y0 [heading Downward]
-		curl RightSB (Descender + SmallSmoothA)
-		hookend (Descender + O)
-		g4 SB (Descender + SHook)
+		curl RightSB (bottom + SmallSmoothA)
+		hookend (bottom + O)
+		g4 SB (bottom + SHook)
 
-	define [SmallYFlatHookCusriveHook y0] : begin
+	define [SmallYFlatHookCusriveHook y0 bottom] : begin
 		local hd : FlatHookDepth [DivFrame 1] (9 / 8)
 		local xTerminal : Math.min (RightSB - hd.x - 0.1) : mix SB RightSB (1 / 5)
 		return : dispiro
 			widths.rhs
 			flat RightSB y0 [heading Downward]
-			curl RightSB (Descender + hd.y)
+			curl RightSB (bottom + hd.y)
 			arcvh
-			flat (RightSB - hd.x) Descender
-			curl xTerminal Descender [heading Leftward]
+			flat (RightSB - hd.x) bottom
+			curl xTerminal bottom [heading Leftward]
 
 	create-glyph 'y.cursive' : glyph-proc
 		include : MarkSet.p
-		include : SmallYCursiveArc
-		include : SmallYCusriveHook XH
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+		include : SmallYCursiveArc XH 0
+		include : SmallYCusriveHook XH Descender
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	create-glyph 'y.cursiveFlatHook' : glyph-proc
 		include : MarkSet.p
-		include : SmallYCursiveArc
-		include : SmallYFlatHookCusriveHook XH
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+		include : SmallYCursiveArc XH 0
+		include : SmallYFlatHookCusriveHook XH Descender
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	select-variant 'y' 'y'
@@ -2081,33 +2081,39 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph 'yhooktop.cursive' : glyph-proc
 		include : MarkSet.p
-		include : SmallYCursiveArc
-		include : SmallYCusriveHook (XH - Hook - HalfStroke)
+		include : SmallYCursiveArc XH 0
+		include : SmallYCusriveHook (XH - Hook - HalfStroke) Descender
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) (XH - Hook - HalfStroke) HookX (-Hook)
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	create-glyph 'yhooktop.cursiveFlatHook' : glyph-proc
 		include : MarkSet.p
-		include : SmallYCursiveArc
-		include : SmallYFlatHookCusriveHook (XH - Hook - HalfStroke)
+		include : SmallYCursiveArc XH 0
+		include : SmallYFlatHookCusriveHook (XH - Hook - HalfStroke) Descender
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) (XH - Hook - HalfStroke) HookX (-Hook)
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	create-glyph : glyph-proc
 		include : MarkSet.capital
+		set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.straight' : glyph-proc
 			include : [GenSmallYShape true false].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.straightTurn' : glyph-proc
 			include : [GenSmallYShape true true].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.curly' : glyph-proc
 			include : [GenSmallYShape false SLAB].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
+		create-derived 'cyrl/U.cursive' : glyph-proc
+			include : SmallYCursiveArc CAP (CAP - XH)
+			include : SmallYCusriveHook CAP 0
+			if SLAB : include : CenterTopSerif (SB + HalfStroke * HVContrast) CAP Jut
+			if SLAB : include : CenterTopSerif (RightSB - HalfStroke * HVContrast) CAP Jut
+		create-derived 'cyrl/U.cursiveFlatHook' : glyph-proc
+			include : SmallYCursiveArc CAP (CAP - XH)
+			include : SmallYFlatHookCusriveHook CAP 0
+			if SLAB : include : CenterTopSerif (SB + HalfStroke * HVContrast) CAP Jut
+			if SLAB : include : CenterTopSerif (RightSB - HalfStroke * HVContrast) CAP Jut
 
 	select-variant 'yhooktop' 0x1B4 (follow -- 'y')
 	select-variant 'cyrl/U' 0x423
@@ -6278,17 +6284,21 @@ glyph-block Letter-Latin-Lower-E : begin
 		include : MarkSet.e
 		include : SmallEShape XH [AdviceStroke2 2 3 XH]
 
-	define [SmallERoundedShape] : params [top stroke barpos curly [bbd 0]] : glyph-proc
-		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
+	define [SmallERoundedShape] : params [top stroke barpos] : glyph-proc
+		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
 		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
-		local pBarRight : 0.5   - TanSlope * 0.5
+		local pBarRight : 0.475 - TanSlope * 0.5
 		local pArcRight : 0.425 - TanSlope * 0.25
 
+		local xStart : SB + (0.5 * stroke * HVContrast)
+		local pfIt : if para.isItalic 1 0
 		include : dispiro
 			widths.lhs stroke
-			flat (SB + (stroke / 2) + OX + bbd) barbottom [heading Rightward]
-			curl [mix SB RightSB pBarRight] barbottom [heading Rightward]
-			g4   (RightSB - OX) [mix barbottom top pArcRight]
+			[if para.isItalic g4 flat] xStart (barbottom - pfIt * [StrokeWidthBlend 2 3] * O)
+			if para.isItalic [alsoThru.g2 0.5 0.8] [list]
+			[if para.isItalic g4 curl] [mix xStart RightSB pBarRight] (barbottom + pfIt * [StrokeWidthBlend 0.25 1] * O)
+			g4 (RightSB - OX) [mix barbottom top pArcRight]
+			arcvh
 			g4 (Middle - CorrectionOMidS) (top - O)
 			archv
 			flat (SB + OX) (top - SmallSmoothA)
