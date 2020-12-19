@@ -78,7 +78,8 @@ async function processCv() {
 		const sampleText = gr.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
 			.join(", ");
-		md.log(`  - Styles for ${sampleText}:`);
+		const explainText = gr.samplerExplain ? ` (${gr.samplerExplain})` : ``;
+		md.log(`  - Styles for ${sampleText}${explainText}:`);
 		const defaults = figureOutDefaults(variantsData, gr);
 		for (const config of gr.variants) {
 			if (!config.rank) continue;

@@ -508,33 +508,21 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 ///////////////////////////////////////////////////////////
 // Sample Images
 
-const Pages = task(`pages`, async target => {
-	await target.need(PagesDataExport, PagesFontExport);
-});
-const PagesFast = task(`pages-fast`, async target => {
-	await target.need(PagesDataExport, PagesFastFontExport(`iosevka`));
-});
-const PagesFastSlab = task(`pages-fast-slab`, async target => {
-	await target.need(PagesDataExport, PagesFastFontExport(`iosevka-slab`));
+const Pages = task(`pages`, async t => {
+	await t.need(PagesDataExport, PagesFontExport);
 });
 
-const PagesDir = oracle(`pages-dir-path`, async target => {
-	const pagesDir = Path.resolve(__dirname, "../Iosevka-Pages");
-	if (!fs.existsSync(pagesDir)) {
-		return "";
-	} else {
-		return pagesDir;
-	}
+const PagesDir = oracle(`pages-dir-path`, async t => {
+	const [rp] = await t.need(RawPlans);
+	if (!rp.buildOptions || !rp.buildOptions.__pagesDir) fail("Pages directory not found");
+	return rp.buildOptions.__pagesDir;
 });
 
-const PagesDataExport = task(`pages:data-export`, async target => {
-	target.is.volatile();
-	const [version, pagesDir] = await target.need(Version, PagesDir);
-	if (!pagesDir) return;
-	await target.need(Parameters, UtilScripts);
-	const [cm] = await target.need(BuildCM("iosevka", "iosevka-regular"));
-	const [cmi] = await target.need(BuildCM("iosevka", "iosevka-italic"));
-	const [cmo] = await target.need(BuildCM("iosevka", "iosevka-oblique"));
+const PagesDataExport = task(`pages:data-export`, async t => {
+	const [pagesDir] = await t.need(PagesDir, Version, Parameters, UtilScripts);
+	const [cm] = await t.need(BuildCM("iosevka", "iosevka-regular"));
+	const [cmi] = await t.need(BuildCM("iosevka", "iosevka-italic"));
+	const [cmo] = await t.need(BuildCM("iosevka", "iosevka-oblique"));
 	await run(
 		`node`,
 		`utility/export-data/index`,
@@ -546,10 +534,9 @@ const PagesDataExport = task(`pages:data-export`, async target => {
 	);
 });
 
-const PagesFontExport = task(`pages:font-export`, async target => {
-	const [pagesDir] = await target.need(PagesDir);
-	if (!pagesDir) return;
-	const dirs = await target.need(
+const PagesFontExport = task(`pages:font-export`, async t => {
+	const [pagesDir] = await t.need(PagesDir);
+	const dirs = await t.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
 		GroupContents`iosevka-aile`,
@@ -557,26 +544,23 @@ const PagesFontExport = task(`pages:font-export`, async target => {
 		GroupContents`iosevka-sparkle`
 	);
 
-	for (const dir of dirs) {
-		await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
-		await mv(
-			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
-			Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
-		);
-	}
+	for (const dir of dirs) exportFontDir(pagesDir, dir);
 });
 
-const PagesFastFontExport = task.make(
-	g => `pages:fast-font-export:${g}`,
-	async (target, g) => {
-		const [pagesDir] = await target.need(PagesDir);
-		if (!pagesDir) return;
-		const dirs = await target.need(GroupContents(g));
-		for (const dir of dirs) {
-			await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
-		}
-	}
-);
+const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, g) => {
+	const [pagesDir] = await target.need(PagesDir);
+	if (!pagesDir) return;
+	const dirs = await target.need(GroupContents(g));
+	for (const dir of dirs) exportFontDir(pagesDir, dir);
+});
+
+async function exportFontDir(pagesDir, dir) {
+	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
+	await mv(
+		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
+		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
+	);
+}
 
 ///////////////////////////////////////////////////////////
 // Sample Images
