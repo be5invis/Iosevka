@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 4.1.1
+
+ * Fix letterform of `t` in `ss14`.
+ * Add curly-turn variant of `y` (#775).
+
+
 ### 4.1.0
 
  * Add rounded variant of `e` (#771).

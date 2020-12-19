@@ -654,6 +654,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `y = 'curly'`, `cv32 = 3`: More curly letter `y`, like Iosevka 2.x.
     + `y = 'cursive'`, `cv32 = 4`: Cursive-like `y` (default for Italic).
     + `y = 'cursive-flat-hook'`, `cv32 = 5`: Cursive-like `y` with flat terminal hook.
+    + `y = 'curly-turn'`, `cv32 = 6`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
   - Styles for `z`, `Z`:
     + `z = 'standard'`, `cv33 = 1`: Standard `Z` and `z` (default).
     + `z = 'with-crossbar'`, `cv33 = 2`: Standard `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
@@ -674,6 +675,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `cyrl-capital-u = 'curly'`, `cv60 = 3`: More curly cyrillic capital U (`У`), like Iosevka 2.x.
     + `cyrl-capital-u = 'cursive'`, `cv60 = 4`: Cursive-like Cyrillic capital U (`У`).
     + `cyrl-capital-u = 'cursive-flat-hook'`, `cv60 = 5`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
+    + `cyrl-capital-u = 'curly-turn'`, `cv60 = 6`: More curly cyrillic capital U (`У`), like Iosevka 2.x, with a tail turns leftward.
   - Styles for `0`:
     + `zero = 'slashed'`, `cv36 = 1`: Slashed Zero `0` (default).
     + `zero = 'dotted'`, `cv36 = 2`: Dotted Zero `0`.
