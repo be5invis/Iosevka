@@ -1836,8 +1836,8 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local px1   0.84
 		local py1 : [StrokeWidthBlend 0.8 0.76] * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
 		local px2 : if slabCurlyNoTurn px1 0.95
-		local py2SansCurly : 0.88 * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
-		local py2 : if (useStraightBottom || useTurnBottom) 0.97 : if slab py1 py2SansCurly
+		local py2VertBot : 0.88 * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
+		local py2 : if slabCurlyNoTurn py1 : if bottomIsNotVertical 0.97 py2VertBot
 		local pds    0.1
 		local pds2   0.01
 		local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
@@ -1854,7 +1854,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			local ds0 : (top - bottom) * pds
 			local ds20 : (top - bottom) * pds2
 			local ds  : if slabCurly [Math.max [AdviceStroke2 3 6 (top - bottom)] ds0] ds0
-			local ds2 : if slabCurlyNoTurn ds : ds20 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
+			local ds2 : if slabCurlyNoTurn ds : ds20 + [if bottomIsNotVertical (slabysize * slabyvx) 0]
 			return {ds ds2}
 
 		define [yDiagCor dy] : DiagCor dy (yrstroker - yrstrokel) 0 0
@@ -1972,8 +1972,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				include : yBaseSerif top bottom
 
 		define [SmallYHookTopShape top bottom] : glyph-proc
-			local ds : (top - bottom) * pds
-			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
+			local {ds ds2} : CalcDS top bottom
 			local joinHeight : yJoinHeight ds ds2 top bottom true
 
 			include : intersection
