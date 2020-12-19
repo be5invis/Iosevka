@@ -669,8 +669,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `lambda = 'straight'`, `cv35 = 1`: More-straight Greek small Lambda (`λ`) (default).
     + `lambda = 'curly'`, `cv35 = 2`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
   - Styles for `У` (Cyrillic Capital U):
-    + `cyrl-capital-u = 'straight'`, `cv60 = 1`: Cyrillic capital U (`У`) that is fully straight (default).
-    + `cyrl-capital-u = 'straight-turn'`, `cv60 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward.
+    + `cyrl-capital-u = 'straight'`, `cv60 = 1`: Cyrillic capital U (`У`) that is fully straight (default for Sans).
+    + `cyrl-capital-u = 'straight-turn'`, `cv60 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward (default for Slab).
     + `cyrl-capital-u = 'curly'`, `cv60 = 3`: More curly cyrillic capital U (`У`), like Iosevka 2.x.
     + `cyrl-capital-u = 'cursive'`, `cv60 = 4`: Cursive-like Cyrillic capital U (`У`).
     + `cyrl-capital-u = 'cursive-flat-hook'`, `cv60 = 5`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
