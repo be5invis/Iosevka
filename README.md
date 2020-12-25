@@ -508,6 +508,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `d = 'toothless-corner'`, `cv14 = 2`: `d` without bottom-right tooth, with a corner transition.
     + `d = 'toothless-rounded'`, `cv14 = 3`: `d` without bottom-right tooth, with a rounded transition.
     + `d = 'tailed'`, `cv14 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
+  - Styles for `e`:
+    + `e = 'flat-crossbar'`, `cv59 = 1`: `e` with flat crossbar (default for Upright).
+    + `e = 'rounded'`, `cv59 = 2`: `e` with more rounded shape (default for Italic).
   - Styles for `f`:
     + `f = 'serifless'`, `cv15 = 1`: `f` without bottom serif, hook or exension (default for Sans Upright).
     + `f = 'serifed'`, `cv15 = 2`: `f` with bottom serif (default for Slab Upright).
@@ -531,6 +534,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `g = 'opendoublestorey'`, `cv16 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
     + `g = 'earless-corner'`, `cv16 = 4`: Earless (cornered top-right) single-storey `g`.
     + `g = 'earless-rounded'`, `cv16 = 5`: Earless (rounded top-right) single-storey `g`.
+    + `g = 'singlestorey-flat-hook'`, `cv16 = 6`: Single-storey `g` with flat terminal hook.
+    + `g = 'singlestorey-earless-corner-flat-hook'`, `cv16 = 7`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
+    + `g = 'singlestorey-earless-rounded-flat-hook'`, `cv16 = 8`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
   - Styles for `h`:
     + `h = 'straight'`, `cv17 = 1`: `h` with straight ending (default).
     + `h = 'tailed'`, `cv17 = 2`: `h` with curly tailed ending.
@@ -647,6 +653,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `y = 'straight-turn'`, `cv32 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
     + `y = 'curly'`, `cv32 = 3`: More curly letter `y`, like Iosevka 2.x.
     + `y = 'cursive'`, `cv32 = 4`: Cursive-like `y` (default for Italic).
+    + `y = 'cursive-flat-hook'`, `cv32 = 5`: Cursive-like `y` with flat terminal hook.
+    + `y = 'curly-turn'`, `cv32 = 6`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
   - Styles for `z`, `Z`:
     + `z = 'standard'`, `cv33 = 1`: Standard `Z` and `z` (default).
     + `z = 'with-crossbar'`, `cv33 = 2`: Standard `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
@@ -654,13 +662,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `z = 'curly'`, `cv33 = 4`: Curly `Z` and `z`.
     + `z = 'curly-with-crossbar'`, `cv33 = 5`: Curly `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
     + `z = 'curly-with-horizontal-crossbar'`, `cv33 = 6`: Curly `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
-  - Styles for `ß`:
-    + `eszet = 'traditional'`, `cv34 = 1`: Traditional, Fraktur-like Eszet.
-    + `eszet = 'sulzbacher'`, `cv34 = 2`: A more modern, beta-like Eszet (default).
-    + `eszet = 'longs-s-lig'`, `cv34 = 3`: An Eszet shown as a ligature of long-S (`ſ`) and `s`.
-  - Styles for `λ`:
-    + `lambda = 'straight'`, `cv35 = 1`: More-straight letter `λ` (default).
-    + `lambda = 'curly'`, `cv35 = 2`: More curly letter `λ`, like Iosevka 2.x.
+  - Styles for `ß` (Eszet):
+    + `eszet = 'traditional'`, `cv34 = 1`: Traditional, Fraktur-like Eszet (`ß`).
+    + `eszet = 'sulzbacher'`, `cv34 = 2`: More modern, beta-like Eszet (`ß`) (default).
+    + `eszet = 'longs-s-lig'`, `cv34 = 3`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
+  - Styles for `λ` (Greek small Lambda):
+    + `lambda = 'straight'`, `cv35 = 1`: More-straight Greek small Lambda (`λ`) (default).
+    + `lambda = 'curly'`, `cv35 = 2`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
+  - Styles for `У` (Cyrillic Capital U):
+    + `cyrl-capital-u = 'straight'`, `cv60 = 1`: Cyrillic capital U (`У`) that is fully straight (default for Sans).
+    + `cyrl-capital-u = 'straight-turn'`, `cv60 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward (default for Slab).
+    + `cyrl-capital-u = 'curly'`, `cv60 = 3`: More curly cyrillic capital U (`У`), like Iosevka 2.x.
+    + `cyrl-capital-u = 'cursive'`, `cv60 = 4`: Cursive-like Cyrillic capital U (`У`).
+    + `cyrl-capital-u = 'cursive-flat-hook'`, `cv60 = 5`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
+    + `cyrl-capital-u = 'curly-turn'`, `cv60 = 6`: More curly cyrillic capital U (`У`), like Iosevka 2.x, with a tail turns leftward.
   - Styles for `0`:
     + `zero = 'slashed'`, `cv36 = 1`: Slashed Zero `0` (default).
     + `zero = 'dotted'`, `cv36 = 2`: Dotted Zero `0`.

@@ -152,9 +152,9 @@ glyph-block Letter-Shared-Shapes : begin
 			include : spiro-outline : nShoulderKnots.apply null [a.concat { (fMask -- true) }]
 
 	glyph-block-export FlatHookDepth
-	define [FlatHookDepth df] : object
-		x : FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div] HVContrast
-		y : FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div]          1
+	define [FlatHookDepth df s] : object
+		x : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div] HVContrast]
+		y : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div]          1]
 	define [FlatHookDepthImpl sHook sStroke] : begin
 		return : Math.max (sHook * Hook) (sStroke * Stroke * 1.375) : Math.min (sHook * Hook) (sStroke * Stroke * 1.75)
 
@@ -1824,24 +1824,26 @@ glyph-block Letter-Latin-Upper-Y : begin
 glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : nShoulder
+	glyph-block-import Letter-Shared-Shapes : nShoulder FlatHookDepth
 
 	define [GenSmallYShape straightBar useTurnBottom serifless] : begin
 		local slab : if serifless false SLAB
 		local useStraightBottom : straightBar && !useTurnBottom
 		local slabCurly : slab && !straightBar
+		local slabCurlyNoTurn : slab && !straightBar && !useTurnBottom
+		local bottomIsNotVertical : slab || useStraightBottom || useTurnBottom
+
 		local px1   0.84
-		local py1  : [StrokeWidthBlend 0.8 0.76] * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
-		local px2 0.95
-		local py20 : 0.88 * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
-		local py2 : if (useStraightBottom || useTurnBottom) 0.97 py20
-		local pds 0.1
-		local pds2 0.01
+		local py1 : [StrokeWidthBlend 0.8 0.76] * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
+		local px2 : if slabCurlyNoTurn px1 0.95
+		local py2VertBot : 0.88 * [if slabCurly [StrokeWidthBlend 1 0.9] 1]
+		local py2 : if slabCurlyNoTurn py1 : if bottomIsNotVertical 0.97 py2VertBot
+		local pds    0.1
+		local pds2   0.01
 		local dpy1 : (1 - [linreg (1 - px2) (1 - py2) px1 py1 1]) / (1 - py1)
-		local dpy20 : (1 - [linreg (1 - px1) (1 - py1) px2 py20 1]) / (1 - py20)
 		local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 		local yrstrokel0 : Middle - Width * 0.1
-		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if (useStraightBottom || useTurnBottom) (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1])
+		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if bottomIsNotVertical (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1])
 		local yrstroker : Width - SB * [if (straightBar && SLAB && !slab) 1.5 1] * [if straightBar DesignParameters.straightSmallYShapeSbShrink 1]
 		local yshrink : [StrokeWidthBlend 1 0.85] * [if straightBar ([AdviceStroke 3.25] / Stroke) 1]
 		local yBottomJut : Jut * 1.25
@@ -1850,8 +1852,9 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 		define [CalcDS top bottom] : begin
 			local ds0 : (top - bottom) * pds
+			local ds20 : (top - bottom) * pds2
 			local ds  : if slabCurly [Math.max [AdviceStroke2 3 6 (top - bottom)] ds0] ds0
-			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
+			local ds2 : if slabCurlyNoTurn ds : ds20 + [if bottomIsNotVertical (slabysize * slabyvx) 0]
 			return {ds ds2}
 
 		define [yDiagCor dy] : DiagCor dy (yrstroker - yrstrokel) 0 0
@@ -1872,6 +1875,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			define joinX : mix yrstrokel yrstroker (1 - px2)
 			define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
 			define [ConnectZ shrink] : curl joinX joinY [widths.rhs : Stroke * shrink]
+
 			return : list
 				if (straightBar && (! hooktop))
 					then : list
@@ -1899,12 +1903,12 @@ glyph-block Letter-Latin-Lower-Y : begin
 			define joinX : mix yrstrokel yrstroker (1 - px2)
 			define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
 
-			if (!useTurnBottom) : begin
-				if (useStraightBottom) : begin
-					local xBaseKnot : mix yrstroker joinX ((top - bottom) / (top - joinY))
-					include : LeftwardBottomSerif (xBaseKnot - HalfStroke * HVContrast) bottom yBottomJut
-				: else : begin
-					include : LeftwardBottomSerif (yrstroker - HalfStroke * HVContrast) bottom yBottomJut
+			if useTurnBottom : return nothing
+			if (useStraightBottom) : begin
+				local xBaseKnot : mix yrstroker joinX ((top - bottom) / (top - joinY))
+				include : LeftwardBottomSerif (xBaseKnot - HalfStroke * HVContrast) bottom yBottomJut
+			: else : begin
+				include : LeftwardBottomSerif (yrstrokel - HalfStroke * HVContrast) bottom yBottomJut
 
 		define [yJoinProportion hooktop x] : linreg
 			1 - px2
@@ -1968,8 +1972,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				include : yBaseSerif top bottom
 
 		define [SmallYHookTopShape top bottom] : glyph-proc
-			local ds : (top - bottom) * pds
-			local ds2 : (top - bottom) * pds2 + [if (useStraightBottom || useTurnBottom) (slabysize * slabyvx) 0]
+			local {ds ds2} : CalcDS top bottom
 			local joinHeight : yJoinHeight ds ds2 top bottom true
 
 			include : intersection
@@ -2012,31 +2015,55 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'y.straight' : glyph-proc
 			include : [GenSmallYShape true false].SmallYShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'y.straightTurn' : glyph-proc
 			include : [GenSmallYShape true true].SmallYShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'y.curly' : glyph-proc
-			include : [GenSmallYShape false SLAB].SmallYShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
+			include : [GenSmallYShape false false].SmallYShape XH Descender
+		create-derived 'y.curlyTurn' : glyph-proc
+			include : [GenSmallYShape false true].SmallYShape XH Descender
 
-	create-glyph 'y.cursive' : glyph-proc
-		include : MarkSet.p
+	define [SmallYCursiveArc top bottom] : new-glyph : glyph-proc
 		include : nShoulder
+			top -- top
+			bottom -- bottom
 			left -- (SB + Stroke * HVContrast)
 			right -- RightSB
 			fine -- ShoulderFine
-		include : FlipAround Middle (XH / 2)
-		include : dispiro
+		include : FlipAround Middle [mix bottom top 0.5]
+
+	define [SmallYCusriveHook y0 bottom] : dispiro
+		widths.rhs
+		flat RightSB y0 [heading Downward]
+		curl RightSB (bottom + SmallSmoothA)
+		hookend (bottom + O)
+		g4 SB (bottom + SHook)
+
+	define [SmallYFlatHookCusriveHook y0 bottom] : begin
+		local hd : FlatHookDepth [DivFrame 1] (9 / 8)
+		local xTerminal : Math.min (RightSB - hd.x - 0.1) : mix SB RightSB (1 / 5)
+		return : dispiro
 			widths.rhs
-			flat RightSB XH [heading Downward]
-			curl RightSB (Descender + SmallSmoothA)
-			hookend (Descender + O)
-			g4 SB (Descender + SHook)
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+			flat RightSB y0 [heading Downward]
+			curl RightSB (bottom + hd.y)
+			arcvh
+			flat (RightSB - hd.x) bottom
+			curl xTerminal bottom [heading Leftward]
+
+	create-glyph 'y.cursive' : glyph-proc
+		include : MarkSet.p
+		include : SmallYCursiveArc XH 0
+		include : SmallYCusriveHook XH Descender
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
+		set-base-anchor 'overlay' Middle (XH / 2)
+
+	create-glyph 'y.cursiveFlatHook' : glyph-proc
+		include : MarkSet.p
+		include : SmallYCursiveArc XH 0
+		include : SmallYFlatHookCusriveHook XH Descender
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	select-variant 'y' 'y'
@@ -2045,45 +2072,53 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'yhooktop.straight' : glyph-proc
 			include : [GenSmallYShape true false].SmallYHookTopShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'yhooktop.straightTurn' : glyph-proc
 			include : [GenSmallYShape true true].SmallYHookTopShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
 		create-derived 'yhooktop.curly' : glyph-proc
-			include : [GenSmallYShape false SLAB].SmallYHookTopShape XH Descender
-			set-base-anchor 'overlay' Middle (XH / 2)
+			include : [GenSmallYShape false false].SmallYHookTopShape XH Descender
+		create-derived 'yhooktop.curlyTurn' : glyph-proc
+			include : [GenSmallYShape false true].SmallYHookTopShape XH Descender
 
 	create-glyph 'yhooktop.cursive' : glyph-proc
 		include : MarkSet.p
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-			fine -- ShoulderFine
-		include : FlipAround Middle (XH / 2)
-		include : dispiro
-			widths.rhs
-			flat RightSB (XH - Hook - HalfStroke) [heading Downward]
-			curl RightSB (Descender + SmallSmoothA)
-			hookend (Descender + O)
-			g4 SB (Descender + SHook)
+		include : SmallYCursiveArc XH 0
+		include : SmallYCusriveHook (XH - Hook - HalfStroke) Descender
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) (XH - Hook - HalfStroke) HookX (-Hook)
-		if SLAB : begin
-			include : LeftwardTopSerif SB XH SideJut
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
+		set-base-anchor 'overlay' Middle (XH / 2)
+
+	create-glyph 'yhooktop.cursiveFlatHook' : glyph-proc
+		include : MarkSet.p
+		include : SmallYCursiveArc XH 0
+		include : SmallYFlatHookCusriveHook (XH - Hook - HalfStroke) Descender
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) (XH - Hook - HalfStroke) HookX (-Hook)
+		if SLAB : include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
 	create-glyph : glyph-proc
 		include : MarkSet.capital
+		set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.straight' : glyph-proc
 			include : [GenSmallYShape true false].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.straightTurn' : glyph-proc
 			include : [GenSmallYShape true true].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
 		create-derived 'cyrl/U.curly' : glyph-proc
-			include : [GenSmallYShape false SLAB].SmallYShape CAP 0
-			set-base-anchor 'overlay' Middle (XH / 2 - Descender)
+			include : [GenSmallYShape false false].SmallYShape CAP 0
+		create-derived 'cyrl/U.curlyTurn' : glyph-proc
+			include : [GenSmallYShape false true].SmallYShape CAP 0
+		create-derived 'cyrl/U.cursive' : glyph-proc
+			include : SmallYCursiveArc CAP (CAP - XH)
+			include : SmallYCusriveHook CAP 0
+			if SLAB : include : CenterTopSerif (SB + HalfStroke * HVContrast) CAP Jut
+			if SLAB : include : CenterTopSerif (RightSB - HalfStroke * HVContrast) CAP Jut
+		create-derived 'cyrl/U.cursiveFlatHook' : glyph-proc
+			include : SmallYCursiveArc CAP (CAP - XH)
+			include : SmallYFlatHookCusriveHook CAP 0
+			if SLAB : include : CenterTopSerif (SB + HalfStroke * HVContrast) CAP Jut
+			if SLAB : include : CenterTopSerif (RightSB - HalfStroke * HVContrast) CAP Jut
 
 	select-variant 'yhooktop' 0x1B4 (follow -- 'y')
 	select-variant 'cyrl/U' 0x423
@@ -3922,7 +3957,7 @@ glyph-block Letter-Latin-Upper-G : begin
 glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend FlatHookDepth
 
 	create-glyph 'g.doubleStorey' : glyph-proc
 		include : MarkSet.p
@@ -4027,6 +4062,41 @@ glyph-block Letter-Latin-Lower-G : begin
 			hookend (Descender + O)
 			g4 SB (Descender + SHook)
 
+	define [SmallGSingleStoreyFlatHookShape df y0] : begin
+		local hd : FlatHookDepth df (9 / 8)
+		local xTerminal : Math.min (df.rightSB - hd.x - 0.1) : mix df.leftSB df.rightSB (1 / 5)
+		return : dispiro
+			widths.rhs
+			flat df.rightSB y0 [heading Downward]
+			curl df.rightSB (Descender + hd.y)
+			arcvh.superness DesignParameters.tightHookSuperness
+			flat (df.rightSB - hd.x) Descender
+			curl xTerminal Descender [heading Leftward]
+
+	create-glyph 'g.singleStoreyFlatHook' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarRightShape
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] XH
+		if SLAB : begin
+			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	create-glyph 'g.singleStoreyEarlessCornerFlatHook' : glyph-proc
+		set-width Width
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] (XH - DToothlessRise)
+
+	create-glyph 'g.singleStoreyEarlessRoundedFlatHook' : glyph-proc
+		set-width Width
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
+		include : FlipAround Middle (XH / 2)
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] (XH - SmallSmoothB)
+
 	select-variant 'g' 'g'
 	turned 'turng' 0x1D77 'g' Middle [mix Descender XH 0.5]
 
@@ -4056,21 +4126,19 @@ glyph-block Letter-Latin-Lower-G : begin
 		define r : mix Width RightSB 0.3
 		define bwDoubleStorey : Math.min [AdviceStroke 5] (0.5 / 3 * (CAP - Stroke * 4))
 		define bwSingleStorey : AdviceStroke2 2 4 XH
-		create-glyph 'gbar.doubleStorey' : glyph-proc
-			include [refer-glyph "g.doubleStorey"] AS_BASE
-			include : HBar l r [query-glyph "g.doubleStorey"].baseAnchors.overlay.y bwDoubleStorey
-		create-glyph 'gbar.openDoubleStorey' : glyph-proc
-			include [refer-glyph "g.openDoubleStorey"] AS_BASE
-			include : HBar l r [query-glyph "g.openDoubleStorey"].baseAnchors.overlay.y bwDoubleStorey
-		create-glyph 'gbar.singleStorey' : glyph-proc
-			include [refer-glyph "g.singleStorey"] AS_BASE
-			include : HBar l r [query-glyph "g.singleStorey"].baseAnchors.overlay.y bwSingleStorey
-		create-glyph 'gbar.singleStoreyEarlessCorner' : glyph-proc
-			include [refer-glyph "g.singleStoreyEarlessCorner"] AS_BASE
-			include : HBar l r [query-glyph "g.singleStoreyEarlessCorner"].baseAnchors.overlay.y bwSingleStorey
-		create-glyph 'gbar.singleStoreyEarlessRounded' : glyph-proc
-			include [refer-glyph "g.singleStoreyEarlessRounded"] AS_BASE
-			include : HBar l r [query-glyph "g.singleStoreyEarlessRounded"].baseAnchors.overlay.y bwSingleStorey
+		define [derive suffix bw] : create-glyph "gbar.\(suffix)" : glyph-proc
+			include [refer-glyph "g.\(suffix)"] AS_BASE
+			include : HBar l r [query-glyph "g.\(suffix)"].baseAnchors.overlay.y bw
+
+		derive 'doubleStorey'                       bwDoubleStorey
+		derive 'openDoubleStorey'                   bwDoubleStorey
+		derive 'singleStorey'                       bwSingleStorey
+		derive 'singleStoreyEarlessCorner'          bwSingleStorey
+		derive 'singleStoreyEarlessRounded'         bwSingleStorey
+		derive 'singleStoreyFlatHook'               bwSingleStorey
+		derive 'singleStoreyEarlessCornerFlatHook'  bwSingleStorey
+		derive 'singleStoreyEarlessRoundedFlatHook' bwSingleStorey
+
 		select-variant "gbar" 0x1E5 (follow -- 'g')
 
 
@@ -6202,9 +6270,9 @@ glyph-block Letter-Latin-Lower-E : begin
 
 	define [SmallEShape] : params [top stroke barpos curly [bbd 0]] : glyph-proc
 		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
-		local hookx (RightSB - OXHook + TailAdjX * TanSlope)
-		local hookmiddle : [mix (SB + O) hookx 0.55] + CorrectionOMidS
 		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
+
+		include : HBarBottom (SB + (stroke / 2) + OX + bbd) (RightSB - (stroke / 2) - OX) barbottom stroke
 		include : dispiro
 			widths.lhs stroke
 			flat (RightSB - OX) barbottom [heading Upward]
@@ -6216,11 +6284,39 @@ glyph-block Letter-Latin-Lower-E : begin
 			curl (SB + OX) (0 + SmallSmoothB)
 			hookend O (sw -- stroke)
 			g4 (RightSB - OX * [if para.isItalic 0 0.5]) hook
-		include : HBarBottom (SB + (stroke / 2) + OX + bbd) (RightSB - (stroke / 2) - OX) barbottom stroke
 
-	create-glyph 'e' 'e' : glyph-proc
+	create-glyph 'e.flatCrossbar' : glyph-proc
 		include : MarkSet.e
 		include : SmallEShape XH [AdviceStroke2 2 3 XH]
+
+	define [SmallERoundedShape] : params [top stroke barpos] : glyph-proc
+		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
+		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
+		local pBarRight : 0.475 - TanSlope * 0.5
+		local pArcRight : 0.425 - TanSlope * 0.25
+
+		local xStart : SB + (0.5 * stroke * HVContrast)
+		local pfIt : if para.isItalic 1 0
+		include : dispiro
+			widths.lhs stroke
+			[if para.isItalic g4 flat] xStart (barbottom - pfIt * [StrokeWidthBlend 2 3] * O)
+			if para.isItalic [alsoThru.g2 0.5 0.8] [list]
+			[if para.isItalic g4 curl] [mix xStart RightSB pBarRight] (barbottom + pfIt * [StrokeWidthBlend 0.25 1] * O)
+			g4 (RightSB - OX) [mix barbottom top pArcRight]
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat (SB + OX) (top - SmallSmoothA)
+			curl (SB + OX) (0 + SmallSmoothB)
+			hookend O (sw -- stroke)
+			g4 (RightSB - OX * [if para.isItalic 0 0.5]) hook
+
+
+	create-glyph 'e.rounded' : glyph-proc
+		include : MarkSet.e
+		include : SmallERoundedShape XH [AdviceStroke2 2 3 XH]
+
+	select-variant 'e' 'e'
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/e' 0x1D556 : glyph-proc
@@ -6238,7 +6334,7 @@ glyph-block Letter-Latin-Lower-E : begin
 		include : FlipAround Middle (CAP / 2)
 
 	alias 'cyrl/ie' 0x435 'e'
-	turned 'turne' 0x1DD 'e' Middle (XH / 2)
+	turned 'turne' 0x1DD 'e.flatCrossbar' Middle (XH / 2)
 	alias 'schwa' 0x259 'turne'
 	alias 'cyrl/schwa' 0x4D9 'turne'
 	alias 'cyrl/Schwa' 0x4D8 'Schwa'

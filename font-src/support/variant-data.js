@@ -75,6 +75,7 @@ class Prime {
 		this.descSampleText = this.ligatureSampler
 			? cfg.sampler.split(" ")
 			: [...(cfg.sampler || "")];
+		this.samplerExplain = cfg.samplerExplain;
 		this.tag = cfg.tag;
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.variants = new Map();
@@ -94,6 +95,7 @@ class Prime {
 		const gr = {
 			key: this.key,
 			sampler: this.sampler,
+			samplerExplain: this.samplerExplain,
 			tag: this.tag,
 			slopeDependent: this.slopeDependent,
 			ligatureSampler: this.ligatureSampler,

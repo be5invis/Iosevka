@@ -1,5 +1,18 @@
 ## Modifications since version 2.x
 
+### 4.1.1
+
+ * Fix letterform of `t` in `ss14`.
+ * Add curly-turn variant of `y` (#775).
+
+
+### 4.1.0
+
+ * Add rounded variant of `e` (#771).
+ * Add flat-hook single-storey variants for `g` and `y` (#772).
+ * Create separate variant selector for Cyrillic capital U (#773).
+
+
 ### 4.0.3
 
  * Fix operator centering chain propagation under Apple platform (#768).
