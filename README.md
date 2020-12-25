@@ -809,6 +809,42 @@ featureTag = 'calt'
 sequence = '<*>'
 ```
 
+#### Metric Override
+
+Subsection `metric-override` provides ability to override certain metric values, if you *reallly* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
+
+| Property | Unit | Default Value | Meaning |
+|----------|------|---------|----------|
+| `cap` | emu | 735 | Height of `H`. |
+| `xheight` | emu | 530 | Height of `x`. |
+| `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
+| `leading` | emu | 1250 | Built-in line height. |
+| `symbolMid` | emu | 340 | Height of the center of hyphen (`-`). |
+| `parenSize` | emu | 966 | Height of Parentheses. |
+| `winMetricAscenderPad` | emu | 0 | Additional pad for Win metrics’ ascender to avoid clipping in legacy Windows applications. |
+| `winMetricDescenderPad` | emu | 0 | Additional pad for Win metrics’ descender to avoid clipping in legacy Windows applications. |
+| `powerlineScaleX`, `powerlineScaleY` | (*ratio*) | 1 | X and Y scale of Powerline glyphs. |
+| `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
+| `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
+
+Sub-subsection `metric-override.multiplies` and `metric-override.adds` could be used to override the value by multiplying a scale to the default value, then add a shift to it further. The following configuration
+
+```toml
+[buildPlans.iosevka-custom.metric-override]
+leading = 1500
+
+[buildPlans.iosevka-custom.metric-override.multiplies]
+sb = 1.0625
+
+[buildPlans.iosevka-custom.metric-override.adds]
+sb = 15
+```
+
+will:
+
+* Override line height to `1500` em-unit;
+* Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
+
 #### Sample Configuration
 
 A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml).
