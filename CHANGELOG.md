@@ -1,5 +1,18 @@
 ## Modifications since version 2.x
 
+### 4.2.0
+
+ * Add character:
+   - Narrow no-break space (`U+202F`).
+   - Thai Currency Symbol Baht (`U+0E3F`, #781).
+   - Bitcoin Symbol (`U+20BF`).
+   - Projection (`U+2305`) and Perspective(`U+2306`, #780).
+ * Add `raised-turn-comma` variant for ASCII grave (#778).
+ * Add `straight-neck` variant for digit TWO (`2`, #779).
+ * Add long-top-serif variants of `1` (#783).
+ * Add metric override `onumZeroHeightRatio` for height of old-style numbers (#784).
+
+
 ### 4.1.1
 
  * Fix letterform of `t` in `ss14`.

@@ -686,6 +686,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `one = 'nobase'`, `cv37 = 1`: `1` without bottom serif (default for Sans).
     + `one = 'base'`, `cv37 = 2`: `1` with bottom serif (default for Slab).
     + `one = 'line'`, `cv37 = 3`: `1` drawn just like a straight line.
+    + `one = 'nobase-long-top-serif'`, `cv37 = 4`: `1` without bottom serif and with a long top serif.
+    + `one = 'base-long-top-serif'`, `cv37 = 5`: `1` with bottom serif and a long top serif.
+  - Styles for `2`:
+    + `two = 'straight-neck'`, `cv61 = 1`: `2` with straight neck.
+    + `two = 'curly-neck'`, `cv61 = 2`: `2` with curly neck (default).
   - Styles for `3`:
     + `three = 'flattop'`, `cv38 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
     + `three = 'twoarcs'`, `cv38 = 2`: Arched top `3` (default).
@@ -773,6 +778,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `` ` ``:
     + `ascii-grave = 'straight'`, `cv58 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
     + `ascii-grave = 'raised-inverse-comma'`, `cv58 = 2`: Show ASCII grave (`` ` ``) as raised comma..
+    + `ascii-grave = 'raised-turn-comma'`, `cv58 = 3`: Show ASCII grave (`` ` ``) as raised turned comma, identical to curly open single quote symbols (U+2018)..
 
 <!-- END Section-Cherry-Picking-Styles -->
 
