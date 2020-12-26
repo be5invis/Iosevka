@@ -686,6 +686,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `one = 'nobase'`, `cv37 = 1`: `1` without bottom serif (default for Sans).
     + `one = 'base'`, `cv37 = 2`: `1` with bottom serif (default for Slab).
     + `one = 'line'`, `cv37 = 3`: `1` drawn just like a straight line.
+    + `one = 'nobase-long-top-serif'`, `cv37 = 4`: `1` without bottom serif and with a long top serif.
+    + `one = 'base-long-top-serif'`, `cv37 = 5`: `1` with bottom serif and a long top serif.
+  - Styles for `2`:
+    + `two = 'straight-neck'`, `cv61 = 1`: `2` with straight neck.
+    + `two = 'curly-neck'`, `cv61 = 2`: `2` with curly neck (default).
   - Styles for `3`:
     + `three = 'flattop'`, `cv38 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
     + `three = 'twoarcs'`, `cv38 = 2`: Arched top `3` (default).
@@ -773,6 +778,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `` ` ``:
     + `ascii-grave = 'straight'`, `cv58 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
     + `ascii-grave = 'raised-inverse-comma'`, `cv58 = 2`: Show ASCII grave (`` ` ``) as raised comma..
+    + `ascii-grave = 'raised-turn-comma'`, `cv58 = 3`: Show ASCII grave (`` ` ``) as raised turned comma, identical to curly open single quote symbols (U+2018)..
 
 <!-- END Section-Cherry-Picking-Styles -->
 
@@ -808,6 +814,42 @@ unicode = 57600 # 0xE100
 featureTag = 'calt'
 sequence = '<*>'
 ```
+
+#### Metric Override
+
+Subsection `metric-override` provides ability to override certain metric values, if you *reallly* want to. Adding this section is **strongly discouraged** as it may introduce broken geometry or broken shapes.
+
+| Property | Unit | Default Value | Meaning |
+|----------|------|---------|----------|
+| `cap` | emu | 735 | Height of `H`. |
+| `xheight` | emu | 530 | Height of `x`. |
+| `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
+| `leading` | emu | 1250 | Built-in line height. |
+| `symbolMid` | emu | 340 | Height of the center of hyphen (`-`). |
+| `parenSize` | emu | 966 | Height of Parentheses. |
+| `winMetricAscenderPad` | emu | 0 | Additional pad for Win metrics’ ascender to avoid clipping in legacy Windows applications. |
+| `winMetricDescenderPad` | emu | 0 | Additional pad for Win metrics’ descender to avoid clipping in legacy Windows applications. |
+| `powerlineScaleX`, `powerlineScaleY` | (*ratio*) | 1 | X and Y scale of Powerline glyphs. |
+| `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
+| `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
+
+Sub-subsection `metric-override.multiplies` and `metric-override.adds` could be used to override the value by multiplying a scale to the default value, then add a shift to it further. The following configuration
+
+```toml
+[buildPlans.iosevka-custom.metric-override]
+leading = 1500
+
+[buildPlans.iosevka-custom.metric-override.multiplies]
+sb = 1.0625
+
+[buildPlans.iosevka-custom.metric-override.adds]
+sb = 15
+```
+
+will:
+
+* Override line height to `1500` em-unit;
+* Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
 
 #### Sample Configuration
 

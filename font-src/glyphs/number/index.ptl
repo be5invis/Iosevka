@@ -8,7 +8,7 @@ glyph-module
 
 glyph-block Digits-Shared : begin
 	glyph-block-export OnumHeight
-	define OnumHeight : mix XH CAP 0.375
+	define OnumHeight : XH * para.onumZeroHeightRatio
 
 	glyph-block-export ShiftDown
 	define [ShiftDown] : glyph-proc
@@ -141,20 +141,29 @@ glyph-block Digits-One : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
-	define [OneShape top balance] : glyph-proc
+	define [OneShape top balance pTopSerif] : glyph-proc
 		define topSW : AdviceStroke 3.5
 		include : VBar (Middle + balance) 0 top
 		include : dispiro
 			flat (Middle - HalfStroke * HVContrast + balance) top [widths topSW 0]
-			curl (Middle - Stroke / 8 * HVContrast - HookX * 1.25 + balance) (top - Stroke / 8 - Hook * 0.75 * (top / CAP))
+			curl (Middle - Stroke / 8 * HVContrast - HookX * 1.25 + balance) (top - Stroke / 8 - Hook * pTopSerif * (top / CAP))
 
 	create-glyph 'one.lnum.nobase' : glyph-proc
 		include : MarkSet.capital
-		include : OneShape CAP OneBalance
+		include : OneShape CAP OneBalance 0.75
 
 	create-glyph 'one.lnum.base' : glyph-proc
 		include : MarkSet.capital
-		include : OneShape CAP (OneBalance / 4)
+		include : OneShape CAP (OneBalance / 4) 0.75
+		include : CenterBottomSerif Middle 0 LongJut
+
+	create-glyph 'one.lnum.nobaseLongTopSerif' : glyph-proc
+		include : MarkSet.capital
+		include : OneShape CAP OneBalance 1.875
+
+	create-glyph 'one.lnum.baseLongTopSerif' : glyph-proc
+		include : MarkSet.capital
+		include : OneShape CAP (OneBalance / 4) 1.875
 		include : CenterBottomSerif Middle 0 LongJut
 
 	create-glyph 'one.lnum.line' : glyph-proc
@@ -164,11 +173,20 @@ glyph-block Digits-One : begin
 
 	create-glyph 'one.onum.nobase' : glyph-proc
 		include : OnumMarks.e
-		include : OneShape OnumHeight OneBalance
+		include : OneShape OnumHeight OneBalance 0.75
 
 	create-glyph 'one.onum.base' : glyph-proc
 		include : OnumMarks.e
-		include : OneShape OnumHeight (OneBalance / 4)
+		include : OneShape OnumHeight (OneBalance / 4) 0.75
+		include : CenterBottomSerif Middle 0 LongJut
+
+	create-glyph 'one.onum.nobaseLongTopSerif' : glyph-proc
+		include : OnumMarks.e
+		include : OneShape OnumHeight OneBalance 1.875
+
+	create-glyph 'one.onum.baseLongTopSerif' : glyph-proc
+		include : OnumMarks.e
+		include : OneShape OnumHeight (OneBalance / 4) 1.875
 		include : CenterBottomSerif Middle 0 LongJut
 
 	create-glyph 'one.onum.line' : glyph-proc
@@ -203,6 +221,20 @@ glyph-block Digits-Two : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
+	define [TwoStraightNeckArcT sink offset sw top] : begin
+		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
+		define xLeft : SB + offset
+		define xRight : RightSB - offset - OX / 2
+		define yPhRight : top - smooth * 1.625 - sw / 2 * (top / CAP)
+		define pStraightBarStart 0.625
+		return : sink
+			widths.rhs sw
+			g4 xLeft (top - Hook)
+			hookstart (top - offset - O)
+			g4.down.mid xRight (top - smooth)
+			flat [mix xLeft xRight pStraightBarStart] [mix sw yPhRight pStraightBarStart]
+			curl xLeft sw [widths.lhs sw]
+
 	define [TwoArcShapeT sink offset sw top] : begin
 		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
 		return : sink
@@ -220,14 +252,30 @@ glyph-block Digits-Two : begin
 		if SLAB : begin
 			include : UpwardRightSerif RightSB 0 VJut
 
-	create-glyph 'two.lnum' [CodeLnum '2'] : glyph-proc
+	define [TwoStraightNeckShape top] : glyph-proc
+		include : TwoStraightNeckArcT dispiro 0 Stroke top
+		include : HBarBottom SB RightSB 0
+		if SLAB : begin
+			include : UpwardRightSerif RightSB 0 VJut
+
+	create-glyph 'two.lnum.straightNeck' : glyph-proc
+		include : MarkSet.capital
+		include : TwoStraightNeckShape CAP
+
+	create-glyph 'two.onum.straightNeck' : glyph-proc
+		include : OnumMarks.e
+		include : TwoStraightNeckShape OnumHeight
+
+	create-glyph 'two.lnum.curlyNeck' : glyph-proc
 		include : MarkSet.capital
 		include : TwoShape CAP
 
-	create-glyph 'two.onum' [CodeOnum '2'] : glyph-proc
+	create-glyph 'two.onum.curlyNeck' : glyph-proc
 		include : OnumMarks.e
 		include : TwoShape OnumHeight
 
+	select-variant 'two.lnum' [CodeLnum '2'] (follow -- 'two')
+	select-variant 'two.onum' [CodeOnum '2'] (follow -- 'two')
 	turned 'turnDigitTwo' 0x218A 'two.lnum' Middle (CAP / 2)
 
 	glyph-block-import Letter-Blackboard : BBS BBD

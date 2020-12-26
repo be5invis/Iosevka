@@ -132,6 +132,7 @@ const metricOverrideHandlers = {
 	powerlineScaleX: numericFieldHandler,
 	powerlineShiftY: numericFieldHandler,
 	powerlineShiftX: numericFieldHandler,
+	onumZeroHeightRatio: numericFieldHandler,
 	multiplies: subObjectHandler,
 	adds: subObjectHandler
 };
