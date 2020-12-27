@@ -158,8 +158,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
 			slope: sfi.slope,
-			width: sfi.shapeWidth,
-			quasiProportionalDiversity: bp["quasiProportionalDiversity"] || 0
+			width: sfi.shapeWidth
 		},
 		// Menu
 		menu: {
@@ -689,7 +688,7 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 		releaseNoteGroups[k] = {
 			subGroups,
 			slab: primePlan.serifs === "slab",
-			quasiProportional: primePlan.quasiProportionalDiversity > 0
+			quasiProportional: primePlan.spacing === "quasi-proportional"
 		};
 	}
 	await fs.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));

@@ -11,8 +11,6 @@ function initPara(data, argv) {
 	apply(para, data, ["shapeWeight"], { shapeWeight: argv.shape.weight });
 	apply(para, data, ["shapeWidth"], { shapeWidth: argv.shape.width });
 	apply(para, data, [`s-${argv.shape.slope}`]);
-	apply(para, data, [`diversity-${argv.shape.quasiProportionalDiversity}`]);
-	para.quasiProportionalDiversity = argv.shape.quasiProportionalDiversity || 0;
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;
 	if (argv.featureControl.noLigation) para.enableLigation = false;
 	return para;
