@@ -522,18 +522,33 @@ glyph-block Symbol-Math-VAndCup : begin
 	glyph-block-import Letter-Greek-Pi : PiShape
 	glyph-block-import Symbol-Arrow : ArrowShape
 
-	create-glyph 'vee' 0x2228 : glyph-proc
-		include : dispiro
+	define [VeeShape top bot] : union
+		dispiro
 			widths.center OperatorStroke
-			flat SB OperTop [heading Downward]
-			curl Middle OperBot [heading Downward]
-
-		include : dispiro
+			flat (SB + HalfStroke * HVContrast) top [heading Downward]
+			curl Middle bot [heading Downward]
+		dispiro
 			widths.center OperatorStroke
-			flat RightSB OperTop [heading Downward]
-			curl Middle OperBot [heading Downward]
+			flat (RightSB - HalfStroke * HVContrast) top [heading Downward]
+			curl Middle bot [heading Downward]
 
-	turned 'wedge' 0x2227 'vee' Middle SymbolMid
+	define [WedgeShape top bot] : new-glyph : glyph-proc
+		include : VeeShape top bot
+		include : FlipAround Middle [mix top bot 0.5]
+
+	create-glyph 'wedge' 0x2227 : WedgeShape OperTop OperBot
+	create-glyph 'vee' 0x2228 : VeeShape OperTop OperBot
+
+	create-glyph 'mt/projection' 0x2305 : union
+		HBarTop SB RightSB OperTop OperatorStroke
+		WedgeShape (OperTop - OperatorStroke) OperBot
+
+	create-glyph 'mt/perspective' 0x2306 : let
+		gap : Math.max [AdviceStroke 4] ((OperTop - OperBot) / 8)
+		union
+			HBarTop SB RightSB OperTop OperatorStroke
+			HBarTop SB RightSB (OperTop - OperatorStroke - gap) OperatorStroke
+			WedgeShape (OperTop - 2 * OperatorStroke - gap) OperBot
 
 	create-glyph 'curlyVee' 0x22CE : glyph-proc
 		local fine : CThin * OperatorStroke

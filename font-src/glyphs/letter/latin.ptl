@@ -1790,7 +1790,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	alias 'grek/Upsilon' 0x3A5 'Y'
 	alias 'cyrl/Ue' 0x4AE 'Y'
-	with-related-glyphs 'Y' 'symbol/currency/yenSign' 0xA5 : lambda [src sel] : glyph-proc
+	with-related-glyphs 'Y' 'currency/yenSign' 0xA5 : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : YOverlayShape
 
@@ -2564,7 +2564,7 @@ glyph-block Letter-Latin-Upper-B : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-	define [BShapeOutline] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
+	define [BShapeMask] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
 		include : BShapeArcsT spiro-outline top
 			offset -- 1
 			stroke -- stroke
@@ -2572,17 +2572,69 @@ glyph-block Letter-Latin-Upper-B : begin
 			topArcShift -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 
+	define [StdBShape sw] : BShape CAP (stroke -- [fallback sw : AdviceStroke2 2 3 CAP])
+	define [StdBShapeMask sw] : BShapeMask CAP (stroke -- [fallback sw : AdviceStroke2 2 3 CAP])
+
 	create-glyph 'B.standard' : glyph-proc
 		set-width Width
 		include : MarkSet.capital
-		include : BShape CAP
+		include : StdBShape
+
+	define [BahtBar sw] : VBar [mix SB RightSB 0.475] (CAP - Descender / 2) (Descender / 2) sw
+
+	create-glyph 'currency/baht.standard' : glyph-proc
+		set-width Width
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP]
+			intersection [BahtBar : AdviceStroke 5] [StdBShapeMask]
+			difference   [BahtBar   Stroke]         [StdBShapeMask]
+
+	define [BitcoinBar sw] : begin
+		local gap : Math.max [AdviceStroke 4] ((RightSB - SB) / 6)
+		return : union
+			VBar (Middle - (gap + sw * HVContrast) / 2) (CAP - Descender / 2) (Descender / 2) sw
+			VBar (Middle + (gap + sw * HVContrast) / 2) (CAP - Descender / 2) (Descender / 2) sw
+
+	create-glyph 'currency/bitcoin.standard' : glyph-proc
+		set-width Width
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP]
+			difference [BitcoinBar : AdviceStroke 5] [StdBShapeMask]
+
+
+	define [AsymmetricBShape sw] : BShape CAP
+		stroke -- [fallback sw : AdviceStroke2 2 3 CAP]
+		barPos -- 0.6
+		topArcShift -- -(RightSB - SB) * 0.05
+		topArcInnerShift -- -(RightSB - SB) * 0.1
+	define [AsymmetricBShapeMask sw] : BShapeMask CAP
+		stroke -- [fallback sw : AdviceStroke2 2 3 CAP]
+		barPos -- 0.6
+		topArcShift -- -(RightSB - SB) * 0.05
+		topArcInnerShift -- -(RightSB - SB) * 0.1
 
 	create-glyph 'B.moreAsymmetric' : glyph-proc
 		set-width Width
 		include : MarkSet.capital
-		include : BShape CAP (barPos -- 0.6) (topArcShift -- -(RightSB - SB) * 0.05) (topArcInnerShift -- -(RightSB - SB) * 0.1)
+		include : AsymmetricBShape
+
+	create-glyph 'currency/baht.moreAsymmetric' : glyph-proc
+		set-width Width
+		include : union
+			AsymmetricBShape [AdviceStroke2 3.5 3 CAP]
+			intersection [BahtBar : AdviceStroke 5] [AsymmetricBShapeMask]
+			difference   [BahtBar   Stroke]         [AsymmetricBShapeMask]
+
+	create-glyph 'currency/bitcoin.moreAsymmetric' : glyph-proc
+		set-width Width
+		include : union
+			AsymmetricBShape [AdviceStroke2 3.5 3 CAP]
+			difference [BitcoinBar : AdviceStroke 5] [AsymmetricBShapeMask]
+
 
 	select-variant 'B' 'B'
+	select-variant 'currency/baht' 0xE3F (follow -- 'B')
+	select-variant 'currency/bitcoin' 0x20BF (follow -- 'B')
 	alias 'grek/Beta' 0x392 'B'
 	alias 'cyrl/Ve' 0x412 'B'
 
@@ -2591,7 +2643,7 @@ glyph-block Letter-Latin-Upper-B : begin
 		include : union
 			BShape CAP (stroke -- BBS) (noSerif -- true)
 			intersection
-				BShapeOutline CAP (stroke -- BBS)
+				BShapeMask CAP (stroke -- BBS)
 				union
 					VBarRight (RightSB - BBD - OX * 2) 0 (CAP * BBarPos) BBS
 					VBarRight ([mix SB RightSB BArcMix] - BBD - OX * 2) (CAP * BBarPos) CAP BBS
@@ -3118,7 +3170,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		eject-contour "serifLT"
 		include : LeftHook (SB * 1.25) CAP
 
-	create-glyph 'symbol/currency/pesetaSign' 0x20A7 : glyph-proc
+	create-glyph 'currency/pesetaSign' 0x20A7 : glyph-proc
 		set-width Width
 		include : MarkSet.capital
 		include : PShape CAP (mul -- 2) (overshoot -- 0)
@@ -3127,7 +3179,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		define sw : AdviceStroke2 2 4 CAP
 		include : HBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix CAP [PBarPosY CAP Stroke PShape.BarPos] 0.5] sw
 
-	create-glyph 'symbol/currency/rubleSign' 0x20BD : glyph-proc
+	create-glyph 'currency/rubleSign' 0x20BD : glyph-proc
 		include [refer-glyph 'P'] AS_BASE ALSO_METRICS
 		define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
 		include : HOverlayBar [mix SB 0 0.7] (SB + HalfStroke * HVContrast) bar1pos
@@ -3326,8 +3378,8 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : HBarTop SB RightSB CAP sw
 		include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
 
-	create-glyph 'symbol/currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' true
-	create-glyph 'symbol/currency/indianRupeeSign.curly' : IndianRupeeShape 'curly' false
+	create-glyph 'currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' true
+	create-glyph 'currency/indianRupeeSign.curly' : IndianRupeeShape 'curly' false
 
 	create-glyph : glyph-proc
 		include : MarkSet.e
@@ -3342,7 +3394,7 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	select-variant 'R' 'R'
 	select-variant 'Rrotunda' 0xA75A (follow -- 'R')
-	select-variant 'symbol/currency/indianRupeeSign' 0x20B9 (follow -- 'R')
+	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'R')
 	select-variant 'smcpR' 0x280 (follow -- 'R')
 	select-variant 'rrotunda' 0xA75B (follow -- 'R')
 
@@ -3693,7 +3745,7 @@ glyph-block Letter-Latin-C : begin
 			CShapeOutline CAP 0 BBS
 			VBarLeft (SB + BBD) 0 CAP BBS
 
-	create-glyph 'symbol/currency/euroSign' 0x20AC : glyph-proc
+	create-glyph 'currency/euroSign' 0x20AC : glyph-proc
 		include [refer-glyph "C"] AS_BASE ALSO_METRICS
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.4)
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.6)
@@ -3734,7 +3786,7 @@ glyph-block Letter-Latin-C : begin
 	alias 'cyrl/es' 0x441 'c'
 	alias 'grek/lunatesigma' 0x3F2 'c'
 
-	create-glyph 'symbol/currency/centSign' 0xA2 : glyph-proc
+	create-glyph 'currency/centSign' 0xA2 : glyph-proc
 		define fine : AdviceStroke 4
 		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
 		include : dispiro
@@ -4501,7 +4553,7 @@ glyph-block Letter-Latin-Upper-N : begin
 		include : MarkSet.e
 		include : NShape XH SB RightSB 3 3.5
 
-	create-glyph 'symbol/currency/nairaSign' 0x20A6 : glyph-proc
+	create-glyph 'currency/nairaSign' 0x20A6 : glyph-proc
 		include : NShape CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
 		define sw : AdviceStroke2 2 4 CAP
 		define gap : Math.max (CAP / 6) sw
@@ -5852,7 +5904,7 @@ glyph-block Letter-Latin-Upper-F : begin
 	turned 'turnF'     0x2132 'F'     Middle (CAP / 2)
 	turned 'turnSmcpF' 0x214E 'smcpF' Middle (XH / 2)
 
-	create-glyph 'symbol/currency/frenchFrancSign' 0x20A3 : glyph-proc
+	create-glyph 'currency/frenchFrancSign' 0x20A3 : glyph-proc
 		include : refer-glyph "F"
 		include : HOverlayBar (SB * 0.5) (SB * 3 + Stroke * HVContrast) [mix 0 XH 0.4]
 
