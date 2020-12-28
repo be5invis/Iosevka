@@ -729,10 +729,62 @@ glyph-block Digits-Eight : begin
 			arcvh
 			close
 
-	create-glyph 'eight.lnum' [CodeLnum '8'] : glyph-proc
+	create-glyph 'eight.lnum.crossing' : glyph-proc
 		include : MarkSet.capital
 		include : EightShape CAP
 
+	define [EightCirclesShape stroke top] : begin
+		local pShrink 1.00
+		local pSizeDiffY : StrokeWidthBlend 0.95 0.94
+		local pSizeDiffX : StrokeWidthBlend 0.95 0.96
+
+		local yMid : top / (1 + pSizeDiffY)
+		local sma : SmoothAOf (Smooth * 0.9) Width
+		local smb : SmoothBOf (Smooth * 0.9) Width
+		local smaTop : SmoothAOf (Smooth * 0.9 * pSizeDiffY) Width
+		local smbTop : SmoothBOf (Smooth * 0.9 * pSizeDiffY) Width
+
+		local botLeft  : mix SB RightSB (1 - pShrink)
+		local botRight : mix SB RightSB pShrink
+		local topLeft  : mix SB RightSB (1 - pShrink * pSizeDiffX)
+		local topRight : mix SB RightSB (pShrink * pSizeDiffX)
+
+		local fine : stroke * CThin
+		local mc : CorrectionOMidX * stroke
+		local coFine : stroke / 2 - (stroke - fine)
+		local spT : StrokeWidthBlend 2.08 2.20
+		local spB : StrokeWidthBlend 2.18 2.20
+
+		return : union
+			dispiro
+				widths.rhs stroke
+				g4 (Middle - mc) (top - O)
+				archv.superness spB
+				g4 (topRight - OX) [YSmoothMidR (top - O) (yMid - coFine) smaTop smbTop]
+				arcvh.superness spT
+				g4 (Middle + mc) (yMid - coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (topLeft + OX) [YSmoothMidL (top - O) (yMid - coFine) smaTop smbTop] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+			dispiro
+				widths.rhs stroke
+				g4 (Middle + mc) O
+				archv.superness spB
+				g4 (botLeft + OX) [YSmoothMidL (yMid + coFine) O sma smb]
+				arcvh.superness spT
+				g4 (Middle - mc) (yMid + coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (botRight - OX) [YSmoothMidR (yMid + coFine) O sma smb] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+
+
+	create-glyph 'eight.lnum.twoCircles' : glyph-proc
+		include : MarkSet.capital
+		include : EightCirclesShape [AdviceStroke2 2 3 CAP] CAP
+
+	select-variant 'eight.lnum' [CodeLnum '8'] (follow -- 'eight')
 	alias 'eight.onum' [CodeOnum '8'] 'eight.lnum'
 
 	# There is an "eight without lower contour" shape used for /propto
