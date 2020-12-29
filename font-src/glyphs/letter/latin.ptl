@@ -173,6 +173,14 @@ glyph-block Letter-Shared-Shapes : begin
 			WithTransform [Translate (Stroke * 1.25 * TanSlope) (Stroke * 1.25)] [refer-glyph src]
 		include : refer-glyph 'blankBelow'
 
+	glyph-block-export ShoulderMidKnotLhs
+	define [ShoulderMidKnotLhs cx cy fine sw dirX dirY] : begin
+		local sb : shoulderMidSlope fine sw (-dirX)
+		return : g4
+			begin (cx + (dirY * CorrectionOMidX - sb) * sw)
+			begin cy
+			widths.heading sw 0 {.y dirY .x (sb)}
+
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -3682,21 +3690,43 @@ glyph-block Letter-Latin-Lower-R : begin
 glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : CurlyTail
+	glyph-block-import Letter-Shared-Shapes : CurlyTail ShoulderMidKnotLhs
 	glyph-block-import Letter-Blackboard : BBS BBD
 
-	define [CShapeT sink offset top bot sw] : sink
+	define [CShapeT sink offset sma smb top bot sw] : sink
 		widths.lhs sw
 		g4 RightSB (top - Hook)
 		hookstart (top - O - offset)
-		flat (SB + OX + offset) (top - SmoothA)
-		curl (SB + OX + offset) (bot + SmoothB)
+		flat (SB + OX + offset) (top - sma)
+		curl (SB + OX + offset) (bot + smb)
 		hookend (bot + O + offset)
 		g4 RightSB (bot + Hook)
 
+	define [CShapeSlabArcT sink offset sma smb top bot sw] : begin
+		local fine : sw * CThinB
+		return : sink
+			widths.lhs fine
+			g4.up.start (RightSB - (sw - fine) * HVContrast - offset) (top - Hook + O * 2) [heading Upward]
+			arcvh
+			ShoulderMidKnotLhs Middle (top - O - offset) fine sw (-1) (-1)
+			archv
+			flat (SB + OX + offset) (top - sma)
+			curl (SB + OX + offset) (bot + smb)
+			hookend (bot + O + offset)
+			g4 RightSB (bot + Hook)
+
 	glyph-block-export CShape
-	define [CShape top bot sw] : CShapeT dispiro 0 top bot sw
-	define [CShapeOutline top bot sw] : CShapeT spiro-outline 1 top bot sw
+	define [CShape top bot sw] : CShapeT dispiro 0 SmoothA SmoothB top bot sw
+	define [SmallCShape top bot sw] : CShapeT dispiro 0 SmallSmoothA SmallSmoothB top bot sw
+	define [CShapeOutline top bot sw] : CShapeT spiro-outline 1 SmoothA SmoothB top bot sw
+	define [SmallCShapeOutline top bot sw] : CShapeT spiro-outline 1 SmallSmoothA SmallSmoothB top bot sw
+
+	define [CSerifedShape top bot sw] : glyph-proc
+		include : CShapeSlabArcT dispiro 0 SmoothA SmoothB top bot sw
+		include : VBarRight RightSB (top - Hook + O * 2) top [AdviceStroke 3.5]
+	define [SmallCSerifedShape top bot sw] : glyph-proc
+		include : CShapeSlabArcT dispiro 0 SmallSmoothA SmallSmoothB top bot sw
+		include : VBarRight RightSB (top - Hook + O * 2) top [AdviceStroke 3.5]
 
 	define [RevCShape top bot sw] : dispiro
 		widths.rhs sw
@@ -3710,11 +3740,11 @@ glyph-block Letter-Latin-C : begin
 	create-glyph 'C' 'C' : glyph-proc
 		set-width Width
 		include : MarkSet.capital
-		include : CShape CAP 0
+		include : [if SLAB CSerifedShape CShape] CAP 0 Stroke
 
 	create-glyph 'revC' 0x2183 : glyph-proc
 		include : MarkSet.capital
-		include : RevCShape CAP 0
+		include : RevCShape CAP 0 Stroke
 
 	alias 'cyrl/Es' 0x421 'C'
 	alias 'grek/lunateSigma' 0x3F9 'C'
@@ -3743,13 +3773,13 @@ glyph-block Letter-Latin-C : begin
 	create-glyph 'c' 'c' : glyph-proc
 		set-width Width
 		include : MarkSet.e
-		include : SmallCShapeT dispiro 0 XH 0 Stroke
+		include : [if SLAB SmallCSerifedShape SmallCShape] XH 0 Stroke
 
 	create-glyph 'mathbb/c' 0x1D554 : glyph-proc
 		include : MarkSet.capital
-		include : SmallCShapeT dispiro 0 XH 0 BBS
+		include : SmallCShape XH 0 BBS
 		include : intersection
-			SmallCShapeT spiro-outline 1 XH 0 BBS
+			SmallCShapeOutline XH 0 BBS
 			VBarLeft (SB + BBD + OX) 0 CAP BBS
 
 	create-glyph 'revSmallC' 0x2184 : glyph-proc
@@ -3796,7 +3826,7 @@ glyph-block Letter-Latin-C : begin
 	create-glyph 'strenchedC' 0x297 : glyph-proc
 		set-width Width
 		include : MarkSet.p
-		include : CShape XH Descender
+		include : CShape XH Descender Stroke
 
 	create-glyph 'Chooktop' 0x187 : glyph-proc
 		include [refer-glyph 'C'] AS_BASE
@@ -3894,7 +3924,7 @@ glyph-block Letter-Latin-C : begin
 glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend ShoulderMidKnotLhs
 
 	define TOOTHED            0
 	define TOOTHLESS-CORNER   1
@@ -3908,19 +3938,29 @@ glyph-block Letter-Latin-Upper-G : begin
 	define [GShape toothShape fCrossBar top sma smb] : glyph-proc
 		local yBar : top * 0.52 + Stroke * 0.25
 		local fine ShoulderFine
-		local sb : shoulderMidSlope fine nothing (-1)
+		local fineTop : Stroke * CThinB
+		local topSerifWidth : AdviceStroke 3.5
 
-		local knots : list
-			widths.lhs
-			g4   RightSB (top - Hook)
-			hookstart (top - O)
+		local knots : if SLAB
+			list
+				widths.lhs fineTop
+				g4.up.start (RightSB - (Stroke - fineTop) * HVContrast) (top - Hook + O * 2) [heading Upward]
+				arcvh
+				ShoulderMidKnotLhs Middle (top - O) fineTop Stroke (-1) (-1)
+				archv
+			list
+				widths.lhs
+				g4   RightSB (top - Hook)
+				hookstart (top - O)
+
+		knots.push
 			flat (SB + OX) (top - sma)
 			curl (SB + OX) smb
 			arcvh
 
 		match toothShape
 			[Just TOOTHED] : knots.push
-				g4.right.mid (Middle + (CorrectionOMidX - sb) * Stroke) O [widths.heading Stroke 0 {.y (1) .x (sb)}]
+				ShoulderMidKnotLhs Middle O fine Stroke 1 1
 				archv
 				straight.up.end (RightSB - (Stroke - fine) * HVContrast) sma [widths.heading fine 0 Upward]
 			[Just TOOTHLESS-CORNER] : knots.push
@@ -3934,6 +3974,7 @@ glyph-block Letter-Latin-Upper-G : begin
 		include : union
 			dispiro.apply null knots
 			if fCrossBar [HBarTop Middle RightSB yBar] [glyph-proc]
+			if SLAB      [VBarRight RightSB (top - Hook + O * 2) top topSerifWidth] [glyph-proc]
 			match toothShape
 				[Just TOOTHED] : union
 					VBarRight RightSB (sma + O) yBar
