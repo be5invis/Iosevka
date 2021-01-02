@@ -70,32 +70,37 @@ async function GenerateChangeList(out) {
 // PACKAGE LIST
 
 const Spacings = {
-	// spacingDesc, ligation, spacingNameSuffix
+	// spacingDesc, ligation
 	type: ["Default", true],
 	term: ["Terminal", true],
-	fixed: ["Fixed", false]
+	fixed: ["Fixed", false],
+	"quasi-proportional": ["Default", false]
 };
 
 const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
 
 async function GeneratePackageList(out) {
 	const pkgShapesData = await fs.readJson(releasePackagesJsonPath);
+	const DownloadLinkPrefix = `https://github.com/be5invis/Iosevka/releases/download/v${Version}`;
 
 	out.log(`<table>`);
 	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
-		const fileName = buildName("-", "ttc", groupID, Version);
-		const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+		const sTtcName = buildName("-", "super-ttc", groupID, Version);
+		const ttcName = buildName("-", "ttc", groupID, Version);
+		const sTtcLink = `${DownloadLinkPrefix}/${sTtcName}.zip`;
+		const ttcLink = `${DownloadLinkPrefix}/${ttcName}.zip`;
 
 		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
 		const desc = `<i>${proportionPrefix}, ${prime.desc}</i>`;
 		const img = `<img src="${imagePrefix}/${groupID}.png"/>`;
 		out.log(
 			`<tr>`,
-			`<td colspan="5"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
-			`<td><b><a href="${downloadLink}">TTC</b></td>`,
+			`<td colspan="4"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
+			`<td><b><a href="${sTtcLink}">Super-TTC</b></td>`,
+			`<td><b><a href="${ttcLink}">TTC</b></td>`,
 			`</tr>`
 		);
 
@@ -115,7 +120,7 @@ async function GeneratePackageList(out) {
 			const [spacingDesc, ligation] = Spacings[subGr.spacing];
 			const createLink = (label, prefix) => {
 				const fileName = buildName("-", prefix, subGroupID, Version);
-				const downloadLink = `https://github.com/be5invis/Iosevka/releases/download/v${Version}/${fileName}.zip`;
+				const downloadLink = `${DownloadLinkPrefix}/${fileName}.zip`;
 				return `<b><a href="${downloadLink}">${label}</a></b>`;
 			};
 			const leader = "&nbsp;&nbsp;&nbsp;&nbsp;" + (subGroupID === lastSubGroupID ? "└" : "├");

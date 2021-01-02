@@ -468,6 +468,21 @@ const TtcArchiveFile = file.make(
 		);
 	}
 );
+const SuperTtcArchiveFile = file.make(
+	(cgr, version) => `${ARCHIVE_DIR}/super-ttc-${cgr}-${version}.zip`,
+	async (target, out, cgr) => {
+		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
+
+		// Packaging
+		await rm(out.full);
+		await cd(DIST_SUPER_TTC).run(
+			["7z", "a"],
+			["-tzip", "-r", "-mx=9"],
+			Path.relative(DIST_SUPER_TTC, out.full),
+			`${cgr}.ttc`
+		);
+	}
+);
 
 // Single-group Archives
 const GroupTtfArchiveFile = file.make(
@@ -718,7 +733,7 @@ phony(`release`, async target => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, subGroups] of Object.entries(collectPlans.groupDecomposition)) {
-		goals.push(TtcArchiveFile(cgr, version));
+		goals.push(TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version));
 		for (const gr of subGroups) {
 			goals.push(
 				GroupTtfArchiveFile(gr, version),
