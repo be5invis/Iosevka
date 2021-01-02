@@ -10,7 +10,7 @@ const toml = require("@iarna/toml");
 
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, mv, fail, echo, silently } = build.actions;
+const { run, cd, cp, rm, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
 
 module.exports = build;
@@ -23,7 +23,7 @@ const SNAPSHOT_TMP = ".build/snapshot";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
-const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
+const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const webfontFormats = [
 	["woff2", "woff2"],
@@ -554,11 +554,7 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 });
 
 async function exportFontDir(pagesDir, dir) {
-	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
-	await mv(
-		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
-		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
-	);
+	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/fonts", dir));
 }
 
 ///////////////////////////////////////////////////////////
