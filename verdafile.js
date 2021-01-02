@@ -10,7 +10,7 @@ const toml = require("@iarna/toml");
 
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, mv, fail, echo, silently } = build.actions;
+const { run, cd, cp, rm, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
 
 module.exports = build;
@@ -23,7 +23,7 @@ const SNAPSHOT_TMP = ".build/snapshot";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
-const PATEL_C = ["node", "./node_modules/patel/bin/patel-c"];
+const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
 const webfontFormats = [
 	["woff2", "woff2"],
@@ -158,8 +158,7 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
 			slope: sfi.slope,
-			width: sfi.shapeWidth,
-			quasiProportionalDiversity: bp["quasiProportionalDiversity"] || 0
+			width: sfi.shapeWidth
 		},
 		// Menu
 		menu: {
@@ -469,6 +468,21 @@ const TtcArchiveFile = file.make(
 		);
 	}
 );
+const SuperTtcArchiveFile = file.make(
+	(cgr, version) => `${ARCHIVE_DIR}/super-ttc-${cgr}-${version}.zip`,
+	async (target, out, cgr) => {
+		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
+
+		// Packaging
+		await rm(out.full);
+		await cd(DIST_SUPER_TTC).run(
+			["7z", "a"],
+			["-tzip", "-r", "-mx=9"],
+			Path.relative(DIST_SUPER_TTC, out.full),
+			`${cgr}.ttc`
+		);
+	}
+);
 
 // Single-group Archives
 const GroupTtfArchiveFile = file.make(
@@ -555,11 +569,7 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 });
 
 async function exportFontDir(pagesDir, dir) {
-	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/font-import", dir));
-	await mv(
-		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.css`),
-		Path.resolve(pagesDir, "shared/font-import", dir, `${dir}.styl`)
-	);
+	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/fonts", dir));
 }
 
 ///////////////////////////////////////////////////////////
@@ -689,7 +699,7 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 		releaseNoteGroups[k] = {
 			subGroups,
 			slab: primePlan.serifs === "slab",
-			quasiProportional: primePlan.quasiProportionalDiversity > 0
+			quasiProportional: primePlan.spacing === "quasi-proportional"
 		};
 	}
 	await fs.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
@@ -723,7 +733,7 @@ phony(`release`, async target => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, subGroups] of Object.entries(collectPlans.groupDecomposition)) {
-		goals.push(TtcArchiveFile(cgr, version));
+		goals.push(TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version));
 		for (const gr of subGroups) {
 			goals.push(
 				GroupTtfArchiveFile(gr, version),

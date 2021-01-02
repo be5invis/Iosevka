@@ -1,5 +1,13 @@
 ## Modifications since version 2.x
 
+### 4.3.0
+
+ * Add two-circle variant of `8` (#786).
+ * Add leading serif for `C`, `c`, `G`, `S`, `s` in Slab (#787).
+ * Made per-mille symbol and base-point symbol wide in non-terminal variants.
+ * Add super-ttc (single-file TTC) into releases.
+
+
 ### 4.2.0
 
  * Add character:
