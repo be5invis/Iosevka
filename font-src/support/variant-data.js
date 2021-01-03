@@ -121,6 +121,7 @@ class PrimeVariant {
 		this.description = cfg.description;
 		this.rank = cfg.rank;
 		this.selector = cfg.selector;
+		this.nonDeriving = cfg.nonDeriving;
 	}
 	resolveFor(para, gn) {
 		let vs = {};

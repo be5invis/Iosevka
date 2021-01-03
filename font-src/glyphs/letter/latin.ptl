@@ -2,7 +2,7 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
 import [DesignParameters] from '../../meta/aesthetics'
-import [Dotless DoNotDeriveVariants CvDecompose] from "../../support/gr"
+import [Dotless CvDecompose] from "../../support/gr"
 
 glyph-module
 
@@ -7087,6 +7087,7 @@ glyph-block Letter-Latin-Z : begin
 
 		create-derived 'Z.withHorizontalCrossBar' : refer-glyph 'barOver'
 		create-derived 'Z.withCrossBar' : refer-glyph 'antiSlashOver'
+		create-derived 'Z.motionSerifed' : UpwardRightSerif (RightSB - OX) 0 VJut
 
 	create-glyph 'z.standard' : glyph-proc
 		include : MarkSet.e
@@ -7108,6 +7109,7 @@ glyph-block Letter-Latin-Z : begin
 
 		create-derived 'z.withHorizontalCrossBar' : refer-glyph 'barOver'
 		create-derived 'z.withCrossBar' : refer-glyph 'antiSlashOver'
+		create-derived 'z.motionSerifed' : UpwardRightSerif (RightSB - OX) 0 VJut
 
 	create-glyph 'Z.curly' : glyph-proc
 		include : MarkSet.capital
@@ -7124,6 +7126,7 @@ glyph-block Letter-Latin-Z : begin
 
 		create-derived 'Z.curlyWithHorizontalCrossBar' : refer-glyph 'barOver'
 		create-derived 'Z.curlyWithCrossBar' : refer-glyph 'antiSlashOver'
+		create-derived 'Z.curlyMotionSerifed' : UpwardRightSerif (RightSB - OX) 0 VJut
 
 	create-glyph 'z.curly' : glyph-proc
 		include : MarkSet.e
@@ -7140,6 +7143,7 @@ glyph-block Letter-Latin-Z : begin
 
 		create-derived 'z.curlyWithHorizontalCrossBar' : refer-glyph 'barOver'
 		create-derived 'z.curlyWithCrossBar' : refer-glyph 'antiSlashOver'
+		create-derived 'z.curlyMotionSerifed' : UpwardRightSerif (RightSB - OX) 0 VJut
 
 	select-variant 'Z' 'Z'
 	select-variant 'z' 'z'
@@ -7147,9 +7151,6 @@ glyph-block Letter-Latin-Z : begin
 	alias 'grek/Zeta' 0x396 'Z.standard'
 	alias 'Zbar' 0x1B5 'Z.withHorizontalCrossBar'
 	alias 'zbar' 0x1B6 'z.withHorizontalCrossBar'
-
-	if [query-glyph 'Z'] : DoNotDeriveVariants.set [query-glyph 'Z']
-	if [query-glyph 'z'] : DoNotDeriveVariants.set [query-glyph 'z']
 
 	define [BBZShape top] : glyph-proc
 		include : HBarTop SB RightSB top BBS
@@ -7179,8 +7180,8 @@ glyph-block Letter-Latin-Z : begin
 	create-glyph 'mathbb/Z' 0x2124  : composite-proc [MarkSet.capital] [BBZShape CAP]
 	create-glyph 'mathbb/z' 0x1D56B : composite-proc [MarkSet.e] [BBZShape XH]
 
-	create-glyph 'Zdtail' 0x224 : glyph-proc
-		include [refer-glyph 'Z'] AS_BASE
+	define [ZDownTailCtor src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour 'strokeBottom'
 		eject-contour 'serifRB'
 		include : dispiro
@@ -7190,16 +7191,8 @@ glyph-block Letter-Latin-Z : begin
 			archv
 			straight.down.end RightSB (-Hook) [widths.heading 0 Stroke Downward]
 
-	create-glyph 'zdtail' 0x225 : glyph-proc
-		include [refer-glyph 'z'] AS_BASE
-		eject-contour 'strokeBottom'
-		eject-contour 'serifRB'
-		include : dispiro
-			widths.lhs
-			flat SB 0 [heading Rightward]
-			curl (RightSB - HookX) 0
-			archv
-			straight.down.end RightSB (-Hook) [widths.heading 0 Stroke Downward]
+	with-related-glyphs 'Z' 'Zdtail' 0x224 ZDownTailCtor
+	with-related-glyphs 'z' 'zdtail' 0x225 ZDownTailCtor
 
 	create-glyph 'Zswash' 0x2C7F : glyph-proc
 		include : MarkSet.if
@@ -7243,18 +7236,16 @@ glyph-block Letter-Latin-Z : begin
 		if SLAB : begin
 			include : DownwardLeftSerif SB XH VJut
 
-	create-glyph 'Zdesc' 0x2C6B : glyph-proc
-		include [refer-glyph 'Z'] AS_BASE
+	define [ZDescCtor src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour 'serifRB'
 		include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
 
-	create-glyph 'zdesc' 0x2C6C : glyph-proc
-		include [refer-glyph 'z'] AS_BASE
-		eject-contour 'serifRB'
-		include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
+	with-related-glyphs 'Z' 'Zdesc' 0x2C6B ZDescCtor
+	with-related-glyphs 'z' 'zdesc' 0x2C6C ZDescCtor
 
-	create-glyph 'zcurlytail' 0x291 : glyph-proc
-		include : MarkSet.e
+	with-related-glyphs 'z' 'zcurlytail' 0x291 : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 
 		local fine : AdviceStroke2 5 4 XH
 		local rinner : Math.max (XH * 0.04) (fine * 0.1)
@@ -7264,9 +7255,6 @@ glyph-block Letter-Latin-Z : begin
 		local m1 : RightSB - fine / 2 - rinner * 1.5 + O
 		include : HCurlyTail fine Stroke rinner SB m1 (RightSB + fine / 2) x1 x2 y2
 
-		include : refer-glyph "z"
-		eject-contour 'strokeBottom'
-		eject-contour 'serifRB'
 
 
 glyph-block Letter-Latin-Eszet : begin
