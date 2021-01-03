@@ -660,18 +660,33 @@ glyph-block Letter-Latin-Upper-L : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define LBarLeftX : SB * 1.5
-	define [LShape top] : glyph-proc
+	define [LShape top sgr] : glyph-proc
 		include : VBarLeft LBarLeftX 0 top
 		include : HBarBottom (LBarLeftX - O) (RightSB - OX) 0
-		if SLAB : begin
+		if (sgr > 1) : begin
 			include : LeftwardBottomSerif (LBarLeftX) 0 SideJut
 			include : LeftwardTopSerif (LBarLeftX + HVContrast * HalfStroke) top Jut
 			include : RightwardTopSerif (LBarLeftX + HVContrast * HalfStroke) top MidJutSide
-			include : UpwardRightSerif (RightSB - OX) 0 VJut
+		if (sgr > 0) : include : UpwardRightSerif (RightSB - OX) 0 VJut
 
-	create-glyph 'L' 'L' : glyph-proc
+	create-glyph 'L.standard' : glyph-proc
 		include : MarkSet.capital
-		include : LShape CAP
+		include : LShape CAP [if SLAB 2 0]
+
+	create-glyph 'L.motionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : LShape CAP 1
+
+	create-glyph 'smcpL.standard' : glyph-proc
+		include : MarkSet.e
+		include : LShape XH [if SLAB 2 0]
+
+	create-glyph 'smcpL.motionSerifed' : glyph-proc
+		include : MarkSet.e
+		include : LShape XH 1
+
+	select-variant 'L' 'L'
+	select-variant 'smcpL' 0x29F (follow -- 'L')
 
 	create-glyph 'mathbb/L' 0x1D543 : glyph-proc
 		include : MarkSet.capital
@@ -682,39 +697,34 @@ glyph-block Letter-Latin-Upper-L : begin
 
 	turned 'turnL' 0xA780 'L' Middle (CAP / 2)
 
-	create-glyph 'Lcaron' 0x13D : glyph-proc
-		include : refer-glyph "commaAbove"
-		include : Translate (Width + (RightSB - SB) * 0.375) 0
-		include [refer-glyph 'L'] AS_BASE
+	with-related-glyphs 'L' 'Lcaron' 0x13D : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : WithTransform [Translate (Width + (RightSB - SB) * 0.375) 0]
+			refer-glyph "commaAbove"
 
-	create-glyph 'Lslash' 0x141 : glyph-proc
-		include [refer-glyph 'L'] AS_BASE ALSO_METRICS
+	with-related-glyphs 'L' 'Lslash' 0x141 : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local fine : 0.5 * OverlayStroke
 		local middle : mix Stroke CAP 0.5
 		include : dispiro
 			flat [mix 0 SB 0.5] (middle - LongJut * 0.4) [widths fine fine]
 			curl (1.6 * LongJut + [mix 0 SB 0.5]) (middle + LongJut * 0.4)
 
-
-	create-glyph 'LTildeOver' 0x2C62 : glyph-proc
-		include [refer-glyph 'L'] AS_BASE ALSO_METRICS
+	with-related-glyphs 'L' 'LTildeOver' 0x2C62 : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeAboveOverlay"
 			include : Upright
 			include : Translate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
 			include : Italify
 
-	create-glyph 'Ldot' 0x13F : glyph-proc
-		include [refer-glyph 'L'] AS_BASE
+	with-related-glyphs 'L' 'Ldot' 0x13F : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
 		include : Ring ([mix Stroke CAP 0.5] + DotRadius) ([mix Stroke CAP 0.5] - DotRadius) ([mix SB RightSB 0.65] - DotRadius) ([mix SB RightSB 0.65] + DotRadius)
 
-	create-glyph 'Lbar' 0x23D : glyph-proc
-		include [refer-glyph 'L'] AS_BASE
+	with-related-glyphs 'L' 'Lbar' 0x23D : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
-
-	create-glyph 'smcpL' 0x29F : glyph-proc
-		include : MarkSet.e
-		include : LShape XH
 
 glyph-block Letter-Latin-Lower-L : begin
 	glyph-block-import CommonShapes
