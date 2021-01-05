@@ -1,9 +1,10 @@
 import '../support/glyph' as Glyph
 import '../support/glyph-store' as GlyphStore
+import '../support/glyph-block' as GlyphBlock
 import '../support/point' as Point
+import '../support/anchor' as Anchor
 import '../kits/spiro-kit' as spirokit
 import '../kits/boole-kit' as BooleKit
-import '../support/anchor' as Anchor
 import [ DesignParameters ] from "../meta/aesthetics"
 
 extern isFinite
@@ -106,13 +107,19 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 			set u [unicode.codePointAt 0]
 		glyphStore.encodeGlyph u g
 
+	define [$defineGlyphBlockImpl$ $Capture$ blockName body] : begin
+		local glyphBlock : new GlyphBlock $Capture$ blockName body
+		if [not $Capture$.(blockName)] : set $Capture$.(blockName) glyphBlock
+		if [not $Capture$.$pendingGlyphBlocks$] : set $Capture$.$pendingGlyphBlocks$ {}
+		$Capture$.$pendingGlyphBlocks$.push glyphBlock
+
 	### Spiro constructions
 	# Basic knots
 	define spirofns : spirokit.SetupBuilders : object GlobalTransform Contrast Stroke Glyph para [superness DesignParameters.superness]
 	define booleFns : BooleKit.SetupBuilders : object GlobalTransform Glyph
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
-	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$
+	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$ $defineGlyphBlockImpl$
 
 	### HERE WE GO
 	run-glyph-module './common/shapes.js'
@@ -121,6 +128,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	run-glyph-module './marks/index.js'
 
 	# Unified letters
+	run-glyph-module './letter/shared.js'
 	run-glyph-module './letter/latin.js'
 	run-glyph-module './letter/greek.js'
 	run-glyph-module './letter/cyrillic.js'
@@ -144,6 +152,8 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	run-glyph-module './auto-build/accents.js'
 	run-glyph-module './auto-build/composite.js'
 	run-glyph-module './auto-build/transformed.js'
+
+	foreach [gb : items-of $$Capture$$.$pendingGlyphBlocks$] : gb.resolve
 
 	return : object metrics glyphStore
 

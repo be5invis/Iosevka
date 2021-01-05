@@ -1,0 +1,90 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-A : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Latin-V : VShapeOutline VShape
+	glyph-block-export LambdaShape AMaskShape DeltaShape
+
+	define [AMaskShape df top sw barStraight] : new-glyph : glyph-proc
+		include : VShapeOutline df top sw barStraight
+		include : FlipAround ([DivFrame df.div].width / 2) (top / 2)
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+		define ABarPosition : mix [if SLAB Stroke 0] CAP (XH / 2 / CAP)
+
+		create-derived 'A.straight' : glyph-proc
+			include : VShape [DivFrame 1] CAP Stroke true
+			include : FlipAround Middle (CAP / 2)
+			include : intersection
+				HBarTop 0 Width ABarPosition
+				AMaskShape [DivFrame 1] CAP Stroke true
+
+		create-derived 'A.curly' : glyph-proc
+			include : VShape [DivFrame 1] CAP Stroke false
+			include : FlipAround Middle (CAP / 2)
+			include : intersection
+				HBarTop 0 Width ABarPosition
+				AMaskShape [DivFrame 1] CAP Stroke false
+
+	select-variant 'A' 'A'
+	alias 'grek/Alpha' 0x391 'A'
+	alias 'cyrl/A' 0x410 'A'
+	turned 'turnA' 0x2C6F 'A' Middle (CAP / 2)
+
+	# Lambda
+	define [LambdaShape] : params [df top sw barStraight [slab SLAB]] : glyph-proc
+		include : VShape df top sw barStraight (slab -- false)
+		include : FlipAround df.middle (top / 2)
+		if slab : begin
+			include : tagged 'serif' : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
+			include : tagged 'serif' : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
+
+	create-glyph 'grek/Lambda.straight' : composite-proc [MarkSet.capital]
+		LambdaShape [DivFrame 1] CAP Stroke true
+	create-glyph 'grek/Lambda.curly' : composite-proc [MarkSet.capital]
+		LambdaShape [DivFrame 1] CAP Stroke false
+
+	select-variant 'grek/Lambda' 0x39B
+	alias 'latinLambda' 0x245 'grek/Lambda'
+
+	# Delta
+	define [DeltaShape df top sw barStraight] : union
+		LambdaShape df top sw barStraight (slab -- false)
+		intersection
+			HBarBottom 0 Width 0 sw
+			AMaskShape df top sw barStraight
+		if [not SLAB] [glyph-proc] : difference
+			union
+				LeftwardBottomSerif SB 0 SideJut
+				RightwardBottomSerif RightSB 0 SideJut
+			AMaskShape df top sw barStraight
+
+	create-glyph 'grek/Delta.straight' : composite-proc [MarkSet.capital]
+		DeltaShape [DivFrame 1] CAP Stroke true
+	create-glyph 'grek/Delta.curly' : composite-proc [MarkSet.capital]
+		DeltaShape [DivFrame 1] CAP Stroke false
+
+	select-variant 'grek/Delta' 0x394
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-V : BBVShape BBVInnerMaskShape
+
+	create-glyph 'mathbb/A' 0x1D538 : glyph-proc
+		include : MarkSet.capital
+		include : union
+			BBVShape SB RightSB 1 1 CAP
+			intersection
+				BBVInnerMaskShape SB RightSB 1 1 CAP
+				HBarTop 0 Width (CAP - XH / 2) BBS
+		include : FlipAround Middle (CAP / 2)

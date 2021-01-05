@@ -1,0 +1,184 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Yeri : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+
+	glyph-block-export CyrYeriShape
+	define [CyrYeriShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : BowlXDepth bowl 0 left right stroke
+		local sma : SmoothAOf Smooth (right - left + SB * 2)
+		local smb : SmoothBOf Smooth (right - left + SB * 2)
+		local turnbottom : YSmoothMidR bowl 0 sma smb
+		include : dispiro
+			widths.lhs stroke
+			flat (left + Stroke * 0.2) 0 [heading Rightward]
+			curl ([Math.max (left + stroke * HVContrast) (right - turnRadius)] + CorrectionOMidX * stroke) 0
+			archv 8
+			g4   (right - OX) turnbottom
+			arcvh 8
+			flat ([Math.max (left + stroke * HVContrast) (right - turnRadius)] - CorrectionOMidX * stroke) bowl
+			curl (left + Stroke * 0.2) bowl [heading Leftward]
+		include : VBarLeft left 0 top stroke
+		if SLAB : begin
+			include : tagged 'serifYeriLB'
+				LeftwardBottomSerif left 0 (jut - stroke / 2 * HVContrast)
+			include : tagged 'serifYeriLT'
+				CenterTopSerif (left + stroke / 2 * HVContrast) top jut
+
+	define [RevCyrYeriShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+		local bowl : top * pBar + HalfStroke
+		local turnRadius : bowl * 0.45
+		local turnbottom : mix 0 bowl (SmoothB / (SmoothA + SmoothB))
+		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
+		include : dispiro
+			widths.rhs stroke
+			flat (right - Stroke * 0.2) 0 [heading Leftward]
+			curl (left + turnRadius * trShrink + CorrectionOMidX * stroke) 0
+			archv
+			g4   (left + O) turnbottom
+			arcvh
+			flat (left + turnRadius * trShrink - CorrectionOMidX * stroke) bowl
+			curl (right - Stroke * 0.2) bowl [heading Rightward]
+		include : VBarRight right 0 top stroke
+		if SLAB : begin
+			include : tagged 'serifYeriRB'
+				RightwardBottomSerif right 0 (jut - stroke / 2 * HVContrast)
+			include : tagged 'serifYeriRT'
+				CenterTopSerif (right - stroke / 2 * HVContrast) top jut
+
+	create-glyph 'cyrl/Yeri' 0x42C : glyph-proc
+		include : MarkSet.capital
+		include : CyrYeriShape CAP
+
+	create-glyph 'cyrl/yeri' 0x44C : glyph-proc
+		include : MarkSet.e
+		include : CyrYeriShape XH
+
+	create-glyph 'cyrl/Be' 0x411 : glyph-proc
+		include [refer-glyph 'cyrl/Yeri'] AS_BASE
+		include : HBar SB [mix SB RightSB 0.9] (CAP - HalfStroke)
+		if SLAB : begin
+			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
+	alias 'latinBe' 0x182 'cyrl/Be'
+
+	create-glyph 'ZhuangToneSix' 0x184 : glyph-proc
+		include [refer-glyph 'cyrl/Yeri'] AS_BASE
+		eject-contour 'serifYeriLT'
+		local s : Math.max Stroke (XH * 0.1)
+		include : spiro-outline
+			corner  SB CAP
+			corner (SB - O) CAP
+			corner (SB - O) (CAP - s * 2)
+			corner  SB (CAP - s * 2)
+			corner (SB - s) (CAP - s)
+
+	create-glyph 'latinDe' 0x18B : glyph-proc
+		include : MarkSet.capital
+		include : RevCyrYeriShape CAP
+		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
+		if SLAB : begin
+			include : DownwardLeftSerif [mix RightSB SB 0.9] CAP VJut
+
+	create-glyph 'cyrl/Yat' 0x462 : glyph-proc
+		include : MarkSet.capital
+		local pBar 0.5
+		include : CyrYeriShape CAP (pBar -- pBar)
+		local cTop : if SLAB (CAP - Stroke / 2) CAP
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+
+	create-glyph 'cyrl/yat.upright' : glyph-proc
+		include : MarkSet.b
+		local pBar 0.4
+		include : CyrYeriShape CAP (pBar -- pBar)
+		local cTop : if SLAB (CAP - Stroke / 2) CAP
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+
+		if SLAB : begin
+			eject-contour 'serifYeriLT'
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
+
+	create-glyph 'cyrl/yat.italic' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		local fine : AdviceStroke 4
+
+		local xMidBarRight   : df.middle + 0.5 * df.mvs * HVContrast
+		local xRightLoopLeft : df.rightSB - fine * HVContrast - OX
+		local rinner         : (xRightLoopLeft - xMidBarRight) / 2
+
+		set-width df.width
+		include : df.markSet.e
+		include : VBarLeft df.leftSB 0 XH df.mvs
+		include : dispiro
+			nShoulderKnots
+				left   -- (df.leftSB + df.mvs * HVContrast)
+				right  -- xMidBarRight
+				fine   -- ShoulderFine
+				bottom -- (rinner + fine)
+				stroke -- df.mvs
+			arcvh
+			g4 [mix xMidBarRight xRightLoopLeft 0.5] (fine + O) [widths.rhs fine]
+			archv
+			g4 xRightLoopLeft (rinner + fine)
+			arcvh
+			g4 [mix xMidBarRight xRightLoopLeft 0.5] (rinner * 2 + fine - O)
+			archv
+			g4.down.end xMidBarRight (rinner + fine) (widths.rhs)
+
+		if SLAB : begin
+			if [not para.isItalic] : include : tagged 'serifLB'
+				LeftwardBottomSerif df.leftSB 0  SideJut
+			include : tagged 'serifLT' : LeftwardTopSerif    df.leftSB XH SideJut
+
+	orthographic-italic 'cyrl/yat' 0x463
+
+	define [CyrYerShape top] : glyph-proc
+		local left : if SLAB ([mix SB RightSB 0.35] - MVertStroke / 2 * HVContrast) [mix SB RightSB 0.2]
+		local barleft : mix 0 SB [if SLAB 0.25 0.375]
+		include : CyrYeriShape top (left -- left) (right -- RightSB - O * 2)
+		include : HBarTop barleft (Stroke * 0.1 + left) top
+		if SLAB : begin
+			include : DownwardLeftSerif barleft top VJut (MVertStroke / HVContrast)
+
+	create-glyph 'cyrl/Yer' 0x42A : glyph-proc
+		include : MarkSet.capital
+		include : CyrYerShape CAP
+
+	create-glyph 'cyrl/yer' 0x44A : glyph-proc
+		include : MarkSet.e
+		include : CyrYerShape XH
+
+	define [CyrYeryShape top df] : glyph-proc
+		local overshoot : O * 2
+		include : CyrYeriShape
+			top -- top
+			left -- df.leftSB + overshoot
+			right -- [mix (df.rightSB - df.mvs * HVContrast) (Middle + df.mvs / 2 * HVContrast) (0.75 / df.div)]
+			stroke -- df.mvs
+			jut -- Jut * 0.75
+		include : VBarRight (df.rightSB - overshoot) 0 top df.mvs
+		if SLAB : begin
+			include : CenterTopSerif (df.rightSB - overshoot - df.mvs / 2 * HVContrast) top (Jut * 0.75)
+			include : CenterBottomSerif (df.rightSB - overshoot - df.mvs / 2 * HVContrast) 0 (Jut * 0.75)
+
+	create-glyph 'cyrl/Yery' 0x42B : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrYeryShape CAP df
+
+	create-glyph 'cyrl/yery' 0x44B : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrYeryShape XH df

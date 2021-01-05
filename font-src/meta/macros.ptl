@@ -112,6 +112,15 @@ define-macro create-derived : syntax-rules
 			[this.cloneRankFromGlyph currentGlyph]
 			[this.include @[formOf body]] ]]
 
+###### Glyph modules and Glyph blocks
+
+define-macro glyph-module : syntax-rules
+	`[glyph-module] : dirty `[begin \\
+		define $GlyphBlocks$ {}
+		export : define [apply] : begin
+			foreach [block : items-of $GlyphBlocks$] : block this
+		]
+
 define-macro run-glyph-module : syntax-rules
 	`[run-glyph-module @path] : dirty `[[import @path].apply.call $$Capture$$]
 
@@ -119,8 +128,8 @@ define-macro glyph-block-import : syntax-rules
 	`[glyph-block-import @_blockName] : begin
 
 		define allExports : object
-			Common-Derivatives `[select-variant orthographic-italic refer-glyph query-glyph alias turned
-			HDual HCombine VDual VCombine with-related-glyphs glyph-is-needed]
+			Common-Derivatives `[select-variant orthographic-italic refer-glyph query-glyph
+			alias turned HDual HCombine VDual VCombine with-related-glyphs glyph-is-needed]
 
 			CommonShapes `[Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt
 			CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape
@@ -139,12 +148,14 @@ define-macro glyph-block-import : syntax-rules
 			lambda [x] true
 
 		local blockName : formOf _blockName
-		dirty `[define [object @::[allExports.(blockName).filter vartiableFilter]] $Capture$.(@({".quote" blockName}))]
+		if allExports.(blockName)
+			dirty `[define [object @::[allExports.(blockName).filter vartiableFilter]] : $Capture$.(@({".quote" blockName})).resolve]
+			dirty `[$Capture$.(@({".quote" blockName})).resolve]
 
 	`[glyph-block-import @_blockName @_variables] : begin
 		local blockName {'.quote' [formOf _blockName]}
 		local variables : formOf _variables
-		dirty `[define [object @::variables] $Capture$.(@blockName)]
+		dirty `[define [object @::variables] : $Capture$.(@blockName).resolve]
 
 define-macro glyph-block-export : syntax-rules
 	`[glyph-block-export @::obj] : begin
@@ -165,13 +176,6 @@ define-macro for-width-kinds : syntax-rules
 			define [MangleName name] : name + MosaicNameSuffix
 			begin @::[_body.map formOf]
 	]
-
-define-macro glyph-module : syntax-rules
-	`[glyph-module] : dirty `[begin \\
-		define $GlyphBlocks$ {}
-		export : define [apply] : begin
-			foreach [block : items-of $GlyphBlocks$] : block this
-		]
 
 define-macro end-glyph-block : syntax-rules
 	`[end-glyph-block] : begin
@@ -218,26 +222,15 @@ define-macro glyph-block : syntax-rules
 			quadcontrols archv arcvh complexThru dispiro spiro-outline]
 		define booleFnImports `[union intersection difference]
 
-		define defaultImports `[begin \\
-			define [object @::[captureImports.filter : lambda [x] variableSet.(x)]] $Capture$
-			define [object @::[metricImports.filter  : lambda [x] variableSet.(x)]] $Capture$.metrics
-			define [object @::[spiroFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.spirofns
-			define [object @::[booleFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.booleFns
-		]
+		dirty `[$GlyphBlocks$.push : lambda [$Capture_Ext$] : begin \\
+			$Capture_Ext$.$defineGlyphBlockImpl$ $Capture_Ext$ @blockName
+				function [$Capture$ $ExportCapture$] : begin
+					define [object @::[captureImports.filter : lambda [x] variableSet.(x)]] $Capture$
+					define [object @::[metricImports.filter  : lambda [x] variableSet.(x)]] $Capture$.metrics
+					define [object @::[spiroFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.spirofns
+					define [object @::[booleFnImports.filter : lambda [x] variableSet.(x)]] $Capture$.booleFns
 
-		dirty `[$GlyphBlocks$.push : lambda [$Capture$] : begin \\
-			define $pendingApplications$ {}
-			define [$ExportCapture$ FnObj] : $pendingApplications$.push : lambda [] : begin
-				local block @blockName
-				if [not $Capture$.(block)] : set $Capture$.(block) {.}
-				local obj : FnObj
-				foreach [key : items-of : Object.keys obj] : set $Capture$.(block).(key) obj.(key)
-
-			* @defaultImports
-			* @body
-
-			$ExportCapture$ : lambda [] {.}
-			foreach [fn : items-of $pendingApplications$] : fn
+					* @body
 
 			end-glyph-block
 		]

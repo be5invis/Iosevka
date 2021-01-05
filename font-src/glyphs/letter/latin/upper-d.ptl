@@ -1,0 +1,82 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-D : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [DArcShapeT sink offset sw fRound] : glyph-proc
+		local barleft SB
+
+		local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.1)
+		local bsmooth : Math.min (Width - SB * 2 - sw) (Smooth * 1.1)
+		local bsmoothRd : Math.min (Width - SB * 2 - sw) (Smooth * 1.25)
+
+		local sma : SmoothAOf dsmooth Width
+		local smb : SmoothBOf dsmooth Width
+
+		if (fRound) : include : sink
+			widths.rhs sw
+			[if offset corner flat] (barleft - O) (CAP - offset) [heading Rightward]
+			curl (RightSB - bsmoothRd - CorrectionOMidS) (CAP - offset)
+			archv
+			g4 (RightSB - OX - offset) [YSmoothMidR CAP 0 sma smb]
+			arcvh
+			flat (RightSB - bsmoothRd + CorrectionOMidS) offset
+			[if offset corner curl] (barleft - O) offset [heading Leftward]
+		: else : include : sink
+			widths.rhs sw
+			[if offset corner flat] (barleft - O) (CAP - offset) [heading Rightward]
+			curl (RightSB - bsmooth - CorrectionOMidS) (CAP - offset)
+			archv
+			flat (RightSB - OX - offset) (CAP - smb)
+			curl (RightSB - OX - offset) (0 + sma)
+			arcvh
+			flat (RightSB - bsmooth + CorrectionOMidS) offset
+			[if offset corner curl] (barleft - O) offset [heading Leftward]
+
+	define [DShape fRound] : glyph-proc
+		local barleft SB
+		include : VBarLeft barleft 0 CAP
+		include : DArcShapeT dispiro 0 Stroke fRound
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif barleft CAP SideJut
+			include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
+
+	create-glyph 'D.standard' : glyph-proc
+		include : MarkSet.capital
+		include : DShape false
+
+	create-glyph 'D.moreRounded' : glyph-proc
+		include : MarkSet.capital
+		include : DShape true
+
+	select-variant 'D' 'D'
+
+	with-related-glyphs 'Eth' 0xD0 'D' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
+
+	alias 'Dcroat' 0x110 'Eth'
+	alias 'arficanD' 0x189 'Eth'
+
+	with-related-glyphs 'Dhookleft' 0x18a 'D' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'serifLT'
+		include : LeftHook SB CAP
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/D' 0x1D53B : glyph-proc
+		include : MarkSet.capital
+		include : VBarLeft SB 0 CAP BBS
+		include : DArcShapeT dispiro 0 BBS false
+		include : intersection
+			DArcShapeT spiro-outline 1 BBS false
+			union
+				VBarLeft (SB + BBD) 0 CAP BBS
+				VBarRight (RightSB - BBD - OX) 0 CAP BBS

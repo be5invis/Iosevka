@@ -1,0 +1,82 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-Q : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-O
+
+	create-glyph 'Q.straight' : glyph-proc
+		include : MarkSet.if
+		include [refer-glyph 'O']
+		local shift : StrokeWidthBlend 0 0.25
+		include : dispiro
+			widths.rhs
+			flat (Middle + Width * 0.075 - Stroke * HVContrast * shift) (-CAP * 0.2) [heading Upward]
+			curl (Middle - Stroke * HVContrast * shift) 0
+
+	create-glyph 'Q.taily' : glyph-proc
+		include : MarkSet.if
+		include [refer-glyph 'O']
+		local shift : StrokeWidthBlend 0.5 0.6
+		local startx : Middle + (Stroke * shift) * HVContrast
+		local terminalx : Middle + HookX
+		include : dispiro
+			widths.rhs
+			flat startx HalfStroke [heading Downward]
+			curl startx 0 [heading Downward]
+			arcvh
+			flat [Math.min (terminalx - 1) (startx + Hook - Stroke)] (Stroke - Hook)
+			curl terminalx (Stroke - Hook)
+
+	create-glyph 'Q.crossing' : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB [AdviceStroke 3] SmoothA SmoothB
+		define k 1.5
+		define cor : DiagCor (k * (RightSB - Middle)) (RightSB - Middle - OX)
+		include : dispiro
+			widths.center (cor * [AdviceStroke 4.25])
+			flat RightSB 0 [heading Upward]
+			curl (Middle + OX) (k * (RightSB - Middle)) [heading Upward]
+
+	create-glyph 'Q.verticalCrossing' : glyph-proc
+		include : MarkSet.if
+		include : OShape CAP 0 SB RightSB [AdviceStroke 3] SmoothA SmoothB
+		define p 0.75
+		include : VBar Middle [Math.max (Stroke * 1.5) : mix Descender 0 (1 + p)] [mix 0 Descender p] [AdviceStroke 3.5]
+
+	select-variant 'Q' 'Q'
+	alias 'cyrl/Qa' 0x51A 'Q'
+
+	create-glyph 'mathbb/Q' 0x211A : glyph-proc
+		define [QInner] : OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS SmoothA SmoothB
+
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB BBS SmoothA SmoothB
+		include : intersection
+			QInner
+			union
+				VBarLeft  (SB + BBD) 0 CAP BBS
+				VBarRight (RightSB - BBD) 0 CAP BBS
+
+		define terminalX : Middle + HookX
+		define tailDeltaX : BBD / 2
+		define qTerminalY : BBS - Hook - BBD / 4
+		define [QTail x] : dispiro
+			widths.center BBS
+			flat (x) (CAP / 2)
+			curl (x) 0
+			arcvh
+			flat [Math.min (terminalX - 1) (x - qTerminalY)] qTerminalY
+			curl terminalX qTerminalY
+		include : difference
+			union
+				QTail (Middle - tailDeltaX)
+				QTail (Middle + tailDeltaX)
+			QInner

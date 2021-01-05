@@ -1,0 +1,145 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-P : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-export PShape PShapeOutline RevPShape PBarPosY PRotundaShape BBPShape
+
+	define [PBarPosY top sw bp] : (top - sw) * bp - sw * PShape.SwBelowBar
+
+	define [PRotundaOutlineKnots top mul bp overshoot sw offset endX hook] : begin
+		local bowlTop (top * 1 - offset)
+		local bowlBottom : [PBarPosY top sw bp] + offset
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
+		local sma : SmoothAOf (Smooth * 0.9) Width
+		local smb : SmoothBOf (Smooth * 0.9) Width
+		local right : RightSB - offset
+		local turn : YSmoothMidR bowlTop bowlBottom sma smb
+		return : list
+			g4 (SB * mul - O) (bowlTop - hook)
+			hookstart (bowlTop - O)
+			g4 (right - overshoot) turn
+			arcvh
+			flat ([Math.max (endX + 0.01 + sw / 2 * TanSlope) Middle] + CorrectionOMidX * sw * 0.5) bowlBottom
+			curl endX bowlBottom [heading Leftward]
+
+	define [PShapeOutlineKnots top mul bp overshoot sw offset] : begin
+		local bowlTop (top * 1 - offset)
+		local bowlBottom : [PBarPosY top sw bp] + offset
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
+		local sma : SmoothAOf (Smooth * 0.9) Width
+		local smb : SmoothBOf (Smooth * 0.9) Width
+		local right : RightSB - offset
+		local turn : YSmoothMidR bowlTop bowlBottom sma smb
+		return : list
+			flat (SB * mul - O) bowlTop [heading Rightward]
+			curl (right - turnRadius - CorrectionOMidX * sw) bowlTop
+			archv
+			g4 (right - overshoot) turn
+			arcvh
+			flat (right - turnRadius + CorrectionOMidX * sw) bowlBottom
+			curl (SB * mul - O) bowlBottom [heading Leftward]
+
+	define [RevPshapeOutlineKnots top mul bp overshoot sw offset] : begin
+		local bowlTop (top * 1 - offset)
+		local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
+		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
+		local sma : SmoothAOf (Smooth * 0.9) Width
+		local smb : SmoothBOf (Smooth * 0.9) Width
+		local left : SB + offset
+		local turn : YSmoothMidL bowlTop bowlBottom sma smb
+		return : list
+			flat (Width - SB * mul + O) bowlTop [heading Leftward]
+			curl (left + turnRadius - CorrectionOMidX * sw) bowlTop
+			archv
+			g4 (left + overshoot) turn
+			arcvh
+			flat (left + turnRadius + CorrectionOMidX * sw) bowlBottom
+			curl (Width - SB * mul + O) bowlBottom [heading Rightward]
+
+
+	define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-proc
+		include : spiro-outline
+			PShapeOutlineKnots top mul bp overshoot sw offset
+
+	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [withBar true]] : glyph-proc
+		include : dispiro
+			widths.rhs sw
+			PShapeOutlineKnots top mul bp overshoot sw 0
+		if withBar : begin
+			include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
+			if slab : begin
+				include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
+				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
+
+	define [PRotundaShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [endX SB] [hook Hook]] : glyph-proc
+		include : dispiro
+			widths.rhs sw
+			PRotundaOutlineKnots top mul bp overshoot sw 0 endX hook
+
+	define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-proc
+		include : tagged 'bowl' : dispiro
+			widths.lhs sw
+			RevPshapeOutlineKnots top mul bp overshoot sw 0
+		include : tagged 'strokeR' : VBarRight (Width - SB * mul) 0 top sw
+
+		if slab : begin
+			include : tagged 'serifRT'
+				RightwardTopSerif (Width - SB * mul) top SideJut sw
+			include : tagged 'serifRB'
+				CenterBottomSerif (Width - SB * mul - HalfStroke * HVContrast) 0 Jut sw
+
+	set PShape.defaultMul 1.25
+	set PShape.defaultOvershoot (OX * 2)
+	set PShape.BarPos (1 - HBarPos)
+	set PShape.SwBelowBar 0.25
+
+	create-glyph 'P' 'P' : glyph-proc
+		include : MarkSet.capital
+		include : PShape CAP
+		if SLAB : begin
+			include : RightwardBottomSerif (SB * PShape.defaultMul + HalfStroke * HVContrast) 0 MidJutSide
+
+	alias 'grek/Rho' 0x3A1 'P'
+	alias 'cyrl/Er' 0x420 'P'
+
+	create-glyph 'Phookleft' 0x1A4 : glyph-proc
+		include [refer-glyph 'P'] AS_BASE
+		eject-contour "serifLT"
+		include : LeftHook (SB * 1.25) CAP
+
+	create-glyph 'currency/pesetaSign' 0x20A7 : glyph-proc
+		include : MarkSet.capital
+		include : PShape CAP (mul -- 2) (overshoot -- 0)
+		if SLAB : include : RightwardBottomSerif (SB * 2 + HalfStroke * HVContrast) 0 MidJutSide
+		include : Translate (-SB * 0.5) 0
+		define sw : AdviceStroke2 2 4 CAP
+		include : HBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix CAP [PBarPosY CAP Stroke PShape.BarPos] 0.5] sw
+
+	create-glyph 'currency/rubleSign' 0x20BD : glyph-proc
+		include [refer-glyph 'P'] AS_BASE ALSO_METRICS
+		define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
+		include : HOverlayBar [mix SB 0 0.7] (SB + HalfStroke * HVContrast) bar1pos
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.8] [mix 0 (bar1pos - Stroke) (3 / 4)]
+
+	define [BBPShape] : params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
+		define sb : SB * mul
+		include : difference
+			PShape CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (slab -- false)
+			Rect (CAP - BBS) 0 (sb + HVContrast * BBS / 2) (sb + BBD)
+		include : VBarLeft sb 0 CAP BBS
+		include : VBarLeft (sb + BBD) 0 CAP BBS
+		include : HBarBottom sb (sb + BBD) 0 BBS
+		include : intersection
+			PShapeOutline CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (offset -- 1)
+			VBarRight (RightSB - overshoot - BBD) 0 CAP BBS
+
+	create-glyph 'mathbb/P' 0x2119 : composite-proc [MarkSet.capital] [BBPShape]

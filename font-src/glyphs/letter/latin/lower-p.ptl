@@ -1,0 +1,75 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-P : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+
+	define [SmallPSerifLT] : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+	define [SmallPSerifLB] : tagged 'serifLB' : union
+		LeftwardBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
+		RightwardBottomSerif (SB + HalfStroke * HVContrast) Descender MidJutSide
+
+	create-glyph 'p.eared' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : tagged 'bowl' : OBarLeftShape
+		include : VBarLeft SB Descender XH
+		if SLAB : begin
+			include : SmallPSerifLT
+			include : SmallPSerifLB
+
+	create-glyph 'p.motionSerifed' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : tagged 'bowl' : OBarLeftShape
+		include : VBarLeft SB Descender XH
+		include : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
+
+	create-glyph 'p.earlessCorner' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : tagged 'bowl' : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : VBarLeft SB Descender (XH - DToothlessRise)
+		if SLAB : begin
+			include : SmallPSerifLB
+
+	create-glyph 'grek/rho' 0x3C1 : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : tagged 'bowl' : OBarRightRoundedShape XH RightSB CAP
+		include : FlipAround Middle (XH / 2)
+
+	create-glyph 'p.earlessRounded' : glyph-proc
+		include [refer-glyph 'grek/rho'] AS_BASE ALSO_METRICS
+		if SLAB : begin
+			include : SmallPSerifLB
+
+	select-variant 'p' 'p'
+	select-variant 'cyrl/er' 0x440 (shapeFrom -- 'p')
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+	create-glyph 'mathbb/p' 0x1D561 : glyph-proc
+		include : MarkSet.p
+		include : BBBarLeft SB Descender XH
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 (SB + BBD + BBS * HVContrast) RightSB
+			VBarRight (RightSB - BBD - OX) 0 XH BBS
+		include : OBarLeftShape
+			left -- SB + BBD
+			top  -- XH
+			stroke -- BBS
+
+	create-glyph 'phooktop' 0x1A5 : glyph-proc
+		include : MarkSet.if
+		include : OBarLeftShape
+		include : HooktopLeftBar nothing Descender
+		if SLAB : begin
+			include : SmallPSerifLB

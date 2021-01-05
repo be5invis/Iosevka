@@ -1,0 +1,99 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-Y : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-X : HalfXStrand
+
+	define [YShape straightBar top bot] : glyph-proc
+		local cross : mix [fallback bot 0] top 0.4
+		include : WithAIHSerifsMask CAP 0 SB RightSB
+			HalfXStrand straightBar SLAB SB top Middle cross 0.1 0.4 0.28
+		include : tagged 'strokeRT' : WithAIHSerifsMask CAP 0 SB RightSB
+			HalfXStrand straightBar SLAB RightSB top Middle cross 0.1 0.4 0.28
+		include : VBar Middle [fallback bot 0] (cross + HalfStroke)
+		set-base-anchor 'overlay' Middle cross
+		if SLAB : begin
+			include : AIVSerifs top
+			include : CenterBottomSerif Middle [fallback bot 0] MidJutSide
+
+	define [YOverlayShape] : glyph-proc
+		include : HOverlayBar SB RightSB (CAP * 0.45)
+		include : HOverlayBar SB RightSB (CAP * 0.25)
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		create-derived 'Y.straight' : YShape true CAP
+		create-derived 'Y.curly' : YShape false CAP
+
+	define [YHookTopShape straightBar] : glyph-proc
+		include : YShape straightBar CAP
+		eject-contour 'strokeRT'
+		eject-contour 'serifRT'
+
+		local cross (CAP * 0.4)
+		include : dispiro
+			widths.rhs
+			straight.left.start (RightSB + HookX / 3) (CAP - Stroke)
+			g4 (RightSB - HookX / 3) (CAP - Hook)
+			quadcontrols 0.55 0.7 32 unimportant
+			g4 (Middle + Stroke / 2 * HVContrast) cross
+			end [function : set this.loose true]
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		create-derived 'Yhooktop.straight' : YHookTopShape true
+		create-derived 'Yhooktop.curly' : YHookTopShape false
+
+	create-glyph : glyph-proc
+		include : MarkSet.p
+		create-derived 'cyrl/ue.straight' : YShape true XH Descender
+		create-derived 'cyrl/ue.curly' : YShape false XH Descender
+
+	create-glyph : glyph-proc
+		include : MarkSet.e
+		create-derived 'smcpY.straight' : YShape true XH
+		create-derived 'smcpY.curly' : YShape true XH
+
+	select-variant 'Y' 'Y'
+	select-variant 'Yhooktop' 0x1B3 (follow -- 'Y')
+	select-variant 'smcpY' 0x28F (follow -- 'Y')
+	select-variant 'cyrl/ue' 0x4AF (follow -- 'Y')
+
+	alias 'grek/Upsilon' 0x3A5 'Y'
+	alias 'cyrl/Ue' 0x4AE 'Y'
+	with-related-glyphs 'currency/yenSign' 0xA5 'Y' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : YOverlayShape
+
+	# Blackboard
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/Y' 0x1D550 : glyph-proc
+		local yCross : CAP * 0.4
+
+		include : MarkSet.capital
+		include : HBarTop SB (SB + BBD) CAP BBS
+		include : intersection
+			Rect CAP 0 (-Width) (2 * Width)
+			union
+				difference
+					ExtLineCenter 1 BBS  SB         CAP (Middle - BBD / 2) yCross
+					Rect CAP 0 (Middle - BBD / 2 + BBS / 2 * HVContrast) (Width * 2)
+				difference
+					ExtLineCenter 1 BBS  (SB + BBD) CAP (Middle + BBD / 2) yCross
+					Rect CAP 0 (Middle + BBD / 2 + BBS / 2 * HVContrast) (Width * 2)
+
+		include : intersection
+			Rect CAP yCross (-Width) (2 * Width)
+			ExtLineCenter 1 BBS  RightSB CAP (Middle + BBD / 2) yCross
+
+		include : HBarBottom (Middle - BBD / 2) (Middle + BBD / 2) 0 BBS
+		include : union
+			VBar (Middle - BBD / 2) 0 yCross BBS
+			VBar (Middle + BBD / 2) 0 yCross BBS

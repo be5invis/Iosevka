@@ -1,0 +1,59 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Thorn : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'Thorn' 0xDE : glyph-proc
+		include : MarkSet.capital
+
+		local bowlTop (CAP * 0.81)
+		local bowlBottom (CAP * 0.19)
+
+		local turn : mix bowlTop bowlBottom (SmoothB / (SmoothA + SmoothB))
+		local turnRadius : (bowlTop - bowlBottom) / 2
+		include : dispiro
+			widths.rhs
+			flat (SB * 1.25 + 1) bowlTop [heading Rightward]
+			curl (RightSB - turnRadius - CorrectionOMidS) bowlTop
+			archv
+			g4   (RightSB - O) turn
+			arcvh
+			flat (RightSB - turnRadius + CorrectionOMidS) bowlBottom
+			curl (SB * 1.25 + 1) bowlBottom [heading Leftward]
+
+		include : VBarLeft (SB * 1.25) 0 CAP
+		if SLAB : begin
+			include : CenterBottomSerif (SB * 1.25 + HalfStroke * HVContrast) 0 Jut
+			include : CenterTopSerif (SB * 1.25 + HalfStroke * HVContrast) CAP Jut
+
+	alias 'grek/Sho' 0x3F7 'Thorn'
+
+	create-glyph 'thorn' 0xFE : glyph-proc
+		include : union
+			glyph-proc
+				include : refer-glyph "b"
+				eject-contour 'serifLB'
+			glyph-proc
+				include : refer-glyph "p"
+				eject-contour 'bowl'
+				eject-contour 'serifLT'
+		include : MarkSet.if
+
+	create-glyph 'grek/sho' 0x3F8 : glyph-proc
+		include : new-glyph : glyph-proc
+			include : refer-glyph "b"
+			eject-contour 'serifLB'
+			eject-contour 'serifLT'
+		include : new-glyph : glyph-proc
+			include : refer-glyph "p"
+			eject-contour 'bowl'
+			eject-contour 'serifLT'
+			eject-contour 'serifLB'
+		include : MarkSet.if

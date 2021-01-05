@@ -1,0 +1,59 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Letter-Greek-Pi : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
+
+	glyph-block-export PiShape
+	define [PiShape] : params [df top bottom [shrinkRate 0.05] [fine Stroke] [noSerif false] [endShrink 0]] : glyph-proc
+		local shrink : if (!noSerif && SLAB) 0 (shrinkRate * (df.rightSB - df.leftSB))
+		local endexpand : if (!noSerif && SLAB) 0 (- endShrink * (df.rightSB - df.leftSB) || shrink / 2)
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top fine
+		include : VBarLeft (df.leftSB + shrink) bottom (top - fine / 2) fine
+		include : VBarRight (df.rightSB - shrink) bottom (top - fine / 2) fine
+
+		if (!noSerif && SLAB) : begin
+			include : CenterBottomSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) bottom Jut fine
+			include : CenterBottomSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) bottom Jut fine
+			include : CenterTopSerif (df.leftSB + shrink + fine * 0.5 * HVContrast) top Jut fine
+			include : CenterTopSerif (df.rightSB - shrink - fine * 0.5 * HVContrast) top Jut fine
+
+	define [MathBBPiShape] : params [df top bottom [shrinkRate 0.05] [endShrink 0]] : glyph-proc
+		local shrink : shrinkRate * (df.rightSB - df.leftSB)
+		local endexpand : -endShrink * (df.rightSB - df.leftSB) || shrink / 2
+		include : HBarTop (df.leftSB - endexpand) (df.rightSB + endexpand) top BBS
+		include : BBBarLeft (df.leftSB + shrink) bottom top
+		include : BBBarRight (df.rightSB - shrink) bottom top
+
+	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
+		include : MarkSet.capital
+		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
+
+	create-glyph 'mathbb/grek/Pi' 0x213F : glyph-proc
+		include : MarkSet.capital
+		include : MathBBPiShape [DivFrame 1] CAP 0 (shrinkRate -- 0)
+
+	create-glyph 'cyrl/pe.upright' : glyph-proc
+		include : MarkSet.e
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0.05) (endShrink -- 0.05)
+
+	with-related-glyphs 'cyrl/pe.SRB' null 'u' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		include : refer-glyph "macronAbove"
+
+	alias 'cyrl/Pe' 0x41F 'grek/Pi'
+	orthographic-italic 'cyrl/pe' 0x43f
+
+	create-glyph 'grek/pi' 0x3C0 : glyph-proc
+		include : MarkSet.e
+		include : PiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)
+
+	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
+		include : MarkSet.e
+		include : MathBBPiShape [DivFrame 1] XH 0 (noSerif -- true) (shrinkRate -- 0.06)

@@ -1,0 +1,152 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-O : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : HornBaseAnchor markHalfStroke
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	create-glyph 'O' 'O' : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB nothing SmoothA SmoothB
+		set-base-anchor 'trailing' Middle 0
+
+	create-glyph 'o' 'o' : glyph-proc
+		include : MarkSet.e
+		include : OShape XH 0 SB RightSB nothing nothing nothing
+		set-base-anchor 'trailing' Middle 0
+
+	alias 'grek/Omicron' 0x39F 'O'
+	alias 'cyrl/O' 0x41E 'O'
+	alias 'grek/omicron' 0x3BF 'o'
+	alias 'cyrl/o' 0x43e 'o'
+
+	create-glyph 'mathbb/O' 0x1D546 : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB BBS SmoothA SmoothB
+		include : intersection
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS SmoothA SmoothB
+			union
+				VBarLeft  (SB + OX + BBD) 0 CAP BBS
+				VBarRight (RightSB - OX - BBD) 0 CAP BBS
+
+	create-glyph 'mathbb/o' 0x1D560 : glyph-proc
+		include : MarkSet.e
+		include : OShape XH 0 SB RightSB BBS
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB RightSB BBS
+			union
+				VBarLeft  (SB + OX + BBD) 0 XH BBS
+				VBarRight (RightSB - OX - BBD) 0 XH BBS
+
+	create-glyph 'OHorn' 0x01A0 : glyph-proc
+		include : MarkSet.capital
+		include : HornBaseAnchor RightSB CAP (Width / 2) (SmoothB) 0.5
+		include : difference
+			new-glyph : glyph-proc
+				include : MarkSet.capital
+				include [refer-glyph 'longHorn']
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB nothing SmoothA SmoothB
+		include : refer-glyph "O"
+
+	create-glyph 'oHorn' 0x01A1 : glyph-proc
+		include : MarkSet.e
+		include : HornBaseAnchor RightSB XH (Width / 2) (SmoothB) 0.5
+		include : difference
+			new-glyph : glyph-proc
+				include : MarkSet.e
+				include [refer-glyph 'longHorn']
+			OShapeOutline.NoOvershoot XH 0 SB RightSB nothing nothing nothing
+		include : refer-glyph "o"
+
+	create-glyph 'Oslash' 0xD8 : glyph-proc
+		local fine : 0.5 * OverlayStroke
+		include [refer-glyph 'O'] AS_BASE
+		include : dispiro
+			flat (SB + O + fine) [mix CAP 0 1.05] [widths fine fine]
+			curl (RightSB - O - fine) [mix 0 CAP 1.05]
+
+	create-glyph 'oslash' 0xF8 : glyph-proc
+		local fine : 0.5 * OverlayStroke
+		include [refer-glyph 'o'] AS_BASE
+		include : dispiro
+			flat (SB + O + fine) [mix XH 0 1.05] [widths fine fine]
+			curl (RightSB - O - fine) [mix 0 XH 1.05]
+
+	create-glyph 'Obar' 0x19F : glyph-proc
+		include [refer-glyph 'O'] AS_BASE
+		include : HBar (SB + OX + 1) (RightSB - OX - 1) (CAP * 0.5) OverlayStroke
+
+	create-glyph 'obar' 0x275 : glyph-proc
+		include [refer-glyph 'o'] AS_BASE
+		include : HBar (SB + OX + 1) (RightSB - OX - 1) (XH * 0.5) OverlayStroke
+
+	create-glyph 'OVBar' 0x2180 : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : OShape CAP 0 df.leftSB df.rightSB df.mvs SmoothA SmoothB
+		include : VBar df.middle (df.mvs / 2) (CAP - df.mvs / 2) df.mvs
+		set-base-anchor 'trailing' Middle 0
+
+	alias 'cyrl/Oe' 0x4E8 'Obar'
+	alias 'grek/capSymbolTheta' 0x3F4 'Obar'
+	alias 'cyrl/oe' 0x4E9 'obar'
+
+	create-glyph 'bulleye' 0x298 : glyph-proc
+		include [refer-glyph 'O'] AS_BASE
+		local halfDotWidth  : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
+		local halfDotHeight : Math.min DotRadius (halfDotWidth * 1.5)
+		include : OShapeOutline.NoOvershoot
+			CAP / 2 + halfDotHeight
+			CAP / 2 - halfDotHeight
+			Middle + halfDotWidth
+			Middle - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
+
+	create-glyph 'oupperhalf' 0x1D16 : glyph-proc
+		include : MarkSet.e
+		include : dispiro
+			widths.rhs
+			flat (SB + OX) (XH / 2) [heading Upward]
+			curl (SB + OX) (XH - [Math.min (XH / 2 - 0.1) SmallSmoothA])
+			arcvh
+			g4 (Middle - CorrectionOMidS) (XH - O)
+			archv
+			flat (RightSB - OX) (XH - [Math.min (XH / 2 - 0.1) SmallSmoothB])
+			curl (RightSB - OX) (XH / 2) [heading Downward]
+
+	create-glyph 'olowerhalf' 0x1D17 : glyph-proc
+		include : MarkSet.e
+		include : dispiro
+			widths.lhs
+			flat (SB + OX) (XH / 2) [heading Downward]
+			curl (SB + OX) [Math.min (XH / 2 - 0.1) SmallSmoothB]
+			arcvh
+			g4 (Middle + CorrectionOMidS) O
+			archv
+			flat (RightSB - OX) [Math.min (XH / 2 - 0.1) SmallSmoothA]
+			curl (RightSB - OX) (XH / 2) [heading Upward]
+
+	create-glyph 'oWithLightCentralizationStroke' : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph "o"
+		local fine      : AdviceStroke 4
+		local outStand  : SB * 0.75 + fine * 0.25
+		local outStandY : SmallSmoothB / 2 - Descender * 0.6
+		local yTurn     : SmallSmoothB / 2
+		include : difference
+			dispiro
+				widths.lhs fine
+				corner Middle          (yTurn + outStandY)
+				corner (SB - outStand) (yTurn - outStandY)
+			OShapeOutline.NoOvershoot XH 0 SB RightSB nothing nothing nothing
+

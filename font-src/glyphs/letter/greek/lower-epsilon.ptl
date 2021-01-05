@@ -1,0 +1,120 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Letter-Greek-Lower-Epsilon : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define StdBlend 0.65
+
+	define [SmallEpsilonShapeDim top bot blend] : begin
+		local stroke : AdviceStroke2 2 3 (top - bot)
+		local midx : mix SB RightSB blend
+		local midy : mix bot top OverlayPos
+		local sma : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothB / (SmoothA + SmoothB))] - TanSlope * HVContrast * stroke
+		local smb : [mix (stroke + O) (midy - stroke / 2) (SmoothB / (SmoothA + SmoothB))] + TanSlope * HVContrast * stroke
+		local fine : stroke * CThin
+		return : object stroke midx midy sma smb fine
+
+	define [SmallEpsilonUpperShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : SmallEpsilonShapeDim top bot blend
+		return : dispiro
+			g4 (RightSB + O) (top - hook) [widths.lhs]
+			hookstart (top - O)
+			g4 (SB + (OX - O)) (top - sma)
+			arcvh
+			flat Middle (midy - (fine - stroke / 2)) [widths.heading fine 0 Rightward]
+			curl midx (midy - (fine - stroke / 2)) [heading Rightward]
+
+	define [SmallEpsilonLowerShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : SmallEpsilonShapeDim top bot blend
+		return : dispiro
+			flat midx (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			curl Middle (midy + (fine - stroke / 2)) [heading Leftward]
+			archv
+			g4 (SB + (OX - O) + O * 2) (bot + smb) [widths.lhs]
+			hookend (bot + O)
+			g4 (RightSB - O) (bot + hook)
+
+	define [SmallEpsilonShape top bot blend hook] : union
+		SmallEpsilonUpperShape top bot blend hook
+		SmallEpsilonLowerShape top bot blend hook
+
+	create-glyph 'grek/epsilon' 0x3B5 : glyph-proc
+		include : MarkSet.e
+		include : SmallEpsilonShape XH 0 StdBlend SHook
+
+	alias 'latinepsilon' 0x25B 'grek/epsilon'
+	turned 'turnepsilon' 0x1D08 'grek/epsilon' Middle (XH / 2)
+
+	create-glyph 'latinEpsilon' 0x190 : glyph-proc
+		include : MarkSet.capital
+		include : SmallEpsilonShape CAP 0 StdBlend Hook
+
+	define [CyrZeShapeDim top bot blend] : begin
+		local stroke : AdviceStroke2 2 3 (top - bot)
+		local midx : mix RightSB SB blend
+		local midy : mix bot top OverlayPos
+		local smb : top - [mix (midy + stroke / 2) (top - O - stroke) (SmoothA / (SmoothA + SmoothB))] + TanSlope * HVContrast * stroke
+		local sma : [mix (stroke + O) (midy - stroke / 2) (SmoothA / (SmoothA + SmoothB))] - TanSlope * HVContrast * stroke
+		local fine : stroke * CThin
+		return : object stroke midx midy sma smb fine
+
+	define [CyrZeUpperShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : CyrZeShapeDim top bot blend
+		return : dispiro
+			widths.rhs
+			g4 (SB - O) (top - hook)
+			hookstart (top - O)
+			g4 (RightSB - (OX - O)) (top - smb)
+			arcvh
+			flat Middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
+			curl midx (midy - (fine - stroke / 2)) [heading Leftward]
+
+	define [CyrZeLowerShape top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : CyrZeShapeDim top bot blend
+		return : dispiro
+			widths.lhs
+			g4 (SB + O) (bot + hook)
+			hookstart (bot + O)
+			g4 (RightSB - (OX - O) - O * 2) (bot + sma)
+			arcvh
+			flat Middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
+
+	define [CyrZeShape top bot blend hook] : union
+		CyrZeUpperShape top bot blend hook
+		CyrZeLowerShape top bot blend hook
+
+	create-glyph 'cyrl/Ze' 0x417 : glyph-proc
+		include : MarkSet.capital
+		include : CyrZeShape CAP 0 StdBlend Hook
+
+	create-glyph 'cyrl/ze.BGR' : glyph-proc
+		include : MarkSet.p
+		include : CyrZeShape CAP 0 StdBlend Hook
+		include : Upright
+		include : Translate 0 (XH - CAP)
+		include : Italify
+
+	create-glyph 'revLatinEpsilon' 0x25C : glyph-proc
+		include : MarkSet.e
+		include : CyrZeShape XH 0 StdBlend SHook
+
+	alias 'cyrl/ze' 0x437 'revLatinEpsilon'
+
+	create-glyph 'voicedlaryngenalspirant' 0x1D24 : glyph-proc
+		include : MarkSet.b
+		local blend 0.505
+		local midGap : Math.max [AdviceStroke2 3 12 CAP] (CAP / 8 - [AdviceStroke2 3 6 XH])
+		local strokeV : AdviceStroke 4
+		local dimUpper : CyrZeShapeDim         CAP            midGap blend
+		local dimLower : SmallEpsilonShapeDim  (CAP - midGap) 0      blend
+		include : union
+			CyrZeUpperShape        CAP            midGap blend Hook
+			SmallEpsilonLowerShape (CAP - midGap) 0      blend Hook
+			Rect (dimUpper.midy + dimUpper.stroke / 2) (dimLower.midy - dimLower.stroke / 2) (Middle - strokeV / 2 * HVContrast) (Middle + strokeV / 2 * HVContrast)

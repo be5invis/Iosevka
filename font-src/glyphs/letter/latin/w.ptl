@@ -1,0 +1,219 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-W : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	### W and w
+	define [WShape top barStraight df] : glyph-proc
+		local fineOuter : if barStraight
+			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
+			AdviceStroke WShape.fineOuter df.div
+		local fineInner : if barStraight
+			AdviceStroke WShape.fineSInner [Math.sqrt df.div]
+			AdviceStroke WShape.fineInner df.div
+		local fineHeight : (fineOuter + fineInner) / 2
+
+		local hwCO : if barStraight
+			(1 / 2) * [AdviceStroke WShape.hwCOS df.div]
+			(1 / 2) * [AdviceStroke WShape.hwCO df.div]
+		local delimBias : hwCO * HVContrast
+		local fineOffsetOuter : hwCO * HVContrast
+		local fineOffsetInner : hwCO * HVContrast
+		local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
+		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+		local topWithoutSerif : if SLAB (top - Stroke) top
+		local wMidHeight : match barStraight
+			2 topWithoutSerif
+			1 (topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)])
+			0 (top * 0.6)
+
+		if barStraight : begin
+			include : tagged 'strokeDown1' : dispiro
+				widths.lhs
+				flat (df.leftSB + O * 2) top [heading Downward]
+				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
+		: else : begin
+			include : tagged 'strokeDown1' : dispiro
+				widths.lhs
+				flat df.leftSB top [heading Downward]
+				curl df.leftSB (top * 0.75) [heading Downward]
+				quadcontrols 0 0.3 6 unimportant
+				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
+
+		# bottom cap 1
+		define [InnerShapes] : union
+			spiro-outline
+				corner (m1 + fineOffsetInner) 0
+				corner (m1 - fineOffsetOuter) 0
+				corner m1 fineHeight
+			spiro-outline
+				corner (df.middle + fineOffsetInner) wMidHeight
+				corner df.middle (wMidHeight - fineHeight)
+				corner (df.middle - fineOffsetInner) wMidHeight
+			spiro-outline
+				corner (m2 + fineOffsetOuter) 0
+				corner (m2 - fineOffsetInner) 0
+				corner m2 fineHeight
+
+			dispiro
+				widths.lhs fineInner
+				flat (df.middle - fineOffsetInner) wMidHeight
+				curl (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
+			dispiro
+				widths.rhs fineInner
+				flat (df.middle + fineOffsetInner) wMidHeight
+				curl (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
+
+		define [InnerStrokeMask] : union
+			spiro-outline
+				corner 0             0
+				corner df.width      0
+				corner df.width      (-df.width)
+				corner 0             (-df.width)
+			spiro-outline
+				corner 0             wMidHeight
+				corner df.width      wMidHeight
+				corner df.width      (wMidHeight + df.width)
+				corner 0             (wMidHeight + df.width)
+
+		include : difference [InnerShapes] [InnerStrokeMask]
+
+		if barStraight : begin
+			include : tagged 'strokeUp2' : dispiro
+				widths.rhs
+				flat (df.rightSB - O * 2) top [heading Downward]
+				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+		: else : begin
+			include : tagged 'strokeUp2' : dispiro
+				widths.rhs
+				flat df.rightSB top [heading Downward]
+				curl df.rightSB (top * 0.75) [heading Downward]
+				quadcontrols 0 0.3 6 unimportant
+				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+
+		include : AIVSerifs top df.leftSB df.rightSB
+
+	set WShape.fineOuter 5
+	set WShape.fineInner 6
+	set WShape.fineSOuter 5.5
+	set WShape.fineSInner 5.5
+	set WShape.hwCO 5
+	set WShape.hwCOS 3.5
+	set WShape.m1    0.25
+	set WShape.m2  : 1 - WShape.m1
+	set WShape.m1S   0.235
+	set WShape.m2S : 1 - WShape.m1S
+
+	define [WonOverlay df] : glyph-proc
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
+		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		create-derived 'W.straightFlatTop' : WShape CAP 2 df
+		create-derived 'W.straight' : WShape CAP 1 df
+		create-derived 'W.curly' : WShape CAP 0 df
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		create-derived 'w.straightFlatTop' : WShape XH 2 df
+		create-derived 'w.straight' : WShape XH 1 df
+		create-derived 'w.curly' : WShape XH 0 df
+
+	define [WHooktopShape top barStraight df] : glyph-proc
+		local fineOuter : if barStraight
+			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
+			AdviceStroke WShape.fineOuter df.div
+
+		local hwCO : if barStraight
+			(1 / 2) * [AdviceStroke WShape.hwCOS df.div]
+			(1 / 2) * [AdviceStroke WShape.hwCO df.div]
+		local delimBias : hwCO * HVContrast
+		local fineOffsetOuter : hwCO * HVContrast
+		local fineOffsetInner : hwCO * HVContrast
+		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+
+		include : WShape top barStraight df
+
+		# Eject unnecessary contours
+		eject-contour 'strokeUp2'
+		if SLAB : eject-contour 'serifRT'
+
+		include : dispiro
+			widths.rhs
+			straight.down.start df.rightSB (top - Hook) [heading Downward]
+			quadcontrols 0 0.3 6 unimportant
+			g4 (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+
+		include : VerticalHook (df.rightSB - HalfStroke * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + HalfStroke)
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		create-derived 'Whooktop.straightFlatTop' : WHooktopShape CAP 2 df
+		create-derived 'Whooktop.straight' : WHooktopShape CAP 1 df
+		create-derived 'Whooktop.curly' : WHooktopShape CAP 0 df
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		create-derived 'whooktop.straightFlatTop' : WHooktopShape XH 2 df
+		create-derived 'whooktop.straight' : WHooktopShape XH 1 df
+		create-derived 'whooktop.curly' : WHooktopShape XH 0 df
+
+	define [LowerWWShape df straightBar] : glyph-proc
+		include : WShape (CAP / 2) straightBar df
+		include : Upright
+		include : Translate 0 (CAP / 2)
+		include : Italify
+		include : WShape (CAP / 2) straightBar df
+	create-glyph : glyph-proc
+		local df : DivFrame 1 3
+		set-width df.width
+		include : df.markSet.capital
+		create-derived 'ww.straightFlatTop' : LowerWWShape df 2
+		create-derived 'ww.straight' : LowerWWShape df 1
+		create-derived 'ww.curly' : LowerWWShape df 0
+
+	select-variant 'W' 'W'
+	select-variant 'Whooktop' 0x2C72 (follow -- 'W')
+	select-variant 'w' 'w'
+	select-variant 'ww' 0x2AC (follow -- 'w')
+	select-variant 'whooktop' 0x2C73 (follow -- 'w')
+	alias 'cyrl/We' 0x51C 'W'
+	alias 'cyrl/we' 0x51D 'w'
+	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)
+
+	with-related-glyphs 'symbols/currency/wonSign' 0x20A9 'W' : lambda [src sel] : glyph-proc
+		local df : DivFrame para.diversityM 3
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include [WonOverlay df]
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-V : BBVShape BBVOuterMaskShape
+
+	define [BBWShape top] : begin
+		local offset : BBD * 2
+		local ksW : [AdviceStroke2 8 2 top] / BBS
+		local kdW : Math.min ksW (3 / 4)
+		return : union
+			difference
+				BBVShape SB (RightSB - offset) kdW ksW top
+				BBVOuterMaskShape (SB + offset) RightSB kdW ksW top
+			BBVShape (SB + offset) RightSB kdW ksW top
+
+	create-glyph 'mathbb/W' 0x1D54E : composite-proc [MarkSet.capital] [BBWShape CAP]
+	create-glyph 'mathbb/w' 0x1D568 : composite-proc [MarkSet.e]       [BBWShape XH]

@@ -1,0 +1,65 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Rams-Horn : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [RamsHornShape bottom top] : glyph-proc
+		local hf : [AdviceStroke 4] / 2
+		local d : hf * 2 + Width * 0.05
+
+		include : dispiro
+			widths.center
+			g4 (SB + HalfStroke * HVContrast + O) top [heading Downward]
+			quadcontrols 1 0.7 16
+			g4 (Middle + d - hf) (bottom + d * (1 - TanSlope * 0.5)) [widths hf hf]
+			arcvh
+			g4 (Middle + CorrectionOMidX * hf * 2) (bottom + hf)
+			archv
+			g4 (Middle - d + hf) (bottom + d * (1 + TanSlope * 0.5))
+			quadcontrols 0 0.3 16
+			g4 (RightSB - HalfStroke * HVContrast - O) top [widths.heading HalfStroke HalfStroke Upward]
+
+	create-glyph 'latingamma' 0x263 : glyph-proc
+		include : MarkSet.p
+		include : RamsHornShape Descender XH
+
+	create-glyph 'latinGamma' 0x194 : glyph-proc
+		include : MarkSet.if
+		include : RamsHornShape Descender CAP
+
+	create-glyph 'ramshorn' 0x264 : glyph-proc
+		include : MarkSet.e
+		include : RamsHornShape 0 XH
+
+	### Ayin
+	create-glyph 'latinAyin' 0x1D25 : glyph-proc
+		include : MarkSet.e
+		local k1 0.65
+		local k2 0.7
+		local zmidy (XH * 0.15)
+		local offset : Stroke * 0.25
+		include : union
+			dispiro
+				widths.lhs
+				g4.right.start SB 0 [heading Rightward]
+				g4 Middle zmidy
+				g4.up.mid [mix Middle RightSB k1] (XH * k2) [heading Upward]
+				arcvh
+				g4.left.mid Middle (XH - O) [heading Leftward]
+				archv
+				g4.down.mid [mix Middle SB k1] (XH * k2) [heading Downward]
+				g4 Middle zmidy
+				g4.right.end RightSB 0 [heading Rightward]
+			spiro-outline
+				corner Middle (zmidy + offset)
+				g4.up.mid ([mix Middle RightSB k1] - offset) (XH * k2)
+				g4.left.mid Middle (XH - offset)
+				g4.down.mid ([mix Middle SB k1] + offset) (XH * k2)
+				close

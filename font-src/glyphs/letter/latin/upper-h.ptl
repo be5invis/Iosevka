@@ -1,0 +1,107 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-H : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define [HShape top] : glyph-proc
+		include : tagged 'strokeL' : VBarLeft SB 0 top
+		include : tagged 'strokeR' : VBarRight RightSB 0 top
+		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
+		include : AIHSerifs top
+
+	create-glyph 'H' 'H' : glyph-proc
+		include : MarkSet.capital
+		include : HShape CAP
+
+	create-glyph 'halfH' 0x2C75 : glyph-proc
+		include : MarkSet.capital
+		include : HShape CAP
+		eject-contour 'strokeR'
+		eject-contour 'serifRT'
+		eject-contour 'serifRB'
+
+	alias 'grek/Eta' 0x397 'H'
+	alias 'cyrl/En' 0x41D 'H'
+
+	create-glyph 'mathbb/H' 0x210D : glyph-proc
+		include : MarkSet.capital
+		include : VBarLeft  SB 0 CAP BBS
+		include : VBarRight RightSB 0 CAP BBS
+		include : VBarLeft  (SB + BBD) 0 CAP BBS
+		include : VBarRight (RightSB - BBD) 0 CAP BBS
+		include : HBar (SB + BBD) (RightSB - BBD)  (CAP * HBarPos) BBS
+		include : HBarTop SB (SB + BBD) CAP BBS
+		include : HBarTop (RightSB - BBD) RightSB CAP BBS
+		include : HBarBottom SB (SB + BBD) 0 BBS
+		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
+
+	create-glyph 'smcpH' 0x29C : glyph-proc
+		include : MarkSet.e
+		include : HShape XH
+
+	create-glyph 'halfSmcpH' 0x2C76 : glyph-proc
+		include : MarkSet.e
+		include : HShape XH
+		eject-contour 'strokeR'
+		eject-contour 'serifRT'
+		eject-contour 'serifRB'
+
+	alias 'cyrl/en' 0x43D 'smcpH'
+
+	create-glyph 0x4A2 : composite-proc [refer-glyph 'cyrl/En'] [CyrDescender RightSB]
+	create-glyph 0x4A3 : composite-proc [refer-glyph 'cyrl/en'] [CyrDescender RightSB]
+
+	define [EnGheShape top] : glyph-proc
+		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
+		local barRight : mix Width RightSB [if SLAB 0.25 0.375]
+
+		include : VBarLeft SB 0 top
+		include : VBarRight right 0 top
+		include : HBar (SB - O) (right + O) (top * HBarPos)
+		include : HBarTop (right - Stroke * 0.1) barRight top
+
+		if SLAB : begin
+			include : AIHSerifs top SB right
+			include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
+
+
+	create-glyph 'cyrl/EnGhe' 0x4A4 : glyph-proc
+		include : MarkSet.capital
+		include : EnGheShape CAP
+
+	create-glyph 'cyrl/enghe' 0x4A5 : glyph-proc
+		include : MarkSet.e
+		include : EnGheShape XH
+
+	create-glyph 'Hbar' 0x126 : glyph-proc
+		include [refer-glyph 'H'] AS_BASE
+		include : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] [mix CapMiddle CAP 0.45]
+
+	create-glyph 'HCedilla' 0x1E28 : glyph-proc
+		include [refer-glyph 'cedillaBelow']
+		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
+		include [refer-glyph 'H']
+		include : MarkSet.if
+
+	create-glyph 'Heng' 0xA726 : glyph-proc
+		include : MarkSet.if
+		include : refer-glyph "H"
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'HengSmcp' : glyph-proc
+		include : MarkSet.if
+		include : refer-glyph "smcpH"
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	alias 'cyrl/EnHook' 0x4C7 'Heng'
+	alias 'cyrl/enHook' 0x4C8 'HengSmcp'

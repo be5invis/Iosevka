@@ -1,0 +1,52 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Che : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [CyrCheShape top _barp] : glyph-proc
+		local bar : top * [fallback _barp 0.5]
+		include : VBarRight RightSB 0 top
+		include : dispiro
+			widths.lhs
+			flat SB top [heading Downward]
+			curl SB (bar + SmoothB - HalfStroke)
+			arcvh
+			flat Middle (bar - HalfStroke)
+			curl (RightSB - 1) (bar - HalfStroke) [heading Rightward]
+		if SLAB : begin
+			include : CenterTopSerif (RightSB - HalfStroke * HVContrast) top Jut
+			include : CenterTopSerif (SB + HalfStroke * HVContrast) top Jut
+			include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+
+	create-glyph 'cyrl/Che' 0x427 : glyph-proc
+		include : MarkSet.capital
+		include : CyrCheShape CAP [if SLAB 0.45 0.35]
+
+	create-glyph 0x4B6 : composite-proc [refer-glyph 'cyrl/Che'] [CyrDescender RightSB]
+	create-glyph 0x4CB : composite-proc [refer-glyph 'cyrl/Che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
+
+	create-glyph 'cyrl/che' 0x447 : glyph-proc
+		include : MarkSet.e
+		include : CyrCheShape XH [if SLAB 0.45 0.4]
+
+	create-glyph 0x4B7 : composite-proc [refer-glyph 'cyrl/che'] [CyrDescender RightSB]
+	create-glyph 0x4CC : composite-proc [refer-glyph 'cyrl/che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
+
+	turned 'cyrl/Shha' 0x4BA 'cyrl/Che' Middle (CAP / 2)
+
+	create-glyph 'cyrl/Chevbar' 0x4B8 : glyph-proc
+		include [refer-glyph 'cyrl/Che'] AS_BASE
+		local yc (CAP * [if SLAB 0.45 0.35] + Stroke * 0.1)
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke
+
+	create-glyph 'cyrl/chevbar' 0x4B9 : glyph-proc
+		include [refer-glyph 'cyrl/che'] AS_BASE
+		local yc (XH * [if SLAB 0.45 0.35] + Stroke * 0.1)
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke

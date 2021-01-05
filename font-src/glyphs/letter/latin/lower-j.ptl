@@ -1,0 +1,130 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-J : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateDottedComposition
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	### j and dotless j
+	create-glyph 'dotlessj.serifless' : glyph-proc
+		include : MarkSet.p
+		local center : Middle + JBalance + HalfStroke * HVContrast
+		set-base-anchor 'above' (center - HVContrast * HalfStroke) XH
+		set-base-anchor 'overlay' (center - HVContrast * HalfStroke) (XH / 2)
+		local hookx  : center - (Width * 0.5) - Stroke * HVContrast + OXHook
+		local turn : [mix center hookx 0.5] + CorrectionOMidS
+		include : dispiro
+			widths.rhs
+			flat center XH [heading Downward]
+			curl center (Descender + SmoothA)
+			hookend (Descender + O)
+			g4 hookx (Descender + JHook)
+
+	create-glyph 'mathbb/dotlessj' : glyph-proc
+		include : MarkSet.p
+		local center : Middle + JBalance + BBD / 2
+		set-base-anchor 'above'   (center - HVContrast * BBS / 2 - BBD / 2) XH
+		set-base-anchor 'overlay' (center - HVContrast * BBS / 2 - BBD / 2) (XH / 2)
+		local hookx  : center - (Width * 0.5) - BBD * HVContrast + OXHook
+		local turn : [mix center hookx 0.5] + CorrectionOMidS
+		include : dispiro
+			widths.rhs BBS
+			flat center XH [heading Downward]
+			curl center (Descender + SmoothA)
+			hookend (Descender + O)
+			g4 hookx (Descender + JHook)
+		include : HBarTop (center - BBD) center XH BBS
+		include : intersection
+			VBarRight (center - BBD) Descender XH BBS
+			spiro-outline
+				corner center XH [heading Downward]
+				curl center (Descender + SmoothA)
+				hookend (Descender + O)
+				g4 hookx (Descender + JHook)
+				corner hookx XH
+
+	create-glyph 'mathbb/j' 0x1D55B : glyph-proc
+		include [refer-glyph 'mathbb/dotlessj'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'mathbb/dotAbove']
+		Dotless.set currentGlyph 'mathbb/dotlessj'
+
+	create-glyph 'dotlessj.straightLine' : glyph-proc
+		include : MarkSet.p
+		include : VBar Middle Descender XH
+
+	create-glyph 'dotlessj.serifed' : glyph-proc
+		include : MarkSet.p
+		include [refer-glyph 'dotlessj.serifless'] AS_BASE
+		include : LeftwardTopSerif (Middle + JBalance) XH LongJut
+
+		set-base-anchor 'above' (Middle + JBalance - Stroke * 0.166 * HVContrast) XH
+		set-base-anchor 'overlay' (Middle + JBalance - Stroke * 0.166 * HVContrast) (XH / 2)
+
+	define [FlatHookDotlessJShape] : params [df crossLeft crossRight barCenter serif] : glyph-proc
+		local terminal : crossLeft - OX * 2
+		local bar : barCenter + HalfStroke * HVContrast
+		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.5) : Math.min Hook (Stroke * 1.75)
+		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
+		include : dispiro
+			widths.lhs
+			flat [Math.min terminal (bar - tTurn - [Math.max (Stroke / 3) (df.width / 6)])] Descender
+			curl (bar - tTurn) Descender
+			archv.superness DesignParameters.tightHookSuperness
+			flat bar (Descender + tTurn)
+			curl bar XH [heading Upward]
+		set-base-anchor 'above' barCenter XH
+		set-base-anchor 'overlay' barCenter (XH / 2)
+
+	create-glyph 'dotlessj.flatHookSerifless' : glyph-proc
+		local df : DivFrame para.diversityII
+		set-width df.width
+		include : df.markSet.p
+		include : FlatHookDotlessJShape df
+			crossLeft -- [mix 0 SB para.diversityII]
+			crossRight -- [mix df.width df.rightSB para.diversityII]
+			barCenter -- (df.middle + 0.5 * JBalance * df.div * [mix 1 para.diversityII 2])
+			serif -- false
+
+	create-glyph 'dotlessj.flatHookSerifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.p
+		include : FlatHookDotlessJShape df
+			crossLeft -- [mix 0 SB : mix 1 para.diversityI 2]
+			crossRight -- [mix df.width df.rightSB : mix 1 para.diversityI 2]
+			barCenter -- (df.middle + JBalance * df.div)
+			serif -- true
+
+	select-variant 'dotlessj' 0x237
+	CreateDottedComposition 'dotlessj' 'j' 'j'
+	CreateDottedComposition 'dotlessj' 'grek/yot' 0x3F3
+	CreateDottedComposition 'dotlessj' 'cyrl/je' 0x458
+
+	create-glyph 'dotlessjCurlyTail' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'above' (Middle + JBalance) XH
+		local fine : AdviceStroke 3.5
+		local rinner : LongJut / 2 - fine / 2
+		local m1 : Middle - HalfStroke * HVContrast + JBalance
+		local x2 : mix RightSB m1 0.25
+		local y2 : Descender + O
+		include : LeftwardTopSerif (Middle + JBalance) XH LongJut
+		include : dispiro
+			widths.lhs
+			flat m1 XH [heading Downward]
+			curl m1 (Descender + fine + rinner * 2)
+			CurlyTail fine rinner m1 Descender (m1 - LongJut) x2 y2
+
+	create-glyph 'jcurlytail' 0x29D : glyph-proc
+		include [refer-glyph 'dotlessjCurlyTail'] AS_BASE ALSO_METRICS
+		include : refer-glyph "dotAbove"
+		if [not currentGlyph.related] : set currentGlyph.related {.}
+		set currentGlyph.related.dotless 'dotlessjCurlyTail'

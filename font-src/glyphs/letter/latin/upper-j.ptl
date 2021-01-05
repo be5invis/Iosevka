@@ -1,0 +1,82 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-J : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	create-glyph 'J.serifless' : glyph-proc
+		include : MarkSet.capital
+		set-base-anchor 'above' (RightSB - Stroke * HVContrast * 0.75 - JBalance2) CAP
+		set-base-anchor 'overlay' (RightSB - Stroke * HVContrast * 0.75 - JBalance2) (CAP * OverlayPos)
+
+		local sw : Math.min (0.4 * (RightSB - JBalance2 - SB)) Stroke
+		local hookx (0.75 * SB)
+
+		include : dispiro
+			widths.rhs sw
+			flat (RightSB - JBalance2) CAP [heading Downward]
+			curl (RightSB - JBalance2) SmoothB
+			hookend O
+			g4 hookx Hook
+
+	create-glyph 'J.shorthook' : glyph-proc
+		include : MarkSet.capital
+
+		local slope (Stroke * 0.00092)
+		local expand 0.35
+		local coexpand ((1 - expand) / 2)
+		local smooth : Hook + 0.75 * Stroke
+
+		local hookx (0.5 * SB)
+
+		include : dispiro
+			widths.rhs
+			flat (RightSB - JBalance2) CAP [heading Downward]
+			curl (RightSB - JBalance2) smooth
+			straight.left.end [mix SB RightSB 0.3] O [heading Leftward]
+
+	create-glyph 'J.serifed' : glyph-proc
+		include [refer-glyph 'J.serifless'] AS_BASE ALSO_METRICS
+		include : LeftwardTopSerif (RightSB - HalfStroke * HVContrast - JBalance2) CAP LongJut
+
+	create-glyph 'J.serifedBothSides' : glyph-proc
+		include [refer-glyph 'J.serifed'] AS_BASE ALSO_METRICS
+		include : RightwardTopSerif (RightSB - HalfStroke * HVContrast - JBalance2) CAP Jut
+
+	create-glyph 'J.serifedSymmetric' : glyph-proc
+		include [refer-glyph 'J.serifless'] AS_BASE ALSO_METRICS
+		include : CenterTopSerif (RightSB - HalfStroke * HVContrast - JBalance2 + O) CAP (Jut + JBalance2)
+
+	select-variant 'J' 'J'
+	alias 'cyrl/Je' 0x408 'J'
+	alias 'grek/Yot' 0x37F 'J'
+
+	create-glyph 'mathbb/J' 0x1D541 : glyph-proc
+		local hookx (0.75 * SB)
+
+		include : MarkSet.capital
+		set-base-anchor 'above' (RightSB - BBD * HVContrast * 0.75 - JBalance2) CAP
+		set-base-anchor 'overlay' (RightSB - BBD * HVContrast * 0.75 - JBalance2) (CAP * OverlayPos)
+
+		include : dispiro
+			widths.rhs BBS
+			flat (RightSB - JBalance2) CAP [heading Downward]
+			curl (RightSB - JBalance2) SmoothB
+			hookend O
+			g4 hookx Hook
+		include : HBarTop (RightSB - JBalance2 - BBD) (RightSB - JBalance2) CAP BBS
+		include : intersection
+			VBarRight (RightSB - JBalance2 - BBD) 0 CAP BBS
+			spiro-outline
+				corner (RightSB - JBalance2 - 1) CAP [heading Downward]
+				curl (RightSB - JBalance2 - 1) SmoothB
+				hookend (1 + O)
+				g4 (hookx + 1) Hook
+				corner (hookx + 1) CAP
