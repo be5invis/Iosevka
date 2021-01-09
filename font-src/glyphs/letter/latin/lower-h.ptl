@@ -1,0 +1,185 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-H : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder nShoulderMask
+
+	define [SmallHSerifs tailed hookTop] : glyph-proc
+		if [not hookTop] : include : LeftwardTopSerif SB CAP SideJut
+		if [not tailed]
+			if (para.isItalic)
+			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+			: else : include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+		if (!para.isItalic) : begin
+			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
+
+	create-glyph 'h.straight' : glyph-proc
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+		if SLAB : include [SmallHSerifs false]
+
+	create-glyph 'h.tailed' : glyph-proc
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		if SLAB : include [SmallHSerifs true]
+
+	create-glyph 'h.motionSerifedStraight' : glyph-proc
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+		include : LeftwardTopSerif SB CAP SideJut
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'h.motionSerifedTailed' : glyph-proc
+		include : MarkSet.b
+
+		include : VBarLeft SB 0 CAP
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		include : LeftwardTopSerif SB CAP SideJut
+
+	select-variant 'h' 'h'
+	alias 'cyrl/shha' 0x4BB 'h'
+
+	with-related-glyphs 'hCedilla' 0x1E29 'h' : lambda [src sel] : glyph-proc
+		include [refer-glyph 'cedillaBelow']
+		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
+		include [refer-glyph src]
+		include : MarkSet.if
+
+	create-glyph 'hhooktop.straight' : glyph-proc
+		include : MarkSet.b
+		include : HooktopLeftBar
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+		if SLAB : include [SmallHSerifs false true]
+
+	create-glyph 'hhooktop.tailed' : glyph-proc
+		include : MarkSet.b
+		include : HooktopLeftBar
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (XH - SmallSmoothB + O)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+		if SLAB : include [SmallHSerifs false true]
+
+	select-variant 'hhooktop' 0x266
+
+	create-glyph 'hhooktopltail' 0x267 : glyph-proc
+		include : MarkSet.if
+		include : refer-glyph "hhooktop.straight"
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	create-glyph 'heng' 0xA727 : glyph-proc
+		include : MarkSet.if
+		include : refer-glyph "h.straight"
+		eject-contour 'serifRB'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	turned 'turnh' 0x265 'h.straight' Middle (XH / 2) [MarkSet.p]
+
+	create-glyph 'hookturnh' 0x2AE : glyph-proc
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (Hook + HalfStroke + 1)
+		include : VBarLeft SB 0 CAP
+		include : new-glyph : glyph-proc
+			include : refer-glyph "rtailBR"
+			include : Upright
+			include : Translate RightSB (Hook + HalfStroke)
+			include : Italify
+		include : FlipAround Middle (XH / 2)
+		include : MarkSet.p
+		if SLAB : begin
+			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
+			include : CenterBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
+
+	create-glyph 'hookturnhrtail' 0x2AF : glyph-proc
+		include : nShoulder
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			bottom -- (Hook + HalfStroke + 1)
+		include : VBarLeft SB 0 (XH - 1)
+		include : new-glyph : glyph-proc
+			include : refer-glyph "rtailBR"
+			include : Upright
+			include : Translate RightSB (Hook + HalfStroke)
+			include : Italify
+		include : FlipAround Middle (XH / 2)
+		include : new-glyph : glyph-proc
+			include : refer-glyph "rtailBR"
+			include : Upright
+			include : Translate RightSB 0
+			include : Italify
+		include : MarkSet.p
+		if SLAB : begin
+			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
+
+	with-related-glyphs 'hbar' 0x127 'h' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		local barSpaceTop : CAP - [if SLAB Stroke 0]
+		local s : Math.min OverlayStroke (0.625 * (barSpaceTop - XH))
+		local xOverlayStart : mix SB 0 0.7
+		local xOverlayEnd : mix SB RightSB 0.5
+		local yOverlay : [mix XH barSpaceTop 0.45] - s / 2
+		include : dispiro
+			widths.lhs s
+			corner xOverlayStart yOverlay
+			corner (SB + HalfStroke * HVContrast) yOverlay
+		include : dispiro
+			widths.lhs OverlayStroke
+			corner (SB + HalfStroke * HVContrast) yOverlay
+			corner xOverlayEnd yOverlay
+
+	alias 'cyrl/tshe' 0x45B 'hbar'
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+	create-glyph 'mathbb/h' 0x1D559 : glyph-proc
+		local df : DivFrame 1 2
+		local bbs BBS
+		local bbd BBD
+		set-width df.width
+		include : df.markSet.e
+		include : BBBarLeft df.leftSB 0 CAP
+		include : union
+			HBarBottom (df.rightSB - bbd) df.rightSB 0 bbs
+			nShoulder
+				stroke -- bbs
+				left -- (df.leftSB + bbd + bbs * HVContrast)
+				right -- df.rightSB
+				fine -- ShoulderFine
+			intersection
+				VBarRight (df.rightSB - bbd) 0 XH bbs
+				nShoulderMask
+					stroke -- bbs
+					left -- (df.leftSB + bbd + bbs * HVContrast + 1)
+					right -- (df.rightSB - 1)
+					top -- (XH - 1)
+					fine -- ShoulderFine

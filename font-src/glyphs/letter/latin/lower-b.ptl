@@ -1,0 +1,115 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-B : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+
+	create-glyph 'b.toothed' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftShape
+		include : VBarLeft SB 0 CAP
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
+
+	create-glyph 'b.toothlessCorner' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : VBarLeft SB DToothlessRise CAP
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	create-glyph 'b.toothlessRounded' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftRoundedShape XH SB CAP
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	create-glyph 'b.motionSerifedToothed' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftShape
+		include : VBarLeft SB 0 CAP
+		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	create-glyph 'b.motionSerifedToothlessCorner' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : VBarLeft SB DToothlessRise CAP
+		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	create-glyph 'b.motionSerifedToothlessRounded' : glyph-proc
+		include : MarkSet.b
+
+		include : OBarLeftRoundedShape XH SB CAP
+		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	select-variant 'b' 'b'
+
+	create-glyph 'bhooktop.toothed' : glyph-proc
+		include : MarkSet.b
+		include : OBarLeftShape
+		include : HooktopLeftBar
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
+
+	create-glyph 'bhooktop.toothlessCorner' : glyph-proc
+		include : MarkSet.b
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : HooktopLeftBar (bottom -- DToothlessRise)
+
+	create-glyph 'bhooktop.toothlessRounded' : glyph-proc
+		include : MarkSet.b
+		include : OBarLeftRoundedShape XH SB XH
+		include : HooktopLeftBar (bottom -- SmallSmoothB)
+
+	select-variant 'bhooktop' 0x253
+
+	with-related-glyphs 'bbar' 0x180 'b' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
+
+	with-related-glyphs 'bdot' 0x1E03 'b' : lambda [src sel] : glyph-proc
+		include : refer-glyph "dotAbove"
+		include : Translate (Width + HalfStroke) 0
+		include [refer-glyph src] AS_BASE
+
+	with-related-glyphs 'latinbe' 0x183 'b' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		include : HBarTop (SB - O) [mix SB RightSB 0.9] CAP
+		if SLAB : begin
+			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
+
+	with-related-glyphs 'zhuangtonesix' 0x185 'b' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		eject-contour 'serifLT'
+		local s : Math.max (XH * 0.1) Stroke
+		include : spiro-outline
+			corner  SB CAP
+			corner (SB - O) CAP
+			corner (SB - O) (CAP - s * 2)
+			corner  SB (CAP - s * 2)
+			corner (SB - s) (CAP - s)
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
+	create-glyph 'mathbb/b' 0x1D553 : glyph-proc
+		include : MarkSet.b
+		include : BBBarLeft SB 0 CAP
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 (SB + BBD + BBS * HVContrast) RightSB
+			VBarRight (RightSB - BBD - OX) 0 XH BBS
+		include : OBarLeftShape
+			left -- SB + BBD
+			top  -- XH
+			stroke -- BBS

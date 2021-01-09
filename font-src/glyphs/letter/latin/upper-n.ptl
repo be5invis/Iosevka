@@ -1,0 +1,72 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-N : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-export NShape
+
+	define [NShape top left right crowd diagcrowd xn] : glyph-proc
+		local topstroke : AdviceStroke [fallback diagcrowd 4]
+		local stroke : AdviceStroke [fallback crowd 1]
+		local halftopstroke : topstroke / 2
+
+		include : union
+			AINSerifs top left right stroke xn
+			dispiro
+				flat left 0 [widths.heading 0 stroke Upward]
+				curl left (top * 0.4) [heading Upward]
+				straight.up.end left top [widths.heading 0 topstroke Upward]
+			dispiro
+				flat right top [widths.heading 0 stroke Downward]
+				curl right (top * 0.6) [heading Downward]
+				straight.down.end right 0 [widths.heading 0 topstroke Downward]
+			dispiro
+				flat (left + halftopstroke) top [widths.heading topstroke 0 Downward]
+				curl (right - halftopstroke) 0 [widths.heading 0 topstroke Downward]
+
+	create-glyph 'N' 'N' : glyph-proc
+		include : MarkSet.capital
+		include : NShape CAP SB RightSB
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	alias 'grek/Nu' 0x39D 'N'
+
+	create-glyph 'smcpN' 0x274 : glyph-proc
+		include : MarkSet.e
+		include : NShape XH SB RightSB 3 3.5
+
+	create-glyph 'currency/nairaSign' 0x20A6 : glyph-proc
+		include : NShape CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
+		define sw : AdviceStroke2 2 4 CAP
+		define gap : Math.max (CAP / 6) sw
+		include : HBarBottom [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
+		include : HBarTop    [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
+
+	create-glyph 'Nltail' 0x19D : glyph-proc
+		include [refer-glyph 'N'] AS_BASE
+		eject-contour 'serifLB'
+		include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/N' 0x2115 : glyph-proc
+		include : MarkSet.capital
+		include : VBarLeft SB 0 CAP BBS
+		include : VBarRight RightSB 0 CAP BBS
+		include : intersection
+			Rect CAP 0 SB RightSB
+			union
+				dispiro
+					widths.center BBS
+					corner (SB + BBS * HVContrast) CAP
+					corner (RightSB - BBS * HVContrast / 2) (CAP / 5)
+				dispiro
+					widths.center BBS
+					corner (SB + BBS * HVContrast / 2) (CAP - (CAP / 5))
+					corner (RightSB - BBS * HVContrast) 0

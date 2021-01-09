@@ -1,0 +1,77 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-F : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-export FShape RevFShape EFVJutLength
+
+	define [xMidBarShrink] : [Math.max HalfStroke ((RightSB - SB) * 0.15)] + [if SLAB (Stroke * 0.25) 0]
+	define [yMidBar top y] : top * [fallback y : DesignParameters.upperEBarPos SLAB]
+	define [EFVJutLength top pyBar stroke] : begin
+		local jutTop : Math.min VJut
+			top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
+		local jutBot : Math.min VJut
+			mix stroke ([yMidBar top pyBar] - stroke / 2) 0.5
+		return { jutTop jutBot }
+
+	define xFBarLeft : SB * 1.5
+	define [FShape] : params [top pyBar noSerif _stroke] : glyph-proc
+		define stroke : fallback _stroke : AdviceStroke2 2 3 top
+		include : VBarLeft (xFBarLeft) 0 top stroke
+		include : HBarTop (xFBarLeft - O) RightSB top stroke
+		include : HBar (xFBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
+		if (SLAB && !noSerif) : begin
+			include : LeftwardTopSerif xFBarLeft top SideJut
+			include : tagged 'serifBottom' : LeftwardBottomSerif xFBarLeft 0 SideJut
+			include : tagged 'serifBottom' : RightwardBottomSerif (xFBarLeft + HalfStroke * HVContrast) 0 MidJutSide
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardRightSerif RightSB top jutTop
+
+	define [RevFShape] : params [top pyBar noSerif] : glyph-proc
+		define stroke : AdviceStroke2 2 3 CAP
+		define xFBarRight : Width - SB * 1.5
+		include : VBarRight (xFBarRight) 0 top stroke
+		include : HBarTop SB (xFBarRight + O) top stroke
+		include : HBar (SB + [xMidBarShrink]) (xFBarRight + O) [yMidBar top pyBar] stroke
+		if (SLAB && !noSerif) : begin
+			include : RightwardTopSerif xFBarRight top SideJut
+			include : tagged 'serifBottom' : RightwardBottomSerif xFBarRight 0 SideJut
+			include : tagged 'serifBottom' : LeftwardBottomSerif (xFBarRight - HalfStroke * HVContrast) 0 MidJutSide
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardLeftSerif SB top jutTop
+
+	create-glyph 'F' 'F' : glyph-proc
+		include : MarkSet.capital
+		include : FShape CAP
+
+	create-glyph 'smcpF' 0xA730 : glyph-proc
+		include : MarkSet.e
+		include : FShape XH
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/F' 0x1D53D : glyph-proc
+		include : MarkSet.capital
+		include : union
+			VBarLeft (xFBarLeft + BBD) 0 CAP BBS
+			HBarBottom xFBarLeft (xFBarLeft + BBD) 0 BBS
+			difference
+				FShape CAP (noSerif -- true) (_stroke -- BBS)
+				Rect (CAP - BBS) BBS (xFBarLeft + BBS * HVContrast) (xFBarLeft + BBD)
+
+	turned 'turnF'     0x2132 'F'     Middle (CAP / 2)
+	turned 'turnSmcpF' 0x214E 'smcpF' Middle (XH / 2)
+
+	create-glyph 'currency/frenchFrancSign' 0x20A3 : glyph-proc
+		include : refer-glyph "F"
+		include : HOverlayBar (SB * 0.5) (SB * 3 + Stroke * HVContrast) [mix 0 XH 0.4]
+
+	create-glyph 'Fltail' 0x191 : glyph-proc
+		include [refer-glyph 'F'] AS_BASE
+		eject-contour 'serifBottom'
+		include : VerticalHook (SB * 1.5 + HalfStroke * HVContrast) 0 (-HookX) Hook

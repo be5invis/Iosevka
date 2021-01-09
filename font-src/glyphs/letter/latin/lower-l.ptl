@@ -1,0 +1,240 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-L : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markMiddle aboveMarkBot aboveMarkTop
+	glyph-block-import Letter-Latin-Lower-I : IotaShape TailedDotlessShape ItalicDotlessIShape
+	glyph-block-import Letter-Shared : CreateCommaCaronComposition
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
+
+	create-glyph 'l.hooky' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		local balance : LBalance2 * df.div * df.div
+		local middle : df.middle + balance
+		set-base-anchor 'above' middle CAP
+		set-base-anchor 'below' middle 0
+		set-base-anchor 'overlay' middle (CAP * OverlayPos)
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+		include : VBar (df.middle + balance) 0 (CAP - Stroke)
+		include : LeftwardTopSerif (df.middle + balance) CAP (LongJut * df.div)
+
+	create-glyph 'l.zshaped' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		include : VBar (df.middle) 0 (CAP - Stroke)
+		include : tagged 'serifLT' : LeftwardTopSerif (df.middle) CAP (LongJut * df.div)
+		include : tagged 'serifRB' : RightwardBottomSerif (df.middle) 0 (LongJut * df.div)
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+
+	create-glyph 'l.serifless' : glyph-proc
+		local df : DivFrame para.diversityII
+		set-width df.width
+		include : df.markSet.b
+		include : VBar (df.middle) 0 (CAP * 0.6)
+		include : VBar (df.middle) (CAP * 0.4) CAP
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+		set currentGlyph.autoRefPriority (-2)
+
+	create-glyph 'l.serifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		local balance : LBalance * df.div * df.div
+		include : VBar (df.middle + balance) 0 CAP
+		include : LeftwardTopSerif (df.middle + balance) CAP ((LongJut * df.div) - balance)
+		include : CenterBottomSerif df.middle 0 (LongJut * df.div)
+		set-base-anchor 'overlay' (df.middle + balance / 2) (CAP * OverlayPos)
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+
+	create-glyph 'l.serifedAsymmetric' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		local balance : LBalance * df.div * df.div
+		include : VBar (df.middle + balance) 0 CAP
+		include : LeftwardTopSerif (df.middle + balance) CAP
+			mix Jut ((LongJut * df.div) - balance) 0.5
+		include : CenterBottomSerif df.middle 0 (LongJut * df.div)
+		set-base-anchor 'overlay' (df.middle + balance / 2) (CAP * OverlayPos)
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+
+	create-glyph 'l.tailed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		if para.isItalic
+		: then : begin
+			include : ItalicDotlessIShape df CAP (addTopSerif -- false)
+		: else : begin
+			include : TailedDotlessShape df CAP (addTopSerif -- false)
+
+	create-glyph 'l.serifedTailed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		if para.isItalic
+		: then : begin
+			include : ItalicDotlessIShape df CAP (addTopSerif -- true)
+		: else : begin
+			include : TailedDotlessShape df CAP (addTopSerif -- true)
+
+	create-glyph 'l.flatTailed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		include : IotaShape CAP (addTopSerif -- false)
+
+	create-glyph 'l.serifedFlatTailed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		include : IotaShape CAP (addTopSerif -- true)
+
+	create-glyph 'l.phoneticLeft' : glyph-proc
+		local df : DivFrame 1
+		set-width df.width
+		include : df.markSet.b
+		define middle : SB + Stroke * HVContrast
+		include : dispiro
+			widths.center
+			flat middle CAP [heading Downward]
+			curl middle Hook
+			arcvh
+			flat (middle + Hook - HalfStroke) HalfStroke
+			curl [Math.max RightSB (middle + [Math.max HookX (LongJut * 1.05 * df.div)])] HalfStroke [heading Rightward]
+		set-base-anchor 'topright' (df.middle + RightSB - Middle) CAP
+
+	create-glyph 'l.hookyBottom' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.b
+		local middle : df.middle - LBalance2
+		set-base-anchor 'above' middle CAP
+		set-base-anchor 'below' middle 0
+		set-base-anchor 'overlay' middle (CAP * OverlayPos)
+		set-base-anchor 'topright' (middle + RightSB - Middle) CAP
+		include : VBar middle 0 CAP
+		include : RightwardBottomSerif middle 0 (LongJut * df.div)
+
+	select-variant 'l' 'l'
+	alias 'cyrl/palochka' 0x4CF 'l'
+	turned 'turnl' 0xA781 'l' Middle (XH / 2) [MarkSet.p]
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
+	create-glyph 'mathbb/l' 0x1D55D : glyph-proc
+		include : MarkSet.b
+		include : BBBarCenter Middle 0 CAP
+		include : HBarTop    (Middle - BBD / 2 - Jut) Middle                   CAP BBS
+		include : HBarBottom (Middle - BBD / 2 - Jut) (Middle + BBD / 2 + Jut) 0   BBS
+
+	CreateCommaCaronComposition 'l' 'lcaron' 0x13E
+
+	with-related-glyphs 'lSlash' 0x142 'l' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local anchor    currentGlyph.baseAnchors.overlay
+		local stretch : Math.sqrt (currentGlyph.advanceWidth / UPM * 2)
+		include : FlatSlashShape anchor.x anchor.y (0.5 * OverlayStroke) (0.8 * stretch) (0.4 * stretch)
+
+	local LDotOptions : list
+		list 'hooky'             0
+		list 'zshaped'           Stroke
+		list 'serifed'           Stroke
+		list 'serifedTailed'     Stroke
+		list 'serifless'         0
+		list 'tailed'            Stroke
+		list 'hookyBottom'       Stroke
+		list 'serifedAsymmetric' Stroke
+		list 'flatTailed'        Stroke
+		list 'serifedFlatTailed' Stroke
+
+	foreach {suffix y0} [items-of LDotOptions] : if [query-glyph ('l.' + suffix)]
+		create-glyph ('ldot.' + suffix) : glyph-proc
+			local df : DivFrame para.diversityI
+			set-width df.width
+			include [refer-glyph ('l.' + suffix)] AS_BASE
+			include : Translate (df.width / 2 - [query-glyph ('l.' + suffix)].advanceWidth / 2) 0
+			include : Translate (-DotRadius / 2) 0
+			include : RingAt [Math.max (df.middle + HalfStroke + DotRadius) (df.rightSB - DotRadius)] [mix y0 CAP 0.5] DotRadius
+
+	select-variant 'ldot' 0x140 (follow -- 'l')
+
+	create-glyph 'lrtail' 0x26D : glyph-proc
+		local df : DivFrame para.diversityI
+		include : refer-glyph "rtailBR"
+		include : Translate (df.middle + LBalance2 + HalfStroke * HVContrast) 0
+		include : refer-glyph "l.hooky"
+		include : df.markSet.if
+
+	create-glyph 'lcurlytail' 0x234 : glyph-proc
+		include : MarkSet.b
+		local fine : AdviceStroke 3.5
+		local rinner : LongJut / 2 - fine / 2
+		local m1 : Middle + HalfStroke * HVContrast
+		local x2 : mix SB m1 0.25
+		local y2 : - fine
+		include : LeftwardTopSerif Middle CAP LongJut
+		include : dispiro
+			widths.rhs
+			flat m1 CAP [heading Downward]
+			curl m1 (fine + rinner * 2)
+			CurlyTail fine rinner m1 0 (m1 + LongJut) x2 y2
+
+	create-glyph 'ltildeover' 0x26B : glyph-proc
+		local df : DivFrame para.diversityI
+		include [refer-glyph 'l.serifed'] AS_BASE ALSO_METRICS
+		include : new-glyph : glyph-proc
+			include : refer-glyph "tildeAboveOverlay"
+			include : Upright
+			include : Translate (df.middle - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
+			include : Italify
+
+	define [Belt middle] : glyph-proc
+		local fine : AdviceStroke 4.5
+		local r : XH * 0.05
+		include : dispiro
+			widths.rhs fine
+			flat middle (CapMiddle + r) [heading Leftward]
+			curl (middle - HalfStroke - r * 1.5) (CapMiddle + r)
+			archv
+			g4.down.mid (middle - HalfStroke - r * 2.5) CapMiddle [heading Downward]
+			arcvh
+			flat (middle - HalfStroke - r * 1.5) (CapMiddle - r)
+			curl (middle + HalfStroke + r * 1.5 + fine) (CapMiddle - r)
+
+	create-glyph 'lbelt' 0x26C : glyph-proc
+		local df : DivFrame para.diversityI
+		include [refer-glyph 'l.serifed'] AS_BASE ALSO_METRICS
+		include : Belt (df.middle + LBalance * df.div * df.div)
+
+	create-glyph 'lbeltrtail' 0xA78E : glyph-proc
+		local df : DivFrame para.diversityI
+		include [refer-glyph 'lrtail'] AS_BASE ALSO_METRICS
+		include : Belt (df.middle + LBalance2 * df.div * df.div)
+
+	create-glyph 'looprevesh' 0x1AA : glyph-proc
+		include : MarkSet.if
+		local fine : AdviceStroke 4
+		include : dispiro
+			widths.center fine
+			g4.down.start Middle (CAP - fine * 1.5) [heading Downward]
+			arcvh
+			g4 (Middle - fine * 1) (CAP - fine * 2.5) [heading Leftward]
+			archv
+			g4 (Middle - fine * 2) (CAP - fine * 1.5) [heading Upward]
+			arcvh
+			g4 (Middle - fine * 1) (CAP - fine * 0.5) [heading Rightward]
+			archv
+			flat Middle (CAP - fine * 1.5) [widths.heading HalfStroke HalfStroke Downward]
+			curl Middle 0 [heading Downward]
+			arcvh
+			straight.right.end (Middle + HookX) (-Hook)

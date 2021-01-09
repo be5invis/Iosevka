@@ -1,0 +1,162 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-D : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markExtend
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
+	glyph-block-import Recursive-Build : Widen
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
+
+	create-glyph 'd.toothed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : VBarRight RightSB 0 CAP
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+			include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.tailed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : RightwardTailedBar RightSB 0 CAP
+		if SLAB : begin
+			include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.toothlessCorner' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : VBarRight RightSB DToothlessRise CAP
+		if SLAB : begin
+			include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.toothlessRounded' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightRoundedShape XH RightSB CAP
+		if SLAB : begin
+			include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.motionSerifedToothed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : VBarRight RightSB 0 CAP
+		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'd.motionSerifedTailed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : RightwardTailedBar RightSB 0 CAP
+		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.motionSerifedToothlessCorner' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : VBarRight RightSB DToothlessRise CAP
+		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	create-glyph 'd.motionSerifedToothlessRounded' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightRoundedShape XH RightSB CAP
+		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+
+	select-variant 'd' 'd'
+
+	with-related-glyphs 'dcroat' 0x111 'd' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		include : HBar [mix (SB + Stroke) (RightSB - Stroke) 0.5] [mix RightSB Width 0.7] [mix XH CAP 0.45] OverlayStroke
+
+	with-related-glyphs 'dcaron' 0x10f 'd' : lambda [src sel] : glyph-proc
+		include : refer-glyph "commaAbove"
+		include : Translate (Width + (RightSB - SB) / 2 + markExtend / 2) 0
+		local f : Widen {src} 0.95 1
+		include : f.queryByName src
+		include : MarkSet.b
+
+	create-glyph 'dcurlytail' 0x221 : glyph-proc
+		local fine : AdviceStroke 4
+		local rinner : clamp (Width * 0.065) (XH * 0.05) (fine * 0.35)
+		local wide Stroke
+		local m1 : Math.min RightSB (Width - rinner * 2 - fine - OX)
+		local x2 : mix SB m1 0.5
+		local y2 : 0 - fine - rinner *  1.25
+		include : MarkSet.e
+		include : OBarRightShape XH m1
+		include : dispiro
+			widths.rhs
+			flat m1 CAP [heading Downward]
+			curl m1 (rinner * 2 + fine)
+			CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
+		if SLAB : begin
+			include : LeftwardTopSerif (m1 - Stroke * HVContrast) CAP SideJut
+
+	define yDHookTopConnect : CAP - Hook - HalfStroke
+	create-glyph 'dhooktop.toothed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : VBarRight RightSB 0 yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'dhooktop.tailed' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightShape
+		include : dispiro
+			flat RightSB yDHookTopConnect [widths.rhs.heading Stroke Downward]
+			curl RightSB (Hook * 0.5 + Stroke + O * 2)
+			g4   (RightSB + Hook * 0.25) (Stroke * 0.75 + O * 2)
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'dhooktop.toothlessCorner' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		include : VBarRight RightSB DToothlessRise yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'dhooktop.toothlessRounded' : glyph-proc
+		include : MarkSet.b
+		include : OBarRightRoundedShape XH RightSB yDHookTopConnect
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	select-variant 'dhooktop' 0x257
+
+	create-glyph 'dHookBottom' 0x256 : glyph-proc
+		include [refer-glyph 'd.toothed'] AS_BASE ALSO_METRICS
+		eject-contour 'serifRB'
+		include : refer-glyph 'rtailBR'
+
+	create-glyph 'dHookTopBottom' 0x1D91 : composite-proc
+		refer-glyph 'dhooktop.toothed'
+		refer-glyph 'rtailBR'
+
+	with-related-glyphs 'ddot' 0x1E0B 'd' : lambda [src sel] : glyph-proc
+		include : refer-glyph "dotAbove"
+		include : Translate (Width - HalfStroke) 0
+		include [refer-glyph src] AS_BASE
+
+	with-related-glyphs 'latinde' 0x18C 'd' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE
+		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
+		if SLAB : begin
+			include : DownwardLeftSerif [mix RightSB SB 0.9] CAP : Math.min VJut (0.8 * (CAP - XH))
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/d' 0x1D555 : glyph-proc
+		include : MarkSet.b
+		include : BBBarRight RightSB 0 CAP
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB (RightSB - BBD - BBS * HVContrast)
+			VBarLeft (SB + BBD + OX) 0 XH BBS
+		include : OBarRightShape
+			right -- RightSB - BBD
+			top  -- XH
+			stroke -- BBS

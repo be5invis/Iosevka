@@ -1,0 +1,235 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-A : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
+
+	define ADoubleStoreyStroke : AdviceStroke2 2 3 XH
+	define ADoubleStoreySmoothA : SmoothAOf (Smooth * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]) Width
+	define ADoubleStoreySmoothB : SmoothBOf (Smooth * [StrokeWidthBlend 0.9 0.81 ADoubleStoreyStroke]) Width
+
+	define [ADoubleStoreyHookAndBarT sink y0 stroke] : glyph-proc
+		local isMask : sink == spiro-outline
+		include : sink
+			widths.lhs stroke
+			[if isMask corner flat] RightSB y0 [heading Upward]
+			curl RightSB (XH - ADoubleStoreySmoothB)
+			hookend (XH - O)
+			g4 SB (XH - AHook)
+			if [not isMask] {} {[corner SB y0]}
+
+	define [ADoubleStoreyHookAndBar y0 _stroke] : ADoubleStoreyHookAndBarT dispiro y0
+		fallback _stroke ADoubleStoreyStroke
+	define [ADoubleStoreyHookAndBarMask y0 _stroke] : ADoubleStoreyHookAndBarT spiro-outline y0
+		fallback _stroke ADoubleStoreyStroke
+
+	define [ADoubleStoreyArcT sink kind rise stroke] : glyph-proc
+		local isMask : sink == spiro-outline
+		local bartop (XH * OverlayPos * 1.02 + stroke * 0.425)
+		local bowlArcY1 : YSmoothMidL 0 bartop SmallSmoothA SmallSmoothB
+		local bowlArcY2 : YSmoothMidR 0 bartop SmallSmoothA SmallSmoothB
+		local lowSlope  : shoulderMidSlope ShoulderFine nothing (-1)
+		local leftSlopeS : 0.1 * (Width / HalfUPM)
+		local leftSlope  : leftSlopeS - TanSlope
+		local lowMiddle : mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]
+		local barSmooth : mix SB RightSB 0.55
+		include : sink
+			widths.lhs stroke
+			[if isMask corner flat] (RightSB + O) bartop [heading Leftward]
+			curl barSmooth bartop
+			archv
+			g4 (SB + OX) (bowlArcY1 - Stroke * HVContrast * leftSlopeS) [heading {.x HVContrast .y leftSlope}]
+			arcvh
+			match kind
+				0 : list
+					g4   (lowMiddle + (-lowSlope) * stroke + CorrectionOMidX * stroke * 0.5) O [heading {.y 1 .x lowSlope}]
+					archv 16
+					straight.up.end   (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) (SmallSmoothB * 0.9) [widths.lhs ShoulderFine]
+					if [not isMask] {} {[ corner (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) bartop ]}
+				1 : list
+					g4  (Middle + CorrectionOMidX * stroke) O
+					g4  RightSB rise
+				2 : list
+					g4  (Middle + CorrectionOMidX * stroke) O
+					archv
+					flat RightSB bowlArcY2
+					curl RightSB ([Math.max bowlArcY2 rise] + stroke * TanSlope + 1) [heading Upward]
+
+	define [ADoubleStoreyArc kind rise _sw] : ADoubleStoreyArcT dispiro kind rise
+		fallback _sw ADoubleStoreyStroke
+	define [ADoubleStoreyArcMask kind rise _sw] : ADoubleStoreyArcT spiro-outline kind rise
+		fallback _sw ADoubleStoreyStroke
+
+	create-glyph 'a.doubleStorey' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar 0
+			ADoubleStoreyArc        0
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.doubleStoreyMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar 0
+			ADoubleStoreyArc        0
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/a' 0x1D552 : glyph-proc
+		include : MarkSet.e
+		include : ADoubleStoreyHookAndBar 0 BBS
+		include : intersection
+			ADoubleStoreyHookAndBarMask 0
+			VBarRight (RightSB - BBD) 0 XH BBS
+		include : difference
+			union
+				ADoubleStoreyArc 0 0 BBS
+				intersection
+					ADoubleStoreyArcMask 0 0 BBS
+					VBarLeft (SB + OX + BBD) 0 XH BBS
+			Rect XH 0 (RightSB - BBD) Width
+		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
+
+	create-glyph 'a.doubleStoreyTailed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar (XH - ADoubleStoreySmoothB + O)
+			ADoubleStoreyArc        0
+			RightwardTailedBar RightSB 0 (XH - ADoubleStoreySmoothB)
+
+	create-glyph 'a.doubleStoreyToothlessCorner' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar DToothlessRise
+			ADoubleStoreyArc        1 DToothlessRise
+
+	create-glyph 'a.doubleStoreyToothlessRounded' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : union
+			ADoubleStoreyHookAndBar ADoubleStoreySmoothA
+			ADoubleStoreyArc        2 ADoubleStoreySmoothA
+
+	create-glyph 'a.singleStorey' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarRightShape
+		include : VBarRight RightSB 0 XH
+		if SLAB : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarRightShape
+		include : VBarRight RightSB 0 XH
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyTailed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarRightShape
+		include : RightwardTailedBar RightSB 0 XH
+
+	create-glyph 'a.singleStoreyEarlessCorner' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : VBarRight RightSB 0 (XH - DToothlessRise)
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyEarlessCornerMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : VBarRight RightSB 0 (XH - DToothlessRise)
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyEarlessCornerTailed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : RightwardTailedBar RightSB 0 (XH - DToothlessRise)
+
+	create-glyph 'a.singleStoreyEarlessRounded' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftRoundedShape XH SB XH
+		include : FlipAround Middle (XH / 2)
+		if SLAB : begin
+			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyEarlessRoundedMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftRoundedShape XH SB XH
+		include : FlipAround Middle (XH / 2)
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+	create-glyph 'a.singleStoreyEarlessRoundedTailed' : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
+		include : FlipAround Middle (XH / 2)
+		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+
+	select-variant 'a' 'a'
+	alias 'cyrl/a' 0x430 'a'
+
+	create-glyph 'largescripta' 0x2C6D : glyph-proc
+		include : MarkSet.capital
+		include : union
+			OBarRightShape CAP
+			spiro-outline
+				corner RightSB 0
+				corner (RightSB - Stroke * HVContrast) 0
+				corner (RightSB - Stroke * HVContrast) (CAP - Stroke / 2)
+				corner RightSB (CAP - O)
+
+	create-glyph 'scripta' 0x0251 : glyph-proc
+		include : MarkSet.e
+		include : union
+			OBarRightShape
+			spiro-outline
+				corner RightSB 0
+				corner (RightSB - Stroke * HVContrast) 0
+				corner (RightSB - Stroke * HVContrast) (XH - Stroke / 2)
+				corner RightSB (XH - O)
+		if SLAB : include : tagged 'serifRB' RightwardBottomSerif RightSB 0 SideJut
+
+	turned 'turnlargescripta' 0x2C70 'largescripta' Middle (CAP / 2)
+	turned 'turnscripta' 0x252 'scripta' Middle (XH / 2)
+
+	create-glyph 'invLatinAlpha' 0xAB64 : glyph-proc
+		include : MarkSet.e
+		include : union
+			OBarRightShape
+			spiro-outline
+				corner RightSB XH
+				corner (RightSB - Stroke * HVContrast) XH
+				corner (RightSB - Stroke * HVContrast) (Stroke / 2)
+				corner RightSB O
+		if SLAB : include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	turned 'turna' 0x250 'a.doubleStorey' Middle (XH / 2)
+
+	create-glyph 'artail' 0x1D8F : glyph-proc
+		include [refer-glyph 'a.doubleStorey'] AS_BASE
+		eject-contour 'serifRB'
+		include : refer-glyph "rtailBR"

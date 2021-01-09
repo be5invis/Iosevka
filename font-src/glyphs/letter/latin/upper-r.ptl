@@ -1,0 +1,191 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-R : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY PRotundaShape BBPShape PShapeOutline
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	### R and CyrYa
+	glyph-block-export RLegShape RLegTerminalX
+	define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVContrast
+	define [RSlabExtraShift slab sw] : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
+	define [RLegDiagCor top bottom left right extraShift sw] : DiagCor (top - bottom) (right - left - extraShift) 0 sw
+	define [RLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
+		local xRightBottom : RLegTerminalX straight right sw
+		if straight : do
+			local shift : RSlabExtraShift slab sw
+			include : dispiro
+				widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
+				corner (left + extraShift + shift / 2) top [heading Downward]
+				corner (xRightBottom + shift) bottom [heading Downward]
+			if slab : begin
+				include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+		: else : begin
+			include : intersection
+				Rect top bottom (-Width) (2 * Width)
+				dispiro
+					widths.center sw
+					g4.up.start xRightBottom bottom [heading Upward]
+					quadcontrols 0 0.4 8
+					g4 left top
+			if slab : begin
+				include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
+
+	define [RevRLegTerminalX straight left sw] : left + [if straight (OX * 2) 0] + sw / 2 * HVContrast
+	define [RevRLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
+		local xLeftBottom : RevRLegTerminalX straight left sw
+		if straight : do
+			local shift : RSlabExtraShift slab sw
+			include : dispiro
+				widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
+				corner (right + extraShift + shift / 2) top [heading Downward]
+				corner (xLeftBottom + shift) bottom [heading Downward]
+			if slab : begin
+				include : LeftwardBottomSerif (xLeftBottom + shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+		: else : begin
+			include : intersection
+				Rect top 0 (-Width) (2 * Width)
+				dispiro
+					widths.center sw
+					g4.up.start xLeftBottom bottom [heading Upward]
+					quadcontrols 0 0.4 8
+					g4 right top
+			if slab : begin
+				include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
+
+	define [RBarPos charTop slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / charTop) PShape.BarPos
+	define [RBarTop p charTop stroke straightBar slab] : (charTop - Stroke) * [fallback p 1] * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
+
+	define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
+		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
+		local right (RightSB - O - [if SLAB (Jut / 8) 0])
+		include : RLegShape [RBarTop 1 top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
+
+	define [RRotundaShape] : params [straightBar top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1]] : glyph-proc
+		local legTop : RBarTop pBar top Stroke straightBar SLAB
+		local right (RightSB - O - [if SLAB (Jut / 8) 0])
+		local cor : RLegDiagCor legTop 0 endX right 0 Stroke
+		local endX1 : endX - [if straightBar (HalfStroke * cor * HVContrast) HalfStroke] + [if straightBar [RSlabExtraShift SLAB Stroke] 0]
+		include : PRotundaShape top (mul -- mul) (bp -- (pBar * [RBarPos top false])) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
+		include : RLegShape legTop 0 endX right top SLAB straightBar Stroke 0
+
+	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
+		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
+		local left (SB + O + [if SLAB (Jut / 8) 0])
+		include : RevRLegShape [RBarTop 1 top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		create-derived 'R.straight' : glyph-proc
+			include : RShape true CAP
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP SLAB
+		create-derived 'Rrotunda.straight' : glyph-proc
+			include : RRotundaShape true CAP (hook -- Hook) (pBar -- 0.9)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP 0
+		create-derived 'R.curly' : glyph-proc
+			include : RShape false CAP
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP SLAB
+		create-derived 'Rrotunda.curly' : glyph-proc
+			include : RRotundaShape false CAP (hook -- Hook) (pBar -- 0.9)
+			set-base-anchor 'overlay'
+				SB + Stroke * HVContrast
+				PBarPosY CAP Stroke : RBarPos CAP 0
+
+	define [IndianRupeeShape suffix straightBar] : glyph-proc
+		define bp : RBarPos CAP 0
+		include : intersection
+			Rect CAP 0 SB Width
+			WithTransform [Translate (-Width / 8) 0]
+				PShape CAP (bp -- bp) (slab -- false) (withBar -- false)
+		local right : RightSB - O - [if straightBar 0 (Width / 16)]
+		include : RLegShape [RBarTop 1 CAP Stroke straightBar false] 0 (Width * 0.375) right CAP false straightBar Stroke 0
+
+		define sw : AdviceStroke2 2 4 CAP
+		include : HBarTop SB RightSB CAP sw
+		include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
+
+	create-glyph 'currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' true
+	create-glyph 'currency/indianRupeeSign.curly' : IndianRupeeShape 'curly' false
+
+	create-glyph : glyph-proc
+		include : MarkSet.e
+		create-derived 'smcpR.straight' : glyph-proc
+			include : RShape true XH
+		create-derived 'rrotunda.straight' : glyph-proc
+			include : RRotundaShape true XH (hook -- AHook) (endX -- [mix Middle RightSB 0.125])
+		create-derived 'smcpR.curly' : glyph-proc
+			include : RShape false XH
+		create-derived 'rrotunda.curly' : glyph-proc
+			include : RRotundaShape false XH (hook -- AHook) (endX -- [mix Middle RightSB 0.125])
+
+	select-variant 'R' 'R'
+	select-variant 'Rrotunda' 0xA75A (follow -- 'R')
+	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'R')
+	select-variant 'smcpR' 0x280 (follow -- 'R')
+	select-variant 'rrotunda' 0xA75B (follow -- 'R')
+
+	with-related-glyphs 'Rbar' 0x24C 'R' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP SLAB] + Stroke * 0.25)
+
+	with-related-glyphs 'turnSmcpR' 0x1D1A 'smcpR' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : FlipAround Middle (XH / 2)
+
+	create-glyph : glyph-proc
+		include : MarkSet.if
+		local top : CAP * 0.85
+		local bp 0.45
+		include : PShape top (mul -- 1) (bp -- bp)
+		include : VBarLeft SB (top - 1) CAP
+
+		local right (RightSB - O - [if SLAB (Jut / 8) 0])
+		create-derived 'Yr.straight'
+			RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB true Stroke 0
+		create-derived 'Yr.curly'
+			RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB false Stroke 0
+
+	select-variant 'Yr' 0x1A6 (follow -- 'R')
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		create-derived 'cyrl/Ya.straight' : RevRShape true CAP
+		create-derived 'cyrl/Ya.curly' : RevRShape false CAP
+	create-glyph : glyph-proc
+		include : MarkSet.e
+		create-derived 'cyrl/ya.straight' : RevRShape true XH
+		create-derived 'cyrl/ya.curly' : RevRShape false XH
+
+	select-variant 'cyrl/Ya' 0x42F (follow -- 'R')
+	select-variant 'cyrl/ya' 0x44F (follow -- 'R')
+
+	turned 'invsmcpR.straight' nothing 'cyrl/ya.straight' Middle (XH / 2)
+	turned 'invsmcpR.curly'    nothing 'cyrl/ya.curly'    Middle (XH / 2)
+	select-variant 'invsmcpR' 0x281 (follow -- 'R')
+
+	create-glyph 'mathbb/R' 0x211D : glyph-proc
+		define [SingleLeg] : RLegShape ((CAP - BBS) * HBarPos) 0 Middle (RightSB - O) CAP false true BBS (BBD / 2)
+		define terminalX : RLegTerminalX true (RightSB - O) BBS
+		include : MarkSet.capital
+		include : BBPShape (mul -- 1) (overshoot -- O)
+		include : difference
+			union
+				SingleLeg
+				new-glyph : glyph-proc
+					include : SingleLeg
+					include : Translate (0 - BBD) 0
+				HBarBottom (terminalX - BBD) (terminalX - BBS / 2) 0 BBS
+			PShapeOutline CAP (sw -- BBS) (mul -- 1) (overshoot -- O) (offset -- 1)

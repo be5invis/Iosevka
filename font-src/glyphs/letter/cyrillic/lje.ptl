@@ -1,0 +1,46 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Lje : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Cyrillic-Yeri : CyrYeriShape
+
+	define [CyrLjeShape top df] : glyph-proc
+		local rightSB : df.width - df.leftSB
+		local l : df.leftSB + O
+		local r : rightSB - O
+		local middle : df.width / 2
+		local xlefttop : mix l r 0.075
+		local jut : Jut * 0.72
+		set-width df.width
+		include : LegShape
+			ztop -- [Point.fromXY Point.Type.Corner xlefttop top]
+			zbot -- [Point.fromXY Point.Type.Corner [mix l 0 [if SLAB 1 0.75]] 0]
+			xb -- [mix l r 0.025]
+			fine -- MVertStroke
+		include : CyrYeriShape top
+			left -- (middle - MVertStroke / 2 * HVContrast)
+			right -- (r - O)
+			stroke -- MVertStroke
+			jut -- jut
+		include : HBarTop xlefttop middle top
+		if SLAB : begin
+			include : LeftwardTopSerif xlefttop top (jut - MVertStroke / 2 * HVContrast)
+
+	create-glyph 'cyrl/Lje' 0x409 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrLjeShape CAP df
+
+	create-glyph 'cyrl/lje' 0x459 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrLjeShape XH df

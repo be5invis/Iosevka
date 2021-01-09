@@ -1,0 +1,204 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-G : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend FlatHookDepth
+
+	create-glyph 'g.doubleStorey' : glyph-proc
+		include : MarkSet.p
+		local obot : XH * DesignParameters.gBarPos - O - Stroke * 0.4
+		include : OShape XH obot SB (RightSB - 0.3 * SB)
+
+		local gleftx  ([mix 0 SB 0.85] + OX)
+		local grightx ([mix Width RightSB 0.825] - OX)
+		local groundy : Math.round : [mix Descender (XH * DesignParameters.gBarPos) 0.64] + HalfStroke
+		local gtipy : [mix groundy (obot + Stroke + O) 1.005] - Stroke * CThin
+		include : dispiro
+			g4.left.start [mix SB RightSB 0.4] gtipy [widths 0 (Stroke * CThin)]
+			g4 ([mix SB RightSB 0.0575] + Stroke * 0.85) [mix groundy gtipy 0.5] [widths.rhs (Stroke * [mix CThin 1 0.5])]
+			flat [mix SB RightSB 0.435] groundy [widths 0 Stroke]
+			curl [mix RightSB SB 0.435] groundy
+			archv 4
+			g4 grightx [mix (Descender + O) groundy (1.06 * SmallSmoothA / (SmallSmoothA + SmallSmoothB))]
+			arcvh
+			g4 (Middle + CorrectionOMidS) (Descender + O)
+			archv
+			g4 gleftx [mix (Descender + O) groundy (1.06 * SmallSmoothB / (SmallSmoothA + SmallSmoothB))]
+			arcvh
+			g4 [mix SB RightSB 0.435] groundy [heading Rightward]
+		local gm : mix SB (RightSB - 0.3 * SB) 0.5
+		include : spiro-outline
+			corner (RightSB + 0.25 * SB - OX) XH
+			corner (RightSB + 0.25 * SB - OX) (XH - Stroke)
+			corner gm  (XH - Stroke - O)
+			corner gm  XH
+
+		set-base-anchor 'overlay' Middle [mix (Descender + O) groundy 0.5]
+
+	create-glyph 'g.openDoubleStorey' : glyph-proc
+		include : MarkSet.p
+		local obot : XH * DesignParameters.gBarPos - O - Stroke * 0.4
+		include : OShape XH obot SB (RightSB - 0.3 * SB)
+
+		local gleftx  ([mix 0 SB 0.85] + OX)
+		local grightx ([mix Width RightSB 0.825] - OX)
+		local groundy : Math.round : [mix Descender (XH * DesignParameters.gBarPos) 0.64] + HalfStroke
+		local gtipy : [mix groundy (obot + Stroke + O) 1.005] - Stroke * CThin
+		include : dispiro
+			g4.left.start [mix SB RightSB 0.4] gtipy [widths 0 (Stroke * CThin)]
+			g4 ([mix SB RightSB 0.0575] + Stroke * 0.85) [mix groundy gtipy 0.5] [widths.rhs (Stroke * [mix CThin 1 0.5])]
+			flat [mix SB RightSB 0.435] groundy [widths 0 Stroke]
+			curl [mix RightSB SB 0.435] groundy
+			archv 4
+			g4 grightx [mix (Descender + O) groundy (1.06 * SmallSmoothA / (SmallSmoothA + SmallSmoothB))]
+			hookend (Descender + O)
+			g4 gleftx [mix (Descender + O) groundy (1.06 * SmallSmoothB / (SmallSmoothA + SmallSmoothB))]
+		local gm : mix SB (RightSB - 0.3 * SB) 0.5
+		include : spiro-outline
+			corner (RightSB + 0.25 * SB - OX) XH
+			corner (RightSB + 0.25 * SB - OX) (XH - Stroke)
+			corner gm  (XH - Stroke - O)
+			corner gm  XH
+
+		set-base-anchor 'overlay' Middle [mix (Descender + O) groundy 0.5]
+
+	define [SmallGSingleStoreyShapeHookT sink offset sw] : sink
+		widths.rhs sw
+		[if (sink == spiro-outline) corner flat] (RightSB - offset) XH [heading Downward]
+		curl (RightSB - offset) (Descender + SmallSmoothA)
+		hookend (Descender + O + offset)
+		g4 (SB + offset) (Descender + SHook)
+		if (sink == spiro-outline) {[corner SB XH]} {}
+
+	create-glyph 'g.singleStorey' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarRightShape
+		include : SmallGSingleStoreyShapeHookT dispiro 0 Stroke
+		if SLAB : include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	create-glyph 'g.singleStoreyMotionSerifed' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarRightShape
+		include : SmallGSingleStoreyShapeHookT dispiro 0 Stroke
+		include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	alias 'scriptg' 0x261 'g.singleStorey'
+	alias 'cyrl/de.SRB' null 'g.singleStorey'
+
+	create-glyph 'g.singleStoreyEarlessCorner' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : dispiro
+			widths.rhs
+			flat RightSB (XH - DToothlessRise) [heading Downward]
+			curl RightSB (Descender + SmallSmoothA)
+			hookend (Descender + O)
+			g4 SB (Descender + SHook)
+
+	create-glyph 'g.singleStoreyEarlessRounded' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
+		include : FlipAround Middle (XH / 2)
+		include : dispiro
+			widths.rhs
+			flat RightSB (XH - SmallSmoothB) [heading Downward]
+			curl RightSB (Descender + SmallSmoothA)
+			hookend (Descender + O)
+			g4 SB (Descender + SHook)
+
+	define [SmallGSingleStoreyFlatHookShape df y0] : begin
+		local hd : FlatHookDepth df (9 / 8)
+		local xTerminal : Math.min (df.rightSB - hd.x - 0.1) : mix df.leftSB df.rightSB (1 / 5)
+		return : dispiro
+			widths.rhs
+			flat df.rightSB y0 [heading Downward]
+			curl df.rightSB (Descender + hd.y)
+			arcvh.superness DesignParameters.tightHookSuperness
+			flat (df.rightSB - hd.x) Descender
+			curl xTerminal Descender [heading Leftward]
+
+	create-glyph 'g.singleStoreyFlatHook' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarRightShape
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] XH
+		if SLAB : include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	create-glyph 'g.singleStoreyMotionSerifedFlatHook' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarRightShape
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] XH
+		include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+
+	create-glyph 'g.singleStoreyEarlessCornerFlatHook' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		include : FlipAround Middle (XH / 2)
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] (XH - DToothlessRise)
+
+	create-glyph 'g.singleStoreyEarlessRoundedFlatHook' : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
+		include : FlipAround Middle (XH / 2)
+		include : SmallGSingleStoreyFlatHookShape [DivFrame 1] (XH - SmallSmoothB)
+
+	select-variant 'g' 'g'
+	turned 'turng' 0x1D77 'g' Middle [mix Descender XH 0.5]
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/g' 0x1D558 : glyph-proc
+		include : MarkSet.p
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB (RightSB - BBD - BBS * HVContrast)
+			VBarLeft (SB + BBD + OX) 0 XH BBS
+		include : OBarRightShape
+			right -- RightSB - BBD
+			top  -- XH
+			stroke -- BBS
+		include : SmallGSingleStoreyShapeHookT dispiro 0 BBS
+		include : HBarTop (RightSB - BBD) RightSB XH BBS
+		include : intersection
+			VBarRight (RightSB - BBD) Descender XH BBS
+			SmallGSingleStoreyShapeHookT spiro-outline 1 BBS
+
+	create-glyph 'scriptghooktop' 0x260 : glyph-proc
+		include [refer-glyph 'scriptg'] AS_BASE
+		eject-contour 'serifRT'
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook) nothing O
+
+	do
+		define l : mix 0 SB 0.3
+		define r : mix Width RightSB 0.3
+		define bwDoubleStorey : Math.min [AdviceStroke 5] (0.5 / 3 * (CAP - Stroke * 4))
+		define bwSingleStorey : AdviceStroke2 2 4 XH
+		define [derive suffix bw] : create-glyph "gbar.\(suffix)" : glyph-proc
+			include [refer-glyph "g.\(suffix)"] AS_BASE
+			include : HBar l r [query-glyph "g.\(suffix)"].baseAnchors.overlay.y bw
+
+		derive 'doubleStorey'                       bwDoubleStorey
+		derive 'openDoubleStorey'                   bwDoubleStorey
+		derive 'singleStorey'                       bwSingleStorey
+		derive 'singleStoreyMotionSerifed'          bwSingleStorey
+		derive 'singleStoreyEarlessCorner'          bwSingleStorey
+		derive 'singleStoreyEarlessRounded'         bwSingleStorey
+		derive 'singleStoreyFlatHook'               bwSingleStorey
+		derive 'singleStoreyMotionSerifedFlatHook'  bwSingleStorey
+		derive 'singleStoreyEarlessCornerFlatHook'  bwSingleStorey
+		derive 'singleStoreyEarlessRoundedFlatHook' bwSingleStorey
+
+		select-variant "gbar" 0x1E5 (follow -- 'g')

@@ -1,0 +1,57 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-U : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-export UShape
+
+	define [UArcT] : params [sink df top bottom [stroke Stroke] [sma SmoothA] [smb SmoothB] [offset 0]] : sink
+		widths.lhs stroke
+		[if (sink == spiro-outline) corner flat] (df.leftSB + offset) top [heading Downward]
+		curl (df.leftSB + offset) (bottom + smb + offset)
+		arcvh
+		g4   (df.middle + CorrectionOMidX * stroke) (bottom + O + offset)
+		archv
+		flat (df.rightSB - offset) (bottom + sma + offset)
+		[if (sink == spiro-outline) corner curl] (df.rightSB - offset) top [heading Upward]
+
+	define [UShape] : params [df top bottom [stroke Stroke] [sma SmoothA] [smb SmoothB] [offset 0] oper] : glyph-proc
+		include : UArcT dispiro
+			df -- df
+			top -- top
+			bottom -- bottom
+			stroke -- stroke
+			sma -- sma
+			smb -- smb
+			offset -- offset
+		if [not oper] : include : AIVSerifs top
+
+	create-glyph 'U' 'U' : glyph-proc
+		include : MarkSet.capital
+		include : UShape [DivFrame 1] CAP 0
+		set-base-anchor 'trailing' Middle 0
+
+	create-glyph 'smcpU' 0x1D1C : glyph-proc
+		include : MarkSet.e
+		include : UShape [DivFrame 1] XH 0
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/U' 0x1D54C : glyph-proc
+		include : MarkSet.capital
+		include : HBarTop SB (SB + BBD) CAP BBS
+		include : UShape [DivFrame 1] CAP 0
+			stroke -- BBS
+			oper -- true
+		include : intersection
+			VBarLeft (SB + BBD) 0 CAP BBS
+			UArcT spiro-outline [DivFrame 1] CAP 0
+				stroke -- BBS
+				oper -- true
+				offset -- 1

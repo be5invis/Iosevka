@@ -1,0 +1,33 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Rhotic : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markFine
+
+	glyph-block-export ErTail
+	define [ErTail left w dohook] : glyph-proc
+		local right Width
+		local mid : mix left right 0.5
+		local rise : (Width - left) * 0.3
+		local sw : fallback w (markFine * 2)
+		include : dispiro
+			widths.rhs sw
+			g2 (left - sw / 2 * HVContrast) (XH * 0.5)
+			g2 (mid - sw * HVContrast) (XH * 0.5 + rise)
+		include : dispiro
+			widths.rhs sw
+			flat mid (XH * 0.5 + rise) [heading Downward]
+			curl mid (XH * 0.5 + [if dohook 0 (rise - 1)]) [heading Downward]
+			if dohook {[hookend (XH * 0.5 - rise)]} {[arcvh]}
+			g4 (right - [if dohook (markFine * 2) 0]) (XH * 0.5 - [if dohook (rise * 0.5) rise]) [if dohook nothing [heading Rightward]]
+			#if dohook {[hookend (XH * 0.5 - rise)] [g4 right (XH * 0.5)]} {}
+
+	create-glyph 'rhotichook' 0x2DE : glyph-proc
+		include : ErTail (-Stroke * HVContrast) Stroke true

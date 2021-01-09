@@ -475,6 +475,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `K`:
     + `capital-k = 'straight'`, `cv07 = 1`: `K` with standard shape (default).
     + `capital-k = 'curly'`, `cv07 = 2`: Slightly curly `K`, like Iosevka 2.x.
+  - Styles for `L`:
+    + `capital-l = 'standard'`, `cv63 = 1`: Standard `L` (default).
+    + `capital-l = 'motion-serifed'`, `cv63 = 2`: Standard `L` with motion serifs.
   - Styles for `M`:
     + `capital-m = 'hanging'`, `cv08 = 1`: `M` with middle being hanging off baseline (default).
     + `capital-m = 'flat-bottom'`, `cv08 = 2`: `M` with middle aligned to baseline.
@@ -482,12 +485,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-q = 'taily'`, `cv09 = 1`: `Q` with a curly tail (default).
     + `capital-q = 'straight'`, `cv09 = 2`: `Q` with a straight tail like in the old versions.
     + `capital-q = 'crossing'`, `cv09 = 3`: `Q` with a tail crossing the ring.
+    + `capital-q = 'vertical-crossing'`, `cv09 = 4`: `Q` with a vertical tail crossing the ring.
   - Styles for `R`:
     + `capital-r = 'straight'`, `cv10 = 1`: Standard, straight-leg `R` (default).
     + `capital-r = 'curly'`, `cv10 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
   - Styles for `Y`:
     + `capital-y = 'straight'`, `cv11 = 1`: Standard, straight `Y` (default).
     + `capital-y = 'curly'`, `cv11 = 2`: Slightly curly `Y`, like Iosevka 2.x.
+  - Styles for `Z`:
+    + `capital-z = 'standard'`, `cv64 = 1`: Standard `Z` (default).
+    + `capital-z = 'with-crossbar'`, `cv64 = 2`: Standard `Z` with a diagonal cross bar for better dsitinction with `2`.
+    + `capital-z = 'with-horizontal-crossbar'`, `cv64 = 3`: Standard `Z` with a horizontal cross bar for better dsitinction with `2`.
+    + `capital-z = 'curly'`, `cv64 = 4`: Curly `Z`.
+    + `capital-z = 'curly-with-crossbar'`, `cv64 = 5`: Curly `Z` with a diagonal cross bar for better dsitinction with `2`.
+    + `capital-z = 'curly-with-horizontal-crossbar'`, `cv64 = 6`: Curly `Z` with a horizontal cross bar for better dsitinction with `2`.
+    + `capital-z = 'motion-serifed'`, `cv64 = 7`: Standard `Z` with motion serifs.
+    + `capital-z = 'curly-motion-serifed'`, `cv64 = 8`: Curly `Z` with motion serifs.
   - Styles for `a`:
     + `a = 'doublestorey'`, `cv12 = 1`: Double-storey `a` (default for Upright).
     + `a = 'doublestorey-tailed'`, `cv12 = 2`: Double-storey `a` with curly tail.
@@ -499,15 +512,26 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `a = 'singlestorey-earless-corner-tailed'`, `cv12 = 8`: Earless (cornered top-right) single-storey `a` with curly tail.
     + `a = 'singlestorey-earless-rounded'`, `cv12 = 9`: Earless (rounded top-right) single-storey `a`.
     + `a = 'singlestorey-earless-rounded-tailed'`, `cv12 = 10`: Earless (rounded top-right) single-storey `a` with curly tail.
+    + `a = 'doublestorey-motion-serifed'`, `cv12 = 11`: Double-storey `a` with motion serifs.
+    + `a = 'singlestorey-motion-serifed'`, `cv12 = 12`: Single-storey `a` with motion serifs.
+    + `a = 'singlestorey-earless-corner-motion-serifed'`, `cv12 = 13`: Earless (cornered top-right) single-storey `a` with motion serifs.
+    + `a = 'singlestorey-earless-rounded-motion-serifed'`, `cv12 = 14`: Earless (rounded top-right) single-storey `a` with motion serifs.
   - Styles for `b`:
     + `b = 'toothed'`, `cv13 = 1`: `b` with bottom-left tooth (default).
     + `b = 'toothless-corner'`, `cv13 = 2`: `b` without bottom-left tooth, with a corner transition.
     + `b = 'toothless-rounded'`, `cv13 = 3`: `b` without bottom-left tooth, with a rounded transition.
+    + `b = 'motion-serifed-toothed'`, `cv13 = 4`: `b` with motion serif, and with bottom-left tooth.
+    + `b = 'motion-serifed-toothless-corner'`, `cv13 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
+    + `b = 'motion-serifed-toothless-rounded'`, `cv13 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
   - Styles for `d`:
     + `d = 'toothed'`, `cv14 = 1`: `d` with bottom-right tooth (default for Upright).
     + `d = 'toothless-corner'`, `cv14 = 2`: `d` without bottom-right tooth, with a corner transition.
     + `d = 'toothless-rounded'`, `cv14 = 3`: `d` without bottom-right tooth, with a rounded transition.
     + `d = 'tailed'`, `cv14 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
+    + `d = 'motion-serifed-toothed'`, `cv14 = 5`: `d` motion serif, and with bottom-right tooth.
+    + `d = 'motion-serifed-toothless-corner'`, `cv14 = 6`: `d` motion serif, and without bottom-right tooth, with a corner transition.
+    + `d = 'motion-serifed-toothless-rounded'`, `cv14 = 7`: `d` motion serif, and without bottom-right tooth, with a rounded transition.
+    + `d = 'motion-serifed-tailed'`, `cv14 = 8`: `d` motion serif, and with a slightly tail bottom-right tail.
   - Styles for `e`:
     + `e = 'flat-crossbar'`, `cv59 = 1`: `e` with flat crossbar (default for Upright).
     + `e = 'rounded'`, `cv59 = 2`: `e` with more rounded shape (default for Italic).
@@ -537,6 +561,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `g = 'singlestorey-flat-hook'`, `cv16 = 6`: Single-storey `g` with flat terminal hook.
     + `g = 'singlestorey-earless-corner-flat-hook'`, `cv16 = 7`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
     + `g = 'singlestorey-earless-rounded-flat-hook'`, `cv16 = 8`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
+    + `g = 'singlestorey-motion-serifed'`, `cv16 = 9`: Single-storey `g` with motion serifs.
+    + `g = 'singlestorey-motion-serifed-flat-hook'`, `cv16 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
   - Styles for `h`:
     + `h = 'straight'`, `cv17 = 1`: `h` with straight ending (default).
     + `h = 'tailed'`, `cv17 = 2`: `h` with curly tailed ending.
@@ -563,6 +589,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `k = 'straight'`, `cv20 = 1`: `k` with standard shape (default for Upright).
     + `k = 'curly'`, `cv20 = 2`: Slightly curly `k`, like Iosevka 2.x.
     + `k = 'cursive'`, `cv20 = 3`: `k` with a cursive loop (default for Italic).
+    + `k = 'motion-serifed-straight'`, `cv20 = 4`: `k` with motion serifs.
+    + `k = 'motion-serifed-curly'`, `cv20 = 5`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
+    + `k = 'motion-serifed-cursive'`, `cv20 = 6`: `k` with a cursive loop and motion serifs.
   - Styles for `l`:
     + `l = 'serifed'`, `cv21 = 1`: Serifed `l` (default for Upright).
     + `l = 'serifless'`, `cv21 = 2`: `l` like a straight line.
@@ -616,6 +645,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-corner-tailed'`, `cv25 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
     + `q = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left) single-storey `q`.
     + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
+    + `q = 'motion-serifed-straight'`, `cv25 = 7`: `q` with straight bar and motion serifs.
+    + `q = 'motion-serifed-tailed'`, `cv25 = 8`: `q` with tail and motion serifs.
   - Styles for `r`:
     + `r = 'serifless'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
     + `r = 'serifed'`, `cv26 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
@@ -656,13 +687,15 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `y = 'cursive'`, `cv32 = 4`: Cursive-like `y` (default for Italic).
     + `y = 'cursive-flat-hook'`, `cv32 = 5`: Cursive-like `y` with flat terminal hook.
     + `y = 'curly-turn'`, `cv32 = 6`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
-  - Styles for `z`, `Z`:
-    + `z = 'standard'`, `cv33 = 1`: Standard `Z` and `z` (default).
-    + `z = 'with-crossbar'`, `cv33 = 2`: Standard `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
-    + `z = 'with-horizontal-crossbar'`, `cv33 = 3`: Standard `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
-    + `z = 'curly'`, `cv33 = 4`: Curly `Z` and `z`.
-    + `z = 'curly-with-crossbar'`, `cv33 = 5`: Curly `Z` and `z` with a diagonal cross bar for better dsitinction with `2`.
-    + `z = 'curly-with-horizontal-crossbar'`, `cv33 = 6`: Curly `Z` and `z` with a horizontal cross bar for better dsitinction with `2`.
+  - Styles for `z`:
+    + `z = 'standard'`, `cv33 = 1`: Standard `z` (default).
+    + `z = 'with-crossbar'`, `cv33 = 2`: Standard `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'with-horizontal-crossbar'`, `cv33 = 3`: Standard `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'curly'`, `cv33 = 4`: Curly `z`.
+    + `z = 'curly-with-crossbar'`, `cv33 = 5`: Curly `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'curly-with-horizontal-crossbar'`, `cv33 = 6`: Curly `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'motion-serifed'`, `cv33 = 7`: Standard `z` with motion serifs.
+    + `z = 'curly-motion-serifed'`, `cv33 = 8`: Curly `z` with motion serifs.
   - Styles for `ß` (Eszet):
     + `eszet = 'traditional'`, `cv34 = 1`: Traditional, Fraktur-like Eszet (`ß`).
     + `eszet = 'sulzbacher'`, `cv34 = 2`: More modern, beta-like Eszet (`ß`) (default).

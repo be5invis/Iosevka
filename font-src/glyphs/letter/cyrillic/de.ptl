@@ -1,0 +1,62 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-De : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-X : HalfXStrand
+
+	define [CyrDeShape top] : glyph-proc
+		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * 0.075)
+		local cutleft SB
+		local cutright RightSB
+		local topleft : mix cutleft cutright 0.15
+		include : HBarBottom (cutleft - descenderOverflow) (cutright + descenderOverflow) 0
+		include : VBarRight cutright 0 top
+		include : HalfXStrand false false (topleft + Stroke * HVContrast) top (cutleft + HalfStroke * HVContrast * 0.8) HalfStroke 0.1 0.75 0.5
+		include : VBarLeft (cutleft - descenderOverflow) (-LongJut + HalfStroke) 0
+		include : VBarRight (cutright + descenderOverflow) (-LongJut + HalfStroke) 0
+
+		if SLAB : then
+			include : dispiro
+				widths.rhs
+				flat (topleft - descenderOverflow) top
+				curl (cutright + descenderOverflow) top
+		: else
+			include : HBarTop topleft cutright top
+
+	create-glyph 'cyrl/De' 0x414 : glyph-proc
+		include : MarkSet.if
+		include : CyrDeShape CAP
+
+	create-glyph 'cyrl/de.upright' : glyph-proc
+		include : MarkSet.e
+		include : CyrDeShape XH
+
+	create-glyph 'cyrl/de.italic' : glyph-proc
+		include : MarkSet.b
+		include : dispiro
+			widths.lhs (Stroke * CThinB)
+			flat (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) SmallSmoothA
+			curl (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) (XH - SmallSmoothB)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP * 0.7 - O) [widths.lhs]
+			archv
+			flat (SB + OX) (XH - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4 (Middle + CorrectionOMidS) O
+			archv
+			flat (RightSB - OX) SmallSmoothA
+			curl (RightSB - OX) (XH - SmallSmoothB)
+			quadcontrols 0 0.8
+			g4 (SB + Stroke * 1.1) CAP
+
+	orthographic-italic 'cyrl/de' 0x434
+
+	alias 'cyrl/de.BGR' null 'g.singleStorey'

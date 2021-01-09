@@ -1,0 +1,329 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-S : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs ArcStartSerif
+
+	define SOBot  OX
+	define [SmallSTensionCoeff stroke] : mix [StrokeWidthBlend 1 0.375 stroke] 1 : clamp 0 1 : Math.pow (Width / (UPM * 0.55)) 0.5
+	define [SmallSDistCoeff] : Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])
+
+	glyph-block-export SNeck
+	define [SNeck] : params [[stroke Stroke] [slantCoeff 0] [tensionCoeff 1] [dist 0.1]] : begin
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define tension : tensionCoeff * (0.5 - 0.4 * dist - 0.005 * strokeCoeff + slantCoeff * TanSlope)
+		return : alsoThruThem {{(0.5 - dist) tension} {(0.5 + dist) (1 - tension)}} [widths.center stroke]
+
+	glyph-block-export SStroke
+	define [SStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+		local ess : refSwEss * stroke / Stroke
+		define smooth : adviceSSmooth CAP (-1) stroke
+		return : dispiro
+			widths.lhs stroke
+			g4   RightSB (CAP - Hook)
+			hookstart (CAP - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   SB (CAP - smooth)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
+			g4   (RightSB - SOBot) smooth [widths 0 stroke]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + SOBot) Hook
+
+	define [SlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+		define ess : refSwEss * stroke / Stroke
+		define smooth : adviceSSmooth CAP (-1) stroke
+		return : dispiro
+			SerifedArcStart_RtlLhs RightSB Middle CAP stroke Hook
+			g4   SB (CAP - smooth)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
+			g4   (RightSB - SOBot) smooth [widths 0 stroke]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + SOBot) Hook
+
+	define [RevSStroke] : begin
+		local stroke : AdviceStroke2 2 3 CAP
+		local ess : Ess * stroke / Stroke
+		local smooth : adviceSSmooth CAP 0.5 stroke
+		return : dispiro
+			widths.rhs stroke
+			g4   SB (CAP - Hook)
+			hookstart (CAP - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   RightSB (CAP - smooth)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
+			g4   (SB + SOBot) smooth [widths stroke 0]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (RightSB - SOBot) Hook
+
+	define [SmallSStroke] : begin
+		define stroke : AdviceStroke2 2 3 XH
+		define ess : AdviceStroke2 2.2 3.2 XH
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define smooth : adviceSSmooth XH (-1) stroke
+		return : dispiro
+			widths.lhs stroke
+			g4   (RightSB + OX / 4) (XH - SHook)
+			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + OX / 8) (XH - smooth)
+			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
+			g4   (RightSB - SOBot) (smooth) [widths 0 stroke]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + SOBot) SHook
+
+	define [SlabSmallSStroke] : begin
+		define stroke : AdviceStroke2 2 3 XH
+		define ess : AdviceStroke2 2.2 3.2 XH
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define smooth : adviceSSmooth XH (-1) stroke
+		return : dispiro
+			SerifedArcStart_RtlLhs RightSB Middle XH stroke SHook
+			g4   (SB + OX / 8) (XH - smooth)
+			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
+			g4   (RightSB - SOBot) (smooth) [widths 0 stroke]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + SOBot) SHook
+
+	glyph-block-export SStrokeAlt
+	define [SStrokeAlt] : params [top hook swStart swEnd oXLeftTop offsetLT offsetRB offsetC] : begin
+		define stroke : Math.max swStart swEnd
+		define fine   : Math.min swStart swEnd
+		define soStart : stroke - swStart
+		define soEnd   : stroke - swEnd
+		define smooth : adviceSSmooth top (-1) stroke
+		return : dispiro
+			widths.lhs fine
+			g4   (RightSB + OX / 4 - HVContrast * soStart) (top - hook)
+			hookstart (top - O - soStart) (sw -- fine) (swItalicAdj -- Stroke) (noAdjTerminalY -- true)
+			g4   (SB + oXLeftTop + offsetLT.x) (top - smooth + offsetLT.y)
+			g2
+				offsetC.x + [mix (SB + oXLeftTop + offsetLT.x) (RightSB - SOBot - offsetRB.x) 0.5]
+				offsetC.y + [mix (top - smooth)                (smooth)                       0.5]
+				widths.center stroke
+			g4   (RightSB - SOBot - offsetRB.x) (smooth + offsetRB.y) [widths.rhs fine]
+			hookend (O + soEnd) (sw -- fine) (swItalicAdj -- Stroke) (noAdjTerminalY -- true)
+			g4   (SB + SOBot + HVContrast * soEnd) (hook) [widths.rhs fine]
+
+	define [SmallSStrokePhoneticRight] : begin
+		define stroke : AdviceStroke2 2 3 XH
+		define ess : AdviceStroke2 2.2 3.2 XH
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define smooth : adviceSSmooth XH (-1) stroke
+		return : dispiro
+			widths.lhs stroke
+			g4   (RightSB + OX / 4) (XH - SHook)
+			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (SB + OX / 8) (XH - smooth)
+			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
+			g4   (RightSB - SOBot) (smooth) [widths 0 stroke]
+			arcvh
+			flat (Middle - CorrectionOMidS) 0 [widths 0 Stroke]
+			curl SB 0
+
+	define [RevSmallSStroke] : begin
+		define stroke : AdviceStroke2 2 3 XH
+		define ess : AdviceStroke2 2.2 3.2 XH
+		define strokeCoeff : StrokeWidthBlend 0 1 stroke
+		define smooth : adviceSSmooth XH 0.75 stroke
+		return : dispiro
+			widths.rhs stroke
+			g4   SB (XH - SHook)
+			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   RightSB (XH - smooth)
+			SNeck (stroke -- ess) (slantCoeff -- 0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
+			g4   (SB + SOBot) (smooth) [widths stroke 0]
+			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   (RightSB - SOBot) SHook
+
+	create-glyph 'S' 'S' : glyph-proc
+		include : MarkSet.capital
+		if SLAB : include : ArcStartSerif RightSB CAP Stroke Hook
+		include : [if SLAB SlabSStroke SStroke]
+
+	alias 'cyrl/Dze' 0x405 'S'
+
+	create-glyph 's' 's' : glyph-proc
+		include : MarkSet.e
+		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+		include : [if SLAB SlabSmallSStroke SmallSStroke]
+
+	alias 'cyrl/dze' 0x455 's'
+
+	create-glyph 's.phoneticRight' : glyph-proc
+		include : MarkSet.e
+		include : SmallSStrokePhoneticRight
+
+	create-glyph 'revS' 0x1A7 : glyph-proc
+		include : MarkSet.capital
+		include : RevSStroke
+
+	create-glyph 'revs' 0x1A8 : glyph-proc
+		include : MarkSet.e
+		include : RevSmallSStroke
+
+	alias 'cyrl/ghe.italic' null 'revs'
+
+	create-glyph 'mathbb/S' 0x1D54A : glyph-proc
+		include : MarkSet.capital
+		define theta : Math.PI / 4
+		foreach sign [items-of { 1 (-1) }] : begin
+			include : SStrokeAlt
+				top -- CAP
+				hook -- Hook
+				swStart -- BBS * [if (sign > 0) CThin 1]
+				swEnd   -- BBS * [if (sign < 0) CThin 1]
+				oXLeftTop -- O
+				ess -- BBD
+				offsetC -- {
+					.x (0.5 * sign * BBD * [Math.sin theta])
+					.y (0.5 * sign * BBD * [Math.cos theta])
+				}
+				offsetLT -- {
+					.x [if (sign > 0) (BBD / 2) 0]
+					.y ([if (sign > 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
+				}
+				offsetRB -- {
+					.x [if (sign < 0) (BBD / 2) 0]
+					.y ([if (sign < 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
+				}
+
+	create-glyph 'mathbb/s' 0x1D564 : glyph-proc
+		include : MarkSet.e
+		define theta : Math.PI / 5
+		foreach sign [items-of { 1 (-1) }] : begin
+			include : SStrokeAlt
+				top -- XH
+				hook -- SHook
+				swStart -- BBS * [if (sign > 0) CThin 1]
+				swEnd   -- BBS * [if (sign < 0) CThin 1]
+				oXLeftTop -- (OX / 8)
+				ess -- BBD
+				offsetC -- {
+					.x (0.5 * sign * BBD * [Math.sin theta])
+					.y (0.5 * sign * BBD * [Math.cos theta])
+				}
+				offsetLT -- {
+					.x [if (sign > 0) (BBD / 2) 0]
+					.y ([if (sign > 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
+				}
+				offsetRB -- {
+					.x [if (sign < 0) (BBD / 2) 0]
+					.y ([if (sign < 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
+				}
+
+	create-glyph 'cyrl/ge.italic' : glyph-proc
+		include : MarkSet.b
+		local stroke : [RevSmallSStroke].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.0
+		include : VBarLeft start.x start.y (XH + Accent)
+
+	create-glyph 'cyrl/gheDescender.italic' : glyph-proc
+		include : MarkSet.b
+		local stroke : [RevSmallSStroke].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.rhsKnots.(0)
+		include : VBarRight start.x (-Accent) start.y
+
+	create-glyph 'srtail' 0x282 : glyph-proc
+		include : MarkSet.p
+
+		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+		local stroke : [[if SLAB SlabSmallSStroke SmallSStroke]].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+		include : new-glyph : glyph-proc
+			local sw : AdviceStroke2 2 3 XH
+			include : refer-glyph "rtailBR"
+			include : Upright
+			include : Translate (start.x + sw * HVContrast) 0
+			include : Italify
+
+		include : VBarLeft start.x 0 start.y
+	create-glyph 'Sswash' 0x2C7E : glyph-proc
+		include : MarkSet.if
+
+		local stroke : [SStroke].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+		local sw : AdviceStroke2 2 3 CAP
+		include : dispiro
+			widths.lhs [AdviceStroke 4.5]
+			g4 start.x start.y
+			alsoThru 0.15 0.6 important
+			flat (RightSB - 1) Descender [widths sw 0]
+			curl RightSB Descender
+
+	create-glyph 'sswash' 0x23F : glyph-proc
+		include : MarkSet.p
+
+		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+		local stroke : [[if SLAB SlabSmallSStroke SmallSStroke]].call currentGlyph
+		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+		local sw : AdviceStroke2 2 3 XH
+		include : dispiro
+			widths.lhs [AdviceStroke 4.5]
+			g4 start.x start.y
+			alsoThru 0.15 0.6 important
+			flat (RightSB - 1) Descender [widths sw 0]
+			curl RightSB Descender
+
+	create-glyph 'dollar.open' : glyph-proc
+		include : MarkSet.capital
+		define top : CAP * 0.95
+		define bot : CAP * 0.05
+		define w : AdviceStroke 3
+		define fine : AdviceStroke 3.5
+		define smooth : adviceSSmooth (top - bot) (-1) w
+		include : dispiro
+			widths.lhs w
+			g4   RightSB (top - Hook)
+			hookstart (top - O)
+			g4   SB (top - smooth)
+			SNeck w
+			g4   RightSB (bot + smooth) [widths 0 w]
+			hookend (bot + O)
+			g4   SB (bot + Hook)
+		include : dispiro
+			widths.center w
+			flat Middle (top - HalfStroke)
+			curl Middle (CAP - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center w
+			flat Middle (Descender / 2) [heading Upward]
+			curl Middle (bot + HalfStroke)
+
+		create-derived 'dollar.through' : VBar Middle (bot + HalfStroke) (top - HalfStroke) fine
+
+	create-glyph 'dollar.opencap' : glyph-proc
+		include : MarkSet.capital
+		define top : CAP * 0.88
+		define bot : CAP * 0.12
+		define w : AdviceStroke 3
+		define fine : AdviceStroke 3.5
+		define smooth : adviceSSmooth (top - bot) (-1) w
+		include : dispiro
+			widths.lhs w
+			g4   RightSB (top - Hook)
+			hookstart (top - O)
+			g4   SB (top - smooth)
+			SNeck w
+			g4   RightSB (bot + smooth) [widths 0 w]
+			hookend (bot + O)
+			g4   SB (bot + Hook)
+		include : dispiro
+			widths.center w
+			flat Middle (top - HalfStroke)
+			curl Middle (CAP) [heading Upward]
+		include : dispiro
+			widths.center w
+			flat Middle (0) [heading Upward]
+			curl Middle (bot + HalfStroke)
+
+		create-derived 'dollar.throughcap' : VBar Middle (bot + HalfStroke) (top - HalfStroke) fine
+
+	select-variant 'dollar' '$'

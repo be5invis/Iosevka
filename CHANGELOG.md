@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 4.4.0
+
+ * Add motion serif variants for `a`, `b`, `d`, `g`, `k`, `L`, `q`, `Z` and `z` (#789).
+ * Add vertical-crossing variant for `Q` (#789).
+ * Split variant assignment for `Z` and `z` (#789).
+
+
 ### 4.3.0
 
  * Add two-circle variant of `8` (#786).

@@ -1,0 +1,132 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Ezh : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
+
+	glyph-block-export EzhShape
+	define [EzhShape] : params [top bot pleft pright hookless] : glyph-proc
+		local cor : 1.2 * HVContrast
+		local yMidBar : mix bot top 0.6
+		local ezhLeft : mix SB RightSB [fallback pleft 0.2]
+		local ezhRight : mix SB RightSB [fallback pright 0.925]
+
+		include : union
+			HBarTop SB ezhRight top
+			spiro-outline
+				corner ezhLeft yMidBar
+				corner (ezhLeft + Stroke * cor) (yMidBar - HalfStroke)
+				corner (ezhLeft + Stroke * cor) yMidBar
+				corner ezhRight (top - Stroke)
+				corner (ezhRight - Stroke * cor) (top - Stroke)
+			dispiro
+				widths.rhs
+				flat ezhLeft yMidBar [heading Rightward]
+				curl (Middle - CorrectionOMidS) yMidBar
+				archv
+				if hookless
+				: then : list
+					g4.down.mid  (RightSB - OX) [mix yMidBar bot hookless] [heading Downward]
+				: else : list
+					g4   (RightSB - OX) [mix yMidBar bot : SmallSmoothB / (SmallSmoothA + SmallSmoothB)]
+					hookend bot
+					g4 SB (bot + Hook * (top - bot) / [fallback para.cap0 CAP])
+
+		if SLAB : begin
+			include : DownwardLeftSerif SB top VJut
+
+	glyph-block-export RevEzhShape
+	define [RevEzhShape] : params [top bot pleft pright hookless [sma SmallSmoothA] [smb SmallSmoothB] [diagCoeff 1.2] [pyBar 0.6]] : glyph-proc
+		local cor : diagCoeff * HVContrast
+		local yMidBar : RevEzhShape.yMidBar top bot pyBar
+		local ezhRight : mix SB RightSB [fallback pright 0.8]
+		local ezhLeft : mix SB RightSB [fallback pleft 0.075]
+		include : HBarTop ezhLeft RightSB top
+
+		include : spiro-outline
+			corner ezhRight yMidBar
+			corner (ezhRight - Stroke * cor) (yMidBar - HalfStroke)
+			corner (ezhRight - Stroke * cor) yMidBar
+			corner ezhLeft (top - Stroke)
+			corner (ezhLeft + Stroke * cor) (top - Stroke)
+
+		include : dispiro
+			widths.lhs
+			flat ezhRight yMidBar [heading Leftward]
+			curl (Middle + CorrectionOMidS) yMidBar
+			archv
+			if hookless
+			: then : list
+				g4.down.mid (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar sma smb]
+			: else : list
+				g4   (SB + OX) [RevEzhShape.yLoopLeft top bot pyBar sma smb]
+				hookend bot
+				g4 RightSB (bot + Hook * ((top - bot) / CAP))
+		if SLAB : begin
+			include : DownwardRightSerif RightSB top VJut
+	set RevEzhShape.yMidBar : lambda [top bot pyBar] : mix bot top pyBar
+	set RevEzhShape.yLoopLeft : lambda [top bot pyBar sma smb]
+		mix [RevEzhShape.yMidBar top bot pyBar] bot (sma / (sma + smb))
+
+	create-glyph 'Ezh' 0x1B7 : glyph-proc
+		include : MarkSet.capital
+		include : EzhShape CAP 0
+
+	create-glyph 'ezh' 0x292 : glyph-proc
+		include : MarkSet.p
+		include : EzhShape XH Descender
+
+	alias 'cyrl/Ezh' 0x4E0 'Ezh'
+	alias 'cyrl/ezh' 0x4E1 'ezh'
+
+	create-glyph 'revEzh' 0x1B8 : glyph-proc
+		include : MarkSet.capital
+		include : RevEzhShape CAP 0
+
+	create-glyph 'revezh' 0x1B9 : glyph-proc
+		include : MarkSet.p
+		include : RevEzhShape XH Descender
+
+	create-glyph 'lyogh' 0x26E : glyph-proc
+		include : MarkSet.if
+		include : EzhShape XH Descender 0.4
+		include : VBarLeft SB (XH * 0.1) CAP
+
+	create-glyph 'ezhtail' 0x1BA : glyph-proc
+		local b : mix Descender XH 0.25
+		include : EzhShape XH b nothing nothing 0.5
+		local y : mix [mix b XH 0.6] b 0.5
+		include : dispiro
+			widths.rhs
+			g4 (RightSB - OX) y [heading Downward]
+			g4 (RightSB - OX) (y - 1) [heading Downward]
+			arcvh
+			flat [mix SB RightSB 0.45] b
+			curl [mix SB RightSB 0.4] b
+			archv
+			g4 (SB + Stroke * HVContrast) [mix (Descender + Stroke) b 0.5]
+			arcvh
+			flat [mix SB RightSB 0.4] (Descender + Stroke)
+			curl RightSB (Descender + Stroke)
+
+	create-glyph 'ezhcurlytail' 0x293 : glyph-proc
+		include : MarkSet.e
+		local p (SmallSmoothB / (SmallSmoothA + SmallSmoothB))
+		include : EzhShape XH Descender nothing nothing p
+		local fine : AdviceStroke2 3 5 (XH - Descender)
+		local rinner : (XH * 0.4 - fine * 1.5) / 2
+		local m1 : RightSB - Stroke * HVContrast - OX
+		local x2 : RightSB - HalfStroke
+		local y2 Descender
+		include : dispiro
+			widths.lhs
+			g4 m1 [mix [mix Descender XH 0.6] Descender p] [heading Downward]
+			g4 m1 ([mix [mix Descender XH 0.6] Descender p] - 1) [heading Downward]
+			CurlyTail fine rinner m1 Descender SB x2 y2

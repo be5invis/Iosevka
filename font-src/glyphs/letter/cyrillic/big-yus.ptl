@@ -1,0 +1,91 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-BigYus : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [CyrBigYusShape df top yp _fine] : glyph-proc
+		local fine : fallback _fine : AdviceStroke 3.3 df.div
+		local cor HVContrast
+		local midx : mix df.leftSB df.middle 0.3
+		local midx2 : Math.min (df.middle - fine * cor) [mix df.leftSB df.middle 0.75]
+		local yb : top * yp
+		local tovershoot 2
+
+		include : union
+			spiro-outline
+				corner (df.leftSB + O * 2) 0
+				corner (df.leftSB + fine * cor + O * 2) 0
+				corner (midx + fine * cor) yb
+				corner midx yb
+			spiro-outline
+				corner (midx2 + fine * cor) yb
+				corner (df.leftSB + fine * cor + O * tovershoot) top
+				corner (df.leftSB + O * tovershoot) top
+				corner midx2 yb
+			spiro-outline
+				corner (df.width - df.leftSB - O * 2) 0
+				corner (df.width - df.leftSB - fine * cor - O * 2) 0
+				corner (df.width - midx - fine * cor) yb
+				corner (df.width - midx) yb
+			spiro-outline
+				corner (df.width - midx2 - fine * cor) yb
+				corner (df.width - df.leftSB - fine * cor - O * tovershoot) top
+				corner (df.width - df.leftSB - O * tovershoot) top
+				corner (df.width - midx2) yb
+			VBar df.middle 0 yb fine
+			HBarTop midx (df.width - midx) yb fine
+			HBarTop
+				df.leftSB + O * tovershoot + HVContrast * fine * 0.99
+				df.rightSB - O * tovershoot - HVContrast * fine * 0.99
+				begin top
+				begin fine
+
+		if SLAB : begin
+			include : tagged 'serifLB' : LeftwardBottomSerif (df.leftSB - 0.5 * fine * HVContrast) 0 (SideJut - 0.5 * fine * HVContrast)
+			include : tagged 'serifRB' : RightwardBottomSerif (df.rightSB + 0.5 * fine * HVContrast) 0 (SideJut - 0.5 * fine * HVContrast)
+
+	create-glyph 'cyrl/bigYus' 0x46A : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrBigYusShape df CAP 0.575
+
+	create-glyph 'cyrl/bigyus' 0x46B : glyph-proc
+		local df : DivFrame 1 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrBigYusShape df XH 0.55
+
+	define [CyrIotifiedBigYusShape df top yp] : glyph-proc
+		local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
+		define divSub : (df.width - gap - df.mvs) / Width
+		define dfSub : DivFrame divSub 3
+		include : CyrBigYusShape dfSub top yp df.mvs
+		eject-contour 'serifLB'
+		eject-contour 'serifRB'
+		include : Translate (Width * (df.div - divSub)) 0
+		include : VBarLeft df.leftSB 0 top df.mvs
+		include : HBarTop (df.leftSB - O) [mix df.leftSB df.rightSB (2 / 3)] (top * yp) df.mvs
+		if SLAB : begin
+			include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
+			include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut df.mvs
+			include : tagged 'serifRB' : RightwardBottomSerif (df.rightSB + 0.5 * df.mvs * HVContrast) 0 (SideJut - 0.5 * df.mvs * HVContrast) df.mvs
+
+	create-glyph 'cyrl/iotifiedBigYus' 0x46C : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrIotifiedBigYusShape df CAP 0.575
+
+	create-glyph 'cyrl/iotifiedBigyus' 0x46D : glyph-proc
+		local df : DivFrame para.diversityM 4
+		set-width df.width
+		include : df.markSet.e
+		include : CyrIotifiedBigYusShape df XH 0.55

@@ -1,0 +1,138 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Eszet : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-S : SNeck
+
+	local ymiddle : [mix 0 CAP 0.5] - HalfStroke
+	local ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
+	local xmiddle : RightSB - ymiddle / 2 - Stroke * 0.75
+	local xmiddleBot : RightSB - ymiddle / 2 - Stroke * 0.75
+	local xfinal : Math.min
+		xmiddle - 1 - Stroke * TanSlope
+		Math.max (SB + Stroke * 2) [mix SB RightSB (1 / 4)]
+
+	create-glyph 'eszet.traditional' : glyph-proc
+		include : MarkSet.if
+		local l : SB * 1
+		include : dispiro
+			widths.lhs
+			g4 ([mix SB RightSB 0.75] + HalfStroke * HVContrast) (CAP - Hook)
+			hookstart (CAP - O)
+			flat l XH
+			curl l 0 [heading Downward]
+		local t : mix 0 CAP 0.7
+		local tm : [mix Descender t 0.625] + HalfStroke
+		local tl : [mix l RightSB 0.35] + HalfStroke * HVContrast
+		include : HBarTop (l + 1) (RightSB - HalfStroke * 1.2 - OX) t
+		include : dispiro
+			widths.rhs
+			flat tl tm [heading Rightward]
+			curl (tl + 1) tm [heading Rightward]
+			g2 (RightSB - OX * 1.5) [mix Descender tm 0.70]
+			g2 (RightSB - OX * 1.5) [mix Descender tm 0.67]
+			alsoThru 0.5 0.75
+			g4 [mix SB RightSB 0.35] Descender
+		include : dispiro
+			widths.center (Stroke * 1.1)
+			corner tl (tm - Stroke) [heading Upward]
+			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
+		piecewise
+			para.isItalic : include : VerticalHook (l + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+
+	create-glyph 'eszet.sulzbacher' : glyph-proc
+		include : MarkSet.capital
+		include : dispiro
+			widths.rhs
+			flat SB 0 [heading Upward]
+			curl SB XH
+			arcvh
+			g4 (Middle + O) (CAP - O)
+			archv
+			g4 (RightSB + O * 2) [mix CAP ymiddle 0.47]
+			g4.left.end xmiddle ymiddle [heading Leftward]
+		include : dispiro
+			widths.rhs
+			g4.right.start xmiddle (ymiddle + Stroke) [heading Rightward]
+			archv
+			g4   (RightSB - O) [mix 0 (ymiddle + Stroke) 0.5]
+			arcvh
+			flat xmiddleBot 0
+			curl xfinal 0 [heading Leftward]
+		piecewise
+			para.isItalic : include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+
+	create-glyph 'eszet.longsslig' : glyph-proc
+		include : MarkSet.capital
+
+		define swOuter : AdviceStroke2 3 3 CAP
+		define strokeCoeff : StrokeWidthBlend 0 1 swInner
+		define sEndX : Math.max
+			SB + swOuter * HVContrast + (RightSB - SB - Stroke) * 0.1
+			mix SB RightSB 0.3
+		define widthInner : Width - swOuter * HVContrast - (RightSB - SB - Stroke) * 0.1
+		define swInner : AdviceStroke2 2 3 XH (widthInner / Width)
+		define sTopY : XH + swInner / 8
+		define smooth : SmoothBOf (swInner + (widthInner / Width) * ([adviceSSmooth XH (-1) swInner] - swInner)) widthInner
+		define sTurnX : Math.max sEndX [mix SB RightSB 0.3]
+		define sBotX : Math.max (sEndX + 1) [mix sEndX RightSB 0.30]
+		define sTopX : sTurnX + (RightSB - sBotX)
+		define sTopHookX : sTopX + 0.5 * swInner * HVContrast
+
+		include : dispiro
+			widths.rhs swOuter
+			flat SB 0 [heading Upward]
+			curl SB XH
+			arcvh
+			g4 ([mix SB sTopHookX 0.52] - CorrectionOMidX * swOuter) (CAP - O) [widths.rhs Stroke]
+			straight.down.end sTopHookX (sTopY - swInner - O) [widths.heading 0 swInner Downward]
+
+		include : dispiro
+			widths.lhs swInner
+			straight.left.start sTopX (sTopY - O) [widths.heading swInner 0 Leftward]
+			archv
+			g4   sTurnX (XH - smooth)
+			SNeck swInner (slantCoeff -- 0.02) (tensionCoeff -- [StrokeWidthBlend 0.99 0.975]) (dist -- 0.025)
+			g4   (RightSB - OX) (smooth) [widths 0 swInner]
+			hookend O (sw -- swInner) (swItalicAdj -- swOuter)
+			g4 (sEndX + OX) SHook
+
+		piecewise
+			para.isItalic : include : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook swOuter
+			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+
+	select-variant 'eszet' 0xDF
+
+	create-glyph 'Eszet' 0x1E9E : glyph-proc
+		include : MarkSet.capital
+		local rightTopX : RightSB + O * 4
+		include : dispiro
+			widths.lhs
+			flat rightTopX CAP
+			curl Middle CAP
+			archv
+			flat SB XH
+			curl SB 0 [heading Downward]
+		include : dispiro
+			widths.rhs
+			g4   xmiddle (ymiddleCap + Stroke) [heading Rightward]
+			archv
+			g4   (RightSB - O * 2) [mix 0 (ymiddleCap + Stroke) 0.5]
+			arcvh
+			flat xmiddleBot 0
+			curl xfinal 0 [heading Leftward]
+		include : dispiro
+			widths.rhs
+			g4 rightTopX (CAP - Stroke)
+			g4 xmiddle (ymiddleCap + Stroke) [widths Stroke 0]
+		if SLAB : include : LeftwardBottomSerif SB 0 SideJut
+

@@ -1,0 +1,67 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-E : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Latin-Upper-F : FShape RevFShape EFVJutLength
+
+	glyph-block-export EShape
+	define xEBarLeft : SB * 1.5
+	define [EShape] : params [top pyBar noSerif] : glyph-proc
+		define stroke : AdviceStroke2 2 3 CAP
+		include : FShape top pyBar true
+		include : HBarBottom (xEBarLeft - O) RightSB 0 stroke
+		if (SLAB && !noSerif) : begin
+			include : LeftwardTopSerif xEBarLeft top SideJut
+			include : LeftwardBottomSerif xEBarLeft 0 SideJut
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardRightSerif RightSB top jutTop
+			include : UpwardRightSerif RightSB 0 jutBot
+
+	glyph-block-export RevEShape
+	define [RevEShape] : params [top pyBar noSerif] : glyph-proc
+		define stroke : AdviceStroke2 2 3 CAP
+		define xEBarRight : Width - SB * 1.5
+		include : RevFShape top pyBar true
+		include : HBarBottom SB (xEBarRight + O) 0 stroke
+		if (SLAB && !noSerif) : begin
+			include : RightwardTopSerif xEBarRight top SideJut
+			include : RightwardBottomSerif xEBarRight 0 SideJut
+			local { jutTop jutBot } : EFVJutLength top pyBar stroke
+			include : DownwardLeftSerif SB top jutTop
+			include : UpwardLeftSerif SB 0 jutBot
+
+	create-glyph 'E' 'E' : glyph-proc
+		include : MarkSet.capital
+		include : EShape CAP
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	alias 'grek/Epsilon' 0x395 'E'
+	alias 'cyrl/Ie' 0x415 'E'
+
+	create-glyph 'revE' 0x18E : glyph-proc
+		include : MarkSet.capital
+		include : RevEShape CAP
+
+	create-glyph 'smcpturnE' 0x2C7B : glyph-proc
+		include : MarkSet.e
+		include : EShape XH
+		include : FlipAround Middle (XH / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/E' 0x1D53C : glyph-proc
+		include : MarkSet.capital
+		include : union
+			VBarLeft (xEBarLeft + BBD) 0 CAP BBS
+			HBarBottom xEBarLeft (xEBarLeft + BBD) 0 BBS
+			difference
+				FShape CAP (noSerif -- true) (_stroke -- BBS)
+				Rect (CAP - BBS) BBS (xEBarLeft + BBS * HVContrast) (xEBarLeft + BBD)
+			HBarBottom (xEBarLeft - O) RightSB 0 BBS

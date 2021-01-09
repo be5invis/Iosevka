@@ -3,7 +3,7 @@ $$include '../../meta/macros.ptl'
 import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyDerivingCv Dotless] from '../../support/gr'
+import [Cv AnyCv AnyDerivingCv Dotless] from '../../support/gr'
 import [DesignParameters] from '../../meta/aesthetics'
 
 extern Map
@@ -19,7 +19,9 @@ glyph-block Common-Derivatives : begin
 				local dstName : [fallback name follow] + '.' + suffix
 				local dst : glyphStore.queryByName dstName
 				if dst : g.dependsOn dst
-				if (h.tag && h.rank) : [Cv h.tag h.rank].set g dstName
+				if (h.tag && h.rank) : begin
+					[Cv h.tag h.rank].set g dstName
+					if h.nonDeriving : [Cv h.tag h.rank].setPreventDeriving g
 
 	define [select-variant] : params [name unicode [shapeFrom name] [follow name]] : begin
 		if [not : glyph-is-needed shapeFrom] : return nothing
@@ -45,7 +47,7 @@ glyph-block Common-Derivatives : begin
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
-	define [with-related-glyphs sourceGid dstGid dstUnicode Fn] : begin
+	define [with-related-glyphs dstGid dstUnicode sourceGid Fn] : begin
 		if [not : glyph-is-needed sourceGid] : return nothing
 
 		local glyphSrc : glyphStore.queryByName sourceGid
@@ -66,13 +68,14 @@ glyph-block Common-Derivatives : begin
 			include [refer-glyph sourceGid] AS_BASE ALSO_METRICS
 
 		if glyphDst : begin
-			foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
+			foreach [gr : items-of : AnyCv.query glyphSrc] : begin
 				gr.set glyphDst [gr.get glyphSrc]
+				if [gr.setPreventDeriving glyphSrc] : gr.setPreventDeriving glyphDst
 			if [Dotless.get glyphSrc] : Dotless.set glyphDst [Dotless.get glyphSrc]
 
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
-		with-related-glyphs id newid unicode
+		with-related-glyphs newid unicode id
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark

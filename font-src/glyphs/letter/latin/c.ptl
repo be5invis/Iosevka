@@ -1,0 +1,234 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-C : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : CurlyTail
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs ArcStartSerif ArcStartHookTop
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define [CShapeT sink offset sma smb top bot sw] : sink
+		widths.lhs sw
+		g4 RightSB (top - Hook)
+		hookstart (top - O - offset)
+		flat (SB + OX + offset) (top - sma)
+		curl (SB + OX + offset) (bot + smb)
+		hookend (bot + O + offset)
+		g4 RightSB (bot + Hook)
+
+	define [CShapeSlabArcT sink offset sma smb top bot sw origBar] : begin
+		return : sink
+			SerifedArcStart_RtlLhs (RightSB - offset) Middle top sw Hook origBar
+			flat (SB + OX + offset) (top - sma)
+			curl (SB + OX + offset) (bot + smb)
+			hookend (bot + O + offset)
+			g4 RightSB (bot + Hook)
+
+	glyph-block-export CShape
+	define [CShape top bot sw] : CShapeT dispiro 0 SmoothA SmoothB top bot sw
+	define [SmallCShape top bot sw] : CShapeT dispiro 0 SmallSmoothA SmallSmoothB top bot sw
+	define [CShapeOutline top bot sw] : CShapeT spiro-outline 1 SmoothA SmoothB top bot sw
+	define [SmallCShapeOutline top bot sw] : CShapeT spiro-outline 1 SmallSmoothA SmallSmoothB top bot sw
+
+	define [CSerifedShape top bot sw] : glyph-proc
+		include : ArcStartSerif RightSB top Stroke Hook
+		include : CShapeSlabArcT dispiro 0 SmoothA SmoothB top bot sw
+	define [SmallCSerifedShape top bot sw] : glyph-proc
+		include : ArcStartSerif RightSB top Stroke Hook
+		include : CShapeSlabArcT dispiro 0 SmallSmoothA SmallSmoothB top bot sw
+
+	define [RevCShape top bot sw] : dispiro
+		widths.rhs sw
+		g4 SB (top - Hook)
+		hookstart (top - O)
+		flat (RightSB - OX) (top - SmoothA)
+		curl (RightSB - OX) (bot + SmoothB)
+		hookend (bot + O)
+		g4 SB (bot + Hook)
+
+	create-glyph 'C' 'C' : glyph-proc
+		include : MarkSet.capital
+		include : [if SLAB CSerifedShape CShape] CAP 0 Stroke
+
+	create-glyph 'revC' 0x2183 : glyph-proc
+		include : MarkSet.capital
+		include : RevCShape CAP 0 Stroke
+
+	alias 'cyrl/Es' 0x421 'C'
+	alias 'grek/lunateSigma' 0x3F9 'C'
+
+	create-glyph 'mathbb/C' 0x2102 : glyph-proc
+		include : MarkSet.capital
+		include : CShape CAP 0 BBS
+		include : intersection
+			CShapeOutline CAP 0 BBS
+			VBarLeft (SB + BBD) 0 CAP BBS
+
+	create-glyph 'currency/euroSign' 0x20AC : glyph-proc
+		include [refer-glyph "C"] AS_BASE ALSO_METRICS
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.4)
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.6)
+
+	define [SmallCShapeT sink offset top bot sw] : sink
+		widths.lhs sw
+		g4 (RightSB - offset) (top - Hook)
+		hookstart (top - O - offset)
+		flat (SB + OX + offset) (top - SmallSmoothA)
+		curl (SB + OX + offset) (bot + SmallSmoothB)
+		hookend (bot + O + offset)
+		g4 (RightSB - offset) (bot + Hook)
+
+	create-glyph 'c' 'c' : glyph-proc
+		include : MarkSet.e
+		include : [if SLAB SmallCSerifedShape SmallCShape] XH 0 Stroke
+
+	create-glyph 'mathbb/c' 0x1D554 : glyph-proc
+		include : MarkSet.capital
+		include : SmallCShape XH 0 BBS
+		include : intersection
+			SmallCShapeOutline XH 0 BBS
+			VBarLeft (SB + BBD + OX) 0 CAP BBS
+
+	create-glyph 'revSmallC' 0x2184 : glyph-proc
+		include : MarkSet.e
+		include : dispiro
+			widths.rhs
+			g4 SB (XH - Hook)
+			hookstart (XH - O)
+			flat (RightSB - OX) (XH - SmallSmoothA)
+			curl (RightSB - OX) (0 + SmallSmoothB)
+			hookend O
+			g4 SB Hook
+
+	alias 'cyrl/es' 0x441 'c'
+	alias 'grek/lunatesigma' 0x3F2 'c'
+
+	create-glyph 'currency/centSign' 0xA2 : glyph-proc
+		define fine : AdviceStroke 4
+		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center
+			flat Middle (XH - HalfStroke)
+			curl Middle (XH - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center
+			flat Middle (Descender / 2) [heading Upward]
+			curl Middle HalfStroke
+		include : VBar Middle (XH - HalfStroke) (0 + HalfStroke) fine
+
+	turned 'turnC' 0x186 'C' Middle (CAP / 2)
+	turned 'turnc' 0x254 'c' Middle (XH / 2)
+	create-glyph 0x37B : composite-proc [refer-glyph 'turnc']
+	create-glyph 0x3FD : composite-proc [refer-glyph 'turnC']
+	create-glyph 0x37C : composite-proc [refer-glyph 'c']
+		DotAt (Middle + HalfStroke / 4) (XH/2) DotRadius
+	create-glyph 0x37D : composite-proc [refer-glyph 'turnc']
+		DotAt (Middle - HalfStroke / 4) (XH/2) DotRadius
+	create-glyph 0x3FE : composite-proc [refer-glyph 'C']
+		DotAt (Middle + HalfStroke / 4) (CAP/2) DotRadius
+	create-glyph 0x3FF : composite-proc [refer-glyph 'turnC']
+		DotAt (Middle - HalfStroke / 4) (CAP/2) DotRadius
+
+	create-glyph 'strenchedC' 0x297 : glyph-proc
+		include : MarkSet.p
+		include : CShape XH Descender Stroke
+
+	create-glyph 'Chooktop' 0x187 : glyph-proc
+		include : MarkSet.capital
+		include : CShapeSlabArcT dispiro 0 SmoothA SmoothB CAP 0 Stroke true
+		include : ArcStartHookTop RightSB CAP Stroke HookX Hook
+
+	create-glyph 'chooktop' 0x188 : glyph-proc
+		include : MarkSet.e
+		include : CShapeSlabArcT dispiro 0 SmallSmoothA SmallSmoothB XH 0 Stroke true
+		include : ArcStartHookTop RightSB XH Stroke HookX Hook
+
+	create-glyph 'Cbar' 0xA792 : glyph-proc
+		include [refer-glyph 'C'] AS_BASE
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
+
+	create-glyph 'cbar' 0xA793 : glyph-proc
+		include [refer-glyph 'c'] AS_BASE
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (XH * OverlayPos)
+
+	create-glyph 'ccurlytail' 0x255 : glyph-proc
+		include : MarkSet.e
+		local stroke : AdviceStroke2 2 3 XH
+		local fine : AdviceStroke2 3 3 XH
+		local rinner : ((XH * 0.45) - fine * 1.5) / 2
+		local m1 : SB + O + stroke * HVContrast
+		local x2 : SB + stroke * 0.3
+		local y2 : -XH * 0.05
+
+		if SLAB : include : ArcStartSerif RightSB XH Stroke Hook
+		include : dispiro
+			if SLAB
+				SerifedArcStart_RtlLhs RightSB Middle XH stroke Hook
+				list [g4 RightSB (XH - Hook) [widths.lhs stroke]] [hookstart XH]
+			flat (SB + OX) (XH - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			CurlyTail fine rinner m1 0 RightSB x2 y2
+
+	create-glyph 'cyrl/E' 0x42D : glyph-proc
+		include [refer-glyph "C"] AS_BASE
+		include : FlipAround Middle (CAP / 2)
+		include : HBar [mix SB RightSB 0.25] RightSB (CAP / 2)
+
+	create-glyph 'cyrl/e' 0x44D : glyph-proc
+		include [refer-glyph "c"] AS_BASE
+		include : FlipAround Middle (XH / 2)
+		include : HBar [mix SB RightSB 0.25] RightSB (XH / 2)
+
+	create-glyph 'cyrl/Ye' 0x404 : glyph-proc
+		include [refer-glyph "C"] AS_BASE
+		include : HBar SB [mix RightSB SB 0.25] (CAP / 2) [AdviceStroke2 2 4 CAP]
+
+	create-glyph 'cyrl/ye' 0x454 : glyph-proc
+		include [refer-glyph "c"] AS_BASE
+		include : HBar SB [mix RightSB SB 0.25] (XH / 2) [AdviceStroke2 2 4 XH]
+
+	create-glyph 'grek/sigma' 0x3C3 : glyph-proc
+		include : MarkSet.e
+		include : spiro-outline
+			corner (RightSB + 0.25 * SB) XH
+			corner (RightSB + 0.25 * SB) (XH - Stroke)
+			corner Middle                (XH - Stroke - O * 1.5)
+			corner Middle                (XH - O)
+		include : dispiro
+			widths.lhs
+			flat (Middle + 1) (XH - O)
+			curl Middle (XH - O)
+			archv
+			flat (SB + OX) (XH - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4   (Middle + CorrectionOMidS) O
+			archv
+			flat (RightSB - OX * 0.5) SmallSmoothA
+			curl (RightSB - OX * 0.5) (XH - SmallSmoothB)
+			arcvh
+			flat Middle (XH - HalfStroke - O) [widths HalfStroke 0]
+			curl (Middle - 1) (XH - HalfStroke - O)
+
+	create-glyph 'grek/sigmaFinal' 0x3C2 : glyph-proc
+		include : MarkSet.p
+		include : dispiro
+			widths.lhs
+			g4 RightSB (XH - Hook)
+			hookstart XH
+			flat (SB + OX) (XH - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4 (Middle + CorrectionOMidS) 0
+			alsoThru 0.5 0.1353
+			g4.down.mid (RightSB - Stroke * HVContrast + OX) [mix Descender Stroke : StrokeWidthBlend 0.5 0.49] [heading Downward]
+			arcvh
+			flat (RightSB - HookX + OX) (Descender + Stroke) [heading Leftward]
+			curl [Math.min (RightSB - Stroke * HVContrast * 1.5) (RightSB - HookX + OX - 1)] (Descender + Stroke) [heading Leftward]

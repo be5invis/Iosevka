@@ -1,0 +1,69 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-T : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define TLeftX  : SB + OX * 1.5
+	define TRightX : RightSB - OX * 1.5
+	define [TShape top] : glyph-proc
+		include : VBar Middle 0 top
+		local l TLeftX
+		local r TRightX
+		include : tagged 'strokeLT' : HBarTop l Middle top
+		include : tagged 'strokeRT' : HBarTop Middle r top
+		if SLAB : begin
+			include : tagged 'serifRT' : DownwardRightSerif r top VJut
+			include : tagged 'serifLT' : DownwardLeftSerif l top VJut
+			include : tagged 'serifMB' : RightwardBottomSerif Middle 0 MidJutCenter
+			include : tagged 'serifMB' : LeftwardBottomSerif Middle 0 MidJutCenter
+
+	create-glyph 'T' 'T' : glyph-proc
+		include : MarkSet.capital
+		set-base-anchor 'bottomright' (Middle + HalfStroke * HVContrast) 0
+		include : TShape CAP
+
+		create-derived 'cyrl/Tedescender' 0x4AC : glyph-proc
+			include : CyrDescender (Middle + HalfStroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+			include : MarkSet.if
+
+		create-derived 'Tbar' 0x166
+			HOverlayBar [mix Middle SB 0.8] [mix Middle RightSB 0.8] [mix 0 CAP 0.45]
+
+		create-derived 'Thookleft' 0x1AC : glyph-proc
+			eject-contour 'serifLT'
+			eject-contour 'strokeLT'
+			include : LeftHook (SB + LeftHook.extension) CAP Middle
+
+	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
+		include : MarkSet.capital
+		include : HBarTop TLeftX TRightX CAP BBS
+		include : VBar (Middle - BBD / 2) 0 CAP BBS
+		include : VBar (Middle + BBD / 2) 0 CAP BBS
+		include : HBarBottom (Middle - BBD / 2) (Middle + BBD / 2) 0 BBS
+
+	alias 'grek/Tau' 0x3A4 'T'
+	alias 'cyrl/Te' 0x422 'T'
+	turned 'turnT' 0xA7B1 'T' Middle (CAP / 2)
+
+	create-glyph 'cyrl/te.upright' : glyph-proc
+		include : MarkSet.e
+		include : TShape XH
+
+		create-derived 'cyrl/tedescender.upright' : glyph-proc
+			include : MarkSet.p
+			include : CyrDescender (Middle + HalfStroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+
+	orthographic-italic 'cyrl/tedescender' 0x4AD
+
+	create-glyph 'grek/tau' 0x3C4 : glyph-proc
+		include : MarkSet.e
+		include : HBar SB RightSB (XH - HalfStroke)
+		include : VBar Middle 0 XH

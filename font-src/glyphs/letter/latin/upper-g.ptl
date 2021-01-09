@@ -1,0 +1,113 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-G : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend ShoulderMidKnotLhs
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerif SerifedArcStart_RtlLhs ArcStartHookTop
+
+	define TOOTHED            0
+	define TOOTHLESS-CORNER   1
+	define TOOTHLESS-ROUNDED  2
+
+	define SLAB-NONE          0
+	define SLAB-LETTER        1
+	define SLAB-HOOK-TOP      2
+	define SLAB-AUTO        : if SLAB SLAB-LETTER SLAB-NONE
+
+	define GConfig : list
+		list 'toothed'                          TOOTHED            1
+		list 'toothlessCorner'                  TOOTHLESS-CORNER   1
+		list 'toothlessRounded'                 TOOTHLESS-ROUNDED  1
+
+	define [GShape toothShape slabShape fCrossBar top sma smb] : glyph-proc
+		local yBar : top * 0.52 + Stroke * 0.25
+		local fine ShoulderFine
+
+		local knots : if slabShape
+			SerifedArcStart_RtlLhs RightSB Middle top Stroke Hook (slabShape === SLAB-HOOK-TOP)
+			list [widths.lhs] [g4 RightSB (top - Hook)] [hookstart (top - O)]
+
+		knots.push
+			flat (SB + OX) (top - sma)
+			curl (SB + OX) smb
+			arcvh
+
+		match toothShape
+			[Just TOOTHED] : knots.push
+				ShoulderMidKnotLhs Middle O fine Stroke 1 1
+				archv
+				straight.up.end (RightSB - (Stroke - fine) * HVContrast) sma [widths.heading fine 0 Upward]
+			[Just TOOTHLESS-CORNER] : knots.push
+				g4   (Middle + CorrectionOMidS) O
+				g4   RightSB  DToothlessRise
+			[Just TOOTHLESS-ROUNDED] : knots.push
+				g4   (Middle + CorrectionOMidS) O
+				flat RightSB sma
+				curl RightSB yBar [heading Upward]
+
+		include : union
+			dispiro.apply null knots
+			if fCrossBar [HBarTop Middle RightSB yBar] [glyph-proc]
+			if (slabShape === SLAB-LETTER) [ArcStartSerif RightSB top Stroke Hook] [glyph-proc]
+			match toothShape
+				[Just TOOTHED] : union
+					VBarRight RightSB (sma + O) yBar
+					VBarRight RightSB sma 0 [Math.max [AdviceStroke 5] (Stroke - fine / 2)]
+				[Just TOOTHLESS-CORNER]  : VBarRight RightSB DToothlessRise yBar
+				[Just TOOTHLESS-ROUNDED] : glyph-proc
+
+	define [OverlayBarOfG top] : begin
+		return : HOverlayBar [mix SB RightSB 0.5] [mix RightSB Width 0.7] [mix 0 (top / 2) 0.55]
+
+	foreach { suffix shape fCrossBar } [items-of GConfig] : begin
+		create-glyph "G.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : GShape shape SLAB-AUTO fCrossBar CAP SmoothA SmoothB
+			create-derived "Gbar.\(suffix)" : OverlayBarOfG CAP
+		create-glyph "Ghooktop.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : GShape shape SLAB-HOOK-TOP fCrossBar CAP SmoothA SmoothB
+			include : ArcStartHookTop RightSB CAP Stroke HookX Hook
+		create-glyph "smcpG.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GShape shape SLAB-AUTO fCrossBar XH SmoothA SmoothB
+		create-glyph "smcpGhooktop.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GShape shape SLAB-HOOK-TOP fCrossBar XH SmoothA SmoothB
+			include : ArcStartHookTop RightSB XH Stroke HookX Hook
+
+	select-variant 'G' 'G'
+	select-variant 'smcpG' 0x262 (follow -- 'G')
+	select-variant 'Ghooktop' 0x193 (follow -- 'G')
+	select-variant 'smcpGhooktop' 0x29B (follow -- 'G')
+	select-variant 'Gbar' 0x1E4 (follow -- 'G')
+	turned 'turnG' 0x2141 'G' Middle (CAP / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	define [BBGArcT sink offset top sma smb xTerm yTerm] : sink
+		widths.lhs BBS
+		g4 (RightSB - offset) (top - Hook)
+		hookstart (top - O - offset)
+		flat (SB + OX + offset) (top - sma)
+		curl (SB + OX + offset) smb
+		arcvh
+		g4   ([mix SB xTerm 0.5] + CorrectionOMidS) (O + offset)
+		archv
+		flat (xTerm - offset) sma
+		curl (xTerm - offset) yTerm [heading Upward]
+
+	create-glyph 'mathbb/G' 0x1D53E : glyph-proc
+		local yBar : CAP * 0.52 + BBS * 0.25
+		include : MarkSet.capital
+		include : BBGArcT dispiro 0 CAP SmoothA SmoothB (RightSB - BBD) yBar
+		include : intersection
+			BBGArcT spiro-outline 1 CAP SmoothA SmoothB (RightSB - BBD) yBar
+			VBarLeft (SB + OX + BBD) 0 CAP BBS
+		include : BBBarRight RightSB 0 yBar

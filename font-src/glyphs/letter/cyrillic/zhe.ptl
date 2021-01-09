@@ -1,0 +1,66 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Zhe : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [CyrZheShape top midtop df] : glyph-proc
+		local fine : AdviceStroke 3.3 df.div
+		local midx : mix df.leftSB df.middle 0.3
+		define [CyrAngleShape] : begin
+			local cor HVContrast
+			local overshoot : if SLAB 0 (O * 3 * df.div)
+			return : spiro-outline
+				corner (df.leftSB + overshoot) 0
+				corner (df.leftSB + fine * cor + overshoot) 0
+				corner (midx + fine * cor) (top / 2)
+				corner (df.leftSB + fine * cor + overshoot) top
+				corner (df.leftSB + overshoot) top
+				corner midx (top / 2)
+
+		include : union
+			new-glyph : glyph-proc
+				include : CyrAngleShape
+				include : FlipAround df.middle (top / 2)
+			CyrAngleShape
+			VBar df.middle 0 midtop fine
+			HBar midx (df.width - midx) (top / 2) fine
+
+		if SLAB : begin
+			define fineK 0.1
+			include : LeftwardTopSerif     (df.leftSB + fine * fineK) top SideJut
+			include : LeftwardBottomSerif  (df.leftSB + fine * fineK) 0 SideJut
+			include : RightwardTopSerif    (df.rightSB - fine * fineK) top SideJut
+			include : RightwardBottomSerif (df.rightSB - fine * fineK) 0 SideJut
+
+	create-glyph 'cyrl/Zhe' 0x416 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrZheShape CAP CAP df
+
+	create-glyph 0x496 : composite-proc
+		refer-glyph 'cyrl/Zhe'
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) (connex -- 0.5)
+
+	create-glyph 'cyrl/zhe' 0x436 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrZheShape XH XH df
+
+	create-glyph 0x497 : composite-proc
+		refer-glyph 'cyrl/zhe'
+		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2) (connex -- 0.5)
+
+	create-glyph 'cyrl/zhe.BGR' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrZheShape XH CAP df

@@ -1,0 +1,87 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-M : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [MShape top df fHanging] : glyph-proc
+		local swSideBot : if fHanging Stroke : AdviceStroke 3.5 df.div
+		local swSideTop : AdviceStroke [if fHanging 5 4] df.div
+		local halfSwMiddle : swSideTop / 2
+		local middleY : if fHanging
+			top * 0.3 / df.div
+			if SLAB Stroke 0
+
+		include : dispiro
+			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
+			curl df.leftSB (top * 0.2) [heading Upward]
+			straight.up.end df.leftSB top [widths.heading 0 swSideTop Upward]
+		include : dispiro
+			flat df.rightSB 0 [widths.heading swSideBot 0 Upward]
+			curl df.rightSB (top * 0.2) [heading Upward]
+			straight.up.end df.rightSB top [widths.heading swSideTop 0 Upward]
+		include : dispiro
+			flat (df.leftSB + halfSwMiddle) top [widths.heading swSideTop 0 Downward]
+			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
+		include : dispiro
+			flat (df.rightSB - halfSwMiddle) top [widths.heading 0 swSideTop Downward]
+			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
+		include : AIMSerifs top df.leftSB df.rightSB
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		include : df.markSet.capital
+		set-width df.width
+
+		create-derived 'M.hanging' : MShape CAP df true
+		create-derived 'M.flatBottom' : MShape CAP df false
+
+	create-glyph : glyph-proc
+		local df : DivFrame para.diversityM 3
+		include : df.markSet.e
+		set-width df.width
+
+		create-derived 'smcpM.hanging' : MShape XH df true
+		create-derived 'smcpM.flatBottom' : MShape XH df false
+
+	select-variant 'M' 'M'
+	select-variant 'smcpM' 0x1D0D (follow -- 'M')
+	alias 'cyrl/em' 0x43C 'smcpM'
+	alias 'grek/Mu' 0x39C 'M'
+	alias 'cyrl/Em' 0x41C 'M'
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/M' 0x1D544 : glyph-proc
+		local df : DivFrame 1 3
+		local bbs : AdviceStroke 8
+		local bbd : BBD * [Math.min (3 / 4) (bbs / BBS)]
+		local kDiag : DiagCorDs CAP (df.rightSB - df.leftSB) bbd
+		local yTurnPos : CAP * 0.25
+
+		include : MarkSet.capital
+		include : VBarLeft df.leftSB 0 CAP bbs
+		include : BBBarRight df.rightSB  0 CAP (bbd -- bbd) (bbs -- bbs)
+		local xLeft : df.leftSB + 0.5 * bbs * HVContrast
+		local xRight : df.rightSB - bbd - 0.5 * bbs * HVContrast
+		local xMiddle : mix xLeft xRight 0.5
+		include : HBarTop xLeft (xLeft + kDiag * bbd) CAP bbs
+		include : intersection
+			Rect CAP yTurnPos xLeft xRight
+			ExtLineCenter 2 bbs xRight CAP xMiddle yTurnPos
+		include : difference
+			intersection
+				Rect CAP yTurnPos xLeft xRight
+				union
+					ExtLineCenter 2 bbs xLeft CAP xMiddle yTurnPos
+					ExtLineCenter 2 bbs (xLeft + kDiag * bbd) CAP (xMiddle + kDiag * bbd) yTurnPos
+			spiro-outline
+				corner (Width * 4)  [mix CAP yTurnPos (-1)]
+				corner [mix xRight xMiddle (-1)] [mix CAP yTurnPos (-1)]
+				corner [mix xRight xMiddle (2)]  [mix CAP yTurnPos (2)]
+				corner (Width * 4)  [mix CAP yTurnPos (2)]

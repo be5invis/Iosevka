@@ -1,0 +1,226 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Z : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : HCurlyTail
+	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-X : XStrand
+
+	define [ZStdSerifs top] : glyph-proc
+		if SLAB : begin
+			include : tagged 'serifLT' : DownwardLeftSerif SB top VJut
+			include : tagged 'serifRB' : UpwardRightSerif RightSB 0 VJut
+
+	define [ZMotionSerifs top] : glyph-proc
+		include : tagged 'serifRB' : UpwardRightSerif RightSB 0 VJut
+
+	define [ZBaseShape] : glyph-proc
+		include : MarkSet.capital
+
+		local cor : 1.15 * HVContrast
+		include : tagged 'strokeTop' : HBarTop SB RightSB CAP
+		include : spiro-outline
+			corner SB Stroke
+			corner (RightSB - Stroke * cor) (CAP - Stroke)
+			corner RightSB (CAP - Stroke)
+			corner (SB + Stroke * cor) Stroke
+		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
+
+	define [ZCurlyShape] : glyph-proc
+		include : MarkSet.capital
+		include : tagged 'strokeTop' : HBarTop SB (RightSB - Stroke * HVContrast) CAP
+		include : XStrand false SLAB SB 0 RightSB CAP 0.125 0.4 0.32
+		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
+
+	create-glyph 'Z.standard' : glyph-proc
+		include : ZBaseShape
+		include : ZStdSerifs CAP
+	create-glyph 'Z.withHorizontalCrossBar' : glyph-proc
+		include : ZBaseShape
+		include : ZStdSerifs CAP
+		include : refer-glyph 'barOver'
+	create-glyph 'Z.withCrossBar' : glyph-proc
+		include : ZBaseShape
+		include : ZStdSerifs CAP
+		include : refer-glyph 'antiSlashOver'
+	create-glyph 'Z.motionSerifed' : glyph-proc
+		include : ZBaseShape
+		include : ZMotionSerifs CAP
+	create-glyph 'Z.curly' : glyph-proc
+		include : ZCurlyShape
+		include : ZStdSerifs CAP
+	create-glyph 'Z.curlyWithHorizontalCrossBar' : glyph-proc
+		include : ZCurlyShape
+		include : ZStdSerifs CAP
+		include : refer-glyph 'barOver'
+	create-glyph 'Z.curlyWithCrossBar' : glyph-proc
+		include : ZCurlyShape
+		include : ZStdSerifs CAP
+		include : refer-glyph 'antiSlashOver'
+	create-glyph 'Z.curlyMotionSerifed' : glyph-proc
+		include : ZCurlyShape
+		include : ZMotionSerifs CAP
+
+	define [SmallZBaseShape] : glyph-proc
+		include : MarkSet.e
+
+		local cor : 1.2 * HVContrast
+		include : tagged 'strokeTop' : HBarTop SB RightSB XH
+		include : spiro-outline
+			corner SB Stroke
+			corner (RightSB - Stroke * cor) (XH - Stroke)
+			corner RightSB (XH - Stroke)
+			corner (SB + Stroke * cor) Stroke
+		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
+
+	define [SmallZCurlyShape] : glyph-proc
+		include : MarkSet.e
+		include : tagged 'strokeTop' : HBarTop SB (RightSB - Stroke * HVContrast) XH
+		include : XStrand false SLAB SB 0 RightSB XH 0.125 0.4 0.36
+		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
+
+	create-glyph 'z.standard' : glyph-proc
+		include : SmallZBaseShape
+		include : ZStdSerifs XH
+	create-glyph 'z.withHorizontalCrossBar' : glyph-proc
+		include : SmallZBaseShape
+		include : ZStdSerifs XH
+		include : refer-glyph 'barOver'
+	create-glyph 'z.withCrossBar' : glyph-proc
+		include : SmallZBaseShape
+		include : ZStdSerifs XH
+		include : refer-glyph 'antiSlashOver'
+	create-glyph 'z.motionSerifed' : glyph-proc
+		include : SmallZBaseShape
+		include : ZMotionSerifs CAP
+	create-glyph 'z.curly' : glyph-proc
+		include : SmallZCurlyShape
+		include : ZStdSerifs XH
+	create-glyph 'z.curlyWithHorizontalCrossBar' : glyph-proc
+		include : SmallZCurlyShape
+		include : ZStdSerifs XH
+		include : refer-glyph 'barOver'
+	create-glyph 'z.curlyWithCrossBar' : glyph-proc
+		include : SmallZCurlyShape
+		include : ZStdSerifs XH
+		include : refer-glyph 'antiSlashOver'
+	create-glyph 'z.curlyMotionSerifed' : glyph-proc
+		include : SmallZCurlyShape
+		include : ZMotionSerifs CAP
+
+	select-variant 'Z' 'Z'
+	select-variant 'z' 'z'
+
+	alias 'grek/Zeta' 0x396 'Z.standard'
+	alias 'Zbar' 0x1B5 'Z.withHorizontalCrossBar'
+	alias 'zbar' 0x1B6 'z.withHorizontalCrossBar'
+
+	define [BBZShape top] : glyph-proc
+		include : HBarTop SB RightSB top BBS
+		include : HBarBottom SB RightSB 0 BBS
+		include : intersection
+			Rect top 0 SB RightSB
+			union
+				dispiro
+					widths.center BBS
+					corner SB (BBS / 2)
+					corner (RightSB - BBD) (top - BBS / 2)
+				dispiro
+					widths.center BBS
+					corner (SB + BBD) (BBS / 2)
+					corner RightSB (top - (BBS / 2))
+
+		include : intersection
+			union
+				VBarRight RightSB (top - BBS * 2) top BBS
+				VBarLeft  SB 0 (BBS * 2) BBS
+			spiro-outline
+				corner SB (BBS / 2)
+				corner (RightSB - BBD) (top - BBS / 2)
+				corner RightSB (top - (BBS / 2))
+				corner (SB + BBD) (BBS / 2)
+
+	create-glyph 'mathbb/Z' 0x2124  : composite-proc [MarkSet.capital] [BBZShape CAP]
+	create-glyph 'mathbb/z' 0x1D56B : composite-proc [MarkSet.e] [BBZShape XH]
+
+	define [ZDownTailCtor src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'strokeBottom'
+		eject-contour 'serifRB'
+		include : dispiro
+			widths.lhs
+			flat SB 0 [heading Rightward]
+			curl (RightSB - HookX) 0
+			archv
+			straight.down.end RightSB (-Hook) [widths.heading 0 Stroke Downward]
+
+	with-related-glyphs 'Zdtail' 0x224 'Z' ZDownTailCtor
+	with-related-glyphs 'zdtail' 0x225 'z' ZDownTailCtor
+
+	create-glyph 'Zswash' 0x2C7F : glyph-proc
+		include : MarkSet.if
+		local cor : 1.15 * HVContrast
+
+		include : union
+			HBarTop SB RightSB CAP
+			spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (CAP - Stroke)
+				corner (RightSB - Stroke * cor) (CAP - Stroke)
+			dispiro
+				widths.lhs
+				g4 SB 0
+				alsoThru 0.36 0.6 important
+				flat (RightSB - 1) Descender
+				curl RightSB Descender
+
+		if SLAB : begin
+			include : DownwardLeftSerif SB CAP VJut
+
+	create-glyph 'zswash' 0x240 : glyph-proc
+		include : MarkSet.p
+		local cor : 1.2 * HVContrast
+
+		include : union
+			HBarTop SB RightSB XH
+			spiro-outline
+				corner SB 0
+				corner (SB + Stroke * cor) 0
+				corner RightSB (XH - Stroke)
+				corner (RightSB - Stroke * cor) (XH - Stroke)
+			dispiro
+				widths.lhs
+				g4 (SB - OXHook) 0
+				alsoThru 0.36 0.6 important
+				flat (RightSB - 1) Descender
+				curl RightSB Descender
+
+		if SLAB : begin
+			include : DownwardLeftSerif SB XH VJut
+
+	define [ZDescCtor src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'serifRB'
+		include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
+
+	with-related-glyphs 'Zdesc' 0x2C6B 'Z' ZDescCtor
+	with-related-glyphs 'zdesc' 0x2C6C 'z' ZDescCtor
+
+	with-related-glyphs 'zcurlytail' 0x291 'z' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+
+		local fine : AdviceStroke2 5 4 XH
+		local rinner : Math.max (XH * 0.04) (fine * 0.1)
+		local x2 : mix (SB + Stroke) RightSB 0.3
+		local x1 : mix x2 (RightSB - fine - rinner * 1.5) 0.45
+		local y2 : -XH * 0.2
+		local m1 : RightSB - fine / 2 - rinner * 1.5 + O
+		include : HCurlyTail fine Stroke rinner SB m1 (RightSB + fine / 2) x1 x2 y2

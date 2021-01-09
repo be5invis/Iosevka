@@ -1,0 +1,121 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-X : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-export HalfXStrand XStrand
+
+	define [HalfXStrand stb slab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
+		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
+		local leftx : _leftx + ((HalfStroke * HVContrast + sbCor) * [if (rightx > _leftx) 1 (-1)])
+		local fine  : (_fine || Stroke) * 0.5
+
+		if stb : begin
+			local hst : HalfStroke * [DiagCor (righty - lefty) (rightx - leftx) 0 0]
+			local hse : HalfStroke * [Math.min 0.97 ([AdviceStroke 3] / Stroke)]
+			include : dispiro
+				corner leftx lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
+				corner rightx righty [widths hse hse]
+
+		: else : begin
+			local height : Math.abs (lefty - righty)
+			local slabClearance : if slab [AdviceStroke2 2 3 height] 0
+			local turnyleft : mix lefty righty [if slab [Math.max turn (slabClearance / height)] turn]
+			local cyleft : mix turnyleft righty tension
+			local straightxleft : mix leftx rightx pStraight
+			local straightyleft : mix cyleft righty pStraight
+			include : dispiro
+				widths.center
+				flat leftx lefty [heading [if (lefty < righty) Upward Downward]]
+				curl leftx turnyleft [heading [if (lefty < righty) Upward Downward]]
+				quadcontrols 0 ((cyleft - turnyleft) / (straightyleft - turnyleft)) 24
+				flat straightxleft straightyleft
+				curl rightx righty
+
+	define [XStrand stb slab _leftx lefty _rightx righty turn pStraight tension] : glyph-proc
+		local middlex : mix _leftx _rightx 0.5
+		local middley : mix lefty righty 0.5
+
+		include : HalfXStrand stb slab _leftx lefty middlex middley turn pStraight tension
+		include : HalfXStrand stb slab _rightx righty middlex middley turn pStraight tension
+
+	create-glyph 'X.straight' : glyph-proc
+		include : MarkSet.capital
+		include : WithAIHSerifsMask CAP 0 SB RightSB : union
+			XStrand true SLAB SB 0 RightSB CAP 0.1 0.4 0.28
+			XStrand true SLAB SB CAP RightSB 0 0.1 0.4 0.28
+		include : AIHSerifs CAP
+
+	create-glyph 'X.curly' : glyph-proc
+		include : MarkSet.capital
+		include : WithAIHSerifsMask CAP 0 SB RightSB : union
+			XStrand false SLAB SB 0 RightSB CAP 0.1 0.4 0.28
+			XStrand false SLAB SB CAP RightSB 0 0.1 0.4 0.28
+		include : AIHSerifs CAP
+
+	local LowerXTurn    : if SLAB 0.1  0.1
+	local LowerXTension : if SLAB 0.24 0.24
+	create-glyph 'x.straight' : glyph-proc
+		include : MarkSet.e
+		include : WithAIHSerifsMask XH 0 SB RightSB : union
+			XStrand true SLAB SB 0 RightSB XH LowerXTurn 0.4 LowerXTension
+			XStrand true SLAB SB XH RightSB 0 LowerXTurn 0.4 LowerXTension
+		include : AIHSerifs XH
+	create-glyph 'x.curly' : glyph-proc
+		include : MarkSet.e
+		include : WithAIHSerifsMask XH 0 SB RightSB : union
+			XStrand false SLAB SB 0 RightSB XH LowerXTurn 0.4 LowerXTension
+			XStrand false SLAB SB XH RightSB 0 LowerXTurn 0.4 LowerXTension
+		include : AIHSerifs XH
+
+	create-glyph 'grek/chi.straight' : composite-proc [MarkSet.p] : union
+		XStrand true false SB Descender RightSB XH 0.05 0.4 0.11
+		XStrand true false SB XH RightSB Descender 0.05 0.4 0.11
+	create-glyph 'grek/chi.curly' : composite-proc [MarkSet.p] : union
+		XStrand false false SB Descender RightSB XH 0.05 0.4 0.11
+		XStrand false false SB XH RightSB Descender 0.05 0.4 0.11
+
+	select-variant 'X' 'X'
+	select-variant 'x' 'x'
+	select-variant 'grek/chi' 0x3C7 (follow -- 'x')
+
+	alias 'grek/Chi' 0x3A7 'X'
+	alias 'cyrl/Ha' 0x425 'X'
+	alias 'cyrl/ha' 0x445 'x'
+	alias 'latinchi' 0xAB53 'grek/chi'
+
+	with-related-glyphs 'cyrl/Hadescender' 0x4B2 'X' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : CyrDescender RightSB (connex -- 0.5)
+
+	with-related-glyphs 'cyrl/hadescender' 0x4B3 'x' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : CyrDescender RightSB (connex -- 0.5)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	define [BBXShape l r top] : let [kDiag : DiagCorDs top (r - l) BBD] : union
+		intersection
+			Rect top 0 (-Width) (Width * 2)
+			union
+				ExtLineCenter 1 BBS l top (r - kDiag * BBD) 0
+				ExtLineCenter 1 BBS (l + kDiag * BBD) top r 0
+		HBarTop    l (l + kDiag * BBD) top BBS
+		HBarBottom r (r - kDiag * BBD) 0 BBS
+		intersection
+			Rect top 0 (-Width) (Width * 2)
+			difference
+				ExtLineCenter 1 BBS l 0 r top
+				spiro-outline
+					corner l top
+					corner (l + kDiag * BBD) top
+					corner r 0
+					corner (r - kDiag * BBD) 0
+
+	create-glyph 'mathbb/X' 0x1D54F : composite-proc [MarkSet.capital] [BBXShape SB RightSB CAP]
+	create-glyph 'mathbb/x' 0x1D569 : composite-proc [MarkSet.e]       [BBXShape SB RightSB XH]

@@ -1,0 +1,63 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Letter-Greek-Lower-Theta : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/theta' 0x3B8 : glyph-proc
+		include : MarkSet.b
+		include : OShape CAP 0 (SB - O) (RightSB + O) Stroke (SmallSmoothA * 100) (SmallSmoothB * 100)
+		include : HBar (SB + HalfStroke) (RightSB - HalfStroke) CapMiddle
+
+glyph-block Letter-Greek-Lower-Theta-Var : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'grek/thetaSymbol' 0x03D1 : glyph-proc
+		define pXTopLeft 0.2
+		define xTopLeft : mix SB RightSB pXTopLeft
+		define coXTopLeft : mix SB RightSB (2 - pXTopLeft)
+		define topSMA : SmoothAOf (SmallSmooth * (1 - pXTopLeft)) (Width * (1 - pXTopLeft))
+		define topSMB : SmoothBOf (SmallSmooth * (1 - pXTopLeft)) (Width * (1 - pXTopLeft))
+		define sw : AdviceStroke2 3 3 CAP
+		include : MarkSet.b
+		include : intersection
+			Rect (CAP * 2) Descender (-Width) [mix RightSB Width 0.5]
+			dispiro
+				flat (SB + OX) (0.45 * CAP) [widths.lhs.heading sw Downward]
+				curl (SB + OX) SmallSmoothB
+				arcvh
+				g4 (Middle + CorrectionOMidX * sw) O
+				archv
+				flat (RightSB - OX) SmallSmoothA
+				curl (RightSB - OX) (CAP - topSMB)
+				arcvh
+				g4 ([mix xTopLeft RightSB 0.5] - CorrectionOMidX * sw) (CAP - O)
+				g4 xTopLeft (CAP - topSMA)
+				g4 [mix xTopLeft RightSB 0.5] [mix (CAP - topSMA) (CAP / 2 - HalfStroke) 0.9]
+				g4 [mix RightSB Width 0.5] (CAP / 2 - HalfStroke)
+				g4 coXTopLeft (CAP - topSMA)
+
+	create-glyph 'partial' 0x2202 : glyph-proc
+		include : MarkSet.b
+		local yMid : CAP * 0.65
+		include : dispiro
+			flat (RightSB - OX - (1 - CThin) * Stroke * HVContrast) SmallSmoothA [widths.lhs : Stroke * CThin]
+			curl (RightSB - OX - (1 - CThin) * Stroke * HVContrast) (yMid - SmallSmoothB)
+			arcvh
+			g4 (Middle + CorrectionOMidS) (yMid - O) [widths.lhs]
+			archv
+			flat (SB + OX) (yMid - SmallSmoothA)
+			curl (SB + OX) SmallSmoothB
+			arcvh
+			g4 (Middle - CorrectionOMidS) O
+			archv
+			flat (RightSB - OX) SmallSmoothA
+			curl (RightSB - OX) (CAP - SmallSmoothB)
+			hookend (CAP - O)
+			g4   SB (CAP - Hook)

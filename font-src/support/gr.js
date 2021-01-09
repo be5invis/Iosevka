@@ -67,17 +67,6 @@ const TieGlyph = {
 	}
 };
 
-const DoNotDeriveVariants = {
-	get(glyph) {
-		if (glyph && glyph.related) return !!glyph.related.DoNotDeriveVariants;
-		else return false;
-	},
-	set(glyph) {
-		if (!glyph.related) glyph.related = {};
-		glyph.related.DoNotDeriveVariants = true;
-	}
-};
-
 const Radical = {
 	get(glyph) {
 		if (glyph && glyph.related) return !!glyph.related.radical;
@@ -105,6 +94,18 @@ function Cv(tag, rank) {
 			if (!glyph.related) glyph.related = {};
 			if (!glyph.related.cv) glyph.related.cv = {};
 			glyph.related.cv[key] = toGid;
+		},
+		getPreventDeriving(glyph) {
+			return (
+				glyph.related &&
+				glyph.related.preventCvDeriving &&
+				!!glyph.related.preventCvDeriving[key]
+			);
+		},
+		setPreventDeriving(glyph) {
+			if (!glyph.related) glyph.related = {};
+			if (!glyph.related.preventCvDeriving) glyph.related.preventCvDeriving = {};
+			glyph.related.preventCvDeriving[key] = true;
 		},
 		amendName(name) {
 			return name + "." + key;
@@ -142,8 +143,10 @@ const AnyDerivingCv = {
 	optional: false,
 	query(glyph) {
 		let ret = [];
-		if (glyph && !DoNotDeriveVariants.get(glyph) && glyph.related && glyph.related.cv) {
+		if (glyph && glyph.related && glyph.related.cv) {
 			for (const key in glyph.related.cv) {
+				if (glyph.related.preventCvDeriving && glyph.related.preventCvDeriving[key])
+					continue;
 				const [tag, rankStr] = key.split("#");
 				const rank = parseInt(rankStr, 10);
 				const rel = Cv(tag, rank);
@@ -151,6 +154,15 @@ const AnyDerivingCv = {
 			}
 		}
 		return ret;
+	},
+	hasNonDerivingVariants(glyph) {
+		if (glyph && glyph.related && glyph.related.cv) {
+			for (const key in glyph.related.cv) {
+				if (glyph.related.preventCvDeriving && glyph.related.preventCvDeriving[key])
+					return true;
+			}
+		}
+		return false;
 	}
 };
 
@@ -314,7 +326,6 @@ exports.getGrTree = getGrTree;
 exports.getGrMesh = getGrMesh;
 exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
-exports.DoNotDeriveVariants = DoNotDeriveVariants;
 exports.Radical = Radical;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;

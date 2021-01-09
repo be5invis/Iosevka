@@ -1,0 +1,106 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-E : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-export SmallEShape RevSmallEShape
+
+	define [SmallEShape] : params [top stroke barpos curly [bbd 0]] : glyph-proc
+		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
+		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
+
+		include : HBarBottom (SB + (stroke / 2) + OX + bbd) (RightSB - (stroke / 2) - OX) barbottom stroke
+		include : dispiro
+			widths.lhs stroke
+			flat (RightSB - OX) barbottom [heading Upward]
+			curl (RightSB - OX) (top - SmallSmoothB)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat (SB + OX) (top - SmallSmoothA)
+			curl (SB + OX) (0 + SmallSmoothB)
+			hookend O (sw -- stroke)
+			g4 (RightSB - OX * [if para.isItalic 0 0.5]) hook
+
+	create-glyph 'e.flatCrossbar' : glyph-proc
+		include : MarkSet.e
+		include : SmallEShape XH [AdviceStroke2 2 3 XH]
+
+	define [SmallERoundedShape] : params [top stroke barpos] : glyph-proc
+		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
+		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
+		local pBarRight : 0.475 - TanSlope * 0.5
+		local pArcRight : 0.425 - TanSlope * 0.25
+
+		local xStart : SB + (0.5 * stroke * HVContrast)
+		local pfIt : if para.isItalic 1 0
+		include : dispiro
+			widths.lhs stroke
+			[if para.isItalic g4 flat] xStart (barbottom - pfIt * [StrokeWidthBlend 2 3] * O)
+			if para.isItalic [alsoThru.g2 0.5 0.8] [list]
+			[if para.isItalic g4 curl] [mix xStart RightSB pBarRight] (barbottom + pfIt * [StrokeWidthBlend 0.25 1] * O)
+			g4 (RightSB - OX) [mix barbottom top pArcRight]
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat (SB + OX) (top - SmallSmoothA)
+			curl (SB + OX) (0 + SmallSmoothB)
+			hookend O (sw -- stroke)
+			g4 (RightSB - OX * [if para.isItalic 0 0.5]) hook
+
+
+	create-glyph 'e.rounded' : glyph-proc
+		include : MarkSet.e
+		include : SmallERoundedShape XH [AdviceStroke2 2 3 XH]
+
+	select-variant 'e' 'e'
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/e' 0x1D556 : glyph-proc
+		include : MarkSet.e
+		include : SmallEShape XH BBS (bbd -- BBD)
+		include : intersection
+			OShapeOutline.NoOvershoot XH 0 SB RightSB BBS
+			union
+				VBarLeft (SB + BBD + OX) 0 XH BBS
+				VBarRight (RightSB - BBD - OX) (XH * DesignParameters.eBarPos) XH BBS
+
+	create-glyph 'Schwa' 0x18F : glyph-proc
+		include : MarkSet.capital
+		include : SmallEShape CAP [AdviceStroke2 2 3 CAP]
+		include : FlipAround Middle (CAP / 2)
+
+	alias 'cyrl/ie' 0x435 'e'
+	turned 'turne' 0x1DD 'e.flatCrossbar' Middle (XH / 2)
+	alias 'schwa' 0x259 'turne'
+	alias 'cyrl/schwa' 0x4D9 'turne'
+	alias 'cyrl/Schwa' 0x4D8 'Schwa'
+
+	define [RevSmallEShape top stroke barpos] : glyph-proc
+		local barbottom (top * [fallback barpos DesignParameters.eBarPos] - HalfStroke)
+		local hookx SB
+		local hookmiddle : [mix (RightSB - O) hookx 0.55] + CorrectionOMidS
+
+		include : dispiro
+			widths.rhs stroke
+			flat (SB + OX) barbottom [heading Upward]
+			curl (SB + OX) (top - SmallSmoothA)
+			arcvh
+			g4   Middle (top - O)
+			archv
+			flat (RightSB - OX) (top - SmallSmoothB)
+			curl (RightSB - OX) SmallSmoothA
+			hookend O (sw -- stroke)
+			g4 (SB + O) AHook
+		include : HBarBottom (SB + (stroke / 2)) (RightSB - (stroke / 2)) barbottom stroke
+
+	create-glyph 'reve' 0x258 : glyph-proc
+		include : MarkSet.e
+		include : RevSmallEShape XH [AdviceStroke2 2 3 XH]
