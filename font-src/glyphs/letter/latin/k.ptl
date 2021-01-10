@@ -103,7 +103,9 @@ glyph-block Letter-Latin-K : begin
 		define arcTopX      : mix arcStartX arcRightX pArcTopX
 		define arcTopY      : top - O
 
-		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight
+		define slabStartX   : kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
+
+		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight slabStartX
 
 	define [KCursiveLoopAndLegShapeImpl top straightBar slabLeft slab] : glyph-proc
 		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
@@ -119,10 +121,9 @@ glyph-block Letter-Latin-K : begin
 			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
 			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
 
-		define slabStartX : dim.kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
 		include : difference
 			intersection
-				Rect XH 0 0 [if SLAB (slabStartX + SideJut) (Width * 2)]
+				Rect XH 0 0 [if SLAB (dim.slabStartX + SideJut) (Width * 2)]
 				dispiro
 					flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
 					curl dim.kshRight 0 [widths.rhs]
@@ -136,10 +137,18 @@ glyph-block Letter-Latin-K : begin
 				g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke - O)
 				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke - O)
 
-		if slab : include : RightwardBottomSerif slabStartX 0 SideJut
+		if slab : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
-	define [KStraightLegs top bar slabLeft slab] : KLegShapeImpl SB RightSB Stroke top bar slabLeft slab
+	define [KNormalLegs top bar slabLeft slab] : KLegShapeImpl SB RightSB Stroke top bar slabLeft slab
 	define [KCursiveLegs top bar slabLeft slab]  : KCursiveLoopAndLegShapeImpl top bar slabLeft slab
+
+	define [KCyrlCursiveDescender top straightBar slabLeft slab] : begin
+		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
+		return : CyrDescender dim.slabStartX (connex -- 0.5)
+
+	define [KCyrlNormalDescender top straightBar slabLeft slab] : CyrDescender
+		RightSB + [KBalanceRight slab straightBar] - [KO slab straightBar top Stroke]
+		connex -- [if straightBar 1 0]
 
 	define [KShapeT Legs straightBar] : glyph-proc
 		include : VBarLeft (SB + [KBalance SLAB straightBar]) 0 CAP
@@ -150,21 +159,20 @@ glyph-block Letter-Latin-K : begin
 
 	create-glyph 'K.straight' : glyph-proc
 		include : MarkSet.capital
-		include : KShapeT KStraightLegs true
-		create-derived 'cyrl/KaDescender.straight'
-			CyrDescender (RightSB + [KBalanceRight SLAB true] - [KO SLAB true CAP Stroke]) (connex -- 1)
+		include : KShapeT KNormalLegs true
+		create-derived 'KDescender.straight' : KCyrlNormalDescender CAP true SLAB SLAB
 
 	create-glyph 'K.curly' : glyph-proc
 		include : MarkSet.capital
-		include : KShapeT KStraightLegs false
-		create-derived 'cyrl/KaDescender.curly'
-			CyrDescender (RightSB + [KBalanceRight SLAB false] - [KO SLAB false CAP Stroke])
+		include : KShapeT KNormalLegs false
+		create-derived 'KDescender.curly' : KCyrlNormalDescender CAP false SLAB SLAB
 
 	select-variant 'K' 'K'
 	alias 'grek/Kappa' 0x39A 'K'
 	alias 'cyrl/Ka' 0x41A 'K'
 	alias 'letterLike/kelvinSign' 0x212A 'K'
-	select-variant 'cyrl/KaDescender' 0x49A (follow -- 'K')
+	select-variant 'KDescender' 0x2C69 (follow -- 'K')
+	alias 'cyrl/KaDescender' 0x49A 'KDescender'
 
 	define [LowerKShapeT Legs straightBar slabTop slabBot] : glyph-proc
 		include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 CAP
@@ -175,29 +183,36 @@ glyph-block Letter-Latin-K : begin
 
 	create-glyph 'k.straight' : glyph-proc
 		include : MarkSet.b
-		include : LowerKShapeT KStraightLegs true SLAB (SLAB && !para.isItalic)
+		include : LowerKShapeT KNormalLegs true SLAB (SLAB && !para.isItalic)
+		create-derived 'kDescender.straight' : KCyrlNormalDescender XH true SLAB (SLAB && !para.isItalic)
 
 	create-glyph 'k.curly' : glyph-proc
 		include : MarkSet.b
-		include : LowerKShapeT KStraightLegs false SLAB (SLAB && !para.isItalic)
+		include : LowerKShapeT KNormalLegs false SLAB (SLAB && !para.isItalic)
+		create-derived 'kDescender.curly' : KCyrlNormalDescender XH false SLAB (SLAB && !para.isItalic)
 
 	create-glyph 'k.cursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKShapeT KCursiveLegs true SLAB (SLAB && !para.isItalic)
+		create-derived 'kDescender.cursive' : KCyrlCursiveDescender XH true SLAB (SLAB && !para.isItalic)
 
 	create-glyph 'k.motionSerifedStraight' : glyph-proc
 		include : MarkSet.b
-		include : LowerKShapeT KStraightLegs true true false
+		include : LowerKShapeT KNormalLegs true true false
+		create-derived 'kDescender.motionSerifedStraight' : KCyrlNormalDescender XH true true false
 
 	create-glyph 'k.motionSerifedCurly' : glyph-proc
 		include : MarkSet.b
-		include : LowerKShapeT KStraightLegs false true false
+		include : LowerKShapeT KNormalLegs false true false
+		create-derived 'kDescender.motionSerifedCurly' : KCyrlNormalDescender XH false true false
 
 	create-glyph 'k.motionSerifedCursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKShapeT KCursiveLegs true true false
+		create-derived 'kDescender.motionSerifedCursive' : KCyrlCursiveDescender XH true true false
 
 	select-variant 'k' 'k'
+	select-variant 'kDescender' 0x2C6A (follow -- 'k')
 	alias 'cyrl/ka.BGR' null 'k'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
@@ -236,11 +251,11 @@ glyph-block Letter-Latin-K : begin
 
 	create-glyph 'grek/kappa.straight' : glyph-proc
 		include : MarkSet.e
-		include : LowerKappaShapeT KStraightLegs true
+		include : LowerKappaShapeT KNormalLegs true
 
 	create-glyph 'grek/kappa.curly' : glyph-proc
 		include : MarkSet.e
-		include : LowerKappaShapeT KStraightLegs false
+		include : LowerKappaShapeT KNormalLegs false
 
 	select-variant 'grek/kappa' 0x3BA (follow -- 'K')
 
@@ -253,15 +268,13 @@ glyph-block Letter-Latin-K : begin
 
 	create-glyph 'cyrl/ka.straight' : glyph-proc
 		include : MarkSet.e
-		include : LowerCyrKaShapeT KStraightLegs true
-		create-derived 'cyrl/kaDescender.straight'
-			CyrDescender (RightSB + [KBalanceRight SLAB true] - [KO SLAB true XH Stroke]) (connex -- 1)
+		include : LowerCyrKaShapeT KNormalLegs true
+		create-derived 'cyrl/kaDescender.straight' : KCyrlNormalDescender XH true SLAB SLAB
 
 	create-glyph 'cyrl/ka.curly' : glyph-proc
 		include : MarkSet.e
-		include : LowerCyrKaShapeT KStraightLegs false
-		create-derived 'cyrl/kaDescender.curly'
-			CyrDescender (RightSB + [KBalanceRight SLAB false] - [KO SLAB false XH Stroke])
+		include : LowerCyrKaShapeT KNormalLegs false
+		create-derived 'cyrl/kaDescender.curly' : KCyrlNormalDescender XH false SLAB SLAB
 
 	select-variant 'cyrl/ka' 0x43A (follow -- 'K')
 	alias 'latinkappa' 0x138 'cyrl/ka'
@@ -285,26 +298,26 @@ glyph-block Letter-Latin-K : begin
 
 	create-glyph 'Khooktop.straight' : glyph-proc
 		include : MarkSet.capital
-		include : KHookTopShapeT KStraightLegs true
+		include : KHookTopShapeT KNormalLegs true
 	create-glyph 'Khooktop.curly' : glyph-proc
 		include : MarkSet.capital
-		include : KHookTopShapeT KStraightLegs false
+		include : KHookTopShapeT KNormalLegs false
 
 	create-glyph 'khooktop.straight' : glyph-proc
 		include : MarkSet.b
-		include : LowerKHookTopShapeT KStraightLegs true false (SLAB && !para.isItalic)
+		include : LowerKHookTopShapeT KNormalLegs true false (SLAB && !para.isItalic)
 	create-glyph 'khooktop.curly' : glyph-proc
 		include : MarkSet.b
-		include : LowerKHookTopShapeT KStraightLegs false false (SLAB && !para.isItalic)
+		include : LowerKHookTopShapeT KNormalLegs false false (SLAB && !para.isItalic)
 	create-glyph 'khooktop.cursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKHookTopShapeT KCursiveLegs true false (SLAB && !para.isItalic)
 	create-glyph 'khooktop.motionSerifedStraight' : glyph-proc
 		include : MarkSet.b
-		include : LowerKHookTopShapeT KStraightLegs true false false
+		include : LowerKHookTopShapeT KNormalLegs true false false
 	create-glyph 'khooktop.motionSerifedCurly' : glyph-proc
 		include : MarkSet.b
-		include : LowerKHookTopShapeT KStraightLegs false false false
+		include : LowerKHookTopShapeT KNormalLegs false false false
 	create-glyph 'khooktop.motionSerifedCursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKHookTopShapeT KCursiveLegs true false false
