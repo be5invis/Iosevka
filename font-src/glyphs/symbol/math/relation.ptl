@@ -1,0 +1,582 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-Relation : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : TildeShape
+	glyph-block-export dH LessSlope
+	glyph-block-export LessShape GreaterShape LigationLessShape LigationGreaterShape
+	glyph-block-export EqualShape EqualHole IdentShape IdentHole EqualHalfSpace
+	glyph-block-import Symbol-Arrow : ArrowShape
+
+	define EqualHalfSpace : (OperTop - OperBot) * 2 * DesignParameters.equal_wideness
+	define LessSlope : (4 / 13) * (OperTop - OperBot) / (RightSB - SB)
+	define dH : LessSlope * (RightSB - SB)
+	define lessEqDist : Math.max [AdviceStroke 4] (XH * 0.16)
+
+	define [EqualShape left right] : union
+		HBar left right (SymbolMid + EqualHalfSpace) OperatorStroke
+		HBar left right (SymbolMid - EqualHalfSpace) OperatorStroke
+
+	define [EqualHole x]
+		VBar x (SymbolMid - EqualHalfSpace) (SymbolMid + EqualHalfSpace) [AdviceStroke 6]
+
+	define [IdentShape left right] : union
+		HBar left right (SymbolMid + EqualHalfSpace * 1.5) OperatorStroke
+		HBar left right SymbolMid OperatorStroke
+		HBar left right (SymbolMid - EqualHalfSpace * 1.5) OperatorStroke
+	define [IdentHole x]
+		VBar x (SymbolMid - EqualHalfSpace * 1.5) (SymbolMid + EqualHalfSpace * 1.5) [AdviceStroke 6]
+
+	create-glyph 'equal' '=' : glyph-proc
+		include : EqualShape SB RightSB
+
+	create-glyph 'equalParallel' 0x22D5 : composite-proc
+		refer-glyph 'equal'
+		refer-glyph 'parallel.upright'
+
+	create-glyph 'oneDotApproxEq' 0x2250 : glyph-proc
+		include : refer-glyph 'equal'
+		include : DotAt Middle (SymbolMid + EqualHalfSpace * 2.5) DotRadius
+
+	create-glyph 'twoDotApproxEqCenter' 0x2251 : glyph-proc
+		include : refer-glyph 'equal'
+		include : DotAt Middle (SymbolMid + EqualHalfSpace * 2.5) DotRadius
+		include : DotAt Middle (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+
+	create-glyph 'twoDotApproxEq' 0x2252 : glyph-proc
+		include : refer-glyph 'equal'
+		include : DotAt [mix SB RightSB (1/6)] (SymbolMid + EqualHalfSpace * 2.5) DotRadius
+		include : DotAt [mix SB RightSB (5/6)] (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+
+	create-glyph 'twoDotApproxEqAlt' 0x2253 : glyph-proc
+		include : refer-glyph 'equal'
+		include : DotAt [mix SB RightSB (5/6)] (SymbolMid + EqualHalfSpace * 2.5) DotRadius
+		include : DotAt [mix SB RightSB (1/6)] (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+
+	create-glyph 'ringInEqual' 0x2256 : glyph-proc
+		local ringSw : AdviceStroke 4
+		include : difference
+			refer-glyph 'equal'
+			RingAt Middle SymbolMid (EqualHalfSpace + O + ringSw / 2)
+		include : RingStrokeAt Middle SymbolMid (EqualHalfSpace + ringSw / 2) ringSw
+
+	create-glyph 'geometricallyEquivalentTo' 0x224E : glyph-proc
+		local ringSw : AdviceStroke 4
+		local halfGap : EqualHalfSpace - OperatorStroke / 2
+		local outerRad : EqualHalfSpace + ringSw / 2
+		include : difference
+			refer-glyph 'equal'
+			OShapeOutline.NoOvershoot
+				SymbolMid + EqualHalfSpace + outerRad
+				SymbolMid - EqualHalfSpace - outerRad
+				Middle - outerRad
+				Middle + outerRad
+				begin ringSw
+				SmoothAOf outerRad Width
+				SmoothBOf outerRad Width
+		include : difference
+			OShape
+				SymbolMid + EqualHalfSpace + outerRad
+				SymbolMid - EqualHalfSpace - outerRad
+				Middle - outerRad
+				Middle + outerRad
+				begin ringSw
+				SmoothAOf outerRad Width
+				SmoothBOf outerRad Width
+			Rect (SymbolMid + halfGap) (SymbolMid - halfGap) 0 Width
+
+	create-glyph 'differenceBetween' 0x224F : glyph-proc
+		include : intersection
+			Rect ParenTop SymbolMid 0 Width
+			refer-glyph 'geometricallyEquivalentTo'
+		include : intersection
+			Rect SymbolMid ParenBot 0 Width
+			refer-glyph 'equal'
+
+	define ColonEqSbSquash 0.5
+	create-glyph 'eqColon' 0x2255 : glyph-proc
+		include : refer-glyph "baselineDot"
+		include : refer-glyph "xhDot"
+
+		local delta : Math.max 0 : Width / 2 - DotRadius - SB * ColonEqSbSquash
+		include : Upright
+		include : Translate (+delta) (SymbolMid - XH / 2)
+		include : Italify
+
+		include : EqualShape (SB * ColonEqSbSquash) (RightSB - DotSize)
+
+	define [ColonEqColonShape] : new-glyph : glyph-proc
+		include : refer-glyph "baselineDot"
+		include : refer-glyph "xhDot"
+
+		local delta : Math.max 0 : Width / 2 - DotRadius - SB * ColonEqSbSquash
+		include : Upright
+		include : Translate (-delta) (SymbolMid - XH / 2)
+		include : Italify
+
+	create-glyph 'colonEq' 0x2254 : glyph-proc
+		include : ColonEqColonShape
+		include : EqualShape (SB + DotSize) (Width - SB * ColonEqSbSquash)
+
+	create-glyph 'colonArrow' 0x29F4 : glyph-proc
+		local barLeft : SB + DotSize
+		local barRight : Width - SB * ColonEqSbSquash
+		local arrowHeadSize : Math.min ((PlusTop - PlusBot) / 2) (0.75 * (barRight - barLeft))
+		include : ColonEqColonShape
+		include : HBar [mix SB barLeft 0.8] [mix barLeft barRight 0.5] SymbolMid OperatorStroke
+		include : ArrowShape barLeft SymbolMid barRight SymbolMid arrowHeadSize
+
+	create-glyph 'ident' 0x2261 : glyph-proc
+		include : IdentShape SB RightSB
+
+	create-glyph 'iiiident' 0x2263 : glyph-proc
+		include : HBar SB RightSB (SymbolMid + EqualHalfSpace * 2.25) OperatorStroke
+		include : HBar SB RightSB (SymbolMid + EqualHalfSpace * 0.75) OperatorStroke
+		include : HBar SB RightSB (SymbolMid - EqualHalfSpace * 0.75) OperatorStroke
+		include : HBar SB RightSB (SymbolMid - EqualHalfSpace * 2.25) OperatorStroke
+
+	create-glyph 'equivalentTo' 0x224D : glyph-proc
+		define kArcExtY1   3
+		define kArcExtY2 : 3 + TanSlope * 2
+		define kArcExtX    2
+		include : intersection [MaskRight SB] [MaskLeft RightSB] : union
+			dispiro
+				widths.center OperatorStroke
+				g4 [mix Middle SB      kArcExtX] (SymbolMid + EqualHalfSpace * kArcExtY1)
+				g4 Middle (SymbolMid + EqualHalfSpace) [heading Rightward]
+				g4 [mix Middle RightSB kArcExtX] (SymbolMid + EqualHalfSpace * kArcExtY2)
+			dispiro
+				widths.center OperatorStroke
+				g4 [mix Middle SB      kArcExtX] (SymbolMid - EqualHalfSpace * kArcExtY2)
+				g4 Middle (SymbolMid - EqualHalfSpace) [heading Rightward]
+				g4 [mix Middle RightSB kArcExtX] (SymbolMid - EqualHalfSpace * kArcExtY1)
+
+	define [LessGreaterExpansion top bot l r]
+		Math.sqrt : 1 + (top - bot) / (2 * (r - l)) * (top - bot) / (2 * (r - l))
+
+	define [LessMaskShape top bot l r] : spiro-outline
+		corner r top
+		corner r bot
+		corner l [mix bot top 0.5]
+	define [GreaterMaskShape top bot l r] : spiro-outline
+		corner l top
+		corner l bot
+		corner r [mix bot top 0.5]
+	define [LessShapeA top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
+		return : dispiro
+			widths.center s
+			flat [mix l r pp] [mix [mix top bot 0.5] top pp]
+			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) Leftward]
+	define [LessShapeB top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
+		return : dispiro
+			widths.center s
+			flat [mix l r pp] [mix [mix top bot 0.5] bot pp]
+			curl l [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) Leftward]
+	define [GreaterShapeA top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
+		return : dispiro
+			widths.center s
+			flat [mix r l pp] [mix [mix top bot 0.5] top pp]
+			curl r [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) Rightward]
+	define [GreaterShapeB top bot l r s p] : begin
+		define exp : LessGreaterExpansion top bot l r
+		define pp : fallback p 1
+		return : dispiro
+			widths.center s
+			flat [mix r l pp] [mix [mix top bot 0.5] bot pp]
+			curl r [mix top bot 0.5] [widths.heading (s / 2 * exp) (s / 2 * exp) Rightward]
+
+	define [LessShape top bot l r s] : union
+		LessShapeA top bot l r [fallback s OperatorStroke]
+		LessShapeB top bot l r [fallback s OperatorStroke]
+
+	define [LigationLessShape top bot l r s t gap] : union
+		intersection
+			Rect [mix bot top 2] [mix top bot 2] [mix r l 2] r
+			union
+				LessShapeA top bot l r [fallback s OperatorStroke] 2
+				LessShapeB top bot l r [fallback s OperatorStroke] 2
+		intersection
+			LessMaskShape top bot l r
+			difference
+				dispiro
+					widths.lhs [fallback t OperatorStroke]
+					corner r bot
+					corner r top
+				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
+
+	define [NormalSubsetShape top bot l r s] : LigationLessShape top bot l r s s 0
+
+	define [GreaterShape top bot l r s] : union
+		GreaterShapeA top bot l r [fallback s OperatorStroke]
+		GreaterShapeB top bot l r [fallback s OperatorStroke]
+
+	define [LigationGreaterShape top bot l r s t gap] : union
+		intersection
+			Rect [mix bot top 2] [mix top bot 2] [mix l r 2] l
+			union
+				GreaterShapeA top bot l r [fallback s OperatorStroke] 2
+				GreaterShapeB top bot l r [fallback s OperatorStroke] 2
+		intersection
+			GreaterMaskShape top bot l r
+			difference
+				dispiro
+					widths.rhs [fallback t OperatorStroke]
+					corner l bot
+					corner l top
+				Rect ([mix top bot 0.5] + gap / 2) ([mix top bot 0.5] - gap / 2) (l + O) (r - O)
+
+	define [NormalSupersetShape top bot l r s] : LigationGreaterShape top bot l r s s 0
+
+	# Sym parameters
+	local approxDist : EqualHalfSpace * 1.75
+	local symMag : (OperTop - SymbolMid) * 0.17
+	define [symWave height mul sw] : TildeShape
+		ttop -- height + symMag * mul
+		tbot -- height - symMag * mul
+		leftEnd -- SB
+		rightEnd -- RightSB
+		hs -- [fallback sw OperatorStroke] / 2
+
+	define [BarNegator symbolBottom dist] : begin
+		local swo : Math.max (OperatorStroke * 1.5) (dist * 1.5)
+		return : dispiro
+			widths.center OperatorStroke
+			flat (Middle + dist) (symbolBottom - dist + swo) [heading Downward]
+			flat (Middle - dist) (symbolBottom - dist - swo) [heading Downward]
+
+	create-glyph 'less' '<' : glyph-proc
+		include : LessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+
+	create-glyph 'lessDot' 0x22D6 : composite-proc
+		LessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB [AdviceStroke 4]
+		DotAt (RightSB - DotRadius) SymbolMid (DotRadius * [AdviceStroke 4] / Stroke)
+
+	create-glyph 'normalSubsetOf' 0x22B2 : glyph-proc
+		include : NormalSubsetShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+
+	create-glyph 'greater' '>' : glyph-proc
+		include : GreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+
+	create-glyph 'greaterDot' 0x22D7 : composite-proc
+		GreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB [AdviceStroke 4]
+		DotAt (SB + DotRadius) SymbolMid (DotRadius * [AdviceStroke 4] / Stroke)
+
+	create-glyph 'normalSupersetOf' 0x22B3 : glyph-proc
+		include : NormalSupersetShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+
+	create-glyph 'lessEqUpper' : AsRadical : LessShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'greaterEqUpper' : AsRadical : GreaterShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'normalSubsetUpper' : AsRadical : NormalSubsetShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'normalSupersetUpper' : AsRadical : NormalSupersetShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'eqLower' : AsRadical : HBar SB RightSB (SymbolMid - dH - lessEqDist) OperatorStroke
+	create-glyph 'eqBarNegatedLower' : AsRadical : union [refer-glyph 'eqLower'] [BarNegator (SymbolMid - dH) lessEqDist]
+	create-glyph 'symLower' : AsRadical : symWave (SymbolMid - dH - lessEqDist) 1
+	create-glyph 'symBarNegatedLower' : AsRadical : union [refer-glyph 'symLower'] [BarNegator (SymbolMid - dH) lessEqDist]
+
+	create-glyph 'less.narrow' : composite-proc [refer-glyph 'lessEqUpper'] [Upright] [Translate 0 (-lessEqDist)] [Italify]
+	create-glyph 'lessEq' 0x2264 : composite-proc [refer-glyph 'lessEqUpper'] [refer-glyph 'eqLower']
+	create-glyph 'lessEqBarNegated' 0x2A87 : composite-proc [refer-glyph 'lessEqUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'lessSym' 0x2272 : composite-proc [refer-glyph 'lessEqUpper'] [refer-glyph 'symLower']
+	create-glyph 'lessSymBarNegated' 0x22E6 : composite-proc [refer-glyph 'lessEqUpper'] [refer-glyph 'symBarNegatedLower']
+	create-glyph 'lessEqslant' 0x2A7D : composite-proc [refer-glyph 'lessEqUpper']
+		LessShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) SB RightSB OperatorStroke
+
+	create-glyph 'greater.narrow' : composite-proc [refer-glyph 'greaterEqUpper'] [Upright] [Translate 0 (-lessEqDist)] [Italify]
+	create-glyph 'greaterEq' 0x2265 : composite-proc [refer-glyph 'greaterEqUpper'] [refer-glyph 'eqLower']
+	create-glyph 'greaterEqBarNegated' 0x2A88 : composite-proc [refer-glyph 'greaterEqUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'greaterSym' 0x2273 : composite-proc [refer-glyph 'greaterEqUpper'] [refer-glyph 'symLower']
+	create-glyph 'greaterSymBarNegated' 0x22E7 : composite-proc [refer-glyph 'greaterEqUpper'] [refer-glyph 'symBarNegatedLower']
+	create-glyph 'greaterEqslant' 0x2A7E : composite-proc [refer-glyph 'greaterEqUpper']
+		GreaterShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) SB RightSB OperatorStroke
+
+	create-glyph 'normalSubsetEq' 0x22B4 : composite-proc [refer-glyph 'normalSubsetUpper'] [refer-glyph 'eqLower']
+	create-glyph 'normalSupersetEq' 0x22B5 : composite-proc [refer-glyph 'normalSupersetUpper'] [refer-glyph 'eqLower']
+
+	turned 'turnGreaterEq' 0x22DC 'greaterEq' Middle SymbolMid
+	turned 'turnLessEq' 0x22DD 'lessEq' Middle SymbolMid
+
+	do "Ligation Glyphs"
+		define l : 0.3 * Width
+		define r : 2 * Width - l
+		define l2 : l - Width
+		define r2 : r - Width
+		create-glyph 'less.lig2' : glyph-proc
+			include : LessShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) l r
+		create-glyph 'greater.lig2' : glyph-proc
+			include : GreaterShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) l r
+		create-glyph 'eq.at-lteq.lig2.flat' : glyph-proc
+			include : HBar l2 r2 (SymbolMid - dH - lessEqDist) OperatorStroke
+			create-aliased-glyph 'eq.at-gteq.lig2.flat'
+		create-glyph 'eq.at-lteq.lig2.slanted' : glyph-proc
+			include : LessShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) l2 r2 OperatorStroke
+		create-glyph 'eq.at-gteq.lig2.slanted' : glyph-proc
+			include : GreaterShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) l2 r2 OperatorStroke
+
+	select-variant 'eq.at-lteq.lig2'
+	select-variant 'eq.at-gteq.lig2'
+
+	define lesslessSW : AdviceStroke 4
+	define lesslessSWO : Math.max lesslessSW lessEqDist
+	define llggHeight : dH * 2 + lessEqDist * 2
+
+	define [EqEqBarNegationImpl sw y1 y2] : dispiro
+		widths.center sw
+		flat (Middle + lessEqDist) (y1 + lesslessSWO) [heading Downward]
+		flat (Middle - lessEqDist) (y2 - lesslessSWO) [heading Downward]
+
+	define [EqEqBarNegation] : EqEqBarNegationImpl lesslessSW
+		SymbolMid - dH + lessEqDist * 2 / 3
+		SymbolMid - dH - lessEqDist
+
+	create-glyph 'lessEqEqUpper' : AsRadical : LessShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist * 1.75) SB RightSB lesslessSW
+	create-glyph 'greaterEqEqUpper' : AsRadical : GreaterShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist * 1.75) SB RightSB lesslessSW
+	create-glyph 'eqEqLower' : AsRadical : union
+		HBar SB RightSB (SymbolMid - dH + lessEqDist * 2 / 3) lesslessSW
+		HBar SB RightSB (SymbolMid - dH - lessEqDist) lesslessSW
+	create-glyph 'symSymLower' : AsRadical : union
+		symWave (SymbolMid - dH + lessEqDist * 2 / 3) 1 lesslessSW
+		symWave (SymbolMid - dH - lessEqDist) 1 lesslessSW
+	create-glyph 'eqEqBarNegatedLower' : AsRadical : union [refer-glyph 'eqEqLower'] [EqEqBarNegation]
+	create-glyph 'symSymBarNegatedLower' : AsRadical : union [refer-glyph 'symSymLower'] [EqEqBarNegation]
+
+	create-glyph 'lessEqEq' 0x2266 : composite-proc [refer-glyph 'lessEqEqUpper'] [refer-glyph 'eqEqLower']
+	create-glyph 'lessEqEqBarNegated' 0x2268 : composite-proc [refer-glyph 'lessEqEqUpper'] [refer-glyph 'eqEqBarNegatedLower']
+	create-glyph 'lessSymSym' 0x2A85 : composite-proc [refer-glyph 'lessEqEqUpper'] [refer-glyph 'symSymLower']
+	create-glyph 'lessSymSymBarNegated' 0x2A89 : composite-proc [refer-glyph 'lessEqEqUpper'] [refer-glyph 'symSymBarNegatedLower']
+	create-glyph 'greaterEqEq' 0x2267 : composite-proc [refer-glyph 'greaterEqEqUpper'] [refer-glyph 'eqEqLower']
+	create-glyph 'greaterEqEqBarNegated' 0x2269 : composite-proc [refer-glyph 'greaterEqEqUpper'] [refer-glyph 'eqEqBarNegatedLower']
+	create-glyph 'greaterSymSym' 0x2A86 : composite-proc [refer-glyph 'greaterEqEqUpper'] [refer-glyph 'symSymLower']
+	create-glyph 'greaterSymSymBarNegated' 0x2A8A : composite-proc [refer-glyph 'greaterEqEqUpper'] [refer-glyph 'symSymBarNegatedLower']
+
+	create-glyph 'lessGreater' 0x2276 : glyph-proc
+		include : LessShape (SymbolMid + llggHeight / 2) (SymbolMid - llggHeight / 6 + lessEqDist) SB RightSB lesslessSW
+		include : GreaterShape (SymbolMid + llggHeight / 6 - lessEqDist) (SymbolMid - llggHeight / 2) SB RightSB lesslessSW
+	create-glyph 'greaterLess' 0x2277 : glyph-proc
+		include : GreaterShape (SymbolMid + llggHeight / 2) (SymbolMid - llggHeight / 6 + lessEqDist) SB RightSB lesslessSW
+		include : LessShape (SymbolMid + llggHeight / 6 - lessEqDist) (SymbolMid - llggHeight / 2) SB RightSB lesslessSW
+	create-glyph 'lessEqGreater' 0x22DA : glyph-proc
+		include : LessShape (SymbolMid + llggHeight / 2 + lessEqDist) (SymbolMid - llggHeight / 6 + lessEqDist * 2) SB RightSB lesslessSW
+		include : GreaterShape (SymbolMid + llggHeight / 6 - lessEqDist * 2) (SymbolMid - llggHeight / 2 - lessEqDist) SB RightSB lesslessSW
+		include : HBar SB RightSB (SymbolMid) lesslessSW
+	create-glyph 'greaterEqLess' 0x22DB : glyph-proc
+		include : GreaterShape (SymbolMid + llggHeight / 2 + lessEqDist) (SymbolMid - llggHeight / 6 + lessEqDist * 2) SB RightSB lesslessSW
+		include : LessShape (SymbolMid + llggHeight / 6 - lessEqDist * 2) (SymbolMid - llggHeight / 2 - lessEqDist) SB RightSB lesslessSW
+		include : HBar SB RightSB (SymbolMid) lesslessSW
+
+	create-glyph 'lessless' 0x226A : glyph-proc
+		include : LessShape (SymbolMid + dH) (SymbolMid - dH) (SB - lessEqDist / 2) (RightSB - lessEqDist * 2) lesslessSW
+		include : LessShape (SymbolMid + dH) (SymbolMid - dH) (SB + lessEqDist * 2) (RightSB + lessEqDist / 2) lesslessSW
+	create-glyph 'greatergreater' 0x226B : glyph-proc
+		include : GreaterShape (SymbolMid + dH) (SymbolMid - dH) (SB - lessEqDist / 2) (RightSB - lessEqDist * 2) lesslessSW
+		include : GreaterShape (SymbolMid + dH) (SymbolMid - dH) (SB + lessEqDist * 2) (RightSB + lessEqDist / 2) lesslessSW
+
+	define [PrecedesShapeA top bot l r s cth] : begin
+		local fine : s * cth
+		return : dispiro
+			widths.center s
+			g4 r top
+			straight.left.end l ([mix top bot 0.5] + s / 2) [widths.heading fine 0 Leftward]
+	define [PrecedesShapeB top bot l r s cth] : begin
+		local fine : s * cth
+		return : dispiro
+			widths.center s
+			g4 r bot
+			straight.left.end l ([mix top bot 0.5] - s / 2) [widths.heading 0 fine Leftward]
+	define [SucceedsShapeA top bot l r s cth] : begin
+		local fine : s * cth
+		return : dispiro
+			widths.center s
+			g4 l top
+			straight.right.end r ([mix top bot 0.5] + s / 2) [widths.heading 0 fine Rightward]
+	define [SucceedsShapeB top bot l r s cth] : begin
+		local fine : s * cth
+		return : dispiro
+			widths.center s
+			g4 l bot
+			straight.right.end r ([mix top bot 0.5] - s / 2) [widths.heading fine 0 Rightward]
+
+	define [PrecedesShape top bot l r s] : glyph-proc
+		include : PrecedesShapeA top bot l r [fallback s OperatorStroke] CThin
+		include : PrecedesShapeB top bot l r [fallback s OperatorStroke] CThin
+	define [SucceedsShape top bot l r s] : glyph-proc
+		include : SucceedsShapeA top bot l r [fallback s OperatorStroke] CThin
+		include : SucceedsShapeB top bot l r [fallback s OperatorStroke] CThin
+
+	create-glyph 'precedes' 0x227a : AsRadical : PrecedesShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+	create-glyph 'succeeds' 0x227b : AsRadical : SucceedsShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
+	create-glyph 'precedesEqUpper' : AsRadical : PrecedesShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'precedesEqEqUpper' : AsRadical : PrecedesShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist * 1.75) SB RightSB lesslessSW
+	create-glyph 'succeedsEqUpper' : AsRadical : SucceedsShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist) SB RightSB
+	create-glyph 'succeedsEqEqUpper' : AsRadical : SucceedsShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist * 1.75) SB RightSB lesslessSW
+
+	create-glyph 'precedes.narrow' : composite-proc [refer-glyph 'precedesEqUpper'] [Upright] [Translate 0 (-lessEqDist)] [Italify]
+	create-glyph 'precedesEq' 0x2AAF : composite-proc [refer-glyph 'precedesEqUpper'] [refer-glyph 'eqLower']
+	create-glyph 'precedesEqBarNegated' 0x2AB1 : composite-proc [refer-glyph 'precedesEqUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'precedesSym' 0x227E : composite-proc [refer-glyph 'precedesEqUpper'] [refer-glyph 'symLower']
+	create-glyph 'precedesSymBarNegated' 0x22E8 : composite-proc [refer-glyph 'precedesEqUpper'] [refer-glyph 'symBarNegatedLower']
+	create-glyph 'precedesEqSlant' 0x227C : composite-proc [refer-glyph 'precedesEqUpper']
+		PrecedesShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) SB RightSB OperatorStroke 1
+
+	create-glyph 'precedesEqEq' 0x2AB3 : composite-proc [refer-glyph 'precedesEqEqUpper'] [refer-glyph 'eqEqLower']
+	create-glyph 'precedesEqEqBarNegated' 0x2AB5 : composite-proc [refer-glyph 'precedesEqEqUpper'] [refer-glyph 'eqEqBarNegatedLower']
+	create-glyph 'precedesSymSym' 0x2AB7 : composite-proc [refer-glyph 'precedesEqEqUpper'] [refer-glyph 'symSymLower']
+	create-glyph 'precedesSymSymBarNegated' 0x2AB9 : composite-proc [refer-glyph 'precedesEqEqUpper'] [refer-glyph 'symSymBarNegatedLower']
+
+
+	create-glyph 'succeeds.narrow' : composite-proc [refer-glyph 'succeedsEqUpper'] [Upright] [Translate 0 (-lessEqDist)] [Italify]
+	create-glyph 'succeedsEq' 0x2AB0 : composite-proc [refer-glyph 'succeedsEqUpper'] [refer-glyph 'eqLower']
+	create-glyph 'sycceedseqBarNegated' 0x2AB2 : composite-proc [refer-glyph 'succeedsEqUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'succeedsSym' 0x227F : composite-proc [refer-glyph 'succeedsEqUpper'] [refer-glyph 'symLower']
+	create-glyph 'succeedsSymBarNegated' 0x22E9 : composite-proc [refer-glyph 'succeedsEqUpper'] [refer-glyph 'symBarNegatedLower']
+	create-glyph 'succeedsEqSlant' 0x227D : composite-proc [refer-glyph 'succeedsEqUpper']
+		SucceedsShapeB (SymbolMid + dH - lessEqDist) (SymbolMid - dH - lessEqDist) SB RightSB OperatorStroke 1
+
+	create-glyph 'succeedsEqEq' 0x2AB4 : composite-proc [refer-glyph 'succeedsEqEqUpper'] [refer-glyph 'eqEqLower']
+	create-glyph 'succeedsEqEqBarNegated' 0x2AB6 : composite-proc [refer-glyph 'succeedsEqEqUpper'] [refer-glyph 'eqEqBarNegatedLower']
+	create-glyph 'succeedsSymSym' 0x2AB8 : composite-proc [refer-glyph 'succeedsEqEqUpper'] [refer-glyph 'symSymLower']
+	create-glyph 'succeedsSymSymBarNegated' 0x2ABA : composite-proc [refer-glyph 'succeedsEqEqUpper'] [refer-glyph 'symSymBarNegatedLower']
+
+	turned 'turnSucceedsEqSlant' 0x22DE 'succeedsEqSlant' Middle SymbolMid
+	turned 'turnPrecedesEqSlant' 0x22DF 'precedesEqSlant' Middle SymbolMid
+
+	create-glyph 'sym' 0x223C : symWave SymbolMid 1
+	create-glyph 'flipSym' 0x223D : symWave SymbolMid (-1)
+
+	VDual 'approx' 0x2248 'sym' approxDist
+
+	create-glyph : glyph-proc
+		include : symWave (SymbolMid + approxDist) 1
+		include : symWave SymbolMid 1
+		create-derived 'aapprox' 0x224B : symWave (SymbolMid - approxDist) 1
+		create-derived 'approxBar' 0x224A : HBar SB RightSB (SymbolMid - approxDist) OperatorStroke
+
+	create-glyph 'barSym' 0x2242 : glyph-proc
+		include [refer-glyph 'sym'] AS_BASE
+		include : Upright
+		include : Translate 0 (-approxDist / 2)
+		include : Italify
+		include : HBar SB RightSB (SymbolMid + approxDist / 2) OperatorStroke
+
+	create-glyph 'symEq' 0x2243 : glyph-proc
+		include [refer-glyph 'sym'] AS_BASE
+		include : Upright
+		include : Translate 0 (approxDist / 2)
+		include : Italify
+		include : HBar SB RightSB (SymbolMid - approxDist / 2) OperatorStroke
+
+	create-glyph 'symEqEq' 0x2245 : glyph-proc
+		local sympShift : approxDist + EqualHalfSpace * 1.5
+		include [refer-glyph 'sym'] AS_BASE
+		include : Upright
+		include : Translate 0 (sympShift / 2)
+		include : Italify
+		include : HBar SB RightSB (SymbolMid - sympShift / 2 + EqualHalfSpace * 1.5) OperatorStroke
+		include : HBar SB RightSB (SymbolMid - sympShift / 2) OperatorStroke
+
+		create-derived 'symEqEqBarNegated' 0x2246 : EqEqBarNegationImpl OperatorStroke
+			SymbolMid - sympShift / 2 + EqualHalfSpace * 1.5
+			SymbolMid - sympShift / 2
+
+	create-glyph 'flipSymEq' 0x22CD : glyph-proc
+		include [refer-glyph 'flipSym'] AS_BASE
+		include : Upright
+		include : Translate 0 (approxDist / 2)
+		include : Italify
+		include : HBar SB RightSB (SymbolMid - approxDist / 2) OperatorStroke
+
+	create-glyph 'flipSymEqEq' 0x224C : glyph-proc
+		local sympShift : approxDist + EqualHalfSpace * 1.5
+		include [refer-glyph 'flipSym'] AS_BASE
+		include : Upright
+		include : Translate 0 (sympShift / 2)
+		include : Italify
+		include : HBar SB RightSB (SymbolMid - sympShift / 2 + EqualHalfSpace * 1.5) OperatorStroke
+		include : HBar SB RightSB (SymbolMid - sympShift / 2) OperatorStroke
+
+	define [SubsetShape] : params [top bot [sw OperatorStroke] [offset 0]] : dispiro
+		widths.lhs sw
+		flat RightSB (top - offset) [heading Leftward]
+		curl (SB + offset + (top - bot) / 2 - offset) (top - offset)
+		archv
+		g4   (SB + offset) [mix top bot 0.5]
+		arcvh
+		flat (SB + offset + (top - bot) / 2 - offset) (bot + offset)
+		curl RightSB (bot + offset) [heading Rightward]
+
+	define [PrefixShape top bot sw] : union
+		VBarLeft SB bot top [fallback sw OperatorStroke]
+		HBarTop  SB RightSB top [fallback sw OperatorStroke]
+		HBarBottom SB RightSB bot [fallback sw OperatorStroke]
+
+	define [SupsetShape top bot sw] : glyph-proc
+		include : SubsetShape top bot sw
+		include : FlipAround Middle [mix top bot 0.5]
+
+	define [SuffixShape top bot sw] : glyph-proc
+		include : PrefixShape top bot sw
+		include : FlipAround Middle [mix top bot 0.5]
+
+	create-glyph 'subst' 0x2282 : SubsetShape (SymbolMid + dH) (SymbolMid - dH)
+	create-glyph 'doubleSubst' 0x22D0 : glyph-proc
+		local sw : AdviceStroke 6
+		local gap : Math.max (Width / 8) (sw / 2)
+
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw)
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw) (offset -- gap + sw)
+
+	turned 'supst' 0x2283 'subst' Middle SymbolMid
+	turned 'doubleSupst' 0x22D1 'doubleSubst' Middle SymbolMid
+
+	create-glyph 'substBarUpper' : AsRadical : SubsetShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist)
+	create-glyph 'supstBarUpper' : AsRadical : SupsetShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist)
+
+	create-glyph 'substBar' 0x2286 : composite-proc [refer-glyph 'substBarUpper'] [refer-glyph 'eqLower']
+	create-glyph 'substBarNegated' 0x228A : composite-proc [refer-glyph 'substBarUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'supstBar' 0x2287 : composite-proc [refer-glyph 'supstBarUpper'] [refer-glyph 'eqLower']
+	create-glyph 'supstBarNegated' 0x228B : composite-proc [refer-glyph 'supstBarUpper'] [refer-glyph 'eqBarNegatedLower']
+
+	create-glyph 'element' 0x2208 : glyph-proc
+		include : SubsetShape (SymbolMid + dH * 4 / 3) (SymbolMid - dH * 4 / 3)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid
+
+	turned 'turnElement' 0x220B 'element' Middle SymbolMid
+
+	create-glyph 'smallElement' 0x220A : glyph-proc
+		include [refer-glyph 'subst'] AS_BASE
+		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+
+	turned 'turnSmallElement' 0x220D 'smallElement' Middle SymbolMid
+
+	create-glyph 'prefix' 0x228F : PrefixShape (SymbolMid + dH) (SymbolMid - dH)
+	create-glyph 'suffix' 0x2290 : SuffixShape (SymbolMid + dH) (SymbolMid - dH)
+
+	create-glyph 'prefixBarUpper' : AsRadical : PrefixShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist)
+	create-glyph 'suffixBarUpper' : AsRadical : SuffixShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist)
+
+	create-glyph 'prefixBar' 0x2291 : composite-proc [refer-glyph 'prefixBarUpper'] [refer-glyph 'eqLower']
+	create-glyph 'prefixBarNegated' 0x22E4 : composite-proc [refer-glyph 'prefixBarUpper'] [refer-glyph 'eqBarNegatedLower']
+	create-glyph 'suffixBar' 0x2292 : composite-proc [refer-glyph 'suffixBarUpper'] [refer-glyph 'eqLower']
+	create-glyph 'suffixBarNegated' 0x22E5 : composite-proc [refer-glyph 'suffixBarUpper'] [refer-glyph 'eqBarNegatedLower']
+
+	create-glyph 'prefixElement' 0x22FF : glyph-proc
+		include : PrefixShape (SymbolMid + dH * 4 / 3) (SymbolMid - dH * 4 / 3)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid
+
+	create-glyph 0x22F8 : composite-proc
+		refer-glyph 'element'
+		MarkSet.plus
+		refer-glyph 'underlineBelow'
+		clear-anchors

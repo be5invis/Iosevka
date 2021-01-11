@@ -1,0 +1,71 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-Dots-And-Colons : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	local radius1 PeriodRadius
+	local radius : Math.min PeriodRadius (0.5 * [AdviceStroke 3.5] * PeriodSize / Stroke)
+	local left : mix 0 Width (1 / 4)
+	local right : mix 0 Width (3 / 4)
+	create-glyph 'therefore' 0x2234 : glyph-proc
+		include : Ring (XH - O) (XH - radius * 2 + O) (Middle - radius + O) (Middle + radius - O) true
+		include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
+		include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
+
+	create-glyph 'because' 0x2235 : glyph-proc
+		include : Ring (XH - O) (XH - radius * 2 + O) (left - radius + O) (left + radius - O) true
+		include : Ring (XH - O) (XH - radius * 2 + O) (right - radius + O) (right + radius - O) true
+		include : Ring (radius * 2 - O) O (Middle - radius + O) (Middle + radius - O) true
+
+	create-glyph 'mathcolon' 0x2236 : glyph-proc
+		include : Ring (PeriodRadius * 2 - O) O (Middle - PeriodRadius + O) (Middle + PeriodRadius - O) true
+		include : Ring (XH - O) (XH - PeriodRadius * 2 + O) (Middle - PeriodRadius + O) (Middle + PeriodRadius - O) true
+
+	create-glyph 'coloncolon' 0x2237 : glyph-proc
+		include : Ring (radius * 2 - O) O (left - radius + O) (left + radius - O) true
+		include : Ring (radius * 2 - O) O (right - radius + O) (right + radius - O) true
+		include : Ring (XH - O) (XH - radius * 2 + O) (left - radius + O) (left + radius - O) true
+		include : Ring (XH - O) (XH - radius * 2 + O) (right - radius + O) (right + radius - O) true
+
+	create-glyph 'mathcdot' : glyph-proc
+		include : Ring (SymbolMid + PeriodRadius - O) (SymbolMid - PeriodRadius + O) (Middle - PeriodRadius + O) (Middle + PeriodRadius - O) true
+
+	for-width-kinds WideWidth1
+		create-glyph [MangleName 'mathcdotBig'] : glyph-proc
+			set-width MosaicWidth
+			include : Ring (SymbolMid + PeriodRadius - O) (SymbolMid - PeriodRadius + O) (MosaicMiddle - PeriodRadius + O) (MosaicMiddle + PeriodRadius - O) true
+
+		create-glyph [MangleName 'innerPlusBig'] : glyph-proc
+			set-width MosaicWidth
+			include : union
+				HBar SB (MosaicWidth - SB) SymbolMid GeometryStroke
+				VBar MosaicMiddle [mix SymbolMid PlusTop MosaicWidthScalar] [mix SymbolMid PlusBot MosaicWidthScalar] GeometryStroke
+
+		create-glyph [MangleName 'innerMultiplyStroke1Big'] : glyph-proc
+			set-width MosaicWidth
+			local radius : (RightSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GeometryStroke
+				flat (MosaicMiddle - radius) (SymbolMid - radius)
+				curl (MosaicMiddle + radius) (SymbolMid + radius)
+
+		create-glyph [MangleName 'innerMultiplyStroke2Big'] : glyph-proc
+			set-width MosaicWidth
+			local radius : (RightSB - SB) / 2 * [Math.sqrt MosaicWidthScalar]
+			include : dispiro
+				widths.center GeometryStroke
+				flat (MosaicMiddle + radius) (SymbolMid - radius)
+				curl (MosaicMiddle - radius) (SymbolMid + radius)
+
+		create-glyph [MangleName 'innerMultiplyBig'] : glyph-proc
+			set-width MosaicWidth
+			include : refer-glyph : MangleName "innerMultiplyStroke1Big"
+			include : refer-glyph : MangleName "innerMultiplyStroke2Big"
+
+	alias 'mathAsterisk' 0x2217 'opAsterisk.low'

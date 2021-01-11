@@ -1,0 +1,169 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-VAndCup : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Upper-U : UShape
+	glyph-block-import Letter-Greek-Pi : PiShape
+	glyph-block-import Symbol-Arrow : ArrowShape
+
+	define [VeeShape top bot] : union
+		dispiro
+			widths.center OperatorStroke
+			flat (SB + HalfStroke * HVContrast) top [heading Downward]
+			curl Middle bot [heading Downward]
+		dispiro
+			widths.center OperatorStroke
+			flat (RightSB - HalfStroke * HVContrast) top [heading Downward]
+			curl Middle bot [heading Downward]
+
+	define [WedgeShape top bot] : new-glyph : glyph-proc
+		include : VeeShape top bot
+		include : FlipAround Middle [mix top bot 0.5]
+
+	create-glyph 'wedge' 0x2227 : WedgeShape OperTop OperBot
+	create-glyph 'vee' 0x2228 : VeeShape OperTop OperBot
+
+	create-glyph 'mt/projection' 0x2305 : union
+		HBarTop SB RightSB OperTop OperatorStroke
+		WedgeShape (OperTop - OperatorStroke) OperBot
+
+	define [WedgeBarGap] : Math.max [AdviceStroke 4] ((OperTop - OperBot) / 8)
+
+	create-glyph 'math/logic/xor' 0x22BB : let [gap : WedgeBarGap] : union
+		HBarBottom SB RightSB OperBot OperatorStroke
+		VeeShape OperTop (OperBot + OperatorStroke + gap)
+
+	create-glyph 'math/logic/nand' 0x22BC : let [gap : WedgeBarGap] : union
+		HBarTop SB RightSB OperTop OperatorStroke
+		WedgeShape (OperTop - OperatorStroke - gap) OperBot
+
+	create-glyph 'math/logic/nor' 0x22BD : let [gap : WedgeBarGap] : union
+		HBarTop SB RightSB OperTop OperatorStroke
+		VeeShape (OperTop - OperatorStroke - gap) OperBot
+
+	create-glyph 'mt/perspective' 0x2306 : let [gap : WedgeBarGap] : union
+		HBarTop SB RightSB OperTop OperatorStroke
+		HBarTop SB RightSB (OperTop - OperatorStroke - gap) OperatorStroke
+		WedgeShape (OperTop - 2 * OperatorStroke - gap) OperBot
+
+	create-glyph 'curlyVee' 0x22CE : glyph-proc
+		local fine : CThin * OperatorStroke
+		include : dispiro
+			g4 SB OperTop [widths.center OperatorStroke]
+			straight.down.end (Middle - OperatorStroke / 2 * HVContrast) OperBot [widths.heading fine 0 Downward]
+
+		include : dispiro
+			widths.center OperatorStroke
+			g4 RightSB OperTop [widths.center OperatorStroke]
+			straight.down.end (Middle + OperatorStroke / 2 * HVContrast) OperBot [widths.heading 0 fine Downward]
+
+	turned 'curlyWedge' 0x22CF 'curlyVee' Middle SymbolMid
+
+	create-glyph 'doubleVee' 0x2A54 : glyph-proc
+		define sw : AdviceStroke 6
+		include : dispiro
+			widths.center sw
+			flat SB OperTop [heading Downward]
+			curl Middle OperBot [heading Downward]
+
+		include : dispiro
+			widths.center sw
+			flat RightSB OperTop [heading Downward]
+			curl Middle OperBot [heading Downward]
+
+		define offsetRatio : 1 / 4
+		define bias : (RightSB - SB) * offsetRatio
+		define a : dispiro
+			widths.center sw
+			flat (SB + bias) OperTop [heading Downward]
+			curl (Middle + bias) OperBot [heading Downward]
+		define b : dispiro
+			widths.center sw
+			flat (RightSB - bias) OperTop [heading Downward]
+			curl (Middle - bias) OperBot [heading Downward]
+
+		include : union
+			intersection a b
+			difference
+				union a b
+				spiro-outline
+					corner 0 OperBot
+					corner Width OperBot
+					corner Width [mix OperBot OperTop (1 - 2 * offsetRatio)]
+					corner 0 [mix OperBot OperTop (1 - 2 * offsetRatio)]
+
+	turned 'doubleWedge' 0x2A53 'doubleVee' Middle SymbolMid
+
+	create-glyph 'cup' 0x222A : glyph-proc
+		include : UShape [DivFrame 1] OperTop OperBot
+			oper -- true
+			stroke -- OperatorStroke
+
+	define ThinCupStroke : AdviceStroke 4
+	create-glyph 'thinCup' : glyph-proc
+		include : UShape [DivFrame 1] OperTop OperBot
+			oper -- true
+			stroke -- ThinCupStroke
+
+	create-glyph 'cupDot' 0x228D : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		include : DotAt Middle (OperBot + Smooth) [Math.min DotRadius ((RightSB - SB - ThinCupStroke * HVContrast * 2) * (1 / 3))]
+
+	create-glyph 'cupArrowLeft' 0x228C : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		local mockUpscale : ThinCupStroke / [AdviceStroke 6]
+		local arrowLength : mockUpscale * [Math.min (RightSB - SB - ThinCupStroke * HVContrast * 2) (Width * 0.6)]
+		include : new-glyph : glyph-proc
+			include : ArrowShape
+				Middle + arrowLength / 2
+				OperBot + Smooth
+				Middle - arrowLength / 2
+				OperBot + Smooth
+				arrowLength * 0.5
+			include : Upright
+			include : Translate (-Middle) (-OperBot - Smooth)
+			include : Scale (1 / mockUpscale) (1 / mockUpscale)
+			include : Translate Middle (OperBot + Smooth)
+			include : Italify
+
+	create-glyph 'cupPlus' 0x228E : glyph-proc
+		include [refer-glyph 'thinCup'] AS_BASE ALSO_METRICS
+		local sw : AdviceStroke 6
+		local size : Math.min (RightSB - SB - ThinCupStroke * HVContrast * (2 + 0.5 * sw / ThinCupStroke)) ((RightSB - SB) * 0.8)
+		include : dispiro
+			widths.center sw
+			corner (Middle - size / 2) (OperBot + Smooth)
+			corner (Middle + size / 2) (OperBot + Smooth)
+		include : dispiro
+			widths.center sw
+			corner Middle (OperBot + Smooth - size / 2)
+			corner Middle (OperBot + Smooth + size / 2)
+
+	create-glyph 'doubleCup' 0x22D3 : glyph-proc
+		local sw : AdviceStroke 6
+		local gap : Math.max (Width / 8) (sw / 2)
+		include : UShape [DivFrame 1] OperTop OperBot
+			oper -- true
+			stroke -- sw
+		include : UShape [DivFrame 1] OperTop OperBot
+			oper -- true
+			stroke -- sw
+			offset -- (sw + gap)
+			sma -- [SmoothAOf (Smooth - sw - gap) Width]
+			smb -- [SmoothBOf (Smooth - sw - gap) Width]
+
+	turned 'cap' 0x2229 'cup' Middle SymbolMid
+	turned 'capDot' 0x2A40 'cupDot' Middle SymbolMid
+	turned 'doubleCap' 0x22D2 'doubleCup' Middle SymbolMid
+
+	create-glyph 'squareCap' 0x2293 : glyph-proc
+		include : PiShape [DivFrame 1] OperTop OperBot (shrinkRate -- 0) (fine -- OperatorStroke) (noSerif -- true)
+
+	turned 'squareCup' 0x2294 'squareCap' Middle SymbolMid

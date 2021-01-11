@@ -1,0 +1,50 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-Integrals : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Lower-F : LongSShape
+
+	define MosaicTop    fontMetrics.OS_2.sTypoAscender
+	define MosaicBottom fontMetrics.OS_2.sTypoDescender
+	define MosaicHeight : MosaicTop - MosaicBottom
+
+	create-glyph 'integrate' 0x222B : glyph-proc
+		local hookY : Math.max (Hook * 0.75) (Stroke * 1.5)
+		include : LongSShape BgOpTop BgOpBot Hook hookY OperatorStroke
+
+	HDual 'doubleintegrate' 0x222C 'integrate' (0.5 * Width)
+
+	create-glyph 'integralUpper' 0x2320 : glyph-proc
+		include : intersection
+			Rect MosaicTop MosaicBottom (-Width) (2 * Width)
+			LongSShape BgOpTop (BgOpBot - MosaicHeight * 2) Hook (Hook * 0.75) OperatorStroke
+
+	create-glyph 'integralExtension' 0x23AE : glyph-proc
+		include : intersection
+			Rect MosaicTop MosaicBottom (-Width) (2 * Width)
+			LongSShape (BgOpTop + MosaicHeight) (BgOpBot - MosaicHeight) Hook (Hook * 0.75) OperatorStroke
+
+	create-glyph 'integralLower' 0x2321 : glyph-proc
+		include : intersection
+			Rect MosaicTop MosaicBottom (-Width) (2 * Width)
+			LongSShape (BgOpTop + MosaicHeight * 2) BgOpBot Hook (Hook * 0.75) OperatorStroke
+
+	create-glyph 'tripleintegrate' 0x222D : glyph-proc
+		define [shape] : LongSShape BgOpTop BgOpBot Hook (Hook * 0.75) [AdviceStroke 3.75]
+		include [shape]
+		include : Translate (-Width / 3) 0
+		include [shape]
+		include : Translate (-Width / 3) 0
+		include [shape]
+		include : Translate (Width / 3) 0
+
+	create-glyph 'ringintegrate' 0x222E : glyph-proc
+		include : refer-glyph "integrate"
+		include : OShape (SymbolMid + (RightSB - SB) / 2) (SymbolMid - (RightSB - SB) / 2) SB RightSB OperatorStroke
