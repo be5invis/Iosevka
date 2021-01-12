@@ -10,6 +10,7 @@ glyph-module
 glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : UnicodeWeightGrade
 
 	define arrowHeight : para.arrowHeight * (Width - SB / 2) * [Math.pow (MosaicWidth / MosaicUnitWidth) (1 / 3)]
 	define arrowWidth  : Math.min (MosaicWidth - SB / 2) arrowHeight
@@ -135,7 +136,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		include : ArrowHead x1 y1 x2 y2 size
 		include : HookArrowBar x1 y1 x2 y2 halfArrowSw (arrowHeadSize * mul)
 
-	define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : glyph-proc
+	define [ThickArrowShape color] : lambda [x1 y1 x2 y2] : begin
 		local headLen : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * 0.4
 		local halfBarWidth : headLen / 3
 		local headWidth : halfBarWidth * 2
@@ -153,7 +154,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		local x1CoA : mix x1 x2 (-0.05)
 		local y1CoA : mix y1 y2 (-0.05)
 
-		if (color == "white") : include : difference
+		if (color == "white") : return : difference
 			union
 				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
 				ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
@@ -161,7 +162,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 				TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
 				ArrowBar x1a y1a x2a y2a (halfBarWidth - fine / 2) 2
 
-		if (color == "white-open") : include : difference
+		if (color == "white-open") : return : difference
 			union
 				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
 				ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
@@ -169,8 +170,26 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 				TriangleArrowHead x1CoA y1CoA x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
 				ArrowBar x1CoA y1CoA x2a y2a (halfBarWidth - fine / 2) 2
 
-		if (color == "black") : include : union
+		if (color == "black") : return : union
 			TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+			ArrowBar x1 y1 x2 y2 halfBarWidth 2
+
+	define [BarbArrowHead x1 y1 x2 y2 width length thickness] : new-glyph : glyph-proc
+		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			spiro-outline
+				corner o 0
+				corner length (width - o)
+				corner (length + thickness) (width - o)
+				corner (o + thickness) 0
+				corner (length + thickness) (-width + o)
+				corner length (-width + o)
+
+	define [BarbArrowShape k thickness] : lambda [x1 y1 x2 y2] : begin
+		local headLen : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * k
+		local halfBarWidth : thickness / 2
+
+		return : union
+			BarbArrowHead x1 y1 x2 y2 headLen headLen (thickness * 1.125)
 			ArrowBar x1 y1 x2 y2 halfBarWidth 2
 
 	define [HalfArrowShape side] : lambda [x1 y1 x2 y2 size] : glyph-proc
@@ -402,6 +421,27 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow [ThickArrowShape 'black'] [MangleName 'uni2B0B'] [MangleUnicode 0x2B0B] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 		DoubleArrow [ThickArrowShape 'black'] [MangleName 'uni2B0C'] [MangleUnicode 0x2B0C] arrowSB SymbolMid arrowRSB SymbolMid
 		DoubleArrow [ThickArrowShape 'black'] [MangleName 'uni2B0D'] [MangleUnicode 0x2B0D] arrowMidX arrowBot arrowMidX arrowTop
+
+	do "Barb arrows"
+		define BarbHeavyWideHeaded : BarbArrowShape 0.25 : UnicodeWeightGrade 9 MosaicWidthScalar
+		MkArrow BarbHeavyWideHeaded [MangleName 'uni2794'] [MangleUnicode 0x2794] arrowSB SymbolMid arrowRSB SymbolMid
+
+		define [BarbGroup prefix b k w] : begin
+			define BarbLight : BarbArrowShape k : UnicodeWeightGrade w MosaicWidthScalar
+			MkArrow BarbLight [MangleName "\(prefix)Left"]  [MangleUnicode : b + 0] arrowRSB SymbolMid arrowSB SymbolMid
+			MkArrow BarbLight [MangleName "\(prefix)Up"]    [MangleUnicode : b + 1] arrowMidX arrowBot arrowMidX arrowTop
+			MkArrow BarbLight [MangleName "\(prefix)Right"] [MangleUnicode : b + 2] arrowSB SymbolMid arrowRSB SymbolMid
+			MkArrow BarbLight [MangleName "\(prefix)Down"]  [MangleUnicode : b + 3] arrowMidX arrowTop arrowMidX arrowBot
+			MkArrow BarbLight [MangleName "\(prefix)LT"]    [MangleUnicode : b + 4] arrowDiagRSB arrowDiagBot arrowDiagSB arrowDiagTop
+			MkArrow BarbLight [MangleName "\(prefix)RT"]    [MangleUnicode : b + 5] arrowDiagSB arrowDiagBot arrowDiagRSB arrowDiagTop
+			MkArrow BarbLight [MangleName "\(prefix)RB"]    [MangleUnicode : b + 6] arrowDiagSB arrowDiagTop arrowDiagRSB arrowDiagBot
+			MkArrow BarbLight [MangleName "\(prefix)LB"]    [MangleUnicode : b + 7] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
+
+		BarbGroup 'barbArrowLight'     0x1F860 0.375 3
+		BarbGroup 'barbArrow'          0x1F868 0.375 5
+		BarbGroup 'barbArrowMedium'    0x1F870 0.375 7
+		BarbGroup 'barbArrowHeavy'     0x1F878 0.375 9
+		BarbGroup 'barbArrowVeryHeavy' 0x1F880 0.375 10
 
 	do "Double-line Arrows"
 		define dasw doubleArrowStemWidth
