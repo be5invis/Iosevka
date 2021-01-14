@@ -19,16 +19,27 @@ export : define [SetupBuilders args] : begin
 
 	#directional bi-knots
 	let
-		directions {{.name 'up' .x 0 .y 1}, {.name 'down' .x 0 .y (-1)}, {.name 'left' .x (-1) .y 0}, {.name 'right' .x 1 .y 0}}
-		adhensions {{.name 'start' .l 0 .r 0.01}, {.name 'mid', .l (-0.005) .r 0.005}, {.name 'end', .l (-0.01) .r 0}}
-		knottypes  {g4, g2, corner, straight}
-		foreach [direction : items-of directions] : let [d direction] : begin
-			foreach [knottype : items-of knottypes] : let [kt knottype] : begin
-				set kt.(d.name) {.}
+		directions : list
+			* {.name 'up'    .x 0    .y 1}
+			* {.name 'down'  .x 0    .y (-1)}
+			* {.name 'left'  .x (-1) .y 0}
+			* {.name 'right' .x 1    .y 0}
+		adhensions : list
+			* {.name 'start' .l 0        .r 0.01}
+			* {.name 'mid'   .l (-0.005) .r 0.005}
+			* {.name 'end'   .l (-0.01)  .r 0}
+		knotTypes : list
+			* {g4 g4 g4}
+			* {g2 g2 g2}
+			* {corner corner corner}
+			* {straight flat curl}
+		foreach [_kt : items-of knotTypes] : let [{ sink kl kr } _kt] : begin
+			foreach [_d : items-of directions] : let [d _d] : begin
+				set sink.(d.name) {.}
 				foreach [adh : items-of adhensions] : let [a adh] : begin
-					set kt.(d.name).(a.name) : lambda [x y f] : list
-						[fallback kt.l kt] (x + d.x * a.l) (y + d.y * a.l) f
-						[fallback kt.r kt] (x + d.x * a.r) (y + d.y * a.r) f
+					set sink.(d.name).(a.name) : lambda [x y af] : list
+						kl (x + d.x * a.l) (y + d.y * a.l) af
+						kr (x + d.x * a.r) (y + d.y * a.r) af
 
 	# Aux functions
 	define [widths l r] : lambda [] : if this.setWidth : this.setWidth l r
@@ -37,7 +48,6 @@ export : define [SetupBuilders args] : begin
 	define [widths.center w] : widths ([fallback w Stroke] / 2) ([fallback w Stroke] / 2)
 
 	# Gizmo handler
-	define [disable-gizmo] : lambda [] : set this.gizmo [Transform.Id]
 	define [disable-contrast] : lambda [] : set this.contrast 1
 
 	define [heading d] : lambda [] : if (this.headsTo) : this.headsTo d
@@ -129,29 +139,40 @@ export : define [SetupBuilders args] : begin
 			foreach knot [items-of a] : ks.push [knot.af.call this before after knot]
 			return ks
 		]}
-	define [flatten knots] : begin
-		local a {}
+
+
+	define [flattenImpl sink knots] : begin
 		foreach p [items-of knots] : piecewise
-			(p <@ Array) : set a : a.concat [flatten p]
-			true         : a.push p
-		return a
-	define [prepareSpiroKnots _knots s] : begin
-		local closed false
-		local lastafs {}
-		local knots _knots
-		while (knots.0 && knots.0 <@ Function) : begin
-			knots.0.call s
-			set knots : knots.slice 1
-		while (knots.(knots.length - 1) && (knots.(knots.length - 1).type === 'close' || knots.(knots.length - 1).type === 'end')) : begin
-			set closed : knots.(knots.length - 1).type === 'close'
-			lastafs.push knots.(knots.length - 1).af
-			set knots : knots.slice 0 (-1)
-		set knots : flatten knots
-		if closed : knots.push knots.0
+			(p <@ Array) : flattenImpl sink p
+			true         : sink.push p
+	define [nCyclic p n] : (p + n + n) % n
+	define [flatten s knots0] : begin
+		local knots : list
+		flattenImpl knots knots0
+
+		# Unwrap interpolation knots
+		local unwrapped false
 		foreach j [range 0 knots.length] : if (knots.(j) && knots.(j).type === 'interpolate') : begin
-			set knots.(j) : knots.(j).af.call s knots.(j - 1) knots.(j + 1) knots.(j)
-		if closed : knots.pop
-		return {.knots [flatten knots] .closed closed .lastafs lastafs}
+			local kBefore  knots.[nCyclic (j - 1) knots.length]
+			local kAfter   knots.[nCyclic (j + 1) knots.length]
+			set knots.(j) : knots.(j).af.call s kBefore kAfter knots.(j)
+			set unwrapped true
+
+		if unwrapped : return : flatten s knots
+		return knots
+
+	define [dropTailKnot knots] : begin
+		define last knots.(knots.length - 1)
+		if (last && (last.type === 'close' || last.type === 'end')) : begin
+			set knots.length : knots.length - 1
+			return : last.type === 'close'
+
+	define [prepareSpiroKnots _knots s] : begin
+		local knots _knots
+		while (knots.0 && knots.0 <@ Function) : begin [knots.0.call s] [knots.splice 0 1]
+		define closed : dropTailKnot knots
+		set knots : flatten s knots
+		return { .knots knots .closed closed }
 
 	define [convertSpiroToBezier knots closed ctx] : begin
 		define CUBIC                false
@@ -161,13 +182,12 @@ export : define [SetupBuilders args] : begin
 		define CLOSED true
 		local s : new SpiroExpansionContext
 		set s.gizmo : this.gizmo || GlobalTransform
-		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots [{}.slice.call args 0] s
+		local { .knots knots .closed closed } : prepareSpiroKnots [{}.slice.call args 0] s
 		foreach knot [items-of knots] : let [ty knot.type] [af knot.af] : begin
 			set knot.af : lambda [] : begin
 				this.setType ty
 				if af : af.apply this args
 		SpiroJs.spiroToArcsOnContext knots closed s
-		foreach af [items-of lastafs] : if af : af.call s
 
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 		if closed : then
@@ -191,14 +211,13 @@ export : define [SetupBuilders args] : begin
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [dontinc] : begin
 		local g : new CurveUtil.BezToContoursSink (this.gizmo || GlobalTransform)
-		local {.knots knots .closed closed .lastafs lastafs} : prepareSpiroKnots k g
+		local { .knots knots .closed closed } : prepareSpiroKnots k g
 		convertSpiroToBezier knots closed g
-		foreach af [items-of lastafs] : if af : af.call g
 		this.includeGeometry g 0 0
 		return g
 
 	return [object
 		g4 g2 corner flat curl close end straight
-		widths disable-gizmo disable-contrast heading unimportant important
+		widths disable-contrast heading unimportant important
 		alsoThru alsoThruThem bezcontrols quadcontrols archv arcvh complexThru
 		dispiro spiro-outline]
