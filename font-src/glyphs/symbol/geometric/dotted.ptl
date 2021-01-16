@@ -1,0 +1,44 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Geometric-Dice : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	define diceCombinations : list
+		list 0x2680 { { 1 1 } }
+		list 0x2681 { { 0 0 } { 2 2 } }
+		list 0x2682 { { 0 0 } { 1 1 } { 2 2 } }
+		list 0x2683 { { 0 0 } { 2 0 } { 0 2 } { 2 2 } }
+		list 0x2684 { { 0 0 } { 2 0 } { 1 1 } { 0 2 } { 2 2 } }
+		list 0x2685 { { 0 0 } { 0 1 } { 0 2 } { 2 0 } { 2 1 } { 2 2 } }
+
+	foreach { unicode dots } [items-of diceCombinations] : begin
+		create-glyph [MangleName "dice_\(unicode)"] [MangleUnicode unicode] : glyph-proc
+			include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
+			define dr : DotRadius / Stroke * [AdviceStroke 7 Geom.Scalar]
+			define xLeftEx   : Geom.MidX - Geom.Size + GeometryStroke
+			define xRightEx  : Geom.MidX + Geom.Size - GeometryStroke
+			define yBottomEx : Geom.MidY + Geom.Size - GeometryStroke
+			define yTopEx    : Geom.MidY - Geom.Size + GeometryStroke
+			define xLeft     : mix xLeftEx xRightEx (1 / 5)
+			define xRight    : mix xLeftEx xRightEx (4 / 5)
+			define yBottom   : mix yBottomEx yTopEx (1 / 5)
+			define yTop      : mix yBottomEx yTopEx (4 / 5)
+			foreach { px py } [items-of dots] : begin
+				include : CircleDotAt
+					mix xLeft xRight (px / 2)
+					mix yBottom yTop (py / 2)
+					begin dr
+
+	create-glyph [MangleName 'dottedWhiteTriangle'] [MangleUnicode 0x25EC] : glyph-proc
+		set-width Geom.Width
+		include : refer-glyph : MangleName 'whiteTriangleUp'
+		include : CircleDotAt Geom.MidX (Geom.MidY - Geom.Size / 3) [Math.min (Geom.Width / 8	) PeriodRadius]

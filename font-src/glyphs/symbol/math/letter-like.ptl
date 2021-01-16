@@ -1,0 +1,68 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-Letter-Like : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Miniature
+	glyph-block-import Letter-Latin-Upper-A : LambdaShape AMaskShape DeltaShape
+	glyph-block-import Letter-Latin-Upper-E : RevEShape
+
+	create-glyph 'micro' 0xB5 : glyph-proc
+		include [refer-glyph 'grek/mu'] AS_BASE
+		if SLAB : if (!para.isItalic) : begin
+			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) Descender Jut
+
+	create-glyph 'forall' 0x2200 : glyph-proc
+		include : LambdaShape [DivFrame 1] CAP OperatorStroke true
+		eject-contour 'serif'
+		include : intersection
+			AMaskShape [DivFrame 1] CAP OperatorStroke true
+			HBar 0 Width (XH / 2) OperatorStroke
+		include : FlipAround Middle (CAP / 2)
+
+	create-glyph 'exists' 0x2203 : glyph-proc
+		include : RevEShape (top -- CAP) (pyBar -- 0.51) (noSerif -- true)
+
+	create-glyph 'emptyset' 0x2205 : glyph-proc
+		include : OShape CAP 0 SB RightSB OperatorStroke
+
+		local fine : OperatorStroke / 2
+		include : dispiro
+			widths.center OperatorStroke
+			flat (SB + O + fine) [mix CAP 0 1.05]
+			curl (RightSB - O - fine) [mix 0 CAP 1.05]
+
+	create-glyph 'increment' 0x2206 : glyph-proc
+		include : MarkSet.capital
+		include : DeltaShape [DivFrame 1] CAP OperatorStroke true
+
+	turned 'nabla' 0x2207 'increment' Middle (CAP / 2)
+
+	if [not recursive] : for-width-kinds WideWidth1 : do
+		local s : (RightSB - SB - O * 4 + (MosaicWidth - Width) * 0.5) / CAP
+		local df : Miniature
+			glyphs     -- {'eight.lnum.crossing' 'rotetedPropto' 'revS'}
+			crowd      -- 4
+			scale      -- s
+			slopeAngle -- 0
+
+		define [InftyLikeShape gn u gns] : begin
+			create-glyph [MangleName gn] [MangleUnicode u] : glyph-proc
+				set-width MosaicWidth
+				include : df.queryByName gns
+				include : Translate (-(Width / 2)) (-CAP / 2)
+				include : Rotate (Math.PI / 2)
+				include : Scale s
+				include : Translate (MosaicWidth / 2) SymbolMid
+				include : Italify
+
+		InftyLikeShape 'propto'   0x221D 'rotetedPropto'
+		InftyLikeShape 'infty'    0x221E 'eight.lnum.crossing'
+		InftyLikeShape 'invLazyS' 0x223E 'revS'
+

@@ -1,0 +1,183 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-APL : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Upper-U : UShape
+
+	define [Overlay fnOverlay fnBackground] : glyph-proc
+		define sw : [AdviceStroke 6] / 2
+		local candidates {}
+		define segs 3
+
+		define overlay    : new-glyph : glyph-proc : include fnOverlay    AS_BASE ALSO_METRICS
+		define background : new-glyph : glyph-proc : include fnBackground AS_BASE ALSO_METRICS
+
+		local corners : new-glyph : glyph-proc
+			set this.gizmo : Translate 0 0
+			foreach [c : items-of overlay.contours] : foreach [z : items-of c] : do
+				if (z.type === Point.Type.Corner) : begin
+					define x z.x
+					define y z.y
+					include : spiro-outline
+						corner (x - sw) (y - sw)
+						corner (x + sw) (y - sw)
+						corner (x + sw) (y + sw)
+						corner (x - sw) (y + sw)
+
+		foreach [r : range (0 - segs) till (segs)] : foreach [c : range (0 - segs) till (segs)] : do
+			define dx : r / segs * sw
+			define dy : c / segs * sw
+			candidates.push : new-glyph : glyph-proc
+				include overlay
+				include : Translate dx dy
+
+		include : difference background corners [union.apply null candidates]
+		include overlay
+
+	define aplBoxInnerTop BgOpTop
+	define aplBoxInnerBot BgOpBot
+	define aplBoxSW : AdviceStroke 4.5
+	define aplBoxTop : mix SymbolMid aplBoxInnerTop 1.1
+	define aplBoxBot : mix SymbolMid aplBoxInnerBot 1.1
+	define aplBoxInnerScale : Math.min ((Width - aplBoxSW * 1.75) / Width) ((aplBoxInnerTop - aplBoxInnerBot) / (ParenTop - ParenBot))
+
+	create-glyph 'aplsquare' 0x2395 : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : HBarTop    l r aplBoxTop aplBoxSW
+		include : HBarBottom l r aplBoxBot aplBoxSW
+		include : VBarLeft   l aplBoxTop aplBoxBot aplBoxSW
+		include : VBarRight  r aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'aplsquareShadow' : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : spiro-outline
+			corner l aplBoxTop
+			corner r aplBoxTop
+			corner r aplBoxBot
+			corner l aplBoxBot
+
+	create-glyph 'aplibar' 0x2336 : glyph-proc
+		local l [mix 0 SB (1 / 3)]
+		local r [mix Width RightSB (1 / 3)]
+		include : HBarTop    l r OperTop aplBoxSW
+		include : HBarBottom l r OperBot aplBoxSW
+		include : VBar    Middle OperTop OperBot aplBoxSW
+
+	create-glyph 'aplsquish' 0x2337 : glyph-proc
+		local l : mix SB RightSB (1 / 8)
+		local r : mix RightSB SB (1 / 8)
+		include : union
+			HBarTop    l r aplBoxTop aplBoxSW
+			HBarBottom l r aplBoxBot aplBoxSW
+			VBarLeft   l aplBoxTop aplBoxBot aplBoxSW
+			VBarRight  r aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'aplbar' : glyph-proc
+		include : VBar Middle aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'aplLongBar' : glyph-proc
+		include : VBar Middle aplBoxTop aplBoxBot aplBoxSW
+
+	create-glyph 'aplminus' : glyph-proc
+		include : dispiro
+			widths.center aplBoxSW
+			flat RightSB  [mix OperTop OperBot 0.5]
+			curl SB       [mix OperTop OperBot 0.5]
+
+	create-glyph 'aplslash' : glyph-proc
+		include : dispiro
+			widths.center aplBoxSW
+			flat RightSB  OperTop
+			curl SB       OperBot
+
+	create-glyph 'aplbackslash' : glyph-proc
+		include : dispiro
+			widths.center aplBoxSW
+			flat SB       OperTop
+			curl RightSB  OperBot
+
+	define [aplBoxed shape] : Overlay [refer-glyph 'aplsquare'] : glyph-proc
+		include : intersection [refer-glyph 'aplsquareShadow'] shape
+		include : ScaleAround Middle SymbolMid aplBoxInnerScale
+
+	create-glyph 0x2338 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'equal']
+	create-glyph 0x2339 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'divide']
+	create-glyph 0x233A : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whiteDiamond.NWID']
+	create-glyph 0x233B : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whiteSmallCircle.NWID']
+	create-glyph 0x233C : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'whiteCircle.NWID']
+	create-glyph 0x233D : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbar'] [refer-glyph 'whiteCircle.NWID']]
+	create-glyph 0x233E : composite-proc [refer-glyph 'whiteCircle.NWID'] [refer-glyph 'whiteSmallCircle.NWID']
+	create-glyph 0x233F : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'slash']]
+	create-glyph 0x2340 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplminus'] [refer-glyph 'backslash']]
+	create-glyph 0x2341 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'slash']
+	create-glyph 0x2342 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'backslash']
+	create-glyph 0x2343 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'less']
+	create-glyph 0x2344 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'greater']
+	create-glyph 0x2345 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowLeft.NWID'] [refer-glyph 'aplbar']]
+	create-glyph 0x2346 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowRight.NWID'] [refer-glyph 'aplbar']]
+	create-glyph 0x2347 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowLeft.NWID']
+	create-glyph 0x2348 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowRight.NWID']
+	create-glyph 0x2349 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'aplbackslash'] [refer-glyph 'whiteCircle.NWID']]
+	create-glyph 0x234A : composite-proc [refer-glyph 'bot'] [MarkSet.tack] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x234B : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'increment'] [refer-glyph 'aplLongBar']]
+	create-glyph 0x234C : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'vee']
+	create-glyph 0x234D : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'increment']
+	create-glyph 0x234F : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowUp.NWID'] [refer-glyph 'minus']]
+	create-glyph 0x2350 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowUp.NWID']
+	create-glyph 0x2351 : composite-proc [refer-glyph 'top'] [MarkSet.tack] [refer-glyph 'sbOverlineAbove'] [clear-anchors]
+	create-glyph 0x2352 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'nabla'] [refer-glyph 'aplLongBar']]
+	create-glyph 0x2353 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'wedge']
+	create-glyph 0x2354 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'nabla']
+	create-glyph 0x2356 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'arrowDown.NWID'] [refer-glyph 'minus']]
+	create-glyph 0x2357 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'arrowDown.NWID']
+	create-glyph 0x2358 : composite-proc [refer-glyph 'asciiSingleQuote.straight'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x2359 : composite-proc [refer-glyph 'increment'] [refer-glyph 'underlineBelow']
+	create-glyph 0x235A : composite-proc [refer-glyph 'whiteDiamond.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x235B : composite-proc [refer-glyph 'whiteSmallCircle.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x235C : composite-proc [refer-glyph 'whiteCircle.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x235D : composite-proc
+		refer-glyph 'whiteSmallCircle.NWID'
+		ScaleAround Middle SymbolMid 0.75
+		Realign Middle SymbolMid Middle (OperBot + Smooth)
+		UShape [DivFrame 1] OperTop OperBot
+			oper -- true
+			stroke -- [AdviceStroke 5]
+		FlipAround Middle SymbolMid
+	create-glyph 0x235E : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'asciiSingleQuote.straight']
+	create-glyph 0x235F : composite-proc [refer-glyph 'enquad'] [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO']
+	create-glyph 0x2360 : composite-proc [refer-glyph 'enquad'] [aplBoxed : composite-proc [refer-glyph 'colon'] [Realign Middle (XH/2) Middle SymbolMid]]
+	create-glyph 0x2361 : composite-proc [refer-glyph 'top'] [MarkSet.tack] [refer-glyph 'dieresisAbove'] [clear-anchors]
+	create-glyph 0x2362 : composite-proc [refer-glyph 'nabla'] [refer-glyph 'dieresisAbove']
+	create-glyph 0x2363 : composite-proc [refer-glyph 'asterisk.low'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
+	create-glyph 0x2364 : composite-proc [refer-glyph 'whiteSmallCircle.NWID'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
+	create-glyph 0x2365 : composite-proc [refer-glyph 'whiteCircle.NWID'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
+	create-glyph 0x2366 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'cup'] [refer-glyph 'aplbar']]
+	create-glyph 0x2367 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'subst'] [refer-glyph 'aplbar']]
+	create-glyph 0x2368 : composite-proc [refer-glyph 'asciiTilde.low'] [refer-glyph 'dieresisAbove']
+	create-glyph 0x2369 : composite-proc [refer-glyph 'greater.narrow'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
+	create-glyph 0x236A : composite-proc [refer-glyph 'minus'] [refer-glyph 'comma']
+	create-glyph 0x236B : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlayTildeOperator'] [refer-glyph 'nabla']]
+	create-glyph 0x236C : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlayTildeOperator'] [refer-glyph 'zero.lnum.unslashed']]
+	create-glyph 0x236D : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlayTildeOperator'] [refer-glyph 'bar']]
+	create-glyph 0x236E : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'semicolon'] [refer-glyph 'underscore.high']]
+	create-glyph 0x236F : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'notequal']
+	create-glyph 0x2370 : composite-proc [refer-glyph 'enquad'] [aplBoxed : refer-glyph 'question']
+	create-glyph 0x2371 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlayTildeOperator'] [refer-glyph 'vee']]
+	create-glyph 0x2372 : composite-proc [refer-glyph 'enquad'] [Overlay [refer-glyph 'overlayTildeOperator'] [refer-glyph 'wedge']]
+	alias 'apliota'  0x2373 'grek/iota'
+	alias 'aplrho'   0x2374 'grek/rho'
+	alias 'aplomega' 0x2375 'grek/omega'
+	create-glyph 0x2376 : composite-proc [refer-glyph 'grek/alpha'] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x2377 : composite-proc [refer-glyph 'smallElement'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x2378 : composite-proc [refer-glyph 'grek/iota'] [refer-glyph 'underlineBelow'] [clear-anchors]
+	create-glyph 0x2379 : composite-proc [refer-glyph 'grek/omega'] [refer-glyph 'underlineBelow'] [clear-anchors]
+	alias 'aplalpha' 0x237A 'grek/alpha'

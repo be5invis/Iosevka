@@ -1,0 +1,126 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Symbol-Math-Frame-And-Geometry : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	local sw GeometryStroke
+	local kBox : 2 / 3
+	local leftBox : SB * kBox
+	local rightBox : Width - SB * kBox
+	local radiusBox : (rightBox - leftBox) / 2
+	local topBox : SymbolMid + radiusBox
+	local bottomBox : SymbolMid - radiusBox
+
+
+	local kCircle : 2 / 3
+	local leftCircle : SB * kCircle
+	local rightCircle : Width - SB * kCircle
+	local radiusCircle : (rightCircle - leftCircle) / 2
+
+	create-glyph 'mathO' : glyph-proc
+		include : dispiro
+			widths.lhs GeometryStroke
+			g4 Middle (SymbolMid + radiusCircle - O)
+			archv nothing 2
+			g4 (leftCircle + O) SymbolMid
+			arcvh nothing 2
+			g4 Middle (SymbolMid - radiusCircle + O)
+			archv nothing 2
+			g4 (rightCircle - O) SymbolMid
+			arcvh nothing 2
+			close
+
+	create-glyph 'mathOOutline' : glyph-proc
+		include : spiro-outline
+			g4 Middle (SymbolMid + radiusCircle)
+			archv nothing 2
+			g4 (leftCircle) SymbolMid
+			arcvh nothing 2
+			g4 Middle (SymbolMid - radiusCircle)
+			archv nothing 2
+			g4 (rightCircle) SymbolMid
+			arcvh nothing 2
+			close
+
+	create-glyph 'mathBoxOutline' : glyph-proc
+		include : spiro-outline
+			corner leftBox topBox
+			corner leftBox bottomBox
+			corner rightBox bottomBox
+			corner rightBox topBox
+
+	create-glyph 'mathBox' : glyph-proc
+		include : intersection [refer-glyph 'mathBoxOutline'] : union
+			dispiro [widths.lhs sw] [flat leftBox topBox] [curl leftBox bottomBox]
+			dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+			dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
+			dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox topBox]
+
+	for-width-kinds WideWidth1
+		local radiusBig : (TackTop - TackBot) / 2 * [Math.sqrt MosaicWidthScalar]
+		local leftBig : MosaicMiddle - radiusBig
+		local rightBig : MosaicMiddle + radiusBig
+		create-glyph [MangleName 'mathOBig'] : glyph-proc
+			set-width MosaicWidth
+			include : dispiro
+				widths.lhs GeometryStroke
+				g4 MosaicMiddle (SymbolMid + radiusBig - O)
+				archv nothing 2
+				g4 (leftBig + O) SymbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (SymbolMid - radiusBig + O)
+				archv nothing 2
+				g4 (rightBig - O) SymbolMid
+				arcvh nothing 2
+				close
+
+		create-glyph [MangleName 'mathOOutlineBig'] : glyph-proc
+			set-width MosaicWidth
+			include : spiro-outline
+				g4 MosaicMiddle (SymbolMid + radiusBig)
+				archv nothing 2
+				g4 (leftBig) SymbolMid
+				arcvh nothing 2
+				g4 MosaicMiddle (SymbolMid - radiusBig)
+				archv nothing 2
+				g4 (rightBig) SymbolMid
+				arcvh nothing 2
+				close
+
+	create-glyph 'mathRightTriangle' 0x22BF : glyph-proc
+		include : intersection
+			spiro-outline
+				corner leftBox bottomBox
+				corner rightBox bottomBox
+				corner rightBox topBox
+			union
+				dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+				dispiro [widths.lhs sw] [flat rightBox bottomBox] [curl rightBox topBox]
+				dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox bottomBox]
+
+	create-glyph 'angle' 0x2220 : glyph-proc
+		include : intersection
+			spiro-outline
+				corner leftBox bottomBox
+				corner rightBox bottomBox
+				corner rightBox topBox
+			union
+				dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+				dispiro [widths.lhs sw] [flat rightBox topBox] [curl leftBox bottomBox]
+
+	create-glyph 'rightAngle' 0x221F : glyph-proc
+		include : intersection
+			spiro-outline
+				corner leftBox bottomBox
+				corner rightBox bottomBox
+				corner rightBox topBox
+				corner leftBox topBox
+			union
+				dispiro [widths.lhs sw] [flat leftBox bottomBox] [curl rightBox bottomBox]
+				dispiro [widths.lhs sw] [flat leftBox topBox] [curl leftBox bottomBox]
