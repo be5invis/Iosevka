@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-K : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailRF
 
 	local [KBalance slab straightBar] : if slab (Width / 16) : if straightBar (Width / 32) 0
 	local [KBalanceRight slab straightBar] : if slab (-Width / 32) : if straightBar (Width / 32) 0
@@ -107,7 +108,7 @@ glyph-block Letter-Latin-K : begin
 
 		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight slabStartX
 
-	define [KCursiveLoopAndLegShapeImpl top straightBar slabLeft slab] : glyph-proc
+	define [KCursiveLoopAndLegShapeImpl tailed top straightBar slabLeft slab] : glyph-proc
 		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
 		include : dispiro
 			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
@@ -121,12 +122,23 @@ glyph-block Letter-Latin-K : begin
 			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
 			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
 
+		define swDiagTail Stroke
+		define swDiagTailAdj : swDiagTail / [mix 1 HVContrast 0.375]
+		define xDTGap : 0.07 * (RightSB - SB) - 0.1 * swDiagTail
+		define xDTStart : dim.arcTerminalX + 0.75 * swDiagTail * HVContrast + xDTGap
+		define xDTEnd : dim.kshRight - 0.8 * Hook - 0.375 * swDiagTail * HVContrast + xDTGap
+
 		include : difference
-			intersection
-				Rect XH 0 0 [if SLAB (dim.slabStartX + SideJut) (Width * 2)]
-				dispiro
-					flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
-					curl dim.kshRight 0 [widths.rhs]
+			if tailed
+				then : dispiro
+					flat xDTStart dim.arcTerminalY [widths.center swDiagTailAdj]
+					curl (xDTEnd + 0.125 * [DiagonalTailInnerRadius]) (0.9 * swDiagTail + 0.5 *[DiagonalTailInnerRadius])
+					DiagonalTailRF [DivFrame 1] xDTEnd 0 (Hook - swDiagTail * 0.375) swDiagTail
+				else : intersection
+					Rect XH 0 0 [if SLAB (dim.slabStartX + SideJut) (Width * 2)]
+					dispiro
+						flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
+						curl dim.kshRight 0 [widths.rhs]
 			spiro-outline
 				g4.up.start (dim.arcStartX - O) dim.arcStartY
 				arcvh 4 2.1
@@ -140,7 +152,8 @@ glyph-block Letter-Latin-K : begin
 		if slab : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
 	define [KNormalLegs top bar slabLeft slab] : KLegShapeImpl SB RightSB Stroke top bar slabLeft slab
-	define [KCursiveLegs top bar slabLeft slab]  : KCursiveLoopAndLegShapeImpl top bar slabLeft slab
+	define [KCursiveLegs top bar slabLeft slab]  : KCursiveLoopAndLegShapeImpl false top bar slabLeft slab
+	define [KDiagTailCursiveLegs top bar slabLeft slab]  : KCursiveLoopAndLegShapeImpl true top bar slabLeft slab
 
 	define [KCyrlCursiveDescender top straightBar slabLeft slab] : begin
 		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
@@ -196,6 +209,10 @@ glyph-block Letter-Latin-K : begin
 		include : LowerKShapeT KCursiveLegs true SLAB (SLAB && !para.isItalic)
 		create-derived 'kDescender.cursive' : KCyrlCursiveDescender XH true SLAB (SLAB && !para.isItalic)
 
+	create-glyph 'k.diagonalTailedSerifedCursive' : glyph-proc
+		include : MarkSet.b
+		include : LowerKShapeT KDiagTailCursiveLegs true SLAB (SLAB && !para.isItalic)
+
 	create-glyph 'k.motionSerifedStraight' : glyph-proc
 		include : MarkSet.b
 		include : LowerKShapeT KNormalLegs true true false
@@ -211,8 +228,12 @@ glyph-block Letter-Latin-K : begin
 		include : LowerKShapeT KCursiveLegs true true false
 		create-derived 'kDescender.motionSerifedCursive' : KCyrlCursiveDescender XH true true false
 
+	create-glyph 'k.motionSerifedDiagonalTailedSerifedCursive' : glyph-proc
+		include : MarkSet.b
+		include : LowerKShapeT KDiagTailCursiveLegs true true false
+
 	select-variant 'k' 'k'
-	select-variant 'kDescender' 0x2C6A (follow -- 'k')
+	select-variant 'kDescender' 0x2C6A
 	alias 'cyrl/ka.BGR' null 'k'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
@@ -312,6 +333,9 @@ glyph-block Letter-Latin-K : begin
 	create-glyph 'khooktop.cursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKHookTopShapeT KCursiveLegs true false (SLAB && !para.isItalic)
+	create-glyph 'khooktop.diagonalTailedSerifedCursive' : glyph-proc
+		include : MarkSet.b
+		include : LowerKHookTopShapeT KDiagTailCursiveLegs true false (SLAB && !para.isItalic)
 	create-glyph 'khooktop.motionSerifedStraight' : glyph-proc
 		include : MarkSet.b
 		include : LowerKHookTopShapeT KNormalLegs true false false
@@ -321,6 +345,9 @@ glyph-block Letter-Latin-K : begin
 	create-glyph 'khooktop.motionSerifedCursive' : glyph-proc
 		include : MarkSet.b
 		include : LowerKHookTopShapeT KCursiveLegs true false false
+	create-glyph 'khooktop.motionSerifedDiagonalTailedSerifedCursive' : glyph-proc
+		include : MarkSet.b
+		include : LowerKHookTopShapeT KDiagTailCursiveLegs true false false
 
 	select-variant 'Khooktop' 0x198 (follow -- 'K')
 	select-variant 'khooktop' 0x199 (follow -- 'k')
