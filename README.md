@@ -151,6 +151,13 @@ Monospace Iosevka contains various stylistic sets to change the shape of certain
 <td colspan="2"><img src="images/stylistic-set-ss14-1.png"/></td>
 </tr>
 <tr>
+<td><code>ss15</code></td>
+<td>IBM Plex Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss15-1.png"/></td>
+</tr>
+<tr>
 <td><code>ss20</code></td>
 <td>Curly Style</td>
 </tr>
@@ -434,6 +441,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - `ss12`: Set character variant to “Ubuntu Mono Style”.
   - `ss13`: Set character variant to “Lucida Style”.
   - `ss14`: Set character variant to “JetBrains Mono Style”.
+  - `ss15`: Set character variant to “IBM Plex Mono Style”.
   - `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
@@ -552,6 +560,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv15 = 14`: `f` with flat top hook, bottom serif; crossbar is placed right at X-height.
     + `f = 'flat-hook-tailed-crossbar-at-x-height'`, `cv15 = 15`: `f` with flat top hook, bottom hook; crossbar is placed right at X-height.
     + `f = 'flat-hook-extended-crossbar-at-x-height'`, `cv15 = 16`: `f` with flat top hook, bar extended to descender; crossbar is placed right at X-height.
+    + `f = 'diagonal-tailed'`, `cv15 = 17`: `f` with bottom diagonal tail.
+    + `f = 'diagonal-tailed-crossbar-at-x-height'`, `cv15 = 18`: `f` with bottom diagonal tail; crossbar is placed right at X-height.
+    + `f = 'flat-hook-diagonal-tailed'`, `cv15 = 19`: `f` with falt hook and bottom diagonal tail.
+    + `f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'`, `cv15 = 20`: `f` with falt hook and bottom diagonal tail; crossbar is placed right at X-height.
   - Styles for `g`:
     + `g = 'singlestorey'`, `cv16 = 1`: Single-storey `g` (default).
     + `g = 'doublestorey'`, `cv16 = 2`: Double-storey `g`.
@@ -579,12 +591,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `i = 'serifed-tailed'`, `cv18 = 8`: `i` with curly tail and top serif (default for Italic).
     + `i = 'flat-tailed'`, `cv18 = 9`: `i` with top serif and a curly-then-flat tail.
     + `i = 'serifed-flat-tailed'`, `cv18 = 10`: `i` with top serif and a curly-then-flat tail.
+    + `i = 'diagonal-tailed'`, `cv18 = 11`: `i` with top serif and a diagonal tail.
+    + `i = 'serifed-diagonal-tailed'`, `cv18 = 12`: `i` with top serif and a diagonal tail.
   - Styles for `j`:
     + `j = 'serifed'`, `cv19 = 1`: `j` with top serif (default).
     + `j = 'serifless'`, `cv19 = 2`: `j` without serif.
     + `j = 'straight-line'`, `cv19 = 3`: `j` like a straight line.
-    + `j = 'flat-hook-serifed'`, `cv19 = 4`: undefined.
-    + `j = 'flat-hook-serifless'`, `cv19 = 5`: undefined.
+    + `j = 'flat-hook-serifed'`, `cv19 = 4`: `j` with flat temrinal hook.
+    + `j = 'flat-hook-serifless'`, `cv19 = 5`: `j` with flat temrinal hook and top serif.
+    + `j = 'diagonal-tailed-serifless'`, `cv19 = 6`: `j` with diagonal tail.
+    + `j = 'diagonal-tailed-serifed'`, `cv19 = 7`: `j` with top serif and diagonal tail.
   - Styles for `k`:
     + `k = 'straight'`, `cv20 = 1`: `k` with standard shape (default for Upright).
     + `k = 'curly'`, `cv20 = 2`: Slightly curly `k`, like Iosevka 2.x.
@@ -592,6 +608,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `k = 'motion-serifed-straight'`, `cv20 = 4`: `k` with motion serifs.
     + `k = 'motion-serifed-curly'`, `cv20 = 5`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
     + `k = 'motion-serifed-cursive'`, `cv20 = 6`: `k` with a cursive loop and motion serifs.
+    + `k = 'diagonal-tailed-cursive'`, `cv20 = 7`: `k` with a cursive loop and diagonal tail.
+    + `k = 'motion-serifed-diagonal-tailed-cursive'`, `cv20 = 8`: `k` with a cursive loop, motion serifs and diagonal tail.
   - Styles for `l`:
     + `l = 'serifed'`, `cv21 = 1`: Serifed `l` (default for Upright).
     + `l = 'serifless'`, `cv21 = 2`: `l` like a straight line.
@@ -603,6 +621,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'serifed-tailed'`, `cv21 = 8`: `l` with top serif and curly tail (default for Italic).
     + `l = 'flat-tailed'`, `cv21 = 9`: `l` with top serif and a curly-then-flat tail.
     + `l = 'serifed-flat-tailed'`, `cv21 = 10`: `l` with top serif and a curly-then-flat tail.
+    + `l = 'diagonal-tailed'`, `cv21 = 11`: `l` with top serif and a diagonal tail.
+    + `l = 'serifed-diagonal-tailed'`, `cv21 = 12`: `l` with top serif and a diagonal tail.
   - Styles for `m`:
     + `m = 'normal'`, `cv22 = 1`: `m` with normal middle leg, touching the baseline (default).
     + `m = 'shortleg'`, `cv22 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
@@ -647,6 +667,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
     + `q = 'motion-serifed-straight'`, `cv25 = 7`: `q` with straight bar and motion serifs.
     + `q = 'motion-serifed-tailed'`, `cv25 = 8`: `q` with tail and motion serifs.
+    + `q = 'diagonal-tailed'`, `cv25 = 9`: `q` with diagonal tail.
+    + `q = 'earless-corner-diagonal-tailed'`, `cv25 = 10`: Earless (cornered top-left) single-storey `q` with curly diagonal tail.
+    + `q = 'earless-rounded-diagonal-tailed'`, `cv25 = 11`: Earless (rounded top-left) single-storey `q` with curly diagonal tail.
+    + `q = 'motion-serifed-diagonal-tailed'`, `cv25 = 12`: `q` with diagonal tail and motion serifs.
   - Styles for `r`:
     + `r = 'serifless'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
     + `r = 'serifed'`, `cv26 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
@@ -663,6 +687,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `t = 'hookless-asymmetric'`, `cv27 = 4`: `t` without hook and ony half the cross bar.
     + `t = 'flat-hook-short-neck'`, `cv27 = 5`: `t` with flat hook and a slightly shorter neck.
     + `t = 'flat-hook-short-neck2'`, `cv27 = 6`: `t` with flat hook and a more shorter neck.
+    + `t = 'diagonal-tailed'`, `cv27 = 7`: `t` with diagonal tail.
   - Styles for `u`:
     + `u = 'toothed'`, `cv28 = 1`: Normal `u` with bottom-right tooth (default for Upright).
     + `u = 'toothless-corner'`, `cv28 = 2`: Toothless (corner bottom-right) `u`.
