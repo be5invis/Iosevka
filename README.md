@@ -597,8 +597,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `j = 'serifed'`, `cv19 = 1`: `j` with top serif (default).
     + `j = 'serifless'`, `cv19 = 2`: `j` without serif.
     + `j = 'straight-line'`, `cv19 = 3`: `j` like a straight line.
-    + `j = 'flat-hook-serifed'`, `cv19 = 4`: `j` with flat temrinal hook.
-    + `j = 'flat-hook-serifless'`, `cv19 = 5`: `j` with flat temrinal hook and top serif.
+    + `j = 'flat-hook-serifed'`, `cv19 = 4`: `j` with flat terminal hook.
+    + `j = 'flat-hook-serifless'`, `cv19 = 5`: `j` with flat terminal hook and top serif.
     + `j = 'diagonal-tailed-serifless'`, `cv19 = 6`: `j` with diagonal tail.
     + `j = 'diagonal-tailed-serifed'`, `cv19 = 7`: `j` with top serif and diagonal tail.
   - Styles for `k`:
