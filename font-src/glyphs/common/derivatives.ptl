@@ -54,10 +54,16 @@ glyph-block Common-Derivatives : begin
 		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
 			include : Fn sourceGid null
 
+		local derivedGlyphIdMap : new Map
 		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
-			gr.set glyphDst [gr.amendName dstGid]
-			create-glyph [gr.amendName dstGid] : glyph-proc
-				include : Fn [gr.get glyphSrc] gr.tag
+			local relGidSrc : gr.get glyphSrc
+			if [derivedGlyphIdMap.get relGidSrc]
+			: then : gr.set glyphDst : derivedGlyphIdMap.get relGidSrc
+			: else : begin
+				local relGidDst : gr.amendName dstGid
+				create-glyph relGidDst : glyph-proc : include : Fn [gr.get glyphSrc] gr.tag
+				gr.set glyphDst relGidDst
+				derivedGlyphIdMap.set relGidSrc relGidDst
 
 	define [alias dstGid dstUnicode sourceGid] : begin
 		if [not dstGid] : throw : new Error "Target ID not specified"
