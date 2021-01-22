@@ -50,7 +50,7 @@ glyph-block Letter-Latin-Upper-B : begin
 			curl (barleft - O) offset [heading Leftward]
 
 
-	define [BShape] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0] [noSerif false]] : glyph-proc
+	define [BShape] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0] [serifTop false] [serifBot false]] : glyph-proc
 		include : BShapeArcsT dispiro top
 			offset -- 0
 			stroke -- stroke
@@ -58,9 +58,8 @@ glyph-block Letter-Latin-Upper-B : begin
 			topArcShift -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 		include : VBarLeft SB 0 top stroke
-		if (!noSerif && SLAB) : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
+		if serifTop : include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
+		if serifBot : include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
 	define [BShapeMask] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
 		include : BShapeArcsT spiro-outline top
@@ -70,18 +69,18 @@ glyph-block Letter-Latin-Upper-B : begin
 			topArcShift -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 
-	define [StdBShape sw] : BShape CAP (stroke -- [fallback sw : AdviceStroke2 2 3 CAP])
+	define [StdBShape sw st sb] : BShape CAP (stroke -- [fallback sw : AdviceStroke2 2 3 CAP]) (serifTop -- st) (serifBot -- sb)
 	define [StdBShapeMask sw] : BShapeMask CAP (stroke -- [fallback sw : AdviceStroke2 2 3 CAP])
 
 	create-glyph 'B.standard' : glyph-proc
 		include : MarkSet.capital
-		include : StdBShape
+		include : StdBShape nothing SLAB SLAB
 
 	define [BahtBar sw] : VBar [mix SB RightSB 0.475] (CAP - Descender / 2) (Descender / 2) sw
 
 	create-glyph 'currency/baht.standard' : glyph-proc
 		include : union
-			StdBShape [AdviceStroke2 3.5 3 CAP]
+			StdBShape [AdviceStroke2 3.5 3 CAP] SLAB SLAB
 			intersection [BahtBar : AdviceStroke 5] [StdBShapeMask]
 			difference   [BahtBar   Stroke]         [StdBShapeMask]
 
@@ -93,15 +92,47 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	create-glyph 'currency/bitcoin.standard' : glyph-proc
 		include : union
-			StdBShape [AdviceStroke2 3.5 3 CAP]
+			StdBShape [AdviceStroke2 3.5 3 CAP] SLAB SLAB
+			difference [BitcoinBar : AdviceStroke 5] [StdBShapeMask]
+
+	create-glyph 'B.standardBilateralMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : StdBShape nothing true true
+
+	create-glyph 'currency/baht.standardBilateralMotionSerifed' : glyph-proc
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP] true true
+			intersection [BahtBar : AdviceStroke 5] [StdBShapeMask]
+			difference   [BahtBar   Stroke]         [StdBShapeMask]
+
+	create-glyph 'currency/bitcoin.standardBilateralMotionSerifed' : glyph-proc
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP] true true
+			difference [BitcoinBar : AdviceStroke 5] [StdBShapeMask]
+
+	create-glyph 'B.standardUnilateralMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : StdBShape nothing true false
+
+	create-glyph 'currency/baht.standardUnilateralMotionSerifed' : glyph-proc
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP] true false
+			intersection [BahtBar : AdviceStroke 5] [StdBShapeMask]
+			difference   [BahtBar   Stroke]         [StdBShapeMask]
+
+	create-glyph 'currency/bitcoin.standardUnilateralMotionSerifed' : glyph-proc
+		include : union
+			StdBShape [AdviceStroke2 3.5 3 CAP] true false
 			difference [BitcoinBar : AdviceStroke 5] [StdBShapeMask]
 
 
-	define [AsymmetricBShape sw] : BShape CAP
+	define [AsymmetricBShape sw st sb] : BShape CAP
 		stroke -- [fallback sw : AdviceStroke2 2 3 CAP]
 		barPos -- 0.6
 		topArcShift -- -(RightSB - SB) * 0.05
 		topArcInnerShift -- -(RightSB - SB) * 0.1
+		serifTop -- st
+		serifBot -- sb
 	define [AsymmetricBShapeMask sw] : BShapeMask CAP
 		stroke -- [fallback sw : AdviceStroke2 2 3 CAP]
 		barPos -- 0.6
@@ -110,16 +141,43 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	create-glyph 'B.moreAsymmetric' : glyph-proc
 		include : MarkSet.capital
-		include : AsymmetricBShape
+		include : AsymmetricBShape nothing SLAB SLAB
 
 	create-glyph 'currency/baht.moreAsymmetric' : union
-		AsymmetricBShape [AdviceStroke2 3.5 3 CAP]
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] SLAB SLAB
 		intersection [BahtBar : AdviceStroke 5] [AsymmetricBShapeMask]
 		difference   [BahtBar   Stroke]         [AsymmetricBShapeMask]
 
 	create-glyph 'currency/bitcoin.moreAsymmetric' : union
-		AsymmetricBShape [AdviceStroke2 3.5 3 CAP]
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] SLAB SLAB
 		difference [BitcoinBar : AdviceStroke 5] [AsymmetricBShapeMask]
+
+	create-glyph 'B.moreAsymmetricBilateralMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : AsymmetricBShape nothing true true
+
+	create-glyph 'currency/baht.moreAsymmetricBilateralMotionSerifed' : union
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] true true
+		intersection [BahtBar : AdviceStroke 5] [AsymmetricBShapeMask]
+		difference   [BahtBar   Stroke]         [AsymmetricBShapeMask]
+
+	create-glyph 'currency/bitcoin.moreAsymmetricBilateralMotionSerifed' : union
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] true true
+		difference [BitcoinBar : AdviceStroke 5] [AsymmetricBShapeMask]
+
+	create-glyph 'B.moreAsymmetricUnilateralMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : AsymmetricBShape nothing true false
+
+	create-glyph 'currency/baht.moreAsymmetricUnilateralMotionSerifed' : union
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] true false
+		intersection [BahtBar : AdviceStroke 5] [AsymmetricBShapeMask]
+		difference   [BahtBar   Stroke]         [AsymmetricBShapeMask]
+
+	create-glyph 'currency/bitcoin.moreAsymmetricUnilateralMotionSerifed' : union
+		AsymmetricBShape [AdviceStroke2 3.5 3 CAP] true false
+		difference [BitcoinBar : AdviceStroke 5] [AsymmetricBShapeMask]
+
 
 	select-variant 'B' 'B'
 	select-variant 'currency/baht' 0xE3F (follow -- 'B')
@@ -130,7 +188,7 @@ glyph-block Letter-Latin-Upper-B : begin
 	create-glyph 'mathbb/B' 0x1D539 : glyph-proc
 		include : MarkSet.capital
 		include : union
-			BShape CAP (stroke -- BBS) (noSerif -- true)
+			BShape CAP (stroke -- BBS) (serifs -- false)
 			intersection
 				BShapeMask CAP (stroke -- BBS)
 				union
@@ -203,9 +261,19 @@ glyph-block Letter-Latin-Upper-B : begin
 		include : MarkSet.e
 		include : ItalicCyrveShape CAP
 
-	create-glyph 'cyrl/ve.upright' : glyph-proc
+	create-glyph 'cyrl/ve.upright.standard' : glyph-proc
 		include : MarkSet.e
-		include : BShape XH
+		include : BShape XH (serifTop -- SLAB) (serifBot -- SLAB)
+
+	create-glyph 'cyrl/ve.upright.standardBilateralMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		include : BShape XH (serifTop -- true) (serifBot -- true)
+
+	create-glyph 'cyrl/ve.upright.standardUnilateralMotionSerifed' : glyph-proc
+		include : MarkSet.e
+		include : BShape XH (serifTop -- true) (serifBot -- false)
+
+	select-variant 'cyrl/ve.upright'
 
 	orthographic-italic 'cyrl/ve' 0x432
 	alias 'smcpB' 0x299 'cyrl/ve.upright'

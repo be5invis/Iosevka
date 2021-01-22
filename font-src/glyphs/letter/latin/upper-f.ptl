@@ -21,38 +21,51 @@ glyph-block Letter-Latin-Upper-F : begin
 		return { jutTop jutBot }
 
 	define xFBarLeft : SB * 1.5
-	define [FShape] : params [top pyBar noSerif _stroke] : glyph-proc
+	define [FShape] : params [top pyBar serifLT serifLB serifV _stroke] : glyph-proc
 		define stroke : fallback _stroke : AdviceStroke2 2 3 top
 		include : VBarLeft (xFBarLeft) 0 top stroke
 		include : HBarTop (xFBarLeft - O) RightSB top stroke
 		include : HBar (xFBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
-		if (SLAB && !noSerif) : begin
-			include : LeftwardTopSerif xFBarLeft top SideJut
+		if serifLT : include : LeftwardTopSerif xFBarLeft top SideJut
+		if serifLB : begin
 			include : tagged 'serifBottom' : LeftwardBottomSerif xFBarLeft 0 SideJut
 			include : tagged 'serifBottom' : RightwardBottomSerif (xFBarLeft + HalfStroke * HVContrast) 0 MidJutSide
+		if serifV : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardRightSerif RightSB top jutTop
 
-	define [RevFShape] : params [top pyBar noSerif] : glyph-proc
+	define [RevFShape] : params [top pyBar serifRT serifRB serifV] : glyph-proc
 		define stroke : AdviceStroke2 2 3 CAP
 		define xFBarRight : Width - SB * 1.5
 		include : VBarRight (xFBarRight) 0 top stroke
 		include : HBarTop SB (xFBarRight + O) top stroke
 		include : HBar (SB + [xMidBarShrink]) (xFBarRight + O) [yMidBar top pyBar] stroke
-		if (SLAB && !noSerif) : begin
-			include : RightwardTopSerif xFBarRight top SideJut
+		if serifRT : include : RightwardTopSerif xFBarRight top SideJut
+		if serifRB : begin
 			include : tagged 'serifBottom' : RightwardBottomSerif xFBarRight 0 SideJut
 			include : tagged 'serifBottom' : LeftwardBottomSerif (xFBarRight - HalfStroke * HVContrast) 0 MidJutSide
+		if serifV : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardLeftSerif SB top jutTop
 
-	create-glyph 'F' 'F' : glyph-proc
+	create-glyph 'F.standard' : glyph-proc
 		include : MarkSet.capital
-		include : FShape CAP
+		include : FShape CAP (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
 
-	create-glyph 'smcpF' 0xA730 : glyph-proc
+	create-glyph 'F.motionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : FShape CAP (serifLT -- true) (serifLB -- false) (serifV -- false)
+
+	create-glyph 'smcpF.standard' : glyph-proc
 		include : MarkSet.e
-		include : FShape XH
+		include : FShape XH (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
+
+	create-glyph 'smcpF.motionSerifed' : glyph-proc
+		include : MarkSet.e
+		include : FShape XH (serifLT -- true) (serifLB -- false) (serifV -- false)
+
+	select-variant 'F' 'F'
+	select-variant 'smcpF' 0xA730 (follow -- 'F')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/F' 0x1D53D : glyph-proc
@@ -61,7 +74,7 @@ glyph-block Letter-Latin-Upper-F : begin
 			VBarLeft (xFBarLeft + BBD) 0 CAP BBS
 			HBarBottom xFBarLeft (xFBarLeft + BBD) 0 BBS
 			difference
-				FShape CAP (noSerif -- true) (_stroke -- BBS)
+				FShape CAP (_stroke -- BBS)
 				Rect (CAP - BBS) BBS (xFBarLeft + BBS * HVContrast) (xFBarLeft + BBD)
 
 	turned 'turnF'     0x2132 'F'     Middle (CAP / 2)

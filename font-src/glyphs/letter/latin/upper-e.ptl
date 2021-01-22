@@ -12,48 +12,67 @@ glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import Marks : markHalfStroke
 	glyph-block-import Letter-Latin-Upper-F : FShape RevFShape EFVJutLength
 
-	glyph-block-export EShape
 	define xEBarLeft : SB * 1.5
-	define [EShape] : params [top pyBar noSerif] : glyph-proc
+	define [EShape] : params [top pyBar serifLT serifLB serifV] : glyph-proc
 		define stroke : AdviceStroke2 2 3 CAP
-		include : FShape top pyBar true
+		include : FShape top pyBar
 		include : HBarBottom (xEBarLeft - O) RightSB 0 stroke
-		if (SLAB && !noSerif) : begin
-			include : LeftwardTopSerif xEBarLeft top SideJut
-			include : LeftwardBottomSerif xEBarLeft 0 SideJut
+		if serifLT : include : LeftwardTopSerif xEBarLeft top SideJut
+		if serifLB : include : LeftwardBottomSerif xEBarLeft 0 SideJut
+		if serifV : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardRightSerif RightSB top jutTop
 			include : UpwardRightSerif RightSB 0 jutBot
 
 	glyph-block-export RevEShape
-	define [RevEShape] : params [top pyBar noSerif] : glyph-proc
+	define [RevEShape] : params [top pyBar serifRT serifRB serifV] : glyph-proc
 		define stroke : AdviceStroke2 2 3 CAP
 		define xEBarRight : Width - SB * 1.5
-		include : RevFShape top pyBar true
+		include : RevFShape top pyBar
 		include : HBarBottom SB (xEBarRight + O) 0 stroke
-		if (SLAB && !noSerif) : begin
-			include : RightwardTopSerif xEBarRight top SideJut
-			include : RightwardBottomSerif xEBarRight 0 SideJut
+		if serifRT : include : RightwardTopSerif xEBarRight top SideJut
+		if serifRB : include : RightwardBottomSerif xEBarRight 0 SideJut
+		if serifV : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardLeftSerif SB top jutTop
 			include : UpwardLeftSerif SB 0 jutBot
 
-	create-glyph 'E' 'E' : glyph-proc
+	create-glyph 'E.standard' : glyph-proc
 		include : MarkSet.capital
-		include : EShape CAP
+		include : EShape CAP (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'E.motionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : EShape CAP (serifLT -- true) (serifLB -- false) (serifV -- false)
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'smcpE.standard' : glyph-proc
+		include : MarkSet.capital
+		include : EShape XH (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	create-glyph 'smcpE.motionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : EShape XH (serifLT -- true) (serifLB -- false) (serifV -- false)
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+	select-variant 'E' 'E'
+	select-variant 'smcpE' 0x1D07 (follow -- 'E')
 
 	alias 'grek/Epsilon' 0x395 'E'
 	alias 'cyrl/Ie' 0x415 'E'
 
-	create-glyph 'revE' 0x18E : glyph-proc
+	create-glyph 'revE.standard' : glyph-proc
 		include : MarkSet.capital
-		include : RevEShape CAP
+		include : RevEShape CAP (serifRT -- SLAB) (serifRB -- SLAB) (serifV -- false)
 
-	create-glyph 'smcpturnE' 0x2C7B : glyph-proc
-		include : MarkSet.e
-		include : EShape XH
-		include : FlipAround Middle (XH / 2)
+	create-glyph 'revE.motionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : RevEShape CAP (serifRT -- false) (serifRB -- true) (serifV -- false)
+
+	select-variant 'revE' 0x18E (follow -- 'E')
+	turned 'turnSmcpE' 0x2C7B 'smcpE' Middle (XH / 2)
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/E' 0x1D53C : glyph-proc
@@ -62,6 +81,6 @@ glyph-block Letter-Latin-Upper-E : begin
 			VBarLeft (xEBarLeft + BBD) 0 CAP BBS
 			HBarBottom xEBarLeft (xEBarLeft + BBD) 0 BBS
 			difference
-				FShape CAP (noSerif -- true) (_stroke -- BBS)
+				FShape CAP (serif -- false) (_stroke -- BBS)
 				Rect (CAP - BBS) BBS (xEBarLeft + BBS * HVContrast) (xEBarLeft + BBD)
 			HBarBottom (xEBarLeft - O) RightSB 0 BBS
