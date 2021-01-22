@@ -10,8 +10,15 @@ glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
+	define FORM-CURLY     0
+	define FORM-STRAIGHT  1
+	define FORM-FLAT-TOP  2
+
+	define SERIFS-AUTO    1
+	define SERIFS-MOTION  2
+
 	### W and w
-	define [WShape top barStraight df] : glyph-proc
+	define [WShape df top barStraight st] : glyph-proc
 		local fineOuter : if barStraight
 			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
 			AdviceStroke WShape.fineOuter df.div
@@ -98,7 +105,8 @@ glyph-block Letter-Latin-W : begin
 				quadcontrols 0 0.3 6 unimportant
 				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
 
-		include : AIVSerifs top df.leftSB df.rightSB
+		if (st === SERIFS-AUTO)   : include : AIVSerifs top df.leftSB df.rightSB
+		if (st === SERIFS-MOTION) : include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
 
 	set WShape.fineOuter 5
 	set WShape.fineInner 6
@@ -119,19 +127,25 @@ glyph-block Letter-Latin-W : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		create-derived 'W.straightFlatTop' : WShape CAP 2 df
-		create-derived 'W.straight' : WShape CAP 1 df
-		create-derived 'W.curly' : WShape CAP 0 df
+		create-derived 'W.straightFlatTop' :              WShape df CAP FORM-FLAT-TOP SERIFS-AUTO
+		create-derived 'W.straight' :                     WShape df CAP FORM-STRAIGHT SERIFS-AUTO
+		create-derived 'W.curly' :                        WShape df CAP FORM-CURLY    SERIFS-AUTO
+		create-derived 'W.straightFlatTopMotionSerifed' : WShape df CAP FORM-FLAT-TOP SERIFS-MOTION
+		create-derived 'W.straightMotionSerifed' :        WShape df CAP FORM-STRAIGHT SERIFS-MOTION
+		create-derived 'W.curlyMotionSerifed' :           WShape df CAP FORM-CURLY    SERIFS-MOTION
 
 	create-glyph : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.e
-		create-derived 'w.straightFlatTop' : WShape XH 2 df
-		create-derived 'w.straight' : WShape XH 1 df
-		create-derived 'w.curly' : WShape XH 0 df
+		create-derived 'w.straightFlatTop' :              WShape df XH FORM-FLAT-TOP SERIFS-AUTO
+		create-derived 'w.straight' :                     WShape df XH FORM-STRAIGHT SERIFS-AUTO
+		create-derived 'w.curly' :                        WShape df XH FORM-CURLY    SERIFS-AUTO
+		create-derived 'w.straightFlatTopMotionSerifed' : WShape df XH FORM-FLAT-TOP SERIFS-MOTION
+		create-derived 'w.straightMotionSerifed' :        WShape df XH FORM-STRAIGHT SERIFS-MOTION
+		create-derived 'w.curlyMotionSerifed' :           WShape df XH FORM-CURLY    SERIFS-MOTION
 
-	define [WHooktopShape top barStraight df] : glyph-proc
+	define [WHooktopShape df top barStraight] : glyph-proc
 		local fineOuter : if barStraight
 			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
 			AdviceStroke WShape.fineOuter df.div
@@ -144,7 +158,7 @@ glyph-block Letter-Latin-W : begin
 		local fineOffsetInner : hwCO * HVContrast
 		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
 
-		include : WShape top barStraight df
+		include : WShape df top barStraight SERIFS-AUTO
 
 		# Eject unnecessary contours
 		eject-contour 'strokeUp2'
@@ -162,37 +176,41 @@ glyph-block Letter-Latin-W : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		create-derived 'Whooktop.straightFlatTop' : WHooktopShape CAP 2 df
-		create-derived 'Whooktop.straight' : WHooktopShape CAP 1 df
-		create-derived 'Whooktop.curly' : WHooktopShape CAP 0 df
+		create-derived 'Whooktop.straightFlatTop' : WHooktopShape df CAP FORM-FLAT-TOP
+		create-derived 'Whooktop.straight'        : WHooktopShape df CAP FORM-STRAIGHT
+		create-derived 'Whooktop.curly'           : WHooktopShape df CAP FORM-CURLY
 
 	create-glyph : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.e
-		create-derived 'whooktop.straightFlatTop' : WHooktopShape XH 2 df
-		create-derived 'whooktop.straight' : WHooktopShape XH 1 df
-		create-derived 'whooktop.curly' : WHooktopShape XH 0 df
+		create-derived 'whooktop.straightFlatTop' : WHooktopShape df XH FORM-FLAT-TOP
+		create-derived 'whooktop.straight'        : WHooktopShape df XH FORM-STRAIGHT
+		create-derived 'whooktop.curly'           : WHooktopShape df XH FORM-CURLY
 
-	define [LowerWWShape df straightBar] : glyph-proc
-		include : WShape (CAP / 2) straightBar df
+	define [LowerWWShape df straightBar st] : glyph-proc
+		include : WShape (CAP / 2) straightBar df st
 		include : Upright
 		include : Translate 0 (CAP / 2)
 		include : Italify
-		include : WShape (CAP / 2) straightBar df
+		include : WShape (CAP / 2) straightBar df st
+
 	create-glyph : glyph-proc
 		local df : DivFrame 1 3
 		set-width df.width
 		include : df.markSet.capital
-		create-derived 'ww.straightFlatTop' : LowerWWShape df 2
-		create-derived 'ww.straight' : LowerWWShape df 1
-		create-derived 'ww.curly' : LowerWWShape df 0
+		create-derived 'ww.straightFlatTop' :              LowerWWShape df FORM-FLAT-TOP SERIFS-AUTO
+		create-derived 'ww.straight' :                     LowerWWShape df FORM-STRAIGHT SERIFS-AUTO
+		create-derived 'ww.curly' :                        LowerWWShape df FORM-CURLY    SERIFS-AUTO
+		create-derived 'ww.straightFlatTopMotionSerifed' : LowerWWShape df FORM-FLAT-TOP SERIFS-MOTION
+		create-derived 'ww.straightMotionSerifed' :        LowerWWShape df FORM-STRAIGHT SERIFS-MOTION
+		create-derived 'ww.curlyMotionSerifed' :           LowerWWShape df FORM-CURLY    SERIFS-MOTION
 
 	select-variant 'W' 'W'
-	select-variant 'Whooktop' 0x2C72 (follow -- 'W')
+	select-variant 'Whooktop' 0x2C72
 	select-variant 'w' 'w'
 	select-variant 'ww' 0x2AC (follow -- 'w')
-	select-variant 'whooktop' 0x2C73 (follow -- 'w')
+	select-variant 'whooktop' 0x2C73
 	alias 'cyrl/We' 0x51C 'W'
 	alias 'cyrl/we' 0x51D 'w'
 	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)
