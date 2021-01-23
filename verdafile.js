@@ -554,8 +554,7 @@ const PagesFontExport = task(`pages:font-export`, async t => {
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
 		GroupContents`iosevka-aile`,
-		GroupContents`iosevka-etoile`,
-		GroupContents`iosevka-sparkle`
+		GroupContents`iosevka-etoile`
 	);
 
 	for (const dir of dirs) exportFontDir(pagesDir, dir);
@@ -585,12 +584,11 @@ const SampleImages = task(`sample-images`, async target => {
 });
 
 const SampleImagesPre = task(`sample-images:pre`, async target => {
-	const [sans, slab, aile, etoile, sparkle] = await target.need(
+	const [sans, slab, aile, etoile] = await target.need(
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
 		GroupContents`iosevka-aile`,
 		GroupContents`iosevka-etoile`,
-		GroupContents`iosevka-sparkle`,
 		SnapShotStatic("index.js"),
 		SnapShotStatic("get-snap.js"),
 		SnapShotJson,
@@ -603,7 +601,6 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 	await cp(`${DIST}/${slab}`, `${SNAPSHOT_TMP}/${slab}`);
 	await cp(`${DIST}/${aile}`, `${SNAPSHOT_TMP}/${aile}`);
 	await cp(`${DIST}/${etoile}`, `${SNAPSHOT_TMP}/${etoile}`);
-	await cp(`${DIST}/${sparkle}`, `${SNAPSHOT_TMP}/${sparkle}`);
 });
 
 const PackageSnapshotConfig = computed(`package-snapshot-config`, async target => {
