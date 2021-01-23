@@ -510,35 +510,35 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-z = 'motion-serifed'`, `cv64 = 7`: Standard `Z` with motion serifs.
     + `capital-z = 'curly-motion-serifed'`, `cv64 = 8`: Curly `Z` with motion serifs.
   - Styles for `a`:
-    + `a = 'doublestorey'`, `cv12 = 1`: Double-storey `a` (default for Upright).
-    + `a = 'doublestorey-tailed'`, `cv12 = 2`: Double-storey `a` with curly tail.
-    + `a = 'doublestorey-toothless-corner'`, `cv12 = 3`: Toothless (cornered bottom-right) double-storey `a`.
-    + `a = 'doublestorey-toothless-rounded'`, `cv12 = 4`: Toothless (rounded bottom-right) double-storey `a`.
-    + `a = 'singlestorey'`, `cv12 = 5`: Single-storey `a`.
-    + `a = 'singlestorey-tailed'`, `cv12 = 6`: Single-storey `a` with curly tail (default for Italic).
-    + `a = 'singlestorey-earless-corner'`, `cv12 = 7`: Earless (cornered top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-corner-tailed'`, `cv12 = 8`: Earless (cornered top-right) single-storey `a` with curly tail.
-    + `a = 'singlestorey-earless-rounded'`, `cv12 = 9`: Earless (rounded top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-rounded-tailed'`, `cv12 = 10`: Earless (rounded top-right) single-storey `a` with curly tail.
-    + `a = 'doublestorey-motion-serifed'`, `cv12 = 11`: Double-storey `a` with motion serifs.
-    + `a = 'singlestorey-motion-serifed'`, `cv12 = 12`: Single-storey `a` with motion serifs.
-    + `a = 'singlestorey-earless-corner-motion-serifed'`, `cv12 = 13`: Earless (cornered top-right) single-storey `a` with motion serifs.
-    + `a = 'singlestorey-earless-rounded-motion-serifed'`, `cv12 = 14`: Earless (rounded top-right) single-storey `a` with motion serifs.
+    + `a = 'double-storey'`, `cv12 = 1`: Double-storey `a` (default for Upright).
+    + `a = 'double-storey-tailed'`, `cv12 = 2`: Double-storey `a` with curly tail.
+    + `a = 'double-storey-toothless-corner'`, `cv12 = 3`: Toothless (cornered bottom-right) double-storey `a`.
+    + `a = 'double-storey-toothless-rounded'`, `cv12 = 4`: Toothless (rounded bottom-right) double-storey `a`.
+    + `a = 'single-storey'`, `cv12 = 5`: Single-storey `a`.
+    + `a = 'single-storey-tailed'`, `cv12 = 6`: Single-storey `a` with curly tail (default for Italic).
+    + `a = 'single-storey-earless-corner'`, `cv12 = 7`: Earless (cornered top-right) single-storey `a`.
+    + `a = 'single-storey-earless-corner-tailed'`, `cv12 = 8`: Earless (cornered top-right) single-storey `a` with curly tail.
+    + `a = 'single-storey-earless-rounded'`, `cv12 = 9`: Earless (rounded top-right) single-storey `a`.
+    + `a = 'single-storey-earless-rounded-tailed'`, `cv12 = 10`: Earless (rounded top-right) single-storey `a` with curly tail.
+    + `a = 'double-storey-motion-serifed'`, `cv12 = 11`: Double-storey `a` with motion serifs.
+    + `a = 'single-storey-motion-serifed'`, `cv12 = 12`: Single-storey `a` with motion serifs.
+    + `a = 'single-storey-earless-corner-motion-serifed'`, `cv12 = 13`: Earless (cornered top-right) single-storey `a` with motion serifs.
+    + `a = 'single-storey-earless-rounded-motion-serifed'`, `cv12 = 14`: Earless (rounded top-right) single-storey `a` with motion serifs.
   - Styles for `b`:
     + `b = 'toothed'`, `cv13 = 1`: `b` with bottom-left tooth (default).
     + `b = 'toothless-corner'`, `cv13 = 2`: `b` without bottom-left tooth, with a corner transition.
     + `b = 'toothless-rounded'`, `cv13 = 3`: `b` without bottom-left tooth, with a rounded transition.
-    + `b = 'motion-serifed-toothed'`, `cv13 = 4`: `b` with motion serif, and with bottom-left tooth.
-    + `b = 'motion-serifed-toothless-corner'`, `cv13 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
-    + `b = 'motion-serifed-toothless-rounded'`, `cv13 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
+    + `b = 'toothed-motion-serifed'`, `cv13 = 4`: `b` with motion serif, and with bottom-left tooth.
+    + `b = 'toothless-corner-motion-serifed'`, `cv13 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
+    + `b = 'toothless-rounded-motion-serifed'`, `cv13 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
   - Styles for `d`:
     + `d = 'toothed'`, `cv14 = 1`: `d` with bottom-right tooth (default for Upright).
     + `d = 'toothless-corner'`, `cv14 = 2`: `d` without bottom-right tooth, with a corner transition.
     + `d = 'toothless-rounded'`, `cv14 = 3`: `d` without bottom-right tooth, with a rounded transition.
     + `d = 'tailed'`, `cv14 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
-    + `d = 'motion-serifed-toothed'`, `cv14 = 5`: `d` motion serif, and with bottom-right tooth.
-    + `d = 'motion-serifed-toothless-corner'`, `cv14 = 6`: `d` motion serif, and without bottom-right tooth, with a corner transition.
-    + `d = 'motion-serifed-toothless-rounded'`, `cv14 = 7`: `d` motion serif, and without bottom-right tooth, with a rounded transition.
+    + `d = 'toothed-motion-serifed'`, `cv14 = 5`: `d` motion serif, and with bottom-right tooth.
+    + `d = 'toothless-corner-motion-serifed'`, `cv14 = 6`: `d` motion serif, and without bottom-right tooth, with a corner transition.
+    + `d = 'toothless-rounded-motion-serifed'`, `cv14 = 7`: `d` motion serif, and without bottom-right tooth, with a rounded transition.
     + `d = 'motion-serifed-tailed'`, `cv14 = 8`: `d` motion serif, and with a slightly tail bottom-right tail.
   - Styles for `e`:
     + `e = 'flat-crossbar'`, `cv59 = 1`: `e` with flat crossbar (default for Upright).
@@ -565,20 +565,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `f = 'flat-hook-diagonal-tailed'`, `cv15 = 19`: `f` with falt hook and bottom diagonal tail.
     + `f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'`, `cv15 = 20`: `f` with falt hook and bottom diagonal tail; crossbar is placed right at X-height.
   - Styles for `g`:
-    + `g = 'singlestorey'`, `cv16 = 1`: Single-storey `g` (default).
-    + `g = 'doublestorey'`, `cv16 = 2`: Double-storey `g`.
-    + `g = 'opendoublestorey'`, `cv16 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
+    + `g = 'single-storey'`, `cv16 = 1`: Single-storey `g` (default).
+    + `g = 'double-storey'`, `cv16 = 2`: Double-storey `g`.
+    + `g = 'double-storey-open'`, `cv16 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
     + `g = 'earless-corner'`, `cv16 = 4`: Earless (cornered top-right) single-storey `g`.
     + `g = 'earless-rounded'`, `cv16 = 5`: Earless (rounded top-right) single-storey `g`.
-    + `g = 'singlestorey-flat-hook'`, `cv16 = 6`: Single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-earless-corner-flat-hook'`, `cv16 = 7`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-earless-rounded-flat-hook'`, `cv16 = 8`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-motion-serifed'`, `cv16 = 9`: Single-storey `g` with motion serifs.
-    + `g = 'singlestorey-motion-serifed-flat-hook'`, `cv16 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
+    + `g = 'single-storey-flat-hook'`, `cv16 = 6`: Single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-earless-corner-flat-hook'`, `cv16 = 7`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-earless-rounded-flat-hook'`, `cv16 = 8`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-motion-serifed'`, `cv16 = 9`: Single-storey `g` with motion serifs.
+    + `g = 'single-storey-motion-serifed-flat-hook'`, `cv16 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
   - Styles for `h`:
     + `h = 'straight'`, `cv17 = 1`: `h` with straight ending (default).
     + `h = 'tailed'`, `cv17 = 2`: `h` with curly tailed ending.
-    + `h = 'motion-serifed-straight'`, `cv17 = 3`: `h` with straight ending.
+    + `h = 'straight-motion-serifed'`, `cv17 = 3`: `h` with straight ending.
     + `h = 'motion-serifed-tailed'`, `cv17 = 4`: `h` with curly tailed ending.
   - Styles for `i`:
     + `i = 'serifed'`, `cv18 = 1`: Serifed `i` (default for Upright).
@@ -605,11 +605,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `k = 'straight'`, `cv20 = 1`: `k` with standard shape (default for Upright).
     + `k = 'curly'`, `cv20 = 2`: Slightly curly `k`, like Iosevka 2.x.
     + `k = 'cursive'`, `cv20 = 3`: `k` with a cursive loop (default for Italic).
-    + `k = 'motion-serifed-straight'`, `cv20 = 4`: `k` with motion serifs.
-    + `k = 'motion-serifed-curly'`, `cv20 = 5`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
-    + `k = 'motion-serifed-cursive'`, `cv20 = 6`: `k` with a cursive loop and motion serifs.
+    + `k = 'straight-motion-serifed'`, `cv20 = 4`: `k` with motion serifs.
+    + `k = 'curly-motion-serifed'`, `cv20 = 5`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
+    + `k = 'cursive-motion-serifed'`, `cv20 = 6`: `k` with a cursive loop and motion serifs.
     + `k = 'diagonal-tailed-cursive'`, `cv20 = 7`: `k` with a cursive loop and diagonal tail.
-    + `k = 'motion-serifed-diagonal-tailed-cursive'`, `cv20 = 8`: `k` with a cursive loop, motion serifs and diagonal tail.
+    + `k = 'diagonal-tailed-cursive-motion-serifed'`, `cv20 = 8`: `k` with a cursive loop, motion serifs and diagonal tail.
   - Styles for `l`:
     + `l = 'serifed'`, `cv21 = 1`: Serifed `l` (default for Upright).
     + `l = 'serifless'`, `cv21 = 2`: `l` like a straight line.
@@ -625,25 +625,25 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'serifed-diagonal-tailed'`, `cv21 = 12`: `l` with top serif and a diagonal tail.
   - Styles for `m`:
     + `m = 'normal'`, `cv22 = 1`: `m` with normal middle leg, touching the baseline (default).
-    + `m = 'shortleg'`, `cv22 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
+    + `m = 'short-leg'`, `cv22 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
     + `m = 'tailed'`, `cv22 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
-    + `m = 'shortleg-tailed'`, `cv22 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
+    + `m = 'short-leg-tailed'`, `cv22 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
     + `m = 'earless-corner-double-arch'`, `cv22 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-corner-double-arch-shortleg'`, `cv22 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-corner-double-arch-short-leg'`, `cv22 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
     + `m = 'earless-corner-double-arch-tailed'`, `cv22 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-corner-double-arch-shortleg-tailed'`, `cv22 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-corner-double-arch-short-leg-tailed'`, `cv22 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
     + `m = 'earless-rounded-double-arch'`, `cv22 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-rounded-double-arch-shortleg'`, `cv22 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-rounded-double-arch-short-leg'`, `cv22 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
     + `m = 'earless-rounded-double-arch-tailed'`, `cv22 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-rounded-double-arch-shortleg-tailed'`, `cv22 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-rounded-double-arch-short-leg-tailed'`, `cv22 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
     + `m = 'earless-single-arch'`, `cv22 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
-    + `m = 'earless-single-arch-shortleg'`, `cv22 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-single-arch-short-leg'`, `cv22 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
     + `m = 'earless-single-arch-tailed'`, `cv22 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-single-arch-shortleg-tailed'`, `cv22 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-single-arch-short-leg-tailed'`, `cv22 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
     + `m = 'motion-serifed'`, `cv22 = 17`: `m` with motion serifs, normal middle leg touching baseline.
-    + `m = 'motion-serifed-shortleg'`, `cv22 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
+    + `m = 'short-leg-motion-serifed'`, `cv22 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
     + `m = 'motion-serifed-tailed'`, `cv22 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
-    + `m = 'motion-serifed-shortleg-tailed'`, `cv22 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'short-leg-motion-serifed-tailed'`, `cv22 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
   - Styles for `n`:
     + `n = 'straight'`, `cv23 = 1`: `n` with straight ending (default).
     + `n = 'tailed'`, `cv23 = 2`: `n` with a curly tail.
@@ -651,7 +651,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `n = 'earless-corner-tailed'`, `cv23 = 4`: Earless (corner top-left) `n` with a curly tail.
     + `n = 'earless-rounded-straight'`, `cv23 = 5`: Earless (rounded top-left) `n` with straight ending.
     + `n = 'earless-rounded-tailed'`, `cv23 = 6`: Earless (rounded top-left) `n` with a curly tail.
-    + `n = 'motion-serifed-straight'`, `cv23 = 7`: `n` with motion serifs and straight ending.
+    + `n = 'straight-motion-serifed'`, `cv23 = 7`: `n` with motion serifs and straight ending.
     + `n = 'motion-serifed-tailed'`, `cv23 = 8`: `n` with motion serifs and a curly tail.
   - Styles for `p`:
     + `p = 'eared'`, `cv24 = 1`: `p` with top-left ear (default).
@@ -665,7 +665,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-corner-tailed'`, `cv25 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
     + `q = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left) single-storey `q`.
     + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
-    + `q = 'motion-serifed-straight'`, `cv25 = 7`: `q` with straight bar and motion serifs.
+    + `q = 'straight-motion-serifed'`, `cv25 = 7`: `q` with straight bar and motion serifs.
     + `q = 'motion-serifed-tailed'`, `cv25 = 8`: `q` with tail and motion serifs.
     + `q = 'diagonal-tailed'`, `cv25 = 9`: `q` with diagonal tail.
     + `q = 'earless-corner-diagonal-tailed'`, `cv25 = 10`: Earless (cornered top-left) single-storey `q` with curly diagonal tail.
