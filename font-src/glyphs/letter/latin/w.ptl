@@ -16,8 +16,10 @@ glyph-block Letter-Latin-W : begin
 	define FORM-DOUBLE-V   3
 	define FORM-ASYMMETRIC 4
 
-	define SERIFS-AUTO    1
-	define SERIFS-MOTION  2
+	define SERIFS-AUTO       1
+	define SERIFS-MOTION     2
+	define SERIFS-DOUBLE-V   3
+	define SERIFS-ASYMMETRIC 4
 
 	define CwFineOuter           5.0
 	define CwFineInner           6.0
@@ -75,8 +77,8 @@ glyph-block Letter-Latin-W : begin
 			[Just FORM-CURLY]      : top * 0.6
 			[Just FORM-STRAIGHT]   : topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)]
 			[Just FORM-FLAT-TOP]     topWithoutSerif
-			[Just FORM-DOUBLE-V]     topWithoutSerif
-			[Just FORM-ASYMMETRIC]   topWithoutSerif
+			[Just FORM-DOUBLE-V]     top
+			[Just FORM-ASYMMETRIC]   top
 
 		local xRight1 : match bodyType
 			([Just FORM-DOUBLE-V] || [Just FORM-ASYMMETRIC]) : mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) (2 * pxBot1)
@@ -149,40 +151,52 @@ glyph-block Letter-Latin-W : begin
 		include : match slabType
 			[Just SERIFS-AUTO]   : AIVSerifs top df.leftSB df.rightSB
 			[Just SERIFS-MOTION] : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
+			[Just SERIFS-DOUBLE-V] : glyph-proc
+				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  df.leftSB top SideJut
+				if SLAB : include : tagged 'serifRT' : RightwardTopSerif df.rightSB top SideJut
+			[Just SERIFS-ASYMMETRIC] : glyph-proc
+				include : AIVSerifs top df.leftSB df.rightSB
+				eject-contour 'serifLT'
+				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  df.leftSB top SideJut
 
 	define [WonOverlay df] : glyph-proc
 		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
 		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		create-derived 'W.straightAsymmetric'              : WshapeImpl df CAP FORM-ASYMMETRIC   SERIFS-AUTO
-		create-derived 'W.straightDoubleV'                 : WshapeImpl df CAP FORM-DOUBLE-V     SERIFS-AUTO
-		create-derived 'W.straightFlatTop'                 : WshapeImpl df CAP FORM-FLAT-TOP     SERIFS-AUTO
-		create-derived 'W.straight'                        : WshapeImpl df CAP FORM-STRAIGHT     SERIFS-AUTO
-		create-derived 'W.curly'                           : WshapeImpl df CAP FORM-CURLY        SERIFS-AUTO
-		create-derived 'W.straightAsymmetricMotionSerifed' : WshapeImpl df CAP FORM-ASYMMETRIC   SERIFS-MOTION
-		create-derived 'W.straightDoubleVMotionSerifed'    : WshapeImpl df CAP FORM-DOUBLE-V     SERIFS-MOTION
-		create-derived 'W.straightFlatTopMotionSerifed'    : WshapeImpl df CAP FORM-FLAT-TOP     SERIFS-MOTION
-		create-derived 'W.straightMotionSerifed'           : WshapeImpl df CAP FORM-STRAIGHT     SERIFS-MOTION
-		create-derived 'W.curlyMotionSerifed'              : WshapeImpl df CAP FORM-CURLY        SERIFS-MOTION
+	define WConfig : object
+		straightAsymmetric               { FORM-ASYMMETRIC   SERIFS-ASYMMETRIC }
+		straightDoubleV                  { FORM-DOUBLE-V     SERIFS-DOUBLE-V   }
+		straightFlatTop                  { FORM-FLAT-TOP     SERIFS-AUTO       }
+		straight                         { FORM-STRAIGHT     SERIFS-AUTO       }
+		curly                            { FORM-CURLY        SERIFS-AUTO       }
+		straightAsymmetricMotionSerifed  { FORM-ASYMMETRIC   SERIFS-MOTION     }
+		straightDoubleVMotionSerifed     { FORM-DOUBLE-V     SERIFS-MOTION     }
+		straightFlatTopMotionSerifed     { FORM-FLAT-TOP     SERIFS-MOTION     }
+		straightMotionSerifed            { FORM-STRAIGHT     SERIFS-MOTION     }
+		curlyMotionSerifed               { FORM-CURLY        SERIFS-MOTION     }
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		create-derived 'w.straightAsymmetric'              : WshapeImpl df XH FORM-ASYMMETRIC   SERIFS-AUTO
-		create-derived 'w.straightDoubleV'                 : WshapeImpl df XH FORM-DOUBLE-V     SERIFS-AUTO
-		create-derived 'w.straightFlatTop'                 : WshapeImpl df XH FORM-FLAT-TOP     SERIFS-AUTO
-		create-derived 'w.straight'                        : WshapeImpl df XH FORM-STRAIGHT     SERIFS-AUTO
-		create-derived 'w.curly'                           : WshapeImpl df XH FORM-CURLY        SERIFS-AUTO
-		create-derived 'w.straightAsymmetricMotionSerifed' : WshapeImpl df XH FORM-ASYMMETRIC   SERIFS-MOTION
-		create-derived 'w.straightDoubleVMotionSerifed'    : WshapeImpl df XH FORM-DOUBLE-V     SERIFS-MOTION
-		create-derived 'w.straightFlatTopMotionSerifed'    : WshapeImpl df XH FORM-FLAT-TOP     SERIFS-MOTION
-		create-derived 'w.straightMotionSerifed'           : WshapeImpl df XH FORM-STRAIGHT     SERIFS-MOTION
-		create-derived 'w.curlyMotionSerifed'              : WshapeImpl df XH FORM-CURLY        SERIFS-MOTION
+	foreach { suffix { bodyType slabType } } [Object.entries WConfig] : do
+		create-glyph "W.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : WshapeImpl df CAP bodyType slabType
+
+		create-glyph "w.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : WshapeImpl df XH bodyType slabType
+
+		create-glyph "ww.\(suffix)": glyph-proc
+			local df : DivFrame 1 3
+			set-width df.width
+			include : df.markSet.capital
+			include : WshapeImpl df (CAP / 2) bodyType slabType
+			include : Upright
+			include : Translate 0 (CAP / 2)
+			include : Italify
+			include : WshapeImpl df (CAP / 2) bodyType slabType
 
 	define [WHooktopShape df top bodyType] : glyph-proc
 		include : WshapeImpl df top bodyType SERIFS-AUTO
@@ -216,28 +230,6 @@ glyph-block Letter-Latin-W : begin
 		create-derived 'whooktop.straightFlatTop' : WHooktopShape df XH FORM-FLAT-TOP
 		create-derived 'whooktop.straight'        : WHooktopShape df XH FORM-STRAIGHT
 		create-derived 'whooktop.curly'           : WHooktopShape df XH FORM-CURLY
-
-	define [LowerWWShape df straightBar slabType] : glyph-proc
-		include : WshapeImpl df (CAP / 2) straightBar slabType
-		include : Upright
-		include : Translate 0 (CAP / 2)
-		include : Italify
-		include : WshapeImpl df (CAP / 2) straightBar slabType
-
-	create-glyph : glyph-proc
-		local df : DivFrame 1 3
-		set-width df.width
-		include : df.markSet.capital
-		create-derived 'ww.straightAsymmetric'              : LowerWWShape df FORM-ASYMMETRIC     SERIFS-AUTO
-		create-derived 'ww.straightDoubleV'                 : LowerWWShape df FORM-DOUBLE-V       SERIFS-AUTO
-		create-derived 'ww.straightFlatTop'                 : LowerWWShape df FORM-FLAT-TOP       SERIFS-AUTO
-		create-derived 'ww.straight'                        : LowerWWShape df FORM-STRAIGHT       SERIFS-AUTO
-		create-derived 'ww.curly'                           : LowerWWShape df FORM-CURLY          SERIFS-AUTO
-		create-derived 'ww.straightAsymmetricMotionSerifed' : LowerWWShape df FORM-ASYMMETRIC     SERIFS-MOTION
-		create-derived 'ww.straightDoubleVMotionSerifed'    : LowerWWShape df FORM-DOUBLE-V       SERIFS-MOTION
-		create-derived 'ww.straightFlatTopMotionSerifed'    : LowerWWShape df FORM-FLAT-TOP       SERIFS-MOTION
-		create-derived 'ww.straightMotionSerifed'           : LowerWWShape df FORM-STRAIGHT       SERIFS-MOTION
-		create-derived 'ww.curlyMotionSerifed'              : LowerWWShape df FORM-CURLY          SERIFS-MOTION
 
 	select-variant 'W' 'W'
 	select-variant 'Whooktop' 0x2C72
