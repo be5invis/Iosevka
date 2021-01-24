@@ -554,7 +554,9 @@ const PagesFontExport = task(`pages:font-export`, async t => {
 		GroupContents`iosevka`,
 		GroupContents`iosevka-slab`,
 		GroupContents`iosevka-aile`,
-		GroupContents`iosevka-etoile`
+		GroupContents`iosevka-etoile`,
+		GroupContents`iosevka-QP`,
+		GroupContents`iosevka-QP-slab`
 	);
 
 	for (const dir of dirs) exportFontDir(pagesDir, dir);
