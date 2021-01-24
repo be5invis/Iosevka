@@ -23,29 +23,37 @@ glyph-block Letter-Latin-S : begin
 		define tension : tensionCoeff * (0.5 - 0.4 * dist - 0.005 * strokeCoeff + slantCoeff * TanSlope)
 		return : alsoThruThem {{(0.5 - dist) tension} {(0.5 + dist) (1 - tension)}} [widths.center stroke]
 
-	glyph-block-export SStroke
-	define [SStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+	define [SStrokeImpl st sb stroke refSwEss] : begin
 		local ess : refSwEss * stroke / Stroke
 		define smooth : adviceSSmooth CAP (-1) stroke
-		return : dispiro
-			widths.lhs stroke
-			g4   RightSB (CAP - Hook)
-			hookstart (CAP - O) (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   SB (CAP - smooth)
-			alsoThru.g2 0.5 0.5 [widths.center ess]
-			g4   (RightSB - SOBot) smooth [widths 0 stroke]
-			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   (SB + SOBot) Hook
 
-	define [SlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
-		define ess : refSwEss * stroke / Stroke
-		define smooth : adviceSSmooth CAP (-1) stroke
 		return : dispiro
-			SerifedArcStart_RtlLhs RightSB Middle CAP stroke Hook
+			if st
+				list
+					SerifedArcStart_RtlLhs RightSB Middle CAP stroke Hook
+				list
+					g4 RightSB (CAP - Hook)
+					hookstart (CAP - O) (sw -- stroke) (swItalicAdj -- Stroke)
+
 			g4   SB (CAP - smooth)
 			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4   (RightSB - SOBot) smooth [widths 0 stroke]
-			SerifedArcEnd_RtlRhs SB Middle 0 stroke Hook
+
+			if sb
+				list
+					SerifedArcEnd_RtlRhs SB Middle 0 stroke Hook
+				list
+					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+					g4   (SB + SOBot) Hook
+
+
+	glyph-block-export SStroke
+	define [SStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+		return : SStrokeImpl false false stroke refSwEss
+	define [HalfSlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+		return : SStrokeImpl true false stroke refSwEss
+	define [SlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
+		return : SStrokeImpl true true stroke refSwEss
 
 	define [RevSStroke] : begin
 		local stroke : AdviceStroke2 2 3 CAP
@@ -61,32 +69,34 @@ glyph-block Letter-Latin-S : begin
 			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   (RightSB - SOBot) Hook
 
-	define [SmallSStroke] : begin
+	define [SmallSStrokeImpl st sb] : begin
 		define stroke : AdviceStroke2 2 3 XH
 		define ess : AdviceStroke2 2.2 3.2 XH
 		define strokeCoeff : StrokeWidthBlend 0 1 stroke
 		define smooth : adviceSSmooth XH (-1) stroke
-		return : dispiro
-			widths.lhs stroke
-			g4   (RightSB + OX) (XH - SHook)
-			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   (SB - OX) (XH - smooth)
-			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
-			g4   (RightSB + OX - SOBot) (smooth) [widths 0 stroke]
-			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   (SB - OX + SOBot) SHook
 
-	define [SlabSmallSStroke] : begin
-		define stroke : AdviceStroke2 2 3 XH
-		define ess : AdviceStroke2 2.2 3.2 XH
-		define strokeCoeff : StrokeWidthBlend 0 1 stroke
-		define smooth : adviceSSmooth XH (-1) stroke
 		return : dispiro
-			SerifedArcStart_RtlLhs RightSB Middle XH stroke SHook
+			if st
+				list
+					SerifedArcStart_RtlLhs RightSB Middle XH stroke SHook
+				list
+					g4   (RightSB + OX) (XH - SHook)
+					hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
+
 			g4   (SB - OX) (XH - smooth)
 			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
 			g4   (RightSB + OX - SOBot) (smooth) [widths 0 stroke]
-			SerifedArcEnd_RtlRhs SB Middle 0 stroke SHook
+
+			if sb
+				list
+					SerifedArcEnd_RtlRhs SB Middle 0 stroke SHook
+				list
+					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+					g4   (SB - OX + SOBot) SHook
+
+	define [SmallSStroke] : SmallSStrokeImpl false false
+	define [HalfSlabSmallSStroke] : SmallSStrokeImpl true false
+	define [SlabSmallSStroke] : SmallSStrokeImpl true true
 
 	glyph-block-export SStrokeAlt
 	define [SStrokeAlt] : params [top hook swStart swEnd oXLeftTop offsetLT offsetRB offsetC] : begin
@@ -219,13 +229,13 @@ glyph-block Letter-Latin-S : begin
 
 	create-glyph 'cyrl/ge.italic' : glyph-proc
 		include : MarkSet.b
-		local stroke : [RevSmallSStroke].call currentGlyph
+		local stroke : include : RevSmallSStroke
 		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.0
 		include : VBarLeft start.x start.y (XH + Accent)
 
 	create-glyph 'cyrl/gheDescender.italic' : glyph-proc
 		include : MarkSet.b
-		local stroke : [RevSmallSStroke].call currentGlyph
+		local stroke : include : RevSmallSStroke
 		local start : currentGlyph.gizmo.unapply stroke.rhsKnots.(0)
 		include : VBarRight start.x (-Accent) start.y
 
@@ -233,7 +243,7 @@ glyph-block Letter-Latin-S : begin
 		include : MarkSet.p
 
 		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-		local stroke : [[if SLAB SlabSmallSStroke SmallSStroke]].call currentGlyph
+		local stroke : include : [if SLAB HalfSlabSmallSStroke SmallSStroke]
 		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 		include : new-glyph : glyph-proc
@@ -247,7 +257,8 @@ glyph-block Letter-Latin-S : begin
 	create-glyph 'Sswash' 0x2C7E : glyph-proc
 		include : MarkSet.if
 
-		local stroke : [SStroke].call currentGlyph
+		if SLAB : include : ArcStartSerif RightSB CAP Stroke Hook
+		local stroke : include : [if SLAB HalfSlabSStroke SStroke]
 		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 		local sw : AdviceStroke2 2 3 CAP
@@ -262,7 +273,7 @@ glyph-block Letter-Latin-S : begin
 		include : MarkSet.p
 
 		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-		local stroke : [[if SLAB SlabSmallSStroke SmallSStroke]].call currentGlyph
+		local stroke : include : [if SLAB HalfSlabSmallSStroke SmallSStroke]
 		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 		local sw : AdviceStroke2 2 3 XH

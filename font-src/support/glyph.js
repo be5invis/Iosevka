@@ -61,15 +61,15 @@ module.exports = class Glyph {
 		} else if (component instanceof Function) {
 			const t = this.defaultTag;
 			if (component.tag) this.defaultTag = component.tag;
-			component.call(this, copyAnchors, copyWidth);
+			let ret = component.call(this, copyAnchors, copyWidth);
 			this.defaultTag = t;
-			return;
+			return ret;
 		} else if (component instanceof Transform) {
-			this.applyTransform(component, copyAnchors);
+			return this.applyTransform(component, copyAnchors);
 		} else if (component.isMarkSet) {
-			this.copyAnchors(component);
+			return this.copyAnchors(component);
 		} else if (component instanceof Glyph) {
-			this.includeGlyph(component, copyAnchors, copyWidth);
+			return this.includeGlyph(component, copyAnchors, copyWidth);
 		} else {
 			throw new Error("Invalid component to be introduced.");
 		}
