@@ -869,6 +869,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `one = 'line'`, `cv52 = 3`: `1` drawn just like a straight line.
     + `one = 'nobase-long-top-serif'`, `cv52 = 4`: `1` without bottom serif and with a long top serif.
     + `one = 'base-long-top-serif'`, `cv52 = 5`: `1` with bottom serif and a long top serif.
+    + `one = 'nobase-flat-top-serif'`, `cv52 = 6`: `1` without bottom serif and with a flat top serif.
+    + `one = 'base-flat-top-serif'`, `cv52 = 7`: `1` with bottom serif and a flat top serif.
   - Styles for `2`:
     + `two = 'straight-neck'`, `cv53 = 1`: `2` with straight neck.
     + `two = 'curly-neck'`, `cv53 = 2`: `2` with curly neck (default).
