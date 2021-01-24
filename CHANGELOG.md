@@ -6,6 +6,8 @@
  * **Breaking** Iosevka Sparkle is removed from prebuilt packages.
  * **Breaking** Reorder `cv##` features and variant assignments for better organization.
  * **Breaking** Spilt out variant selector for `A`, `V`, `W`, `Z` (#806).
+ * **Breaking** Certain variants' names are changed:
+   - Phrase `singlestorey` and `doublestorey` used in  `a` and `g` variants are renamed to `single-storey` and `double-storey`.
  * Add diagonal-tailed variants for `f`, `i`, `j`, `k`, `l`, `q`, `t` (#795).
  * Add motion-serifed variants for `A`, `B`, `D`, `E`, `F`, `H`, `K`, `M`, `N`, `P`, `R`, `T`, `V`, `W`, `X`, `Y`, `Z`, `v`, `w`, `x`, `y`, `z` (#806, #815, #818).
  * Add symmetric-legged variants for `K` and `k` (#807).
