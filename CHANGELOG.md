@@ -1,5 +1,29 @@
 ## Modifications since version 2.x
 
+### 5.0.0-beta.1
+
+ * **Breaking** Iosevka Aile and Iosevka Etoile now support `cv##` and `ss##` features.
+ * **Breaking** Iosevka Sparkle is removed from prebuilt packages.
+ * **Breaking** Reorder `cv##` features and variant assignments for better organization.
+ * **Breaking** Spilt out variant selector for `A`, `V`, `W`, `Z` (#806).
+ * Add diagonal-tailed variants of `f`, `i`, `j`, `k`, `l`, `q`, `t` (#795).
+ * Add motion-serifed variants of `A`, `B`, `D`, `E`, `F`, `H`, `K`, `M`, `N`, `P`, `R`, `T`, `V`, `W`, `X`, `Y`, `Z`, `v`, `w`, `x`, `y`, `z` (#806, #815, #818).
+ * Add symmetric-legged variants of `K` and `k` (#807).
+ * Add horizontal-tailed and detach-tailed variants of `Q` (#808).
+ * Add hookless and capped variants of `G` (#809).
+ * Add open-contour variants of `P` and `R` (#810).
+ * Add standing variants of `R` (#810).
+ * Add toothed and motion-serifed variants of `U` (#811).
+ * Add motion-serifed toothless variants of `u` (#813).
+ * Add double-v and asymmetric variants of `W` and `w` (#812).
+ * Add IBM Plex Mono style set (#796).
+ * Fix broken geometry of `K` and `%` under ultra-wide (#800).
+ * Add straight-bar AE (`Æ`), follows variant selector for `A` (#800).
+ * Refine the shape of Slab `S` and `s` to add serifs at both terminals (#800).
+ * Fix broken shape of tailed Cyrillic DJE (`U+0452`, #803).
+ * Slightly increase size of `⊂`, `⊃`, `⊏` and `⊐` for better distinction (#804).
+
+
 ### 4.5.0
 
  * Fix broken shape of `LCaron` (`U+013D`, #791).
