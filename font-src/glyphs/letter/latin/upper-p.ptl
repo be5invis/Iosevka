@@ -70,15 +70,21 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : spiro-outline
 			PShapeOutlineKnots top mul bp overshoot sw offset
 
-	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [withBar true]] : glyph-proc
-		include : dispiro
-			widths.rhs sw
-			PShapeOutlineKnots top mul bp overshoot sw 0
-		if withBar : begin
-			include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
-			if slab : begin
-				include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
-				include : CenterBottomSerif (SB * mul + HalfStroke * HVContrast) 0 Jut sw
+	define [PShapeSlabNone] : glyph-proc
+	define [PShapeSlabMotion top sw mul] : tagged 'serifLT'
+		LeftwardTopSerif (SB * mul) top SideJut sw
+	define [PShapeSlabSymmetric top sw mul] : glyph-proc
+		include : PShapeSlabMotion top sw mul
+		include : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
+	define [PShapeSlabAsymmetric top sw mul] : glyph-proc
+		include : PShapeSlabMotion top sw mul
+		include : LeftwardBottomSerif (SB * mul) 0 SideJut sw
+		include : RightwardBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
+
+	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab null] [withBar true]] : glyph-proc
+		include : dispiro [widths.rhs sw] [PShapeOutlineKnots top mul bp overshoot sw 0]
+		if withBar : include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
+		if slab : include : slab top sw mul
 
 	define [PRotundaShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [endX SB] [hook Hook]] : glyph-proc
 		include : dispiro
@@ -102,11 +108,48 @@ glyph-block Letter-Latin-Upper-P : begin
 	set PShape.BarPos (1 - HBarPos)
 	set PShape.SwBelowBar 0.25
 
-	create-glyph 'P' 'P' : glyph-proc
+	set PShape.SlabMotion : function [top sw mul] : tagged 'serifLT'
+		LeftwardTopSerif (SB * mul) top SideJut sw
+	set PShape.SlabSymmetric : function [top sw mul] : glyph-proc
+		include : PShape.SlabMotion top sw mul
+		include : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
+	set PShape.SlabAsymmetric : function [top sw mul] : glyph-proc
+		include : PShape.SlabMotion top sw mul
+		include : LeftwardBottomSerif (SB * mul) 0 SideJut sw
+		include : RightwardBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
+	set PShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarLeft
+		SB * mul + sw * HVContrast
+		[PBarPosY top sw bp] - sw
+		[PBarPosY top sw bp] + sw + 1
+		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
+
+	set RevPShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarRight
+		Width - SB * mul - sw * HVContrast
+		[PBarPosY top sw bp] - sw
+		[PBarPosY top sw bp] + sw + 1
+		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
+
+	create-glyph 'P.closed' : glyph-proc
 		include : MarkSet.capital
-		include : PShape CAP
-		if SLAB : begin
-			include : RightwardBottomSerif (SB * PShape.defaultMul + HalfStroke * HVContrast) 0 MidJutSide
+		include : PShape CAP (slab -- [if SLAB PShape.SlabAsymmetric])
+
+	create-glyph 'P.open' : glyph-proc
+		include : MarkSet.capital
+		include : difference
+			PShape CAP (slab -- [if SLAB PShape.SlabAsymmetric])
+			PShape.OpenGap CAP
+
+	create-glyph 'P.closedMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : PShape CAP (slab -- PShape.SlabMotion)
+
+	create-glyph 'P.openMotionSerifed' : glyph-proc
+		include : MarkSet.capital
+		include : difference
+			PShape CAP (slab -- PShape.SlabMotion)
+			PShape.OpenGap CAP
+
+	select-variant 'P' 'P'
 
 	alias 'grek/Rho' 0x3A1 'P'
 	alias 'cyrl/Er' 0x420 'P'
@@ -118,8 +161,7 @@ glyph-block Letter-Latin-Upper-P : begin
 
 	create-glyph 'currency/pesetaSign' 0x20A7 : glyph-proc
 		include : MarkSet.capital
-		include : PShape CAP (mul -- 2) (overshoot -- 0)
-		if SLAB : include : RightwardBottomSerif (SB * 2 + HalfStroke * HVContrast) 0 MidJutSide
+		include : PShape CAP (mul -- 2) (overshoot -- 0) (slab -- [if SLAB PShape.SlabAsymmetric])
 		include : Translate (-SB * 0.5) 0
 		define sw : AdviceStroke2 2 4 CAP
 		include : HBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix CAP [PBarPosY CAP Stroke PShape.BarPos] 0.5] sw

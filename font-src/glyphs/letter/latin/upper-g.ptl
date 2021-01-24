@@ -16,17 +16,17 @@ glyph-block Letter-Latin-Upper-G : begin
 	define TOOTHLESS-CORNER   1
 	define TOOTHLESS-ROUNDED  2
 
+	define CROSSBAR-NONE      0
+	define CROSSBAR-HOOKED    1
+	define CROSSBAR-CAPPED    2
+
 	define SLAB-NONE          0
 	define SLAB-LETTER        1
 	define SLAB-HOOK-TOP      2
 	define SLAB-AUTO        : if SLAB SLAB-LETTER SLAB-NONE
 
-	define GConfig : list
-		list 'toothed'                          TOOTHED            1
-		list 'toothlessCorner'                  TOOTHLESS-CORNER   1
-		list 'toothlessRounded'                 TOOTHLESS-ROUNDED  1
 
-	define [GShape toothShape slabShape fCrossBar top sma smb] : glyph-proc
+	define [GShape toothShape slabShape crossBarShape top sma smb] : glyph-proc
 		local yBar : top * 0.52 + Stroke * 0.25
 		local fine ShoulderFine
 
@@ -54,8 +54,11 @@ glyph-block Letter-Latin-Upper-G : begin
 
 		include : union
 			dispiro.apply null knots
-			if fCrossBar [HBarTop Middle RightSB yBar] [glyph-proc]
 			if (slabShape === SLAB-LETTER) [ArcStartSerif RightSB top Stroke Hook] [glyph-proc]
+			match crossBarShape
+				[Just CROSSBAR-NONE]   : glyph-proc
+				[Just CROSSBAR-HOOKED] : HBarTop Middle RightSB yBar
+				[Just CROSSBAR-CAPPED] : HBarTop Middle [mix RightSB Width 0.625] yBar
 			match toothShape
 				[Just TOOTHED] : union
 					VBarRight RightSB (sma + O) yBar
@@ -66,21 +69,33 @@ glyph-block Letter-Latin-Upper-G : begin
 	define [OverlayBarOfG top] : begin
 		return : HOverlayBar [mix SB RightSB 0.5] [mix RightSB Width 0.7] [mix 0 (top / 2) 0.55]
 
-	foreach { suffix shape fCrossBar } [items-of GConfig] : begin
+	define GConfig : object
+		toothedHookless           { TOOTHED           CROSSBAR-NONE      }
+		toothlessCornerHookless   { TOOTHLESS-CORNER  CROSSBAR-NONE      }
+		toothlessRoundedHookless  { TOOTHLESS-ROUNDED CROSSBAR-NONE      }
+		toothedHooked             { TOOTHED           CROSSBAR-HOOKED    }
+		toothlessCornerHooked     { TOOTHLESS-CORNER  CROSSBAR-HOOKED    }
+		toothlessRoundedHooked    { TOOTHLESS-ROUNDED CROSSBAR-HOOKED    }
+		toothedCapped             { TOOTHED           CROSSBAR-CAPPED    }
+		toothlessCornerCapped     { TOOTHLESS-CORNER  CROSSBAR-CAPPED    }
+		toothlessRoundedCapped    { TOOTHLESS-ROUNDED CROSSBAR-CAPPED    }
+
+
+	foreach { suffix { shape crossBarShape} } [Object.entries GConfig] : begin
 		create-glyph "G.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape SLAB-AUTO fCrossBar CAP SmoothA SmoothB
+			include : GShape shape SLAB-AUTO crossBarShape CAP SmoothA SmoothB
 			create-derived "Gbar.\(suffix)" : OverlayBarOfG CAP
 		create-glyph "Ghooktop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape SLAB-HOOK-TOP fCrossBar CAP SmoothA SmoothB
+			include : GShape shape SLAB-HOOK-TOP crossBarShape CAP SmoothA SmoothB
 			include : ArcStartHookTop RightSB CAP Stroke HookX Hook
 		create-glyph "smcpG.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape SLAB-AUTO fCrossBar XH SmoothA SmoothB
+			include : GShape shape SLAB-AUTO crossBarShape XH SmoothA SmoothB
 		create-glyph "smcpGhooktop.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape SLAB-HOOK-TOP fCrossBar XH SmoothA SmoothB
+			include : GShape shape SLAB-HOOK-TOP crossBarShape XH SmoothA SmoothB
 			include : ArcStartHookTop RightSB XH Stroke HookX Hook
 
 	select-variant 'G' 'G'

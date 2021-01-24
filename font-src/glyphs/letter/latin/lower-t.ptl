@@ -11,6 +11,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth
 
 	define xSmallTBarLeft : Middle - TBalance - Stroke * 0.5 * HVContrast
 	define [SmallTHookShapeT sink offset top bot sw] : begin
@@ -27,11 +28,10 @@ glyph-block Letter-Latin-Lower-T : begin
 			if (sink == spiro-outline) {[corner (hookx - offset) top]} {}
 
 	define [SmallTShape top bot] : glyph-proc
-		local G : SmallTHookShapeT dispiro 0 top bot Stroke
-		local g : G.call currentGlyph # Not using include
+		local g : include : SmallTHookShapeT dispiro 0 top bot Stroke
 		set-base-anchor 'bottomright' g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
 		set-base-anchor 'below' [mix xSmallTBarLeft g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
-		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (XH * 0.6)
+		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (top * 0.42)
 
 		include : HCrossBar.top
 			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
@@ -72,7 +72,7 @@ glyph-block Letter-Latin-Lower-T : begin
 				flat xBarLeft hd.y
 				curl xBarLeft top [heading Upward]
 		set-base-anchor 'topright' xCrossRight  CAP
-		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.6)
+		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (top * 0.42)
 		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) 0
 
 	define dfNarrowT : DivFrame para.diversityF
@@ -90,6 +90,27 @@ glyph-block Letter-Latin-Lower-T : begin
 		set-width dfNarrowT.width
 		include : dfNarrowT.markSet.b
 		include : TFlatShape dfNarrowT [Math.min CAP ([mix XH CAP 0.625] + Stroke * 0.25)] [mix 1 para.diversityF 2] 0
+
+	define [DiagTailedSmallTHookShape df top bot sw] : begin
+		local xMid : xSmallTBarLeft + HalfStroke * HVContrast
+		return : dispiro
+			flat xMid top [widths.center.heading sw Downward]
+			DiagonalTailR df xMid bot [DiagonalTailStdDepth df sw] sw
+
+
+	define [TDiagTailShape df top] : glyph-proc
+		local g : include : DiagTailedSmallTHookShape df top 0 Stroke
+		set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (top * 0.42)
+
+		include : HCrossBar.top
+			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
+			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
+			begin XH
+
+	create-glyph 't.diagonalTailed' : glyph-proc
+		include : MarkSet.b
+		include : TDiagTailShape [DivFrame 1] CAP
+
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
@@ -109,13 +130,13 @@ glyph-block Letter-Latin-Lower-T : begin
 		include : MarkSet.b
 		include : VBar Middle 0 CAP
 		include : HCrossBar.top (Middle - LongJut) (Middle + LongJut) XH
-		set-base-anchor 'overlay' Middle (XH * 0.6)
+		set-base-anchor 'overlay' Middle (CAP * 0.42)
 
 	create-glyph 't.hooklessAsymmetric' : glyph-proc
 		include : MarkSet.b
 		include : VBarLeft xSmallTBarLeft 0 CAP
 		include : HCrossBar.top xSmallTBarLeft (Middle + LongJut) XH
-		set-base-anchor 'overlay' (xSmallTBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.6)
+		set-base-anchor 'overlay' (xSmallTBarLeft + 0.625 * Stroke * HVContrast) (CAP * 0.42)
 		set-base-anchor 'below' (xSmallTBarLeft + HalfStroke * HVContrast) 0
 
 	select-variant 't' 't'
@@ -126,6 +147,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	turned 'turnt.hooklessAsymmetric' nothing 't.hooklessAsymmetric' Middle (XH / 2) [MarkSet.p]
 	turned 'turnt.flatHookShortNeck' nothing 't.flatHookShortNeck' Middle (XH / 2) [MarkSet.p]
 	turned 'turnt.flatHookShortNeck2' nothing 't.flatHookShortNeck2' Middle (XH / 2) [MarkSet.p]
+	turned 'turnt.diagonalTailed' nothing 't.diagonalTailed' Middle (XH / 2) [MarkSet.p]
 	select-variant 'turnt' 0x287 (follow -- 't')
 
 	CreateCommaCaronComposition 't' 'tcaron' 0x165

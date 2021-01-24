@@ -11,29 +11,33 @@ glyph-block Letter-Latin-Upper-Y : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-X : HalfXStrand
 
-	define [YShape straightBar top bot] : glyph-proc
+	define BODY-CURLY    0
+	define BODY-STRAIGHT 1
+
+	define SLAB-AUTO   1
+	define SLAB-MOTION 2
+
+	define [YShape bodyType slabType top bot] : glyph-proc
 		local cross : mix [fallback bot 0] top 0.4
 		include : WithAIHSerifsMask CAP 0 SB RightSB
-			HalfXStrand straightBar SLAB SB top Middle cross 0.1 0.4 0.28
+			HalfXStrand bodyType SLAB SB top Middle cross 0.1 0.4 0.28
 		include : tagged 'strokeRT' : WithAIHSerifsMask CAP 0 SB RightSB
-			HalfXStrand straightBar SLAB RightSB top Middle cross 0.1 0.4 0.28
+			HalfXStrand bodyType SLAB RightSB top Middle cross 0.1 0.4 0.28
 		include : VBar Middle [fallback bot 0] (cross + HalfStroke)
 		set-base-anchor 'overlay' Middle cross
-		if SLAB : begin
-			include : AIVSerifs top
-			include : CenterBottomSerif Middle [fallback bot 0] MidJutSide
+
+		match slabType
+			[Just SLAB-AUTO] : if SLAB : begin
+				include : AIVSerifs top
+				include : CenterBottomSerif Middle [fallback bot 0] MidJutSide
+			[Just SLAB-MOTION] : include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
 
 	define [YOverlayShape] : glyph-proc
 		include : HOverlayBar SB RightSB (CAP * 0.45)
 		include : HOverlayBar SB RightSB (CAP * 0.25)
 
-	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-derived 'Y.straight' : YShape true CAP
-		create-derived 'Y.curly' : YShape false CAP
-
-	define [YHookTopShape straightBar] : glyph-proc
-		include : YShape straightBar CAP
+	define [YHookTopShape bodyType slabType] : glyph-proc
+		include : YShape bodyType slabType CAP
 		eject-contour 'strokeRT'
 		eject-contour 'serifRT'
 
@@ -45,20 +49,29 @@ glyph-block Letter-Latin-Upper-Y : begin
 			quadcontrols 0.55 0.7 32 unimportant
 			g4 (Middle + Stroke / 2 * HVContrast) cross
 
-	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-derived 'Yhooktop.straight' : YHookTopShape true
-		create-derived 'Yhooktop.curly' : YHookTopShape false
 
-	create-glyph : glyph-proc
-		include : MarkSet.p
-		create-derived 'cyrl/ue.straight' : YShape true XH Descender
-		create-derived 'cyrl/ue.curly' : YShape false XH Descender
+	define YConfig : object
+		straight              { BODY-STRAIGHT SLAB-AUTO   }
+		curly                 { BODY-CURLY    SLAB-AUTO   }
+		straightMotionSerifed { BODY-STRAIGHT SLAB-MOTION }
+		curlyMotionSerifed    { BODY-CURLY    SLAB-MOTION }
 
-	create-glyph : glyph-proc
-		include : MarkSet.e
-		create-derived 'smcpY.straight' : YShape true XH
-		create-derived 'smcpY.curly' : YShape true XH
+	foreach { suffix { bodyType slabType } } [Object.entries YConfig] : do
+		create-glyph "Y.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YShape bodyType slabType CAP
+
+		create-glyph "smcpY.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : YShape bodyType slabType XH
+
+		create-glyph "Yhooktop.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : YHookTopShape bodyType slabType
+
+		create-glyph "cyrl/ue.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : YShape bodyType slabType XH Descender
 
 	select-variant 'Y' 'Y'
 	select-variant 'Yhooktop' 0x1B3 (follow -- 'Y')

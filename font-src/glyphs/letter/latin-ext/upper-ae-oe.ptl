@@ -11,52 +11,93 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
 
-	create-glyph 'AE' 0xC6 : glyph-proc
-		define df : DivFrame para.diversityM 3
-		define eBarPos : DesignParameters.upperEBarPos SLAB
-		define sw : Math.min df.mvs : AdviceStroke2 3 3 CAP df.div
-		define eleft : df.middle - sw * 0.25 * HVContrast
-		define fine : AdviceStroke2 3 4 CAP df.div
-		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
-
-		set-width df.width
-		include : df.markSet.capital
-
-		local turn : XH * 0.1
+	define [AEAHalfCurly df top eleft sw] : glyph-proc
+		define fine : AdviceStroke2 3 4 top df.div
 
 		# A half
 		include : dispiro
 			widths.rhs sw
 			flat df.leftSB 0 [heading Upward]
-			curl df.leftSB (CAP * 0.1) [heading Upward]
+			curl df.leftSB (top * 0.1) [heading Upward]
 			quadcontrols 0 0.3 6 unimportant
-			g4   (eleft - HalfStroke) CAP [widths.rhs fine]
+			g4   (eleft - HalfStroke) top [widths.rhs fine]
 
 		include : spiro-outline
-			corner (eleft - HalfStroke) CAP
-			corner eleft CAP
-			corner eleft (CAP - sw)
+			corner (eleft - HalfStroke) top
+			corner eleft top
+			corner eleft (top - sw)
 		include : intersection
 			WithTransform [Translate (-O) 0] : spiro-outline
 				corner df.leftSB 0 [heading Upward]
-				curl   df.leftSB (CAP * 0.1) [heading Upward]
+				curl   df.leftSB (top * 0.1) [heading Upward]
 				quadcontrols 0 0.3 6 unimportant
-				corner   (eleft - HalfStroke) CAP [widths.rhs fine]
-				corner eleft CAP
+				corner   (eleft - HalfStroke) top [widths.rhs fine]
+				corner eleft top
 				corner eleft 0
 			HBarTop 0 eleft (XH / 2) sw
 
+
+	define [AEAHalfStraight df top eleft sw] : glyph-proc
+		define StraightSbShrink : mix 1 (DesignParameters.straightVShapeSbShrink * [StrokeWidthBlend 1 0.75]) [if SLAB 0.75 1]
+		define fine : sw * CThin * 1.15
+		define pInktrap : 2 / 3
+		define clearance : 0 - OX
+		define vxStartL : df.leftSB * StraightSbShrink
+		define vxEndL : df.middle - 0.75 * sw * HVContrast
+		define dgCor : DiagCor top (df.width / 2) 0 (sw * 2)
+		define midSW : dgCor * [Math.min [mix sw fine pInktrap] [AdviceStroke 3 df.div]]
+
+		include : dispiro
+			widths.rhs (sw * dgCor)
+			flat [mix vxStartL vxEndL 0] [mix 0 top 0] [heading Upward]
+			curl [mix vxStartL vxEndL pInktrap] [mix 0 top pInktrap] [widths.rhs.heading midSW Upward]
+			g4   [mix vxStartL vxEndL 1] [mix 0 top 1] [widths.rhs.heading fine Upward]
+
+		include : intersection
+			HBarTop 0 eleft (XH / 2) sw
+			spiro-outline
+				flat (1 + [mix vxStartL vxEndL 0]) [mix 0 top 0]
+				curl (1 + [mix vxStartL vxEndL pInktrap]) [mix 0 top pInktrap]
+				corner (1 + [mix vxStartL vxEndL 1]) [mix 0 top 1]
+				corner eleft top
+				corner eleft 0
+
+	define [AEShape df top straight] : glyph-proc
+		define eBarPos : DesignParameters.upperEBarPos SLAB
+		define sw : Math.min df.mvs : AdviceStroke2 3 3 top df.div
+		define eleft : df.middle - sw * 0.25 * HVContrast
+		define swVJut : Math.min sw ((df.rightSB - eleft - sw * HVContrast) * (4 / 5))
+		local turn : XH * 0.1
+
+		# A half
+		if straight
+			include : AEAHalfStraight df top eleft sw
+			include : AEAHalfCurly df top eleft sw
+
 		# E half
-		include : VBarLeft eleft 0 CAP sw
-		include : HBarTop (eleft - O) df.rightSB CAP
-		include : HBar (eleft - O) (df.rightSB - sw / 4) (CAP * eBarPos)
+		include : VBarLeft eleft 0 top sw
+		include : HBarTop (eleft - O) df.rightSB top
+		include : HBar (eleft - O) (df.rightSB - sw / 4) (top * eBarPos)
 		include : HBarBottom (eleft - O) df.rightSB 0
 		if SLAB : begin
-			local { jutTop jutBot } : EFVJutLength CAP eBarPos sw
+			local { jutTop jutBot } : EFVJutLength top eBarPos sw
 			include : CenterBottomSerif (df.leftSB + sw / 2 * HVContrast) 0 Jut sw
 			include : DownwardRightSerif df.rightSB CAP jutTop swVJut
 			include : UpwardRightSerif df.rightSB 0 jutBot swVJut
 
+	create-glyph 'AE.straight' : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : AEShape df CAP true
+
+	create-glyph 'AE.curly' : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : AEShape df CAP false
+
+	select-variant 'AE' 0xC6 (follow -- 'grek/Lambda')
 	alias 'cyrl/AE' 0x4D4 'AE'
 
 	define [OEShape top df] : glyph-proc

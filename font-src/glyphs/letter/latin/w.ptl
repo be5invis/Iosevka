@@ -10,151 +10,208 @@ glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	### W and w
-	define [WShape top barStraight df] : glyph-proc
-		local fineOuter : if barStraight
-			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
-			AdviceStroke WShape.fineOuter df.div
-		local fineInner : if barStraight
-			AdviceStroke WShape.fineSInner [Math.sqrt df.div]
-			AdviceStroke WShape.fineInner df.div
+	define FORM-CURLY      0
+	define FORM-STRAIGHT   1
+	define FORM-FLAT-TOP   2
+	define FORM-DOUBLE-V   3
+	define FORM-ASYMMETRIC 4
+
+	define SERIFS-AUTO       1
+	define SERIFS-MOTION     2
+	define SERIFS-DOUBLE-V   3
+	define SERIFS-ASYMMETRIC 4
+
+	define CwFineOuter           5.0
+	define CwFineInner           6.0
+	define CwFineOuterStraight   5.5
+	define CwFineInnerStraight   5.5
+	define CwFineInnerDoubleV    4.25
+	define CwOuterStrokeStraight 3.0
+	define CwDoubleV             3.625
+	define CwWCoCurly            5.0
+	define CwWCoStraight         3.5
+	define CwWCoDoubleV          3.5
+	define PXBot1Curly           0.25
+	define PXBot1Straight        0.235
+
+	define [WDim df top bodyType] : begin
+		local strokeOuter : match bodyType
+			[Just FORM-CURLY]      : AdviceStroke CwOuterStrokeStraight [Math.sqrt df.div]
+			[Just FORM-STRAIGHT]   : AdviceStroke CwOuterStrokeStraight [Math.sqrt df.div]
+			[Just FORM-FLAT-TOP]   : AdviceStroke CwOuterStrokeStraight [Math.sqrt df.div]
+			[Just FORM-DOUBLE-V]   : AdviceStroke CwDoubleV [Math.sqrt df.div]
+			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV [Math.sqrt df.div]
+		local fineOuter : match bodyType
+			[Just FORM-CURLY]      : AdviceStroke CwFineOuter df.div
+			[Just FORM-STRAIGHT]   : AdviceStroke CwFineOuterStraight [Math.sqrt df.div]
+			[Just FORM-FLAT-TOP]   : AdviceStroke CwFineOuterStraight [Math.sqrt df.div]
+			[Just FORM-DOUBLE-V]   : AdviceStroke CwDoubleV [Math.sqrt df.div]
+			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV [Math.sqrt df.div]
+		local fineInner : match bodyType
+			[Just FORM-CURLY]      : AdviceStroke CwFineInner          df.div
+			[Just FORM-STRAIGHT]   : AdviceStroke CwFineInnerStraight [Math.sqrt df.div]
+			[Just FORM-FLAT-TOP]   : AdviceStroke CwFineInnerStraight [Math.sqrt df.div]
+			[Just FORM-DOUBLE-V]   : AdviceStroke CwFineInnerDoubleV  [Math.sqrt df.div]
+			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV  [Math.sqrt df.div]
 		local fineHeight : (fineOuter + fineInner) / 2
 
-		local hwCO : if barStraight
-			(1 / 2) * [AdviceStroke WShape.hwCOS df.div]
-			(1 / 2) * [AdviceStroke WShape.hwCO df.div]
-		local delimBias : hwCO * HVContrast
-		local fineOffsetOuter : hwCO * HVContrast
-		local fineOffsetInner : hwCO * HVContrast
-		local m1 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m1S WShape.m1] + [if barStraight O 0]
-		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
-		local topWithoutSerif : if SLAB (top - Stroke) top
-		local wMidHeight : match barStraight
-			2 topWithoutSerif
-			1 (topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)])
-			0 (top * 0.6)
+		local wCo : match bodyType
+			[Just FORM-CURLY]      : AdviceStroke CwWCoCurly    df.div
+			[Just FORM-STRAIGHT]   : AdviceStroke CwWCoStraight df.div
+			[Just FORM-FLAT-TOP]   : AdviceStroke CwWCoStraight df.div
+			[Just FORM-DOUBLE-V]   : AdviceStroke CwWCoDoubleV df.div
+			[Just FORM-ASYMMETRIC] : AdviceStroke CwWCoDoubleV df.div
+		local kWCoShrink CThin
+		local pxBot1 : match bodyType
+			[Just FORM-CURLY]        0.25
+			[Just FORM-STRAIGHT]     0.235
+			[Just FORM-FLAT-TOP]     0.235
+			[Just FORM-DOUBLE-V]     0.315
+			[Just FORM-ASYMMETRIC]   0.3
 
-		if barStraight : begin
+		local botMixOffset : 0.5 * HVContrast * wCo
+		local xBot1 : [if bodyType O 0] + [mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) pxBot1]
+		local xBot2 : df.width - xBot1
+		local topWithoutSerif : if SLAB (top - Stroke) top
+		local wMidHeight : match bodyType
+			[Just FORM-CURLY]      : top * 0.6
+			[Just FORM-STRAIGHT]   : topWithoutSerif * [Math.min 1 ([Math.pow df.div 1.5] * 0.72)]
+			[Just FORM-FLAT-TOP]     topWithoutSerif
+			[Just FORM-DOUBLE-V]     top
+			[Just FORM-ASYMMETRIC]   top
+
+		local xRight1 : match bodyType
+			([Just FORM-DOUBLE-V] || [Just FORM-ASYMMETRIC]) : mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) (2 * pxBot1)
+			__                                             : if (bodyType < FORM-DOUBLE-V) df.middle
+		local xLeft2  : df.width - xRight1
+
+		local corWCo : DiagCorDs wMidHeight (xRight1 - xBot1) wCo
+		local wCoCr : corWCo * wCo
+
+		local corFOuter : DiagCorDs top (xBot1 - df.leftSB) fineOuter
+		local fineOuterCr : Math.min (kWCoShrink * wCoCr) : corFOuter * fineOuter
+		local strokeOuterCr : corFOuter * strokeOuter
+
+		local corFInner : DiagCorDs wMidHeight (xRight1 - xBot1) fineInner
+		local fineInnerCr : Math.min wCoCr : corFInner * fineInner
+		local fineInnerCrTop : if (bodyType === FORM-DOUBLE-V || bodyType === FORM-ASYMMETRIC) fineInnerCr (kWCoShrink * wCoCr)
+
+		return : object xBot1 xBot2 strokeOuter strokeOuterCr fineOuter fineOuterCr fineInner fineInnerCr fineInnerCrTop fineHeight wMidHeight xRight1 xLeft2 wCoCr
+
+	### W and w
+	define [WshapeImpl df top bodyType slabType] : glyph-proc
+		local dim : WDim df top bodyType
+
+		if bodyType : begin
 			include : tagged 'strokeDown1' : dispiro
-				widths.lhs
+				widths.lhs dim.strokeOuterCr
 				flat (df.leftSB + O * 2) top [heading Downward]
-				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
+				g4   (dim.xBot1 - 0.5 * HVContrast * dim.wCoCr) 0 [widths.lhs.heading dim.fineOuterCr Downward]
 		: else : begin
 			include : tagged 'strokeDown1' : dispiro
-				widths.lhs
+				widths.lhs dim.strokeOuter
 				flat df.leftSB top [heading Downward]
 				curl df.leftSB (top * 0.75) [heading Downward]
 				quadcontrols 0 0.3 6 unimportant
-				g4   (m1 - fineOffsetOuter) 0 [widths.lhs fineOuter]
+				g4   (dim.xBot1 - 0.5 * HVContrast * dim.wCoCr) 0 [widths.lhs.heading dim.fineOuterCr Downward]
 
-		# bottom cap 1
-		define [InnerShapes] : union
-			spiro-outline
-				corner (m1 + fineOffsetInner) 0
-				corner (m1 - fineOffsetOuter) 0
-				corner m1 fineHeight
-			spiro-outline
-				corner (df.middle + fineOffsetInner) wMidHeight
-				corner df.middle (wMidHeight - fineHeight)
-				corner (df.middle - fineOffsetInner) wMidHeight
-			spiro-outline
-				corner (m2 + fineOffsetOuter) 0
-				corner (m2 - fineOffsetInner) 0
-				corner m2 fineHeight
+		local kTopShift : if (bodyType === FORM-DOUBLE-V || bodyType === FORM-ASYMMETRIC) 0 1
+		local k1 0.5
+		local k2 : 1 - k1
+		local shiftT  : kTopShift * HVContrast * (0.5 * dim.wCoCr - 0.5 * dim.fineInnerCrTop)
+		local shiftB  :             HVContrast * (0.5 * dim.wCoCr - 0.5 * dim.fineOuterCr   )
 
+		include : tagged 'strokeUp1' : difference
 			dispiro
-				widths.lhs fineInner
-				flat (df.middle - fineOffsetInner) wMidHeight
-				curl (m1 + fineOffsetInner) 0 [widths.rhs fineInner]
-			dispiro
-				widths.rhs fineInner
-				flat (df.middle + fineOffsetInner) wMidHeight
-				curl (m2 - fineOffsetInner) 0 [widths.lhs fineInner]
+				flat (dim.xRight1 - shiftT) dim.wMidHeight [widths.center.heading dim.fineInnerCrTop Downward]
+				curl (dim.xBot1 + shiftB)   0              [widths.center.heading dim.fineOuterCr    Downward]
+			if (bodyType !== FORM-ASYMMETRIC) [glyph-proc] : spiro-outline
+				corner dim.xLeft2 dim.wMidHeight
+				corner dim.xBot2  0
+				corner df.width  0
+				corner df.width  dim.wMidHeight
 
-		define [InnerStrokeMask] : union
-			spiro-outline
-				corner 0             0
-				corner df.width      0
-				corner df.width      (-df.width)
-				corner 0             (-df.width)
-			spiro-outline
-				corner 0             wMidHeight
-				corner df.width      wMidHeight
-				corner df.width      (wMidHeight + df.width)
-				corner 0             (wMidHeight + df.width)
+		include : tagged 'strokeDown2' : dispiro
+			flat (dim.xLeft2 + shiftT) dim.wMidHeight [widths.center.heading dim.fineInnerCrTop Downward]
+			curl (dim.xBot2 - shiftB)   0             [widths.center.heading dim.fineOuterCr    Downward]
 
-		include : difference [InnerShapes] [InnerStrokeMask]
-
-		if barStraight : begin
+		if bodyType : begin
 			include : tagged 'strokeUp2' : dispiro
-				widths.rhs
+				widths.rhs dim.strokeOuterCr
 				flat (df.rightSB - O * 2) top [heading Downward]
-				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+				g4   (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
 		: else : begin
 			include : tagged 'strokeUp2' : dispiro
-				widths.rhs
+				widths.rhs dim.strokeOuter
 				flat df.rightSB top [heading Downward]
 				curl df.rightSB (top * 0.75) [heading Downward]
 				quadcontrols 0 0.3 6 unimportant
-				g4   (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+				g4   (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
 
-		include : AIVSerifs top df.leftSB df.rightSB
-
-	set WShape.fineOuter 5
-	set WShape.fineInner 6
-	set WShape.fineSOuter 5.5
-	set WShape.fineSInner 5.5
-	set WShape.hwCO 5
-	set WShape.hwCOS 3.5
-	set WShape.m1    0.25
-	set WShape.m2  : 1 - WShape.m1
-	set WShape.m1S   0.235
-	set WShape.m2S : 1 - WShape.m1S
+		include : match slabType
+			[Just SERIFS-AUTO]   : AIVSerifs top df.leftSB df.rightSB
+			[Just SERIFS-MOTION] : tagged 'serifLT' : LeftwardTopSerif (df.leftSB + O * 2) top SideJut
+			[Just SERIFS-DOUBLE-V] : glyph-proc
+				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  (df.leftSB + O * 2) top SideJut
+				if SLAB : include : tagged 'serifRT' : RightwardTopSerif (df.rightSB - O * 2) top SideJut
+			[Just SERIFS-ASYMMETRIC] : glyph-proc
+				include : AIVSerifs top df.leftSB df.rightSB
+				eject-contour 'serifLT'
+				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  (df.leftSB + O * 2) top SideJut
 
 	define [WonOverlay df] : glyph-proc
 		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
 		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.35)
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		create-derived 'W.straightFlatTop' : WShape CAP 2 df
-		create-derived 'W.straight' : WShape CAP 1 df
-		create-derived 'W.curly' : WShape CAP 0 df
+	define WConfig : object
+		straightAsymmetric               { FORM-ASYMMETRIC   SERIFS-ASYMMETRIC }
+		straightDoubleV                  { FORM-DOUBLE-V     SERIFS-DOUBLE-V   }
+		straightFlatTop                  { FORM-FLAT-TOP     SERIFS-AUTO       }
+		straight                         { FORM-STRAIGHT     SERIFS-AUTO       }
+		curly                            { FORM-CURLY        SERIFS-AUTO       }
+		straightAsymmetricMotionSerifed  { FORM-ASYMMETRIC   SERIFS-MOTION     }
+		straightDoubleVMotionSerifed     { FORM-DOUBLE-V     SERIFS-MOTION     }
+		straightFlatTopMotionSerifed     { FORM-FLAT-TOP     SERIFS-MOTION     }
+		straightMotionSerifed            { FORM-STRAIGHT     SERIFS-MOTION     }
+		curlyMotionSerifed               { FORM-CURLY        SERIFS-MOTION     }
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		create-derived 'w.straightFlatTop' : WShape XH 2 df
-		create-derived 'w.straight' : WShape XH 1 df
-		create-derived 'w.curly' : WShape XH 0 df
+	foreach { suffix { bodyType slabType } } [Object.entries WConfig] : do
+		create-glyph "W.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : WshapeImpl df CAP bodyType slabType
 
-	define [WHooktopShape top barStraight df] : glyph-proc
-		local fineOuter : if barStraight
-			AdviceStroke WShape.fineSOuter [Math.sqrt df.div]
-			AdviceStroke WShape.fineOuter df.div
+		create-glyph "w.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : WshapeImpl df XH bodyType slabType
 
-		local hwCO : if barStraight
-			(1 / 2) * [AdviceStroke WShape.hwCOS df.div]
-			(1 / 2) * [AdviceStroke WShape.hwCO df.div]
-		local delimBias : hwCO * HVContrast
-		local fineOffsetOuter : hwCO * HVContrast
-		local fineOffsetInner : hwCO * HVContrast
-		local m2 : [mix (df.leftSB + delimBias) (df.rightSB - delimBias) : if barStraight WShape.m2S WShape.m2] - [if barStraight O 0]
+		create-glyph "ww.\(suffix)": glyph-proc
+			local df : DivFrame 1 3
+			set-width df.width
+			include : df.markSet.capital
+			include : WshapeImpl df (CAP / 2) bodyType slabType
+			include : Upright
+			include : Translate 0 (CAP / 2)
+			include : Italify
+			include : WshapeImpl df (CAP / 2) bodyType slabType
 
-		include : WShape top barStraight df
+	define [WHooktopShape df top bodyType] : glyph-proc
+		include : WshapeImpl df top bodyType SERIFS-AUTO
+
+		local dim : WDim df top bodyType
 
 		# Eject unnecessary contours
 		eject-contour 'strokeUp2'
 		if SLAB : eject-contour 'serifRT'
 
 		include : dispiro
-			widths.rhs
+			widths.rhs dim.strokeOuter
 			straight.down.start df.rightSB (top - Hook) [heading Downward]
 			quadcontrols 0 0.3 6 unimportant
-			g4 (m2 + fineOffsetOuter) 0 [widths.rhs fineOuter]
+			g4 (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
 
 		include : VerticalHook (df.rightSB - HalfStroke * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + HalfStroke)
 
@@ -162,37 +219,23 @@ glyph-block Letter-Latin-W : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		create-derived 'Whooktop.straightFlatTop' : WHooktopShape CAP 2 df
-		create-derived 'Whooktop.straight' : WHooktopShape CAP 1 df
-		create-derived 'Whooktop.curly' : WHooktopShape CAP 0 df
+		create-derived 'Whooktop.straightFlatTop' : WHooktopShape df CAP FORM-FLAT-TOP
+		create-derived 'Whooktop.straight'        : WHooktopShape df CAP FORM-STRAIGHT
+		create-derived 'Whooktop.curly'           : WHooktopShape df CAP FORM-CURLY
 
 	create-glyph : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.e
-		create-derived 'whooktop.straightFlatTop' : WHooktopShape XH 2 df
-		create-derived 'whooktop.straight' : WHooktopShape XH 1 df
-		create-derived 'whooktop.curly' : WHooktopShape XH 0 df
-
-	define [LowerWWShape df straightBar] : glyph-proc
-		include : WShape (CAP / 2) straightBar df
-		include : Upright
-		include : Translate 0 (CAP / 2)
-		include : Italify
-		include : WShape (CAP / 2) straightBar df
-	create-glyph : glyph-proc
-		local df : DivFrame 1 3
-		set-width df.width
-		include : df.markSet.capital
-		create-derived 'ww.straightFlatTop' : LowerWWShape df 2
-		create-derived 'ww.straight' : LowerWWShape df 1
-		create-derived 'ww.curly' : LowerWWShape df 0
+		create-derived 'whooktop.straightFlatTop' : WHooktopShape df XH FORM-FLAT-TOP
+		create-derived 'whooktop.straight'        : WHooktopShape df XH FORM-STRAIGHT
+		create-derived 'whooktop.curly'           : WHooktopShape df XH FORM-CURLY
 
 	select-variant 'W' 'W'
-	select-variant 'Whooktop' 0x2C72 (follow -- 'W')
+	select-variant 'Whooktop' 0x2C72
 	select-variant 'w' 'w'
 	select-variant 'ww' 0x2AC (follow -- 'w')
-	select-variant 'whooktop' 0x2C73 (follow -- 'w')
+	select-variant 'whooktop' 0x2C73
 	alias 'cyrl/We' 0x51C 'W'
 	alias 'cyrl/we' 0x51D 'w'
 	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)

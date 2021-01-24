@@ -9,68 +9,118 @@ glyph-module
 glyph-block Letter-Latin-K : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailF
 
 	local [KBalance slab straightBar] : if slab (Width / 16) : if straightBar (Width / 32) 0
 	local [KBalanceRight slab straightBar] : if slab (-Width / 32) : if straightBar (Width / 32) 0
 	local [KBalanceRightCursive slab straightBar] : if slab (Width / 32) : if straightBar (Width / 32) 0
 	local [KO slab straightBar top stroke] : if straightBar (([if slab (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
-	define [KLegShapeImpl left right stroke top straightBar slabLeft slab] : glyph-proc
-		local turn (top * 0.99)
+	define [KSlabs top left right stroke straightBar] : glyph-proc
+		local kshRight : right + [KBalanceRight true straightBar]
+		local topSerifX : kshRight - (1.15 * stroke * (Width * 2 / UPM) / 2 - stroke / 2) * HVContrast * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVContrast
+		local bottomSerifX : kshRight - O * [if para.isItalic 1 0]
+
+		include : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
+		include : RightwardBottomSerif bottomSerifX 0 SideJut
+
+	define [KStraightLegShapeImpl left right stroke top slabLeft slab] : glyph-proc
 		local fine : AdviceStroke 3.5
-		local Ok : KO slab straightBar top stroke
-		local kshLeft : left + [KBalance slabLeft straightBar]
-		local kshRight : right + [KBalanceRight slab straightBar]
+		local Ok : KO slab true top stroke
+		local kshLeft : left + [KBalance slabLeft true]
+		local kshRight : right + [KBalanceRight slab true]
 
-		if straightBar : do
-			local attach (top * 0.42 - stroke)
-			local attach2 (top * 0.72 + stroke)
-			include : intersection
-				Rect top 0 kshLeft (2 * Width)
-				dispiro
-					widths.rhs stroke
-					flat (kshRight - Ok) top
-					curl (kshLeft + stroke) attach [widths 0 fine]
+		local attach (top * 0.42 - stroke)
+		local attach2 (top * 0.72 + stroke)
+		include : intersection
+			Rect top 0 kshLeft (2 * Width)
+			dispiro
+				widths.rhs stroke
+				flat (kshRight - Ok) top
+				curl (kshLeft + stroke) attach [widths 0 fine]
 
-			include : intersection
+		include : intersection
+			spiro-outline
+				corner (kshLeft + stroke) 0
+				corner (kshLeft + stroke) (attach + 1)
+				corner (kshRight - Ok - 1) top
+				corner (kshRight - Ok) top
+				corner (kshRight - Ok) 0
+			dispiro
+				widths.lhs stroke
+				flat (kshRight - Ok) 0
+				curl (kshLeft + stroke) attach2
+
+		if slab : include : KSlabs top left right stroke true
+
+	define [KSymmetricLegsImpl fConnected] : function [left right stroke top slabLeft slab] : glyph-proc
+		local fine : AdviceStroke 3.5
+		local Ok : KO slab true top stroke
+
+		local kshLeft : left + [KBalance slabLeft true]
+		local kshRight : right + [KBalanceRight slab true]
+
+		local xAttach : kshLeft + stroke * HVContrast + [AdviceStroke 6]
+		local yAttach : top * 0.42 - stroke
+		local coYAttach : top - yAttach
+		include : intersection
+			Rect top (0.5 * top) kshLeft (2 * Width)
+			dispiro
+				widths.rhs stroke
+				flat (kshRight - Ok) top
+				curl xAttach yAttach [widths.rhs fine]
+
+		include : intersection
+			Rect (0.5 * top) 0 kshLeft (2 * Width)
+			dispiro
+				widths.lhs stroke
+				flat (kshRight - Ok) 0
+				curl xAttach coYAttach [widths.lhs fine]
+
+		if fConnected : include : intersection
+			HBar kshLeft (2 * Width) (0.5 * top) stroke
+			union
+				Rect top 0 kshLeft xAttach
 				spiro-outline
-					corner (kshLeft + stroke) 0
-					corner (kshLeft + stroke) (attach + 1)
 					corner (kshRight - Ok - 1) top
-					corner (kshRight - Ok) top
-					corner (kshRight - Ok) 0
-				dispiro
-					widths.lhs stroke
-					flat (kshRight - Ok) 0
-					curl (kshLeft + stroke) attach2
-		: else : do
-			local attach (top * [if slab 0.325 0.375])
-			local attach2 [if slab [mix kshLeft kshRight 0.48] Middle]
-			include : intersection
-				Rect top 0 kshLeft (2 * Width)
-				dispiro
-					g4.down.start (kshRight) top [widths.heading 0 (stroke * [if slab 1.15 1.05] * (Width * 2 / UPM)) Downward]
-					bezcontrols 0 0.2 0.5 0.65 8
-					g4 (kshLeft + stroke) attach [widths 0 fine]
-			include : difference
-				dispiro
-					widths.center
-					g4.up.start (kshRight - O - stroke / 2 * HVContrast) 0 [heading Upward]
-					quadcontrols 0 0.25 8
-					g4 attach2 (top * 0.61) [widths.center fine]
+					corner (xAttach - 1) yAttach
+					corner (xAttach - 1) top
 				spiro-outline
-					corner.down.start kshRight top
-					bezcontrols 0 0.2 0.5 0.65 8
-					corner (kshLeft + stroke) attach
-					corner kshLeft 0
-					corner kshLeft top
+					corner (kshRight - Ok - 1) 0
+					corner (xAttach - 1) coYAttach
+					corner (xAttach - 1) 0
 
-		if slab : do
-			local topSerifX : kshRight - (stroke * [if slab 1.15 1.05] * (Width * 2 / UPM) / 2 - stroke / 2) * HVContrast * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVContrast
-			local bottomSerifX : kshRight - O * [if para.isItalic 1 0]
+		if slab : include : KSlabs top left right stroke true
 
-			include : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
-			include : RightwardBottomSerif bottomSerifX 0 SideJut
+	define [KCurlyLegShapeImpl left right stroke top slabLeft slab] : glyph-proc
+		local turn : top * 0.99
+		local fine : AdviceStroke 3.5
+		local kshLeft : left + [KBalance slabLeft false]
+		local kshRight : right + [KBalanceRight slab false]
+
+		local attach (top * [if slab 0.325 0.375])
+		local attach2 [if slab [mix kshLeft kshRight 0.48] Middle]
+		local kDiag : mix 1 [DiagCorDs (top - attach) (kshRight - kshLeft) stroke] 0.5
+		include : intersection
+			Rect top 0 kshLeft (2 * Width)
+			dispiro
+				g4.down.start (kshRight) top [widths.rhs.heading (stroke * kDiag) Downward]
+				bezcontrols 0 0.2 0.5 0.65 8
+				g4 (kshLeft + stroke) attach [widths.rhs fine]
+		include : difference
+			dispiro
+				widths.center
+				g4.up.start (kshRight - O - stroke / 2 * HVContrast) 0 [heading Upward]
+				quadcontrols 0 0.25 8
+				g4 attach2 (top * 0.61) [widths.center fine]
+			spiro-outline
+				corner.down.start (kshRight - 1) top
+				bezcontrols 0 0.2 0.5 0.65 8
+				corner (kshLeft + stroke) (attach + 1)
+				corner kshLeft 0
+				corner kshLeft top
+
+		if slab : include : KSlabs top left right stroke false
 
 	define [KCursiveLoopAndLegDimen top straightBar slabLeft slab] : begin
 		define kshLeft : SB + [KBalance slabLeft straightBar]
@@ -107,8 +157,8 @@ glyph-block Letter-Latin-K : begin
 
 		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight slabStartX
 
-	define [KCursiveLoopAndLegShapeImpl top straightBar slabLeft slab] : glyph-proc
-		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
+	define [KCursiveLoopAndLegShapeImpl tailed top slabLeft slab] : glyph-proc
+		define dim : KCursiveLoopAndLegDimen top true slabLeft slab
 		include : dispiro
 			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
 			arcvh 8 2.0
@@ -121,12 +171,23 @@ glyph-block Letter-Latin-K : begin
 			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
 			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
 
+		define swDiagTail Stroke
+		define swDiagTailAdj : swDiagTail / [mix 1 HVContrast 0.375]
+		define xDTGap : 0.07 * (RightSB - SB) - 0.1 * swDiagTail
+		define xDTStart : dim.arcTerminalX + 0.75 * swDiagTail * HVContrast + xDTGap
+		define xDTEnd : dim.kshRight - 0.8 * Hook - 0.375 * swDiagTail * HVContrast + xDTGap
+
 		include : difference
-			intersection
-				Rect XH 0 0 [if SLAB (dim.slabStartX + SideJut) (Width * 2)]
-				dispiro
-					flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
-					curl dim.kshRight 0 [widths.rhs]
+			if tailed
+				then : dispiro
+					flat xDTStart dim.arcTerminalY [widths.center swDiagTailAdj]
+					curl (xDTEnd + 0.125 * [DiagonalTailInnerRadius]) (0.9 * swDiagTail + 0.5 *[DiagonalTailInnerRadius])
+					DiagonalTailF 1 [DivFrame 1] xDTEnd 0 (Hook - swDiagTail * 0.375) swDiagTail
+				else : intersection
+					Rect XH 0 0 [if slab (dim.slabStartX + SideJut) (Width * 2)]
+					dispiro
+						flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
+						curl dim.kshRight 0 [widths.rhs]
 			spiro-outline
 				g4.up.start (dim.arcStartX - O) dim.arcStartY
 				arcvh 4 2.1
@@ -137,10 +198,14 @@ glyph-block Letter-Latin-K : begin
 				g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke - O)
 				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke - O)
 
-		if slab : include : RightwardBottomSerif dim.slabStartX 0 SideJut
+		if (slab && !tailed) : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
-	define [KNormalLegs top bar slabLeft slab] : KLegShapeImpl SB RightSB Stroke top bar slabLeft slab
-	define [KCursiveLegs top bar slabLeft slab]  : KCursiveLoopAndLegShapeImpl top bar slabLeft slab
+	define [KNormalLegs                top slabLeft slab] :  KStraightLegShapeImpl       SB RightSB Stroke top slabLeft slab
+	define [KSymmetricDisconnectedLegs top slabLeft slab] : [KSymmetricLegsImpl false]   SB RightSB Stroke top slabLeft slab
+	define [KSymmetricConnectedLegs    top slabLeft slab] : [KSymmetricLegsImpl true]    SB RightSB Stroke top slabLeft slab
+	define [KCurlyLegs                 top slabLeft slab] :  KCurlyLegShapeImpl          SB RightSB Stroke top slabLeft slab
+	define [KCursiveLegs               top slabLeft slab] :  KCursiveLoopAndLegShapeImpl false             top slabLeft slab
+	define [KDiagTailCursiveLegs       top slabLeft slab] :  KCursiveLoopAndLegShapeImpl true              top slabLeft slab
 
 	define [KCyrlCursiveDescender top straightBar slabLeft slab] : begin
 		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
@@ -150,22 +215,113 @@ glyph-block Letter-Latin-K : begin
 		RightSB + [KBalanceRight slab straightBar] - [KO slab straightBar top Stroke]
 		connex -- [if straightBar 1 0]
 
-	define [KShapeT Legs straightBar] : glyph-proc
-		include : VBarLeft (SB + [KBalance SLAB straightBar]) 0 CAP
-		include : Legs CAP straightBar SLAB SLAB
-		if SLAB : begin
-			include : CenterTopSerif (SB + [KBalance SLAB straightBar] + HalfStroke * HVContrast) CAP Jut
-			include : CenterBottomSerif (SB + [KBalance SLAB straightBar] + HalfStroke * HVContrast) 0 Jut
+	define [KHookTopBar slab straightBar] : union
+		VBarLeft (SB + [KBalance slab straightBar]) 0 (CAP - Hook - HalfStroke)
+		VerticalHook (SB + [KBalance slab straightBar] + HalfStroke * HVContrast) (CAP - Hook - HalfStroke) HookX (-Hook)
 
-	create-glyph 'K.straight' : glyph-proc
-		include : MarkSet.capital
-		include : KShapeT KNormalLegs true
-		create-derived 'KDescender.straight' : KCyrlNormalDescender CAP true SLAB SLAB
+	define UpperKConfig : object
+		straight                           { KNormalLegs                 KStraightLegShapeImpl        [if SLAB 1 0] [if SLAB 1 0]  }
+		curly                              { KCurlyLegs                  KCurlyLegShapeImpl           [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricDisconnected              { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false] [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricConnected                 { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  [if SLAB 1 0] [if SLAB 1 0]  }
+		straightMotionSerifed              { KNormalLegs                 KStraightLegShapeImpl         2             0 }
+		curlyMotionSerifed                 { KCurlyLegs                  KCurlyLegShapeImpl            2             0 }
+		symmetricDisconnectedMotionSerifed { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false]  2             0 }
+		symmetricConnectedMotionSerifed    { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]   2             0 }
 
-	create-glyph 'K.curly' : glyph-proc
-		include : MarkSet.capital
-		include : KShapeT KNormalLegs false
-		create-derived 'KDescender.curly' : KCyrlNormalDescender CAP false SLAB SLAB
+	define [UpperKLTSerif slabTop top straightBar] : match slabTop
+		2 : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) top SideJut
+		1 : CenterTopSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) top Jut
+		_ : glyph-proc
+
+	define [UpperKLBSerif slabTop top straightBar] : match slabTop
+		2 : LeftwardBottomSerif (SB + [KBalance slabTop straightBar]) 0 SideJut
+		1 : CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
+		_ : glyph-proc
+
+	foreach { suffix { Legs BashkirKaLegs slabTop slabBot } } [Object.entries UpperKConfig] : do
+		local straightBar : Legs !== KCurlyLegs
+
+		create-glyph "K.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 CAP
+			include : Legs CAP slabTop slabBot
+			if slabTop : include : UpperKLTSerif slabTop CAP straightBar
+			if slabBot : include : UpperKLBSerif slabTop CAP straightBar
+			create-derived "KDescender.\(suffix)" : KCyrlNormalDescender CAP straightBar slabTop slabBot
+
+		create-glyph "grek/kappa.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 XH
+			include : Legs XH slabTop false
+			if slabTop : include : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) XH SideJut
+
+		create-glyph "cyrl/ka.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 XH
+			include : Legs XH slabTop slabBot
+			if slabTop : include : UpperKLTSerif slabTop XH straightBar
+			if slabBot : include : UpperKLBSerif slabTop XH straightBar
+			create-derived "cyrl/kaDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabBot
+
+		create-glyph "Khooktop.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : Legs CAP slabTop slabBot
+			include : KHookTopBar slabTop straightBar
+			if slabBot : include : UpperKLBSerif slabTop CAP straightBar
+
+		define [BashkirKaShape top] : glyph-proc
+			local left : if slabTop ([mix SB RightSB 0.35] - MVertStroke / 2 * HVContrast) [mix SB RightSB 0.2]
+			local leftNB : left - [KBalance slabTop straightBar]
+			local barLeft : mix 0 SB [if slabTop 0.25 0.375]
+			local sw : AdviceStroke 3
+
+			include : HBarTop barLeft (Stroke * 0.1 + left) top
+			include : VBarLeft left 0 top sw
+			include : BashkirKaLegs leftNB RightSB Stroke top slabTop slabBot
+			if slabBot : include : CenterBottomSerif (left + HalfStroke * HVContrast) 0 Jut
+			if slabTop : include : DownwardLeftSerif barLeft top VJut (MVertStroke / HVContrast)
+
+		create-glyph "cyrl/BashkirUpperKa.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : BashkirKaShape CAP
+
+		create-glyph "cyrl/BashkirKa.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : BashkirKaShape XH
+
+	define LowerKConfig : object
+		straight                                  { KNormalLegs                SLAB (SLAB && !para.isItalic) }
+		curly                                     { KCurlyLegs                 SLAB (SLAB && !para.isItalic) }
+		cursive                                   { KCursiveLegs               SLAB (SLAB && !para.isItalic) }
+		diagonalTailedSerifedCursive              { KDiagTailCursiveLegs       SLAB (SLAB && !para.isItalic) }
+		symmetricDisconnected                     { KSymmetricDisconnectedLegs SLAB (SLAB && !para.isItalic) }
+		symmetricConnected                        { KSymmetricConnectedLegs    SLAB (SLAB && !para.isItalic) }
+		straightMotionSerifed                     { KNormalLegs                true false                    }
+		curlyMotionSerifed                        { KCurlyLegs                 true false                    }
+		cursiveMotionSerifed                      { KCursiveLegs               true false                    }
+		diagonalTailedSerifedCursiveMotionSerifed { KDiagTailCursiveLegs       true false                    }
+		symmetricDisconnectedMotionSerifed        { KSymmetricDisconnectedLegs true false                    }
+		symmetricConnectedMotionSerifed           { KSymmetricConnectedLegs    true false                    }
+
+	foreach { suffix { Legs slabTop slabBot } } [Object.entries LowerKConfig] : do
+		local straightBar : Legs !== KCurlyLegs
+
+		create-glyph "k.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 CAP
+			include : Legs XH slabTop slabBot
+			if slabTop : include : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) CAP SideJut
+			if slabBot : include : tagged 'serifLB'
+				CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
+			create-derived "kDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabBot
+
+		create-glyph "khooktop.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Legs XH straightBar slabTop slabBot
+			include : KHookTopBar slabTop straightBar
+			if slabBot : include : tagged 'serifLB'
+				CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
 
 	select-variant 'K' 'K'
 	alias 'grek/Kappa' 0x39A 'K'
@@ -174,46 +330,25 @@ glyph-block Letter-Latin-K : begin
 	select-variant 'KDescender' 0x2C69 (follow -- 'K')
 	alias 'cyrl/KaDescender' 0x49A 'KDescender'
 
-	define [LowerKShapeT Legs straightBar slabTop slabBot] : glyph-proc
-		include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 CAP
-		include : Legs XH straightBar slabTop slabBot
-		if slabTop : include : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) CAP SideJut
-		if slabBot : include : tagged 'serifLB'
-			CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
-
-	create-glyph 'k.straight' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KNormalLegs true SLAB (SLAB && !para.isItalic)
-		create-derived 'kDescender.straight' : KCyrlNormalDescender XH true SLAB (SLAB && !para.isItalic)
-
-	create-glyph 'k.curly' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KNormalLegs false SLAB (SLAB && !para.isItalic)
-		create-derived 'kDescender.curly' : KCyrlNormalDescender XH false SLAB (SLAB && !para.isItalic)
-
-	create-glyph 'k.cursive' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KCursiveLegs true SLAB (SLAB && !para.isItalic)
-		create-derived 'kDescender.cursive' : KCyrlCursiveDescender XH true SLAB (SLAB && !para.isItalic)
-
-	create-glyph 'k.motionSerifedStraight' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KNormalLegs true true false
-		create-derived 'kDescender.motionSerifedStraight' : KCyrlNormalDescender XH true true false
-
-	create-glyph 'k.motionSerifedCurly' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KNormalLegs false true false
-		create-derived 'kDescender.motionSerifedCurly' : KCyrlNormalDescender XH false true false
-
-	create-glyph 'k.motionSerifedCursive' : glyph-proc
-		include : MarkSet.b
-		include : LowerKShapeT KCursiveLegs true true false
-		create-derived 'kDescender.motionSerifedCursive' : KCyrlCursiveDescender XH true true false
-
 	select-variant 'k' 'k'
-	select-variant 'kDescender' 0x2C6A (follow -- 'k')
+	select-variant 'kDescender' 0x2C6A
 	alias 'cyrl/ka.BGR' null 'k'
+
+	select-variant 'grek/kappa' 0x3BA (follow -- 'K')
+
+	select-variant 'cyrl/ka' 0x43A (follow -- 'K')
+	alias 'latinkappa' 0x138 'cyrl/ka'
+	select-variant 'cyrl/kaDescender' 0x49B (follow -- 'K')
+
+	select-variant 'Khooktop' 0x198
+	select-variant 'khooktop' 0x199
+
+	turned 'turnK' 0xA7B0 'K' Middle (CAP / 2)
+	turned 'turnk' 0x29E  'k' Middle (CAP / 2)
+
+	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'K')
+	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'K')
+
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	define [BBKLegShape top left right] : begin
@@ -243,116 +378,3 @@ glyph-block Letter-Latin-K : begin
 		include : MarkSet.b
 		include : BBBarLeft SB 0 CAP
 		include : BBKLegShape XH (SB + BBD + HVContrast * BBS) RightSB
-
-	define [LowerKappaShapeT Legs straightBar] : glyph-proc
-		include : VBarLeft (SB + [KBalance SLAB straightBar]) 0 XH
-		include : Legs XH straightBar SLAB false
-		if SLAB : include : LeftwardTopSerif (SB + [KBalance SLAB straightBar]) XH SideJut
-
-	create-glyph 'grek/kappa.straight' : glyph-proc
-		include : MarkSet.e
-		include : LowerKappaShapeT KNormalLegs true
-
-	create-glyph 'grek/kappa.curly' : glyph-proc
-		include : MarkSet.e
-		include : LowerKappaShapeT KNormalLegs false
-
-	select-variant 'grek/kappa' 0x3BA (follow -- 'K')
-
-	define [LowerCyrKaShapeT Legs straightBar] : glyph-proc
-		include : VBarLeft (SB + [KBalance SLAB straightBar]) 0 XH
-		include : Legs XH straightBar SLAB SLAB
-		if SLAB : begin
-			include : CenterBottomSerif (SB + [KBalance SLAB straightBar] + HalfStroke * HVContrast) 0 Jut
-			include : CenterTopSerif (SB + [KBalance SLAB straightBar] + HalfStroke * HVContrast) XH Jut
-
-	create-glyph 'cyrl/ka.straight' : glyph-proc
-		include : MarkSet.e
-		include : LowerCyrKaShapeT KNormalLegs true
-		create-derived 'cyrl/kaDescender.straight' : KCyrlNormalDescender XH true SLAB SLAB
-
-	create-glyph 'cyrl/ka.curly' : glyph-proc
-		include : MarkSet.e
-		include : LowerCyrKaShapeT KNormalLegs false
-		create-derived 'cyrl/kaDescender.curly' : KCyrlNormalDescender XH false SLAB SLAB
-
-	select-variant 'cyrl/ka' 0x43A (follow -- 'K')
-	alias 'latinkappa' 0x138 'cyrl/ka'
-	select-variant 'cyrl/kaDescender' 0x49B (follow -- 'K')
-
-	define [KHookTopBar slab straightBar] : union
-		VBarLeft (SB + [KBalance slab straightBar]) 0 (CAP - Hook - HalfStroke)
-		VerticalHook (SB + [KBalance slab straightBar] + HalfStroke * HVContrast) (CAP - Hook - HalfStroke) HookX (-Hook)
-
-	define [KHookTopShapeT Legs straightBar] : glyph-proc
-		include : Legs CAP straightBar SLAB SLAB
-		include : KHookTopBar SLAB straightBar
-		if SLAB : begin
-			include : CenterBottomSerif (SB + [KBalance SLAB straightBar] + HalfStroke * HVContrast) 0 Jut
-
-	define [LowerKHookTopShapeT Legs straightBar slabTop slabBot] : glyph-proc
-		include : Legs XH straightBar slabTop slabBot
-		include : KHookTopBar slabTop straightBar
-		if slabBot : include : tagged 'serifLB'
-			CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
-
-	create-glyph 'Khooktop.straight' : glyph-proc
-		include : MarkSet.capital
-		include : KHookTopShapeT KNormalLegs true
-	create-glyph 'Khooktop.curly' : glyph-proc
-		include : MarkSet.capital
-		include : KHookTopShapeT KNormalLegs false
-
-	create-glyph 'khooktop.straight' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KNormalLegs true false (SLAB && !para.isItalic)
-	create-glyph 'khooktop.curly' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KNormalLegs false false (SLAB && !para.isItalic)
-	create-glyph 'khooktop.cursive' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KCursiveLegs true false (SLAB && !para.isItalic)
-	create-glyph 'khooktop.motionSerifedStraight' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KNormalLegs true false false
-	create-glyph 'khooktop.motionSerifedCurly' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KNormalLegs false false false
-	create-glyph 'khooktop.motionSerifedCursive' : glyph-proc
-		include : MarkSet.b
-		include : LowerKHookTopShapeT KCursiveLegs true false false
-
-	select-variant 'Khooktop' 0x198 (follow -- 'K')
-	select-variant 'khooktop' 0x199 (follow -- 'k')
-
-	turned 'turnK' 0xA7B0 'K' Middle (CAP / 2)
-	turned 'turnk' 0x29E  'k' Middle (CAP / 2)
-
-	define [BashkirKaShape top straightBar] : glyph-proc
-		local left : if SLAB ([mix SB RightSB 0.35] - MVertStroke / 2 * HVContrast) [mix SB RightSB 0.2]
-		local leftNB : left - [KBalance SLAB straightBar]
-		local barLeft : mix 0 SB [if SLAB 0.25 0.375]
-		local sw : AdviceStroke 3
-
-		include : HBarTop barLeft (Stroke * 0.1 + left) top
-		include : VBarLeft left 0 top sw
-		include : KLegShapeImpl leftNB RightSB Stroke top straightBar SLAB SLAB
-		if SLAB : begin
-			include : CenterBottomSerif (left + HalfStroke * HVContrast) 0 Jut
-			include : DownwardLeftSerif barLeft top VJut (MVertStroke / HVContrast)
-
-	create-glyph 'cyrl/BashkirUpperKa.straight' : glyph-proc
-		include : MarkSet.capital
-		include : BashkirKaShape CAP true
-	create-glyph 'cyrl/BashkirUpperKa.curly' : glyph-proc
-		include : MarkSet.capital
-		include : BashkirKaShape CAP false
-	create-glyph 'cyrl/BashkirKa.straight' : glyph-proc
-		include : MarkSet.e
-		include : BashkirKaShape XH true
-	create-glyph 'cyrl/BashkirKa.curly' : glyph-proc
-		include : MarkSet.e
-		include : BashkirKaShape XH false
-
-	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'K')
-	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'K')

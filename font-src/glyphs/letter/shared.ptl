@@ -171,7 +171,13 @@ glyph-block Letter-Shared-Shapes : begin
 		x : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div] HVContrast]
 		y : [fallback s 1] * [FlatHookDepthImpl [Math.min 1 : Math.sqrt df.div]          1]
 	define [FlatHookDepthImpl sHook sStroke] : begin
-		return : Math.max (sHook * Hook) (sStroke * Stroke * 1.375) : Math.min (sHook * Hook) (sStroke * Stroke * 1.75)
+		define kFlathook 0.875
+		return : Math.max
+			kFlathook * sHook * Hook
+			sStroke * Stroke * 1.375
+			Math.min
+				kFlathook * sHook * Hook
+				sStroke * Stroke * 1.625
 
 	glyph-block-export ConnectedCedilla
 	define [ConnectedCedilla src sel] : glyph-proc
@@ -201,6 +207,19 @@ glyph-block Letter-Shared-Shapes : begin
 			ShoulderMidKnotLhs cx (cy - O) fine sw (-1) (-1)
 			archv
 
+	glyph-block-export SerifedArcEnd_RtlRhs
+	define [SerifedArcEnd_RtlRhs sx cx cy sw hook origBar] : begin
+		local barSw : if origBar sw [ArcStartSerifWidth sw]
+		local fine : barSw * [mix CThinB (ShoulderFine / Stroke) 0.5]
+		return : list
+			arcvh
+			ShoulderMidKnotRhs cx (cy + O) fine sw (+1) (+1)
+			archv
+			g4.up.end
+				sx + (barSw - fine) * HVContrast
+				cy + hook - O * 2
+				widths.rhs.heading fine Upward
+
 	glyph-block-export ArcStartSerifWidth
 	define [ArcStartSerifWidth stroke] : Math.max (stroke * 0.875) [AdviceStroke 3.5]
 
@@ -208,7 +227,62 @@ glyph-block Letter-Shared-Shapes : begin
 	define [ArcStartSerif cx cy stroke hook] : begin
 		return : VBarRight cx (cy - hook + O * 2) cy [ArcStartSerifWidth stroke]
 
+	glyph-block-export ArcEndSerif
+	define [ArcEndSerif cx cy stroke hook] : begin
+		return : VBarLeft cx (cy + hook - O * 2) cy [ArcStartSerifWidth stroke]
+
 	glyph-block-export ArcStartHookTop
 	define [ArcStartHookTop cx cy sw hookX hookY] : union
 		VBarRight cx (cy - hookY + O * 2) cy sw
 		VerticalHook (cx - sw / 2 * HVContrast) cy hookX (-hookY) sw
+
+	glyph-block-export DiagonalTailStdDepth
+	define [DiagonalTailStdDepth df sw] : Math.max (0.5 * sw)
+		df.div * [Math.hypot HookX Hook] - 0.25 * sw
+
+	glyph-block-export DiagonalTailInnerRadius
+	define [DiagonalTailInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
+
+	glyph-block-export DiagonalTailF
+	define [DiagonalTailF sign df cx cy depth sw] : begin
+		define mocFine : [AdviceStroke 3] / Stroke * sw
+		define mocSwMid : mix sw mocFine (2 / 3)
+		define fine : mocFine / [mix 1 HVContrast 0.375]
+		define swMid : mix sw fine 0.7
+		define rInY : DiagonalTailInnerRadius
+		define rInX : 1 * rInY
+		define InvSqrt2 : 1 / [Math.sqrt 2]
+		define dxTurn : 0.5 * sw * HVContrast + rInX
+		define dxTurnObl : if (sign > 0)
+			-0.75 * TanSlope * rInY
+			0 * TanSlope * (0.5 * mocSwMid + rInY)
+		define dyTurn : 0.5 * mocSwMid
+		define dxTailStart : dxTurn + InvSqrt2 * rInX + InvSqrt2 * 0.5 * mocFine * HVContrast
+		define dyTailStart : dyTurn + (1 - InvSqrt2 + [if (sign > 0) 0 (TanSlope)]) * (0.5 * mocFine + rInY)
+		define dxyDepth : (depth - 0.5 * sw) * InvSqrt2
+		return : list
+			g2
+				cx + sign * dxTurn + dxTurnObl
+				cy + O + dyTurn
+				if (sign > 0)
+					widths.center.heading swMid Rightward
+					widths.center.heading swMid Leftward
+			if (sign > 0) [alsoThru.g2 0.541 (1 - 0.76) [widths.center : mix swMid fine 0.52]] {}
+			flat (cx + sign * dxTailStart) (cy + O + dyTailStart) [widths.center fine]
+			curl (cx + sign * dxTailStart + sign * dxyDepth) (cy + O + dyTailStart + dxyDepth)
+
+	glyph-block-export DiagonalTailR
+	define [DiagonalTailR df cx cy depth sw] : begin
+		define rInY : DiagonalTailInnerRadius
+		return : list
+			curl cx (cy + sw + rInY)
+			arcvh 8
+			DiagonalTailF (+1) df cx cy depth sw
+
+	glyph-block-export DiagonalTailL
+	define [DiagonalTailL df cx cy depth sw] : begin
+		define rInY : DiagonalTailInnerRadius
+		return : list
+			curl cx (cy + sw + rInY)
+			arcvh 8
+			DiagonalTailF (-1) df cx cy depth sw

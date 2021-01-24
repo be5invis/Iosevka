@@ -151,6 +151,13 @@ Monospace Iosevka contains various stylistic sets to change the shape of certain
 <td colspan="2"><img src="images/stylistic-set-ss14-1.png"/></td>
 </tr>
 <tr>
+<td><code>ss15</code></td>
+<td>IBM Plex Mono Style</td>
+</tr>
+<tr>
+<td colspan="2"><img src="images/stylistic-set-ss15-1.png"/></td>
+</tr>
+<tr>
 <td><code>ss20</code></td>
 <td>Curly Style</td>
 </tr>
@@ -325,6 +332,7 @@ Inside the plan, top-level properties include:
 
 * `family`: String, defines the family name of your custom variant.
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
+  - `quasi-proportional`: The font will become quasi-proportional.
   - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
   - `fontconfig-mono`: Apply `term` spacing changes and further apply changes to be compatible with FontConfig's Mono spacing, which recognizes a font as monospace if and only if its every non-combining characters having the same width. The changes include:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
@@ -434,6 +442,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - `ss12`: Set character variant to “Ubuntu Mono Style”.
   - `ss13`: Set character variant to “Lucida Style”.
   - `ss14`: Set character variant to “JetBrains Mono Style”.
+  - `ss15`: Set character variant to “IBM Plex Mono Style”.
   - `ss20`: Set character variant to “Curly Style”.
 
 <!-- END Section-Stylistic-Sets -->
@@ -451,371 +460,509 @@ Subsection `variants` is used to configure character variants in the font. Prope
     - `digit-form = 'lining'`: Lining (default).
     - `digit-form = 'old-style'`: Old-style.
   - Styles for `A`, `Λ`, `Δ`:
-    + `turn-v = 'straight'`, `cv01 = 1`: Standard, straight `A`, `Λ`, `Δ` (default).
-    + `turn-v = 'curly'`, `cv01 = 2`: Slightly curly `A`, `Λ`, `Δ`, like Iosevka 2.x.
+    + `capital-a = 'straight'`, `cv01 = 1`: Standard, straight `A` (default).
+    + `capital-a = 'curly'`, `cv01 = 2`: Slightly curly `A`, like Iosevka 2.x.
+    + `capital-a = 'straight-motion-serifed'`, `cv01 = 3`: Standard, straight `A`.
+    + `capital-a = 'curly-motion-serifed'`, `cv01 = 4`: Slightly curly `A`, like Iosevka 2.x.
   - Styles for `B`:
     + `capital-b = 'standard'`, `cv02 = 1`: Standard `B` (default).
     + `capital-b = 'more-asymmetric'`, `cv02 = 2`: More asymmetric `B` to differentiate with `8`.
+    + `capital-b = 'standard-unilateral-motion-serifed'`, `cv02 = 3`: Standard `B` with motion serifs at both top and bottom.
+    + `capital-b = 'more-asymmetric-unilateral-motion-serifed'`, `cv02 = 4`: More asymmetric `B` to differentiate with `8` with motion serifs at top.
+    + `capital-b = 'standard-bilateral-motion-serifed'`, `cv02 = 5`: Standard `B` with motion serifs at both top and bottom.
+    + `capital-b = 'more-asymmetric-bilateral-motion-serifed'`, `cv02 = 6`: More asymmetric `B` to differentiate with `8` with motion serifs at top.
   - Styles for `D`:
     + `capital-d = 'standard'`, `cv03 = 1`: Standard `D` (default).
     + `capital-d = 'more-rounded'`, `cv03 = 2`: More rounded `D` to differentiate with `O`.
+    + `capital-d = 'standard-unilateral-motion-serifed'`, `cv03 = 3`: Standard `B` with motion serifs at both top and bottom.
+    + `capital-d = 'more-rounded-unilateral-motion-serifed'`, `cv03 = 4`: More rounded `B` to differentiate with `O` with motion serifs at top.
+    + `capital-d = 'standard-bilateral-motion-serifed'`, `cv03 = 5`: Standard `B` with motion serifs at both top and bottom.
+    + `capital-d = 'more-rounded-bilateral-motion-serifed'`, `cv03 = 6`: More rounded `B` to differentiate with `O` with motion serifs at top.
+  - Styles for `E`:
+    + `capital-e = 'standard'`, `cv04 = 1`: Standard E (default).
+    + `capital-e = 'motion-serifed'`, `cv04 = 2`: Motion-Serifed E.
+  - Styles for `F`:
+    + `capital-f = 'standard'`, `cv05 = 1`: Standard F (default).
+    + `capital-f = 'motion-serifed'`, `cv05 = 2`: Motion-Serifed F.
   - Styles for `G`:
-    + `capital-g = 'toothed'`, `cv04 = 1`: Toothed G (default).
-    + `capital-g = 'toothless-corner'`, `cv04 = 2`: Corner toothless G.
-    + `capital-g = 'toothless-rounded'`, `cv04 = 3`: Round toothless G.
+    + `capital-g = 'toothed-hookless'`, `cv06 = 1`: Toothed G.
+    + `capital-g = 'toothless-corner-hookless'`, `cv06 = 2`: Corner toothless G.
+    + `capital-g = 'toothless-rounded-hookless'`, `cv06 = 3`: Round toothless G.
+    + `capital-g = 'toothed-hooked'`, `cv06 = 4`: Toothed G with invard hook at terminal (default).
+    + `capital-g = 'toothless-corner-hooked'`, `cv06 = 5`: Corner toothless G with invard hook at terminal.
+    + `capital-g = 'toothless-rounded-hooked'`, `cv06 = 6`: Round toothless G with invard hook at terminal.
+    + `capital-g = 'toothed-capped'`, `cv06 = 7`: Toothed G with a cap terminal.
+    + `capital-g = 'toothless-corner-capped'`, `cv06 = 8`: Corner toothless G with a cap terminal.
+    + `capital-g = 'toothless-rounded-capped'`, `cv06 = 9`: Round toothless G with a cap terminal.
+  - Styles for `H`:
+    + `capital-h = 'standard'`, `cv07 = 1`: Standard H (default).
+    + `capital-h = 'motion-serifed'`, `cv07 = 2`: Motion-Serifed H.
   - Styles for `I`:
-    + `capital-i = 'serifed'`, `cv05 = 1`: I with standard (long) serifs (default).
-    + `capital-i = 'serifless'`, `cv05 = 2`: I without serifs, like a straight bar.
-    + `capital-i = 'short-serifed'`, `cv05 = 3`: I with short serifs.
+    + `capital-i = 'serifed'`, `cv08 = 1`: I with standard (long) serifs (default).
+    + `capital-i = 'serifless'`, `cv08 = 2`: I without serifs, like a straight bar.
+    + `capital-i = 'short-serifed'`, `cv08 = 3`: I with short serifs.
   - Styles for `J`:
-    + `capital-j = 'serifless'`, `cv06 = 1`: J without top serif.
-    + `capital-j = 'serifed'`, `cv06 = 2`: J with top serif at left side (default).
-    + `capital-j = 'serifed-both-sides'`, `cv06 = 3`: J with symmetric at both sides.
-    + `capital-j = 'serifed-symmetric'`, `cv06 = 4`: J with symmetric at both sides and is symmetric.
+    + `capital-j = 'serifless'`, `cv09 = 1`: J without top serif.
+    + `capital-j = 'serifed'`, `cv09 = 2`: J with top serif at left side (default).
+    + `capital-j = 'serifed-both-sides'`, `cv09 = 3`: J with symmetric at both sides.
+    + `capital-j = 'serifed-symmetric'`, `cv09 = 4`: J with symmetric at both sides and is symmetric.
   - Styles for `K`:
-    + `capital-k = 'straight'`, `cv07 = 1`: `K` with standard shape (default).
-    + `capital-k = 'curly'`, `cv07 = 2`: Slightly curly `K`, like Iosevka 2.x.
+    + `capital-k = 'straight'`, `cv10 = 1`: `K` with standard shape (default).
+    + `capital-k = 'curly'`, `cv10 = 2`: Slightly curly `K`, like Iosevka 2.x.
+    + `capital-k = 'symmetric-disconnected'`, `cv10 = 3`: `K` with symmetric legs disconnected to the vertical bar.
+    + `capital-k = 'symmetric-connected'`, `cv10 = 4`: `K` with symmetric legs connected to the vertical bar.
+    + `capital-k = 'straight-motion-serifed'`, `cv10 = 5`: `K` with standard shape and motion serifs.
+    + `capital-k = 'curly-motion-serifed'`, `cv10 = 6`: Slightly curly `K`, like Iosevka 2.x, with motion serifs.
+    + `capital-k = 'symmetric-disconnected-motion-serifed'`, `cv10 = 7`: `K` with symmetric legs disconnected to the vertical bar, and motion serifs.
+    + `capital-k = 'symmetric-connected-motion-serifed'`, `cv10 = 8`: `K` with symmetric legs connected to the vertical bar, and motion serifs.
   - Styles for `L`:
-    + `capital-l = 'standard'`, `cv63 = 1`: Standard `L` (default).
-    + `capital-l = 'motion-serifed'`, `cv63 = 2`: Standard `L` with motion serifs.
+    + `capital-l = 'standard'`, `cv11 = 1`: Standard `L` (default).
+    + `capital-l = 'motion-serifed'`, `cv11 = 2`: Standard `L` with motion serifs.
   - Styles for `M`:
-    + `capital-m = 'hanging'`, `cv08 = 1`: `M` with middle being hanging off baseline (default).
-    + `capital-m = 'flat-bottom'`, `cv08 = 2`: `M` with middle aligned to baseline.
+    + `capital-m = 'hanging'`, `cv12 = 1`: `M` with middle being hanging off baseline (default).
+    + `capital-m = 'flat-bottom'`, `cv12 = 2`: `M` with middle aligned to baseline.
+    + `capital-m = 'hanging-motion-serifed'`, `cv12 = 3`: `M` with middle being hanging off baseline and motion serifs.
+    + `capital-m = 'flat-bottom-motion-serifed'`, `cv12 = 4`: `M` with middle aligned to baseline and motion serifs.
+  - Styles for `N`:
+    + `capital-n = 'standard'`, `cv13 = 1`: Standard N (default).
+    + `capital-n = 'motion-serifed'`, `cv13 = 2`: Motion-Serifed N.
+  - Styles for `P`:
+    + `capital-p = 'closed'`, `cv14 = 1`: Closed `P` (default).
+    + `capital-p = 'open'`, `cv14 = 2`: P with open contour at bottom.
+    + `capital-p = 'closed-motion-serifed'`, `cv14 = 3`: Closed `P` with motion serifs.
+    + `capital-p = 'open-motion-serifed'`, `cv14 = 4`: P with open contour at bottom and motion serifs.
   - Styles for `Q`:
-    + `capital-q = 'taily'`, `cv09 = 1`: `Q` with a curly tail (default).
-    + `capital-q = 'straight'`, `cv09 = 2`: `Q` with a straight tail like in the old versions.
-    + `capital-q = 'crossing'`, `cv09 = 3`: `Q` with a tail crossing the ring.
-    + `capital-q = 'vertical-crossing'`, `cv09 = 4`: `Q` with a vertical tail crossing the ring.
+    + `capital-q = 'curly-tailed'`, `cv15 = 1`: `Q` with a curly tail (default).
+    + `capital-q = 'straight'`, `cv15 = 2`: `Q` with a straight tail like in the old versions.
+    + `capital-q = 'crossing'`, `cv15 = 3`: `Q` with a tail crossing the ring.
+    + `capital-q = 'vertical-crossing'`, `cv15 = 4`: `Q` with a vertical tail crossing the ring.
+    + `capital-q = 'horizontal-tailed'`, `cv15 = 5`: `Q` with a horizontal tail, like Univers.
+    + `capital-q = 'detached-horizontal-tailed'`, `cv15 = 6`: `Q` with a horizontal tail detached.
+    + `capital-q = 'detached-oblique-tailed'`, `cv15 = 7`: `Q` with a oblique tail detached.
   - Styles for `R`:
-    + `capital-r = 'straight'`, `cv10 = 1`: Standard, straight-leg `R` (default).
-    + `capital-r = 'curly'`, `cv10 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
-  - Styles for `Y`:
-    + `capital-y = 'straight'`, `cv11 = 1`: Standard, straight `Y` (default).
-    + `capital-y = 'curly'`, `cv11 = 2`: Slightly curly `Y`, like Iosevka 2.x.
-  - Styles for `Z`:
-    + `capital-z = 'standard'`, `cv64 = 1`: Standard `Z` (default).
-    + `capital-z = 'with-crossbar'`, `cv64 = 2`: Standard `Z` with a diagonal cross bar for better dsitinction with `2`.
-    + `capital-z = 'with-horizontal-crossbar'`, `cv64 = 3`: Standard `Z` with a horizontal cross bar for better dsitinction with `2`.
-    + `capital-z = 'curly'`, `cv64 = 4`: Curly `Z`.
-    + `capital-z = 'curly-with-crossbar'`, `cv64 = 5`: Curly `Z` with a diagonal cross bar for better dsitinction with `2`.
-    + `capital-z = 'curly-with-horizontal-crossbar'`, `cv64 = 6`: Curly `Z` with a horizontal cross bar for better dsitinction with `2`.
-    + `capital-z = 'motion-serifed'`, `cv64 = 7`: Standard `Z` with motion serifs.
-    + `capital-z = 'curly-motion-serifed'`, `cv64 = 8`: Curly `Z` with motion serifs.
-  - Styles for `a`:
-    + `a = 'doublestorey'`, `cv12 = 1`: Double-storey `a` (default for Upright).
-    + `a = 'doublestorey-tailed'`, `cv12 = 2`: Double-storey `a` with curly tail.
-    + `a = 'doublestorey-toothless-corner'`, `cv12 = 3`: Toothless (cornered bottom-right) double-storey `a`.
-    + `a = 'doublestorey-toothless-rounded'`, `cv12 = 4`: Toothless (rounded bottom-right) double-storey `a`.
-    + `a = 'singlestorey'`, `cv12 = 5`: Single-storey `a`.
-    + `a = 'singlestorey-tailed'`, `cv12 = 6`: Single-storey `a` with curly tail (default for Italic).
-    + `a = 'singlestorey-earless-corner'`, `cv12 = 7`: Earless (cornered top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-corner-tailed'`, `cv12 = 8`: Earless (cornered top-right) single-storey `a` with curly tail.
-    + `a = 'singlestorey-earless-rounded'`, `cv12 = 9`: Earless (rounded top-right) single-storey `a`.
-    + `a = 'singlestorey-earless-rounded-tailed'`, `cv12 = 10`: Earless (rounded top-right) single-storey `a` with curly tail.
-    + `a = 'doublestorey-motion-serifed'`, `cv12 = 11`: Double-storey `a` with motion serifs.
-    + `a = 'singlestorey-motion-serifed'`, `cv12 = 12`: Single-storey `a` with motion serifs.
-    + `a = 'singlestorey-earless-corner-motion-serifed'`, `cv12 = 13`: Earless (cornered top-right) single-storey `a` with motion serifs.
-    + `a = 'singlestorey-earless-rounded-motion-serifed'`, `cv12 = 14`: Earless (rounded top-right) single-storey `a` with motion serifs.
-  - Styles for `b`:
-    + `b = 'toothed'`, `cv13 = 1`: `b` with bottom-left tooth (default).
-    + `b = 'toothless-corner'`, `cv13 = 2`: `b` without bottom-left tooth, with a corner transition.
-    + `b = 'toothless-rounded'`, `cv13 = 3`: `b` without bottom-left tooth, with a rounded transition.
-    + `b = 'motion-serifed-toothed'`, `cv13 = 4`: `b` with motion serif, and with bottom-left tooth.
-    + `b = 'motion-serifed-toothless-corner'`, `cv13 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
-    + `b = 'motion-serifed-toothless-rounded'`, `cv13 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
-  - Styles for `d`:
-    + `d = 'toothed'`, `cv14 = 1`: `d` with bottom-right tooth (default for Upright).
-    + `d = 'toothless-corner'`, `cv14 = 2`: `d` without bottom-right tooth, with a corner transition.
-    + `d = 'toothless-rounded'`, `cv14 = 3`: `d` without bottom-right tooth, with a rounded transition.
-    + `d = 'tailed'`, `cv14 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
-    + `d = 'motion-serifed-toothed'`, `cv14 = 5`: `d` motion serif, and with bottom-right tooth.
-    + `d = 'motion-serifed-toothless-corner'`, `cv14 = 6`: `d` motion serif, and without bottom-right tooth, with a corner transition.
-    + `d = 'motion-serifed-toothless-rounded'`, `cv14 = 7`: `d` motion serif, and without bottom-right tooth, with a rounded transition.
-    + `d = 'motion-serifed-tailed'`, `cv14 = 8`: `d` motion serif, and with a slightly tail bottom-right tail.
-  - Styles for `e`:
-    + `e = 'flat-crossbar'`, `cv59 = 1`: `e` with flat crossbar (default for Upright).
-    + `e = 'rounded'`, `cv59 = 2`: `e` with more rounded shape (default for Italic).
-  - Styles for `f`:
-    + `f = 'serifless'`, `cv15 = 1`: `f` without bottom serif, hook or exension (default for Sans Upright).
-    + `f = 'serifed'`, `cv15 = 2`: `f` with bottom serif (default for Slab Upright).
-    + `f = 'tailed'`, `cv15 = 3`: `f` with bottom hook.
-    + `f = 'extended'`, `cv15 = 4`: `f` with bar extended to descender.
-    + `f = 'serifless-crossbar-at-x-height'`, `cv15 = 5`: `f` without bottom serif, hook or exension; crossbar is placed right at X-height.
-    + `f = 'serifed-crossbar-at-x-height'`, `cv15 = 6`: `f` with bottom serif; crossbar is placed right at X-height.
-    + `f = 'tailed-crossbar-at-x-height'`, `cv15 = 7`: `f` with bottom hook; crossbar is placed right at X-height.
-    + `f = 'extended-crossbar-at-x-height'`, `cv15 = 8`: `f` with bar extended to descender; crossbar is placed right at X-height.
-    + `f = 'flat-hook'`, `cv15 = 9`: `f` with flat top hook, without bottom serif, hook or exension.
-    + `f = 'flat-hook-serifed'`, `cv15 = 10`: `f` with flat top hook and bottom serif.
-    + `f = 'flat-hook-tailed'`, `cv15 = 11`: `f` with flat top hook and bottom hook (default for Italic).
-    + `f = 'flat-hook-extended'`, `cv15 = 12`: `f` with flat top hook and bar extended to descender.
-    + `f = 'flat-hook-crossbar-at-x-height'`, `cv15 = 13`: `f` with flat top hook, without bottom serif, hook or exension; crossbar is placed right at X-height.
-    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv15 = 14`: `f` with flat top hook, bottom serif; crossbar is placed right at X-height.
-    + `f = 'flat-hook-tailed-crossbar-at-x-height'`, `cv15 = 15`: `f` with flat top hook, bottom hook; crossbar is placed right at X-height.
-    + `f = 'flat-hook-extended-crossbar-at-x-height'`, `cv15 = 16`: `f` with flat top hook, bar extended to descender; crossbar is placed right at X-height.
-  - Styles for `g`:
-    + `g = 'singlestorey'`, `cv16 = 1`: Single-storey `g` (default).
-    + `g = 'doublestorey'`, `cv16 = 2`: Double-storey `g`.
-    + `g = 'opendoublestorey'`, `cv16 = 3`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
-    + `g = 'earless-corner'`, `cv16 = 4`: Earless (cornered top-right) single-storey `g`.
-    + `g = 'earless-rounded'`, `cv16 = 5`: Earless (rounded top-right) single-storey `g`.
-    + `g = 'singlestorey-flat-hook'`, `cv16 = 6`: Single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-earless-corner-flat-hook'`, `cv16 = 7`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-earless-rounded-flat-hook'`, `cv16 = 8`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
-    + `g = 'singlestorey-motion-serifed'`, `cv16 = 9`: Single-storey `g` with motion serifs.
-    + `g = 'singlestorey-motion-serifed-flat-hook'`, `cv16 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
-  - Styles for `h`:
-    + `h = 'straight'`, `cv17 = 1`: `h` with straight ending (default).
-    + `h = 'tailed'`, `cv17 = 2`: `h` with curly tailed ending.
-    + `h = 'motion-serifed-straight'`, `cv17 = 3`: `h` with straight ending.
-    + `h = 'motion-serifed-tailed'`, `cv17 = 4`: `h` with curly tailed ending.
-  - Styles for `i`:
-    + `i = 'serifed'`, `cv18 = 1`: Serifed `i` (default for Upright).
-    + `i = 'serifless'`, `cv18 = 2`: `i` like a straight line.
-    + `i = 'hooky'`, `cv18 = 3`: Hooky `i`.
-    + `i = 'zshaped'`, `cv18 = 4`: Z-shaped `i`.
-    + `i = 'hooky-bottom'`, `cv18 = 5`: `i` with a straight tail.
-    + `i = 'serifed-asymmetric'`, `cv18 = 6`: `i` with shorter top serif and full bottom serif.
-    + `i = 'tailed'`, `cv18 = 7`: `i` with curly tail.
-    + `i = 'serifed-tailed'`, `cv18 = 8`: `i` with curly tail and top serif (default for Italic).
-    + `i = 'flat-tailed'`, `cv18 = 9`: `i` with top serif and a curly-then-flat tail.
-    + `i = 'serifed-flat-tailed'`, `cv18 = 10`: `i` with top serif and a curly-then-flat tail.
-  - Styles for `j`:
-    + `j = 'serifed'`, `cv19 = 1`: `j` with top serif (default).
-    + `j = 'serifless'`, `cv19 = 2`: `j` without serif.
-    + `j = 'straight-line'`, `cv19 = 3`: `j` like a straight line.
-    + `j = 'flat-hook-serifed'`, `cv19 = 4`: undefined.
-    + `j = 'flat-hook-serifless'`, `cv19 = 5`: undefined.
-  - Styles for `k`:
-    + `k = 'straight'`, `cv20 = 1`: `k` with standard shape (default for Upright).
-    + `k = 'curly'`, `cv20 = 2`: Slightly curly `k`, like Iosevka 2.x.
-    + `k = 'cursive'`, `cv20 = 3`: `k` with a cursive loop (default for Italic).
-    + `k = 'motion-serifed-straight'`, `cv20 = 4`: `k` with motion serifs.
-    + `k = 'motion-serifed-curly'`, `cv20 = 5`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
-    + `k = 'motion-serifed-cursive'`, `cv20 = 6`: `k` with a cursive loop and motion serifs.
-  - Styles for `l`:
-    + `l = 'serifed'`, `cv21 = 1`: Serifed `l` (default for Upright).
-    + `l = 'serifless'`, `cv21 = 2`: `l` like a straight line.
-    + `l = 'hooky'`, `cv21 = 3`: Hooky `l`.
-    + `l = 'zshaped'`, `cv21 = 4`: Z-shaped `l`.
-    + `l = 'hooky-bottom'`, `cv21 = 5`: `l` with a straight tail.
-    + `l = 'serifed-asymmetric'`, `cv21 = 6`: `l` with shorter top serif and full bottom serif.
-    + `l = 'tailed'`, `cv21 = 7`: `l` with curly tail.
-    + `l = 'serifed-tailed'`, `cv21 = 8`: `l` with top serif and curly tail (default for Italic).
-    + `l = 'flat-tailed'`, `cv21 = 9`: `l` with top serif and a curly-then-flat tail.
-    + `l = 'serifed-flat-tailed'`, `cv21 = 10`: `l` with top serif and a curly-then-flat tail.
-  - Styles for `m`:
-    + `m = 'normal'`, `cv22 = 1`: `m` with normal middle leg, touching the baseline (default).
-    + `m = 'shortleg'`, `cv22 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
-    + `m = 'tailed'`, `cv22 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
-    + `m = 'shortleg-tailed'`, `cv22 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-corner-double-arch'`, `cv22 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-corner-double-arch-shortleg'`, `cv22 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-corner-double-arch-tailed'`, `cv22 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-corner-double-arch-shortleg-tailed'`, `cv22 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-rounded-double-arch'`, `cv22 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-rounded-double-arch-shortleg'`, `cv22 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-rounded-double-arch-tailed'`, `cv22 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-rounded-double-arch-shortleg-tailed'`, `cv22 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-single-arch'`, `cv22 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
-    + `m = 'earless-single-arch-shortleg'`, `cv22 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-single-arch-tailed'`, `cv22 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-single-arch-shortleg-tailed'`, `cv22 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'motion-serifed'`, `cv22 = 17`: `m` with motion serifs, normal middle leg touching baseline.
-    + `m = 'motion-serifed-shortleg'`, `cv22 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
-    + `m = 'motion-serifed-tailed'`, `cv22 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
-    + `m = 'motion-serifed-shortleg-tailed'`, `cv22 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
-  - Styles for `n`:
-    + `n = 'straight'`, `cv23 = 1`: `n` with straight ending (default).
-    + `n = 'tailed'`, `cv23 = 2`: `n` with a curly tail.
-    + `n = 'earless-corner-straight'`, `cv23 = 3`: Earless (corner top-left) `n` with straight ending.
-    + `n = 'earless-corner-tailed'`, `cv23 = 4`: Earless (corner top-left) `n` with a curly tail.
-    + `n = 'earless-rounded-straight'`, `cv23 = 5`: Earless (rounded top-left) `n` with straight ending.
-    + `n = 'earless-rounded-tailed'`, `cv23 = 6`: Earless (rounded top-left) `n` with a curly tail.
-    + `n = 'motion-serifed-straight'`, `cv23 = 7`: `n` with motion serifs and straight ending.
-    + `n = 'motion-serifed-tailed'`, `cv23 = 8`: `n` with motion serifs and a curly tail.
-  - Styles for `p`:
-    + `p = 'eared'`, `cv24 = 1`: `p` with top-left ear (default).
-    + `p = 'earless-corner'`, `cv24 = 2`: `p` without top-left ear (corner).
-    + `p = 'earless-rounded'`, `cv24 = 3`: `p` without top-left ear (rounded).
-    + `p = 'motion-serifed'`, `cv24 = 4`: `p` with motion serifs.
-  - Styles for `q`:
-    + `q = 'straight'`, `cv25 = 1`: `q` with straight bar (default).
-    + `q = 'tailed'`, `cv25 = 2`: `q` with tail.
-    + `q = 'earless-corner'`, `cv25 = 3`: Earless (cornered top-left) single-storey `q`.
-    + `q = 'earless-corner-tailed'`, `cv25 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
-    + `q = 'earless-rounded'`, `cv25 = 5`: Earless (rounded top-left) single-storey `q`.
-    + `q = 'earless-rounded-tailed'`, `cv25 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
-    + `q = 'motion-serifed-straight'`, `cv25 = 7`: `q` with straight bar and motion serifs.
-    + `q = 'motion-serifed-tailed'`, `cv25 = 8`: `q` with tail and motion serifs.
-  - Styles for `r`:
-    + `r = 'serifless'`, `cv26 = 1`: Straight, serif-less `r` (default for Sans).
-    + `r = 'serifed'`, `cv26 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
-    + `r = 'top-serifed'`, `cv26 = 3`: `r` with serifs at top-left only (default for Slab Italic).
-    + `r = 'earless-corner'`, `cv26 = 4`: Earless (corner top-left), serif-less `r`.
-    + `r = 'earless-corner-serifed'`, `cv26 = 5`: Earless (corner top-left), serifed `r`.
-    + `r = 'earless-rounded'`, `cv26 = 6`: Earless (rounded top-left), serif-less `r`.
-    + `r = 'earless-rounded-serifed'`, `cv26 = 7`: Earless (rounded top-left), serifed `r`.
-    + `r = 'compact'`, `cv26 = 8`: Compact, serifless `r`.
-  - Styles for `t`:
-    + `t = 'standard'`, `cv27 = 1`: Standard `t` shape (default).
-    + `t = 'cross'`, `cv27 = 2`: Futura-like `t` shape.
-    + `t = 'flat-hook'`, `cv27 = 3`: `t` with flat hook.
-    + `t = 'hookless-asymmetric'`, `cv27 = 4`: `t` without hook and ony half the cross bar.
-    + `t = 'flat-hook-short-neck'`, `cv27 = 5`: `t` with flat hook and a slightly shorter neck.
-    + `t = 'flat-hook-short-neck2'`, `cv27 = 6`: `t` with flat hook and a more shorter neck.
+    + `capital-r = 'straight'`, `cv16 = 1`: Standard, straight-leg `R` (default).
+    + `capital-r = 'curly'`, `cv16 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
+    + `capital-r = 'standing'`, `cv16 = 3`: `R` with near-vertical standing leg.
+    + `capital-r = 'straight-open'`, `cv16 = 4`: Standard, straight-leg `R`, with open contour at bottom.
+    + `capital-r = 'curly-open'`, `cv16 = 5`:  Slightly curly-legged `R`, like Iosevka 2.x, with open contour at bottom.
+    + `capital-r = 'standing-open'`, `cv16 = 6`: `R` with near-vertical standing leg, with open contour at bottom.
+    + `capital-r = 'straight-motion-serifed'`, `cv16 = 7`: Standard, straight-leg `R`, with motion serifs.
+    + `capital-r = 'curly-motion-serifed'`, `cv16 = 8`:  Slightly curly-legged `R`, like Iosevka 2.x, with motion serifs.
+    + `capital-r = 'standing-motino-serifed'`, `cv16 = 9`: `R` with near-vertical standing leg.
+    + `capital-r = 'straight-open-motion-serifed'`, `cv16 = 10`: Standard, straight-leg `R`, with open contour at bottom and motion serifs.
+    + `capital-r = 'curly-open-motion-serifed'`, `cv16 = 11`:  Slightly curly-legged `R`, like Iosevka 2.x, with open contour at bottom and motion serifs.
+    + `capital-r = 'standing-open-motion-serifed'`, `cv16 = 12`: `R` with near-vertical standing leg, with open contour at bottom.
+  - Styles for `T`:
+    + `capital-t = 'standard'`, `cv17 = 1`: Standard T (default).
+    + `capital-t = 'motion-serifed'`, `cv17 = 2`: Motion-Serifed T.
   - Styles for `u`:
-    + `u = 'toothed'`, `cv28 = 1`: Normal `u` with bottom-right tooth (default for Upright).
-    + `u = 'toothless-corner'`, `cv28 = 2`: Toothless (corner bottom-right) `u`.
-    + `u = 'toothless-rounded'`, `cv28 = 3`: Toothless (rounded) `u`, like a smaller uppercase `U`.
-    + `u = 'tailed'`, `cv28 = 4`: `u` with right bar and a slightly curly tail (default for Italic).
-    + `u = 'motion-serifed'`, `cv28 = 5`: Normal `u` with right bar and motion serifs.
-    + `u = 'motion-serifed-tailed'`, `cv28 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
-  - Styles for `v`, `V`:
-    + `v = 'straight'`, `cv29 = 1`: Standard, straight `V` and `v` (default).
-    + `v = 'curly'`, `cv29 = 2`:  Slightly curly `V` and `v`, like Iosevka 2.x.
-  - Styles for `w`, `W`:
-    + `w = 'straight'`, `cv30 = 1`: Standard, straight `W` and `w` (default).
-    + `w = 'curly'`, `cv30 = 2`: Slightly curly `W` and `w`, like Iosevka 2.x.
-    + `w = 'straight-flat-top'`, `cv30 = 3`: Standard, straight `W` and `w`, and the middle is forced to be aligned the top.
-  - Styles for `x`, `X`:
-    + `x = 'straight'`, `cv31 = 1`: Standard, straight `X` and `x` (default).
-    + `x = 'curly'`, `cv31 = 2`: Slightly curly `X` and `x`, like Iosevka 2.x.
+    + `capital-u = 'toothed'`, `cv18 = 1`: `U` with bottom-right tooth.
+    + `capital-u = 'toothless-corner'`, `cv18 = 2`: Toothless (corner bottom-right) `U`.
+    + `capital-u = 'toothless-rounded'`, `cv18 = 3`: Toothless (rounded) `U` (default).
+    + `capital-u = 'tailed'`, `cv18 = 4`: `U` with right bar and a slightly curly tail.
+    + `capital-u = 'motion-serifed'`, `cv18 = 5`: Normal `U` with right bar and motion serifs.
+    + `capital-u = 'motion-serifed-tailed'`, `cv18 = 6`: `U` with right bar, motion serifs and a slightly curly tail.
+    + `capital-u = 'toothless-corner-unilateral-motion-serifed'`, `cv18 = 7`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
+    + `capital-u = 'toothless-rounded-unilateral-motion-serifed'`, `cv18 = 8`: Toothless (rounded) `U` with motion serifs, like Museo.
+    + `capital-u = 'toothless-corner-bilateral-motion-serifed'`, `cv18 = 9`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
+    + `capital-u = 'toothless-rounded-bilateral-motion-serifed'`, `cv18 = 10`: Toothless (rounded) `U` with motion serifs, like Museo.
+  - Styles for `V`:
+    + `capital-v = 'straight'`, `cv19 = 1`: Standard, straight `V` (default).
+    + `capital-v = 'curly'`, `cv19 = 2`:  Slightly curly `V`, like Iosevka 2.x.
+    + `capital-v = 'straight-motion-serifed'`, `cv19 = 3`: Standard, straight `V`, and motion serifs.
+    + `capital-v = 'curly-motion-serifed'`, `cv19 = 4`:  Slightly curly `V`, like Iosevka 2.x, and motion serifs.
+  - Styles for `W`:
+    + `capital-w = 'straight'`, `cv20 = 1`: Standard, straight `W` (default).
+    + `capital-w = 'curly'`, `cv20 = 2`: Slightly curly `W`, like Iosevka 2.x.
+    + `capital-w = 'straight-flat-top'`, `cv20 = 3`: Standard, straight `W`, and the middle is forced to be aligned the top.
+    + `capital-w = 'straight-double-v'`, `cv20 = 4`: Straight `W` looks like double V.
+    + `capital-w = 'straight-asymmetric'`, `cv20 = 5`: Straight `W` looks asymmetric.
+    + `capital-w = 'straight-motion-serifed'`, `cv20 = 6`: Standard, straight `W`, with motion serifs.
+    + `capital-w = 'curly-motion-serifed'`, `cv20 = 7`: Slightly curly `W`, like Iosevka 2.x, with motion serifs.
+    + `capital-w = 'straight-flat-top-motion-serifed'`, `cv20 = 8`: Standard, straight `W`, and the middle is forced to be aligned the top, with motion serifs.
+    + `capital-w = 'straight-double-v-motion-serifed'`, `cv20 = 9`: Straight `W` looks like double V, with motion serifs.
+    + `capital-w = 'straight-asymmetric-motion-serifed'`, `cv20 = 10`: Straight `W` looks asymmetric, with motion serifs.
+  - Styles for `X`:
+    + `capital-x = 'straight'`, `cv21 = 1`: Standard, straight `X` (default).
+    + `capital-x = 'curly'`, `cv21 = 2`: Slightly curly `X`, like Iosevka 2.x.
+    + `capital-x = 'straight-motion-serifed'`, `cv21 = 3`: Standard, straight `X` with motion serifs.
+    + `capital-x = 'curly-motion-serifed'`, `cv21 = 4`: Slightly curly `X`, like Iosevka 2.x, with motion serifs.
+  - Styles for `Y`:
+    + `capital-y = 'straight'`, `cv22 = 1`: Standard, straight `Y` (default).
+    + `capital-y = 'curly'`, `cv22 = 2`: Slightly curly `Y`, like Iosevka 2.x.
+    + `capital-y = 'straight-motion-serifed'`, `cv22 = 3`: Standard, straight `Y`, with motion serifs.
+    + `capital-y = 'curly-motion-serifed'`, `cv22 = 4`: Slightly curly `Y`, like Iosevka 2.x, with motion serifs.
+  - Styles for `Z`:
+    + `capital-z = 'standard'`, `cv23 = 1`: Standard `Z` (default).
+    + `capital-z = 'with-crossbar'`, `cv23 = 2`: Standard `Z` with a diagonal cross bar for better dsitinction with `2`.
+    + `capital-z = 'with-horizontal-crossbar'`, `cv23 = 3`: Standard `Z` with a horizontal cross bar for better dsitinction with `2`.
+    + `capital-z = 'curly'`, `cv23 = 4`: Curly `Z`.
+    + `capital-z = 'curly-with-crossbar'`, `cv23 = 5`: Curly `Z` with a diagonal cross bar for better dsitinction with `2`.
+    + `capital-z = 'curly-with-horizontal-crossbar'`, `cv23 = 6`: Curly `Z` with a horizontal cross bar for better dsitinction with `2`.
+    + `capital-z = 'motion-serifed'`, `cv23 = 7`: Standard `Z` with motion serifs at bottom.
+    + `capital-z = 'curly-motion-serifed'`, `cv23 = 8`: Curly `Z` with motion serifs at bottom.
+    + `capital-z = 'top-motion-serifed'`, `cv23 = 9`: Standard `Z` with motion serifs at top.
+    + `capital-z = 'curly-top-motion-serifed'`, `cv23 = 10`: Curly `Z` with motion serifs at top.
+  - Styles for `a`:
+    + `a = 'double-storey'`, `cv24 = 1`: Double-storey `a` (default for Upright).
+    + `a = 'double-storey-tailed'`, `cv24 = 2`: Double-storey `a` with curly tail.
+    + `a = 'double-storey-toothless-corner'`, `cv24 = 3`: Toothless (cornered bottom-right) double-storey `a`.
+    + `a = 'double-storey-toothless-rounded'`, `cv24 = 4`: Toothless (rounded bottom-right) double-storey `a`.
+    + `a = 'double-storey-motion-serifed'`, `cv24 = 5`: Double-storey `a` with motion serifs.
+    + `a = 'single-storey'`, `cv24 = 6`: Single-storey `a`.
+    + `a = 'single-storey-earless-corner'`, `cv24 = 7`: Earless (cornered top-right) single-storey `a`.
+    + `a = 'single-storey-earless-rounded'`, `cv24 = 8`: Earless (rounded top-right) single-storey `a`.
+    + `a = 'single-storey-tailed'`, `cv24 = 9`: Single-storey `a` with curly tail (default for Italic).
+    + `a = 'single-storey-earless-corner-tailed'`, `cv24 = 10`: Earless (cornered top-right) single-storey `a` with curly tail.
+    + `a = 'single-storey-earless-rounded-tailed'`, `cv24 = 11`: Earless (rounded top-right) single-storey `a` with curly tail.
+    + `a = 'single-storey-motion-serifed'`, `cv24 = 12`: Single-storey `a` with motion serifs.
+    + `a = 'single-storey-earless-corner-motion-serifed'`, `cv24 = 13`: Earless (cornered top-right) single-storey `a` with motion serifs.
+    + `a = 'single-storey-earless-rounded-motion-serifed'`, `cv24 = 14`: Earless (rounded top-right) single-storey `a` with motion serifs.
+  - Styles for `b`:
+    + `b = 'toothed'`, `cv25 = 1`: `b` with bottom-left tooth (default).
+    + `b = 'toothless-corner'`, `cv25 = 2`: `b` without bottom-left tooth, with a corner transition.
+    + `b = 'toothless-rounded'`, `cv25 = 3`: `b` without bottom-left tooth, with a rounded transition.
+    + `b = 'toothed-motion-serifed'`, `cv25 = 4`: `b` with motion serif, and with bottom-left tooth.
+    + `b = 'toothless-corner-motion-serifed'`, `cv25 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
+    + `b = 'toothless-rounded-motion-serifed'`, `cv25 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
+  - Styles for `d`:
+    + `d = 'toothed'`, `cv26 = 1`: `d` with bottom-right tooth (default for Upright).
+    + `d = 'toothless-corner'`, `cv26 = 2`: `d` without bottom-right tooth, with a corner transition.
+    + `d = 'toothless-rounded'`, `cv26 = 3`: `d` without bottom-right tooth, with a rounded transition.
+    + `d = 'tailed'`, `cv26 = 4`: `d` with a slightly tail bottom-right tail (default for Italic).
+    + `d = 'toothed-motion-serifed'`, `cv26 = 5`: `d` motion serif, and with bottom-right tooth.
+    + `d = 'toothless-corner-motion-serifed'`, `cv26 = 6`: `d` motion serif, and without bottom-right tooth, with a corner transition.
+    + `d = 'toothless-rounded-motion-serifed'`, `cv26 = 7`: `d` motion serif, and without bottom-right tooth, with a rounded transition.
+    + `d = 'motion-serifed-tailed'`, `cv26 = 8`: `d` motion serif, and with a slightly tail bottom-right tail.
+  - Styles for `e`:
+    + `e = 'flat-crossbar'`, `cv27 = 1`: `e` with flat crossbar (default for Upright).
+    + `e = 'rounded'`, `cv27 = 2`: `e` with more rounded shape (default for Italic).
+  - Styles for `f`:
+    + `f = 'serifless'`, `cv28 = 1`: `f` without bottom serif, hook or exension (default for Sans Upright).
+    + `f = 'serifed'`, `cv28 = 2`: `f` with bottom serif (default for Slab Upright).
+    + `f = 'tailed'`, `cv28 = 3`: `f` with bottom hook.
+    + `f = 'extended'`, `cv28 = 4`: `f` with bar extended to descender.
+    + `f = 'diagonal-tailed'`, `cv28 = 5`: `f` with bottom diagonal tail.
+    + `f = 'serifless-crossbar-at-x-height'`, `cv28 = 6`: `f` without bottom serif, hook or exension; crossbar is placed right at X-height.
+    + `f = 'serifed-crossbar-at-x-height'`, `cv28 = 7`: `f` with bottom serif; crossbar is placed right at X-height.
+    + `f = 'tailed-crossbar-at-x-height'`, `cv28 = 8`: `f` with bottom hook; crossbar is placed right at X-height.
+    + `f = 'extended-crossbar-at-x-height'`, `cv28 = 9`: `f` with bar extended to descender; crossbar is placed right at X-height.
+    + `f = 'diagonal-tailed-crossbar-at-x-height'`, `cv28 = 10`: `f` with bottom diagonal tail; crossbar is placed right at X-height.
+    + `f = 'flat-hook'`, `cv28 = 11`: `f` with flat top hook, without bottom serif, hook or exension.
+    + `f = 'flat-hook-serifed'`, `cv28 = 12`: `f` with flat top hook and bottom serif.
+    + `f = 'flat-hook-tailed'`, `cv28 = 13`: `f` with flat top hook and bottom hook (default for Italic).
+    + `f = 'flat-hook-extended'`, `cv28 = 14`: `f` with flat top hook and bar extended to descender.
+    + `f = 'flat-hook-diagonal-tailed'`, `cv28 = 15`: `f` with falt hook and bottom diagonal tail.
+    + `f = 'flat-hook-crossbar-at-x-height'`, `cv28 = 16`: `f` with flat top hook, without bottom serif, hook or exension; crossbar is placed right at X-height.
+    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv28 = 17`: `f` with flat top hook, bottom serif; crossbar is placed right at X-height.
+    + `f = 'flat-hook-tailed-crossbar-at-x-height'`, `cv28 = 18`: `f` with flat top hook, bottom hook; crossbar is placed right at X-height.
+    + `f = 'flat-hook-extended-crossbar-at-x-height'`, `cv28 = 19`: `f` with flat top hook, bar extended to descender; crossbar is placed right at X-height.
+    + `f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'`, `cv28 = 20`: `f` with falt hook and bottom diagonal tail; crossbar is placed right at X-height.
+  - Styles for `g`:
+    + `g = 'double-storey'`, `cv29 = 1`: Double-storey `g`.
+    + `g = 'double-storey-open'`, `cv29 = 2`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
+    + `g = 'single-storey'`, `cv29 = 3`: Single-storey `g` (default).
+    + `g = 'earless-corner'`, `cv29 = 4`: Earless (cornered top-right) single-storey `g`.
+    + `g = 'earless-rounded'`, `cv29 = 5`: Earless (rounded top-right) single-storey `g`.
+    + `g = 'single-storey-motion-serifed'`, `cv29 = 6`: Single-storey `g` with motion serifs.
+    + `g = 'single-storey-flat-hook'`, `cv29 = 7`: Single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-earless-corner-flat-hook'`, `cv29 = 8`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-earless-rounded-flat-hook'`, `cv29 = 9`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
+    + `g = 'single-storey-motion-serifed-flat-hook'`, `cv29 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
+  - Styles for `h`:
+    + `h = 'straight'`, `cv30 = 1`: `h` with straight ending (default).
+    + `h = 'tailed'`, `cv30 = 2`: `h` with curly tailed ending.
+    + `h = 'straight-motion-serifed'`, `cv30 = 3`: `h` with straight ending.
+    + `h = 'motion-serifed-tailed'`, `cv30 = 4`: `h` with curly tailed ending.
+  - Styles for `i`:
+    + `i = 'serifed'`, `cv31 = 1`: Serifed `i` (default for Upright).
+    + `i = 'serifless'`, `cv31 = 2`: `i` like a straight line.
+    + `i = 'hooky'`, `cv31 = 3`: Hooky `i`.
+    + `i = 'zshaped'`, `cv31 = 4`: Z-shaped `i`.
+    + `i = 'hooky-bottom'`, `cv31 = 5`: `i` with a straight tail.
+    + `i = 'serifed-asymmetric'`, `cv31 = 6`: `i` with shorter top serif and full bottom serif.
+    + `i = 'tailed'`, `cv31 = 7`: `i` with curly tail.
+    + `i = 'serifed-tailed'`, `cv31 = 8`: `i` with curly tail and top serif (default for Italic).
+    + `i = 'flat-tailed'`, `cv31 = 9`: `i` with top serif and a curly-then-flat tail.
+    + `i = 'serifed-flat-tailed'`, `cv31 = 10`: `i` with top serif and a curly-then-flat tail.
+    + `i = 'diagonal-tailed'`, `cv31 = 11`: `i` with top serif and a diagonal tail.
+    + `i = 'serifed-diagonal-tailed'`, `cv31 = 12`: `i` with top serif and a diagonal tail.
+  - Styles for `j`:
+    + `j = 'serifed'`, `cv32 = 1`: `j` with top serif (default).
+    + `j = 'serifless'`, `cv32 = 2`: `j` without serif.
+    + `j = 'straight-line'`, `cv32 = 3`: `j` like a straight line.
+    + `j = 'flat-hook-serifed'`, `cv32 = 4`: `j` with flat terminal hook.
+    + `j = 'flat-hook-serifless'`, `cv32 = 5`: `j` with flat terminal hook and top serif.
+    + `j = 'diagonal-tailed-serifless'`, `cv32 = 6`: `j` with diagonal tail.
+    + `j = 'diagonal-tailed-serifed'`, `cv32 = 7`: `j` with top serif and diagonal tail.
+  - Styles for `k`:
+    + `k = 'straight'`, `cv33 = 1`: `k` with standard shape (default for Upright).
+    + `k = 'curly'`, `cv33 = 2`: Slightly curly `k`, like Iosevka 2.x.
+    + `k = 'cursive'`, `cv33 = 3`: `k` with a cursive loop (default for Italic).
+    + `k = 'diagonal-tailed-cursive'`, `cv33 = 4`: `k` with a cursive loop and diagonal tail.
+    + `k = 'symmetric-disconnected'`, `cv33 = 5`: `k` with symmetric legs disconnected to the vertical bar.
+    + `k = 'symmetric-connected'`, `cv33 = 6`: `k` with symmetric legs connected to the vertical bar.
+    + `k = 'straight-motion-serifed'`, `cv33 = 7`: `k` with motion serifs.
+    + `k = 'curly-motion-serifed'`, `cv33 = 8`: Slightly curly `k`, like Iosevka 2.x, with motion serifs.
+    + `k = 'cursive-motion-serifed'`, `cv33 = 9`: `k` with a cursive loop and motion serifs.
+    + `k = 'diagonal-tailed-cursive-motion-serifed'`, `cv33 = 10`: `k` with a cursive loop, motion serifs and diagonal tail.
+    + `k = 'symmetric-disconnected-motion-serifed'`, `cv33 = 11`: `k` with symmetric legs disconnected to the vertical bar and motion serifs.
+    + `k = 'symmetric-connected-motion-serifed'`, `cv33 = 12`: `k` with symmetric legs connected to the vertical bar and motion serifs.
+  - Styles for `l`:
+    + `l = 'serifed'`, `cv34 = 1`: Serifed `l` (default for Upright).
+    + `l = 'serifless'`, `cv34 = 2`: `l` like a straight line.
+    + `l = 'hooky'`, `cv34 = 3`: Hooky `l`.
+    + `l = 'zshaped'`, `cv34 = 4`: Z-shaped `l`.
+    + `l = 'hooky-bottom'`, `cv34 = 5`: `l` with a straight tail.
+    + `l = 'serifed-asymmetric'`, `cv34 = 6`: `l` with shorter top serif and full bottom serif.
+    + `l = 'tailed'`, `cv34 = 7`: `l` with curly tail.
+    + `l = 'serifed-tailed'`, `cv34 = 8`: `l` with top serif and curly tail (default for Italic).
+    + `l = 'flat-tailed'`, `cv34 = 9`: `l` with top serif and a curly-then-flat tail.
+    + `l = 'serifed-flat-tailed'`, `cv34 = 10`: `l` with top serif and a curly-then-flat tail.
+    + `l = 'diagonal-tailed'`, `cv34 = 11`: `l` with top serif and a diagonal tail.
+    + `l = 'serifed-diagonal-tailed'`, `cv34 = 12`: `l` with top serif and a diagonal tail.
+  - Styles for `m`:
+    + `m = 'normal'`, `cv35 = 1`: `m` with normal middle leg, touching the baseline (default).
+    + `m = 'short-leg'`, `cv35 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
+    + `m = 'tailed'`, `cv35 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
+    + `m = 'short-leg-tailed'`, `cv35 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-corner-double-arch'`, `cv35 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
+    + `m = 'earless-corner-double-arch-short-leg'`, `cv35 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-corner-double-arch-tailed'`, `cv35 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-corner-double-arch-short-leg-tailed'`, `cv35 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-rounded-double-arch'`, `cv35 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
+    + `m = 'earless-rounded-double-arch-short-leg'`, `cv35 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-rounded-double-arch-tailed'`, `cv35 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-rounded-double-arch-short-leg-tailed'`, `cv35 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'earless-single-arch'`, `cv35 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
+    + `m = 'earless-single-arch-short-leg'`, `cv35 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
+    + `m = 'earless-single-arch-tailed'`, `cv35 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
+    + `m = 'earless-single-arch-short-leg-tailed'`, `cv35 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'motion-serifed'`, `cv35 = 17`: `m` with motion serifs, normal middle leg touching baseline.
+    + `m = 'short-leg-motion-serifed'`, `cv35 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
+    + `m = 'motion-serifed-tailed'`, `cv35 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
+    + `m = 'short-leg-motion-serifed-tailed'`, `cv35 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
+  - Styles for `n`:
+    + `n = 'straight'`, `cv36 = 1`: `n` with straight ending (default).
+    + `n = 'tailed'`, `cv36 = 2`: `n` with a curly tail.
+    + `n = 'earless-corner-straight'`, `cv36 = 3`: Earless (corner top-left) `n` with straight ending.
+    + `n = 'earless-corner-tailed'`, `cv36 = 4`: Earless (corner top-left) `n` with a curly tail.
+    + `n = 'earless-rounded-straight'`, `cv36 = 5`: Earless (rounded top-left) `n` with straight ending.
+    + `n = 'earless-rounded-tailed'`, `cv36 = 6`: Earless (rounded top-left) `n` with a curly tail.
+    + `n = 'straight-motion-serifed'`, `cv36 = 7`: `n` with motion serifs and straight ending.
+    + `n = 'motion-serifed-tailed'`, `cv36 = 8`: `n` with motion serifs and a curly tail.
+  - Styles for `p`:
+    + `p = 'eared'`, `cv37 = 1`: `p` with top-left ear (default).
+    + `p = 'earless-corner'`, `cv37 = 2`: `p` without top-left ear (corner).
+    + `p = 'earless-rounded'`, `cv37 = 3`: `p` without top-left ear (rounded).
+    + `p = 'motion-serifed'`, `cv37 = 4`: `p` with motion serifs.
+  - Styles for `q`:
+    + `q = 'straight'`, `cv38 = 1`: `q` with straight bar (default).
+    + `q = 'tailed'`, `cv38 = 2`: `q` with tail.
+    + `q = 'earless-corner'`, `cv38 = 3`: Earless (cornered top-left) single-storey `q`.
+    + `q = 'earless-corner-tailed'`, `cv38 = 4`: Earless (cornered top-left) single-storey `q` with curly tail.
+    + `q = 'earless-rounded'`, `cv38 = 5`: Earless (rounded top-left) single-storey `q`.
+    + `q = 'earless-rounded-tailed'`, `cv38 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
+    + `q = 'straight-motion-serifed'`, `cv38 = 7`: `q` with straight bar and motion serifs.
+    + `q = 'motion-serifed-tailed'`, `cv38 = 8`: `q` with tail and motion serifs.
+    + `q = 'diagonal-tailed'`, `cv38 = 9`: `q` with diagonal tail.
+    + `q = 'earless-corner-diagonal-tailed'`, `cv38 = 10`: Earless (cornered top-left) single-storey `q` with curly diagonal tail.
+    + `q = 'earless-rounded-diagonal-tailed'`, `cv38 = 11`: Earless (rounded top-left) single-storey `q` with curly diagonal tail.
+    + `q = 'motion-serifed-diagonal-tailed'`, `cv38 = 12`: `q` with diagonal tail and motion serifs.
+  - Styles for `r`:
+    + `r = 'serifless'`, `cv39 = 1`: Straight, serif-less `r` (default for Sans).
+    + `r = 'serifed'`, `cv39 = 2`: `r` with serif at both top and bottom (default for Slab Upright).
+    + `r = 'top-serifed'`, `cv39 = 3`: `r` with serifs at top-left only (default for Slab Italic).
+    + `r = 'earless-corner'`, `cv39 = 4`: Earless (corner top-left), serif-less `r`.
+    + `r = 'earless-corner-serifed'`, `cv39 = 5`: Earless (corner top-left), serifed `r`.
+    + `r = 'earless-rounded'`, `cv39 = 6`: Earless (rounded top-left), serif-less `r`.
+    + `r = 'earless-rounded-serifed'`, `cv39 = 7`: Earless (rounded top-left), serifed `r`.
+    + `r = 'compact'`, `cv39 = 8`: Compact, serifless `r`.
+  - Styles for `t`:
+    + `t = 'standard'`, `cv40 = 1`: Standard `t` shape (default).
+    + `t = 'cross'`, `cv40 = 2`: Futura-like `t` shape.
+    + `t = 'flat-hook'`, `cv40 = 3`: `t` with flat hook.
+    + `t = 'hookless-asymmetric'`, `cv40 = 4`: `t` without hook and ony half the cross bar.
+    + `t = 'flat-hook-short-neck'`, `cv40 = 5`: `t` with flat hook and a slightly shorter neck.
+    + `t = 'flat-hook-short-neck2'`, `cv40 = 6`: `t` with flat hook and a more shorter neck.
+    + `t = 'diagonal-tailed'`, `cv40 = 7`: `t` with diagonal tail.
+  - Styles for `u`:
+    + `u = 'toothed'`, `cv41 = 1`: Normal `u` with bottom-right tooth (default for Upright).
+    + `u = 'toothless-corner'`, `cv41 = 2`: Toothless (corner bottom-right) `u`.
+    + `u = 'toothless-rounded'`, `cv41 = 3`: Toothless (rounded) `u`, like a smaller uppercase `U`.
+    + `u = 'tailed'`, `cv41 = 4`: `u` with right bar and a slightly curly tail (default for Italic).
+    + `u = 'motion-serifed'`, `cv41 = 5`: Normal `u` with right bar and motion serifs.
+    + `u = 'motion-serifed-tailed'`, `cv41 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
+    + `u = 'toothless-corner-motion-serifed'`, `cv41 = 7`: Toothless (corner bottom-right) `u` with motion serifs.
+    + `u = 'toothless-rounded-motion-serifed'`, `cv41 = 8`: Toothless (rounded) `u` with motion serifs.
+  - Styles for `v`:
+    + `v = 'straight'`, `cv42 = 1`: Standard, straight `v` (default).
+    + `v = 'curly'`, `cv42 = 2`:  Slightly curly `v`, like Iosevka 2.x.
+    + `v = 'straight-motion-serifed'`, `cv42 = 3`: Standard, straight `v`, and motion serifs.
+    + `v = 'curly-motion-serifed'`, `cv42 = 4`:  Slightly curly `v`, like Iosevka 2.x, and motion serifs.
+  - Styles for `w`:
+    + `w = 'straight'`, `cv43 = 1`: Standard, straight `w` (default).
+    + `w = 'curly'`, `cv43 = 2`: Slightly curly `w`, like Iosevka 2.x.
+    + `w = 'straight-flat-top'`, `cv43 = 3`: Standard, straight `w`, and the middle is forced to be aligned the top.
+    + `w = 'straight-double-v'`, `cv43 = 4`: Straight `w` looks like double V.
+    + `w = 'straight-asymmetric'`, `cv43 = 5`: Straight `w` looks asymmetric.
+    + `w = 'straight-motion-serifed'`, `cv43 = 6`: Standard, straight `w`, with motion serifs.
+    + `w = 'curly-motion-serifed'`, `cv43 = 7`: Slightly curly `w`, like Iosevka 2.x, with motion serifs.
+    + `w = 'straight-flat-top-motion-serifed'`, `cv43 = 8`: Standard, straight `w`, and the middle is forced to be aligned the top, with motion serifs.
+    + `w = 'straight-double-v-motion-serifed'`, `cv43 = 9`: Straight `w` looks like double V, with motion serifs.
+    + `w = 'straight-asymmetric-motion-serifed'`, `cv43 = 10`: Straight `w` looks asymmetric, with motion serifs.
+  - Styles for `x`:
+    + `x = 'straight'`, `cv44 = 1`: Standard, straight `X` (default).
+    + `x = 'curly'`, `cv44 = 2`: Slightly curly `X`, like Iosevka 2.x.
+    + `x = 'straight-motion-serifed'`, `cv44 = 3`: Standard, straight `X` with motion serifs.
+    + `x = 'curly-motion-serifed'`, `cv44 = 4`: Slightly curly `X`, like Iosevka 2.x, with motion serifs.
   - Styles for `y`:
-    + `y = 'straight'`, `cv32 = 1`: Letter `y` that is fully straight (default for Sans Upright).
-    + `y = 'straight-turn'`, `cv32 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
-    + `y = 'curly'`, `cv32 = 3`: More curly letter `y`, like Iosevka 2.x.
-    + `y = 'cursive'`, `cv32 = 4`: Cursive-like `y` (default for Italic).
-    + `y = 'cursive-flat-hook'`, `cv32 = 5`: Cursive-like `y` with flat terminal hook.
-    + `y = 'curly-turn'`, `cv32 = 6`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
+    + `y = 'straight'`, `cv45 = 1`: Letter `y` that is fully straight (default for Sans Upright).
+    + `y = 'straight-turn'`, `cv45 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
+    + `y = 'curly'`, `cv45 = 3`: More curly letter `y`, like Iosevka 2.x.
+    + `y = 'curly-turn'`, `cv45 = 4`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
+    + `y = 'cursive'`, `cv45 = 5`: Cursive-like `y` (default for Italic).
+    + `y = 'cursive-flat-hook'`, `cv45 = 6`: Cursive-like `y` with flat terminal hook.
+    + `y = 'straight-motion-serifed'`, `cv45 = 7`: Letter `y` that is fully straight, with motion serifs.
+    + `y = 'straight-turn-motion-serifed'`, `cv45 = 8`: Letter `y` with straight upper and a tail turns leftward, and motion serifs.
+    + `y = 'curly-motion-serifed'`, `cv45 = 9`: More curly letter `y`, like Iosevka 2.x, with motion serifs.
+    + `y = 'curly-turn-motion-serifed'`, `cv45 = 10`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward and motion serifs.
+    + `y = 'cursive-motion-serifed'`, `cv45 = 11`: Cursive-like `y`, with motion serifs.
+    + `y = 'cursive-flat-hook-motion-serifed'`, `cv45 = 12`: Cursive-like `y` with flat terminal hook, and motion serifs.
   - Styles for `z`:
-    + `z = 'standard'`, `cv33 = 1`: Standard `z` (default).
-    + `z = 'with-crossbar'`, `cv33 = 2`: Standard `z` with a diagonal cross bar for better dsitinction with `2`.
-    + `z = 'with-horizontal-crossbar'`, `cv33 = 3`: Standard `z` with a horizontal cross bar for better dsitinction with `2`.
-    + `z = 'curly'`, `cv33 = 4`: Curly `z`.
-    + `z = 'curly-with-crossbar'`, `cv33 = 5`: Curly `z` with a diagonal cross bar for better dsitinction with `2`.
-    + `z = 'curly-with-horizontal-crossbar'`, `cv33 = 6`: Curly `z` with a horizontal cross bar for better dsitinction with `2`.
-    + `z = 'motion-serifed'`, `cv33 = 7`: Standard `z` with motion serifs.
-    + `z = 'curly-motion-serifed'`, `cv33 = 8`: Curly `z` with motion serifs.
+    + `z = 'standard'`, `cv46 = 1`: Standard `z` (default).
+    + `z = 'with-crossbar'`, `cv46 = 2`: Standard `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'with-horizontal-crossbar'`, `cv46 = 3`: Standard `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'curly'`, `cv46 = 4`: Curly `z`.
+    + `z = 'curly-with-crossbar'`, `cv46 = 5`: Curly `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'curly-with-horizontal-crossbar'`, `cv46 = 6`: Curly `z` with a horizontal cross bar for better dsitinction with `2`.
+    + `z = 'motion-serifed'`, `cv46 = 7`: Standard `z` with motion serifs at bottom.
+    + `z = 'curly-motion-serifed'`, `cv46 = 8`: Curly `z` with motion serifs at bottom.
+    + `z = 'top-motion-serifed'`, `cv46 = 9`: Standard `z` with motion serifs at top.
+    + `z = 'curly-top-motion-serifed'`, `cv46 = 10`: Curly `z` with motion serifs at top.
   - Styles for `ß` (Eszet):
-    + `eszet = 'traditional'`, `cv34 = 1`: Traditional, Fraktur-like Eszet (`ß`).
-    + `eszet = 'sulzbacher'`, `cv34 = 2`: More modern, beta-like Eszet (`ß`) (default).
-    + `eszet = 'longs-s-lig'`, `cv34 = 3`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
+    + `eszet = 'traditional'`, `cv47 = 1`: Traditional, Fraktur-like Eszet (`ß`).
+    + `eszet = 'sulzbacher'`, `cv47 = 2`: More modern, beta-like Eszet (`ß`) (default).
+    + `eszet = 'longs-s-lig'`, `cv47 = 3`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
+  - Styles for `Λ`, `Δ`:
+    + `turn-v = 'straight'`, `cv48 = 1`: Standard, straight `Λ`, `Δ` (default).
+    + `turn-v = 'curly'`, `cv48 = 2`: Slightly curly `Λ`, `Δ`, like Iosevka 2.x.
   - Styles for `λ` (Greek small Lambda):
-    + `lambda = 'straight'`, `cv35 = 1`: More-straight Greek small Lambda (`λ`) (default).
-    + `lambda = 'curly'`, `cv35 = 2`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
+    + `lambda = 'straight'`, `cv49 = 1`: More-straight Greek small Lambda (`λ`) (default).
+    + `lambda = 'curly'`, `cv49 = 2`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
   - Styles for `У` (Cyrillic Capital U):
-    + `cyrl-capital-u = 'straight'`, `cv60 = 1`: Cyrillic capital U (`У`) that is fully straight (default for Sans).
-    + `cyrl-capital-u = 'straight-turn'`, `cv60 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward (default for Slab).
-    + `cyrl-capital-u = 'curly'`, `cv60 = 3`: More curly cyrillic capital U (`У`), like Iosevka 2.x.
-    + `cyrl-capital-u = 'cursive'`, `cv60 = 4`: Cursive-like Cyrillic capital U (`У`).
-    + `cyrl-capital-u = 'cursive-flat-hook'`, `cv60 = 5`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
-    + `cyrl-capital-u = 'curly-turn'`, `cv60 = 6`: More curly cyrillic capital U (`У`), like Iosevka 2.x, with a tail turns leftward.
+    + `cyrl-capital-u = 'straight'`, `cv50 = 1`: Cyrillic capital U (`У`) that is fully straight (default for Sans).
+    + `cyrl-capital-u = 'straight-turn'`, `cv50 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward (default for Slab).
+    + `cyrl-capital-u = 'curly'`, `cv50 = 3`: More curly cyrillic capital U (`У`), like Iosevka 2.x.
+    + `cyrl-capital-u = 'curly-turn'`, `cv50 = 4`: More curly cyrillic capital U (`У`), like Iosevka 2.x, with a tail turns leftward.
+    + `cyrl-capital-u = 'cursive'`, `cv50 = 5`: Cursive-like Cyrillic capital U (`У`).
+    + `cyrl-capital-u = 'cursive-flat-hook'`, `cv50 = 6`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
   - Styles for `0`:
-    + `zero = 'slashed'`, `cv36 = 1`: Slashed Zero `0` (default).
-    + `zero = 'dotted'`, `cv36 = 2`: Dotted Zero `0`.
-    + `zero = 'unslashed'`, `cv36 = 3`: O-like `0`.
-    + `zero = 'reverse-slashed'`, `cv36 = 4`: Reverse-slashed `0`.
-    + `zero = 'long-dotted'`, `cv36 = 5`: Long-dotted Zero `0` like Hack.
+    + `zero = 'slashed'`, `cv51 = 1`: Slashed Zero `0` (default).
+    + `zero = 'dotted'`, `cv51 = 2`: Dotted Zero `0`.
+    + `zero = 'unslashed'`, `cv51 = 3`: O-like `0`.
+    + `zero = 'reverse-slashed'`, `cv51 = 4`: Reverse-slashed `0`.
+    + `zero = 'long-dotted'`, `cv51 = 5`: Long-dotted Zero `0` like Hack.
   - Styles for `1`:
-    + `one = 'nobase'`, `cv37 = 1`: `1` without bottom serif (default for Sans).
-    + `one = 'base'`, `cv37 = 2`: `1` with bottom serif (default for Slab).
-    + `one = 'line'`, `cv37 = 3`: `1` drawn just like a straight line.
-    + `one = 'nobase-long-top-serif'`, `cv37 = 4`: `1` without bottom serif and with a long top serif.
-    + `one = 'base-long-top-serif'`, `cv37 = 5`: `1` with bottom serif and a long top serif.
+    + `one = 'nobase'`, `cv52 = 1`: `1` without bottom serif (default for Sans).
+    + `one = 'base'`, `cv52 = 2`: `1` with bottom serif (default for Slab).
+    + `one = 'line'`, `cv52 = 3`: `1` drawn just like a straight line.
+    + `one = 'nobase-long-top-serif'`, `cv52 = 4`: `1` without bottom serif and with a long top serif.
+    + `one = 'base-long-top-serif'`, `cv52 = 5`: `1` with bottom serif and a long top serif.
   - Styles for `2`:
-    + `two = 'straight-neck'`, `cv61 = 1`: `2` with straight neck.
-    + `two = 'curly-neck'`, `cv61 = 2`: `2` with curly neck (default).
+    + `two = 'straight-neck'`, `cv53 = 1`: `2` with straight neck.
+    + `two = 'curly-neck'`, `cv53 = 2`: `2` with curly neck (default).
   - Styles for `3`:
-    + `three = 'flattop'`, `cv38 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
-    + `three = 'twoarcs'`, `cv38 = 2`: Arched top `3` (default).
+    + `three = 'flattop'`, `cv54 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
+    + `three = 'twoarcs'`, `cv54 = 2`: Arched top `3` (default).
   - Styles for `4`:
-    + `four = 'closed'`, `cv39 = 1`: `4` with closed contour (default).
-    + `four = 'closed-non-crossing'`, `cv39 = 2`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
-    + `four = 'semi-open'`, `cv39 = 3`: `4` with semi-open contour.
-    + `four = 'semi-open-non-crossing'`, `cv39 = 4`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
-    + `four = 'open'`, `cv39 = 5`: `4` with open contour.
-    + `four = 'open-non-crossing'`, `cv39 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
+    + `four = 'closed'`, `cv55 = 1`: `4` with closed contour (default).
+    + `four = 'closed-non-crossing'`, `cv55 = 2`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
+    + `four = 'semi-open'`, `cv55 = 3`: `4` with semi-open contour.
+    + `four = 'semi-open-non-crossing'`, `cv55 = 4`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
+    + `four = 'open'`, `cv55 = 5`: `4` with open contour.
+    + `four = 'open-non-crossing'`, `cv55 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
   - Styles for `6`:
-    + `six = 'closed-contour'`, `cv40 = 1`: `6` with a more closed contour.
-    + `six = 'open-contour'`, `cv40 = 2`: `6` with a more open contour.
-    + `six = 'straight-bar'`, `cv40 = 3`: `6` with a straight bar (default).
+    + `six = 'closed-contour'`, `cv56 = 1`: `6` with a more closed contour.
+    + `six = 'open-contour'`, `cv56 = 2`: `6` with a more open contour.
+    + `six = 'straight-bar'`, `cv56 = 3`: `6` with a straight bar (default).
   - Styles for `7`:
-    + `seven = 'noserif'`, `cv41 = 1`: `7` without serif (default for Sans).
-    + `seven = 'serifed'`, `cv41 = 2`: `7` with initial serif (default for Slab).
-    + `seven = 'crossbar'`, `cv41 = 3`: `7` with crossbar.
-    + `seven = 'crossbar-serifed'`, `cv41 = 4`: `7` with crossbar and initial serif.
+    + `seven = 'noserif'`, `cv57 = 1`: `7` without serif (default for Sans).
+    + `seven = 'serifed'`, `cv57 = 2`: `7` with initial serif (default for Slab).
+    + `seven = 'crossbar'`, `cv57 = 3`: `7` with crossbar.
+    + `seven = 'crossbar-serifed'`, `cv57 = 4`: `7` with crossbar and initial serif.
   - Styles for `8`:
-    + `eight = 'crossing'`, `cv62 = 1`: `8` with crossing middle part (default).
-    + `eight = 'two-circles'`, `cv62 = 2`: `8` looks like two circles joined together.
+    + `eight = 'crossing'`, `cv58 = 1`: `8` with crossing middle part (default).
+    + `eight = 'two-circles'`, `cv58 = 2`: `8` looks like two circles joined together.
   - Styles for `9`:
-    + `nine = 'closed-contour'`, `cv42 = 1`: `9` with a more closed contour.
-    + `nine = 'open-contour'`, `cv42 = 2`: `9` with a more open contour.
-    + `nine = 'straight-bar'`, `cv42 = 3`: `9` with a straight bar (default).
+    + `nine = 'closed-contour'`, `cv59 = 1`: `9` with a more closed contour.
+    + `nine = 'open-contour'`, `cv59 = 2`: `9` with a more open contour.
+    + `nine = 'straight-bar'`, `cv59 = 3`: `9` with a straight bar (default).
   - Styles for `~`:
-    + `tilde = 'high'`, `cv43 = 1`: Higher tilde `~`.
-    + `tilde = 'low'`, `cv43 = 2`: Lower tilde `~` (default).
+    + `tilde = 'high'`, `cv60 = 1`: Higher tilde `~`.
+    + `tilde = 'low'`, `cv60 = 2`: Lower tilde `~` (default).
   - Styles for `*`:
-    + `asterisk = 'high'`, `cv44 = 1`: Higher five-pointed asterisk `*` (default).
-    + `asterisk = 'low'`, `cv44 = 2`: Lower five-pointed asterisk `*`.
-    + `asterisk = 'hexhigh'`, `cv44 = 3`: Higher six-pointed asterisk `*`.
-    + `asterisk = 'hexlow'`, `cv44 = 4`: Lower six-pointed asterisk `*`.
-    + `asterisk = 'flip-penta-high'`, `cv44 = 5`: Higher five-pointed and turned asterisk `*`.
-    + `asterisk = 'flip-penta-low'`, `cv44 = 6`: Lower five-pointed and turned asterisk `*`.
+    + `asterisk = 'high'`, `cv61 = 1`: Higher five-pointed asterisk `*` (default).
+    + `asterisk = 'low'`, `cv61 = 2`: Lower five-pointed asterisk `*`.
+    + `asterisk = 'hexhigh'`, `cv61 = 3`: Higher six-pointed asterisk `*`.
+    + `asterisk = 'hexlow'`, `cv61 = 4`: Lower six-pointed asterisk `*`.
+    + `asterisk = 'flip-penta-high'`, `cv61 = 5`: Higher five-pointed and turned asterisk `*`.
+    + `asterisk = 'flip-penta-low'`, `cv61 = 6`: Lower five-pointed and turned asterisk `*`.
   - Styles for `_`:
-    + `underscore = 'high'`, `cv45 = 1`: Higher underscore `_`, placed right below baseline (default).
-    + `underscore = 'low'`, `cv45 = 2`: Lower underscore `_`, placed right above descender line.
-    + `underscore = 'above-baseline'`, `cv45 = 3`: Extra-high `_`, placed right below baseline.
+    + `underscore = 'high'`, `cv62 = 1`: Higher underscore `_`, placed right below baseline (default).
+    + `underscore = 'low'`, `cv62 = 2`: Lower underscore `_`, placed right above descender line.
+    + `underscore = 'above-baseline'`, `cv62 = 3`: Extra-high `_`, placed right below baseline.
   - Styles for `¶`:
-    + `paragraph-sign = 'high'`, `cv46 = 1`: Higher paragraph sign `¶` (default).
-    + `paragraph-sign = 'low'`, `cv46 = 2`: Lower paragraph sign `¶`.
+    + `paragraph-sign = 'high'`, `cv63 = 1`: Higher paragraph sign `¶` (default).
+    + `paragraph-sign = 'low'`, `cv63 = 2`: Lower paragraph sign `¶`.
   - Styles for `^`:
-    + `caret = 'high'`, `cv47 = 1`: Higher circumflex `^` (default).
-    + `caret = 'low'`, `cv47 = 2`: Lower circumflex `^`.
+    + `caret = 'high'`, `cv64 = 1`: Higher circumflex `^` (default).
+    + `caret = 'low'`, `cv64 = 2`: Lower circumflex `^`.
   - Styles for `(`, `)`:
-    + `paren = 'normal'`, `cv48 = 1`: Parenthesis with normal contour (default).
-    + `paren = 'large-contour'`, `cv48 = 2`: Parenthesis with larger contour, like that in Monaco.
+    + `paren = 'normal'`, `cv65 = 1`: Parenthesis with normal contour (default).
+    + `paren = 'large-contour'`, `cv65 = 2`: Parenthesis with larger contour, like that in Monaco.
   - Styles for `{`, `}`:
-    + `brace = 'straight'`, `cv49 = 1`: More straight braces.
-    + `brace = 'curly'`, `cv49 = 2`: More curly braces (default).
+    + `brace = 'straight'`, `cv66 = 1`: More straight braces.
+    + `brace = 'curly'`, `cv66 = 2`: More curly braces (default).
   - Styles for `#`:
-    + `number-sign = 'upright'`, `cv50 = 1`: Number sign with vertical bars (default).
-    + `number-sign = 'slanted'`, `cv50 = 2`: Number sign with slanted bars.
-    + `number-sign = 'upright-open'`, `cv50 = 3`: Number sign with vertical bars and open inner.
-    + `number-sign = 'slanted-open'`, `cv50 = 4`: Number sign with slanted bars and open inner.
+    + `number-sign = 'upright'`, `cv67 = 1`: Number sign with vertical bars (default).
+    + `number-sign = 'slanted'`, `cv67 = 2`: Number sign with slanted bars.
+    + `number-sign = 'upright-open'`, `cv67 = 3`: Number sign with vertical bars and open inner.
+    + `number-sign = 'slanted-open'`, `cv67 = 4`: Number sign with slanted bars and open inner.
   - Styles for `&`:
-    + `ampersand = 'closed'`, `cv51 = 1`: Ampersand (`&`) with a closed contour (default).
-    + `ampersand = 'upper-open'`, `cv51 = 2`: Ampersand (`&`) with an open contour at upper half.
-    + `ampersand = 'lower-open'`, `cv51 = 3`: Ampersand (`&`) with an open contour at lower half.
-    + `ampersand = 'et-toothed'`, `cv51 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
-    + `ampersand = 'et-toothless-corner'`, `cv51 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (corner).
-    + `ampersand = 'et-toothless-rounded'`, `cv51 = 6`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (rounded).
-    + `ampersand = 'flat-top'`, `cv51 = 7`: Ampersand (`&`) drawn with a flat top.
+    + `ampersand = 'closed'`, `cv68 = 1`: Ampersand (`&`) with a closed contour (default).
+    + `ampersand = 'upper-open'`, `cv68 = 2`: Ampersand (`&`) with an open contour at upper half.
+    + `ampersand = 'lower-open'`, `cv68 = 3`: Ampersand (`&`) with an open contour at lower half.
+    + `ampersand = 'et-toothed'`, `cv68 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
+    + `ampersand = 'et-toothless-corner'`, `cv68 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (corner).
+    + `ampersand = 'et-toothless-rounded'`, `cv68 = 6`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (rounded).
+    + `ampersand = 'flat-top'`, `cv68 = 7`: Ampersand (`&`) drawn with a flat top.
   - Styles for `@`:
-    + `at = 'threefold'`, `cv52 = 1`: The long, three-fold At symbol (`@`) (default).
-    + `at = 'fourfold'`, `cv52 = 2`: The traditional, four-fold At symbol (`@`).
-    + `at = 'short'`, `cv52 = 3`: The shorter, Fira-like At symbol (`@`).
+    + `at = 'threefold'`, `cv69 = 1`: The long, three-fold At symbol (`@`) (default).
+    + `at = 'fourfold'`, `cv69 = 2`: The traditional, four-fold At symbol (`@`).
+    + `at = 'short'`, `cv69 = 3`: The shorter, Fira-like At symbol (`@`).
   - Styles for `$`:
-    + `dollar = 'open'`, `cv53 = 1`: Dollar symbol with open contour.
-    + `dollar = 'through'`, `cv53 = 2`: Dollar symbol with strike-through vertical bar (default).
-    + `dollar = 'opencap'`, `cv53 = 3`: Dollar symbol with open contour, not exceeding baseline and ascender.
-    + `dollar = 'throughcap'`, `cv53 = 4`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
+    + `dollar = 'open'`, `cv70 = 1`: Dollar symbol with open contour.
+    + `dollar = 'through'`, `cv70 = 2`: Dollar symbol with strike-through vertical bar (default).
+    + `dollar = 'opencap'`, `cv70 = 3`: Dollar symbol with open contour, not exceeding baseline and ascender.
+    + `dollar = 'throughcap'`, `cv70 = 4`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
   - Styles for `%`:
-    + `percent = 'dots'`, `cv54 = 1`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
-    + `percent = 'rings'`, `cv54 = 2`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
-    + `percent = 'rings-connected'`, `cv54 = 3`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
+    + `percent = 'dots'`, `cv71 = 1`: Percent `%`, Per-mille `‰` and basis point `‱` using rectangular dots.
+    + `percent = 'rings'`, `cv71 = 2`: Percent `%` with rings and broken bar; Per-mille `‰` and basis point `‱` with rings (default).
+    + `percent = 'rings-connected'`, `cv71 = 3`: Percent `%`, Per-mille `‰` and basis point `‱` using rings and continuous bar.
   - Styles for `|`:
-    + `bar = 'natural-slope'`, `cv55 = 1`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
-    + `bar = 'force-upright'`, `cv55 = 2`: Bar punctuations (`|`) is forced upright under italics and oblique.
+    + `bar = 'natural-slope'`, `cv72 = 1`: Bar punctuations (`|`) has a natural slope under italics and oblique (default).
+    + `bar = 'force-upright'`, `cv72 = 2`: Bar punctuations (`|`) is forced upright under italics and oblique.
   - Styles for `<=`, `>=`:
-    + `lig-ltgteq = 'flat'`, `cv56 = 1`: The lower bar of `<=` and `>=` ligation is flat (default).
-    + `lig-ltgteq = 'slanted'`, `cv56 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
+    + `lig-ltgteq = 'flat'`, `cv73 = 1`: The lower bar of `<=` and `>=` ligation is flat (default).
+    + `lig-ltgteq = 'slanted'`, `cv73 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
   - Styles for `'`:
-    + `ascii-single-quote = 'straight'`, `cv57 = 1`: Show ASCII quote (`'`) as short vertical straight bar. (default).
-    + `ascii-single-quote = 'raised-comma'`, `cv57 = 2`: Show ASCII quote (`'`) as raised comma..
+    + `ascii-single-quote = 'straight'`, `cv74 = 1`: Show ASCII quote (`'`) as short vertical straight bar. (default).
+    + `ascii-single-quote = 'raised-comma'`, `cv74 = 2`: Show ASCII quote (`'`) as raised comma..
   - Styles for `` ` ``:
-    + `ascii-grave = 'straight'`, `cv58 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
-    + `ascii-grave = 'raised-inverse-comma'`, `cv58 = 2`: Show ASCII grave (`` ` ``) as raised comma..
-    + `ascii-grave = 'raised-turn-comma'`, `cv58 = 3`: Show ASCII grave (`` ` ``) as raised turned comma, identical to curly open single quote symbols (U+2018)..
+    + `ascii-grave = 'straight'`, `cv75 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar. (default).
+    + `ascii-grave = 'raised-inverse-comma'`, `cv75 = 2`: Show ASCII grave (`` ` ``) as raised comma..
+    + `ascii-grave = 'raised-turn-comma'`, `cv75 = 3`: Show ASCII grave (`` ` ``) as raised turned comma, identical to curly open single quote symbols (U+2018)..
 
 <!-- END Section-Cherry-Picking-Styles -->
 

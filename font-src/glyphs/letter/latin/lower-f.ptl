@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Lower-F : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailL DiagonalTailStdDepth
 
 	define fovershoot : fallback para.fovershoot (O * 6)
 
@@ -142,6 +143,12 @@ glyph-block Letter-Latin-Lower-F : begin
 			flat barRight [Math.min 0 (Descender + hd.y)]
 			curl barRight 0.1 [heading Upward]
 
+	define [SmallFDiagonalTail df barLeft] : begin
+		local xBarMiddle : barLeft + HalfStroke * HVContrast
+		return : dispiro
+			flat xBarMiddle 0.1 [widths.center.heading Stroke Downward]
+			DiagonalTailL df xBarMiddle Descender [DiagonalTailStdDepth df Stroke] Stroke
+
 	define [StandardSmallFShape df m bh counterHook] : glyph-proc
 		local barLeft0 : [mix SB RightSB 0.35] - Stroke * 0.25 * HVContrast
 		local barLeft : [mix SB RightSB : if (counterHook > 1) 0.45 0.35] - Stroke * [if (counterHook > 1) 0.45 0.25] * HVContrast
@@ -155,8 +162,7 @@ glyph-block Letter-Latin-Lower-F : begin
 			local crossRight : mix df.width df.rightSB m
 			local counterHookLeft : Math.max SB : barRight - (crossRight - barLeft)
 			include : SmallFDownHook df barRight counterHookLeft
-		if (counterHook === 3) : begin
-			include : VerticalHook (barLeft + HalfStroke * HVContrast) 0 (-HookX) Hook
+		if (counterHook === 3) : include : SmallFDiagonalTail df barLeft
 
 	define [NarrowFShape df m bh counterHook] : glyph-proc
 		local crossLeft : mix 0 SB m
@@ -179,6 +185,7 @@ glyph-block Letter-Latin-Lower-F : begin
 			local crossRight : mix df.width df.rightSB m
 			local counterHookLeft : barRight - (crossRight - barLeft)
 			include : SmallFDownHook df barRight counterHookLeft
+		if (counterHook === 3) : include : SmallFDiagonalTail df barLeft
 
 
 	create-glyph 'f.serifless' : glyph-proc
@@ -199,13 +206,17 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : MarkSet.if
 		include : StandardSmallFShape [DivFrame 1] 1    fbar 2
 
+	create-glyph 'f.extended' : glyph-proc
+		include : MarkSet.if
+		include : StandardSmallFShape [DivFrame 1] 0.95 fbar 1
+
 	create-glyph 'f.tailed' : glyph-proc
 		include : MarkSet.if
 		include : StandardSmallFShape [DivFrame 1] 1    fbar 2
 
-	create-glyph 'f.extended' : glyph-proc
+	create-glyph 'f.diagonalTailed' : glyph-proc
 		include : MarkSet.if
-		include : StandardSmallFShape [DivFrame 1] 0.95 fbar 1
+		include : StandardSmallFShape [DivFrame 1] 1    fbar 3
 
 	create-glyph 'f.seriflessCrossbarAtXHeight' : glyph-proc
 		include : MarkSet.b
@@ -216,13 +227,17 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : StandardSmallFShape [DivFrame 1] 0.95 XH
 		include : SmallFBottomSerif [DivFrame 1] 0
 
+	create-glyph 'f.extendedCrossbarAtXHeight' : glyph-proc
+		include : MarkSet.if
+		include : StandardSmallFShape [DivFrame 1] 0.95 XH   1
+
 	create-glyph 'f.tailedCrossbarAtXHeight' : glyph-proc
 		include : MarkSet.if
 		include : StandardSmallFShape [DivFrame 1] 1    XH   2
 
-	create-glyph 'f.extendedCrossbarAtXHeight' : glyph-proc
+	create-glyph 'f.diagonalTailedCrossbarAtXHeight' : glyph-proc
 		include : MarkSet.if
-		include : StandardSmallFShape [DivFrame 1] 0.95 XH   1
+		include : StandardSmallFShape [DivFrame 1] 1    XH   3
 
 
 	create-glyph 'f.narrow' : glyph-proc
@@ -254,16 +269,6 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] XH
 		include : SmallFBottomSerif dfNarrowF 0.035
 
-	create-glyph 'f.flatHookTailed' : glyph-proc
-		set-width dfNarrowF.width
-		include : dfNarrowF.markSet.if
-		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] fbar 2
-
-	create-glyph 'f.flatHookTailedCrossbarAtXHeight' : glyph-proc
-		set-width dfNarrowF.width
-		include : dfNarrowF.markSet.if
-		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] XH   2
-
 	create-glyph 'f.flatHookExtended' : glyph-proc
 		set-width dfNarrowF.width
 		include : dfNarrowF.markSet.if
@@ -274,25 +279,47 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : dfNarrowF.markSet.if
 		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] XH   1
 
+	create-glyph 'f.flatHookTailed' : glyph-proc
+		set-width dfNarrowF.width
+		include : dfNarrowF.markSet.if
+		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] fbar 2
+
+	create-glyph 'f.flatHookTailedCrossbarAtXHeight' : glyph-proc
+		set-width dfNarrowF.width
+		include : dfNarrowF.markSet.if
+		include : NarrowFShape dfNarrowF [mix 1 dfNarrowF.div 2] XH   2
+
+	create-glyph 'f.flatHookDiagonalTailed' : glyph-proc
+		include : MarkSet.if
+		include : NarrowFShape [DivFrame 1] 1 fbar 3
+
+	create-glyph 'f.flatHookDiagonalTailedCrossbarAtXHeight' : glyph-proc
+		include : MarkSet.if
+		include : NarrowFShape [DivFrame 1] 1 XH   3
+
 	select-variant 'f' 'f'
 	alias 'lenisf' 0xAB35 'f.serifless'
 
 	turned 'turnf.serifless' nothing 'f.serifless' Middle (XH / 2) [MarkSet.p]
 	turned 'turnf.serifed' nothing 'f.serifed' Middle (XH / 2) [MarkSet.p]
 	turned 'turnf.tailed' nothing 'f.tailed' Middle (XH / 2) [MarkSet.if]
+	turned 'turnf.diagonalTailed' nothing 'f.diagonalTailed' Middle (XH / 2) [MarkSet.if]
 	turned 'turnf.extended' nothing 'f.extended' Middle (XH / 2) [MarkSet.if]
 	turned 'turnf.seriflessCrossbarAtXHeight' nothing 'f.seriflessCrossbarAtXHeight' Middle (XH / 2) [MarkSet.p]
 	turned 'turnf.serifedCrossbarAtXHeight' nothing 'f.serifedCrossbarAtXHeight' Middle (XH / 2) [MarkSet.p]
 	turned 'turnf.tailedCrossbarAtXHeight' nothing 'f.tailedCrossbarAtXHeight' Middle (XH / 2) [MarkSet.if]
+	turned 'turnf.diagonalTailedCrossbarAtXHeight' nothing 'f.diagonalTailedCrossbarAtXHeight' Middle (XH / 2) [MarkSet.if]
 	turned 'turnf.extendedCrossbarAtXHeight' nothing 'f.extendedCrossbarAtXHeight' Middle (XH / 2) [MarkSet.if]
 	turned 'turnf.flatHook' nothing 'f.flatHook' dfNarrowF.middle (XH / 2) [dfNarrowF.markSet.p]
 	turned 'turnf.flatHookSerifed' nothing 'f.flatHookSerifed' dfNarrowF.middle (XH / 2) [dfNarrowF.markSet.p]
 	turned 'turnf.flatHookTailed' nothing 'f.flatHookTailed' dfNarrowF.middle [mix Descender CAP 0.5] [dfNarrowF.markSet.if]
+	turned 'turnf.flatHookDiagonalTailed' nothing 'f.flatHookDiagonalTailed' dfNarrowF.middle [mix Descender CAP 0.5] [dfNarrowF.markSet.if]
 	turned 'turnf.flatHookExtended' nothing 'f.flatHookExtended' dfNarrowF.middle [mix Descender CAP 0.5] [dfNarrowF.markSet.if]
 	turned 'turnf.flatHookCrossbarAtXHeight' nothing 'f.flatHookCrossbarAtXHeight' dfNarrowF.middle (XH / 2) [dfNarrowF.markSet.p]
 	turned 'turnf.flatHookSerifedCrossbarAtXHeight' nothing 'f.flatHookSerifedCrossbarAtXHeight' dfNarrowF.middle (XH / 2) [dfNarrowF.markSet.p]
 	turned 'turnf.flatHookTailedCrossbarAtXHeight' nothing 'f.flatHookTailedCrossbarAtXHeight' dfNarrowF.middle [mix Descender CAP 0.5] [dfNarrowF.markSet.if]
-	turned 'turnf.flatHookExtendedCrossbarAtXHeight' nothing 'f.flatHookExtendedCrossbarAtXHeight' dfNarrowF.middle [mix Descender CAP 0.5] [dfNarrowF.markSet.if]
+	turned 'turnf.flatHookDiagonalTailedCrossbarAtXHeight' nothing 'f.flatHookDiagonalTailedCrossbarAtXHeight' Middle [mix Descender CAP 0.5] [MarkSet.if]
+	turned 'turnf.flatHookExtendedCrossbarAtXHeight' nothing 'f.flatHookExtendedCrossbarAtXHeight' Middle [mix Descender CAP 0.5] [MarkSet.if]
 	select-variant 'turnf' 0x25F (follow -- 'f')
 
 	glyph-block-import Letter-Blackboard : BBS BBD

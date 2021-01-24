@@ -10,49 +10,71 @@ glyph-block Letter-Latin-Upper-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
-	glyph-block-export NShape
 
-	define [NShape top left right crowd diagcrowd xn] : glyph-proc
-		local topstroke : AdviceStroke [fallback diagcrowd 4]
-		local stroke : AdviceStroke [fallback crowd 1]
-		local halftopstroke : topstroke / 2
+	define SLAB-AUTO   1
+	define SLAB-MOTION 2
+
+	define [StdNSerifs top left right sw xn] : glyph-proc
+		include : tagged 'serifLT'
+			LeftwardTopSerif left top (xn * Jut - 0.5 * sw * HVContrast)
+		include : tagged 'serifRB'
+			CenterTopSerif (right - 0.5 * sw * HVContrast) top (xn * Jut)
+		include : tagged 'serifLB'
+			CenterBottomSerif (left + 0.5 * sw * HVContrast) 0 (xn * Jut)
+
+	define [NShape] : params [slabType top left right [crowd 2] [crDiag 4] [xn 1]] : glyph-proc
+		local swDiag : AdviceStroke crDiag
+		local stroke : AdviceStroke crowd
 
 		include : union
-			AINSerifs top left right stroke xn
 			dispiro
 				flat left 0 [widths.heading 0 stroke Upward]
 				curl left (top * 0.4) [heading Upward]
-				straight.up.end left top [widths.heading 0 topstroke Upward]
+				straight.up.end left top [widths.heading 0 swDiag Upward]
 			dispiro
 				flat right top [widths.heading 0 stroke Downward]
 				curl right (top * 0.6) [heading Downward]
-				straight.down.end right 0 [widths.heading 0 topstroke Downward]
+				straight.down.end right 0 [widths.heading 0 swDiag Downward]
 			dispiro
-				flat (left + halftopstroke) top [widths.heading topstroke 0 Downward]
-				curl (right - halftopstroke) 0 [widths.heading 0 topstroke Downward]
+				flat (left + swDiag / 2) top [widths.heading swDiag 0 Downward]
+				curl (right - swDiag / 2) 0 [widths.heading 0 swDiag Downward]
 
-	create-glyph 'N' 'N' : glyph-proc
-		include : MarkSet.capital
-		include : NShape CAP SB RightSB
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : match slabType
+			[Just SLAB-AUTO]   : if SLAB [StdNSerifs top left right stroke xn] [glyph-proc]
+			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif left top SideJut
 
+	define NConfig : object
+		standard                 { SLAB-AUTO   }
+		motionSerifed            { SLAB-MOTION   }
+
+	do : foreach { suffix { slabType } } [Object.entries NConfig] : do
+		create-glyph "N.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : NShape slabType CAP SB RightSB
+			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+		create-glyph "Nltail.\(suffix)" : glyph-proc
+			include [refer-glyph "N.\(suffix)"] AS_BASE ALSO_METRICS
+			eject-contour 'serifLB'
+			include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
+
+		create-glyph "smcpN.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : NShape slabType XH SB RightSB
+			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+
+
+	select-variant 'N' 'N'
 	alias 'grek/Nu' 0x39D 'N'
-
-	create-glyph 'smcpN' 0x274 : glyph-proc
-		include : MarkSet.e
-		include : NShape XH SB RightSB 3 3.5
+	select-variant 'smcpN' 0x274 (follow -- 'N')
+	select-variant 'Nltail' 0x19D  (follow -- 'N')
 
 	create-glyph 'currency/nairaSign' 0x20A6 : glyph-proc
-		include : NShape CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
+		include : NShape SLAB-AUTO CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
 		define sw : AdviceStroke2 2 4 CAP
 		define gap : Math.max (CAP / 6) sw
 		include : HBarBottom [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
 		include : HBarTop    [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 - gap / 2) sw
-
-	create-glyph 'Nltail' 0x19D : glyph-proc
-		include [refer-glyph 'N'] AS_BASE
-		eject-contour 'serifLB'
-		include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-HookX) Hook
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/N' 0x2115 : glyph-proc
@@ -70,3 +92,9 @@ glyph-block Letter-Latin-Upper-N : begin
 					widths.center BBS
 					corner (SB + BBS * HVContrast / 2) (CAP - (CAP / 5))
 					corner (RightSB - BBS * HVContrast) 0
+
+	create-glyph 'numero' 0x2116 : glyph-proc
+		local fine : AdviceStroke 4.5
+		include : OShape XH [Math.max (fine * 2) (CAP * 0.1)] (Middle + [Math.max (fine / 2) ((RightSB - SB) * 0.1)]) [mix RightSB Width 0.5] fine (SmoothA * fine / Stroke) (SmoothB * fine / Stroke)
+		include : NShape SLAB-AUTO CAP (SB / 2) Middle (crowd -- 4.5) (crDiag -- 5.5) (xn -- 0.7)
+		include : HBarBottom (Middle + fine / 2) [mix RightSB Width 0.5] 0 fine

@@ -10,7 +10,8 @@ glyph-block Letter-Latin-Lower-J : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateDottedComposition
-	glyph-block-import Letter-Shared-Shapes : CurlyTail
+	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailL DiagonalTailStdDepth
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	### j and dotless j
@@ -57,8 +58,10 @@ glyph-block Letter-Latin-Lower-J : begin
 		Dotless.set currentGlyph 'mathbb/dotlessj'
 
 	create-glyph 'dotlessj.straightLine' : glyph-proc
-		include : MarkSet.p
-		include : VBar Middle Descender XH
+		local df : DivFrame para.diversityII
+		set-width df.width
+		include : df.markSet.p
+		include : VBar df.middle Descender XH
 
 	create-glyph 'dotlessj.serifed' : glyph-proc
 		include : MarkSet.p
@@ -71,20 +74,20 @@ glyph-block Letter-Latin-Lower-J : begin
 	define [FlatHookDotlessJShape] : params [df crossLeft crossRight barCenter serif] : glyph-proc
 		local terminal : crossLeft - OX * 2
 		local bar : barCenter + HalfStroke * HVContrast
-		local tTurn : Math.max (Hook * 0.9) (Stroke * 1.5) : Math.min Hook (Stroke * 1.75)
+		local hd : FlatHookDepth df
 		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
 		include : dispiro
 			widths.lhs
-			flat [Math.min terminal (bar - tTurn - [Math.max (Stroke / 3) (df.width / 6)])] Descender
-			curl (bar - tTurn) Descender
+			flat [Math.min terminal (bar - hd.x - [Math.max (Stroke / 3) (df.width / 6)])] Descender
+			curl (bar - hd.x) Descender
 			archv.superness DesignParameters.tightHookSuperness
-			flat bar (Descender + tTurn)
+			flat bar (Descender + hd.y)
 			curl bar XH [heading Upward]
 		set-base-anchor 'above' barCenter XH
 		set-base-anchor 'overlay' barCenter (XH / 2)
 
 	create-glyph 'dotlessj.flatHookSerifless' : glyph-proc
-		local df : DivFrame para.diversityII
+		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.p
 		include : FlatHookDotlessJShape df
@@ -98,6 +101,36 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-width df.width
 		include : df.markSet.p
 		include : FlatHookDotlessJShape df
+			crossLeft -- [mix 0 SB : mix 1 para.diversityI 2]
+			crossRight -- [mix df.width df.rightSB : mix 1 para.diversityI 2]
+			barCenter -- (df.middle + JBalance * df.div)
+			serif -- true
+
+	define [DiagTailDotlessJShape] : params [df crossLeft crossRight barCenter serif] : glyph-proc
+		local terminal : crossLeft - OX * 2
+		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
+		include : dispiro
+			widths.center
+			flat barCenter XH [heading Downward]
+			DiagonalTailL df barCenter Descender [DiagonalTailStdDepth df Stroke] Stroke
+		set-base-anchor 'above' barCenter XH
+		set-base-anchor 'overlay' barCenter (XH / 2)
+
+	create-glyph 'dotlessj.diagonalTailedSerifless' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.p
+		include : DiagTailDotlessJShape df
+			crossLeft -- [mix 0 SB para.diversityII]
+			crossRight -- [mix df.width df.rightSB para.diversityII]
+			barCenter -- (df.middle + 0.5 * JBalance * df.div * [mix 1 para.diversityII 2])
+			serif -- false
+
+	create-glyph 'dotlessj.diagonalTailedSerifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.p
+		include : DiagTailDotlessJShape df
 			crossLeft -- [mix 0 SB : mix 1 para.diversityI 2]
 			crossRight -- [mix df.width df.rightSB : mix 1 para.diversityI 2]
 			barCenter -- (df.middle + JBalance * df.div)

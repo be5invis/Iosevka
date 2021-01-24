@@ -12,130 +12,231 @@ glyph-block Letter-Latin-Upper-R : begin
 	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY PRotundaShape BBPShape PShapeOutline
 	glyph-block-import Letter-Blackboard : BBS BBD
 
-	### R and CyrYa
-	glyph-block-export RLegShape RLegTerminalX
-	define [RLegTerminalX straight right sw] : right - [if straight (OX * 2) 0] - sw / 2 * HVContrast
+	define LEG-SHAPE-CURLY    0
+	define LEG-SHAPE-STRAIGHT 1
+	define LEG-SHAPE-STANDING 2
+
+	define [RLegTerminalX legShape right sw] : right - [if legShape (OX * 2) 0] - sw / 2 * HVContrast
 	define [RSlabExtraShift slab sw] : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
 	define [RLegDiagCor top bottom left right extraShift sw] : DiagCor (top - bottom) (right - left - extraShift) 0 sw
-	define [RLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
-		local xRightBottom : RLegTerminalX straight right sw
-		if straight : do
-			local shift : RSlabExtraShift slab sw
-			include : dispiro
-				widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
-				corner (left + extraShift + shift / 2) top [heading Downward]
-				corner (xRightBottom + shift) bottom [heading Downward]
-			if slab : begin
-				include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
-		: else : begin
-			include : intersection
-				Rect top bottom (-Width) (2 * Width)
-				dispiro
-					widths.center sw
-					g4.up.start xRightBottom bottom [heading Upward]
-					quadcontrols 0 0.4 8
-					g4 left top
-			if slab : begin
-				include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
-	define [RevRLegTerminalX straight left sw] : left + [if straight (OX * 2) 0] + sw / 2 * HVContrast
-	define [RevRLegShape] : params [top bottom left right charTop slab straight sw extraShift] : glyph-proc
-		local xLeftBottom : RevRLegTerminalX straight left sw
-		if straight : do
-			local shift : RSlabExtraShift slab sw
-			include : dispiro
-				widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
-				corner (right + extraShift + shift / 2) top [heading Downward]
-				corner (xLeftBottom + shift) bottom [heading Downward]
-			if slab : begin
-				include : LeftwardBottomSerif (xLeftBottom + shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
-		: else : begin
-			include : intersection
-				Rect top 0 (-Width) (2 * Width)
-				dispiro
-					widths.center sw
-					g4.up.start xLeftBottom bottom [heading Upward]
-					quadcontrols 0 0.4 8
-					g4 right top
-			if slab : begin
-				include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
+	define [RStandingLegFine sw] : sw * CThinB
+	define [RStandingLegBend left right top bottom sw] : Math.min ((right - left) * 0.99) : Math.max (sw * 1.5) ((right - left) * 0.875)
+	define [RStandingBottomOverflow slab] : if slab 0 (2 * OX)
 
-	define [RBarPos charTop slab] : if slab (0.5 + Stroke * PShape.SwBelowBar / charTop) PShape.BarPos
-	define [RBarTop p charTop stroke straightBar slab] : (charTop - Stroke) * [fallback p 1] * [RBarPos charTop slab] + [if straightBar 0 (Stroke / 2)]
+	define [RLegShape-Straight] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local xRightBottom : RLegTerminalX LEG-SHAPE-STRAIGHT right sw
+		local shift : RSlabExtraShift slab sw
+		include : dispiro
+			widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
+			corner (left + extraShift + shift / 2) top [heading Downward]
+			corner (xRightBottom + shift) bottom [heading Downward]
+		if slab : begin
+			include : RightwardBottomSerif (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
 
-	define [RShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
-		include : PShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
-		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		include : RLegShape [RBarTop 1 top Stroke straightBar slab] 0 Middle right top slab straightBar Stroke 0
+	define [RLegShape-Curly] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local xRightBottom : RLegTerminalX LEG-SHAPE-CURLY right sw
+		include : intersection
+			Rect top bottom (-Width) (2 * Width)
+			dispiro
+				widths.center sw
+				g4.up.start xRightBottom bottom [heading Upward]
+				quadcontrols 0 0.4 8
+				g4 left top
+		if slab : begin
+			include : RightwardBottomSerif right bottom (SideJut + Jut / 8)
 
-	define [RRotundaShape] : params [straightBar top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1]] : glyph-proc
-		local legTop : RBarTop pBar top Stroke straightBar SLAB
+	define [RLegShape-Standing] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local fine : RStandingLegFine sw
+		local bend : RStandingLegBend left right top bottom sw
+		local ytopRef : begin top
+		local yTopStroke : top - sw / 2 + fine
+		local yOffset : mix bottom top 0.2
+		local xOverflow : RStandingBottomOverflow slab
+		include : dispiro
+			widths.rhs fine
+			flat left yTopStroke [heading Rightward]
+			curl (right - bend) yTopStroke [heading Rightward]
+			archv
+			flat (right + O) (ytopRef - bend) [widths.rhs.heading sw Downward]
+			curl (right + O) yOffset [heading Downward]
+			curl (right + O - xOverflow) bottom  [heading Downward]
+		if slab : include : RightwardBottomSerif right bottom SideJut
+
+	define RLegShapes { RLegShape-Curly RLegShape-Straight RLegShape-Standing }
+
+	define [RevRLegTerminalX legShape left sw] : left + [if legShape (OX * 2) 0] + sw / 2 * HVContrast
+
+	define [RevRLegShape-Straight] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local xLeftBottom : RevRLegTerminalX LEG-SHAPE-STRAIGHT left sw
+		local shift : RSlabExtraShift slab sw
+		include : dispiro
+			widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
+			corner (right - extraShift - shift / 2) top [heading Downward]
+			corner (xLeftBottom - shift) bottom [heading Downward]
+		if slab : begin
+			include : LeftwardBottomSerif (xLeftBottom - shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+
+	define [RevRLegShape-Curly] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local xLeftBottom : RevRLegTerminalX LEG-SHAPE-CURLY left sw
+		include : intersection
+			Rect top 0 (-Width) (2 * Width)
+			dispiro
+				widths.center sw
+				g4.up.start xLeftBottom bottom [heading Upward]
+				quadcontrols 0 0.4 8
+				g4 right top
+		if slab : begin
+			include : LeftwardBottomSerif left bottom (SideJut + Jut / 8)
+
+	define [RevRLegShape-Standing] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
+		local fine : RStandingLegFine sw
+		local bend : RStandingLegBend left right top bottom sw
+		local ytopRef : begin top
+		local yTopStroke : top - sw / 2 + fine
+		local yOffset : mix bottom top 0.2
+		local xOverflow : RStandingBottomOverflow slab
+		include : dispiro
+			widths.lhs fine
+			flat right yTopStroke [heading Leftward]
+			curl (left + bend) yTopStroke [heading Leftward]
+			archv
+			flat (left - O) (ytopRef - bend) [widths.lhs.heading sw Downward]
+			curl (left - O) yOffset [heading Downward]
+			curl (left - O + xOverflow) bottom  [heading Downward]
+		if slab : include : LeftwardBottomSerif left bottom SideJut
+
+	define RevRLegShapes { RevRLegShape-Curly RevRLegShape-Straight RevRLegShape-Standing }
+
+
+	define [RBarPos charTop slab] : begin PShape.BarPos
+	define [RLegTop charTop sw bp] : (sw / 2) + [PBarPosY charTop sw bp]
+
+	define [RShape] : params [legShape top bp [mul 1] [slab null]] : glyph-proc
+		include : PShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
+		local right : RightSB - O - [if SLAB (Jut / 8) 0]
+		include : RLegShapes.(legShape) [RLegTop top Stroke bp] 0 Middle right top (slab === PShape.SlabSymmetric) Stroke 0
+
+	define [RRotundaShape] : params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1]] : glyph-proc
+		local bp : pBar * [RBarPos top false]
+		local legTop : RLegTop top Stroke (pBar * bp)
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
 		local cor : RLegDiagCor legTop 0 endX right 0 Stroke
-		local endX1 : endX - [if straightBar (HalfStroke * cor * HVContrast) HalfStroke] + [if straightBar [RSlabExtraShift SLAB Stroke] 0]
-		include : PRotundaShape top (mul -- mul) (bp -- (pBar * [RBarPos top false])) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
-		include : RLegShape legTop 0 endX right top SLAB straightBar Stroke 0
+		local endX1 : endX - [if legShape (HalfStroke * cor * HVContrast) HalfStroke] + [if legShape [RSlabExtraShift SLAB Stroke] 0]
+		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
+		include : RLegShapes.(legShape) legTop 0 endX right top SLAB Stroke 0
 
-	define [RevRShape] : params [straightBar top [mul 1] [slab SLAB]] : glyph-proc
-		include : RevPShape top (mul -- mul) (bp -- [RBarPos top slab]) (overshoot -- O) (slab -- slab)
-		local left (SB + O + [if SLAB (Jut / 8) 0])
-		include : RevRLegShape [RBarTop 1 top Stroke straightBar slab] 0 left Middle top slab straightBar Stroke 0
+	define [RevRShape] : params [legShape top bp [mul 1]] : glyph-proc
+		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- SLAB) (bp -- bp)
+		local left : SB + O + [if SLAB (Jut / 8) 0]
+		include : RevRLegShapes.(legShape) [RLegTop top Stroke bp] 0 left Middle top SLAB Stroke 0
 
-	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-derived 'R.straight' : glyph-proc
-			include : RShape true CAP
-			set-base-anchor 'overlay'
-				SB + Stroke * HVContrast
-				PBarPosY CAP Stroke : RBarPos CAP SLAB
-		create-derived 'Rrotunda.straight' : glyph-proc
-			include : RRotundaShape true CAP (hook -- Hook) (pBar -- 0.9)
-			set-base-anchor 'overlay'
-				SB + Stroke * HVContrast
-				PBarPosY CAP Stroke : RBarPos CAP 0
-		create-derived 'R.curly' : glyph-proc
-			include : RShape false CAP
-			set-base-anchor 'overlay'
-				SB + Stroke * HVContrast
-				PBarPosY CAP Stroke : RBarPos CAP SLAB
-		create-derived 'Rrotunda.curly' : glyph-proc
-			include : RRotundaShape false CAP (hook -- Hook) (pBar -- 0.9)
-			set-base-anchor 'overlay'
-				SB + Stroke * HVContrast
-				PBarPosY CAP Stroke : RBarPos CAP 0
+	define [ROverlayAnchor] : glyph-proc
+		set-base-anchor 'overlay'
+			SB + Stroke * HVContrast
+			PBarPosY CAP Stroke : RBarPos CAP SLAB
 
-	define [IndianRupeeShape suffix straightBar] : glyph-proc
+	define RConfig : object
+		standing                   { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  false }
+		straight                   { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  false }
+		curly                      { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  false }
+		standingOpen               { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  true  }
+		straightOpen               { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  true  }
+		curlyOpen                  { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  true  }
+		standingMotionSerifed      { LEG-SHAPE-STANDING   PShape.SlabMotion               false }
+		straightMotionSerifed      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               false }
+		curlyMotionSerifed         { LEG-SHAPE-CURLY      PShape.SlabMotion               false }
+		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               true  }
+		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               true  }
+		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               true  }
+
+	foreach { suffix { fStraight slabs fOpen } } [Object.entries RConfig] : begin
+		local fMotion : slabs === PShape.SlabMotion
+		local bpCap : RBarPos CAP (slabs === PShape.SlabSymmetric)
+		local bpXH  : RBarPos XH  (slabs === PShape.SlabSymmetric)
+
+		create-glyph "R.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : ROverlayAnchor
+			if fOpen
+			: then : begin
+				include : difference
+					RShape fStraight CAP (slab -- slabs) (bp -- bpCap)
+					PShape.OpenGap CAP (mul -- 1) (bp -- bpCap)
+			: else : begin
+				include : RShape fStraight CAP (slab -- slabs) (bp -- bpCap)
+
+		create-glyph "smcpR.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : ROverlayAnchor
+			if fOpen
+			: then : begin
+				include : difference
+					RShape fStraight XH (slab -- slabs) (bp -- bpXH)
+					PShape.OpenGap XH (mul -- 1) (bp -- bpXH)
+			: else : begin
+				include : RShape fStraight XH (slab -- slabs) (bp -- bpXH)
+
+		if (!fMotion && !fOpen) : create-glyph "Rrotunda.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RRotundaShape fStraight CAP (hook -- Hook) (pBar -- 0.9)
+
+		if (!fMotion && !fOpen) : create-glyph "rrotunda.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RRotundaShape fStraight XH (hook -- AHook) (pBar -- 0.9)
+
+		if (!fMotion) : create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : ROverlayAnchor
+			if fOpen
+			: then : begin
+				include : difference
+					RevRShape fStraight CAP (bp -- bpCap)
+					RevPShape.OpenGap CAP (mul -- 1) (bp -- bpCap)
+			: else : begin
+				include : RevRShape fStraight CAP (bp -- bpCap)
+
+		if (!fMotion) : create-glyph "cyrl/ya.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : ROverlayAnchor
+			if fOpen
+			: then : begin
+				include : difference
+					RevRShape fStraight XH (bp -- bpXH)
+					RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)
+			: else : begin
+				include : RevRShape fStraight XH (bp -- bpXH)
+
+
+	select-variant 'R' 'R'
+	select-variant 'smcpR' 0x280 (follow -- 'R')
+
+	select-variant 'Rrotunda' 0xA75A
+	select-variant 'rrotunda' 0xA75B (follow -- 'Rrotunda')
+
+	select-variant 'cyrl/Ya' 0x42F
+	select-variant 'cyrl/ya' 0x44F (follow -- 'cyrl/Ya')
+	turned 'invsmcpR' 0x281 'cyrl/ya' Middle (XH / 2)
+
+	define [IndianRupeeShape suffix legShape] : glyph-proc
 		define bp : RBarPos CAP 0
 		include : intersection
 			Rect CAP 0 SB Width
 			WithTransform [Translate (-Width / 8) 0]
-				PShape CAP (bp -- bp) (slab -- false) (withBar -- false)
-		local right : RightSB - O - [if straightBar 0 (Width / 16)]
-		include : RLegShape [RBarTop 1 CAP Stroke straightBar false] 0 (Width * 0.375) right CAP false straightBar Stroke 0
+				PShape CAP (bp -- bp) (withBar -- false)
+		local right : RightSB - O - [if legShape 0 (Width / 16)]
+		include : RLegShapes.(legShape) [RLegTop CAP Stroke bp] 0 (Width * 0.375) right CAP false Stroke 0
 
 		define sw : AdviceStroke2 2 4 CAP
 		include : HBarTop SB RightSB CAP sw
 		include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
 
-	create-glyph 'currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' true
-	create-glyph 'currency/indianRupeeSign.curly' : IndianRupeeShape 'curly' false
+	create-glyph 'currency/indianRupeeSign.curly'    : IndianRupeeShape 'curly'    0
+	create-glyph 'currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' 1
+	create-glyph 'currency/indianRupeeSign.standing' : IndianRupeeShape 'curly'    2
 
-	create-glyph : glyph-proc
-		include : MarkSet.e
-		create-derived 'smcpR.straight' : glyph-proc
-			include : RShape true XH
-		create-derived 'rrotunda.straight' : glyph-proc
-			include : RRotundaShape true XH (hook -- AHook) (endX -- [mix Middle RightSB 0.125])
-		create-derived 'smcpR.curly' : glyph-proc
-			include : RShape false XH
-		create-derived 'rrotunda.curly' : glyph-proc
-			include : RRotundaShape false XH (hook -- AHook) (endX -- [mix Middle RightSB 0.125])
+	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'Rrotunda')
 
-	select-variant 'R' 'R'
-	select-variant 'Rrotunda' 0xA75A (follow -- 'R')
-	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'R')
-	select-variant 'smcpR' 0x280 (follow -- 'R')
-	select-variant 'rrotunda' 0xA75B (follow -- 'R')
 
 	with-related-glyphs 'Rbar' 0x24C 'R' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -149,36 +250,24 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : MarkSet.if
 		local top : CAP * 0.85
 		local bp 0.45
-		include : PShape top (mul -- 1) (bp -- bp)
+		include : PShape top (mul -- 1) (bp -- bp) (slab -- [if SLAB PShape.SlabSymmetric])
 		include : VBarLeft SB (top - 1) CAP
 
+		local legTop : RLegTop top Stroke bp
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
 		create-derived 'Yr.straight'
-			RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB true Stroke 0
+			RLegShape-Straight legTop Descender Middle right (top - Descender) SLAB Stroke 0
 		create-derived 'Yr.curly'
-			RLegShape ((top - Stroke) * bp) Descender Middle right (top - Descender) SLAB false Stroke 0
+			RLegShape-Curly    legTop Descender Middle right (top - Descender) SLAB Stroke 0
+		create-derived 'Yr.standing'
+			RLegShape-Standing legTop Descender Middle right (top - Descender) SLAB Stroke 0
 
-	select-variant 'Yr' 0x1A6 (follow -- 'R')
+	select-variant 'Yr' 0x1A6 (follow -- 'Rrotunda')
 
-	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-derived 'cyrl/Ya.straight' : RevRShape true CAP
-		create-derived 'cyrl/Ya.curly' : RevRShape false CAP
-	create-glyph : glyph-proc
-		include : MarkSet.e
-		create-derived 'cyrl/ya.straight' : RevRShape true XH
-		create-derived 'cyrl/ya.curly' : RevRShape false XH
-
-	select-variant 'cyrl/Ya' 0x42F (follow -- 'R')
-	select-variant 'cyrl/ya' 0x44F (follow -- 'R')
-
-	turned 'invsmcpR.straight' nothing 'cyrl/ya.straight' Middle (XH / 2)
-	turned 'invsmcpR.curly'    nothing 'cyrl/ya.curly'    Middle (XH / 2)
-	select-variant 'invsmcpR' 0x281 (follow -- 'R')
 
 	create-glyph 'mathbb/R' 0x211D : glyph-proc
-		define [SingleLeg] : RLegShape ((CAP - BBS) * HBarPos) 0 Middle (RightSB - O) CAP false true BBS (BBD / 2)
-		define terminalX : RLegTerminalX true (RightSB - O) BBS
+		define [SingleLeg] : RLegShape-Straight ((CAP - BBS) * HBarPos) 0 Middle (RightSB - O) CAP false BBS (BBD / 2)
+		define terminalX : RLegTerminalX LEG-SHAPE-STRAIGHT (RightSB - O) BBS
 		include : MarkSet.capital
 		include : BBPShape (mul -- 1) (overshoot -- O)
 		include : difference

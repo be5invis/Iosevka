@@ -1,0 +1,234 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-U : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Shared-Shapes : nShoulder RightwardTailedBar DToothlessRise
+
+	glyph-block-export UShape
+
+	define [UArcT] : params [sink df top bottom [stroke Stroke] [sma SmoothA] [smb SmoothB] [offset 0]] : sink
+		widths.lhs stroke
+		[if (sink == spiro-outline) corner flat] (df.leftSB + offset) top [heading Downward]
+		curl (df.leftSB + offset) (bottom + smb + offset)
+		arcvh
+		g4   (df.middle + CorrectionOMidX * stroke) (bottom + O + offset)
+		archv
+		flat (df.rightSB - offset) (bottom + sma + offset)
+		[if (sink == spiro-outline) corner curl] (df.rightSB - offset) top [heading Upward]
+
+	define [UShape] : params [df top bottom [stroke Stroke] [sma SmoothA] [smb SmoothB] [offset 0]] : glyph-proc
+		include : UArcT dispiro
+			df -- df
+			top -- top
+			bottom -- bottom
+			stroke -- stroke
+			sma -- sma
+			smb -- smb
+			offset -- offset
+
+	define [UToothed top] : glyph-proc
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : nShoulder
+			top -- top
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			fine -- ShoulderFine
+		include : FlipAround Middle (top / 2)
+		include : VBarRight RightSB 0 top
+
+	define [UTailed top] : glyph-proc
+		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		include : nShoulder
+			top -- top
+			left -- (SB + Stroke * HVContrast)
+			right -- RightSB
+			fine -- ShoulderFine
+		include : FlipAround Middle (top / 2)
+		include : RightwardTailedBar RightSB 0 top
+
+	define [UToothlessRounded top] : glyph-proc
+		set-base-anchor 'trailing' Middle 0
+		include : UShape [DivFrame 1] top 0
+
+	define [UToothlessRoundedSmall top] : glyph-proc
+		set-base-anchor 'trailing' Middle 0
+		include : UShape [DivFrame 1] top 0 (sma -- SmallSmoothA) (smb -- SmallSmoothB)
+
+	define [UToothlessCorner top] : glyph-proc
+		set-base-anchor 'trailing' Middle 0
+		include : VBarLeft SB 0 (top - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 SB (top - DToothlessRise)
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat RightSB (top - SmoothB)
+			curl RightSB 0 [heading Downward]
+		include : FlipAround Middle (top / 2)
+
+	define [UToothlessCornerSmall top] : glyph-proc
+		set-base-anchor 'trailing' Middle 0
+		include : VBarLeft SB 0 (top - DToothlessRise)
+		include : dispiro
+			widths.rhs
+			g4 SB (top - DToothlessRise)
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat RightSB (top - SmallSmoothB)
+			curl RightSB 0 [heading Downward]
+		include : FlipAround Middle (top / 2)
+
+	define [UTopLeftSerif yTop]  : tagged 'serifLT'
+		LeftwardTopSerif SB yTop SideJut
+
+	define [UTopRightSerif yTop] : tagged 'serifRT'
+		LeftwardTopSerif (RightSB - Stroke * HVContrast) yTop SideJut
+
+	define [UBottomRightSerif yTop] : tagged 'serifRB'
+		RightwardBottomSerif RightSB 0 SideJut
+
+	define [SmallUSlabs top] : glyph-proc : if SLAB : begin
+		include : UTopLeftSerif top
+		if [not para.isItalic] : include : UTopRightSerif top
+		include : UBottomRightSerif top
+
+	define [SmallUTailedSlabs top] : glyph-proc : if SLAB : begin
+		include : UTopLeftSerif top
+		if [not para.isItalic] : include : UTopRightSerif top
+
+	define [CapitalUMotionToothlessSlabs top] : glyph-proc
+		include : LeftwardTopSerif SB top SideJut
+		include : RightwardTopSerif RightSB top SideJut
+
+	define [SmallUToothlessSlabs top] : glyph-proc : if SLAB : begin
+		include : UTopLeftSerif top
+		include : UTopRightSerif top
+
+	define [SmallUMotionSlabs top] : glyph-proc
+		include : UTopLeftSerif top
+		include : UBottomRightSerif top
+
+	define [SmallUMotionTailedSlabs top] : glyph-proc
+		include : UTopLeftSerif top
+
+	define CapitalUConfig : object
+		toothed                                 { UToothed          SmallUSlabs                  }
+		tailed                                  { UTailed           SmallUTailedSlabs            }
+		motionSerifed                           { UToothed          SmallUMotionSlabs            }
+		motionSerifedTailed                     { UTailed           SmallUMotionTailedSlabs      }
+		toothlessCorner                         { UToothlessCorner  AIVSerifs                    }
+		toothlessRounded                        { UToothlessRounded AIVSerifs                    }
+		toothlessCornerBilateralMotionSerifed   { UToothlessCorner  CapitalUMotionToothlessSlabs }
+		toothlessRoundedBilateralMotionSerifed  { UToothlessRounded CapitalUMotionToothlessSlabs }
+		toothlessCornerUnilateralMotionSerifed  { UToothlessCorner  SmallUMotionTailedSlabs      }
+		toothlessRoundedUnilateralMotionSerifed { UToothlessRounded SmallUMotionTailedSlabs      }
+
+	foreach { suffix { Base Slabs } } [Object.entries CapitalUConfig] : do
+		create-glyph "U.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Base CAP
+			include : Slabs CAP
+
+		create-glyph "smcpU.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Base XH
+			include : Slabs XH
+
+	define SmallUConfig : object
+		toothed                       { UToothed               SmallUSlabs             }
+		tailed                        { UTailed                SmallUTailedSlabs       }
+		motionSerifed                 { UToothed               SmallUMotionSlabs       }
+		motionSerifedTailed           { UTailed                SmallUMotionTailedSlabs }
+		toothlessCorner               { UToothlessCornerSmall  SmallUToothlessSlabs    }
+		toothlessRounded              { UToothlessRoundedSmall SmallUToothlessSlabs    }
+		toothlessCornerMotionSerifed  { UToothlessCornerSmall  SmallUMotionTailedSlabs }
+		toothlessRoundedMotionSerifed { UToothlessRoundedSmall SmallUMotionTailedSlabs }
+
+	foreach { suffix { Base Slabs } } [Object.entries SmallUConfig] : do
+		create-glyph "u.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : Base XH
+			include : Slabs XH
+
+	select-variant 'U' 'U'
+	select-variant 'smcpU' 0x1D1C (follow -- 'U')
+	select-variant 'u' 'u'
+
+	create-glyph 'grek/upsilon' 0x3C5 : glyph-proc
+		include : MarkSet.e
+		set-base-anchor 'trailing' Middle 0
+		include : UShape [DivFrame 1] XH 0 (sma -- SmallSmoothA) (smb -- SmallSmoothB)
+
+	create-glyph 'urtailBR' 0x1D99 : glyph-proc
+		include [refer-glyph 'u.toothed'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'rtailBR']
+
+	define [LatinUpsilon2Shape top sma smb] : glyph-proc
+		include : dispiro
+			widths.lhs
+			flat SB top [heading Downward]
+			curl SB smb
+			arcvh
+			g4 (Middle + CorrectionOMidS) O
+			archv
+			flat RightSB sma
+			curl RightSB (top - Hook - HalfStroke) [heading Upward]
+		include : VerticalHook (RightSB - HalfStroke * HVContrast) (top - Hook - HalfStroke) (-(RightSB - HalfStroke * HVContrast - Middle)) (-Hook)
+
+	create-glyph 'latinUpsilon2' 0x1B2 : glyph-proc
+		include : MarkSet.e
+		include : LatinUpsilon2Shape CAP SmoothA SmoothB
+
+	create-glyph 'latinupsilon2' 0x28B : glyph-proc
+		include : MarkSet.e
+		include : LatinUpsilon2Shape XH SmallSmoothA SmallSmoothB
+
+	create-glyph 'uWithLightCentralizationStroke' : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph "u.toothed"
+		local fine      : AdviceStroke 4
+		local outStand  : SB * 0.75 + fine * 0.25
+		local outStandY : SmallSmoothB / 2 - Descender * 0.6
+		local yTurn     : SmallSmoothB / 2
+		include : difference
+			dispiro
+				widths.lhs fine
+				corner (SB + outStand) (yTurn + outStandY)
+				corner (SB - outStand) (yTurn - outStandY)
+			spiro-outline
+				corner (SB - O) XH
+				curl (SB - O) SmallSmoothB
+				arcvh
+				g4   (Middle + CorrectionOMidS) (-O)
+				archv
+				flat (RightSB + O) SmallSmoothA
+				corner (RightSB + O) XH
+		if SLAB : begin
+			include : LeftwardTopSerif SB XH SideJut
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
+	create-glyph 'mathbb/U' 0x1D54C : glyph-proc
+		include : MarkSet.capital
+		include : HBarTop SB (SB + BBD) CAP BBS
+		include : UShape [DivFrame 1] CAP 0
+			stroke -- BBS
+		include : intersection
+			VBarLeft (SB + BBD) 0 CAP BBS
+			UArcT spiro-outline [DivFrame 1] CAP 0
+				stroke -- BBS
+				oper -- true
+				offset -- 1
+
+	create-glyph 'mathbb/u' 0x1D566 : glyph-proc
+		local df : DivFrame 1 2
+		include : df.markSet.e
+		include [refer-glyph 'mathbb/n']
+		include : FlipAround Middle (XH / 2)
