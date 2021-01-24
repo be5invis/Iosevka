@@ -10,7 +10,13 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [MShape top df fHanging] : glyph-proc
+	define FORM-FLAT    0
+	define FORM-HANGING 1
+
+	define SLAB-AUTO   1
+	define SLAB-MOTION 2
+
+	define [MShape top df fHanging slabType] : glyph-proc
 		local swSideBot : if fHanging Stroke : AdviceStroke 3.5 df.div
 		local swSideTop : AdviceStroke [if fHanging 5 4] df.div
 		local halfSwMiddle : swSideTop / 2
@@ -32,23 +38,28 @@ glyph-block Letter-Latin-Upper-M : begin
 		include : dispiro
 			flat (df.rightSB - halfSwMiddle) top [widths.heading 0 swSideTop Downward]
 			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
-		include : AIMSerifs top df.leftSB df.rightSB
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		include : df.markSet.capital
-		set-width df.width
+		include : match slabType
+			[Just SLAB-AUTO]   : AIMSerifs top df.leftSB df.rightSB
+			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
 
-		create-derived 'M.hanging' : MShape CAP df true
-		create-derived 'M.flatBottom' : MShape CAP df false
+	define MConfig : object
+		hanging                 { FORM-HANGING SLAB-AUTO   }
+		flatBottom              { FORM-FLAT    SLAB-AUTO   }
+		hangingMotionSerifed    { FORM-HANGING SLAB-MOTION }
+		flatBottomMotionSerifed { FORM-FLAT    SLAB-MOTION }
 
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		include : df.markSet.e
-		set-width df.width
-
-		create-derived 'smcpM.hanging' : MShape XH df true
-		create-derived 'smcpM.flatBottom' : MShape XH df false
+	foreach { suffix { form slab } } [Object.entries MConfig] : do
+		create-glyph "M.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : MShape CAP df form slab
+		create-glyph "smcpM.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : MShape XH df form slab
 
 	select-variant 'M' 'M'
 	select-variant 'smcpM' 0x1D0D (follow -- 'M')
