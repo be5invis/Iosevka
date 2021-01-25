@@ -1,0 +1,75 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Seven : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
+
+	define SevenXLeft : mix SB RightSB 0.28
+	define [SevenShape top] : glyph-proc
+		include : union
+			HBarTop SB RightSB top
+			intersection
+				Rect (top - Stroke) 0 SB RightSB
+				dispiro
+					widths.rhs
+					corner RightSB (top - Stroke)
+					corner [mix RightSB (SevenXLeft + 0.75 * Stroke * HVContrast) 2] [mix (top - Stroke) 0 2]
+
+	define [SevenCrossbarShape top] : glyph-proc
+		local m : mix SevenXLeft (RightSB - HalfStroke * HVContrast) 0.5
+		include : HBar
+			m - Stroke * HVContrast * 0.25 - LongJut * 0.8
+			m + Stroke * HVContrast * 0.25 + LongJut * 0.7
+			mix 0 (top - Stroke * 0.25) 0.5
+
+	create-glyph : glyph-proc
+		include : MarkSet.capital
+		include : SevenShape CAP
+		create-derived 'seven.lnum.noserif' : glyph-proc
+		create-derived 'seven.lnum.crossbar' : glyph-proc
+			include : SevenCrossbarShape CAP
+		create-derived 'seven.lnum.serifed' : glyph-proc
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+		create-derived 'seven.lnum.crossbarSerifed' : glyph-proc
+			include : SevenCrossbarShape CAP
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+
+	create-glyph : glyph-proc
+		include : OnumMarks.p
+		include : SevenShape CAP
+		create-derived 'seven.onum.noserif' : glyph-proc
+			include : ShiftDown
+		create-derived 'seven.onum.crossbar' : glyph-proc
+			include : SevenCrossbarShape CAP
+			include : ShiftDown
+		create-derived 'seven.onum.serifed' : glyph-proc
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+			include : ShiftDown
+		create-derived 'seven.onum.crossbarSerifed' : glyph-proc
+			include : SevenCrossbarShape CAP
+			include : DownwardLeftSerif (SB + (OX - O)) CAP VJut
+			include : ShiftDown
+
+	select-variant 'seven.lnum' [CodeLnum '7'] (follow -- 'seven')
+	select-variant 'seven.onum' [CodeOnum '7'] (follow -- 'seven')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/seven' 0x1D7DF : glyph-proc
+		local tr : RightSB - BBS / 2
+		local kDiag : DiagCorDs (CAP - BBS) (tr - SevenXLeft) (BBD * 0.75)
+		local xTerm : SevenXLeft - 0.25 * kDiag * BBD
+		include : union
+			HBarTop SB RightSB CAP BBS
+			intersection
+				Rect CAP 0 0 RightSB
+				union
+					HBarBottom xTerm (xTerm + kDiag * BBD) 0 BBS
+					ExtLineCenter 2 BBS tr         (CAP - BBS) (xTerm + kDiag * BBD) 0
+					ExtLineCenter 2 BBS (tr - BBD) (CAP - BBS) xTerm                 0

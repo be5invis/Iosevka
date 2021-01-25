@@ -1,0 +1,138 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Zero : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
+
+	define [ZeroSlashShape top] : begin
+		local fine : 0.5 * OverlayStroke
+		return : intersection
+			OShapeOutline.NoOvershoot top 0 SB RightSB
+			dispiro
+				flat 0 (top * (1 - 0.77)) [widths fine fine]
+				curl Width (top * 0.77)
+
+	define [ZeroReverseSlashShape top] : begin
+		local fine : 0.5 * OverlayStroke
+		return : intersection
+			OShapeOutline.NoOvershoot top 0 SB RightSB
+			dispiro
+				flat 0 (top * 0.77) [widths fine fine]
+				curl Width (top * (1 - 0.77))
+
+	define [ZeroDotShape top] : begin
+		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
+		return : OShapeOutline.NoOvershoot
+			top / 2 + DotRadius
+			top / 2 - DotRadius
+			Middle + halfDotWidth
+			Middle - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
+
+	define [ZeroLongDotShape top] : begin
+		local circleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
+		local halfDotWidth : Math.min HalfStroke (circleInnerWidth / 4)
+		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (circleInnerWidth - halfDotWidth * 2)) / 2)
+		return : OShapeOutline.NoOvershoot
+			top / 2 + halfDotHeight
+			top / 2 - halfDotHeight
+			Middle + halfDotWidth
+			Middle - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			SmoothAOf halfDotWidth (halfDotWidth * 2)
+			SmoothBOf halfDotWidth (halfDotWidth * 2)
+
+	define [ZeroOvalShape top] : dispiro
+		widths.rhs
+		g4 (Middle - CorrectionOMidS) (CAP - O)
+		archv
+		g4 (RightSB - OX) [YSmoothMidR CAP 0 SmallSmoothA SmallSmoothB]
+		arcvh
+		g4 (Middle + CorrectionOMidS) O
+		archv
+		g4 (SB + OX) [YSmoothMidL CAP 0 SmallSmoothA SmallSmoothB]
+		arcvh
+		close
+
+	create-glyph 'zero.lnum.unslashed' : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB
+
+	create-glyph 'zero.lnum.unslashedOval' : glyph-proc
+		include : MarkSet.capital
+		include : ZeroOvalShape CAP
+
+	create-glyph 'zero.lnum.slashed' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroSlashShape CAP
+
+	create-glyph 'zero.lnum.reverse-slashed' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroReverseSlashShape CAP
+
+	create-glyph 'zero.lnum.dotted' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroDotShape CAP
+
+	create-glyph 'zero.lnum.longDotted' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashed"
+		include : ZeroLongDotShape CAP
+
+	create-glyph 'zero.onum.unslashed' : glyph-proc
+		include : OnumMarks.e
+		include : OShape OnumHeight 0 SB RightSB
+
+	create-glyph 'zero.onum.unslashedOval' : glyph-proc
+		include : OnumMarks.e
+		include : ZeroOvalShape OnumHeight
+
+	create-glyph 'zero.onum.slashed' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroSlashShape OnumHeight
+
+	create-glyph 'zero.onum.reverse-slashed' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroReverseSlashShape OnumHeight
+
+	create-glyph 'zero.onum.dotted' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroDotShape OnumHeight
+
+	create-glyph 'zero.onum.longDotted' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashed"
+		include : ZeroLongDotShape OnumHeight
+
+	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
+	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/zero' 0x1D7D8 : glyph-proc
+		include : MarkSet.capital
+		include : OShape CAP 0 SB RightSB BBS
+		include : intersection
+			OShapeOutline.NoOvershoot CAP 0 SB RightSB BBS
+			union
+				VBarLeft  (SB + OX + BBD)      0 CAP BBS
+				VBarRight (RightSB - OX - BBD) 0 CAP BBS
+				intersection
+					Rect CAP 0 (SB + BBD) (RightSB - BBD)
+					dispiro
+						flat 0 (CAP * (1 - 0.77)) [widths.center BBS]
+						curl Width (CAP * 0.77)

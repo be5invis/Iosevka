@@ -1,0 +1,78 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Two : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
+
+	define [TwoStraightNeckArcT sink offset sw top] : begin
+		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
+		define xLeft : SB + offset
+		define xRight : RightSB - offset - OX / 2
+		define yPhRight : top - smooth * 1.625 - sw / 2 * (top / CAP)
+		define pStraightBarStart 0.625
+		return : sink
+			widths.rhs sw
+			g4 xLeft (top - Hook)
+			hookstart (top - offset - O)
+			g4.down.mid xRight (top - smooth)
+			flat [mix xLeft xRight pStraightBarStart] [mix sw yPhRight pStraightBarStart]
+			curl xLeft sw [widths.lhs sw]
+
+	define [TwoArcShapeT sink offset sw top] : begin
+		define smooth : [adviceGlottalStopSmooth top 1] * 0.95
+		return : sink
+			widths.rhs sw
+			g4 (SB + offset) (top - Hook)
+			hookstart (top - offset - O)
+			g4.down.mid (RightSB - offset - OX / 2) (top - smooth)
+			alsoThru.g2 0.5 ([StrokeWidthBlend 0.425 0.4 sw] * [linreg 500 1 700 0.95 Width]) [widths.center sw]
+			flat (SB - offset) 1 [widths.heading sw 0 Downward]
+			curl (SB - offset) 0 [heading Downward]
+
+	define [TwoShape top] : glyph-proc
+		include : TwoArcShapeT dispiro 0 Stroke top
+		include : HBarBottom  (SB + HalfStroke) RightSB 0
+		if SLAB : begin
+			include : UpwardRightSerif RightSB 0 VJut
+
+	define [TwoStraightNeckShape top] : glyph-proc
+		include : TwoStraightNeckArcT dispiro 0 Stroke top
+		include : HBarBottom SB RightSB 0
+		if SLAB : begin
+			include : UpwardRightSerif RightSB 0 VJut
+
+	create-glyph 'two.lnum.straightNeck' : glyph-proc
+		include : MarkSet.capital
+		include : TwoStraightNeckShape CAP
+
+	create-glyph 'two.onum.straightNeck' : glyph-proc
+		include : OnumMarks.e
+		include : TwoStraightNeckShape OnumHeight
+
+	create-glyph 'two.lnum.curlyNeck' : glyph-proc
+		include : MarkSet.capital
+		include : TwoShape CAP
+
+	create-glyph 'two.onum.curlyNeck' : glyph-proc
+		include : OnumMarks.e
+		include : TwoShape OnumHeight
+
+	select-variant 'two.lnum' [CodeLnum '2'] (follow -- 'two')
+	select-variant 'two.onum' [CodeOnum '2'] (follow -- 'two')
+	turned 'turnDigitTwo' 0x218A 'two.lnum' Middle (CAP / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/two' 0x1D7DA : glyph-proc
+		include : MarkSet.capital
+		include : TwoArcShapeT dispiro 0 BBS CAP
+		include : intersection
+			TwoArcShapeT spiro-outline 1 BBS CAP
+			VBarRight (RightSB - OX / 2 - BBD) 0 CAP BBS
+		include : HBarBottom (SB + BBS / 2 * HVContrast) RightSB 0 BBS

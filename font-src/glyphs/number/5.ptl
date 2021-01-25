@@ -1,0 +1,95 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Five : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
+
+	define [FiveShape] : params [top bp [sw Stroke] [bbd 0] [obl 0]] : glyph-proc
+		local t1 : top * bp * 0.8
+		local t2 : top * bp
+		local ycurly : YSmoothMidR t2 0 SmoothA SmoothB
+		local xleft : mix SB RightSB 0.025
+		local xright : [mix RightSB SB 0.05] - (OX - O)
+
+		include : difference
+			glyph-proc
+				local FiveStroke : dispiro
+					widths.rhs sw
+					g4 xleft (t2 - AHook * top / CAP)
+					hookstart (t2 - O)
+					g4 (RightSB - OX) ycurly
+					hookend O
+					g4 SB (Hook * top / CAP)
+
+				local FiveStrokeMask : spiro-outline
+					g4 (xleft + 1) (t2 - AHook * top / CAP)
+					hookstart (t2 - O - 1)
+					g4 (RightSB - OX - 1) ycurly
+					hookend (O + 1)
+					g4 (SB + 1) (Hook * top / CAP)
+
+				local fiveStroke : include FiveStroke
+				local firstKnot : currentGlyph.gizmo.unapply fiveStroke.rhsKnots.(fiveStroke.rhsKnots.length - 1)
+
+				local oblCor : Math.hypot 1 obl
+				local xVBar : firstKnot.x - oblCor * sw * HVContrast
+				local xVBarOffset : (top - firstKnot.y) * obl
+				include : HBarTop (xVBar + xVBarOffset) xright top sw
+				include : union
+					intersection [Rect (firstKnot.y + sw) firstKnot.y 0 Width] : dispiro
+						flat xVBar firstKnot.y [widths.rhs.heading (sw) Upward]
+						flat (xVBar + xVBarOffset) top [heading Upward]
+					intersection [Rect top (firstKnot.y + sw) 0 Width] : dispiro
+						flat xVBar firstKnot.y [widths.rhs.heading (oblCor * sw) Upward]
+						flat (xVBar + xVBarOffset) top [heading Upward]
+
+				if bbd : begin
+					include : intersection FiveStrokeMask [VBarRight (RightSB - OX - bbd) 0 CAP sw]
+					include : difference
+						VBarRight (firstKnot.x + bbd) 0 CAP sw
+						begin FiveStrokeMask
+						Rect (t2 / 2) 0 0 Width
+
+				if (!bbd && SLAB) : include : DownwardRightSerif xright top VJut
+			Rect (t2 / 2 + top * 0.015) (t2 / 2 - top * 0.015) 0 Middle
+
+	create-glyph 'five.lnum.verticalUpperLeftBar' : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP DesignParameters.fiveBarPos
+
+	create-glyph 'five.onum.verticalUpperLeftBar' : glyph-proc
+		include : OnumMarks.p
+		include : FiveShape CAP DesignParameters.fiveBarPos
+		include : ShiftDown
+
+	create-glyph 'five.lnum.obliqueUpperLeftBar' : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP DesignParameters.fiveBarPos (obl -- (1 / 12))
+
+	create-glyph 'five.onum.obliqueUpperLeftBar' : glyph-proc
+		include : OnumMarks.p
+		include : FiveShape CAP DesignParameters.fiveBarPos (obl -- (1 / 12))
+		include : ShiftDown
+
+	select-variant 'five.lnum' [CodeLnum '5'] (follow -- 'five')
+	select-variant 'five.onum' [CodeOnum '5'] (follow -- 'five')
+
+	create-glyph 'zhuangToneFive' 0x1BC : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP DesignParameters.fiveBarPos
+
+	create-glyph 'zhuangtonefive' 0x1BD : glyph-proc
+		include : MarkSet.e
+		include : FiveShape XH DesignParameters.fiveBarPos
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/five' 0x1D7DD : glyph-proc
+		include : MarkSet.capital
+		include : FiveShape CAP DesignParameters.fiveBarPos (sw -- BBS) (bbd -- BBD)
