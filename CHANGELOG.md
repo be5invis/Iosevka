@@ -1,5 +1,16 @@
 ## Modifications since version 2.x
 
+### 5.0.0-beta.2
+
+ * Fix broken curly variants of `x` and `X` (#824).
+ * Add compact-serifed and compact-top-serifed variants of `r` (#826).
+ * Allow Zeta to share variants with `Z` (#827).
+ * Add serifed and top-serifed variants for `S` and `s` (#822).
+ * Add oblique-upper-left-bar variant for `5` (#820).
+ * Add oval variant for `0` (#828).
+ * Add corner and flat-hooked variants for `?` (#829).
+
+
 ### 5.0.0-beta.1
 
  * **Breaking** Iosevka Aile and Iosevka Etoile now support `cv##` and `ss##` features.
