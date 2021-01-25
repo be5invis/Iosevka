@@ -1,0 +1,66 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Three : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumHeight OnumMarks ShiftDown CodeLnum CodeOnum
+	glyph-block-import Letter-Latin-Ezh : EzhShape
+
+	define [ThreeShapeT sink offset sw top] : glyph-proc
+		local barcenter : top * HBarPos
+		local threeRadius : ((top / 2) + HalfStroke - Smooth) * 1.25
+		local fine : sw * CThin
+
+		include : sink
+			widths.rhs sw
+			g4 (SB + offset - O) (top - Hook)
+			hookstart (top - offset - O)
+			g4 (RightSB - offset) (top - (SmoothB * (top - barcenter) / (top / 2)))
+			flat (RightSB - threeRadius + 0.01) (barcenter - (fine - sw / 2)) [widths.heading 0 fine Leftward]
+			curl (RightSB - threeRadius) (barcenter - (fine - sw / 2)) [heading Leftward]
+		include : sink
+			widths.lhs sw
+			g4 (SB + offset + O) Hook
+			hookstart (offset + O)
+			g4 (RightSB - offset - O * 2) (SmoothA * barcenter / (top / 2))
+			flat (RightSB - threeRadius + 0.01) (barcenter + (fine - sw / 2)) [widths.heading fine 0 Leftward]
+			curl (RightSB - threeRadius) (barcenter + (fine - sw / 2)) [heading Leftward]
+
+	define [ThreeShape top] : ThreeShapeT dispiro 0 Stroke top
+
+	create-glyph 'three.lnum.twoarcs' : glyph-proc
+		include : MarkSet.capital
+		include : ThreeShape CAP
+	create-glyph 'three.lnum.flattop' : glyph-proc
+		include : MarkSet.capital
+		include : EzhShape CAP 0 0.25 0.975
+	create-glyph 'three.onum.twoarcs' : glyph-proc
+		include : OnumMarks.p
+		include : ThreeShape CAP
+		include : ShiftDown
+	create-glyph 'three.onum.flattop' : glyph-proc
+		include : OnumMarks.p
+		include : EzhShape CAP 0 0.25 0.975
+		include : ShiftDown
+
+	select-variant 'three.lnum' [CodeLnum '3'] (follow -- 'three')
+	select-variant 'three.onum' [CodeOnum '3'] (follow -- 'three')
+
+	turned 'turnDigitThree' 0x218B 'three.lnum' Middle (CAP / 2)
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/three' 0x1D7DB : glyph-proc
+		include : MarkSet.capital
+		include : union
+			ThreeShapeT dispiro 0 BBS CAP
+			intersection
+				ThreeShapeT spiro-outline 1 BBS CAP
+				union
+					VBarRight (RightSB - BBD)         (CAP * HBarPos) CAP BBS
+					VBarRight (RightSB - BBD - O * 2) 0 (CAP * HBarPos)   BBS

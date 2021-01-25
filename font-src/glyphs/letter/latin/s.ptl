@@ -149,20 +149,78 @@ glyph-block Letter-Latin-S : begin
 			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   (RightSB + OX - SOBot) SHook
 
-	create-glyph 'S' 'S' : glyph-proc
-		include : MarkSet.capital
-		if SLAB : include : ArcStartSerif RightSB CAP Stroke Hook
-		if SLAB : include : ArcEndSerif   SB      0   Stroke Hook
-		include : [if SLAB SlabSStroke SStroke]
+	define SConfig : object
+		'serifless'   { SStroke         SmallSStroke          0  0 }
+		'serifed'     { SlabSStroke     SlabSmallSStroke      1  1 }
+		'topSerifed'  { HalfSlabSStroke HalfSlabSmallSStroke  1  0 }
+
+	foreach { suffix { upperShape lowerShape doTS doBS } } [Object.entries SConfig] : do
+		create-glyph "S.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : upperShape
+			if doTS : include : ArcStartSerif RightSB CAP Stroke Hook
+			if doBS : include : ArcEndSerif   SB      0   Stroke Hook
+
+		create-glyph "s.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : lowerShape
+			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+			if doBS : include : ArcEndSerif   SB      0  [AdviceStroke2 2 3 XH] Hook
+
+		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
+			include : MarkSet.if
+
+			if doTS : include : ArcStartSerif RightSB CAP Stroke Hook
+			local stroke : include : upperShape
+			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+			local sw : AdviceStroke2 2 3 CAP
+			include : dispiro
+				widths.lhs [AdviceStroke 4.5]
+				g4 start.x start.y
+				alsoThru 0.15 0.6 important
+				flat (RightSB - 1) Descender [widths sw 0]
+				curl RightSB Descender
+
+		if [not doBS] : create-glyph "sSwash.\(suffix)" : glyph-proc
+			include : MarkSet.p
+
+			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+			local stroke : include : lowerShape
+			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+			local sw : AdviceStroke2 2 3 XH
+			include : dispiro
+				widths.lhs [AdviceStroke 4.5]
+				g4 start.x start.y
+				alsoThru 0.15 0.6 important
+				flat (RightSB - 1) Descender [widths sw 0]
+				curl RightSB Descender
+
+
+		if [not doBS] : create-glyph "sRTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+
+			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
+			local stroke : include : lowerShape
+			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+			include : new-glyph : glyph-proc
+				local sw : AdviceStroke2 2 3 XH
+				include : refer-glyph "rtailBR"
+				include : Upright
+				include : Translate (start.x + sw * HVContrast) 0
+				include : Italify
+
+			include : VBarLeft start.x 0 start.y
+
+	select-variant 'S' 'S'
+	select-variant 's' 's'
+	select-variant 'SSwash' 0x2C7E
+	select-variant 'sSwash' 0x23F
+	select-variant 'sRTail' 0x282 (follow -- 'sSwash')
 
 	alias 'cyrl/Dze' 0x405 'S'
-
-	create-glyph 's' 's' : glyph-proc
-		include : MarkSet.e
-		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-		if SLAB : include : ArcEndSerif   SB      0  [AdviceStroke2 2 3 XH] Hook
-		include : [if SLAB SlabSmallSStroke SmallSStroke]
-
 	alias 'cyrl/dze' 0x455 's'
 
 	create-glyph 's.phoneticRight' : glyph-proc
@@ -239,50 +297,6 @@ glyph-block Letter-Latin-S : begin
 		local start : currentGlyph.gizmo.unapply stroke.rhsKnots.(0)
 		include : VBarRight start.x (-Accent) start.y
 
-	create-glyph 'srtail' 0x282 : glyph-proc
-		include : MarkSet.p
-
-		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-		local stroke : include : [if SLAB HalfSlabSmallSStroke SmallSStroke]
-		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
-
-		include : new-glyph : glyph-proc
-			local sw : AdviceStroke2 2 3 XH
-			include : refer-glyph "rtailBR"
-			include : Upright
-			include : Translate (start.x + sw * HVContrast) 0
-			include : Italify
-
-		include : VBarLeft start.x 0 start.y
-	create-glyph 'Sswash' 0x2C7E : glyph-proc
-		include : MarkSet.if
-
-		if SLAB : include : ArcStartSerif RightSB CAP Stroke Hook
-		local stroke : include : [if SLAB HalfSlabSStroke SStroke]
-		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
-
-		local sw : AdviceStroke2 2 3 CAP
-		include : dispiro
-			widths.lhs [AdviceStroke 4.5]
-			g4 start.x start.y
-			alsoThru 0.15 0.6 important
-			flat (RightSB - 1) Descender [widths sw 0]
-			curl RightSB Descender
-
-	create-glyph 'sswash' 0x23F : glyph-proc
-		include : MarkSet.p
-
-		if SLAB : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-		local stroke : include : [if SLAB HalfSlabSmallSStroke SmallSStroke]
-		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
-
-		local sw : AdviceStroke2 2 3 XH
-		include : dispiro
-			widths.lhs [AdviceStroke 4.5]
-			g4 start.x start.y
-			alsoThru 0.15 0.6 important
-			flat (RightSB - 1) Descender [widths sw 0]
-			curl RightSB Descender
 
 	create-glyph 'dollar.open' : glyph-proc
 		include : MarkSet.capital

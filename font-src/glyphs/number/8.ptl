@@ -1,0 +1,171 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Eight : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : CodeLnum CodeOnum
+
+	local EightPr : StrokeWidthBlend 0.85 0.925
+	define [EightShape top] : begin
+		local stroke : AdviceStroke2 2 3 CAP
+		local p 0.96
+		local l (SB + OX)
+		local r (RightSB - OX)
+		return : dispiro
+			widths.rhs stroke
+			g4.right.mid (Middle - CorrectionOMidS) (top - O)
+			archv
+			g4 [mix l r p] (top - [SmoothBOf (Smooth * EightPr) Width])
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 (l) [SmoothBOf (Smooth * EightPr) Width] [widths.lhs stroke]
+			arcvh
+			g4.right.mid (Middle + CorrectionOMidS) (O)
+			archv
+			g4 (r) [SmoothAOf (Smooth * EightPr) Width] [widths.lhs stroke]
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4 [mix r l p] (top - [SmoothAOf (Smooth * EightPr) Width]) [widths.rhs stroke]
+			arcvh
+			close
+
+	create-glyph 'eight.lnum.crossing' : glyph-proc
+		include : MarkSet.capital
+		include : EightShape CAP
+
+	define [EightCirclesShape stroke top] : begin
+		local pShrink 1.00
+		local pSizeDiffY : StrokeWidthBlend 0.95 0.94
+		local pSizeDiffX : StrokeWidthBlend 0.95 0.96
+
+		local yMid : top / (1 + pSizeDiffY)
+		local sma : SmoothAOf (Smooth * 0.9) Width
+		local smb : SmoothBOf (Smooth * 0.9) Width
+		local smaTop : SmoothAOf (Smooth * 0.9 * pSizeDiffY) Width
+		local smbTop : SmoothBOf (Smooth * 0.9 * pSizeDiffY) Width
+
+		local botLeft  : mix SB RightSB (1 - pShrink)
+		local botRight : mix SB RightSB pShrink
+		local topLeft  : mix SB RightSB (1 - pShrink * pSizeDiffX)
+		local topRight : mix SB RightSB (pShrink * pSizeDiffX)
+
+		local fine : stroke * CThin
+		local mc : CorrectionOMidX * stroke
+		local coFine : stroke / 2 - (stroke - fine)
+		local spT : StrokeWidthBlend 2.08 2.20
+		local spB : StrokeWidthBlend 2.18 2.20
+
+		return : union
+			dispiro
+				widths.rhs stroke
+				g4 (Middle - mc) (top - O)
+				archv.superness spB
+				g4 (topRight - OX) [YSmoothMidR (top - O) (yMid - coFine) smaTop smbTop]
+				arcvh.superness spT
+				g4 (Middle + mc) (yMid - coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (topLeft + OX) [YSmoothMidL (top - O) (yMid - coFine) smaTop smbTop] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+			dispiro
+				widths.rhs stroke
+				g4 (Middle + mc) O
+				archv.superness spB
+				g4 (botLeft + OX) [YSmoothMidL (yMid + coFine) O sma smb]
+				arcvh.superness spT
+				g4 (Middle - mc) (yMid + coFine) [widths.rhs fine]
+				archv.superness spT
+				g4 (botRight - OX) [YSmoothMidR (yMid + coFine) O sma smb] [widths.rhs stroke]
+				arcvh.superness spB
+				close
+
+
+	create-glyph 'eight.lnum.twoCircles' : glyph-proc
+		include : MarkSet.capital
+		include : EightCirclesShape [AdviceStroke2 2 3 CAP] CAP
+
+	select-variant 'eight.lnum' [CodeLnum '8'] (follow -- 'eight')
+	alias 'eight.onum' [CodeOnum '8'] 'eight.lnum'
+
+	# There is an "eight without lower contour" shape used for /propto
+	create-glyph 'rotetedPropto' : glyph-proc # rotetedPropto
+		local p 0.96
+		local py 0.4
+		local l (SB + OX)
+		local r (RightSB - OX)
+		include : dispiro
+			widths.lhs
+			straight.up.start r 0 [heading Upward]
+			alsoThru 0.5 (1 - py) [widths (Stroke * py) (Stroke * (1 - py))]
+			g4 [mix r l p] (CAP - SmoothA * p * EightPr) [widths.rhs]
+			arcvh
+			g4 (Middle - CorrectionOMidS) (CAP - O)
+			archv
+			g4 [mix l r p] (CAP - SmoothB * p * EightPr)
+			alsoThru 0.5 py [widths (Stroke * py) (Stroke * (1 - py))]
+			straight.down.end l 0 [widths.heading Stroke 0 Downward]
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+
+	define [BBEightSd] : params [top swStart swEnd kTop sign OffsetLT OffsetRB OffsetC] : begin
+		define stroke : Math.max swStart swEnd
+		define fine   : Math.min swStart swEnd
+		define soStart : stroke - swStart
+		define soEnd   : stroke - swEnd
+		define bbOvershoot : BBD / 8
+		define xLeftTop  : [mix SB RightSB (1 - kTop)] - bbOvershoot
+		define xRightTop : mix SB RightSB kTop
+		define xLeftBot  : SB + OX
+		define xRightBot : RightSB - OX + bbOvershoot
+		define sma : SmoothAOf (Smooth * EightPr) Width
+		define smb : SmoothBOf (Smooth * EightPr) Width
+
+		define NcCenterX   : mix xLeftTop     xRightBot   0.5
+		define NcCenterY   : mix (top - sma)  (sma)       0.5
+
+		define [Center s] : object
+			x : mix (xLeftTop + [OffsetLT s].x) (xRightBot - [OffsetRB s].x) 0.5
+			y : mix (top - sma)                 (sma)                        0.5
+
+		return : dispiro
+			g2   ([Center 1].x + [OffsetC 1].x) ([Center 1].y + [OffsetC 1].y) [widths.center stroke]
+			g4   (xRightTop - HVContrast * soStart) (top - smb) [widths.lhs fine]
+			arcvh
+			g4   (Middle - CorrectionOMidX * stroke - bbOvershoot / 2) (top - O - soStart)
+			archv
+			g4   (xLeftTop + [OffsetLT sign].x) (top - sma + [OffsetLT sign].y)
+			g2   ([Center sign].x + [OffsetC sign].x) ([Center sign].y + [OffsetC sign].y) [widths.center stroke]
+			g4   (xRightBot - [OffsetRB sign].x) (sma + [OffsetRB sign].y) [widths.rhs fine]
+			arcvh
+			g4   (Middle + CorrectionOMidX * stroke + bbOvershoot / 2) (O + soEnd)
+			archv
+			g4   (xLeftBot + HVContrast * soEnd) smb [widths.rhs fine]
+			g2   ([Center (-1)].x + [OffsetC (-1)].x) ([Center (-1)].y + [OffsetC (-1)].y) [widths.center stroke]
+
+	create-glyph 'mathbb/eight' 0x1D7E0 : glyph-proc
+		include : MarkSet.capital
+		define theta : Math.PI / 4
+		foreach sign [items-of { 1 (-1) }] : begin
+			include : BBEightSd
+				top     -- CAP
+				swStart -- BBS * [if (sign > 0) CThin 1]
+				swEnd   -- BBS * [if (sign < 0) CThin 1]
+				kTop    -- 0.96
+				ess     -- BBD
+				sign    -- sign
+				OffsetC -- [lambda [s] {
+					.x (0.5 * s * BBD * [Math.sin theta])
+					.y (0.5 * s * BBD * [Math.cos theta])
+				}]
+				OffsetLT -- [lambda [s] {
+					.x [if (s > 0) (BBD / 2) 0]
+					.y ([if (s > 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]
+				OffsetRB -- [lambda [s] {
+					.x [if (s < 0) (BBD / 2) 0]
+					.y ([if (s < 0) 0.25 0.375] * s * BBD * [Math.cos theta])
+				}]

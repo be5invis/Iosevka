@@ -1,0 +1,116 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Four : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : OnumMarks ShiftDown CodeLnum CodeOnum
+
+	define [FourStdShape] : params [top open crossing [fine : AdviceStroke 3] [sw Stroke] [bbd 0]] : glyph-proc
+		local yBar (top * 0.4)
+
+		define xVertBar : [mix SB RightSB [if crossing 0.825 0.9125]] - (bbd * 0.75)
+		define yVertBarTop : mix (yBar - sw) top [if open 0.5 1]
+		define xHBarTerminal : if crossing RightSB xVertBar
+		define xSlopeTop : xVertBar - sw * HVContrast - fine * HVContrast * [if crossing 0.25 0.5]
+
+		include : union
+			VBarRight xVertBar 0 yVertBarTop sw
+			difference
+				HBarTop (SB + OX) xHBarTerminal yBar sw
+				Rect CAP 0 xVertBar (xVertBar + bbd)
+			intersection
+				if open
+					Rect top yBar 0 Width
+					Rect top yBar 0 xVertBar
+				dispiro
+					widths.rhs fine
+					g4 (SB + OX) yBar
+					g4 [mix (SB + OX) xSlopeTop 2] [mix yBar top 2]
+
+		if bbd : begin
+			include : VBarRight (xVertBar + bbd) 0 yVertBarTop sw
+			include : HBarTop xVertBar (xVertBar + bbd) CAP sw
+			include : HBarBottom xVertBar (xVertBar + bbd) 0 sw
+		if (!bbd && SLAB) : begin
+			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
+
+	define [FourOpenShape top crossing] : glyph-proc
+		local yBar (top * 0.4)
+		local fine : AdviceStroke 3
+
+		define xVertBar : mix SB RightSB [if crossing 0.825 0.9125]
+		define xHBarTerminal : if crossing RightSB xVertBar
+
+		include : HBarTop SB xHBarTerminal yBar
+		include : VBarRight xVertBar 0 [mix (yBar - Stroke) top 0.75]
+		include : VBarLeft SB yBar top
+		if SLAB : begin
+			include : CenterBottomSerif (xVertBar - HalfStroke * HVContrast) 0 Jut
+
+	create-glyph 'four.lnum.closed' : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP false true
+
+	create-glyph 'four.lnum.closedNonCrossing' : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP false false
+
+	create-glyph 'four.lnum.semiOpen' : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP true true
+
+	create-glyph 'four.lnum.semiOpenNonCrossing' : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP true false
+
+	create-glyph 'four.lnum.open' : glyph-proc
+		include : MarkSet.capital
+		include : FourOpenShape CAP true
+
+	create-glyph 'four.lnum.openNonCrossing' : glyph-proc
+		include : MarkSet.capital
+		include : FourOpenShape CAP false
+
+	create-glyph 'four.onum.closed' : glyph-proc
+		include : OnumMarks.p
+		include : FourStdShape CAP false true
+		include : ShiftDown
+
+	create-glyph 'four.onum.closedNonCrossing' : glyph-proc
+		include : OnumMarks.p
+		include : FourStdShape CAP false false
+		include : ShiftDown
+
+	create-glyph 'four.onum.semiOpen' : glyph-proc
+		include : OnumMarks.p
+		include : FourStdShape CAP true true
+		include : ShiftDown
+
+	create-glyph 'four.onum.semiOpenNonCrossing' : glyph-proc
+		include : OnumMarks.p
+		include : FourStdShape CAP true false
+		include : ShiftDown
+
+	create-glyph 'four.onum.open' : glyph-proc
+		include : OnumMarks.p
+		include : FourOpenShape CAP true
+		include : ShiftDown
+
+	create-glyph 'four.onum.openNonCrossing' : glyph-proc
+		include : OnumMarks.p
+		include : FourOpenShape CAP false
+		include : ShiftDown
+
+	select-variant 'four.lnum' [CodeLnum '4'] (follow -- 'four')
+	select-variant 'four.onum' [CodeOnum '4'] (follow -- 'four')
+
+	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
+	create-glyph 'mathbb/four' 0x1D7DC : glyph-proc
+		include : MarkSet.capital
+		include : FourStdShape CAP false true (sw -- BBS) (bbd -- BBD) (fine -- BBS)

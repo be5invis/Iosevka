@@ -1,0 +1,122 @@
+$$include '../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [AnyCv getGrMesh] from "../../support/gr"
+
+glyph-module
+
+glyph-block Digits-Six : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Digits-Shared : CodeLnum CodeOnum
+
+	glyph-block-export OpenContourSixShape
+	define [OpenContourSixShape charTop] : glyph-proc
+		local oTop : charTop * 0.55 + Stroke / 2
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
+		local fine   : Stroke * CThinB
+		local coFine : Math.max [AdviceStroke 3.5] (Stroke - fine / 2)
+		include : dispiro
+			widths.rhs fine
+			g4.left.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine)
+			archv
+			g4 (SB + OX + (Stroke - fine) * HVContrast) ymiddlea
+			arcvh
+			g4 (Middle - CorrectionOMidS) (oTop - O) [widths.rhs]
+			archv
+			g4.down.mid (RightSB - OX) ymiddleb
+			arcvh
+			g4.left.mid (Middle + CorrectionOMidS) (O)
+			archv
+			g4.up.mid (SB + OX) (ymiddlea + Stroke * 0.3) [widths.rhs coFine]
+			quadcontrols 0 0.85
+			g4 ([mix SB RightSB 0.85] - 0.25 * Stroke * HVContrast) (charTop - O) [widths.rhs]
+
+	glyph-block-export ClosedContourNineShape
+	define [ClosedContourNineShape top] : glyph-proc
+		local u top
+		local d : Math.min (u - SmallSmoothA - SmallSmoothB - 0.1) (top * 0.45 - HalfStroke)
+		local l (SB + OX)
+		local r (RightSB - OX)
+		local ymiddlea : mix u d 0.5
+		include : dispiro
+			widths.rhs (Stroke * CThinB)
+			flat (r - Stroke * (1 - CThinB) * HVContrast) ymiddlea
+			curl (r - Stroke * (1 - CThinB) * HVContrast) (d + SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] + CorrectionOMidS) (d + O) [widths 0 Stroke]
+			archv
+			flat l (d + SmallSmoothB)
+			curl l (u - SmallSmoothA)
+			arcvh
+			g4   ([mix l r 0.5] - CorrectionOMidS) (u - O)
+			archv
+			flat r ymiddlea
+			curl r SmallSmoothA
+			hookend O
+			g4 SB Hook
+
+	glyph-block-export StraightBarSixShape
+	define [StraightBarSixShape] : params [charTop [sw Stroke] [bbd 0]] : glyph-proc
+		local oTop : charTop * 0.55 + sw / 2
+		local ymiddlea : (oTop - SmallSmoothA + SmallSmoothB) / 2
+		local ymiddleb : (oTop - SmallSmoothB + SmallSmoothA) / 2
+		local fine   : sw * CThin
+		local coFine : Math.max (sw * CThin) (sw - fine / 2)
+
+		local xMockBarStart   0
+		local yMockBarStart : ymiddlea + sw * 0.3
+		local xTerminal0 : [mix SB RightSB 0.6] - 0.5 * sw * HVContrast
+		local kDiagBbd : DiagCorDs (charTop - yMockBarStart) (xTerminal0 - xMockBarStart) bbd
+		local xTerminal : xTerminal0 + (kDiagBbd * bbd / 2)
+		local pStraightBarStart : 0.75 - (sw / charTop)
+		include : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				widths.rhs fine
+				g4.left.start (Middle + bbd / 2 + CorrectionOMidS - TanSlope * (sw - fine)) (O + sw - fine + 1/16)
+				archv
+				g4.up.mid (SB + bbd + OX + (sw - fine) * HVContrast + 1/16) ymiddlea
+				arcvh
+				g4 (Middle + bbd / 2 - CorrectionOMidS) (oTop - O) [widths.rhs sw]
+				archv
+				g4.down.mid (RightSB - OX) ymiddleb
+				arcvh
+				g4.left.mid (Middle + bbd / 2 + CorrectionOMidS) (O)
+				archv
+				g4.up.mid (SB + bbd + OX) (ymiddlea + sw * 0.3) [widths.rhs coFine]
+				flat [mix (xMockBarStart + bbd) xTerminal pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart] [widths.rhs sw]
+				curl [mix (xMockBarStart + bbd) xTerminal 2]                 [mix yMockBarStart charTop 2]
+
+		if bbd : include : HBarTop (xTerminal - kDiagBbd * bbd) xTerminal charTop sw
+		if bbd : include : intersection
+			Rect charTop (-charTop) (-Width) (2 * Width)
+			dispiro
+				g4.left.mid (Middle + bbd / 2 + CorrectionOMidS) (O) [widths.rhs sw]
+				archv
+				g4.up.mid (SB + OX) (ymiddlea + sw * 0.3)
+				flat [mix xMockBarStart (xTerminal - kDiagBbd * bbd) pStraightBarStart] [mix yMockBarStart charTop pStraightBarStart]
+				curl [mix xMockBarStart (xTerminal - kDiagBbd * bbd) 2]                 [mix yMockBarStart charTop 2]
+
+	create-glyph 'six.lnum.openContour' : glyph-proc
+		include : MarkSet.capital
+		include : OpenContourSixShape CAP
+
+	create-glyph 'six.lnum.closedContour' : glyph-proc
+		include : MarkSet.capital
+		include : ClosedContourNineShape CAP
+		include : FlipAround (Middle) (CAP / 2)
+
+	create-glyph 'six.lnum.straightBar' : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP
+
+	select-variant 'six.lnum' [CodeLnum '6'] (follow -- 'six')
+	alias          'six.onum' [CodeOnum '6'] 'six.lnum'
+
+	glyph-block-import Letter-Blackboard : BBS BBD
+	create-glyph 'mathbb/six' 0x1D7DE : glyph-proc
+		include : MarkSet.capital
+		include : StraightBarSixShape CAP (sw -- BBS) (bbd -- BBD)
