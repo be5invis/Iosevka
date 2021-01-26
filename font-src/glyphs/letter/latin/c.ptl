@@ -10,7 +10,8 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : CurlyTail
-	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs ArcStartSerif ArcStartHookTop
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcStart_LtrRhs
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifL ArcStartSerifR ArcStartHookTop
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define [CShapeT sink offset sma smb top bot sw] : sink
@@ -22,13 +23,12 @@ glyph-block Letter-Latin-C : begin
 		hookend (bot + O + offset)
 		g4 RightSB (bot + Hook)
 
-	define [CShapeSlabArcT sink offset sma smb top bot sw origBar] : begin
-		return : sink
-			SerifedArcStart_RtlLhs (RightSB - offset) Middle top sw Hook origBar
-			flat (SB + OX + offset) (top - sma)
-			curl (SB + OX + offset) (bot + smb)
-			hookend (bot + O + offset)
-			g4 RightSB (bot + Hook)
+	define [CShapeSlabArcT sink offset sma smb top bot sw origBar] : sink
+		SerifedArcStart_RtlLhs (RightSB - offset) Middle top sw Hook origBar
+		flat (SB + OX + offset) (top - sma)
+		curl (SB + OX + offset) (bot + smb)
+		hookend (bot + O + offset)
+		g4 RightSB (bot + Hook)
 
 	glyph-block-export CShape
 	define [CShape top bot sw] : CShapeT dispiro 0 SmoothA SmoothB top bot sw
@@ -37,16 +37,24 @@ glyph-block Letter-Latin-C : begin
 	define [SmallCShapeOutline top bot sw] : CShapeT spiro-outline 1 SmallSmoothA SmallSmoothB top bot sw
 
 	define [CSerifedShape top bot sw] : glyph-proc
-		include : ArcStartSerif RightSB top Stroke Hook
+		include : ArcStartSerifR RightSB top Stroke Hook
 		include : CShapeSlabArcT dispiro 0 SmoothA SmoothB top bot sw
 	define [SmallCSerifedShape top bot sw] : glyph-proc
-		include : ArcStartSerif RightSB top Stroke Hook
+		include : ArcStartSerifR RightSB top Stroke Hook
 		include : CShapeSlabArcT dispiro 0 SmallSmoothA SmallSmoothB top bot sw
 
-	define [RevCShape top bot sw] : dispiro
+	define [RevCShape top bot sma smb sw] : dispiro
 		widths.rhs sw
 		g4 SB (top - Hook)
 		hookstart (top - O)
+		flat (RightSB - OX) (top - sma)
+		curl (RightSB - OX) (bot + smb)
+		hookend (bot + O)
+		g4 SB (bot + Hook)
+
+	define [SlabRevCShape top bot sma smb sw] : dispiro
+		widths.rhs sw
+		SerifedArcStart_LtrRhs SB Middle top sw Hook
 		flat (RightSB - OX) (top - SmoothA)
 		curl (RightSB - OX) (bot + SmoothB)
 		hookend (bot + O)
@@ -58,7 +66,7 @@ glyph-block Letter-Latin-C : begin
 
 	create-glyph 'revC' 0x2183 : glyph-proc
 		include : MarkSet.capital
-		include : RevCShape CAP 0 Stroke
+		include : RevCShape CAP 0 SmoothA SmoothB Stroke
 
 	alias 'cyrl/Es' 0x421 'C'
 	alias 'grek/lunateSigma' 0x3F9 'C'
@@ -166,7 +174,7 @@ glyph-block Letter-Latin-C : begin
 		local x2 : SB + stroke * 0.3
 		local y2 : -XH * 0.05
 
-		if SLAB : include : ArcStartSerif RightSB XH Stroke Hook
+		if SLAB : include : ArcStartSerifR RightSB XH Stroke Hook
 		include : dispiro
 			if SLAB
 				SerifedArcStart_RtlLhs RightSB Middle XH stroke Hook
@@ -177,13 +185,15 @@ glyph-block Letter-Latin-C : begin
 			CurlyTail fine rinner m1 0 RightSB x2 y2
 
 	create-glyph 'cyrl/E' 0x42D : glyph-proc
-		include [refer-glyph "C"] AS_BASE
-		include : FlipAround Middle (CAP / 2)
+		include : MarkSet.capital
+		include : [if SLAB SlabRevCShape RevCShape] CAP 0 SmoothA SmoothB Stroke
+		if SLAB : include : ArcStartSerifL SB CAP Stroke Hook
 		include : HBar [mix SB RightSB 0.25] RightSB (CAP / 2)
 
 	create-glyph 'cyrl/e' 0x44D : glyph-proc
-		include [refer-glyph "c"] AS_BASE
-		include : FlipAround Middle (XH / 2)
+		include : MarkSet.e
+		include : [if SLAB SlabRevCShape RevCShape] XH 0 SmallSmoothA SmallSmoothB Stroke
+		if SLAB : include : ArcStartSerifL SB XH Stroke Hook
 		include : HBar [mix SB RightSB 0.25] RightSB (XH / 2)
 
 	create-glyph 'cyrl/Ye' 0x404 : glyph-proc
