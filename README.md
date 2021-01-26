@@ -488,9 +488,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-g = 'toothed-hookless'`, `cv06 = 1`: Toothed G.
     + `capital-g = 'toothless-corner-hookless'`, `cv06 = 2`: Corner toothless G.
     + `capital-g = 'toothless-rounded-hookless'`, `cv06 = 3`: Round toothless G.
-    + `capital-g = 'toothed-hooked'`, `cv06 = 4`: Toothed G with invard hook at terminal (default).
-    + `capital-g = 'toothless-corner-hooked'`, `cv06 = 5`: Corner toothless G with invard hook at terminal.
-    + `capital-g = 'toothless-rounded-hooked'`, `cv06 = 6`: Round toothless G with invard hook at terminal.
+    + `capital-g = 'toothed-hooked'`, `cv06 = 4`: Toothed G with inward hook at terminal (default).
+    + `capital-g = 'toothless-corner-hooked'`, `cv06 = 5`: Corner toothless G with inward hook at terminal.
+    + `capital-g = 'toothless-rounded-hooked'`, `cv06 = 6`: Round toothless G with inward hook at terminal.
     + `capital-g = 'toothed-capped'`, `cv06 = 7`: Toothed G with a cap terminal.
     + `capital-g = 'toothless-corner-capped'`, `cv06 = 8`: Corner toothless G with a cap terminal.
     + `capital-g = 'toothless-rounded-capped'`, `cv06 = 9`: Round toothless G with a cap terminal.
