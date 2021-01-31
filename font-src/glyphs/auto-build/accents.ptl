@@ -1,7 +1,7 @@
 ###### Automatic builds
 $$include '../../meta/macros.ptl'
 
-import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose] from "../../support/gr"
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose ZReduced] from "../../support/gr"
 import [fallback] from '../../support/utils'
 
 glyph-module
@@ -32,10 +32,14 @@ glyph-block AutoBuild-Accents : begin
 		set parts.(j) [query-glyph 'ogonekTR']
 
 	define [subParts parts] : begin
+		# Reduce Z variants
+		if [ZReduced.get parts.0] : begin
+			local reduced : query-glyph : ZReduced.get parts.0
+			if reduced : set parts.0 reduced
+
+		# Handle dotless
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
-
-		# replace dotted-i and dotted-j with dotless equalivents
 		if (hasMarkAbove && [Dotless.get parts.0]) : begin
 			local dotless [query-glyph : Dotless.get parts.0]
 			if dotless : set parts.0 dotless
@@ -117,6 +121,7 @@ glyph-block AutoBuild-Accents : begin
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
 		local nonTrivial : AnyDerivingCv.hasNonDerivingVariants s_parts.0
+		if nonTrivial : console.log s_parts.0
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
 			if (part.markAnchors && part.markAnchors.bottomright) : begin
