@@ -133,26 +133,36 @@ glyph-block AutoBuild-Accents : begin
 		set s_parts  parts
 		return : create-glyph goalName code construction
 
+	define [NeedBuildMesh glyphName part0Name] : begin
+		define g : query-glyph glyphName
+		define part0 : query-glyph part0Name
+		if [not g] : return false
+		if [not part0] : return false
+		if [not : CvDecompose.get g] : return true
+		if [DotlessOrNot.query part0] : return true
+		return false
+
 	foreach [_id : items-of : Object.keys foundDecompositions] : do
 		local { glyphName code parts } foundDecompositions.(_id)
 
-		local result : RootGlyphProc glyphName code parts
-		if result : begin
+		local saved : RootGlyphProc glyphName code parts
+		if saved : begin
 			define part0Name : glyphStore.queryNameOf parts.0
 			if (parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
 
-		local dstTree {}
-		local targetNameMap  {.}
-		set targetNameMap.(part0Name) glyphName
-		local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
-		foreach [{gr origBase relBase} : items-of tree] : begin
-			local origGN targetNameMap.(origBase)
-			if [not origGN] : throw : new Error 'Unreachable'
-			local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
-			local parts1 : parts.slice 0
-			set parts1.0 : query-glyph relBase
-			if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
-			if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
+		if [NeedBuildMesh glyphName part0Name] : begin
+			local dstTree {}
+			local targetNameMap  {.}
+			set targetNameMap.(part0Name) glyphName
+			local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
+			foreach [{gr origBase relBase} : items-of tree] : begin
+				local origGN targetNameMap.(origBase)
+				if [not origGN] : throw : new Error 'Unreachable'
+				local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
+				local parts1 : parts.slice 0
+				set parts1.0 : query-glyph relBase
+				if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
+				if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
 
 define customDecompositions : object
 	# Latvians use comma instead of cedillas in several letters.

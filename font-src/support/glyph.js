@@ -85,18 +85,10 @@ module.exports = class Glyph {
 			}
 		}
 
-		const newContours = this.includeGeometry(g, shift.x, shift.y);
+		this.includeGlyphImpl(g, shift.x, shift.y);
 		if (copyAnchors || g.isMarkSet) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
 		this.dependsOn(g);
-		if (g._m_identifier && newContours && newContours.length) {
-			this.semanticInclusions.push({
-				glyph: g,
-				x: shift.x,
-				y: shift.y,
-				contours: newContours
-			});
-		}
 	}
 	cloneFromGlyph(g) {
 		this.includeGlyph(g, true, true);
@@ -113,12 +105,6 @@ module.exports = class Glyph {
 		this.avoidBeingComposite = g.avoidBeingComposite;
 	}
 
-	includeGeometry(geom, shiftX, shiftY) {
-		if (!geom || !geom.contours || !geom.contours.length) return null;
-		if (this.includeGeometryAsTransparentReferences(geom, shiftX, shiftY)) return null;
-		return this.includeContours(geom.contours, shiftX, shiftY);
-	}
-
 	isPureComposite() {
 		if (!this.semanticInclusions || !this.semanticInclusions.length) return false;
 		const origContourSet = new Set(this.contours);
@@ -133,22 +119,28 @@ module.exports = class Glyph {
 		return true;
 	}
 
-	includeGeometryAsTransparentReferences(geom, shiftX, shiftY) {
-		if (!(geom instanceof Glyph && !geom._m_identifier)) return false;
-		if (!geom.isPureComposite()) return false;
-
-		for (const sr of geom.semanticInclusions) {
-			const cs = this.includeContours(sr.glyph.contours, sr.x + shiftX, sr.y + shiftY);
-			if (cs) {
-				this.semanticInclusions.push({
-					glyph: sr.glyph,
-					x: sr.x + shiftX,
-					y: sr.y + shiftY,
-					contours: cs
-				});
-			}
+	includeGlyphImpl(g, shiftX, shiftY) {
+		if (g._m_identifier) {
+			this.includeGlyphComponentImpl(g, shiftX, shiftY);
+		} else {
+			this.includeGeometry(g, shiftX, shiftY);
 		}
-		return true;
+	}
+	includeGlyphComponentImpl(g, shiftX, shiftY) {
+		const newContours = this.includeGeometry(g, shiftX, shiftY);
+		if (newContours && newContours.length) {
+			this.semanticInclusions.push({
+				glyph: g,
+				x: shiftX,
+				y: shiftY,
+				contours: newContours
+			});
+		}
+	}
+
+	includeGeometry(geom, shiftX, shiftY) {
+		if (!geom || !geom.contours || !geom.contours.length) return null;
+		return this.includeContours(geom.contours, shiftX, shiftY);
 	}
 	includeContours(contours, shiftX, shiftY) {
 		let newContours = [];
