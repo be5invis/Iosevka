@@ -12,11 +12,11 @@ glyph-module
 
 glyph-block Common-Derivatives : begin
 	glyph-block-import CommonShapes : FlipAround
-	define [ApplyCv g follow para name] : begin
+	define [ApplyCv g shapeFrom follow para] : begin
 		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
 			local suffix : h.resolveFor para follow
 			if suffix : begin
-				local dstName : [fallback name follow] + '.' + suffix
+				local dstName : shapeFrom + '.' + suffix
 				local dst : glyphStore.queryByName dstName
 				if dst : g.dependsOn dst
 				if (h.tag && h.rank) : begin
@@ -24,14 +24,14 @@ glyph-block Common-Derivatives : begin
 					if h.nonDeriving : [Cv h.tag h.rank].setPreventDeriving g
 
 	define [select-variant] : params [name unicode [shapeFrom name] [follow name]] : begin
-		if [not : glyph-is-needed shapeFrom] : return nothing
+		if [not : glyph-is-needed name] : return nothing
 
 		local variant para.variantSelector.(follow)
 		if [not variant] : throw : new Error "Variant for \(name) is not assigned."
 
 		create-glyph name unicode : glyph-proc
 			include [refer-glyph (shapeFrom + '.' + variant)] AS_BASE ALSO_METRICS
-			ApplyCv currentGlyph follow para shapeFrom
+			ApplyCv currentGlyph shapeFrom follow para
 			set this.autoRefPriority [query-glyph (shapeFrom + '.' + variant)].autoRefPriority
 
 	define [orthographic-italic name unicode] : if para.isItalic
@@ -76,7 +76,7 @@ glyph-block Common-Derivatives : begin
 		if glyphDst : begin
 			foreach [gr : items-of : AnyCv.query glyphSrc] : begin
 				gr.set glyphDst [gr.get glyphSrc]
-				if [gr.setPreventDeriving glyphSrc] : gr.setPreventDeriving glyphDst
+				if [gr.getPreventDeriving glyphSrc] : gr.setPreventDeriving glyphDst
 			if [Dotless.get glyphSrc] : Dotless.set glyphDst [Dotless.get glyphSrc]
 
 	define [turned newid unicode id _x _y mark] : begin

@@ -1,7 +1,7 @@
 ###### Automatic builds
 $$include '../../meta/macros.ptl'
 
-import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose] from "../../support/gr"
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose ZReduced] from "../../support/gr"
 import [fallback] from '../../support/utils'
 
 glyph-module
@@ -32,10 +32,14 @@ glyph-block AutoBuild-Accents : begin
 		set parts.(j) [query-glyph 'ogonekTR']
 
 	define [subParts parts] : begin
+		# Reduce Z variants
+		if [ZReduced.get parts.0] : begin
+			local reduced : query-glyph : ZReduced.get parts.0
+			if reduced : set parts.0 reduced
+
+		# Handle dotless
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
-
-		# replace dotted-i and dotted-j with dotless equalivents
 		if (hasMarkAbove && [Dotless.get parts.0]) : begin
 			local dotless [query-glyph : Dotless.get parts.0]
 			if dotless : set parts.0 dotless
@@ -102,6 +106,8 @@ glyph-block AutoBuild-Accents : begin
 				set parts : subParts parts
 				set foundDecompositions.(glyphName) { glyphName code parts }
 
+	local s_goalName  nothing
+	local s_code      nothing
 	local s_parts     nothing
 
 	define [recursivelyDecompose g sink] : begin
@@ -115,6 +121,7 @@ glyph-block AutoBuild-Accents : begin
 	define construction : glyph-proc
 		include s_parts.0 AS_BASE ALSO_METRICS
 		local nonTrivial : AnyDerivingCv.hasNonDerivingVariants s_parts.0
+		if nonTrivial : console.log s_parts.0
 		foreach part [items-of : s_parts.slice 1] : if part : begin
 			include part
 			if (part.markAnchors && part.markAnchors.bottomright) : begin
@@ -126,29 +133,41 @@ glyph-block AutoBuild-Accents : begin
 			CvDecompose.set currentGlyph decomposeParts
 
 	define [RootGlyphProc goalName code parts] : begin
+		set s_goalName goalName
+		set s_code   code
 		set s_parts  parts
 		return : create-glyph goalName code construction
+
+	define [NeedBuildMesh glyphName part0Name] : begin
+		define g : query-glyph glyphName
+		define part0 : query-glyph part0Name
+		if [not g] : return false
+		if [not part0] : return false
+		if [not : CvDecompose.get g] : return true
+		if [DotlessOrNot.query part0] : return true
+		return false
 
 	foreach [_id : items-of : Object.keys foundDecompositions] : do
 		local { glyphName code parts } foundDecompositions.(_id)
 
-		local result : RootGlyphProc glyphName code parts
-		if result : begin
+		local saved : RootGlyphProc glyphName code parts
+		if saved : begin
 			define part0Name : glyphStore.queryNameOf parts.0
 			if (parts.0 != [query-glyph part0Name]) : throw : new Error "Unreachable"
 
-		local dstTree {}
-		local targetNameMap  {.}
-		set targetNameMap.(part0Name) glyphName
-		local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
-		foreach [{gr origBase relBase} : items-of tree] : begin
-			local origGN targetNameMap.(origBase)
-			if [not origGN] : throw : new Error 'Unreachable'
-			local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
-			local parts1 : parts.slice 0
-			set parts1.0 : query-glyph relBase
-			if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
-			if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
+		if [NeedBuildMesh glyphName part0Name] : begin
+			local dstTree {}
+			local targetNameMap  {.}
+			set targetNameMap.(part0Name) glyphName
+			local tree : getGrTree part0Name { DotlessOrNot AnyDerivingCv } query-glyph
+			foreach [{gr origBase relBase} : items-of tree] : begin
+				local origGN targetNameMap.(origBase)
+				if [not origGN] : throw : new Error 'Unreachable'
+				local relGN  : suggestMappedName targetNameMap relBase [gr.amendName origGN]
+				local parts1 : parts.slice 0
+				set parts1.0 : query-glyph relBase
+				if [not : query-glyph relGN] : RootGlyphProc relGN null parts1
+				if [query-glyph origGN] : gr.set [query-glyph origGN] relGN
 
 define customDecompositions : object
 	# Latvians use comma instead of cedillas in several letters.

@@ -1,5 +1,22 @@
 ## Modifications since version 2.x
 
+### 5.0.0-beta.3
+
+ * **Breaking** Continue organizing and renaming variants.
+   - Variants of percent (`%`) sign are renamed.
+ * Fix the incorrect order of `capital-s` (`cv17`) and `capital-t` (`cv18`) variants (#831).
+ * Fix Misplaced serif in Slab `cyrl/e` (#832).
+ * Fix variant selector for `cyrl/shcha` (#833).
+ * Add oval slashed / dotted variants for `0` (#834).
+ * Add rings-continuous-slash-also-connected variant to `%` (#835).
+ * Add inward-serifed variants for `C`, `G`, `S`, `c` (#837).
+ * Add asymmetric variants for `N` (#838).
+ * Add base-serifed variants for `Y` (#850).
+ * Add base-serifed variants for `r` (#851).
+ * Add stylistic set matching PT Mono and Recursive Mono (#855).
+ * Add character Z NOTATION SCHEMA COMPOSITION (`U+2A1F`) and Z NOTATION RELATION COMPOSITION (`U+2A3E`) (#857).
+
+
 ### 5.0.0-beta.2
 
  * Fix broken curly variants of `x` and `X` (#824).

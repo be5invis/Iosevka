@@ -16,6 +16,18 @@ const Dotless = {
 	}
 };
 
+const ZReduced = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.zReduced;
+		else return null;
+	},
+	set(glyph, toGid) {
+		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
+		if (!glyph.related) glyph.related = {};
+		glyph.related.zReduced = toGid;
+	}
+};
+
 const CvDecompose = {
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.CvDecompose;
@@ -319,6 +331,7 @@ function queryCvFeatureTagsOf(gid, glyph, variantAssignmentSet) {
 }
 
 exports.Dotless = Dotless;
+exports.ZReduced = ZReduced;
 exports.Cv = Cv;
 exports.AnyCv = AnyCv;
 exports.DotlessOrNot = DotlessOrNot;

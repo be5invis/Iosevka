@@ -11,21 +11,33 @@ glyph-block Digits-Zero : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
-	define [ZeroSlashShape top] : begin
-		local fine : 0.5 * OverlayStroke
-		return : intersection
-			OShapeOutline.NoOvershoot top 0 SB RightSB
-			dispiro
-				flat 0 (top * (1 - 0.77)) [widths fine fine]
-				curl Width (top * 0.77)
+	define [OvalShapeT sink offsetY offsetX t b l r] : let [m : mix l r 0.5] : sink
+		widths.rhs
+		g4 (m - CorrectionOMidS) (t - offsetY)
+		archv
+		g4 (r - offsetX) [YSmoothMidR t b SmallSmoothA SmallSmoothB]
+		arcvh
+		g4 (m + CorrectionOMidS) (b + offsetY)
+		archv
+		g4 (l + offsetX) [YSmoothMidL t b SmallSmoothA SmallSmoothB]
+		arcvh
+		close
 
-	define [ZeroReverseSlashShape top] : begin
-		local fine : 0.5 * OverlayStroke
-		return : intersection
-			OShapeOutline.NoOvershoot top 0 SB RightSB
-			dispiro
-				flat 0 (top * 0.77) [widths fine fine]
-				curl Width (top * (1 - 0.77))
+	define [ZeroSlash top] : dispiro
+		flat 0 (top * (1 - 0.77)) [widths.center OverlayStroke]
+		curl Width (top * 0.77)
+
+	define [ZeroReverseSlash top] : dispiro
+		flat 0 (top * 0.77) [widths.center OverlayStroke]
+		curl Width (top * (1 - 0.77))
+
+	define [ZeroSlashShape top] : intersection
+		OShapeOutline.NoOvershoot top 0 SB RightSB
+		ZeroSlash top
+
+	define [ZeroReverseSlashShape top] : intersection
+		OShapeOutline.NoOvershoot top 0 SB RightSB
+		ZeroReverseSlash top
 
 	define [ZeroDotShape top] : begin
 		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
@@ -51,17 +63,28 @@ glyph-block Digits-Zero : begin
 			SmoothAOf halfDotWidth (halfDotWidth * 2)
 			SmoothBOf halfDotWidth (halfDotWidth * 2)
 
-	define [ZeroOvalShape top] : dispiro
-		widths.rhs
-		g4 (Middle - CorrectionOMidS) (CAP - O)
-		archv
-		g4 (RightSB - OX) [YSmoothMidR CAP 0 SmallSmoothA SmallSmoothB]
-		arcvh
-		g4 (Middle + CorrectionOMidS) O
-		archv
-		g4 (SB + OX) [YSmoothMidL CAP 0 SmallSmoothA SmallSmoothB]
-		arcvh
-		close
+	define [ZeroOvalShapeT sink offsetX offsetY top] : OvalShapeT sink (OX + offsetX) (O + offsetY) top 0 SB RightSB
+
+	define [ZeroOvalShape top] : ZeroOvalShapeT dispiro 0 0 top
+	define [ZeroOvalShapeMask top] : ZeroOvalShapeT spiro-outline 1 1 top
+
+	define [ZeroOvalDotShape top] : begin
+		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
+		return : OvalShapeT spiro-outline OX O
+			top / 2 + DotRadius
+			top / 2 - DotRadius
+			Middle - halfDotWidth
+			Middle + halfDotWidth
+
+	define [ZeroOvalLongDotShape top] : begin
+		local circleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
+		local halfDotWidth : Math.min HalfStroke (circleInnerWidth / 4)
+		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (circleInnerWidth - halfDotWidth * 2)) / 2)
+		return : OvalShapeT spiro-outline OX O
+			top / 2 + halfDotHeight
+			top / 2 - halfDotHeight
+			Middle - halfDotWidth
+			Middle + halfDotWidth
 
 	create-glyph 'zero.lnum.unslashed' : glyph-proc
 		include : MarkSet.capital
@@ -76,20 +99,40 @@ glyph-block Digits-Zero : begin
 		include : refer-glyph "zero.lnum.unslashed"
 		include : ZeroSlashShape CAP
 
-	create-glyph 'zero.lnum.reverse-slashed' : glyph-proc
+	create-glyph 'zero.lnum.slashedOval' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashedOval"
+		include : intersection [ZeroOvalShapeMask CAP] [ZeroSlash CAP]
+
+	create-glyph 'zero.lnum.reverseSlashed' : glyph-proc
 		include : MarkSet.capital
 		include : refer-glyph "zero.lnum.unslashed"
 		include : ZeroReverseSlashShape CAP
+
+	create-glyph 'zero.lnum.reverseSlashedOval' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashedOval"
+		include : intersection [ZeroOvalShapeMask CAP] [ZeroReverseSlash CAP]
 
 	create-glyph 'zero.lnum.dotted' : glyph-proc
 		include : MarkSet.capital
 		include : refer-glyph "zero.lnum.unslashed"
 		include : ZeroDotShape CAP
 
+	create-glyph 'zero.lnum.dottedOval' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashedOval"
+		include : ZeroOvalDotShape CAP
+
 	create-glyph 'zero.lnum.longDotted' : glyph-proc
 		include : MarkSet.capital
 		include : refer-glyph "zero.lnum.unslashed"
 		include : ZeroLongDotShape CAP
+
+	create-glyph 'zero.lnum.longDottedOval' : glyph-proc
+		include : MarkSet.capital
+		include : refer-glyph "zero.lnum.unslashedOval"
+		include : ZeroOvalLongDotShape CAP
 
 	create-glyph 'zero.onum.unslashed' : glyph-proc
 		include : OnumMarks.e
@@ -104,20 +147,40 @@ glyph-block Digits-Zero : begin
 		include : refer-glyph "zero.onum.unslashed"
 		include : ZeroSlashShape OnumHeight
 
-	create-glyph 'zero.onum.reverse-slashed' : glyph-proc
+	create-glyph 'zero.onum.slashedOval' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashedOval"
+		include : intersection [ZeroOvalShapeMask OnumHeight] [ZeroSlash OnumHeight]
+
+	create-glyph 'zero.onum.reverseSlashed' : glyph-proc
 		include : OnumMarks.e
 		include : refer-glyph "zero.onum.unslashed"
 		include : ZeroReverseSlashShape OnumHeight
+
+	create-glyph 'zero.onum.reverseSlashedOval' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashedOval"
+		include : intersection [ZeroOvalShapeMask OnumHeight] [ZeroReverseSlash OnumHeight]
 
 	create-glyph 'zero.onum.dotted' : glyph-proc
 		include : OnumMarks.e
 		include : refer-glyph "zero.onum.unslashed"
 		include : ZeroDotShape OnumHeight
 
+	create-glyph 'zero.onum.dottedOval' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashedOval"
+		include : ZeroOvalDotShape OnumHeight
+
 	create-glyph 'zero.onum.longDotted' : glyph-proc
 		include : OnumMarks.e
 		include : refer-glyph "zero.onum.unslashed"
 		include : ZeroLongDotShape OnumHeight
+
+	create-glyph 'zero.onum.longDottedOval' : glyph-proc
+		include : OnumMarks.e
+		include : refer-glyph "zero.onum.unslashedOval"
+		include : ZeroOvalLongDotShape OnumHeight
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')

@@ -383,12 +383,8 @@ glyph-block Symbol-Punctuation-Small : begin
 	create-glyph 'hollowColon' 0x2982 : glyph-proc
 		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
-		include : difference
-			DotAt Middle dotRadius (dotRadius - O + sw / 2)
-			DotAt Middle dotRadius (dotRadius - O - sw / 2)
-		include : difference
-			DotAt Middle (XH - dotRadius) (dotRadius - O + sw / 2)
-			DotAt Middle (XH - dotRadius) (dotRadius - O - sw / 2)
+		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt Middle dotRadius (dotRadius + sw / 2 - O) sw
 
 	create-glyph 'semicolon' ';' : glyph-proc
 		include : refer-glyph "comma"
@@ -396,6 +392,43 @@ glyph-block Symbol-Punctuation-Small : begin
 
 	alias 'greekquestion' 0x37E 'semicolon'
 
+	define [RingCommaStroke mx my rad s k1x k1y k2x k2y] : begin
+		local u : my + rad
+		local d : my - rad
+		local l : mx - rad
+		local r : mx + rad
+		local fine : s * CThin
+		return : dispiro
+			widths.rhs [fallback fine]
+			g4 mx (u - s + fine) [heading Rightward]
+			archv
+			g4 (r - s + [mix fine s 0.5]) my [widths.rhs : mix fine s 0.5]
+			arcvh
+			g4 mx d [widths.rhs.heading s Leftward]
+			archv
+			g4 l my
+			arcvh
+			g4 mx u [heading Rightward]
+			archv
+			g4 r my [widths.rhs fine]
+			flat (mx + rad * k1x) (d + rad * k1y) [widths.rhs s]
+			curl (mx - rad * k2x) (d - rad * k2y)
+
+	create-glyph 'zNotationSchemaComposition' 0x2A1F : glyph-proc
+		define sw : AdviceStroke 5
+		define dotRadius : Math.max PeriodRadius (XH / 8)
+		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : intersection
+			MaskAbove Descender
+			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 1 3
+
+	create-glyph 'zNotationRelationalComposition' 0x2A3E : glyph-proc
+		define sw : AdviceStroke 6.5
+		define dotRadius : 0.625 * [Math.max PeriodRadius (XH / 8)]
+		include : RingStrokeAt Middle (0.625 * XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : intersection
+			MaskAbove (Descender * 0.75)
+			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 0.75 3
 
 glyph-block Symbol-Punctuation-Emotion : begin
 	glyph-block-import CommonShapes
@@ -1456,7 +1489,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		include : VBarRight (RightSB - gap * 0.3) 0 [mix 0 CAP 0.3] lowerDotWidth
 		include : VBarRight RightSB                0 [mix 0 CAP 0.3] lowerDotWidth
 
-	create-glyph 'percent.ringsConnected' : glyph-proc
+	create-glyph 'percent.ringsContinuousSlash' : glyph-proc
 		set-width Width
 		local l   : SB / 2
 		local r   : Width - l
@@ -1478,6 +1511,10 @@ glyph-block Symbol-Punctuation-Percentages : begin
 
 		local perMilleOffset : Width + l - halfGapRing * 1.5 - m
 
+		create-derived 'percent.ringsContinuousSlashAlsoConnected' : difference
+			HBarTop ([mix l (m - halfGapRing) 0.5] - CorrectionOMidX * swRing) (r - swBar * HVContrast) CAP fineBar
+			OShapeOutline.NoOvershoot CAP (CAP / 2 + halfGapRing) l (m - halfGapRing) swRing sma smb
+
 		create-derived 'permille.WWID' [WideUnicode 0x2030] : glyph-proc
 			set-width WideWidth0
 			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + perMilleOffset) (r + perMilleOffset) swRing sma smb
@@ -1488,7 +1525,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + 2 * perMilleOffset) (r + 2 * perMilleOffset) swRing sma smb
 			include : Translate ((WideWidth0 - r - 2 * perMilleOffset) / 2) 0
 
-	create-glyph 'percent.rings' : glyph-proc
+	create-glyph 'percent.ringsSegmentedSlash' : glyph-proc
 		set-width Width
 		local l   : SB / 2
 		local r   : Width - l
@@ -1539,7 +1576,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			curl r (CAP - otop)          [widths.center sw]
 
 		# bottom row
-		create-derived 'permille.NWID.rings' : glyph-proc
+		create-derived 'permille.NWID.ringsContinuousSlash' : glyph-proc
 			local l1   : l - O
 			local r2   r
 			local gap  : (SB / 2 - O * 2) * para.diversityM
@@ -1550,7 +1587,7 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			include : OShape otop  0  l1 r1 swp sma smb
 			include : OShape otop  0  l2 r2 swp sma smb
 
-		create-derived 'basepoint.NWID.rings' : glyph-proc
+		create-derived 'basepoint.NWID.ringsContinuousSlash' : glyph-proc
 			local l1   : l - O
 			local r3   r
 			local gap  : (SB / 2 - O) * para.diversityM
@@ -1566,12 +1603,9 @@ glyph-block Symbol-Punctuation-Percentages : begin
 			include : OShape otop  0  l2 r2 swp smap smbp
 			include : OShape otop  0  l3 r3 swp smap smbp
 
-	alias 'permille.NWID.ringsConnected' null 'permille.NWID.rings'
-	alias 'basepoint.NWID.ringsConnected' null 'basepoint.NWID.rings'
-
 	select-variant 'percent' '%'
-	select-variant 'permille.NWID'  [NarrowUnicode 0x2030] (follow -- 'percent')
-	select-variant 'basepoint.NWID' [NarrowUnicode 0x2031] (follow -- 'percent')
+	select-variant 'permille.NWID'  [NarrowUnicode 0x2030] (follow -- 'permille')
+	select-variant 'basepoint.NWID' [NarrowUnicode 0x2031] (follow -- 'permille')
 
 glyph-block Symbol-Punctuation-Ascii-Marks : begin
 	glyph-block-import CommonShapes

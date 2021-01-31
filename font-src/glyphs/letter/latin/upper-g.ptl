@@ -9,8 +9,9 @@ glyph-module
 glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend ShoulderMidKnotLhs
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerif SerifedArcStart_RtlLhs ArcStartHookTop
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise ShoulderMidKnotLhs
+	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs ArcStartHookTop
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifR ArcStartInwardSerifR
 
 	define TOOTHED            0
 	define TOOTHLESS-CORNER   1
@@ -22,17 +23,17 @@ glyph-block Letter-Latin-Upper-G : begin
 
 	define SLAB-NONE          0
 	define SLAB-LETTER        1
-	define SLAB-HOOK-TOP      2
-	define SLAB-AUTO        : if SLAB SLAB-LETTER SLAB-NONE
-
+	define SLAB-INWARD        2
+	define SLAB-HOOK-TOP     10
 
 	define [GShape toothShape slabShape crossBarShape top sma smb] : glyph-proc
 		local yBar : top * 0.52 + Stroke * 0.25
 		local fine ShoulderFine
 
-		local knots : if slabShape
-			SerifedArcStart_RtlLhs RightSB Middle top Stroke Hook (slabShape === SLAB-HOOK-TOP)
-			list [widths.lhs] [g4 RightSB (top - Hook)] [hookstart (top - O)]
+		local knots : match slabType
+			([Just SLAB-LETTER] || [Just SLAB-HOOK-TOP]) : SerifedArcStart_RtlLhs RightSB Middle top Stroke Hook (slabShape === SLAB-HOOK-TOP)
+			[Just SLAB-INWARD] : list [g4 RightSB (top - DToothlessRise) [widths.lhs]] [g4 (Middle - CorrectionOMidS) (top - O)] [archv]
+			__ : list [widths.lhs] [g4 RightSB (top - Hook)] [hookstart (top - O)]
 
 		knots.push
 			flat (SB + OX) (top - sma)
@@ -54,7 +55,8 @@ glyph-block Letter-Latin-Upper-G : begin
 
 		include : union
 			dispiro.apply null knots
-			if (slabShape === SLAB-LETTER) [ArcStartSerif RightSB top Stroke Hook] [glyph-proc]
+			if (slabShape === SLAB-LETTER) [ArcStartSerifR RightSB top Stroke Hook] [glyph-proc]
+			if (slabShape === SLAB-INWARD) [ArcStartInwardSerifR RightSB top Stroke Hook] [glyph-proc]
 			match crossBarShape
 				[Just CROSSBAR-NONE]   : glyph-proc
 				[Just CROSSBAR-HOOKED] : HBarTop Middle RightSB yBar
@@ -70,38 +72,56 @@ glyph-block Letter-Latin-Upper-G : begin
 		return : HOverlayBar [mix SB RightSB 0.5] [mix RightSB Width 0.7] [mix 0 (top / 2) 0.55]
 
 	define GConfig : object
-		toothedHookless           { TOOTHED           CROSSBAR-NONE      }
-		toothlessCornerHookless   { TOOTHLESS-CORNER  CROSSBAR-NONE      }
-		toothlessRoundedHookless  { TOOTHLESS-ROUNDED CROSSBAR-NONE      }
-		toothedHooked             { TOOTHED           CROSSBAR-HOOKED    }
-		toothlessCornerHooked     { TOOTHLESS-CORNER  CROSSBAR-HOOKED    }
-		toothlessRoundedHooked    { TOOTHLESS-ROUNDED CROSSBAR-HOOKED    }
-		toothedCapped             { TOOTHED           CROSSBAR-CAPPED    }
-		toothlessCornerCapped     { TOOTHLESS-CORNER  CROSSBAR-CAPPED    }
-		toothlessRoundedCapped    { TOOTHLESS-ROUNDED CROSSBAR-CAPPED    }
+		toothedSeriflessHookless              { TOOTHED           CROSSBAR-NONE   SLAB-NONE   }
+		toothlessCornerSeriflessHookless      { TOOTHLESS-CORNER  CROSSBAR-NONE   SLAB-NONE   }
+		toothlessRoundedSeriflessHookless     { TOOTHLESS-ROUNDED CROSSBAR-NONE   SLAB-NONE   }
+		toothedSeriflessHooked                { TOOTHED           CROSSBAR-HOOKED SLAB-NONE   }
+		toothlessCornerSeriflessHooked        { TOOTHLESS-CORNER  CROSSBAR-HOOKED SLAB-NONE   }
+		toothlessRoundedSeriflessHooked       { TOOTHLESS-ROUNDED CROSSBAR-HOOKED SLAB-NONE   }
+		toothedSeriflessCapped                { TOOTHED           CROSSBAR-CAPPED SLAB-NONE   }
+		toothlessCornerSeriflessCapped        { TOOTHLESS-CORNER  CROSSBAR-CAPPED SLAB-NONE   }
+		toothlessRoundedSeriflessCapped       { TOOTHLESS-ROUNDED CROSSBAR-CAPPED SLAB-NONE   }
+		toothedSerifedHookless                { TOOTHED           CROSSBAR-NONE   SLAB-LETTER }
+		toothlessCornerSerifedHookless        { TOOTHLESS-CORNER  CROSSBAR-NONE   SLAB-LETTER }
+		toothlessRoundedSerifedHookless       { TOOTHLESS-ROUNDED CROSSBAR-NONE   SLAB-LETTER }
+		toothedSerifedHooked                  { TOOTHED           CROSSBAR-HOOKED SLAB-LETTER }
+		toothlessCornerSerifedHooked          { TOOTHLESS-CORNER  CROSSBAR-HOOKED SLAB-LETTER }
+		toothlessRoundedSerifedHooked         { TOOTHLESS-ROUNDED CROSSBAR-HOOKED SLAB-LETTER }
+		toothedSerifedCapped                  { TOOTHED           CROSSBAR-CAPPED SLAB-LETTER }
+		toothlessCornerSerifedCapped          { TOOTHLESS-CORNER  CROSSBAR-CAPPED SLAB-LETTER }
+		toothlessRoundedSerifedCapped         { TOOTHLESS-ROUNDED CROSSBAR-CAPPED SLAB-LETTER }
+		toothedInwardSerifedHookless          { TOOTHED           CROSSBAR-NONE   SLAB-INWARD }
+		toothlessCornerInwardSerifedHookless  { TOOTHLESS-CORNER  CROSSBAR-NONE   SLAB-INWARD }
+		toothlessRoundedInwardSerifedHookless { TOOTHLESS-ROUNDED CROSSBAR-NONE   SLAB-INWARD }
+		toothedInwardSerifedHooked            { TOOTHED           CROSSBAR-HOOKED SLAB-INWARD }
+		toothlessCornerInwardSerifedHooked    { TOOTHLESS-CORNER  CROSSBAR-HOOKED SLAB-INWARD }
+		toothlessRoundedInwardSerifedHooked   { TOOTHLESS-ROUNDED CROSSBAR-HOOKED SLAB-INWARD }
+		toothedInwardSerifedCapped            { TOOTHED           CROSSBAR-CAPPED SLAB-INWARD }
+		toothlessCornerInwardSerifedCapped    { TOOTHLESS-CORNER  CROSSBAR-CAPPED SLAB-INWARD }
+		toothlessRoundedInwardSerifedCapped   { TOOTHLESS-ROUNDED CROSSBAR-CAPPED SLAB-INWARD }
 
 
-	foreach { suffix { shape crossBarShape} } [Object.entries GConfig] : begin
+	foreach { suffix { shape crossBarShape slabType } } [Object.entries GConfig] : begin
 		create-glyph "G.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : GShape shape SLAB-AUTO crossBarShape CAP SmoothA SmoothB
+			include : GShape shape slabType crossBarShape CAP SmoothA SmoothB
 			create-derived "Gbar.\(suffix)" : OverlayBarOfG CAP
-		create-glyph "Ghooktop.\(suffix)" : glyph-proc
+		create-glyph "GHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GShape shape SLAB-HOOK-TOP crossBarShape CAP SmoothA SmoothB
 			include : ArcStartHookTop RightSB CAP Stroke HookX Hook
 		create-glyph "smcpG.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : GShape shape SLAB-AUTO crossBarShape XH SmoothA SmoothB
-		create-glyph "smcpGhooktop.\(suffix)" : glyph-proc
+			include : GShape shape slabType crossBarShape XH SmoothA SmoothB
+		create-glyph "smcpGHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : GShape shape SLAB-HOOK-TOP crossBarShape XH SmoothA SmoothB
 			include : ArcStartHookTop RightSB XH Stroke HookX Hook
 
 	select-variant 'G' 'G'
 	select-variant 'smcpG' 0x262 (follow -- 'G')
-	select-variant 'Ghooktop' 0x193 (follow -- 'G')
-	select-variant 'smcpGhooktop' 0x29B (follow -- 'G')
+	select-variant 'GHookTop' 0x193
+	select-variant 'smcpGHookTop' 0x29B (follow -- 'GHookTop')
 	select-variant 'Gbar' 0x1E4 (follow -- 'G')
 	turned 'turnG' 0x2141 'G' Middle (CAP / 2)
 

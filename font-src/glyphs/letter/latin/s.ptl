@@ -10,8 +10,14 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcEnd_RtlRhs
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifR ArcEndSerifL
+	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifR ArcEndInwardSerifL
+
+	define SLAB-NONE      0
+	define SLAB-CLASSICAL 1
+	define SLAB-INWARD    2
 
 	define SOBot  OX
 	define [SmallSTensionCoeff stroke] : mix [StrokeWidthBlend 1 0.375 stroke] 1 : clamp 0 1 : Math.pow (Width / (UPM * 0.55)) 0.5
@@ -28,10 +34,13 @@ glyph-block Letter-Latin-S : begin
 		define smooth : adviceSSmooth CAP (-1) stroke
 
 		return : dispiro
-			if st
-				list
-					SerifedArcStart_RtlLhs RightSB Middle CAP stroke Hook
-				list
+			match st
+				[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs RightSB Middle CAP stroke Hook
+				[Just SLAB-INWARD] : list
+					g4 RightSB (CAP - DToothlessRise) [widths.lhs stroke]
+					g4 (Middle - CorrectionOMidX * stroke) (CAP - O)
+					archv
+				__ : list
 					g4 RightSB (CAP - Hook) [widths.lhs stroke]
 					hookstart (CAP - O) (sw -- stroke) (swItalicAdj -- Stroke)
 
@@ -39,21 +48,15 @@ glyph-block Letter-Latin-S : begin
 			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4   (RightSB - SOBot) smooth [widths 0 stroke]
 
-			if sb
-				list
-					SerifedArcEnd_RtlRhs SB Middle 0 stroke Hook
-				list
+			match sb
+				[Just SLAB-CLASSICAL] : SerifedArcEnd_RtlRhs SB Middle 0 stroke Hook
+				[Just SLAB-INWARD] : list
+					arcvh
+					g4 (Middle + CorrectionOMidX * stroke) O
+					g4 SB DToothlessRise
+				__ : list
 					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 					g4   (SB + SOBot) Hook
-
-
-	glyph-block-export SStroke
-	define [SStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
-		return : SStrokeImpl false false stroke refSwEss
-	define [HalfSlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
-		return : SStrokeImpl true false stroke refSwEss
-	define [SlabSStroke] : params [[stroke : AdviceStroke2 2 3 CAP] [refSwEss Ess]] : begin
-		return : SStrokeImpl true true stroke refSwEss
 
 	define [RevSStroke] : begin
 		local stroke : AdviceStroke2 2 3 CAP
@@ -69,34 +72,35 @@ glyph-block Letter-Latin-S : begin
 			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   (RightSB - SOBot) Hook
 
-	define [SmallSStrokeImpl st sb] : begin
-		define stroke : AdviceStroke2 2 3 XH
-		define ess : AdviceStroke2 2.2 3.2 XH
+	define [SmallSStrokeImpl st sb stroke refSwEss] : begin
+		define ess : refSwEss * stroke / Stroke
 		define strokeCoeff : StrokeWidthBlend 0 1 stroke
 		define smooth : adviceSSmooth XH (-1) stroke
 
 		return : dispiro
-			if st
-				list
-					SerifedArcStart_RtlLhs RightSB Middle XH stroke SHook
-				list
-					g4   (RightSB + OX) (XH - SHook) [widths.lhs stroke]
-					hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			match st
+				[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs RightSB Middle XH stroke SHook
+				[Just SLAB-INWARD] : list
+					g4 RightSB (XH - DToothlessRise) [widths.lhs stroke]
+					g4 (Middle - CorrectionOMidX * stroke) (XH - O)
+					archv
+				__ : list
+						g4   (RightSB + OX) (XH - SHook) [widths.lhs stroke]
+						hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 
 			g4   (SB - OX) (XH - smooth)
 			SNeck (stroke -- ess) (slantCoeff -- -0.02) (dist -- [SmallSDistCoeff]) (tensionCoeff -- [SmallSTensionCoeff stroke])
 			g4   (RightSB + OX - SOBot) (smooth) [widths 0 stroke]
 
-			if sb
-				list
-					SerifedArcEnd_RtlRhs SB Middle 0 stroke SHook
-				list
+			match sb
+				[Just SLAB-CLASSICAL] : SerifedArcEnd_RtlRhs SB Middle 0 stroke SHook
+				[Just SLAB-INWARD] : list
+					arcvh
+					g4 (Middle + CorrectionOMidX * stroke) O
+					g4 SB DToothlessRise
+				__ : list
 					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 					g4   (SB - OX + SOBot) SHook
-
-	define [SmallSStroke] : SmallSStrokeImpl false false
-	define [HalfSlabSmallSStroke] : SmallSStrokeImpl true false
-	define [SlabSmallSStroke] : SmallSStrokeImpl true true
 
 	glyph-block-export SStrokeAlt
 	define [SStrokeAlt] : params [top hook swStart swEnd oXLeftTop offsetLT offsetRB offsetC] : begin
@@ -149,29 +153,41 @@ glyph-block Letter-Latin-S : begin
 			hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   (RightSB + OX - SOBot) SHook
 
-	define SConfig : object
-		'serifless'   { SStroke         SmallSStroke          0  0 }
-		'serifed'     { SlabSStroke     SlabSmallSStroke      1  1 }
-		'topSerifed'  { HalfSlabSStroke HalfSlabSmallSStroke  1  0 }
+	define [SAutoSlabStart st top sw hook] : match st
+		[Just SLAB-CLASSICAL] : ArcStartSerifR RightSB top sw hook
+		[Just SLAB-INWARD] : ArcStartInwardSerifR RightSB top sw hook
+		__ : glyph-proc
 
-	foreach { suffix { upperShape lowerShape doTS doBS } } [Object.entries SConfig] : do
+	define [SAutoSlabEnd st bot sw hook] : match st
+		[Just SLAB-CLASSICAL] : ArcEndSerifL SB bot  sw hook
+		[Just SLAB-INWARD] : ArcEndInwardSerifL SB bot  sw hook
+		__ : glyph-proc
+
+	define SConfig : object
+		serifless               { SLAB-NONE      SLAB-NONE      }
+		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
+		bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
+		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
+		bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
+
+	foreach { suffix { doTS doBS } } [Object.entries SConfig] : do
 		create-glyph "S.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : upperShape
-			if doTS : include : ArcStartSerif RightSB CAP Stroke Hook
-			if doBS : include : ArcEndSerif   SB      0   Stroke Hook
+			include : SStrokeImpl doTS doBS [AdviceStroke2 2 3 CAP] Ess
+			include : SAutoSlabStart doTS CAP Stroke Hook
+			include : SAutoSlabEnd   doBS 0   Stroke Hook
 
 		create-glyph "s.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : lowerShape
-			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-			if doBS : include : ArcEndSerif   SB      0  [AdviceStroke2 2 3 XH] Hook
+			include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] Ess
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			include : SAutoSlabEnd   doBS 0  [AdviceStroke2 2 3 XH] Hook
 
 		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
 			include : MarkSet.if
 
-			if doTS : include : ArcStartSerif RightSB CAP Stroke Hook
-			local stroke : include : upperShape
+			include : SAutoSlabStart doTS CAP Stroke Hook
+			local stroke : include : SStrokeImpl doTS doBS [AdviceStroke2 2 3 CAP] Ess
 			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			local sw : AdviceStroke2 2 3 CAP
@@ -185,8 +201,8 @@ glyph-block Letter-Latin-S : begin
 		if [not doBS] : create-glyph "sSwash.\(suffix)" : glyph-proc
 			include : MarkSet.p
 
-			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-			local stroke : include : lowerShape
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] Ess
 			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			local sw : AdviceStroke2 2 3 XH
@@ -201,8 +217,8 @@ glyph-block Letter-Latin-S : begin
 		if [not doBS] : create-glyph "sRTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
 
-			if doTS : include : ArcStartSerif RightSB XH [AdviceStroke2 2 3 XH] Hook
-			local stroke : include : lowerShape
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] Ess
 			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			include : new-glyph : glyph-proc
@@ -291,12 +307,15 @@ glyph-block Letter-Latin-S : begin
 		local start : currentGlyph.gizmo.unapply stroke.lhsKnots.0
 		include : VBarLeft start.x start.y (XH + Accent)
 
+	create-glyph 'cyrl/ghayn.italic' : glyph-proc
+		include [refer-glyph 'revs'] AS_BASE
+		include : FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
+
 	create-glyph 'cyrl/gheDescender.italic' : glyph-proc
 		include : MarkSet.b
 		local stroke : include : RevSmallSStroke
 		local start : currentGlyph.gizmo.unapply stroke.rhsKnots.(0)
 		include : VBarRight start.x (-Accent) start.y
-
 
 	create-glyph 'dollar.open' : glyph-proc
 		include : MarkSet.capital

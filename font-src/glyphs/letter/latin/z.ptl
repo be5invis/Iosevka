@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [ZReduced] from "../../../support/gr"
 
 glyph-module
 
@@ -132,17 +132,19 @@ glyph-block Letter-Latin-Z : begin
 
 	select-variant 'Z' 'Z'
 	select-variant 'z' 'z'
+	select-variant 'ZReduced' (shapeFrom -- 'Z')
+	select-variant 'zReduced' (shapeFrom -- 'z')
+	select-variant 'grek/Zeta' 0x396 (shapeFrom -- 'Z') (follow -- 'ZReduced')
+	# if recursive : console.log recursive [query-glyph 'grek/Zeta']
+	if [query-glyph 'Z'] : ZReduced.set [query-glyph 'Z'] 'ZReduced'
+	if [query-glyph 'z'] : ZReduced.set [query-glyph 'z'] 'zReduced'
 
-	alias 'grek/Zeta.standard'              null 'Z.standard'
-	alias 'grek/Zeta.curly'                 null 'Z.curly'
-	alias 'grek/Zeta.motionSerifed'         null 'Z.motionSerifed'
-	alias 'grek/Zeta.curlyMotionSerifed'    null 'Z.curlyMotionSerifed'
-	alias 'grek/Zeta.topMotionSerifed'      null 'Z.topMotionSerifed'
-	alias 'grek/Zeta.curlyTopMotionSerifed' null 'Z.curlyTopMotionSerifed'
-	select-variant 'grek/Zeta' 0x396
-
-	alias 'Zbar' 0x1B5 'Z.withHorizontalCrossBar'
-	alias 'zbar' 0x1B6 'z.withHorizontalCrossBar'
+	with-related-glyphs 'ZBar' 0x1B5 'ZReduced' : lambda [src sel] : composite-proc
+		refer-glyph src
+		refer-glyph 'barOver'
+	with-related-glyphs 'zBar' 0x1B6 'zReduced' : lambda [src sel] : composite-proc
+		refer-glyph src
+		refer-glyph 'barOver'
 
 	define [BBZShape top] : glyph-proc
 		include : HBarTop SB RightSB top BBS
@@ -183,8 +185,8 @@ glyph-block Letter-Latin-Z : begin
 			archv
 			straight.down.end RightSB (-Hook) [widths.heading 0 Stroke Downward]
 
-	with-related-glyphs 'Zdtail' 0x224 'Z' ZDownTailCtor
-	with-related-glyphs 'zdtail' 0x225 'z' ZDownTailCtor
+	with-related-glyphs 'Zdtail' 0x224 'ZReduced' ZDownTailCtor
+	with-related-glyphs 'zdtail' 0x225 'zReduced' ZDownTailCtor
 
 	create-glyph 'Zswash' 0x2C7F : glyph-proc
 		include : MarkSet.if
@@ -233,10 +235,10 @@ glyph-block Letter-Latin-Z : begin
 		eject-contour 'serifRB'
 		include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
 
-	with-related-glyphs 'Zdesc' 0x2C6B 'Z' ZDescCtor
-	with-related-glyphs 'zdesc' 0x2C6C 'z' ZDescCtor
+	with-related-glyphs 'Zdesc' 0x2C6B 'ZReduced' ZDescCtor
+	with-related-glyphs 'zdesc' 0x2C6C 'zReduced' ZDescCtor
 
-	with-related-glyphs 'zCurlyTail' 0x291 'z' : lambda [src sel] : glyph-proc
+	with-related-glyphs 'zCurlyTail' 0x291 'zReduced' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 
 		local fine : AdviceStroke2 5 4 XH

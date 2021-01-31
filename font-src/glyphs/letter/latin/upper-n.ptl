@@ -11,6 +11,9 @@ glyph-block Letter-Latin-Upper-N : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
 
+	define BODY-SYMMETRIC  1
+	define BODY-ASYMMETRIC 2
+
 	define SLAB-AUTO   1
 	define SLAB-MOTION 2
 
@@ -22,35 +25,43 @@ glyph-block Letter-Latin-Upper-N : begin
 		include : tagged 'serifLB'
 			CenterBottomSerif (left + 0.5 * sw * HVContrast) 0 (xn * Jut)
 
-	define [NShape] : params [slabType top left right [crowd 2] [crDiag 4] [xn 1]] : glyph-proc
+	define [NShape] : params [bodyType slabType top left right [crowd 2] [crDiag 4] [xn 1]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
+		local yEnd : match bodyType
+			[Just BODY-SYMMETRIC]    0
+			[Just BODY-ASYMMETRIC] : top * 0.375
 
 		include : union
-			dispiro
-				flat left 0 [widths.heading 0 stroke Upward]
-				curl left (top * 0.4) [heading Upward]
-				straight.up.end left top [widths.heading 0 swDiag Upward]
-			dispiro
-				flat right top [widths.heading 0 stroke Downward]
-				curl right (top * 0.6) [heading Downward]
-				straight.down.end right 0 [widths.heading 0 swDiag Downward]
-			dispiro
-				flat (left + swDiag / 2) top [widths.heading swDiag 0 Downward]
-				curl (right - swDiag / 2) 0 [widths.heading 0 swDiag Downward]
+			match bodyType
+				[Just BODY-SYMMETRIC] : dispiro
+					flat left 0 [widths.heading 0 stroke Upward]
+					curl left (top * 0.4) [heading Upward]
+					straight.up.end left top [widths.heading 0 swDiag Upward]
+				[Just BODY-ASYMMETRIC] : VBarLeft left 0 top stroke
+			match bodyType
+				[Just BODY-SYMMETRIC] : dispiro
+					flat right top [widths.heading 0 stroke Downward]
+					curl right (top * 0.6) [heading Downward]
+					straight.down.end right 0 [widths.heading 0 swDiag Downward]
+				[Just BODY-ASYMMETRIC] : VBarRight right 0 top stroke
+			intersection [Rect top 0 left right]
+				ExtLineCenter 2 swDiag (left + swDiag) top (right - swDiag) yEnd
 
 		include : match slabType
 			[Just SLAB-AUTO]   : if SLAB [StdNSerifs top left right stroke xn] [glyph-proc]
 			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif left top SideJut
 
 	define NConfig : object
-		standard                 { SLAB-AUTO   }
-		motionSerifed            { SLAB-MOTION   }
+		standard                { BODY-SYMMETRIC  4 SLAB-AUTO   }
+		motionSerifed           { BODY-SYMMETRIC  4 SLAB-MOTION }
+		asymmetric              { BODY-ASYMMETRIC 3 SLAB-AUTO   }
+		asymmetricMotionSerifed { BODY-ASYMMETRIC 3 SLAB-MOTION }
 
-	do : foreach { suffix { slabType } } [Object.entries NConfig] : do
+	foreach { suffix { bodyType crD slabType } } [Object.entries NConfig] : do
 		create-glyph "N.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : NShape slabType CAP SB RightSB
+			include : NShape bodyType slabType CAP SB RightSB (crDiag -- crD)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 		create-glyph "Nltail.\(suffix)" : glyph-proc
@@ -60,7 +71,7 @@ glyph-block Letter-Latin-Upper-N : begin
 
 		create-glyph "smcpN.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : NShape slabType XH SB RightSB
+			include : NShape bodyType slabType XH SB RightSB (crDiag -- crD)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
 
@@ -70,7 +81,7 @@ glyph-block Letter-Latin-Upper-N : begin
 	select-variant 'Nltail' 0x19D  (follow -- 'N')
 
 	create-glyph 'currency/nairaSign' 0x20A6 : glyph-proc
-		include : NShape SLAB-AUTO CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
+		include : NShape BODY-SYMMETRIC SLAB-AUTO CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
 		define sw : AdviceStroke2 2 4 CAP
 		define gap : Math.max (CAP / 6) sw
 		include : HBarBottom [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
@@ -96,5 +107,5 @@ glyph-block Letter-Latin-Upper-N : begin
 	create-glyph 'numero' 0x2116 : glyph-proc
 		local fine : AdviceStroke 4.5
 		include : OShape XH [Math.max (fine * 2) (CAP * 0.1)] (Middle + [Math.max (fine / 2) ((RightSB - SB) * 0.1)]) [mix RightSB Width 0.5] fine (SmoothA * fine / Stroke) (SmoothB * fine / Stroke)
-		include : NShape SLAB-AUTO CAP (SB / 2) Middle (crowd -- 4.5) (crDiag -- 5.5) (xn -- 0.7)
+		include : NShape BODY-SYMMETRIC SLAB-AUTO CAP (SB / 2) Middle (crowd -- 4.5) (crDiag -- 5.5) (xn -- 0.7)
 		include : HBarBottom (Middle + fine / 2) [mix RightSB Width 0.5] 0 fine
