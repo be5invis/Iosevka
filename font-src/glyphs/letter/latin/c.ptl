@@ -232,18 +232,28 @@ glyph-block Letter-Latin-C : begin
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.4)
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.6)
 
-	with-related-glyphs 'currency/centSign' 0xA2 'c' : lambda [src sel] : glyph-proc
+	create-glyph 'currency/centSignBar.open' : glyph-proc
+		set-width 0
+		include : dispiro
+			widths.center
+			flat (Middle - Width) (XH - HalfStroke)
+			curl (Middle - Width) (XH - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center
+			flat (Middle - Width) (Descender / 2) [heading Upward]
+			curl (Middle - Width) HalfStroke
+
+	create-glyph 'currency/centSignBar.through' : glyph-proc
 		define fine : AdviceStroke 4
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : dispiro
-			widths.center
-			flat Middle (XH - HalfStroke)
-			curl Middle (XH - Descender / 2) [heading Upward]
-		include : dispiro
-			widths.center
-			flat Middle (Descender / 2) [heading Upward]
-			curl Middle HalfStroke
-		include : VBar Middle (XH - HalfStroke) (0 + HalfStroke) fine
+		include [refer-glyph 'currency/centSignBar.open'] AS_BASE ALSO_METRICS
+		include : VBar (Middle - Width) (XH - HalfStroke) (0 + HalfStroke) fine
+
+	select-variant 'currency/centSignBar' (follow -- 'cent')
+
+	create-glyph 'currency/centSign' 0xA2 : glyph-proc
+		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
+		include : WithTransform [Translate Width 0] [refer-glyph 'currency/centSignBar']
+		CvDecompose.set currentGlyph { 'c' 'currency/centSignBar' }
 
 	turned 'turnC' 0x186 'C' Middle (CAP / 2)
 	turned 'turnc' 0x254 'c' Middle (XH / 2)

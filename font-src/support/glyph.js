@@ -122,6 +122,9 @@ module.exports = class Glyph {
 	includeGlyphImpl(g, shiftX, shiftY) {
 		if (g._m_identifier) {
 			this.includeGlyphComponentImpl(g, shiftX, shiftY);
+		} else if (!g._m_identifier && g.isPureComposite()) {
+			for (const sr of g.semanticInclusions)
+				this.includeGlyphComponentImpl(sr.glyph, sr.x + shiftX, sr.y + shiftY);
 		} else {
 			this.includeGeometry(g, shiftX, shiftY);
 		}
