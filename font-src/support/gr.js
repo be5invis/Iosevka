@@ -16,17 +16,23 @@ const Dotless = {
 	}
 };
 
-const ZReduced = {
-	get(glyph) {
-		if (glyph && glyph.related) return glyph.related.zReduced;
-		else return null;
-	},
-	set(glyph, toGid) {
-		if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
-		if (!glyph.related) glyph.related = {};
-		glyph.related.zReduced = toGid;
-	}
-};
+function SimpleProp(key) {
+	return {
+		get(glyph) {
+			if (glyph && glyph.related) return glyph.related[key];
+			else return null;
+		},
+		set(glyph, toGid) {
+			if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
+			if (!glyph.related) glyph.related = {};
+			glyph.related[key] = toGid;
+		}
+	};
+}
+
+const ZReduced = SimpleProp("ZReduced");
+const DollarShrinkKernel = SimpleProp("DollarShrinkKernel");
+const DollarShorterBar = SimpleProp("DollarShorterBar");
 
 const CvDecompose = {
 	get(glyph) {
@@ -344,3 +350,6 @@ exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
 exports.createGrDisplaySheet = createGrDisplaySheet;
+exports.DollarShrinkKernel = DollarShrinkKernel;
+exports.DollarShorterBar = DollarShorterBar;
+exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar];

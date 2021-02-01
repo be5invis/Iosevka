@@ -3,7 +3,7 @@ $$include '../../meta/macros.ptl'
 import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyCv AnyDerivingCv Dotless] from '../../support/gr'
+import [Cv AnyCv AnyDerivingCv Dotless SvInheritableRelations] from '../../support/gr'
 import [DesignParameters] from '../../meta/aesthetics'
 
 extern Map
@@ -32,7 +32,10 @@ glyph-block Common-Derivatives : begin
 		create-glyph name unicode : glyph-proc
 			include [refer-glyph (shapeFrom + '.' + variant)] AS_BASE ALSO_METRICS
 			ApplyCv currentGlyph shapeFrom follow para
-			set this.autoRefPriority [query-glyph (shapeFrom + '.' + variant)].autoRefPriority
+			currentGlyph.cloneRankFromGlyph [query-glyph (shapeFrom + '.' + variant)]
+			foreach gr [items-of SvInheritableRelations] : begin
+				local v : gr.get [query-glyph (shapeFrom + '.' + variant)]
+				if v : gr.set this v
 
 	define [orthographic-italic name unicode] : if para.isItalic
 		alias name unicode (name + '.italic')
