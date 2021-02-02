@@ -16,14 +16,7 @@ function finalizeGlyphs(para, glyphStore) {
 
 function suppressNaN(glyphStore) {
 	for (const g of glyphStore.glyphs()) {
-		if (!g.contours) continue;
-		for (let k = 0; k < g.contours.length; k++) {
-			let contour = g.contours[k];
-			for (let z of contour) {
-				if (!isFinite(z.x)) z.x = 0;
-				if (!isFinite(z.y)) z.y = 0;
-			}
-		}
+		if (g.geometry) g.geometry.suppressNaN();
 	}
 }
 
@@ -31,32 +24,38 @@ function suppressNaN(glyphStore) {
 
 function regulateGlyphStore(skew, glyphStore) {
 	for (const g of glyphStore.glyphs()) {
-		if (!g.semanticInclusions || !g.contours) continue;
-		if (g.isPureComposite()) regulateCompositeGlyph(glyphStore, g);
+		if (g.geometry.isEmpty()) continue;
+		if (!regulateCompositeGlyph(glyphStore, g)) {
+			const cs = g.geometry.asContours();
+			g.clearGeometry();
+			for (const c of cs) g.geometry.addContour(c);
+		}
 	}
-	for (const g of glyphStore.glyphs()) regulateSimpleGlyph(g, skew);
+	for (const g of glyphStore.glyphs()) {
+		if (!g.geometry.asReferences()) regulateSimpleGlyph(g, skew);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function regulateCompositeGlyph(glyphStore, g) {
-	const references = [];
-	for (const sr of g.semanticInclusions) {
+	const refs = g.geometry.asReferences();
+	if (!refs) return false;
+	for (const sr of refs) {
 		const gn = glyphStore.queryNameOf(sr.glyph);
-		if (!gn || sr.glyph.autoRefPriority < 0) return;
-		references.push({ glyph: gn, x: sr.x, y: sr.y });
+		if (!gn || sr.glyph.autoRefPriority < 0) return false;
 	}
-
-	g.semanticInclusions = [];
-	g.contours = [];
-	g.references = references;
+	return true;
 }
 
 function regulateSimpleGlyph(g, skew) {
-	if (!g.contours || !g.contours.length) return;
-	for (const contour of g.contours) for (const z of contour) z.x -= z.y * skew;
-	g.contours = simplifyContours(g.contours);
-	for (const contour of g.contours) for (const z of contour) z.x += z.y * skew;
+	let cs = g.geometry.asContours();
+	for (const contour of cs) for (const z of contour) z.x -= z.y * skew;
+	cs = simplifyContours(cs);
+	for (const contour of cs) for (const z of contour) z.x += z.y * skew;
+
+	g.clearGeometry();
+	for (const c of cs) g.geometry.addContour(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

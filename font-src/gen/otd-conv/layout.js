@@ -35,8 +35,8 @@ const GsubSingleHandler = {
 	fill(dst, src, store) {
 		const st = src.substitutions;
 		for (const k in st) {
-			const from = store.glyphs.query(k);
-			const to = store.glyphs.query(st[k]);
+			const from = store.glyphs.queryByName(k);
+			const to = store.glyphs.queryByName(st[k]);
 			if (from && to) dst.mapping.set(from, to);
 		}
 	}
@@ -48,7 +48,7 @@ const GsubMultipleHandler = {
 	fill(dst, src, store) {
 		const st = src.substitutions;
 		for (const k in st) {
-			const from = store.glyphs.query(k);
+			const from = store.glyphs.queryByName(k);
 			const to = mapGlyphListAll(st[k], store);
 			if (!from || !to) continue;
 			dst.mapping.set(from, to);
@@ -68,7 +68,7 @@ const GsubLigatureHandler = {
 	fill(dst, src, store) {
 		const st = src.substitutions;
 		for (const { from: _from, to: _to } of st) {
-			const to = store.glyphs.query(_to);
+			const to = store.glyphs.queryByName(_to);
 			const from = mapGlyphListAll(_from, store);
 			if (!from || !to) continue;
 			dst.mapping.push({ from, to });
@@ -114,7 +114,7 @@ const GsubReverseHandler = {
 				{
 					const m1 = new Set();
 					for (let k = 0; k < st.match[j].length; k++) {
-						const gFrom = store.glyphs.query(st.match[j][k]);
+						const gFrom = store.glyphs.queryByName(st.match[j][k]);
 						if (gFrom) m1.add(gFrom);
 					}
 					if (!m1.size) continue out;
@@ -123,8 +123,8 @@ const GsubReverseHandler = {
 
 				if (j === doSubAt) {
 					for (let k = 0; k < st.match[j].length; k++) {
-						const gFrom = store.glyphs.query(st.match[j][k]);
-						const gTo = store.glyphs.query(st.to[k]);
+						const gFrom = store.glyphs.queryByName(st.match[j][k]);
+						const gTo = store.glyphs.queryByName(st.to[k]);
 						if (!gFrom) continue;
 						if (gTo) {
 							replacement.set(gFrom, gTo);
@@ -142,7 +142,7 @@ const GsubReverseHandler = {
 function mapGlyphListAll(gl, store) {
 	const out = [];
 	for (const item of gl) {
-		const fg = store.glyphs.query(item);
+		const fg = store.glyphs.queryByName(item);
 		if (!fg) return null;
 		out.push(fg);
 	}
@@ -151,7 +151,7 @@ function mapGlyphListAll(gl, store) {
 function mapGlyphListSome(gl, store) {
 	const out = [];
 	for (const item of gl) {
-		const fg = store.glyphs.query(item);
+		const fg = store.glyphs.queryByName(item);
 		if (!fg) continue;
 		out.push(fg);
 	}
@@ -204,7 +204,7 @@ function convertMarkRecords(marks, mm, store) {
 	const out = new Map();
 	for (const gn in marks) {
 		const mark = marks[gn];
-		const g = store.glyphs.query(gn);
+		const g = store.glyphs.queryByName(gn);
 		if (!g) continue;
 		let markAnchors = [];
 		markAnchors[mm.get(mark.class)] = { x: mark.x, y: mark.y };
@@ -216,7 +216,7 @@ function convertBaseRecords(bases, mm, store) {
 	const out = new Map();
 	for (const gn in bases) {
 		const baseObj = bases[gn];
-		const g = store.glyphs.query(gn);
+		const g = store.glyphs.queryByName(gn);
 		if (!g) continue;
 		const baseArray = [];
 		for (const bkStr in baseObj) {
@@ -319,7 +319,7 @@ function convertGdef(otdGdef, glyphs) {
 	const gdef = new Ot.Gdef.Table();
 	gdef.glyphClassDef = new Map();
 	for (const gn in otdGdef.glyphClassDef) {
-		const g = glyphs.query(gn);
+		const g = glyphs.queryByName(gn);
 		if (g) gdef.glyphClassDef.set(g, otdGdef.glyphClassDef[gn]);
 	}
 	return gdef;

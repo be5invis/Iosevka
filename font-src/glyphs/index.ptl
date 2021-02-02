@@ -89,14 +89,9 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 	define [warnAboutBrokenGlyph g ensuredGlyphName saveGlyphName] : begin
 		local complexity 0
-		local broken false
-		if g.contours : begin
-			foreach [c : items-of g.contours] : foreach [z : items-of c] : begin
-				inc complexity
-				if [not : isFinite z.x] : set broken true
-				if [not : isFinite z.y] : set broken true
+		if g.geometry : set complexity : g.geometry.suppressNaN
 
-		if ([not recursive] && (broken || complexity > 4096)) : begin
+		if ([not recursive] && complexity > 4096) : begin
 			console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
 			console.log 'Family' para.naming.family para.naming.weight para.naming.width para.naming.slope
 			if saveGlyphName : throw : new Error "Overcomplicated \(saveGlyphName)"
