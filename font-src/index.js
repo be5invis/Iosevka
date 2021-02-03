@@ -2,8 +2,9 @@
 
 const fs = require("fs-extra");
 const path = require("path");
-const { FontIo } = require("ot-builder");
+const zlib = require("zlib");
 
+const { FontIo } = require("ot-builder");
 const Toml = require("@iarna/toml");
 
 const BuildFont = require("./gen/build-font.js");
@@ -96,5 +97,5 @@ async function saveCharMap(argv, glyphStore) {
 			...createGrDisplaySheet(glyphStore, gn)
 		]);
 	}
-	await fs.writeFile(argv.oCharMap, JSON.stringify(charMap), "utf8");
+	await fs.writeFile(argv.oCharMap, zlib.gzipSync(Buffer.from(JSON.stringify(charMap), "utf-8")));
 }
