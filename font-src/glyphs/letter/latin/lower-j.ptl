@@ -79,39 +79,38 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-base-anchor 'above' (Middle + JBalance - Stroke * 0.166 * HVContrast) XH
 		set-base-anchor 'overlay' (Middle + JBalance - Stroke * 0.166 * HVContrast) (XH / 2)
 
-	define [FlatHookDotlessJShape] : params [df crossLeft crossRight barCenter serif] : glyph-proc
+	glyph-block-export FlatHookDotlessJShape
+	define [FlatHookDotlessJShape] : params [df dfHook top crossLeft barCenter serif] : glyph-proc
 		local terminal : crossLeft - OX * 2
 		local bar : barCenter + HalfStroke * HVContrast
-		local hd : FlatHookDepth df
-		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
+		local hd : FlatHookDepth dfHook
+		if serif : include : LeftwardTopSerif barCenter top (LongJut * df.div)
 		include : dispiro
 			widths.lhs
 			flat [Math.min terminal (bar - hd.x - [Math.max (Stroke / 3) (df.width / 6)])] Descender
 			curl (bar - hd.x) Descender
 			archv.superness DesignParameters.tightHookSuperness
 			flat bar (Descender + hd.y)
-			curl bar XH [heading Upward]
-		set-base-anchor 'above' barCenter XH
-		set-base-anchor 'overlay' barCenter (XH / 2)
+			curl bar top [heading Upward]
+		set-base-anchor 'above' barCenter top
+		set-base-anchor 'overlay' barCenter (top / 2)
 
 	create-glyph 'dotlessj.flatHookSerifless' : glyph-proc
 		local df : DivFrame para.diversityII
 		local dfHook : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.p
-		include : FlatHookDotlessJShape df
-			crossLeft -- [mix 0 SB dfHook.div]
-			crossRight -- [mix df.width df.rightSB df.div]
-			barCenter -- (df.middle + 0.5 * JBalance * df.div * [mix 1 df.div 2])
+		include : FlatHookDotlessJShape df dfHook XH
+			crossLeft -- (df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2]))
+			barCenter -- (df.middle + 0.25 * JBalance * df.div * [mix 1 df.div 2])
 			serif -- false
 
 	create-glyph 'dotlessj.flatHookSerifed' : glyph-proc
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.p
-		include : FlatHookDotlessJShape df
+		include : FlatHookDotlessJShape df df XH
 			crossLeft -- [mix 0 SB : mix 1 df.div 2]
-			crossRight -- [mix df.width df.rightSB : mix 1 df.div 2]
 			barCenter -- (df.middle + JBalance * df.div)
 			serif -- true
 
