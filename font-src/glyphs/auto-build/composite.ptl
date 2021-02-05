@@ -67,10 +67,12 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			foreach part [items-of parts] : if [query-glyph part] : begin
 				local g : query-glyph part
 				local relatedGlyphs : AnyCv.query g
-				foreach gr [items-of relatedGlyphs] : if [query-glyph : gr.get g] : begin
+				foreach gr [items-of relatedGlyphs] : if ([query-glyph : gr.get g] && parts.length > 1) : begin
+					# Multi-part enclosure, proportinal
 					if ([query-glyph : gr.get g].advanceWidth != g.advanceWidth)
 						set demandDecomposable false
-					if (centered && parts.length > 1 && [getGlyphDefaultShift 0 0 : query-glyph : gr.get g] != [getGlyphDefaultShift 0 0 g])
+					# Multi-part enclosure, different Y-offset
+					if (centered && [getGlyphDefaultShift 0 0 : query-glyph : gr.get g] != [getGlyphDefaultShift 0 0 g])
 						set demandDecomposable false
 
 			local jobsOrig : if demandDecomposable decomposableJobs    nonDecomposable
@@ -114,32 +116,26 @@ glyph-block AutoBuild-Enclosure : begin
 	define [AdjustDigitCount digits width] : Math.max 1 (digits * Width / width)
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
-	define aliasableInnerSubGlyphMap : new Map
-	define [EnsureInnerSubGlyphImpl miniatureFont finalPlacement dscale xCompress mp mpShift bal baly] : lambda [gidPart] : begin
-		local shift : if mp mpShift : getGlyphDefaultShift bal baly [miniatureFont.queryByNameEnsured gidPart]
-		local shiftPartName : if mp "mp\(shift)" "sp"
-		define gniPartNoPlc : '.ci.' + gidPart + '@' + [{ dscale xCompress shiftPartName }.join '/']
-		define gniPart : '.ci.' + gidPart + '@' + [{ finalPlacement dscale xCompress shiftPartName }.join '/']
-		define aliasGoal : aliasableInnerSubGlyphMap.get gniPartNoPlc
+	define enclosureInnerPartActualWidth : new Map
+	define [EnsureInnerSubGlyphImpl miniatureFont dscale xCompress mp mpShift bal baly] : lambda [gidPart] : begin
+		define subGlyph : miniatureFont.queryByNameEnsured gidPart
+		define shift : if mp mpShift : getGlyphDefaultShift bal baly subGlyph
+		define shiftPartName : if mp "mp\(shift)" "sp"
+		define gniPart : '.ci.' + gidPart + '@' + [{ dscale xCompress shiftPartName }.join '/']
 		if [not : query-glyph gniPart] : begin
-			if aliasGoal : begin
-				create-glyph gniPart : composite-proc
-					refer-glyph aliasGoal.gn
-					Translate (finalPlacement - aliasGoal.placement) 0
-			: else : begin
-				create-glyph gniPart : glyph-proc
-					set-width 0
-					include : miniatureFont.queryByNameEnsured gidPart
-					include : Upright
-					include : Scale (dscale * xCompress) dscale
-					include : Translate 0 (dscale * (-CAP / 2 + shift))
-					include : Translate 0 (CAP / 2 * dscale)
-					include : Translate 0 (SymbolMid - CAP * dscale / 2)
-					include : Italify
-					include : Translate finalPlacement 0
-				aliasableInnerSubGlyphMap.set gniPartNoPlc : object
-					gn gniPart
-					placement finalPlacement
+			enclosureInnerPartActualWidth.set gniPart (subGlyph.advanceWidth * dscale * xCompress)
+			create-glyph gniPart : glyph-proc
+				set-width 0
+				include   subGlyph
+				include : Upright
+				include : Scale (dscale * xCompress) dscale
+				include : Translate 0 (dscale * (-CAP / 2 + shift))
+				include : Translate 0 (CAP / 2 * dscale)
+				include : Translate 0 (SymbolMid - CAP * dscale / 2)
+				include : Italify
+				if mp
+					set-mark-anchor 'enclosureInner' 0 0 (subGlyph.advanceWidth * dscale * xCompress) 0
+					set-mark-anchor 'enclosureInner' (subGlyph.advanceWidth * dscale * xCompress / 2) 0
 		return gniPart
 
 	define [EnsureInnerSubGlyphSeq miniatureFont job dimens] : begin
@@ -157,26 +153,31 @@ glyph-block AutoBuild-Enclosure : begin
 		local mpShift : getGlyphDefaultShift bal baly firstDerivedGyph
 
 		local finalParts {}
-		local accumulatedAdvanceSoFar 0
 		foreach partIndex [range 0 parts.length] : do
 			define gidPart parts.(partIndex)
-			define finalPlacement : accumulatedAdvanceSoFar - width / 2 - totalWidth * dscale / 2
-			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont finalPlacement dscale xCompress (parts.length > 1) mpShift bal baly
-			set accumulatedAdvanceSoFar : accumulatedAdvanceSoFar + [miniatureFont.queryByNameEnsured gidPart].advanceWidth * dscale * xCompress
+			finalParts.push : EnsureComponentGlyphT gidPart : EnsureInnerSubGlyphImpl miniatureFont dscale xCompress (parts.length > 1) mpShift bal baly
 
 		return finalParts
+
+	define [EnclosureInnerImpl dimens finalParts] : glyph-proc
+		define [object width dscale mockInnerWidth] dimens
+
+		local totalInnerWidth 0
+		foreach [gniPart : items-of finalParts] : begin
+			set totalInnerWidth : totalInnerWidth + ([enclosureInnerPartActualWidth.get gniPart] || 0)
+		local x : 0.5 * width - 0.5 * totalInnerWidth
+		foreach [gniPart : items-of finalParts] : begin
+			include : WithTransform [Translate x 0] : refer-glyph gniPart
+			set x : x + ([enclosureInnerPartActualWidth.get gniPart] || 0)
 
 	define [EnclosureInner gnEnclosure miniatureFont job dimens] : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
 		local finalParts : EnsureInnerSubGlyphSeq miniatureFont job dimens
 		if gnEnclosure : return : glyph-proc
-			foreach [gidPart : items-of finalParts] : include [refer-glyph gidPart]
-			include : Translate width 0
+			include : EnclosureInnerImpl dimens finalParts
 			CvDecompose.set currentGlyph [{gnEnclosure}.concat finalParts]
-		: else : return : new-glyph : glyph-proc
-			foreach [gidPart : items-of finalParts] : include [refer-glyph gidPart]
-			include : Translate width 0
+		: else : return : new-glyph : EnclosureInnerImpl dimens finalParts
 
 	define [CircCrowd digits width] : 2 + 2 * [Math.pow [AdjustDigitCount digits width] (2 / 3)] * [Math.max 1 (HalfUPM / Width)]
 	define [CircScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -251,6 +252,12 @@ glyph-block AutoBuild-Enclosure : begin
 					refer-glyph gnEnclosure
 					EnclosureInner [if decomposable gnEnclosure null] miniatureFont job dimens
 
+	define [AddEnclosureMark digits dimens] : glyph-proc
+		define [object width dscale mockInnerWidth] dimens
+		if (digits > 1)
+			set-base-anchor 'enclosureInner' (0.5 * width - 0.5 * dscale * [Math.min (Width * digits) mockInnerWidth]) 0
+			set-base-anchor 'enclosureInner' (0.5 * width) 0
+
 	define [createCircledGlyphs digits demands]
 		EnclosureT "circle" CircledBuilder SLOPE-INHERIT digits demands CircleEnclosureShape
 	define [createItalicCircledGlyphs digits demands]
@@ -259,6 +266,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 		set-width width
 		include : OShape top bot left right sw smoothA smoothB
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createBoxedGlyphs digits demands]
 		EnclosureT 'boxed' CircledBuilder SLOPE-INHERIT digits demands BoxEnclosureShape
@@ -270,6 +278,7 @@ glyph-block AutoBuild-Enclosure : begin
 			HBarBottom left right bot sw
 			VBarLeft   left bot top   sw
 			VBarRight  right bot top  sw
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createDashedBoxedGlyphs digits demands]
 		EnclosureT 'dashed-boxed' CircledBuilder SLOPE-INHERIT digits demands DashedBoxEnclosureShape
@@ -289,6 +298,7 @@ glyph-block AutoBuild-Enclosure : begin
 				HBar left right [mix bot top 0.25] sw
 				HBar left right [mix bot top 0.50] sw
 				HBar left right [mix bot top 0.75] sw
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createInsetCircledGlyphs digits demands]
 		EnclosureT 'inset-circle' InsetBuilder SLOPE-INHERIT digits demands InsetCircleEnclosureShape
@@ -296,6 +306,7 @@ glyph-block AutoBuild-Enclosure : begin
 		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 		set-width width
 		include : OShapeOutline top bot left right sw smoothA smoothB
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createInsetBoxedGlyphs digits demands]
 		EnclosureT 'inset-boxed' InsetBuilder SLOPE-INHERIT digits demands InsetBoxEnclosureShape
@@ -308,6 +319,7 @@ glyph-block AutoBuild-Enclosure : begin
 			corner right bot
 			corner right top
 			close
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createInsetDiamondGlyphs digits demands]
 		EnclosureT 'inset-diamond' InsetBuilder SLOPE-INHERIT digits demands InsetDiamondEnclosureShape
@@ -320,6 +332,7 @@ glyph-block AutoBuild-Enclosure : begin
 			corner (right - O) [mix bot top 0.5]
 			corner [mix left right 0.5] (top - O)
 			close
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createInsetMosaicGlyphs digits demands]
 		EnclosureT 'inset-mosaic' InsetBuilder SLOPE-INHERIT digits demands InsetMosaicEnclosureShape
@@ -333,6 +346,7 @@ glyph-block AutoBuild-Enclosure : begin
 			corner mosaicRight mosaicBot
 			corner mosaicRight mosaicTop
 			close
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createDoubleCircledGlyphs digits demands]
 		EnclosureT 'double-circle' CircledBuilder SLOPE-INHERIT digits demands DoubleCircledEnclosureShape
@@ -349,6 +363,7 @@ glyph-block AutoBuild-Enclosure : begin
 			begin sw1
 			smoothA - sw + sw1
 			smoothB - sw + sw1
+		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
 	define [BraceScale digits width] : 0.65 / [Math.pow [AdjustDigitCount digits width] 0.5]
@@ -408,6 +423,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : Upright
 		include : Translate 0 (SymbolMid - SymbolMid * pscale)
 		include : Italify
+		include : AddEnclosureMark digits : bracedDottdeDimens digits ww
 
 	define [createHexBracedGlyphs digits demands] : BracedT 'hex-braced' digits demands HexBracedShape
 	define [HexBracedShape digits ww] : glyph-proc
@@ -449,6 +465,7 @@ glyph-block AutoBuild-Enclosure : begin
 		include : Upright
 		include : Translate 0 (SymbolMid - SymbolMid * pscale)
 		include : Italify
+		include : AddEnclosureMark digits : bracedDottdeDimens digits ww
 
 	define [DottedCrowd digits width] : 2 + [AdjustDigitCount digits width]
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
