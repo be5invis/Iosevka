@@ -10,6 +10,7 @@ glyph-block Letter-Latin-V : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-export VShape VShapeOutline
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define VCornerHalfWidth : HalfStroke * HVContrast * 1.15
@@ -103,6 +104,24 @@ glyph-block Letter-Latin-V : begin
 
 		if slab : include : AIVSerifs top
 
+	define [VCursiveShapeBarPos k] : mix SB RightSB k
+	define [VCursiveShape] : params [k top [sw Stroke]] : glyph-proc
+		define xBar : VCursiveShapeBarPos k
+		define xArcRight : RightSB - OX
+		define yArcRight : [mix 0 top 0.6] - sw * 0.2
+		define xArcEnd : [mix SB RightSB 0.8] + sw * 0.375
+		define yArcEnd : top - O
+		define rInY : DiagonalTailInnerRadius
+		include : dispiro
+			widths.lhs sw
+			flat xBar top [heading Downward]
+			curl xBar ((sw + rInY) * (1 + TanSlope))
+			arcvh
+			g2 (xBar + sw * HVContrast + rInY * HVContrast + TanSlope * sw) O
+			archv.superness 2
+			g4 xArcRight yArcRight
+			g4 xArcEnd yArcEnd
+
 	create-glyph : glyph-proc
 		include : MarkSet.capital
 		create-derived 'V.straight' : VShape [DivFrame 1] CAP Stroke true
@@ -118,12 +137,16 @@ glyph-block Letter-Latin-V : begin
 		include : MarkSet.e
 		create-derived 'v.straight' : VShape [DivFrame 1] XH Stroke true
 		create-derived 'v.curly' : VShape [DivFrame 1] XH Stroke false
+		create-derived 'v.cursive' : VCursiveShape 0 XH Stroke
 		create-derived 'v.straightMotionSerifed' : composite-proc
 			VShape [DivFrame 1] XH Stroke true (slab -- false)
 			LeftwardTopSerif SB XH SideJut
 		create-derived 'v.curlyMotionSerifed' : composite-proc
 			VShape [DivFrame 1] XH Stroke false (slab -- false)
 			LeftwardTopSerif SB XH SideJut
+		create-derived 'v.cursiveMotionSerifed' : composite-proc
+			VCursiveShape (1 / 32) XH Stroke
+			LeftwardTopSerif [VCursiveShapeBarPos (1 / 32)] XH (SideJut + [VCursiveShapeBarPos (1 / 32)] - SB)
 
 
 	define [VHooktopShape df barStraight top] : glyph-proc

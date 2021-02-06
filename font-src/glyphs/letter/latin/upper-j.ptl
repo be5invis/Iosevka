@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Upper-J : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Latin-Lower-J : FlatHookDotlessJShape
 
 	create-glyph 'J.serifless' : glyph-proc
 		include : MarkSet.capital
@@ -53,6 +54,51 @@ glyph-block Letter-Latin-Upper-J : begin
 	create-glyph 'J.serifedSymmetric' : glyph-proc
 		include [refer-glyph 'J.serifless'] AS_BASE ALSO_METRICS
 		include : CenterTopSerif (RightSB - HalfStroke * HVContrast - JBalance2 + O) CAP (Jut + JBalance2)
+
+	create-glyph 'J.descendingSerifless' : glyph-proc
+		include : MarkSet.if
+		local center : Middle + JBalance + HalfStroke * HVContrast
+		set-base-anchor 'above' (center - HVContrast * HalfStroke) CAP
+		set-base-anchor 'overlay' (center - HVContrast * HalfStroke) (CAP / 2)
+		local hookx  : center - (Width * 0.5) - Stroke * HVContrast + OXHook
+		local turn : [mix center hookx 0.5] + CorrectionOMidS
+		include : dispiro
+			widths.rhs
+			flat center CAP [heading Downward]
+			curl center (Descender + SmoothA)
+			hookend (Descender + O)
+			g4 hookx (Descender + JHook)
+
+	create-glyph 'J.descendingSerifed' : glyph-proc
+		include [refer-glyph 'J.descendingSerifless'] AS_BASE ALSO_METRICS
+		include : LeftwardTopSerif (Middle + JBalance) CAP LongJut
+
+	create-glyph 'J.descendingSerifedBothSides' : glyph-proc
+		include [refer-glyph 'J.descendingSerifed'] AS_BASE ALSO_METRICS
+		include : RightwardTopSerif (Middle + JBalance) CAP Jut
+
+	create-glyph 'J.descendingSerifedSymmetric' : glyph-proc
+		include [refer-glyph 'J.descendingSerifless'] AS_BASE ALSO_METRICS
+		include : CenterTopSerif (Middle + JBalance) CAP (Jut + JBalance)
+
+	create-glyph 'J.descendingFlatHookSerifless' : glyph-proc
+		local df : DivFrame para.diversityII
+		local dfHook : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.if
+		include : FlatHookDotlessJShape df dfHook CAP
+			crossLeft -- (df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2]))
+			barCenter -- (df.middle + 0.25 * JBalance * df.div * [mix 1 df.div 2])
+			serif -- false
+
+	create-glyph 'J.descendingFlatHookSerifed' : glyph-proc
+		local df : DivFrame para.diversityI
+		set-width df.width
+		include : df.markSet.if
+		include : FlatHookDotlessJShape df df CAP
+			crossLeft -- [mix 0 SB : mix 1 df.div 2]
+			barCenter -- (df.middle + JBalance * df.div)
+			serif -- true
 
 	select-variant 'J' 'J'
 	alias 'cyrl/Je' 0x408 'J'

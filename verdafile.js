@@ -29,6 +29,7 @@ const webfontFormats = [
 	["woff2", "woff2"],
 	["ttf", "truetype"]
 ];
+const webfontFormatsFast = [["ttf", "truetype"]];
 
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
@@ -237,20 +238,21 @@ function whyBuildPlanIsnNotThere(gid) {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
-const BuildTTF = file.make(
-	(gr, fn) => `${BUILD}/ttf/${gr}/${fn}.ttf`,
+const DistUnhintedTTF = file.make(
+	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		const charmap = out.dir + "/" + fn + ".charmap";
-		const [fi] = await target.need(FontInfoOf(fn), de`${out.dir}`, Scripts);
+		const charMapDir = `${BUILD}/ttf/${gr}`;
+		const charMapPath = `${charMapDir}/${fn}.cm.gz`;
+		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir), Scripts);
 		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
-		await silently.node("font-src/index", { o: out.full, oCharMap: charmap, ...fi });
+		await silently.node("font-src/index", { o: out.full, oCharMap: charMapPath, ...fi });
 	}
 );
 
 const BuildCM = file.make(
-	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap`,
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.cm.gz`,
 	async (target, output, gr, f) => {
-		await target.need(BuildTTF(gr, f));
+		await target.need(DistUnhintedTTF(gr, f));
 	}
 );
 
@@ -268,13 +270,16 @@ const GroupContents = task.group("contents", async (target, gr) => {
 const DistWebFontCSS = file.make(
 	gr => `${DIST}/${gr}/${gr}.css`,
 	async (target, out, gr) => {
-		// Note: this target does NOT depend on the font files.
-		const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr), de(out.dir));
-		const hs = await target.need(...ts.map(FontInfoOf));
-		echo.action(echo.hl.command(`Create WebFont CSS`), gr, echo.hl.operator("->"), out.full);
-		await silently.node("utility/make-webfont-css.js", out.full, bp.family, hs, webfontFormats);
+		await target.need(de(out.dir));
+		await createWebFontCssImpl(target, out.full, gr, webfontFormats);
 	}
 );
+async function createWebFontCssImpl(target, output, gr, formats) {
+	const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr));
+	const hs = await target.need(...ts.map(FontInfoOf));
+	echo.action(echo.hl.command(`Create WebFont CSS`), gr, echo.hl.operator("->"), output);
+	await silently.node("utility/make-webfont-css.js", output, bp.family, hs, formats);
+}
 
 // Content files
 const GroupTTFs = task.group("ttf", async (target, gr) => {
@@ -287,7 +292,7 @@ const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
 });
 const GroupWebFonts = task.group("webfont", async (target, gr) => {
 	const [ts] = await target.need(GroupFontsOf(gr));
-	await target.need(GroupWoff2s(gr), DistWebFontCSS(gr));
+	await target.need(GroupTTFs(gr), GroupWoff2s(gr), DistWebFontCSS(gr));
 });
 const GroupWoff2s = task.group("woff2", async (target, gr) => {
 	const [ts] = await target.need(GroupFontsOf(gr));
@@ -298,18 +303,11 @@ const GroupFonts = task.group("fonts", async (target, gr) => {
 });
 
 // Per group file
-const DistUnhintedTTF = file.make(
-	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
-	async (target, out, gr, f) => {
-		const [from] = await target.need(BuildTTF(gr, f), de`${out.dir}`);
-		await cp(from.full, out.full);
-	}
-);
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
 	async (target, out, gr, f) => {
 		const [{ hintParams }, hint] = await target.need(FontInfoOf(f), CheckTtfAutoHintExists);
-		const [from] = await target.need(BuildTTF(gr, f), de`${out.dir}`);
+		const [from] = await target.need(DistUnhintedTTF(gr, f), de`${out.dir}`);
 		echo.action(echo.hl.command(`Hint TTF`), from.full, echo.hl.operator("->"), out.full);
 		await silently.run(hint, hintParams, from.full, out.full);
 	}
@@ -438,7 +436,7 @@ async function buildCompositeTtc(out, inputs) {
 }
 async function buildGlyphSharingTtc(target, parts, out) {
 	await target.need(de`${out.dir}`);
-	const [ttfInputs] = await target.need(parts.map(part => BuildTTF(part.dir, part.file)));
+	const [ttfInputs] = await target.need(parts.map(part => DistUnhintedTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
 	await run(TTCIZE, "-u", ["-o", tmpTtc], ttfInputPaths);
@@ -523,7 +521,15 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 // Sample Images
 
 const Pages = task(`pages`, async t => {
-	await t.need(PagesDataExport, PagesFontExport);
+	await t.need(
+		PagesDataExport,
+		PagesFontExport`iosevka`,
+		PagesFontExport`iosevka-slab`,
+		PagesFontExport`iosevka-aile`,
+		PagesFontExport`iosevka-etoile`,
+		PagesFontExport`iosevka-QP`,
+		PagesFontExport`iosevka-QP-slab`
+	);
 });
 
 const PagesDir = oracle(`pages-dir-path`, async t => {
@@ -548,30 +554,26 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 	);
 });
 
-const PagesFontExport = task(`pages:font-export`, async t => {
-	const [pagesDir] = await t.need(PagesDir);
-	const dirs = await t.need(
-		GroupContents`iosevka`,
-		GroupContents`iosevka-slab`,
-		GroupContents`iosevka-aile`,
-		GroupContents`iosevka-etoile`,
-		GroupContents`iosevka-QP`,
-		GroupContents`iosevka-QP-slab`
-	);
-
-	for (const dir of dirs) exportFontDir(pagesDir, dir);
-});
-
-const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, g) => {
+const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
+	target.is.volatile();
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
-	const dirs = await target.need(GroupContents(g));
-	for (const dir of dirs) exportFontDir(pagesDir, dir);
+	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
+	await target.need(GroupWebFonts(gr), de(outDir));
+	await cp(`${DIST}/${gr}/ttf`, Path.resolve(outDir, "ttf"));
+	await cp(`${DIST}/${gr}/woff2`, Path.resolve(outDir, "woff2"));
+	await cp(`${DIST}/${gr}/${gr}.css`, Path.resolve(outDir, `${gr}.css`));
 });
 
-async function exportFontDir(pagesDir, dir) {
-	await cp(`${DIST}/${dir}`, Path.resolve(pagesDir, "shared/fonts", dir));
-}
+const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, gr) => {
+	target.is.volatile();
+	const [pagesDir] = await target.need(PagesDir);
+	if (!pagesDir) return;
+	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
+	await target.need(GroupTTFs(gr), de(outDir));
+	await cp(`${DIST}/${gr}/ttf`, Path.resolve(outDir, "ttf"));
+	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsFast);
+});
 
 ///////////////////////////////////////////////////////////
 // Sample Images

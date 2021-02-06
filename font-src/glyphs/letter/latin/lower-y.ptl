@@ -339,26 +339,21 @@ glyph-block Letter-Latin-Lower-Y : begin
 	turned 'turny' 0x28E 'y' Middle (XH / 2) [MarkSet.b]
 
 	define [LambdaBarOverlayShape] : FlatSlashShape [mix SB RightSB 0.45] [mix 0 CAP 0.8] (OverlayStroke / 2)
+	define LambdaConfig : object
+		straight                  { true false  SLAB-NONE   }
+		straightTurn              { true true   SLAB-NONE   }
+		curly                     { false false SLAB-NONE   }
+		curlyTurn                 { false true  SLAB-NONE   }
 
-	create-glyph 'grek/lambda.straight' : glyph-proc
-		include : MarkSet.b
-		include : [GenSmallYShape true  false SLAB-NONE].SmallLambdaShape CAP 0
-
-	create-glyph 'grek/lambda.curly' : glyph-proc
-		include : MarkSet.b
-		include : [GenSmallYShape false false SLAB-NONE].SmallLambdaShape CAP 0
-
-	create-glyph 'lambdaSlash.straight' : glyph-proc
-		include : MarkSet.b
-		include : union
-			refer-glyph 'grek/lambda.straight'
-			LambdaBarOverlayShape
-
-	create-glyph 'lambdaSlash.curly' : glyph-proc
-		include : MarkSet.b
-		include : union
-			refer-glyph 'grek/lambda.curly'
-			LambdaBarOverlayShape
+	foreach { suffix { fStraight fTurn slabType } } [Object.entries LambdaConfig] : do
+		create-glyph "grek/lambda.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : [GenSmallYShape fStraight fTurn slabType].SmallLambdaShape CAP 0
+		create-glyph "lambdaSlash.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : union
+				LambdaBarOverlayShape
+				[GenSmallYShape fStraight fTurn slabType].SmallLambdaShape CAP 0
 
 	select-variant 'grek/lambda' 0x3BB
 	select-variant 'lambdaSlash' 0x19B (follow -- 'grek/lambda')

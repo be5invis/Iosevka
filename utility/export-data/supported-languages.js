@@ -1,14 +1,16 @@
 const cldr = require("cldr");
 const fs = require("fs-extra");
+const zlib = require("zlib");
+
 const gatherCov = require("./coverage-export/gather-coverage-data");
 
 // List all the languages that Iosevka supports, but cannot inferred from CLDR data.
 const overrideSupportedLanguages = [];
 
 module.exports = async function (charMapPath, charMapItalicPath, charMapObliquePath) {
-	const charMap = await fs.readJson(charMapPath);
-	const charMapItalic = await fs.readJson(charMapItalicPath);
-	const charMapOblique = await fs.readJson(charMapObliquePath);
+	const charMap = await readJsonGz(charMapPath);
+	const charMapItalic = await readJsonGz(charMapItalicPath);
+	const charMapOblique = await readJsonGz(charMapObliquePath);
 
 	const rawCoverage = getRawCoverage(charMap);
 	const rawCoverageItalic = getRawCoverage(charMapItalic);
@@ -23,6 +25,11 @@ module.exports = async function (charMapPath, charMapItalicPath, charMapObliqueP
 		languages: Array.from(getSupportedLanguageSet(rawCoverage)).sort()
 	};
 };
+
+async function readJsonGz(p) {
+	const buf = await fs.readFile(p);
+	return JSON.parse(zlib.gunzipSync(buf).toString("utf-8"));
+}
 
 function getSupportedLanguageSet(rawCoverage) {
 	const supportLocaleSet = getSupportLocaleSet(rawCoverage);

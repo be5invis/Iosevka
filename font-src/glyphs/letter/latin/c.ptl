@@ -203,12 +203,12 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'C' 'C'
 	select-variant 'revC' 0x2183 (follow -- 'C')
 	alias 'cyrl/Es' 0x421 'C'
-	alias 'grek/lunateSigma' 0x3F9 'C'
+	alias 'grek/lunateSigma' 0x3F9 'C.serifless'
 
 	select-variant 'c' 'c'
 	select-variant 'revSmallC' 0x2184 (follow -- 'c')
 	alias 'cyrl/es' 0x441 'c'
-	alias 'grek/lunatesigma' 0x3F2 'c'
+	alias 'grek/lunateSmallSigma' 0x3F2 'c.serifless'
 
 	select-variant 'cCurlyTail' 0x255
 	select-variant 'stretchedC' 0x297 (follow -- 'C')
@@ -232,35 +232,57 @@ glyph-block Letter-Latin-C : begin
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.4)
 		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.7] (CAP * 0.6)
 
-	with-related-glyphs 'currency/centSign' 0xA2 'c' : lambda [src sel] : glyph-proc
+	create-glyph 'currency/centSignBar.open' : glyph-proc
+		set-width 0
+		include : dispiro
+			widths.center
+			flat (Middle - Width) (XH - HalfStroke)
+			curl (Middle - Width) (XH - Descender / 2) [heading Upward]
+		include : dispiro
+			widths.center
+			flat (Middle - Width) (Descender / 2) [heading Upward]
+			curl (Middle - Width) HalfStroke
+
+	create-glyph 'currency/centSignBar.through' : glyph-proc
 		define fine : AdviceStroke 4
-		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include [refer-glyph 'currency/centSignBar.open'] AS_BASE ALSO_METRICS
+		include : VBar (Middle - Width) (XH - HalfStroke) (0 + HalfStroke) fine
+
+	create-glyph 'currency/centSignBar.barInterrupted' : glyph-proc
+		set-width 0
+		define fine : AdviceStroke 4
+		define gap : Math.max (XH / 8) [AdviceStroke2 6 6 XH]
 		include : dispiro
-			widths.center
-			flat Middle (XH - HalfStroke)
-			curl Middle (XH - Descender / 2) [heading Upward]
+			flat (Middle - Width) (XH - Descender / 2) [widths.center.heading Stroke Downward]
+			curl (Middle - Width) (XH / 2 + gap / 2) [widths.center.heading fine Downward]
 		include : dispiro
-			widths.center
-			flat Middle (Descender / 2) [heading Upward]
-			curl Middle HalfStroke
-		include : VBar Middle (XH - HalfStroke) (0 + HalfStroke) fine
+			flat (Middle - Width) (Descender / 2) [widths.center.heading Stroke Upward]
+			curl (Middle - Width) (XH / 2 - gap / 2) [widths.center.heading fine Upward]
+
+	select-variant 'currency/centSignBar' (follow -- 'cent')
+
+	create-glyph 'currency/centSign' 0xA2 : glyph-proc
+		include [refer-glyph 'c'] AS_BASE ALSO_METRICS
+		include : WithTransform [Translate Width 0] [refer-glyph 'currency/centSignBar']
+		CvDecompose.set currentGlyph { 'c' 'currency/centSignBar' }
 
 	turned 'turnC' 0x186 'C' Middle (CAP / 2)
 	turned 'turnc' 0x254 'c' Middle (XH / 2)
-	alias 'revLunateSigma' 0x37B 'revC'
-	alias 'revSmallLunateSigma' 0x3FD 'revSmallC'
-	with-related-glyphs 'dotSmallLunateSigma' 0x37C 'c' : lambda [src sel] : composite-proc
-		refer-glyph src
-		DotAt (Middle + HalfStroke / 4) (XH / 2) DotRadius
-	with-related-glyphs 'dotRevSmallLunateSigma' 0x37D 'revSmallC' : lambda [src sel] : composite-proc
-		refer-glyph src
-		DotAt (Middle - HalfStroke / 4) (XH / 2) DotRadius
-	with-related-glyphs 'dotLunateSigma' 0x3FE 'C' : lambda [src sel] : composite-proc
-		refer-glyph src
+	alias 'grek/revLunateSigma' 0x37B 'revC.serifless'
+	alias 'grek/revLunateSmallSigma' 0x3FD 'revSmallC.serifless'
+
+	create-glyph 'grek/dotLunateSigma' 0x3FE : composite-proc
+		refer-glyph 'grek/lunateSigma'
 		DotAt (Middle + HalfStroke / 4) (CAP / 2) DotRadius
-	with-related-glyphs 'dotRevLunateSigma' 0x3FF 'revC' : lambda [src sel] : composite-proc
-		refer-glyph src
+	create-glyph 'grek/dotRevLunateSigma' 0x3FF : composite-proc
+		refer-glyph 'grek/revLunateSigma'
 		DotAt (Middle - HalfStroke / 4) (CAP / 2) DotRadius
+	create-glyph 'grek/dotLunateSmallSigma' 0x37C : composite-proc
+		refer-glyph 'grek/lunateSmallSigma'
+		DotAt (Middle + HalfStroke / 4) (XH / 2) DotRadius
+	create-glyph 'grek/dotRevLunateSmallSigma' 0x37D : composite-proc
+		refer-glyph 'grek/revLunateSmallSigma'
+		DotAt (Middle - HalfStroke / 4) (XH / 2) DotRadius
 
 	create-glyph 'Chooktop' 0x187 : glyph-proc
 		include : MarkSet.capital

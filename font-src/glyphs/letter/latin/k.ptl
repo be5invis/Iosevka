@@ -54,28 +54,28 @@ glyph-block Letter-Latin-K : begin
 		if slab : include : KSlabs top left right stroke true
 
 	define [KSymmetricLegsImpl fConnected] : function [left right stroke top slabLeft slab] : glyph-proc
-		local fine : AdviceStroke 3.5
+		local fine : AdviceStroke [if fConnected 3.5 3]
 		local Ok : KO slab true top stroke
 
 		local kshLeft : left + [KBalance slabLeft true]
 		local kshRight : right + [KBalanceRight slab true]
 
-		local xAttach : kshLeft + stroke * HVContrast + [AdviceStroke 6]
-		local yAttach : top * 0.42 - stroke
+		local xAttach : kshLeft + stroke * HVContrast + [if fConnected [AdviceStroke 6] fine]
+		local yAttach : top * [if fConnected 0.42 0.49] - stroke * [if fConnected 1 (-0.1)]
 		local coYAttach : top - yAttach
 		include : intersection
 			Rect top (0.5 * top) kshLeft (2 * Width)
 			dispiro
 				widths.rhs stroke
 				flat (kshRight - Ok) top
-				curl xAttach yAttach [widths.rhs fine]
+				curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
 		include : intersection
 			Rect (0.5 * top) 0 kshLeft (2 * Width)
 			dispiro
 				widths.lhs stroke
 				flat (kshRight - Ok) 0
-				curl xAttach coYAttach [widths.lhs fine]
+				curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
 
 		if fConnected : include : intersection
 			HBar kshLeft (2 * Width) (0.5 * top) stroke
@@ -201,7 +201,7 @@ glyph-block Letter-Latin-K : begin
 		if (slab && !tailed) : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
 	define [KNormalLegs                top slabLeft slab] :  KStraightLegShapeImpl       SB RightSB Stroke top slabLeft slab
-	define [KSymmetricDisconnectedLegs top slabLeft slab] : [KSymmetricLegsImpl false]   SB RightSB Stroke top slabLeft slab
+	define [KSymmetricTouchingLegs     top slabLeft slab] : [KSymmetricLegsImpl false]   SB RightSB Stroke top slabLeft slab
 	define [KSymmetricConnectedLegs    top slabLeft slab] : [KSymmetricLegsImpl true]    SB RightSB Stroke top slabLeft slab
 	define [KCurlyLegs                 top slabLeft slab] :  KCurlyLegShapeImpl          SB RightSB Stroke top slabLeft slab
 	define [KCursiveLegs               top slabLeft slab] :  KCursiveLoopAndLegShapeImpl false             top slabLeft slab
@@ -220,14 +220,18 @@ glyph-block Letter-Latin-K : begin
 		VerticalHook (SB + [KBalance slab straightBar] + HalfStroke * HVContrast) (CAP - Hook - HalfStroke) HookX (-Hook)
 
 	define UpperKConfig : object
-		straight                           { KNormalLegs                 KStraightLegShapeImpl        [if SLAB 1 0] [if SLAB 1 0]  }
-		curly                              { KCurlyLegs                  KCurlyLegShapeImpl           [if SLAB 1 0] [if SLAB 1 0]  }
-		symmetricDisconnected              { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false] [if SLAB 1 0] [if SLAB 1 0]  }
-		symmetricConnected                 { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  [if SLAB 1 0] [if SLAB 1 0]  }
-		straightMotionSerifed              { KNormalLegs                 KStraightLegShapeImpl         2             0 }
-		curlyMotionSerifed                 { KCurlyLegs                  KCurlyLegShapeImpl            2             0 }
-		symmetricDisconnectedMotionSerifed { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false]  2             0 }
-		symmetricConnectedMotionSerifed    { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]   2             0 }
+		straight                         { KNormalLegs                 KStraightLegShapeImpl        [if SLAB 1 0] [if SLAB 1 0]  }
+		curly                            { KCurlyLegs                  KCurlyLegShapeImpl           [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricTouching                { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricConnected               { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  [if SLAB 1 0] [if SLAB 1 0]  }
+		straightSerifless                { KNormalLegs                 KStraightLegShapeImpl        0 0 }
+		curlySerifless                   { KCurlyLegs                  KCurlyLegShapeImpl           0 0 }
+		symmetricTouchingSerifless       { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] 0 0 }
+		symmetricConnectedSerifless      { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  0 0 }
+		straightMotionSerifed            { KNormalLegs                 KStraightLegShapeImpl        2 0 }
+		curlyMotionSerifed               { KCurlyLegs                  KCurlyLegShapeImpl           2 0 }
+		symmetricTouchingMotionSerifed   { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] 2 0 }
+		symmetricConnectedMotionSerifed  { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  2 0 }
 
 	define [UpperKLTSerif slabTop top straightBar] : match slabTop
 		2 : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) top SideJut
@@ -256,7 +260,7 @@ glyph-block Letter-Latin-K : begin
 			include : Legs XH slabTop false
 			if slabTop : include : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) XH SideJut
 
-		create-glyph "cyrl/ka.\(suffix)" : glyph-proc
+		create-glyph "smcpK.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 XH
 			include : Legs XH slabTop slabBot
@@ -290,18 +294,19 @@ glyph-block Letter-Latin-K : begin
 			include : MarkSet.e
 			include : BashkirKaShape XH
 
+
 	define LowerKConfig : object
 		straight                                  { KNormalLegs                SLAB (SLAB && !para.isItalic) }
 		curly                                     { KCurlyLegs                 SLAB (SLAB && !para.isItalic) }
 		cursive                                   { KCursiveLegs               SLAB (SLAB && !para.isItalic) }
 		diagonalTailedSerifedCursive              { KDiagTailCursiveLegs       SLAB (SLAB && !para.isItalic) }
-		symmetricDisconnected                     { KSymmetricDisconnectedLegs SLAB (SLAB && !para.isItalic) }
+		symmetricTouching                         { KSymmetricTouchingLegs     SLAB (SLAB && !para.isItalic) }
 		symmetricConnected                        { KSymmetricConnectedLegs    SLAB (SLAB && !para.isItalic) }
 		straightMotionSerifed                     { KNormalLegs                true false                    }
 		curlyMotionSerifed                        { KCurlyLegs                 true false                    }
 		cursiveMotionSerifed                      { KCursiveLegs               true false                    }
 		diagonalTailedSerifedCursiveMotionSerifed { KDiagTailCursiveLegs       true false                    }
-		symmetricDisconnectedMotionSerifed        { KSymmetricDisconnectedLegs true false                    }
+		symmetricTouchingMotionSerifed            { KSymmetricTouchingLegs     true false                    }
 		symmetricConnectedMotionSerifed           { KSymmetricConnectedLegs    true false                    }
 
 	foreach { suffix { Legs slabTop slabBot } } [Object.entries LowerKConfig] : do
@@ -325,20 +330,21 @@ glyph-block Letter-Latin-K : begin
 
 	select-variant 'K' 'K'
 	alias 'grek/Kappa' 0x39A 'K'
-	alias 'cyrl/Ka' 0x41A 'K'
 	alias 'letterLike/kelvinSign' 0x212A 'K'
 	select-variant 'KDescender' 0x2C69 (follow -- 'K')
-	alias 'cyrl/KaDescender' 0x49A 'KDescender'
+	select-variant 'cyrl/Ka' 0x41A 'K' (shapeFrom -- 'K') (follow -- 'cyrl/ka')
+	select-variant 'cyrl/KaDescender' 0x49A (shapeFrom -- 'KDescender') (follow -- 'cyrl/ka')
 
 	select-variant 'k' 'k'
 	select-variant 'kDescender' 0x2C6A
-	alias 'cyrl/ka.BGR' null 'k'
 
-	select-variant 'grek/kappa' 0x3BA (follow -- 'K')
+	select-variant 'grek/kappa' 0x3BA
 
-	select-variant 'cyrl/ka' 0x43A (follow -- 'K')
-	alias 'latinkappa' 0x138 'cyrl/ka'
-	select-variant 'cyrl/kaDescender' 0x49B (follow -- 'K')
+	select-variant 'smcpK' 0x1D0B (follow -- 'K')
+	alias 'latinkappa' 0x138 'smcpK'
+	select-variant 'cyrl/ka' 0x43A (shapeFrom -- 'smcpK')
+	select-variant 'cyrl/kaDescender' 0x49B (follow -- 'cyrl/ka')
+	select-variant 'cyrl/ka.BGR' null (shapeFrom -- 'k') (follow -- 'cyrl/ka')
 
 	select-variant 'Khooktop' 0x198
 	select-variant 'khooktop' 0x199
@@ -346,8 +352,8 @@ glyph-block Letter-Latin-K : begin
 	turned 'turnK' 0xA7B0 'K' Middle (CAP / 2)
 	turned 'turnk' 0x29E  'k' Middle (CAP / 2)
 
-	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'K')
-	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'K')
+	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'cyrl/ka')
+	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'cyrl/ka')
 
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
