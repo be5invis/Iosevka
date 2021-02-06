@@ -54,28 +54,28 @@ glyph-block Letter-Latin-K : begin
 		if slab : include : KSlabs top left right stroke true
 
 	define [KSymmetricLegsImpl fConnected] : function [left right stroke top slabLeft slab] : glyph-proc
-		local fine : AdviceStroke 3.5
+		local fine : AdviceStroke [if fConnected 3.5 3]
 		local Ok : KO slab true top stroke
 
 		local kshLeft : left + [KBalance slabLeft true]
 		local kshRight : right + [KBalanceRight slab true]
 
-		local xAttach : kshLeft + stroke * HVContrast + [AdviceStroke 6]
-		local yAttach : top * 0.42 - stroke
+		local xAttach : kshLeft + stroke * HVContrast + [if fConnected [AdviceStroke 6] fine]
+		local yAttach : top * [if fConnected 0.42 0.49] - stroke * [if fConnected 1 (-0.1)]
 		local coYAttach : top - yAttach
 		include : intersection
 			Rect top (0.5 * top) kshLeft (2 * Width)
 			dispiro
 				widths.rhs stroke
 				flat (kshRight - Ok) top
-				curl xAttach yAttach [widths.rhs fine]
+				curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
 		include : intersection
 			Rect (0.5 * top) 0 kshLeft (2 * Width)
 			dispiro
 				widths.lhs stroke
 				flat (kshRight - Ok) 0
-				curl xAttach coYAttach [widths.lhs fine]
+				curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
 
 		if fConnected : include : intersection
 			HBar kshLeft (2 * Width) (0.5 * top) stroke
@@ -201,7 +201,7 @@ glyph-block Letter-Latin-K : begin
 		if (slab && !tailed) : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
 	define [KNormalLegs                top slabLeft slab] :  KStraightLegShapeImpl       SB RightSB Stroke top slabLeft slab
-	define [KSymmetricDisconnectedLegs top slabLeft slab] : [KSymmetricLegsImpl false]   SB RightSB Stroke top slabLeft slab
+	define [KSymmetricTouchingLegs     top slabLeft slab] : [KSymmetricLegsImpl false]   SB RightSB Stroke top slabLeft slab
 	define [KSymmetricConnectedLegs    top slabLeft slab] : [KSymmetricLegsImpl true]    SB RightSB Stroke top slabLeft slab
 	define [KCurlyLegs                 top slabLeft slab] :  KCurlyLegShapeImpl          SB RightSB Stroke top slabLeft slab
 	define [KCursiveLegs               top slabLeft slab] :  KCursiveLoopAndLegShapeImpl false             top slabLeft slab
@@ -220,18 +220,18 @@ glyph-block Letter-Latin-K : begin
 		VerticalHook (SB + [KBalance slab straightBar] + HalfStroke * HVContrast) (CAP - Hook - HalfStroke) HookX (-Hook)
 
 	define UpperKConfig : object
-		straight                           { KNormalLegs                 KStraightLegShapeImpl        [if SLAB 1 0] [if SLAB 1 0]  }
-		curly                              { KCurlyLegs                  KCurlyLegShapeImpl           [if SLAB 1 0] [if SLAB 1 0]  }
-		symmetricDisconnected              { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false] [if SLAB 1 0] [if SLAB 1 0]  }
-		symmetricConnected                 { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  [if SLAB 1 0] [if SLAB 1 0]  }
-		straightSerifless                  { KNormalLegs                 KStraightLegShapeImpl        0 0 }
-		curlySerifless                     { KCurlyLegs                  KCurlyLegShapeImpl           0 0 }
-		symmetricDisconnectedSerifless     { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false] 0 0 }
-		symmetricConnectedSerifless        { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  0 0 }
-		straightMotionSerifed              { KNormalLegs                 KStraightLegShapeImpl        2 0 }
-		curlyMotionSerifed                 { KCurlyLegs                  KCurlyLegShapeImpl           2 0 }
-		symmetricDisconnectedMotionSerifed { KSymmetricDisconnectedLegs [KSymmetricLegsImpl    false] 2 0 }
-		symmetricConnectedMotionSerifed    { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  2 0 }
+		straight                         { KNormalLegs                 KStraightLegShapeImpl        [if SLAB 1 0] [if SLAB 1 0]  }
+		curly                            { KCurlyLegs                  KCurlyLegShapeImpl           [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricTouching                { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] [if SLAB 1 0] [if SLAB 1 0]  }
+		symmetricConnected               { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  [if SLAB 1 0] [if SLAB 1 0]  }
+		straightSerifless                { KNormalLegs                 KStraightLegShapeImpl        0 0 }
+		curlySerifless                   { KCurlyLegs                  KCurlyLegShapeImpl           0 0 }
+		symmetricTouchingSerifless       { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] 0 0 }
+		symmetricConnectedSerifless      { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  0 0 }
+		straightMotionSerifed            { KNormalLegs                 KStraightLegShapeImpl        2 0 }
+		curlyMotionSerifed               { KCurlyLegs                  KCurlyLegShapeImpl           2 0 }
+		symmetricTouchingMotionSerifed   { KSymmetricTouchingLegs     [KSymmetricLegsImpl    false] 2 0 }
+		symmetricConnectedMotionSerifed  { KSymmetricConnectedLegs    [KSymmetricLegsImpl    true]  2 0 }
 
 	define [UpperKLTSerif slabTop top straightBar] : match slabTop
 		2 : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) top SideJut
@@ -294,18 +294,19 @@ glyph-block Letter-Latin-K : begin
 			include : MarkSet.e
 			include : BashkirKaShape XH
 
+
 	define LowerKConfig : object
 		straight                                  { KNormalLegs                SLAB (SLAB && !para.isItalic) }
 		curly                                     { KCurlyLegs                 SLAB (SLAB && !para.isItalic) }
 		cursive                                   { KCursiveLegs               SLAB (SLAB && !para.isItalic) }
 		diagonalTailedSerifedCursive              { KDiagTailCursiveLegs       SLAB (SLAB && !para.isItalic) }
-		symmetricDisconnected                     { KSymmetricDisconnectedLegs SLAB (SLAB && !para.isItalic) }
+		symmetricTouching                         { KSymmetricTouchingLegs     SLAB (SLAB && !para.isItalic) }
 		symmetricConnected                        { KSymmetricConnectedLegs    SLAB (SLAB && !para.isItalic) }
 		straightMotionSerifed                     { KNormalLegs                true false                    }
 		curlyMotionSerifed                        { KCurlyLegs                 true false                    }
 		cursiveMotionSerifed                      { KCursiveLegs               true false                    }
 		diagonalTailedSerifedCursiveMotionSerifed { KDiagTailCursiveLegs       true false                    }
-		symmetricDisconnectedMotionSerifed        { KSymmetricDisconnectedLegs true false                    }
+		symmetricTouchingMotionSerifed            { KSymmetricTouchingLegs     true false                    }
 		symmetricConnectedMotionSerifed           { KSymmetricConnectedLegs    true false                    }
 
 	foreach { suffix { Legs slabTop slabBot } } [Object.entries LowerKConfig] : do
