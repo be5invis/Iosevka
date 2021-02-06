@@ -337,7 +337,7 @@ function queryCvFeatureTagsOf(sink, gid, glyph, variantAssignmentSet) {
 			variantAssignmentSet.add(assignCss);
 		}
 	}
-	for (const g of m.values()) if (g.length) sink.push(g.sort());
+	for (const g of m.values()) if (g.length) sink.push(g);
 }
 
 exports.Dotless = Dotless;
