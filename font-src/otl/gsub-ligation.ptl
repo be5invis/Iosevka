@@ -81,8 +81,6 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				if (lastSameRank != ln) : sink.lookupDep.push {lastSameRank ln}
 			sameRankLookupBlob.push {ln obj}
 
-	define [keep-if lg x] : if [hasLG lg] x null
-
 	define [filterNulls _rules] : begin
 		if [not _rules] : return _rules
 		define rules {}
@@ -103,7 +101,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			.rules rules
 		set lookupRank : lookupRank + 1
 
-	do "Operator centering"
+	do "Operator centering" : if [hasLG 'center-ops'] : begin
 		define [centerAsterisk]   : {'asterisk'}    ~>  {'asterisk/lowered'}
 		define [centerColon]      : {'colon'}       ~>  {'colon.mid'}
 		define [centerCaret]      : {'asciiCaret'}  ~>  {'asciiCaret.low'}
@@ -123,8 +121,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 
 		define [Cg] : centerizeL ~> centerizeR
 
-		do "Bracket-star"
-			CreateLigationLookup : keep-if 'brst' : list
+		do "Bracket-star" : if [hasLG 'brst'] : begin
+			CreateLigationLookup : list
 				chain-rule # (*
 					{'parenLeft'}  ~> look-around
 					centerAsterisk
@@ -133,7 +131,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					{'parenRight'} ~> look-around
 
 		do "Bracket-colon"
-			CreateLigationLookup : keep-if 'center-ops' : list
+			CreateLigationLookup : list
 				chain-rule # (:
 					{'parenLeft' 'bracketLeft' 'braceLeft'}    ~> look-around
 					centerColon
@@ -142,7 +140,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
 
 		do "Operator Centering"
-			CreateLigationLookup : keep-if 'center-ops' : list
+			CreateLigationLookup : list
 				chain-rule [Cg] [Cg] [acskip] [acskip] [acops] # ::+
 				chain-rule [Cg] [Cg] [acskip] [acops]          # ::+
 				chain-rule [Cg] [Cg] [acops]                   # ::+
@@ -154,12 +152,12 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				chain-rule [acops] [Cg]                        # +:
 
 		do "Operator centering : Trailing"
-			CreateLigationLookup : keep-if 'center-ops' : list
+			CreateLigationLookup : list
 				chain-rule centerizeR [acskip] [acskip] [Cg]
 				chain-rule centerizeR [acskip] [Cg]
 				chain-rule centerizeR [Cg]
 
-			CreateReverseLigationLookup : keep-if 'center-ops' : list
+			CreateReverseLigationLookup : list
 				reverse-rule [Cg] [acskip] [acskip] centerizeR
 				reverse-rule [Cg] [acskip] centerizeR
 				reverse-rule [Cg] centerizeR
@@ -167,12 +165,12 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		do "Operator centering : Apple fix"
 			# Apple (still) have problem when dealing with reverse chaining lookup
 			# They give up at run beginning. Fix them.
-			CreateLigationLookup : keep-if 'center-ops' : list
+			CreateLigationLookup : list
 				chain-rule [Cg] [acskip] [acskip] centerizeR
 				chain-rule [Cg] [acskip] centerizeR
 				chain-rule [Cg] centerizeR
 
-	do "Kern Dotty"
+	do "Kern Dotty" : if [hasLG 'kern-dotty'] : begin
 		define dottyPunctuationSets : list
 			list { "period" "period.mid" } { "colon" "colon.mid" "question" "exclam" }
 			list { "comma" }               { "semicolon" }
@@ -206,7 +204,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			define dRightHalf : [lsx 'dRightHalf'] dp
 			define dMid       : [lsx 'dMid']       dp
 
-			CreateLigationLookup : keep-if 'kern-dotty' : list
+			CreateLigationLookup : list
 				chain-rule
 					[dRight.concat dMid] ~> look-around
 					dp ~> dMid
@@ -225,7 +223,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				define dgLeftHalf  : [lsx 'dLeftHalf']  dg
 				define dgRightHalf : [lsx 'dRightHalf'] dg
 				define dgMid       : [lsx 'dMid']       dg
-				CreateLigationLookup : keep-if 'kern-dotty' : list
+				CreateLigationLookup : list
 					chain-rule
 						boundary               ~> look-around
 						dgRight                ~> dgMid
@@ -240,13 +238,13 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 						dgLeft                 ~> dgMid
 						boundary               ~> look-around
 
-			CreateLigationLookup : keep-if 'kern-dotty' : list
+			CreateLigationLookup : list
 				chain-rule
 					dRight ~> dRightHalf
 					dLeft  ~> dLeftHalf
 
-	do "Plus chains" : begin
-		CreateLigationLookup : keep-if 'plusplus' : list
+	do "Plus chains" : if [hasLG 'plusplus'] : begin
+		CreateLigationLookup : list
 			# +++++++++
 			chain-rule
 				{'plus.lig.cr' 'plus.lig.jr'} ~> look-around
@@ -263,7 +261,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			chain-rule
 				{'plus'} ~> [lsx 'lc']
 				{'plus'} ~> [lsx 'cr']
-		CreateLigationLookup : keep-if 'plusplus' : list
+		CreateLigationLookup : list
 			chain-rule # +++
 				{'plus.lig.lc'} ~> {'plus.lig.lc.s'}
 				{'plus.lig.cc'} ~> look-around
@@ -272,8 +270,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				{'plus.lig.lc'} ~> {'plus.lig.lc.s'}
 				{'plus.lig.cr'} ~> {'plus.lig.cr.s'}
 
-	do "triangles" : begin
-		CreateLigationLookup : keep-if 'trig' : list
+	do "triangles" : if [hasLG 'trig'] : begin
+		CreateLigationLookup : list
 			chain-rule # <|
 				less    ~> [lsx 'trig']
 				{'bar'} ~> [lsx 'trig']
@@ -286,18 +284,18 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			chain-rule # <||||
 				[[lsx 'trig'] {'bar'}] ~> look-around
 				{'bar'}                ~> [lsx 'trig']
-		CreateReverseLigationLookup : keep-if 'trig' : list
+		CreateReverseLigationLookup : list
 			reverse-rule
 				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
 				[[lsx 'trig'] {'bar'}] ~> look-around
 		# Apple fix
-		CreateLigationLookup : keep-if 'trig' : list
+		CreateLigationLookup : list
 			chain-rule
 				{'bar'}                ~> [[lsx 'trig'] {'bar'}]
 				[[lsx 'trig'] {'bar'}] ~> look-around
 
-	do "shift-eq operators (<<= and >>=)"
-		CreateLigationLookup : keep-if "llggeq" : list
+	do "shift-eq operators (<<= and >>=)" : if [hasLG 'llggeq']  : begin
+		CreateLigationLookup : list
 			chain-rule # =<<<=
 				equal      ~> look-around
 				less       ~> advance
@@ -361,8 +359,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				greater    ~> [lsx 'shiftN0h']
 				equal      ~> look-around
 
-	do "HTML Comment"
-		CreateLigationLookup : keep-if 'html-comment' : list
+	do "HTML Comment" : if [hasLG 'html-comment'] : begin
+		CreateLigationLookup : list
 			chain-rule # <!---
 				less   ~> look-around
 				exclam ~> [lsx 'htmlcommentstart']
@@ -375,7 +373,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				hyphen ~> [lsx 'lxc']
 				hyphen ~> [lsx 'cf']
 
-	do "Arrows"
+	do "Arrows" : if [hasLG 'arrow'] : begin
 		define singular : hyphen.concat anyWave
 		define [CBarSingular k] : begin
 			local hyphenSet : new Set hyphen
@@ -657,8 +655,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				CreateLigationLookup ambiguousRods
 
 	# <<, >>, <<<, >>>
-	do "Less/Greater Chaining"
-		CreateLigationLookup : keep-if 'llgg' : list
+	do "Less/Greater Chaining" : if [hasLG 'llgg'] : begin
+		CreateLigationLookup : list
 			chain-rule
 				{'parenLeft'} ~> look-around
 				{'question'}  ~> look-around
@@ -699,19 +697,19 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		local gNeut {"greater" "greater"            "greater"}
 		local lgAll  : lAll.concat  gAll
 		local lgNeut : lNeut.concat gNeut
-		CreateLigationLookup : keep-if 'llgg' : list
+		CreateLigationLookup : list
 			chain-rule
 				lgAll ~> lgNeut
 				lgAll ~> lgNeut
 				lgAll ~> lgNeut
 				lgAll ~> look-around
-		CreateLigationLookup : keep-if 'llgg' : list
+		CreateLigationLookup : list
 			chain-rule
 				lgAll ~> look-around
 				lgAll ~> look-around
 				lgAll ~> look-around
 				lgAll ~> lgNeut
-		CreateLigationLookup : keep-if 'llgg' : list
+		CreateLigationLookup : list
 			chain-rule
 				lAll ~> lNeut
 				lAll ~> lNeut
@@ -730,19 +728,20 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				lAll ~> lNeut
 
 	# /\ and \/
-	do "logical" : CreateLigationLookup : keep-if 'logic' : list
-		chain-rule
-			slash         ~> [csx 'left']
-			backslash     ~> [csx 'right']
-		chain-rule
-			backslash     ~> [csx 'left']
-			slash         ~> [csx 'right']
-		chain-rule
-			bar           ~> look-around
-			hyphen        ~> [lsx 'jf']
-		chain-rule
-			hyphen        ~> [lsx 'fj']
-			bar           ~> look-around
+	do "logical" : if [hasLG 'logic'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				slash         ~> [csx 'left']
+				backslash     ~> [csx 'right']
+			chain-rule
+				backslash     ~> [csx 'left']
+				slash         ~> [csx 'right']
+			chain-rule
+				bar           ~> look-around
+				hyphen        ~> [lsx 'jf']
+			chain-rule
+				hyphen        ~> [lsx 'fj']
+				bar           ~> look-around
 
 	# == and !=, and other related
 	do "equals" : begin
@@ -849,57 +848,61 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					equal       ~> {'equal.cf'}
 
 	# <= and >=
-	do "inequals" : CreateLigationLookup : keep-if 'ineq' : list
-		# Disable regular expression lookaheads
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			{'parenLeft'} ~> look-around
-			{'question'}  ~> look-around
-			regexLookAround ~> advance
-			regexLookAround ~> advance
-		chain-rule
-			[acops]            ~> look-around
-			{'less' 'greater'} ~> advance
-			equal              ~> advance
-		chain-rule
-			{'less' 'greater'} ~> advance
-			equal              ~> advance
-			[acops]            ~> look-around
-		chain-rule
-			{'less'}    ~> {'less.lig2'}
-			equal       ~> {'eq.at-lteq.lig2'}
-		chain-rule
-			{'greater'} ~> {'greater.lig2'}
-			equal       ~> {'eq.at-gteq.lig2'}
+	do "inequals" : if [hasLG 'ineq'] : begin
+		CreateLigationLookup : list
+			# Disable regular expression lookaheads
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				{'parenLeft'} ~> look-around
+				{'question'}  ~> look-around
+				regexLookAround ~> advance
+				regexLookAround ~> advance
+			chain-rule
+				[acops]            ~> look-around
+				{'less' 'greater'} ~> advance
+				equal              ~> advance
+			chain-rule
+				{'less' 'greater'} ~> advance
+				equal              ~> advance
+				[acops]            ~> look-around
+			chain-rule
+				{'less'}    ~> {'less.lig2'}
+				equal       ~> {'eq.at-lteq.lig2'}
+			chain-rule
+				{'greater'} ~> {'greater.lig2'}
+				equal       ~> {'eq.at-gteq.lig2'}
 
 	# :>
-	do "colon-less-greater" : CreateLigationLookup : keep-if 'colon-greater' : list
-		chain-rule
-			{'colon.mid'} ~> look-around
-			{'greater'}   ~> {'greaterArrow'}
+	do "colon-less-greater" : if [hasLG 'colon-greater'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				{'colon.mid'} ~> look-around
+				{'greater'}   ~> {'greaterArrow'}
 
 	# [| |] {| |}
-	do "brack-brace-bar" : begin
-		CreateLigationLookup : keep-if 'brack-bar' : list
+	do "brack-bar" : if [hasLG 'brack-bar'] : begin
+		CreateLigationLookup : list
 			chain-rule
 				{'bracketLeft'}  ~> {'ligExtBracketLeft'}
 				{'bar'}          ~> {'ligBarInsideBracketLeft'}
 			chain-rule
 				{'bar'}          ~> {'ligBarInsideBracketRight'}
 				{'bracketRight'} ~> {'ligExtBracketRight'}
-		CreateLigationLookup : keep-if 'brace-bar' : list
+
+	do "brace-bar" : if [hasLG 'brace-bar'] : begin
+		CreateLigationLookup : list
 			chain-rule
 				{'braceLeft'}    ~> {'ligExtBraceLeft'}
 				{'bar'}          ~> {'ligBarInsideBracketLeft'}
