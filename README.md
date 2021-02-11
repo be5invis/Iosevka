@@ -926,8 +926,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `z = 'curly-top-motion-serifed'`, `cv50 = 10`: Curly `z` with motion serifs at top.
   - Styles for `ß` (Eszet):
     + `eszet = 'traditional'`, `cv51 = 1`: Traditional, Fraktur-like Eszet (`ß`).
-    + `eszet = 'sulzbacher'`, `cv51 = 2`: More modern, beta-like Eszet (`ß`) (default).
-    + `eszet = 'longs-s-lig'`, `cv51 = 3`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
+    + `eszet = 'traditional-tailed'`, `cv51 = 2`: Traditional, Fraktur-like Eszet (`ß`).
+    + `eszet = 'sulzbacher'`, `cv51 = 3`: More modern, beta-like Eszet (`ß`) (default for Upright).
+    + `eszet = 'sulzbacher-tailed'`, `cv51 = 4`: More modern, beta-like Eszet (`ß`) (default for Italic).
+    + `eszet = 'longs-s-lig'`, `cv51 = 5`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
+    + `eszet = 'longs-s-lig-tailed'`, `cv51 = 6`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
   - Styles for `Λ`, `Δ`:
     + `turn-v = 'straight'`, `cv52 = 1`: Standard, straight `Λ`, `Δ` (default).
     + `turn-v = 'curly'`, `cv52 = 2`: Slightly curly `Λ`, `Δ`, like Iosevka 2.x.
