@@ -1,0 +1,32 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [maskBit] from '../../../support/mask-bit'
+
+glyph-module
+
+glyph-block Symbol-Pictograph-I-Ching : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'iChing/barYin' : glyph-proc
+		local bar : AdviceStroke 3
+		local gap : Math.max (Width / 8) [AdviceStroke 5]
+		include : HBar SB (Middle - gap / 2 * HVContrast) 0 bar
+		include : HBar (Middle + gap / 2 * HVContrast) RightSB 0 bar
+
+	create-glyph 'iChing/barYang' : glyph-proc
+		local bar : AdviceStroke 3
+		include : HBar SB RightSB 0 bar
+
+	define [patterns n su] : foreach [offset: range 0 [Math.pow 2 n]] : begin
+		create-glyph ('iChing/Patterrn/' + n + '/' + offset) (su + offset) : glyph-proc
+			foreach [bit : range 0 n] : begin
+				local offsetY : (2 / 3) * (OperBot - PictTop) / n
+				local startY : SymbolMid - offsetY * (n - 1) / 2
+				include : WithTransform [ApparentTranslate 0 (startY + offsetY * bit)]
+					refer-glyph : if [not : maskBit offset bit] 'iChing/barYang' 'iChing/barYin'
+
+	patterns 1 0x268A
+	patterns 2 0x268C
+	patterns 3 0x2630

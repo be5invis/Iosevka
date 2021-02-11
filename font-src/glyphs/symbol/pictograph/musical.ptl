@@ -1,0 +1,187 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import '../../../support/transform' as Transform
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Musical : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define fine : AdviceStroke 6
+	define noteSize : Width * 0.4 + fine / 2
+	define noteCompress 0.8
+	define commonNoteBottom : PictBot + noteCompress / 2 * noteSize
+	define [BandShape z1 z2 l r h] : begin
+		local slope : (z2.y - z1.y) / (z2.x - z1.x)
+		local yl : z1.y + (l - z1.x) * slope
+		local yr : z1.y + (r - z1.x) * slope
+		return : spiro-outline
+			corner l yl
+			corner r yr
+			corner r (yr + h)
+			corner l (yl + h)
+	define [MusicalNoteAt size x y] : glyph-proc
+		include : Ring (- noteCompress / 2 * size) (noteCompress / 2 * size) (-size) 0
+		include : Upright
+		include : new Transform 1 0 0.15 1 0 0
+		include : Translate x y
+		include : Italify
+
+	create-glyph 'crotchet' 0x2669 : union
+		MusicalNoteAt noteSize (Middle + noteSize / 6 + fine / 2 * HVContrast) commonNoteBottom
+		VBar (Middle + noteSize / 6) commonNoteBottom PictTop fine
+
+	create-glyph 'quaver' 0x266A : glyph-proc
+		local x3 : mix Middle RightSB 0.35
+		local y3 : mix PictBot PictTop 0.25
+		local y2 : mix y3 PictTop 0.25
+		include : union
+			MusicalNoteAt noteSize Middle commonNoteBottom
+			VBarRight Middle commonNoteBottom PictTop fine
+			dispiro
+				widths.rhs fine
+				g4.down.start Middle PictTop
+				g4.down.mid RightSB y2
+				g4 x3 y3
+
+	do "Beamed Notes"
+		local x1 : Middle - noteSize / 6
+		local x2 : x1 + noteSize * 7 / 6
+		local deltaY : noteCompress * noteSize / 2
+		local lb1 : PictBot + noteCompress / 2 * noteSize
+		local bandWidth : noteSize * noteCompress * 0.75
+
+		create-glyph 'beamQuaver' 0x266B : difference
+			union
+				MusicalNoteAt noteSize x1 commonNoteBottom
+				VBarRight x1 commonNoteBottom (PictTop - deltaY) fine
+				MusicalNoteAt noteSize x2 (commonNoteBottom + deltaY)
+				VBarRight x2 (commonNoteBottom + deltaY) PictTop fine
+				BandShape
+					object [x x1] [y : PictTop - deltaY]
+					object [x x2] [y PictTop]
+					x1 - fine * HVContrast
+					x2 + 0
+					0 - bandWidth
+			BandShape
+				object [x x1] [y : PictTop - deltaY]
+				object [x x2] [y PictTop]
+				x1 - fine * HVContrast
+				x2 + 0
+				0 + bandWidth
+
+		create-glyph 'beamSemiQuaver' 0x266C : union [refer-glyph 'beamQuaver']
+			BandShape
+				object [x x1] [y : PictTop - deltaY - 1.5 * bandWidth]
+				object [x x2] [y : PictTop - 1.5 * bandWidth]
+				x1 - fine * HVContrast
+				x2 + 0
+				0 - bandWidth
+
+	do "sharp, flat and neutral"
+		local nsTop PictTop
+		local nsBot PictBot
+		local fine : AdviceStroke 3.5
+		local fine2 : AdviceStroke 4
+		local l : SB - fine * 0
+		local r : RightSB + fine * 0
+		local hsp : ((r - l) - (fine * 2 * HVContrast)) * 0.3
+		local skew 0.2
+
+		create-glyph 'sharpTone' 0x266F : glyph-proc
+			include : dispiro
+				widths.center
+				flat l ([mix nsTop nsBot 0.3] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.3] - (Middle - r) * skew) [heading Rightward]
+			include : dispiro
+				widths.center
+				flat l ([mix nsTop nsBot 0.7] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.7] - (Middle - r) * skew) [heading Rightward]
+			include : VBarLeft  (l + hsp) (nsBot - (Middle - l - hsp) * skew) (nsTop - (Middle - l - hsp) * skew) fine
+			include : VBarRight (r - hsp) (nsBot - (Middle - r + hsp) * skew) (nsTop - (Middle - r + hsp) * skew) fine
+
+		create-glyph 'flatTone' 0x266D : glyph-proc
+			local yTerminal : mix nsBot nsTop 0.55
+			local curly 0.65
+			local curly2 1.1
+			local curly3 0.3
+			local l [mix SB RightSB 0.07]
+			local r [mix RightSB SB 0.07]
+			include : difference
+				union
+					VBarLeft l nsBot nsTop fine
+					dispiro
+						widths.lhs fine
+						g4 l (nsBot - 1)
+						alsoThru 0.5 curly3
+						g4.up.mid (r - O + 1) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust) [widths.lhs (fine + 1)]
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2 + 1)
+						g4 l (yTerminal + 1)
+				difference
+					spiro-outline
+						corner l (nsBot - UPM)
+						corner l nsBot
+						alsoThru 0.5 curly3
+						g4.up.mid (r - O) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust)
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2)
+						corner l yTerminal
+						corner l (yTerminal + 1)
+						corner l nsTop
+						corner Width nsTop
+						corner Width (nsBot - UPM)
+					spiro-outline
+						corner 0 yTerminal
+						corner 0 nsTop
+						corner (l + fine * HVContrast) nsTop
+						corner (l + fine * HVContrast) yTerminal
+				spiro-outline
+					corner l (nsBot - UPM)
+					corner l nsTop
+					corner (l - UPM) nsTop
+					corner (l - UPM) (nsBot - UPM)
+
+		create-glyph 'neutralTone' 0x266E : glyph-proc
+			local k : 0.25 - (Stroke * 0.25 / (nsTop - nsBot))
+			local kr 0.5
+			local ll (l + hsp * kr)
+			local rr (r - hsp * kr)
+
+			local barLeft  : VBarLeft  ll [mix nsBot nsTop k] nsTop fine
+			local barRight : VBarRight rr nsBot [mix nsBot nsTop (1 - k)] fine
+			local diagLow : dispiro
+				widths.lhs fine
+				flat ll [mix nsBot nsTop k]
+				curl rr ([mix nsBot nsTop k] + (rr - ll) * skew)
+			local belowDiagLow : spiro-outline
+				corner ll [mix nsBot nsTop k]
+				corner rr ([mix nsBot nsTop k] + (rr - ll) * skew)
+				corner rr nsBot
+				corner ll nsBot
+			local diagHigh : dispiro
+				widths.lhs fine
+				flat rr [mix nsBot nsTop (1 - k)]
+				curl ll ([mix nsBot nsTop (1 - k)] - (rr - ll) * skew)
+			local aboveDiagHigh : spiro-outline
+				corner rr [mix nsBot nsTop (1 - k)]
+				corner ll ([mix nsBot nsTop (1 - k)] - (rr - ll) * skew)
+				corner ll nsTop
+				corner rr nsTop
+			local outsideBars : difference
+				spiro-outline
+					corner (ll - UPM) (nsBot - UPM)
+					corner (ll - UPM) (nsTop + UPM)
+					corner (rr + UPM) (nsTop + UPM)
+					corner (rr + UPM) (nsBot - UPM)
+				spiro-outline
+					corner ll nsBot
+					corner ll nsTop
+					corner rr nsTop
+					corner rr nsBot
+
+			include : union
+				difference barLeft belowDiagLow
+				difference barRight aboveDiagHigh
+				difference diagLow barLeft barRight outsideBars
+				difference diagHigh barLeft barRight outsideBars
