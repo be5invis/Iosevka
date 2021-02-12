@@ -617,7 +617,9 @@ const PackageSnapshotConfig = computed(`package-snapshot-config`, async target =
 			el: "#packaging-sampler",
 			applyClass: p.snapshotFamily,
 			applyFeature: p.snapshotFeature,
-			name: key
+			name: key,
+			applyCallback: `cbAmendStylisticSetContents`,
+			applyCallbackArgs: { hotChars: [] }
 		});
 	}
 	return cfg;

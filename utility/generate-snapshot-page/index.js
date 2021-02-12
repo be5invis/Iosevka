@@ -53,12 +53,20 @@ async function main() {
 	}
 	for (const ss of variationData.composites) {
 		readmeSnapshotTasks.push({
-			el: "#stylistic-set-sampler",
-			applyClass: "iosevka",
+			el: "#packaging-sampler",
+			applyClass: "scl iosevka",
 			applyFeature: `'${ss.tag}' ${ss.rank}`,
-			name: `stylistic-set-${ss.tag}-${ss.rank}`,
+			name: `stylistic-set-u-${ss.tag}-${ss.rank}`,
 			applyCallback: `cbAmendStylisticSetContents`,
-			applyCallbackArgs: ss
+			applyCallbackArgs: { hotChars: ss.hotCharSetUpright }
+		});
+		readmeSnapshotTasks.push({
+			el: "#packaging-sampler",
+			applyClass: "scl iosevka italic",
+			applyFeature: `'${ss.tag}' ${ss.rank}`,
+			name: `stylistic-set-i-${ss.tag}-${ss.rank}`,
+			applyCallback: `cbAmendStylisticSetContents`,
+			applyCallbackArgs: { hotChars: ss.hotCharSetItalic }
 		});
 	}
 	await fs.writeJson(
