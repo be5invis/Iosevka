@@ -44,8 +44,12 @@ async function processSsOt() {
 		}
 		{
 			md.log(`<tr>`);
+			md.log(`<td colspan="2">`);
+			md.log(`<table><tr>`);
 			md.log(`<td><img src="images/stylistic-set-u-${ss.tag}-${ss.rank}.png"/></td>`);
 			md.log(`<td><img src="images/stylistic-set-i-${ss.tag}-${ss.rank}.png"/></td>`);
+			md.log(`</tr></table>`);
+			md.log(`</td>`);
 			md.log(`</tr>`);
 		}
 	}
