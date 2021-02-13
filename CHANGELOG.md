@@ -13,6 +13,7 @@
  * Add Characters:
      * Z Notation Schema Composition (`U+2A1F`) and Z Notation Relation Composition (`U+2A3E`) (#857).
      * Circled Zero With Slash (`U+1F10D`, #861).
+     * Ballot Box, Ballot Box with Check and Ballot Box with X (`U+2610` ... `U+2612`, #890).
  * Add Variants:
      * Add diagonal-tailed variants for `f`, `i`, `j`, `k`, `l`, `q`, `t` (#795).
      * Add motion-serifed variants for `A`, `B`, `D`, `E`, `F`, `H`, `K`, `M`, `N`, `P`, `R`, `T`, `V`, `W`, `X`, `Y`, `Z`, `v`, `w`, `x`, `y`, `z` (#806, #815, #818).
