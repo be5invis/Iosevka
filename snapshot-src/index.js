@@ -26,25 +26,36 @@ const captureCallbacks = {
 	cbAmendStylisticSetContents
 };
 
-const ssString = "@real fox.quick(h){ *is_brown && it_jumps_over(dogs.lazy) } 0123456789 ABCKRWXYZ";
+const ssStrings = [
+	["ABC.DEF.GHI.JKL.MNO.PQRS.TUV.WXYZ", "abc.def.ghi.jkl.mno.pqrs.tuv.wxyz"],
+	["1234567890 ,._-+= >< ¯-¬_ >~–÷+×<", "{}[]()<> $*-+=/#_%^@\\&|~?'\" !,.;:"],
+	["!iIlL17|¦ coO08BbDQ $5SZ2zsz 96G&", [..."dbqp E3 g9q CGQ vvw VVW /V ", "<=", " ", ">="]]
+];
+
 function cbAmendStylisticSetContents(element, p) {
 	element.innerHTML = "";
-	const cfg = [
-		["upright", "hotCharSetUpright"],
-		["italic", "hotCharSetItalic"]
-	];
-	for (const [cls, kHC] of cfg) {
-		const line = document.createElement("div");
-		line.className = cls;
-		element.appendChild(line);
-		const sHC = new Set(p[kHC]);
-		for (const lch of ssString) {
-			if (sHC.has(lch)) {
-				const b = document.createElement("b");
-				b.appendChild(document.createTextNode(lch));
-				line.appendChild(b);
-			} else {
-				line.append(document.createTextNode(lch));
+	const inner = document.createElement("div");
+	inner.className = "inner";
+	element.appendChild(inner);
+
+	for (const row of ssStrings) {
+		const line = document.createElement("p");
+		line.className = "line";
+		inner.appendChild(line);
+		const sHC = new Set(p.hotChars || []);
+
+		for (const colStr of row) {
+			const col = document.createElement("span");
+			col.className = "col";
+			line.appendChild(col);
+			for (const lch of colStr) {
+				if (sHC.has(lch)) {
+					const b = document.createElement("b");
+					b.appendChild(document.createTextNode(lch));
+					col.appendChild(b);
+				} else {
+					col.append(document.createTextNode(lch));
+				}
 			}
 		}
 	}

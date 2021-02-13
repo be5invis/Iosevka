@@ -1,0 +1,46 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Geometric-Dice : for-width-kinds WideWidth1
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Geometric-Shared : GeometricDim UnicodeWeightGrade GeometricSizes
+
+	define Geom : GeometricDim MosaicUnitWidth MosaicWidth
+
+	alias [MangleName 'ballotBox'] [MangleUnicode 0x2610] [MangleName 'whiteSquare']
+
+	define bbGap : Math.max (Geom.Size / 6) [AdviceStroke 5 Geom.Scalar]
+	define swMark : Math.min GeometryStroke : AdviceStroke 5 Geom.Scalar
+	define bbSize : Geom.Size - bbGap - swMark * 0.75
+
+	create-glyph [MangleName 'checkedBallotBox'] [MangleUnicode 0x2611] : glyph-proc
+		local k1 0.4
+		local k2 0.425
+		local k3 1
+		include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
+
+		local z1 : corner (Geom.MidX - bbSize) [mix (Geom.MidY - bbSize) (Geom.MidY + bbSize) k1]
+		local z2 : corner [mix (Geom.MidX - bbSize) (Geom.MidX + bbSize) k2] (Geom.MidY - bbSize)
+		local z3 : corner (Geom.MidX + bbSize) [mix (Geom.MidY - bbSize) (Geom.MidY + bbSize) k3]
+
+		include : intersection
+			spiro-outline z1 z2 z3 [corner z1.x z3.y]
+			union
+				dispiro [widths.lhs swMark] z1 z2
+				dispiro [widths.lhs swMark] z2 z3
+
+	create-glyph [MangleName 'crossBallotBox'] [MangleUnicode 0x2612] : glyph-proc
+		include [refer-glyph : MangleName 'whiteSquare'] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center swMark
+			corner (Geom.MidX - bbSize) (Geom.MidY - bbSize)
+			corner (Geom.MidX + bbSize) (Geom.MidY + bbSize)
+		include : dispiro
+			widths.center swMark
+			corner (Geom.MidX + bbSize) (Geom.MidY - bbSize)
+			corner (Geom.MidX - bbSize) (Geom.MidY + bbSize)

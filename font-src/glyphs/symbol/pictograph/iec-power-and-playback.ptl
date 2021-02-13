@@ -1,0 +1,114 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+
+glyph-module
+
+glyph-block Symbol-Pictograph-IEC-Power-And-Playback : for-width-kinds WideWidth1 : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define leftFW : 0 + SB * MosaicWidthScalar
+	define rightFW : MosaicWidth - SB * MosaicWidthScalar
+	define squareRadiusFW : (rightFW - leftFW) / (2 * [Math.pow MosaicWidthScalar 0.3])
+	define topFW : SymbolMid + squareRadiusFW
+	define bottomFW : SymbolMid - squareRadiusFW
+
+	define df : DivFrame MosaicWidthScalar
+	define gap : Math.max (squareRadiusFW / 8 * MosaicWidthScalar) GeometryStroke
+
+	create-glyph [MangleName 'powerOff'] [MangleUnicode 0x2B58] : glyph-proc
+		set-width df.width
+		include : RingStrokeAt df.middle SymbolMid squareRadiusFW GeometryStroke
+
+	create-glyph [MangleName 'powerOn'] [MangleUnicode 0x23FD] : glyph-proc
+		set-width df.width
+		include : Rect
+			SymbolMid + squareRadiusFW
+			SymbolMid - squareRadiusFW
+			df.middle - GeometryStroke / 2 * HVContrast
+			df.middle + GeometryStroke / 2 * HVContrast
+
+	create-glyph [MangleName 'powerOnOff'] [MangleUnicode 0x23FC] : glyph-proc
+		set-width df.width
+		include : refer-glyph [MangleName 'powerOff']
+		include : Rect
+			SymbolMid + squareRadiusFW - GeometryStroke - gap
+			SymbolMid - squareRadiusFW + GeometryStroke + gap
+			df.middle - GeometryStroke / 2 * HVContrast
+			df.middle + GeometryStroke / 2 * HVContrast
+
+	create-glyph [MangleName 'powerStandby'] [MangleUnicode 0x23FB] : glyph-proc
+		set-width df.width
+		include : union
+			difference
+				refer-glyph [MangleName 'powerOff']
+				spiro-outline
+					corner df.middle SymbolMid
+					corner (df.middle - gap * 2 - GeometryStroke * HVContrast) (SymbolMid + squareRadiusFW * 2)
+					corner (df.middle + gap * 2 + GeometryStroke * HVContrast) (SymbolMid + squareRadiusFW * 2)
+			Rect
+				SymbolMid + 1.5 * squareRadiusFW
+				SymbolMid - 0.0 * squareRadiusFW
+				df.middle - GeometryStroke / 2 * HVContrast
+				df.middle + GeometryStroke / 2 * HVContrast
+
+	create-glyph [MangleName 'powerSleep'] [MangleUnicode 0x23FE] : glyph-proc
+		set-width df.width
+		include : difference
+			CircleRingAt df.middle SymbolMid squareRadiusFW
+			CircleRingAt
+				df.middle + squareRadiusFW * 0.5
+				SymbolMid + squareRadiusFW * 0.35
+				squareRadiusFW * 1.1
+		include : Translate (squareRadiusFW * 0.15) 0
+
+	create-glyph [MangleName 'playback/record'] [MangleUnicode 0x23FA] : glyph-proc
+		set-width df.width
+		include : RingAt df.middle SymbolMid squareRadiusFW GeometryStroke
+
+	create-glyph [MangleName 'playback/stop'] [MangleUnicode 0x23F9] : glyph-proc
+		set-width df.width
+		include : Rect (SymbolMid + squareRadiusFW) (SymbolMid - squareRadiusFW) (df.middle - squareRadiusFW) (df.middle + squareRadiusFW)
+
+	create-glyph [MangleName 'playback/pause'] [MangleUnicode 0x23F8] : glyph-proc
+		set-width df.width
+		include : Rect (SymbolMid + squareRadiusFW) (SymbolMid - squareRadiusFW) (df.middle - squareRadiusFW) (df.middle - squareRadiusFW / 3)
+		include : Rect (SymbolMid + squareRadiusFW) (SymbolMid - squareRadiusFW) (df.middle + squareRadiusFW / 3) (df.middle + squareRadiusFW)
+
+	local trigRad : squareRadiusFW - O
+	create-glyph [MangleName 'playback/down'] [MangleUnicode 0x23F7] : glyph-proc
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad) (SymbolMid + trigRad / 2)
+			corner (df.middle + trigRad) (SymbolMid + trigRad / 2)
+			corner (df.middle)           (SymbolMid - trigRad / 2)
+
+	create-glyph [MangleName 'playback/up'] [MangleUnicode 0x23F6] : glyph-proc
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad) (SymbolMid - trigRad / 2)
+			corner (df.middle + trigRad) (SymbolMid - trigRad / 2)
+			corner (df.middle)           (SymbolMid + trigRad / 2)
+
+	create-glyph [MangleName 'playback/right'] [MangleUnicode 0x23F5] : glyph-proc
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle - trigRad / 2) (SymbolMid - trigRad)
+			corner (df.middle - trigRad / 2) (SymbolMid + trigRad)
+			corner (df.middle + trigRad / 2) (SymbolMid)
+
+	create-glyph [MangleName 'playback/left'] [MangleUnicode 0x23F4] : glyph-proc
+		set-width df.width
+		include : spiro-outline
+			corner (df.middle + trigRad / 2) (SymbolMid - trigRad)
+			corner (df.middle + trigRad / 2) (SymbolMid + trigRad)
+			corner (df.middle - trigRad / 2) (SymbolMid)
+
+	create-glyph [MangleUnicode 'playback/eject'] [MangleUnicode 0x23CF] : glyph-proc
+		set-width df.width
+		include : Rect (SymbolMid - squareRadiusFW / 3) (SymbolMid - squareRadiusFW) (df.middle - squareRadiusFW) (df.middle + squareRadiusFW)
+		include : spiro-outline
+			corner (df.middle - trigRad) (SymbolMid)
+			corner (df.middle + trigRad) (SymbolMid)
+			corner (df.middle)           (SymbolMid + trigRad)

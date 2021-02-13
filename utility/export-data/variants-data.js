@@ -108,7 +108,11 @@ function buildupComposite(variants, para, ...composites) {
 		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
 			if (!prime.sampler) continue;
 			const key = getSelectorKey(prime, variant);
-			for (const ch of prime.sampler) hotChars.set(ch, key);
+			if (/ /.test(prime.sampler)) {
+				for (const ch of prime.sampler.split(" ")) hotChars.set(ch, key);
+			} else {
+				for (const ch of prime.sampler) hotChars.set(ch, key);
+			}
 			compositionMap.set(prime.key, variant.key);
 		}
 	}

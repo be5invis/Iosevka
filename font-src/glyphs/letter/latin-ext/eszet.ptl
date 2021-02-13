@@ -19,8 +19,8 @@ glyph-block Letter-Latin-Eszet : begin
 		xmiddle - 1 - Stroke * TanSlope
 		Math.max (SB + Stroke * 2) [mix SB RightSB (1 / 4)]
 
-	create-glyph 'eszet.traditional' : glyph-proc
-		include : MarkSet.if
+	define [TraditionalBody slab tail] : glyph-proc
+		include : MarkSet.b
 		local l : SB * 1
 		include : dispiro
 			widths.lhs
@@ -44,12 +44,12 @@ glyph-block Letter-Latin-Eszet : begin
 			widths.center (Stroke * 1.1)
 			corner tl (tm - Stroke) [heading Upward]
 			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
-		piecewise
-			para.isItalic : include : VerticalHook (l + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
-			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+		if tail : include : VerticalHook (l + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+		if slab : include : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'eszet.sulzbacher' : glyph-proc
-		include : MarkSet.capital
+
+	define [SulzbacherBody slab tail] : glyph-proc
+		include : MarkSet.b
 		include : dispiro
 			widths.rhs
 			flat SB 0 [heading Upward]
@@ -67,12 +67,12 @@ glyph-block Letter-Latin-Eszet : begin
 			arcvh
 			flat xmiddleBot 0
 			curl xfinal 0 [heading Leftward]
-		piecewise
-			para.isItalic : include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
-			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+		if tail : include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+		if slab : include : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'eszet.longsslig' : glyph-proc
-		include : MarkSet.capital
+
+	define [LongSSLigBody slab tail] : glyph-proc
+		include : MarkSet.b
 
 		define swOuter : AdviceStroke2 3 3 CAP
 		define strokeCoeff : StrokeWidthBlend 0 1 swInner
@@ -81,34 +81,42 @@ glyph-block Letter-Latin-Eszet : begin
 			mix SB RightSB 0.3
 		define widthInner : Width - swOuter * HVContrast - (RightSB - SB - Stroke) * 0.1
 		define swInner : AdviceStroke2 2 3 XH (widthInner / Width)
-		define sTopY : XH + swInner / 8
-		define smooth : SmoothBOf (swInner + (widthInner / Width) * ([adviceSSmooth XH (-1) swInner] - swInner)) widthInner
+		define ess: swInner * Ess / Stroke
 		define sTurnX : Math.max sEndX [mix SB RightSB 0.3]
 		define sBotX : Math.max (sEndX + 1) [mix sEndX RightSB 0.30]
 		define sTopX : sTurnX + (RightSB - sBotX)
+
 		define sTopHookX : sTopX + 0.5 * swInner * HVContrast
+		define smoothATop : SmoothAOf (Smooth * (sTopHookX - SB - swInner * 0.375) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
+		define smoothBTop : SmoothBOf (Smooth * (sTopHookX - SB - swInner * 0.375) / (RightSB - SB)) (Width - (RightSB - sTopHookX))
+		define innerSmoothB : 1 * smoothBTop # SmoothBOf (0.5 * swInner + (widthInner / Width) * [adviceSSmooth XH (-1) swInner]) widthInner
+
 
 		include : dispiro
 			widths.rhs swOuter
 			flat SB 0 [heading Upward]
-			curl SB XH
+			curl SB (CAP - smoothATop)
 			arcvh
-			g4 ([mix SB sTopHookX 0.52] - CorrectionOMidX * swOuter) (CAP - O) [widths.rhs Stroke]
-			straight.down.end sTopHookX (sTopY - swInner - O) [widths.heading 0 swInner Downward]
-
-		include : dispiro
-			widths.lhs swInner
-			straight.left.start sTopX (sTopY - O) [widths.heading swInner 0 Leftward]
+			g4 ([mix SB sTopHookX 0.52] - CorrectionOMidX * swOuter) (CAP - O) [widths.rhs : mix swOuter swInner 0.5]
 			archv
-			g4   sTurnX (XH - smooth)
-			SNeck swInner (slantCoeff -- 0.02) (tensionCoeff -- [StrokeWidthBlend 0.99 0.975]) (dist -- 0.025)
-			g4   (RightSB - OX) (smooth) [widths 0 swInner]
-			hookend O (sw -- swInner) (swItalicAdj -- swOuter)
-			g4 (sEndX + OX) SHook
+			g4 sTopHookX (CAP - smoothBTop + TanSlope * swInner) [widths.rhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.50 [widths.center swInner]
+			g4 sTurnX [mix innerSmoothB (CAP - smoothBTop) 0.5] [widths.lhs.heading swInner Downward]
+			alsoThru.g2 0.5 0.50 [widths.center swInner]
+			g4   (RightSB - OX) (innerSmoothB - 2 * TanSlope * swInner) [widths.rhs swInner]
+			arcvh
+			flat ([Math.max (sEndX + 1) : Math.min (RightSB - innerSmoothB * 0.875) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner) 0
+			curl sEndX 0 [heading Leftward]
 
-		piecewise
-			para.isItalic : include : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook swOuter
-			SLAB : include : LeftwardBottomSerif SB 0 SideJut
+		if tail : include : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook swOuter
+		if slab : include : LeftwardBottomSerif SB 0 SideJut
+
+	create-glyph 'eszet.traditional' : TraditionalBody SLAB false
+	create-glyph 'eszet.traditionalTailed' : TraditionalBody false true
+	create-glyph 'eszet.sulzbacher' : SulzbacherBody SLAB false
+	create-glyph 'eszet.sulzbacherTailed' : SulzbacherBody false true
+	create-glyph 'eszet.longSSLig' : LongSSLigBody SLAB false
+	create-glyph 'eszet.longSSLigTailed' : LongSSLigBody false true
 
 	select-variant 'eszet' 0xDF
 

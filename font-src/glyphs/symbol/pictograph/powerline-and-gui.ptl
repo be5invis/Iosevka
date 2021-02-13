@@ -1,0 +1,456 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+
+glyph-module
+
+glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define uiFigTop : mix ParenBot ParenTop 0.95
+	define uiFigBot : mix ParenBot ParenTop 0.05
+
+	create-glyph 'branch' 0xE0A0 : glyph-proc
+		local fine : AdviceStroke 3.5
+		local y1 : mix uiFigBot uiFigTop 0.8
+		local y2 : mix uiFigBot uiFigTop 0.2
+		include : VBarLeft SB uiFigBot uiFigTop fine
+		include : dispiro
+			widths.rhs fine
+			flat RightSB y1
+			curl RightSB [mix y1 y2 0.4]
+			g4 (SB + fine * HVContrast) y2 [heading Leftward]
+		include : DotAt (RightSB - fine * HVContrast / 2) y1 [Math.max (fine * 1.5) PeriodRadius]
+
+	create-glyph 'pwlLock' 0xE0A2 : glyph-proc
+		local fine : AdviceStroke 3.5
+		local lockTop : mix uiFigBot uiFigTop 0.6
+		local lockLeft : SB / 2
+		local lockRight : Width - SB / 2
+		local lockHoleWidth : 1 / 5
+		local lockHoleLeft : mix lockLeft lockRight (1 / 2 - lockHoleWidth / 2)
+		local lockHoleRight : mix lockLeft lockRight (1 / 2 + lockHoleWidth / 2)
+		local lockHoleTop : mix uiFigBot lockTop 0.75
+		local lockHoleBottom : mix uiFigBot lockTop 0.25
+		include : union
+			intersection
+				spiro-outline
+					corner 0 (2 * uiFigTop)
+					corner Width (2 * uiFigTop)
+					corner Width (lockTop - 1)
+					corner 0 (lockTop - 1)
+					close
+				OShape uiFigTop uiFigBot SB RightSB fine (SmallSmoothA) (SmallSmoothB)
+			difference
+				spiro-outline
+					corner lockLeft lockTop
+					corner lockRight lockTop
+					corner lockRight uiFigBot
+					corner lockLeft uiFigBot
+					close
+				OShapeOutline lockHoleTop lockHoleBottom lockHoleLeft lockHoleRight fine (SmallSmoothA * lockHoleWidth) (SmallSmoothB * lockHoleWidth)
+
+	for-width-kinds WideWidth4
+		do "arrowheadShapedPointer"
+			define scaffold : object
+			set scaffold.top : mix uiFigBot uiFigTop 0.85
+			set scaffold.bot : mix uiFigBot uiFigTop 0.15
+			set scaffold.width   : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.3]
+			set scaffold.xMiddle : MosaicWidth / 2
+			set scaffold.xLeft : scaffold.xMiddle - scaffold.width / 2
+			set scaffold.xRight : scaffold.xMiddle + scaffold.width / 2
+			create-glyph [MangleName 'arrowheadShapedPointer'] [MangleUnicode 0x1FBB0] : glyph-proc
+				set-width MosaicWidth
+				include : spiro-outline
+					corner scaffold.xLeft scaffold.top
+					corner scaffold.xRight [mix scaffold.bot scaffold.top (1 / 4)]
+					corner [mix scaffold.xLeft scaffold.xRight (2 / 5)] [mix scaffold.bot scaffold.top (1 / 4)]
+					corner scaffold.xLeft scaffold.bot
+
+		do "Split graphics"
+			define mLeft    SB
+			define mRight : MosaicWidth - SB
+
+			define [RoundSegW n hs he] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
+				local sw : AdviceStroke 4
+				local left mLeft
+				local right : mRight + MosaicWidth * (n - 1)
+				include : dispiro
+					widths.center sw
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1] hs
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2] he
+
+				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
+				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
+
+			define [ArcVHW n] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
+				local sw : AdviceStroke 4
+				local left mLeft
+				local right : mRight + MosaicWidth * (n - 1)
+				include : dispiro
+					widths.center sw
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (v2 > v1) Upward Downward]
+					arcvh
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (h2 > h1) Rightward Leftward]
+
+				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
+				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
+
+			define [ArcHVW n] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
+				local sw : AdviceStroke 4
+				local left mLeft
+				local right : mRight + MosaicWidth * (n - 1)
+				include : dispiro
+					widths.center sw
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (h2 > h1) Rightward Leftward]
+					archv
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (v2 > v1) Upward Downward]
+
+				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
+				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
+
+			define [BoxW n] : lambda [h1 v1 h2 v2] : glyph-proc
+				local sw : AdviceStroke 4
+				local left mLeft
+				local right : mRight + MosaicWidth * (n - 1)
+				include : spiro-outline
+					corner [mix left right h1] [mix uiFigBot uiFigTop v1]
+					corner [mix left right h2] [mix uiFigBot uiFigTop v1]
+					corner [mix left right h2] [mix uiFigBot uiFigTop v2]
+					corner [mix left right h1] [mix uiFigBot uiFigTop v2]
+
+			define [CircW n] : lambda [h1 v1 r] : glyph-proc
+				local sw : AdviceStroke 4
+				local left mLeft
+				local right : mRight + MosaicWidth * (n - 1)
+				include : DotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (r * (uiFigTop - uiFigBot))
+
+			define [Nop] : begin
+			define RoundSeg2  : RoundSegW 2 Nop Nop
+			define Box2       : BoxW 2
+			define Circ2      : CircW 2
+			define RoundSeg3  : RoundSegW 3 Nop Nop
+			define RoundSeg3H : RoundSegW 3 [heading Rightward] [heading Rightward]
+			define RoundSeg3V : RoundSegW 3 [heading Downward] [heading Downward]
+			define ArcVH3     : ArcVHW 3
+			define ArcHV3     : ArcHVW 3
+			define Box3       : BoxW 3
+			define Circ3      : CircW 3
+
+			define [MosaicWidthMask] : spiro-outline
+				corner 0           [mix ParenBot ParenTop (-1)]
+				corner MosaicWidth [mix ParenBot ParenTop (-1)]
+				corner MosaicWidth [mix ParenBot ParenTop (+2)]
+				corner 0           [mix ParenBot ParenTop (+2)]
+
+			define [RunningManBody xOffset] : glyph-proc
+				include : union
+					RoundSeg2 (0 / 16) (3 / 8) (3 / 16) (5 / 8) 1 1
+					RoundSeg2 (3 / 16) (5 / 8) (10 / 16) (5 / 8)
+					RoundSeg2 (10 / 16) (5 / 8) (13 / 16) (7 / 8) 1 1
+					RoundSeg2 (4 / 16) (3 / 8) (9 / 16) (3 / 8) 1 1
+					RoundSeg2 (9 / 16) (3 / 8) (13 / 16) (0 / 8)
+					RoundSeg2 (13 / 16) (0 / 8) (15 / 16) (0 / 8) 1 1
+					RoundSeg2 (4 / 16) (6 / 16) (6 / 16) (3 / 16)
+					RoundSeg2 (6 / 16) (3 / 16) (0 / 16) (3 / 16) 1 1
+					RoundSeg2 (0 / 16) (3 / 16) (2 / 16) (0 / 8) 0 1
+					Box2 (4 / 16) (6 / 16) (8 / 16) (5 / 8)
+				include : Translate xOffset 0
+
+			define [RunningManHead xOffset] : glyph-proc
+				include : Circ2 (6 / 16) (14 / 16) (5 / 32)
+				include : Translate xOffset 0
+
+			create-glyph [MangleName 'runningManLeft'] [MangleUnicode 0x1FBB2] : glyph-proc
+				set-width MosaicWidth
+				include : RunningManHead 0
+				include : intersection
+					MosaicWidthMask
+					RunningManBody 0
+
+			create-glyph [MangleName 'runningManRight'] [MangleUnicode 0x1FBB3] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					RunningManBody (-MosaicWidth)
+
+			define [FolderBody xOffset] : glyph-proc
+				include : union
+					RoundSeg2 (0 / 16) (1 / 8) (0 / 16) (11 / 16)
+					RoundSeg2 (0 / 16) (11 / 16) (3 / 16) (7 / 8) 1 1
+					RoundSeg2 (3 / 16) (7 / 8) (6 / 16) (7 / 8)
+					RoundSeg2 (6 / 16) (7 / 8) (9 / 16) (11 / 16) 1 1
+					RoundSeg2 (9 / 16) (11 / 16) (16 / 16) (11 / 16) 0 1
+					RoundSeg2 (16 / 16) (11 / 16) (16 / 16) (1 / 8)
+					RoundSeg2 (0 / 16) (1 / 8) (16 / 16) (1 / 8) 1 1
+				include : Translate xOffset 0
+
+			create-glyph [MangleName 'folderLeft'] [MangleUnicode 0x1FBB9] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					FolderBody 0
+
+			create-glyph [MangleName 'folderRight'] [MangleUnicode 0x1FBBA] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					FolderBody (-MosaicWidth)
+
+			define [PointingHandBody xOffset] : glyph-proc
+				include : union
+					RoundSeg3  (0 / 24) (0 / 8) (0 / 24) (8 / 8) 1 1
+					RoundSeg3  (3 / 24) (7 / 8) (0 / 24) (8 / 8)
+					RoundSeg3  (3 / 24) (1 / 8) (0 / 24) (0 / 8)
+					RoundSeg3V (3 / 24) (7 / 8) (3 / 24) (1 / 8)
+					ArcVH3     (3 / 24) (7 / 8) (6 / 24) (8 / 8)
+					ArcVH3     (3 / 24) (1 / 8) (6 / 24) (0 / 8)
+					RoundSeg3H (6 / 24) (8 / 8) (22 / 24) (8 / 8)
+					ArcHV3     (22 / 24) (8 / 8) (24 / 24) (7 / 8)
+					ArcVH3     (24 / 24) (7 / 8) (22 / 24) (6 / 8)
+					RoundSeg3H (14 / 24) (6 / 8) (22 / 24) (6 / 8)
+					ArcHV3     (11 / 24) (8 / 8) (14 / 24) (6 / 8)
+					ArcVH3     (14 / 24) (6 / 8) (12 / 24) (5 / 8)
+					RoundSeg3H (9 / 24) (5 / 8) (12 / 24) (5 / 8) 1 0
+					ArcVH3     (9 / 24) (5 / 8) (3 / 24) (2 / 8)
+					ArcHV3     (15 / 24) (6 / 8) (17 / 24) (5 / 8)
+					ArcVH3     (17 / 24) (5 / 8) (15 / 24) (4 / 8)
+					RoundSeg3H (11 / 24) (4 / 8) (15 / 24) (4 / 8) 1 0
+					ArcHV3     (14 / 24) (4 / 8) (16 / 24) (3 / 8)
+					ArcVH3     (16 / 24) (3 / 8) (14 / 24) (2 / 8)
+					RoundSeg3H (8 / 24) (2 / 8) (14 / 24) (2 / 8) 1 0
+					ArcHV3     (13 / 24) (2 / 8) (15 / 24) (1 / 8)
+					ArcVH3     (15 / 24) (1 / 8) (13 / 24) (0 / 8)
+					RoundSeg3H (6 / 24) (0 / 8) (13 / 24) (0 / 8)
+				include : Translate xOffset 0
+
+			create-glyph [MangleName 'pointingHand1'] [MangleUnicode 0x1FBC1] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					PointingHandBody 0
+
+			create-glyph [MangleName 'pointingHand2'] [MangleUnicode 0x1FBC2] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					PointingHandBody (-MosaicWidth)
+
+			create-glyph [MangleName 'pointingHand3'] [MangleUnicode 0x1FBC3] : glyph-proc
+				set-width MosaicWidth
+				include : intersection
+					MosaicWidthMask
+					PointingHandBody (-MosaicWidth * 2)
+
+		do "Stick Man"
+			define scaffold : object
+			set scaffold.top       uiFigTop
+			set scaffold.bot       uiFigBot
+			set scaffold.xMiddle  : MosaicWidth / 2
+			set scaffold.headSize : (uiFigTop - uiFigBot) / 2.5
+			set scaffold.legSize  : (Middle - SB) * 2
+			set scaffold.armSize  : (Middle - SB / 2) * 2
+			set scaffold.stroke   : AdviceStroke 3.5
+			set scaffold.armRaiseK  0.4
+			set scaffold.yPelvis    : scaffold.bot + scaffold.legSize / 2
+			set scaffold.xLeftFoot  : scaffold.xMiddle - scaffold.legSize / 2
+			set scaffold.xRightFoot : scaffold.xMiddle + scaffold.legSize / 2
+			set scaffold.yNeck      : scaffold.top - scaffold.headSize
+			set scaffold.xLeftHead  : scaffold.xMiddle - scaffold.headSize / 2
+			set scaffold.xRightHead : scaffold.xMiddle + scaffold.headSize / 2
+			set scaffold.xLeftArm   : scaffold.xMiddle - scaffold.armSize / 2
+			set scaffold.xRightArm  : scaffold.xMiddle + scaffold.armSize / 2
+			set scaffold.yShoulder : lambda [p] : mix scaffold.yPelvis scaffold.yNeck p
+
+			define [StickManHead] : OShape (scaffold.top - O) (scaffold.yNeck + O) (scaffold.xLeftHead + O) (scaffold.xRightHead - O) scaffold.stroke
+			define [StickManArms p kl kr] : union
+				dispiro
+					widths.center scaffold.stroke
+					corner scaffold.xMiddle [scaffold.yShoulder p]
+					corner scaffold.xLeftArm ([scaffold.yShoulder p] + scaffold.armSize / 2 * kl)
+				dispiro
+					widths.center scaffold.stroke
+					corner scaffold.xMiddle [scaffold.yShoulder p]
+					corner scaffold.xRightArm ([scaffold.yShoulder p] + scaffold.armSize / 2 * kr)
+
+			define [StickManBody kl kr] : glyph-proc
+				include : StickManHead
+				include : VBar scaffold.xMiddle scaffold.yPelvis scaffold.yNeck
+				include : dispiro
+					widths.center scaffold.stroke
+					corner scaffold.xMiddle scaffold.yPelvis
+					corner scaffold.xLeftFoot scaffold.bot
+				include : dispiro
+					widths.center scaffold.stroke
+					corner scaffold.xMiddle scaffold.yPelvis
+					corner scaffold.xRightFoot scaffold.bot
+				include : StickManArms 0.6 kl kr
+
+			define [StickManDressBody kl kr] : glyph-proc
+				include : OShape (scaffold.top - O) (scaffold.yNeck + O) (scaffold.xLeftHead + O) (scaffold.xRightHead - O) scaffold.stroke
+				define p 0.7
+				define dressBottom : [mix scaffold.bot scaffold.yNeck 0.25] - scaffold.stroke / 2
+				define dressLeft : scaffold.xLeftFoot - scaffold.stroke / 2
+				define dressRight : scaffold.xRightFoot + scaffold.stroke / 2
+				include : StickManArms p kl kr
+				include : VBar scaffold.xMiddle [scaffold.yShoulder p] scaffold.yNeck
+				include : intersection
+					spiro-outline
+						corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+						corner dressRight dressBottom
+						corner dressLeft dressBottom
+					union
+						dispiro
+							widths.rhs scaffold.stroke
+							corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+							corner dressRight dressBottom
+						dispiro
+							widths.rhs scaffold.stroke
+							corner dressRight dressBottom
+							corner dressLeft dressBottom
+						dispiro
+							widths.rhs scaffold.stroke
+							corner dressLeft dressBottom
+							corner scaffold.xMiddle ([scaffold.yShoulder p] + scaffold.stroke)
+				include : VBar [mix dressLeft dressRight 0.3] scaffold.bot (dressBottom - O) scaffold.stroke
+				include : VBar [mix dressLeft dressRight 0.7] scaffold.bot (dressBottom - O) scaffold.stroke
+
+			# Stick Man Figure
+			create-glyph [MangleName 'stickMan'] [MangleUnicode 0x1FBC5] : glyph-proc
+				set-width MosaicWidth
+				include : StickManBody 0 0
+			create-glyph [MangleName 'stickManArmsRaised'] [MangleUnicode 0x1FBC6] : glyph-proc
+				set-width MosaicWidth
+				include : StickManBody scaffold.armRaiseK scaffold.armRaiseK
+			create-glyph [MangleName 'stickManLeaningLeft'] [MangleUnicode 0x1FBC7] : glyph-proc
+				set-width MosaicWidth
+				include : StickManBody (-scaffold.armRaiseK) scaffold.armRaiseK
+			create-glyph [MangleName 'stickManLeaningRight'] [MangleUnicode 0x1FBC8] : glyph-proc
+				set-width MosaicWidth
+				include : StickManBody scaffold.armRaiseK (-scaffold.armRaiseK)
+			create-glyph [MangleName 'stickManWithDress'] [MangleUnicode 0x1FBC9] : glyph-proc
+				set-width MosaicWidth
+				include : StickManDressBody 0 0
+
+		do "upPointingChevron"
+			define scaffold : object
+			set scaffold.top : mix uiFigBot uiFigTop 0.85
+			set scaffold.bot : mix uiFigBot uiFigTop 0.15
+			set scaffold.slope 0.6
+			set scaffold.width   : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.5]
+			set scaffold.stroke  : AdviceStroke 3.5
+			set scaffold.xMiddle : MosaicWidth / 2
+			set scaffold.xLeft : scaffold.xMiddle - scaffold.width / 2
+			set scaffold.xRight : scaffold.xMiddle + scaffold.width / 2
+			set scaffold.xLeft2 : scaffold.xMiddle - scaffold.width
+			set scaffold.xRight2 : scaffold.xMiddle + scaffold.width
+			set scaffold.slopeRise : scaffold.slope * scaffold.width / 2
+
+			define [ChevronUpperHalf flat] : intersection
+				spiro-outline
+					corner scaffold.xMiddle scaffold.top
+					corner scaffold.xLeft   (scaffold.top - scaffold.slopeRise)
+					corner scaffold.xLeft   (scaffold.bot + scaffold.stroke)
+					if flat {} : list
+						corner scaffold.xMiddle (scaffold.bot + scaffold.stroke + scaffold.slopeRise)
+					corner scaffold.xRight  (scaffold.bot + scaffold.stroke)
+					corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
+				union
+					VBarLeft scaffold.xLeft scaffold.bot scaffold.top scaffold.stroke
+					VBarRight scaffold.xRight scaffold.bot scaffold.top scaffold.stroke
+					dispiro
+						widths.lhs scaffold.stroke
+						corner scaffold.xMiddle scaffold.top
+						corner scaffold.xLeft   (scaffold.top - scaffold.slopeRise)
+					dispiro
+						widths.rhs scaffold.stroke
+						corner scaffold.xMiddle scaffold.top
+						corner scaffold.xRight  (scaffold.top - scaffold.slopeRise)
+
+			create-glyph [MangleName "upPointingChevron"] [MangleUnicode 0x1FBCA] : glyph-proc
+				set-width MosaicWidth
+				include : ChevronUpperHalf false
+				include : intersection
+					spiro-outline
+						corner scaffold.xLeft   scaffold.top
+						corner scaffold.xLeft   (scaffold.bot - scaffold.stroke)
+						corner scaffold.xRight  (scaffold.bot - scaffold.stroke)
+						corner scaffold.xRight  scaffold.top
+					union
+						dispiro
+							widths.lhs scaffold.stroke
+							corner scaffold.xMiddle (scaffold.bot + scaffold.slopeRise + scaffold.stroke)
+							corner scaffold.xLeft2  (scaffold.bot - scaffold.slopeRise + scaffold.stroke)
+						dispiro
+							widths.rhs scaffold.stroke
+							corner scaffold.xMiddle (scaffold.bot + scaffold.slopeRise + scaffold.stroke)
+							corner scaffold.xRight2 (scaffold.bot - scaffold.slopeRise + scaffold.stroke)
+
+			create-glyph [MangleName "upPointingHouse"] [MangleUnicode 0x2302] : glyph-proc
+				set-width MosaicWidth
+				include : ChevronUpperHalf true
+				include : HBarBottom scaffold.xLeft scaffold.xRight scaffold.stroke
+
+		do "Segmented digits"
+			define scaffold : object
+			set scaffold.gap : Width / 16
+			set scaffold.stroke : [AdviceStroke 2] / 2
+			set scaffold.top   : [mix uiFigBot uiFigTop 0.9] - scaffold.stroke
+			set scaffold.mid   : mix uiFigBot uiFigTop 0.5
+			set scaffold.bot   : [mix uiFigBot uiFigTop 0.1] + scaffold.stroke
+			set scaffold.width : (Middle - SB) * 2 * [Math.pow (MosaicWidth / Width) 0.5]
+			set scaffold.left  : (MosaicWidth / 2) - scaffold.width / 2 + scaffold.stroke / 2
+			set scaffold.right : (MosaicWidth / 2) + scaffold.width / 2 - scaffold.stroke / 2
+			define [StrokeV x yt yb] : spiro-outline
+				corner x (yt - scaffold.gap)
+				corner (x + scaffold.stroke) (yt - scaffold.gap - scaffold.stroke)
+				corner (x + scaffold.stroke) (yb + scaffold.gap + scaffold.stroke)
+				corner x (yb + scaffold.gap)
+				corner (x - scaffold.stroke) (yb + scaffold.gap + scaffold.stroke)
+				corner (x - scaffold.stroke) (yt - scaffold.gap - scaffold.stroke)
+			define [StrokeH xl xr y s] : spiro-outline
+				corner (xl + scaffold.gap) y
+				corner (xl + scaffold.gap + scaffold.stroke) (y + scaffold.stroke)
+				corner (xr - scaffold.gap - scaffold.stroke) (y + scaffold.stroke)
+				corner (xr - scaffold.gap) y
+				corner (xr - scaffold.gap - scaffold.stroke) (y - scaffold.stroke)
+				corner (xl + scaffold.gap + scaffold.stroke) (y - scaffold.stroke)
+			define [SegmentedDigit unicode a b c d e f g] : begin
+				create-glyph [MangleName : NameUni unicode] [MangleUnicode unicode] : glyph-proc
+					set-width MosaicWidth
+					if a : include : StrokeH scaffold.left scaffold.right scaffold.top
+					if b : include : StrokeV scaffold.left scaffold.top scaffold.mid
+					if c : include : StrokeV scaffold.right scaffold.top scaffold.mid
+					if d : include : StrokeH scaffold.left scaffold.right scaffold.mid
+					if e : include : StrokeV scaffold.left scaffold.mid scaffold.bot
+					if f : include : StrokeV scaffold.right scaffold.mid scaffold.bot
+					if g : include : StrokeH scaffold.left scaffold.right scaffold.bot
+
+			SegmentedDigit 0x1FBF0 1 1 1 0 1 1 1
+			SegmentedDigit 0x1FBF1 0 0 1 0 0 1 0
+			SegmentedDigit 0x1FBF2 1 0 1 1 1 0 1
+			SegmentedDigit 0x1FBF3 1 0 1 1 0 1 1
+			SegmentedDigit 0x1FBF4 0 1 1 1 0 1 0
+			SegmentedDigit 0x1FBF5 1 1 0 1 0 1 1
+			SegmentedDigit 0x1FBF6 1 1 0 1 1 1 1
+			SegmentedDigit 0x1FBF7 1 1 1 0 0 1 0
+			SegmentedDigit 0x1FBF8 1 1 1 1 1 1 1
+			SegmentedDigit 0x1FBF9 1 1 1 1 0 1 1
+
+		do "voidedGreekCross"
+			create-glyph [MangleName "voidedGreekCross"] [MangleUnicode 0x1FBBB] : glyph-proc
+				set-width MosaicWidth
+				local sw : AdviceStroke 4
+				local gap : [Math.max (Width / 8) (Width / 6 - sw / 2) ([AdviceStroke 3] - sw / 2)] / 2
+				local mid : MosaicWidth / 2
+				local size : [Math.min (MosaicWidth - SB * 2) (uiFigTop - uiFigBot)] / 2
+				include : union
+					VBarRight  (mid - gap) (SymbolMid + gap) (SymbolMid + size) sw
+					VBarRight  (mid - gap) (SymbolMid - gap) (SymbolMid - size) sw
+					VBarLeft   (mid + gap) (SymbolMid + gap) (SymbolMid + size) sw
+					VBarLeft   (mid + gap) (SymbolMid - gap) (SymbolMid - size) sw
+					HBarBottom (mid - size) (mid - gap) (SymbolMid + gap) sw
+					HBarBottom (mid + size) (mid + gap) (SymbolMid + gap) sw
+					HBarTop    (mid - size) (mid - gap) (SymbolMid - gap) sw
+					HBarTop    (mid + size) (mid + gap) (SymbolMid - gap) sw
