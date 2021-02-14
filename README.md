@@ -520,6 +520,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
   - `brace-bar`: Enable ligation for `{|` and `|}`.
   - `brack-bar`: Enable ligation for `[|` and `|]`.
+  - `connected-underscore`: Make contiguous underscores (like `__`) connected.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 

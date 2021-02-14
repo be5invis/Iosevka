@@ -32,6 +32,7 @@ const plusPlus = TAG("plusplus");
 const colonGt = TAG("colon-greater");
 const brackBar = TAG("brack-bar");
 const braceBar = TAG("brace-bar");
+const underscores = TAG("connected-underscore");
 
 const ligationSamples = [
 	[
@@ -118,7 +119,8 @@ const ligationSamples = [
 		centerOps("+:"),
 		centerOps("-:"),
 		centerOps("=:"),
-		centerOps("<******>"),
+		centerOps("<***>"),
+		underscores("__"),
 		brst("(* comm *)"),
 		plusPlus("++"),
 		plusPlus("+++"),
@@ -204,7 +206,8 @@ const ligationSamplesNarrow = [
 		centerOps("+:"),
 		centerOps("-:"),
 		centerOps("=:"),
-		colonGt(":>")
+		colonGt(":>"),
+		underscores("__")
 	],
 	[
 		brst("(*"),
