@@ -1120,28 +1120,25 @@ glyph-block Symbol-Punctuation-Dashes : begin
 				VBarLeft  SB      y (y + openBoxGap)
 				VBarRight RightSB y (y + openBoxGap)
 
-		create-glyph 'underscore.aboveBaseline' : glyph-proc
-			set-width Width
-			include : HBarBottom SB RightSB 0
+		define UnderScoreConfig : object
+			aboveBaseline { 0         }
+			high          { (-Stroke) }
+			low           { Descender }
 
-			create-derived 'doubleUnderscore.aboveBaseline' : HBarBottom SB RightSB (-openBoxGap)
-			create-derived 'openBox.aboveBaseline' : OpenBoxSide (Stroke / 2)
+		define joiningOverlap (-Width / 6)
 
-		create-glyph 'underscore.high' : glyph-proc
-			set-width Width
-			include : HBarTop SB RightSB 0
-
-			create-derived 'doubleUnderscore.high' : HBarTop SB RightSB (-openBoxGap)
-			create-derived 'openBox.high' : OpenBoxSide (-Stroke / 2)
-
-		create-glyph 'underscore.low' : glyph-proc
-			set-width Width
-			include : HBarBottom SB RightSB Descender
-
-			create-derived 'doubleUnderscore.low' : HBarBottom SB RightSB (Descender - openBoxGap)
-			create-derived 'openBox.low' : OpenBoxSide (Descender + Stroke / 2)
+		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
+			create-glyph "underscore.\(suffix)" : HBarBottom SB RightSB yBar
+			create-glyph "underscore.jr.\(suffix)" : HBarBottom (joiningOverlap - SB) RightSB yBar
+			create-glyph "doubleUnderscore.\(suffix)" : composite-proc
+				HBarBottom SB RightSB yBar
+				HBarBottom SB RightSB (yBar - openBoxGap)
+			create-glyph "openBox.\(suffix)" : composite-proc
+				HBarBottom SB RightSB yBar
+				OpenBoxSide (yBar + Stroke / 2)
 
 		select-variant 'underscore'       '_'
+		select-variant 'underscore.jr'    null   (follow -- 'underscore')
 		select-variant 'openBox'          0x2423 (follow -- 'underscore')
 		select-variant 'doubleUnderscore' 0x2017 (follow -- 'underscore')
 
