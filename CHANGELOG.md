@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.0.1
+
+ * Correct shape of turned `t`, and width of various variant of `t` and `r` in Aile (#892).
+ * Add ligation for connected underscore. Currently only under `dlig` (#888).
+
+
 ### 5.0.0
 
  * **Breaking** Iosevka Aile and Iosevka Etoile now support `cv##` and `ss##` features.
