@@ -664,7 +664,7 @@ const ScreenShot = file.make(
 	img => `images/${img}.png`,
 	async (target, { full }) => {
 		await target.need(TakeSampleImages);
-		await run("optipng", full);
+		await run("optipng", ["--strip", "all"], full);
 	}
 );
 
