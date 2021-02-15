@@ -101,6 +101,15 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			.rules rules
 		set lookupRank : lookupRank + 1
 
+	do "Bracket-star" : if [hasLG 'brst'] : begin
+		CreateLigationLookup : list
+			chain-rule # (*
+				{'parenLeft'}  ~> look-around
+				{'asterisk'}   ~> {'asterisk/lowered'}
+			chain-rule # *)
+				{'asterisk'}   ~> {'asterisk/lowered'}
+				{'parenRight'} ~> look-around
+
 	do "Operator centering" : if [hasLG 'center-ops'] : begin
 		define [centerAsterisk]   : {'asterisk'}    ~>  {'asterisk/lowered'}
 		define [centerColon]      : {'colon'}       ~>  {'colon.mid'}
@@ -120,15 +129,6 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			return : if right (right.0 || left.0) (left.0)
 
 		define [Cg] : centerizeL ~> centerizeR
-
-		do "Bracket-star" : if [hasLG 'brst'] : begin
-			CreateLigationLookup : list
-				chain-rule # (*
-					{'parenLeft'}  ~> look-around
-					centerAsterisk
-				chain-rule # *)
-					centerAsterisk
-					{'parenRight'} ~> look-around
 
 		do "Bracket-colon"
 			CreateLigationLookup : list
