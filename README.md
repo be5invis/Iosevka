@@ -517,10 +517,11 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `lteq-as-arrow`: Treat `<=` as arrow.
   - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
   - `html-comment`: Enable ligation for `<!--` and `<!---`.
-  - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow..
+  - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
   - `brace-bar`: Enable ligation for `{|` and `|}`.
   - `brack-bar`: Enable ligation for `[|` and `|]`.
   - `connected-underscore`: Make contiguous underscores (like `__`) connected.
+  - `connected-number-sign`: Make contiguous number signs (like `##`) connected.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 

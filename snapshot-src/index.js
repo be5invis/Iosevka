@@ -28,7 +28,7 @@ const captureCallbacks = {
 
 const ssStrings = [
 	["ABC.DEF.GHI.JKL.MNO.PQRS.TUV.WXYZ", "abc.def.ghi.jkl.mno.pqrs.tuv.wxyz"],
-	["1234567890 ,._-+= >< ¯-¬_ >~–÷+×<", "{}[]()<> $*-+=/#_%^@\\&|~?'\" !,.;:"],
+	["1234567890 ,._-+= >< ¯-¬_ >~–÷+×<", "{}[]()<> +-=$*/#_%^@\\&|~?'\" !,.;:"],
 	["!iIlL17|¦ coO08BbDQ $5SZ2zsz 96G&", [..."dbqp E3 g9q CGQ vvw VVW /V ", "<=", " ", ">="]]
 ];
 
