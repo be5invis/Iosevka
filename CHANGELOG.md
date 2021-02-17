@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 5.0.2
+
+ * Fixed SS17 family names for Term and Fixed.
+
+
 ### 5.0.1
 
  * Correct shape of turned `t`, and width of various variant of `t` and `r` in Aile (#892).
