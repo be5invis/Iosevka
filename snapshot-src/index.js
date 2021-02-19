@@ -99,8 +99,12 @@ function captureElement(options, callback) {
 	window.scroll(0, 0);
 	setTimeout(function () {
 		const element = document.querySelector(options.el);
-		if (options.applyClass) element.className = options.applyClass;
-		if (options.applyFeature) element.style = "font-feature-settings:" + options.applyFeature;
+		if (options.applyClass) {
+			element.className = options.applyClass;
+		}
+		if (options.applyFeature) {
+			element.style = "font-feature-settings:" + options.applyFeature;
+		}
 		if (options.applyCallback) {
 			captureCallbacks[options.applyCallback](element, options.applyCallbackArgs);
 		}
