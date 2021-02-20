@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 5.0.3
+
+ * Add ligation set for chaining number signs (#894).
+
+
 ### 5.0.2
 
  * Fixed SS17 family names for Term and Fixed.

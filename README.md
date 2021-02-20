@@ -951,13 +951,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `eszet = 'sulzbacher-tailed'`, `cv51 = 4`: More modern, beta-like Eszet (`ß`) (default for Italic).
     + `eszet = 'longs-s-lig'`, `cv51 = 5`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
     + `eszet = 'longs-s-lig-tailed'`, `cv51 = 6`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
-  - Styles for `Λ`, `Δ`:
-    + `turn-v = 'straight'`, `cv52 = 1`: Standard, straight `Λ`, `Δ` (default).
-    + `turn-v = 'curly'`, `cv52 = 2`: Slightly curly `Λ`, `Δ`, like Iosevka 2.x.
+  - Styles for `Λ`, `Δ` (Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`)):
+    + `turn-v = 'straight'`, `cv52 = 1`: Standard, straight Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`) (default).
+    + `turn-v = 'curly'`, `cv52 = 2`: Slightly curly Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`), like Iosevka 2.x.
   - Styles for `α` (Greek lower Alpha):
     + `lower-alpha = 'crossing'`, `cv53 = 1`: Greek lower Alpha (`α`) with a cross-like shape at right (default).
     + `lower-alpha = 'tailed-barred'`, `cv53 = 2`: Greek lower Alpha (`α`) with a straight right bar and tail.
-  - Styles for `Γ` (Greek capital Lambda):
+  - Styles for `Γ` (Greek capital Gamma):
     + `capital-gamma = 'standard'`, `cv54 = 1`: Standard capital Gamma (`Γ`) (default).
     + `capital-gamma = 'motion-serifed'`, `cv54 = 2`: Standard capital Gamma (`Γ`) with motion serifs.
   - Styles for `ɛ` (Latin small Epsilon):
