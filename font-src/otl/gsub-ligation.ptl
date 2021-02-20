@@ -42,10 +42,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
 
 	define [acops]  {'less' 'greater' 'hyphen' 'equal' 'plus'}
-	define [acskip] {
-		'slash' 'bar' 'at' 'ampersand' 'percent'
-		'numberSign' 'numberSign.upright' 'numberSign.slanted'
-	}
+	define [acskip] {'slash' 'bar' 'at' 'ampersand' 'percent' 'numberSign'}
 
 	local ligationLookupName : 'lig_' + featureName + '{' + mappedFeature + '}'
 
@@ -101,6 +98,15 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			.rules rules
 		set lookupRank : lookupRank + 1
 
+	do "Bracket-star" : if [hasLG 'brst'] : begin
+		CreateLigationLookup : list
+			chain-rule # (*
+				{'parenLeft'}  ~> look-around
+				{'asterisk'}   ~> {'asterisk/lowered'}
+			chain-rule # *)
+				{'asterisk'}   ~> {'asterisk/lowered'}
+				{'parenRight'} ~> look-around
+
 	do "Operator centering" : if [hasLG 'center-ops'] : begin
 		define [centerAsterisk]   : {'asterisk'}    ~>  {'asterisk/lowered'}
 		define [centerColon]      : {'colon'}       ~>  {'colon.mid'}
@@ -120,15 +126,6 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			return : if right (right.0 || left.0) (left.0)
 
 		define [Cg] : centerizeL ~> centerizeR
-
-		do "Bracket-star" : if [hasLG 'brst'] : begin
-			CreateLigationLookup : list
-				chain-rule # (*
-					{'parenLeft'}  ~> look-around
-					centerAsterisk
-				chain-rule # *)
-					centerAsterisk
-					{'parenRight'} ~> look-around
 
 		do "Bracket-colon"
 			CreateLigationLookup : list
@@ -275,6 +272,12 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			chain-rule
 				{'underscore' 'underscore.jr'} ~> look-around
 				{'underscore'} ~> {'underscore.jr'}
+
+	do "Number sign chains" : if [hasLG 'connected-number-sign'] : begin
+		CreateLigationLookup : list
+			chain-rule
+				{'numberSign' 'numberSign.jr'} ~> look-around
+				{'numberSign'} ~> {'numberSign.jr'}
 
 	do "triangles" : if [hasLG 'trig'] : begin
 		CreateLigationLookup : list
