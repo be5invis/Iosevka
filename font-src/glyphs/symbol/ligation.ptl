@@ -53,9 +53,20 @@ glyph-block Symbol-Ligation : begin
 
 	local arrowExtend [clamp 0 Width (RightSB - OperatorStroke / 2 * arrowheadSlope)]
 	local arrowJ : clamp 0 Width (SB + OperatorStroke / 2 * arrowheadSlope)
-	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : create-glyph ('hyphen.lig.' + subclass) : glyph-proc
-		include : HBar left right SymbolMid OperatorStroke
-		set currentGlyph.autoRefPriority (-3)
+
+	define [HyphenNotch x] : union
+		VBar x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) OperatorStroke
+		VBar x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) OperatorStroke
+	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : begin
+
+		create-glyph "hyphen.lig.\(subclass)" : glyph-proc
+			include : HBar left right SymbolMid OperatorStroke
+			set currentGlyph.autoRefPriority (-3)
+		create-glyph "hyphen.lig.\(subclass).notched" : glyph-proc
+			include : difference
+				HBar left right SymbolMid OperatorStroke
+				if (left < SB)       [HyphenNotch 0]     [glyph-proc]
+				if (right > RightSB) [HyphenNotch Width] [glyph-proc]
 
 	# =>
 	local dblArrowD  : (ParenTop - ParenBot) * DesignParameters.equal_wideness + OperatorStroke * 0.75
@@ -96,7 +107,7 @@ glyph-block Symbol-Ligation : begin
 			j    { J    (Width + arrowJ)                          true }
 			j1   { J    (Width + arrowJ + arrowheadsKern)         true }
 
-		foreach [lS : items-of : Object.keys lk] : foreach [rS : items-of : Object.keys rk] : create-glyph"wave.\(lS)\(rS)" : glyph-proc
+		foreach [lS : items-of : Object.keys lk] : foreach [rS : items-of : Object.keys rk] : create-glyph"wave.lig.\(lS)\(rS)" : glyph-proc
 			local {tL jL djL} lk.(lS)
 			local {tR jR djR} rk.(rS)
 			include : WaveShape
@@ -322,12 +333,12 @@ glyph-block Symbol-Ligation : begin
 	do "Chaining Plus"
 		glyph-block-import Symbol-Math-Arith : PlusShape
 
-		create-glyph 'plus.lig.lc'   : PlusShape SB (Width - O)
-		create-glyph 'plus.lig.lc.s' : PlusShape SB (Width - O) SB
+		create-glyph 'plus.lig.fc'   : PlusShape SB (Width - O)
+		create-glyph 'plus.lig.fc.s' : PlusShape SB (Width - O) SB
 		create-glyph 'plus.lig.cc'   : PlusShape O (Width - O)
-		create-glyph 'plus.lig.cr'   : PlusShape O RightSB
-		create-glyph 'plus.lig.cr.s' : PlusShape O RightSB (-SB)
-		create-glyph 'plus.lig.jr'   : PlusShape (-SB + O) RightSB
+		create-glyph 'plus.lig.cf'   : PlusShape O RightSB
+		create-glyph 'plus.lig.cf.s' : PlusShape O RightSB (-SB)
+		create-glyph 'plus.lig.zf'   : PlusShape (-SB + O) RightSB
 
 	do 'Less / Greater as arrow'
 		create-glyph 'greaterArrow' : composite-proc
