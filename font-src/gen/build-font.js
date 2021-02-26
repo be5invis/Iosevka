@@ -7,14 +7,14 @@ const convertOtd = require("./otd-conv/index");
 
 const { buildOtl } = require("../otl/index");
 const { assignFontNames } = require("../meta/naming");
-const { setFontMetrics } = require("../meta/aesthetics");
+const { copyFontMetrics } = require("../meta/aesthetics");
 
 module.exports = function (para) {
 	const otd = EmptyFont();
 	const gs = buildGlyphs(para);
 
-	assignFontNames(para, gs.metrics, otd);
-	setFontMetrics(para, gs.metrics, otd);
+	assignFontNames(para, otd);
+	copyFontMetrics(gs.fontMetrics, otd);
 
 	const otl = buildOtl(para, gs.glyphStore);
 	otd.GSUB = otl.GSUB;
