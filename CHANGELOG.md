@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.0.4
+
+ * Add ligation for chained hyphens and tildes (#893).
+ * Add symbols used by BQN programming language (`U+2389`, `U+2687`, `U+231C`, `U+238A`, `U+27DC`, and `U+294A`; #870).
+
+
 ### 5.0.3
 
  * Add ligation set for chaining number signs (#894).
