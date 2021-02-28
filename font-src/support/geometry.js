@@ -16,12 +16,18 @@ class GeometryBase {
 	isEmpty() {
 		return true;
 	}
+	measureComplexity() {
+		return 0;
+	}
 }
 
 class ContourGeometry extends GeometryBase {
 	constructor(points) {
 		super();
-		this.m_points = points;
+		this.m_points = [];
+		for (const z of points) {
+			this.m_points.push(Point.from(z.type, z));
+		}
 	}
 	asContours() {
 		if (this.isEmpty()) return [];
@@ -36,6 +42,9 @@ class ContourGeometry extends GeometryBase {
 	isEmpty() {
 		return !this.m_points.length;
 	}
+	measureComplexity() {
+		return this.m_points.length;
+	}
 }
 
 class ReferenceGeometry extends GeometryBase {
@@ -43,8 +52,8 @@ class ReferenceGeometry extends GeometryBase {
 		super();
 		if (!glyph || !glyph.geometry) throw new TypeError("Invalid glyph");
 		this.m_glyph = glyph;
-		this.m_x = x;
-		this.m_y = y;
+		this.m_x = x || 0;
+		this.m_y = y || 0;
 	}
 	unwrap() {
 		return new TransformedGeometry(
@@ -68,6 +77,9 @@ class ReferenceGeometry extends GeometryBase {
 		if (!this.m_glyph || !this.m_glyph.geometry) return true;
 		return this.m_glyph.geometry.isEmpty();
 	}
+	measureComplexity() {
+		return this.m_glyph.geometry.measureComplexity();
+	}
 }
 
 class TaggedGeometry extends GeometryBase {
@@ -88,6 +100,9 @@ class TaggedGeometry extends GeometryBase {
 	}
 	isEmpty() {
 		return this.m_geom.isEmpty();
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity();
 	}
 }
 
@@ -121,6 +136,9 @@ class TransformedGeometry extends GeometryBase {
 	}
 	isEmpty() {
 		return this.m_geom.isEmpty();
+	}
+	measureComplexity() {
+		return this.m_geom.measureComplexity();
 	}
 }
 
@@ -167,6 +185,10 @@ class CombineGeometry extends GeometryBase {
 	isEmpty() {
 		for (const part of this.m_parts) if (!part.isEmpty()) return false;
 		return true;
+	}
+	measureComplexity() {
+		let s = 0;
+		for (const part of this.m_parts) s += part.measureComplexity();
 	}
 }
 

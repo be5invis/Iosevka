@@ -7,18 +7,9 @@ const util = require("util");
 
 module.exports = finalizeGlyphs;
 function finalizeGlyphs(para, glyphStore) {
-	suppressNaN(glyphStore);
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
 	regulateGlyphStore(skew, glyphStore);
 	return glyphStore;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-function suppressNaN(glyphStore) {
-	for (const g of glyphStore.glyphs()) {
-		// if (g.geometry) g.geometry.suppressNaN();
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
