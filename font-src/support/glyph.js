@@ -3,19 +3,19 @@
 const Transform = require("./transform");
 const Point = require("./point");
 const Anchor = require("./anchor");
-const GeometryStore = require("./geometry");
+const Geom = require("./geometry");
 
 module.exports = class Glyph {
 	constructor(_identifier) {
 		this._m_identifier = _identifier;
-		this.geometry = new GeometryStore();
+		this.geometry = new Geom.CombineGeometry();
 		this.advanceWidth = 500;
 		this.autoRefPriority = 0;
 		this.markAnchors = {};
 		this.baseAnchors = {};
 		this.gizmo = Transform.Id();
 		this.dependencies = [];
-		this.defaultTag = null;
+		this.ctxTag = null;
 	}
 
 	get contours() {
@@ -53,11 +53,7 @@ module.exports = class Glyph {
 		if (!component) {
 			throw new Error("Unreachable: Attempt to include a Null or Undefined");
 		} else if (component instanceof Function) {
-			const t = this.defaultTag;
-			if (component.tag) this.defaultTag = component.tag;
-			let ret = component.call(this, copyAnchors, copyWidth);
-			this.defaultTag = t;
-			return ret;
+			return component.call(this, copyAnchors, copyWidth);
 		} else if (component instanceof Transform) {
 			return this.applyTransform(component, copyAnchors);
 		} else if (component.isMarkSet) {
@@ -99,33 +95,32 @@ module.exports = class Glyph {
 		this.avoidBeingComposite = g.avoidBeingComposite;
 	}
 
+	combineGeometryImpl(g) {
+		if (this.ctxTag) g = new Geom.TaggedGeometry(g, this.ctxTag);
+		this.geometry = Geom.combineWith(this.geometry, g);
+	}
 	includeGlyphImpl(g, shiftX, shiftY) {
 		if (g._m_identifier) {
-			if (!g.geometry.isEmpty()) this.geometry.addReference(g, shiftX, shiftY);
-		} else if (!g._m_identifier && g.geometry.asReferences()) {
-			for (const sr of g.geometry.asReferences()) {
-				if (!sr.glyph.geometry.isEmpty())
-					this.geometry.addReference(sr.glyph, sr.x + shiftX, sr.y + shiftY);
-			}
+			this.combineGeometryImpl(new Geom.ReferenceGeometry(g, shiftX, shiftY));
 		} else {
-			this.includeContours(g.geometry.asContours(), shiftX, shiftY);
+			this.combineGeometryImpl(
+				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY))
+			);
 		}
 	}
 
 	includeContours(cs, shiftX, shiftY) {
+		let parts = [];
 		for (const contour of cs) {
 			let c = [];
 			for (const z of contour) c.push(Point.translated(z, shiftX, shiftY));
-			this.geometry.addContour(c, contour.tag || cs.tag || this.defaultTag);
+			parts.push(new Geom.ContourGeometry(c));
 		}
+		this.combineGeometryImpl(new Geom.CombineGeometry(parts));
 	}
 
 	applyTransform(tfm, alsoAnchors) {
-		if (Transform.isTranslate(tfm)) {
-			this.geometry.applyTranslate(tfm.x, tfm.y);
-		} else {
-			this.geometry.applyTransform(tfm);
-		}
+		this.geometry = new Geom.TransformedGeometry(this.geometry, tfm);
 		if (alsoAnchors) {
 			for (const k in this.baseAnchors)
 				this.baseAnchors[k] = Anchor.transform(tfm, this.baseAnchors[k]);
@@ -153,12 +148,14 @@ module.exports = class Glyph {
 				if (z1.x !== z2.x || z1.y !== z2.y || z1.type !== z2.type) return;
 			}
 		}
-		this.geometry = new GeometryStore();
-		this.geometry.addReference(dst, 0, 0);
+		this.geometry = new Geom.CombineGeometry([new Geom.ReferenceGeometry(dst, 0, 0)]);
 		rankSet.add(this);
 	}
 	clearGeometry() {
-		this.geometry = new GeometryStore();
+		this.geometry = new Geom.CombineGeometry();
+	}
+	ejectTagged(tag) {
+		this.geometry = this.geometry.filterTag(t => tag !== t);
 	}
 
 	// Anchors

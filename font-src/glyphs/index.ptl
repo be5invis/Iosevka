@@ -21,11 +21,6 @@ define [$NamedParameterPair$ l r] : begin
 
 define [$donothing$] nothing
 
-# contour tagging
-define [tagged tag component] : begin
-	set component.tag tag
-	return component
-
 export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	local glyphStore : new GlyphStore
 
@@ -89,7 +84,7 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 
 	define [warnAboutBrokenGlyph g ensuredGlyphName saveGlyphName] : begin
 		local complexity 0
-		if g.geometry : set complexity : g.geometry.suppressNaN
+		# if g.geometry : set complexity : g.geometry.suppressNaN
 
 		if ([not recursive] && complexity > 4096) : begin
 			console.log 'Possible broken shape found in' ensuredGlyphName 'Complexity' complexity
@@ -112,6 +107,14 @@ export all : define [buildGlyphs para recursive recursiveCodes] : begin
 	# Basic knots
 	define spirofns : spirokit.SetupBuilders : object GlobalTransform Contrast Stroke Glyph para [superness DesignParameters.superness]
 	define booleFns : BooleKit.SetupBuilders : object GlobalTransform Glyph
+
+	# Meta
+	define [tagged tag component] : function [ca cw] : begin
+		define t this.ctxTag
+		set this.ctxTag tag
+		define ret : this.include component ca cw
+		set this.ctxTag t
+		return ret
 
 	# IDKY, but wrapping "metrics" prevents Node.js on Arch modifying it.
 	define $$Capture$$ : object [metrics : Object.create metrics] $NamedParameterPair$ $donothing$ para recursive recursiveCodes glyphStore $createAndSaveGlyphImpl$ spirofns booleFns MarkSet AS_BASE ALSO_METRICS pickHash buildGlyphs tagged DivFrame fontMetrics $assignUnicodeImpl$ $defineGlyphBlockImpl$
