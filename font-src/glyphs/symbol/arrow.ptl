@@ -26,6 +26,7 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define halfArrowSw : arrowSw / 2
 	define fine : AdviceStroke 3.5
 	define terminal : AdviceStroke 5
+	define halfTerminal : terminal / 2
 	define doubleArrowStemWidth : arrowHeadSize * 1.1
 	define waveArrowAmplitude : (Width - SB) * DesignParameters.arrow_size * 1.1
 
@@ -65,6 +66,15 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 				g4 (mag - O) (s / 2)
 				arcvh
 				flat (mag - [Math.abs s] / 2) 0
+				curl [mix mag 0 p] 0
+
+	define [SemiHookArrowBar x1 y1 x2 y2 halfSw halfFine s w] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			local p : (mag - o - halfSw * [fallback w 1.1]) / mag
+			dispiro
+				straight.[if (s > 0) 'down' 'up'].start (mag - O) s [widths.center (halfFine * 2)]
+				arcvh
+				flat (mag - [Math.abs s] / 2) 0 [widths.center (halfSw * 2)]
 				curl [mix mag 0 p] 0
 
 	define [ArrowHead x1 y1 x2 y2 _size] : union
@@ -164,25 +174,34 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		local x1CoA : mix x1 x2 (-0.05)
 		local y1CoA : mix y1 y2 (-0.05)
 
-		if (color == "white") : return : difference
-			union
-				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
-				ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
-			union
-				TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
-				ArrowBar x1a y1a x2a y2a (halfBarWidth - fine / 2) 2
+		return : match color
+			[Just 'white'] : difference
+				union
+					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+					ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
+				union
+					TriangleArrowHead x1a y1a x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					ArrowBar x1a y1a x2a y2a (halfBarWidth - fine / 2) 2
 
-		if (color == "white-open") : return : difference
-			union
-				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
-				ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
-			union
-				TriangleArrowHead x1CoA y1CoA x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
-				ArrowBar x1CoA y1CoA x2a y2a (halfBarWidth - fine / 2) 2
+			[Just "white-open"] : difference
+				union
+					TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+					ArrowBar x1 y1 x2 y2 (halfBarWidth + fine / 2) 2
+				union
+					TriangleArrowHead x1CoA y1CoA x2a y2a (headWidth - innerHeaderLengthShrink * headWidth / headLen) (headLen - innerHeaderLengthShrink)
+					ArrowBar x1CoA y1CoA x2a y2a (halfBarWidth - fine / 2) 2
 
-		if (color == "black") : return : union
-			TriangleArrowHead x1 y1 x2 y2 headWidth headLen
-			ArrowBar x1 y1 x2 y2 halfBarWidth 2
+			[Just "black"] : union
+				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+				ArrowBar x1 y1 x2 y2 halfBarWidth 2
+
+			[Just "blackSemiHookR"] : union
+				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+				SemiHookArrowBar x1 y1 x2 y2 halfBarWidth halfTerminal headWidth 2
+
+			[Just "blackSemiHookL"] : union
+				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
+				SemiHookArrowBar x1 y1 x2 y2 halfBarWidth halfTerminal (-headWidth) 2
 
 	define [BarbArrowHead x1 y1 x2 y2 width length thickness] : new-glyph : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
@@ -437,6 +456,9 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow [ThickArrowShape 'black'] [MangleName 'uni2B0B'] [MangleUnicode 0x2B0B] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 		DoubleArrow [ThickArrowShape 'black'] [MangleName 'uni2B0C'] [MangleUnicode 0x2B0C] arrowSB SymbolMid arrowRSB SymbolMid
 		DoubleArrow [ThickArrowShape 'black'] [MangleName 'uni2B0D'] [MangleUnicode 0x2B0D] arrowMidX arrowBot arrowMidX arrowTop
+
+		MkArrow [ThickArrowShape 'blackSemiHookL'] [MangleName 'uni27A5'] [MangleUnicode 0x27A5] arrowSB SymbolMid arrowRSB SymbolMid
+		MkArrow [ThickArrowShape 'blackSemiHookR'] [MangleName 'uni27A6'] [MangleUnicode 0x27A6] arrowSB SymbolMid arrowRSB SymbolMid
 
 	do "Barb arrows"
 		define BarbHeavyWideHeaded : BarbArrowShape 0.25 : UnicodeWeightGrade 9 MosaicWidthScalar
