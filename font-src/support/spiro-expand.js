@@ -53,6 +53,10 @@ module.exports = class SpiroExpansionContext {
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
 		if (k0) k0.type = type;
 	}
+	setUnimportant() {
+		const k0 = this.controlKnots[this.controlKnots.length - 1];
+		if (k0) k0.unimportant = true;
+	}
 	expand(contrast) {
 		if (contrast == null) contrast = 1 / 0.9;
 		const lhs = [],
@@ -100,6 +104,7 @@ module.exports = class SpiroExpansionContext {
 				rhsAfter = this.gizmo.unapply(rhs[jAfter]);
 
 			lhs[j] = {
+				unimportant: true,
 				type: knot.type,
 				...this.gizmo.apply({
 					x: linreg(knotBefore.x, lhsBefore.x, knotAfter.x, lhsAfter.x, ref.x),
@@ -107,6 +112,7 @@ module.exports = class SpiroExpansionContext {
 				})
 			};
 			rhs[j] = {
+				unimportant: true,
 				type: reverseKnotType(knot.type),
 				...this.gizmo.apply({
 					x: linreg(knotBefore.x, rhsBefore.x, knotAfter.x, rhsAfter.x, ref.x),

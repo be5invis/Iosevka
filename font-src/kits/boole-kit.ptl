@@ -1,38 +1,22 @@
 import 'typo-geom' as TypoGeom
 import '../support/curve-util' as CurveUtil
+import '../support/geometry' as [object BooleanGeometry]
 
 export : define [SetupBuilders args] : begin
 	define [object Glyph GlobalTransform] args
-	define [Boole operator] : begin
-		define [BooleImplFn] : begin
-			define k : {}.slice.call arguments 0
-			return : lambda [] : begin
-				local contourArcs : getArcsFromProc this k.0
-				if (k.length === 1) : set contourArcs : TypoGeom.Boolean.removeOverlap
-					begin contourArcs
-					begin TypoGeom.Boolean.PolyFillType.pftNonZero
-					begin CurveUtil.BOOLE_RESOLUTION
+	define [impl operator operands] : begin
+		return : function [] : begin
+			local operandGeometries {}
+			foreach operand [items-of operands] : begin
+				local g1 : new Glyph
+				set g1.gizmo : this.gizmo || GlobalTransform
+				g1.include operand
+				operandGeometries.push g1.geometry
 
-				foreach [item : items-of : k.slice 1] : begin
-					set contourArcs : TypoGeom.Boolean.combine operator
-						begin contourArcs
-						getArcsFromProc this item
-						begin TypoGeom.Boolean.PolyFillType.pftNonZero
-						begin TypoGeom.Boolean.PolyFillType.pftNonZero
-						begin CurveUtil.BOOLE_RESOLUTION
+			this.includeGeometry : new BooleanGeometry operator operandGeometries
 
-				local ctx : new CurveUtil.BezToContoursSink
-				TypoGeom.ShapeConv.transferBezArcShape contourArcs ctx
-				this.includeContours ctx.contours 0 0
-
-	define [getArcsFromProc g p] : begin
-		local g1 : new Glyph
-		set g1.gizmo : g.gizmo || GlobalTransform
-		g1.include p
-		return : CurveUtil.convertShapeToArcs : g1.geometry.asContours
-
-	define union : Boole TypoGeom.Boolean.ClipType.ctUnion
-	define intersection : Boole TypoGeom.Boolean.ClipType.ctIntersection
-	define difference : Boole TypoGeom.Boolean.ClipType.ctDifference
+	define [union] : impl TypoGeom.Boolean.ClipType.ctUnion [{}.slice.call arguments 0]
+	define [intersection] : impl TypoGeom.Boolean.ClipType.ctIntersection [{}.slice.call arguments 0]
+	define [difference] : impl TypoGeom.Boolean.ClipType.ctDifference [{}.slice.call arguments 0]
 
 	return [object union intersection difference]

@@ -2,6 +2,8 @@
 
 const Point = require("./point");
 const Transform = require("./transform");
+const CurveUtil = require("./curve-util");
+const TypoGeom = require("typo-geom");
 
 class GeometryBase {
 	asContours() {
@@ -132,7 +134,9 @@ class TransformedGeometry extends GeometryBase {
 		return result;
 	}
 	filterTag(fn) {
-		return new TransformedGeometry(this.m_geom.filterTag(fn), this.m_transform);
+		const e = this.m_geom.filterTag(fn);
+		if (!e) return null;
+		return new TransformedGeometry(e, this.m_transform);
 	}
 	isEmpty() {
 		return this.m_geom.isEmpty();
@@ -192,6 +196,62 @@ class CombineGeometry extends GeometryBase {
 	}
 }
 
+class BooleanGeometry extends GeometryBase {
+	constructor(operator, operands) {
+		super();
+		this.m_operator = operator;
+		this.m_operands = operands;
+		this.m_resolved = null;
+	}
+	asContours() {
+		if (this.m_resolved) return this.m_resolved;
+		this.m_resolved = this.asContoursImpl();
+		return this.m_resolved;
+	}
+	asContoursImpl() {
+		let arcs = CurveUtil.convertShapeToArcs(this.m_operands[0].asContours());
+		if (this.m_operands.length < 2) {
+			arcs = TypoGeom.Boolean.removeOverlap(
+				arcs,
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				CurveUtil.BOOLE_RESOLUTION
+			);
+		}
+		for (let j = 1; j < this.m_operands.length; j++) {
+			arcs = TypoGeom.Boolean.combine(
+				this.m_operator,
+				arcs,
+				CurveUtil.convertShapeToArcs(this.m_operands[j].asContours()),
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				TypoGeom.Boolean.PolyFillType.pftNonZero,
+				CurveUtil.BOOLE_RESOLUTION
+			);
+		}
+		const ctx = new CurveUtil.BezToContoursSink();
+		TypoGeom.ShapeConv.transferBezArcShape(arcs, ctx);
+		return ctx.contours;
+	}
+	asReferences() {
+		return null;
+	}
+	filterTag(fn) {
+		let filtered = [];
+		for (const operand of this.m_operands) {
+			const fp = operand.filterTag(fn);
+			if (fp) filtered.push(fp);
+		}
+		return new BooleanGeometry(this.m_operator, filtered);
+	}
+	isEmpty() {
+		for (const operand of this.m_operands) if (!operand.isEmpty()) return false;
+		return true;
+	}
+	measureComplexity() {
+		let s = 0;
+		for (const operand of this.m_operands) s += operand.measureComplexity();
+	}
+}
+
 function combineWith(a, b) {
 	if (a instanceof CombineGeometry) {
 		return a.with(b);
@@ -206,5 +266,6 @@ exports.ReferenceGeometry = ReferenceGeometry;
 exports.TaggedGeometry = TaggedGeometry;
 exports.TransformedGeometry = TransformedGeometry;
 exports.CombineGeometry = CombineGeometry;
+exports.BooleanGeometry = BooleanGeometry;
 
 exports.combineWith = combineWith;

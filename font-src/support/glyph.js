@@ -95,15 +95,15 @@ module.exports = class Glyph {
 		this.avoidBeingComposite = g.avoidBeingComposite;
 	}
 
-	combineGeometryImpl(g) {
+	includeGeometry(g) {
 		if (this.ctxTag) g = new Geom.TaggedGeometry(g, this.ctxTag);
 		this.geometry = Geom.combineWith(this.geometry, g);
 	}
 	includeGlyphImpl(g, shiftX, shiftY) {
 		if (g._m_identifier) {
-			this.combineGeometryImpl(new Geom.ReferenceGeometry(g, shiftX, shiftY));
+			this.includeGeometry(new Geom.ReferenceGeometry(g, shiftX, shiftY));
 		} else {
-			this.combineGeometryImpl(
+			this.includeGeometry(
 				new Geom.TransformedGeometry(g.geometry, Transform.Translate(shiftX, shiftY))
 			);
 		}
@@ -116,7 +116,7 @@ module.exports = class Glyph {
 			for (const z of contour) c.push(Point.translated(z, shiftX, shiftY));
 			parts.push(new Geom.ContourGeometry(c));
 		}
-		this.combineGeometryImpl(new Geom.CombineGeometry(parts));
+		this.includeGeometry(new Geom.CombineGeometry(parts));
 	}
 
 	applyTransform(tfm, alsoAnchors) {
