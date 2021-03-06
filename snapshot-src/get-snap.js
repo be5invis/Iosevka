@@ -21,8 +21,8 @@ app.on("window-all-closed", function () {
 
 function combineImages(images, outPath, width, height, doubleTrim) {
 	let command =
-		`magick ${images.join(" ")} -append -crop ${width}x${height} ` +
-		`+0+0 +repage -bordercolor #008000 -fuzz 5% -trim ` +
+		`magick ${images.join(" ")} -append -crop ${width}x${height}+0+0 ` +
+		`+repage -bordercolor #008000 -fuzz 5% -trim ` +
 		`${doubleTrim ? `-bordercolor ${doubleTrim} -trim` : ""} ${outPath}`;
 	console.log(command);
 	cp.exec(command, function (err, stdout, stderr) {
