@@ -14,6 +14,10 @@ module.exports = class Transform {
 		return new Transform(1, 0, 0, 1, 0, 0);
 	}
 
+	static Translate(x, y) {
+		return new Transform(1, 0, 0, 1, x, y);
+	}
+
 	apply(pt) {
 		return {
 			x: pt.x * this.xx + pt.y * this.yx + this.x,

@@ -4,6 +4,7 @@ const TypoGeom = require("typo-geom");
 const Point = require("./point");
 const Transform = require("./transform");
 
+exports.SPIRO_PRECISION = 1 / 2;
 exports.GEOMETRY_PRECISION = 1 / 4;
 exports.RECIP_GEOMETRY_PRECISION = 4;
 exports.BOOLE_RESOLUTION = 0x4000;
@@ -31,6 +32,18 @@ exports.OffsetCurve = class OffsetCurve {
 			x: (forward.x - backward.x) / (2 * DELTA),
 			y: (forward.y - backward.y) / (2 * DELTA)
 		};
+	}
+};
+
+exports.ReverseCurve = class ReverseCurve {
+	constructor(original) {
+		this.m_original = original;
+	}
+	eval(t) {
+		return this.m_original.eval(1 - t);
+	}
+	derivative(t) {
+		return -this.m_original.derivative(1 - t);
 	}
 };
 

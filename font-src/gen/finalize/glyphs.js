@@ -3,21 +3,13 @@
 const TypoGeom = require("typo-geom");
 const Point = require("../../support/point");
 const CurveUtil = require("../../support/curve-util");
+const util = require("util");
 
 module.exports = finalizeGlyphs;
 function finalizeGlyphs(para, glyphStore) {
-	suppressNaN(glyphStore);
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
 	regulateGlyphStore(skew, glyphStore);
 	return glyphStore;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-function suppressNaN(glyphStore) {
-	for (const g of glyphStore.glyphs()) {
-		if (g.geometry) g.geometry.suppressNaN();
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +20,7 @@ function regulateGlyphStore(skew, glyphStore) {
 		if (!regulateCompositeGlyph(glyphStore, g)) {
 			const cs = g.geometry.asContours();
 			g.clearGeometry();
-			for (const c of cs) g.geometry.addContour(c);
+			g.includeContours(cs, 0, 0);
 		}
 	}
 	for (const g of glyphStore.glyphs()) {
@@ -55,7 +47,7 @@ function regulateSimpleGlyph(g, skew) {
 	for (const contour of cs) for (const z of contour) z.x += z.y * skew;
 
 	g.clearGeometry();
-	for (const c of cs) g.geometry.addContour(c);
+	g.includeContours(cs, 0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -19,17 +19,11 @@ app.on("window-all-closed", function () {
 	checkQuit();
 });
 
-function combineImages(images, outfile, width, height, doubleTrim) {
+function combineImages(images, outPath, width, height, doubleTrim) {
 	let command =
-		"magick " +
-		images.join(" ") +
-		" -append -crop " +
-		width +
-		"x" +
-		height +
-		"+0+0 +repage -bordercolor #008000 -fuzz 5% -trim  " +
-		(doubleTrim ? "-bordercolor " + doubleTrim + " -trim " : "") +
-		outfile;
+		`magick ${images.join(" ")} -append -crop ${width}x${height}+0+0 ` +
+		`+repage -bordercolor #008000 -fuzz 5% -trim ` +
+		`${doubleTrim ? `-bordercolor ${doubleTrim} -trim` : ""} ${outPath}`;
 	console.log(command);
 	cp.exec(command, function (err, stdout, stderr) {
 		if (err) console.log(err);
@@ -112,6 +106,7 @@ app.on("ready", function () {
 		height: 1024 * zoom,
 		//x: 5000, y: 5000,
 		webPreferences: {
+			contextIsolation: false,
 			zoomFactor: zoom,
 			nodeIntegration: true,
 			backgroundThrottling: false
