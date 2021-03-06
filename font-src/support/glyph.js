@@ -177,11 +177,15 @@ module.exports = class Glyph {
 		if (g.baseAnchors) for (const k in g.baseAnchors) this.baseAnchors[k] = g.baseAnchors[k];
 	}
 	setBaseAnchor(id, x, y) {
+		if (isNaN(x - 0) || isNaN(y - 0)) throw new Error(`NaN found in anchor coord for ${id}`);
 		this.baseAnchors[id] = new Anchor(x, y).transform(this.gizmo);
 	}
 	setMarkAnchor(id, x, y, mbx, mby) {
+		if (isNaN(x - 0) || isNaN(y - 0)) throw new Error(`NaN found in anchor coord for ${id}`);
 		this.markAnchors[id] = new Anchor(x, y).transform(this.gizmo);
 		if (mbx != null && mby != null) {
+			if (isNaN(mbx - 0) || isNaN(mby - 0))
+				throw new Error(`NaN found in anchor coord for ${id}`);
 			this.baseAnchors[id] = new Anchor(mbx, mby).transform(this.gizmo);
 		}
 	}

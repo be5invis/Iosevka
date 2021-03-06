@@ -12,30 +12,44 @@ glyph-block Letter-Latin-Lower-I : begin
 	glyph-block-import Letter-Shared : CreateDottedComposition
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagonalTailR DiagonalTailStdDepth
 
+	glyph-block-export OverrideILMarks
+	define [OverrideILMarks df xMiddle yTop] : glyph-proc
+		set-base-anchor 'above' xMiddle yTop
+		set-base-anchor 'below' xMiddle 0
+		set-base-anchor 'overlay' xMiddle (yTop * OverlayPos)
+		set-base-anchor 'topright' (xMiddle + df.rightSB - df.middle) yTop
+
+	glyph-block-export OverrideILMarksSerifed
+	define [OverrideILMarksSerifed df xMiddle yTop] : glyph-proc
+		set-base-anchor 'above' xMiddle yTop
+		set-base-anchor 'below' xMiddle 0
+		set-base-anchor 'overlay' [mix df.middle xMiddle 0.5] (yTop * OverlayPos)
+		set-base-anchor 'topright' (xMiddle + df.rightSB - df.middle) yTop
+
 	### dotless i, i and iota
 	glyph-block-export IotaShape
 	define [IotaShape] : params [df top [addTopSerif false]] : glyph-proc
-		local middle : df.middle - [if addTopSerif 0 LBalance2]
+		local xMiddle : df.middle - [if addTopSerif 0 : IBalance2 df]
+		local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
 		local hd : FlatHookDepth df
-		set-base-anchor 'above' middle top
-		set-base-anchor 'below' middle 0
-		set-base-anchor 'overlay' middle (top * OverlayPos)
-		set-base-anchor 'topright' (middle + RightSB - Middle) top
 
 		if addTopSerif : include : tagged 'serifLT'
-			LeftwardTopSerif middle top (LongJut * df.div)
+			LeftwardTopSerif xMiddle top (LongJut * df.div)
 		include : dispiro
 			widths.center
-			flat middle top [heading Downward]
-			curl middle hd.y
+			flat xMiddle top [heading Downward]
+			curl xMiddle hd.y
 			arcvh.superness DesignParameters.tightHookSuperness
-			flat (middle + hd.x - HalfStroke * HVContrast) HalfStroke
-			curl (middle + [Math.max (hd.x - HalfStroke * HVContrast + 1) (LongJut * 1.05 * df.div)] + HalfStroke * TanSlope) HalfStroke
+			flat (xMiddle + hd.x - HalfStroke * HVContrast) HalfStroke
+			curl (xMiddle + [Math.max (hd.x - HalfStroke * HVContrast + 1) tailLength] + HalfStroke * TanSlope) HalfStroke
+		include : OverrideILMarks df xMiddle top
 
 	glyph-block-export ItalicDotlessIShape
 	define [ItalicDotlessIShape] : params [df top [addTopSerif false] [setMarks true]] : glyph-proc
+		local fine : AdviceStroke 3
 		local shift : (1 - df.div) * 0.2
-		local left : [mix SB df.rightSB ([StrokeWidthBlend 0.42 0.46] - shift)] - HalfStroke * HVContrast
+		local xBarMiddle : mix SB df.rightSB ([StrokeWidthBlend 0.42 0.46] - shift)
+		local left : xBarMiddle - HalfStroke * HVContrast
 		local right : mix SB df.rightSB (1.1 - shift)
 		local rightTerm : Math.max right (left + HookX + Stroke)
 		local middle : mix left right (0.55 * df.div)
@@ -44,32 +58,33 @@ glyph-block Letter-Latin-Lower-I : begin
 			flat left top [heading Downward]
 			curl left (SmallSmoothB * 0.8)
 			hookend O
-			g4   rightTerm (Hook * [StrokeWidthBlend 0.85 1] * df.div)
+			g4   rightTerm (Hook * [StrokeWidthBlend 0.85 1] * df.div) [widths.lhs fine]
 		if addTopSerif : include : dispiro
 			flat (left - (LongJut * df.div) + HalfStroke * HVContrast) top [widths 0 Stroke]
 			curl left top
-		if setMarks : begin
-			set-base-anchor 'above' (left + HalfStroke * HVContrast + [StrokeWidthBlend 0.25 0] * TanSlope * df.width) top
-			set-base-anchor 'below' middle 0
+
+		local xDot : xBarMiddle + [StrokeWidthBlend 0.25 0] * TanSlope * df.width
+		include : OverrideILMarks df xDot top
 
 	glyph-block-export TailedDotlessShape
-	define [TailedDotlessShape] : params [df top [xMiddle (df.middle - LBalance2)] [setMarks true] [hookScale 1] [addTopSerif false]] : glyph-proc
-		local x0 : mix HalfStroke (HalfStroke + (Hook - Stroke + 1) * 0.85 * df.div + LBalance2) hookScale
-		local x1 : mix HalfStroke ([Math.max (Hook - HalfStroke + 1) (LongJut * df.div)] + LBalance2) hookScale
+	define [TailedDotlessShape] : params [df top [setMarks true] [addTopSerif false]] : glyph-proc
+		local xMiddle : df.middle - [if addTopSerif 0 : IBalance2 df]
+		local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
+
+		local hookScaleX  : mix 1 df.div 0.5
+		local hookScaleY  : mix 1 df.div 1.25
+		local x0 : mix HalfStroke (HalfStroke + (Hook - Stroke + 1) * 0.85 * df.div + [IBalance2 df]) hookScaleX
+		local x1 : mix HalfStroke ([Math.max (Hook - HalfStroke + 1) tailLength] + [IBalance2 df]) hookScaleX
 		include : dispiro
 			widths.center
 			flat xMiddle top [heading Downward]
-			curl xMiddle [mix Stroke Hook hookScale]
-			arcvh
+			curl xMiddle [mix Stroke Hook hookScaleY]
+			arcvh 16
 			g4.right.mid (xMiddle + x0) (HalfStroke + O) [heading Rightward]
-			g4 (xMiddle + x1) (HalfStroke + (1 - 2 * hookScale) * O) [heading Rightward]
-		if setMarks : begin
-			set-base-anchor 'above' xMiddle top
-			set-base-anchor 'below' xMiddle 0
-			set-base-anchor 'overlay' xMiddle (top * OverlayPos)
-			set-base-anchor 'topright' (xMiddle + RightSB - Middle) top
+			g4 (xMiddle + x1) (HalfStroke + (1 - 2 * hookScaleY) * O) [heading Rightward]
 		if addTopSerif : begin
 			include : tagged 'serifLT' : LeftwardTopSerif xMiddle top (LongJut * df.div)
+		include : OverrideILMarks df xMiddle top
 
 	create-glyph 'dotlessi.straight' : glyph-proc
 		local df : DivFrame para.diversityI
@@ -78,12 +93,13 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : VBar (df.middle) 0 XH
 
 	create-glyph 'dotlessi.hooky' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
-		local balance : IBalance2 * df.div * df.div
-		include : VBar (df.middle + balance) 0 XH
-		include : LeftwardTopSerif (df.middle + balance) XH (LongJut * df.div)
+		local xMiddle : df.middle + [IBalance2 df]
+		include : OverrideILMarks df xMiddle XH
+		include : VBar xMiddle 0 XH
+		include : LeftwardTopSerif xMiddle XH (LongJut * df.div)
 
 	create-glyph 'dotlessi.zshaped' : glyph-proc
 		local df : DivFrame para.diversityI
@@ -102,18 +118,22 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : RightwardBottomSerif df.middle 0 (LongJut * df.div)
 
 	create-glyph 'dotlessi.hookyBottom' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
-		include : VBar (df.middle - LBalance2) 0 XH
-		include : RightwardBottomSerif (df.middle - LBalance2) 0 (LongJut * df.div)
+		local xMiddle : df.middle - [IBalance2 df]
+		include : OverrideILMarks df xMiddle XH
+		include : VBar xMiddle 0 XH
+		include : RightwardBottomSerif xMiddle 0 (LongJut * df.div)
 
 	create-glyph 'latn/Iota.hookyBottom' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.capital
-		include : VBar (df.middle - LBalance2) 0 CAP
-		include : RightwardBottomSerif (df.middle - LBalance2) 0 (LongJut * df.div)
+		local xMiddle : df.middle - [IBalance2 df]
+		include : OverrideILMarks df xMiddle CAP
+		include : VBar xMiddle 0 CAP
+		include : RightwardBottomSerif xMiddle 0 (LongJut * df.div)
 
 	create-glyph 'dotlessi.serifless' : glyph-proc
 		local df : DivFrame para.diversityII
@@ -125,7 +145,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.e
-		local balance : IBalance * df.div * df.div
+		local balance : IBalance df
+		include : OverrideILMarksSerifed df (df.middle + balance) XH
 		include : VBar (df.middle + balance) 0 XH
 		include : LeftwardTopSerif (df.middle + balance) XH (LongJut * df.div - balance)
 		include : RightwardBottomSerif df.middle 0 (LongJut * df.div)
@@ -135,7 +156,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.e
-		local balance : IBalance * df.div * df.div
+		local balance : IBalance df
+		include : OverrideILMarksSerifed df (df.middle + balance) XH
 		include : VBar (df.middle + balance) 0 XH
 		include : LeftwardTopSerif (df.middle + balance) XH
 			mix Jut ((LongJut * df.div) - balance) 0.5
@@ -143,23 +165,23 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : LeftwardBottomSerif df.middle 0 (LongJut * df.div)
 
 	create-glyph 'dotlessi.tailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
-		if para.isItalic
+		if (para.isItalic && para.diversityII >= (3 / 4))
 		: then : begin
-			include : ItalicDotlessIShape df XH (setMarks -- true) (addTopSerif -- false)
+			include : ItalicDotlessIShape df XH (addTopSerif -- false)
 		: else : begin
 			include : TailedDotlessShape df XH (addTopSerif -- false)
 
 	create-glyph 'grek/iota.tailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
 		include : TailedDotlessShape df XH (addTopSerif -- false)
 
 	create-glyph 'latn/Iota.tailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.capital
 		include : TailedDotlessShape df CAP (addTopSerif -- false)
@@ -168,9 +190,9 @@ glyph-block Letter-Latin-Lower-I : begin
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.e
-		if para.isItalic
+		if (para.isItalic && para.diversityI >= (3 / 4))
 		: then : begin
-			include : ItalicDotlessIShape df XH (setMarks -- true) (addTopSerif -- true)
+			include : ItalicDotlessIShape df XH (addTopSerif -- true)
 		: else : begin
 			include : TailedDotlessShape df XH (addTopSerif -- true)
 
@@ -187,13 +209,13 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : TailedDotlessShape df CAP (addTopSerif -- true)
 
 	create-glyph 'dotlessi.flatTailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
 		include : IotaShape df XH (addTopSerif -- false)
 
 	create-glyph 'latn/Iota.flatTailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.capital
 		include : IotaShape df CAP (addTopSerif -- false)
@@ -211,31 +233,27 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : IotaShape df CAP (addTopSerif -- true)
 
 	glyph-block-export DTailDotlessIShape
-	define [DTailDotlessIShape] : params [top [addTopSerif false]] : glyph-proc
-		local df : DivFrame para.diversityI
-		local middle : df.middle - [if addTopSerif 0 LBalance2]
-		set-base-anchor 'above' middle top
-		set-base-anchor 'below' middle 0
-		set-base-anchor 'overlay' middle (top * OverlayPos)
-		set-base-anchor 'topright' (middle + RightSB - Middle) top
+	define [DTailDotlessIShape] : params [df top [addTopSerif false]] : glyph-proc
+		local xMiddle : df.middle - [if addTopSerif 0 : IBalance2 df]
+		include : OverrideILMarks df xMiddle top
 		if addTopSerif : include : tagged 'serifLT'
-			LeftwardTopSerif middle top (LongJut * df.div)
+			LeftwardTopSerif xMiddle top (LongJut * df.div)
 		include : dispiro
 			widths.center
-			flat middle top [heading Downward]
-			DiagonalTailR df middle 0 [DiagonalTailStdDepth df Stroke] Stroke
+			flat xMiddle top [heading Downward]
+			DiagonalTailR df xMiddle 0 [DiagonalTailStdDepth df Stroke] Stroke
 
 	create-glyph 'dotlessi.diagonalTailed' : glyph-proc
-		local df : DivFrame para.diversityI
+		local df : DivFrame para.diversityII
 		set-width df.width
 		include : df.markSet.e
-		include : DTailDotlessIShape XH (addTopSerif -- false)
+		include : DTailDotlessIShape df XH (addTopSerif -- false)
 
 	create-glyph 'dotlessi.serifedDiagonalTailed' : glyph-proc
 		local df : DivFrame para.diversityI
 		set-width df.width
 		include : df.markSet.e
-		include : DTailDotlessIShape XH (addTopSerif -- true)
+		include : DTailDotlessIShape df XH (addTopSerif -- true)
 
 	select-variant 'dotlessi' 0x131
 	create-glyph 'iogonek.dotless' : glyph-proc
@@ -254,7 +272,7 @@ glyph-block Letter-Latin-Lower-I : begin
 	alias 'latn/iota' 0x269 'grek/iota'
 	select-variant 'latn/Iota' 0x196 (follow -- 'grek/iota')
 
-	turned 'turni' 0x1D09 'i' [lambda [] : this.advanceWidth / 2] (XH / 2) [MarkSet.p]
+	turned 'turni' 0x1D09 'i' HalfAdvance (XH / 2) [TurnMarks 'p']
 
 	with-related-glyphs 'cyrl/ghe.SRB' null 'dotlessi' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
