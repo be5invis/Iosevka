@@ -75,7 +75,8 @@ const RawPlans = computed(`metadata:raw-plans`, async target => {
 
 	if (fs.existsSync(PRIVATE_BUILD_PLANS)) {
 		const privateBP = await tryParseToml(PRIVATE_BUILD_PLANS);
-		Object.assign(bp.buildPlans, privateBP.buildPlans);
+		Object.assign(bp.buildPlans, privateBP.buildPlans || {});
+		Object.assign(bp.collectPlans, privateBP.collectPlans || {});
 		Object.assign(bp.buildOptions, privateBP.buildOptions || {});
 	}
 	return bp;
