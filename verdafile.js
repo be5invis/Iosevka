@@ -5,6 +5,7 @@ const build = require("verda").create();
 const which = require("which");
 const Path = require("path");
 const toml = require("@iarna/toml");
+const semver = require("semver");
 
 ///////////////////////////////////////////////////////////
 
@@ -49,10 +50,15 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const Version = oracle(`oracle:version`, async target => {
+const PackageJsonData = computed(`env::package-json-data`, async target => {
 	const [pj] = await target.need(sfu`package.json`);
 	const package_json = JSON.parse(await fs.promises.readFile(pj.full, "utf-8"));
-	return package_json.version;
+	return package_json;
+});
+
+const Version = computed(`env::version`, async target => {
+	const [pj] = await target.need(PackageJsonData);
+	return pj.version;
 });
 
 const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async target => {
@@ -61,6 +67,31 @@ const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async t
 	} catch (e) {
 		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
 	}
+});
+
+const InstalledVersion = computed.make(
+	(pkg, required) => `env::installed-version::${pkg}::${required}`,
+	async (target, pkg, required) => {
+		const [pj] = await target.need(sfu(`node_modules/${pkg}/package.json`));
+		const depPkg = JSON.parse(await fs.promises.readFile(pj.full));
+		if (!semver.satisfies(depPkg.version, required)) {
+			fail(
+				`Package version for ${pkg} is outdated:`,
+				`Required ${required}, Installed ${depPkg.version}`
+			);
+		}
+		return { name: pkg, actual: depPkg.version, required };
+	}
+);
+
+const Dependencies = computed("env::dependencies", async target => {
+	const [pj] = await target.need(PackageJsonData);
+	let subGoals = [];
+	for (const pkgName in pj.dependencies) {
+		subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
+	}
+	const [actual] = await target.need(subGoals);
+	return actual;
 });
 
 ///////////////////////////////////////////////////////////
@@ -243,9 +274,10 @@ function whyBuildPlanIsnNotThere(gid) {
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
+		await target.need(Scripts, Parameters, Dependencies);
 		const charMapDir = `${BUILD}/ttf/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.cm.gz`;
-		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir), Scripts);
+		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir));
 		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
 		await silently.node("font-src/index", { o: out.full, oCharMap: charMapPath, ...fi });
 	}
@@ -807,7 +839,7 @@ const Scripts = task("scripts", async target => {
 	let subGoals = [];
 	for (const js of jsFromPtlSet) subGoals.push(CompiledJs(js));
 	for (const js of jsList) if (!jsFromPtlSet.has(js)) subGoals.push(sfu(js));
-	await target.need(Parameters, subGoals);
+	await target.need(subGoals);
 });
 const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
