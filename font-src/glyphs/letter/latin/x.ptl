@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotRhs ShoulderMidKnotLhs
 	glyph-block-export HalfXStrand XStrand
 
 	define [HalfXStrand stb slab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
@@ -92,6 +93,38 @@ glyph-block Letter-Latin-X : begin
 		include : MarkSet.e
 		include : LowerXBase false
 		include : XMotionSerifs XH
+	create-glyph 'x.cursive' : glyph-proc
+		include : MarkSet.e
+
+		define [halfShape] : begin
+			define kThin 0.550
+			define swEnd : AdviceStroke 3
+			define swMid : AdviceStroke 3.125
+			define xCenterRight : Middle + HVContrast * swMid / 2 
+			define xCenterLeft  : Middle - HVContrast * swMid / 2 
+			define xTurn : mix (SB + swEnd * HVContrast) xCenterLeft 0.5
+			define hook1Depth : Hook + Stroke * 0.125
+			define hook1StraightDepth : Math.min
+				hook1Depth - swEnd * 1.125
+				hook1Depth / 3 - swEnd / 4
+
+			return : dispiro
+				flat (SB + OX) hook1Depth [widths.lhs.heading swEnd Downward]
+				curl (SB + OX) (hook1Depth - hook1StraightDepth) [heading Downward]
+				arcvh
+				ShoulderMidKnotLhs (xTurn) O (swMid * kThin) swEnd 1 1
+				archv
+				flat (xCenterLeft + HVContrast * swMid * kThin) SmoothA [widths.lhs : swMid * kThin]
+				curl (xCenterLeft + HVContrast * swMid * kThin) (XH - SmoothB)
+				arcvh
+				ShoulderMidKnotLhs (xTurn) (XH - O) (swMid * kThin) swEnd (-1) (-1)
+				archv
+				flat (SB + OX) (XH - hook1Depth + hook1StraightDepth) [heading Downward]
+				curl (SB + OX) (XH - hook1Depth) [heading Downward]
+		
+		include : halfShape
+		include : FlipAround Middle (XH / 2)
+		include : halfShape
 
 	define [ChiBase fStraight] : union
 		XStrand fStraight false SB Descender RightSB XH 0.05 0.4 0.11
