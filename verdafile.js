@@ -379,7 +379,8 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 	const glyfTtcComposition = {},
 		ttcComposition = {},
 		ttcContents = {},
-		groupDecomposition = {};
+		groupDecomposition = {},
+		groupInRelease = {};
 	for (const collectPrefix in rawCollectPlans) {
 		const groupFileList = new Set();
 		const collect = rawCollectPlans[collectPrefix];
@@ -418,8 +419,9 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 		}
 		ttcContents[collectPrefix] = [...groupFileList];
 		groupDecomposition[collectPrefix] = [...collect.from];
+		groupInRelease[collectPrefix] = !!collect.release;
 	}
-	return { glyfTtcComposition, ttcComposition, ttcContents, groupDecomposition };
+	return { glyfTtcComposition, ttcComposition, ttcContents, groupDecomposition, groupInRelease };
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
@@ -724,6 +726,7 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 	const [{ buildPlans }] = await t.need(BuildPlans);
 	let releaseNoteGroups = {};
 	for (const [k, g] of Object.entries(collectPlans.groupDecomposition)) {
+		if (!collectPlans.groupInRelease[k]) continue;
 		const primePlan = buildPlans[g[0]];
 		let subGroups = {};
 		for (const gr of g) {
@@ -771,6 +774,7 @@ phony(`release`, async target => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, subGroups] of Object.entries(collectPlans.groupDecomposition)) {
+		if (!collectPlans.groupInRelease[cgr]) continue;
 		goals.push(TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version));
 		for (const gr of subGroups) {
 			goals.push(

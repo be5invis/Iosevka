@@ -791,8 +791,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `k`:
     + `k = 'straight'`, `cv36 = 1`: `k` with standard shape (default for Upright).
     + `k = 'curly'`, `cv36 = 2`: Slightly curly `k`, like Iosevka 2.x.
-    + `k = 'cursive'`, `cv36 = 3`: `k` with a cursive loop (default for Italic).
-    + `k = 'diagonal-tailed-cursive'`, `cv36 = 4`: `k` with a cursive loop and diagonal tail.
+    + `k = 'cursive'`, `cv36 = 3`: `k` with a cursive loop (default for Sans Italic).
+    + `k = 'diagonal-tailed-cursive'`, `cv36 = 4`: `k` with a cursive loop and diagonal tail (default for Slab Italic).
     + `k = 'symmetric-touching'`, `cv36 = 5`: `k` with symmetric legs disconnected to the vertical bar.
     + `k = 'symmetric-connected'`, `cv36 = 6`: `k` with symmetric legs connected to the vertical bar.
     + `k = 'straight-motion-serifed'`, `cv36 = 7`: `k` with motion serifs.
@@ -919,10 +919,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `w = 'straight-asymmetric-motion-serifed'`, `cv47 = 11`: Straight `w` looks asymmetric, with motion serifs.
     + `w = 'cursive-motion-serifed'`, `cv47 = 12`: Cursive `w` with motion serifs.
   - Styles for `x`:
-    + `x = 'straight'`, `cv48 = 1`: Standard, straight `X` (default).
-    + `x = 'curly'`, `cv48 = 2`: Slightly curly `X`, like Iosevka 2.x.
-    + `x = 'straight-motion-serifed'`, `cv48 = 3`: Standard, straight `X` with motion serifs.
-    + `x = 'curly-motion-serifed'`, `cv48 = 4`: Slightly curly `X`, like Iosevka 2.x, with motion serifs.
+    + `x = 'straight'`, `cv48 = 1`: Standard, straight `x` (default for Sans Upright, Sans Italic, Slab Upright).
+    + `x = 'curly'`, `cv48 = 2`: Slightly curly `x`, like Iosevka 2.x.
+    + `x = 'straight-motion-serifed'`, `cv48 = 3`: Standard, straight `x` with motion serifs.
+    + `x = 'curly-motion-serifed'`, `cv48 = 4`: Slightly curly `x`, like Iosevka 2.x, with motion serifs.
+    + `x = 'cursive'`, `cv48 = 5`: Cursive `x` (default for Slab Italic).
   - Styles for `y`:
     + `y = 'straight'`, `cv49 = 1`: Letter `y` that is fully straight (default for Sans Upright).
     + `y = 'straight-turn'`, `cv49 = 2`: Letter `y` with straight upper and a tail turns leftward (default for Slab Upright).
@@ -937,7 +938,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `y = 'cursive-motion-serifed'`, `cv49 = 11`: Cursive-like `y`, with motion serifs.
     + `y = 'cursive-flat-hook-motion-serifed'`, `cv49 = 12`: Cursive-like `y` with flat terminal hook, and motion serifs.
   - Styles for `z`:
-    + `z = 'standard'`, `cv50 = 1`: Standard `z` (default).
+    + `z = 'standard'`, `cv50 = 1`: Standard `z` (default for Sans Upright, Sans Italic, Slab Upright).
     + `z = 'with-crossbar'`, `cv50 = 2`: Standard `z` with a diagonal cross bar for better dsitinction with `2`.
     + `z = 'with-horizontal-crossbar'`, `cv50 = 3`: Standard `z` with a horizontal cross bar for better dsitinction with `2`.
     + `z = 'curly'`, `cv50 = 4`: Curly `z`.
@@ -947,6 +948,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `z = 'curly-motion-serifed'`, `cv50 = 8`: Curly `z` with motion serifs at bottom.
     + `z = 'top-motion-serifed'`, `cv50 = 9`: Standard `z` with motion serifs at top.
     + `z = 'curly-top-motion-serifed'`, `cv50 = 10`: Curly `z` with motion serifs at top.
+    + `z = 'cursive'`, `cv50 = 11`: Cursive `z` (default for Slab Italic).
+    + `z = 'cursive-with-crossbar'`, `cv50 = 12`: Cursive `z` with a diagonal cross bar for better dsitinction with `2`.
+    + `z = 'cursive-with-horizontal-crossbar'`, `cv50 = 13`: Cursive `z` with a horizontal cross bar for better dsitinction with `2`.
   - Styles for `ß` (Eszet):
     + `eszet = 'traditional'`, `cv51 = 1`: Traditional, Fraktur-like Eszet (`ß`).
     + `eszet = 'traditional-tailed'`, `cv51 = 2`: Traditional, Fraktur-like Eszet (`ß`).
