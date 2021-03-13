@@ -95,6 +95,62 @@ glyph-block Letter-Latin-Z : begin
 		include : XStrand false SLAB SB 0 RightSB XH 0.125 0.4 0.36
 		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
 
+	define [SmallZCursiveShape] : glyph-proc
+		include : MarkSet.e
+
+		define hookTerminalWidth : AdviceStroke 3.5
+		define xDiagWidth : 1 * Stroke
+		define yFootHeight : Math.max (0.15 * XH) (Stroke * 0.625)
+		define kFoot : 1 + 0.5 * Stroke / yFootHeight
+		define yHookDepth : Hook + Stroke * 0.25
+		define yHookStraightDepth : Math.min (yHookDepth - Stroke * 1.1) (yHookDepth / 3 - Stroke / 4)
+		define xHookDepth : Math.max (0.2 * (RightSB - SB)) (hookTerminalWidth * 1.375)
+		define xMockTailDepth : Math.max (0.375 * (RightSB - SB)) (hookTerminalWidth * 1.375)
+		define kTop 0.625
+		define kBot 0.625
+		define yTailDepth : Hook * 0.5
+
+		include : tagged 'strokeTop' : intersection
+			spiro-outline 
+				corner SB 0
+				corner (-Width) 0
+				corner (-Width) (2 * XH)
+				corner (RightSB - xDiagWidth) (2 * XH)
+				corner (RightSB - xDiagWidth) (XH - yFootHeight)
+			dispiro
+				flat (SB + 2 * O) (XH - yHookDepth) [widths.rhs.heading hookTerminalWidth Upward]
+				curl (SB + 2 * O) (XH - yHookDepth + yHookStraightDepth) [heading Upward]
+				arcvh
+				g2.right.mid (SB + xHookDepth) (XH - O) [widths.rhs.heading Stroke Rightward]
+				flat [mix (SB + xMockTailDepth) RightSB kTop] (XH - kTop * yTailDepth)
+				curl RightSB                                  (XH - yTailDepth)
+
+		include : spiro-outline
+			corner SB 0
+			corner SB (kFoot * yFootHeight)
+			corner (RightSB - xDiagWidth) (XH - yFootHeight)
+			corner (RightSB - xDiagWidth) XH
+			corner RightSB XH
+			corner RightSB (XH - kFoot * yFootHeight)
+			corner (SB + xDiagWidth) yFootHeight
+			corner (SB + xDiagWidth) 0
+		
+		include : tagged 'strokeBottom' : intersection
+			spiro-outline 
+				corner (SB + xDiagWidth) yFootHeight
+				corner (SB + xDiagWidth) (-XH)
+				corner (2 * Width) (-XH)
+				corner (2 * Width) (XH)
+				corner RightSB XH
+			
+			dispiro
+				flat (RightSB - 2 * O) yHookDepth [widths.rhs.heading hookTerminalWidth Downward]
+				curl (RightSB - 2 * O) (yHookDepth - yHookStraightDepth) [heading Downward]
+				arcvh
+				g2.left.mid (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
+				flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
+				curl SB                                   (yTailDepth)
+	
 	create-glyph 'z.standard' : glyph-proc
 		include : SmallZBaseShape
 		include : ZStdSerifs XH
@@ -129,6 +185,14 @@ glyph-block Letter-Latin-Z : begin
 	create-glyph 'z.curlyTopMotionSerifed' : glyph-proc
 		include : SmallZCurlyShape
 		include : ZMotionSerifsT XH
+	create-glyph 'z.cursive' : glyph-proc
+		include : SmallZCursiveShape
+	create-glyph 'z.cursiveWithHorizontalCrossBar' : glyph-proc
+		include : SmallZCursiveShape
+		include : refer-glyph 'barOver'
+	create-glyph 'z.cursiveWithCrossBar' : glyph-proc
+		include : SmallZCursiveShape
+		include : refer-glyph 'antiSlashOver'
 
 	select-variant 'Z' 'Z'
 	select-variant 'z' 'z'

@@ -299,6 +299,8 @@ glyph-block Letter-Shared-Shapes : begin
 		VBarRight cx (cy - hookY + O * 2) cy sw
 		VerticalHook (cx - sw / 2 * HVContrast) cy hookX (-hookY) sw
 
+	define DiagTailDefaultAngle 40
+
 	glyph-block-export DiagonalTailStdDepth
 	define [DiagonalTailStdDepth df sw] : Math.max (0.5 * sw)
 		df.div * [Math.hypot HookX Hook] - 0.25 * sw
@@ -307,30 +309,38 @@ glyph-block Letter-Shared-Shapes : begin
 	define [DiagonalTailInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
 
 	glyph-block-export DiagonalTailF
-	define [DiagonalTailF sign df cx cy depth sw] : begin
+	define [DiagonalTailF sign df cx cy angle depth sw] : begin
+		define tailAngle : angle / 180 * Math.PI
+		define sinAngle : Math.sin tailAngle
+		define cosAngle : Math.cos tailAngle
+
 		define mocFine : [AdviceStroke 3] / Stroke * sw
 		define mocSwMid : mix sw mocFine (2 / 3)
 		define fine : mocFine / [mix 1 HVContrast 0.375]
 		define swMid : mix sw fine 0.7
-		define rInY : DiagonalTailInnerRadius
-		define rInX : 1 * rInY
-		define InvSqrt2 : 1 / [Math.sqrt 2]
-		define dxTurn : 0.5 * sw * HVContrast + rInX * df.div
-		define dxTurnObl : if (sign > 0) (-0.75 * TanSlope * rInY) 0
+		define rIn : DiagonalTailInnerRadius
+		define rTurn : rIn + 0.5 * mocFine
+
+		define dxTurn : 0.5 * sw * HVContrast + rIn * df.div
+		define dxTurnObl : if (sign > 0) (-0.75 * TanSlope * rIn) 0
 		define dyTurn : 0.5 * mocSwMid
-		define dxTailStart : dxTurn + InvSqrt2 * rInX + InvSqrt2 * 0.5 * mocFine * HVContrast
-		define dyTailStart : dyTurn + (1 - InvSqrt2 + [if (sign > 0) 0 (TanSlope)]) * (0.5 * mocFine + rInY)
-		define dxyDepth : (depth - 0.5 * sw) * InvSqrt2
+		define dxTailStart : dxTurn + sinAngle * rTurn
+		define dyTailStart : dyTurn + (1 - cosAngle + [if (sign > 0) 0 (TanSlope)]) * rTurn
+		define dxDepth : (depth - 0.5 * sw) * cosAngle
+		define dyDepth : (depth - 0.5 * sw) * sinAngle
 		return : list
-			g2
+			g2.[if (sign > 0) "right" "left"].mid
 				cx + sign * dxTurn + dxTurnObl
 				cy + O + dyTurn
 				if (sign > 0)
 					widths.center.heading swMid Rightward
 					widths.center.heading swMid Leftward
-			if (sign > 0) [alsoThru.g2 0.541 (1 - 0.76) [widths.center : mix swMid fine 0.52]] {}
+			if (sign <= 0) {} : alsoThru.g2
+				[Math.sin (tailAngle / 2)] / [Math.sin tailAngle]
+				(1 - [Math.cos (tailAngle / 2)]) / (1 - [Math.cos tailAngle])
+				widths.center : mix swMid fine (1 / 2)
 			flat (cx + sign * dxTailStart) (cy + O + dyTailStart) [widths.center fine]
-			curl (cx + sign * dxTailStart + sign * dxyDepth) (cy + O + dyTailStart + dxyDepth)
+			curl (cx + sign * dxTailStart + sign * dxDepth) (cy + O + dyTailStart + dyDepth)
 
 	glyph-block-export DiagonalTailR
 	define [DiagonalTailR df cx cy depth sw] : begin
@@ -338,7 +348,7 @@ glyph-block Letter-Shared-Shapes : begin
 		return : list
 			curl cx (cy + sw + rInY)
 			arcvh 8
-			DiagonalTailF (+1) df cx cy depth sw
+			DiagonalTailF (+1) df cx cy DiagTailDefaultAngle depth sw
 
 	glyph-block-export DiagonalTailL
 	define [DiagonalTailL df cx cy depth sw] : begin
@@ -346,4 +356,4 @@ glyph-block Letter-Shared-Shapes : begin
 		return : list
 			curl cx (cy + sw + rInY)
 			arcvh 8
-			DiagonalTailF (-1) df cx cy depth sw
+			DiagonalTailF (-1) df cx cy DiagTailDefaultAngle depth sw

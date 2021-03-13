@@ -1,5 +1,13 @@
 ## Modifications since version 2.x
 
+### 5.0.6
+
+ * Fix incorrect serif shape for motion-serifed `m` under semi-proportional subfamilies.
+ * Add cursive variant for `x` and `z` (#852).
+ * Slab will now use more cursive variants for `k`, `x` and `z`.
+ * `ss15` and `ss17` are updated to use latest cursive variants (#852).
+
+
 ### 5.0.5
 
  * The variants of Aile is now chosen to better reflect a Neo-Grotesque fashion (#903).
