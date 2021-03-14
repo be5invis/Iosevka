@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.0.8
+
+ * Fix metrics of Latin Small Letter M with Hook in Aile (`U+0271`).
+ * Fix broken shape of of Latin Small Letter L with Retroflex Hook (`U+026D`).
+
+
 ### 5.0.7
 
  * Fix width of `cyrl/sha.italic.tailed` and `cyrl/sha.italic.motionSerifedTailed` (#909).
