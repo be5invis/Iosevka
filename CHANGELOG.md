@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.0.7
+
+ * Fix width of `cyrl/sha.italic.tailed` and `cyrl/sha.italic.motionSerifedTailed` (#909).
+ * Optimize geometry for Comma for better legibility (#912).
+
+
 ### 5.0.6
 
  * Fix incorrect serif shape for motion-serifed `m` under semi-proportional subfamilies.
