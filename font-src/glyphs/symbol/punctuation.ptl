@@ -349,27 +349,79 @@ glyph-block Symbol-Punctuation-Small : begin
 	create-glyph 'xhPeriod' : DotAt Middle (XH - PeriodRadius) (PeriodRadius - O)
 	create-glyph 'xhDot' : DotAt Middle (XH - DotRadius) (DotRadius - O)
 
+	define [CommaShapeT cx cy gp] : new-glyph : glyph-proc
+		set currentGlyph.gizmo [Translate 0 0]
+		include gp
+		local {.x mx1 .y my1} : GlobalTransform.apply {.x cx .y cy}
+		include : Translate (mx1) (my1)
+
 	create-glyph 'comma' ',' : glyph-proc
 		set-width Width
-		include : refer-glyph "period"
-		local sw : Math.min Stroke (PeriodSize * 0.5)
-		include : dispiro
-			widths.rhs sw
-			g4 (Middle + PeriodRadius - O) [mix O (PeriodSize - O) 0.5]
-			g4 (Middle + PeriodRadius - O + 0.1 * TanSlope) ([mix O (PeriodSize - O) 0.5] - 0.1)
-			quadcontrols (0.9 * TanSlope * Descender / (1.7 * PeriodRadius - O)) 0.5 12
-			g4 [mix Middle (Middle - PeriodRadius) 0.3] Descender
+		include : CommaShapeT Middle 0 : glyph-proc
+			local r : PeriodRadius + 0
+			local ro : PeriodRadius - O
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * 0.5)
+			local commaOverflow : PeriodRadius - swEnd * 0.5
+			local rFill : ro - sw / 4
+			include : union
+				spiro-outline
+					g4 rFill rFill
+					arcvh
+					g4 0 0
+					archv
+					g4 (-rFill) rFill
+					arcvh
+					g4 0 (2 * rFill)
+					archv
+					close
+				dispiro
+					g4 r r [widths.rhs (sw / 4)]
+					arcvh
+					g4 0 O [widths.rhs (sw / 2)]
+					archv
+					g4 (-ro) r
+					arcvh
+					g4 0 (r + ro)
+					archv
+					g4 ro r [widths.rhs sw]
+					quadcontrols (0 + TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
 
 	create-glyph 'invertComma' : glyph-proc
 		include : refer-glyph "period"
 
-		local sw : Math.min Stroke (PeriodSize * 0.5)
-		include : dispiro
-			widths.lhs sw
-			g4 (Middle - PeriodRadius + O) [mix O (PeriodSize - O) 0.5]
-			g4 (Middle - PeriodRadius + O + 0.1 * TanSlope) ([mix O (PeriodSize - O) 0.5] - 0.1)
-			quadcontrols (-0.3 * TanSlope * Descender / ((1.3 + TanSlope * 2) * PeriodRadius - O)) 0.5 12
-			g4 [mix Middle (Middle + PeriodRadius) (0.3 + TanSlope * 2)] Descender
+		set-width Width
+		include : CommaShapeT Middle 0 : glyph-proc
+			local r : PeriodRadius + 0
+			local ro : PeriodRadius - O
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * 0.5)
+			local commaOverflow : PeriodRadius - swEnd * 0.5
+			local rFill : ro - sw / 4
+			include : union
+				spiro-outline
+					g4 rFill rFill
+					arcvh
+					g4 0 0
+					archv
+					g4 (-rFill) rFill
+					arcvh
+					g4 0 (2 * rFill)
+					archv
+					close
+				dispiro
+					g4 (-r) r [widths.lhs (sw / 4)]
+					arcvh
+					g4 0 O [widths.lhs (sw / 2)]
+					archv
+					g4 (ro) r
+					arcvh
+					g4 0 (r + ro)
+					archv
+					g4 (-ro) r [widths.lhs sw]
+					quadcontrols (0 - TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
 
 	create-glyph 'colon' ':' : glyph-proc
 		include : refer-glyph "period"
