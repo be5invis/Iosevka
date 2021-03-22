@@ -713,9 +713,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `b = 'toothless-rounded-motion-serifed'`, `cv27 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
   - Styles for `c`:
     + `c = 'serifless'`, `cv28 = 1`: Serifless `c` (default for Sans).
-    + `c = 'unilateral-serifed'`, `cv28 = 2`: `c` with serif at top (default for Slab).
+    + `c = 'unilateral-serifed'`, `cv28 = 2`: `c` with serif at top (default for Slab Upright).
     + `c = 'bilateral-serifed'`, `cv28 = 3`: `c` with serifs at both top and bottom.
-    + `c = 'unilateral-inward-serifed'`, `cv28 = 4`: `c` with inward serif at top.
+    + `c = 'unilateral-inward-serifed'`, `cv28 = 4`: `c` with inward serif at top (default for Slab Italic).
     + `c = 'bilateral-inward-serifed'`, `cv28 = 5`: `c` with inward serif at both top and bottom.
   - Styles for `d`:
     + `d = 'toothed'`, `cv29 = 1`: `d` with bottom-right tooth (default for Upright).
@@ -762,8 +762,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `g = 'single-storey-earless-rounded-flat-hook'`, `cv32 = 9`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
     + `g = 'single-storey-motion-serifed-flat-hook'`, `cv32 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
   - Styles for `h`:
-    + `h = 'straight'`, `cv33 = 1`: `h` with straight ending (default).
-    + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending.
+    + `h = 'straight'`, `cv33 = 1`: `h` with straight ending (default for Sans Upright, Sans Italic, Slab Upright).
+    + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending (default for Slab Italic).
     + `h = 'straight-motion-serifed'`, `cv33 = 3`: `h` with straight ending.
     + `h = 'motion-serifed-tailed'`, `cv33 = 4`: `h` with curly tailed ending.
   - Styles for `i`:
@@ -815,9 +815,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'diagonal-tailed'`, `cv37 = 11`: `l` with diagonal tail.
     + `l = 'serifed-diagonal-tailed'`, `cv37 = 12`: `l` with top serif and diagonal tail.
   - Styles for `m`:
-    + `m = 'normal'`, `cv38 = 1`: `m` with normal middle leg, touching the baseline (default).
+    + `m = 'normal'`, `cv38 = 1`: `m` with normal middle leg, touching the baseline (default for Sans Upright, Sans Italic, Slab Upright).
     + `m = 'short-leg'`, `cv38 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
-    + `m = 'tailed'`, `cv38 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
+    + `m = 'tailed'`, `cv38 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail (default for Slab Italic).
     + `m = 'short-leg-tailed'`, `cv38 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
     + `m = 'earless-corner-double-arch'`, `cv38 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
     + `m = 'earless-corner-double-arch-short-leg'`, `cv38 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
@@ -836,8 +836,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `m = 'motion-serifed-tailed'`, `cv38 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
     + `m = 'short-leg-motion-serifed-tailed'`, `cv38 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
   - Styles for `n`:
-    + `n = 'straight'`, `cv39 = 1`: `n` with straight ending (default).
-    + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail.
+    + `n = 'straight'`, `cv39 = 1`: `n` with straight ending (default for Sans Upright, Sans Italic, Slab Upright).
+    + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail (default for Slab Italic).
     + `n = 'earless-corner-straight'`, `cv39 = 3`: Earless (corner top-left) `n` with straight ending.
     + `n = 'earless-corner-tailed'`, `cv39 = 4`: Earless (corner top-left) `n` with a curly tail.
     + `n = 'earless-rounded-straight'`, `cv39 = 5`: Earless (rounded top-left) `n` with straight ending.
@@ -878,9 +878,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `s`:
     + `s = 'serifless'`, `cv43 = 1`: Serifless `s` (default for Sans).
     + `s = 'unilateral-serifed'`, `cv43 = 2`: `s` with single serif at top.
-    + `s = 'bilateral-serifed'`, `cv43 = 3`: `s` with serifs at both end (default for Slab).
+    + `s = 'bilateral-serifed'`, `cv43 = 3`: `s` with serifs at both end (default for Slab Upright).
     + `s = 'unilateral-inward-serifed'`, `cv43 = 4`: `s` with single inward serif at top.
-    + `s = 'bilateral-inward-serifed'`, `cv43 = 5`: `s` with inward serifs at both end.
+    + `s = 'bilateral-inward-serifed'`, `cv43 = 5`: `s` with inward serifs at both end (default for Slab Italic).
   - Styles for `t`:
     + `t = 'standard'`, `cv44 = 1`: Standard `t` shape (default).
     + `t = 'cross'`, `cv44 = 2`: Futura-like `t` shape.
@@ -899,20 +899,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `u = 'toothless-corner-motion-serifed'`, `cv45 = 7`: Toothless (corner bottom-right) `u` with motion serifs.
     + `u = 'toothless-rounded-motion-serifed'`, `cv45 = 8`: Toothless (rounded) `u` with motion serifs.
   - Styles for `v`:
-    + `v = 'straight'`, `cv46 = 1`: Standard, straight `v` (default).
+    + `v = 'straight'`, `cv46 = 1`: Standard, straight `v` (default for Sans Upright, Sans Italic, Slab Upright).
     + `v = 'curly'`, `cv46 = 2`: Slightly curly `v`, like Iosevka 2.x.
     + `v = 'cursive'`, `cv46 = 3`: Cursive `v`.
-    + `v = 'straight-motion-serifed'`, `cv46 = 4`: Standard, straight `v`, with motion serifs.
+    + `v = 'straight-motion-serifed'`, `cv46 = 4`: Standard, straight `v`, with motion serifs (default for Slab Italic).
     + `v = 'curly-motion-serifed'`, `cv46 = 5`: Slightly curly `v`, like Iosevka 2.x, with motion serifs.
     + `v = 'cursive-serifed'`, `cv46 = 6`: Cursive `v` with motion serifs.
   - Styles for `w`:
-    + `w = 'straight'`, `cv47 = 1`: Standard, straight `w` (default).
+    + `w = 'straight'`, `cv47 = 1`: Standard, straight `w` (default for Sans Upright, Sans Italic, Slab Upright).
     + `w = 'curly'`, `cv47 = 2`: Slightly curly `w`, like Iosevka 2.x.
     + `w = 'straight-flat-top'`, `cv47 = 3`: Standard, straight `w`, and the middle is forced to be aligned the top.
     + `w = 'straight-double-v'`, `cv47 = 4`: Straight `w` looks like double V.
     + `w = 'straight-asymmetric'`, `cv47 = 5`: Straight `w` looks asymmetric.
     + `w = 'cursive'`, `cv47 = 6`: Cursive `w`.
-    + `w = 'straight-motion-serifed'`, `cv47 = 7`: Standard, straight `w`, with motion serifs.
+    + `w = 'straight-motion-serifed'`, `cv47 = 7`: Standard, straight `w`, with motion serifs (default for Slab Italic).
     + `w = 'curly-motion-serifed'`, `cv47 = 8`: Slightly curly `w`, like Iosevka 2.x, with motion serifs.
     + `w = 'straight-flat-top-motion-serifed'`, `cv47 = 9`: Standard, straight `w`, and the middle is forced to be aligned the top, with motion serifs.
     + `w = 'straight-double-v-motion-serifed'`, `cv47 = 10`: Straight `w` looks like double V, with motion serifs.
@@ -983,8 +983,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `lower-iota = 'flat-tailed'`, `cv57 = 5`: Greek lower Iota (`ι`) with a curly-then-flat tail.
     + `lower-iota = 'serifed-flat-tailed'`, `cv57 = 6`: Greek lower Iota (`ι`) with top serif and a curly-then-flat tail (default).
   - Styles for `λ` (Greek small Lambda):
-    + `lower-lambda = 'straight'`, `cv58 = 1`: More-straight Greek small Lambda (`λ`) (default).
-    + `lower-lambda = 'straight-turn'`, `cv58 = 2`: Greek small Lambda (`λ`) with straight upper and a tail turns leftward.
+    + `lower-lambda = 'straight'`, `cv58 = 1`: More-straight Greek small Lambda (`λ`) (default for Sans Upright, Sans Italic, Slab Italic).
+    + `lower-lambda = 'straight-turn'`, `cv58 = 2`: Greek small Lambda (`λ`) with straight upper and a tail turns leftward (default for Slab Upright).
     + `lower-lambda = 'curly'`, `cv58 = 3`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
     + `lower-lambda = 'curly-turn'`, `cv58 = 4`: More curly Greek small Lambda (`λ`), like Iosevka 2.x, with a tail turns leftward.
   - Styles for `к` (Cyrillic Ka):

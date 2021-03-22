@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.0.9
+
+ * Fix missing serif of cursive `w` in Slab.
+ * Refine geometry of cursive `x` (#917).
+
+
 ### 5.0.8
 
  * Fix metrics of Latin Small Letter M with Hook in Aile (`U+0271`).
