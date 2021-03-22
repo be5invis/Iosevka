@@ -102,7 +102,7 @@ class FairizedShapeSink {
 		this.lastContour.push(z);
 	}
 	arcTo(arc, x, y) {
-		const offPoints = TypoGeom.Quadify.auto(arc, 1, 16);
+		const offPoints = TypoGeom.Quadify.auto(arc, 1, 8);
 		if (offPoints) {
 			for (const z of offPoints)
 				this.lastContour.push(

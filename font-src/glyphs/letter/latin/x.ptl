@@ -9,7 +9,8 @@ glyph-module
 glyph-block Letter-Latin-X : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotRhs ShoulderMidKnotLhs
+	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailF
 	glyph-block-export HalfXStrand XStrand
 
 	define [HalfXStrand stb slab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
@@ -103,28 +104,33 @@ glyph-block Letter-Latin-X : begin
 			define kThin 0.550
 			define swEnd : AdviceStroke 3
 			define swMid : AdviceStroke 3.125
-			define xCenterRight : Middle + HVContrast * swMid / 2 
-			define xCenterLeft  : Middle - HVContrast * swMid / 2 
-			define xTurn : mix (SB + swEnd * HVContrast) xCenterLeft 0.5
+			define xCenterRight : Middle + HVContrast * swMid / 2
+			define xCenterLeft  : Middle - HVContrast * swMid / 2
+			define xTurn : mix (RightSB - swEnd * HVContrast) xCenterRight 0.5
 			define hook1Depth : Hook + Stroke * 0.125
 			define hook1StraightDepth : Math.min
 				hook1Depth - swEnd * 1.125
 				Math.max 1 : hook1Depth / 5 - swEnd / 4
 
-			return : dispiro
-				flat (SB + OX) hook1Depth [widths.lhs.heading swEnd Downward]
-				curl (SB + OX) (hook1Depth - hook1StraightDepth) [heading Downward]
-				arcvh 16
-				ShoulderMidKnotLhs (xTurn) O (swMid * kThin) swEnd 1 1
-				archv 16
-				flat (xCenterLeft + HVContrast * swMid * kThin) sma [widths.lhs : swMid * kThin]
-				curl (xCenterLeft + HVContrast * swMid * kThin) (XH - smb)
-				arcvh 16
-				ShoulderMidKnotLhs (xTurn) (XH - O) (swMid * kThin) swEnd 1 (-1)
-				archv 16
-				flat (SB + OX) (XH - hook1Depth + hook1StraightDepth) [heading Downward]
-				curl (SB + OX) (XH - hook1Depth) [heading Downward]
-		
+			define fineMid : swMid * kThin
+			define rIn : Math.max (0.2 * (RightSB - SB) - 0.7 * Stroke * HVContrast) [AdviceStroke 16]
+			define flatHookDepth : 0.7 * (RightSB - SB) - swEnd - 1.5 * rIn
+
+			return : union
+				dispiro
+					curl (RightSB - OX) (XH - hook1Depth) [widths.lhs.heading swEnd Upward]
+					flat (RightSB - OX) (XH - hook1Depth + hook1StraightDepth) [heading Upward]
+					arcvh 16
+					ShoulderMidKnotLhsRev (xTurn) (XH - O) fineMid swEnd (-1) (-1)
+					archv 16
+					flat (xCenterRight - HVContrast * fineMid) (XH - sma) [widths.lhs fineMid]
+					curl (xCenterRight - HVContrast * fineMid) (XH / 2 + O)
+				dispiro
+					flat (xCenterRight - 0.5 * HVContrast * fineMid) (XH / 2 - O) [widths.center fineMid]
+					curl (xCenterRight - 0.5 * HVContrast * fineMid) [Math.min smb (swMid + rIn)]
+					arcvh 16
+					DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) 0 rIn 50 flatHookDepth Stroke
+
 		include : halfShape
 		include : FlipAround Middle (XH / 2)
 		include : halfShape
