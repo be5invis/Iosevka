@@ -1,0 +1,65 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Yat : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Metrics : BowlXDepth
+	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape
+
+	create-glyph 'cyrl/Yat' 0x462 : glyph-proc
+		include : MarkSet.capital
+		local pBar 0.5
+		include : CyrlYeriUprightShape CAP (pBar -- pBar)
+		local cTop : if SLAB (CAP - Stroke / 2) CAP
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+
+	create-glyph 'cyrl/yat.upright' : glyph-proc
+		include : MarkSet.b
+		local pBar 0.4
+		include : CyrlYeriUprightShape CAP (pBar -- pBar)
+		local cTop : if SLAB (CAP - Stroke / 2) CAP
+		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix (CAP * pBar) cTop 0.5]
+
+		if SLAB : begin
+			eject-contour 'serifYeriLT'
+			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+
+	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
+
+	create-glyph 'cyrl/yat.italic' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		local fine : AdviceStroke 4 df.div
+
+		local xMidBarRight   : df.middle + 0.5 * df.mvs * HVContrast
+		local xRightLoopLeft : df.rightSB - fine * HVContrast - OX
+		local rinner         : (xRightLoopLeft - xMidBarRight) / 2
+
+		set-width df.width
+		include : df.markSet.e
+		include : VBarLeft df.leftSB 0 XH df.mvs
+		include : dispiro
+			nShoulderKnots
+				left   -- (df.leftSB + df.mvs * HVContrast)
+				right  -- xMidBarRight
+				fine   -- ShoulderFine
+				bottom -- (rinner + fine)
+				stroke -- df.mvs
+			arcvh
+			g4 [mix xMidBarRight xRightLoopLeft 0.5] (fine + O) [widths.rhs fine]
+			archv
+			g4 xRightLoopLeft (rinner + fine)
+			arcvh
+			g4 [mix xMidBarRight xRightLoopLeft 0.5] (rinner * 2 + fine - O)
+			archv
+			g4.down.end xMidBarRight (rinner + fine) (widths.rhs)
+
+		if SLAB : begin
+			if [not para.isItalic] : include : tagged 'serifLB'
+				LeftwardBottomSerif df.leftSB 0  SideJut
+			include : tagged 'serifLT' : LeftwardTopSerif    df.leftSB XH SideJut

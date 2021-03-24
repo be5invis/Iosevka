@@ -9,12 +9,9 @@ glyph-module
 glyph-block Letter-Cyrillic-Nje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Cyrillic-Yeri : CyrYeriShape
+	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriRoundShape CyrlYeriCursiveShape
 
-	define SLAB-ALL    1
-	define SLAB-LOWER  2
-
-	define [CyrNjeShape df top slabType] : glyph-proc
+	define [CyrNjeShape Yeri df top] : glyph-proc
 		local rightSB : df.width - df.leftSB
 		local xlefttop : mix df.leftSB df.rightSB 0.075
 		local jut : Jut * 0.72
@@ -22,33 +19,41 @@ glyph-block Letter-Cyrillic-Nje : begin
 		local r : rightSB - O
 		local middle : df.width / 2
 		set-width df.width
-		include : VBarLeft l 0 top MVertStroke
-		include : CyrYeriShape top
-			left -- (middle - MVertStroke / 2 * HVContrast)
+		include : VBarLeft l 0 top df.mvs
+		include : Yeri top
+			left -- (middle - df.mvs / 2 * HVContrast)
 			right -- (r - O)
-			stroke -- MVertStroke
+			stroke -- df.mvs
 			jut -- jut
-			slabType -- slabType
-		include : HBar (df.leftSB + MVertStroke * 0.1) middle (top / 2)
+		include : HBar (df.leftSB + df.mvs * 0.1) middle (top / 2)
 
-		define useItalicShape : para.isItalic && slabType === SLAB-LOWER
+		define useItalicShape : Yeri === CyrlYeriCursiveShape
 		if SLAB : begin
 			include : tagged 'serifLT' : if useItalicShape
 				then : LeftwardTopSerif l top jut
-				else : CenterTopSerif (l + MVertStroke / 2 * HVContrast) top jut
+				else : CenterTopSerif (l + df.mvs / 2 * HVContrast) top jut
 			include : tagged 'serifLB' : if useItalicShape
 				then : glyph-proc
-				else : CenterBottomSerif (l + MVertStroke / 2 * HVContrast) 0 jut
+				else : CenterBottomSerif (l + df.mvs / 2 * HVContrast) 0 jut
 			if useItalicShape : eject-contour 'serifYeriLT'
 
-	create-glyph 'cyrl/Nje' 0x40A : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		include : CyrNjeShape df CAP SLAB-ALL
+	define YerConfig : object
+		corner  { CyrlYeriUprightShape }
+		round   { CyrlYeriRoundShape   }
+		cursive { CyrlYeriCursiveShape }
 
-	create-glyph 'cyrl/nje' 0x45A : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : CyrNjeShape df XH SLAB-LOWER
+	foreach { suffix { Yeri } } [Object.entries YerConfig] : do
+		create-glyph "cyrl/Nje.\(suffix)"  : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : CyrNjeShape Yeri df CAP
+
+		create-glyph "cyrl/nje.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : CyrNjeShape Yeri df XH
+
+	select-variant 'cyrl/Nje' 0x40A
+	select-variant 'cyrl/nje' 0x45A
