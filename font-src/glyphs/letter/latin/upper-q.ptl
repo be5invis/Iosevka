@@ -14,21 +14,34 @@ glyph-block Letter-Latin-Upper-Q : begin
 
 	define TailDepth : 0 - Hook
 
-	create-glyph 'Q.straight' : glyph-proc
-		include : MarkSet.if
-		include [refer-glyph 'O']
+	define [QStdBody top sw] : OShape top 0 SB RightSB sw SmoothA SmoothB
+	define [QHorizontalTailedBody top sw] : begin
+		define fine : mix ShoulderFine sw 0.125
+		return : dispiro
+			flat (Middle - sw * TanSlope + O) (sw - fine) [widths.lhs fine]
+			curl (Middle + CorrectionOMidX * fine) (sw - fine)
+			archv
+			flat RightSB SmoothA [widths.lhs sw]
+			curl RightSB (top - SmoothB)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat SB (top - SmoothA)
+			curl SB SmoothB
+			arcvh
+			straight.right.end (Middle + CorrectionOMidS) 0
+
+	define [QStaraightTail] : begin
 		local shift : StrokeWidthBlend 0 0.25
-		include : dispiro
+		return : dispiro
 			widths.rhs
 			flat (Middle - Stroke * HVContrast * shift - TailDepth * 0.25) TailDepth [heading Upward]
 			curl (Middle - Stroke * HVContrast * shift) 0
 
-	create-glyph 'Q.curlyTailed' : glyph-proc
-		include : MarkSet.if
-		include [refer-glyph 'O']
+	define [QCurlyTail] : begin
 		local shift : StrokeWidthBlend 0.5 0.6
 		local startx : Middle + (Stroke * shift) * HVContrast
-		include : dispiro
+		return : dispiro
 			widths.rhs
 			flat startx HalfStroke [heading Downward]
 			curl startx 0 [heading Downward]
@@ -36,11 +49,9 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (startx - TailDepth - Stroke * HVContrast)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	create-glyph 'Q.crossingCurlyTailed' : glyph-proc
-		include : MarkSet.if
-		include : OShape CAP 0 SB RightSB [AdviceStroke 3] SmoothA SmoothB
-		include : VBar Middle HalfStroke [mix Descender HalfStroke 1.75] [AdviceStroke 3.5]
-		include : dispiro
+	define [QCrossingCurlyTail] : union
+		VBar Middle HalfStroke [mix Descender HalfStroke 1.75] [AdviceStroke 3.5]
+		dispiro
 			widths.rhs
 			flat (Middle + HalfStroke * HVContrast) HalfStroke [heading Downward]
 			curl (Middle + HalfStroke * HVContrast) 0 [heading Downward]
@@ -48,40 +59,20 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (Middle - HalfStroke * HVContrast - TailDepth)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	create-glyph 'Q.crossing' : glyph-proc
-		include : MarkSet.capital
-		include : OShape CAP 0 SB RightSB [AdviceStroke 3] SmoothA SmoothB
+	define [QCrossing] : begin
 		define k 1.5
 		define cor : DiagCor (k * (RightSB - Middle)) (RightSB - Middle - OX)
-		include : dispiro
+		return : dispiro
 			widths.center (cor * [AdviceStroke 4.25])
 			flat RightSB 0 [heading Upward]
 			curl (Middle + OX) (k * (RightSB - Middle)) [heading Upward]
 
-	create-glyph 'Q.verticalCrossing' : glyph-proc
-		include : MarkSet.if
-		include : OShape CAP 0 SB RightSB [AdviceStroke 3] SmoothA SmoothB
-		include : VBar Middle [mix Descender HalfStroke 1.75] TailDepth [AdviceStroke 3.5]
+	define [QVerticalCrossing] : begin
+		return : VBar Middle [mix Descender HalfStroke 1.75] TailDepth [AdviceStroke 3.5]
 
-	create-glyph 'Q.horizontalTailed' : glyph-proc
-		include : MarkSet.capital
-		define fine : mix ShoulderFine Stroke 0.125
-		include : dispiro
-			flat (Middle - Stroke * TanSlope + O) (Stroke - fine) [widths.lhs fine]
-			curl (Middle + CorrectionOMidX * fine) (Stroke - fine)
-			archv
-			flat RightSB SmoothA [widths.lhs Stroke]
-			curl RightSB (CAP - SmoothB)
-			arcvh
-			g4 (Middle - CorrectionOMidS) (CAP - O)
-			archv
-			flat SB (CAP - SmoothA)
-			curl SB SmoothB
-			arcvh
-			straight.right.end (Middle + CorrectionOMidS) 0
-		include : dispiro
-			flat (Middle + CorrectionOMidS) 0 [widths.lhs : AdviceStroke 3]
-			curl [mix RightSB Width 0.5] 0
+	define [QHorizontalTail] : dispiro
+		flat (Middle + CorrectionOMidS) 0 [widths.lhs : AdviceStroke 3]
+		curl [mix RightSB Width 0.5] 0
 
 	define detachedTailGap : Math.max (-0.25 * Descender) [AdviceStroke 12]
 	define yObliqueTailStart : 0 - detachedTailGap - Stroke * 0.875
@@ -91,23 +82,40 @@ glyph-block Letter-Latin-Upper-Q : begin
 	define xBendTailStart : mix Middle SB kBendStartPartLeftLength
 	define yBendTailStart : mix yObliqueTailStart yObliqueTailEnd kBendStartPartLeftLength
 
-	create-glyph 'Q.detachedTailed' : glyph-proc
-		include : MarkSet.if
-		include [refer-glyph 'O']
-		include : dispiro
-			widths.lhs Stroke
-			corner Middle           yObliqueTailStart [heading Rightward]
-			corner xDetachedTailEnd yObliqueTailEnd   [heading Rightward]
+	define [QDetachedTail] : dispiro
+		widths.lhs Stroke
+		corner Middle           yObliqueTailStart [heading Rightward]
+		corner xDetachedTailEnd yObliqueTailEnd   [heading Rightward]
 
-	create-glyph 'Q.detachedBendTailed' : glyph-proc
-		include : MarkSet.if
-		include [refer-glyph 'Q.detachedTailed']
-		include : dispiro
-			widths.lhs Stroke
-			corner xBendTailStart yBendTailStart    [heading Rightward]
-			corner Middle         yObliqueTailStart [heading Rightward]
+	define [QDetachedBendTail] : union [QDetachedTail] : dispiro
+		widths.lhs Stroke
+		corner xBendTailStart yBendTailStart    [heading Rightward]
+		corner Middle         yObliqueTailStart [heading Rightward]
+
+	define QConfig : object
+		straight            { QStdBody               Stroke          QStaraightTail     }
+		curlyTailed         { QStdBody               Stroke          QCurlyTail         }
+		crossingCurlyTailed { QStdBody              [AdviceStroke 3] QCrossingCurlyTail }
+		crossing            { QStdBody              [AdviceStroke 3] QCrossing          }
+		verticalCrossing    { QStdBody              [AdviceStroke 3] QVerticalCrossing  }
+		horizontalTailed    { QHorizontalTailedBody  Stroke          QHorizontalTail    }
+		detachedTailed      { QStdBody               Stroke          QDetachedTail      }
+		detachedBendTailed  { QStdBody               Stroke          QDetachedBendTail  }
+
+
+	foreach { suffix { body swRing tailShape } } [Object.entries QConfig] : do
+		create-glyph "Q.\(suffix)" : glyph-proc
+			include : MarkSet.if
+			include : body CAP swRing
+			include : tailShape CAP swRing
+
+		create-glyph "smcpQ.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : body XH swRing
+			include : tailShape XH swRing
 
 	select-variant 'Q' 'Q'
+	select-variant 'smcpQ' 0xA7AF (follow -- 'Q')
 	alias 'cyrl/Qa' 0x51A 'Q'
 
 	create-glyph 'mathbb/Q' 0x211A : glyph-proc
