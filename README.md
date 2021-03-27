@@ -499,10 +499,12 @@ Subsection `variants` is used to configure character variants in the font. Prope
     - `digit-form = 'lining'`: Lining (default).
     - `digit-form = 'old-style'`: Old-style.
   - Styles for `A`:
-    + `capital-a = 'straight'`, `cv01 = 1`: Standard, straight `A` (default).
-    + `capital-a = 'curly'`, `cv01 = 2`: Slightly curly `A`, like Iosevka 2.x.
-    + `capital-a = 'straight-motion-serifed'`, `cv01 = 3`: Standard, straight `A`.
-    + `capital-a = 'curly-motion-serifed'`, `cv01 = 4`: Slightly curly `A`, like Iosevka 2.x.
+    + `capital-a = 'straight'`, `cv01 = 1`: Standard, straight `A`, with bottom serifs visible in Slab families (default).
+    + `capital-a = 'curly'`, `cv01 = 2`: Slightly curly `A`, like Iosevka 2.x, with bottom serifs visible in Slab families.
+    + `capital-a = 'straight-motion-serifed'`, `cv01 = 3`: Straight `A` with motion serif at top.
+    + `capital-a = 'curly-motion-serifed'`, `cv01 = 4`: Slightly curly `A`, like Iosevka 2.x, with motion serif at top.
+    + `capital-a = 'straight-tri-serifed'`, `cv01 = 5`: Straight `A` with serif at both top and bottom.
+    + `capital-a = 'curly-tri-serifed'`, `cv01 = 6`: Slightly curly `A`, like Iosevka 2.x, with serif at both top and bottom.
   - Styles for `B`:
     + `capital-b = 'standard'`, `cv02 = 1`: `B` in near-symmetric proportion (default).
     + `capital-b = 'more-asymmetric'`, `cv02 = 2`: `B` in more asymmetric proportion to differentiate with `8`.
@@ -762,8 +764,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `g = 'single-storey-earless-rounded-flat-hook'`, `cv32 = 9`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
     + `g = 'single-storey-motion-serifed-flat-hook'`, `cv32 = 10`: Single-storey `g` with motion serifs and flat terminal hook.
   - Styles for `h`:
-    + `h = 'straight'`, `cv33 = 1`: `h` with straight ending (default for Sans Upright, Sans Italic, Slab Upright).
-    + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending (default for Slab Italic).
+    + `h = 'straight'`, `cv33 = 1`: `h` with straight ending (default).
+    + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending.
     + `h = 'straight-motion-serifed'`, `cv33 = 3`: `h` with straight ending.
     + `h = 'motion-serifed-tailed'`, `cv33 = 4`: `h` with curly tailed ending.
   - Styles for `i`:
@@ -815,9 +817,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'diagonal-tailed'`, `cv37 = 11`: `l` with diagonal tail.
     + `l = 'serifed-diagonal-tailed'`, `cv37 = 12`: `l` with top serif and diagonal tail.
   - Styles for `m`:
-    + `m = 'normal'`, `cv38 = 1`: `m` with normal middle leg, touching the baseline (default for Sans Upright, Sans Italic, Slab Upright).
+    + `m = 'normal'`, `cv38 = 1`: `m` with normal middle leg, touching the baseline (default).
     + `m = 'short-leg'`, `cv38 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
-    + `m = 'tailed'`, `cv38 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail (default for Slab Italic).
+    + `m = 'tailed'`, `cv38 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
     + `m = 'short-leg-tailed'`, `cv38 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
     + `m = 'earless-corner-double-arch'`, `cv38 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
     + `m = 'earless-corner-double-arch-short-leg'`, `cv38 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
@@ -836,8 +838,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `m = 'motion-serifed-tailed'`, `cv38 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
     + `m = 'short-leg-motion-serifed-tailed'`, `cv38 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
   - Styles for `n`:
-    + `n = 'straight'`, `cv39 = 1`: `n` with straight ending (default for Sans Upright, Sans Italic, Slab Upright).
-    + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail (default for Slab Italic).
+    + `n = 'straight'`, `cv39 = 1`: `n` with straight ending (default).
+    + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail.
     + `n = 'earless-corner-straight'`, `cv39 = 3`: Earless (corner top-left) `n` with straight ending.
     + `n = 'earless-corner-tailed'`, `cv39 = 4`: Earless (corner top-left) `n` with a curly tail.
     + `n = 'earless-rounded-straight'`, `cv39 = 5`: Earless (rounded top-left) `n` with straight ending.
