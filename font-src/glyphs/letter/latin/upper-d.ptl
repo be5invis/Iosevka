@@ -10,10 +10,10 @@ glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [DArcShapeT sink offset sw fRound] : glyph-proc
+	define [DArcShapeT sink top offset sw fRound] : glyph-proc
 		local barleft SB
 
-		local dsmooth : Math.min (CAP * 0.499) (Smooth * 1.1)
+		local dsmooth : Math.min (top * 0.499) (Smooth * 1.1)
 		local bsmooth : Math.min (Width - SB * 2 - sw) (Smooth * 1.1)
 		local bsmoothRd : Math.min (Width - SB * 2 - sw) (Smooth * 1.25)
 
@@ -22,63 +22,58 @@ glyph-block Letter-Latin-Upper-D : begin
 
 		if (fRound) : include : sink
 			widths.rhs sw
-			[if offset corner flat] (barleft - O) (CAP - offset) [heading Rightward]
-			curl (RightSB - bsmoothRd - CorrectionOMidS) (CAP - offset)
+			[if offset corner flat] (barleft - O) (top - offset) [heading Rightward]
+			curl (RightSB - bsmoothRd - CorrectionOMidS) (top - offset)
 			archv
-			g4 (RightSB - OX - offset) [YSmoothMidR CAP 0 sma smb]
+			g4 (RightSB - OX - offset) [YSmoothMidR top 0 sma smb]
 			arcvh
 			flat (RightSB - bsmoothRd + CorrectionOMidS) offset
 			[if offset corner curl] (barleft - O) offset [heading Leftward]
 		: else : include : sink
 			widths.rhs sw
-			[if offset corner flat] (barleft - O) (CAP - offset) [heading Rightward]
-			curl (RightSB - bsmooth - CorrectionOMidS) (CAP - offset)
+			[if offset corner flat] (barleft - O) (top - offset) [heading Rightward]
+			curl (RightSB - bsmooth - CorrectionOMidS) (top - offset)
 			archv
-			flat (RightSB - OX - offset) (CAP - smb)
+			flat (RightSB - OX - offset) (top - smb)
 			curl (RightSB - OX - offset) (0 + sma)
 			arcvh
 			flat (RightSB - bsmooth + CorrectionOMidS) offset
 			[if offset corner curl] (barleft - O) offset [heading Leftward]
 
-	define [DShape fRound slabTop slabBot] : glyph-proc
+	define [DShape top fRound slabTop slabBot] : glyph-proc
 		local barleft SB
-		include : VBarLeft barleft 0 CAP
-		include : DArcShapeT dispiro 0 Stroke fRound
-		if slabTop : include : tagged 'serifLT' : LeftwardTopSerif barleft CAP SideJut
+		include : VBarLeft barleft 0 top
+		include : DArcShapeT dispiro top 0 Stroke fRound
+		if slabTop : include : tagged 'serifLT' : LeftwardTopSerif barleft top SideJut
 		if slabBot : include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
 
-	create-glyph 'D.standard' : glyph-proc
-		include : MarkSet.capital
-		include : DShape false SLAB SLAB
+	define DConfig : object
+		standard                           { false SLAB SLAB  }
+		moreRounded                        { true  SLAB SLAB  }
+		standardUnilateralMotionSerifed    { false true false }
+		moreRoundedUnilateralMotionSerifed { true  true false }
+		standardBilateralMotionSerifed     { false true true  }
+		moreRoundedBilateralMotionSerifed  { true  true true  }
 
-	create-glyph 'D.moreRounded' : glyph-proc
-		include : MarkSet.capital
-		include : DShape true SLAB SLAB
-
-	create-glyph 'D.standardUnilateralMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : DShape false true false
-
-	create-glyph 'D.moreRoundedUnilateralMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : DShape true true false
-
-	create-glyph 'D.standardBilateralMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : DShape false true true
-
-	create-glyph 'D.moreRoundedBilateralMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : DShape true true true
+	foreach { suffix { fRound fSlabTop fSlabBot } } [Object.entries DConfig] : do
+		create-glyph "D.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : DShape CAP fRound fSlabTop fSlabBot
+		create-glyph "smcpD.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : DShape XH fRound fSlabTop fSlabBot
 
 	select-variant 'D' 'D'
-
 	with-related-glyphs 'Eth' 0xD0 'D' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
-
 	alias 'Dcroat' 0x110 'Eth'
 	alias 'arficanD' 0x189 'Eth'
+
+	select-variant 'smcpD' 0x1D05 (follow -- 'D')
+	with-related-glyphs 'smcpEth' 0x1D06 'smcpD' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (XH * OverlayPos)
 
 	with-related-glyphs 'Dhookleft' 0x18a 'D' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -89,9 +84,9 @@ glyph-block Letter-Latin-Upper-D : begin
 	create-glyph 'mathbb/D' 0x1D53B : glyph-proc
 		include : MarkSet.capital
 		include : VBarLeft SB 0 CAP BBS
-		include : DArcShapeT dispiro 0 BBS false
+		include : DArcShapeT dispiro CAP 0 BBS false
 		include : intersection
-			DArcShapeT spiro-outline 1 BBS false
+			DArcShapeT spiro-outline CAP 1 BBS false
 			union
 				VBarLeft (SB + BBD) 0 CAP BBS
 				VBarRight (RightSB - BBD - OX) 0 CAP BBS

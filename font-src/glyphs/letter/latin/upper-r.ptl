@@ -126,10 +126,14 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
 		include : RLegShapes.(legShape) legTop 0 endX right top SLAB Stroke 0
 
-	define [RevRShape] : params [legShape top bp [mul 1]] : glyph-proc
-		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- SLAB) (bp -- bp)
+	define [RevRShape] : params [legShape top bp [slab null] [mul 1] [italicShape false]] : glyph-proc
+		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
 		local left : SB + O + [if SLAB (Jut / 8) 0]
 		include : RevRLegShapes.(legShape) [RLegTop top Stroke bp] 0 left Middle top SLAB Stroke 0
+		if (SLAB && italicShape) : begin
+			eject-contour 'serifRT'
+			eject-contour 'serifRB'
+			include : tagged 'serifRB' : RightwardBottomSerif (Width - SB * mul) 0 SideJut
 
 	define [ROverlayAnchor] : glyph-proc
 		set-base-anchor 'overlay'
@@ -137,20 +141,20 @@ glyph-block Letter-Latin-Upper-R : begin
 			PBarPosY CAP Stroke : RBarPos CAP SLAB
 
 	define RConfig : object
-		standing                   { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  false }
-		straight                   { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  false }
-		curly                      { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  false }
-		standingOpen               { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  true  }
-		straightOpen               { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  true  }
-		curlyOpen                  { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  true  }
-		standingMotionSerifed      { LEG-SHAPE-STANDING   PShape.SlabMotion               false }
-		straightMotionSerifed      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               false }
-		curlyMotionSerifed         { LEG-SHAPE-CURLY      PShape.SlabMotion               false }
-		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               true  }
-		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               true  }
-		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               true  }
+		standing                   { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
+		straight                   { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
+		curly                      { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
+		standingOpen               { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
+		straightOpen               { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
+		curlyOpen                  { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
+		standingMotionSerifed      { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion               false }
+		straightMotionSerifed      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion               false }
+		curlyMotionSerifed         { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion               false }
+		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion               true  }
+		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion               true  }
+		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion               true  }
 
-	foreach { suffix { fStraight slabs fOpen } } [Object.entries RConfig] : begin
+	foreach { suffix { fStraight slabs revSlabs fOpen } } [Object.entries RConfig] : begin
 		local fMotion : slabs === PShape.SlabMotion
 		local bpCap : RBarPos CAP (slabs === PShape.SlabSymmetric)
 		local bpXH  : RBarPos XH  (slabs === PShape.SlabSymmetric)
@@ -185,38 +189,32 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : MarkSet.capital
 			include : RRotundaShape fStraight XH (hook -- AHook) (pBar -- 0.9)
 
-		if (!fMotion) : create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
+		create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
-			if fOpen
-			: then : begin
-				include : difference
-					RevRShape fStraight CAP (bp -- bpCap)
-					RevPShape.OpenGap CAP (mul -- 1) (bp -- bpCap)
-			: else : begin
-				include : RevRShape fStraight CAP (bp -- bpCap)
+			include : difference
+				RevRShape fStraight CAP (slab -- revSlabs) (bp -- bpCap)
+				if fOpen [RevPShape.OpenGap CAP (mul -- 1) (bp -- bpCap)] [glyph-proc]
 
-		if (!fMotion) : create-glyph "cyrl/ya.\(suffix)" : glyph-proc
+		create-glyph "cyrl/ya.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
-			if fOpen
-			: then : begin
-				include : difference
-					RevRShape fStraight XH (bp -- bpXH)
-					RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)
-			: else : begin
-				include : RevRShape fStraight XH (bp -- bpXH)
+			include : difference
+				RevRShape fStraight XH (slab -- revSlabs) (bp -- bpXH) (italicShape -- para.isItalic)
+				if fOpen [RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
 
 	select-variant 'R' 'R'
 	select-variant 'smcpR' 0x280 (follow -- 'R')
+	turned 'turnSmapR' 0x1D1A 'smcpR' Middle (XH / 2)
 
 	select-variant 'Rrotunda' 0xA75A
 	select-variant 'rrotunda' 0xA75B (follow -- 'Rrotunda')
 
 	select-variant 'cyrl/Ya' 0x42F
 	select-variant 'cyrl/ya' 0x44F (follow -- 'cyrl/Ya')
-	turned 'invsmcpR' 0x281 'cyrl/ya' Middle (XH / 2)
+	select-variant 'revSmcpR' 0x1D19 (shapeFrom -- 'cyrl/ya') (follow -- 'R')
+	turned 'invSmcpR' 0x281 'revSmcpR' Middle (XH / 2)
 
 	define [IndianRupeeShape suffix legShape] : glyph-proc
 		define bp : RBarPos CAP 0
@@ -241,10 +239,6 @@ glyph-block Letter-Latin-Upper-R : begin
 	with-related-glyphs 'Rbar' 0x24C 'R' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP SLAB] + Stroke * 0.25)
-
-	with-related-glyphs 'turnSmcpR' 0x1D1A 'smcpR' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : FlipAround Middle (XH / 2)
 
 	create-glyph : glyph-proc
 		include : MarkSet.if

@@ -9,38 +9,47 @@ glyph-module
 glyph-block Letter-Cyrillic-Lje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Cyrillic-Yeri : CyrYeriShape
+	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriRoundShape CyrlYeriCursiveShape
 
-	define [CyrLjeShape top df] : glyph-proc
+	define [CyrLjeShape Yeri df top] : glyph-proc
 		local rightSB : df.width - df.leftSB
-		local l : df.leftSB + O
-		local r : rightSB - O
+		local l : df.leftSB + 0
+		local r : rightSB - 0
 		local middle : df.width / 2
 		local xlefttop : mix l r 0.075
-		local jut : Jut * 0.72
+		local jut : Math.min Jut : Jut * 0.75 * df.div
 		set-width df.width
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner xlefttop top]
 			zbot -- [Point.fromXY Point.Type.Corner [mix l 0 [if SLAB 1 0.75]] 0]
 			xb -- [mix l r 0.025]
-			fine -- MVertStroke
-		include : CyrYeriShape top
-			left -- (middle - MVertStroke / 2 * HVContrast)
+			fine -- df.mvs
+		include : Yeri top
+			left -- (middle - df.mvs / 2 * HVContrast)
 			right -- (r - O)
-			stroke -- MVertStroke
+			stroke -- df.mvs
 			jut -- jut
 		include : HBarTop xlefttop middle top
 		if SLAB : begin
-			include : LeftwardTopSerif xlefttop top (jut - MVertStroke / 2 * HVContrast)
+			include : LeftwardTopSerif xlefttop top (jut - df.mvs / 2 * HVContrast)
 
-	create-glyph 'cyrl/Lje' 0x409 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		include : CyrLjeShape CAP df
+	define YerConfig : object
+		corner  { CyrlYeriUprightShape }
+		round   { CyrlYeriRoundShape   }
+		cursive { CyrlYeriCursiveShape }
 
-	create-glyph 'cyrl/lje' 0x459 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : CyrLjeShape XH df
+	foreach { suffix { Yeri } } [Object.entries YerConfig] : do
+		create-glyph "cyrl/Lje.\(suffix)"  : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : CyrLjeShape Yeri df CAP
+
+		create-glyph "cyrl/lje.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : CyrLjeShape Yeri df XH
+
+	select-variant 'cyrl/Lje' 0x409
+	select-variant 'cyrl/lje' 0x459

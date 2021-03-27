@@ -10,7 +10,10 @@ glyph-block Letter-Cyrillic-El : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [CyrElShape top] : glyph-proc
+	define SLAB-ALL    1
+	define SLAB-LOWER  2
+
+	define [CyrElShape top slabType] : glyph-proc
 		local cutleft : mix SB RightSB 0.135
 		local cutleft2 : mix SB RightSB 0.075
 		local cutright : mix SB RightSB 1
@@ -20,18 +23,25 @@ glyph-block Letter-Cyrillic-El : begin
 			ztop -- [Point.fromXY Point.Type.Corner cutleft top]
 			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 [if SLAB 1 0.75]] 0]
 			xb -- cutleft2
+
+		define useItalicShape : para.isItalic && slabType === SLAB-LOWER
 		if SLAB : begin
-			include : RightwardTopSerif cutright top SideJut
-			include : LeftwardTopSerif cutleft top SideJut
-			include : CenterBottomSerif (cutright - HalfStroke * HVContrast) 0 Jut
+			include : tagged 'serifLT' : LeftwardTopSerif cutleft top SideJut
+			include : tagged 'serifRT' : if useItalicShape
+				then : glyph-proc
+				else : RightwardTopSerif cutright top SideJut
+			include : tagged 'serifRB' : if useItalicShape
+				then : RightwardBottomSerif cutright 0 SideJut
+				else : CenterBottomSerif (cutright - HalfStroke * HVContrast) 0 Jut
 
 	create-glyph 'cyrl/El' 0x41B : glyph-proc
 		include : MarkSet.capital
-		include : CyrElShape CAP
+		include : CyrElShape CAP SLAB-ALL
 
 	create-glyph 'cyrl/el' 0x43B : glyph-proc
 		include : MarkSet.e
-		include : CyrElShape XH
+		include : CyrElShape XH SLAB-LOWER
 
+	alias 'cyrl/smcpEl' 0x1D2B 'cyrl/el'
 	alias 'cyrl/El.BGR' null 'grek/Lambda'
 	alias 'cyrl/el.BGR' null 'turnv'

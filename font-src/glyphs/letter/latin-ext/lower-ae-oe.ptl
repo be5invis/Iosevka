@@ -16,7 +16,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local smb : SmoothBOf [Math.max (stroke * 1.125) (SmallSmooth * 0.6 * df.div)] (Width * df.div)
 		return { sma smb }
 
-	define [aeepart df] : glyph-proc
+	define [aeEPart df] : glyph-proc
 		local eLeft : df.middle - df.mvs / 2 * HVContrast + 0.1
 		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] - df.mvs * TanSlope
 		local barbottom (XH * DesignParameters.eBarPos - df.mvs / 2)
@@ -26,19 +26,40 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			union
 				dispiro
 					widths.lhs df.mvs
-					flat (df.rightSB - OX * 2) barbottom [heading Upward]
-					curl (df.rightSB - OX * 2) (XH - smb)
+					flat df.rightSB barbottom [heading Upward]
+					curl df.rightSB (XH - smb)
 					arcvh
 					g4   eMiddle (XH - O)
 					archv
 					flat eLeft (XH - sma)
 					curl eLeft smb
 					hookend O (tight -- true) (sw -- df.mvs)
-					g4 (df.rightSB - OX * 2) (AHook + df.mvs * TanSlope) [heading Upward]
-				HBarBottom (eLeft +  df.mvs / 2) (df.rightSB - OX * 2 -  df.mvs / 2) barbottom df.mvs
+					g4 df.rightSB (AHook + df.mvs * TanSlope) [heading Upward]
+				HBarBottom (eLeft + df.mvs / 2) (df.rightSB - df.mvs / 2) barbottom df.mvs
 			Rect barbottom (barbottom - XH * 0.05) eMiddle df.width
 
-	define [aeapart df] : glyph-proc
+	define [aeEPartRounded df] : glyph-proc
+		local eLeft : df.middle - df.mvs / 2 * HVContrast + 0.1
+		local eMiddle : [mix eLeft (df.rightSB - OX * 2) 0.5] - df.mvs * TanSlope
+		local barbottom (XH * DesignParameters.eBarPos - df.mvs / 2)
+		local { sma smb } : GetSm df df.mvs
+
+		include : difference
+			dispiro
+				flat eLeft barbottom [widths.lhs.heading df.mvs Rightward]
+				curl eMiddle barbottom [heading Rightward]
+				archv
+				g4 (df.rightSB - OX) [YSmoothMidR XH barbottom sma smb]
+				arcvh
+				g4   eMiddle (XH - O)
+				archv
+				flat eLeft (XH - sma)
+				curl eLeft smb
+				hookend O (tight -- true) (sw -- df.mvs)
+				g4 (df.rightSB - OX * 2) (AHook + df.mvs * TanSlope) [heading Upward]
+			Rect barbottom (barbottom - XH * 0.05) eMiddle df.width
+
+	define [aeAPart df] : glyph-proc
 		local bartop (XH * OverlayPos * 1.02 + df.mvs / 2)
 		local abarRight : df.middle + df.mvs / 2 * HVContrast - 0.1
 		local lowmiddle : mix (df.leftSB + OX * 2) abarRight 0.5
@@ -59,13 +80,13 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			flat barsmooth bartop
 			curl (abarRight - 1) bartop [heading Rightward]
 
-	define [oeopart df] : glyph-proc
+	define [oeOPart df] : glyph-proc
 		local abarRight : df.middle + df.mvs / 2 * HVContrast
 		local { sma smb } : GetSm df df.mvs
 
 		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) df.mvs sma smb
 
-	define [ueupart df] : glyph-proc
+	define [ueUPart df] : new-glyph : glyph-proc
 		local abarRight : df.middle + df.mvs / 2 * HVContrast
 		local { sma smb } : GetSm df df.mvs
 
@@ -77,40 +98,46 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			smb -- smb
 		include : FlipAround (df.width / 2) (XH / 2)
 
-	create-glyph 'ae' 0xE6 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : aeapart df
-		include : aeepart df
+	define AeConfig : object
+		flatCrossbar { aeEPart        }
+		rounded      { aeEPartRounded }
 
+	foreach { suffix { ePartshape } } [Object.entries AeConfig] : do
+		create-glyph "ae.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : aeAPart df
+			include : ePartshape df
+		create-glyph "oe.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : oeOPart df
+			include : ePartshape df
+		create-glyph "ue.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : ueUPart df
+			include : ePartshape df
+
+	select-variant 'ae' 0xE6
 	alias 'cyrl/ae' 0x4D5 'ae'
 	turned 'turnae' 0x1D02 'ae' [DivFrame para.diversityM].middle (XH / 2)
 
-	create-glyph 'oe' 0x153 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : oeopart df
-		include : aeepart df
-
+	select-variant 'oe' 0x153
 	turned 'turnoe' 0x1D14 'oe' [DivFrame para.diversityM].middle (XH / 2)
 
-	create-glyph 'ue' 0x1D6B : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : new-glyph : glyph-proc
-			include : ueupart df
-		include : aeepart df
+	select-variant 'ue' 0x1D6B
 
 	create-glyph 'db' 0x238 : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.b
-		include : oeopart df
+		include : oeOPart df
 		include : FlipAround df.middle (XH / 2)
-		include : oeopart df
+		include : oeOPart df
 		include : VBar df.middle (XH / 2) CAP MVertStroke
 		if SLAB : begin
 			include : LeftwardTopSerif (df.middle - MVertStroke / 2 * HVContrast) CAP SideJut
@@ -119,9 +146,9 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.p
-		include : oeopart df
+		include : oeOPart df
 		include : FlipAround df.middle (XH / 2)
-		include : oeopart df
+		include : oeOPart df
 		include : VBar df.middle Descender (XH / 2) MVertStroke
 		if SLAB : begin
 			include : CenterBottomSerif df.middle Descender Jut

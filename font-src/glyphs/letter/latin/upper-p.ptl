@@ -70,17 +70,6 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : spiro-outline
 			PShapeOutlineKnots top mul bp overshoot sw offset
 
-	define [PShapeSlabNone] : glyph-proc
-	define [PShapeSlabMotion top sw mul] : tagged 'serifLT'
-		LeftwardTopSerif (SB * mul) top SideJut sw
-	define [PShapeSlabSymmetric top sw mul] : glyph-proc
-		include : PShapeSlabMotion top sw mul
-		include : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
-	define [PShapeSlabAsymmetric top sw mul] : glyph-proc
-		include : PShapeSlabMotion top sw mul
-		include : LeftwardBottomSerif (SB * mul) 0 SideJut sw
-		include : RightwardBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
-
 	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab null] [withBar true]] : glyph-proc
 		include : dispiro [widths.rhs sw] [PShapeOutlineKnots top mul bp overshoot sw 0]
 		if withBar : include : tagged 'strokeL' : VBarLeft (SB * mul) 0 top sw
@@ -97,59 +86,62 @@ glyph-block Letter-Latin-Upper-P : begin
 			RevPshapeOutlineKnots top mul bp overshoot sw 0
 		include : tagged 'strokeR' : VBarRight (Width - SB * mul) 0 top sw
 
-		if slab : begin
-			include : tagged 'serifRT'
-				RightwardTopSerif (Width - SB * mul) top SideJut sw
-			include : tagged 'serifRB'
-				CenterBottomSerif (Width - SB * mul - HalfStroke * HVContrast) 0 Jut sw
+		if slab : include : slab top sw mul
 
 	set PShape.defaultMul 1.25
 	set PShape.defaultOvershoot (OX * 2)
 	set PShape.BarPos (1 - HBarPos)
 	set PShape.SwBelowBar 0.25
 
-	set PShape.SlabMotion : function [top sw mul] : tagged 'serifLT'
-		LeftwardTopSerif (SB * mul) top SideJut sw
+	set PShape.SlabMotion : function [top sw mul] : glyph-proc
+		include : tagged 'serifLT' :LeftwardTopSerif (SB * mul) top SideJut sw
 	set PShape.SlabSymmetric : function [top sw mul] : glyph-proc
 		include : PShape.SlabMotion top sw mul
-		include : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
+		include : tagged 'serifLB' : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
 	set PShape.SlabAsymmetric : function [top sw mul] : glyph-proc
 		include : PShape.SlabMotion top sw mul
-		include : LeftwardBottomSerif (SB * mul) 0 SideJut sw
-		include : RightwardBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
+		include : tagged 'serifLB' : union
+			LeftwardBottomSerif (SB * mul) 0 SideJut sw
+			RightwardBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
 	set PShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarLeft
 		SB * mul + sw * HVContrast
 		[PBarPosY top sw bp] - sw
 		[PBarPosY top sw bp] + sw + 1
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
+	set RevPShape.SlabMotion : function [top sw mul] : glyph-proc
+		include : tagged 'serifRT' : RightwardTopSerif (Width - SB * mul) top SideJut sw
+	set RevPShape.SlabSymmetric : function [top sw mul] : glyph-proc
+		include : RevPShape.SlabMotion top sw mul
+		include : tagged 'serifRB' : CenterBottomSerif (Width - SB * mul - HalfStroke * HVContrast) 0 Jut sw
 	set RevPShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarRight
 		Width - SB * mul - sw * HVContrast
 		[PBarPosY top sw bp] - sw
 		[PBarPosY top sw bp] + sw + 1
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
-	create-glyph 'P.closed' : glyph-proc
-		include : MarkSet.capital
-		include : PShape CAP (slab -- [if SLAB PShape.SlabAsymmetric])
+	define PConfig : object
+		closed                { false  [if SLAB PShape.SlabAsymmetric] }
+		open                  { true   [if SLAB PShape.SlabAsymmetric] }
+		closedMotionSerifed   { false  PShape.SlabMotion               }
+		openMotionSerifed     { true   PShape.SlabMotion               }
 
-	create-glyph 'P.open' : glyph-proc
-		include : MarkSet.capital
-		include : difference
-			PShape CAP (slab -- [if SLAB PShape.SlabAsymmetric])
-			PShape.OpenGap CAP
+	foreach { suffix { fGap slabs } } [Object.entries PConfig] : do
+		create-glyph "P.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : difference
+				PShape CAP (slab -- slabs)
+				if fGap [PShape.OpenGap CAP] [glyph-proc]
 
-	create-glyph 'P.closedMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : PShape CAP (slab -- PShape.SlabMotion)
-
-	create-glyph 'P.openMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : difference
-			PShape CAP (slab -- PShape.SlabMotion)
-			PShape.OpenGap CAP
+		create-glyph "smcpP.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : difference
+				PShape XH (slab -- slabs)
+				if fGap [PShape.OpenGap XH] [glyph-proc]
 
 	select-variant 'P' 'P'
+	select-variant 'smcpP' 0x1D18 (follow -- 'P')
+	alias 'grek/smcpRho' 0x1D29 'smcpP'
 
 	alias 'grek/Rho' 0x3A1 'P'
 	alias 'cyrl/Er' 0x420 'P'

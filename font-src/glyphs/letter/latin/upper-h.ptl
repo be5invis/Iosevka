@@ -11,16 +11,21 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
 
-	define SLAB-AUTO   1
-	define SLAB-MOTION 2
+	define SLAB-AUTO            1
+	define SLAB-MOTION          2
+	define SLAB-SMALL-CYRILLIC  3
 
 	define [HShape top slabType] : glyph-proc
 		include : tagged 'strokeL' : VBarLeft SB 0 top
 		include : tagged 'strokeR' : VBarRight RightSB 0 top
 		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
 		include : match slabType
-			[Just SLAB-AUTO]   : AIHSerifs top
+			[Just SLAB-AUTO]   : NeedSlab SLAB : HSerifs top
 			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
+			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic] [NeedSlab SLAB : HSerifs top]
+				NeedSlab SLAB : composite-proc
+					tagged 'serifLT' : LeftwardTopSerif SB top SideJut
+					tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
 	create-glyph 'H.standard' : glyph-proc
 		include : MarkSet.capital
@@ -35,6 +40,10 @@ glyph-block Letter-Latin-Upper-H : begin
 	create-glyph 'smcpH.standard' : glyph-proc
 		include : MarkSet.e
 		include : HShape XH SLAB-AUTO
+
+	create-glyph 'smcpH.standardSmallCyrl' : glyph-proc
+		include : MarkSet.e
+		include : HShape XH SLAB-SMALL-CYRILLIC
 
 	create-glyph 'smcpH.motionSerifed' : glyph-proc
 		include : MarkSet.e
@@ -59,7 +68,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	alias 'grek/Eta' 0x397 'H'
 	alias 'cyrl/En' 0x41D 'H'
 
-	alias 'cyrl/en' 0x43D 'smcpH'
+	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
 
 	create-glyph 0x4A2 : composite-proc [refer-glyph 'cyrl/En'] [CyrDescender RightSB]
 	create-glyph 0x4A3 : composite-proc [refer-glyph 'cyrl/en'] [CyrDescender RightSB]
@@ -77,7 +86,7 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
 
 
-	define [EnGheShape top] : glyph-proc
+	define [EnGheShape top slabType] : glyph-proc
 		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
 		local barRight : mix Width RightSB [if SLAB 0.25 0.375]
 
@@ -87,17 +96,24 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBarTop (right - Stroke * 0.1) barRight top
 
 		if SLAB : begin
-			include : AIHSerifs top SB right
 			include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
+			include : match slabType
+				[Just SLAB-AUTO]   : HSerifs top SB right
+				[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
+				[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
+					then : HSerifs top SB right
+					else : glyph-proc
+						if SLAB : include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
+						if SLAB : include : tagged 'serifRB' : RightwardBottomSerif right 0 SideJut
 
 
 	create-glyph 'cyrl/EnGhe' 0x4A4 : glyph-proc
 		include : MarkSet.capital
-		include : EnGheShape CAP
+		include : EnGheShape CAP SLAB-AUTO
 
 	create-glyph 'cyrl/enghe' 0x4A5 : glyph-proc
 		include : MarkSet.e
-		include : EnGheShape XH
+		include : EnGheShape XH SLAB-SMALL-CYRILLIC
 
 	create-glyph 'Hbar' 0x126 : glyph-proc
 		include [refer-glyph 'H'] AS_BASE
