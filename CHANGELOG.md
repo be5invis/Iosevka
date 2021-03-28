@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 5.1.1
+
+ * Re-enable cursive form of Cyrillic Small HA (#922).
+ * Cyrillic Small Ef is changed to cursive in Italic Slab subfamilies (#922).
+
+
 ### 5.1.0
 
  * Fix serif length of Cyrillic Yeru under Iosevka Etoile (#922).
