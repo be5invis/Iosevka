@@ -10,6 +10,7 @@ glyph-block Digits-Eight : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : CodeLnum CodeOnum
+	glyph-block-import Letter-Blackboard : BBS BBD
 
 	local EightPr : StrokeWidthBlend 0.85 0.925
 	define [EightShape top] : begin
@@ -21,7 +22,7 @@ glyph-block Digits-Eight : begin
 			widths.rhs stroke
 			g4.right.mid (Middle - CorrectionOMidS) (top - O)
 			archv
-			g4 [mix l r p] (top - [SmoothBOf (Smooth * EightPr) Width])
+			g4 [mix l r p] (top - [SmoothBOf (Smooth * EightPr * p) Width])
 			alsoThru.g2 0.5 0.5 [widths.center stroke]
 			g4 (l) [SmoothBOf (Smooth * EightPr) Width] [widths.lhs stroke]
 			arcvh
@@ -29,7 +30,7 @@ glyph-block Digits-Eight : begin
 			archv
 			g4 (r) [SmoothAOf (Smooth * EightPr) Width] [widths.lhs stroke]
 			alsoThru.g2 0.5 0.5 [widths.center stroke]
-			g4 [mix r l p] (top - [SmoothAOf (Smooth * EightPr) Width]) [widths.rhs stroke]
+			g4 [mix r l p] (top - [SmoothAOf (Smooth * EightPr * p) Width]) [widths.rhs stroke]
 			arcvh
 			close
 
@@ -88,8 +89,57 @@ glyph-block Digits-Eight : begin
 		include : MarkSet.capital
 		include : EightCirclesShape [AdviceStroke2 2 3 CAP] CAP
 
+	define [EightCrossingAsymmetricShape top] : begin
+		local stroke : AdviceStroke2 2 3 CAP
+		local p 0.96
+		local l : SB + OX
+		local r : RightSB - OX
+		local arch : Smooth * [mix 1 EightPr 0.5]
+
+		local gap : (r - l) * 0.25
+
+		define [Spine kty] : list
+			kty (Middle - CorrectionOMidS) (top - O) [widths.lhs stroke]
+			archv
+			g4 [mix r l p] (top - [SmoothAOf (arch * p) Width])
+			alsoThru.sNeck 0.96 0.3 stroke (2 / 3)
+			g4 r [SmoothAOf arch Width] [widths.rhs stroke]
+			arcvh
+			kty (Middle + CorrectionOMidS) (O)
+
+		define [CoSpine gap1 gap2] : dispiro
+			widths.rhs stroke
+			g4.right.mid (Middle - CorrectionOMidS - gap1) (top - O)
+			g4.down.mid ([mix l r p] - gap1) (top - [SmoothBOf (arch * p) Width])
+			alsoThru.sNeck 0.8 [StrokeWidthBlend 0.32 0.375] stroke (1 / 3)
+			g4.down.mid (l + gap2) [SmoothBOf arch Width] [widths.lhs stroke]
+			g4.right.mid (Middle + CorrectionOMidS + gap2) (O)
+
+		define [CoSpineMask xFar] : spiro-outline
+			corner xFar (2 * CAP)
+			corner (Middle - CorrectionOMidS) (2 * CAP)
+			Spine corner
+			corner (Middle + CorrectionOMidS) (-CAP)
+			corner xFar (-CAP)
+
+		return : union
+			difference
+				CoSpine 0 gap
+				CoSpineMask (-Width * 4)
+				MaskBelow arch
+			difference
+				CoSpine gap 0
+				CoSpineMask (Width * 4)
+				MaskAbove (top - arch * p)
+			dispiro : Spine g4.left.mid
+
+	create-glyph 'eight.lnum.crossingAsymmetric' : glyph-proc
+		include : MarkSet.capital
+		include : EightCrossingAsymmetricShape CAP
+
 	select-variant 'eight.lnum' [CodeLnum '8'] (follow -- 'eight')
 	alias 'eight.onum' [CodeOnum '8'] 'eight.lnum'
+
 
 	# There is an "eight without lower contour" shape used for /propto
 	create-glyph 'rotetedPropto' : glyph-proc # rotetedPropto
@@ -109,7 +159,6 @@ glyph-block Digits-Eight : begin
 			alsoThru 0.5 py [widths (Stroke * py) (Stroke * (1 - py))]
 			straight.down.end l 0 [widths.heading Stroke 0 Downward]
 
-	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define [BBEightSd] : params [top swStart swEnd kTop sign OffsetLT OffsetRB OffsetC] : begin
 		define stroke : Math.max swStart swEnd
