@@ -12,9 +12,12 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth
+	glyph-block-import Letter-Blackboard : BBS BBD
 
+	define dfNarrowT : DivFrame para.diversityF
 	define [xSmallTBarLeftT df] : df.middle - TBalance - Stroke * 0.5 * HVContrast
 	define xSmallTBarLeft : xSmallTBarLeftT : DivFrame 1
+
 	define [SmallTHookShapeT sink offset top bot sw] : begin
 		local hookx : xSmallTBarLeft + (Width - SB * 2) * 0.8 + Stroke * 0.25 * HVContrast
 		local turn : [mix xSmallTBarLeft hookx 0.5] + CorrectionOMidS
@@ -28,37 +31,34 @@ glyph-block Letter-Latin-Lower-T : begin
 			g4 (hookx - offset) (bot + Hook)
 			if (sink == spiro-outline) {[corner (hookx - offset) top]} {}
 
-	define [SmallTShape top bot] : glyph-proc
+	define [SmallTShape __ top bot] : glyph-proc
 		local g : include : SmallTHookShapeT dispiro 0 top bot Stroke
 		set-base-anchor 'bottomright' g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
 		set-base-anchor 'below' [mix xSmallTBarLeft g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
-		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (top * 0.42)
+		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (XH * 0.58)
 
 		include : HCrossBar.top
 			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
 			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
 			begin XH
 
-	create-glyph 't.standard' : glyph-proc
-		include : MarkSet.b
-		include : SmallTShape CAP 0
+	define [DiagTailedSmallTHookShape df top bot sw] : begin
+		local xMid : xSmallTBarLeft + HalfStroke * HVContrast
+		return : dispiro
+			flat xMid top [widths.center.heading sw Downward]
+			DiagonalTailR df xMid bot [DiagonalTailStdDepth df sw] sw
 
-	glyph-block-import Letter-Blackboard : BBS BBD
-	create-glyph 'mathbb/t' 0x1D565 : glyph-proc
-		include : HBarTop xSmallTBarLeft (xSmallTBarLeft + BBD) CAP BBS
-		include : SmallTHookShapeT dispiro 0 CAP 0 BBS
-		include : intersection
-			VBarLeft (xSmallTBarLeft + BBD) 0 CAP BBS
-			SmallTHookShapeT spiro-outline 1 CAP 0 BBS
-		include : difference
-			HCrossBar.top
-				xSmallTBarLeft + (BBD / 2) - LongJut + TBalance2
-				xSmallTBarLeft + (BBD / 2) + LongJut + TBalance2
-				begin XH
-				begin BBS
-			Rect CAP 0 xSmallTBarLeft (xSmallTBarLeft + BBD)
+	define [TDiagTailShape df top] : glyph-proc
+		local g : include : DiagTailedSmallTHookShape df top 0 Stroke
+		set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (XH * 0.58)
 
-	define [TFlatShape df top m ext] : glyph-proc
+		include : HCrossBar.top
+			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
+			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
+			begin XH
+
+	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top [mix 1 df.div 2] 0
+	define [TFlatShapeImpl df top m ext] : glyph-proc
 		local xCrossLeft : mix 0 SB m
 		local xCrossRight : mix df.width df.rightSB m
 		local xBarLeft : [mix xCrossLeft xCrossRight 0.42] - Stroke * 0.375 * HVContrast
@@ -73,90 +73,79 @@ glyph-block Letter-Latin-Lower-T : begin
 				flat xBarLeft hd.y
 				curl xBarLeft top [heading Upward]
 		set-base-anchor 'topright' xCrossRight  CAP
-		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (top * 0.42)
+		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
 		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) 0
 
-	define dfNarrowT : DivFrame para.diversityF
-	create-glyph 't.flatHook' : glyph-proc
-		set-width dfNarrowT.width
-		include : dfNarrowT.markSet.b
-		include : TFlatShape dfNarrowT CAP [mix 1 para.diversityF 2] 0
-
-	create-glyph 't.flatHookShortNeck' : glyph-proc
-		set-width dfNarrowT.width
-		include : dfNarrowT.markSet.b
-		include : TFlatShape dfNarrowT [Math.min CAP ([mix XH CAP 0.75] + Stroke * 0.25)] [mix 1 para.diversityF 2] 0
-
-	create-glyph 't.flatHookShortNeck2' : glyph-proc
-		set-width dfNarrowT.width
-		include : dfNarrowT.markSet.b
-		include : TFlatShape dfNarrowT [Math.min CAP ([mix XH CAP 0.625] + Stroke * 0.25)] [mix 1 para.diversityF 2] 0
-
-	create-glyph 't.cross' : glyph-proc
-		define df dfNarrowT
-		set-width df.width
-		include : df.markSet.b
-		include : VBar df.middle 0 CAP
+	define [SmallTCrossBody df top bot] : glyph-proc
+		include : VBar df.middle 0 top
 		include : HCrossBar.top (df.middle - LongJut * df.div) (df.middle + LongJut * df.div) XH
-		set-base-anchor 'overlay' df.middle (CAP * 0.42)
+		set-base-anchor 'overlay' df.middle (XH * 0.58)
 
-	create-glyph 't.hooklessAsymmetric' : glyph-proc
-		define df dfNarrowT
+	define [SmallTHooklessAsymmetricBody df top bot] : glyph-proc
 		define xBar : xSmallTBarLeftT df
-		set-width df.width
-		include : df.markSet.b
-		include : VBarLeft xBar 0 CAP
+		include : VBarLeft xBar 0 top
 		include : HCrossBar.top xBar (df.middle + df.div * LongJut) XH
-		set-base-anchor 'overlay' (xBar + 0.625 * Stroke * HVContrast) (CAP * 0.42)
+		set-base-anchor 'overlay' (xBar + 0.625 * Stroke * HVContrast) (XH * 0.58)
 		set-base-anchor 'below' (xBar + HalfStroke * HVContrast) 0
 
-	define [DiagTailedSmallTHookShape df top bot sw] : begin
-		local xMid : xSmallTBarLeft + HalfStroke * HVContrast
-		return : dispiro
-			flat xMid top [widths.center.heading sw Downward]
-			DiagonalTailR df xMid bot [DiagonalTailStdDepth df sw] sw
+	define yShortNeck1 : Math.min CAP ([mix XH CAP 0.75] + Stroke * 0.25)
+	define yShortNeck2 : Math.min CAP ([mix XH CAP 0.625] + Stroke * 0.25)
+	define SmallTConfig : object
+		standard                     { [DivFrame  1] SmallTShape                  CAP         }
+		diagonalTailed               { [DivFrame  1] TDiagTailShape               CAP         }
+		flatHook                     {  dfNarrowT    SmallTFlatBody               CAP         }
+		cross                        {  dfNarrowT    SmallTCrossBody              CAP         }
+		hooklessAsymmetric           {  dfNarrowT    SmallTHooklessAsymmetricBody CAP         }
+		standardShortNeck            { [DivFrame  1] SmallTShape                  yShortNeck1 }
+		diagonalTailedShortNeck      { [DivFrame  1] TDiagTailShape               yShortNeck1 }
+		flatHookShortNeck            {  dfNarrowT    SmallTFlatBody               yShortNeck1 }
+		crossShortNeck               {  dfNarrowT    SmallTCrossBody              yShortNeck1 }
+		hooklessAsymmetricShortNeck  {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck1 }
+		standardShortNeck2           { [DivFrame  1] SmallTShape                  yShortNeck2 }
+		diagonalTailedShortNeck2     { [DivFrame  1] TDiagTailShape               yShortNeck2 }
+		flatHookShortNeck2           {  dfNarrowT    SmallTFlatBody               yShortNeck2 }
+		crossShortNeck2              {  dfNarrowT    SmallTCrossBody              yShortNeck2 }
+		hooklessAsymmetricShortNeck2 {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck2 }
 
-	define [TDiagTailShape df top] : glyph-proc
-		local g : include : DiagTailedSmallTHookShape df top 0 Stroke
-		set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (top * 0.42)
+	foreach { suffix { df body top } } [Object.entries SmallTConfig] : do
+		create-glyph "t.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.b
+			include : body df top 0
 
-		include : HCrossBar.top
-			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
-			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
-			begin XH
-
-	create-glyph 't.diagonalTailed' : glyph-proc
-		include : MarkSet.b
-		include : TDiagTailShape [DivFrame 1] CAP
-
+		turned "turnt.\(suffix)" nothing "t.\(suffix)" df.middle (XH / 2) [df.markSet.p]
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include : df.markSet.b
-		include : TFlatShape df CAP 1 0
+		include : TFlatShapeImpl df CAP 1 0
 
 	create-glyph 't.phoneticLeft.extended' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include : df.markSet.b
 		include : intersection
-			TFlatShape df CAP 1 Width
+			TFlatShapeImpl df CAP 1 Width
 			Rect CAP 0 SB (Middle + Width)
 
+	create-glyph 'mathbb/t' 0x1D565 : glyph-proc
+		include : HBarTop xSmallTBarLeft (xSmallTBarLeft + BBD) CAP BBS
+		include : SmallTHookShapeT dispiro 0 CAP 0 BBS
+		include : intersection
+			VBarLeft (xSmallTBarLeft + BBD) 0 CAP BBS
+			SmallTHookShapeT spiro-outline 1 CAP 0 BBS
+		include : difference
+			HCrossBar.top
+				xSmallTBarLeft + (BBD / 2) - LongJut + TBalance2
+				xSmallTBarLeft + (BBD / 2) + LongJut + TBalance2
+				begin XH
+				begin BBS
+			Rect CAP 0 xSmallTBarLeft (xSmallTBarLeft + BBD)
+
 	select-variant 't' 't'
-
-	turned 'turnt.standard'           nothing 't.standard'           Middle           (XH / 2) [MarkSet.p]
-	turned 'turnt.diagonalTailed'     nothing 't.diagonalTailed'     Middle           (XH / 2) [MarkSet.p]
-	turned 'turnt.cross'              nothing 't.cross'              dfNarrowT.middle (XH / 2) [dfNarrowT.markSet.p]
-	turned 'turnt.flatHook'           nothing 't.flatHook'           dfNarrowT.middle (XH / 2) [dfNarrowT.markSet.p]
-	turned 'turnt.hooklessAsymmetric' nothing 't.hooklessAsymmetric' dfNarrowT.middle (XH / 2) [dfNarrowT.markSet.p]
-	turned 'turnt.flatHookShortNeck'  nothing 't.flatHookShortNeck'  dfNarrowT.middle (XH / 2) [dfNarrowT.markSet.p]
-	turned 'turnt.flatHookShortNeck2' nothing 't.flatHookShortNeck2' dfNarrowT.middle (XH / 2) [dfNarrowT.markSet.p]
 	select-variant 'turnt' 0x287 (follow -- 't')
-
 	CreateCommaCaronComposition 't' 'tcaron' 0x165
-
 	with-related-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
 
 	create-glyph 'tltail' 0x1AB : glyph-proc
@@ -168,12 +157,12 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	create-glyph 'thooktop' 0x1AD : glyph-proc
 		include : MarkSet.e
-		include : SmallTShape (XH - HalfStroke) 0
+		include : SmallTShape [DivFrame 1] (XH - HalfStroke) 0
 		include : VerticalHook (xSmallTBarLeft + HalfStroke * HVContrast) XH HookX (-Hook)
 
 	create-glyph 'trtail' 0x288 : glyph-proc
 		include : MarkSet.if
-		include : SmallTShape CAP Descender
+		include : SmallTShape [DivFrame 1] CAP Descender
 
 	create-glyph 'tcurlytail' 0x236 : glyph-proc
 		include : MarkSet.b
