@@ -1,5 +1,15 @@
 ## Modifications since version 2.x
 
+### 5.2.0
+
+ * Add asymmetric crossing `8` (#867).
+ * Fix incorrect placement of asterisk in SS04 (#928).
+ * Fix typo in the copyright field of the NAME table (#929).
+ * Improve legibility of Cyrillic Tshe and Dje (#931).
+ * Fix broken shape of Latin Small Caps AE (#933).
+ * Add shoer-neck variants for non-flat-hook styles of `t` (#934).
+
+
 ### 5.1.1
 
  * Re-enable cursive form of Cyrillic Small HA (#922).
