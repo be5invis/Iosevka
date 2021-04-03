@@ -887,10 +887,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `t = 'standard'`, `cv44 = 1`: Standard `t` shape (default).
     + `t = 'cross'`, `cv44 = 2`: Futura-like `t` shape.
     + `t = 'flat-hook'`, `cv44 = 3`: `t` with flat hook.
-    + `t = 'hookless-asymmetric'`, `cv44 = 4`: `t` without hook and ony half the cross bar.
+    + `t = 'hookless-asymmetric'`, `cv44 = 4`: `t` without hook and with ony half the cross bar.
     + `t = 'flat-hook-short-neck'`, `cv44 = 5`: `t` with flat hook and a slightly shorter neck.
     + `t = 'flat-hook-short-neck2'`, `cv44 = 6`: `t` with flat hook and a more shorter neck.
     + `t = 'diagonal-tailed'`, `cv44 = 7`: `t` with diagonal tail.
+    + `t = 'standard-short-neck'`, `cv44 = 8`: Standard `t` shape with a shorter neck.
+    + `t = 'cross-short-neck'`, `cv44 = 9`: Futura-like `t` shape with a shorter neck.
+    + `t = 'hookless-asymmetric-short-neck'`, `cv44 = 10`: `t` without hook, with ony half the cross bar and a shorter neck.
+    + `t = 'diagonal-tailed-short-neck'`, `cv44 = 11`: `t` with diagonal tail and a shorter neck.
+    + `t = 'standard-short-neck2'`, `cv44 = 12`: Standard `t` shape with a more shorter neck.
+    + `t = 'cross-short-neck2'`, `cv44 = 13`: Futura-like `t` shape with a more shorter neck.
+    + `t = 'hookless-asymmetric-short-neck2'`, `cv44 = 14`: `t` without hook, with ony half the cross bar and a more shorter neck.
+    + `t = 'diagonal-tailed-short-neck2'`, `cv44 = 15`: `t` with diagonal tail and a more shorter neck.
   - Styles for `u`:
     + `u = 'toothed'`, `cv45 = 1`: Normal `u` with bottom-right tooth (default for Upright).
     + `u = 'toothless-corner'`, `cv45 = 2`: Toothless (corner bottom-right) `u`.
@@ -1060,6 +1068,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `8`:
     + `eight = 'crossing'`, `cv69 = 1`: `8` with crossing middle part (default).
     + `eight = 'two-circles'`, `cv69 = 2`: `8` looks like two circles joined together.
+    + `eight = 'crossing-asymmetric'`, `cv69 = 3`: `8` looks asymmetric crossing middle part.
   - Styles for `9`:
     + `nine = 'closed-contour'`, `cv70 = 1`: `9` with a more closed contour.
     + `nine = 'open-contour'`, `cv70 = 2`: `9` with a more open contour.

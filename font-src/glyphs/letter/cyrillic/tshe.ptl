@@ -14,18 +14,28 @@ glyph-block Letter-Cyrillic-Tshe : begin
 	create-glyph 'cyrl/Tshe' 0x40B : glyph-proc
 		include : MarkSet.capital
 
-		local left : [mix SB RightSB 0.15] + OX
+		local sw : AdviceStroke 2.75
+		local left : [mix SB RightSB 0.20] + OX
 		local right : RightSB - OX
 
+		local xTopBarLeft : SB - SideJut
+		local xTopBarRightSym : 2 * left + HVContrast * sw - xTopBarLeft
+		local xTopBarRight : Math.max xTopBarRightSym : mix left RightSB 0.475
+
 		include : nShoulder
-			left -- (left + Stroke * HVContrast)
+			left -- (left + sw * HVContrast)
 			right -- right
-		include : VBarLeft left 0 CAP
+			top -- [Math.min XH : if SLAB (CAP - 1.25 * VJut) XH]
+			stroke -- sw
+		include : VBarLeft left 0 CAP sw
 		include : dispiro
-			widths.rhs
-			flat (SB + OX) CAP
-			curl [mix left RightSB 0.475] CAP
+			widths.rhs sw
+			flat xTopBarLeft  CAP [if SLAB [heading Rightward] null]
+			curl xTopBarRight CAP [if SLAB [heading Rightward] null]
 
 		if SLAB : begin
-			include : CenterBottomSerif (left + HVContrast * HalfStroke) 0 Jut
-			include : CenterBottomSerif (right - HVContrast * HalfStroke) 0 Jut
+			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
+			include : CenterBottomSerif (left + 0.5 * HVContrast * sw) 0 Jut
+			include : CenterBottomSerif (right - 0.5 * HVContrast * sw) 0 Jut
+			include : DownwardLeftSerif  xTopBarLeft  CAP VJut swVJut
+			include : DownwardRightSerif xTopBarRight CAP VJut swVJut
