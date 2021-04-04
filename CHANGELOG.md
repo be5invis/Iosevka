@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 5.2.1
+
+ * Add corner-hooked variants for `r` (#935).
+
+
 ### 5.2.0
 
  * Add asymmetric crossing `8` (#867).
