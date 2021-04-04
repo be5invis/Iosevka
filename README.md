@@ -874,9 +874,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `r = 'earless-rounded'`, `cv42 = 7`: Earless (rounded top-left), serif-less `r`.
     + `r = 'earless-rounded-serifed'`, `cv42 = 8`: Earless (rounded top-left), serifed `r`.
     + `r = 'compact'`, `cv42 = 9`: Compact, serifless `r`.
-    + `r = 'compact-serifed'`, `cv42 = 10`: Compact, serifless `r`.
-    + `r = 'compact-top-serifed'`, `cv42 = 11`: Compact, serifless `r`.
-    + `r = 'compact-base-serifed'`, `cv42 = 12`: Compact, serifless `r`.
+    + `r = 'compact-serifed'`, `cv42 = 10`: Compact `r` with top and bottom serifs.
+    + `r = 'compact-top-serifed'`, `cv42 = 11`: Compact `r` with top serif.
+    + `r = 'compact-base-serifed'`, `cv42 = 12`: Compact `r` with bottom serif.
+    + `r = 'corner-hooked'`, `cv42 = 13`: `r` with vertical corner hook downwards.
+    + `r = 'corner-hooked-serifed'`, `cv42 = 14`: `r` with vertical corner hook downwards, top and bottom serifs.
+    + `r = 'corner-hooked-top-serifed'`, `cv42 = 15`: `r` with vertical corner hook downwards and top serif.
+    + `r = 'corner-hooked-base-serifed'`, `cv42 = 16`: `r` with vertical corner hook downwards and bottom serif.
   - Styles for `s`:
     + `s = 'serifless'`, `cv43 = 1`: Serifless `s` (default for Sans).
     + `s = 'unilateral-serifed'`, `cv43 = 2`: `s` with single serif at top.
