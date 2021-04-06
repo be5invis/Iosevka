@@ -923,7 +923,7 @@ const VlMenuWeight = VlCssWeight;
 
 const g_widthFixupMemory = new Map();
 const VlShapeWidth = {
-	validate: x => x >= 433 && x <= 665,
+	validate: x => x >= 416 && x <= 720,
 	fix(x) {
 		if (x >= 3 && x <= 9) {
 			if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);

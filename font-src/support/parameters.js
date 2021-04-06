@@ -8,12 +8,31 @@ function initPara(data, argv) {
 	apply(para, data, ["iosevka"]);
 	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
 	if (argv.shape.spacing) apply(para, data, ["spacing-" + argv.shape.spacing]);
-	apply(para, data, ["shapeWeight"], { shapeWeight: argv.shape.weight });
-	apply(para, data, ["shapeWidth"], { shapeWidth: argv.shape.width });
-	apply(para, data, [`s-${argv.shape.slope}`]);
+
+	applyBlendingParam(argv, para, data, "shapeWeight", "weight");
+	applyBlendingParam(argv, para, data, "shapeWidth", "width");
+	applyAlternatesParam(argv, para, data, "slope", "slope");
+
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;
 	if (argv.featureControl.noLigation) para.enableLigation = false;
 	return para;
+}
+
+function applyBlendingParam(argv, para, data, key, keyArgv) {
+	applySingleBlendingParam(argv, para, data, key, keyArgv);
+	if (argv.shape.serifs)
+		applySingleBlendingParam(argv, para, data, `${key}-serifs-${argv.shape.serifs}`, keyArgv);
+	if (argv.shape.spacing)
+		applySingleBlendingParam(argv, para, data, `${key}-spacing-${argv.shape.spacing}`, keyArgv);
+}
+function applySingleBlendingParam(argv, para, data, key, keyArgv) {
+	apply(para, data, [key], { [key]: argv.shape[keyArgv] });
+}
+function applyAlternatesParam(argv, para, data, key, keyArgv) {
+	const kBase = `${key}-${argv.shape[keyArgv]}`;
+	apply(para, data, [kBase]);
+	if (argv.shape.serifs) apply(para, data, [`${kBase}-serifs-${argv.shape.serifs}`]);
+	if (argv.shape.spacing) apply(para, data, [`${kBase}-spacing-${argv.shape.spacing}`]);
 }
 
 exports.apply = apply;
