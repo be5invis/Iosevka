@@ -77,10 +77,12 @@ class FairizedShapeSink {
 	beginShape() {}
 	endShape() {
 		if (this.lastContour.length > 2) {
-			const zFirst = this.lastContour[0],
-				zLast = this.lastContour[this.lastContour.length - 1];
-			if (isOccurrent(zFirst, zLast)) this.lastContour.pop();
-			this.contours.push(this.lastContour);
+			// TT use CW for outline, being different from Clipper
+			const c = this.lastContour.reverse();
+			const zFirst = c[0],
+				zLast = c[c.length - 1];
+			if (isOccurrent(zFirst, zLast)) c.pop();
+			this.contours.push(c);
 		}
 		this.lastContour = [];
 	}
