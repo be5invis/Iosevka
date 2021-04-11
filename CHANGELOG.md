@@ -1,6 +1,6 @@
 ## Modifications since version 2.x
 
-### 6.0.0-preview.1
+### 6.0.0-preview.2
 
  * \[**Breaking**\]: The grades for width is updated to make the unit width of Extended subfamily being 0.6em.
  * \[**Breaking**\]: Made serifed variants of `X`, `Y`, `Z`, `x` and `z` selectable via variant selector (#939).
@@ -9,6 +9,7 @@
  * Remove unnecessary serifs of Slab Italic Small Cyrillic KA (#938).
  * Add flat-hook variants of `J` (#940).
  * Add flat-arc parenthesis (#941).
+ * Fixed broken shape of Motion Serifed Cyrl/Shcha (#944).
 
 
 ### 5.2.1

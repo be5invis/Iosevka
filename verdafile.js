@@ -927,7 +927,7 @@ const VlShapeWidth = {
 	fix(x) {
 		if (x >= 3 && x <= 9) {
 			if (g_widthFixupMemory.has(x)) return g_widthFixupMemory.get(x);
-			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(576 / 500), x - 5));
+			const xCorrected = Math.round(500 * Math.pow(Math.sqrt(600 / 500), x - 5));
 			echo.warn(
 				`The build plan is using legacy width grade ${x}. ` +
 					`Converting to unit width ${xCorrected}.`
