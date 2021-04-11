@@ -1,5 +1,16 @@
 ## Modifications since version 2.x
 
+### 6.0.0-preview.1
+
+ * \[**Breaking**\]: The grades for width is updated to make the unit width of Extended subfamily being 0.6em.
+ * \[**Breaking**\]: Made serifed variants of `X`, `Y`, `Z`, `x` and `z` selectable via variant selector (#939).
+ * \[**Breaking**\]: Reorganize variants of `A`, `B`, `D`, `J`, `X`, `Y`, `Z`, `d`, `x` and `z`.
+ * Update SS02 and SS16 to better reflect their source fonts (#939).
+ * Remove unnecessary serifs of Slab Italic Small Cyrillic KA (#938).
+ * Add flat-hook variants of `J` (#940).
+ * Add flat-arc parenthesis (#941).
+
+
 ### 5.2.1
 
  * Add corner-hooked variants for `r` (#935).

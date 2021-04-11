@@ -16,13 +16,9 @@ module.exports = async function () {
 
 	const primes = getCvData(varDatParsed);
 	const composites = getSsData(varDatParsed);
-	const defaults = getDefaultCompData(varDatParsed);
+	const defaults = getCompWithLens(varDatParsed, null, x => x.composition);
 
-	return {
-		primes,
-		composites,
-		defaults: defaults
-	};
+	return { primes, composites, defaults };
 };
 
 function getCvData(parsed) {
@@ -34,9 +30,18 @@ function getCvData(parsed) {
 	return Array.from(samplerGroups.values());
 }
 
-const UPRIGHT = {};
-const OBLIQUE = { isOblique: true };
-const ITALIC = { isItalic: true };
+const mockPara = {
+	sans: {
+		upright: {},
+		oblique: { isOblique: true },
+		italic: { isItalic: true }
+	},
+	slab: {
+		upright: { slab: 2 },
+		oblique: { slab: 2, isOblique: true },
+		italic: { slab: 2, isItalic: true }
+	}
+};
 
 function getSsData(variants) {
 	const result = [
@@ -45,51 +50,73 @@ function getSsData(variants) {
 			tag: "off",
 			rank: 0,
 			description: "Default",
-			uprightComposition: {},
-			italicComposition: {},
-			obliqueComposition: {},
-			hotCharSetUpright: [],
-			hotCharSetItalic: [],
-			hotCharSetOblique: []
+			composition: {
+				sans: { upright: {}, italic: {}, oblique: {} },
+				slab: { upright: {}, italic: {}, oblique: {} }
+			},
+			hotChars: {
+				sans: { upright: [], italic: [], oblique: [] },
+				slab: { upright: [], italic: [], oblique: [] }
+			}
 		}
 	];
 
-	const hcSansUpright = buildupComposite(variants, UPRIGHT, variants.defaultComposite).hotChars;
-	const hcSansItalic = buildupComposite(variants, ITALIC, variants.defaultComposite).hotChars;
-	const hcSansOblique = buildupComposite(variants, OBLIQUE, variants.defaultComposite).hotChars;
+	const hcDefault = getCompWithLens(variants, null, x => x.hotChars);
 
 	for (const [key, composite] of variants.composites) {
 		if (!composite.tag) continue;
-		const upright = buildupComposite(variants, UPRIGHT, composite);
-		const oblique = buildupComposite(variants, OBLIQUE, composite);
-		const italic = buildupComposite(variants, ITALIC, composite);
-
 		result.push({
 			key,
 			tag: composite.tag,
 			rank: 1,
 			description: composite.description,
-			uprightComposition: upright.composition,
-			italicComposition: italic.composition,
-			obliqueComposition: oblique.composition,
-			hotCharSetUpright: uniqueHotChars(hcSansUpright, upright.hotChars),
-			hotCharSetItalic: uniqueHotChars(hcSansItalic, italic.hotChars),
-			hotCharSetOblique: uniqueHotChars(hcSansOblique, oblique.hotChars)
+			composition: getCompWithLens(variants, composite, x => x.composition),
+			hotChars: getCompWithLens(variants, composite, (x, style, slope) =>
+				uniqueHotChars(x.hotChars, hcDefault[style][slope])
+			)
 		});
 	}
 	return result;
 }
 
-function getDefaultCompData(variants) {
+function getCompWithLens(variants, c, lens) {
 	const cDefault = variants.defaultComposite;
 	const cSlab = variants.composites.get("slab");
 	return {
-		sansUpright: buildupComposite(variants, UPRIGHT, cDefault).composition,
-		sansItalic: buildupComposite(variants, ITALIC, cDefault).composition,
-		sansOblique: buildupComposite(variants, OBLIQUE, cDefault).composition,
-		slabUpright: buildupComposite(variants, UPRIGHT, cDefault, cSlab).composition,
-		slabItalic: buildupComposite(variants, ITALIC, cDefault, cSlab).composition,
-		slabOblique: buildupComposite(variants, OBLIQUE, cDefault, cSlab).composition
+		sans: {
+			upright: lens(
+				buildupComposite(variants, mockPara.sans.upright, cDefault, c),
+				"sans",
+				"upright"
+			),
+			italic: lens(
+				buildupComposite(variants, mockPara.sans.italic, cDefault, c),
+				"sans",
+				"italic"
+			),
+			oblique: lens(
+				buildupComposite(variants, mockPara.sans.oblique, cDefault, c),
+				"sans",
+				"oblique"
+			)
+		},
+		slab: {
+			upright: lens(
+				buildupComposite(variants, mockPara.slab.upright, cDefault, cSlab, c),
+				"slab",
+				"upright"
+			),
+			italic: lens(
+				buildupComposite(variants, mockPara.slab.italic, cDefault, cSlab, c),
+				"slab",
+				"italic"
+			),
+			oblique: lens(
+				buildupComposite(variants, mockPara.slab.oblique, cDefault, cSlab, c),
+				"slab",
+				"oblique"
+			)
+		}
 	};
 }
 
@@ -105,6 +132,7 @@ function buildupComposite(variants, para, ...composites) {
 	let compositionMap = new Map();
 	let hotChars = new Map();
 	for (const composite of composites) {
+		if (!composite) continue;
 		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
 			if (!prime.sampler) continue;
 			const key = getSelectorKey(prime, variant);

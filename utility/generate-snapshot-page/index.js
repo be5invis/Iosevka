@@ -58,7 +58,7 @@ async function main() {
 			applyFeature: `'${ss.tag}' ${ss.rank}`,
 			name: `stylistic-set-u-${ss.tag}-${ss.rank}`,
 			applyCallback: `cbAmendStylisticSetContents`,
-			applyCallbackArgs: { hotChars: ss.hotCharSetUpright }
+			applyCallbackArgs: { hotChars: ss.hotChars.sans.upright }
 		});
 		readmeSnapshotTasks.push({
 			el: "#packaging-sampler",
@@ -66,7 +66,7 @@ async function main() {
 			applyFeature: `'${ss.tag}' ${ss.rank}`,
 			name: `stylistic-set-i-${ss.tag}-${ss.rank}`,
 			applyCallback: `cbAmendStylisticSetContents`,
-			applyCallbackArgs: { hotChars: ss.hotCharSetItalic }
+			applyCallbackArgs: { hotChars: ss.hotChars.sans.italic }
 		});
 	}
 	await fs.writeJson(

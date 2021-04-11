@@ -143,14 +143,26 @@ class Composite {
 		this.upright = cfg.upright || cfg["upright-oblique"];
 		this.oblique = cfg.oblique || cfg["upright-oblique"];
 		this.italic = cfg.italic;
+
+		const slabOverrideCfg = cfg["slab-override"] || {};
+		this.slabOverride = {
+			design: slabOverrideCfg.design,
+			override: slabOverrideCfg.upright || slabOverrideCfg["upright-oblique"],
+			oblique: slabOverrideCfg.oblique || slabOverrideCfg["upright-oblique"],
+			italic: slabOverrideCfg.italic
+		};
 	}
 
 	decompose(para, selTree) {
 		const ans = [];
 		const cfg = Object.assign(
 			{},
-			this.design,
-			para.isItalic ? this.italic : para.isOblique ? this.oblique : this.upright
+			this.decomposeSlabOverride(this.design, this.slabOverride.design, para),
+			para.isItalic
+				? this.decomposeSlabOverride(this.italic, this.slabOverride.italic, para)
+				: para.isOblique
+				? this.decomposeSlabOverride(this.oblique, this.slabOverride.oblique, para)
+				: this.decomposeSlabOverride(this.upright, this.slabOverride.upright, para)
 		);
 		for (const [k, v] of Object.entries(cfg)) {
 			const pv = selTree.get(k, v);
@@ -158,6 +170,10 @@ class Composite {
 			ans.push(pv);
 		}
 		return ans;
+	}
+	decomposeSlabOverride(d, sd, para) {
+		if (para.slab) return Object.assign({}, d, sd);
+		else return d;
 	}
 	resolve(para, selTree, catalog, vs) {
 		if (this.inherits) {
