@@ -1,0 +1,141 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+
+glyph-block Symbol-Punctuation-At : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'at.threefold' : glyph-proc
+		set-width Width
+
+		local top : mix OperTop ParenTop 0.6
+		local bot : mix OperBot ParenBot 0.6
+		local otop : mix bot top 0.75
+		local obot : mix top bot 0.8
+
+		local sw : AdviceStroke 3.5
+		local m1 : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
+		local m2 : [mix m1 RightSB 0.52] + TanSlope * sw
+
+		local sma : SmoothA * ((RightSB - m1) / (RightSB - SB) * 1.1)
+		local smb : SmoothB * ((RightSB - m1) / (RightSB - SB) * 1.1)
+
+		include : dispiro
+			widths.lhs sw
+			flat RightSB (otop - O) [heading Leftward]
+			curl m2 (otop - O)
+			archv
+			flat m1 (otop - sma)
+			curl m1 (obot + smb)
+			arcvh
+			g4   m2 (obot + O)
+			archv
+			flat RightSB (obot + sma)
+			curl RightSB (top - SmoothB)
+			arcvh
+			g4   (Middle - CorrectionOMidS) (top - O) [widths Stroke 0]
+			archv
+			flat SB (top - SmoothA) [widths sw 0]
+			curl SB (bot + SmoothB)
+			arcvh
+			flat (Middle + CorrectionOMidS) (bot + O) [widths Stroke 0 ]
+			curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
+
+	create-glyph 'at.fourfold' : glyph-proc
+		local div para.diversityM
+		set-width (Width * div)
+
+		local top : mix OperTop ParenTop 0.6
+		local bot : mix OperBot ParenBot 0.6
+		local otop : mix bot top 0.75
+		local obot : mix top bot 0.8
+
+		local sw : AdviceStroke 4 div
+		local swh : AdviceStroke 3.75 div
+		local left : SB * div - sw * HVContrast / 3
+		local right : (Width * div - SB * div) + sw * HVContrast / 3
+		local middle: Middle * div
+
+		local m1 : [mix (left + sw / 2) (right - sw / 2) (1 / 3)] - sw * HVContrast / 2
+		local m2 : [mix (left + sw / 2) (right - sw / 2) (2 / 3)] + sw * HVContrast / 2
+
+		local sma : SmoothA * ((m2 - m1) / (Width - SB * 2) * 1.1)
+		local smb : SmoothB * ((m2 - m1) / (Width - SB * 2) * 1.1)
+
+		include : dispiro
+			widths.lhs sw
+			flat m2 (obot - O) [heading Upward]
+			curl m2 (otop - smb)
+			arcvh
+			g4   (middle - CorrectionOMidX * sw) (otop - O)
+			archv
+			flat m1 (otop - sma)
+			curl m1 (obot + smb)
+			arcvh
+			flat middle obot
+			curl (right - (m2 - m1) / 2) obot
+			archv
+			flat right (obot + sma)
+			curl right (top - SmoothB * div)
+			arcvh
+			g4   (middle - CorrectionOMidS) (top - O) [widths swh 0]
+			archv
+			flat left (top - SmoothA * div) [widths sw 0]
+			curl left (bot + SmoothB * div)
+			arcvh
+			flat (middle + CorrectionOMidS) (bot + O) [widths swh 0 ]
+			curl (right - HalfStroke + TanSlope * sw) (bot + O)
+
+	create-glyph 'at.short' : glyph-proc
+		set-width Width
+
+		local top  CAP
+		local obot 0
+		local otop [mix obot top 0.675]
+
+		local sw : AdviceStroke 3.5
+		local m1 : [mix (SB + sw) (RightSB - sw) 0.53] + sw / 2
+		local m2 : [mix SB m1 0.5] + TanSlope * sw
+
+		local sma : SmoothA * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local smb : SmoothB * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local atTurnBot (obot - sma / 4)
+
+		local shrink 0.6
+
+		include : dispiro
+			straight.up.start (m1 - (sw * (1 - shrink) * HVContrast)) (otop - smb) [widths.heading (sw * shrink) 0 Upward]
+			arcvh
+			g4 (m2 - sw * TanSlope) (otop - O) [widths.heading sw 0 Leftward]
+			archv
+			flat SB (otop - sma)
+			curl SB (obot + smb)
+			arcvh
+			g4 (m2 - sw * TanSlope) (obot + O) [heading Rightward]
+			archv
+			straight.up.end (m1 - (sw * (1 - shrink) * HVContrast)) (obot + sma) [widths.heading (sw * shrink) 0 Upward]
+
+		include : dispiro
+			widths.lhs sw
+			corner m1 (atTurnBot + sma) [heading Upward]
+			corner m1 (otop - smb) [heading Upward]
+			corner m1 otop [widths.heading (sw * shrink) 0 Upward]
+
+		include : dispiro
+			widths.lhs (sw * shrink)
+			straight.down.start (m1 - sw * shrink * HVContrast) (atTurnBot + sma) [heading Downward]
+			arcvh
+			g4 ([mix (m1 - sw * HVContrast) RightSB 0.5] + CorrectionOMidX * sw) (atTurnBot + O) [widths.lhs sw]
+			archv
+			flat RightSB (atTurnBot + sma)
+			curl RightSB (top - SmoothB)
+			hookend (top - O)
+			g4 SB (top - Hook)
+
+	select-variant 'at' '@'

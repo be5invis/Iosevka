@@ -1,0 +1,194 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Percentages : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [NarrowUnicode u] : if (para.spacing <  1) u null
+	define [WideUnicode   u] : if (para.spacing >= 1) u null
+
+	define [PercentBarCor df sw] : HVContrast / [Math.sqrt (1 - [Math.pow ((df.rightSB - df.leftSB - sw) / (CAP - 0)) 2])]
+	define [PercentBarShape df sw] : begin
+		local cor : PercentBarCor df sw
+		return : spiro-outline
+			corner df.leftSB 0
+			corner (df.rightSB - sw * cor) CAP
+			corner df.rightSB CAP
+			corner (df.leftSB + sw * cor) 0
+
+	create-glyph 'percent.dots' : glyph-proc
+		include : PercentBarShape [DivFrame 1] Stroke
+		local dotwidth ([AdviceStroke 4] * 1.5)
+		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
+		include : VBarRight RightSB 0 [mix 0 CAP 0.3] dotwidth
+
+	create-glyph 'commercialMinusSign' 0x2052 : glyph-proc
+		include : PercentBarShape [DivFrame 1] Stroke
+		include : DotAt (SB      + PeriodRadius) (CAP - PeriodRadius) PeriodRadius
+		include : DotAt (RightSB - PeriodRadius) (0   + PeriodRadius) PeriodRadius
+
+	create-glyph 'permille.NWID.dots' : glyph-proc
+		define df : DivFrame para.diversityM
+		set-width df.width
+
+		define refSw : AdviceStroke 4 df.div
+
+		include : PercentBarShape df refSw
+		local dotwidth : refSw * 1.5
+		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
+
+		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor df refSw]
+		local lowerDotWidth : 1.5 * [AdviceStroke 3 (gap / Width)]
+		include : VBarRight (RightSB - gap * 0.45) 0 [mix 0 CAP 0.3] lowerDotWidth
+		include : VBarRight RightSB                0 [mix 0 CAP 0.3] lowerDotWidth
+
+	create-glyph 'basepoint.NWID.dots' : glyph-proc
+		define df : DivFrame para.diversityM
+		define slopeDf : DivFrame (para.diversityM * 0.8)
+		set-width df.width
+
+		define refSw : AdviceStroke 5 df.div
+
+		include : PercentBarShape slopeDf refSw
+		local dotwidth : refSw * 1.5
+		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
+
+		local gap : (df.width - df.leftSB) * 0.9 - refSw * [PercentBarCor slopeDf refSw]
+		local lowerDotWidth : 1.5 * [AdviceStroke 4 (gap / Width)]
+		include : VBarRight (RightSB - gap * 0.6) 0 [mix 0 CAP 0.3] lowerDotWidth
+		include : VBarRight (RightSB - gap * 0.3) 0 [mix 0 CAP 0.3] lowerDotWidth
+		include : VBarRight RightSB                0 [mix 0 CAP 0.3] lowerDotWidth
+
+	create-glyph 'percent.ringsContinuousSlash' : glyph-proc
+		set-width Width
+		local l   : SB / 2
+		local r   : Width - l
+		local m   : mix l r (1 / 2)
+		local sma  : SmoothA * 0.5
+		local smb  : SmoothB * 0.5
+		local swRing : AdviceStroke 3.75
+		local swBar  : AdviceStroke 3.75
+		local fineBar : AdviceStroke 4.5
+		local halfGapRing : [AdviceStroke 6] / 2
+		local cor : DiagCorDs CAP (r - l) swBar
+
+		include : OShape CAP (CAP / 2 + halfGapRing) l (m - halfGapRing) swRing sma smb
+		include : OShape (CAP / 2 - halfGapRing)  0  (m + halfGapRing) r swRing sma smb
+		include : dispiro
+			corner r CAP [widths.rhs.heading (swBar * cor) Downward]
+			corner [mix r l 0.5] [mix CAP 0 0.5] [widths.center.heading (fineBar * cor) Downward]
+			corner l 0 [widths.lhs.heading (swBar * cor) Downward]
+
+		local perMilleOffset : Width + l - halfGapRing * 1.5 - m
+
+		define [ConnnectedBar] : difference
+			HBarTop ([mix l (m - halfGapRing) 0.5] - CorrectionOMidX * swRing) (r - swBar * HVContrast) CAP fineBar
+			OShapeOutline.NoOvershoot CAP (CAP / 2 + halfGapRing) l (m - halfGapRing) swRing sma smb
+
+		define [PerMilleProc] : glyph-proc
+			set-width WideWidth0
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + perMilleOffset) (r + perMilleOffset) swRing sma smb
+			include : Translate ((WideWidth0 - r - perMilleOffset) / 2) 0
+
+		define [BasePointProc] : glyph-proc
+			set-width WideWidth0
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + perMilleOffset) (r + perMilleOffset) swRing sma smb
+			include : OShape (CAP / 2 - halfGapRing) 0 (m + halfGapRing + 2 * perMilleOffset) (r + 2 * perMilleOffset) swRing sma smb
+			include : Translate ((WideWidth0 - r - 2 * perMilleOffset) / 2) 0
+
+		create-derived 'percent.ringsContinuousSlashAlsoConnected' : ConnnectedBar
+		create-derived 'permille.WWID.ringsContinuousSlash' : PerMilleProc
+		create-derived 'basepoint.WWID.ringsContinuousSlash' : BasePointProc
+		create-derived 'permille.WWID.ringsContinuousSlashAlsoConnected' : composite-proc [ConnnectedBar] [PerMilleProc]
+		create-derived 'basepoint.WWID.ringsContinuousSlashAlsoConnected' : composite-proc [ConnnectedBar] [BasePointProc]
+
+	select-variant 'permille.WWID' [WideUnicode 0x2030] (follow -- 'permille.WWID')
+	select-variant 'basepoint.WWID' [WideUnicode 0x2031] (follow -- 'permille.WWID')
+
+	create-glyph 'percent.ringsSegmentedSlash' : glyph-proc
+		set-width Width
+		local l   : SB / 2
+		local r   : Width - l
+		local m   : mix l r (1 / 2)
+		local sma  : SmoothA * 0.5
+		local smb  : SmoothB * 0.5
+		local swRing : AdviceStroke 3.5
+		local swBar : AdviceStroke 3
+		local fine : AdviceStroke 4
+		local cor : DiagCorDs CAP (r - l) swBar
+		local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
+		local pFine : 1 / 2 - [Math.max (CAP / 10) (Stroke / 2)] / [Math.hypot CAP (r - l)]
+
+		include : OShape CAP (CAP / 2) l m swRing sma smb
+		include : OShape (CAP / 2)  0  m r swRing sma smb
+		include : dispiro
+			widths.rhs (swBar * cor)
+			flat r CAP [heading Downward]
+			curl [mix r l pFine] [mix CAP 0 pFine] [widths.heading (fine * cor) 0 Downward]
+
+		include : dispiro
+			widths.rhs (swBar * cor)
+			flat l 0 [heading Upward]
+			curl [mix l r pFine] [mix 0 CAP pFine] [widths.heading (fine * cor) 0 Upward]
+
+	create-glyph : glyph-proc
+		local width : Width * para.diversityM
+		local rightSB : width - SB
+		set-width width
+		local l   : SB / 2
+		local r   : width - l
+		local m   : mix l r (1 / 2)
+		local sma  : SmoothA * 0.5 * para.diversityM
+		local smb  : SmoothB * 0.5 * para.diversityM
+		local sw   : AdviceStroke2 4 5 CAP para.diversityM
+		local fine : AdviceStroke2 5 5 CAP para.diversityM
+		local cor : HVContrast / [Math.sqrt (1 - [Math.pow ((r - l - sw) / (CAP - 0)) 2])]
+		local pTerm : (fine / 2) / [Math.hypot CAP (r - l)]
+		local pFine : 1 / 2 - (Stroke / 2) / [Math.hypot CAP (r - l)]
+
+		local otop : CAP / 2 - [Math.max (CAP / 5) (fine * 2)] / 2
+		local coOtop : CAP - otop
+
+		include : OShape CAP (CAP - otop) l m sw sma smb
+
+		include : dispiro
+			flat l [mix otop coOtop 0.3] [widths.center fine]
+			curl r (CAP - otop)          [widths.center sw]
+
+		# bottom row
+		create-derived 'permille.NWID.ringsContinuousSlash' : glyph-proc
+			local l1   : l - O
+			local r2   r
+			local gap  : (SB / 2 - O * 2) * para.diversityM
+			local fill : ((r2 - l1) - gap) / 2
+			local r1 : l1 + fill
+			local l2 : r1 + gap
+			local swp : AdviceStroke2 4 5 CAP para.diversityM
+			include : OShape otop  0  l1 r1 swp sma smb
+			include : OShape otop  0  l2 r2 swp sma smb
+
+		create-derived 'basepoint.NWID.ringsContinuousSlash' : glyph-proc
+			local l1   : l - O
+			local r3   r
+			local gap  : (SB / 2 - O) * para.diversityM
+			local fill : ((r3 - l1) - 2 * gap) / 3
+			local r1 : l1 + fill
+			local l2 : r1 + gap
+			local r2 : l2 + fill
+			local l3 : r2 + gap
+			local swp : AdviceStroke2 6 5 CAP para.diversityM
+			local smap : SmoothA * (1/3) * para.diversityM
+			local smbp : SmoothB * (1/3) * para.diversityM
+			include : OShape otop  0  l1 r1 swp smap smbp
+			include : OShape otop  0  l2 r2 swp smap smbp
+			include : OShape otop  0  l3 r3 swp smap smbp
+
+	select-variant 'percent' '%'
+	select-variant 'permille.NWID'  [NarrowUnicode 0x2030] (follow -- 'permille.NWID')
+	select-variant 'basepoint.NWID' [NarrowUnicode 0x2031] (follow -- 'permille.NWID')
