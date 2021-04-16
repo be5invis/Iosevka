@@ -10,20 +10,29 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define FORM-FLAT    0
-	define FORM-HANGING 1
+	define FORM-FLAT     0
+	define FORM-HANGING  1
+	define FORM-TOBEFLIP 2
 
+	define SLAB-NONE            0
 	define SLAB-AUTO            1
 	define SLAB-MOTION          2
 	define SLAB-SMALL-CYRILLIC  3
 
-	define [MShape top df fHanging slabType] : glyph-proc
-		local swSideBot : if fHanging Stroke : AdviceStroke 3.5 df.div
-		local swSideTop : AdviceStroke [if fHanging 5 4] df.div
+	glyph-block-export MShape
+	define [MShape] : params [top df form slabType] : glyph-proc
+		local swSideBot : match form
+			[Just FORM-HANGING] : begin Stroke
+			__                  : AdviceStroke 3.5 df.div
+		define cwSideTop : match form
+			[Just FORM-HANGING] : begin 5
+			__                  : begin 4
+		local swSideTop : AdviceStroke cwSideTop df.div
 		local halfSwMiddle : swSideTop / 2
-		local middleY : if fHanging
-			top * 0.3 / df.div
-			if SLAB Stroke 0
+		local middleY : match form
+			[Just FORM-TOBEFLIP] : top * 0.4 / df.div
+			[Just FORM-HANGING]  : top * 0.3 / df.div
+			__                   : if SLAB Stroke 0
 
 		include : dispiro
 			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
@@ -41,6 +50,7 @@ glyph-block Letter-Latin-Upper-M : begin
 			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
 
 		include : match slabType
+			[Just SLAB-NONE]   : glyph-proc
 			[Just SLAB-AUTO]   : NeedSlab SLAB : MSerifs top df.leftSB df.rightSB
 			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
 			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
