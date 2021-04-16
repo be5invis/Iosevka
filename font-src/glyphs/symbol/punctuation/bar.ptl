@@ -1,0 +1,69 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Bar : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [BarShape x gap] : glyph-proc
+		set-base-anchor 'above' x ParenTop
+		set-base-anchor 'below' x ParenBot
+		include : VBar x (ParenBot + gap) (ParenTop - gap)
+
+	create-glyph 'bar.upright' : BarShape Middle 0
+	create-glyph 'bar.italic.naturalSlope' : BarShape Middle 0
+	create-glyph 'bar.italic.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : BarShape Middle 0
+
+	create-glyph 'ligBarInsideBracketLeft' : BarShape
+		[mix SB RightSB DesignParameters.bracketOutside] + HalfStroke * HVContrast
+		Stroke + [Math.max [AdviceStroke 5] (XH / 12)]
+
+	create-glyph 'ligBarInsideBracketRight' : BarShape
+		[mix RightSB SB DesignParameters.bracketOutside] - HalfStroke * HVContrast
+		Stroke + [Math.max [AdviceStroke 5] (XH / 12)]
+
+	define [DoubleBarShape] : glyph-proc
+		set-base-anchor 'above' Middle ParenTop
+		set-base-anchor 'below' Middle ParenBot
+		local sw : AdviceStroke 3.5
+		include : VBar (Middle - Width * 0.175) ParenBot ParenTop sw
+		include : VBar (Middle + Width * 0.175) ParenBot ParenTop sw
+
+	create-glyph 'parallel.upright'             : DoubleBarShape
+	create-glyph 'parallel.italic.naturalSlope' : DoubleBarShape
+	create-glyph 'parallel.italic.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : DoubleBarShape
+
+	define [BrokenBarShape] : glyph-proc
+		local breakDist : Math.max Stroke (CAP / 8)
+		include : VBar Middle (SymbolMid + breakDist / 2) ParenTop
+		include : VBar Middle ParenBot (SymbolMid - breakDist / 2)
+
+	create-glyph 'brokenBar.upright'             : BrokenBarShape
+	create-glyph 'brokenBar.italic.naturalSlope' : BrokenBarShape
+	create-glyph 'brokenBar.italic.forceUpright' : glyph-proc
+		include : ForceUpright
+		include : BrokenBarShape
+
+	create-glyph 'palatoalveolarclick' 0x1C2 : glyph-proc
+		include [refer-glyph 'bar.upright'] AS_BASE
+		include : HBarBottom SB RightSB (SymbolMid + XH * 0.1) OperatorStroke
+		include : HBarTop SB RightSB (SymbolMid - XH * 0.1) OperatorStroke
+
+	select-variant 'bar.italic'
+	orthographic-italic 'bar' '|'
+	select-variant 'parallel.italic' (follow -- 'bar.italic')
+	orthographic-italic 'parallel' 0x2225
+	select-variant 'brokenBar.italic' (follow -- 'bar.italic')
+	orthographic-italic 'brokenBar' 0xA6
+	alias 'dentalclick' 0x1C0 'bar.upright'
+	alias 'doubleBar' 0x2016 'parallel'
+	alias 'alveolarlateralclick' 0x1C1 'parallel.upright'

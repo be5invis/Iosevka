@@ -1,0 +1,47 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Asterisk : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define asteriskCenterY : ParenTop - LongJut * 1.5
+	define asteriskKinds : list
+		list 5  1.2  0  0.4  Stroke         'asterisk'       'high'          'low'           'midXH'
+		list 5  0.85 0  0.4  Stroke         'smallasterisk'  'high'          'low'           ''
+		list 5  1    0  0.4  GeometryStroke 'opAsterisk'     'high'          'low'           ''
+		list 6  1.2  0  0.4  Stroke         'asterisk'       'hexHigh'       'hexLow'        ''
+		list 5  1.2  1  0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaLow'  ''
+	foreach [{sides size rot pFine stroke name high low midXH} : items-of asteriskKinds] : begin
+		create-glyph (name + '.' + high) : glyph-proc
+			local radius : LongJut * size
+			local fine : stroke * pFine
+			local final : 0.5 * [Math.min stroke (radius * Math.PI / sides)]
+
+			foreach j [range 0 sides] : begin
+				local s : Math.sin ((2 * j / sides + rot) * Math.PI)
+				local c : Math.cos ((2 * j / sides + rot) * Math.PI)
+				include : dispiro
+					flat Middle asteriskCenterY [widths fine fine]
+					curl (Middle + radius * s) (asteriskCenterY + radius * c) [widths final final]
+
+		create-glyph (name + '.' + low) : composite-proc
+			refer-glyph (name + '.' + high)
+			Upright
+			Translate 0 (SymbolMid - asteriskCenterY)
+			Italify
+
+		if midXH : create-glyph (name + '.' + midXH) : composite-proc
+			refer-glyph (name + '.' + high)
+			Upright
+			Translate 0 (XH / 2 - asteriskCenterY)
+			Italify
+
+	select-variant 'asterisk' '*'
+	select-variant 'asterisk/lowered' (shapeFrom -- 'asterisk')
+

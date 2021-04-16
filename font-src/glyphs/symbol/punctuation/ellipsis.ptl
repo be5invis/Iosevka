@@ -1,0 +1,61 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Ellipsis : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define [EllipsisDotRadius darkness space] : begin
+		return : 0.5 * [AdviceStroke darkness (space / Width)] * PeriodSize / Stroke
+
+	define [VerticalThreeDotsShape l r p bottom top] : glyph-proc
+		local radius : EllipsisDotRadius 5 (top - bottom)
+		local xMid : mix l r 0.5
+		local yMid : mix bottom top 0.5
+		include : DotAt [mix xMid l p] (bottom + radius) (radius - O)
+		include : DotAt xMid           yMid              (radius - O)
+		include : DotAt [mix xMid r p] (top - radius)    (radius - O)
+
+	for-width-kinds WideWidth1 "Ellipsis"
+		create-glyph [MangleName 'onedotLeader'] [MangleUnicode 0x2024] : glyph-proc
+			set-width MosaicWidth
+			local radius : EllipsisDotRadius 3.5 MosaicWidth
+			include : DotAt (MosaicWidth / 2) radius (radius - O)
+
+		create-glyph [MangleName 'twodotsLEader'] [MangleUnicode 0x2025] : glyph-proc
+			set-width MosaicWidth
+			local radius : EllipsisDotRadius 3.5 MosaicWidth
+			local left : mix 0 MosaicWidth (1 / 4)
+			local right : mix 0 MosaicWidth (3 / 4)
+			include : DotAt left radius (radius - O)
+			include : DotAt right radius (radius - O)
+
+		create-glyph [MangleName 'ellipsis'] [MangleUnicode 0x2026] : glyph-proc
+			set-width MosaicWidth
+			local radius : EllipsisDotRadius 5 MosaicWidth
+			local left : mix 0 MosaicWidth (1 / 6)
+			local right : mix 0 MosaicWidth (5 / 6)
+			include : DotAt left radius (radius - O)
+			include : DotAt (MosaicWidth / 2) radius (radius - O)
+			include : DotAt right radius (radius - O)
+
+			create-derived [MangleName 'mathCDots'] [MangleUnicode 0x22EF]
+				ApparentTranslate 0 (SymbolMid - radius)
+
+		create-glyph : glyph-proc
+			set-width MosaicWidth
+			local left : mix 0 MosaicWidth (1 / 6)
+			local right : mix 0 MosaicWidth (5 / 6)
+			create-derived [MangleName 'mathCVDots'] [MangleUnicode 0x22EE] : begin
+				VerticalThreeDotsShape left right 0 OperBot OperTop
+			create-derived [MangleName 'mathCD1Dots'] [MangleUnicode 0x22F0] : begin
+				VerticalThreeDotsShape left right (-1) OperBot OperTop
+			create-derived [MangleName 'mathCD2Dots'] [MangleUnicode 0x22F1] : begin
+				VerticalThreeDotsShape left right (+1) OperBot OperTop
+
+	create-glyph 'tricolon' 0x205D : VerticalThreeDotsShape 0 Width 0 0 XH

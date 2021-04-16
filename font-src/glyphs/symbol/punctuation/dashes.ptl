@@ -1,0 +1,64 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Dashes : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	do 'underscore'
+		define openBoxGap : Math.max (Stroke * 1.25) (XH / 4)
+		define [OpenBoxSide y] : begin
+			return : union
+				VBarLeft  SB      y (y + openBoxGap)
+				VBarRight RightSB y (y + openBoxGap)
+
+		define UnderScoreConfig : object
+			aboveBaseline { 0         }
+			high          { (-Stroke) }
+			low           { Descender }
+
+		define joiningOverlap (-Width / 6)
+
+		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
+			create-glyph "underscore.\(suffix)" : HBarBottom SB RightSB yBar
+			create-glyph "underscore.jr.\(suffix)" : HBarBottom (joiningOverlap - SB) RightSB yBar
+			create-glyph "doubleUnderscore.\(suffix)" : composite-proc
+				HBarBottom SB RightSB yBar
+				HBarBottom SB RightSB (yBar - openBoxGap)
+			create-glyph "openBox.\(suffix)" : composite-proc
+				HBarBottom SB RightSB yBar
+				OpenBoxSide (yBar + Stroke / 2)
+
+		select-variant 'underscore'       '_'
+		select-variant 'underscore.jr'    null   (follow -- 'underscore')
+		select-variant 'openBox'          0x2423 (follow -- 'underscore')
+		select-variant 'doubleUnderscore' 0x2017 (follow -- 'underscore')
+
+	create-glyph 'overline' 0x203E : HBarTop SB RightSB CAP
+	create-glyph 'hyphen' '-' : HBar SB RightSB SymbolMid
+
+	alias 'softhyphen' 0xAD  'hyphen'
+	alias 'gpHyphen' 0x2010 'hyphen'
+	alias 'nbHyphen' 0x2011 'hyphen'
+	alias 'hyphenBullet' 0x2043 'hyphen'
+	alias 'figureDash' 0x2012 'hyphen'
+
+	create-glyph 'enDash' 0x2013 : glyph-proc
+		set-width Width
+		include : HBar [mix 0 SB 0.5] [mix Width RightSB 0.5] SymbolMid
+
+	for-width-kinds WideWidth1
+		create-glyph [MangleName 'emDash'] [MangleUnicode 0x2014] : glyph-proc
+			set-width MosaicWidth
+			include : HBar 0 MosaicWidth SymbolMid
+
+		alias [MangleName 'horizontalBar'] [MangleUnicode 0x2015] [MangleName 'emDash']
+
+		create-glyph [MangleName 'doubleEmDash'] : glyph-proc
+			set-width (MosaicWidth * 2)
+			include : HBar 0 (MosaicWidth * 2) SymbolMid

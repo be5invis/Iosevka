@@ -1,0 +1,147 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Small : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	create-glyph 'period' '.' : DotAt Middle PeriodRadius (PeriodRadius - O)
+	create-glyph 'baselineDot' : DotAt Middle DotRadius (DotRadius - O)
+	create-glyph 'xhPeriod' : DotAt Middle (XH - PeriodRadius) (PeriodRadius - O)
+	create-glyph 'xhDot' : DotAt Middle (XH - DotRadius) (DotRadius - O)
+
+	define [CommaShapeT cx cy gp] : new-glyph : glyph-proc
+		set currentGlyph.gizmo [Translate 0 0]
+		include gp
+		local {.x mx1 .y my1} : GlobalTransform.apply {.x cx .y cy}
+		include : Translate (mx1) (my1)
+
+	create-glyph 'comma' ',' : glyph-proc
+		set-width Width
+		include : CommaShapeT Middle 0 : glyph-proc
+			local r : PeriodRadius + 0
+			local ro : PeriodRadius - O
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * 0.5)
+			local commaOverflow : PeriodRadius - swEnd * 0.5
+			local rFill : ro - sw / 4
+			include : union
+				spiro-outline
+					g4 rFill rFill
+					arcvh
+					g4 0 0
+					archv
+					g4 (-rFill) rFill
+					arcvh
+					g4 0 (2 * rFill)
+					archv
+					close
+				dispiro
+					g4 r r [widths.rhs (sw / 4)]
+					arcvh
+					g4 0 O [widths.rhs (sw / 2)]
+					archv
+					g4 (-ro) r
+					arcvh
+					g4 0 (r + ro)
+					archv
+					g4 ro r [widths.rhs sw]
+					quadcontrols (0 + TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
+
+	create-glyph 'invertComma' : glyph-proc
+		include : refer-glyph "period"
+
+		set-width Width
+		include : CommaShapeT Middle 0 : glyph-proc
+			local r : PeriodRadius + 0
+			local ro : PeriodRadius - O
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * 0.5)
+			local commaOverflow : PeriodRadius - swEnd * 0.5
+			local rFill : ro - sw / 4
+			include : union
+				spiro-outline
+					g4 rFill rFill
+					arcvh
+					g4 0 0
+					archv
+					g4 (-rFill) rFill
+					arcvh
+					g4 0 (2 * rFill)
+					archv
+					close
+				dispiro
+					g4 (-r) r [widths.lhs (sw / 4)]
+					arcvh
+					g4 0 O [widths.lhs (sw / 2)]
+					archv
+					g4 (ro) r
+					arcvh
+					g4 0 (r + ro)
+					archv
+					g4 (-ro) r [widths.lhs sw]
+					quadcontrols (0 - TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
+
+	create-glyph 'colon' ':' : glyph-proc
+		include : refer-glyph "period"
+		include : refer-glyph "xhPeriod"
+
+		create-derived 'colon.mid' : glyph-proc
+			include : ApparentTranslate 0 (SymbolMid - XH / 2)
+
+	create-glyph 'hollowColon' 0x2982 : glyph-proc
+		define sw : AdviceStroke 5
+		define dotRadius : Math.max PeriodRadius (XH / 8)
+		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt Middle dotRadius (dotRadius + sw / 2 - O) sw
+
+	create-glyph 'semicolon' ';' : glyph-proc
+		include : refer-glyph "comma"
+		include : refer-glyph "xhPeriod"
+
+	alias 'greekquestion' 0x37E 'semicolon'
+
+	define [RingCommaStroke mx my rad s k1x k1y k2x k2y] : begin
+		local u : my + rad
+		local d : my - rad
+		local l : mx - rad
+		local r : mx + rad
+		local fine : s * CThin
+		return : dispiro
+			widths.rhs [fallback fine]
+			g4 mx (u - s + fine) [heading Rightward]
+			archv
+			g4 (r - s + [mix fine s 0.5]) my [widths.rhs : mix fine s 0.5]
+			arcvh
+			g4 mx d [widths.rhs.heading s Leftward]
+			archv
+			g4 l my
+			arcvh
+			g4 mx u [heading Rightward]
+			archv
+			g4 r my [widths.rhs fine]
+			flat (mx + rad * k1x) (d + rad * k1y) [widths.rhs s]
+			curl (mx - rad * k2x) (d - rad * k2y)
+
+	create-glyph 'zNotationSchemaComposition' 0x2A1F : glyph-proc
+		define sw : AdviceStroke 5
+		define dotRadius : Math.max PeriodRadius (XH / 8)
+		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : intersection
+			MaskAbove Descender
+			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 1 3
+
+	create-glyph 'zNotationRelationalComposition' 0x2A3E : glyph-proc
+		define sw : AdviceStroke 6.5
+		define dotRadius : 0.625 * [Math.max PeriodRadius (XH / 8)]
+		include : RingStrokeAt Middle (0.625 * XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : intersection
+			MaskAbove (Descender * 0.75)
+			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 0.75 3

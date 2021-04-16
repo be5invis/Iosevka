@@ -1,0 +1,132 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Punctuation-Small
+
+	local quoteTop (CAP * 1.05)
+	local quoteBottom (XH * 0.85)
+
+	local yCurlyQuotes [mix quoteBottom quoteTop 0.5]
+	local commaLow (Descender * 0.9)
+	local ratio : Math.min 1 : (quoteTop - quoteBottom) / (PeriodSize - commaLow)
+
+	create-glyph 'lowSingleQuote' 0x201A : glyph-proc
+		include : refer-glyph "comma"
+		include : FlipAround Middle 0 ratio ratio
+
+	create-glyph 'openSingleQuote' 0x2018 : glyph-proc
+		include : refer-glyph "lowSingleQuote"
+		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
+
+	create-glyph 'closeSingleQuote' 0x2019 : glyph-proc
+		include : refer-glyph "openSingleQuote"
+		include : FlipAround Middle yCurlyQuotes
+
+	create-glyph 'revertSingleQuote' 0x201B : glyph-proc
+		include : refer-glyph "invertComma"
+		include : FlipAround Middle 0 ratio ratio
+		include : FlipAround Middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
+		include : FlipAround Middle yCurlyQuotes
+
+	define [DoubleQuoteProc gn] : glyph-proc
+		local dist : Width * 0.225
+		include : refer-glyph gn
+		include : Translate (-dist * 2) 0
+		include : refer-glyph gn
+		include : Translate dist 0
+
+	create-glyph 'lowDoubleQuote' 0x201E : DoubleQuoteProc 'lowSingleQuote'
+	create-glyph 'openDoubleQuote' 0x201C : DoubleQuoteProc 'openSingleQuote'
+	create-glyph 'closeDoubleQuote' 0x201D : DoubleQuoteProc 'closeSingleQuote'
+	create-glyph 'revertDoubleQuote' 0x201F : DoubleQuoteProc 'revertSingleQuote'
+
+	create-glyph 'prime' 0x2032 : glyph-proc
+		local wide : Width * 0.1
+		include : dispiro
+			widths.center (Stroke * 1.2)
+			flat (Middle + wide) quoteTop [heading Downward]
+			curl (Middle - wide) quoteBottom [widths.heading HalfStroke HalfStroke Downward]
+
+	create-glyph 'doubleprime' 0x2033 : glyph-proc
+		local d : 0.25 * (RightSB - SB)
+		include : refer-glyph "prime"
+		include : Translate (-d * 2) 0
+		include : refer-glyph "prime"
+		include : Translate d 0
+
+	create-glyph 'tripleprime' 0x2034 : glyph-proc
+		local wide : Width * 0.1
+		local d : Width * 0.3
+		local fine : 0.5 * [AdviceStroke 3.5]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle + wide) quoteTop [heading Downward]
+			curl (Middle - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle - d + wide) quoteTop [heading Downward]
+			curl (Middle - d - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle + d + wide) quoteTop [heading Downward]
+			curl (Middle + d - wide) quoteBottom [widths.heading fine fine Downward]
+
+	create-glyph 'revprime' 0x2035 : glyph-proc
+		local wide : -Width * 0.1
+		include : dispiro
+			widths.center (Stroke * 1.2)
+			flat (Middle + wide) quoteTop [heading Downward]
+			curl (Middle - wide) quoteBottom [widths.heading HalfStroke HalfStroke Downward]
+
+	create-glyph 'revdoubleprime' 0x2036 : glyph-proc
+		local d : 0.25 * (RightSB - SB)
+		include : refer-glyph "revprime"
+		include : Translate (-d * 2) 0
+		include : refer-glyph "revprime"
+		include : Translate d 0
+
+	create-glyph 'revtripleprime' 0x2037 : glyph-proc
+		local wide : -Width * 0.1
+		local d : Width * 0.3
+		local fine : 0.5 * [AdviceStroke 3.5]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle + wide) quoteTop [heading Downward]
+			curl (Middle - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle - d + wide) quoteTop [heading Downward]
+			curl (Middle - d - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (Middle + d + wide) quoteTop [heading Downward]
+			curl (Middle + d - wide) quoteBottom [widths.heading fine fine Downward]
+
+	# ASCII quotes
+	create-glyph 'asciiSingleQuote.straight' : glyph-proc
+		include : dispiro
+			widths.center (Stroke * 1.1)
+			g4.down.start Middle quoteTop [heading Downward]
+			g4 Middle quoteBottom [widths.heading (HalfStroke * 0.95) (HalfStroke * 0.95) Downward]
+
+	alias 'asciiSingleQuote.raisedComma' null 'closeSingleQuote'
+	alias 'asciiGrave.raisedInverseComma' null 'revertSingleQuote'
+	alias 'asciiGrave.raisedTurnComma' null 'openSingleQuote'
+
+	select-variant 'asciiSingleQuote' 0x27
+	select-variant 'asciiGrave' 0x60
+
+	create-glyph 'asciiDoubleQuote' 0x22 : glyph-proc
+		local dist : 0.2 * Width
+		include : refer-glyph "asciiSingleQuote.straight"
+		include : Translate (-dist * 2) 0
+		include : refer-glyph "asciiSingleQuote.straight"
+		include : Translate dist 0

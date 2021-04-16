@@ -1,0 +1,106 @@
+### Punctuation symbols
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+
+glyph-module
+
+glyph-block Symbol-Other-Phonetic : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	local triangleSize : Math.min (PeriodRadius) (XH / 5)
+
+	create-glyph 'trianglecolon' 0x2D0 : glyph-proc
+		include : union
+			spiro-outline
+				corner (Middle - triangleSize * 1.35) XH
+				corner Middle (XH - triangleSize * 2.75)
+				corner (Middle + triangleSize * 1.35) XH
+			spiro-outline
+				corner (Middle - triangleSize * 1.35) 0
+				corner Middle (0 + triangleSize * 2.75)
+				corner (Middle + triangleSize * 1.35) 0
+
+	create-glyph 'halftrianglecolon' 0x2D1 : glyph-proc
+		include : spiro-outline
+			corner (Middle - triangleSize * 1.35) XH
+			corner Middle (XH - triangleSize * 2.75)
+			corner (Middle + triangleSize * 1.35) XH
+
+	define [yOfTone tone] : mix (OperatorStroke / 2) (CAP - OperatorStroke / 2) (tone / 4)
+	define [yOfToneNeutral tone] : mix DotRadius (CAP - DotRadius) (tone / 4)
+
+	foreach tone [range 4 downtill 0] : begin
+		create-glyph ('tone' + tone) (0x2E5 + 4 - tone) : glyph-proc
+			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
+			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+		create-glyph ('toneSandhi' + tone) (0xA712 + 4 - tone) : glyph-proc
+			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
+			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+		create-glyph ('toneNeutral' + tone) (0xA708 + 4 - tone) : glyph-proc
+			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
+			include : DotAt ([mix SB RightSB 0.1] + DotRadius) [yOfToneNeutral tone] DotRadius
+		create-glyph ('toneSandhiNeutral' + tone) (0xA70D + 4 - tone) : glyph-proc
+			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
+			include : DotAt ([mix SB RightSB 0.9] - DotRadius) [yOfToneNeutral tone] DotRadius
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneStart' + toneStart + toneEnd) : glyph-proc
+			include : intersection
+				Rect CAP 0 Middle Width
+				dispiro
+					widths.center OperatorStroke
+					corner (Width / 2) [yOfTone toneStart]
+					corner (Width + Width / 2) [yOfTone toneEnd]
+		create-glyph ('toneSandhiStart' + toneStart + toneEnd) : glyph-proc
+			include : intersection
+				Rect CAP 0 Middle Width
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2) [yOfTone : mix toneEnd toneStart 2]
+					corner (Width + Width / 2) [yOfTone toneEnd]
+			include : VBar Middle 0 CAP OperatorStroke
+
+	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneEnd' + toneStart + toneEnd) : glyph-proc
+			include : intersection
+				Rect CAP 0 0 Middle
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2)         [yOfTone toneStart]
+					corner (Width + Width / 2)     [yOfTone : mix toneStart toneEnd 2]
+			include : VBar Middle 0 CAP OperatorStroke
+		create-glyph ('toneSandhiEnd' + toneStart + toneEnd) : glyph-proc
+			include : intersection
+				Rect CAP 0 0 Width
+				dispiro
+					widths.center OperatorStroke
+					corner (0 - Width / 2) [yOfTone toneStart]
+					corner (Width / 2) [yOfTone toneEnd]
+
+	foreach toneStart [range 4 downtill 0] : foreach toneMid [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
+		create-glyph ('toneMid' + toneStart + toneMid + toneEnd) : glyph-proc
+			include : intersection
+				Rect CAP 0 0 Width
+				union
+					intersection
+						dispiro
+							widths.center OperatorStroke
+							corner (0 - Width / 2)     [yOfTone toneStart]
+							corner (Width + Width / 2) [yOfTone : mix toneStart toneMid 2]
+						dispiro
+							widths.center OperatorStroke
+							corner (0 - Width / 2)     [yOfTone : mix toneEnd toneMid 2]
+							corner (Width + Width / 2) [yOfTone toneEnd]
+					dispiro
+						widths.center OperatorStroke
+						corner (0 - Width / 2) [yOfTone toneStart]
+						corner (Width / 2)     [yOfTone toneMid]
+					dispiro
+						widths.center OperatorStroke
+						corner (Width / 2)         [yOfTone toneMid]
+						corner (Width + Width / 2) [yOfTone toneEnd]
+		create-glyph ('toneSandhiMid' + toneStart + toneMid + toneEnd) : glyph-proc
+			include [refer-glyph ('toneMid' + toneStart + toneMid + toneEnd)] AS_BASE ALSO_METRICS
