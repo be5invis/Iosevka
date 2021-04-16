@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-Eszet : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
 	glyph-block-import Letter-Latin-S : SNeck
 
 	local ymiddle : [mix 0 CAP 0.5] - HalfStroke
@@ -19,12 +20,21 @@ glyph-block Letter-Latin-Eszet : begin
 		xmiddle - 1 - Stroke * TanSlope
 		Math.max (SB + Stroke * 2) [mix SB RightSB (1 / 4)]
 
-	define [TraditionalBody slab tail] : glyph-proc
+	define [TraditionalBody fFlathook slab tail] : glyph-proc
 		include : MarkSet.b
 		local l : SB * 1
-		include : dispiro
+		local xHook : [mix SB RightSB 0.75] + HalfStroke * HVContrast
+		local hd : FlatHookDepth [DivFrame 1]
+		if fFlathook
+		: then : include : dispiro
+			flat xHook CAP [widths.lhs]
+			curl (l + hd.x) CAP
+			archv
+			flat l (CAP - hd.y)
+			curl l 0 [heading Downward]
+		: else : include : dispiro
 			widths.lhs
-			g4 ([mix SB RightSB 0.75] + HalfStroke * HVContrast) (CAP - Hook)
+			g4 xHook (CAP - Hook)
 			hookstart (CAP - O)
 			flat l XH
 			curl l 0 [heading Downward]
@@ -112,8 +122,10 @@ glyph-block Letter-Latin-Eszet : begin
 		if tail : include : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook swOuter
 		if slab : include : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'eszet.traditional' : TraditionalBody SLAB false
-	create-glyph 'eszet.traditionalTailed' : TraditionalBody false true
+	create-glyph 'eszet.traditional' : TraditionalBody false SLAB false
+	create-glyph 'eszet.traditionalTailed' : TraditionalBody false false true
+	create-glyph 'eszet.traditionalFlatHook' : TraditionalBody true SLAB false
+	create-glyph 'eszet.traditionalFlatHookTailed' : TraditionalBody true false true
 	create-glyph 'eszet.sulzbacher' : SulzbacherBody SLAB false
 	create-glyph 'eszet.sulzbacherTailed' : SulzbacherBody false true
 	create-glyph 'eszet.longSSLig' : LongSSLigBody SLAB false
