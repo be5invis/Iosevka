@@ -1,9 +1,9 @@
 const Transform = require("./transform");
 const { linreg } = require("./utils");
 
-module.exports = class SpiroExpansionContext {
-	constructor() {
-		this.gizmo = Transform.Id();
+class SpiroExpansionContext1 {
+	constructor(gizmo) {
+		this.gizmo = gizmo;
 		this.controlKnots = [];
 		this.defaultD1 = 0;
 		this.defaultD2 = 0;
@@ -12,6 +12,7 @@ module.exports = class SpiroExpansionContext {
 	endShape() {}
 	moveTo(x, y, unimportant) {
 		if (unimportant) return;
+		if (!isFinite(x) || !isFinite(y)) throw new Error("NaN detected.");
 		this.controlKnots.push({
 			type: "g4",
 			d1: this.defaultD1,
@@ -20,6 +21,7 @@ module.exports = class SpiroExpansionContext {
 		});
 	}
 	arcTo(arc, x, y) {
+		if (!isFinite(x) || !isFinite(y)) throw new Error("NaN detected.");
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
 		if (!k0) throw new Error("Unreachable: lineTo called before moveTo");
 		if (k0.normalAngle == null) {
@@ -57,8 +59,21 @@ module.exports = class SpiroExpansionContext {
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
 		if (k0) k0.unimportant = true;
 	}
+
+	getPass2Knots(closed, contrast) {
+		const expanded = this.expand(contrast);
+		const middles = [];
+		for (let j = 0; j + (closed ? 1 : 0) < this.controlKnots.length; j++) {
+			middles[j] = {
+				x: 0.5 * (expanded.lhs[j].x + expanded.rhs[j].x),
+				y: 0.5 * (expanded.lhs[j].y + expanded.rhs[j].y),
+				type: this.controlKnots[j].type,
+				unimportant: this.controlKnots[j].unimportant
+			};
+		}
+		return middles;
+	}
 	expand(contrast) {
-		if (contrast == null) contrast = 1 / 0.9;
 		const lhs = [],
 			rhs = [];
 
@@ -67,21 +82,23 @@ module.exports = class SpiroExpansionContext {
 			const knot = this.controlKnots[j];
 			if (knot.unimportant) continue;
 
-			let dx = 0,
-				dy = 0;
+			let dx, dy;
 			if (knot.proposedNormal) {
-				dx = knot.proposedNormal.x - normalX(knot.normalAngle, contrast);
-				dy = knot.proposedNormal.y - normalY(knot.normalAngle, contrast);
+				dx = knot.proposedNormal.x;
+				dy = knot.proposedNormal.y;
+			} else {
+				dx = normalX(knot.normalAngle, contrast);
+				dy = normalY(knot.normalAngle, contrast);
 			}
 			lhs[j] = {
 				type: knot.type,
-				x: knot.x + knot.d1 * (dx + normalX(knot.normalAngle, contrast)),
-				y: knot.y + knot.d1 * (dy + normalY(knot.normalAngle, contrast))
+				x: knot.x + knot.d1 * dx,
+				y: knot.y + knot.d1 * dy
 			};
 			rhs[j] = {
 				type: reverseKnotType(knot.type),
-				x: knot.x - knot.d2 * (dx + normalX(knot.normalAngle, contrast)),
-				y: knot.y - knot.d2 * (dy + normalY(knot.normalAngle, contrast))
+				x: knot.x - knot.d2 * dx,
+				y: knot.y - knot.d2 * dy
 			};
 		}
 		this.interpolateUnimportantKnots(lhs, rhs);
@@ -121,7 +138,34 @@ module.exports = class SpiroExpansionContext {
 			};
 		}
 	}
-};
+}
+
+class SpiroExpansionContext2 {
+	constructor(stage1ControlKnots, gizmo) {
+		this.gizmo = gizmo;
+		this.controlKnots = stage1ControlKnots;
+		this.nKnotsProcessed = 0;
+	}
+
+	beginShape() {}
+	endShape() {}
+	moveTo(x, y, unimportant) {
+		if (unimportant) return;
+		this.nKnotsProcessed += 1;
+	}
+	arcTo(arc, x, y) {
+		if (this.nKnotsProcessed === 1) {
+			const angle = computeNormalAngle(this.gizmo, arc.deriveX0, arc.deriveY0);
+			if (isFinite(angle)) this.controlKnots[0].normalAngle = angle;
+		}
+		{
+			const angle = computeNormalAngle(this.gizmo, arc.deriveX1, arc.deriveY1);
+			if (isFinite(angle)) this.controlKnots[this.nKnotsProcessed].normalAngle = angle;
+		}
+		this.nKnotsProcessed += 1;
+	}
+}
+
 function normalX(angle, contrast) {
 	return Math.cos(angle) * contrast;
 }
@@ -131,3 +175,10 @@ function normalY(angle) {
 function reverseKnotType(ty) {
 	return ty === "left" ? "right" : ty === "right" ? "left" : ty;
 }
+function computeNormalAngle(gizmo, x, y) {
+	const tfd = gizmo.applyOffset({ x, y });
+	return Math.PI / 2 + Math.atan2(tfd.y, tfd.x);
+}
+
+exports.SpiroExpansionContext1 = SpiroExpansionContext1;
+exports.SpiroExpansionContext2 = SpiroExpansionContext2;
