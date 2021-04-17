@@ -91,27 +91,49 @@ class FairizedShapeSink {
 		this.lineTo(x, y);
 	}
 	lineTo(x, y) {
-		const z = Point.fromXY(Point.Type.Corner, x, y).round(CurveUtil.RECIP_GEOMETRY_PRECISION);
-		while (this.lastContour.length >= 2) {
-			const a = this.lastContour[this.lastContour.length - 2],
-				b = this.lastContour[this.lastContour.length - 1];
-			if (isLineExtend(a, b, z)) {
-				this.lastContour.pop();
-			} else {
-				break;
-			}
-		}
+		const z = Point.fromXY(Point.Type.Corner, x, y).round(1);
+		this.popOccurrentKnots(z);
+		this.popColinearKnots(z);
 		this.lastContour.push(z);
 	}
 	arcTo(arc, x, y) {
 		const offPoints = TypoGeom.Quadify.auto(arc, 1, 8);
-		if (offPoints) {
-			for (const z of offPoints)
-				this.lastContour.push(
-					Point.from(Point.Type.Quadratic, z).round(CurveUtil.RECIP_GEOMETRY_PRECISION)
-				);
+		for (const z of offPoints) {
+			this.lastContour.push(Point.from(Point.Type.Quadratic, z).round(1));
 		}
 		this.lineTo(x, y);
+	}
+	popOccurrentKnots(z) {
+		if (this.lastContour.length <= 0) return;
+		const last = this.lastContour[this.lastContour.length - 1];
+		if (last.type === Point.Type.Corner && last.x === z.x && last.y === z.y) {
+			this.lastContour.pop();
+		}
+	}
+	popColinearKnots(z) {
+		let kArcStart = this.lastContour.length - 2;
+		if (kArcStart >= 0) {
+			const kLast = kArcStart + 1;
+			if (
+				this.lastContour[kArcStart].type !== Point.Type.Corner &&
+				this.lastContour[kLast].type === Point.Type.Corner
+			) {
+				return;
+			}
+		}
+		while (kArcStart >= 0 && this.lastContour[kArcStart].type !== Point.Type.Corner)
+			kArcStart--;
+		if (kArcStart >= 0) {
+			const a = this.lastContour[kArcStart];
+			let fColinearH = true;
+			let fColinearV = true;
+			for (let m = kArcStart + 1; m < this.lastContour.length; m++) {
+				const b = this.lastContour[m];
+				if (!(aligned(a.y, b.y, z.y) && between(a.x, b.x, z.x))) fColinearH = false;
+				if (!(aligned(a.x, b.x, z.x) && between(a.y, b.y, z.y))) fColinearV = false;
+			}
+			if (fColinearH || fColinearV) this.lastContour.length = kArcStart + 1;
+		}
 	}
 }
 function isOccurrent(zFirst, zLast) {
@@ -122,19 +144,8 @@ function isOccurrent(zFirst, zLast) {
 		zFirst.y === zLast.y
 	);
 }
-function isLineExtend(a, b, c) {
-	return (
-		a.type === Point.Type.Corner &&
-		c.type === Point.Type.Corner &&
-		((aligned(a.x, b.x, c.x) && between(a.y, b.y, c.y)) ||
-			(aligned(a.y, b.y, c.y) && between(a.x, b.x, c.x)))
-	);
-}
 function geometryPrecisionEqual(a, b) {
-	return (
-		Math.round(a * CurveUtil.RECIP_GEOMETRY_PRECISION) ===
-		Math.round(b * CurveUtil.RECIP_GEOMETRY_PRECISION)
-	);
+	return Math.round(a) === Math.round(b);
 }
 function aligned(a, b, c) {
 	return geometryPrecisionEqual(a, b) && geometryPrecisionEqual(b, c);
