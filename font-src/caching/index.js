@@ -3,17 +3,19 @@
 const fs = require("fs-extra");
 const zlib = require("zlib");
 
+const Edition = 1;
+
 class Cache {
 	constructor() {
 		this.gfSource = {};
 		this.gfSink = {};
 	}
 	loadRep(version, rep) {
-		if (!rep || rep.version !== version) return;
+		if (!rep || rep.version !== version + "@" + Edition) return;
 		this.gfSource = rep.gf || {};
 	}
 	toRep(version) {
-		return { version, gf: this.gfSink };
+		return { version: version + "@" + Edition, gf: this.gfSink };
 	}
 
 	// Geometry flattening conversion cache
