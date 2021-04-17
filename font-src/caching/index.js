@@ -3,39 +3,38 @@
 const fs = require("fs-extra");
 const zlib = require("zlib");
 
-const EDITION = "Iosevka.PTCache.1";
-
 class Cache {
 	constructor() {
-		this.ptSource = {};
-		this.ptSink = {};
+		this.gfSource = {};
+		this.gfSink = {};
 	}
-	loadRep(rep) {
-		if (!rep || rep.edition !== EDITION) return;
-		this.ptSource = rep.pt;
+	loadRep(version, rep) {
+		if (!rep || rep.version !== version) return;
+		this.gfSource = rep.gf || {};
 	}
-	toRep() {
-		return { edition: EDITION, pt: this.ptSink };
+	toRep(version) {
+		return { version, gf: this.gfSink };
 	}
-	// Path conversion cache
-	getPT(ck) {
-		return this.ptSource[ck];
+
+	// Geometry flattening conversion cache
+	getGF(ck) {
+		return this.gfSource[ck];
 	}
-	savePT(ck, val) {
-		this.ptSink[ck] = val;
+	saveGF(ck, val) {
+		this.gfSink[ck] = val;
 	}
 }
 
 exports.load = async function (argv) {
 	let cache = new Cache();
 	if (argv.oCache && fs.existsSync(argv.oCache)) {
-		cache.loadRep(unzip(await fs.readFile(argv.oCache)));
+		cache.loadRep(argv.menu.version, unzip(await fs.readFile(argv.oCache)));
 	}
 	return cache;
 };
 
 exports.save = async function savePTCache(argv, cache) {
-	if (argv.oCache) await fs.writeFile(argv.oCache, zip(cache.toRep()));
+	if (argv.oCache) await fs.writeFile(argv.oCache, zip(cache.toRep(argv.menu.version)));
 };
 
 function unzip(buf) {

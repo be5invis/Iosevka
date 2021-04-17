@@ -1,9 +1,11 @@
 "use strict";
 
+const crypto = require("crypto");
+const TypoGeom = require("typo-geom");
+
 const Point = require("./point");
 const Transform = require("./transform");
 const CurveUtil = require("./curve-util");
-const TypoGeom = require("typo-geom");
 
 class GeometryBase {
 	asContours() {
@@ -20,6 +22,9 @@ class GeometryBase {
 	}
 	measureComplexity() {
 		return 0;
+	}
+	toShapeStringOrNull() {
+		return null;
 	}
 }
 
@@ -46,6 +51,14 @@ class ContourGeometry extends GeometryBase {
 	}
 	measureComplexity() {
 		return this.m_points.length;
+	}
+	toShapeStringOrNull() {
+		let s = "ContourGeometry{";
+		for (const z of this.m_points) {
+			s += `(${z.type};${formatN(z.x)};${formatN(z.y)})`;
+		}
+		s += "}";
+		return s;
 	}
 }
 
@@ -82,6 +95,11 @@ class ReferenceGeometry extends GeometryBase {
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
 	}
+	toShapeStringOrNull() {
+		let sTarget = this.m_glyph.geometry.toShapeStringOrNull();
+		if (!sTarget) return null;
+		return `ReferenceGeometry{${sTarget};${formatN(this.m_x)};${formatN(this.m_y)}}`;
+	}
 }
 
 class TaggedGeometry extends GeometryBase {
@@ -105,6 +123,9 @@ class TaggedGeometry extends GeometryBase {
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
+	}
+	toShapeStringOrNull() {
+		return this.m_geom.toShapeStringOrNull();
 	}
 }
 
@@ -143,6 +164,17 @@ class TransformedGeometry extends GeometryBase {
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
+	}
+	toShapeStringOrNull() {
+		const sTarget = this.m_geom.toShapeStringOrNull();
+		if (!sTarget) return null;
+		return (
+			`TransformedGeometry{${sTarget};` +
+			`${formatN(this.m_transform.xx)},${formatN(this.m_transform.xy)},` +
+			`${formatN(this.m_transform.yx)},${formatN(this.m_transform.yy)},` +
+			`${formatN(this.m_transform.x)},${formatN(this.m_transform.y)}` +
+			`}`
+		);
 	}
 }
 
@@ -193,6 +225,15 @@ class CombineGeometry extends GeometryBase {
 	measureComplexity() {
 		let s = 0;
 		for (const part of this.m_parts) s += part.measureComplexity();
+	}
+	toShapeStringOrNull() {
+		let sParts = [];
+		for (const item of this.m_parts) {
+			const sPart = item.toShapeStringOrNull();
+			if (!sPart) return null;
+			sParts.push(sPart);
+		}
+		return `CombineGeometry{${sParts.join(",")}}`;
 	}
 }
 
@@ -250,7 +291,22 @@ class BooleanGeometry extends GeometryBase {
 		let s = 0;
 		for (const operand of this.m_operands) s += operand.measureComplexity();
 	}
+	toShapeStringOrNull() {
+		let sParts = [];
+		for (const item of this.m_operands) {
+			const sPart = item.toShapeStringOrNull();
+			if (!sPart) return null;
+			sParts.push(sPart);
+		}
+		return `BooleanGeometry{${this.m_operator};${sParts.join(",")}}`;
+	}
 }
+
+exports.hashGeometry = function (geom) {
+	const s = geom.toShapeStringOrNull();
+	if (!s) return null;
+	return crypto.createHash("sha256").update(s).digest();
+};
 
 function combineWith(a, b) {
 	if (a instanceof CombineGeometry) {
@@ -258,6 +314,10 @@ function combineWith(a, b) {
 	} else {
 		return new CombineGeometry([a, b]);
 	}
+}
+
+function formatN(x) {
+	return `${Math.round(x * 0x10000)}`;
 }
 
 exports.GeometryBase = GeometryBase;
