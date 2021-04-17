@@ -9,7 +9,7 @@ const { buildOtl } = require("../otl/index");
 const { assignFontNames } = require("../meta/naming");
 const { copyFontMetrics } = require("../meta/aesthetics");
 
-module.exports = async function (argv, para, ptCache) {
+module.exports = async function (cache, para) {
 	const otd = EmptyFont();
 	const gs = buildGlyphs(para);
 
@@ -29,7 +29,7 @@ module.exports = async function (argv, para, ptCache) {
 		}
 	}
 
-	const finalGs = finalizeFont(para, gs.glyphStore, excludeChars, otd, ptCache);
+	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otd);
 	const font = convertOtd(otd, finalGs);
 	return { font, glyphStore: finalGs };
 };

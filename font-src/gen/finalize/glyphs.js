@@ -6,15 +6,15 @@ const CurveUtil = require("../../support/curve-util");
 const util = require("util");
 
 module.exports = finalizeGlyphs;
-function finalizeGlyphs(para, glyphStore, ptCache) {
+function finalizeGlyphs(cache, para, glyphStore) {
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
-	regulateGlyphStore(skew, glyphStore, ptCache);
+	regulateGlyphStore(cache, skew, glyphStore);
 	return glyphStore;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function regulateGlyphStore(skew, glyphStore, ptCache) {
+function regulateGlyphStore(cache, skew, glyphStore) {
 	for (const g of glyphStore.glyphs()) {
 		if (g.geometry.isEmpty()) continue;
 		if (!regulateCompositeGlyph(glyphStore, g)) {
@@ -24,7 +24,7 @@ function regulateGlyphStore(skew, glyphStore, ptCache) {
 		}
 	}
 	for (const g of glyphStore.glyphs()) {
-		if (!g.geometry.asReferences()) regulateSimpleGlyph(g, skew, ptCache);
+		if (!g.geometry.asReferences()) regulateSimpleGlyph(cache, skew, g);
 	}
 }
 
@@ -40,10 +40,10 @@ function regulateCompositeGlyph(glyphStore, g) {
 	return true;
 }
 
-function regulateSimpleGlyph(g, skew, ptCache) {
+function regulateSimpleGlyph(cache, skew, g) {
 	let cs = g.geometry.asContours();
 	for (const contour of cs) for (const z of contour) z.x -= z.y * skew;
-	cs = simplifyContours(cs, ptCache);
+	cs = simplifyContours(cache, cs);
 	for (const contour of cs) for (const z of contour) z.x += z.y * skew;
 
 	g.clearGeometry();
@@ -52,11 +52,12 @@ function regulateSimpleGlyph(g, skew, ptCache) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function simplifyContours(source, ptCache) {
+function simplifyContours(cache, source) {
 	const ck = CurveUtil.hashShape(source);
-	if (ptCache.source[ck]) {
-		ptCache.sink[ck] = ptCache.source[ck];
-		return CurveUtil.repToShape(ptCache.source[ck]);
+	const cached = cache.getPT(ck);
+	if (cached) {
+		cache.savePT(ck, cached);
+		return CurveUtil.repToShape(cached);
 	}
 
 	const sink = new FairizedShapeSink();
@@ -72,7 +73,7 @@ function simplifyContours(source, ptCache) {
 		CurveUtil.GEOMETRY_PRECISION
 	);
 
-	ptCache.sink[ck] = CurveUtil.shapeToRep(sink.contours);
+	cache.savePT(ck, CurveUtil.shapeToRep(sink.contours));
 	return sink.contours;
 }
 
