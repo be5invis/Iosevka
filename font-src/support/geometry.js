@@ -50,6 +50,9 @@ class ContourGeometry extends GeometryBase {
 		return !this.m_points.length;
 	}
 	measureComplexity() {
+		for (const z of this.m_points) {
+			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+		}
 		return this.m_points.length;
 	}
 	toShapeStringOrNull() {
