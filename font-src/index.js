@@ -15,10 +15,26 @@ const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
 	const paraT = await getParameters();
-	const { font, glyphStore } = BuildFont(paraT(argv));
+
+	const ptCache = await loadPTCache(argv);
+
+	const { font, glyphStore } = await BuildFont(argv, paraT(argv), ptCache);
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
+
+	await savePTCache(argv, ptCache);
 };
+
+async function loadPTCache(argv) {
+	let ptCache = { source: {}, sink: {} };
+	if (argv.ptCache && fs.existsSync(argv.ptCache)) {
+		ptCache.source = unzip(await fs.readFile(argv.ptCache));
+	}
+	return ptCache;
+}
+async function savePTCache(argv, ptCache) {
+	if (argv.ptCache) await fs.writeFile(argv.ptCache, zip(ptCache.sink));
+}
 
 // Parameter preparation
 async function getParameters() {
@@ -97,5 +113,12 @@ async function saveCharMap(argv, glyphStore) {
 			...createGrDisplaySheet(glyphStore, gn)
 		]);
 	}
-	await fs.writeFile(argv.oCharMap, zlib.gzipSync(Buffer.from(JSON.stringify(charMap), "utf-8")));
+	await fs.writeFile(argv.oCharMap, zip(charMap));
+}
+
+function unzip(buf) {
+	return JSON.parse(zlib.gunzipSync(buf));
+}
+function zip(obj) {
+	return zlib.gzipSync(Buffer.from(JSON.stringify(obj), "utf-8"));
 }

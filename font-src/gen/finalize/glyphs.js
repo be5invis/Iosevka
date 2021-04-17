@@ -6,15 +6,15 @@ const CurveUtil = require("../../support/curve-util");
 const util = require("util");
 
 module.exports = finalizeGlyphs;
-function finalizeGlyphs(para, glyphStore) {
+function finalizeGlyphs(para, glyphStore, ptCache) {
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
-	regulateGlyphStore(skew, glyphStore);
+	regulateGlyphStore(skew, glyphStore, ptCache);
 	return glyphStore;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function regulateGlyphStore(skew, glyphStore) {
+function regulateGlyphStore(skew, glyphStore, ptCache) {
 	for (const g of glyphStore.glyphs()) {
 		if (g.geometry.isEmpty()) continue;
 		if (!regulateCompositeGlyph(glyphStore, g)) {
@@ -24,7 +24,7 @@ function regulateGlyphStore(skew, glyphStore) {
 		}
 	}
 	for (const g of glyphStore.glyphs()) {
-		if (!g.geometry.asReferences()) regulateSimpleGlyph(g, skew);
+		if (!g.geometry.asReferences()) regulateSimpleGlyph(g, skew, ptCache);
 	}
 }
 
@@ -40,10 +40,10 @@ function regulateCompositeGlyph(glyphStore, g) {
 	return true;
 }
 
-function regulateSimpleGlyph(g, skew) {
+function regulateSimpleGlyph(g, skew, ptCache) {
 	let cs = g.geometry.asContours();
 	for (const contour of cs) for (const z of contour) z.x -= z.y * skew;
-	cs = simplifyContours(cs);
+	cs = simplifyContours(cs, ptCache);
 	for (const contour of cs) for (const z of contour) z.x += z.y * skew;
 
 	g.clearGeometry();
@@ -52,7 +52,13 @@ function regulateSimpleGlyph(g, skew) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function simplifyContours(source) {
+function simplifyContours(source, ptCache) {
+	const ck = CurveUtil.hashShape(source);
+	if (ptCache.source[ck]) {
+		ptCache.sink[ck] = ptCache.source[ck];
+		return CurveUtil.repToShape(ptCache.source[ck]);
+	}
+
 	const sink = new FairizedShapeSink();
 	TypoGeom.ShapeConv.transferGenericShape(
 		TypoGeom.Fairize.fairizeBezierShape(
@@ -66,6 +72,7 @@ function simplifyContours(source) {
 		CurveUtil.GEOMETRY_PRECISION
 	);
 
+	ptCache.sink[ck] = CurveUtil.shapeToRep(sink.contours);
 	return sink.contours;
 }
 

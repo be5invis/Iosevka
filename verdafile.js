@@ -277,9 +277,15 @@ const DistUnhintedTTF = file.make(
 		await target.need(Scripts, Parameters, Dependencies);
 		const charMapDir = `${BUILD}/ttf/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.cm.gz`;
+		const ptCachePath = `${charMapDir}/${fn}.ptCache.gz`;
 		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir));
 		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
-		await silently.node("font-src/index", { o: out.full, oCharMap: charMapPath, ...fi });
+		await silently.node("font-src/index", {
+			o: out.full,
+			oCharMap: charMapPath,
+			ptCache: ptCachePath,
+			...fi
+		});
 	}
 );
 

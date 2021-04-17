@@ -1,5 +1,7 @@
 "use strict";
 
+const crypto = require("crypto");
+
 const TypoGeom = require("typo-geom");
 const Point = require("./point");
 const Transform = require("./transform");
@@ -49,6 +51,36 @@ exports.ReverseCurve = class ReverseCurve {
 
 exports.convertShapeToArcs = function convertShapeToArcs(shape) {
 	return shape.map(convertContourToArcs);
+};
+
+exports.hashShape = function (shape) {
+	let s = "";
+	for (const c of shape) {
+		s += "[";
+		for (const z of c) {
+			s += `[${z.type};${Math.round(z.x * 0x10000)};${Math.round(z.y * 0x10000)}]`;
+		}
+		s += "]";
+	}
+	return crypto.createHash("sha256").update(s).digest();
+};
+
+function contourToRep(contour) {
+	let c = [];
+	for (const z of contour) c.push({ type: z.type, x: z.x, y: z.y });
+	return c;
+}
+exports.shapeToRep = function (shape) {
+	return shape.map(contourToRep);
+};
+
+function repToContour(contourRep) {
+	let c = [];
+	for (const z of contourRep) c.push(Point.fromXY(z.type, z.x, z.y));
+	return c;
+}
+exports.repToShape = function (shapeRep) {
+	return shapeRep.map(repToContour);
 };
 
 function convertContourToArcs(contour) {
