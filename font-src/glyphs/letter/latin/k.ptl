@@ -155,35 +155,36 @@ glyph-block Letter-Latin-K : begin
 
 		define slabStartX   : kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
 
-		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshRight slabStartX
+		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSlope arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight slabStartX
 
 	define [KCursiveLoopAndLegShapeImpl tailed top slabLeft slab] : glyph-proc
 		define dim : KCursiveLoopAndLegDimen top true slabLeft slab
 		include : dispiro
 			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
 			arcvh 8 2.0
-			g4.right.mid dim.arcTopX dim.arcTopY
+			g4 dim.arcTopX dim.arcTopY
 				widths.rhs.heading dim.arcStroke {.y (+1) .x dim.arcTopSlope}
-			archv
+			archv 8 2.0
 			g4.down.mid dim.arcRightX (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
 				heading {.y dim.arcRightSlope .x HVContrast}
 			arcvh
 			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
 			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
 
-		define swDiagTail Stroke
+		define swDiagTail : AdviceStroke 2 (1 - (dim.kshLeft - SB) / Width)
 		define swDiagTailAdj : swDiagTail / [mix 1 HVContrast 0.375]
-		define xDTGap : 0.10 * (RightSB - SB) - 0.125 * swDiagTail
-		define xDTStart : dim.arcTerminalX + 0.75 * swDiagTail * HVContrast + xDTGap
-		define xDTEnd : dim.kshRight - 0.8 * Hook - 0.5 * swDiagTail * HVContrast + xDTGap * 0.625
-		define tailAngle : Math.min 75 (50 + [Math.atan2 (swDiagTail / 2) Hook] / Math.PI * 180)
+		define xDTGap : 0.10 * (RightSB - SB) - (0.125 + [clamp 0 0.375 (0.5 * (Width / UPM * 2 - 1))]) * swDiagTail
+		define xDTStart : dim.arcTerminalX + swDiagTail * HVContrast + xDTGap
+		define xDTEnd : dim.kshRight - 0.8 * Hook - 0.25 * swDiagTail * HVContrast + xDTGap * 0.625
+		define tailAngle : Math.min 85 (50 + [Math.atan2 (0.75 * swDiagTail) Hook] / Math.PI * 180)
+		define dtInnerRadius : [clamp 0.125 1 : mix 1 (Width / UPM * 2) 3] * [DiagonalTailInnerRadius]
 
 		include : difference
 			if tailed
 				then : dispiro
 					flat xDTStart dim.arcTerminalY [widths.center swDiagTailAdj]
-					curl (xDTEnd + 0.125 * [DiagonalTailInnerRadius]) (0.9 * swDiagTail + 0.5 *[DiagonalTailInnerRadius])
-					DiagonalTailF 1 [DivFrame 1] xDTEnd 0 [DiagonalTailInnerRadius] tailAngle (Hook + swDiagTail / 4) swDiagTail
+					curl (xDTEnd + 0.125 * dtInnerRadius) (0.9 * swDiagTail + 0.5 * dtInnerRadius)
+					DiagonalTailF 1 [DivFrame 1] xDTEnd 0 dtInnerRadius tailAngle (Hook + swDiagTail / 4) swDiagTail
 				else : intersection
 					Rect XH 0 0 [if slab (dim.slabStartX + SideJut) (Width * 2)]
 					dispiro
