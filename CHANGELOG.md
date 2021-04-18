@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 6.0.0-preview.4
+
+ * Fix broken shape of horn diacritic and `ww` (#957).
+ * Add turned six-pointed asterisk (#958).
+
+
 ### 6.0.0-preview.3
 
  * \[**Breaking**\]: The grades for width is updated to make the unit width of Extended subfamily being 0.6em.

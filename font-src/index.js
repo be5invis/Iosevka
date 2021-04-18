@@ -7,6 +7,7 @@ const zlib = require("zlib");
 const { FontIo } = require("ot-builder");
 const Toml = require("@iarna/toml");
 
+const Caching = require("./caching/index");
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
 const VariantData = require("./support/variant-data");
@@ -15,9 +16,14 @@ const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
 	const paraT = await getParameters();
-	const { font, glyphStore } = BuildFont(paraT(argv));
+
+	const cache = await Caching.load(argv);
+
+	const { font, glyphStore } = await BuildFont(cache, paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
+
+	await Caching.save(argv, cache);
 };
 
 // Parameter preparation
@@ -97,5 +103,12 @@ async function saveCharMap(argv, glyphStore) {
 			...createGrDisplaySheet(glyphStore, gn)
 		]);
 	}
-	await fs.writeFile(argv.oCharMap, zlib.gzipSync(Buffer.from(JSON.stringify(charMap), "utf-8")));
+	await fs.writeFile(argv.oCharMap, zip(charMap));
+}
+
+function unzip(buf) {
+	return JSON.parse(zlib.gunzipSync(buf));
+}
+function zip(obj) {
+	return zlib.gzipSync(Buffer.from(JSON.stringify(obj), "utf-8"));
 }

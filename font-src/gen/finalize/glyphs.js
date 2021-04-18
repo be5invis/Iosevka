@@ -1,30 +1,24 @@
 "use strict";
 
 const TypoGeom = require("typo-geom");
+const Geom = require("../../support/geometry");
 const Point = require("../../support/point");
 const CurveUtil = require("../../support/curve-util");
 const util = require("util");
 
 module.exports = finalizeGlyphs;
-function finalizeGlyphs(para, glyphStore) {
+function finalizeGlyphs(cache, para, glyphStore) {
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
-	regulateGlyphStore(skew, glyphStore);
+	regulateGlyphStore(cache, skew, glyphStore);
 	return glyphStore;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function regulateGlyphStore(skew, glyphStore) {
+function regulateGlyphStore(cache, skew, glyphStore) {
 	for (const g of glyphStore.glyphs()) {
 		if (g.geometry.isEmpty()) continue;
-		if (!regulateCompositeGlyph(glyphStore, g)) {
-			const cs = g.geometry.asContours();
-			g.clearGeometry();
-			g.includeContours(cs, 0, 0);
-		}
-	}
-	for (const g of glyphStore.glyphs()) {
-		if (!g.geometry.asReferences()) regulateSimpleGlyph(g, skew);
+		if (!regulateCompositeGlyph(glyphStore, g)) flattenSimpleGlyph(cache, skew, g);
 	}
 }
 
@@ -40,14 +34,23 @@ function regulateCompositeGlyph(glyphStore, g) {
 	return true;
 }
 
-function regulateSimpleGlyph(g, skew) {
-	let cs = g.geometry.asContours();
-	for (const contour of cs) for (const z of contour) z.x -= z.y * skew;
-	cs = simplifyContours(cs);
-	for (const contour of cs) for (const z of contour) z.x += z.y * skew;
+function flattenSimpleGlyph(cache, skew, g) {
+	const ck = Geom.hashGeometry(g.geometry);
+	const cached = cache.getGF(ck);
+	if (ck && cached) {
+		g.clearGeometry();
+		g.includeContours(CurveUtil.repToShape(cached), 0, 0);
+		cache.saveGF(ck, cached);
+	} else {
+		let cs = g.geometry.asContours();
+		for (const contour of cs) for (const z of contour) z.x -= z.y * skew;
+		cs = simplifyContours(cs);
+		for (const contour of cs) for (const z of contour) z.x += z.y * skew;
 
-	g.clearGeometry();
-	g.includeContours(cs, 0, 0);
+		g.clearGeometry();
+		g.includeContours(cs, 0, 0);
+		if (ck) cache.saveGF(ck, CurveUtil.shapeToRep(cs));
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +68,6 @@ function simplifyContours(source) {
 		sink,
 		CurveUtil.GEOMETRY_PRECISION
 	);
-
 	return sink.contours;
 }
 

@@ -1029,7 +1029,7 @@ glyph-block Marks : begin
 	# horn and angle marks
 	define [HornDim attX attY overshootX overshootY yrP] : begin
 		local radius commaAboveRadius
-		local hornFine : Math.min (radius * 0.8) (markFine * 1.75)
+		local hornFine : Math.min (radius * 0.75) (markFine * 1.75)
 		local hornStroke : Math.min (radius * 1) (markFine * 1.75)
 		local startX : attX + 2 * radius
 		local startY : attY + yrP * radius + (aboveMarkTop - aboveMarkBot) / 2
@@ -1046,20 +1046,18 @@ glyph-block Marks : begin
 
 	define [HornShape attX attY overshootX overshootY yrP] : glyph-proc
 		local [object radius hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY yrP
-		local swStart : Math.min (radius / 2) ShoulderFine
-		local tSlope : shoulderMidSlope [mix swStart hornFine 0.5] [mix swStart hornFine 0.75]
 		include : union
-			RingAt (startX - radius) startY (radius + OX)
+			RingAt (startX - radius) startY (radius - hornFine / 8)
 			dispiro
-				g4.down.start (startX + OX) (startY) [widths.rhs.heading swStart Downward]
+				g4 (startX + OX) (startY) [widths.rhs (hornFine / 4)]
 				arcvh
-				g4.left.mid (startX - radius) (startY - radius) [widths.rhs.heading [mix swStart hornFine 0.25] Leftward]
+				g4 (startX - radius) (startY - radius)
 				archv
-				g4.up.mid (startX - 2 * radius) (startY) [widths.rhs.heading [mix swStart hornFine 0.5] Upward]
+				g4 (startX - 2 * radius) (startY)
 				arcvh
-				g4.right.mid (startX - radius) (startY + radius) [widths.rhs.heading [mix swStart hornFine 0.75] { .y 1 .x tSlope }]
+				g4 (startX - radius) (startY + radius) [widths.rhs (hornFine / 2)]
 				archv
-				g4.down.mid startX startY [widths.rhs.heading hornFine Downward]
+				g4 startX startY [widths.rhs hornFine]
 				quadcontrols.g4 0 0.75 16 : object : blend : lambda [t]
 					widths.rhs [mix hornFine hornStroke t]
 				g4 (attX - overshootX - HalfStroke * HVContrast) (attY - overshootY - Stroke) [widths.rhs hornStroke]

@@ -3,9 +3,9 @@
 const finalizeGlyphs = require("./glyphs");
 const gcFont = require("./gc");
 
-module.exports = function finalizeFont(para, glyphStore, excludedCodePoints, restFont) {
+module.exports = function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
 	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont, {});
-	glyphStore = finalizeGlyphs(para, glyphStore);
+	glyphStore = finalizeGlyphs(cache, para, glyphStore);
 	validateMonospace(para, glyphStore);
 	return glyphStore;
 };

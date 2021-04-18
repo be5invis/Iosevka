@@ -1139,12 +1139,14 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `tilde = 'high'`, `cv72 = 1`: Higher tilde `~`.
     + `tilde = 'low'`, `cv72 = 2`: Lower tilde `~`.
   - Styles for `*`:
-    + `asterisk = 'high'`, `cv73 = 1`: Higher five-pointed asterisk `*`.
-    + `asterisk = 'low'`, `cv73 = 2`: Lower five-pointed asterisk `*`.
-    + `asterisk = 'hex-high'`, `cv73 = 3`: Higher six-pointed asterisk `*`.
-    + `asterisk = 'hex-low'`, `cv73 = 4`: Lower six-pointed asterisk `*`.
-    + `asterisk = 'flip-penta-high'`, `cv73 = 5`: Higher five-pointed and turned asterisk `*`.
-    + `asterisk = 'flip-penta-low'`, `cv73 = 6`: Lower five-pointed and turned asterisk `*`.
+    + `asterisk = 'penta-high'`, `cv73 = 1`: Higher five-pointed asterisk `*`.
+    + `asterisk = 'penta-low'`, `cv73 = 2`: Lower five-pointed asterisk `*`.
+    + `asterisk = 'flip-penta-high'`, `cv73 = 3`: Higher five-pointed and turned asterisk `*`.
+    + `asterisk = 'flip-penta-low'`, `cv73 = 4`: Lower five-pointed and turned asterisk `*`.
+    + `asterisk = 'hex-high'`, `cv73 = 5`: Higher six-pointed asterisk `*`.
+    + `asterisk = 'hex-low'`, `cv73 = 6`: Lower six-pointed asterisk `*`.
+    + `asterisk = 'turn-hex-high'`, `cv73 = 7`: Higher turned six-pointed asterisk `*`.
+    + `asterisk = 'turn-hex-low'`, `cv73 = 8`: Lower turned six-pointed asterisk `*`.
   - Styles for `_`:
     + `underscore = 'above-baseline'`, `cv74 = 1`: Extra-high `_`, placed right below baseline.
     + `underscore = 'high'`, `cv74 = 2`: Higher underscore `_`, placed right below baseline.

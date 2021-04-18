@@ -51,6 +51,24 @@ exports.convertShapeToArcs = function convertShapeToArcs(shape) {
 	return shape.map(convertContourToArcs);
 };
 
+function contourToRep(contour) {
+	let c = [];
+	for (const z of contour) c.push({ type: z.type, x: z.x, y: z.y });
+	return c;
+}
+exports.shapeToRep = function (shape) {
+	return shape.map(contourToRep);
+};
+
+function repToContour(contourRep) {
+	let c = [];
+	for (const z of contourRep) c.push(Point.fromXY(z.type, z.x, z.y));
+	return c;
+}
+exports.repToShape = function (shapeRep) {
+	return shapeRep.map(repToContour);
+};
+
 function convertContourToArcs(contour) {
 	if (!contour || !contour.length) return [];
 

@@ -157,10 +157,12 @@ class SpiroExpansionContext2 {
 		if (this.nKnotsProcessed === 1) {
 			const angle = computeNormalAngle(this.gizmo, arc.deriveX0, arc.deriveY0);
 			if (isFinite(angle)) this.controlKnots[0].normalAngle = angle;
+			else throw new Error("NaN angle detected.");
 		}
 		{
 			const angle = computeNormalAngle(this.gizmo, arc.deriveX1, arc.deriveY1);
 			if (isFinite(angle)) this.controlKnots[this.nKnotsProcessed].normalAngle = angle;
+			else throw new Error("NaN angle detected.");
 		}
 		this.nKnotsProcessed += 1;
 	}
