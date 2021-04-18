@@ -9,6 +9,8 @@ glyph-module
 glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
 
 	define FORM-FLAT     0
 	define FORM-HANGING  1
@@ -53,23 +55,17 @@ glyph-block Letter-Latin-Upper-M : begin
 			flat (xRightTop - halfSwMiddle) top [widths.heading 0 swSideTop Downward]
 			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
 
+		local sfT : SerifFrame top 0 xLeftTop  xRightTop
+		local sfB : SerifFrame top 0 df.leftSB df.rightSB
 		include : match slabType
 			[Just SLAB-NONE] : glyph-proc
-			[Just SLAB-AUTO] : NeedSlab SLAB : composite-proc
-				tagged 'serifLT' : LeftwardTopSerif  xLeftTop top SideJut
-				tagged 'serifRT' : RightwardTopSerif xRightTop top SideJut
-				tagged 'serifLB' : CenterBottomSerif (df.leftSB + swSideBot / 2 * HVContrast) 0 Jut
-				tagged 'serifRB' : CenterBottomSerif (df.rightSB - swSideBot / 2 * HVContrast) 0 Jut
-			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
-			[Just SLAB-SMALL-CYRILLIC] : NeedSlab SLAB : composite-proc
-				tagged 'serifLT' : LeftwardTopSerif xLeftTop top SideJut
-				tagged 'serifRT' : NeedNotItalic : RightwardTopSerif xRightTop top SideJut
-				tagged 'serifLB' : if para.isItalic
-					LeftwardBottomSerif df.leftSB 0 SideJut
-					CenterBottomSerif (df.leftSB + swSideBot / 2 * HVContrast) 0 Jut
-				tagged 'serifRB' : if para.isItalic
-					RightwardBottomSerif df.rightSB 0 SideJut
-					CenterBottomSerif (df.rightSB - swSideBot / 2 * HVContrast) 0 Jut
+			[Just SLAB-AUTO] : NeedSlab SLAB
+				composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
+			[Just SLAB-MOTION] : composite-proc sfT.lt.outer
+			[Just SLAB-SMALL-CYRILLIC] : NeedSlab SLAB
+				composite-proc sfT.lt.outer [NeedNotItalic sfT.rt.outer]
+					if para.isItalic sfB.lb.outer sfB.lb.full
+					if para.isItalic sfB.rb.outer sfB.rb.full
 
 	define MConfig : object
 		hanging                             { FORM-HANGING SLAB-AUTO            false }

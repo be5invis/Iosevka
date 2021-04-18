@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Upper-A : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-V : VShapeOutline VShape
 	glyph-block-export LambdaShape AMaskShape DeltaShape
 
@@ -34,24 +35,25 @@ glyph-block Letter-Latin-Upper-A : begin
 		straightTriSerifed    { true   SLAB-TRI  true  }
 		curlyTriSerifed       { false  SLAB-TRI  true  }
 
-	define [ASerifs df top kind] : glyph-proc : match kind
-		[Just SLAB-TRI] : begin
-			include : LeftwardTopSerif df.middle top (MidJutSide + Stroke * HVContrast * 0.25)
-		[Just SLAB-TOP] : begin
-			include : LeftwardTopSerif Middle top [mix MidJutSide LongJut 0.5]
+	define [ASerifs df top fBaseSlabs kind] : glyph-proc : begin
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
+		if fBaseSlabs : include : composite-proc sf.lb.full sf.rb.full
+		match kind
+			[Just SLAB-TRI] : begin
+				include : LeftwardTopSerif df.middle top (MidJutSide + Stroke * HVContrast * 0.25)
+			[Just SLAB-TOP] : begin
+				include : LeftwardTopSerif df.middle top [mix MidJutSide LongJut 0.5]
 
 	foreach { suffix { fStraightBar slabKind fBaseSlabs } } [Object.entries AConfig] : do
 		define [AShapeImpl mak top] : glyph-proc
 			local df : DivFrame 1
 			include : df.markSet.(mak)
 			set-base-anchor 'trailing' (df.rightSB - markHalfStroke) 0
-			include : VShape df top Stroke fStraightBar (slab -- fBaseSlabs)
+			include : VShape df top Stroke fStraightBar
 			include : FlipAround Middle (top / 2)
 			define yBar : ABarPosition fBaseSlabs top
-			include : intersection
-				HBarTop 0 Width yBar
-				AMaskShape df top Stroke fStraightBar
-			include : ASerifs df top slabKind
+			include : intersection [HBarTop 0 Width yBar] [AMaskShape df top Stroke fStraightBar]
+			include : ASerifs df top fBaseSlabs slabKind
 
 		create-glyph "A.\(suffix)" : AShapeImpl "capital" CAP
 		create-glyph "smcpA.\(suffix)" : AShapeImpl "e" XH
@@ -64,11 +66,10 @@ glyph-block Letter-Latin-Upper-A : begin
 
 	# Lambda
 	define [LambdaShape] : params [df top sw barStraight [slab SLAB]] : glyph-proc
-		include : VShape df top sw barStraight (slab -- false)
+		include : VShape df top sw barStraight
 		include : FlipAround df.middle (top / 2)
-		if slab : begin
-			include : tagged 'serif' : CenterBottomSerif (SB + sw / 2 * HVContrast) 0 Jut
-			include : tagged 'serif' : CenterBottomSerif (RightSB - sw / 2 * HVContrast) 0 Jut
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
+		include : NeedSlab slab : composite-proc sf.lb.full sf.rb.full
 
 	create-glyph 'grek/Lambda.straight' : composite-proc [MarkSet.capital]
 		LambdaShape [DivFrame 1] CAP Stroke true

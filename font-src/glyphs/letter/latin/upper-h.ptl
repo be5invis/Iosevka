@@ -10,22 +10,28 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
 	define SLAB-AUTO            1
 	define SLAB-MOTION          2
 	define SLAB-SMALL-CYRILLIC  3
 
+	define [HSerifs t b l r slabType] : begin
+		local sf : SerifFrame t b l r
+		return : match slabType
+			[Just SLAB-AUTO]   : begin
+				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
+			[Just SLAB-MOTION] : begin sf.lt.outer
+			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
+				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
+				NeedSlab SLAB : composite-proc sf.lt.outer sf.rb.outer
+
 	define [HShape top slabType] : glyph-proc
 		include : tagged 'strokeL' : VBarLeft SB 0 top
 		include : tagged 'strokeR' : VBarRight RightSB 0 top
 		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
-		include : match slabType
-			[Just SLAB-AUTO]   : NeedSlab SLAB : HSerifs top
-			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic] [NeedSlab SLAB : HSerifs top]
-				NeedSlab SLAB : composite-proc
-					tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-					tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+
+		include : HSerifs top 0 SB RightSB slabType
 
 	create-glyph 'H.standard' : glyph-proc
 		include : MarkSet.capital
@@ -95,16 +101,8 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBar (SB - O) (right + O) (top * HBarPos)
 		include : HBarTop (right - Stroke * 0.1) barRight top
 
-		if SLAB : begin
-			include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
-			include : match slabType
-				[Just SLAB-AUTO]   : HSerifs top SB right
-				[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-				[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
-					then : HSerifs top SB right
-					else : glyph-proc
-						if SLAB : include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-						if SLAB : include : tagged 'serifRB' : RightwardBottomSerif right 0 SideJut
+		include : HSerifs top 0 SB right slabType
+		if SLAB : include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
 
 
 	create-glyph 'cyrl/EnGhe' 0x4A4 : glyph-proc

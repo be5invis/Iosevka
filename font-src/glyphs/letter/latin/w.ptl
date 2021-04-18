@@ -9,6 +9,7 @@ glyph-module
 glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-Upper-M : MShape
 
 	define FORM-CURLY      0
@@ -152,18 +153,14 @@ glyph-block Letter-Latin-W : begin
 
 		local oSlabPos : if bodyType (O * 2) 0
 
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
+		local sfm : SerifFrame top 0 (df.leftSB + oSlabPos) (df.rightSB - oSlabPos)
 		include : match slabType
-			[Just SERIFS-AUTO]   : NeedSlab SLAB : VSerifs top df.leftSB df.rightSB
-			[Just SERIFS-MOTION] : tagged 'serifLT' : LeftwardTopSerif (df.leftSB + oSlabPos) top SideJut
-			[Just SERIFS-CURSIVE] : glyph-proc
-				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif (df.leftSB + oSlabPos) top SideJut
-			[Just SERIFS-DOUBLE-V] : glyph-proc
-				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  (df.leftSB + oSlabPos) top SideJut
-				if SLAB : include : tagged 'serifRT' : RightwardTopSerif (df.rightSB - oSlabPos) top SideJut
-			[Just SERIFS-ASYMMETRIC] : glyph-proc
-				include : NeedSlab SLAB : VSerifs top df.leftSB df.rightSB
-				eject-contour 'serifLT'
-				if SLAB : include : tagged 'serifLT' : LeftwardTopSerif  (df.leftSB + oSlabPos) top SideJut
+			[Just SERIFS-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
+			[Just SERIFS-MOTION] : begin sfm.lt.outer
+			[Just SERIFS-CURSIVE] : NeedSlab SLAB sfm.lt.outer
+			[Just SERIFS-DOUBLE-V] : NeedSlab SLAB : composite-proc sfm.lt.outer sfm.rt.outer
+			[Just SERIFS-ASYMMETRIC] : NeedSlab SLAB : composite-proc sfm.lt.outer sfm.rt.full
 
 	define [WCursiveImpl df top bodyType slabType] : glyph-proc
 		local fine : AdviceStroke 3.25 df.div
@@ -194,20 +191,21 @@ glyph-block Letter-Latin-W : begin
 			flat (df.middle - (mfine - fine / 2) * HVContrast) y3 [widths.heading 0 mfine Upward]
 			curl (df.middle - (mfine - fine / 2) * HVContrast) y4 [heading Upward]
 
+		local sf : SerifFrame top 0 x1 df.rightSB
 		include : match slabType
-			[Just SERIFS-CURSIVE] : if SLAB
-				tagged 'serifLT' : LeftwardTopSerif x1 top SideJut
-				glyph-proc
-			[Just SERIFS-MOTION]  : tagged 'serifLT' : LeftwardTopSerif x1 top SideJut
+			[Just SERIFS-CURSIVE] : NeedSlab SLAB sf.lt.outer
+			[Just SERIFS-MOTION]  : begin sf.lt.outer
 			___                   : glyph-proc
 
 	define [WVertSides df top bodyType slabType] : glyph-proc
 		include : new-glyph : glyph-proc
 			include : MShape top df (form -- 2) (slabType -- 0)
 			include : FlipAround (df.width / 2) (top / 2)
+
+		local sf : SerifFrame top 0 df.leftSB df.rightSB
 		include : match slabType
-			[Just SERIFS-AUTO]   : NeedSlab SLAB : VSerifs top df.leftSB df.rightSB
-			[Just SERIFS-MOTION] : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
+			[Just SERIFS-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
+			[Just SERIFS-MOTION] : begin sf.lt.outer
 			___                  : glyph-proc
 
 	define WConfig : object

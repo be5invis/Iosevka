@@ -10,7 +10,7 @@ glyph-block Letter-Latin-V : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-export VShape VShapeOutline
-	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius SerifFrame
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define VCornerHalfWidth : HalfStroke * HVContrast * 1.15
@@ -65,7 +65,7 @@ glyph-block Letter-Latin-V : begin
 			corner (df.middle - cornerHW) 0
 			corner df.middle [Math.min sw : if barStraight VShapeFineStraight VShapeFine]
 
-	define [VShape] : params [df top [sw Stroke] barStraight [slab SLAB]] : glyph-proc
+	define [VShape] : params [df top [sw Stroke] barStraight] : glyph-proc
 		define cornerHW : VCornerHalfWidth * sw / Stroke
 		define fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 		define dgCor : DiagCor (2 * top) Width 0 (2 * sw)
@@ -102,8 +102,6 @@ glyph-block Letter-Latin-V : begin
 			#bottom cap
 			include : VBottomCapShape df barStraight sw
 
-		if slab : include : VSerifs top
-
 	define [VCursiveShapeBarPos k] : mix SB RightSB k
 	define [VCursiveShape] : params [k top [sw Stroke]] : glyph-proc
 		define xBar : VCursiveShapeBarPos k
@@ -122,43 +120,52 @@ glyph-block Letter-Latin-V : begin
 			g4 xArcRight yArcRight
 			g4 xArcEnd yArcEnd
 
+	define [VSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
+		composite-proc sf.lt.full sf.rt.full
+	define [VMotionSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
+		composite-proc sf.lt.outer
+
 	create-glyph 'V.straight' : glyph-proc
 		include : MarkSet.capital
 		include : VShape [DivFrame 1] CAP Stroke true
+		include : NeedSlab SLAB : VSerifs CAP
 	create-glyph 'V.curly' : glyph-proc
 		include : MarkSet.capital
 		include : VShape [DivFrame 1] CAP Stroke false
+		include : NeedSlab SLAB : VSerifs CAP
 	create-glyph 'V.straightMotionSerifed' : glyph-proc
 		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke true (slab -- false)
-		include : LeftwardTopSerif SB CAP SideJut
+		include : VShape [DivFrame 1] CAP Stroke true
+		include : VMotionSerifs CAP
 	create-glyph 'V.curlyMotionSerifed' : glyph-proc
 		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke false (slab -- false)
-		include : LeftwardTopSerif SB CAP SideJut
+		include : VShape [DivFrame 1] CAP Stroke false
+		include : VMotionSerifs CAP
 
 	create-glyph 'v.straight' : glyph-proc
 		include : MarkSet.e
 		include : VShape [DivFrame 1] XH Stroke true
+		include : NeedSlab SLAB : VSerifs XH
 	create-glyph 'v.curly' : glyph-proc
 		include : MarkSet.e
 		include : VShape [DivFrame 1] XH Stroke false
+		include : NeedSlab SLAB : VSerifs XH
 	create-glyph 'v.cursive' : glyph-proc
 		include : MarkSet.e
 		include : VCursiveShape 0 XH Stroke
 	create-glyph 'v.straightMotionSerifed' : glyph-proc
 		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke true (slab -- false)
-		include : LeftwardTopSerif SB XH SideJut
+		include : VShape [DivFrame 1] XH Stroke true
+		include : VMotionSerifs XH
 	create-glyph 'v.curlyMotionSerifed' : glyph-proc
 		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke false (slab -- false)
-		include : LeftwardTopSerif SB XH SideJut
+		include : VShape [DivFrame 1] XH Stroke false
+		include : VMotionSerifs XH
 	create-glyph 'v.cursiveMotionSerifed' : glyph-proc
 		local pxBar : 1 / 16
 		include : MarkSet.e
 		include : VCursiveShape pxBar XH Stroke
-		include : LeftwardTopSerif [VCursiveShapeBarPos pxBar] XH (SideJut + [VCursiveShapeBarPos pxBar] - SB)
+		include : tagged 'serifLT' : LeftwardTopSerif [VCursiveShapeBarPos pxBar] XH (SideJut + [VCursiveShapeBarPos pxBar] - SB)
 
 
 	define [VHooktopShape df barStraight top] : glyph-proc
