@@ -1,5 +1,16 @@
-const Transform = require("./transform");
 const { linreg } = require("./utils");
+
+class BiKnot {
+	constructor(type, x, y, d1, d2) {
+		this.type = type;
+		this.x = x;
+		this.y = y;
+		this.d1 = d1;
+		this.d2 = d2;
+		this.origTangent = null;
+		this.proposedNormal = null;
+	}
+}
 
 class SpiroExpansionContext1 {
 	constructor(gizmo) {
@@ -13,30 +24,22 @@ class SpiroExpansionContext1 {
 	moveTo(x, y, unimportant) {
 		if (unimportant) return;
 		if (!isFinite(x) || !isFinite(y)) throw new Error("NaN detected.");
-		this.controlKnots.push({
-			type: "g4",
-			d1: this.defaultD1,
-			d2: this.defaultD2,
-			...this.gizmo.apply({ x, y })
-		});
+		const tfZ = this.gizmo.apply({ x, y });
+		this.controlKnots.push(new BiKnot("g2", tfZ.x, tfZ.y, this.defaultD1, this.defaultD2));
 	}
 	arcTo(arc, x, y) {
 		if (!isFinite(x) || !isFinite(y)) throw new Error("NaN detected.");
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
 		if (!k0) throw new Error("Unreachable: lineTo called before moveTo");
-		if (k0.normalAngle == null) {
-			const tfDerive0 = this.gizmo.applyOffset({ x: arc.deriveX0, y: arc.deriveY0 });
-			k0.normalAngle = Math.PI / 2 + Math.atan2(tfDerive0.y, tfDerive0.x);
+		if (k0.origTangent == null) {
+			k0.origTangent = this.gizmo.applyOffset({ x: arc.deriveX0, y: arc.deriveY0 });
 		}
 		{
 			const tfDerive1 = this.gizmo.applyOffset({ x: arc.deriveX1, y: arc.deriveY1 });
-			this.controlKnots.push({
-				type: "g4",
-				d1: k0.d1,
-				d2: k0.d2,
-				...this.gizmo.apply({ x, y }),
-				normalAngle: Math.PI / 2 + Math.atan2(tfDerive1.y, tfDerive1.x)
-			});
+			const tfZ = this.gizmo.apply({ x, y });
+			const bz = new BiKnot("g2", tfZ.x, tfZ.y, k0.d1, k0.d2);
+			bz.origTangent = tfDerive1;
+			this.controlKnots.push(bz);
 		}
 	}
 	setWidth(l, r) {
@@ -87,8 +90,8 @@ class SpiroExpansionContext1 {
 				dx = knot.proposedNormal.x;
 				dy = knot.proposedNormal.y;
 			} else {
-				dx = normalX(knot.normalAngle, contrast);
-				dy = normalY(knot.normalAngle, contrast);
+				dx = normalX(knot.origTangent, contrast);
+				dy = normalY(knot.origTangent, contrast);
 			}
 			lhs[j] = {
 				type: knot.type,
@@ -155,24 +158,27 @@ class SpiroExpansionContext2 {
 	}
 	arcTo(arc, x, y) {
 		if (this.nKnotsProcessed === 1) {
-			const angle = computeNormalAngle(this.gizmo, arc.deriveX0, arc.deriveY0);
-			if (isFinite(angle)) this.controlKnots[0].normalAngle = angle;
+			const d = this.gizmo.applyOffset({ x: arc.deriveX0, y: arc.deriveY0 });
+			if (isTangentValid(d)) this.controlKnots[0].origTangent = d;
 			else throw new Error("NaN angle detected.");
 		}
 		{
-			const angle = computeNormalAngle(this.gizmo, arc.deriveX1, arc.deriveY1);
-			if (isFinite(angle)) this.controlKnots[this.nKnotsProcessed].normalAngle = angle;
+			const d = this.gizmo.applyOffset({ x: arc.deriveX1, y: arc.deriveY1 });
+			if (isTangentValid(d)) this.controlKnots[this.nKnotsProcessed].origTangent = d;
 			else throw new Error("NaN angle detected.");
 		}
 		this.nKnotsProcessed += 1;
 	}
 }
 
-function normalX(angle, contrast) {
-	return Math.cos(angle) * contrast;
+function isTangentValid(d) {
+	return isFinite(d.x) && isFinite(d.y);
 }
-function normalY(angle) {
-	return Math.sin(angle);
+function normalX(tangent, contrast) {
+	return contrast * (-tangent.y / Math.hypot(tangent.x, tangent.y));
+}
+function normalY(tangent) {
+	return tangent.x / Math.hypot(tangent.x, tangent.y);
 }
 function reverseKnotType(ty) {
 	return ty === "left" ? "right" : ty === "right" ? "left" : ty;

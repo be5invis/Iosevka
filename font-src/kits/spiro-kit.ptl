@@ -185,6 +185,11 @@ export : define [SetupBuilders args] : begin
 	define [convertSpiroToBezier knots closed ctx] : begin
 		return : SpiroJs.spiroToBezierOnContext knots closed ctx CurveUtil.SPIRO_PRECISION
 
+	define [iterateNormals s closed] : begin
+		local knotsP2 : s.getPass2Knots closed [fallback s.contrast Contrast]
+		local s2 : new SpiroExpansionContext2 s.controlKnots s.gizmo
+		SpiroJs.spiroToArcsOnContext knotsP2 closed s2
+
 	define [dispiro] : let [args : {}.slice.call arguments 0] : lambda [] : begin
 		define CLOSED true
 		local s : new SpiroExpansionContext1 (this.gizmo || GlobalTransform)
@@ -195,10 +200,8 @@ export : define [SetupBuilders args] : begin
 				if af : af.apply this args
 
 		SpiroJs.spiroToArcsOnContext knots closed s
-		local knotsP2 : s.getPass2Knots closed [fallback s.contrast Contrast]
-		# console.log knotsP2
-		local s2 : new SpiroExpansionContext2 s.controlKnots s.gizmo
-		SpiroJs.spiroToArcsOnContext knotsP2 closed s2
+		iterateNormals s closed
+		iterateNormals s closed
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 
 		if closed : then
