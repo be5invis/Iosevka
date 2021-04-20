@@ -38,7 +38,9 @@ class ContourGeometry extends GeometryBase {
 	}
 	asContours() {
 		if (this.isEmpty()) return [];
-		else return [this.m_points];
+		let c1 = [];
+		for (const z of this.m_points) c1.push(Point.from(z.type, z));
+		return [c1];
 	}
 	asReferences() {
 		return null;

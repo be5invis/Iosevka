@@ -3,7 +3,7 @@
 const fs = require("fs-extra");
 const zlib = require("zlib");
 
-const Edition = 1;
+const Edition = 2;
 
 class Cache {
 	constructor() {
