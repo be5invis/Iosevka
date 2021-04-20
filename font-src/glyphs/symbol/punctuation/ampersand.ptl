@@ -14,7 +14,7 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 
 	define sw : AdviceStroke2 2.5 3 CAP
 	define fineAmp : AdviceStroke 3.5
-	define pxUpperLoopRight 0.875
+	define pxUpperLoopRight : 0.75 + 0.5 * Stroke / (RightSB - SB)
 	define pxUpperLoopLeft  0.05
 	define pXTerminal 1.1
 	define pStraightBar 0.4
@@ -30,33 +30,40 @@ glyph-block Symbol-Punctuation-Ampersand : begin
 	define xUpperLoopTop : mix xUpperLoopLeft xUpperLoopRight 0.5
 	define yMockUpperLoopLeftBottom : CAP - smaUpperLoop - smbUpperLoop * 0.3
 
-	create-glyph 'ampersand.closed' : difference
-		dispiro
-			widths.rhs fineAmp
-			flat (RightSB - O) CapMiddle [heading Downward]
-			curl (RightSB - O) SmoothA
-			arcvh
-			g4   (Middle + CorrectionOMidX * sw) O [widths.rhs sw]
-			archv
-			g4   (SB + O) SmoothB
-			alsoThru 0.5 0.5 [widths.center sw]
-			g4   xUpperLoopRight yUpperLoopRight [widths.lhs sw]
-			arcvh
-			g4   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
-			archv
-			g4   xUpperLoopLeft yUpperLoopLeft
-			flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
-			curl [mix xUpperLoopLeft xTerminal 2] (-yMockUpperLoopLeftBottom)
-		Rect 0 (-CAP * 2) xTerminal (Width * 2)
+	define xClosedAmpersandBottom : [mix SB RightSB 0.44] + (CorrectionOMidX + 0.125) * sw
+	define [ClosedAmpersandLead] : begin
+		define x1 : mix SB RightSB 0.80
+		define x2 : [mix SB RightSB pXTerminal] + sw * HVContrast * 0.1
+		define y1   0
+		define y2 : CAP * 0.375 + sw / 2
+		define k1   0.5
+		return : intersection [MaskBelow y2] : dispiro
+			flat [mix x1 x2 4]  [mix y1 y2 4]  [widths.rhs : AdviceStroke 3]
+			curl [mix x1 x2 k1] [mix y1 y2 k1]
+			g4.left.mid xClosedAmpersandBottom O [widths.rhs sw]
 
-	create-glyph 'ampersand.upperOpen' : union
+	create-glyph 'ampersand.closed' : union
+		ClosedAmpersandLead sw
 		difference
 			dispiro
-				widths.rhs fineAmp
-				flat (RightSB - O) CapMiddle [heading Downward]
-				curl (RightSB - O) SmoothA
+				g4.left.mid xClosedAmpersandBottom O [widths.rhs sw]
+				archv
+				g4   (SB + O) SmoothB
+				alsoThru 0.5 0.5 [widths.center sw]
+				g4   xUpperLoopRight yUpperLoopRight [widths.lhs sw]
 				arcvh
-				g4   (Middle + CorrectionOMidX * sw) O [widths.rhs sw]
+				g4   (xUpperLoopTop - CorrectionOMidX * sw) (CAP - O)
+				archv
+				g4   xUpperLoopLeft yUpperLoopLeft
+				flat [mix xUpperLoopLeft xTerminal pStraightBar] [mix yMockUpperLoopLeftBottom 0 pStraightBar]
+				curl [mix xUpperLoopLeft xTerminal 2] (-yMockUpperLoopLeftBottom)
+			Rect 0 (-CAP * 2) xTerminal (Width * 2)
+
+	create-glyph 'ampersand.upperOpen' : union
+		ClosedAmpersandLead sw
+		difference
+			dispiro
+				g4.left.mid xClosedAmpersandBottom O [widths.rhs sw]
 				archv
 				g4   (SB + O) SmoothB
 				alsoThru 0.5 0.5 [widths.center sw]
