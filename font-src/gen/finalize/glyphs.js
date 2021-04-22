@@ -41,7 +41,7 @@ function flattenSimpleGlyph(cache, skew, g) {
 	if (ck && cached) {
 		g.clearGeometry();
 		g.includeContours(CurveUtil.repToShape(cached), 0, 0);
-		cache.saveGF(ck, cached);
+		cache.refreshGF(ck);
 	} else {
 		const tfBack = new Transform(1, -skew, 0, 1, 0, 0);
 		const tfForward = new Transform(1, +skew, 0, 1, 0, 0);

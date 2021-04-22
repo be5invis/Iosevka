@@ -1,4 +1,5 @@
 "use strict";
+
 const fs = require("fs-extra");
 const wawoff = require("wawoff2");
 

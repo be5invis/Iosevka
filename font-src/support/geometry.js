@@ -310,7 +310,7 @@ class BooleanGeometry extends GeometryBase {
 exports.hashGeometry = function (geom) {
 	const s = geom.toShapeStringOrNull();
 	if (!s) return null;
-	return crypto.createHash("sha256").update(s).digest();
+	return crypto.createHash("sha256").update(s).digest("hex");
 };
 
 function combineWith(a, b) {
