@@ -3,6 +3,7 @@
 const fs = require("fs-extra");
 const path = require("path");
 const zlib = require("zlib");
+const { encode } = require("@msgpack/msgpack");
 
 const { FontIo } = require("ot-builder");
 const Toml = require("@iarna/toml");
@@ -103,12 +104,5 @@ async function saveCharMap(argv, glyphStore) {
 			...createGrDisplaySheet(glyphStore, gn)
 		]);
 	}
-	await fs.writeFile(argv.oCharMap, zip(charMap));
-}
-
-function unzip(buf) {
-	return JSON.parse(zlib.gunzipSync(buf));
-}
-function zip(obj) {
-	return zlib.gzipSync(Buffer.from(JSON.stringify(obj), "utf-8"));
+	await fs.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
 }

@@ -290,30 +290,29 @@ glyph-block CommonShapes : begin
 		include : OBarLeftRoundedTopShape top (Width - right) (top - yTerminal)
 		include : FlipAround Middle (top / 2)
 
-	define SERIF_SHIFT_X 0.6
 	define [LeftwardTopSerif x y length _sw] : glyph-proc
 		local sw : fallback _sw Stroke
 		include : dispiro
 			flat (x + sw / 2 * HVContrast) y [widths.heading sw 0 Leftward]
-			curl (x - length - TanSlope * (sw * SERIF_SHIFT_X)) y
+			curl (x - length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define [LeftwardBottomSerif x y length _sw] : glyph-proc
 		local sw : fallback _sw Stroke
 		include : dispiro
 			flat (x + sw / 2 * HVContrast) y [widths.heading 0 sw Leftward]
-			curl (x - length + TanSlope * (sw * SERIF_SHIFT_X)) y
+			curl (x - length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define [RightwardTopSerif x y length _sw] : glyph-proc
 		local sw : fallback _sw Stroke
 		include : dispiro
 			flat (x - sw / 2 * HVContrast) y [widths.heading 0 sw Rightward]
-			curl (x + length - TanSlope * (sw * SERIF_SHIFT_X)) y
+			curl (x + length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define [RightwardBottomSerif x y length _sw] : glyph-proc
 		local sw : fallback _sw Stroke
 		include : dispiro
 			flat (x - sw / 2 * HVContrast) y [widths.heading sw 0 Rightward]
-			curl (x + length + TanSlope * (sw * SERIF_SHIFT_X)) y
+			curl (x + length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define [CenterTopSerif x y length _sw] : CenterTopSerifAsymmetric x y length length _sw
 
@@ -322,14 +321,14 @@ glyph-block CommonShapes : begin
 	define [CenterTopSerifAsymmetric x y l r _sw] : begin
 		local sw : fallback _sw Stroke
 		return : dispiro
-			flat (x + r - TanSlope * (sw * SERIF_SHIFT_X)) y [widths sw 0]
-			curl (x - l - TanSlope * (sw * SERIF_SHIFT_X)) y
+			flat (x + r - TanSlope * (sw * DesignParameters.serifShiftX)) y [widths sw 0]
+			curl (x - l - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define [CenterBottomSerifAsymmetric x y l r _sw] : begin
 		local sw : fallback _sw Stroke
 		return : dispiro
-			flat (x + r + TanSlope * (sw * SERIF_SHIFT_X)) y [widths 0 sw]
-			curl (x - l + TanSlope * (sw * SERIF_SHIFT_X)) y
+			flat (x + r + TanSlope * (sw * DesignParameters.serifShiftX)) y [widths 0 sw]
+			curl (x - l + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
 	define VJutSw : AdviceStroke 3.5
 	define [DownwardRightSerif x y length sw] : glyph-proc
@@ -353,43 +352,8 @@ glyph-block CommonShapes : begin
 			flat x y [heading Upward]
 			curl x (y + length) [heading Upward]
 
-	define sideSerifK 0.5
-	define [JutIn left right] : Math.min Jut (HalfStroke + [Math.max (Stroke * TanSlope) ((right - left - Stroke * 2 * HVContrast) * 0.4)])
 	define [NeedSlab level p] : if level p [glyph-proc]
 	define [NeedNotItalic p] : if para.isItalic [glyph-proc] p
-	define [VSerifs top _left _right] : glyph-proc
-		local left : fallback _left SB
-		local right : fallback _right RightSB
-		local jutIn : JutIn left right
-		include : tagged 'serifLT' : CenterTopSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) top Jut jutIn
-		include : tagged 'serifRT' : CenterTopSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) top jutIn Jut
-
-	define [HSerifs top _left _right] : glyph-proc
-		local left : fallback _left SB
-		local right : fallback _right RightSB
-		local jutIn : JutIn left right
-		include : VSerifs top _left _right
-		include : tagged 'serifLB'
-			CenterBottomSerifAsymmetric (left + Stroke * sideSerifK * HVContrast) 0 Jut jutIn
-		include : tagged 'serifRB'
-			CenterBottomSerifAsymmetric (right - Stroke * sideSerifK * HVContrast) 0 jutIn Jut
-
-	define [CyrISerifs top _left _right] : glyph-proc
-		local left : fallback _left SB
-		local right : fallback _right RightSB
-		include : LeftwardBottomSerif left 0 SideJut
-		include : RightwardTopSerif right top SideJut
-		include : CenterTopSerif (left + Stroke * sideSerifK * HVContrast) top Jut
-		include : tagged 'serifRB'
-			CenterBottomSerif (right - Stroke * sideSerifK * HVContrast) 0 Jut
-
-	define [WithAIHSerifsMask top bottom left right s] : if [not SLAB] s : begin
-		local leftCenter : left + HalfStroke * HVContrast
-		local rightCenter : right - HalfStroke * HVContrast
-		local adj : TanSlope * Stroke * SERIF_SHIFT_X
-		return : intersection s : union
-			Rect top [mix top bottom 0.5] (leftCenter - Jut) (rightCenter + Jut - adj)
-			Rect [mix top bottom 0.5] bottom (leftCenter - Jut + adj) (rightCenter + Jut)
 
 	define [DiagCor dy dx dyt dxt] : begin
 		local ay : Math.max 0 : [Math.abs dy] - [fallback dyt 0]
@@ -442,14 +406,6 @@ glyph-block CommonShapes : begin
 			arcvh
 			flat (x + extend - [if (extend > 0) 0.01 (-0.01)]) (y - depth)
 			curl (x + extend) (y - depth)
-
-	define [LegShape] : params [ztop zbot xb [fine Stroke]] : glyph-proc
-		include : dispiro
-			widths.lhs fine
-			flat ztop.x ztop.y [heading Downward]
-			curl xb (zbot.y + LongJut)
-			alsoThruThem {{0.5 0.94}}
-			g4.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
 	define [LeftHook x y xextend] : glyph-proc
 		local fine : AdviceStroke 4.25
@@ -605,33 +561,6 @@ glyph-block CommonShapes : begin
 
 	define [ForceUpright] : glyph-proc [set this.gizmo : Translate 0 0]
 
-	define [CreateWaveShape dist sw _phaesShift] : begin
-		define WaveResolution 64
-		define WaveMagnitude : dist * (3 / 4) - sw / 2
-		define WaveAdj : TanSlope * WaveMagnitude * (-0.75)
-		define phaseShift : fallback _phaesShift 0
-		define [WaveShapeImpl] : params [left right ts te xsJoin xfJoin diagJoinS diagJoinF] : glyph-proc
-			local resolution : Math.ceil (WaveResolution * (te - ts))
-			local knots {}
-			foreach [pr : range 0 till resolution] : begin
-				local theta : (phaseShift + [mix ts te (pr / resolution)]) * Math.PI * 2
-				local waveRelY : (-1) * [Math.sin theta] - 0.075 * [Math.sin (theta * 3)]
-				knots.push : g2
-					(WaveAdj * waveRelY) + [mix left right (pr / resolution)]
-					SymbolMid + WaveMagnitude * waveRelY
-			include : dispiro
-				widths.center sw
-				if (xsJoin === nothing) {} :  if diagJoinS
-					list [g2                   xsJoin SymbolMid]
-					list [straight.right.start xsJoin SymbolMid]
-				begin knots
-				if (xfJoin === nothing) {} :  if diagJoinF
-					list [g2                   xfJoin SymbolMid]
-					list [straight.right.end   xfJoin SymbolMid]
-
-		define [WaveShape] : params [left right xsJoin xfJoin diagJoinS diagJoinF [waveCount 1] [unitWidth Width]] : WaveShapeImpl (unitWidth * -left) (unitWidth * (1 + right)) (-left * waveCount) ((1 + right) * waveCount) xsJoin xfJoin diagJoinS diagJoinF
-		return WaveShape
-
 	define [NameUni unicode] : begin
 		local hex : [unicode.toString 16].toUpperCase
 		while (hex.length < 4) : set hex : '0' + hex
@@ -665,4 +594,4 @@ glyph-block CommonShapes : begin
 		corner [mix x1 x2 (-k)]  [mix y1 y2 (-k)]
 		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
 
-	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterBottomSerif DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif NeedSlab NeedNotItalic VSerifs HSerifs CyrISerifs HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LegShape LeftHook HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender CyrLeftDescender FlipAround ScaleAround Realign ForceUpright DiagCor CreateWaveShape NameUni PointingTo WithAIHSerifsMask WithTransform clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical ExtLineCenter DiagCorDs HCrossBar VERY-FAR MaskAbove MaskBelow MaskLeft MaskRight
+	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterTopSerifAsymmetric CenterBottomSerif CenterBottomSerifAsymmetric DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif NeedSlab NeedNotItalic HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LeftHook HooktopLeftBar FlatSlashShape hookstart hookend CyrDescender CyrLeftDescender FlipAround ScaleAround Realign ForceUpright DiagCor NameUni PointingTo WithTransform clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical ExtLineCenter DiagCorDs HCrossBar VERY-FAR MaskAbove MaskBelow MaskLeft MaskRight

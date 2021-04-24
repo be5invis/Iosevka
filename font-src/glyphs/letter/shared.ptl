@@ -2,6 +2,7 @@ $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from '../../support/utils'
 import [Dotless CvDecompose] from "../../support/gr"
+import [ DesignParameters ] from "../../meta/aesthetics"
 
 glyph-module
 
@@ -370,3 +371,42 @@ glyph-block Letter-Shared-Shapes : begin
 			curl cx (cy + sw + rInY)
 			arcvh 8
 			DiagonalTailF (-1) df cx cy rInY DiagTailDefaultAngle depth sw
+
+	define [JutIn left right] : Math.min Jut (HalfStroke + [Math.max (Stroke * TanSlope) ((right - left - Stroke * 2 * HVContrast) * 0.4)])
+
+	glyph-block-export SerifFrame
+	define [SerifFrame] : params [top bot left right [sw Stroke]] : begin
+		local jutIn : JutIn left right
+		local lBarCenter : left + 0.5 * sw * HVContrast
+		local rBarCenter : right - 0.5 * sw * HVContrast
+		return : object
+			lt : object
+				full : tagged 'serifLT' : CenterTopSerifAsymmetric lBarCenter top Jut jutIn sw
+				outer : tagged 'serifLT' : LeftwardTopSerif left top SideJut sw
+			rt : object
+				full : tagged 'serifRT' : CenterTopSerifAsymmetric rBarCenter top jutIn Jut sw
+				outer : tagged 'serifRT' : RightwardTopSerif right top SideJut sw
+			lb : object
+				full : tagged 'serifLB' : CenterBottomSerifAsymmetric lBarCenter bot Jut jutIn sw
+				outer : tagged 'serifLB' : LeftwardBottomSerif left bot SideJut sw
+			rb : object
+				full : tagged 'serifRB' : CenterBottomSerifAsymmetric rBarCenter bot jutIn Jut sw
+				outer : tagged 'serifRB' : RightwardBottomSerif right bot SideJut sw
+
+	glyph-block-export WithAIHSerifsMask
+	define [WithAIHSerifsMask top bottom left right s] : if [not SLAB] s : begin
+		local leftCenter : left + HalfStroke * HVContrast
+		local rightCenter : right - HalfStroke * HVContrast
+		local adj : TanSlope * Stroke * DesignParameters.serifShiftX
+		return : intersection s : union
+			Rect top [mix top bottom 0.5] (leftCenter - Jut) (rightCenter + Jut - adj)
+			Rect [mix top bottom 0.5] bottom (leftCenter - Jut + adj) (rightCenter + Jut)
+
+	glyph-block-export LegShape
+	define [LegShape] : params [ztop zbot xb [fine Stroke]] : glyph-proc
+		include : dispiro
+			widths.lhs fine
+			flat ztop.x ztop.y [heading Downward]
+			curl xb (zbot.y + LongJut)
+			alsoThruThem {{0.5 0.94}}
+			g4.left.end zbot.x (zbot.y + fine) [heading Leftward]

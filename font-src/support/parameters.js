@@ -87,8 +87,11 @@ function getBlendArg(blendArgs, style) {
 function hiveBlend(hive, value) {
 	if (!hive || !hive.blend || value == null) return hive;
 
-	const generatedHive = {};
 	const block = hive.blend;
+	delete hive.blend;
+
+	const generatedHive = { ...hive };
+
 	let keys = new Set();
 	for (const grade in block) {
 		if (!isFinite(parseFloat(grade))) continue;

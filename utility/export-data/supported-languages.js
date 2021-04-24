@@ -1,6 +1,9 @@
+"use strict";
+
 const cldr = require("cldr");
 const fs = require("fs-extra");
 const zlib = require("zlib");
+const { decode } = require("@msgpack/msgpack");
 
 const gatherCov = require("./coverage-export/gather-coverage-data");
 
@@ -8,9 +11,9 @@ const gatherCov = require("./coverage-export/gather-coverage-data");
 const overrideSupportedLanguages = [];
 
 module.exports = async function (charMapPath, charMapItalicPath, charMapObliquePath) {
-	const charMap = await readJsonGz(charMapPath);
-	const charMapItalic = await readJsonGz(charMapItalicPath);
-	const charMapOblique = await readJsonGz(charMapObliquePath);
+	const charMap = await readMpCharMap(charMapPath);
+	const charMapItalic = await readMpCharMap(charMapItalicPath);
+	const charMapOblique = await readMpCharMap(charMapObliquePath);
 
 	const rawCoverage = getRawCoverage(charMap);
 	const rawCoverageItalic = getRawCoverage(charMapItalic);
@@ -26,9 +29,8 @@ module.exports = async function (charMapPath, charMapItalicPath, charMapObliqueP
 	};
 };
 
-async function readJsonGz(p) {
-	const buf = await fs.readFile(p);
-	return JSON.parse(zlib.gunzipSync(buf).toString("utf-8"));
+async function readMpCharMap(p) {
+	return decode(zlib.gunzipSync(await fs.readFile(p)));
 }
 
 function getSupportedLanguageSet(rawCoverage) {

@@ -38,7 +38,9 @@ class ContourGeometry extends GeometryBase {
 	}
 	asContours() {
 		if (this.isEmpty()) return [];
-		else return [this.m_points];
+		let c1 = [];
+		for (const z of this.m_points) c1.push(Point.from(z.type, z));
+		return [c1];
 	}
 	asReferences() {
 		return null;
@@ -308,7 +310,7 @@ class BooleanGeometry extends GeometryBase {
 exports.hashGeometry = function (geom) {
 	const s = geom.toShapeStringOrNull();
 	if (!s) return null;
-	return crypto.createHash("sha256").update(s).digest();
+	return crypto.createHash("sha256").update(s).digest("hex");
 };
 
 function combineWith(a, b) {

@@ -38,9 +38,9 @@ All versions include the same ranges of characters: Latin letters, Greek letters
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
 
-160 Supported Languages: 
+161 Supported Languages: 
 
-Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, Nigerian Pidgin, North Ndebele, Northern Sami, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Sundanese, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
+Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Basaa, Basque, Belarusian, Bemba, Bena, Bosnian, Breton, Bulgarian, Catalan, Cebuano, Central Atlas Tamazight, Chechen, Chiga, Colognian, Cornish, Croatian, Czech, Danish, Duala, Dutch, Embu, English, Esperanto, Estonian, Ewe, Ewondo, Faroese, Filipino, Finnish, French, Friulian, Fulah, Galician, Ganda, German, Greek, Gusii, Hausa, Hawaiian, Hungarian, Icelandic, Igbo, Inari Sami, Indonesian, Interlingua, Irish, Italian, Javanese, Jola-Fonyi, Kabuverdianu, Kabyle, Kako, Kalaallisut, Kalenjin, Kamba, Kazakh, Kikuyu, Kinyarwanda, Koyra Chiini, Koyraboro Senni, Kurdish, Kwasio, Kyrgyz, Lakota, Langi, Latvian, Lingala, Lithuanian, Low German, Lower Sorbian, Luba-Katanga, Luo, Luxembourgish, Luyia, Macedonian, Machame, Makhuwa-Meetto, Makonde, Malagasy, Malay, Maltese, Manx, Maori, Masai, Meru, Metaʼ, Mongolian, Morisyen, Mundang, Nama, Ngiemboon, Nigerian Pidgin, North Ndebele, Northern Sami, Norwegian, Norwegian Bokmål, Norwegian Nynorsk, Nuer, Nyankole, Oromo, Ossetic, Polish, Portuguese, Quechua, Romanian, Romansh, Rombo, Rundi, Russian, Rwa, Sakha, Samburu, Sango, Sangu, Scottish Gaelic, Sena, Serbian, Shambala, Shona, Slovak, Slovenian, Soga, Somali, Spanish, Sundanese, Swahili, Swedish, Swiss German, Tachelhit (shi_latn), Taita, Tajik, Tasawaq, Tatar, Teso, Tongan, Turkish, Turkmen, Ukrainian, Upper Sorbian, Uzbek, Vai (vai_latn), Vietnamese, Vunjo, Walser, Welsh, Western Frisian, Wolof, Xhosa, Yangben, Yoruba, Zarma, Zulu
 
 <!-- END Section-Language-List -->
 
@@ -924,20 +924,20 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `s = 'bilateral-inward-serifed'`, `cv43 = 5`: `s` with inward serifs at both end.
   - Styles for `t`:
     + `t = 'standard'`, `cv44 = 1`: Standard `t` shape.
-    + `t = 'cross'`, `cv44 = 2`: Futura-like `t` shape.
-    + `t = 'flat-hook'`, `cv44 = 3`: `t` with flat hook.
-    + `t = 'hookless-asymmetric'`, `cv44 = 4`: `t` without hook and with ony half the cross bar.
-    + `t = 'flat-hook-short-neck'`, `cv44 = 5`: `t` with flat hook and a slightly shorter neck.
-    + `t = 'flat-hook-short-neck2'`, `cv44 = 6`: `t` with flat hook and a more shorter neck.
-    + `t = 'diagonal-tailed'`, `cv44 = 7`: `t` with diagonal tail.
-    + `t = 'standard-short-neck'`, `cv44 = 8`: Standard `t` shape with a shorter neck.
+    + `t = 'flat-hook'`, `cv44 = 2`: `t` with flat hook.
+    + `t = 'diagonal-tailed'`, `cv44 = 3`: `t` with diagonal tail.
+    + `t = 'cross'`, `cv44 = 4`: Futura-like `t` shape.
+    + `t = 'hookless-asymmetric'`, `cv44 = 5`: `t` without hook and with ony half the cross bar.
+    + `t = 'standard-short-neck'`, `cv44 = 6`: Standard `t` shape with a shorter neck.
+    + `t = 'flat-hook-short-neck'`, `cv44 = 7`: `t` with flat hook and a slightly shorter neck.
+    + `t = 'diagonal-tailed-short-neck'`, `cv44 = 8`: `t` with diagonal tail and a shorter neck.
     + `t = 'cross-short-neck'`, `cv44 = 9`: Futura-like `t` shape with a shorter neck.
     + `t = 'hookless-asymmetric-short-neck'`, `cv44 = 10`: `t` without hook, with ony half the cross bar and a shorter neck.
-    + `t = 'diagonal-tailed-short-neck'`, `cv44 = 11`: `t` with diagonal tail and a shorter neck.
-    + `t = 'standard-short-neck2'`, `cv44 = 12`: Standard `t` shape with a more shorter neck.
-    + `t = 'cross-short-neck2'`, `cv44 = 13`: Futura-like `t` shape with a more shorter neck.
-    + `t = 'hookless-asymmetric-short-neck2'`, `cv44 = 14`: `t` without hook, with ony half the cross bar and a more shorter neck.
-    + `t = 'diagonal-tailed-short-neck2'`, `cv44 = 15`: `t` with diagonal tail and a more shorter neck.
+    + `t = 'standard-short-neck2'`, `cv44 = 11`: Standard `t` shape with a more shorter neck.
+    + `t = 'flat-hook-short-neck2'`, `cv44 = 12`: `t` with flat hook and a more shorter neck.
+    + `t = 'diagonal-tailed-short-neck2'`, `cv44 = 13`: `t` with diagonal tail and a more shorter neck.
+    + `t = 'cross-short-neck2'`, `cv44 = 14`: Futura-like `t` shape with a more shorter neck.
+    + `t = 'hookless-asymmetric-short-neck2'`, `cv44 = 15`: `t` without hook, with ony half the cross bar and a more shorter neck.
   - Styles for `u`:
     + `u = 'toothed'`, `cv45 = 1`: Normal `u` with bottom-right tooth.
     + `u = 'toothless-corner'`, `cv45 = 2`: Toothless (corner bottom-right) `u`.

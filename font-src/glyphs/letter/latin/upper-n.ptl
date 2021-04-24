@@ -10,6 +10,8 @@ glyph-block Letter-Latin-Upper-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+
 
 	define BODY-SYMMETRIC  1
 	define BODY-ASYMMETRIC 2
@@ -25,7 +27,7 @@ glyph-block Letter-Latin-Upper-N : begin
 		include : tagged 'serifLB'
 			CenterBottomSerif (left + 0.5 * sw * HVContrast) 0 (xn * Jut)
 
-	define [NShape] : params [bodyType slabType top left right [crowd 2] [crDiag 4] [xn 1]] : glyph-proc
+	define [NShape] : params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
 		local stroke : AdviceStroke crowd
 		local yEnd : match bodyType
@@ -48,9 +50,10 @@ glyph-block Letter-Latin-Upper-N : begin
 			intersection [Rect top 0 left right]
 				ExtLineCenter 2 swDiag (left + swDiag) top (right - swDiag) yEnd
 
+		local sf : SerifFrame top 0 left right stroke
 		include : match slabType
-			[Just SLAB-AUTO]   : if SLAB [StdNSerifs top left right stroke xn] [glyph-proc]
-			[Just SLAB-MOTION] : tagged 'serifLT' : LeftwardTopSerif left top SideJut
+			[Just SLAB-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.outer sf.lb.full sf.rt.full
+			[Just SLAB-MOTION] : composite-proc sf.lt.full
 
 	define NConfig : object
 		standard                { BODY-SYMMETRIC  4 SLAB-AUTO   }
@@ -81,7 +84,7 @@ glyph-block Letter-Latin-Upper-N : begin
 	select-variant 'Nltail' 0x19D  (follow -- 'N')
 
 	create-glyph 'currency/nairaSign' 0x20A6 : glyph-proc
-		include : NShape BODY-SYMMETRIC SLAB-AUTO CAP (SB * 1.25) (Width - SB * 1.25) 3.5 4
+		include : NShape BODY-SYMMETRIC SLAB-AUTO CAP (SB * 1.25) (Width - SB * 1.25) (crowd -- 3.5) (crDiag -- 4)
 		define sw : AdviceStroke2 2 4 CAP
 		define gap : Math.max (CAP / 6) sw
 		include : HBarBottom [mix 0 SB 0.5] [mix Width RightSB 0.5] (CAP / 2 + gap / 2) sw
@@ -103,9 +106,3 @@ glyph-block Letter-Latin-Upper-N : begin
 					widths.center BBS
 					corner (SB + BBS * HVContrast / 2) (CAP - (CAP / 5))
 					corner (RightSB - BBS * HVContrast) 0
-
-	create-glyph 'numero' 0x2116 : glyph-proc
-		local fine : AdviceStroke 4.5
-		include : OShape XH [Math.max (fine * 2) (CAP * 0.1)] (Middle + [Math.max (fine / 2) ((RightSB - SB) * 0.1)]) [mix RightSB Width 0.5] fine (SmoothA * fine / Stroke) (SmoothB * fine / Stroke)
-		include : NShape BODY-SYMMETRIC SLAB-AUTO CAP (SB / 2) Middle (crowd -- 4.5) (crDiag -- 5.5) (xn -- 0.7)
-		include : HBarBottom (Middle + fine / 2) [mix RightSB Width 0.5] 0 fine

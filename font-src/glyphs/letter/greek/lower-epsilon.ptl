@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Greek-Lower-Epsilon : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcStart_LtrRhs
 	glyph-block-import Letter-Shared-Shapes : InwardSlabArcStart_RtlLhs InwardSlabArcStart_LtrRhs
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerifL ArcStartSerifR DToothlessRise
@@ -94,9 +95,28 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			flat Middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
 			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
 
+	define [CyrZeLowerShapeTailed slabType top bot blend hook] : begin
+		define [object stroke midx midy sma smb fine] : CyrZeShapeDim top bot blend
+		return : dispiro
+			flat (TanSlope * Stroke + [Math.max (SB + (Stroke - [mix Descender Stroke 0.5]) * 1.1 + 1) Middle]) Descender [widths.rhs]
+			curl (TanSlope * Stroke + SB + (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender
+			archv
+			g4.up.mid (SB + HalfStroke * HVContrast) [mix Descender Stroke 0.5] [widths.center.heading Stroke Upward]
+			arcvh
+			g4 (Middle + CorrectionOMidS) 0 [widths.lhs]
+			archv
+			g4 (RightSB - (OX - O) - O * 2) (bot + sma)
+			arcvh
+			flat Middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
+
 	define [CyrZeShape slabType top bot blend hook] : union
 		CyrZeUpperShape slabType top bot blend hook
 		CyrZeLowerShape slabType top bot blend hook
+
+	define [CyrKsiBaseShape slabType top bot blend hook] : union
+		CyrZeUpperShape slabType top bot blend hook
+		CyrZeLowerShapeTailed slabType top bot blend hook
 
 	define [AutoStartSerifL sty top] : match sty
 		[Just SLAB-CLASSICAL] : ArcStartSerifL SB top Stroke Hook
@@ -134,6 +154,16 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			include : CyrZeShape slabType XH Descender StdBlend SHook
 			include : AutoStartSerifL slabType XH
 
+		create-glyph "cyrl/KsiBase.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : CyrKsiBaseShape slabType CAP 0 StdBlend Hook
+			include : AutoStartSerifL slabType CAP
+
+		create-glyph "cyrl/ksiBase.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : CyrKsiBaseShape slabType XH 0 StdBlend SHook
+			include : AutoStartSerifL slabType XH
+
 	alias 'grek/epsilon' 0x3B5 'latn/epsilon.serifless'
 	select-variant 'latn/Epsilon' 0x190
 	select-variant 'latn/epsilon' 0x25B
@@ -141,8 +171,13 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 
 	select-variant 'cyrl/Ze' 0x417
 	select-variant 'cyrl/ze' 0x437
+	select-variant 'cyrl/KsiBase' (follow -- 'cyrl/Ze')
+	select-variant 'cyrl/ksiBase' (follow -- 'cyrl/ze')
 	select-variant 'cyrl/ze.BGR' (follow -- 'cyrl/ze')
 	alias 'latn/revSmallEpsilon' 0x25C 'cyrl/ze'
+
+	CreateAccentedComposition 'cyrl/Ksi' 0x46E 'cyrl/KsiBase' 'caronAbove'
+	CreateAccentedComposition 'cyrl/ksi' 0x46F 'cyrl/ksiBase' 'caronAbove'
 
 	create-glyph 'voicedlaryngenalspirant' 0x1D24 : glyph-proc
 		include : MarkSet.b
