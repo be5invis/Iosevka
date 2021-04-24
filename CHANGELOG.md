@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 6.0.1
+
+ * Increase weight of bolder weight grades for better distinction with lighter weights (#964).
+
+
 ### 6.0.0
 
  * \[**Breaking**\]: The grades for width is updated to make the unit width of Extended subfamily being 0.6em.
