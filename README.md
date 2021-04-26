@@ -19,7 +19,7 @@ Quit your editor/program. Unzip and open the folder.
   *  Search for other variants using `brew search font-iosevka` and install what you want.
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
 * **Linux** : Copy the TTF files to your fonts directory → Run `sudo fc-cache`. 
-  - Arch Linux users can install the font from the AUR [here](https://aur.archlinux.org/packages/ttf-iosevka) using an AUR wrapper or by doing it manually. [All variants](https://aur.archlinux.org/packages/?O=0&SeB=nd&K=ttf-iosevka&SB=n&SO=a&PP=50&do_Search=Go).
+  - Arch Linux users can install one of the [ttc-iosevka packages](https://archlinux.org/packages/?q=ttc-iosevka).
   - Void Linux users can install the font with `xbps-install font-iosevka`.
   - Fedora Linux users can install the font(s) from the copr [here](https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/). Run `dnf search iosevka` to discover available fonts and `dnf install` to install the chosen one(s).
 * **FreeBSD**: The font can be installed with `pkg install iosevka`.
