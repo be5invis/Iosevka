@@ -11,16 +11,13 @@ const { assignFontNames } = require("../meta/naming");
 const { copyFontMetrics } = require("../meta/aesthetics");
 
 module.exports = async function (argv, para) {
-	const otd = EmptyFont();
 	const gs = buildGlyphs(para);
 
-	assignFontNames(para, otd);
-	copyFontMetrics(gs.fontMetrics, otd);
+	const baseFont = EmptyFont();
+	assignFontNames(para, baseFont);
+	copyFontMetrics(gs.fontMetrics, baseFont);
 
 	const otl = buildOtl(para, gs.glyphStore);
-	otd.GSUB = otl.GSUB;
-	otd.GPOS = otl.GPOS;
-	otd.GDEF = otl.GDEF;
 
 	// Regulate
 	const excludeChars = new Set();
@@ -31,9 +28,9 @@ module.exports = async function (argv, para) {
 	}
 
 	const cache = await Caching.load(argv);
-	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otd);
+	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otl);
 	await Caching.save(argv, cache);
 
-	const font = convertOtd(otd, finalGs);
+	const font = convertOtd(baseFont, otl, finalGs);
 	return { font, glyphStore: finalGs };
 };

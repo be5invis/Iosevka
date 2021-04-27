@@ -1,5 +1,8 @@
-import [fallback] from '../support/utils'
 import 'semver' as semver
+import [Ot] from "ot-builder"
+extern Buffer
+
+import [fallback] from '../support/utils'
 
 define COPYRIGHT             0
 define FAMILY                1
@@ -19,18 +22,18 @@ define WWS_PREFERRED_FAMILY 21
 define WWS_PREFERRED_STYLE  22
 
 define [nameFont font nameid str] : begin
-	font.name.push : object # Mac Roman
-		platformID 1
-		encodingID 0
-		languageID 0
-		nameID nameid
-		nameString str
-	font.name.push : object # Windows Unicode English
-		platformID 3
-		encodingID 1
-		languageID 1033
-		nameID nameid
-		nameString str
+	font.name.records.push : object # Mac Roman
+		platformID  1
+		encodingID  0
+		languageID  0
+		nameID      nameid
+		value       : Buffer.from str 'utf-8'
+	font.name.records.push : object # Windows Unicode English
+		platformID  3
+		encodingID  1
+		languageID  1033
+		nameID      nameid
+		value       str
 
 define weightToMenuStyleMap : object
 	100 "Thin"
@@ -122,11 +125,14 @@ define [getStyleLinkedStyles weight width slope] : begin
 		getStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
 		getShortStyle nameSuffixWeight nameSuffixWidth nameSuffixSlope
 
-
+define [accumulate entries] : begin
+	local s 0
+	foreach { ev cond } [items-of entries] : begin
+		if cond : set s : s + ev
+	return s
 
 export : define [assignFontNames para font] : begin
-	set font.name {}
-
+	# Preferred names
 	define family  : para.naming.family.trim
 	define style   : getStyle para.naming.weight para.naming.width para.naming.slope
 	define version : "Version " + para.naming.version
@@ -140,6 +146,7 @@ export : define [assignFontNames para font] : begin
 	nameFont font WWS_PREFERRED_FAMILY family # WWS Preferred Family
 	nameFont font WWS_PREFERRED_STYLE style  # WWS Preferred Style
 
+	# Compat names
 	local {compatStyle compatFamilySuffix shortCompatFamilySuffix} : getStyleLinkedStyles para.naming.weight para.naming.width para.naming.slope
 	local compatFamily family
 	if (compatFamilySuffix != "Regular") : set compatFamily : family + ' ' + compatFamilySuffix
@@ -154,47 +161,65 @@ export : define [assignFontNames para font] : begin
 	nameFont font FULL_NAME fontfullName # Full Name
 	nameFont font POSTSCRIPT : fontfullName.replace [regex ' ' 'g'] '-' # Postscript
 
-	nameFont font VERSION version # Version
-
+	# Misc names
 	nameFont font COPYRIGHT    para.naming.copyright    # Copyright
 	nameFont font MANUFACTURER para.naming.manufacturer # Manufacturer
 	nameFont font DESIGNER     para.naming.designer     # Designer
 	nameFont font DESCRIPTION  para.naming.description  # Description
 	nameFont font LICENCE      para.naming.licence      # Licence
 
-	set font.name : font.name.sort : lambda [a b] : begin
-		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
-		if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
-		if (a.languageID != b.languageID) : return : a.languageID - b.languageID
-		return : a.nameID - b.nameID
+	# Weight, width and slope numbers
+	set font.os2.usWeightClass     para.naming.weight
+	set font.os2.usWidthClass      para.naming.width
+	set font.os2.panose.bWeight    : 1 + para.naming.weight / 100
+	set font.os2.sFamilyClass      : 8 * 0x100 + 9
+	set font.os2.xAvgCharWidth     : Math.round para.width
 
-	# Weight, width and slope
-	set font.OS_2.usWeightClass     para.naming.weight
-	set font.OS_2.usWidthClass      para.naming.width
-	set font.OS_2.panose.bWeight    : 1 + para.naming.weight / 100
-	set font.OS_2.fsSelection       : object
-		oblique        : not : not isOblique
-		bold           : not : not isBold
-		italic         : not : not (isItalic || isOblique)
-		regular        : not : not ([not isBold] && [not isItalic] && [not isOblique])
-		useTypoMetrics true
-	set font.OS_2.sFamilyClass      : 8 * 0x100 + 9
-	set font.OS_2.xAvgCharWidth     : Math.round para.width
-	set font.head.macStyle          : object
-		bold          : not : not isBold
-		italic        : not : not (isItalic || isOblique)
-		condensed     : not : not (para.naming.width < 5)
-		extended      : not : not (para.naming.width > 5)
+	set font.os2.fsSelection : accumulate : list
+		list  Ot.Os2.FsSelection.OBLIQUE           isOblique
+		list  Ot.Os2.FsSelection.BOLD              isBold
+		list  Ot.Os2.FsSelection.ITALIC            (isItalic || isOblique)
+		list  Ot.Os2.FsSelection.REGULAR           (!isBold && !isItalic && !isOblique)
+		list  Ot.Os2.FsSelection.USE_TYPO_METRICS  true
+	set font.head.macStyle : accumulate : list
+		list  Ot.Head.MacStyle.Bold       isBold
+		list  Ot.Head.MacStyle.Italic     (isItalic || isOblique)
+		list  Ot.Head.MacStyle.Condensed  (para.naming.width < 5)
+		list  Ot.Head.MacStyle.Extended   (para.naming.width > 5)
 
+	# Version
+	nameFont font VERSION version # Version
 	define majorVersion : semver.major para.naming.version
 	define minorVersion : semver.minor para.naming.version
 	define patchVersion : semver.patch para.naming.version
 	if (minorVersion > 99 || patchVersion > 9) : throw : new Error "Version number overflow"
 	set font.head.fontRevision : majorVersion + (minorVersion * 10 + patchVersion) / 1000
 
-	if [not para.isQuasiProportional] : begin
-		set font.OS_2.panose.bProportion 9 # Monospaced
+	# Panose
+	set font.os2.panose.bFamilyType      2
+	set font.os2.panose.bContrast        3
+	set font.os2.panose.bXHeight         4
+
+	# Pitch
+	if [not para.isQuasiProportional]
+	: then : begin
+		set font.os2.panose.bProportion  9 # Monospaced
 		set font.post.isFixedPitch       true
 	: else : begin
-		set font.OS_2.panose.bProportion 0
+		set font.os2.panose.bProportion  0
 		set font.post.isFixedPitch       false
+
+	# Misc
+	set font.head.flags : accumulate : list
+		list Ot.Head.Flags.BaseLineYAt0                      true
+		list Ot.Head.Flags.LeftSidebearingAtX0               true
+		list Ot.Head.Flags.InstructionsMayDependOnPointSize  true
+		list Ot.Head.Flags.ForcePpemToBeInteger              true
+		list Ot.Head.Flags.InstructionMayAlterAdvanceWidth   true
+
+	# Enforce the order of NAME table entries
+	font.name.records.sort : lambda [a b] : begin
+		if (a.platformID != b.platformID) : return : a.platformID - b.platformID
+		if (a.encodingID != b.encodingID) : return : a.encodingID - b.encodingID
+		if (a.languageID != b.languageID) : return : a.languageID - b.languageID
+		return : a.nameID - b.nameID
