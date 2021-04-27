@@ -8,7 +8,6 @@ const { encode } = require("@msgpack/msgpack");
 const { FontIo } = require("ot-builder");
 const Toml = require("@iarna/toml");
 
-const Caching = require("./caching/index");
 const BuildFont = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
 const VariantData = require("./support/variant-data");
@@ -17,14 +16,9 @@ const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
 	const paraT = await getParameters();
-
-	const cache = await Caching.load(argv);
-
-	const { font, glyphStore } = await BuildFont(cache, paraT(argv));
+	const { font, glyphStore } = await BuildFont(argv, paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
-
-	await Caching.save(argv, cache);
 };
 
 // Parameter preparation

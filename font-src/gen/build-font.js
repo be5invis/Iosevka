@@ -4,12 +4,13 @@ const EmptyFont = require("./empty-font");
 const buildGlyphs = require("../glyphs/index");
 const finalizeFont = require("./finalize/index");
 const convertOtd = require("./otd-conv/index");
+const Caching = require("./caching/index");
 
 const { buildOtl } = require("../otl/index");
 const { assignFontNames } = require("../meta/naming");
 const { copyFontMetrics } = require("../meta/aesthetics");
 
-module.exports = async function (cache, para) {
+module.exports = async function (argv, para) {
 	const otd = EmptyFont();
 	const gs = buildGlyphs(para);
 
@@ -29,7 +30,10 @@ module.exports = async function (cache, para) {
 		}
 	}
 
+	const cache = await Caching.load(argv);
 	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otd);
+	await Caching.save(argv, cache);
+
 	const font = convertOtd(otd, finalGs);
 	return { font, glyphStore: finalGs };
 };
