@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 6.1.0
+
+ * Refinement of shape of short-neck `t` (#970).
+ * Refinement of shape of Ogonek (#971).
+
+
 ### 6.0.1
 
  * Increase weight of bolder weight grades for better distinction with lighter weights (#964).
