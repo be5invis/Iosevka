@@ -16,7 +16,7 @@ export : define [calculateMetrics para] : begin
 	define Descender : fallback para.descender (XH - CAP)
 	define Contrast : fallback para.contrast 1
 	# Key metrics for symbols
-	define SymbolMid : fallback para.symbolMid (XH * 0.65)
+	define SymbolMid para.symbolMid
 	define ParenTop : SymbolMid + para.parenSize / 2
 	define ParenBot : SymbolMid - para.parenSize / 2
 
@@ -234,7 +234,12 @@ export : define [setFontMetrics para metrics fm] : begin
 
 	set fm.os2.sxHeight           XH
 	set fm.os2.sCapHeight         CAP
-	set fm.post.italicAngle       [Math.round (0 - para.slopeAngle)]
+
+	local slope : Math.tan para.slopeAngle
+	set fm.post.italicAngle       : Math.round (0 - para.slopeAngle)
+	set fm.hhea.caretSlopeRise    : if para.slopeAngle (1000)                    1
+	set fm.hhea.caretSlopeRun     : if para.slopeAngle (-slope * 1000)           0
+	set fm.hhea.caretOffset       : if para.slopeAngle (-slope * para.symbolMid) 0
 
 	# Fixed metrics
 	set fm.os2.yStrikeoutPosition    para."os2.yStrikeoutPosition"
@@ -266,7 +271,11 @@ export : define [copyFontMetrics fm1 fm2] : begin
 
 	set fm2.os2.sxHeight           fm1.os2.sxHeight
 	set fm2.os2.sCapHeight         fm1.os2.sCapHeight
+
 	set fm2.post.italicAngle       fm1.post.italicAngle
+	set fm2.hhea.caretSlopeRise    fm1.hhea.caretSlopeRise
+	set fm2.hhea.caretSlopeRun     fm1.hhea.caretSlopeRun
+	set fm2.hhea.caretOffset       fm1.hhea.caretOffset
 
 	set fm2.os2.yStrikeoutPosition   fm1.os2.yStrikeoutPosition
 	set fm2.os2.yStrikeoutSize       fm1.os2.yStrikeoutSize
@@ -281,6 +290,7 @@ export : define [copyFontMetrics fm1 fm2] : begin
 
 	set fm2.post.underlinePosition   fm1.post.underlinePosition
 	set fm2.post.underlineThickness  fm1.post.underlineThickness
+
 
 export : define [compositeBaseAnchors] : begin
 	local h {.}
