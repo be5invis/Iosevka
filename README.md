@@ -1109,7 +1109,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `four = 'open-non-crossing'`, `cv66 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
   - Styles for `5`:
     + `five = 'vertical-upper-left-bar'`, `cv67 = 1`: `5` with a vertical upper-left bar.
-    + `five = 'oblique-upper-left-bar'`, `cv67 = 2`: `5` with a more open contour.
+    + `five = 'oblique-upper-left-bar'`, `cv67 = 2`: `5` with an oblique upper-left bar.
   - Styles for `6`:
     + `six = 'closed-contour'`, `cv68 = 1`: `6` with a more closed contour.
     + `six = 'open-contour'`, `cv68 = 2`: `6` with a more open contour.

@@ -2,10 +2,10 @@
 
 const { Radical } = require("../../support/gr");
 
-module.exports = function gcFont(glyphStore, excludedChars, restFont, cfg) {
-	markSweepOtlLookups(restFont.GSUB);
-	markSweepOtlLookups(restFont.GPOS);
-	const sink = markGlyphs(glyphStore, excludedChars, restFont, cfg);
+module.exports = function gcFont(glyphStore, excludedChars, otl, cfg) {
+	markSweepOtlLookups(otl.GSUB);
+	markSweepOtlLookups(otl.GPOS);
+	const sink = markGlyphs(glyphStore, excludedChars, otl, cfg);
 	return sweep(glyphStore, sink);
 };
 
@@ -66,9 +66,9 @@ function sweepFeatures(table, accessibleLookupsIds) {
 	table.features = features1;
 }
 
-function markGlyphs(glyphStore, excludedChars, restFont, cfg) {
+function markGlyphs(glyphStore, excludedChars, otl, cfg) {
 	const sink = markGlyphsInitial(glyphStore, excludedChars);
-	while (markGlyphsStep(glyphStore, sink, restFont, cfg));
+	while (markGlyphsStep(glyphStore, sink, otl, cfg));
 	return sink;
 }
 function markGlyphsInitial(glyphStore, excludedChars) {
@@ -86,11 +86,11 @@ function markGlyphsInitial(glyphStore, excludedChars) {
 	}
 	return sink;
 }
-function markGlyphsStep(glyphStore, sink, restFont, cfg) {
+function markGlyphsStep(glyphStore, sink, otl, cfg) {
 	const glyphCount = sink.size;
-	if (restFont.GSUB) {
-		for (const l in restFont.GSUB.lookups) {
-			const lookup = restFont.GSUB.lookups[l];
+	if (otl.GSUB) {
+		for (const l in otl.GSUB.lookups) {
+			const lookup = otl.GSUB.lookups[l];
 			if (!lookup) continue;
 			markGlyphsLookupImpl(sink, lookup, cfg);
 		}
