@@ -119,24 +119,24 @@ glyph-block Letter-Latin-C : begin
 	define [UniInwardSlabCShape df top bot sma smb sw] : UniInwardSlabCShapeT dispiro 0 df top bot sma smb sw
 	define [BiInwardSlabCShape df top bot sma smb sw] : BuInwardSlabCShapeT dispiro 0 df top bot sma smb sw
 
-	define [AutoStartSerifR sty top] : match sty
-		[Just SLAB-CLASSICAL] : ArcStartSerifR RightSB top Stroke Hook
-		[Just SLAB-INWARD]    : ArcStartInwardSerifR RightSB top Stroke Hook
+	define [AutoStartSerifR df sty top sw] : match sty
+		[Just SLAB-CLASSICAL] : ArcStartSerifR df.rightSB top [fallback sw Stroke] Hook
+		[Just SLAB-INWARD]    : ArcStartInwardSerifR df.rightSB top [fallback sw Stroke] Hook
 		__ : glyph-proc
 
-	define [AutoStartSerifL sty top] : match sty
-		[Just SLAB-CLASSICAL] : ArcStartSerifL SB top Stroke Hook
-		[Just SLAB-INWARD]    : ArcStartInwardSerifL SB top Stroke Hook
+	define [AutoStartSerifL df sty top sw] : match sty
+		[Just SLAB-CLASSICAL] : ArcStartSerifL df.leftSB top [fallback sw Stroke] Hook
+		[Just SLAB-INWARD]    : ArcStartInwardSerifL df.leftSB top [fallback sw Stroke] Hook
 		__ : glyph-proc
 
-	define [AutoStartSerifRB sty bot] : match sty
-		[Just SLAB-CLASSICAL] : ArcEndSerifR RightSB bot Stroke Hook
-		[Just SLAB-INWARD]    : ArcEndInwardSerifR RightSB bot Stroke Hook
+	define [AutoStartSerifRB df sty bot sw] : match sty
+		[Just SLAB-CLASSICAL] : ArcEndSerifR df.rightSB bot [fallback sw Stroke] Hook
+		[Just SLAB-INWARD]    : ArcEndInwardSerifR df.rightSB bot [fallback sw Stroke] Hook
 		__ : glyph-proc
 
-	define [AutoStartSerifLB sty bot] : match sty
-		[Just SLAB-CLASSICAL] : ArcEndSerifL SB bot Stroke Hook
-		[Just SLAB-INWARD]    : ArcEndInwardSerifL SB bot Stroke Hook
+	define [AutoStartSerifLB df sty bot sw] : match sty
+		[Just SLAB-CLASSICAL] : ArcEndSerifL df.leftSB bot [fallback sw Stroke] Hook
+		[Just SLAB-INWARD]    : ArcEndInwardSerifL df.leftSB bot [fallback sw Stroke] Hook
 		__ : glyph-proc
 
 	define [CCurlyTailShape slabType] : glyph-proc
@@ -168,56 +168,58 @@ glyph-block Letter-Latin-C : begin
 		create-glyph "C.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : cShape [DivFrame 1] CAP 0 SmoothA SmoothB Stroke
-			include : AutoStartSerifR sty CAP
-			include : AutoStartSerifRB styBot 0
+			include : AutoStartSerifR [DivFrame 1] sty CAP
+			include : AutoStartSerifRB [DivFrame 1] styBot 0
 
 		create-glyph "smcpC.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : cShape [DivFrame 1] XH 0 SmoothA SmoothB Stroke
-			include : AutoStartSerifR sty XH
-			include : AutoStartSerifRB styBot 0
+			include : AutoStartSerifR [DivFrame 1] sty XH
+			include : AutoStartSerifRB [DivFrame 1] styBot 0
 
 		create-glyph "revC.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : revCShape [DivFrame 1] CAP 0 SmoothA SmoothB Stroke
-			include : AutoStartSerifL sty CAP
-			include : AutoStartSerifLB styBot 0
+			include : AutoStartSerifL [DivFrame 1] sty CAP
+			include : AutoStartSerifLB [DivFrame 1] styBot 0
 
 		create-glyph "c.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : cShape [DivFrame 1] XH 0 SmallSmoothA SmallSmoothB Stroke
-			include : AutoStartSerifR sty XH
-			include : AutoStartSerifRB styBot 0
+			include : AutoStartSerifR [DivFrame 1] sty XH
+			include : AutoStartSerifRB [DivFrame 1] styBot 0
 
 		create-glyph "revSmallC.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : revCShape [DivFrame 1] XH 0 SmallSmoothA SmallSmoothB Stroke
-			include : AutoStartSerifL sty XH
-			include : AutoStartSerifLB styBot 0
+			include : AutoStartSerifL [DivFrame 1] sty XH
+			include : AutoStartSerifLB [DivFrame 1] styBot 0
 
 		create-glyph "cCurlyTail.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : CCurlyTailShape sty
-			include : AutoStartSerifR sty XH
+			include : AutoStartSerifR [DivFrame 1] sty XH
 
 		create-glyph "stretchedC.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : cShape [DivFrame 1] XH Descender SmoothA SmoothB Stroke
-			include : AutoStartSerifR sty XH
-			include : AutoStartSerifRB styBot Descender
+			include : AutoStartSerifR [DivFrame 1] sty XH
+			include : AutoStartSerifRB [DivFrame 1] styBot Descender
 
 		define [IotifiedEsShape df top sma smb] : glyph-proc
 			local gap : (df.width - 2 * df.leftSB - 2.5 * df.mvs) * 0.375
 			define divSub : (df.width - gap - df.mvs) / Width
 			define dfSub : DivFrame divSub 2
 			include : cShape dfSub top 0 sma smb df.mvs
+			include : AutoStartSerifR dfSub sty top df.mvs
+			include : AutoStartSerifRB dfSub styBot 0 df.mvs
+
 			include : Translate (Width * (df.div - divSub)) 0
 			include : VBarLeft df.leftSB 0 top df.mvs
 			include : HBar (df.leftSB - O) [mix df.leftSB df.rightSB (3 / 4)] (top / 2) df.mvs
 			if SLAB : begin
 				include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut df.mvs
-				include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut df.mvs
-				include : tagged 'serifRB' : RightwardBottomSerif (df.rightSB + 0.5 * df.mvs * HVContrast) 0 (SideJut - 0.5 * df.mvs * HVContrast) df.mvs
+				if [not para.isItalic] : include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut df.mvs
 
 		create-glyph "cyrl/iotified{E}.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 2.5

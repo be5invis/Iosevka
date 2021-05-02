@@ -17,7 +17,9 @@ glyph-block Letter-Latin-W : begin
 	define FORM-FLAT-TOP   2
 	define FORM-DOUBLE-V   3
 	define FORM-ASYMMETRIC 4
+	define FORM-CYRL-OMEGA 5
 
+	define SERIFS-NONE       0
 	define SERIFS-AUTO       1
 	define SERIFS-MOTION     2
 	define SERIFS-DOUBLE-V   3
@@ -31,6 +33,7 @@ glyph-block Letter-Latin-W : begin
 	define CwFineInnerDoubleV    4.25
 	define CwOuterStrokeStraight 3.0
 	define CwDoubleV             3.625
+	define CwCyrlOmega           3.00
 	define CwWCoCurly            5.0
 	define CwWCoStraight         3.5
 	define CwWCoDoubleV          3.5
@@ -44,18 +47,21 @@ glyph-block Letter-Latin-W : begin
 			[Just FORM-FLAT-TOP]   : AdviceStroke CwOuterStrokeStraight [Math.sqrt df.div]
 			[Just FORM-DOUBLE-V]   : AdviceStroke CwDoubleV [Math.sqrt df.div]
 			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV [Math.sqrt df.div]
+			[Just FORM-CYRL-OMEGA] : AdviceStroke CwCyrlOmega [Math.sqrt df.div]
 		local fineOuter : match bodyType
 			[Just FORM-CURLY]      : AdviceStroke CwFineOuter df.div
 			[Just FORM-STRAIGHT]   : AdviceStroke CwFineOuterStraight [Math.sqrt df.div]
 			[Just FORM-FLAT-TOP]   : AdviceStroke CwFineOuterStraight [Math.sqrt df.div]
 			[Just FORM-DOUBLE-V]   : AdviceStroke CwDoubleV [Math.sqrt df.div]
 			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV [Math.sqrt df.div]
+			[Just FORM-CYRL-OMEGA] : AdviceStroke CwCyrlOmega [Math.sqrt df.div]
 		local fineInner : match bodyType
 			[Just FORM-CURLY]      : AdviceStroke CwFineInner          df.div
 			[Just FORM-STRAIGHT]   : AdviceStroke CwFineInnerStraight [Math.sqrt df.div]
 			[Just FORM-FLAT-TOP]   : AdviceStroke CwFineInnerStraight [Math.sqrt df.div]
 			[Just FORM-DOUBLE-V]   : AdviceStroke CwFineInnerDoubleV  [Math.sqrt df.div]
 			[Just FORM-ASYMMETRIC] : AdviceStroke CwDoubleV  [Math.sqrt df.div]
+			[Just FORM-CYRL-OMEGA] : AdviceStroke CwCyrlOmega  [Math.sqrt df.div]
 		local fineHeight : (fineOuter + fineInner) / 2
 
 		local wCo : match bodyType
@@ -64,6 +70,7 @@ glyph-block Letter-Latin-W : begin
 			[Just FORM-FLAT-TOP]   : AdviceStroke CwWCoStraight df.div
 			[Just FORM-DOUBLE-V]   : AdviceStroke CwWCoDoubleV df.div
 			[Just FORM-ASYMMETRIC] : AdviceStroke CwWCoDoubleV df.div
+			[Just FORM-CYRL-OMEGA] : AdviceStroke CwWCoDoubleV df.div
 		local kWCoShrink CThin
 		local pxBot1 : match bodyType
 			[Just FORM-CURLY]        0.25
@@ -71,6 +78,7 @@ glyph-block Letter-Latin-W : begin
 			[Just FORM-FLAT-TOP]     0.235
 			[Just FORM-DOUBLE-V]     0.315
 			[Just FORM-ASYMMETRIC]   0.3
+			[Just FORM-CYRL-OMEGA]   0.275
 
 		local botMixOffset : 0.5 * HVContrast * wCo
 		local xBot1 : [if bodyType O 0] + [mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) pxBot1]
@@ -82,10 +90,13 @@ glyph-block Letter-Latin-W : begin
 			[Just FORM-FLAT-TOP]     topWithoutSerif
 			[Just FORM-DOUBLE-V]     top
 			[Just FORM-ASYMMETRIC]   top
+			[Just FORM-CYRL-OMEGA]   top
 
 		local xRight1 : match bodyType
-			([Just FORM-DOUBLE-V] || [Just FORM-ASYMMETRIC]) : mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) (2 * pxBot1)
-			__                                             : if (bodyType < FORM-DOUBLE-V) df.middle
+			([Just FORM-DOUBLE-V] || [Just FORM-ASYMMETRIC] || [Just FORM-CYRL-OMEGA])
+				mix (df.leftSB + botMixOffset) (df.rightSB - botMixOffset) (2 * pxBot1)
+			__
+				if (bodyType < FORM-DOUBLE-V) df.middle
 		local xLeft2  : df.width - xRight1
 
 		local corWCo : DiagCorDs wMidHeight (xRight1 - xBot1) wCo
@@ -97,15 +108,23 @@ glyph-block Letter-Latin-W : begin
 
 		local corFInner : DiagCorDs wMidHeight (xRight1 - xBot1) fineInner
 		local fineInnerCr : Math.min wCoCr : corFInner * fineInner
-		local fineInnerCrTop : if (bodyType === FORM-DOUBLE-V || bodyType === FORM-ASYMMETRIC) fineInnerCr (kWCoShrink * wCoCr)
+		local fineInnerCrTop : match bodyType
+			[Just FORM-DOUBLE-V]     fineInnerCr
+			[Just FORM-ASYMMETRIC]   fineInnerCr
+			[Just FORM-CYRL-OMEGA]   fineInnerCr
+			__                     : kWCoShrink * wCoCr
 
-		return : object xBot1 xBot2 strokeOuter strokeOuterCr fineOuter fineOuterCr fineInner fineInnerCr fineInnerCrTop fineHeight wMidHeight xRight1 xLeft2 wCoCr
+		local curlyStraightSegLength : match bodyType
+			[Just FORM-CURLY]  0.25
+			__                 0.05
+
+		return : object xBot1 xBot2 strokeOuter strokeOuterCr fineOuter fineOuterCr fineInner fineInnerCr fineInnerCrTop fineHeight wMidHeight xRight1 xLeft2 wCoCr curlyStraightSegLength
 
 	### W and w
 	define [WshapeImpl df top bodyType slabType] : glyph-proc
 		local dim : WDim df top bodyType
 
-		if bodyType : begin
+		if (bodyType !== FORM-CURLY) : begin
 			include : tagged 'strokeDown1' : dispiro
 				widths.lhs dim.strokeOuterCr
 				flat (df.leftSB + O * 2) top [heading Downward]
@@ -114,11 +133,15 @@ glyph-block Letter-Latin-W : begin
 			include : tagged 'strokeDown1' : dispiro
 				widths.lhs dim.strokeOuter
 				flat df.leftSB top [heading Downward]
-				curl df.leftSB (top * 0.75) [heading Downward]
+				curl df.leftSB (top * (1 - dim.curlyStraightSegLength)) [heading Downward]
 				quadcontrols 0 0.3 6 unimportant
 				g4   (dim.xBot1 - 0.5 * HVContrast * dim.wCoCr) 0 [widths.lhs.heading dim.fineOuterCr Downward]
 
-		local kTopShift : if (bodyType === FORM-DOUBLE-V || bodyType === FORM-ASYMMETRIC) 0 1
+		local kTopShift : match bodyType
+			[Just FORM-DOUBLE-V]     0
+			[Just FORM-ASYMMETRIC]   0
+			[Just FORM-CYRL-OMEGA]   0
+			__                       1
 		local k1 0.5
 		local k2 : 1 - k1
 		local shiftT  : kTopShift * HVContrast * (0.5 * dim.wCoCr - 0.5 * dim.fineInnerCrTop)
@@ -128,17 +151,18 @@ glyph-block Letter-Latin-W : begin
 			dispiro
 				flat (dim.xRight1 - shiftT) dim.wMidHeight [widths.center.heading dim.fineInnerCrTop Downward]
 				curl (dim.xBot1 + shiftB)   0              [widths.center.heading dim.fineOuterCr    Downward]
-			if (bodyType !== FORM-ASYMMETRIC) [glyph-proc] : spiro-outline
-				corner dim.xLeft2 dim.wMidHeight
-				corner dim.xBot2  0
-				corner df.width  0
-				corner df.width  dim.wMidHeight
+			if (bodyType !== FORM-ASYMMETRIC && bodyType !== FORM-CYRL-OMEGA) [glyph-proc]
+				spiro-outline
+					corner dim.xLeft2 dim.wMidHeight
+					corner dim.xBot2  0
+					corner df.width  0
+					corner df.width  dim.wMidHeight
 
 		include : tagged 'strokeDown2' : dispiro
 			flat (dim.xLeft2 + shiftT) dim.wMidHeight [widths.center.heading dim.fineInnerCrTop Downward]
 			curl (dim.xBot2 - shiftB)   0             [widths.center.heading dim.fineOuterCr    Downward]
 
-		if bodyType : begin
+		if (bodyType !== FORM-CURLY && bodyType !== FORM-CYRL-OMEGA) : begin
 			include : tagged 'strokeUp2' : dispiro
 				widths.rhs dim.strokeOuterCr
 				flat (df.rightSB - O * 2) top [heading Downward]
@@ -147,7 +171,7 @@ glyph-block Letter-Latin-W : begin
 			include : tagged 'strokeUp2' : dispiro
 				widths.rhs dim.strokeOuter
 				flat df.rightSB top [heading Downward]
-				curl df.rightSB (top * 0.75) [heading Downward]
+				curl df.rightSB (top * (1 - dim.curlyStraightSegLength)) [heading Downward]
 				quadcontrols 0 0.3 6 unimportant
 				g4   (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
 
@@ -156,6 +180,7 @@ glyph-block Letter-Latin-W : begin
 		local sf : SerifFrame top 0 df.leftSB df.rightSB
 		local sfm : SerifFrame top 0 (df.leftSB + oSlabPos) (df.rightSB - oSlabPos)
 		include : match slabType
+			[Just SERIFS-NONE]   : glyph-proc
 			[Just SERIFS-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
 			[Just SERIFS-MOTION] : begin sfm.lt.outer
 			[Just SERIFS-CURSIVE] : NeedSlab SLAB sfm.lt.outer
@@ -209,6 +234,7 @@ glyph-block Letter-Latin-W : begin
 			___                  : glyph-proc
 
 	define WConfig : object
+		cyrlSmallOmega                     { WshapeImpl   FORM-CYRL-OMEGA   SERIFS-NONE       }
 		straightAsymmetric                 { WshapeImpl   FORM-ASYMMETRIC   SERIFS-ASYMMETRIC }
 		straightDoubleV                    { WshapeImpl   FORM-DOUBLE-V     SERIFS-DOUBLE-V   }
 		straightFlatTop                    { WshapeImpl   FORM-FLAT-TOP     SERIFS-AUTO       }
@@ -288,6 +314,8 @@ glyph-block Letter-Latin-W : begin
 	alias 'cyrl/We' 0x51C 'W'
 	alias 'cyrl/we' 0x51D 'w'
 	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)
+
+	alias 'cyrl/omega' 0x461 'w.cyrlSmallOmega'
 
 	define [WonOverlay df] : glyph-proc
 		include : HOverlayBar [mix SB 0 0.7] [mix df.rightSB df.width 0.7] (CAP * 0.6)
