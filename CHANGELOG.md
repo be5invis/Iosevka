@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 6.1.2
+
+ * Make shape of straight-neck `2` less crooked (#978).
+
+
 ### 6.1.1
 
  * Fix macOS warning about `hhea` table (#977).
