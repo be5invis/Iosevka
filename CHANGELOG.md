@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 6.1.3
+
+ * Fix MinTTY's warning about missing code pages (#980).
+
+
 ### 6.1.2
 
  * Make shape of straight-neck `2` less crooked (#978).
