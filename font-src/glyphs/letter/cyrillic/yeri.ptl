@@ -10,7 +10,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
-	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev
+	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev RightwardTailedBar
 
 	glyph-block-export CyrlYeriUprightShape
 	define [CyrlYeriUprightShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
@@ -120,7 +120,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 		if SLAB : begin
 			include : DownwardLeftSerif barleft top VJut (MVertStroke / HVContrast)
 
-	define [CyrYeryShape Yeri df top] : glyph-proc
+	define [CyrYeryShape Yeri df top fTail] : glyph-proc
 		local jut : Math.min Jut : [Math.pow (df.mvs / Stroke) 0.5] * Jut
 		include : Yeri
 			top -- top
@@ -128,21 +128,26 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			right -- [mix (df.rightSB - df.mvs * HVContrast) (Middle + df.mvs / 2 * HVContrast) (0.75 / df.div)]
 			stroke -- df.mvs
 			jut -- jut
-		include : VBarRight df.rightSB 0 top df.mvs
+		include : if fTail
+			RightwardTailedBar df.rightSB 0 top df.mvs
+			VBarRight df.rightSB 0 top df.mvs
 		if SLAB : begin
 			include : tagged 'serifRT' : if (Yeri !== CyrlYeriUprightShape)
 				then : glyph-proc
 				else : CenterTopSerif (df.rightSB - df.mvs / 2 * HVContrast) top jut
-			include : tagged 'serifRB' : if (Yeri !== CyrlYeriUprightShape)
+			if (!fTail) : include : tagged 'serifRB' : if (Yeri !== CyrlYeriUprightShape)
 				then : RightwardBottomSerif df.rightSB 0 (jut - 0.5 * df.mvs * HVContrast)
 				else : CenterBottomSerif (df.rightSB - df.mvs / 2 * HVContrast) 0 jut
 
 	define YerConfig : object
-		corner  { CyrlYeriUprightShape }
-		round   { CyrlYeriRoundShape   }
-		cursive { CyrlYeriCursiveShape }
+		corner        { CyrlYeriUprightShape false }
+		round         { CyrlYeriRoundShape   false }
+		cursive       { CyrlYeriCursiveShape false }
+		cornerTailed  { CyrlYeriUprightShape true  }
+		roundTailed   { CyrlYeriRoundShape   true  }
+		cursiveTailed { CyrlYeriCursiveShape true  }
 
-	foreach { suffix { Yeri } } [Object.entries YerConfig] : do
+	foreach { suffix { Yeri fTail } } [Object.entries YerConfig] : do
 		create-glyph "cyrl/Yeri.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Yeri CAP
@@ -159,12 +164,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.capital
-			include : CyrYeryShape Yeri df CAP
+			include : CyrYeryShape Yeri df CAP fTail
 		create-glyph "cyrl/yery.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.e
-			include : CyrYeryShape Yeri df XH
+			include : CyrYeryShape Yeri df XH fTail
 
 
 	select-variant 'cyrl/Yer'  0x42A

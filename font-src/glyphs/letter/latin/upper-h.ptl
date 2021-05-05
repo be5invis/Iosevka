@@ -10,11 +10,12 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 
 	define SLAB-AUTO            1
 	define SLAB-MOTION          2
 	define SLAB-SMALL-CYRILLIC  3
+	define SLAB-TAILED-CYRILLIC 4
 
 	define [HSerifs t b l r slabType] : begin
 		local sf : SerifFrame t b l r
@@ -25,12 +26,20 @@ glyph-block Letter-Latin-Upper-H : begin
 			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
 				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
 				NeedSlab SLAB : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : if [not para.isItalic]
+				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full
+				NeedSlab SLAB : composite-proc sf.lt.outer
 
 	define [HShape top slabType] : glyph-proc
 		include : tagged 'strokeL' : VBarLeft SB 0 top
 		include : tagged 'strokeR' : VBarRight RightSB 0 top
 		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
+		include : HSerifs top 0 SB RightSB slabType
 
+	define [TailedHShape top slabType] : glyph-proc
+		include : tagged 'strokeL' : VBarLeft SB 0 top
+		include : tagged 'strokeR' : RightwardTailedBar RightSB 0 top
+		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
 		include : HSerifs top 0 SB RightSB slabType
 
 	create-glyph 'H.standard' : glyph-proc
@@ -50,6 +59,10 @@ glyph-block Letter-Latin-Upper-H : begin
 	create-glyph 'smcpH.standardSmallCyrl' : glyph-proc
 		include : MarkSet.e
 		include : HShape XH SLAB-SMALL-CYRILLIC
+
+	create-glyph 'smcpH.tailed' : glyph-proc
+		include : MarkSet.e
+		include : TailedHShape XH SLAB-TAILED-CYRILLIC
 
 	create-glyph 'smcpH.motionSerifed' : glyph-proc
 		include : MarkSet.e
