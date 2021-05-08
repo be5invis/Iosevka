@@ -8,7 +8,7 @@ glyph-module
 glyph-block Letter-Greek-Upper-Gamma: begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : nShoulder
+	glyph-block-import Letter-Shared-Shapes : nShoulder CyrDescender
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 
 	define SLAB-AUTO    0
@@ -28,21 +28,33 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 				include : tagged 'serifRT' : DownwardRightSerif (RightSB - OX) top VJut
 
 	define GammaConfig : object
-		standard      { SLAB-AUTO   }
-		motionSerifed { SLAB-MOTION }
+		standard      { SLAB-AUTO   SLAB  }
+		motionSerifed { SLAB-MOTION false }
 
-	foreach { suffix { slabType } } [Object.entries GammaConfig] : do
+	foreach { suffix { slabType doSB } } [Object.entries GammaConfig] : do
 		create-glyph "grek/Gamma.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GammaShape CAP slabType
+
+		create-glyph "cyrl/GheDescender.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : GammaShape CAP slabType
+			include : CyrDescender (GammaBarLeft + Stroke * HVContrast) (overflow -- [if doSB (MidJutCenter - HalfStroke * HVContrast)])
 
 		create-glyph "cyrl/ghe.upright.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : GammaShape XH slabType
 
+		create-glyph "cyrl/gheDescender.upright.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : GammaShape XH slabType
+			include : CyrDescender (GammaBarLeft + Stroke * HVContrast) (overflow -- [if doSB (MidJutCenter - HalfStroke * HVContrast)])
+
 	select-variant 'grek/Gamma' 0x393
 	select-variant 'cyrl/Ghe' 0x413 (shapeFrom -- 'grek/Gamma')
+	select-variant 'cyrl/GheDescender' 0x4F6 (follow -- 'cyrl/Ghe')
 	select-variant 'cyrl/ghe.upright'
+	select-variant 'cyrl/gheDescender.upright' (follow -- 'cyrl/ghe.upright')
 	alias 'grek/smcpGamma' 0x1D26 'cyrl/ghe.upright'
 
 	with-related-glyphs 'cyrl/GheHook' 0x494 'cyrl/Ghe' : lambda [src sel] : glyph-proc
@@ -74,17 +86,6 @@ glyph-block Letter-Greek-Upper-Gamma: begin
 	with-related-glyphs 'cyrl/ghayn.upright' null 'cyrl/ghe.upright' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (XH * (1 - OverlayPos))
-
-
-	with-related-glyphs 'cyrl/GheDescender' 0x4F6 'cyrl/Ghe' : lambda [src sel] : composite-proc
-		refer-glyph src
-		CyrDescender (GammaBarLeft + Stroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
-		MarkSet.if
-
-	with-related-glyphs 'cyrl/gheDescender.upright' null 'cyrl/ghe.upright' : lambda [src sel] : composite-proc
-		refer-glyph src
-		CyrDescender (GammaBarLeft + Stroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
-		MarkSet.p
 
 	define [CyrGeShape top] : glyph-proc
 		include : GammaShape top
