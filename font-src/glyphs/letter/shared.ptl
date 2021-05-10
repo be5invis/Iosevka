@@ -349,12 +349,21 @@ glyph-block Letter-Shared-Shapes : begin
 				if (sign > 0)
 					widths.center.heading swMid Rightward
 					widths.center.heading swMid Leftward
-			if (sign <= 0) {} : alsoThru.g2
-				[Math.sin (tailAngle / 2)] / [Math.sin tailAngle]
-				(1 - [Math.cos (tailAngle / 2)]) / (1 - [Math.cos tailAngle])
-				widths.center : mix swMid fine (1 / 2)
+			if (sign <= 0) {} : alsoThruThem
+				list
+					DiagonalTailFArc2K tailAngle (1 / 4)
+					DiagonalTailFArc2K tailAngle (2 / 4)
+					DiagonalTailFArc2K tailAngle (3 / 4)
+			# if (sign <= 0) {} : alsoThru.g2
+			# 	[Math.sin (tailAngle / 2)] / [Math.sin tailAngle]
+			# 	(1 - [Math.cos (tailAngle / 2)]) / (1 - [Math.cos tailAngle])
+			# 	widths.center : mix swMid fine (1 / 2)
 			flat (cx + sign * dxTailStart) (cy + O + dyTailStart) [widths.center fine]
 			curl (cx + sign * dxTailStart + sign * dxDepth) (cy + O + dyTailStart + dyDepth)
+	define [DiagonalTailFArc2K tailAngle t] : list
+		[Math.sin (t * tailAngle)] / [Math.sin tailAngle]
+		(1 - [Math.cos (t * tailAngle)]) / (1 - [Math.cos tailAngle])
+		begin t
 
 	glyph-block-export DiagonalTailR
 	define [DiagonalTailR df cx cy depth sw] : begin
@@ -422,6 +431,23 @@ glyph-block Letter-Shared-Shapes : begin
 				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 				glyph-proc
 
+	glyph-block-export CyrHookDescender
+	define [CyrHookDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
+		local descenderOverflow : fallback overflow : if SLAB SideJut ((RightSB - SB) * shift)
+		local xRef : x + descenderOverflow + 0.25 * Stroke
+		local hd : FlatHookDepth [DivFrame 1]
+		return : union
+			dispiro
+				widths.rhs VJutSw
+				flat xRef Stroke [heading Downward]
+				curl xRef (hd.y - Hook - 0.25 * VJutSw) [heading Downward]
+				arcvh
+				flat (xRef - hd.x + 0.25 * VJutSw * HVContrast) (0 - Hook)
+				curl (xRef - HookX - 0.5 * VJutSw * HVContrast) (0 - Hook)
+			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
+				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
+				glyph-proc
+
 	glyph-block-export CyrTailDescender
 	define [CyrTailDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
 		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * shift)
@@ -431,7 +457,7 @@ glyph-block Letter-Shared-Shapes : begin
 				ExtLineLhs 4 VJutSw (xRef - 0.275 * LongJut) (HalfStroke - LongJut) xRef Stroke
 				MaskAbove Stroke
 				MaskBelow (HalfStroke - LongJut)
-			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
+			if (!SLAB && descenderOverflow > Stroke * 0.7 || connex)
 				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 				glyph-proc
 
