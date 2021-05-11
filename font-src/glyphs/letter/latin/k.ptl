@@ -3,6 +3,7 @@ $$include '../../../meta/macros.ptl'
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
 import [Dotless CvDecompose] from "../../../support/gr"
+import [maskBit maskBits popCountByte] from '../../../support/mask-bit'
 
 glyph-module
 
@@ -16,13 +17,13 @@ glyph-block Letter-Latin-K : begin
 	local [KBalanceRightCursive slab straightBar] : if slab (Width / 32) : if straightBar (Width / 32) 0
 	local [KO slab straightBar top stroke] : if straightBar (([if slab (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
-	define [KSlabs top left right stroke straightBar] : glyph-proc
+	define [KSlabs mode top left right stroke straightBar] : glyph-proc
 		local kshRight : right + [KBalanceRight true straightBar]
 		local topSerifX : kshRight - (1.15 * stroke * (Width * 2 / UPM) / 2 - stroke / 2) * HVContrast * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVContrast
 		local bottomSerifX : kshRight - O * [if para.isItalic 1 0]
 
-		include : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
-		include : RightwardBottomSerif bottomSerifX 0 SideJut
+		if [maskBit mode 1] : include : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
+		if [maskBit mode 0] : include : RightwardBottomSerif bottomSerifX 0 SideJut
 
 	define [KStraightLegShapeImpl left right stroke top slabLeft slab] : glyph-proc
 		local fine : AdviceStroke 3.5
@@ -33,7 +34,7 @@ glyph-block Letter-Latin-K : begin
 		local attach (top * 0.42 - stroke)
 		local attach2 (top * 0.72 + stroke)
 		include : intersection
-			Rect top 0 kshLeft [if slab kshRight (2 * Width)]
+			Rect top 0 kshLeft [if [maskBit slab 1] kshRight (2 * Width)]
 			dispiro
 				widths.rhs stroke
 				flat (kshRight - Ok) top
@@ -51,7 +52,7 @@ glyph-block Letter-Latin-K : begin
 				flat (kshRight - Ok) 0
 				curl (kshLeft + stroke) attach2
 
-		if slab : include : KSlabs top left right stroke true
+		include : KSlabs slab top left right stroke true
 
 	define [KSymmetricLegsImpl leadGap] : function [left right stroke top slabLeft slab] : glyph-proc
 		local fine : AdviceStroke [if leadGap 3.5 3]
@@ -64,14 +65,14 @@ glyph-block Letter-Latin-K : begin
 		local yAttach : top * [if leadGap 0.42 0.49] - stroke * [if leadGap 1 (-0.1)]
 		local coYAttach : top - yAttach
 		include : intersection
-			Rect top (0.5 * top) kshLeft [if slab kshRight (2 * Width)]
+			Rect top (0.5 * top) kshLeft [if [maskBit slab 1] kshRight (2 * Width)]
 			dispiro
 				widths.rhs stroke
 				flat (kshRight - Ok) top
 				curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
 		include : intersection
-			Rect (0.5 * top) 0 kshLeft [if slab kshRight (2 * Width)]
+			Rect (0.5 * top) 0 kshLeft [if [maskBit slab 0] kshRight (2 * Width)]
 			dispiro
 				widths.lhs stroke
 				flat (kshRight - Ok) 0
@@ -90,7 +91,7 @@ glyph-block Letter-Latin-K : begin
 					corner (xAttach - 1) coYAttach
 					corner (xAttach - 1) 0
 
-		if slab : include : KSlabs top left right stroke true
+		include : KSlabs slab top left right stroke true
 
 	define [KCurlyLegShapeImpl left right stroke top slabLeft slab] : glyph-proc
 		local turn : top * 0.99
@@ -120,7 +121,7 @@ glyph-block Letter-Latin-K : begin
 				corner kshLeft 0
 				corner kshLeft top
 
-		if slab : include : KSlabs top left right stroke false
+		include : KSlabs slab top left right stroke false
 
 	define [KCursiveLoopAndLegDimen top straightBar slabLeft slab] : begin
 		define kshLeft : SB + [KBalance slabLeft straightBar]
@@ -219,25 +220,29 @@ glyph-block Letter-Latin-K : begin
 	define CyrlVbSw : AdviceStroke 3
 
 	define UpperKConfig : object
-		straight                          {  KStraightLegShapeImpl                 [if SLAB 1 0]                      [if SLAB 1 0]                      [if SLAB 1 0]                      }
-		curly                             {  KCurlyLegShapeImpl                    [if SLAB 1 0]                      [if SLAB 1 0]                      [if SLAB 1 0]                      }
-		symmetricTouching                 { [KSymmetricLegsImpl 0]                 [if SLAB 1 0]                      [if SLAB 1 0]                      [if SLAB 1 0]                      }
-		symmetricConnected                { [KSymmetricLegsImpl : AdviceStroke 6]  [if SLAB 1 0]                      [if SLAB 1 0]                      [if SLAB 1 0]                      }
-		symmetricConnectedVB              { [KSymmetricLegsImpl CyrlVbGap]         [if SLAB 1 0]                      [if SLAB 1 0]                      [if SLAB 1 0]                      }
-		straightSmallCyrl                 {  KStraightLegShapeImpl                 [if SLAB [if para.isItalic 2 1] 0] [if SLAB [if para.isItalic 0 1] 0] [if SLAB [if para.isItalic 0 1] 0] }
-		curlySmallCyrl                    {  KCurlyLegShapeImpl                    [if SLAB [if para.isItalic 2 1] 0] [if SLAB [if para.isItalic 0 1] 0] [if SLAB [if para.isItalic 0 1] 0] }
-		symmetricTouchingSmallCyrl        { [KSymmetricLegsImpl 0]                 [if SLAB [if para.isItalic 2 1] 0] [if SLAB [if para.isItalic 0 1] 0] [if SLAB [if para.isItalic 0 1] 0] }
-		symmetricConnectedSmallCyrl       { [KSymmetricLegsImpl : AdviceStroke 6]  [if SLAB [if para.isItalic 2 1] 0] [if SLAB [if para.isItalic 0 1] 0] [if SLAB [if para.isItalic 0 1] 0] }
-		symmetricConnectedSmallCyrlVB     { [KSymmetricLegsImpl CyrlVbGap]         [if SLAB [if para.isItalic 2 1] 0] [if SLAB [if para.isItalic 0 1] 0] [if SLAB [if para.isItalic 0 1] 0] }
-		straightSerifless                 {  KStraightLegShapeImpl                  0                                  0                                  0                                 }
-		curlySerifless                    {  KCurlyLegShapeImpl                     0                                  0                                  0                                 }
-		symmetricTouchingSerifless        { [KSymmetricLegsImpl 0]                  0                                  0                                  0                                 }
-		symmetricConnectedSerifless       { [KSymmetricLegsImpl : AdviceStroke 6]   0                                  0                                  0                                 }
-		straightMotionSerifed             {  KStraightLegShapeImpl                  2                                  0                                  0                                 }
-		curlyMotionSerifed                {  KCurlyLegShapeImpl                     2                                  0                                  0                                 }
-		symmetricTouchingMotionSerifed    { [KSymmetricLegsImpl 0]                  2                                  0                                  0                                 }
-		symmetricConnectedMotionSerifed   { [KSymmetricLegsImpl : AdviceStroke 6]   2                                  0                                  0                                 }
-		symmetricConnectedMotionSerifedVB { [KSymmetricLegsImpl CyrlVbGap]          2                                  0                                  0                                 }
+		straightSerifless                      {  KStraightLegShapeImpl                  0 0 0 }
+		curlySerifless                         {  KCurlyLegShapeImpl                     0 0 0 }
+		symmetricTouchingSerifless             { [KSymmetricLegsImpl 0]                  0 0 0 }
+		symmetricConnectedSerifless            { [KSymmetricLegsImpl : AdviceStroke 6]   0 0 0 }
+		symmetricConnectedSeriflessVB          { [KSymmetricLegsImpl CyrlVbGap]          0 0 0 }
+
+		straightTopLeftSerifed                 {  KStraightLegShapeImpl                  2 0 0 }
+		curlyTopLeftSerifed                    {  KCurlyLegShapeImpl                     2 0 0 }
+		symmetricTouchingTopLeftSerifed        { [KSymmetricLegsImpl 0]                  2 0 0 }
+		symmetricConnectedTopLeftSerifed       { [KSymmetricLegsImpl : AdviceStroke 6]   2 0 0 }
+		symmetricConnectedTopLeftSerifedVB     { [KSymmetricLegsImpl CyrlVbGap]          2 0 0 }
+
+		straightBottomRightSerifed             {  KStraightLegShapeImpl                  0 0 1 }
+		curlyBottomRightSerifed                {  KCurlyLegShapeImpl                     0 0 1 }
+		symmetricTouchingBottomRightSerifed    { [KSymmetricLegsImpl 0]                  0 0 1 }
+		symmetricConnectedBottomRightSerifed   { [KSymmetricLegsImpl : AdviceStroke 6]   0 0 1 }
+		symmetricConnectedBottomRightSerifedVB { [KSymmetricLegsImpl CyrlVbGap]          0 0 1 }
+
+		straightSerifed                        {  KStraightLegShapeImpl                  1 1 3 }
+		curlySerifed                           {  KCurlyLegShapeImpl                     1 1 3 }
+		symmetricTouchingSerifed               { [KSymmetricLegsImpl 0]                  1 1 3 }
+		symmetricConnectedSerifed              { [KSymmetricLegsImpl : AdviceStroke 6]   1 1 3 }
+		symmetricConnectedSerifedVB            { [KSymmetricLegsImpl CyrlVbGap]          1 1 3 }
 
 	define [UpperKLTSerif top sw slabTop straightBar] : match slabTop
 		2 : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) top SideJut
@@ -267,7 +272,7 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "K.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : KBaseShape Stroke CAP
-			create-derived "KDescender.\(suffix)" : KCyrlNormalDescender CAP straightBar slabTop slabBot
+			create-derived "KDescender.\(suffix)" : KCyrlNormalDescender CAP straightBar slabTop slabLegs
 
 		create-glyph "KBar.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
@@ -287,7 +292,7 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "smcpK.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : KBaseShape Stroke XH
-			create-derived "cyrl/kaDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabBot
+			create-derived "cyrl/kaDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabLegs
 
 		create-glyph "smcpKVBar.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -322,30 +327,48 @@ glyph-block Letter-Latin-K : begin
 
 
 	define LowerKConfig : object
-		straight                                  { KStraightLegShapeImpl                  SLAB (SLAB && !para.isItalic) }
-		curly                                     { KCurlyLegShapeImpl                     SLAB (SLAB && !para.isItalic) }
-		cursive                                   { [KCursiveLoopAndLegShapeImpl 0]        SLAB (SLAB && !para.isItalic) }
-		diagonalTailedSerifedCursive              { [KCursiveLoopAndLegShapeImpl 1]        SLAB (SLAB && !para.isItalic) }
-		symmetricTouching                         { [KSymmetricLegsImpl 0]                 SLAB (SLAB && !para.isItalic) }
-		symmetricConnected                        { [KSymmetricLegsImpl : AdviceStroke 6]  SLAB (SLAB && !para.isItalic) }
-		straightMotionSerifed                     { KStraightLegShapeImpl                  true false                    }
-		curlyMotionSerifed                        { KCurlyLegShapeImpl                     true false                    }
-		cursiveMotionSerifed                      { [KCursiveLoopAndLegShapeImpl 0]        true false                    }
-		diagonalTailedSerifedCursiveMotionSerifed { [KCursiveLoopAndLegShapeImpl 1]        true false                    }
-		symmetricTouchingMotionSerifed            { [KSymmetricLegsImpl 0]                 true false                    }
-		symmetricConnectedMotionSerifed           { [KSymmetricLegsImpl : AdviceStroke 6]  true false                    }
+		straightSerifed                                { KStraightLegShapeImpl                  1 1 3 }
+		curlySerifed                                   { KCurlyLegShapeImpl                     1 1 3 }
+		cursiveSerifed                                 { [KCursiveLoopAndLegShapeImpl 0]        1 1 3 }
+		diagonalTailedSerifedCursiveSerifed            { [KCursiveLoopAndLegShapeImpl 1]        1 1 3 }
+		symmetricTouchingSerifed                       { [KSymmetricLegsImpl 0]                 1 1 3 }
+		symmetricConnectedSerifed                      { [KSymmetricLegsImpl : AdviceStroke 6]  1 1 3 }
+		straightSerifless                              { KStraightLegShapeImpl                  0 0 0 }
+		curlySerifless                                 { KCurlyLegShapeImpl                     0 0 0 }
+		cursiveSerifless                               { [KCursiveLoopAndLegShapeImpl 0]        0 0 0 }
+		diagonalTailedSerifedCursiveSerifless          { [KCursiveLoopAndLegShapeImpl 1]        0 0 0 }
+		symmetricTouchingSerifless                     { [KSymmetricLegsImpl 0]                 0 0 0 }
+		symmetricConnectedSerifless                    { [KSymmetricLegsImpl : AdviceStroke 6]  0 0 0 }
+		straightTopLeftSerifed                         { KStraightLegShapeImpl                  1 0 0 }
+		curlyTopLeftSerifed                            { KCurlyLegShapeImpl                     1 0 0 }
+		cursiveTopLeftSerifed                          { [KCursiveLoopAndLegShapeImpl 0]        1 0 0 }
+		diagonalTailedSerifedCursiveTopLeftSerifed     { [KCursiveLoopAndLegShapeImpl 1]        1 0 0 }
+		symmetricTouchingTopLeftSerifed                { [KSymmetricLegsImpl 0]                 1 0 0 }
+		symmetricConnectedTopLeftSerifed               { [KSymmetricLegsImpl : AdviceStroke 6]  1 0 0 }
+		straightBottomRightSerifed                     { KStraightLegShapeImpl                  0 0 1 }
+		curlyBottomRightSerifed                        { KCurlyLegShapeImpl                     0 0 1 }
+		cursiveBottomRightSerifed                      { [KCursiveLoopAndLegShapeImpl 0]        0 0 1 }
+		diagonalTailedSerifedCursiveBottomRightSerifed { [KCursiveLoopAndLegShapeImpl 1]        0 0 1 }
+		symmetricTouchingBottomRightSerifed            { [KSymmetricLegsImpl 0]                 0 0 1 }
+		symmetricConnectedBottomRightSerifed           { [KSymmetricLegsImpl : AdviceStroke 6]  0 0 1 }
+		straightTlBrSerifed                            { KStraightLegShapeImpl                  1 0 1 }
+		curlyTlBrSerifed                               { KCurlyLegShapeImpl                     1 0 1 }
+		cursiveTlBrSerifed                             { [KCursiveLoopAndLegShapeImpl 0]        1 0 1 }
+		diagonalTailedSerifedCursiveTlBrSerifed        { [KCursiveLoopAndLegShapeImpl 1]        1 0 1 }
+		symmetricTouchingTlBrSerifed                   { [KSymmetricLegsImpl 0]                 1 0 1 }
+		symmetricConnectedTlBrSerifed                  { [KSymmetricLegsImpl : AdviceStroke 6]  1 0 1 }
 
-	foreach { suffix { LegsImpl slabTop slabBot } } [Object.entries LowerKConfig] : do
+	foreach { suffix { LegsImpl slabTop slabBot slabLegs } } [Object.entries LowerKConfig] : do
 		local straightBar : LegsImpl !== KCurlyLegShapeImpl
 
 		create-glyph "k.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : VBarLeft (SB + [KBalance slabTop straightBar]) 0 CAP
-			include : LegsImpl SB RightSB Stroke XH slabTop slabBot
+			include : LegsImpl SB RightSB Stroke XH slabTop slabLegs
 			if slabTop : include : LeftwardTopSerif (SB + [KBalance slabTop straightBar]) CAP SideJut
 			if slabBot : include : tagged 'serifLB'
 				CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
-			create-derived "kDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabBot
+			create-derived "kDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabLegs
 
 		create-glyph "kBar.\(suffix)" : glyph-proc
 			include [refer-glyph "k.\(suffix)"] AS_BASE ALSO_METRICS
@@ -353,7 +376,7 @@ glyph-block Letter-Latin-K : begin
 
 		create-glyph "khooktop.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : LegsImpl SB RightSB Stroke XH straightBar slabTop slabBot
+			include : LegsImpl SB RightSB Stroke XH straightBar slabTop slabLegs
 			include : KHookTopBar slabTop straightBar
 			if slabBot : include : tagged 'serifLB'
 				CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
