@@ -50,14 +50,9 @@ build.setSelfTracking();
 //////                   Oracles                     //////
 ///////////////////////////////////////////////////////////
 
-const PackageJsonData = computed(`env::package-json-data`, async target => {
-	const [pj] = await target.need(sfu`package.json`);
-	const package_json = JSON.parse(await fs.promises.readFile(pj.full, "utf-8"));
-	return package_json;
-});
-
 const Version = computed(`env::version`, async target => {
-	const [pj] = await target.need(PackageJsonData);
+	const [pjf] = await target.need(sfu`package.json`);
+	const pj = JSON.parse(await fs.promises.readFile(pjf.full, "utf-8"));
 	return pj.version;
 });
 
@@ -67,6 +62,17 @@ const CheckTtfAutoHintExists = oracle(`oracle:check-ttfautohint-exists`, async t
 	} catch (e) {
 		fail("External dependency <ttfautohint>, needed for building hinted font, does not exist.");
 	}
+});
+
+const Dependencies = computed("env::dependencies", async target => {
+	const [pjf] = await target.need(sfu`package.json`);
+	const pj = JSON.parse(await fs.promises.readFile(pjf.full, "utf-8"));
+	let subGoals = [];
+	for (const pkgName in pj.dependencies) {
+		subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
+	}
+	const [actual] = await target.need(subGoals);
+	return actual;
 });
 
 const InstalledVersion = computed.make(
@@ -84,22 +90,12 @@ const InstalledVersion = computed.make(
 	}
 );
 
-const Dependencies = computed("env::dependencies", async target => {
-	const [pj] = await target.need(PackageJsonData);
-	let subGoals = [];
-	for (const pkgName in pj.dependencies) {
-		subGoals.push(InstalledVersion(pkgName, pj.dependencies[pkgName]));
-	}
-	const [actual] = await target.need(subGoals);
-	return actual;
-});
-
 ///////////////////////////////////////////////////////////
 //////                    Plans                      //////
 ///////////////////////////////////////////////////////////
 
 const RawPlans = computed(`metadata:raw-plans`, async target => {
-	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS));
+	await target.need(sfu(BUILD_PLANS), ofu(PRIVATE_BUILD_PLANS), Version);
 
 	const bp = await tryParseToml(BUILD_PLANS);
 	bp.buildOptions = bp.buildOptions || {};
@@ -778,21 +774,27 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	const [version, collectPlans] = await target.need(Version, CollectPlans);
+	const [collectPlans] = await target.need(CollectPlans);
 	let goals = [];
-	for (const [cgr, subGroups] of Object.entries(collectPlans.groupDecomposition)) {
+	for (const cgr of Object.keys(collectPlans.groupDecomposition)) {
 		if (!collectPlans.groupInRelease[cgr]) continue;
-		goals.push(TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version));
-		for (const gr of subGroups) {
-			goals.push(
-				GroupTtfArchiveFile(gr, version),
-				GroupTtfUnhintedArchiveFile(gr, version),
-				GroupWebArchiveFile(gr, version)
-			);
-		}
+		goals.push(ReleaseGroup(cgr));
 	}
 	await target.need(goals);
 	await target.need(SampleImages, Pages, ReleaseNotes, ChangeLog);
+});
+const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
+	const [version, collectPlans] = await target.need(Version, CollectPlans);
+	const subGroups = collectPlans.GroupContents[cgr];
+
+	let goals = [TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version)];
+	for (const gr of subGroups) {
+		goals.push(GroupTtfArchiveFile(gr, version));
+		goals.push(GroupTtfUnhintedArchiveFile(gr, version));
+		goals.push(GroupWebArchiveFile(gr, version));
+	}
+
+	await target.need(goals);
 });
 
 ///////////////////////////////////////////////////////////
