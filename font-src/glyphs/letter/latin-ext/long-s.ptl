@@ -1,0 +1,138 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import [Dotless CvDecompose] from "../../../support/gr"
+
+glyph-module
+
+glyph-block Letter-Latin-Long-S : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth
+
+	define [LongSUpperHalf sign x top bottom hookX hookY _sw] : begin
+		local hd : FlatHookDepth [DivFrame 1]
+		local sw : fallback _sw Stroke
+		return : dispiro
+			widths.center sw
+			flat (x + sign * hookX) (top - sw / 2)
+			curl (x + sign * [Math.min (hd.x - 0.25 * sw * HVContrast) (hookX - 0.1)]) (top - sw / 2)
+			archv.superness DesignParameters.tightHookSuperness
+			flat x (top - sw / 2 - [Math.min hd.y hookY])
+			curl x bottom [heading Downward]
+
+	define [LongSLowerHalf sign x top bottom hookX hookY _sw] : begin
+		local hd : FlatHookDepth [DivFrame 1]
+		local sw : fallback _sw Stroke
+		return : dispiro
+			widths.center sw
+			flat (x - sign * hookX) (bottom + sw / 2)
+			curl (x - sign * [Math.min (hd.x - 0.25 * sw * HVContrast) (hookX - 0.1)]) (bottom + sw / 2)
+			archv.superness DesignParameters.tightHookSuperness
+			flat x (bottom + sw / 2 + [Math.min hd.y hookY])
+			curl x top [heading Upward]
+
+	glyph-block-export LongSShape
+	define [LongSShape top bottom hookx hooky fine] : union
+		LongSUpperHalf 1 Middle top [mix top bottom 0.5] hookx hooky fine
+		LongSLowerHalf 1 Middle [mix top bottom 0.5] bottom hookx hooky fine
+
+	define [RevLongSShape top bottom hookx hooky fine] : union
+		LongSUpperHalf (-1) Middle top [mix top bottom 0.5] hookx hooky fine
+		LongSLowerHalf (-1) Middle [mix top bottom 0.5] bottom hookx hooky fine
+
+	create-glyph 'longs.upright.standard' : glyph-proc
+		include : MarkSet.b
+		local m : Middle - JBalance - HalfStroke * HVContrast
+		local r : m + (Width * 0.5) + Stroke * HVContrast - OXHook
+		include : dispiro
+			widths.lhs
+			g4 r (CAP - Hook)
+			hookstart (CAP - O)
+			flat m (CAP - SmoothA)
+			curl m 0 [heading Downward]
+		set-base-anchor 'overlay' (m + Stroke * 0.65 * HVContrast) (CAP * OverlayPos)
+		if SLAB : begin
+			include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
+
+		create-derived 'longsbar.upright.standard' : glyph-proc
+			include : HOverlayBar
+				m + HalfStroke * HVContrast - LongJut * 0.75
+				m + HalfStroke * HVContrast + LongJut * 0.75
+				[mix (XH - Stroke) CAP 0.5] - HalfStroke
+
+	create-glyph 'longs.upright.flatHook' : glyph-proc
+		include : MarkSet.b
+		local hd : FlatHookDepth [DivFrame 1]
+		local m : Middle - JBalance - HalfStroke * HVContrast
+		include : dispiro
+			widths.lhs
+			flat RightSB CAP
+			curl (m + hd.x) CAP
+			archv
+			flat m (CAP - hd.y)
+			curl m 0 [heading Downward]
+		set-base-anchor 'overlay' (m + Stroke * 0.65 * HVContrast) (CAP * OverlayPos)
+		if SLAB : begin
+			include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
+
+		create-derived 'longsbar.upright.flatHook' : glyph-proc
+			include : HOverlayBar
+				m + HalfStroke * HVContrast - LongJut * 0.75
+				m + HalfStroke * HVContrast + LongJut * 0.75
+				[mix (XH - Stroke) CAP 0.5] - HalfStroke
+
+	create-glyph 'longs.italic' : glyph-proc
+		include : MarkSet.if
+		include : LongSShape CAP Descender (HookX + 0.25 * Stroke) Hook
+
+		create-derived 'longsbar.italic' : glyph-proc
+			include : HOverlayBar
+				Middle - LongJut * 0.75
+				Middle + LongJut * 0.75
+				[mix (XH - Stroke) CAP 0.5] - HalfStroke
+
+		create-derived 'eshbar' 0x284 : glyph-proc
+			include : HOverlayBar
+				Middle - LongJut * 0.75
+				Middle + LongJut * 0.75
+				[mix Stroke Descender 0.5] + HalfStroke
+
+	select-variant 'longs.upright'
+	select-variant 'longsbar.upright' null (follow -- 'longs.upright')
+	alias 'esh' 0x283 'longs.italic'
+
+	create-glyph 'eshCurlyTail' 0x286 : glyph-proc
+		include : MarkSet.if
+		local fine : AdviceStroke 3.5
+		local rinner : LongJut / 2 - fine / 2
+		local m1 : Middle - HalfStroke * HVContrast - FBalance
+		local x2 : mix RightSB m1 0.25
+		local y2 : Descender + O
+		include : union
+			LongSUpperHalf 1 (Middle - FBalance) CAP 0 (HookX + 0.25 * Stroke) Hook
+			dispiro
+				widths.lhs
+				flat m1 (-O) [heading Downward]
+				curl m1 (Descender + fine + rinner * 2)
+				CurlyTail
+					fine -- fine
+					rinner -- rinner
+					xleft -- m1
+					bottom -- Descender
+					right -- (m1 - LongJut)
+					x2 -- x2
+					y2 -- y2
+
+	create-glyph 'ifishhook' 0x27F : glyph-proc
+		include : MarkSet.p
+		include : VBar Middle Descender (XH - Hook)
+		include : VerticalHook Middle (XH - Hook) (-LongJut + [IBalance2 : DivFrame 1]) (-Hook + HalfStroke)
+		include : Translate [IBalance2 : DivFrame 1] 0
+		if SLAB : begin
+			include : CenterBottomSerif Middle Descender Jut
+
+	create-glyph 'iviby' 0x285 : glyph-proc
+		include : MarkSet.p
+		include : RevLongSShape XH Descender (HookX + 0.25 * Stroke) Hook
