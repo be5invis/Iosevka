@@ -11,6 +11,7 @@ glyph-block Letter-Latin-Upper-R : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Latin-Upper-P : PShape RevPShape PBarPosY PRotundaShape BBPShape PShapeOutline
 	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
 
 	define LEG-SHAPE-CURLY    0
 	define LEG-SHAPE-STRAIGHT 1
@@ -126,14 +127,13 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
 		include : RLegShapes.(legShape) legTop 0 endX right top SLAB Stroke 0
 
-	define [RevRShape] : params [legShape top bp [slab null] [mul 1] [italicShape false]] : glyph-proc
+	define [RevRShape] : params [legShape top bp [slab null] [mul 1] [tailedShape false]] : glyph-proc
 		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
 		local left : SB + O + [if SLAB (Jut / 8) 0]
 		include : RevRLegShapes.(legShape) [RLegTop top Stroke bp] 0 left Middle top SLAB Stroke 0
-		if (SLAB && italicShape) : begin
-			eject-contour 'serifRT'
-			eject-contour 'serifRB'
-			include : tagged 'serifRB' : RightwardBottomSerif (Width - SB * mul) 0 SideJut
+		if tailedShape : begin
+			eject-contour 'strokeR'
+			include : tagged 'strokeR' : RightwardTailedBar (Width - SB * mul) 0 top
 
 	define [ROverlayAnchor] : glyph-proc
 		set-base-anchor 'overlay'
@@ -141,20 +141,32 @@ glyph-block Letter-Latin-Upper-R : begin
 			PBarPosY CAP Stroke : RBarPos CAP SLAB
 
 	define RConfig : object
-		standing                   { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
-		straight                   { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
-		curly                      { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  false }
-		standingOpen               { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
-		straightOpen               { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
-		curlyOpen                  { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]  true  }
-		standingMotionSerifed      { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion               false }
-		straightMotionSerifed      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion               false }
-		curlyMotionSerifed         { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion               false }
-		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion               true  }
-		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion               true  }
-		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion               true  }
+		standing                   { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             false  false }
+		straight                   { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             false  false }
+		curly                      { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             false  false }
+		standingOpen               { LEG-SHAPE-STANDING   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             true   false }
+		straightOpen               { LEG-SHAPE-STRAIGHT   [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             true   false }
+		curlyOpen                  { LEG-SHAPE-CURLY      [if SLAB PShape.SlabSymmetric]  [if SLAB RevPShape.SlabSymmetric]                                             true   false }
+		standingMotionSerifed      { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion                                                          false  false }
+		straightMotionSerifed      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion                                                          false  false }
+		curlyMotionSerifed         { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion                                                          false  false }
+		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
+		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
+		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
+		standingSmallCyrl          { LEG-SHAPE-STANDING   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
+		straightSmallCyrl          { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
+		curlySmallCyrl             { LEG-SHAPE-CURLY      PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
+		standingOpenSmallCyrl      { LEG-SHAPE-STANDING   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] true   false }
+		straightOpenSmallCyrl      { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] true   false }
+		curlyOpenSmallCyrl         { LEG-SHAPE-CURLY      PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] true   false }
+		standingTailed             { LEG-SHAPE-STANDING   PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            false  true  }
+		straightTailed             { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            false  true  }
+		curlyTailed                { LEG-SHAPE-CURLY      PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            false  true  }
+		standingOpenTailed         { LEG-SHAPE-STANDING   PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            true   true  }
+		straightOpenTailed         { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            true   true  }
+		curlyOpenTailed            { LEG-SHAPE-CURLY      PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            true   true  }
 
-	foreach { suffix { fStraight slabs revSlabs fOpen } } [Object.entries RConfig] : begin
+	foreach { suffix { fStraight slabs revSlabs fOpen fTailed } } [Object.entries RConfig] : begin
 		local fMotion : slabs === PShape.SlabMotion
 		local bpCap : RBarPos CAP (slabs === PShape.SlabSymmetric)
 		local bpXH  : RBarPos XH  (slabs === PShape.SlabSymmetric)
@@ -200,7 +212,7 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : MarkSet.capital
 			include : ROverlayAnchor
 			include : difference
-				RevRShape fStraight XH (slab -- revSlabs) (bp -- bpXH) (italicShape -- para.isItalic)
+				RevRShape fStraight XH (slab -- revSlabs) (bp -- bpXH) (tailedShape -- fTailed)
 				if fOpen [RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
 
@@ -212,7 +224,7 @@ glyph-block Letter-Latin-Upper-R : begin
 	select-variant 'rrotunda' 0xA75B (follow -- 'Rrotunda')
 
 	select-variant 'cyrl/Ya' 0x42F
-	select-variant 'cyrl/ya' 0x44F (follow -- 'cyrl/Ya')
+	select-variant 'cyrl/ya' 0x44F
 	select-variant 'revSmcpR' 0x1D19 (shapeFrom -- 'cyrl/ya') (follow -- 'R')
 	turned 'invSmcpR' 0x281 'revSmcpR' Middle (XH / 2)
 

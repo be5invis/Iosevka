@@ -106,6 +106,7 @@ class Prime {
 			gr.variants.push({
 				key: variant.key,
 				rank: variant.rank,
+				rankGroup: variant.rankGroup,
 				description: variant.description
 			});
 		}
@@ -120,6 +121,7 @@ class PrimeVariant {
 		this.tag = tag;
 		this.description = cfg.description;
 		this.rank = cfg.rank;
+		this.rankGroup = cfg.rankGroup || 0;
 		this.selector = cfg.selector;
 		this.nonDeriving = cfg.nonDeriving;
 	}
