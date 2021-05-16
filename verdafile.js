@@ -579,9 +579,11 @@ const PagesDir = oracle(`pages-dir-path`, async t => {
 
 const PagesDataExport = task(`pages:data-export`, async t => {
 	const [pagesDir] = await t.need(PagesDir, Version, Parameters, UtilScripts);
-	const [cm] = await t.need(BuildCM("iosevka", "iosevka-regular"));
-	const [cmi] = await t.need(BuildCM("iosevka", "iosevka-italic"));
-	const [cmo] = await t.need(BuildCM("iosevka", "iosevka-oblique"));
+	const [cm, cmi, cmo] = await t.need(
+		BuildCM("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-italic"),
+		BuildCM("iosevka", "iosevka-oblique")
+	);
 	await run(
 		`node`,
 		`utility/export-data/index`,
