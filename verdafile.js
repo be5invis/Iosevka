@@ -787,7 +787,7 @@ phony(`release`, async target => {
 });
 const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
-	const subGroups = collectPlans.GroupContents[cgr];
+	const subGroups = collectPlans.groupDecomposition[cgr];
 
 	let goals = [TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version)];
 	for (const gr of subGroups) {
