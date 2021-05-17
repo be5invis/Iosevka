@@ -1,5 +1,16 @@
 ## Modifications since version 2.x
 
+### 7.0.0-preview.2
+
+ * Fix broken serifs of Cyrillic Ge (#995).
+ * Add characters:
+   - Measured Angle (`U+2221`).
+   - Spherical Angle (`U+2222`).
+   - Homothetic (`U+223B`).
+   - Sine Wave (`U+223F`).
+   - Wraith Product (`U+2240`).
+
+
 ### 7.0.0-preview.1
 
  * \[**Breaking**\] Variant tags are reordered.

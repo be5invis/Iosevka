@@ -1054,8 +1054,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `z = 'cursive-with-crossbar'`, `cv50 = 26`: Cursive `z` with a diagonal cross bar.
     + `z = 'cursive-with-horizontal-crossbar'`, `cv50 = 27`: Cursive `z` with a horizontal cross bar.
   - Styles for `ſ` (Long-S):
-    + `long-s = 'standard'`, `cv51 = 1`: Long-S with standard hook.
+    + `long-s = 'bent-hook'`, `cv51 = 1`: Long-S with standard bending hook.
     + `long-s = 'flat-hook'`, `cv51 = 2`: Long-S with flat hook.
+    + `long-s = 'bent-hook-tailed'`, `cv51 = 3`: Long-S with standard bending hook and tail.
+    + `long-s = 'flat-hook-tailed'`, `cv51 = 4`: Long-S with flat hook and tail.
   - Styles for `ß` (Eszet):
     + `eszet = 'traditional'`, `cv52 = 1`: Traditional, Fraktur-like Eszet (`ß`).
     + `eszet = 'traditional-tailed'`, `cv52 = 2`: Traditional, Fraktur-like Eszet (`ß`) with descending tail.
@@ -1109,13 +1111,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `cyrl-capital-ka = 'symmetric-touching-top-left-serifed'`, `cv60 = 7`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs at top left.
     + `cyrl-capital-ka = 'symmetric-connected-top-left-serifed'`, `cv60 = 8`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs at top left.
     + `cyrl-capital-ka = 'straight-bottom-right-serifed'`, `cv60 = 9`: Cyrillic Capital Ka (`К`)  with standard shape and serifs at bottom right.
-    + `cyrl-capital-ka = 'straight-serifed'`, `cv60 = 9`: Cyrillic Capital Ka (`К`)  with standard shape and serifs.
     + `cyrl-capital-ka = 'curly-bottom-right-serifed'`, `cv60 = 10`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs at bottom right.
-    + `cyrl-capital-ka = 'curly-serifed'`, `cv60 = 10`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs.
     + `cyrl-capital-ka = 'symmetric-touching-bottom-right-serifed'`, `cv60 = 11`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs at bottom right.
-    + `cyrl-capital-ka = 'symmetric-touching-serifed'`, `cv60 = 11`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs.
     + `cyrl-capital-ka = 'symmetric-connected-bottom-right-serifed'`, `cv60 = 12`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs at bottom right.
-    + `cyrl-capital-ka = 'symmetric-connected-serifed'`, `cv60 = 12`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs.
+    + `cyrl-capital-ka = 'straight-serifed'`, `cv60 = 13`: Cyrillic Capital Ka (`К`)  with standard shape and serifs.
+    + `cyrl-capital-ka = 'curly-serifed'`, `cv60 = 14`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs.
+    + `cyrl-capital-ka = 'symmetric-touching-serifed'`, `cv60 = 15`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs.
+    + `cyrl-capital-ka = 'symmetric-connected-serifed'`, `cv60 = 16`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs.
   - Styles for `к` (Cyrillic Ka):
     + `cyrl-ka = 'straight-serifless'`, `cv61 = 1`: Cyrillic Lower Ka (`к`)  with standard shape, and without serifs.
     + `cyrl-ka = 'curly-serifless'`, `cv61 = 2`: Slightly curly Cyrillic Lower Ka (`к`) , like Iosevka 2.x, and without serifs.
