@@ -15,7 +15,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define dfNarrowT : DivFrame para.diversityF
-	define [xSmallTBarLeftT df] : df.middle - TBalance - Stroke * 0.5 * HVContrast
+	define [xSmallTBarLeftT df] : df.middle - TBalance * df.div * df.div - HalfStroke * HVContrast
+	define [xSmallTCrossRefT df] : [xSmallTBarLeftT df] + df.div * TBalance2 + HalfStroke * HVContrast
 	define xSmallTBarLeft : xSmallTBarLeftT : DivFrame 1
 
 	define yCrossBar     XH
@@ -47,18 +48,18 @@ glyph-block Letter-Latin-Lower-T : begin
 			begin yCrossBar
 
 	define [DiagTailedSmallTHookShape df top bot sw] : begin
-		local xMid : xSmallTBarLeft + HalfStroke * HVContrast
+		local xMid : [xSmallTBarLeftT df] + HalfStroke * HVContrast
 		return : dispiro
 			flat xMid top [widths.center.heading sw Downward]
-			DiagonalTailR df xMid bot [DiagonalTailStdDepth df sw] sw
+			DiagonalTailR df xMid bot [DiagonalTailStdDepth [DivFrame : Math.sqrt df.div] sw] sw
 
 	define [TDiagTailShape df top] : glyph-proc
 		local g : include : DiagTailedSmallTHookShape df top 0 Stroke
 		set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (XH * 0.58)
 
 		include : HCrossBar.top
-			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
-			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
+			[xSmallTCrossRefT df] - LongJut * [Math.sqrt df.div]
+			[xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div]
 			begin yCrossBar
 
 	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top [mix 1 df.div 2] 0
@@ -82,29 +83,31 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	define [SmallTCrossBody df top bot] : glyph-proc
 		include : VBar df.middle 0 top
-		include : HCrossBar.top (df.middle - LongJut * df.div) (df.middle + LongJut * df.div) yCrossBar
+		include : HCrossBar.top (df.middle - LongJut * [Math.sqrt df.div]) (df.middle + LongJut * [Math.sqrt df.div]) yCrossBar
 		set-base-anchor 'overlay' df.middle (XH * 0.58)
 
 	define [SmallTHooklessAsymmetricBody df top bot] : glyph-proc
 		define xBar : xSmallTBarLeftT df
 		include : VBarLeft xBar 0 top
-		include : HCrossBar.top xBar (df.middle + df.div * LongJut) yCrossBar
+		include : difference
+			HCrossBar.top xBar (df.middle + df.div * LongJut) yCrossBar
+			MaskLeft (xBar - O)
 		set-base-anchor 'overlay' (xBar + 0.625 * Stroke * HVContrast) (XH * 0.58)
 		set-base-anchor 'below' (xBar + HalfStroke * HVContrast) 0
 
 	define SmallTConfig : object
 		standard                     { [DivFrame  1] SmallTShape                  CAP         }
-		diagonalTailed               { [DivFrame  1] TDiagTailShape               CAP         }
+		diagonalTailed               {  dfNarrowT    TDiagTailShape               CAP         }
 		flatHook                     {  dfNarrowT    SmallTFlatBody               CAP         }
 		cross                        {  dfNarrowT    SmallTCrossBody              CAP         }
 		hooklessAsymmetric           {  dfNarrowT    SmallTHooklessAsymmetricBody CAP         }
 		standardShortNeck            { [DivFrame  1] SmallTShape                  yShortNeck1 }
-		diagonalTailedShortNeck      { [DivFrame  1] TDiagTailShape               yShortNeck1 }
+		diagonalTailedShortNeck      {  dfNarrowT    TDiagTailShape               yShortNeck1 }
 		flatHookShortNeck            {  dfNarrowT    SmallTFlatBody               yShortNeck1 }
 		crossShortNeck               {  dfNarrowT    SmallTCrossBody              yShortNeck1 }
 		hooklessAsymmetricShortNeck  {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck1 }
 		standardShortNeck2           { [DivFrame  1] SmallTShape                  yShortNeck2 }
-		diagonalTailedShortNeck2     { [DivFrame  1] TDiagTailShape               yShortNeck2 }
+		diagonalTailedShortNeck2     {  dfNarrowT    TDiagTailShape               yShortNeck2 }
 		flatHookShortNeck2           {  dfNarrowT    SmallTFlatBody               yShortNeck2 }
 		crossShortNeck2              {  dfNarrowT    SmallTCrossBody              yShortNeck2 }
 		hooklessAsymmetricShortNeck2 {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck2 }
@@ -148,7 +151,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	select-variant 't' 't'
 	select-variant 'turnt' 0x287 (follow -- 't')
 	CreateCommaCaronComposition 't' 'tcaron' 0x165
-	with-related-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
+	derive-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
 
 	create-glyph 'tltail' 0x1AB : glyph-proc
 		include : MarkSet.if

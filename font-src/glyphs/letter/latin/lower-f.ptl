@@ -17,12 +17,11 @@ glyph-block Letter-Latin-Lower-F : begin
 		flat ([mix df.leftSB df.rightSB 0.02] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
 		curl ([mix df.leftSB df.rightSB 0.875] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
 
-	define SmallFOvershoot2 (O * 2)
 	define [StdFShapeT sink offset barleft sw] : sink
 		widths.lhs sw
-		g4 (RightSB + RBalance2 - (OX - O) - offset) (CAP - Hook * 0.75 - SmallFOvershoot2)
-		hookstart (CAP - O - SmallFOvershoot2 - offset) (tight -- true)
-		flat (barleft + offset) (CAP - SmoothA * 0.8 - SmallFOvershoot2)
+		g4 (RightSB + RBalance2 - (OX - O) - offset) (CAP - Hook * 0.75)
+		hookstart (CAP - O - offset) (tight -- true)
+		flat (barleft + offset) (CAP - SmoothA * 0.8)
 		[if offset corner curl] (barleft + offset) 0 [heading Downward]
 		if offset {[corner (RightSB + RBalance2 - (OX - O) - offset) 0]} {}
 
@@ -44,10 +43,16 @@ glyph-block Letter-Latin-Lower-F : begin
 			flat xBarMiddle 0.1 [widths.center.heading Stroke Downward]
 			DiagonalTailL df xBarMiddle Descender [DiagonalTailStdDepth df Stroke] Stroke
 
+	glyph-block-export StdSmallFBarLeftPos
+	define [StdSmallFBarLeftPos barAtCenter] : [mix SB RightSB : if barAtCenter 0.45 0.35] - Stroke * [if barAtCenter 0.45 0.25] * HVContrast
+
+	glyph-block-export StdSmallFBarLeftPos0
+	define [StdSmallFBarLeftPos0] : [mix SB RightSB 0.35] - Stroke * 0.25 * HVContrast
+
 	define [StandardSmallFShape df m bh counterHook] : glyph-proc
 		local barAtCenter : (counterHook === CH-HOOK) || (counterHook === CH-DIAGONAL-HOOK)
-		local barLeft0 : [mix SB RightSB 0.35] - Stroke * 0.25 * HVContrast
-		local barLeft : [mix SB RightSB : if barAtCenter 0.45 0.35] - Stroke * [if barAtCenter 0.45 0.25] * HVContrast
+		local barLeft0 : StdSmallFBarLeftPos0
+		local barLeft : StdSmallFBarLeftPos barAtCenter
 
 		include : StdFShapeT dispiro 0 barLeft0 Stroke
 		include : Translate (barLeft - barLeft0) 0
@@ -134,9 +139,9 @@ glyph-block Letter-Latin-Lower-F : begin
 		turned "turnf.\(suffix)" nothing "f.\(suffix)" df.middle (XH / 2) [df.markSet.(mkTurn)]
 
 	select-variant 'f' 'f'
-	alias 'lenisf' 0xAB35 'f.serifless'
-	alias 'fltail' 0x192  'f.tailed'
 	select-variant 'turnf' 0x25F (follow -- 'f')
+	select-variant 'lenisf' 0xAB35 (shapeFrom -- 'f')
+	select-variant 'fltail' 0x192  (shapeFrom -- 'f')
 
 	alias 'dotlessJHookBar' 0x284 'f.dotlessJHookBar'
 

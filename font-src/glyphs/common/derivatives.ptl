@@ -50,7 +50,7 @@ glyph-block Common-Derivatives : begin
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
-	define [with-related-glyphs dstGid dstUnicode srcGid Fn] : begin
+	define [derive-glyphs dstGid dstUnicode srcGid Fn] : begin
 		if [not : glyph-is-needed srcGid] : return nothing
 
 		local glyphSrc : glyphStore.queryByName srcGid
@@ -68,13 +68,16 @@ glyph-block Common-Derivatives : begin
 				gr.set glyphDst relGidDst
 				derivedGlyphIdMap.set relGidSrc relGidDst
 
-	define [build-related-composite dstGid dstUnicode srcGid] : begin
+	define [derive-composites dstGid dstUnicode srcGid] : begin
 		if [not : glyph-is-needed srcGid] : return nothing
 
 		local restComponents : {}.slice.call arguments 3
-		return : with-related-glyphs dstGid dstUnicode srcGid : lambda [src sel] : glyph-proc
+		return : derive-glyphs dstGid dstUnicode srcGid : lambda [src sel] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
-			foreach component [items-of restComponents] : include component
+			foreach component [items-of restComponents] : begin
+				if ([typeof component] === 'string')
+				: then : include [refer-glyph component]
+				: else : include component
 
 	define [alias dstGid dstUnicode srcGid] : begin
 		if [not dstGid] : throw : new Error "Target ID not specified"
@@ -92,7 +95,7 @@ glyph-block Common-Derivatives : begin
 
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
-		with-related-glyphs newid unicode id
+		derive-glyphs newid unicode id
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark
@@ -134,7 +137,7 @@ glyph-block Common-Derivatives : begin
 		return : VCombine newid unicode id id spacing
 
 	glyph-block-export select-variant orthographic-italic refer-glyph query-glyph
-	glyph-block-export with-related-glyphs build-related-composite
+	glyph-block-export derive-glyphs derive-composites
 	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
 	glyph-block-export HalfAdvance TurnMarks
 
