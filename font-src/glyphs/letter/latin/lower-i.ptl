@@ -27,9 +27,12 @@ glyph-block Letter-Latin-Lower-I : begin
 		set-base-anchor 'topright' (xMiddle + df.rightSB - df.middle) yTop
 
 	### dotless i, i and iota
+	glyph-block-export TailedDotlessXMiddle
+	define [TailedDotlessXMiddle df addTopSerif] : df.middle - [if addTopSerif 0 : IBalance2 df]
+
 	glyph-block-export IotaShape
 	define [IotaShape] : params [df top [addTopSerif false]] : glyph-proc
-		local xMiddle : df.middle - [if addTopSerif 0 : IBalance2 df]
+		local xMiddle : TailedDotlessXMiddle df addTopSerif
 		local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
 		local hd : FlatHookDepth df
 
@@ -44,13 +47,18 @@ glyph-block Letter-Latin-Lower-I : begin
 			curl (xMiddle + [Math.max (hd.x - HalfStroke * HVContrast + 1) tailLength] + HalfStroke * TanSlope) HalfStroke
 		include : OverrideILMarks df xMiddle top
 
+	glyph-block-export ItalicDotlessIXMiddle
+	define [ItalicDotlessIShift df] : (1 - df.div) * 0.2
+	define [ItalicDotlessIXMiddle df] : begin
+		return : mix df.leftSB df.rightSB ([StrokeWidthBlend 0.42 0.46] - [ItalicDotlessIShift df])
+
 	glyph-block-export ItalicDotlessIShape
 	define [ItalicDotlessIShape] : params [df top [addTopSerif false] [setMarks true]] : glyph-proc
 		local fine : AdviceStroke 3
-		local shift : (1 - df.div) * 0.2
-		local xBarMiddle : mix SB df.rightSB ([StrokeWidthBlend 0.42 0.46] - shift)
+		local shift : ItalicDotlessIShift df
+		local xBarMiddle : ItalicDotlessIXMiddle df
 		local left : xBarMiddle - HalfStroke * HVContrast
-		local right : mix SB df.rightSB (1.1 - shift)
+		local right : mix df.leftSB df.rightSB (1.1 - shift)
 		local rightTerm : Math.max right (left + HookX + Stroke)
 		local middle : mix left right (0.55 * df.div)
 		include : dispiro
@@ -68,7 +76,7 @@ glyph-block Letter-Latin-Lower-I : begin
 
 	glyph-block-export TailedDotlessShape
 	define [TailedDotlessShape] : params [df top [setMarks true] [addTopSerif false]] : glyph-proc
-		local xMiddle : df.middle - [if addTopSerif 0 : IBalance2 df]
+		local xMiddle : TailedDotlessXMiddle df addTopSerif
 		local tailLength : LongJut * 1.05 * [mix 1 df.div 0.75]
 
 		local hookScaleX  : mix 1 df.div 0.5
@@ -256,12 +264,14 @@ glyph-block Letter-Latin-Lower-I : begin
 		include : DTailDotlessIShape df XH (addTopSerif -- true)
 
 	select-variant 'dotlessi' 0x131
+	select-variant 'dotlessi/compLigRight' (shapeFrom -- 'dotlessi')
 	create-glyph 'iogonek.dotless' : glyph-proc
 		include [refer-glyph 'dotlessi'] AS_BASE
 		include : refer-glyph "ogonekBelow"
 
 	CreateDottedComposition 'dotlessi' 'i' 'i'
 	CreateDottedComposition 'dotlessi' 'cyrl/Ukrainiani' 0x456
+	CreateDottedComposition 'dotlessi/compLigRight' 'i/compLigRight' null
 
 	alias 'grek/iota.flatTailed' null 'dotlessi.flatTailed'
 	alias 'grek/iota.serifedFlatTailed' null 'dotlessi.serifedFlatTailed'

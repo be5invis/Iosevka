@@ -109,7 +109,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 glyph-block AutoBuild-Enclosure : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Miniature Thinner
+	glyph-block-import Recursive-Build : Miniature
 	glyph-block-import Autobuild-Enclosure-Shared : CircNameNoCheck CircName CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations getGlyphDefaultShift
 
 	define circleWidthClasses {{'NWID' Width 0.12} {'WWID' WideWidth0 0.08}}
@@ -728,7 +728,7 @@ glyph-block AutoBuild-Enclosure : begin
 glyph-block Autobuild-Fractions : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Miniature Thinner
+	glyph-block-import Recursive-Build : Miniature Thner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations
 
 	define [createFracImpl prefix demands fine scaleFactor closing] : begin
@@ -838,7 +838,7 @@ glyph-block Autobuild-Fractions : begin
 glyph-block AutoBuild-Accented-Equal : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Miniature Thinner
+	glyph-block-import Recursive-Build : Miniature
 	glyph-block-import Marks : aboveMarkBot
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
@@ -1047,6 +1047,7 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x1F3 { 'd' 'z' }
 		list 0x478 { 'O' 'y' }
 		list 0x479 { 'o' 'y' }
+		list 0x20A7 { 'P' 't.flatHook' }
 		list 0x20A8 { 'R' 's' }
 		list 0x20AF { 'D' 'grek/rho' }
 		list 0x203c { 'exclam' 'exclam' }
@@ -1063,16 +1064,11 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Miniature Thinner
+	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [glyphNameIsNotUsed name] : begin
-		if [query-glyph name] : throw : new Error "Glyph \(name) already exists!"
-		return name
-	define [PhoneticLigatureGlyphName a b] : glyphNameIsNotUsed "phonetic{\(a)}{\(b)}"
-
-	define [createPhoneticLigatures _shrink1 _shrink2 wadj1 wadj2 records] : begin
-		define CWidth : Width * para.diversityM
-		define pendingGlyphs1 : records.map : [record] => record.1
-		define pendingGlyphs2 : records.map : [record] => record.2
+	define [createPhoneticLigatures prefix div _shrink1 _shrink2 wadj1 wadj2 demands] : begin
+		define CWidth : Width * div
+		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED prefix "" demands
 		local shrink1 : clamp 0 1 _shrink1
 		local shrink2 : clamp 0 1 _shrink2
 		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
@@ -1084,11 +1080,10 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 			set shrink1 : clamp 0 1 tmp-shrink1
 			set shrink2 : clamp 0 1 tmp-shrink2
 
-		define df1 : Thinner pendingGlyphs1 shrink1
-		define df2 : Thinner pendingGlyphs2 shrink2
+		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
+		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
 
-		foreach [{unicode c1 c2 mak} : items-of records] : begin
-			local glyphName : PhoneticLigatureGlyphName c1 c2
+		foreach [{gn unicode { c1 c2 } mak} : items-of jobs.nonDecomposable] : if [not : query-glyph gn] : begin
 
 			local maskOuts {}
 			local s    0
@@ -1102,9 +1097,9 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 					include : Translate (s + dfg1.advanceWidth * wadj1 - kern) 0
 				set s : s + step
 
-			create-glyph glyphName unicode : glyph-proc
+			create-glyph gn unicode : glyph-proc
 				set-width CWidth
-				include : [DivFrame (CWidth / Width)].markSet.(mak || 'if')
+				if mak : include : [DivFrame (CWidth / Width)].markSet.(mak)
 				define dfg1 : df1.queryByNameEnsured c1
 				define dfg2 : df2.queryByNameEnsured c2
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
@@ -1120,20 +1115,26 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 				include : Translate (CWidth / 2) 0
 				include : Italify
 
-	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 Stroke
-	createPhoneticLigatures stdShrink stdShrink 1 1 : list
-		list 0x02A3 'd'                       'z'                 'b'
-		list 0x02A4 'd'                       'ezh'               'if'
-		list 0x02A5 'd'                       'zCurlyTail'        'if'
-		list 0x02A6 't.phoneticLeft'          's.phoneticRight'   'b'
-		list 0x02A7 't.phoneticLeft.extended' 'esh'               'if'
-		list 0x02A8 't.phoneticLeft'          'cCurlyTail'        'b'
-		list 0x02A9 'f.phoneticLeft'          'eng'               'if'
-		list 0x02AA 'l.phoneticLeft'          's.phoneticRight'   'b'
-		list 0x02AB 'l.phoneticLeft'          'z'                 'b'
-		list 0xAB66 'd'                       'zRTailBR'          'if'
-		list 0xAB67 't.phoneticLeft'          'sRTail'            'if'
-		list 0x20A7 'P'                       't.flatHook'        'b'
+		applyRelations jobs.relApplications
+
+	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.78 0.9
+	createPhoneticLigatures 'phonetic' para.diversityM stdShrink stdShrink 1 1 : list
+		list 0x02A3 { 'd/phoneticLeft'          'zReduced'              } 'b'
+		list 0x02A4 { 'd/phoneticLeft'          'ezh'                   } 'if'
+		list 0x02A5 { 'd/phoneticLeft'          'zCurlyTail'            } 'if'
+		list 0x02A6 { 't.phoneticLeft'          's/phoneticRight'       } 'b'
+		list 0x02A7 { 't.phoneticLeft.extended' 'esh'                   } 'if'
+		list 0x02A8 { 't.phoneticLeft'          'cCurlyTail'            } 'b'
+		list 0x02A9 { 'f.phoneticLeft'          'eng'                   } 'if'
+		list 0x02AA { 'l/phoneticLeft'          's/phoneticRight'       } 'b'
+		list 0x02AB { 'l/phoneticLeft'          'zReduced'              } 'b'
+		list 0xAB66 { 'd/phoneticLeft'          'zRTailBR'              } 'if'
+		list 0xAB67 { 't.phoneticLeft'          'sRTail'                } null
+
+	define compatLigShrink : clamp 0.75 1 : StrokeWidthBlend 0.78 1
+	createPhoneticLigatures 'compatLig' 1 compatLigShrink compatLigShrink 1 1 : list
+		list 0xFB01 { 'f/compLigLeft1'          'dotlessi/compLigRight' } null
+		list 0xFB02 { 'f/compLigLeft2'          'l/compLigRight'        } null
 
 glyph-block Autobuild-Grouped-Digits : begin
 	glyph-block-import CommonShapes
