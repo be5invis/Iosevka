@@ -97,6 +97,17 @@ const Radical = {
 	}
 };
 
+const RequireCcmpDecompose = {
+	get(glyph) {
+		if (glyph && glyph.related) return !!glyph.related.RequireCcmpDecompose;
+		else return false;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.RequireCcmpDecompose = true;
+	}
+};
+
 const CvTagCache = new Map();
 function Cv(tag, rank) {
 	const key = tag + "#" + rank;
@@ -351,6 +362,7 @@ exports.getGrMesh = getGrMesh;
 exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
 exports.Radical = Radical;
+exports.RequireCcmpDecompose = RequireCcmpDecompose;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
