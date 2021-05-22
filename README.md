@@ -616,8 +616,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-k = 'symmetric-touching-serifed'`, `cv11 = 15`: `K` with symmetric legs disconnected to the vertical bar, and serifs.
     + `capital-k = 'symmetric-connected-serifed'`, `cv11 = 16`: `K` with symmetric legs connected to the vertical bar, and serifs.
   - Styles for `L`:
-    + `capital-l = 'standard'`, `cv12 = 1`: Standard `L`.
-    + `capital-l = 'motion-serifed'`, `cv12 = 2`: Standard `L` with motion serifs.
+    + `capital-l = 'serifless'`, `cv12 = 1`: Serifless `L`.
+    + `capital-l = 'motion-serifed'`, `cv12 = 2`: Standard `L` with motion serif at bottom right.
+    + `capital-l = 'serifed'`, `cv12 = 3`: `L` with serifs.
   - Styles for `M`:
     + `capital-m = 'hanging'`, `cv13 = 1`: `M` with middle being hanging off baseline.
     + `capital-m = 'flat-bottom'`, `cv13 = 2`: `M` with middle aligned to baseline.
@@ -1142,6 +1143,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `cyrl-en = 'standard'`, `cv63 = 1`: Cyrillic Lower En (`н`) with standard shape.
     + `cyrl-en = 'tailed'`, `cv63 = 2`: Cyrillic Lower En (`н`) with tail.
     + `cyrl-en = 'motion-serifed'`, `cv63 = 3`: Cyrillic Lower En (`н`) with motion serifs.
+    + `cyrl-en = 'motion-serifed-tailed'`, `cv63 = 4`: Cyrillic Lower En (`н`) with tail and motion serifs.
   - Styles for `ф` (Cyrillic Lower Ef):
     + `cyrl-ef = 'serifless'`, `cv64 = 1`: Cyrillic Lower Ef (`ф`) with standard shape and without serifs.
     + `cyrl-ef = 'cursive'`, `cv64 = 2`: Cyrillic Lower Ef (`ф`) with cursive shape.
