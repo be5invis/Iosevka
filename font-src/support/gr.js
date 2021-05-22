@@ -33,6 +33,7 @@ function SimpleProp(key) {
 const ZReduced = SimpleProp("ZReduced");
 const DollarShrinkKernel = SimpleProp("DollarShrinkKernel");
 const DollarShorterBar = SimpleProp("DollarShorterBar");
+const MathSansSerif = SimpleProp("MathSansSerif");
 
 const CvDecompose = {
 	get(glyph) {
@@ -356,4 +357,5 @@ exports.CvDecompose = CvDecompose;
 exports.createGrDisplaySheet = createGrDisplaySheet;
 exports.DollarShrinkKernel = DollarShrinkKernel;
 exports.DollarShorterBar = DollarShorterBar;
+exports.MathSansSerif = MathSansSerif;
 exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar];

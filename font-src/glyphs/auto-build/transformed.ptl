@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../../support/utils'
-import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose MathSansSerif] from "../../support/gr"
 extern Map
 extern Set
 
@@ -508,20 +508,20 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	define LowerGreek  : Array.from 'αβγδεζηθικλμνξοπρςστυφχψω∂ϵϑϰϕϱϖ' # Some are missing though
 	define ObliqueBlackboardBolds : Array.from '𝔻𝕕𝕖𝕚𝕛'
 
-	define [CreateMathDerivatives groupName tfm base letters overrides] : begin
+	define [CreateMathDerivatives groupName tfm gr base letters overrides] : begin
 		if recursive : return nothing
 		local jobs {}
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
 			local letter letters.(j)
 			local source : glyphStore.queryNameOfUnicode : letter.codePointAt 0
+			if (gr && [gr.get : query-glyph source]) : set source : gr.get : query-glyph source
 			local dst : base + j
 			if [overrideMap.has letter] : set dst [overrideMap.get letter]
 			if source : jobs.push { dst source }
-
 		createMathDerivedSeriesImpl groupName tfm jobs
 
-	define [CreateMathAliasableImpl groupName altGroupName tfm base letters overrides] : begin
+	define [CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides] : begin
 		if recursive : return nothing
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
@@ -532,61 +532,61 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 			if [overrideMap.has letter] : set uDst [overrideMap.get letter]
 			if source : alias [wrapName groupName source] uDst source
 
-	define [CreateMathAliasable cond groupName altGroupName tfm base letters overrides] : begin
+	define [CreateMathAliasable cond groupName altGroupName tfm gr base letters overrides] : begin
 		if cond
-			CreateMathDerivatives   groupName              tfm base letters overrides
-			CreateMathAliasableImpl groupName altGroupName tfm base letters overrides
+			CreateMathDerivatives   groupName              tfm gr base letters overrides
+			CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides
 
 	# Math bold
-	CreateMathDerivatives 'mathbf' tfBold 0x1D400 UpperLatin
-	CreateMathDerivatives 'mathbf' tfBold 0x1D41A LowerLatin
-	CreateMathDerivatives 'mathbf' tfBold 0x1D6A8 UpperGreek
-	CreateMathDerivatives 'mathbf' tfBold 0x1D6C2 LowerGreek
-	CreateMathDerivatives 'mathbf' tfBold 0x1D7CE Digits
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D400 UpperLatin
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D41A LowerLatin
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D6A8 UpperGreek
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D6C2 LowerGreek
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D7CE Digits
 
 	# Math Italic
-	CreateMathDerivatives 'mathit' tfItalic 0x1D434 UpperLatin
-	CreateMathDerivatives 'mathit' tfItalic 0x1D44E LowerLatin2 : list
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D434 UpperLatin
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D44E LowerLatin2 : list
 		list 'h' 0x210E
 		list 'ı' 0x1D6A4
 		list 'ȷ' 0x1D6A5
-	CreateMathDerivatives 'mathit' tfItalic 0x1D6E2 UpperGreek
-	CreateMathDerivatives 'mathit' tfItalic 0x1D6FC LowerGreek
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D6E2 UpperGreek
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D6FC LowerGreek
 
 
 	# Math Bold Italic
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D468 UpperLatin
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D482 LowerLatin
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D71C UpperGreek
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D736 LowerGreek
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D468 UpperLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D482 LowerLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D71C UpperGreek
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D736 LowerGreek
 
 	# Math Sans-serif
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5A0 UpperLatin
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5BA LowerLatin
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D7E2 Digits
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D5A0 UpperLatin
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D5BA LowerLatin
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D7E2 Digits
 
-	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D608 UpperLatin
-	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D622 LowerLatin
+	CreateMathDerivatives 'mathsi' tfSansItalic MathSansSerif 0x1D608 UpperLatin
+	CreateMathDerivatives 'mathsi' tfSansItalic MathSansSerif 0x1D622 LowerLatin
 
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5D4 UpperLatin
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5EE LowerLatin
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D756 UpperGreek
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D770 LowerGreek
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D7EC Digits
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D5D4 UpperLatin
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D5EE LowerLatin
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D756 UpperGreek
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D770 LowerGreek
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D7EC Digits
 
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D63C UpperLatin
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D656 LowerLatin
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D790 UpperGreek
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D7AA LowerGreek
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D63C UpperLatin
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D656 LowerLatin
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D790 UpperGreek
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D7AA LowerGreek
 
 	# Math Typewriter
 	local doTypewriter para.isQuasiProportional
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D670 UpperLatin
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D68A LowerLatin
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D7F6 Digits
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D670 UpperLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D68A LowerLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D7F6 Digits
 
 	# Italic blackboard bold
-	CreateMathDerivatives 'mathit' tfItalic 0x2145  ObliqueBlackboardBolds
+	CreateMathDerivatives 'mathit' tfItalic null 0x2145  ObliqueBlackboardBolds
 
 glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Marks : markFine
