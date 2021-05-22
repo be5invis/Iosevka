@@ -68,7 +68,16 @@ glyph-block Letter-Latin-Lower-F : begin
 			[Just CH-DIAGONAL-HOOK] : include : SmallFDiagonalTail df barLeft
 			[Just CH-SERIF] : include : SmallFBottomSerif df 0
 
-	define [NarrowFShape df m bh counterHook] : glyph-proc
+	define [NarrowFShape clcStyle] : function [df m bh counterHook] : glyph-proc
+		local topHookExt : match clcStyle
+			[Just 1] Width
+			[Just 2] Jut
+			__       0
+		local topHookHdExt : match clcStyle
+			[Just 1] 1
+			__       0
+		local crossBarExt : if (clcStyle === 1) Jut 0
+
 		local barAtCenter : (counterHook === CH-HOOK) || (counterHook === CH-DIAGONAL-HOOK)
 		local crossLeft : mix 0 df.leftSB m
 		local crossRight : mix df.width df.rightSB m
@@ -78,12 +87,12 @@ glyph-block Letter-Latin-Lower-F : begin
 		local hd : FlatHookDepth df
 		include : dispiro
 			widths.lhs
-			flat crossRight CAP
-			curl [Math.min (barLeft + hd.x) (crossRight - 0.1)] CAP
+			flat (crossRight + topHookExt) CAP
+			curl [Math.min (barLeft + hd.x * (1 + topHookHdExt)) (crossRight - 0.1)] CAP
 			archv.superness DesignParameters.tightHookSuperness
 			flat barLeft [Math.max XH (CAP - hd.y)]
 			curl barLeft 0 [heading Downward]
-		include : HCrossBar.top crossLeft crossRight bh
+		include : HCrossBar.top crossLeft (crossRight + crossBarExt) bh
 
 		match counterHook
 			[Just CH-EXTENSION] : include : SmallFDownExtension barLeft
@@ -115,16 +124,28 @@ glyph-block Letter-Latin-Lower-F : begin
 		'extendedCrossbarAtXHeight'               { { StandardSmallFShape [DivFrame 1] } { 0.95        XH   CH-EXTENSION     } { 'if' 'if' } }
 		'tailedCrossbarAtXHeight'                 { { StandardSmallFShape [DivFrame 1] } { 1           XH   CH-HOOK          } { 'if' 'if' } }
 		'diagonalTailedCrossbarAtXHeight'         { { StandardSmallFShape [DivFrame 1] } { 1           XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
-		'flatHook'                                { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
-		'flatHookSerifed'                         { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
-		'flatHookExtended'                        { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
-		'flatHookTailed'                          { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
-		'flatHookDiagonalTailed'                  { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
-		'flatHookCrossbarAtXHeight'               { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
-		'flatHookSerifedCrossbarAtXHeight'        { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
-		'flatHookExtendedCrossbarAtXHeight'       { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
-		'flatHookTailedCrossbarAtXHeight'         { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
-		'flatHookDiagonalTailedCrossbarAtXHeight' { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
+		'flatHook'                                { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifed'                         { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtended'                        { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailed'                          { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailed'                  { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
+		'flatHookCrossbarAtXHeight'               { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCrossbarAtXHeight'        { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCrossbarAtXHeight'       { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCrossbarAtXHeight'         { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCrossbarAtXHeight' { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
+
+		'flatHookCLC1'                            { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCLC1'                     { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCLC1'                    { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCLC1'                      { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCLC1'              { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
+
+		'flatHookCLC2'                            { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCLC2'                     { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCLC2'                    { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCLC2'                      { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCLC2'              { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
 
 		'phoneticLeft'                            { { StandardSmallFShape [DivFrame 1] } { 1 fbar [if SLAB CH-SERIF CH-NONE] } { 'b'  'p'  } }
 
@@ -142,6 +163,8 @@ glyph-block Letter-Latin-Lower-F : begin
 	select-variant 'turnf' 0x25F (follow -- 'f')
 	select-variant 'lenisf' 0xAB35 (shapeFrom -- 'f')
 	select-variant 'fltail' 0x192  (shapeFrom -- 'f')
+	select-variant 'f/compLigLeft1' (shapeFrom -- 'f')
+	select-variant 'f/compLigLeft2' (shapeFrom -- 'f')
 
 	alias 'dotlessJHookBar' 0x284 'f.dotlessJHookBar'
 

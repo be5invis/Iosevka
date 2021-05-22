@@ -59,7 +59,7 @@ glyph-block Letter-Latin-Z : begin
 		include : XStrand false SLAB SB 0 RightSB XH 0.125 0.4 0.36
 		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
 
-	define [ZCursiveShapeImpl top] : glyph-proc
+	define [ZCursiveShapeImpl top fRTB] : glyph-proc
 		define hookTerminalWidth : AdviceStroke 3.5
 		define xDiagWidth : 1 * Stroke
 		define yFootHeight : Math.max (0.15 * top) (Stroke * 0.625)
@@ -97,7 +97,7 @@ glyph-block Letter-Latin-Z : begin
 			corner (SB + xDiagWidth) yFootHeight
 			corner (SB + xDiagWidth) 0
 
-		include : tagged 'strokeBottom' : intersection
+		if [not fRTB] : include : tagged 'strokeBottom' : intersection
 			spiro-outline
 				corner (SB + xDiagWidth) yFootHeight
 				corner (SB + xDiagWidth) (-top)
@@ -113,8 +113,25 @@ glyph-block Letter-Latin-Z : begin
 				flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
 				curl SB                                   (yTailDepth)
 
+		if fRTB : include : tagged 'strokeBottom' : intersection
+			spiro-outline
+				corner (SB + xDiagWidth) yFootHeight
+				corner (SB + xDiagWidth) (-top)
+				corner (2 * Width) (-top)
+				corner (2 * Width) (top)
+				corner RightSB top
+
+			union
+				VBarRight RightSB 0 yHookDepth hookTerminalWidth
+				dispiro
+					flat  RightSB               O [widths.rhs.heading Stroke Leftward]
+					g2  (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
+					flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
+					curl SB                                   (yTailDepth)
+
 	define [ZCursiveShape]      : ZCursiveShapeImpl CAP
 	define [SmallZCursiveShape] : ZCursiveShapeImpl XH
+	define [SmallZCursiveRTB]   : ZCursiveShapeImpl XH 1
 
 	define [NoBottomStrokeMask top] : glyph-proc
 	define [CurlyBottomStrokeMask top] : spiro-outline
@@ -158,6 +175,7 @@ glyph-block Letter-Latin-Z : begin
 		cursive                                     { ZCursiveShape SmallZCursiveShape ZSerifless     null     NoBottomStrokeMask    }
 		cursiveWithCrossBar                         { ZCursiveShape SmallZCursiveShape ZSerifless     DBarOver NoBottomStrokeMask    }
 		cursiveWithHorizontalCrossBar               { ZCursiveShape SmallZCursiveShape ZSerifless     HBarOver NoBottomStrokeMask    }
+		cursiveRTBase                               { ZCursiveShape SmallZCursiveRTB   ZSerifless     null     NoBottomStrokeMask    }
 
 	foreach { suffix { capital small serifs slash bsMask } } [Object.entries ZConfig] : do
 		create-glyph "Z.\(suffix)" : glyph-proc
@@ -213,6 +231,7 @@ glyph-block Letter-Latin-Z : begin
 	select-variant 'smcpZ' 0x1D22 (shapeFrom -- 'z') (follow -- 'Z')
 	select-variant 'ZReduced' (shapeFrom -- 'Z')
 	select-variant 'zReduced' (shapeFrom -- 'z')
+	select-variant 'zReduced/rtailBase' (shapeFrom -- 'z')
 	if [query-glyph 'Z'] : ZReduced.set [query-glyph 'Z'] 'ZReduced'
 	if [query-glyph 'z'] : ZReduced.set [query-glyph 'z'] 'zReduced'
 	select-variant 'ZDesc' 0x2C6B
@@ -296,4 +315,4 @@ glyph-block Letter-Latin-Z : begin
 	CreateAccentedComposition 'zBar' 0x1B6 'zReduced' 'barOver'
 	CreateAccentedComposition 'ZCaron' 0x17D 'ZReduced' 'caronAbove'
 	CreateAccentedComposition 'zCaron' 0x17E 'zReduced' 'caronAbove'
-	CreateAccentedComposition 'zRTailBR' 0x290 'zReduced' 'rtailBR'
+	CreateAccentedComposition 'zRTailBR' 0x290 'zReduced/rtailBase' 'rtailBR'

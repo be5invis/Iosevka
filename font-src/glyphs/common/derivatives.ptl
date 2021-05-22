@@ -173,7 +173,7 @@ glyph-block Recursive-Build : begin
 		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
 		return gs.glyphStore
 
-	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false]] : begin
+	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false] [mono2 false]] : begin
 		local forkedPara : Object.create para
 		forkedPara.stroke = [AdviceStroke crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
 		forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
@@ -183,21 +183,30 @@ glyph-block Recursive-Build : begin
 		forkedPara.slopeAngle = slopeAngle
 		if mono : begin
 			forkedPara.diversityM  = 1
+		if mono2 : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
 		return : Fork glyphs forkedPara
 
-	define [Thinner glyphs p crowd] : begin
+	define [Thinner glyphs p fMono] : begin
 		local forkedPara : Object.create para
-		forkedPara.stroke = [AdviceStroke : fallback crowd 1]
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
 		forkedPara.width = Width * p
 		forkedPara.accentx = AccentX * p
 		forkedPara.jut = Jut * p
 		forkedPara.longjut = LongJut * p
 		forkedPara.diversityM = 1
+		if fMono : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
 		#forkedPara.hookx = HookX * p
 		return : Fork glyphs forkedPara
 
 	define [Widen glyphs p psb] : begin
 		local forkedPara : Object.create para
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
 		forkedPara.width = Width * p
 		forkedPara.sb = SB * [fallback psb p]
 		forkedPara.accentx = AccentX * p

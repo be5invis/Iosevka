@@ -333,7 +333,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export DiagonalTailStdDepth
 	define [DiagonalTailStdDepth df sw] : Math.max (0.5 * sw)
-		df.div * [Math.hypot HookX Hook] - 0.25 * sw
+		df.div * para.unitWidthScalar * [Math.hypot HookX Hook] - 0.25 * sw
 
 	glyph-block-export DiagonalTailInnerRadius
 	define [DiagonalTailInnerRadius] : Math.max (XH / 32) (0.5 * [AdviceStroke2 24 32 XH])
@@ -437,20 +437,19 @@ glyph-block Letter-Shared-Shapes : begin
 	define VJutSw : AdviceStroke 3.5
 
 	glyph-block-export CyrDescender
-	define [CyrDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow : if SLAB SideJut ((RightSB - SB) * shift)
+	define [CyrDescender] : params [x [connex 0.5] [overflow nothing]] : begin
+		local descenderOverflow : fallback overflow SideJut
 		return : union
-			VBarRight (x + descenderOverflow + 0.25 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
-			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
-				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
-				glyph-proc
+			VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
+			HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 
 	glyph-block-export CyrHookDescender
-	define [CyrHookDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow : if SLAB SideJut ((RightSB - SB) * shift)
+	define [CyrHookDescender] : params [x [connex 0.5] [overflow nothing]] : begin
+		local descenderOverflow : fallback overflow SideJut
 		local xRef : x + descenderOverflow + 0.25 * Stroke
 		local hd : FlatHookDepth [DivFrame 1]
 		return : union
+			HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 			dispiro
 				widths.rhs VJutSw
 				flat xRef Stroke [heading Downward]
@@ -458,13 +457,10 @@ glyph-block Letter-Shared-Shapes : begin
 				arcvh
 				flat (xRef - hd.x + 0.25 * VJutSw * HVContrast) (0 - Hook)
 				curl (xRef - HookX - 0.5 * VJutSw * HVContrast) (0 - Hook)
-			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
-				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
-				glyph-proc
 
 	glyph-block-export CyrTailDescender
-	define [CyrTailDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * shift)
+	define [CyrTailDescender] : params [x [connex 0.5] [overflow nothing]] : begin
+		local descenderOverflow SideJut
 		local xRef : x + descenderOverflow + (0.3 + TanSlope) * Stroke
 		return : union
 			difference
@@ -476,8 +472,8 @@ glyph-block Letter-Shared-Shapes : begin
 				glyph-proc
 
 	glyph-block-export CyrLeftDescender
-	define [CyrLeftDescender] : params [x [shift 0.1] [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow : if SLAB SideJut ((RightSB - SB) * shift)
+	define [CyrLeftDescender] : params [x [connex 0.5] [overflow nothing]] : begin
+		local descenderOverflow : fallback overflow SideJut
 		return : union
 			VBarLeft (x - descenderOverflow - 0.25 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
 			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)

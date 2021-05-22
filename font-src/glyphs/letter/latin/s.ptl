@@ -143,18 +143,24 @@ glyph-block Letter-Latin-S : begin
 			hookend (O + soEnd) (sw -- fine) (swItalicAdj -- Stroke) (noAdjTerminalY -- true)
 			g4   (SB + SOBot + HVContrast * soEnd) (hook) [widths.rhs fine]
 
-	define [SmallSStrokePhoneticRight] : begin
-		define stroke : AdviceStroke2 2 3 XH
-		define ess : AdviceStroke2 2.2 3.2 XH
+	define [SmallSStrokePhoneticRight st top] : begin
+		define stroke : AdviceStroke2 2 3 top
+		define ess : AdviceStroke2 2.2 3.2 top
 		define strokeCoeff : StrokeWidthBlend 0 1 stroke
-		define smooth : adviceSSmooth XH (-1) stroke
+		define smooth : adviceSSmooth top (-1) stroke
 		return : dispiro
-			widths.lhs stroke
-			g4   (RightSB + OX) (XH - SHook)
-			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   (SB - OX) (XH - smooth)
+			match st
+				[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs RightSB Middle top stroke Hook
+				[Just SLAB-INWARD] : list
+					g4 RightSB (top - DToothlessRise) [widths.lhs stroke]
+					g4 (Middle - CorrectionOMidX * stroke) (top - O)
+					archv
+				__ : list
+					g4 RightSB (top - Hook) [widths.lhs stroke]
+					hookstart (top - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   SB (top - smooth)
 			SNeck (stroke -- ess)
-			g4   (RightSB + OX - SOBot) (smooth) [widths 0 stroke]
+			g4   (RightSB - SOBot) (smooth) [widths 0 stroke]
 			arcvh
 			flat (Middle - CorrectionOMidS) 0 [widths 0 Stroke]
 			curl SB 0
@@ -247,6 +253,11 @@ glyph-block Letter-Latin-S : begin
 			include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] Ess
 			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 			include : SAutoSlabEnd   doBS 0  [AdviceStroke2 2 3 XH] Hook
+
+		create-glyph "s/phoneticRight.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : SmallSStrokePhoneticRight doTS XH
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 
 		create-glyph "revS.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -354,9 +365,7 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'cyrl/gheDescender.italic' null (follow -- 'sSwash')
 	select-variant 'cyrl/gheDHook.italic' null (follow -- 'sSwash')
 
-	create-glyph 's.phoneticRight' : glyph-proc
-		include : MarkSet.e
-		include : SmallSStrokePhoneticRight
+	select-variant 's/phoneticRight'
 
 	create-glyph 'mathbb/S' 0x1D54A : glyph-proc
 		include : MarkSet.capital

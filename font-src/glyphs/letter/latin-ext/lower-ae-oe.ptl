@@ -86,7 +86,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 		include : OShape XH 0 (df.leftSB + OX) (abarRight + OX) df.mvs sma smb
 
-	define [ueUPart df] : new-glyph : glyph-proc
+	define [ueUPart df fSlab] : new-glyph : glyph-proc
 		local abarRight : df.middle + df.mvs / 2 * HVContrast
 		local { sma smb } : GetSm df df.mvs
 
@@ -97,6 +97,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			sma -- smb
 			smb -- smb
 		include : FlipAround (df.width / 2) (XH / 2)
+		if fSlab : include : LeftwardTopSerif df.leftSB XH SideJut
 
 	define AeConfig : object
 		flatCrossbar { aeEPart        }
@@ -115,12 +116,22 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 			include : df.markSet.e
 			include : oeOPart df
 			include : ePartshape df
-		create-glyph "ue.\(suffix)" : glyph-proc
+		create-glyph "ue/e.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.e
-			include : ueUPart df
 			include : ePartshape df
+
+
+	define UeUConfig : object
+		"toothed"       { SLAB }
+		"motionSerifed" { true }
+
+	foreach { suffix { fSlab } } [Object.entries UeUConfig] : do
+		create-glyph "ue/u.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width 0
+			include : ueUPart df fSlab
 
 	select-variant 'ae' 0xE6
 	alias 'cyrl/ae' 0x4D5 'ae'
@@ -129,7 +140,13 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	select-variant 'oe' 0x153
 	turned 'turnoe' 0x1D14 'oe' [DivFrame para.diversityM].middle (XH / 2)
 
-	select-variant 'ue' 0x1D6B
+	select-variant "ue/e"
+	select-variant "ue/u"
+
+	create-glyph 'ue' 0x1D6B : glyph-proc
+		include [refer-glyph "ue/u"]
+		include [refer-glyph "ue/e"] AS_BASE ALSO_METRICS
+		CvDecompose.set currentGlyph { 'ue/u' 'ue/e' }
 
 	create-glyph 'db' 0x238 : glyph-proc
 		local df : DivFrame para.diversityM 3

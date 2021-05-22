@@ -69,6 +69,10 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : MarkSet.e
 		include : HShape XH SLAB-MOTION
 
+	create-glyph 'smcpH.motionSerifedTailed' : glyph-proc
+		include : MarkSet.e
+		include : TailedHShape XH SLAB-MOTION
+
 	select-variant 'smcpH' 0x29C (follow -- 'H')
 
 	create-glyph 'halfH' 0x2C75 : glyph-proc
@@ -89,12 +93,13 @@ glyph-block Letter-Latin-Upper-H : begin
 	alias 'cyrl/En' 0x41D 'H'
 
 	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
+	select-variant 'cyrl/en/reduced' (shapeFrom -- 'smcpH')
 
-	derive-composites 'cyrl/EnDescender' 0x4A2 'H' [CyrDescender RightSB (connex -- 0.5)]
-	derive-composites 'cyrl/enDescender' 0x4A3 'smcpH' [CyrDescender RightSB (connex -- 0.5)]
+	derive-composites 'cyrl/EnDescender' 0x4A2 'cyrl/En' [CyrDescender RightSB]
+	derive-composites 'cyrl/enDescender' 0x4A3 'cyrl/en/reduced' [CyrDescender RightSB]
 
-	derive-composites 'cyrl/EnTail' 0x4C9 'H' [CyrTailDescender RightSB (connex -- 0.5)]
-	derive-composites 'cyrl/enTail' 0x4CA 'smcpH' [CyrTailDescender RightSB (connex -- 0.5)]
+	derive-composites 'cyrl/EnTail' 0x4C9 'cyrl/En' [CyrTailDescender RightSB]
+	derive-composites 'cyrl/enTail' 0x4CA 'cyrl/en/reduced' [CyrTailDescender RightSB]
 
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
@@ -131,9 +136,11 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : MarkSet.e
 		include : EnGheShape XH SLAB-SMALL-CYRILLIC
 
-	create-glyph 'Hbar' 0x126 : glyph-proc
-		include [refer-glyph 'H'] AS_BASE
-		include : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] [mix CapMiddle CAP 0.45]
+	derive-composites 'Hbar' 0x126 'H'
+		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (CAP * 0.725)
+
+	derive-composites 'smcpHbar' null 'smcpH'
+		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.725)
 
 	create-glyph 'HCedilla' 0x1E28 : glyph-proc
 		include [refer-glyph 'cedillaBelow']
@@ -141,17 +148,19 @@ glyph-block Letter-Latin-Upper-H : begin
 		include [refer-glyph 'H']
 		include : MarkSet.if
 
-	create-glyph 'Heng' 0xA726 : glyph-proc
+	define [DProcCapitalHeng src sel] : glyph-proc
 		include : MarkSet.if
-		include : refer-glyph "H"
+		include : refer-glyph src
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-	create-glyph 'HengSmcp' : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph "smcpH"
+	define [DProcSmallHeng src sel] : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph src
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-	alias 'cyrl/EnHook' 0x4C7 'Heng'
-	alias 'cyrl/enHook' 0x4C8 'HengSmcp'
+	derive-glyphs 'Heng' 0xA726 'H' DProcCapitalHeng
+	derive-glyphs 'HengSmcp' null 'smcpH' DProcSmallHeng
+	derive-glyphs 'cyrl/EnHook' 0x4C7 'cyrl/En' DProcCapitalHeng
+	derive-glyphs 'cyrl/enHook' 0x4C8 'cyrl/en/reduced' DProcSmallHeng
