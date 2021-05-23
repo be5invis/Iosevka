@@ -363,22 +363,16 @@ const DistWoff2 = file.make(
 ///////////////////////////////////////////////////////////
 
 const CollectPlans = computed(`metadata:collect-plans`, async target => {
-	const [rawPlans, suffixMapping] = await target.need(RawPlans, StandardSuffixes);
+	const [rawPlans] = await target.need(RawPlans);
 	return await getCollectPlans(
 		target,
 		rawPlans.collectPlans,
-		suffixMapping,
 		rawPlans.collectConfig,
 		fnStandardTtc
 	);
 });
 
-const StandardSuffixes = computed(`metadata:standard-suffixes`, async target => {
-	const [rp] = await target.need(RawPlans);
-	return getSuffixMapping(rp.weights, rp.slopes, rp.widths);
-});
-
-async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, fnFileName) {
+async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
 	const glyfTtcComposition = {},
 		ttcComposition = {},
 		ttcContents = {},
@@ -392,6 +386,7 @@ async function getCollectPlans(target, rawCollectPlans, suffixMapping, config, f
 		for (const prefix of collect.from) {
 			const [gri] = await target.need(BuildPlanOf(prefix));
 			const ttfFileNameSet = new Set(gri.targets);
+			const suffixMapping = getSuffixMapping(gri.weights, gri.slopes, gri.widths);
 			for (const suffix in suffixMapping) {
 				const sfi = suffixMapping[suffix];
 				const ttcFileName = fnFileName(
@@ -928,8 +923,8 @@ function nValidate(key, v, validator) {
 	return v;
 }
 
-const VlShapeWeight = { validate: x => x >= 100 && x <= 900 };
-const VlCssWeight = { validate: x => x > 0 && x < 1000 };
+const VlShapeWeight = { validate: x => x >= 100 && x <= 1000 };
+const VlCssWeight = { validate: x => x > 0 && x <= 1000 };
 const VlMenuWeight = VlCssWeight;
 
 const g_widthFixupMemory = new Map();

@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -37,39 +37,34 @@ glyph-block Letter-Latin-Upper-E : begin
 			include : DownwardLeftSerif SB top jutTop
 			include : UpwardLeftSerif SB 0 jutBot
 
-	create-glyph 'E.standard' : glyph-proc
-		include : MarkSet.capital
-		include : EShape CAP (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+	define EConfig : object
+		serifless      { false false false }
+		topLeftSerifed { true false false  }
+		serifed        { true true true    }
 
-	create-glyph 'E.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : EShape CAP (serifLT -- true) (serifLB -- false) (serifV -- false)
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+	foreach { suffix { lt lb v } } [Object.entries EConfig] : do
+		create-glyph "E.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : EShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
-	create-glyph 'smcpE.standard' : glyph-proc
-		include : MarkSet.capital
-		include : EShape XH (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		create-glyph "smcpE.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
+			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
-	create-glyph 'smcpE.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : EShape XH (serifLT -- true) (serifLB -- false) (serifV -- false)
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+		create-glyph "revE.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : RevEShape CAP (serifRT -- lt) (serifRB -- lb) (serifV -- v)
+
 
 	select-variant 'E' 'E'
+	link-reduced-variant 'E/sansSerif' 'E' MathSansSerif
 	select-variant 'smcpE' 0x1D07 (follow -- 'E')
 
 	alias 'grek/Epsilon' 0x395 'E'
+	alias-reduced-variant 'grek/Epsilon/sansSerif' 'grek/Epsilon' 'E/sansSerif' MathSansSerif
 	alias 'cyrl/Ie' 0x415 'E'
-
-	create-glyph 'revE.standard' : glyph-proc
-		include : MarkSet.capital
-		include : RevEShape CAP (serifRT -- SLAB) (serifRB -- SLAB) (serifV -- SLAB)
-
-	create-glyph 'revE.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : RevEShape CAP (serifRT -- false) (serifRB -- true) (serifV -- false)
 
 	select-variant 'revE' 0x18E (follow -- 'E')
 	turned 'turnSmcpE' 0x2C7B 'smcpE' Middle (XH / 2)

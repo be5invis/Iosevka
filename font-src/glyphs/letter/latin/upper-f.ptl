@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -48,23 +48,23 @@ glyph-block Letter-Latin-Upper-F : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardLeftSerif SB top jutTop
 
-	create-glyph 'F.standard' : glyph-proc
-		include : MarkSet.capital
-		include : FShape CAP (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
 
-	create-glyph 'F.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : FShape CAP (serifLT -- true) (serifLB -- false) (serifV -- false)
+	define FConfig : object
+		serifless      { false false false }
+		topLeftSerifed { true false false  }
+		serifed        { true true true    }
 
-	create-glyph 'smcpF.standard' : glyph-proc
-		include : MarkSet.e
-		include : FShape XH (serifLT -- SLAB) (serifLB -- SLAB) (serifV -- SLAB)
+	foreach { suffix { lt lb v } } [Object.entries FConfig] : do
+		create-glyph "F.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
 
-	create-glyph 'smcpF.motionSerifed' : glyph-proc
-		include : MarkSet.e
-		include : FShape XH (serifLT -- true) (serifLB -- false) (serifV -- false)
+		create-glyph "smcpF.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : FShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
 
 	select-variant 'F' 'F'
+	link-reduced-variant 'F/sansSerif' 'F' MathSansSerif
 	select-variant 'smcpF' 0xA730 (follow -- 'F')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
@@ -84,7 +84,8 @@ glyph-block Letter-Latin-Upper-F : begin
 		include : refer-glyph "F"
 		include : HOverlayBar (SB * 0.5) (SB * 3 + Stroke * HVContrast) [mix 0 XH 0.4]
 
-	create-glyph 'Fltail' 0x191 : glyph-proc
-		include [refer-glyph 'F'] AS_BASE
+	derive-glyphs 'Fltail' 0x191 'F' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : MarkSet.if
 		eject-contour 'serifBottom'
 		include : VerticalHook (SB * 1.5 + HalfStroke * HVContrast) 0 (-HookX) Hook

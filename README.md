@@ -543,11 +543,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-d = 'standard-bilateral-serifed'`, `cv04 = 5`: Standard `B` with serifs at both top and bottom.
     + `capital-d = 'more-rounded-bilateral-serifed'`, `cv04 = 6`: More rounded `B` to differentiate with `O` with serifs at both top and bottom.
   - Styles for `E`:
-    + `capital-e = 'standard'`, `cv05 = 1`: Standard E.
-    + `capital-e = 'motion-serifed'`, `cv05 = 2`: Motion-Serifed E.
+    + `capital-e = 'serifless'`, `cv05 = 1`: E without serifs.
+    + `capital-e = 'top-left-serifed'`, `cv05 = 2`: E with serif only at top left.
+    + `capital-e = 'serifed'`, `cv05 = 3`: E with serifs.
   - Styles for `F`:
-    + `capital-f = 'standard'`, `cv06 = 1`: Standard F.
-    + `capital-f = 'motion-serifed'`, `cv06 = 2`: Motion-Serifed F.
+    + `capital-f = 'serifless'`, `cv06 = 1`: F without serifs.
+    + `capital-f = 'top-left-serifed'`, `cv06 = 2`: F with serif only at top left.
+    + `capital-f = 'serifed'`, `cv06 = 3`: F with serifs.
   - Styles for `G`:
     + `capital-g = 'toothed-serifless-hookless'`, `cv07 = 1`: Toothed G.
     + `capital-g = 'toothless-corner-serifless-hookless'`, `cv07 = 2`: Corner toothless G.
@@ -577,8 +579,10 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-g = 'toothless-corner-inward-serifed-capped'`, `cv07 = 26`: Corner toothless G with a cap terminal and inward top serif.
     + `capital-g = 'toothless-rounded-inward-serifed-capped'`, `cv07 = 27`: Round toothless G with a cap terminal and inward top serif.
   - Styles for `H`:
-    + `capital-h = 'standard'`, `cv08 = 1`: Standard H.
-    + `capital-h = 'motion-serifed'`, `cv08 = 2`: Motion-Serifed H.
+    + `capital-h = 'serifless'`, `cv08 = 1`: H without serifs.
+    + `capital-h = 'top-left-serifed'`, `cv08 = 2`: H with serif only at top left.
+    + `capital-h = 'top-left-bottom-right-serifed'`, `cv08 = 3`: H with serif only at top left and bottom right.
+    + `capital-h = 'serifed'`, `cv08 = 4`: H with serifs.
   - Styles for `I`:
     + `capital-i = 'serifed'`, `cv09 = 1`: I with standard (long) serifs.
     + `capital-i = 'serifless'`, `cv09 = 2`: I without serifs, like a straight bar.
@@ -1140,10 +1144,13 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `cyrl-el = 'straight'`, `cv62 = 1`: Cyrillic Lower El (`л`) with standard shape.
     + `cyrl-el = 'tailed'`, `cv62 = 2`: Cyrillic Lower El (`л`) with tail shape.
   - Styles for `н` (Cyrillic Lower En):
-    + `cyrl-en = 'standard'`, `cv63 = 1`: Cyrillic Lower En (`н`) with standard shape.
-    + `cyrl-en = 'tailed'`, `cv63 = 2`: Cyrillic Lower En (`н`) with tail.
-    + `cyrl-en = 'motion-serifed'`, `cv63 = 3`: Cyrillic Lower En (`н`) with motion serifs.
-    + `cyrl-en = 'motion-serifed-tailed'`, `cv63 = 4`: Cyrillic Lower En (`н`) with tail and motion serifs.
+    + `cyrl-en = 'serifless'`, `cv63 = 1`: Cyrillic Lower En (`н`) with standard shape.
+    + `cyrl-en = 'tailed-serifless'`, `cv63 = 2`: Cyrillic Lower En (`н`) with tail.
+    + `cyrl-en = 'top-left-serifed'`, `cv63 = 3`: Cyrillic Lower En (`н`) with outward serifs only at top left.
+    + `cyrl-en = 'tailed-top-left-serifed'`, `cv63 = 4`: Cyrillic Lower En (`н`) with tail and outward serifs only at top left.
+    + `cyrl-en = 'top-left-bottom-right-serifed'`, `cv63 = 5`: Cyrillic Lower En (`н`) with outward serifs only at top left and bottom right.
+    + `cyrl-en = 'serifed'`, `cv63 = 6`: Cyrillic Lower En (`н`) with full serifs.
+    + `cyrl-en = 'tailed-serifed'`, `cv63 = 7`: Cyrillic Lower En (`н`) with tail and full serifs.
   - Styles for `ф` (Cyrillic Lower Ef):
     + `cyrl-ef = 'serifless'`, `cv64 = 1`: Cyrillic Lower Ef (`ф`) with standard shape and without serifs.
     + `cyrl-ef = 'cursive'`, `cv64 = 2`: Cyrillic Lower Ef (`ф`) with cursive shape.
