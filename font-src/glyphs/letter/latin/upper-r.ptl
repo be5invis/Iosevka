@@ -118,14 +118,14 @@ glyph-block Letter-Latin-Upper-R : begin
 		local right : RightSB - O - [if SLAB (Jut / 8) 0]
 		include : RLegShapes.(legShape) [RLegTop top Stroke bp] 0 Middle right top (slab === PShape.SlabSymmetric) Stroke 0
 
-	define [RRotundaShape] : params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1]] : glyph-proc
+	define [RRotundaShape] : params [legShape top [mul 1] [pmRotunda 0] [endX Middle] [hook Hook] [pBar 1] [slab null]] : glyph-proc
 		local bp : pBar * [RBarPos top false]
 		local legTop : RLegTop top Stroke bp
 		local right (RightSB - O - [if SLAB (Jut / 8) 0])
 		local cor : RLegDiagCor legTop 0 endX right 0 Stroke
 		local endX1 : endX - [if legShape (HalfStroke * cor * HVContrast) HalfStroke] + [if legShape [RSlabExtraShift SLAB Stroke] 0]
 		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
-		include : RLegShapes.(legShape) legTop 0 endX right top SLAB Stroke 0
+		include : RLegShapes.(legShape) legTop 0 endX right top (slab === PShape.SlabSymmetric) Stroke 0
 
 	define [RevRShape] : params [legShape top bp [slab null] [mul 1] [tailedShape false]] : glyph-proc
 		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
@@ -153,6 +153,12 @@ glyph-block Letter-Latin-Upper-R : begin
 		standingOpenMotionSerifed  { LEG-SHAPE-STANDING   PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
 		straightOpenMotionSerifed  { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
 		curlyOpenMotionSerifed     { LEG-SHAPE-CURLY      PShape.SlabMotion               RevPShape.SlabMotion                                                          true   false }
+		standingSerifless          { LEG-SHAPE-STANDING   null                            null                                                                          false  false }
+		straightSerifless          { LEG-SHAPE-STRAIGHT   null                            null                                                                          false  false }
+		curlySerifless             { LEG-SHAPE-CURLY      null                            null                                                                          false  false }
+		standingOpenSerifless      { LEG-SHAPE-STANDING   null                            null                                                                          true   false }
+		straightOpenSerifless      { LEG-SHAPE-STRAIGHT   null                            null                                                                          true   false }
+		curlyOpenSerifless         { LEG-SHAPE-CURLY      null                            null                                                                          true   false }
 		standingSmallCyrl          { LEG-SHAPE-STANDING   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
 		straightSmallCyrl          { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
 		curlySmallCyrl             { LEG-SHAPE-CURLY      PShape.SlabMotion               [if SLAB : if para.isItalic RevPShape.SlabCyrlItalic RevPShape.SlabSymmetric] false  false }
@@ -166,7 +172,7 @@ glyph-block Letter-Latin-Upper-R : begin
 		straightOpenTailed         { LEG-SHAPE-STRAIGHT   PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            true   true  }
 		curlyOpenTailed            { LEG-SHAPE-CURLY      PShape.SlabMotion               [if (SLAB && !para.isItalic) RevPShape.SlabMotion]                            true   true  }
 
-	foreach { suffix { fStraight slabs revSlabs fOpen fTailed } } [Object.entries RConfig] : begin
+	foreach { suffix { legShape slabs revSlabs fOpen fTailed } } [Object.entries RConfig] : begin
 		local fMotion : slabs === PShape.SlabMotion
 		local bpCap : RBarPos CAP (slabs === PShape.SlabSymmetric)
 		local bpXH  : RBarPos XH  (slabs === PShape.SlabSymmetric)
@@ -174,47 +180,65 @@ glyph-block Letter-Latin-Upper-R : begin
 		create-glyph "R.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
-			if fOpen
-			: then : begin
-				include : difference
-					RShape fStraight CAP (slab -- slabs) (bp -- bpCap)
-					PShape.OpenGap CAP (mul -- 1) (bp -- bpCap)
-			: else : begin
-				include : RShape fStraight CAP (slab -- slabs) (bp -- bpCap)
+			include : difference
+				RShape legShape CAP (slab -- slabs) (bp -- bpCap)
+				if fOpen [PShape.OpenGap CAP (mul -- 1) (bp -- bpCap)] [glyph-proc]
 
 		create-glyph "smcpR.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
-			if fOpen
-			: then : begin
-				include : difference
-					RShape fStraight XH (slab -- slabs) (bp -- bpXH)
-					PShape.OpenGap XH (mul -- 1) (bp -- bpXH)
-			: else : begin
-				include : RShape fStraight XH (slab -- slabs) (bp -- bpXH)
+			include : difference
+				RShape legShape XH (slab -- slabs) (bp -- bpXH)
+				if fOpen [PShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
 		if (!fMotion && !fOpen) : create-glyph "Rrotunda.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : RRotundaShape fStraight CAP (hook -- Hook) (pBar -- 0.9)
+			include : RRotundaShape legShape CAP (hook -- Hook) (pBar -- 0.9) (slab -- slabs)
 
 		if (!fMotion && !fOpen) : create-glyph "rrotunda.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : RRotundaShape fStraight XH (hook -- AHook) (pBar -- 0.9)
+			include : RRotundaShape legShape XH (hook -- AHook) (pBar -- 0.9) (slab -- slabs)
 
 		create-glyph "cyrl/Ya.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
 			include : difference
-				RevRShape fStraight CAP (slab -- revSlabs) (bp -- bpCap)
+				RevRShape legShape CAP (slab -- revSlabs) (bp -- bpCap)
 				if fOpen [RevPShape.OpenGap CAP (mul -- 1) (bp -- bpCap)] [glyph-proc]
 
 		create-glyph "cyrl/ya.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
 			include : difference
-				RevRShape fStraight XH (slab -- revSlabs) (bp -- bpXH) (tailedShape -- fTailed)
+				RevRShape legShape XH (slab -- revSlabs) (bp -- bpXH) (tailedShape -- fTailed)
 				if fOpen [RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
+		create-glyph "Yr.\(suffix)" : glyph-proc
+			include : MarkSet.if
+			local top : CAP * 0.85
+			local bp 0.45
+			local legTop : RLegTop top Stroke bp
+			local right (RightSB - O - [if SLAB (Jut / 8) 0])
+
+			include : VBarLeft SB (top - 1) CAP
+			include : difference
+				union
+					PShape top (mul -- 1) (bp -- bp) (slab -- slabs)
+					RLegShape-Straight legTop Descender Middle right (top - Descender) (slabs === PShape.SlabSymmetric) Stroke 0
+				if fOpen [PShape.OpenGap top (mul -- 1) (bp -- bp)] [glyph-proc]
+
+		create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
+			define bp : RBarPos CAP 0
+			include : intersection
+				Rect CAP 0 SB Width
+				WithTransform [Translate (-Width / 8) 0]
+					PShape CAP (bp -- bp) (withBar -- false)
+			local right : RightSB - O - [if legShape 0 (Width / 16)]
+			include : RLegShapes.(legShape) [RLegTop CAP Stroke bp] 0 (Width * 0.375) right CAP (slabs === PShape.SlabSymmetric) Stroke 0
+
+			define sw : AdviceStroke2 2 4 CAP
+			include : HBarTop SB RightSB CAP sw
+			include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
 
 	select-variant 'R' 'R'
 	link-reduced-variant 'R/sansSerif' 'R' MathSansSerif
@@ -229,48 +253,13 @@ glyph-block Letter-Latin-Upper-R : begin
 	select-variant 'revSmcpR' 0x1D19 (shapeFrom -- 'cyrl/ya') (follow -- 'R')
 	turned 'invSmcpR' 0x281 'revSmcpR' Middle (XH / 2)
 
-	define [IndianRupeeShape suffix legShape] : glyph-proc
-		define bp : RBarPos CAP 0
-		include : intersection
-			Rect CAP 0 SB Width
-			WithTransform [Translate (-Width / 8) 0]
-				PShape CAP (bp -- bp) (withBar -- false)
-		local right : RightSB - O - [if legShape 0 (Width / 16)]
-		include : RLegShapes.(legShape) [RLegTop CAP Stroke bp] 0 (Width * 0.375) right CAP false Stroke 0
-
-		define sw : AdviceStroke2 2 4 CAP
-		include : HBarTop SB RightSB CAP sw
-		include : HBar SB RightSB [mix CAP [PBarPosY CAP Stroke bp] 0.5] sw
-
-	create-glyph 'currency/indianRupeeSign.curly'    : IndianRupeeShape 'curly'    0
-	create-glyph 'currency/indianRupeeSign.straight' : IndianRupeeShape 'straight' 1
-	create-glyph 'currency/indianRupeeSign.standing' : IndianRupeeShape 'curly'    2
+	select-variant 'Yr' 0x1A6 (follow -- 'R')
 
 	select-variant 'currency/indianRupeeSign' 0x20B9 (follow -- 'Rrotunda')
-
 
 	derive-glyphs 'Rbar' 0x24C 'R' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : HBar [mix 0 SB 0.3] (SB - O) ((CAP - Stroke) * [RBarPos CAP SLAB] + Stroke * 0.25)
-
-	create-glyph : glyph-proc
-		include : MarkSet.if
-		local top : CAP * 0.85
-		local bp 0.45
-		include : PShape top (mul -- 1) (bp -- bp) (slab -- [if SLAB PShape.SlabSymmetric])
-		include : VBarLeft SB (top - 1) CAP
-
-		local legTop : RLegTop top Stroke bp
-		local right (RightSB - O - [if SLAB (Jut / 8) 0])
-		create-forked-glyph 'Yr.straight'
-			RLegShape-Straight legTop Descender Middle right (top - Descender) SLAB Stroke 0
-		create-forked-glyph 'Yr.curly'
-			RLegShape-Curly    legTop Descender Middle right (top - Descender) SLAB Stroke 0
-		create-forked-glyph 'Yr.standing'
-			RLegShape-Standing legTop Descender Middle right (top - Descender) SLAB Stroke 0
-
-	select-variant 'Yr' 0x1A6 (follow -- 'Rrotunda')
-
 
 	create-glyph 'mathbb/R' 0x211D : glyph-proc
 		define [SingleLeg] : RLegShape-Straight ((CAP - BBS) * HBarPos) 0 Middle (RightSB - O) CAP false BBS (BBD / 2)
