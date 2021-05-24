@@ -1,5 +1,18 @@
 ## Modifications since version 2.x
 
+### 7.0.0-preview.5
+
+ * Fix missing serifs on `U+0198` and `U+0199` (#1042).
+ * Fix missing dot on `U+1DA4` (#1043).
+ * Fix missing variants of `U+1D2D` (Regression, #1044).
+ * Fix missing variants of `U+20A6` (#1045).
+ * Fix missing serifs on capital Greek lunate sigmas (#1046).
+ * Make `cv15` able to influence P with Hook (`U+01A4`) and Ruble sign (`U+20BD`) (#1047).
+ * Make `cv17` able to influence Yr (`U+01A6`) and R-roundta (`U+A75A`, `U+A75B`) (#1049).
+ * Correct width of Latin Small Letter UE (`U+1D6B`) (Regression, #1050).
+ * Fix incorrect slope of Circled Italic Latin Capital Letter C (`U+1F12B`) and Circled Italic Latin Capital Letter R (`U+1F12C`) (#1051).
+
+
 ### 7.0.0-preview.4
 
  * \[**Breaking**\] Variant names of certain letters are renamed and reorganized, including:
