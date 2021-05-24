@@ -181,21 +181,24 @@ glyph-block Recursive-Build : begin
 		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
 		return gs.glyphStore
 
-	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false] [mono2 false]] : begin
-		local forkedPara : Object.create para
+	define [MiniatureParaT] : params [pp crowd scale [sbscale (Width / UPM)] [mono false] [mono2 false]] : begin
+		local forkedPara : Object.create pp
 		forkedPara.stroke = [AdviceStroke crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
-		forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
-		forkedPara.dotsize = para.dotsize * forkedPara.stroke / para.stroke
-		forkedPara.periodsize = para.periodsize * forkedPara.stroke / para.stroke
+		forkedPara.ess = pp.ess * forkedPara.stroke / pp.stroke
+		forkedPara.dotsize = pp.dotsize * forkedPara.stroke / pp.stroke
+		forkedPara.periodsize = pp.periodsize * forkedPara.stroke / pp.stroke
 		forkedPara.sb = SB * sbscale
-		forkedPara.slopeAngle = slopeAngle
 		if mono : begin
 			forkedPara.diversityM  = 1
 		if mono2 : begin
 			forkedPara.diversityF  = 1
 			forkedPara.diversityI  = 1
 			forkedPara.diversityII = 1
-		return : Fork glyphs forkedPara
+
+		return forkedPara
+
+	define [Miniature glyphs] : begin
+		return : Fork glyphs : MiniatureParaT.apply null { para :: [{}.slice.call arguments 1] }
 
 	define [Thinner glyphs p fMono] : begin
 		local forkedPara : Object.create para
@@ -223,4 +226,4 @@ glyph-block Recursive-Build : begin
 		forkedPara.hookx = HookX * p
 		return : Fork glyphs forkedPara
 
-	glyph-block-export Fork Miniature Thinner Widen
+	glyph-block-export Fork Miniature MiniatureParaT Thinner Widen
