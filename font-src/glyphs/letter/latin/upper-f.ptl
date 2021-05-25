@@ -9,10 +9,13 @@ glyph-module
 glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-export FShape RevFShape EFVJutLength
 
+	glyph-block-export xMidBarShrink
 	define [xMidBarShrink] : [Math.max HalfStroke ((RightSB - SB) * 0.15)] + [if SLAB (Stroke * 0.25) 0]
+	glyph-block-export yMidBar
 	define [yMidBar top y] : top * [fallback y : DesignParameters.upperEBarPos SLAB]
+
+	glyph-block-export EFVJutLength
 	define [EFVJutLength top pyBar stroke] : begin
 		local jutTop : Math.min VJut
 			top - [mix (top - stroke) ([yMidBar top pyBar] + stroke / 2) 0.5]
@@ -21,8 +24,9 @@ glyph-block Letter-Latin-Upper-F : begin
 		return { jutTop jutBot }
 
 	define xFBarLeft : SB * 1.5
-	define [FShape] : params [top pyBar serifLT serifLB serifV _stroke] : glyph-proc
-		define stroke : fallback _stroke : AdviceStroke2 2 3 top
+	define xFBarRight : Width - SB * 1.5
+
+	define [FShape] : params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
 		include : VBarLeft (xFBarLeft) 0 top stroke
 		include : HBarTop (xFBarLeft - O) RightSB top stroke
 		include : HBar (xFBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
@@ -34,9 +38,7 @@ glyph-block Letter-Latin-Upper-F : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardRightSerif RightSB top jutTop
 
-	define [RevFShape] : params [top pyBar serifRT serifRB serifV] : glyph-proc
-		define stroke : AdviceStroke2 2 3 CAP
-		define xFBarRight : Width - SB * 1.5
+	define [RevFShape] : params [top pyBar serifRT serifRB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
 		include : VBarRight (xFBarRight) 0 top stroke
 		include : HBarTop SB (xFBarRight + O) top stroke
 		include : HBar (SB + [xMidBarShrink]) (xFBarRight + O) [yMidBar top pyBar] stroke
