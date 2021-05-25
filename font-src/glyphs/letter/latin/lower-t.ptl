@@ -64,8 +64,8 @@ glyph-block Letter-Latin-Lower-T : begin
 			[xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div]
 			begin yCrossBar
 
-	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top [mix 1 df.div 2] 0
-	define [TFlatShapeImpl df top m ext] : glyph-proc
+	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top bot [mix 1 df.div 2] 0
+	define [TFlatShapeImpl df top bot m ext] : glyph-proc
 		local xCrossLeft : mix 0 SB m
 		local xCrossRight : mix df.width df.rightSB m
 		local xBarLeft : [mix xCrossLeft xCrossRight 0.42] - Stroke * 0.375 * HVContrast
@@ -82,7 +82,7 @@ glyph-block Letter-Latin-Lower-T : begin
 		set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'topright' xCrossRight  CAP
 		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
-		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) 0
+		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) bot
 
 	define [SmallTCrossBody df top bot] : glyph-proc
 		include : VBar df.middle 0 top
@@ -97,7 +97,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			MaskLeft (xBarLeft - O)
 		set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
-		set-base-anchor 'below' (xBarLeft + HalfStroke * HVContrast) 0
+		set-base-anchor 'below' (xBarLeft + HalfStroke * HVContrast) bot
 
 	define SmallTConfig : object
 		standard                     { [DivFrame  1] SmallTShape                  CAP         }
@@ -129,13 +129,58 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : body df1 top 0
 			include : HCrossBar.top df1.middle (df1.width + df1.middle) yCrossBar
 
+		create-glyph "tHookTop.\(suffix)" : glyph-proc
+			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
+			currentGlyph.clearGeometry
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.above
+			include : union
+				difference [body df top 0] [MaskAbove XH]
+				VerticalHook attach.x XH HookX (-Hook)
+
+		if (body === SmallTShape) : create-glyph "tLTail.\(suffix)" : glyph-proc
+			include : MarkSet.if
+			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.bottomright
+			include : VBarRight attach.x 0 attach.y
+			include : VerticalHook (attach.x - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+		create-glyph "tRTail.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.if
+			include : body df top Descender
+
 		turned "turnt.\(suffix)" nothing "t.\(suffix)" df.middle (XH / 2) [df.markSet.p]
+
+		create-glyph "tCurlyTal.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			local fine : AdviceStroke 3.5
+			local rinner : LongJut / 2 - fine / 2
+			local x2 : mix SB xSmallTBarLeft 0.4
+			local y2 : -fine
+			include : HBarTop (xSmallTBarLeft + HalfStroke - LongJut + TBalance2) (xSmallTBarLeft + HalfStroke + LongJut + TBalance2) XH
+			include : dispiro
+				widths.lhs
+				flat xSmallTBarLeft top [heading Downward]
+				curl xSmallTBarLeft (fine + rinner * 2)
+				CurlyTail fine rinner (xSmallTBarLeft+ Stroke * HVContrast) 0 (xSmallTBarLeft + Stroke * HVContrast + LongJut) x2 y2
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include : df.markSet.b
-		include : TFlatShapeImpl df CAP 1 0
+		include : TFlatShapeImpl df CAP 0 1 0
+
+	select-variant 't' 't'
+	select-variant 't/teshLeft' (follow -- 't')
+	select-variant 'turnt' 0x287 (follow -- 't')
+	CreateCommaCaronComposition 't' 'tcaron' 0x165
+	derive-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
+
+	select-variant "tHookTop" 0x1AD
+	select-variant 'tLTail' 0x1AB
+	select-variant 'tRTail' 0x288 (follow -- 'tLTail')
+	select-variant 'tCurlyTal' 0x236 (follow -- 'tLTail')
+
 
 	create-glyph 'mathbb/t' 0x1D565 : glyph-proc
 		include : HBarTop xSmallTBarLeft (xSmallTBarLeft + BBD) CAP BBS
@@ -150,38 +195,3 @@ glyph-block Letter-Latin-Lower-T : begin
 				begin yCrossBar
 				begin BBS
 			Rect CAP 0 xSmallTBarLeft (xSmallTBarLeft + BBD)
-
-	select-variant 't' 't'
-	select-variant 't/teshLeft' (follow -- 't')
-	select-variant 'turnt' 0x287 (follow -- 't')
-	CreateCommaCaronComposition 't' 'tcaron' 0x165
-	derive-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
-
-	create-glyph 'tltail' 0x1AB : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph 't.standard'
-		local attach : currentGlyph.gizmo.unapply [query-glyph 't.standard'].baseAnchors.bottomright
-		include : VBarRight attach.x 0 attach.y
-		include : VerticalHook (attach.x - HalfStroke * HVContrast) 0 (-HookX) Hook
-
-	create-glyph 'thooktop' 0x1AD : glyph-proc
-		include : MarkSet.e
-		include : SmallTShape [DivFrame 1] (XH - HalfStroke) 0
-		include : VerticalHook (xSmallTBarLeft + HalfStroke * HVContrast) XH HookX (-Hook)
-
-	create-glyph 'trtail' 0x288 : glyph-proc
-		include : MarkSet.if
-		include : SmallTShape [DivFrame 1] CAP Descender
-
-	create-glyph 'tcurlytail' 0x236 : glyph-proc
-		include : MarkSet.b
-		local fine : AdviceStroke 3.5
-		local rinner : LongJut / 2 - fine / 2
-		local x2 : mix SB xSmallTBarLeft 0.4
-		local y2 : -fine
-		include : HBarTop (xSmallTBarLeft + HalfStroke - LongJut + TBalance2) (xSmallTBarLeft + HalfStroke + LongJut + TBalance2) XH
-		include : dispiro
-			widths.lhs
-			flat xSmallTBarLeft CAP [heading Downward]
-			curl xSmallTBarLeft (fine + rinner * 2)
-			CurlyTail fine rinner (xSmallTBarLeft+ Stroke * HVContrast) 0 (xSmallTBarLeft + Stroke * HVContrast + LongJut) x2 y2
