@@ -122,7 +122,7 @@ glyph-block Letter-Latin-W : begin
 		return : object xBot1 xBot2 strokeOuter strokeOuterCr fineOuter fineOuterCr fineInner fineInnerCr fineInnerCrTop fineHeight wMidHeight xRight1 xLeft2 wCoCr curlyStraightSegLength
 
 	### W and w
-	define [WshapeImpl df top bodyType slabType] : glyph-proc
+	define [WShapeImpl df top bodyType slabType] : glyph-proc
 		local dim : WDim df top bodyType
 
 		if (bodyType !== FORM-CURLY) : begin
@@ -234,24 +234,56 @@ glyph-block Letter-Latin-W : begin
 			[Just SERIFS-MOTION] : begin sf.lt.outer
 			___                  : glyph-proc
 
-	define WConfig : object
-		cyrlSmallOmega                     { WshapeImpl   FORM-CYRL-OMEGA   SERIFS-NONE       }
-		straightAsymmetric                 { WshapeImpl   FORM-ASYMMETRIC   SERIFS-ASYMMETRIC }
-		straightDoubleV                    { WshapeImpl   FORM-DOUBLE-V     SERIFS-DOUBLE-V   }
-		straightFlatTop                    { WshapeImpl   FORM-FLAT-TOP     SERIFS-AUTO       }
-		straight                           { WshapeImpl   FORM-STRAIGHT     SERIFS-AUTO       }
-		straightVerticalSides              { WVertSides   FORM-STRAIGHT     SERIFS-AUTO       }
-		curly                              { WshapeImpl   FORM-CURLY        SERIFS-AUTO       }
-		cursive                            { WCursiveImpl FORM-CURLY        SERIFS-CURSIVE    }
-		straightAsymmetricMotionSerifed    { WshapeImpl   FORM-ASYMMETRIC   SERIFS-MOTION     }
-		straightDoubleVMotionSerifed       { WshapeImpl   FORM-DOUBLE-V     SERIFS-MOTION     }
-		straightFlatTopMotionSerifed       { WshapeImpl   FORM-FLAT-TOP     SERIFS-MOTION     }
-		straightVerticalSidesMotionSerifed { WVertSides   FORM-STRAIGHT     SERIFS-MOTION     }
-		straightMotionSerifed              { WshapeImpl   FORM-STRAIGHT     SERIFS-MOTION     }
-		curlyMotionSerifed                 { WshapeImpl   FORM-CURLY        SERIFS-MOTION     }
-		cursiveMotionSerifed               { WCursiveImpl FORM-CURLY        SERIFS-MOTION     }
+	define [WHooktopShape df top bodyType serifsType] : glyph-proc
+		include : WShapeImpl df top bodyType serifsType
 
-	foreach { suffix { implT bodyType slabType } } [Object.entries WConfig] : do
+		local dim : WDim df top bodyType
+
+		# Eject unnecessary contours
+		eject-contour 'strokeUp2'
+		eject-contour 'serifRT'
+
+		include : dispiro
+			widths.rhs dim.strokeOuter
+			straight.down.start df.rightSB (top - Hook) [heading Downward]
+			quadcontrols 0 0.3 6 unimportant
+			g4 (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
+
+		include : VerticalHook (df.rightSB - HalfStroke * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + HalfStroke)
+
+	define [WVSHookTopShape df top bodyType serifsType] : glyph-proc
+		include : WVertSides df top bodyType serifsType
+
+		# Eject unnecessary contours
+		eject-contour 'strokeLeftBar'
+		eject-contour 'serifRT'
+
+		include : dispiro
+			widths.rhs
+			flat df.rightSB (top - Hook) [heading Downward]
+			curl df.rightSB [Math.min (0.8 * top) (top - Hook - 0.1)] [heading Downward]
+			straight.down.end df.rightSB 0 [widths.rhs.heading [AdviceStroke 4 df.div] Downward]
+
+		include : VerticalHook (df.rightSB - HalfStroke * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + HalfStroke)
+
+	define WConfig : object
+		cyrlSmallOmega                     { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA   SERIFS-NONE       }
+		straightAsymmetric                 { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-ASYMMETRIC }
+		straightDoubleV                    { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-DOUBLE-V   }
+		straightFlatTop                    { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-AUTO       }
+		straight                           { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-AUTO       }
+		straightVerticalSides              { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-AUTO       }
+		curly                              { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-AUTO       }
+		cursive                            { WCursiveImpl null            FORM-CURLY        SERIFS-CURSIVE    }
+		straightAsymmetricMotionSerifed    { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-MOTION     }
+		straightDoubleVMotionSerifed       { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-MOTION     }
+		straightFlatTopMotionSerifed       { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-MOTION     }
+		straightVerticalSidesMotionSerifed { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-MOTION     }
+		straightMotionSerifed              { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-MOTION     }
+		curlyMotionSerifed                 { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-MOTION     }
+		cursiveMotionSerifed               { WCursiveImpl null            FORM-CURLY        SERIFS-MOTION     }
+
+	foreach { suffix { implT hookTopImplT bodyType slabType } } [Object.entries WConfig] : do
 		create-glyph "W.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
@@ -273,38 +305,17 @@ glyph-block Letter-Latin-W : begin
 			include : ApparentTranslate 0 (CAP / 2 + gap)
 			include : implT df (CAP / 2 - gap / 2) bodyType slabType
 
-	define [WHooktopShape df top bodyType] : glyph-proc
-		include : WshapeImpl df top bodyType SERIFS-AUTO
+		if hookTopImplT : create-glyph "Whooktop.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : hookTopImplT df CAP bodyType slabType
 
-		local dim : WDim df top bodyType
-
-		# Eject unnecessary contours
-		eject-contour 'strokeUp2'
-		if SLAB : eject-contour 'serifRT'
-
-		include : dispiro
-			widths.rhs dim.strokeOuter
-			straight.down.start df.rightSB (top - Hook) [heading Downward]
-			quadcontrols 0 0.3 6 unimportant
-			g4 (dim.xBot2 + 0.5 * HVContrast * dim.wCoCr) 0 [widths.rhs.heading dim.fineOuterCr Downward]
-
-		include : VerticalHook (df.rightSB - HalfStroke * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + HalfStroke)
-
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		create-forked-glyph 'Whooktop.straightFlatTop' : WHooktopShape df CAP FORM-FLAT-TOP
-		create-forked-glyph 'Whooktop.straight'        : WHooktopShape df CAP FORM-STRAIGHT
-		create-forked-glyph 'Whooktop.curly'           : WHooktopShape df CAP FORM-CURLY
-
-	create-glyph : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		create-forked-glyph 'whooktop.straightFlatTop' : WHooktopShape df XH FORM-FLAT-TOP
-		create-forked-glyph 'whooktop.straight'        : WHooktopShape df XH FORM-STRAIGHT
-		create-forked-glyph 'whooktop.curly'           : WHooktopShape df XH FORM-CURLY
+		if hookTopImplT : create-glyph "whooktop.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : hookTopImplT df XH bodyType slabType
 
 	select-variant 'W' 'W'
 	link-reduced-variant 'W/sansSerif' 'W' MathSansSerif
