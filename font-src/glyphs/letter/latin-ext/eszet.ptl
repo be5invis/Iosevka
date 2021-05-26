@@ -11,6 +11,10 @@ glyph-block Letter-Latin-Eszet : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
 
+	define NO-TAIL    0
+	define DESCENDING 1
+	define TAILED     2
+
 	local ymiddle : [mix 0 CAP 0.5] - HalfStroke
 	local ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
 	local xmiddle : Math.max (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
@@ -53,8 +57,12 @@ glyph-block Letter-Latin-Eszet : begin
 			widths.center (Stroke * 1.1)
 			corner tl (tm - Stroke) [heading Upward]
 			corner (RightSB - HalfStroke * 1.2 - OX) t [heading Upward]
-		if tail : include : VerticalHook (l + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+
 		if slab : include : LeftwardBottomSerif SB 0 SideJut
+		include : match tail
+			[Just DESCENDING] : VBarLeft l Descender 0
+			[Just TAILED] : VerticalHook (l + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+			__ : glyph-proc
 
 
 	define [SulzbacherBody slab tail] : glyph-proc
@@ -76,8 +84,12 @@ glyph-block Letter-Latin-Eszet : begin
 			arcvh
 			flat xmiddleBot 0
 			curl xfinal 0 [heading Leftward]
-		if tail : include : VerticalHook (SB + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+
 		if slab : include : LeftwardBottomSerif SB 0 SideJut
+		include : match tail
+			[Just DESCENDING] : VBarLeft SB Descender 0
+			[Just TAILED] : VerticalHook (SB + HalfStroke * HVContrast) 0 (-Hook * 1.2) Hook
+			__ : glyph-proc
 
 
 	define [LongSSLigBody slab tail] : glyph-proc
@@ -113,20 +125,28 @@ glyph-block Letter-Latin-Eszet : begin
 			alsoThru.g2 0.5 0.50 [widths.center swInner]
 			g4 (RightSB - OX) (innerSmoothB - 2 * TanSlope * swInner) [widths.rhs.heading swInner Downward]
 			arcvh
-			flat ([Math.max (sEndX + 1) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 ) 0
+			flat ([Math.max (sEndX + 1) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 + TanSlope * swInner ) 0
 			curl sEndX 0 [heading Leftward]
 
-		if tail : include : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook swOuter
 		if slab : include : LeftwardBottomSerif SB 0 SideJut
+		include : match tail
+			[Just DESCENDING] : VBarLeft SB Descender 0
+			[Just TAILED] : VerticalHook (SB + 0.5 * swOuter * HVContrast) 0 (-Hook * 1.2) Hook
+			__ : glyph-proc
 
-	create-glyph 'eszet.traditional' : TraditionalBody false SLAB false
-	create-glyph 'eszet.traditionalTailed' : TraditionalBody false false true
-	create-glyph 'eszet.traditionalFlatHook' : TraditionalBody true SLAB false
-	create-glyph 'eszet.traditionalFlatHookTailed' : TraditionalBody true false true
-	create-glyph 'eszet.sulzbacher' : SulzbacherBody SLAB false
-	create-glyph 'eszet.sulzbacherTailed' : SulzbacherBody false true
-	create-glyph 'eszet.longSSLig' : LongSSLigBody SLAB false
-	create-glyph 'eszet.longSSLigTailed' : LongSSLigBody false true
+
+	create-glyph 'eszet.traditional'                   : TraditionalBody  false SLAB  NO-TAIL
+	create-glyph 'eszet.traditionalDescending'         : TraditionalBody  false false DESCENDING
+	create-glyph 'eszet.traditionalTailed'             : TraditionalBody  false false TAILED
+	create-glyph 'eszet.traditionalFlatHook'           : TraditionalBody  true  SLAB  NO-TAIL
+	create-glyph 'eszet.traditionalFlatHookDescending' : TraditionalBody  true  false DESCENDING
+	create-glyph 'eszet.traditionalFlatHookTailed'     : TraditionalBody  true  false TAILED
+	create-glyph 'eszet.sulzbacher'                    : SulzbacherBody         SLAB  NO-TAIL
+	create-glyph 'eszet.sulzbacherDescending'          : SulzbacherBody         false DESCENDING
+	create-glyph 'eszet.sulzbacherTailed'              : SulzbacherBody         false TAILED
+	create-glyph 'eszet.longSSLig'                     : LongSSLigBody          SLAB  NO-TAIL
+	create-glyph 'eszet.longSSLigDescending'           : LongSSLigBody          false DESCENDING
+	create-glyph 'eszet.longSSLigTailed'               : LongSSLigBody          false TAILED
 
 	select-variant 'eszet' 0xDF
 
