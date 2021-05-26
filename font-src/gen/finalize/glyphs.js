@@ -5,7 +5,6 @@ const Geom = require("../../support/geometry");
 const Point = require("../../support/point");
 const Transform = require("../../support/transform");
 const CurveUtil = require("../../support/curve-util");
-const util = require("util");
 
 module.exports = finalizeGlyphs;
 function finalizeGlyphs(cache, para, glyphStore) {
@@ -17,22 +16,44 @@ function finalizeGlyphs(cache, para, glyphStore) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function regulateGlyphStore(cache, skew, glyphStore) {
+	const compositeMemo = new Map();
 	for (const g of glyphStore.glyphs()) {
 		if (g.geometry.isEmpty()) continue;
-		if (!regulateCompositeGlyph(glyphStore, g)) flattenSimpleGlyph(cache, skew, g);
+		if (!regulateCompositeGlyph(glyphStore, compositeMemo, g)) {
+			flattenSimpleGlyph(cache, skew, g);
+		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-function regulateCompositeGlyph(glyphStore, g) {
-	const refs = g.geometry.asReferences();
-	if (!refs) return false;
+function memoSet(memo, g, v) {
+	memo.set(g, v);
+	return v;
+}
+function regulateCompositeGlyph(glyphStore, memo, g) {
+	if (memo.has(g)) return memo.get(g);
+
+	let refs = g.geometry.asReferences();
+	if (!refs) return memoSet(memo, g, false);
+
 	for (const sr of refs) {
 		const gn = glyphStore.queryNameOf(sr.glyph);
-		if (!gn || sr.glyph.autoRefPriority < 0) return false;
+		if (!gn || sr.glyph.autoRefPriority < 0) return memoSet(memo, g, false);
 	}
-	return true;
+
+	// De-doppelganger
+	while (refs.length === 1 && regulateCompositeGlyph(glyphStore, memo, refs[0].glyph)) {
+		const sr = refs[0];
+		const targetRefs = sr.glyph.geometry.asReferences();
+		g.clearGeometry();
+		for (const tr of targetRefs) {
+			g.includeGeometry(new Geom.ReferenceGeometry(tr.glyph, tr.x + sr.x, tr.y + sr.y));
+		}
+		refs = g.geometry.asReferences();
+	}
+
+	return memoSet(memo, g, true);
 }
 
 function flattenSimpleGlyph(cache, skew, g) {
@@ -92,7 +113,7 @@ class SimplifyGeometry extends Geom.GeometryBase {
 		return this.m_geom.measureComplexity();
 	}
 	toShapeStringOrNull() {
-		const sTarget = this.m_geom.toShapeStringOrNull();
+		const sTarget = this.m_geom.unwrapShapeIdentity().toShapeStringOrNull();
 		if (!sTarget) return null;
 		return `SimplifyGeometry{${sTarget}}`;
 	}

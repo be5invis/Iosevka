@@ -131,26 +131,14 @@ module.exports = class Glyph {
 
 	tryBecomeMirrorOf(dst, rankSet) {
 		if (rankSet.has(this) || rankSet.has(dst)) return;
-		const csThis = this.geometry.asContours();
-		const csDst = dst.geometry.asContours();
-		if (csThis.length !== csDst.length) return;
-		for (let j = 0; j < csThis.length; j++) {
-			const c1 = csThis[j],
-				c2 = csDst[j];
-			if (c1.length !== c2.length) return;
+		const csThis = this.geometry.unwrapShapeIdentity().toShapeStringOrNull();
+		const csDst = dst.geometry.unwrapShapeIdentity().toShapeStringOrNull();
+		if (csThis && csDst && csThis === csDst) {
+			this.geometry = new Geom.CombineGeometry([new Geom.ReferenceGeometry(dst, 0, 0)]);
+			rankSet.add(this);
 		}
-		for (let j = 0; j < csThis.length; j++) {
-			const c1 = csThis[j],
-				c2 = csDst[j];
-			for (let k = 0; k < c1.length; k++) {
-				const z1 = c1[k],
-					z2 = c2[k];
-				if (z1.x !== z2.x || z1.y !== z2.y || z1.type !== z2.type) return;
-			}
-		}
-		this.geometry = new Geom.CombineGeometry([new Geom.ReferenceGeometry(dst, 0, 0)]);
-		rankSet.add(this);
 	}
+
 	clearGeometry() {
 		this.geometry = new Geom.CombineGeometry();
 	}
