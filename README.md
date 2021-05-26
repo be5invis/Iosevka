@@ -680,7 +680,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `capital-u = 'toothless-rounded'`, `cv20 = 3`: Toothless (rounded) `U`.
     + `capital-u = 'tailed'`, `cv20 = 4`: `U` with right bar and a slightly curly tail.
     + `capital-u = 'motion-serifed'`, `cv20 = 5`: Normal `U` with right bar and motion serifs.
-    + `capital-u = 'motion-serifed-tailed'`, `cv20 = 6`: `U` with right bar, motion serifs and a slightly curly tail.
+    + `capital-u = 'tailed-motion-serifed'`, `cv20 = 6`: `U` with right bar, motion serifs and a slightly curly tail.
     + `capital-u = 'toothless-corner-unilateral-motion-serifed'`, `cv20 = 7`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
     + `capital-u = 'toothless-rounded-unilateral-motion-serifed'`, `cv20 = 8`: Toothless (rounded) `U` with motion serifs, like Museo.
     + `capital-u = 'toothless-corner-bilateral-motion-serifed'`, `cv20 = 9`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
@@ -824,7 +824,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `h = 'straight'`, `cv33 = 1`: `h` with straight ending.
     + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending.
     + `h = 'straight-motion-serifed'`, `cv33 = 3`: `h` with straight ending and motion serifs.
-    + `h = 'motion-serifed-tailed'`, `cv33 = 4`: `h` with curly tailed ending and motion serifs.
+    + `h = 'tailed-motion-serifed'`, `cv33 = 4`: `h` with curly tailed ending and motion serifs.
     + `h = 'straight-top-left-serifed'`, `cv33 = 5`: `h` with straight ending and serif at top left.
   - Styles for `i`:
     + `i = 'serifed'`, `cv34 = 1`: Serifed `i`.
@@ -834,7 +834,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `i = 'hooky-bottom'`, `cv34 = 5`: `i` with a sharp-turning horizontal tail.
     + `i = 'serifed-asymmetric'`, `cv34 = 6`: `i` with shorter top serif and full bottom serif.
     + `i = 'tailed'`, `cv34 = 7`: `i` with curly tail.
-    + `i = 'serifed-tailed'`, `cv34 = 8`: `i` with top serif and curly tail.
+    + `i = 'tailed-serifed'`, `cv34 = 8`: `i` with top serif and curly tail.
     + `i = 'flat-tailed'`, `cv34 = 9`: `i` with curly-then-flat tail.
     + `i = 'serifed-flat-tailed'`, `cv34 = 10`: `i` with top serif and curly-then-flat tail.
     + `i = 'diagonal-tailed'`, `cv34 = 11`: `i` with diagonal tail.
@@ -884,7 +884,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `l = 'hooky-bottom'`, `cv37 = 5`: `l` with a straight sharp-turning horizontal tail.
     + `l = 'serifed-asymmetric'`, `cv37 = 6`: `l` with shorter top serif and full bottom serif.
     + `l = 'tailed'`, `cv37 = 7`: `l` with curly tail.
-    + `l = 'serifed-tailed'`, `cv37 = 8`: `l` with top serif and curly tail.
+    + `l = 'tailed-serifed'`, `cv37 = 8`: `l` with top serif and curly tail.
     + `l = 'flat-tailed'`, `cv37 = 9`: `l` with curly-then-flat tail.
     + `l = 'serifed-flat-tailed'`, `cv37 = 10`: `l` with top serif and curly-then-flat tail.
     + `l = 'diagonal-tailed'`, `cv37 = 11`: `l` with diagonal tail.
@@ -908,8 +908,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `m = 'earless-single-arch-short-leg-tailed'`, `cv38 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
     + `m = 'motion-serifed'`, `cv38 = 17`: `m` with motion serifs, normal middle leg touching baseline.
     + `m = 'short-leg-motion-serifed'`, `cv38 = 18`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono.
-    + `m = 'motion-serifed-tailed'`, `cv38 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
-    + `m = 'short-leg-motion-serifed-tailed'`, `cv38 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
+    + `m = 'tailed-motion-serifed'`, `cv38 = 19`: `m` with motion serifs, normal middle leg touching baseline, and a curly tail.
+    + `m = 'short-leg-tailed-motion-serifed'`, `cv38 = 20`: `m` with motion serifs, a shorter middle leg like Ubuntu Mono, and a curly tail.
   - Styles for `n`:
     + `n = 'straight'`, `cv39 = 1`: `n` with straight ending.
     + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail.
@@ -918,7 +918,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `n = 'earless-rounded-straight'`, `cv39 = 5`: Earless (rounded top-left) `n` with straight ending.
     + `n = 'earless-rounded-tailed'`, `cv39 = 6`: Earless (rounded top-left) `n` with a curly tail.
     + `n = 'straight-motion-serifed'`, `cv39 = 7`: `n` with motion serifs and straight ending.
-    + `n = 'motion-serifed-tailed'`, `cv39 = 8`: `n` with motion serifs and a curly tail.
+    + `n = 'tailed-motion-serifed'`, `cv39 = 8`: `n` with motion serifs and a curly tail.
     + `n = 'straight-top-left-serifed'`, `cv39 = 9`: `n` with motion serifs at top left and straight ending.
   - Styles for `p`:
     + `p = 'eared'`, `cv40 = 1`: `p` with top-left ear.
@@ -933,11 +933,11 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `q = 'earless-rounded'`, `cv41 = 5`: Earless (rounded top-left) single-storey `q`.
     + `q = 'earless-rounded-tailed'`, `cv41 = 6`: Earless (rounded top-left) single-storey `q` with curly tail.
     + `q = 'straight-motion-serifed'`, `cv41 = 7`: `q` with straight bar and motion serifs.
-    + `q = 'motion-serifed-tailed'`, `cv41 = 8`: `q` with tail and motion serifs.
+    + `q = 'tailed-motion-serifed'`, `cv41 = 8`: `q` with tail and motion serifs.
     + `q = 'diagonal-tailed'`, `cv41 = 9`: `q` with diagonal tail.
     + `q = 'earless-corner-diagonal-tailed'`, `cv41 = 10`: Earless (cornered top-left) single-storey `q` with curly diagonal tail.
     + `q = 'earless-rounded-diagonal-tailed'`, `cv41 = 11`: Earless (rounded top-left) single-storey `q` with curly diagonal tail.
-    + `q = 'motion-serifed-diagonal-tailed'`, `cv41 = 12`: `q` with diagonal tail and motion serifs.
+    + `q = 'diagonal-tailed-motion-serifed'`, `cv41 = 12`: `q` with diagonal tail and motion serifs.
   - Styles for `r`:
     + `r = 'serifless'`, `cv42 = 1`: Straight, serif-less `r`.
     + `r = 'serifed'`, `cv42 = 2`: `r` with serif at both top and bottom.
@@ -983,7 +983,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `u = 'toothless-rounded'`, `cv45 = 3`: Toothless (rounded) `u`, like a smaller uppercase `U`.
     + `u = 'tailed'`, `cv45 = 4`: `u` with right bar and a slightly curly tail.
     + `u = 'motion-serifed'`, `cv45 = 5`: Normal `u` with right bar and motion serifs.
-    + `u = 'motion-serifed-tailed'`, `cv45 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
+    + `u = 'tailed-motion-serifed'`, `cv45 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
     + `u = 'toothless-corner-motion-serifed'`, `cv45 = 7`: Toothless (corner bottom-right) `u` with motion serifs.
     + `u = 'toothless-rounded-motion-serifed'`, `cv45 = 8`: Toothless (rounded) `u` with motion serifs.
     + `u = 'bottom-right-serifed'`, `cv45 = 9`: `u` with right bar and a slightly curly tail.
@@ -1086,7 +1086,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `lower-iota = 'zshaped'`, `cv56 = 1`: Z-shaped Greek lower Iota (`ι`).
     + `lower-iota = 'hooky-bottom'`, `cv56 = 2`: Greek lower Iota (`ι`) with a sharp-turning horizontal tail.
     + `lower-iota = 'tailed'`, `cv56 = 3`: Greek lower Iota (`ι`) with curly tail.
-    + `lower-iota = 'serifed-tailed'`, `cv56 = 4`: Greek lower Iota (`ι`) with top serif and curly tail.
+    + `lower-iota = 'tailed-serifed'`, `cv56 = 4`: Greek lower Iota (`ι`) with top serif and curly tail.
     + `lower-iota = 'flat-tailed'`, `cv56 = 5`: Greek lower Iota (`ι`) with a curly-then-flat tail.
     + `lower-iota = 'serifed-flat-tailed'`, `cv56 = 6`: Greek lower Iota (`ι`) with top serif and a curly-then-flat tail.
   - Styles for `λ` (Greek small Lambda):
