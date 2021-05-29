@@ -9,6 +9,7 @@ class BiKnot {
 		this.d2 = d2;
 		this.origTangent = null;
 		this.proposedNormal = null;
+		this.unimportant = 0;
 	}
 }
 
@@ -60,16 +61,18 @@ class SpiroExpansionContext1 {
 	}
 	setUnimportant() {
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
-		if (k0) k0.unimportant = true;
+		if (k0) k0.unimportant = 1;
 	}
 
 	getPass2Knots(closed, contrast) {
 		const expanded = this.expand(contrast);
 		const middles = [];
 		for (let j = 0; j + (closed ? 1 : 0) < this.controlKnots.length; j++) {
+			const lhs = this.gizmo.unapply(expanded.lhs[j]);
+			const rhs = this.gizmo.unapply(expanded.rhs[j]);
 			middles[j] = {
-				x: 0.5 * (expanded.lhs[j].x + expanded.rhs[j].x),
-				y: 0.5 * (expanded.lhs[j].y + expanded.rhs[j].y),
+				x: 0.5 * (lhs.x + rhs.x),
+				y: 0.5 * (lhs.y + rhs.y),
 				type: this.controlKnots[j].type,
 				unimportant: this.controlKnots[j].unimportant
 			};
@@ -124,7 +127,7 @@ class SpiroExpansionContext1 {
 				rhsAfter = this.gizmo.unapply(rhs[jAfter]);
 
 			lhs[j] = {
-				unimportant: true,
+				unimportant: knot.unimportant,
 				type: knot.type,
 				...this.gizmo.apply({
 					x: linreg(knotBefore.x, lhsBefore.x, knotAfter.x, lhsAfter.x, ref.x),
@@ -132,7 +135,7 @@ class SpiroExpansionContext1 {
 				})
 			};
 			rhs[j] = {
-				unimportant: true,
+				unimportant: knot.unimportant,
 				type: reverseKnotType(knot.type),
 				...this.gizmo.apply({
 					x: linreg(knotBefore.x, rhsBefore.x, knotAfter.x, rhsAfter.x, ref.x),

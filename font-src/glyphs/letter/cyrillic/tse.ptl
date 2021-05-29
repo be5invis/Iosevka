@@ -9,18 +9,45 @@ glyph-module
 glyph-block Letter-Cyrillic-Tse : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrDescender
 
 	define [CyrTseShape top] : glyph-proc
 		include : VBarLeft SB 0 top
 		include : HBarBottom SB RightSB 0
 		include : VBarRight RightSB 0 top
-		include : CyrDescender RightSB (shift -- 0.05)
+		include : CyrDescender RightSB
 		if SLAB : let [sf : SerifFrame top 0 SB RightSB] : begin
 			include sf.lt.full
 			include sf.rt.full
 			include sf.lb.outer
 			include sf.rb.outer
+
+	define [CyrTsTseShape top] : glyph-proc
+		local sw : AdviceStroke 2.75
+		local left : [mix SB RightSB 0.2] - 0.25 * sw * HVContrast + OX
+		local right : RightSB - OX
+
+		local xTopBarLeft : SB - SideJut
+		local xTopBarRight : mix xTopBarLeft (left + 0.5 * sw * HVContrast) 2
+
+		include : VBarLeft left 0 top sw
+		include : HBarBottom left right 0 sw
+		include : VBarRight right 0 top sw
+		include : dispiro
+			widths.rhs sw
+			flat xTopBarLeft  top [if SLAB [heading Rightward] null]
+			curl xTopBarRight top [if SLAB [heading Rightward] null]
+		include : CyrDescender right
+
+		if SLAB : let [sf : SerifFrame top 0 left right sw] : begin
+			include sf.rt.outer
+			include sf.lb.outer
+			include sf.rb.outer
+
+			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
+			include : DownwardLeftSerif  xTopBarLeft  top VJut swVJut
+			include : DownwardRightSerif xTopBarRight top VJut swVJut
+
 
 	create-glyph 'cyrl/Tse' 0x426 : glyph-proc
 		include : MarkSet.capital
@@ -33,12 +60,33 @@ glyph-block Letter-Cyrillic-Tse : begin
 	create-glyph 'cyrl/tse.italic.toothed' : glyph-proc
 		include [refer-glyph "u.toothed"] AS_BASE
 		eject-contour 'serifRB'
-		include : CyrDescender RightSB (shift -- 0.05) (connex -- 0.5)
+		include : CyrDescender RightSB
 
 	create-glyph 'cyrl/tse.italic.motionSerifed' : glyph-proc
 		include [refer-glyph "u.motionSerifed"] AS_BASE
 		eject-contour 'serifRB'
-		include : CyrDescender RightSB (shift -- 0.05) (connex -- 0.5)
+		include : CyrDescender RightSB
+
+	create-glyph 'cyrl/TsTse' 0x4B4 : glyph-proc
+		include : MarkSet.capital
+		include : CyrTsTseShape CAP
+
+	create-glyph 'cyrl/tstse.upright' : glyph-proc
+		include : MarkSet.e
+		include : CyrTsTseShape XH
+
+	create-glyph 'cyrl/tstse.italic.toothed' : glyph-proc
+		include [refer-glyph "u.toothed"] AS_BASE ALSO_METRICS
+		include [refer-glyph "tildeAbove"]
+		eject-contour 'serifRB'
+		include : CyrDescender RightSB
+
+	create-glyph 'cyrl/tstse.italic.motionSerifed' : glyph-proc
+		include [refer-glyph "u.motionSerifed"] AS_BASE ALSO_METRICS
+		include [refer-glyph "tildeAbove"]
+		eject-contour 'serifRB'
+		include : CyrDescender RightSB
 
 	select-variant 'cyrl/tse.italic'
+	select-variant 'cyrl/tstse.italic' (follow -- 'cyrl/tse.italic')
 	alias 'cyrl/tse.BGR' null 'cyrl/tse.italic'

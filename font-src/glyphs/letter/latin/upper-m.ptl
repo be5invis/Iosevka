@@ -2,19 +2,18 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrTailDescender
 
 
 	define FORM-FLAT     0
 	define FORM-HANGING  1
-	define FORM-TOBEFLIP 2
 
 	define SLAB-NONE            0
 	define SLAB-AUTO            1
@@ -30,21 +29,17 @@ glyph-block Letter-Latin-Upper-M : begin
 		local swSideBot : match form
 			[Just FORM-HANGING] : begin Stroke
 			__                  : AdviceStroke 3.5 df.div
-		define cwSideTop : match form
-			[Just FORM-HANGING] : begin 5
-			__                  : begin 4
-		local swSideTop : AdviceStroke cwSideTop df.div
+		local swSideTop : AdviceStroke 4 df.div
 		local halfSwMiddle : swSideTop / 2
 		local middleY : match form
-			[Just FORM-TOBEFLIP] : top * 0.4 / df.div
-			[Just FORM-HANGING]  : top * 0.3 / df.div
+			[Just FORM-HANGING]  : top * 0.3 / (df.div * df.div)
 			__                   : if SLAB Stroke 0
 
-		include : dispiro
+		include : tagged 'strokeLeftBar' : dispiro
 			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
 			curl [mix df.leftSB xLeftTop 0.2] (top * 0.2) [heading Upward]
 			straight.up.end xLeftTop top [widths.heading 0 swSideTop Upward]
-		include : dispiro
+		include : tagged 'strokeRightBar' : dispiro
 			flat df.rightSB 0 [widths.heading swSideBot 0 Upward]
 			curl [mix df.rightSB xRightTop 0.2] (top * 0.2) [heading Upward]
 			straight.up.end xRightTop top [widths.heading swSideTop 0 Upward]
@@ -87,17 +82,23 @@ glyph-block Letter-Latin-Upper-M : begin
 			set-width df.width
 			include : df.markSet.capital
 			include : MShape CAP df form slab slanted
+
 		create-glyph "smcpM.\(suffix)" : glyph-proc
-			local df : DivFrame 1 3
+			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.e
 			include : MShape XH df form slab slanted
 
 	select-variant 'M' 'M'
+	link-reduced-variant 'M/sansSerif' 'M' MathSansSerif
 	select-variant 'smcpM' 0x1D0D (follow -- 'M')
 	select-variant 'cyrl/em' 0x43C (shapeFrom -- 'smcpM')
 	alias 'grek/Mu' 0x39C 'M'
+	alias-reduced-variant 'grek/Mu/sansSerif' 'grek/Mu' 'M/sansSerif' MathSansSerif
 	alias 'cyrl/Em' 0x41C 'M'
+
+	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' [CyrTailDescender [DivFrame para.diversityM 3].rightSB]
+	derive-composites 'cyrl/emTail' 0x4CE 'cyrl/em' [CyrTailDescender [DivFrame para.diversityM 3].rightSB]
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/M' 0x1D544 : glyph-proc

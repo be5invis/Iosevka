@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -13,8 +13,9 @@ glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotRhs
 	glyph-block-import Letter-Blackboard : BBS BBD
 
-	define BArcMix 0.93
-	define BBarPos 0.52
+	define BArcMix           0.93
+	define BBarPos           0.52
+	define AsymmetricBBarPos 0.60
 	define [BShapeArcsT] : params [sink top stroke offset barPos topArcShift topArcInnerShift] : glyph-proc
 		local bowl : top * barPos + stroke * (1 - barPos)
 		local barleft SB
@@ -80,7 +81,7 @@ glyph-block Letter-Latin-Upper-B : begin
 
 	define [AsymmetricBShape top sw st sb] : BShape top
 		stroke -- [fallback sw : AdviceStroke2 2 3 top]
-		barPos -- 0.6
+		barPos -- AsymmetricBBarPos
 		topArcShift -- -(RightSB - SB) * 0.05
 		topArcInnerShift -- -(RightSB - SB) * 0.1
 		serifTop -- st
@@ -88,9 +89,17 @@ glyph-block Letter-Latin-Upper-B : begin
 	define [AsymmetricBShapeInterrupted top sw st sb] : difference [AsymmetricBShape top sw st sb] [InterruptShape 0.6 top sw st sb]
 	define [AsymmetricBShapeMask top sw] : BShapeMask top
 		stroke -- [fallback sw : AdviceStroke2 2 3 top]
-		barPos -- 0.6
+		barPos -- AsymmetricBBarPos
 		topArcShift -- -(RightSB - SB) * 0.05
 		topArcInnerShift -- -(RightSB - SB) * 0.1
+
+	define [BOverlayBar top bp] : begin
+		local stroke : AdviceStroke2 2 3 top
+		return : HOverlayBar
+			mix SB 0 0.7
+			mix SB RightSB 0.5
+			mix 0 (top * bp + stroke / 2) 0.5
+			Math.min ((top - Stroke * 3) / 4) OverlayStroke
 
 	define [BahtBar sw] : VBar [mix SB RightSB 0.475] (CAP - Descender / 2) (Descender / 2) sw
 	define [BitcoinBar sw] : begin
@@ -100,25 +109,29 @@ glyph-block Letter-Latin-Upper-B : begin
 			VBar (Middle + (gap + sw * HVContrast) / 2) (CAP - Descender / 2) (Descender / 2) sw
 
 	define BConfig : object
-		standardSerifless                          { StdBShape                   StdBShapeMask        false false }
-		standardBilateralSerifed                   { StdBShape                   StdBShapeMask        true true   }
-		standardUnilateralSerifed                  { StdBShape                   StdBShapeMask        true false  }
-		moreAsymmetricSerifless                    { AsymmetricBShape            AsymmetricBShapeMask false false }
-		moreAsymmetricBilateralSerifed             { AsymmetricBShape            AsymmetricBShapeMask true true   }
-		moreAsymmetricUnilateralSerifed            { AsymmetricBShape            AsymmetricBShapeMask true false  }
-		standardInterruptedSerifless               { StdBShapeInterrupted        StdBShapeMask        false false }
-		standardInterruptedBilateralSerifed        { StdBShapeInterrupted        StdBShapeMask        true true   }
-		standardInterruptedUnilateralSerifed       { StdBShapeInterrupted        StdBShapeMask        true false  }
-		moreAsymmetricInterruptedSerifless         { AsymmetricBShapeInterrupted AsymmetricBShapeMask false false }
-		moreAsymmetricInterruptedBilateralSerifed  { AsymmetricBShapeInterrupted AsymmetricBShapeMask true true   }
-		moreAsymmetricInterruptedUnilateralSerifed { AsymmetricBShapeInterrupted AsymmetricBShapeMask true false  }
+		standardSerifless                          { StdBShape                   StdBShapeMask        false false BBarPos           }
+		standardBilateralSerifed                   { StdBShape                   StdBShapeMask        true true   BBarPos           }
+		standardUnilateralSerifed                  { StdBShape                   StdBShapeMask        true false  BBarPos           }
+		moreAsymmetricSerifless                    { AsymmetricBShape            AsymmetricBShapeMask false false AsymmetricBBarPos }
+		moreAsymmetricBilateralSerifed             { AsymmetricBShape            AsymmetricBShapeMask true true   AsymmetricBBarPos }
+		moreAsymmetricUnilateralSerifed            { AsymmetricBShape            AsymmetricBShapeMask true false  AsymmetricBBarPos }
+		standardInterruptedSerifless               { StdBShapeInterrupted        StdBShapeMask        false false BBarPos           }
+		standardInterruptedBilateralSerifed        { StdBShapeInterrupted        StdBShapeMask        true true   BBarPos           }
+		standardInterruptedUnilateralSerifed       { StdBShapeInterrupted        StdBShapeMask        true false  BBarPos           }
+		moreAsymmetricInterruptedSerifless         { AsymmetricBShapeInterrupted AsymmetricBShapeMask false false AsymmetricBBarPos }
+		moreAsymmetricInterruptedBilateralSerifed  { AsymmetricBShapeInterrupted AsymmetricBShapeMask true true   AsymmetricBBarPos }
+		moreAsymmetricInterruptedUnilateralSerifed { AsymmetricBShapeInterrupted AsymmetricBShapeMask true false  AsymmetricBBarPos }
 
-	foreach { suffix { body mask ts bs } } [Object.entries BConfig] : do
+	foreach { suffix { body mask ts bs bp } } [Object.entries BConfig] : do
 		local currencySw : AdviceStroke2 3.5 3 CAP
 
 		create-glyph "B.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : body CAP [AdviceStroke2 2 3 CAP] ts bs
+
+		create-glyph "BBar.\(suffix)" : glyph-proc
+			include [refer-glyph "B.\(suffix)"] AS_BASE ALSO_METRICS
+			include : BOverlayBar CAP bp
 
 		create-glyph "currency/baht.\(suffix)" : union
 			body CAP currencySw ts bs
@@ -133,12 +146,19 @@ glyph-block Letter-Latin-Upper-B : begin
 			include : MarkSet.e
 			include : body XH [AdviceStroke2 2 3 XH] ts bs
 
+		create-glyph "smcpBBar.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpB.\(suffix)"] AS_BASE ALSO_METRICS
+			include : BOverlayBar XH bp
+
 
 	select-variant 'B' 'B'
-	select-variant 'BReduced' null (shapeFrom -- 'B')
+	link-reduced-variant 'B/sansSerif' 'B' MathSansSerif
 	select-variant 'currency/baht' 0xE3F (follow -- 'B')
 	select-variant 'currency/bitcoin' 0x20BF (follow -- 'B')
+	select-variant 'BBar' 0x243 (follow -- 'B')
+	select-variant 'smcpBBar' 0x1D03 (follow -- 'B')
 	alias 'grek/Beta' 0x392 'B'
+	alias-reduced-variant 'grek/Beta/sansSerif' 'grek/Beta' 'B/sansSerif' MathSansSerif
 	alias 'cyrl/Ve' 0x412 'B'
 
 	select-variant 'smcpB' 0x299
@@ -155,7 +175,7 @@ glyph-block Letter-Latin-Upper-B : begin
 					VBarRight ([mix SB RightSB BArcMix] - BBD - OX * 2) (CAP * BBarPos) CAP BBS
 					VBarLeft (SB + BBD) 0 CAP BBS
 
-	with-related-glyphs 'Bhookleft' 0x181 'B' : lambda [src sel] : glyph-proc
+	derive-glyphs 'Bhookleft' 0x181 'B' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		eject-contour "serifLT"
 		include : LeftHook SB CAP
@@ -225,22 +245,6 @@ glyph-block Letter-Latin-Upper-B : begin
 	create-glyph 'closeepsilon' 0x29A : glyph-proc
 		include : MarkSet.e
 		include : ClosedEpsilonShape XH
-
-	define [BOverlayBar top] : begin
-		local stroke : AdviceStroke2 2 3 top
-		return : HOverlayBar
-			mix SB 0 0.7
-			mix SB RightSB 0.5
-			mix 0 (top * 0.52 + stroke / 2) 0.5
-			Math.min ((top - Stroke * 3) / 4) OverlayStroke
-
-	with-related-glyphs 'BBar' 0x243 'BReduced' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : BOverlayBar CAP
-
-	with-related-glyphs 'smcpBbar' 0x1D03 'smcpB' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : BOverlayBar XH
 
 	create-glyph 'grek/beta' 0x3B2 : glyph-proc
 		include : MarkSet.if

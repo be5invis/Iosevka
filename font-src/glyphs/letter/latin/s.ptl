@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [DollarShrinkKernel DollarShorterBar CvDecompose] from "../../../support/gr"
+import [DollarShrinkKernel DollarShorterBar CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -10,7 +10,8 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise
+	glyph-block-import Letter-Shared : CreateDollarLikeComposition
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise FlatHookDepth ArcStartSerifWidth
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcEnd_RtlRhs
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_LtrRhs SerifedArcEnd_LtrLhs
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerifR ArcEndSerifL
@@ -143,18 +144,24 @@ glyph-block Letter-Latin-S : begin
 			hookend (O + soEnd) (sw -- fine) (swItalicAdj -- Stroke) (noAdjTerminalY -- true)
 			g4   (SB + SOBot + HVContrast * soEnd) (hook) [widths.rhs fine]
 
-	define [SmallSStrokePhoneticRight] : begin
-		define stroke : AdviceStroke2 2 3 XH
-		define ess : AdviceStroke2 2.2 3.2 XH
+	define [SmallSStrokePhoneticRight st top] : begin
+		define stroke : AdviceStroke2 2 3 top
+		define ess : AdviceStroke2 2.2 3.2 top
 		define strokeCoeff : StrokeWidthBlend 0 1 stroke
-		define smooth : adviceSSmooth XH (-1) stroke
+		define smooth : adviceSSmooth top (-1) stroke
 		return : dispiro
-			widths.lhs stroke
-			g4   (RightSB + OX) (XH - SHook)
-			hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
-			g4   (SB - OX) (XH - smooth)
+			match st
+				[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs RightSB Middle top stroke Hook
+				[Just SLAB-INWARD] : list
+					g4 RightSB (top - DToothlessRise) [widths.lhs stroke]
+					g4 (Middle - CorrectionOMidX * stroke) (top - O)
+					archv
+				__ : list
+					g4 RightSB (top - Hook) [widths.lhs stroke]
+					hookstart (top - O) (sw -- stroke) (swItalicAdj -- Stroke)
+			g4   SB (top - smooth)
 			SNeck (stroke -- ess)
-			g4   (RightSB + OX - SOBot) (smooth) [widths 0 stroke]
+			g4   (RightSB - SOBot) (smooth) [widths 0 stroke]
 			arcvh
 			flat (Middle - CorrectionOMidS) 0 [widths 0 Stroke]
 			curl SB 0
@@ -248,6 +255,11 @@ glyph-block Letter-Latin-S : begin
 			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 			include : SAutoSlabEnd   doBS 0  [AdviceStroke2 2 3 XH] Hook
 
+		create-glyph "s/phoneticRight.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : SmallSStrokePhoneticRight doTS XH
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+
 		create-glyph "revS.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : RevSStroke        doTS doBS Stroke Ess
@@ -269,8 +281,22 @@ glyph-block Letter-Latin-S : begin
 		create-glyph "cyrl/gheDescender.italic.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : RevSmallSStroke doTS SLAB-CLASSICAL [AdviceStroke2 2 3 XH] Ess
-			include : ArcEndSerifR RightSB 0 [AdviceStroke2 2 3 XH] Hook Accent
 			include : RevSAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			include : ArcEndSerifR RightSB 0 [AdviceStroke2 2 3 XH] Hook Accent
+
+		create-glyph "cyrl/gheDHook.italic.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : RevSmallSStroke doTS SLAB-CLASSICAL [AdviceStroke2 2 3 XH] Ess
+			include : RevSAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			local hd : FlatHookDepth [DivFrame 1]
+			local hookSw : ArcStartSerifWidth : AdviceStroke2 2 3 XH
+			include : dispiro
+				widths.rhs hookSw
+				flat RightSB (Hook - O * 2) [heading Downward]
+				curl RightSB (hd.y - Hook - 0.25 * hookSw) [heading Downward]
+				arcvh
+				flat (RightSB - hd.x + 0.25 * hookSw * HVContrast) (0 - Hook)
+				curl (RightSB - HookX - 0.5 * hookSw * HVContrast) (0 - Hook)
 
 		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
 			include : MarkSet.if
@@ -318,7 +344,9 @@ glyph-block Letter-Latin-S : begin
 			include : VBarLeft start.x 0 start.y
 
 	select-variant 'S' 'S'
+	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
 	select-variant 's' 's'
+	link-reduced-variant 's/sansSerif' 's' MathSansSerif
 	select-variant 'smcpS' 0xA731 (follow -- 'S')
 	select-variant 'revS' 0x1A7 (follow -- 'S')
 	select-variant 'revs' 0x1A8 (follow -- 's')
@@ -338,10 +366,9 @@ glyph-block Letter-Latin-S : begin
 	alias 'cyrl/ghe.italic' null 'revs'
 	select-variant 'cyrl/ge.italic' null
 	select-variant 'cyrl/gheDescender.italic' null (follow -- 'sSwash')
+	select-variant 'cyrl/gheDHook.italic' null (follow -- 'sSwash')
 
-	create-glyph 's.phoneticRight' : glyph-proc
-		include : MarkSet.e
-		include : SmallSStrokePhoneticRight
+	select-variant 's/phoneticRight'
 
 	create-glyph 'mathbb/S' 0x1D54A : glyph-proc
 		include : MarkSet.capital
@@ -391,9 +418,11 @@ glyph-block Letter-Latin-S : begin
 					.y ([if (sign < 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
 				}
 
-	with-related-glyphs 'cyrl/ghayn.italic' null 'revs' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
+	derive-composites 'cyrl/ghayn.italic' null 'revs'
+		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
+
+	derive-composites 'cyrl/gheStrokeHook.italic' null 'cyrl/gheDHook.italic'
+		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
 	define DollarConfig : object
 		open           { 0.95 0.05 (Descender / 2) 0 0 }
@@ -442,9 +471,4 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'dollar/bar' (follow -- 'dollar')
 
-	create-glyph 'dollar' '$' : glyph-proc
-		local kernel : if [DollarShorterBar.get : query-glyph 'dollar/bar'] 'DollarKernelCap' 'DollarKernelStd'
-		include : union
-			refer-glyph kernel
-			WithTransform [Translate Width 0] [refer-glyph 'dollar/bar']
-		CvDecompose.set currentGlyph { 'DollarKernelStd' 'dollar/bar' }
+	CreateDollarLikeComposition 'dollar' '$' 'DollarKernelStd' 'DollarKernelCap' 'dollar/bar' Width

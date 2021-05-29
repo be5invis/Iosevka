@@ -9,13 +9,23 @@ glyph-module
 glyph-block Letter-Cyrillic-Che : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrLeftDescender
 
-	define SLAB-ALL    1
-	define SLAB-LOWER  2
+	define BODY-STRAIGHT 0
+	define BODY-TAILED   1
 
-	define [CyrCheShape top pyBar slabType] : glyph-proc
+	define SLAB-NONE     0
+	define SLAB-ALL      1
+	define SLAB-LOWER    2
+	define SLAB-TAILED-U 3
+	define SLAB-TAILED-I 4
+
+	define [CyrCheShape top pyBar bodyType slabType] : glyph-proc
 		local bar : top * [fallback pyBar 0.5]
-		include : VBarRight RightSB 0 top
+		include : match bodyType
+			[Just BODY-TAILED] : RightwardTailedBar RightSB 0 top
+			__                 : VBarRight RightSB 0 top
 		include : dispiro
 			widths.lhs
 			flat SB top [heading Downward]
@@ -24,40 +34,52 @@ glyph-block Letter-Cyrillic-Che : begin
 			flat Middle (bar - HalfStroke)
 			curl (RightSB - 1) (bar - HalfStroke) [heading Rightward]
 
-		define useItalicShape : para.isItalic && slabType === SLAB-LOWER
-		if SLAB : begin
-			include : tagged 'serifLT' : if useItalicShape
-				then : LeftwardTopSerif SB top SideJut
-				else : CenterTopSerif (SB + HalfStroke * HVContrast) top Jut
-			include : tagged 'serifRT' : if useItalicShape
-				then : glyph-proc
-				else : CenterTopSerif (RightSB - HalfStroke * HVContrast) top Jut
-			include : tagged 'serifRB' : if useItalicShape
-				then : RightwardBottomSerif RightSB 0 SideJut
-				else : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+		local sf : SerifFrame top 0 SB RightSB
+		include : tagged 'serifLT' : match slabType
+			[Just SLAB-ALL]        sf.lt.full
+			[Just SLAB-LOWER]      sf.lt.outer
+			[Just SLAB-TAILED-U]   sf.lt.full
+			[Just SLAB-TAILED-I]   sf.lt.outer
+			__                   : glyph-proc
+		include : tagged 'SerifRT' : match slabType
+			[Just SLAB-ALL]        sf.rt.full
+			[Just SLAB-TAILED-U]   sf.rt.full
+			__                   : glyph-proc
+		include : tagged 'SerifRB' : match slabType
+			[Just SLAB-ALL]        sf.rb.full
+			[Just SLAB-LOWER]      sf.rb.outer
+			__                   : glyph-proc
 
 	create-glyph 'cyrl/Che' 0x427 : glyph-proc
 		include : MarkSet.capital
-		include : CyrCheShape CAP [if SLAB 0.45 0.35] SLAB-ALL
+		include : CyrCheShape CAP [if SLAB 0.45 0.35] BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
 
 	create-glyph 0x4B6 : composite-proc [refer-glyph 'cyrl/Che'] [CyrDescender RightSB]
 	create-glyph 0x4CB : composite-proc [refer-glyph 'cyrl/Che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
 
-	create-glyph 'cyrl/che' 0x447 : glyph-proc
+	create-glyph 'cyrl/che.standard' : glyph-proc
 		include : MarkSet.e
-		include : CyrCheShape XH [if SLAB 0.45 0.4] SLAB-LOWER
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT : if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
 
-	create-glyph 0x4B7 : composite-proc [refer-glyph 'cyrl/che'] [CyrDescender RightSB]
-	create-glyph 0x4CC : composite-proc [refer-glyph 'cyrl/che'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
+	create-glyph 'cyrl/che.tailed' : glyph-proc
+		include : MarkSet.e
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+
+	select-variant 'cyrl/che' 0x447
+
+	create-glyph 0x4B7 : composite-proc [refer-glyph 'cyrl/che.standard'] [CyrDescender RightSB]
+	create-glyph 0x4CC : composite-proc [refer-glyph 'cyrl/che.standard'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
 
 	turned 'cyrl/Shha' 0x4BA 'cyrl/Che' Middle (CAP / 2)
+	derive-composites 'cyrl/ShhaDescender' 0x526 'cyrl/Shha' [CyrDescender RightSB]
 
-	create-glyph 'cyrl/Chevbar' 0x4B8 : glyph-proc
+	define SwCheVBar : Math.min OverlayStroke (0.625 * (RightSB - SB - Stroke * 2 * HVContrast) / HVContrast)
+	create-glyph 'cyrl/CheVBar' 0x4B8 : glyph-proc
 		include [refer-glyph 'cyrl/Che'] AS_BASE
 		local yc (CAP * [if SLAB 0.45 0.35] + Stroke * 0.1)
-		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) SwCheVBar
 
-	create-glyph 'cyrl/chevbar' 0x4B9 : glyph-proc
+	create-glyph 'cyrl/cheVBar' 0x4B9 : glyph-proc
 		include [refer-glyph 'cyrl/che'] AS_BASE
 		local yc (XH * [if SLAB 0.45 0.35] + Stroke * 0.1)
-		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) OverlayStroke
+		include : VBar Middle (yc + LongJut * 0.8) (yc - LongJut * 0.8) SwCheVBar

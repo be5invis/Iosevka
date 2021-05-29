@@ -2,14 +2,14 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-P : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar
 
 	define [SmallPSerifLT] : tagged 'serifLT' : LeftwardTopSerif SB XH SideJut
 	define [SmallPSerifLB] : tagged 'serifLB' : union
@@ -53,7 +53,15 @@ glyph-block Letter-Latin-Lower-P : begin
 			include : SmallPSerifLB
 
 	select-variant 'p' 'p'
+	link-reduced-variant 'p/sansSerif' 'p' MathSansSerif
 	select-variant 'cyrl/er' 0x440 (shapeFrom -- 'p')
+
+	derive-glyphs 'cyrl/rrTick' 0x48F 'cyrl/er' : lambda [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : dispiro
+			widths.center [AdviceStroke 4]
+			flat [mix SB RightSB 0.5]   (HalfStroke + XH * 0.25)
+			curl [mix SB RightSB 0.875] (HalfStroke - XH * 0.25)
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/p' 0x1D561 : glyph-proc
@@ -70,6 +78,6 @@ glyph-block Letter-Latin-Lower-P : begin
 	create-glyph 'phooktop' 0x1A5 : glyph-proc
 		include : MarkSet.if
 		include : OBarLeftShape
-		include : HooktopLeftBar nothing Descender
+		include : HooktopLeftBar (bottom -- Descender)
 		if SLAB : begin
 			include : SmallPSerifLB

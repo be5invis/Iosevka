@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -120,57 +120,8 @@ glyph-block Letter-Latin-V : begin
 			g4 xArcRight yArcRight
 			g4 xArcEnd yArcEnd
 
-	define [VSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
-		composite-proc sf.lt.full sf.rt.full
-	define [VMotionSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
-		composite-proc sf.lt.outer
-
-	create-glyph 'V.straight' : glyph-proc
-		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke true
-		include : NeedSlab SLAB : VSerifs CAP
-	create-glyph 'V.curly' : glyph-proc
-		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke false
-		include : NeedSlab SLAB : VSerifs CAP
-	create-glyph 'V.straightMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke true
-		include : VMotionSerifs CAP
-	create-glyph 'V.curlyMotionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : VShape [DivFrame 1] CAP Stroke false
-		include : VMotionSerifs CAP
-
-	create-glyph 'v.straight' : glyph-proc
-		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke true
-		include : NeedSlab SLAB : VSerifs XH
-	create-glyph 'v.curly' : glyph-proc
-		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke false
-		include : NeedSlab SLAB : VSerifs XH
-	create-glyph 'v.cursive' : glyph-proc
-		include : MarkSet.e
-		include : VCursiveShape 0 XH Stroke
-	create-glyph 'v.straightMotionSerifed' : glyph-proc
-		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke true
-		include : VMotionSerifs XH
-	create-glyph 'v.curlyMotionSerifed' : glyph-proc
-		include : MarkSet.e
-		include : VShape [DivFrame 1] XH Stroke false
-		include : VMotionSerifs XH
-	create-glyph 'v.cursiveMotionSerifed' : glyph-proc
-		local pxBar : 1 / 16
-		include : MarkSet.e
-		include : VCursiveShape pxBar XH Stroke
-		include : tagged 'serifLT' : LeftwardTopSerif [VCursiveShapeBarPos pxBar] XH (SideJut + [VCursiveShapeBarPos pxBar] - SB)
-
-
 	define [VHooktopShape df barStraight top] : glyph-proc
 		include : VShape df top Stroke barStraight
-		eject-contour 'serifRT'
 		eject-contour 'strokeUp'
 		include : VBottomCapShape df barStraight Stroke
 		include : dispiro
@@ -180,21 +131,57 @@ glyph-block Letter-Latin-V : begin
 			quadcontrols 0.4 0.75 64 unimportant
 			g4   (Middle + VCornerHalfWidth) 0 [widths.rhs VShapeFine]
 
-	create-glyph : glyph-proc
-		include : MarkSet.e
-		create-derived 'vhooktop.straight' : VHooktopShape [DivFrame 1] true XH
-		create-derived 'vhooktop.curly' : VHooktopShape [DivFrame 1] false XH
+	define [VSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
+		NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
+	define [VMotionSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
+		composite-proc sf.lt.outer
 
-	create-glyph : glyph-proc
-		include : MarkSet.capital
-		create-derived 'cyrl/Izhitsa.straight' : VHooktopShape [DivFrame 1] true CAP
-		create-derived 'cyrl/Izhitsa.curly' : VHooktopShape [DivFrame 1] false CAP
+	define VStandardConfig : object
+		straight              { VSerifs       true  }
+		curly                 { VSerifs       false }
+		straightMotionSerifed { VMotionSerifs true  }
+		curlyMotionSerifed    { VMotionSerifs false }
+
+	foreach { suffix { Serifs fStraightBar }} [Object.entries VStandardConfig] : do
+		create-glyph "V.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : VShape [DivFrame 1] CAP Stroke fStraightBar
+			include : Serifs CAP
+
+		create-glyph "v.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : VShape [DivFrame 1] XH Stroke fStraightBar
+			include : Serifs XH
+
+		create-glyph "Vhooktop.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : VHooktopShape [DivFrame 1] fStraightBar CAP
+			include : Serifs CAP
+			eject-contour 'serifRT'
+
+		create-glyph "vhooktop.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : VHooktopShape [DivFrame 1] fStraightBar XH
+			include : Serifs XH
+			eject-contour 'serifRT'
+
+	create-glyph 'v.cursive' : glyph-proc
+		include : MarkSet.e
+		include : VCursiveShape 0 XH Stroke
+
+	create-glyph 'v.cursiveMotionSerifed' : glyph-proc
+		local pxBar : 1 / 16
+		include : MarkSet.e
+		include : VCursiveShape pxBar XH Stroke
+		include : tagged 'serifLT' : LeftwardTopSerif [VCursiveShapeBarPos pxBar] XH (SideJut + [VCursiveShapeBarPos pxBar] - SB)
 
 	select-variant 'V' 'V'
+	link-reduced-variant 'V/sansSerif' 'V' MathSansSerif
 	select-variant 'v' 'v'
+	link-reduced-variant 'v/sansSerif' 'v' MathSansSerif
 	select-variant 'smcpV' 0x1D20 (shapeFrom -- 'v') (follow -- 'V')
 	select-variant 'vhooktop' 0x2C71 (follow -- 'vhooktop')
-	select-variant 'cyrl/Izhitsa' 0x474 (follow -- 'Vhooktop')
+	select-variant 'cyrl/Izhitsa' 0x474 (follow -- 'Vhooktop') (shapeFrom -- 'Vhooktop')
 	alias 'cyrl/izhitsa' 0x475 'vhooktop'
 
 

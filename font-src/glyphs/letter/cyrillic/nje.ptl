@@ -3,43 +3,68 @@ $$include '../../../meta/macros.ptl'
 import [mix barmixL linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
 import '../../../support/point' as Point
+import [DollarShrinkKernel DollarShorterBar CvDecompose] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Cyrillic-Nje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateDollarLikeComposition
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriRoundShape CyrlYeriCursiveShape
 
-	define [CyrNjeShape Yeri df top] : glyph-proc
-		local rightSB : df.width - df.leftSB
-		local xlefttop : mix df.leftSB df.rightSB 0.075
-		local l : df.leftSB + 0
-		local r : rightSB - 0
-		local middle : df.width / 2
-		local jut : Math.min Jut : Jut * 0.72 * df.div
-		set-width df.width
-		include : VBarLeft l 0 top df.mvs
-		include : Yeri top
-			left -- (middle - df.mvs / 2 * HVContrast)
-			right -- (r - O)
-			stroke -- df.mvs
-			jut -- jut
-		include : HBar (df.leftSB + df.mvs * 0.1) middle (top / 2)
+	define SLAB-NONE                   0
+	define SLAB-TOP-LEFT               1
+	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
+	define SLAB-TAILED-CYRILLIC        3
+	define SLAB-ALL                    4
 
-		define useItalicShape : Yeri === CyrlYeriCursiveShape
-		if SLAB : begin
-			include : tagged 'serifLT' : if useItalicShape
-				then : LeftwardTopSerif l top SideJut
-				else : union
-					LeftwardTopSerif l top SideJut
-					CenterTopSerif (l + df.mvs / 2 * HVContrast) top jut
-			include : tagged 'serifLB' : if useItalicShape
-				then : glyph-proc
-				else : union
-					LeftwardBottomSerif l 0 SideJut
-					CenterBottomSerif (l + df.mvs / 2 * HVContrast) 0 jut
-			if useItalicShape : eject-contour 'serifYeriLT'
+	define [LeftHalf slabType df top] : glyph-proc
+		include : VBarLeft df.leftSB 0 top df.mvs
+		include : HBar df.leftSB df.middle (top / 2)
+
+		local sf : SerifFrame top 0 df.leftSB (df.middle + 0.5 * df.mvs * HVContrast) (sw -- df.mvs)
+		include : match slabType
+			[Just SLAB-NONE]   : glyph-proc
+			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : composite-proc sf.lt.full sf.rt.full sf.lb.full
+			[Just SLAB-ALL] : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
+
+	define [RightHalf Yeri df top] : glyph-proc
+		include : Yeri top
+			left -- (df.middle - df.mvs / 2 * HVContrast)
+			right -- (df.rightSB - O)
+			stroke -- df.mvs
+		eject-contour 'serifYeriLT'
+		eject-contour 'serifYeriLB'
+
+	define LeftHalfConfig : object
+		serifless                        { SLAB-NONE                  }
+		topLeftSerifed                   { SLAB-TOP-LEFT              }
+		topLeftBottomRightSerifed        { SLAB-TOP-LEFT-BOTTOM-RIGHT }
+		serifed                          { SLAB-ALL                   }
+		serifedExceptBottomRight         { SLAB-TAILED-CYRILLIC       }
+
+	foreach { suffix { slabType } } [Object.entries LeftHalfConfig] : do
+		create-glyph "cyrl/Nje/leftHalf.\(suffix)"  : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : LeftHalf slabType df CAP
+			set-base-anchor 'cvDecompose' 0 0
+			if ( slabType === SLAB-ALL ) : begin
+				DollarShrinkKernel.set currentGlyph "cyrl/Nje/leftHalf.serifedExceptBottomRight"
+
+		create-glyph "cyrl/nje/leftHalf.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : LeftHalf slabType df XH
+			set-base-anchor 'cvDecompose' 0 0
+			if ( slabType === SLAB-ALL ) : begin
+				DollarShrinkKernel.set currentGlyph "cyrl/nje/leftHalf.serifedExceptBottomRight"
 
 	define YerConfig : object
 		corner  { CyrlYeriUprightShape }
@@ -47,17 +72,33 @@ glyph-block Letter-Cyrillic-Nje : begin
 		cursive { CyrlYeriCursiveShape }
 
 	foreach { suffix { Yeri } } [Object.entries YerConfig] : do
-		create-glyph "cyrl/Nje.\(suffix)"  : glyph-proc
+		create-glyph "cyrl/Nje/rightHalf.\(suffix)"  : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.capital
-			include : CyrNjeShape Yeri df CAP
+			include : RightHalf Yeri df CAP
+			set-mark-anchor 'cvDecompose' 0 0
+			if (Yeri !== CyrlYeriUprightShape) : DollarShorterBar.set currentGlyph 'trigger'
 
-		create-glyph "cyrl/nje.\(suffix)" : glyph-proc
+		create-glyph "cyrl/nje/rightHalf.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.e
-			include : CyrNjeShape Yeri df XH
+			include : RightHalf Yeri df XH
+			set-mark-anchor 'cvDecompose' 0 0
+			if (Yeri !== CyrlYeriUprightShape) : DollarShorterBar.set currentGlyph 'trigger'
 
-	select-variant 'cyrl/Nje' 0x40A
-	select-variant 'cyrl/nje' 0x45A
+	select-variant 'cyrl/Nje/rightHalf'
+	select-variant 'cyrl/nje/rightHalf'
+	select-variant 'cyrl/Nje/leftHalf/full' (shapeFrom -- 'cyrl/Nje/leftHalf')
+	select-variant 'cyrl/nje/leftHalf/full' (shapeFrom -- 'cyrl/nje/leftHalf')
+	select-variant 'cyrl/Nje/leftHalf/reduced' (shapeFrom -- 'cyrl/Nje/leftHalf')
+	select-variant 'cyrl/nje/leftHalf/reduced' (shapeFrom -- 'cyrl/nje/leftHalf')
+
+	if [query-glyph 'cyrl/Nje/leftHalf/full'] : begin
+		DollarShrinkKernel.set [query-glyph 'cyrl/Nje/leftHalf/full'] 'cyrl/Nje/leftHalf/reduced'
+	if [query-glyph 'cyrl/nje/leftHalf/full'] : begin
+		DollarShrinkKernel.set [query-glyph 'cyrl/nje/leftHalf/full'] 'cyrl/nje/leftHalf/reduced'
+
+	CreateDollarLikeComposition 'cyrl/Nje' 0x40A 'cyrl/Nje/leftHalf/full' 'cyrl/Nje/leftHalf/reduced' 'cyrl/Nje/rightHalf' 0
+	CreateDollarLikeComposition 'cyrl/nje' 0x45A 'cyrl/nje/leftHalf/full' 'cyrl/nje/leftHalf/reduced' 'cyrl/nje/rightHalf' 0

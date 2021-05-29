@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../../support/utils'
-import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose] from "../../support/gr"
+import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose MathSansSerif] from "../../support/gr"
 extern Map
 extern Set
 
@@ -75,8 +75,7 @@ glyph-block Autobuild-Transformed : begin
 	define [createSuperscripts _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs 'sup' _records
 		local pendingGlyphs : records.map : [record] => record.1
-		local miniatureFont : Miniature
-			glyphs -- pendingGlyphs
+		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
@@ -95,12 +94,12 @@ glyph-block Autobuild-Transformed : begin
 					include [Italify] true
 					if pri : set currentGlyph.autoRefPriority pri
 		link-relations relSets
+		return { targetNameMap records }
 
 	define [createSubscripts _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs 'sub' _records
 		local pendingGlyphs : records.map : [record] => record.1
-		local miniatureFont : Miniature
-			glyphs -- pendingGlyphs
+		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
@@ -140,8 +139,7 @@ glyph-block Autobuild-Transformed : begin
 	define [createMedievalCombs defaultLow defaultHigh _records] : begin
 		local { records relSets targetNameMap } : extendRelatedGlyphs 'medievalAbove' _records
 		local pendingGlyphs : records.map : [record] => record.1
-		local miniatureFont : Miniature
-			glyphs -- pendingGlyphs
+		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 7
 			scale  -- 0.4
 			mono   -- true
@@ -173,8 +171,7 @@ glyph-block Autobuild-Transformed : begin
 	define [createMedievalBelowCombs _records] : begin
 		local { records relSets targetNameMap } : extendRelatedGlyphs 'medievalBelow' _records
 		local pendingGlyphs : records.map : [record] => record.1
-		local miniatureFont : Miniature
-			glyphs -- pendingGlyphs
+		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 7
 			scale  -- 0.4
 			mono   -- true
@@ -206,7 +203,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x2078 'eight.lnum'
 		list 0x2079 'nine.lnum'
 		list 0x02B0 'h'
-		list 0x02B1 'hhooktop'
+		list 0x02B1 'hHookTop'
 		list 0x02B2 'j'
 		list 0x02B3 'r'
 		list 0x02B4 'turnr'
@@ -253,7 +250,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1D5F 'grek/delta'
 		list 0x1D60 'grek/phi'
 		list 0x1D61 'grek/chi'
-		list 0x1D78 'smcpH'
+		list 0x1D78 'cyrl/en'
 		list 0x1D9B 'turnscripta'
 		list 0x1D9C 'c'
 		list 0x1D9D 'cCurlyTail'
@@ -269,17 +266,17 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DA7 'smcpIBarOver'
 		list 0x1DA8 'jCurlyTail'
 		list 0x1DAB 'smcpL'
-		list 0x1DA9 'lrtail'
-		list 0x1DAC 'mltail'
-		list 0x1DAD 'turnmleg'
+		list 0x1DA9 'lRTail'
+		list 0x1DAC 'mLTail'
+		list 0x1DAD 'turnmLeg'
 		list 0x1DAE 'nltail'
 		list 0x1DAF 'nHookBottom'
 		list 0x1DB0 'smcpN'
 		list 0x1DB1 'obar'
-		list 0x1DB2 'latinphi'
+		list 0x1DB2 'latn/phi'
 		list 0x1DB3 'sRTail'
 		list 0x1DB4 'esh'
-		list 0x1DB5 'tltail'
+		list 0x1DB5 'tLTail'
 		list 0x1DB6 'uLongBarOver'
 		list 0x1DB7 'latinupsilon1'
 		list 0x1DB8 'smcpU'
@@ -291,7 +288,6 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DBF 'grek/theta'
 		list 0x1DBB 'z'
 		list 0x1D2C 'A'
-		list 0x1D2D 'AE'
 		list 0x1D2E 'B'
 		list 0x1D2F 'BBar'
 		list 0x1D30 'D'
@@ -321,8 +317,16 @@ glyph-block Autobuild-Transformed : begin
 		list 0x207C 'equal' (-11)
 		list 0x207D 'parenLeft' (-11)
 		list 0x207E 'parenRight' (-11)
-		list 0xA7F8 'Hbar'
+		list 0xA7F8 'smcpHbar'
 		list 0xA7F9 'oe'
+
+	do "superscript AE"
+		define { tnmAHalf jobsAHalf } : createSuperscripts { { null 'AE/AHalf' } }
+		define { tnmEHalf jobsEHalf } : createSuperscripts { { null 'AE/EHalf' } }
+		create-glyph 'sup{AE}' 0x1D2D : glyph-proc
+			include [refer-glyph tnmAHalf.('AE/AHalf')] AS_BASE ALSO_METRICS
+			include [refer-glyph tnmEHalf.('AE/EHalf')]
+			CvDecompose.set currentGlyph { tnmAHalf.('AE/AHalf') tnmEHalf.('AE/EHalf') }
 
 	let [df : Miniature {'a' 'o'} 4 0.7] : begin
 		create-glyph 'ordfeminine' 0xAA : glyph-proc
@@ -411,6 +415,31 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DED 'oWithLightCentralizationStroke'
 		list 0x1DF0 'uWithLightCentralizationStroke'
 		list 0x1DF1 'w'
+		list 0x2DE1 'cyrl/ve'
+		list 0x2DE2 'cyrl/ghe'
+		list 0x2DE3 'cyrl/de'
+		list 0x2DE4 'cyrl/zhe'
+		list 0x2DE5 'cyrl/ze'
+		list 0x2DE6 'cyrl/ka'
+		list 0x2DE7 'cyrl/el'
+		list 0x2DE8 'cyrl/em'
+		list 0x2DE9 'cyrl/en'
+		list 0x2DEA 'cyrl/o'
+		list 0x2DEB 'cyrl/pe'
+		list 0x2DED 'cyrl/es'
+		list 0x2DEE 'cyrl/te'
+		list 0x2DEF 'cyrl/ha'
+		list 0x2DF0 'cyrl/tse'
+		list 0x2DF1 'cyrl/che'
+		list 0x2DF2 'cyrl/sha'
+		list 0x2DF3 'cyrl/shcha'
+		list 0x2DF4 'cyrl/fita'
+		list 0x2DF6 'cyrl/a'
+		list 0x2DF7 'cyrl/ie'
+		list 0x2DFB 'cyrl/yu'
+		list 0x2DFD 'cyrl/smallYus'
+		list 0x2DFE 'cyrl/bigYus'
+		list 0x2DFF 'cyrl/bigYusIotified'
 
 	createMedievalCombs 0 CAP : list
 		list 0x365 'i'
@@ -422,12 +451,15 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DF2 'aDieresis'
 		list 0x1DF3 'oDieresis'
 		list 0x1DF4 'uDieresis'
+		list 0x2DE0 'cyrl/be'
+		list 0x2DFA 'cyrl/yat'
 
 	createMedievalCombs Descender XH : list
 		list 0x1DDA 'g'
 		list 0x1DD7 'cCedilla'
 		list 0x1DE9 'grek/beta'
 		list 0x1DEE 'p'
+		list 0x2DEC 'cyrl/er'
 
 	createMedievalCombs Descender CAP : list
 		list 0x1DEB 'f'
@@ -443,7 +475,7 @@ glyph-block Autobuild-Transformed : begin
 glyph-block Autobuild-Transformed-Mathematical : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Recursive-Build : Fork Miniature
+	glyph-block-import Recursive-Build : Fork
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations wrapName
 
 	define [createMathDerivedSeriesImpl groupName tfm _records] : begin
@@ -480,20 +512,20 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	define LowerGreek  : Array.from 'αβγδεζηθικλμνξοπρςστυφχψω∂ϵϑϰϕϱϖ' # Some are missing though
 	define ObliqueBlackboardBolds : Array.from '𝔻𝕕𝕖𝕚𝕛'
 
-	define [CreateMathDerivatives groupName tfm base letters overrides] : begin
+	define [CreateMathDerivatives groupName tfm gr base letters overrides] : begin
 		if recursive : return nothing
 		local jobs {}
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
 			local letter letters.(j)
 			local source : glyphStore.queryNameOfUnicode : letter.codePointAt 0
+			if (gr && [gr.get : query-glyph source]) : set source : gr.get : query-glyph source
 			local dst : base + j
 			if [overrideMap.has letter] : set dst [overrideMap.get letter]
 			if source : jobs.push { dst source }
-
 		createMathDerivedSeriesImpl groupName tfm jobs
 
-	define [CreateMathAliasableImpl groupName altGroupName tfm base letters overrides] : begin
+	define [CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides] : begin
 		if recursive : return nothing
 		local overrideMap : new Map (overrides || {})
 		foreach j [range 0 letters.length] : begin
@@ -504,61 +536,61 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 			if [overrideMap.has letter] : set uDst [overrideMap.get letter]
 			if source : alias [wrapName groupName source] uDst source
 
-	define [CreateMathAliasable cond groupName altGroupName tfm base letters overrides] : begin
+	define [CreateMathAliasable cond groupName altGroupName tfm gr base letters overrides] : begin
 		if cond
-			CreateMathDerivatives   groupName              tfm base letters overrides
-			CreateMathAliasableImpl groupName altGroupName tfm base letters overrides
+			CreateMathDerivatives   groupName              tfm gr base letters overrides
+			CreateMathAliasableImpl groupName altGroupName tfm gr base letters overrides
 
 	# Math bold
-	CreateMathDerivatives 'mathbf' tfBold 0x1D400 UpperLatin
-	CreateMathDerivatives 'mathbf' tfBold 0x1D41A LowerLatin
-	CreateMathDerivatives 'mathbf' tfBold 0x1D6A8 UpperGreek
-	CreateMathDerivatives 'mathbf' tfBold 0x1D6C2 LowerGreek
-	CreateMathDerivatives 'mathbf' tfBold 0x1D7CE Digits
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D400 UpperLatin
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D41A LowerLatin
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D6A8 UpperGreek
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D6C2 LowerGreek
+	CreateMathDerivatives 'mathbf' tfBold null 0x1D7CE Digits
 
 	# Math Italic
-	CreateMathDerivatives 'mathit' tfItalic 0x1D434 UpperLatin
-	CreateMathDerivatives 'mathit' tfItalic 0x1D44E LowerLatin2 : list
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D434 UpperLatin
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D44E LowerLatin2 : list
 		list 'h' 0x210E
 		list 'ı' 0x1D6A4
 		list 'ȷ' 0x1D6A5
-	CreateMathDerivatives 'mathit' tfItalic 0x1D6E2 UpperGreek
-	CreateMathDerivatives 'mathit' tfItalic 0x1D6FC LowerGreek
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D6E2 UpperGreek
+	CreateMathDerivatives 'mathit' tfItalic null 0x1D6FC LowerGreek
 
 
 	# Math Bold Italic
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D468 UpperLatin
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D482 LowerLatin
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D71C UpperGreek
-	CreateMathDerivatives 'mathbi' tfBoldItalic 0x1D736 LowerGreek
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D468 UpperLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D482 LowerLatin
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D71C UpperGreek
+	CreateMathDerivatives 'mathbi' tfBoldItalic null 0x1D736 LowerGreek
 
 	# Math Sans-serif
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5A0 UpperLatin
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D5BA LowerLatin
-	CreateMathAliasable SLAB 'mathss' null     tfSans 0x1D7E2 Digits
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D5A0 UpperLatin
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D5BA LowerLatin
+	CreateMathDerivatives 'mathss' tfSans MathSansSerif 0x1D7E2 Digits
 
-	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D608 UpperLatin
-	CreateMathAliasable SLAB 'mathsi' 'mathit' tfSansItalic 0x1D622 LowerLatin
+	CreateMathDerivatives 'mathsi' tfSansItalic MathSansSerif 0x1D608 UpperLatin
+	CreateMathDerivatives 'mathsi' tfSansItalic MathSansSerif 0x1D622 LowerLatin
 
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5D4 UpperLatin
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D5EE LowerLatin
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D756 UpperGreek
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D770 LowerGreek
-	CreateMathAliasable SLAB 'mathsb' 'mathbf' tfSansBold 0x1D7EC Digits
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D5D4 UpperLatin
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D5EE LowerLatin
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D756 UpperGreek
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D770 LowerGreek
+	CreateMathDerivatives 'mathsb' tfSansBold MathSansSerif 0x1D7EC Digits
 
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D63C UpperLatin
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D656 LowerLatin
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D790 UpperGreek
-	CreateMathAliasable SLAB 'mathsz' 'mathbi' tfSansBoldItalic 0x1D7AA LowerGreek
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D63C UpperLatin
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D656 LowerLatin
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D790 UpperGreek
+	CreateMathDerivatives 'mathsz' tfSansBoldItalic MathSansSerif 0x1D7AA LowerGreek
 
 	# Math Typewriter
 	local doTypewriter para.isQuasiProportional
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D670 UpperLatin
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D68A LowerLatin
-	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter 0x1D7F6 Digits
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D670 UpperLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D68A LowerLatin
+	CreateMathAliasable doTypewriter 'mathtt' null tfTypeWriter null 0x1D7F6 Digits
 
 	# Italic blackboard bold
-	CreateMathDerivatives 'mathit' tfItalic 0x2145  ObliqueBlackboardBolds
+	CreateMathDerivatives 'mathit' tfItalic null 0x2145  ObliqueBlackboardBolds
 
 glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Marks : markFine
@@ -566,17 +598,26 @@ glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Widen
 	glyph-block-import Letter-Latin-Rhotic : ErTail
+	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
 
-	let [thinfont : Widen {'schwa' 'latn/revSmallEpsilon'} 0.85 1] : begin
-		create-glyph 'er' 0x25A : glyph-proc # er
-			include : MarkSet.e
-			include : thinfont.queryByName 'schwa'
-			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+	define [createRhotics groupName y _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs "rhotic_\(groupName)" _records
+		local pendingGlyphs : records.map : [record] => record.1
+		local thinFont : Widen pendingGlyphs 0.85 1
+		foreach {unicode glyphid pri} [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)]
+				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
+					if [not : thinFont.queryByName glyphid] : begin
+						throw : new Error "Cannot find glyph \(glyphid)"
+					include : MarkSet.e
+					include : thinFont.queryByName glyphid
+					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y
 
-		create-glyph 'revlatinepsiloner' 0x25D : glyph-proc # revlatinepsiloner
-			include : MarkSet.e
-			include : thinfont.queryByName 'latn/revSmallEpsilon'
-			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+		link-relations relSets
+		return { targetNameMap records }
+
+	createRhotics 'er' (XH / 2) : list { 0x25A 'schwa' }
+	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/revSmallEpsilon' }
 
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes
@@ -585,8 +626,7 @@ glyph-block Autobuild-Rotated : begin
 
 	for-width-kinds WideWidth1 : do
 		local s : (RightSB - SB - O * 4 + (MosaicWidth - Width) * 0.5) / CAP
-		local df : Miniature
-			glyphs     -- {'eight.lnum.crossing' 'rotetedPropto' 'revS'}
+		local df : Miniature {'eight.lnum.crossing' 'rotetedPropto' 'revS'}
 			crowd      -- 4
 			scale      -- s
 			slopeAngle -- 0

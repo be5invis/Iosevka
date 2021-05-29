@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -12,6 +12,7 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-import Marks : markHalfStroke
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : nShoulder RightwardTailedBar DToothlessRise SerifFrame
+	glyph-block-import Letter-Shared-Shapes : CyrTailDescender
 
 	glyph-block-export UShape
 
@@ -101,6 +102,10 @@ glyph-block Letter-Latin-U : begin
 		if [not para.isItalic] : include : UTopRightSerif top
 		include : UBottomRightSerif top
 
+	define [UrtBaseSlabs top] : glyph-proc : if SLAB : begin
+		include : UTopLeftSerif top
+		if [not para.isItalic] : include : UTopRightSerif top
+
 	define [SmallUTailedSlabs top] : glyph-proc : if SLAB : begin
 		include : UTopLeftSerif top
 		if [not para.isItalic] : include : UTopRightSerif top
@@ -117,6 +122,9 @@ glyph-block Letter-Latin-U : begin
 		include : UTopLeftSerif top
 		include : UBottomRightSerif top
 
+	define [SmallUBottomRightSlabs top] : glyph-proc
+		include : UBottomRightSerif top
+
 	define [SmallUMotionTailedSlabs top] : glyph-proc
 		include : UTopLeftSerif top
 
@@ -127,7 +135,7 @@ glyph-block Letter-Latin-U : begin
 		toothed                                 { UToothed          SmallUSlabs                  }
 		tailed                                  { UTailed           SmallUTailedSlabs            }
 		motionSerifed                           { UToothed          SmallUMotionSlabs            }
-		motionSerifedTailed                     { UTailed           SmallUMotionTailedSlabs      }
+		tailedMotionSerifed                     { UTailed           SmallUMotionTailedSlabs      }
 		toothlessCorner                         { UToothlessCorner  ToothlessSlabs               }
 		toothlessRounded                        { UToothlessRounded ToothlessSlabs               }
 		toothlessCornerBilateralMotionSerifed   { UToothlessCorner  CapitalUMotionToothlessSlabs }
@@ -151,11 +159,15 @@ glyph-block Letter-Latin-U : begin
 		toothed                       { UToothed               SmallUSlabs             }
 		tailed                        { UTailed                SmallUTailedSlabs       }
 		motionSerifed                 { UToothed               SmallUMotionSlabs       }
-		motionSerifedTailed           { UTailed                SmallUMotionTailedSlabs }
+		tailedMotionSerifed           { UTailed                SmallUMotionTailedSlabs }
 		toothlessCorner               { UToothlessCornerSmall  SmallUToothlessSlabs    }
 		toothlessRounded              { UToothlessRoundedSmall SmallUToothlessSlabs    }
 		toothlessCornerMotionSerifed  { UToothlessCornerSmall  SmallUMotionTailedSlabs }
 		toothlessRoundedMotionSerifed { UToothlessRoundedSmall SmallUMotionTailedSlabs }
+		bottomRightSerifed            { UToothed               SmallUBottomRightSlabs  }
+		urtBase                       { UToothed               UrtBaseSlabs            }
+		urtBaseMotionSerifed          { UToothed               SmallUMotionTailedSlabs }
+		urtBaseSerifless              { UToothed               [function : glyph-proc] }
 
 	foreach { suffix { Base Slabs } } [Object.entries SmallUConfig] : do
 		create-glyph "u.\(suffix)" : glyph-proc
@@ -164,27 +176,31 @@ glyph-block Letter-Latin-U : begin
 			include : Slabs XH
 
 	select-variant 'U' 'U'
+	link-reduced-variant 'U/sansSerif' 'U' MathSansSerif
 	select-variant 'smcpU' 0x1D1C (follow -- 'U')
 	select-variant 'u' 'u'
+	link-reduced-variant 'u/sansSerif' 'u' MathSansSerif
+	select-variant 'u/urtailBase' (shapeFrom -- 'u')
 	select-variant 'cyrl/i.italic' (shapeFrom -- 'u')
+	select-variant 'cyrl/i.italic.reduced' (shapeFrom -- 'u')
 	alias 'cyrl/i.BGR' null 'cyrl/i.italic'
 
-	with-related-glyphs 'cyrl/ibreve.BGR' null 'cyrl/i.BGR' : lambda [src sel] : glyph-proc
+	derive-glyphs 'cyrl/ibreve.BGR' null 'cyrl/i.BGR' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include [refer-glyph 'breveAbove']
 
-	with-related-glyphs 'cyrl/igrave.BGR' null 'cyrl/i.BGR' : lambda [src sel] : glyph-proc
+	derive-glyphs 'cyrl/igrave.BGR' null 'cyrl/i.BGR' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include [refer-glyph 'graveAbove']
+
+	derive-composites 'cyrl/iShortTail.italic' null  'cyrl/i.italic.reduced' [refer-glyph 'breveAbove'] [CyrTailDescender RightSB]
 
 	create-glyph 'grek/upsilon' 0x3C5 : glyph-proc
 		include : MarkSet.e
 		set-base-anchor 'trailing' Middle 0
 		include : UShape [DivFrame 1] XH 0 (sma -- SmallSmoothA) (smb -- SmallSmoothB)
 
-	create-glyph 'urtailBR' 0x1D99 : glyph-proc
-		include [refer-glyph 'u.toothed'] AS_BASE ALSO_METRICS
-		include [refer-glyph 'rtailBR']
+	derive-composites 'urtailBR' 0x1D99 'u/urtailBase' 'rRetroflexTailBR'
 
 	define [LatinUpsilon2Shape top sma smb] : glyph-proc
 		include : dispiro

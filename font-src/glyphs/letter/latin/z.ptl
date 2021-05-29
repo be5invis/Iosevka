@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [ZReduced CvDecompose] from "../../../support/gr"
+import [ZReduced CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -13,6 +13,13 @@ glyph-block Letter-Latin-Z : begin
 	glyph-block-import Letter-Shared-Shapes : HCurlyTail
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Latin-X : XStrand
+
+	define MODE-Z      0
+	define MODE-RTAIL  1
+	define MODE-ZDESC  2
+	define MODE-ZSWASH 3
+
+	define [DisplayBottomStroke mode] : not : mode === MODE-ZDESC || mode === MODE-ZSWASH
 
 	define [ZSerifless top] : glyph-proc
 
@@ -26,40 +33,40 @@ glyph-block Letter-Latin-Z : begin
 	define [ZMotionSerifsT top] : glyph-proc
 		include : tagged 'serifLT' : DownwardLeftSerif SB top VJut
 
-	define [ZBaseShape] : glyph-proc
+	define [ZBaseShape mode] : glyph-proc
 		local cor : 1.15 * HVContrast
 		include : tagged 'strokeTop' : HBarTop SB RightSB CAP
 		include : spiro-outline
-			corner SB Stroke
+			corner SB [if (mode === MODE-ZSWASH) 0 Stroke]
 			corner (RightSB - Stroke * cor) (CAP - Stroke)
 			corner RightSB (CAP - Stroke)
-			corner (SB + Stroke * cor) Stroke
-		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
+			corner (SB + Stroke * cor) [if (mode === MODE-ZSWASH) 0 Stroke]
+		if [DisplayBottomStroke mode] : include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 
-	define [ZCurlyShape] : glyph-proc
+	define [ZCurlyShape mode] : glyph-proc
 		include : tagged 'strokeTop' : HBarTop SB (RightSB - Stroke * HVContrast) CAP
 		include : XStrand false SLAB SB 0 RightSB CAP 0.125 0.4 0.32
-		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
+		if [DisplayBottomStroke mode] : include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
 
 	define [HBarOver] : refer-glyph 'barOver'
 	define [DBarOver] : refer-glyph 'antiSlashOver'
 
-	define [SmallZBaseShape] : glyph-proc
+	define [SmallZBaseShape mode] : glyph-proc
 		local cor : 1.2 * HVContrast
 		include : tagged 'strokeTop' : HBarTop SB RightSB XH
 		include : spiro-outline
-			corner SB Stroke
+			corner SB [if (mode === MODE-ZSWASH) 0 Stroke]
 			corner (RightSB - Stroke * cor) (XH - Stroke)
 			corner RightSB (XH - Stroke)
-			corner (SB + Stroke * cor) Stroke
-		include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
+			corner (SB + Stroke * cor) [if (mode === MODE-ZSWASH) 0 Stroke]
+		if [DisplayBottomStroke mode] : include : tagged 'strokeBottom' : HBarBottom SB RightSB 0
 
-	define [SmallZCurlyShape] : glyph-proc
+	define [SmallZCurlyShape mode] : glyph-proc
 		include : tagged 'strokeTop' : HBarTop SB (RightSB - Stroke * HVContrast) XH
 		include : XStrand false SLAB SB 0 RightSB XH 0.125 0.4 0.36
-		include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
+		if [DisplayBottomStroke mode] : include : tagged 'strokeBottom' : HBarBottom (SB + Stroke * HVContrast) RightSB 0
 
-	define [ZCursiveShapeImpl top] : glyph-proc
+	define [ZCursiveShapeImpl top mode] : glyph-proc
 		define hookTerminalWidth : AdviceStroke 3.5
 		define xDiagWidth : 1 * Stroke
 		define yFootHeight : Math.max (0.15 * top) (Stroke * 0.625)
@@ -87,34 +94,59 @@ glyph-block Letter-Latin-Z : begin
 				flat [mix (SB + xMockTailDepth) RightSB kTop] (top - kTop * yTailDepth)
 				curl RightSB                                  (top - yTailDepth)
 
-		include : spiro-outline
-			corner SB 0
-			corner SB (kFoot * yFootHeight)
-			corner (RightSB - xDiagWidth) (top - yFootHeight)
-			corner (RightSB - xDiagWidth) top
-			corner RightSB top
-			corner RightSB (top - kFoot * yFootHeight)
-			corner (SB + xDiagWidth) yFootHeight
-			corner (SB + xDiagWidth) 0
-
-		include : tagged 'strokeBottom' : intersection
-			spiro-outline
-				corner (SB + xDiagWidth) yFootHeight
-				corner (SB + xDiagWidth) (-top)
-				corner (2 * Width) (-top)
-				corner (2 * Width) (top)
+		include : match mode
+			[Just MODE-ZSWASH] : spiro-outline
+				corner SB 0
+				corner (RightSB - xDiagWidth) (top - yFootHeight)
+				corner (RightSB - xDiagWidth) top
 				corner RightSB top
+				corner RightSB (top - kFoot * yFootHeight)
+				corner (SB + xDiagWidth) 0
+			__ : spiro-outline
+				corner SB 0
+				corner SB (kFoot * yFootHeight)
+				corner (RightSB - xDiagWidth) (top - yFootHeight)
+				corner (RightSB - xDiagWidth) top
+				corner RightSB top
+				corner RightSB (top - kFoot * yFootHeight)
+				corner (SB + xDiagWidth) yFootHeight
+				corner (SB + xDiagWidth) 0
 
-			dispiro
-				flat (RightSB - 2 * O) yHookDepth [widths.rhs.heading hookTerminalWidth Downward]
-				curl (RightSB - 2 * O) (yHookDepth - yHookStraightDepth) [heading Downward]
-				arcvh
-				g2.left.mid (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
-				flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
-				curl SB                                   (yTailDepth)
+		include : tagged 'strokeBottom' : match mode
+			[Just MODE-RTAIL] : intersection
+				spiro-outline
+					corner (SB + xDiagWidth) yFootHeight
+					corner (SB + xDiagWidth) (-top)
+					corner (2 * Width) (-top)
+					corner (2 * Width) (top)
+					corner RightSB top
 
-	define [ZCursiveShape]      : ZCursiveShapeImpl CAP
-	define [SmallZCursiveShape] : ZCursiveShapeImpl XH
+				union
+					VBarRight RightSB 0 yHookDepth hookTerminalWidth
+					dispiro
+						flat  RightSB               O [widths.rhs.heading Stroke Leftward]
+						g2  (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
+						flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
+						curl SB                                   (yTailDepth)
+			([Just MODE-ZDESC] || [Just MODE-ZSWASH]) : glyph-proc
+			__ : intersection
+				spiro-outline
+					corner (SB + xDiagWidth) yFootHeight
+					corner (SB + xDiagWidth) (-top)
+					corner (2 * Width) (-top)
+					corner (2 * Width) (top)
+					corner RightSB top
+
+				dispiro
+					flat (RightSB - 2 * O) yHookDepth [widths.rhs.heading hookTerminalWidth Downward]
+					curl (RightSB - 2 * O) (yHookDepth - yHookStraightDepth) [heading Downward]
+					arcvh
+					g2.left.mid (RightSB - xHookDepth) O [widths.rhs.heading Stroke Leftward]
+					flat [mix (RightSB - xHookDepth) SB kBot] (kBot * yTailDepth)
+					curl SB                                   (yTailDepth)
+
+	define [ZCursiveShape mode]         : ZCursiveShapeImpl CAP mode
+	define [SmallZCursiveShape mode]    : ZCursiveShapeImpl XH mode
 
 	define [NoBottomStrokeMask top] : glyph-proc
 	define [CurlyBottomStrokeMask top] : spiro-outline
@@ -130,39 +162,46 @@ glyph-block Letter-Latin-Z : begin
 		archv
 		straight.down.end RightSB (-Hook) [widths.heading 0 Stroke Downward]
 
+	define [SwashBottomStroke] : dispiro
+		widths.lhs
+		g4 SB 0
+		alsoThru 0.36 0.6 important
+		flat (RightSB - 1) Descender
+		curl RightSB Descender
+
 	define ZConfig : object
-		straightSerifless                           { ZBaseShape    SmallZBaseShape    ZSerifless     null     NoBottomStrokeMask    }
-		straightSeriflessWithCrossBar               { ZBaseShape    SmallZBaseShape    ZSerifless     DBarOver NoBottomStrokeMask    }
-		straightSeriflessWithHorizontalCrossBar     { ZBaseShape    SmallZBaseShape    ZSerifless     HBarOver NoBottomStrokeMask    }
-		curlySerifless                              { ZCurlyShape   SmallZCurlyShape   ZSerifless     null     CurlyBottomStrokeMask }
-		curlySeriflessWithCrossBar                  { ZCurlyShape   SmallZCurlyShape   ZSerifless     DBarOver CurlyBottomStrokeMask }
-		curlySeriflessWithHorizontalCrossBar        { ZCurlyShape   SmallZCurlyShape   ZSerifless     HBarOver CurlyBottomStrokeMask }
-		straightSerifed                             { ZBaseShape    SmallZBaseShape    ZStdSerifs     null     NoBottomStrokeMask    }
-		straightSerifedWithCrossBar                 { ZBaseShape    SmallZBaseShape    ZStdSerifs     DBarOver NoBottomStrokeMask    }
-		straightSerifedWithHorizontalCrossBar       { ZBaseShape    SmallZBaseShape    ZStdSerifs     HBarOver NoBottomStrokeMask    }
-		curlySerifed                                { ZCurlyShape   SmallZCurlyShape   ZStdSerifs     null     CurlyBottomStrokeMask }
-		curlySerifedWithCrossBar                    { ZCurlyShape   SmallZCurlyShape   ZStdSerifs     DBarOver CurlyBottomStrokeMask }
-		curlySerifedWithHorizontalCrossBar          { ZCurlyShape   SmallZCurlyShape   ZStdSerifs     HBarOver CurlyBottomStrokeMask }
-		straightBottomSerifed                       { ZBaseShape    SmallZBaseShape    ZMotionSerifsB null     NoBottomStrokeMask    }
-		straightBottomSerifedWithCrossbar           { ZBaseShape    SmallZBaseShape    ZMotionSerifsB DBarOver NoBottomStrokeMask    }
-		straightBottomSerifedWithHorizontalCrossBar { ZBaseShape    SmallZBaseShape    ZMotionSerifsB HBarOver NoBottomStrokeMask    }
-		curlyBottomSerifed                          { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsB null     CurlyBottomStrokeMask }
-		curlyBottomSerifedWithCrossbar              { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsB DBarOver CurlyBottomStrokeMask }
-		curlyBottomSerifedWithHorizontalCrossBar    { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsB HBarOver CurlyBottomStrokeMask }
-		straightTopSerifed                          { ZBaseShape    SmallZBaseShape    ZMotionSerifsT null     NoBottomStrokeMask    }
-		straightTopSerifedWithCrossbar              { ZBaseShape    SmallZBaseShape    ZMotionSerifsT DBarOver NoBottomStrokeMask    }
-		straightTopSerifedWithHorizontalCrossBar    { ZBaseShape    SmallZBaseShape    ZMotionSerifsT HBarOver NoBottomStrokeMask    }
-		curlyTopSerifed                             { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsT null     CurlyBottomStrokeMask }
-		curlyTopSerifedWithCrossbar                 { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsT DBarOver CurlyBottomStrokeMask }
-		curlyTopSerifedWithHorizontalCrossBar       { ZCurlyShape   SmallZCurlyShape   ZMotionSerifsT HBarOver CurlyBottomStrokeMask }
-		cursive                                     { ZCursiveShape SmallZCursiveShape ZSerifless     null     NoBottomStrokeMask    }
-		cursiveWithCrossBar                         { ZCursiveShape SmallZCursiveShape ZSerifless     DBarOver NoBottomStrokeMask    }
-		cursiveWithHorizontalCrossBar               { ZCursiveShape SmallZCursiveShape ZSerifless     HBarOver NoBottomStrokeMask    }
+		straightSerifless                           { ZBaseShape       SmallZBaseShape       ZSerifless     null     NoBottomStrokeMask    }
+		straightSeriflessWithCrossBar               { ZBaseShape       SmallZBaseShape       ZSerifless     DBarOver NoBottomStrokeMask    }
+		straightSeriflessWithHorizontalCrossBar     { ZBaseShape       SmallZBaseShape       ZSerifless     HBarOver NoBottomStrokeMask    }
+		curlySerifless                              { ZCurlyShape      SmallZCurlyShape      ZSerifless     null     CurlyBottomStrokeMask }
+		curlySeriflessWithCrossBar                  { ZCurlyShape      SmallZCurlyShape      ZSerifless     DBarOver CurlyBottomStrokeMask }
+		curlySeriflessWithHorizontalCrossBar        { ZCurlyShape      SmallZCurlyShape      ZSerifless     HBarOver CurlyBottomStrokeMask }
+		straightSerifed                             { ZBaseShape       SmallZBaseShape       ZStdSerifs     null     NoBottomStrokeMask    }
+		straightSerifedWithCrossBar                 { ZBaseShape       SmallZBaseShape       ZStdSerifs     DBarOver NoBottomStrokeMask    }
+		straightSerifedWithHorizontalCrossBar       { ZBaseShape       SmallZBaseShape       ZStdSerifs     HBarOver NoBottomStrokeMask    }
+		curlySerifed                                { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     null     CurlyBottomStrokeMask }
+		curlySerifedWithCrossBar                    { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     DBarOver CurlyBottomStrokeMask }
+		curlySerifedWithHorizontalCrossBar          { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     HBarOver CurlyBottomStrokeMask }
+		straightBottomSerifed                       { ZBaseShape       SmallZBaseShape       ZMotionSerifsB null     NoBottomStrokeMask    }
+		straightBottomSerifedWithCrossbar           { ZBaseShape       SmallZBaseShape       ZMotionSerifsB DBarOver NoBottomStrokeMask    }
+		straightBottomSerifedWithHorizontalCrossBar { ZBaseShape       SmallZBaseShape       ZMotionSerifsB HBarOver NoBottomStrokeMask    }
+		curlyBottomSerifed                          { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB null     CurlyBottomStrokeMask }
+		curlyBottomSerifedWithCrossbar              { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB DBarOver CurlyBottomStrokeMask }
+		curlyBottomSerifedWithHorizontalCrossBar    { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB HBarOver CurlyBottomStrokeMask }
+		straightTopSerifed                          { ZBaseShape       SmallZBaseShape       ZMotionSerifsT null     NoBottomStrokeMask    }
+		straightTopSerifedWithCrossbar              { ZBaseShape       SmallZBaseShape       ZMotionSerifsT DBarOver NoBottomStrokeMask    }
+		straightTopSerifedWithHorizontalCrossBar    { ZBaseShape       SmallZBaseShape       ZMotionSerifsT HBarOver NoBottomStrokeMask    }
+		curlyTopSerifed                             { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT null     CurlyBottomStrokeMask }
+		curlyTopSerifedWithCrossbar                 { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT DBarOver CurlyBottomStrokeMask }
+		curlyTopSerifedWithHorizontalCrossBar       { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT HBarOver CurlyBottomStrokeMask }
+		cursive                                     { ZCursiveShape    SmallZCursiveShape    ZSerifless     null     NoBottomStrokeMask    }
+		cursiveWithCrossBar                         { ZCursiveShape    SmallZCursiveShape    ZSerifless     DBarOver NoBottomStrokeMask    }
+		cursiveWithHorizontalCrossBar               { ZCursiveShape    SmallZCursiveShape    ZSerifless     HBarOver NoBottomStrokeMask    }
 
 	foreach { suffix { capital small serifs slash bsMask } } [Object.entries ZConfig] : do
 		create-glyph "Z.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : capital
+			include : capital MODE-Z
 			if serifs : include : serifs CAP
 			if slash  : include : slash  CAP
 
@@ -172,14 +211,24 @@ glyph-block Letter-Latin-Z : begin
 			include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
 
 		create-glyph "ZDTail.\(suffix)" : glyph-proc
-			include [refer-glyph "Z.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'strokeBottom'
+			include : MarkSet.capital
+			include : capital MODE-ZDESC
+			if serifs : include : serifs CAP
+			if slash  : include : slash  CAP
 			eject-contour 'serifRB'
 			include : difference [DTailBottomStroke] [bsMask CAP]
 
+		create-glyph "ZSwash.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : capital MODE-ZSWASH
+			if serifs : include : serifs CAP
+			if slash  : include : slash  CAP
+			eject-contour 'serifRB'
+			include : difference [SwashBottomStroke] [bsMask CAP]
+
 		create-glyph "z.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : small
+			include : small MODE-Z
 			if serifs : include : serifs XH
 			if slash  : include : slash  XH
 
@@ -188,15 +237,33 @@ glyph-block Letter-Latin-Z : begin
 			eject-contour 'serifRB'
 			include : VBarRight [mix SB RightSB 1.05] (HalfStroke - LongJut) Stroke
 
+		create-glyph "z/rtailBase.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : small MODE-RTAIL
+			if serifs : include : serifs XH
+			if slash  : include : slash  XH
+
 		create-glyph "zDTail.\(suffix)" : glyph-proc
-			include [refer-glyph "z.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'strokeBottom'
+			include : MarkSet.e
+			include : small MODE-ZDESC
+			if serifs : include : serifs XH
+			if slash  : include : slash  XH
 			eject-contour 'serifRB'
 			include : difference [DTailBottomStroke] [bsMask XH]
 
+		create-glyph "zSwash.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : small MODE-ZSWASH
+			if serifs : include : serifs XH
+			if slash  : include : slash  XH
+			eject-contour 'serifRB'
+			include : difference [SwashBottomStroke] [bsMask XH]
+
 		create-glyph "zCurlyTail.\(suffix)" : glyph-proc
-			include [refer-glyph "z.\(suffix)"] AS_BASE ALSO_METRICS
-			eject-contour 'strokeBottom'
+			include : MarkSet.e
+			include : small MODE-ZDESC
+			if serifs : include : serifs XH
+			if slash  : include : slash  XH
 			eject-contour 'serifRB'
 			local fine : AdviceStroke2 5 4 XH
 			local rinner : Math.max (XH * 0.04) (fine * 0.1)
@@ -209,18 +276,27 @@ glyph-block Letter-Latin-Z : begin
 				bsMask XH
 
 	select-variant 'Z' 'Z'
+	link-reduced-variant 'Z/sansSerif' 'Z' MathSansSerif
+	link-reduced-variant 'Z/reduced/sansSerif' 'Z'
 	select-variant 'z' 'z'
+	link-reduced-variant 'z/sansSerif' 'z' MathSansSerif
 	select-variant 'smcpZ' 0x1D22 (shapeFrom -- 'z') (follow -- 'Z')
-	select-variant 'ZReduced' (shapeFrom -- 'Z')
-	select-variant 'zReduced' (shapeFrom -- 'z')
-	if [query-glyph 'Z'] : ZReduced.set [query-glyph 'Z'] 'ZReduced'
-	if [query-glyph 'z'] : ZReduced.set [query-glyph 'z'] 'zReduced'
+	select-variant 'Z/reduced' (shapeFrom -- 'Z')
+	select-variant 'z/reduced' (shapeFrom -- 'z')
+	select-variant 'z/rtailBase' (follow -- 'z')
+	if [query-glyph 'Z'] : ZReduced.set [query-glyph 'Z'] 'Z/reduced'
+	if [query-glyph 'z'] : ZReduced.set [query-glyph 'z'] 'z/reduced'
+
 	select-variant 'ZDesc' 0x2C6B
 	select-variant 'zDesc' 0x2C6C
 	select-variant 'ZDTail' 0x224 (follow -- 'ZDesc')
 	select-variant 'zDTail' 0x225 (follow -- 'zDesc')
+	select-variant 'ZSwash' 0x2C7F (follow -- 'ZDesc')
+	select-variant 'zSwash' 0x240 (follow -- 'zDesc')
 	select-variant 'zCurlyTail' 0x291 (follow -- 'zDesc')
-	select-variant 'grek/Zeta' 0x396 (shapeFrom -- 'Z') (follow -- 'ZReduced')
+
+	alias 'grek/Zeta' 0x396 'Z/reduced'
+	alias-reduced-variant 'grek/Zeta/sansSerif' 'grek/Zeta' 'Z/reduced/sansSerif' MathSansSerif
 
 	define [BBZShape top] : glyph-proc
 		include : HBarTop SB RightSB top BBS
@@ -250,50 +326,9 @@ glyph-block Letter-Latin-Z : begin
 	create-glyph 'mathbb/Z' 0x2124  : composite-proc [MarkSet.capital] [BBZShape CAP]
 	create-glyph 'mathbb/z' 0x1D56B : composite-proc [MarkSet.e] [BBZShape XH]
 
-	create-glyph 'Zswash' 0x2C7F : glyph-proc
-		include : MarkSet.if
-		local cor : 1.15 * HVContrast
 
-		include : union
-			HBarTop SB RightSB CAP
-			spiro-outline
-				corner SB 0
-				corner (SB + Stroke * cor) 0
-				corner RightSB (CAP - Stroke)
-				corner (RightSB - Stroke * cor) (CAP - Stroke)
-			dispiro
-				widths.lhs
-				g4 SB 0
-				alsoThru 0.36 0.6 important
-				flat (RightSB - 1) Descender
-				curl RightSB Descender
-
-		if SLAB : begin
-			include : DownwardLeftSerif SB CAP VJut
-
-	create-glyph 'zswash' 0x240 : glyph-proc
-		include : MarkSet.p
-		local cor : 1.2 * HVContrast
-
-		include : union
-			HBarTop SB RightSB XH
-			spiro-outline
-				corner SB 0
-				corner (SB + Stroke * cor) 0
-				corner RightSB (XH - Stroke)
-				corner (RightSB - Stroke * cor) (XH - Stroke)
-			dispiro
-				widths.lhs
-				g4 (SB - OXHook) 0
-				alsoThru 0.36 0.6 important
-				flat (RightSB - 1) Descender
-				curl RightSB Descender
-
-		if SLAB : begin
-			include : DownwardLeftSerif SB XH VJut
-
-	CreateAccentedComposition 'ZBar' 0x1B5 'ZReduced' 'barOver'
-	CreateAccentedComposition 'zBar' 0x1B6 'zReduced' 'barOver'
-	CreateAccentedComposition 'ZCaron' 0x17D 'ZReduced' 'caronAbove'
-	CreateAccentedComposition 'zCaron' 0x17E 'zReduced' 'caronAbove'
-	CreateAccentedComposition 'zRTailBR' 0x290 'zReduced' 'rtailBR'
+	CreateAccentedComposition 'ZBar' 0x1B5 'Z/reduced' 'barOver'
+	CreateAccentedComposition 'zBar' 0x1B6 'z/reduced' 'barOver'
+	CreateAccentedComposition 'ZCaron' 0x17D 'Z' 'caronAbove'
+	CreateAccentedComposition 'zCaron' 0x17E 'z' 'caronAbove'
+	CreateAccentedComposition 'zRTailBR' 0x290 'z/rtailBase' 'rtailBR'

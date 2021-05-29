@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -11,6 +11,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Latin-Lower-M
+	glyph-block-import Letter-Shared-Shapes : CyrDescender
 
 	define TLeftX  : SB + OX * 1.5
 	define TRightX : RightSB - OX * 1.5
@@ -43,7 +44,7 @@ glyph-block Letter-Latin-Upper-T : begin
 			include : MarkSet.if
 			set-base-anchor 'bottomright' (Middle + HalfStroke * HVContrast) 0
 			include : TShape CAP doST doSB
-			include : CyrDescender (Middle + HalfStroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+			include : CyrDescender (Middle + HalfStroke * HVContrast) (overflow -- [if doSB (MidJutCenter - HalfStroke * HVContrast)])
 
 		create-glyph "TBar.\(suffix)" : glyph-proc
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
@@ -63,20 +64,25 @@ glyph-block Letter-Latin-Upper-T : begin
 		create-glyph "cyrl/teDescender.upright.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : TShape XH doST doSB
-			include : CyrDescender (Middle + HalfStroke * HVContrast) (sideJut -- MidJutCenter - HalfStroke * HVContrast)
+			include : CyrDescender (Middle + HalfStroke * HVContrast) (overflow -- [if doSB (MidJutCenter - HalfStroke * HVContrast)])
 
 	select-variant 'T' 'T'
+	link-reduced-variant 'T/sansSerif' 'T' MathSansSerif
+	select-variant 'T/rtailBase' (shapeFrom -- 'T')
 	select-variant 'smcpT' 0x1D1B (follow -- 'T')
 	select-variant "TBar" 0x166 (follow -- 'T')
 	select-variant "Thookleft" 0x1AC (follow -- 'T')
 	select-variant "cyrl/TeDescender" 0x4AC (follow -- 'T')
 
 	alias 'grek/Tau' 0x3A4 'T'
+	alias-reduced-variant 'grek/Tau/sansSerif' 'grek/Tau' 'T/sansSerif' MathSansSerif
 	alias 'cyrl/Te' 0x422 'T'
 	turned 'turnT' 0xA7B1 'T' Middle (CAP / 2)
 
 	alias 'cyrl/te.upright' null 'smcpT'
 	select-variant 'cyrl/teDescender.upright' (follow -- 'T')
+
+	derive-composites 'TRtailBR' 0x1AE 'T/rtailBase' 'rtailBR'
 
 	create-glyph 'mathbb/T' 0x1D54B : glyph-proc
 		include : MarkSet.capital

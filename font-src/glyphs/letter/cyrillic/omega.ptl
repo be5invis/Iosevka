@@ -1,0 +1,67 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix barmixL linreg clamp fallback] from '../../../support/utils'
+import [DesignParameters] from '../../../meta/aesthetics'
+import '../../../support/point' as Point
+
+glyph-module
+
+glyph-block Letter-Cyrillic-Omega : begin
+	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Letter-Latin-W
+	glyph-block-import Letter-Cyrillic-Te-Comb
+
+	define [CyrlOmegaShape df top p1 p2] : glyph-proc
+		local fine : AdviceStroke 3 df.div
+		local mfine : fine * CThin
+
+		local xMidBarLeft :df.middle - fine / 2 * HVContrast
+		local xMidBarRight : df.middle + fine / 2 * HVContrast
+		local xMidBarCoLeft : df.middle - (mfine - fine / 2) * HVContrast
+		local xMidBarCoRight : df.middle + (mfine - fine / 2) * HVContrast
+		local y3 : top * p1
+		local y4 : top * p2
+
+		include : dispiro
+			widths.lhs fine
+			g4.left.start ([Math.max [mix df.leftSB xMidBarRight 0.5] (df.leftSB + fine * 1.5 * HVContrast)] - CorrectionOMidX * fine) top
+			archv 8
+			flat df.leftSB (top - SmoothA)
+			curl df.leftSB SmoothB
+			arcvh 8
+			g4 [mix df.leftSB xMidBarRight 0.5] O [heading Rightward]
+			archv 8
+			flat xMidBarCoRight y3 [widths.heading mfine 0 Upward]
+			curl xMidBarCoRight y4 [heading Upward]
+		include : dispiro
+			widths.rhs fine
+			g4.right.start ([Math.min [mix df.rightSB xMidBarLeft 0.5] (df.rightSB - fine * 1.5 * HVContrast)] - CorrectionOMidX * fine) top
+			archv 8
+			flat df.rightSB (top - SmoothB)
+			curl df.rightSB SmoothA
+			arcvh 8
+			g4 [mix df.rightSB xMidBarLeft 0.5] O [heading Leftward]
+			archv 8
+			flat xMidBarCoLeft y3 [widths.heading 0 mfine Upward]
+			curl xMidBarCoLeft y4 [heading Upward]
+
+	create-glyph 'cyrl/Omega' 0x460 : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : [DivFrame df.div].markSet.capital
+		include : CyrlOmegaShape df CAP 0.40 0.65
+
+	create-glyph 'cyrl/BroadOmega' 0xA64C : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : [DivFrame df.div].markSet.capital
+		include : CyrlOmegaShape df CAP 0.30 0.31
+
+	create-glyph 'cyrl/broadOmega' 0xA64D : glyph-proc
+		define df : DivFrame para.diversityM 3
+		set-width df.width
+		include : [DivFrame df.div].markSet.e
+		include : CyrlOmegaShape df XH 0.30 0.31
+
+	CreateAccentedComposition 'cyrl/Ot' 0x47E 'cyrl/Omega' 'cyrl/teAbove'
+	CreateAccentedComposition 'cyrl/ot' 0x47F 'cyrl/omega' 'cyrl/teAbove'

@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -13,6 +13,9 @@ glyph-block Letter-Latin-Lower-Q : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth
 
+	define TERMINAL-NORMAL  0
+	define TERMINAL-TAILED  1
+	define TERMINAL-DIAG    2
 	define [RDiagTailedBar x0 yb yt] : begin
 		local df : DivFrame 1
 		local xMid : x0 - HalfStroke * HVContrast
@@ -20,102 +23,88 @@ glyph-block Letter-Latin-Lower-Q : begin
 			flat xMid yt [widths.center.heading Stroke Downward]
 			DiagonalTailR df xMid yb (0.875 * Hook - Stroke * 0.375) Stroke
 
-	create-glyph 'q.straight' : glyph-proc
-		include : MarkSet.p
+	define [EaredBody terminal top bottom] : glyph-proc
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : VBarRight RightSB Descender XH
-		if SLAB : begin
-			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
-			include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
-			include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
+		include : OBarRightShape top
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBarRight          RightSB bottom top
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom top
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom top
 
-	create-glyph 'q.tailed' : glyph-proc
-		include : MarkSet.p
+	define [EarlessCornerBody terminal top bottom] : glyph-proc
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : RightwardTailedBar RightSB Descender XH
-		if SLAB : begin
-			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+		include : OBarLeftToothlessShape top SB DToothlessRise DMBlend
+		include : FlipAround Middle (top / 2)
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBarRight          RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - DToothlessRise)
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - DToothlessRise)
 
-	create-glyph 'q.diagonalTailed' : glyph-proc
-		include : MarkSet.p
+	define [EarlessRoundedBody terminal top bottom] : glyph-proc
 		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : RDiagTailedBar RightSB Descender XH
-		if SLAB : begin
-			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+		include : OBarLeftRoundedShape top SB (SmallSmoothB - O)
+		include : FlipAround Middle (top / 2)
+		include : match terminal
+			[Just TERMINAL-NORMAL] : VBarRight          RightSB bottom (top - SmallSmoothB)
+			[Just TERMINAL-TAILED] : RightwardTailedBar RightSB bottom (top - SmallSmoothB)
+			[Just TERMINAL-DIAG]   : RDiagTailedBar     RightSB bottom (top - SmallSmoothB)
 
-	create-glyph 'q.straightMotionSerifed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : VBarRight RightSB Descender XH
-		include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+	define [RtSerif y] : tagged 'serifRT' : RightwardTopSerif RightSB y SideJut
+	define [RtSerifAuto y] : NeedSlab SLAB : RtSerif y
+	define [RbSerif y] : tagged 'serifRB' : union
+		LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) y MidJutSide
+		RightwardBottomSerif (RightSB - HalfStroke * HVContrast) y Jut
+	define [RbSerifAuto y] : NeedSlab SLAB : RbSerif y
 
-	create-glyph 'q.motionSerifedTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : RightwardTailedBar RightSB Descender XH
-		include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+	define QConfig : object
+		straight                     { EaredBody          TERMINAL-NORMAL RtSerifAuto RbSerifAuto }
+		tailed                       { EaredBody          TERMINAL-TAILED RtSerifAuto nothing     }
+		diagonalTailed               { EaredBody          TERMINAL-DIAG   RtSerifAuto nothing     }
+		straightMotionSerifed        { EaredBody          TERMINAL-NORMAL RtSerif     nothing     }
+		tailedMotionSerifed          { EaredBody          TERMINAL-TAILED RtSerif     nothing     }
+		diagonalTailedMotionSerifed  { EaredBody          TERMINAL-DIAG   RtSerif     nothing     }
+		earlessCorner                { EarlessCornerBody  TERMINAL-NORMAL nothing     RbSerifAuto }
+		earlessCornerTailed          { EarlessCornerBody  TERMINAL-TAILED nothing     nothing     }
+		earlessCornerDiagonalTailed  { EarlessCornerBody  TERMINAL-DIAG   nothing     nothing     }
+		earlessRounded               { EarlessRoundedBody TERMINAL-NORMAL nothing     RbSerifAuto }
+		earlessRoundedTailed         { EarlessRoundedBody TERMINAL-TAILED nothing     nothing     }
+		earlessRoundedDiagonalTailed { EarlessRoundedBody TERMINAL-DIAG   nothing     nothing     }
 
-	create-glyph 'q.motionSerifedDiagonalTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarRightShape
-		include : RDiagTailedBar RightSB Descender XH
-		include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
+	foreach { suffix { Body terminal sRT sRB } } [Object.entries QConfig] : do
+		create-glyph "q.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body terminal XH Descender
+			if sRT : include : sRT XH
+			if sRB : include : sRB Descender
 
-	create-glyph 'q.earlessCorner' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		include : FlipAround Middle (XH / 2)
-		include : VBarRight RightSB Descender (XH - DToothlessRise)
-		if SLAB : begin
-			include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
-			include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
+		create-glyph "qHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body terminal XH Descender
+			include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)
+			if sRB : include : sRB Descender
 
-	create-glyph 'q.earlessCornerTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		include : FlipAround Middle (XH / 2)
-		include : RightwardTailedBar RightSB Descender (XH - DToothlessRise)
+		create-glyph "QRTail.\(suffix)" : glyph-proc
+			include : MarkSet.if
+			include : Body terminal CAP 0
+			include : new-glyph : glyph-proc
+				include : refer-glyph "rtailBR"
+				include : ApparentTranslate RightSB 0
+			if sRT : include : sRT CAP
 
-	create-glyph 'q.earlessCornerDiagonalTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		include : FlipAround Middle (XH / 2)
-		include : RDiagTailedBar RightSB Descender (XH - DToothlessRise)
-
-	create-glyph 'q.earlessRounded' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftRoundedShape XH SB CAP
-		include : FlipAround Middle (XH / 2)
-		if SLAB : begin
-			include : LeftwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender MidJutSide
-			include : RightwardBottomSerif (RightSB - HalfStroke * HVContrast) Descender Jut
-
-	create-glyph 'q.earlessRoundedTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
-		include : FlipAround Middle (XH / 2)
-		include : RightwardTailedBar RightSB Descender (XH - SmallSmoothB)
-
-	create-glyph 'q.earlessRoundedDiagonalTailed' : glyph-proc
-		include : MarkSet.p
-		set-base-anchor 'trailing' (RightSB - markHalfStroke) Descender
-		include : OBarLeftRoundedShape XH SB (SmallSmoothB - O)
-		include : FlipAround Middle (XH / 2)
-		include : RDiagTailedBar RightSB Descender (XH - SmallSmoothB)
+		create-glyph "qRTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body terminal XH 0
+			include : new-glyph : glyph-proc
+				include : refer-glyph "rtailBR"
+				include : ApparentTranslate RightSB 0
+			if sRT : include : sRT XH
 
 	select-variant 'q' 'q'
+	link-reduced-variant 'q/sansSerif' 'q' MathSansSerif
 	alias 'cyrl/qa' 0x51B 'q'
+	select-variant 'QRTail' 0x24A (follow -- 'qRTail')
+	select-variant 'qRTail' 0x24B
+	select-variant 'qHookTop' 0x2A0
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/q' 0x1D562 : glyph-proc
@@ -128,28 +117,3 @@ glyph-block Letter-Latin-Lower-Q : begin
 			right -- RightSB - BBD
 			top  -- XH
 			stroke -- BBS
-
-	create-glyph 'Qrtail' 0x24A : glyph-proc
-		include : MarkSet.capital
-		include : OBarRightShape CAP
-		include : VBarRight RightSB 0 CAP
-		include : new-glyph : glyph-proc
-			include : refer-glyph "rtailBR"
-			include : ApparentTranslate RightSB 0
-		if SLAB : begin
-			include : tagged 'serifRT' : RightwardTopSerif RightSB CAP SideJut
-
-	create-glyph 'qrtail' 0x24B : glyph-proc
-		include : MarkSet.e
-		include : OBarRightShape
-		include : VBarRight RightSB 0 XH
-		include : new-glyph : glyph-proc
-			include : refer-glyph "rtailBR"
-			include : ApparentTranslate RightSB 0
-		if SLAB : begin
-			include : tagged 'serifRT' : RightwardTopSerif RightSB XH SideJut
-
-	create-glyph 'qhooktop' 0x2A0 : glyph-proc
-		include [refer-glyph "q.straight"] AS_BASE
-		eject-contour 'serifRT'
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) XH HookX (-Hook)

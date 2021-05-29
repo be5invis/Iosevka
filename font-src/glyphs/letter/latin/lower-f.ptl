@@ -2,139 +2,14 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-F : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth
-	glyph-block-import Letter-Shared-Shapes : DiagonalTailL DiagonalTailStdDepth
-
-	define fovershoot : fallback para.fovershoot (O * 6)
-
-	create-glyph 'longs.straight' : glyph-proc
-		include : MarkSet.b
-		include : dispiro
-			widths.center
-			flat (Middle - FBalance) 0 [heading Upward]
-			curl (Middle - FBalance) (CAP - FHook)
-			arcvh
-			straight.right.end (Middle - FBalance + HookX) (CAP - HalfStroke - fovershoot)
-		set-base-anchor 'overlay' (Middle - FBalance + Stroke * 0.5 * HVContrast) (CAP * OverlayPos)
-		if SLAB : begin
-			include : tagged 'serifMB' : CenterBottomSerif (Middle - FBalance) 0 Jut
-
-	create-glyph 'longs.upright.standard' : glyph-proc
-		include : MarkSet.b
-		local m : Middle - JBalance - HalfStroke * HVContrast
-		local r : m + (Width * 0.5) + Stroke * HVContrast - OXHook
-		include : dispiro
-			widths.lhs
-			g4 r (CAP - Hook)
-			hookstart (CAP - O)
-			flat m (CAP - SmoothA)
-			curl m 0 [heading Downward]
-		set-base-anchor 'overlay' (m + Stroke * 0.65 * HVContrast) (CAP * OverlayPos)
-		if SLAB : begin
-			include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
-
-		create-derived 'longsbar.upright.standard' : glyph-proc
-			include : HOverlayBar
-				m + HalfStroke * HVContrast - LongJut * 0.75
-				m + HalfStroke * HVContrast + LongJut * 0.75
-				[mix (XH - Stroke) CAP 0.5] - HalfStroke
-
-	create-glyph 'longs.upright.flatHook' : glyph-proc
-		include : MarkSet.b
-		local hd : FlatHookDepth [DivFrame 1]
-		local m : Middle - JBalance - HalfStroke * HVContrast
-		include : dispiro
-			widths.lhs
-			flat RightSB CAP
-			curl (m + hd.x) CAP
-			archv
-			flat m (CAP - hd.y)
-			curl m 0 [heading Downward]
-		set-base-anchor 'overlay' (m + Stroke * 0.65 * HVContrast) (CAP * OverlayPos)
-		if SLAB : begin
-			include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
-
-		create-derived 'longsbar.upright.flatHook' : glyph-proc
-			include : HOverlayBar
-				m + HalfStroke * HVContrast - LongJut * 0.75
-				m + HalfStroke * HVContrast + LongJut * 0.75
-				[mix (XH - Stroke) CAP 0.5] - HalfStroke
-
-	glyph-block-export LongSShape
-	define [LongSShape top bottom hookx hooky fine] : glyph-proc
-		local w [fallback fine Stroke]
-		include : dispiro
-			widths.center w
-			flat (Middle - hookx) (bottom + w / 2 + fovershoot)
-			curl (Middle - [Math.min hooky (hookx - 0.1)]) (bottom + w / 2 + fovershoot)
-			flat Middle (bottom + hooky)
-			curl Middle (top - hooky)
-			flat (Middle + [Math.min hooky (hookx - 0.1)]) (top - w / 2 - fovershoot)
-			curl (Middle + hookx) (top - w / 2 - fovershoot)
-
-	create-glyph 'longs.italic' : glyph-proc
-		include : MarkSet.if
-		include : LongSShape CAP (-Hook) HookX Hook
-
-		create-derived 'longsbar.italic' : glyph-proc
-			include : HOverlayBar
-				Middle - LongJut * 0.75
-				Middle + LongJut * 0.75
-				[mix (XH - Stroke) CAP 0.5] - HalfStroke
-
-		create-derived 'eshbar' 0x284 : glyph-proc
-			include : HOverlayBar
-				Middle - LongJut * 0.75
-				Middle + LongJut * 0.75
-				[mix Stroke Descender 0.5] + HalfStroke
-
-	select-variant 'longs.upright'
-	select-variant 'longsbar.upright' null (follow -- 'longs.upright')
-	alias 'esh' 0x283 'longs.italic'
-
-	create-glyph 'eshcurlytail' 0x286 : glyph-proc
-		include : MarkSet.if
-		local fine : AdviceStroke 3.5
-		local rinner : LongJut / 2 - fine / 2
-		local m1 : Middle - HalfStroke * HVContrast - FBalance
-		local x2 : mix RightSB m1 0.25
-		local y2 : Descender + O
-		include [refer-glyph 'longs.straight'] false
-		eject-contour 'serifMB'
-		include : dispiro
-			widths.lhs
-			flat m1 XH [heading Downward]
-			curl m1 (Descender + fine + rinner * 2)
-			CurlyTail
-				fine -- fine
-				rinner -- rinner
-				xleft -- m1
-				bottom -- Descender
-				right -- (m1 - LongJut)
-				x2 -- x2
-				y2 -- y2
-
-	create-glyph 'ifishhook' 0x27F : glyph-proc
-		include : MarkSet.p
-		include : VBar Middle Descender (XH - Hook)
-		include : VerticalHook Middle (XH - Hook) (-LongJut + [IBalance2 : DivFrame 1]) (-Hook + HalfStroke)
-		include : Translate [IBalance2 : DivFrame 1] 0
-		if SLAB : begin
-			include : CenterBottomSerif Middle Descender Jut
-
-	create-glyph 'iviby' 0x285 : glyph-proc
-		include : MarkSet.p
-		include : VBar Middle 0 (XH - Hook - HalfStroke)
-		include : VerticalHook Middle (XH - Hook - HalfStroke) (-LongJut) (-Hook)
-		include : VerticalHook Middle 0 LongJut Hook
-
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagonalTailL DiagonalTailStdDepth
 
 	define fbar : XH * DesignParameters.fBarPosToXH + Stroke * DesignParameters.fbarStrokeAdj
 	define [SmallFBottomSerif df shift] : dispiro
@@ -142,12 +17,11 @@ glyph-block Letter-Latin-Lower-F : begin
 		flat ([mix df.leftSB df.rightSB 0.02] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
 		curl ([mix df.leftSB df.rightSB 0.875] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
 
-	define SmallFOvershoot2 (O * 2)
 	define [StdFShapeT sink offset barleft sw] : sink
 		widths.lhs sw
-		g4 (RightSB + RBalance2 - (OX - O) - offset) (CAP - Hook * 0.75 - SmallFOvershoot2)
-		hookstart (CAP - O - SmallFOvershoot2 - offset) (tight -- true)
-		flat (barleft + offset) (CAP - SmoothA * 0.8 - SmallFOvershoot2)
+		g4 (RightSB + RBalance2 - (OX - O) - offset) (CAP - Hook * 0.75)
+		hookstart (CAP - O - offset) (tight -- true)
+		flat (barleft + offset) (CAP - SmoothA * 0.8)
 		[if offset corner curl] (barleft + offset) 0 [heading Downward]
 		if offset {[corner (RightSB + RBalance2 - (OX - O) - offset) 0]} {}
 
@@ -169,10 +43,16 @@ glyph-block Letter-Latin-Lower-F : begin
 			flat xBarMiddle 0.1 [widths.center.heading Stroke Downward]
 			DiagonalTailL df xBarMiddle Descender [DiagonalTailStdDepth df Stroke] Stroke
 
+	glyph-block-export StdSmallFBarLeftPos
+	define [StdSmallFBarLeftPos barAtCenter] : [mix SB RightSB : if barAtCenter 0.45 0.35] - Stroke * [if barAtCenter 0.45 0.25] * HVContrast
+
+	glyph-block-export StdSmallFBarLeftPos0
+	define [StdSmallFBarLeftPos0] : [mix SB RightSB 0.35] - Stroke * 0.25 * HVContrast
+
 	define [StandardSmallFShape df m bh counterHook] : glyph-proc
 		local barAtCenter : (counterHook === CH-HOOK) || (counterHook === CH-DIAGONAL-HOOK)
-		local barLeft0 : [mix SB RightSB 0.35] - Stroke * 0.25 * HVContrast
-		local barLeft : [mix SB RightSB : if barAtCenter 0.45 0.35] - Stroke * [if barAtCenter 0.45 0.25] * HVContrast
+		local barLeft0 : StdSmallFBarLeftPos0
+		local barLeft : StdSmallFBarLeftPos barAtCenter
 
 		include : StdFShapeT dispiro 0 barLeft0 Stroke
 		include : Translate (barLeft - barLeft0) 0
@@ -188,7 +68,16 @@ glyph-block Letter-Latin-Lower-F : begin
 			[Just CH-DIAGONAL-HOOK] : include : SmallFDiagonalTail df barLeft
 			[Just CH-SERIF] : include : SmallFBottomSerif df 0
 
-	define [NarrowFShape df m bh counterHook] : glyph-proc
+	define [NarrowFShape clcStyle] : function [df m bh counterHook] : glyph-proc
+		local topHookExt : match clcStyle
+			[Just 1] Width
+			[Just 2] Jut
+			__       0
+		local topHookHdExt : match clcStyle
+			[Just 1] 1
+			__       0
+		local crossBarExt : if (clcStyle === 1) Jut 0
+
 		local barAtCenter : (counterHook === CH-HOOK) || (counterHook === CH-DIAGONAL-HOOK)
 		local crossLeft : mix 0 df.leftSB m
 		local crossRight : mix df.width df.rightSB m
@@ -198,12 +87,12 @@ glyph-block Letter-Latin-Lower-F : begin
 		local hd : FlatHookDepth df
 		include : dispiro
 			widths.lhs
-			flat crossRight CAP
-			curl [Math.min (barLeft + hd.x) (crossRight - 0.1)] CAP
+			flat (crossRight + topHookExt) CAP
+			curl [Math.min (barLeft + hd.x * (1 + topHookHdExt)) (crossRight - 0.1)] CAP
 			archv.superness DesignParameters.tightHookSuperness
 			flat barLeft [Math.max XH (CAP - hd.y)]
 			curl barLeft 0 [heading Downward]
-		include : HCrossBar.top crossLeft crossRight bh
+		include : HCrossBar.top crossLeft (crossRight + crossBarExt) bh
 
 		match counterHook
 			[Just CH-EXTENSION] : include : SmallFDownExtension barLeft
@@ -235,18 +124,31 @@ glyph-block Letter-Latin-Lower-F : begin
 		'extendedCrossbarAtXHeight'               { { StandardSmallFShape [DivFrame 1] } { 0.95        XH   CH-EXTENSION     } { 'if' 'if' } }
 		'tailedCrossbarAtXHeight'                 { { StandardSmallFShape [DivFrame 1] } { 1           XH   CH-HOOK          } { 'if' 'if' } }
 		'diagonalTailedCrossbarAtXHeight'         { { StandardSmallFShape [DivFrame 1] } { 1           XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
-		'flatHook'                                { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
-		'flatHookSerifed'                         { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
-		'flatHookExtended'                        { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
-		'flatHookTailed'                          { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
-		'flatHookDiagonalTailed'                  { { NarrowFShape         dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
-		'flatHookCrossbarAtXHeight'               { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
-		'flatHookSerifedCrossbarAtXHeight'        { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
-		'flatHookExtendedCrossbarAtXHeight'       { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
-		'flatHookTailedCrossbarAtXHeight'         { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
-		'flatHookDiagonalTailedCrossbarAtXHeight' { { NarrowFShape         dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
+		'flatHook'                                { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifed'                         { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtended'                        { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailed'                          { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailed'                  { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
+		'flatHookCrossbarAtXHeight'               { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCrossbarAtXHeight'        { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCrossbarAtXHeight'       { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCrossbarAtXHeight'         { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCrossbarAtXHeight' { { [NarrowFShape 0]     dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
 
-		'phoneticLeft'                            { { StandardSmallFShape [DivFrame 1] } { 1 fbar [if SLAB 4 0] } { 'b'  'p'  } }
+		'flatHookCLC1'                            { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCLC1'                     { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCLC1'                    { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCLC1'                      { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCLC1'              { { [NarrowFShape 1]     dfNarrowF   } { pNarrowSide XH   CH-DIAGONAL-HOOK } { 'if' 'if' } }
+
+		'flatHookCLC2'                            { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-NONE          } { 'b'  'p'  } }
+		'flatHookSerifedCLC2'                     { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-SERIF         } { 'b'  'p'  } }
+		'flatHookExtendedCLC2'                    { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-EXTENSION     } { 'if' 'if' } }
+		'flatHookTailedCLC2'                      { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-HOOK          } { 'if' 'if' } }
+		'flatHookDiagonalTailedCLC2'              { { [NarrowFShape 2]     dfNarrowF   } { pNarrowSide fbar CH-DIAGONAL-HOOK } { 'if' 'if' } }
+
+		# Construct shape of U+0284 with "f" code
+		'dotlessJHookBar'                         { { StandardSmallFShape [DivFrame 1] } { 1 (XH * 0.1 + Stroke) CH-HOOK     } { 'if' 'if' } }
 
 	foreach { suffix {{Body df} {pBar yBar ch} {mk mkTurn}}} [Object.entries SmallFConfig] : do
 		create-glyph "f.\(suffix)" : glyph-proc
@@ -256,9 +158,15 @@ glyph-block Letter-Latin-Lower-F : begin
 		turned "turnf.\(suffix)" nothing "f.\(suffix)" df.middle (XH / 2) [df.markSet.(mkTurn)]
 
 	select-variant 'f' 'f'
-	alias 'lenisf' 0xAB35 'f.serifless'
-	alias 'fltail' 0x192  'f.tailed'
+	link-reduced-variant 'f/sansSerif' 'f' MathSansSerif
 	select-variant 'turnf' 0x25F (follow -- 'f')
+	select-variant 'lenisf' 0xAB35 (shapeFrom -- 'f')
+	select-variant 'fltail' 0x192  (shapeFrom -- 'f')
+	select-variant 'f/compLigLeft1' (shapeFrom -- 'f')
+	select-variant 'f/compLigLeft2' (shapeFrom -- 'f')
+	select-variant 'f/phoneticLeft' (shapeFrom -- 'f')
+
+	alias 'dotlessJHookBar' 0x284 'f.dotlessJHookBar'
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/f' 0x1D557 : glyph-proc
@@ -272,51 +180,3 @@ glyph-block Letter-Latin-Lower-F : begin
 			HCrossBar.top SB [mix SB RightSB 0.95] fbar BBS
 			Rect CAP 0 barLeft (barLeft + BBD)
 		include : HBarBottom barLeft (barLeft + BBD) 0 BBS
-
-	do "f ligatures"
-		local shift (-(Width * 0.055 + SB * 0.5))
-		local barr RightSB
-		local hbarleft (SB + shift + Stroke * [if para.slopeAngle 0.5 0.25])
-
-		create-glyph 'f_i.upright' : glyph-proc
-			include : MarkSet.b
-			include : new-glyph : glyph-proc
-				include : refer-glyph "longs.upright"
-				include : Translate shift 0
-			include : VBarRight barr 0 fbar
-			include : HBarTop hbarleft barr fbar
-			if SLAB : include : tagged 'serifRB' : CenterBottomSerif (barr - HalfStroke * HVContrast) 0 Jut
-
-		create-glyph 'f_i.italic' : glyph-proc
-			include : MarkSet.b
-			include : new-glyph : glyph-proc
-				include : refer-glyph "longs.italic"
-				include : Translate shift 0
-			include : VBarRight barr 0 fbar
-			include : HBarTop hbarleft barr fbar
-			if SLAB : include : tagged 'serifRB' : RightwardBottomSerif barr 0 SideJut
-
-		create-glyph 'f_l.upright' : glyph-proc
-			local m : Middle - JBalance - HalfStroke * HVContrast + shift
-			include : dispiro
-				widths.rhs
-				flat m 0 [heading Upward]
-				curl m (CAP - SmoothA)
-				hookend (CAP - O)
-				g4 (barr + OXHook) (CAP - Hook)
-			include : VBarRight barr 0 (CAP - Hook)
-			include : dispiro
-				widths.rhs
-				flat ([Math.min (m - Stroke * 0.3) hbarleft] - TanSlope * HalfStroke) fbar
-				curl ([mix SB barr 0.6] - TanSlope * HalfStroke) fbar
-			if SLAB : begin
-				include : tagged 'serifLB' : CenterBottomSerif (m + HalfStroke * HVContrast + RBalance * 0.35) 0 (Jut + RBalance * 0.65)
-				include : tagged 'serifRB' : CenterBottomSerif (barr - HalfStroke * HVContrast) 0 Jut
-
-		create-glyph 'f_l.italic' : glyph-proc
-			include : new-glyph : glyph-proc
-				include [refer-glyph 'longs.italic'] AS_BASE
-				include : Translate shift 0
-			include : VBarRight barr 0 CAP
-			include : HBarTop hbarleft [mix SB barr 0.65] fbar
-			if SLAB : include : tagged 'serifRB' : RightwardBottomSerif barr 0 SideJut

@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -10,74 +10,132 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender
 
-	define SLAB-AUTO            1
-	define SLAB-MOTION          2
-	define SLAB-SMALL-CYRILLIC  3
+	define SLAB-NONE                   0
+	define SLAB-TOP-LEFT               1
+	define SLAB-TOP-LEFT-BOTTOM-RIGHT  2
+	define SLAB-TAILED-CYRILLIC        3
+	define SLAB-ALL                    4
 
-	define [HSerifs t b l r slabType] : begin
-		local sf : SerifFrame t b l r
+	define [HSerifs slabType t b l r sw] : begin
+		local sf : SerifFrame t b l r (sw -- [fallback sw Stroke])
 		return : match slabType
-			[Just SLAB-AUTO]   : begin
-				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
-			[Just SLAB-MOTION] : begin sf.lt.outer
-			[Just SLAB-SMALL-CYRILLIC] : if [not para.isItalic]
-				NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
-				NeedSlab SLAB : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-NONE]   : glyph-proc
+			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
+			[Just SLAB-TOP-LEFT-BOTTOM-RIGHT] : composite-proc sf.lt.outer sf.rb.outer
+			[Just SLAB-TAILED-CYRILLIC] : composite-proc sf.lt.full sf.rt.full sf.lb.full
+			[Just SLAB-ALL] : composite-proc sf.lt.full sf.rt.full sf.lb.full sf.rb.full
 
-	define [HShape top slabType] : glyph-proc
-		include : tagged 'strokeL' : VBarLeft SB 0 top
-		include : tagged 'strokeR' : VBarRight RightSB 0 top
-		include : HBar (SB - O) (RightSB + O) (top * HBarPos)
+	define [HShape l r top sw] : glyph-proc
+		include : tagged 'strokeL' : VBarLeft l 0 top [fallback sw Stroke]
+		include : tagged 'strokeR' : VBarRight r 0 top [fallback sw Stroke]
+		include : HBar (l - O) (r + O) (top * HBarPos) [fallback sw Stroke]
 
-		include : HSerifs top 0 SB RightSB slabType
+	define [TailedHShape l r top sw] : glyph-proc
+		include : tagged 'strokeL' : VBarLeft l 0 top [fallback sw Stroke]
+		include : tagged 'strokeR' : RightwardTailedBar r 0 top (sw -- [fallback sw Stroke])
+		include : HBar (l - O) (r + O) (top * HBarPos) [fallback sw Stroke]
 
-	create-glyph 'H.standard' : glyph-proc
-		include : MarkSet.capital
-		include : HShape CAP SLAB-AUTO
+	define [EnGheShape Body top slabType vSlab] : glyph-proc
+		local sw : AdviceStroke 2.75
+		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
+		local barRight : mix Width RightSB [if SLAB 0.25 0.375]
 
-	create-glyph 'H.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : HShape CAP SLAB-MOTION
+		include : Body SB right top sw
+		include : HBarTop (right + O) barRight top
+
+		include : HSerifs slabType top 0 SB right sw
+		if vSlab : include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
+
+	define [HwairShape df top slabType] : glyph-proc
+		include : VBarLeft df.leftSB 0 CAP df.mvs
+		include : HBar SB df.middle (CAP / 2)
+		include : dispiro
+			widths.lhs df.mvs
+			flat (df.middle - df.mvs * 0.5 * HVContrast) CAP [heading Downward]
+			curl (df.middle - df.mvs * 0.5 * HVContrast) (SmallSmoothB * 0.6 * df.div)
+			arcvh
+			g4 [mix (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB 0.5] O [heading Rightward]
+			archv
+			flat df.rightSB (SmallSmoothA * 0.6 * df.div)
+			curl df.rightSB XH [heading Upward]
+		include : HSerifs slabType top 0 df.leftSB (df.middle + 0.5 * df.mvs * HVContrast) df.mvs
+
+	define HConfig : object
+		serifless                        { HShape       SLAB-NONE                  false }
+		tailed                           { TailedHShape SLAB-NONE                  false }
+		topLeftSerifed                   { HShape       SLAB-TOP-LEFT              false }
+		tailedTopLeftSerifed             { TailedHShape SLAB-TOP-LEFT              false }
+		topLeftBottomRightSerifed        { HShape       SLAB-TOP-LEFT-BOTTOM-RIGHT true  }
+		serifed                          { HShape       SLAB-ALL                   true  }
+		tailedSerifed                    { TailedHShape SLAB-TAILED-CYRILLIC       true  }
+		serifedExceptBottomRight         { HShape       SLAB-TAILED-CYRILLIC       true  }
+
+	foreach { suffix { Body slabType enGheVSlab } } [Object.entries HConfig] : do
+		create-glyph "H.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Body SB RightSB CAP
+			include : HSerifs slabType CAP 0 SB RightSB
+
+		create-glyph "smcpH.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : Body SB RightSB  XH
+			include : HSerifs slabType XH 0 SB RightSB
+
+		create-glyph "halfH.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Body SB RightSB CAP
+			eject-contour 'strokeR'
+			include : HSerifs slabType CAP 0 SB RightSB
+			eject-contour 'serifRT'
+			eject-contour 'serifRB'
+
+		create-glyph "halfSmcpH.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : Body SB RightSB XH
+			eject-contour 'strokeR'
+			include : HSerifs slabType XH 0 SB RightSB
+			eject-contour 'serifRT'
+			eject-contour 'serifRB'
+
+		create-glyph "cyrl/EnGhe.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : EnGheShape Body CAP slabType enGheVSlab
+
+		create-glyph "cyrl/enghe.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : EnGheShape Body XH slabType enGheVSlab
+
+		create-glyph "Hwair.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : HwairShape df CAP slabType
 
 	select-variant 'H' 'H'
-
-	create-glyph 'smcpH.standard' : glyph-proc
-		include : MarkSet.e
-		include : HShape XH SLAB-AUTO
-
-	create-glyph 'smcpH.standardSmallCyrl' : glyph-proc
-		include : MarkSet.e
-		include : HShape XH SLAB-SMALL-CYRILLIC
-
-	create-glyph 'smcpH.motionSerifed' : glyph-proc
-		include : MarkSet.e
-		include : HShape XH SLAB-MOTION
+	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
+	alias 'grek/Eta' 0x397 'H'
+	alias-reduced-variant 'grek/Eta/sansSerif' 'grek/Eta' 'H/sansSerif' MathSansSerif
+	alias 'cyrl/En' 0x41D 'H'
+	select-variant 'halfH' 0x2C75
 
 	select-variant 'smcpH' 0x29C (follow -- 'H')
-
-	create-glyph 'halfH' 0x2C75 : glyph-proc
-		include : MarkSet.capital
-		include : HShape CAP SLAB-AUTO
-		eject-contour 'strokeR'
-		eject-contour 'serifRT'
-		eject-contour 'serifRB'
-
-	create-glyph 'halfSmcpH' 0x2C76 : glyph-proc
-		include : MarkSet.e
-		include : HShape XH SLAB-AUTO
-		eject-contour 'strokeR'
-		eject-contour 'serifRT'
-		eject-contour 'serifRB'
-
-	alias 'grek/Eta' 0x397 'H'
-	alias 'cyrl/En' 0x41D 'H'
-
+	select-variant 'halfSmcpH' 0x2C76 (follow -- 'halfH')
 	select-variant 'cyrl/en' 0x43D (shapeFrom -- 'smcpH')
+	select-variant 'cyrl/en/descenderBase' (shapeFrom -- 'smcpH')
 
-	create-glyph 0x4A2 : composite-proc [refer-glyph 'cyrl/En'] [CyrDescender RightSB]
-	create-glyph 0x4A3 : composite-proc [refer-glyph 'cyrl/en'] [CyrDescender RightSB]
+	derive-composites 'cyrl/EnDescender' 0x4A2 'cyrl/En' [CyrDescender RightSB]
+	derive-composites 'cyrl/enDescender' 0x4A3 'cyrl/en/descenderBase' [CyrDescender RightSB]
+
+	derive-composites 'cyrl/EnTail' 0x4C9 'cyrl/En' [CyrTailDescender RightSB]
+	derive-composites 'cyrl/enTail' 0x4CA 'cyrl/en/descenderBase' [CyrTailDescender RightSB]
+
+	select-variant 'cyrl/EnGhe' 0x4A4 (follow -- 'H')
+	select-variant 'cyrl/enghe' 0x4A5 (follow -- 'cyrl/en')
+
+	select-variant 'Hwair' 0x1F6
 
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
@@ -91,50 +149,31 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBarBottom SB (SB + BBD) 0 BBS
 		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
 
+	derive-composites 'Hbar' 0x126 'H'
+		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (CAP * 0.725)
 
-	define [EnGheShape top slabType] : glyph-proc
-		local sw : AdviceStroke 2.75
-		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
-		local barRight : mix Width RightSB [if SLAB 0.25 0.375]
+	derive-composites 'smcpHbar' null 'smcpH'
+		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.725)
 
-		include : VBarLeft SB 0 top sw
-		include : VBarRight right 0 top sw
-		include : HBar (SB - O) (right + O) (top * HBarPos)
-		include : HBarTop (right - Stroke * 0.1) barRight top
-
-		include : HSerifs top 0 SB right slabType
-		if SLAB : include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
-
-
-	create-glyph 'cyrl/EnGhe' 0x4A4 : glyph-proc
-		include : MarkSet.capital
-		include : EnGheShape CAP SLAB-AUTO
-
-	create-glyph 'cyrl/enghe' 0x4A5 : glyph-proc
-		include : MarkSet.e
-		include : EnGheShape XH SLAB-SMALL-CYRILLIC
-
-	create-glyph 'Hbar' 0x126 : glyph-proc
-		include [refer-glyph 'H'] AS_BASE
-		include : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] [mix CapMiddle CAP 0.45]
-
-	create-glyph 'HCedilla' 0x1E28 : glyph-proc
+	derive-glyphs 'HCedilla' 0x1E28 'H' : lambda [src sel] : glyph-proc
 		include [refer-glyph 'cedillaBelow']
 		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
-		include [refer-glyph 'H']
+		include [refer-glyph src]
 		include : MarkSet.if
 
-	create-glyph 'Heng' 0xA726 : glyph-proc
+	define [DProcCapitalHeng src sel] : glyph-proc
 		include : MarkSet.if
-		include : refer-glyph "H"
+		include : refer-glyph src
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-	create-glyph 'HengSmcp' : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph "smcpH"
+	define [DProcSmallHeng src sel] : glyph-proc
+		include : MarkSet.p
+		include : refer-glyph src
 		eject-contour 'serifRB'
 		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-	alias 'cyrl/EnHook' 0x4C7 'Heng'
-	alias 'cyrl/enHook' 0x4C8 'HengSmcp'
+	derive-glyphs 'Heng' 0xA726 'H' DProcCapitalHeng
+	derive-glyphs 'HengSmcp' null 'smcpH' DProcSmallHeng
+	derive-glyphs 'cyrl/EnHook' 0x4C7 'cyrl/En' DProcCapitalHeng
+	derive-glyphs 'cyrl/enHook' 0x4C8 'cyrl/en/descenderBase' DProcSmallHeng

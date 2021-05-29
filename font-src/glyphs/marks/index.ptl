@@ -283,13 +283,13 @@ glyph-block Marks : begin
 			rightEnd -- (markMiddle + markExtend * 1.5)
 			hs -- fine
 
-		create-derived 'tildeSlashAbove' 0x34A : glyph-proc
+		create-forked-glyph 'tildeSlashAbove' 0x34A : glyph-proc
 			include : dispiro
 				widths.center (fine * 2)
 				flat (markMiddle + markExtend * 0.2) [mix tbot ttop 1.5]
 				curl (markMiddle - markExtend * 0.2) [mix ttop tbot 1.5]
 
-		create-derived 'tildedotdotAbove' 0x34B : glyph-proc
+		create-forked-glyph 'tildedotdotAbove' 0x34B : glyph-proc
 			local r : 0.75 * DotRadius * fine / HalfStroke
 			include : DotAt markMiddle [mix tbot ttop 1.5] r
 			include : DotAt markMiddle [mix ttop tbot 1.5] r
@@ -716,18 +716,59 @@ glyph-block Marks : begin
 		set-width 0
 		set-mark-anchor 'aboveBrace' markMiddle aboveMarkMid markMiddle aboveMarkMid
 		local braceDepth : markExtend * 0.25
-		local left : SB - Width
-		local right : RightSB - Width
+		local left : [mix 0 SB 0.25] - Width
+		local right : [mix Width RightSB 0.25] - Width
 		include : dispiro
 			widths.lhs markFine
-			g4 (left + braceDepth) aboveMarkTop
+			g4 (left + braceDepth) (aboveMarkTop + markFine)
 			g4 (left + OX)         aboveMarkMid
-			g4 (left + braceDepth) aboveMarkBot
+			g4 (left + braceDepth) (aboveMarkBot - markFine)
 		include : dispiro
 			widths.rhs markFine
-			g4 (right - braceDepth) aboveMarkTop
+			g4 (right - braceDepth) (aboveMarkTop + markFine)
 			g4 (right - OX)         aboveMarkMid
-			g4 (right - braceDepth) aboveMarkBot
+			g4 (right - braceDepth) (aboveMarkBot - markFine)
+
+	alias 'cyrlDasiaAbove' 0x485 'revCommaAbove'
+	alias 'cyrlPsiliAbove' 0x486 'commaAbove'
+	create-glyph 'cyrlPalatilizationAbove' 0x484 : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+
+		local leftEnd  : markMiddle - markExtend * 2.0
+		local rightEnd : markMiddle + markExtend * 1.2
+
+		include : dispiro
+			g4.up.start rightEnd aboveMarkBot [widths.heading markHalfStroke markHalfStroke Upward]
+			arcvh
+			g2.left.mid markMiddle (aboveMarkTop - markHalfStroke) [heading Leftward]
+			alsoThru.g2 0.5 0.5
+			g2.left.end leftEnd ([mix aboveMarkBot aboveMarkTop 0.5] - markHalfStroke) [heading Leftward]
+	create-glyph 'cyrlPokrytieAbove' 0x487 : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+
+		local leftEnd  : markMiddle - markExtend * 1.2
+		local rightEnd : markMiddle + markExtend * 2.0
+
+		include : dispiro
+			g4.up.start leftEnd aboveMarkBot [widths.heading markHalfStroke markHalfStroke Upward]
+			arcvh
+			g2.right.mid markMiddle (aboveMarkTop - markHalfStroke) [heading Rightward]
+			alsoThru.g2 0.5 0.5
+			g2.right.end rightEnd ([mix aboveMarkBot aboveMarkTop 0.5] - markHalfStroke) [heading Rightward]
+
+
+	create-glyph 'cyrlTitloAbove' 0x483 : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+
+		include : VBar (markMiddle - markExtend) aboveMarkBot (aboveMarkMid + markFine) (markFine * 2)
+		include : VBar (markMiddle + markExtend) (aboveMarkMid - markFine) aboveMarkTop (markFine * 2)
+		include : HBar (markMiddle - markExtend) (markMiddle + markExtend)aboveMarkMid (markFine * 2)
 
 	### Below marks
 	create-glyph 'blankBelow' : glyph-proc
@@ -1029,18 +1070,18 @@ glyph-block Marks : begin
 		set-width 0
 		set-mark-anchor 'belowBrace' markMiddle belowMarkMid markMiddle belowMarkMid
 		local braceDepth : markExtend * 0.25
-		local left : SB - Width
-		local right : RightSB - Width
+		local left : [mix 0 SB 0.25] - Width
+		local right : [mix Width RightSB 0.25] - Width
 		include : dispiro
 			widths.lhs markFine
-			g4 (left + braceDepth) belowMarkTop
+			g4 (left + braceDepth) (belowMarkTop + markFine)
 			g4 (left + OX)         belowMarkMid
-			g4 (left + braceDepth) belowMarkBot
+			g4 (left + braceDepth) (belowMarkBot - markFine)
 		include : dispiro
 			widths.rhs markFine
-			g4 (right - braceDepth) belowMarkTop
+			g4 (right - braceDepth) (belowMarkTop + markFine)
 			g4 (right - OX)         belowMarkMid
-			g4 (right - braceDepth) belowMarkBot
+			g4 (right - braceDepth) (belowMarkBot - markFine)
 
 	# horn and angle marks
 	define [HornDim attX attY overshootX overshootY yrP] : begin
@@ -1114,6 +1155,18 @@ glyph-block Marks : begin
 			widths.rhs
 			flat 0 (-O) [heading Downward]
 			curl 0 0 [heading Downward]
+			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
+		set currentGlyph.autoRefPriority (-2)
+
+	create-glyph 'rRetroflexTailBR' : glyph-proc
+		set-width 0
+
+		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
+		include : HBarBottom (-Stroke * HVContrast) (SideJut - HalfStroke * HVContrast) 0
+		include : dispiro
+			widths.rhs
+			flat (SideJut) Stroke [heading Downward]
+			curl (SideJut) 0 [heading Downward]
 			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
 		set currentGlyph.autoRefPriority (-2)
 
@@ -1355,6 +1408,21 @@ glyph-block Marks : begin
 			g4.right.mid markMiddle (yc + radius)
 			archv
 			g4.down.end (markMiddle + radius) yc [heading Downward]
+		set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkTop + markHalfStroke * 2)
+		set currentGlyph.autoRefPriority 50
+
+	create-glyph 'cyrlPsiliPokrytieAbove' : glyph-proc
+		set-width 0
+		include : refer-glyph "commaAbove"
+		local radius : Math.max (markExtend - commaAboveRadius) (commaAboveRadius * 1.25)
+		local sw : Math.min (markHalfStroke * 2) ([AdviceStroke 6.5] * 1.25)
+		include : dispiro
+			widths.lhs sw
+			g4.up.start (markMiddle - radius) yc [heading Upward]
+			arcvh
+			g2.right.mid markMiddle (yc + radius)
+			alsoThru.g2 0.5 0.5
+			g2.right.end (markMiddle + [Math.max radius (markExtend * 2)]) yc [heading Rightward]
 		set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkTop + markHalfStroke * 2)
 		set currentGlyph.autoRefPriority 50
 

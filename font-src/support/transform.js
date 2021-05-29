@@ -51,7 +51,14 @@ module.exports = class Transform {
 		);
 	}
 
+	toString() {
+		return `[[${this.xx} ${this.xy}] [${this.yx} ${this.yy}]] + [[${this.x}] [${this.y}]]`;
+	}
+
 	static isTranslate(tfm) {
 		return tfm.xx === 1 && tfm.yy === 1 && tfm.xy === 0 && tfm.yx === 0;
+	}
+	static isIdentity(tfm) {
+		return this.isTranslate(tfm) && tfm.x === 0 && tfm.y === 0;
 	}
 };

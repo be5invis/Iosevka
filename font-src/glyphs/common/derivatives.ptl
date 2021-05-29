@@ -50,12 +50,12 @@ glyph-block Common-Derivatives : begin
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
-	define [with-related-glyphs dstGid dstUnicode sourceGid Fn] : begin
-		if [not : glyph-is-needed sourceGid] : return nothing
+	define [derive-glyphs dstGid dstUnicode srcGid Fn] : begin
+		if [not : glyph-is-needed srcGid] : return nothing
 
-		local glyphSrc : glyphStore.queryByName sourceGid
+		local glyphSrc : glyphStore.queryByName srcGid
 		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
-			include : Fn sourceGid null
+			include : Fn srcGid null
 
 		local derivedGlyphIdMap : new Map
 		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
@@ -68,13 +68,24 @@ glyph-block Common-Derivatives : begin
 				gr.set glyphDst relGidDst
 				derivedGlyphIdMap.set relGidSrc relGidDst
 
-	define [alias dstGid dstUnicode sourceGid] : begin
-		if [not dstGid] : throw : new Error "Target ID not specified"
-		if [not : glyph-is-needed sourceGid] : return nothing
+	define [derive-composites dstGid dstUnicode srcGid] : begin
+		if [not : glyph-is-needed srcGid] : return nothing
 
-		local glyphSrc : glyphStore.queryByNameEnsured sourceGid
+		local restComponents : {}.slice.call arguments 3
+		return : derive-glyphs dstGid dstUnicode srcGid : lambda [src sel] : glyph-proc
+			include [refer-glyph src] AS_BASE ALSO_METRICS
+			foreach component [items-of restComponents] : begin
+				if ([typeof component] === 'string')
+				: then : include [refer-glyph component]
+				: else : include component
+
+	define [alias dstGid dstUnicode srcGid] : begin
+		if [not dstGid] : throw : new Error "Target ID not specified"
+		if [not : glyph-is-needed srcGid] : return nothing
+
+		local glyphSrc : glyphStore.queryByNameEnsured srcGid
 		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
-			include [refer-glyph sourceGid] AS_BASE ALSO_METRICS
+			include [refer-glyph srcGid] AS_BASE ALSO_METRICS
 
 		if glyphDst : begin
 			foreach [gr : items-of : AnyCv.query glyphSrc] : begin
@@ -84,7 +95,7 @@ glyph-block Common-Derivatives : begin
 
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
-		with-related-glyphs newid unicode id
+		derive-glyphs newid unicode id
 			lambda [src sel] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark
@@ -92,6 +103,14 @@ glyph-block Common-Derivatives : begin
 				define y : if (_y <@ Function) [_y.call currentGlyph] _y
 				include : FlipAround x y
 				set currentGlyph.autoRefPriority [query-glyph src].autoRefPriority
+
+	define [link-reduced-variant dstGid srcGid gr] : begin
+		if [not : query-glyph dstGid] : select-variant dstGid (shapeFrom -- srcGid)
+		if (gr && [query-glyph srcGid]) : gr.set [query-glyph srcGid] dstGid
+
+	define [alias-reduced-variant dstGid srcGid shapeGid gr] : begin
+		alias dstGid null shapeGid
+		if (gr && [query-glyph srcGid]) : gr.set [query-glyph srcGid] dstGid
 
 	define [HalfAdvance] : this.advanceWidth / 2
 
@@ -125,7 +144,8 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : VCombine newid unicode id id spacing
 
-	glyph-block-export select-variant orthographic-italic refer-glyph query-glyph with-related-glyphs
+	glyph-block-export select-variant orthographic-italic refer-glyph query-glyph
+	glyph-block-export derive-glyphs derive-composites link-reduced-variant alias-reduced-variant
 	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
 	glyph-block-export HalfAdvance TurnMarks
 
@@ -161,31 +181,43 @@ glyph-block Recursive-Build : begin
 		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
 		return gs.glyphStore
 
-	define [Miniature] : params [glyphs crowd scale [slopeAngle para.slopeAngle] [sbscale (Width / UPM)] [mono false]] : begin
-		local forkedPara : Object.create para
+	define [MiniatureParaT] : params [pp crowd scale [sbscale (Width / UPM)] [mono false] [mono2 false]] : begin
+		local forkedPara : Object.create pp
 		forkedPara.stroke = [AdviceStroke crowd : Math.pow [clamp 0 1 (HalfUPM / Width)] 0.5] / scale
-		forkedPara.ess = para.ess * forkedPara.stroke / para.stroke
-		forkedPara.dotsize = para.dotsize * forkedPara.stroke / para.stroke
-		forkedPara.periodsize = para.periodsize * forkedPara.stroke / para.stroke
+		forkedPara.ess = pp.ess * forkedPara.stroke / pp.stroke
+		forkedPara.dotsize = pp.dotsize * forkedPara.stroke / pp.stroke
+		forkedPara.periodsize = pp.periodsize * forkedPara.stroke / pp.stroke
 		forkedPara.sb = SB * sbscale
-		forkedPara.slopeAngle = slopeAngle
 		if mono : begin
 			forkedPara.diversityM  = 1
-		return : Fork glyphs forkedPara
+		if mono2 : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
 
-	define [Thinner glyphs p crowd] : begin
+		return forkedPara
+
+	define [Miniature glyphs] : begin
+		return : Fork glyphs : MiniatureParaT.apply null { para :: [{}.slice.call arguments 1] }
+
+	define [Thinner glyphs p fMono] : begin
 		local forkedPara : Object.create para
-		forkedPara.stroke = [AdviceStroke : fallback crowd 1]
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
 		forkedPara.width = Width * p
 		forkedPara.accentx = AccentX * p
 		forkedPara.jut = Jut * p
 		forkedPara.longjut = LongJut * p
 		forkedPara.diversityM = 1
+		if fMono : begin
+			forkedPara.diversityF  = 1
+			forkedPara.diversityI  = 1
+			forkedPara.diversityII = 1
 		#forkedPara.hookx = HookX * p
 		return : Fork glyphs forkedPara
 
 	define [Widen glyphs p psb] : begin
 		local forkedPara : Object.create para
+		forkedPara.unitWidthScalar = para.unitWidthScalar * p
 		forkedPara.width = Width * p
 		forkedPara.sb = SB * [fallback psb p]
 		forkedPara.accentx = AccentX * p
@@ -194,4 +226,4 @@ glyph-block Recursive-Build : begin
 		forkedPara.hookx = HookX * p
 		return : Fork glyphs forkedPara
 
-	glyph-block-export Fork Miniature Thinner Widen
+	glyph-block-export Fork Miniature MiniatureParaT Thinner Widen

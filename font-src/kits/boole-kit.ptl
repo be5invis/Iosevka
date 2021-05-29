@@ -1,19 +1,22 @@
 import 'typo-geom' as TypoGeom
 import '../support/curve-util' as CurveUtil
-import '../support/geometry' as [object BooleanGeometry]
+import '../support/geometry' as [object BooleanGeometry TransformedGeometry]
 
 export : define [SetupBuilders args] : begin
 	define [object Glyph GlobalTransform] args
 	define [impl operator operands] : begin
 		return : function [] : begin
 			local operandGeometries {}
+			local forwardGizmo : this.gizmo || GlobalTransform
+			local backwardGizmo : forwardGizmo.inverse
 			foreach operand [items-of operands] : begin
 				local g1 : new Glyph
-				set g1.gizmo : this.gizmo || GlobalTransform
+				set g1.gizmo forwardGizmo
 				g1.include operand
-				operandGeometries.push g1.geometry
+				operandGeometries.push : new TransformedGeometry g1.geometry backwardGizmo
 
-			this.includeGeometry : new BooleanGeometry operator operandGeometries
+			define geomPureBoolian : new BooleanGeometry operator operandGeometries
+			this.includeGeometry : new TransformedGeometry geomPureBoolian forwardGizmo
 
 	define [union] : impl TypoGeom.Boolean.ClipType.ctUnion [{}.slice.call arguments 0]
 	define [intersection] : impl TypoGeom.Boolean.ClipType.ctIntersection [{}.slice.call arguments 0]

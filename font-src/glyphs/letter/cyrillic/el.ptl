@@ -9,40 +9,70 @@ glyph-module
 glyph-block Letter-Cyrillic-El : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : LegShape
+	glyph-block-import Letter-Shared-Shapes : LegShape RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender CyrHookDescender
 
-	define SLAB-ALL    1
-	define SLAB-LOWER  2
+	define BODY-STRAIGHT 0
+	define BODY-TAILED   1
 
-	define [CyrElShape top slabType] : glyph-proc
+	define SLAB-NONE     0
+	define SLAB-ALL      1
+	define SLAB-LOWER    2
+	define SLAB-TAILED-U 3
+	define SLAB-TAILED-I 4
+
+	define [CyrElShape top bodyType slabType] : glyph-proc
 		local cutleft : mix SB RightSB 0.135
 		local cutleft2 : mix SB RightSB 0.075
-		local cutright : mix SB RightSB 1
-		include : VBarRight cutright 0 top
-		include : HBar cutleft cutright (top - HalfStroke)
+		include : match bodyType
+			[Just BODY-TAILED] : RightwardTailedBar RightSB 0 top
+			__                 : VBarRight RightSB 0 top
+		include : HBar cutleft RightSB (top - HalfStroke)
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner cutleft top]
 			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 [if SLAB 1 0.75]] 0]
 			xb -- cutleft2
 
-		define useItalicShape : para.isItalic && slabType === SLAB-LOWER
-		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif cutleft top SideJut
-			include : tagged 'serifRT' : if useItalicShape
-				then : glyph-proc
-				else : RightwardTopSerif cutright top SideJut
-			include : tagged 'serifRB' : if useItalicShape
-				then : RightwardBottomSerif cutright 0 SideJut
-				else : CenterBottomSerif (cutright - HalfStroke * HVContrast) 0 Jut
+		include : tagged 'serifLT' : match slabType
+			[Just SLAB-ALL]      : LeftwardTopSerif cutleft top SideJut
+			[Just SLAB-LOWER]    : LeftwardTopSerif cutleft top SideJut
+			[Just SLAB-TAILED-U] : LeftwardTopSerif cutleft top SideJut
+			[Just SLAB-TAILED-I] : LeftwardTopSerif cutleft top SideJut
+			__                   : glyph-proc
+		include : tagged 'SerifRT' : match slabType
+			[Just SLAB-ALL]      : RightwardTopSerif RightSB top SideJut
+			[Just SLAB-TAILED-U] : RightwardTopSerif RightSB top SideJut
+			__                   : glyph-proc
+		include : tagged 'SerifRB' : match slabType
+			[Just SLAB-ALL]    : CenterBottomSerif (RightSB - HalfStroke * HVContrast) 0 Jut
+			[Just SLAB-LOWER]  : RightwardBottomSerif RightSB 0 SideJut
+			__                 : glyph-proc
 
 	create-glyph 'cyrl/El' 0x41B : glyph-proc
 		include : MarkSet.capital
-		include : CyrElShape CAP SLAB-ALL
+		include : CyrElShape CAP BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
 
-	create-glyph 'cyrl/el' 0x43B : glyph-proc
+	create-glyph 'cyrl/smcpEl' 0x1D2B : glyph-proc
 		include : MarkSet.e
-		include : CyrElShape XH SLAB-LOWER
+		include : CyrElShape XH BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
 
-	alias 'cyrl/smcpEl' 0x1D2B 'cyrl/el'
+	create-glyph 'cyrl/el.straight' : glyph-proc
+		include : MarkSet.e
+		include : CyrElShape XH BODY-STRAIGHT : if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
+
+	create-glyph 'cyrl/el.tailed' : glyph-proc
+		include : MarkSet.e
+		include : CyrElShape XH BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+
+	derive-composites 'cyrl/ElDescender' 0x52E 'cyrl/El' [CyrDescender RightSB]
+	derive-composites 'cyrl/elDescender' 0x52F 'cyrl/el.straight' [CyrDescender RightSB]
+
+	derive-composites 'cyrl/ElTail' 0x4C5 'cyrl/El' [CyrTailDescender RightSB]
+	derive-composites 'cyrl/elTail' 0x4C6 'cyrl/el.straight' [CyrTailDescender RightSB]
+
+	derive-composites 'cyrl/ElHook' 0x512 'cyrl/El' [CyrHookDescender RightSB]
+	derive-composites 'cyrl/elHook' 0x513 'cyrl/el.straight' [CyrHookDescender RightSB]
+
+	select-variant 'cyrl/el' 0x43B
 	alias 'cyrl/El.BGR' null 'grek/Lambda'
 	alias 'cyrl/el.BGR' null 'turnv'

@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -52,7 +52,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			[Just rStraight]            : mix (xBar - fine) rHookX (0.54 + 2 * TanSlope * strokeBar / Width)
 			[Just rSerifed]             : mix (xBar - fine) rHookX (0.59 + 2 * TanSlope * strokeBar / Width)
 			[Just rNarrow]              : mix df.width rHookX : Math.max 1.01 (5 / 4 * [mix 1 dfR.div 2])
-			[Just rNarrowSerifed]       : xBar + RHook * 1.25 * df.div
+			[Just rNarrowSerifed]       : Math.min ([mix df.width rHookX df.div] - 0.1) : xBar + RHook * 1.25 * df.div
 			[Just rCornerHooked]        : rHookX - strokeBar / 2 * HVContrast
 			[Just rCornerHookedSerifed] : rHookX - strokeBar / 2 * HVContrast
 			[Just rEarless]             : mix (xBar - strokeBar * HVContrast) rHookX 0.5
@@ -69,8 +69,13 @@ glyph-block Letter-Latin-Lower-R : begin
 			__                      rHookX
 		return : object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookXN rHookY hookSuperness
 
+	define [OverrideMarks doTopSerif xBar] : glyph-proc
+		set-base-anchor 'above' [mix [mix df.leftSB (xBar - Stroke * HVContrast) : if doTopSerif 0.5 1] df.rightSB 0.5] XH
+		set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
+
 	define [StandardShape df md doTopSerif doBottomSerif] : glyph-proc
 		define [object xBar rBottomSerif rTopSerif fine xArchMiddle skew rHookX rHookY hookSuperness] : RDim df md
+		include : OverrideMarks doTopSerif xBar
 		include : dispiro
 			widths.lhs
 			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
@@ -79,7 +84,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			archv
 			straight.down.end (xBar - fine * HVContrast) (XH * 0.53 + (SmallSmooth - SmallSmoothA)) [widths.heading fine 0 Downward]
 		include : VBarRight xBar 0 XH
-		set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
 		if doBottomSerif : include : rBottomSerif 0
 		if doTopSerif : include : rTopSerif XH
 
@@ -87,6 +91,7 @@ glyph-block Letter-Latin-Lower-R : begin
 	define [CornerHookShape df md ts bs] : CompactShapeImpl df md true  ts bs
 	define [CompactShapeImpl df md doHookSerif doTopSerif doBottomSerif] : glyph-proc
 		define [object xBar rBottomSerif rTopSerif fine xArchMiddle rHookXN] : RDim df md
+		include : OverrideMarks doTopSerif xBar
 		define xCor : if doHookSerif 0 : CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]
 		define [ArcKnots] : list
 			flat (rHookXN - xCor) XH [if doHookSerif [heading Leftward] null]
@@ -95,7 +100,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			straight.down.end (xBar - fine * HVContrast) (XH * 0.53 + (SmallSmooth - SmallSmoothA)) [widths.heading fine 0 Downward]
 		include : dispiro [widths.lhs] [ArcKnots]
 		include : VBarRight xBar 0 XH
-		set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
 		if doHookSerif : include : intersection
 			DownwardRightSerif (rHookXN - xCor) XH VJut
 			spiro-outline
@@ -108,6 +112,7 @@ glyph-block Letter-Latin-Lower-R : begin
 
 	define [EarlessCornerShape df md doTopSerif doBottomSerif] : glyph-proc
 		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
+		include : OverrideMarks doTopSerif xBar
 		include : dispiro
 			widths.lhs
 			g4.up.start rHookX (XH - rHookY - Stroke * 0.5) [heading Upward]
@@ -116,10 +121,10 @@ glyph-block Letter-Latin-Lower-R : begin
 			g4 (xBar - Stroke * HVContrast) (XH - DToothlessRise)
 		include : VBarRight xBar 0 (XH - DToothlessRise)
 		if doBottomSerif : include : rBottomSerif 0
-		set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
 
 	define [EarlessRoundedShape df md doTopSerif doBottomSerif] : glyph-proc
 		define [object xBar xArchMiddle rHookX rHookY hookSuperness rBottomSerif] : RDim df md
+		include : OverrideMarks doTopSerif xBar
 		local hx : Math.max rHookX (xBar + 1.25 * Stroke)
 		include : dispiro
 			widths.lhs
@@ -128,7 +133,6 @@ glyph-block Letter-Latin-Lower-R : begin
 			flat (xBar - Stroke * HVContrast) (XH - SmallSmoothA)
 			curl (xBar - Stroke * HVContrast) 0 [heading Downward]
 		if doBottomSerif : include : rBottomSerif 0
-		set-base-anchor 'overlay' (xBar - Stroke * 0.25) (XH * 0.5)
 
 	define SmallRConfig : object
 		'serifless'               { StandardShape       dfN rStraight            { 0 0 } }
@@ -186,6 +190,7 @@ glyph-block Letter-Latin-Lower-R : begin
 
 
 	select-variant 'r' 'r'
+	link-reduced-variant 'r/sansSerif' 'r' MathSansSerif
 
 	define [TurnRMarks k] : TurnMarks k
 		function [df] : return {.baseAnchors {.bottomright {.x (df.rightSB - RBalance) .y 0}}}
@@ -224,7 +229,7 @@ glyph-block Letter-Latin-Lower-R : begin
 		include : dfN.markSet.e
 		define [object rBottomSerif] : RDim dfN rEarless
 		include : EarlessRoundedShape dfN rEarless 0 0
-		create-derived 'rflap.serifed' : rBottomSerif 0
+		create-forked-glyph 'rflap.serifed' : rBottomSerif 0
 
 	create-glyph 'rflap.compact' : glyph-proc
 		set-width dfR.width

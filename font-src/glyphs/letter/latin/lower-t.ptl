@@ -15,7 +15,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define dfNarrowT : DivFrame para.diversityF
-	define [xSmallTBarLeftT df] : df.middle - TBalance - Stroke * 0.5 * HVContrast
+	define [xSmallTBarLeftT df] : df.middle - TBalance * df.div * df.div - HalfStroke * HVContrast
+	define [xSmallTCrossRefT df] : [xSmallTBarLeftT df] + df.div * TBalance2 + HalfStroke * HVContrast
 	define xSmallTBarLeft : xSmallTBarLeftT : DivFrame 1
 
 	define yCrossBar     XH
@@ -38,6 +39,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	define [SmallTShape __ top bot] : glyph-proc
 		local g : include : SmallTHookShapeT dispiro 0 top bot Stroke
 		set-base-anchor 'bottomright' g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
+		set-base-anchor 'above' (xSmallTBarLeft + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'below' [mix xSmallTBarLeft g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
 		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (XH * 0.58)
 
@@ -47,22 +49,23 @@ glyph-block Letter-Latin-Lower-T : begin
 			begin yCrossBar
 
 	define [DiagTailedSmallTHookShape df top bot sw] : begin
-		local xMid : xSmallTBarLeft + HalfStroke * HVContrast
+		local xMid : [xSmallTBarLeftT df] + HalfStroke * HVContrast
 		return : dispiro
 			flat xMid top [widths.center.heading sw Downward]
-			DiagonalTailR df xMid bot [DiagonalTailStdDepth df sw] sw
+			DiagonalTailR df xMid bot [DiagonalTailStdDepth [DivFrame : Math.sqrt df.div] sw] sw
 
 	define [TDiagTailShape df top] : glyph-proc
 		local g : include : DiagTailedSmallTHookShape df top 0 Stroke
+		set-base-anchor 'above' ([xSmallTBarLeftT df] + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (XH * 0.58)
 
 		include : HCrossBar.top
-			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
-			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
+			[xSmallTCrossRefT df] - LongJut * [Math.sqrt df.div]
+			[xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div]
 			begin yCrossBar
 
-	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top [mix 1 df.div 2] 0
-	define [TFlatShapeImpl df top m ext] : glyph-proc
+	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top bot [mix 1 df.div 2] 0
+	define [TFlatShapeImpl df top bot m ext] : glyph-proc
 		local xCrossLeft : mix 0 SB m
 		local xCrossRight : mix df.width df.rightSB m
 		local xBarLeft : [mix xCrossLeft xCrossRight 0.42] - Stroke * 0.375 * HVContrast
@@ -76,35 +79,39 @@ glyph-block Letter-Latin-Lower-T : begin
 				archv.superness DesignParameters.tightHookSuperness
 				flat xBarLeft hd.y
 				curl xBarLeft top [heading Upward]
+		set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'topright' xCrossRight  CAP
 		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
-		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) 0
+		set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + hd.x / 2) (xCrossRight - 1)]) bot
 
 	define [SmallTCrossBody df top bot] : glyph-proc
 		include : VBar df.middle 0 top
-		include : HCrossBar.top (df.middle - LongJut * df.div) (df.middle + LongJut * df.div) yCrossBar
+		include : HCrossBar.top (df.middle - LongJut * [Math.sqrt df.div]) (df.middle + LongJut * [Math.sqrt df.div]) yCrossBar
 		set-base-anchor 'overlay' df.middle (XH * 0.58)
 
 	define [SmallTHooklessAsymmetricBody df top bot] : glyph-proc
-		define xBar : xSmallTBarLeftT df
-		include : VBarLeft xBar 0 top
-		include : HCrossBar.top xBar (df.middle + df.div * LongJut) yCrossBar
-		set-base-anchor 'overlay' (xBar + 0.625 * Stroke * HVContrast) (XH * 0.58)
-		set-base-anchor 'below' (xBar + HalfStroke * HVContrast) 0
+		define xBarLeft : xSmallTBarLeftT df
+		include : VBarLeft xBarLeft 0 top
+		include : difference
+			HCrossBar.top xBarLeft (df.middle + df.div * LongJut) yCrossBar
+			MaskLeft (xBarLeft - O)
+		set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
+		set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
+		set-base-anchor 'below' (xBarLeft + HalfStroke * HVContrast) bot
 
 	define SmallTConfig : object
 		standard                     { [DivFrame  1] SmallTShape                  CAP         }
-		diagonalTailed               { [DivFrame  1] TDiagTailShape               CAP         }
+		diagonalTailed               {  dfNarrowT    TDiagTailShape               CAP         }
 		flatHook                     {  dfNarrowT    SmallTFlatBody               CAP         }
 		cross                        {  dfNarrowT    SmallTCrossBody              CAP         }
 		hooklessAsymmetric           {  dfNarrowT    SmallTHooklessAsymmetricBody CAP         }
 		standardShortNeck            { [DivFrame  1] SmallTShape                  yShortNeck1 }
-		diagonalTailedShortNeck      { [DivFrame  1] TDiagTailShape               yShortNeck1 }
+		diagonalTailedShortNeck      {  dfNarrowT    TDiagTailShape               yShortNeck1 }
 		flatHookShortNeck            {  dfNarrowT    SmallTFlatBody               yShortNeck1 }
 		crossShortNeck               {  dfNarrowT    SmallTCrossBody              yShortNeck1 }
 		hooklessAsymmetricShortNeck  {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck1 }
 		standardShortNeck2           { [DivFrame  1] SmallTShape                  yShortNeck2 }
-		diagonalTailedShortNeck2     { [DivFrame  1] TDiagTailShape               yShortNeck2 }
+		diagonalTailedShortNeck2     {  dfNarrowT    TDiagTailShape               yShortNeck2 }
 		flatHookShortNeck2           {  dfNarrowT    SmallTFlatBody               yShortNeck2 }
 		crossShortNeck2              {  dfNarrowT    SmallTCrossBody              yShortNeck2 }
 		hooklessAsymmetricShortNeck2 {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck2 }
@@ -115,21 +122,65 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : df.markSet.b
 			include : body df top 0
 
+		create-glyph "t/teshLeft.\(suffix)" : glyph-proc
+			define df1 : DivFrame 1
+			set-width df1.width
+			include : df1.markSet.b
+			include : body df1 top 0
+			include : HCrossBar.top df1.middle (df1.width + df1.middle) yCrossBar
+
+		create-glyph "tHookTop.\(suffix)" : glyph-proc
+			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
+			currentGlyph.clearGeometry
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.above
+			include : union
+				difference [body df top 0] [MaskAbove XH]
+				VerticalHook attach.x XH HookX (-Hook)
+
+		if (body === SmallTShape) : create-glyph "tLTail.\(suffix)" : glyph-proc
+			include : MarkSet.if
+			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.bottomright
+			include : VBarRight attach.x 0 attach.y
+			include : VerticalHook (attach.x - HalfStroke * HVContrast) 0 (-HookX) Hook
+
+		create-glyph "tRTail.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.if
+			include : body df top Descender
+
 		turned "turnt.\(suffix)" nothing "t.\(suffix)" df.middle (XH / 2) [df.markSet.p]
+
+		create-glyph "tCurlyTal.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			local fine : AdviceStroke 3.5
+			local rinner : LongJut / 2 - fine / 2
+			local x2 : mix SB xSmallTBarLeft 0.4
+			local y2 : -fine
+			include : HBarTop (xSmallTBarLeft + HalfStroke - LongJut + TBalance2) (xSmallTBarLeft + HalfStroke + LongJut + TBalance2) XH
+			include : dispiro
+				widths.lhs
+				flat xSmallTBarLeft top [heading Downward]
+				curl xSmallTBarLeft (fine + rinner * 2)
+				CurlyTail fine rinner (xSmallTBarLeft+ Stroke * HVContrast) 0 (xSmallTBarLeft + Stroke * HVContrast + LongJut) x2 y2
 
 	create-glyph 't.phoneticLeft' : glyph-proc
 		local df : DivFrame 1
 		set-width df.width
 		include : df.markSet.b
-		include : TFlatShapeImpl df CAP 1 0
+		include : TFlatShapeImpl df CAP 0 1 0
 
-	create-glyph 't.phoneticLeft.extended' : glyph-proc
-		local df : DivFrame 1
-		set-width df.width
-		include : df.markSet.b
-		include : intersection
-			TFlatShapeImpl df CAP 1 Width
-			Rect CAP 0 SB (Middle + Width)
+	select-variant 't' 't'
+	select-variant 't/teshLeft' (follow -- 't')
+	select-variant 'turnt' 0x287 (follow -- 't')
+	CreateCommaCaronComposition 't' 'tcaron' 0x165
+	derive-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
+
+	select-variant "tHookTop" 0x1AD
+	select-variant 'tLTail' 0x1AB
+	select-variant 'tRTail' 0x288 (follow -- 'tLTail')
+	select-variant 'tCurlyTal' 0x236 (follow -- 'tLTail')
+
 
 	create-glyph 'mathbb/t' 0x1D565 : glyph-proc
 		include : HBarTop xSmallTBarLeft (xSmallTBarLeft + BBD) CAP BBS
@@ -144,37 +195,3 @@ glyph-block Letter-Latin-Lower-T : begin
 				begin yCrossBar
 				begin BBS
 			Rect CAP 0 xSmallTBarLeft (xSmallTBarLeft + BBD)
-
-	select-variant 't' 't'
-	select-variant 'turnt' 0x287 (follow -- 't')
-	CreateCommaCaronComposition 't' 'tcaron' 0x165
-	with-related-glyphs 'tCedilla' 0x163 't' ConnectedCedilla
-
-	create-glyph 'tltail' 0x1AB : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph 't.standard'
-		local attach : currentGlyph.gizmo.unapply [query-glyph 't.standard'].baseAnchors.bottomright
-		include : VBarRight attach.x 0 attach.y
-		include : VerticalHook (attach.x - HalfStroke * HVContrast) 0 (-HookX) Hook
-
-	create-glyph 'thooktop' 0x1AD : glyph-proc
-		include : MarkSet.e
-		include : SmallTShape [DivFrame 1] (XH - HalfStroke) 0
-		include : VerticalHook (xSmallTBarLeft + HalfStroke * HVContrast) XH HookX (-Hook)
-
-	create-glyph 'trtail' 0x288 : glyph-proc
-		include : MarkSet.if
-		include : SmallTShape [DivFrame 1] CAP Descender
-
-	create-glyph 'tcurlytail' 0x236 : glyph-proc
-		include : MarkSet.b
-		local fine : AdviceStroke 3.5
-		local rinner : LongJut / 2 - fine / 2
-		local x2 : mix SB xSmallTBarLeft 0.4
-		local y2 : -fine
-		include : HBarTop (xSmallTBarLeft + HalfStroke - LongJut + TBalance2) (xSmallTBarLeft + HalfStroke + LongJut + TBalance2) XH
-		include : dispiro
-			widths.lhs
-			flat xSmallTBarLeft CAP [heading Downward]
-			curl xSmallTBarLeft (fine + rinner * 2)
-			CurlyTail fine rinner (xSmallTBarLeft+ Stroke * HVContrast) 0 (xSmallTBarLeft + Stroke * HVContrast + LongJut) x2 y2

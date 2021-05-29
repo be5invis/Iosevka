@@ -9,7 +9,8 @@ glyph-block Letter-Greek-Pi : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifFrame
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifFrame nShoulder
+	glyph-block-import Letter-Shared-Shapes : CyrDescender
 
 	glyph-block-export PiShape
 	define [PiShape] : params [df top bottom [shrinkRate 0.05] [fine Stroke] [doSerif false] [endShrink 0] [tailed false]] : glyph-proc
@@ -35,6 +36,7 @@ glyph-block Letter-Greek-Pi : begin
 	create-glyph 'grek/Pi' 0x3A0 : glyph-proc
 		include : MarkSet.capital
 		include : PiShape [DivFrame 1] CAP 0 (shrinkRate -- 0) (doSerif -- SLAB)
+	alias 'cyrl/Pe' 0x41F 'grek/Pi'
 
 	create-glyph 'grek/smcpPi' 0x1D28 : glyph-proc
 		include : MarkSet.e
@@ -46,13 +48,14 @@ glyph-block Letter-Greek-Pi : begin
 
 	create-glyph 'cyrl/pe.upright' : glyph-proc
 		include : MarkSet.e
-		include : PiShape [DivFrame 1] XH 0 (doSerif -- SLAB) (shrinkRate -- 0.05) (endShrink -- 0.05)
+		include : PiShape [DivFrame 1] XH 0 (shrinkRate -- 0) (doSerif -- SLAB)
 
-	with-related-glyphs 'cyrl/pe.SRB' null 'u' : lambda [src sel] : glyph-proc
+	derive-glyphs 'cyrl/pe.SRB' null 'u' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : refer-glyph "macronAbove"
 
-	alias 'cyrl/Pe' 0x41F 'grek/Pi'
+	derive-composites 'cyrl/PeDescender' 0x524 'cyrl/Pe' [CyrDescender RightSB]
+	derive-composites 'cyrl/peDescender.upright' null 'cyrl/pe.upright' [CyrDescender RightSB]
 
 	create-glyph 'grek/pi' 0x3C0 : glyph-proc
 		include : MarkSet.e
@@ -61,3 +64,67 @@ glyph-block Letter-Greek-Pi : begin
 	create-glyph 'mathbb/grek/pi' 0x213C : glyph-proc
 		include : MarkSet.e
 		include : MathBBPiShape [DivFrame 1] XH 0 (shrinkRate -- 0.06)
+
+
+	define [CyrlPeHookHookShape df top] : glyph-proc
+		local xm : df.middle + 0.5 * df.mvs * HVContrast
+		include : nShoulder
+			left   -- xm
+			right  -- df.rightSB
+			top    -- top * 0.625 + df.mvs / 4
+			bottom -- 0
+			sma    -- SmoothA
+			smb    -- SmoothB
+			stroke -- df.mvs
+		include : VerticalHook (df.rightSB - 0.5 * df.mvs * HVContrast) 0 (-[Math.max (df.mvs * HVContrast) : Math.min HookX (0.5 * (df.rightSB - df.leftSB - 2 * df.mvs * HVContrast))]) Hook df.mvs
+
+	define [CyrlPeHookShape df top] : glyph-proc
+		local xm : df.middle + 0.5 * df.mvs * HVContrast
+		include : HBarTop df.leftSB xm top df.mvs
+		include : VBarLeft df.leftSB 0 (top - df.mvs / 2) df.mvs
+		include : VBarRight xm 0 (top - df.mvs / 2) df.mvs
+		include : CyrlPeHookHookShape df top
+
+		if SLAB : begin
+			local sf : SerifFrame top 0 df.leftSB xm df.mvs
+			if (df.width > para.refJut * 7)
+			: then
+				include sf.lt.outer
+				include sf.rt.outer
+				include sf.lb.full
+				include sf.rb.full
+			: else
+				include sf.lt.outer
+				include sf.rt.outer
+				include sf.lb.outer
+				include sf.rb.outer
+
+	create-glyph 'cyrl/PeMidHook' 0x4A6 : glyph-proc
+		define df : DivFrame para.diversityM 3
+		include : df.markSet.if
+		include : CyrlPeHookShape df CAP
+
+	create-glyph 'cyrl/peMidHook.upright' : glyph-proc
+		define df : DivFrame para.diversityM 3
+		include : df.markSet.p
+		include : CyrlPeHookShape df XH
+
+	create-glyph 'cyrl/peMidHook.italic' : glyph-proc
+		define df : DivFrame para.diversityM 3
+		include : df.markSet.p
+		local xm : df.middle + 0.5 * df.mvs * HVContrast
+		include : VBarLeft df.leftSB 0 XH df.mvs
+		include : nShoulder
+			left   -- df.leftSB + df.mvs * HVContrast
+			right  -- xm
+			top    -- XH
+			bottom -- 0
+			sma    -- SmoothA
+			smb    -- SmoothB
+			stroke -- df.mvs
+		include : CyrlPeHookHookShape df XH
+
+		if SLAB : begin
+			local sf : SerifFrame XH 0 df.leftSB xm df.mvs
+			include sf.lt.outer
+			include sf.rb.outer

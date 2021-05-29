@@ -2,7 +2,7 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
@@ -22,24 +22,25 @@ glyph-block Letter-Latin-Upper-L : begin
 			include : RightwardTopSerif (LBarLeftX + HVContrast * HalfStroke) top MidJutSide
 		if (sgr > 0) : include : UpwardRightSerif (RightSB - OX) 0 VJut
 
-	create-glyph 'L.standard' : glyph-proc
-		include : MarkSet.capital
-		include : LShape CAP [if SLAB 2 0]
+	define LConfig : object
+		serifless     { 0 }
+		motionSerifed { 1 }
+		serifed       { 2 }
 
-	create-glyph 'L.motionSerifed' : glyph-proc
-		include : MarkSet.capital
-		include : LShape CAP 1
-
-	create-glyph 'smcpL.standard' : glyph-proc
-		include : MarkSet.e
-		include : LShape XH [if SLAB 2 0]
-
-	create-glyph 'smcpL.motionSerifed' : glyph-proc
-		include : MarkSet.e
-		include : LShape XH 1
+	foreach { suffix { serifGrade } } [Object.entries LConfig] : do
+		create-glyph "L.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LShape CAP serifGrade
+		create-glyph "smcpL.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LShape XH serifGrade
 
 	select-variant 'L' 'L'
+	link-reduced-variant 'L/sansSerif' 'L' MathSansSerif
 	select-variant 'smcpL' 0x29F (follow -- 'L')
+
+	turned 'turnL' 0xA780 'L' Middle (CAP / 2)
+	turned 'turnSansSerifL' 0x2142 'L.serifless' Middle (CAP / 2)
 
 	create-glyph 'mathbb/L' 0x1D543 : glyph-proc
 		include : MarkSet.capital
@@ -48,9 +49,7 @@ glyph-block Letter-Latin-Upper-L : begin
 		include : VBarLeft (LBarLeftX + BBD) 0 CAP BBS
 		include : HBarTop LBarLeftX (LBarLeftX + BBD) CAP BBS
 
-	turned 'turnL' 0xA780 'L' Middle (CAP / 2)
-
-	with-related-glyphs 'Lcaron' 0x13D 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'Lcaron' 0x13D 'L' : lambda [src sel] : glyph-proc
 		include : WithTransform [Translate (Width + (RightSB - SB) * 0.375) 0]
 			refer-glyph "commaAbove"
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -62,24 +61,24 @@ glyph-block Letter-Latin-Upper-L : begin
 			flat [mix 0 SB 0.5] (middle - LongJut * 0.4) [widths fine fine]
 			curl (1.6 * LongJut + [mix 0 SB 0.5]) (middle + LongJut * 0.4)
 
-	with-related-glyphs 'LSlash' 0x141 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'LSlash' 0x141 'L' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : LSlashOverlay CAP
 
-	with-related-glyphs 'smcpLSlash' 0x1D0C 'smcpL' : lambda [src sel] : glyph-proc
+	derive-glyphs 'smcpLSlash' 0x1D0C 'smcpL' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : LSlashOverlay XH
 
-	with-related-glyphs 'LTildeOver' 0x2C62 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'LTildeOver' 0x2C62 'L' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeAboveOverlay"
 			include : ApparentTranslate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
 
-	with-related-glyphs 'Ldot' 0x13F 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'Ldot' 0x13F 'L' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : Ring ([mix Stroke CAP 0.5] + DotRadius) ([mix Stroke CAP 0.5] - DotRadius) ([mix SB RightSB 0.65] - DotRadius) ([mix SB RightSB 0.65] + DotRadius)
 
-	with-related-glyphs 'Lbar' 0x23D 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'Lbar' 0x23D 'L' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE
 		include : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)

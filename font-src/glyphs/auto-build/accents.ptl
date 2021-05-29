@@ -1,7 +1,7 @@
 ###### Automatic builds
 $$include '../../meta/macros.ptl'
 
-import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose ZReduced] from "../../support/gr"
+import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose CcmpDecompose RequireCcmpDecompose] from "../../support/gr"
 import [fallback] from '../../support/utils'
 
 glyph-module
@@ -32,11 +32,6 @@ glyph-block AutoBuild-Accents : begin
 		set parts.(j) [query-glyph 'ogonekTR']
 
 	define [subParts parts] : begin
-		# Reduce Z variants
-		if [ZReduced.get parts.0] : begin
-			local reduced : query-glyph : ZReduced.get parts.0
-			if reduced : set parts.0 reduced
-
 		# Handle dotless
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
@@ -58,6 +53,8 @@ glyph-block AutoBuild-Accents : begin
 						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilioxia']
 					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
 						set parts.(j) null; set parts.(j + 1) [query-glyph 'psiliperispomeni']
+					(parts.(j + 1) === [query-glyph 'cyrlPokrytieAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'commaCyrlPorkytieAbove']
 			(parts.(j) === [query-glyph 'revCommaAbove']) : begin
 				piecewise
 					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
@@ -66,7 +63,11 @@ glyph-block AutoBuild-Accents : begin
 						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaoxia']
 					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
 						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaperispomeni']
-		return parts
+			(parts.(j) === [query-glyph 'cyrlPsiliAbove']) : begin
+				piecewise
+					(parts.(j + 1) === [query-glyph 'cyrlPokrytieAbove']) : begin
+						set parts.(j) null; set parts.(j + 1) [query-glyph 'cyrlPsiliPokrytieAbove']
+		return : parts.filter : function [x] [not : not x]
 
 	define [pad _s n] : begin
 		local s _s
@@ -131,6 +132,10 @@ glyph-block AutoBuild-Accents : begin
 			local decomposeParts { }
 			foreach part [items-of s_parts] : recursivelyDecompose part decomposeParts
 			CvDecompose.set currentGlyph decomposeParts
+			if [RequireCcmpDecompose.get s_parts.0] : begin
+				local ccmpParts { }
+				foreach part [items-of s_parts] : ccmpParts.push : glyphStore.queryNameOf part
+				CcmpDecompose.set currentGlyph ccmpParts
 
 	define [RootGlyphProc goalName code parts] : begin
 		set s_goalName goalName
@@ -214,7 +219,6 @@ define customDecompositions : object
 	."\u0247" "e\u0337"
 
 	."\u0290" "z\u0322"
-	."\u01AE" "T\u0322"
 	."\u1D90" "\u0251\u0322"
 
 	."\u1E10" "D\u0326"
@@ -239,6 +243,8 @@ define customDecompositions : object
 	."\u0499" "\u0437\u0327"
 	."\u04AA" "\u0421\u0327"
 	."\u04AB" "\u0441\u0327"
+	."\u047C" "\uA64C\u0486\u0487"
+	."\u047D" "\uA64D\u0486\u0487"
 
 	# Spacing modifers
 	."\u02CB" "\uE00D\u0300"

@@ -12,13 +12,13 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 
 	define asteriskCenterY : ParenTop - LongJut * 1.5
 	define asteriskKinds : list
-		list 5  1.2  0    0.4  Stroke         'asterisk'       'pentaHigh'     'pentaLow'  'midXH'
-		list 5  0.85 0    0.4  Stroke         'smallasterisk'  'high'          'low'           ''
-		list 5  1    0    0.4  GeometryStroke 'opAsterisk'     'high'          'low'           ''
-		list 6  1.2  0    0.4  Stroke         'asterisk'       'hexHigh'       'hexLow'        ''
-		list 5  1.2  1    0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaLow'  ''
-		list 6  1.2  0.5  0.4  Stroke         'asterisk'       'turnHexHigh'   'turnHexLow'    ''
-	foreach [{sides size rot pFine stroke name high low midXH} : items-of asteriskKinds] : begin
+		list 5  1.2  0    0.4  Stroke         'asterisk'       'pentaHigh'     'pentaSMid'      'midXH'  'pentaLow'      'dualAsterisk'
+		list 6  1.2  0    0.4  Stroke         'asterisk'       'hexHigh'       'hexSMid'        ''       'hexLow'        'dualAsterisk'
+		list 5  1.2  1    0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaSMid'  ''       'turnPentaLow'  'dualAsterisk'
+		list 6  1.2  0.5  0.4  Stroke         'asterisk'       'turnHexHigh'   'turnHexSMid'    ''       'turnHexLow'    'dualAsterisk'
+		list 5  0.85 0    0.4  Stroke         'smallAsterisk'  'high'          'low'            ''       ''              ''
+		list 5  1    0    0.4  GeometryStroke 'opAsterisk'     'high'          'low'            ''       ''              ''
+	foreach [{sides size rot pFine stroke name high sMid midXH low dual} : items-of asteriskKinds] : begin
 		create-glyph (name + '.' + high) : glyph-proc
 			local radius : LongJut * size
 			local fine : stroke * pFine
@@ -31,18 +31,23 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 					flat Middle asteriskCenterY [widths fine fine]
 					curl (Middle + radius * s) (asteriskCenterY + radius * c) [widths final final]
 
-		create-glyph (name + '.' + low) : composite-proc
+		if sMid : create-glyph (name + '.' + sMid) : composite-proc
 			refer-glyph (name + '.' + high)
-			Upright
-			Translate 0 (SymbolMid - asteriskCenterY)
-			Italify
+			ApparentTranslate 0 (SymbolMid - asteriskCenterY)
 
 		if midXH : create-glyph (name + '.' + midXH) : composite-proc
 			refer-glyph (name + '.' + high)
-			Upright
-			Translate 0 (XH / 2 - asteriskCenterY)
-			Italify
+			ApparentTranslate 0 (XH / 2 - asteriskCenterY)
+
+		if low : create-glyph (name + '.' + low) : composite-proc
+			refer-glyph (name + '.' + high)
+			ApparentTranslate 0 (2 * (SymbolMid - asteriskCenterY))
+
+		if (dual && sMid && low) : create-glyph (dual + '.' + sMid) : composite-proc
+			refer-glyph (name + '.' + high)
+			refer-glyph (name + '.' + low)
 
 	select-variant 'asterisk' '*'
-	select-variant 'asterisk/lowered' (shapeFrom -- 'asterisk')
-
+	select-variant 'asterisk/sMid' (shapeFrom -- 'asterisk')
+	select-variant 'lowAsterisk' 0x204E (shapeFrom -- 'asterisk')
+	select-variant 'dualAsterisk' 0x2051 (follow -- 'asterisk/sMid')
