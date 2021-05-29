@@ -77,12 +77,12 @@ const TieMark = {
 
 const TieGlyph = {
 	get(glyph) {
-		if (glyph && glyph.related) return glyph.related.TieMark;
+		if (glyph && glyph.related) return glyph.related.TieGlyph;
 		else return null;
 	},
 	set(glyph) {
 		if (!glyph.related) glyph.related = {};
-		glyph.related.TieMark = true;
+		glyph.related.TieGlyph = true;
 	}
 };
 
