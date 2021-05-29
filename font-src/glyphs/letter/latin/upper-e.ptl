@@ -10,12 +10,15 @@ glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : markHalfStroke
-	glyph-block-import Letter-Latin-Upper-F : FShape RevFShape EFVJutLength
+	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink yMidBar EFVJutLength
 
-	define xEBarLeft : SB * 1.5
-	define [EShape] : params [top pyBar serifLT serifLB serifV] : glyph-proc
-		define stroke : AdviceStroke2 2 3 CAP
-		include : FShape top pyBar
+	define kSB 1
+	define xEBarLeft     : SB * kSB - O
+	define xRevEBarRight : Width - SB * kSB + O
+	define [EShape] : params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		include : VBarLeft (xEBarLeft) 0 top stroke
+		include : HBarTop (xEBarLeft - O) RightSB top stroke
+		include : HBar (xEBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
 		include : HBarBottom (xEBarLeft - O) RightSB 0 stroke
 		if serifLT : include : LeftwardTopSerif xEBarLeft top SideJut
 		if serifLB : include : LeftwardBottomSerif xEBarLeft 0 SideJut
@@ -25,13 +28,13 @@ glyph-block Letter-Latin-Upper-E : begin
 			include : UpwardRightSerif RightSB 0 jutBot
 
 	glyph-block-export RevEShape
-	define [RevEShape] : params [top pyBar serifRT serifRB serifV] : glyph-proc
-		define stroke : AdviceStroke2 2 3 CAP
-		define xEBarRight : Width - SB * 1.5
-		include : RevFShape top pyBar
-		include : HBarBottom SB (xEBarRight + O) 0 stroke
-		if serifRT : include : RightwardTopSerif xEBarRight top SideJut
-		if serifRB : include : RightwardBottomSerif xEBarRight 0 SideJut
+	define [RevEShape] : params [top pyBar serifRT serifRB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
+		include : VBarRight (xRevEBarRight) 0 top stroke
+		include : HBarTop SB (xRevEBarRight + O) top stroke
+		include : HBar (SB + [xMidBarShrink]) (xRevEBarRight + O) [yMidBar top pyBar] stroke
+		include : HBarBottom SB (xRevEBarRight + O) 0 stroke
+		if serifRT : include : RightwardTopSerif xRevEBarRight top SideJut
+		if serifRB : include : RightwardBottomSerif xRevEBarRight 0 SideJut
 		if serifV : begin
 			local { jutTop jutBot } : EFVJutLength top pyBar stroke
 			include : DownwardLeftSerif SB top jutTop
@@ -72,10 +75,7 @@ glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/E' 0x1D53C : glyph-proc
 		include : MarkSet.capital
-		include : union
-			VBarLeft (xEBarLeft + BBD) 0 CAP BBS
-			HBarBottom xEBarLeft (xEBarLeft + BBD) 0 BBS
-			difference
-				FShape CAP (serif -- false) (_stroke -- BBS)
-				Rect (CAP - BBS) BBS (xEBarLeft + BBS * HVContrast) (xEBarLeft + BBD)
-			HBarBottom (xEBarLeft - O) RightSB 0 BBS
+		include : difference
+			EShape CAP (serif -- false) (stroke -- BBS)
+			Rect (CAP - BBS) BBS (xEBarLeft + BBS * HVContrast) (xEBarLeft + BBD)
+

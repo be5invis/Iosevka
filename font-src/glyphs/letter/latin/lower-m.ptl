@@ -95,14 +95,22 @@ glyph-block Letter-Latin-Lower-M : begin
 	define [SmallMBottomMotionRightSerif df top rbot] : glyph-proc
 		include : tagged 'serifRB' : RightwardBottomSerif df.rightSB rbot SideJut df.mvs
 
-	define [SmallMSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		if [not earless] : include : SmallMTopLeftSerif df top lbot
-		if [not para.isItalic] : include : SmallMBottomLeftSerif df top lbot
-		if [not para.isItalic] : include : SmallMBottomMiddleSerif df top mbot
-		if [not tailed] : include : SmallMBottomRightSerif df top rbot
+	define [AutoSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		if SLAB : begin
+			if [not earless] : include : SmallMTopLeftSerif df top lbot
+			if [not para.isItalic] : include : SmallMBottomLeftSerif df top lbot
+			if [not para.isItalic] : include : SmallMBottomMiddleSerif df top mbot
+			if [not tailed] : include : SmallMBottomRightSerif df top rbot
+
+	define [LtSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		include : SmallMTopLeftSerif df top lbot
+
+	define [LtRbSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		include : SmallMTopLeftSerif df top lbot
+		include : SmallMBottomMotionRightSerif df top rbot
 
 	define [dfM] : DivFrame para.diversityM 3
-	define [SmallMArches top lbot mbot rbot df tailed] : glyph-proc
+	define [SmallMArches top lbot mbot rbot df] : glyph-proc
 		include : SmallMShoulderSpiro
 			df        -- df
 			left      -- (df.leftSB + df.mvs * HVContrast)
@@ -121,74 +129,11 @@ glyph-block Letter-Latin-Lower-M : begin
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 		include : tagged 'barL' : VBarLeft df.leftSB lbot top df.mvs
 
-	define [SmallMShape top lbot mbot rbot df tailed] : glyph-proc
-		include : SmallMArches top lbot mbot rbot df tailed
-		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed false
-
-	define [SmallMMotionSerifedShape top lbot mbot rbot df tailed] : glyph-proc
-		include : SmallMArches top lbot mbot rbot df tailed
-		include : SmallMTopLeftSerif df top lbot
-		if [not tailed] : include : SmallMBottomMotionRightSerif df top rbot
-
 	glyph-block-export SmallMSmoothHeight
 	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
 	define [SmallMSmoothHeight df] : XH - [SmallMSmooth df] - TanSlope * Stroke
 
-	create-glyph 'm.normal' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMShape XH 0 0 0 df
-
-	create-glyph 'm.tailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	create-glyph 'm.shortLeg' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMShape XH 0 [SmallMShortLegHeight df] 0 df
-		eject-contour 'serifMB'
-
-	create-glyph 'm.shortLegTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	create-glyph 'm.motionSerifed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMMotionSerifedShape XH 0 0 0 df
-
-	create-glyph 'm.motionSerifedTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMMotionSerifedShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	create-glyph 'm.shortLegMotionSerifed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMMotionSerifedShape XH 0 [SmallMShortLegHeight df] 0 df
-		eject-contour 'serifMB'
-
-	create-glyph 'm.shortLegMotionSerifedTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : SmallMMotionSerifedShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
 		include : dispiro
 			widths.rhs df.mvs
 			g4 df.leftSB (top - DToothlessRise)
@@ -204,35 +149,8 @@ glyph-block Letter-Latin-Lower-M : begin
 
 		include : tagged 'barL' : VBarLeft df.leftSB lbot (top - DToothlessRise) df.mvs
 		include : tagged 'barM' : VBar     df.middle mbot (top - DToothlessRise) df.mvs
-		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed true
 
-	create-glyph 'm.earlessCornerDoubleArch' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessCornerDoubleArchSmallMShape XH 0 0 0 df
-
-	create-glyph 'm.earlessCornerDoubleArchShortleg' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessCornerDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
-
-	create-glyph 'm.earlessCornerDoubleArchTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessCornerDoubleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	create-glyph 'm.earlessCornerDoubleArchShortlegTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessCornerDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	define [EarlessRoundedDoubleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+	define [EarlessRoundedDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
 		include : union
 			RevSmallMShoulderSpiro
 				df        -- df
@@ -253,36 +171,7 @@ glyph-block Letter-Latin-Lower-M : begin
 				width     -- df.mvs
 				fine      -- (df.mvs * CThin)
 
-		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed true
-
-	create-glyph 'm.earlessRoundedDoubleArch' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessRoundedDoubleArchSmallMShape XH 0 0 0 df
-
-	create-glyph 'm.earlessRoundedDoubleArchShortleg' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessRoundedDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
-
-	create-glyph 'm.earlessRoundedDoubleArchTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessRoundedDoubleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-	create-glyph 'm.earlessRoundedDoubleArchShortlegTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessRoundedDoubleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-
-
-	define [EarlessSingleArchSmallMShape top lbot mbot rbot df tailed] : glyph-proc
+	define [EarlessSingleArchSmallMShape top lbot mbot rbot df] : glyph-proc
 		include : tagged 'barL' : VBarLeft df.leftSB lbot (XH - DToothlessRise) df.mvs
 		include : tagged 'barM' : VBar df.middle mbot XH df.mvs
 		include : dispiro
@@ -293,69 +182,86 @@ glyph-block Letter-Latin-Lower-M : begin
 			flat df.rightSB [Math.max (XH - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
 
-		if SLAB : include : SmallMSerifs df top lbot mbot rbot tailed true
+	define SmallMConfig : object
+		normal                                 { SmallMArches                        AutoSerifs 0 0 0 }
+		tailed                                 { SmallMArches                        AutoSerifs 1 0 0 }
+		shortLeg                               { SmallMArches                        AutoSerifs 0 1 0 }
+		shortLegTailed                         { SmallMArches                        AutoSerifs 1 1 0 }
+		topLeftSerifed                         { SmallMArches                        LtSerifs   0 0 0 }
+		tailedTopLeftSerifed                   { SmallMArches                        LtSerifs   1 0 0 }
+		shortLegTopLeftSerifed                 { SmallMArches                        LtSerifs   0 1 0 }
+		shortLegTopLeftSerifedTailed           { SmallMArches                        LtSerifs   1 1 0 }
+		topLeftAndBottomRightSerifed           { SmallMArches                        LtRbSerifs 0 0 0 }
+		shortLegTopLeftAndBottomRightSerifed   { SmallMArches                        LtRbSerifs 0 1 0 }
+		normal                                 { SmallMArches                        AutoSerifs 0 0 0 }
+		tailed                                 { SmallMArches                        AutoSerifs 1 0 0 }
+		shortLeg                               { SmallMArches                        AutoSerifs 0 1 0 }
+		shortLegTailed                         { SmallMArches                        AutoSerifs 1 1 0 }
+		earlessCornerDoubleArch                { EarlessCornerDoubleArchSmallMShape  AutoSerifs 0 0 1 }
+		earlessCornerDoubleArchTailed          { EarlessCornerDoubleArchSmallMShape  AutoSerifs 1 0 1 }
+		earlessCornerDoubleArchShortleg        { EarlessCornerDoubleArchSmallMShape  AutoSerifs 0 1 1 }
+		earlessCornerDoubleArchShortlegTailed  { EarlessCornerDoubleArchSmallMShape  AutoSerifs 1 1 1 }
+		earlessRoundedDoubleArch               { EarlessRoundedDoubleArchSmallMShape AutoSerifs 0 0 1 }
+		earlessRoundedDoubleArchTailed         { EarlessRoundedDoubleArchSmallMShape AutoSerifs 1 0 1 }
+		earlessRoundedDoubleArchShortleg       { EarlessRoundedDoubleArchSmallMShape AutoSerifs 0 1 1 }
+		earlessRoundedDoubleArchShortlegTailed { EarlessRoundedDoubleArchSmallMShape AutoSerifs 1 1 1 }
+		earlessSingleArch                      { EarlessSingleArchSmallMShape        AutoSerifs 0 0 1 }
+		earlessSingleArchTailed                { EarlessSingleArchSmallMShape        AutoSerifs 1 0 1 }
+		earlessSingleArchShortleg              { EarlessSingleArchSmallMShape        AutoSerifs 0 1 1 }
+		earlessSingleArchShortlegTailed        { EarlessSingleArchSmallMShape        AutoSerifs 1 1 1 }
 
-	create-glyph 'm.earlessSingleArch' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessSingleArchSmallMShape XH 0 0 0 df
+	foreach { suffix { Body Serifs tailed shortLeg earless } } [Object.entries SmallMConfig] : do
+		create-glyph "m.\(suffix)" : glyph-proc
+			local df : dfM
+			set-width df.width
+			include : df.markSet.e
+			include : Body XH 0 [if shortLeg [SmallMShortLegHeight df] 0] [if tailed ([SmallMSmoothHeight df] + O) 0] df
+			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+			include : Serifs df XH 0 [SmallMSmoothHeight df] 0 tailed earless
 
-	create-glyph 'm.earlessSingleArchShortleg' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessSingleArchSmallMShape XH 0 [SmallMShortLegHeight df] 0 df
+		create-glyph "capitalSmallM.\(suffix)" : glyph-proc
+			local df : dfM
+			set-width df.width
+			include : df.markSet.capital
+			include : Body CAP 0 [if shortLeg [SmallMShortLegHeight df] 0] [if tailed ([SmallMSmoothHeight df] + O) 0] df
+			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+			include : Serifs df CAP 0 [SmallMSmoothHeight df] 0 tailed earless
 
-	create-glyph 'm.earlessSingleArchTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessSingleArchSmallMShape XH 0 0 ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+		create-glyph "mLTail.\(suffix)" : glyph-proc
+			local df : dfM
+			set-width df.width
+			include : df.markSet.p
+			include [refer-glyph "m.\(suffix)"]
+			eject-contour 'serifRB'
+			include : VerticalHook (df.rightSB - df.mvs / 2 * HVContrast) 0 (-HookX) Hook df.mvs
 
-	create-glyph 'm.earlessSingleArchShortlegTailed' : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.e
-		include : EarlessSingleArchSmallMShape XH 0 [SmallMShortLegHeight df] ([SmallMSmoothHeight df] + O) df true
-		include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
+		create-glyph "turnmLeg.\(suffix)" : glyph-proc
+			local df : dfM
+			set-width df.width
+			include : df.markSet.p
+			include [refer-glyph "m.\(suffix)"]
+			eject-contour 'serifLT'
+			include : FlipAround df.middle (XH / 2)
+			include : VBarRight df.rightSB Descender 0 df.mvs
+			if (SLAB && Serifs === AutoSerifs) : include : union
+				LeftwardBottomSerif (df.rightSB - HalfStroke * HVContrast) Descender MidJutSide
+				RightwardBottomSerif (df.rightSB - HalfStroke * HVContrast) Descender Jut
+			if (Serifs === LtRbSerifs) : include : RightwardBottomSerif df.rightSB Descender SideJut
 
 	select-variant 'm' 'm'
+	select-variant 'capitalSmallM' (follow -- 'm')
 	link-reduced-variant 'm/sansSerif' 'm' MathSansSerif
 
 	select-variant 'cyrl/te.italic' (shapeFrom -- 'm')
 	alias 'cyrl/te.BGR' null 'cyrl/te.italic'
-
-	create-glyph 'cyrl/teDescender.italic' : composite-proc [MarkSet.e]
-		refer-glyph 'm.normal'
+	derive-composites 'cyrl/teDescender.italic' null 'cyrl/te.italic'
 		CyrDescender [DivFrame para.diversityM 3].rightSB
 
-	create-glyph 'mltail' 0x271 : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.p
-		include : refer-glyph "m.normal"
-		eject-contour 'serifRB'
-		include : VerticalHook (df.rightSB - df.mvs / 2 * HVContrast) 0 (-HookX) Hook df.mvs
+	select-variant 'mLTail' 0x271
+	select-variant 'turnmLeg' 0x270
 
-	turned 'turnm' 0x26F 'm.normal' [dfM].middle (XH / 2)
-
-	create-glyph 'capitalTurnm' 0x19C : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.capital
-		include : SmallMShape CAP 0 0 0 df
-		include : FlipAround df.middle (CAP / 2)
-
-	create-glyph 'turnmleg' 0x270 : glyph-proc
-		local df : dfM
-		set-width df.width
-		include : df.markSet.p
-		include : refer-glyph "m.normal"
-		eject-contour 'serifLT'
-		include : FlipAround df.middle (XH / 2)
-		include : VBarRight df.rightSB Descender 0 df.mvs
+	turned 'turnm' 0x26F 'm' [dfM].middle (XH / 2)
+	turned 'capitalTurnm' 0x19C 'capitalSmallM' [dfM].middle (CAP / 2)
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/m' 0x1D55E : glyph-proc

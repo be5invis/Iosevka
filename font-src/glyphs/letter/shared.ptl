@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from '../../support/utils'
-import [Dotless CvDecompose] from "../../support/gr"
+import [Dotless CvDecompose DollarShorterBar] from "../../support/gr"
 import [ DesignParameters ] from "../../meta/aesthetics"
 
 glyph-module
@@ -35,6 +35,15 @@ glyph-block Letter-Shared : begin
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			include [refer-glyph accentGid]
 			if [not sel] : CvDecompose.set currentGlyph { src accentGid }
+
+	glyph-block-export CreateDollarLikeComposition
+	define [CreateDollarLikeComposition gidDst unicode gidPart1U gidPart1R gidPart2 dx] : begin
+		create-glyph gidDst unicode : glyph-proc
+			local kernel : if [DollarShorterBar.get : query-glyph gidPart2] gidPart1R gidPart1U
+			include : union
+				refer-glyph kernel
+				WithTransform [Translate dx 0] [refer-glyph gidPart2]
+			CvDecompose.set currentGlyph { gidPart1U gidPart2 }
 
 
 glyph-block Letter-Blackboard : begin
@@ -479,3 +488,12 @@ glyph-block Letter-Shared-Shapes : begin
 			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
 				HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
 				glyph-proc
+
+	glyph-block-export HooktopLeftBar
+	define [HooktopLeftBar] : params [bottom] : glyph-proc
+		include : dispiro
+			widths.lhs
+			straight.left.start (SB + HalfStroke * HVContrast + HookX) CAP
+			archv
+			flat SB (CAP - Hook - HalfStroke)
+			curl SB [fallback bottom 0] [heading Downward]

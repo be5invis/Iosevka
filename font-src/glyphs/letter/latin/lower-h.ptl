@@ -10,10 +10,10 @@ glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder nShoulderMask
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrLeftDescender
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrLeftDescender HooktopLeftBar
 
-	define [SmallHSerifs tailed hookTop] : glyph-proc
-		if [not hookTop] : include : LeftwardTopSerif SB CAP SideJut
+	define [SmallHSerifs tailed hookTop] : glyph-proc : if SLAB : begin
+		if [not hookTop] : include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 		if [not tailed]
 			if (para.isItalic)
 			: then : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
@@ -21,106 +21,63 @@ glyph-block Letter-Latin-Lower-H : begin
 		if (!para.isItalic) : begin
 			include : tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) 0 Jut
 
-	create-glyph 'h.straight' : glyph-proc
-		include : MarkSet.b
+	define [SmallHMotionSerifs tailed hookTop] : glyph-proc
+		if [not hookTop] : include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+		if [not tailed] : include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
-		include : VBarLeft SB 0 CAP
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-		if SLAB : include [SmallHSerifs false]
+	define [SmallHTopLeftSerifs tailed hookTop] : glyph-proc
+		if [not hookTop] : include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 
-	create-glyph 'h.tailed' : glyph-proc
-		include : MarkSet.b
+	define HConfig : object
+		straight               { 0 SmallHSerifs        }
+		tailed                 { 1 SmallHSerifs        }
+		straightMotionSerifed  { 0 SmallHMotionSerifs  }
+		tailedMotionSerifed    { 1 SmallHMotionSerifs  }
+		straightTopLeftSerifed { 0 SmallHTopLeftSerifs }
 
-		include : VBarLeft SB 0 CAP
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-			bottom -- (XH - SmallSmoothB + O)
-		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
-		if SLAB : include [SmallHSerifs true]
+	foreach { suffix { fTailed Serifs } } [Object.entries HConfig] : do
+		create-glyph "h.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : VBarLeft SB 0 CAP
+			include : nShoulder
+				left -- (SB + Stroke * HVContrast)
+				right -- RightSB
+				bottom -- [if fTailed (XH - SmallSmoothB + O) 0]
+			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+			include : Serifs fTailed false
 
-	create-glyph 'h.straightMotionSerifed' : glyph-proc
-		include : MarkSet.b
+		create-glyph "hHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : HooktopLeftBar
+			include : nShoulder
+				left -- (SB + Stroke * HVContrast)
+				right -- RightSB
+				bottom -- [if fTailed (XH - SmallSmoothB + O) 0]
+			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
+			include : Serifs fTailed true
 
-		include : VBarLeft SB 0 CAP
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-		include : LeftwardTopSerif SB CAP SideJut
-		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+		create-glyph "hHookTopLTail.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : refer-glyph "hHookTop.\(suffix)"
+			eject-contour 'serifRB'
+			include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
-	create-glyph 'h.straightTopLeftSerifed' : glyph-proc
-		include : MarkSet.b
-
-		include : VBarLeft SB 0 CAP
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-		include : LeftwardTopSerif SB CAP SideJut
-
-	create-glyph 'h.motionSerifedTailed' : glyph-proc
-		include : MarkSet.b
-
-		include : VBarLeft SB 0 CAP
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-			bottom -- (XH - SmallSmoothB + O)
-		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
-		include : LeftwardTopSerif SB CAP SideJut
+		create-glyph "heng.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : refer-glyph "h.\(suffix)"
+			eject-contour 'serifRB'
+			include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
 	select-variant 'h' 'h'
 	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
+	turned 'turnh' 0x265 'h' Middle (XH / 2) [MarkSet.p]
+
 	select-variant 'cyrl/shha' 0x4BB (shapeFrom -- 'h')
 	derive-composites 'cyrl/shhaDescender' 0x527 'cyrl/shha' [CyrDescender RightSB]
 
-	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src sel] : glyph-proc
-		include [refer-glyph 'cedillaBelow']
-		include : Translate (Width + SB - Middle + HalfStroke * HVContrast) 0
-		include [refer-glyph src]
-		include : MarkSet.if
-
-	create-glyph 'hhooktop.straight' : glyph-proc
-		include : MarkSet.b
-		include : HooktopLeftBar
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-		if SLAB : include [SmallHSerifs false true]
-
-	create-glyph 'hhooktop.tailed' : glyph-proc
-		include : MarkSet.b
-		include : HooktopLeftBar
-		include : nShoulder
-			left -- (SB + Stroke * HVContrast)
-			right -- RightSB
-			bottom -- (XH - SmallSmoothB + O)
-		include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
-		if SLAB : include [SmallHSerifs false true]
-
-	select-variant 'hhooktop' 0x266
-
-	create-glyph 'hhooktopltail' 0x267 : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph "hhooktop.straight"
-		eject-contour 'serifRB'
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
-
-	create-glyph 'heng.straight' : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph "h.straight"
-		eject-contour 'serifRB'
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
-
-	create-glyph 'heng.straightTopLeftSerifed' : glyph-proc
-		include : MarkSet.if
-		include : refer-glyph "h.straightTopLeftSerifed"
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
-
+	select-variant 'hHookTop' 0x266
+	select-variant 'hHookTopLTail' 0x267
 	select-variant 'heng' 0xA727
-	turned 'turnh' 0x265 'h.straight' Middle (XH / 2) [MarkSet.p]
 
 	create-glyph 'hookturnh' 0x2AE : glyph-proc
 		include : nShoulder

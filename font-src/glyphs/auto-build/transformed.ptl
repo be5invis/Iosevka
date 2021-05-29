@@ -203,7 +203,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x2078 'eight.lnum'
 		list 0x2079 'nine.lnum'
 		list 0x02B0 'h'
-		list 0x02B1 'hhooktop'
+		list 0x02B1 'hHookTop'
 		list 0x02B2 'j'
 		list 0x02B3 'r'
 		list 0x02B4 'turnr'
@@ -267,8 +267,8 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DA8 'jCurlyTail'
 		list 0x1DAB 'smcpL'
 		list 0x1DA9 'lRTail'
-		list 0x1DAC 'mltail'
-		list 0x1DAD 'turnmleg'
+		list 0x1DAC 'mLTail'
+		list 0x1DAD 'turnmLeg'
 		list 0x1DAE 'nltail'
 		list 0x1DAF 'nHookBottom'
 		list 0x1DB0 'smcpN'
@@ -276,7 +276,7 @@ glyph-block Autobuild-Transformed : begin
 		list 0x1DB2 'latn/phi'
 		list 0x1DB3 'sRTail'
 		list 0x1DB4 'esh'
-		list 0x1DB5 'tltail'
+		list 0x1DB5 'tLTail'
 		list 0x1DB6 'uLongBarOver'
 		list 0x1DB7 'latinupsilon1'
 		list 0x1DB8 'smcpU'
@@ -598,17 +598,26 @@ glyph-block Autobuild-Rhotic : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Widen
 	glyph-block-import Letter-Latin-Rhotic : ErTail
+	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
 
-	let [thinfont : Widen {'schwa' 'latn/revSmallEpsilon'} 0.85 1] : begin
-		create-glyph 'er' 0x25A : glyph-proc # er
-			include : MarkSet.e
-			include : thinfont.queryByName 'schwa'
-			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+	define [createRhotics groupName y _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs "rhotic_\(groupName)" _records
+		local pendingGlyphs : records.map : [record] => record.1
+		local thinFont : Widen pendingGlyphs 0.85 1
+		foreach {unicode glyphid pri} [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)]
+				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
+					if [not : thinFont.queryByName glyphid] : begin
+						throw : new Error "Cannot find glyph \(glyphid)"
+					include : MarkSet.e
+					include : thinFont.queryByName glyphid
+					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y
 
-		create-glyph 'revlatinepsiloner' 0x25D : glyph-proc # revlatinepsiloner
-			include : MarkSet.e
-			include : thinfont.queryByName 'latn/revSmallEpsilon'
-			include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+		link-relations relSets
+		return { targetNameMap records }
+
+	createRhotics 'er' (XH / 2) : list { 0x25A 'schwa' }
+	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/revSmallEpsilon' }
 
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes

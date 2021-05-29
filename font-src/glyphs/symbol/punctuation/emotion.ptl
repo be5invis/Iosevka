@@ -11,7 +11,18 @@ glyph-block Symbol-Punctuation-Emotion : begin
 	glyph-block-import Common-Derivatives
 
 	local questionBottom : Math.max (CAP * 0.3) (DotSize * 1.5)
-	local questionYConnect : mix questionBottom (CAP - HalfStroke) 0.375
+	local [questionYConnectT top questionBottom] : mix questionBottom (top - HalfStroke) 0.375
+
+
+	create-glyph 'exclam' '!' : glyph-proc
+		set-width Width
+		include : MarkSet.capital
+		include : VBar Middle [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
+		include : DotAt Middle DotRadius (DotRadius - O)
+
+	alias 'alveolarclick' 0x1C3 'exclam'
+	turned 'exclamDown'  0xA1   'exclam'      Middle (XH / 2)
+
 
 	define [QuestionSmoothShape top questionBottom left right] : glyph-proc
 		define strokeEndCor : Math.hypot 1 TanSlope
@@ -23,58 +34,53 @@ glyph-block Symbol-Punctuation-Emotion : begin
 			alsoThru.g2 0.5 0.45 [widths.center EssQuestion]
 			straight.down.end ([mix left right 0.5] - HalfStroke * HVContrast * strokeEndCor) questionBottom [widths.heading (Stroke * strokeEndCor) 0 Downward]
 
-	create-glyph 'question.smooth' : glyph-proc
-		set-width Width
-		include : QuestionSmoothShape CAP questionBottom SB RightSB
-		include : DotAt Middle DotRadius (DotRadius - O)
-
-	create-glyph 'question.corner' : glyph-proc
+	define [QuestionCornerShape top questionBottom left right] : glyph-proc
+		local questionYConnect : questionYConnectT top questionBottom
 		include : dispiro
 			widths.rhs
-			g4 SB (CAP - Hook)
-			hookstart (CAP - O)
-			g4 (RightSB - OX) [YSmoothMidR CAP (questionYConnect - Stroke) SmoothA SmoothB]
+			g4 left (top - Hook)
+			hookstart (top - O)
+			g4 (right - OX) [YSmoothMidR top (questionYConnect - Stroke) SmoothA SmoothB]
 			arcvh
-			straight.left.end Middle (questionYConnect - Stroke) [heading Leftward]
-		include : VBar Middle questionBottom questionYConnect
-		include : DotAt Middle DotRadius (DotRadius - O)
+			straight.left.end [mix left right 0.5] (questionYConnect - Stroke) [heading Leftward]
+		include : VBar [mix left right 0.5] questionBottom questionYConnect
 
-	create-glyph 'question.cornerFlatHooked' : glyph-proc
-		local depth : Math.max (Stroke * 1.5) ((RightSB - SB) * 0.5)
+	define [QuestionCornerFlatShape top questionBottom left right] : glyph-proc
+		local questionYConnect : questionYConnectT top questionBottom
+		local depth : Math.max (Stroke * 1.5) ((right - left) * 0.5)
 		include : dispiro
 			widths.rhs
-			flat [mix Middle SB 0.75] CAP [heading Rightward]
-			curl (RightSB - depth - CorrectionOMidS) CAP
+			flat [mix left right 0.125] top [heading Rightward]
+			curl (right - depth - CorrectionOMidS) top
 			archv
-			g4 (RightSB - OX) [YSmoothMidR CAP (questionYConnect - Stroke) SmoothA SmoothB]
+			g4 (right - OX) [YSmoothMidR top (questionYConnect - Stroke) SmoothA SmoothB]
 			arcvh
-			straight.left.end Middle (questionYConnect - Stroke) [heading Leftward]
-		include : VBar Middle questionBottom questionYConnect
-		include : DotAt Middle DotRadius (DotRadius - O)
+			straight.left.end [mix left right 0.5] (questionYConnect - Stroke) [heading Leftward]
+		include : VBar [mix left right 0.5] questionBottom questionYConnect
+
+	define QuestionConfig : object
+		smooth           { QuestionSmoothShape     }
+		corner           { QuestionCornerShape     }
+		cornerFlatHooked { QuestionCornerFlatShape }
+
+	foreach { suffix { Body } } [Object.entries QuestionConfig] : do
+		create-glyph "question.\(suffix)" : glyph-proc
+			include : Body CAP questionBottom SB RightSB
+			include : DotAt Middle DotRadius (DotRadius - O)
+
+		create-glyph "interrobang.\(suffix)" : glyph-proc
+			local angle : 12 / 180 * Math.PI
+			include : Body CAP questionBottom [mix Middle SB 0.75] RightSB
+			include : Translate (-Middle) (-DotRadius)
+			include : Rotate (-2 * angle)
+			include : Translate Middle DotRadius
+			include : VBar Middle questionBottom CAP
+			include : Translate (-Middle) (-DotRadius)
+			include : Rotate (1.2 * angle)
+			include : Translate Middle DotRadius
+			include : DotAt Middle DotRadius (DotRadius - O)
 
 	select-variant 'question' '?'
-
-	create-glyph 'exclam' '!' : glyph-proc
-		set-width Width
-		include : MarkSet.capital
-		include : VBar Middle [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
-		include : DotAt Middle DotRadius (DotRadius - O)
-
-	alias 'alveolarclick' 0x1C3 'exclam'
-
-	create-glyph 'interrobang' 0x203D : glyph-proc
-		set-width Width
-		local angle : 12 / 180 * Math.PI
-		include : QuestionSmoothShape CAP questionBottom [mix Middle SB 0.75] RightSB
-		include : Translate (-Middle) (-DotRadius)
-		include : Rotate (-2 * angle)
-		include : Translate Middle DotRadius
-		include : VBar Middle questionBottom CAP
-		include : Translate (-Middle) (-DotRadius)
-		include : Rotate (1.2 * angle)
-		include : Translate Middle DotRadius
-		include : DotAt Middle DotRadius (DotRadius - O)
-
-	turned 'gnaborretni' 0x2E18 'interrobang' Middle (CAP / 2)
 	turned 'questionDown'0xBF   'question'    Middle (XH / 2)
-	turned 'exclamDown'  0xA1   'exclam'      Middle (XH / 2)
+	select-variant 'interrobang' 0x203D (follow -- 'question')
+	turned 'gnaborretni' 0x2E18 'interrobang' Middle (CAP / 2)

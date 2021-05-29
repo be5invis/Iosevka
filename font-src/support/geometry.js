@@ -14,6 +14,9 @@ class GeometryBase {
 	asReferences() {
 		throw new Error("Unimplemented");
 	}
+	unwrapShapeIdentity() {
+		return this;
+	}
 	filterTag(fn) {
 		return this;
 	}
@@ -100,6 +103,9 @@ class ReferenceGeometry extends GeometryBase {
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
 	}
+	unwrapShapeIdentity() {
+		return this.unwrap().unwrapShapeIdentity();
+	}
 	toShapeStringOrNull() {
 		let sTarget = this.m_glyph.geometry.toShapeStringOrNull();
 		if (!sTarget) return null;
@@ -128,6 +134,9 @@ class TaggedGeometry extends GeometryBase {
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
+	}
+	unwrapShapeIdentity() {
+		return this.m_geom.unwrapShapeIdentity();
 	}
 	toShapeStringOrNull() {
 		return this.m_geom.toShapeStringOrNull();
@@ -169,6 +178,26 @@ class TransformedGeometry extends GeometryBase {
 	}
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
+	}
+	unwrapShapeIdentity() {
+		const unwrapped = this.m_geom.unwrapShapeIdentity();
+		if (Transform.isIdentity(this.m_transform)) {
+			return unwrapped;
+		} else if (
+			unwrapped instanceof TransformedGeometry &&
+			Transform.isTranslate(this.m_transform) &&
+			Transform.isTranslate(unwrapped.m_transform)
+		) {
+			return new TransformedGeometry(
+				unwrapped.m_geom,
+				Transform.Translate(
+					this.m_transform.x + unwrapped.m_transform.x,
+					this.m_transform.y + unwrapped.m_transform.y
+				)
+			);
+		} else {
+			return new TransformedGeometry(unwrapped, this.m_transform);
+		}
 	}
 	toShapeStringOrNull() {
 		const sTarget = this.m_geom.toShapeStringOrNull();
@@ -231,6 +260,19 @@ class CombineGeometry extends GeometryBase {
 		let s = 0;
 		for (const part of this.m_parts) s += part.measureComplexity();
 	}
+
+	unwrapShapeIdentity() {
+		let parts = [];
+		for (const part of this.m_parts) {
+			const unwrapped = part.unwrapShapeIdentity();
+			if (unwrapped instanceof CombineGeometry) {
+				for (const p of unwrapped.m_parts) parts.push(p);
+			} else {
+				parts.push(unwrapped);
+			}
+		}
+		return new CombineGeometry(parts);
+	}
 	toShapeStringOrNull() {
 		let sParts = [];
 		for (const item of this.m_parts) {
@@ -255,8 +297,10 @@ class BooleanGeometry extends GeometryBase {
 		return this.m_resolved;
 	}
 	asContoursImpl() {
+		if (this.m_operands.length === 0) return [];
+
 		let arcs = CurveUtil.convertShapeToArcs(this.m_operands[0].asContours());
-		if (this.m_operands.length < 2) {
+		if (this.m_operands.length === 1) {
 			arcs = TypoGeom.Boolean.removeOverlap(
 				arcs,
 				TypoGeom.Boolean.PolyFillType.pftNonZero,
@@ -295,6 +339,16 @@ class BooleanGeometry extends GeometryBase {
 	measureComplexity() {
 		let s = 0;
 		for (const operand of this.m_operands) s += operand.measureComplexity();
+	}
+	unwrapShapeIdentity() {
+		if (this.m_operands.length === 0) return new CombineGeometry([]);
+		if (this.m_operands.length === 1) return this.m_operands[0].unwrapShapeIdentity();
+
+		let operands = [];
+		for (const operand of this.m_operands) {
+			operands.push(operand.unwrapShapeIdentity());
+		}
+		return new BooleanGeometry(this.m_operator, operands);
 	}
 	toShapeStringOrNull() {
 		let sParts = [];

@@ -19,8 +19,8 @@ glyph-block Letter-Latin-Upper-H : begin
 	define SLAB-TAILED-CYRILLIC        3
 	define SLAB-ALL                    4
 
-	define [HSerifs t b l r slabType] : begin
-		local sf : SerifFrame t b l r
+	define [HSerifs slabType t b l r sw] : begin
+		local sf : SerifFrame t b l r (sw -- [fallback sw Stroke])
 		return : match slabType
 			[Just SLAB-NONE]   : glyph-proc
 			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
@@ -46,8 +46,22 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : Body SB right top sw
 		include : HBarTop (right + O) barRight top
 
-		include : HSerifs top 0 SB right slabType
+		include : HSerifs slabType top 0 SB right sw
 		if vSlab : include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
+
+	define [HwairShape df top slabType] : glyph-proc
+		include : VBarLeft df.leftSB 0 CAP df.mvs
+		include : HBar SB df.middle (CAP / 2)
+		include : dispiro
+			widths.lhs df.mvs
+			flat (df.middle - df.mvs * 0.5 * HVContrast) CAP [heading Downward]
+			curl (df.middle - df.mvs * 0.5 * HVContrast) (SmallSmoothB * 0.6 * df.div)
+			arcvh
+			g4 [mix (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB 0.5] O [heading Rightward]
+			archv
+			flat df.rightSB (SmallSmoothA * 0.6 * df.div)
+			curl df.rightSB XH [heading Upward]
+		include : HSerifs slabType top 0 df.leftSB (df.middle + 0.5 * df.mvs * HVContrast) df.mvs
 
 	define HConfig : object
 		serifless                        { HShape       SLAB-NONE                  false }
@@ -57,23 +71,24 @@ glyph-block Letter-Latin-Upper-H : begin
 		topLeftBottomRightSerifed        { HShape       SLAB-TOP-LEFT-BOTTOM-RIGHT true  }
 		serifed                          { HShape       SLAB-ALL                   true  }
 		tailedSerifed                    { TailedHShape SLAB-TAILED-CYRILLIC       true  }
+		serifedExceptBottomRight         { HShape       SLAB-TAILED-CYRILLIC       true  }
 
 	foreach { suffix { Body slabType enGheVSlab } } [Object.entries HConfig] : do
 		create-glyph "H.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Body SB RightSB CAP
-			include : HSerifs CAP 0 SB RightSB slabType
+			include : HSerifs slabType CAP 0 SB RightSB
 
 		create-glyph "smcpH.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : Body SB RightSB  XH
-			include : HSerifs XH 0 SB RightSB slabType
+			include : HSerifs slabType XH 0 SB RightSB
 
 		create-glyph "halfH.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Body SB RightSB CAP
 			eject-contour 'strokeR'
-			include : HSerifs CAP 0 SB RightSB slabType
+			include : HSerifs slabType CAP 0 SB RightSB
 			eject-contour 'serifRT'
 			eject-contour 'serifRB'
 
@@ -81,7 +96,7 @@ glyph-block Letter-Latin-Upper-H : begin
 			include : MarkSet.e
 			include : Body SB RightSB XH
 			eject-contour 'strokeR'
-			include : HSerifs XH 0 SB RightSB slabType
+			include : HSerifs slabType XH 0 SB RightSB
 			eject-contour 'serifRT'
 			eject-contour 'serifRB'
 
@@ -92,6 +107,12 @@ glyph-block Letter-Latin-Upper-H : begin
 		create-glyph "cyrl/enghe.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : EnGheShape Body XH slabType enGheVSlab
+
+		create-glyph "Hwair.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : HwairShape df CAP slabType
 
 	select-variant 'H' 'H'
 	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
@@ -113,6 +134,8 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	select-variant 'cyrl/EnGhe' 0x4A4 (follow -- 'H')
 	select-variant 'cyrl/enghe' 0x4A5 (follow -- 'cyrl/en')
+
+	select-variant 'Hwair' 0x1F6
 
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
