@@ -121,11 +121,13 @@ class SimplifyGeometry extends Geom.GeometryBase {
 
 class FairizedShapeSink {
 	constructor() {
+		this.lastReferenceZ = null;
 		this.contours = [];
 		this.lastContour = [];
 	}
 	beginShape() {}
 	endShape() {
+		this.lastReferenceZ = null;
 		if (this.lastContour.length > 2) {
 			// TT use CW for outline, being different from Clipper
 			const c = this.lastContour.reverse();
@@ -136,20 +138,32 @@ class FairizedShapeSink {
 		}
 		this.lastContour = [];
 	}
+	tryAlignWithPreviousKnot(z) {
+		if (!this.lastReferenceZ) return z;
+		let x1 = z.x,
+			y1 = z.y;
+		if (geometryPrecisionEqual(x1, this.lastReferenceZ.x)) x1 = this.lastReferenceZ.x;
+		if (geometryPrecisionEqual(y1, this.lastReferenceZ.y)) y1 = this.lastReferenceZ.y;
+		return Point.fromXY(z.type, x1, y1).round(CurveUtil.GEOMETRY_PRECISION);
+	}
 	moveTo(x, y) {
 		this.endShape();
 		this.lineTo(x, y);
 	}
 	lineTo(x, y) {
-		const z = Point.fromXY(Point.Type.Corner, x, y).round(1);
+		const z0 = Point.fromXY(Point.Type.Corner, x, y);
+		const z = this.tryAlignWithPreviousKnot(z0);
 		this.popOccurrentKnots(z);
 		this.popColinearKnots(z);
 		this.lastContour.push(z);
+		this.lastReferenceZ = z0;
 	}
 	arcTo(arc, x, y) {
 		const offPoints = TypoGeom.Quadify.auto(arc, 1, 8);
 		for (const z of offPoints) {
-			this.lastContour.push(Point.from(Point.Type.Quadratic, z).round(1));
+			this.lastContour.push(
+				this.tryAlignWithPreviousKnot(Point.from(Point.Type.Quadratic, z))
+			);
 		}
 		this.lineTo(x, y);
 	}
@@ -195,7 +209,10 @@ function isOccurrent(zFirst, zLast) {
 	);
 }
 function geometryPrecisionEqual(a, b) {
-	return Math.round(a) === Math.round(b);
+	return (
+		Math.round(a * CurveUtil.RECIP_GEOMETRY_PRECISION) ===
+		Math.round(b * CurveUtil.RECIP_GEOMETRY_PRECISION)
+	);
 }
 function aligned(a, b, c) {
 	return geometryPrecisionEqual(a, b) && geometryPrecisionEqual(b, c);
