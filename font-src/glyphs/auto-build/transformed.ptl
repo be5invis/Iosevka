@@ -192,6 +192,8 @@ glyph-block Autobuild-Transformed : begin
 		link-relations relSets
 
 	createSuperscripts : list
+		list 0x00AA 'aSbRsbUnderlineBelow'
+		list 0x00BA 'oSbRsbUnderlineBelow'
 		list 0x2070 'zero.lnum'
 		list 0x00B9 'one.lnum'
 		list 0x00B2 'two.lnum'
@@ -328,25 +330,6 @@ glyph-block Autobuild-Transformed : begin
 			include [refer-glyph tnmEHalf.('AE/EHalf')]
 			CvDecompose.set currentGlyph { tnmAHalf.('AE/AHalf') tnmEHalf.('AE/EHalf') }
 
-	let [df : Miniature {'a' 'o'} 4 0.7] : begin
-		create-glyph 'ordfeminine' 0xAA : glyph-proc
-			include : df.queryByName 'a'
-			include : HBarBottom SB RightSB Descender
-			include : Upright
-			include : Translate (-Middle) (-XH)
-			include : Scale 0.7
-			include : Translate Middle CAP
-			include : Italify
-
-		create-glyph 'ordmasculine' 0xBA : glyph-proc
-			include : df.queryByName 'o'
-			include : HBarBottom SB RightSB Descender
-			include : Upright
-			include : Translate (-Middle) (-XH)
-			include : Scale 0.7
-			include : Translate Middle CAP
-			include : Italify
-
 	createSubscripts : list
 		list 0x2080 'zero.lnum'
 		list 0x2081 'one.lnum'
@@ -481,7 +464,8 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	define [createMathDerivedSeriesImpl groupName tfm _records] : begin
 		local { records relSets targetNameMap } : extendRelatedGlyphs groupName _records
 		local pendingGlyphs : records.map : [record] => record.1
-		local forked : Fork pendingGlyphs [para.reinit tfm]
+		local forkedPara : para.reinit tfm
+		local forked : Fork pendingGlyphs forkedPara
 		foreach {unicode glyphid} [items-of records] : if [not : query-glyph targetNameMap.(glyphid)]
 			create-glyph targetNameMap.(glyphid) unicode : glyph-proc
 				if [not : forked.queryByName glyphid] : console.log glyphid

@@ -40,10 +40,10 @@ async function getParameters() {
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
 	const rawLigationData = await tryParseToml(LIGATIONS_TOML);
 
-	function reinit(argv) {
-		let para = Parameters.init(parametersData, argv);
-		VariantData.apply(rawVariantsData, para, argv);
-		ApplyLigationData(rawLigationData, para, argv);
+	function createParaImpl(argv) {
+		let para = Parameters.init(deepClone(parametersData), argv);
+		VariantData.apply(deepClone(rawVariantsData), para, argv);
+		ApplyLigationData(deepClone(rawLigationData), para, argv);
 
 		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
@@ -57,9 +57,13 @@ async function getParameters() {
 			width: argv.menu.width - 0,
 			slope: argv.menu.slope
 		};
+		return para;
+	}
 
+	function reinit(argv) {
+		const para = createParaImpl(argv);
 		para.reinit = function (tf) {
-			const argv1 = JSON.parse(JSON.stringify(argv));
+			const argv1 = deepClone(argv);
 			tf(argv1, argv);
 			return reinit(argv1);
 		};
@@ -76,6 +80,10 @@ async function tryParseToml(str) {
 			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`
 		);
 	}
+}
+
+function deepClone(pod) {
+	return JSON.parse(JSON.stringify(pod));
 }
 
 // Save TTF

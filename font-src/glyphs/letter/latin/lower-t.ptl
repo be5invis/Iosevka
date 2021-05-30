@@ -64,8 +64,9 @@ glyph-block Letter-Latin-Lower-T : begin
 			[xSmallTCrossRefT df] + LongJut * [Math.sqrt df.div]
 			begin yCrossBar
 
-	define [SmallTFlatBody df top bot] : TFlatShapeImpl df top bot [mix 1 df.div 2] 0
-	define [TFlatShapeImpl df top bot m ext] : glyph-proc
+	define [SmallTFlatBody df top bot] : TFlatShapeImpl false df top bot [mix 1 df.div 2] 0
+	define [RetroflexHookBody df top bot] : TFlatShapeImpl true df top bot [mix 1 df.div 2] 0
+	define [TFlatShapeImpl fRetroflex df top bot m ext] : glyph-proc
 		local xCrossLeft : mix 0 SB m
 		local xCrossRight : mix df.width df.rightSB m
 		local xBarLeft : [mix xCrossLeft xCrossRight 0.42] - Stroke * 0.375 * HVContrast
@@ -74,10 +75,13 @@ glyph-block Letter-Latin-Lower-T : begin
 			HCrossBar.top xCrossLeft (xCrossRight + ext) yCrossBar
 			dispiro
 				widths.rhs
-				flat xCrossRight 0
-				curl [Math.min (xBarLeft + hd.x) (xCrossRight - 1)] 0
+				if fRetroflex
+					straight.left.start (xBarLeft + HookX + HalfStroke * HVContrast) bot
+					list
+						flat xCrossRight bot
+						curl [Math.min (xBarLeft + hd.x) (xCrossRight - 1)] bot
 				archv.superness DesignParameters.tightHookSuperness
-				flat xBarLeft hd.y
+				flat xBarLeft [if fRetroflex (bot + Hook + HalfStroke) hd.y]
 				curl xBarLeft top [heading Upward]
 		set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
 		set-base-anchor 'topright' xCrossRight  CAP
@@ -103,16 +107,19 @@ glyph-block Letter-Latin-Lower-T : begin
 		standard                     { [DivFrame  1] SmallTShape                  CAP         }
 		diagonalTailed               {  dfNarrowT    TDiagTailShape               CAP         }
 		flatHook                     {  dfNarrowT    SmallTFlatBody               CAP         }
+		retroflexHookBase            {  dfNarrowT    RetroflexHookBody            CAP         }
 		cross                        {  dfNarrowT    SmallTCrossBody              CAP         }
 		hooklessAsymmetric           {  dfNarrowT    SmallTHooklessAsymmetricBody CAP         }
 		standardShortNeck            { [DivFrame  1] SmallTShape                  yShortNeck1 }
 		diagonalTailedShortNeck      {  dfNarrowT    TDiagTailShape               yShortNeck1 }
 		flatHookShortNeck            {  dfNarrowT    SmallTFlatBody               yShortNeck1 }
+		retroflexHookBaseShortNeck   {  dfNarrowT    RetroflexHookBody            yShortNeck1 }
 		crossShortNeck               {  dfNarrowT    SmallTCrossBody              yShortNeck1 }
 		hooklessAsymmetricShortNeck  {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck1 }
 		standardShortNeck2           { [DivFrame  1] SmallTShape                  yShortNeck2 }
 		diagonalTailedShortNeck2     {  dfNarrowT    TDiagTailShape               yShortNeck2 }
 		flatHookShortNeck2           {  dfNarrowT    SmallTFlatBody               yShortNeck2 }
+		retroflexHookBaseShortNeck2  {  dfNarrowT    RetroflexHookBody            yShortNeck2 }
 		crossShortNeck2              {  dfNarrowT    SmallTCrossBody              yShortNeck2 }
 		hooklessAsymmetricShortNeck2 {  dfNarrowT    SmallTHooklessAsymmetricBody yShortNeck2 }
 
@@ -168,7 +175,7 @@ glyph-block Letter-Latin-Lower-T : begin
 		local df : DivFrame 1
 		set-width df.width
 		include : df.markSet.b
-		include : TFlatShapeImpl df CAP 0 1 0
+		include : TFlatShapeImpl false df CAP 0 1 0
 
 	select-variant 't' 't'
 	select-variant 't/teshLeft' (follow -- 't')
@@ -178,7 +185,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 	select-variant "tHookTop" 0x1AD
 	select-variant 'tLTail' 0x1AB
-	select-variant 'tRTail' 0x288 (follow -- 'tLTail')
+	select-variant 'tRTail' 0x288
 	select-variant 'tCurlyTal' 0x236 (follow -- 'tLTail')
 
 
