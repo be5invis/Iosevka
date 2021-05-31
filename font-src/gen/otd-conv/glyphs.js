@@ -5,12 +5,15 @@ class MappedGlyphStore {
 	constructor() {
 		this.m_nameMapping = new Map();
 		this.m_mapping = new Map();
+		this.m_primaryUnicodeMapping = new Map();
 	}
 	declare(name, source) {
 		const g = new Ot.Glyph();
-		g.name = name;
 		this.m_nameMapping.set(name, g);
 		this.m_mapping.set(source, g);
+	}
+	setPrimaryUnicode(source, u) {
+		this.m_primaryUnicodeMapping.set(source, u);
 	}
 	queryBySourceGlyph(source) {
 		return this.m_mapping.get(source);
@@ -38,6 +41,31 @@ class MappedGlyphStore {
 		} else {
 			this.fillContours(g, source.geometry.asContours());
 		}
+	}
+	fillOtGlyphNames() {
+		let gid = 0;
+		let conflictSet = new Set();
+		for (const [gSrc, gOt] of this.m_mapping) {
+			gOt.name = this.nameSingleGlyph(gid, gSrc, conflictSet);
+			gid++;
+		}
+	}
+
+	nameSingleGlyph(gid, gSrc, conflictSet) {
+		if (gid === 0) return ".notdef";
+		if (gid === 1) return ".null";
+
+		let preferredName = null;
+		let primaryUnicode = this.m_primaryUnicodeMapping.get(gSrc);
+		if (primaryUnicode) {
+			preferredName = `u${formatCodePointHex(primaryUnicode)}`;
+		}
+		if (preferredName && !conflictSet.has(preferredName)) {
+			conflictSet.add(preferredName);
+			return preferredName;
+		}
+
+		return `.gid${gid}`;
 	}
 
 	fillReferences(g, rs) {
@@ -85,14 +113,14 @@ function convertGlyphs(gsOrig) {
 		const us = gsOrig.queryUnicodeOf(gSrc);
 		if (us) {
 			for (const u of us) {
-				if (isFinite(u - 0) && u) {
-					cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
-				}
+				if (!(isFinite(u - 0) && u)) continue;
+				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
+				gs.setPrimaryUnicode(gSrc, u);
 			}
 		}
 	}
 	for (const [origIndex, name, uOrd, gSrc] of sortedEntries) gs.fill(name, gSrc);
-
+	gs.fillOtGlyphNames();
 	return { glyphs: gs, cmap };
 }
 function queryOrderingUnicode(gs, g) {
@@ -104,4 +132,8 @@ function byRank([ja, gna, ua, a], [jb, gnb, ub, b]) {
 	return (
 		(b.glyphRank || 0) - (a.glyphRank || 0) || (ua || 0) - (ub || 0) || (ja || 0) - (jb || 0)
 	);
+}
+
+function formatCodePointHex(u) {
+	return u.toString(16).padStart(4, "0").toUpperCase();
 }
