@@ -199,29 +199,32 @@ class FairizedShapeSink {
 		return c;
 	}
 	removeColinearKnots(c0) {
-		const c = c0.slice(0),
-			shouldRemove = [];
-		for (let i = 0; i < c.length; i++) {
-			const zPrev = c[(i - 1 + c.length) % c.length],
-				zCurr = c[i],
-				zNext = c[(i + 1) % c.length];
-			if (
-				zPrev.type === Point.Type.Corner &&
-				zCurr.type === Point.Type.Corner &&
-				zNext.type === Point.Type.Corner
-			) {
-				if (aligned(zPrev.x, zCurr.x, zNext.x) && between(zPrev.y, zCurr.y, zNext.y))
-					shouldRemove[i] = true;
-				if (aligned(zPrev.y, zCurr.y, zNext.y) && between(zPrev.x, zCurr.x, zNext.x))
-					shouldRemove[i] = true;
+		const c = c0.slice(0);
+		let lengthBefore = c.length,
+			lengthAfter = c.length;
+		do {
+			lengthBefore = c.length;
+			const shouldRemove = [];
+			for (let i = 0; i < c.length; i++) {
+				const zPrev = c[(i - 1 + c.length) % c.length],
+					zCurr = c[i],
+					zNext = c[(i + 1) % c.length];
+				if (zPrev.type === Point.Type.Corner && zNext.type === Point.Type.Corner) {
+					if (aligned(zPrev.x, zCurr.x, zNext.x) && between(zPrev.y, zCurr.y, zNext.y))
+						shouldRemove[i] = true;
+					if (aligned(zPrev.y, zCurr.y, zNext.y) && between(zPrev.x, zCurr.x, zNext.x))
+						shouldRemove[i] = true;
+				}
 			}
-		}
+			let n = 0;
+			for (let i = 0; i < c.length; i++) {
+				if (!shouldRemove[i]) c[n++] = c[i];
+			}
+			c.length = n;
+			lengthAfter = c.length;
+		} while (lengthAfter < lengthBefore);
 
-		const c2 = [];
-		for (let i = 0; i < c.length; i++) {
-			if (!shouldRemove[i]) c2.push(c[i]);
-		}
-		return c2;
+		return c;
 	}
 }
 function isOccurrent(zFirst, zLast) {

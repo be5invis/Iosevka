@@ -4,7 +4,7 @@ const fs = require("fs-extra");
 const zlib = require("zlib");
 const { encode, decode } = require("@msgpack/msgpack");
 
-const Edition = 5;
+const Edition = 6;
 const MAX_AGE = 5;
 
 class GfEntry {
