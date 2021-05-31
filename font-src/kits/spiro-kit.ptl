@@ -1,8 +1,9 @@
 import 'spiro' as SpiroJs
-import [SpiroExpansionContext1 SpiroExpansionContext2] from '../support/spiro-expand'
 import '../support/curve-util' as CurveUtil
 import '../support/transform' as Transform
-import '../support/utils' as [object fallback mix bez2 bez3]
+import [SpiroExpansionContext1 SpiroExpansionContext2] from '../support/spiro-expand'
+import [fallback mix bez2 bez3] from '../support/utils'
+import [SpiroGeometry CombineGeometry] from "../support/geometry"
 
 export : define [SetupBuilders args] : begin
 	define [object para Glyph Contrast GlobalTransform Stroke] args
@@ -182,9 +183,6 @@ export : define [SetupBuilders args] : begin
 		set knots : flatten s knots
 		return { .knots knots .closed closed }
 
-	define [convertSpiroToBezier knots closed ctx] : begin
-		return : SpiroJs.spiroToBezierOnContext knots closed ctx CurveUtil.SPIRO_PRECISION
-
 	define [iterateNormals s closed] : begin
 		local knotsP2 : s.getPass2Knots closed [fallback s.contrast Contrast]
 		local s2 : new SpiroExpansionContext2 s.controlKnots s.gizmo
@@ -205,30 +203,23 @@ export : define [SetupBuilders args] : begin
 		local {.lhs lhs .rhs rhs} : s.expand [fallback s.contrast Contrast]
 
 		if closed : then
-			local g : new CurveUtil.BezToContoursSink
-			# CurveUtil.BezToContoursSink::beginShape won't clear the contours
-			# We will get two contours at last
-			convertSpiroToBezier [lhs.slice 0 (-1)] CLOSED g
-			convertSpiroToBezier [rhs.reverse :.slice 0 (-1)] CLOSED g
-			set g.contours { [g.contours.0.concat g.contours.1] }
+			this.includeGeometry : new CombineGeometry : list
+				new SpiroGeometry [lhs.slice 0 (-1)]           closed [Transform.Id]
+				new SpiroGeometry [rhs.reverse :.slice 0 (-1)] closed [Transform.Id]
+
 		: else : begin
-			local g : new CurveUtil.BezToContoursSink
 			lhs.0.type = lhs.(lhs.length - 1).type = 'corner'
 			rhs.0.type = rhs.(rhs.length - 1).type = 'corner'
-			convertSpiroToBezier [lhs.concat : rhs.reverse] CLOSED g
+			define allKnots : lhs.concat : rhs.reverse
+			this.includeGeometry : new SpiroGeometry allKnots CLOSED [Transform.Id]
 
-		set g.knots knots
-		set g.lhsKnots lhs
-		set g.rhsKnots rhs
-		this.includeContours g.contours 0 0
-		return g
+		return { .knots knots .lhsKnots lhs .rhsKnots rhs }
 
 	define [spiro-outline] : let [k : {}.slice.call arguments 0] : lambda [] : begin
-		local g : new CurveUtil.BezToContoursSink (this.gizmo || GlobalTransform)
+		local gizmo : this.gizmo || GlobalTransform
+		local g : new CurveUtil.BezToContoursSink gizmo
 		local { .knots knots .closed closed } : prepareSpiroKnots k g
-		convertSpiroToBezier knots closed g
-		this.includeContours g.contours 0 0
-		return g
+		this.includeGeometry : new SpiroGeometry knots closed gizmo
 
 	return [object
 		g4 g2 corner flat curl close end straight
