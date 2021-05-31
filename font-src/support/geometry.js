@@ -14,7 +14,7 @@ class GeometryBase {
 	asReferences() {
 		throw new Error("Unimplemented");
 	}
-	unwrapShapeIdentity() {
+	unlinkReferences() {
 		return this;
 	}
 	filterTag(fn) {
@@ -103,8 +103,8 @@ class ReferenceGeometry extends GeometryBase {
 	measureComplexity() {
 		return this.m_glyph.geometry.measureComplexity();
 	}
-	unwrapShapeIdentity() {
-		return this.unwrap().unwrapShapeIdentity();
+	unlinkReferences() {
+		return this.unwrap().unlinkReferences();
 	}
 	toShapeStringOrNull() {
 		let sTarget = this.m_glyph.geometry.toShapeStringOrNull();
@@ -135,8 +135,8 @@ class TaggedGeometry extends GeometryBase {
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
 	}
-	unwrapShapeIdentity() {
-		return this.m_geom.unwrapShapeIdentity();
+	unlinkReferences() {
+		return this.m_geom.unlinkReferences();
 	}
 	toShapeStringOrNull() {
 		return this.m_geom.toShapeStringOrNull();
@@ -179,8 +179,8 @@ class TransformedGeometry extends GeometryBase {
 	measureComplexity() {
 		return this.m_geom.measureComplexity();
 	}
-	unwrapShapeIdentity() {
-		const unwrapped = this.m_geom.unwrapShapeIdentity();
+	unlinkReferences() {
+		const unwrapped = this.m_geom.unlinkReferences();
 		if (Transform.isIdentity(this.m_transform)) {
 			return unwrapped;
 		} else if (
@@ -261,10 +261,10 @@ class CombineGeometry extends GeometryBase {
 		for (const part of this.m_parts) s += part.measureComplexity();
 	}
 
-	unwrapShapeIdentity() {
+	unlinkReferences() {
 		let parts = [];
 		for (const part of this.m_parts) {
-			const unwrapped = part.unwrapShapeIdentity();
+			const unwrapped = part.unlinkReferences();
 			if (unwrapped instanceof CombineGeometry) {
 				for (const p of unwrapped.m_parts) parts.push(p);
 			} else {
@@ -340,13 +340,13 @@ class BooleanGeometry extends GeometryBase {
 		let s = 0;
 		for (const operand of this.m_operands) s += operand.measureComplexity();
 	}
-	unwrapShapeIdentity() {
+	unlinkReferences() {
 		if (this.m_operands.length === 0) return new CombineGeometry([]);
-		if (this.m_operands.length === 1) return this.m_operands[0].unwrapShapeIdentity();
+		if (this.m_operands.length === 1) return this.m_operands[0].unlinkReferences();
 
 		let operands = [];
 		for (const operand of this.m_operands) {
-			operands.push(operand.unwrapShapeIdentity());
+			operands.push(operand.unlinkReferences());
 		}
 		return new BooleanGeometry(this.m_operator, operands);
 	}

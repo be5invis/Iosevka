@@ -159,12 +159,10 @@ class Composite {
 		const ans = [];
 		const cfg = Object.assign(
 			{},
-			this.decomposeSlabOverride(this.design, this.slabOverride.design, para),
-			para.isItalic
-				? this.decomposeSlabOverride(this.italic, this.slabOverride.italic, para)
-				: para.isOblique
-				? this.decomposeSlabOverride(this.oblique, this.slabOverride.oblique, para)
-				: this.decomposeSlabOverride(this.upright, this.slabOverride.upright, para)
+			this.design,
+			this.decomposeSlope(this, para),
+			!para.slab ? {} : this.slabOverride.design,
+			!para.slab ? {} : this.decomposeSlope(this.slabOverride, para)
 		);
 		for (const [k, v] of Object.entries(cfg)) {
 			const pv = selTree.get(k, v);
@@ -173,9 +171,8 @@ class Composite {
 		}
 		return ans;
 	}
-	decomposeSlabOverride(d, sd, para) {
-		if (para.slab) return Object.assign({}, d, sd);
-		else return d;
+	decomposeSlope(base, para) {
+		return para.isItalic ? base.italic : para.isOblique ? base.oblique : base.upright;
 	}
 	resolve(para, selTree, catalog, vs) {
 		if (this.inherits) {
