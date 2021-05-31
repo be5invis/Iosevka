@@ -5,8 +5,8 @@ const Point = require("./point");
 const Transform = require("./transform");
 
 exports.SPIRO_PRECISION = 1 / 2;
+exports.OCCURRENT_PRECISION = 1 / 16;
 exports.GEOMETRY_PRECISION = 1 / 4;
-exports.RECIP_GEOMETRY_PRECISION = 4;
 exports.BOOLE_RESOLUTION = 0x4000;
 
 exports.OffsetCurve = class OffsetCurve {
