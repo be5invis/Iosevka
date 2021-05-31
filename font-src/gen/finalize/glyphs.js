@@ -20,8 +20,11 @@ function regulateGlyphStore(cache, skew, glyphStore) {
 	for (const g of glyphStore.glyphs()) {
 		if (g.geometry.isEmpty()) continue;
 		if (!regulateCompositeGlyph(glyphStore, compositeMemo, g)) {
-			flattenSimpleGlyph(cache, skew, g);
+			g.geometry = g.geometry.unlinkReferences();
 		}
+	}
+	for (const g of glyphStore.glyphs()) {
+		if (!compositeMemo.get(g)) flattenSimpleGlyph(cache, skew, g);
 	}
 }
 
@@ -113,7 +116,7 @@ class SimplifyGeometry extends Geom.GeometryBase {
 		return this.m_geom.measureComplexity();
 	}
 	toShapeStringOrNull() {
-		const sTarget = this.m_geom.unwrapShapeIdentity().toShapeStringOrNull();
+		const sTarget = this.m_geom.unlinkReferences().toShapeStringOrNull();
 		if (!sTarget) return null;
 		return `SimplifyGeometry{${sTarget}}`;
 	}
@@ -121,83 +124,104 @@ class SimplifyGeometry extends Geom.GeometryBase {
 
 class FairizedShapeSink {
 	constructor() {
-		this.lastReferenceZ = null;
 		this.contours = [];
 		this.lastContour = [];
 	}
 	beginShape() {}
 	endShape() {
-		this.lastReferenceZ = null;
 		if (this.lastContour.length > 2) {
 			// TT use CW for outline, being different from Clipper
-			const c = this.lastContour.reverse();
-			const zFirst = c[0],
-				zLast = c[c.length - 1];
-			if (isOccurrent(zFirst, zLast)) c.pop();
+			let c = this.lastContour.reverse();
+			c = this.alignHVKnots(c);
+			c = this.cleanupOccurrentKnots1(c);
+			c = this.cleanupOccurrentKnots2(c);
+			c = this.removeColinearKnots(c);
 			this.contours.push(c);
 		}
 		this.lastContour = [];
-	}
-	tryAlignWithPreviousKnot(z) {
-		if (!this.lastReferenceZ) return z;
-		let x1 = z.x,
-			y1 = z.y;
-		if (geometryPrecisionEqual(x1, this.lastReferenceZ.x)) x1 = this.lastReferenceZ.x;
-		if (geometryPrecisionEqual(y1, this.lastReferenceZ.y)) y1 = this.lastReferenceZ.y;
-		return Point.fromXY(z.type, x1, y1).round(CurveUtil.GEOMETRY_PRECISION);
 	}
 	moveTo(x, y) {
 		this.endShape();
 		this.lineTo(x, y);
 	}
 	lineTo(x, y) {
-		const z0 = Point.fromXY(Point.Type.Corner, x, y);
-		const z = this.tryAlignWithPreviousKnot(z0);
-		this.popOccurrentKnots(z);
-		this.popColinearKnots(z);
-		this.lastContour.push(z);
-		this.lastReferenceZ = z0;
+		this.lastContour.push(Point.fromXY(Point.Type.Corner, x, y));
 	}
 	arcTo(arc, x, y) {
 		const offPoints = TypoGeom.Quadify.auto(arc, 1, 8);
 		for (const z of offPoints) {
-			this.lastContour.push(
-				this.tryAlignWithPreviousKnot(Point.from(Point.Type.Quadratic, z))
-			);
+			this.lastContour.push(Point.from(Point.Type.Quadratic, z));
 		}
 		this.lineTo(x, y);
 	}
-	popOccurrentKnots(z) {
-		if (this.lastContour.length <= 0) return;
-		const last = this.lastContour[this.lastContour.length - 1];
-		if (last.type === Point.Type.Corner && last.x === z.x && last.y === z.y) {
-			this.lastContour.pop();
+
+	// Contour cleaning code
+	alignHVKnots(c0) {
+		const c = c0.slice(0);
+		for (let i = 0; i < c.length; i++) {
+			const zPrev = c[i],
+				zCurr = c[(i + 1) % c.length];
+			if (zPrev.type === Point.Type.Corner) {
+				if (occurrentPrecisionEqual(zPrev.x, zCurr.x)) zCurr.x = zPrev.x;
+				if (occurrentPrecisionEqual(zPrev.y, zCurr.y)) zCurr.y = zPrev.y;
+			}
 		}
+		for (let i = 0; i < c.length; i++) {
+			const zCurr = c[i],
+				zNext = c[(i + 1) % c.length];
+			if (zCurr.type === Point.Type.Quadratic && zNext.type === Point.Type.Corner) {
+				if (occurrentPrecisionEqual(zCurr.x, zNext.x)) zCurr.x = zNext.x;
+				if (occurrentPrecisionEqual(zCurr.y, zNext.y)) zCurr.y = zNext.y;
+			}
+		}
+		return c;
 	}
-	popColinearKnots(z) {
-		let kArcStart = this.lastContour.length - 2;
-		if (kArcStart >= 0) {
-			const kLast = kArcStart + 1;
+	cleanupOccurrentKnots1(c0) {
+		const c = [c0[0]];
+		for (let i = 1; i < c0.length; i++) {
 			if (
-				this.lastContour[kArcStart].type !== Point.Type.Corner &&
-				this.lastContour[kLast].type === Point.Type.Corner
+				!(
+					c0[i].type === Point.Type.Corner &&
+					c0[i - 1].type === Point.Type.Corner &&
+					isOccurrent(c0[i], c0[i - 1])
+				)
 			) {
-				return;
+				c.push(c0[i]);
 			}
 		}
-		while (kArcStart >= 0 && this.lastContour[kArcStart].type !== Point.Type.Corner)
-			kArcStart--;
-		if (kArcStart >= 0) {
-			const a = this.lastContour[kArcStart];
-			let fColinearH = true;
-			let fColinearV = true;
-			for (let m = kArcStart + 1; m < this.lastContour.length; m++) {
-				const b = this.lastContour[m];
-				if (!(aligned(a.y, b.y, z.y) && between(a.x, b.x, z.x))) fColinearH = false;
-				if (!(aligned(a.x, b.x, z.x) && between(a.y, b.y, z.y))) fColinearV = false;
+		return c;
+	}
+	cleanupOccurrentKnots2(c0) {
+		const c = c0.slice(0);
+		const zFirst = c[0],
+			zLast = c[c.length - 1];
+		if (isOccurrent(zFirst, zLast)) c.pop();
+		return c;
+	}
+	removeColinearKnots(c0) {
+		const c = c0.slice(0),
+			shouldRemove = [];
+		for (let i = 0; i < c.length; i++) {
+			const zPrev = c[(i - 1 + c.length) % c.length],
+				zCurr = c[i],
+				zNext = c[(i + 1) % c.length];
+			if (
+				zPrev.type === Point.Type.Corner &&
+				zCurr.type === Point.Type.Corner &&
+				zNext.type === Point.Type.Corner
+			) {
+				if (aligned(zPrev.x, zCurr.x, zNext.x) && between(zPrev.y, zCurr.y, zNext.y))
+					shouldRemove[i] = true;
+				if (aligned(zPrev.y, zCurr.y, zNext.y) && between(zPrev.x, zCurr.x, zNext.x))
+					shouldRemove[i] = true;
 			}
-			if (fColinearH || fColinearV) this.lastContour.length = kArcStart + 1;
 		}
+
+		const c2 = [];
+		for (let i = 0; i < c.length; i++) {
+			if (!shouldRemove[i]) c2.push(c[i]);
+		}
+		return c2;
 	}
 }
 function isOccurrent(zFirst, zLast) {
@@ -208,14 +232,11 @@ function isOccurrent(zFirst, zLast) {
 		zFirst.y === zLast.y
 	);
 }
-function geometryPrecisionEqual(a, b) {
-	return (
-		Math.round(a * CurveUtil.RECIP_GEOMETRY_PRECISION) ===
-		Math.round(b * CurveUtil.RECIP_GEOMETRY_PRECISION)
-	);
+function occurrentPrecisionEqual(a, b) {
+	return Math.abs(a - b) < CurveUtil.OCCURRENT_PRECISION;
 }
 function aligned(a, b, c) {
-	return geometryPrecisionEqual(a, b) && geometryPrecisionEqual(b, c);
+	return occurrentPrecisionEqual(a, b) && occurrentPrecisionEqual(b, c);
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);
