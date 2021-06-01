@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 7.0.3
+
+ * Fix assignment of italic `d`, `ss03`, `ss06` and `ss08` (#1104).
+
+
 ### 7.0.2
 
  * Fix Aile's long-S at Italic (#1098).

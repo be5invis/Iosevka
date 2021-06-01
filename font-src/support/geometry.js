@@ -2,6 +2,7 @@
 
 const crypto = require("crypto");
 const TypoGeom = require("typo-geom");
+const SpiroJs = require("spiro");
 
 const Point = require("./point");
 const Transform = require("./transform");
@@ -65,6 +66,55 @@ class ContourGeometry extends GeometryBase {
 		for (const z of this.m_points) {
 			s += `(${z.type};${formatN(z.x)};${formatN(z.y)})`;
 		}
+		s += "}";
+		return s;
+	}
+}
+
+class SpiroGeometry extends GeometryBase {
+	constructor(knots, closed, gizmo) {
+		super();
+		this.m_knots = [];
+		for (const k of knots) {
+			this.m_knots.push({ type: k.type, x: k.x, y: k.y });
+		}
+		this.m_closed = closed;
+		this.m_gizmo = gizmo;
+		this.m_cachedContours = null;
+	}
+	asContours() {
+		if (this.m_cachedContours) return this.m_cachedContours;
+		const s = new CurveUtil.BezToContoursSink(this.m_gizmo);
+		SpiroJs.spiroToBezierOnContext(this.m_knots, this.m_closed, s, CurveUtil.SPIRO_PRECISION);
+		this.m_cachedContours = s.contours;
+		return this.m_cachedContours;
+	}
+	asReferences() {
+		return null;
+	}
+	filterTag(fn) {
+		return this;
+	}
+	isEmpty() {
+		return !this.m_knots.length;
+	}
+	measureComplexity() {
+		for (const z of this.m_knots) {
+			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+		}
+		return this.m_knots.length;
+	}
+	toShapeStringOrNull() {
+		let s = "SpiroGeometry{{";
+		for (const k of this.m_knots) {
+			s += `(${k.type};${formatN(k.x)};${formatN(k.y)})`;
+		}
+		s += "};";
+		s += `${this.m_closed};`;
+		s +=
+			`;{${formatN(this.m_gizmo.xx)},${formatN(this.m_gizmo.xy)},` +
+			`${formatN(this.m_gizmo.yx)},${formatN(this.m_gizmo.yy)},` +
+			`${formatN(this.m_gizmo.x)},${formatN(this.m_gizmo.y)}}`;
 		s += "}";
 		return s;
 	}
@@ -380,6 +430,7 @@ function formatN(x) {
 }
 
 exports.GeometryBase = GeometryBase;
+exports.SpiroGeometry = SpiroGeometry;
 exports.ContourGeometry = ContourGeometry;
 exports.ReferenceGeometry = ReferenceGeometry;
 exports.TaggedGeometry = TaggedGeometry;
