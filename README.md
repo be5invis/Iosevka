@@ -844,8 +844,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `j = 'serifed'`, `cv35 = 2`: `j` with top serif.
     + `j = 'straight-line'`, `cv35 = 3`: `j` like a straight line.
     + `j = 'hooky'`, `cv35 = 4`: `j` like a straight line with top serif.
-    + `j = 'flat-hook-serifless'`, `cv35 = 5`: `j` with flat terminal hook and top serif.
-    + `j = 'flat-hook-serifed'`, `cv35 = 6`: `j` with flat terminal hook.
+    + `j = 'flat-hook-serifless'`, `cv35 = 5`: `j` with flat terminal hook.
+    + `j = 'flat-hook-serifed'`, `cv35 = 6`: `j` with flat terminal hook and top serif.
     + `j = 'diagonal-tailed-serifless'`, `cv35 = 7`: `j` with diagonal tail.
     + `j = 'diagonal-tailed-serifed'`, `cv35 = 8`: `j` with top serif and diagonal tail.
   - Styles for `k`:
