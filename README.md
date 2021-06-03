@@ -386,6 +386,7 @@ Inside the plan, top-level properties include:
   - Otherwise the font will be sans-serif.
 * `no-cv-ss`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
 * `no-ligation`: Optional, Boolean, disables ligations.
+* `export-glyph-names`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will incrase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
 
 Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
 
