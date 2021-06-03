@@ -1,5 +1,6 @@
 const { Ot } = require("ot-builder");
 const Point = require("../../support/point");
+const { Joining } = require("../../support/gr");
 
 class MappedGlyphStore {
 	constructor() {
@@ -62,10 +63,12 @@ class MappedGlyphStore {
 		}
 		if (preferredName && !conflictSet.has(preferredName)) {
 			conflictSet.add(preferredName);
-			return preferredName;
+		} else {
+			preferredName = `.gid${gid}`;
 		}
 
-		return `.gid${gid}`;
+		preferredName = Joining.amendOtName(preferredName, Joining.get(gSrc));
+		return preferredName;
 	}
 
 	fillReferences(g, rs) {

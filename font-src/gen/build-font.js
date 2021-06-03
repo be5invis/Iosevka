@@ -13,7 +13,7 @@ const { copyFontMetrics } = require("../meta/aesthetics");
 module.exports = async function (argv, para) {
 	const gs = buildGlyphs(para);
 
-	const baseFont = EmptyFont();
+	const baseFont = EmptyFont(argv);
 	assignFontNames(para, baseFont);
 	copyFontMetrics(gs.fontMetrics, baseFont);
 

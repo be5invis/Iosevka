@@ -108,6 +108,34 @@ const RequireCcmpDecompose = {
 	}
 };
 
+const Joining = {
+	get(glyph) {
+		if (glyph && glyph.related) return glyph.related.joining || 0;
+		else return 0;
+	},
+	set(glyph, cls) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.joining = cls;
+	},
+	amendOtName(baseName, cl) {
+		switch (cl) {
+			case Joining.Classes.Left:
+				return `${baseName}.join-l`;
+			case Joining.Classes.Right:
+				return `${baseName}.join-r`;
+			case Joining.Classes.Mid:
+				return `${baseName}.join-m`;
+			default:
+				return baseName;
+		}
+	},
+	Classes: {
+		Left: 1,
+		Right: 2,
+		Mid: 3
+	}
+};
+
 const CvTagCache = new Map();
 function Cv(tag, rank) {
 	const key = tag + "#" + rank;
@@ -363,6 +391,7 @@ exports.TieMark = TieMark;
 exports.TieGlyph = TieGlyph;
 exports.Radical = Radical;
 exports.RequireCcmpDecompose = RequireCcmpDecompose;
+exports.Joining = Joining;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
@@ -370,4 +399,4 @@ exports.createGrDisplaySheet = createGrDisplaySheet;
 exports.DollarShrinkKernel = DollarShrinkKernel;
 exports.DollarShorterBar = DollarShorterBar;
 exports.MathSansSerif = MathSansSerif;
-exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar];
+exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar, Joining];
