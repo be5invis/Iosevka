@@ -1,6 +1,6 @@
 const { Ot } = require("ot-builder");
 const Point = require("../../support/point");
-const { Joining } = require("../../support/gr");
+const { nameSingleGlyph } = require("./glyph-name");
 
 class MappedGlyphStore {
 	constructor() {
@@ -14,7 +14,7 @@ class MappedGlyphStore {
 		this.m_mapping.set(source, g);
 	}
 	setPrimaryUnicode(source, u) {
-		this.m_primaryUnicodeMapping.set(source, u);
+		this.m_primaryUnicodeMapping.set(u, source);
 	}
 	queryBySourceGlyph(source) {
 		return this.m_mapping.get(source);
@@ -46,29 +46,12 @@ class MappedGlyphStore {
 	fillOtGlyphNames() {
 		let gid = 0;
 		let conflictSet = new Set();
+		let rev = new Map();
+		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
 		for (const [gSrc, gOt] of this.m_mapping) {
-			gOt.name = this.nameSingleGlyph(gid, gSrc, conflictSet);
+			gOt.name = nameSingleGlyph(gid, gSrc, rev.get(gSrc), conflictSet);
 			gid++;
 		}
-	}
-
-	nameSingleGlyph(gid, gSrc, conflictSet) {
-		if (gid === 0) return ".notdef";
-		if (gid === 1) return ".null";
-
-		let preferredName = null;
-		let primaryUnicode = this.m_primaryUnicodeMapping.get(gSrc);
-		if (primaryUnicode) {
-			preferredName = `u${formatCodePointHex(primaryUnicode)}`;
-		}
-		if (preferredName && !conflictSet.has(preferredName)) {
-			conflictSet.add(preferredName);
-		} else {
-			preferredName = `.gid${gid}`;
-		}
-
-		preferredName = Joining.amendOtName(preferredName, Joining.get(gSrc));
-		return preferredName;
 	}
 
 	fillReferences(g, rs) {
@@ -135,8 +118,4 @@ function byRank([ja, gna, ua, a], [jb, gnb, ub, b]) {
 	return (
 		(b.glyphRank || 0) - (a.glyphRank || 0) || (ua || 0) - (ub || 0) || (ja || 0) - (jb || 0)
 	);
-}
-
-function formatCodePointHex(u) {
-	return u.toString(16).padStart(4, "0").toUpperCase();
 }
