@@ -1,6 +1,6 @@
 const { Ot } = require("ot-builder");
 const Point = require("../../support/point");
-const { nameSingleGlyph } = require("./glyph-name");
+const { nameSingleGlyph1, nameSingleGlyph2, nameSingleGlyph3 } = require("./glyph-name");
 
 class MappedGlyphStore {
 	constructor() {
@@ -48,8 +48,22 @@ class MappedGlyphStore {
 		let conflictSet = new Set();
 		let rev = new Map();
 		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
+		for (const [gSrc, gOt] of this.m_mapping) gOt.name = undefined;
+
+		// Name by Unicode
+		gid = 0;
 		for (const [gSrc, gOt] of this.m_mapping) {
-			gOt.name = nameSingleGlyph(gid, gSrc, rev.get(gSrc), conflictSet);
+			gOt.name = nameSingleGlyph1(gid, gSrc, rev.get(gSrc), conflictSet);
+			gid++;
+		}
+		// Name by CV
+		for (const [gSrcBase, gOtBase] of this.m_mapping) {
+			nameSingleGlyph2(gSrcBase, gOtBase.name, this.m_nameMapping, conflictSet);
+		}
+		// Name rest
+		gid = 0;
+		for (const [gSrc, gOt] of this.m_mapping) {
+			gOt.name = nameSingleGlyph3(gid, gSrc, gOt.name);
 			gid++;
 		}
 	}

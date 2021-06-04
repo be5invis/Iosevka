@@ -72,6 +72,9 @@ const TieMark = {
 	},
 	amendName(name) {
 		return `TieMark{${name}}`;
+	},
+	amendOtName(name) {
+		return name + ".tieMark";
 	}
 };
 
@@ -167,6 +170,9 @@ function Cv(tag, rank) {
 		},
 		amendName(name) {
 			return name + "." + key;
+		},
+		amendOtName(name) {
+			return name + "." + tag + "-" + rank;
 		}
 	};
 	CvTagCache.set(key, rel);

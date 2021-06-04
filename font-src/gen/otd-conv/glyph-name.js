@@ -1,4 +1,4 @@
-const { Joining } = require("../../support/gr");
+const { Joining, AnyCv, TieMark } = require("../../support/gr");
 
 const ApplePostNames = new Map([
 	/* spell-checker: disable */
@@ -261,7 +261,7 @@ const ApplePostNames = new Map([
 	/* spell-checker: enable */
 ]);
 
-function nameSingleGlyph(gid, gSrc, primaryUnicode, conflictSet) {
+function nameSingleGlyph1(gid, gSrc, primaryUnicode, conflictSet) {
 	if (gid === 0) return ".notdef";
 	if (gid === 1) return ".null";
 
@@ -272,11 +272,7 @@ function nameSingleGlyph(gid, gSrc, primaryUnicode, conflictSet) {
 	}
 	if (preferredName && !conflictSet.has(preferredName)) {
 		conflictSet.add(preferredName);
-	} else {
-		preferredName = `.gid${gid}`;
 	}
-
-	preferredName = Joining.amendOtName(preferredName, Joining.get(gSrc));
 	return preferredName;
 }
 
@@ -284,4 +280,31 @@ function formatCodePointHex(u) {
 	return u.toString(16).padStart(4, "0").toUpperCase();
 }
 
-exports.nameSingleGlyph = nameSingleGlyph;
+function nameSingleGlyph2(gSrcBase, baseName, internalNameMap, conflictSet) {
+	if (!baseName) return;
+	for (const cv of AnyCv.query(gSrcBase)) {
+		nameByGr(cv, gSrcBase, baseName, internalNameMap, conflictSet);
+	}
+	if (TieMark.get(gSrcBase)) {
+		nameByGr(TieMark, gSrcBase, baseName, internalNameMap, conflictSet);
+	}
+}
+function nameByGr(gr, gSrcBase, baseName, internalNameMap, conflictSet) {
+	const gnDst = gr.get(gSrcBase);
+	const gOtDst = internalNameMap.get(gnDst);
+	const nameT = gr.amendOtName(baseName);
+	if (gOtDst && !gOtDst.name && !conflictSet.has(nameT)) {
+		conflictSet.add(nameT);
+		gOtDst.name = nameT;
+	}
+}
+
+function nameSingleGlyph3(gid, gSrc, gnOrig) {
+	if (!gnOrig) gnOrig = `.gid${gid}`;
+	gnOrig = Joining.amendOtName(gnOrig, Joining.get(gSrc));
+	return gnOrig;
+}
+
+exports.nameSingleGlyph1 = nameSingleGlyph1;
+exports.nameSingleGlyph2 = nameSingleGlyph2;
+exports.nameSingleGlyph3 = nameSingleGlyph3;
