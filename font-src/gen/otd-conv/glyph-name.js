@@ -1,6 +1,7 @@
 const { Joining } = require("../../support/gr");
 
 const ApplePostNames = new Map([
+	/* spell-checker: disable */
 	[0xd, "nonmarkingreturn"],
 	[0x20, "space"],
 	[0x21, "exclam"],
@@ -257,6 +258,7 @@ const ApplePostNames = new Map([
 	[0x10c, "Ccaron"],
 	[0x10d, "ccaron"],
 	[0x111, "dcroat"]
+	/* spell-checker: enable */
 ]);
 
 function nameSingleGlyph(gid, gSrc, primaryUnicode, conflictSet) {
