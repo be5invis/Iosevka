@@ -1109,7 +1109,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `cyrl-capital-ze = 'bilateral-serifed'`, `cv58 = 3`: Cyrillic Capital Ze (`З`) with serif.
     + `cyrl-capital-ze = 'unilateral-inward-serifed'`, `cv58 = 4`: Cyrillic Capital Ze (`З`) with inward serif.
     + `cyrl-capital-ze = 'bilateral-inward-serifed'`, `cv58 = 5`: Cyrillic Capital Ze (`З`) with inward serif.
-  - Styles for `ɜ` (Cyrillic Lower Ze):
+  - Styles for `з` (Cyrillic Lower Ze):
     + `cyrl-ze = 'serifless'`, `cv59 = 1`: Serifless Cyrillic Lower Ze (`з`).
     + `cyrl-ze = 'unilateral-serifed'`, `cv59 = 2`: Cyrillic Lower Ze (`з`) with serif.
     + `cyrl-ze = 'bilateral-serifed'`, `cv59 = 3`: Cyrillic Lower Ze (`з`) with serif.
@@ -1335,7 +1335,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `<=`, `>=`:
     + `lig-ltgteq = 'flat'`, `cv95 = 1`: The lower bar of `<=` and `>=` ligation is flat.
     + `lig-ltgteq = 'slanted'`, `cv95 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
-  - Styles for `"`:
+  - Styles for `'`:
     + `ascii-single-quote = 'straight'`, `cv96 = 1`: Show ASCII quote (`"`) as short vertical straight bar..
     + `ascii-single-quote = 'raised-comma'`, `cv96 = 2`: Show ASCII quote (`"`) as raised comma..
   - Styles for `` ` ``:
