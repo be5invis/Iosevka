@@ -178,7 +178,8 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 		derivingVariants: bp.derivingVariants,
 		featureControl: {
 			noCvSs: bp["no-cv-ss"] || false,
-			noLigation: bp["no-ligation"] || false
+			noLigation: bp["no-ligation"] || false,
+			exportGlyphNames: bp["export-glyph-names"] || false
 		},
 		// Ligations
 		ligations: bp.ligations || null,

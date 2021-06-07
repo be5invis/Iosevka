@@ -2,6 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from '../../support/utils'
+import [Joining] from '../../support/gr'
 import [DesignParameters] from '../../meta/aesthetics'
 
 glyph-module
@@ -12,6 +13,12 @@ glyph-block Symbol-Ligation : begin
 	glyph-block-import Symbol-Math-Relation-Common : LessSlope
 
 	local arrowheadsKern : (2 / 3) * [clamp 0 (Width * 0.4) (Width - OperatorStroke * 3)]
+
+	define [SetJoiningKind lk rk] : glyph-proc
+		local k 0
+		if (lk !== 'f') : set k : k + Joining.Classes.Left
+		if (rk !== 'f') : set k : k + Joining.Classes.Right
+		Joining.set currentGlyph k
 
 	define arrowheadSlope : 1 / LessSlope
 	define [ArrowBarConfig extend kern join doubleBar] : begin
@@ -48,7 +55,7 @@ glyph-block Symbol-Ligation : begin
 
 		define result {}
 		foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
-			result.push { (l + r) lk.(l) rk.(r) }
+			result.push { l r lk.(l) rk.(r) }
 		return result
 
 	local arrowExtend [clamp 0 Width (RightSB - OperatorStroke / 2 * arrowheadSlope)]
@@ -57,12 +64,13 @@ glyph-block Symbol-Ligation : begin
 	define [HyphenNotch x] : union
 		VBar x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) OperatorStroke
 		VBar x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) OperatorStroke
-	foreach [{subclass left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : begin
-
-		create-glyph "hyphen.lig.\(subclass)" : glyph-proc
+	foreach [{lS rS left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : begin
+		create-glyph "hyphen.lig.\(lS)\(rS)" : glyph-proc
+			include : SetJoiningKind lS rS
 			include : HBar left right SymbolMid OperatorStroke
 			set currentGlyph.autoRefPriority (-3)
-		create-glyph "hyphen.lig.\(subclass).notched" : glyph-proc
+		create-glyph "hyphen.lig.\(lS)\(rS).notched" : glyph-proc
+			include : SetJoiningKind lS rS
 			include : difference
 				HBar left right SymbolMid OperatorStroke
 				if (left < SB)       [HyphenNotch 0]     [glyph-proc]
@@ -74,10 +82,12 @@ glyph-block Symbol-Ligation : begin
 	local dblExtend : clamp 0 Width (RightSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 	local dblArrowJ : clamp 0 Width (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 
-	foreach [{subclass left right} : items-of [ArrowBarConfig dblExtend arrowheadsKern dblArrowJ true]] : create-glyph ('equal.lig.' + subclass) : glyph-proc
-		include : HBarTop left right (SymbolMid + dblArrowD) dblArrowSw
-		include : HBarBottom left right (SymbolMid - dblArrowD) dblArrowSw
-		set currentGlyph.autoRefPriority (-3)
+	foreach {lS rS left right} [items-of : ArrowBarConfig dblExtend arrowheadsKern dblArrowJ true]
+		create-glyph "equal.lig.\(lS)\(rS)" : glyph-proc
+			include : SetJoiningKind lS rS
+			include : HBarTop left right (SymbolMid + dblArrowD) dblArrowSw
+			include : HBarBottom left right (SymbolMid - dblArrowD) dblArrowSw
+			set currentGlyph.autoRefPriority (-3)
 
 	do "Waves"
 		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
@@ -109,6 +119,7 @@ glyph-block Symbol-Ligation : begin
 			j1   { J    (Width + arrowJ + arrowheadsKern)         true }
 
 		foreach [lS : items-of : Object.keys lk] : foreach [rS : items-of : Object.keys rk] : create-glyph"wave.lig.\(lS)\(rS)" : glyph-proc
+			include : SetJoiningKind lS rS
 			local {tL jL djL} lk.(lS)
 			local {tR jR djR} rk.(rS)
 			include : WaveShape
@@ -125,35 +136,46 @@ glyph-block Symbol-Ligation : begin
 		glyph-block-import Symbol-Math-Relation-Inequality : LigationLessShape LigationGreaterShape
 
 		create-glyph 'less.lig.dblhead' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : LigationLessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			create-aliased-glyph 'less.lig.dblhead.mid'
-			create-forked-glyph 'less.lig.dblhead.shift1' : Translate (-arrowheadsKern) 0
+			create-forked-glyph 'less.lig.dblhead.shift1' : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Mid
+				include : Translate (-arrowheadsKern) 0
 
 		create-glyph 'greater.lig.dblhead' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : LigationGreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
 			create-aliased-glyph 'greater.lig.dblhead.mid'
-			create-forked-glyph 'greater.lig.dblhead.shift1' : Translate (+arrowheadsKern) 0
+			create-forked-glyph 'greater.lig.dblhead.shift1' : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Mid
+				include : Translate (+arrowheadsKern) 0
 
 		create-glyph 'exclam.lig.htmlcommentstart' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : refer-glyph "exclam"
 			include : Translate (((RightSB - Width) + (Width - arrowExtend / 2)) / 2 - Middle) 0
 			include : HBar (-arrowExtend) (RightSB - Width) SymbolMid OperatorStroke
 
 		# Right-shifted >
+		define [ArrowShiftTranslate k] : glyph-proc
+			include : Translate (arrowheadsKern * k) 0
+			if (k > 0) : Joining.set currentGlyph Joining.Classes.Right
+			if (k < 0) : Joining.set currentGlyph Joining.Classes.Left
 		create-glyph 'greater.lig.shift0' : glyph-proc
 			include [refer-glyph 'greater'] AS_BASE ALSO_METRICS
 			create-aliased-glyph 'greater.lig.shift0.mid'
 			create-aliased-glyph 'greater.lig.shift0.anti'
 			create-aliased-glyph 'greater.lig.shiftN0'
 			create-aliased-glyph 'greater.lig.shiftN0.mid'
-			create-forked-glyph 'greater.lig.shift0h'  : Translate (arrowheadsKern *   0.5 ) 0
-			create-forked-glyph 'greater.lig.shift1'   : Translate (arrowheadsKern *   1.0 ) 0
-			create-forked-glyph 'greater.lig.shift1h'  : Translate (arrowheadsKern *   1.5 ) 0
-			create-forked-glyph 'greater.lig.shift2'   : Translate (arrowheadsKern *   2.0 ) 0
-			create-forked-glyph 'greater.lig.shiftN0h' : Translate (arrowheadsKern * (-0.5)) 0
-			create-forked-glyph 'greater.lig.shiftN1'  : Translate (arrowheadsKern * (-1.0)) 0
-			create-forked-glyph 'greater.lig.shiftN1h' : Translate (arrowheadsKern * (-1.5)) 0
-			create-forked-glyph 'greater.lig.shiftN2'  : Translate (arrowheadsKern * (-2.0)) 0
+			create-forked-glyph 'greater.lig.shift0h'  : ArrowShiftTranslate   0.5
+			create-forked-glyph 'greater.lig.shift1'   : ArrowShiftTranslate   1.0
+			create-forked-glyph 'greater.lig.shift1h'  : ArrowShiftTranslate   1.5
+			create-forked-glyph 'greater.lig.shift2'   : ArrowShiftTranslate   2.0
+			create-forked-glyph 'greater.lig.shiftN0h' : ArrowShiftTranslate (-0.5)
+			create-forked-glyph 'greater.lig.shiftN1'  : ArrowShiftTranslate (-1.0)
+			create-forked-glyph 'greater.lig.shiftN1h' : ArrowShiftTranslate (-1.5)
+			create-forked-glyph 'greater.lig.shiftN2'  : ArrowShiftTranslate (-2.0)
 
 		create-glyph 'less.lig.shift0' : glyph-proc
 			include [refer-glyph 'less'] AS_BASE ALSO_METRICS
@@ -161,33 +183,37 @@ glyph-block Symbol-Ligation : begin
 			create-aliased-glyph 'less.lig.shift0.anti'
 			create-aliased-glyph 'less.lig.shiftN0'
 			create-aliased-glyph 'less.lig.shiftN0.mid'
-			create-forked-glyph 'less.lig.shift0h'  : Translate (arrowheadsKern * (-0.5)) 0
-			create-forked-glyph 'less.lig.shift1'   : Translate (arrowheadsKern * (-1.0)) 0
-			create-forked-glyph 'less.lig.shift1h'  : Translate (arrowheadsKern * (-1.5)) 0
-			create-forked-glyph 'less.lig.shift2'   : Translate (arrowheadsKern * (-2.0)) 0
-			create-forked-glyph 'less.lig.shiftN0h' : Translate (arrowheadsKern *   0.5 ) 0
-			create-forked-glyph 'less.lig.shiftN1'  : Translate (arrowheadsKern *   1.0 ) 0
-			create-forked-glyph 'less.lig.shiftN1h' : Translate (arrowheadsKern *   1.5 ) 0
-			create-forked-glyph 'less.lig.shiftN2'  : Translate (arrowheadsKern *   2.0 ) 0
+			create-forked-glyph 'less.lig.shift0h'  : ArrowShiftTranslate (-0.5)
+			create-forked-glyph 'less.lig.shift1'   : ArrowShiftTranslate (-1.0)
+			create-forked-glyph 'less.lig.shift1h'  : ArrowShiftTranslate (-1.5)
+			create-forked-glyph 'less.lig.shift2'   : ArrowShiftTranslate (-2.0)
+			create-forked-glyph 'less.lig.shiftN0h' : ArrowShiftTranslate   0.5
+			create-forked-glyph 'less.lig.shiftN1'  : ArrowShiftTranslate   1.0
+			create-forked-glyph 'less.lig.shiftN1h' : ArrowShiftTranslate   1.5
+			create-forked-glyph 'less.lig.shiftN2'  : ArrowShiftTranslate   2.0
 
 		define [ArrowHeadHole] : Rect (SymbolMid + dblArrowD - dblArrowSw) (SymbolMid - dblArrowD + dblArrowSw) (-Width) (2 * Width)
 
 		create-glyph 'less.lig.hole' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : difference
 				glyph-proc : include : refer-glyph "less"
 				ArrowHeadHole
 
 		create-glyph 'greater.lig.hole' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				glyph-proc : include : refer-glyph "greater"
 				ArrowHeadHole
 
 		create-glyph 'less.lig.hole.shiftN1' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				glyph-proc : include : refer-glyph "less.lig.shiftN1"
 				ArrowHeadHole
 
 		create-glyph 'greater.lig.hole.shiftN1' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				glyph-proc : include : refer-glyph "greater.lig.shiftN1"
 				ArrowHeadHole
@@ -197,76 +223,90 @@ glyph-block Symbol-Ligation : begin
 		glyph-block-import Symbol-Math-Relation-Equal : EqualShape EqualHole IdentShape IdentHole
 		define joiningOverlap (-Width / 6)
 		create-glyph 'equal.fc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : difference
 				EqualShape SB (Width - joiningOverlap)
 				EqualHole Width
 
 		create-glyph 'equal.cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				EqualShape joiningOverlap RightSB
 				EqualHole 0
 
 		create-glyph 'equal.jf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				EqualShape (RightSB - Width + joiningOverlap) RightSB
 				EqualHole 0
 
 		create-glyph 'equal.cc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				EqualShape joiningOverlap (Width - joiningOverlap)
 				EqualHole 0
 				EqualHole Width
 
 		create-glyph 'equal.fc+cc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				EqualShape (SB - Width) (Width - joiningOverlap)
 				EqualHole 0
 				EqualHole Width
 
 		create-glyph 'equal.fc+cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				EqualShape (SB - Width) RightSB
 				EqualHole 0
 
 		create-glyph 'equal.cc+cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				EqualShape (joiningOverlap - Width) RightSB
 				EqualHole (-Width)
 				EqualHole 0
 
 		create-glyph 'ident.fc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : difference
 				IdentShape SB (Width - joiningOverlap)
 				IdentHole Width
 
 		create-glyph 'ident.cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				IdentShape joiningOverlap RightSB
 				IdentHole 0
 
 		create-glyph 'ident.jf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				IdentShape (RightSB - Width + joiningOverlap) RightSB
 				IdentHole 0
 
 		create-glyph 'ident.cc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				IdentShape joiningOverlap (Width - joiningOverlap)
 				IdentHole 0
 				IdentHole Width
 
 		create-glyph 'ident.fc+cc' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
 			include : difference
 				IdentShape (SB - Width) (Width - joiningOverlap)
 				IdentHole 0
 				IdentHole Width
 
 		create-glyph 'ident.fc+cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				IdentShape (SB - Width) RightSB
 				IdentHole 0
 
 		create-glyph 'ident.cc+cf' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : difference
 				IdentShape (joiningOverlap - Width) RightSB
 				IdentHole (-Width)
@@ -274,14 +314,17 @@ glyph-block Symbol-Ligation : begin
 
 		glyph-block-import NotGlyphFn : notGlyph
 
-		define [slash t b l r sw sh] : dispiro
-			widths.center OperatorStroke
-			flat (sh + l) b
-			curl (sh + r) t
+		define [slash jk] : function [t b l r sw sh] : glyph-proc
+			Joining.set currentGlyph jk
+			include : dispiro
+				widths.center OperatorStroke
+				flat (sh + l) b
+				curl (sh + r) t
 
-		define [exSlash2 t b l r sw sh] : begin
+		define [exSlash2 jk] : function [t b l r sw sh] : glyph-proc
 			local dr : PeriodRadius / Stroke * OperatorStroke
-			union
+			Joining.set currentGlyph jk
+			include : union
 				DotAt (sh + l + dr * (r - l) / (t - b)) (b + dr) dr
 				intersection
 					Rect (SymbolMid + t) [Math.min (b + dr * 3.5) (SymbolMid - EqualHalfSpace)] (-Width * 4) (Width * 4)
@@ -290,15 +333,55 @@ glyph-block Symbol-Ligation : begin
 						flat (sh + l) b
 						curl (sh + r) t
 
-		notGlyph.generic 'neq.1' null 'sp1' (shift -- (Width * 0.0)) (F -- slash)
-		notGlyph.generic 'neq.2' null 'sp1' (shift -- (Width * 0.5)) (F -- slash)
-		notGlyph.generic 'neq.3' null 'sp1' (shift -- (Width * 1.0)) (F -- slash)
-		notGlyph.generic 'neq.4' null 'sp1' (shift -- (Width * 1.5)) (F -- slash)
+		notGlyph.generic 'neq.1l' null 'sp1'
+			shift -- (Width * 0.0)
+			F -- [slash Joining.Classes.Right]
+		notGlyph.generic 'neq.2l' null 'sp1'
+			shift -- (Width * 0.5)
+			F -- [slash Joining.Classes.Right]
+		notGlyph.generic 'neq.3l' null 'sp1'
+			shift -- (Width * 1.0)
+			F -- [slash Joining.Classes.Right]
+		notGlyph.generic 'neq.4l' null 'sp1'
+			shift -- (Width * 1.5)
+			F -- [slash Joining.Classes.Right]
+		notGlyph.generic 'neq.1m' null 'sp1'
+			shift -- (Width * 0.0)
+			F -- [slash Joining.Classes.Mid]
+		notGlyph.generic 'neq.2m' null 'sp1'
+			shift -- (Width * 0.5)
+			F -- [slash Joining.Classes.Mid]
+		notGlyph.generic 'neq.3m' null 'sp1'
+			shift -- (Width * 1.0)
+			F -- [slash Joining.Classes.Mid]
+		notGlyph.generic 'neq.4m' null 'sp1'
+			shift -- (Width * 1.5)
+			F -- [slash Joining.Classes.Mid]
 
-		notGlyph.generic 'neq.1-dotted' null 'sp1' (shift -- (Width * 0.0)) (F -- exSlash2)
-		notGlyph.generic 'neq.2-dotted' null 'sp1' (shift -- (Width * 0.5)) (F -- exSlash2)
-		notGlyph.generic 'neq.3-dotted' null 'sp1' (shift -- (Width * 1.0)) (F -- exSlash2)
-		notGlyph.generic 'neq.4-dotted' null 'sp1' (shift -- (Width * 1.5)) (F -- exSlash2)
+		notGlyph.generic 'neq.1l-dotted' null 'sp1'
+			shift -- (Width * 0.0)
+			F -- [exSlash2 Joining.Classes.Right]
+		notGlyph.generic 'neq.2l-dotted' null 'sp1'
+			shift -- (Width * 0.5)
+			F -- [exSlash2 Joining.Classes.Right]
+		notGlyph.generic 'neq.3l-dotted' null 'sp1'
+			shift -- (Width * 1.0)
+			F -- [exSlash2 Joining.Classes.Right]
+		notGlyph.generic 'neq.4l-dotted' null 'sp1'
+			shift -- (Width * 1.5)
+			F -- [exSlash2 Joining.Classes.Right]
+		notGlyph.generic 'neq.1m-dotted' null 'sp1'
+			shift -- (Width * 0.0)
+			F -- [exSlash2 Joining.Classes.Mid]
+		notGlyph.generic 'neq.2m-dotted' null 'sp1'
+			shift -- (Width * 0.5)
+			F -- [exSlash2 Joining.Classes.Mid]
+		notGlyph.generic 'neq.3m-dotted' null 'sp1'
+			shift -- (Width * 1.0)
+			F -- [exSlash2 Joining.Classes.Mid]
+		notGlyph.generic 'neq.4m-dotted' null 'sp1'
+			shift -- (Width * 1.5)
+			F -- [exSlash2 Joining.Classes.Mid]
 
 	do "<| , |> and <>"
 		glyph-block-import Symbol-Math-Relation-Inequality : LessShape GreaterShape
@@ -311,15 +394,18 @@ glyph-block Symbol-Ligation : begin
 		define [TrigRightShape shift] : GreaterShape (SymbolMid + dHTriangle) (SymbolMid - dHTriangle) (Width - trigRight + shift) (Width - trigLeft + shift)
 
 		create-glyph 'less.lig.trig' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : TrigLeftShape 0
 
 		create-glyph 'bar.lig.trig' : glyph-proc
 			include : VBar Middle (SymbolMid + dHTriangle + OperatorStroke) (SymbolMid - dHTriangle - OperatorStroke) OperatorStroke
 
 		create-glyph 'greater.lig.trig' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : TrigRightShape 0
 
 		create-glyph 'less.lig.diamond' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
 			include : intersection
 				TrigLeftShape 0
 				union
@@ -327,6 +413,7 @@ glyph-block Symbol-Ligation : begin
 					TrigRightShape Width
 
 		create-glyph 'greater.lig.diamond' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
 			include : intersection
 				TrigRightShape 0
 				union
@@ -336,12 +423,24 @@ glyph-block Symbol-Ligation : begin
 	do "Chaining Plus"
 		glyph-block-import Symbol-Math-Arith : PlusShape
 
-		create-glyph 'plus.lig.fc'   : PlusShape SB (Width - O)
-		create-glyph 'plus.lig.fc.s' : PlusShape SB (Width - O) SB
-		create-glyph 'plus.lig.cc'   : PlusShape O (Width - O)
-		create-glyph 'plus.lig.cf'   : PlusShape O RightSB
-		create-glyph 'plus.lig.cf.s' : PlusShape O RightSB (-SB)
-		create-glyph 'plus.lig.zf'   : PlusShape (-SB + O) RightSB
+		create-glyph 'plus.lig.fc'   : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
+			include : PlusShape SB (Width - O)
+		create-glyph 'plus.lig.fc.s' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Right
+			include : PlusShape SB (Width - O) SB
+		create-glyph 'plus.lig.cc'   : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Mid
+			include : PlusShape O (Width - O)
+		create-glyph 'plus.lig.cf'   : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
+			include : PlusShape O RightSB
+		create-glyph 'plus.lig.cf.s' : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
+			include : PlusShape O RightSB (-SB)
+		create-glyph 'plus.lig.zf'   : glyph-proc
+			Joining.set currentGlyph Joining.Classes.Left
+			include : PlusShape (-SB + O) RightSB
 
 	do 'Less / Greater as arrow'
 		create-glyph 'greaterArrow' : composite-proc
