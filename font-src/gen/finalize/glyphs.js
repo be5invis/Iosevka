@@ -158,22 +158,24 @@ class FairizedShapeSink {
 	// Contour cleaning code
 	alignHVKnots(c0) {
 		const c = c0.slice(0);
+		const alignX = new CoordinateAligner(c, GetX, SetX);
+		const alignY = new CoordinateAligner(c, GetY, SetY);
 		for (let i = 0; i < c.length; i++) {
-			const zPrev = c[i],
-				zCurr = c[(i + 1) % c.length];
-			if (zPrev.type === Point.Type.Corner) {
-				if (occurrentPrecisionEqual(zPrev.x, zCurr.x)) zCurr.x = zPrev.x;
-				if (occurrentPrecisionEqual(zPrev.y, zCurr.y)) zCurr.y = zPrev.y;
+			if (c[i].type === Point.Type.Corner) {
+				alignX.tryAlign(i, (i + 1) % c.length);
+				alignY.tryAlign(i, (i + 1) % c.length);
 			}
 		}
 		for (let i = 0; i < c.length; i++) {
 			const zCurr = c[i],
 				zNext = c[(i + 1) % c.length];
 			if (zCurr.type === Point.Type.Quadratic && zNext.type === Point.Type.Corner) {
-				if (occurrentPrecisionEqual(zCurr.x, zNext.x)) zCurr.x = zNext.x;
-				if (occurrentPrecisionEqual(zCurr.y, zNext.y)) zCurr.y = zNext.y;
+				alignX.tryAlign(i, (i + 1) % c.length);
+				alignY.tryAlign(i, (i + 1) % c.length);
 			}
 		}
+		alignX.apply();
+		alignY.apply();
 		return c;
 	}
 	cleanupOccurrentKnots1(c0) {
@@ -227,6 +229,52 @@ class FairizedShapeSink {
 		return c;
 	}
 }
+
+// Disjoint set for coordinate alignment
+class CoordinateAligner {
+	constructor(c, lens, lensSet) {
+		this.c = c;
+		this.lens = lens;
+		this.lensSet = lensSet;
+		this.rank = [];
+		this.up = [];
+		for (let i = 0; i < c.length; i++) {
+			const x = lens(c[i]);
+			this.up[i] = i;
+			this.rank[i] = Math.abs(x - Math.round(x));
+		}
+	}
+	find(i) {
+		if (this.up[i] !== i) {
+			this.up[i] = this.find(this.up[i]);
+			return this.up[i];
+		} else {
+			return i;
+		}
+	}
+	tryAlign(i, j) {
+		if (occurrentPrecisionEqual(this.lens(this.c[i]), this.lens(this.c[j]))) {
+			this.align(i, j);
+		}
+	}
+	align(i, j) {
+		i = this.find(i);
+		j = this.find(j);
+		if (this.rank[i] > this.rank[j]) [i, j] = [j, i];
+		this.up[j] = i;
+	}
+	apply() {
+		for (let i = 0; i < this.c.length; i++) {
+			this.lensSet(this.c[i], this.lens(this.c[this.find(i)]));
+		}
+	}
+}
+
+const GetX = z => z.x;
+const SetX = (z, x) => (z.x = x);
+const GetY = z => z.y;
+const SetY = (z, y) => (z.y = y);
+
 function isOccurrent(zFirst, zLast) {
 	return (
 		zFirst.type === Point.Type.Corner &&
@@ -239,7 +287,7 @@ function occurrentPrecisionEqual(a, b) {
 	return Math.abs(a - b) < CurveUtil.OCCURRENT_PRECISION;
 }
 function aligned(a, b, c) {
-	return occurrentPrecisionEqual(a, b) && occurrentPrecisionEqual(b, c);
+	return a === b && b === c;
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);

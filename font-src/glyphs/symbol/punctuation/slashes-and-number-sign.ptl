@@ -2,6 +2,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
+import [Joining] from '../../../support/gr'
 import [DesignParameters] from '../../../meta/aesthetics'
 
 glyph-module
@@ -36,9 +37,11 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		include : SlashShape (slashDefautLeft + b) (slashDefaultRight + b) nothing nothing w
 
 	create-glyph 'slash.left' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Right
 		include : SlashShape slashDefautLeft Width
 
 	create-glyph 'slash.right' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Left
 		include : SlashShape 0 slashDefaultRight
 
 	local backslashWidth : (slashDefaultRight - slashDefautLeft) * (1 + TanSlope * 2)
@@ -56,9 +59,11 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 	alias 'mathBackslash' 0x2216 'backslash'
 
 	create-glyph 'backslash.left' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Right
 		include : BackslashShape (Middle - backslashWidth / 2) Width
 
 	create-glyph 'backslash.right' : glyph-proc
+		Joining.set currentGlyph Joining.Classes.Left
 		include : BackslashShape 0 (Middle + backslashWidth / 2)
 
 	do "number sign"
@@ -124,13 +129,10 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 			define l : SB - fine / 2
 			define r : RightSB + fine / 2
 
-			create-glyph "numberSign.\(suffix)" : union
-				FHBars l l r p
-				FVBars l l r p
-
-			create-glyph "numberSign.jr.\(suffix)" : union
-				FHBars (r - Width) l r p
-				FVBars (r - Width) l r p
+			create-glyph "numberSign.\(suffix)" : union [FHBars l l r p] [FVBars l l r p]
+			create-glyph "numberSign.jr.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Right
+				include : union [FHBars (r - Width) l r p] [FVBars (r - Width) l r p]
 
 		select-variant 'numberSign' '#'
 		select-variant 'numberSign.jr' (follow -- 'numberSign')

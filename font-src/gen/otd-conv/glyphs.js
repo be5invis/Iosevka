@@ -1,5 +1,6 @@
 const { Ot } = require("ot-builder");
 const Point = require("../../support/point");
+const { nameSingleGlyph1, nameSingleGlyph2, nameSingleGlyph3 } = require("./glyph-name");
 
 class MappedGlyphStore {
 	constructor() {
@@ -13,7 +14,7 @@ class MappedGlyphStore {
 		this.m_mapping.set(source, g);
 	}
 	setPrimaryUnicode(source, u) {
-		this.m_primaryUnicodeMapping.set(source, u);
+		this.m_primaryUnicodeMapping.set(u, source);
 	}
 	queryBySourceGlyph(source) {
 		return this.m_mapping.get(source);
@@ -45,27 +46,26 @@ class MappedGlyphStore {
 	fillOtGlyphNames() {
 		let gid = 0;
 		let conflictSet = new Set();
+		let rev = new Map();
+		for (const [u, g] of this.m_primaryUnicodeMapping) rev.set(g, u);
+		for (const [gSrc, gOt] of this.m_mapping) gOt.name = undefined;
+
+		// Name by Unicode
+		gid = 0;
 		for (const [gSrc, gOt] of this.m_mapping) {
-			gOt.name = this.nameSingleGlyph(gid, gSrc, conflictSet);
+			gOt.name = nameSingleGlyph1(gid, gSrc, rev.get(gSrc), conflictSet);
 			gid++;
 		}
-	}
-
-	nameSingleGlyph(gid, gSrc, conflictSet) {
-		if (gid === 0) return ".notdef";
-		if (gid === 1) return ".null";
-
-		let preferredName = null;
-		let primaryUnicode = this.m_primaryUnicodeMapping.get(gSrc);
-		if (primaryUnicode) {
-			preferredName = `u${formatCodePointHex(primaryUnicode)}`;
+		// Name by CV
+		for (const [gSrcBase, gOtBase] of this.m_mapping) {
+			nameSingleGlyph2(gSrcBase, gOtBase.name, this.m_nameMapping, conflictSet);
 		}
-		if (preferredName && !conflictSet.has(preferredName)) {
-			conflictSet.add(preferredName);
-			return preferredName;
+		// Name rest
+		gid = 0;
+		for (const [gSrc, gOt] of this.m_mapping) {
+			gOt.name = nameSingleGlyph3(gid, gSrc, gOt.name);
+			gid++;
 		}
-
-		return `.gid${gid}`;
 	}
 
 	fillReferences(g, rs) {
@@ -132,8 +132,4 @@ function byRank([ja, gna, ua, a], [jb, gnb, ub, b]) {
 	return (
 		(b.glyphRank || 0) - (a.glyphRank || 0) || (ua || 0) - (ub || 0) || (ja || 0) - (jb || 0)
 	);
-}
-
-function formatCodePointHex(u) {
-	return u.toString(16).padStart(4, "0").toUpperCase();
 }
