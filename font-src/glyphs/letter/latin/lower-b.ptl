@@ -11,51 +11,46 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar
 
-	create-glyph 'b.toothed' : glyph-proc
-		include : MarkSet.b
+	define [ToothedBody] : union
+		OBarLeftShape
+		VBarLeft SB 0 CAP
 
-		include : OBarLeftShape
-		include : VBarLeft SB 0 CAP
+	define [ToothlessCornerBody] : union
+		OBarLeftToothlessShape XH SB DToothlessRise DMBlend
+		VBarLeft SB DToothlessRise CAP
+
+	define [ToothlessRoundedBody] : OBarLeftRoundedShape XH SB CAP
+
+	define [FullSerifs] : glyph-proc
 		if SLAB : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'b.toothlessCorner' : glyph-proc
-		include : MarkSet.b
-
-		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		include : VBarLeft SB DToothlessRise CAP
+	define [LTSerifs] : glyph-proc
 		if SLAB : begin
 			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 
-	create-glyph 'b.toothlessRounded' : glyph-proc
-		include : MarkSet.b
+	define [MotionSerifs] : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 
-		include : OBarLeftRoundedShape XH SB CAP
-		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+	define BConfig : object
+		toothed                       { ToothedBody          FullSerifs   SLAB }
+		toothlessCorner               { ToothlessCornerBody  LTSerifs     SLAB }
+		toothlessRounded              { ToothlessRoundedBody LTSerifs     SLAB }
+		toothedMotionSerifed          { ToothedBody          MotionSerifs true }
+		toothlessCornerMotionSerifed  { ToothlessCornerBody  MotionSerifs true }
+		toothlessRoundedMotionSerifed { ToothlessRoundedBody MotionSerifs true }
 
-	create-glyph 'b.toothedMotionSerifed' : glyph-proc
-		include : MarkSet.b
-
-		include : OBarLeftShape
-		include : VBarLeft SB 0 CAP
-		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
-
-	create-glyph 'b.toothlessCornerMotionSerifed' : glyph-proc
-		include : MarkSet.b
-
-		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		include : VBarLeft SB DToothlessRise CAP
-		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
-
-	create-glyph 'b.toothlessRoundedMotionSerifed' : glyph-proc
-		include : MarkSet.b
-
-		include : OBarLeftRoundedShape XH SB CAP
-		include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
+		create-glyph "b.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Body
+			include : Serifs
+		create-glyph "bBar.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH (CAP - [if doTS Stroke 0]) 0.45]
 
 	select-variant 'b' 'b'
+	select-variant 'bBar' 0x180 (follow -- 'b')
 	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
 
 
@@ -77,10 +72,6 @@ glyph-block Letter-Latin-Lower-B : begin
 		include : HooktopLeftBar (bottom -- SmallSmoothB)
 
 	select-variant 'bhooktop' 0x253
-
-	derive-glyphs 'bbar' 0x180 'b' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE
-		include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH CAP 0.45]
 
 	derive-glyphs 'bdot' 0x1E03 'b' : lambda [src sel] : glyph-proc
 		include : refer-glyph "dotAbove"

@@ -376,12 +376,23 @@ const CollectPlans = computed(`metadata:collect-plans`, async target => {
 async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
 	const glyfTtcComposition = {},
 		ttcComposition = {},
-		ttcContents = {},
-		groupDecomposition = {},
-		groupInRelease = {};
+		plans = {};
+
+	let allCollectableGroups = new Set();
 	for (const collectPrefix in rawCollectPlans) {
-		const groupFileList = new Set();
 		const collect = rawCollectPlans[collectPrefix];
+		if (!collect.release) continue;
+		for (const gr of collect.from) allCollectableGroups.add(gr);
+	}
+
+	const amendedRawCollectPlans = { ...rawCollectPlans };
+	for (const gr of allCollectableGroups) {
+		amendedRawCollectPlans[`sgr-` + gr] = { release: true, isAmended: true, from: [gr] };
+	}
+
+	for (const collectPrefix in amendedRawCollectPlans) {
+		const groupFileList = new Set();
+		const collect = amendedRawCollectPlans[collectPrefix];
 		if (!collect || !collect.from || !collect.from.length) continue;
 
 		for (const prefix of collect.from) {
@@ -416,11 +427,14 @@ async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
 				groupFileList.add(ttcFileName);
 			}
 		}
-		ttcContents[collectPrefix] = [...groupFileList];
-		groupDecomposition[collectPrefix] = [...collect.from];
-		groupInRelease[collectPrefix] = !!collect.release;
+		plans[collectPrefix] = {
+			ttcContents: [...groupFileList],
+			groupDecomposition: [...collect.from],
+			inRelease: !!collect.release,
+			isAmended: !!collect.isAmended
+		};
 	}
-	return { glyfTtcComposition, ttcComposition, ttcContents, groupDecomposition, groupInRelease };
+	return { glyfTtcComposition, ttcComposition, plans };
 }
 function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
@@ -443,7 +457,7 @@ const CollectedSuperTtcFile = file.make(
 	cgr => `${DIST_SUPER_TTC}/${cgr}.ttc`,
 	async (target, out, cgr) => {
 		const [cp] = await target.need(CollectPlans, de(out.dir));
-		const parts = Array.from(new Set(cp.ttcContents[cgr]));
+		const parts = Array.from(new Set(cp.plans[cgr].ttcContents));
 		const [inputs] = await target.need(parts.map(pt => CollectedTtcFile(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
 	}
@@ -488,7 +502,7 @@ const TtcArchiveFile = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/ttc-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
 		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
-		const ttcFiles = Array.from(new Set(collectPlans.ttcContents[cgr]));
+		const ttcFiles = Array.from(new Set(collectPlans.plans[cgr].ttcContents));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 
 		// Packaging
@@ -726,11 +740,11 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 	const [collectPlans] = await t.need(CollectPlans);
 	const [{ buildPlans }] = await t.need(BuildPlans);
 	let releaseNoteGroups = {};
-	for (const [k, g] of Object.entries(collectPlans.groupDecomposition)) {
-		if (!collectPlans.groupInRelease[k]) continue;
-		const primePlan = buildPlans[g[0]];
+	for (const [k, plan] of Object.entries(collectPlans.plans)) {
+		if (!plan.inRelease || plan.isAmended) continue;
+		const primePlan = buildPlans[plan.groupDecomposition[0]];
 		let subGroups = {};
-		for (const gr of g) {
+		for (const gr of plan.groupDecomposition) {
 			const bp = buildPlans[gr];
 			subGroups[gr] = {
 				family: bp.family,
@@ -774,8 +788,8 @@ phony(`clean`, async () => {
 phony(`release`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
 	let goals = [];
-	for (const cgr of Object.keys(collectPlans.groupDecomposition)) {
-		if (!collectPlans.groupInRelease[cgr]) continue;
+	for (const [cgr, plan] of Object.entries(collectPlans.plans)) {
+		if (!plan.inRelease) continue;
 		goals.push(ReleaseGroup(cgr));
 	}
 	await target.need(goals);
@@ -783,7 +797,7 @@ phony(`release`, async target => {
 });
 const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
-	const subGroups = collectPlans.groupDecomposition[cgr];
+	const subGroups = collectPlans.plans[cgr].groupDecomposition;
 
 	let goals = [TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version)];
 	for (const gr of subGroups) {

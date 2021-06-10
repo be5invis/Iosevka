@@ -2,13 +2,14 @@ $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
 import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [LowerYDotAtBelow Dotless CvDecompose MathSansSerif] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Marks : belowMarkBot
 	glyph-block-import Letter-Shared-Shapes : nShoulder FlatHookDepth SerifFrame
 
 	define SLAB-NONE    { false false false }
@@ -35,7 +36,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 		local dpy2 : (1 - [linreg (1 - px1) (1 - py1) px2 py2 1]) / (1 - py2)
 		local yrstrokel0 : Middle - Width * 0.1
 		local yrstrokel : Middle - Width * 0.1 + (Stroke * HVContrast * [if bottomIsNotVertical (2 / 3) (1 / 3)] * [if slabCurly [StrokeWidthBlend 0.95 0.97] 1])
-		local yrstroker : Width - SB * [if (straightBar && SLAB && !doSlabTop) 1.5 1] * [if straightBar DesignParameters.straightSmallYShapeSbShrink 1]
+		local yrstroker : Width - SB * [if (straightBar && !doSlabTop) 1.5 1] * [if straightBar DesignParameters.straightSmallYShapeSbShrink 1]
 		local yshrink : [StrokeWidthBlend 1 0.85] * [if straightBar ([AdviceStroke 3.25] / Stroke) 1]
 		local yBottomJut : Jut * 1.25
 		local slabysize : Jut * 1.25 * (Width / UPM) + Stroke
@@ -158,7 +159,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				SmallYStrokeSplitMask top bottom false (-1)
 				Rect (bottom + HalfStroke) (bottom - top) 0 Width
 
-			if doSlabTop    : include : NeedSlab SLAB : let [sf : SerifFrame top bottom SB RightSB]
+			if doSlabTop    : include : let [sf : SerifFrame top bottom SB RightSB]
 				composite-proc sf.lt.full sf.rt.full
 			if doSlabBottom : include : yBaseSerif top bottom
 			if doSlabMotion : include : LeftwardTopSerif SB top SideJut
@@ -188,8 +189,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 					yJoinKnots ds ds2 top bottom true
 				SmallYStrokeSplitMask top bottom true (-1)
 
-			if doSlabTop : begin
-				include : NeedSlab SLAB : let [sf : SerifFrame top bottom SB RightSB] sf.lt.full
+			if doSlabTop : include : let [sf : SerifFrame top bottom SB RightSB] sf.lt.full
 			if doSlabBottom : include : yBaseSerif top bottom
 
 		define [SmallLambdaShape top bottom] : union : glyph-proc
@@ -207,6 +207,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 	create-glyph : glyph-proc
 		include : MarkSet.p
 		set-base-anchor 'overlay' Middle (XH / 2)
+		set-base-anchor 'yBelowDot' (RightSB - 0.5 * DotRadius) (Descender + Accent + DotRadius)
 		create-forked-glyph 'y.straight' : glyph-proc
 			include : [GenSmallYShape true false SLAB-AUTO].SmallYShape XH Descender
 		create-forked-glyph 'y.straightTurn' : glyph-proc
@@ -253,6 +254,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph 'y.cursive' : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'yBelowDot' Middle Descender
 		include : SmallYCursiveArc XH 0
 		include : SmallYCusriveHook XH Descender
 		if SLAB : include : LeftwardTopSerif SB XH SideJut
@@ -260,6 +262,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph 'y.cursiveFlatHook' : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'yBelowDot' Middle Descender
 		include : SmallYCursiveArc XH 0
 		include : SmallYFlatHookCusriveHook XH Descender
 		if SLAB : include : LeftwardTopSerif SB XH SideJut
@@ -267,6 +270,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph 'y.cursiveMotionSerifed' : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'yBelowDot' Middle Descender
 		include : SmallYCursiveArc XH 0
 		include : SmallYCusriveHook XH Descender
 		include : LeftwardTopSerif SB XH SideJut
@@ -274,6 +278,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 	create-glyph 'y.cursiveFlatHookMotionSerifed' : glyph-proc
 		include : MarkSet.p
+		set-base-anchor 'yBelowDot' Middle Descender
 		include : SmallYCursiveArc XH 0
 		include : SmallYFlatHookCusriveHook XH Descender
 		include : LeftwardTopSerif SB XH SideJut
@@ -282,6 +287,12 @@ glyph-block Letter-Latin-Lower-Y : begin
 	select-variant 'y' 'y'
 	link-reduced-variant 'y/sansSerif' 'y' MathSansSerif
 	alias 'cyrl/u' 0x443 'y'
+
+	create-glyph 'yDotBelowDot1' : glyph-proc
+		set-mark-anchor 'yBelowDot' 0 0 0 belowMarkBot
+		include : DotAt 0 (-Accent) DotRadius
+
+	derive-composites 'yDotBelow' 0x1EF5 'y' 'yDotBelowDot1'
 
 	create-glyph : glyph-proc
 		include : MarkSet.p

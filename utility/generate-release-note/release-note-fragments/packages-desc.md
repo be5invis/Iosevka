@@ -9,10 +9,10 @@ Iosevka provides a large variety of variants. Prebuilt variants are listed below
 
 Iosevka provides various packaging formats, here is the list of them:
 
-| Option    | Contents                                            | Description                                                  |
-| --------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| Super TTC | 1 `.ttc` file                                       | Bundles all weights, widths, slopes and spacing variations. Bundling all fonts in a single file reduces footprint and simplifies management. It is the recommended way to install fonts for Desktop usage, if your operating system is updated to date. |
-| TTC       | 9 `.ttc` files                                      | Each TTC file bundles fonts with the same weight together.   |
-| TTF       | 54 `.ttf` files                                     | Each TTF file contains one font for a specific weight, width, slope and spacing variant. This option is ideal for embedding Iosevka into applications, or for desktop usage if TTC options have compatibility issues.<br/>TTF packages also provide *unhinted* version which removes [hints](https://en.wikipedia.org/wiki/Font_hinting), which reduced file size, but will be less clear on certain platforms. |
-| WebFont   | 1 `.css` file + 54 `.woff2` files + 54 `.ttf` files | Contains contents required to use Iosevka on websites.       |
+| Option         | Contents                                            | Description                                                  |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+| Super TTC | 1 `.ttc` file                                       | Bundles all fonts in the scope together into a single file. It is the recommended way to install fonts for Desktop usage, if your operating system is updated to date. |
+| TTC            | 9 `.ttc` files                                      | Each TTC file bundles fonts with the same weight together.   |
+| TTF            | 54 `.ttf` files                                     | Each TTF file contains one font for a specific weight, width, slope and spacing variant. This option is ideal for embedding Iosevka into applications, or for desktop usage if TTC options have compatibility issues.<br/>TTF packages also provide *unhinted* version which removes [hints](https://en.wikipedia.org/wiki/Font_hinting), which reduced file size, but will be less clear on certain platforms. |
+| WebFont        | 1 `.css` file + 54 `.woff2` files + 54 `.ttf` files | Contains contents required to use Iosevka on websites.       |
 

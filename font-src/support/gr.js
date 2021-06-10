@@ -30,7 +30,7 @@ function SimpleProp(key) {
 	};
 }
 
-const ZReduced = SimpleProp("ZReduced");
+const LowerYDotAtBelow = SimpleProp("LowerYDotAtBelow");
 const DollarShrinkKernel = SimpleProp("DollarShrinkKernel");
 const DollarShorterBar = SimpleProp("DollarShorterBar");
 const MathSansSerif = SimpleProp("MathSansSerif");
@@ -387,7 +387,7 @@ function queryCvFeatureTagsOf(sink, gid, glyph, variantAssignmentSet) {
 }
 
 exports.Dotless = Dotless;
-exports.ZReduced = ZReduced;
+exports.LowerYDotAtBelow = LowerYDotAtBelow;
 exports.Cv = Cv;
 exports.AnyCv = AnyCv;
 exports.DotlessOrNot = DotlessOrNot;
