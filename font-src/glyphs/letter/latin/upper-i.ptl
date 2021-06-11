@@ -9,44 +9,36 @@ glyph-module
 glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition
 
-	create-glyph 'I.straight' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.capital
-		include : VBar df.middle 0 CAP
-		set currentGlyph.autoRefPriority (-2)
+	define [ISeriflessShape df top jut] : VBar df.middle 0 CAP
 
-	create-glyph 'I.serifless' : glyph-proc
-		local df : DivFrame para.diversityII
-		set-width df.width
-		include : df.markSet.capital
-		include : VBar df.middle 0 CAP
-		set currentGlyph.autoRefPriority (-2)
-
-	define [ISerifShape top jut] : glyph-proc
-		local df : DivFrame para.diversityI
+	define [ISerifShape df top jut] : glyph-proc
 		include : VBar df.middle 0 top
 		include : CenterBottomSerif df.middle 0   (jut * df.div)
 		include : CenterTopSerif    df.middle top (jut * df.div)
 
-	create-glyph 'I.serifed' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.capital
-		include : ISerifShape CAP LongJut
+	define UpperIConfig : object
+		'straight'     { para.diversityI  ISeriflessShape LongJut      }
+		'serifless'    { para.diversityII ISeriflessShape LongJut      }
+		'serifed'      { para.diversityI  ISerifShape     LongJut      }
+		'shortSerifed' { para.diversityI  ISerifShape     MidJutCenter }
 
-	create-glyph 'I.shortSerifed' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.capital
-		include : ISerifShape CAP MidJutCenter
+	foreach { suffix { div Body jut } } [Object.entries UpperIConfig] : do
+		create-glyph "I.\(suffix)" : glyph-proc
+			local df : DivFrame div
+			set-width df.width
+			include : df.markSet.capital
+			include : Body df CAP jut
+
+		create-glyph "grek/Iota.\(suffix)" : glyph-proc
+			include [refer-glyph "I.\(suffix)"] AS_BASE ALSO_METRICS
+			include : SetGrekUpperTonos 0
 
 	select-variant 'I' 'I'
 	link-reduced-variant 'I/sansSerif' 'I' MathSansSerif
-	alias 'grek/Iota' 0x399 'I'
-	alias-reduced-variant 'grek/Iota/sansSerif' 'grek/Iota' 'I/sansSerif' MathSansSerif
+	select-variant 'grek/Iota' 0x399 (follow -- 'I')
+	link-reduced-variant 'grek/Iota/sansSerif' 'grek/Iota' MathSansSerif (follow -- 'I/sansSerif')
 	alias 'cyrl/UkrainianI' 0x406 'I'
 	alias 'cyrl/Palochka' 0x4C0 'I'
 
@@ -54,7 +46,7 @@ glyph-block Letter-Latin-Upper-I : begin
 		local df : DivFrame para.diversityI
 		include : df.markSet.e
 		set-width df.width
-		include : ISerifShape XH MidJutCenter
+		include : ISerifShape df XH MidJutCenter
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
 	create-glyph 'mathbb/I' 0x1D540 : glyph-proc
