@@ -1,0 +1,22 @@
+import [add-common-feature add-feature add-lookup BeginLookupBlock EndLookupBlock] from "./table-util"
+
+# Name-driven feature pairs
+export : define [buildGrFeature sink glyphStore tag gr] : begin
+	local rec : BeginLookupBlock sink
+
+	local mapping {.}
+	foreach { gnSrc glyph } [glyphStore.namedEntries] : begin
+		local gnDst : gr.get glyph
+		local glyphDst : glyphStore.queryByName gnDst
+		if (glyphDst && ([glyphStore.queryUnicodeOf glyph] || [glyphStore.queryUnicodeOf glyphDst]))
+			set mapping.(gnSrc) gnDst
+
+	if [objectIsNotEmpty mapping] : begin
+		define lookup1 : add-lookup sink {.type 'gsub_single' .substitutions mapping}
+		define feature1 : add-feature sink tag
+		feature1.lookups.push lookup1
+		add-common-feature sink feature1
+
+	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

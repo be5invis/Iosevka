@@ -88,6 +88,7 @@ function markGlyphsInitial(glyphStore, excludedChars) {
 }
 function markGlyphsStep(glyphStore, sink, otl, cfg) {
 	const glyphCount = sink.size;
+
 	if (otl.GSUB) {
 		for (const l in otl.GSUB.lookups) {
 			const lookup = otl.GSUB.lookups[l];

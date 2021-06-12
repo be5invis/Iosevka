@@ -36,6 +36,7 @@ const webfontFormatsPages = [["woff2", "woff2"]];
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
 const SLOPE_NORMAL = "upright";
+const SLOPE_OBLIQUE = "oblique";
 const DEFAULT_SUBFAMILY = "regular";
 
 const BUILD_PLANS = "build-plans.toml";
@@ -409,7 +410,7 @@ async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
 					sfi.slope
 				);
 				const glyfTtcFileName = fnFileName(
-					{ ...config, distinguishWidths: true },
+					{ ...config, distinguishWidths: true, distinguishWhetherUpright: true },
 					collectPrefix,
 					sfi.weight,
 					sfi.width,
@@ -440,7 +441,13 @@ function fnStandardTtc(collectConfig, prefix, w, wd, s) {
 	const ttcSuffix = makeSuffix(
 		collectConfig.distinguishWeights ? w : WEIGHT_NORMAL,
 		collectConfig.distinguishWidths ? wd : WIDTH_NORMAL,
-		collectConfig.distinguishSlope ? s : SLOPE_NORMAL,
+		collectConfig.distinguishSlope
+			? s
+			: collectConfig.distinguishWhetherUpright
+			? s === SLOPE_NORMAL
+				? SLOPE_NORMAL
+				: SLOPE_OBLIQUE
+			: SLOPE_NORMAL,
 		DEFAULT_SUBFAMILY
 	);
 	return `${prefix}-${ttcSuffix}`;

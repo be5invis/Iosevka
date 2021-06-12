@@ -42,7 +42,7 @@ function regulateCompositeGlyph(glyphStore, memo, g) {
 
 	for (const sr of refs) {
 		const gn = glyphStore.queryNameOf(sr.glyph);
-		if (!gn || sr.glyph.autoRefPriority < 0) return memoSet(memo, g, false);
+		if (!gn) return memoSet(memo, g, false);
 	}
 
 	// De-doppelganger

@@ -35,6 +35,11 @@ const DollarShrinkKernel = SimpleProp("DollarShrinkKernel");
 const DollarShorterBar = SimpleProp("DollarShorterBar");
 const MathSansSerif = SimpleProp("MathSansSerif");
 
+const Nwid = SimpleProp("Nwid");
+const Wwid = SimpleProp("Wwid");
+const Lnum = SimpleProp("Lnum");
+const Onum = SimpleProp("Onum");
+
 const CvDecompose = {
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.CvDecompose;
@@ -386,6 +391,19 @@ function queryCvFeatureTagsOf(sink, gid, glyph, variantAssignmentSet) {
 	for (const g of m.values()) if (g.length) sink.push(g);
 }
 
+function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
+	const reTagCis = new RegExp("\\." + tagCis + "$");
+	for (const [gnCis, gCis] of gs.namedEntries()) {
+		if (reTagCis.test(gnCis) && !/^\./.test(gnCis)) {
+			const gnTrans = gnCis.replace(reTagCis, "." + tagTrans);
+			const gTrans = gs.queryByName(gnTrans);
+			if (!gTrans) continue;
+			grTrans.set(gCis, gnTrans);
+			grCis.set(gTrans, gnCis);
+		}
+	}
+}
+
 exports.Dotless = Dotless;
 exports.LowerYDotAtBelow = LowerYDotAtBelow;
 exports.Cv = Cv;
@@ -401,8 +419,15 @@ exports.Joining = Joining;
 exports.AnyDerivingCv = AnyDerivingCv;
 exports.CcmpDecompose = CcmpDecompose;
 exports.CvDecompose = CvDecompose;
-exports.createGrDisplaySheet = createGrDisplaySheet;
 exports.DollarShrinkKernel = DollarShrinkKernel;
 exports.DollarShorterBar = DollarShorterBar;
 exports.MathSansSerif = MathSansSerif;
+exports.Nwid = Nwid;
+exports.Wwid = Wwid;
+exports.Lnum = Lnum;
+exports.Onum = Onum;
+
+exports.createGrDisplaySheet = createGrDisplaySheet;
+exports.linkSuffixPairGr = linkSuffixPairGr;
+
 exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar, Joining];
