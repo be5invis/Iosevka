@@ -91,6 +91,7 @@ const TieGlyph = {
 	set(glyph) {
 		if (!glyph.related) glyph.related = {};
 		glyph.related.TieGlyph = true;
+		Joining.or(glyph, Joining.Classes.Mid);
 	}
 };
 
@@ -124,6 +125,9 @@ const Joining = {
 	set(glyph, cls) {
 		if (!glyph.related) glyph.related = {};
 		glyph.related.joining = cls;
+	},
+	or(glyph, cls) {
+		Joining.set(glyph, cls | Joining.get(cls));
 	},
 	amendOtName(baseName, cl) {
 		switch (cl) {
