@@ -96,7 +96,6 @@ glyph-block Letter-Latin-S : begin
 
 	define [SmallSStrokeImpl st sb stroke refSwEss] : begin
 		define ess : refSwEss * stroke / Stroke
-		define strokeCoeff : StrokeWidthBlend 0 1 stroke
 		define smooth : adviceSSmooth XH (-1) stroke
 
 		return : dispiro
@@ -147,7 +146,6 @@ glyph-block Letter-Latin-S : begin
 	define [SmallSStrokePhoneticRight st top] : begin
 		define stroke : AdviceStroke2 2 3 top
 		define ess : AdviceStroke2 2.2 3.2 top
-		define strokeCoeff : StrokeWidthBlend 0 1 stroke
 		define smooth : adviceSSmooth top (-1) stroke
 		return : dispiro
 			match st
@@ -167,7 +165,6 @@ glyph-block Letter-Latin-S : begin
 			curl SB 0
 
 	define [RevSmallSStroke st sb stroke ess] : begin
-		define strokeCoeff : StrokeWidthBlend 0 1 stroke
 		define smooth : adviceSSmooth XH 0.75 stroke
 		return : dispiro
 			match st
@@ -192,11 +189,13 @@ glyph-block Letter-Latin-S : begin
 					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
 					g4   (RightSB + OX - SOBot) SHook
 
+	glyph-block-export SAutoSlabStart
 	define [SAutoSlabStart st top sw hook] : match st
 		[Just SLAB-CLASSICAL] : ArcStartSerifR RightSB top sw hook
 		[Just SLAB-INWARD] : ArcStartInwardSerifR RightSB top sw hook
 		__ : glyph-proc
 
+	glyph-block-export SAutoSlabEnd
 	define [SAutoSlabEnd st bot sw hook] : match st
 		[Just SLAB-CLASSICAL] : ArcEndSerifL SB bot  sw hook
 		[Just SLAB-INWARD] : ArcEndInwardSerifL SB bot  sw hook
@@ -236,6 +235,7 @@ glyph-block Letter-Latin-S : begin
 			define top : CAP * 0.95
 			define bot : CAP * 0.05
 			include : MarkSet.capital
+			set-base-anchor 'cvDecompose' 0 0
 			include : SStrokeImpl top bot doTS doBS [AdviceStroke2 3 3 (top - bot)] Ess
 			include : SAutoSlabStart doTS top Stroke Hook
 			include : SAutoSlabEnd   doBS bot Stroke Hook
@@ -245,6 +245,7 @@ glyph-block Letter-Latin-S : begin
 			define top : CAP * 0.88
 			define bot : CAP * 0.12
 			include : MarkSet.capital
+			set-base-anchor 'cvDecompose' 0 0
 			include : SStrokeImpl top bot doTS doBS [AdviceStroke2 3 3 (top - bot)] Ess
 			include : SAutoSlabStart doTS top Stroke Hook
 			include : SAutoSlabEnd   doBS bot Stroke Hook
@@ -435,22 +436,22 @@ glyph-block Letter-Latin-S : begin
 	foreach { suffix { kTop kBot overflow fillType fShort } } [Object.entries DollarConfig] : do
 		create-glyph "dollar/bar.\(suffix)" : glyph-proc
 			set-width 0
+			set-mark-anchor 'cvDecompose' 0 0
 			define top : CAP * kTop
 			define bot : CAP * kBot
 			define w : AdviceStroke 3
 			define fine : AdviceStroke 4
-			define barMid : Middle - Width
 
-			if (fillType === 1) : include : VBar barMid (bot + HalfStroke) (top - HalfStroke) fine
+			if (fillType === 1) : include : VBar Middle (bot + HalfStroke) (top - HalfStroke) fine
 			if (fillType === 0 || fillType === 1) : begin
 				include : dispiro
 					widths.center w
-					flat barMid (top - HalfStroke)
-					curl barMid (CAP - overflow) [heading Upward]
+					flat Middle (top - HalfStroke)
+					curl Middle (CAP - overflow) [heading Upward]
 				include : dispiro
 					widths.center w
-					flat barMid overflow [heading Upward]
-					curl barMid (bot + HalfStroke)
+					flat Middle overflow [heading Upward]
+					curl Middle (bot + HalfStroke)
 			if (fillType === 2) : begin
 				local gap : (w / Stroke * Ess) + [Math.max ((top - bot) / 6) [AdviceStroke2 3 3 (top - bot)]]
 				local yMid : mix bot top 0.5
@@ -459,16 +460,16 @@ glyph-block Letter-Latin-S : begin
 				include : difference
 					union
 						dispiro
-							flat barMid (CAP - overflow) [widths.center.heading w Downward]
-							curl barMid [mix bot top 0.5] [widths.center.heading fine Downward]
+							flat Middle (CAP - overflow) [widths.center.heading w Downward]
+							curl Middle [mix bot top 0.5] [widths.center.heading fine Downward]
 						dispiro
-							flat barMid overflow [widths.center.heading w Upward]
-							curl barMid [mix bot top 0.5] [widths.center.heading fine Upward]
+							flat Middle overflow [widths.center.heading w Upward]
+							curl Middle [mix bot top 0.5] [widths.center.heading fine Upward]
 
-					dispiro [corner (-Width) yTermLeft : widths.center gap] [corner 0 yTermRight]
+					dispiro [corner 0 yTermLeft : widths.center gap] [corner Width yTermRight]
 
 			if fShort : DollarShorterBar.set currentGlyph 'trigger'
 
 	select-variant 'dollar/bar' (follow -- 'dollar')
 
-	CreateDollarLikeComposition 'dollar' '$' 'DollarKernelStd' 'DollarKernelCap' 'dollar/bar' Width
+	CreateDollarLikeComposition 'dollar' '$' 'DollarKernelStd' 'DollarKernelCap' 'dollar/bar'

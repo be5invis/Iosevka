@@ -14,11 +14,23 @@ class GlyphStore {
 	namedEntries() {
 		return this.nameForward.entries();
 	}
-	*indexedNamedEntries() {
-		let i = 0;
-		for (const [name, g] of this.nameForward.entries()) {
-			yield [i, name, g];
-			i++;
+	encodedEntries() {
+		return this.encodingForward.entries();
+	}
+
+	*flattenCodes(g, flatteners) {
+		{
+			const codes = this.encodingBackward.get(g);
+			if (codes) for (const c of codes) yield c;
+		}
+
+		for (const gr of flatteners) {
+			const gn = gr.get(g);
+			if (!gn) continue;
+			const g2 = this.nameForward.get(gn);
+			if (!g2) continue;
+			const codes2 = this.encodingBackward.get(g2);
+			if (codes2) for (const c of codes2) yield c;
 		}
 	}
 
@@ -98,16 +110,6 @@ class GlyphStore {
 		const gs1 = new GlyphStore();
 		for (const [name, g] of this.nameForward) {
 			if (!nameSet.has(name)) continue;
-			gs1.addGlyph(name, g);
-			const us = this.encodingBackward.get(g);
-			if (us) for (const u of us) gs1.encodeGlyph(u, g);
-		}
-		return gs1;
-	}
-	filterByGlyph(glyphSet) {
-		const gs1 = new GlyphStore();
-		for (const [name, g] of this.nameForward) {
-			if (!glyphSet.has(g)) continue;
 			gs1.addGlyph(name, g);
 			const us = this.encodingBackward.get(g);
 			if (us) for (const u of us) gs1.encodeGlyph(u, g);

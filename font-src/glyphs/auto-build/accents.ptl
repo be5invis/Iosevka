@@ -3,6 +3,7 @@ $$include '../../meta/macros.ptl'
 
 import [Dotless AnyDerivingCv DotlessOrNot getGrTree CvDecompose CcmpDecompose RequireCcmpDecompose] from "../../support/gr"
 import [fallback] from '../../support/utils'
+import "../../meta/unicode-knowledge" as UnicodeKnowledge
 
 glyph-module
 
@@ -26,12 +27,17 @@ glyph-block AutoBuild-Accents : begin
 	# Build accented glyphs
 	define [isAboveMark mark] : begin
 		return : mark && mark.markAnchors && mark.markAnchors.above
-	define [iotaBelowToLF p j parts] : if (p === [query-glyph 'iotaBelow']) : begin
-		set parts.(j) [query-glyph 'iotaLF']
-	define [ogonekBelowToTR p j parts] : if (p === [query-glyph 'ogonekBelow']) : begin
-		set parts.(j) [query-glyph 'ogonekTR']
+
+	define [MarkSubst lookup] : function [p j parts] : begin
+		foreach { k v } [Object.entries lookup] : begin
+			if (p === [query-glyph k]) : set parts.(j) [query-glyph v]
+
+	define iotaBelowToLF : MarkSubst UnicodeKnowledge.iotaBelowToLfTf
+	define ogonekBelowToTR : MarkSubst UnicodeKnowledge.ogonekBelowToTRTf
+	define grekUpperTonos : MarkSubst UnicodeKnowledge.upperGrekMarkToTonosTf
 
 	define [subParts parts] : begin
+		# Keep the semantics here synchronized with `ccmp` feature
 		# Handle dotless
 		local hasMarkAbove false
 		foreach p [items-of parts] : if [isAboveMark p] : set hasMarkAbove true
@@ -44,29 +50,15 @@ glyph-block AutoBuild-Accents : begin
 		if parts.0.baseAnchors.trailing : parts.forEach ogonekBelowToTR
 
 		# composite greek Marks
-		for [local j 0] (j < parts.length) [inc j] : piecewise
-			(parts.(j) === [query-glyph 'commaAbove']) : begin
-				piecewise
-					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilivaria']
-					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'psilioxia']
-					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'psiliperispomeni']
-					(parts.(j + 1) === [query-glyph 'cyrlPokrytieAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'commaCyrlPorkytieAbove']
-			(parts.(j) === [query-glyph 'revCommaAbove']) : begin
-				piecewise
-					(parts.(j + 1) === [query-glyph 'graveAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiavaria']
-					(parts.(j + 1) === [query-glyph 'acuteAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaoxia']
-					(parts.(j + 1) === [query-glyph 'perispomeniAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'dasiaperispomeni']
-			(parts.(j) === [query-glyph 'cyrlPsiliAbove']) : begin
-				piecewise
-					(parts.(j + 1) === [query-glyph 'cyrlPokrytieAbove']) : begin
-						set parts.(j) null; set parts.(j + 1) [query-glyph 'cyrlPsiliPokrytieAbove']
+		for [local j 0] (j < parts.length) [inc j] : begin
+			foreach { gidFirst seconds } [Object.entries UnicodeKnowledge.markCompositionTf]
+				if (parts.(j) === [query-glyph gidFirst])
+					foreach { gidSecond gidTo } [Object.entries seconds]
+						if (parts.(j + 1) === [query-glyph gidSecond]) : begin
+							set parts.(j) [query-glyph gidTo]; set parts.(j + 1) null
+
+		if parts.0.baseAnchors.grekUpperTonos : grekUpperTonos parts.1 1 parts
+
 		return : parts.filter : function [x] [not : not x]
 
 	define [pad _s n] : begin
@@ -204,7 +196,6 @@ define customDecompositions : object
 	."\u0244" "U\uE001"
 	."\u01E5" "g\uE001"
 	."\u01BB" "2\uE001"
-	."\u024E" "Y\uE001"
 	."\u04B0" "\u04AE\u0335"
 	."\u04B1" "\u04AF\u0335"
 	."\u024F" "y\uE001"
@@ -224,7 +215,6 @@ define customDecompositions : object
 	."\u1E10" "D\u0326"
 	."\u1E11" "d\u0326"
 
-	."\u1E9A" "a\u0357"
 	."\u1E9C" "\u017F\uE000"
 
 	."\u1EDC" "\u01A0\u0300"

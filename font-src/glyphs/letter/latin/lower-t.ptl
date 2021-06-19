@@ -12,6 +12,8 @@ glyph-block Letter-Latin-Lower-T : begin
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth ConnectedCedilla
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailR DiagonalTailStdDepth
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise SerifedArcEnd_RtlRhs
+	glyph-block-import Letter-Latin-S : SAutoSlabEnd
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define dfNarrowT : DivFrame para.diversityF
@@ -36,6 +38,11 @@ glyph-block Letter-Latin-Lower-T : begin
 			g4 (hookx - offset) (bot + Hook)
 			if (sink == spiro-outline) {[corner (hookx - offset) top]} {}
 
+	define [SmallTCorssBar] : HCrossBar.top
+		xSmallTBarLeft + HalfStroke - LongJut + TBalance2
+		xSmallTBarLeft + HalfStroke + LongJut + TBalance2
+		begin yCrossBar
+
 	define [SmallTShape __ top bot] : glyph-proc
 		local g : include : SmallTHookShapeT dispiro 0 top bot Stroke
 		set-base-anchor 'bottomright' g.knots.(g.knots.length - 1).x g.knots.(g.knots.length - 1).y
@@ -43,10 +50,7 @@ glyph-block Letter-Latin-Lower-T : begin
 		set-base-anchor 'below' [mix xSmallTBarLeft g.knots.(g.knots.length - 1).x : StrokeWidthBlend 0.375 0.5] bot
 		set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (XH * 0.58)
 
-		include : HCrossBar.top
-			xSmallTBarLeft + HalfStroke - LongJut + TBalance2
-			xSmallTBarLeft + HalfStroke + LongJut + TBalance2
-			begin yCrossBar
+		include : SmallTCorssBar
 
 	define [DiagTailedSmallTHookShape df top bot sw] : begin
 		local xMid : [xSmallTBarLeftT df] + HalfStroke * HVContrast
@@ -188,6 +192,62 @@ glyph-block Letter-Latin-Lower-T : begin
 	select-variant 'tRTail' 0x288
 	select-variant 'tCurlyTal' 0x236 (follow -- 'tLTail')
 
+	# U+01BE is catually "t" and "s" combined together
+	define SLAB-NONE        0
+	define SLAB-CLASSICAL   1
+	define SLAB-INWARD      2
+	define [TsLigStrokeShape stroke top sb] : begin
+		define smooth : adviceSSmooth (XH + 0.5 * Smooth) (-1) stroke
+		return : dispiro
+			widths.lhs stroke
+			flat xSmallTBarLeft top [heading Downward]
+			curl xSmallTBarLeft XH [heading Downward]
+			alsoThru.g2 0.5 0.5 [widths.center stroke]
+			g4   RightSB (smooth) [widths.rhs stroke]
+			match sb
+				[Just SLAB-CLASSICAL] : SerifedArcEnd_RtlRhs SB Middle 0 stroke SHook
+				[Just SLAB-INWARD] : list
+					arcvh
+					g4 (Middle + CorrectionOMidX * stroke) O
+					g4 SB DToothlessRise
+				__ : list
+					hookend O (sw -- stroke) (swItalicAdj -- Stroke)
+					g4      SB SHook
+
+	define TSUpperConfig : object
+		standard            { CAP         }
+		standardShortNeck   { yShortNeck1 }
+		standardShortNeck2  { yShortNeck2 }
+
+	foreach { suffix { yTop } } [Object.entries TSUpperConfig] : do
+		create-glyph "tsLig/upperHalf.\(suffix)" : glyph-proc
+			set-base-anchor 'cvDecompose' 0 0
+			include : difference
+				TsLigStrokeShape Stroke top false
+				MaskBelow XH
+			include : SmallTCorssBar
+
+	define TSLowerConfig : object
+		serifless               { SLAB-NONE      }
+		bilateralSerifed        { SLAB-CLASSICAL }
+		bilateralInwardSerifed  { SLAB-INWARD    }
+
+	foreach { suffix { doBS } } [Object.entries TSLowerConfig] : do
+		create-glyph "tsLig/lowerHalf.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			set-mark-anchor 'cvDecompose' 0 0
+			include : intersection
+				TsLigStrokeShape Stroke CAP doBS
+				MaskBelow XH
+			include : SAutoSlabEnd   doBS 0  Stroke Hook
+
+	select-variant 'tsLig/upperHalf'
+	select-variant 'tsLig/lowerHalf'
+
+	create-glyph "tsLig" 0x1BE : glyph-proc
+		include [refer-glyph 'tsLig/upperHalf'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'tsLig/lowerHalf']
+		CvDecompose.set currentGlyph { 'tsLig/upperHalf' 'tsLig/lowerHalf' }
 
 	create-glyph 'mathbb/t' 0x1D565 : glyph-proc
 		include : HBarTop xSmallTBarLeft (xSmallTBarLeft + BBD) CAP BBS

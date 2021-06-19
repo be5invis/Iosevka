@@ -106,9 +106,10 @@ async function GeneratePackageList(out) {
 		const img = `<img src="${imagePrefix}/${groupID}.png"/>`;
 		out.log(
 			`<tr>`,
-			`<td colspan="4"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
+			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
 			`<td><b><a href="${sTtcLink}">Super-TTC</b></td>`,
 			`<td><b><a href="${ttcLink}">TTC</b></td>`,
+			`<td colspan="3">&nbsp;</td>`,
 			`</tr>`
 		);
 
@@ -117,7 +118,7 @@ async function GeneratePackageList(out) {
 			`<td><b>&nbsp;&nbsp;└ Sub-packages</b></td>`,
 			`<td><b>Spacing</b></td>`,
 			`<td><b>Ligatures</b></td>`,
-			`<td colspan="3"><b>Downloads</b></td>`,
+			`<td colspan="5"><b>Downloads</b></td>`,
 			`</tr>`
 		);
 		let lastSubGroupID = null;
@@ -137,6 +138,8 @@ async function GeneratePackageList(out) {
 				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
+				`<td>${createLink("Super TTC", "super-ttc-sgr")}</td>`,
+				`<td>${createLink("TTC", "ttc-sgr")}</td>`,
 				`<td>${createLink("TTF", "ttf")}</td>`,
 				`<td>${createLink("Unhinted", "ttf-unhinted")}</td>`,
 				`<td>${createLink("WebFont", "webfont")}</td>`,
@@ -144,7 +147,7 @@ async function GeneratePackageList(out) {
 			);
 		}
 
-		out.log(`<tr>`, `<td colspan="6">${img}</td>`, `<tr/>`);
+		out.log(`<tr>`, `<td colspan="8">${img}</td>`, `<tr/>`);
 	}
 	out.log(`</table>\n`);
 }
