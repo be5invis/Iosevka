@@ -10,18 +10,20 @@ import '../../support/point' as Point
 glyph-module
 
 glyph-block CommonShapes : begin
-	define [Rect u d l r transformShiftOnly] : new-glyph : glyph-proc
-		local my ((u + d) / 2)
-		local mx ((l + r) / 2)
-		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] GlobalTransform]
-		include : spiro-outline
-			corner l d
-			corner l u
-			corner r u
-			corner r d
-		if transformShiftOnly : begin
-			local {.x mx1 .y my1} : GlobalTransform.apply {.x mx .y my}
-			include : Translate (mx1 - mx) (my1 - my)
+	define [Rect u d l r transformShiftOnly] : glyph-proc
+		local giz currentGlyph.gizmo
+		include : new-glyph : glyph-proc
+			local my ((u + d) / 2)
+			local mx ((l + r) / 2)
+			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
+			include : spiro-outline
+				corner l d
+				corner l u
+				corner r u
+				corner r d
+			if transformShiftOnly : begin
+				local {.x mx1 .y my1} : giz.apply {.x mx .y my}
+				include : Translate (mx1 - mx) (my1 - my)
 
 	define [SquareAt x y r] : Rect (y + r) (y - r) (x - r) (x + r)
 
@@ -31,62 +33,68 @@ glyph-block CommonShapes : begin
 	define [MaskLeft  x] : Rect VERY-FAR (-VERY-FAR) (-VERY-FAR) x
 	define [MaskRight x] : Rect VERY-FAR (-VERY-FAR) x VERY-FAR
 
-	define [Ring u d l r transformShiftOnly] : new-glyph : glyph-proc
-		local my ((u + d) / 2)
-		local mx ((l + r) / 2)
-		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] GlobalTransform]
-		include : spiro-outline
-			g4 mx d
-			archv
-			g4 l my
-			arcvh
-			g4 mx u
-			archv
-			g4 r my
-			arcvh
-			close
-		if transformShiftOnly : begin
-			local {.x mx1 .y my1} : GlobalTransform.apply {.x mx .y my}
-			include : Translate (mx1 - mx) (my1 - my)
+	define [Ring u d l r transformShiftOnly] : glyph-proc
+		local giz currentGlyph.gizmo
+		include : new-glyph : glyph-proc
+			local my ((u + d) / 2)
+			local mx ((l + r) / 2)
+			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
+			include : spiro-outline
+				g4 mx d
+				archv
+				g4 l my
+				arcvh
+				g4 mx u
+				archv
+				g4 r my
+				arcvh
+				close
+			if transformShiftOnly : begin
+				local {.x mx1 .y my1} : giz.apply {.x mx .y my}
+				include : Translate (mx1 - mx) (my1 - my)
 	define [RingAt x y r] : Ring (y + r) (y - r) (x - r) (x + r)
 	define [DotAt x y r] : Ring (y + r) (y - r) (x - r) (x + r) true
 
-	define [RingStroke u d l r s transformShiftOnly] : new-glyph : glyph-proc
-		local my ((u + d) / 2)
-		local mx ((l + r) / 2)
-		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] GlobalTransform]
-		include : dispiro
-			begin [lambda : set this.gizmo currentGlyph.gizmo]
-			widths.rhs [fallback s Stroke]
-			g4 mx d [heading Leftward]
-			archv
-			g4 l my
-			arcvh
-			g4 mx u [heading Rightward]
-			archv
-			g4 r my
-			arcvh
-			close
-		if transformShiftOnly : begin
-			local {.x mx1 .y my1} : GlobalTransform.apply {.x mx .y my}
-			include : Translate (mx1 - mx) (my1 - my)
+	define [RingStroke u d l r s transformShiftOnly] : glyph-proc
+		local giz currentGlyph.gizmo
+		include : new-glyph : glyph-proc
+			local my ((u + d) / 2)
+			local mx ((l + r) / 2)
+			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
+			include : dispiro
+				begin [lambda : set this.gizmo currentGlyph.gizmo]
+				widths.rhs [fallback s Stroke]
+				g4 mx d [heading Leftward]
+				archv
+				g4 l my
+				arcvh
+				g4 mx u [heading Rightward]
+				archv
+				g4 r my
+				arcvh
+				close
+			if transformShiftOnly : begin
+				local {.x mx1 .y my1} : giz.apply {.x mx .y my}
+				include : Translate (mx1 - mx) (my1 - my)
 	define [RingStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s
 	define [DotStrokeAt x y r s] : RingStroke (y + r) (y - r) (x - r) (x + r) s true
 
-	define [CircleRing u d l r transformShiftOnly] : new-glyph : glyph-proc
-		local my ((u + d) / 2)
-		local mx ((l + r) / 2)
-		currentGlyph.gizmo = [if transformShiftOnly [Translate 0 0] GlobalTransform]
-		include : spiro-outline
-			begin [lambda : set this.gizmo currentGlyph.gizmo]
-			g4 mx d
-			g4 l my
-			g4 mx u
-			g4 r my
-			close
-		if transformShiftOnly : begin
-			local {.x mx1 .y my1} : GlobalTransform.apply {.x mx .y my}
-			include : Translate (mx1 - mx) (my1 - my)
+	define [CircleRing u d l r transformShiftOnly] : glyph-proc
+		local giz currentGlyph.gizmo
+		include : new-glyph : glyph-proc
+			local my ((u + d) / 2)
+			local mx ((l + r) / 2)
+			currentGlyph.gizmo = [if transformShiftOnly [Transform.Id] giz]
+			include : spiro-outline
+				begin [lambda : set this.gizmo currentGlyph.gizmo]
+				g4 mx d
+				g4 l my
+				g4 mx u
+				g4 r my
+				close
+			if transformShiftOnly : begin
+				local {.x mx1 .y my1} : giz.apply {.x mx .y my}
+				include : Translate (mx1 - mx) (my1 - my)
 	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
 	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
 
@@ -398,14 +406,13 @@ glyph-block CommonShapes : begin
 	define [VBarLeft x yd yu _fine] : VBar (x + [fallback _fine Stroke] * 0.5 * HVContrast) yd yu _fine
 	define [VBarRight x yd yu _fine] : VBar (x - [fallback _fine Stroke] * 0.5 * HVContrast) yd yu _fine
 
-	define [VerticalHook x y extend depth fine strg] : glyph-proc
-		include : dispiro
-			widths.center [fallback fine Stroke]
-			flat x (y + [fallback strg 0]) [heading [if (depth > 0) Downward Upward]]
-			curl x (y - [if (depth > 0) 0.01 (-0.01)]) [heading [if (depth > 0) Downward Upward]]
+	define [VerticalHook] : params [x y xDepth yDepth [sw Stroke] [xExtension 0] [yExtension 0]]
+		dispiro [widths.center sw]
+			flat x (y + yExtension) [heading [if (yDepth > 0) Downward Upward]]
+			curl x (y - [if (yDepth > 0) 0.01 (-0.01)]) [heading [if (yDepth > 0) Downward Upward]]
 			arcvh
-			flat (x + extend - [if (extend > 0) 0.01 (-0.01)]) (y - depth)
-			curl (x + extend) (y - depth)
+			flat (x + xDepth - [if (xDepth > 0) 0.01 (-0.01)]) (y - yDepth)
+			curl (x + xDepth + xExtension) (y - yDepth)
 
 	define [LeftHook x y xextend] : glyph-proc
 		local fine : AdviceStroke 4.25
@@ -539,7 +546,7 @@ glyph-block CommonShapes : begin
 
 	define [Realign x y sx sy] : ApparentTranslate (sx - x) (sy - y)
 
-	define [ForceUpright] : glyph-proc [set this.gizmo : Translate 0 0]
+	define [ForceUpright] : glyph-proc [set this.gizmo : Transform.Id]
 
 	define [NameUni unicode] : begin
 		local hex : [unicode.toString 16].toUpperCase
@@ -549,7 +556,7 @@ glyph-block CommonShapes : begin
 	define [PointingTo x1 y1 x2 y2 G] : glyph-proc
 		local giz this.gizmo
 		local g : new-glyph : glyph-proc
-			set this.gizmo : Translate 0 0
+			set this.gizmo : Transform.Id
 			local {.x xo .y yo} : [Transform.Id].apply {.x x1 .y y1}
 			local {.x xt .y yt} : [Transform.Id].apply {.x x2 .y y2}
 			local mag : Math.hypot (yo - yt) (xo - xt)

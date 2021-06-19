@@ -1,4 +1,4 @@
-const { Joining, AnyCv, TieMark } = require("../../support/gr");
+const { Joining, AnyCv, TieMark, Nwid, Wwid } = require("../../support/gr");
 
 const ApplePostNames = new Map([
 	/* spell-checker: disable */
@@ -261,9 +261,9 @@ const ApplePostNames = new Map([
 	/* spell-checker: enable */
 ]);
 
-function nameSingleGlyph1(gid, gSrc, primaryUnicode, conflictSet) {
-	if (gid === 0) return ".notdef";
-	if (gid === 1) return ".null";
+function byCode(gSrc, primaryUnicode, conflictSet) {
+	if (gSrc.glyphRank === 9999) return ".notdef";
+	if (gSrc.glyphRank === 9998) return ".null";
 
 	let preferredName = null;
 	if (primaryUnicode) {
@@ -279,32 +279,61 @@ function nameSingleGlyph1(gid, gSrc, primaryUnicode, conflictSet) {
 function formatCodePointHex(u) {
 	return u.toString(16).padStart(4, "0").toUpperCase();
 }
-
-function nameSingleGlyph2(gSrcBase, baseName, internalNameMap, conflictSet) {
-	if (!baseName) return;
+function bySpacing(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+	if (!gOtBase.name) return 0;
+	let n = 0;
+	n += nameByPairGr(Nwid, Wwid, "NWID", "WWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
+	n += nameByPairGr(Wwid, Nwid, "WWID", "NWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
+	return n;
+}
+function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+	if (!gOtBase.name) return 0;
+	let n = 0;
 	for (const cv of AnyCv.query(gSrcBase)) {
-		nameByGr(cv, gSrcBase, baseName, internalNameMap, conflictSet);
+		n += nameByGr(cv, gSrcBase, gOtBase, internalNameMap, conflictSet);
 	}
 	if (TieMark.get(gSrcBase)) {
-		nameByGr(TieMark, gSrcBase, baseName, internalNameMap, conflictSet);
+		n += nameByGr(TieMark, gSrcBase, gOtBase, internalNameMap, conflictSet);
 	}
+	return n;
 }
-function nameByGr(gr, gSrcBase, baseName, internalNameMap, conflictSet) {
+function nameByPairGr(grCis, grTrans, tagCis, tagTrans, gSrcBase, gOtBase, nm, conflictSet) {
+	const gnDst = grCis.get(gSrcBase);
+	if (!gnDst) return 0;
+	const gOtDst = nm.get(gnDst);
+	if (!gOtDst || gOtDst.name) return 0;
+	const nameS = gOtBase.name + "." + tagTrans;
+	const nameT = gOtBase.name + "." + tagCis;
+	if (!conflictSet.has(nameS) && !conflictSet.has(nameT)) {
+		conflictSet.add(nameS);
+		conflictSet.add(nameT);
+		gOtBase.name = nameS;
+		gOtDst.name = nameT;
+		return 1;
+	}
+	return 0;
+}
+function nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	const gnDst = gr.get(gSrcBase);
+	if (!gnDst) return 0;
 	const gOtDst = internalNameMap.get(gnDst);
-	const nameT = gr.amendOtName(baseName);
-	if (gOtDst && !gOtDst.name && !conflictSet.has(nameT)) {
+	if (!gOtDst || gOtDst.name) return 0;
+	const nameT = gr.amendOtName(gOtBase.name);
+	if (!conflictSet.has(nameT)) {
 		conflictSet.add(nameT);
 		gOtDst.name = nameT;
+		return 1;
 	}
+	return 0;
 }
 
-function nameSingleGlyph3(gid, gSrc, gnOrig) {
-	if (!gnOrig) gnOrig = `.gid${gid}`;
+function byBuildOrder(rank, gSrc, gnOrig) {
+	if (!gnOrig) gnOrig = `.g${rank}`;
 	gnOrig = Joining.amendOtName(gnOrig, Joining.get(gSrc));
 	return gnOrig;
 }
 
-exports.nameSingleGlyph1 = nameSingleGlyph1;
-exports.nameSingleGlyph2 = nameSingleGlyph2;
-exports.nameSingleGlyph3 = nameSingleGlyph3;
+exports.byCode = byCode;
+exports.bySpacing = bySpacing;
+exports.byGr = byGr;
+exports.byBuildOrder = byBuildOrder;

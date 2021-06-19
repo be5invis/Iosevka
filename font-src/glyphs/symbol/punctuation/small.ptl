@@ -10,10 +10,14 @@ glyph-block Symbol-Punctuation-Small : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	create-glyph 'period' '.' : DotAt Middle PeriodRadius (PeriodRadius - O)
-	create-glyph 'baselineDot' : DotAt Middle DotRadius (DotRadius - O)
-	create-glyph 'xhPeriod' : DotAt Middle (XH - PeriodRadius) (PeriodRadius - O)
-	create-glyph 'xhDot' : DotAt Middle (XH - DotRadius) (DotRadius - O)
+	create-glyph 'period' '.' : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : DotAt df.middle PeriodRadius (PeriodRadius - O)
+	create-glyph 'xhPeriod' : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : DotAt df.middle (XH - PeriodRadius) (PeriodRadius - O)
 
 	define [CommaShapeT cx cy gp] : new-glyph : glyph-proc
 		set currentGlyph.gizmo [Translate 0 0]
@@ -22,8 +26,9 @@ glyph-block Symbol-Punctuation-Small : begin
 		include : Translate (mx1) (my1)
 
 	create-glyph 'comma' ',' : glyph-proc
-		set-width Width
-		include : CommaShapeT Middle 0 : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : CommaShapeT df.middle 0 : glyph-proc
 			local r : PeriodRadius + 0
 			local ro : PeriodRadius - O
 			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
@@ -55,10 +60,9 @@ glyph-block Symbol-Punctuation-Small : begin
 					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
 
 	create-glyph 'invertComma' : glyph-proc
-		include : refer-glyph "period"
-
-		set-width Width
-		include : CommaShapeT Middle 0 : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : CommaShapeT df.middle 0 : glyph-proc
 			local r : PeriodRadius + 0
 			local ro : PeriodRadius - O
 			local sw : Math.min [AdviceStroke 4] (PeriodSize * 0.4)
@@ -90,21 +94,25 @@ glyph-block Symbol-Punctuation-Small : begin
 					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
 
 	create-glyph 'colon' ':' : glyph-proc
-		include : refer-glyph "period"
-		include : refer-glyph "xhPeriod"
+		include [refer-glyph "period"] AS_BASE ALSO_METRICS
+		include [refer-glyph "xhPeriod"]
 
 		create-forked-glyph 'colon.mid' : glyph-proc
 			include : ApparentTranslate 0 (SymbolMid - XH / 2)
 
+	alias 'modifierLetterColon' 0xA789 'colon'
+
 	create-glyph 'hollowColon' 0x2982 : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
 		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
-		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
-		include : RingStrokeAt Middle dotRadius (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt df.middle dotRadius (dotRadius + sw / 2 - O) sw
 
 	create-glyph 'semicolon' ';' : glyph-proc
-		include : refer-glyph "comma"
-		include : refer-glyph "xhPeriod"
+		include [refer-glyph "comma"] AS_BASE ALSO_METRICS
+		include [refer-glyph "xhPeriod"]
 
 	alias 'greekquestion' 0x37E 'semicolon'
 
@@ -131,17 +139,21 @@ glyph-block Symbol-Punctuation-Small : begin
 			curl (mx - rad * k2x) (d - rad * k2y)
 
 	create-glyph 'zNotationSchemaComposition' 0x2A1F : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
 		define sw : AdviceStroke 5
 		define dotRadius : Math.max PeriodRadius (XH / 8)
-		include : RingStrokeAt Middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
 		include : intersection
 			MaskAbove Descender
-			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 1 3
+			RingCommaStroke df.middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 1 3
 
 	create-glyph 'zNotationRelationalComposition' 0x2A3E : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
 		define sw : AdviceStroke 6.5
 		define dotRadius : 0.625 * [Math.max PeriodRadius (XH / 8)]
-		include : RingStrokeAt Middle (0.625 * XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt df.middle (0.625 * XH - dotRadius) (dotRadius + sw / 2 - O) sw
 		include : intersection
 			MaskAbove (Descender * 0.75)
-			RingCommaStroke Middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 0.75 3
+			RingCommaStroke df.middle dotRadius (dotRadius + sw / 2 - O) sw 0.75 0 0.75 3
