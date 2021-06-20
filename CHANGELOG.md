@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 7.1.1
+
+ * Add Greek Number Sign (`U+0374`).
+ * Fix Misplaced diacritics in `U+A7BA`, `U+A7BC`, and `U+A7BE` (#1125).
+ * Make Modifier Letter Colon (`U+A789`) smaller than Colon (#1126).
+
+
 ### 7.1.0
 
  * Add single-spacing TTC and Super TTC (#1112).
