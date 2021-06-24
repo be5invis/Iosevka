@@ -136,7 +136,9 @@ function buildupComposite(variants, para, ...composites) {
 		for (const [prime, variant] of composite.decompose(para, variants.selectorTree)) {
 			if (!prime.sampler) continue;
 			const key = getSelectorKey(prime, variant);
-			if (/ /.test(prime.sampler)) {
+			if (prime.hotChars) {
+				for (const ch of prime.hotChars) hotChars.set(ch, key);
+			} else if (isLigatureSampler(prime)) {
 				for (const ch of prime.sampler.split(" ")) hotChars.set(ch, key);
 			} else {
 				for (const ch of prime.sampler) hotChars.set(ch, key);
