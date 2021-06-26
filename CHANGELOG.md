@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 7.2.0
+
+ * Add square-dot variants for period, comma, colon, semicolon and all punctuations and symbols involving dot shape (diacritics are not included; #927).
+ * Refine geometry of Partial Differential Symbol (`U+2202`) (#862).
+ * Refine geometry of Cyrillic Small Be (`U+0431`), De (`U+0414`, `U+0434`), El (`U+041B`, `U+043B`), Ef (`U+0424`, `U+0444`), Che (`U+0247`, `U+0447`), E (`U+042D`, `U+044D`) and Ye (`U+0404`, `U+0454`) (#1128).
+
+
 ### 7.1.1
 
  * Add Greek Number Sign (`U+0374`).

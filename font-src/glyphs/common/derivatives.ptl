@@ -3,7 +3,7 @@ $$include '../../meta/macros.ptl'
 import '../../support/transform' as Transform
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyCv AnyDerivingCv Dotless SvInheritableRelations] from '../../support/gr'
+import [Cv AnyCv AnyDerivingCv Dotless SvInheritableRelations CvDecompose] from '../../support/gr'
 import [DesignParameters] from '../../meta/aesthetics'
 
 extern Map
@@ -143,10 +143,18 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : VCombine newid unicode id id spacing
 
+	# Two-art glyphs
+	define [create-two-part-glyph newid unicode id1 id2] : begin
+		create-glyph newid unicode : glyph-proc
+			include [refer-glyph id1] AS_BASE ALSO_METRICS
+			include [refer-glyph id2]
+			CvDecompose.set currentGlyph { id1 id2 }
+
+
 	glyph-block-export select-variant orthographic-italic refer-glyph query-glyph
 	glyph-block-export derive-glyphs derive-composites link-reduced-variant alias-reduced-variant
 	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
-	glyph-block-export HalfAdvance TurnMarks
+	glyph-block-export HalfAdvance TurnMarks create-two-part-glyph
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin

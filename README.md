@@ -591,18 +591,18 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `J`:
     + `capital-j = 'serifless'`, `cv10 = 1`: J without top serif.
     + `capital-j = 'serifed'`, `cv10 = 2`: J with top serif at left side.
-    + `capital-j = 'serifed-both-sides'`, `cv10 = 3`: J with symmetric at both sides.
-    + `capital-j = 'serifed-symmetric'`, `cv10 = 4`: J with symmetric at both sides and is symmetric.
-    + `capital-j = 'flat-hook-serifless'`, `cv10 = 5`: J with flat hook and without serif.
-    + `capital-j = 'flat-hook-serifed'`, `cv10 = 6`: J with flat hook and top serif.
-    + `capital-j = 'flat-hook-serifed-both-sides'`, `cv10 = 7`: J with flat hook and without serif.
-    + `capital-j = 'flat-hook-serifed-symmetric'`, `cv10 = 8`: J with flat hook and top serif.
+    + `capital-j = 'serifed-both-sides'`, `cv10 = 3`: J with top serif at both sides (asymmetric).
+    + `capital-j = 'serifed-symmetric'`, `cv10 = 4`: J with top serif at both sides (symmetric).
+    + `capital-j = 'flat-hook-serifless'`, `cv10 = 5`: J with flat hook and without top serif.
+    + `capital-j = 'flat-hook-serifed'`, `cv10 = 6`: J with flat hook and top serif at left side.
+    + `capital-j = 'flat-hook-serifed-both-sides'`, `cv10 = 7`: J with flat hook and top serif at both sides (asymmetric).
+    + `capital-j = 'flat-hook-serifed-symmetric'`, `cv10 = 8`: J with flat hook and top serif at both sides (symmetric).
     + `capital-j = 'descending-serifless'`, `cv10 = 9`: J with hook goes below descender and without serif.
-    + `capital-j = 'descending-serifed'`, `cv10 = 10`: J with hook goes below descender and top serif.
+    + `capital-j = 'descending-serifed'`, `cv10 = 10`: J with hook goes below descender and top serif at left side.
     + `capital-j = 'descending-serifed-both-sides'`, `cv10 = 11`: J with hook goes below descender and top serif at both sides (asymmetric).
     + `capital-j = 'descending-serifed-symmetric'`, `cv10 = 12`: J with hook goes below descender and top serif at both sides (symmetric).
     + `capital-j = 'descending-flat-hook-serifless'`, `cv10 = 13`: J with flat hook goes below descender and without serif.
-    + `capital-j = 'descending-flat-hook-serifed'`, `cv10 = 14`: J with flat hook goes below descender and top serif.
+    + `capital-j = 'descending-flat-hook-serifed'`, `cv10 = 14`: J with flat hook goes below descender and top serif at left side.
   - Styles for `K`:
     + `capital-k = 'straight-serifless'`, `cv11 = 1`: `K` with standard shape, without serifs.
     + `capital-k = 'curly-serifless'`, `cv11 = 2`: Slightly curly `K`, like Iosevka 2.x, without serifs.
@@ -1346,6 +1346,9 @@ Subsection `variants` is used to configure character variants in the font. Prope
     + `question = 'smooth'`, `cv98 = 1`: Smooth question mark (`?`).
     + `question = 'corner'`, `cv98 = 2`: Question mark (`?`) with a corner at middle.
     + `question = 'corner-flat-hooked'`, `cv98 = 3`: Question mark (`?`) with a corner at middle and flat hook.
+  - Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols):
+    + `punctuation-dot = 'round'`, `cv99 = 1`: Small punctuations (like `.`, `,`) use round dots.
+    + `punctuation-dot = 'square'`, `cv99 = 2`: Small punctuations (like `.`, `,`) use square dots.
 
 <!-- END Section-Cherry-Picking-Styles -->
 

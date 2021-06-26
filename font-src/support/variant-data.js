@@ -79,6 +79,7 @@ class Prime {
 		this.tag = cfg.tag;
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.variants = new Map();
+		this.hotChars = cfg.hotChars ? [...cfg.hotChars] : this.descSampleText;
 		for (const varKey in cfg.variants) {
 			const variant = cfg.variants[varKey];
 			this.variants.set(varKey, new PrimeVariant(varKey, cfg.tag, variant));
@@ -100,6 +101,7 @@ class Prime {
 			slopeDependent: this.slopeDependent,
 			ligatureSampler: this.ligatureSampler,
 			descSampleText: this.descSampleText,
+			hotChars: this.hotChars,
 			variants: []
 		};
 		for (const variant of this.variants.values()) {
