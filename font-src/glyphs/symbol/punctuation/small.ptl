@@ -10,14 +10,21 @@ glyph-block Symbol-Punctuation-Small : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	create-glyph 'period' '.' : glyph-proc
-		local df : DivFrame para.diversityF
-		set-width df.width
-		include : DotAt df.middle PeriodRadius (PeriodRadius - O)
-	create-glyph 'xhPeriod' : glyph-proc
-		local df : DivFrame para.diversityF
-		set-width df.width
-		include : DotAt df.middle (XH - PeriodRadius) (PeriodRadius - O)
+	define DotVariants : object
+		round  { DotAt    1                                O }
+		square { SquareAt DesignParameters.squareDotScalar 0 }
+
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+		create-glyph "period.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityF
+			set-width df.width
+			include : DrawAt df.middle (PeriodRadius * kDotRadius) (PeriodRadius * kDotRadius - overshoot)
+		create-glyph "xhPeriod.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityF
+			set-width df.width
+			include : DrawAt df.middle (XH - PeriodRadius * kDotRadius) (PeriodRadius * kDotRadius - overshoot)
+
+	select-variant 'period' '.' (follow -- 'punctuationDot')
 
 	define [CommaShapeT cx cy gp] : new-glyph : glyph-proc
 		set currentGlyph.gizmo [Translate 0 0]
@@ -25,7 +32,7 @@ glyph-block Symbol-Punctuation-Small : begin
 		local {.x mx1 .y my1} : GlobalTransform.apply {.x cx .y cy}
 		include : Translate (mx1) (my1)
 
-	create-glyph 'comma' ',' : glyph-proc
+	create-glyph 'comma.round' : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : CommaShapeT df.middle 0 : glyph-proc
@@ -56,10 +63,27 @@ glyph-block Symbol-Punctuation-Small : begin
 					g4 0 (r + ro)
 					archv
 					g4 ro r [widths.rhs sw]
-					quadcontrols (0 + TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					quadcontrols (0 + TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
 					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
 
-	create-glyph 'invertComma' : glyph-proc
+	create-glyph 'comma.square' : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : WithTransform [Translate df.middle 0] : glyph-proc
+			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
+			local commaOverflow : r - swEnd * 0.5
+
+			include : union
+				SquareAt 0 r r
+				dispiro
+					straight.down.mid r 0 [widths.rhs sw]
+					quadcontrols (0 + TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
+					g4 (-commaOverflow + Descender * TanSlope) Descender [widths.rhs swEnd]
+
+
+	create-glyph 'invertComma.round' : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : CommaShapeT df.middle 0 : glyph-proc
@@ -90,36 +114,57 @@ glyph-block Symbol-Punctuation-Small : begin
 					g4 0 (r + ro)
 					archv
 					g4 (-ro) r [widths.lhs sw]
-					quadcontrols (0 - TanSlope / 2) (0.5 - TanSlope * PeriodRadius / Descender) 12
+					quadcontrols (0 - TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
 					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
 
-	create-glyph 'colon' ':' : glyph-proc
-		include [refer-glyph "period"] AS_BASE ALSO_METRICS
-		include [refer-glyph "xhPeriod"]
-
-		create-forked-glyph 'colon.mid' : glyph-proc
-			include : ApparentTranslate 0 (SymbolMid - XH / 2)
-
-	create-glyph 'modifierLetterColon' 0xA789 : glyph-proc
-		local df : DivFrame para.diversityII
-		set-width df.width
-		local k 0.9
-		include : DotAt df.middle [mix DotRadius (XH - DotRadius) k] DotRadius
-		include : DotAt df.middle [mix DotRadius (XH - DotRadius) (1 - k)] DotRadius
-
-	create-glyph 'hollowColon' 0x2982 : glyph-proc
+	create-glyph 'invertComma.square' : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
-		define sw : AdviceStroke 5
-		define dotRadius : Math.max PeriodRadius (XH / 8)
-		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
-		include : RingStrokeAt df.middle dotRadius (dotRadius + sw / 2 - O) sw
+		include : WithTransform [Translate df.middle 0] : glyph-proc
+			local r : PeriodRadius * DesignParameters.squareDotScalar + 0
+			local sw : Math.min [AdviceStroke 4] (PeriodSize * DesignParameters.squareDotScalar * 0.4)
+			local swEnd : Math.min Stroke (PeriodSize * DesignParameters.squareDotScalar * 0.5)
+			local commaOverflow : r - swEnd * 0.5
 
-	create-glyph 'semicolon' ';' : glyph-proc
-		include [refer-glyph "comma"] AS_BASE ALSO_METRICS
-		include [refer-glyph "xhPeriod"]
+			include : union
+				SquareAt 0 r r
+				dispiro
+					straight.down.mid (-r) 0 [widths.lhs sw]
+					quadcontrols (0 - TanSlope / 2) (0.5 - TanSlope * r / Descender) 12
+					g4 (commaOverflow + Descender * TanSlope) Descender [widths.lhs swEnd]
 
+	select-variant 'comma' ',' (follow -- 'punctuationDot')
+	select-variant 'invertComma' (follow -- 'punctuationDot')
+
+	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+
+
+		create-glyph "colon.\(suffix)" : glyph-proc
+			include [refer-glyph "period.\(suffix)"] AS_BASE ALSO_METRICS
+			include [refer-glyph "xhPeriod.\(suffix)"]
+
+			create-forked-glyph "colon/mid.\(suffix)" : glyph-proc
+				include : ApparentTranslate 0 (SymbolMid - XH / 2)
+
+		create-glyph "modifierLetterColon.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityII
+			set-width df.width
+			local k 0.9
+			local dr : DotRadius * kDotRadius
+			include : DotAt df.middle [mix dr (XH - dr) k] (dr - overshoot)
+			include : DotAt df.middle [mix dr (XH - dr) (1 - k)] (dr - overshoot)
+
+		create-glyph "semicolon.\(suffix)" : glyph-proc
+			include [refer-glyph "comma.\(suffix)"] AS_BASE ALSO_METRICS
+			include [refer-glyph "xhPeriod.\(suffix)"]
+
+	select-variant 'colon' ':'  (follow -- 'punctuationDot')
+	select-variant 'colon/mid' (follow -- 'punctuationDot')
+	select-variant 'modifierLetterColon' 0xA789 (follow -- 'punctuationDot')
+	select-variant 'semicolon' ';' (follow -- 'punctuationDot')
 	alias 'greekquestion' 0x37E 'semicolon'
+
+	# Hollow (no CV)
 
 	define [RingCommaStroke mx my rad s k1x k1y k2x k2y] : begin
 		local u : my + rad
@@ -142,6 +187,14 @@ glyph-block Symbol-Punctuation-Small : begin
 			g4 r my [widths.rhs fine]
 			flat (mx + rad * k1x) (d + rad * k1y) [widths.rhs s]
 			curl (mx - rad * k2x) (d - rad * k2y)
+
+	create-glyph 'hollowColon' 0x2982 : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		define sw : AdviceStroke 5
+		define dotRadius : Math.max PeriodRadius (XH / 8)
+		include : RingStrokeAt df.middle (XH - dotRadius) (dotRadius + sw / 2 - O) sw
+		include : RingStrokeAt df.middle dotRadius (dotRadius + sw / 2 - O) sw
 
 	create-glyph 'zNotationSchemaComposition' 0x2A1F : glyph-proc
 		local df : DivFrame para.diversityF

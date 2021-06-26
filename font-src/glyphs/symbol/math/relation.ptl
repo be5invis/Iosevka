@@ -9,6 +9,9 @@ import '../../../support/point' as Point
 glyph-module
 
 glyph-block Symbol-Math-Relation-Common : begin
+	glyph-block-import Common-Derivatives
+	glyph-block-import CommonShapes
+
 	glyph-block-export EqualHalfSpace
 	define EqualHalfSpace : (OperTop - OperBot) * 2 * DesignParameters.equal_wideness
 
@@ -27,11 +30,22 @@ glyph-block Symbol-Math-Relation-Common : begin
 	glyph-block-export lessEqDist
 	define lessEqDist : Math.max [AdviceStroke 4] (XH * 0.16)
 
+	# Dot variant constructor
+	define DotVariants : object
+		round  { DotAt    1                                O }
+		square { SquareAt DesignParameters.squareDotScalar 0 }
+
+	glyph-block-export WithDotVariants
+	define [WithDotVariants name unicode F] : begin
+		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+			create-glyph "\(name).\(suffix)" : F DrawAt kDotRadius overshoot
+		select-variant name unicode (follow -- 'punctuationDot')
+
 glyph-block Symbol-Math-Relation-Equal : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace dH
+	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace dH WithDotVariants
 	glyph-block-export EqualShape EqualHole IdentShape IdentHole
 
 	glyph-block-export : EqualShape
@@ -60,24 +74,28 @@ glyph-block Symbol-Math-Relation-Equal : begin
 		refer-glyph 'equal'
 		refer-glyph 'parallel.upright'
 
-	create-glyph 'oneDotApproxEq' 0x2250 : glyph-proc
+	WithDotVariants 'oneDotApproxEq' 0x2250 : function [DrawAt kr ov] : glyph-proc
+		local dr : DotRadius * kr
 		include : refer-glyph 'equal'
-		include : DotAt Middle (SymbolMid + EqualHalfSpace * 2.5) DotRadius
+		include : DrawAt Middle (SymbolMid + EqualHalfSpace * 2.5) (dr - ov)
 
-	create-glyph 'twoDotApproxEqCenter' 0x2251 : glyph-proc
+	WithDotVariants 'twoDotApproxEqCenter' 0x2251 : function [DrawAt kr ov] : glyph-proc
+		local dr : DotRadius * kr
 		include : refer-glyph 'equal'
-		include : DotAt Middle (SymbolMid + EqualHalfSpace * 2.5) DotRadius
-		include : DotAt Middle (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+		include : DrawAt Middle (SymbolMid + EqualHalfSpace * 2.5) (dr - ov)
+		include : DrawAt Middle (SymbolMid - EqualHalfSpace * 2.5) (dr - ov)
 
-	create-glyph 'twoDotApproxEq' 0x2252 : glyph-proc
+	WithDotVariants 'twoDotApproxEq' 0x2252 : function [DrawAt kr ov] : glyph-proc
+		local dr : DotRadius * kr
 		include : refer-glyph 'equal'
-		include : DotAt [mix SB RightSB (1/6)] (SymbolMid + EqualHalfSpace * 2.5) DotRadius
-		include : DotAt [mix SB RightSB (5/6)] (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+		include : DrawAt [mix SB RightSB (1/6)] (SymbolMid + EqualHalfSpace * 2.5) (dr - ov)
+		include : DrawAt [mix SB RightSB (5/6)] (SymbolMid - EqualHalfSpace * 2.5) (dr - ov)
 
-	create-glyph 'twoDotApproxEqAlt' 0x2253 : glyph-proc
+	WithDotVariants 'twoDotApproxEqAlt' 0x2253 : function [DrawAt kr ov] : glyph-proc
+		local dr : DotRadius * kr
 		include : refer-glyph 'equal'
-		include : DotAt [mix SB RightSB (5/6)] (SymbolMid + EqualHalfSpace * 2.5) DotRadius
-		include : DotAt [mix SB RightSB (1/6)] (SymbolMid - EqualHalfSpace * 2.5) DotRadius
+		include : DrawAt [mix SB RightSB (5/6)] (SymbolMid + EqualHalfSpace * 2.5) (dr - ov)
+		include : DrawAt [mix SB RightSB (1/6)] (SymbolMid - EqualHalfSpace * 2.5) (dr - ov)
 
 	create-glyph 'ringInEqual' 0x2256 : glyph-proc
 		local ringSw : AdviceStroke 4
@@ -170,33 +188,30 @@ glyph-block Symbol-Math-Relation-Colons : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Arrow : ArrowShape
 	glyph-block-import Symbol-Math-Relation-Equal : EqualShape
+	glyph-block-import Symbol-Math-Relation-Common : WithDotVariants
 
 	define ColonEqSbSquash 0.5
-	create-glyph 'eqColon' 0x2255 : glyph-proc
-		include : DotAt Middle DotRadius (DotRadius - O)
-		include : DotAt Middle (XH - DotRadius) (DotRadius - O)
+	define [ColonEqColonShape sign DrawAt kr ov] : new-glyph : glyph-proc
+		local dr : DotRadius * kr
+		include : DrawAt Middle dr (dr - ov)
+		include : DrawAt Middle (XH - dr) (dr - ov)
 
-		local delta : Math.max 0 : Middle - DotRadius - SB * ColonEqSbSquash
-		include : ApparentTranslate (+delta) (SymbolMid - XH / 2)
+		local delta : Math.max 0 : Middle - dr - SB * ColonEqSbSquash
+		include : ApparentTranslate (sign * delta) (SymbolMid - XH / 2)
 
-		include : EqualShape (SB * ColonEqSbSquash) (RightSB - DotSize)
+	WithDotVariants 'eqColon' 0x2255 : function [DrawAt kr ov] : glyph-proc
+		include : ColonEqColonShape (+1) DrawAt kr ov
+		include : EqualShape (SB * ColonEqSbSquash) (RightSB - DotSize * kr)
 
-	define [ColonEqColonShape] : new-glyph : glyph-proc
-		include : DotAt Middle DotRadius (DotRadius - O)
-		include : DotAt Middle (XH - DotRadius) (DotRadius - O)
+	WithDotVariants 'colonEq' 0x2254 : function [DrawAt kr ov] : glyph-proc
+		include : ColonEqColonShape (-1) DrawAt kr ov
+		include : EqualShape (SB + DotSize * kr) (Width - SB * ColonEqSbSquash)
 
-		local delta : Math.max 0 : Middle - DotRadius - SB * ColonEqSbSquash
-		include : ApparentTranslate (-delta) (SymbolMid - XH / 2)
-
-	create-glyph 'colonEq' 0x2254 : glyph-proc
-		include : ColonEqColonShape
-		include : EqualShape (SB + DotSize) (Width - SB * ColonEqSbSquash)
-
-	create-glyph 'colonArrow' 0x29F4 : glyph-proc
-		local barLeft : SB + DotSize
+	WithDotVariants 'colonArrow' 0x29F4 : function [DrawAt kr ov] : glyph-proc
+		local barLeft : SB + DotSize * kr
 		local barRight : Width - SB * ColonEqSbSquash
 		local arrowHeadSize : Math.min ((PlusTop - PlusBot) / 2) (0.75 * (barRight - barLeft))
-		include : ColonEqColonShape
+		include : ColonEqColonShape (-1) DrawAt kr ov
 		include : HBar [mix SB barLeft 0.8] [mix barLeft barRight 0.5] SymbolMid OperatorStroke
 		include : ArrowShape barLeft SymbolMid barRight SymbolMid arrowHeadSize
 
@@ -204,7 +219,7 @@ glyph-block Symbol-Math-Relation-Sym : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Marks : TildeShape
-	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
+	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace WithDotVariants
 	glyph-block-import Symbol-Math-Relation-Addons : EqEqBarNegationImpl
 
 	# Sym parameters
@@ -222,10 +237,10 @@ glyph-block Symbol-Math-Relation-Sym : begin
 	create-glyph 'sym' 0x223C : symWave SymbolMid 1
 	create-glyph 'flipSym' 0x223D : symWave SymbolMid (-1)
 
-	create-glyph 'twoDotSym' 0x223B : composite-proc
+	WithDotVariants 'twoDotSym' 0x223B : function [DrawAt kr ov] : composite-proc
 		refer-glyph 'sym'
-		DotAt Middle PlusTop DotRadius
-		DotAt Middle PlusBot DotRadius
+		DrawAt Middle PlusTop (DotRadius * kr - ov)
+		DrawAt Middle PlusBot (DotRadius * kr - ov)
 
 	VDual 'approx' 0x2248 'sym' approxDist
 
@@ -275,7 +290,7 @@ glyph-block Symbol-Math-Relation-Sym : begin
 glyph-block Symbol-Math-Relation-Inequality : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Math-Relation-Common : dH lessEqDist
+	glyph-block-import Symbol-Math-Relation-Common : dH lessEqDist WithDotVariants
 	glyph-block-import Symbol-Math-Relation-Sym : symWave
 	glyph-block-import Symbol-Math-Relation-Addons : lesslessSW EqEqBarNegation llggHeight
 	glyph-block-import Symbol-Math-Relation-Addon-Glyphs
@@ -369,9 +384,9 @@ glyph-block Symbol-Math-Relation-Inequality : begin
 	create-glyph 'less' '<' : glyph-proc
 		include : LessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
 
-	create-glyph 'lessDot' 0x22D6 : composite-proc
+	WithDotVariants 'lessDot' 0x22D6 : function [DrawAt kr ov] : composite-proc
 		LessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB [AdviceStroke 4]
-		DotAt (RightSB - DotRadius) SymbolMid (DotRadius * [AdviceStroke 4] / Stroke)
+		DrawAt (RightSB - DotRadius) SymbolMid (DotRadius * kr * [AdviceStroke 4] / Stroke - ov)
 
 	create-glyph 'normalSubsetOf' 0x22B2 : glyph-proc
 		include : NormalSubsetShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
@@ -379,9 +394,9 @@ glyph-block Symbol-Math-Relation-Inequality : begin
 	create-glyph 'greater' '>' : glyph-proc
 		include : GreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB
 
-	create-glyph 'greaterDot' 0x22D7 : composite-proc
+	WithDotVariants 'greaterDot' 0x22D7 : function [DrawAt kr ov] : composite-proc
 		GreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB [AdviceStroke 4]
-		DotAt (SB + DotRadius) SymbolMid (DotRadius * [AdviceStroke 4] / Stroke)
+		DrawAt (SB + DotRadius) SymbolMid (DotRadius * kr * [AdviceStroke 4] / Stroke - ov)
 
 	create-glyph 'normalSupersetOf' 0x22B3 : glyph-proc
 		include : NormalSupersetShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB

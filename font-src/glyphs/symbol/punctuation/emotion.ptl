@@ -13,12 +13,25 @@ glyph-block Symbol-Punctuation-Emotion : begin
 	local questionBottom : Math.max (CAP * 0.3) (DotSize * 1.5)
 	local [questionYConnectT top questionBottom] : mix questionBottom (top - HalfStroke) 0.375
 
-	create-glyph 'exclam' '!' : glyph-proc
-		local df : DivFrame para.diversityF
-		set-width df.width
-		include : MarkSet.capital
-		include : VBar df.middle [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
-		include : DotAt df.middle DotRadius (DotRadius - O)
+	define DotVariants : object
+		round  { DotAt    DotRadius                                      O }
+		square { SquareAt (DotRadius * DesignParameters.squareDotScalar) 0 }
+
+	foreach { suffix { DrawAt dr overshoot } } [Object.entries DotVariants] : do
+		create-glyph "exclam.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityF
+			set-width df.width
+			include : MarkSet.capital
+			include : VBar df.middle [clamp 0 (CAP * 0.4) (questionBottom * 1.18)] CAP
+			include : DrawAt df.middle dr (dr - overshoot)
+
+		create-glyph "question/dotPart.\(suffix)" : glyph-proc
+			set-width 0
+			include : DrawAt Middle dr (dr - overshoot)
+			set-mark-anchor 'cvDecompose' 0 0
+
+	select-variant 'exclam' '!' (follow -- 'punctuationDot')
+	select-variant 'question/dotPart' (follow -- 'punctuationDot')
 
 	alias 'alveolarclick' 0x1C3 'exclam'
 	turned 'exclamDown'  0xA1   'exclam'  [DivFrame para.diversityF].middle (XH / 2)
@@ -63,11 +76,11 @@ glyph-block Symbol-Punctuation-Emotion : begin
 		cornerFlatHooked { QuestionCornerFlatShape }
 
 	foreach { suffix { Body } } [Object.entries QuestionConfig] : do
-		create-glyph "question.\(suffix)" : glyph-proc
+		create-glyph "question/hookPart.\(suffix)" : glyph-proc
 			include : Body CAP questionBottom SB RightSB
-			include : DotAt Middle DotRadius (DotRadius - O)
+			set-base-anchor 'cvDecompose' 0 0
 
-		create-glyph "interrobang.\(suffix)" : glyph-proc
+		create-glyph "interrobang/bodyPart.\(suffix)" : glyph-proc
 			local angle : 12 / 180 * Math.PI
 			include : Body CAP questionBottom [mix Middle SB 0.75] RightSB
 			include : Translate (-Middle) (-DotRadius)
@@ -77,9 +90,12 @@ glyph-block Symbol-Punctuation-Emotion : begin
 			include : Translate (-Middle) (-DotRadius)
 			include : Rotate (1.2 * angle)
 			include : Translate Middle DotRadius
-			include : DotAt Middle DotRadius (DotRadius - O)
+			set-base-anchor 'cvDecompose' 0 0
 
-	select-variant 'question' '?'
+	select-variant 'question/hookPart' (follow -- 'question')
+	create-two-part-glyph 'question' '?' 'question/hookPart' 'question/dotPart'
 	turned 'questionDown'0xBF   'question'    Middle (XH / 2)
-	select-variant 'interrobang' 0x203D (follow -- 'question')
+
+	select-variant 'interrobang/bodyPart' (follow -- 'question')
+	create-two-part-glyph 'interrobang' 0x203D 'interrobang/bodyPart' 'question/dotPart'
 	turned 'gnaborretni' 0x2E18 'interrobang' Middle (CAP / 2)

@@ -22,44 +22,15 @@ glyph-block Symbol-Math-Arith : begin
 	create-glyph 'innerPlus' : PlusShape SB RightSB 0 MathEnclosureSw
 	create-glyph 'innerMinus' : HBar SB RightSB SymbolMid MathEnclosureSw
 
-	create-glyph 'minusDot' 0x2238 : composite-proc [refer-glyph 'minus']
-		DotAt Middle PlusTop DotRadius
-
-	create-glyph 'geometricProportion' 0x223A : composite-proc
-		refer-glyph 'minus'
-		DotAt (SB      + DotRadius) PlusTop DotRadius
-		DotAt (SB      + DotRadius) PlusBot DotRadius
-		DotAt (RightSB - DotRadius) PlusTop DotRadius
-		DotAt (RightSB - DotRadius) PlusBot DotRadius
-
 	create-glyph 'hermetianConjugateMatrixPlus' 0x22B9 : difference
 		PlusShape SB RightSB
 		SquareAt Middle SymbolMid DotRadius
-
-	create-glyph 'minusColon' 0x2239 : glyph-proc
-		include : DotAt Middle DotRadius (DotRadius - O)
-		include : DotAt Middle (XH - DotRadius) (DotRadius - O)
-
-		local sbSquash 0.5
-
-		local delta : Math.max 0 : Middle - DotRadius - SB * sbSquash
-		include : ApparentTranslate (+delta) (SymbolMid - XH / 2)
-
-		include : HBar (SB * sbSquash) (RightSB - DotSize) SymbolMid OperatorStroke
-
 
 	create-glyph 'plusminus' 0xB1 : glyph-proc
 		include : HBarBottom SB RightSB 0 OperatorStroke
 		include : refer-glyph "plus"
 
 	turned 'minusplus' 0x2213 'plusminus' Middle SymbolMid
-	create-glyph 'dotplus' 0x2214 : glyph-proc
-		local gap : AdviceStroke 12
-		include : union
-			DotAt Middle (SymbolMid * 2 - OperatorStroke / 2) DotRadius
-			difference
-				refer-glyph 'plus'
-				DotAt Middle (SymbolMid * 2 - OperatorStroke / 2) (DotRadius + gap)
 
 	define MultiplyHalfHeight : (RightSB - SB) / 2
 	define swBowtie : AdviceStroke 4
@@ -135,20 +106,63 @@ glyph-block Symbol-Math-Arith : begin
 
 	alias 'mathAsterisk' 0x2217 'opAsterisk.low'
 
-	create-glyph 'divide' 0xF7 : glyph-proc
-		include : refer-glyph "minus"
-		define gap : (RightSB - SB) / 2
-		include : DotAt Middle (SymbolMid + gap) DotRadius
-		include : DotAt Middle (SymbolMid - gap) DotRadius
+	do "dotted"
+		define DotVariants : object
+			round  { DotAt    1                                O }
+			square { SquareAt DesignParameters.squareDotScalar 0 }
 
-	create-glyph 'divisionTimes' 0x22C7 : glyph-proc
-		define sw : AdviceStroke 4
-		define gap : (RightSB - SB) / 2
-		include : MultiplyStroke1Shape sw 1 1
-		include : MultiplyStroke2Shape sw 1 1
-		include : HBar SB RightSB SymbolMid sw
-		include : DotAt Middle (SymbolMid + gap) (DotRadius * sw / OperatorStroke)
-		include : DotAt Middle (SymbolMid - gap) (DotRadius * sw / OperatorStroke)
+		foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
+			local dr : DotRadius * kDotRadius
+			create-glyph "dotplus.\(suffix)" : glyph-proc
+				local gap : AdviceStroke 12
+				include : union
+					DrawAt Middle (SymbolMid * 2 - OperatorStroke / 2) (dr - overshoot)
+					difference
+						refer-glyph 'plus'
+						DrawAt Middle (SymbolMid * 2 - OperatorStroke / 2) (dr + gap - overshoot)
+
+			create-glyph "minusDot.\(suffix)" : composite-proc [refer-glyph 'minus']
+				DrawAt Middle PlusTop (dr - overshoot)
+
+			create-glyph "geometricProportion.\(suffix)" : composite-proc
+				refer-glyph 'minus'
+				DrawAt (SB      + dr) PlusTop (dr - overshoot)
+				DrawAt (SB      + dr) PlusBot (dr - overshoot)
+				DrawAt (RightSB - dr) PlusTop (dr - overshoot)
+				DrawAt (RightSB - dr) PlusBot (dr - overshoot)
+
+			create-glyph "minusColon.\(suffix)" : glyph-proc
+				include : DrawAt Middle dr (dr - overshoot)
+				include : DrawAt Middle (XH - dr) (dr - overshoot)
+
+				local sbSquash 0.5
+
+				local delta : Math.max 0 : Middle - dr - SB * sbSquash
+				include : ApparentTranslate (+delta) (SymbolMid - XH / 2)
+
+				include : HBar (SB * sbSquash) (RightSB - DotSize) SymbolMid OperatorStroke
+
+			create-glyph "divide.\(suffix)" : glyph-proc
+				include : refer-glyph "minus"
+				define gap : (RightSB - SB) / 2
+				include : DrawAt Middle (SymbolMid + gap) (dr - overshoot)
+				include : DrawAt Middle (SymbolMid - gap) (dr - overshoot)
+
+			create-glyph "divisionTimes.\(suffix)" : glyph-proc
+				define sw : AdviceStroke 4
+				define gap : (RightSB - SB) / 2
+				include : MultiplyStroke1Shape sw 1 1
+				include : MultiplyStroke2Shape sw 1 1
+				include : HBar SB RightSB SymbolMid sw
+				include : DrawAt Middle (SymbolMid + gap) (dr * sw / OperatorStroke - overshoot)
+				include : DrawAt Middle (SymbolMid - gap) (dr * sw / OperatorStroke - overshoot)
+
+		select-variant 'dotplus' 0x2214 (follow -- 'punctuationDot')
+		select-variant 'minusDot' 0x2238 (follow -- 'punctuationDot')
+		select-variant 'geometricProportion' 0x223A (follow -- 'punctuationDot')
+		select-variant 'minusColon' 0x2239 (follow -- 'punctuationDot')
+		select-variant 'divide' 0xF7 (follow -- 'punctuationDot')
+		select-variant 'divisionTimes' 0x22C7 (follow -- 'punctuationDot')
 
 	do
 		define fine : AdviceStroke 5.5

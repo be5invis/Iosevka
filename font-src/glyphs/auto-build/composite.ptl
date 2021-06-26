@@ -522,11 +522,11 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [DottedCrowd digits width] : 2 + [AdjustDigitCount digits width]
 	define [DottedScale digits width] : 1 / [Math.pow [AdjustDigitCount digits width] 0.5]
-	define [createDottedGlyphs digits gidDot demands] : begin
+	define [createDottedGlyphs digits demands] : begin
 		foreach {suffix ww} [items-of circleWidthClasses] : do
 			define jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL ('dotted' + digits) suffix demands
 
-			local miniatureFont : CreateDerivedFontFromJobs jobs {gidDot} : lambda [gs]: Miniature gs
+			local miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs]: Miniature gs
 				crowd   -- [DottedCrowd digits ww]
 				scale   -- [DottedScale digits ww]
 				sbscale -- 1
@@ -546,12 +546,11 @@ glyph-block AutoBuild-Enclosure : begin
 				return gniPart
 
 			define [createDottedGlyphImpl job jobDecomposable] : begin
-				local {gn unicode parts w} job
+				local {gn unicode partsWithDot w} job
 				define [object width dscale pscale sw l r] : bracedDottdeDimens 1 ww
 
 				local totalWidth 0
 				local offsets    { }
-				local partsWithDot : parts.concat { gidDot }
 				foreach [j : range 0 partsWithDot.length] : begin
 					local gidPart partsWithDot.(j)
 					if j : set totalWidth : totalWidth - SB
@@ -719,7 +718,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "inset diamond"
 		createInsetDiamondGlyphs 1 : list
-			list 0xFFFD { 'question.corner' } WideWidth2
+			list 0xFFFD { 'question' } WideWidth2
 
 	do "double-digit inset boxed"
 		createInsetBoxedGlyphs 2 : list
@@ -778,28 +777,28 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit dotted"
 		local compositions : list
-			list 0x1F100 {'zero.lnum'} WideWidth1
+			list 0x1F100 {'zero.lnum' 'period'} WideWidth1
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2488 + j - 1
-			digitGlyphNames j
+			[digitGlyphNames j].concat {'period'}
 			begin WideWidth1
-		createDottedGlyphs 1 'period' compositions
+		createDottedGlyphs 1 compositions
 
 	do "Single-digit comma"
 		local compositions {}
 		foreach [j : range 0 till 9] : compositions.push : list
 			0x1F101 + j
-			digitGlyphNames j
+			[digitGlyphNames j].concat {'comma'}
 			begin WideWidth1
-		createDottedGlyphs 1 'comma' compositions
+		createDottedGlyphs 1 compositions
 
 	do "Double-digit dotted"
 		local compositions : list
 		foreach [j : range 10 till 20] : compositions.push : list
 			0x2488 + j - 1
-			digitGlyphNames j
+			[digitGlyphNames j].concat {'period'}
 			begin WideWidth1
-		createDottedGlyphs 2 'period' compositions
+		createDottedGlyphs 2 compositions
 
 glyph-block Autobuild-Fractions : begin
 	glyph-block-import CommonShapes
@@ -1129,10 +1128,6 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x20A7 { 'P' 't.flatHook' }
 		list 0x20A8 { 'R' 's' }
 		list 0x20AF { 'D' 'grek/rho' }
-		list 0x203c { 'exclam' 'exclam' }
-		list 0x2047 { 'question' 'question' }
-		list 0x2048 { 'question' 'exclam' }
-		list 0x2049 { 'exclam' 'question' }
 		list 0x2116 { 'N' 'numeroRightHalf' }
 		list 0x1F190 { 'D' 'J' } WideWidth1
 	createLigatures 'temperature' 0.7 0.8 0.75 0.9 : list
@@ -1214,6 +1209,57 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	createPhoneticLigatures 'compatLig' 1 compatLigShrink compatLigShrink 1 1 : list
 		list 0xFB01 { 'f/compLigLeft1'          'dotlessi/compLigRight' } null
 		list 0xFB02 { 'f/compLigLeft2'          'l/compLigRight'        } null
+
+glyph-block Autobuild-Double-Emotions : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Recursive-Build : Thinner
+	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
+
+	define [createDoubleEmotions prefix div _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
+		define CWidth : if FMosaicWide MosaicWidth (Width * div)
+		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
+		local shrink1 : clamp 0 1 _shrink1
+		local shrink2 : clamp 0 1 _shrink2
+		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
+		define antiScale : (CWidth * shrink1 + CWidth * shrink2 - kern) / CWidth
+		foreach [cycle : range 0 4] : begin
+			set kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
+			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
+			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
+			set shrink1 : clamp 0 1 tmp-shrink1
+			set shrink2 : clamp 0 1 tmp-shrink2
+
+		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
+		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
+
+		foreach [{gn unicode { c1 m1 c2 m2 } mak} : items-of jobs.nonDecomposable] : if [not : query-glyph gn] : begin
+			create-glyph gn [MangleUnicode unicode] : glyph-proc
+				set-width CWidth
+				if mak : include : [DivFrame (CWidth / Width)].markSet.(mak)
+				define dfg1 : df1.queryByNameEnsured c1
+				define dfm1 : df1.queryByNameEnsured m1
+				define dfg2 : df2.queryByNameEnsured c2
+				define dfm2 : df2.queryByNameEnsured m2
+				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
+				local refW : sumChildrenWidth - kern
+				include : union dfg2 dfm2
+				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
+				include : union dfg1 dfm1
+				include : Upright
+				include : Translate (-refW / 2) 0
+				include : Scale [clamp 0 1 ((CWidth - SB * 1.25) / (CWidth - SB * 2) * CWidth / refW)] 1
+				include : Translate (CWidth / 2) 0
+				include : Italify
+
+		applyRelations jobs.relApplications
+
+	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.78 0.9
+	createDoubleEmotions 'doubleemotion' para.diversityM stdShrink stdShrink 1 1 : list
+		list 0x203c { 'exclam' 'zwsp' 'exclam' 'zwsp' }
+		list 0x2047 { 'question/hookPart' 'question/dotPart' 'question/hookPart' 'question/dotPart' }
+		list 0x2048 { 'question/hookPart' 'question/dotPart' 'exclam' 'zwsp' }
+		list 0x2049 { 'exclam' 'zwsp' 'question/hookPart' 'question/dotPart' }
 
 glyph-block Autobuild-Grouped-Digits : begin
 	glyph-block-import CommonShapes

@@ -18,28 +18,28 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	local commaLow (Descender * 0.9)
 	local ratio : Math.min 1 : (quoteTop - quoteBottom) / (PeriodSize - commaLow)
 
-	create-glyph 'lowSingleQuote' 0x201A : glyph-proc
+	derive-glyphs 'lowSingleQuote' 0x201A 'comma' : function [src sel] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
-		include : refer-glyph "comma"
+		include : refer-glyph src
 		include : FlipAround df.middle 0 ratio ratio
 
-	create-glyph 'openSingleQuote' 0x2018 : glyph-proc
+	derive-glyphs 'openSingleQuote' 0x2018 'lowSingleQuote' : function [src sel] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
-		include : refer-glyph "lowSingleQuote"
+		include : refer-glyph src
 		include : FlipAround df.middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
 
-	create-glyph 'closeSingleQuote' 0x2019 : glyph-proc
+	derive-glyphs 'closeSingleQuote' 0x2019 'openSingleQuote' : function [src sel] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
-		include : refer-glyph "openSingleQuote"
+		include : refer-glyph src
 		include : FlipAround df.middle yCurlyQuotes
 
-	create-glyph 'revertSingleQuote' 0x201B : glyph-proc
+	derive-glyphs 'revertSingleQuote' 0x201B 'invertComma' : function [src sel] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
-		include : refer-glyph "invertComma"
+		include : refer-glyph src
 		include : FlipAround df.middle 0 ratio ratio
 		include : FlipAround df.middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
 		include : FlipAround df.middle yCurlyQuotes
@@ -52,10 +52,14 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 		include : refer-glyph gn
 		include : Translate (dist + Middle - dfSingle.middle) 0
 
-	create-glyph 'lowDoubleQuote' 0x201E : DoubleQuoteProc 'lowSingleQuote'
-	create-glyph 'openDoubleQuote' 0x201C : DoubleQuoteProc 'openSingleQuote'
-	create-glyph 'closeDoubleQuote' 0x201D : DoubleQuoteProc 'closeSingleQuote'
-	create-glyph 'revertDoubleQuote' 0x201F : DoubleQuoteProc 'revertSingleQuote'
+	derive-glyphs 'lowDoubleQuote' 0x201E 'lowSingleQuote'
+		function [src sel] : DoubleQuoteProc src
+	derive-glyphs 'openDoubleQuote' 0x201C 'openSingleQuote'
+		function [src sel] : DoubleQuoteProc src
+	derive-glyphs 'closeDoubleQuote' 0x201D 'closeSingleQuote'
+		function [src sel] : DoubleQuoteProc src
+	derive-glyphs 'revertDoubleQuote' 0x201F 'revertSingleQuote'
+		function [src sel] : DoubleQuoteProc src
 
 	create-glyph 'prime' 0x2032 : glyph-proc
 		local df : DivFrame para.diversityF
