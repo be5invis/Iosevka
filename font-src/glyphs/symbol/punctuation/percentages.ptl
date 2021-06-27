@@ -9,6 +9,7 @@ glyph-module
 glyph-block Symbol-Punctuation-Percentages : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : WithDotVariants
 
 	define [NarrowUnicode u] : if (para.spacing <  1) u null
 	define [WideUnicode   u] : if (para.spacing >= 1) u null
@@ -28,17 +29,11 @@ glyph-block Symbol-Punctuation-Percentages : begin
 		include : VBarLeft SB [mix CAP 0 0.3] CAP dotwidth
 		include : VBarRight RightSB 0 [mix 0 CAP 0.3] dotwidth
 
-	define DotVariants : object
-		round  { DotAt    1                                O }
-		square { SquareAt DesignParameters.squareDotScalar 0 }
-	foreach { suffix { DrawAt kDotRadius overshoot } } [Object.entries DotVariants] : do
-		create-glyph "commercialMinusSign.\(suffix)" : glyph-proc
-			include : PercentBarShape [DivFrame 1] Stroke
-			local r : PeriodRadius * kDotRadius
-			include : DrawAt (SB      + r) (CAP - r) (r - overshoot)
-			include : DrawAt (RightSB - r) (0   + r) (r - overshoot)
-
-	select-variant 'commercialMinusSign' 0x2052 (follow -- 'punctuationDot')
+	WithDotVariants "commercialMinusSign" 0x2052 : function [DrawAt kdr overshoot] : glyph-proc
+		include : PercentBarShape [DivFrame 1] Stroke
+		local r : PeriodRadius * kdr
+		include : DrawAt (SB      + r) (CAP - r) (r - overshoot)
+		include : DrawAt (RightSB - r) (0   + r) (r - overshoot)
 
 	create-glyph 'permille.NWID.dots' : glyph-proc
 		define df : DivFrame para.diversityM

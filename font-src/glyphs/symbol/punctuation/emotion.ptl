@@ -9,15 +9,13 @@ glyph-module
 glyph-block Symbol-Punctuation-Emotion : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Shared-Symbol-Shapes : DotVariants
 
 	local questionBottom : Math.max (CAP * 0.3) (DotSize * 1.5)
 	local [questionYConnectT top questionBottom] : mix questionBottom (top - HalfStroke) 0.375
 
-	define DotVariants : object
-		round  { DotAt    DotRadius                                      O }
-		square { SquareAt (DotRadius * DesignParameters.squareDotScalar) 0 }
-
-	foreach { suffix { DrawAt dr overshoot } } [Object.entries DotVariants] : do
+	foreach { suffix { DrawAt kdr overshoot } } [Object.entries DotVariants] : do
+		local dr : DotRadius * kdr
 		create-glyph "exclam.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityF
 			set-width df.width
@@ -27,11 +25,17 @@ glyph-block Symbol-Punctuation-Emotion : begin
 
 		create-glyph "question/dotPart.\(suffix)" : glyph-proc
 			set-width 0
-			include : DrawAt Middle dr (dr - overshoot)
-			set-mark-anchor 'cvDecompose' 0 0
+			include : DrawAt (Middle - Width) dr (dr - overshoot)
+			set-mark-anchor 'cvDecompose' (0 - Width) 0
+
+		create-glyph "questionDown/dotPart.\(suffix)" : glyph-proc
+			set-width 0
+			include : DrawAt (Middle - Width) (XH - dr) (dr - overshoot)
+			set-mark-anchor 'cvDecompose' (0 - Width) 0
 
 	select-variant 'exclam' '!' (follow -- 'punctuationDot')
 	select-variant 'question/dotPart' (follow -- 'punctuationDot')
+	select-variant 'questionDown/dotPart' (follow -- 'punctuationDot')
 
 	alias 'alveolarclick' 0x1C3 'exclam'
 	turned 'exclamDown'  0xA1   'exclam'  [DivFrame para.diversityF].middle (XH / 2)
@@ -80,7 +84,12 @@ glyph-block Symbol-Punctuation-Emotion : begin
 			include : Body CAP questionBottom SB RightSB
 			set-base-anchor 'cvDecompose' 0 0
 
-		create-glyph "interrobang/bodyPart.\(suffix)" : glyph-proc
+		create-glyph "questionDown/hookPart.\(suffix)" : glyph-proc
+			include : Body CAP questionBottom SB RightSB
+			include : FlipAround Middle (XH / 2)
+			set-base-anchor 'cvDecompose' 0 0
+
+		define [InterroBangBodyImpl] : glyph-proc
 			local angle : 12 / 180 * Math.PI
 			include : Body CAP questionBottom [mix Middle SB 0.75] RightSB
 			include : Translate (-Middle) (-DotRadius)
@@ -90,12 +99,24 @@ glyph-block Symbol-Punctuation-Emotion : begin
 			include : Translate (-Middle) (-DotRadius)
 			include : Rotate (1.2 * angle)
 			include : Translate Middle DotRadius
+
+		create-glyph "interrobang/bodyPart.\(suffix)" : glyph-proc
+			include : InterroBangBodyImpl
+			set-base-anchor 'cvDecompose' 0 0
+
+		create-glyph "interrobangDown/bodyPart.\(suffix)" : glyph-proc
+			include : InterroBangBodyImpl
+			include : FlipAround Middle (XH / 2)
 			set-base-anchor 'cvDecompose' 0 0
 
 	select-variant 'question/hookPart' (follow -- 'question')
 	create-two-part-glyph 'question' '?' 'question/hookPart' 'question/dotPart'
-	turned 'questionDown'0xBF   'question'    Middle (XH / 2)
+
+	select-variant 'questionDown/hookPart' (follow -- 'question')
+	create-two-part-glyph 'questionDown' 0xBF 'questionDown/hookPart' 'questionDown/dotPart'
 
 	select-variant 'interrobang/bodyPart' (follow -- 'question')
 	create-two-part-glyph 'interrobang' 0x203D 'interrobang/bodyPart' 'question/dotPart'
-	turned 'gnaborretni' 0x2E18 'interrobang' Middle (CAP / 2)
+
+	select-variant 'interrobangDown/bodyPart' (follow -- 'question')
+	create-two-part-glyph 'gnaborretni'  0x2E18 'interrobangDown/bodyPart' 'questionDown/dotPart'
