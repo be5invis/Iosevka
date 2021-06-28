@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 7.2.2
+
+ * Fix broken geometry of Apl Functional Symbol Quad Question (`U+2370`) (#1138).
+ * Add Tugrik Sign (`U+20AE`) (#1139).
+
+
 ### 7.2.1
 
  * Fix missing variants of square dots of the following characters (#1136):

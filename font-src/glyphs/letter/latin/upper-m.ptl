@@ -14,6 +14,7 @@ glyph-block Letter-Latin-Upper-M : begin
 
 	define FORM-FLAT     0
 	define FORM-HANGING  1
+	define FORM-TURN-W   2
 
 	define SLAB-NONE            0
 	define SLAB-AUTO            1
@@ -27,13 +28,23 @@ glyph-block Letter-Latin-Upper-M : begin
 		local xRightTop : df.rightSB - top * sidesSlope
 
 		local swSideBot : match form
-			[Just FORM-HANGING] : begin Stroke
-			__                  : AdviceStroke 3.5 df.div
-		local swSideTop : AdviceStroke 4 df.div
-		local halfSwMiddle : swSideTop / 2
+			[Just FORM-TURN-W]  : AdviceStroke 2.5  df.div
+			[Just FORM-HANGING] : AdviceStroke 2.5  df.div
+			__                  : AdviceStroke 2.75 df.div
+		local swSideTop : match form
+			[Just FORM-TURN-W]  : AdviceStroke 3 df.div
+			__                  : AdviceStroke 4 df.div
+		local swMiddle : AdviceStroke 4.5 df.div
 		local middleY : match form
-			[Just FORM-HANGING]  : top * 0.3 / (df.div * df.div)
-			__                   : if SLAB Stroke 0
+			[Just FORM-TURN-W]  : top * 0.45
+			[Just FORM-HANGING] : top * 0.3 / (df.div * df.div)
+			__                  : if SLAB Stroke 0
+		local kMidShift : match form
+			[Just FORM-FLAT] 0.75
+			__               0.5
+		local kMidBotStrokeShrink : match form
+			[Just FORM-FLAT] : mix 1 df.div (-0.5)
+			__               1
 
 		include : tagged 'strokeLeftBar' : dispiro
 			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
@@ -44,11 +55,11 @@ glyph-block Letter-Latin-Upper-M : begin
 			curl [mix df.rightSB xRightTop 0.2] (top * 0.2) [heading Upward]
 			straight.up.end xRightTop top [widths.heading swSideTop 0 Upward]
 		include : dispiro
-			flat (xLeftTop + halfSwMiddle) top [widths.heading swSideTop 0 Downward]
-			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
+			flat (xLeftTop + kMidShift * swSideTop * HVContrast) top [widths.lhs.heading swMiddle Downward]
+			curl (df.middle - 0.5 * swMiddle * HVContrast) middleY [widths.lhs.heading (kMidBotStrokeShrink * swMiddle) Downward]
 		include : dispiro
-			flat (xRightTop - halfSwMiddle) top [widths.heading 0 swSideTop Downward]
-			curl df.middle middleY [widths.heading (swSideTop / 2) (swSideTop / 2) Downward]
+			flat (xRightTop - kMidShift * swSideTop * HVContrast) top [widths.rhs.heading swMiddle Downward]
+			curl (df.middle + 0.5 * swMiddle * HVContrast) middleY [widths.rhs.heading (kMidBotStrokeShrink * swMiddle) Downward]
 
 		local sfT : SerifFrame top 0 xLeftTop  xRightTop
 		local sfB : SerifFrame top 0 df.leftSB df.rightSB
