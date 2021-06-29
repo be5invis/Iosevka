@@ -5,6 +5,7 @@ import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from '../../support/cu
 import [mix linreg clamp fallback] from '../../support/utils'
 import [DesignParameters] from '../../meta/aesthetics'
 import [TieMark TieGlyph] from "../../support/gr"
+import [Box] from '../../support/box'
 
 glyph-module
 
@@ -794,7 +795,6 @@ glyph-block Marks : begin
 			alsoThru.g2 0.5 0.5
 			g2.right.end rightEnd ([mix aboveMarkBot aboveMarkTop 0.5] - markHalfStroke) [heading Rightward]
 
-
 	create-glyph 'cyrlTitloAbove' 0x483 : glyph-proc
 		set-width 0
 		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
@@ -803,6 +803,20 @@ glyph-block Marks : begin
 		include : VBar (markMiddle - markExtend) aboveMarkBot (aboveMarkMid + markFine) (markFine * 2)
 		include : VBar (markMiddle + markExtend) (aboveMarkMid - markFine) aboveMarkTop (markFine * 2)
 		include : HBar (markMiddle - markExtend) (markMiddle + markExtend)aboveMarkMid (markFine * 2)
+
+	create-glyph 'zigzagAbove' 0x35B : glyph-proc
+		set-width 0
+		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkTop
+		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+
+		local ext : 0.625 * markExtend + markFine
+		local coSlope  0.2
+		local fr : new Box aboveMarkTop aboveMarkBot (markMiddle - ext) (markMiddle + ext)
+		include : HBar fr.left fr.right fr.yMid (markFine * 2)
+		include : intersection [MaskBelow fr.top] [MaskAbove (fr.yMid - markFine)]
+			ExtLineLhs 4 (markFine * 2) (fr.left + coSlope * (fr.top - fr.yMid - markFine)) fr.top (fr.left - 2 * markFine * coSlope) (fr.yMid - markFine)
+		include : intersection [MaskAbove fr.bot] [MaskBelow (fr.yMid + markFine)]
+			ExtLineLhs 4 (markFine * 2) (fr.right - coSlope * (fr.yMid - fr.bot - markFine)) fr.bot (fr.right + 2 * markFine * coSlope) (fr.yMid + markFine)
 
 	### Below marks
 	create-glyph 'blankBelow' : glyph-proc
