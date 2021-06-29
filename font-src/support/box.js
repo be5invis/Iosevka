@@ -3,7 +3,7 @@ const { mix } = require("./utils");
 class Box {
 	constructor(t, b, l, r) {
 		this.top = t;
-		this.bottom = b;
+		this.bottom = this.bot = b;
 		this.left = l;
 		this.right = r;
 		this.xMid = this.xMiddle = mix(l, r, 0.5);

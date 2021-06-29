@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 7.2.3
+
+ * Fix geometry of `y` (#1144).
+ * Make the Zero in SS13 more distinctive (#1141).
+
+
 ### 7.2.2
 
  * Fix broken geometry of Apl Functional Symbol Quad Question (`U+2370`) (#1138).
