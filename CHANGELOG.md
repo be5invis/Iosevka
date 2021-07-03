@@ -1,5 +1,15 @@
 ## Modifications since version 2.x
 
+### 7.2.4
+
+ * Turn on square-dot punctuations in these stylistic sets:
+   - `ss02` Anonymous Pro;
+   - `ss04` Menlo;
+   - `ss06` Liberation Mono;
+   - `ss13` Lucida Grande Mono;
+   - `ss17` Recursive Mono.
+
+
 ### 7.2.3
 
  * Fix geometry of `y` (#1144).
