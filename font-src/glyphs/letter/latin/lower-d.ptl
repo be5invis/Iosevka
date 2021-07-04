@@ -11,85 +11,71 @@ glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend CurlyTail
 
-	create-glyph 'd.toothedSerifless' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightShape
-		include : VBarRight RightSB 0 CAP
+	define [ToothedBody] : union
+		OBarRightShape
+		VBarRight RightSB 0 CAP
 
-	create-glyph 'd.toothedTopSerifed' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightShape
-		include : VBarRight RightSB 0 CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+	define [ToothlessCornerBody] : union
+		OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		VBarRight RightSB DToothlessRise CAP
 
-	create-glyph 'd.toothedSerifed' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightShape
-		include : VBarRight RightSB 0 CAP
-		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+	define [ToothlessCornerHBBBody] : union
+		OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
+		VBarRight RightSB 0 CAP
 
-	create-glyph 'd.tailedSerifless' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightShape
-		include : RightwardTailedBar RightSB 0 CAP
+	define [ToothlessRoundedBody] : OBarRightRoundedShape XH RightSB CAP
+	define [ToothlessRoundedHBBBody] : union
+		OBarRightRoundedShape XH RightSB CAP
+		VBarRight RightSB 0 CAP
 
-	create-glyph 'd.toothlessCornerSerifless' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
-		include : VBarRight RightSB DToothlessRise CAP
+	define [TailedBody] : union
+		OBarRightShape
+		RightwardTailedBar RightSB 0 CAP
 
-	create-glyph 'd.toothlessCornerSeriflessHBB' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
-		include : VBarRight RightSB 0 CAP
+	define [TopSerif] : tagged 'serifRT'
+		LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
 
-	create-glyph 'd.toothlessRoundedSerifless' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightRoundedShape XH RightSB CAP
+	define [BaseSerif] : tagged 'serifRB'
+		RightwardBottomSerif RightSB 0 SideJut
 
-	create-glyph 'd.toothlessRoundedSeriflessHBB' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightRoundedShape XH RightSB CAP
-		include : VBarRight RightSB 0 CAP
+	define DConfig : object
+		toothedSerifless             { ToothedBody             null     null      }
+		toothedTopSerifed            { ToothedBody             TopSerif null      }
+		toothedSerifed               { ToothedBody             TopSerif BaseSerif }
+		tailedSerifless              { TailedBody              null     null      }
+		tailedSerifed                { ToothedBody             TopSerif null      }
+		toothlessCornerSerifless     { ToothlessCornerBody     null     null      }
+		toothlessCornerSerifed       { ToothlessCornerBody     TopSerif null      }
+		toothlessCornerSeriflessHBB  { ToothlessCornerHBBBody  null     null      }
+		toothlessCornerSerifedHBB    { ToothlessCornerHBBBody  TopSerif null      }
+		toothlessRoundedSerifless    { ToothlessRoundedBody    null     null      }
+		toothlessRoundedSerifed      { ToothlessRoundedBody    TopSerif null      }
+		toothlessRoundedSeriflessHBB { ToothlessRoundedHBBBody null     null      }
+		toothlessRoundedSerifedHBB   { ToothlessRoundedHBBBody TopSerif null      }
 
-	create-glyph 'd.tailedSerifed' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightShape
-		include : RightwardTailedBar RightSB 0 CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+	foreach { suffix { Body TopSerif BottomSerif } } [Object.entries DConfig] : do
+		create-glyph "d.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Body
+			if TopSerif    : include : TopSerif
+			if BottomSerif : include : BottomSerif
 
-	create-glyph 'd.toothlessCornerSerifed' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
-		include : VBarRight RightSB DToothlessRise CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+		create-glyph "dcroat.\(suffix)" : glyph-proc
+			include [refer-glyph "d.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HOverlayBar [mix SB RightSB 0.5] [mix RightSB Width 0.7] [mix XH (CAP - [if TopSerif Stroke 0]) 0.45]
 
-	create-glyph 'd.toothlessCornerSerifedHBB' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
-		include : VBarRight RightSB 0 CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
-
-	create-glyph 'd.toothlessRoundedSerifed' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightRoundedShape XH RightSB CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
-
-	create-glyph 'd.toothlessRoundedSerifedHBB' : glyph-proc
-		include : MarkSet.b
-		include : OBarRightRoundedShape XH RightSB CAP
-		include : VBarRight RightSB 0 CAP
-		include : tagged 'serifRT' : LeftwardTopSerif (RightSB - Stroke * HVContrast) CAP SideJut
+		create-glyph "latn/de.\(suffix)" : glyph-proc
+			include [refer-glyph "d.\(suffix)"] AS_BASE ALSO_METRICS
+			local xLeft : mix RightSB SB 0.9
+			include : HBarTop xLeft (RightSB + O) CAP
+			if TopSerif : include : DownwardLeftSerif xLeft CAP : Math.min VJut (0.8 * (CAP - XH))
 
 	select-variant 'd' 'd'
+	select-variant 'dcroat' 0x111 (follow -- 'd')
+	select-variant 'latn/de' 0x18C (follow -- 'd')
 	link-reduced-variant 'd/sansSerif' 'd' MathSansSerif
 	link-reduced-variant 'd/phoneticLeft' 'd'
 	link-reduced-variant 'd/hookBottomBase' 'd'
-
-	derive-glyphs 'dcroat' 0x111 'd' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE
-		include : HBar [mix (SB + Stroke) (RightSB - Stroke) 0.5] [mix RightSB Width 0.7] [mix XH CAP 0.45] OverlayStroke
 
 	define DCurlyTailConfig : object
 		toothedSerifless  { false }
@@ -167,12 +153,6 @@ glyph-block Letter-Latin-Lower-D : begin
 		include : refer-glyph "dotAbove"
 		include : Translate (Width - HalfStroke) 0
 		include [refer-glyph src] AS_BASE
-
-	derive-glyphs 'latinde' 0x18C 'd' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE
-		include : HBarTop [mix RightSB SB 0.9] (RightSB + O) CAP
-		if SLAB : begin
-			include : DownwardLeftSerif [mix RightSB SB 0.9] CAP : Math.min VJut (0.8 * (CAP - XH))
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/d' 0x1D555 : glyph-proc
