@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 7.2.6
+
+ * Fixed shape of Bulgarian I with Breve, Yer, Yeri, De, Che and En (#1147).
+
+
 ### 7.2.5
 
  * Fix placement of overlay bar in Latin Small Letter D with Stroke (`U+0111`) (#1146).
