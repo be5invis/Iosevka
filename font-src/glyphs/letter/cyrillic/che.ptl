@@ -15,11 +15,13 @@ glyph-block Letter-Cyrillic-Che : begin
 	define BODY-STRAIGHT 0
 	define BODY-TAILED   1
 
-	define SLAB-NONE     0
-	define SLAB-ALL      1
-	define SLAB-LOWER    2
-	define SLAB-TAILED-U 3
-	define SLAB-TAILED-I 4
+	define SLAB-NONE        0
+	define SLAB-ALL         1
+	define SLAB-LOWER       2
+	define SLAB-TAILED-U    3
+	define SLAB-TAILED-I    4
+	define SLAB-ALL-BGR     5
+	define SLAB-TAILED-BGR  6
 
 	define [CyrCheShape top pyBar bodyType slabType] : glyph-proc
 		local bar : top * [fallback pyBar 0.5]
@@ -36,16 +38,21 @@ glyph-block Letter-Cyrillic-Che : begin
 		local sf : SerifFrame top 0 SB RightSB
 		include : tagged 'serifLT' : match slabType
 			[Just SLAB-ALL]        sf.lt.full
-			[Just SLAB-LOWER]      sf.lt.outer
 			[Just SLAB-TAILED-U]   sf.lt.full
+			[Just SLAB-ALL-BGR]    sf.lt.outer
+			[Just SLAB-TAILED-BGR] sf.lt.outer
+			[Just SLAB-LOWER]      sf.lt.outer
 			[Just SLAB-TAILED-I]   sf.lt.outer
 			__                   : glyph-proc
 		include : tagged 'SerifRT' : match slabType
 			[Just SLAB-ALL]        sf.rt.full
 			[Just SLAB-TAILED-U]   sf.rt.full
+			[Just SLAB-ALL-BGR]    sf.rt.inner
+			[Just SLAB-TAILED-BGR] sf.rt.inner
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
 			[Just SLAB-ALL]        sf.rb.full
+			[Just SLAB-ALL-BGR]    sf.rb.full
 			[Just SLAB-LOWER]      sf.rb.outer
 			__                   : glyph-proc
 
@@ -58,13 +65,26 @@ glyph-block Letter-Cyrillic-Che : begin
 
 	create-glyph 'cyrl/che.standard' : glyph-proc
 		include : MarkSet.e
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT : if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT
+			if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
 
 	create-glyph 'cyrl/che.tailed' : glyph-proc
 		include : MarkSet.e
-		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED
+			if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+
+	create-glyph 'cyrl/che.BGR.standard' : glyph-proc
+		include : MarkSet.e
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-STRAIGHT
+			if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL-BGR] SLAB-NONE
+
+	create-glyph 'cyrl/che.BGR.tailed' : glyph-proc
+		include : MarkSet.e
+		include : CyrCheShape XH [if SLAB 0.45 0.4] BODY-TAILED
+			if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-BGR] SLAB-NONE
 
 	select-variant 'cyrl/che' 0x447
+	select-variant 'cyrl/che.BGR' (follow -- 'cyrl/che')
 
 	create-glyph 0x4B7 : composite-proc [refer-glyph 'cyrl/che.standard'] [CyrDescender RightSB]
 	create-glyph 0x4CC : composite-proc [refer-glyph 'cyrl/che.standard'] [CyrLeftDescender (RightSB - HVContrast * Stroke)]
