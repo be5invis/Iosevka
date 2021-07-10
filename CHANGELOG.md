@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 7.2.7
+
+ * Fix incorrect shape of Proportional To (`U+221D`), Infinity (`U+221E`) and Inverted Lazy S (`U+223E`) under Italic/Oblique.
+ * Fix shape of `d` `serifed-tailed` (#1150).
+ * Make Latin Small Letter Dotless J with Stroke and Hook (`U+0284`) follow shape of `f` (#1151).
+ * Fix `cv44` application on phonetic letters (#1152).
+ * Fix shape of Combining Low Line (#1153).
+
+
 ### 7.2.6
 
  * Fixed shape of Bulgarian I with Breve, Yer, Yeri, De, Che and En (#1147).
