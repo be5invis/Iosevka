@@ -214,7 +214,2240 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 
 **Caution :**  Certain software may limit the quantity of OpenType features and drop some of them if the feature list is too long. Please validate your feature configuration to ensure that it worked in your software.
 
-![Character Variants](images/charvars.png)
+<!-- BEGIN Section-OT-Character-Variants -->
+<!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
+
+<table>
+<tr>
+<td rowspan="2"><code>cv01</code></td>
+<td><img src="images/character-variant-cv01-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv01-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv02</code></td>
+<td><img src="images/character-variant-cv02-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv02-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv03</code></td>
+<td><img src="images/character-variant-cv03-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv03-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv03-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv03-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv03-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv04</code></td>
+<td><img src="images/character-variant-cv04-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv04-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv04-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv04-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv04-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv04-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv05</code></td>
+<td><img src="images/character-variant-cv05-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv05-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv05-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv06</code></td>
+<td><img src="images/character-variant-cv06-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv06-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv06-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="6"><code>cv07</code></td>
+<td><img src="images/character-variant-cv07-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv07-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-20.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-21.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-22.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-23.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-24.png" width="32"/></td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv07-25.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-26.png" width="32"/></td>
+<td><img src="images/character-variant-cv07-27.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>25</td>
+<td>26</td>
+<td>27</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv08</code></td>
+<td><img src="images/character-variant-cv08-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv08-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv08-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv08-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv09</code></td>
+<td><img src="images/character-variant-cv09-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv09-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv09-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv10</code></td>
+<td><img src="images/character-variant-cv10-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv10-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv10-14.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv11</code></td>
+<td><img src="images/character-variant-cv11-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv11-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv11-16.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv12</code></td>
+<td><img src="images/character-variant-cv12-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv12-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv12-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv13</code></td>
+<td><img src="images/character-variant-cv13-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv13-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv14</code></td>
+<td><img src="images/character-variant-cv14-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv14-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv14-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv14-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv15</code></td>
+<td><img src="images/character-variant-cv15-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv15-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv15-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv15-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv16</code></td>
+<td><img src="images/character-variant-cv16-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv16-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv17</code></td>
+<td><img src="images/character-variant-cv17-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv17-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv18</code></td>
+<td><img src="images/character-variant-cv18-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv18-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv18-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv18-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv18-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv19</code></td>
+<td><img src="images/character-variant-cv19-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv19-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv19-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv20</code></td>
+<td><img src="images/character-variant-cv20-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv20-10.png" width="32"/></td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv21</code></td>
+<td><img src="images/character-variant-cv21-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv21-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv21-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv21-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv22</code></td>
+<td><img src="images/character-variant-cv22-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv22-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv23</code></td>
+<td><img src="images/character-variant-cv23-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv23-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv23-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv23-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv23-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv23-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv24</code></td>
+<td><img src="images/character-variant-cv24-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv24-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="6"><code>cv25</code></td>
+<td><img src="images/character-variant-cv25-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv25-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-20.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-21.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-22.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-23.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-24.png" width="32"/></td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv25-25.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-26.png" width="32"/></td>
+<td><img src="images/character-variant-cv25-27.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>25</td>
+<td>26</td>
+<td>27</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv26</code></td>
+<td><img src="images/character-variant-cv26-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv26-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv26-14.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv27</code></td>
+<td><img src="images/character-variant-cv27-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv27-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv27-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv27-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv27-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv27-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv28</code></td>
+<td><img src="images/character-variant-cv28-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv28-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv28-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv28-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv28-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv29</code></td>
+<td><img src="images/character-variant-cv29-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv29-9.png" width="32"/></td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv30</code></td>
+<td><img src="images/character-variant-cv30-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv30-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv31</code></td>
+<td><img src="images/character-variant-cv31-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv31-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv31-20.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv32</code></td>
+<td><img src="images/character-variant-cv32-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv32-10.png" width="32"/></td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv33</code></td>
+<td><img src="images/character-variant-cv33-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv33-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv33-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv33-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv33-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv34</code></td>
+<td><img src="images/character-variant-cv34-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv34-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv35</code></td>
+<td><img src="images/character-variant-cv35-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv35-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="6"><code>cv36</code></td>
+<td><img src="images/character-variant-cv36-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv36-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-20.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-21.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-22.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-23.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-24.png" width="32"/></td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv36-25.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-26.png" width="32"/></td>
+<td><img src="images/character-variant-cv36-27.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>25</td>
+<td>26</td>
+<td>27</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv37</code></td>
+<td><img src="images/character-variant-cv37-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv37-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv38</code></td>
+<td><img src="images/character-variant-cv38-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv38-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-20.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-21.png" width="32"/></td>
+<td><img src="images/character-variant-cv38-22.png" width="32"/></td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv39</code></td>
+<td><img src="images/character-variant-cv39-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv39-9.png" width="32"/></td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv40</code></td>
+<td><img src="images/character-variant-cv40-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv40-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv40-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv40-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv41</code></td>
+<td><img src="images/character-variant-cv41-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv41-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv42</code></td>
+<td><img src="images/character-variant-cv42-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv42-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv42-16.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv43</code></td>
+<td><img src="images/character-variant-cv43-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv43-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv43-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv43-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv43-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv44</code></td>
+<td><img src="images/character-variant-cv44-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv44-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv44-15.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv45</code></td>
+<td><img src="images/character-variant-cv45-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv45-9.png" width="32"/></td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td colspan="3"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv46</code></td>
+<td><img src="images/character-variant-cv46-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv46-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv46-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv46-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv46-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv46-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv47</code></td>
+<td><img src="images/character-variant-cv47-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv47-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv47-14.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv48</code></td>
+<td><img src="images/character-variant-cv48-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv48-7.png" width="32"/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv49</code></td>
+<td><img src="images/character-variant-cv49-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv49-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="6"><code>cv50</code></td>
+<td><img src="images/character-variant-cv50-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv50-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-16.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-17.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-18.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-19.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-20.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-21.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-22.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-23.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-24.png" width="32"/></td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td>24</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv50-25.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-26.png" width="32"/></td>
+<td><img src="images/character-variant-cv50-27.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>25</td>
+<td>26</td>
+<td>27</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv51</code></td>
+<td><img src="images/character-variant-cv51-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv51-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv51-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv51-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv51-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv51-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv52</code></td>
+<td><img src="images/character-variant-cv52-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv52-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv53</code></td>
+<td colspan="2"><img src="images/character-variant-cv53-1.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv53-2.png" width="64"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv54</code></td>
+<td><img src="images/character-variant-cv54-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv54-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv55</code></td>
+<td><img src="images/character-variant-cv55-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv55-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv55-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv56</code></td>
+<td><img src="images/character-variant-cv56-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv56-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv56-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv56-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv56-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv56-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv57</code></td>
+<td><img src="images/character-variant-cv57-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv57-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv57-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv57-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv58</code></td>
+<td><img src="images/character-variant-cv58-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv58-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv58-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv58-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv58-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv59</code></td>
+<td><img src="images/character-variant-cv59-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv59-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv59-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv59-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv59-5.png" width="32"/></td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv60</code></td>
+<td><img src="images/character-variant-cv60-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv60-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv60-16.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="4"><code>cv61</code></td>
+<td><img src="images/character-variant-cv61-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="images/character-variant-cv61-13.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-14.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-15.png" width="32"/></td>
+<td><img src="images/character-variant-cv61-16.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv62</code></td>
+<td><img src="images/character-variant-cv62-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv62-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv63</code></td>
+<td><img src="images/character-variant-cv63-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv63-7.png" width="32"/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv64</code></td>
+<td><img src="images/character-variant-cv64-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv64-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv64-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv64-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv65</code></td>
+<td><img src="images/character-variant-cv65-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv65-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv66</code></td>
+<td><img src="images/character-variant-cv66-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv66-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv66-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv66-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv66-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv66-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv67</code></td>
+<td><img src="images/character-variant-cv67-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv67-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv67-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv67-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv67-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv67-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv68</code></td>
+<td><img src="images/character-variant-cv68-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv68-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv69</code></td>
+<td><img src="images/character-variant-cv69-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv69-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv69-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv70</code></td>
+<td><img src="images/character-variant-cv70-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv70-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv70-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv70-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv70-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv70-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv71</code></td>
+<td><img src="images/character-variant-cv71-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv71-10.png" width="32"/></td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv72</code></td>
+<td><img src="images/character-variant-cv72-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv72-7.png" width="32"/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv73</code></td>
+<td><img src="images/character-variant-cv73-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv73-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv74</code></td>
+<td><img src="images/character-variant-cv74-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv74-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv75</code></td>
+<td><img src="images/character-variant-cv75-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv75-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv75-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv75-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv75-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv75-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv76</code></td>
+<td><img src="images/character-variant-cv76-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv76-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv77</code></td>
+<td><img src="images/character-variant-cv77-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv77-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv77-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv78</code></td>
+<td><img src="images/character-variant-cv78-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-8.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-9.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-10.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-11.png" width="32"/></td>
+<td><img src="images/character-variant-cv78-12.png" width="32"/></td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv79</code></td>
+<td><img src="images/character-variant-cv79-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv79-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv79-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv80</code></td>
+<td><img src="images/character-variant-cv80-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv80-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv80-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv81</code></td>
+<td><img src="images/character-variant-cv81-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv81-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv82</code></td>
+<td><img src="images/character-variant-cv82-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv82-8.png" width="32"/></td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv83</code></td>
+<td><img src="images/character-variant-cv83-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv83-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv83-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv84</code></td>
+<td><img src="images/character-variant-cv84-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv84-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv85</code></td>
+<td><img src="images/character-variant-cv85-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv85-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv85-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv86</code></td>
+<td colspan="2"><img src="images/character-variant-cv86-1.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv86-2.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv86-3.png" width="64"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="2">3</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv87</code></td>
+<td colspan="2"><img src="images/character-variant-cv87-1.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv87-2.png" width="64"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv88</code></td>
+<td><img src="images/character-variant-cv88-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv89</code></td>
+<td><img src="images/character-variant-cv89-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv89-7.png" width="32"/></td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv90</code></td>
+<td><img src="images/character-variant-cv90-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv90-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv90-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv91</code></td>
+<td><img src="images/character-variant-cv91-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv91-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv91-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv91-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv91-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv91-6.png" width="32"/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv92</code></td>
+<td><img src="images/character-variant-cv92-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv92-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv92-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv93</code></td>
+<td><img src="images/character-variant-cv93-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv93-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv93-3.png" width="32"/></td>
+<td><img src="images/character-variant-cv93-4.png" width="32"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv94</code></td>
+<td colspan="2"><img src="images/character-variant-cv94-1.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv94-2.png" width="64"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv95</code></td>
+<td colspan="2"><img src="images/character-variant-cv95-1.png" width="64"/></td>
+<td colspan="2"><img src="images/character-variant-cv95-2.png" width="64"/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td colspan="2">1</td>
+<td colspan="2">2</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv96</code></td>
+<td><img src="images/character-variant-cv96-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv96-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv97</code></td>
+<td><img src="images/character-variant-cv97-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv97-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv97-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv98</code></td>
+<td><img src="images/character-variant-cv98-1.png" width="32"/></td>
+<td><img src="images/character-variant-cv98-2.png" width="32"/></td>
+<td><img src="images/character-variant-cv98-3.png" width="32"/></td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td colspan="9"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>cv99</code></td>
+<td colspan="6"><img src="images/character-variant-cv99-1.png" width="192"/></td>
+<td colspan="6"><img src="images/character-variant-cv99-2.png" width="192"/></td>
+</tr>
+<tr>
+<td colspan="6">1</td>
+<td colspan="6">2</td>
+</tr>
+</table>
+
+<!-- END Section-OT-Character-Variants -->
 
 ### Ligations
 
@@ -506,849 +2739,205 @@ Subsection `variants` is used to configure character variants in the font. Prope
   The valid combinations include:
 
   - Default digit form:
-    - `digit-form = 'lining'`: Lining (default).
-    - `digit-form = 'old-style'`: Old-style.
+     <table><tr><td rowspan="2" width="348"><img src="images/character-variant-lnum.png" width="320"/></td><td><code>digit-form = 'lining'</code></td></tr><tr><td>Lining (default)</td></tr><tr><td rowspan="2" width="348"><img src="images/character-variant-onum.png" width="320"/></td><td><code>digit-form = 'old-style'</code></td></tr><tr><td>Old-style</td></tr></table>
   - Styles for `A`:
-    + `capital-a = 'straight-serifless'`, `cv01 = 1`: Standard, straight `A`, without serifs.
-    + `capital-a = 'curly-serifless'`, `cv01 = 2`: Slightly curly `A`, like Iosevka 2.x, without serifs.
-    + `capital-a = 'straight-top-serifed'`, `cv01 = 3`: Straight `A` with serif at top.
-    + `capital-a = 'curly-top-serifed'`, `cv01 = 4`: Slightly curly `A`, like Iosevka 2.x, with serif at top.
-    + `capital-a = 'straight-base-serifed'`, `cv01 = 5`: Straight `A` with serif at both top and bottom.
-    + `capital-a = 'curly-base-serifed'`, `cv01 = 6`: Slightly curly `A`, like Iosevka 2.x, with serif at both top and bottom.
-    + `capital-a = 'straight-tri-serifed'`, `cv01 = 7`: Straight `A` with serif at both top and bottom.
-    + `capital-a = 'curly-tri-serifed'`, `cv01 = 8`: Slightly curly `A`, like Iosevka 2.x, with serif at both top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-1.png" width="32"/></td><td><code>capital-a = 'straight-serifless'</code>, <code>cv01 = 1</code></td></tr><tr><td>Standard, straight <code>A</code>, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-2.png" width="32"/></td><td><code>capital-a = 'curly-serifless'</code>, <code>cv01 = 2</code></td></tr><tr><td>Slightly curly <code>A</code>, like Iosevka 2.x, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-3.png" width="32"/></td><td><code>capital-a = 'straight-top-serifed'</code>, <code>cv01 = 3</code></td></tr><tr><td>Straight <code>A</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-4.png" width="32"/></td><td><code>capital-a = 'curly-top-serifed'</code>, <code>cv01 = 4</code></td></tr><tr><td>Slightly curly <code>A</code>, like Iosevka 2.x, with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-5.png" width="32"/></td><td><code>capital-a = 'straight-base-serifed'</code>, <code>cv01 = 5</code></td></tr><tr><td>Straight <code>A</code> with serif at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-6.png" width="32"/></td><td><code>capital-a = 'curly-base-serifed'</code>, <code>cv01 = 6</code></td></tr><tr><td>Slightly curly <code>A</code>, like Iosevka 2.x, with serif at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-7.png" width="32"/></td><td><code>capital-a = 'straight-tri-serifed'</code>, <code>cv01 = 7</code></td></tr><tr><td>Straight <code>A</code> with serif at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv01-8.png" width="32"/></td><td><code>capital-a = 'curly-tri-serifed'</code>, <code>cv01 = 8</code></td></tr><tr><td>Slightly curly <code>A</code>, like Iosevka 2.x, with serif at both top and bottom</td></tr></table>
   - Styles for `B`:
-    + `capital-b = 'standard-serifless'`, `cv02 = 1`: `B` in near-symmetric proportion, without serifs.
-    + `capital-b = 'more-asymmetric-serifless'`, `cv02 = 2`: `B` in more asymmetric proportion to differentiate with `8`, without serifs.
-    + `capital-b = 'standard-unilateral-serifed'`, `cv02 = 3`: `B` in near-symmetric proportion with motion serifs at top.
-    + `capital-b = 'more-asymmetric-unilateral-serifed'`, `cv02 = 4`: `B` in more asymmetric proportion with motion serifs at top.
-    + `capital-b = 'standard-bilateral-serifed'`, `cv02 = 5`: `B` in near-symmetric proportion with motion serifs at both top and bottom.
-    + `capital-b = 'more-asymmetric-bilateral-serifed'`, `cv02 = 6`: `B` in more asymmetric proportion with motion serifs at both top and bottom.
-    + `capital-b = 'standard-interrupted-serifless'`, `cv02 = 7`: `B` in near-symmetric proportion with interupted middle bar, without serifs.
-    + `capital-b = 'more-asymmetric-interrupted-serifless'`, `cv02 = 8`: `B` in more asymmetric proportion to differentiate with `8`, with interupted middle bar, without serifs.
-    + `capital-b = 'standard-interrupted-unilateral-serifed'`, `cv02 = 9`: `B` in near-symmetric proportion with interupted middle bar and motion serifs at top.
-    + `capital-b = 'more-asymmetric-interrupted-unilateral-serifed'`, `cv02 = 10`: `B` in more asymmetric proportion with interupted middle bar and `8` with motion serifs at top.
-    + `capital-b = 'standard-interrupted-bilateral-serifed'`, `cv02 = 11`: `B` in near-symmetric proportion with interupted middle bar and motion serifs at both top and bottom.
-    + `capital-b = 'more-asymmetric-interrupted-bilateral-serifed'`, `cv02 = 12`: `B` in more asymmetric proportion with interupted middle bar and `8` with motion serifs at both top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-1.png" width="32"/></td><td><code>capital-b = 'standard-serifless'</code>, <code>cv02 = 1</code></td></tr><tr><td><code>B</code> in near-symmetric proportion, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-2.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-serifless'</code>, <code>cv02 = 2</code></td></tr><tr><td><code>B</code> in more asymmetric proportion to differentiate with <code>8</code>, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-3.png" width="32"/></td><td><code>capital-b = 'standard-unilateral-serifed'</code>, <code>cv02 = 3</code></td></tr><tr><td><code>B</code> in near-symmetric proportion with motion serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-4.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-unilateral-serifed'</code>, <code>cv02 = 4</code></td></tr><tr><td><code>B</code> in more asymmetric proportion with motion serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-5.png" width="32"/></td><td><code>capital-b = 'standard-bilateral-serifed'</code>, <code>cv02 = 5</code></td></tr><tr><td><code>B</code> in near-symmetric proportion with motion serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-6.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-bilateral-serifed'</code>, <code>cv02 = 6</code></td></tr><tr><td><code>B</code> in more asymmetric proportion with motion serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-7.png" width="32"/></td><td><code>capital-b = 'standard-interrupted-serifless'</code>, <code>cv02 = 7</code></td></tr><tr><td><code>B</code> in near-symmetric proportion with interupted middle bar, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-8.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-interrupted-serifless'</code>, <code>cv02 = 8</code></td></tr><tr><td><code>B</code> in more asymmetric proportion to differentiate with <code>8</code>, with interupted middle bar, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-9.png" width="32"/></td><td><code>capital-b = 'standard-interrupted-unilateral-serifed'</code>, <code>cv02 = 9</code></td></tr><tr><td><code>B</code> in near-symmetric proportion with interupted middle bar and motion serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-10.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-interrupted-unilateral-serifed'</code>, <code>cv02 = 10</code></td></tr><tr><td><code>B</code> in more asymmetric proportion with interupted middle bar and <code>8</code> with motion serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-11.png" width="32"/></td><td><code>capital-b = 'standard-interrupted-bilateral-serifed'</code>, <code>cv02 = 11</code></td></tr><tr><td><code>B</code> in near-symmetric proportion with interupted middle bar and motion serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv02-12.png" width="32"/></td><td><code>capital-b = 'more-asymmetric-interrupted-bilateral-serifed'</code>, <code>cv02 = 12</code></td></tr><tr><td><code>B</code> in more asymmetric proportion with interupted middle bar and <code>8</code> with motion serifs at both top and bottom</td></tr></table>
   - Styles for `C`:
-    + `capital-c = 'serifless'`, `cv03 = 1`: Serifless `C`.
-    + `capital-c = 'unilateral-serifed'`, `cv03 = 2`: `C` with serif at top.
-    + `capital-c = 'bilateral-serifed'`, `cv03 = 3`: `C` with serifs at both top and bottom.
-    + `capital-c = 'unilateral-inward-serifed'`, `cv03 = 4`: `C` with inward serif at top.
-    + `capital-c = 'bilateral-inward-serifed'`, `cv03 = 5`: `C` with inward serif at both top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv03-1.png" width="32"/></td><td><code>capital-c = 'serifless'</code>, <code>cv03 = 1</code></td></tr><tr><td>Serifless <code>C</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv03-2.png" width="32"/></td><td><code>capital-c = 'unilateral-serifed'</code>, <code>cv03 = 2</code></td></tr><tr><td><code>C</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv03-3.png" width="32"/></td><td><code>capital-c = 'bilateral-serifed'</code>, <code>cv03 = 3</code></td></tr><tr><td><code>C</code> with serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv03-4.png" width="32"/></td><td><code>capital-c = 'unilateral-inward-serifed'</code>, <code>cv03 = 4</code></td></tr><tr><td><code>C</code> with inward serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv03-5.png" width="32"/></td><td><code>capital-c = 'bilateral-inward-serifed'</code>, <code>cv03 = 5</code></td></tr><tr><td><code>C</code> with inward serif at both top and bottom</td></tr></table>
   - Styles for `D`:
-    + `capital-d = 'standard-serifless'`, `cv04 = 1`: Standard `D` without serifs.
-    + `capital-d = 'more-rounded-serifless'`, `cv04 = 2`: More rounded `D` to differentiate with `O`, without serifs.
-    + `capital-d = 'standard-unilateral-serifed'`, `cv04 = 3`: Standard `B` with serifs at top.
-    + `capital-d = 'more-rounded-unilateral-serifed'`, `cv04 = 4`: More rounded `B` to differentiate with `O` with motion serifs at top.
-    + `capital-d = 'standard-bilateral-serifed'`, `cv04 = 5`: Standard `B` with serifs at both top and bottom.
-    + `capital-d = 'more-rounded-bilateral-serifed'`, `cv04 = 6`: More rounded `B` to differentiate with `O` with serifs at both top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-1.png" width="32"/></td><td><code>capital-d = 'standard-serifless'</code>, <code>cv04 = 1</code></td></tr><tr><td>Standard <code>D</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-2.png" width="32"/></td><td><code>capital-d = 'more-rounded-serifless'</code>, <code>cv04 = 2</code></td></tr><tr><td>More rounded <code>D</code> to differentiate with <code>O</code>, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-3.png" width="32"/></td><td><code>capital-d = 'standard-unilateral-serifed'</code>, <code>cv04 = 3</code></td></tr><tr><td>Standard <code>B</code> with serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-4.png" width="32"/></td><td><code>capital-d = 'more-rounded-unilateral-serifed'</code>, <code>cv04 = 4</code></td></tr><tr><td>More rounded <code>B</code> to differentiate with <code>O</code> with motion serifs at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-5.png" width="32"/></td><td><code>capital-d = 'standard-bilateral-serifed'</code>, <code>cv04 = 5</code></td></tr><tr><td>Standard <code>B</code> with serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv04-6.png" width="32"/></td><td><code>capital-d = 'more-rounded-bilateral-serifed'</code>, <code>cv04 = 6</code></td></tr><tr><td>More rounded <code>B</code> to differentiate with <code>O</code> with serifs at both top and bottom</td></tr></table>
   - Styles for `E`:
-    + `capital-e = 'serifless'`, `cv05 = 1`: E without serifs.
-    + `capital-e = 'top-left-serifed'`, `cv05 = 2`: E with serif only at top left.
-    + `capital-e = 'serifed'`, `cv05 = 3`: E with serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv05-1.png" width="32"/></td><td><code>capital-e = 'serifless'</code>, <code>cv05 = 1</code></td></tr><tr><td>E without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv05-2.png" width="32"/></td><td><code>capital-e = 'top-left-serifed'</code>, <code>cv05 = 2</code></td></tr><tr><td>E with serif only at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv05-3.png" width="32"/></td><td><code>capital-e = 'serifed'</code>, <code>cv05 = 3</code></td></tr><tr><td>E with serifs</td></tr></table>
   - Styles for `F`:
-    + `capital-f = 'serifless'`, `cv06 = 1`: F without serifs.
-    + `capital-f = 'top-left-serifed'`, `cv06 = 2`: F with serif only at top left.
-    + `capital-f = 'serifed'`, `cv06 = 3`: F with serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv06-1.png" width="32"/></td><td><code>capital-f = 'serifless'</code>, <code>cv06 = 1</code></td></tr><tr><td>F without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv06-2.png" width="32"/></td><td><code>capital-f = 'top-left-serifed'</code>, <code>cv06 = 2</code></td></tr><tr><td>F with serif only at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv06-3.png" width="32"/></td><td><code>capital-f = 'serifed'</code>, <code>cv06 = 3</code></td></tr><tr><td>F with serifs</td></tr></table>
   - Styles for `G`:
-    + `capital-g = 'toothed-serifless-hookless'`, `cv07 = 1`: Toothed G.
-    + `capital-g = 'toothless-corner-serifless-hookless'`, `cv07 = 2`: Corner toothless G.
-    + `capital-g = 'toothless-rounded-serifless-hookless'`, `cv07 = 3`: Round toothless G.
-    + `capital-g = 'toothed-serifless-hooked'`, `cv07 = 4`: Toothed G with inward hook at terminal.
-    + `capital-g = 'toothless-corner-serifless-hooked'`, `cv07 = 5`: Corner toothless G with inward hook at terminal.
-    + `capital-g = 'toothless-rounded-serifless-hooked'`, `cv07 = 6`: Round toothless G with inward hook at terminal.
-    + `capital-g = 'toothed-serifless-capped'`, `cv07 = 7`: Toothed G with a cap terminal.
-    + `capital-g = 'toothless-corner-serifless-capped'`, `cv07 = 8`: Corner toothless G with a cap terminal.
-    + `capital-g = 'toothless-rounded-serifless-capped'`, `cv07 = 9`: Round toothless G with a cap terminal.
-    + `capital-g = 'toothed-serifed-hookless'`, `cv07 = 10`: Toothed G with top serif.
-    + `capital-g = 'toothless-corner-serifed-hookless'`, `cv07 = 11`: Corner toothless G with top serif.
-    + `capital-g = 'toothless-rounded-serifed-hookless'`, `cv07 = 12`: Round toothless G with top serif.
-    + `capital-g = 'toothed-serifed-hooked'`, `cv07 = 13`: Toothed G with inward hook at terminal and top serif.
-    + `capital-g = 'toothless-corner-serifed-hooked'`, `cv07 = 14`: Corner toothless G with inward hook at terminal and top serif.
-    + `capital-g = 'toothless-rounded-serifed-hooked'`, `cv07 = 15`: Round toothless G with inward hook at terminal and top serif.
-    + `capital-g = 'toothed-serifed-capped'`, `cv07 = 16`: Toothed G with a cap terminal and top serif.
-    + `capital-g = 'toothless-corner-serifed-capped'`, `cv07 = 17`: Corner toothless G with a cap terminal and top serif.
-    + `capital-g = 'toothless-rounded-serifed-capped'`, `cv07 = 18`: Round toothless G with a cap terminal and top serif.
-    + `capital-g = 'toothed-inward-serifed-hookless'`, `cv07 = 19`: Toothed G with inward top serif.
-    + `capital-g = 'toothless-corner-inward-serifed-hookless'`, `cv07 = 20`: Corner toothless G with inward top serif.
-    + `capital-g = 'toothless-rounded-inward-serifed-hookless'`, `cv07 = 21`: Round toothless G with inward top serif.
-    + `capital-g = 'toothed-inward-serifed-hooked'`, `cv07 = 22`: Toothed G with inward hook at terminal and inward top serif.
-    + `capital-g = 'toothless-corner-inward-serifed-hooked'`, `cv07 = 23`: Corner toothless G with inward hook at terminal and inward top serif.
-    + `capital-g = 'toothless-rounded-inward-serifed-hooked'`, `cv07 = 24`: Round toothless G with inward hook at terminal and inward top serif.
-    + `capital-g = 'toothed-inward-serifed-capped'`, `cv07 = 25`: Toothed G with a cap terminal and inward top serif.
-    + `capital-g = 'toothless-corner-inward-serifed-capped'`, `cv07 = 26`: Corner toothless G with a cap terminal and inward top serif.
-    + `capital-g = 'toothless-rounded-inward-serifed-capped'`, `cv07 = 27`: Round toothless G with a cap terminal and inward top serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-1.png" width="32"/></td><td><code>capital-g = 'toothed-serifless-hookless'</code>, <code>cv07 = 1</code></td></tr><tr><td>Toothed G</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-2.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifless-hookless'</code>, <code>cv07 = 2</code></td></tr><tr><td>Corner toothless G</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-3.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifless-hookless'</code>, <code>cv07 = 3</code></td></tr><tr><td>Round toothless G</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-4.png" width="32"/></td><td><code>capital-g = 'toothed-serifless-hooked'</code>, <code>cv07 = 4</code></td></tr><tr><td>Toothed G with inward hook at terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-5.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifless-hooked'</code>, <code>cv07 = 5</code></td></tr><tr><td>Corner toothless G with inward hook at terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-6.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifless-hooked'</code>, <code>cv07 = 6</code></td></tr><tr><td>Round toothless G with inward hook at terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-7.png" width="32"/></td><td><code>capital-g = 'toothed-serifless-capped'</code>, <code>cv07 = 7</code></td></tr><tr><td>Toothed G with a cap terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-8.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifless-capped'</code>, <code>cv07 = 8</code></td></tr><tr><td>Corner toothless G with a cap terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-9.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifless-capped'</code>, <code>cv07 = 9</code></td></tr><tr><td>Round toothless G with a cap terminal</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-10.png" width="32"/></td><td><code>capital-g = 'toothed-serifed-hookless'</code>, <code>cv07 = 10</code></td></tr><tr><td>Toothed G with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-11.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifed-hookless'</code>, <code>cv07 = 11</code></td></tr><tr><td>Corner toothless G with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-12.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifed-hookless'</code>, <code>cv07 = 12</code></td></tr><tr><td>Round toothless G with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-13.png" width="32"/></td><td><code>capital-g = 'toothed-serifed-hooked'</code>, <code>cv07 = 13</code></td></tr><tr><td>Toothed G with inward hook at terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-14.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifed-hooked'</code>, <code>cv07 = 14</code></td></tr><tr><td>Corner toothless G with inward hook at terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-15.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifed-hooked'</code>, <code>cv07 = 15</code></td></tr><tr><td>Round toothless G with inward hook at terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-16.png" width="32"/></td><td><code>capital-g = 'toothed-serifed-capped'</code>, <code>cv07 = 16</code></td></tr><tr><td>Toothed G with a cap terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-17.png" width="32"/></td><td><code>capital-g = 'toothless-corner-serifed-capped'</code>, <code>cv07 = 17</code></td></tr><tr><td>Corner toothless G with a cap terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-18.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-serifed-capped'</code>, <code>cv07 = 18</code></td></tr><tr><td>Round toothless G with a cap terminal and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-19.png" width="32"/></td><td><code>capital-g = 'toothed-inward-serifed-hookless'</code>, <code>cv07 = 19</code></td></tr><tr><td>Toothed G with inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-20.png" width="32"/></td><td><code>capital-g = 'toothless-corner-inward-serifed-hookless'</code>, <code>cv07 = 20</code></td></tr><tr><td>Corner toothless G with inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-21.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-inward-serifed-hookless'</code>, <code>cv07 = 21</code></td></tr><tr><td>Round toothless G with inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-22.png" width="32"/></td><td><code>capital-g = 'toothed-inward-serifed-hooked'</code>, <code>cv07 = 22</code></td></tr><tr><td>Toothed G with inward hook at terminal and inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-23.png" width="32"/></td><td><code>capital-g = 'toothless-corner-inward-serifed-hooked'</code>, <code>cv07 = 23</code></td></tr><tr><td>Corner toothless G with inward hook at terminal and inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-24.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-inward-serifed-hooked'</code>, <code>cv07 = 24</code></td></tr><tr><td>Round toothless G with inward hook at terminal and inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-25.png" width="32"/></td><td><code>capital-g = 'toothed-inward-serifed-capped'</code>, <code>cv07 = 25</code></td></tr><tr><td>Toothed G with a cap terminal and inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-26.png" width="32"/></td><td><code>capital-g = 'toothless-corner-inward-serifed-capped'</code>, <code>cv07 = 26</code></td></tr><tr><td>Corner toothless G with a cap terminal and inward top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv07-27.png" width="32"/></td><td><code>capital-g = 'toothless-rounded-inward-serifed-capped'</code>, <code>cv07 = 27</code></td></tr><tr><td>Round toothless G with a cap terminal and inward top serif</td></tr></table>
   - Styles for `H`:
-    + `capital-h = 'serifless'`, `cv08 = 1`: H without serifs.
-    + `capital-h = 'top-left-serifed'`, `cv08 = 2`: H with serif only at top left.
-    + `capital-h = 'top-left-bottom-right-serifed'`, `cv08 = 3`: H with serif only at top left and bottom right.
-    + `capital-h = 'serifed'`, `cv08 = 4`: H with serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv08-1.png" width="32"/></td><td><code>capital-h = 'serifless'</code>, <code>cv08 = 1</code></td></tr><tr><td>H without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv08-2.png" width="32"/></td><td><code>capital-h = 'top-left-serifed'</code>, <code>cv08 = 2</code></td></tr><tr><td>H with serif only at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv08-3.png" width="32"/></td><td><code>capital-h = 'top-left-bottom-right-serifed'</code>, <code>cv08 = 3</code></td></tr><tr><td>H with serif only at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv08-4.png" width="32"/></td><td><code>capital-h = 'serifed'</code>, <code>cv08 = 4</code></td></tr><tr><td>H with serifs</td></tr></table>
   - Styles for `I`:
-    + `capital-i = 'serifed'`, `cv09 = 1`: I with standard (long) serifs.
-    + `capital-i = 'serifless'`, `cv09 = 2`: I without serifs, like a straight bar.
-    + `capital-i = 'short-serifed'`, `cv09 = 3`: I with short serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv09-1.png" width="32"/></td><td><code>capital-i = 'serifed'</code>, <code>cv09 = 1</code></td></tr><tr><td>I with standard (long) serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv09-2.png" width="32"/></td><td><code>capital-i = 'serifless'</code>, <code>cv09 = 2</code></td></tr><tr><td>I without serifs, like a straight bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv09-3.png" width="32"/></td><td><code>capital-i = 'short-serifed'</code>, <code>cv09 = 3</code></td></tr><tr><td>I with short serifs</td></tr></table>
   - Styles for `J`:
-    + `capital-j = 'serifless'`, `cv10 = 1`: J without top serif.
-    + `capital-j = 'serifed'`, `cv10 = 2`: J with top serif at left side.
-    + `capital-j = 'serifed-both-sides'`, `cv10 = 3`: J with top serif at both sides (asymmetric).
-    + `capital-j = 'serifed-symmetric'`, `cv10 = 4`: J with top serif at both sides (symmetric).
-    + `capital-j = 'flat-hook-serifless'`, `cv10 = 5`: J with flat hook and without top serif.
-    + `capital-j = 'flat-hook-serifed'`, `cv10 = 6`: J with flat hook and top serif at left side.
-    + `capital-j = 'flat-hook-serifed-both-sides'`, `cv10 = 7`: J with flat hook and top serif at both sides (asymmetric).
-    + `capital-j = 'flat-hook-serifed-symmetric'`, `cv10 = 8`: J with flat hook and top serif at both sides (symmetric).
-    + `capital-j = 'descending-serifless'`, `cv10 = 9`: J with hook goes below descender and without serif.
-    + `capital-j = 'descending-serifed'`, `cv10 = 10`: J with hook goes below descender and top serif at left side.
-    + `capital-j = 'descending-serifed-both-sides'`, `cv10 = 11`: J with hook goes below descender and top serif at both sides (asymmetric).
-    + `capital-j = 'descending-serifed-symmetric'`, `cv10 = 12`: J with hook goes below descender and top serif at both sides (symmetric).
-    + `capital-j = 'descending-flat-hook-serifless'`, `cv10 = 13`: J with flat hook goes below descender and without serif.
-    + `capital-j = 'descending-flat-hook-serifed'`, `cv10 = 14`: J with flat hook goes below descender and top serif at left side.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-1.png" width="32"/></td><td><code>capital-j = 'serifless'</code>, <code>cv10 = 1</code></td></tr><tr><td>J without top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-2.png" width="32"/></td><td><code>capital-j = 'serifed'</code>, <code>cv10 = 2</code></td></tr><tr><td>J with top serif at left side</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-3.png" width="32"/></td><td><code>capital-j = 'serifed-both-sides'</code>, <code>cv10 = 3</code></td></tr><tr><td>J with top serif at both sides (asymmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-4.png" width="32"/></td><td><code>capital-j = 'serifed-symmetric'</code>, <code>cv10 = 4</code></td></tr><tr><td>J with top serif at both sides (symmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-5.png" width="32"/></td><td><code>capital-j = 'flat-hook-serifless'</code>, <code>cv10 = 5</code></td></tr><tr><td>J with flat hook and without top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-6.png" width="32"/></td><td><code>capital-j = 'flat-hook-serifed'</code>, <code>cv10 = 6</code></td></tr><tr><td>J with flat hook and top serif at left side</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-7.png" width="32"/></td><td><code>capital-j = 'flat-hook-serifed-both-sides'</code>, <code>cv10 = 7</code></td></tr><tr><td>J with flat hook and top serif at both sides (asymmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-8.png" width="32"/></td><td><code>capital-j = 'flat-hook-serifed-symmetric'</code>, <code>cv10 = 8</code></td></tr><tr><td>J with flat hook and top serif at both sides (symmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-9.png" width="32"/></td><td><code>capital-j = 'descending-serifless'</code>, <code>cv10 = 9</code></td></tr><tr><td>J with hook goes below descender and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-10.png" width="32"/></td><td><code>capital-j = 'descending-serifed'</code>, <code>cv10 = 10</code></td></tr><tr><td>J with hook goes below descender and top serif at left side</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-11.png" width="32"/></td><td><code>capital-j = 'descending-serifed-both-sides'</code>, <code>cv10 = 11</code></td></tr><tr><td>J with hook goes below descender and top serif at both sides (asymmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-12.png" width="32"/></td><td><code>capital-j = 'descending-serifed-symmetric'</code>, <code>cv10 = 12</code></td></tr><tr><td>J with hook goes below descender and top serif at both sides (symmetric)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-13.png" width="32"/></td><td><code>capital-j = 'descending-flat-hook-serifless'</code>, <code>cv10 = 13</code></td></tr><tr><td>J with flat hook goes below descender and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv10-14.png" width="32"/></td><td><code>capital-j = 'descending-flat-hook-serifed'</code>, <code>cv10 = 14</code></td></tr><tr><td>J with flat hook goes below descender and top serif at left side</td></tr></table>
   - Styles for `K`:
-    + `capital-k = 'straight-serifless'`, `cv11 = 1`: `K` with standard shape, without serifs.
-    + `capital-k = 'curly-serifless'`, `cv11 = 2`: Slightly curly `K`, like Iosevka 2.x, without serifs.
-    + `capital-k = 'symmetric-touching-serifless'`, `cv11 = 3`: `K` with symmetric legs disconnected to the vertical bar, without serifs.
-    + `capital-k = 'symmetric-connected-serifless'`, `cv11 = 4`: `K` with symmetric legs connected to the vertical bar, without serifs.
-    + `capital-k = 'straight-top-left-serifed'`, `cv11 = 5`: `K` with standard shape and serifs at top left.
-    + `capital-k = 'curly-top-left-serifed'`, `cv11 = 6`: Slightly curly `K`, like Iosevka 2.x, with serifs at top left.
-    + `capital-k = 'symmetric-touching-top-left-serifed'`, `cv11 = 7`: `K` with symmetric legs disconnected to the vertical bar, and serifs at top left.
-    + `capital-k = 'symmetric-connected-top-left-serifed'`, `cv11 = 8`: `K` with symmetric legs connected to the vertical bar, and serifs at top left.
-    + `capital-k = 'straight-bottom-right-serifed'`, `cv11 = 9`: `K` with standard shape and serifs at bottom right.
-    + `capital-k = 'curly-bottom-right-serifed'`, `cv11 = 10`: Slightly curly `K`, like Iosevka 2.x, with serifs at bottom right.
-    + `capital-k = 'symmetric-touching-bottom-right-serifed'`, `cv11 = 11`: `K` with symmetric legs disconnected to the vertical bar, and serifs at bottom right.
-    + `capital-k = 'symmetric-connected-bottom-right-serifed'`, `cv11 = 12`: `K` with symmetric legs connected to the vertical bar, and serifs at bottom right.
-    + `capital-k = 'straight-serifed'`, `cv11 = 13`: `K` with standard shape, and serifs.
-    + `capital-k = 'curly-serifed'`, `cv11 = 14`: Slightly curly `K`, like Iosevka 2.x, and with serifs.
-    + `capital-k = 'symmetric-touching-serifed'`, `cv11 = 15`: `K` with symmetric legs disconnected to the vertical bar, and serifs.
-    + `capital-k = 'symmetric-connected-serifed'`, `cv11 = 16`: `K` with symmetric legs connected to the vertical bar, and serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-1.png" width="32"/></td><td><code>capital-k = 'straight-serifless'</code>, <code>cv11 = 1</code></td></tr><tr><td><code>K</code> with standard shape, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-2.png" width="32"/></td><td><code>capital-k = 'curly-serifless'</code>, <code>cv11 = 2</code></td></tr><tr><td>Slightly curly <code>K</code>, like Iosevka 2.x, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-3.png" width="32"/></td><td><code>capital-k = 'symmetric-touching-serifless'</code>, <code>cv11 = 3</code></td></tr><tr><td><code>K</code> with symmetric legs disconnected to the vertical bar, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-4.png" width="32"/></td><td><code>capital-k = 'symmetric-connected-serifless'</code>, <code>cv11 = 4</code></td></tr><tr><td><code>K</code> with symmetric legs connected to the vertical bar, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-5.png" width="32"/></td><td><code>capital-k = 'straight-top-left-serifed'</code>, <code>cv11 = 5</code></td></tr><tr><td><code>K</code> with standard shape and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-6.png" width="32"/></td><td><code>capital-k = 'curly-top-left-serifed'</code>, <code>cv11 = 6</code></td></tr><tr><td>Slightly curly <code>K</code>, like Iosevka 2.x, with serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-7.png" width="32"/></td><td><code>capital-k = 'symmetric-touching-top-left-serifed'</code>, <code>cv11 = 7</code></td></tr><tr><td><code>K</code> with symmetric legs disconnected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-8.png" width="32"/></td><td><code>capital-k = 'symmetric-connected-top-left-serifed'</code>, <code>cv11 = 8</code></td></tr><tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-9.png" width="32"/></td><td><code>capital-k = 'straight-bottom-right-serifed'</code>, <code>cv11 = 9</code></td></tr><tr><td><code>K</code> with standard shape and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-10.png" width="32"/></td><td><code>capital-k = 'curly-bottom-right-serifed'</code>, <code>cv11 = 10</code></td></tr><tr><td>Slightly curly <code>K</code>, like Iosevka 2.x, with serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-11.png" width="32"/></td><td><code>capital-k = 'symmetric-touching-bottom-right-serifed'</code>, <code>cv11 = 11</code></td></tr><tr><td><code>K</code> with symmetric legs disconnected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-12.png" width="32"/></td><td><code>capital-k = 'symmetric-connected-bottom-right-serifed'</code>, <code>cv11 = 12</code></td></tr><tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-13.png" width="32"/></td><td><code>capital-k = 'straight-serifed'</code>, <code>cv11 = 13</code></td></tr><tr><td><code>K</code> with standard shape, and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-14.png" width="32"/></td><td><code>capital-k = 'curly-serifed'</code>, <code>cv11 = 14</code></td></tr><tr><td>Slightly curly <code>K</code>, like Iosevka 2.x, and with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-15.png" width="32"/></td><td><code>capital-k = 'symmetric-touching-serifed'</code>, <code>cv11 = 15</code></td></tr><tr><td><code>K</code> with symmetric legs disconnected to the vertical bar, and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv11-16.png" width="32"/></td><td><code>capital-k = 'symmetric-connected-serifed'</code>, <code>cv11 = 16</code></td></tr><tr><td><code>K</code> with symmetric legs connected to the vertical bar, and serifs</td></tr></table>
   - Styles for `L`:
-    + `capital-l = 'serifless'`, `cv12 = 1`: Serifless `L`.
-    + `capital-l = 'motion-serifed'`, `cv12 = 2`: Standard `L` with motion serif at bottom right.
-    + `capital-l = 'serifed'`, `cv12 = 3`: `L` with serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv12-1.png" width="32"/></td><td><code>capital-l = 'serifless'</code>, <code>cv12 = 1</code></td></tr><tr><td>Serifless <code>L</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv12-2.png" width="32"/></td><td><code>capital-l = 'motion-serifed'</code>, <code>cv12 = 2</code></td></tr><tr><td>Standard <code>L</code> with motion serif at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv12-3.png" width="32"/></td><td><code>capital-l = 'serifed'</code>, <code>cv12 = 3</code></td></tr><tr><td><code>L</code> with serifs</td></tr></table>
   - Styles for `M`:
-    + `capital-m = 'hanging'`, `cv13 = 1`: `M` with middle being hanging off baseline.
-    + `capital-m = 'flat-bottom'`, `cv13 = 2`: `M` with middle aligned to baseline.
-    + `capital-m = 'slanted-sides-hanging'`, `cv13 = 3`: `M` with slanted sides and middle being hanging off baseline.
-    + `capital-m = 'slanted-sides-flat-bottom'`, `cv13 = 4`: `M` with slanted sides and middle aligned to baseline.
-    + `capital-m = 'hanging-motion-serifed'`, `cv13 = 5`: `M` with middle being hanging off baseline and motion serifs.
-    + `capital-m = 'flat-bottom-motion-serifed'`, `cv13 = 6`: `M` with middle aligned to baseline and motion serifs.
-    + `capital-m = 'slanted-sides-hanging-motion-serifed'`, `cv13 = 7`: `M` with slanted sides, middle being hanging off baseline, and motion serifs.
-    + `capital-m = 'slanted-sides-flat-bottom-motion-serifed'`, `cv13 = 8`: `M` with slanted sides, middle aligned to baseline, and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-1.png" width="32"/></td><td><code>capital-m = 'hanging'</code>, <code>cv13 = 1</code></td></tr><tr><td><code>M</code> with middle being hanging off baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-2.png" width="32"/></td><td><code>capital-m = 'flat-bottom'</code>, <code>cv13 = 2</code></td></tr><tr><td><code>M</code> with middle aligned to baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-3.png" width="32"/></td><td><code>capital-m = 'slanted-sides-hanging'</code>, <code>cv13 = 3</code></td></tr><tr><td><code>M</code> with slanted sides and middle being hanging off baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-4.png" width="32"/></td><td><code>capital-m = 'slanted-sides-flat-bottom'</code>, <code>cv13 = 4</code></td></tr><tr><td><code>M</code> with slanted sides and middle aligned to baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-5.png" width="32"/></td><td><code>capital-m = 'hanging-motion-serifed'</code>, <code>cv13 = 5</code></td></tr><tr><td><code>M</code> with middle being hanging off baseline and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-6.png" width="32"/></td><td><code>capital-m = 'flat-bottom-motion-serifed'</code>, <code>cv13 = 6</code></td></tr><tr><td><code>M</code> with middle aligned to baseline and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-7.png" width="32"/></td><td><code>capital-m = 'slanted-sides-hanging-motion-serifed'</code>, <code>cv13 = 7</code></td></tr><tr><td><code>M</code> with slanted sides, middle being hanging off baseline, and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv13-8.png" width="32"/></td><td><code>capital-m = 'slanted-sides-flat-bottom-motion-serifed'</code>, <code>cv13 = 8</code></td></tr><tr><td><code>M</code> with slanted sides, middle aligned to baseline, and motion serifs</td></tr></table>
   - Styles for `N`:
-    + `capital-n = 'standard'`, `cv14 = 1`: Standard N.
-    + `capital-n = 'asymmetric'`, `cv14 = 2`: More asymmetric N, with the diagonal bar stops at middle of right stem.
-    + `capital-n = 'motion-serifed'`, `cv14 = 3`: Standard N with motion serifs.
-    + `capital-n = 'asymmetric-motion-serifed'`, `cv14 = 4`: More asymmetric N, with the diagonal bar stops at middle of right stem and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv14-1.png" width="32"/></td><td><code>capital-n = 'standard'</code>, <code>cv14 = 1</code></td></tr><tr><td>Standard N</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv14-2.png" width="32"/></td><td><code>capital-n = 'asymmetric'</code>, <code>cv14 = 2</code></td></tr><tr><td>More asymmetric N, with the diagonal bar stops at middle of right stem</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv14-3.png" width="32"/></td><td><code>capital-n = 'motion-serifed'</code>, <code>cv14 = 3</code></td></tr><tr><td>Standard N with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv14-4.png" width="32"/></td><td><code>capital-n = 'asymmetric-motion-serifed'</code>, <code>cv14 = 4</code></td></tr><tr><td>More asymmetric N, with the diagonal bar stops at middle of right stem and motion serifs</td></tr></table>
   - Styles for `P`:
-    + `capital-p = 'closed'`, `cv15 = 1`: Closed `P`.
-    + `capital-p = 'open'`, `cv15 = 2`: P with open contour at bottom.
-    + `capital-p = 'closed-motion-serifed'`, `cv15 = 3`: Closed `P` with motion serifs.
-    + `capital-p = 'open-motion-serifed'`, `cv15 = 4`: P with open contour at bottom and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv15-1.png" width="32"/></td><td><code>capital-p = 'closed'</code>, <code>cv15 = 1</code></td></tr><tr><td>Closed <code>P</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv15-2.png" width="32"/></td><td><code>capital-p = 'open'</code>, <code>cv15 = 2</code></td></tr><tr><td>P with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv15-3.png" width="32"/></td><td><code>capital-p = 'closed-motion-serifed'</code>, <code>cv15 = 3</code></td></tr><tr><td>Closed <code>P</code> with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv15-4.png" width="32"/></td><td><code>capital-p = 'open-motion-serifed'</code>, <code>cv15 = 4</code></td></tr><tr><td>P with open contour at bottom and motion serifs</td></tr></table>
   - Styles for `Q`:
-    + `capital-q = 'curly-tailed'`, `cv16 = 1`: `Q` with a curly tail.
-    + `capital-q = 'crossing-curly-tailed'`, `cv16 = 2`: `Q` with a curly tail.
-    + `capital-q = 'straight'`, `cv16 = 3`: `Q` with a straight tail like in the old versions.
-    + `capital-q = 'crossing'`, `cv16 = 4`: `Q` with a tail crossing the ring.
-    + `capital-q = 'vertical-crossing'`, `cv16 = 5`: `Q` with a vertical tail crossing the ring.
-    + `capital-q = 'horizontal-tailed'`, `cv16 = 6`: `Q` with a horizontal tail, like Univers.
-    + `capital-q = 'detached-tailed'`, `cv16 = 7`: `Q` with a oblique tail detached.
-    + `capital-q = 'detached-bend-tailed'`, `cv16 = 8`: `Q` with a bend tail detached.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-1.png" width="32"/></td><td><code>capital-q = 'curly-tailed'</code>, <code>cv16 = 1</code></td></tr><tr><td><code>Q</code> with a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-2.png" width="32"/></td><td><code>capital-q = 'crossing-curly-tailed'</code>, <code>cv16 = 2</code></td></tr><tr><td><code>Q</code> with a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-3.png" width="32"/></td><td><code>capital-q = 'straight'</code>, <code>cv16 = 3</code></td></tr><tr><td><code>Q</code> with a straight tail like in the old versions</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-4.png" width="32"/></td><td><code>capital-q = 'crossing'</code>, <code>cv16 = 4</code></td></tr><tr><td><code>Q</code> with a tail crossing the ring</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-5.png" width="32"/></td><td><code>capital-q = 'vertical-crossing'</code>, <code>cv16 = 5</code></td></tr><tr><td><code>Q</code> with a vertical tail crossing the ring</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-6.png" width="32"/></td><td><code>capital-q = 'horizontal-tailed'</code>, <code>cv16 = 6</code></td></tr><tr><td><code>Q</code> with a horizontal tail, like Univers</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-7.png" width="32"/></td><td><code>capital-q = 'detached-tailed'</code>, <code>cv16 = 7</code></td></tr><tr><td><code>Q</code> with a oblique tail detached</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv16-8.png" width="32"/></td><td><code>capital-q = 'detached-bend-tailed'</code>, <code>cv16 = 8</code></td></tr><tr><td><code>Q</code> with a bend tail detached</td></tr></table>
   - Styles for `R`:
-    + `capital-r = 'straight'`, `cv17 = 1`: Standard, straight-leg `R`.
-    + `capital-r = 'curly'`, `cv17 = 2`:  Slightly curly-legged `R`, like Iosevka 2.x.
-    + `capital-r = 'standing'`, `cv17 = 3`: `R` with near-vertical standing leg.
-    + `capital-r = 'straight-open'`, `cv17 = 4`: Standard, straight-leg `R`, with open contour at bottom.
-    + `capital-r = 'curly-open'`, `cv17 = 5`:  Slightly curly-legged `R`, like Iosevka 2.x, with open contour at bottom.
-    + `capital-r = 'standing-open'`, `cv17 = 6`: `R` with near-vertical standing leg, with open contour at bottom.
-    + `capital-r = 'straight-motion-serifed'`, `cv17 = 7`: Standard, straight-leg `R`, with motion serifs.
-    + `capital-r = 'curly-motion-serifed'`, `cv17 = 8`:  Slightly curly-legged `R`, like Iosevka 2.x, with motion serifs.
-    + `capital-r = 'standing-motino-serifed'`, `cv17 = 9`: `R` with near-vertical standing leg.
-    + `capital-r = 'straight-open-motion-serifed'`, `cv17 = 10`: Standard, straight-leg `R`, with open contour at bottom and motion serifs.
-    + `capital-r = 'curly-open-motion-serifed'`, `cv17 = 11`:  Slightly curly-legged `R`, like Iosevka 2.x, with open contour at bottom and motion serifs.
-    + `capital-r = 'standing-open-motion-serifed'`, `cv17 = 12`: `R` with near-vertical standing leg, with open contour at bottom and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-1.png" width="32"/></td><td><code>capital-r = 'straight'</code>, <code>cv17 = 1</code></td></tr><tr><td>Standard, straight-leg <code>R</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-2.png" width="32"/></td><td><code>capital-r = 'curly'</code>, <code>cv17 = 2</code></td></tr><tr><td> Slightly curly-legged <code>R</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-3.png" width="32"/></td><td><code>capital-r = 'standing'</code>, <code>cv17 = 3</code></td></tr><tr><td><code>R</code> with near-vertical standing leg</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-4.png" width="32"/></td><td><code>capital-r = 'straight-open'</code>, <code>cv17 = 4</code></td></tr><tr><td>Standard, straight-leg <code>R</code>, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-5.png" width="32"/></td><td><code>capital-r = 'curly-open'</code>, <code>cv17 = 5</code></td></tr><tr><td> Slightly curly-legged <code>R</code>, like Iosevka 2.x, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-6.png" width="32"/></td><td><code>capital-r = 'standing-open'</code>, <code>cv17 = 6</code></td></tr><tr><td><code>R</code> with near-vertical standing leg, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-7.png" width="32"/></td><td><code>capital-r = 'straight-motion-serifed'</code>, <code>cv17 = 7</code></td></tr><tr><td>Standard, straight-leg <code>R</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-8.png" width="32"/></td><td><code>capital-r = 'curly-motion-serifed'</code>, <code>cv17 = 8</code></td></tr><tr><td> Slightly curly-legged <code>R</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-9.png" width="32"/></td><td><code>capital-r = 'standing-motino-serifed'</code>, <code>cv17 = 9</code></td></tr><tr><td><code>R</code> with near-vertical standing leg</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-10.png" width="32"/></td><td><code>capital-r = 'straight-open-motion-serifed'</code>, <code>cv17 = 10</code></td></tr><tr><td>Standard, straight-leg <code>R</code>, with open contour at bottom and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-11.png" width="32"/></td><td><code>capital-r = 'curly-open-motion-serifed'</code>, <code>cv17 = 11</code></td></tr><tr><td> Slightly curly-legged <code>R</code>, like Iosevka 2.x, with open contour at bottom and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv17-12.png" width="32"/></td><td><code>capital-r = 'standing-open-motion-serifed'</code>, <code>cv17 = 12</code></td></tr><tr><td><code>R</code> with near-vertical standing leg, with open contour at bottom and motion serifs</td></tr></table>
   - Styles for `S`:
-    + `capital-s = 'serifless'`, `cv18 = 1`: Serifless `S`.
-    + `capital-s = 'unilateral-serifed'`, `cv18 = 2`: `S` with single serif at top.
-    + `capital-s = 'bilateral-serifed'`, `cv18 = 3`: `S` with serifs at both end.
-    + `capital-s = 'unilateral-inward-serifed'`, `cv18 = 4`: `S` with single inward serif at top.
-    + `capital-s = 'bilateral-inward-serifed'`, `cv18 = 5`: `S` with inward serifs at both end.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv18-1.png" width="32"/></td><td><code>capital-s = 'serifless'</code>, <code>cv18 = 1</code></td></tr><tr><td>Serifless <code>S</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv18-2.png" width="32"/></td><td><code>capital-s = 'unilateral-serifed'</code>, <code>cv18 = 2</code></td></tr><tr><td><code>S</code> with single serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv18-3.png" width="32"/></td><td><code>capital-s = 'bilateral-serifed'</code>, <code>cv18 = 3</code></td></tr><tr><td><code>S</code> with serifs at both end</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv18-4.png" width="32"/></td><td><code>capital-s = 'unilateral-inward-serifed'</code>, <code>cv18 = 4</code></td></tr><tr><td><code>S</code> with single inward serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv18-5.png" width="32"/></td><td><code>capital-s = 'bilateral-inward-serifed'</code>, <code>cv18 = 5</code></td></tr><tr><td><code>S</code> with inward serifs at both end</td></tr></table>
   - Styles for `T`:
-    + `capital-t = 'serifless'`, `cv19 = 1`: Serifless T.
-    + `capital-t = 'motion-serifed'`, `cv19 = 2`: Motion-Serifed T.
-    + `capital-t = 'serifed'`, `cv19 = 3`: Serifed T.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv19-1.png" width="32"/></td><td><code>capital-t = 'serifless'</code>, <code>cv19 = 1</code></td></tr><tr><td>Serifless T</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv19-2.png" width="32"/></td><td><code>capital-t = 'motion-serifed'</code>, <code>cv19 = 2</code></td></tr><tr><td>Motion-Serifed T</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv19-3.png" width="32"/></td><td><code>capital-t = 'serifed'</code>, <code>cv19 = 3</code></td></tr><tr><td>Serifed T</td></tr></table>
   - Styles for `U`:
-    + `capital-u = 'toothed'`, `cv20 = 1`: `U` with bottom-right tooth.
-    + `capital-u = 'toothless-corner'`, `cv20 = 2`: Toothless (corner bottom-right) `U`.
-    + `capital-u = 'toothless-rounded'`, `cv20 = 3`: Toothless (rounded) `U`.
-    + `capital-u = 'tailed'`, `cv20 = 4`: `U` with right bar and a slightly curly tail.
-    + `capital-u = 'motion-serifed'`, `cv20 = 5`: Normal `U` with right bar and motion serifs.
-    + `capital-u = 'tailed-motion-serifed'`, `cv20 = 6`: `U` with right bar, motion serifs and a slightly curly tail.
-    + `capital-u = 'toothless-corner-unilateral-motion-serifed'`, `cv20 = 7`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
-    + `capital-u = 'toothless-rounded-unilateral-motion-serifed'`, `cv20 = 8`: Toothless (rounded) `U` with motion serifs, like Museo.
-    + `capital-u = 'toothless-corner-bilateral-motion-serifed'`, `cv20 = 9`: Toothless (corner bottom-right) `U` with motion serifs, like Museo.
-    + `capital-u = 'toothless-rounded-bilateral-motion-serifed'`, `cv20 = 10`: Toothless (rounded) `U` with motion serifs, like Museo.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-1.png" width="32"/></td><td><code>capital-u = 'toothed'</code>, <code>cv20 = 1</code></td></tr><tr><td><code>U</code> with bottom-right tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-2.png" width="32"/></td><td><code>capital-u = 'toothless-corner'</code>, <code>cv20 = 2</code></td></tr><tr><td>Toothless (corner bottom-right) <code>U</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-3.png" width="32"/></td><td><code>capital-u = 'toothless-rounded'</code>, <code>cv20 = 3</code></td></tr><tr><td>Toothless (rounded) <code>U</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-4.png" width="32"/></td><td><code>capital-u = 'tailed'</code>, <code>cv20 = 4</code></td></tr><tr><td><code>U</code> with right bar and a slightly curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-5.png" width="32"/></td><td><code>capital-u = 'motion-serifed'</code>, <code>cv20 = 5</code></td></tr><tr><td>Normal <code>U</code> with right bar and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-6.png" width="32"/></td><td><code>capital-u = 'tailed-motion-serifed'</code>, <code>cv20 = 6</code></td></tr><tr><td><code>U</code> with right bar, motion serifs and a slightly curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-7.png" width="32"/></td><td><code>capital-u = 'toothless-corner-unilateral-motion-serifed'</code>, <code>cv20 = 7</code></td></tr><tr><td>Toothless (corner bottom-right) <code>U</code> with motion serifs, like Museo</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-8.png" width="32"/></td><td><code>capital-u = 'toothless-rounded-unilateral-motion-serifed'</code>, <code>cv20 = 8</code></td></tr><tr><td>Toothless (rounded) <code>U</code> with motion serifs, like Museo</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-9.png" width="32"/></td><td><code>capital-u = 'toothless-corner-bilateral-motion-serifed'</code>, <code>cv20 = 9</code></td></tr><tr><td>Toothless (corner bottom-right) <code>U</code> with motion serifs, like Museo</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv20-10.png" width="32"/></td><td><code>capital-u = 'toothless-rounded-bilateral-motion-serifed'</code>, <code>cv20 = 10</code></td></tr><tr><td>Toothless (rounded) <code>U</code> with motion serifs, like Museo</td></tr></table>
   - Styles for `V`:
-    + `capital-v = 'straight'`, `cv21 = 1`: Standard, straight `V`.
-    + `capital-v = 'curly'`, `cv21 = 2`:  Slightly curly `V`, like Iosevka 2.x.
-    + `capital-v = 'straight-motion-serifed'`, `cv21 = 3`: Standard, straight `V`, and motion serifs.
-    + `capital-v = 'curly-motion-serifed'`, `cv21 = 4`:  Slightly curly `V`, like Iosevka 2.x, and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv21-1.png" width="32"/></td><td><code>capital-v = 'straight'</code>, <code>cv21 = 1</code></td></tr><tr><td>Standard, straight <code>V</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv21-2.png" width="32"/></td><td><code>capital-v = 'curly'</code>, <code>cv21 = 2</code></td></tr><tr><td> Slightly curly <code>V</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv21-3.png" width="32"/></td><td><code>capital-v = 'straight-motion-serifed'</code>, <code>cv21 = 3</code></td></tr><tr><td>Standard, straight <code>V</code>, and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv21-4.png" width="32"/></td><td><code>capital-v = 'curly-motion-serifed'</code>, <code>cv21 = 4</code></td></tr><tr><td> Slightly curly <code>V</code>, like Iosevka 2.x, and motion serifs</td></tr></table>
   - Styles for `W`:
-    + `capital-w = 'straight'`, `cv22 = 1`: Standard, straight `W`.
-    + `capital-w = 'curly'`, `cv22 = 2`: Slightly curly `W`, like Iosevka 2.x.
-    + `capital-w = 'straight-flat-top'`, `cv22 = 3`: Standard, straight `W`, and the middle is forced to be aligned the top.
-    + `capital-w = 'straight-double-v'`, `cv22 = 4`: Straight `W` looks like double V.
-    + `capital-w = 'straight-asymmetric'`, `cv22 = 5`: Straight `W` looks asymmetric.
-    + `capital-w = 'straight-vertical-sides'`, `cv22 = 6`: Straight `W` with vertical sides.
-    + `capital-w = 'straight-motion-serifed'`, `cv22 = 7`: Standard, straight `W`, with motion serifs.
-    + `capital-w = 'curly-motion-serifed'`, `cv22 = 8`: Slightly curly `W`, like Iosevka 2.x, with motion serifs.
-    + `capital-w = 'straight-flat-top-motion-serifed'`, `cv22 = 9`: Standard, straight `W`, and the middle is forced to be aligned the top, with motion serifs.
-    + `capital-w = 'straight-double-v-motion-serifed'`, `cv22 = 10`: Straight `W` looks like double V, with motion serifs.
-    + `capital-w = 'straight-asymmetric-motion-serifed'`, `cv22 = 11`: Straight `W` looks asymmetric, with motion serifs.
-    + `capital-w = 'straight-vertical-sides-motion-serifed'`, `cv22 = 12`: Straight `W` with vertical sides and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-1.png" width="32"/></td><td><code>capital-w = 'straight'</code>, <code>cv22 = 1</code></td></tr><tr><td>Standard, straight <code>W</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-2.png" width="32"/></td><td><code>capital-w = 'curly'</code>, <code>cv22 = 2</code></td></tr><tr><td>Slightly curly <code>W</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-3.png" width="32"/></td><td><code>capital-w = 'straight-flat-top'</code>, <code>cv22 = 3</code></td></tr><tr><td>Standard, straight <code>W</code>, and the middle is forced to be aligned the top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-4.png" width="32"/></td><td><code>capital-w = 'straight-double-v'</code>, <code>cv22 = 4</code></td></tr><tr><td>Straight <code>W</code> looks like double V</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-5.png" width="32"/></td><td><code>capital-w = 'straight-asymmetric'</code>, <code>cv22 = 5</code></td></tr><tr><td>Straight <code>W</code> looks asymmetric</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-6.png" width="32"/></td><td><code>capital-w = 'straight-vertical-sides'</code>, <code>cv22 = 6</code></td></tr><tr><td>Straight <code>W</code> with vertical sides</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-7.png" width="32"/></td><td><code>capital-w = 'straight-motion-serifed'</code>, <code>cv22 = 7</code></td></tr><tr><td>Standard, straight <code>W</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-8.png" width="32"/></td><td><code>capital-w = 'curly-motion-serifed'</code>, <code>cv22 = 8</code></td></tr><tr><td>Slightly curly <code>W</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-9.png" width="32"/></td><td><code>capital-w = 'straight-flat-top-motion-serifed'</code>, <code>cv22 = 9</code></td></tr><tr><td>Standard, straight <code>W</code>, and the middle is forced to be aligned the top, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-10.png" width="32"/></td><td><code>capital-w = 'straight-double-v-motion-serifed'</code>, <code>cv22 = 10</code></td></tr><tr><td>Straight <code>W</code> looks like double V, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-11.png" width="32"/></td><td><code>capital-w = 'straight-asymmetric-motion-serifed'</code>, <code>cv22 = 11</code></td></tr><tr><td>Straight <code>W</code> looks asymmetric, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv22-12.png" width="32"/></td><td><code>capital-w = 'straight-vertical-sides-motion-serifed'</code>, <code>cv22 = 12</code></td></tr><tr><td>Straight <code>W</code> with vertical sides and motion serifs</td></tr></table>
   - Styles for `X`:
-    + `capital-x = 'straight-serifless'`, `cv23 = 1`: Serifless, straight `X`.
-    + `capital-x = 'curly-serifless'`, `cv23 = 2`: Serifless, slightly curly `X`, like Iosevka 2.x.
-    + `capital-x = 'straight-motion-serifed'`, `cv23 = 3`: Straight `X` with motion serifs.
-    + `capital-x = 'curly-motion-serifed'`, `cv23 = 4`: Slightly curly `X`, like Iosevka 2.x, with motion serifs.
-    + `capital-x = 'straight-serifed'`, `cv23 = 5`: Straight `X` with full serifs.
-    + `capital-x = 'curly-serifed'`, `cv23 = 6`: Slightly curly `X`, like Iosevka 2.x, with full serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-1.png" width="32"/></td><td><code>capital-x = 'straight-serifless'</code>, <code>cv23 = 1</code></td></tr><tr><td>Serifless, straight <code>X</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-2.png" width="32"/></td><td><code>capital-x = 'curly-serifless'</code>, <code>cv23 = 2</code></td></tr><tr><td>Serifless, slightly curly <code>X</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-3.png" width="32"/></td><td><code>capital-x = 'straight-motion-serifed'</code>, <code>cv23 = 3</code></td></tr><tr><td>Straight <code>X</code> with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-4.png" width="32"/></td><td><code>capital-x = 'curly-motion-serifed'</code>, <code>cv23 = 4</code></td></tr><tr><td>Slightly curly <code>X</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-5.png" width="32"/></td><td><code>capital-x = 'straight-serifed'</code>, <code>cv23 = 5</code></td></tr><tr><td>Straight <code>X</code> with full serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv23-6.png" width="32"/></td><td><code>capital-x = 'curly-serifed'</code>, <code>cv23 = 6</code></td></tr><tr><td>Slightly curly <code>X</code>, like Iosevka 2.x, with full serifs</td></tr></table>
   - Styles for `Y`:
-    + `capital-y = 'straight-serifless'`, `cv24 = 1`: Straight `Y` without serifs.
-    + `capital-y = 'curly-serifless'`, `cv24 = 2`: Slightly curly `Y`, like Iosevka 2.x, without serifs.
-    + `capital-y = 'straight-base-serifed'`, `cv24 = 3`: Standard, straight `Y`, with serif at bottom.
-    + `capital-y = 'curly-base-serifed'`, `cv24 = 4`: Slightly curly `Y`, like Iosevka 2.x, with serif at bottom.
-    + `capital-y = 'straight-motion-serifed'`, `cv24 = 5`: Standard, straight `Y`, with motion serifs.
-    + `capital-y = 'curly-motion-serifed'`, `cv24 = 6`: Slightly curly `Y`, like Iosevka 2.x, with motion serifs.
-    + `capital-y = 'straight-serifed'`, `cv24 = 7`: Standard, straight `Y`, with serifs.
-    + `capital-y = 'curly-serifed'`, `cv24 = 8`: Slightly curly `Y`, like Iosevka 2.x, with serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-1.png" width="32"/></td><td><code>capital-y = 'straight-serifless'</code>, <code>cv24 = 1</code></td></tr><tr><td>Straight <code>Y</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-2.png" width="32"/></td><td><code>capital-y = 'curly-serifless'</code>, <code>cv24 = 2</code></td></tr><tr><td>Slightly curly <code>Y</code>, like Iosevka 2.x, without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-3.png" width="32"/></td><td><code>capital-y = 'straight-base-serifed'</code>, <code>cv24 = 3</code></td></tr><tr><td>Standard, straight <code>Y</code>, with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-4.png" width="32"/></td><td><code>capital-y = 'curly-base-serifed'</code>, <code>cv24 = 4</code></td></tr><tr><td>Slightly curly <code>Y</code>, like Iosevka 2.x, with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-5.png" width="32"/></td><td><code>capital-y = 'straight-motion-serifed'</code>, <code>cv24 = 5</code></td></tr><tr><td>Standard, straight <code>Y</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-6.png" width="32"/></td><td><code>capital-y = 'curly-motion-serifed'</code>, <code>cv24 = 6</code></td></tr><tr><td>Slightly curly <code>Y</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-7.png" width="32"/></td><td><code>capital-y = 'straight-serifed'</code>, <code>cv24 = 7</code></td></tr><tr><td>Standard, straight <code>Y</code>, with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv24-8.png" width="32"/></td><td><code>capital-y = 'curly-serifed'</code>, <code>cv24 = 8</code></td></tr><tr><td>Slightly curly <code>Y</code>, like Iosevka 2.x, with serifs</td></tr></table>
   - Styles for `Z`:
-    + `capital-z = 'straight-serifless'`, `cv25 = 1`: Straight `Z` without serifs.
-    + `capital-z = 'straight-serifless-with-crossbar'`, `cv25 = 2`: Straight `Z` with a diagonal crossbar, and without serifs.
-    + `capital-z = 'straight-serifless-with-horizontal-crossbar'`, `cv25 = 3`: Straight `Z` with a horizontal crossbar, and without serifs.
-    + `capital-z = 'curly-serifless'`, `cv25 = 4`: Curly `Z` without serifs.
-    + `capital-z = 'curly-serifless-with-crossbar'`, `cv25 = 5`: Curly `Z` with a diagonal crossbar, and without serifs.
-    + `capital-z = 'curly-serifless-with-horizontal-crossbar'`, `cv25 = 6`: Curly `Z` with a horizontal crossbar, and without serifs.
-    + `capital-z = 'straight-serifed'`, `cv25 = 7`: Straight `Z` with top and bottom serifs.
-    + `capital-z = 'straight-serifed-with-crossbar'`, `cv25 = 8`: Straight `Z` with a diagonal crossbar and serifs.
-    + `capital-z = 'straight-serifed-with-horizontal-crossbar'`, `cv25 = 9`: Straight `Z` with a horizontal crossbar and serifs.
-    + `capital-z = 'curly-serifed'`, `cv25 = 10`: Curly `Z` woth top and bottom serifs.
-    + `capital-z = 'curly-serifed-with-crossbar'`, `cv25 = 11`: Curly `Z` with a diagonal crossbar and serifs.
-    + `capital-z = 'curly-serifed-with-horizontal-crossbar'`, `cv25 = 12`: Curly `Z` with a horizontal crossbar and serifs.
-    + `capital-z = 'straight-bottom-serifed'`, `cv25 = 13`: Standard `Z` with serif at bottom.
-    + `capital-z = 'straight-bottom-serifed-with-crossbar'`, `cv25 = 14`: Standard `Z` with a diagonal crossbar and serif at bottom.
-    + `capital-z = 'straight-bottom-serifed-with-horizontal-crossbar'`, `cv25 = 15`: Standard `Z` with a horizontal crossbar and serif at bottom.
-    + `capital-z = 'curly-bottom-serifed-with-crossbar'`, `cv25 = 16`: Curly `Z` with serif at bottom.
-    + `capital-z = 'curly-bottom-serifed-with-horizontal-crossbar'`, `cv25 = 17`: Curly `Z` with a diagonal crossbar and serif at bottom.
-    + `capital-z = 'curly-bottom-serifed'`, `cv25 = 18`: Curly `Z` with a horizontal crossbar and serif at bottom.
-    + `capital-z = 'straight-top-serifed'`, `cv25 = 19`: Standard `Z` with serif at top.
-    + `capital-z = 'straight-top-serifed-with-crossbar'`, `cv25 = 20`: Standard `Z` with a diagonal crossbar and serif at top.
-    + `capital-z = 'straight-top-serifed-with-horizontal-crossbar'`, `cv25 = 21`: Standard `Z` with a horizontal crossbar and serif at top.
-    + `capital-z = 'curly-top-serifed'`, `cv25 = 22`: Curly `Z` with serif at top.
-    + `capital-z = 'curly-top-serifed-with-crossbar'`, `cv25 = 23`: Curly `Z` with a diagonal crossbar and serif at top.
-    + `capital-z = 'curly-top-serifed-with-horizontal-crossbar'`, `cv25 = 24`: Curly `Z` with a horizontal crossbar and serif at top.
-    + `capital-z = 'cursive'`, `cv25 = 25`: Cursive `Z`.
-    + `capital-z = 'cursive-with-crossbar'`, `cv25 = 26`: Cursive `Z` with a diagonal cross bar.
-    + `capital-z = 'cursive-with-horizontal-crossbar'`, `cv25 = 27`: Cursive `Z` with a horizontal cross bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-1.png" width="32"/></td><td><code>capital-z = 'straight-serifless'</code>, <code>cv25 = 1</code></td></tr><tr><td>Straight <code>Z</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-2.png" width="32"/></td><td><code>capital-z = 'straight-serifless-with-crossbar'</code>, <code>cv25 = 2</code></td></tr><tr><td>Straight <code>Z</code> with a diagonal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-3.png" width="32"/></td><td><code>capital-z = 'straight-serifless-with-horizontal-crossbar'</code>, <code>cv25 = 3</code></td></tr><tr><td>Straight <code>Z</code> with a horizontal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-4.png" width="32"/></td><td><code>capital-z = 'curly-serifless'</code>, <code>cv25 = 4</code></td></tr><tr><td>Curly <code>Z</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-5.png" width="32"/></td><td><code>capital-z = 'curly-serifless-with-crossbar'</code>, <code>cv25 = 5</code></td></tr><tr><td>Curly <code>Z</code> with a diagonal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-6.png" width="32"/></td><td><code>capital-z = 'curly-serifless-with-horizontal-crossbar'</code>, <code>cv25 = 6</code></td></tr><tr><td>Curly <code>Z</code> with a horizontal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-7.png" width="32"/></td><td><code>capital-z = 'straight-serifed'</code>, <code>cv25 = 7</code></td></tr><tr><td>Straight <code>Z</code> with top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-8.png" width="32"/></td><td><code>capital-z = 'straight-serifed-with-crossbar'</code>, <code>cv25 = 8</code></td></tr><tr><td>Straight <code>Z</code> with a diagonal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-9.png" width="32"/></td><td><code>capital-z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 9</code></td></tr><tr><td>Straight <code>Z</code> with a horizontal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-10.png" width="32"/></td><td><code>capital-z = 'curly-serifed'</code>, <code>cv25 = 10</code></td></tr><tr><td>Curly <code>Z</code> woth top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-11.png" width="32"/></td><td><code>capital-z = 'curly-serifed-with-crossbar'</code>, <code>cv25 = 11</code></td></tr><tr><td>Curly <code>Z</code> with a diagonal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-12.png" width="32"/></td><td><code>capital-z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 12</code></td></tr><tr><td>Curly <code>Z</code> with a horizontal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-13.png" width="32"/></td><td><code>capital-z = 'straight-bottom-serifed'</code>, <code>cv25 = 13</code></td></tr><tr><td>Standard <code>Z</code> with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-14.png" width="32"/></td><td><code>capital-z = 'straight-bottom-serifed-with-crossbar'</code>, <code>cv25 = 14</code></td></tr><tr><td>Standard <code>Z</code> with a diagonal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-15.png" width="32"/></td><td><code>capital-z = 'straight-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 15</code></td></tr><tr><td>Standard <code>Z</code> with a horizontal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-16.png" width="32"/></td><td><code>capital-z = 'curly-bottom-serifed-with-crossbar'</code>, <code>cv25 = 16</code></td></tr><tr><td>Curly <code>Z</code> with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-17.png" width="32"/></td><td><code>capital-z = 'curly-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 17</code></td></tr><tr><td>Curly <code>Z</code> with a diagonal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-18.png" width="32"/></td><td><code>capital-z = 'curly-bottom-serifed'</code>, <code>cv25 = 18</code></td></tr><tr><td>Curly <code>Z</code> with a horizontal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-19.png" width="32"/></td><td><code>capital-z = 'straight-top-serifed'</code>, <code>cv25 = 19</code></td></tr><tr><td>Standard <code>Z</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-20.png" width="32"/></td><td><code>capital-z = 'straight-top-serifed-with-crossbar'</code>, <code>cv25 = 20</code></td></tr><tr><td>Standard <code>Z</code> with a diagonal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-21.png" width="32"/></td><td><code>capital-z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 21</code></td></tr><tr><td>Standard <code>Z</code> with a horizontal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-22.png" width="32"/></td><td><code>capital-z = 'curly-top-serifed'</code>, <code>cv25 = 22</code></td></tr><tr><td>Curly <code>Z</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-23.png" width="32"/></td><td><code>capital-z = 'curly-top-serifed-with-crossbar'</code>, <code>cv25 = 23</code></td></tr><tr><td>Curly <code>Z</code> with a diagonal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-24.png" width="32"/></td><td><code>capital-z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv25 = 24</code></td></tr><tr><td>Curly <code>Z</code> with a horizontal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-25.png" width="32"/></td><td><code>capital-z = 'cursive'</code>, <code>cv25 = 25</code></td></tr><tr><td>Cursive <code>Z</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-26.png" width="32"/></td><td><code>capital-z = 'cursive-with-crossbar'</code>, <code>cv25 = 26</code></td></tr><tr><td>Cursive <code>Z</code> with a diagonal cross bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv25-27.png" width="32"/></td><td><code>capital-z = 'cursive-with-horizontal-crossbar'</code>, <code>cv25 = 27</code></td></tr><tr><td>Cursive <code>Z</code> with a horizontal cross bar</td></tr></table>
   - Styles for `a`:
-    + `a = 'double-storey-serifless'`, `cv26 = 1`: Double-storey `a` without serifs.
-    + `a = 'double-storey-tailed'`, `cv26 = 2`: Double-storey `a` with curly tail.
-    + `a = 'double-storey-toothless-corner'`, `cv26 = 3`: Toothless (cornered bottom-right) double-storey `a`.
-    + `a = 'double-storey-toothless-rounded'`, `cv26 = 4`: Toothless (rounded bottom-right) double-storey `a`.
-    + `a = 'double-storey-serifed'`, `cv26 = 5`: Double-storey `a` with serif at bottom right.
-    + `a = 'single-storey-serifless'`, `cv26 = 6`: Single-storey `a` without serifs.
-    + `a = 'single-storey-earless-corner-serifless'`, `cv26 = 7`: Earless (cornered top-right) single-storey `a` without serifs.
-    + `a = 'single-storey-earless-rounded-serifless'`, `cv26 = 8`: Earless (rounded top-right) single-storey `a` without serifs.
-    + `a = 'single-storey-tailed'`, `cv26 = 9`: Single-storey `a` with curly tail.
-    + `a = 'single-storey-earless-corner-tailed'`, `cv26 = 10`: Earless (cornered top-right) single-storey `a` with curly tail.
-    + `a = 'single-storey-earless-rounded-tailed'`, `cv26 = 11`: Earless (rounded top-right) single-storey `a` with curly tail.
-    + `a = 'single-storey-serifed'`, `cv26 = 12`: Single-storey `a` with serif at bottom right.
-    + `a = 'single-storey-earless-corner-serifed'`, `cv26 = 13`: Earless (cornered top-right) single-storey `a` with serif at bottom right.
-    + `a = 'single-storey-earless-rounded-serifed'`, `cv26 = 14`: Earless (rounded top-right) single-storey `a` with serif at bottom right.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-1.png" width="32"/></td><td><code>a = 'double-storey-serifless'</code>, <code>cv26 = 1</code></td></tr><tr><td>Double-storey <code>a</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-2.png" width="32"/></td><td><code>a = 'double-storey-tailed'</code>, <code>cv26 = 2</code></td></tr><tr><td>Double-storey <code>a</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-3.png" width="32"/></td><td><code>a = 'double-storey-toothless-corner'</code>, <code>cv26 = 3</code></td></tr><tr><td>Toothless (cornered bottom-right) double-storey <code>a</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-4.png" width="32"/></td><td><code>a = 'double-storey-toothless-rounded'</code>, <code>cv26 = 4</code></td></tr><tr><td>Toothless (rounded bottom-right) double-storey <code>a</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-5.png" width="32"/></td><td><code>a = 'double-storey-serifed'</code>, <code>cv26 = 5</code></td></tr><tr><td>Double-storey <code>a</code> with serif at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-6.png" width="32"/></td><td><code>a = 'single-storey-serifless'</code>, <code>cv26 = 6</code></td></tr><tr><td>Single-storey <code>a</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-7.png" width="32"/></td><td><code>a = 'single-storey-earless-corner-serifless'</code>, <code>cv26 = 7</code></td></tr><tr><td>Earless (cornered top-right) single-storey <code>a</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-8.png" width="32"/></td><td><code>a = 'single-storey-earless-rounded-serifless'</code>, <code>cv26 = 8</code></td></tr><tr><td>Earless (rounded top-right) single-storey <code>a</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-9.png" width="32"/></td><td><code>a = 'single-storey-tailed'</code>, <code>cv26 = 9</code></td></tr><tr><td>Single-storey <code>a</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-10.png" width="32"/></td><td><code>a = 'single-storey-earless-corner-tailed'</code>, <code>cv26 = 10</code></td></tr><tr><td>Earless (cornered top-right) single-storey <code>a</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-11.png" width="32"/></td><td><code>a = 'single-storey-earless-rounded-tailed'</code>, <code>cv26 = 11</code></td></tr><tr><td>Earless (rounded top-right) single-storey <code>a</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-12.png" width="32"/></td><td><code>a = 'single-storey-serifed'</code>, <code>cv26 = 12</code></td></tr><tr><td>Single-storey <code>a</code> with serif at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-13.png" width="32"/></td><td><code>a = 'single-storey-earless-corner-serifed'</code>, <code>cv26 = 13</code></td></tr><tr><td>Earless (cornered top-right) single-storey <code>a</code> with serif at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv26-14.png" width="32"/></td><td><code>a = 'single-storey-earless-rounded-serifed'</code>, <code>cv26 = 14</code></td></tr><tr><td>Earless (rounded top-right) single-storey <code>a</code> with serif at bottom right</td></tr></table>
   - Styles for `b`:
-    + `b = 'toothed'`, `cv27 = 1`: `b` with bottom-left tooth.
-    + `b = 'toothless-corner'`, `cv27 = 2`: `b` without bottom-left tooth, with a corner transition.
-    + `b = 'toothless-rounded'`, `cv27 = 3`: `b` without bottom-left tooth, with a rounded transition.
-    + `b = 'toothed-motion-serifed'`, `cv27 = 4`: `b` with motion serif, and with bottom-left tooth.
-    + `b = 'toothless-corner-motion-serifed'`, `cv27 = 5`: `b` with motion serif, and without bottom-left tooth, with a corner transition.
-    + `b = 'toothless-rounded-motion-serifed'`, `cv27 = 6`: `b` with motion serif, and without bottom-left tooth, with a rounded transition.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-1.png" width="32"/></td><td><code>b = 'toothed'</code>, <code>cv27 = 1</code></td></tr><tr><td><code>b</code> with bottom-left tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-2.png" width="32"/></td><td><code>b = 'toothless-corner'</code>, <code>cv27 = 2</code></td></tr><tr><td><code>b</code> without bottom-left tooth, with a corner transition</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-3.png" width="32"/></td><td><code>b = 'toothless-rounded'</code>, <code>cv27 = 3</code></td></tr><tr><td><code>b</code> without bottom-left tooth, with a rounded transition</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-4.png" width="32"/></td><td><code>b = 'toothed-motion-serifed'</code>, <code>cv27 = 4</code></td></tr><tr><td><code>b</code> with motion serif, and with bottom-left tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-5.png" width="32"/></td><td><code>b = 'toothless-corner-motion-serifed'</code>, <code>cv27 = 5</code></td></tr><tr><td><code>b</code> with motion serif, and without bottom-left tooth, with a corner transition</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv27-6.png" width="32"/></td><td><code>b = 'toothless-rounded-motion-serifed'</code>, <code>cv27 = 6</code></td></tr><tr><td><code>b</code> with motion serif, and without bottom-left tooth, with a rounded transition</td></tr></table>
   - Styles for `c`:
-    + `c = 'serifless'`, `cv28 = 1`: Serifless `c`.
-    + `c = 'unilateral-serifed'`, `cv28 = 2`: `c` with serif at top.
-    + `c = 'bilateral-serifed'`, `cv28 = 3`: `c` with serifs at both top and bottom.
-    + `c = 'unilateral-inward-serifed'`, `cv28 = 4`: `c` with inward serif at top.
-    + `c = 'bilateral-inward-serifed'`, `cv28 = 5`: `c` with inward serif at both top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv28-1.png" width="32"/></td><td><code>c = 'serifless'</code>, <code>cv28 = 1</code></td></tr><tr><td>Serifless <code>c</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv28-2.png" width="32"/></td><td><code>c = 'unilateral-serifed'</code>, <code>cv28 = 2</code></td></tr><tr><td><code>c</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv28-3.png" width="32"/></td><td><code>c = 'bilateral-serifed'</code>, <code>cv28 = 3</code></td></tr><tr><td><code>c</code> with serifs at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv28-4.png" width="32"/></td><td><code>c = 'unilateral-inward-serifed'</code>, <code>cv28 = 4</code></td></tr><tr><td><code>c</code> with inward serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv28-5.png" width="32"/></td><td><code>c = 'bilateral-inward-serifed'</code>, <code>cv28 = 5</code></td></tr><tr><td><code>c</code> with inward serif at both top and bottom</td></tr></table>
   - Styles for `d`:
-    + `d = 'toothed-serifless'`, `cv29 = 1`: `d` with bottom-right tooth, and without serifs.
-    + `d = 'toothless-corner-serifless'`, `cv29 = 2`: `d` without bottom-right tooth, with a corner transition, and without serif.
-    + `d = 'toothless-rounded-serifless'`, `cv29 = 3`: `d` without bottom-right tooth, with a rounded transition, and without serif.
-    + `d = 'tailed-serifless'`, `cv29 = 4`: `d` with a bottom-right tail, and without serif.
-    + `d = 'toothed-top-serifed'`, `cv29 = 5`: `d` with bottom-right tooth and top serif.
-    + `d = 'toothed-serifed'`, `cv29 = 6`: `d` with serifs.
-    + `d = 'toothless-corner-serifed'`, `cv29 = 7`: `d` without bottom-right tooth, with a corner transition and top serif.
-    + `d = 'toothless-rounded-serifed'`, `cv29 = 8`: `d` without bottom-right tooth, with a rounded transition and top serif.
-    + `d = 'tailed-serifed'`, `cv29 = 9`: `d` with a bottom-right tail and top serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-1.png" width="32"/></td><td><code>d = 'toothed-serifless'</code>, <code>cv29 = 1</code></td></tr><tr><td><code>d</code> with bottom-right tooth, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-2.png" width="32"/></td><td><code>d = 'toothless-corner-serifless'</code>, <code>cv29 = 2</code></td></tr><tr><td><code>d</code> without bottom-right tooth, with a corner transition, and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-3.png" width="32"/></td><td><code>d = 'toothless-rounded-serifless'</code>, <code>cv29 = 3</code></td></tr><tr><td><code>d</code> without bottom-right tooth, with a rounded transition, and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-4.png" width="32"/></td><td><code>d = 'tailed-serifless'</code>, <code>cv29 = 4</code></td></tr><tr><td><code>d</code> with a bottom-right tail, and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-5.png" width="32"/></td><td><code>d = 'toothed-top-serifed'</code>, <code>cv29 = 5</code></td></tr><tr><td><code>d</code> with bottom-right tooth and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-6.png" width="32"/></td><td><code>d = 'toothed-serifed'</code>, <code>cv29 = 6</code></td></tr><tr><td><code>d</code> with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-7.png" width="32"/></td><td><code>d = 'toothless-corner-serifed'</code>, <code>cv29 = 7</code></td></tr><tr><td><code>d</code> without bottom-right tooth, with a corner transition and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-8.png" width="32"/></td><td><code>d = 'toothless-rounded-serifed'</code>, <code>cv29 = 8</code></td></tr><tr><td><code>d</code> without bottom-right tooth, with a rounded transition and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv29-9.png" width="32"/></td><td><code>d = 'tailed-serifed'</code>, <code>cv29 = 9</code></td></tr><tr><td><code>d</code> with a bottom-right tail and top serif</td></tr></table>
   - Styles for `e`:
-    + `e = 'flat-crossbar'`, `cv30 = 1`: `e` with flat crossbar.
-    + `e = 'rounded'`, `cv30 = 2`: `e` with more rounded shape.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv30-1.png" width="32"/></td><td><code>e = 'flat-crossbar'</code>, <code>cv30 = 1</code></td></tr><tr><td><code>e</code> with flat crossbar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv30-2.png" width="32"/></td><td><code>e = 'rounded'</code>, <code>cv30 = 2</code></td></tr><tr><td><code>e</code> with more rounded shape</td></tr></table>
   - Styles for `f`:
-    + `f = 'serifless'`, `cv31 = 1`: `f` without bottom serif, hook or exension.
-    + `f = 'serifed'`, `cv31 = 2`: `f` with bottom serif.
-    + `f = 'tailed'`, `cv31 = 3`: `f` with bottom hook.
-    + `f = 'extended'`, `cv31 = 4`: `f` with bar extended to descender.
-    + `f = 'diagonal-tailed'`, `cv31 = 5`: `f` with bottom diagonal tail.
-    + `f = 'serifless-crossbar-at-x-height'`, `cv31 = 6`: `f` without bottom serif, hook or exension; crossbar is placed right at X-height.
-    + `f = 'serifed-crossbar-at-x-height'`, `cv31 = 7`: `f` with bottom serif; crossbar is placed right at X-height.
-    + `f = 'tailed-crossbar-at-x-height'`, `cv31 = 8`: `f` with bottom hook; crossbar is placed right at X-height.
-    + `f = 'extended-crossbar-at-x-height'`, `cv31 = 9`: `f` with bar extended to descender; crossbar is placed right at X-height.
-    + `f = 'diagonal-tailed-crossbar-at-x-height'`, `cv31 = 10`: `f` with bottom diagonal tail; crossbar is placed right at X-height.
-    + `f = 'flat-hook'`, `cv31 = 11`: `f` with flat top hook, without bottom serif, hook or exension.
-    + `f = 'flat-hook-serifed'`, `cv31 = 12`: `f` with flat top hook and bottom serif.
-    + `f = 'flat-hook-tailed'`, `cv31 = 13`: `f` with flat top hook and bottom hook.
-    + `f = 'flat-hook-extended'`, `cv31 = 14`: `f` with flat top hook and bar extended to descender.
-    + `f = 'flat-hook-diagonal-tailed'`, `cv31 = 15`: `f` with falt hook and bottom diagonal tail.
-    + `f = 'flat-hook-crossbar-at-x-height'`, `cv31 = 16`: `f` with flat top hook, without bottom serif, hook or exension; crossbar is placed right at X-height.
-    + `f = 'flat-hook-serifed-crossbar-at-x-height'`, `cv31 = 17`: `f` with flat top hook, bottom serif; crossbar is placed right at X-height.
-    + `f = 'flat-hook-tailed-crossbar-at-x-height'`, `cv31 = 18`: `f` with flat top hook, bottom hook; crossbar is placed right at X-height.
-    + `f = 'flat-hook-extended-crossbar-at-x-height'`, `cv31 = 19`: `f` with flat top hook, bar extended to descender; crossbar is placed right at X-height.
-    + `f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'`, `cv31 = 20`: `f` with falt hook and bottom diagonal tail; crossbar is placed right at X-height.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-1.png" width="32"/></td><td><code>f = 'serifless'</code>, <code>cv31 = 1</code></td></tr><tr><td><code>f</code> without bottom serif, hook or exension</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-2.png" width="32"/></td><td><code>f = 'serifed'</code>, <code>cv31 = 2</code></td></tr><tr><td><code>f</code> with bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-3.png" width="32"/></td><td><code>f = 'tailed'</code>, <code>cv31 = 3</code></td></tr><tr><td><code>f</code> with bottom hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-4.png" width="32"/></td><td><code>f = 'extended'</code>, <code>cv31 = 4</code></td></tr><tr><td><code>f</code> with bar extended to descender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-5.png" width="32"/></td><td><code>f = 'diagonal-tailed'</code>, <code>cv31 = 5</code></td></tr><tr><td><code>f</code> with bottom diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-6.png" width="32"/></td><td><code>f = 'serifless-crossbar-at-x-height'</code>, <code>cv31 = 6</code></td></tr><tr><td><code>f</code> without bottom serif, hook or exension; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-7.png" width="32"/></td><td><code>f = 'serifed-crossbar-at-x-height'</code>, <code>cv31 = 7</code></td></tr><tr><td><code>f</code> with bottom serif; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-8.png" width="32"/></td><td><code>f = 'tailed-crossbar-at-x-height'</code>, <code>cv31 = 8</code></td></tr><tr><td><code>f</code> with bottom hook; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-9.png" width="32"/></td><td><code>f = 'extended-crossbar-at-x-height'</code>, <code>cv31 = 9</code></td></tr><tr><td><code>f</code> with bar extended to descender; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-10.png" width="32"/></td><td><code>f = 'diagonal-tailed-crossbar-at-x-height'</code>, <code>cv31 = 10</code></td></tr><tr><td><code>f</code> with bottom diagonal tail; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-11.png" width="32"/></td><td><code>f = 'flat-hook'</code>, <code>cv31 = 11</code></td></tr><tr><td><code>f</code> with flat top hook, without bottom serif, hook or exension</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-12.png" width="32"/></td><td><code>f = 'flat-hook-serifed'</code>, <code>cv31 = 12</code></td></tr><tr><td><code>f</code> with flat top hook and bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-13.png" width="32"/></td><td><code>f = 'flat-hook-tailed'</code>, <code>cv31 = 13</code></td></tr><tr><td><code>f</code> with flat top hook and bottom hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-14.png" width="32"/></td><td><code>f = 'flat-hook-extended'</code>, <code>cv31 = 14</code></td></tr><tr><td><code>f</code> with flat top hook and bar extended to descender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-15.png" width="32"/></td><td><code>f = 'flat-hook-diagonal-tailed'</code>, <code>cv31 = 15</code></td></tr><tr><td><code>f</code> with falt hook and bottom diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-16.png" width="32"/></td><td><code>f = 'flat-hook-crossbar-at-x-height'</code>, <code>cv31 = 16</code></td></tr><tr><td><code>f</code> with flat top hook, without bottom serif, hook or exension; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-17.png" width="32"/></td><td><code>f = 'flat-hook-serifed-crossbar-at-x-height'</code>, <code>cv31 = 17</code></td></tr><tr><td><code>f</code> with flat top hook, bottom serif; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-18.png" width="32"/></td><td><code>f = 'flat-hook-tailed-crossbar-at-x-height'</code>, <code>cv31 = 18</code></td></tr><tr><td><code>f</code> with flat top hook, bottom hook; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-19.png" width="32"/></td><td><code>f = 'flat-hook-extended-crossbar-at-x-height'</code>, <code>cv31 = 19</code></td></tr><tr><td><code>f</code> with flat top hook, bar extended to descender; crossbar is placed right at X-height</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv31-20.png" width="32"/></td><td><code>f = 'flat-hook-diagonal-tailed-crossbar-at-x-height'</code>, <code>cv31 = 20</code></td></tr><tr><td><code>f</code> with falt hook and bottom diagonal tail; crossbar is placed right at X-height</td></tr></table>
   - Styles for `g`:
-    + `g = 'double-storey'`, `cv32 = 1`: Double-storey `g`.
-    + `g = 'double-storey-open'`, `cv32 = 2`: Open Double-storey `g`, like Trebuchet MS or Fira Code.
-    + `g = 'single-storey-serifless'`, `cv32 = 3`: Single-storey `g` without serifs.
-    + `g = 'single-storey-serifed'`, `cv32 = 4`: Single-storey `g` with serif at top right.
-    + `g = 'earless-corner'`, `cv32 = 5`: Earless (cornered top-right) single-storey `g`.
-    + `g = 'earless-rounded'`, `cv32 = 6`: Earless (rounded top-right) single-storey `g`.
-    + `g = 'single-storey-flat-hook-serifless'`, `cv32 = 7`: Single-storey `g` with flat terminal hook and without serifs.
-    + `g = 'single-storey-flat-hook-serifed'`, `cv32 = 8`: Single-storey `g` with top-right serif and flat terminal hook.
-    + `g = 'single-storey-earless-corner-flat-hook'`, `cv32 = 9`: Earless (cornered top-right) single-storey `g` with flat terminal hook.
-    + `g = 'single-storey-earless-rounded-flat-hook'`, `cv32 = 10`: Earless (rounded top-right) single-storey `g` with flat terminal hook.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-1.png" width="32"/></td><td><code>g = 'double-storey'</code>, <code>cv32 = 1</code></td></tr><tr><td>Double-storey <code>g</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-2.png" width="32"/></td><td><code>g = 'double-storey-open'</code>, <code>cv32 = 2</code></td></tr><tr><td>Open Double-storey <code>g</code>, like Trebuchet MS or Fira Code</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-3.png" width="32"/></td><td><code>g = 'single-storey-serifless'</code>, <code>cv32 = 3</code></td></tr><tr><td>Single-storey <code>g</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-4.png" width="32"/></td><td><code>g = 'single-storey-serifed'</code>, <code>cv32 = 4</code></td></tr><tr><td>Single-storey <code>g</code> with serif at top right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-5.png" width="32"/></td><td><code>g = 'earless-corner'</code>, <code>cv32 = 5</code></td></tr><tr><td>Earless (cornered top-right) single-storey <code>g</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-6.png" width="32"/></td><td><code>g = 'earless-rounded'</code>, <code>cv32 = 6</code></td></tr><tr><td>Earless (rounded top-right) single-storey <code>g</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-7.png" width="32"/></td><td><code>g = 'single-storey-flat-hook-serifless'</code>, <code>cv32 = 7</code></td></tr><tr><td>Single-storey <code>g</code> with flat terminal hook and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-8.png" width="32"/></td><td><code>g = 'single-storey-flat-hook-serifed'</code>, <code>cv32 = 8</code></td></tr><tr><td>Single-storey <code>g</code> with top-right serif and flat terminal hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-9.png" width="32"/></td><td><code>g = 'single-storey-earless-corner-flat-hook'</code>, <code>cv32 = 9</code></td></tr><tr><td>Earless (cornered top-right) single-storey <code>g</code> with flat terminal hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv32-10.png" width="32"/></td><td><code>g = 'single-storey-earless-rounded-flat-hook'</code>, <code>cv32 = 10</code></td></tr><tr><td>Earless (rounded top-right) single-storey <code>g</code> with flat terminal hook</td></tr></table>
   - Styles for `h`:
-    + `h = 'straight'`, `cv33 = 1`: `h` with straight ending.
-    + `h = 'tailed'`, `cv33 = 2`: `h` with curly tailed ending.
-    + `h = 'straight-motion-serifed'`, `cv33 = 3`: `h` with straight ending and motion serifs.
-    + `h = 'tailed-motion-serifed'`, `cv33 = 4`: `h` with curly tailed ending and motion serifs.
-    + `h = 'straight-top-left-serifed'`, `cv33 = 5`: `h` with straight ending and serif at top left.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv33-1.png" width="32"/></td><td><code>h = 'straight'</code>, <code>cv33 = 1</code></td></tr><tr><td><code>h</code> with straight ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv33-2.png" width="32"/></td><td><code>h = 'tailed'</code>, <code>cv33 = 2</code></td></tr><tr><td><code>h</code> with curly tailed ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv33-3.png" width="32"/></td><td><code>h = 'straight-motion-serifed'</code>, <code>cv33 = 3</code></td></tr><tr><td><code>h</code> with straight ending and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv33-4.png" width="32"/></td><td><code>h = 'tailed-motion-serifed'</code>, <code>cv33 = 4</code></td></tr><tr><td><code>h</code> with curly tailed ending and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv33-5.png" width="32"/></td><td><code>h = 'straight-top-left-serifed'</code>, <code>cv33 = 5</code></td></tr><tr><td><code>h</code> with straight ending and serif at top left</td></tr></table>
   - Styles for `i`:
-    + `i = 'serifed'`, `cv34 = 1`: Serifed `i`.
-    + `i = 'zshaped'`, `cv34 = 2`: Z-shaped `i`.
-    + `i = 'serifless'`, `cv34 = 3`: `i` like a straight line.
-    + `i = 'hooky'`, `cv34 = 4`: Hooky `i`.
-    + `i = 'hooky-bottom'`, `cv34 = 5`: `i` with a sharp-turning horizontal tail.
-    + `i = 'serifed-asymmetric'`, `cv34 = 6`: `i` with shorter top serif and full bottom serif.
-    + `i = 'tailed'`, `cv34 = 7`: `i` with curly tail.
-    + `i = 'tailed-serifed'`, `cv34 = 8`: `i` with top serif and curly tail.
-    + `i = 'flat-tailed'`, `cv34 = 9`: `i` with curly-then-flat tail.
-    + `i = 'serifed-flat-tailed'`, `cv34 = 10`: `i` with top serif and curly-then-flat tail.
-    + `i = 'diagonal-tailed'`, `cv34 = 11`: `i` with diagonal tail.
-    + `i = 'serifed-diagonal-tailed'`, `cv34 = 12`: `i` with top serif and diagonal tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-1.png" width="32"/></td><td><code>i = 'serifed'</code>, <code>cv34 = 1</code></td></tr><tr><td>Serifed <code>i</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-2.png" width="32"/></td><td><code>i = 'zshaped'</code>, <code>cv34 = 2</code></td></tr><tr><td>Z-shaped <code>i</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-3.png" width="32"/></td><td><code>i = 'serifless'</code>, <code>cv34 = 3</code></td></tr><tr><td><code>i</code> like a straight line</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-4.png" width="32"/></td><td><code>i = 'hooky'</code>, <code>cv34 = 4</code></td></tr><tr><td>Hooky <code>i</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-5.png" width="32"/></td><td><code>i = 'hooky-bottom'</code>, <code>cv34 = 5</code></td></tr><tr><td><code>i</code> with a sharp-turning horizontal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-6.png" width="32"/></td><td><code>i = 'serifed-asymmetric'</code>, <code>cv34 = 6</code></td></tr><tr><td><code>i</code> with shorter top serif and full bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-7.png" width="32"/></td><td><code>i = 'tailed'</code>, <code>cv34 = 7</code></td></tr><tr><td><code>i</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-8.png" width="32"/></td><td><code>i = 'tailed-serifed'</code>, <code>cv34 = 8</code></td></tr><tr><td><code>i</code> with top serif and curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-9.png" width="32"/></td><td><code>i = 'flat-tailed'</code>, <code>cv34 = 9</code></td></tr><tr><td><code>i</code> with curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-10.png" width="32"/></td><td><code>i = 'serifed-flat-tailed'</code>, <code>cv34 = 10</code></td></tr><tr><td><code>i</code> with top serif and curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-11.png" width="32"/></td><td><code>i = 'diagonal-tailed'</code>, <code>cv34 = 11</code></td></tr><tr><td><code>i</code> with diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv34-12.png" width="32"/></td><td><code>i = 'serifed-diagonal-tailed'</code>, <code>cv34 = 12</code></td></tr><tr><td><code>i</code> with top serif and diagonal tail</td></tr></table>
   - Styles for `j`:
-    + `j = 'serifless'`, `cv35 = 1`: `j` without serif.
-    + `j = 'serifed'`, `cv35 = 2`: `j` with top serif.
-    + `j = 'straight-line'`, `cv35 = 3`: `j` like a straight line.
-    + `j = 'hooky'`, `cv35 = 4`: `j` like a straight line with top serif.
-    + `j = 'flat-hook-serifless'`, `cv35 = 5`: `j` with flat terminal hook.
-    + `j = 'flat-hook-serifed'`, `cv35 = 6`: `j` with flat terminal hook and top serif.
-    + `j = 'diagonal-tailed-serifless'`, `cv35 = 7`: `j` with diagonal tail.
-    + `j = 'diagonal-tailed-serifed'`, `cv35 = 8`: `j` with top serif and diagonal tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-1.png" width="32"/></td><td><code>j = 'serifless'</code>, <code>cv35 = 1</code></td></tr><tr><td><code>j</code> without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-2.png" width="32"/></td><td><code>j = 'serifed'</code>, <code>cv35 = 2</code></td></tr><tr><td><code>j</code> with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-3.png" width="32"/></td><td><code>j = 'straight-line'</code>, <code>cv35 = 3</code></td></tr><tr><td><code>j</code> like a straight line</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-4.png" width="32"/></td><td><code>j = 'hooky'</code>, <code>cv35 = 4</code></td></tr><tr><td><code>j</code> like a straight line with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-5.png" width="32"/></td><td><code>j = 'flat-hook-serifless'</code>, <code>cv35 = 5</code></td></tr><tr><td><code>j</code> with flat terminal hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-6.png" width="32"/></td><td><code>j = 'flat-hook-serifed'</code>, <code>cv35 = 6</code></td></tr><tr><td><code>j</code> with flat terminal hook and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-7.png" width="32"/></td><td><code>j = 'diagonal-tailed-serifless'</code>, <code>cv35 = 7</code></td></tr><tr><td><code>j</code> with diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv35-8.png" width="32"/></td><td><code>j = 'diagonal-tailed-serifed'</code>, <code>cv35 = 8</code></td></tr><tr><td><code>j</code> with top serif and diagonal tail</td></tr></table>
   - Styles for `k`:
-    + `k = 'straight-serifless'`, `cv36 = 1`: `k` with standard shape, and without serifs.
-    + `k = 'curly-serifless'`, `cv36 = 2`: Slightly curly `k`, like Iosevka 2.x, and without serifs.
-    + `k = 'cursive-serifless'`, `cv36 = 3`: `k` with a cursive loop, and without serifs.
-    + `k = 'diagonal-tailed-cursive-serifless'`, `cv36 = 4`: `k` with a cursive loop and diagonal tail, and without serifs.
-    + `k = 'symmetric-touching-serifless'`, `cv36 = 5`: `k` with symmetric legs disconnected to the vertical bar, and without serifs.
-    + `k = 'symmetric-connected-serifless'`, `cv36 = 6`: `k` with symmetric legs connected to the vertical bar, and without serifs.
-    + `k = 'straight-top-left-serifed'`, `cv36 = 7`: `k` with serifs at top left.
-    + `k = 'curly-top-left-serifed'`, `cv36 = 8`: Slightly curly `k`, like Iosevka 2.x, with serifs at top left.
-    + `k = 'cursive-top-left-serifed'`, `cv36 = 9`: `k` with a cursive loop and serifs at top left.
-    + `k = 'diagonal-tailed-cursive-top-left-serifed'`, `cv36 = 10`: `k` with a cursive loop, diagonal tail and serifs at top left.
-    + `k = 'symmetric-touching-top-left-serifed'`, `cv36 = 11`: `k` with symmetric legs disconnected to the vertical bar and serifs at top left.
-    + `k = 'symmetric-connected-top-left-serifed'`, `cv36 = 12`: `k` with symmetric legs connected to the vertical bar and serifs at top left.
-    + `k = 'straight-bottom-right-serifed'`, `cv36 = 13`: `k` with serifs at bottom right.
-    + `k = 'curly-bottom-right-serifed'`, `cv36 = 14`: Slightly curly `k`, like Iosevka 2.x, with serifs at bottom right.
-    + `k = 'cursive-bottom-right-serifed'`, `cv36 = 15`: `k` with a cursive loop and serifs at bottom right.
-    + `k = 'symmetric-touching-bottom-right-serifed'`, `cv36 = 16`: `k` with symmetric legs disconnected to the vertical bar and serifs at bottom right.
-    + `k = 'symmetric-connected-bottom-right-serifed'`, `cv36 = 17`: `k` with symmetric legs connected to the vertical bar and serifs at bottom right.
-    + `k = 'straight-top-left-and-bottom-right-serifed'`, `cv36 = 18`: `k` with serifs at top left and bottom right.
-    + `k = 'curly-top-left-and-bottom-right-serifed'`, `cv36 = 19`: Slightly curly `k`, like Iosevka 2.x, with serifs at top left and bottom right.
-    + `k = 'cursive-top-left-and-bottom-right-serifed'`, `cv36 = 20`: `k` with a cursive loop and serifs at top left and bottom right.
-    + `k = 'symmetric-touching-top-left-and-bottom-right-serifed'`, `cv36 = 21`: `k` with symmetric legs disconnected to the vertical bar and serifs at top left and bottom right.
-    + `k = 'symmetric-connected-top-left-and-bottom-right-serifed'`, `cv36 = 22`: `k` with symmetric legs connected to the vertical bar and serifs at top left and bottom right.
-    + `k = 'straight-serifed'`, `cv36 = 23`: `k` with serifs.
-    + `k = 'curly-serifed'`, `cv36 = 24`: Slightly curly `k`, like Iosevka 2.x, with serifs.
-    + `k = 'cursive-serifed'`, `cv36 = 25`: `k` with a cursive loop and serifs.
-    + `k = 'symmetric-touching-serifed'`, `cv36 = 26`: `k` with symmetric legs disconnected to the vertical bar and serifs.
-    + `k = 'symmetric-connected-serifed'`, `cv36 = 27`: `k` with symmetric legs connected to the vertical bar and serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-1.png" width="32"/></td><td><code>k = 'straight-serifless'</code>, <code>cv36 = 1</code></td></tr><tr><td><code>k</code> with standard shape, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-2.png" width="32"/></td><td><code>k = 'curly-serifless'</code>, <code>cv36 = 2</code></td></tr><tr><td>Slightly curly <code>k</code>, like Iosevka 2.x, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-3.png" width="32"/></td><td><code>k = 'cursive-serifless'</code>, <code>cv36 = 3</code></td></tr><tr><td><code>k</code> with a cursive loop, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-4.png" width="32"/></td><td><code>k = 'diagonal-tailed-cursive-serifless'</code>, <code>cv36 = 4</code></td></tr><tr><td><code>k</code> with a cursive loop and diagonal tail, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-5.png" width="32"/></td><td><code>k = 'symmetric-touching-serifless'</code>, <code>cv36 = 5</code></td></tr><tr><td><code>k</code> with symmetric legs disconnected to the vertical bar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-6.png" width="32"/></td><td><code>k = 'symmetric-connected-serifless'</code>, <code>cv36 = 6</code></td></tr><tr><td><code>k</code> with symmetric legs connected to the vertical bar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-7.png" width="32"/></td><td><code>k = 'straight-top-left-serifed'</code>, <code>cv36 = 7</code></td></tr><tr><td><code>k</code> with serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-8.png" width="32"/></td><td><code>k = 'curly-top-left-serifed'</code>, <code>cv36 = 8</code></td></tr><tr><td>Slightly curly <code>k</code>, like Iosevka 2.x, with serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-9.png" width="32"/></td><td><code>k = 'cursive-top-left-serifed'</code>, <code>cv36 = 9</code></td></tr><tr><td><code>k</code> with a cursive loop and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-10.png" width="32"/></td><td><code>k = 'diagonal-tailed-cursive-top-left-serifed'</code>, <code>cv36 = 10</code></td></tr><tr><td><code>k</code> with a cursive loop, diagonal tail and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-11.png" width="32"/></td><td><code>k = 'symmetric-touching-top-left-serifed'</code>, <code>cv36 = 11</code></td></tr><tr><td><code>k</code> with symmetric legs disconnected to the vertical bar and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-12.png" width="32"/></td><td><code>k = 'symmetric-connected-top-left-serifed'</code>, <code>cv36 = 12</code></td></tr><tr><td><code>k</code> with symmetric legs connected to the vertical bar and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-13.png" width="32"/></td><td><code>k = 'straight-bottom-right-serifed'</code>, <code>cv36 = 13</code></td></tr><tr><td><code>k</code> with serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-14.png" width="32"/></td><td><code>k = 'curly-bottom-right-serifed'</code>, <code>cv36 = 14</code></td></tr><tr><td>Slightly curly <code>k</code>, like Iosevka 2.x, with serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-15.png" width="32"/></td><td><code>k = 'cursive-bottom-right-serifed'</code>, <code>cv36 = 15</code></td></tr><tr><td><code>k</code> with a cursive loop and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-16.png" width="32"/></td><td><code>k = 'symmetric-touching-bottom-right-serifed'</code>, <code>cv36 = 16</code></td></tr><tr><td><code>k</code> with symmetric legs disconnected to the vertical bar and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-17.png" width="32"/></td><td><code>k = 'symmetric-connected-bottom-right-serifed'</code>, <code>cv36 = 17</code></td></tr><tr><td><code>k</code> with symmetric legs connected to the vertical bar and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-18.png" width="32"/></td><td><code>k = 'straight-top-left-and-bottom-right-serifed'</code>, <code>cv36 = 18</code></td></tr><tr><td><code>k</code> with serifs at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-19.png" width="32"/></td><td><code>k = 'curly-top-left-and-bottom-right-serifed'</code>, <code>cv36 = 19</code></td></tr><tr><td>Slightly curly <code>k</code>, like Iosevka 2.x, with serifs at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-20.png" width="32"/></td><td><code>k = 'cursive-top-left-and-bottom-right-serifed'</code>, <code>cv36 = 20</code></td></tr><tr><td><code>k</code> with a cursive loop and serifs at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-21.png" width="32"/></td><td><code>k = 'symmetric-touching-top-left-and-bottom-right-serifed'</code>, <code>cv36 = 21</code></td></tr><tr><td><code>k</code> with symmetric legs disconnected to the vertical bar and serifs at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-22.png" width="32"/></td><td><code>k = 'symmetric-connected-top-left-and-bottom-right-serifed'</code>, <code>cv36 = 22</code></td></tr><tr><td><code>k</code> with symmetric legs connected to the vertical bar and serifs at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-23.png" width="32"/></td><td><code>k = 'straight-serifed'</code>, <code>cv36 = 23</code></td></tr><tr><td><code>k</code> with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-24.png" width="32"/></td><td><code>k = 'curly-serifed'</code>, <code>cv36 = 24</code></td></tr><tr><td>Slightly curly <code>k</code>, like Iosevka 2.x, with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-25.png" width="32"/></td><td><code>k = 'cursive-serifed'</code>, <code>cv36 = 25</code></td></tr><tr><td><code>k</code> with a cursive loop and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-26.png" width="32"/></td><td><code>k = 'symmetric-touching-serifed'</code>, <code>cv36 = 26</code></td></tr><tr><td><code>k</code> with symmetric legs disconnected to the vertical bar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv36-27.png" width="32"/></td><td><code>k = 'symmetric-connected-serifed'</code>, <code>cv36 = 27</code></td></tr><tr><td><code>k</code> with symmetric legs connected to the vertical bar and serifs</td></tr></table>
   - Styles for `l`:
-    + `l = 'serifed'`, `cv37 = 1`: Serifed `l`.
-    + `l = 'serifless'`, `cv37 = 2`: `l` like a straight line.
-    + `l = 'hooky'`, `cv37 = 3`: Hooky `l`.
-    + `l = 'zshaped'`, `cv37 = 4`: Z-shaped `l`.
-    + `l = 'hooky-bottom'`, `cv37 = 5`: `l` with a straight sharp-turning horizontal tail.
-    + `l = 'serifed-asymmetric'`, `cv37 = 6`: `l` with shorter top serif and full bottom serif.
-    + `l = 'tailed'`, `cv37 = 7`: `l` with curly tail.
-    + `l = 'tailed-serifed'`, `cv37 = 8`: `l` with top serif and curly tail.
-    + `l = 'flat-tailed'`, `cv37 = 9`: `l` with curly-then-flat tail.
-    + `l = 'serifed-flat-tailed'`, `cv37 = 10`: `l` with top serif and curly-then-flat tail.
-    + `l = 'diagonal-tailed'`, `cv37 = 11`: `l` with diagonal tail.
-    + `l = 'serifed-diagonal-tailed'`, `cv37 = 12`: `l` with top serif and diagonal tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-1.png" width="32"/></td><td><code>l = 'serifed'</code>, <code>cv37 = 1</code></td></tr><tr><td>Serifed <code>l</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-2.png" width="32"/></td><td><code>l = 'serifless'</code>, <code>cv37 = 2</code></td></tr><tr><td><code>l</code> like a straight line</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-3.png" width="32"/></td><td><code>l = 'hooky'</code>, <code>cv37 = 3</code></td></tr><tr><td>Hooky <code>l</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-4.png" width="32"/></td><td><code>l = 'zshaped'</code>, <code>cv37 = 4</code></td></tr><tr><td>Z-shaped <code>l</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-5.png" width="32"/></td><td><code>l = 'hooky-bottom'</code>, <code>cv37 = 5</code></td></tr><tr><td><code>l</code> with a straight sharp-turning horizontal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-6.png" width="32"/></td><td><code>l = 'serifed-asymmetric'</code>, <code>cv37 = 6</code></td></tr><tr><td><code>l</code> with shorter top serif and full bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-7.png" width="32"/></td><td><code>l = 'tailed'</code>, <code>cv37 = 7</code></td></tr><tr><td><code>l</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-8.png" width="32"/></td><td><code>l = 'tailed-serifed'</code>, <code>cv37 = 8</code></td></tr><tr><td><code>l</code> with top serif and curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-9.png" width="32"/></td><td><code>l = 'flat-tailed'</code>, <code>cv37 = 9</code></td></tr><tr><td><code>l</code> with curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-10.png" width="32"/></td><td><code>l = 'serifed-flat-tailed'</code>, <code>cv37 = 10</code></td></tr><tr><td><code>l</code> with top serif and curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-11.png" width="32"/></td><td><code>l = 'diagonal-tailed'</code>, <code>cv37 = 11</code></td></tr><tr><td><code>l</code> with diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv37-12.png" width="32"/></td><td><code>l = 'serifed-diagonal-tailed'</code>, <code>cv37 = 12</code></td></tr><tr><td><code>l</code> with top serif and diagonal tail</td></tr></table>
   - Styles for `m`:
-    + `m = 'normal'`, `cv38 = 1`: `m` with normal middle leg, touching the baseline.
-    + `m = 'short-leg'`, `cv38 = 2`: `m` with shorter middle leg, like Ubuntu Mono.
-    + `m = 'tailed'`, `cv38 = 3`: `m` with normal middle leg, touching the baseline, and a curly tail.
-    + `m = 'short-leg-tailed'`, `cv38 = 4`: `m` with shorter middle leg, like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-corner-double-arch'`, `cv38 = 5`: Earless (corner top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-corner-double-arch-short-leg'`, `cv38 = 6`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-corner-double-arch-tailed'`, `cv38 = 7`: Earless (corner top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-corner-double-arch-short-leg-tailed'`, `cv38 = 8`: Earless (corner top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-rounded-double-arch'`, `cv38 = 9`: Earless (rounded top-left) `m` with normal middle leg touching baseline.
-    + `m = 'earless-rounded-double-arch-short-leg'`, `cv38 = 10`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-rounded-double-arch-tailed'`, `cv38 = 11`: Earless (rounded top-left) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-rounded-double-arch-short-leg-tailed'`, `cv38 = 12`: Earless (rounded top-left) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'earless-single-arch'`, `cv38 = 13`: Earless (single-arch) `m` with normal middle leg touching baseline.
-    + `m = 'earless-single-arch-short-leg'`, `cv38 = 14`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono.
-    + `m = 'earless-single-arch-tailed'`, `cv38 = 15`: Earless (single-arch) `m` with normal middle leg touching baseline, and a curly tail.
-    + `m = 'earless-single-arch-short-leg-tailed'`, `cv38 = 16`: Earless (single-arch) `m` with a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'top-left-serifed'`, `cv38 = 17`: `m` with serif at top left, normal middle leg touching baseline.
-    + `m = 'short-leg-top-left-serifed'`, `cv38 = 18`: `m` with serif at top left, a shorter middle leg like Ubuntu Mono.
-    + `m = 'tailed-top-left-serifed'`, `cv38 = 19`: `m` with serif at top left, normal middle leg touching baseline, and a curly tail.
-    + `m = 'short-leg-tailed-top-left-serifed'`, `cv38 = 20`: `m` with serif at top left, a shorter middle leg like Ubuntu Mono, and a curly tail.
-    + `m = 'top-left-and-bottom-right-serifed'`, `cv38 = 21`: `m` with serifs at top left and bottom right, normal middle leg touching baseline.
-    + `m = 'short-leg-top-left-and-bottom-right-serifed'`, `cv38 = 22`: `m` with serifs at top left and bottom right, a shorter middle leg like Ubuntu Mono.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-1.png" width="32"/></td><td><code>m = 'normal'</code>, <code>cv38 = 1</code></td></tr><tr><td><code>m</code> with normal middle leg, touching the baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-2.png" width="32"/></td><td><code>m = 'short-leg'</code>, <code>cv38 = 2</code></td></tr><tr><td><code>m</code> with shorter middle leg, like Ubuntu Mono</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-3.png" width="32"/></td><td><code>m = 'tailed'</code>, <code>cv38 = 3</code></td></tr><tr><td><code>m</code> with normal middle leg, touching the baseline, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-4.png" width="32"/></td><td><code>m = 'short-leg-tailed'</code>, <code>cv38 = 4</code></td></tr><tr><td><code>m</code> with shorter middle leg, like Ubuntu Mono, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-5.png" width="32"/></td><td><code>m = 'earless-corner-double-arch'</code>, <code>cv38 = 5</code></td></tr><tr><td>Earless (corner top-left) <code>m</code> with normal middle leg touching baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-6.png" width="32"/></td><td><code>m = 'earless-corner-double-arch-short-leg'</code>, <code>cv38 = 6</code></td></tr><tr><td>Earless (corner top-left) <code>m</code> with a shorter middle leg like Ubuntu Mono</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-7.png" width="32"/></td><td><code>m = 'earless-corner-double-arch-tailed'</code>, <code>cv38 = 7</code></td></tr><tr><td>Earless (corner top-left) <code>m</code> with normal middle leg touching baseline, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-8.png" width="32"/></td><td><code>m = 'earless-corner-double-arch-short-leg-tailed'</code>, <code>cv38 = 8</code></td></tr><tr><td>Earless (corner top-left) <code>m</code> with a shorter middle leg like Ubuntu Mono, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-9.png" width="32"/></td><td><code>m = 'earless-rounded-double-arch'</code>, <code>cv38 = 9</code></td></tr><tr><td>Earless (rounded top-left) <code>m</code> with normal middle leg touching baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-10.png" width="32"/></td><td><code>m = 'earless-rounded-double-arch-short-leg'</code>, <code>cv38 = 10</code></td></tr><tr><td>Earless (rounded top-left) <code>m</code> with a shorter middle leg like Ubuntu Mono</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-11.png" width="32"/></td><td><code>m = 'earless-rounded-double-arch-tailed'</code>, <code>cv38 = 11</code></td></tr><tr><td>Earless (rounded top-left) <code>m</code> with normal middle leg touching baseline, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-12.png" width="32"/></td><td><code>m = 'earless-rounded-double-arch-short-leg-tailed'</code>, <code>cv38 = 12</code></td></tr><tr><td>Earless (rounded top-left) <code>m</code> with a shorter middle leg like Ubuntu Mono, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-13.png" width="32"/></td><td><code>m = 'earless-single-arch'</code>, <code>cv38 = 13</code></td></tr><tr><td>Earless (single-arch) <code>m</code> with normal middle leg touching baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-14.png" width="32"/></td><td><code>m = 'earless-single-arch-short-leg'</code>, <code>cv38 = 14</code></td></tr><tr><td>Earless (single-arch) <code>m</code> with a shorter middle leg like Ubuntu Mono</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-15.png" width="32"/></td><td><code>m = 'earless-single-arch-tailed'</code>, <code>cv38 = 15</code></td></tr><tr><td>Earless (single-arch) <code>m</code> with normal middle leg touching baseline, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-16.png" width="32"/></td><td><code>m = 'earless-single-arch-short-leg-tailed'</code>, <code>cv38 = 16</code></td></tr><tr><td>Earless (single-arch) <code>m</code> with a shorter middle leg like Ubuntu Mono, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-17.png" width="32"/></td><td><code>m = 'top-left-serifed'</code>, <code>cv38 = 17</code></td></tr><tr><td><code>m</code> with serif at top left, normal middle leg touching baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-18.png" width="32"/></td><td><code>m = 'short-leg-top-left-serifed'</code>, <code>cv38 = 18</code></td></tr><tr><td><code>m</code> with serif at top left, a shorter middle leg like Ubuntu Mono</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-19.png" width="32"/></td><td><code>m = 'tailed-top-left-serifed'</code>, <code>cv38 = 19</code></td></tr><tr><td><code>m</code> with serif at top left, normal middle leg touching baseline, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-20.png" width="32"/></td><td><code>m = 'short-leg-tailed-top-left-serifed'</code>, <code>cv38 = 20</code></td></tr><tr><td><code>m</code> with serif at top left, a shorter middle leg like Ubuntu Mono, and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-21.png" width="32"/></td><td><code>m = 'top-left-and-bottom-right-serifed'</code>, <code>cv38 = 21</code></td></tr><tr><td><code>m</code> with serifs at top left and bottom right, normal middle leg touching baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv38-22.png" width="32"/></td><td><code>m = 'short-leg-top-left-and-bottom-right-serifed'</code>, <code>cv38 = 22</code></td></tr><tr><td><code>m</code> with serifs at top left and bottom right, a shorter middle leg like Ubuntu Mono</td></tr></table>
   - Styles for `n`:
-    + `n = 'straight'`, `cv39 = 1`: `n` with straight ending.
-    + `n = 'tailed'`, `cv39 = 2`: `n` with a curly tail.
-    + `n = 'earless-corner-straight'`, `cv39 = 3`: Earless (corner top-left) `n` with straight ending.
-    + `n = 'earless-corner-tailed'`, `cv39 = 4`: Earless (corner top-left) `n` with a curly tail.
-    + `n = 'earless-rounded-straight'`, `cv39 = 5`: Earless (rounded top-left) `n` with straight ending.
-    + `n = 'earless-rounded-tailed'`, `cv39 = 6`: Earless (rounded top-left) `n` with a curly tail.
-    + `n = 'straight-motion-serifed'`, `cv39 = 7`: `n` with motion serifs and straight ending.
-    + `n = 'tailed-motion-serifed'`, `cv39 = 8`: `n` with motion serifs and a curly tail.
-    + `n = 'straight-top-left-serifed'`, `cv39 = 9`: `n` with motion serifs at top left and straight ending.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-1.png" width="32"/></td><td><code>n = 'straight'</code>, <code>cv39 = 1</code></td></tr><tr><td><code>n</code> with straight ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-2.png" width="32"/></td><td><code>n = 'tailed'</code>, <code>cv39 = 2</code></td></tr><tr><td><code>n</code> with a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-3.png" width="32"/></td><td><code>n = 'earless-corner-straight'</code>, <code>cv39 = 3</code></td></tr><tr><td>Earless (corner top-left) <code>n</code> with straight ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-4.png" width="32"/></td><td><code>n = 'earless-corner-tailed'</code>, <code>cv39 = 4</code></td></tr><tr><td>Earless (corner top-left) <code>n</code> with a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-5.png" width="32"/></td><td><code>n = 'earless-rounded-straight'</code>, <code>cv39 = 5</code></td></tr><tr><td>Earless (rounded top-left) <code>n</code> with straight ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-6.png" width="32"/></td><td><code>n = 'earless-rounded-tailed'</code>, <code>cv39 = 6</code></td></tr><tr><td>Earless (rounded top-left) <code>n</code> with a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-7.png" width="32"/></td><td><code>n = 'straight-motion-serifed'</code>, <code>cv39 = 7</code></td></tr><tr><td><code>n</code> with motion serifs and straight ending</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-8.png" width="32"/></td><td><code>n = 'tailed-motion-serifed'</code>, <code>cv39 = 8</code></td></tr><tr><td><code>n</code> with motion serifs and a curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv39-9.png" width="32"/></td><td><code>n = 'straight-top-left-serifed'</code>, <code>cv39 = 9</code></td></tr><tr><td><code>n</code> with motion serifs at top left and straight ending</td></tr></table>
   - Styles for `p`:
-    + `p = 'eared'`, `cv40 = 1`: `p` with top-left ear.
-    + `p = 'earless-corner'`, `cv40 = 2`: `p` without top-left ear (corner).
-    + `p = 'earless-rounded'`, `cv40 = 3`: `p` without top-left ear (rounded).
-    + `p = 'motion-serifed'`, `cv40 = 4`: `p` with motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv40-1.png" width="32"/></td><td><code>p = 'eared'</code>, <code>cv40 = 1</code></td></tr><tr><td><code>p</code> with top-left ear</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv40-2.png" width="32"/></td><td><code>p = 'earless-corner'</code>, <code>cv40 = 2</code></td></tr><tr><td><code>p</code> without top-left ear (corner)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv40-3.png" width="32"/></td><td><code>p = 'earless-rounded'</code>, <code>cv40 = 3</code></td></tr><tr><td><code>p</code> without top-left ear (rounded)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv40-4.png" width="32"/></td><td><code>p = 'motion-serifed'</code>, <code>cv40 = 4</code></td></tr><tr><td><code>p</code> with motion serifs</td></tr></table>
   - Styles for `q`:
-    + `q = 'straight'`, `cv41 = 1`: `q` with straight bar.
-    + `q = 'earless-corner'`, `cv41 = 2`: Earless (cornered top-left) single-storey `q`.
-    + `q = 'earless-rounded'`, `cv41 = 3`: Earless (rounded top-left) single-storey `q`.
-    + `q = 'straight-motion-serifed'`, `cv41 = 4`: `q` with straight bar and motion serifs.
-    + `q = 'tailed'`, `cv41 = 5`: `q` with tail.
-    + `q = 'earless-corner-tailed'`, `cv41 = 6`: Earless (cornered top-left) single-storey `q` with curly tail.
-    + `q = 'earless-rounded-tailed'`, `cv41 = 7`: Earless (rounded top-left) single-storey `q` with curly tail.
-    + `q = 'tailed-motion-serifed'`, `cv41 = 8`: `q` with tail and motion serifs.
-    + `q = 'diagonal-tailed'`, `cv41 = 9`: `q` with diagonal tail.
-    + `q = 'earless-corner-diagonal-tailed'`, `cv41 = 10`: Earless (cornered top-left) single-storey `q` with curly diagonal tail.
-    + `q = 'earless-rounded-diagonal-tailed'`, `cv41 = 11`: Earless (rounded top-left) single-storey `q` with curly diagonal tail.
-    + `q = 'diagonal-tailed-motion-serifed'`, `cv41 = 12`: `q` with diagonal tail and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-1.png" width="32"/></td><td><code>q = 'straight'</code>, <code>cv41 = 1</code></td></tr><tr><td><code>q</code> with straight bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-2.png" width="32"/></td><td><code>q = 'earless-corner'</code>, <code>cv41 = 2</code></td></tr><tr><td>Earless (cornered top-left) single-storey <code>q</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-3.png" width="32"/></td><td><code>q = 'earless-rounded'</code>, <code>cv41 = 3</code></td></tr><tr><td>Earless (rounded top-left) single-storey <code>q</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-4.png" width="32"/></td><td><code>q = 'straight-motion-serifed'</code>, <code>cv41 = 4</code></td></tr><tr><td><code>q</code> with straight bar and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-5.png" width="32"/></td><td><code>q = 'tailed'</code>, <code>cv41 = 5</code></td></tr><tr><td><code>q</code> with tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-6.png" width="32"/></td><td><code>q = 'earless-corner-tailed'</code>, <code>cv41 = 6</code></td></tr><tr><td>Earless (cornered top-left) single-storey <code>q</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-7.png" width="32"/></td><td><code>q = 'earless-rounded-tailed'</code>, <code>cv41 = 7</code></td></tr><tr><td>Earless (rounded top-left) single-storey <code>q</code> with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-8.png" width="32"/></td><td><code>q = 'tailed-motion-serifed'</code>, <code>cv41 = 8</code></td></tr><tr><td><code>q</code> with tail and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-9.png" width="32"/></td><td><code>q = 'diagonal-tailed'</code>, <code>cv41 = 9</code></td></tr><tr><td><code>q</code> with diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-10.png" width="32"/></td><td><code>q = 'earless-corner-diagonal-tailed'</code>, <code>cv41 = 10</code></td></tr><tr><td>Earless (cornered top-left) single-storey <code>q</code> with curly diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-11.png" width="32"/></td><td><code>q = 'earless-rounded-diagonal-tailed'</code>, <code>cv41 = 11</code></td></tr><tr><td>Earless (rounded top-left) single-storey <code>q</code> with curly diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv41-12.png" width="32"/></td><td><code>q = 'diagonal-tailed-motion-serifed'</code>, <code>cv41 = 12</code></td></tr><tr><td><code>q</code> with diagonal tail and motion serifs</td></tr></table>
   - Styles for `r`:
-    + `r = 'serifless'`, `cv42 = 1`: Straight, serif-less `r`.
-    + `r = 'serifed'`, `cv42 = 2`: `r` with serif at both top and bottom.
-    + `r = 'top-serifed'`, `cv42 = 3`: `r` with serifs at top-left only.
-    + `r = 'base-serifed'`, `cv42 = 4`: `r` with serifs at top-left only.
-    + `r = 'earless-corner'`, `cv42 = 5`: Earless (corner top-left), serif-less `r`.
-    + `r = 'earless-corner-serifed'`, `cv42 = 6`: Earless (corner top-left), serifed `r`.
-    + `r = 'earless-rounded'`, `cv42 = 7`: Earless (rounded top-left), serif-less `r`.
-    + `r = 'earless-rounded-serifed'`, `cv42 = 8`: Earless (rounded top-left), serifed `r`.
-    + `r = 'compact'`, `cv42 = 9`: Compact, serifless `r`.
-    + `r = 'compact-serifed'`, `cv42 = 10`: Compact `r` with top and bottom serifs.
-    + `r = 'compact-top-serifed'`, `cv42 = 11`: Compact `r` with top serif.
-    + `r = 'compact-base-serifed'`, `cv42 = 12`: Compact `r` with bottom serif.
-    + `r = 'corner-hooked'`, `cv42 = 13`: `r` with vertical corner hook downwards.
-    + `r = 'corner-hooked-serifed'`, `cv42 = 14`: `r` with vertical corner hook downwards, top and bottom serifs.
-    + `r = 'corner-hooked-top-serifed'`, `cv42 = 15`: `r` with vertical corner hook downwards and top serif.
-    + `r = 'corner-hooked-base-serifed'`, `cv42 = 16`: `r` with vertical corner hook downwards and bottom serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-1.png" width="32"/></td><td><code>r = 'serifless'</code>, <code>cv42 = 1</code></td></tr><tr><td>Straight, serif-less <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-2.png" width="32"/></td><td><code>r = 'serifed'</code>, <code>cv42 = 2</code></td></tr><tr><td><code>r</code> with serif at both top and bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-3.png" width="32"/></td><td><code>r = 'top-serifed'</code>, <code>cv42 = 3</code></td></tr><tr><td><code>r</code> with serifs at top-left only</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-4.png" width="32"/></td><td><code>r = 'base-serifed'</code>, <code>cv42 = 4</code></td></tr><tr><td><code>r</code> with serifs at top-left only</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-5.png" width="32"/></td><td><code>r = 'earless-corner'</code>, <code>cv42 = 5</code></td></tr><tr><td>Earless (corner top-left), serif-less <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-6.png" width="32"/></td><td><code>r = 'earless-corner-serifed'</code>, <code>cv42 = 6</code></td></tr><tr><td>Earless (corner top-left), serifed <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-7.png" width="32"/></td><td><code>r = 'earless-rounded'</code>, <code>cv42 = 7</code></td></tr><tr><td>Earless (rounded top-left), serif-less <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-8.png" width="32"/></td><td><code>r = 'earless-rounded-serifed'</code>, <code>cv42 = 8</code></td></tr><tr><td>Earless (rounded top-left), serifed <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-9.png" width="32"/></td><td><code>r = 'compact'</code>, <code>cv42 = 9</code></td></tr><tr><td>Compact, serifless <code>r</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-10.png" width="32"/></td><td><code>r = 'compact-serifed'</code>, <code>cv42 = 10</code></td></tr><tr><td>Compact <code>r</code> with top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-11.png" width="32"/></td><td><code>r = 'compact-top-serifed'</code>, <code>cv42 = 11</code></td></tr><tr><td>Compact <code>r</code> with top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-12.png" width="32"/></td><td><code>r = 'compact-base-serifed'</code>, <code>cv42 = 12</code></td></tr><tr><td>Compact <code>r</code> with bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-13.png" width="32"/></td><td><code>r = 'corner-hooked'</code>, <code>cv42 = 13</code></td></tr><tr><td><code>r</code> with vertical corner hook downwards</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-14.png" width="32"/></td><td><code>r = 'corner-hooked-serifed'</code>, <code>cv42 = 14</code></td></tr><tr><td><code>r</code> with vertical corner hook downwards, top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-15.png" width="32"/></td><td><code>r = 'corner-hooked-top-serifed'</code>, <code>cv42 = 15</code></td></tr><tr><td><code>r</code> with vertical corner hook downwards and top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv42-16.png" width="32"/></td><td><code>r = 'corner-hooked-base-serifed'</code>, <code>cv42 = 16</code></td></tr><tr><td><code>r</code> with vertical corner hook downwards and bottom serif</td></tr></table>
   - Styles for `s`:
-    + `s = 'serifless'`, `cv43 = 1`: Serifless `s`.
-    + `s = 'unilateral-serifed'`, `cv43 = 2`: `s` with single serif at top.
-    + `s = 'bilateral-serifed'`, `cv43 = 3`: `s` with serifs at both end.
-    + `s = 'unilateral-inward-serifed'`, `cv43 = 4`: `s` with single inward serif at top.
-    + `s = 'bilateral-inward-serifed'`, `cv43 = 5`: `s` with inward serifs at both end.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv43-1.png" width="32"/></td><td><code>s = 'serifless'</code>, <code>cv43 = 1</code></td></tr><tr><td>Serifless <code>s</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv43-2.png" width="32"/></td><td><code>s = 'unilateral-serifed'</code>, <code>cv43 = 2</code></td></tr><tr><td><code>s</code> with single serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv43-3.png" width="32"/></td><td><code>s = 'bilateral-serifed'</code>, <code>cv43 = 3</code></td></tr><tr><td><code>s</code> with serifs at both end</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv43-4.png" width="32"/></td><td><code>s = 'unilateral-inward-serifed'</code>, <code>cv43 = 4</code></td></tr><tr><td><code>s</code> with single inward serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv43-5.png" width="32"/></td><td><code>s = 'bilateral-inward-serifed'</code>, <code>cv43 = 5</code></td></tr><tr><td><code>s</code> with inward serifs at both end</td></tr></table>
   - Styles for `t`:
-    + `t = 'standard'`, `cv44 = 1`: Standard `t` shape.
-    + `t = 'flat-hook'`, `cv44 = 2`: `t` with flat hook.
-    + `t = 'diagonal-tailed'`, `cv44 = 3`: `t` with diagonal tail.
-    + `t = 'cross'`, `cv44 = 4`: Futura-like `t` shape.
-    + `t = 'hookless-asymmetric'`, `cv44 = 5`: `t` without hook and with ony half the cross bar.
-    + `t = 'standard-short-neck'`, `cv44 = 6`: Standard `t` shape with a shorter neck.
-    + `t = 'flat-hook-short-neck'`, `cv44 = 7`: `t` with flat hook and a slightly shorter neck.
-    + `t = 'diagonal-tailed-short-neck'`, `cv44 = 8`: `t` with diagonal tail and a shorter neck.
-    + `t = 'cross-short-neck'`, `cv44 = 9`: Futura-like `t` shape with a shorter neck.
-    + `t = 'hookless-asymmetric-short-neck'`, `cv44 = 10`: `t` without hook, with ony half the cross bar and a shorter neck.
-    + `t = 'standard-short-neck2'`, `cv44 = 11`: Standard `t` shape with a more shorter neck.
-    + `t = 'flat-hook-short-neck2'`, `cv44 = 12`: `t` with flat hook and a more shorter neck.
-    + `t = 'diagonal-tailed-short-neck2'`, `cv44 = 13`: `t` with diagonal tail and a more shorter neck.
-    + `t = 'cross-short-neck2'`, `cv44 = 14`: Futura-like `t` shape with a more shorter neck.
-    + `t = 'hookless-asymmetric-short-neck2'`, `cv44 = 15`: `t` without hook, with ony half the cross bar and a more shorter neck.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-1.png" width="32"/></td><td><code>t = 'standard'</code>, <code>cv44 = 1</code></td></tr><tr><td>Standard <code>t</code> shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-2.png" width="32"/></td><td><code>t = 'flat-hook'</code>, <code>cv44 = 2</code></td></tr><tr><td><code>t</code> with flat hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-3.png" width="32"/></td><td><code>t = 'diagonal-tailed'</code>, <code>cv44 = 3</code></td></tr><tr><td><code>t</code> with diagonal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-4.png" width="32"/></td><td><code>t = 'cross'</code>, <code>cv44 = 4</code></td></tr><tr><td>Futura-like <code>t</code> shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-5.png" width="32"/></td><td><code>t = 'hookless-asymmetric'</code>, <code>cv44 = 5</code></td></tr><tr><td><code>t</code> without hook and with ony half the cross bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-6.png" width="32"/></td><td><code>t = 'standard-short-neck'</code>, <code>cv44 = 6</code></td></tr><tr><td>Standard <code>t</code> shape with a shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-7.png" width="32"/></td><td><code>t = 'flat-hook-short-neck'</code>, <code>cv44 = 7</code></td></tr><tr><td><code>t</code> with flat hook and a slightly shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-8.png" width="32"/></td><td><code>t = 'diagonal-tailed-short-neck'</code>, <code>cv44 = 8</code></td></tr><tr><td><code>t</code> with diagonal tail and a shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-9.png" width="32"/></td><td><code>t = 'cross-short-neck'</code>, <code>cv44 = 9</code></td></tr><tr><td>Futura-like <code>t</code> shape with a shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-10.png" width="32"/></td><td><code>t = 'hookless-asymmetric-short-neck'</code>, <code>cv44 = 10</code></td></tr><tr><td><code>t</code> without hook, with ony half the cross bar and a shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-11.png" width="32"/></td><td><code>t = 'standard-short-neck2'</code>, <code>cv44 = 11</code></td></tr><tr><td>Standard <code>t</code> shape with a more shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-12.png" width="32"/></td><td><code>t = 'flat-hook-short-neck2'</code>, <code>cv44 = 12</code></td></tr><tr><td><code>t</code> with flat hook and a more shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-13.png" width="32"/></td><td><code>t = 'diagonal-tailed-short-neck2'</code>, <code>cv44 = 13</code></td></tr><tr><td><code>t</code> with diagonal tail and a more shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-14.png" width="32"/></td><td><code>t = 'cross-short-neck2'</code>, <code>cv44 = 14</code></td></tr><tr><td>Futura-like <code>t</code> shape with a more shorter neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv44-15.png" width="32"/></td><td><code>t = 'hookless-asymmetric-short-neck2'</code>, <code>cv44 = 15</code></td></tr><tr><td><code>t</code> without hook, with ony half the cross bar and a more shorter neck</td></tr></table>
   - Styles for `u`:
-    + `u = 'toothed'`, `cv45 = 1`: Normal `u` with bottom-right tooth.
-    + `u = 'toothless-corner'`, `cv45 = 2`: Toothless (corner bottom-right) `u`.
-    + `u = 'toothless-rounded'`, `cv45 = 3`: Toothless (rounded) `u`, like a smaller uppercase `U`.
-    + `u = 'tailed'`, `cv45 = 4`: `u` with right bar and a slightly curly tail.
-    + `u = 'motion-serifed'`, `cv45 = 5`: Normal `u` with right bar and motion serifs.
-    + `u = 'tailed-motion-serifed'`, `cv45 = 6`: `u` with right bar, motion serifs and a slightly curly tail.
-    + `u = 'toothless-corner-motion-serifed'`, `cv45 = 7`: Toothless (corner bottom-right) `u` with motion serifs.
-    + `u = 'toothless-rounded-motion-serifed'`, `cv45 = 8`: Toothless (rounded) `u` with motion serifs.
-    + `u = 'bottom-right-serifed'`, `cv45 = 9`: `u` with right bar and a slightly curly tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-1.png" width="32"/></td><td><code>u = 'toothed'</code>, <code>cv45 = 1</code></td></tr><tr><td>Normal <code>u</code> with bottom-right tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-2.png" width="32"/></td><td><code>u = 'toothless-corner'</code>, <code>cv45 = 2</code></td></tr><tr><td>Toothless (corner bottom-right) <code>u</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-3.png" width="32"/></td><td><code>u = 'toothless-rounded'</code>, <code>cv45 = 3</code></td></tr><tr><td>Toothless (rounded) <code>u</code>, like a smaller uppercase <code>U</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-4.png" width="32"/></td><td><code>u = 'tailed'</code>, <code>cv45 = 4</code></td></tr><tr><td><code>u</code> with right bar and a slightly curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-5.png" width="32"/></td><td><code>u = 'motion-serifed'</code>, <code>cv45 = 5</code></td></tr><tr><td>Normal <code>u</code> with right bar and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-6.png" width="32"/></td><td><code>u = 'tailed-motion-serifed'</code>, <code>cv45 = 6</code></td></tr><tr><td><code>u</code> with right bar, motion serifs and a slightly curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-7.png" width="32"/></td><td><code>u = 'toothless-corner-motion-serifed'</code>, <code>cv45 = 7</code></td></tr><tr><td>Toothless (corner bottom-right) <code>u</code> with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-8.png" width="32"/></td><td><code>u = 'toothless-rounded-motion-serifed'</code>, <code>cv45 = 8</code></td></tr><tr><td>Toothless (rounded) <code>u</code> with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv45-9.png" width="32"/></td><td><code>u = 'bottom-right-serifed'</code>, <code>cv45 = 9</code></td></tr><tr><td><code>u</code> with right bar and a slightly curly tail</td></tr></table>
   - Styles for `v`:
-    + `v = 'straight'`, `cv46 = 1`: Standard, straight `v`.
-    + `v = 'curly'`, `cv46 = 2`: Slightly curly `v`, like Iosevka 2.x.
-    + `v = 'cursive'`, `cv46 = 3`: Cursive `v`.
-    + `v = 'straight-motion-serifed'`, `cv46 = 4`: Standard, straight `v`, with motion serifs.
-    + `v = 'curly-motion-serifed'`, `cv46 = 5`: Slightly curly `v`, like Iosevka 2.x, with motion serifs.
-    + `v = 'cursive-serifed'`, `cv46 = 6`: Cursive `v` with motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-1.png" width="32"/></td><td><code>v = 'straight'</code>, <code>cv46 = 1</code></td></tr><tr><td>Standard, straight <code>v</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-2.png" width="32"/></td><td><code>v = 'curly'</code>, <code>cv46 = 2</code></td></tr><tr><td>Slightly curly <code>v</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-3.png" width="32"/></td><td><code>v = 'cursive'</code>, <code>cv46 = 3</code></td></tr><tr><td>Cursive <code>v</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-4.png" width="32"/></td><td><code>v = 'straight-motion-serifed'</code>, <code>cv46 = 4</code></td></tr><tr><td>Standard, straight <code>v</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-5.png" width="32"/></td><td><code>v = 'curly-motion-serifed'</code>, <code>cv46 = 5</code></td></tr><tr><td>Slightly curly <code>v</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv46-6.png" width="32"/></td><td><code>v = 'cursive-serifed'</code>, <code>cv46 = 6</code></td></tr><tr><td>Cursive <code>v</code> with motion serifs</td></tr></table>
   - Styles for `w`:
-    + `w = 'straight'`, `cv47 = 1`: Standard, straight `w`.
-    + `w = 'curly'`, `cv47 = 2`: Slightly curly `w`, like Iosevka 2.x.
-    + `w = 'straight-flat-top'`, `cv47 = 3`: Standard, straight `w`, and the middle is forced to be aligned the top.
-    + `w = 'straight-double-v'`, `cv47 = 4`: Straight `w` looks like double V.
-    + `w = 'straight-asymmetric'`, `cv47 = 5`: Straight `w` looks asymmetric.
-    + `w = 'straight-vertical-sides'`, `cv47 = 6`: Straight `w` with vertical sides.
-    + `w = 'cursive'`, `cv47 = 7`: Cursive `w`.
-    + `w = 'straight-motion-serifed'`, `cv47 = 8`: Standard, straight `w`, with motion serifs.
-    + `w = 'curly-motion-serifed'`, `cv47 = 9`: Slightly curly `w`, like Iosevka 2.x, with motion serifs.
-    + `w = 'straight-flat-top-motion-serifed'`, `cv47 = 10`: Standard, straight `w`, and the middle is forced to be aligned the top, with motion serifs.
-    + `w = 'straight-double-v-motion-serifed'`, `cv47 = 11`: Straight `w` looks like double V, with motion serifs.
-    + `w = 'straight-asymmetric-motion-serifed'`, `cv47 = 12`: Straight `w` looks asymmetric, with motion serifs.
-    + `w = 'straight-vertical-sides-motion-serifed'`, `cv47 = 13`: Straight `w` with vertical sides and motion serifs.
-    + `w = 'cursive-motion-serifed'`, `cv47 = 14`: Cursive `w` with motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-1.png" width="32"/></td><td><code>w = 'straight'</code>, <code>cv47 = 1</code></td></tr><tr><td>Standard, straight <code>w</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-2.png" width="32"/></td><td><code>w = 'curly'</code>, <code>cv47 = 2</code></td></tr><tr><td>Slightly curly <code>w</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-3.png" width="32"/></td><td><code>w = 'straight-flat-top'</code>, <code>cv47 = 3</code></td></tr><tr><td>Standard, straight <code>w</code>, and the middle is forced to be aligned the top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-4.png" width="32"/></td><td><code>w = 'straight-double-v'</code>, <code>cv47 = 4</code></td></tr><tr><td>Straight <code>w</code> looks like double V</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-5.png" width="32"/></td><td><code>w = 'straight-asymmetric'</code>, <code>cv47 = 5</code></td></tr><tr><td>Straight <code>w</code> looks asymmetric</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-6.png" width="32"/></td><td><code>w = 'straight-vertical-sides'</code>, <code>cv47 = 6</code></td></tr><tr><td>Straight <code>w</code> with vertical sides</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-7.png" width="32"/></td><td><code>w = 'cursive'</code>, <code>cv47 = 7</code></td></tr><tr><td>Cursive <code>w</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-8.png" width="32"/></td><td><code>w = 'straight-motion-serifed'</code>, <code>cv47 = 8</code></td></tr><tr><td>Standard, straight <code>w</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-9.png" width="32"/></td><td><code>w = 'curly-motion-serifed'</code>, <code>cv47 = 9</code></td></tr><tr><td>Slightly curly <code>w</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-10.png" width="32"/></td><td><code>w = 'straight-flat-top-motion-serifed'</code>, <code>cv47 = 10</code></td></tr><tr><td>Standard, straight <code>w</code>, and the middle is forced to be aligned the top, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-11.png" width="32"/></td><td><code>w = 'straight-double-v-motion-serifed'</code>, <code>cv47 = 11</code></td></tr><tr><td>Straight <code>w</code> looks like double V, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-12.png" width="32"/></td><td><code>w = 'straight-asymmetric-motion-serifed'</code>, <code>cv47 = 12</code></td></tr><tr><td>Straight <code>w</code> looks asymmetric, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-13.png" width="32"/></td><td><code>w = 'straight-vertical-sides-motion-serifed'</code>, <code>cv47 = 13</code></td></tr><tr><td>Straight <code>w</code> with vertical sides and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv47-14.png" width="32"/></td><td><code>w = 'cursive-motion-serifed'</code>, <code>cv47 = 14</code></td></tr><tr><td>Cursive <code>w</code> with motion serifs</td></tr></table>
   - Styles for `x`:
-    + `x = 'straight-serifless'`, `cv48 = 1`: Serifless, straight `x`.
-    + `x = 'curly-serifless'`, `cv48 = 2`: Serifless, slightly curly `x`, like Iosevka 2.x.
-    + `x = 'straight-motion-serifed'`, `cv48 = 3`: Straight `x` with motion serifs.
-    + `x = 'curly-motion-serifed'`, `cv48 = 4`: Slightly curly `x`, like Iosevka 2.x, with motion serifs.
-    + `x = 'straight-serifed'`, `cv48 = 5`: Straight `x` with full serifs.
-    + `x = 'curly-serifed'`, `cv48 = 6`: Slightly curly `x`, like Iosevka 2.x, with full serifs.
-    + `x = 'cursive'`, `cv48 = 7`: Cursive `x`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-1.png" width="32"/></td><td><code>x = 'straight-serifless'</code>, <code>cv48 = 1</code></td></tr><tr><td>Serifless, straight <code>x</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-2.png" width="32"/></td><td><code>x = 'curly-serifless'</code>, <code>cv48 = 2</code></td></tr><tr><td>Serifless, slightly curly <code>x</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-3.png" width="32"/></td><td><code>x = 'straight-motion-serifed'</code>, <code>cv48 = 3</code></td></tr><tr><td>Straight <code>x</code> with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-4.png" width="32"/></td><td><code>x = 'curly-motion-serifed'</code>, <code>cv48 = 4</code></td></tr><tr><td>Slightly curly <code>x</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-5.png" width="32"/></td><td><code>x = 'straight-serifed'</code>, <code>cv48 = 5</code></td></tr><tr><td>Straight <code>x</code> with full serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-6.png" width="32"/></td><td><code>x = 'curly-serifed'</code>, <code>cv48 = 6</code></td></tr><tr><td>Slightly curly <code>x</code>, like Iosevka 2.x, with full serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv48-7.png" width="32"/></td><td><code>x = 'cursive'</code>, <code>cv48 = 7</code></td></tr><tr><td>Cursive <code>x</code></td></tr></table>
   - Styles for `y`:
-    + `y = 'straight'`, `cv49 = 1`: Letter `y` that is fully straight.
-    + `y = 'straight-turn'`, `cv49 = 2`: Letter `y` with straight upper and a tail turns leftward.
-    + `y = 'curly'`, `cv49 = 3`: More curly letter `y`, like Iosevka 2.x.
-    + `y = 'curly-turn'`, `cv49 = 4`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward.
-    + `y = 'cursive'`, `cv49 = 5`: Cursive-like `y`.
-    + `y = 'cursive-flat-hook'`, `cv49 = 6`: Cursive-like `y` with flat terminal hook.
-    + `y = 'straight-motion-serifed'`, `cv49 = 7`: Letter `y` that is fully straight, with motion serifs.
-    + `y = 'straight-turn-motion-serifed'`, `cv49 = 8`: Letter `y` with straight upper and a tail turns leftward, and motion serifs.
-    + `y = 'curly-motion-serifed'`, `cv49 = 9`: More curly letter `y`, like Iosevka 2.x, with motion serifs.
-    + `y = 'curly-turn-motion-serifed'`, `cv49 = 10`: More curly letter `y`, like Iosevka 2.x, with a tail turns leftward and motion serifs.
-    + `y = 'cursive-motion-serifed'`, `cv49 = 11`: Cursive-like `y`, with motion serifs.
-    + `y = 'cursive-flat-hook-motion-serifed'`, `cv49 = 12`: Cursive-like `y` with flat terminal hook, and motion serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-1.png" width="32"/></td><td><code>y = 'straight'</code>, <code>cv49 = 1</code></td></tr><tr><td>Letter <code>y</code> that is fully straight</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-2.png" width="32"/></td><td><code>y = 'straight-turn'</code>, <code>cv49 = 2</code></td></tr><tr><td>Letter <code>y</code> with straight upper and a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-3.png" width="32"/></td><td><code>y = 'curly'</code>, <code>cv49 = 3</code></td></tr><tr><td>More curly letter <code>y</code>, like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-4.png" width="32"/></td><td><code>y = 'curly-turn'</code>, <code>cv49 = 4</code></td></tr><tr><td>More curly letter <code>y</code>, like Iosevka 2.x, with a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-5.png" width="32"/></td><td><code>y = 'cursive'</code>, <code>cv49 = 5</code></td></tr><tr><td>Cursive-like <code>y</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-6.png" width="32"/></td><td><code>y = 'cursive-flat-hook'</code>, <code>cv49 = 6</code></td></tr><tr><td>Cursive-like <code>y</code> with flat terminal hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-7.png" width="32"/></td><td><code>y = 'straight-motion-serifed'</code>, <code>cv49 = 7</code></td></tr><tr><td>Letter <code>y</code> that is fully straight, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-8.png" width="32"/></td><td><code>y = 'straight-turn-motion-serifed'</code>, <code>cv49 = 8</code></td></tr><tr><td>Letter <code>y</code> with straight upper and a tail turns leftward, and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-9.png" width="32"/></td><td><code>y = 'curly-motion-serifed'</code>, <code>cv49 = 9</code></td></tr><tr><td>More curly letter <code>y</code>, like Iosevka 2.x, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-10.png" width="32"/></td><td><code>y = 'curly-turn-motion-serifed'</code>, <code>cv49 = 10</code></td></tr><tr><td>More curly letter <code>y</code>, like Iosevka 2.x, with a tail turns leftward and motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-11.png" width="32"/></td><td><code>y = 'cursive-motion-serifed'</code>, <code>cv49 = 11</code></td></tr><tr><td>Cursive-like <code>y</code>, with motion serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv49-12.png" width="32"/></td><td><code>y = 'cursive-flat-hook-motion-serifed'</code>, <code>cv49 = 12</code></td></tr><tr><td>Cursive-like <code>y</code> with flat terminal hook, and motion serifs</td></tr></table>
   - Styles for `z`:
-    + `z = 'straight-serifless'`, `cv50 = 1`: Straight `z` without serifs.
-    + `z = 'straight-serifless-with-crossbar'`, `cv50 = 2`: Straight `z` with a diagonal crossbar, and without serifs.
-    + `z = 'straight-serifless-with-horizontal-crossbar'`, `cv50 = 3`: Straight `z` with a horizontal crossbar, and without serifs.
-    + `z = 'curly-serifless'`, `cv50 = 4`: Curly `z` without serifs.
-    + `z = 'curly-serifless-with-crossbar'`, `cv50 = 5`: Curly `z` with a diagonal crossbar, and without serifs.
-    + `z = 'curly-serifless-with-horizontal-crossbar'`, `cv50 = 6`: Curly `z` with a horizontal crossbar, and without serifs.
-    + `z = 'straight-serifed'`, `cv50 = 7`: Straight `z` with top and bottom serifs.
-    + `z = 'straight-serifed-with-crossbar'`, `cv50 = 8`: Straight `z` with a diagonal crossbar and serifs.
-    + `z = 'straight-serifed-with-horizontal-crossbar'`, `cv50 = 9`: Straight `z` with a horizontal crossbar and serifs.
-    + `z = 'curly-serifed'`, `cv50 = 10`: Curly `z` woth top and bottom serifs.
-    + `z = 'curly-serifed-with-crossbar'`, `cv50 = 11`: Curly `z` with a diagonal crossbar and serifs.
-    + `z = 'curly-serifed-with-horizontal-crossbar'`, `cv50 = 12`: Curly `z` with a horizontal crossbar and serifs.
-    + `z = 'straight-bottom-serifed'`, `cv50 = 13`: Standard `z` with serif at bottom.
-    + `z = 'straight-bottom-serifed-with-crossbar'`, `cv50 = 14`: Standard `z` with a diagonal crossbar and serif at bottom.
-    + `z = 'straight-bottom-serifed-with-horizontal-crossbar'`, `cv50 = 15`: Standard `z` with a horizontal crossbar and serif at bottom.
-    + `z = 'curly-bottom-serifed-with-crossbar'`, `cv50 = 16`: Curly `z` with serif at bottom.
-    + `z = 'curly-bottom-serifed-with-horizontal-crossbar'`, `cv50 = 17`: Curly `z` with a diagonal crossbar and serif at bottom.
-    + `z = 'curly-bottom-serifed'`, `cv50 = 18`: Curly `z` with a horizontal crossbar and serif at bottom.
-    + `z = 'straight-top-serifed'`, `cv50 = 19`: Standard `z` with serif at top.
-    + `z = 'straight-top-serifed-with-crossbar'`, `cv50 = 20`: Standard `z` with a diagonal crossbar and serif at top.
-    + `z = 'straight-top-serifed-with-horizontal-crossbar'`, `cv50 = 21`: Standard `z` with a horizontal crossbar and serif at top.
-    + `z = 'curly-top-serifed'`, `cv50 = 22`: Curly `z` with serif at top.
-    + `z = 'curly-top-serifed-with-crossbar'`, `cv50 = 23`: Curly `z` with a diagonal crossbar and serif at top.
-    + `z = 'curly-top-serifed-with-horizontal-crossbar'`, `cv50 = 24`: Curly `z` with a horizontal crossbar and serif at top.
-    + `z = 'cursive'`, `cv50 = 25`: Cursive `z`.
-    + `z = 'cursive-with-crossbar'`, `cv50 = 26`: Cursive `z` with a diagonal cross bar.
-    + `z = 'cursive-with-horizontal-crossbar'`, `cv50 = 27`: Cursive `z` with a horizontal cross bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-1.png" width="32"/></td><td><code>z = 'straight-serifless'</code>, <code>cv50 = 1</code></td></tr><tr><td>Straight <code>z</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-2.png" width="32"/></td><td><code>z = 'straight-serifless-with-crossbar'</code>, <code>cv50 = 2</code></td></tr><tr><td>Straight <code>z</code> with a diagonal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-3.png" width="32"/></td><td><code>z = 'straight-serifless-with-horizontal-crossbar'</code>, <code>cv50 = 3</code></td></tr><tr><td>Straight <code>z</code> with a horizontal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-4.png" width="32"/></td><td><code>z = 'curly-serifless'</code>, <code>cv50 = 4</code></td></tr><tr><td>Curly <code>z</code> without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-5.png" width="32"/></td><td><code>z = 'curly-serifless-with-crossbar'</code>, <code>cv50 = 5</code></td></tr><tr><td>Curly <code>z</code> with a diagonal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-6.png" width="32"/></td><td><code>z = 'curly-serifless-with-horizontal-crossbar'</code>, <code>cv50 = 6</code></td></tr><tr><td>Curly <code>z</code> with a horizontal crossbar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-7.png" width="32"/></td><td><code>z = 'straight-serifed'</code>, <code>cv50 = 7</code></td></tr><tr><td>Straight <code>z</code> with top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-8.png" width="32"/></td><td><code>z = 'straight-serifed-with-crossbar'</code>, <code>cv50 = 8</code></td></tr><tr><td>Straight <code>z</code> with a diagonal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-9.png" width="32"/></td><td><code>z = 'straight-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 9</code></td></tr><tr><td>Straight <code>z</code> with a horizontal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-10.png" width="32"/></td><td><code>z = 'curly-serifed'</code>, <code>cv50 = 10</code></td></tr><tr><td>Curly <code>z</code> woth top and bottom serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-11.png" width="32"/></td><td><code>z = 'curly-serifed-with-crossbar'</code>, <code>cv50 = 11</code></td></tr><tr><td>Curly <code>z</code> with a diagonal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-12.png" width="32"/></td><td><code>z = 'curly-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 12</code></td></tr><tr><td>Curly <code>z</code> with a horizontal crossbar and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-13.png" width="32"/></td><td><code>z = 'straight-bottom-serifed'</code>, <code>cv50 = 13</code></td></tr><tr><td>Standard <code>z</code> with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-14.png" width="32"/></td><td><code>z = 'straight-bottom-serifed-with-crossbar'</code>, <code>cv50 = 14</code></td></tr><tr><td>Standard <code>z</code> with a diagonal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-15.png" width="32"/></td><td><code>z = 'straight-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 15</code></td></tr><tr><td>Standard <code>z</code> with a horizontal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-16.png" width="32"/></td><td><code>z = 'curly-bottom-serifed-with-crossbar'</code>, <code>cv50 = 16</code></td></tr><tr><td>Curly <code>z</code> with serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-17.png" width="32"/></td><td><code>z = 'curly-bottom-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 17</code></td></tr><tr><td>Curly <code>z</code> with a diagonal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-18.png" width="32"/></td><td><code>z = 'curly-bottom-serifed'</code>, <code>cv50 = 18</code></td></tr><tr><td>Curly <code>z</code> with a horizontal crossbar and serif at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-19.png" width="32"/></td><td><code>z = 'straight-top-serifed'</code>, <code>cv50 = 19</code></td></tr><tr><td>Standard <code>z</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-20.png" width="32"/></td><td><code>z = 'straight-top-serifed-with-crossbar'</code>, <code>cv50 = 20</code></td></tr><tr><td>Standard <code>z</code> with a diagonal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-21.png" width="32"/></td><td><code>z = 'straight-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 21</code></td></tr><tr><td>Standard <code>z</code> with a horizontal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-22.png" width="32"/></td><td><code>z = 'curly-top-serifed'</code>, <code>cv50 = 22</code></td></tr><tr><td>Curly <code>z</code> with serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-23.png" width="32"/></td><td><code>z = 'curly-top-serifed-with-crossbar'</code>, <code>cv50 = 23</code></td></tr><tr><td>Curly <code>z</code> with a diagonal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-24.png" width="32"/></td><td><code>z = 'curly-top-serifed-with-horizontal-crossbar'</code>, <code>cv50 = 24</code></td></tr><tr><td>Curly <code>z</code> with a horizontal crossbar and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-25.png" width="32"/></td><td><code>z = 'cursive'</code>, <code>cv50 = 25</code></td></tr><tr><td>Cursive <code>z</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-26.png" width="32"/></td><td><code>z = 'cursive-with-crossbar'</code>, <code>cv50 = 26</code></td></tr><tr><td>Cursive <code>z</code> with a diagonal cross bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv50-27.png" width="32"/></td><td><code>z = 'cursive-with-horizontal-crossbar'</code>, <code>cv50 = 27</code></td></tr><tr><td>Cursive <code>z</code> with a horizontal cross bar</td></tr></table>
   - Styles for `ſ` (Long-S):
-    + `long-s = 'bent-hook'`, `cv51 = 1`: Long-S with standard bending hook.
-    + `long-s = 'flat-hook'`, `cv51 = 2`: Long-S with flat hook.
-    + `long-s = 'bent-hook-descending'`, `cv51 = 3`: Long-S with standard bending hook and descends baseline.
-    + `long-s = 'flat-hook-descending'`, `cv51 = 4`: Long-S with flat hook and descends baseline.
-    + `long-s = 'bent-hook-tailed'`, `cv51 = 5`: Long-S with standard bending hook and tail.
-    + `long-s = 'flat-hook-tailed'`, `cv51 = 6`: Long-S with flat hook and tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-1.png" width="32"/></td><td><code>long-s = 'bent-hook'</code>, <code>cv51 = 1</code></td></tr><tr><td>Long-S with standard bending hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-2.png" width="32"/></td><td><code>long-s = 'flat-hook'</code>, <code>cv51 = 2</code></td></tr><tr><td>Long-S with flat hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-3.png" width="32"/></td><td><code>long-s = 'bent-hook-descending'</code>, <code>cv51 = 3</code></td></tr><tr><td>Long-S with standard bending hook and descends baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-4.png" width="32"/></td><td><code>long-s = 'flat-hook-descending'</code>, <code>cv51 = 4</code></td></tr><tr><td>Long-S with flat hook and descends baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-5.png" width="32"/></td><td><code>long-s = 'bent-hook-tailed'</code>, <code>cv51 = 5</code></td></tr><tr><td>Long-S with standard bending hook and tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv51-6.png" width="32"/></td><td><code>long-s = 'flat-hook-tailed'</code>, <code>cv51 = 6</code></td></tr><tr><td>Long-S with flat hook and tail</td></tr></table>
   - Styles for `ß` (Eszet):
-    + `eszet = 'traditional'`, `cv52 = 1`: Traditional, Fraktur-like Eszet (`ß`).
-    + `eszet = 'traditional-descending'`, `cv52 = 2`: Traditional, Fraktur-like Eszet (`ß`) with descending bar.
-    + `eszet = 'traditional-tailed'`, `cv52 = 3`: Traditional, Fraktur-like Eszet (`ß`) with descending tail.
-    + `eszet = 'traditional-flat-hook'`, `cv52 = 4`: Traditional, Fraktur-like Eszet (`ß`) with flat hook.
-    + `eszet = 'traditional-flat-hook-descending'`, `cv52 = 5`: Traditional, Fraktur-like Eszet (`ß`) with flat hook and descending bar.
-    + `eszet = 'traditional-flat-hook-tailed'`, `cv52 = 6`: Traditional, Fraktur-like Eszet (`ß`) with flat hook and descending tail.
-    + `eszet = 'sulzbacher'`, `cv52 = 7`: More modern, beta-like Eszet (`ß`).
-    + `eszet = 'sulzbacher-descending'`, `cv52 = 8`: More modern, beta-like Eszet (`ß`) with descending bar.
-    + `eszet = 'sulzbacher-tailed'`, `cv52 = 9`: More modern, beta-like Eszet (`ß`) with descending tail.
-    + `eszet = 'longs-s-lig'`, `cv52 = 10`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`.
-    + `eszet = 'longs-s-lig-descending'`, `cv52 = 11`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`, with descending bar.
-    + `eszet = 'longs-s-lig-tailed'`, `cv52 = 12`: Eszet (`ß`) shown as a ligature of long-S (`ſ`) and `s`, with descending tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-1.png" width="32"/></td><td><code>eszet = 'traditional'</code>, <code>cv52 = 1</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-2.png" width="32"/></td><td><code>eszet = 'traditional-descending'</code>, <code>cv52 = 2</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>) with descending bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-3.png" width="32"/></td><td><code>eszet = 'traditional-tailed'</code>, <code>cv52 = 3</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>) with descending tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-4.png" width="32"/></td><td><code>eszet = 'traditional-flat-hook'</code>, <code>cv52 = 4</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>) with flat hook</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-5.png" width="32"/></td><td><code>eszet = 'traditional-flat-hook-descending'</code>, <code>cv52 = 5</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>) with flat hook and descending bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-6.png" width="32"/></td><td><code>eszet = 'traditional-flat-hook-tailed'</code>, <code>cv52 = 6</code></td></tr><tr><td>Traditional, Fraktur-like Eszet (<code>ß</code>) with flat hook and descending tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-7.png" width="32"/></td><td><code>eszet = 'sulzbacher'</code>, <code>cv52 = 7</code></td></tr><tr><td>More modern, beta-like Eszet (<code>ß</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-8.png" width="32"/></td><td><code>eszet = 'sulzbacher-descending'</code>, <code>cv52 = 8</code></td></tr><tr><td>More modern, beta-like Eszet (<code>ß</code>) with descending bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-9.png" width="32"/></td><td><code>eszet = 'sulzbacher-tailed'</code>, <code>cv52 = 9</code></td></tr><tr><td>More modern, beta-like Eszet (<code>ß</code>) with descending tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-10.png" width="32"/></td><td><code>eszet = 'longs-s-lig'</code>, <code>cv52 = 10</code></td></tr><tr><td>Eszet (<code>ß</code>) shown as a ligature of long-S (<code>ſ</code>) and <code>s</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-11.png" width="32"/></td><td><code>eszet = 'longs-s-lig-descending'</code>, <code>cv52 = 11</code></td></tr><tr><td>Eszet (<code>ß</code>) shown as a ligature of long-S (<code>ſ</code>) and <code>s</code>, with descending bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv52-12.png" width="32"/></td><td><code>eszet = 'longs-s-lig-tailed'</code>, <code>cv52 = 12</code></td></tr><tr><td>Eszet (<code>ß</code>) shown as a ligature of long-S (<code>ſ</code>) and <code>s</code>, with descending tail</td></tr></table>
   - Styles for `Λ`, `Δ` (Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`)):
-    + `turn-v = 'straight'`, `cv53 = 1`: Standard, straight Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`).
-    + `turn-v = 'curly'`, `cv53 = 2`: Slightly curly Greek capital Lambda (`Λ`) and Greek capital Delta (`Δ`), like Iosevka 2.x.
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv53-1.png" width="64"/></td><td><code>turn-v = 'straight'</code>, <code>cv53 = 1</code></td></tr><tr><td>Standard, straight Greek capital Lambda (<code>Λ</code>) and Greek capital Delta (<code>Δ</code>)</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv53-2.png" width="64"/></td><td><code>turn-v = 'curly'</code>, <code>cv53 = 2</code></td></tr><tr><td>Slightly curly Greek capital Lambda (<code>Λ</code>) and Greek capital Delta (<code>Δ</code>), like Iosevka 2.x</td></tr></table>
   - Styles for `α` (Greek lower Alpha):
-    + `lower-alpha = 'crossing'`, `cv54 = 1`: Greek lower Alpha (`α`) with a cross-like shape at right.
-    + `lower-alpha = 'tailed-barred'`, `cv54 = 2`: Greek lower Alpha (`α`) with a straight right bar and tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv54-1.png" width="32"/></td><td><code>lower-alpha = 'crossing'</code>, <code>cv54 = 1</code></td></tr><tr><td>Greek lower Alpha (<code>α</code>) with a cross-like shape at right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv54-2.png" width="32"/></td><td><code>lower-alpha = 'tailed-barred'</code>, <code>cv54 = 2</code></td></tr><tr><td>Greek lower Alpha (<code>α</code>) with a straight right bar and tail</td></tr></table>
   - Styles for `Γ` (Greek capital Gamma):
-    + `capital-gamma = 'serifless'`, `cv55 = 1`: Standard capital Gamma (`Γ`) without serifs.
-    + `capital-gamma = 'top-right-serifed'`, `cv55 = 2`: Standard capital Gamma (`Γ`) with serifs at top right.
-    + `capital-gamma = 'serifed'`, `cv55 = 3`: Standard capital Gamma (`Γ`) with motion serifs at top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-1.png" width="32"/></td><td><code>capital-gamma = 'serifless'</code>, <code>cv55 = 1</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-2.png" width="32"/></td><td><code>capital-gamma = 'top-right-serifed'</code>, <code>cv55 = 2</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) with serifs at top right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-3.png" width="32"/></td><td><code>capital-gamma = 'serifed'</code>, <code>cv55 = 3</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) with motion serifs at top and bottom</td></tr></table>
   - Styles for `ι` (Greek lower Iota):
-    + `lower-iota = 'zshaped'`, `cv56 = 1`: Z-shaped Greek lower Iota (`ι`).
-    + `lower-iota = 'hooky-bottom'`, `cv56 = 2`: Greek lower Iota (`ι`) with a sharp-turning horizontal tail.
-    + `lower-iota = 'tailed'`, `cv56 = 3`: Greek lower Iota (`ι`) with curly tail.
-    + `lower-iota = 'tailed-serifed'`, `cv56 = 4`: Greek lower Iota (`ι`) with top serif and curly tail.
-    + `lower-iota = 'flat-tailed'`, `cv56 = 5`: Greek lower Iota (`ι`) with a curly-then-flat tail.
-    + `lower-iota = 'serifed-flat-tailed'`, `cv56 = 6`: Greek lower Iota (`ι`) with top serif and a curly-then-flat tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-1.png" width="32"/></td><td><code>lower-iota = 'zshaped'</code>, <code>cv56 = 1</code></td></tr><tr><td>Z-shaped Greek lower Iota (<code>ι</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-2.png" width="32"/></td><td><code>lower-iota = 'hooky-bottom'</code>, <code>cv56 = 2</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a sharp-turning horizontal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-3.png" width="32"/></td><td><code>lower-iota = 'tailed'</code>, <code>cv56 = 3</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-4.png" width="32"/></td><td><code>lower-iota = 'tailed-serifed'</code>, <code>cv56 = 4</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-5.png" width="32"/></td><td><code>lower-iota = 'flat-tailed'</code>, <code>cv56 = 5</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-6.png" width="32"/></td><td><code>lower-iota = 'serifed-flat-tailed'</code>, <code>cv56 = 6</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and a curly-then-flat tail</td></tr></table>
   - Styles for `λ` (Greek small Lambda):
-    + `lower-lambda = 'straight'`, `cv57 = 1`: More-straight Greek small Lambda (`λ`).
-    + `lower-lambda = 'straight-turn'`, `cv57 = 2`: Greek small Lambda (`λ`) with straight upper and a tail turns leftward.
-    + `lower-lambda = 'curly'`, `cv57 = 3`: More curly Greek small Lambda (`λ`), like Iosevka 2.x.
-    + `lower-lambda = 'curly-turn'`, `cv57 = 4`: More curly Greek small Lambda (`λ`), like Iosevka 2.x, with a tail turns leftward.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-1.png" width="32"/></td><td><code>lower-lambda = 'straight'</code>, <code>cv57 = 1</code></td></tr><tr><td>More-straight Greek small Lambda (<code>λ</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-2.png" width="32"/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv57 = 2</code></td></tr><tr><td>Greek small Lambda (<code>λ</code>) with straight upper and a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-3.png" width="32"/></td><td><code>lower-lambda = 'curly'</code>, <code>cv57 = 3</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-4.png" width="32"/></td><td><code>lower-lambda = 'curly-turn'</code>, <code>cv57 = 4</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x, with a tail turns leftward</td></tr></table>
   - Styles for `З` (Cyrillic Capital Ze):
-    + `cyrl-capital-ze = 'serifless'`, `cv58 = 1`: Serifless Cyrillic Capital Ze (`З`).
-    + `cyrl-capital-ze = 'unilateral-serifed'`, `cv58 = 2`: Cyrillic Capital Ze (`З`) with serif.
-    + `cyrl-capital-ze = 'bilateral-serifed'`, `cv58 = 3`: Cyrillic Capital Ze (`З`) with serif.
-    + `cyrl-capital-ze = 'unilateral-inward-serifed'`, `cv58 = 4`: Cyrillic Capital Ze (`З`) with inward serif.
-    + `cyrl-capital-ze = 'bilateral-inward-serifed'`, `cv58 = 5`: Cyrillic Capital Ze (`З`) with inward serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-1.png" width="32"/></td><td><code>cyrl-capital-ze = 'serifless'</code>, <code>cv58 = 1</code></td></tr><tr><td>Serifless Cyrillic Capital Ze (<code>З</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-2.png" width="32"/></td><td><code>cyrl-capital-ze = 'unilateral-serifed'</code>, <code>cv58 = 2</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-3.png" width="32"/></td><td><code>cyrl-capital-ze = 'bilateral-serifed'</code>, <code>cv58 = 3</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-4.png" width="32"/></td><td><code>cyrl-capital-ze = 'unilateral-inward-serifed'</code>, <code>cv58 = 4</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-5.png" width="32"/></td><td><code>cyrl-capital-ze = 'bilateral-inward-serifed'</code>, <code>cv58 = 5</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif</td></tr></table>
   - Styles for `з` (Cyrillic Lower Ze):
-    + `cyrl-ze = 'serifless'`, `cv59 = 1`: Serifless Cyrillic Lower Ze (`з`).
-    + `cyrl-ze = 'unilateral-serifed'`, `cv59 = 2`: Cyrillic Lower Ze (`з`) with serif.
-    + `cyrl-ze = 'bilateral-serifed'`, `cv59 = 3`: Cyrillic Lower Ze (`з`) with serif.
-    + `cyrl-ze = 'unilateral-inward-serifed'`, `cv59 = 4`: Cyrillic Lower Ze (`з`) with inward serif.
-    + `cyrl-ze = 'bilateral-inward-serifed'`, `cv59 = 5`: Cyrillic Lower Ze (`з`) with inward serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv59-1.png" width="32"/></td><td><code>cyrl-ze = 'serifless'</code>, <code>cv59 = 1</code></td></tr><tr><td>Serifless Cyrillic Lower Ze (<code>з</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv59-2.png" width="32"/></td><td><code>cyrl-ze = 'unilateral-serifed'</code>, <code>cv59 = 2</code></td></tr><tr><td>Cyrillic Lower Ze (<code>з</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv59-3.png" width="32"/></td><td><code>cyrl-ze = 'bilateral-serifed'</code>, <code>cv59 = 3</code></td></tr><tr><td>Cyrillic Lower Ze (<code>з</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv59-4.png" width="32"/></td><td><code>cyrl-ze = 'unilateral-inward-serifed'</code>, <code>cv59 = 4</code></td></tr><tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv59-5.png" width="32"/></td><td><code>cyrl-ze = 'bilateral-inward-serifed'</code>, <code>cv59 = 5</code></td></tr><tr><td>Cyrillic Lower Ze (<code>з</code>) with inward serif</td></tr></table>
   - Styles for `К` (Cyrillic Capital Ka):
-    + `cyrl-capital-ka = 'straight-serifless'`, `cv60 = 1`: Cyrillic Capital Ka (`К`)  with standard shape.
-    + `cyrl-capital-ka = 'curly-serifless'`, `cv60 = 2`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x.
-    + `cyrl-capital-ka = 'symmetric-touching-serifless'`, `cv60 = 3`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar.
-    + `cyrl-capital-ka = 'symmetric-connected-serifless'`, `cv60 = 4`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar.
-    + `cyrl-capital-ka = 'straight-top-left-serifed'`, `cv60 = 5`: Cyrillic Capital Ka (`К`)  with standard shape and serifs at top left.
-    + `cyrl-capital-ka = 'curly-top-left-serifed'`, `cv60 = 6`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs at top left.
-    + `cyrl-capital-ka = 'symmetric-touching-top-left-serifed'`, `cv60 = 7`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs at top left.
-    + `cyrl-capital-ka = 'symmetric-connected-top-left-serifed'`, `cv60 = 8`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs at top left.
-    + `cyrl-capital-ka = 'straight-bottom-right-serifed'`, `cv60 = 9`: Cyrillic Capital Ka (`К`)  with standard shape and serifs at bottom right.
-    + `cyrl-capital-ka = 'curly-bottom-right-serifed'`, `cv60 = 10`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs at bottom right.
-    + `cyrl-capital-ka = 'symmetric-touching-bottom-right-serifed'`, `cv60 = 11`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs at bottom right.
-    + `cyrl-capital-ka = 'symmetric-connected-bottom-right-serifed'`, `cv60 = 12`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs at bottom right.
-    + `cyrl-capital-ka = 'straight-serifed'`, `cv60 = 13`: Cyrillic Capital Ka (`К`)  with standard shape and serifs.
-    + `cyrl-capital-ka = 'curly-serifed'`, `cv60 = 14`: Slightly curly Cyrillic Capital Ka (`К`) , like Iosevka 2.x, with serifs.
-    + `cyrl-capital-ka = 'symmetric-touching-serifed'`, `cv60 = 15`: Cyrillic Capital Ka (`К`)  with symmetric legs disconnected to the vertical bar, and serifs.
-    + `cyrl-capital-ka = 'symmetric-connected-serifed'`, `cv60 = 16`: Cyrillic Capital Ka (`К`)  with symmetric legs connected to the vertical bar, and serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-1.png" width="32"/></td><td><code>cyrl-capital-ka = 'straight-serifless'</code>, <code>cv60 = 1</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with standard shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-2.png" width="32"/></td><td><code>cyrl-capital-ka = 'curly-serifless'</code>, <code>cv60 = 2</code></td></tr><tr><td>Slightly curly Cyrillic Capital Ka (<code>К</code>) , like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-3.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-touching-serifless'</code>, <code>cv60 = 3</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs disconnected to the vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-4.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-connected-serifless'</code>, <code>cv60 = 4</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs connected to the vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-5.png" width="32"/></td><td><code>cyrl-capital-ka = 'straight-top-left-serifed'</code>, <code>cv60 = 5</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with standard shape and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-6.png" width="32"/></td><td><code>cyrl-capital-ka = 'curly-top-left-serifed'</code>, <code>cv60 = 6</code></td></tr><tr><td>Slightly curly Cyrillic Capital Ka (<code>К</code>) , like Iosevka 2.x, with serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-7.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-touching-top-left-serifed'</code>, <code>cv60 = 7</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs disconnected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-8.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-connected-top-left-serifed'</code>, <code>cv60 = 8</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs connected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-9.png" width="32"/></td><td><code>cyrl-capital-ka = 'straight-bottom-right-serifed'</code>, <code>cv60 = 9</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with standard shape and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-10.png" width="32"/></td><td><code>cyrl-capital-ka = 'curly-bottom-right-serifed'</code>, <code>cv60 = 10</code></td></tr><tr><td>Slightly curly Cyrillic Capital Ka (<code>К</code>) , like Iosevka 2.x, with serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-11.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-touching-bottom-right-serifed'</code>, <code>cv60 = 11</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs disconnected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-12.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-connected-bottom-right-serifed'</code>, <code>cv60 = 12</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs connected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-13.png" width="32"/></td><td><code>cyrl-capital-ka = 'straight-serifed'</code>, <code>cv60 = 13</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with standard shape and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-14.png" width="32"/></td><td><code>cyrl-capital-ka = 'curly-serifed'</code>, <code>cv60 = 14</code></td></tr><tr><td>Slightly curly Cyrillic Capital Ka (<code>К</code>) , like Iosevka 2.x, with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-15.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-touching-serifed'</code>, <code>cv60 = 15</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs disconnected to the vertical bar, and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv60-16.png" width="32"/></td><td><code>cyrl-capital-ka = 'symmetric-connected-serifed'</code>, <code>cv60 = 16</code></td></tr><tr><td>Cyrillic Capital Ka (<code>К</code>)  with symmetric legs connected to the vertical bar, and serifs</td></tr></table>
   - Styles for `к` (Cyrillic Ka):
-    + `cyrl-ka = 'straight-serifless'`, `cv61 = 1`: Cyrillic Lower Ka (`к`)  with standard shape, and without serifs.
-    + `cyrl-ka = 'curly-serifless'`, `cv61 = 2`: Slightly curly Cyrillic Lower Ka (`к`) , like Iosevka 2.x, and without serifs.
-    + `cyrl-ka = 'symmetric-touching-serifless'`, `cv61 = 3`: Cyrillic Lower Ka (`к`)  with symmetric legs disconnected to the vertical bar, and without serifs.
-    + `cyrl-ka = 'symmetric-connected-serifless'`, `cv61 = 4`: Cyrillic Lower Ka (`к`)  with symmetric legs connected to the vertical bar, and without serifs.
-    + `cyrl-ka = 'straight-top-left-serifed'`, `cv61 = 5`: Cyrillic Lower Ka (`к`)  with standard shape and serifs at top left.
-    + `cyrl-ka = 'curly-top-left-serifed'`, `cv61 = 6`: Slightly curly Cyrillic Lower Ka (`к`) , like Iosevka 2.x, with serifs at top left.
-    + `cyrl-ka = 'symmetric-touching-top-left-serifed'`, `cv61 = 7`: Cyrillic Lower Ka (`к`)  with symmetric legs disconnected to the vertical bar, and serifs at top left.
-    + `cyrl-ka = 'symmetric-connected-top-left-serifed'`, `cv61 = 8`: Cyrillic Lower Ka (`к`)  with symmetric legs connected to the vertical bar, and serifs at top left.
-    + `cyrl-ka = 'straight-bottom-right-serifed'`, `cv61 = 9`: Cyrillic Lower Ka (`к`)  with standard shape and serifs at bottom right.
-    + `cyrl-ka = 'curly-bottom-right-serifed'`, `cv61 = 10`: Slightly curly Cyrillic Lower Ka (`к`) , like Iosevka 2.x, with serifs at bottom right.
-    + `cyrl-ka = 'symmetric-touching-bottom-right-serifed'`, `cv61 = 11`: Cyrillic Lower Ka (`к`)  with symmetric legs disconnected to the vertical bar, and serifs at bottom right.
-    + `cyrl-ka = 'symmetric-connected-bottom-right-serifed'`, `cv61 = 12`: Cyrillic Lower Ka (`к`)  with symmetric legs connected to the vertical bar, and serifs at bottom right.
-    + `cyrl-ka = 'straight-serifed'`, `cv61 = 13`: Cyrillic Lower Ka (`к`)  with standard shape and serifs.
-    + `cyrl-ka = 'curly-serifed'`, `cv61 = 14`: Slightly curly Cyrillic Lower Ka (`к`) , like Iosevka 2.x, with serifs.
-    + `cyrl-ka = 'symmetric-touching-serifed'`, `cv61 = 15`: Cyrillic Lower Ka (`к`)  with symmetric legs disconnected to the vertical bar, and serifs.
-    + `cyrl-ka = 'symmetric-connected-serifed'`, `cv61 = 16`: Cyrillic Lower Ka (`к`)  with symmetric legs connected to the vertical bar, and serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-1.png" width="32"/></td><td><code>cyrl-ka = 'straight-serifless'</code>, <code>cv61 = 1</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with standard shape, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-2.png" width="32"/></td><td><code>cyrl-ka = 'curly-serifless'</code>, <code>cv61 = 2</code></td></tr><tr><td>Slightly curly Cyrillic Lower Ka (<code>к</code>) , like Iosevka 2.x, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-3.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-touching-serifless'</code>, <code>cv61 = 3</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs disconnected to the vertical bar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-4.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-connected-serifless'</code>, <code>cv61 = 4</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs connected to the vertical bar, and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-5.png" width="32"/></td><td><code>cyrl-ka = 'straight-top-left-serifed'</code>, <code>cv61 = 5</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with standard shape and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-6.png" width="32"/></td><td><code>cyrl-ka = 'curly-top-left-serifed'</code>, <code>cv61 = 6</code></td></tr><tr><td>Slightly curly Cyrillic Lower Ka (<code>к</code>) , like Iosevka 2.x, with serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-7.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-touching-top-left-serifed'</code>, <code>cv61 = 7</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs disconnected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-8.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-connected-top-left-serifed'</code>, <code>cv61 = 8</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs connected to the vertical bar, and serifs at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-9.png" width="32"/></td><td><code>cyrl-ka = 'straight-bottom-right-serifed'</code>, <code>cv61 = 9</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with standard shape and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-10.png" width="32"/></td><td><code>cyrl-ka = 'curly-bottom-right-serifed'</code>, <code>cv61 = 10</code></td></tr><tr><td>Slightly curly Cyrillic Lower Ka (<code>к</code>) , like Iosevka 2.x, with serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-11.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-touching-bottom-right-serifed'</code>, <code>cv61 = 11</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs disconnected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-12.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-connected-bottom-right-serifed'</code>, <code>cv61 = 12</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs connected to the vertical bar, and serifs at bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-13.png" width="32"/></td><td><code>cyrl-ka = 'straight-serifed'</code>, <code>cv61 = 13</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with standard shape and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-14.png" width="32"/></td><td><code>cyrl-ka = 'curly-serifed'</code>, <code>cv61 = 14</code></td></tr><tr><td>Slightly curly Cyrillic Lower Ka (<code>к</code>) , like Iosevka 2.x, with serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-15.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-touching-serifed'</code>, <code>cv61 = 15</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs disconnected to the vertical bar, and serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv61-16.png" width="32"/></td><td><code>cyrl-ka = 'symmetric-connected-serifed'</code>, <code>cv61 = 16</code></td></tr><tr><td>Cyrillic Lower Ka (<code>к</code>)  with symmetric legs connected to the vertical bar, and serifs</td></tr></table>
   - Styles for `л` (Cyrillic Lower El):
-    + `cyrl-el = 'straight'`, `cv62 = 1`: Cyrillic Lower El (`л`) with standard shape.
-    + `cyrl-el = 'tailed'`, `cv62 = 2`: Cyrillic Lower El (`л`) with tail shape.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv62-1.png" width="32"/></td><td><code>cyrl-el = 'straight'</code>, <code>cv62 = 1</code></td></tr><tr><td>Cyrillic Lower El (<code>л</code>) with standard shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv62-2.png" width="32"/></td><td><code>cyrl-el = 'tailed'</code>, <code>cv62 = 2</code></td></tr><tr><td>Cyrillic Lower El (<code>л</code>) with tail shape</td></tr></table>
   - Styles for `н` (Cyrillic Lower En):
-    + `cyrl-en = 'serifless'`, `cv63 = 1`: Cyrillic Lower En (`н`) with standard shape.
-    + `cyrl-en = 'tailed-serifless'`, `cv63 = 2`: Cyrillic Lower En (`н`) with tail.
-    + `cyrl-en = 'top-left-serifed'`, `cv63 = 3`: Cyrillic Lower En (`н`) with outward serifs only at top left.
-    + `cyrl-en = 'tailed-top-left-serifed'`, `cv63 = 4`: Cyrillic Lower En (`н`) with tail and outward serifs only at top left.
-    + `cyrl-en = 'top-left-bottom-right-serifed'`, `cv63 = 5`: Cyrillic Lower En (`н`) with outward serifs only at top left and bottom right.
-    + `cyrl-en = 'serifed'`, `cv63 = 6`: Cyrillic Lower En (`н`) with full serifs.
-    + `cyrl-en = 'tailed-serifed'`, `cv63 = 7`: Cyrillic Lower En (`н`) with tail and full serifs.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-1.png" width="32"/></td><td><code>cyrl-en = 'serifless'</code>, <code>cv63 = 1</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with standard shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-2.png" width="32"/></td><td><code>cyrl-en = 'tailed-serifless'</code>, <code>cv63 = 2</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-3.png" width="32"/></td><td><code>cyrl-en = 'top-left-serifed'</code>, <code>cv63 = 3</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with outward serifs only at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-4.png" width="32"/></td><td><code>cyrl-en = 'tailed-top-left-serifed'</code>, <code>cv63 = 4</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with tail and outward serifs only at top left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-5.png" width="32"/></td><td><code>cyrl-en = 'top-left-bottom-right-serifed'</code>, <code>cv63 = 5</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with outward serifs only at top left and bottom right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-6.png" width="32"/></td><td><code>cyrl-en = 'serifed'</code>, <code>cv63 = 6</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with full serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv63-7.png" width="32"/></td><td><code>cyrl-en = 'tailed-serifed'</code>, <code>cv63 = 7</code></td></tr><tr><td>Cyrillic Lower En (<code>н</code>) with tail and full serifs</td></tr></table>
   - Styles for `ф` (Cyrillic Lower Ef):
-    + `cyrl-ef = 'serifless'`, `cv64 = 1`: Cyrillic Lower Ef (`ф`) with standard shape and without serifs.
-    + `cyrl-ef = 'cursive'`, `cv64 = 2`: Cyrillic Lower Ef (`ф`) with cursive shape.
-    + `cyrl-ef = 'top-serifed'`, `cv64 = 3`: Cyrillic Lower Ef (`ф`) with standard shape and serif at top.
-    + `cyrl-ef = 'serifed'`, `cv64 = 4`: Cyrillic Lower Ef (`ф`) with standard shape and serifs at top and bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv64-1.png" width="32"/></td><td><code>cyrl-ef = 'serifless'</code>, <code>cv64 = 1</code></td></tr><tr><td>Cyrillic Lower Ef (<code>ф</code>) with standard shape and without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv64-2.png" width="32"/></td><td><code>cyrl-ef = 'cursive'</code>, <code>cv64 = 2</code></td></tr><tr><td>Cyrillic Lower Ef (<code>ф</code>) with cursive shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv64-3.png" width="32"/></td><td><code>cyrl-ef = 'top-serifed'</code>, <code>cv64 = 3</code></td></tr><tr><td>Cyrillic Lower Ef (<code>ф</code>) with standard shape and serif at top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv64-4.png" width="32"/></td><td><code>cyrl-ef = 'serifed'</code>, <code>cv64 = 4</code></td></tr><tr><td>Cyrillic Lower Ef (<code>ф</code>) with standard shape and serifs at top and bottom</td></tr></table>
   - Styles for `ч` (Cyrillic Lower Che):
-    + `cyrl-che = 'standard'`, `cv65 = 1`: Cyrillic Lower Che (`ч`) with standard shape.
-    + `cyrl-che = 'tailed'`, `cv65 = 2`: Cyrillic Lower Che (`ч`) with tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv65-1.png" width="32"/></td><td><code>cyrl-che = 'standard'</code>, <code>cv65 = 1</code></td></tr><tr><td>Cyrillic Lower Che (<code>ч</code>) with standard shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv65-2.png" width="32"/></td><td><code>cyrl-che = 'tailed'</code>, <code>cv65 = 2</code></td></tr><tr><td>Cyrillic Lower Che (<code>ч</code>) with tail</td></tr></table>
   - Styles for `У` (Cyrillic Capital U):
-    + `cyrl-capital-u = 'straight'`, `cv66 = 1`: Cyrillic capital U (`У`) that is fully straight.
-    + `cyrl-capital-u = 'straight-turn'`, `cv66 = 2`: Cyrillic capital U (`У`) with straight upper and a tail turns leftward.
-    + `cyrl-capital-u = 'curly'`, `cv66 = 3`: More curly Cyrillic capital U (`У`), like Iosevka 2.x.
-    + `cyrl-capital-u = 'curly-turn'`, `cv66 = 4`: More curly Cyrillic capital U (`У`), like Iosevka 2.x, with a tail turns leftward.
-    + `cyrl-capital-u = 'cursive'`, `cv66 = 5`: Cursive-like Cyrillic capital U (`У`).
-    + `cyrl-capital-u = 'cursive-flat-hook'`, `cv66 = 6`: Cursive-like Cyrillic capital U (`У`) with flat terminal hook.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-1.png" width="32"/></td><td><code>cyrl-capital-u = 'straight'</code>, <code>cv66 = 1</code></td></tr><tr><td>Cyrillic capital U (<code>У</code>) that is fully straight</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-2.png" width="32"/></td><td><code>cyrl-capital-u = 'straight-turn'</code>, <code>cv66 = 2</code></td></tr><tr><td>Cyrillic capital U (<code>У</code>) with straight upper and a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-3.png" width="32"/></td><td><code>cyrl-capital-u = 'curly'</code>, <code>cv66 = 3</code></td></tr><tr><td>More curly Cyrillic capital U (<code>У</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-4.png" width="32"/></td><td><code>cyrl-capital-u = 'curly-turn'</code>, <code>cv66 = 4</code></td></tr><tr><td>More curly Cyrillic capital U (<code>У</code>), like Iosevka 2.x, with a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-5.png" width="32"/></td><td><code>cyrl-capital-u = 'cursive'</code>, <code>cv66 = 5</code></td></tr><tr><td>Cursive-like Cyrillic capital U (<code>У</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv66-6.png" width="32"/></td><td><code>cyrl-capital-u = 'cursive-flat-hook'</code>, <code>cv66 = 6</code></td></tr><tr><td>Cursive-like Cyrillic capital U (<code>У</code>) with flat terminal hook</td></tr></table>
   - Styles for `Я` (Cyrillic Capital Ya):
-    + `cyrl-capital-ya = 'straight'`, `cv67 = 1`: Standard, straight-leg Cyrillic Capital Ya (`Я`).
-    + `cyrl-capital-ya = 'curly'`, `cv67 = 2`: Slightly curly-legged Cyrillic Capital Ya (`Я`), like Iosevka 2.x.
-    + `cyrl-capital-ya = 'standing'`, `cv67 = 3`: Cyrillic Capital Ya (`Я`) with near-vertical standing leg.
-    + `cyrl-capital-ya = 'straight-open'`, `cv67 = 4`: Standard, straight-leg Cyrillic Capital Ya (`Я`), with open contour at bottom.
-    + `cyrl-capital-ya = 'curly-open'`, `cv67 = 5`:  Slightly curly-legged Cyrillic Capital Ya (`Я`), like Iosevka 2.x, with open contour at bottom.
-    + `cyrl-capital-ya = 'standing-open'`, `cv67 = 6`: Cyrillic Capital Ya (`Я`) with near-vertical standing leg, with open contour at bottom.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-1.png" width="32"/></td><td><code>cyrl-capital-ya = 'straight'</code>, <code>cv67 = 1</code></td></tr><tr><td>Standard, straight-leg Cyrillic Capital Ya (<code>Я</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-2.png" width="32"/></td><td><code>cyrl-capital-ya = 'curly'</code>, <code>cv67 = 2</code></td></tr><tr><td>Slightly curly-legged Cyrillic Capital Ya (<code>Я</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-3.png" width="32"/></td><td><code>cyrl-capital-ya = 'standing'</code>, <code>cv67 = 3</code></td></tr><tr><td>Cyrillic Capital Ya (<code>Я</code>) with near-vertical standing leg</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-4.png" width="32"/></td><td><code>cyrl-capital-ya = 'straight-open'</code>, <code>cv67 = 4</code></td></tr><tr><td>Standard, straight-leg Cyrillic Capital Ya (<code>Я</code>), with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-5.png" width="32"/></td><td><code>cyrl-capital-ya = 'curly-open'</code>, <code>cv67 = 5</code></td></tr><tr><td> Slightly curly-legged Cyrillic Capital Ya (<code>Я</code>), like Iosevka 2.x, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv67-6.png" width="32"/></td><td><code>cyrl-capital-ya = 'standing-open'</code>, <code>cv67 = 6</code></td></tr><tr><td>Cyrillic Capital Ya (<code>Я</code>) with near-vertical standing leg, with open contour at bottom</td></tr></table>
   - Styles for `я` (Cyrillic Lower Ya):
-    + `cyrl-ya = 'straight'`, `cv68 = 1`: Standard, straight-leg Cyrillic Lower Ya (`я`).
-    + `cyrl-ya = 'curly'`, `cv68 = 2`: Slightly curly-legged Cyrillic Lower Ya (`я`), like Iosevka 2.x.
-    + `cyrl-ya = 'standing'`, `cv68 = 3`: Cyrillic Lower Ya (`я`) with near-vertical standing leg.
-    + `cyrl-ya = 'straight-open'`, `cv68 = 4`: Standard, straight-leg Cyrillic Lower Ya (`я`), with open contour at bottom.
-    + `cyrl-ya = 'curly-open'`, `cv68 = 5`:  Slightly curly-legged Cyrillic Lower Ya (`я`), like Iosevka 2.x, with open contour at bottom.
-    + `cyrl-ya = 'standing-open'`, `cv68 = 6`: Cyrillic Lower Ya (`я`) with near-vertical standing leg, with open contour at bottom.
-    + `cyrl-ya = 'straight-tailed'`, `cv68 = 7`: Standard, straight-leg Cyrillic Lower Ya (`я`), with tail.
-    + `cyrl-ya = 'curly-tailed'`, `cv68 = 8`:  Slightly curly-legged Cyrillic Lower Ya (`я`), like Iosevka 2.x, with tail.
-    + `cyrl-ya = 'standing-tailed'`, `cv68 = 9`: Cyrillic Lower Ya (`я`) with near-vertical standing leg.
-    + `cyrl-ya = 'straight-open-tailed'`, `cv68 = 10`: Standard, straight-leg Cyrillic Lower Ya (`я`), with open contour at bottom and tail.
-    + `cyrl-ya = 'curly-open-tailed'`, `cv68 = 11`:  Slightly curly-legged Cyrillic Lower Ya (`я`), like Iosevka 2.x, with open contour at bottom and tail.
-    + `cyrl-ya = 'standing-open-tailed'`, `cv68 = 12`: Cyrillic Lower Ya (`я`) with near-vertical standing leg, with open contour at bottom and tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-1.png" width="32"/></td><td><code>cyrl-ya = 'straight'</code>, <code>cv68 = 1</code></td></tr><tr><td>Standard, straight-leg Cyrillic Lower Ya (<code>я</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-2.png" width="32"/></td><td><code>cyrl-ya = 'curly'</code>, <code>cv68 = 2</code></td></tr><tr><td>Slightly curly-legged Cyrillic Lower Ya (<code>я</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-3.png" width="32"/></td><td><code>cyrl-ya = 'standing'</code>, <code>cv68 = 3</code></td></tr><tr><td>Cyrillic Lower Ya (<code>я</code>) with near-vertical standing leg</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-4.png" width="32"/></td><td><code>cyrl-ya = 'straight-open'</code>, <code>cv68 = 4</code></td></tr><tr><td>Standard, straight-leg Cyrillic Lower Ya (<code>я</code>), with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-5.png" width="32"/></td><td><code>cyrl-ya = 'curly-open'</code>, <code>cv68 = 5</code></td></tr><tr><td> Slightly curly-legged Cyrillic Lower Ya (<code>я</code>), like Iosevka 2.x, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-6.png" width="32"/></td><td><code>cyrl-ya = 'standing-open'</code>, <code>cv68 = 6</code></td></tr><tr><td>Cyrillic Lower Ya (<code>я</code>) with near-vertical standing leg, with open contour at bottom</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-7.png" width="32"/></td><td><code>cyrl-ya = 'straight-tailed'</code>, <code>cv68 = 7</code></td></tr><tr><td>Standard, straight-leg Cyrillic Lower Ya (<code>я</code>), with tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-8.png" width="32"/></td><td><code>cyrl-ya = 'curly-tailed'</code>, <code>cv68 = 8</code></td></tr><tr><td> Slightly curly-legged Cyrillic Lower Ya (<code>я</code>), like Iosevka 2.x, with tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-9.png" width="32"/></td><td><code>cyrl-ya = 'standing-tailed'</code>, <code>cv68 = 9</code></td></tr><tr><td>Cyrillic Lower Ya (<code>я</code>) with near-vertical standing leg</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-10.png" width="32"/></td><td><code>cyrl-ya = 'straight-open-tailed'</code>, <code>cv68 = 10</code></td></tr><tr><td>Standard, straight-leg Cyrillic Lower Ya (<code>я</code>), with open contour at bottom and tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-11.png" width="32"/></td><td><code>cyrl-ya = 'curly-open-tailed'</code>, <code>cv68 = 11</code></td></tr><tr><td> Slightly curly-legged Cyrillic Lower Ya (<code>я</code>), like Iosevka 2.x, with open contour at bottom and tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv68-12.png" width="32"/></td><td><code>cyrl-ya = 'standing-open-tailed'</code>, <code>cv68 = 12</code></td></tr><tr><td>Cyrillic Lower Ya (<code>я</code>) with near-vertical standing leg, with open contour at bottom and tail</td></tr></table>
   - Styles for `ь` (Cyrillic Lower Yeri and related letters):
-    + `cyrl-yeri = 'corner'`, `cv69 = 1`: Cyrillic Lower Yeri (`ь`) with corner at bottom left.
-    + `cyrl-yeri = 'round'`, `cv69 = 2`: Cyrillic Lower Yeri (`ь`) with rounded shape.
-    + `cyrl-yeri = 'cursive'`, `cv69 = 3`: Cyrillic Lower Yeri (`ь`) with cursive shape.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv69-1.png" width="32"/></td><td><code>cyrl-yeri = 'corner'</code>, <code>cv69 = 1</code></td></tr><tr><td>Cyrillic Lower Yeri (<code>ь</code>) with corner at bottom left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv69-2.png" width="32"/></td><td><code>cyrl-yeri = 'round'</code>, <code>cv69 = 2</code></td></tr><tr><td>Cyrillic Lower Yeri (<code>ь</code>) with rounded shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv69-3.png" width="32"/></td><td><code>cyrl-yeri = 'cursive'</code>, <code>cv69 = 3</code></td></tr><tr><td>Cyrillic Lower Yeri (<code>ь</code>) with cursive shape</td></tr></table>
   - Styles for `ы` (Cyrillic Lower Yery):
-    + `cyrl-yery = 'corner'`, `cv70 = 1`: Cyrillic Lower Yery (`ы`) with corner at bottom left.
-    + `cyrl-yery = 'round'`, `cv70 = 2`: Cyrillic Lower Yery (`ы`) with rounded shape.
-    + `cyrl-yery = 'cursive'`, `cv70 = 3`: Cyrillic Lower Yery (`ы`) with cursive shape.
-    + `cyrl-yery = 'corner-tailed'`, `cv70 = 4`: Cyrillic Lower Yery (`ы`) with corner at bottom left and tail.
-    + `cyrl-yery = 'round-tailed'`, `cv70 = 5`: Cyrillic Lower Yery (`ы`) with rounded shape and tail.
-    + `cyrl-yery = 'cursive-tailed'`, `cv70 = 6`: Cyrillic Lower Yery (`ы`) with cursive shape and tail.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-1.png" width="32"/></td><td><code>cyrl-yery = 'corner'</code>, <code>cv70 = 1</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with corner at bottom left</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-2.png" width="32"/></td><td><code>cyrl-yery = 'round'</code>, <code>cv70 = 2</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with rounded shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-3.png" width="32"/></td><td><code>cyrl-yery = 'cursive'</code>, <code>cv70 = 3</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-4.png" width="32"/></td><td><code>cyrl-yery = 'corner-tailed'</code>, <code>cv70 = 4</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with corner at bottom left and tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-5.png" width="32"/></td><td><code>cyrl-yery = 'round-tailed'</code>, <code>cv70 = 5</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with rounded shape and tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv70-6.png" width="32"/></td><td><code>cyrl-yery = 'cursive-tailed'</code>, <code>cv70 = 6</code></td></tr><tr><td>Cyrillic Lower Yery (<code>ы</code>) with cursive shape and tail</td></tr></table>
   - Styles for `0`:
-    + `zero = 'unslashed'`, `cv71 = 1`: O-like Zero (`0`).
-    + `zero = 'slashed'`, `cv71 = 2`: Slashed Zero (`0`).
-    + `zero = 'reverse-slashed'`, `cv71 = 3`: Reverse-slashed Zero (`0`).
-    + `zero = 'dotted'`, `cv71 = 4`: Dotted Zero (`0`).
-    + `zero = 'long-dotted'`, `cv71 = 5`: Long-dotted Zero (`0`) like Hack.
-    + `zero = 'unslashed-oval'`, `cv71 = 6`: O-like Zero (`0`) but more round.
-    + `zero = 'slashed-oval'`, `cv71 = 7`: Slashed Zero (`0`) but more round.
-    + `zero = 'reverse-slashed-oval'`, `cv71 = 8`: Reverse-slashed Zero (`0`) but more round.
-    + `zero = 'dotted-oval'`, `cv71 = 9`: Dotted Zero (`0`).
-    + `zero = 'long-dotted-oval'`, `cv71 = 10`: Long-dotted Zero (`0`) like Hack.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-1.png" width="32"/></td><td><code>zero = 'unslashed'</code>, <code>cv71 = 1</code></td></tr><tr><td>O-like Zero (<code>0</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-2.png" width="32"/></td><td><code>zero = 'slashed'</code>, <code>cv71 = 2</code></td></tr><tr><td>Slashed Zero (<code>0</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-3.png" width="32"/></td><td><code>zero = 'reverse-slashed'</code>, <code>cv71 = 3</code></td></tr><tr><td>Reverse-slashed Zero (<code>0</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-4.png" width="32"/></td><td><code>zero = 'dotted'</code>, <code>cv71 = 4</code></td></tr><tr><td>Dotted Zero (<code>0</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-5.png" width="32"/></td><td><code>zero = 'long-dotted'</code>, <code>cv71 = 5</code></td></tr><tr><td>Long-dotted Zero (<code>0</code>) like Hack</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-6.png" width="32"/></td><td><code>zero = 'unslashed-oval'</code>, <code>cv71 = 6</code></td></tr><tr><td>O-like Zero (<code>0</code>) but more round</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-7.png" width="32"/></td><td><code>zero = 'slashed-oval'</code>, <code>cv71 = 7</code></td></tr><tr><td>Slashed Zero (<code>0</code>) but more round</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-8.png" width="32"/></td><td><code>zero = 'reverse-slashed-oval'</code>, <code>cv71 = 8</code></td></tr><tr><td>Reverse-slashed Zero (<code>0</code>) but more round</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-9.png" width="32"/></td><td><code>zero = 'dotted-oval'</code>, <code>cv71 = 9</code></td></tr><tr><td>Dotted Zero (<code>0</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv71-10.png" width="32"/></td><td><code>zero = 'long-dotted-oval'</code>, <code>cv71 = 10</code></td></tr><tr><td>Long-dotted Zero (<code>0</code>) like Hack</td></tr></table>
   - Styles for `1`:
-    + `one = 'nobase'`, `cv72 = 1`: `1` without bottom serif.
-    + `one = 'base'`, `cv72 = 2`: `1` with bottom serif.
-    + `one = 'line'`, `cv72 = 3`: `1` drawn just like a straight line.
-    + `one = 'nobase-long-top-serif'`, `cv72 = 4`: `1` without bottom serif and with a long top serif.
-    + `one = 'base-long-top-serif'`, `cv72 = 5`: `1` with bottom serif and a long top serif.
-    + `one = 'nobase-flat-top-serif'`, `cv72 = 6`: `1` without bottom serif and with a flat top serif.
-    + `one = 'base-flat-top-serif'`, `cv72 = 7`: `1` with bottom serif and a flat top serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-1.png" width="32"/></td><td><code>one = 'nobase'</code>, <code>cv72 = 1</code></td></tr><tr><td><code>1</code> without bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-2.png" width="32"/></td><td><code>one = 'base'</code>, <code>cv72 = 2</code></td></tr><tr><td><code>1</code> with bottom serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-3.png" width="32"/></td><td><code>one = 'line'</code>, <code>cv72 = 3</code></td></tr><tr><td><code>1</code> drawn just like a straight line</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-4.png" width="32"/></td><td><code>one = 'nobase-long-top-serif'</code>, <code>cv72 = 4</code></td></tr><tr><td><code>1</code> without bottom serif and with a long top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-5.png" width="32"/></td><td><code>one = 'base-long-top-serif'</code>, <code>cv72 = 5</code></td></tr><tr><td><code>1</code> with bottom serif and a long top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-6.png" width="32"/></td><td><code>one = 'nobase-flat-top-serif'</code>, <code>cv72 = 6</code></td></tr><tr><td><code>1</code> without bottom serif and with a flat top serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv72-7.png" width="32"/></td><td><code>one = 'base-flat-top-serif'</code>, <code>cv72 = 7</code></td></tr><tr><td><code>1</code> with bottom serif and a flat top serif</td></tr></table>
   - Styles for `2`:
-    + `two = 'straight-neck'`, `cv73 = 1`: `2` with straight neck.
-    + `two = 'curly-neck'`, `cv73 = 2`: `2` with curly neck.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv73-1.png" width="32"/></td><td><code>two = 'straight-neck'</code>, <code>cv73 = 1</code></td></tr><tr><td><code>2</code> with straight neck</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv73-2.png" width="32"/></td><td><code>two = 'curly-neck'</code>, <code>cv73 = 2</code></td></tr><tr><td><code>2</code> with curly neck</td></tr></table>
   - Styles for `3`:
-    + `three = 'flattop'`, `cv74 = 1`: Flat top `3` (Like Museo Sans / Montserrat).
-    + `three = 'twoarcs'`, `cv74 = 2`: Arched top `3`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv74-1.png" width="32"/></td><td><code>three = 'flattop'</code>, <code>cv74 = 1</code></td></tr><tr><td>Flat top <code>3</code> (Like Museo Sans / Montserrat)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv74-2.png" width="32"/></td><td><code>three = 'twoarcs'</code>, <code>cv74 = 2</code></td></tr><tr><td>Arched top <code>3</code></td></tr></table>
   - Styles for `4`:
-    + `four = 'closed'`, `cv75 = 1`: `4` with closed contour.
-    + `four = 'closed-non-crossing'`, `cv75 = 2`: `4` with closed contour but the horizontal bar does not overflow the vertical bar.
-    + `four = 'semi-open'`, `cv75 = 3`: `4` with semi-open contour.
-    + `four = 'semi-open-non-crossing'`, `cv75 = 4`: `4` with semi-open contour but the horizontal bar does not overflow the vertical bar.
-    + `four = 'open'`, `cv75 = 5`: `4` with open contour.
-    + `four = 'open-non-crossing'`, `cv75 = 6`: `4` with open contour but the horizontal bar does not overflow the vertical bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-1.png" width="32"/></td><td><code>four = 'closed'</code>, <code>cv75 = 1</code></td></tr><tr><td><code>4</code> with closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-2.png" width="32"/></td><td><code>four = 'closed-non-crossing'</code>, <code>cv75 = 2</code></td></tr><tr><td><code>4</code> with closed contour but the horizontal bar does not overflow the vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-3.png" width="32"/></td><td><code>four = 'semi-open'</code>, <code>cv75 = 3</code></td></tr><tr><td><code>4</code> with semi-open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-4.png" width="32"/></td><td><code>four = 'semi-open-non-crossing'</code>, <code>cv75 = 4</code></td></tr><tr><td><code>4</code> with semi-open contour but the horizontal bar does not overflow the vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-5.png" width="32"/></td><td><code>four = 'open'</code>, <code>cv75 = 5</code></td></tr><tr><td><code>4</code> with open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv75-6.png" width="32"/></td><td><code>four = 'open-non-crossing'</code>, <code>cv75 = 6</code></td></tr><tr><td><code>4</code> with open contour but the horizontal bar does not overflow the vertical bar</td></tr></table>
   - Styles for `5`:
-    + `five = 'vertical-upper-left-bar'`, `cv76 = 1`: `5` with a vertical upper-left bar.
-    + `five = 'oblique-upper-left-bar'`, `cv76 = 2`: `5` with an oblique upper-left bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv76-1.png" width="32"/></td><td><code>five = 'vertical-upper-left-bar'</code>, <code>cv76 = 1</code></td></tr><tr><td><code>5</code> with a vertical upper-left bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv76-2.png" width="32"/></td><td><code>five = 'oblique-upper-left-bar'</code>, <code>cv76 = 2</code></td></tr><tr><td><code>5</code> with an oblique upper-left bar</td></tr></table>
   - Styles for `6`:
-    + `six = 'closed-contour'`, `cv77 = 1`: `6` with a more closed contour.
-    + `six = 'open-contour'`, `cv77 = 2`: `6` with a more open contour.
-    + `six = 'straight-bar'`, `cv77 = 3`: `6` with a straight bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv77-1.png" width="32"/></td><td><code>six = 'closed-contour'</code>, <code>cv77 = 1</code></td></tr><tr><td><code>6</code> with a more closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv77-2.png" width="32"/></td><td><code>six = 'open-contour'</code>, <code>cv77 = 2</code></td></tr><tr><td><code>6</code> with a more open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv77-3.png" width="32"/></td><td><code>six = 'straight-bar'</code>, <code>cv77 = 3</code></td></tr><tr><td><code>6</code> with a straight bar</td></tr></table>
   - Styles for `7`:
-    + `seven = 'straight-serifless'`, `cv78 = 1`: `7` with straight stem and without serif.
-    + `seven = 'straight-serifed'`, `cv78 = 2`: `7` with straight stem and initial serif.
-    + `seven = 'bend-serifless'`, `cv78 = 3`: `7` with bend stem and without serif.
-    + `seven = 'bend-serifed'`, `cv78 = 4`: `7` with bend stem and initial serif.
-    + `seven = 'curly-serifless'`, `cv78 = 5`: `7` with curly stem and without serif.
-    + `seven = 'curly-serifed'`, `cv78 = 6`: `7` with curly stem and initial serif.
-    + `seven = 'straight-crossbar'`, `cv78 = 7`: `7` with straight stem and crossbar.
-    + `seven = 'straight-crossbar-serifed'`, `cv78 = 8`: `7` with straight stem, crossbar and initial serif.
-    + `seven = 'bend-crossbar'`, `cv78 = 9`: `7` with bend stem and crossbar.
-    + `seven = 'bend-crossbar-serifed'`, `cv78 = 10`: `7` with bend stem, crossbar and initial serif.
-    + `seven = 'curly-crossbar'`, `cv78 = 11`: `7` with curly stem and crossbar.
-    + `seven = 'curly-crossbar-serifed'`, `cv78 = 12`: `7` with curly stem, crossbar and initial serif.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-1.png" width="32"/></td><td><code>seven = 'straight-serifless'</code>, <code>cv78 = 1</code></td></tr><tr><td><code>7</code> with straight stem and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-2.png" width="32"/></td><td><code>seven = 'straight-serifed'</code>, <code>cv78 = 2</code></td></tr><tr><td><code>7</code> with straight stem and initial serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-3.png" width="32"/></td><td><code>seven = 'bend-serifless'</code>, <code>cv78 = 3</code></td></tr><tr><td><code>7</code> with bend stem and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-4.png" width="32"/></td><td><code>seven = 'bend-serifed'</code>, <code>cv78 = 4</code></td></tr><tr><td><code>7</code> with bend stem and initial serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-5.png" width="32"/></td><td><code>seven = 'curly-serifless'</code>, <code>cv78 = 5</code></td></tr><tr><td><code>7</code> with curly stem and without serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-6.png" width="32"/></td><td><code>seven = 'curly-serifed'</code>, <code>cv78 = 6</code></td></tr><tr><td><code>7</code> with curly stem and initial serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-7.png" width="32"/></td><td><code>seven = 'straight-crossbar'</code>, <code>cv78 = 7</code></td></tr><tr><td><code>7</code> with straight stem and crossbar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-8.png" width="32"/></td><td><code>seven = 'straight-crossbar-serifed'</code>, <code>cv78 = 8</code></td></tr><tr><td><code>7</code> with straight stem, crossbar and initial serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-9.png" width="32"/></td><td><code>seven = 'bend-crossbar'</code>, <code>cv78 = 9</code></td></tr><tr><td><code>7</code> with bend stem and crossbar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-10.png" width="32"/></td><td><code>seven = 'bend-crossbar-serifed'</code>, <code>cv78 = 10</code></td></tr><tr><td><code>7</code> with bend stem, crossbar and initial serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-11.png" width="32"/></td><td><code>seven = 'curly-crossbar'</code>, <code>cv78 = 11</code></td></tr><tr><td><code>7</code> with curly stem and crossbar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv78-12.png" width="32"/></td><td><code>seven = 'curly-crossbar-serifed'</code>, <code>cv78 = 12</code></td></tr><tr><td><code>7</code> with curly stem, crossbar and initial serif</td></tr></table>
   - Styles for `8`:
-    + `eight = 'crossing'`, `cv79 = 1`: `8` with crossing middle part.
-    + `eight = 'two-circles'`, `cv79 = 2`: `8` looks like two circles joined together.
-    + `eight = 'crossing-asymmetric'`, `cv79 = 3`: `8` looks asymmetric crossing middle part.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv79-1.png" width="32"/></td><td><code>eight = 'crossing'</code>, <code>cv79 = 1</code></td></tr><tr><td><code>8</code> with crossing middle part</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv79-2.png" width="32"/></td><td><code>eight = 'two-circles'</code>, <code>cv79 = 2</code></td></tr><tr><td><code>8</code> looks like two circles joined together</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv79-3.png" width="32"/></td><td><code>eight = 'crossing-asymmetric'</code>, <code>cv79 = 3</code></td></tr><tr><td><code>8</code> looks asymmetric crossing middle part</td></tr></table>
   - Styles for `9`:
-    + `nine = 'closed-contour'`, `cv80 = 1`: `9` with a more closed contour.
-    + `nine = 'open-contour'`, `cv80 = 2`: `9` with a more open contour.
-    + `nine = 'straight-bar'`, `cv80 = 3`: `9` with a straight bar.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv80-1.png" width="32"/></td><td><code>nine = 'closed-contour'</code>, <code>cv80 = 1</code></td></tr><tr><td><code>9</code> with a more closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv80-2.png" width="32"/></td><td><code>nine = 'open-contour'</code>, <code>cv80 = 2</code></td></tr><tr><td><code>9</code> with a more open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv80-3.png" width="32"/></td><td><code>nine = 'straight-bar'</code>, <code>cv80 = 3</code></td></tr><tr><td><code>9</code> with a straight bar</td></tr></table>
   - Styles for `~`:
-    + `tilde = 'high'`, `cv81 = 1`: Higher tilde `~`.
-    + `tilde = 'low'`, `cv81 = 2`: Lower tilde `~`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv81-1.png" width="32"/></td><td><code>tilde = 'high'</code>, <code>cv81 = 1</code></td></tr><tr><td>Higher tilde <code>~</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv81-2.png" width="32"/></td><td><code>tilde = 'low'</code>, <code>cv81 = 2</code></td></tr><tr><td>Lower tilde <code>~</code></td></tr></table>
   - Styles for `*`:
-    + `asterisk = 'penta-high'`, `cv82 = 1`: Higher five-pointed asterisk `*`.
-    + `asterisk = 'penta-low'`, `cv82 = 2`: Lower five-pointed asterisk `*`.
-    + `asterisk = 'flip-penta-high'`, `cv82 = 3`: Higher five-pointed and turned asterisk `*`.
-    + `asterisk = 'flip-penta-low'`, `cv82 = 4`: Lower five-pointed and turned asterisk `*`.
-    + `asterisk = 'hex-high'`, `cv82 = 5`: Higher six-pointed asterisk `*`.
-    + `asterisk = 'hex-low'`, `cv82 = 6`: Lower six-pointed asterisk `*`.
-    + `asterisk = 'turn-hex-high'`, `cv82 = 7`: Higher turned six-pointed asterisk `*`.
-    + `asterisk = 'turn-hex-low'`, `cv82 = 8`: Lower turned six-pointed asterisk `*`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-1.png" width="32"/></td><td><code>asterisk = 'penta-high'</code>, <code>cv82 = 1</code></td></tr><tr><td>Higher five-pointed asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-2.png" width="32"/></td><td><code>asterisk = 'penta-low'</code>, <code>cv82 = 2</code></td></tr><tr><td>Lower five-pointed asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-3.png" width="32"/></td><td><code>asterisk = 'flip-penta-high'</code>, <code>cv82 = 3</code></td></tr><tr><td>Higher five-pointed and turned asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-4.png" width="32"/></td><td><code>asterisk = 'flip-penta-low'</code>, <code>cv82 = 4</code></td></tr><tr><td>Lower five-pointed and turned asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-5.png" width="32"/></td><td><code>asterisk = 'hex-high'</code>, <code>cv82 = 5</code></td></tr><tr><td>Higher six-pointed asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-6.png" width="32"/></td><td><code>asterisk = 'hex-low'</code>, <code>cv82 = 6</code></td></tr><tr><td>Lower six-pointed asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-7.png" width="32"/></td><td><code>asterisk = 'turn-hex-high'</code>, <code>cv82 = 7</code></td></tr><tr><td>Higher turned six-pointed asterisk <code>*</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv82-8.png" width="32"/></td><td><code>asterisk = 'turn-hex-low'</code>, <code>cv82 = 8</code></td></tr><tr><td>Lower turned six-pointed asterisk <code>*</code></td></tr></table>
   - Styles for `_`:
-    + `underscore = 'above-baseline'`, `cv83 = 1`: Extra-high `_`, placed right below baseline.
-    + `underscore = 'high'`, `cv83 = 2`: Higher underscore `_`, placed right below baseline.
-    + `underscore = 'low'`, `cv83 = 3`: Lower underscore `_`, placed right above descender line.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv83-1.png" width="32"/></td><td><code>underscore = 'above-baseline'</code>, <code>cv83 = 1</code></td></tr><tr><td>Extra-high <code>_</code>, placed right below baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv83-2.png" width="32"/></td><td><code>underscore = 'high'</code>, <code>cv83 = 2</code></td></tr><tr><td>Higher underscore <code>_</code>, placed right below baseline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv83-3.png" width="32"/></td><td><code>underscore = 'low'</code>, <code>cv83 = 3</code></td></tr><tr><td>Lower underscore <code>_</code>, placed right above descender line</td></tr></table>
   - Styles for `¶`:
-    + `paragraph-sign = 'high'`, `cv84 = 1`: Higher paragraph sign `¶`.
-    + `paragraph-sign = 'low'`, `cv84 = 2`: Lower paragraph sign `¶`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv84-1.png" width="32"/></td><td><code>paragraph-sign = 'high'</code>, <code>cv84 = 1</code></td></tr><tr><td>Higher paragraph sign <code>¶</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv84-2.png" width="32"/></td><td><code>paragraph-sign = 'low'</code>, <code>cv84 = 2</code></td></tr><tr><td>Lower paragraph sign <code>¶</code></td></tr></table>
   - Styles for `^`:
-    + `caret = 'high'`, `cv85 = 1`: Higher circumflex `^`.
-    + `caret = 'medium'`, `cv85 = 2`: Lower circumflex `^`.
-    + `caret = 'low'`, `cv85 = 3`: Lower circumflex `^`.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv85-1.png" width="32"/></td><td><code>caret = 'high'</code>, <code>cv85 = 1</code></td></tr><tr><td>Higher circumflex <code>^</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv85-2.png" width="32"/></td><td><code>caret = 'medium'</code>, <code>cv85 = 2</code></td></tr><tr><td>Lower circumflex <code>^</code></td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv85-3.png" width="32"/></td><td><code>caret = 'low'</code>, <code>cv85 = 3</code></td></tr><tr><td>Lower circumflex <code>^</code></td></tr></table>
   - Styles for `(`, `)`:
-    + `paren = 'normal'`, `cv86 = 1`: Parenthesis with normal contour.
-    + `paren = 'large-contour'`, `cv86 = 2`: Parenthesis with larger contour, like that in Monaco.
-    + `paren = 'flat-arc'`, `cv86 = 3`: Parenthesis with flat arc, like that in JetBrains Mono.
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-1.png" width="64"/></td><td><code>paren = 'normal'</code>, <code>cv86 = 1</code></td></tr><tr><td>Parenthesis with normal contour</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-2.png" width="64"/></td><td><code>paren = 'large-contour'</code>, <code>cv86 = 2</code></td></tr><tr><td>Parenthesis with larger contour, like that in Monaco</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-3.png" width="64"/></td><td><code>paren = 'flat-arc'</code>, <code>cv86 = 3</code></td></tr><tr><td>Parenthesis with flat arc, like that in JetBrains Mono</td></tr></table>
   - Styles for `{`, `}`:
-    + `brace = 'straight'`, `cv87 = 1`: More straight braces.
-    + `brace = 'curly'`, `cv87 = 2`: More curly braces.
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr></table>
   - Styles for `#`:
-    + `number-sign = 'upright'`, `cv88 = 1`: Number sign with vertical bars.
-    + `number-sign = 'slanted'`, `cv88 = 2`: Number sign with slanted bars.
-    + `number-sign = 'upright-open'`, `cv88 = 3`: Number sign with vertical bars and open inner.
-    + `number-sign = 'slanted-open'`, `cv88 = 4`: Number sign with slanted bars and open inner.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-1.png" width="32"/></td><td><code>number-sign = 'upright'</code>, <code>cv88 = 1</code></td></tr><tr><td>Number sign with vertical bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-2.png" width="32"/></td><td><code>number-sign = 'slanted'</code>, <code>cv88 = 2</code></td></tr><tr><td>Number sign with slanted bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-3.png" width="32"/></td><td><code>number-sign = 'upright-open'</code>, <code>cv88 = 3</code></td></tr><tr><td>Number sign with vertical bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-4.png" width="32"/></td><td><code>number-sign = 'slanted-open'</code>, <code>cv88 = 4</code></td></tr><tr><td>Number sign with slanted bars and open inner</td></tr></table>
   - Styles for `&`:
-    + `ampersand = 'closed'`, `cv89 = 1`: Ampersand (`&`) with a closed contour.
-    + `ampersand = 'upper-open'`, `cv89 = 2`: Ampersand (`&`) with an open contour at upper half.
-    + `ampersand = 'lower-open'`, `cv89 = 3`: Ampersand (`&`) with an open contour at lower half.
-    + `ampersand = 'et-toothed'`, `cv89 = 4`: Ampersand (`&`) drawn like a ligature of Ɛ and t with tooth.
-    + `ampersand = 'et-toothless-corner'`, `cv89 = 5`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (corner).
-    + `ampersand = 'et-toothless-rounded'`, `cv89 = 6`: Ampersand (`&`) drawn like a ligature of Ɛ and t without tooth (rounded).
-    + `ampersand = 'flat-top'`, `cv89 = 7`: Ampersand (`&`) drawn with a flat top.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-1.png" width="32"/></td><td><code>ampersand = 'closed'</code>, <code>cv89 = 1</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with a closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-2.png" width="32"/></td><td><code>ampersand = 'upper-open'</code>, <code>cv89 = 2</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at upper half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-3.png" width="32"/></td><td><code>ampersand = 'lower-open'</code>, <code>cv89 = 3</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at lower half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-4.png" width="32"/></td><td><code>ampersand = 'et-toothed'</code>, <code>cv89 = 4</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-5.png" width="32"/></td><td><code>ampersand = 'et-toothless-corner'</code>, <code>cv89 = 5</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (corner)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-6.png" width="32"/></td><td><code>ampersand = 'et-toothless-rounded'</code>, <code>cv89 = 6</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (rounded)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-7.png" width="32"/></td><td><code>ampersand = 'flat-top'</code>, <code>cv89 = 7</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn with a flat top</td></tr></table>
   - Styles for `@`:
-    + `at = 'threefold'`, `cv90 = 1`: The long, three-fold At symbol (`@`).
-    + `at = 'fourfold'`, `cv90 = 2`: The traditional, four-fold At symbol (`@`).
-    + `at = 'short'`, `cv90 = 3`: The shorter, Fira-like At symbol (`@`).
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-1.png" width="32"/></td><td><code>at = 'threefold'</code>, <code>cv90 = 1</code></td></tr><tr><td>The long, three-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-2.png" width="32"/></td><td><code>at = 'fourfold'</code>, <code>cv90 = 2</code></td></tr><tr><td>The traditional, four-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-3.png" width="32"/></td><td><code>at = 'short'</code>, <code>cv90 = 3</code></td></tr><tr><td>The shorter, Fira-like At symbol (<code>@</code>)</td></tr></table>
   - Styles for `$`:
-    + `dollar = 'open'`, `cv91 = 1`: Dollar symbol with open contour.
-    + `dollar = 'through'`, `cv91 = 2`: Dollar symbol with strike-through vertical bar.
-    + `dollar = 'interrupted'`, `cv91 = 3`: Dollar symbol with strike-through vertical bar.
-    + `dollar = 'open-cap'`, `cv91 = 4`: Dollar symbol with open contour, not exceeding baseline and ascender.
-    + `dollar = 'through-cap'`, `cv91 = 5`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
-    + `dollar = 'interrupted-cap'`, `cv91 = 6`: Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-1.png" width="32"/></td><td><code>dollar = 'open'</code>, <code>cv91 = 1</code></td></tr><tr><td>Dollar symbol with open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-2.png" width="32"/></td><td><code>dollar = 'through'</code>, <code>cv91 = 2</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-3.png" width="32"/></td><td><code>dollar = 'interrupted'</code>, <code>cv91 = 3</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-4.png" width="32"/></td><td><code>dollar = 'open-cap'</code>, <code>cv91 = 4</code></td></tr><tr><td>Dollar symbol with open contour, not exceeding baseline and ascender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-5.png" width="32"/></td><td><code>dollar = 'through-cap'</code>, <code>cv91 = 5</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-6.png" width="32"/></td><td><code>dollar = 'interrupted-cap'</code>, <code>cv91 = 6</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender</td></tr></table>
   - Styles for `¢`:
-    + `cent = 'open'`, `cv92 = 1`: Cent sign (`¢`) with open contour.
-    + `cent = 'through'`, `cv92 = 2`: Cent sign (`¢`) with vertical bar all through the `c` part.
-    + `cent = 'bar-interrupted'`, `cv92 = 3`: Cent sign (`¢`) with vertical bar breaks at center.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv92-1.png" width="32"/></td><td><code>cent = 'open'</code>, <code>cv92 = 1</code></td></tr><tr><td>Cent sign (<code>¢</code>) with open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv92-2.png" width="32"/></td><td><code>cent = 'through'</code>, <code>cv92 = 2</code></td></tr><tr><td>Cent sign (<code>¢</code>) with vertical bar all through the <code>c</code> part</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv92-3.png" width="32"/></td><td><code>cent = 'bar-interrupted'</code>, <code>cv92 = 3</code></td></tr><tr><td>Cent sign (<code>¢</code>) with vertical bar breaks at center</td></tr></table>
   - Styles for `%`:
-    + `percent = 'dots'`, `cv93 = 1`: Percent `%` with rectangular dots.
-    + `percent = 'rings-segmented-slash'`, `cv93 = 2`: Percent `%` with rings and segmented slash.
-    + `percent = 'rings-continuous-slash'`, `cv93 = 3`: Percent `%` with rings and continuous bar.
-    + `percent = 'rings-continuous-slash-also-connected'`, `cv93 = 4`: Percent `%` with rings and continuous bar and the slash in `%` is also connected to the top-left ring.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv93-1.png" width="32"/></td><td><code>percent = 'dots'</code>, <code>cv93 = 1</code></td></tr><tr><td>Percent <code>%</code> with rectangular dots</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv93-2.png" width="32"/></td><td><code>percent = 'rings-segmented-slash'</code>, <code>cv93 = 2</code></td></tr><tr><td>Percent <code>%</code> with rings and segmented slash</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv93-3.png" width="32"/></td><td><code>percent = 'rings-continuous-slash'</code>, <code>cv93 = 3</code></td></tr><tr><td>Percent <code>%</code> with rings and continuous bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv93-4.png" width="32"/></td><td><code>percent = 'rings-continuous-slash-also-connected'</code>, <code>cv93 = 4</code></td></tr><tr><td>Percent <code>%</code> with rings and continuous bar and the slash in <code>%</code> is also connected to the top-left ring</td></tr></table>
   - Styles for `|`:
-    + `bar = 'natural-slope'`, `cv94 = 1`: Bar punctuations (`|`) has a natural slope under italics and oblique.
-    + `bar = 'force-upright'`, `cv94 = 2`: Bar punctuations (`|`) is forced upright under italics and oblique.
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv94-1.png" width="64"/></td><td><code>bar = 'natural-slope'</code>, <code>cv94 = 1</code></td></tr><tr><td>Bar punctuations (<code>|</code>) has a natural slope under italics and oblique</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv94-2.png" width="64"/></td><td><code>bar = 'force-upright'</code>, <code>cv94 = 2</code></td></tr><tr><td>Bar punctuations (<code>|</code>) is forced upright under italics and oblique</td></tr></table>
   - Styles for `<=`, `>=`:
-    + `lig-ltgteq = 'flat'`, `cv95 = 1`: The lower bar of `<=` and `>=` ligation is flat.
-    + `lig-ltgteq = 'slanted'`, `cv95 = 2`: The lower bar of `<=` and `>=` ligation is slanted.
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv95-1.png" width="64"/></td><td><code>lig-ltgteq = 'flat'</code>, <code>cv95 = 1</code></td></tr><tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is flat</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv95-2.png" width="64"/></td><td><code>lig-ltgteq = 'slanted'</code>, <code>cv95 = 2</code></td></tr><tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is slanted</td></tr></table>
   - Styles for `'`:
-    + `ascii-single-quote = 'straight'`, `cv96 = 1`: Show ASCII quote (`"`) as short vertical straight bar..
-    + `ascii-single-quote = 'raised-comma'`, `cv96 = 2`: Show ASCII quote (`"`) as raised comma..
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv96-1.png" width="32"/></td><td><code>ascii-single-quote = 'straight'</code>, <code>cv96 = 1</code></td></tr><tr><td>Show ASCII quote (<code>"</code>) as short vertical straight bar.</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv96-2.png" width="32"/></td><td><code>ascii-single-quote = 'raised-comma'</code>, <code>cv96 = 2</code></td></tr><tr><td>Show ASCII quote (<code>"</code>) as raised comma.</td></tr></table>
   - Styles for `` ` ``:
-    + `ascii-grave = 'straight'`, `cv97 = 1`: Show ASCII grave (`` ` ``) as short diagonal straight bar..
-    + `ascii-grave = 'raised-inverse-comma'`, `cv97 = 2`: Show ASCII grave (`` ` ``) as raised comma..
-    + `ascii-grave = 'raised-turn-comma'`, `cv97 = 3`: Show ASCII grave (`` ` ``) as raised turned comma, identical to curly open single quote symbols (U+2018)..
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv97-1.png" width="32"/></td><td><code>ascii-grave = 'straight'</code>, <code>cv97 = 1</code></td></tr><tr><td>Show ASCII grave (<code>`</code>) as short diagonal straight bar.</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv97-2.png" width="32"/></td><td><code>ascii-grave = 'raised-inverse-comma'</code>, <code>cv97 = 2</code></td></tr><tr><td>Show ASCII grave (<code>`</code>) as raised comma.</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv97-3.png" width="32"/></td><td><code>ascii-grave = 'raised-turn-comma'</code>, <code>cv97 = 3</code></td></tr><tr><td>Show ASCII grave (<code>`</code>) as raised turned comma, identical to curly open single quote symbols (U+2018).</td></tr></table>
   - Styles for `?`:
-    + `question = 'smooth'`, `cv98 = 1`: Smooth question mark (`?`).
-    + `question = 'corner'`, `cv98 = 2`: Question mark (`?`) with a corner at middle.
-    + `question = 'corner-flat-hooked'`, `cv98 = 3`: Question mark (`?`) with a corner at middle and flat hook.
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv98-1.png" width="32"/></td><td><code>question = 'smooth'</code>, <code>cv98 = 1</code></td></tr><tr><td>Smooth question mark (<code>?</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv98-2.png" width="32"/></td><td><code>question = 'corner'</code>, <code>cv98 = 2</code></td></tr><tr><td>Question mark (<code>?</code>) with a corner at middle</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv98-3.png" width="32"/></td><td><code>question = 'corner-flat-hooked'</code>, <code>cv98 = 3</code></td></tr><tr><td>Question mark (<code>?</code>) with a corner at middle and flat hook</td></tr></table>
   - Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols):
-    + `punctuation-dot = 'round'`, `cv99 = 1`: Small punctuations (like `.`, `,`) use round dots.
-    + `punctuation-dot = 'square'`, `cv99 = 2`: Small punctuations (like `.`, `,`) use square dots.
+     <table><tr><td rowspan="2" width="220"><img src="images/character-variant-cv99-1.png" width="192"/></td><td><code>punctuation-dot = 'round'</code>, <code>cv99 = 1</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots</td></tr><tr><td rowspan="2" width="220"><img src="images/character-variant-cv99-2.png" width="192"/></td><td><code>punctuation-dot = 'square'</code>, <code>cv99 = 2</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr></table>
 
 <!-- END Section-Cherry-Picking-Styles -->
 
