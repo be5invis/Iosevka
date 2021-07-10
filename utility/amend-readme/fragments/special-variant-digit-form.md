@@ -1,3 +1,0 @@
-  - Default digit form:
-    - `digit-form = 'lining'`: Lining (default).
-    - `digit-form = 'old-style'`: Old-style.

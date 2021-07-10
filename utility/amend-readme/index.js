@@ -13,14 +13,15 @@ const charMapObliquePath = process.argv[4];
 
 execMain(main);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 async function main() {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
 	readme = (await processSsOt()).apply(readme);
-	readme = (await processCv()).apply(readme);
-	readme = (await processSs()).apply(readme);
+	readme = (await processCherryPickingStyles()).apply(readme);
+	readme = (await processSsStyles()).apply(readme);
+	readme = (await processCvOt()).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
 	readme = (await processLigSetOt(1, g => g.tag === "calt")).apply(readme);
@@ -56,7 +57,58 @@ async function processSsOt() {
 	md.log(`</table>`);
 	return md;
 }
-async function processSs() {
+async function processCvOt() {
+	const variantsData = await parseVariantsData();
+	const md = new MdCol("Section-OT-Character-Variants");
+	const TableColumns = 12;
+	md.log(`<table>`);
+	for (const cv of variantsData.primes) {
+		if (!cv.tag) continue;
+		let effVariants = [];
+		for (const cvv of cv.variants) if (cvv.rank) effVariants.push(cvv);
+		const entryWidth = sampleImageCountEmOfCv(cv);
+		const imgWidth = 32 * entryWidth;
+		const entriesPerRow = Math.floor(TableColumns / entryWidth);
+		const rowsNeeded = Math.ceil(effVariants.length / entriesPerRow);
+		const itemColSpanHtml = entryWidth > 1 ? ` colspan="${entryWidth}"` : ``;
+
+		for (let rid = 0; rid < rowsNeeded; rid++) {
+			const entriesInThisRow = Math.min(
+				entriesPerRow,
+				effVariants.length - rid * entriesPerRow
+			);
+			const tailBlankColumnsCount = TableColumns - entryWidth * entriesInThisRow;
+
+			// Image row
+			md.log(`<tr>`);
+			if (rid === 0) md.log(`<td rowspan="${2 * rowsNeeded}"><code>${cv.tag}</code></td>`);
+			for (let cid = 0; cid < entriesPerRow; cid++) {
+				const iCvv = rid * entriesPerRow + cid;
+				if (iCvv >= effVariants.length) continue;
+				const cvv = effVariants[iCvv];
+				const imageUrl = `images/character-variant-${cv.tag}-${cvv.rank}.png`;
+				md.log(`<td${itemColSpanHtml}><img src="${imageUrl}" width="${imgWidth}"/></td>`);
+			}
+			if (tailBlankColumnsCount > 0) md.log(`<td colspan="${tailBlankColumnsCount}"> </td>`);
+			md.log(`</tr>`);
+
+			// CV ID row
+			md.log(`<tr>`);
+			for (let cid = 0; cid < entriesPerRow; cid++) {
+				const iCvv = rid * entriesPerRow + cid;
+				if (iCvv >= effVariants.length) continue;
+				const cvv = effVariants[iCvv];
+				md.log(`<td${itemColSpanHtml}>${cvv.rank}</td>`);
+			}
+			if (tailBlankColumnsCount > 0) md.log(`<td colspan="${tailBlankColumnsCount}"> </td>`);
+			md.log(`</tr>`);
+		}
+	}
+	md.log(`</table>`);
+	return md;
+}
+
+async function processSsStyles() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
 	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
@@ -67,36 +119,85 @@ async function processSs() {
 	}
 	return md;
 }
-async function processCv() {
+async function processCherryPickingStyles() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
 
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 
-	const cvDigitFormPath = path.resolve(__dirname, "fragments/special-variant-digit-form.md");
-	md.log(await fs.readFile(cvDigitFormPath, "utf-8"));
+	formatCv(md, {
+		introMD: `Default digit form`,
+		sampleImageCountEm: 10,
+		alternatives: [
+			{
+				imageId: "lnum",
+				selectors: [`digit-form = 'lining'`],
+				description: `Lining (default)`
+			},
+			{
+				imageId: "onum",
+				selectors: [`digit-form = 'old-style'`],
+				description: `Old-style`
+			}
+		]
+	});
 
-	for (const gr of variantsData.primes) {
-		const sampleText = gr.descSampleText
+	for (const cv of variantsData.primes) {
+		if (!cv.tag) continue;
+		const sampleText = cv.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
 			.join(", ");
-		const explainText = gr.samplerExplain ? ` (${gr.samplerExplain})` : ``;
-		md.log(`  - Styles for ${sampleText}${explainText}:`);
-		const defaults = figureOutDefaults(variantsData, gr);
-		for (const config of gr.variants) {
-			if (!config.rank) continue;
-			let selectorText = `\`${gr.key} = '${config.key}'\``;
-			if (gr.tag && config.rank) {
-				selectorText += `, \`${gr.tag} = ${config.rank}\``;
-			}
-			md.log(
-				`    + ${selectorText}: ` +
-					`${config.description}${formatDefaults(config.key, defaults)}.`
-			);
+		const explainText = cv.samplerExplain ? ` (${cv.samplerExplain})` : ``;
+		const info = {
+			introMD: `Styles for ${sampleText}${explainText}`,
+			sampleImageCountEm: sampleImageCountEmOfCv(cv),
+			alternatives: []
+		};
+		const defaults = figureOutDefaults(variantsData, cv);
+		for (const cvv of cv.variants) {
+			if (!cvv.rank) continue;
+
+			info.alternatives.push({
+				imageId: `${cv.tag}-${cvv.rank}`,
+				selectors: [`${cv.key} = '${cvv.key}'`, `${cv.tag} = ${cvv.rank}`],
+				description: formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
+			});
 		}
+		formatCv(md, info);
 	}
 	return md;
+}
+
+function sampleImageCountEmOfCv(cv) {
+	return cv.hotChars.length * (cv.slopeDependent ? 2 : 1);
+}
+
+function formatCv(md, info) {
+	md.log(`  - ${info.introMD}:`);
+	const imgWidth = 32 * info.sampleImageCountEm;
+	let sTable = "     <table>";
+	for (const alt of info.alternatives) {
+		const imageUrl = `images/character-variant-${alt.imageId}.png`;
+		const image = `<img src="${imageUrl}" width="${imgWidth}"/>`;
+		const selectorText = alt.selectors.map(x => `<code>${x}</code>`).join(", ");
+		sTable +=
+			`<tr><td rowspan="2" width="${2 * 14 + imgWidth}">${image}</td>` +
+			`<td>${selectorText}</td></tr>`;
+		sTable += `<tr><td>${alt.description}</td></tr>`;
+	}
+	sTable += "</table>";
+	md.log(sTable);
+}
+
+function formatDescription(s) {
+	return s
+		.replace(/`` (\S+?) ``/g, ($0, $1) => `<code>${escapeHtml($1)}</code>`)
+		.replace(/`([^`]+?)`/g, ($0, $1) => `<code>${escapeHtml($1)}</code>`);
+}
+
+function escapeHtml(s) {
+	return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 async function processPrivateBuildPlans() {

@@ -6,6 +6,7 @@ const path = require("path");
 const parseVariantsData = require("../export-data/variants-data");
 const getLigationData = require("../export-data/ligation-data");
 const execMain = require("../shared/execMain");
+const variantsData = require("../export-data/variants-data");
 
 const inputPath = process.argv[2];
 const outputPath = process.argv[3];
@@ -36,7 +37,6 @@ async function main() {
 
 	let readmeSnapshotTasks = [
 		{ el: "#languages", name: "languages" },
-		{ el: "#charvars", name: "charvars" },
 		{ el: "#matrix", name: "matrix" },
 		{ el: "#previews", name: "preview-all" },
 		{ el: "#weights", name: "weights" }
@@ -68,6 +68,44 @@ async function main() {
 			applyCallback: `cbAmendStylisticSetContents`,
 			applyCallbackArgs: { hotChars: ss.hotChars.sans.italic }
 		});
+	}
+	readmeSnapshotTasks.push({
+		el: "#cv-sampler",
+		applyClass: "cv-sampler",
+		applyFeature: "'lnum' on",
+		name: "character-variant-lnum",
+		applyCallback: `cbAmendCharacterVariantContents`,
+		applyCallbackArgs: {
+			hotChars: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+			slopeDependent: false
+		}
+	});
+	readmeSnapshotTasks.push({
+		el: "#cv-sampler",
+		applyClass: "cv-sampler",
+		applyFeature: "'onum' on",
+		name: "character-variant-onum",
+		applyCallback: `cbAmendCharacterVariantContents`,
+		applyCallbackArgs: {
+			hotChars: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+			slopeDependent: false
+		}
+	});
+	for (const cv of variationData.primes) {
+		if (!cv.tag) continue;
+		for (const variant of cv.variants) {
+			readmeSnapshotTasks.push({
+				el: "#cv-sampler",
+				applyClass: "cv-sampler",
+				applyFeature: `'${cv.tag}' ${variant.rank}`,
+				name: `character-variant-${cv.tag}-${variant.rank}`,
+				applyCallback: `cbAmendCharacterVariantContents`,
+				applyCallbackArgs: {
+					hotChars: cv.hotChars,
+					slopeDependent: !!cv.slopeDependent
+				}
+			});
+		}
 	}
 	await fs.writeJson(
 		outputDataPath,
