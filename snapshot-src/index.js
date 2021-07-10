@@ -23,7 +23,8 @@ ipc.on("complete", function () {
 
 const captureCallbacks = {
 	cbAmendLigsetSamplerContents,
-	cbAmendStylisticSetContents
+	cbAmendStylisticSetContents,
+	cbAmendCharacterVariantContents
 };
 
 const ssStrings = [
@@ -91,6 +92,20 @@ function cbAmendLigsetSamplerContents(element, p) {
 				run.className = `rank-${rank}`;
 				line.appendChild(run);
 			}
+		}
+	}
+}
+
+function cbAmendCharacterVariantContents(element, p) {
+	element.innerHTML = "";
+	const slopeClasses = p.slopeDependent ? ["run", "run italic"] : ["run"];
+	element.style.width = p.hotChars.length * slopeClasses.length + "em";
+	for (const s of p.hotChars) {
+		for (const slopeCls of slopeClasses) {
+			const run = document.createElement("span");
+			run.className = slopeCls;
+			run.appendChild(document.createTextNode(s));
+			element.appendChild(run);
 		}
 	}
 }
