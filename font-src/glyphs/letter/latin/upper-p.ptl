@@ -95,7 +95,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	set PShape.SwBelowBar 0.25
 
 	set PShape.SlabMotion : function [top sw mul] : glyph-proc
-		include : tagged 'serifLT' :LeftwardTopSerif (SB * mul) top SideJut sw
+		include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
 	set PShape.SlabSymmetric : function [top sw mul] : glyph-proc
 		include : PShape.SlabMotion top sw mul
 		include : tagged 'serifLB' : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
@@ -149,8 +149,16 @@ glyph-block Letter-Latin-Upper-P : begin
 		create-glyph "currency/rubleSign.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
-			include : HOverlayBar [mix SB 0 0.7] (SB + HalfStroke * HVContrast) bar1pos
-			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.8] [mix 0 (bar1pos - Stroke) (3 / 4)]
+
+			define xCrossBarLeft : SB - SideJut
+			define xPLeft : SB * PShape.defaultMul + HalfStroke * HVContrast
+			define xCrossBarRight : mix SB RightSB 0.8
+			define yBase : if (slabs === PShape.SlabAsymmetric) Stroke 0
+			define yCrossbar : Math.max
+				mix yBase (bar1pos - HalfStroke) (1 / 2)
+				[mix yBase (bar1pos - HalfStroke) (2 / 3)] - OverlayStroke / 2
+			include : HOverlayBar xCrossBarLeft xPLeft bar1pos Stroke
+			include : HOverlayBar xCrossBarLeft xCrossBarRight yCrossbar
 
 		create-glyph "PHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE
