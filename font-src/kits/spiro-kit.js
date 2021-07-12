@@ -3,9 +3,9 @@
 const SpiroJs = require("spiro");
 const CurveUtil = require("../support/curve-util");
 const Transform = require("../support/transform");
-const { SpiroExpansionContext1, SpiroExpansionContext2 } = require("../support/spiro-expand");
+const { BiKnotCollector } = require("../support/spiro-expand");
 const { fallback, mix, bez2, bez3 } = require("../support/utils");
-const { SpiroGeometry, CombineGeometry } = require("../support/geometry");
+const { SpiroGeometry, DiSpiroGeometry, CombineGeometry } = require("../support/geometry");
 
 exports.SetupBuilders = function (bindings) {
 	const { Contrast, GlobalTransform, Stroke, Superness } = bindings;
@@ -279,15 +279,34 @@ exports.SetupBuilders = function (bindings) {
 		knots = flatten(s, knots);
 		return { knots, closed };
 	}
-	function iterateNormals(s, closed) {
-		let knotsP2 = s.getPass2Knots(closed, fallback(s.contrast, Contrast));
-		let s2 = new SpiroExpansionContext2(s.controlKnots, s.gizmo);
-		return SpiroJs.spiroToArcsOnContext(knotsP2, closed, s2);
+
+	class DiSpiroProxy {
+		constructor(closed, collector, origKnots) {
+			this.geometry = new DiSpiroGeometry(
+				collector.gizmo,
+				collector.contrast,
+				closed,
+				collector.controlKnots
+			);
+			this.m_origKnots = origKnots;
+		}
+
+		get knots() {
+			return this.m_origKnots;
+		}
+		get lhsKnots() {
+			return this.geometry.expand().lhs;
+		}
+		get rhsKnots() {
+			return this.geometry.expand().rhs;
+		}
 	}
+
 	function dispiro(...args) {
 		return function () {
-			let s = new SpiroExpansionContext1(this.gizmo || GlobalTransform);
-			let { knots, closed } = prepareSpiroKnots([].slice.call(args, 0), s);
+			const gizmo = this.gizmo || GlobalTransform;
+			const collector = new BiKnotCollector(gizmo, Contrast);
+			const { knots, closed } = prepareSpiroKnots([].slice.call(args, 0), collector);
 			for (const knot of knots) {
 				const ty = knot.type;
 				const af = knot.af;
@@ -296,26 +315,10 @@ exports.SetupBuilders = function (bindings) {
 					return af ? af.apply(this, args) : void 0;
 				};
 			}
-
-			SpiroJs.spiroToArcsOnContext(knots, closed, s);
-			iterateNormals(s, closed);
-			iterateNormals(s, closed);
-			const { lhs, rhs } = s.expand(fallback(s.contrast, Contrast));
-
-			if (closed) {
-				this.includeGeometry(
-					new CombineGeometry([
-						new SpiroGeometry(lhs.slice(0, -1), closed, Transform.Id()),
-						new SpiroGeometry(rhs.reverse().slice(0, -1), closed, Transform.Id())
-					])
-				);
-			} else {
-				lhs[0].type = lhs[lhs.length - 1].type = "corner";
-				rhs[0].type = rhs[rhs.length - 1].type = "corner";
-				const allKnots = lhs.concat(rhs.reverse());
-				this.includeGeometry(new SpiroGeometry(allKnots, true, Transform.Id()));
-			}
-			return { knots, lhsKnots: lhs, rhsKnots: rhs };
+			SpiroJs.spiroToArcsOnContext(knots, closed, collector);
+			const dsp = new DiSpiroProxy(closed, collector, knots);
+			this.includeGeometry(dsp.geometry);
+			return dsp;
 		};
 	}
 
@@ -324,7 +327,7 @@ exports.SetupBuilders = function (bindings) {
 			const gizmo = this.gizmo || GlobalTransform;
 			const g = new CurveUtil.BezToContoursSink(gizmo);
 			const { knots, closed } = prepareSpiroKnots(args, g);
-			return this.includeGeometry(new SpiroGeometry(knots, closed, gizmo));
+			return this.includeGeometry(new SpiroGeometry(gizmo, closed, knots));
 		};
 	}
 	return {

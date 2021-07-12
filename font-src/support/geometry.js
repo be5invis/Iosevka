@@ -7,6 +7,8 @@ const SpiroJs = require("spiro");
 const Point = require("./point");
 const Transform = require("./transform");
 const CurveUtil = require("./curve-util");
+const { SpiroExpander } = require("./spiro-expand");
+const Format = require("./formatter");
 
 class GeometryBase {
 	asContours() {
@@ -62,17 +64,12 @@ class ContourGeometry extends GeometryBase {
 		return this.m_points.length;
 	}
 	toShapeStringOrNull() {
-		let s = "ContourGeometry{";
-		for (const z of this.m_points) {
-			s += `(${z.type};${formatN(z.x)};${formatN(z.y)})`;
-		}
-		s += "}";
-		return s;
+		return Format.struct(`ContourGeometry`, Format.list(this.m_points.map(Format.typedPoint)));
 	}
 }
 
 class SpiroGeometry extends GeometryBase {
-	constructor(knots, closed, gizmo) {
+	constructor(gizmo, closed, knots) {
 		super();
 		this.m_knots = [];
 		for (const k of knots) {
@@ -105,18 +102,86 @@ class SpiroGeometry extends GeometryBase {
 		return this.m_knots.length;
 	}
 	toShapeStringOrNull() {
-		let s = "SpiroGeometry{{";
-		for (const k of this.m_knots) {
-			s += `(${k.type};${formatN(k.x)};${formatN(k.y)})`;
+		return Format.struct(
+			"SpiroGeometry",
+			Format.gizmo(this.m_gizmo),
+			this.m_closed,
+			Format.list(this.m_knots.map(Format.typedPoint))
+		);
+	}
+}
+
+class DiSpiroGeometry extends GeometryBase {
+	constructor(gizmo, contrast, closed, biKnots) {
+		super();
+
+		this.m_biKnots = [];
+		for (const k of biKnots) this.m_biKnots.push(k.clone());
+
+		this.m_closed = closed;
+		this.m_gizmo = gizmo;
+		this.m_contrast = contrast;
+
+		this.m_cachedExpansionResults = null;
+		this.m_cachedContours = null;
+	}
+
+	asContours() {
+		if (this.m_cachedContours) return this.m_cachedContours;
+		const { lhs, rhs } = this.expand();
+
+		let rawGeometry;
+		if (this.m_closed) {
+			rawGeometry = new CombineGeometry([
+				new SpiroGeometry(Transform.Id(), this.m_closed, lhs.slice(0, -1)),
+				new SpiroGeometry(Transform.Id(), this.m_closed, rhs.reverse().slice(0, -1))
+			]);
+		} else {
+			lhs[0].type = lhs[lhs.length - 1].type = "corner";
+			rhs[0].type = rhs[rhs.length - 1].type = "corner";
+			const allKnots = lhs.concat(rhs.reverse());
+			rawGeometry = new SpiroGeometry(Transform.Id(), true, allKnots);
 		}
-		s += "};";
-		s += `${this.m_closed};`;
-		s +=
-			`;{${formatN(this.m_gizmo.xx)},${formatN(this.m_gizmo.xy)},` +
-			`${formatN(this.m_gizmo.yx)},${formatN(this.m_gizmo.yy)},` +
-			`${formatN(this.m_gizmo.x)},${formatN(this.m_gizmo.y)}}`;
-		s += "}";
-		return s;
+		this.m_cachedContours = rawGeometry.asContours();
+		return this.m_cachedContours;
+	}
+	expand() {
+		if (this.m_cachedExpansionResults) return this.m_cachedExpansionResults;
+		const expander = new SpiroExpander(
+			this.m_gizmo,
+			this.m_contrast,
+			this.m_closed,
+			this.m_biKnots.map(k => k.clone())
+		);
+		expander.iterateNormals();
+		expander.iterateNormals();
+		this.m_cachedExpansionResults = expander.expand();
+		return this.m_cachedExpansionResults;
+	}
+
+	asReferences() {
+		return null;
+	}
+	filterTag(fn) {
+		return this;
+	}
+	isEmpty() {
+		return !this.m_biKnots.length;
+	}
+	measureComplexity() {
+		for (const z of this.m_biKnots) {
+			if (!isFinite(z.x) || !isFinite(z.y)) return 0xffff;
+		}
+		return this.m_biKnots.length;
+	}
+
+	toShapeStringOrNull() {
+		return Format.struct(
+			Format.gizmo(this.m_gizmo),
+			Format.n(this.m_contrast),
+			this.m_closed,
+			Format.list(this.m_biKnots.map(z => z.toShapeString()))
+		);
 	}
 }
 
@@ -159,7 +224,7 @@ class ReferenceGeometry extends GeometryBase {
 	toShapeStringOrNull() {
 		let sTarget = this.m_glyph.geometry.toShapeStringOrNull();
 		if (!sTarget) return null;
-		return `ReferenceGeometry{${sTarget};${formatN(this.m_x)};${formatN(this.m_y)}}`;
+		return Format.struct("ReferenceGeometry", sTarget, Format.n(this.m_x), Format.n(this.m_y));
 	}
 }
 
@@ -252,13 +317,7 @@ class TransformedGeometry extends GeometryBase {
 	toShapeStringOrNull() {
 		const sTarget = this.m_geom.toShapeStringOrNull();
 		if (!sTarget) return null;
-		return (
-			`TransformedGeometry{${sTarget};` +
-			`${formatN(this.m_transform.xx)},${formatN(this.m_transform.xy)},` +
-			`${formatN(this.m_transform.yx)},${formatN(this.m_transform.yy)},` +
-			`${formatN(this.m_transform.x)},${formatN(this.m_transform.y)}` +
-			`}`
-		);
+		return Format.struct(TransformedGeometry, sTarget, Format.gizmo(this.m_transform));
 	}
 }
 
@@ -330,7 +389,7 @@ class CombineGeometry extends GeometryBase {
 			if (!sPart) return null;
 			sParts.push(sPart);
 		}
-		return `CombineGeometry{${sParts.join(",")}}`;
+		return Format.struct("CombineGeometry", Format.list(sParts));
 	}
 }
 
@@ -407,7 +466,7 @@ class BooleanGeometry extends GeometryBase {
 			if (!sPart) return null;
 			sParts.push(sPart);
 		}
-		return `BooleanGeometry{${this.m_operator};${sParts.join(",")}}`;
+		return Format.struct("BooleanGeometry", this.m_operator, Format.list(sParts));
 	}
 }
 
@@ -425,12 +484,9 @@ function combineWith(a, b) {
 	}
 }
 
-function formatN(x) {
-	return `${Math.round(x * 0x10000)}`;
-}
-
 exports.GeometryBase = GeometryBase;
 exports.SpiroGeometry = SpiroGeometry;
+exports.DiSpiroGeometry = DiSpiroGeometry;
 exports.ContourGeometry = ContourGeometry;
 exports.ReferenceGeometry = ReferenceGeometry;
 exports.TaggedGeometry = TaggedGeometry;

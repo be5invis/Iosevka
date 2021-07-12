@@ -1,4 +1,9 @@
+"use strict";
+
+const SpiroJs = require("spiro");
+
 const { linreg } = require("./utils");
+const Format = require("./formatter");
 
 class BiKnot {
 	constructor(type, x, y, d1, d2) {
@@ -11,15 +16,42 @@ class BiKnot {
 		this.proposedNormal = null;
 		this.unimportant = 0;
 	}
+	clone() {
+		const k1 = new BiKnot(this.type, this.x, this.y, this.d1, this.d2);
+		k1.origTangent = this.origTangent;
+		k1.proposedNormal = this.proposedNormal;
+		k1.unimportant = this.unimportant;
+		return k1;
+	}
+
+	toShapeString() {
+		return Format.tuple(
+			this.type,
+			Format.n(this.x),
+			Format.n(this.y),
+			Format.n(this.d1),
+			Format.n(this.d2),
+			this.origTangent
+				? Format.tuple(Format.n(this.origTangent.x), Format.n(this.origTangent.y))
+				: "",
+			this.proposedNormal
+				? Format.tuple(Format.n(this.proposedNormal.x), Format.n(this.proposedNormal.y))
+				: "",
+			this.unimportant
+		);
+	}
 }
 
-class SpiroExpansionContext1 {
-	constructor(gizmo) {
+class BiKnotCollector {
+	constructor(gizmo, contrast) {
 		this.gizmo = gizmo;
+		this.contrast = contrast;
+
 		this.controlKnots = [];
 		this.defaultD1 = 0;
 		this.defaultD2 = 0;
 	}
+
 	beginShape() {}
 	endShape() {}
 	moveTo(x, y, unimportant) {
@@ -63,11 +95,26 @@ class SpiroExpansionContext1 {
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
 		if (k0) k0.unimportant = 1;
 	}
+}
 
-	getPass2Knots(closed, contrast) {
-		const expanded = this.expand(contrast);
+class SpiroExpander {
+	constructor(gizmo, contrast, closed, cks) {
+		this.gizmo = gizmo;
+		this.contrast = contrast;
+		this.closed = closed;
+		this.controlKnots = cks;
+	}
+
+	iterateNormals() {
+		const centerBone = this.getPass2Knots();
+		const normalRectifier = new NormalRectifier(this.controlKnots, this.gizmo);
+		SpiroJs.spiroToArcsOnContext(centerBone, this.closed, normalRectifier);
+	}
+
+	getPass2Knots() {
+		const expanded = this.expand(this.contrast);
 		const middles = [];
-		for (let j = 0; j + (closed ? 1 : 0) < this.controlKnots.length; j++) {
+		for (let j = 0; j + (this.closed ? 1 : 0) < this.controlKnots.length; j++) {
 			const lhs = this.gizmo.unapply(expanded.lhs[j]);
 			const rhs = this.gizmo.unapply(expanded.rhs[j]);
 			middles[j] = {
@@ -79,7 +126,8 @@ class SpiroExpansionContext1 {
 		}
 		return middles;
 	}
-	expand(contrast) {
+
+	expand() {
 		const lhs = [],
 			rhs = [];
 
@@ -93,8 +141,8 @@ class SpiroExpansionContext1 {
 				dx = knot.proposedNormal.x;
 				dy = knot.proposedNormal.y;
 			} else {
-				dx = normalX(knot.origTangent, contrast);
-				dy = normalY(knot.origTangent, contrast);
+				dx = normalX(knot.origTangent, this.contrast);
+				dy = normalY(knot.origTangent, this.contrast);
 			}
 			lhs[j] = {
 				type: knot.type,
@@ -146,7 +194,7 @@ class SpiroExpansionContext1 {
 	}
 }
 
-class SpiroExpansionContext2 {
+class NormalRectifier {
 	constructor(stage1ControlKnots, gizmo) {
 		this.gizmo = gizmo;
 		this.controlKnots = stage1ControlKnots;
@@ -191,5 +239,5 @@ function computeNormalAngle(gizmo, x, y) {
 	return Math.PI / 2 + Math.atan2(tfd.y, tfd.x);
 }
 
-exports.SpiroExpansionContext1 = SpiroExpansionContext1;
-exports.SpiroExpansionContext2 = SpiroExpansionContext2;
+exports.BiKnotCollector = BiKnotCollector;
+exports.SpiroExpander = SpiroExpander;

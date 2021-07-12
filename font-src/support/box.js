@@ -1,3 +1,5 @@
+"use strict";
+
 const { mix } = require("./utils");
 
 class Box {
