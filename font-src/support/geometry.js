@@ -153,6 +153,7 @@ class DiSpiroGeometry extends GeometryBase {
 			this.m_closed,
 			this.m_biKnots.map(k => k.clone())
 		);
+		expander.initializeNormals();
 		expander.iterateNormals();
 		expander.iterateNormals();
 		this.m_cachedExpansionResults = expander.expand();
