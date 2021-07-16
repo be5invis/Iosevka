@@ -3,9 +3,6 @@
 function mix(a, b, p) {
 	return a + (b - a) * p;
 }
-function ratio(l, r, m) {
-	return l === r ? 0 : (m - l) / (r - l);
-}
 function barmixL(l, r, b, p) {
 	return l > r ? barmixL(r, l, b, p) : l + b + p * (r - l - b * 3);
 }
@@ -38,7 +35,6 @@ function bez3(a, b, c, d, t) {
 }
 
 exports.mix = mix;
-exports.ratio = ratio;
 exports.barmixL = barmixL;
 exports.barmixM = barmixM;
 exports.barmixR = barMixR;

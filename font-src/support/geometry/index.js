@@ -8,7 +8,7 @@ const Point = require("./point");
 const Transform = require("./transform");
 const CurveUtil = require("./curve-util");
 const { SpiroExpander } = require("./spiro-expand");
-const Format = require("./formatter");
+const Format = require("../util/formatter");
 
 class GeometryBase {
 	asContours() {

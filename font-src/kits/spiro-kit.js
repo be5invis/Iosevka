@@ -1,11 +1,9 @@
 ﻿"use strict";
 
-const SpiroJs = require("spiro");
-const CurveUtil = require("../support/curve-util");
-const Transform = require("../support/transform");
-const { BiKnotCollector } = require("../support/spiro-expand");
-const { fallback, mix, bez2, bez3 } = require("../support/utils");
-const { SpiroGeometry, DiSpiroGeometry, CombineGeometry } = require("../support/geometry");
+const CurveUtil = require("../support/geometry/curve-util");
+const { BiKnotCollector } = require("../support/geometry/spiro-expand");
+const { fallback, mix, bez3 } = require("../support/utils");
+const { SpiroGeometry, DiSpiroGeometry } = require("../support/geometry/index");
 
 exports.SetupBuilders = function (bindings) {
 	const { Contrast, GlobalTransform, Stroke, Superness } = bindings;

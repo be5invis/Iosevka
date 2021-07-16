@@ -2,8 +2,8 @@
 
 const SpiroJs = require("spiro");
 
-const { linreg } = require("./utils");
-const Format = require("./formatter");
+const { linreg } = require("../utils");
+const Format = require("../util/formatter");
 
 class BiKnot {
 	constructor(type, x, y, d1, d2) {

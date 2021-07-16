@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const monotonicInterpolate = require("./monotonic-interpolate");
+const monotonicInterpolate = require("./util/monotonic-interpolate");
 
 exports.init = initPara;
 function initPara(data, argv) {
