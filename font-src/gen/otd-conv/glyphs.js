@@ -1,5 +1,5 @@
 const { Ot } = require("ot-builder");
-const Point = require("../../support/point");
+const Point = require("../../support/geometry/point");
 const Gr = require("../../support/gr");
 const { byCode, bySpacing, byGr, byBuildOrder } = require("./glyph-name");
 
