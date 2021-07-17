@@ -1,4 +1,6 @@
-const { mix } = require("./utils");
+"use strict";
+
+const { mix } = require("../utils");
 
 class Box {
 	constructor(t, b, l, r) {

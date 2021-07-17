@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 7.3.0
+
+ * Add Greek Upsilon with Hook Symbol (`U+03D2`).
+ * Add flat-topped lowercase Delta (#856).
+ * Add rounded lowercase Xi (#856).
+ * Fix Bulgarian Small Ka's variant assignment (#1147).
+ * Fix shape of Ruble Sign (#1155).
+
+
 ### 7.2.8
 
  * Fix broken shape of Cyrillic Small Letter Sha when `cv45 = 9` (#1154).
