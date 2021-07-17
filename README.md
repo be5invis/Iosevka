@@ -1695,6 +1695,17 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td colspan="10"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAA</code></td>
+<td><img src="images/character-variant-VXAA-1.png" width="32"/></td>
+<td><img src="images/character-variant-VXAA-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>cv55</code></td>
 <td><img src="images/character-variant-cv55-1.png" width="32"/></td>
 <td><img src="images/character-variant-cv55-2.png" width="32"/></td>
@@ -1740,6 +1751,17 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td>3</td>
 <td>4</td>
 <td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAB</code></td>
+<td><img src="images/character-variant-VXAB-1.png" width="32"/></td>
+<td><img src="images/character-variant-VXAB-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv58</code></td>
@@ -2848,12 +2870,16 @@ Subsection `variants` is used to configure character variants in the font. Prope
      <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv53-1.png" width="64"/></td><td><code>turn-v = 'straight'</code>, <code>cv53 = 1</code></td></tr><tr><td>Standard, straight Greek capital Lambda (<code>Λ</code>) and Greek capital Delta (<code>Δ</code>)</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv53-2.png" width="64"/></td><td><code>turn-v = 'curly'</code>, <code>cv53 = 2</code></td></tr><tr><td>Slightly curly Greek capital Lambda (<code>Λ</code>) and Greek capital Delta (<code>Δ</code>), like Iosevka 2.x</td></tr></table>
   - Styles for `α` (Greek lower Alpha):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv54-1.png" width="32"/></td><td><code>lower-alpha = 'crossing'</code>, <code>cv54 = 1</code></td></tr><tr><td>Greek lower Alpha (<code>α</code>) with a cross-like shape at right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv54-2.png" width="32"/></td><td><code>lower-alpha = 'tailed-barred'</code>, <code>cv54 = 2</code></td></tr><tr><td>Greek lower Alpha (<code>α</code>) with a straight right bar and tail</td></tr></table>
+  - Styles for `δ` (Greek lower Delta):
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAA-1.png" width="32"/></td><td><code>lower-delta = 'rounded'</code>, <code>VXAA = 1</code></td></tr><tr><td>Greek lower Delta (<code>δ</code>) with rounded top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAA-2.png" width="32"/></td><td><code>lower-delta = 'flat-top'</code>, <code>VXAA = 2</code></td></tr><tr><td>Greek lower Delta (<code>δ</code>) with flat top</td></tr></table>
   - Styles for `Γ` (Greek capital Gamma):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-1.png" width="32"/></td><td><code>capital-gamma = 'serifless'</code>, <code>cv55 = 1</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) without serifs</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-2.png" width="32"/></td><td><code>capital-gamma = 'top-right-serifed'</code>, <code>cv55 = 2</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) with serifs at top right</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv55-3.png" width="32"/></td><td><code>capital-gamma = 'serifed'</code>, <code>cv55 = 3</code></td></tr><tr><td>Standard capital Gamma (<code>Γ</code>) with motion serifs at top and bottom</td></tr></table>
   - Styles for `ι` (Greek lower Iota):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-1.png" width="32"/></td><td><code>lower-iota = 'zshaped'</code>, <code>cv56 = 1</code></td></tr><tr><td>Z-shaped Greek lower Iota (<code>ι</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-2.png" width="32"/></td><td><code>lower-iota = 'hooky-bottom'</code>, <code>cv56 = 2</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a sharp-turning horizontal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-3.png" width="32"/></td><td><code>lower-iota = 'tailed'</code>, <code>cv56 = 3</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-4.png" width="32"/></td><td><code>lower-iota = 'tailed-serifed'</code>, <code>cv56 = 4</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-5.png" width="32"/></td><td><code>lower-iota = 'flat-tailed'</code>, <code>cv56 = 5</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-6.png" width="32"/></td><td><code>lower-iota = 'serifed-flat-tailed'</code>, <code>cv56 = 6</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and a curly-then-flat tail</td></tr></table>
   - Styles for `λ` (Greek small Lambda):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-1.png" width="32"/></td><td><code>lower-lambda = 'straight'</code>, <code>cv57 = 1</code></td></tr><tr><td>More-straight Greek small Lambda (<code>λ</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-2.png" width="32"/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv57 = 2</code></td></tr><tr><td>Greek small Lambda (<code>λ</code>) with straight upper and a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-3.png" width="32"/></td><td><code>lower-lambda = 'curly'</code>, <code>cv57 = 3</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-4.png" width="32"/></td><td><code>lower-lambda = 'curly-turn'</code>, <code>cv57 = 4</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x, with a tail turns leftward</td></tr></table>
+  - Styles for `ξ` (Greek lower Xi):
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAB-1.png" width="32"/></td><td><code>lower-xi = 'rounded'</code>, <code>VXAB = 1</code></td></tr><tr><td>Greek lower Xi (<code>ξ</code>) with rounded top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAB-2.png" width="32"/></td><td><code>lower-xi = 'flat-top'</code>, <code>VXAB = 2</code></td></tr><tr><td>Greek lower Xi (<code>ξ</code>) with flat top</td></tr></table>
   - Styles for `З` (Cyrillic Capital Ze):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-1.png" width="32"/></td><td><code>cyrl-capital-ze = 'serifless'</code>, <code>cv58 = 1</code></td></tr><tr><td>Serifless Cyrillic Capital Ze (<code>З</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-2.png" width="32"/></td><td><code>cyrl-capital-ze = 'unilateral-serifed'</code>, <code>cv58 = 2</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-3.png" width="32"/></td><td><code>cyrl-capital-ze = 'bilateral-serifed'</code>, <code>cv58 = 3</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-4.png" width="32"/></td><td><code>cyrl-capital-ze = 'unilateral-inward-serifed'</code>, <code>cv58 = 4</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv58-5.png" width="32"/></td><td><code>cyrl-capital-ze = 'bilateral-inward-serifed'</code>, <code>cv58 = 5</code></td></tr><tr><td>Cyrillic Capital Ze (<code>З</code>) with inward serif</td></tr></table>
   - Styles for `з` (Cyrillic Lower Ze):
