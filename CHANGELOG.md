@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 7.3.1
+
+ * Fix placement of above marks over Cyrillic Small Ge, Te, and Ya (#1157).
+
+
 ### 7.3.0
 
  * Add Greek Upsilon with Hook Symbol (`U+03D2`).

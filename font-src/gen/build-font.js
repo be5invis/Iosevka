@@ -1,7 +1,7 @@
 "use strict";
 
 const EmptyFont = require("./empty-font");
-const buildGlyphs = require("../glyphs/index");
+const { buildGlyphs } = require("../glyphs/index");
 const finalizeFont = require("./finalize/index");
 const convertOtd = require("./otd-conv/index");
 const Caching = require("./caching/index");
