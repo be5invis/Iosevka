@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 7.3.3
+
+ * Fix serif placement of Latin Small Letter Reversed R with Fishhook (`U+027F`) (#1163).
+
+
 ### 7.3.2
 
  * Fix anchor placement of:
