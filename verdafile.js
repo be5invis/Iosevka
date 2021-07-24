@@ -36,7 +36,6 @@ const webfontFormatsPages = [["woff2", "woff2"]];
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
 const SLOPE_NORMAL = "upright";
-const SLOPE_OBLIQUE = "oblique";
 const DEFAULT_SUBFAMILY = "regular";
 
 const BUILD_PLANS = "build-plans.toml";
@@ -189,8 +188,9 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			serifs: bp.serifs || null,
 			spacing: bp.spacing || null,
 			weight: sfi.shapeWeight,
-			slope: sfi.slope,
-			width: sfi.shapeWidth
+			width: sfi.shapeWidth,
+			slope: sfi.shapeSlope,
+			slopeAngle: sfi.shapeSlopeAngle
 		},
 		// Menu
 		menu: {
@@ -228,23 +228,28 @@ function getSuffixMapping(weights, slopes, widths) {
 	return mapping;
 }
 function getSuffixMappingItem(weights, w, slopes, s, widths, wd) {
+	const weightDef = wwsDefValidate("Weight definition of " + s, weights[w]);
+	const widthDef = wwsDefValidate("Width definition of " + s, widths[wd]);
+	const slopeDef = wwsDefValidate("Slope definition of " + s, slopes[s]);
 	return {
 		// Weights
 		weight: w,
-		shapeWeight: nValidate("Shape weight of " + w, weights[w].shape, VlShapeWeight),
-		cssWeight: nValidate("CSS weight of " + w, weights[w].css, VlCssWeight),
-		menuWeight: nValidate("Menu weight of " + w, weights[w].menu, VlMenuWeight),
+		shapeWeight: nValidate("Shape weight of " + w, weightDef.shape, VlShapeWeight),
+		cssWeight: nValidate("CSS weight of " + w, weightDef.css, VlCssWeight),
+		menuWeight: nValidate("Menu weight of " + w, weightDef.menu, VlMenuWeight),
 
 		// Widths
 		width: wd,
-		shapeWidth: nValidate("Shape width of " + wd, widths[wd].shape, VlShapeWidth),
-		cssStretch: widths[wd].css || wd,
-		menuWidth: nValidate("Menu width of " + wd, widths[wd].menu, VlMenuWidth),
+		shapeWidth: nValidate("Shape width of " + wd, widthDef.shape, VlShapeWidth),
+		cssStretch: sValidate("CSS stretch of " + wd, widthDef.css, VlCssFontStretch),
+		menuWidth: nValidate("Menu width of " + wd, widthDef.menu, VlMenuWidth),
 
 		// Slopes
 		slope: s,
-		cssStyle: slopes[s] || s,
-		menuSlope: slopes[s] || s
+		shapeSlope: sValidate("Shape slope of " + s, slopeDef.shape, VlShapeSlope),
+		shapeSlopeAngle: nValidate("Angle of " + s, slopeDef.angle, VlSlopeAngle),
+		cssStyle: sValidate("CSS style of " + s, slopeDef.css, VlCssStyle),
+		menuSlope: sValidate("Menu slope of " + s, slopeDef.menu, VlShapeSlope)
 	};
 }
 
@@ -366,18 +371,11 @@ const DistWoff2 = file.make(
 
 const CollectPlans = computed(`metadata:collect-plans`, async target => {
 	const [rawPlans] = await target.need(RawPlans);
-	return await getCollectPlans(
-		target,
-		rawPlans.collectPlans,
-		rawPlans.collectConfig,
-		fnStandardTtc
-	);
+	return await getCollectPlans(target, rawPlans.collectPlans);
 });
 
-async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
-	const glyfTtcComposition = {},
-		ttcComposition = {},
-		plans = {};
+async function getCollectPlans(target, rawCollectPlans) {
+	const plans = {};
 
 	let allCollectableGroups = new Set();
 	for (const collectPrefix in rawCollectPlans) {
@@ -392,65 +390,60 @@ async function getCollectPlans(target, rawCollectPlans, config, fnFileName) {
 	}
 
 	for (const collectPrefix in amendedRawCollectPlans) {
-		const groupFileList = new Set();
+		const glyfTtcComposition = {};
+		const ttcComposition = {};
 		const collect = amendedRawCollectPlans[collectPrefix];
 		if (!collect || !collect.from || !collect.from.length) continue;
 
 		for (const prefix of collect.from) {
 			const [gri] = await target.need(BuildPlanOf(prefix));
 			const ttfFileNameSet = new Set(gri.targets);
-			const suffixMapping = getSuffixMapping(gri.weights, gri.slopes, gri.widths);
-			for (const suffix in suffixMapping) {
-				const sfi = suffixMapping[suffix];
-				const ttcFileName = fnFileName(
-					config,
-					collectPrefix,
-					sfi.weight,
-					sfi.width,
-					sfi.slope
-				);
-				const glyfTtcFileName = fnFileName(
-					{ ...config, distinguishWidths: true, distinguishWhetherUpright: true },
-					collectPrefix,
-					sfi.weight,
-					sfi.width,
-					sfi.slope
-				);
+			const suffixMap = getSuffixMapping(gri.weights, gri.slopes, gri.widths);
+			for (const suffix in suffixMap) {
+				const sfi = suffixMap[suffix];
 
 				const ttfTargetName = makeFileName(prefix, suffix);
 				if (!ttfFileNameSet.has(ttfTargetName)) continue;
 
+				const glyfTtcFileName = fnStandardTtc(true, collectPrefix, suffixMap, sfi);
 				if (!glyfTtcComposition[glyfTtcFileName]) glyfTtcComposition[glyfTtcFileName] = [];
 				glyfTtcComposition[glyfTtcFileName].push({ dir: prefix, file: ttfTargetName });
+
+				const ttcFileName = fnStandardTtc(false, collectPrefix, suffixMap, sfi);
 				if (!ttcComposition[ttcFileName]) ttcComposition[ttcFileName] = [];
 				ttcComposition[ttcFileName].push(glyfTtcFileName);
-
-				groupFileList.add(ttcFileName);
 			}
 		}
 		plans[collectPrefix] = {
-			ttcContents: [...groupFileList],
+			glyfTtcComposition,
+			ttcComposition,
 			groupDecomposition: [...collect.from],
 			inRelease: !!collect.release,
 			isAmended: !!collect.isAmended
 		};
 	}
-	return { glyfTtcComposition, ttcComposition, plans };
+	return plans;
 }
-function fnStandardTtc(collectConfig, prefix, w, wd, s) {
-	const ttcSuffix = makeSuffix(
-		collectConfig.distinguishWeights ? w : WEIGHT_NORMAL,
-		collectConfig.distinguishWidths ? wd : WIDTH_NORMAL,
-		collectConfig.distinguishSlope
-			? s
-			: collectConfig.distinguishWhetherUpright
-			? s === SLOPE_NORMAL
-				? SLOPE_NORMAL
-				: SLOPE_OBLIQUE
-			: SLOPE_NORMAL,
-		DEFAULT_SUBFAMILY
-	);
-	return `${prefix}-${ttcSuffix}`;
+
+function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
+	let optimalSfi = null,
+		maxScore = 0;
+	for (const ttcSuffix in suffixMapping) {
+		const sfiT = suffixMapping[ttcSuffix];
+		if (sfi.shapeWeight !== sfiT.shapeWeight) continue;
+		if (sfi.shapeWidth !== sfiT.shapeWidth) continue;
+		if (fIsGlyfTtc && sfi.shapeSlopeAngle !== sfiT.shapeSlopeAngle) continue;
+		const score =
+			(sfiT.weight === WEIGHT_NORMAL ? 1 : 0) +
+			(sfiT.width === WIDTH_NORMAL ? 1 : 0) +
+			(sfiT.slope === SLOPE_NORMAL ? 1 : 0);
+		if (!optimalSfi || score > maxScore) {
+			maxScore = score;
+			optimalSfi = sfiT;
+		}
+	}
+	if (!optimalSfi) throw new Error("Unreachable: TTC name decision");
+	return `${prefix}-${makeSuffix(optimalSfi.weight, optimalSfi.width, optimalSfi.slope)}`;
 }
 
 ///////////////////////////////////////////////////////////
@@ -464,25 +457,25 @@ const CollectedSuperTtcFile = file.make(
 	cgr => `${DIST_SUPER_TTC}/${cgr}.ttc`,
 	async (target, out, cgr) => {
 		const [cp] = await target.need(CollectPlans, de(out.dir));
-		const parts = Array.from(new Set(cp.plans[cgr].ttcContents));
-		const [inputs] = await target.need(parts.map(pt => CollectedTtcFile(cgr, pt)));
+		const parts = Array.from(Object.keys(cp[cgr].glyfTtcComposition));
+		const [inputs] = await target.need(parts.map(pt => GlyfTtc(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
 	}
 );
 const CollectedTtcFile = file.make(
-	(cgr, f) => `${BUILD}/ttc-collect/${cgr}/ttc/${f}.ttc`,
-	async (target, out, gr, f) => {
+	(cgr, f) => `${BUILD}/ttc-collect/${cgr}/${f}.ttc`,
+	async (target, out, cgr, f) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
-		const parts = Array.from(new Set(cp.ttcComposition[f]));
-		const [inputs] = await target.need(parts.map(pt => GlyfTtc(gr, pt)));
+		const parts = Array.from(new Set(cp[cgr].ttcComposition[f]));
+		const [inputs] = await target.need(parts.map(pt => GlyfTtc(cgr, pt)));
 		await buildCompositeTtc(out, inputs);
 	}
 );
 const GlyfTtc = file.make(
 	(cgr, f) => `${BUILD}/glyf-ttc/${cgr}/${f}.ttc`,
-	async (target, out, gr, f) => {
+	async (target, out, cgr, f) => {
 		const [cp] = await target.need(CollectPlans);
-		const parts = cp.glyfTtcComposition[f];
+		const parts = cp[cgr].glyfTtcComposition[f];
 		await buildGlyphSharingTtc(target, parts, out);
 	}
 );
@@ -508,13 +501,13 @@ async function buildGlyphSharingTtc(target, parts, out) {
 const TtcArchiveFile = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/ttc-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
-		const [collectPlans] = await target.need(CollectPlans, de`${out.dir}`);
-		const ttcFiles = Array.from(new Set(collectPlans.plans[cgr].ttcContents));
+		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
+		const ttcFiles = Array.from(Object.keys(cp[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 
 		// Packaging
 		await rm(out.full);
-		await cd(`${BUILD}/ttc-collect/${cgr}/ttc`).run(
+		await cd(`${BUILD}/ttc-collect/${cgr}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
 			`../../../../${out.full}`,
@@ -795,7 +788,7 @@ phony(`clean`, async () => {
 phony(`release`, async target => {
 	const [collectPlans] = await target.need(CollectPlans);
 	let goals = [];
-	for (const [cgr, plan] of Object.entries(collectPlans.plans)) {
+	for (const [cgr, plan] of Object.entries(collectPlans)) {
 		if (!plan.inRelease) continue;
 		goals.push(ReleaseGroup(cgr));
 	}
@@ -804,7 +797,7 @@ phony(`release`, async target => {
 });
 const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
-	const subGroups = collectPlans.plans[cgr].groupDecomposition;
+	const subGroups = collectPlans[cgr].groupDecomposition;
 
 	let goals = [TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version)];
 	for (const gr of subGroups) {
@@ -887,6 +880,7 @@ const Parameters = task(`meta:parameters`, async target => {
 		sfu`params/parameters.toml`,
 		sfu`params/shape-weight.toml`,
 		sfu`params/shape-width.toml`,
+		sfu`params/shape-slope.toml`,
 		ofu`params/private-parameters.toml`,
 		sfu`params/variants.toml`,
 		sfu`params/ligation-set.toml`
@@ -937,6 +931,13 @@ function validateRecommendedWeight(w, value, label) {
 }
 
 // Value validation
+function wwsDefValidate(key, obj) {
+	if (!obj || typeof obj === "string") {
+		throw new TypeError(`${key} is invalid.`);
+	}
+	return obj;
+}
+
 function nValidate(key, v, validator) {
 	if (validator.fixup) v = validator.fix(v);
 	if (typeof v !== "number" || !isFinite(v) || !validator.validate(v)) {
@@ -968,3 +969,26 @@ const VlShapeWidth = {
 	}
 };
 const VlMenuWidth = { validate: x => x >= 1 && x <= 9 && x % 1 === 0 };
+const VlSlopeAngle = { validate: x => x >= 0 && x <= 15 };
+
+function sValidate(key, v, validator) {
+	if (validator.fixup) v = validator.fix(v);
+	if (typeof v !== "string" || !validator.validate(v)) {
+		throw new TypeError(`${key} = ${v} is not a valid string.`);
+	}
+	return v;
+}
+const VlShapeSlope = { validate: x => x === "upright" || x === "oblique" || x === "italic" };
+const VlCssStyle = { validate: x => x === "normal" || x === "oblique" || x === "italic" };
+const VlCssFontStretch = {
+	validate: x =>
+		x == "ultra-condensed" ||
+		x == "extra-condensed" ||
+		x == "condensed" ||
+		x == "semi-condensed" ||
+		x == "normal" ||
+		x == "semi-expanded" ||
+		x == "expanded" ||
+		x == "extra-expanded" ||
+		x == "ultra-expanded"
+};
