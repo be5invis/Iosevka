@@ -510,8 +510,8 @@ const TtcArchiveFile = file.make(
 		await cd(`${BUILD}/ttc-collect/${cgr}`).run(
 			["7z", "a"],
 			["-tzip", "-r", "-mx=9"],
-			`../../../../${out.full}`,
-			`./`
+			Path.relative(`${BUILD}/ttc-collect/${cgr}`, out.full),
+			`*.ttc`
 		);
 	}
 );
