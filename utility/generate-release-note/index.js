@@ -107,7 +107,7 @@ async function GeneratePackageList(out) {
 		out.log(
 			`<tr>`,
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
-			`<td><b><a href="${sTtcLink}">Super-TTC</b></td>`,
+			`<td><b><a href="${sTtcLink}">Super\u00A0TTC</b></td>`,
 			`<td><b><a href="${ttcLink}">TTC</b></td>`,
 			`<td colspan="3">&nbsp;</td>`,
 			`</tr>`
@@ -138,7 +138,7 @@ async function GeneratePackageList(out) {
 				`<td>${leader}&nbsp;<b>${noBreak(subGr.family)}</b></td>`,
 				`<td>${spacingDesc}</td>`,
 				`<td>${flag(ligation)}</td>`,
-				`<td>${createLink("Super TTC", "super-ttc-sgr")}</td>`,
+				`<td>${createLink("Super\u00A0TTC", "super-ttc-sgr")}</td>`,
 				`<td>${createLink("TTC", "ttc-sgr")}</td>`,
 				`<td>${createLink("TTF", "ttf")}</td>`,
 				`<td>${createLink("Unhinted", "ttf-unhinted")}</td>`,
