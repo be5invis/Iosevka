@@ -737,10 +737,10 @@ const ReleaseNotesFile = file.make(
 	}
 );
 const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
-	const [collectPlans] = await t.need(CollectPlans);
+	const [cp] = await t.need(CollectPlans);
 	const [{ buildPlans }] = await t.need(BuildPlans);
 	let releaseNoteGroups = {};
-	for (const [k, plan] of Object.entries(collectPlans.plans)) {
+	for (const [k, plan] of Object.entries(cp)) {
 		if (!plan.inRelease || plan.isAmended) continue;
 		const primePlan = buildPlans[plan.groupDecomposition[0]];
 		let subGroups = {};
