@@ -53,156 +53,137 @@ Monospace Iosevka contains various stylistic sets to change the shape of certain
 
 <table>
 <tr>
-<td><code>ss01</code></td>
-<td colspan="3">Andale Mono Style</td>
+<td colspan="2"><code>ss01</code> — Andale Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss01-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss01-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss01-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss01-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss02</code></td>
-<td colspan="3">Anonymous Pro Style</td>
+<td colspan="2"><code>ss02</code> — Anonymous Pro Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss02-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss02-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss02-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss02-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss03</code></td>
-<td colspan="3">Consolas Style</td>
+<td colspan="2"><code>ss03</code> — Consolas Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss03-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss03-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss03-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss03-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss04</code></td>
-<td colspan="3">Menlo Style</td>
+<td colspan="2"><code>ss04</code> — Menlo Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss04-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss04-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss04-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss04-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss05</code></td>
-<td colspan="3">Fira Mono Style</td>
+<td colspan="2"><code>ss05</code> — Fira Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss05-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss05-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss05-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss05-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss06</code></td>
-<td colspan="3">Liberation Mono Style</td>
+<td colspan="2"><code>ss06</code> — Liberation Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss06-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss06-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss06-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss06-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss07</code></td>
-<td colspan="3">Monaco Style</td>
+<td colspan="2"><code>ss07</code> — Monaco Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss07-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss07-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss07-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss07-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss08</code></td>
-<td colspan="3">Pragmata Pro Style</td>
+<td colspan="2"><code>ss08</code> — Pragmata Pro Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss08-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss08-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss08-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss08-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss09</code></td>
-<td colspan="3">Source Code Pro Style</td>
+<td colspan="2"><code>ss09</code> — Source Code Pro Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss09-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss09-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss09-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss09-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss10</code></td>
-<td colspan="3">Envy Code R Style</td>
+<td colspan="2"><code>ss10</code> — Envy Code R Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss10-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss10-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss10-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss10-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss11</code></td>
-<td colspan="3">X Window Style</td>
+<td colspan="2"><code>ss11</code> — X Window Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss11-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss11-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss11-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss11-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss12</code></td>
-<td colspan="3">Ubuntu Mono Style</td>
+<td colspan="2"><code>ss12</code> — Ubuntu Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss12-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss12-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss12-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss12-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss13</code></td>
-<td colspan="3">Lucida Style</td>
+<td colspan="2"><code>ss13</code> — Lucida Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss13-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss13-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss13-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss13-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss14</code></td>
-<td colspan="3">JetBrains Mono Style</td>
+<td colspan="2"><code>ss14</code> — JetBrains Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss14-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss14-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss14-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss14-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss15</code></td>
-<td colspan="3">IBM Plex Mono Style</td>
+<td colspan="2"><code>ss15</code> — IBM Plex Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss15-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss15-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss15-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss15-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss16</code></td>
-<td colspan="3">PT Mono Style</td>
+<td colspan="2"><code>ss16</code> — PT Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss16-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss16-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss16-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss16-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss17</code></td>
-<td colspan="3">Recursive Mono Style</td>
+<td colspan="2"><code>ss17</code> — Recursive Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss17-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss17-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss17-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss17-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss18</code></td>
-<td colspan="3">Input Mono Style</td>
+<td colspan="2"><code>ss18</code> — Input Mono Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss18-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss18-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss18-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss18-1.png"/></td>
 </tr>
 <tr>
-<td><code>ss20</code></td>
-<td colspan="3">Curly Style</td>
+<td colspan="2"><code>ss20</code> — Curly Style</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/stylistic-set-u-ss20-1.png"/></td>
-<td colspan="2"><img src="images/stylistic-set-i-ss20-1.png"/></td>
+<td><img src="images/stylistic-set-u-ss20-1.png"/></td>
+<td><img src="images/stylistic-set-i-ss20-1.png"/></td>
 </tr>
 </table>
 
@@ -2971,15 +2952,22 @@ Subsection `variants` is used to configure character variants in the font. Prope
 
 Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
 
-* `shape`: Integer, configures the weight grade of the glyphs' shapes.
+* `shape`: Number, configures the weight grade of the glyphs' shapes.
 * `menu`: Integer, configures the weight grade used when naming fonts.
 * `css`: Integer, configures the weight grade used in web font CSS.
 
-Subsection `widths` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of sub-objects with properties:
 
-* `shape`: Integer, configures the width of the glyphs' shapes, measured in 1/1000 em.
+* `shape`: Number, configures the width of the glyphs' shapes, measured in 1/1000 em.
 * `menu`: Integer, configures the width grade used when naming fonts. The valid values are `1` to `9`, inclusive.
 * `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
+
+Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of sub-objects with properties:
+
+* `angle`: Number, configures the slope angle in degrees. The valid vales are `0` to `15`, inclusive.
+* `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 
+* `menu`: String from `upright`, `italic` or `oblique`. Configures the slope grade used when naming fonts.
+* `css`: String from `normal`, `italic` or `oblique`. Configures the [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) value.
 
 Subsection `slopes` is a simple string-to-string dictionary maps slopes (`upright`, `italic` or `oblique`) to [CSS font-style](https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style) values, represented in string.
 

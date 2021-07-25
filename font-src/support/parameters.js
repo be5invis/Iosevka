@@ -11,6 +11,7 @@ function initPara(data, argv) {
 
 	applyBlendingParam(argv, para, data, "shapeWeight", "weight");
 	applyBlendingParam(argv, para, data, "shapeWidth", "width");
+	applyBlendingParam(argv, para, data, "shapeSlopeAngle", "slopeAngle");
 	applyAlternatesParam(argv, para, data, "slope", "slope");
 
 	if (argv.featureControl.noCvSs) para.enableCvSs = false;

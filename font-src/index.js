@@ -26,6 +26,7 @@ async function getParameters() {
 	const PARAMETERS_TOML = path.resolve(__dirname, "../params/parameters.toml");
 	const WEIGHTS_TOML = path.resolve(__dirname, "../params/shape-weight.toml");
 	const WIDTHS_TOML = path.resolve(__dirname, "../params/shape-width.toml");
+	const SLOPES_TOML = path.resolve(__dirname, "../params/shape-slope.toml");
 	const PRIVATE_TOML = path.resolve(__dirname, "../params/private-parameters.toml");
 	const VARIANTS_TOML = path.resolve(__dirname, "../params/variants.toml");
 	const LIGATIONS_TOML = path.resolve(__dirname, "../params/ligation-set.toml");
@@ -35,6 +36,7 @@ async function getParameters() {
 		await tryParseToml(PARAMETERS_TOML),
 		await tryParseToml(WEIGHTS_TOML),
 		await tryParseToml(WIDTHS_TOML),
+		await tryParseToml(SLOPES_TOML),
 		fs.existsSync(PRIVATE_TOML) ? await tryParseToml(PRIVATE_TOML) : {}
 	);
 	const rawVariantsData = await tryParseToml(VARIANTS_TOML);
