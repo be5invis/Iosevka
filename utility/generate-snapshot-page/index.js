@@ -6,7 +6,6 @@ const path = require("path");
 const parseVariantsData = require("../export-data/variants-data");
 const getLigationData = require("../export-data/ligation-data");
 const execMain = require("../shared/execMain");
-const variantsData = require("../export-data/variants-data");
 
 const inputPath = process.argv[2];
 const outputPath = process.argv[3];
@@ -51,6 +50,7 @@ async function main() {
 			applyCallbackArgs: ls
 		});
 	}
+	/*
 	for (const ss of variationData.composites) {
 		readmeSnapshotTasks.push({
 			el: "#packaging-sampler",
@@ -107,9 +107,14 @@ async function main() {
 			});
 		}
 	}
+	*/
 	await fs.writeJson(
 		outputDataPath,
-		{ readmeSnapshotTasks, ligationSamples: ligationData.samples },
+		{
+			readmeSnapshotTasks,
+			ligationSamples: ligationData.samples,
+			ligationCherry: ligationData.cherry
+		},
 		{ spaces: "  " }
 	);
 }
