@@ -31,6 +31,7 @@ async function main() {
 			version,
 			variantsData,
 			ligationData: {
+				cherry: ligationData.cherry,
 				samplesNarrow: ligationData.samplesNarrow,
 				nonMergeSets: ligationData.nonMergeSets
 			}
