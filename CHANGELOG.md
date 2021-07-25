@@ -1,5 +1,31 @@
 ## Modifications since version 2.x
 
+### 8.0.0
+
+ * \[**Breaking**\] Add support for slope customization (#599, #1165).
+   - Slope customization format has a major change, giving ability to customize slope grade used for variant selection, as well as slope angle.
+   - The format will look like this:
+     ``` toml
+     [buildPlans.iosevka-custom.slopes.upright]
+     angle = 0             # Angle in degrees. Valid range [0, 15]
+     shape = "upright"     # Slope grade used for shape selection.  `upright` | `oblique` | `italic`
+     menu  = "upright"     # Slope grade used for naming.           `upright` | `oblique` | `italic`
+     css   = "normal"      # Slope grade used for webfont CSS.      `normal`  | `oblique` | `italic`
+
+     [buildPlans.iosevka-custom.slopes.oblique]
+     angle = 9.4
+     shape = "oblique"
+     menu  = "oblique"
+     css   = "oblique"
+
+     [buildPlans.iosevka-custom.slopes.italic]
+     angle = 9.4
+     shape = "italic"
+     menu  = "italic"
+     css   = "italic"
+     ```
+
+
 ### 7.3.3
 
  * Fix serif placement of Latin Small Letter Reversed R with Fishhook (`U+027F`) (#1163).

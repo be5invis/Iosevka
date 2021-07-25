@@ -73,22 +73,22 @@ function cbAmendLigsetSamplerContents(element, p) {
 		element.appendChild(line);
 		for (let m = 0; m < row.length; m++) {
 			if (m > 0) line.appendChild(document.createTextNode(" "));
-			const item = row[m];
+			const sampleStr = row[m];
 			let rank = 0;
-			for (let k = item.tags.length; k-- > 0; ) {
-				if (groupSet.has(item.tags[k])) {
-					rank = k + 1;
-					break;
-				}
+			for (const [lgName, lg] of Object.entries(auxData.ligationCherry)) {
+				if (!groupSet.has(lg.ligGroup)) continue;
+				if (!new Set(lg.samples || []).has(sampleStr)) continue;
+				const rankT = lg.sampleRank || 1;
+				if (rankT > rank) rank = rankT;
 			}
 			if (rank) {
 				const run = document.createElement("em");
-				run.appendChild(document.createTextNode(item.s));
+				run.appendChild(document.createTextNode(sampleStr));
 				run.className = `rank-${rank}`;
 				line.appendChild(run);
 			} else {
 				const run = document.createElement("s");
-				run.appendChild(document.createTextNode(item.s));
+				run.appendChild(document.createTextNode(sampleStr));
 				run.className = `rank-${rank}`;
 				line.appendChild(run);
 			}
