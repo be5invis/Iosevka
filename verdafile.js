@@ -443,7 +443,12 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 		}
 	}
 	if (!optimalSfi) throw new Error("Unreachable: TTC name decision");
-	return `${prefix}-${makeSuffix(optimalSfi.weight, optimalSfi.width, optimalSfi.slope)}`;
+	return `${prefix}-${makeSuffix(
+		optimalSfi.weight,
+		optimalSfi.width,
+		optimalSfi.slope,
+		DEFAULT_SUBFAMILY
+	)}`;
 }
 
 ///////////////////////////////////////////////////////////
