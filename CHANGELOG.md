@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 8.0.1
+
+ * Fix filenames in 9-file TTC (#1167).
+ * Fix gap in Bulgarian De (#1168).
+
+
 ### 8.0.0
 
  * \[**Breaking**\] Add support for slope customization (#599, #1165).
