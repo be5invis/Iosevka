@@ -50,7 +50,6 @@ async function main() {
 			applyCallbackArgs: ls
 		});
 	}
-	/*
 	for (const ss of variationData.composites) {
 		readmeSnapshotTasks.push({
 			el: "#packaging-sampler",
@@ -107,7 +106,7 @@ async function main() {
 			});
 		}
 	}
-	*/
+
 	await fs.writeJson(
 		outputDataPath,
 		{
