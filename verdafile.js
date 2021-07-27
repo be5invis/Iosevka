@@ -431,7 +431,7 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 	for (const ttcSuffix in suffixMapping) {
 		const sfiT = suffixMapping[ttcSuffix];
 		if (sfi.shapeWeight !== sfiT.shapeWeight) continue;
-		if (sfi.shapeWidth !== sfiT.shapeWidth) continue;
+		if (fIsGlyfTtc && sfi.shapeWidth !== sfiT.shapeWidth) continue;
 		if (fIsGlyfTtc && sfi.shapeSlopeAngle !== sfiT.shapeSlopeAngle) continue;
 		const score =
 			(sfiT.weight === WEIGHT_NORMAL ? 1 : 0) +
