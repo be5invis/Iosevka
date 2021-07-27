@@ -1109,7 +1109,7 @@ glyph-block Autobuild-Ligatures : begin
 
 		applyRelations jobs.relApplications
 
-	define stdShrink : clamp 0.75 0.9 : linreg 72 0.75 108 0.9 Stroke
+	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
 	createLigatures 'compatLigature1' stdShrink stdShrink 1 1 : list
 		list 0x1C4 { 'D' 'ZCaron' }
 		list 0x1C5 { 'D' 'zCaron' }
@@ -1146,11 +1146,10 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		local shrink1 : clamp 0 1 _shrink1
 		local shrink2 : clamp 0 1 _shrink2
 		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-		define antiScale : (CWidth * shrink1 + CWidth * shrink2 - kern) / CWidth
 		foreach [cycle : range 0 4] : begin
 			set kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
-			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
+			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / CWidth
+			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / CWidth
 			set shrink1 : clamp 0 1 tmp-shrink1
 			set shrink2 : clamp 0 1 tmp-shrink2
 
@@ -1191,24 +1190,21 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 
 		applyRelations jobs.relApplications
 
-	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.78 0.9
+	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
 	createPhoneticLigatures 'phonetic' para.diversityM stdShrink stdShrink 1 1 : list
-		list 0x02A3 { 'd/phoneticLeft'  'z'                 } 'b'
-		list 0x02A4 { 'd/phoneticLeft'  'ezh'               } 'if'
-		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'        } 'if'
-		list 0x02A6 { 't/phoneticLeft2' 's/phoneticRight'   } 'b'
-		list 0x02A7 { 't/teshLeft'      'esh'               } 'if'
-		list 0x02A8 { 't/phoneticLeft1' 'cCurlyTail'        } 'b'
-		list 0x02A9 { 'f/phoneticLeft'  'eng/phoneticRight' } 'if'
-		list 0x02AA { 'l/phoneticLeft'  's/phoneticRight'   } 'b'
-		list 0x02AB { 'l/phoneticLeft'  'z'                 } 'b'
-		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'          } 'if'
-		list 0xAB67 { 't/phoneticLeft1' 'sRTail'            } null
-
-	define compatLigShrink : clamp 0.75 1 : StrokeWidthBlend 0.78 1
-	createPhoneticLigatures 'compatLig' 1 compatLigShrink compatLigShrink 1 1 : list
-		list 0xFB01 { 'f/compLigLeft1'          'dotlessi/compLigRight' } null
-		list 0xFB02 { 'f/compLigLeft2'          'l/compLigRight'        } null
+		list 0x02A3 { 'd/phoneticLeft'  'z'                     } 'b'
+		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'if'
+		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
+		list 0x02A6 { 't/phoneticLeft2' 's/phoneticRight'       } 'b'
+		list 0x02A7 { 't/teshLeft'      'esh'                   } 'if'
+		list 0x02A8 { 't/phoneticLeft1' 'cCurlyTail'            } 'b'
+		list 0x02A9 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'if'
+		list 0x02AA { 'l/phoneticLeft'  's/phoneticRight'       } 'b'
+		list 0x02AB { 'l/phoneticLeft'  'z'                     } 'b'
+		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
+		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } null
+		list 0xFB01 { 'f/compLigLeft1'  'dotlessi/compLigRight' } null
+		list 0xFB02 { 'f/compLigLeft2'  'l/compLigRight'        } null
 
 glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import CommonShapes
@@ -1216,19 +1212,11 @@ glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createDoubleEmotions prefix div _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
+	define [createDoubleEmotions prefix div shrink1 shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
 		define CWidth : if FMosaicWide MosaicWidth (Width * div)
 		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
-		local shrink1 : clamp 0 1 _shrink1
-		local shrink2 : clamp 0 1 _shrink2
+
 		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-		define antiScale : (CWidth * shrink1 + CWidth * shrink2 - kern) / CWidth
-		foreach [cycle : range 0 4] : begin
-			set kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
-			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / (CWidth * shrink1 + CWidth * shrink2 - kern) * antiScale
-			set shrink1 : clamp 0 1 tmp-shrink1
-			set shrink2 : clamp 0 1 tmp-shrink2
 
 		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
 		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
@@ -1254,7 +1242,7 @@ glyph-block Autobuild-Double-Emotions : begin
 
 		applyRelations jobs.relApplications
 
-	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.78 0.9
+	define stdShrink : clamp 0.625 0.9 : StrokeWidthBlend 0.625 0.9
 	createDoubleEmotions 'doubleemotion' para.diversityM stdShrink stdShrink 1 1 : list
 		list 0x203c { 'exclam' 'zwsp' 'exclam' 'zwsp' }
 		list 0x2047 { 'question/hookPart' 'question/dotPart' 'question/hookPart' 'question/dotPart' }
