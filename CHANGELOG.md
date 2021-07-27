@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 8.0.2
+
+ * Fix TTC grouping (#1167).
+
+
 ### 8.0.1
 
  * Fix filenames in 9-file TTC (#1167).
