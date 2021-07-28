@@ -1037,7 +1037,7 @@ glyph-block Autobuild-Ligatures : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
+	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 kKern demands] : for-width-kinds WideWidth2
 		local ww : if FMosaicWide MosaicWidth (MosaicWidth * para.diversityM)
 		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
 		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / Width)]
@@ -1081,7 +1081,7 @@ glyph-block Autobuild-Ligatures : begin
 			: else : begin
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
 				local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
-				local kern   0
+				local kern      : kKern * ww
 				local refW : sumChildrenWidth - kern
 				foreach [cycle : range 0 4] : begin
 					set kern : Math.max 0 : Math.min (SB * 7/8 * (shrink1 + shrink2)) (refW - compRefWw)
@@ -1109,8 +1109,13 @@ glyph-block Autobuild-Ligatures : begin
 
 		applyRelations jobs.relApplications
 
+	define ijShrink : clamp 0.65 0.8 : StrokeWidthBlend 0.7 0.8
+	createLigatures 'compatLigature1' ijShrink ijShrink 1 1 0.05 : list
+		list 0x132 { 'I' 'J' }
+		list 0x133 { 'i' 'j' }
+
 	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createLigatures 'compatLigature1' stdShrink stdShrink 1 1 : list
+	createLigatures 'compatLigature2' stdShrink stdShrink 1 1 0 : list
 		list 0x1C4 { 'D' 'ZCaron' }
 		list 0x1C5 { 'D' 'zCaron' }
 		list 0x1C6 { 'd' 'zCaron' }
@@ -1130,7 +1135,8 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x20AF { 'D' 'grek/rho' }
 		list 0x2116 { 'N' 'numeroRightHalf' }
 		list 0x1F190 { 'D' 'J' } WideWidth1
-	createLigatures 'temperature' 0.7 0.8 0.75 0.9 : list
+
+	createLigatures 'temperature' 0.7 0.8 0.75 0.9 0 : list
 		list 0x2103 { 'degree' 'C' }
 		list 0x2109 { 'degree' 'F' }
 
