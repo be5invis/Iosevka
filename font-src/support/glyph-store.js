@@ -1,6 +1,6 @@
 "use strict";
 
-class GlyphStore {
+exports.GlyphStore = class GlyphStore {
 	constructor() {
 		this.nameForward = new Map();
 		this.nameBackward = new Map();
@@ -116,6 +116,4 @@ class GlyphStore {
 		}
 		return gs1;
 	}
-}
-
-module.exports = GlyphStore;
+};

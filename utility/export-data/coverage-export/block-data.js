@@ -1,4 +1,4 @@
-module.exports = [
+exports.blockData = [
 	[[0x0000, 0x007f], "Basic Latin"],
 	[[0x0080, 0x00ff], "Latin-1 Supplement"],
 	[[0x0100, 0x017f], "Latin Extended-A"],

@@ -60,4 +60,4 @@ Point.Type = {
 	Quadratic: 3
 };
 
-module.exports = Point;
+exports.Point = Point;

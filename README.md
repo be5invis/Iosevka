@@ -2277,12 +2277,14 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td rowspan="2"><code>cv87</code></td>
 <td colspan="2"><img src="images/character-variant-cv87-1.png" width="64"/></td>
 <td colspan="2"><img src="images/character-variant-cv87-2.png" width="64"/></td>
-<td colspan="8"> </td>
+<td colspan="2"><img src="images/character-variant-cv87-3.png" width="64"/></td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td colspan="2">1</td>
 <td colspan="2">2</td>
-<td colspan="8"> </td>
+<td colspan="2">3</td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv88</code></td>
@@ -2920,7 +2922,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `(`, `)`:
      <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-1.png" width="64"/></td><td><code>paren = 'normal'</code>, <code>cv86 = 1</code></td></tr><tr><td>Parenthesis with normal contour</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-2.png" width="64"/></td><td><code>paren = 'large-contour'</code>, <code>cv86 = 2</code></td></tr><tr><td>Parenthesis with larger contour, like that in Monaco</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-3.png" width="64"/></td><td><code>paren = 'flat-arc'</code>, <code>cv86 = 3</code></td></tr><tr><td>Parenthesis with flat arc, like that in JetBrains Mono</td></tr></table>
   - Styles for `{`, `}`:
-     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr></table>
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-3.png" width="64"/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>cv87 = 3</code></td></tr><tr><td>Curly braces with flat boundary shape</td></tr></table>
   - Styles for `#`:
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-1.png" width="32"/></td><td><code>number-sign = 'upright'</code>, <code>cv88 = 1</code></td></tr><tr><td>Number sign with vertical bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-2.png" width="32"/></td><td><code>number-sign = 'slanted'</code>, <code>cv88 = 2</code></td></tr><tr><td>Number sign with slanted bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-3.png" width="32"/></td><td><code>number-sign = 'upright-open'</code>, <code>cv88 = 3</code></td></tr><tr><td>Number sign with vertical bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-4.png" width="32"/></td><td><code>number-sign = 'slanted-open'</code>, <code>cv88 = 4</code></td></tr><tr><td>Number sign with slanted bars and open inner</td></tr></table>
   - Styles for `&`:

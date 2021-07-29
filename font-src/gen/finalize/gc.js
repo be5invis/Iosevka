@@ -2,7 +2,7 @@
 
 const { Radical } = require("../../support/gr");
 
-module.exports = function gcFont(glyphStore, excludedChars, otl, cfg) {
+exports.gcFont = function (glyphStore, excludedChars, otl, cfg) {
 	markSweepOtlLookups(otl.GSUB);
 	markSweepOtlLookups(otl.GPOS);
 	const sink = markGlyphs(glyphStore, excludedChars, otl, cfg);

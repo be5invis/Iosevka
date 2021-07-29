@@ -1,7 +1,38 @@
 const { Ot } = require("ot-builder");
-const Point = require("../../support/geometry/point");
+const { Point } = require("../../support/geometry/point");
 const Gr = require("../../support/gr");
 const { byCode, bySpacing, byGr, byBuildOrder } = require("./glyph-name");
+
+exports.convertGlyphs = function convertGlyphs(gsOrig) {
+	const sortedEntries = Array.from(gsOrig.namedEntries(Gr.Nwid, Gr.Wwid)).sort(byRank);
+
+	const gs = new MappedGlyphStore();
+	const cmap = new Ot.Cmap.Table();
+
+	for (const [name, gSrc] of sortedEntries) {
+		gs.declare(name, gSrc);
+		const us = gsOrig.queryUnicodeOf(gSrc);
+		if (us) {
+			for (const u of us) {
+				if (!(isFinite(u - 0) && u)) continue;
+				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
+				gs.setPrimaryUnicode(gSrc, u);
+			}
+		}
+	}
+	for (const [name, gSrc] of sortedEntries) gs.fill(name, gSrc);
+	gs.fillOtGlyphNames();
+	return { glyphs: gs, cmap };
+};
+
+function byRank([gna, a], [gnb, b]) {
+	return (
+		b.glyphRank - a.glyphRank ||
+		a.grRank - b.grRank ||
+		a.codeRank - b.codeRank ||
+		a.subRank - b.subRank
+	);
+}
 
 class MappedGlyphStore {
 	constructor() {
@@ -120,36 +151,4 @@ class MappedGlyphStore {
 		}
 		g.geometry = cs;
 	}
-}
-
-module.exports = convertGlyphs;
-function convertGlyphs(gsOrig) {
-	const sortedEntries = Array.from(gsOrig.namedEntries(Gr.Nwid, Gr.Wwid)).sort(byRank);
-
-	const gs = new MappedGlyphStore();
-	const cmap = new Ot.Cmap.Table();
-
-	for (const [name, gSrc] of sortedEntries) {
-		gs.declare(name, gSrc);
-		const us = gsOrig.queryUnicodeOf(gSrc);
-		if (us) {
-			for (const u of us) {
-				if (!(isFinite(u - 0) && u)) continue;
-				cmap.unicode.set(u, gs.queryBySourceGlyph(gSrc));
-				gs.setPrimaryUnicode(gSrc, u);
-			}
-		}
-	}
-	for (const [name, gSrc] of sortedEntries) gs.fill(name, gSrc);
-	gs.fillOtGlyphNames();
-	return { glyphs: gs, cmap };
-}
-
-function byRank([gna, a], [gnb, b]) {
-	return (
-		b.glyphRank - a.glyphRank ||
-		a.grRank - b.grRank ||
-		a.codeRank - b.codeRank ||
-		a.subRank - b.subRank
-	);
 }

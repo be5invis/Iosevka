@@ -2,16 +2,15 @@
 
 const TypoGeom = require("typo-geom");
 const Geom = require("../../support/geometry/index");
-const Point = require("../../support/geometry/point");
-const Transform = require("../../support/geometry/transform");
+const { Point } = require("../../support/geometry/point");
+const { Transform } = require("../../support/geometry/transform");
 const CurveUtil = require("../../support/geometry/curve-util");
 
-module.exports = finalizeGlyphs;
-function finalizeGlyphs(cache, para, glyphStore) {
+exports.finalizeGlyphs = function finalizeGlyphs(cache, para, glyphStore) {
 	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
 	regulateGlyphStore(cache, skew, glyphStore);
 	return glyphStore;
-}
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

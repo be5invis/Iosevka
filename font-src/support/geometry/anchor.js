@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-module.exports = class Anchor {
+exports.Anchor = class Anchor {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;

@@ -11,7 +11,7 @@ const semver = require("semver");
 
 const { task, file, oracle, computed, phony } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, cd, cp, rm, fail, echo, silently } = build.actions;
+const { run, node, cd, cp, rm, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
 
 module.exports = build;
@@ -599,15 +599,13 @@ const PagesDataExport = task(`pages:data-export`, async t => {
 		BuildCM("iosevka", "iosevka-italic"),
 		BuildCM("iosevka", "iosevka-oblique")
 	);
-	await run(
-		`node`,
-		`utility/export-data/index`,
-		cm.full,
-		cmi.full,
-		cmo.full,
-		Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
-		Path.resolve(pagesDir, "shared/data-import/raw/coverage.json")
-	);
+	await node(`utility/export-data/index`, {
+		charMapPath: cm.full,
+		charMapItalicPath: cmi.full,
+		charMapObliquePath: cmo.full,
+		exportPathMeta: Path.resolve(pagesDir, "shared/data-import/raw/metadata.json"),
+		exportPathCov: Path.resolve(pagesDir, "shared/data-import/raw/coverage.json")
+	});
 });
 
 const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
@@ -692,14 +690,16 @@ const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 		BuildCM("iosevka", "iosevka-italic"),
 		BuildCM("iosevka", "iosevka-oblique")
 	);
-	await run(
-		`node`,
-		`utility/generate-snapshot-page/index.js`,
-		"snapshot-src/templates",
-		out.full,
-		`${out.dir}/${out.name}.data.json`
-	);
-	await run(`node`, `utility/amend-readme/index`, cm.full, cmi.full, cmo.full);
+	await node(`utility/generate-snapshot-page/index`, {
+		inputPath: "snapshot-src/templates",
+		outputPath: out.full,
+		outputDataPath: `${out.dir}/${out.name}.data.json`
+	});
+	await node(`utility/amend-readme/index`, {
+		charMapPath: cm.full,
+		charMapItalicPath: cmi.full,
+		charMapObliquePath: cmo.full
+	});
 });
 const SnapShotStatic = file.make(
 	x => `${SNAPSHOT_TMP}/${x}`,
@@ -738,7 +738,11 @@ const ReleaseNotesFile = file.make(
 		await t.need(UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
 		await t.need(changeFiles.map(fu));
-		await run("node", "utility/generate-release-note/index", version, rpFiles.full, out.full);
+		await node("utility/generate-release-note/index", {
+			version,
+			releasePackagesJsonPath: rpFiles.full,
+			outputPath: out.full
+		});
 	}
 );
 const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
@@ -773,7 +777,7 @@ const ChangeLogFile = file(`CHANGELOG.md`, async (t, out) => {
 	await t.need(UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await t.need(ChangeFileList());
 	await t.need(changeFiles.map(fu));
-	await run("node", "utility/generate-change-log/index", version, out.full);
+	await node("utility/generate-change-log/index", { version, outputPath: out.full });
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
