@@ -2999,6 +2999,12 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `cap` | emu | 735 | Height of `H`. |
 | `xheight` | emu | 530 | Height of `x`. |
 | `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
+| `accentWidth` | emu | 200 | Width of accent marks. |
+| `accentClearance` | emu | 72 | Vertical clearance of accent marks to the base. |
+| `accentHeight` | emu | 176 | Height of accent marks. |
+| `accentStackOffset` | emu | 220 | Offset height of accent mark stack. |
+| `dotSize` | emu | (*varies, 125 for regular*) | Size of dots in diacritic marks. |
+| `periodSize` | emu | (*varies, 140 for regular*) | Size of dots in period. |
 | `leading` | emu | 1250 | Built-in line height. |
 | `symbolMid` | emu | 340 | Height of the center of hyphen (`-`). |
 | `parenSize` | emu | 966 | Height of Parentheses. |

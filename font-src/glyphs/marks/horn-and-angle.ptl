@@ -1,0 +1,128 @@
+$$include '../../meta/macros.ptl'
+
+import [Arcs Quadify ShapeConv] from "typo-geom"
+import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from '../../support/geometry/curve-util'
+import [mix linreg clamp fallback] from '../../support/utils'
+import [DesignParameters] from '../../meta/aesthetics'
+import [TieMark TieGlyph] from "../../support/gr"
+import [Box] from '../../support/geometry/box'
+
+glyph-module
+
+glyph-block Mark-Horn-And-Angle : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
+	glyph-block-import Mark-Above : commaAboveRadius
+	glyph-block-import Mark-Below : belowMarkBot belowMarkTop belowMarkMid
+
+	# horn and angle marks
+	define [HornDim attX attY overshootX overshootY yrP] : begin
+		local radius commaAboveRadius
+		local hornFine : Math.min (radius * 0.75) (markFine * 1.75)
+		local hornStroke : Math.min (radius * 1) (markFine * 1.75)
+		local startX : attX + 2 * radius
+		local startY : attY + yrP * radius + (aboveMarkTop - aboveMarkBot) / 2
+		return : object radius hornFine hornStroke startX startY
+
+	define [HornMarkAnchor attX attY overshootX overshootY yrP] : glyph-proc
+		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY yrP
+		set-mark-anchor 'topright' attX attY startX startY
+
+	glyph-block-export HornBaseAnchor
+	define [HornBaseAnchor attX attY overshootX overshootY yrP] : glyph-proc
+		local [object radius hornFine startX startY] : HornDim attX attY overshootX overshootY yrP
+		set-base-anchor 'topright' startX startY
+
+	define [HornShape attX attY overshootX overshootY yrP] : glyph-proc
+		local [object radius hornFine hornStroke startX startY] : HornDim attX attY overshootX overshootY yrP
+		include : union
+			RingAt (startX - radius) startY (radius - hornFine / 8)
+			dispiro
+				g4 (startX + OX) (startY) [widths.rhs (hornFine / 4)]
+				arcvh
+				g4 (startX - radius) (startY - radius)
+				archv
+				g4 (startX - 2 * radius) (startY)
+				arcvh
+				g4 (startX - radius) (startY + radius) [widths.rhs (hornFine / 2)]
+				archv
+				g4 startX startY [widths.rhs hornFine]
+				quadControls 0 0.75 16 : object : blend : lambda [t]
+					widths.rhs [mix hornFine hornStroke t]
+				g4 (attX - overshootX - HalfStroke * HVContrast) (attY - overshootY - Stroke) [widths.rhs hornStroke]
+
+	create-glyph 'horn' 0x31B : glyph-proc
+		set-width 0
+		include : HornShape 0 XH 0 0 0.5
+		include : HornMarkAnchor 0 XH 0 0 0.5
+
+	create-glyph 'longHorn' : glyph-proc
+		set-width 0
+		include : HornShape 0 XH (Width / 2) (SmoothB) 0.5
+		include : HornMarkAnchor 0 XH (Width / 2) (SmoothB) 0.5
+
+	create-glyph 'leftangleTR' 0x31A : glyph-proc
+		set-width 0
+		include : VBarLeft 0 aboveMarkBot aboveMarkTop (markFine * 2)
+		include : HBarTop (-markExtend * 1.5) 0 aboveMarkTop (markFine * 2)
+		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
+
+	create-glyph 'dotTR' 0x358 : glyph-proc
+		set-width 0
+		include : refer-glyph "dotAbove"
+		include : ApparentTranslate (RightSB - Middle + DotRadius) 0
+		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
+
+	create-glyph 'commaTR' 0x315 : glyph-proc
+		set-width 0
+		include : refer-glyph "commaAbove"
+		include : ApparentTranslate (RightSB - Middle + DotRadius) 0
+		set-mark-anchor 'topright' 0 XH 0 aboveMarkTop
+
+	create-glyph 'rtailBR' 0x322 : glyph-proc
+		set-width 0
+
+		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
+		include : dispiro
+			widths.rhs
+			flat 0 (-O) [heading Downward]
+			curl 0 0 [heading Downward]
+			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
+
+	create-glyph 'rRetroflexTailBR' : glyph-proc
+		set-width 0
+
+		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
+		include : HBarBottom (-Stroke * HVContrast) (SideJut - HalfStroke * HVContrast) 0
+		include : dispiro
+			widths.rhs
+			flat (SideJut) Stroke [heading Downward]
+			curl (SideJut) 0 [heading Downward]
+			straight.right.end (HookX - HalfStroke * HVContrast) (-Hook + HalfStroke)
+
+	create-glyph 'ltailBR' 0x321 : glyph-proc
+		set-width 0
+
+		set-mark-anchor 'bottomright' 0 0 0 belowMarkBot
+		include : dispiro
+			widths.rhs
+			flat 0 (-O) [heading Downward]
+			curl 0 0 [heading Downward]
+			straight.left.end (-HookX - HalfStroke * HVContrast) (-Hook - HalfStroke)
+
+	create-glyph 'rightHalfCircleTR' : glyph-proc
+		set-width 0
+		set-mark-anchor 'topright' markMiddle XH markMiddle aboveMarkStack
+		include : refer-glyph "leftHalfCircleBelow"
+		include : FlipAround markMiddle (XH / 2)
+
+	create-glyph 'ogonekTR' : glyph-proc
+		set-width 0
+		include : refer-glyph "ogonekBelow"
+		local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress
+		local ogonekRight : markMiddle + markExtend * 0.85
+		set-mark-anchor 'trailing' markMiddle 0 ogonekRight ogonekBot
