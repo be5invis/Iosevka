@@ -10,6 +10,7 @@ const Toml = require("@iarna/toml");
 
 const { buildFont } = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
+const { applyMetricOverride } = require("./support/metric-override");
 const VariantData = require("./support/variant-data");
 const { applyLigationData } = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
@@ -49,7 +50,7 @@ async function getParameters() {
 
 		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-		if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
+		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
 
 		para.naming = {
 			...para.naming,

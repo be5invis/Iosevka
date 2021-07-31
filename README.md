@@ -3014,23 +3014,47 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
 | `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
 
-Sub-subsection `metric-override.multiplies` and `metric-override.adds` could be used to override the value by multiplying a scale to the default value, then add a shift to it further. The following configuration
+The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
+
+```
+Expression -> Term (('+' | '-') Term)*
+Term       -> Factor (('*' | '/') Factor)*
+Factor     -> ('+' | '-')* Primitive
+Primitive  -> Literal
+            | Call
+            | Binding
+            | Group
+            | List
+Literal    -> ['0'..'9']+ ('.' ['0'..'9']+)?
+Identifier -> ['A'..'Z', 'a'..'z', '_']+
+Call       -> Identifier '(' Expression (',' Expression)* ')'
+List       -> Identifier '[' Expression (',' Expression)* ']'
+Binding    -> Identifier
+```
+
+Valid identifiers include:
+ * `weight`: being the weight grade;
+ * `width`: being the characters' unit width, measured in em-units;
+ * `slopeAngle`: being the slope angle in degrees;
+ * Default value of all overridable metrics, prefixed with `default_`, i.e., default `cap` value will be accessable thorugh `default_cap`.
+
+Valid functions include:
+ * `blend`(_x_, \[_x1_, _y1_\], \[_x2_, _y2_\], ...): Perform a smooth interpolation through data pairs \[_x1_, _y1_\], \[_x2_, _y2_\], ..., against parameter _x_.
+
+For example, the following configuration:
 
 ```toml
 [buildPlans.iosevka-custom.metric-override]
 leading = 1500
-
-[buildPlans.iosevka-custom.metric-override.multiplies]
-sb = 1.0625
-
-[buildPlans.iosevka-custom.metric-override.adds]
-sb = 15
+sb = 'default_sb * 1.0625 + 15'
+dotSize = 'blend(weight, [100, 50], [400, 125], [900, 180])'
 ```
 
 will:
 
-* Override line height to `1500` em-unit;
-* Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
+ * Override line height to `1500` em-unit;
+ * Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
+ * Override the dot size by a interpolation against weight: at thin (`100`) being `50`, at regular (`400`) being `125`, and at heavy (`900`) being `180`.
 
 #### Sample Configuration
 
