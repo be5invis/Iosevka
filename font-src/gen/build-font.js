@@ -1,19 +1,19 @@
 "use strict";
 
-const EmptyFont = require("./empty-font");
+const { CreateEmptyFont } = require("./empty-font");
 const { buildGlyphs } = require("../glyphs/index");
-const finalizeFont = require("./finalize/index");
-const convertOtd = require("./otd-conv/index");
+const { finalizeFont } = require("./finalize/index");
+const { convertOtd } = require("./otd-conv/index");
 const Caching = require("./caching/index");
 
 const { buildOtl } = require("../otl/index");
 const { assignFontNames } = require("../meta/naming");
 const { copyFontMetrics } = require("../meta/aesthetics");
 
-module.exports = async function (argv, para) {
+exports.buildFont = async function buildFont(argv, para) {
 	const gs = buildGlyphs(para);
 
-	const baseFont = EmptyFont(argv);
+	const baseFont = CreateEmptyFont(argv);
 	assignFontNames(para, baseFont);
 	copyFontMetrics(gs.fontMetrics, baseFont);
 

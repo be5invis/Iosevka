@@ -2,7 +2,7 @@
 
 const { Ot } = require("ot-builder");
 
-module.exports = function (argv) {
+exports.CreateEmptyFont = function (argv) {
 	let font = {
 		head: new Ot.Head.Table(),
 		hhea: new Ot.MetricHead.Hhea(),

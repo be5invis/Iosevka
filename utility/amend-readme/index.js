@@ -2,20 +2,13 @@
 
 const fs = require("fs-extra");
 const path = require("path");
-const parseVariantsData = require("../export-data/variants-data");
-const parseLigationData = require("../export-data/ligation-data");
-const getCharMapAndSupportedLanguageList = require("../export-data/supported-languages");
-const execMain = require("../shared/execMain");
-
-const charMapPath = process.argv[2];
-const charMapItalicPath = process.argv[3];
-const charMapObliquePath = process.argv[4];
-
-execMain(main);
+const { parseVariantsData } = require("../export-data/variants-data");
+const { parseLigationData } = require("../export-data/ligation-data");
+const { getCharMapAndSupportedLanguageList } = require("../export-data/supported-languages");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-async function main() {
+module.exports = async function main(argv) {
 	const readmePath = path.resolve(__dirname, "../../README.md");
 	let readme = await fs.readFile(readmePath, "utf-8");
 	readme = (await processSsOt()).apply(readme);
@@ -26,10 +19,10 @@ async function main() {
 	readme = (await processLigSetPreDef()).apply(readme);
 	readme = (await processLigSetOt(1, g => g.tag === "calt")).apply(readme);
 	readme = (await processLigSetOt(2, g => g.tag !== "calt")).apply(readme);
-	readme = (await processLangList()).apply(readme);
+	readme = (await processLangList(argv)).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
 	await fs.writeFile(readmePath, readme);
-}
+};
 
 async function processSsOt() {
 	const variantsData = await parseVariantsData();
@@ -309,11 +302,11 @@ async function processLigSetOt(index, fn) {
 	return md;
 }
 
-async function processLangList() {
+async function processLangList(argv) {
 	const cl = await getCharMapAndSupportedLanguageList(
-		charMapPath,
-		charMapItalicPath,
-		charMapObliquePath
+		argv.charMapPath,
+		argv.charMapItalicPath,
+		argv.charMapObliquePath
 	);
 	const md = new MdCol("Section-Language-List");
 	md.log(`${cl.languages.length} Supported Languages: \n`);

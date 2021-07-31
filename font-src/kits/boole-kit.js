@@ -1,7 +1,7 @@
 ﻿"use strict";
 
 const TypoGeom = require("typo-geom");
-const { BooleanGeometry, TransformedGeometry } = require("../support/geometry");
+const { BooleanGeometry, TransformedGeometry } = require("../support/geometry/index");
 
 exports.SetupBuilders = function ({ Glyph, GlobalTransform }) {
 	function impl(operator, operands) {

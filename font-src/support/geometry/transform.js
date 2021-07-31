@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-module.exports = class Transform {
+exports.Transform = class Transform {
 	constructor(xx, yx, xy, yy, x, y) {
 		this.xx = xx;
 		this.yx = yx;

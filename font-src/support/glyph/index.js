@@ -1,11 +1,11 @@
 ﻿"use strict";
 
-const Transform = require("../geometry/transform");
-const Point = require("../geometry/point");
-const Anchor = require("../geometry/anchor");
+const { Transform } = require("../geometry/transform");
+const { Point } = require("../geometry/point");
+const { Anchor } = require("../geometry/anchor");
 const Geom = require("../geometry");
 
-module.exports = class Glyph {
+exports.Glyph = class Glyph {
 	constructor(_identifier) {
 		this._m_identifier = _identifier;
 

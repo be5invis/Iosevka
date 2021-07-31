@@ -6,7 +6,7 @@ const toml = require("@iarna/toml");
 
 const VariantDataParser = require("../../font-src/support/variant-data");
 
-module.exports = async function () {
+exports.parseVariantsData = async function () {
 	const variantsToml = await fs.readFile(
 		path.join(__dirname, "../../params/variants.toml"),
 		"utf8"

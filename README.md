@@ -2277,12 +2277,14 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td rowspan="2"><code>cv87</code></td>
 <td colspan="2"><img src="images/character-variant-cv87-1.png" width="64"/></td>
 <td colspan="2"><img src="images/character-variant-cv87-2.png" width="64"/></td>
-<td colspan="8"> </td>
+<td colspan="2"><img src="images/character-variant-cv87-3.png" width="64"/></td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td colspan="2">1</td>
 <td colspan="2">2</td>
-<td colspan="8"> </td>
+<td colspan="2">3</td>
+<td colspan="6"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv88</code></td>
@@ -2920,7 +2922,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `(`, `)`:
      <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-1.png" width="64"/></td><td><code>paren = 'normal'</code>, <code>cv86 = 1</code></td></tr><tr><td>Parenthesis with normal contour</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-2.png" width="64"/></td><td><code>paren = 'large-contour'</code>, <code>cv86 = 2</code></td></tr><tr><td>Parenthesis with larger contour, like that in Monaco</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv86-3.png" width="64"/></td><td><code>paren = 'flat-arc'</code>, <code>cv86 = 3</code></td></tr><tr><td>Parenthesis with flat arc, like that in JetBrains Mono</td></tr></table>
   - Styles for `{`, `}`:
-     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr></table>
+     <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-3.png" width="64"/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>cv87 = 3</code></td></tr><tr><td>Curly braces with flat boundary shape</td></tr></table>
   - Styles for `#`:
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-1.png" width="32"/></td><td><code>number-sign = 'upright'</code>, <code>cv88 = 1</code></td></tr><tr><td>Number sign with vertical bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-2.png" width="32"/></td><td><code>number-sign = 'slanted'</code>, <code>cv88 = 2</code></td></tr><tr><td>Number sign with slanted bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-3.png" width="32"/></td><td><code>number-sign = 'upright-open'</code>, <code>cv88 = 3</code></td></tr><tr><td>Number sign with vertical bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-4.png" width="32"/></td><td><code>number-sign = 'slanted-open'</code>, <code>cv88 = 4</code></td></tr><tr><td>Number sign with slanted bars and open inner</td></tr></table>
   - Styles for `&`:
@@ -2997,6 +2999,12 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `cap` | emu | 735 | Height of `H`. |
 | `xheight` | emu | 530 | Height of `x`. |
 | `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
+| `accentWidth` | emu | 200 | Width of accent marks. |
+| `accentClearance` | emu | 72 | Vertical clearance of accent marks to the base. |
+| `accentHeight` | emu | 176 | Height of accent marks. |
+| `accentStackOffset` | emu | 220 | Offset height of accent mark stack. |
+| `dotSize` | emu | (*varies, 125 for regular*) | Size of dots in diacritic marks. |
+| `periodSize` | emu | (*varies, 140 for regular*) | Size of dots in period. |
 | `leading` | emu | 1250 | Built-in line height. |
 | `symbolMid` | emu | 340 | Height of the center of hyphen (`-`). |
 | `parenSize` | emu | 966 | Height of Parentheses. |
@@ -3006,23 +3014,47 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
 | `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
 
-Sub-subsection `metric-override.multiplies` and `metric-override.adds` could be used to override the value by multiplying a scale to the default value, then add a shift to it further. The following configuration
+The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
+
+```
+Expression -> Term (('+' | '-') Term)*
+Term       -> Factor (('*' | '/') Factor)*
+Factor     -> ('+' | '-')* Primitive
+Primitive  -> Literal
+            | Call
+            | Binding
+            | Group
+            | List
+Literal    -> ['0'..'9']+ ('.' ['0'..'9']+)?
+Identifier -> ['A'..'Z', 'a'..'z', '_']+
+Call       -> Identifier '(' Expression (',' Expression)* ')'
+List       -> Identifier '[' Expression (',' Expression)* ']'
+Binding    -> Identifier
+```
+
+Valid identifiers include:
+ * `weight`: being the weight grade;
+ * `width`: being the characters' unit width, measured in em-units;
+ * `slopeAngle`: being the slope angle in degrees;
+ * Default value of all overridable metrics, prefixed with `default_`, i.e., default `cap` value will be accessable thorugh `default_cap`.
+
+Valid functions include:
+ * `blend`(_x_, \[_x1_, _y1_\], \[_x2_, _y2_\], ...): Perform a smooth interpolation through data pairs \[_x1_, _y1_\], \[_x2_, _y2_\], ..., against parameter _x_.
+
+For example, the following configuration:
 
 ```toml
 [buildPlans.iosevka-custom.metric-override]
 leading = 1500
-
-[buildPlans.iosevka-custom.metric-override.multiplies]
-sb = 1.0625
-
-[buildPlans.iosevka-custom.metric-override.adds]
-sb = 15
+sb = 'default_sb * 1.0625 + 15'
+dotSize = 'blend(weight, [100, 50], [400, 125], [900, 180])'
 ```
 
 will:
 
-* Override line height to `1500` em-unit;
-* Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
+ * Override line height to `1500` em-unit;
+ * Override the sidebearing value by its value multiplied by `1.0625` then added with `15`.
+ * Override the dot size by a interpolation against weight: at thin (`100`) being `50`, at regular (`400`) being `125`, and at heavy (`900`) being `180`.
 
 #### Sample Configuration
 
