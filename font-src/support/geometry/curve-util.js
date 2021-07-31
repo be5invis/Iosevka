@@ -1,8 +1,8 @@
 "use strict";
 
 const TypoGeom = require("typo-geom");
-const Point = require("./point");
-const Transform = require("./transform");
+const { Point } = require("./point");
+const { Transform } = require("./transform");
 
 exports.SPIRO_PRECISION = 1 / 2;
 exports.OCCURRENT_PRECISION = 1 / 16;

@@ -3,27 +3,21 @@
 const Path = require("path");
 const Fs = require("fs-extra");
 const SemVer = require("semver");
-const execMain = require("../shared/execMain");
 
 const ChangeFileDir = Path.join(__dirname, "../../changes");
-const Version = process.argv[2];
-const releasePackagesJsonPath = process.argv[3];
-const outputPath = process.argv[4];
-
-execMain(main);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-async function main() {
+module.exports = async function main(argv) {
 	const out = new Output();
 
-	await GenerateChangeList(out);
+	await GenerateChangeList(argv, out);
 	await CopyMarkdown(out, "packages-desc.md");
-	await GeneratePackageList(out);
+	await GeneratePackageList(argv, out);
 
 	await Fs.ensureDir(Path.join(__dirname, `../../release-archives/`));
-	await Fs.writeFile(outputPath, out.buffer);
-}
+	await Fs.writeFile(argv.outputPath, out.buffer);
+};
 
 class Output {
 	constructor() {
@@ -48,14 +42,14 @@ async function CopyMarkdown(out, name) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CHANGE LIST
 
-async function GenerateChangeList(out) {
+async function GenerateChangeList(argv, out) {
 	const changeFiles = await Fs.readdir(ChangeFileDir);
 	const fragments = new Map();
 	for (const file of changeFiles) {
 		const filePath = Path.join(ChangeFileDir, file);
 		const fileParts = Path.parse(filePath);
 		if (fileParts.ext !== ".md") continue;
-		if (!SemVer.valid(fileParts.name) || SemVer.lt(Version, fileParts.name)) continue;
+		if (!SemVer.valid(fileParts.name) || SemVer.lt(argv.version, fileParts.name)) continue;
 		fragments.set(fileParts.name, await Fs.readFile(filePath, "utf8"));
 	}
 
@@ -85,19 +79,21 @@ const Spacings = {
 	"quasi-proportional": ["Default", false]
 };
 
-const imagePrefix = `https://raw.githubusercontent.com/be5invis/Iosevka/v${Version}/images`;
+const ImagePrefixNoVersion = `https://raw.githubusercontent.com/be5invis/Iosevka`;
+const DownloadLinkPrefixNoVersion = `https://github.com/be5invis/Iosevka/releases/download`;
 
-async function GeneratePackageList(out) {
-	const pkgShapesData = await Fs.readJson(releasePackagesJsonPath);
-	const DownloadLinkPrefix = `https://github.com/be5invis/Iosevka/releases/download/v${Version}`;
+async function GeneratePackageList(argv, out) {
+	const imagePrefix = `${ImagePrefixNoVersion}/v${argv.version}/images`;
+	const pkgShapesData = await Fs.readJson(argv.releasePackagesJsonPath);
+	const DownloadLinkPrefix = `${DownloadLinkPrefixNoVersion}/v${argv.version}`;
 
 	out.log(`<table>`);
 	for (let [groupID, gr] of Object.entries(pkgShapesData)) {
 		const prime = gr.subGroups[groupID];
 
 		const familyName = buildName("\u00a0", ...prime.family.split(" "));
-		const sTtcName = buildName("-", "super-ttc", groupID, Version);
-		const ttcName = buildName("-", "ttc", groupID, Version);
+		const sTtcName = buildName("-", "super-ttc", groupID, argv.version);
+		const ttcName = buildName("-", "ttc", groupID, argv.version);
 		const sTtcLink = `${DownloadLinkPrefix}/${sTtcName}.zip`;
 		const ttcLink = `${DownloadLinkPrefix}/${ttcName}.zip`;
 
@@ -128,7 +124,7 @@ async function GeneratePackageList(out) {
 		for (const [subGroupID, subGr] of Object.entries(gr.subGroups)) {
 			const [spacingDesc, ligation] = Spacings[subGr.spacing];
 			const createLink = (label, prefix) => {
-				const fileName = buildName("-", prefix, subGroupID, Version);
+				const fileName = buildName("-", prefix, subGroupID, argv.version);
 				const downloadLink = `${DownloadLinkPrefix}/${fileName}.zip`;
 				return `<b><a href="${downloadLink}">${label}</a></b>`;
 			};

@@ -8,15 +8,16 @@ const { encode } = require("@msgpack/msgpack");
 const { FontIo } = require("ot-builder");
 const Toml = require("@iarna/toml");
 
-const BuildFont = require("./gen/build-font.js");
+const { buildFont } = require("./gen/build-font.js");
 const Parameters = require("./support/parameters");
+const { applyMetricOverride } = require("./support/metric-override");
 const VariantData = require("./support/variant-data");
-const ApplyLigationData = require("./support/ligation-data");
+const { applyLigationData } = require("./support/ligation-data");
 const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
 	const paraT = await getParameters();
-	const { font, glyphStore } = await BuildFont(argv, paraT(argv));
+	const { font, glyphStore } = await buildFont(argv, paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
 };
@@ -45,11 +46,11 @@ async function getParameters() {
 	function createParaImpl(argv) {
 		let para = Parameters.init(deepClone(parametersData), argv);
 		VariantData.apply(deepClone(rawVariantsData), para, argv);
-		ApplyLigationData(deepClone(rawLigationData), para, argv);
+		applyLigationData(deepClone(rawLigationData), para, argv);
 
 		if (argv.excludedCharRanges) para.excludedCharRanges = argv.excludedCharRanges;
 		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
-		if (argv.metricOverride) Parameters.applyMetricOverride(para, argv.metricOverride);
+		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
 
 		para.naming = {
 			...para.naming,

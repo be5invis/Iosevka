@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const monotonicInterpolate = require("./util/monotonic-interpolate");
+const { monotonicInterpolate } = require("./util/monotonic-interpolate");
 
 exports.init = initPara;
 function initPara(data, argv) {
@@ -115,45 +115,3 @@ function hiveBlend(hive, value) {
 	}
 	return generatedHive;
 }
-
-exports.applyMetricOverride = applyMetricOverride;
-function applyMetricOverride(para, mo) {
-	const overrideObj = { metricOverride: {} };
-	createMetricDataSet(overrideObj.metricOverride, mo);
-	apply(para, overrideObj, ["metricOverride"]);
-}
-
-function createMetricDataSet(sink, mo) {
-	for (const key in mo) {
-		if (metricOverrideHandlers[key]) {
-			metricOverrideHandlers[key](sink, key, mo[key]);
-		} else {
-			console.error(`Metric override key ${key} is not supported. Skipping it.`);
-		}
-	}
-}
-
-function numericFieldHandler(sink, key, x) {
-	if (x != null && isFinite(x)) sink[key] = x;
-}
-function subObjectHandler(sink, key, obj) {
-	sink[key] = {};
-	createMetricDataSet(sink[key], obj);
-}
-const metricOverrideHandlers = {
-	cap: numericFieldHandler,
-	xheight: numericFieldHandler,
-	sb: numericFieldHandler,
-	leading: numericFieldHandler,
-	winMetricAscenderPad: numericFieldHandler,
-	winMetricDescenderPad: numericFieldHandler,
-	symbolMid: numericFieldHandler,
-	parenSize: numericFieldHandler,
-	powerlineScaleY: numericFieldHandler,
-	powerlineScaleX: numericFieldHandler,
-	powerlineShiftY: numericFieldHandler,
-	powerlineShiftX: numericFieldHandler,
-	onumZeroHeightRatio: numericFieldHandler,
-	multiplies: subObjectHandler,
-	adds: subObjectHandler
-};

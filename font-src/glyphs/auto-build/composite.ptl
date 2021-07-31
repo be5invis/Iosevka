@@ -3,6 +3,7 @@ $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
 import [getGrMesh AnyCv CvDecompose Joining] from "../../support/gr"
+import [hashGeometry] from "../../support/geometry/index"
 extern Map
 extern Set
 
@@ -121,9 +122,11 @@ glyph-block AutoBuild-Enclosure : begin
 	define enclosureInnerPartActualWidth : new Map
 	define [EnsureInnerSubGlyphImpl miniatureFont markClass dscale xCompress yCompress mp mpShift bal baly kExtraYShift] : lambda [gidPart] : begin
 		define subGlyph : miniatureFont.queryByNameEnsured gidPart
+		define geomHash : hashGeometry subGlyph.geometry
 		define shift : if mp mpShift : getGlyphDefaultShift bal baly subGlyph
 		define shiftPartName : if mp "mp\(shift)" "sp"
-		define gniPart : '.ci.' + gidPart + '@' + [{ dscale xCompress shiftPartName yCompress kExtraYShift [subGlyph.gizmo.toString] }.join '/']
+
+		define gniPart : '.ci.' + geomHash + '@' + [{ dscale xCompress yCompress shiftPartName kExtraYShift [subGlyph.gizmo.toString] }.join '/']
 		if [not : query-glyph gniPart] : begin
 			enclosureInnerPartActualWidth.set gniPart (subGlyph.advanceWidth * dscale * xCompress)
 			create-glyph gniPart : glyph-proc
@@ -132,9 +135,7 @@ glyph-block AutoBuild-Enclosure : begin
 				include   subGlyph
 				include : subGlyph.gizmo.inverse
 				include : Scale (dscale * xCompress) (dscale * yCompress)
-				include : Translate 0 (dscale * (-CAP / 2 + shift))
-				include : Translate 0 (CAP / 2 * dscale)
-				include : Translate 0 (SymbolMid + (kExtraYShift - 0.5) * CAP * dscale)
+				include : Translate 0 (dscale * shift + SymbolMid + (kExtraYShift - 0.5) * CAP * dscale)
 				include subGlyph.gizmo
 				if mp
 				: then : set-mark-anchor markClass 0 0 (subGlyph.advanceWidth * dscale * xCompress) 0
@@ -236,7 +237,14 @@ glyph-block AutoBuild-Enclosure : begin
 		mono2      -- (digits > 1)
 
 	define [ItalicSpacing pp digits rows width] : begin
-		define pp1 : pp.reinit : function [a] : set a.shape.slope 'italic'
+		define pp1 : pp.reinit : function [a] : begin
+			set a.shape.slope 'italic'
+			set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
+		return : StandardSpacing pp1 digits rows width
+
+	define [SansSerifSpacing pp digits rows width] : begin
+		define pp1 : pp.reinit : function [a] : begin
+			set a.shape.serifs 'sans'
 		return : StandardSpacing pp1 digits rows width
 
 	define [EnclosureT prefix builder spacing digits rows demands fnEnclosure] : begin
@@ -304,6 +312,8 @@ glyph-block AutoBuild-Enclosure : begin
 		EnclosureT "circle" CircledBuilder StandardSpacing digits 1 demands CircleEnclosureShape
 	define [createItalicCircledGlyphs digits demands]
 		EnclosureT "circle-italic" CircledBuilder ItalicSpacing digits 1 demands CircleEnclosureShape
+	define [createSansSerifCircledGlyphs digits demands]
+		EnclosureT "circle-ss" CircledBuilder SansSerifSpacing digits 1 demands CircleEnclosureShape
 	define [CircleEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 		set-width width
@@ -356,6 +366,8 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createInsetCircledGlyphs digits demands]
 		EnclosureT 'inset-circle' InsetBuilder StandardSpacing digits 1 demands InsetCircleEnclosureShape
+	define [createInsetSansSerifCircledGlyphs digits demands]
+		EnclosureT 'inset-circle-ss' InsetBuilder SansSerifSpacing digits 1 demands InsetCircleEnclosureShape
 	define [InsetCircleEnclosureShape digits ww gap] : glyph-proc
 		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
 		set-width width
@@ -586,12 +598,12 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit circled"
 		local compositions : list
-			list 0xA9    {'C'}     WideWidth2
-			list 0x1F12F {'revC'} WideWidth2
-			list 0x2117  {'P'}     WideWidth2
-			list 0x1F1AD {'M'}     WideWidth2
-			list 0x24EA  {'zero.lnum'}  WideWidth1
-			list 0x1F10D {'zero.lnum.slashed'}  WideWidth1
+			list 0xA9    {'C'}                       WideWidth2
+			list 0x1F12F {'revC'}                    WideWidth2
+			list 0x2117  {'P'}                       WideWidth2
+			list 0x1F1AD {'M'}                       WideWidth2
+			list 0x24EA  {'zero.lnum'}               WideWidth1
+			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth1
 		foreach [j : range 1 till 9] : compositions.push : list
 			0x2460 + j - 1
 			digitGlyphNames j
@@ -605,47 +617,51 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F12B {'C'} WideWidth1
 			list 0x1F12C {'R'} WideWidth1
 
+	do "Single-digit sans-serif circled"
+		local compositions : list
+			list 0x1F10B  {'zero.lnum'}  WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
+		createSansSerifCircledGlyphs 1 compositions
+
 	do "Double-digit circled"
 		local compositions : list
 			list null    {'markBaseSpace'} WideWidth1
 			list 0x1F16D {'C' 'C'} WideWidth1
 			list 0x1F12D {'C' 'D'} WideWidth1
 			list 0x1F12E {'W' 'z'} WideWidth1
-		foreach [j : range 10 till 20] : compositions.push : list
-			0x2460 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
-		foreach [j : range 21 till 35] : compositions.push : list
-			0x3251 + j - 21
-			digitGlyphNames j
-			begin WideWidth1
-		foreach [j : range 36 till 50] : compositions.push : list
-			0x32B1 + j - 36
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 10 till 20] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 21 till 35] : compositions.push : list (0x3251 + j - 21) [digitGlyphNames j] WideWidth1
+		foreach [j : range 36 till 50] : compositions.push : list (0x32B1 + j - 36) [digitGlyphNames j] WideWidth1
 		createCircledGlyphs 2 compositions
+
+	do "Double-digit sans-serif circled"
+		local compositions : list
+		foreach [j : range 10 till 10] : compositions.push : list (0x2789 + j - 10) [digitGlyphNames j] WideWidth1
+		createSansSerifCircledGlyphs 2 compositions
 
 	do "Single-digit inset circled"
 		local compositions : list
 			list 0x24FF {'zero.lnum'} WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x2776 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
 
+	do "Single-digit inset sans-serif circled"
+		local compositions : list
+			list 0x1F10C  {'zero.lnum'}  WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
+		createInsetSansSerifCircledGlyphs 1 compositions
+
 	do "Double-digit inset circled"
 		local compositions : list
-		foreach [j : range 10 till 10] : compositions.push : list
-			0x2776 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
-		foreach [j : range 11 till 20] : compositions.push : list
-			0x24EB + j - 11
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 10 till 10] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 11 till 20] : compositions.push : list (0x24EB + j - 11) [digitGlyphNames j] WideWidth1
 		createInsetCircledGlyphs 2 compositions
+
+	do "Double-digit inset sans-serif circled"
+		local compositions : list
+		foreach [j : range 10 till 10] : compositions.push : list (0x2793 + j - 10) [digitGlyphNames j] WideWidth1
+		createInsetSansSerifCircledGlyphs 2 compositions
 
 	do "boxed"
 		local compositions {}
@@ -738,37 +754,25 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Single-digit double circled"
 		local compositions {}
 		compositions.push { null {'markBaseSpace'} WideWidth1 }
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x24F5 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x24F5 + j - 1) [digitGlyphNames j] WideWidth1
 		createDoubleCircledGlyphs 1 compositions
 
 	do "Double-digit double circled"
 		local compositions {}
 		compositions.push { null {'markBaseSpace'} WideWidth1 }
-		foreach [j : range 10 till 10] : compositions.push : list
-			0x24F5 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 10 till 10] : compositions.push : list (0x24F5 + j - 1) [digitGlyphNames j] WideWidth1
 		createDoubleCircledGlyphs 2 compositions
 
 	do "Single-digit braced"
 		local compositions {}
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x2474 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2474 + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x249C + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		foreach [j : range 0 26] : compositions.push {(0x1F110 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createBracedGlyphs 1 compositions
 
 	do "Double-digit braced"
 		local compositions {}
-		foreach [j : range 10 till 20] : compositions.push : list
-			0x2474 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 10 till 20] : compositions.push : list (0x2474 + j - 1) [digitGlyphNames j] WideWidth1
 		createBracedGlyphs 2 compositions
 
 	do "Single-digit hex braced"
@@ -778,26 +782,17 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Single-digit dotted"
 		local compositions : list
 			list 0x1F100 {'zero.lnum' 'period'} WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x2488 + j - 1
-			[digitGlyphNames j].concat {'period'}
-			begin WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2488 + j - 1) [[digitGlyphNames j].concat {'period'}] WideWidth1
 		createDottedGlyphs 1 compositions
 
 	do "Single-digit comma"
 		local compositions {}
-		foreach [j : range 0 till 9] : compositions.push : list
-			0x1F101 + j
-			[digitGlyphNames j].concat {'comma'}
-			begin WideWidth1
+		foreach [j : range 0 till 9] : compositions.push : list (0x1F101 + j) [[digitGlyphNames j].concat {'comma'}] WideWidth1
 		createDottedGlyphs 1 compositions
 
 	do "Double-digit dotted"
 		local compositions : list
-		foreach [j : range 10 till 20] : compositions.push : list
-			0x2488 + j - 1
-			[digitGlyphNames j].concat {'period'}
-			begin WideWidth1
+		foreach [j : range 10 till 20] : compositions.push : list (0x2488 + j - 1) [[digitGlyphNames j].concat {'period'}] WideWidth1
 		createDottedGlyphs 2 compositions
 
 glyph-block Autobuild-Fractions : begin
@@ -915,7 +910,7 @@ glyph-block AutoBuild-Accented-Equal : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Miniature
-	glyph-block-import Marks : aboveMarkBot
+	glyph-block-import Mark-Above : aboveMarkBot
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
 	define [createAccentedOp gnBase crowd scale shiftX shiftY demands] : begin
@@ -1037,7 +1032,7 @@ glyph-block Autobuild-Ligatures : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
+	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 kKern demands] : for-width-kinds WideWidth2
 		local ww : if FMosaicWide MosaicWidth (MosaicWidth * para.diversityM)
 		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
 		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / Width)]
@@ -1081,7 +1076,7 @@ glyph-block Autobuild-Ligatures : begin
 			: else : begin
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
 				local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
-				local kern   0
+				local kern      : kKern * ww
 				local refW : sumChildrenWidth - kern
 				foreach [cycle : range 0 4] : begin
 					set kern : Math.max 0 : Math.min (SB * 7/8 * (shrink1 + shrink2)) (refW - compRefWw)
@@ -1109,8 +1104,13 @@ glyph-block Autobuild-Ligatures : begin
 
 		applyRelations jobs.relApplications
 
+	define ijShrink : clamp 0.65 0.8 : StrokeWidthBlend 0.7 0.8
+	createLigatures 'compatLigature1' ijShrink ijShrink 1 1 0.05 : list
+		list 0x132 { 'I' 'J' }
+		list 0x133 { 'i' 'j' }
+
 	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createLigatures 'compatLigature1' stdShrink stdShrink 1 1 : list
+	createLigatures 'compatLigature2' stdShrink stdShrink 1 1 0 : list
 		list 0x1C4 { 'D' 'ZCaron' }
 		list 0x1C5 { 'D' 'zCaron' }
 		list 0x1C6 { 'd' 'zCaron' }
@@ -1130,7 +1130,8 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x20AF { 'D' 'grek/rho' }
 		list 0x2116 { 'N' 'numeroRightHalf' }
 		list 0x1F190 { 'D' 'J' } WideWidth1
-	createLigatures 'temperature' 0.7 0.8 0.75 0.9 : list
+
+	createLigatures 'temperature' 0.7 0.8 0.75 0.9 0 : list
 		list 0x2103 { 'degree' 'C' }
 		list 0x2109 { 'degree' 'F' }
 

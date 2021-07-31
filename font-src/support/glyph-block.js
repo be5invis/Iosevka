@@ -1,6 +1,6 @@
 "use strict";
 
-class GlyphBlock {
+exports.GlyphBlock = class GlyphBlock {
 	constructor(capture, blockName, body) {
 		this.capture = capture;
 		this.blockName = blockName;
@@ -26,6 +26,4 @@ class GlyphBlock {
 		for (const f of pendingApplications) f();
 		return this.exports;
 	}
-}
-
-module.exports = GlyphBlock;
+};

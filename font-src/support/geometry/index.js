@@ -4,11 +4,11 @@ const crypto = require("crypto");
 const TypoGeom = require("typo-geom");
 const SpiroJs = require("spiro");
 
-const Point = require("./point");
-const Transform = require("./transform");
 const CurveUtil = require("./curve-util");
-const { SpiroExpander } = require("./spiro-expand");
 const Format = require("../util/formatter");
+const { Point } = require("./point");
+const { Transform } = require("./transform");
+const { SpiroExpander } = require("./spiro-expand");
 
 class GeometryBase {
 	asContours() {

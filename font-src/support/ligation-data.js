@@ -2,7 +2,7 @@
 
 const Parameters = require("./parameters");
 
-module.exports = function applyLigationData(data, para, argv) {
+exports.applyLigationData = function (data, para, argv) {
 	const defaultBuildup = {};
 
 	const hives = {};

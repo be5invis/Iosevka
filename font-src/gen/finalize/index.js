@@ -1,10 +1,10 @@
 "use strict";
 
-const finalizeGlyphs = require("./glyphs");
-const gcFont = require("./gc");
+const { finalizeGlyphs } = require("./glyphs");
+const { gcFont } = require("./gc");
 const { Nwid, Wwid } = require("../../support/gr");
 
-module.exports = function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
+exports.finalizeFont = function (cache, para, glyphStore, excludedCodePoints, restFont) {
 	assignGrAndCodeRank(glyphStore, Nwid, Wwid);
 	assignSubRank(glyphStore);
 	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont, {});

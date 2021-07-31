@@ -27,14 +27,29 @@ glyph-block Letter-Latin-Lower-H : begin
 	define [SmallHTopLeftSerifs tailed hookTop] : glyph-proc
 		if [not hookTop] : include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
 
-	define HConfig : object
-		straight               { 0 SmallHSerifs        }
-		tailed                 { 1 SmallHSerifs        }
-		straightMotionSerifed  { 0 SmallHMotionSerifs  }
-		tailedMotionSerifed    { 1 SmallHMotionSerifs  }
-		straightTopLeftSerifed { 0 SmallHTopLeftSerifs }
+	define [HBarOverlay fHasTopSerif] : glyph-proc
+		local barSpaceTop : CAP - [if fHasTopSerif Stroke 0]
+		local s : Math.min OverlayStroke (0.625 * (barSpaceTop - XH))
+		local xOverlayStart : mix SB 0 0.7
+		local xOverlayEnd : mix SB RightSB 0.5
+		local yOverlay : [mix XH barSpaceTop 0.45] - s / 2
+		include : dispiro
+			widths.lhs s
+			corner xOverlayStart yOverlay
+			corner (SB + HalfStroke * HVContrast) yOverlay
+		include : dispiro
+			widths.lhs OverlayStroke
+			corner (SB + HalfStroke * HVContrast) yOverlay
+			corner xOverlayEnd yOverlay
 
-	foreach { suffix { fTailed Serifs } } [Object.entries HConfig] : do
+	define HConfig : object
+		straight               { 0 SLAB SmallHSerifs        }
+		tailed                 { 1 SLAB SmallHSerifs        }
+		straightMotionSerifed  { 0 true SmallHMotionSerifs  }
+		tailedMotionSerifed    { 1 true SmallHMotionSerifs  }
+		straightTopLeftSerifed { 0 true SmallHTopLeftSerifs }
+
+	foreach { suffix { fTailed fHasTopSerif Serifs } } [Object.entries HConfig] : do
 		create-glyph "h.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : VBarLeft SB 0 CAP
@@ -44,6 +59,10 @@ glyph-block Letter-Latin-Lower-H : begin
 				bottom -- [if fTailed (XH - SmallSmoothB + O) 0]
 			if fTailed : include : RightwardTailedBar RightSB 0 (XH - SmallSmoothB)
 			include : Serifs fTailed false
+
+		create-glyph "hbar.\(suffix)" : glyph-proc
+			include [refer-glyph "h.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HBarOverlay fHasTopSerif
 
 		create-glyph "hHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
@@ -67,9 +86,15 @@ glyph-block Letter-Latin-Lower-H : begin
 			eject-contour 'serifRB'
 			include : VerticalHook (RightSB - HalfStroke * HVContrast) 0 (-HookX) Hook
 
+		create-glyph "hengBar.\(suffix)" : glyph-proc
+			include [refer-glyph "heng.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HBarOverlay fHasTopSerif
+
+
 	select-variant 'h' 'h'
 	link-reduced-variant 'h/sansSerif' 'h' MathSansSerif
 	turned 'turnh' 0x265 'h' Middle (XH / 2) [MarkSet.p]
+	select-variant 'hbar' 0x127 (follow -- 'h')
 
 	select-variant 'cyrl/shha' 0x4BB (shapeFrom -- 'h')
 	derive-composites 'cyrl/shhaDescender' 0x527 'cyrl/shha' [CyrDescender RightSB]
@@ -77,6 +102,7 @@ glyph-block Letter-Latin-Lower-H : begin
 	select-variant 'hHookTop' 0x266
 	select-variant 'hHookTopLTail' 0x267
 	select-variant 'heng' 0xA727
+	select-variant 'cyrl/dje' 0x452 (follow -- 'heng') (shapeFrom -- 'hengBar')
 
 	create-glyph 'hookturnh' 0x2AE : glyph-proc
 		include : nShoulder
@@ -109,26 +135,6 @@ glyph-block Letter-Latin-Lower-H : begin
 		include : MarkSet.p
 		if SLAB : begin
 			include : LeftwardTopSerif (RightSB - Stroke * HVContrast) XH SideJut
-
-	glyph-block-export HBarOverlay
-	define [HBarOverlay] : glyph-proc
-		local barSpaceTop : CAP - [if SLAB Stroke 0]
-		local s : Math.min OverlayStroke (0.625 * (barSpaceTop - XH))
-		local xOverlayStart : mix SB 0 0.7
-		local xOverlayEnd : mix SB RightSB 0.5
-		local yOverlay : [mix XH barSpaceTop 0.45] - s / 2
-		include : dispiro
-			widths.lhs s
-			corner xOverlayStart yOverlay
-			corner (SB + HalfStroke * HVContrast) yOverlay
-		include : dispiro
-			widths.lhs OverlayStroke
-			corner (SB + HalfStroke * HVContrast) yOverlay
-			corner xOverlayEnd yOverlay
-
-	derive-glyphs 'hbar' 0x127 'h' : lambda [src sel] : glyph-proc
-		include [refer-glyph src] AS_BASE
-		include : HBarOverlay
 
 	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src sel] : glyph-proc
 		include [refer-glyph 'cedillaBelow']

@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function (xs, ys) {
+exports.monotonicInterpolate = function (xs, ys) {
 	let i,
 		length = xs.length;
 

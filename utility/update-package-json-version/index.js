@@ -3,12 +3,18 @@
 const path = require("path");
 const fs = require("fs-extra");
 const semver = require("semver");
-const execMain = require("../shared/execMain");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const PackageJsonPath = path.join(__dirname, "../../package.json");
 
-execMain(main);
+setTimeout(
+	() =>
+		main().catch(e => {
+			console.error(e);
+			process.exit(1);
+		}),
+	0
+);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
