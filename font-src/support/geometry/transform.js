@@ -67,4 +67,22 @@ exports.Transform = class Transform {
 	static isIdentity(tfm) {
 		return this.isTranslate(tfm) && tfm.x === 0 && tfm.y === 0;
 	}
+	static Combine(...tfms) {
+		let z00 = { x: 0, y: 0 };
+		let z10 = { x: 1, y: 0 };
+		let z01 = { x: 0, y: 1 };
+		for (const tfm of tfms) {
+			z00 = tfm.apply(z00);
+			z10 = tfm.apply(z10);
+			z01 = tfm.apply(z01);
+		}
+		return new Transform(
+			z10.x - z00.x,
+			z01.x - z00.x,
+			z10.y - z00.y,
+			z01.y - z00.y,
+			z00.x,
+			z00.y
+		);
+	}
 };
