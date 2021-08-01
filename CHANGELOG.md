@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 9.0.1
+
+ * Fix serifs in dingbat circled numbers (#1182).
+ * Fix broken shape of Latin Letter Tone Five (Regression, #1074).
+ * Fix broken serif of iotified capital Cyrillic letters (#1184).
+
+
 ### 9.0.0
 
  * \[**Breaking**\]: Add support for expression-style metric override. The old `[metric-override.multiplies]` and `[metric-override.adds]` are no longer supported (#1181).
