@@ -4,6 +4,7 @@ $$include '../../meta/macros.ptl'
 import [mix linreg clamp fallback] from '../../support/utils'
 import [getGrMesh AnyCv CvDecompose Joining] from "../../support/gr"
 import [hashGeometry] from "../../support/geometry/index"
+import [Transform] from "../../support/geometry/transform"
 extern Map
 extern Set
 
@@ -120,29 +121,25 @@ glyph-block AutoBuild-Enclosure : begin
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
 	define enclosureInnerPartActualWidth : new Map
-	define [EnsureInnerSubGlyphImpl miniatureFont markClass dscale xCompress yCompress mp mpShift bal baly kExtraYShift] : lambda [gidPart] : begin
+	define [EnsureInnerSubGlyphImpl gniPrefix markClass miniatureFont mp actualWidth accumulatedTfm] : function [gidPart] : begin
 		define subGlyph : miniatureFont.queryByNameEnsured gidPart
 		define geomHash : hashGeometry subGlyph.geometry
-		define shift : if mp mpShift : getGlyphDefaultShift bal baly subGlyph
-		define shiftPartName : if mp "mp\(shift)" "sp"
 
-		define gniPart : '.ci.' + geomHash + '@' + [{ dscale xCompress yCompress shiftPartName kExtraYShift [subGlyph.gizmo.toString] }.join '/']
+		define gniPart : '.ci.' + gniPrefix + '.' + geomHash + '@' + [{ mp actualWidth accumulatedTfm }.join '/']
 		if [not : query-glyph gniPart] : begin
-			enclosureInnerPartActualWidth.set gniPart (subGlyph.advanceWidth * dscale * xCompress)
+			enclosureInnerPartActualWidth.set gniPart (actualWidth)
 			create-glyph gniPart : glyph-proc
 				set-width 0
 				set-mark-anchor 'compositeInner' 0 0
-				include   subGlyph
-				include : subGlyph.gizmo.inverse
-				include : Scale (dscale * xCompress) (dscale * yCompress)
-				include : Translate 0 (dscale * shift + SymbolMid + (kExtraYShift - 0.5) * CAP * dscale)
-				include subGlyph.gizmo
+				include subGlyph
+				include accumulatedTfm
 				if mp
-				: then : set-mark-anchor markClass 0 0 (subGlyph.advanceWidth * dscale * xCompress) 0
-				: else : set-mark-anchor markClass (subGlyph.advanceWidth * dscale * xCompress / 2) 0
+					then : set-mark-anchor markClass 0 0 (actualWidth) 0
+					else : set-mark-anchor markClass (actualWidth / 2) 0
+
 		return gniPart
 
-	define [EnsureInnerSubGlyphSeq markClass miniatureFont job dimens yCompress kExtraYShift] : begin
+	define [EnsureInnerSubGlyphSeq gniPrefix markClass miniatureFont job dimens yCompress kExtraYShift] : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
 
@@ -154,13 +151,20 @@ glyph-block AutoBuild-Enclosure : begin
 			set totalWidth : totalWidth + derivedGlyph.advanceWidth
 		local xCompress [Math.min 1 (mockInnerWidth / totalWidth)]
 		set totalWidth : Math.min mockInnerWidth totalWidth
-		local mpShift : getGlyphDefaultShift bal baly firstDerivedGyph
+
+		local shift : getGlyphDefaultShift bal baly firstDerivedGyph
+		local accumulatedTfm : Transform.Combine
+			firstDerivedGyph.gizmo.inverse
+			Scale (dscale * xCompress) (dscale * yCompress)
+			Translate 0 (dscale * shift + SymbolMid + (kExtraYShift - 0.5) * CAP * dscale)
+			begin firstDerivedGyph.gizmo
 
 		local finalParts {}
 		foreach partIndex [range 0 parts.length] : do
 			define gidPart parts.(partIndex)
+			local actualWidth : [miniatureFont.queryByNameEnsured gidPart].advanceWidth * dscale * xCompress
 			finalParts.push : EnsureComponentGlyphT gidPart
-				EnsureInnerSubGlyphImpl miniatureFont markClass dscale xCompress yCompress (parts.length > 1) mpShift bal baly kExtraYShift
+				EnsureInnerSubGlyphImpl gniPrefix markClass miniatureFont (parts.length > 1) actualWidth accumulatedTfm
 
 		return finalParts
 
@@ -175,22 +179,22 @@ glyph-block AutoBuild-Enclosure : begin
 			include : WithTransform [Translate x 0] : refer-glyph gniPart
 			set x : x + ([enclosureInnerPartActualWidth.get gniPart] || 0)
 
-	define [EnclosureInner gnEnclosure miniatureFont job dimens] : begin
+	define [EnclosureInner gniPrefix gnEnclosure miniatureFont job dimens] : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
-		local finalParts : EnsureInnerSubGlyphSeq 'enclosureInner' miniatureFont job dimens 1 0
+		local finalParts : EnsureInnerSubGlyphSeq gniPrefix 'enclosureInner' miniatureFont job dimens 1 0
 		if gnEnclosure : return : glyph-proc
 			include : EnclosureInnerImpl dimens finalParts
 			CvDecompose.set currentGlyph [{gnEnclosure}.concat finalParts]
 		: else : return : new-glyph : EnclosureInnerImpl dimens finalParts
 
-	define [TwoRowEnclosureInner gnEnclosure miniatureFont job dimens] : begin
+	define [TwoRowEnclosureInner gniPrefix gnEnclosure miniatureFont job dimens] : begin
 		define { gn unicode parts w bal baly }      job
 		define [object width mockInnerWidth dscale] dimens
 		local jobFirstHalf  { gn unicode [parts.slice 0 (parts.length / 2)] w bal baly }
 		local jobSecondHalf { gn unicode [parts.slice (parts.length / 2)  ] w bal baly }
-		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq 'enclosureInnerFirstHalf'  miniatureFont jobFirstHalf  dimens 0.45 (+0.55)
-		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq 'enclosureInnerSecondHalf' miniatureFont jobSecondHalf dimens 0.45 (+0.00)
+		local finalPartsFirstHalf  : EnsureInnerSubGlyphSeq gniPrefix 'enclosureInnerFirstHalf'  miniatureFont jobFirstHalf  dimens 0.45 (+0.55)
+		local finalPartsSecondHalf : EnsureInnerSubGlyphSeq gniPrefix 'enclosureInnerSecondHalf' miniatureFont jobSecondHalf dimens 0.45 (+0.00)
 		if gnEnclosure : return : glyph-proc
 			include : EnclosureInnerImpl dimens finalPartsFirstHalf
 			include : EnclosureInnerImpl dimens finalPartsSecondHalf
@@ -229,64 +233,70 @@ glyph-block AutoBuild-Enclosure : begin
 		define smoothB : SmoothBOf (SmallSmooth * (right - left) / (RightSB - SB)) width
 		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight smoothA smoothB
 
-	define [StandardSpacing pp digits rows width] : MiniatureParaT pp
-		crowd      -- [CircCrowd (digits / rows) width]
-		scale      -- [CircScale (digits / rows) width]
-		sbscale    -- 1
-		mono       -- (digits > 1)
-		mono2      -- (digits > 1)
+	define StandardSpacing : object
+		gniPrefix  ''
+		getPara : function [pp digits rows width] : MiniatureParaT pp
+			crowd      -- [CircCrowd (digits / rows) width]
+			scale      -- [CircScale (digits / rows) width]
+			sbscale    -- 1
+			mono       -- (digits > 1)
+			mono2      -- (digits > 1)
 
-	define [ItalicSpacing pp digits rows width] : begin
-		define pp1 : pp.reinit : function [a] : begin
-			set a.shape.slope 'italic'
-			set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
-		return : StandardSpacing pp1 digits rows width
+	define ItalicSpacing : object
+		gniPrefix 'i'
+		getPara : function[pp digits rows width] : begin
+			define pp1 : pp.reinit : function [a] : begin
+				set a.shape.slope 'italic'
+				set a.shape.slopeAngle : mix (para.slopeAngle || 0) 15 (95 / 150)
+			return : StandardSpacing.getPara pp1 digits rows width
 
-	define [SansSerifSpacing pp digits rows width] : begin
-		define pp1 : pp.reinit : function [a] : begin
-			set a.shape.serifs 'sans'
-		return : StandardSpacing pp1 digits rows width
+	define SansSerifSpacing : object
+		gniPrefix 'ss'
+		getPara : function [pp digits rows width] : begin
+			define pp1 : pp.reinit : function [a] : begin
+				set a.shape.serifs 'sans'
+			return : StandardSpacing.getPara pp1 digits rows width
 
 	define [EnclosureT prefix builder spacing digits rows demands fnEnclosure] : begin
 		foreach {suffix ww gap} [items-of circleWidthClasses] : do
 			define allowProportional : if (digits > 1) MONOSPACE-ONLY ALLOW-PROPORTIONAL
 			define jobs : CollectJobs builder.decomposable CENTERED allowProportional (prefix + digits) suffix demands
-			define forkedPara : spacing para digits rows ww
+			define forkedPara : spacing.getPara para digits rows ww
 			define miniatureFont : CreateDerivedFontFromJobs jobs {} : function [gs] : Fork gs forkedPara
 			define gnEnclosure : CircName null (prefix + digits + '.enclosure') {} suffix
 			if [not : query-glyph gnEnclosure] : create-glyph gnEnclosure : fnEnclosure digits ww gap
 			foreach job [items-of jobs.decomposableJobs] : begin
-				builder.build (prefix + digits) digits ww gap job miniatureFont gnEnclosure true
+				builder.build (prefix + digits) spacing.gniPrefix digits ww gap job miniatureFont gnEnclosure true
 			foreach job [items-of jobs.nonDecomposable] : begin
-				builder.build (prefix + digits) digits ww gap job miniatureFont gnEnclosure false
+				builder.build (prefix + digits) spacing.gniPrefix digits ww gap job miniatureFont gnEnclosure false
 			applyRelations jobs.relApplications
 
 	# Builders and Enclosure Shapes
 	define CircledBuilder : object
 		decomposable true
-		build : lambda [prefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
+		build : lambda [prefix gniPrefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
 			define dimens : circleDimens digits ww
 			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
 				set-width width
-				include : EnclosureInner [if decomposable gnEnclosure null] miniatureFont job dimens
+				include : EnclosureInner gniPrefix [if decomposable gnEnclosure null] miniatureFont job dimens
 				include : refer-glyph gnEnclosure
 
 	define TwoRowBoxedBuilder : object
 		decomposable true
-		build : lambda [prefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
+		build : lambda [prefix gniPrefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
 			define dimens : circleDimens digits ww
 			define [object width mockInnerWidth dscale] dimens
 			if [not : query-glyph gn] : create-glyph gn [if (w == ww) unicode null] : glyph-proc
 				set-width width
-				include : TwoRowEnclosureInner [if decomposable gnEnclosure null] miniatureFont job dimens
+				include : TwoRowEnclosureInner gniPrefix [if decomposable gnEnclosure null] miniatureFont job dimens
 				include : refer-glyph gnEnclosure
 
 	define InsetBuilder : object
 		decomposable false
-		build : lambda [prefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
+		build : lambda [prefix gniPrefix digits ww gap job miniatureFont gnEnclosure decomposable] : begin
 			define { gn unicode parts w bal baly } job
 			define dimens : circleDimens digits ww
 			define [object width mockInnerWidth dscale] dimens
@@ -294,7 +304,7 @@ glyph-block AutoBuild-Enclosure : begin
 				set-width width
 				include : difference
 					refer-glyph gnEnclosure
-					EnclosureInner [if decomposable gnEnclosure null] miniatureFont job dimens
+					EnclosureInner gniPrefix [if decomposable gnEnclosure null] miniatureFont job dimens
 
 	define [AddEnclosureMark digits dimens] : glyph-proc
 		define [object width dscale mockInnerWidth] dimens
@@ -460,7 +470,7 @@ glyph-block AutoBuild-Enclosure : begin
 				define dimens : bracedDottdeDimens digits ww
 				define [object width mockInnerWidth dscale] dimens
 				set-width width
-				include : EnclosureInner [if jobDecomposable gnb null] miniatureFont job dimens
+				include : EnclosureInner '' [if jobDecomposable gnb null] miniatureFont job dimens
 				include : refer-glyph gnb
 
 		foreach job [items-of jobs.decomposableJobs] : CreateGlyphImpl true job
