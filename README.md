@@ -2685,6 +2685,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `brst`: Center asterisk in `(*` and `*)`.
   - `plusplus`: Enable ligation for `++` and further plus-chaining.
   - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
+  - `kern-bars`: Move consecutive bars closer, like for `||`, `|||` and `//`.
   - `logic`: Enable ligation for `/\` and `\/`.
   - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.

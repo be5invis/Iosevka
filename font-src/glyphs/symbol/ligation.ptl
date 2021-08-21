@@ -20,6 +20,9 @@ glyph-block Symbol-Ligation : begin
 		if (rk !== 'f') : set k : k + Joining.Classes.Right
 		Joining.set currentGlyph k
 
+	define RodBarHGap : Math.max (Width / 8) [AdviceStroke 6]
+	define RodBarHOffset : 0.5 * Width - HalfStroke * HVContrast - RodBarHGap
+
 	define arrowheadSlope : 1 / LessSlope
 	define [ArrowBarConfig extend kern join doubleBar] : begin
 		define cleft O
@@ -38,6 +41,7 @@ glyph-block Symbol-Ligation : begin
 			l    arrowl
 			l1 : arrowl - kern
 			c    cleft
+			m    (0 - RodBarHOffset)
 			j    (-join)
 			j1   (-join - kern)
 			z    zleft
@@ -49,6 +53,7 @@ glyph-block Symbol-Ligation : begin
 			r    arrowr
 			r1 : arrowr + kern
 			c    cright
+			m    (Width + RodBarHOffset)
 			j    (Width + join)
 			j1   (Width + join + kern)
 			z    zright
@@ -64,7 +69,7 @@ glyph-block Symbol-Ligation : begin
 	define [HyphenNotch x] : union
 		VBar x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) OperatorStroke
 		VBar x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) OperatorStroke
-	foreach [{lS rS left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ false]] : begin
+	foreach [{lS rS left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ 0]] : begin
 		create-glyph "hyphen.lig.\(lS)\(rS)" : glyph-proc
 			include : SetJoiningKind lS rS
 			include : HBar left right SymbolMid OperatorStroke
@@ -81,11 +86,32 @@ glyph-block Symbol-Ligation : begin
 	local dblExtend : clamp 0 Width (RightSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 	local dblArrowJ : clamp 0 Width (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
 
-	foreach {lS rS left right} [items-of : ArrowBarConfig dblExtend arrowheadsKern dblArrowJ true]
+	foreach {lS rS left right} [items-of : ArrowBarConfig dblExtend arrowheadsKern dblArrowJ 1]
 		create-glyph "equal.lig.\(lS)\(rS)" : glyph-proc
 			include : SetJoiningKind lS rS
 			include : HBarTop left right (SymbolMid + dblArrowD) dblArrowSw
 			include : HBarBottom left right (SymbolMid - dblArrowD) dblArrowSw
+
+	do "bottom sign derivatives"
+		glyph-block-import Symbol-Punctuation-Dashes : UnderScoreConfig
+
+		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
+			create-glyph "underscore.lig.zf.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBarBottom (O - SB) RightSB yBar
+			create-glyph "underscore.lig.fm.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Right
+				include : HBarBottom SB (Width + RodBarHOffset) yBar
+			create-glyph "underscore.lig.mf.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBarBottom (0 - RodBarHOffset) RightSB yBar
+			create-glyph "bar.lig.bottomMid.\(suffix)"
+				VBar Middle yBar ParenTop
+
+		select-variant "underscore.lig.zf" (follow -- 'underscore')
+		select-variant "underscore.lig.fm" (follow -- 'underscore')
+		select-variant "underscore.lig.mf" (follow -- 'underscore')
+		select-variant "bar.lig.bottomMid" (follow -- 'underscore')
 
 	do "Waves"
 		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
@@ -104,6 +130,7 @@ glyph-block Symbol-Ligation : begin
 			f    { F    nothing                                  false }
 			z    { Z    nothing                                  false }
 			c    { C    nothing                                  false }
+			m    { J    (0 - RodBarHOffset)                       true }
 			j    { J    (-arrowJ)                                 true }
 			j1   { J    (-arrowJ - arrowheadsKern)                true }
 
@@ -113,6 +140,7 @@ glyph-block Symbol-Ligation : begin
 			f    { F    nothing                                  false }
 			z    { Z    nothing                                  false }
 			c    { C    nothing                                  false }
+			m    { J    (Width + RodBarHOffset)                   true }
 			j    { J    (Width + arrowJ)                          true }
 			j1   { J    (Width + arrowJ + arrowheadsKern)         true }
 
