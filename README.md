@@ -3065,6 +3065,10 @@ A sample configuration could be found at [private-build-plans.sample.toml](priva
 
 → [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic).
 
+## Mirrors
+
+- TUNA (CN): https://mirrors.tuna.tsinghua.edu.cn/github-release/be5invis/Iosevka
+- NJU (CN): https://mirrors.nju.edu.cn/github-release/be5invis/Iosevka
 ---
 
 ![Family Matrix](images/matrix.png)
