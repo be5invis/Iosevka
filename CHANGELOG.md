@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 10.1.1
+
+ * Refines the design of APL glyphs, and also introduces a configurable "Favor APL" configuration for APL-oriented custom builds (#1200).
+
+
 ### 10.1.0
 
  * Improve ligation set for logical operators; Add bar kerning to match JetBrains Mono (#1192).
