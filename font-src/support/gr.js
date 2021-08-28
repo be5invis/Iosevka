@@ -35,10 +35,15 @@ const DollarShrinkKernel = SimpleProp("DollarShrinkKernel");
 const DollarShorterBar = SimpleProp("DollarShorterBar");
 const MathSansSerif = SimpleProp("MathSansSerif");
 
-const Nwid = SimpleProp("Nwid");
-const Wwid = SimpleProp("Wwid");
-const Lnum = SimpleProp("Lnum");
-const Onum = SimpleProp("Onum");
+function OtlTaggedProp(key, otlTag) {
+	return { ...SimpleProp(key), otlTag };
+}
+
+const Nwid = OtlTaggedProp("Nwid", "NWID");
+const Wwid = OtlTaggedProp("Wwid", "WWID");
+const Lnum = OtlTaggedProp("Lnum", "lnum");
+const Onum = OtlTaggedProp("Onum", "onum");
+const AplForm = OtlTaggedProp("AplForm", "APLF");
 
 const CvDecompose = {
 	get(glyph) {
@@ -332,8 +337,9 @@ function createGrDisplaySheet(glyphStore, gid) {
 
 	// Query selected typographic features -- mostly NWID and WWID
 	let typographicFeatures = [];
-	queryPairFeatureTags(gid, "NWID", "WWID", typographicFeatures);
-	queryPairFeatureTags(gid, "lnum", "onum", typographicFeatures);
+	displayQueryPairFeatures(glyphStore, gid, Nwid, Wwid, typographicFeatures);
+	displayQueryPairFeatures(glyphStore, gid, Lnum, Onum, typographicFeatures);
+	displayQuerySingleFeature(glyphStore, gid, AplForm, typographicFeatures);
 
 	let charVariantFeatures = [];
 	const decomposition = CvDecompose.get(glyph);
@@ -350,16 +356,25 @@ function createGrDisplaySheet(glyphStore, gid) {
 
 	return [typographicFeatures, charVariantFeatures];
 }
-function queryPairFeatureTags(gid, f1, f2, sink) {
+function displayQueryPairFeatures(gs, gid, grCis, grTrans, sink) {
+	const g = gs.queryByName(gid);
+	if (!g) return;
 	const glyphIsHidden = /^\./.test(gid);
-	if (!glyphIsHidden) {
-		const re1 = new RegExp(`\\.${f1}$`),
-			re2 = new RegExp(`\\.${f2}$`);
-		if (re1.test(gid) || re2.test(gid)) {
-			sink.push(`'${f1}' 1`, `'${f2}' 1`);
-		}
+	if (glyphIsHidden) return;
+	if (grCis.get(g) || grTrans.get(g)) {
+		sink.push(`'${grCis.otlTag}' 1`, `'${grTrans.otlTag}' 1`);
 	}
 }
+function displayQuerySingleFeature(gs, gid, grCis, sink) {
+	const g = gs.queryByName(gid);
+	if (!g) return;
+	const glyphIsHidden = /^\./.test(gid);
+	if (glyphIsHidden) return;
+	if (grCis.get(g)) {
+		sink.push(`'${grCis.otlTag}' 0`, `'${grCis.otlTag}' 1`);
+	}
+}
+
 function byTagPreference(a, b) {
 	const ua = a.tag.toUpperCase(),
 		ub = b.tag.toUpperCase();
@@ -395,6 +410,17 @@ function queryCvFeatureTagsOf(sink, gid, glyph, variantAssignmentSet) {
 	for (const g of m.values()) if (g.length) sink.push(g);
 }
 
+function linkSuffixGr(gs, suffix, gr) {
+	const reSuffix = new RegExp("\\." + suffix + "$");
+	for (const [gnSuffixed, gSuffixed] of gs.namedEntries()) {
+		if (reSuffix.test(gnSuffixed) && !/^\./.test(gnSuffixed)) {
+			const gnOriginal = gnSuffixed.replace(reSuffix, "");
+			const gOriginal = gs.queryByName(gnOriginal);
+			if (!gOriginal) continue;
+			gr.set(gOriginal, gnSuffixed);
+		}
+	}
+}
 function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
 	const reTagCis = new RegExp("\\." + tagCis + "$");
 	for (const [gnCis, gCis] of gs.namedEntries()) {
@@ -430,8 +456,10 @@ exports.Nwid = Nwid;
 exports.Wwid = Wwid;
 exports.Lnum = Lnum;
 exports.Onum = Onum;
+exports.AplForm = AplForm;
 
 exports.createGrDisplaySheet = createGrDisplaySheet;
+exports.linkSuffixGr = linkSuffixGr;
 exports.linkSuffixPairGr = linkSuffixPairGr;
 
 exports.SvInheritableRelations = [DollarShrinkKernel, DollarShorterBar, Joining];

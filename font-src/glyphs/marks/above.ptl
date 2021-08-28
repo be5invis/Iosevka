@@ -6,6 +6,7 @@ import [mix linreg clamp fallback] from '../../support/utils'
 import [DesignParameters] from '../../meta/aesthetics'
 import [TieMark TieGlyph] from "../../support/gr"
 import [Box] from '../../support/geometry/box'
+import [Point] from '../../support/geometry/point'
 
 glyph-module
 
@@ -190,8 +191,7 @@ glyph-block Mark-Above : begin
 			flat (markMiddle - markStress * HVContrast) (aboveMarkBot - markFine * 1.7 + markStress)
 			curl (markMiddle + markExtend * 1.5) (aboveMarkBot - markFine * 1.7 + markStress)
 
-	glyph-block-export TildeShape
-	define [TildeShape] : params [ttop tbot leftEnd rightEnd hs] : glyph-proc
+	define [TildeKnots] : params [ttop tbot leftEnd rightEnd hs] : glyph-proc
 		local fine : hs * 8 / 9
 		local hsvh : hs * 2 / [Math.abs (ttop - tbot)]
 		local hvc : (rightEnd - leftEnd) / [Math.abs (ttop - tbot)]
@@ -206,6 +206,12 @@ glyph-block Mark-Above : begin
 		define z2 : currentGlyph.gizmo.apply : object [x : mix leftEnd rightEnd tildeWaveX] [y : mix tbot ttop tildeWave]
 		define z3 : currentGlyph.gizmo.apply : object [x : mix leftEnd rightEnd (1 - tildeWaveX)] [y : mix tbot ttop (1 - tildeWave)]
 		define z4 : currentGlyph.gizmo.apply : object [x rightEnd] [y ttop]
+
+		return { z1 z2 z3 z4 }
+
+	glyph-block-export TildeShape
+	define [TildeShape] : params [ttop tbot leftEnd rightEnd hs] : glyph-proc
+		define { z1 z2 z3 z4 } : include : TildeKnots ttop tbot leftEnd rightEnd hs
 		define bone : new Arcs.Bez3 z1 z2 z3 z4
 
 		define inner : new OffsetCurve bone (+hs) HVContrast
@@ -249,16 +255,37 @@ glyph-block Mark-Above : begin
 			rightEnd -- RightSB
 			hs -- (OperatorStroke / 2)
 
-	create-glyph 'overlayTildeOperator' : glyph-proc
+	define [OverlayTildeT sink] : begin
 		local t [mix aboveMarkMid aboveMarkTop ((RightSB - SB) / (markExtend * 3))]
 		local b [mix aboveMarkMid (aboveMarkBot + markFine / 2) ((RightSB - SB) / (markExtend * 3))]
-		include : TildeShape
-			ttop -- t
-			tbot -- b
+		local offset : SymbolMid - [mix t b (1 / 2)]
+		return : sink
+			ttop -- (t + offset)
+			tbot -- (b + offset)
 			leftEnd  -- [mix 0 SB (1/3)]
 			rightEnd -- [mix Width RightSB (1/3)]
 			hs -- ([AdviceStroke 4] / 2)
-		include : Realign Middle [mix t b (1/2)] Middle SymbolMid
+
+	create-glyph 'overlayTildeOperator' : glyph-proc
+		include : OverlayTildeT TildeShape
+
+	create-glyph 'overlayTildeOperatorAboveMask' : glyph-proc
+		define FarRight :  Width * 4
+		define FarLeft  : -Width * 3
+		define FarAbove :  CAP   * 4
+
+		define { z1 z2 z3 z4 } : include : OverlayTildeT TildeKnots
+		define arcs : list : list
+			new Arcs.Bez3 z1 z2 z3 z4
+			new Arcs.StraightSegment z4 [Point.withX z4 FarRight]
+			new Arcs.StraightSegment [Point.withX z4 FarRight] [Point.corner FarRight FarAbove]
+			new Arcs.StraightSegment [Point.corner FarRight FarAbove] [Point.corner FarLeft FarAbove]
+			new Arcs.StraightSegment [Point.corner FarLeft FarAbove] [Point.withX z1 FarLeft]
+			new Arcs.StraightSegment [Point.withX z1 FarLeft] z1
+
+		define cs : new BezToContoursSink
+		ShapeConv.transferGenericShapeAsBezier arcs cs GEOMETRY_PRECISION
+		currentGlyph.includeContours cs.contours 0 0
 
 	create-glyph : glyph-proc
 		set-width 0
