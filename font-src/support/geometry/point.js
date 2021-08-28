@@ -38,6 +38,15 @@ class Point {
 	static fromXY(type, x, y) {
 		return new Point(type, x || 0, y || 0);
 	}
+	static corner(x, y) {
+		return new Point(Point.Type.Corner, x || 0, y || 0);
+	}
+	static withX(z, x) {
+		return new Point(z.type, x || 0, z.y);
+	}
+	static withY(z, y) {
+		return new Point(z.type, z.x, y || 0);
+	}
 	static transformed(tfm, z) {
 		return Point.transformedXY(tfm, z.type, z.x, z.y);
 	}

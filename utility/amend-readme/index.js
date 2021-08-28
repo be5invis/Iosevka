@@ -131,6 +131,23 @@ async function processCherryPickingStyles() {
 		]
 	});
 
+	formatCv(md, {
+		introMD: `APL form`,
+		sampleImageCountEm: 7,
+		alternatives: [
+			{
+				imageId: "APLF-off",
+				selectors: [`apl-form = 'none'`],
+				description: `Disable APL-specific forms`
+			},
+			{
+				imageId: "APLF-on",
+				selectors: [`apl-form = 'enable'`],
+				description: `Enable APL-specific forms for operators used in APL to harmonize APL operators`
+			}
+		]
+	});
+
 	for (const cv of variantsData.primes) {
 		if (!cv.tag) continue;
 		const sampleText = cv.descSampleText

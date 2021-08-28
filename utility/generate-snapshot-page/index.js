@@ -83,6 +83,22 @@ module.exports = async function main(argv) {
 			slopeDependent: false
 		}
 	});
+	readmeSnapshotTasks.push({
+		el: "#cv-sampler",
+		applyClass: "cv-sampler",
+		applyFeature: "'APLF' on",
+		name: "character-variant-APLF-on",
+		applyCallback: `cbAmendCharacterVariantContents`,
+		applyCallbackArgs: { hotChars: ["∆", "∇", "○", "←", "→", "↑", "↓"], slopeDependent: false }
+	});
+	readmeSnapshotTasks.push({
+		el: "#cv-sampler",
+		applyClass: "cv-sampler",
+		applyFeature: "'APLF' off",
+		name: "character-variant-APLF-off",
+		applyCallback: `cbAmendCharacterVariantContents`,
+		applyCallbackArgs: { hotChars: ["∆", "∇", "○", "←", "→", "↑", "↓"], slopeDependent: false }
+	});
 	for (const cv of variationData.primes) {
 		if (!cv.tag) continue;
 		for (const variant of cv.variants) {
