@@ -143,7 +143,7 @@ async function processCherryPickingStyles() {
 			{
 				imageId: "APLF-on",
 				selectors: [`apl-form = 'enable'`],
-				description: `Enable APL-specific forms for Increment and Nabla to harmonize APL operators`
+				description: `Enable APL-specific forms for operators used in APL to harmonize APL operators`
 			}
 		]
 	});
