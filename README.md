@@ -2955,19 +2955,19 @@ Subsection `variants` is used to configure character variants in the font. Prope
 
 #### Configuring Weights, Widths and Slopes
 
-Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of either strings formatted in `default.<weight>` format, meaning reusing a default weight grade, or sub-objects with properties:
 
 * `shape`: Number, configures the weight grade of the glyphs' shapes.
 * `menu`: Integer, configures the weight grade used when naming fonts.
 * `css`: Integer, configures the weight grade used in web font CSS.
 
-Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of either strings formatted in `default.<width>` format, meaning reusing a default width grade, or sub-objects with properties:
 
 * `shape`: Number, configures the width of the glyphs' shapes, measured in 1/1000 em.
 * `menu`: Integer, configures the width grade used when naming fonts. The valid values are `1` to `9`, inclusive.
 * `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
 
-Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of either strings formatted in `default.<slope>` format, meaning reusing a default slope grade, or sub-objects with properties:
 
 * `angle`: Number, configures the slope angle in degrees. The valid vales are `0` to `15`, inclusive.
 * `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 
