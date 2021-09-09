@@ -10,11 +10,9 @@ glyph-block Symbol-Punctuation-At : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	create-glyph 'at.threefold' : glyph-proc
-		set-width Width
-
-		local top : mix OperTop ParenTop 0.6
-		local bot : mix OperBot ParenBot 0.6
+	define [AtThreeFoldShape height] : glyph-proc
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
@@ -46,12 +44,12 @@ glyph-block Symbol-Punctuation-At : begin
 			flat (Middle + CorrectionOMidS) (bot + O) [widths Stroke 0 ]
 			curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
 
-	create-glyph 'at.fourfold' : glyph-proc
+	define [AtFourFoldShape height] : glyph-proc
 		local div para.diversityM
 		set-width (Width * div)
 
-		local top : mix OperTop ParenTop 0.6
-		local bot : mix OperBot ParenBot 0.6
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
@@ -91,9 +89,7 @@ glyph-block Symbol-Punctuation-At : begin
 			flat (middle + CorrectionOMidS) (bot + O) [widths swh 0 ]
 			curl (right - HalfStroke + TanSlope * sw) (bot + O)
 
-	create-glyph 'at.short' : glyph-proc
-		set-width Width
-
+	define [AtShortShape] : glyph-proc
 		local top  CAP
 		local obot 0
 		local otop [mix obot top 0.675]
@@ -136,5 +132,15 @@ glyph-block Symbol-Punctuation-At : begin
 			curl RightSB (top - SmoothB)
 			hookend (top - O)
 			g4 SB (top - Hook)
+
+	define AtConfig : object
+		threefold     { AtThreeFoldShape [mix (OperTop - OperBot) (ParenTop - ParenBot) 0.600] }
+		fourfold      { AtFourFoldShape  [mix (OperTop - OperBot) (ParenTop - ParenBot) 0.600] }
+		threefoldTall { AtThreeFoldShape [mix (OperTop - OperBot) (ParenTop - ParenBot) 0.875] }
+		fourfoldTall  { AtFourFoldShape  [mix (OperTop - OperBot) (ParenTop - ParenBot) 0.875] }
+		short         { AtShortShape     CAP                                                   }
+
+	foreach { suffix { body height } } [Object.entries AtConfig] : do
+		create-glyph "at.\(suffix)" : body height
 
 	select-variant 'at' '@'
