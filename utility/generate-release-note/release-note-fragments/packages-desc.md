@@ -11,8 +11,8 @@ Iosevka provides various packaging formats, here is the list of them:
 
 | Option         | Contents                                            | Description                                                  |
 | -------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-| Super TTC | 1 `.ttc` file                                       | Bundles all fonts in the scope together into a single file. It is the recommended way to install fonts for Desktop usage, if your operating system is updated to date. |
-| TTC            | 9 `.ttc` files                                      | Each TTC file bundles fonts with the same weight together.   |
+| Super TTC | 1 `.ttc` file                                       | Bundles all fonts in the scope together into a single file. It is the recommended way to install fonts for Desktop usage, if your operating system is updated to date. Package files with `-sgr-` infix in the filename only contains fonts for one single group (variant and spacing). |
+| TTC            | 9 `.ttc` files                                      | Each TTC file bundles fonts with the same weight together.  Package files with `-sgr-` infix in the filename only contains fonts for one single group (variant and spacing).   |
 | TTF            | 54 `.ttf` files                                     | Each TTF file contains one font for a specific weight, width, slope and spacing variant. This option is ideal for embedding Iosevka into applications, or for desktop usage if TTC options have compatibility issues.<br/>TTF packages also provide *unhinted* version which removes [hints](https://en.wikipedia.org/wiki/Font_hinting), which reduced file size, but will be less clear on certain platforms. |
 | WebFont        | 1 `.css` file + 54 `.woff2` files + 54 `.ttf` files | Contains contents required to use Iosevka on websites.       |
 
