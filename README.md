@@ -1734,6 +1734,17 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td colspan="8"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAC</code></td>
+<td><img src="images/character-variant-VXAC-1.png" width="32"/></td>
+<td><img src="images/character-variant-VXAC-2.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>VXAB</code></td>
 <td><img src="images/character-variant-VXAB-1.png" width="32"/></td>
 <td><img src="images/character-variant-VXAB-2.png" width="32"/></td>
@@ -2327,13 +2338,17 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td><img src="images/character-variant-cv90-1.png" width="32"/></td>
 <td><img src="images/character-variant-cv90-2.png" width="32"/></td>
 <td><img src="images/character-variant-cv90-3.png" width="32"/></td>
-<td colspan="9"> </td>
+<td><img src="images/character-variant-cv90-4.png" width="32"/></td>
+<td><img src="images/character-variant-cv90-5.png" width="32"/></td>
+<td colspan="7"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
-<td colspan="9"> </td>
+<td>4</td>
+<td>5</td>
+<td colspan="7"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv91</code></td>
@@ -2864,6 +2879,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-1.png" width="32"/></td><td><code>lower-iota = 'zshaped'</code>, <code>cv56 = 1</code></td></tr><tr><td>Z-shaped Greek lower Iota (<code>ι</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-2.png" width="32"/></td><td><code>lower-iota = 'hooky-bottom'</code>, <code>cv56 = 2</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a sharp-turning horizontal tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-3.png" width="32"/></td><td><code>lower-iota = 'tailed'</code>, <code>cv56 = 3</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-4.png" width="32"/></td><td><code>lower-iota = 'tailed-serifed'</code>, <code>cv56 = 4</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and curly tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-5.png" width="32"/></td><td><code>lower-iota = 'flat-tailed'</code>, <code>cv56 = 5</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with a curly-then-flat tail</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv56-6.png" width="32"/></td><td><code>lower-iota = 'serifed-flat-tailed'</code>, <code>cv56 = 6</code></td></tr><tr><td>Greek lower Iota (<code>ι</code>) with top serif and a curly-then-flat tail</td></tr></table>
   - Styles for `λ` (Greek small Lambda):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-1.png" width="32"/></td><td><code>lower-lambda = 'straight'</code>, <code>cv57 = 1</code></td></tr><tr><td>More-straight Greek small Lambda (<code>λ</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-2.png" width="32"/></td><td><code>lower-lambda = 'straight-turn'</code>, <code>cv57 = 2</code></td></tr><tr><td>Greek small Lambda (<code>λ</code>) with straight upper and a tail turns leftward</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-3.png" width="32"/></td><td><code>lower-lambda = 'curly'</code>, <code>cv57 = 3</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv57-4.png" width="32"/></td><td><code>lower-lambda = 'curly-turn'</code>, <code>cv57 = 4</code></td></tr><tr><td>More curly Greek small Lambda (<code>λ</code>), like Iosevka 2.x, with a tail turns leftward</td></tr></table>
+  - Styles for `μ` (Greek small Mu):
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAC-1.png" width="32"/></td><td><code>lower-mu = 'tailless'</code>, <code>VXAC = 1</code></td></tr><tr><td>Tailless Greek small Mu (<code>μ</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAC-2.png" width="32"/></td><td><code>lower-mu = 'tailed'</code>, <code>VXAC = 2</code></td></tr><tr><td>Tailed Greek small Mu (<code>μ</code>)</td></tr></table>
   - Styles for `ξ` (Greek lower Xi):
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAB-1.png" width="32"/></td><td><code>lower-xi = 'rounded'</code>, <code>VXAB = 1</code></td></tr><tr><td>Greek lower Xi (<code>ξ</code>) with rounded top</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-VXAB-2.png" width="32"/></td><td><code>lower-xi = 'flat-top'</code>, <code>VXAB = 2</code></td></tr><tr><td>Greek lower Xi (<code>ξ</code>) with flat top</td></tr></table>
   - Styles for `З` (Cyrillic Capital Ze):
@@ -2931,7 +2948,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `&`:
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-1.png" width="32"/></td><td><code>ampersand = 'closed'</code>, <code>cv89 = 1</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with a closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-2.png" width="32"/></td><td><code>ampersand = 'upper-open'</code>, <code>cv89 = 2</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at upper half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-3.png" width="32"/></td><td><code>ampersand = 'lower-open'</code>, <code>cv89 = 3</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at lower half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-4.png" width="32"/></td><td><code>ampersand = 'et-toothed'</code>, <code>cv89 = 4</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-5.png" width="32"/></td><td><code>ampersand = 'et-toothless-corner'</code>, <code>cv89 = 5</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (corner)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-6.png" width="32"/></td><td><code>ampersand = 'et-toothless-rounded'</code>, <code>cv89 = 6</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (rounded)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-7.png" width="32"/></td><td><code>ampersand = 'flat-top'</code>, <code>cv89 = 7</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn with a flat top</td></tr></table>
   - Styles for `@`:
-     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-1.png" width="32"/></td><td><code>at = 'threefold'</code>, <code>cv90 = 1</code></td></tr><tr><td>The long, three-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-2.png" width="32"/></td><td><code>at = 'fourfold'</code>, <code>cv90 = 2</code></td></tr><tr><td>The traditional, four-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-3.png" width="32"/></td><td><code>at = 'short'</code>, <code>cv90 = 3</code></td></tr><tr><td>The shorter, Fira-like At symbol (<code>@</code>)</td></tr></table>
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-1.png" width="32"/></td><td><code>at = 'threefold'</code>, <code>cv90 = 1</code></td></tr><tr><td>The three-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-2.png" width="32"/></td><td><code>at = 'fourfold'</code>, <code>cv90 = 2</code></td></tr><tr><td>The traditional, four-fold At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-3.png" width="32"/></td><td><code>at = 'short'</code>, <code>cv90 = 3</code></td></tr><tr><td>The shorter, Fira-like At symbol (<code>@</code>)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-4.png" width="32"/></td><td><code>at = 'threefold-tall'</code>, <code>cv90 = 4</code></td></tr><tr><td>The three-fold At symbol (<code>@</code>) with taller outline</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv90-5.png" width="32"/></td><td><code>at = 'fourfold-tall'</code>, <code>cv90 = 5</code></td></tr><tr><td>The traditional, four-fold At symbol (<code>@</code>) with taller outline</td></tr></table>
   - Styles for `$`:
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-1.png" width="32"/></td><td><code>dollar = 'open'</code>, <code>cv91 = 1</code></td></tr><tr><td>Dollar symbol with open contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-2.png" width="32"/></td><td><code>dollar = 'through'</code>, <code>cv91 = 2</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-3.png" width="32"/></td><td><code>dollar = 'interrupted'</code>, <code>cv91 = 3</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-4.png" width="32"/></td><td><code>dollar = 'open-cap'</code>, <code>cv91 = 4</code></td></tr><tr><td>Dollar symbol with open contour, not exceeding baseline and ascender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-5.png" width="32"/></td><td><code>dollar = 'through-cap'</code>, <code>cv91 = 5</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv91-6.png" width="32"/></td><td><code>dollar = 'interrupted-cap'</code>, <code>cv91 = 6</code></td></tr><tr><td>Dollar symbol with strike-through vertical bar, not exceeding baseline and ascender</td></tr></table>
   - Styles for `¢`:
@@ -2955,19 +2972,19 @@ Subsection `variants` is used to configure character variants in the font. Prope
 
 #### Configuring Weights, Widths and Slopes
 
-Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `weights` is used to change the weight grades that the custom family needs. It is a dictionary of either strings formatted in `default.<weight>` format, meaning reusing a default weight grade, or sub-objects with properties:
 
 * `shape`: Number, configures the weight grade of the glyphs' shapes.
 * `menu`: Integer, configures the weight grade used when naming fonts.
 * `css`: Integer, configures the weight grade used in web font CSS.
 
-Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `widths` is used to change the width grades that the custom family needs. It is a dictionary of either strings formatted in `default.<width>` format, meaning reusing a default width grade, or sub-objects with properties:
 
 * `shape`: Number, configures the width of the glyphs' shapes, measured in 1/1000 em.
 * `menu`: Integer, configures the width grade used when naming fonts. The valid values are `1` to `9`, inclusive.
 * `css`: String, configures the [font-stretch](https://developer.mozilla.org/en-US/docs/Web/CSS/font-stretch) value used in web font CSS.
 
-Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of sub-objects with properties:
+Subsection `slopes` is used to change the slope angles and grades that the custom family needs. It is a dictionary of either strings formatted in `default.<slope>` format, meaning reusing a default slope grade, or sub-objects with properties:
 
 * `angle`: Number, configures the slope angle in degrees. The valid vales are `0` to `15`, inclusive.
 * `shape`: String from `upright`, `italic` or `oblique`. Configures the slope used for variant selection. 

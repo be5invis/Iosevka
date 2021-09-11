@@ -925,9 +925,29 @@ function validateAndShimBuildPlans(prefix, bp, dWeights, dSlopes, dWidths) {
 		);
 	}
 
-	bp.weights = bp.weights || dWeights;
-	bp.slopes = bp.slopes || bp.slants || dSlopes;
-	bp.widths = bp.widths || dWidths;
+	bp.weights = shimBpAspect("weights", bp.weights, dWeights);
+	bp.slopes = shimBpAspect("slopes", bp.slopes || bp.slants, dSlopes);
+	bp.widths = shimBpAspect("widths", bp.widths, dWidths);
+}
+function shimBpAspect(aspectName, aspect, defaultAspect) {
+	if (!aspect) return defaultAspect;
+	const result = {};
+	for (const [k, v] of Object.entries(aspect)) {
+		shimBpAspectKey(aspectName, result, k, v, defaultAspect);
+	}
+	return result;
+}
+function shimBpAspectKey(aspectName, sink, k, v, defaultAspect) {
+	if (typeof v === "string") {
+		if (!/^default\./.test(v))
+			throw new Error(`Invalid configuration '${v}' for ${aspectName}.${k}'`);
+		const remappingKey = v.slice("default.".length);
+		if (!defaultAspect[remappingKey])
+			throw new Error(`Invalid configuration '${v}' for ${aspectName}.${k}'`);
+		sink[k] = defaultAspect[remappingKey];
+	} else {
+		sink[k] = v;
+	}
 }
 
 // Recommended weight validation
