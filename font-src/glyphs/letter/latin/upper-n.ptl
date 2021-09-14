@@ -96,3 +96,60 @@ glyph-block Letter-Latin-Upper-N : begin
 					widths.center BBS
 					corner (SB + BBS * HVContrast / 2) (CAP - (CAP / 5))
 					corner (RightSB - BBS * HVContrast) 0
+
+glyph-block Letter-Latin-Inverse-Upper-N : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : CyrTailDescender SerifFrame
+
+	define SLAB-INV-NONE     0
+	define SLAB-INV-ALL      1
+	define SLAB-INV-DIGAMMA  2
+
+	define [InverseNSerifs mode top _left _right] : glyph-proc
+		local left : fallback _left SB
+		local right : fallback _right RightSB
+		local sf : SerifFrame top 0 left right Stroke
+		if (mode === SLAB-INV-ALL) : include sf.lb.outer
+		if (mode === SLAB-INV-ALL) : include sf.rt.outer
+		if  mode                   : include sf.lt.full
+		if  mode                   : include sf.rb.full
+
+	define [InverseNShape mode top] : glyph-proc
+		local topstroke : AdviceStroke 4
+		local halftopstroke : topstroke / 2
+		include : dispiro
+			widths.lhs
+			flat RightSB 0 [heading Upward]
+			curl RightSB (top * 0.4) [heading Upward]
+			straight.up.end RightSB top [widths.heading topstroke 0 Upward]
+		include : dispiro
+			widths.lhs
+			flat SB top [heading Downward]
+			curl SB (top * 0.6) [heading Downward]
+			straight.down.end SB 0 [widths.heading topstroke 0 Downward]
+		include : dispiro
+			flat (RightSB - halftopstroke) top [widths.heading 0 topstroke Downward]
+			curl (SB + halftopstroke) 0 [widths.heading topstroke 0 Downward]
+		include : NeedSlab SLAB : InverseNSerifs mode top
+
+	create-glyph 'cyrl/I' 0x418 : glyph-proc
+		include : MarkSet.capital
+		include : InverseNShape SLAB-INV-ALL CAP
+
+	create-glyph 'cyrl/i.upright' : glyph-proc
+		include : MarkSet.e
+		include : InverseNShape SLAB-INV-ALL XH
+
+	create-glyph 'grek/DigammaPamphylian' 0x376 : glyph-proc
+		include : MarkSet.capital
+		include : InverseNShape SLAB-INV-DIGAMMA CAP
+
+	create-glyph 'grek/digammaPamphylian' 0x377 : glyph-proc
+		include : MarkSet.e
+		include : InverseNShape SLAB-INV-NONE XH
+
+	alias 'cyrl/smcpI' 0x1D0E 'cyrl/i.upright'
+
+	derive-composites 'cyrl/IShortTail' 0x48A 'cyrl/I' [refer-glyph 'breveAbove'] [CyrTailDescender RightSB]
+	derive-composites 'cyrl/iShortTail.upright' null  'cyrl/i.upright' [refer-glyph 'breveAbove'] [CyrTailDescender RightSB]
