@@ -11,9 +11,11 @@ glyph-block Letter-Latin-Upper-M : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame CyrTailDescender
 
 
-	define FORM-FLAT     0
-	define FORM-HANGING  1
-	define FORM-TURN-W   2
+	define FORM-FLAT      0
+	define FORM-HANGING   1
+	define FORM-TURN-W    2
+	define FORM-SAN       3
+	define FORM-SAN-SMALL 4
 
 	define SLAB-NONE            0
 	define SLAB-AUTO            1
@@ -27,17 +29,23 @@ glyph-block Letter-Latin-Upper-M : begin
 		local xRightTop : df.rightSB - top * sidesSlope
 
 		local swSideBot : match form
-			[Just FORM-TURN-W]  : AdviceStroke 2.5  df.div
-			[Just FORM-HANGING] : AdviceStroke 2.5  df.div
-			__                  : AdviceStroke 2.75 df.div
+			[Just FORM-SAN-SMALL] : AdviceStroke 2.5  df.div
+			[Just FORM-SAN]       : AdviceStroke 2.5  df.div
+			[Just FORM-TURN-W]    : AdviceStroke 2.5  df.div
+			[Just FORM-HANGING]   : AdviceStroke 2.5  df.div
+			__                    : AdviceStroke 2.75 df.div
 		local swSideTop : match form
-			[Just FORM-TURN-W]  : AdviceStroke 3 df.div
-			__                  : AdviceStroke 4 df.div
+			[Just FORM-SAN-SMALL] : AdviceStroke 3 df.div
+			[Just FORM-SAN]       : AdviceStroke 3 df.div
+			[Just FORM-TURN-W]    : AdviceStroke 3 df.div
+			__                    : AdviceStroke 4 df.div
 		local swMiddle : AdviceStroke 4.5 df.div
 		local middleY : match form
-			[Just FORM-TURN-W]  : top * 0.45
-			[Just FORM-HANGING] : top * 0.3 / (df.div * df.div)
-			__                  : if SLAB Stroke 0
+			[Just FORM-SAN-SMALL] : top * 0.55
+			[Just FORM-SAN]       : top * 0.55
+			[Just FORM-TURN-W]    : top * 0.45
+			[Just FORM-HANGING]   : top * 0.3 / (df.div * df.div)
+			__                    : if SLAB Stroke 0
 		local kMidShift : match form
 			[Just FORM-FLAT] 0.75
 			__               0.5
@@ -46,7 +54,7 @@ glyph-block Letter-Latin-Upper-M : begin
 			__               1
 
 		include : tagged 'strokeLeftBar' : dispiro
-			flat df.leftSB 0 [widths.heading 0 swSideBot Upward]
+			flat df.leftSB [if (form === FORM-SAN-SMALL) Descender 0] [widths.heading 0 swSideBot Upward]
 			curl [mix df.leftSB xLeftTop 0.2] (top * 0.2) [heading Upward]
 			straight.up.end xLeftTop top [widths.heading 0 swSideTop Upward]
 		include : tagged 'strokeRightBar' : dispiro
@@ -73,18 +81,20 @@ glyph-block Letter-Latin-Upper-M : begin
 					if para.isItalic sfB.rb.outer sfB.rb.full
 
 	define MConfig : object
-		hanging                             { FORM-HANGING SLAB-AUTO            false }
-		flatBottom                          { FORM-FLAT    SLAB-AUTO            false }
-		hangingSmallCyrl                    { FORM-HANGING SLAB-SMALL-CYRILLIC  false }
-		flatBottomSmallCyrl                 { FORM-FLAT    SLAB-SMALL-CYRILLIC  false }
-		hangingMotionSerifed                { FORM-HANGING SLAB-MOTION          false }
-		flatBottomMotionSerifed             { FORM-FLAT    SLAB-MOTION          false }
-		slantedSidesHanging                 { FORM-HANGING SLAB-AUTO            true  }
-		slantedSidesFlatBottom              { FORM-FLAT    SLAB-AUTO            true  }
-		slantedSidesHangingSmallCyrl        { FORM-HANGING SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesFlatBottomSmallCyrl     { FORM-FLAT    SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesHangingMotionSerifed    { FORM-HANGING SLAB-MOTION          true  }
-		slantedSidesFlatBottomMotionSerifed { FORM-FLAT    SLAB-MOTION          true  }
+		hanging                             { FORM-HANGING   SLAB-AUTO            false }
+		flatBottom                          { FORM-FLAT      SLAB-AUTO            false }
+		hangingSmallCyrl                    { FORM-HANGING   SLAB-SMALL-CYRILLIC  false }
+		flatBottomSmallCyrl                 { FORM-FLAT      SLAB-SMALL-CYRILLIC  false }
+		hangingMotionSerifed                { FORM-HANGING   SLAB-MOTION          false }
+		flatBottomMotionSerifed             { FORM-FLAT      SLAB-MOTION          false }
+		slantedSidesHanging                 { FORM-HANGING   SLAB-AUTO            true  }
+		slantedSidesFlatBottom              { FORM-FLAT      SLAB-AUTO            true  }
+		slantedSidesHangingSmallCyrl        { FORM-HANGING   SLAB-SMALL-CYRILLIC  true  }
+		slantedSidesFlatBottomSmallCyrl     { FORM-FLAT      SLAB-SMALL-CYRILLIC  true  }
+		slantedSidesHangingMotionSerifed    { FORM-HANGING   SLAB-MOTION          true  }
+		slantedSidesFlatBottomMotionSerifed { FORM-FLAT      SLAB-MOTION          true  }
+		grekCapitalSan                      { FORM-SAN       SLAB-AUTO            false }
+		grekSmallSan                        { FORM-SAN-SMALL SLAB-NONE            false }
 
 	foreach { suffix { form slab slanted } } [Object.entries MConfig] : do
 		create-glyph "M.\(suffix)" : glyph-proc
@@ -99,6 +109,12 @@ glyph-block Letter-Latin-Upper-M : begin
 			include : df.markSet.e
 			include : MShape XH df form slab slanted
 
+		create-glyph "smcpMWithDescender.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.p
+			include : MShape XH df form slab slanted
+
 	select-variant 'M' 'M'
 	link-reduced-variant 'M/sansSerif' 'M' MathSansSerif
 	select-variant 'smcpM' 0x1D0D (follow -- 'M')
@@ -109,6 +125,9 @@ glyph-block Letter-Latin-Upper-M : begin
 
 	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' [CyrTailDescender [DivFrame para.diversityM 3].rightSB]
 	derive-composites 'cyrl/emTail' 0x4CE 'cyrl/em' [CyrTailDescender [DivFrame para.diversityM 3].rightSB]
+
+	alias 'grek/San' 0x3FA 'M.grekCapitalSan'
+	alias 'grek/san' 0x3FB 'smcpMWithDescender.grekSmallSan'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/M' 0x1D544 : glyph-proc
