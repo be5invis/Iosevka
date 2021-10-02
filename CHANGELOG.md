@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 10.3.1
+
+ * Add taller variants of Number Sign (#1222).
+
+
 ### 10.3.0
 
  * Add Greek letters and symbols:
