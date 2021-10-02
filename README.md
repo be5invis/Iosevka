@@ -2303,14 +2303,22 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 <td><img src="images/character-variant-cv88-2.png" width="32"/></td>
 <td><img src="images/character-variant-cv88-3.png" width="32"/></td>
 <td><img src="images/character-variant-cv88-4.png" width="32"/></td>
-<td colspan="8"> </td>
+<td><img src="images/character-variant-cv88-5.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-6.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-7.png" width="32"/></td>
+<td><img src="images/character-variant-cv88-8.png" width="32"/></td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td>1</td>
 <td>2</td>
 <td>3</td>
 <td>4</td>
-<td colspan="8"> </td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv89</code></td>
@@ -2944,7 +2952,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - Styles for `{`, `}`:
      <table><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-1.png" width="64"/></td><td><code>brace = 'straight'</code>, <code>cv87 = 1</code></td></tr><tr><td>More straight braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-2.png" width="64"/></td><td><code>brace = 'curly'</code>, <code>cv87 = 2</code></td></tr><tr><td>More curly braces</td></tr><tr><td rowspan="2" width="92"><img src="images/character-variant-cv87-3.png" width="64"/></td><td><code>brace = 'curly-flat-boundary'</code>, <code>cv87 = 3</code></td></tr><tr><td>Curly braces with flat boundary shape</td></tr></table>
   - Styles for `#`:
-     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-1.png" width="32"/></td><td><code>number-sign = 'upright'</code>, <code>cv88 = 1</code></td></tr><tr><td>Number sign with vertical bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-2.png" width="32"/></td><td><code>number-sign = 'slanted'</code>, <code>cv88 = 2</code></td></tr><tr><td>Number sign with slanted bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-3.png" width="32"/></td><td><code>number-sign = 'upright-open'</code>, <code>cv88 = 3</code></td></tr><tr><td>Number sign with vertical bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-4.png" width="32"/></td><td><code>number-sign = 'slanted-open'</code>, <code>cv88 = 4</code></td></tr><tr><td>Number sign with slanted bars and open inner</td></tr></table>
+     <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-1.png" width="32"/></td><td><code>number-sign = 'upright'</code>, <code>cv88 = 1</code></td></tr><tr><td>Number sign with vertical bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-2.png" width="32"/></td><td><code>number-sign = 'slanted'</code>, <code>cv88 = 2</code></td></tr><tr><td>Number sign with slanted bars</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-3.png" width="32"/></td><td><code>number-sign = 'upright-open'</code>, <code>cv88 = 3</code></td></tr><tr><td>Number sign with vertical bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-4.png" width="32"/></td><td><code>number-sign = 'slanted-open'</code>, <code>cv88 = 4</code></td></tr><tr><td>Number sign with slanted bars and open inner</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-5.png" width="32"/></td><td><code>number-sign = 'upright-tall'</code>, <code>cv88 = 5</code></td></tr><tr><td>Number sign with vertical bars and taller than digits</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-6.png" width="32"/></td><td><code>number-sign = 'slanted-tall'</code>, <code>cv88 = 6</code></td></tr><tr><td>Number sign with slanted bars and taller than digits</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-7.png" width="32"/></td><td><code>number-sign = 'upright-open-tall'</code>, <code>cv88 = 7</code></td></tr><tr><td>Number sign with vertical bars, open inner, and taller than digits</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv88-8.png" width="32"/></td><td><code>number-sign = 'slanted-open-tall'</code>, <code>cv88 = 8</code></td></tr><tr><td>Number sign with slanted bars, open inner, and taller than digits</td></tr></table>
   - Styles for `&`:
      <table><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-1.png" width="32"/></td><td><code>ampersand = 'closed'</code>, <code>cv89 = 1</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with a closed contour</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-2.png" width="32"/></td><td><code>ampersand = 'upper-open'</code>, <code>cv89 = 2</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at upper half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-3.png" width="32"/></td><td><code>ampersand = 'lower-open'</code>, <code>cv89 = 3</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) with an open contour at lower half</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-4.png" width="32"/></td><td><code>ampersand = 'et-toothed'</code>, <code>cv89 = 4</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t with tooth</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-5.png" width="32"/></td><td><code>ampersand = 'et-toothless-corner'</code>, <code>cv89 = 5</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (corner)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-6.png" width="32"/></td><td><code>ampersand = 'et-toothless-rounded'</code>, <code>cv89 = 6</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn like a ligature of Ɛ and t without tooth (rounded)</td></tr><tr><td rowspan="2" width="60"><img src="images/character-variant-cv89-7.png" width="32"/></td><td><code>ampersand = 'flat-top'</code>, <code>cv89 = 7</code></td></tr><tr><td>Ampersand (<code>&amp;</code>) drawn with a flat top</td></tr></table>
   - Styles for `@`:

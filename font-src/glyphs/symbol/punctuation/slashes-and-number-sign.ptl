@@ -66,25 +66,27 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 		include : BackslashShape 0 (Middle + backslashWidth / 2)
 
 	do "number sign"
-		define nsTop : mix 0 CAP 0.975
-		define nsBot : mix 0 CAP 0.025
 		define fine : AdviceStroke 2.75
 
 		define [HspT l r] : ((r - l) - (fine * 2 * HVContrast)) * 0.3
 
-		define [UprightHBars lx l r p] : union
-			HBar lx r [mix nsTop nsBot 0.3]
-			HBar lx r [mix nsTop nsBot 0.7]
+		define [UprightHBars height lx l r p] : begin
+			define { nsTop nsBot } height
+			return : union
+				HBar lx r [mix nsTop nsBot 0.3]
+				HBar lx r [mix nsTop nsBot 0.7]
 
-		define [UprightHBarsOpen lx l r p] : begin
+		define [UprightHBarsOpen height lx l r p] : begin
+			define { nsTop nsBot } height
 			define hsp : HspT l r
 			return : difference
-				UprightHBars lx l r p
+				UprightHBars height lx l r p
 				Rect nsTop nsBot
 					l + hsp + fine * (0.5 + p)
 					r - hsp - fine * (0.5 + p)
 
-		define [UprightVBars lx l r p] : begin
+		define [UprightVBars height lx l r p] : begin
+			define { nsTop nsBot } height
 			define hsp : HspT l r
 			return : union
 				VBarLeft  (l + hsp + p * fine) nsBot nsTop fine
@@ -97,41 +99,54 @@ glyph-block Symbol-Punctuation-Slashes-And-Number-Sign : begin
 			define shift : w / 3
 			return : object hsp x w shift
 
-		define [SlantedHBars lx l r p] : begin
+		define [SlantedHBars height lx l r p] : begin
+			define { nsTop nsBot } height
 			define [object shift] : SlantedDim l r
 			return : union
 				HBar (lx + shift) (r + shift) [mix nsTop nsBot 0.3]
 				HBar (lx - shift) (r - shift) [mix nsTop nsBot 0.7]
-		define [SlantedHBarsOpen lx l r p] : begin
+		define [SlantedHBarsOpen height lx l r p] : begin
+			define { nsTop nsBot } height
 			define [object x w] : SlantedDim l r
 			return : difference
-				SlantedHBars lx l r p
+				SlantedHBars height lx l r p
 				spiro-outline
 					corner (l + x + w + p * fine) nsTop
 					corner (r - x + w - p * fine) nsTop
 					corner (r - x - w - p * fine) nsBot
 					corner (l + x - w + p * fine) nsBot
-		define [SlantedVBars lx l r p] : begin
+		define [SlantedVBars height lx l r p] : begin
+			define { nsTop nsBot } height
 			define [object x w] : SlantedDim l r
 			return : union
 				SlashShape (l + x - w + p * fine) (l + x + w + p * fine) nsTop nsBot fine
 				SlashShape (r - x - w - p * fine) (r - x + w - p * fine) nsTop nsBot fine
 
+		define normalHeight  { [mix 0 CAP 0.975]          [mix 0 CAP 0.025]          }
+		define tallHeight    { [mix OperTop ParenTop 0.8] [mix OperBot ParenBot 0.8] }
 		define NumberSignConfig : object
-			upright     { UprightHBars     UprightVBars  0      }
-			uprightOpen { UprightHBarsOpen UprightVBars (1 / 8) }
-			slanted     { SlantedHBars     SlantedVBars  0      }
-			slantedOpen { SlantedHBarsOpen SlantedVBars (1 / 8) }
+			upright         { UprightHBars     UprightVBars  0      normalHeight }
+			uprightOpen     { UprightHBarsOpen UprightVBars (1 / 8) normalHeight }
+			slanted         { SlantedHBars     SlantedVBars  0      normalHeight }
+			slantedOpen     { SlantedHBarsOpen SlantedVBars (1 / 8) normalHeight }
+			uprightTall     { UprightHBars     UprightVBars  0      tallHeight   }
+			uprightOpenTall { UprightHBarsOpen UprightVBars (1 / 8) tallHeight   }
+			slantedTall     { SlantedHBars     SlantedVBars  0      tallHeight   }
+			slantedOpenTall { SlantedHBarsOpen SlantedVBars (1 / 8) tallHeight   }
 
-		foreach { suffix { FHBars FVBars p } } [Object.entries NumberSignConfig] : do
+		foreach { suffix { FHBars FVBars p height } } [Object.entries NumberSignConfig] : do
 
 			define l : SB - fine / 2
 			define r : RightSB + fine / 2
 
-			create-glyph "numberSign.\(suffix)" : union [FHBars l l r p] [FVBars l l r p]
+			create-glyph "numberSign.\(suffix)" : union
+				FHBars height l l r p
+				FVBars height l l r p
 			create-glyph "numberSign.jr.\(suffix)" : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Right
-				include : union [FHBars (r - Width) l r p] [FVBars (r - Width) l r p]
+				include : union
+					FHBars height (r - Width) l r p
+					FVBars height (r - Width) l r p
 
 		select-variant 'numberSign' '#'
 		select-variant 'numberSign.jr' (follow -- 'numberSign')
