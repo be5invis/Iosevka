@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 10.3.2
+
+ * Add support for OpenType `frac` feature (#1230).
+ * Fix placement of `U+031C` and `U+0357`.
+
+
 ### 10.3.1
 
  * Add taller variants of Number Sign (#1222).
