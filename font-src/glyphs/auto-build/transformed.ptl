@@ -2,7 +2,9 @@
 $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from '../../support/utils'
-import [AnyCv DotlessOrNot getGrTree getGrMesh CvDecompose MathSansSerif] from "../../support/gr"
+import [getGrTree getGrMesh] from "../../support/gr"
+import [AnyCv DotlessOrNot CvDecompose MathSansSerif] from "../../support/gr"
+import [NumeratorForm DenominatorForm] from "../../support/gr"
 extern Map
 extern Set
 
@@ -50,6 +52,7 @@ glyph-block Autobuild-Transformed-Shared : begin
 				local relatedRecord : record.slice 0
 				set relatedRecord.0 null
 				set relatedRecord.1 relSrcName
+				set relatedRecord.2 true
 				relatedRecords.push relatedRecord
 
 				relSets.push { gr origDstName relDstName }
@@ -74,16 +77,16 @@ glyph-block Autobuild-Transformed : begin
 	glyph-block-import Mark-Below : belowMarkBot belowMarkTop
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
 
-	define [createSuperscripts _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs 'sup' _records
+	define [createSuperscripts prefix gr _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs prefix _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
-			sbscale -- 1
-		foreach {unicode glyphid} [items-of records]
-			if [not : query-glyph targetNameMap.(glyphid)]
+			sbscale -- 0.75
+		foreach { unicode glyphid fRelated } [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)] : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
 					if [not : miniatureFont.queryByName glyphid] : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
@@ -94,19 +97,20 @@ glyph-block Autobuild-Transformed : begin
 					include [Scale 0.7] true
 					include [Translate middle (CAP + AccentStackOffset / 2)] true
 					include [Italify] true
+				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 		return { targetNameMap records }
 
-	define [createSubscripts _records] : begin
-		local {records relSets targetNameMap} : extendRelatedGlyphs 'sub' _records
+	define [createSubscripts prefix gr _records] : begin
+		local {records relSets targetNameMap} : extendRelatedGlyphs prefix _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature pendingGlyphs
 			crowd  -- 3.5
 			scale  -- 0.7
 			mono   -- true
-			sbscale -- 1
-		foreach {unicode glyphid} [items-of records]
-			if [not : query-glyph targetNameMap.(glyphid)]
+			sbscale -- 0.75
+		foreach { unicode glyphid fRelated } [items-of records]
+			if [not : query-glyph targetNameMap.(glyphid)] : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
 					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
@@ -115,6 +119,7 @@ glyph-block Autobuild-Transformed : begin
 					include [Scale 0.7] true
 					include [Translate middle (Descender / 2)] true
 					include [Italify] true
+				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 
 	# Not used today -- may be used in the future
@@ -191,7 +196,7 @@ glyph-block Autobuild-Transformed : begin
 
 		link-relations relSets
 
-	createSuperscripts : list
+	createSuperscripts 'sup' null : list
 		list 0x00AA 'aSbRsbUnderlineBelow'
 		list 0x00BA 'oSbRsbUnderlineBelow'
 		list 0x2070 'zero.lnum'
@@ -322,15 +327,37 @@ glyph-block Autobuild-Transformed : begin
 		list 0xA7F8 'smcpHbar'
 		list 0xA7F9 'oe'
 
+	createSuperscripts 'numerator' NumeratorForm : list
+		list null 'zero.onum'
+		list null 'one.onum'
+		list null 'two.onum'
+		list null 'three.onum'
+		list null 'four.onum'
+		list null 'five.onum'
+		list null 'six.onum'
+		list null 'seven.onum'
+		list null 'eight.onum'
+		list null 'nine.onum'
+		list null 'zero.lnum'
+		list null 'one.lnum'
+		list null 'two.lnum'
+		list null 'three.lnum'
+		list null 'four.lnum'
+		list null 'five.lnum'
+		list null 'six.lnum'
+		list null 'seven.lnum'
+		list null 'eight.lnum'
+		list null 'nine.lnum'
+
 	do "superscript AE"
-		define { tnmAHalf jobsAHalf } : createSuperscripts { { null 'AE/AHalf' } }
-		define { tnmEHalf jobsEHalf } : createSuperscripts { { null 'AE/EHalf' } }
+		define { tnmAHalf jobsAHalf } : createSuperscripts 'sup' null { { null 'AE/AHalf' } }
+		define { tnmEHalf jobsEHalf } : createSuperscripts 'sup' null { { null 'AE/EHalf' } }
 		create-glyph 'sup{AE}' 0x1D2D : glyph-proc
 			include [refer-glyph tnmAHalf.('AE/AHalf')] AS_BASE ALSO_METRICS
 			include [refer-glyph tnmEHalf.('AE/EHalf')]
 			CvDecompose.set currentGlyph { tnmAHalf.('AE/AHalf') tnmEHalf.('AE/EHalf') }
 
-	createSubscripts : list
+	createSubscripts 'sub' null : list
 		list 0x2080 'zero.lnum'
 		list 0x2081 'one.lnum'
 		list 0x2082 'two.lnum'
@@ -369,6 +396,28 @@ glyph-block Autobuild-Transformed : begin
 		list 0x208C 'equal'
 		list 0x208D 'parenLeft'
 		list 0x208E 'parenRight'
+
+	createSubscripts 'denominator' DenominatorForm : list
+		list null 'zero.onum'
+		list null 'one.onum'
+		list null 'two.onum'
+		list null 'three.onum'
+		list null 'four.onum'
+		list null 'five.onum'
+		list null 'six.onum'
+		list null 'seven.onum'
+		list null 'eight.onum'
+		list null 'nine.onum'
+		list null 'zero.lnum'
+		list null 'one.lnum'
+		list null 'two.lnum'
+		list null 'three.lnum'
+		list null 'four.lnum'
+		list null 'five.lnum'
+		list null 'six.lnum'
+		list null 'seven.lnum'
+		list null 'eight.lnum'
+		list null 'nine.lnum'
 
 	createMedievalCombs 0 XH : list
 		list 0x363 'a'

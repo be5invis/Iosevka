@@ -44,6 +44,8 @@ const Wwid = OtlTaggedProp("Wwid", "WWID");
 const Lnum = OtlTaggedProp("Lnum", "lnum");
 const Onum = OtlTaggedProp("Onum", "onum");
 const AplForm = OtlTaggedProp("AplForm", "APLF");
+const NumeratorForm = OtlTaggedProp("Numerator", "NUMF");
+const DenominatorForm = OtlTaggedProp("Denominator", "DENF");
 
 const CvDecompose = {
 	get(glyph) {
@@ -457,6 +459,8 @@ exports.Wwid = Wwid;
 exports.Lnum = Lnum;
 exports.Onum = Onum;
 exports.AplForm = AplForm;
+exports.NumeratorForm = NumeratorForm;
+exports.DenominatorForm = DenominatorForm;
 
 exports.createGrDisplaySheet = createGrDisplaySheet;
 exports.linkSuffixGr = linkSuffixGr;
