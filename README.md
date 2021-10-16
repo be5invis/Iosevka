@@ -3088,6 +3088,19 @@ will:
 
 A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml).
 
+### TTC Building
+
+It is possible to create a customized TTC build by using the following method:
+
+ 1. Add a collect plan into `private-build-plans.toml`, with a `from` field containing all the TTF groups it needs:
+   ```toml
+   [collectPlans.iosevka-custom]
+   from = ["iosevka-custom1", "iosevka-custom-2"]
+   ```
+ 2. Run build with the following command:
+  - `npm run built -- ttc::iosevka-custom`: Create TTCs from collection `iosevka-custom`; The file will be saved into `dist/.ttc`.
+  - `npm run built -- super-ttc::iosevka-custom`: Create a single-file TTC from collection `iosevka-custom`; The file will be saved into `dist/.super-ttc`.
+
 ## For Chinese and Japanese users...
 
 → [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic).

@@ -455,6 +455,13 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 //////               Font Collection                 //////
 ///////////////////////////////////////////////////////////
 
+const SpecificTtc = task.group(`ttc`, async (target, cgr) => {
+	const outputDir = `dist/.ttc/${cgr}`;
+	const [cPlan] = await target.need(CollectPlans, de(outputDir));
+	const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
+	const [files] = await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
+	for (const file of files) await cp(file.full, `${outputDir}/${file.base}`);
+});
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, cgr) => {
 	await target.need(CollectedSuperTtcFile(cgr));
 });
@@ -506,8 +513,8 @@ async function buildGlyphSharingTtc(target, parts, out) {
 const TtcArchiveFile = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/ttc-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
-		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
-		const ttcFiles = Array.from(Object.keys(cp[cgr].ttcComposition));
+		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
+		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 
 		// Packaging
