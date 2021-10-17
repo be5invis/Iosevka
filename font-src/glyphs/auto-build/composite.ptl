@@ -1042,72 +1042,83 @@ glyph-block Autobuild-Ligatures : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createLigatures prefix _shrink1 _shrink2 wadj1 wadj2 kKern demands] : for-width-kinds WideWidth2
+	define [createLigatures prefix fAlwaysCompress _shrink1 _shrinkN wadj1 wadjN kKern demands] : for-width-kinds WideWidth2
 		local ww : if FMosaicWide MosaicWidth (MosaicWidth * para.diversityM)
 		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
-		local shrink1 : if FMosaicWide 1 [clamp 0 1 (_shrink1 * ww / Width)]
-		local shrink2 : if FMosaicWide 1 [clamp 0 1 (_shrink2 * ww / Width)]
+		local shrink1 : if (FMosaicWide && !fAlwaysCompress) 1 [clamp 0 1 (_shrink1 * [mix Width ww 0.5] / Width)]
+		local shrinkN : if (FMosaicWide && !fAlwaysCompress) 1 [clamp 0 1 (_shrinkN * [mix Width ww 0.5] / Width)]
 		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1
-		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2
+		local dfN : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrinkN
 
-		define [LigaturePartImpl df offset1 compress offset2 aw] : lambda [gidPart] : begin
-			define gni : '.ligature-part-1.' + gidPart + '@' + [{prefix compress offset1 offset2 aw}.join '/']
+		define [LigaturePlaceholderImpl aw markPlacement] : begin
+			define gni : '.ligature-placeholder@' + [{aw markPlacement}.join '/']
 			if [query-glyph gni] : return gni
 			create-glyph gni : glyph-proc
 				set-width aw
-				if [not aw] : set-mark-anchor 'compositeInner' 0 0
+				set-base-anchor 'enclosureInner' markPlacement 0
+			return gni
+		define [LigaturePartImpl df offset1 compress markDist] : lambda [gidPart] : begin
+			define gni : '.ligature-part.' + gidPart + '@' + [{ prefix compress offset1 markDist }.join '/']
+			if [query-glyph gni] : return gni
+			create-glyph gni : glyph-proc
+				set-width 0
 				include : df.queryByNameEnsured gidPart
 				include : Upright
 				include : Translate offset1 0
 				include : Scale compress 1
-				include : Translate offset2 0
 				include : Italify
+				set-mark-anchor 'enclosureInner' 0 0 markDist 0
 			return gni
 
 		define [LigatureImpl job decomposable] : begin
-			local { gn unicode { c1 c2 } desiredWidth } job
+			local { gn unicode components desiredWidth } job
 			local ps {}
 
-			local dfg1 : df1.queryByNameEnsured c1
-			local dfg2 : df2.queryByNameEnsured c2
-			local aw : dfg1.advanceWidth + dfg2.advanceWidth
+			local dfgs {}
+			foreach { i component } [components.entries] : begin
+				set dfgs.(i) : [if i dfN df1].queryByNameEnsured component
 
-			if FMosaicWide : begin
-				if [not : query-glyph gn] : begin
+			if [not : query-glyph gn] : begin
+				if (FMosaicWide && !fAlwaysCompress) : begin
 					create-glyph gn [MangleUnicode unicode desiredWidth] : glyph-proc
+						local decomposition { }
+						local aw 0
+						foreach { i component } [components.entries] : do
+							local componentG : query-glyph component
+							include : WithTransform [Translate aw 0] : refer-glyph component
+							set aw : aw + componentG.advanceWidth
+							decomposition.push component
 						set-width aw
-						local part1 : EnsureComponentGlyphT c1
-							LigaturePartImpl df1 0                 1 0     aw
-						local part2 : EnsureComponentGlyphT c2
-							LigaturePartImpl df2 dfg1.advanceWidth 1 (-aw) 0
-						include : refer-glyph part1
-						include : WithTransform [Translate aw 0] : refer-glyph part2
-						if decomposable : CvDecompose.set currentGlyph { part1 part2 }
-			: else : begin
-				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
-				local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
-				local kern      : kKern * ww
-				local refW : sumChildrenWidth - kern
-				foreach [cycle : range 0 4] : begin
-					set kern : Math.max 0 : Math.min (SB * 7/8 * (shrink1 + shrink2)) (refW - compRefWw)
-					set refW : sumChildrenWidth - kern
+						if decomposable : CvDecompose.set currentGlyph decomposition
+				: else : begin
+					local sumChildrenWidth 0
+					foreach {i dfg} [dfgs.entries] : begin
+						set sumChildrenWidth : sumChildrenWidth + dfg.advanceWidth * [if i wadjN wadj1]
 
-				local offset1Part1 : - refW / 2
-				local offset1Part2 : dfg1.advanceWidth * wadj1 - kern - refW / 2
-				local compress     : clamp 0 1 (compRefWw / refW)
-				local offset2      : ww / 2
+					local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
+					local kern      : kKern * ww
+					local refW      : sumChildrenWidth - kern * (dfgs.length - 1)
+					if (dfgs.length > 1) : foreach [cycle : range 0 4] : begin
+						set kern : clamp 0 (SB * 7 / 8) ((refW - compRefWw) / (dfgs.length - 1))
+						set refW : sumChildrenWidth - kern * (dfgs.length - 1)
 
-				if [not : query-glyph gn] : begin
+					local compress : clamp 0 1 (compRefWw / refW)
+
 					create-glyph gn [MangleUnicode unicode desiredWidth] : glyph-proc
-						set-width ww
-						local part1 : EnsureComponentGlyphT c1
-							LigaturePartImpl df1 offset1Part1 compress offset2        ww
-						local part2 : EnsureComponentGlyphT c2
-							LigaturePartImpl df2 offset1Part2 compress (offset2 - ww) 0
-						include : refer-glyph part1
-						include : WithTransform [Translate ww 0] : refer-glyph part2
-						if decomposable : CvDecompose.set currentGlyph { part1 part2 }
-
+						local decomposition   { }
+						local baseOffset : ww / 2 - refW * compress / 2
+						foreach { i component } [components.entries] : do
+							local componentAdvance : compress * (dfgs.(i).advanceWidth * [if i wadjN wadj1] - kern)
+							local componentRefOffset : dfgs.(i).advanceWidth * ([if i wadjN wadj1] - 1) / 2
+							if (i === 0) : begin
+								local placeholder : LigaturePlaceholderImpl ww baseOffset
+								decomposition.push placeholder
+								include [refer-glyph placeholder] AS_BASE ALSO_METRICS
+							local part : EnsureComponentGlyphT component
+								LigaturePartImpl dfN componentRefOffset compress componentAdvance
+							decomposition.push part
+							include [refer-glyph part]
+						if decomposable : CvDecompose.set currentGlyph decomposition
 
 		foreach job [items-of jobs.nonDecomposable]  : LigatureImpl job false
 		foreach job [items-of jobs.decomposableJobs] : LigatureImpl job true
@@ -1115,12 +1126,12 @@ glyph-block Autobuild-Ligatures : begin
 		applyRelations jobs.relApplications
 
 	define ijShrink : clamp 0.65 0.8 : StrokeWidthBlend 0.7 0.8
-	createLigatures 'compatLigature1' ijShrink ijShrink 1 1 0.05 : list
+	createLigatures 'compatLigature1' false ijShrink ijShrink 1 1 0.05 : list
 		list 0x132 { 'I' 'J' }
 		list 0x133 { 'i' 'j' }
 
 	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createLigatures 'compatLigature2' stdShrink stdShrink 1 1 0 : list
+	createLigatures 'compatLigature2' false stdShrink stdShrink 1 1 0 : list
 		list 0x1C4 { 'D' 'ZCaron' }
 		list 0x1C5 { 'D' 'zCaron' }
 		list 0x1C6 { 'd' 'zCaron' }
@@ -1141,7 +1152,49 @@ glyph-block Autobuild-Ligatures : begin
 		list 0x2116 { 'N' 'numeroRightHalf' }
 		list 0x1F190 { 'D' 'J' } WideWidth1
 
-	createLigatures 'temperature' 0.7 0.8 0.75 0.9 0 : list
+	createLigatures 'romanNumerals1' true 1 1 1 1 0 : list
+		list 0x2160 { 'I' }
+		list 0x2164 { 'V' }
+		list 0x2169 { 'X' }
+		list 0x216C { 'L' }
+		list 0x216D { 'C' }
+		list 0x216E { 'D' }
+		list 0x216F { 'M' }
+		list 0x2170 { 'i' }
+		list 0x2174 { 'v' }
+		list 0x2179 { 'x' }
+		list 0x217C { 'l' }
+		list 0x217D { 'c' }
+		list 0x217E { 'd' }
+		list 0x217F { 'm' }
+
+	createLigatures 'romanNumerals2' true stdShrink stdShrink 1 1 0 : list
+		list 0x2161 { 'I' 'I' }
+		list 0x2163 { 'I' 'V' }
+		list 0x2165 { 'V' 'I' }
+		list 0x2168 { 'I' 'X' }
+		list 0x216A { 'X' 'I' }
+		list 0x2171 { 'i' 'i' }
+		list 0x2173 { 'i' 'v' }
+		list 0x2175 { 'v' 'i' }
+		list 0x2178 { 'i' 'x' }
+		list 0x217A { 'x' 'i' }
+
+	define romanShrink : clamp 0.625 0.875 : StrokeWidthBlend 0.625 0.875
+	createLigatures 'romanNumerals3' true romanShrink romanShrink 1 1 0 : list
+		list 0x2162 { 'I' 'I' 'I' }
+		list 0x2166 { 'V' 'I' 'I' }
+		list 0x216B { 'X' 'I' 'I' }
+		list 0x2172 { 'i' 'i' 'i' }
+		list 0x2176 { 'v' 'i' 'i' }
+		list 0x217B { 'x' 'i' 'i' }
+
+	define romanShrink4 : clamp 0.5 0.875 : StrokeWidthBlend 0.5 0.875
+	createLigatures 'romanNumerals4' true romanShrink4 romanShrink4 1 1 0 : list
+		list 0x2167 { 'V' 'I' 'I' 'I' }
+		list 0x2177 { 'v' 'i' 'i' 'i' }
+
+	createLigatures 'temperature' false 0.7 0.8 0.75 0.9 0 : list
 		list 0x2103 { 'degree' 'C' }
 		list 0x2109 { 'degree' 'F' }
 

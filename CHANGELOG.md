@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 10.3.3
+
+ * Add support for Roman numerals (#623).
+
+
 ### 10.3.2
 
  * Add support for OpenType `frac` feature (#1230).
