@@ -9,42 +9,41 @@ glyph-block Letter-Latin-Upper-D : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [DArcShapeT sink top offset sw fRound] : glyph-proc
-		local barleft SB
+	define [DArcShapeT sink df top right offset sw fRound] : glyph-proc
+		local mockWidth : right + (df.width - df.rightSB)
+		local maxXSmoothWidth : mockWidth - df.leftSB * 2 - sw * HVContrast
+		local dsmooth : clamp (sw * 1.5) (top * 0.499) ((top / CAP) * Smooth * 1.1)
+		local bsmooth : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * Smooth * 1.1)
+		local bsmoothRd : clamp (sw * 1.5) maxXSmoothWidth ((mockWidth / Width) * Smooth * 1.25)
 
-		local dsmooth : Math.min (top * 0.499) (Smooth * 1.1)
-		local bsmooth : Math.min (Width - SB * 2 - sw) (Smooth * 1.1)
-		local bsmoothRd : Math.min (Width - SB * 2 - sw) (Smooth * 1.25)
-
-		local sma : SmoothAOf dsmooth Width
-		local smb : SmoothBOf dsmooth Width
+		local sma : SmoothAOf dsmooth mockWidth
+		local smb : SmoothBOf dsmooth mockWidth
 
 		if (fRound) : include : sink
 			widths.rhs sw
-			[if offset corner flat] (barleft - O) (top - offset) [heading Rightward]
-			curl (RightSB - bsmoothRd - CorrectionOMidS) (top - offset)
+			[if offset corner flat] (df.leftSB - O) (top - offset) [heading Rightward]
+			curl (right - bsmoothRd - CorrectionOMidS) (top - offset)
 			archv
-			g4 (RightSB - OX - offset) [YSmoothMidR top 0 sma smb]
+			g4 (right - OX - offset) [YSmoothMidR top 0 sma smb]
 			arcvh
-			flat (RightSB - bsmoothRd + CorrectionOMidS) offset
-			[if offset corner curl] (barleft - O) offset [heading Leftward]
+			flat (right - bsmoothRd + CorrectionOMidS) offset
+			[if offset corner curl] (df.leftSB - O) offset [heading Leftward]
 		: else : include : sink
 			widths.rhs sw
-			[if offset corner flat] (barleft - O) (top - offset) [heading Rightward]
-			curl (RightSB - bsmooth - CorrectionOMidS) (top - offset)
+			[if offset corner flat] (df.leftSB - O) (top - offset) [heading Rightward]
+			curl (right - bsmooth - CorrectionOMidS) (top - offset)
 			archv
-			flat (RightSB - OX - offset) (top - smb)
-			curl (RightSB - OX - offset) (0 + sma)
+			flat (right - OX - offset) (top - smb)
+			curl (right - OX - offset) (0 + sma)
 			arcvh
-			flat (RightSB - bsmooth + CorrectionOMidS) offset
-			[if offset corner curl] (barleft - O) offset [heading Leftward]
+			flat (right - bsmooth + CorrectionOMidS) offset
+			[if offset corner curl] (df.leftSB - O) offset [heading Leftward]
 
-	define [DShape top fRound slabTop slabBot] : glyph-proc
-		local barleft SB
-		include : VBarLeft barleft 0 top
-		include : DArcShapeT dispiro top 0 Stroke fRound
-		if slabTop : include : tagged 'serifLT' : LeftwardTopSerif barleft top SideJut
-		if slabBot : include : tagged 'serifLB' : LeftwardBottomSerif barleft 0 SideJut
+	define [DShape df top right fRound slabTop slabBot] : glyph-proc
+		include : VBarLeft df.leftSB 0 top df.mvs
+		include : DArcShapeT dispiro df top right 0 df.mvs fRound
+		if slabTop : include : tagged 'serifLT' : LeftwardTopSerif df.leftSB top SideJut
+		if slabBot : include : tagged 'serifLB' : LeftwardBottomSerif df.leftSB 0 SideJut
 
 	define DConfig : object
 		standardSerifless            { false false false }
@@ -57,12 +56,32 @@ glyph-block Letter-Latin-Upper-D : begin
 	foreach { suffix { fRound fSlabTop fSlabBot } } [Object.entries DConfig] : do
 		create-glyph "D.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : DShape CAP fRound fSlabTop fSlabBot
+			include : DShape [DivFrame 1] CAP RightSB fRound fSlabTop fSlabBot
 		create-glyph "smcpD.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : DShape XH fRound fSlabTop fSlabBot
+			include : DShape [DivFrame 1] XH RightSB fRound fSlabTop fSlabBot
+		create-glyph "romanFiveThousand.\(suffix)" : glyph-proc
+			local df : DivFrame 1 3
+			include : MarkSet.capital
+			include : DShape df CAP df.rightSB fRound fSlabTop fSlabBot
+			include : WithTransform [ApparentTranslate 0 (CAP * 0.2)]
+				DShape df (CAP * 0.6) (df.middle + HVContrast * df.mvs * 0.5) fRound
+		create-glyph "romanFiftyThousand.\(suffix)" : glyph-proc
+			local df : DivFrame 1 4
+			local innerDist : df.rightSB - df.leftSB - 4 * df.mvs * HVContrast
+			local arcX1 : df.leftSB + innerDist * (1 / 3) + 2 * df.mvs * HVContrast
+			local arcX2 : df.leftSB + innerDist * (2 / 3) + 3 * df.mvs * HVContrast
+			local heightGap : df.mvs + (CAP - df.mvs * 6) / 6
+			include : MarkSet.capital
+			include : DShape df CAP df.rightSB fRound fSlabTop fSlabBot
+			include : WithTransform [ApparentTranslate 0 heightGap]
+				DShape df (CAP - 2 * heightGap) arcX2 fRound
+			include : WithTransform [ApparentTranslate 0 (2 * heightGap)]
+				DShape df (CAP - 4 * heightGap) arcX1 fRound
 
 	select-variant 'D' 'D'
+	select-variant 'romanFiveThousand' 0x2181 (follow -- 'D')
+	select-variant 'romanFiftyThousand' 0x2187 (follow -- 'D')
 	link-reduced-variant 'D/sansSerif' 'D' MathSansSerif
 	derive-glyphs 'Eth' 0xD0 'D' : lambda [src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
@@ -82,11 +101,12 @@ glyph-block Letter-Latin-Upper-D : begin
 
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/D' 0x1D53B : glyph-proc
-		include : MarkSet.capital
-		include : VBarLeft SB 0 CAP BBS
-		include : DArcShapeT dispiro CAP 0 BBS false
+		define df : DivFrame 1
+		include : df.markSet.capital
+		include : VBarLeft df.leftSB 0 CAP BBS
+		include : DArcShapeT dispiro df CAP df.rightSB 0 BBS false
 		include : intersection
-			DArcShapeT spiro-outline CAP 1 BBS false
+			DArcShapeT spiro-outline df CAP df.rightSB 1 BBS false
 			union
-				VBarLeft (SB + BBD) 0 CAP BBS
-				VBarRight (RightSB - BBD - OX) 0 CAP BBS
+				VBarLeft (df.leftSB + BBD) 0 CAP BBS
+				VBarRight (df.rightSB - BBD - OX) 0 CAP BBS
