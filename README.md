@@ -3098,8 +3098,8 @@ It is possible to create a customized TTC build by using the following method:
    from = ["iosevka-custom1", "iosevka-custom-2"]
    ```
  2. Run build with the following command:
-  - `npm run built -- ttc::iosevka-custom`: Create TTCs from collection `iosevka-custom`; The file will be saved into `dist/.ttc`.
-  - `npm run built -- super-ttc::iosevka-custom`: Create a single-file TTC from collection `iosevka-custom`; The file will be saved into `dist/.super-ttc`.
+  - `npm run build -- ttc::iosevka-custom`: Create TTCs from collection `iosevka-custom`; The file will be saved into `dist/.ttc`.
+  - `npm run build -- super-ttc::iosevka-custom`: Create a single-file TTC from collection `iosevka-custom`; The file will be saved into `dist/.super-ttc`.
 
 ## For Chinese and Japanese users...
 
