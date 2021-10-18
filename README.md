@@ -14,7 +14,7 @@ Quit your editor/program. Unzip and open the folder.
   * Standard distribution in Homebrew: 
     ```bash
     brew tap homebrew/cask-fonts
-    brew install --cask font-iosevka
+    brew install font-iosevka
     ```
   *  Search for other variants using `brew search font-iosevka` and install what you want.
   * Customizable install using Homebrew: see [robertgzr/homebrew-tap](https://github.com/robertgzr/homebrew-tap).
