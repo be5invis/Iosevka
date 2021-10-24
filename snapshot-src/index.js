@@ -2,9 +2,6 @@
 
 "use strict";
 
-const windowWidth = window.innerWidth;
-const windowHeight = window.innerHeight;
-const dpi = window.devicePixelRatio;
 const ipc = require("electron").ipcRenderer;
 const packagingTasks = require("./packaging-tasks.json");
 const auxData = require("./index.data.json");
@@ -139,10 +136,10 @@ function captureElement(options, callback) {
 		});
 		ipc.send("snapshot", {
 			name: options.name,
-			windowWidth: windowWidth,
-			windowHeight: windowHeight,
+			windowWidth: window.innerWidth,
+			windowHeight: window.innerHeight,
 			doubleTrim: options.doubleTrim,
-			dpi: dpi,
+			dpi: window.devicePixelRatio,
 			x: rect.left | 0,
 			y: rect.top | 0,
 			width: rect.width | 0,
