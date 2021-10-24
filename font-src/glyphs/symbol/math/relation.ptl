@@ -592,14 +592,14 @@ glyph-block Symbol-Math-Relation-Subset : begin
 	glyph-block-import Symbol-Math-Relation-Common : dH dHSubstSimple lessEqDist dHElem
 	glyph-block-import Symbol-Math-Relation-Addon-Glyphs
 
-	define [SubsetShape] : params [top bot [sw OperatorStroke] [offset 0]] : dispiro
+	define [SubsetShape] : params [top bot [sw OperatorStroke] [offset 0] [xShift 0]] : dispiro
 		widths.lhs sw
 		flat RightSB (top - offset) [heading Leftward]
-		curl (SB + offset + (top - bot) / 2 - offset) (top - offset)
+		curl (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (top - offset)
 		archv
-		g4   (SB + offset + O) [mix top bot 0.5]
+		g4   (SB + xShift + offset + O) [mix top bot 0.5]
 		arcvh
-		flat (SB + offset + (top - bot) / 2 - offset) (bot + offset)
+		flat (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (bot + offset)
 		curl RightSB (bot + offset) [heading Rightward]
 
 	define [SupsetShape top bot sw] : glyph-proc
@@ -637,10 +637,35 @@ glyph-block Symbol-Math-Relation-Subset : begin
 	turned 'turnElement' 0x220B 'element' Middle SymbolMid
 
 	create-glyph 'smallElement' 0x220A : glyph-proc
-		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH)
-		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+		local sw : AdviceStroke2 3 2.75 (dH * 2)
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid sw
 
 	turned 'turnSmallElement' 0x220D 'smallElement' Middle SymbolMid
+
+	create-glyph 'elementStroke' 0x22F2 : glyph-proc
+		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem)
+			xShift -- ((RightSB - SB) * 0.2 + Stroke * 0.25 * HVContrast)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+
+	turned 'turnElementStroke' 0x22FA 'elementStroke' Middle SymbolMid
+
+	define [ElementBarHalfHeight h] : h / 2 - OperatorStroke / 4
+
+	create-glyph 'elementBarAtEnd' 0x22F3 : glyph-proc
+		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem)
+		include : VBarRight RightSB (SymbolMid - [ElementBarHalfHeight dHElem]) (SymbolMid + [ElementBarHalfHeight dHElem]) OperatorStroke
+		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+
+	turned 'turnElementBarAtEnd' 0x22FB 'elementBarAtEnd' Middle SymbolMid
+
+	create-glyph 'smallElementBarAtEnd' 0x22F4 : glyph-proc
+		local sw : AdviceStroke2 3 2.75 (dH * 2)
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw)
+		include : VBarRight RightSB (SymbolMid - [ElementBarHalfHeight dH]) (SymbolMid + [ElementBarHalfHeight dH]) sw
+		include : HBar (SB + HalfStroke) RightSB SymbolMid sw
+
+	turned 'turnSmallElementBarAtEnd' 0x22FC 'smallElementBarAtEnd' Middle SymbolMid
 
 	create-glyph 0x22F6 : composite-proc [refer-glyph 'element']
 		ApparentTranslate 0 (-lessEqDist)
