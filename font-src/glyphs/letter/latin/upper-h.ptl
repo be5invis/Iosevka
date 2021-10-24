@@ -42,16 +42,18 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : tagged 'strokeR' : RightwardTailedBar r 0 top (sw -- [fallback sw Stroke])
 		include : HBar (l - O) (r + O) (top * HBarPos) [fallback sw Stroke]
 
-	define [EnGheShape Body top slabType vSlab] : glyph-proc
+	define [EnGheShape Body df top slabType vSlab] : glyph-proc
 		local sw : AdviceStroke 2.75
-		local right : if SLAB ([mix RightSB SB 0.35] + MVertStroke / 2 * HVContrast) [mix RightSB SB 0.2]
-		local barRight : mix Width RightSB [if SLAB 0.25 0.375]
+		local xRightBar : Math.min (Width - df.leftSB) : if SLAB
+			[mix df.rightSB df.leftSB 0.35] + df.mvs / 2 * HVContrast
+			mix df.rightSB df.leftSB 0.2
+		local xTopRight : mix df.width df.rightSB [if SLAB 0.25 0.375]
 
-		include : Body SB right top sw
-		include : HBarTop (right + O) barRight top
+		include : Body df.leftSB xRightBar top sw
+		include : HBarTop (xRightBar + O) xTopRight top
 
-		include : HSerifs slabType top 0 SB right sw
-		if vSlab : include : DownwardRightSerif barRight top VJut (MVertStroke / HVContrast)
+		include : HSerifs slabType top 0 df.leftSB xRightBar sw
+		if vSlab : include : DownwardRightSerif xTopRight top VJut (df.mvs / HVContrast)
 
 	define [HwairShape df top slabType] : glyph-proc
 		include : VBarLeft df.leftSB 0 CAP df.mvs
@@ -114,12 +116,16 @@ glyph-block Letter-Latin-Upper-H : begin
 			eject-contour 'serifRB'
 
 		create-glyph "cyrl/EnGhe.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : EnGheShape Body CAP slabType enGheVSlab
+			define df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : EnGheShape Body df CAP slabType enGheVSlab
 
 		create-glyph "cyrl/enghe.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : EnGheShape Body XH slabType enGheVSlab
+			define df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : EnGheShape Body df XH slabType enGheVSlab
 
 		create-glyph "Hwair.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3

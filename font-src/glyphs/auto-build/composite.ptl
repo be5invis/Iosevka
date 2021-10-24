@@ -1276,14 +1276,15 @@ glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createDoubleEmotions prefix div shrink1 shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
+	define [createDoubleEmotions prefix div _shrink1 _shrink2 wadj1 wadj2 demands] : for-width-kinds WideWidth2
 		define CWidth : if FMosaicWide MosaicWidth (Width * div)
+		define shrink1 : if FMosaicWide 1 _shrink1
+		define shrink2 : if FMosaicWide 1 _shrink2
+		define kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
+
 		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix MosaicNameSuffix demands
-
-		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-
-		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
-		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
+		define df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
+		define df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
 
 		foreach [{gn unicode { c1 m1 c2 m2 } mak} : items-of jobs.nonDecomposable] : if [not : query-glyph gn] : begin
 			create-glyph gn [MangleUnicode unicode] : glyph-proc

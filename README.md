@@ -2640,7 +2640,6 @@ Inside the plan, top-level properties include:
       - As a consequence, the following characters will be **removed**:
         - `U+27F5` LONG LEFTWARDS ARROW
         - `U+27F6` LONG RIGHTWARDS ARROW
-    - Remove `NWID` and `WWID` OpenType feature.
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
