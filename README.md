@@ -3040,6 +3040,7 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `powerlineScaleX`, `powerlineScaleY` | (*ratio*) | 1 | X and Y scale of Powerline glyphs. |
 | `powerlineShiftX`, `powerlineShiftY` | emu | 0 | X and Y shift of Powerline glyphs. |
 | `onumZeroHeightRatio` | (*ratio*) | 1.145 | Ratio of height of `0` under `onum` feature, to the height of `x`. |
+| `essRatio` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`/`s`, to the normal stroke width. |
 
 The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
 

@@ -42,7 +42,8 @@ const validMetricOverrideFields = new Set([
 	"powerlineScaleX",
 	"powerlineShiftY",
 	"powerlineShiftX",
-	"onumZeroHeightRatio"
+	"onumZeroHeightRatio",
+	"essRatio"
 ]);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
