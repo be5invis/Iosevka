@@ -702,12 +702,21 @@ const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 		outputPath: out.full,
 		outputDataPath: `${out.dir}/${out.name}.data.json`
 	});
-	await node(`utility/amend-readme/index`, {
+	await amendReadmeFor("README.md", cm, cmi, cmo);
+	await amendReadmeFor("doc/stylistic-sets.md", cm, cmi, cmo);
+	await amendReadmeFor("doc/character-variants.md", cm, cmi, cmo);
+	await amendReadmeFor("doc/custom-build.md", cm, cmi, cmo);
+	await amendReadmeFor("doc/language-specific-ligation-sets.md", cm, cmi, cmo);
+});
+async function amendReadmeFor(md, cm, cmi, cmo) {
+	return node(`utility/amend-readme/index`, {
+		mdFilePath: md,
 		charMapPath: cm.full,
 		charMapItalicPath: cmi.full,
 		charMapObliquePath: cmo.full
 	});
-});
+}
+
 const SnapShotStatic = file.make(
 	x => `${SNAPSHOT_TMP}/${x}`,
 	async (target, out) => {
