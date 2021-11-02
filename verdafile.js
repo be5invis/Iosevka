@@ -742,7 +742,7 @@ const ReleaseNotes = task(`release:release-note`, async t => {
 const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
 	async (t, out, version) => {
-		await t.need(UtilScripts, de(ARCHIVE_DIR));
+		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
 		await t.need(changeFiles.map(fu));
 		await node("utility/generate-release-note/index", {
@@ -752,16 +752,16 @@ const ReleaseNotesFile = file.make(
 		});
 	}
 );
-const ReleaseNotesPackageListMD = task.make(
-	version => `release:package-list-md:${version}`,
-	async (t, version) => {
-		await t.need(UtilScripts, de(ARCHIVE_DIR));
+const ReleaseNotesPackageListMD = file.make(
+	version => `doc/PACKAGE-LIST.md`,
+	async (t, out, version) => {
+		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
 		await t.need(changeFiles.map(fu));
 		await node("utility/generate-release-note/package-list", {
 			version,
 			releasePackagesJsonPath: rpFiles.full,
-			outputPath: "PACKAGE-LIST.md"
+			outputPath: out.full
 		});
 	}
 );
