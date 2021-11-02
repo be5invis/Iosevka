@@ -48,7 +48,7 @@ Afrikaans, Aghem, Akan, Albanian, Asturian, Asu, Azerbaijani, Bafia, Bambara, Ba
 
 Monospace Iosevka contains various stylistic sets to change the shape of certain characters. Enabling corresponded OpenType feature to enable.
 
-<table><tr><td><a href="doc/stylistic-sets.md">View list of stylistic sets of Iosevka.</a></td></tr></table>
+<table><tr><td><h2><a href="doc/stylistic-sets.md">View list of stylistic sets of Iosevka.</a></h2></td></tr></table>
 
 
 ### Character Variants
@@ -57,7 +57,7 @@ Alongside stylistic sets, Monospace Iosevka can also be configured to cherry-pic
 
 **Caution :**  Certain software may limit the quantity of OpenType features and drop some of them if the feature list is too long. Please validate your feature configuration to ensure that it worked in your software.
 
-<table><tr><td><a href="doc/character-variants.md">View list of character variants of Iosevka.</a></td></tr></table>
+<table><tr><td><h2><a href="doc/character-variants.md">View list of character variants of Iosevka.</a></h2></td></tr></table>
 
 ### Ligations
 
@@ -87,13 +87,13 @@ Monospace subfamilies support ligations. Iosevka’s default ligation set is ass
 
 Iosevka supports Language-Specific Ligations, which is the ligation set enabled only under certain languages. These ligation sets are assigned to custom feature tags. To use them, you need to turn **off** `calt` and enable the corresponded feature. The feature list is:
 
-<table><tr><td><a href="doc/language-specific-ligation-sets.md">See instructions.</a></td></tr></table>
+<table><tr><td><h2><a href="doc/language-specific-ligation-sets.md">View list of language-specific ligations.</a></h2></td></tr></table>
 
 Please note that, due to the complex interactions when forming ligations, cherry-picking ligation groups will require a custom Iosevka build. The instructions could be seen below.
 
 ## Building from Source
 
-<table><tr><td><a href="doc/custom-build.md">See instructions.</a></td></tr></table>
+<table><tr><td><h2><a href="doc/custom-build.md">Read instructions.</a></h2></td></tr></table>
 
 ## For Chinese and Japanese users...
 
