@@ -45,7 +45,7 @@ glyph-block Letter-Latin-Lower-R : begin
 			RightwardBottomSerif rSerifX y (rSerifRightJut + (strokeBar / 2) * HVContrast)
 		local [rTopSerif y] : tagged 'serifLT'
 			LeftwardTopSerif rSerifX y (rSerifLeftJut + (strokeBar / 2) * HVContrast)
-		local fine : ShoulderFine * CThin
+		local fine ShoulderFine
 		local rHookX : df.rightSB + RBalance2 * rBalanceMultiplier - (OX - O)
 		local xArchMiddle : match mode
 			[Just rStraight]            : mix (xBar - fine) rHookX (0.54 + 2 * TanSlope * strokeBar / Width)
@@ -92,12 +92,20 @@ glyph-block Letter-Latin-Lower-R : begin
 		define [object xBar rBottomSerif rTopSerif fine xArchMiddle rHookXN] : RDim df md
 		include : OverrideMarks doTopSerif xBar
 		define xCor : if doHookSerif 0 : CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]
+
+		define arcTopShift : match md
+			[Just rNarrow] : O * [clamp 0 1 : StrokeWidthBlend 0 16]
+			__               0
+		define arcTopWidth : match md
+			[Just rNarrow] : Stroke - O * [clamp 0 1 : StrokeWidthBlend 0 16]
+			__               Stroke
+
 		define [ArcKnots] : list
-			flat (rHookXN - xCor) XH [if doHookSerif [heading Leftward] null]
-			curl (xArchMiddle - xCor) XH [if doHookSerif [heading Leftward] null]
+			flat (rHookXN - xCor) (XH - arcTopShift) [if doHookSerif [heading Leftward] null]
+			curl (xArchMiddle - xCor) (XH - arcTopShift) [if doHookSerif [heading Leftward] null]
 			archv
 			straight.down.end (xBar - fine * HVContrast) (XH * 0.53 + (SmallSmooth - SmallSmoothA)) [widths.heading fine 0 Downward]
-		include : dispiro [widths.lhs] [ArcKnots]
+		include : dispiro [widths.lhs arcTopWidth] [ArcKnots]
 		include : VBarRight xBar 0 XH
 		if doHookSerif : include : intersection
 			DownwardRightSerif (rHookXN - xCor) XH VJut

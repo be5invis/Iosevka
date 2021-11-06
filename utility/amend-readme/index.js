@@ -9,22 +9,24 @@ const { getCharMapAndSupportedLanguageList } = require("../export-data/supported
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports = async function main(argv) {
-	const readmePath = path.resolve(__dirname, "../../README.md");
-	let readme = await fs.readFile(readmePath, "utf-8");
-	readme = (await processSsOt()).apply(readme);
-	readme = (await processCherryPickingStyles()).apply(readme);
+	let readme = await fs.readFile(argv.mdFilePath, "utf-8");
+	const dirs = {
+		images: path.posix.relative(path.dirname(argv.mdFilePath), "images")
+	};
+	readme = (await processSsOt(dirs)).apply(readme);
+	readme = (await processCherryPickingStyles(dirs)).apply(readme);
 	readme = (await processSsStyles()).apply(readme);
-	readme = (await processCvOt()).apply(readme);
+	readme = (await processCvOt(dirs)).apply(readme);
 	readme = (await processLigSetCherryPicking()).apply(readme);
 	readme = (await processLigSetPreDef()).apply(readme);
-	readme = (await processLigSetOt(1, g => g.tag === "calt")).apply(readme);
-	readme = (await processLigSetOt(2, g => g.tag !== "calt")).apply(readme);
+	readme = (await processLigSetOt(dirs, 1, g => g.tag === "calt")).apply(readme);
+	readme = (await processLigSetOt(dirs, 2, g => g.tag !== "calt")).apply(readme);
 	readme = (await processLangList(argv)).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
-	await fs.writeFile(readmePath, readme);
+	await fs.writeFile(argv.mdFilePath, readme);
 };
 
-async function processSsOt() {
+async function processSsOt(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-OT-Stylistic-Sets");
 	md.log(`<table>`);
@@ -37,15 +39,15 @@ async function processSsOt() {
 		}
 		{
 			md.log(`<tr>`);
-			md.log(`<td><img src="images/stylistic-set-u-${ss.tag}-${ss.rank}.png"/></td>`);
-			md.log(`<td><img src="images/stylistic-set-i-${ss.tag}-${ss.rank}.png"/></td>`);
+			md.log(`<td><img src="${dirs.images}/stylistic-set-u-${ss.tag}-${ss.rank}.png"/></td>`);
+			md.log(`<td><img src="${dirs.images}/stylistic-set-i-${ss.tag}-${ss.rank}.png"/></td>`);
 			md.log(`</tr>`);
 		}
 	}
 	md.log(`</table>`);
 	return md;
 }
-async function processCvOt() {
+async function processCvOt(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-OT-Character-Variants");
 	const TableColumns = 12;
@@ -74,7 +76,7 @@ async function processCvOt() {
 				const iCvv = rid * entriesPerRow + cid;
 				if (iCvv >= effVariants.length) continue;
 				const cvv = effVariants[iCvv];
-				const imageUrl = `images/character-variant-${cv.tag}-${cvv.rank}.png`;
+				const imageUrl = `${dirs.images}/character-variant-${cv.tag}-${cvv.rank}.png`;
 				md.log(`<td${itemColSpanHtml}><img src="${imageUrl}" width="${imgWidth}"/></td>`);
 			}
 			if (tailBlankColumnsCount > 0) md.log(`<td colspan="${tailBlankColumnsCount}"> </td>`);
@@ -107,14 +109,14 @@ async function processSsStyles() {
 	}
 	return md;
 }
-async function processCherryPickingStyles() {
+async function processCherryPickingStyles(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
 
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 
-	formatCv(md, {
+	formatCv(md, dirs, {
 		introMD: `Default digit form`,
 		sampleImageCountEm: 10,
 		alternatives: [
@@ -131,7 +133,7 @@ async function processCherryPickingStyles() {
 		]
 	});
 
-	formatCv(md, {
+	formatCv(md, dirs, {
 		introMD: `APL form`,
 		sampleImageCountEm: 7,
 		alternatives: [
@@ -169,7 +171,7 @@ async function processCherryPickingStyles() {
 				description: formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
 			});
 		}
-		formatCv(md, info);
+		formatCv(md, dirs, info);
 	}
 	return md;
 }
@@ -178,12 +180,12 @@ function sampleImageCountEmOfCv(cv) {
 	return cv.hotChars.length * (cv.slopeDependent ? 2 : 1);
 }
 
-function formatCv(md, info) {
+function formatCv(md, dirs, info) {
 	md.log(`  - ${info.introMD}:`);
 	const imgWidth = 32 * info.sampleImageCountEm;
 	let sTable = "     <table>";
 	for (const alt of info.alternatives) {
-		const imageUrl = `images/character-variant-${alt.imageId}.png`;
+		const imageUrl = `${dirs.images}/character-variant-${alt.imageId}.png`;
 		const image = `<img src="${imageUrl}" width="${imgWidth}"/>`;
 		const selectorText = alt.selectors.map(x => `<code>${x}</code>`).join(", ");
 		sTable +=
@@ -295,7 +297,7 @@ async function processLigSetPreDef() {
 	return md;
 }
 
-async function processLigSetOt(index, fn) {
+async function processLigSetOt(dirs, index, fn) {
 	const ligData = await parseLigationData();
 	const md = new MdCol(`Section-OT-Ligation-Tags-${index}`);
 	md.log(`<table>`);
@@ -311,7 +313,9 @@ async function processLigSetOt(index, fn) {
 		}
 		{
 			md.log(`<tr>`);
-			md.log(`<td colspan="2"><img src="images/ligset-${ls.tag}-${ls.rank}.png"/></td>`);
+			md.log(
+				`<td colspan="2"><img src="${dirs.images}/ligset-${ls.tag}-${ls.rank}.png"/></td>`
+			);
 			md.log(`</tr>`);
 		}
 	}

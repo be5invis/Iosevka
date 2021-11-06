@@ -111,7 +111,7 @@ async function GeneratePackageList(argv, out) {
 			);
 		}
 
-		out.log(`<tr>`, `<td colspan="8">${img}</td>`, `<tr/>`);
+		out.log(`<tr>`, `<td colspan="8">${img}</td>`, `</tr>`);
 	}
 	out.log(`</table>\n`);
 }
