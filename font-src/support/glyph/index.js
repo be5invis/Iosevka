@@ -65,10 +65,10 @@ exports.Glyph = class Glyph {
 			throw new Error("Unreachable: Attempt to include a Null or Undefined");
 		} else if (component instanceof Function) {
 			return component.call(this, copyAnchors, copyWidth);
+		} else if (component.applyToGlyph instanceof Function) {
+			return component.applyToGlyph(this, copyAnchors, copyWidth);
 		} else if (component instanceof Transform) {
 			return this.applyTransform(component, copyAnchors);
-		} else if (component.isMarkSet) {
-			return this.copyAnchors(component);
 		} else if (component instanceof Glyph) {
 			return this.includeGlyph(component, copyAnchors, copyWidth);
 		} else {
@@ -83,7 +83,8 @@ exports.Glyph = class Glyph {
 		this.combineMarks(g, shift);
 
 		this.includeGlyphImpl(g, shift.x, shift.y);
-		if (copyAnchors || g.isMarkSet) this.copyAnchors(g);
+		if (g.isMarkSet) throw new Error("Invalid component to be introduced.");
+		if (copyAnchors) this.copyAnchors(g);
 		if (copyWidth && g.advanceWidth >= 0) this.advanceWidth = g.advanceWidth;
 		this.dependsOn(g);
 	}
