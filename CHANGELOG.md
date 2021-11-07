@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 11.0.1
+
+ * Fix custom builds with compatibility ligatures (#1248).
+
+
 ### 11.0.0
 
  * \[**Breaking**\] Fixed width and removal logic for Long Leftwards Arrow (`U+27F5`) and Long Rightwards Arrow (`U+27F6`) (#1245).
