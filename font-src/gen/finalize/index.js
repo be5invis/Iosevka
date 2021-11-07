@@ -39,8 +39,7 @@ function validateMonospace(para, glyphStore) {
 	if (para.forceMonospace && awSet.size > 1) {
 		throw new Error("Unreachable! Fixed variant has wide characters");
 	}
-	if (!para.isQuasiProportional && awSet.size > 2) {
-		console.log(awSet);
-		throw new Error("Unreachable! Fixed variant has wide characters");
+	if (!para.isQuasiProportional && !para.compLig && awSet.size > 2) {
+		throw new Error("Unreachable! Building monospace with more than 2 character widths");
 	}
 }
