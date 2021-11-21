@@ -1,5 +1,17 @@
 ## Modifications since version 2.x
 
+### 11.1.0
+
+ * Add characters
+   - MODIFIER LETTER CHINESE TONE YIN PING .. MODIFIER LETTER CHINESE TONE YANG RU (`U+A700` .. `U+A707`) (#1249).
+   - LONG LEFTWARDS ARROW FROM BAR (`U+27FB`), LONG RIGHTWARDS ARROW FROM BAR (`U+27FC`) (#1251).
+   - PITCHFORK (`U+22D4`).
+   - ELEMENT OF WITH DOT ABOVE (`U+22F5`).
+   - ELEMENT OF WITH TWO HORIZONTAL STROKES (`U+22F9`).
+
+ * Fix serif of Cyrillic capital Ya under italics (#1250).
+
+
 ### 11.0.1
 
  * Fix custom builds with compatibility ligatures (#1248).
