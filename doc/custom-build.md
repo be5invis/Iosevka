@@ -54,6 +54,8 @@ Inside the plan, top-level properties include:
       - As a consequence, the following characters will be **removed**:
         - `U+27F5` LONG LEFTWARDS ARROW
         - `U+27F6` LONG RIGHTWARDS ARROW
+        - `U+27FB` LONG LEFTWARDS ARROW FROM BAR
+        - `U+27FC` LONG RIGHTWARDS ARROW FROM BAR
   - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
