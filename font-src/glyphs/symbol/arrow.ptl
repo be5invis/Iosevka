@@ -27,6 +27,8 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define doubleArrowStemWidth : arrowHeadSize * 1.1
 	define waveArrowAmplitude : (Width - SB) * DesignParameters.arrow_size * 1.1
 
+	define kLongArrowSB : [DivFrame MosaicWidthScalar 4].leftSB / [DivFrame MosaicWidthScalar 2].leftSB
+
 	# Diagonal arrow params
 	define diagPropX : 1 / [Math.pow 2 (1 / 4)]
 	define diagPropY : 1 / [Math.pow 2 (1 / 4)]
@@ -287,10 +289,11 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		MkArrow ArrowShape [MangleName 'arrowDownLeft']   [MangleUnicode 0x2199] arrowDiagRSB arrowDiagTop arrowDiagSB arrowDiagBot
 
 		# These arrows are always wide. In force-monospace variants they will be deleted
-		if (MosaicWidthScalar > 1 && !para.forceMonospace) : begin
-			define kLong 0.5
-			MkArrow ArrowShape 'longArrowLeft'  0x27F5 [mix MosaicWidth arrowRSB kLong] SymbolMid [mix 0 arrowSB kLong] SymbolMid
-			MkArrow ArrowShape 'longArrowRight' 0x27F6 [mix 0 arrowSB kLong] SymbolMid [mix MosaicWidth arrowRSB kLong] SymbolMid
+		if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
+			define l : mix 0 arrowSB kLongArrowSB
+			define r : mix MosaicWidth arrowRSB kLongArrowSB
+			MkArrow ArrowShape 'longArrowLeft'  0x27F5 r SymbolMid l SymbolMid
+			MkArrow ArrowShape 'longArrowRight' 0x27F6 l SymbolMid r SymbolMid
 
 	do "Dash Straight Arrow"
 		MkArrow DashArrowShape [MangleName 'dashArrowLeft']  [MangleUnicode 0x21E0] arrowRSB SymbolMid arrowSB SymbolMid
@@ -543,6 +546,18 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		create-glyph [MangleName 'barArrowDown'] [MangleUnicode 0x21A7] : composite-proc
 			refer-glyph : MangleName 'arrowDownSK'
 			HBar (arrowMidX - arrowHeadSize) (arrowMidX + arrowHeadSize) arrowTop fine
+
+		if (MosaicWidthScalar > 1 && !para.forceMonospace) : do
+			define l : mix 0 arrowSB kLongArrowSB
+			define r : mix MosaicWidth arrowRSB kLongArrowSB
+			MkArrow ArrowShape 'longArrowLeftSK'  null (r - fine / 2) SymbolMid l SymbolMid
+			MkArrow ArrowShape 'longArrowRightSK' null (l + fine / 2) SymbolMid r SymbolMid
+			create-glyph 'longBarArrowLeft' 0x27FB : composite-proc
+				refer-glyph 'longArrowLeftSK'
+				VBar r (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
+			create-glyph 'longBarArrowRight' 0x27FC : composite-proc
+				refer-glyph 'longArrowRightSK'
+				VBar l (SymbolMid - arrowHeadSize) (SymbolMid + arrowHeadSize) fine
 
 	do "Double-headed Arrows"
 		DoubleArrow ArrowShape [MangleName 'arrowLeftRight'] [MangleUnicode 0x2194] arrowSB SymbolMid arrowRSB SymbolMid
