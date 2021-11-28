@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 11.1.1
+
+ * Fix broken geometry of SECTION SIGN (`U+00A7`) under extra-wide widths (#1252).
+ * Fix broken geometry of K under extra-wide widths (#1253).
+
+
 ### 11.1.0
 
  * Add characters
