@@ -16,13 +16,17 @@ glyph-block Letter-Latin-K : begin
 	local [KBalanceRightCursive slab straightBar] : if slab (Width / 32) : if straightBar (Width / 32) 0
 	local [KO slab straightBar top stroke] : if straightBar (([if slab (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
-	define [KSlabs mode top left right stroke straightBar] : glyph-proc
-		local kshRight   : right + [KBalanceRight true straightBar]
-		local topSerifX  : kshRight - (1.15 * stroke * (Width * 2 / UPM) / 2 - stroke / 2) * HVContrast * [if para.isItalic 1 0] - stroke / 2 * 0.5 * HVContrast
-		local bottomSerifX kshRight
+	define [KSlabs mode top left right stroke straightBar mask] : glyph-proc
+		local Ok             : KO mode true top stroke
+		local kshRight       : right + [KBalanceRight true straightBar]
+		local serifLengthAdj : Ok + stroke * HVContrast
 
-		if [maskBit mode 1] : include : tagged 'serifRT' : RightwardTopSerif topSerifX top (SideJut + stroke / 2 * 0.5 * HVContrast)
-		if [maskBit mode 0] : include : tagged 'serifRB' : RightwardBottomSerif bottomSerifX 0 SideJut
+		if [maskBit mode 1] : include : tagged 'serifRT' : difference
+			RightwardTopSerif    (kshRight - serifLengthAdj) top (SideJut + serifLengthAdj)
+			if mask mask [glyph-proc]
+		if [maskBit mode 0] : include : tagged 'serifRB' : difference
+			RightwardBottomSerif (kshRight - serifLengthAdj) 0   (SideJut + serifLengthAdj)
+			if mask mask [glyph-proc]
 
 	define [KStraightLegShapeImpl fHookTop left right stroke top slabLeft slab] : glyph-proc
 		local fine : AdviceStroke 3.5
@@ -36,8 +40,9 @@ glyph-block Letter-Latin-K : begin
 
 		set-base-anchor 'trailing' (kshRightBot - Ok) 0
 
+		define [TopStrokeMask offset] : Rect top 0 kshLeft [if [maskBit slab 1] (kshRightTop + offset) (2 * Width)]
 		if [not fHookTop] : include : intersection
-			Rect top 0 kshLeft [if [maskBit slab 1] kshRightTop (2 * Width)]
+			TopStrokeMask 0
 			dispiro
 				widths.rhs stroke
 				flat (kshRightTop - Ok) top
@@ -62,7 +67,11 @@ glyph-block Letter-Latin-K : begin
 				flat (kshRightBot - Ok) 0
 				curl (kshLeft + stroke) attach2
 
-		include : KSlabs slab top left right stroke true
+		include : KSlabs slab top left right stroke true : union
+			HalfRectTriangle (kshRightBot - Ok - 0.1) 0 (kshLeft + stroke - 0.1) attach2
+			intersection
+				TopStrokeMask (-0.1)
+				HalfRectTriangle (kshRightTop - Ok - 0.1) top (kshLeft + stroke - 0.1) attach
 
 	define [KSymmetricLegsImpl leadGap hookDepth] : function [fHookTop left right stroke top slabLeft slab] : glyph-proc
 		local fine : AdviceStroke [if leadGap 3.5 3]
@@ -77,8 +86,9 @@ glyph-block Letter-Latin-K : begin
 
 		if [not hookDepth] : set-base-anchor 'trailing' (kshRight - Ok) 0
 
+		define [StrokeMask t b offset] : Rect t b kshLeft [if [maskBit slab 1] (kshRight + offset) (2 * Width)]
 		if [not fHookTop] : include : tagged 'strokeRT' : intersection
-			Rect top (0.5 * top) kshLeft [if [maskBit slab 1] kshRight (2 * Width)]
+			StrokeMask top (0.5 * top) 0
 			dispiro
 				widths.rhs stroke
 				flat (kshRight - Ok) top
@@ -95,10 +105,9 @@ glyph-block Letter-Latin-K : begin
 				curl  [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
 		if [not hookDepth] : include : tagged 'strokeRB' : intersection
-			Rect (0.5 * top) 0 kshLeft [if [maskBit slab 0] kshRight (2 * Width)]
+			StrokeMask (0.5 * top) 0 0
 			dispiro
-				widths.lhs stroke
-				flat (kshRight - Ok) 0
+				flat (kshRight - Ok) 0 [widths.lhs stroke]
 				curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
 
 		if (leadGap && !hookDepth) : include : intersection
@@ -123,7 +132,13 @@ glyph-block Letter-Latin-K : begin
 			arcvh
 			straight.left.end (right - HookX - 0.5 * stroke * HVContrast) hookDepth
 
-		include : KSlabs slab top left right stroke true
+		include : KSlabs slab top left right stroke true : union
+			intersection
+				StrokeMask top (0.5 * top) 0.1
+				HalfRectTriangle (kshRight - Ok) top [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2]
+			intersection
+				StrokeMask (0.5 * top) 0 0.1
+				HalfRectTriangle (kshRight - Ok) 0 [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2]
 
 	define [KCurlyLegShapeImpl fHookTop left right stroke top slabLeft slab] : glyph-proc
 		local turn : top * 0.99
@@ -172,7 +187,9 @@ glyph-block Letter-Latin-K : begin
 					corner kshLeft 0
 					corner kshLeft top
 
-		include : KSlabs slab top left right stroke false
+		include : KSlabs slab top left right stroke false : union
+			HalfRectTriangle kshRight top xAttach1 yAttach1
+			HalfRectTriangle (kshRight - O - stroke / 2 * HVContrast) 0 xAttach2 yAttach2
 
 	define [KCursiveLoopAndLegDimen top straightBar slabLeft slab] : begin
 		define kshLeft : SB + [KBalance slabLeft straightBar]
