@@ -440,7 +440,7 @@ Subsection `metric-override` provides ability to override certain metric values,
 | Property | Unit | Default Value | Meaning |
 |----------|------|---------|----------|
 | `cap` | emu | 735 | Height of `H`. |
-| `xheight` | emu | 530 | Height of `x`. |
+| `xheight` | emu | 520 | Height of `x`. |
 | `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
 | `accentWidth` | emu | 200 | Width of accent marks. |
 | `accentClearance` | emu | 72 | Vertical clearance of accent marks to the base. |
