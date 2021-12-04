@@ -65,7 +65,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			parenOvershoot      DesignParameters.parenOvershoot
 		include : ParenShape Stroke dp
 
-	create-glyph'parenLeft.flatArc' : glyph-proc
+	create-glyph'parenLeft.flatArc' 0x27EE : glyph-proc
 		local dp : object
 			parenOutside        (0.5 * DesignParameters.parenOutside)
 			parenInside         DesignParameters.parenInside
@@ -81,9 +81,9 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			arcvh
 			g4.right.start dim.inside dim.bottom
 
-	turned 'parenRight.normal'       null 'parenLeft.normal'       Middle SymbolMid
-	turned 'parenRight.largeContour' null 'parenLeft.largeContour' Middle SymbolMid
-	turned 'parenRight.flatArc'      null 'parenLeft.flatArc'      Middle SymbolMid
+	turned 'parenRight.normal'       null   'parenLeft.normal'       Middle SymbolMid
+	turned 'parenRight.largeContour' null   'parenLeft.largeContour' Middle SymbolMid
+	turned 'parenRight.flatArc'      0x27EF 'parenLeft.flatArc'      Middle SymbolMid
 
 	select-variant 'parenLeft'  '('
 	select-variant 'parenRight' ')'
@@ -375,44 +375,44 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	select-variant 'whiteBraceLeft' 0x2983 (follow -- 'braceLeft')
 	select-variant 'whiteBraceRight' 0x2984 (follow -- 'braceRight')
 
+	do "Angle Bracket"
+		define [AngleLeftShape outside inside sw] : begin
+			local fatten : Math.hypot 1 ((inside - outside - O) / (ParenTop - SymbolMid))
+			return : union
+				dispiro
+					widths.lhs sw
+					flat inside ParenTop
+					curl (outside + O) SymbolMid [widths.heading (sw * fatten) 0 Downward]
+				dispiro
+					widths.rhs sw
+					flat inside ParenBot
+					curl (outside + O) SymbolMid [widths.heading 0 (sw * fatten) Upward]
 
-	define [AngleLeftShape outside inside sw] : begin
-		local fatten : Math.hypot 1 ((inside - outside - O) / (ParenTop - SymbolMid))
-		return : union
-			dispiro
-				widths.lhs sw
-				flat inside ParenTop
-				curl (outside + O) SymbolMid [widths.heading (sw * fatten) 0 Downward]
-			dispiro
-				widths.rhs sw
-				flat inside ParenBot
-				curl (outside + O) SymbolMid [widths.heading 0 (sw * fatten) Upward]
+		create-glyph 'angleLeft' 0x2329 : glyph-proc
+			define dim : ParenDim (delta -- 0)
+			include : AngleLeftShape dim.outside dim.inside OperatorStroke
 
-	create-glyph 'angleLeft' 0x2329 : glyph-proc
-		define dim : ParenDim (delta -- 0)
-		include : AngleLeftShape dim.outside dim.inside OperatorStroke
+		create-glyph 'dblAngleLeft' 0x27EA : glyph-proc
+			define dim : ParenDim (delta -- 0)
+			define fine : Math.min OperatorStroke [AdviceStroke 3.5]
+			define farOutside : dim.outside / 2
+			define middle : mix farOutside dim.inside 0.5
+			include : AngleLeftShape farOutside middle fine
+			include : AngleLeftShape middle dim.inside fine
 
-	create-glyph 'dblAngleLeft' 0x27EA : glyph-proc
-		define dim : ParenDim (delta -- 0)
-		define fine : Math.min OperatorStroke [AdviceStroke 3.5]
-		define farOutside : dim.outside / 2
-		define middle : mix farOutside dim.inside 0.5
-		include : AngleLeftShape farOutside middle fine
-		include : AngleLeftShape middle dim.inside fine
+		turned 'angleRight' 0x232A 'angleLeft' Middle SymbolMid
+		turned 'dblAngleRight' 0x27EB 'dblAngleLeft' Middle SymbolMid
+		alias 'mathAngleLeft' 0x27E8 'angleLeft'
+		alias 'mathAngleRight' 0x27E9 'angleRight'
 
-	turned 'angleRight' 0x232A 'angleLeft' Middle SymbolMid
-	turned 'dblAngleRight' 0x27EB 'dblAngleLeft' Middle SymbolMid
-	alias 'mathAngleLeft' 0x27E8 'angleLeft'
-	alias 'mathAngleRight' 0x27E9 'angleRight'
+	do "Floor and Ceiling"
+		create-glyph 'ceilingLeft' 0x2308 : glyph-proc
+			include : HBarTop    [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenTop
+			include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
 
-	create-glyph 'ceilingLeft' 0x2308 : glyph-proc
-		include : HBarTop    [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenTop
-		include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
+		create-glyph 'floorLeft' 0x230A : glyph-proc
+			include : HBarBottom [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenBot
+			include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
 
-	create-glyph 'floorLeft' 0x230A : glyph-proc
-		include : HBarBottom [mix SB RightSB DesignParameters.bracketOutside] [mix SB RightSB DesignParameters.bracketInside] ParenBot
-		include : VBarLeft   [mix SB RightSB DesignParameters.bracketOutside] ParenBot ParenTop
-
-	turned 'floorRight' 0x230B 'ceilingLeft' Middle SymbolMid
-	turned 'ceilingRight' 0x2309 'floorLeft' Middle SymbolMid
-
+		turned 'floorRight' 0x230B 'ceilingLeft' Middle SymbolMid
+		turned 'ceilingRight' 0x2309 'floorLeft' Middle SymbolMid

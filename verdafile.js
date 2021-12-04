@@ -516,30 +516,14 @@ const TtcArchiveFile = file.make(
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
-
-		// Packaging
-		await rm(out.full);
-		await cd(`${BUILD}/ttc-collect/${cgr}`).run(
-			["7z", "a"],
-			["-tzip", "-r", "-mx=9"],
-			Path.relative(`${BUILD}/ttc-collect/${cgr}`, out.full),
-			`*.ttc`
-		);
+		await CreateGroupArchiveFile(`${BUILD}/ttc-collect/${cgr}`, out, `*.ttc`);
 	}
 );
 const SuperTtcArchiveFile = file.make(
 	(cgr, version) => `${ARCHIVE_DIR}/super-ttc-${cgr}-${version}.zip`,
 	async (target, out, cgr) => {
 		await target.need(de`${out.dir}`, CollectedSuperTtcFile(cgr));
-
-		// Packaging
-		await rm(out.full);
-		await cd(DIST_SUPER_TTC).run(
-			["7z", "a"],
-			["-tzip", "-r", "-mx=9"],
-			Path.relative(DIST_SUPER_TTC, out.full),
-			`${cgr}.ttc`
-		);
+		await CreateGroupArchiveFile(DIST_SUPER_TTC, out, `${cgr}.ttc`);
 	}
 );
 
@@ -568,6 +552,7 @@ const GroupWebArchiveFile = file.make(
 		await CreateGroupArchiveFile(`${DIST}/${gr}`, out, "*.css", "ttf", "woff2");
 	}
 );
+
 async function CreateGroupArchiveFile(dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
