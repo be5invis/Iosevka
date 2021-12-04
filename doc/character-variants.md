@@ -1141,14 +1141,22 @@
 <td><img src="../images/character-variant-cv42-14.png" width="32"/></td>
 <td><img src="../images/character-variant-cv42-15.png" width="32"/></td>
 <td><img src="../images/character-variant-cv42-16.png" width="32"/></td>
-<td colspan="8"> </td>
+<td><img src="../images/character-variant-cv42-17.png" width="32"/></td>
+<td><img src="../images/character-variant-cv42-18.png" width="32"/></td>
+<td><img src="../images/character-variant-cv42-19.png" width="32"/></td>
+<td><img src="../images/character-variant-cv42-20.png" width="32"/></td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td>13</td>
 <td>14</td>
 <td>15</td>
 <td>16</td>
-<td colspan="8"> </td>
+<td>17</td>
+<td>18</td>
+<td>19</td>
+<td>20</td>
+<td colspan="4"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv43</code></td>
