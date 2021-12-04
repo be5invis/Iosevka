@@ -1,5 +1,15 @@
 ## Modifications since version 2.x
 
+### 11.2.0
+
+ * Slightly reduce X-height by 0.01em foe better geometric balancing.
+ * Make low-crossbar variants of `f` more distinctive with `crossbar-at-x-height` (#1254).
+ * Add Fira Code V6's progress bar symbols.
+ * Add BLACK FOUR POINTED STAR (`U+2726`) and WHITE FOUR POINTED STAR (`U+2727`).
+ * Add MATHEMATICAL LEFT FLATTENED PARENTHESIS (`U+27EE`) and MATHEMATICAL RIGHT FLATTENED PARENTHESIS (`U+27EF`).
+ * Add Hookless variants for `r` (#1255).
+
+
 ### 11.1.1
 
  * Fix broken geometry of SECTION SIGN (`U+00A7`) under extra-wide widths (#1252).
