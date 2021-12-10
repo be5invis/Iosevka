@@ -293,8 +293,9 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 	define [MkAngleArrow shape bar id unicode x1 y1 x2 y2 x3 y3 size]
 		create-glyph id unicode : glyph-proc
 			set-width MosaicWidth
-			include : shape x2 y2 x3 y3 size
-			include : bar x1 y1 x2 y2
+			include : union
+				shape x2 y2 x3 y3 size
+				bar x1 y1 x2 y2
 
 	do "Straight Arrow"
 		MkArrow ArrowShape [MangleName 'arrowLeft']       [MangleUnicode 0x2190] arrowRSB SymbolMid arrowSB SymbolMid
@@ -395,15 +396,26 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		define bendSize : mix arrowSw arrowHeadSize 0.75
 		define bendL : mix arrowMidX arrowSB [Math.max (bendSize / (arrowMidX - arrowSB)) : Math.pow 0.6 (2 /  MosaicWidthScalar)]
 		define bendR : mix arrowMidX arrowRSB [Math.max (bendSize / (arrowMidX - arrowSB)) : Math.pow 0.6 (2 /  MosaicWidthScalar)]
-		define [VBR x1 y1 x2 y2] : VBarRight x1 y1 y2 arrowSw
-		define [VBL x1 y1 x2 y2] : VBarLeft  x1 y1 y2 arrowSw
-		define [HBT x1 y1 x2 y2] : HBarTop   x1 x2 y1 arrowSw
-		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-up-angle-bend-left'] [MangleUnicode 0x21b0] bendR arrowBot bendR (arrowTop - bendSize) bendL (arrowTop - bendSize) bendSize
-		MkAngleArrow ArrowShape VBL [MangleName 'MkArrow-up-angle-bend-right'] [MangleUnicode 0x21b1] bendL arrowBot bendL (arrowTop - bendSize) bendR (arrowTop - bendSize) bendSize
-		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-down-angle-bend-left'] [MangleUnicode 0x21b2] bendR arrowTop bendR (arrowBot + bendSize) bendL (arrowBot + bendSize) bendSize
-		MkAngleArrow ArrowShape VBL [MangleName 'MkArrow-down-angle-bend-right'] [MangleUnicode 0x21b3] bendL arrowTop bendL (arrowBot + bendSize) bendR (arrowBot + bendSize) bendSize
-		MkAngleArrow ArrowShape HBT [MangleName 'MkArrow-right-angle-down'] [MangleUnicode 0x21b4] arrowSB arrowTop (arrowRSB - arrowHeadSize) arrowTop (arrowRSB - arrowHeadSize) arrowBot arrowHeadSize
-		MkAngleArrow ArrowShape VBR [MangleName 'MkArrow-down-angle-left'] [MangleUnicode 0x21b5] arrowRSB arrowTop arrowRSB (arrowBot + arrowHeadSize) arrowSB (arrowBot + arrowHeadSize) arrowHeadSize
+		define bendT : SymbolMid + bendSize * 2
+		define bendB : SymbolMid - bendSize * 2
+
+		define [VBR x1 y1 x2 y2] : VBarRight  x1 y1 y2 arrowSw
+		define [VBL x1 y1 x2 y2] : VBarLeft   x1 y1 y2 arrowSw
+		define [HBT x1 y1 x2 y2] : HBarTop    x1 x2 y1 arrowSw
+		define [HBB x1 y1 x2 y2] : HBarBottom x1 x2 y1 arrowSw
+
+		MkAngleArrow ArrowShape VBR [MangleName 'Arrow-up-angle-bend-left'] [MangleUnicode 0x21b0] bendR arrowBot bendR (arrowTop - bendSize) bendL (arrowTop - bendSize) bendSize
+		MkAngleArrow ArrowShape VBL [MangleName 'Arrow-up-angle-bend-right'] [MangleUnicode 0x21b1] bendL arrowBot bendL (arrowTop - bendSize) bendR (arrowTop - bendSize) bendSize
+		MkAngleArrow ArrowShape VBR [MangleName 'Arrow-down-angle-bend-left'] [MangleUnicode 0x21b2] bendR arrowTop bendR (arrowBot + bendSize) bendL (arrowBot + bendSize) bendSize
+		MkAngleArrow ArrowShape VBL [MangleName 'Arrow-down-angle-bend-right'] [MangleUnicode 0x21b3] bendL arrowTop bendL (arrowBot + bendSize) bendR (arrowBot + bendSize) bendSize
+
+		MkAngleArrow ArrowShape HBT [MangleName 'Arrow-right-angle-bend-down'] [MangleUnicode 0x2B0E] arrowSB SymbolMid (arrowRSB - bendSize) SymbolMid (arrowRSB - bendSize) bendB bendSize
+		MkAngleArrow ArrowShape HBB [MangleName 'Arrow-right-angle-bend-up'] [MangleUnicode 0x2B0F] arrowSB SymbolMid (arrowRSB - bendSize) SymbolMid (arrowRSB - bendSize) bendT bendSize
+		MkAngleArrow ArrowShape HBT [MangleName 'Arrow-left-angle-bend-down'] [MangleUnicode 0x2B10] arrowRSB SymbolMid (arrowSB + bendSize) SymbolMid (arrowSB + bendSize) bendB bendSize
+		MkAngleArrow ArrowShape HBB [MangleName 'Arrow-left-angle-bend-up'] [MangleUnicode 0x2B11] arrowRSB SymbolMid (arrowSB + bendSize) SymbolMid (arrowSB + bendSize) bendT bendSize
+
+		MkAngleArrow ArrowShape HBT [MangleName 'Arrow-right-angle-down'] [MangleUnicode 0x21b4] arrowSB arrowTop (arrowRSB - arrowHeadSize) arrowTop (arrowRSB - arrowHeadSize) arrowBot arrowHeadSize
+		MkAngleArrow ArrowShape VBR [MangleName 'Arrow-down-angle-left'] [MangleUnicode 0x21b5] arrowRSB arrowTop arrowRSB (arrowBot + arrowHeadSize) arrowSB (arrowBot + arrowHeadSize) arrowHeadSize
 
 	do "Half-head Arrows"
 		MkArrow [HalfArrowShape RHSHalfArrowHead] [MangleName 'arrowLeftHR']  [MangleUnicode 0x21BC] arrowRSB SymbolMid arrowSB SymbolMid
