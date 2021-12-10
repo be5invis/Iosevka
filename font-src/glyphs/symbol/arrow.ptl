@@ -711,6 +711,39 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		VCombine [MangleName 'uni21CC'] [MangleUnicode 0x21CC] [MangleName 'arrowRightHL'] [MangleName 'arrowLeftHL'] (arrowHeadSize)
 		VCombine [MangleName 'uni21B9'] [MangleUnicode 0x21B9] [MangleName 'arrowBarLeft'] [MangleName 'arrowBarRight'] (arrowHeadSize * 1.75)
 
+	do "Zig zag"
+		create-glyph [MangleName 'zigZagArrow'] [MangleUnicode 0x21AF] : glyph-proc
+			set-width MosaicWidth
+			local x2 : mix arrowMidX arrowSB  (0.875 / [Math.sqrt MosaicWidthScalar])
+			local x3 : mix arrowMidX arrowRSB (0.875 / [Math.sqrt MosaicWidthScalar])
+			local x1 : mix x2 x3 (1 / 3)
+			local x4 : mix x2 x3 (2 / 3)
+			local y2 : mix arrowBot arrowTop 0.375
+			local y3 : mix arrowBot arrowTop 0.625
+
+			local magLastSeg : Math.hypot (x3 - x4) (y3 - arrowBot)
+			local x3ArrowHeadMock : x3 - (x3 - x4) / magLastSeg * arrowSw * HVContrast
+			local pLastSeg : (magLastSeg - o - 0.55 * arrowSw) / magLastSeg
+
+			include : union
+				ArrowHead x3ArrowHeadMock y3 x4 arrowBot arrowHeadSize
+				difference
+					dispiro
+						flat [mix x3 x4 pLastSeg] [mix y3 arrowBot pLastSeg] [widths.center arrowSw]
+						curl x3 y3 [widths.lhs arrowSw]
+					MaskAboveLine x2 y2 x3 y3
+				difference
+					dispiro
+						flat x3 y3 [widths.lhs arrowSw]
+						curl x2 y2 [widths.rhs arrowSw]
+					MaskRightLine x3 y3 x4 arrowBot
+					MaskLeftLine  x2 y2 x1 arrowTop
+				difference
+					dispiro
+						flat x2 y2       [widths.rhs arrowSw]
+						curl x1 arrowTop [widths.center arrowSw]
+					MaskBelowLine x2 y2 x3 y3
+
 	do "Legacy computing arrows"
 		define bodyWidth : Math.min arrowWidth (arrowHeight * 0.6)
 		create-glyph [MangleName 'arrowUpThenNW'] [MangleUnicode 0x1F8B0] : glyph-proc
