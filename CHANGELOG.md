@@ -1,5 +1,19 @@
 ## Modifications since version 2.x
 
+### 11.2.1
+
+ * Add top-left and bottom-right serifed variants for `K` and Cyrillic Ka (#1257).
+ * Add characters:
+   - LEFTWARDS ARROW WITH LOOP (`U+21AB`).
+   - RIGHTWARDS ARROW WITH LOOP (`U+21AC`).
+   - DOWNWARDS ZIGZAG ARROW (`U+21AF`).
+   - LEFTWARDS TRIPLE ARROW (`U+21DA`).
+   - RIGHTWARDS TRIPLE ARROW (`U+21DB`).
+   - LEFTWARDS SQUIGGLE ARROW (`U+21DC`).
+   - RIGHTWARDS SQUIGGLE ARROW (`U+21DD`).
+   - RIGHTWARDS ARROW WITH TIP DOWNWARDS (`U+2B0E`) ... LEFTWARDS ARROW WITH TIP UPWARDS (`U+2B11`).
+
+
 ### 11.2.0
 
  * Slightly reduce X-height by 0.01em foe better geometric balancing.
