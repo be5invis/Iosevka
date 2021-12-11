@@ -1,11 +1,11 @@
-const { blockData } = require("./block-data");
-const ucdNames = require("@unicode/unicode-13.0.0/Names");
-const ugc = require("@unicode/unicode-13.0.0/General_Category");
+const { BlockData } = require("./block-data");
+const ucdNames = require("@unicode/unicode-14.0.0/Names");
+const ugc = require("@unicode/unicode-14.0.0/General_Category");
 
 // eslint-disable-next-line complexity
 exports.gatherCoverageData = function (covUpright, covItalic, covOblique) {
 	const result = [];
-	for (const [[lchBlockStart, lchBlockEnd], block] of blockData) {
+	for (const [[lchBlockStart, lchBlockEnd], block] of BlockData) {
 		let blockResults = [];
 
 		const [lchStart, lchEnd] = findFirstLastChar(lchBlockStart, lchBlockEnd, covUpright);
