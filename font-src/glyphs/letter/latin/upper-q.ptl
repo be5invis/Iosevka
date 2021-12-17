@@ -13,6 +13,8 @@ glyph-block Letter-Latin-Upper-Q : begin
 
 	define TailDepth : 0 - Hook
 
+	# Bodies
+
 	define [QStdBody top sw] : OShape top 0 SB RightSB sw SmoothA SmoothB
 	define [QHorizontalTailedBody top sw] : begin
 		define fine : mix ShoulderFine sw 0.125
@@ -29,6 +31,53 @@ glyph-block Letter-Latin-Upper-Q : begin
 			curl SB SmoothB
 			arcvh
 			straight.right.end (Middle + CorrectionOMidS) 0
+
+	define [QOpenSwashyBody top] : glyph-proc
+		define fine : AdviceStroke 3.5
+		define xLB : [mix SB RightSB 0.125] + 0.6 * HVContrast * fine
+		define yLB : [mix 0 Descender 0.875] + O
+		define xMBArc : mix RightSB xLB 0.5
+		define yMBArc : [mix SmoothA yLB 0.625] + Stroke * (1 / 16)
+		define xRB0 : mix RightSB Width 0.7
+		define xRB : xRB0 - 0.75 * HVContrast * Stroke
+		define notchOffset : (-Descender * 0.625) + Stroke * 0.625
+		define tailSlope : 1 - fine / Stroke
+		# Lower part
+		include : difference
+			dispiro
+				flat Width O [widths.rhs.heading fine Leftward]
+				curl (Middle + CorrectionOMidS) O
+				archv
+				flat (SB + OX) SmoothB [widths.rhs Stroke]
+				curl (SB + OX) (top / 2) [heading Upward]
+			MaskBelowLine
+				mix xMBArc xLB 4
+				[mix yMBArc yLB 4] + notchOffset
+				mix xLB xMBArc 4
+				[mix yLB yMBArc 4] + notchOffset
+		include : dispiro
+			flat (SB + OX) (top / 2) [widths.rhs.heading Stroke Upward]
+			curl (SB + OX) (top - SmoothA)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat (RightSB - OX) (top - SmoothB)
+			curl (RightSB - OX) SmoothA
+			alsoThru.g2 0.5 0.8 [widths.rhs : 0.9 * [mix Stroke fine 0.25]]
+			g2 xMBArc yMBArc [widths.rhs : 0.8 * [mix Stroke fine 0.5]]
+			alsoThru.g2 0.55 0.35 [widths.rhs : 0.9 * [mix Stroke fine 0.75]]
+			g2 xLB yLB [widths.rhs fine]
+		include : difference
+			dispiro
+				g2 xLB yLB [widths.lhs (fine * CThin)]
+				g2.right.mid [mix xLB xRB (1 / 4)] (yLB - Descender / 4 - Stroke * (1 / 16)) [widths.lhs.heading (fine * CThin) Rightward]
+				alsoThru.g2 0.5 0.5
+				g2.right.mid ([mix xLB xRB (3 / 4)] + 0.75 * Stroke * tailSlope) (Descender + O) [widths.lhs.heading Stroke {.x (TanSlope - tailSlope) .y 1}]
+				archv
+				g2 xRB0 [mix Descender xLB 0.5] [widths.lhs.heading fine Upward]
+			MaskLeft xLB
+
+	# Tails
 
 	define [QStaraightTail] : begin
 		local shift : StrokeWidthBlend 0 0.25
@@ -94,6 +143,10 @@ glyph-block Letter-Latin-Upper-Q : begin
 		corner xBendTailStart yBendTailStart    [heading Rightward]
 		corner Middle         yObliqueTailStart [heading Rightward]
 
+	define [QSwashyTail] : return : glyph-proc
+
+	###################################
+
 	define QInnerVertSw : Math.min [AdviceStroke 3.5] ((RightSB - SB - Stroke * 2 * HVContrast) / (2 * HVContrast))
 	define QConfig : object
 		straight            { QStdBody                Stroke             QStaraightTail     'if'      'p' }
@@ -104,6 +157,7 @@ glyph-block Letter-Latin-Upper-Q : begin
 		horizontalTailed    { QHorizontalTailedBody  [AdviceStroke 3]    QHorizontalTail    'capital' 'e' }
 		detachedTailed      { QStdBody                Stroke             QDetachedTail      'if'      'p' }
 		detachedBendTailed  { QStdBody                Stroke             QDetachedBendTail  'if'      'p' }
+		openSwash           { QOpenSwashyBody         Stroke             QSwashyTail        'if'      'p' }
 
 
 	foreach { suffix { body swTailInner tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
