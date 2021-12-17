@@ -48,8 +48,8 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (startx - TailDepth - Stroke * HVContrast)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	define [QCrossingCurlyTail] : union
-		VBar Middle HalfStroke [mix Descender HalfStroke 1.75] [AdviceStroke 3.5]
+	define [QCrossingCurlyTail top sw] : union
+		VBar Middle HalfStroke [mix Descender HalfStroke 1.75] sw
 		dispiro
 			widths.rhs
 			flat (Middle + HalfStroke * HVContrast) HalfStroke [heading Downward]
@@ -58,18 +58,21 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (Middle - HalfStroke * HVContrast - TailDepth)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	define [QCrossing] : begin
+	define [QCrossing top sw] : begin
 		define k 1.5
 		define cor : DiagCor (k * (RightSB - Middle)) (RightSB - Middle - OX)
+		define shift : XH * (-0.1)
 		return : dispiro
-			widths.center (cor * [AdviceStroke 4.25])
-			flat RightSB 0 [heading Upward]
-			curl (Middle + OX) (k * (RightSB - Middle)) [heading Upward]
+			widths.center (cor * sw)
+			flat RightSB shift [heading Upward]
+			curl (Middle + OX) (k * (RightSB - Middle) + shift) [heading Upward]
 
-	define [QVerticalCrossing] : begin
-		return : VBar Middle [mix Descender HalfStroke 1.75] TailDepth [AdviceStroke 3.5]
+	define [QVerticalCrossing top sw] : begin
+		return : union
+			VBar Middle [mix Descender HalfStroke 1.75] 0 sw
+			VBar Middle 0 TailDepth
 
-	define [QHorizontalTail] : dispiro
+	define [QHorizontalTail tio sw] : dispiro
 		flat (Middle + CorrectionOMidS) 0 [widths.lhs : AdviceStroke 3]
 		curl [mix RightSB Width 0.5] 0
 
@@ -91,27 +94,28 @@ glyph-block Letter-Latin-Upper-Q : begin
 		corner xBendTailStart yBendTailStart    [heading Rightward]
 		corner Middle         yObliqueTailStart [heading Rightward]
 
+	define QInnerVertSw : Math.min [AdviceStroke 3.5] ((RightSB - SB - Stroke * 2 * HVContrast) / (2 * HVContrast))
 	define QConfig : object
-		straight            { QStdBody               Stroke          QStaraightTail     'if'      'p' }
-		curlyTailed         { QStdBody               Stroke          QCurlyTail         'if'      'p' }
-		crossingCurlyTailed { QStdBody              [AdviceStroke 3] QCrossingCurlyTail 'if'      'p' }
-		crossing            { QStdBody              [AdviceStroke 3] QCrossing          'capital' 'e' }
-		verticalCrossing    { QStdBody              [AdviceStroke 3] QVerticalCrossing  'if'      'p' }
-		horizontalTailed    { QHorizontalTailedBody  Stroke          QHorizontalTail    'capital' 'e' }
-		detachedTailed      { QStdBody               Stroke          QDetachedTail      'if'      'p' }
-		detachedBendTailed  { QStdBody               Stroke          QDetachedBendTail  'if'      'p' }
+		straight            { QStdBody                Stroke             QStaraightTail     'if'      'p' }
+		curlyTailed         { QStdBody                Stroke             QCurlyTail         'if'      'p' }
+		crossingCurlyTailed { QStdBody                QInnerVertSw       QCrossingCurlyTail 'if'      'p' }
+		crossing            { QStdBody               [AdviceStroke 4]    QCrossing          'capital' 'e' }
+		verticalCrossing    { QStdBody                QInnerVertSw       QVerticalCrossing  'if'      'p' }
+		horizontalTailed    { QHorizontalTailedBody  [AdviceStroke 3]    QHorizontalTail    'capital' 'e' }
+		detachedTailed      { QStdBody                Stroke             QDetachedTail      'if'      'p' }
+		detachedBendTailed  { QStdBody                Stroke             QDetachedBendTail  'if'      'p' }
 
 
-	foreach { suffix { body swRing tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
+	foreach { suffix { body swTailInner tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
 		create-glyph "Q.\(suffix)" : glyph-proc
 			include : MarkSet.(mkCapital)
-			include : body CAP swRing
-			include : tailShape CAP swRing
+			include : body CAP Stroke
+			include : tailShape CAP swTailInner
 
 		create-glyph "smcpQ.\(suffix)" : glyph-proc
 			include : MarkSet.(mkSmcp)
-			include : body XH swRing
-			include : tailShape XH swRing
+			include : body XH Stroke
+			include : tailShape XH swTailInner
 
 	select-variant 'Q' 'Q'
 
