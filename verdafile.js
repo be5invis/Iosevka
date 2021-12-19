@@ -556,7 +556,7 @@ const GroupWebArchiveFile = file.make(
 async function CreateGroupArchiveFile(dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
-	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9"], relOut, ...files);
+	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9", "-mmt=off"], relOut, ...files);
 }
 
 ///////////////////////////////////////////////////////////
