@@ -7,11 +7,25 @@ const { SpiroGeometry, DiSpiroGeometry } = require("../support/geometry/index");
 
 exports.SetupBuilders = function (bindings) {
 	const { Contrast, GlobalTransform, Stroke, Superness } = bindings;
-	const g4 = (x, y, f) => ({ x, y, type: "g4", af: f });
-	const g2 = (x, y, f) => ({ x, y, type: "g2", af: f });
-	const corner = (x, y, f) => ({ x, y, type: "corner", af: f });
-	const flat = (x, y, f) => ({ x, y, type: "left", af: f });
-	const curl = (x, y, f) => ({ x, y, type: "right", af: f });
+
+	function validateCoord(x) {
+		if (!isFinite(x)) throw new TypeError("NaN detected");
+		return x;
+	}
+
+	function KnotType(type) {
+		return (x, y, f) => ({
+			type,
+			x: validateCoord(x),
+			y: validateCoord(y),
+			af: f
+		});
+	}
+	const g4 = KnotType("g4");
+	const g2 = KnotType("g2");
+	const corner = KnotType("corner");
+	const flat = KnotType("left");
+	const curl = KnotType("right");
 	const close = f => ({ type: "close", af: f });
 	const end = f => ({ type: "end", af: f });
 
@@ -49,7 +63,7 @@ exports.SetupBuilders = function (bindings) {
 
 	function widths(l, r) {
 		return function () {
-			return this.setWidth ? this.setWidth(l, r) : void 0;
+			return this.setWidth ? this.setWidth(validateCoord(l), validateCoord(r)) : void 0;
 		};
 	}
 	widths.lhs = function (w) {
