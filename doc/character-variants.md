@@ -381,7 +381,8 @@
 <td><img src="../images/character-variant-cv16-6.png" width="32"/></td>
 <td><img src="../images/character-variant-cv16-7.png" width="32"/></td>
 <td><img src="../images/character-variant-cv16-8.png" width="32"/></td>
-<td colspan="4"> </td>
+<td><img src="../images/character-variant-cv16-9.png" width="32"/></td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -392,7 +393,8 @@
 <td>6</td>
 <td>7</td>
 <td>8</td>
-<td colspan="4"> </td>
+<td>9</td>
+<td colspan="3"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv17</code></td>
