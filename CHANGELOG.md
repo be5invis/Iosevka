@@ -1,5 +1,15 @@
 ## Modifications since version 2.x
 
+### 11.2.2
+
+ * Add open-swash Q (#1264).
+ * Add ability to customize the width of S-related necks for different kind of letters (#1265).
+ * Add Characters
+   - NORTH WEST ARROW TO CORNER (`U+21F1`).
+   - SOUTH EAST ARROW TO CORNER (`U+21F2`).
+   - THREE RIGHTWARDS ARROWS (`U+21F6`).
+
+
 ### 11.2.1
 
  * Add top-left and bottom-right serifed variants for `K` and Cyrillic Ka (#1257).

@@ -13,6 +13,8 @@ glyph-block Letter-Latin-Upper-Q : begin
 
 	define TailDepth : 0 - Hook
 
+	# Bodies
+
 	define [QStdBody top sw] : OShape top 0 SB RightSB sw SmoothA SmoothB
 	define [QHorizontalTailedBody top sw] : begin
 		define fine : mix ShoulderFine sw 0.125
@@ -29,6 +31,55 @@ glyph-block Letter-Latin-Upper-Q : begin
 			curl SB SmoothB
 			arcvh
 			straight.right.end (Middle + CorrectionOMidS) 0
+
+	define [QOpenSwashyBody top] : glyph-proc
+		define fine : AdviceStroke 3.5
+		define xLB0 : mix SB RightSB (1 / 16)
+		define xLB : xLB0 + 0.6 * HVContrast * fine
+		define yLB : [mix 0 Descender (1 - 1 / 32)] + O
+		define xMBArc : mix RightSB xLB 0.5
+		define yMBArc : [mix SmoothA yLB 0.625] + Stroke * (1 / 16)
+		define xRB0 : mix RightSB Width 0.7
+		define xRB : xRB0 - 0.75 * HVContrast * Stroke
+		define yRingStart : XH / 12
+		define notchOffset : (-Descender * 0.625) + Stroke * 0.625 + yRingStart / 2
+		define tailSlope : 0.2 + 0.5 * (1 - fine / Stroke)
+		# Lower part
+		include : difference
+			dispiro
+				flat Width (yRingStart + O) [widths.rhs.heading fine Leftward]
+				curl (Middle + CorrectionOMidS) (yRingStart + O)
+				archv
+				flat (SB + OX) (yRingStart + SmoothB) [widths.rhs Stroke]
+				curl (SB + OX) [mix yRingStart top 0.5] [heading Upward]
+			MaskBelowLine
+				mix xMBArc xLB0 4
+				[mix yMBArc yLB 4] + notchOffset
+				mix xLB0 xMBArc 4
+				[mix yLB yMBArc 4] + notchOffset
+		include : dispiro
+			flat (SB + OX) [mix yRingStart top 0.5] [widths.rhs.heading Stroke Upward]
+			curl (SB + OX) (top - SmoothA)
+			arcvh
+			g4 (Middle - CorrectionOMidS) (top - O)
+			archv
+			flat (RightSB - OX) (top - SmoothB)
+			curl (RightSB - OX) SmoothA
+			alsoThru.g2 0.5 0.8 [widths.rhs : 0.9 * [mix Stroke fine 0.25]]
+			g2 xMBArc yMBArc [widths.rhs : 0.8 * [mix Stroke fine 0.5]]
+			alsoThru.g2 0.55 0.35 [widths.rhs : 0.9 * [mix Stroke fine 0.75]]
+			g2 xLB yLB [widths.rhs fine]
+		include : difference
+			dispiro
+				g2 xLB yLB [widths.lhs (fine * CThin)]
+				g2.right.mid [mix xLB xRB (1 / 4)] (yLB - Descender / 4 - Stroke * (1 / 16)) [widths.lhs.heading (fine * CThin) {.x (TanSlope + tailSlope) .y 1}]
+				alsoThru.g2 0.5 0.5
+				g2.right.mid ([mix xLB xRB (3 / 4)] + Stroke * tailSlope) (Descender + O) [widths.lhs.heading Stroke {.x (TanSlope - tailSlope) .y 1}]
+				archv
+				g2 xRB0 [mix Descender xLB 0.5] [widths.lhs.heading fine Upward]
+			MaskLeft xLB
+
+	# Tails
 
 	define [QStaraightTail] : begin
 		local shift : StrokeWidthBlend 0 0.25
@@ -48,8 +99,8 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (startx - TailDepth - Stroke * HVContrast)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	define [QCrossingCurlyTail] : union
-		VBar Middle HalfStroke [mix Descender HalfStroke 1.75] [AdviceStroke 3.5]
+	define [QCrossingCurlyTail top sw] : union
+		VBar Middle HalfStroke [mix Descender HalfStroke 1.75] sw
 		dispiro
 			widths.rhs
 			flat (Middle + HalfStroke * HVContrast) HalfStroke [heading Downward]
@@ -58,18 +109,21 @@ glyph-block Letter-Latin-Upper-Q : begin
 			flat [Math.min (Middle + HookX - 1) (Middle - HalfStroke * HVContrast - TailDepth)] (Stroke + TailDepth)
 			curl (Middle + HookX) (Stroke + TailDepth)
 
-	define [QCrossing] : begin
+	define [QCrossing top sw] : begin
 		define k 1.5
 		define cor : DiagCor (k * (RightSB - Middle)) (RightSB - Middle - OX)
+		define shift : XH * (-0.1)
 		return : dispiro
-			widths.center (cor * [AdviceStroke 4.25])
-			flat RightSB 0 [heading Upward]
-			curl (Middle + OX) (k * (RightSB - Middle)) [heading Upward]
+			widths.center (cor * sw)
+			flat RightSB shift [heading Upward]
+			curl (Middle + OX) (k * (RightSB - Middle) + shift) [heading Upward]
 
-	define [QVerticalCrossing] : begin
-		return : VBar Middle [mix Descender HalfStroke 1.75] TailDepth [AdviceStroke 3.5]
+	define [QVerticalCrossing top sw] : begin
+		return : union
+			VBar Middle [mix Descender HalfStroke 1.75] 0 sw
+			VBar Middle 0 TailDepth
 
-	define [QHorizontalTail] : dispiro
+	define [QHorizontalTail tio sw] : dispiro
 		flat (Middle + CorrectionOMidS) 0 [widths.lhs : AdviceStroke 3]
 		curl [mix RightSB Width 0.5] 0
 
@@ -91,27 +145,33 @@ glyph-block Letter-Latin-Upper-Q : begin
 		corner xBendTailStart yBendTailStart    [heading Rightward]
 		corner Middle         yObliqueTailStart [heading Rightward]
 
+	define [QSwashyTail] : return : glyph-proc
+
+	###################################
+
+	define QInnerVertSw : Math.min [AdviceStroke 3.5] ((RightSB - SB - Stroke * 2 * HVContrast) / (2 * HVContrast))
 	define QConfig : object
-		straight            { QStdBody               Stroke          QStaraightTail     'if'      'p' }
-		curlyTailed         { QStdBody               Stroke          QCurlyTail         'if'      'p' }
-		crossingCurlyTailed { QStdBody              [AdviceStroke 3] QCrossingCurlyTail 'if'      'p' }
-		crossing            { QStdBody              [AdviceStroke 3] QCrossing          'capital' 'e' }
-		verticalCrossing    { QStdBody              [AdviceStroke 3] QVerticalCrossing  'if'      'p' }
-		horizontalTailed    { QHorizontalTailedBody  Stroke          QHorizontalTail    'capital' 'e' }
-		detachedTailed      { QStdBody               Stroke          QDetachedTail      'if'      'p' }
-		detachedBendTailed  { QStdBody               Stroke          QDetachedBendTail  'if'      'p' }
+		straight            { QStdBody                Stroke             QStaraightTail     'if'      'p' }
+		curlyTailed         { QStdBody                Stroke             QCurlyTail         'if'      'p' }
+		crossingCurlyTailed { QStdBody                QInnerVertSw       QCrossingCurlyTail 'if'      'p' }
+		crossing            { QStdBody               [AdviceStroke 4]    QCrossing          'capital' 'e' }
+		verticalCrossing    { QStdBody                QInnerVertSw       QVerticalCrossing  'if'      'p' }
+		horizontalTailed    { QHorizontalTailedBody  [AdviceStroke 3]    QHorizontalTail    'capital' 'e' }
+		detachedTailed      { QStdBody                Stroke             QDetachedTail      'if'      'p' }
+		detachedBendTailed  { QStdBody                Stroke             QDetachedBendTail  'if'      'p' }
+		openSwash           { QOpenSwashyBody         Stroke             QSwashyTail        'if'      'p' }
 
 
-	foreach { suffix { body swRing tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
+	foreach { suffix { body swTailInner tailShape mkCapital mkSmcp } } [Object.entries QConfig] : do
 		create-glyph "Q.\(suffix)" : glyph-proc
 			include : MarkSet.(mkCapital)
-			include : body CAP swRing
-			include : tailShape CAP swRing
+			include : body CAP Stroke
+			include : tailShape CAP swTailInner
 
 		create-glyph "smcpQ.\(suffix)" : glyph-proc
 			include : MarkSet.(mkSmcp)
-			include : body XH swRing
-			include : tailShape XH swRing
+			include : body XH Stroke
+			include : tailShape XH swTailInner
 
 	select-variant 'Q' 'Q'
 
