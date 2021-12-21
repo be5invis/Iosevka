@@ -549,14 +549,20 @@ const GroupWebArchiveFile = file.make(
 	async (target, out, gr) => {
 		await target.need(de`${out.dir}`);
 		await target.need(GroupContents(gr));
-		await CreateGroupArchiveFile(`${DIST}/${gr}`, out, "*.css", "ttf", "woff2");
+		await CreateGroupArchiveFile(
+			`${DIST}/${gr}`,
+			out,
+			"*.css",
+			...webfontFormats.map(([suffix, cssFormat]) => suffix)
+		);
 	}
 );
 
 async function CreateGroupArchiveFile(dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
-	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9", "-mmt=off"], relOut, ...files);
+	echo.action(echo.hl.command("Create Archive"), out.full);
+	await cd(dir).silently.run(["7z", "a"], ["-tzip", "-r", "-mx=9", "-mmt=off"], relOut, ...files);
 }
 
 ///////////////////////////////////////////////////////////
