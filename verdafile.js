@@ -334,8 +334,19 @@ const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
 	await target.need(ts.map(tn => DistUnhintedTTF(gr, tn)));
 });
 const GroupWebFonts = task.group("webfont", async (target, gr) => {
-	const [ts] = await target.need(GroupFontsOf(gr));
-	await target.need(GroupTTFs(gr), GroupWoff2s(gr), DistWebFontCSS(gr));
+	const [bp] = await target.need(BuildPlanOf(gr));
+	const groupsNeeded = [];
+	for (const ext of bp.webfontFormats) {
+		switch (ext) {
+			case "ttf":
+				groupsNeeded.push(GroupTTFs(gr));
+				break;
+			case "woff2":
+				groupsNeeded.push(GroupWoff2s(gr));
+				break;
+		}
+	}
+	await target.need(groupsNeeded, DistWebFontCSS(gr));
 });
 const GroupWoff2s = task.group("woff2", async (target, gr) => {
 	const [ts] = await target.need(GroupFontsOf(gr));
