@@ -26,12 +26,10 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
-const webfontFormats = [
-	["woff2", "woff2"],
-	["ttf", "truetype"]
-];
-const webfontFormatsFast = [["ttf", "truetype"]];
-const webfontFormatsPages = [["woff2", "woff2"]];
+
+const defaultWebFontFormats = ["ttf", "woff2"];
+const webfontFormatsFast = ["ttf"];
+const webfontFormatsPages = ["woff2"];
 
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
@@ -129,7 +127,7 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
 		validateAndShimBuildPlans(prefix, bp, rp.weights, rp.slopes, rp.widths);
-
+		bp.webfontFormats = bp["webfont-formats"] || defaultWebFontFormats;
 		bp.targets = [];
 		const weights = bp.weights,
 			slopes = bp.slopes,
@@ -314,8 +312,9 @@ const GroupContents = task.group("contents", async (target, gr) => {
 const DistWebFontCSS = file.make(
 	gr => `${DIST}/${gr}/${gr}.css`,
 	async (target, out, gr) => {
+		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de(out.dir));
-		await createWebFontCssImpl(target, out.full, gr, webfontFormats);
+		await createWebFontCssImpl(target, out.full, gr, plan.webfontFormats);
 	}
 );
 async function createWebFontCssImpl(target, output, gr, formats) {
@@ -547,14 +546,10 @@ const GroupTtfUnhintedArchiveFile = file.make(
 const GroupWebArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/webfont-${gr}-${version}.zip`,
 	async (target, out, gr) => {
+		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de`${out.dir}`);
 		await target.need(GroupContents(gr));
-		await CreateGroupArchiveFile(
-			`${DIST}/${gr}`,
-			out,
-			"*.css",
-			...webfontFormats.map(([suffix, cssFormat]) => suffix)
-		);
+		await CreateGroupArchiveFile(`${DIST}/${gr}`, out, "*.css", ...plan.webfontFormats);
 	}
 );
 
