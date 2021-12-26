@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 11.2.3
+
+ * Make webfont formats customizable (#1266).
+ * Fix localization of Macedonian GJE (#1267).
+
+
 ### 11.2.2
 
  * Add open-swash Q (#1264).
