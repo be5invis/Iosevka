@@ -26,12 +26,10 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
-const webfontFormats = [
-	["woff2", "woff2"],
-	["ttf", "truetype"]
-];
-const webfontFormatsFast = [["ttf", "truetype"]];
-const webfontFormatsPages = [["woff2", "woff2"]];
+
+const defaultWebFontFormats = ["ttf", "woff2"];
+const webfontFormatsFast = ["ttf"];
+const webfontFormatsPages = ["woff2"];
 
 const WIDTH_NORMAL = "normal";
 const WEIGHT_NORMAL = "regular";
@@ -129,7 +127,7 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 	for (const prefix in rawBuildPlans) {
 		const bp = { ...rawBuildPlans[prefix] };
 		validateAndShimBuildPlans(prefix, bp, rp.weights, rp.slopes, rp.widths);
-
+		bp.webfontFormats = bp["webfont-formats"] || defaultWebFontFormats;
 		bp.targets = [];
 		const weights = bp.weights,
 			slopes = bp.slopes,
@@ -314,8 +312,9 @@ const GroupContents = task.group("contents", async (target, gr) => {
 const DistWebFontCSS = file.make(
 	gr => `${DIST}/${gr}/${gr}.css`,
 	async (target, out, gr) => {
+		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de(out.dir));
-		await createWebFontCssImpl(target, out.full, gr, webfontFormats);
+		await createWebFontCssImpl(target, out.full, gr, plan.webfontFormats);
 	}
 );
 async function createWebFontCssImpl(target, output, gr, formats) {
@@ -335,8 +334,19 @@ const GroupUnhintedTTFs = task.group("ttf-unhinted", async (target, gr) => {
 	await target.need(ts.map(tn => DistUnhintedTTF(gr, tn)));
 });
 const GroupWebFonts = task.group("webfont", async (target, gr) => {
-	const [ts] = await target.need(GroupFontsOf(gr));
-	await target.need(GroupTTFs(gr), GroupWoff2s(gr), DistWebFontCSS(gr));
+	const [bp] = await target.need(BuildPlanOf(gr));
+	const groupsNeeded = [];
+	for (const ext of bp.webfontFormats) {
+		switch (ext) {
+			case "ttf":
+				groupsNeeded.push(GroupTTFs(gr));
+				break;
+			case "woff2":
+				groupsNeeded.push(GroupWoff2s(gr));
+				break;
+		}
+	}
+	await target.need(groupsNeeded, DistWebFontCSS(gr));
 });
 const GroupWoff2s = task.group("woff2", async (target, gr) => {
 	const [ts] = await target.need(GroupFontsOf(gr));
@@ -547,16 +557,18 @@ const GroupTtfUnhintedArchiveFile = file.make(
 const GroupWebArchiveFile = file.make(
 	(gr, version) => `${ARCHIVE_DIR}/webfont-${gr}-${version}.zip`,
 	async (target, out, gr) => {
+		const [plan] = await target.need(BuildPlanOf(gr));
 		await target.need(de`${out.dir}`);
 		await target.need(GroupContents(gr));
-		await CreateGroupArchiveFile(`${DIST}/${gr}`, out, "*.css", "ttf", "woff2");
+		await CreateGroupArchiveFile(`${DIST}/${gr}`, out, "*.css", ...plan.webfontFormats);
 	}
 );
 
 async function CreateGroupArchiveFile(dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
-	await cd(dir).run(["7z", "a"], ["-tzip", "-r", "-mx=9"], relOut, ...files);
+	echo.action(echo.hl.command("Create Archive"), out.full);
+	await cd(dir).silently.run(["7z", "a"], ["-tzip", "-r", "-mx=9", "-mmt=off"], relOut, ...files);
 }
 
 ///////////////////////////////////////////////////////////

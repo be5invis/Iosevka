@@ -63,6 +63,7 @@ Inside the plan, top-level properties include:
 * `no-cv-ss`: Optional, Boolean, disables `cv##` and `ss##` OpenType features.
 * `no-ligation`: Optional, Boolean, disables ligations.
 * `export-glyph-names`: Optional, Boolean, whether to export glyph names into the fonts. Setting this to `true` will increase file footprint, however this is necessary for ligature support in [Kitty](https://sw.kovidgoyal.net/kitty/).
+* `webfont-formats`: Optional, Array of String. Controls the formats needed to be exported into the webfont CSS. Valid options are `'ttf'` and `'woff2'`, or including both.
 
 Build plan could have 5 optional subsections: `ligations`, `variants`, `weights`, `widths` and `slopes`.
 

@@ -2,11 +2,18 @@
 
 const fs = require("fs");
 
+const WebfontFormatMap = new Map([
+	["woff2", "woff2"],
+	["ttf", "truetype"]
+]);
 module.exports = function (output, family, hs, formats) {
 	let ans = ``;
+	for (const ext of formats) {
+		if (!WebfontFormatMap.get(ext)) throw new TypeError("Invalid webfont file format " + ext);
+	}
 	for (const term of hs) {
-		let src = formats
-			.map(([ext, format]) => `url('${ext}/${term.name}.${ext}') format('${format}')`)
+		const src = formats
+			.map(ext => `url('${ext}/${term.name}.${ext}') format('${WebfontFormatMap.get(ext)}')`)
 			.join(", ");
 		ans += `
 @font-face {
