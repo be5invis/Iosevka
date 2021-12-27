@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 11.2.4
+
+ * Add spacing grade `quasi-proportional-extension-only`.
+ * Fix broken geometry of `a.double-storey-tailed` under heavy weights.
+ * Fix broken geometry of Cyrillic Iotified Es under heavy weights.
+
+
 ### 11.2.3
 
  * Make webfont formats customizable (#1266).

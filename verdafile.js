@@ -586,7 +586,9 @@ const Pages = task(`pages`, async t => {
 		PagesFontExport`iosevka-aile`,
 		PagesFontExport`iosevka-etoile`,
 		PagesFontExport`iosevka-QP`,
-		PagesFontExport`iosevka-QP-slab`
+		PagesFontExport`iosevka-QP-slab`,
+		PagesFontExport`iosevka-QPE`,
+		PagesFontExport`iosevka-QPE-slab`
 	);
 });
 

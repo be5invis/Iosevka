@@ -48,6 +48,7 @@ Inside the plan, top-level properties include:
 * `spacing`: Optional, String, denotes the spacing of the custom variant. Valid values include:
   - `normal`: The normal monospace font.
   - `quasi-proportional`: The font will become quasi-proportional.
+  - `quasi-proportional-extension-only`: The font will become quasi-proportional, but will not shrink narrow letters (like `i`). Only wide letters (like `M`) will get expanded.
   - `term`: Make the symbols' width suitable for terminal emulators. Arrows and geometric symbols will become narrower.
   - `fontconfig-mono`: Apply `term` spacing changes and further apply changes to be compatible with FontConfig's Mono spacing, which recognizes a font as monospace if and only if its every non-combining characters having the same width. The changes include:
     - Completely remove wide glyphs. All non-combining glyphs will be exactly the same width.
