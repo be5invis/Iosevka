@@ -39,7 +39,7 @@
 
 ### 11.2.0
 
- * Slightly reduce X-height by 0.01em foe better geometric balancing.
+ * Slightly reduce X-height by 0.01em for better geometric balancing.
  * Make low-crossbar variants of `f` more distinctive with `crossbar-at-x-height` (#1254).
  * Add Fira Code V6's progress bar symbols.
  * Add BLACK FOUR POINTED STAR (`U+2726`) and WHITE FOUR POINTED STAR (`U+2727`).
