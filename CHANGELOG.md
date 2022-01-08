@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 11.2.5
+
+ * Add split-slash variants of `0` (#1270).
+ * Add ligation set for Dafny (#1271).
+
+
 ### 11.2.4
 
  * Add spacing grade `quasi-proportional-extension-only`.

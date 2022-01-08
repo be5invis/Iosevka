@@ -122,14 +122,14 @@ glyph-block CommonShapes : begin
 	define [CircleRingAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r)
 	define [CircleDotAt x y r] : CircleRing (y + r) (y - r) (x - r) (x + r) true
 
-	define [OShape u d l r _width _sma _smb] : glyph-proc
+	define [OShapeT sink u d l r _width _sma _smb] : glyph-proc
 		local middle : (l + r) / 2
 		local width : fallback _width Stroke
 		local sma : fallback _sma SmallSmoothA
 		local smb : fallback _smb SmallSmoothB
 		local mc : CorrectionOMidX * width
 		if (u - d > sma + smb) : then : begin
-			include : dispiro
+			include : sink
 				widths width 0
 				g4 (middle - mc) (u - O)
 				archv
@@ -145,7 +145,7 @@ glyph-block CommonShapes : begin
 		: else : begin
 			local ymiddlea : mix d u (smb / (sma + smb))
 			local ymiddleb : mix d u (sma / (sma + smb))
-			include : dispiro
+			include : sink
 				widths width 0
 				g4 (middle - mc) (u - O)
 				archv
@@ -156,38 +156,9 @@ glyph-block CommonShapes : begin
 				g4 (r - OX) ymiddleb
 				arcvh
 				close
-	define [OShapeOutline u d l r _width _sma _smb] : glyph-proc
-		local middle : (l + r) / 2
-		local width : fallback _width Stroke
-		local sma : fallback _sma SmallSmoothA
-		local smb : fallback _smb SmallSmoothB
-		local mc : CorrectionOMidX * width
-		if (u - d > sma + smb) : then : begin
-			include : spiro-outline
-				g4 (middle - mc) (u - O)
-				archv
-				flat (l + OX) (u - sma)
-				curl (l + OX) (d + smb)
-				arcvh
-				g4 (middle + mc) (d + O)
-				archv
-				flat (r - OX) (d + sma)
-				curl (r - OX) (u - smb)
-				arcvh
-				close
-		: else : begin
-			local ymiddlea : mix d u (smb / (sma + smb))
-			local ymiddleb : mix d u (sma / (sma + smb))
-			include : spiro-outline
-				g4 (middle - mc) (u - O)
-				archv
-				g4 (l + OX) ymiddlea
-				arcvh
-				g4 (middle + mc) (d + O)
-				archv
-				g4 (r - OX) ymiddleb
-				arcvh
-				close
+
+	define [OShape u d l r _width _sma _smb] : OShapeT dispiro u d l r _width _sma _smb
+	define [OShapeOutline u d l r _width _sma _smb] : OShapeT spiro-outline u d l r _width _sma _smb
 
 	set OShape.NoOvershoot : lambda [u d l r _width _sma _smb] : OShape (u + O) (d - O) (l - OX) (r + OX) _width _sma _smb
 	set OShapeOutline.NoOvershoot : lambda [u d l r _width _sma _smb] : OShapeOutline (u + O) (d - O) (l - OX) (r + OX) _width _sma _smb
@@ -665,4 +636,4 @@ glyph-block CommonShapes : begin
 		corner [mix x1 x2 (-k)]  [mix y1 y2 (-k)]
 		corner [mix x1 x2 (1+k)] [mix y1 y2 (1+k)]
 
-	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShape OShapeOutline OShapeFlatTB OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterTopSerifAsymmetric CenterBottomSerif CenterBottomSerifAsymmetric DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif NeedSlab NeedNotItalic HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LeftHook FlatSlashShape hookstart hookend FlipAround ScaleAround Realign ForceUpright DiagCor NameUni PointingTo WithTransform clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical ExtLineCenter ExtLineLhs DiagCorDs HCrossBar VERY-FAR MaskAbove MaskBelow MaskLeft MaskRight HalfRectTriangle MaskAboveLine MaskBelowLine MaskLeftLine MaskRightLine
+	glyph-block-export Rect SquareAt Ring RingAt DotAt RingStroke RingStrokeAt DotStrokeAt CircleRing CircleRingAt CircleDotAt OShapeT OShape OShapeOutline OShapeFlatTB OBarLeftShape OBarRightShape LeftwardTopSerif LeftwardBottomSerif RightwardTopSerif RightwardBottomSerif CenterTopSerif CenterTopSerifAsymmetric CenterBottomSerif CenterBottomSerifAsymmetric DownwardRightSerif UpwardRightSerif DownwardLeftSerif UpwardLeftSerif NeedSlab NeedNotItalic HBar HBarTop HBarBottom HOverlayBar VBar VBarLeft VBarRight VerticalHook LeftHook FlatSlashShape hookstart hookend FlipAround ScaleAround Realign ForceUpright DiagCor NameUni PointingTo WithTransform clear-anchors OBarLeftToothlessShape OBarLeftRoundedShape OBarRightToothlessShape OBarRightRoundedShape AsRadical ExtLineCenter ExtLineLhs DiagCorDs HCrossBar VERY-FAR MaskAbove MaskBelow MaskLeft MaskRight HalfRectTriangle MaskAboveLine MaskBelowLine MaskLeftLine MaskRightLine
