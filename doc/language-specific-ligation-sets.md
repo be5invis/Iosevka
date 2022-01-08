@@ -47,6 +47,13 @@
 <td colspan="2"><img src="../images/ligset-SWFT-1.png"/></td>
 </tr>
 <tr>
+<td><code>DFNY</code></td>
+<td>Dafny</td>
+</tr>
+<tr>
+<td colspan="2"><img src="../images/ligset-DFNY-1.png"/></td>
+</tr>
+<tr>
 <td><code>COQX</code></td>
 <td>Coq</td>
 </tr>

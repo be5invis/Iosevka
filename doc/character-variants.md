@@ -1872,7 +1872,7 @@
 <td colspan="6"> </td>
 </tr>
 <tr>
-<td rowspan="2"><code>cv71</code></td>
+<td rowspan="4"><code>cv71</code></td>
 <td><img src="../images/character-variant-cv71-1.png" width="32"/></td>
 <td><img src="../images/character-variant-cv71-2.png" width="32"/></td>
 <td><img src="../images/character-variant-cv71-3.png" width="32"/></td>
@@ -1883,7 +1883,8 @@
 <td><img src="../images/character-variant-cv71-8.png" width="32"/></td>
 <td><img src="../images/character-variant-cv71-9.png" width="32"/></td>
 <td><img src="../images/character-variant-cv71-10.png" width="32"/></td>
-<td colspan="2"> </td>
+<td><img src="../images/character-variant-cv71-11.png" width="32"/></td>
+<td><img src="../images/character-variant-cv71-12.png" width="32"/></td>
 </tr>
 <tr>
 <td>1</td>
@@ -1896,7 +1897,18 @@
 <td>8</td>
 <td>9</td>
 <td>10</td>
-<td colspan="2"> </td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td><img src="../images/character-variant-cv71-13.png" width="32"/></td>
+<td><img src="../images/character-variant-cv71-14.png" width="32"/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td colspan="10"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv72</code></td>
