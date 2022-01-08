@@ -10,17 +10,26 @@ glyph-block Digits-Zero : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
-	define [OvalShapeT sink offsetY offsetX t b l r] : let [m : mix l r 0.5] : sink
+	define [OvalShapeT sink t b l r] : let [m : mix l r 0.5] : sink
 		widths.rhs
-		g4 (m - CorrectionOMidS) (t - offsetY)
+		g4 (m - CorrectionOMidS) t
 		archv
-		g4 (r - offsetX) [YSmoothMidR t b SmallSmoothA SmallSmoothB]
+		g4 r [YSmoothMidR t b SmallSmoothA SmallSmoothB]
 		arcvh
-		g4 (m + CorrectionOMidS) (b + offsetY)
+		g4 (m + CorrectionOMidS) b
 		archv
-		g4 (l + offsetX) [YSmoothMidL t b SmallSmoothA SmallSmoothB]
+		g4 l [YSmoothMidL t b SmallSmoothA SmallSmoothB]
 		arcvh
 		close
+
+	define [ZeroOutlineShapeT sink offsetX offsetY top] : OShapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
+	define [ZeroOutlineShape top] : ZeroOutlineShapeT dispiro 0 0 top
+	define [ZeroOutlineMask top] : ZeroOutlineShapeT spiro-outline 1 1 top
+
+	define [ZeroOvalShapeT sink offsetX offsetY top] : OvalShapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
+	define [ZeroOvalShape top] : ZeroOvalShapeT dispiro 0 0 top
+	define [ZeroOvalMask top] : ZeroOvalShapeT spiro-outline 1 1 top
+
 
 	define [ZeroSlash top] : dispiro
 		flat 0 (top * (1 - 0.77)) [widths.center OverlayStroke]
@@ -30,16 +39,11 @@ glyph-block Digits-Zero : begin
 		flat 0 (top * 0.77) [widths.center OverlayStroke]
 		curl Width (top * (1 - 0.77))
 
-	define [ZeroSlashShape top] : intersection
-		OShapeOutline.NoOvershoot top 0 SB RightSB
-		ZeroSlash top
-
-	define [ZeroReverseSlashShape top] : intersection
-		OShapeOutline.NoOvershoot top 0 SB RightSB
-		ZeroReverseSlash top
+	define CircleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
+	define SplitSlashGap : Stroke * HVContrast + [clamp (CircleInnerWidth / 5) (CircleInnerWidth / 3) ([AdviceStroke 5] * HVContrast)]
 
 	define [ZeroDotShape top] : begin
-		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
+		local halfDotWidth : Math.min DotRadius (CircleInnerWidth / 4)
 		return : OShapeOutline.NoOvershoot
 			top / 2 + DotRadius
 			top / 2 - DotRadius
@@ -50,9 +54,8 @@ glyph-block Digits-Zero : begin
 			SmoothBOf halfDotWidth (halfDotWidth * 2)
 
 	define [ZeroLongDotShape top] : begin
-		local circleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
-		local halfDotWidth : Math.min HalfStroke (circleInnerWidth / 4)
-		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (circleInnerWidth - halfDotWidth * 2)) / 2)
+		local halfDotWidth : Math.min HalfStroke (CircleInnerWidth / 4)
+		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (CircleInnerWidth - halfDotWidth * 2)) / 2)
 		return : OShapeOutline.NoOvershoot
 			top / 2 + halfDotHeight
 			top / 2 - halfDotHeight
@@ -62,124 +65,53 @@ glyph-block Digits-Zero : begin
 			SmoothAOf halfDotWidth (halfDotWidth * 2)
 			SmoothBOf halfDotWidth (halfDotWidth * 2)
 
-	define [ZeroOvalShapeT sink offsetX offsetY top] : OvalShapeT sink (OX + offsetX) (O + offsetY) top 0 SB RightSB
-
-	define [ZeroOvalShape top] : ZeroOvalShapeT dispiro 0 0 top
-	define [ZeroOvalShapeMask top] : ZeroOvalShapeT spiro-outline 1 1 top
-
 	define [ZeroOvalDotShape top] : begin
-		local halfDotWidth : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
-		return : OvalShapeT spiro-outline OX O
-			top / 2 + DotRadius
-			top / 2 - DotRadius
-			Middle - halfDotWidth
-			Middle + halfDotWidth
+		local halfDotWidth : Math.min DotRadius (CircleInnerWidth / 4)
+		return : OvalShapeT spiro-outline
+			top / 2 + DotRadius - O
+			top / 2 - DotRadius + O
+			Middle - halfDotWidth + OX
+			Middle + halfDotWidth - OX
 
 	define [ZeroOvalLongDotShape top] : begin
-		local circleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
-		local halfDotWidth : Math.min HalfStroke (circleInnerWidth / 4)
-		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (circleInnerWidth - halfDotWidth * 2)) / 2)
-		return : OvalShapeT spiro-outline OX O
-			top / 2 + halfDotHeight
-			top / 2 - halfDotHeight
-			Middle - halfDotWidth
-			Middle + halfDotWidth
+		local halfDotWidth : Math.min HalfStroke (CircleInnerWidth / 4)
+		local halfDotHeight : Math.max DotRadius : Math.min ((top - Stroke * 2) / 4) ((top - Stroke * 2 - (CircleInnerWidth - halfDotWidth * 2)) / 2)
+		return : OvalShapeT spiro-outline
+			top / 2 + halfDotHeight - O
+			top / 2 - halfDotHeight + O
+			Middle - halfDotWidth + OX
+			Middle + halfDotWidth - OX
 
-	create-glyph 'zero.lnum.unslashed' : glyph-proc
-		include : MarkSet.capital
-		include : OShape CAP 0 SB RightSB
+	define ZeroConfig : object
+		'unslashed'               { ZeroOutlineShape ZeroOutlineMask null                 0             }
+		'slashed'                 { ZeroOutlineShape ZeroOutlineMask ZeroSlash            0             }
+		'reverseSlashed'          { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     0             }
+		'slashedSplit'            { ZeroOutlineShape ZeroOutlineMask ZeroSlash            SplitSlashGap }
+		'reverseSlashedSplit'     { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     SplitSlashGap }
+		'dotted'                  { ZeroOutlineShape ZeroOutlineMask ZeroDotShape         0             }
+		'longDotted'              { ZeroOutlineShape ZeroOutlineMask ZeroLongDotShape     0             }
+		'unslashedOval'           { ZeroOvalShape    ZeroOvalMask    null                 0             }
+		'slashedOval'             { ZeroOvalShape    ZeroOvalMask    ZeroSlash            0             }
+		'reverseSlashedOval'      { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     0             }
+		'slashedSplitOval'        { ZeroOvalShape    ZeroOvalMask    ZeroSlash            SplitSlashGap }
+		'reverseSlashedSplitOval' { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     SplitSlashGap }
+		'dottedOval'              { ZeroOvalShape    ZeroOvalMask    ZeroOvalDotShape     0             }
+		'longDottedOval'          { ZeroOvalShape    ZeroOvalMask    ZeroOvalLongDotShape 0             }
 
-	create-glyph 'zero.lnum.unslashedOval' : glyph-proc
-		include : MarkSet.capital
-		include : ZeroOvalShape CAP
+	define Infixes : object
+		'lnum' { CAP        [function [] : MarkSet.capital] }
+		'onum' { OnumHeight [function [] : OnumMarks.e]     }
 
-	create-glyph 'zero.lnum.slashed' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashed"
-		include : ZeroSlashShape CAP
-
-	create-glyph 'zero.lnum.slashedOval' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashedOval"
-		include : intersection [ZeroOvalShapeMask CAP] [ZeroSlash CAP]
-
-	create-glyph 'zero.lnum.reverseSlashed' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashed"
-		include : ZeroReverseSlashShape CAP
-
-	create-glyph 'zero.lnum.reverseSlashedOval' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashedOval"
-		include : intersection [ZeroOvalShapeMask CAP] [ZeroReverseSlash CAP]
-
-	create-glyph 'zero.lnum.dotted' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashed"
-		include : ZeroDotShape CAP
-
-	create-glyph 'zero.lnum.dottedOval' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashedOval"
-		include : ZeroOvalDotShape CAP
-
-	create-glyph 'zero.lnum.longDotted' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashed"
-		include : ZeroLongDotShape CAP
-
-	create-glyph 'zero.lnum.longDottedOval' : glyph-proc
-		include : MarkSet.capital
-		include : refer-glyph "zero.lnum.unslashedOval"
-		include : ZeroOvalLongDotShape CAP
-
-	create-glyph 'zero.onum.unslashed' : glyph-proc
-		include : OnumMarks.e
-		include : OShape OnumHeight 0 SB RightSB
-
-	create-glyph 'zero.onum.unslashedOval' : glyph-proc
-		include : OnumMarks.e
-		include : ZeroOvalShape OnumHeight
-
-	create-glyph 'zero.onum.slashed' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashed"
-		include : ZeroSlashShape OnumHeight
-
-	create-glyph 'zero.onum.slashedOval' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashedOval"
-		include : intersection [ZeroOvalShapeMask OnumHeight] [ZeroSlash OnumHeight]
-
-	create-glyph 'zero.onum.reverseSlashed' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashed"
-		include : ZeroReverseSlashShape OnumHeight
-
-	create-glyph 'zero.onum.reverseSlashedOval' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashedOval"
-		include : intersection [ZeroOvalShapeMask OnumHeight] [ZeroReverseSlash OnumHeight]
-
-	create-glyph 'zero.onum.dotted' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashed"
-		include : ZeroDotShape OnumHeight
-
-	create-glyph 'zero.onum.dottedOval' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashedOval"
-		include : ZeroOvalDotShape OnumHeight
-
-	create-glyph 'zero.onum.longDotted' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashed"
-		include : ZeroLongDotShape OnumHeight
-
-	create-glyph 'zero.onum.longDottedOval' : glyph-proc
-		include : OnumMarks.e
-		include : refer-glyph "zero.onum.unslashedOval"
-		include : ZeroOvalLongDotShape OnumHeight
+	foreach { suffix { Outline Mask Overlay gap } } [Object.entries ZeroConfig] : begin
+		foreach { infix { height Marks } } [Object.entries Infixes] : begin
+			create-glyph "zero.\(infix).\(suffix)" : glyph-proc
+				include : Marks
+				include : Outline height
+				if Overlay : if Mask
+					then : include : intersection [Overlay height]
+						WithTransform [ApparentTranslate (-gap) 0] [Mask height]
+						WithTransform [ApparentTranslate   gap  0] [Mask height]
+					else : include : Overlay height
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')
