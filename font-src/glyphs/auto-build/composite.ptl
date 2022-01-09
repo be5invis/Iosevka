@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [getGrMesh AnyCv CvDecompose Joining] from "../../support/gr"
+import [getGrMesh AnyCv CvDecompose Joining hashCv] from "../../support/gr"
 import [hashGeometry] from "../../support/geometry/index"
 import [Transform] from "../../support/geometry/transform"
 extern Map
@@ -121,11 +121,16 @@ glyph-block AutoBuild-Enclosure : begin
 	define [EnclosureStrokeScale dscale digits width] : dscale / [Math.pow [AdjustDigitCount digits width] 0.66]
 
 	define enclosureInnerPartActualWidth : new Map
+
+	define [GlyphNameInnerOf gniPrefix subGlyph mp actualWidth accumulatedTfm] : begin
+		define nameParts : list mp actualWidth accumulatedTfm
+			hashGeometry subGlyph.geometry
+			hashCv subGlyph
+		return : '.ci.' + gniPrefix + '/' + [nameParts.join '/']
+
 	define [EnsureInnerSubGlyphImpl gniPrefix markClass miniatureFont mp actualWidth accumulatedTfm] : function [gidPart] : begin
 		define subGlyph : miniatureFont.queryByNameEnsured gidPart
-		define geomHash : hashGeometry subGlyph.geometry
-
-		define gniPart : '.ci.' + gniPrefix + '.' + geomHash + '@' + [{ mp actualWidth accumulatedTfm }.join '/']
+		define gniPart : GlyphNameInnerOf gniPrefix subGlyph mp actualWidth accumulatedTfm
 		if [not : query-glyph gniPart] : begin
 			enclosureInnerPartActualWidth.set gniPart (actualWidth)
 			create-glyph gniPart : glyph-proc
