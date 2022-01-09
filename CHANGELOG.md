@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 11.2.6
+
+ * Fix variant selection of CIRCLED ZERO WITH SLASH (`U+1F10D`) (#1274).
+
+
 ### 11.2.5
 
  * Add split-slash variants of `0` (#1270).

@@ -1,5 +1,7 @@
 "use strict";
 
+const crypto = require("crypto");
+
 const Dotless = {
 	tag: "dtls",
 	get(glyph) {
@@ -436,6 +438,14 @@ function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
 	}
 }
 
+function hashCv(g) {
+	const hasher = crypto.createHash("sha256");
+	for (const gr of AnyCv.query(g)) {
+		hasher.update(`${gr.tag}/${gr.rank}:${gr.get(g)}\n`);
+	}
+	return hasher.digest("hex");
+}
+
 exports.Dotless = Dotless;
 exports.LowerYDotAtBelow = LowerYDotAtBelow;
 exports.Cv = Cv;
@@ -461,6 +471,7 @@ exports.Onum = Onum;
 exports.AplForm = AplForm;
 exports.NumeratorForm = NumeratorForm;
 exports.DenominatorForm = DenominatorForm;
+exports.hashCv = hashCv;
 
 exports.createGrDisplaySheet = createGrDisplaySheet;
 exports.linkSuffixGr = linkSuffixGr;
