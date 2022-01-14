@@ -38,10 +38,12 @@ async function processSsOt(dirs) {
 			md.log(`</tr>`);
 		}
 		{
-			md.log(`<tr>`);
-			md.log(`<td><img src="${dirs.images}/stylistic-set-u-${ss.tag}-${ss.rank}.png"/></td>`);
-			md.log(`<td><img src="${dirs.images}/stylistic-set-i-${ss.tag}-${ss.rank}.png"/></td>`);
-			md.log(`</tr>`);
+			md.log(
+				`<tr>`,
+				`<td>${ImgX(`${dirs.images}/stylistic-set-u-${ss.tag}-${ss.rank}`)}</td>`,
+				`<td>${ImgX(`${dirs.images}/stylistic-set-i-${ss.tag}-${ss.rank}`)}</td>`,
+				`</tr>`
+			);
 		}
 	}
 	md.log(`</table>`);
@@ -76,8 +78,9 @@ async function processCvOt(dirs) {
 				const iCvv = rid * entriesPerRow + cid;
 				if (iCvv >= effVariants.length) continue;
 				const cvv = effVariants[iCvv];
-				const imageUrl = `${dirs.images}/character-variant-${cv.tag}-${cvv.rank}.png`;
-				md.log(`<td${itemColSpanHtml}><img src="${imageUrl}" width="${imgWidth}"/></td>`);
+				const imageID = `${dirs.images}/character-variant-${cv.tag}-${cvv.rank}`;
+				const image = ImgX(imageID, imgWidth);
+				md.log(`<td${itemColSpanHtml}>${image}</td>`);
 			}
 			if (tailBlankColumnsCount > 0) md.log(`<td colspan="${tailBlankColumnsCount}"> </td>`);
 			md.log(`</tr>`);
@@ -185,8 +188,8 @@ function formatCv(md, dirs, info) {
 	const imgWidth = 32 * info.sampleImageCountEm;
 	let sTable = "     <table>";
 	for (const alt of info.alternatives) {
-		const imageUrl = `${dirs.images}/character-variant-${alt.imageId}.png`;
-		const image = `<img src="${imageUrl}" width="${imgWidth}"/>`;
+		const imageId = `${dirs.images}/character-variant-${alt.imageId}`;
+		const image = ImgX(imageId, imgWidth);
 		const selectorText = alt.selectors.map(x => `<code>${x}</code>`).join(", ");
 		sTable +=
 			`<tr><td rowspan="2" width="${2 * 14 + imgWidth}">${image}</td>` +
@@ -312,10 +315,9 @@ async function processLigSetOt(dirs, index, fn) {
 			md.log(`</tr>`);
 		}
 		{
+			const imageId = `${dirs.images}/ligset-${ls.tag}-${ls.rank}`;
 			md.log(`<tr>`);
-			md.log(
-				`<td colspan="2"><img src="${dirs.images}/ligset-${ls.tag}-${ls.rank}.png"/></td>`
-			);
+			md.log(`<td colspan="2">${ImgX(imageId)}</td>`);
 			md.log(`</tr>`);
 		}
 	}
@@ -359,4 +361,12 @@ class MdCol {
 			).replace(/^/gm, $1);
 		});
 	}
+}
+
+function ImgX(path, w) {
+	const widthProp = w ? ` width=${w}` : ``;
+	return (
+		`<img src="${path}.light.png#gh-light-mode-only"${widthProp}/>` +
+		`<img src="${path}.dark.png#gh-dark-mode-only"${widthProp}/>`
+	);
 }

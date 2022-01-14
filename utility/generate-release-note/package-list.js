@@ -67,7 +67,7 @@ async function GeneratePackageList(argv, out) {
 
 		const proportionPrefix = gr.quasiProportional ? "Quasi-proportional" : "Monospace";
 		const desc = `<i>${proportionPrefix}, ${prime.desc}</i>`;
-		const img = `<img src="${imagePrefix}/${groupID}.png"/>`;
+		const img = ImgX(`${imagePrefix}/${groupID}`);
 		out.log(
 			`<tr>`,
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
@@ -126,4 +126,12 @@ function buildName(j, ...parts) {
 
 function flag(f) {
 	return f ? "<b>Yes</b>" : "No";
+}
+
+function ImgX(path, w) {
+	const widthProp = w ? ` width=${w}` : ``;
+	return (
+		`<img src="${path}.light.png#gh-light-mode-only"${widthProp}/>` +
+		`<img src="${path}.dark.png#gh-dark-mode-only"${widthProp}/>`
+	);
 }
