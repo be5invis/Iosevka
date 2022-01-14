@@ -740,9 +740,19 @@ const TakeSampleImages = task(`sample-images:take`, async target => {
 });
 const ScreenShot = file.make(
 	img => `images/${img}.png`,
-	async (target, { full }) => {
+	async (target, out) => {
 		await target.need(TakeSampleImages);
-		await run("optipng", ["--strip", "all"], full);
+		await run(
+			"magick",
+			...[`${out.dir}/${out.name}.black.png`, `${out.dir}/${out.name}.white.png`],
+			..."( -clone 0-1 -fx u-v+1 )".split(" "),
+			..."( -clone 0,2 -compose DivideSrc -composite )".split(" "),
+			..."( -clone 3,2 -alpha Off -compose CopyOpacity -composite )".split(" "),
+			...["-delete", "0-3", out.full]
+		);
+		await rm(`${out.dir}/${out.name}.black.png`);
+		await rm(`${out.dir}/${out.name}.white.png`);
+		await run("optipng", ["--strip", "all"], out.full);
 	}
 );
 

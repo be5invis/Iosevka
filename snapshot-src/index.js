@@ -111,7 +111,8 @@ function captureElement(options, callback) {
 	window.scroll(0, 0);
 	setTimeout(function () {
 		// Set theme
-		document.querySelector("body").className = `color-${options.theme}`;
+		document.querySelector("body").className =
+			`color-${options.theme}` + ` bg-${options.background}`;
 
 		const element = document.querySelector(options.el);
 		if (options.applyClass) {
@@ -156,11 +157,14 @@ window.onload = function () {
 	let snapshotTasks = [];
 	for (const task of snapshotTasksRaw) {
 		for (const theme of ["dark", "light"]) {
-			snapshotTasks.push({
-				...task,
-				theme,
-				name: task.name + "." + theme
-			});
+			for (const bg of ["black", "white"]) {
+				snapshotTasks.push({
+					...task,
+					theme,
+					background: bg,
+					name: task.name + "." + theme + "." + bg
+				});
+			}
 		}
 	}
 	let current = 0;
