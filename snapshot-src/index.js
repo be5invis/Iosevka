@@ -11,7 +11,7 @@ ipc.on("scroll", function () {
 	onScroll.apply(this, arguments);
 	setTimeout(function () {
 		ipc.send("snapshot", "scroll-done");
-	}, 500);
+	}, 100);
 });
 let onComplete = function () {};
 ipc.on("complete", function () {
@@ -110,6 +110,9 @@ function cbAmendCharacterVariantContents(element, p) {
 function captureElement(options, callback) {
 	window.scroll(0, 0);
 	setTimeout(function () {
+		// Set theme
+		document.querySelector("body").className = `color-${options.theme}`;
+
 		const element = document.querySelector(options.el);
 		if (options.applyClass) {
 			element.className = options.applyClass;
@@ -149,7 +152,17 @@ function captureElement(options, callback) {
 }
 
 window.onload = function () {
-	const snapshotTasks = [...auxData.readmeSnapshotTasks, ...packagingTasks];
+	const snapshotTasksRaw = [...auxData.readmeSnapshotTasks, ...packagingTasks];
+	let snapshotTasks = [];
+	for (const task of snapshotTasksRaw) {
+		for (const theme of ["dark", "light"]) {
+			snapshotTasks.push({
+				...task,
+				theme,
+				name: task.name + "." + theme
+			});
+		}
+	}
 	let current = 0;
 	const step = function () {
 		const doit = function () {

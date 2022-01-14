@@ -1,7 +1,7 @@
 # Iosevka ![Version](https://img.shields.io/github/release/be5invis/Iosevka.svg)
 **Iosevka** is an *open-source*, *sans-serif* + *slab-serif*, *monospace* + *quasi‑proportional* typeface family, designed for *writing code*, using in *terminals*, and preparing *technical documents*.
 
-![](images/preview-all.png)
+![](images/preview-all.light.png#gh-light-mode-only)![](images/preview-all.dark.png#gh-dark-mode-only)
 
 ## Installation
 
@@ -29,11 +29,11 @@ Quit your editor/program. Unzip and open the folder.
 
 In the official package, Iosevka provides 6 monospace subfamilies (sans-serif and slab-serif, each in the 3 spacings Default, Term and Fixed) and 2 quasi-proportional subfamilies (Aile (sans-serif) and Etoile (slab-serif)). In all the monospace subfamilies, 9 weights (Thin to Heavy), 2 widths (Normal and Extended), and 3 slopes (Upright, Italic and Oblique) are included. In the quasi-proportional subfamilies, the quantity of widths is reduced to 1.
 
-![Weights sample](images/weights.png)
+![Weights sample](images/weights.light.png#gh-light-mode-only)![Weights sample](images/weights.dark.png#gh-dark-mode-only)
 
 All versions include the same ranges of characters: Latin letters, Greek letters (including Polytonic), some Cyrillic letters, IPA symbols and common punctuations and some symbols. You can check out the full list [here](http://be5invis.github.io/Iosevka/specimen).
 
-![Languages Sample](images/languages.png)
+![Languages Sample](images/languages.light.png#gh-light-mode-only)![Languages Sample](images/languages.dark.png#gh-dark-mode-only)
 
 <!-- BEGIN Section-Language-List -->
 <!-- THIS SECTION IS AUTOMATICALLY GENERATED. DO NOT EDIT. -->
@@ -72,14 +72,14 @@ Monospace subfamilies support ligations. Iosevka’s default ligation set is ass
 <td>Ligation Off</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/ligset-calt-0.png"/></td>
+<td colspan="2"><img src="images/ligset-calt-0.light.png#gh-light-mode-only"/><img src="images/ligset-calt-0.dark.png#gh-dark-mode-only"/></td>
 </tr>
 <tr>
 <td><code>calt</code></td>
 <td>Default setting in text editors</td>
 </tr>
 <tr>
-<td colspan="2"><img src="images/ligset-calt-1.png"/></td>
+<td colspan="2"><img src="images/ligset-calt-1.light.png#gh-light-mode-only"/><img src="images/ligset-calt-1.dark.png#gh-dark-mode-only"/></td>
 </tr>
 </table>
 
@@ -105,4 +105,4 @@ Please note that, due to the complex interactions when forming ligations, cherry
 - NJU (CN): https://mirrors.nju.edu.cn/github-release/be5invis/Iosevka
 ---
 
-![Family Matrix](images/matrix.png)
+![Family Matrix](images/matrix.light.png#gh-light-mode-only)![Family Matrix](images/matrix.dark.png#gh-dark-mode-only)

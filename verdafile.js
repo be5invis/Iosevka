@@ -643,8 +643,10 @@ const SampleImages = task(`sample-images`, async target => {
 	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
 	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
 	await target.need(
-		cfgP.map(opt => ScreenShot(opt.name)),
-		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name))
+		cfgP.map(opt => ScreenShot(opt.name + ".dark")),
+		cfgP.map(opt => ScreenShot(opt.name + ".light")),
+		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name + ".dark")),
+		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name + ".light"))
 	);
 });
 
@@ -691,16 +693,20 @@ const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target,
 });
 const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
-	const [cm, cmi, cmo] = await target.need(
-		BuildCM("iosevka", "iosevka-regular"),
-		BuildCM("iosevka", "iosevka-italic"),
-		BuildCM("iosevka", "iosevka-oblique")
-	);
 	await node(`utility/generate-snapshot-page/index`, {
 		inputPath: "snapshot-src/templates",
 		outputPath: out.full,
 		outputDataPath: `${out.dir}/${out.name}.data.json`
 	});
+});
+
+const AmendReadme = task("amend-readme", async target => {
+	await target.need(Parameters, UtilScripts);
+	const [cm, cmi, cmo] = await target.need(
+		BuildCM("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-italic"),
+		BuildCM("iosevka", "iosevka-oblique")
+	);
 	await amendReadmeFor("README.md", cm, cmi, cmo);
 	await amendReadmeFor("doc/stylistic-sets.md", cm, cmi, cmo);
 	await amendReadmeFor("doc/character-variants.md", cm, cmi, cmo);
@@ -830,7 +836,7 @@ phony(`release`, async target => {
 		goals.push(ReleaseGroup(cgr));
 	}
 	await target.need(goals);
-	await target.need(SampleImages, Pages, ReleaseNotes, ChangeLog);
+	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
