@@ -3,8 +3,35 @@
 "use strict";
 
 const ipc = require("electron").ipcRenderer;
-const packagingTasks = require("./packaging-tasks.json");
 const auxData = require("./index.data.json");
+
+ipc.on("start", function (event, snapshotTasksRaw) {
+	let snapshotTasks = [];
+	for (const task of snapshotTasksRaw) {
+		for (const theme of ["dark", "light"]) {
+			for (const bg of ["black", "white"]) {
+				snapshotTasks.push({
+					...task,
+					theme,
+					background: bg,
+					name: task.name + "." + theme + "." + bg
+				});
+			}
+		}
+	}
+	let current = 0;
+	const step = function () {
+		const doit = function () {
+			captureElement(snapshotTasks[current], function () {
+				current += 1;
+				if (current >= snapshotTasks.length) window.close();
+				else setTimeout(step, 100);
+			});
+		};
+		setTimeout(doit, 100);
+	};
+	setTimeout(step, 2000);
+});
 
 let onScroll = function () {};
 ipc.on("scroll", function () {
@@ -13,6 +40,7 @@ ipc.on("scroll", function () {
 		ipc.send("snapshot", "scroll-done");
 	}, 100);
 });
+
 let onComplete = function () {};
 ipc.on("complete", function () {
 	onComplete.apply(this, arguments);
@@ -153,32 +181,5 @@ function captureElement(options, callback) {
 }
 
 window.onload = function () {
-	const snapshotTasksRaw = [...auxData.readmeSnapshotTasks, ...packagingTasks];
-	let snapshotTasks = [];
-	for (const task of snapshotTasksRaw) {
-		for (const theme of ["dark", "light"]) {
-			for (const bg of ["black", "white"]) {
-				snapshotTasks.push({
-					...task,
-					theme,
-					background: bg,
-					name: task.name + "." + theme + "." + bg
-				});
-			}
-		}
-	}
-	let current = 0;
-	const step = function () {
-		const doit = function () {
-			captureElement(snapshotTasks[current], function () {
-				current += 1;
-				if (current >= snapshotTasks.length) window.close();
-				else setTimeout(step, 100);
-			});
-		};
-		setTimeout(doit, 100);
-	};
-	ipc.send("snapshot", "i am ready");
-	console.log("I AM READY");
-	setTimeout(step, 2000);
+	ipc.send("snapshot", "Browser process ready");
 };
