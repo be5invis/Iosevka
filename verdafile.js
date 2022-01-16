@@ -639,14 +639,17 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 ///////////////////////////////////////////////////////////
 // Sample Images
 
+const SnapshotParallel = 8;
 const SampleImages = task(`sample-images`, async target => {
 	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
-	const de = JSON.parse(fs.readFileSync(`${sh.dir}/${sh.name}.data.json`));
+	let snapshotFiles = [...cfgP];
+	for (let i = 0; i < SnapshotParallel; i++) {
+		const de = JSON.parse(fs.readFileSync(`${sh.dir}/readme-tasks-${i}.json`));
+		for (const x of de) snapshotFiles.push(x);
+	}
 	await target.need(
-		cfgP.map(opt => ScreenShot(opt.name + ".dark")),
-		cfgP.map(opt => ScreenShot(opt.name + ".light")),
-		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name + ".dark")),
-		de.readmeSnapshotTasks.map(opt => ScreenShot(opt.name + ".light"))
+		snapshotFiles.map(opt => ScreenShot(opt.name + ".dark")),
+		snapshotFiles.map(opt => ScreenShot(opt.name + ".light"))
 	);
 });
 
@@ -696,7 +699,9 @@ const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
 	await node(`utility/generate-snapshot-page/index`, {
 		inputPath: "snapshot-src/templates",
 		outputPath: out.full,
-		outputDataPath: `${out.dir}/${out.name}.data.json`
+		outputDataPath: `${out.dir}/${out.name}.data.json`,
+		outputTaskFilePrefix: `${out.dir}/readme-tasks`,
+		parallel: SnapshotParallel
 	});
 });
 
@@ -736,7 +741,18 @@ const SnapShotCSS = file(`${SNAPSHOT_TMP}/index.css`, async (target, out) => {
 });
 const TakeSampleImages = task(`sample-images:take`, async target => {
 	await target.need(SampleImagesPre);
-	await cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images");
+
+	await run("npm", "install", "--no-save", "electron");
+
+	let taskLists = [`packaging-tasks.json`];
+	for (let i = 0; i < SnapshotParallel; i++) taskLists.push(`readme-tasks-${i}.json`);
+	await Promise.all(
+		taskLists.map((file, i) =>
+			Delay(i * 1000).then(() =>
+				cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images", file)
+			)
+		)
+	);
 });
 const ScreenShot = file.make(
 	img => `images/${img}.png`,
@@ -1065,3 +1081,9 @@ const VlCssFontStretch = {
 		x == "extra-expanded" ||
 		x == "ultra-expanded"
 };
+
+// Utilities
+
+function Delay(t) {
+	return new Promise(resolve => setTimeout(resolve, t));
+}
