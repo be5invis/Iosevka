@@ -1,9 +1,11 @@
 "use strict";
 
 const { app, BrowserWindow } = require("electron");
-let argDir = process.argv[2];
-let fs = require("fs");
-let cp = require("child_process");
+const fs = require("fs");
+const cp = require("child_process");
+
+const argDir = process.argv[2];
+const taskFile = process.argv[3];
 
 let mainWindow = null;
 let allWindowClosed = false;
@@ -41,6 +43,13 @@ function GOTO(phase) {
 }
 const phases = {
 	prepare: function (event, arg) {
+		console.log(arg);
+		GOTO(phases["receive-rect"]);
+
+		const tasks = JSON.parse(fs.readFileSync(taskFile));
+		event.sender.send("start", tasks);
+	},
+	"wait-screenshot": function (event, arg) {
 		console.log(arg);
 		GOTO(phases["receive-rect"]);
 	},
