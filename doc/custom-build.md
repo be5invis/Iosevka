@@ -18,6 +18,12 @@ To pull it from Docker Hub and start a standard build of the latest released ver
 docker run -it -v $(pwd):/build avivace/iosevka-build
 ```
 
+If you are using Powershell, run
+
+```
+docker run -it -v ${pwd}:/build avivace/iosevka-build
+```
+
 Fonts files will be placed in the `dist` folder.
 
 You can provide `private-build.plans.toml` for a customized build and/or specify the desired release appending `-e FONT_VERSION=X.X.X`. to the Docker command.
