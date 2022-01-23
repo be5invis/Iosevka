@@ -38,7 +38,7 @@ ipc.on("scroll", function () {
 	onScroll.apply(this, arguments);
 	setTimeout(function () {
 		ipc.send("snapshot", "scroll-done");
-	}, 100);
+	}, 500);
 });
 
 let onComplete = function () {};
