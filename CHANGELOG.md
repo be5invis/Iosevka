@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 11.2.7
+
+* Add characters:
+  - LIGHT VERTICAL BAR (`U+2758`) ... HEAVY VERTICAL BAR (`U+275A`).
+
+
 ### 11.2.6
 
  * Fix variant selection of CIRCLED ZERO WITH SLASH (`U+1F10D`) (#1274).
