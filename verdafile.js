@@ -748,7 +748,7 @@ const TakeSampleImages = task(`sample-images:take`, async target => {
 	for (let i = 0; i < SnapshotParallel; i++) taskLists.push(`readme-tasks-${i}.json`);
 	await Promise.all(
 		taskLists.map((file, i) =>
-			Delay(i * 1000).then(() =>
+			Delay(i * 4000).then(() =>
 				cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images", file)
 			)
 		)
