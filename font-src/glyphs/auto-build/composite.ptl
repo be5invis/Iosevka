@@ -819,67 +819,65 @@ glyph-block Autobuild-Fractions : begin
 	define [createFracImpl prefix demands fine scaleFactor closing] : begin
 		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix '' demands
 		define miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature gs
-			crowd  -- 3.5
-			scale  -- (scaleFactor + 0.05)
+			crowd  --  3.5
+			scale  --  (scaleFactor + 0.05)
 
-		local dist : XH * (1 - scaleFactor - closing)
-		local gnFractionBar ".frac-bar-\(prefix)"
+		define dist : XH * (1 - scaleFactor - closing)
+		define partOffsetY : CAP * scaleFactor + dist
 
-		define [numeratorImpl numid] : begin
-			local gnn ".frac-num-\(prefix){\(numid)}"
+		define [FracBar numWidth] : begin
+			local gnFracBar ".frac-bar{\(prefix)}{\(numWidth)}"
+			if [not : query-glyph gnFracBar] : create-glyph gnFracBar : glyph-proc
+				set-width Width
+				if fine : include : HBar SB RightSB SymbolMid (fine * 0.75)
+				set-base-anchor 'fracBuildUp' (Middle - numWidth * scaleFactor / 2) (SymbolMid + dist / 2)
+			return gnFracBar
+
+		define [FracShift numWidth denWidth] : begin
+			local offset : -(numWidth / 2 + denWidth / 2) * scaleFactor
+			local gnFracShift ".frac-shift{\(prefix)}{\(offset)}"
+			if [not : query-glyph gnFracShift] : create-glyph gnFracShift : glyph-proc
+				set-width 0
+				set-mark-anchor 'fracBuildUp' 0 0 offset (-partOffsetY)
+			return gnFracShift
+
+		define [FracPartImpl subGlyphName] : begin
+			local gnn ".frac-inner{\(prefix)}{\(subGlyphName)}"
 			if [not : query-glyph gnn] : create-glyph gnn : glyph-proc
-				define mfNumGlyph : miniatureFont.queryByNameEnsured numid
+				define subGlyph : miniatureFont.queryByNameEnsured subGlyphName
 
 				set-width 0
-				set-mark-anchor 'compositeInner' 0 0
-				include mfNumGlyph
+				set-mark-anchor 'fracBuildUp' 0 0 (subGlyph.advanceWidth * scaleFactor) 0
+
+				include subGlyph
 				include : Upright
-				include : Translate (- mfNumGlyph.advanceWidth / 2) 0
+				include : Translate 0 0
 				include : Scale scaleFactor
-				include : Translate Middle (SymbolMid + dist / 2)
 				include : Italify
-				include : Translate (-Width) 0
 			return gnn
 
-		define [denumeratorImplT offset] : lambda [denid] : begin
-			local gnd ".frac-den-\(prefix){\(denid)}{\(offset)}"
-			if [not : query-glyph gnd] : create-glyph gnd : glyph-proc
-				define mfDenGlyph : miniatureFont.queryByNameEnsured denid
-
-				set-width 0
-				set-mark-anchor 'compositeInner' 0 0
-				include mfDenGlyph
-				include : Upright
-				include : Translate offset 0
-				include : Scale scaleFactor
-				include : Translate Middle (SymbolMid - CAP * scaleFactor - dist / 2)
-				include : Italify
-				include : Translate (-Width) 0
-			return gnd
-
 		define [createFractionImpl job jobDecomposable] : begin
-				local {gnf unicode {numid :: denidList}} job
-				local gnn : EnsureComponentGlyphT numid numeratorImpl
-				local gndList {}
+			local {gnf unicode {numid :: denidList}} job
+			if [not : query-glyph gnf] : create-glyph gnf unicode : glyph-proc
 
+				local gnn : EnsureComponentGlyphT numid FracPartImpl
+				local numWidth [miniatureFont.queryByNameEnsured numid].advanceWidth
+
+				local gnFracBar : FracBar numWidth
+
+				local gndList {}
 				local totalDenWidth 0
-				local offset        0
 				foreach denid [items-of denidList] : begin
 					set totalDenWidth : totalDenWidth + [miniatureFont.queryByNameEnsured denid].advanceWidth
-				foreach denid [items-of denidList] : begin
-					gndList.push : EnsureComponentGlyphT denid : denumeratorImplT (offset - totalDenWidth / 2)
-					set offset : offset + [miniatureFont.queryByNameEnsured denid].advanceWidth
+					gndList.push : EnsureComponentGlyphT denid FracPartImpl
 
-				if [not : query-glyph gnf] : create-glyph gnf unicode : glyph-proc
-					include : refer-glyph gnn
-					foreach gnd [items-of gndList] : include : refer-glyph gnd
-					include : Translate (Width) 0
-					include : refer-glyph gnFractionBar
-					if jobDecomposable : CvDecompose.set currentGlyph { gnFractionBar gnn :: gndList }
+				local gnFracShift : FracShift numWidth totalDenWidth
 
-		create-glyph gnFractionBar : glyph-proc
-			set-width Width
-			if fine : include : HBar SB RightSB SymbolMid (fine * 0.75)
+				include [refer-glyph gnFracBar] AS_BASE ALSO_METRICS
+				include : refer-glyph gnn
+				include : refer-glyph gnFracShift
+				foreach gnd [items-of gndList] : include : refer-glyph gnd
+				if jobDecomposable : CvDecompose.set currentGlyph { gnFracBar gnn gnFracShift :: gndList }
 
 		foreach job [items-of jobs.nonDecomposable] : createFractionImpl job false
 		foreach job [items-of jobs.decomposableJobs] : createFractionImpl job true
