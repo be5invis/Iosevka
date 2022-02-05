@@ -515,7 +515,7 @@ will:
 
 #### Sample Configuration
 
-A sample configuration could be found at [private-build-plans.sample.toml](private-build-plans.sample.toml).
+A sample configuration could be found at [private-build-plans.sample.toml](https://github.com/be5invis/Iosevka/blob/master/private-build-plans.sample.toml).
 
 ### TTC Building
 
