@@ -94,7 +94,6 @@ exports.Glyph = class Glyph {
 		this.cloneRankFromGlyph(g);
 	}
 	cloneRelationFromGlyph(g) {
-		this.shortName = g.shortName;
 		this.related = g.related;
 	}
 	cloneRankFromGlyph(g) {

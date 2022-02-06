@@ -114,7 +114,9 @@ app.on("ready", function () {
 		width: 64 * 16 * zoom,
 		height: 1024 * zoom,
 		//x: 5000, y: 5000,
+		show: false,
 		webPreferences: {
+			offscreen: true,
 			contextIsolation: false,
 			zoomFactor: zoom,
 			nodeIntegration: true,
