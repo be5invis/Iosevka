@@ -2199,7 +2199,9 @@
 <td><img src="../images/character-variant-cv90-3.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-cv90-3.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-cv90-4.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-cv90-4.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-cv90-5.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-cv90-5.dark.png#gh-dark-mode-only" width=32/></td>
-<td colspan="7"> </td>
+<td><img src="../images/character-variant-cv90-6.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-cv90-6.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-cv90-7.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-cv90-7.dark.png#gh-dark-mode-only" width=32/></td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td>1</td>
@@ -2207,7 +2209,9 @@
 <td>3</td>
 <td>4</td>
 <td>5</td>
-<td colspan="7"> </td>
+<td>6</td>
+<td>7</td>
+<td colspan="5"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>cv91</code></td>

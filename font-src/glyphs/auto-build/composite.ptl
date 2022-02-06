@@ -816,78 +816,114 @@ glyph-block Autobuild-Fractions : begin
 	glyph-block-import Recursive-Build : Miniature Thner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs EnsureComponentGlyphT CreateDerivedFontFromJobs applyRelations
 
-	define [createFracImpl prefix demands fine scaleFactor closing] : begin
+	define [createFracImpl prefix demands layout] : begin
 		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix '' demands
 		define miniatureFont : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Miniature gs
-			crowd  -- 3.5
-			scale  -- (scaleFactor + 0.05)
+			crowd  --  layout.crowd
+			scale  --  (layout.scaleFactor + 0.05)
+			mono   --  true
+			mono2  --  true
 
-		local dist : XH * (1 - scaleFactor - closing)
-		local gnFractionBar ".frac-bar-\(prefix)"
+		define [FracBase nRows numWidth] : begin
+			local gnFracBase ".frac-base{\(prefix)}{\(nRows)}{\(numWidth)}"
+			if [not : query-glyph gnFracBase] : create-glyph gnFracBase : layout.baseShape nRows numWidth
+			return gnFracBase
 
-		define [numeratorImpl numid] : begin
-			local gnn ".frac-num-\(prefix){\(numid)}"
+		define [FracShift iRow nRows numWidth denWidth] : begin
+			local gnFracShift ".frac-shift{\(prefix)}{\(iRow)}{\(nRows)}{\(numWidth)}{\(denWidth)}"
+			if [not : query-glyph gnFracShift] : create-glyph gnFracShift : layout.shiftShape iRow nRows numWidth denWidth
+			return gnFracShift
+
+		define [FracPartImpl subGlyphName] : begin
+			local gnn ".frac-inner{\(prefix)}{\(subGlyphName)}"
 			if [not : query-glyph gnn] : create-glyph gnn : glyph-proc
-				define mfNumGlyph : miniatureFont.queryByNameEnsured numid
-
+				define subGlyph : miniatureFont.queryByNameEnsured subGlyphName
 				set-width 0
-				set-mark-anchor 'compositeInner' 0 0
-				include mfNumGlyph
+				set-mark-anchor 'fracBuildUp' 0 0 (subGlyph.advanceWidth * layout.scaleFactor) 0
+
+				include subGlyph
 				include : Upright
-				include : Translate (- mfNumGlyph.advanceWidth / 2) 0
-				include : Scale scaleFactor
-				include : Translate Middle (SymbolMid + dist / 2)
+				include : Translate 0 0
+				include : Scale layout.scaleFactor
 				include : Italify
-				include : Translate (-Width) 0
 			return gnn
 
-		define [denumeratorImplT offset] : lambda [denid] : begin
-			local gnd ".frac-den-\(prefix){\(denid)}{\(offset)}"
-			if [not : query-glyph gnd] : create-glyph gnd : glyph-proc
-				define mfDenGlyph : miniatureFont.queryByNameEnsured denid
-
-				set-width 0
-				set-mark-anchor 'compositeInner' 0 0
-				include mfDenGlyph
-				include : Upright
-				include : Translate offset 0
-				include : Scale scaleFactor
-				include : Translate Middle (SymbolMid - CAP * scaleFactor - dist / 2)
-				include : Italify
-				include : Translate (-Width) 0
-			return gnd
-
 		define [createFractionImpl job jobDecomposable] : begin
-				local {gnf unicode {numid :: denidList}} job
-				local gnn : EnsureComponentGlyphT numid numeratorImpl
-				local gndList {}
+			local {gnf unicode gnParts} job
+			if [not : query-glyph gnf] : create-glyph gnf unicode : glyph-proc
+				local rows : layout.breakRows gnParts
+				local decomposition {}
+				local lastRowWidth 0
+				foreach j [range 0 rows.length] : begin
+					local gnList {}
+					local thisRowWidth 0
+					foreach gnSubRowElement [items-of rows.(j)] : begin
+						set thisRowWidth : thisRowWidth + [miniatureFont.queryByNameEnsured gnSubRowElement].advanceWidth
+						gnList.push : EnsureComponentGlyphT gnSubRowElement FracPartImpl
 
-				local totalDenWidth 0
-				local offset        0
-				foreach denid [items-of denidList] : begin
-					set totalDenWidth : totalDenWidth + [miniatureFont.queryByNameEnsured denid].advanceWidth
-				foreach denid [items-of denidList] : begin
-					gndList.push : EnsureComponentGlyphT denid : denumeratorImplT (offset - totalDenWidth / 2)
-					set offset : offset + [miniatureFont.queryByNameEnsured denid].advanceWidth
+					if (j == 0)
+					: then : begin
+						local gnBase : FracBase rows.length thisRowWidth
+						include [refer-glyph gnBase] AS_BASE ALSO_METRICS
+						decomposition.push gnBase
+					: else : begin
+						local gnShift : FracShift j rows.length lastRowWidth thisRowWidth
+						include : refer-glyph gnShift
+						decomposition.push gnShift
 
-				if [not : query-glyph gnf] : create-glyph gnf unicode : glyph-proc
-					include : refer-glyph gnn
-					foreach gnd [items-of gndList] : include : refer-glyph gnd
-					include : Translate (Width) 0
-					include : refer-glyph gnFractionBar
-					if jobDecomposable : CvDecompose.set currentGlyph { gnFractionBar gnn :: gndList }
+					foreach gnRowElement [items-of gnList] : begin
+						include : refer-glyph gnRowElement
+						decomposition.push gnRowElement
 
-		create-glyph gnFractionBar : glyph-proc
-			set-width Width
-			if fine : include : HBar SB RightSB SymbolMid (fine * 0.75)
+					set lastRowWidth thisRowWidth
+
+				if jobDecomposable : CvDecompose.set currentGlyph decomposition
 
 		foreach job [items-of jobs.nonDecomposable] : createFractionImpl job false
 		foreach job [items-of jobs.decomposableJobs] : createFractionImpl job true
 
 		applyRelations jobs.relApplications
 
-	define [createFractions records]       : createFracImpl 'frac' records [AdviceStroke 3] 0.55 0.05
-	define [createPowerlineStacks records] : createFracImpl 'pwlStack' records 0 0.6 0.15
+
+	define [FractionLayout fine scaleFactor closing] : begin
+		define dist : XH * (1 - scaleFactor - closing)
+		define partOffsetY : CAP * scaleFactor + dist
+
+		return : object
+			crowd        : begin 3.5
+			scaleFactor  : begin scaleFactor
+			breakRows    : function [a] { {a.0} [a.slice 1] }
+			baseShape    : function [nRows firstRowWidth] : glyph-proc
+				set-width Width
+				if fine : include : HBar SB RightSB SymbolMid (fine * 0.75)
+				set-base-anchor 'fracBuildUp' (Middle - firstRowWidth * scaleFactor / 2) (SymbolMid + dist / 2)
+			shiftShape   : function [iRow nRows numWidth denWidth] : glyph-proc
+				local offset : -(numWidth / 2 + denWidth / 2) * scaleFactor
+				set-width 0
+				set-mark-anchor 'fracBuildUp' 0 0 offset (-partOffsetY)
+
+
+	define [ControlPictureLayout crowd scaleFactor pGap] : begin
+		define gap : XH * pGap
+
+		return : object
+			crowd        : begin crowd
+			scaleFactor  : begin scaleFactor
+			breakRows    : function [a] : a.map : function [x] {x}
+			baseShape    : function [nRows firstRowWidth] : glyph-proc
+				set-width Width
+				set-base-anchor 'fracBuildUp' SB (SymbolMid + (CAP * scaleFactor * nRows + gap * (nRows - 1)) / 2 - CAP * scaleFactor)
+			shiftShape   : function [iRow nRows numWidth denWidth] : glyph-proc
+				define [startPos w p] : SB + (RightSB - SB - w * scaleFactor) * p / (nRows - 1)
+				local offset : [startPos denWidth iRow] - [startPos numWidth (iRow - 1)] - numWidth * scaleFactor
+
+				set-width 0
+				set-mark-anchor 'fracBuildUp' 0 0 offset (-(CAP * scaleFactor + gap))
+
+	define [createFractions records]       : createFracImpl 'frac'     records : FractionLayout [AdviceStroke 3] 0.55 0.05
+	define [createPowerlineStacks records] : createFracImpl 'pwlStack' records : FractionLayout 0 0.6 0.15
+	define [createControlPictures2 records] : createFracImpl 'ctrlPict2' records : ControlPictureLayout 3.75 0.55  0.2
+	define [createControlPictures3 records] : createFracImpl 'ctrlPict3' records : ControlPictureLayout 5    0.375 0.1
 
 	createFractions : list
 		list 0x00BC { 'one.lnum' 'four.lnum' }
@@ -920,6 +956,45 @@ glyph-block Autobuild-Fractions : begin
 		# Powerline LN symbol
 		list 0xE0A1 { 'L' 'N' }
 		list 0xE0A3 { 'C' 'N' }
+
+	createControlPictures2 : list
+		list 0x2408 {"B" "S"}
+		list 0x2409 {"H" "T"}
+		list 0x240A {"L" "F"}
+		list 0x240B {"V" "T"}
+		list 0x240C {"F" "F"}
+		list 0x240D {"C" "R"}
+		list 0x240E {"S" "O"}
+		list 0x240F {"S" "I"}
+		list 0x2419 {"E" "M"}
+		list 0x241C {"F" "S"}
+		list 0x241D {"G" "S"}
+		list 0x241E {"R" "S"}
+		list 0x241F {"U" "S"}
+		list 0x2420 {"S" "P"}
+		list 0x2424 {"N" "L"}
+
+	createControlPictures3 : list
+		list 0x2400 {"N" "U" "L"}
+		list 0x2401 {"S" "O" "H"}
+		list 0x2402 {"S" "T" "X"}
+		list 0x2403 {"E" "T" "X"}
+		list 0x2404 {"E" "O" "T"}
+		list 0x2405 {"E" "N" "Q"}
+		list 0x2406 {"A" "C" "K"}
+		list 0x2407 {"B" "E" "L"}
+		list 0x2410 {"D" "L" "E"}
+		list 0x2411 {"D" "C" "one.lnum"}
+		list 0x2412 {"D" "C" "two.lnum"}
+		list 0x2413 {"D" "C" "three.lnum"}
+		list 0x2414 {"D" "C" "four.lnum"}
+		list 0x2415 {"N" "A" "K"}
+		list 0x2416 {"S" "Y" "N"}
+		list 0x2417 {"E" "T" "B"}
+		list 0x2418 {"C" "A" "N"}
+		list 0x241A {"S" "U" "B"}
+		list 0x241B {"E" "S" "C"}
+		list 0x2421 {"D" "E" "L"}
 
 glyph-block AutoBuild-Accented-Equal : begin
 	glyph-block-import CommonShapes
@@ -1004,42 +1079,6 @@ glyph-block AutoBuild-Accented-Equal : begin
 	createAccentedOp 'markDemoBaseSpace' 6.5 0.35 0 (aboveMarkBot - (CAP * 0.35 - XH * 0.35)) : list
 		list 0x2121  {"T" "E" "L"}
 		list 0x213B  {"F" "A" "X"}
-	createAccentedOp 'markDemoBaseSpace' 6.5 0.35 0 (SymbolMid - CAP / 2 * 0.35) : list
-		list 0x2400 {"N" "U" "L"}
-		list 0x2401 {"S" "O" "H"}
-		list 0x2402 {"S" "T" "X"}
-		list 0x2403 {"E" "T" "X"}
-		list 0x2404 {"E" "O" "T"}
-		list 0x2405 {"E" "N" "Q"}
-		list 0x2406 {"A" "C" "K"}
-		list 0x2407 {"B" "E" "L"}
-		list 0x2408 {"B" "S"}
-		list 0x2409 {"H" "T"}
-		list 0x240A {"L" "F"}
-		list 0x240B {"V" "T"}
-		list 0x240C {"F" "F"}
-		list 0x240D {"C" "R"}
-		list 0x240E {"S" "O"}
-		list 0x240F {"S" "I"}
-		list 0x2410 {"D" "L" "E"}
-		list 0x2411 {"D" "C" "one.lnum"}
-		list 0x2412 {"D" "C" "two.lnum"}
-		list 0x2413 {"D" "C" "three.lnum"}
-		list 0x2414 {"D" "C" "four.lnum"}
-		list 0x2415 {"N" "A" "K"}
-		list 0x2416 {"S" "Y" "N"}
-		list 0x2417 {"E" "T" "B"}
-		list 0x2418 {"C" "A" "N"}
-		list 0x2419 {"E" "M"}
-		list 0x241A {"S" "U" "B"}
-		list 0x241B {"E" "S" "C"}
-		list 0x241C {"F" "S"}
-		list 0x241D {"G" "S"}
-		list 0x241E {"R" "S"}
-		list 0x241F {"U" "S"}
-		list 0x2420 {"S" "P"}
-		list 0x2421 {"D" "E" "L"}
-		list 0x2424 {"N" "L"}
 
 glyph-block Autobuild-Ligatures : begin
 	glyph-block-import CommonShapes
