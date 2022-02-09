@@ -255,7 +255,7 @@ exports.SetupBuilders = function (bindings) {
 		}
 	}
 	function prepareSpiroKnots(_knots, s) {
-		let knots = _knots;
+		let knots = [..._knots];
 		while (knots[0] && knots[0] instanceof Function) {
 			knots[0].call(s);
 			knots.splice(0, 1);
