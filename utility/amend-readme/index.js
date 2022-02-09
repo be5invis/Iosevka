@@ -216,25 +216,25 @@ function figureOutDefaults(variantsData, gr) {
 			desc: "Sans Upright",
 			mask: 1,
 			result: null,
-			composition: { ...variantsData.defaults.sansUpright }
+			composition: { ...variantsData.defaults.sans.upright }
 		},
 		{
 			desc: "Sans Italic",
 			mask: 2,
 			result: null,
-			composition: { ...variantsData.defaults.sansItalic }
+			composition: { ...variantsData.defaults.sans.italic }
 		},
 		{
 			desc: "Slab Upright",
 			mask: 4,
 			result: null,
-			composition: { ...variantsData.defaults.slabUpright }
+			composition: { ...variantsData.defaults.slab.upright }
 		},
 		{
 			desc: "Slab Italic",
 			mask: 8,
 			result: null,
-			composition: { ...variantsData.defaults.slabItalic }
+			composition: { ...variantsData.defaults.slab.italic }
 		}
 	];
 
