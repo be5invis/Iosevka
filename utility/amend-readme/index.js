@@ -78,7 +78,7 @@ async function processCvOt(dirs) {
 				const iCvv = rid * entriesPerRow + cid;
 				if (iCvv >= effVariants.length) continue;
 				const cvv = effVariants[iCvv];
-				const imageID = `${dirs.images}/character-variant-${cv.tag}-${cvv.rank}`;
+				const imageID = `${dirs.images}/character-variant-${cv.key}-${cvv.key}`;
 				const image = ImgX(imageID, imgWidth);
 				md.log(`<td${itemColSpanHtml}>${image}</td>`);
 			}
@@ -119,60 +119,35 @@ async function processCherryPickingStyles(dirs) {
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
 	md.log(await fs.readFile(headerPath, "utf-8"));
 
-	formatCv(md, dirs, {
-		introMD: `Default digit form`,
-		sampleImageCountEm: 10,
-		alternatives: [
-			{
-				imageId: "lnum",
-				selectors: [`digit-form = 'lining'`],
-				description: `Lining (default)`
-			},
-			{
-				imageId: "onum",
-				selectors: [`digit-form = 'old-style'`],
-				description: `Old-style`
-			}
-		]
-	});
-
-	formatCv(md, dirs, {
-		introMD: `APL form`,
-		sampleImageCountEm: 7,
-		alternatives: [
-			{
-				imageId: "APLF-off",
-				selectors: [`apl-form = 'none'`],
-				description: `Disable APL-specific forms`
-			},
-			{
-				imageId: "APLF-on",
-				selectors: [`apl-form = 'enable'`],
-				description: `Enable APL-specific forms for operators used in APL to harmonize APL operators`
-			}
-		]
-	});
-
-	for (const cv of variantsData.primes) {
-		if (!cv.tag) continue;
+	for (const cv of [...variantsData.specials, ...variantsData.primes]) {
+		if (!cv.tag && !cv.isSpecial) continue;
 		const sampleText = cv.descSampleText
 			.map(c => (c === "`" ? "`` ` ``" : `\`${c}\``))
 			.join(", ");
 		const explainText = cv.samplerExplain ? ` (${cv.samplerExplain})` : ``;
 		const info = {
-			introMD: `Styles for ${sampleText}${explainText}`,
+			introMD: cv.description || `Styles for ${sampleText + explainText}`,
 			sampleImageCountEm: sampleImageCountEmOfCv(cv),
 			alternatives: []
 		};
 		const defaults = figureOutDefaults(variantsData, cv);
 		for (const cvv of cv.variants) {
-			if (!cvv.rank) continue;
-
-			info.alternatives.push({
-				imageId: `${cv.tag}-${cvv.rank}`,
-				selectors: [`${cv.key} = '${cvv.key}'`, `${cv.tag} = ${cvv.rank}`],
-				description: formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
-			});
+			if (!cvv.rank && !cv.isSpecial) continue;
+			if (cv.tag) {
+				info.alternatives.push({
+					imageId: `${cv.key}-${cvv.key}`,
+					selectors: [`${cv.key} = '${cvv.key}'`, `${cv.tag} = ${cvv.rank}`],
+					description:
+						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
+				});
+			} else {
+				info.alternatives.push({
+					imageId: `${cv.key}-${cvv.key}`,
+					selectors: [`${cv.key} = '${cvv.key}'`],
+					description:
+						formatDescription(cvv.description) + formatDefaults(cvv.key, defaults)
+				});
+			}
 		}
 		formatCv(md, dirs, info);
 	}
