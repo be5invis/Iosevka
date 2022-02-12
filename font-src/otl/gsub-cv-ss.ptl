@@ -1,6 +1,7 @@
 import [add-lookup add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from "./table-util"
-import [Cv AnyCv CvDecompose DollarShrinkKernel DollarShorterBar] from "../support/gr"
+import [Cv AnyCv CvDecompose RightDependentLink RightDependentTrigger] from "../support/gr"
 
+extern Map
 extern Set
 
 define look-around null
@@ -29,20 +30,32 @@ export : define [buildCVSS sink para glyphStore] : begin
 		.type 'gsub_multiple'
 		.substitutions decompositions
 
-	# '$' : Kernel Shrinking
-	define dsFrom { }
-	define dsTo   { }
-	define sbSet : new Set
+	# Right Dependent
+	define rightDependentGroups {.}
 	foreach { gid g } [glyphStore.namedEntries] : begin
-		if ([DollarShorterBar.get g] === 'trigger') : begin
-			sbSet.add : glyphStore.ensureExists gid
-		if [DollarShrinkKernel.get g] : begin
-			dsFrom.push : glyphStore.ensureExists gid
-			dsTo.push : glyphStore.ensureExists : DollarShrinkKernel.get g
+		local trigger : RightDependentTrigger.get g
+		if trigger : begin
+			if [not rightDependentGroups.(trigger)] : set rightDependentGroups.(trigger) : object
+				triggerGlyphs : new Set
+				links         : new Map
+
+			rightDependentGroups.(trigger).triggerGlyphs.add gid
+
+		local links : RightDependentLink.getAll g
+		if links : foreach { key linked } [Object.entries links] : begin
+			if [not rightDependentGroups.(key)] : set rightDependentGroups.(key) : object
+				triggerGlyphs : new Set
+				links         : new Map
+
+			rightDependentGroups.(key).links.set gid [glyphStore.ensureExists linked]
 
 	define lookupNameDollarShrink : add-lookup sink : object
 		.type 'gsub_chaining'
-		.rules : list : chain-rule (dsFrom ~> dsTo) ([Array.from sbSet] ~> look-around)
+		.rules : [Array.from : Object.entries rightDependentGroups].map : function kv : begin
+			local group kv.1
+			return : chain-rule
+				[Array.from : group.links.keys]  ~> [Array.from : group.links.values]
+				[Array.from group.triggerGlyphs] ~> look-around
 
 
 	define [addFeatureAndLookup tag lookupName init] : begin

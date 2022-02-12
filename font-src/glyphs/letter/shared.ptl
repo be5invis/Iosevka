@@ -1,8 +1,8 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from '../../support/utils'
-import [Dotless CvDecompose DollarShorterBar] from "../../support/gr"
-import [ DesignParameters ] from "../../meta/aesthetics"
+import [Dotless CvDecompose RightDependentTrigger RightDependentLink] from "../../support/gr"
+import [DesignParameters] from "../../meta/aesthetics"
 
 glyph-module
 
@@ -43,13 +43,14 @@ glyph-block Letter-Shared : begin
 			foreach accentGid [items-of accentGids] : include [refer-glyph accentGid]
 			if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src ::accentGids }
 
-	glyph-block-export CreateDollarLikeComposition
-	define [CreateDollarLikeComposition gidDst unicode gidPart1U gidPart1R gidPart2] : begin
+	glyph-block-export CreateRightDependentComposite
+	define [CreateRightDependentComposite gidDst unicode gidPart1 gidPart2] : begin
 		create-glyph gidDst unicode : glyph-proc
-			local kernel : if [DollarShorterBar.get : query-glyph gidPart2] gidPart1R gidPart1U
+			local trigger : RightDependentTrigger.get : query-glyph gidPart2
+			local kernel : [RightDependentLink.get [query-glyph gidPart1] trigger] || gidPart1
 			include [refer-glyph kernel] AS_BASE ALSO_METRICS
 			include [refer-glyph gidPart2]
-			CvDecompose.set currentGlyph { gidPart1U gidPart2 }
+			CvDecompose.set currentGlyph { gidPart1 gidPart2 }
 
 	glyph-block-export SetGrekUpperTonos
 	define [SetGrekUpperTonos kern] : glyph-proc
