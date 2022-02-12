@@ -30,11 +30,13 @@ glyph-block Letter-Latin-V : begin
 		define dgCor : DiagCor top (Width / 2) 0 (sw * 2)
 		define clearance : 0 - OX
 
+		local sbScale : if barStraight StraightSbShrink 1
+		define vxStartL : df.leftSB * sbScale + clearance
+		define vxEndL : df.middle - cornerHW + clearance
+		define vxStartR : df.width - df.leftSB * sbScale - clearance
+		define vxEndR : df.middle + cornerHW - clearance
+
 		if barStraight : do
-			define vxStartL : df.leftSB * StraightSbShrink + clearance
-			define vxEndL : df.middle - cornerHW + clearance
-			define vxStartR : df.width - df.leftSB * StraightSbShrink - clearance
-			define vxEndR : df.middle + cornerHW - clearance
 			include : spiro-outline
 				flat [mix vxStartL vxEndL 0] [mix top 0 0]
 				curl [mix vxStartL vxEndL pInktrap] [mix top 0 pInktrap]
@@ -43,10 +45,6 @@ glyph-block Letter-Latin-V : begin
 				flat [mix vxStartR vxEndR pInktrap] [mix top 0 pInktrap]
 				curl [mix vxStartR vxEndR 0] [mix top 0 0]
 		: else : do
-			define vxStartL : df.leftSB + clearance
-			define vxEndL : df.middle - cornerHW + clearance
-			define vxStartR : df.width - df.leftSB - clearance
-			define vxEndR : df.middle + cornerHW - clearance
 			include : spiro-outline
 				flat vxStartL top
 				curl vxStartL [VShapeTopFlat top]
@@ -68,11 +66,14 @@ glyph-block Letter-Latin-V : begin
 		define cornerHW : VCornerHalfWidth * sw / Stroke
 		define fine : Math.min sw : if barStraight VShapeFineStraight VShapeFine
 		define dgCor : DiagCor (2 * top) Width 0 (2 * sw)
+
+		local sbScale : if barStraight StraightSbShrink 1
+		define vxStartL : df.leftSB * sbScale
+		define vxEndL : df.middle - cornerHW
+		define vxStartR : df.width - df.leftSB * sbScale
+		define vxEndR : df.middle + cornerHW
+
 		if barStraight : do
-			define vxStartL : df.leftSB * StraightSbShrink
-			define vxEndL : df.middle - cornerHW
-			define vxStartR : df.width - df.leftSB * StraightSbShrink
-			define vxEndR : df.middle + cornerHW
 			define midSW : dgCor * VShapeMiddleWidth / Stroke * sw
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs (sw * dgCor)
@@ -87,14 +88,14 @@ glyph-block Letter-Latin-V : begin
 		: else : do
 			include : tagged 'strokeDown' : dispiro
 				widths.lhs sw
-				flat df.leftSB top [heading Downward]
-				curl df.leftSB [VShapeTopFlat top] [heading Downward]
+				flat vxStartL top [heading Downward]
+				curl vxStartL [VShapeTopFlat top] [heading Downward]
 				quadControls 0 VCurviness 9 unimportant
 				g4 (df.middle - cornerHW) 0 [widths.lhs fine]
 			include : tagged 'strokeUp' : dispiro
 				widths.rhs sw
-				flat df.rightSB top [heading Downward]
-				curl df.rightSB [VShapeTopFlat top] [heading Downward]
+				flat vxStartR top [heading Downward]
+				curl vxStartR [VShapeTopFlat top] [heading Downward]
 				quadControls 0 VCurviness 9 unimportant
 				g4 (df.middle + cornerHW) 0 [widths.rhs fine]
 
@@ -130,10 +131,16 @@ glyph-block Letter-Latin-V : begin
 			quadControls 0.4 0.75 64 unimportant
 			g4   (Middle + VCornerHalfWidth) 0 [widths.rhs VShapeFine]
 
-	define [VSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
-		NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
-	define [VMotionSerifs top] : let [sf : SerifFrame top 0 SB RightSB] : begin
-		composite-proc sf.lt.outer
+	define [VSerifs df top barStraight] : begin
+		local sbScale  : if barStraight StraightSbShrink 1
+		local sbOffset : if barStraight (OX * [StrokeWidthBlend 1 2]) 0
+		local sf : SerifFrame top 0 (df.leftSB * sbScale - sbOffset) (df.width - df.leftSB * sbScale + sbOffset)
+		return : NeedSlab SLAB : composite-proc sf.lt.full sf.rt.full
+	define [VMotionSerifs df top barStraight] : begin
+		local sbScale  : if barStraight StraightSbShrink 1
+		local sbOffset : if barStraight (OX * [StrokeWidthBlend 1 2]) 0
+		local sf : SerifFrame top 0 (df.leftSB * sbScale - sbOffset) (df.width - df.leftSB * sbScale + sbOffset)
+		return : composite-proc sf.lt.outer
 
 	define VStandardConfig : object
 		straight              { VSerifs       true  }
@@ -145,23 +152,23 @@ glyph-block Letter-Latin-V : begin
 		create-glyph "V.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : VShape [DivFrame 1] CAP Stroke fStraightBar
-			include : Serifs CAP
+			include : Serifs [DivFrame 1] CAP fStraightBar
 
 		create-glyph "v.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VShape [DivFrame 1] XH Stroke fStraightBar
-			include : Serifs XH
+			include : Serifs [DivFrame 1] XH fStraightBar
 
 		create-glyph "VHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : VHooktopShape [DivFrame 1] fStraightBar CAP
-			include : Serifs CAP
+			include : Serifs [DivFrame 1] CAP fStraightBar
 			eject-contour 'serifRT'
 
 		create-glyph "vHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : VHooktopShape [DivFrame 1] fStraightBar XH
-			include : Serifs XH
+			include : Serifs [DivFrame 1] XH fStraightBar
 			eject-contour 'serifRT'
 
 	create-glyph 'v.cursive' : glyph-proc

@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 13.3.1
+
+ * Fix geometry of reversed comma under heavy italic (#1292).
+ * Fix alignment of motion serif in v when squished (#1293).
+ * Fix geometry of "Ӊ", "ӊ", "Ӎ" , and "ӎ" (#1295).
+
+
 ### 11.3.0
 
  * Add Characters

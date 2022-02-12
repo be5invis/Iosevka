@@ -15,10 +15,11 @@ exports.parseVariantsData = async function () {
 	const varDatParsed = VariantDataParser.parse(varDatRaw);
 
 	const primes = getCvData(varDatParsed);
+	const specials = getSpecialVariantsData(varDatParsed);
 	const composites = getSsData(varDatParsed);
 	const defaults = getCompWithLens(varDatParsed, null, x => x.composition);
 
-	return { primes, composites, defaults };
+	return { primes, composites, specials, defaults };
 };
 
 function getCvData(parsed) {
@@ -28,6 +29,15 @@ function getCvData(parsed) {
 		samplerGroups.set(prime.key, prime.toJson());
 	}
 	return Array.from(samplerGroups.values());
+}
+
+function getSpecialVariantsData(parsed) {
+	let result = new Map();
+	for (const [keyPrime, prime] of parsed.primes) {
+		if (!prime.isSpecial) continue;
+		result.set(prime.key, prime.toJson());
+	}
+	return Array.from(result.values());
 }
 
 const mockPara = {

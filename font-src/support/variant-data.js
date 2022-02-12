@@ -71,11 +71,13 @@ class Prime {
 		if (!cfg.variants) throw new Error(`Missing variants in ${key}`);
 		this.key = key;
 		this.sampler = cfg.sampler;
+		this.samplerExplain = cfg.samplerExplain;
+		this.isSpecial = cfg.isSpecial || false;
+		this.description = cfg.description || null;
 		this.ligatureSampler = / /.test(cfg.sampler || "");
 		this.descSampleText = this.ligatureSampler
 			? cfg.sampler.split(" ")
 			: [...(cfg.sampler || "")];
-		this.samplerExplain = cfg.samplerExplain;
 		this.tag = cfg.tag;
 		this.slopeDependent = !!cfg.slopeDependent;
 		this.variants = new Map();
@@ -97,6 +99,8 @@ class Prime {
 			key: this.key,
 			sampler: this.sampler,
 			samplerExplain: this.samplerExplain,
+			isSpecial: this.isSpecial,
+			description: this.description,
 			tag: this.tag,
 			slopeDependent: this.slopeDependent,
 			ligatureSampler: this.ligatureSampler,
@@ -109,7 +113,8 @@ class Prime {
 				key: variant.key,
 				rank: variant.rank,
 				rankGroup: variant.rankGroup,
-				description: variant.description
+				description: variant.description,
+				snapshotFeatureApplication: variant.snapshotFeatureApplication
 			});
 		}
 		gr.variants.sort((a, b) => (a.rank || 0x7fffffff) - (b.rank || 0x7fffffff));
@@ -126,6 +131,7 @@ class PrimeVariant {
 		this.rankGroup = cfg.rankGroup || 0;
 		this.selector = cfg.selector;
 		this.nonDeriving = cfg.nonDeriving;
+		this.snapshotFeatureApplication = cfg.snapshotFeatureApplication;
 	}
 	resolveFor(para, gn) {
 		let vs = {};
