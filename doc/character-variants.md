@@ -1878,13 +1878,13 @@
 <td><img src="../images/character-variant-zero-reverse-slashed.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-reverse-slashed.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-dotted.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-dotted.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-long-dotted.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-long-dotted.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-zero-slashed-split.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-slashed-split.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-zero-reverse-slashed-split.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-reverse-slashed-split.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-unslashed-oval.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-unslashed-oval.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-slashed-oval.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-slashed-oval.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-reverse-slashed-oval.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-reverse-slashed-oval.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-dotted-oval.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-dotted-oval.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-zero-long-dotted-oval.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-long-dotted-oval.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-zero-slashed-split.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-slashed-split.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-zero-reverse-slashed-split.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-zero-reverse-slashed-split.dark.png#gh-dark-mode-only" width=32/></td>
 </tr>
 <tr>
 <td>1</td>
@@ -1912,9 +1912,9 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv72</code></td>
+<td><img src="../images/character-variant-one-line.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-line.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-no-base.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-base.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-base.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-one-line.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-line.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-no-base-long-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-long-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-base-long-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-base-long-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-no-base-flat-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-flat-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
@@ -2100,8 +2100,8 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv84</code></td>
-<td><img src="../images/character-variant-paragraph-sign-high.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-paragraph-sign-high.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-paragraph-sign-low.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-paragraph-sign-low.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-pilcrow-high.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-pilcrow-high.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-pilcrow-low.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-pilcrow-low.dark.png#gh-dark-mode-only" width=32/></td>
 <td colspan="10"> </td>
 </tr>
 <tr>
@@ -2196,11 +2196,11 @@
 <td rowspan="2"><code>cv90</code></td>
 <td><img src="../images/character-variant-at-threefold.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-threefold.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-at-fourfold.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-fourfold.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-at-short.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-short.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-at-fourfold-solid-inner.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-fourfold-solid-inner.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-at-threefold-tall.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-threefold-tall.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-at-fourfold-tall.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-fourfold-tall.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-at-fourfold-solid-inner.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-fourfold-solid-inner.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-at-fourfold-solid-inner-tall.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-fourfold-solid-inner-tall.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-at-short.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-at-short.dark.png#gh-dark-mode-only" width=32/></td>
 <td colspan="5"> </td>
 </tr>
 <tr>
