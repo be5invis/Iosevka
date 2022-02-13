@@ -2100,8 +2100,8 @@
 </tr>
 <tr>
 <td rowspan="2"><code>cv84</code></td>
-<td><img src="../images/character-variant-paragraph-sign-high.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-paragraph-sign-high.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-paragraph-sign-low.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-paragraph-sign-low.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-pilcrow-high.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-pilcrow-high.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-pilcrow-low.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-pilcrow-low.dark.png#gh-dark-mode-only" width=32/></td>
 <td colspan="10"> </td>
 </tr>
 <tr>
