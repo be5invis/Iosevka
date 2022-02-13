@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../../support/utils'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [Dotless CvDecompose MathSansSerif Joining] from "../../../support/gr"
 
 glyph-module
 
@@ -140,10 +140,23 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'nExt' 0x19E (follow -- 'n')
 
 	derive-composites 'cyrl/peDescender.italic' null 'cyrl/peItalicDescBase' [CyrDescender RightSB]
-	derive-glyphs 'nApostrophe' 0x149 'n' : lambda [src srl] : glyph-proc
-		include : refer-glyph "commaAbove"
-		include : Translate (Width + SB - Middle) 0
-		include [refer-glyph src] AS_BASE
+
+	do "n with Apostrophe"
+		create-glyph 'nApostrophe/comma.round' : glyph-proc
+			set-width 0
+			Joining.set currentGlyph Joining.Classes.Right
+			include : WithTransform [Translate (Width + SB - Middle) 0]
+				refer-glyph "commaAbove"
+
+		create-glyph 'nApostrophe/comma.square' : glyph-proc
+			set-width 0
+			Joining.set currentGlyph Joining.Classes.Right
+			include : WithTransform [Translate (Width + SB - Middle) 0]
+				refer-glyph "commaAboveSquare"
+
+		select-variant 'nApostrophe/comma' (follow -- 'punctuationDot')
+
+		create-two-part-glyph 'nApostrophe' 0x149 'nApostrophe/comma' 'n'
 
 	derive-glyphs 'nltail' 0x272 'n' : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE

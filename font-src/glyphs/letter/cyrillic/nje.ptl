@@ -1,14 +1,14 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix barmixL linreg clamp fallback] from '../../../support/utils'
-import [DollarShrinkKernel DollarShorterBar CvDecompose] from "../../../support/gr"
+import [RightDependentLink RightDependentTrigger CvDecompose] from "../../../support/gr"
 
 glyph-module
 
 glyph-block Letter-Cyrillic-Nje : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared : CreateDollarLikeComposition
+	glyph-block-import Letter-Shared : CreateRightDependentComposite
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriRoundShape CyrlYeriCursiveShape
 
@@ -38,6 +38,9 @@ glyph-block Letter-Cyrillic-Nje : begin
 		eject-contour 'serifYeriLT'
 		eject-contour 'serifYeriLB'
 
+	define NjeReduction : object
+		serifed 'serifedExceptBottomRight'
+
 	define LeftHalfConfig : object
 		serifless                        { SLAB-NONE                  }
 		topLeftSerifed                   { SLAB-TOP-LEFT              }
@@ -46,6 +49,7 @@ glyph-block Letter-Cyrillic-Nje : begin
 		serifedExceptBottomRight         { SLAB-TAILED-CYRILLIC       }
 
 	foreach { suffix { slabType } } [Object.entries LeftHalfConfig] : do
+		local kReducedLink NjeReduction.(suffix)
 		create-glyph "cyrl/Nje/leftHalf.\(suffix)"  : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
@@ -53,8 +57,8 @@ glyph-block Letter-Cyrillic-Nje : begin
 			include : df.markSet.capital
 			include : LeftHalf slabType df CAP
 			set-base-anchor 'cvDecompose' 0 0
-			if ( slabType === SLAB-ALL ) : begin
-				DollarShrinkKernel.set currentGlyph "cyrl/Nje/leftHalf.serifedExceptBottomRight"
+			if kReducedLink : begin
+				RightDependentLink.set currentGlyph 'reduced' "cyrl/Nje/leftHalf.\(kReducedLink)"
 
 		create-glyph "cyrl/nje/leftHalf.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
@@ -63,8 +67,8 @@ glyph-block Letter-Cyrillic-Nje : begin
 			include : df.markSet.e
 			include : LeftHalf slabType df XH
 			set-base-anchor 'cvDecompose' 0 0
-			if ( slabType === SLAB-ALL ) : begin
-				DollarShrinkKernel.set currentGlyph "cyrl/nje/leftHalf.serifedExceptBottomRight"
+			if kReducedLink : begin
+				RightDependentLink.set currentGlyph 'reduced' "cyrl/nje/leftHalf.\(kReducedLink)"
 
 	define YerConfig : object
 		corner  { CyrlYeriUprightShape }
@@ -79,7 +83,7 @@ glyph-block Letter-Cyrillic-Nje : begin
 			include : df.markSet.capital
 			include : RightHalf Yeri df CAP
 			set-mark-anchor 'cvDecompose' 0 0
-			if (Yeri !== CyrlYeriUprightShape) : DollarShorterBar.set currentGlyph 'trigger'
+			if (Yeri !== CyrlYeriUprightShape) : RightDependentTrigger.set currentGlyph 'reduced'
 
 		create-glyph "cyrl/nje/rightHalf.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
@@ -88,19 +92,17 @@ glyph-block Letter-Cyrillic-Nje : begin
 			include : df.markSet.e
 			include : RightHalf Yeri df XH
 			set-mark-anchor 'cvDecompose' 0 0
-			if (Yeri !== CyrlYeriUprightShape) : DollarShorterBar.set currentGlyph 'trigger'
+			if (Yeri !== CyrlYeriUprightShape) : RightDependentTrigger.set currentGlyph 'reduced'
 
 	select-variant 'cyrl/Nje/rightHalf'
 	select-variant 'cyrl/nje/rightHalf'
-	select-variant 'cyrl/Nje/leftHalf/full' (shapeFrom -- 'cyrl/Nje/leftHalf')
-	select-variant 'cyrl/nje/leftHalf/full' (shapeFrom -- 'cyrl/nje/leftHalf')
-	select-variant 'cyrl/Nje/leftHalf/reduced' (shapeFrom -- 'cyrl/Nje/leftHalf')
-	select-variant 'cyrl/nje/leftHalf/reduced' (shapeFrom -- 'cyrl/nje/leftHalf')
+	select-variant 'cyrl/Nje/leftHalf/full'    (follow -- 'cyrl/Nje/leftHalf') (shapeFrom -- 'cyrl/Nje/leftHalf')
+	select-variant 'cyrl/nje/leftHalf/full'    (follow -- 'cyrl/nje/leftHalf') (shapeFrom -- 'cyrl/nje/leftHalf')
+	select-variant 'cyrl/Nje/leftHalf/reduced' (follow -- 'cyrl/Nje/leftHalf') (shapeFrom -- 'cyrl/Nje/leftHalf') (reduction -- NjeReduction)
+	select-variant 'cyrl/nje/leftHalf/reduced' (follow -- 'cyrl/nje/leftHalf') (shapeFrom -- 'cyrl/nje/leftHalf') (reduction -- NjeReduction)
 
-	if [query-glyph 'cyrl/Nje/leftHalf/full'] : begin
-		DollarShrinkKernel.set [query-glyph 'cyrl/Nje/leftHalf/full'] 'cyrl/Nje/leftHalf/reduced'
-	if [query-glyph 'cyrl/nje/leftHalf/full'] : begin
-		DollarShrinkKernel.set [query-glyph 'cyrl/nje/leftHalf/full'] 'cyrl/nje/leftHalf/reduced'
+	if [query-glyph 'cyrl/Nje/leftHalf/full'] : RightDependentLink.set [query-glyph 'cyrl/Nje/leftHalf/full'] 'reduced' 'cyrl/Nje/leftHalf/reduced'
+	if [query-glyph 'cyrl/nje/leftHalf/full'] : RightDependentLink.set [query-glyph 'cyrl/nje/leftHalf/full'] 'reduced' 'cyrl/nje/leftHalf/reduced'
 
-	CreateDollarLikeComposition 'cyrl/Nje' 0x40A 'cyrl/Nje/leftHalf/full' 'cyrl/Nje/leftHalf/reduced' 'cyrl/Nje/rightHalf'
-	CreateDollarLikeComposition 'cyrl/nje' 0x45A 'cyrl/nje/leftHalf/full' 'cyrl/nje/leftHalf/reduced' 'cyrl/nje/rightHalf'
+	CreateRightDependentComposite 'cyrl/Nje' 0x40A 'cyrl/Nje/leftHalf/full' 'cyrl/Nje/rightHalf'
+	CreateRightDependentComposite 'cyrl/nje' 0x45A 'cyrl/nje/leftHalf/full' 'cyrl/nje/rightHalf'
