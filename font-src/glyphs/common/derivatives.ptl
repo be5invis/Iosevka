@@ -8,7 +8,6 @@ extern Map
 glyph-module
 
 glyph-block Common-Derivatives : begin
-	glyph-block-import CommonShapes : FlipAround
 	define [ApplyCv g shapeFrom follow para] : begin
 		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
 			local suffix : h.resolveFor para follow
@@ -103,7 +102,14 @@ glyph-block Common-Derivatives : begin
 				if mark : include mark
 				define x : if (_x <@ Function) [_x.call currentGlyph] _x
 				define y : if (_y <@ Function) [_y.call currentGlyph] _y
-				include : FlipAround x y
+
+				# This is [FlipAround], but we cannot use it because common-shapes depends on this
+				# glyph block
+				include : Upright
+				include : Translate (-x) (-y)
+				include : Scale (-1) (-1)
+				include : Translate x y
+				include : Italify
 
 	define [link-reduced-variant] : params [dstGid srcGid gr follow] : begin
 		if [not : query-glyph dstGid] : select-variant dstGid (shapeFrom -- srcGid) (follow -- [fallback follow dstGid])

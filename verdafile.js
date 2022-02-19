@@ -168,7 +168,9 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	const bp = buildPlans[fi0.prefix];
 	if (!bp) fail(`Build plan for '${fileName}' not found.` + whyBuildPlanIsnNotThere(fileName));
 
-	const sfi = getSuffixMapping(bp.weights, bp.slopes, bp.widths)[fi0.suffix];
+	const sfm = getSuffixMapping(bp.weights, bp.slopes, bp.widths);
+	const sfi = sfm[fi0.suffix];
+	const hintReferenceSuffix = fetchHintReferenceSuffix(sfm);
 
 	return {
 		name: fileName,
@@ -205,11 +207,37 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 			style: sfi.cssStyle
 		},
 		hintParams: bp.hintParams || [],
+		hintReference:
+			!bp["metric-override"] && hintReferenceSuffix !== fi0.suffix
+				? makeFileName(fi0.prefix, hintReferenceSuffix)
+				: null,
 		compatibilityLigatures: bp["compatibility-ligatures"] || null,
 		metricOverride: bp["metric-override"] || null,
-		excludedCharRanges: bp["exclude-chars"] ? bp["exclude-chars"].ranges || null : null
+		excludedCharRanges: bp["exclude-chars"]?.ranges
 	};
 });
+
+function fetchHintReferenceSuffix(sfm) {
+	if (sfm["regular"]) return "regular";
+
+	let bestSuffix = null,
+		bestSfi = null;
+	for (const [suffix, sfi] of Object.entries(sfm)) {
+		if (
+			!bestSfi ||
+			Math.abs(sfi.shapeWeight - 400) < Math.abs(bestSfi.shapeWeight - 400) ||
+			(Math.abs(sfi.shapeWeight - 400) === Math.abs(bestSfi.shapeWeight - 400) &&
+				Math.abs(sfi.shapeSlopeAngle) < Math.abs(bestSfi.shapeSlopeAngle)) ||
+			(Math.abs(sfi.shapeWeight - 400) === Math.abs(bestSfi.shapeWeight - 400) &&
+				Math.abs(sfi.shapeSlopeAngle) === Math.abs(bestSfi.shapeSlopeAngle) &&
+				Math.abs(sfi.shapeWidth - 500) < Math.abs(bestSfi.shapeWidth - 500))
+		) {
+			bestSuffix = suffix;
+			bestSfi = sfi;
+		}
+	}
+	return bestSuffix;
+}
 
 function getSuffixMapping(weights, slopes, widths) {
 	const mapping = {};
@@ -359,9 +387,9 @@ const GroupFonts = task.group("fonts", async (target, gr) => {
 // Per group file
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
-	async (target, out, gr, f) => {
-		const [{ hintParams }, hint] = await target.need(FontInfoOf(f), CheckTtfAutoHintExists);
-		const [from] = await target.need(DistUnhintedTTF(gr, f), de`${out.dir}`);
+	async (target, out, gr, fn) => {
+		const [{ hintParams }, hint] = await target.need(FontInfoOf(fn), CheckTtfAutoHintExists);
+		const [from] = await target.need(DistUnhintedTTF(gr, fn), de`${out.dir}`);
 		echo.action(echo.hl.command(`Hint TTF`), from.full, echo.hl.operator("->"), out.full);
 		await silently.run(hint, hintParams, from.full, out.full);
 	}
