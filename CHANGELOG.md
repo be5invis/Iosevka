@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 14.0.1
+
+ * Balance weight of `$` under heavy weights (#1302).
+ * Balance serif weight of `7`'s serifed-straight variants (#1303).
+ * Add moon phase symbols (`U+1F311` ... `U+1F319`, #1308).
+
+
 ### 14.0.0
 
  * **\[Breaking\]** Reordered variants for `@`, `0`, `1`.
