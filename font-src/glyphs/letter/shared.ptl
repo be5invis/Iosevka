@@ -10,38 +10,30 @@ glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-export CreateDottedComposition
-	define [CreateDottedComposition sourceGid dstGid unicode fDontDecompose]
-		derive-glyphs dstGid unicode sourceGid
-			lambda [src sel] : glyph-proc
-				include [refer-glyph src] AS_BASE ALSO_METRICS
-				include : refer-glyph "dotAbove"
-				Dotless.set currentGlyph src
-				if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src "dotAbove" }
+	glyph-block-export CreateAccentedComposition
+	define [CreateAccentedComposition dst u srcGid accentGid fDontDecompose]
+		derive-multi-part-glyphs dst u { srcGid accentGid } : function [gns gr] : glyph-proc
+			local { base mark } gns
+			include [refer-glyph base] AS_BASE ALSO_METRICS
+			include [refer-glyph mark]
+			if (!gr && accentGid === 'dotAbove') : Dotless.set currentGlyph base
 
 	glyph-block-export CreateCommaCaronComposition
-	define [CreateCommaCaronComposition sourceGid dstGid unicode]
-		derive-glyphs dstGid unicode sourceGid
-			lambda [src sel] : glyph-proc
-				define srcGlyph : query-glyph src
-				define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
-				include : refer-glyph "commaTR"
-				include : ApparentTranslate commaOffset 0
-				include srcGlyph AS_BASE ALSO_METRICS
-
-	glyph-block-export CreateAccentedComposition
-	define [CreateAccentedComposition dstGid unicode srcGid accentGid fDontDecompose]
-		derive-glyphs dstGid unicode srcGid : lambda [src sel] : glyph-proc
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			include [refer-glyph accentGid]
-			if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src accentGid }
+	define [CreateCommaCaronComposition dst u sourceGid]
+		derive-multi-part-glyphs dst u { sourceGid 'commaTR' } : function [gns gr] : glyph-proc
+			local { base comma } gns
+			define baseGlyph : query-glyph base
+			define commaOffset : (Width / 2) * [Math.pow (baseGlyph.advanceWidth / Width * 2) (2/3)]
+			include : refer-glyph comma
+			include : ApparentTranslate commaOffset 0
+			include [refer-glyph base] AS_BASE ALSO_METRICS
 
 	glyph-block-export CreateMultiAccentedComposition
 	define [CreateMultiAccentedComposition dstGid unicode srcGid accentGids fDontDecompose]
-		derive-glyphs dstGid unicode srcGid : lambda [src sel] : glyph-proc
+		derive-glyphs dstGid unicode srcGid : lambda [src gr] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			foreach accentGid [items-of accentGids] : include [refer-glyph accentGid]
-			if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src ::accentGids }
+			if (!fDontDecompose && !gr) : CvDecompose.set currentGlyph { src :: accentGids }
 
 	glyph-block-export CreateRightDependentComposite
 	define [CreateRightDependentComposite gidDst unicode gidPart1 gidPart2] : begin
