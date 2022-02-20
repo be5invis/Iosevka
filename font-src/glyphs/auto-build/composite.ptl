@@ -35,29 +35,12 @@ glyph-block Autobuild-Enclosure-Shared : begin
 		return name
 
 	glyph-block-export EnsureComponentGlyphT
-	define [EnsureComponentGlyphT gidPart fnBuildup] : begin
+	define [EnsureComponentGlyphT gnPart fnBuildup] : begin
 		local rs : new Set
-		local linksGnMap : new Map
-
-		# Build the original
-		local gniPart : fnBuildup gidPart
-		linksGnMap.set gidPart gniPart
-
-		# Build the related, using a mesh query to find out all variants
-		local mesh : getGrMesh { gidPart } AnyCv query-glyph
-		foreach { gr { from } { relatedGidPart } } [items-of mesh] : begin
-			local gniRelated : fnBuildup relatedGidPart
-			linksGnMap.set relatedGidPart gniRelated
-
-		# Link relations
-		foreach { gr { from } { to } } [items-of mesh] : begin
-			local gniFrom : linksGnMap.get from
-			local gniTo   : linksGnMap.get to
-			if (gniFrom && gniTo && [query-glyph gniFrom] && [query-glyph gniTo]) : begin
-				gr.set [query-glyph gniFrom] gniTo
+		return : DeriveMeshT { gnPart } AnyCv
+			function [gns gr] : fnBuildup gns.0
+			function [gniFrom gniTo] : begin
 				[query-glyph gniFrom].tryBecomeMirrorOf [query-glyph gniTo] rs
-
-		return gniPart
 
 	glyph-block-export getGlyphDefaultShift
 	define [getGlyphDefaultShift bal baly g] : begin
