@@ -2,7 +2,7 @@
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 14.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
 2. Run `npm install`. This command will install **all** the NPM dependencies, and will also validate whether external dependencies are present.
 3. `npm run build -- contents::iosevka`.
 
