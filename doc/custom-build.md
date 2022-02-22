@@ -450,7 +450,7 @@ Subsection `metric-override` provides ability to override certain metric values,
 | Property | Unit | Default Value | Meaning |
 |----------|------|---------|----------|
 | `cap` | emu | 735 | Height of `H`. |
-| `xheight` | emu | 520 | Height of `x`. |
+| `xHeight` | emu | 520 | Height of `x`. |
 | `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
 | `accentWidth` | emu | 200 | Width of accent marks. |
 | `accentClearance` | emu | 72 | Vertical clearance of accent marks to the base. |
@@ -470,6 +470,8 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `essRatioUpper` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`, to the normal stroke width. |
 | `essRatioLower` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `s`, to the normal stroke width. |
 | `essRatioQuestion` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `?`, to the normal stroke width. |
+| `archDepth` | emu | (*varies, 195 for Regular*) | Depth of the curve segment of arches / O rings in capital letters. |
+| `smallArchDepth` | emu | (*varies, 200 for Regular*) | Depth of the curve segment of arches / O rings in small letters. |
 
 The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
 
