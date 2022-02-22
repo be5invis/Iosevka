@@ -71,8 +71,8 @@ export : define [calculateMetrics para] : begin
 	define JHook para.jhook
 	define FHook para.fhook
 	define HookX para.hookx
-	define Smooth para.smooth
-	define SmallSmooth para.smallsmooth
+	define ArchDepth para.archDepth
+	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
 	# We will estimate blackness using lower-case 'e'
@@ -143,24 +143,24 @@ export : define [calculateMetrics para] : begin
 	define [StrokeWidthBlend min max sw] : linreg para.canonicalStrokeWidthMin min para.canonicalStrokeWidthMax max [fallback sw Stroke]
 
 	define SmoothAdjust : StrokeWidthBlend 80 144
-	define [SmoothAOf smooth width] : smooth - TanSlope * SmoothAdjust / Width * width
-	define [SmoothBOf smooth width] : smooth + TanSlope * SmoothAdjust / Width * width
-	define [YSmoothMidR top bot sma smb] : begin
-		local delta : (smb - sma) / 2
-		local smOfSma : sma + delta
-		local smOfSmb : smb - delta
+	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust / Width * width
+	define [ArchDepthBOf archDepth width] : archDepth + TanSlope * SmoothAdjust / Width * width
+	define [YSmoothMidR top bot ada adb] : begin
+		local delta : (adb - ada) / 2
+		local smOfSma : ada + delta
+		local smOfSmb : adb - delta
 		local yNotAdjusted : mix top bot (smOfSmb / (smOfSma + smOfSmb))
 		return : yNotAdjusted - delta
-	define [YSmoothMidL top bot sma smb] : begin
-		local delta : (smb - sma) / 2
-		local smOfSma : sma + delta
-		local smOfSmb : smb - delta
+	define [YSmoothMidL top bot ada adb] : begin
+		local delta : (adb - ada) / 2
+		local smOfSma : ada + delta
+		local smOfSmb : adb - delta
 		local yNotAdjusted : mix top bot (smOfSma / (smOfSma + smOfSmb))
 		return : yNotAdjusted + delta
-	define SmoothA : Smooth - TanSlope * SmoothAdjust
-	define SmoothB : Smooth + TanSlope * SmoothAdjust
-	define SmallSmoothA : SmallSmooth - TanSlope * SmoothAdjust
-	define SmallSmoothB : SmallSmooth + TanSlope * SmoothAdjust
+	define ArchDepthA : ArchDepth - TanSlope * SmoothAdjust
+	define ArchDepthB : ArchDepth + TanSlope * SmoothAdjust
+	define SmallArchDepthA : SmallArchDepth - TanSlope * SmoothAdjust
+	define SmallArchDepthB : SmallArchDepth + TanSlope * SmoothAdjust
 
 
 	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
@@ -188,7 +188,7 @@ export : define [calculateMetrics para] : begin
 		local ss : y * 0.21 + 0.375 * strokeFactor + 0.035 * widthFactor
 		return : ss + sign * TanSlope * (SmoothAdjust + 0.75 * stroke)
 
-	define [adviceGlottalStopSmooth y sign] : begin
+	define [AdviceGlottalStopArchDepth y sign] : begin
 		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
 
 	define [shoulderMidSlope _fine _stroke _dir] : begin
@@ -202,15 +202,15 @@ export : define [calculateMetrics para] : begin
 		OperTop OperBot TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop BgOpBot Italify
 		Upright Scale Translate ApparentTranslate Rotate GlobalTransform TanSlope HVContrast Upward
 		Downward Rightward Leftward UpwardT DownwardT LeftwardT RightwardT O OX OXHook Hook AHook
-		SHook RHook JHook FHook HookX Smooth SmallSmooth Stroke DotSize PeriodSize HBarPos
+		SHook RHook JHook FHook HookX ArchDepth SmallArchDepth Stroke DotSize PeriodSize HBarPos
 		OverlayPos LongJut Jut VJut AccentStackOffset AccentWidth AccentClearance AccentHeight CThin
 		CThinB SLAB TailAdjX TailAdjY IBalance IBalance2 JBalance JBalance2 TBalance TBalance2
 		RBalance RBalance2 FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3
 		WideWidth4 EssUpper EssLower EssQuestion HalfStroke RightSB Middle DotRadius PeriodRadius
-		SideJut SmoothA SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS ArchXAdjust
+		SideJut ArchDepthA ArchDepthB SmallArchDepthA SmallArchDepthB CorrectionOMidX CorrectionOMidS ArchXAdjust
 		compositeBaseAnchors AdviceStroke AdviceStroke2 OverlayStroke OperatorStroke GeometryStroke
-		ShoulderFine _SuperXY adviceSSmooth adviceGlottalStopSmooth shoulderMidSlope
-		StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter YSmoothMidR
+		ShoulderFine _SuperXY adviceSSmooth AdviceGlottalStopArchDepth shoulderMidSlope
+		StrokeWidthBlend ArchDepthAOf ArchDepthBOf SmoothAdjust MidJutSide MidJutCenter YSmoothMidR
 		YSmoothMidL HSwToV]
 
 export : define [setFontMetrics para metrics fm] : begin
@@ -416,10 +416,10 @@ export : define [GenDivFrame metrics] : begin
 			set this.leftSB       : metrics.SB * sbMul
 			set this.rightSB      : metrics.Width * div - metrics.SB * sbMul
 			set this.mvs          : metrics.AdviceStroke hPack div
-			set this.smoothA      : metrics.SmoothAOf metrics.Smooth      (metrics.Width * div)
-			set this.smoothB      : metrics.SmoothBOf metrics.Smooth      (metrics.Width * div)
-			set this.smallSmoothA : metrics.SmoothAOf metrics.SmallSmooth (metrics.Width * div)
-			set this.smallSmoothB : metrics.SmoothBOf metrics.SmallSmooth (metrics.Width * div)
+			set this.archDepthA      : metrics.ArchDepthAOf metrics.ArchDepth      (metrics.Width * div)
+			set this.archDepthB      : metrics.ArchDepthBOf metrics.ArchDepth      (metrics.Width * div)
+			set this.smallSmoothA : metrics.ArchDepthAOf metrics.SmallArchDepth (metrics.Width * div)
+			set this.smallSmoothB : metrics.ArchDepthBOf metrics.SmallArchDepth (metrics.Width * div)
 			set this.markSet      : MarksetDiv div sbMul metrics
 
 		public [applyToGlyph g] : begin
