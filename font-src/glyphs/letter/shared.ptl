@@ -10,47 +10,39 @@ glyph-block Letter-Shared : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-export CreateDottedComposition
-	define [CreateDottedComposition sourceGid dstGid unicode fDontDecompose]
-		derive-glyphs dstGid unicode sourceGid
-			lambda [src sel] : glyph-proc
-				include [refer-glyph src] AS_BASE ALSO_METRICS
-				include : refer-glyph "dotAbove"
-				Dotless.set currentGlyph src
-				if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src "dotAbove" }
+	glyph-block-export CreateAccentedComposition
+	define [CreateAccentedComposition dst u srcGid accentGid fDontDecompose]
+		derive-multi-part-glyphs dst u { srcGid accentGid } : function [gns gr] : glyph-proc
+			local { base mark } gns
+			include [refer-glyph base] AS_BASE ALSO_METRICS
+			include [refer-glyph mark]
+			if (!gr && accentGid === 'dotAbove') : Dotless.set currentGlyph base
 
 	glyph-block-export CreateCommaCaronComposition
-	define [CreateCommaCaronComposition sourceGid dstGid unicode]
-		derive-glyphs dstGid unicode sourceGid
-			lambda [src sel] : glyph-proc
-				define srcGlyph : query-glyph src
-				define commaOffset : (Width / 2) * [Math.pow (srcGlyph.advanceWidth / Width * 2) (2/3)]
-				include : refer-glyph "commaTR"
-				include : ApparentTranslate commaOffset 0
-				include srcGlyph AS_BASE ALSO_METRICS
-
-	glyph-block-export CreateAccentedComposition
-	define [CreateAccentedComposition dstGid unicode srcGid accentGid fDontDecompose]
-		derive-glyphs dstGid unicode srcGid : lambda [src sel] : glyph-proc
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			include [refer-glyph accentGid]
-			if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src accentGid }
+	define [CreateCommaCaronComposition dst u sourceGid]
+		derive-multi-part-glyphs dst u { sourceGid 'commaTR' } : function [gns gr] : glyph-proc
+			local { base comma } gns
+			define baseGlyph : query-glyph base
+			define commaOffset : (Width / 2) * [Math.pow (baseGlyph.advanceWidth / Width * 2) (2/3)]
+			include : refer-glyph comma
+			include : ApparentTranslate commaOffset 0
+			include [refer-glyph base] AS_BASE ALSO_METRICS
 
 	glyph-block-export CreateMultiAccentedComposition
 	define [CreateMultiAccentedComposition dstGid unicode srcGid accentGids fDontDecompose]
-		derive-glyphs dstGid unicode srcGid : lambda [src sel] : glyph-proc
+		derive-glyphs dstGid unicode srcGid : lambda [src gr] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			foreach accentGid [items-of accentGids] : include [refer-glyph accentGid]
-			if (!fDontDecompose && !sel) : CvDecompose.set currentGlyph { src ::accentGids }
+			if (!fDontDecompose && !gr) : CvDecompose.set currentGlyph { src :: accentGids }
 
 	glyph-block-export CreateRightDependentComposite
 	define [CreateRightDependentComposite gidDst unicode gidPart1 gidPart2] : begin
-		create-glyph gidDst unicode : glyph-proc
-			local trigger : RightDependentTrigger.get : query-glyph gidPart2
-			local kernel : [RightDependentLink.get [query-glyph gidPart1] trigger] || gidPart1
+		derive-multi-part-glyphs gidDst unicode { gidPart1 gidPart2 } : function [src] : glyph-proc
+			local { a b } src
+			local trigger : RightDependentTrigger.get : query-glyph b
+			local kernel : [RightDependentLink.get [query-glyph a] trigger] || a
 			include [refer-glyph kernel] AS_BASE ALSO_METRICS
-			include [refer-glyph gidPart2]
-			CvDecompose.set currentGlyph { gidPart1 gidPart2 }
+			include [refer-glyph b]
 
 	glyph-block-export SetGrekUpperTonos
 	define [SetGrekUpperTonos kern] : glyph-proc
@@ -178,16 +170,16 @@ glyph-block Letter-Shared-Shapes : begin
 			widths.heading 0 sw {.y (-dirY) .x (sb)}
 
 	glyph-block-export nShoulderKnots
-	define [nShoulderKnots] : params [left right [fine ShoulderFine] [top XH] [bottom 0] [sma SmallSmoothA] [smb SmallSmoothB] [stroke Stroke] [fMask false] [leftY0 nothing]] : begin
+	define [nShoulderKnots] : params [left right [fine ShoulderFine] [top XH] [bottom 0] [ada SmallArchDepthA] [adb SmallArchDepthB] [stroke Stroke] [fMask false] [leftY0 nothing]] : begin
 		local slope : shoulderMidSlope fine stroke
 		local middle : [mix (left - stroke * HVContrast) right 0.5] + (slope - CorrectionOMidX) * stroke
 		return : list
-			flat (left - fine * HVContrast) [fallback leftY0 (top - sma - 2)] [widths.rhs fine]
-			curl (left - fine * HVContrast) (top - sma)
+			flat (left - fine * HVContrast) [fallback leftY0 (top - ada - 2)] [widths.rhs fine]
+			curl (left - fine * HVContrast) (top - ada)
 			arcvh
 			ShoulderMidKnotRhs [mix (left - stroke * HVContrast) right 0.5] (top - O) fine stroke (+1) (-1)
 			archv
-			flat right (top - smb) [widths.rhs stroke]
+			flat right (top - adb) [widths.rhs stroke]
 			[if fMask corner curl] right bottom [widths.rhs.heading stroke Downward]
 			if [not fMask] {} {[corner left bottom]}
 

@@ -19,7 +19,6 @@ Describe your problem here. Provide pictures and files if necessary.
 If you have problem when building Iosevka, please provide these information:
 
 * Your Node.js version:
-* Your _otfcc_ version:
 * Your `params/parameters.toml`, paste if modified:
   ```
   paste here

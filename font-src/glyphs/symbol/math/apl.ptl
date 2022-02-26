@@ -84,15 +84,15 @@ glyph-block Symbol-Math-APL : begin
 			VBarRight  r aplBoxTop aplBoxBot aplBoxSW
 
 	create-glyph 'apl/lamp' 0x235D : glyph-proc
-		local shift : OperTop - 2 * Smooth - OperBot
+		local shift : OperTop - 2 * ArchDepth - OperBot
 		local fine : CThin * [AdviceStroke 4]
 		local [InnerCircleMask sw] : spiro-outline
 			corner (SB + HVContrast * (Stroke - fine)) (OperTop + shift)
-			curl   (SB + HVContrast * (Stroke - fine)) (OperBot + SmoothB + shift)
+			curl   (SB + HVContrast * (Stroke - fine)) (OperBot + ArchDepthB + shift)
 			arcvh
 			g4     (Middle + CorrectionOMidX * OperatorStroke) (OperBot + (OperatorStroke - sw) + shift + O)
 			archv
-			flat   (RightSB - HVContrast * (Stroke - fine)) (OperBot + SmoothA + shift)
+			flat   (RightSB - HVContrast * (Stroke - fine)) (OperBot + ArchDepthA + shift)
 			corner (RightSB - HVContrast * (Stroke - fine)) (OperTop + shift)
 		include : union
 			composite-proc
@@ -101,7 +101,7 @@ glyph-block Symbol-Math-APL : begin
 			intersection
 				UShape [DivFrame 1] (OperTop + shift) (OperBot + shift) (stroke -- OperatorStroke)
 				InnerCircleMask OperatorStroke
-				composite-proc [InnerCircleMask fine] [FlipAround Middle (OperTop - Smooth)]
+				composite-proc [InnerCircleMask fine] [FlipAround Middle (OperTop - ArchDepth)]
 
 	create-glyph 'apl/bar' : glyph-proc
 		include : VBar Middle aplBoxTop aplBoxBot aplBoxSW
@@ -155,17 +155,10 @@ glyph-block Symbol-Math-APL : begin
 	create-glyph 0x235E : aplBoxed : refer-glyph 'asciiSingleQuote.straight'
 	create-glyph 0x236F : aplBoxed : refer-glyph 'notequal'
 
-	derive-glyphs 'apl/boxedDivide' 0x2339 'divide' : function [src sel] : aplBoxed : refer-glyph src
-	derive-glyphs 'apl/boxedColon' 0x2360 'colon/mid' : function [src sel] : aplBoxed : refer-glyph src
-
-	derive-glyphs 'apl/quadQuestion/hookPart' null 'question/hookPart' : function [src sel] : glyph-proc
-		include : aplBoxed : refer-glyph src
-		set-base-anchor 'cvDecompose' 0 0
-	derive-glyphs 'apl/quadQuestion/dotPart' null 'question/dotPart' : function [src sel] : glyph-proc
-		set-width 0
-		include : aplBoxedPhantom : WithTransform [Translate Width 0] : refer-glyph src
-		set-mark-anchor 'cvDecompose' 0 0
-	create-two-part-glyph 'apl/quadQuestion'  0x2370 'apl/quadQuestion/hookPart' 'apl/quadQuestion/dotPart'
+	define [DeriveBoxed src] : aplBoxed : refer-glyph src
+	derive-glyphs 'apl/boxedDivide' 0x2339 'divide' DeriveBoxed
+	derive-glyphs 'apl/boxedColon' 0x2360 'colon/mid' DeriveBoxed
+	derive-glyphs 'apl/quadQuestion' 0x2370 'question' DeriveBoxed
 
 	# Simple Composites
 	create-glyph 0x233D : composite-proc [refer-glyph 'apl/bar'] [refer-glyph 'whiteCircle.NWID']
@@ -184,22 +177,26 @@ glyph-block Symbol-Math-APL : begin
 	derive-composites 'apl/barComma' 0x236A 'comma' 'minus'
 	derive-composites 'apl/zeroTilde' 0x236C 'zero.lnum/forceUnslashed' 'overlayTildeOperator'
 
-	# Dieresis
-	create-glyph 0x2362 : composite-proc [refer-glyph 'nabla.aplForm'] [MarkSet.tack] [refer-glyph 'dieresisAbove'] [clear-anchors]
-	create-glyph 0x2361 : composite-proc [refer-glyph 'top'] [MarkSet.tack] [refer-glyph 'dieresisAbove'] [clear-anchors]
-	create-glyph 0x2363 : composite-proc [refer-glyph 'asterisk.pentaSMid'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
-	create-glyph 0x2364 : composite-proc [refer-glyph 'whiteSmallCircle.NWID'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
-	create-glyph 0x2365 : composite-proc [refer-glyph 'whiteCircle.NWID'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
-	create-glyph 0x2368 : composite-proc [refer-glyph 'asciiTilde.low'] [refer-glyph 'dieresisAbove']
-	create-glyph 0x2369 : composite-proc [refer-glyph 'greater.narrow'] [MarkSet.plus] [refer-glyph 'dieresisAbove'] [clear-anchors]
-
-	# Underscore
-	create-glyph 0x234A : composite-proc [refer-glyph 'bot'] [MarkSet.tack] [refer-glyph 'underlineBelow'] [clear-anchors]
-	create-glyph 0x2358 : composite-proc [refer-glyph 'asciiSingleQuote.straight'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
-	create-glyph 0x235A : composite-proc [refer-glyph 'whiteDiamond.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
-	create-glyph 0x235B : composite-proc [refer-glyph 'whiteSmallCircle.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
-	create-glyph 0x235C : composite-proc [refer-glyph 'whiteCircle.NWID'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
-	create-glyph 0x2377 : composite-proc [refer-glyph 'smallElement'] [MarkSet.plus] [refer-glyph 'underlineBelow'] [clear-anchors]
+	# Dieresis & underscore
+	define [AplAccented u part1 part2 marks]
+		derive-multi-part-glyphs [NameUni u] u {part1 part2} : function [srcs gr] : composite-proc
+			refer-glyph srcs.0
+			begin marks
+			refer-glyph srcs.1
+			clear-anchors
+	AplAccented 0x2362 'nabla.aplForm'             'dieresisAbove'  [MarkSet.tack]
+	AplAccented 0x2361 'top'                       'dieresisAbove'  [MarkSet.tack]
+	AplAccented 0x2363 'asterisk.pentaSMid'        'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2364 'whiteSmallCircle.NWID'     'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2365 'whiteCircle.NWID'          'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2368 'asciiTilde.low'            'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x2369 'greater.narrow'            'dieresisAbove'  [MarkSet.plus]
+	AplAccented 0x234A 'bot'                       'underlineBelow' [MarkSet.tack]
+	AplAccented 0x2358 'asciiSingleQuote.straight' 'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235A 'whiteDiamond.NWID'         'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235B 'whiteSmallCircle.NWID'     'underlineBelow' [MarkSet.plus]
+	AplAccented 0x235C 'whiteCircle.NWID'          'underlineBelow' [MarkSet.plus]
+	AplAccented 0x2377 'smallElement'              'underlineBelow' [MarkSet.plus]
 
 	derive-composites 'apl/alphaBar' 0x2376 'grek/alpha' [refer-glyph 'underlineBelow'] [clear-anchors]
 	derive-composites 'apl/iotaBar' 0x2378 'grek/iota' [refer-glyph 'underlineBelow'] [clear-anchors]
@@ -213,7 +210,7 @@ glyph-block Symbol-Math-APL : begin
 	create-glyph 0x2346 : composite-proc : Overlay [refer-glyph 'arrowRight.NWID'] [refer-glyph 'apl/bar']
 	create-glyph 0x235F : composite-proc [intersection [refer-glyph 'mathOOutline'] [refer-glyph 'opAsterisk.low']] [refer-glyph 'mathO']
 
-	derive-glyphs 'apl/barSemicolon' 0x236E 'semicolon' : function [src sel] : Overlay [refer-glyph src] [refer-glyph 'underscore.high']
+	derive-glyphs 'apl/barSemicolon' 0x236E 'semicolon' : function [src gr] : Overlay [refer-glyph src] [refer-glyph 'underscore.high']
 
 	# Complex Composition
 	create-glyph 0x2367 : composite-proc [refer-glyph 'apl/bar'] : union
