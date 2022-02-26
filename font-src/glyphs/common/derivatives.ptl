@@ -107,18 +107,6 @@ glyph-block Common-Derivatives : begin
 			create-glyph gnDst unicodeDst : Fn gns gr
 			return gnDst
 
-	glyph-block-export derive-composites
-	define [derive-composites dstGid dstUnicode srcGid] : begin
-		if [not : glyph-is-needed srcGid] : return nothing
-
-		local restComponents : {}.slice.call arguments 3
-		return : derive-glyphs dstGid dstUnicode srcGid : lambda [src gr] : glyph-proc
-			include [refer-glyph src] AS_BASE ALSO_METRICS
-			foreach component [items-of restComponents] : begin
-				if ([typeof component] === 'string')
-				: then : include [refer-glyph component]
-				: else : include component
-
 	glyph-block-export alias
 	define [alias dstGid dstUnicode srcGid] : begin
 		if [not dstGid] : throw : new Error "Target ID not specified"
@@ -201,16 +189,26 @@ glyph-block Common-Derivatives : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : VCombine newid unicode id id spacing
 
-	# Two-part glyphs
-	glyph-block-export create-two-part-glyph
-	define [create-two-part-glyph newid unicode id1 id2] : begin
-		derive-multi-part-glyphs newid unicode { id1 id2 } : function [src] : glyph-proc
-			local { a b } src
-			local awA [query-glyph a].advanceWidth
-			local awB [query-glyph b].advanceWidth
-			set-width (awA + awB)
-			include [refer-glyph a] AS_BASE
-			include [refer-glyph b]
+	glyph-block-export derive-composites
+	define [derive-composites dstGid dstUnicode srcGid] : begin
+		if [not : glyph-is-needed dstGid] : return nothing
+		local components : {}.slice.call arguments 2
+		local refs {}
+		foreach part [items-of components] : if ([typeof part] === 'string')
+			then : refs.push part
+
+		return : derive-multi-part-glyphs dstGid dstUnicode refs : function [srcs] : glyph-proc
+			local rid 0
+			foreach j [range 0 components.length] : begin
+				local asBase      : if (j === 0) AS_BASE      nothing
+				local alsoMetrics : if (j === 0) ALSO_METRICS nothing
+				local part components.(j)
+
+				if ([typeof part] === 'string')
+				: then : begin
+					include [refer-glyph srcs.(rid)] asBase alsoMetrics
+					set rid : rid + 1
+				: else : include part asBase alsoMetrics
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin
