@@ -2328,6 +2328,17 @@
 <td colspan="6">1</td>
 <td colspan="6">2</td>
 </tr>
+<tr>
+<td rowspan="2"><code>VXDD</code></td>
+<td colspan="5"><img src="../images/character-variant-diacritic-dot-round.light.png#gh-light-mode-only" width=160/><img src="../images/character-variant-diacritic-dot-round.dark.png#gh-dark-mode-only" width=160/></td>
+<td colspan="5"><img src="../images/character-variant-diacritic-dot-square.light.png#gh-light-mode-only" width=160/><img src="../images/character-variant-diacritic-dot-square.dark.png#gh-dark-mode-only" width=160/></td>
+<td colspan="2"> </td>
+</tr>
+<tr>
+<td colspan="5">1</td>
+<td colspan="5">2</td>
+<td colspan="2"> </td>
+</tr>
 </table>
 
 <!-- END Section-OT-Character-Variants -->
