@@ -30,44 +30,14 @@ export : define [buildCVSS sink para glyphStore] : begin
 		.type 'gsub_multiple'
 		.substitutions decompositions
 
-	# Right Dependent
-	define rightDependentGroups {.}
-	foreach { gid g } [glyphStore.namedEntries] : begin
-		local trigger : RightDependentTrigger.get g
-		if trigger : begin
-			if [not rightDependentGroups.(trigger)] : set rightDependentGroups.(trigger) : object
-				triggerGlyphs : new Set
-				links         : new Map
-
-			rightDependentGroups.(trigger).triggerGlyphs.add gid
-
-		local links : RightDependentLink.getAll g
-		if links : foreach { key linked } [Object.entries links] : begin
-			if [not rightDependentGroups.(key)] : set rightDependentGroups.(key) : object
-				triggerGlyphs : new Set
-				links         : new Map
-
-			rightDependentGroups.(key).links.set gid [glyphStore.ensureExists linked]
-
-	define lookupNameDollarShrink : add-lookup sink : object
-		.type 'gsub_chaining'
-		.rules : [Array.from : Object.entries rightDependentGroups].map : function kv : begin
-			local group kv.1
-			return : chain-rule
-				[Array.from : group.links.keys]  ~> [Array.from : group.links.values]
-				[Array.from group.triggerGlyphs] ~> look-around
-
-
 	define [addFeatureAndLookup tag lookupName init] : begin
 		define feature : pick-feature sink [FeatureName tag]
 		add-common-feature sink feature
 
 		define lookup : pick-lookup sink lookupName init
 		add-feature-lookup feature lookupNameCvDecompose
-		add-feature-lookup feature lookupNameDollarShrink
 		add-feature-lookup feature lookupName
 		sink.lookupDep.push { lookupNameCvDecompose lookupName }
-		sink.lookupDep.push { lookupName lookupNameDollarShrink }
 		cvLookupNameSet.add lookupName
 
 
@@ -109,3 +79,5 @@ export : define [buildCVSS sink para glyphStore] : begin
 		sink.lookupDep.push { lutnCv lutnSS }
 
 	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

@@ -1,13 +1,14 @@
 $$include '../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from '../../support/utils'
-import [Cv AnyCv AnyDerivingCv Dotless SvInheritableRelations CvDecompose] from '../../support/gr'
+import [Cv AnyCv AnyDerivingCv Dotless SvInheritableRelations CvDecompose PseudoCvDecompose getGrMesh] from '../../support/gr'
 
 extern Map
 
 glyph-module
 
 glyph-block Common-Derivatives : begin
+	glyph-block-export ApplyCv
 	define [ApplyCv g shapeFrom follow para] : begin
 		foreach { kPrime prime } para.variants.primes : foreach h [prime.variants.values] : begin
 			local suffix : h.resolveFor para follow
@@ -15,10 +16,11 @@ glyph-block Common-Derivatives : begin
 				local dstName : shapeFrom + '.' + suffix
 				local dst : glyphStore.queryByName dstName
 				if dst : g.dependsOn dst
-				if (h.tag && h.rank) : begin
+				if (para.enableCvSs && h.tag && h.rank) : begin
 					[Cv h.tag h.rank].set g dstName
 					if h.nonDeriving : [Cv h.tag h.rank].setPreventDeriving g
 
+	glyph-block-export select-variant
 	define [select-variant] : params [name unicode [shapeFrom name] [follow name] [reduction null]] : begin
 		if [not : glyph-is-needed name] : return nothing
 
@@ -34,52 +36,90 @@ glyph-block Common-Derivatives : begin
 				local v : gr.get [query-glyph (shapeFrom + '.' + variant)]
 				if v : gr.set this v
 
+	glyph-block-export orthographic-italic
 	define [orthographic-italic name unicode] : if para.isItalic
 		alias name unicode (name + '.italic')
 		alias name unicode (name + '.upright')
 
+	glyph-block-export orthographic-slanted
 	define [orthographic-slanted name unicode] : if para.slopeAngle
 		alias name unicode (name + '.slanted')
 		alias name unicode (name + '.upright')
 
+	glyph-block-export glyph-is-needed
 	define [glyph-is-needed name] : [not pickHash] || pickHash.(name)
 
+	glyph-block-export query-glyph
 	define [query-glyph id] : return : glyphStore.queryByName id
 
+	glyph-block-export refer-glyph
 	define [refer-glyph id] : lambda [copyAnchors copyWidth] : begin
 		local goal : query-glyph id
 		if [not goal] : throw : new Error "Cannot find glyph '\(id)'"
 		this.includeGlyph goal copyAnchors copyWidth
 
+	glyph-block-export DeriveMeshT
+	define [DeriveMeshT gnSources Query Fn FnLink] : begin
+		local linksGnMap : new Map
+
+		# Build principal
+		local gndSource : Fn gnSources null null
+		linksGnMap.set [keyOfGnList gnSources] gndSource
+
+		local mesh : getGrMesh gnSources Query query-glyph
+
+		# Build related derivatives
+		foreach { gr from to } [items-of mesh] : begin
+			local key : keyOfGnList to
+			if [not : linksGnMap.has key] : begin
+				local gnDerivedTo : Fn to gr from
+				linksGnMap.set key gnDerivedTo
+
+		# Link related derivatives
+		foreach { gr from to } [items-of mesh] : begin
+			local gndFrom : linksGnMap.get [keyOfGnList from]
+			local gndTo   : linksGnMap.get [keyOfGnList to]
+			if (gndFrom && gndTo && [query-glyph gndFrom] && [query-glyph gndTo]) : begin
+				gr.set [query-glyph gndFrom] gndTo
+				if FnLink : FnLink gndFrom gndTo from to
+
+		return gndSource
+	define [keyOfGnList gns] ".deriveKey{\[gns.join '}{']}"
+
+	glyph-block-export derive-glyphs
 	define [derive-glyphs dstGid dstUnicode srcGid Fn] : begin
-		if [not : glyph-is-needed srcGid] : return nothing
+		if [not : glyph-is-needed dstGid] : return nothing
 
-		local glyphSrc : glyphStore.queryByName srcGid
-		local glyphDst : create-glyph dstGid dstUnicode : glyph-proc
-			include : Fn srcGid null
+		DeriveMeshT { srcGid } AnyDerivingCv : function [gns gr] : begin
+			local gn gns.0
+			local gnDst : if [not gr] dstGid ".derive{\(dstGid)}{\(gn)}"
+			local unicodeDst : if [not gr] dstUnicode null
+			create-glyph gnDst unicodeDst : Fn gn gr
+			return gnDst
 
-		local derivedGlyphIdMap : new Map
-		if glyphDst : foreach [gr : items-of : AnyDerivingCv.query glyphSrc] : begin
-			local relGidSrc : gr.get glyphSrc
-			if [derivedGlyphIdMap.get relGidSrc]
-			: then : gr.set glyphDst : derivedGlyphIdMap.get relGidSrc
-			: else : begin
-				local relGidDst : gr.amendName dstGid
-				create-glyph relGidDst : glyph-proc : include : Fn [gr.get glyphSrc] gr.tag
-				gr.set glyphDst relGidDst
-				derivedGlyphIdMap.set relGidSrc relGidDst
+	glyph-block-export derive-multi-part-glyphs
+	define [derive-multi-part-glyphs dstGid dstUnicode gnSoruces Fn] : begin
+		if [not : glyph-is-needed dstGid] : return nothing
 
+		DeriveMeshT gnSoruces AnyDerivingCv : function [gns gr] : begin
+			local gnDst : if [not gr] dstGid ".derive{\(dstGid)}{\[gns.join '}{']}"
+			local unicodeDst : if [not gr] dstUnicode null
+			create-glyph gnDst unicodeDst : Fn gns gr
+			return gnDst
+
+	glyph-block-export derive-composites
 	define [derive-composites dstGid dstUnicode srcGid] : begin
 		if [not : glyph-is-needed srcGid] : return nothing
 
 		local restComponents : {}.slice.call arguments 3
-		return : derive-glyphs dstGid dstUnicode srcGid : lambda [src sel] : glyph-proc
+		return : derive-glyphs dstGid dstUnicode srcGid : lambda [src gr] : glyph-proc
 			include [refer-glyph src] AS_BASE ALSO_METRICS
 			foreach component [items-of restComponents] : begin
 				if ([typeof component] === 'string')
 				: then : include [refer-glyph component]
 				: else : include component
 
+	glyph-block-export alias
 	define [alias dstGid dstUnicode srcGid] : begin
 		if [not dstGid] : throw : new Error "Target ID not specified"
 		if [not : glyph-is-needed srcGid] : return nothing
@@ -94,10 +134,11 @@ glyph-block Common-Derivatives : begin
 				if [gr.getPreventDeriving glyphSrc] : gr.setPreventDeriving glyphDst
 			if [Dotless.get glyphSrc] : Dotless.set glyphDst [Dotless.get glyphSrc]
 
+	glyph-block-export turned
 	define [turned newid unicode id _x _y mark] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		derive-glyphs newid unicode id
-			lambda [src sel] : glyph-proc
+			lambda [src gr] : glyph-proc
 				include [refer-glyph src] [if mark false AS_BASE] ALSO_METRICS
 				if mark : include mark
 				define x : if (_x <@ Function) [_x.call currentGlyph] _x
@@ -111,16 +152,20 @@ glyph-block Common-Derivatives : begin
 				include : Translate x y
 				include : Italify
 
+	glyph-block-export link-reduced-variant
 	define [link-reduced-variant] : params [dstGid srcGid gr follow] : begin
 		if [not : query-glyph dstGid] : select-variant dstGid (shapeFrom -- srcGid) (follow -- [fallback follow dstGid])
 		if (gr && [query-glyph srcGid]) : gr.set [query-glyph srcGid] dstGid
 
+	glyph-block-export alias-reduced-variant
 	define [alias-reduced-variant dstGid srcGid shapeGid gr] : begin
 		alias dstGid null shapeGid
 		if (gr && [query-glyph srcGid]) : gr.set [query-glyph srcGid] dstGid
 
+	glyph-block-export HalfAdvance
 	define [HalfAdvance] : this.advanceWidth / 2
 
+	glyph-block-export TurnMarks
 	define [TurnMarks k fnOverride] : glyph-proc
 		local df : DivFrame (currentGlyph.advanceWidth / Width)
 		local mx : compositeBaseAnchors [df.markSet.(k)]
@@ -128,6 +173,7 @@ glyph-block Common-Derivatives : begin
 		include mx
 
 	# Dual derivatives
+	glyph-block-export HCombine
 	define [HCombine newid unicode id1 id2 spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
@@ -136,10 +182,12 @@ glyph-block Common-Derivatives : begin
 			include [refer-glyph id2]
 			include : Translate (spacing / 2) 0
 
+	glyph-block-export HDual
 	define [HDual newid unicode id spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : HCombine newid unicode id id spacing
 
+	glyph-block-export VCombine
 	define [VCombine newid unicode id1 id2 spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		create-glyph newid unicode : glyph-proc
@@ -147,24 +195,22 @@ glyph-block Common-Derivatives : begin
 			include : Translate (-spacing * TanSlope) (-spacing)
 			include [refer-glyph id1]
 			include : Translate (spacing * TanSlope / 2) (spacing / 2)
+
+	glyph-block-export VDual
 	define [VDual newid unicode id spacing] : begin
 		if [not newid] : throw : new Error "Target ID not specified"
 		return : VCombine newid unicode id id spacing
 
-	# Two-art glyphs
+	# Two-part glyphs
+	glyph-block-export create-two-part-glyph
 	define [create-two-part-glyph newid unicode id1 id2] : begin
-		create-glyph newid unicode : glyph-proc
-			set-width ([query-glyph id1].advanceWidth + [query-glyph id2].advanceWidth)
-			include [refer-glyph id1] AS_BASE
-			include [refer-glyph id2]
-			CvDecompose.set currentGlyph { id1 id2 }
-
-
-	glyph-block-export select-variant orthographic-italic orthographic-slanted
-	glyph-block-export refer-glyph query-glyph derive-glyphs derive-composites
-	glyph-block-export link-reduced-variant alias-reduced-variant
-	glyph-block-export alias turned HDual HCombine VDual VCombine glyph-is-needed
-	glyph-block-export HalfAdvance TurnMarks create-two-part-glyph
+		derive-multi-part-glyphs newid unicode { id1 id2 } : function [src] : glyph-proc
+			local { a b } src
+			local awA [query-glyph a].advanceWidth
+			local awB [query-glyph b].advanceWidth
+			set-width (awA + awB)
+			include [refer-glyph a] AS_BASE
+			include [refer-glyph b]
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin

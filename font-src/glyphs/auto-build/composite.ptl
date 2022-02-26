@@ -35,18 +35,12 @@ glyph-block Autobuild-Enclosure-Shared : begin
 		return name
 
 	glyph-block-export EnsureComponentGlyphT
-	define [EnsureComponentGlyphT gidPart fnBuildup] : begin
+	define [EnsureComponentGlyphT gnPart fnBuildup] : begin
 		local rs : new Set
-		local gniPart : fnBuildup gidPart
-		local grs : AnyCv.query [query-glyph gidPart]
-		if (para.enableCvSs && grs) : foreach gr [items-of grs] : begin
-			local relatedGidPart : gr.get [query-glyph gidPart]
-			local gniRelated : fnBuildup relatedGidPart
-			if [query-glyph gniPart] : begin
-				gr.set [query-glyph gniPart] gniRelated
-				if [query-glyph gniRelated] : begin
-					[query-glyph gniPart].tryBecomeMirrorOf [query-glyph gniRelated] rs
-		return gniPart
+		return : DeriveMeshT { gnPart } AnyCv
+			function [gns gr] : fnBuildup gns.0
+			function [gniFrom gniTo] : begin
+				[query-glyph gniFrom].tryBecomeMirrorOf [query-glyph gniTo] rs
 
 	glyph-block-export getGlyphDefaultShift
 	define [getGlyphDefaultShift bal baly g] : begin
@@ -71,7 +65,7 @@ glyph-block Autobuild-Enclosure-Shared : begin
 			foreach part [items-of parts] : if [query-glyph part] : begin
 				local g : query-glyph part
 				local relatedGlyphs : AnyCv.query g
-				foreach gr [items-of relatedGlyphs] : if ([query-glyph : gr.get g] && parts.length > 1) : begin
+				foreach gr [items-of relatedGlyphs] : if [query-glyph : gr.get g] : begin
 					# Multi-part enclosure, proportinal
 					if (allowProportional && [query-glyph : gr.get g].advanceWidth != g.advanceWidth)
 						set demandDecomposable false
@@ -97,10 +91,10 @@ glyph-block Autobuild-Enclosure-Shared : begin
 	define [CreateDerivedFontFromJobs aj restGids fn] : begin
 		define [object nonDecomposable decomposableJobs decomposableRelJobs] aj
 		local dfJobs : nonDecomposable.concat decomposableJobs decomposableRelJobs
-		local pendingGlyphs : restGids.slice 0
+		local pendingGlyphs : new Set : restGids.slice 0
 		foreach {gnf unicode parts} [items-of dfJobs] : foreach gn [items-of parts]
-			pendingGlyphs.push gn
-		return : fn pendingGlyphs
+			pendingGlyphs.add gn
+		return : fn : Array.from pendingGlyphs
 
 	glyph-block-export applyRelations
 	define [applyRelations relApplications] : begin
@@ -234,9 +228,9 @@ glyph-block AutoBuild-Enclosure : begin
 				width / 2 + (top - bot) / 2
 				width / 2 + CAP / 2 * dscale + sw * 2.5
 		define mockInnerWidth : width + 2 * (Stroke - sw) * dscale
-		define smoothA : SmoothAOf (SmallSmooth * (right - left) / (RightSB - SB)) width
-		define smoothB : SmoothBOf (SmallSmooth * (right - left) / (RightSB - SB)) width
-		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight smoothA smoothB
+		define archDepthA : ArchDepthAOf (SmallArchDepth * (right - left) / (RightSB - SB)) width
+		define archDepthB : ArchDepthBOf (SmallArchDepth * (right - left) / (RightSB - SB)) width
+		return : object width mockInnerWidth dscale sw0 sw top bot left right mosaicTop mosaicBot mosaicLeft mosaicRight archDepthA archDepthB
 
 	define StandardSpacing : object
 		gniPrefix  ''
@@ -330,9 +324,9 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createSansSerifCircledGlyphs digits demands]
 		EnclosureT "circle-ss" CircledBuilder SansSerifSpacing digits 1 demands CircleEnclosureShape
 	define [CircleEnclosureShape digits ww gap] : glyph-proc
-		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
+		define [object width sw top bot left right archDepthA archDepthB] : circleDimens digits ww
 		set-width width
-		include : OShape top bot left right sw smoothA smoothB
+		include : OShape top bot left right sw archDepthA archDepthB
 		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createBoxedGlyphs digits demands]
@@ -384,9 +378,9 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createInsetSansSerifCircledGlyphs digits demands]
 		EnclosureT 'inset-circle-ss' InsetBuilder SansSerifSpacing digits 1 demands InsetCircleEnclosureShape
 	define [InsetCircleEnclosureShape digits ww gap] : glyph-proc
-		define [object width sw top bot left right smoothA smoothB] : circleDimens digits ww
+		define [object width sw top bot left right archDepthA archDepthB] : circleDimens digits ww
 		set-width width
-		include : OShapeOutline top bot left right sw smoothA smoothB
+		include : OShapeOutline top bot left right sw archDepthA archDepthB
 		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [createInsetBoxedGlyphs digits demands]
@@ -432,18 +426,18 @@ glyph-block AutoBuild-Enclosure : begin
 	define [createDoubleCircledGlyphs digits demands]
 		EnclosureT 'double-circle' CircledBuilder StandardSpacing digits 1 demands DoubleCircledEnclosureShape
 	define [DoubleCircledEnclosureShape digits ww gap] : glyph-proc
-		define [object width mockInnerWidth sw0 sw top bot left right smoothA smoothB] : circleDimens digits ww (ww * gap)
+		define [object width mockInnerWidth sw0 sw top bot left right archDepthA archDepthB] : circleDimens digits ww (ww * gap)
 		set-width width
 		define sw1 : Math.min sw0 (sw / 3)
-		include : OShape top bot left right sw1 smoothA smoothB
+		include : OShape top bot left right sw1 archDepthA archDepthB
 		include : OShape
 			top - sw + sw1
 			bot + sw - sw1
 			left + sw * HVContrast - sw1 * HVContrast
 			right - sw * HVContrast + sw1 * HVContrast
 			begin sw1
-			smoothA - sw + sw1
-			smoothB - sw + sw1
+			archDepthA - sw + sw1
+			archDepthB - sw + sw1
 		include : AddEnclosureMark digits : circleDimens digits ww
 
 	define [BraceCrowd digits width] : 2.75 + [AdjustDigitCount digits width]
@@ -740,7 +734,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "triple-digit dashed-boxed"
 		createDashedBoxedGlyphs 3 : list
-			list 0xFFFC {'O'           'B.standardSerifless'      'J.serifless'} WideWidth1
+			list 0xFFFC {'O' 'B' 'J/noDescend'} WideWidth1
 
 	do "inset boxed"
 		local compositions {}
@@ -749,7 +743,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "inset diamond"
 		createInsetDiamondGlyphs 1 : list
-			list 0xFFFD { 'question' } WideWidth2
+			list 0xFFFD { "question" } WideWidth2
 
 	do "double-digit inset boxed"
 		createInsetBoxedGlyphs 2 : list
@@ -763,7 +757,7 @@ glyph-block AutoBuild-Enclosure : begin
 		local compositions {}
 		compositions.push { 0x1FBB1 { [[glyphStore.queryNameOfUnicode (0x2714)].replace [regex '.WWID$'] ".NWID"] } WideWidth4 }
 		compositions.push { 0x1FBB4 { [[glyphStore.queryNameOfUnicode (0x21B2)].replace [regex '.WWID$'] ".NWID"] } WideWidth4 }
-		compositions.push { 0x1FBC4 { "question/hookPart" "question/dotPart" } WideWidth4 }
+		compositions.push { 0x1FBC4 { "question" } WideWidth4 }
 		createInsetMosaicGlyphs 1 compositions
 
 	do "Single-digit double circled"

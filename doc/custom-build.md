@@ -2,7 +2,7 @@
 
 To build Iosevka you should:
 
-1. Ensure that [`nodejs`](http://nodejs.org) (≥ 12.16.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
+1. Ensure that [`nodejs`](http://nodejs.org) (≥ 14.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
 2. Run `npm install`. This command will install **all** the NPM dependencies, and will also validate whether external dependencies are present.
 3. `npm run build -- contents::iosevka`.
 
@@ -400,6 +400,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
      <table><tr><td rowspan="2" width="60"><img src="../images/character-variant-question-smooth.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-question-smooth.dark.png#gh-dark-mode-only" width=32/></td><td><code>question = 'smooth'</code>, <code>cv98 = 1</code></td></tr><tr><td>Smooth question mark (<code>?</code>) (default)</td></tr><tr><td rowspan="2" width="60"><img src="../images/character-variant-question-corner.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-question-corner.dark.png#gh-dark-mode-only" width=32/></td><td><code>question = 'corner'</code>, <code>cv98 = 2</code></td></tr><tr><td>Question mark (<code>?</code>) with a corner at middle</td></tr><tr><td rowspan="2" width="60"><img src="../images/character-variant-question-corner-flat-hooked.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-question-corner-flat-hooked.dark.png#gh-dark-mode-only" width=32/></td><td><code>question = 'corner-flat-hooked'</code>, <code>cv98 = 3</code></td></tr><tr><td>Question mark (<code>?</code>) with a corner at middle and flat hook</td></tr></table>
   - Styles for `.,`, `:;` (Dot and Comma shape in punctuations and symbols):
      <table><tr><td rowspan="2" width="220"><img src="../images/character-variant-punctuation-dot-round.light.png#gh-light-mode-only" width=192/><img src="../images/character-variant-punctuation-dot-round.dark.png#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'round'</code>, <code>cv99 = 1</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots (default)</td></tr><tr><td rowspan="2" width="220"><img src="../images/character-variant-punctuation-dot-square.light.png#gh-light-mode-only" width=192/><img src="../images/character-variant-punctuation-dot-square.dark.png#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv99 = 2</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr></table>
+  - Styles for `öẋ`, `ij` (Dot and Comma shape in diacritics):
+     <table><tr><td rowspan="2" width="188"><img src="../images/character-variant-diacritic-dot-round.light.png#gh-light-mode-only" width=160/><img src="../images/character-variant-diacritic-dot-round.dark.png#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'round'</code>, <code>VXDD = 1</code></td></tr><tr><td>Dots and Commas in diacritics are round (default)</td></tr><tr><td rowspan="2" width="188"><img src="../images/character-variant-diacritic-dot-square.light.png#gh-light-mode-only" width=160/><img src="../images/character-variant-diacritic-dot-square.dark.png#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'square'</code>, <code>VXDD = 2</code></td></tr><tr><td>Dots and Commas in diacritics are square</td></tr></table>
 
 <!-- END Section-Cherry-Picking-Styles -->
 
@@ -450,7 +452,7 @@ Subsection `metric-override` provides ability to override certain metric values,
 | Property | Unit | Default Value | Meaning |
 |----------|------|---------|----------|
 | `cap` | emu | 735 | Height of `H`. |
-| `xheight` | emu | 520 | Height of `x`. |
+| `xHeight` | emu | 520 | Height of `x`. |
 | `sb` | emu | (*varies, 60 for Regular*) | Width of common side-bearings. |
 | `accentWidth` | emu | 200 | Width of accent marks. |
 | `accentClearance` | emu | 72 | Vertical clearance of accent marks to the base. |
@@ -470,6 +472,8 @@ Subsection `metric-override` provides ability to override certain metric values,
 | `essRatioUpper` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `S`, to the normal stroke width. |
 | `essRatioLower` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `s`, to the normal stroke width. |
 | `essRatioQuestion` | (*ratio*) | (*varies, 1.12 for Regular*) | Ratio of the thickness of the neck of `?`, to the normal stroke width. |
+| `archDepth` | emu | (*varies, 195 for Regular*) | Depth of the curve segment of arches / O rings in capital letters. |
+| `smallArchDepth` | emu | (*varies, 200 for Regular*) | Depth of the curve segment of arches / O rings in small letters. |
 
 The values of each item could be either a number, or a string representing an expression so that it could be different for different instance fonts, or depending on default values. The syntax of valid expressions are:
 
