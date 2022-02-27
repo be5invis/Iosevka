@@ -350,10 +350,11 @@ glyph-block Letter-Latin-C : begin
 	alias 'grek/revLunateSigma' 0x3FD 'revC'
 	alias 'grek/revLunateSmallSigma' 0x37B 'revSmallC.serifless'
 
-	define [LunateSigmaShape k] : begin
-		local halfDotWidth  : Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)
-		local halfDotHeight : Math.min DotRadius (halfDotWidth * k)
-		return : OShapeOutline.NoOvershoot
+	define [LunateSigmaShape k fRound kdr] : begin
+		local halfDotWidth  : kdr * [Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)]
+		local halfDotHeight : kdr * [Math.min DotRadius (halfDotWidth * k)]
+		if fRound
+		: then : return :OShapeOutline.NoOvershoot
 			CAP / 2 + halfDotHeight
 			CAP / 2 - halfDotHeight
 			0 + halfDotWidth
@@ -361,15 +362,23 @@ glyph-block Letter-Latin-C : begin
 			Stroke * halfDotWidth * 2 / Width
 			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
 			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
+		: else : return : Rect
+			CAP / 2 + halfDotHeight
+			CAP / 2 - halfDotHeight
+			0 + halfDotWidth
+			0 - halfDotWidth
+	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+		create-glyph "grek/lunateSigmaDot.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
+			include : LunateSigmaShape 2 (DrawAt === DotAt) kdr
+		create-glyph "grek/lunateSigmaDotSmall.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
+			include : LunateSigmaShape 1.5 (DrawAt === DotAt) kdr
 
-	create-glyph 'grek/lunateSigmaDot' : glyph-proc
-		set-width 0
-		set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-		include : LunateSigmaShape 2
-	create-glyph 'grek/lunateSigmaDotSmall' : glyph-proc
-		set-width 0
-		set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-		include : LunateSigmaShape 1.5
+	select-variant "grek/lunateSigmaDot"      (follow -- 'diacriticDot')
+	select-variant "grek/lunateSigmaDotSmall" (follow -- 'diacriticDot')
 
 	derive-composites 'grek/dotLunateSigma' 0x3FE 'grek/lunateSigma' 'grek/lunateSigmaDot'
 	derive-composites 'grek/dotRevLunateSigma' 0x3FF 'grek/revLunateSigma' 'grek/lunateSigmaDot'

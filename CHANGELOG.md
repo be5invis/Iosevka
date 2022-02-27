@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 15.0.1
+
+ * Fix `cv99`/`VXDD` applications on `U+0149`, `U+0310`, `U+034B`, `U+0352`, `U+037C`, `U+037D`, `U+03FE`, `U+03FF`, `U+1E0B`, and `U+1EF5` (#1317).
+
+
 ### 15.0.0
 
  * \[**Breaking**\] Metric override name change: `xheight` → `xHeight`.
