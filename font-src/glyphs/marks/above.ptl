@@ -315,11 +315,14 @@ glyph-block Mark-Above : begin
 				flat (markMiddle + markExtend * 0.2) [mix tbot ttop 1.5]
 				curl (markMiddle - markExtend * 0.2) [mix ttop tbot 1.5]
 
-		create-forked-glyph 'tildedotdotAbove' 0x34B : glyph-proc
-			set-mark-anchor 'above' markMiddle (XH - AccentHeight / 4) markMiddle (aboveMarkStack + AccentHeight / 4)
-			local r : 0.75 * DotRadius * fine / HalfStroke
-			include : DotAt markMiddle [mix tbot ttop 1.5] r
-			include : DotAt markMiddle [mix ttop tbot 1.5] r
+		foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+			create-forked-glyph "tildedotdotAbove.\(suffix)" : glyph-proc
+				set-mark-anchor 'above' markMiddle (XH - AccentHeight / 4) markMiddle (aboveMarkStack + AccentHeight / 4)
+				local r : 0.75 * DotRadius * fine / HalfStroke
+				include : DrawAt markMiddle [mix tbot ttop 1.5] (r * kdr)
+				include : DrawAt markMiddle [mix ttop tbot 1.5] (r * kdr)
+
+	select-variant 'tildedotdotAbove' 0x34B (follow -- 'diacriticDot')
 
 	create-glyph 'dblTildeAbove' 0x34C : glyph-proc
 		set-width 0
@@ -507,6 +510,7 @@ glyph-block Mark-Above : begin
 		include : ApparentTranslate 0 (DotRadius * 0.3)
 
 	select-variant 'commaAbove' 0x313 (follow -- 'diacriticDot')
+	select-variant 'commaAbove/asPunctuation' (shapeFrom -- 'commaAbove') (follow -- 'punctuationDot')
 
 	derive-glyphs 'commaGrekUpperTonos' null 'commaAbove' : function [src gr] : glyph-proc
 		set-width 0
@@ -599,24 +603,26 @@ glyph-block Mark-Above : begin
 			alsoThruThem {{0.9 0.36} {0.1 0.64}} [heading Upward]
 			g2 (markMiddle + markFine * 0.5) aboveMarkTop  [heading Upward]
 
-	create-glyph 'candrabinduAbove' 0x310 : glyph-proc
-		set-width 0
-		local fine : AdviceStroke 6.5
-		local arcSw : Math.min (markHalfStroke * 2) (fine * 1.25)
-		local radius : Math.max (markExtend - DotRadius) (fine * 1.35)
-		local yDot : mix aboveMarkBot aboveMarkTop 0.625
-		include : dispiro
-			widths.rhs arcSw
-			g4.down.start (markMiddle - radius) yDot [heading Downward]
-			arcvh
-			g4.right.mid markMiddle (yDot - radius)
-			archv
-			g4.up.end (markMiddle + radius) yDot [heading Upward]
-		include : DotAt markMiddle yDot fine
-		include : ApparentTranslate 0 (fine * 0.5)
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+		create-glyph "candrabinduAbove.\(suffix)" : glyph-proc
+			set-width 0
+			local fine : AdviceStroke 6.5
+			local arcSw : Math.min (markHalfStroke * 2) (fine * 1.25)
+			local radius : Math.max (markExtend - DotRadius) (fine * 1.35)
+			local yDot : mix aboveMarkBot aboveMarkTop 0.625
+			include : dispiro
+				widths.rhs arcSw
+				g4.down.start (markMiddle - radius) yDot [heading Downward]
+				arcvh
+				g4.right.mid markMiddle (yDot - radius)
+				archv
+				g4.up.end (markMiddle + radius) yDot [heading Upward]
+			include : DrawAt markMiddle yDot (fine * kdr)
+			include : ApparentTranslate 0 (fine * 0.5)
+			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
+			set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
 
+	select-variant 'candrabinduAbove' 0x310 (follow -- 'diacriticDot')
 	turned 'turncandrabinduAbove' 0x352 'candrabinduAbove' markMiddle aboveMarkMid
 
 	create-glyph 'variaAbove' 0x340 : glyph-proc
