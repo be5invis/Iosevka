@@ -46,6 +46,7 @@ glyph-block Symbol-Punctuation-At : begin
 
 	define [FourFoldShape height fSolidInner] : glyph-proc
 		local df : DivFrame para.diversityM [if fSolidInner 3.25 4]
+		set-width df.width
 
 		local top : SymbolMid + height / 2
 		local bot : SymbolMid - height / 2
@@ -60,8 +61,13 @@ glyph-block Symbol-Punctuation-At : begin
 		local m1 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) kM12      ] - [HSwToV (sw * kM12Sw)]
 		local m2 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) (1 - kM12)] + [HSwToV (sw * kM12Sw)]
 
-		local ada : ArchDepthA * ((m2 - m1) / (df.rightSB - df.leftSB) * 1.1)
-		local adb : ArchDepthB * ((m2 - m1) / (df.rightSB - df.leftSB) * 1.1)
+		local ad : ArchDepth * [Math.sqrt df.div]
+		local ada : ArchDepthAOf ad df.width
+		local adb : ArchDepthBOf ad df.width
+
+		local adInner : Math.max (ad * (m2 - m1) / (df.rightSB - df.leftSB)) (sw * 1.25)
+		local adaInner : ArchDepthAOf adInner (m2 - m1 + df.leftSB * 2)
+		local adbInner : ArchDepthBOf adInner (m2 - m1 + df.leftSB * 2)
 
 		include : union
 			dispiro
@@ -70,23 +76,23 @@ glyph-block Symbol-Punctuation-At : begin
 				: then { }
 				: else : list
 					flat m2 (obot - O) [heading Upward]
-					curl m2 (otop - adb)
+					curl m2 (otop - adbInner)
 					arcvh
 					g4   [ArchXAdjust.top df.middle sw] (otop - O)
 					archv
-					flat m1 (otop - ada)
-					curl m1 (obot + adb)
+					flat m1 (otop - adaInner)
+					curl m1 (obot + adbInner)
 					arcvh
 				flat df.middle obot
 				curl (df.rightSB - [Math.max ((m2 - m1) / 2) (sw * 1.5 * HVContrast)]) obot
 				archv
-				flat df.rightSB (obot + [Math.max ada (sw * 1.5)])
-				curl df.rightSB (top - df.archDepthB)
+				flat df.rightSB (obot + [Math.max adaInner (sw * 1.5)])
+				curl df.rightSB (top - adb)
 				arcvh
 				g4   [ArchXAdjust.top df.middle sw] (top - O) [widths swh 0]
 				archv
-				flat df.leftSB (top - df.archDepthA) [widths sw 0]
-				curl df.leftSB (bot + df.archDepthB)
+				flat df.leftSB (top - ada) [widths sw 0]
+				curl df.leftSB (bot + adb)
 				arcvh
 				flat [ArchXAdjust.bot df.middle sw] (bot + O) [widths swh 0 ]
 				curl (df.rightSB - HalfStroke + TanSlope * sw) (bot + O)
@@ -94,12 +100,12 @@ glyph-block Symbol-Punctuation-At : begin
 			if fSolidInner
 				spiro-outline
 					corner m2 obot
-					curl   m2 (otop - adb)
+					curl   m2 (otop - adbInner)
 					arcvh
 					g4     [ArchXAdjust.top df.middle sw] otop
 					archv
-					flat   m1 (otop - ada)
-					curl   m1 (obot + adb)
+					flat   m1 (otop - adaInner)
+					curl   m1 (obot + adbInner)
 					arcvh
 					flat   df.middle obot
 				glyph-proc
