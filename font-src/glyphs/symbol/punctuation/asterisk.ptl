@@ -10,14 +10,16 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 	glyph-block-import Common-Derivatives
 
 	define asteriskCenterY : ParenTop - LongJut * 1.5
+	define asteriskCenterYLow : asteriskCenterY + 2 * (SymbolMid - asteriskCenterY)
+
 	define asteriskKinds : list
-		list 5  1.2  0    0.4  Stroke         'asterisk'       'pentaHigh'     'pentaSMid'      'midXH'  'pentaLow'      'dualAsterisk'
-		list 6  1.2  0    0.4  Stroke         'asterisk'       'hexHigh'       'hexSMid'        ''       'hexLow'        'dualAsterisk'
-		list 5  1.2  1    0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaSMid'  ''       'turnPentaLow'  'dualAsterisk'
-		list 6  1.2  0.5  0.4  Stroke         'asterisk'       'turnHexHigh'   'turnHexSMid'    ''       'turnHexLow'    'dualAsterisk'
-		list 5  0.85 0    0.4  Stroke         'smallAsterisk'  'high'          'low'            ''       ''              ''
-		list 5  1    0    0.4  GeometryStroke 'opAsterisk'     'high'          'low'            ''       ''              ''
-	foreach [{sides size rot pFine stroke name high sMid midXH low dual} : items-of asteriskKinds] : begin
+		list 5  1.2  0    0.4  Stroke         'asterisk'       'pentaHigh'     'pentaSMid'      'midXH'  'pentaLow'      'dualAsterisk'  'asterism'
+		list 6  1.2  0    0.4  Stroke         'asterisk'       'hexHigh'       'hexSMid'        ''       'hexLow'        'dualAsterisk'  'asterism'
+		list 5  1.2  1    0.4  Stroke         'asterisk'       'turnPentaHigh' 'turnPentaSMid'  ''       'turnPentaLow'  'dualAsterisk'  'asterism'
+		list 6  1.2  0.5  0.4  Stroke         'asterisk'       'turnHexHigh'   'turnHexSMid'    ''       'turnHexLow'    'dualAsterisk'  'asterism'
+		list 5  0.85 0    0.4  Stroke         'smallAsterisk'  'high'          'low'            ''       ''              ''              ''
+		list 5  1    0    0.4  GeometryStroke 'opAsterisk'     'high'          'low'            ''       ''              ''              ''
+	foreach [{sides size rot pFine stroke name high sMid midXH low dual triple} : items-of asteriskKinds] : begin
 		create-glyph (name + '.' + high) : glyph-proc
 			local radius : LongJut * size
 			local fine : stroke * pFine
@@ -46,7 +48,27 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 			refer-glyph (name + '.' + high)
 			refer-glyph (name + '.' + low)
 
+		if (triple && sMid && low) : for-width-kinds WideWidth1
+			local scale : Math.sqrt (MosaicWidthScalar / 2)
+			create-glyph ([MangleName triple] + '.' + sMid) : glyph-proc
+				set-width MosaicWidth
+				include : WithTransform [ApparentTranslate (MosaicWidth * 0.5  - Width / 2) 0]
+					composite-proc
+						refer-glyph (name + '.' + high)
+						ScaleAround Middle asteriskCenterY    scale scale
+				include : WithTransform [ApparentTranslate (MosaicWidth * 0.75 - Width / 2) 0]
+					composite-proc
+						refer-glyph (name + '.' + low)
+						ScaleAround Middle asteriskCenterYLow scale scale
+				include : WithTransform [ApparentTranslate (MosaicWidth * 0.25 - Width / 2) 0]
+					composite-proc
+						refer-glyph (name + '.' + low)
+						ScaleAround Middle asteriskCenterYLow scale scale
+
 	select-variant 'asterisk' '*'
 	select-variant 'asterisk/sMid' (shapeFrom -- 'asterisk')
 	select-variant 'lowAsterisk' 0x204E (shapeFrom -- 'asterisk')
 	select-variant 'dualAsterisk' 0x2051 (follow -- 'asterisk/sMid')
+
+	for-width-kinds WideWidth1
+		select-variant [MangleName 'asterism'] [MangleUnicode 0x2042] (follow -- 'asterisk/sMid')

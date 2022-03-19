@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 15.0.3
+
+ * Add Asterism (`U+2042`) character (#1324).
+
+
 ### 15.0.2
 
  * Fix placement of COMBINING DOT ABOVE RIGHT (`U+0358`) (#1318).
