@@ -44,6 +44,8 @@ To create a custom build, you need:
    4. `webfont::<plan>` : Web fonts only (CSS + WOFF2);
    5. `woff2::<plan>` : WOFF2 only.
 
+⚠️ **Important:** By default, the build system will schedule a number of concurrently running jobs equal to the number of threads available on the CPU, which *will* push CPU usage and also likely RAM usage, if you do not have very much to work with, to the ceiling (each job consumes more than 1 GB of RAM at its peak). If this is an issue for you, pass an additional argument `--jCmd=<number of concurrent jobs>`.
+
 ### Configuring Custom Build
 
 Configuration of build plans are organized under `[buildPlans.<plan name>]` sections in the `private-build-plans.toml`. You can use [the Customizer](https://be5invis.github.io/Iosevka/customizer) to create the build plan, and/or manually edit them, following the instructions below.
