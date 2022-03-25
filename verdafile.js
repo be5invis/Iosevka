@@ -649,6 +649,7 @@ const PagesFontExport = task.group(`pages:font-export`, async (target, gr) => {
 	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
 	await target.need(GroupWebFonts(gr), de(outDir));
 	await cp(`${DIST}/${gr}/woff2`, Path.resolve(outDir, "woff2"));
+	await Delay(500);
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsPages);
 	await rm(Path.resolve(outDir, "ttf"));
 });
@@ -660,6 +661,7 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
 	await target.need(GroupTTFs(gr), de(outDir));
 	await cp(`${DIST}/${gr}/ttf`, Path.resolve(outDir, "ttf"));
+	await Delay(500);
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsFast);
 	await rm(Path.resolve(outDir, "woff2"));
 });
