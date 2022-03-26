@@ -11,6 +11,8 @@ glyph-block Symbol-Other-Phonetic : begin
 	glyph-block-import Common-Derivatives
 
 	local triangleSize : Math.min (PeriodRadius) (XH / 5)
+	local toneMarkLeft : mix SB RightSB 0.1
+	local toneMarkRight : Width - toneMarkLeft
 
 	create-glyph 'trianglecolon' 0x2D0 : glyph-proc
 		include : union
@@ -29,23 +31,25 @@ glyph-block Symbol-Other-Phonetic : begin
 			corner Middle (XH - triangleSize * 2.75)
 			corner (Middle + triangleSize * 1.35) XH
 
-	define [yOfTone tone] : mix (OperatorStroke / 2) (CAP - OperatorStroke / 2) (tone / 4)
+	define [yOfTone tone]        : mix (OperatorStroke / 2) (CAP - OperatorStroke / 2) (tone / 4)
 	define [yOfToneNeutral tone] : mix DotRadius (CAP - DotRadius) (tone / 4)
+	define [yOfToneDepart a b p]     : mix (CAP * a + OperatorStroke / 2) (CAP * b - OperatorStroke / 2) p
 
 	foreach tone [range 4 downtill 0] : begin
 		create-glyph ('tone' + tone) (0x2E5 + 4 - tone) : glyph-proc
-			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
-			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+			include : VBarRight toneMarkRight 0 CAP OperatorStroke
+			include : HBar toneMarkLeft (toneMarkRight - 0.1) [yOfTone tone] OperatorStroke
 		create-glyph ('toneSandhi' + tone) (0xA712 + 4 - tone) : glyph-proc
-			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
-			include : HBar [mix SB RightSB 0.1] ([mix SB RightSB 0.9] - 1) [yOfTone tone] OperatorStroke
+			include : VBarLeft toneMarkLeft 0 CAP OperatorStroke
+			include : HBar (toneMarkLeft + 0.1) toneMarkRight [yOfTone tone] OperatorStroke
 		create-glyph ('toneNeutral' + tone) (0xA708 + 4 - tone) : glyph-proc
-			include : VBarRight [mix SB RightSB 0.9] 0 CAP OperatorStroke
-			include : DotAt ([mix SB RightSB 0.1] + DotRadius) [yOfToneNeutral tone] DotRadius
+			include : VBarRight toneMarkRight 0 CAP OperatorStroke
+			include : DotAt (toneMarkLeft + DotRadius) [yOfToneNeutral tone] DotRadius
 		create-glyph ('toneSandhiNeutral' + tone) (0xA70D + 4 - tone) : glyph-proc
-			include : VBarLeft [mix SB RightSB 0.1] 0 CAP OperatorStroke
-			include : DotAt ([mix SB RightSB 0.9] - DotRadius) [yOfToneNeutral tone] DotRadius
+			include : VBarLeft toneMarkLeft 0 CAP OperatorStroke
+			include : DotAt (toneMarkRight - DotRadius) [yOfToneNeutral tone] DotRadius
 
+	# Connected tones
 	foreach toneStart [range 4 downtill 0] : foreach toneEnd [range 4 downtill 0] : begin
 		create-glyph ('toneStart' + toneStart + toneEnd) : glyph-proc
 			Joining.set currentGlyph Joining.Classes.Right
@@ -110,3 +114,22 @@ glyph-block Symbol-Other-Phonetic : begin
 		create-glyph ('toneSandhiMid' + toneStart + toneMid + toneEnd) : glyph-proc
 			include [refer-glyph ('toneMid' + toneStart + toneMid + toneEnd)] AS_BASE ALSO_METRICS
 			Joining.set currentGlyph Joining.Classes.Mid
+
+	# Departing tones
+	local DepartingToneConfig : list
+		list 'departingToneYin'  0x2EA  0    0.5  0
+		list 'departingToneYang' 0x2EB  0    0.5  0.5
+		list 'beginHighTone'     0x2F9  0.6  1    1.0
+		list 'beginLowTone'      0x2FB  0    0.4   0
+	foreach { name code a b pos } [items-of DepartingToneConfig] : begin
+		create-glyph name code : glyph-proc
+			include : VBarLeft toneMarkLeft (CAP * a) (CAP * b) OperatorStroke
+			include : HBar (toneMarkLeft + 0.1) toneMarkRight [yOfToneDepart a b pos] OperatorStroke
+
+	local EnteringToneConfig : list
+		list 'endHighTone'       0x2FA  0.6  1    1.0
+		list 'endLowTone'        0x2FC  0    0.4  0
+	foreach { name code a b pos } [items-of EnteringToneConfig] : begin
+		create-glyph name code : glyph-proc
+			include : VBarRight toneMarkRight (CAP * a) (CAP * b) OperatorStroke
+			include : HBar toneMarkLeft (toneMarkRight - 0.1) [yOfToneDepart a b pos] OperatorStroke
