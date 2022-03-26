@@ -7,6 +7,11 @@ const WebfontFormatMap = new Map([
 	["ttf", "truetype"]
 ]);
 module.exports = function (output, family, hs, formats) {
+	if (!formats) {
+		fs.writeFileSync(output, "");
+		return;
+	}
+
 	let ans = ``;
 	for (const ext of formats) {
 		if (!WebfontFormatMap.get(ext)) throw new TypeError("Invalid webfont file format " + ext);
