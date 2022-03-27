@@ -8,6 +8,9 @@ exports.GlyphStore = class GlyphStore {
 		this.encodingBackward = new Map();
 	}
 
+	get size() {
+		return this.nameForward.size;
+	}
 	glyphs() {
 		return this.nameForward.values();
 	}
