@@ -222,95 +222,15 @@ exports.SetupBuilders = function (bindings) {
 	arcvh.superness = function (s) {
 		return arcvh(DEFAULT_STEPS, s);
 	};
-	function flattenImpl(sink, knots) {
-		for (const p of knots) {
-			if (p instanceof Array) flattenImpl(sink, p);
-			else sink.push(p);
-		}
-	}
-	function nCyclic(p, n) {
-		return (p + n + n) % n;
-	}
-	function flatten(s, knots0) {
-		let knots = [];
-		flattenImpl(knots, knots0);
-		let unwrapped = false;
-		for (let j = 0; j < knots.length; j = j + 1)
-			if (knots[j] && knots[j].type === "interpolate") {
-				const kBefore = knots[nCyclic(j - 1, knots.length)];
-				const kAfter = knots[nCyclic(j + 1, knots.length)];
-				knots[j] = knots[j].blender(kBefore, kAfter, knots[j]);
-				unwrapped = true;
-			}
-		if (unwrapped) return flatten(s, knots);
-		return knots;
-	}
-	function dropTailKnot(knots) {
-		let last = knots[knots.length - 1];
-		if (last && (last.type === "close" || last.type === "end")) {
-			knots.length = knots.length - 1;
-			return last.type === "close";
-		} else {
-			return false;
-		}
-	}
-	function prepareSpiroKnots(_knots, s) {
-		let knots = [..._knots];
-		while (knots[0] && knots[0] instanceof Function) {
-			knots[0].call(s);
-			knots.splice(0, 1);
-		}
-		const closed = dropTailKnot(knots);
-		knots = flatten(s, knots);
-		return { knots, closed };
-	}
-
-	class DiSpiroProxy {
-		constructor(closed, collector, origKnots) {
-			this.geometry = new DiSpiroGeometry(
-				collector.gizmo,
-				collector.contrast,
-				closed,
-				collector.controlKnots
-			);
-			this.m_origKnots = origKnots;
-		}
-
-		get knots() {
-			return this.m_origKnots;
-		}
-		get lhsKnots() {
-			return this.geometry.expand().lhs;
-		}
-		get rhsKnots() {
-			return this.geometry.expand().rhs;
-		}
-	}
 
 	function dispiro(...args) {
-		return function () {
-			const gizmo = this.gizmo || GlobalTransform;
-			const collector = new BiKnotCollector(gizmo, Contrast);
-			const { knots, closed } = prepareSpiroKnots(args, collector);
-			for (const knot of knots) {
-				collector.pushKnot(knot.type, knot.x, knot.y);
-				if (knot.af) knot.af.call(collector);
-			}
-
-			const dsp = new DiSpiroProxy(closed, collector, knots);
-			this.includeGeometry(dsp.geometry);
-			return dsp;
-		};
+		return new DispiroImpl(bindings, args);
 	}
 
 	function spiroOutline(...args) {
-		return function () {
-			const gizmo = this.gizmo || GlobalTransform;
-			const g = new CurveUtil.BezToContoursSink(gizmo);
-			const { knots, closed } = prepareSpiroKnots(args, g);
-			return this.includeGeometry(new SpiroGeometry(gizmo, closed, knots));
-		};
+		return new SpiroOutlineImpl(bindings, args);
 	}
+
 	return {
 		g4,
 		g2,
@@ -335,3 +255,108 @@ exports.SetupBuilders = function (bindings) {
 		"spiro-outline": spiroOutline
 	};
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+class DispiroImpl {
+	constructor(bindings, args) {
+		this.bindings = bindings;
+		this.args = args;
+	}
+	applyToGlyph(glyph) {
+		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
+		const collector = new BiKnotCollector(gizmo, this.bindings.Contrast);
+		const { knots, closed } = prepareSpiroKnots(this.args, collector);
+		for (const knot of knots) {
+			collector.pushKnot(knot.type, knot.x, knot.y);
+			if (knot.af) knot.af.call(collector);
+		}
+
+		const dsp = new DiSpiroProxy(closed, collector, knots);
+		glyph.includeGeometry(dsp.geometry);
+		return dsp;
+	}
+}
+
+class SpiroOutlineImpl {
+	constructor(bindings, args) {
+		this.bindings = bindings;
+		this.args = args;
+	}
+
+	applyToGlyph(glyph) {
+		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
+		const g = new CurveUtil.BezToContoursSink(gizmo);
+		const { knots, closed } = prepareSpiroKnots(this.args, g);
+		return glyph.includeGeometry(new SpiroGeometry(gizmo, closed, knots));
+	}
+}
+
+class DiSpiroProxy {
+	constructor(closed, collector, origKnots) {
+		this.geometry = new DiSpiroGeometry(
+			collector.gizmo,
+			collector.contrast,
+			closed,
+			collector.controlKnots
+		);
+		this.m_origKnots = origKnots;
+	}
+
+	get knots() {
+		return this.m_origKnots;
+	}
+	get lhsKnots() {
+		return this.geometry.expand().lhs;
+	}
+	get rhsKnots() {
+		return this.geometry.expand().rhs;
+	}
+}
+
+function prepareSpiroKnots(_knots, s) {
+	let knots = [..._knots];
+	while (knots[0] && knots[0] instanceof Function) {
+		knots[0].call(s);
+		knots.splice(0, 1);
+	}
+	const closed = dropTailKnot(knots);
+	knots = flatten(s, knots);
+	return { knots, closed };
+}
+
+function dropTailKnot(knots) {
+	let last = knots[knots.length - 1];
+	if (last && (last.type === "close" || last.type === "end")) {
+		knots.length = knots.length - 1;
+		return last.type === "close";
+	} else {
+		return false;
+	}
+}
+
+function flatten(s, knots0) {
+	let knots = [];
+	flattenImpl(knots, knots0);
+	let unwrapped = false;
+	for (let j = 0; j < knots.length; j = j + 1)
+		if (knots[j] && knots[j].type === "interpolate") {
+			const kBefore = knots[nCyclic(j - 1, knots.length)];
+			const kAfter = knots[nCyclic(j + 1, knots.length)];
+			knots[j] = knots[j].blender(kBefore, kAfter, knots[j]);
+			unwrapped = true;
+		}
+	if (unwrapped) return flatten(s, knots);
+	return knots;
+}
+
+function flattenImpl(sink, knots) {
+	for (const p of knots) {
+		if (p instanceof Array) flattenImpl(sink, p);
+		else sink.push(p);
+	}
+}
+
+function nCyclic(p, n) {
+	return (p + n + n) % n;
+}

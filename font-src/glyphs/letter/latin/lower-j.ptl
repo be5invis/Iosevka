@@ -13,74 +13,6 @@ glyph-block Letter-Latin-Lower-J : begin
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailL DiagonalTailStdDepth
 	glyph-block-import Letter-Blackboard : BBS BBD
 
-	### j and dotless j
-	create-glyph 'dotlessj.serifless' : glyph-proc
-		include : MarkSet.p
-		local center : Middle + JBalance + HalfStroke * HVContrast
-		set-base-anchor 'above' (center - HVContrast * HalfStroke) XH
-		set-base-anchor 'overlay' (center - HVContrast * HalfStroke) (XH / 2)
-		local hookx  : center - (Width * 0.5) - Stroke * HVContrast + OXHook
-		local turn : [mix center hookx 0.5] + CorrectionOMidS
-		include : dispiro
-			widths.rhs
-			flat center XH [heading Downward]
-			curl center (Descender + ArchDepthA)
-			hookend (Descender + O)
-			g4 hookx (Descender + JHook)
-
-	create-glyph 'mathbb/dotlessj' : glyph-proc
-		include : MarkSet.p
-		local center : Middle + JBalance + BBD / 2
-		set-base-anchor 'above'   (center - HVContrast * BBS / 2 - BBD / 2) XH
-		set-base-anchor 'overlay' (center - HVContrast * BBS / 2 - BBD / 2) (XH / 2)
-		local hookx  : center - (Width * 0.5) - BBD * HVContrast + OXHook
-		local turn : [mix center hookx 0.5] + CorrectionOMidS
-		include : dispiro
-			widths.rhs BBS
-			flat center XH [heading Downward]
-			curl center (Descender + ArchDepthA)
-			hookend (Descender + O)
-			g4 hookx (Descender + JHook)
-		include : HBarTop (center - BBD) center XH BBS
-		include : intersection
-			VBarRight (center - BBD) Descender XH BBS
-			spiro-outline
-				corner center XH [heading Downward]
-				curl center (Descender + ArchDepthA)
-				hookend (Descender + O)
-				g4 hookx (Descender + JHook)
-				corner hookx XH
-
-	define [OverrideJMarks df balance] : glyph-proc
-		set-base-anchor 'above' (df.middle + balance - Stroke * 0.166 * HVContrast) XH
-		set-base-anchor 'overlay' (df.middle + balance - Stroke * 0.166 * HVContrast) (XH / 2)
-
-	create-glyph 'mathbb/j' 0x1D55B : glyph-proc
-		include [refer-glyph 'mathbb/dotlessj'] AS_BASE ALSO_METRICS
-		include [refer-glyph 'mathbb/dotAbove']
-		Dotless.set currentGlyph 'mathbb/dotlessj'
-
-	create-glyph 'dotlessj.straightLine' : glyph-proc
-		local df : DivFrame para.diversityII
-		set-width df.width
-		include : df.markSet.p
-		include : VBar df.middle Descender XH
-
-	create-glyph 'dotlessj.hooky' : glyph-proc
-		local df : DivFrame para.diversityII
-		set-width df.width
-		include : df.markSet.p
-		local balance : IBalance2 df
-		include : OverrideJMarks df balance
-		include : LeftwardTopSerif (df.middle + balance) XH (LongJut * df.div)
-		include : VBar (df.middle + balance) Descender XH
-
-	create-glyph 'dotlessj.serifed' : glyph-proc
-		include : MarkSet.p
-		include [refer-glyph 'dotlessj.serifless'] AS_BASE
-		include : OverrideJMarks [DivFrame 1] JBalance
-		include : LeftwardTopSerif (Middle + JBalance) XH LongJut
-
 	glyph-block-export FlatHookDotlessJShape
 	define [FlatHookDotlessJShape] : params [df dfHook top crossLeft barCenter serif] : glyph-proc
 		local terminal : crossLeft - OX * 2
@@ -97,52 +29,75 @@ glyph-block Letter-Latin-Lower-J : begin
 		set-base-anchor 'above' barCenter top
 		set-base-anchor 'overlay' barCenter (top / 2)
 
-	create-glyph 'dotlessj.flatHookSerifless' : glyph-proc
-		local df : DivFrame para.diversityII
-		local dfHook : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.p
-		include : FlatHookDotlessJShape df dfHook XH
-			crossLeft -- (df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2]))
-			barCenter -- (df.middle + 0.25 * JBalance * df.div * [mix 1 df.div 2])
-			serif -- false
 
-	create-glyph 'dotlessj.flatHookSerifed' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.p
-		include : FlatHookDotlessJShape df df XH
-			crossLeft -- [mix 0 SB : mix 1 df.div 2]
-			barCenter -- (df.middle + JBalance * df.div)
-			serif -- true
-		include : OverrideJMarks df (JBalance * df.div)
+	define XMiddle : namespace
+		export : define [Straight df] : begin df.middle
+		export : define [Hooky df] : df.middle + [IBalance2 df]
+		export : define [Regular df] : df.middle + JBalance
+		export : define [FlatHookSerifless df] : df.middle + 0.25 * JBalance * df.div * [mix 1 df.div 2]
+		export : define [FlatHookSerifed df] : df.middle + JBalance * df.div
 
-	define [DiagTailDotlessJShape] : params [df dfH barCenter serif] : glyph-proc
-		if serif : include : LeftwardTopSerif barCenter XH (LongJut * df.div)
-		include : dispiro
-			widths.center
-			flat barCenter XH [heading Downward]
-			DiagonalTailL df barCenter Descender [DiagonalTailStdDepth dfH Stroke] Stroke
-		set-base-anchor 'above' barCenter XH
-		set-base-anchor 'overlay' barCenter (XH / 2)
+	define Body : namespace
+		export : define [Regular df top xMiddle] : glyph-proc
+			local hookx : xMiddle - (Width * 0.5) - HalfStroke * HVContrast + OXHook
+			local turn : xMiddle - Width * 0.25 + CorrectionOMidS
+			include : dispiro
+				widths.rhs
+				flat (xMiddle + HalfStroke * HVContrast) top [heading Downward]
+				curl (xMiddle + HalfStroke * HVContrast) (Descender + ArchDepthA)
+				hookend (Descender + O)
+				g4 hookx (Descender + JHook)
 
-	create-glyph 'dotlessj.diagonalTailedSerifless' : glyph-proc
-		local df : DivFrame para.diversityII
-		local dfHook : DivFrame [mix para.diversityI para.diversityII 0.5]
-		set-width df.width
-		include : df.markSet.p
-		include : DiagTailDotlessJShape df dfHook
-			barCenter -- (df.middle + 0.5 * JBalance * df.div * [mix 1 df.div 2])
-			serif -- false
+		export : define [Straight df top xMiddle] : glyph-proc
+			include : VBar xMiddle Descender top
 
-	create-glyph 'dotlessj.diagonalTailedSerifed' : glyph-proc
-		local df : DivFrame para.diversityI
-		set-width df.width
-		include : df.markSet.p
-		include : DiagTailDotlessJShape df df
-			barCenter -- (df.middle + JBalance * df.div)
-			serif -- true
-		include : OverrideJMarks df (JBalance * df.div)
+		export : define [FlatHook df top xMiddle] : glyph-proc
+			local dfHook : DivFrame para.diversityI
+			set-width df.width
+			include : df.markSet.p
+			include : FlatHookDotlessJShape df dfHook top
+				crossLeft -- (df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2]))
+				barCenter -- xMiddle
+				serif -- false
+
+		export : define [DiagonalTailed df top xMiddle] : glyph-proc
+			local dfHook : DivFrame [mix para.diversityI para.diversityII 0.5]
+			include : dispiro
+				widths.center
+				flat xMiddle top [heading Downward]
+				DiagonalTailL df xMiddle Descender [DiagonalTailStdDepth dfHook Stroke] Stroke
+
+	define Serifs : namespace
+		export : define [Long df top xMiddle] : LeftwardTopSerif xMiddle top (LongJut * df.div)
+
+	define Marks : namespace
+		export : define [FullHook df top xMiddle fSerifed] : glyph-proc
+			set-base-anchor 'above' (xMiddle - [if fSerifed 1 0] * Stroke * 0.166 * HVContrast * df.div) top
+			set-base-anchor 'overlay' (xMiddle - [if fSerifed 1 0] * Stroke * 0.166 * HVContrast * df.div) (top / 2)
+
+		export : define [Straight df top xMiddle fSerifed] : glyph-proc
+			set-base-anchor 'above' xMiddle top
+			set-base-anchor 'overlay' xMiddle (top / 2)
+
+	define JConfig : object
+		'serifless'               { Body.Regular         null         XMiddle.Regular            Marks.FullHook  1                }
+		'serifed'                 { Body.Regular         Serifs.Long  XMiddle.Regular            Marks.FullHook  1                }
+		'straightLine'            { Body.Straight        null         XMiddle.Straight           Marks.Straight  para.diversityII }
+		'hooky'                   { Body.Straight        Serifs.Long  XMiddle.Hooky              Marks.Straight  para.diversityII }
+		'flatHookSerifless'       { Body.FlatHook        null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
+		'flatHookSerifed'         { Body.FlatHook        Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
+		'diagonalTailedSerifless' { Body.DiagonalTailed  null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
+		'diagonalTailedSerifed'   { Body.DiagonalTailed  Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
+
+	foreach {suffix { Body Serif xMiddleT Marks div } } [Object.entries JConfig] : do
+		create-glyph "dotlessj.\(suffix)" : glyph-proc
+			local df : DivFrame div
+			set-width df.width
+			include : df.markSet.p
+			local xMiddle : xMiddleT df
+			include : Body df XH xMiddle
+			if Serif : include : tagged 'serifLT' : Serif df XH xMiddle
+			include : Marks df XH xMiddle (!(!Serif))
 
 	select-variant 'dotlessj' 0x237
 	link-reduced-variant 'dotlessj/sansSerif' 'dotlessj' MathSansSerif
@@ -172,3 +127,31 @@ glyph-block Letter-Latin-Lower-J : begin
 
 	select-variant 'dotlessjCurlyTail'
 	CreateAccentedComposition 'jCurlyTail' 0x29D 'dotlessjCurlyTail' 'dotAbove'
+
+	create-glyph 'mathbb/dotlessj' : glyph-proc
+		include : MarkSet.p
+		local center : Middle + JBalance + BBD / 2
+		set-base-anchor 'above'   (center - HVContrast * BBS / 2 - BBD / 2) XH
+		set-base-anchor 'overlay' (center - HVContrast * BBS / 2 - BBD / 2) (XH / 2)
+		local hookx  : center - (Width * 0.5) - BBD * HVContrast + OXHook
+		local turn : [mix center hookx 0.5] + CorrectionOMidS
+		include : dispiro
+			widths.rhs BBS
+			flat center XH [heading Downward]
+			curl center (Descender + ArchDepthA)
+			hookend (Descender + O)
+			g4 hookx (Descender + JHook)
+		include : HBarTop (center - BBD) center XH BBS
+		include : intersection
+			VBarRight (center - BBD) Descender XH BBS
+			spiro-outline
+				corner center XH [heading Downward]
+				curl center (Descender + ArchDepthA)
+				hookend (Descender + O)
+				g4 hookx (Descender + JHook)
+				corner hookx XH
+
+	create-glyph 'mathbb/j' 0x1D55B : glyph-proc
+		include [refer-glyph 'mathbb/dotlessj'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'mathbb/dotAbove']
+		Dotless.set currentGlyph 'mathbb/dotlessj'
