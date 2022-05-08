@@ -180,6 +180,7 @@ class DiSpiroGeometry extends GeometryBase {
 
 	toShapeStringOrNull() {
 		return Format.struct(
+			"DiSpiroGeometry",
 			Format.gizmo(this.m_gizmo),
 			Format.n(this.m_contrast),
 			this.m_closed,
@@ -320,7 +321,7 @@ class TransformedGeometry extends GeometryBase {
 	toShapeStringOrNull() {
 		const sTarget = this.m_geom.toShapeStringOrNull();
 		if (!sTarget) return null;
-		return Format.struct(TransformedGeometry, sTarget, Format.gizmo(this.m_transform));
+		return Format.struct("TransformedGeometry", sTarget, Format.gizmo(this.m_transform));
 	}
 }
 
