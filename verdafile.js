@@ -889,27 +889,25 @@ phony(`clean`, async () => {
 	build.deleteJournal();
 });
 phony(`release`, async target => {
-	const [collectPlans] = await target.need(CollectPlans);
+	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
 		if (!plan.inRelease) continue;
-		goals.push(ReleaseGroup(cgr));
+		const subGroups = collectPlans[cgr].groupDecomposition;
+		goals.push(TtcArchiveFile(cgr, version));
+		goals.push(SuperTtcArchiveFile(cgr, version));
+		for (const gr of subGroups) {
+			goals.push(GroupTtfArchiveFile(gr, version));
+			goals.push(GroupTtfUnhintedArchiveFile(gr, version));
+			goals.push(GroupWebArchiveFile(gr, version));
+		}
 	}
-	await target.need(goals);
+	const [archiveFiles] = await target.need(goals);
+	// Create hash of packages
+	await target.need(fu`utility/create-sha-file.js`);
+	await node("utility/create-sha-file.js", "doc/packages-sha.txt", archiveFiles);
+	// Images and release notes
 	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
-});
-const ReleaseGroup = phony.group("release-group", async (target, cgr) => {
-	const [version, collectPlans] = await target.need(Version, CollectPlans);
-	const subGroups = collectPlans[cgr].groupDecomposition;
-
-	let goals = [TtcArchiveFile(cgr, version), SuperTtcArchiveFile(cgr, version)];
-	for (const gr of subGroups) {
-		goals.push(GroupTtfArchiveFile(gr, version));
-		goals.push(GroupTtfUnhintedArchiveFile(gr, version));
-		goals.push(GroupWebArchiveFile(gr, version));
-	}
-
-	await target.need(goals);
 });
 
 ///////////////////////////////////////////////////////////
