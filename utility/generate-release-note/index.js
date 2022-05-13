@@ -10,14 +10,17 @@ const ChangeFileDir = Path.join(__dirname, "../../changes");
 
 module.exports = async function main(argv) {
 	const out = new Output();
-
+	let baseUrl = `https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc`;
 	await GenerateChangeList(argv, out);
 	out.log(
-		`<table><tr><td align="center"><h1>` +
-			`<a href="https://github.com/be5invis/Iosevka/blob/v${argv.version}/doc/PACKAGE-LIST.md">` +
-			`View package list` +
-			`</a>` +
-			`</h1></tr></td></table>`
+		`<table>` +
+			`<tr><td align="center"><h1>` +
+			`<a href="${baseUrl}/PACKAGE-LIST.md">View package list</a>` +
+			`</h1></td></tr>` +
+			`<tr><td align="center">` +
+			`<a href="${baseUrl}/packages-sha.txt">Package hashes (SHA-256)</a>` +
+			`</td></tr>` +
+			`</table>`
 	);
 
 	await Fs.ensureDir(Path.join(__dirname, `../../release-archives/`));
