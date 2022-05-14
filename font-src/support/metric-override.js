@@ -25,6 +25,7 @@ function applyMetricOverride(para, mo, argv) {
 
 const validMetricOverrideFields = new Set([
 	"cap",
+	"ascender",
 	"xHeight",
 	"sb",
 	"accentWidth",
