@@ -26,7 +26,6 @@ function combineImages(images, outPath, width, height, doubleTrim) {
 		`magick ${images.join(" ")} -append -crop ${width}x${height}+0+0 ` +
 		`+repage -bordercolor #008000 -fuzz 5% -trim ` +
 		`${doubleTrim ? `-bordercolor ${doubleTrim} -trim` : ""} ${outPath}`;
-	console.log(command);
 	cp.exec(command, function (err, stdout, stderr) {
 		if (err) console.log(err);
 		images.forEach(function (file) {
@@ -43,19 +42,15 @@ function GOTO(phase) {
 }
 const phases = {
 	prepare: function (event, arg) {
-		console.log(arg);
 		GOTO(phases["receive-rect"]);
-
 		const tasks = JSON.parse(fs.readFileSync(taskFile));
 		event.sender.send("start", tasks);
 	},
 	"wait-screenshot": function (event, arg) {
-		console.log(arg);
 		GOTO(phases["receive-rect"]);
 	},
 	"receive-rect": function (event, rect) {
 		pendingTasks += 1;
-		console.log("Received rect.");
 		rect = JSON.parse(JSON.stringify(rect));
 		let file = argDir + "/" + rect.name + ".png";
 		let j = 0;
