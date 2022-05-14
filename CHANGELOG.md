@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 15.3.1
+
+* Fix display of Kleisli arrows under Kitty (#1350).
+* Ascender height and Cap height is decoupled. Now they could be configured separately (#1334).
+
+
 ### 15.3.0
 
 * Add characters (#1337):
