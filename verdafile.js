@@ -158,6 +158,18 @@ const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gi
 	return plan.targets;
 });
 
+const CompositesFromBuildPlan = computed(`metadata:composites-from-build-plan`, async target => {
+	const [{ buildPlans }] = await target.need(BuildPlans);
+	let data = {};
+	for (const bpn in buildPlans) {
+		let bp = buildPlans[bpn];
+		if (bp.variants) {
+			data[bpn] = bp.variants;
+		}
+	}
+	return data;
+});
+
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
 	const [{ fileNameToBpMap, buildPlans }] = await target.need(BuildPlans);
 	const [version] = await target.need(Version);
@@ -304,6 +316,7 @@ const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
 		await target.need(Scripts, Parameters, Dependencies);
+		const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
 		const charMapDir = `${BUILD}/ttf/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
 		const cachePath = `${charMapDir}/${fn}.cache.mpz`;
@@ -314,6 +327,7 @@ const DistUnhintedTTF = file.make(
 			o: out.full,
 			oCharMap: charMapPath,
 			oCache: cachePath,
+			compositesFromBuildPlan,
 			...fi
 		});
 	}

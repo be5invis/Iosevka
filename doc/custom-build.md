@@ -182,6 +182,7 @@ Subsection `variants` is used to configure character variants in the font. Prope
   - `ss17`: Set character variant to “Recursive Mono Style”.
   - `ss18`: Set character variant to “Input Mono Style”.
   - `ss20`: Set character variant to “Curly Style”.
+  - Other build plans’ variant information, by using `buildPlans.<name>`. For example, `inherits = "buildPlans.iosevka-exp"` will inherit from build plan “`iosevka-exp`”’s variant configuration.
 
 <!-- END Section-Stylistic-Sets -->
 
