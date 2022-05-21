@@ -10,79 +10,55 @@ glyph-block Digits-One : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
-	define [OneShape top balance pTopSerif] : glyph-proc
-		define topSW : AdviceStroke 3.5
-		include : VBar (Middle + balance) 0 top
-		include : dispiro
-			flat (Middle - HalfStroke * HVContrast + balance) top [widths topSW 0]
-			curl (Middle - Stroke / 8 * HVContrast - HookX * 1.25 + balance) (top - Stroke / 8 - Hook * pTopSerif * (top / CAP))
+	define Shape : namespace
+		export : define [Line top balance pTopSerif] : VBar (Middle + balance) 0 top
 
-	define [OneShapeFlat top balance pTopSerif] : glyph-proc
-		define topSW : AdviceStroke 3.5
-		include : VBar (Middle + balance) 0 top
-		include : LeftwardTopSerif (Middle + balance - HalfStroke * HVContrast) (top - Stroke / 8 - Hook * pTopSerif * (top / CAP)) (LongJut - HalfStroke * HVContrast)
+		export : define [Serifed top balance pTopSerif] : glyph-proc
+			define topSW : AdviceStroke 3.5
+			include : VBar (Middle + balance) 0 top
+			include : dispiro
+				flat (Middle - HalfStroke * HVContrast + balance) top [widths topSW 0]
+				curl (Middle - Stroke / 8 * HVContrast - HookX * 1.25 + balance) (top - Stroke / 8 - Hook * pTopSerif * (top / CAP))
 
-	create-glyph 'one.lnum.noBase' : glyph-proc
-		include : MarkSet.capital
-		include : OneShape CAP OneBalance 0.75
+		export : define [FlatSerifed top balance pTopSerif] : glyph-proc
+			define topSW : AdviceStroke 3.5
+			include : VBar (Middle + balance) 0 top
+			include : LeftwardTopSerif (Middle + balance - HalfStroke * HVContrast) (top - Stroke / 8 - Hook * pTopSerif * (top / CAP)) (LongJut - HalfStroke * HVContrast)
 
-	create-glyph 'one.lnum.base' : glyph-proc
-		include : MarkSet.capital
-		include : OneShape CAP (OneBalance / 4) 0.75
-		include : CenterBottomSerif Middle 0 LongJut
+		export : define [TopCut top balance pTopSerif] : glyph-proc
+			local sl : Middle + balance - 0.5 * Stroke * HVContrast
+			local sr : Middle + balance + 0.5 * Stroke * HVContrast
+			include : spiro-outline
+				corner sr 0
+				corner sl 0
+				corner sl (top - (sr - sl) * pTopSerif)
+				corner sr top
 
-	create-glyph 'one.lnum.noBaseLongTopSerif' : glyph-proc
-		include : MarkSet.capital
-		include : OneShape CAP OneBalance 1.875
+		export : define [Base] : CenterBottomSerif Middle 0 LongJut
 
-	create-glyph 'one.lnum.baseLongTopSerif' : glyph-proc
-		include : MarkSet.capital
-		include : OneShape CAP (OneBalance / 4) 1.875
-		include : CenterBottomSerif Middle 0 LongJut
+	define OneConfig : object
+		line               { Shape.Line         null        0.75   0 }
+		noBase             { Shape.Serifed      null        0.75   1 }
+		base               { Shape.Serifed      Shape.Base  0.75   1 }
+		noBaseLongTopSerif { Shape.Serifed      null        1.875  1 }
+		baseLongTopSerif   { Shape.Serifed      Shape.Base  1.875  1 }
+		noBaseFlatTopSerif { Shape.FlatSerifed  null        0.75   1 }
+		baseFlatTopSerif   { Shape.FlatSerifed  Shape.Base  0.75   1 }
+		noBaseTopCut       { Shape.TopCut       null        0.75   0 }
+		baseTopCut         { Shape.TopCut       Shape.Base  0.75   0 }
 
-	create-glyph 'one.lnum.noBaseFlatTopSerif' : glyph-proc
-		include : MarkSet.capital
-		include : OneShapeFlat CAP OneBalance 0.625
+	foreach {suffix {Shape Base pTS pBalance}} [Object.entries OneConfig] : do
+		local balance : pBalance * [if Base (OneBalance / 4) OneBalance]
 
-	create-glyph 'one.lnum.baseFlatTopSerif' : glyph-proc
-		include : MarkSet.capital
-		include : OneShapeFlat CAP (OneBalance / 4) 0.625
-		include : CenterBottomSerif Middle 0 LongJut
+		create-glyph "one.lnum.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : Shape CAP balance pTS
+			if Base : include [Base]
 
-	create-glyph 'one.lnum.line' : glyph-proc
-		include : MarkSet.capital
-		include : VBar Middle 0 CAP
-
-	create-glyph 'one.onum.noBase' : glyph-proc
-		include : OnumMarks.e
-		include : OneShape OnumHeight OneBalance 0.75
-
-	create-glyph 'one.onum.base' : glyph-proc
-		include : OnumMarks.e
-		include : OneShape OnumHeight (OneBalance / 4) 0.75
-		include : CenterBottomSerif Middle 0 LongJut
-
-	create-glyph 'one.onum.noBaseLongTopSerif' : glyph-proc
-		include : OnumMarks.e
-		include : OneShape OnumHeight OneBalance 1.875
-
-	create-glyph 'one.onum.baseLongTopSerif' : glyph-proc
-		include : OnumMarks.e
-		include : OneShape OnumHeight (OneBalance / 4) 1.875
-		include : CenterBottomSerif Middle 0 LongJut
-
-	create-glyph 'one.onum.noBaseFlatTopSerif' : glyph-proc
-		include : OnumMarks.e
-		include : OneShapeFlat OnumHeight OneBalance 0.625
-
-	create-glyph 'one.onum.baseFlatTopSerif' : glyph-proc
-		include : OnumMarks.e
-		include : OneShapeFlat OnumHeight (OneBalance / 4) 0.625
-		include : CenterBottomSerif Middle 0 LongJut
-
-	create-glyph 'one.onum.line' : glyph-proc
-		include : OnumMarks.e
-		include : VBar Middle 0 OnumHeight
+		create-glyph "one.onum.\(suffix)" : glyph-proc
+			include : OnumMarks.e
+			include : Shape OnumHeight balance (pTS * 5 / 6)
+			if Base : include [Base]
 
 	select-variant 'one.lnum' [CodeLnum '1'] (follow -- 'one')
 	select-variant 'one.onum' [CodeOnum '1'] (follow -- 'one')
