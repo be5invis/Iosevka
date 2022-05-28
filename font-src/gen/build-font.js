@@ -27,10 +27,13 @@ exports.buildFont = async function buildFont(argv, para) {
 		}
 	}
 
-	const cache = await Caching.load(argv);
+	// Finalize (like geometry conversion)
+	const cache = await Caching.load(argv.iCache, argv.menu.version, argv.cacheFreshAgeKey);
 	const finalGs = finalizeFont(cache, para, gs.glyphStore, excludeChars, otl);
-	await Caching.save(argv, cache);
+	if (cache.isUpdated()) {
+		await Caching.save(argv.oCache, argv.menu.version, cache, true);
+	}
 
 	const font = convertOtd(baseFont, otl, finalGs);
-	return { font, glyphStore: finalGs };
+	return { font, glyphStore: finalGs, cacheUpdated: cache.isUpdated() };
 };

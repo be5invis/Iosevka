@@ -128,9 +128,8 @@ glyph-block Letter-Latin-Lower-M : begin
 			fine      -- (df.mvs * ShoulderFine / Stroke)
 		include : tagged 'barL' : VBarLeft df.leftSB lbot top df.mvs
 
-	glyph-block-export SmallMSmoothHeight
-	define [SmallMShortLegHeight df] : (XH - df.mvs) * 0.45
-	define [SmallMSmoothHeight df] : XH - [SmallMSmooth df] - TanSlope * Stroke
+	define [SmallMShortLegHeight top df] : (top - df.mvs) * 0.45
+	define [SmallMSmoothHeight top df] : top - [SmallMSmooth df] - TanSlope * Stroke
 
 	define [EarlessCornerDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
 		include : dispiro
@@ -210,21 +209,22 @@ glyph-block Letter-Latin-Lower-M : begin
 		earlessSingleArchShortLegTailed        { EarlessSingleArchSmallMShape        AutoSerifs 1 1 1 }
 
 	foreach { suffix { Body Serifs tailed shortLeg earless } } [Object.entries SmallMConfig] : do
+		define [mShapeBody df height] : glyph-proc
+			include : Body height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0] df
+			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)
+			include : Serifs df height 0 [if shortLeg [SmallMShortLegHeight height df] 0] 0 tailed earless
+
 		create-glyph "m.\(suffix)" : glyph-proc
 			local df : dfM
 			set-width df.width
 			include : df.markSet.e
-			include : Body XH 0 [if shortLeg [SmallMShortLegHeight df] 0] [if tailed ([SmallMSmoothHeight df] + O) 0] df
-			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-			include : Serifs df XH 0 [if shortLeg [SmallMShortLegHeight df] 0] 0 tailed earless
+			include : mShapeBody df XH
 
 		create-glyph "capitalSmallM.\(suffix)" : glyph-proc
 			local df : dfM
 			set-width df.width
 			include : df.markSet.capital
-			include : Body CAP 0 [if shortLeg [SmallMShortLegHeight df] 0] [if tailed ([SmallMSmoothHeight df] + O) 0] df
-			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight df] (sw -- df.mvs)
-			include : Serifs df CAP 0 [if shortLeg [SmallMShortLegHeight df] 0] 0 tailed earless
+			include : mShapeBody df CAP
 
 		create-glyph "mLTail.\(suffix)" : glyph-proc
 			local df : dfM
@@ -249,6 +249,16 @@ glyph-block Letter-Latin-Lower-M : begin
 			if (Serifs === LtRbSerifs || Serifs === LtSerifs) : begin
 				include : RightwardBottomSerif df.rightSB Descender SideJut
 
+		create-glyph "turnmSideways.\(suffix)" : glyph-proc
+			local realHeight : XH * para.diversityM
+			local realTop : XH / 2 + realHeight / 2
+			local realBot : XH / 2 - realHeight / 2
+			local df : DivFrame (realHeight / Width) 3 (XH * 0.1 / SB)
+			include : PointingTo Width realTop Width realBot : function [] : glyph-proc
+				include : mShapeBody df (Width - SB)
+				include : FlipAround df.middle ((Width - SB) / 2)
+				include : Translate 0 (SB / 2)
+
 	select-variant 'm' 'm'
 	select-variant 'capitalSmallM' (follow -- 'm')
 	link-reduced-variant 'm/sansSerif' 'm' MathSansSerif
@@ -260,6 +270,7 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	select-variant 'mLTail' 0x271
 	select-variant 'turnmLeg' 0x270 (follow -- 'm')
+	select-variant 'turnmSideways' 0x1D1F (follow -- 'm')
 
 	turned 'turnm' 0x26F 'm' [dfM].middle (XH / 2)
 	turned 'capitalTurnm' 0x19C 'capitalSmallM' [dfM].middle (CAP / 2)
