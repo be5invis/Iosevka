@@ -4,8 +4,8 @@ const fs = require("fs-extra");
 const zlib = require("zlib");
 const { encode, decode } = require("@msgpack/msgpack");
 
-const Edition = 14;
-const MAX_AGE = 5;
+const Edition = 20;
+const MAX_AGE = 16;
 
 class GfEntry {
 	constructor(age, value) {
@@ -15,21 +15,44 @@ class GfEntry {
 }
 
 class Cache {
-	constructor() {
+	constructor(freshAgeKey) {
+		this.freshAgeKey = freshAgeKey;
+		this.historyAgeKeys = [];
 		this.gf = new Map();
+		this.diff = new Set();
 	}
 	loadRep(version, rep) {
 		if (!rep || rep.version !== version + "@" + Edition) return;
+		this.historyAgeKeys = rep.ageKeys.slice(0, MAX_AGE);
+		const ageKeySet = new Set(this.historyAgeKeys);
 		for (const [k, e] of Object.entries(rep.gf)) {
-			this.gf.set(k, new GfEntry((e.age || 0) + 1, e.value));
+			if (ageKeySet.has(e.age)) this.gf.set(k, new GfEntry(e.age, e.value));
 		}
 	}
-	toRep(version) {
+	toRep(version, diffOnly) {
 		let gfRep = {};
 		for (const [k, e] of this.gf) {
-			if (e.age < MAX_AGE) gfRep[k] = { age: e.age, value: e.value };
+			if (!diffOnly || this.diff.has(k)) {
+				gfRep[k] = { age: e.age, value: e.value };
+			}
 		}
-		return { version: version + "@" + Edition, gf: gfRep };
+		const mergedAgeKeys =
+			this.historyAgeKeys[0] === this.freshAgeKey
+				? this.historyAgeKeys
+				: [this.freshAgeKey, ...this.historyAgeKeys];
+
+		return {
+			version: version + "@" + Edition,
+			ageKeys: mergedAgeKeys,
+			gf: gfRep
+		};
+	}
+
+	isEmpty() {
+		return this.gf.size == 0;
+	}
+	isUpdated() {
+		return this.diff.size != 0;
 	}
 
 	// Geometry flattening conversion cache
@@ -41,26 +64,45 @@ class Cache {
 	refreshGF(k) {
 		const entry = this.gf.get(k);
 		if (!entry) return;
-		entry.age = 0;
+		if (entry.age != this.freshAgeKey) {
+			this.diff.add(k);
+			entry.age = this.freshAgeKey;
+		}
 	}
 	saveGF(k, v) {
-		this.gf.set(k, new GfEntry(0, v));
+		this.gf.set(k, new GfEntry(this.freshAgeKey, v));
+		this.diff.add(k);
+	}
+	merge(other) {
+		for (const [k, e] of other.gf) {
+			this.gf.set(k, e);
+		}
 	}
 }
 
-exports.load = async function (argv) {
-	let cache = new Cache();
-	if (argv.oCache && fs.existsSync(argv.oCache)) {
-		const buf = zlib.gunzipSync(await fs.readFile(argv.oCache));
-		cache.loadRep(argv.menu.version, decode(buf));
+exports.load = async function (path, version, freshAgeKey) {
+	let cache = new Cache(freshAgeKey);
+	if (path && fs.existsSync(path)) {
+		const buf = zlib.gunzipSync(await fs.readFile(path));
+		cache.loadRep(version, decode(buf));
 	}
 	return cache;
 };
 
-exports.save = async function savePTCache(argv, cache) {
-	if (argv.oCache) {
-		const buf = encode(cache.toRep(argv.menu.version));
+exports.save = async function savePTCache(path, version, cache, diffOnly) {
+	if (path) {
+		const buf = encode(cache.toRep(version, diffOnly));
 		const bufZip = zlib.gzipSync(Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength));
-		await fs.writeFile(argv.oCache, bufZip);
+		await fs.writeFile(path, bufZip);
 	}
+};
+
+exports.merge = async function (base, diff, version, freshAgeKey) {
+	const cacheDiff = await exports.load(diff, version, freshAgeKey);
+	if (!cacheDiff.isEmpty()) {
+		const cacheBase = await exports.load(base, version, freshAgeKey);
+		cacheBase.merge(cacheDiff);
+		await exports.save(base, version, cacheBase, false);
+	}
+	if (fs.existsSync(diff)) await fs.rm(diff);
 };
