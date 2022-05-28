@@ -6,6 +6,7 @@ const which = require("which");
 const Path = require("path");
 const toml = require("@iarna/toml");
 const semver = require("semver");
+const uuid = require("uuid");
 
 ///////////////////////////////////////////////////////////
 
@@ -158,6 +159,18 @@ const GroupFontsOf = computed.group("metadata:group-fonts-of", async (target, gi
 	return plan.targets;
 });
 
+const CompositesFromBuildPlan = computed(`metadata:composites-from-build-plan`, async target => {
+	const [{ buildPlans }] = await target.need(BuildPlans);
+	let data = {};
+	for (const bpn in buildPlans) {
+		let bp = buildPlans[bpn];
+		if (bp.variants) {
+			data[bpn] = bp.variants;
+		}
+	}
+	return data;
+});
+
 const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileName) => {
 	const [{ fileNameToBpMap, buildPlans }] = await target.need(BuildPlans);
 	const [version] = await target.need(Version);
@@ -300,22 +313,43 @@ function whyBuildPlanIsnNotThere(gid) {
 //////                Font Building                  //////
 ///////////////////////////////////////////////////////////
 
+const ageKey = uuid.v4();
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		await target.need(Scripts, Parameters, Dependencies);
+		await target.need(Scripts, Parameters, Dependencies, de(`${BUILD}/caches`));
+		const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
 		const charMapDir = `${BUILD}/ttf/${gr}`;
 		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
-		const cachePath = `${charMapDir}/${fn}.cache.mpz`;
 
 		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir));
+		const cacheFileName =
+			`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
+			`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
+		const cachePath = `${BUILD}/caches/${cacheFileName}.mpz`;
+		const cacheDiffPath = `${charMapDir}/${fn}.cache.mpz`;
+
 		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
-		await silently.node("font-src/index", {
+		const { cacheUpdated } = await silently.node("font-src/index", {
 			o: out.full,
 			oCharMap: charMapPath,
-			oCache: cachePath,
+			cacheFreshAgeKey: ageKey,
+			iCache: cachePath,
+			oCache: cacheDiffPath,
+			compositesFromBuildPlan,
 			...fi
 		});
+		if (cacheUpdated) {
+			const lock = build.locks.alloc(cacheFileName);
+			await lock.acquire();
+			await silently.node(`font-src/merge-cache`, {
+				base: cachePath,
+				diff: cacheDiffPath,
+				version: fi.menu.version,
+				freshAgeKey: ageKey
+			});
+			lock.release();
+		}
 	}
 );
 

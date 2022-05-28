@@ -2,7 +2,7 @@
 
 exports.apply = applyVariantData;
 function applyVariantData(data, para, argv) {
-	const parsed = parseVariantsData(data);
+	const parsed = parseVariantsData(data, argv);
 	let tagSet = new Set();
 	for (const prime of parsed.primes.values()) {
 		if (!prime.tag) continue;
@@ -20,7 +20,6 @@ function applyVariantData(data, para, argv) {
 		const userComposite = new Composite("{user}", argv.variants);
 		userComposite.resolve(para, parsed.selectorTree, parsed.composites, variantSelector);
 	}
-
 	para.variants = {
 		selectorTree: parsed.selectorTree,
 		primes: parsed.primes,
@@ -30,7 +29,7 @@ function applyVariantData(data, para, argv) {
 }
 
 exports.parse = parseVariantsData;
-function parseVariantsData(data) {
+function parseVariantsData(data, argv) {
 	const primes = new Map();
 	const selectorTree = new SelectorTree();
 	for (const k in data.prime) {
@@ -45,7 +44,13 @@ function parseVariantsData(data) {
 		const comp = new Composite(k, data.composite[k]);
 		composites.set(k, comp);
 	}
-
+	if (argv && argv.compositesFromBuildPlan) {
+		for (const k in argv.compositesFromBuildPlan) {
+			const key = `buildPlans.${k}`;
+			const comp = new Composite(key, argv.compositesFromBuildPlan[k]);
+			composites.set(key, comp);
+		}
+	}
 	return { selectorTree: selectorTree, primes, composites, defaultComposite };
 }
 

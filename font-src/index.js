@@ -17,9 +17,10 @@ const { createGrDisplaySheet } = require("./support/gr");
 
 module.exports = async function main(argv) {
 	const paraT = await getParameters();
-	const { font, glyphStore } = await buildFont(argv, paraT(argv));
+	const { font, glyphStore, cacheUpdated } = await buildFont(argv, paraT(argv));
 	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
 	if (argv.o) await saveTTF(argv, font);
+	return { cacheUpdated };
 };
 
 // Parameter preparation
