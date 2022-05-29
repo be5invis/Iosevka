@@ -692,14 +692,14 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 	const [pagesDir] = await target.need(PagesDir);
 	if (!pagesDir) return;
 	const outDir = Path.resolve(pagesDir, "shared/fonts", gr);
-	await target.need(GroupTTFs(gr), de(outDir));
+	await target.need(GroupUnhintedTTFs(gr), de(outDir));
 
 	// Next.js 12 has some problem about refreshing fonts, so write an empty CSS first
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, null);
 	await Delay(2000);
 
 	// Then do the copy
-	await cp(`${DIST}/${gr}/ttf`, Path.resolve(outDir, "ttf"));
+	await cp(`${DIST}/${gr}/ttf-unhinted`, Path.resolve(outDir, "ttf"));
 	await createWebFontCssImpl(target, Path.resolve(outDir, `${gr}.css`), gr, webfontFormatsFast);
 	await rm(Path.resolve(outDir, "woff2"));
 });
