@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 15.4.1
+
+* Fix VXDD application on U+1D1E (#1357).
+
+
 ### 15.4.0
 
 * Add characters:
