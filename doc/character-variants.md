@@ -1918,8 +1918,8 @@
 <td><img src="../images/character-variant-one-no-base-long-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-long-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-base-long-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-base-long-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-no-base-flat-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-flat-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
-<td><img src="../images/character-variant-one-no-base-top-cut.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-top-cut.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-base-flat-top-serif.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-base-flat-top-serif.dark.png#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/character-variant-one-no-base-top-cut.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-no-base-top-cut.dark.png#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/character-variant-one-base-top-cut.light.png#gh-light-mode-only" width=32/><img src="../images/character-variant-one-base-top-cut.dark.png#gh-dark-mode-only" width=32/></td>
 <td colspan="3"> </td>
 </tr>
@@ -1930,9 +1930,9 @@
 <td>4</td>
 <td>5</td>
 <td>6</td>
-<td>6</td>
 <td>7</td>
-<td>7</td>
+<td>8</td>
+<td>9</td>
 <td colspan="3"> </td>
 </tr>
 <tr>
