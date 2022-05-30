@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 15.4.2
+
+* Fix ranks of `cv72` (variants applying to `1`) (#1358).
+
+
 ### 15.4.1
 
 * Fix VXDD application on U+1D1E (#1357).
