@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar
 
 	define [ToothedBody] : union
@@ -40,18 +41,20 @@ glyph-block Letter-Latin-Lower-B : begin
 		toothlessRoundedMotionSerifed { ToothlessRoundedBody MotionSerifs true }
 
 	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
+		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.45
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body
 			include : Serifs
+			set-base-anchor 'overlayOnBar' (SB + 0.5 * Stroke * HVContrast) yOverlay
 		create-glyph "bBar.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
-			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH (Ascender - [if doTS Stroke 0]) 0.45]
+			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] yOverlay
 
 	select-variant 'b' 'b'
 	select-variant 'bBar' 0x180 (follow -- 'b')
 	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
-
+	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnBar'
 
 	create-glyph 'bHookTop.toothed' : glyph-proc
 		include : MarkSet.b
