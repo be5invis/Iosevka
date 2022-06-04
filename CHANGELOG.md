@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 15.5.0
+
+* Add characters
+  - LATIN SMALL LETTER B WITH MIDDLE TILDE (`U+1D6C`) ... LATIN SMALL LETTER Z WITH MIDDLE TILDE (`U+1D76`);
+  - LATIN SMALL CAPITAL LETTER U WITH STROKE (`U+1D7E`);
+
+
 ### 15.4.2
 
 * Fix ranks of `cv72` (variants applying to `1`) (#1358).
