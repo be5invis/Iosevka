@@ -38,13 +38,15 @@ To create a custom build, you need:
    
 3. Run `npm run build -- contents::<your plan name>` and the built fonts would be available in `dist/`. Aside from `contents::<plan>`, other options are:
 
-   1. `contents::<plan>` : TTF (Hinted and Unhinted), WOFF(2) and Web font CSS;
-   2. `ttf::<plan>` : TTF;
+   1. `contents::<plan>` : Everything (TTF + webfont, hinted + unhinted);
+   2. `ttf::<plan>` : TTF only;
    3. `ttf-unhinted::<plan>` : Unhinted TTF only;
    4. `webfont::<plan>` : Web fonts only (CSS + WOFF2);
+   4. `webfont-unhinted::<plan>` : Unhinted web fonts only (CSS + WOFF2);
    5. `woff2::<plan>` : WOFF2 only.
+   5. `woff2-unhinted::<plan>` : Unhinted WOFF2 only.
 
-⚠️ **Important:** By default, the build system will schedule a number of concurrently running jobs equal to the number of threads available on the CPU, which *will* push CPU usage and also likely RAM usage, if you do not have very much to work with, to the ceiling (each job consumes more than 1 GB of RAM at its peak). If this is an issue for you, pass an additional argument `--jCmd=<number of concurrent jobs>`.
+⚠️ **Important**: By default, the build system will schedule a number of concurrently running jobs equal to the number of threads available on the CPU, which *will* push CPU usage and also likely RAM usage, if you do not have very much to work with, to the ceiling (each job consumes more than 1 GB of RAM at its peak). If this is an issue for you, pass an additional argument `--jCmd=<number of concurrent jobs>`.
 
 ### Configuring Custom Build
 
