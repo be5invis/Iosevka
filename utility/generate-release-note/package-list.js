@@ -73,7 +73,7 @@ async function GeneratePackageList(argv, out) {
 			`<td colspan="3"><b>&#x1F4E6; ${familyName}</b> — ${desc}</td>`,
 			`<td><b><a href="${sTtcLink}">Super\u00A0TTC</b></td>`,
 			`<td><b><a href="${ttcLink}">TTC</b></td>`,
-			`<td colspan="3">&nbsp;</td>`,
+			`<td colspan="2">&nbsp;</td>`,
 			`</tr>`
 		);
 
@@ -82,7 +82,7 @@ async function GeneratePackageList(argv, out) {
 			`<td><b>&nbsp;&nbsp;└ Sub-packages</b></td>`,
 			`<td><b>Spacing</b></td>`,
 			`<td><b>Ligatures</b></td>`,
-			`<td colspan="5"><b>Downloads</b></td>`,
+			`<td colspan="4"><b>Downloads</b></td>`,
 			`</tr>`
 		);
 		let lastSubGroupID = null;
@@ -104,9 +104,10 @@ async function GeneratePackageList(argv, out) {
 				`<td>${flag(ligation)}</td>`,
 				`<td>${createLink("Super\u00A0TTC", "super-ttc-sgr")}</td>`,
 				`<td>${createLink("TTC", "ttc-sgr")}</td>`,
-				`<td>${createLink("TTF", "ttf")}</td>`,
-				`<td>${createLink("Unhinted", "ttf-unhinted")}</td>`,
-				`<td>${createLink("WebFont", "webfont")}</td>`,
+				`<td>${createLink("TTF", "ttf")}&nbsp;` +
+					`(${createLink("Unhinted", "ttf-unhinted")})</td>`,
+				`<td>${createLink("WebFont", "webfont")}&nbsp;` +
+					`(${createLink("Unhinted", "webfont-unhinted")})</td>`,
 				`</tr>`
 			);
 		}

@@ -969,6 +969,7 @@ phony(`release`, async target => {
 			goals.push(GroupTtfZip(gr, version, false));
 			goals.push(GroupTtfZip(gr, version, true));
 			goals.push(GroupWebZip(gr, version, false));
+			goals.push(GroupWebZip(gr, version, true));
 		}
 	}
 	const [archiveFiles] = await target.need(goals);
@@ -977,15 +978,6 @@ phony(`release`, async target => {
 	await node("utility/create-sha-file.js", "doc/packages-sha.txt", archiveFiles);
 	// Images and release notes
 	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
-});
-phony.group(`release-test`, async (target, gr) => {
-	const [version] = await target.need(Version);
-	await target.need(
-		GroupTtfZip(gr, version, false),
-		GroupTtfZip(gr, version, true),
-		GroupWebZip(gr, version, false),
-		GroupWebZip(gr, version, true)
-	);
 });
 
 ///////////////////////////////////////////////////////////
