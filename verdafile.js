@@ -441,6 +441,7 @@ const GroupTtfsImpl = task.make(
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 		const [ts] = await target.need(GroupFontsOf(gr));
 		await target.need(ts.map(tn => Ctor(gr, tn)));
+		return gr;
 	}
 );
 const GroupWoff2Impl = task.make(
@@ -448,6 +449,7 @@ const GroupWoff2Impl = task.make(
 	async (target, gr, unhinted) => {
 		const [ts] = await target.need(GroupFontsOf(gr));
 		await target.need(ts.map(tn => DistWoff2(gr, tn, unhinted)));
+		return gr;
 	}
 );
 const GroupWebFontsImpl = task.make(
@@ -466,6 +468,7 @@ const GroupWebFontsImpl = task.make(
 			}
 		}
 		await target.need(groupsNeeded, DistWebFontCSS(gr, unhinted));
+		return gr;
 	}
 );
 
