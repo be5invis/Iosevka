@@ -3,7 +3,7 @@ const themes = require("../themes/index");
 module.exports = function (args) {
 	const theme = themes[args.theme];
 
-	const EM = 24;
+	const EM = 48;
 	const elementHeight = 1.5 * EM;
 
 	const canvasWidth = 30 * EM;

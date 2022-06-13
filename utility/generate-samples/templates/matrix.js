@@ -3,7 +3,7 @@ const themes = require("../themes/index");
 module.exports = function (args) {
 	const theme = themes[args.theme];
 
-	const EM = 24;
+	const EM = 48;
 	const elementWidth = 2.75 * EM;
 	const elementHeight = 1.5 * EM;
 
