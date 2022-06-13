@@ -1,13 +1,13 @@
 exports.light = {
-	body: "#000000",
-	dimmed: "#00000040",
+	body: "#20242E",
+	dimmed: "#20242E40",
 	stress: "#048FBF",
 	title: "#8757AD"
 };
 
 exports.dark = {
-	body: "#FFFFFF",
-	dimmed: "#FFFFFF40",
+	body: "#DEE4E3",
+	dimmed: "#DEE4E340",
 	stress: "#03AEE9",
 	title: "#B77FDB"
 };
