@@ -21,7 +21,8 @@ module.exports = build;
 
 const BUILD = ".build";
 const DIST = "dist";
-const SNAPSHOT_TMP = ".build/snapshot";
+const IMAGES = "images";
+const IMAGE_TASKS = ".build/image-tasks";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
@@ -743,73 +744,7 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 });
 
 ///////////////////////////////////////////////////////////
-// Sample Images
-
-const SnapshotParallel = 8;
-const SampleImages = task(`sample-images`, async target => {
-	const [cfgP, sh] = await target.need(PackageSnapshotConfig, SnapShotHtml, TakeSampleImages);
-	let snapshotFiles = [...cfgP];
-	for (let i = 0; i < SnapshotParallel; i++) {
-		const de = JSON.parse(fs.readFileSync(`${sh.dir}/readme-tasks-${i}.json`));
-		for (const x of de) snapshotFiles.push(x);
-	}
-	await target.need(
-		snapshotFiles.map(opt => ScreenShot(opt.name + ".dark")),
-		snapshotFiles.map(opt => ScreenShot(opt.name + ".light"))
-	);
-});
-
-const SampleImagesPre = task(`sample-images:pre`, async target => {
-	const [sans, slab, aile, etoile] = await target.need(
-		GroupWebFontsImpl(`iosevka`, false),
-		GroupWebFontsImpl(`iosevka-slab`, false),
-		GroupWebFontsImpl(`iosevka-aile`, false),
-		GroupWebFontsImpl(`iosevka-etoile`, false),
-		SnapShotStatic("index.js"),
-		SnapShotStatic("get-snap.js"),
-		SnapShotJson,
-		SnapShotCSS,
-		SnapShotHtml,
-		de`images`,
-		de(SNAPSHOT_TMP)
-	);
-	await cp(`${DIST}/${sans}`, `${SNAPSHOT_TMP}/${sans}`);
-	await cp(`${DIST}/${slab}`, `${SNAPSHOT_TMP}/${slab}`);
-	await cp(`${DIST}/${aile}`, `${SNAPSHOT_TMP}/${aile}`);
-	await cp(`${DIST}/${etoile}`, `${SNAPSHOT_TMP}/${etoile}`);
-});
-
-const PackageSnapshotConfig = computed(`package-snapshot-config`, async target => {
-	const [plan] = await target.need(BuildPlans);
-	const cfg = [];
-	for (const key in plan.buildPlans) {
-		const p = plan.buildPlans[key];
-		if (!p || !p.snapshotFamily) continue;
-		cfg.push({
-			el: "#packaging-sampler",
-			applyClass: p.snapshotFamily,
-			applyFeature: p.snapshotFeature,
-			name: key,
-			applyCallback: `cbAmendStylisticSetContents`,
-			applyCallbackArgs: { hotChars: [] }
-		});
-	}
-	return cfg;
-});
-const SnapShotJson = file(`${SNAPSHOT_TMP}/packaging-tasks.json`, async (target, out) => {
-	const [cfg] = await target.need(PackageSnapshotConfig, de(out.dir));
-	fs.writeFileSync(out.full, JSON.stringify(cfg, null, "  "));
-});
-const SnapShotHtml = file(`${SNAPSHOT_TMP}/index.html`, async (target, out) => {
-	await target.need(Parameters, UtilScripts, SnapshotTemplates, de(out.dir));
-	await node(`utility/generate-snapshot-page/index`, {
-		inputPath: "snapshot-src/templates",
-		outputPath: out.full,
-		outputDataPath: `${out.dir}/${out.name}.data.json`,
-		outputTaskFilePrefix: `${out.dir}/readme-tasks`,
-		parallel: SnapshotParallel
-	});
-});
+// README
 
 const AmendReadme = task("amend-readme", async target => {
 	await target.need(Parameters, UtilScripts);
@@ -833,48 +768,56 @@ async function amendReadmeFor(md, cm, cmi, cmo) {
 	});
 }
 
-const SnapShotStatic = file.make(
-	x => `${SNAPSHOT_TMP}/${x}`,
-	async (target, out) => {
-		const [$1] = await target.need(sfu`snapshot-src/${out.base}`, de(out.dir));
-		await cp($1.full, `${out.dir}/${$1.base}`);
-	}
-);
-const SnapShotCSS = file(`${SNAPSHOT_TMP}/index.css`, async (target, out) => {
-	const [$1] = await target.need(sfu`snapshot-src/index.styl`, de(out.dir));
-	await cp($1.full, `${out.dir}/${$1.base}`);
-	await run(`npx`, `stylus`, `${out.dir}/${$1.base}`, `-c`);
+///////////////////////////////////////////////////////////
+// Sample Images
+
+const SampleImages = task(`sample-images`, async target => {
+	const [tasksToTake] = await target.need(SampleImagesPre, de(IMAGES));
+	let tasks = [];
+	for (const id of tasksToTake) tasks.push(ScreenShotImpl(id));
+	await target.need(tasks);
 });
-const TakeSampleImages = task(`sample-images:take`, async target => {
-	await target.need(SampleImagesPre);
 
-	await run("npm", "install", "--no-save", "electron");
-
-	let taskLists = [`packaging-tasks.json`];
-	for (let i = 0; i < SnapshotParallel; i++) taskLists.push(`readme-tasks-${i}.json`);
-	await Promise.all(
-		taskLists.map((file, i) =>
-			Delay(i * 4000).then(() =>
-				cd(SNAPSHOT_TMP).run("npx", "electron", "get-snap.js", "../../images", file)
-			)
-		)
+const SampleImagesPre = task(`sample-images:pre`, async target => {
+	const [version] = await target.need(Version, de(IMAGE_TASKS), UtilScripts);
+	const fontGroups = await target.need(
+		GroupTtfsImpl(`iosevka`, false),
+		GroupTtfsImpl(`iosevka-slab`, false),
+		GroupTtfsImpl(`iosevka-aile`, false),
+		GroupTtfsImpl(`iosevka-etoile`, false)
 	);
+	return await node("utility/generate-samples/index.js", {
+		outputDir: IMAGE_TASKS,
+		packageSnapshotTasks: await PackageSnapshotConfig(target),
+		fontGroups: fontGroups,
+		version
+	});
 });
-const ScreenShot = file.make(
-	img => `images/${img}.png`,
-	async (target, out) => {
-		await target.need(TakeSampleImages);
-		await run(
-			"magick",
-			...[`${out.dir}/${out.name}.black.png`, `${out.dir}/${out.name}.white.png`],
-			..."( -clone 0-1 -fx u-v+1 )".split(" "),
-			..."( -clone 0,2 -compose DivideSrc -composite )".split(" "),
-			..."( -clone 3,2 -alpha Off -compose CopyOpacity -composite )".split(" "),
-			...["-delete", "0-3", out.full]
-		);
-		await rm(`${out.dir}/${out.name}.black.png`);
-		await rm(`${out.dir}/${out.name}.white.png`);
-		await run("optipng", ["--strip", "all"], out.full);
+const PackageSnapshotConfig = async target => {
+	const [plan] = await target.need(BuildPlans);
+	const cfg = [];
+	for (const key in plan.buildPlans) {
+		const p = plan.buildPlans[key];
+		if (!p || !p.snapshotFamily) continue;
+		cfg.push({
+			name: key,
+			fontFamily: p.snapshotFamily,
+			fontFeatures: p.snapshotFeature
+		});
+	}
+	return cfg;
+};
+
+const ScreenShotImpl = file.make(
+	img => `${IMAGES}/${img}.svg`,
+	async (target, out, id) => {
+		const [rp] = await target.need(RawPlans);
+		await target.need(SampleImagesPre, de(IMAGES));
+		await run(rp.buildOptions.snapshotGeneratorApp, [
+			`${IMAGE_TASKS}/${id}.json`,
+			"-o",
+			out.full
+		]);
 	}
 );
 
@@ -1001,12 +944,8 @@ const UtilScriptFiles = computed("util-script-files", async target => {
 	return [...js, ...ejs, ...md];
 });
 const SnapshotTemplateFiles = computed("snapshot-templates", async target => {
-	const [js, ejs, md] = await target.need(
-		ScriptsUnder("js", "snapshot-src"),
-		ScriptsUnder("ejs", "snapshot-src"),
-		ScriptsUnder("md", "snapshot-src")
-	);
-	return [...js, ...ejs, ...md];
+	const [js] = await target.need(ScriptsUnder("js", "image-gen"));
+	return [...js];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const [ss] = await target.need(ScriptsUnder(ext, `font-src`));
@@ -1044,10 +983,7 @@ const UtilScripts = task("util-scripts", async target => {
 	const [files] = await target.need(UtilScriptFiles);
 	await target.need(files.map(fu));
 });
-const SnapshotTemplates = task("snapshot-templates", async target => {
-	const [files] = await target.need(SnapshotTemplateFiles);
-	await target.need(files.map(fu));
-});
+
 const Parameters = task(`meta:parameters`, async target => {
 	await target.need(
 		Version,

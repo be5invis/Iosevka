@@ -132,7 +132,7 @@ function flag(f) {
 function ImgX(path, w) {
 	const widthProp = w ? ` width=${w}` : ``;
 	return (
-		`<img src="${path}.light.png#gh-light-mode-only"${widthProp}/>` +
-		`<img src="${path}.dark.png#gh-dark-mode-only"${widthProp}/>`
+		`<img src="${path}.light.svg#gh-light-mode-only"${widthProp}/>` +
+		`<img src="${path}.dark.svg#gh-dark-mode-only"${widthProp}/>`
 	);
 }
