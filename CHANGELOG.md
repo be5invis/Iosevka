@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 15.5.1
+
+* Add characters:
+  - QUADRUPLE PRIME (`U+2057`);
+  - CARET INSERTION POINT (`U+2041`);
+  - DOTTED CROSS (`U+205C`);
+* Unhinted webfonts are added into releases.
+
+
 ### 15.5.0
 
 * Add characters
