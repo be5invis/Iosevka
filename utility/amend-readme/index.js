@@ -40,8 +40,8 @@ async function processSsOt(dirs) {
 		{
 			md.log(
 				`<tr>`,
-				`<td>${ImgX(`${dirs.images}/stylistic-set-u-${ss.tag}-${ss.rank}`)}</td>`,
-				`<td>${ImgX(`${dirs.images}/stylistic-set-i-${ss.tag}-${ss.rank}`)}</td>`,
+				`<td>${ImgX(`${dirs.images}/ss-u-${ss.tag}-${ss.rank}`)}</td>`,
+				`<td>${ImgX(`${dirs.images}/ss-i-${ss.tag}-${ss.rank}`)}</td>`,
 				`</tr>`
 			);
 		}
@@ -78,7 +78,7 @@ async function processCvOt(dirs) {
 				const iCvv = rid * entriesPerRow + cid;
 				if (iCvv >= effVariants.length) continue;
 				const cvv = effVariants[iCvv];
-				const imageID = `${dirs.images}/character-variant-${cv.key}-${cvv.key}`;
+				const imageID = `${dirs.images}/cv-${cv.key}-${cvv.key}`;
 				const image = ImgX(imageID, imgWidth);
 				md.log(`<td${itemColSpanHtml}>${image}</td>`);
 			}
@@ -163,7 +163,7 @@ function formatCv(md, dirs, info) {
 	const imgWidth = 32 * info.sampleImageCountEm;
 	let sTable = "     <table>";
 	for (const alt of info.alternatives) {
-		const imageId = `${dirs.images}/character-variant-${alt.imageId}`;
+		const imageId = `${dirs.images}/cv-${alt.imageId}`;
 		const image = ImgX(imageId, imgWidth);
 		const selectorText = alt.selectors.map(x => `<code>${x}</code>`).join(", ");
 		sTable +=
@@ -341,7 +341,7 @@ class MdCol {
 function ImgX(path, w) {
 	const widthProp = w ? ` width=${w}` : ``;
 	return (
-		`<img src="${path}.light.png#gh-light-mode-only"${widthProp}/>` +
-		`<img src="${path}.dark.png#gh-dark-mode-only"${widthProp}/>`
+		`<img src="${path}.light.svg#gh-light-mode-only"${widthProp}/>` +
+		`<img src="${path}.dark.svg#gh-dark-mode-only"${widthProp}/>`
 	);
 }
