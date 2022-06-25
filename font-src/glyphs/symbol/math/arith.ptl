@@ -7,100 +7,150 @@ glyph-module
 glyph-block Symbol-Math-Arith : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-export PlusShape
 	glyph-block-import Symbol-Math-Frame : MathEnclosureSw
 
-	define [PlusShape left right s sw] : union
-		HBar left right SymbolMid [fallback sw OperatorStroke]
-		VBar (Middle + [fallback s 0]) PlusTop PlusBot [fallback sw OperatorStroke]
+	do "Plus/Minus"
+		glyph-block-export PlusShape
+		define [PlusShape left right s sw] : union
+			HBar left right SymbolMid [fallback sw OperatorStroke]
+			VBar (Middle + [fallback s 0]) PlusTop PlusBot [fallback sw OperatorStroke]
 
-	create-glyph 'plus' '+' : PlusShape SB RightSB
-	create-glyph 'minus' 0x2212 : HBar SB RightSB SymbolMid OperatorStroke
+		create-glyph 'plus' '+' : PlusShape SB RightSB
+		create-glyph 'minus' 0x2212 : HBar SB RightSB SymbolMid OperatorStroke
 
-	create-glyph 'innerPlus' : PlusShape SB RightSB 0 MathEnclosureSw
-	create-glyph 'innerMinus' : HBar SB RightSB SymbolMid MathEnclosureSw
+		create-glyph 'innerPlus' : PlusShape SB RightSB 0 MathEnclosureSw
+		create-glyph 'innerMinus' : HBar SB RightSB SymbolMid MathEnclosureSw
 
-	create-glyph 'hermetianConjugateMatrixPlus' 0x22B9 : difference
-		PlusShape SB RightSB
-		SquareAt Middle SymbolMid DotRadius
+		create-glyph 'hermetianConjugateMatrixPlus' 0x22B9 : difference
+			PlusShape SB RightSB
+			SquareAt Middle SymbolMid DotRadius
 
-	create-glyph 'plusminus' 0xB1 : glyph-proc
-		include : HBarBottom SB RightSB 0 OperatorStroke
-		include : refer-glyph "plus"
+		create-glyph 'plusminus' 0xB1 : glyph-proc
+			include : HBarBottom SB RightSB 0 OperatorStroke
+			include : refer-glyph "plus"
 
-	turned 'minusplus' 0x2213 'plusminus' Middle SymbolMid
+		turned 'minusplus' 0x2213 'plusminus' Middle SymbolMid
 
-	define MultiplyHalfHeight : (RightSB - SB) / 2
-	define swBowtie : AdviceStroke 4
-	define [MultiplyMask p1 p2] : spiro-outline
-		corner (Middle - p1 * MultiplyHalfHeight) (SymbolMid - p1 * MultiplyHalfHeight)
-		corner (Middle + p2 * MultiplyHalfHeight) (SymbolMid + p2 * MultiplyHalfHeight)
-		corner (Middle + p2 * MultiplyHalfHeight) (SymbolMid - p2 * MultiplyHalfHeight)
-		corner (Middle - p1 * MultiplyHalfHeight) (SymbolMid + p1 * MultiplyHalfHeight)
+	do "Multiply"
+		define Size : 0.5 * (RightSB - SB) + 0.25 * SB
+		define swBowtie : AdviceStroke 4.25
+		define swBowtieHv : AdviceStroke 4.75
 
-	define [MultiplyStroke1Shape s p1 p2] : dispiro
-		widths.center s
-		flat (Middle - p1 * MultiplyHalfHeight) (SymbolMid - p1 * MultiplyHalfHeight)
-		curl (Middle + p2 * MultiplyHalfHeight) (SymbolMid + p2 * MultiplyHalfHeight)
+		define [MultiplyMask py p1 p2] : spiro-outline
+			corner (Middle - p1 * Size) (SymbolMid - p1 * py * Size)
+			corner (Middle + p2 * Size) (SymbolMid + p2 * py * Size)
+			corner (Middle + p2 * Size) (SymbolMid - p2 * py * Size)
+			corner (Middle - p1 * Size) (SymbolMid + p1 * py * Size)
+		define [CoMultiplyMask py p1 p2] : spiro-outline
+			corner (Middle + p2 * Size) (SymbolMid + p2 * py * Size)
+			corner (Middle - p1 * Size) (SymbolMid - p1 * py * Size)
+			corner (Middle + p2 * Size) (SymbolMid - p2 * py * Size)
+			corner (Middle - p1 * Size) (SymbolMid + p1 * py * Size)
+		define [MultiplyStroke1Shape s py p1 p2] : dispiro
+			widths.center s
+			flat (Middle - p1 * Size) (SymbolMid - p1 * py * Size)
+			curl (Middle + p2 * Size) (SymbolMid + p2 * py * Size)
+		define [MultiplyStroke2Shape s py p1 p2] : dispiro
+			widths.center s
+			flat (Middle - p1 * Size) (SymbolMid + p1 * py * Size)
+			curl (Middle + p2 * Size) (SymbolMid - p2 * py * Size)
 
-	define [MultiplyStroke2Shape s p1 p2] : dispiro
-		widths.center s
-		flat (Middle - p1 * MultiplyHalfHeight) (SymbolMid + p1 * MultiplyHalfHeight)
-		curl (Middle + p2 * MultiplyHalfHeight) (SymbolMid - p2 * MultiplyHalfHeight)
+		create-glyph 'multiply' 0xD7 : glyph-proc
+			include : MultiplyStroke1Shape OperatorStroke 1 1 1
+			include : MultiplyStroke2Shape OperatorStroke 1 1 1
 
-	create-glyph 'multiply' 0xD7 : glyph-proc
-		include : MultiplyStroke1Shape OperatorStroke 1 1
-		include : MultiplyStroke2Shape OperatorStroke 1 1
+		create-glyph 'multiplyInMulDiv' : glyph-proc
+			include : MultiplyStroke1Shape swBowtie 1 1 1
+			include : MultiplyStroke2Shape swBowtie 1 1 1
 
-	create-glyph 'bowtie' 0x22C8 : glyph-proc
-		include : union
-			intersection
-				MultiplyMask 1 1
-				union
-					VBarLeft SB (SymbolMid - MultiplyHalfHeight) (SymbolMid + MultiplyHalfHeight) swBowtie
-					VBarRight RightSB (SymbolMid - MultiplyHalfHeight) (SymbolMid + MultiplyHalfHeight) swBowtie
-			intersection
-				Rect ParenTop ParenBot SB RightSB
-				union
-					MultiplyStroke1Shape swBowtie 1 1
-					MultiplyStroke2Shape swBowtie 1 1
+		create-glyph 'bowtie' 0x22C8 : glyph-proc
+			include : union
+				intersection
+					MultiplyMask 1 1 1
+					union
+						VBarLeft  (Middle - Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
+						VBarRight (Middle + Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
+				intersection
+					Rect ParenTop ParenBot (Middle - Size) (Middle + Size)
+					union
+						MultiplyStroke1Shape swBowtie 1 1 1
+						MultiplyStroke2Shape swBowtie 1 1 1
 
-	create-glyph 'bowtieLeft' 0x22C9 : glyph-proc
-		include : union
-			intersection
-				MultiplyMask 1 1
-				VBarLeft SB (SymbolMid - MultiplyHalfHeight) (SymbolMid + MultiplyHalfHeight) swBowtie
-			intersection
-				Rect ParenTop ParenBot SB [mix SB RightSB 2]
-				union
-					MultiplyStroke1Shape swBowtie 1 1
-					MultiplyStroke2Shape swBowtie 1 1
+		create-glyph 'bowtieLeft' 0x22C9 : glyph-proc
+			include : union
+				intersection
+					MultiplyMask 1 1 1
+					VBarLeft (Middle - Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
+				intersection
+					Rect ParenTop ParenBot (Middle - Size) [mix SB RightSB 2]
+					union
+						MultiplyStroke1Shape swBowtie 1 1 1
+						MultiplyStroke2Shape swBowtie 1 1 1
 
-	create-glyph 'bowtieRight' 0x22CA : glyph-proc
-		include : union
-			intersection
-				MultiplyMask 1 1
-				VBarRight RightSB (SymbolMid - MultiplyHalfHeight) (SymbolMid + MultiplyHalfHeight) swBowtie
-			intersection
-				Rect ParenTop ParenBot [mix RightSB SB 2] RightSB
-				union
-					MultiplyStroke1Shape swBowtie 1 1
-					MultiplyStroke2Shape swBowtie 1 1
+		create-glyph 'bowtieRight' 0x22CA : glyph-proc
+			include : union
+				intersection
+					MultiplyMask 1 1 1
+					VBarRight (Middle + Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
+				intersection
+					Rect ParenTop ParenBot [mix RightSB SB 2] (Middle + Size)
+					union
+						MultiplyStroke1Shape swBowtie 1 1 1
+						MultiplyStroke2Shape swBowtie 1 1 1
 
-	create-glyph 'leftSemidirectProduct' 0x22CB : glyph-proc
-		include : MultiplyStroke1Shape OperatorStroke 1 0
-		include : MultiplyStroke2Shape OperatorStroke 1 1
+		create-glyph 'bowtieWithLeftHalfBlack' 0x29D1 : union
+			refer-glyph 'bowtie'
+			MultiplyMask 1 1 0
 
-	create-glyph 'rightSemidirectProduct' 0x22CC : glyph-proc
-		include : MultiplyStroke1Shape OperatorStroke 1 1
-		include : MultiplyStroke2Shape OperatorStroke 0 1
+		create-glyph 'bowtieWithRightHalfBlack' 0x29D2 : union
+			refer-glyph 'bowtie'
+			MultiplyMask 1 0 1
 
-	create-glyph 'innerMultiplyStroke1' : glyph-proc
-		include : MultiplyStroke1Shape MathEnclosureSw 1 1
+		create-glyph 'blackBowtie' 0x29D3 : union
+			refer-glyph 'bowtie'
+			MultiplyMask 1 1 1
 
-	create-glyph 'innerMultiply' : glyph-proc
-		include : MultiplyStroke1Shape MathEnclosureSw 1 1
-		include : MultiplyStroke2Shape MathEnclosureSw 1 1
+		create-glyph 'timesWithLeftHalfBlack' 0x29D4 : union
+			refer-glyph 'bowtieLeft'
+			MultiplyMask 1 1 0
+
+		create-glyph 'timesWithRightHalfBlack' 0x29D5 : union
+			refer-glyph 'bowtieRight'
+			MultiplyMask 1 0 1
+
+		define HourglassStretch 1.6
+		create-glyph 'whiteHourglass' 0x29D6 : glyph-proc
+			include : union
+				intersection
+					CoMultiplyMask HourglassStretch 1 1
+					union
+						HBarTop    (Middle - Size) (Middle + Size) (SymbolMid + HourglassStretch * Size) swBowtieHv
+						HBarBottom (Middle - Size) (Middle + Size) (SymbolMid - HourglassStretch * Size) swBowtieHv
+				intersection
+					Rect (SymbolMid + HourglassStretch * Size) (SymbolMid - HourglassStretch * Size) (-Width) (2 * Width)
+					union
+						MultiplyStroke1Shape swBowtie HourglassStretch 1 1
+						MultiplyStroke2Shape swBowtie HourglassStretch 1 1
+
+		create-glyph 'blackHourglass' 0x29D7 : glyph-proc
+			include : union
+				refer-glyph 'whiteHourglass'
+				CoMultiplyMask HourglassStretch 1 1
+
+		create-glyph 'leftSemidirectProduct' 0x22CB : glyph-proc
+			include : MultiplyStroke1Shape OperatorStroke 1 1 0
+			include : MultiplyStroke2Shape OperatorStroke 1 1 1
+
+		create-glyph 'rightSemidirectProduct' 0x22CC : glyph-proc
+			include : MultiplyStroke1Shape OperatorStroke 1 1 1
+			include : MultiplyStroke2Shape OperatorStroke 1 0 1
+
+		create-glyph 'innerMultiplyStroke1' : glyph-proc
+			include : MultiplyStroke1Shape MathEnclosureSw 1 1 1
+
+		create-glyph 'innerMultiply' : glyph-proc
+			include : MultiplyStroke1Shape MathEnclosureSw 1 1 1
+			include : MultiplyStroke2Shape MathEnclosureSw 1 1 1
 
 	alias 'mathAsterisk' 0x2217 'opAsterisk.low'
 
@@ -145,11 +195,11 @@ glyph-block Symbol-Math-Arith : begin
 			create-glyph "divisionTimes.\(suffix)" : glyph-proc
 				define sw : AdviceStroke 4
 				define gap : (RightSB - SB) / 2
-				include : MultiplyStroke1Shape sw 1 1
-				include : MultiplyStroke2Shape sw 1 1
-				include : HBar SB RightSB SymbolMid sw
-				include : DrawAt Middle (SymbolMid + gap) (dr * sw / OperatorStroke - overshoot)
-				include : DrawAt Middle (SymbolMid - gap) (dr * sw / OperatorStroke - overshoot)
+				include : union
+					refer-glyph 'multiplyInMulDiv'
+					HBar SB RightSB SymbolMid sw
+					DrawAt Middle (SymbolMid + gap) (dr * sw / OperatorStroke - overshoot)
+					DrawAt Middle (SymbolMid - gap) (dr * sw / OperatorStroke - overshoot)
 
 		select-variant 'dotplus' 0x2214 (follow -- 'punctuationDot')
 		select-variant 'minusDot' 0x2238 (follow -- 'punctuationDot')

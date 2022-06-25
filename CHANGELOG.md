@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 15.5.2
+
+* Add characters:
+  - BOWTIE WITH LEFT HALF BLACK (`U+29D1`) ... BLACK HOURGLASS (`U+29D7`) (#1370);
+
+
 ### 15.5.1
 
 * Add characters:
