@@ -3,6 +3,7 @@
 const path = require("path");
 const fs = require("fs");
 const SemVer = require("semver");
+const { Output } = require("./shared/index");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
 
@@ -25,26 +26,6 @@ module.exports = async function main(argv) {
 
 	await fs.promises.writeFile(argv.outputPath, out.buffer);
 };
-
-class Output {
-	constructor() {
-		this.buffer = "";
-	}
-	log(...s) {
-		this.buffer += s.join("") + "\n";
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Copy Markdown
-
-async function CopyMarkdown(out, name) {
-	const content = await fs.promises.readFile(
-		path.resolve(__dirname, `release-note-fragments/${name}`),
-		"utf8"
-	);
-	out.log(content);
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CHANGE LIST

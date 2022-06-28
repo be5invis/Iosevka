@@ -3,6 +3,7 @@
 const path = require("path");
 const fs = require("fs");
 const semver = require("semver");
+const { Output } = require("./shared/index");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const ModifiedSinceVersion = "2.x";
@@ -14,15 +15,6 @@ module.exports = async function main(argv) {
 	await GenerateChangeList(argv, out);
 	await fs.writeFile(argv.outputPath, out.buffer);
 };
-
-class Output {
-	constructor() {
-		this.buffer = "";
-	}
-	log(...s) {
-		this.buffer += s.join("") + "\n";
-	}
-}
 
 async function GenerateChangeList(argv, out) {
 	const changeFiles = await fs.promises.readdir(ChangeFileDir);

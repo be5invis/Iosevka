@@ -2,6 +2,7 @@
 
 const path = require("path");
 const fs = require("fs");
+const { Output } = require("./shared/index");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,15 +15,6 @@ module.exports = async function main(argv) {
 
 	await fs.promises.writeFile(argv.outputPath, out.buffer);
 };
-
-class Output {
-	constructor() {
-		this.buffer = "";
-	}
-	log(...s) {
-		this.buffer += s.join("") + "\n";
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown

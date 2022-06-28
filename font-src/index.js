@@ -97,7 +97,7 @@ async function saveTTF(argv, font) {
 		generateDummyDigitalSignature: true
 	});
 	const buf = FontIo.writeSfntOtf(sfnt);
-	await fs.writeFile(argv.o, buf);
+	await fs.promises.writeFile(argv.o, buf);
 }
 
 // Save character map file
