@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path");
-const fs = require("fs-extra");
+const fs = require("fs");
 const semver = require("semver");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
@@ -26,7 +26,7 @@ async function main() {
 }
 
 async function GetLatestVersion() {
-	const changeFiles = await fs.readdir(ChangeFileDir);
+	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const versions = new Set();
 	for (const file of changeFiles) {
 		const filePath = path.join(ChangeFileDir, file);

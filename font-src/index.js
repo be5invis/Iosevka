@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const { encode } = require("@msgpack/msgpack");
@@ -78,7 +78,7 @@ async function getParameters() {
 
 async function tryParseToml(str) {
 	try {
-		return Toml.parse(await fs.readFile(str, "utf-8"));
+		return Toml.parse(await fs.promises.readFile(str, "utf-8"));
 	} catch (e) {
 		throw new Error(
 			`Failed to parse configuration file ${str}.\nPlease validate whether there's syntax error.\n${e}`
@@ -110,5 +110,5 @@ async function saveCharMap(argv, glyphStore) {
 			...createGrDisplaySheet(glyphStore, gn)
 		]);
 	}
-	await fs.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
+	await fs.promises.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
 }

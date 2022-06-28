@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path");
-const fs = require("fs-extra");
+const fs = require("fs");
 const semver = require("semver");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
@@ -25,14 +25,14 @@ class Output {
 }
 
 async function GenerateChangeList(argv, out) {
-	const changeFiles = await fs.readdir(ChangeFileDir);
+	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const fragments = new Map();
 	for (const file of changeFiles) {
 		const filePath = path.join(ChangeFileDir, file);
 		const fileParts = path.parse(filePath);
 		if (fileParts.ext !== ".md") continue;
 		if (!semver.valid(fileParts.name) || semver.lt(argv.version, fileParts.name)) continue;
-		fragments.set(fileParts.name, await fs.readFile(filePath, "utf8"));
+		fragments.set(fileParts.name, await fs.promises.readFile(filePath, "utf8"));
 	}
 	const sortedFragments = Array.from(fragments).sort((a, b) => semver.compare(b[0], a[0]));
 

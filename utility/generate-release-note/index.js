@@ -1,10 +1,10 @@
 "use strict";
 
-const Path = require("path");
-const Fs = require("fs-extra");
+const path = require("path");
+const fs = require("fs");
 const SemVer = require("semver");
 
-const ChangeFileDir = Path.join(__dirname, "../../changes");
+const ChangeFileDir = path.join(__dirname, "../../changes");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,8 +23,7 @@ module.exports = async function main(argv) {
 			`</table>`
 	);
 
-	await Fs.ensureDir(Path.join(__dirname, `../../release-archives/`));
-	await Fs.writeFile(argv.outputPath, out.buffer);
+	await fs.promises.writeFile(argv.outputPath, out.buffer);
 };
 
 class Output {
@@ -40,8 +39,8 @@ class Output {
 // Copy Markdown
 
 async function CopyMarkdown(out, name) {
-	const content = await Fs.readFile(
-		Path.resolve(__dirname, `release-note-fragments/${name}`),
+	const content = await fs.promises.readFile(
+		path.resolve(__dirname, `release-note-fragments/${name}`),
 		"utf8"
 	);
 	out.log(content);
@@ -51,14 +50,14 @@ async function CopyMarkdown(out, name) {
 // CHANGE LIST
 
 async function GenerateChangeList(argv, out) {
-	const changeFiles = await Fs.readdir(ChangeFileDir);
+	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const fragments = new Map();
 	for (const file of changeFiles) {
-		const filePath = Path.join(ChangeFileDir, file);
-		const fileParts = Path.parse(filePath);
+		const filePath = path.join(ChangeFileDir, file);
+		const fileParts = path.parse(filePath);
 		if (fileParts.ext !== ".md") continue;
 		if (!SemVer.valid(fileParts.name) || SemVer.lt(argv.version, fileParts.name)) continue;
-		fragments.set(fileParts.name, await Fs.readFile(filePath, "utf8"));
+		fragments.set(fileParts.name, await fs.promises.readFile(filePath, "utf8"));
 	}
 
 	const sortedFragments = Array.from(fragments).sort((a, b) => SemVer.compare(b[0], a[0]));
