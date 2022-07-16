@@ -1579,6 +1579,36 @@
 <td colspan="10"> </td>
 </tr>
 <tr>
+<td rowspan="2"><code>VXAD</code></td>
+<td><img src="../images/cv-cyrl-capital-zhe-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-straight.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-zhe-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-curly.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-zhe-symmetric-touching.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-symmetric-touching.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-capital-zhe-symmetric-connected.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-zhe-symmetric-connected.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAE</code></td>
+<td><img src="../images/cv-cyrl-zhe-straight.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-straight.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-zhe-curly.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-curly.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-zhe-symmetric-touching.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-symmetric-touching.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-cyrl-zhe-symmetric-connected.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-zhe-symmetric-connected.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="8"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td colspan="8"> </td>
+</tr>
+<tr>
 <td rowspan="2"><code>cv58</code></td>
 <td><img src="../images/cv-cyrl-capital-ze-serifless.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-serifless.dark.svg#gh-dark-mode-only" width=32/></td>
 <td><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-cyrl-capital-ze-unilateral-serifed.dark.svg#gh-dark-mode-only" width=32/></td>
