@@ -16,7 +16,6 @@ const { parseVariantsData } = require("../export-data/variants-data");
 const { parseLigationData } = require("../export-data/ligation-data");
 
 module.exports = async function main(argv) {
-	const weightGrades = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 	const variantsData = await parseVariantsData();
 	const ligationData = await parseLigationData();
 

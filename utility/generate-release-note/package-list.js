@@ -1,7 +1,8 @@
 "use strict";
 
-const Path = require("path");
-const Fs = require("fs-extra");
+const path = require("path");
+const fs = require("fs");
+const { Output } = require("./shared/index");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -12,25 +13,15 @@ module.exports = async function main(argv) {
 	await CopyMarkdown(out, "packages-desc.md");
 	await GeneratePackageList(argv, out);
 
-	await Fs.ensureDir(Path.join(__dirname, `../../release-archives/`));
-	await Fs.writeFile(argv.outputPath, out.buffer);
+	await fs.promises.writeFile(argv.outputPath, out.buffer);
 };
-
-class Output {
-	constructor() {
-		this.buffer = "";
-	}
-	log(...s) {
-		this.buffer += s.join("") + "\n";
-	}
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown
 
 async function CopyMarkdown(out, name) {
-	const content = await Fs.readFile(
-		Path.resolve(__dirname, `release-note-fragments/${name}`),
+	const content = await fs.promises.readFile(
+		path.resolve(__dirname, `release-note-fragments/${name}`),
 		"utf8"
 	);
 	out.log(content);
@@ -52,7 +43,7 @@ const DownloadLinkPrefixNoVersion = `https://github.com/be5invis/Iosevka/release
 
 async function GeneratePackageList(argv, out) {
 	const imagePrefix = `${ImagePrefixNoVersion}/v${argv.version}/images`;
-	const pkgShapesData = await Fs.readJson(argv.releasePackagesJsonPath);
+	const pkgShapesData = JSON.parse(await fs.promises.readFile(argv.releasePackagesJsonPath));
 	const DownloadLinkPrefix = `${DownloadLinkPrefixNoVersion}/v${argv.version}`;
 
 	out.log(`<table>`);

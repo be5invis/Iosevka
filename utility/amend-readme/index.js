@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 const { parseVariantsData } = require("../export-data/variants-data");
 const { parseLigationData } = require("../export-data/ligation-data");
@@ -9,7 +9,7 @@ const { getCharMapAndSupportedLanguageList } = require("../export-data/supported
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports = async function main(argv) {
-	let readme = await fs.readFile(argv.mdFilePath, "utf-8");
+	let readme = await fs.promises.readFile(argv.mdFilePath, "utf-8");
 	const dirs = {
 		images: path.posix.relative(path.dirname(argv.mdFilePath), "images")
 	};
@@ -23,7 +23,7 @@ module.exports = async function main(argv) {
 	readme = (await processLigSetOt(dirs, 2, g => g.tag !== "calt")).apply(readme);
 	readme = (await processLangList(argv)).apply(readme);
 	readme = (await processPrivateBuildPlans()).apply(readme);
-	await fs.writeFile(argv.mdFilePath, readme);
+	await fs.promises.writeFile(argv.mdFilePath, readme);
 };
 
 async function processSsOt(dirs) {
@@ -105,7 +105,7 @@ async function processSsStyles() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
 	const headerPath = path.resolve(__dirname, "fragments/description-stylistic-sets.md");
-	md.log(await fs.readFile(headerPath, "utf-8"));
+	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 	for (const gr of variantsData.composites) {
 		if (!gr.rank) continue;
 		md.log(`  - \`${gr.tag}\`: Set character variant to “${gr.description}”.`);
@@ -117,7 +117,7 @@ async function processCherryPickingStyles(dirs) {
 	const md = new MdCol("Section-Cherry-Picking-Styles");
 
 	const headerPath = path.resolve(__dirname, "fragments/description-cheery-picking-styles.md");
-	md.log(await fs.readFile(headerPath, "utf-8"));
+	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 
 	for (const cv of [...variantsData.specials, ...variantsData.primes]) {
 		if (!cv.tag && !cv.isSpecial) continue;
@@ -188,7 +188,7 @@ function escapeHtml(s) {
 async function processPrivateBuildPlans() {
 	const md = new MdCol("Section-Private-Build-Plan-Sample");
 	const tomlPath = path.resolve(__dirname, "../../private-build-plans.sample.toml");
-	const toml = await fs.readFile(tomlPath, "utf-8");
+	const toml = await fs.promises.readFile(tomlPath, "utf-8");
 	md.log("```toml\n" + toml + "```");
 	return md;
 }
@@ -253,7 +253,7 @@ async function processLigSetCherryPicking() {
 		__dirname,
 		"fragments/description-cherry-picking-ligation-sets.md"
 	);
-	md.log(await fs.readFile(headerPath, "utf-8"));
+	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 
 	for (const gr in ligData.cherry) {
 		md.log(`  - \`${gr}\`: ${ligData.cherry[gr].desc}.`);
@@ -265,7 +265,7 @@ async function processLigSetPreDef() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Predefined-Ligation-Sets");
 	const headerPath = path.resolve(__dirname, "fragments/description-predefined-ligation-sets.md");
-	md.log(await fs.readFile(headerPath, "utf-8"));
+	md.log(await fs.promises.readFile(headerPath, "utf-8"));
 	for (const gr in ligData.rawSets) {
 		const readmeDesc =
 			ligData.rawSets[gr].readmeDesc ||

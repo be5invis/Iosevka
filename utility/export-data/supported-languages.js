@@ -1,7 +1,7 @@
 "use strict";
 
 const cldr = require("cldr");
-const fs = require("fs-extra");
+const fs = require("fs");
 const zlib = require("zlib");
 const { decode } = require("@msgpack/msgpack");
 
@@ -30,7 +30,7 @@ exports.getCharMapAndSupportedLanguageList = async function (cmpUpright, cmpItal
 };
 
 async function readMpCharMap(p) {
-	return decode(zlib.gunzipSync(await fs.readFile(p)));
+	return decode(zlib.gunzipSync(await fs.promises.readFile(p)));
 }
 
 function getSupportedLanguageSet(rawCoverage) {

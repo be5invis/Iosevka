@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const zlib = require("zlib");
 const { encode, decode } = require("@msgpack/msgpack");
 
@@ -83,7 +83,7 @@ class Cache {
 exports.load = async function (path, version, freshAgeKey) {
 	let cache = new Cache(freshAgeKey);
 	if (path && fs.existsSync(path)) {
-		const buf = zlib.gunzipSync(await fs.readFile(path));
+		const buf = zlib.gunzipSync(await fs.promises.readFile(path));
 		cache.loadRep(version, decode(buf));
 	}
 	return cache;
@@ -93,7 +93,7 @@ exports.save = async function savePTCache(path, version, cache, diffOnly) {
 	if (path) {
 		const buf = encode(cache.toRep(version, diffOnly));
 		const bufZip = zlib.gzipSync(Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength));
-		await fs.writeFile(path, bufZip);
+		await fs.promises.writeFile(path, bufZip);
 	}
 };
 
@@ -104,5 +104,5 @@ exports.merge = async function (base, diff, version, freshAgeKey) {
 		cacheBase.merge(cacheDiff);
 		await exports.save(base, version, cacheBase, false);
 	}
-	if (fs.existsSync(diff)) await fs.rm(diff);
+	if (fs.existsSync(diff)) await fs.promises.rm(diff);
 };

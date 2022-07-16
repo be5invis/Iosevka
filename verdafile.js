@@ -747,26 +747,31 @@ const PagesFastFontExport = task.group(`pages:fast-font-export`, async (target, 
 // README
 
 const AmendReadme = task("amend-readme", async target => {
-	await target.need(Parameters, UtilScripts);
-	const [cm, cmi, cmo] = await target.need(
-		BuildCM("iosevka", "iosevka-regular"),
-		BuildCM("iosevka", "iosevka-italic"),
-		BuildCM("iosevka", "iosevka-oblique")
+	await target.need(
+		AmendReadmeFor("README.md"),
+		AmendReadmeFor("doc/stylistic-sets.md"),
+		AmendReadmeFor("doc/character-variants.md"),
+		AmendReadmeFor("doc/custom-build.md"),
+		AmendReadmeFor("doc/language-specific-ligation-sets.md")
 	);
-	await amendReadmeFor("README.md", cm, cmi, cmo);
-	await amendReadmeFor("doc/stylistic-sets.md", cm, cmi, cmo);
-	await amendReadmeFor("doc/character-variants.md", cm, cmi, cmo);
-	await amendReadmeFor("doc/custom-build.md", cm, cmi, cmo);
-	await amendReadmeFor("doc/language-specific-ligation-sets.md", cm, cmi, cmo);
 });
-async function amendReadmeFor(md, cm, cmi, cmo) {
-	return node(`utility/amend-readme/index`, {
-		mdFilePath: md,
-		charMapPath: cm.full,
-		charMapItalicPath: cmi.full,
-		charMapObliquePath: cmo.full
-	});
-}
+const AmendReadmeFor = task.make(
+	f => `amend-readme::for::${f}`,
+	async (target, f) => {
+		await target.need(Parameters, UtilScripts);
+		const [cm, cmi, cmo] = await target.need(
+			BuildCM("iosevka", "iosevka-regular"),
+			BuildCM("iosevka", "iosevka-italic"),
+			BuildCM("iosevka", "iosevka-oblique")
+		);
+		return node(`utility/amend-readme/index`, {
+			mdFilePath: f,
+			charMapPath: cm.full,
+			charMapItalicPath: cmi.full,
+			charMapObliquePath: cmo.full
+		});
+	}
+);
 
 ///////////////////////////////////////////////////////////
 // Sample Images
@@ -834,7 +839,7 @@ const ReleaseNotesFile = file.make(
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
 		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
 		await t.need(changeFiles.map(fu));
-		await node("utility/generate-release-note/index", {
+		await node("utility/generate-release-note/release-note", {
 			version,
 			releasePackagesJsonPath: rpFiles.full,
 			outputPath: out.full
@@ -879,14 +884,14 @@ const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t,
 	await fs.promises.writeFile(out.full, JSON.stringify(releaseNoteGroups, null, "  "));
 });
 const ChangeLog = task(`release:change-log`, async t => {
-	await t.need(ChangeLogFile);
+	await t.need(ChangeLogMd);
 });
-const ChangeLogFile = file(`CHANGELOG.md`, async (t, out) => {
+const ChangeLogMd = file(`CHANGELOG.md`, async (t, out) => {
 	const [version] = await t.need(Version);
 	await t.need(UtilScripts, de(ARCHIVE_DIR));
 	const [changeFiles] = await t.need(ChangeFileList());
 	await t.need(changeFiles.map(fu));
-	await node("utility/generate-change-log/index", { version, outputPath: out.full });
+	await node("utility/generate-release-note/change-log", { version, outputPath: out.full });
 });
 const ChangeFileList = oracle.make(
 	() => `release:change-file-list`,
