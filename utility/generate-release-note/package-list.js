@@ -43,7 +43,7 @@ const DownloadLinkPrefixNoVersion = `https://github.com/be5invis/Iosevka/release
 
 async function GeneratePackageList(argv, out) {
 	const imagePrefix = `${ImagePrefixNoVersion}/v${argv.version}/images`;
-	const pkgShapesData = await fs.promises.readJson(argv.releasePackagesJsonPath);
+	const pkgShapesData = JSON.parse(await fs.promises.readFile(argv.releasePackagesJsonPath));
 	const DownloadLinkPrefix = `${DownloadLinkPrefixNoVersion}/v${argv.version}`;
 
 	out.log(`<table>`);

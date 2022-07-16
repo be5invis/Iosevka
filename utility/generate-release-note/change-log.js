@@ -13,7 +13,7 @@ const ModifiedSinceVersion = "2.x";
 module.exports = async function main(argv) {
 	const out = new Output();
 	await GenerateChangeList(argv, out);
-	await fs.writeFile(argv.outputPath, out.buffer);
+	await fs.promises.writeFile(argv.outputPath, out.buffer);
 };
 
 async function GenerateChangeList(argv, out) {

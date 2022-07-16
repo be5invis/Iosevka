@@ -20,9 +20,9 @@ setTimeout(
 
 async function main() {
 	const version = await GetLatestVersion();
-	const packageJson = await fs.readJson(PackageJsonPath);
+	const packageJson = JSON.parse(await fs.promises.readFile(PackageJsonPath));
 	packageJson.version = version;
-	await fs.writeJson(PackageJsonPath, packageJson, { spaces: 2 });
+	await fs.promises.writeFile(PackageJsonPath, JSON.stringify(packageJson, null, "  ") + "\n");
 }
 
 async function GetLatestVersion() {
