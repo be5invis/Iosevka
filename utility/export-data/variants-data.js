@@ -1,13 +1,13 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 const toml = require("@iarna/toml");
 
 const VariantDataParser = require("../../font-src/support/variant-data");
 
 exports.parseVariantsData = async function () {
-	const variantsToml = await fs.readFile(
+	const variantsToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/variants.toml"),
 		"utf8"
 	);

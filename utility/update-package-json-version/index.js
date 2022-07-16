@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path");
-const fs = require("fs-extra");
+const fs = require("fs");
 const semver = require("semver");
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
@@ -20,13 +20,13 @@ setTimeout(
 
 async function main() {
 	const version = await GetLatestVersion();
-	const packageJson = await fs.readJson(PackageJsonPath);
+	const packageJson = JSON.parse(await fs.promises.readFile(PackageJsonPath));
 	packageJson.version = version;
-	await fs.writeJson(PackageJsonPath, packageJson, { spaces: 2 });
+	await fs.promises.writeFile(PackageJsonPath, JSON.stringify(packageJson, null, "  ") + "\n");
 }
 
 async function GetLatestVersion() {
-	const changeFiles = await fs.readdir(ChangeFileDir);
+	const changeFiles = await fs.promises.readdir(ChangeFileDir);
 	const versions = new Set();
 	for (const file of changeFiles) {
 		const filePath = path.join(ChangeFileDir, file);

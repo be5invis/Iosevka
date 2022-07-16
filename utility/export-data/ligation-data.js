@@ -1,6 +1,6 @@
 "use strict";
 
-const fs = require("fs-extra");
+const fs = require("fs");
 const path = require("path");
 const toml = require("@iarna/toml");
 
@@ -189,7 +189,7 @@ const ligationSamplesNarrow = [
 ];
 
 exports.parseLigationData = async function () {
-	const ligToml = await fs.readFile(
+	const ligToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/ligation-set.toml"),
 		"utf8"
 	);
