@@ -1,8 +1,9 @@
 import * as TypoGeom from "typo-geom";
+
+import * as CurveUtil from "../../support/geometry/curve-util.mjs";
 import * as Geom from "../../support/geometry/index.mjs";
 import { Point } from "../../support/geometry/point.mjs";
 import { Transform } from "../../support/geometry/transform.mjs";
-import * as CurveUtil from "../../support/geometry/curve-util.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 function regulateGlyphStore(cache, skew, glyphStore) {

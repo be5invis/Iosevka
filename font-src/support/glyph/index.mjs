@@ -1,7 +1,7 @@
-import { Transform } from "../geometry/transform.mjs";
-import { Point } from "../geometry/point.mjs";
 import { Anchor } from "../geometry/anchor.mjs";
 import * as Geom from "../geometry/index.mjs";
+import { Point } from "../geometry/point.mjs";
+import { Transform } from "../geometry/transform.mjs";
 
 export class Glyph {
 	constructor(_identifier) {

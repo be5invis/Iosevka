@@ -1,6 +1,7 @@
 import * as SpiroJs from "spiro";
-import { linreg } from "../utils.mjs";
+
 import * as Format from "../util/formatter.mjs";
+import { linreg } from "../utils.mjs";
 
 class BiKnot {
 	constructor(type, x, y, d1, d2) {

@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
+import * as url from "url";
+
 import * as toml from "@iarna/toml";
+
 import * as VariantDataParser from "../../font-src/support/variant-data.mjs";
 
 function getCvData(parsed) {
@@ -138,6 +141,7 @@ function uniqueHotChars(cfgDefault, cfgSS) {
 	return Array.from(s);
 }
 export const parseVariantsData = async function () {
+	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const variantsToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/variants.toml"),
 		"utf8"

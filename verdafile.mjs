@@ -1,10 +1,11 @@
 import * as FS from "fs";
 import * as Path from "path";
-import * as Verda from "verda";
-import which from "which";
+
 import * as toml from "@iarna/toml";
 import semver from "semver";
 import * as uuid from "uuid";
+import * as Verda from "verda";
+import which from "which";
 
 ///////////////////////////////////////////////////////////
 
@@ -922,7 +923,7 @@ phony(`release`, async target => {
 	}
 	const [archiveFiles] = await target.need(goals);
 	// Create hash of packages
-	await target.need(fu`utility/create-sha-file.js`);
+	await target.need(fu`utility/create-sha-file.mjs`);
 	await node("utility/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
 	// Images and release notes
 	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
@@ -938,12 +939,11 @@ const ScriptsUnder = oracle.make(
 	(target, ext, dir) => FileList({ under: dir, pattern: `**/*.${ext}` })(target)
 );
 const UtilScriptFiles = computed("util-script-files", async target => {
-	const [js, ejs, md] = await target.need(
+	const [mjs, md] = await target.need(
 		ScriptsUnder("mjs", "utility"),
-		ScriptsUnder("ejs", "utility"),
 		ScriptsUnder("md", "utility")
 	);
-	return [...js, ...ejs, ...md];
+	return [...mjs, ...md];
 });
 const ScriptFiles = computed.group("script-files", async (target, ext) => {
 	const [ss] = await target.need(ScriptsUnder(ext, `font-src`));

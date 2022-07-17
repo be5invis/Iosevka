@@ -1,7 +1,10 @@
 import { Ot } from "ot-builder";
+
 import { Point } from "../../support/geometry/point.mjs";
 import * as Gr from "../../support/gr.mjs";
+
 import { byCode, bySpacing, byGr, byBuildOrder } from "./glyph-name.mjs";
+
 function byRank([gna, a], [gnb, b]) {
 	return (
 		b.glyphRank - a.glyphRank ||

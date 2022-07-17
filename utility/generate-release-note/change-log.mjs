@@ -1,7 +1,12 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
+import * as url from "url";
+
 import semver from "semver";
+
 import { Output } from "./shared/index.mjs";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const ModifiedSinceVersion = "2.x";

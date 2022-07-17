@@ -1,7 +1,9 @@
-import cldr from "cldr";
 import fs from "fs";
 import zlib from "zlib";
+
 import { decode } from "@msgpack/msgpack";
+import cldr from "cldr";
+
 import { gatherCoverageData } from "./coverage-export/gather-coverage-data.mjs";
 
 // List all the languages that Iosevka supports, but cannot inferred from CLDR data.
@@ -74,11 +76,7 @@ function getRawCoverage(charMap) {
 		for (const u of codes) rawCoverage.set(u, [gn, tv, cv]);
 	return rawCoverage;
 }
-export const getCharMapAndSupportedLanguageList = async function (
-	cmpUpright,
-	cmpItalic,
-	cmpOblique
-) {
+export async function getCharMapAndSupportedLanguageList(cmpUpright, cmpItalic, cmpOblique) {
 	const charMap = await readMpCharMap(cmpUpright);
 	const charMapItalic = await readMpCharMap(cmpItalic);
 	const charMapOblique = await readMpCharMap(cmpOblique);
@@ -90,7 +88,11 @@ export const getCharMapAndSupportedLanguageList = async function (
 			glyphCount: charMap.length,
 			codePointCount: rawCoverage.size
 		},
-		unicodeCoverage: gatherCoverageData(rawCoverage, rawCoverageItalic, rawCoverageOblique),
+		unicodeCoverage: await gatherCoverageData(
+			rawCoverage,
+			rawCoverageItalic,
+			rawCoverageOblique
+		),
 		languages: Array.from(getSupportedLanguageSet(rawCoverage)).sort()
 	};
-};
+}

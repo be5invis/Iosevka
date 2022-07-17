@@ -1,6 +1,10 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
+import * as url from "url";
+
 import { Output } from "./shared/index.mjs";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Copy Markdown

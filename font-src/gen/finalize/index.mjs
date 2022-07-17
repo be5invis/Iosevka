@@ -1,6 +1,7 @@
-import { finalizeGlyphs } from "./glyphs.mjs";
-import { gcFont } from "./gc.mjs";
 import { Nwid, Wwid } from "../../support/gr.mjs";
+
+import { gcFont } from "./gc.mjs";
+import { finalizeGlyphs } from "./glyphs.mjs";
 
 function assignGrAndCodeRank(glyphStore, ...flatteners) {
 	for (const g of glyphStore.glyphs()) {

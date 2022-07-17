@@ -1,8 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { parseVariantsData } from "../export-data/variants-data.mjs";
+import * as url from "url";
+
 import { parseLigationData } from "../export-data/ligation-data.mjs";
 import { getCharMapAndSupportedLanguageList } from "../export-data/supported-languages.mjs";
+import { parseVariantsData } from "../export-data/variants-data.mjs";
+
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 async function processSsOt(dirs) {
 	const variantsData = await parseVariantsData();

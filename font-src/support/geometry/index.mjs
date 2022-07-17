@@ -1,11 +1,14 @@
 import crypto from "crypto";
-import * as TypoGeom from "typo-geom";
+
 import * as SpiroJs from "spiro";
-import * as CurveUtil from "./curve-util.mjs";
+import * as TypoGeom from "typo-geom";
+
 import * as Format from "../util/formatter.mjs";
+
+import * as CurveUtil from "./curve-util.mjs";
 import { Point } from "./point.mjs";
-import { Transform } from "./transform.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
+import { Transform } from "./transform.mjs";
 
 class GeometryBase {
 	asContours() {

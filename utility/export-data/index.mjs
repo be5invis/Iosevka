@@ -1,11 +1,19 @@
 import fs from "fs";
-import { parseVariantsData } from "./variants-data.mjs";
+import path from "path";
+import * as url from "url";
+
 import { parseLigationData } from "./ligation-data.mjs";
 import { getCharMapAndSupportedLanguageList } from "./supported-languages.mjs";
-import package$0 from "../../package.json" assert { type: "json" };
+import { parseVariantsData } from "./variants-data.mjs";
 
-const version = package$0.version;
-export default (async function main(argv) {
+export default main;
+async function main(argv) {
+	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+	const packageJson = JSON.parse(
+		await fs.promises.readFile(path.join(__dirname, "../../package.json"))
+	);
+	const version = packageJson.version;
+
 	const variantsData = await parseVariantsData();
 	const ligationData = await parseLigationData();
 	const cl = await getCharMapAndSupportedLanguageList(
@@ -32,4 +40,4 @@ export default (async function main(argv) {
 		argv.exportPathCov,
 		JSON.stringify({ version, ...cl }, { spaces: 2 })
 	);
-});
+}

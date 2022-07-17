@@ -1,11 +1,13 @@
-import { CreateEmptyFont } from "./empty-font.mjs";
 import { buildGlyphs } from "../glyphs/index.mjs";
+import { copyFontMetrics } from "../meta/aesthetics.mjs";
+import { assignFontNames } from "../meta/naming.mjs";
+import { buildOtl } from "../otl/index.mjs";
+
+import * as Caching from "./caching/index.mjs";
+import { CreateEmptyFont } from "./empty-font.mjs";
 import { finalizeFont } from "./finalize/index.mjs";
 import { convertOtd } from "./otd-conv/index.mjs";
-import * as Caching from "./caching/index.mjs";
-import { buildOtl } from "../otl/index.mjs";
-import { assignFontNames } from "../meta/naming.mjs";
-import { copyFontMetrics } from "../meta/aesthetics.mjs";
+
 ("use strict");
 export async function buildFont(argv, para) {
 	const gs = buildGlyphs(para);

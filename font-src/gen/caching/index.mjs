@@ -1,5 +1,6 @@
 import fs from "fs";
 import zlib from "zlib";
+
 import { encode, decode } from "@msgpack/msgpack";
 
 const Edition = 20;
@@ -75,8 +76,13 @@ class Cache {
 export const load = async function (path, version, freshAgeKey) {
 	let cache = new Cache(freshAgeKey);
 	if (path && fs.existsSync(path)) {
-		const buf = zlib.gunzipSync(await fs.promises.readFile(path));
-		cache.loadRep(version, decode(buf));
+		try {
+			const buf = zlib.gunzipSync(await fs.promises.readFile(path));
+			cache.loadRep(version, decode(buf));
+		} catch (e) {
+			console.error("Error loading cache. Treat as empty.");
+			console.error(e);
+		}
 	}
 	return cache;
 };

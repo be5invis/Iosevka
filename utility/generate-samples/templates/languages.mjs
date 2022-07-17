@@ -1,4 +1,5 @@
 import * as themes from "../themes/index.mjs";
+
 // prettier-ignore
 const languages = [
     { lang: 'English', sample: 'Shaw, those twelve beige hooks are joined if I patch a young, gooey mouth.' },
@@ -26,6 +27,7 @@ const languages = [
     { lang: 'Turkish', sample: 'Pijamalı hasta yağız şoföre çabucak güvendi.' },
     { lang: 'Ukrainian', sample: 'Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!' }
 ];
+
 export default (function (args) {
 	const theme = themes[args.theme];
 	const EM = 24;

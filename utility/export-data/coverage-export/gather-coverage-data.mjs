@@ -1,6 +1,8 @@
-import { BlockData } from "./block-data.mjs";
-import ucdNames from "@unicode/unicode-14.0.0/Names";
-import ugc from "@unicode/unicode-14.0.0/General_Category";
+import ugc from "@unicode/unicode-14.0.0/General_Category/index.js";
+import ucdNames from "@unicode/unicode-14.0.0/Names/index.js";
+
+import { collectBlockData } from "./block-data.mjs";
+
 function findFirstLastChar(lchBlockStart, lchBlockEnd, cov) {
 	let lchFirst = 0,
 		lchLast = 0;
@@ -18,9 +20,9 @@ function findFirstLastChar(lchBlockStart, lchBlockEnd, cov) {
 	const lchEnd = ((lchLast >>> 4) << 4) + 0x10;
 	return [lchStart, lchEnd];
 }
-export const gatherCoverageData = function (covUpright, covItalic, covOblique) {
+export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 	const result = [];
-	for (const [[lchBlockStart, lchBlockEnd], block] of BlockData) {
+	for (const [[lchBlockStart, lchBlockEnd], block] of await collectBlockData()) {
 		let blockResults = [];
 		const [lchStart, lchEnd] = findFirstLastChar(lchBlockStart, lchBlockEnd, covUpright);
 		if (!lchStart || !lchEnd) continue;
@@ -63,4 +65,4 @@ export const gatherCoverageData = function (covUpright, covItalic, covOblique) {
 		}
 	}
 	return result;
-};
+}

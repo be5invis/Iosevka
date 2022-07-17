@@ -1,5 +1,6 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
+
 import semver from "semver";
 
 const ChangeFileDir = path.join(__dirname, "../../changes");

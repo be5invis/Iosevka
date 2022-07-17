@@ -1,15 +1,17 @@
 import fs from "fs";
 import path from "path";
+
+import { parseLigationData } from "../export-data/ligation-data.mjs";
+import { parseVariantsData } from "../export-data/variants-data.mjs";
+
 import Button from "./templates/button.mjs";
+import CharVariant from "./templates/character-variant.mjs";
 import GrandTitle from "./templates/grand-title.mjs";
 import Languages from "./templates/languages.mjs";
-import Weights from "./templates/weights.mjs";
+import LigationSet from "./templates/ligation-set.mjs";
 import Matrix from "./templates/matrix.mjs";
 import StylisticSet from "./templates/stylistic-set.mjs";
-import CharVariant from "./templates/character-variant.mjs";
-import LigationSet from "./templates/ligation-set.mjs";
-import { parseVariantsData } from "../export-data/variants-data.mjs";
-import { parseLigationData } from "../export-data/ligation-data.mjs";
+import Weights from "./templates/weights.mjs";
 
 class Generator {
 	constructor(outputDir, fontFiles) {

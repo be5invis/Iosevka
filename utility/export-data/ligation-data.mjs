@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import * as url from "url";
+
 import * as toml from "@iarna/toml";
 
 const ligationSamples = [
@@ -217,6 +219,7 @@ function buildLigationSet(ligData, getKey) {
 	return ligationSets;
 }
 export const parseLigationData = async function () {
+	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const ligToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/ligation-set.toml"),
 		"utf8"

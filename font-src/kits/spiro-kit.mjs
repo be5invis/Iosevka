@@ -1,7 +1,7 @@
 import * as CurveUtil from "../support/geometry/curve-util.mjs";
+import { SpiroGeometry, DiSpiroGeometry } from "../support/geometry/index.mjs";
 import { BiKnotCollector } from "../support/geometry/spiro-expand.mjs";
 import { fallback, mix, bez3 } from "../support/utils.mjs";
-import { SpiroGeometry, DiSpiroGeometry } from "../support/geometry/index.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 class DispiroImpl {
