@@ -1,6 +1,6 @@
 import { mix } from "../utils.mjs";
 
-class Box {
+export class Box {
 	constructor(t, b, l, r) {
 		this.top = t;
 		this.bottom = this.bot = b;
@@ -40,4 +40,3 @@ class Box {
 		return mix(this.bottom, this.top, t);
 	}
 }
-export { Box };

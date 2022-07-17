@@ -260,7 +260,8 @@ const ApplePostNames = new Map([
 	[0x111, "dcroat"]
 	/* spell-checker: enable */
 ]);
-function byCode(gSrc, primaryUnicode, conflictSet) {
+
+export function byCode(gSrc, primaryUnicode, conflictSet) {
 	if (gSrc.glyphRank === 9999) return ".notdef";
 	if (gSrc.glyphRank === 9998) return ".null";
 	let preferredName = null;
@@ -276,14 +277,16 @@ function byCode(gSrc, primaryUnicode, conflictSet) {
 function formatCodePointHex(u) {
 	return u.toString(16).padStart(4, "0").toUpperCase();
 }
-function bySpacing(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+
+export function bySpacing(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	if (!gOtBase.name) return 0;
 	let n = 0;
 	n += nameByPairGr(Nwid, Wwid, "NWID", "WWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
 	n += nameByPairGr(Wwid, Nwid, "WWID", "NWID", gSrcBase, gOtBase, internalNameMap, conflictSet);
 	return n;
 }
-function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
+
+export function byGr(gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	if (!gOtBase.name) return 0;
 	let n = 0;
 	for (const cv of AnyCv.query(gSrcBase)) {
@@ -323,12 +326,9 @@ function nameByGr(gr, gSrcBase, gOtBase, internalNameMap, conflictSet) {
 	}
 	return 0;
 }
-function byBuildOrder(rank, gSrc, gnOrig) {
+
+export function byBuildOrder(rank, gSrc, gnOrig) {
 	if (!gnOrig) gnOrig = `.g${rank}`;
 	gnOrig = Joining.amendOtName(gnOrig, Joining.get(gSrc));
 	return gnOrig;
 }
-export { byCode };
-export { bySpacing };
-export { byGr };
-export { byBuildOrder };

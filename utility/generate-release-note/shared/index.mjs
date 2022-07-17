@@ -1,4 +1,4 @@
-class Output {
+export class Output {
 	constructor() {
 		this.buffer = "";
 	}
@@ -6,4 +6,3 @@ class Output {
 		this.buffer += s.join("") + "\n";
 	}
 }
-export { Output };

@@ -1,5 +1,97 @@
 import { Ot } from "ot-builder";
 
+export function convertGsub(table, glyphs) {
+	ConvertGsubGposImpl(GsubHandlers, Ot.Gsub.Table, table, glyphs);
+}
+export function convertGpos(table, glyphs) {
+	ConvertGsubGposImpl(GposHandlers, Ot.Gpos.Table, table, glyphs);
+}
+export function convertGdef(otdGdef, glyphs) {
+	const gdef = new Ot.Gdef.Table();
+	gdef.glyphClassDef = new Map();
+	for (const gn in otdGdef.glyphClassDef) {
+		const g = glyphs.queryByName(gn);
+		if (g) gdef.glyphClassDef.set(g, otdGdef.glyphClassDef[gn]);
+	}
+	return gdef;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+function ConvertGsubGposImpl(handlers, T, table, glyphs) {
+	if (!table) return null;
+	const ls = new LookupStore(handlers, glyphs);
+	if (table.lookups) {
+		if (table.lookupOrder) {
+			for (const l of table.lookupOrder) ls.declare(l, table.lookups[l]);
+		}
+		for (const l in table.lookups) ls.declare(l, table.lookups[l]);
+		for (const l in table.lookups) ls.fill(l, table.lookups[l]);
+	}
+	const fs = new FeatureStore(ls);
+	if (table.features) {
+		for (const f in table.features) fs.fill(f, table.features[f]);
+	}
+	const ss = new ScriptLanguageStore(fs);
+	if (table.languages) {
+		for (const sl in table.languages) ss.fill(sl, table.languages[sl]);
+	}
+	return new T(ss.extract(), fs.extract(), ls.extract());
+}
+
+class ScriptLanguageStore {
+	constructor(features) {
+		this.featureStore = features;
+		this.m_scriptMapping = new Map();
+	}
+	extract() {
+		return this.m_scriptMapping;
+	}
+	fill(id, data) {
+		const scriptTag = id.slice(0, 4);
+		const languageTag = id.slice(5, 9).padEnd(4);
+		let sr = this.m_scriptMapping.get(scriptTag);
+		if (!sr) {
+			sr = { defaultLanguage: null, languages: new Map() };
+			this.m_scriptMapping.set(scriptTag, sr);
+		}
+		const lr = this.createLanguageRecord(data);
+		if (languageTag === "dflt" || languageTag === "DFLT") sr.defaultLanguage = lr;
+		else sr.languages.set(languageTag, lr);
+	}
+	createLanguageRecord(data) {
+		const features = [];
+		for (const fid of data.features) {
+			const feature = this.featureStore.query(fid);
+			if (feature) features.push(feature);
+		}
+		return {
+			requiredFeature: this.featureStore.query(data.requiredFeature) || null,
+			features: features
+		};
+	}
+}
+class FeatureStore {
+	constructor(lookups) {
+		this.lookupStore = lookups;
+		this.m_mapping = new Map();
+	}
+	extract() {
+		return Array.from(this.m_mapping.values());
+	}
+	query(id) {
+		return this.m_mapping.get(id);
+	}
+	fill(id, data) {
+		const tag = id.slice(0, 4);
+		const lookups = [];
+		for (const lid of data) {
+			const lookup = this.lookupStore.query(lid);
+			if (lookup) lookups.push(lookup);
+		}
+		this.m_mapping.set(id, { tag, lookups });
+	}
+}
 class LookupStore {
 	constructor(handlers, glyphs) {
 		this.glyphs = glyphs;
@@ -26,6 +118,9 @@ class LookupStore {
 		handler.fill(dst, otdLookup, this);
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 const GsubSingleHandler = {
 	init() {
 		return new Ot.Gsub.Single();
@@ -133,6 +228,7 @@ const GsubReverseHandler = {
 		}
 	}
 };
+
 function mapGlyphListAll(gl, store) {
 	const out = [];
 	for (const item of gl) {
@@ -160,6 +256,9 @@ const GsubHandlers = {
 	gsub_chaining: GsubChainingHandler,
 	gsub_reverse: GsubReverseHandler
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 const GposMarkToBaseHandler = {
 	init() {
 		return new Ot.Gpos.MarkToBase();
@@ -222,90 +321,3 @@ const GposHandlers = {
 	gpos_mark_to_base: GposMarkToBaseHandler,
 	gpos_mark_to_mark: GposMarkToMarkHandler
 };
-class FeatureStore {
-	constructor(lookups) {
-		this.lookupStore = lookups;
-		this.m_mapping = new Map();
-	}
-	extract() {
-		return Array.from(this.m_mapping.values());
-	}
-	query(id) {
-		return this.m_mapping.get(id);
-	}
-	fill(id, data) {
-		const tag = id.slice(0, 4);
-		const lookups = [];
-		for (const lid of data) {
-			const lookup = this.lookupStore.query(lid);
-			if (lookup) lookups.push(lookup);
-		}
-		this.m_mapping.set(id, { tag, lookups });
-	}
-}
-class ScriptLanguageStore {
-	constructor(features) {
-		this.featureStore = features;
-		this.m_scriptMapping = new Map();
-	}
-	extract() {
-		return this.m_scriptMapping;
-	}
-	fill(id, data) {
-		const scriptTag = id.slice(0, 4);
-		const languageTag = id.slice(5, 9).padEnd(4);
-		let sr = this.m_scriptMapping.get(scriptTag);
-		if (!sr) {
-			sr = { defaultLanguage: null, languages: new Map() };
-			this.m_scriptMapping.set(scriptTag, sr);
-		}
-		const lr = this.createLanguageRecord(data);
-		if (languageTag === "dflt" || languageTag === "DFLT") sr.defaultLanguage = lr;
-		else sr.languages.set(languageTag, lr);
-	}
-	createLanguageRecord(data) {
-		const features = [];
-		for (const fid of data.features) {
-			const feature = this.featureStore.query(fid);
-			if (feature) features.push(feature);
-		}
-		return {
-			requiredFeature: this.featureStore.query(data.requiredFeature) || null,
-			features: features
-		};
-	}
-}
-function ConvertGsubGposT(handlers, T) {
-	return function (table, glyphs) {
-		if (!table) return null;
-		const ls = new LookupStore(handlers, glyphs);
-		if (table.lookups) {
-			if (table.lookupOrder) {
-				for (const l of table.lookupOrder) ls.declare(l, table.lookups[l]);
-			}
-			for (const l in table.lookups) ls.declare(l, table.lookups[l]);
-			for (const l in table.lookups) ls.fill(l, table.lookups[l]);
-		}
-		const fs = new FeatureStore(ls);
-		if (table.features) {
-			for (const f in table.features) fs.fill(f, table.features[f]);
-		}
-		const ss = new ScriptLanguageStore(fs);
-		if (table.languages) {
-			for (const sl in table.languages) ss.fill(sl, table.languages[sl]);
-		}
-		return new T(ss.extract(), fs.extract(), ls.extract());
-	};
-}
-function convertGdef(otdGdef, glyphs) {
-	const gdef = new Ot.Gdef.Table();
-	gdef.glyphClassDef = new Map();
-	for (const gn in otdGdef.glyphClassDef) {
-		const g = glyphs.queryByName(gn);
-		if (g) gdef.glyphClassDef.set(g, otdGdef.glyphClassDef[gn]);
-	}
-	return gdef;
-}
-export const convertGsub = ConvertGsubGposT(GsubHandlers, Ot.Gsub.Table);
-export const convertGpos = ConvertGsubGposT(GposHandlers, Ot.Gpos.Table);
-export { convertGdef };
