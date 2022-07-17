@@ -1,6 +1,6 @@
 import { monotonicInterpolate } from "./util/monotonic-interpolate.mjs";
 
-function applyMetricOverride(para, mo, argv) {
+export function applyMetricOverride(para, mo, argv) {
 	const bindings = initBindings(para, argv);
 	for (const [field, expr] of Object.entries(mo)) {
 		if (!validMetricOverrideFields.has(field)) {
@@ -47,8 +47,10 @@ const validMetricOverrideFields = new Set([
 	"archDepth",
 	"smallArchDepth"
 ]);
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Function bindings
+
 function initBindings(para, argv) {
 	const valueBindings = new Map();
 	for (const k of validMetricOverrideFields) {
@@ -61,6 +63,7 @@ function initBindings(para, argv) {
 	functionBindings.set("blend", blend);
 	return { val: valueBindings, functions: functionBindings };
 }
+
 function blend(against, ...pairs) {
 	const xs = [],
 		ys = [];
@@ -69,8 +72,10 @@ function blend(against, ...pairs) {
 	}
 	return monotonicInterpolate(xs, ys)(against);
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Simple expression parser
+
 class State {
 	constructor(input) {
 		this.input = input;
@@ -99,6 +104,7 @@ class State {
 		throw new SyntaxError("Failed to parse expression: " + this.input + "@" + this.cp);
 	}
 }
+
 function RootExpression(state, bindings) {
 	const e = Expression(state, bindings);
 	state.expectEnd();
@@ -221,6 +227,7 @@ function List(start, end, state, bindings) {
 	state.expectAndAdvance(end);
 	return results;
 }
+
 function skipSpaces(state) {
 	while (state.testCk(isSpace)) state.advance();
 }
@@ -233,4 +240,3 @@ function isDigit(ch) {
 function isAlpha(ch) {
 	return (ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z") || ch === "_";
 }
-export { applyMetricOverride };

@@ -1,4 +1,4 @@
-class Point {
+export class Point {
 	constructor(type, x, y) {
 		this.type = type;
 		this.x = x;
@@ -64,4 +64,3 @@ Point.Type = {
 	CubicEnd: 2,
 	Quadratic: 3
 };
-export { Point };

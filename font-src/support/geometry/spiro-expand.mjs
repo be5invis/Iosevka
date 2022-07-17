@@ -38,7 +38,8 @@ class BiKnot {
 		);
 	}
 }
-class BiKnotCollector {
+
+export class BiKnotCollector {
 	constructor(gizmo, contrast) {
 		this.gizmo = gizmo;
 		this.contrast = contrast;
@@ -76,7 +77,8 @@ class BiKnotCollector {
 		if (k0) k0.unimportant = 1;
 	}
 }
-class SpiroExpander {
+
+export class SpiroExpander {
 	constructor(gizmo, contrast, closed, cks) {
 		this.gizmo = gizmo;
 		this.contrast = contrast;
@@ -204,20 +206,21 @@ class NormalRectifier {
 		this.nKnotsProcessed += 1;
 	}
 }
+
 function isTangentValid(d) {
 	return isFinite(d.x) && isFinite(d.y);
 }
+
 function normalX(tangent, contrast) {
 	return contrast * (-tangent.y / Math.hypot(tangent.x, tangent.y));
 }
 function normalY(tangent) {
 	return tangent.x / Math.hypot(tangent.x, tangent.y);
 }
+
 function reverseKnotType(ty) {
 	return ty === "left" ? "right" : ty === "right" ? "left" : ty;
 }
 function cyNth(a, j) {
 	return a[j % a.length];
 }
-export { BiKnotCollector };
-export { SpiroExpander };

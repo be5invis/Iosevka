@@ -66,10 +66,12 @@ function convertContourToArcs(contour) {
 	}
 	return newContour;
 }
+
 export const SPIRO_PRECISION = 1 / 2;
 export const OCCURRENT_PRECISION = 1 / 16;
 export const GEOMETRY_PRECISION = 1 / 4;
 export const BOOLE_RESOLUTION = 0x4000;
+
 export class OffsetCurve {
 	constructor(bone, offset, contrast) {
 		this.bone = bone;
@@ -95,6 +97,7 @@ export class OffsetCurve {
 		};
 	}
 }
+
 export class ReverseCurve {
 	constructor(original) {
 		this.m_original = original;
@@ -106,6 +109,7 @@ export class ReverseCurve {
 		return -this.m_original.derivative(1 - t);
 	}
 }
+
 export function convertShapeToArcs(shape) {
 	return shape.map(convertContourToArcs);
 }
@@ -115,6 +119,7 @@ export function shapeToRep(shape) {
 export function repToShape(shapeRep) {
 	return shapeRep.map(repToContour);
 }
+
 export class BezToContoursSink {
 	constructor(gizmo) {
 		this.gizmo = gizmo || Transform.Id();

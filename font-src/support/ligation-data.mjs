@@ -1,13 +1,5 @@
 import * as Parameters from "./parameters.mjs";
 
-function createBuildup(simple, buildup) {
-	let ligSet = new Set();
-	for (const s of buildup) {
-		if (!simple[s]) throw new Error("Cannot find simple ligation group " + s);
-		ligSet.add(simple[s].ligGroup);
-	}
-	return Array.from(ligSet);
-}
 export function applyLigationData(data, para, argv) {
 	const defaultBuildup = {};
 	const hives = {};
@@ -43,4 +35,13 @@ export function applyLigationData(data, para, argv) {
 				argv.ligations.enables.map(x => `ligset-enable-${x}`)
 			);
 	}
+}
+
+function createBuildup(simple, buildup) {
+	let ligSet = new Set();
+	for (const s of buildup) {
+		if (!simple[s]) throw new Error("Cannot find simple ligation group " + s);
+		ligSet.add(simple[s].ligGroup);
+	}
+	return Array.from(ligSet);
 }

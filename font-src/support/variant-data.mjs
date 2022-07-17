@@ -1,5 +1,5 @@
-function applyVariantData(data, para, argv) {
-	const parsed = parseVariantsData(data, argv);
+export function apply(data, para, argv) {
+	const parsed = parse(data, argv);
 	let tagSet = new Set();
 	for (const prime of parsed.primes.values()) {
 		if (!prime.tag) continue;
@@ -23,7 +23,8 @@ function applyVariantData(data, para, argv) {
 	};
 	para.variantSelector = variantSelector;
 }
-function parseVariantsData(data, argv) {
+
+export function parse(data, argv) {
 	const primes = new Map();
 	const selectorTree = new SelectorTree();
 	for (const k in data.prime) {
@@ -46,6 +47,7 @@ function parseVariantsData(data, argv) {
 	}
 	return { selectorTree: selectorTree, primes, composites, defaultComposite };
 }
+
 class SelectorTree {
 	constructor() {
 		this.m_mapping = new Map();
@@ -62,6 +64,7 @@ class SelectorTree {
 		for (const m of this.m_mapping.values()) yield* m.values();
 	}
 }
+
 class Prime {
 	constructor(key, cfg) {
 		if (!cfg.variants) throw new Error(`Missing variants in ${key}`);
@@ -116,6 +119,7 @@ class Prime {
 		return gr;
 	}
 }
+
 class PrimeVariant {
 	constructor(key, tag, cfg) {
 		this.key = key;
@@ -136,6 +140,7 @@ class PrimeVariant {
 		Object.assign(vs, this.selector);
 	}
 }
+
 class Composite {
 	constructor(key, cfg) {
 		this.key = key;
@@ -185,5 +190,3 @@ class Composite {
 		}
 	}
 }
-export { applyVariantData as apply };
-export { parseVariantsData as parse };

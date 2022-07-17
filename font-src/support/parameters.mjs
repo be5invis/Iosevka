@@ -1,6 +1,6 @@
 import { monotonicInterpolate } from "./util/monotonic-interpolate.mjs";
 
-function initPara(data, argv) {
+export function init(data, argv) {
 	let para = {};
 	apply(para, data, ["iosevka"]);
 	if (argv.shape.serifs) apply(para, data, ["serifs-" + argv.shape.serifs]);
@@ -29,10 +29,14 @@ function applyAlternatesParam(argv, para, data, key, keyArgv) {
 	if (argv.shape.serifs) apply(para, data, [`${kBase}-serifs-${argv.shape.serifs}`]);
 	if (argv.shape.spacing) apply(para, data, [`${kBase}-spacing-${argv.shape.spacing}`]);
 }
-function apply(sink, parametersData, styles, blendArgs) {
+
+export function apply(sink, parametersData, styles, blendArgs) {
 	if (!styles) return;
 	for (const item of styles) intro(parametersData, item, blendArgs, sink);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 // eslint-disable-next-line complexity
 function intro(source, style, blendArgs, sink) {
 	let hive = source[style];
@@ -68,10 +72,12 @@ function intro(source, style, blendArgs, sink) {
 	hive = hiveBlend(hive, getBlendArg(blendArgs, style));
 	for (const k in hive) sink[k] = hive[k];
 }
+
 function getBlendArg(blendArgs, style) {
 	if (!blendArgs) return undefined;
 	return blendArgs[style];
 }
+
 function hiveBlend(hive, value) {
 	if (!hive || !hive.blend || value == null) return hive;
 	const block = hive.blend;
@@ -98,5 +104,3 @@ function hiveBlend(hive, value) {
 	}
 	return generatedHive;
 }
-export { initPara as init };
-export { apply };

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const Dotless = {
+export const Dotless = {
 	tag: "dtls",
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.dotless;
@@ -15,6 +15,10 @@ const Dotless = {
 		return name + ".dotless";
 	}
 };
+
+export const LowerYDotAtBelow = SimpleProp("LowerYDotAtBelow");
+export const RightDependentTrigger = SimpleProp("RightDependentTrigger");
+export const MathSansSerif = SimpleProp("MathSansSerif");
 function SimpleProp(key) {
 	return {
 		get(glyph) {
@@ -28,9 +32,8 @@ function SimpleProp(key) {
 		}
 	};
 }
-const LowerYDotAtBelow = SimpleProp("LowerYDotAtBelow");
-const RightDependentTrigger = SimpleProp("RightDependentTrigger");
-const MathSansSerif = SimpleProp("MathSansSerif");
+
+export const RightDependentLink = DependentLinkProp("RightDependentLink");
 function DependentLinkProp(key) {
 	return {
 		get(glyph, subKey) {
@@ -52,17 +55,21 @@ function DependentLinkProp(key) {
 		}
 	};
 }
-const RightDependentLink = DependentLinkProp("RightDependentLink");
+
+export const Nwid = OtlTaggedProp("Nwid", "NWID");
+export const Wwid = OtlTaggedProp("Wwid", "WWID");
+export const Lnum = OtlTaggedProp("Lnum", "lnum");
+export const Onum = OtlTaggedProp("Onum", "onum");
+export const AplForm = OtlTaggedProp("AplForm", "APLF");
+export const NumeratorForm = OtlTaggedProp("Numerator", "numr");
+export const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
 function OtlTaggedProp(key, otlTag) {
 	return { ...SimpleProp(key), otlTag };
 }
-const Nwid = OtlTaggedProp("Nwid", "NWID");
-const Wwid = OtlTaggedProp("Wwid", "WWID");
-const Lnum = OtlTaggedProp("Lnum", "lnum");
-const Onum = OtlTaggedProp("Onum", "onum");
-const AplForm = OtlTaggedProp("AplForm", "APLF");
-const NumeratorForm = OtlTaggedProp("Numerator", "numr");
-const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
+
+export const CvDecompose = DecompositionProp("CvDecompose");
+export const PseudoCvDecompose = DecompositionProp("PseudoCvDecompose");
+export const CcmpDecompose = DecompositionProp("CcmpDecompose");
 function DecompositionProp(key) {
 	return {
 		get(glyph) {
@@ -76,10 +83,8 @@ function DecompositionProp(key) {
 		}
 	};
 }
-const CvDecompose = DecompositionProp("CvDecompose");
-const PseudoCvDecompose = DecompositionProp("PseudoCvDecompose");
-const CcmpDecompose = DecompositionProp("CcmpDecompose");
-const TieMark = {
+
+export const TieMark = {
 	tag: "TMRK",
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.TieMark;
@@ -97,7 +102,8 @@ const TieMark = {
 		return name + ".tieMark";
 	}
 };
-const TieGlyph = {
+
+export const TieGlyph = {
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.TieGlyph;
 		else return null;
@@ -108,7 +114,8 @@ const TieGlyph = {
 		Joining.or(glyph, Joining.Classes.Mid);
 	}
 };
-const Radical = {
+
+export const Radical = {
 	get(glyph) {
 		if (glyph && glyph.related) return !!glyph.related.radical;
 		else return false;
@@ -118,7 +125,8 @@ const Radical = {
 		glyph.related.radical = true;
 	}
 };
-const RequireCcmpDecompose = {
+
+export const RequireCcmpDecompose = {
 	get(glyph) {
 		if (glyph && glyph.related) return !!glyph.related.RequireCcmpDecompose;
 		else return false;
@@ -128,7 +136,8 @@ const RequireCcmpDecompose = {
 		glyph.related.RequireCcmpDecompose = true;
 	}
 };
-const Joining = {
+
+export const Joining = {
 	get(glyph) {
 		if (glyph && glyph.related) return glyph.related.joining || 0;
 		else return 0;
@@ -158,8 +167,12 @@ const Joining = {
 		Mid: 3
 	}
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 const CvTagCache = new Map();
-function Cv(tag, rank) {
+
+export function Cv(tag, rank) {
 	const key = tag + "#" + rank;
 	if (CvTagCache.has(key)) return CvTagCache.get(key);
 	const rel = {
@@ -197,13 +210,15 @@ function Cv(tag, rank) {
 	CvTagCache.set(key, rel);
 	return rel;
 }
-const DotlessOrNot = {
+
+export const DotlessOrNot = {
 	query(glyph) {
 		if (Dotless.get(glyph)) return [Dotless];
 		return null;
 	}
 };
-const AnyCv = {
+
+export const AnyCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
@@ -217,7 +232,8 @@ const AnyCv = {
 		return ret;
 	}
 };
-const AnyDerivingCv = {
+
+export const AnyDerivingCv = {
 	query(glyph) {
 		let ret = [];
 		if (glyph && glyph.related && glyph.related.cv) {
@@ -242,6 +258,15 @@ const AnyDerivingCv = {
 		return false;
 	}
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function getGrTree(gid, grSetList, fnGidToGlyph) {
+	if (typeof gid !== "string") throw new TypeError("Must supply a GID");
+	let sink = [];
+	getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink);
+	return sink;
+}
 function getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink) {
 	if (!grSetList.length) return;
 	const g = fnGidToGlyph(gid);
@@ -255,11 +280,30 @@ function getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink) {
 		}
 	}
 }
-function getGrTree(gid, grSetList, fnGidToGlyph) {
-	if (typeof gid !== "string") throw new TypeError("Must supply a GID");
-	let sink = [];
-	getGrTreeImpl(gid, grSetList, fnGidToGlyph, sink);
-	return sink;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function getGrMesh(gidList, grq, fnGidToGlyph) {
+	if (typeof gidList === "string" || !Array.isArray(gidList))
+		throw new TypeError(`glyphs must be a glyph array!`);
+	const allGrSet = new Set();
+	for (const g of gidList) {
+		for (const gr of grq.query(fnGidToGlyph(g))) allGrSet.add(gr);
+	}
+	const allGrList = Array.from(allGrSet);
+	let ret = [];
+	for (const gr of allGrList) {
+		const col = [];
+		collectGidLists(gidList, gidList, allGrList, gr, fnGidToGlyph, col);
+		if (!col.length) continue;
+		for (const from of col) {
+			const to = gidListMap(from, gr, fnGidToGlyph);
+			if (to && !gidListSame(from, to)) {
+				ret.push([gr, from, to]);
+			}
+		}
+	}
+	return ret;
 }
 function gidListSame(a, b) {
 	for (let j = 0; j < a.length; j++) {
@@ -295,29 +339,10 @@ function collectGidLists(gidListOrig, gidList, grl, excluded, fnGidToGlyph, sink
 		}
 	}
 }
-function getGrMesh(gidList, grq, fnGidToGlyph) {
-	if (typeof gidList === "string" || !Array.isArray(gidList))
-		throw new TypeError(`glyphs must be a glyph array!`);
-	const allGrSet = new Set();
-	for (const g of gidList) {
-		for (const gr of grq.query(fnGidToGlyph(g))) allGrSet.add(gr);
-	}
-	const allGrList = Array.from(allGrSet);
-	let ret = [];
-	for (const gr of allGrList) {
-		const col = [];
-		collectGidLists(gidList, gidList, allGrList, gr, fnGidToGlyph, col);
-		if (!col.length) continue;
-		for (const from of col) {
-			const to = gidListMap(from, gr, fnGidToGlyph);
-			if (to && !gidListSame(from, to)) {
-				ret.push([gr, from, to]);
-			}
-		}
-	}
-	return ret;
-}
-function createGrDisplaySheet(glyphStore, gid) {
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function createGrDisplaySheet(glyphStore, gid) {
 	const glyph = glyphStore.queryByName(gid);
 	if (!glyph) return [];
 	// Query selected typographic features -- mostly NWID and WWID
@@ -389,7 +414,8 @@ function queryCvFeatureTagsOf(sink, gid, glyph, variantAssignmentSet) {
 	}
 	for (const g of m.values()) if (g.length) sink.push(g);
 }
-function linkSuffixGr(gs, suffix, gr) {
+
+export function linkSuffixGr(gs, suffix, gr) {
 	const reSuffix = new RegExp("\\." + suffix + "$");
 	for (const [gnSuffixed, gSuffixed] of gs.namedEntries()) {
 		if (reSuffix.test(gnSuffixed) && !/^\./.test(gnSuffixed)) {
@@ -400,7 +426,8 @@ function linkSuffixGr(gs, suffix, gr) {
 		}
 	}
 }
-function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
+
+export function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
 	const reTagCis = new RegExp("\\." + tagCis + "$");
 	for (const [gnCis, gCis] of gs.namedEntries()) {
 		if (reTagCis.test(gnCis) && !/^\./.test(gnCis)) {
@@ -412,41 +439,17 @@ function linkSuffixPairGr(gs, tagCis, tagTrans, grCis, grTrans) {
 		}
 	}
 }
-function hashCv(g) {
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function hashCv(g) {
 	const hasher = crypto.createHash("sha256");
 	for (const gr of AnyCv.query(g)) {
 		hasher.update(`${gr.tag}/${gr.rank}:${gr.get(g)}\n`);
 	}
 	return hasher.digest("hex");
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 export const SvInheritableRelations = [RightDependentLink, RightDependentTrigger, Joining];
-export { Dotless };
-export { LowerYDotAtBelow };
-export { Cv };
-export { AnyCv };
-export { DotlessOrNot };
-export { getGrTree };
-export { getGrMesh };
-export { TieMark };
-export { TieGlyph };
-export { Radical };
-export { RequireCcmpDecompose };
-export { Joining };
-export { AnyDerivingCv };
-export { CcmpDecompose };
-export { CvDecompose };
-export { PseudoCvDecompose };
-export { RightDependentLink };
-export { RightDependentTrigger };
-export { MathSansSerif };
-export { Nwid };
-export { Wwid };
-export { Lnum };
-export { Onum };
-export { AplForm };
-export { NumeratorForm };
-export { DenominatorForm };
-export { hashCv };
-export { createGrDisplaySheet };
-export { linkSuffixGr };
-export { linkSuffixPairGr };
