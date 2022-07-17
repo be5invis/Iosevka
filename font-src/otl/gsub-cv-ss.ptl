@@ -1,5 +1,5 @@
-import [add-lookup add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from "./table-util"
-import [Cv AnyCv CvDecompose RightDependentLink RightDependentTrigger] from "../support/gr"
+import [AddLookup AddCommonFeature PickFeature AdeFeatureLookup PickLookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from"./table-util.mjs"
+import [Cv AnyCv CvDecompose RightDependentLink RightDependentTrigger] from"../support/gr.mjs"
 
 extern Map
 extern Set
@@ -26,17 +26,17 @@ export : define [buildCVSS sink para glyphStore] : begin
 		local parts : CvDecompose.get g
 		if (parts && parts.length) : set decompositions.(gid) parts
 
-	define lookupNameCvDecompose : add-lookup sink : object
+	define lookupNameCvDecompose : AddLookup sink : object
 		.type 'gsub_multiple'
 		.substitutions decompositions
 
 	define [addFeatureAndLookup tag lookupName init] : begin
-		define feature : pick-feature sink [FeatureName tag]
-		add-common-feature sink feature
+		define feature : PickFeature sink [FeatureName tag]
+		AddCommonFeature sink feature
 
-		define lookup : pick-lookup sink lookupName init
-		add-feature-lookup feature lookupNameCvDecompose
-		add-feature-lookup feature lookupName
+		define lookup : PickLookup sink lookupName init
+		AdeFeatureLookup feature lookupNameCvDecompose
+		AdeFeatureLookup feature lookupName
 		sink.lookupDep.push { lookupNameCvDecompose lookupName }
 		cvLookupNameSet.add lookupName
 
@@ -49,7 +49,7 @@ export : define [buildCVSS sink para glyphStore] : begin
 				addFeatureAndLookup gr.tag lookupName {.type 'gsub_alternate' .substitutions {.}}
 				cvLookupNameSet.add lookupName
 
-			local st [pick-lookup sink lookupName].substitutions
+			local st [PickLookup sink lookupName].substitutions
 			if [not st.(gn)] : set st.(gn) { }
 			set st.(gn).(gr.rank - 1) : glyphStore.ensureExists : gr.get glyph
 
@@ -60,7 +60,7 @@ export : define [buildCVSS sink para glyphStore] : begin
 			addFeatureAndLookup composition.tag lookupName {.type 'gsub_single' .substitutions {.}}
 			cvLookupNameSet.add lookupName
 
-		define st [pick-lookup sink lookupName].substitutions
+		define st [PickLookup sink lookupName].substitutions
 		define decomp : composition.decompose para para.variants.selectorTree
 		foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
 			local gr : Cv pv.tag pv.rank
@@ -70,7 +70,7 @@ export : define [buildCVSS sink para glyphStore] : begin
 
 	# If there are holes in the alternates list, fill them
 	foreach lutn cvLookupNameSet : begin
-		local st [pick-lookup sink lutn].substitutions
+		local st [PickLookup sink lutn].substitutions
 		foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
 			set v.(idx) k
 

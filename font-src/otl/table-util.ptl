@@ -1,27 +1,27 @@
-import as toposort from 'toposort'
-import [AnyCv] from "../support/gr"
+import toposort from 'toposort'
+import [AnyCv] from"../support/gr.mjs"
 
 export : define [CreateEmptyTable] {.languages {.} .features {.} .lookups {.} .lookupDep {}}
 extern Map
 extern Set
 
-export : define [pick-language sink tag] : begin
+export : define [PickLanguage sink tag] : begin
 	if sink.languages.(tag) : return sink.languages.(tag)
 	define lang {.features {}}
 	set sink.languages.(tag) lang
 	return lang
 
-export : define [copy-language sink tag tagFrom] : begin
-	define langFrom : pick-language sink tagFrom
-	define langTo : pick-language sink tag
+export : define [CopyLanguage sink tag tagFrom] : begin
+	define langFrom : PickLanguage sink tagFrom
+	define langTo : PickLanguage sink tag
 	foreach [feat : items-of langFrom.features] : langTo.features.push feat
 	return langTo
 
-export : define [add-lang-feature lang fea] : begin
+export : define [AddLangFeature lang fea] : begin
 	define index : lang.features.indexOf fea.name
 	if (index < 0) : lang.features.push fea.name
 
-export : define [add-feature sink tag] : begin
+export : define [AddFeature sink tag] : begin
 	define lookupArray {}
 	local n 0
 	while true : begin
@@ -30,17 +30,17 @@ export : define [add-feature sink tag] : begin
 			return {.name (tag + '_' + n) .lookups lookupArray}
 		set n : n + 1
 
-export : define [pick-feature sink name] : begin
+export : define [PickFeature sink name] : begin
 	if sink.features.(name) : return { .name name .lookups sink.features.(name) }
 	define featObj { .name name .lookups {} }
 	set sink.features.(name) featObj.lookups
 	return featObj
 
-export : define [add-feature-lookup fea lookupName] : begin
+export : define [AdeFeatureLookup fea lookupName] : begin
 	define index : fea.lookups.indexOf lookupName
 	if (index < 0) : fea.lookups.push lookupName
 
-export : define [add-lookup sink data _prefix] : begin
+export : define [AddLookup sink data _prefix] : begin
 	local prefix : _prefix || '_lut_'
 	local n 0
 	while true : begin
@@ -49,21 +49,21 @@ export : define [add-lookup sink data _prefix] : begin
 			return (prefix + n)
 		set n : n + 1
 
-export : define [pick-lookup sink name fallback] : begin
+export : define [PickLookup sink name fallback] : begin
 	if sink.lookups.(name) : return sink.lookups.(name)
 	set sink.lookups.(name) fallback
 	return sink.lookups.(name)
 
-export : define [add-common-feature sink fea] : begin
-	define dfltDflt : pick-language sink 'DFLT_DFLT'
-	define latnDflt : pick-language sink 'latn_DFLT'
-	define grekDflt : pick-language sink 'grek_DFLT'
-	define cyrlDflt : pick-language sink 'cyrl_DFLT'
+export : define [AddCommonFeature sink fea] : begin
+	define dfltDflt : PickLanguage sink 'DFLT_DFLT'
+	define latnDflt : PickLanguage sink 'latn_DFLT'
+	define grekDflt : PickLanguage sink 'grek_DFLT'
+	define cyrlDflt : PickLanguage sink 'cyrl_DFLT'
 
-	add-lang-feature dfltDflt fea
-	add-lang-feature latnDflt fea
-	add-lang-feature grekDflt fea
-	add-lang-feature cyrlDflt fea
+	AddLangFeature dfltDflt fea
+	AddLangFeature latnDflt fea
+	AddLangFeature grekDflt fea
+	AddLangFeature cyrlDflt fea
 
 	return fea
 
@@ -97,7 +97,7 @@ export : define [ChainRuleBuilder sink] : begin
 	define [createNewLookup f t] : begin
 		local subst {.}
 		foreach [j : range 0 f.length] : set subst.(f.(j)) t.(j)
-		return : add-lookup sink {.type 'gsub_single' .substitutions subst} UtilityLookupPrefix
+		return : AddLookup sink {.type 'gsub_single' .substitutions subst} UtilityLookupPrefix
 
 	define [getSubLookup left right] : piecewise
 		[not right] null
@@ -172,7 +172,7 @@ export : define [ChainRuleBuilder sink] : begin
 
 	return {chain-rule reverse-rule}
 
-export : define [query-related-glyphs glyphs para entries] : begin
+export : define [QueryRelatedGlyphs glyphs para entries] : begin
 	define sink {}
 	foreach [gid : items-of entries] : if glyphs.(gid) : begin
 		sink.push gid
@@ -180,7 +180,7 @@ export : define [query-related-glyphs glyphs para entries] : begin
 			sink.push : gr.get glyphs.(gid)
 	return sink
 
-export : define [finalizeTable table] : begin
+export : define [FinalizeTable table] : begin
 	set table.lookupOrder : toposort table.lookupDep
 	foreach [{key lang} : pairs-of table.languages] : begin
 		if lang.features : lang.features.sort

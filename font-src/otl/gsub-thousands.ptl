@@ -1,4 +1,4 @@
-import [add-common-feature add-feature add-lookup ChainRuleBuilder query-related-glyphs BeginLookupBlock EndLookupBlock] from "./table-util"
+import [AddCommonFeature AddFeature AddLookup ChainRuleBuilder QueryRelatedGlyphs BeginLookupBlock EndLookupBlock] from"./table-util.mjs"
 
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
@@ -6,7 +6,7 @@ define-operator "~>" 880 'right' : syntax-rules
 export : define [buildGsubThousands sink para] : begin
 	local rec : BeginLookupBlock sink
 
-	define Thousand : add-feature sink 'THND'
+	define Thousand : AddFeature sink 'THND'
 	define {chain-rule reverse-rule} : ChainRuleBuilder sink
 	define numberGlyphIDs {
 		'zero.lnum' 'one.lnum' 'two.lnum' 'three.lnum' 'four.lnum'
@@ -15,7 +15,7 @@ export : define [buildGsubThousands sink para] : begin
 
 	define [nd s] : numberGlyphIDs.map : lambda [x] "\(x).nd\(s)"
 
-	define lookupThousand1 : add-lookup sink : object
+	define lookupThousand1 : AddLookup sink : object
 		.type 'gsub_chaining'
 		.rules : list
 			chain-rule ({'period'} ~> null) (numberGlyphIDs ~> [nd 2]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
@@ -26,13 +26,13 @@ export : define [buildGsubThousands sink para] : begin
 			chain-rule ([nd 4] ~> null) (numberGlyphIDs ~> [nd 3])
 			chain-rule ([nd 3] ~> null) (numberGlyphIDs ~> [nd 2])
 
-	define lookupThousand2 : add-lookup sink : object
+	define lookupThousand2 : AddLookup sink : object
 		.type 'gsub_chaining'
 		.rules : list
 			chain-rule (numberGlyphIDs ~> [nd 0]) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null) (numberGlyphIDs ~> null)
 			chain-rule ([nd 0] ~> null) (numberGlyphIDs ~> [nd 0])
 
-	define lookupThousand3 : add-lookup sink : object
+	define lookupThousand3 : AddLookup sink : object
 		.type 'gsub_reverse'
 		.rules : list
 			reverse-rule ([nd 0] ~> [nd 1]) ([nd 0] ~>  null)
@@ -45,5 +45,5 @@ export : define [buildGsubThousands sink para] : begin
 
 
 	Thousand.lookups.push lookupThousand1 lookupThousand2 lookupThousand3
-	add-common-feature sink Thousand
+	AddCommonFeature sink Thousand
 	EndLookupBlock rec sink
