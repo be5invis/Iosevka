@@ -829,7 +829,7 @@ const ScreenShotImpl = file.make(
 
 const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
-	await t.need(ReleaseNotesFile(version), ReleaseNotesPackageListMD(version));
+	await t.need(ReleaseNotesFile(version));
 });
 const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
@@ -842,14 +842,6 @@ const ReleaseNotesFile = file.make(
 			releasePackagesJsonPath: rpFiles.full,
 			outputPath: out.full
 		});
-	}
-);
-const ReleaseNotesPackageListMD = file.make(
-	version => `doc/PACKAGE-LIST.md`,
-	async (t, out, version) => {
-		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
-		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
-		await t.need(changeFiles.map(fu));
 		await node("utility/generate-release-note/package-list.mjs", {
 			version,
 			releasePackagesJsonPath: rpFiles.full,
@@ -857,6 +849,7 @@ const ReleaseNotesPackageListMD = file.make(
 		});
 	}
 );
+
 const ReleaseNotePackagesFile = file(`${BUILD}/release-packages.json`, async (t, out) => {
 	const [cp] = await t.need(CollectPlans);
 	const [{ buildPlans }] = await t.need(BuildPlans);
@@ -964,7 +957,7 @@ const CompiledJs = file.make(
 		if (/\/glyphs\//.test(out.full)) await target.need(MARCOS);
 		await target.need(sfu(ptl));
 		echo.action(echo.hl.command("Compile Script"), ptl);
-		await silently.run(PATEL_C, "--esm", ptl, "-o", out.full);
+		await silently.run(PATEL_C, "--strict", "--esm", ptl, "-o", out.full);
 	}
 );
 const Scripts = task("scripts", async target => {
