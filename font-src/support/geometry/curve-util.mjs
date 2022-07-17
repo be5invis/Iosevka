@@ -109,12 +109,12 @@ export class ReverseCurve {
 export function convertShapeToArcs(shape) {
 	return shape.map(convertContourToArcs);
 }
-export const shapeToRep = function (shape) {
+export function shapeToRep(shape) {
 	return shape.map(contourToRep);
-};
-export const repToShape = function (shapeRep) {
+}
+export function repToShape(shapeRep) {
 	return shapeRep.map(repToContour);
-};
+}
 export class BezToContoursSink {
 	constructor(gizmo) {
 		this.gizmo = gizmo || Transform.Id();

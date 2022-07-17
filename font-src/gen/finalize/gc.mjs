@@ -139,9 +139,9 @@ function markGlyphsGsubReverse(sink, lookup, cfg) {
 function sweep(glyphStore, gnSet) {
 	return glyphStore.filterByName(gnSet);
 }
-export const gcFont = function (glyphStore, excludedChars, otl, cfg) {
+export function gcFont(glyphStore, excludedChars, otl, cfg) {
 	markSweepOtlLookups(otl.GSUB);
 	markSweepOtlLookups(otl.GPOS);
 	const sink = markGlyphs(glyphStore, excludedChars, otl, cfg);
 	return sweep(glyphStore, sink);
-};
+}

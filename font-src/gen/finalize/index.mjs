@@ -31,11 +31,11 @@ function validateMonospace(para, glyphStore) {
 		throw new Error("Unreachable! Building monospace with more than 2 character widths");
 	}
 }
-export const finalizeFont = function (cache, para, glyphStore, excludedCodePoints, restFont) {
+export function finalizeFont(cache, para, glyphStore, excludedCodePoints, restFont) {
 	assignGrAndCodeRank(glyphStore, Nwid, Wwid);
 	assignSubRank(glyphStore);
 	glyphStore = gcFont(glyphStore, excludedCodePoints, restFont, {});
 	glyphStore = finalizeGlyphs(cache, para, glyphStore);
 	validateMonospace(para, glyphStore);
 	return glyphStore;
-};
+}

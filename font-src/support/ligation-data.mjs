@@ -8,7 +8,7 @@ function createBuildup(simple, buildup) {
 	}
 	return Array.from(ligSet);
 }
-export const applyLigationData = function (data, para, argv) {
+export function applyLigationData(data, para, argv) {
 	const defaultBuildup = {};
 	const hives = {};
 	hives["default"] = { caltBuildup: [] };
@@ -43,4 +43,4 @@ export const applyLigationData = function (data, para, argv) {
 				argv.ligations.enables.map(x => `ligset-enable-${x}`)
 			);
 	}
-};
+}

@@ -10,7 +10,7 @@ import { Point } from "./point.mjs";
 import { SpiroExpander } from "./spiro-expand.mjs";
 import { Transform } from "./transform.mjs";
 
-class GeometryBase {
+export class GeometryBase {
 	asContours() {
 		throw new Error("Unimplemented");
 	}
@@ -33,7 +33,8 @@ class GeometryBase {
 		return null;
 	}
 }
-class ContourGeometry extends GeometryBase {
+
+export class ContourGeometry extends GeometryBase {
 	constructor(points) {
 		super();
 		this.m_points = [];
@@ -66,7 +67,8 @@ class ContourGeometry extends GeometryBase {
 		return Format.struct(`ContourGeometry`, Format.list(this.m_points.map(Format.typedPoint)));
 	}
 }
-class SpiroGeometry extends GeometryBase {
+
+export class SpiroGeometry extends GeometryBase {
 	constructor(gizmo, closed, knots) {
 		super();
 		this.m_knots = [];
@@ -108,7 +110,8 @@ class SpiroGeometry extends GeometryBase {
 		);
 	}
 }
-class DiSpiroGeometry extends GeometryBase {
+
+export class DiSpiroGeometry extends GeometryBase {
 	constructor(gizmo, contrast, closed, biKnots) {
 		super();
 		this.m_biKnots = [];
@@ -178,7 +181,8 @@ class DiSpiroGeometry extends GeometryBase {
 		);
 	}
 }
-class ReferenceGeometry extends GeometryBase {
+
+export class ReferenceGeometry extends GeometryBase {
 	constructor(glyph, x, y) {
 		super();
 		if (!glyph || !glyph.geometry) throw new TypeError("Invalid glyph");
@@ -220,7 +224,8 @@ class ReferenceGeometry extends GeometryBase {
 		return Format.struct("ReferenceGeometry", sTarget, Format.n(this.m_x), Format.n(this.m_y));
 	}
 }
-class TaggedGeometry extends GeometryBase {
+
+export class TaggedGeometry extends GeometryBase {
 	constructor(g, tag) {
 		super();
 		this.m_geom = g;
@@ -249,7 +254,8 @@ class TaggedGeometry extends GeometryBase {
 		return this.m_geom.toShapeStringOrNull();
 	}
 }
-class TransformedGeometry extends GeometryBase {
+
+export class TransformedGeometry extends GeometryBase {
 	constructor(g, tfm) {
 		super();
 		this.m_geom = g;
@@ -310,7 +316,8 @@ class TransformedGeometry extends GeometryBase {
 		return Format.struct("TransformedGeometry", sTarget, Format.gizmo(this.m_transform));
 	}
 }
-class CombineGeometry extends GeometryBase {
+
+export class CombineGeometry extends GeometryBase {
 	constructor(parts) {
 		super();
 		this.m_parts = parts || [];
@@ -380,7 +387,8 @@ class CombineGeometry extends GeometryBase {
 		return Format.struct("CombineGeometry", Format.list(sParts));
 	}
 }
-class BooleanGeometry extends GeometryBase {
+
+export class BooleanGeometry extends GeometryBase {
 	constructor(operator, operands) {
 		super();
 		this.m_operator = operator;
@@ -454,25 +462,17 @@ class BooleanGeometry extends GeometryBase {
 		return Format.struct("BooleanGeometry", this.m_operator, Format.list(sParts));
 	}
 }
-function combineWith(a, b) {
+
+export function combineWith(a, b) {
 	if (a instanceof CombineGeometry) {
 		return a.with(b);
 	} else {
 		return new CombineGeometry([a, b]);
 	}
 }
-export const hashGeometry = function (geom) {
+
+export function hashGeometry(geom) {
 	const s = geom.toShapeStringOrNull();
 	if (!s) return null;
 	return crypto.createHash("sha256").update(s).digest("hex");
-};
-export { GeometryBase };
-export { SpiroGeometry };
-export { DiSpiroGeometry };
-export { ContourGeometry };
-export { ReferenceGeometry };
-export { TaggedGeometry };
-export { TransformedGeometry };
-export { CombineGeometry };
-export { BooleanGeometry };
-export { combineWith };
+}

@@ -140,7 +140,7 @@ function uniqueHotChars(cfgDefault, cfgSS) {
 	}
 	return Array.from(s);
 }
-export const parseVariantsData = async function () {
+export async function parseVariantsData() {
 	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const variantsToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/variants.toml"),
@@ -153,4 +153,4 @@ export const parseVariantsData = async function () {
 	const composites = getSsData(varDatParsed);
 	const defaults = getCompWithLens(varDatParsed, null, x => x.composition);
 	return { primes, composites, specials, defaults };
-};
+}

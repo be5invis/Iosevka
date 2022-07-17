@@ -5,6 +5,6 @@ export function maskBit(x, y) {
 export function maskBits(x, y) {
 	return x & y;
 }
-export const popCountByte = function (x) {
+export function popCountByte(x) {
 	return pcNibbleLookup[x & 0x0f] + pcNibbleLookup[(x >>> 4) & 0x0f];
-};
+}

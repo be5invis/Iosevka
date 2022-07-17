@@ -27,7 +27,7 @@ class BooleImpl {
 		);
 	}
 }
-export const SetupBuilders = function (bindings) {
+export function SetupBuilders(bindings) {
 	const union = (...operands) =>
 		new BooleImpl(bindings, TypoGeom.Boolean.ClipType.ctUnion, operands);
 	const intersection = (...operands) =>
@@ -39,4 +39,4 @@ export const SetupBuilders = function (bindings) {
 		intersection: intersection,
 		difference: difference
 	};
-};
+}

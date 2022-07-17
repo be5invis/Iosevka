@@ -96,7 +96,7 @@ function flattenImpl(sink, knots) {
 function nCyclic(p, n) {
 	return (p + n + n) % n;
 }
-export const SetupBuilders = function (bindings) {
+export function SetupBuilders(bindings) {
 	const { Contrast, GlobalTransform, Stroke, Superness } = bindings;
 	function validateCoord(x) {
 		if (!isFinite(x)) throw new TypeError("NaN detected");
@@ -333,4 +333,4 @@ export const SetupBuilders = function (bindings) {
 		dispiro,
 		"spiro-outline": spiroOutline
 	};
-};
+}

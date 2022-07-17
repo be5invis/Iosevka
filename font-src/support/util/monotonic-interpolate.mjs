@@ -1,4 +1,4 @@
-export const monotonicInterpolate = function (xs, ys) {
+export function monotonicInterpolate(xs, ys) {
 	let i,
 		length = xs.length;
 	// Deal with length issues
@@ -101,4 +101,4 @@ export const monotonicInterpolate = function (xs, ys) {
 			diffSq = diff * diff;
 		return ys[i] + c1s[i] * diff + c2s[i] * diffSq + c3s[i] * diff * diffSq;
 	};
-};
+}

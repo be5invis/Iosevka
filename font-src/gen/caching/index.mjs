@@ -73,7 +73,7 @@ class Cache {
 		}
 	}
 }
-export const load = async function (path, version, freshAgeKey) {
+export async function load(path, version, freshAgeKey) {
 	let cache = new Cache(freshAgeKey);
 	if (path && fs.existsSync(path)) {
 		try {
@@ -85,15 +85,15 @@ export const load = async function (path, version, freshAgeKey) {
 		}
 	}
 	return cache;
-};
-export const save = async function savePTCache(path, version, cache, diffOnly) {
+}
+export async function save(path, version, cache, diffOnly) {
 	if (path) {
 		const buf = encode(cache.toRep(version, diffOnly));
 		const bufZip = zlib.gzipSync(Buffer.from(buf.buffer, buf.byteOffset, buf.byteLength));
 		await fs.promises.writeFile(path, bufZip);
 	}
-};
-export const merge = async function (base, diff, version, freshAgeKey) {
+}
+export async function merge(base, diff, version, freshAgeKey) {
 	const cacheDiff = await load(diff, version, freshAgeKey);
 	if (!cacheDiff.isEmpty()) {
 		const cacheBase = await load(base, version, freshAgeKey);
@@ -101,4 +101,4 @@ export const merge = async function (base, diff, version, freshAgeKey) {
 		await save(base, version, cacheBase, false);
 	}
 	if (fs.existsSync(diff)) await fs.promises.rm(diff);
-};
+}

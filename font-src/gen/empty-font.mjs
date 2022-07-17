@@ -1,6 +1,6 @@
 import { Ot } from "ot-builder";
 
-export const CreateEmptyFont = function (argv) {
+export function CreateEmptyFont(argv) {
 	let font = {
 		head: new Ot.Head.Table(),
 		hhea: new Ot.MetricHead.Hhea(),
@@ -14,4 +14,4 @@ export const CreateEmptyFont = function (argv) {
 		font.head.modified = new Date(process.env.SOURCE_DATE_EPOCH * 1000);
 	}
 	return font;
-};
+}

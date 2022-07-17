@@ -218,7 +218,7 @@ function buildLigationSet(ligData, getKey) {
 	}
 	return ligationSets;
 }
-export const parseLigationData = async function () {
+export async function parseLigationData() {
 	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const ligToml = await fs.promises.readFile(
 		path.join(__dirname, "../../params/ligation-set.toml"),
@@ -238,4 +238,4 @@ export const parseLigationData = async function () {
 		sets: [...ligationSets.values()],
 		nonMergeSets: [...nonMergeLigationSets.values()]
 	};
-};
+}
