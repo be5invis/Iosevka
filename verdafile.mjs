@@ -829,7 +829,7 @@ const ScreenShotImpl = file.make(
 
 const ReleaseNotes = task(`release:release-note`, async t => {
 	const [version] = await t.need(Version);
-	await t.need(ReleaseNotesFile(version));
+	await t.need(ReleaseNotesFile(version), PackageListFile(version));
 });
 const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
@@ -842,6 +842,15 @@ const ReleaseNotesFile = file.make(
 			releasePackagesJsonPath: rpFiles.full,
 			outputPath: out.full
 		});
+	}
+);
+const PackageListFile = file.make(
+	version => `doc/PACKAGE-LIST.md`,
+	async (t, out, version) => {
+		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
+		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
+		await t.need(changeFiles.map(fu));
+
 		await node("utility/generate-release-note/package-list.mjs", {
 			version,
 			releasePackagesJsonPath: rpFiles.full,
