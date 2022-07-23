@@ -1,10 +1,14 @@
 import fs from "fs";
 import path from "path";
+import * as url from "url";
 
 import semver from "semver";
 
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
 const ChangeFileDir = path.join(__dirname, "../../changes");
 const PackageJsonPath = path.join(__dirname, "../../package.json");
+
 setTimeout(
 	() =>
 		main().catch(e => {
@@ -13,7 +17,9 @@ setTimeout(
 		}),
 	0
 );
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function main() {
 	const version = await GetLatestVersion();
 	const packageJson = JSON.parse(await fs.promises.readFile(PackageJsonPath));
