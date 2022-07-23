@@ -835,11 +835,10 @@ const ReleaseNotesFile = file.make(
 	version => `${ARCHIVE_DIR}/release-notes-${version}.md`,
 	async (t, out, version) => {
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
-		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
+		const [changeFiles] = await t.need(ChangeFileList());
 		await t.need(changeFiles.map(fu));
 		await node("utility/generate-release-note/release-note.mjs", {
 			version,
-			releasePackagesJsonPath: rpFiles.full,
 			outputPath: out.full
 		});
 	}
@@ -848,9 +847,7 @@ const PackageListFile = file.make(
 	version => `doc/PACKAGE-LIST.md`,
 	async (t, out, version) => {
 		await t.need(Version, UtilScripts, de(ARCHIVE_DIR));
-		const [changeFiles, rpFiles] = await t.need(ChangeFileList(), ReleaseNotePackagesFile);
-		await t.need(changeFiles.map(fu));
-
+		const [rpFiles] = await t.need(ReleaseNotePackagesFile);
 		await node("utility/generate-release-note/package-list.mjs", {
 			version,
 			releasePackagesJsonPath: rpFiles.full,
