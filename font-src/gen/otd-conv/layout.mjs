@@ -1,10 +1,10 @@
 import { Ot } from "ot-builder";
 
 export function convertGsub(table, glyphs) {
-	ConvertGsubGposImpl(GsubHandlers, Ot.Gsub.Table, table, glyphs);
+	return ConvertGsubGposImpl(GsubHandlers, Ot.Gsub.Table, table, glyphs);
 }
 export function convertGpos(table, glyphs) {
-	ConvertGsubGposImpl(GposHandlers, Ot.Gpos.Table, table, glyphs);
+	return ConvertGsubGposImpl(GposHandlers, Ot.Gpos.Table, table, glyphs);
 }
 export function convertGdef(otdGdef, glyphs) {
 	const gdef = new Ot.Gdef.Table();
