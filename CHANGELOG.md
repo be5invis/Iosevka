@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 15.6.3
+
+ * Improve shape of Cyrillic Zhe under Curly variants (#1392).
+
+
 ### 15.6.2
 
  * Fix assignment of `l` for SS08.
