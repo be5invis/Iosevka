@@ -1,5 +1,11 @@
 # Building Iosevka from Source
+### Cloning
+Note that this repo has a 30+ GB commit history. If you only want the current files and future changes, you can avoid downloading so much by cloning the repo with a [`--depth`](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt) limit. Example:
+```
+git clone --depth 1 https://github.com/be5invis/Iosevka.git 
+```
 
+### Building
 To build Iosevka you should:
 
 1. Ensure that [`nodejs`](http://nodejs.org) (≥ 14.0.0) and [`ttfautohint`](http://www.freetype.org/ttfautohint/) are present, and accessible from `PATH`.
