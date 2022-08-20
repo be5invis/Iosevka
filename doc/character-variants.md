@@ -2373,6 +2373,25 @@
 <td colspan="5">2</td>
 <td colspan="2"> </td>
 </tr>
+<tr>
+<td rowspan="2"><code>VXAF</code></td>
+<td><img src="../images/cv-lig-neq-vertical.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-vertical.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-neq-slightly-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-slightly-slanted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-neq-more-slanted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-more-slanted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-neq-vertical-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-vertical-dotted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-neq-slightly-slanted-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-slightly-slanted-dotted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-neq-more-slanted-dotted.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-neq-more-slanted-dotted.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="6"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td colspan="6"> </td>
+</tr>
 </table>
 
 <!-- END Section-OT-Character-Variants -->
