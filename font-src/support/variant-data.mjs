@@ -75,7 +75,7 @@ class Prime {
 		this.description = cfg.description || null;
 		this.ligatureSampler = / /.test(cfg.sampler || "");
 		this.descSampleText = this.ligatureSampler
-			? cfg.sampler.split(" ")
+			? cfg.sampler.split(" ").filter(x => !!x.trim())
 			: [...(cfg.sampler || "")];
 		this.tag = cfg.tag;
 		this.slopeDependent = !!cfg.slopeDependent;
