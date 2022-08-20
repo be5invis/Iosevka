@@ -1,5 +1,13 @@
 ## Modifications since version 2.x
 
+### 16.0.0
+
+ * \[**Breaking**\] Change the mechanism of variants of not-equal ligation (#1400):
+   - The "dotted" ligation groups (`exeqeq-dotted`, `eqexeq-dotted`, `eqexeq-dl-dotted`, `exeq-dotted`) are removed.
+   - A character variant, "lig-neq" (feature tag `VXAF`), is added to control the shape instead.
+ * Ensure that the middle point between Typo Ascender and Descender lies on the middle of symbols/operators (#1398).
+
+
 ### 15.6.3
 
  * Improve shape of Cyrillic Zhe under Curly variants (#1392).

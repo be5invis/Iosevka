@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from"../../support/utils.mjs"
-import [Joining] from"../../support/gr.mjs"
+import [Joining NeqLigationSlashDotted] from"../../support/gr.mjs"
 import [DesignParameters] from"../../meta/aesthetics.mjs"
 
 glyph-module
@@ -338,76 +338,77 @@ glyph-block Symbol-Ligation : begin
 				IdentHole (-Width)
 				IdentHole 0
 
-		glyph-block-import NotGlyphFn : notGlyph
+		### Inequality
 
-		define [slash jk] : function [t b l r sw sh] : glyph-proc
-			Joining.set currentGlyph jk
-			include : dispiro
-				widths.center OperatorStroke
-				flat (sh + l) b
-				curl (sh + r) t
 
-		define [exSlash2 jk] : function [t b l r sw sh] : glyph-proc
-			local dr : PeriodRadius / Stroke * OperatorStroke
-			Joining.set currentGlyph jk
-			include : union
-				DotAt (sh + l + dr * (r - l) / (t - b)) (b + dr) dr
-				intersection
-					Rect (SymbolMid + t) [Math.min (b + dr * 3.5) (SymbolMid - EqualHalfSpace)] (-Width * 4) (Width * 4)
-					dispiro
-						widths.center OperatorStroke
-						flat (sh + l) b
-						curl (sh + r) t
 
-		notGlyph.generic 'neq.1l' null 'sp1'
-			shift -- (Width * 0.0)
-			F -- [slash Joining.Classes.Right]
-		notGlyph.generic 'neq.2l' null 'sp1'
-			shift -- (Width * 0.5)
-			F -- [slash Joining.Classes.Right]
-		notGlyph.generic 'neq.3l' null 'sp1'
-			shift -- (Width * 1.0)
-			F -- [slash Joining.Classes.Right]
-		notGlyph.generic 'neq.4l' null 'sp1'
-			shift -- (Width * 1.5)
-			F -- [slash Joining.Classes.Right]
-		notGlyph.generic 'neq.1m' null 'sp1'
-			shift -- (Width * 0.0)
-			F -- [slash Joining.Classes.Mid]
-		notGlyph.generic 'neq.2m' null 'sp1'
-			shift -- (Width * 0.5)
-			F -- [slash Joining.Classes.Mid]
-		notGlyph.generic 'neq.3m' null 'sp1'
-			shift -- (Width * 1.0)
-			F -- [slash Joining.Classes.Mid]
-		notGlyph.generic 'neq.4m' null 'sp1'
-			shift -- (Width * 1.5)
-			F -- [slash Joining.Classes.Mid]
+		define Neq : namespace
+			export : define Sw   OperatorStroke
+			export : define Dr : Sw / Stroke * DotRadius
+			export : define DotGap : Math.max ((ParenTop - ParenBot) / 8) [AdviceStroke 5]
 
-		notGlyph.generic 'neq.1l-dotted' null 'sp1'
-			shift -- (Width * 0.0)
-			F -- [exSlash2 Joining.Classes.Right]
-		notGlyph.generic 'neq.2l-dotted' null 'sp1'
-			shift -- (Width * 0.5)
-			F -- [exSlash2 Joining.Classes.Right]
-		notGlyph.generic 'neq.3l-dotted' null 'sp1'
-			shift -- (Width * 1.0)
-			F -- [exSlash2 Joining.Classes.Right]
-		notGlyph.generic 'neq.4l-dotted' null 'sp1'
-			shift -- (Width * 1.5)
-			F -- [exSlash2 Joining.Classes.Right]
-		notGlyph.generic 'neq.1m-dotted' null 'sp1'
-			shift -- (Width * 0.0)
-			F -- [exSlash2 Joining.Classes.Mid]
-		notGlyph.generic 'neq.2m-dotted' null 'sp1'
-			shift -- (Width * 0.5)
-			F -- [exSlash2 Joining.Classes.Mid]
-		notGlyph.generic 'neq.3m-dotted' null 'sp1'
-			shift -- (Width * 1.0)
-			F -- [exSlash2 Joining.Classes.Mid]
-		notGlyph.generic 'neq.4m-dotted' null 'sp1'
-			shift -- (Width * 1.5)
-			F -- [exSlash2 Joining.Classes.Mid]
+			export : define PlacementSuffixes : object
+				"1l" { 0   Joining.Classes.Right }
+				"2l" { 1   Joining.Classes.Right }
+				"3l" { 2   Joining.Classes.Right }
+				"4l" { 3   Joining.Classes.Right }
+				"1m" { 0   Joining.Classes.Mid   }
+				"2m" { 1   Joining.Classes.Mid   }
+				"3m" { 2   Joining.Classes.Mid   }
+				"4m" { 3   Joining.Classes.Mid   }
+
+			export : define BarShapeSuffixes : object
+				vertical              {  0      false  }
+				slightlySlanted       {  0.375  false  }
+				moreSlanted           {  0.75   false  }
+				verticalDotted        {  0      true   }
+				slightlySlantedDotted {  0.375  true   }
+				moreSlantedDotted     {  0.75   true   }
+
+			export : define [DependentGlyphBuilder src] : glyph-proc
+				local { bar dot } src
+				include [refer-glyph bar] AS_BASE ALSO_METRICS
+				local dotted : NeqLigationSlashDotted.get [query-glyph bar]
+				if dotted : include [refer-glyph dot]
+
+		foreach { suffix { DrawAt kdr overshoot } } [Object.entries DotVariants] : do
+			create-glyph "neq/dotPart.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'cvDecompose' 0 0
+				include : DrawAt 0 0 (Neq.Dr - overshoot)
+
+		select-variant 'neq/dotPart' (follow -- 'punctuationDot')
+
+		foreach { place { shift joinCls } } [Object.entries Neq.PlacementSuffixes] : do
+			foreach { barSuffix { slope fDotted } } [Object.entries Neq.BarShapeSuffixes] : do
+				create-glyph "neq.\(place)/barPart.\(barSuffix)" : glyph-proc
+					define yUp     BgOpTop
+					define yDown : BgOpBot + [if fDotted (2 * Neq.Dr + Neq.DotGap) 0]
+
+					define xCenter : Width * (1 / 2 + shift / 2)
+					define xUp     : xCenter + slope * (yUp   - SymbolMid)
+					define xDown   : xCenter + slope * (yDown - SymbolMid)
+
+					include : dispiro
+						widths.center Neq.Sw
+						corner xUp yUp
+						corner xDown yDown
+
+					if fDotted : begin
+						NeqLigationSlashDotted.set currentGlyph
+						define yDotCenter : BgOpBot + Neq.Dr
+						define xDotCenter : xCenter + slope * (yDotCenter - SymbolMid)
+						set-base-anchor 'cvDecompose' xDotCenter yDotCenter
+
+			select-variant "neq.allow-dot.\(place)/barPart"
+				follow    -- "neq.allow-dot"
+				shapeFrom -- "neq.\(place)/barPart"
+			select-variant "neq.bar-only.\(place)/barPart"
+				follow    -- "neq.bar-only"
+				shapeFrom -- "neq.\(place)/barPart"
+
+			derive-multi-part-glyphs "neq.allow-dot.\(place)" null { "neq.allow-dot.\(place)/barPart" "neq/dotPart" } Neq.DependentGlyphBuilder
+			derive-multi-part-glyphs "neq.bar-only.\(place)"  null { "neq.bar-only.\(place)/barPart"  "neq/dotPart" } Neq.DependentGlyphBuilder
 
 	do "<| , |> and <>"
 		glyph-block-import Symbol-Math-Relation-Inequality : LessShape GreaterShape

@@ -168,6 +168,17 @@ export const Joining = {
 	}
 };
 
+export const NeqLigationSlashDotted = {
+	get(glyph) {
+		if (glyph && glyph.related) return !!glyph.related.neqLigationSlashDotted;
+		else return false;
+	},
+	set(glyph) {
+		if (!glyph.related) glyph.related = {};
+		glyph.related.neqLigationSlashDotted = true;
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 const CvTagCache = new Map();
@@ -452,4 +463,9 @@ export function hashCv(g) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const SvInheritableRelations = [RightDependentLink, RightDependentTrigger, Joining];
+export const SvInheritableRelations = [
+	RightDependentLink,
+	RightDependentTrigger,
+	Joining,
+	NeqLigationSlashDotted
+];

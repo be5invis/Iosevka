@@ -26,6 +26,7 @@ const ARCHIVE_DIR = "release-archives";
 
 const PATEL_C = ["node", "node_modules/patel/bin/patel-c"];
 const TTCIZE = ["node", "node_modules/otb-ttc-bundle/bin/otb-ttc-bundle"];
+const SEVEN_ZIP = process.env.SEVEN_ZIP_PATH || "7z";
 
 const defaultWebFontFormats = ["ttf", "woff2"];
 const webfontFormatsFast = ["ttf"];
@@ -667,7 +668,12 @@ async function CreateGroupArchiveFile(dir, out, ...files) {
 	const relOut = Path.relative(dir, out.full);
 	await rm(out.full);
 	echo.action(echo.hl.command("Create Archive"), out.full);
-	await cd(dir).silently.run(["7z", "a"], ["-tzip", "-r", "-mx=9", "-mmt=off"], relOut, ...files);
+	await cd(dir).silently.run(
+		[SEVEN_ZIP, "a"],
+		["-tzip", "-r", "-mx=9", "-mmt=off"],
+		relOut,
+		...files
+	);
 }
 
 ///////////////////////////////////////////////////////////
