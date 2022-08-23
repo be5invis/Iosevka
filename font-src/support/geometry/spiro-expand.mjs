@@ -146,7 +146,18 @@ export class SpiroExpander {
 			rhs[j].y = knot.y - knot.d2 * dy;
 		}
 		this.interpolateUnimportantKnots(lhs, rhs);
-		return { lhs, rhs };
+
+		const lhsUntransformed = [],
+			rhsUntransformed = [];
+		for (const z of lhs) {
+			const u = this.gizmo.unapply(z);
+			lhsUntransformed.push({ type: z.type, x: u.x, y: u.y });
+		}
+		for (const z of rhs) {
+			const u = this.gizmo.unapply(z);
+			rhsUntransformed.push({ type: z.type, x: u.x, y: u.y });
+		}
+		return { lhs, rhs, lhsUntransformed, rhsUntransformed };
 	}
 	interpolateUnimportantKnots(lhs, rhs) {
 		for (let j = 0; j < this.controlKnots.length; j++) {
