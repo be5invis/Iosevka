@@ -48,10 +48,10 @@ class DiSpiroProxy {
 		return this.m_origKnots;
 	}
 	get lhsKnots() {
-		return this.geometry.expand().lhs;
+		return this.geometry.expand().lhsUntransformed;
 	}
 	get rhsKnots() {
-		return this.geometry.expand().rhs;
+		return this.geometry.expand().rhsUntransformed;
 	}
 }
 function prepareSpiroKnots(_knots, s) {

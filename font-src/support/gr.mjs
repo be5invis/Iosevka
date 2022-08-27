@@ -16,10 +16,10 @@ export const Dotless = {
 	}
 };
 
-export const LowerYDotAtBelow = SimpleProp("LowerYDotAtBelow");
-export const RightDependentTrigger = SimpleProp("RightDependentTrigger");
-export const MathSansSerif = SimpleProp("MathSansSerif");
-function SimpleProp(key) {
+export const LowerYDotAtBelow = LinkedGlyphProp("LowerYDotAtBelow");
+export const DependentSelector = LinkedGlyphProp("DependentSelector");
+export const MathSansSerif = LinkedGlyphProp("MathSansSerif");
+function LinkedGlyphProp(key) {
 	return {
 		get(glyph) {
 			if (glyph && glyph.related) return glyph.related[key];
@@ -33,29 +33,6 @@ function SimpleProp(key) {
 	};
 }
 
-export const RightDependentLink = DependentLinkProp("RightDependentLink");
-function DependentLinkProp(key) {
-	return {
-		get(glyph, subKey) {
-			if (glyph && glyph.related && glyph.related[key]) {
-				return glyph.related[key][subKey];
-			} else {
-				return null;
-			}
-		},
-		getAll(glyph) {
-			if (glyph && glyph.related) return glyph.related[key];
-			else return null;
-		},
-		set(glyph, subKey, toGid) {
-			if (typeof toGid !== "string") throw new Error("Must supply a GID instead of a glyph");
-			if (!glyph.related) glyph.related = {};
-			if (!glyph.related[key]) glyph.related[key] = {};
-			glyph.related[key][subKey] = toGid;
-		}
-	};
-}
-
 export const Nwid = OtlTaggedProp("Nwid", "NWID");
 export const Wwid = OtlTaggedProp("Wwid", "WWID");
 export const Lnum = OtlTaggedProp("Lnum", "lnum");
@@ -64,7 +41,7 @@ export const AplForm = OtlTaggedProp("AplForm", "APLF");
 export const NumeratorForm = OtlTaggedProp("Numerator", "numr");
 export const DenominatorForm = OtlTaggedProp("Denominator", "dnom");
 function OtlTaggedProp(key, otlTag) {
-	return { ...SimpleProp(key), otlTag };
+	return { ...LinkedGlyphProp(key), otlTag };
 }
 
 export const CvDecompose = DecompositionProp("CvDecompose");
@@ -115,27 +92,21 @@ export const TieGlyph = {
 	}
 };
 
-export const Radical = {
-	get(glyph) {
-		if (glyph && glyph.related) return !!glyph.related.radical;
-		else return false;
-	},
-	set(glyph) {
-		if (!glyph.related) glyph.related = {};
-		glyph.related.radical = true;
-	}
-};
-
-export const RequireCcmpDecompose = {
-	get(glyph) {
-		if (glyph && glyph.related) return !!glyph.related.RequireCcmpDecompose;
-		else return false;
-	},
-	set(glyph) {
-		if (!glyph.related) glyph.related = {};
-		glyph.related.RequireCcmpDecompose = true;
-	}
-};
+function BoolProp(id) {
+	return {
+		get(glyph) {
+			if (glyph && glyph.related) return !!glyph.related[id];
+			else return false;
+		},
+		set(glyph) {
+			if (!glyph.related) glyph.related = {};
+			glyph.related[id] = true;
+		}
+	};
+}
+export const Radical = BoolProp("Radical");
+export const RequireCcmpDecompose = BoolProp("RequireCcmpDecompose");
+export const NeqLigationSlashDotted = BoolProp("NeqLigationSlashDotted");
 
 export const Joining = {
 	get(glyph) {
@@ -165,17 +136,6 @@ export const Joining = {
 		Left: 1,
 		Right: 2,
 		Mid: 3
-	}
-};
-
-export const NeqLigationSlashDotted = {
-	get(glyph) {
-		if (glyph && glyph.related) return !!glyph.related.neqLigationSlashDotted;
-		else return false;
-	},
-	set(glyph) {
-		if (!glyph.related) glyph.related = {};
-		glyph.related.neqLigationSlashDotted = true;
 	}
 };
 
@@ -463,9 +423,4 @@ export function hashCv(g) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const SvInheritableRelations = [
-	RightDependentLink,
-	RightDependentTrigger,
-	Joining,
-	NeqLigationSlashDotted
-];
+export const SvInheritableRelations = [DependentSelector, Joining, NeqLigationSlashDotted];

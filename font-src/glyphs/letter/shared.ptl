@@ -1,7 +1,7 @@
 $$include '../../meta/macros.ptl'
 
 import [mix clamp fallback] from"../../support/utils.mjs"
-import [Dotless CvDecompose RightDependentTrigger RightDependentLink] from"../../support/gr.mjs"
+import [Dotless CvDecompose RightDependentTrigger RightDependentLink DependentSelector] from"../../support/gr.mjs"
 import [DesignParameters] from"../../meta/aesthetics.mjs"
 
 glyph-module
@@ -35,13 +35,20 @@ glyph-block Letter-Shared : begin
 			foreach accentGid [items-of accentGids] : include [refer-glyph accentGid]
 			if (!fDontDecompose && !gr) : CvDecompose.set currentGlyph { src :: accentGids }
 
-	glyph-block-export CreateRightDependentComposite
-	define [CreateRightDependentComposite gidDst unicode gidPart1 gidPart2] : begin
-		derive-multi-part-glyphs gidDst unicode { gidPart1 gidPart2 } : function [src] : glyph-proc
-			local { a b } src
-			local trigger : RightDependentTrigger.get : query-glyph b
-			local kernel : [RightDependentLink.get [query-glyph a] trigger] || a
-			include [refer-glyph kernel] AS_BASE ALSO_METRICS
+	glyph-block-export CreateDependentComposite
+	define [CreateDependentComposite gidDst unicode gidPart1 gidPart2Map] : begin
+		local sourceGidList { gidPart1 }
+		local keyToIndexMap {.}
+		foreach { key g } [pairs-of gidPart2Map] : begin
+			set keyToIndexMap.(key) sourceGidList.length
+			sourceGidList.push g
+
+		derive-multi-part-glyphs gidDst unicode sourceGidList : function [src] : glyph-proc
+			local a src.0
+			local selector : DependentSelector.get : query-glyph a
+			local b src.(keyToIndexMap.(selector))
+
+			include [refer-glyph a] AS_BASE ALSO_METRICS
 			include [refer-glyph b]
 
 	glyph-block-export SetGrekUpperTonos
