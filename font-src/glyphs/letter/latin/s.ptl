@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
-import [RightDependentLink RightDependentTrigger CvDecompose MathSansSerif] from"../../../support/gr.mjs"
+import [DependentSelector CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -9,7 +9,7 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Shared : CreateAccentedComposition CreateRightDependentComposite
+	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise FlatHookDepth ArcStartSerifWidth
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcEnd_RtlRhs
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_LtrRhs SerifedArcEnd_LtrLhs
@@ -240,7 +240,6 @@ glyph-block Letter-Latin-S : begin
 			include : SStrokeImpl top bot doTS doBS [AdviceStroke2 2 3 (top - bot)] EssUpper
 			include : SAutoSlabStart doTS top Stroke Hook
 			include : SAutoSlabEnd   doBS bot Stroke Hook
-			RightDependentLink.set currentGlyph "cap" "DollarKernelCap.\(suffix)"
 
 		create-glyph "DollarKernelCap.\(suffix)" : glyph-proc
 			define top : CAP * 0.88
@@ -305,7 +304,7 @@ glyph-block Letter-Latin-S : begin
 
 			include : SAutoSlabStart doTS CAP Stroke Hook
 			local stroke : include : SStrokeImpl CAP 0 doTS doBS [AdviceStroke2 2 3 CAP] EssUpper
-			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			local sw : AdviceStroke2 2 3 CAP
 			include : dispiro
@@ -320,7 +319,7 @@ glyph-block Letter-Latin-S : begin
 
 			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] EssLower
-			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			local sw : AdviceStroke2 2 3 XH
 			include : dispiro
@@ -336,7 +335,7 @@ glyph-block Letter-Latin-S : begin
 
 			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] EssLower
-			local start : currentGlyph.gizmo.unapply stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
 			include : new-glyph : glyph-proc
 				local sw : AdviceStroke2 2 3 XH
@@ -355,8 +354,6 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'DollarKernelStd' (follow -- 'S')
 	select-variant 'DollarKernelCap' (follow -- 'S')
-	if [query-glyph 'DollarKernelStd'] : begin
-		RightDependentLink.set [query-glyph 'DollarKernelStd'] "cap" 'DollarKernelCap'
 
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
@@ -429,17 +426,15 @@ glyph-block Letter-Latin-S : begin
 		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
 	define DollarConfig : object
-		open           { 0.95 0.05 (Descender / 2) 0 0 }
-		through        { 0.95 0.05 (Descender / 2) 1 0 }
-		interrupted    { 0.95 0.05 (Descender / 2) 2 0 }
-		openCap        { 0.88 0.12              0  0 1 }
-		throughCap     { 0.88 0.12              0  1 1 }
-		interruptedCap { 0.88 0.12              0  2 1 }
+		open           { 0.95 0.05 (Descender / 2) 0 "std" }
+		through        { 0.95 0.05 (Descender / 2) 1 "std" }
+		interrupted    { 0.95 0.05 (Descender / 2) 2 "std" }
+		openCap        { 0.88 0.12              0  0 "cap" }
+		throughCap     { 0.88 0.12              0  1 "cap" }
+		interruptedCap { 0.88 0.12              0  2 "cap" }
 
-	foreach { suffix { kTop kBot overflow fillType fShort } } [Object.entries DollarConfig] : do
+	foreach { suffix { kTop kBot overflow fillType selector } } [Object.entries DollarConfig] : do
 		create-glyph "dollar/bar.\(suffix)" : glyph-proc
-			set-width 0
-			set-mark-anchor 'cvDecompose' 0 0
 			define top : CAP * kTop
 			define bot : CAP * kBot
 			define w : AdviceStroke 3
@@ -471,8 +466,10 @@ glyph-block Letter-Latin-S : begin
 
 					dispiro [corner 0 yTermLeft : widths.center gap] [corner Width yTermRight]
 
-			if fShort : RightDependentTrigger.set currentGlyph 'cap'
+			DependentSelector.set currentGlyph selector
 
 	select-variant 'dollar/bar' (follow -- 'dollar')
 
-	CreateRightDependentComposite 'dollar' '$' 'DollarKernelStd' 'dollar/bar'
+	CreateDependentComposite 'dollar' '$' "dollar/bar" : object
+		'std' 'DollarKernelStd'
+		'cap' 'DollarKernelCap'

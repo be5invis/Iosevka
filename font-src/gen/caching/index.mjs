@@ -3,7 +3,7 @@ import zlib from "zlib";
 
 import { encode, decode } from "@msgpack/msgpack";
 
-const Edition = 20;
+const Edition = 21;
 const MAX_AGE = 16;
 class GfEntry {
 	constructor(age, value) {

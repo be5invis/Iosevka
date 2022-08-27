@@ -2,6 +2,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [DependentSelector] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -9,6 +10,7 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Punctuation-Small
+	glyph-block-import Letter-Shared : CreateDependentComposite
 
 	local quoteTop (CAP * 1.05)
 	local quoteBottom (XH * 0.85)
@@ -172,7 +174,7 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 		ApparentTranslate 0 ([mix [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5] quoteBottom (-1)] - quoteTop)
 
 	# ASCII quotes
-	create-glyph 'asciiSingleQuote.straight' : glyph-proc
+	create-glyph 'asciiSingleQuote/body/straight' : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : dispiro
@@ -180,22 +182,36 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 			g4.down.start df.middle quoteTop [heading Downward]
 			g4 df.middle quoteBottom [widths.heading (HalfStroke * 0.95) (HalfStroke * 0.95) Downward]
 
-	alias 'asciiSingleQuote.raisedComma' null 'closeSingleQuote'
-	alias 'asciiGrave.raisedInverseComma' null 'revSingleQuote'
-	alias 'asciiGrave.raisedTurnComma' null 'openSingleQuote'
+	create-glyph 'asciiGrave/selector.straight' : glyph-proc
+		DependentSelector.set currentGlyph 'straight'
+	create-glyph 'asciiGrave/selector.raisedInverseComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedInverseComma'
+	create-glyph 'asciiGrave/selector.raisedTurnComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedTurnComma'
 
-	select-variant 'asciiSingleQuote' 0x27
-	select-variant 'asciiGrave' 0x60
+	create-glyph 'asciiSingleQuote/selector.straight' : glyph-proc
+		DependentSelector.set currentGlyph 'straight'
+	create-glyph 'asciiSingleQuote/selector.raisedComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedComma'
 
-	alias 'mdfStress' 0x2C8 'asciiSingleQuote.straight'
-	turned 'mdfSecondaryStress' 0x2CC 'asciiSingleQuote.straight' Middle (XH / 2)
+	select-variant 'asciiSingleQuote/selector' (follow -- 'asciiSingleQuote')
+	select-variant 'asciiGrave/selector' (follow -- 'asciiGrave')
+
+	CreateDependentComposite 'asciiGrave' 0x60 'asciiGrave/selector' : object
+		'straight'            'asciiGrave/body/straight'
+		'raisedInverseComma'  'revSingleQuote'
+		'raisedTurnComma'     'openSingleQuote'
+
+	CreateDependentComposite 'asciiSingleQuote' 0x27 'asciiSingleQuote/selector' : object
+		'straight'            'asciiSingleQuote/body/straight'
+		'raisedComma'         'closeSingleQuote'
 
 	create-glyph 'asciiDoubleQuote' 0x22 : glyph-proc
 		local dfSingle : DivFrame para.diversityF
 		local dist : 0.2 * Width
-		include : refer-glyph "asciiSingleQuote.straight"
+		include : refer-glyph "asciiSingleQuote/body/straight"
 		include : Translate (-dist * 2) 0
-		include : refer-glyph "asciiSingleQuote.straight"
+		include : refer-glyph "asciiSingleQuote/body/straight"
 		include : Translate (dist + Middle - dfSingle.middle) 0
 
 	# Half-circle modifiers, use quote dimensions
