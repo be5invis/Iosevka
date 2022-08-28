@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 16.0.2
+
+ * Fix mapping of MODIFIER LETTER VERTICAL LINE (`U+02C8`) and MODIFIER LETTER LOW VERTICAL LINE (`U+02CC`) (#1407).
+ * Fix shape of LATIN SMALL LETTER T WITH CURL (`U+0236`) (#1408).
+ * Fix `cv99` application on ELEMENT OF WITH DOT ABOVE (`U+22F5`) (#1409).
+ * Fix `cv33` application on Hwair (`U+0195`) (#1410).
+ * Fix letterform of Cyrillic Small Letter Ghe With Upturn under Italic.
+
+
 ### 16.0.1
 
  * Fix `cv99` application on ASCII single quotes and graves (#1404).

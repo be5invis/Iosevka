@@ -464,11 +464,20 @@ glyph-block Letter-Shared-Shapes : begin
 	define VJutSw : AdviceStroke 3.5
 
 	glyph-block-export CyrDescender
-	define [CyrDescender] : params [x [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow SideJut
-		return : union
-			VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
-			HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
+	define [CyrDescender] : params [x [connex 0.5] [overflow nothing]] : glyph-proc
+		local attachAnchor currentGlyph.baseAnchors.cyrlDescenderAttach
+		if attachAnchor
+		: then : begin
+			local attach : currentGlyph.gizmo.unapply attachAnchor
+			local descenderOverflow : fallback overflow SideJut
+			include : union
+				VBarRight attach.x (HalfStroke - LongJut) attach.y VJutSw
+				HBarTop (attach.x - connex * Stroke * HVContrast) attach.x attach.y
+		: else : begin
+			local descenderOverflow : fallback overflow SideJut
+			include : union
+				VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
+				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 
 	glyph-block-export CyrHookDescender
 	define [CyrHookDescender] : params [x [connex 0.5] [overflow nothing]] : begin
