@@ -10,6 +10,7 @@ import GrandTitle from "./templates/grand-title.mjs";
 import Languages from "./templates/languages.mjs";
 import LigationSet from "./templates/ligation-set.mjs";
 import Matrix from "./templates/matrix.mjs";
+import PackageSample from "./templates/package-sample.mjs";
 import StylisticSet from "./templates/stylistic-set.mjs";
 import Weights from "./templates/weights.mjs";
 
@@ -47,14 +48,13 @@ export default (async function main(argv) {
 	await tasks.add("weights", Weights, {});
 	// Packages
 	for (const pst of argv.packageSnapshotTasks) {
-		await tasks.add(pst.name, StylisticSet, {
+		await tasks.add(pst.name, PackageSample, {
 			hSize: 2,
 			vSize: 1,
 			lineBreakMode: "each-row",
 			fontFamily: pst.fontFamily,
 			fontStyle: "normal",
-			fontFeatures: pst.fontFeatures,
-			hotChars: []
+			fontFeatures: pst.fontFeatures
 		});
 	}
 	// Ligation sets
