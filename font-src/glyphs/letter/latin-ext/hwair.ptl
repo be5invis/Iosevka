@@ -11,25 +11,32 @@ glyph-block Letter-Latin-Hwair : begin
 	glyph-block-import Letter-Shared-Shapes : nShoulderKnots
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
-	create-glyph 'hwair' 0x195 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.b
-		include : VBarLeft df.leftSB 0 Ascender df.mvs
-		include : dispiro
-			nShoulderKnots (df.leftSB + df.mvs * HVContrast) (df.middle + df.mvs * 0.5 * HVContrast) (df.mvs * 0.4) nothing (XH * 0.51) (SmallArchDepthA * 0.6 * df.div) (SmallArchDepthB * 0.6 * df.div) df.mvs
-			flat (df.middle + df.mvs * 0.5 * HVContrast) (XH * 0.5) [heading Downward]
-			curl (df.middle + df.mvs * 0.5 * HVContrast) (SmallArchDepthB * 0.6 * df.div)
-			arcvh
-			g4 [mix (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB 0.5] O [widths.heading df.mvs 0 Rightward]
-			archv
-			flat df.rightSB (SmallArchDepthA * 0.6 * df.div)
-			curl df.rightSB XH [heading Upward]
-		if SLAB : begin
-			local sf1 : SerifFrame Ascender 0 df.leftSB df.rightSB df.mvs
-			local sf2 : SerifFrame XH 0 (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB df.mvs
-			local jut : Jut * 0.75
-			include : tagged 'serifLT' sf1.lt.outer
-			if (!para.isItalic) : begin
-				include : tagged 'serifLB' sf1.lb.full
-				include : tagged 'serifRT' sf2.rt.full
+	define Variants : object
+		straight               { SLAB  SLAB  SLAB  }
+		straightTopLeftSerifed { true  false false }
+
+	foreach { suffix { serifLT serifLB serifRT } } [pairs-of Variants] : do
+		create-glyph "hwair.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.b
+			include : VBarLeft df.leftSB 0 Ascender df.mvs
+			include : dispiro
+				nShoulderKnots (df.leftSB + df.mvs * HVContrast) (df.middle + df.mvs * 0.5 * HVContrast) (df.mvs * 0.4) nothing (XH * 0.51) (SmallArchDepthA * 0.6 * df.div) (SmallArchDepthB * 0.6 * df.div) df.mvs
+				flat (df.middle + df.mvs * 0.5 * HVContrast) (XH * 0.5) [heading Downward]
+				curl (df.middle + df.mvs * 0.5 * HVContrast) (SmallArchDepthB * 0.6 * df.div)
+				arcvh
+				g4 [mix (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB 0.5] O [widths.heading df.mvs 0 Rightward]
+				archv
+				flat df.rightSB (SmallArchDepthA * 0.6 * df.div)
+				curl df.rightSB XH [heading Upward]
+
+			do "slabs"
+				local sf1 : SerifFrame Ascender 0 df.leftSB df.rightSB df.mvs
+				local sf2 : SerifFrame XH 0 (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB df.mvs
+				local jut : Jut * 0.75
+				if serifLT : include : tagged 'serifLT' sf1.lt.outer
+				if serifLB : include : tagged 'serifLB' sf1.lb.full
+				if serifRT : include : tagged 'serifRT' sf2.rt.full
+
+	select-variant 'hwair' 0x195 (follow -- 'heng')

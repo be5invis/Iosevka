@@ -112,7 +112,7 @@ glyph-block Letter-Latin-X : begin
 		include : LowerXBase false
 		include : XMotionSerifs XH
 
-	define [XCursiveHalfShape top fFlatEnd] : begin
+	define [XCursiveHalfShape top] : glyph-proc
 		local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
 		local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
 
@@ -131,39 +131,29 @@ glyph-block Letter-Latin-X : begin
 		define rIn : Math.max (0.2 * (RightSB - SB) - 0.7 * Stroke * HVContrast) [AdviceStroke 16]
 		define flatHookDepth : 0.7 * (RightSB - SB) - swEnd - 1.5 * rIn
 
-		return : union
-			dispiro
-				curl (RightSB - OX) (top - hook1Depth) [widths.lhs.heading swEnd Upward]
-				flat (RightSB - OX) (top - hook1Depth + hook1StraightDepth) [heading Upward]
-				arcvh 16
-				ShoulderMidKnotLhsRev (xTurn) (top - O) fineMid swEnd (-1) (-1)
-				archv 16
-				flat (xCenterRight - HVContrast * fineMid) (top - ada) [widths.lhs fineMid]
-				curl (xCenterRight - HVContrast * fineMid) (top / 2 + O)
-			if fFlatEnd
-			: then : dispiro
-				flat (xCenterRight - 0.5 * HVContrast * fineMid) (top / 2 - O) [widths.center fineMid]
-				curl (xCenterRight - 0.5 * HVContrast * fineMid) adb
-				arcvh 16
-				flat [mix xCenterRight RightSB 0.5] HalfStroke [widths.center.heading Stroke Rightward]
-				curl RightSB HalfStroke [heading Rightward]
-			: else : dispiro
-				flat (xCenterRight - 0.5 * HVContrast * fineMid) (top / 2 - O) [widths.center fineMid]
-				curl (xCenterRight - 0.5 * HVContrast * fineMid) [Math.min adb (swMid + rIn)]
-				arcvh 16
-				DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) 0 rIn 50 flatHookDepth Stroke
+		define upperHalf : include : dispiro
+			curl (RightSB - OX) (top - hook1Depth) [widths.lhs.heading swEnd Upward]
+			flat (RightSB - OX) (top - hook1Depth + hook1StraightDepth) [heading Upward]
+			arcvh 16
+			ShoulderMidKnotLhsRev (xTurn) (top - O) fineMid swEnd (-1) (-1)
+			archv 16
+			flat (xCenterRight - HVContrast * fineMid) (top - ada) [widths.lhs fineMid]
+			curl (xCenterRight - HVContrast * fineMid) (top / 2 + O)
+
+		define lowerHalf : include : dispiro
+			flat (xCenterRight - 0.5 * HVContrast * fineMid) (top / 2 - O) [widths.center fineMid]
+			curl (xCenterRight - 0.5 * HVContrast * fineMid) [Math.min adb (swMid + rIn)]
+			arcvh 16
+			DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) 0 rIn 50 flatHookDepth Stroke
+
+		define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
+		set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
 
 	create-glyph 'x.cursive' : glyph-proc
 		include : MarkSet.e
 		include : XCursiveHalfShape XH
 		include : FlipAround Middle (XH / 2)
 		include : XCursiveHalfShape XH
-
-	create-glyph 'x.cursiveCyrlHaDescenderBase' : glyph-proc
-		include : MarkSet.e
-		include : XCursiveHalfShape XH
-		include : FlipAround Middle (XH / 2)
-		include : XCursiveHalfShape XH true
 
 	define [ChiBase fStraight] : union
 		XStrand fStraight false SB Descender RightSB XH 0.05 0.4 0.11
@@ -205,17 +195,16 @@ glyph-block Letter-Latin-X : begin
 
 	select-variant 'x' 'x'
 	link-reduced-variant 'x/sansSerif' 'x' MathSansSerif
-	select-variant 'xCyrlHaDescenderBase' nothing (shapeFrom -- 'x')
 	select-variant 'cyrl/ha' 0x445 (shapeFrom -- 'x')
 
 	select-variant 'grek/chi' 0x3C7 (shapeFrom -- 'latn/chi')
 	select-variant 'latn/chi' 0xAB53 (follow -- 'x')
 
 	derive-composites 'cyrl/HaDescender' 0x4B2 'cyrl/Ha' [CyrDescender RightSB]
-	derive-composites 'cyrl/haDescender' 0x4B3 'xCyrlHaDescenderBase' [CyrDescender RightSB]
+	derive-composites 'cyrl/haDescender' 0x4B3 'cyrl/ha' [CyrDescender RightSB]
 
 	derive-composites 'cyrl/HaHook' 0x4FC 'cyrl/Ha' [CyrHookDescender RightSB]
-	derive-composites 'cyrl/haHook' 0x4FD 'xCyrlHaDescenderBase' [CyrHookDescender RightSB]
+	derive-composites 'cyrl/haHook' 0x4FD 'cyrl/ha' [CyrHookDescender RightSB]
 
 	define [CyrlHaBarShape top] : HOverlayBar [mix SB RightSB 0.08] [mix SB RightSB 0.92] (top / 2)
 	derive-composites 'cyrl/HaBar' 0x4FE 'cyrl/Ha' [CyrlHaBarShape CAP]
