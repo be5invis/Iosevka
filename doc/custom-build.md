@@ -98,6 +98,8 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `clike`: Default ligation set would be assigned to C-Like.
   - `javascript`: Default ligation set would be assigned to JavaScript.
   - `php`: Default ligation set would be assigned to PHP.
+  - `julia`: Default ligation set would be assigned to Julia.
+  - `raku`: Default ligation set would be assigned to Raku.
   - `ml`: Default ligation set would be assigned to ML.
   - `fsharp`: Default ligation set would be assigned to F#.
   - `fstar`: Default ligation set would be assigned to F*.
@@ -126,6 +128,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `eqeqeq`: Enable special ligation for `===` with triple lines.
   - `eqeq`: Enable ligation for `==` and `===`.
   - `ineq`: Enable ligation for `<=` and `>=`.
+  - `exeqeqeq`: Enable special ligation for `!===` with triple lines.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
   - `eqexeq-dl`: Enable special ligation for `=!=` with double lines.
