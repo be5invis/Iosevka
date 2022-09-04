@@ -220,6 +220,49 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 				TriangleArrowHead x1 y1 x2 y2 headWidth headLen
 				SemiHookArrowBar x1 y1 x2 y2 halfBarWidth halfTerminal (-headWidth) 2
 
+	define RoundArrow : namespace
+		define [Blob x y sw] : RoundStrokeTerminalAt x y (sw / 2)
+
+		define [Bar x1 y1 x2 y2 sw] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : union
+				Blob 0   0 sw
+				Blob mag 0 sw
+				dispiro
+					widths.center  sw
+					flat 0   0
+					curl mag 0
+
+		define [Head x1 y1 x2 y2 sw headLen headWidth] : begin
+			return : PointingTo x1 y1 x2 y2 : lambda [mag] : union
+				Blob headLen headWidth    sw
+				Blob headLen (-headWidth) sw
+				dispiro
+					widths.center  sw
+					flat 0       0
+					curl headLen headWidth
+				dispiro
+					widths.center  sw
+					flat 0       0
+					curl headLen (-headWidth)
+
+		export : define [Shape sw] : function [x1 y1 x2 y2] : begin
+			define headLen   : MosaicUnitWidth * [Math.sqrt MosaicWidthScalar] * 0.5
+			define headWidth : headLen * 1.00
+
+			define mag : Math.hypot (x2 - x1) (y2 - y1)
+			define p : 1 - sw / mag
+			define pHalf : mix 1 p 0.5
+
+			define x1a : mix [mix x1 x2 0.5] x1 p
+			define x2a : mix [mix x1 x2 0.5] x2 p
+
+			define y1a : mix [mix y1 y2 0.5] y1 p
+			define y2a : mix [mix y1 y2 0.5] y2 p
+
+			return : union
+				Bar  x1a y1a x2a y2a  sw
+				Head x1a y1a x2a y2a  sw (pHalf * headLen) (pHalf * headWidth)
+
 	define [BarbArrowHead x1 y1 x2 y2 width length thickness] : new-glyph : glyph-proc
 		include : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
 			spiro-outline
@@ -588,6 +631,10 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		BarbGroup 'barbArrowMedium'    0x1F870 0.375 7
 		BarbGroup 'barbArrowHeavy'     0x1F878 0.375 9
 		BarbGroup 'barbArrowVeryHeavy' 0x1F880 0.375 10
+
+	do "Round-stroke arrows"
+		define sw : UnicodeWeightGrade 9 MosaicWidthScalar
+		MkArrow [RoundArrow.Shape sw] [MangleName 'heavyRoundArrowRight'] [MangleUnicode 0x279C] arrowSB SymbolMid arrowRSB SymbolMid
 
 	do "Sans-serif Arrows"
 		MkArrow SsArrowShape [MangleName 'sansSerifArrowLeft']       [MangleUnicode 0x1F850] arrowRSB SymbolMid arrowSB SymbolMid
