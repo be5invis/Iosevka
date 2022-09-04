@@ -26,6 +26,20 @@
 <td colspan="2"><img src="../images/ligset-PHPX-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-PHPX-1.dark.svg#gh-dark-mode-only"/></td>
 </tr>
 <tr>
+<td><code>JLIA</code></td>
+<td>Julia</td>
+</tr>
+<tr>
+<td colspan="2"><img src="../images/ligset-JLIA-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-JLIA-1.dark.svg#gh-dark-mode-only"/></td>
+</tr>
+<tr>
+<td><code>RAKU</code></td>
+<td>Raku</td>
+</tr>
+<tr>
+<td colspan="2"><img src="../images/ligset-RAKU-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-RAKU-1.dark.svg#gh-dark-mode-only"/></td>
+</tr>
+<tr>
 <td><code>MLXX</code>; <code>FSHP</code></td>
 <td>ML, F#</td>
 </tr>

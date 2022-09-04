@@ -1,5 +1,18 @@
 ## Modifications since version 2.x
 
+### 16.1.0
+
+* Add characters:
+  - HEAVY ROUND-TIPPED RIGHTWARDS ARROW (`U+279C`) (#1401).
+* Add ligation sets for Julia and Raku (#1386, #1391).
+
+
+### 16.0.3
+
+* Add characters:
+  - HEAVY ROUND-TIPPED RIGHTWARDS ARROW (`U+279C`) (#1401).
+
+
 ### 16.0.2
 
  * Fix mapping of MODIFIER LETTER VERTICAL LINE (`U+02C8`) and MODIFIER LETTER LOW VERTICAL LINE (`U+02CC`) (#1407).
