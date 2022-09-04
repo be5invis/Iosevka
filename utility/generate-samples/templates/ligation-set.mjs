@@ -25,7 +25,7 @@ export default (function (args) {
 	const theme = themes[args.theme];
 	return {
 		width: 1200,
-		height: 200,
+		height: 300,
 		frames: [
 			{
 				"horizontal-align": "center",
