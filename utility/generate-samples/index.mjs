@@ -62,7 +62,7 @@ export default (async function main(argv) {
 		await tasks.add(`ligset-${ls.tag}-${ls.rank}`, LigationSet, {
 			fontFamily: "Iosevka",
 			fontStyle: "normal",
-			ligationSamples: ligationData.samples,
+			ligationSamples: ligationData.samplesNarrow,
 			ligationCherry: ligationData.cherry,
 			tag: ls.tag,
 			rank: ls.rank,
