@@ -8,6 +8,27 @@ import { parseVariantsData } from "../export-data/variants-data.mjs";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
+export default main;
+async function main(argv) {
+	let readme = await fs.promises.readFile(argv.mdFilePath, "utf-8");
+	const dirs = {
+		images: path.posix.relative(path.dirname(argv.mdFilePath), "images")
+	};
+	readme = (await processSsOt(dirs)).apply(readme);
+	readme = (await processCherryPickingStyles(dirs)).apply(readme);
+	readme = (await processSsStyles()).apply(readme);
+	readme = (await processCvOt(dirs)).apply(readme);
+	readme = (await processLigSetCherryPicking()).apply(readme);
+	readme = (await processLigSetPreDef()).apply(readme);
+	readme = (await processLigSetOt(dirs, 1, g => !isLanguageSpecificLigTag(g.tag))).apply(readme);
+	readme = (await processLigSetOt(dirs, 2, g => isLanguageSpecificLigTag(g.tag))).apply(readme);
+	readme = (await processLangList(argv)).apply(readme);
+	readme = (await processPrivateBuildPlans()).apply(readme);
+	await fs.promises.writeFile(argv.mdFilePath, readme);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function processSsOt(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-OT-Stylistic-Sets");
@@ -31,6 +52,7 @@ async function processSsOt(dirs) {
 	md.log(`</table>`);
 	return md;
 }
+
 async function processCvOt(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-OT-Character-Variants");
@@ -79,6 +101,7 @@ async function processCvOt(dirs) {
 	md.log(`</table>`);
 	return md;
 }
+
 async function processSsStyles() {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Stylistic-Sets");
@@ -90,6 +113,7 @@ async function processSsStyles() {
 	}
 	return md;
 }
+
 async function processCherryPickingStyles(dirs) {
 	const variantsData = await parseVariantsData();
 	const md = new MdCol("Section-Cherry-Picking-Styles");
@@ -213,6 +237,9 @@ function figureOutDefaults(variantsData, gr) {
 	}
 	return defaultConfigs;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function processLigSetCherryPicking() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Cherry-Picking-Ligation-Sets");
@@ -226,6 +253,7 @@ async function processLigSetCherryPicking() {
 	}
 	return md;
 }
+
 async function processLigSetPreDef() {
 	const ligData = await parseLigationData();
 	const md = new MdCol("Section-Predefined-Ligation-Sets");
@@ -239,6 +267,7 @@ async function processLigSetPreDef() {
 	}
 	return md;
 }
+
 async function processLigSetOt(dirs, index, fn) {
 	const ligData = await parseLigationData();
 	const md = new MdCol(`Section-OT-Ligation-Tags-${index}`);
@@ -263,6 +292,13 @@ async function processLigSetOt(dirs, index, fn) {
 	md.log(`</table>`);
 	return md;
 }
+
+function isLanguageSpecificLigTag(tag) {
+	return tag !== "calt" && tag !== "dlig";
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function processLangList(argv) {
 	const cl = await getCharMapAndSupportedLanguageList(
 		argv.charMapPath,
@@ -274,7 +310,9 @@ async function processLangList(argv) {
 	md.log(cl.languages.join(", "));
 	return md;
 }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class MdCol {
 	constructor(sectionName) {
 		this.data = "";
@@ -298,6 +336,7 @@ class MdCol {
 		});
 	}
 }
+
 function ImgX(path, w) {
 	const widthProp = w ? ` width=${w}` : ``;
 	return (
@@ -305,20 +344,3 @@ function ImgX(path, w) {
 		`<img src="${path}.dark.svg#gh-dark-mode-only"${widthProp}/>`
 	);
 }
-export default (async function main(argv) {
-	let readme = await fs.promises.readFile(argv.mdFilePath, "utf-8");
-	const dirs = {
-		images: path.posix.relative(path.dirname(argv.mdFilePath), "images")
-	};
-	readme = (await processSsOt(dirs)).apply(readme);
-	readme = (await processCherryPickingStyles(dirs)).apply(readme);
-	readme = (await processSsStyles()).apply(readme);
-	readme = (await processCvOt(dirs)).apply(readme);
-	readme = (await processLigSetCherryPicking()).apply(readme);
-	readme = (await processLigSetPreDef()).apply(readme);
-	readme = (await processLigSetOt(dirs, 1, g => g.tag === "calt")).apply(readme);
-	readme = (await processLigSetOt(dirs, 2, g => g.tag !== "calt")).apply(readme);
-	readme = (await processLangList(argv)).apply(readme);
-	readme = (await processPrivateBuildPlans()).apply(readme);
-	await fs.promises.writeFile(argv.mdFilePath, readme);
-});
