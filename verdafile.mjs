@@ -10,7 +10,7 @@ import which from "which";
 ///////////////////////////////////////////////////////////
 
 export const build = Verda.create();
-const { task, file, oracle, computed, phony } = build.ruleTypes;
+const { task, file, oracle, computed } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
@@ -909,13 +909,18 @@ const ChangeFileList = oracle.make(
 //////                   Entries                     //////
 ///////////////////////////////////////////////////////////
 
-phony(`clean`, async () => {
+const Clean = task(`clean`, async () => {
 	await rm(BUILD);
 	await rm(DIST);
 	await rm(ARCHIVE_DIR);
 	build.deleteJournal();
 });
-phony(`release`, async target => {
+
+const Release = task(`release`, async target => {
+	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+});
+
+const ReleaseArchives = task(`release:archives`, async target => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
@@ -934,8 +939,6 @@ phony(`release`, async target => {
 	// Create hash of packages
 	await target.need(fu`utility/create-sha-file.mjs`);
 	await node("utility/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
-	// Images and release notes
-	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 
 ///////////////////////////////////////////////////////////
