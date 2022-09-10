@@ -10,7 +10,7 @@ import which from "which";
 ///////////////////////////////////////////////////////////
 
 export const build = Verda.create();
-const { task, file, oracle, computed, phony } = build.ruleTypes;
+const { task, file, oracle, computed } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
 const { run, node, cd, cp, rm, fail, echo, silently } = build.actions;
 const { FileList } = build.predefinedFuncs;
@@ -20,7 +20,11 @@ const { FileList } = build.predefinedFuncs;
 const BUILD = ".build";
 const DIST = "dist";
 const IMAGES = "images";
+
 const IMAGE_TASKS = ".build/image-tasks";
+const GLYF_TTC = ".build/glyf-ttc";
+
+const DIST_TTC = "dist/.ttc";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
 
@@ -563,15 +567,14 @@ function fnStandardTtc(fIsGlyfTtc, prefix, suffixMapping, sfi) {
 ///////////////////////////////////////////////////////////
 
 const SpecificTtc = task.group(`ttc`, async (target, cgr) => {
-	const outputDir = `dist/.ttc/${cgr}`;
-	const [cPlan] = await target.need(CollectPlans, de(outputDir));
+	const [cPlan] = await target.need(CollectPlans);
 	const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
-	const [files] = await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
-	for (const file of files) await cp(file.full, `${outputDir}/${file.base}`);
+	await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
 });
 const SpecificSuperTtc = task.group(`super-ttc`, async (target, cgr) => {
 	await target.need(CollectedSuperTtcFile(cgr));
 });
+
 const CollectedSuperTtcFile = file.make(
 	cgr => `${DIST_SUPER_TTC}/${cgr}.ttc`,
 	async (target, out, cgr) => {
@@ -582,7 +585,7 @@ const CollectedSuperTtcFile = file.make(
 	}
 );
 const CollectedTtcFile = file.make(
-	(cgr, f) => `${BUILD}/ttc-collect/${cgr}/${f}.ttc`,
+	(cgr, f) => `${DIST_TTC}/${cgr}/${f}.ttc`,
 	async (target, out, cgr, f) => {
 		const [cp] = await target.need(CollectPlans, de`${out.dir}`);
 		const parts = Array.from(new Set(cp[cgr].ttcComposition[f]));
@@ -591,13 +594,14 @@ const CollectedTtcFile = file.make(
 	}
 );
 const GlyfTtc = file.make(
-	(cgr, f) => `${BUILD}/glyf-ttc/${cgr}/${f}.ttc`,
+	(cgr, f) => `${GLYF_TTC}/${cgr}/${f}.ttc`,
 	async (target, out, cgr, f) => {
 		const [cp] = await target.need(CollectPlans);
 		const parts = cp[cgr].glyfTtcComposition[f];
 		await buildGlyphSharingTtc(target, parts, out);
 	}
 );
+
 async function buildCompositeTtc(out, inputs) {
 	const inputPaths = inputs.map(f => f.full);
 	await run(TTCIZE, ["-o", out.full], inputPaths);
@@ -623,7 +627,7 @@ const TtcZip = file.make(
 		const [cPlan] = await target.need(CollectPlans, de`${out.dir}`);
 		const ttcFiles = Array.from(Object.keys(cPlan[cgr].ttcComposition));
 		await target.need(ttcFiles.map(pt => CollectedTtcFile(cgr, pt)));
-		await CreateGroupArchiveFile(`${BUILD}/ttc-collect/${cgr}`, out, `*.ttc`);
+		await CreateGroupArchiveFile(`${DIST_TTC}/${cgr}`, out, `*.ttc`);
 	}
 );
 const SuperTtcZip = file.make(
@@ -905,13 +909,18 @@ const ChangeFileList = oracle.make(
 //////                   Entries                     //////
 ///////////////////////////////////////////////////////////
 
-phony(`clean`, async () => {
+const Clean = task(`clean`, async () => {
 	await rm(BUILD);
 	await rm(DIST);
 	await rm(ARCHIVE_DIR);
 	build.deleteJournal();
 });
-phony(`release`, async target => {
+
+const Release = task(`release`, async target => {
+	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
+});
+
+const ReleaseArchives = task(`release:archives`, async target => {
 	const [version, collectPlans] = await target.need(Version, CollectPlans);
 	let goals = [];
 	for (const [cgr, plan] of Object.entries(collectPlans)) {
@@ -930,8 +939,6 @@ phony(`release`, async target => {
 	// Create hash of packages
 	await target.need(fu`utility/create-sha-file.mjs`);
 	await node("utility/create-sha-file.mjs", "doc/packages-sha.txt", archiveFiles);
-	// Images and release notes
-	await target.need(SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
 
 ///////////////////////////////////////////////////////////

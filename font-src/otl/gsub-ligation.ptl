@@ -36,6 +36,8 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 	define exclam {'exclam'}
 	define greater {'greater'}
 	define greaterAndEquiv {'greater' 'greater.lig.shift0' 'greater.lig.shift0.anti'}
+	define lessOrGreater         : {}.concat less         greater
+	define lessOrGreaterAndEquiv : {}.concat lessAndEquiv greaterAndEquiv
 	define anyBar {'bar' 'slash' 'backslash'}
 	define slash {'slash'}
 	define backslash {'backslash'}
@@ -409,11 +411,11 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 
-			define [CJoinHeadForce]         : if dbl [lsx 'dblhead']        [lsx 'shift0']
+			define [CJoinHeadForce]         : if dbl [lsx 'dblhead']        [lsx 'shift0.head']
 			define [CJoinHeadMid]           : if dbl [lsx 'dblhead.mid']    [lsx 'shift0.mid']
-			define [CJoinHeadForceShift1]   : if dbl [lsx 'dblhead.shift1'] [lsx 'shift1']
+			define [CJoinHeadForceShift1]   : if dbl [lsx 'dblhead.shift1'] [lsx 'shift1.head']
 			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
-			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1']
+			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1.anti']
 
 			define [TJoinHeadForce]         : if [hasLG 'arrow']  [CJoinHeadForce]        advance
 			define [TJoinHeadAmbig]         : if [not ltgt]       [TJoinHeadForce]        advance
@@ -679,9 +681,9 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 
 		# Cancel alternates of < and > shapes if there are more after them
 		local lAll  {"less" "less.lig.shift0h" "less.lig.shiftN0h"}
-		local lNeut {"less" "less"            "less"}
+		local lNeut {"less" "less"             "less"}
 		local gAll  {"greater" "greater.lig.shift0h" "greater.lig.shiftN0h"}
-		local gNeut {"greater" "greater"            "greater"}
+		local gNeut {"greater" "greater"             "greater"}
 		local lgAll  : lAll.concat  gAll
 		local lgNeut : lNeut.concat gNeut
 		CreateLigationLookup : list
@@ -808,13 +810,6 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 					exclam      ~> {'neq.allow-dot.2l'}
 					equal       ~> {'equal.fc+cf'}
 			piecewise
-				[hasLG 'ltgt-diamond'] : chain-rule
-					lessAndEquiv    ~> [just 'less.lig.diamond']
-					greaterAndEquiv ~> [just 'greater.lig.diamond']
-				[hasLG 'ltgt-ne'] : chain-rule
-					lessAndEquiv    ~> [just 'neq.bar-only.2l']
-					greaterAndEquiv ~> [just 'equal.fc+cf']
-			piecewise
 				[hasLG 'eqeq'] : chain-rule
 					equal       ~> {'equal.fc'}
 					equal       ~> {'equal.cf'}
@@ -841,27 +836,51 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
+
+			# <>
+			piecewise
+				[hasLG 'ltgt-diamond'] : chain-rule
+					lessAndEquiv    ~> [just 'less.lig.diamond']
+					greaterAndEquiv ~> [just 'greater.lig.diamond']
+				[hasLG 'ltgt-diamond-tag'] : chain-rule
+					lessAndEquiv    ~> [just 'less.lig.diamond.tag']
+					greaterAndEquiv ~> [just 'greater.lig.diamond.tag']
+				[hasLG 'ltgt-ne'] : chain-rule
+					lessAndEquiv    ~> [just 'neq.bar-only.2l']
+					greaterAndEquiv ~> [just 'equal.fc+cf']
+
+			# <=, >=
 			chain-rule
-				[acops]            ~> look-around
-				{'less' 'greater'} ~> advance
-				equal              ~> advance
+				[acops]               ~> look-around
+				lessOrGreaterAndEquiv ~> advance
+				equal                 ~> advance
 			chain-rule
-				{'less' 'greater'} ~> advance
-				equal              ~> advance
-				[acops]            ~> look-around
+				lessOrGreaterAndEquiv ~> advance
+				equal                 ~> advance
+				[acops]               ~> look-around
 			chain-rule
-				{'less'}    ~> {'less.lig2'}
-				equal       ~> {'eq.at-lteq.lig2'}
+				lessAndEquiv          ~> [just 'less.lig2']
+				equal                 ~> {'eq.at-lteq.lig2'}
 			chain-rule
-				{'greater'} ~> {'greater.lig2'}
-				equal       ~> {'eq.at-gteq.lig2'}
+				greaterAndEquiv       ~> [just 'greater.lig2']
+				equal                 ~> {'eq.at-gteq.lig2'}
+
+			# </, /> and </>
+			piecewise
+				[hasLG 'ltgt-slash-tag'] : chain-rule
+					lessAndEquiv    ~> [just 'less.lig.tag-slash']
+					slash           ~> look-around
+			piecewise
+				[hasLG 'ltgt-slash-tag'] : chain-rule
+					slash           ~> look-around
+					greaterAndEquiv ~> [just 'greater.lig.tag-slash']
 
 	# :>
 	do "colon-less-greater" : if [hasLG 'colon-greater'] : begin
 		CreateLigationLookup : list
 			chain-rule
-				{'colon/mid'} ~> look-around
-				{'greater'}   ~> {'greaterArrow'}
+				{'colon/mid'}   ~> look-around
+				greaterAndEquiv ~> [just 'greaterArrow']
 
 	# [| |] {| |}
 	do "brack-bar" : if [hasLG 'brack-bar'] : begin

@@ -138,6 +138,8 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `slasheq`: Enable ligation for `/=` and `=/=` as inequality.
   - `ltgt-ne`: Enable ligation for `<>` as inequality.
   - `ltgt-diamond`: Enable ligation for `<>` as diamond.
+  - `ltgt-diamond-tag`: Enable ligation for `<>` as diamond-shaped empty HTML/XML tag.
+  - `ltgt-slash-tag`: Enable ligation for `</`, `/>` and `</>`.
   - `brst`: Center asterisk in `(*` and `*)`.
   - `plusplus`: Enable ligation for `++` and further plus-chaining.
   - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
