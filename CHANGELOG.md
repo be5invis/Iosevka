@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 16.2.0
+
+* Add ligation set for HTML/XML/React tags (`<>`, `</`, `/>` and `</>`) (#1413).
+
+
 ### 16.1.0
 
 * Add characters:
