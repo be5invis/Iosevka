@@ -12,9 +12,6 @@ export function createNamingDictFromArgv(argv) {
 }
 
 export function assignFontNames(font, naming, isQuasiProportional) {
-	// Clear existing names
-	font.name.records.length = 0;
-
 	// Preferred names
 	const family = naming.family.trim();
 	const style = getStyle(naming.weight, naming.width, naming.slope);
@@ -145,23 +142,19 @@ function getStyleLinkedStyles(weight, width, slope) {
 }
 
 function nameFont(font, nameID, str) {
-	// Mac Roman
-	font.name.records.push({
-		platformID: 1,
-		encodingID: 0,
-		languageID: 0,
-		nameID,
-		value: Buffer.from(str, "utf-8")
-	});
-
-	// Windows Unicode English
-	font.name.records.push({
-		platformID: 3,
-		encodingID: 1,
-		languageID: 1033,
-		nameID,
-		value: str
-	});
+	nameFontImpl(font.name.records, 1, 0, 0, nameID, Buffer.from(str, "utf-8")); // Mac Roman
+	nameFontImpl(font.name.records, 3, 1, 1033, nameID, str); // Windows Unicode English
+}
+function nameFontImpl(records, platformID, encodingID, languageID, nameID, value) {
+	for (let record of records) {
+		if (record.platformID !== platformID) continue;
+		if (record.encodingID !== encodingID) continue;
+		if (record.languageID !== languageID) continue;
+		if (record.nameID !== nameID) continue;
+		record.value = value;
+		return;
+	}
+	records.push({ platformID, encodingID, languageID, nameID, value });
 }
 
 function isRBIZ(weight, slope) {
