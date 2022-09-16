@@ -1,20 +1,22 @@
 import { buildGlyphs } from "../glyphs/index.mjs";
 import { copyFontMetrics } from "../meta/aesthetics.mjs";
-import { assignFontNames } from "../meta/naming.mjs";
 import { buildOtl } from "../otl/index.mjs";
 
 import * as Caching from "./caching/index.mjs";
-import { CreateEmptyFont } from "./empty-font.mjs";
 import { finalizeFont } from "./finalize/index.mjs";
+import { CreateEmptyFont } from "./meta/empty-font.mjs";
+import { assignFontNames } from "./meta/naming.mjs";
 import { convertOtd } from "./otd-conv/index.mjs";
 
-("use strict");
 export async function buildFont(argv, para) {
-	const gs = buildGlyphs(para);
 	const baseFont = CreateEmptyFont(argv);
-	assignFontNames(para, baseFont);
+	assignFontNames(baseFont, para.naming, para.isQuasiProportional);
+
+	const gs = buildGlyphs(para);
 	copyFontMetrics(gs.fontMetrics, baseFont);
+
 	const otl = buildOtl(para, gs.glyphStore);
+
 	// Regulate
 	const excludeChars = new Set();
 	if (para.excludedCharRanges) {

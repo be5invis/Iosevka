@@ -2,6 +2,7 @@ import * as FS from "fs";
 import * as Path from "path";
 
 import * as toml from "@iarna/toml";
+import deepEqual from "deep-equal";
 import semver from "semver";
 import * as uuid from "uuid";
 import * as Verda from "verda";
@@ -148,8 +149,36 @@ const BuildPlans = computed("metadata:build-plans", async target => {
 		}
 		returnBuildPlans[prefix] = bp;
 	}
+	linkSpacingDerivableBuildPlans(returnBuildPlans);
 	return { fileNameToBpMap, buildPlans: returnBuildPlans };
 });
+
+function linkSpacingDerivableBuildPlans(bps) {
+	for (const pfxTo in bps) {
+		const planTo = bps[pfxTo];
+		const planToVal = rectifyPlanForSpacingDerivation(planTo);
+		if (!(planTo.spacing === "term" || planTo.spacing === "fixed")) continue;
+		for (const pfxFrom in bps) {
+			const planFrom = bps[pfxFrom];
+			if (!(planFrom.spacing === "normal" || !planFrom.spacing)) continue;
+			const planFromVal = rectifyPlanForSpacingDerivation(planFrom);
+			if (!deepEqual(planToVal, planFromVal)) continue;
+			planTo.spacingDeriveFrom = pfxFrom;
+		}
+	}
+}
+
+function rectifyPlanForSpacingDerivation(p) {
+	return {
+		...p,
+		family: "#Validation",
+		desc: "#Validation",
+		spacing: "#Validation",
+		snapshotFamily: null,
+		snapshotFeature: null,
+		targets: null
+	};
+}
 
 const BuildPlanOf = computed.group("metadata:build-plan-of", async (target, gid) => {
 	const [{ buildPlans }] = await target.need(BuildPlans);
@@ -188,6 +217,15 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 	const sfm = getSuffixMapping(bp.weights, bp.slopes, bp.widths);
 	const sfi = sfm[fi0.suffix];
 	const hintReferenceSuffix = fetchHintReferenceSuffix(sfm);
+
+	let spacingDerive = null;
+	if (bp.spacingDeriveFrom) {
+		spacingDerive = {
+			manner: bp.spacing,
+			prefix: bp.spacingDeriveFrom,
+			fileName: makeFileName(bp.spacingDeriveFrom, fi0.suffix)
+		};
+	}
 
 	return {
 		name: fileName,
@@ -230,7 +268,10 @@ const FontInfoOf = computed.group("metadata:font-info-of", async (target, fileNa
 				: null,
 		compatibilityLigatures: bp["compatibility-ligatures"] || null,
 		metricOverride: bp["metric-override"] || null,
-		excludedCharRanges: bp["exclude-chars"]?.ranges
+		excludedCharRanges: bp["exclude-chars"]?.ranges,
+
+		// Spacing derivation -- creating faster build for spacing variants
+		spacingDerive
 	};
 });
 
@@ -321,41 +362,59 @@ const ageKey = uuid.v4();
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		await target.need(Scripts, Parameters, Dependencies, de(`${BUILD}/caches`));
-		const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
-		const charMapDir = `${BUILD}/ttf/${gr}`;
-		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
+		await target.need(Scripts, Parameters, Dependencies);
+		const [fi] = await target.need(FontInfoOf(fn), de(out.dir));
 
-		const [fi] = await target.need(FontInfoOf(fn), de(out.dir), de(charMapDir));
-		const cacheFileName =
-			`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
-			`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
-		const cachePath = `${BUILD}/caches/${cacheFileName}.mpz`;
-		const cacheDiffPath = `${charMapDir}/${fn}.cache.mpz`;
-
-		echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
-		const { cacheUpdated } = await silently.node("font-src/index.mjs", {
-			o: out.full,
-			oCharMap: charMapPath,
-			cacheFreshAgeKey: ageKey,
-			iCache: cachePath,
-			oCache: cacheDiffPath,
-			compositesFromBuildPlan,
-			...fi
-		});
-		if (cacheUpdated) {
-			const lock = build.locks.alloc(cacheFileName);
-			await lock.acquire();
-			await silently.node(`font-src/merge-cache.mjs`, {
-				base: cachePath,
-				diff: cacheDiffPath,
-				version: fi.menu.version,
-				freshAgeKey: ageKey
+		if (fi.spacingDerive) {
+			// The font is a spacing variant, and is derivable form an existing
+			// normally-spaced variant.
+			const spD = fi.spacingDerive;
+			const [deriveFrom] = await target.need(DistUnhintedTTF(spD.prefix, spD.fileName));
+			await silently.node(`font-src/derive-spacing.mjs`, {
+				i: deriveFrom.full,
+				o: out.full,
+				...fi
 			});
-			lock.release();
+		} else {
+			// Ab-initio build
+			const charMapDir = `${BUILD}/ttf/${gr}`;
+			const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
+			await target.need(de(charMapDir));
+
+			await target.need(de(`${BUILD}/caches`));
+			const cacheFileName =
+				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
+				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
+			const cachePath = `${BUILD}/caches/${cacheFileName}.mpz`;
+			const cacheDiffPath = `${charMapDir}/${fn}.cache.mpz`;
+
+			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
+
+			const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
+			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
+				o: out.full,
+				oCharMap: charMapPath,
+				cacheFreshAgeKey: ageKey,
+				iCache: cachePath,
+				oCache: cacheDiffPath,
+				compositesFromBuildPlan,
+				...fi
+			});
+			if (cacheUpdated) {
+				const lock = build.locks.alloc(cacheFileName);
+				await lock.acquire();
+				await silently.node(`font-src/merge-cache.mjs`, {
+					base: cachePath,
+					diff: cacheDiffPath,
+					version: fi.menu.version,
+					freshAgeKey: ageKey
+				});
+				lock.release();
+			}
 		}
 	}
 );
+
 const BuildCM = file.make(
 	(gr, f) => `${BUILD}/ttf/${gr}/${f}.charmap.mpz`,
 	async (target, output, gr, f) => {
@@ -363,20 +422,19 @@ const BuildCM = file.make(
 	}
 );
 
-function formatSuffix(fmt, unhinted) {
-	return fmt + (unhinted ? "-unhinted" : "");
-}
-
 const DistHintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		const [{ hintParams }, hint] = await target.need(FontInfoOf(fn), CheckTtfAutoHintExists);
+		const [fi, hint] = await target.need(FontInfoOf(fn), CheckTtfAutoHintExists);
 		const [from] = await target.need(DistUnhintedTTF(gr, fn), de`${out.dir}`);
 		echo.action(echo.hl.command(`Hint TTF`), from.full, echo.hl.operator("->"), out.full);
-		await silently.run(hint, hintParams, from.full, out.full);
+		await silently.run(hint, fi.hintParams, from.full, out.full);
 	}
 );
 
+function formatSuffix(fmt, unhinted) {
+	return fmt + (unhinted ? "-unhinted" : "");
+}
 const DistWoff2 = file.make(
 	(gr, fn, unhinted) => `${DIST}/${gr}/${formatSuffix("woff2", unhinted)}/${fn}.woff2`,
 	async (target, out, group, f, unhinted) => {

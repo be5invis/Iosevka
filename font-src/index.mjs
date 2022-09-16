@@ -8,6 +8,7 @@ import { encode } from "@msgpack/msgpack";
 import { FontIo } from "ot-builder";
 
 import { buildFont } from "./gen/build-font.mjs";
+import { createNamingDictFromArgv } from "./gen/meta/naming.mjs";
 import { createGrDisplaySheet } from "./support/gr.mjs";
 import { applyLigationData } from "./support/ligation-data.mjs";
 import { applyMetricOverride } from "./support/metric-override.mjs";
@@ -44,12 +45,8 @@ async function getParameters() {
 		if (argv.compatibilityLigatures) para.compLig = argv.compatibilityLigatures;
 		if (argv.metricOverride) applyMetricOverride(para, argv.metricOverride, argv);
 		para.naming = {
-			...para.naming,
-			family: argv.menu.family,
-			version: argv.menu.version,
-			weight: argv.menu.weight - 0,
-			width: argv.menu.width - 0,
-			slope: argv.menu.slope
+			miscNames: para.naming,
+			...createNamingDictFromArgv(argv)
 		};
 		return para;
 	}
