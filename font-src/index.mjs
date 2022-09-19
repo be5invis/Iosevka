@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import * as url from "url";
+import url from "url";
 import zlib from "zlib";
 
 import * as Toml from "@iarna/toml";
@@ -15,7 +15,6 @@ import { applyMetricOverride } from "./support/metric-override.mjs";
 import * as Parameters from "./support/parameters.mjs";
 import * as VariantData from "./support/variant-data.mjs";
 
-const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 // Parameter preparation

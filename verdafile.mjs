@@ -25,6 +25,7 @@ const IMAGES = "images";
 const IMAGE_TASKS = ".build/image-tasks";
 const GLYF_TTC = ".build/glyf-ttc";
 
+const SHARED_CACHE = `${BUILD}/cache`;
 const DIST_TTC = "dist/.ttc";
 const DIST_SUPER_TTC = "dist/.super-ttc";
 const ARCHIVE_DIR = "release-archives";
@@ -157,15 +158,22 @@ function linkSpacingDerivableBuildPlans(bps) {
 	for (const pfxTo in bps) {
 		const planTo = bps[pfxTo];
 		const planToVal = rectifyPlanForSpacingDerivation(planTo);
-		if (!(planTo.spacing === "term" || planTo.spacing === "fixed")) continue;
+		if (!isLinkDeriveToSpacing(planTo.spacing)) continue;
 		for (const pfxFrom in bps) {
 			const planFrom = bps[pfxFrom];
-			if (!(planFrom.spacing === "normal" || !planFrom.spacing)) continue;
+			if (!isLinkDeriveFromSpacing(planFrom.spacing)) continue;
 			const planFromVal = rectifyPlanForSpacingDerivation(planFrom);
 			if (!deepEqual(planToVal, planFromVal)) continue;
 			planTo.spacingDeriveFrom = pfxFrom;
 		}
 	}
+}
+
+function isLinkDeriveToSpacing(spacing) {
+	return spacing === "term" || spacing === "fontconfig-mono" || spacing === "fixed";
+}
+function isLinkDeriveFromSpacing(spacing) {
+	return !spacing || spacing === "normal";
 }
 
 function rectifyPlanForSpacingDerivation(p) {
@@ -362,14 +370,16 @@ const ageKey = uuid.v4();
 const DistUnhintedTTF = file.make(
 	(gr, fn) => `${DIST}/${gr}/ttf-unhinted/${fn}.ttf`,
 	async (target, out, gr, fn) => {
-		await target.need(Scripts, Parameters, Dependencies);
-		const [fi] = await target.need(FontInfoOf(fn), de(out.dir));
+		await target.need(Scripts, Parameters, Dependencies, de(out.dir));
+		const [fi] = await target.need(FontInfoOf(fn));
 
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(DistUnhintedTTF(spD.prefix, spD.fileName));
+
+			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				o: out.full,
@@ -379,27 +389,30 @@ const DistUnhintedTTF = file.make(
 			// Ab-initio build
 			const charMapDir = `${BUILD}/ttf/${gr}`;
 			const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
-			await target.need(de(charMapDir));
 
-			await target.need(de(`${BUILD}/caches`));
 			const cacheFileName =
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
 				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
-			const cachePath = `${BUILD}/caches/${cacheFileName}.mpz`;
+			const cachePath = `${SHARED_CACHE}/${cacheFileName}.mpz`;
 			const cacheDiffPath = `${charMapDir}/${fn}.cache.mpz`;
 
-			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
+			const [comps] = await target.need(
+				CompositesFromBuildPlan,
+				de(charMapDir),
+				de(SHARED_CACHE)
+			);
 
-			const [compositesFromBuildPlan] = await target.need(CompositesFromBuildPlan);
+			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
 			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
 				o: out.full,
 				oCharMap: charMapPath,
 				cacheFreshAgeKey: ageKey,
 				iCache: cachePath,
 				oCache: cacheDiffPath,
-				compositesFromBuildPlan,
+				compositesFromBuildPlan: comps,
 				...fi
 			});
+
 			if (cacheUpdated) {
 				const lock = build.locks.alloc(cacheFileName);
 				await lock.acquire();

@@ -1,11 +1,15 @@
 import fs from "fs";
+import path from "path";
+import url from "url";
 
-import { FontIo, Ot } from "ot-builder";
+import * as Toml from "@iarna/toml";
+import { FontIo, Ot, CliProc } from "ot-builder";
 
 import { assignFontNames, createNamingDictFromArgv } from "./gen/meta/naming.mjs";
 
-export default main;
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
+export default main;
 async function main(argv) {
 	const font = await readTTF(argv);
 
@@ -14,11 +18,19 @@ async function main(argv) {
 
 	switch (argv.shape.spacing) {
 		case "term":
-			deriveTerm(font);
+			await deriveTerm(font);
+			break;
+		case "fontconfig-mono":
+			await deriveTerm(font);
+			await deriveFixed_DropWideChars(font);
+			await deriveFixed_DropFeatures(font, false);
+			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
 			break;
 		case "fixed":
-			deriveTerm(font);
-			deriveFixed(font);
+			await deriveTerm(font);
+			await deriveFixed_DropWideChars(font);
+			await deriveFixed_DropFeatures(font, true);
+			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
 			break;
 	}
 
@@ -26,7 +38,7 @@ async function main(argv) {
 }
 
 // To derive -Term variants, simply apply NWID
-function deriveTerm(font) {
+async function deriveTerm(font) {
 	const gsub = font.gsub;
 	let nwidMap = new Map();
 	for (const feature of gsub.features) {
@@ -52,7 +64,7 @@ function deriveTerm(font) {
 // In FontConfig, a font is considered "monospace" if and only if all encoded non-combining
 // characters  (AW > 0) have the same width. We use this method to validate whether our
 // "Fixed" subfamilies are properly built.
-function deriveFixed(font) {
+async function deriveFixed_DropWideChars(font) {
 	const unitWidth = font.os2.xAvgCharWidth;
 	for (const [ch, g] of [...font.cmap.unicode.entries()]) {
 		const advanceWidth = g.horizontal.end - g.horizontal.start;
@@ -62,6 +74,62 @@ function deriveFixed(font) {
 		const advanceWidth = g.horizontal.end - g.horizontal.start;
 		if (!(advanceWidth === 0 || advanceWidth === unitWidth)) font.cmap.vs.delete(ch, vs);
 	}
+}
+
+async function deriveFixed_DropFeatures(font, fFixed) {
+	if (!font.gsub) return;
+
+	const dropFeatureTagSet = new Set();
+	dropFeatureTagSet.add("NWID");
+	dropFeatureTagSet.add("WWID");
+
+	if (fFixed) {
+		const LIGATIONS_TOML = path.resolve(__dirname, "../params/ligation-set.toml");
+		const rawLigationData = Toml.parse(await fs.promises.readFile(LIGATIONS_TOML, "utf-8"));
+		for (const [_, comp] of Object.entries(rawLigationData.composite)) {
+			dropFeatureTagSet.add(comp.tag);
+		}
+	}
+
+	for (const feature of font.gsub.features) {
+		if (dropFeatureTagSet.has(feature.tag)) {
+			feature.lookups.length = 0;
+			feature.params = null;
+		}
+	}
+
+	markSweepLookups(font.gsub);
+}
+function markSweepLookups(table) {
+	let lookupSet = new Set();
+	for (const feature of table.features) {
+		for (const lookup of feature.lookups) {
+			lookupSet.add(lookup);
+		}
+	}
+
+	do {
+		let sizeBefore = lookupSet.size;
+		for (const lookup of table.lookups) {
+			if (lookup instanceof Ot.Gsub.Chaining || lookup instanceof Ot.Gpos.Chaining) {
+				for (const rule of lookup.rules) {
+					for (const app of rule.applications) lookupSet.add(app.apply);
+				}
+			}
+		}
+		let sizeAfter = lookupSet.size;
+		if (sizeBefore >= sizeAfter) break;
+	} while (true);
+
+	let front = 0;
+	for (let rear = 0; rear < table.lookups.length; rear++) {
+		if (lookupSet.has(table.lookups[rear])) {
+			table.lookups[front++] = table.lookups[rear];
+		}
+	}
+	table.lookups.length = front;
+
+	return lookupSet;
 }
 
 async function readTTF(argv) {

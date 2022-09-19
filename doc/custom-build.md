@@ -73,7 +73,7 @@ Inside the plan, top-level properties include:
         - `U+27F6` LONG RIGHTWARDS ARROW
         - `U+27FB` LONG LEFTWARDS ARROW FROM BAR
         - `U+27FC` LONG RIGHTWARDS ARROW FROM BAR
-  - `fixed`: Apply `fontconfig-mono` changes and further remove ligations.
+  - `fixed`: Apply `fontconfig-mono` changes and further remove ligations, `NWID` and `WWID` typographic features.
 * `serifs`: Optional, String, configures style of serifs.
   - When set to `slab`, the font will be converted into slab-serif.
   - Otherwise the font will be sans-serif.
