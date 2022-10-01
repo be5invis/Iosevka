@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import * as url from "url";
+import url from "url";
 
 import { parseLigationData } from "./ligation-data.mjs";
 import { getCharMapAndSupportedLanguageList } from "./supported-languages.mjs";
