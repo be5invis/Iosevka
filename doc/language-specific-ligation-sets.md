@@ -5,13 +5,6 @@
 
 <table>
 <tr>
-<td><code>dlig</code></td>
-<td>Discretionary ligatures</td>
-</tr>
-<tr>
-<td colspan="2"><img src="../images/ligset-dlig-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-dlig-1.dark.svg#gh-dark-mode-only"/></td>
-</tr>
-<tr>
 <td><code>CLIK</code>; <code>JSPT</code></td>
 <td>C-Like, JavaScript</td>
 </tr>
