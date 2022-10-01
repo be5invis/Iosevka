@@ -15,9 +15,10 @@ function assignSubRank(glyphStore) {
 	let sr = 0;
 	for (const g of glyphStore.glyphs()) g.subRank = sr++;
 }
-// In FontConfig, a font is considered "monospace" if and only if all non-combining characters
-//  (AW > 0) have the same width. We use this method to validate whether our "Fixed" subfamilies
-//  are properly built.
+
+// In FontConfig, a font is considered "monospace" if and only if all encoded non-combining
+// characters (AW > 0) have the same width. We use this method to validate whether our
+// "Fixed" subfamilies are properly built.
 function validateMonospace(para, glyphStore) {
 	let awSet = new Set();
 	for (const [u, g] of glyphStore.encodedEntries()) {
