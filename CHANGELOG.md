@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 16.3.0
+
+ * Add variant selector to remove notches for equality ligations (#1425).
+ * Fix `cv40`'s application to CYRILLIC SMALL LETTER ER (`U+0440`) (#1426).
+
+
 ### 16.2.1
 
  * Fix shape of `p` @ `motion-serifed` (#1423).

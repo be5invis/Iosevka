@@ -2392,6 +2392,17 @@
 <td>6</td>
 <td colspan="6"> </td>
 </tr>
+<tr>
+<td rowspan="2"><code>VXAG</code></td>
+<td><img src="../images/cv-lig-equal-chain-with-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-equal-chain-with-notch.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lig-equal-chain-without-notch.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lig-equal-chain-without-notch.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
 </table>
 
 <!-- END Section-OT-Character-Variants -->
