@@ -13,7 +13,7 @@ glyph-block Mark-Horn-And-Angle : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
 	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
 	glyph-block-import Mark-Above : commaAboveRadius
@@ -152,7 +152,21 @@ glyph-block Mark-Horn-And-Angle : begin
 
 	create-glyph 'ogonekTR' : glyph-proc
 		set-width 0
-		include : refer-glyph "ogonekBelow"
-		local ogonekBot : [mix belowMarkTop belowMarkBot 0.75] + markStress
-		local ogonekRight : markMiddle + markExtend * 0.85
-		set-mark-anchor 'trailing' markMiddle 0 ogonekRight ogonekBot
+
+		local fine : AdviceStroke 8
+		local depth : 0 - Descender - markStroke
+		local extL : (7 / 16) * depth + 0.125 * markStress
+		local extR : Math.max (0.125 * markExtend) (1.5 * TanSlope * markStroke)
+
+		include : difference
+			dispiro
+				g4 markMiddle 0 [widths.rhs fine]
+				g4.down.mid (markMiddle - extL) (-0.75 * depth) [widths.rhs.heading markStroke {.x (HVContrast) .y (0.5 * (markStroke - fine) / markStroke)}]
+				arcvh [widths.rhs markStroke]
+				g4 (markMiddle + [mix (-extL) extR (11/16)]) (-depth + O) [heading Rightward]
+				g4 (markMiddle + extR) (-depth + 0.5 * O) [heading Rightward]
+			intersection
+				MaskAbove 0
+				MaskRight markMiddle
+
+		set-mark-anchor 'trailing' markMiddle 0 (markMiddle + extR) (-depth - 0.5 * O - markStroke)

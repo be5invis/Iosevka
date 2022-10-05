@@ -209,6 +209,13 @@ export function SetupBuilders(bindings) {
 			fallback(args.raf, unimportant)
 		);
 	}
+	function afInterpolateDelta(before, after, args) {
+		return g4(
+			mix(before.x, after.x, args.rx) + args.deltaX,
+			mix(before.y, after.y, args.ry) + args.deltaY,
+			fallback(args.raf, unimportant)
+		);
+	}
 	function afInterpolateG2(before, after, args) {
 		return g2(
 			mix(before.x, after.x, args.rx),
@@ -236,6 +243,9 @@ export function SetupBuilders(bindings) {
 	function alsoThru(rx, ry, raf) {
 		return { type: "interpolate", rx, ry, raf, blender: afInterpolate };
 	}
+	alsoThru.withOffset = function (rx, ry, deltaX, deltaY, raf) {
+		return { type: "interpolate", rx, ry, deltaX, deltaY, raf, blender: afInterpolateDelta };
+	};
 	alsoThru.g2 = function (rx, ry, raf) {
 		return { type: "interpolate", rx, ry, raf, blender: afInterpolateG2 };
 	};

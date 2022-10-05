@@ -14,7 +14,6 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 	define {chain-rule} : ChainRuleBuilder sink
 
 	define groupGrekUpperTonos {}
-	define groupTR             {}
 	define groupLF             {}
 	define dotlessFrom         {}
 	define dotlessTo           {}
@@ -23,7 +22,6 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 	define TieGlyphs           {}
 
 	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
-		if g.baseAnchors.trailing       : groupTR.push gid
 		if g.baseAnchors.lf             : groupLF.push gid
 		if g.baseAnchors.grekUpperTonos : groupGrekUpperTonos.push gid
 		if [Dotless.get g] : begin
@@ -35,7 +33,6 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			TieMarkTo.push   [TieMark.get g]
 
 	define [IotaLF]         : UkMapToLookup UnicodeKnowledge.iotaBelowToLfTf
-	define [OgonekTrailing] : UkMapToLookup UnicodeKnowledge.ogonekBelowToTRTf
 	define [GrekUpperTonosTf] : UkMapToLookup UnicodeKnowledge.upperGrekMarkToTonosTf
 
 	define [ToneToToneStart toneEnd] : begin
@@ -123,13 +120,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
 			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
 
-			# Ogonek transform (max 6 middle marks are supported)
-			chain-rule groupTR [OgonekTrailing]
-			chain-rule groupTR markGlyphs.all [OgonekTrailing]
-			chain-rule groupTR markGlyphs.all markGlyphs.all [OgonekTrailing]
-			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
-			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
-			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
+
 
 	define lookupMarks2 : AddLookup sink : object
 		.type 'gsub_ligature'
@@ -233,6 +224,34 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		AdeFeatureLookup ccmp lookupCcmp-Decompose
 
 	AddCommonFeature sink ccmp
+	EndLookupBlock rec sink
+
+	return ccmp
+
+export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : begin
+	local rec : BeginLookupBlock sink
+
+	define ccmp : AddFeature sink 'ccmp'
+	define {chain-rule} : ChainRuleBuilder sink
+
+	define groupTR             {}
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== "."): begin
+		if g.baseAnchors.trailing       : groupTR.push gid
+
+	define [OgonekTrailing] : UkMapToLookup UnicodeKnowledge.ogonekBelowToTRTf
+
+	define lookupMarks1 : AddLookup sink : object
+		.type 'gsub_chaining'
+		.rules : list
+			# Ogonek transform (max 6 middle marks are supported)
+			chain-rule groupTR [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
+			chain-rule groupTR markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [OgonekTrailing]
+
+	ccmpFeature.lookups.push lookupMarks1
 	EndLookupBlock rec sink
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

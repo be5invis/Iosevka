@@ -10,12 +10,15 @@ glyph-block Letter-Latin-Lower-E : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth
 
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
+
 	define [SmallEShape] : params [df top stroke barpos curly [bbd 0]] : glyph-proc
 		local barbottom : top * [fallback barpos DesignParameters.eBarPos] - (stroke / 2)
 		local hook : Math.min AHook : if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
 
 		include : HBarBottom (df.leftSB + (stroke / 2) + OX + bbd) (df.rightSB - (stroke / 2) - OX) barbottom stroke
-		include : dispiro
+		local path : include : dispiro
 			widths.lhs stroke
 			flat (df.rightSB - OX) barbottom [heading Upward]
 			curl (df.rightSB - OX) (top - SmallArchDepthB)
@@ -26,6 +29,8 @@ glyph-block Letter-Latin-Lower-E : begin
 			curl (df.leftSB + OX) (0 + SmallArchDepthB)
 			hookend O (sw -- stroke)
 			g4 (df.rightSB - OX * [if para.isItalic 0 0.5]) hook
+
+		return path.rhsKnots.[path.rhsKnots.length - 1]
 
 	define [RevSmallEShape] : params [df top stroke barpos] : glyph-proc
 		local barbottom (top * [fallback barpos DesignParameters.eBarPos] - HalfStroke)
@@ -53,7 +58,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 		local xStart : df.leftSB + (0.125 * stroke * HVContrast)
 		local pfIt : if para.isItalic 1 0
-		include : dispiro
+		local path : include : dispiro
 			widths.lhs stroke
 			[if para.isItalic g2 flat] xStart (barbottom - pfIt * [StrokeWidthBlend 2 3] * O)
 			if para.isItalic [alsoThru.g2 0.5 0.8] [list]
@@ -67,6 +72,8 @@ glyph-block Letter-Latin-Lower-E : begin
 			curl (df.leftSB + OX) (0 + SmallArchDepthB)
 			hookend O (sw -- stroke)
 			g4 (df.rightSB - OX * [if para.isItalic 0 0.5]) hook
+
+		return path.rhsKnots.[path.rhsKnots.length - 1]
 
 	define [RevSmallERoundedShape] : params [df top stroke barpos] : glyph-proc
 		local barbottom : top * [fallback barpos : if para.isItalic 0.500 0.475] - (stroke / 2)
@@ -119,6 +126,30 @@ glyph-block Letter-Latin-Lower-E : begin
 			include : MarkSet.e
 			include : Body [DivFrame 1] XH [AdviceStroke2 2 3 XH]
 
+		create-glyph "eOgonek.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			local lastKnot : include : Body [DivFrame 1] XH [AdviceStroke2 2 3 XH]
+
+			# Connected Ogonek shape
+			local fine : AdviceStroke 8
+			local depth : 0 - Descender - markStroke
+			local extL : (7 / 16) * depth + 0.25 * markStress
+			local extR : Math.max (0.0625 * markExtend) (1.5 * TanSlope * markStroke)
+			local beginCoSlope : if para.isItalic 0.2 0
+
+			set-base-anchor 'trailing' (RightSB + extR) (-depth + 0.5 * O - markStroke)
+
+			include : intersection
+				MaskBelow lastKnot.y
+				dispiro
+					g4 lastKnot.x lastKnot.y [widths.rhs fine]
+					g4 (lastKnot.x - beginCoSlope * 0.01) (lastKnot.y - 0.01)
+					alsoThru.withOffset 0.5 0.525 0 (-0.25 * [mix fine markStroke 0.5]) [widths.rhs [mix fine markStroke 0.5]]
+					g4.down.mid (RightSB - extL) (-0.75 * depth) [widths.rhs.heading markStroke {.x (HVContrast) .y (0.5 * (markStroke - fine) / markStroke)}]
+					arcvh [widths.rhs markStroke]
+					g4 (RightSB + [mix (-extL) extR (11/16)]) (-depth + O) [heading Rightward]
+					g4 (RightSB + extR) (-depth + 0.5 * O) [heading Rightward]
+
 		create-glyph "Schwa.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Body [DivFrame 1] CAP [AdviceStroke2 2 3 CAP]
@@ -159,6 +190,8 @@ glyph-block Letter-Latin-Lower-E : begin
 	select-variant 'e' 'e'
 	alias 'cyrl/ie' 0x435 'e'
 	turned 'turne' 0x1DD 'e' Middle (XH / 2)
+
+	select-variant 'eOgonek' 0x119 (follow -- 'e')
 
 	select-variant 'Schwa' 0x18F
 	alias 'cyrl/Schwa' 0x4D8 'Schwa'
