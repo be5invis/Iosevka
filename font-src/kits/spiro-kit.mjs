@@ -240,6 +240,37 @@ export function SetupBuilders(bindings) {
 		}
 		return innerKnots;
 	}
+	function afInterpolateThemWithDelta(before, after, args) {
+		let innerKnots = [];
+		for (const [rx, ry, deltaX, deltaY, rt] of args.rs) {
+			innerKnots.push(
+				fallback(args.ty, g2)(
+					mix(before.x, after.x, rx) + deltaX,
+					mix(before.y, after.y, ry) + deltaY,
+					args.raf && args.raf.blend && rt !== void 0
+						? args.raf.blend(rt)
+						: args.raf
+						? args.raf
+						: unimportant
+				)
+			);
+		}
+		return innerKnots;
+	}
+	function afInterpolateThemFromTWithDelta(before, after, args) {
+		let innerKnots = [];
+		for (const rt of args.rs) {
+			innerKnots.push(
+				fallback(args.ty, g2)(
+					mix(before.x, after.x, args.raf.rx(rt)) + args.raf.deltaX(rt),
+					mix(before.y, after.y, args.raf.ry(rt)) + args.raf.deltaY(rt),
+					args.raf.modifier(rt)
+				)
+			);
+		}
+		return innerKnots;
+	}
+
 	function alsoThru(rx, ry, raf) {
 		return { type: "interpolate", rx, ry, raf, blender: afInterpolate };
 	}
@@ -252,6 +283,12 @@ export function SetupBuilders(bindings) {
 	function alsoThruThem(es, raf, ty) {
 		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThem };
 	}
+	alsoThruThem.withOffset = function (es, raf, ty) {
+		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThemWithDelta };
+	};
+	alsoThruThem.fromTWithOffset = function (es, raf, ty) {
+		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThemFromTWithDelta };
+	};
 	function bezControlsImpl(x1, y1, x2, y2, samples, raf, ty) {
 		let rs = [];
 		for (let j = 1; j < samples; j = j + 1)
