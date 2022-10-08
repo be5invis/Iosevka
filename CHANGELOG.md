@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 16.3.1
+
+ * Fix shape of LATIN SMALL LETTER E WITH OGONEK (`U+0119`) (#1427).
+ * Width grade will now influence marks' width.
+
+
 ### 16.3.0
 
  * Add variant selector to remove notches for equality ligations (#1425).
