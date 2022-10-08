@@ -9,7 +9,7 @@ glyph-block Letter-Latin-U : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
-	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos
+	glyph-block-import Letter-Shared : CreateAccentedComposition SetGrekUpperTonos CreateOgonekComposition
 	glyph-block-import Letter-Shared-Shapes : nShoulder RightwardTailedBar DToothlessRise SerifFrame
 	glyph-block-import Letter-Shared-Shapes : CyrTailDescender
 
@@ -36,7 +36,7 @@ glyph-block Letter-Latin-U : begin
 			offset -- offset
 
 	define [UToothed df top] : glyph-proc
-		set-base-anchor 'trailing' (df.rightSB - markHalfStroke) 0
+		set-base-anchor 'trailing' df.rightSB 0
 		include : nShoulder
 			top -- top
 			left -- (df.leftSB + Stroke * HVContrast)
@@ -46,7 +46,7 @@ glyph-block Letter-Latin-U : begin
 		include : VBarRight df.rightSB 0 top
 
 	define [UTailed df top] : glyph-proc
-		set-base-anchor 'trailing' (df.rightSB - markHalfStroke) 0
+		set-base-anchor 'trailing' (df.rightSB + SideJut) 0
 		include : nShoulder
 			top -- top
 			left -- (df.leftSB + Stroke * HVContrast)
@@ -56,15 +56,12 @@ glyph-block Letter-Latin-U : begin
 		include : RightwardTailedBar df.rightSB 0 top
 
 	define [UToothlessRounded df top] : glyph-proc
-		set-base-anchor 'trailing' df.middle 0
 		include : UShape df top 0
 
 	define [UToothlessRoundedSmall df top] : glyph-proc
-		set-base-anchor 'trailing' df.middle 0
 		include : UShape df top 0 (ada -- SmallArchDepthA) (adb -- SmallArchDepthB)
 
 	define [UToothlessCorner df top] : glyph-proc
-		set-base-anchor 'trailing' df.middle 0
 		include : VBarLeft df.leftSB 0 (top - DToothlessRise)
 		include : dispiro
 			widths.rhs
@@ -76,7 +73,6 @@ glyph-block Letter-Latin-U : begin
 		include : FlipAround df.middle (top / 2)
 
 	define [UToothlessCornerSmall df top] : glyph-proc
-		set-base-anchor 'trailing' df.middle 0
 		include : VBarLeft df.leftSB 0 (top - DToothlessRise)
 		include : dispiro
 			widths.rhs
@@ -93,8 +89,11 @@ glyph-block Letter-Latin-U : begin
 	define [UTopRightSerif df yTop] : tagged 'serifRT'
 		LeftwardTopSerif (df.rightSB - Stroke * HVContrast) yTop SideJut
 
-	define [UBottomRightSerif df yTop] : tagged 'serifRB'
-		RightwardBottomSerif df.rightSB 0 SideJut
+	define [UBottomRightSerif df yTop] : glyph-proc
+		include : tagged 'serifRB' : RightwardBottomSerif df.rightSB 0 SideJut
+		define trAnchor currentGlyph.baseAnchors.trailing
+		if trAnchor : begin
+			set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
 
 	define [SmallUSlabs df top] : glyph-proc : if SLAB : begin
 		include : UTopLeftSerif df top
@@ -299,3 +298,6 @@ glyph-block Letter-Latin-U : begin
 			include : Translate 0 (SB / 2)
 
 	CreateAccentedComposition 'uDieresisSideways' 0x1D1E 'uDieresisSidewaysBase' 'uDieresisSidewaysMark'
+
+	CreateOgonekComposition 'UOgonek' 0x172 'U'
+	CreateOgonekComposition 'uOgonek' 0x173 'u'

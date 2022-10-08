@@ -13,7 +13,7 @@ glyph-block Mark-Below : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
 	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
 
 	glyph-block-export belowMarkBot belowMarkTop belowMarkMid belowMarkStack
@@ -29,18 +29,18 @@ glyph-block Mark-Below : begin
 		set-base-anchor 'belowBrace' markMiddle belowMarkMid
 
 	define [CedillaShape ext] : begin
-		local fine : Math.min markHalfStroke ((belowMarkTop - belowMarkBot) * 0.25)
-		local cedillaTop (belowMarkTop + fine * 0.85)
-		local cedillaBot belowMarkBot
+		local fine : Math.min [AdviceStroke 6] (0.75 * (belowMarkTop - belowMarkBot - markStroke))
+		local cedillaTop (belowMarkTop + 0.875 * fine)
+		local cedillaBot  belowMarkBot
 		return : union
-			VBar markMiddle ext (cedillaTop - fine) (fine * 2)
+			VBar markMiddle ext (cedillaTop - fine) markStroke
 			dispiro
-				flat (markMiddle - fine * HVContrast) cedillaTop [widths.heading 0 (fine * 2) Rightward]
+				flat (markMiddle - 0.5 * markStroke * HVContrast) cedillaTop [widths.rhs.heading fine Rightward]
 				curl markMiddle cedillaTop [heading Rightward]
 				archv
-				g4   (markMiddle + markExtend - O) [mix cedillaTop cedillaBot 0.5] [heading Downward]
+				g4   (markMiddle + markExtend - O) [mix cedillaTop cedillaBot 0.5] [widths.rhs.heading [mix fine markStroke 0.5] {.x HVContrast .y (-0.5 * (markStroke - fine) / markStroke)}]
 				arcvh
-				flat markMiddle cedillaBot [heading Leftward]
+				flat markMiddle cedillaBot [widths.rhs.heading markStroke Leftward]
 				curl (markMiddle - markExtend) cedillaBot [heading Leftward]
 
 	create-glyph 'cedillaExtShapeBelow' : glyph-proc
@@ -59,12 +59,12 @@ glyph-block Mark-Below : begin
 		set-width 0
 		set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkStack
 		set-base-anchor 'belowBrace' markMiddle belowMarkMid
-		include : VBar markMiddle belowMarkBot belowMarkTop (markHalfStroke * 2)
+		include : VBar markMiddle belowMarkBot belowMarkTop markStroke
 
 	create-glyph 'iotaLF' : glyph-proc
 		set-width 0
 		set-mark-anchor 'lf' markMiddle 0 markMiddle belowMarkStack
-		include : VBar markMiddle belowMarkBot belowMarkTop (markHalfStroke * 2)
+		include : VBar markMiddle belowMarkBot belowMarkTop markStroke
 
 	create-glyph 'uptackBelow' 0x31D : glyph-proc
 		set-width 0
@@ -159,19 +159,19 @@ glyph-block Mark-Below : begin
 		set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkStack
 		set-base-anchor 'belowBrace' markMiddle belowMarkMid
 
-		local hsw : [AdviceStroke 3.5] / Stroke * markHalfStroke
-		local extend : (belowMarkTop - belowMarkBot - markHalfStroke) * 1.25
+		local sw : [AdviceStroke 3.5] / Stroke * markStroke
+		local extend : (belowMarkTop - belowMarkBot - 0.5 * markStroke) * 1.25
 
 		include : dispiro
-			g4.down.start (markMiddle - extend) belowMarkTop [widths.heading hsw hsw Downward]
+			g4.down.start (markMiddle - extend) belowMarkTop [widths.center.heading sw Downward]
 			arcvh
-			g4.right.mid  [mix markMiddle (markMiddle - extend) 0.5] (belowMarkBot + hsw) [heading Rightward]
+			g4.right.mid  [mix markMiddle (markMiddle - extend) 0.5] (belowMarkBot + 0.5 * sw) [heading Rightward]
 			archv
 			g4.up.end     markMiddle belowMarkTop [heading Upward]
 		include : dispiro
-			g4.down.start markMiddle belowMarkTop [widths.heading hsw hsw Downward]
+			g4.down.start markMiddle belowMarkTop [widths.center.heading sw Downward]
 			arcvh
-			g4.right.mid  [mix markMiddle (markMiddle + extend) 0.5] (belowMarkBot + hsw) [heading Rightward]
+			g4.right.mid  [mix markMiddle (markMiddle + extend) 0.5] (belowMarkBot + 0.5 * sw) [heading Rightward]
 			archv
 			g4.up.end     (markMiddle + extend) belowMarkTop [heading Upward]
 

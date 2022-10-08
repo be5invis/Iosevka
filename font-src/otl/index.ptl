@@ -4,7 +4,7 @@ import as Gr from"../support/gr.mjs"
 import [CreateEmptyTable FinalizeTable MoveBackUtilityLookups] from"./table-util.mjs"
 
 import [buildLigations] from"./gsub-ligation.mjs"
-import [buildCCMP] from"./gsub-ccmp.mjs"
+import [buildCCMP buildCCMPPostCvSs] from"./gsub-ccmp.mjs"
 import [buildGrFeature] from"./gsub-gr.mjs"
 import [buildFrac] from"./gsub-frac.mjs"
 import [buildCVSS] from"./gsub-cv-ss.mjs"
@@ -22,22 +22,24 @@ define [buildGSUB para glyphStore markGlyphs] : begin
 	define gsub : CreateEmptyTable
 
 	# NWID / WWID
-	buildGrFeature gsub glyphStore Gr.Nwid
-	buildGrFeature gsub glyphStore Gr.Wwid
+	if para.enableNwidWwid : begin
+		buildGrFeature gsub glyphStore Gr.Nwid
+		buildGrFeature gsub glyphStore Gr.Wwid
 
 	# lnum / onum
 	buildGrFeature gsub glyphStore Gr.Lnum
 	buildGrFeature gsub glyphStore Gr.Onum
 
 	# APLF
-	buildGrFeature gsub glyphStore Gr.AplForm
+	if para.enableCvSs : begin
+		buildGrFeature gsub glyphStore Gr.AplForm
 
 	# numr / dnom
 	buildGrFeature gsub glyphStore Gr.NumeratorForm
 	buildGrFeature gsub glyphStore Gr.DenominatorForm
 
 	# ccmp
-	buildCCMP gsub glyphStore markGlyphs
+	local ccmp : buildCCMP gsub glyphStore markGlyphs
 
 	# frac
 	buildFrac gsub glyphStore
@@ -53,7 +55,11 @@ define [buildGSUB para glyphStore markGlyphs] : begin
 	buildGsubThousands gsub para glyphStore
 
 	# cv##, ss##
-	buildCVSS gsub para glyphStore
+	if para.enableCvSs : begin
+		buildCVSS gsub para glyphStore
+
+	# ccmp post cv/ss (for Ogonek shape transform)
+	buildCCMPPostCvSs gsub ccmp glyphStore markGlyphs
 
 	# locl
 	# Builds last, but the lookups are added into the beginning of the lookup list
