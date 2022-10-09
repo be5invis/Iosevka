@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 16.3.2
+
+ * Fix alignment of Ogonek in LATIN SMALL LETTER I WITH OGONEK (`U+012F`) at with `'cv34' = 5` (#1431).
+ * Fix soft dot of LATIN SMALL LETTER I WITH OGONEK (`U+012F`) (#1432).
+
+
 ### 16.3.1
 
  * Fix shape of LATIN SMALL LETTER E WITH OGONEK (`U+0119`) (#1427).
