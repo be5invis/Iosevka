@@ -23,9 +23,15 @@ function ConvertGsubGposImpl(handlers, T, table, glyphs) {
 	const ls = new LookupStore(handlers, glyphs);
 	if (table.lookups) {
 		if (table.lookupOrder) {
-			for (const l of table.lookupOrder) ls.declare(l, table.lookups[l]);
+			for (const l of table.lookupOrder) {
+				if (!table.lookups[l]) throw new Error("Cannot find lookup " + l);
+				ls.declare(l, table.lookups[l]);
+			}
 		}
-		for (const l in table.lookups) ls.declare(l, table.lookups[l]);
+		for (const l in table.lookups) {
+			if (!table.lookups[l]) throw new Error("Cannot find lookup " + l);
+			ls.declare(l, table.lookups[l]);
+		}
 		for (const l in table.lookups) ls.fill(l, table.lookups[l]);
 	}
 	const fs = new FeatureStore(ls);

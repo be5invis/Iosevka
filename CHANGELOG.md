@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 16.3.3
+
+ * Fix application of CV/SS on certain composites and some of the sample images (#1433).
+
+
 ### 16.3.2
 
  * Fix alignment of Ogonek in LATIN SMALL LETTER I WITH OGONEK (`U+012F`) at with `'cv34' = 5` (#1431).
