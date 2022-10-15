@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 16.3.4
+
+ * Fix inconsistent serifs in Exists and Forall sign (#1435).
+
+
 ### 16.3.3
 
  * Fix application of CV/SS on certain composites and some of the sample images (#1433).
