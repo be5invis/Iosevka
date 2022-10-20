@@ -15,20 +15,23 @@ glyph-block Letter-Latin-Lower-J : begin
 
 	glyph-block-export FlatHookDotlessJShape
 	define [FlatHookDotlessJShape] : params [df dfHook top crossLeft barCenter serif] : glyph-proc
-		local terminal : crossLeft - OX * 2
 		local bar : barCenter + HalfStroke * HVContrast
 		local hd : FlatHookDepth dfHook
+		local terminal : Math.min
+			bar - hd.x - [Math.max (Stroke / 3) (df.width / 6)]
+			crossLeft - OX * 2
+
 		if serif : include : LeftwardTopSerif barCenter top (LongJut * df.div)
 		include : dispiro
 			widths.lhs
-			flat [Math.min terminal (bar - hd.x - [Math.max (Stroke / 3) (df.width / 6)])] Descender
+			flat terminal Descender
 			curl (bar - hd.x) Descender
 			archv.superness DesignParameters.tightHookSuperness
 			flat bar (Descender + hd.y)
 			curl bar top [heading Upward]
 		set-base-anchor 'above' barCenter top
+		set-base-anchor 'trailing' (bar - hd.x) Descender
 		set-base-anchor 'overlay' barCenter (top / 2)
-
 
 	define XMiddle : namespace
 		export : define [Straight df] : begin df.middle
@@ -41,6 +44,7 @@ glyph-block Letter-Latin-Lower-J : begin
 		export : define [Regular df top xMiddle] : glyph-proc
 			local hookx : xMiddle - (Width * 0.5) - HalfStroke * HVContrast + OXHook
 			local turn : xMiddle - Width * 0.25 + CorrectionOMidS
+			set-base-anchor "below" [mix hookx xMiddle 0.5] Descender
 			include : dispiro
 				widths.rhs
 				flat (xMiddle + HalfStroke * HVContrast) top [heading Downward]
@@ -50,13 +54,16 @@ glyph-block Letter-Latin-Lower-J : begin
 
 		export : define [Straight df top xMiddle] : glyph-proc
 			include : VBar xMiddle Descender top
+			set-base-anchor "below" xMiddle Descender
+			set-base-anchor "trailing" (xMiddle + HalfStroke * HVContrast) Descender
 
 		export : define [FlatHook df top xMiddle] : glyph-proc
 			local dfHook : DivFrame para.diversityI
+			local crossLeft : df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2])
 			set-width df.width
 			include : df.markSet.p
 			include : FlatHookDotlessJShape df dfHook top
-				crossLeft -- (df.middle - (dfHook.middle - [mix 0 dfHook.leftSB : mix 1 dfHook.div 2]))
+				crossLeft -- crossLeft
 				barCenter -- xMiddle
 				serif -- false
 
@@ -66,6 +73,7 @@ glyph-block Letter-Latin-Lower-J : begin
 				widths.center
 				flat xMiddle top [heading Downward]
 				DiagonalTailL df xMiddle Descender [DiagonalTailStdDepth dfHook Stroke] Stroke
+			set-base-anchor "trailing" (xMiddle - HalfStroke * HVContrast) Descender
 
 	define Serifs : namespace
 		export : define [Long df top xMiddle] : LeftwardTopSerif xMiddle top (LongJut * df.div)

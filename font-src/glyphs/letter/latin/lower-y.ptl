@@ -9,6 +9,8 @@ glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition
+	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markStress markFine
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
 	glyph-block-import Mark-Below : belowMarkStack
 	glyph-block-import Letter-Shared-Shapes : nShoulder FlatHookDepth SerifFrame
 
@@ -62,21 +64,38 @@ glyph-block Letter-Latin-Lower-Y : begin
 				curl x (top - ds) [widths.heading hl hr Downward]
 				quadControls 0 dpy1 16
 
-		define [yBaseKnots top bottom shrink hooktop] : begin
-			local {ds ds2} : CalcDS top bottom
+		define [yBaseKnots top bottom shrink hooktop ogonek] : begin
+			define {ds ds2} : CalcDS top bottom
+			define coJoinX : mix yrstrokel yrstroker px1
+			define coJoinY : mix (bottom + ds2) (top - ds) py1
 			define joinX : mix yrstrokel yrstroker (1 - px2)
 			define joinY : mix (bottom + ds2) (top - ds) (1 - py2)
 			define [ConnectZ shrink] : curl joinX joinY [widths.rhs : Stroke * shrink]
 
+			define [ogonekKnots] : begin
+
+				local stopX : mix joinX coJoinX ((0 - joinY) / (coJoinY - joinY))
+				local stopY   0
+
+				local depth : 0 - Descender - markStroke
+				local extL : (0.5 * 0.75 * depth / coJoinY) * depth + 0.25 * markStress
+				local extR : Math.max (0.5 * markExtend) (1.5 * TanSlope * markStroke)
+				local turnSlope : 0.5 * ((markStroke - Stroke) / markStroke - (ArchDepthB - ArchDepth) / ArchDepth)
+
+				list
+					curl stopX stopY [widths.rhs : Stroke * [if useStraightBottom shrink 1]]
+					g4.down.mid (stopX - extL) (stopY - 0.75 * depth) [widths.rhs.heading [mix Stroke markStroke 0.25] {.x HVContrast .y (-turnSlope)}]
+					arcvh [widths.rhs markStroke]
+					g4 (stopX + [mix (-extL) extR (11/16)]) (stopY - depth + O) [heading Rightward]
+					g4 (stopX + extR) (stopY - depth + 0.5 * O) [heading Rightward]
+
 			return : list
 				if (straightBar && (! hooktop))
 					then : list
-					else : list
-						flat
-							mix yrstrokel yrstroker px1
-							mix (bottom + ds2) (top - ds) py1
+					else : list [flat coJoinX coJoinY]
 
 				piecewise
+					ogonek : ogonekKnots
 					useStraightBottom : list
 						ConnectZ shrink
 						curl [mix yrstroker joinX ((top - bottom) / (top - joinY))] bottom [widths.heading 0 (Stroke * [yDiagCor (top - bottom)]) Downward]
@@ -164,6 +183,35 @@ glyph-block Letter-Latin-Lower-Y : begin
 			if doSlabBottom : include : yBaseSerif top bottom
 			if doSlabMotion : include : LeftwardTopSerif SB top SideJut
 
+		define [SmallYOgonekShape top bottom] : glyph-proc
+			local {ds ds2} : CalcDS top bottom
+
+			include : intersection
+				union
+					SmallYStrokeSplitMask top bottom false 1
+					MaskBelow 0
+				dispiro
+					yTopKnots yrstroker top bottom ds 1
+					yBaseKnots top bottom 1 false true
+
+			include : difference
+				dispiro
+					yTopKnots yrstroker top bottom ds 1
+					yBaseKnots top bottom yshrink false true
+				SmallYStrokeSplitMask top bottom false 1 1
+				MaskBelow 0
+
+			include : difference
+				dispiro
+					yTopKnots (Width - yrstroker) top bottom ds (-1)
+					yJoinKnots ds ds2 top bottom
+				SmallYStrokeSplitMask top bottom false (-1)
+				Rect (bottom + HalfStroke) (bottom - top) 0 Width
+
+			if doSlabTop    : include : let [sf : SerifFrame top bottom SB RightSB]
+				composite-proc sf.lt.full sf.rt.full
+			if doSlabMotion : include : LeftwardTopSerif SB top SideJut
+
 		define [SmallYHookTopShape top bottom] : glyph-proc
 			local {ds ds2} : CalcDS top bottom
 			local joinHeight : yJoinHeight ds ds2 top bottom true
@@ -200,7 +248,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : Scale 1 (-1)
 			include : Translate 0 (+[mix bottom top 0.5])
 
-		return : object SmallYShape SmallYHookTopShape SmallLambdaShape
+		return : object SmallYShape SmallYOgonekShape SmallYHookTopShape SmallLambdaShape
 
 	create-glyph : glyph-proc
 		include : MarkSet.p
@@ -222,6 +270,19 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : [GenSmallYShape false false SLAB-MOTION].SmallYShape XH Descender
 		create-forked-glyph 'y.curlyTurnMotionSerifed' : glyph-proc
 			include : [GenSmallYShape false true SLAB-MOTION].SmallYShape XH Descender
+
+	create-glyph : glyph-proc
+		include : MarkSet.p
+		set-base-anchor 'overlay' Middle (XH / 2)
+		set-base-anchor 'yBelowDot' (RightSB - 0.5 * DotRadius) (Descender + AccentStackOffset + DotRadius)
+		create-forked-glyph 'yOgonek.straight' : glyph-proc
+			include : [GenSmallYShape true false SLAB-AUTO].SmallYOgonekShape XH Descender
+		create-forked-glyph 'yOgonek.curly' : glyph-proc
+			include : [GenSmallYShape false false SLAB-AUTO].SmallYOgonekShape XH Descender
+		create-forked-glyph 'yOgonek.straightMotionSerifed' : glyph-proc
+			include : [GenSmallYShape true false SLAB-MOTION].SmallYOgonekShape XH Descender
+		create-forked-glyph 'yOgonek.curlyMotionSerifed' : glyph-proc
+			include : [GenSmallYShape false false SLAB-MOTION].SmallYOgonekShape XH Descender
 
 	define [SmallYCursiveArc top bottom] : new-glyph : glyph-proc
 		include : nShoulder
@@ -282,8 +343,25 @@ glyph-block Letter-Latin-Lower-Y : begin
 		include : LeftwardTopSerif SB XH SideJut
 		set-base-anchor 'overlay' Middle (XH / 2)
 
+	create-glyph 'yOgonek.cursive' : glyph-proc
+		include [refer-glyph 'y.cursive'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ogonekBelow']
+
+	create-glyph 'yOgonek.cursiveFlatHook' : glyph-proc
+		include [refer-glyph 'y.cursiveFlatHook'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ogonekBelow']
+
+	create-glyph 'yOgonek.cursiveMotionSerifed' : glyph-proc
+		include [refer-glyph 'y.cursiveMotionSerifed'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ogonekBelow']
+
+	create-glyph 'yOgonek.cursiveFlatHookMotionSerifed' : glyph-proc
+		include [refer-glyph 'y.cursiveFlatHookMotionSerifed'] AS_BASE ALSO_METRICS
+		include [refer-glyph 'ogonekBelow']
+
 	select-variant 'y' 'y'
 	link-reduced-variant 'y/sansSerif' 'y' MathSansSerif
+	select-variant 'yOgonek' 0xE011
 	alias 'cyrl/u' 0x443 'y'
 
 	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
