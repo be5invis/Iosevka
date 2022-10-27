@@ -831,7 +831,8 @@ const AmendReadme = task("amend-readme", async target => {
 		AmendReadmeFor("doc/stylistic-sets.md"),
 		AmendReadmeFor("doc/character-variants.md"),
 		AmendReadmeFor("doc/custom-build.md"),
-		AmendReadmeFor("doc/language-specific-ligation-sets.md")
+		AmendReadmeFor("doc/language-specific-ligation-sets.md"),
+		AmendLicenseYear
 	);
 });
 const AmendReadmeFor = task.make(
@@ -851,6 +852,11 @@ const AmendReadmeFor = task.make(
 		});
 	}
 );
+const AmendLicenseYear = task("amend-readme:license-year", async target => {
+	return node(`utility/amend-readme/license-year.mjs`, {
+		path: "LICENSE.md"
+	});
+});
 
 ///////////////////////////////////////////////////////////
 // Sample Images
