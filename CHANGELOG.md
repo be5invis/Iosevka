@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 16.3.5
+
+ * Update Powerline line number and column number symbol (`U+E0A1`, `U+E0A2`) to follow other fonts’ design.
+
+
 ### 16.3.4
 
  * Fix inconsistent serifs in Exists and Forall sign (#1435).
