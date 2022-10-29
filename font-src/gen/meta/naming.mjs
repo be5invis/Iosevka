@@ -82,11 +82,11 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 
 	// Licensing
 	if (naming.miscNames) {
-		nameFont(font, Ot.Name.NameID.Copyright, naming.miscNames.copyright);
-		nameFont(font, Ot.Name.NameID.Manufacturer, naming.miscNames.manufacturer);
-		nameFont(font, Ot.Name.NameID.Designer, naming.miscNames.designer);
-		nameFont(font, Ot.Name.NameID.Description, naming.miscNames.description);
-		nameFont(font, Ot.Name.NameID.LicenseDescription, naming.miscNames.licence);
+		nameFont(font, Ot.Name.NameID.Copyright, ancNameEntry(naming.miscNames.copyright));
+		nameFont(font, Ot.Name.NameID.Manufacturer, ancNameEntry(naming.miscNames.manufacturer));
+		nameFont(font, Ot.Name.NameID.Designer, ancNameEntry(naming.miscNames.designer));
+		nameFont(font, Ot.Name.NameID.Description, ancNameEntry(naming.miscNames.description));
+		nameFont(font, Ot.Name.NameID.LicenseDescription, ancNameEntry(naming.miscNames.licence));
 	}
 
 	// Version
@@ -108,6 +108,8 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 		[Ot.Head.Flags.InstructionMayAlterAdvanceWidth, true]
 	);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function accumulateFlags(...entries) {
 	let s = 0;
@@ -232,3 +234,9 @@ const slopeToMenuStyleMapShort = {
 	italic: "It",
 	oblique: "Obl"
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function ancNameEntry(input) {
+	return input.replace(/\{\{currentYear\}\}/g, () => String(new Date().getFullYear()));
+}
