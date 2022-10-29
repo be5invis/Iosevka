@@ -424,4 +424,9 @@ export function hashCv(g) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const SvInheritableRelations = [DependentSelector, Joining, NeqLigationSlashDotted];
+export const SvInheritableRelations = [
+	DependentSelector,
+	Joining,
+	NeqLigationSlashDotted,
+	OgonekTrY
+];
