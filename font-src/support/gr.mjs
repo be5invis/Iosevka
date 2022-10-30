@@ -107,6 +107,7 @@ function BoolProp(id) {
 export const Radical = BoolProp("Radical");
 export const RequireCcmpDecompose = BoolProp("RequireCcmpDecompose");
 export const NeqLigationSlashDotted = BoolProp("NeqLigationSlashDotted");
+export const OgonekTrY = BoolProp("OgonekTrY");
 
 export const Joining = {
 	get(glyph) {
@@ -423,4 +424,9 @@ export function hashCv(g) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const SvInheritableRelations = [DependentSelector, Joining, NeqLigationSlashDotted];
+export const SvInheritableRelations = [
+	DependentSelector,
+	Joining,
+	NeqLigationSlashDotted,
+	OgonekTrY
+];
