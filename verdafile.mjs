@@ -13,7 +13,7 @@ import which from "which";
 export const build = Verda.create();
 const { task, file, oracle, computed } = build.ruleTypes;
 const { de, fu, sfu, ofu } = build.rules;
-const { run, node, cd, cp, rm, fail, echo, silently } = build.actions;
+const { run, node, cd, cp, rm, fail, echo, silently, absolutelySilently } = build.actions;
 const { FileList } = build.predefinedFuncs;
 
 ///////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ const DistUnhintedTTF = file.make(
 			const spD = fi.spacingDerive;
 			const [deriveFrom] = await target.need(DistUnhintedTTF(spD.prefix, spD.fileName));
 
-			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
+			echo.action(echo.hl.command(`Create TTF`), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
 				o: out.full,
@@ -402,7 +402,7 @@ const DistUnhintedTTF = file.make(
 				de(SHARED_CACHE)
 			);
 
-			echo.action(echo.hl.command(`Create TTF`), fn, echo.hl.operator("->"), out.full);
+			echo.action(echo.hl.command(`Create TTF`), out.full);
 			const { cacheUpdated } = await silently.node("font-src/index.mjs", {
 				o: out.full,
 				oCharMap: charMapPath,
@@ -440,7 +440,7 @@ const DistHintedTTF = file.make(
 	async (target, out, gr, fn) => {
 		const [fi, hint] = await target.need(FontInfoOf(fn), CheckTtfAutoHintExists);
 		const [from] = await target.need(DistUnhintedTTF(gr, fn), de`${out.dir}`);
-		echo.action(echo.hl.command(`Hint TTF`), from.full, echo.hl.operator("->"), out.full);
+		echo.action(echo.hl.command(`Hint TTF`), out.full, echo.hl.operator("<-"), from.full);
 		await silently.run(hint, fi.hintParams, from.full, out.full);
 	}
 );
@@ -454,7 +454,7 @@ const DistWoff2 = file.make(
 		const Ctor = unhinted ? DistUnhintedTTF : DistHintedTTF;
 
 		const [from] = await target.need(Ctor(group, f), de`${out.dir}`);
-		echo.action(echo.hl.command("Create WOFF2"), from.full, echo.hl.operator("->"), out.full);
+		echo.action(echo.hl.command("Create WOFF2"), out.full, echo.hl.operator("<-"), from.full);
 		await silently.node(`utility/ttf-to-woff2.mjs`, from.full, out.full);
 	}
 );
@@ -505,7 +505,7 @@ const DistWebFontCSS = file.make(
 async function createWebFontCssImpl(target, output, gr, formats, unhinted) {
 	const [bp, ts] = await target.need(BuildPlanOf(gr), GroupFontsOf(gr));
 	const hs = await target.need(...ts.map(FontInfoOf));
-	echo.action(echo.hl.command(`Create WebFont CSS`), gr, echo.hl.operator("->"), output);
+	echo.action(echo.hl.command(`Create WebFont CSS`), output, echo.hl.operator("<-"), gr);
 	await silently.node("utility/make-webfont-css.mjs", output, bp.family, hs, formats, unhinted);
 }
 
@@ -675,15 +675,17 @@ const GlyfTtc = file.make(
 
 async function buildCompositeTtc(out, inputs) {
 	const inputPaths = inputs.map(f => f.full);
-	await run(TTCIZE, ["-o", out.full], inputPaths);
+	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
+	await absolutelySilently.run(TTCIZE, ["-o", out.full], inputPaths);
 }
 async function buildGlyphSharingTtc(target, parts, out) {
 	await target.need(de`${out.dir}`);
 	const [ttfInputs] = await target.need(parts.map(part => DistUnhintedTTF(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
-	await run(TTCIZE, "-u", ["-o", tmpTtc], ttfInputPaths);
-	await run("ttfautohint", tmpTtc, out.full);
+	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), ttfInputPaths);
+	await silently.run(TTCIZE, "-u", ["-o", tmpTtc], ttfInputPaths);
+	await silently.run("ttfautohint", tmpTtc, out.full);
 	await rm(tmpTtc);
 }
 
