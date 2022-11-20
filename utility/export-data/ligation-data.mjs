@@ -77,6 +77,8 @@ const ligationSamplesNarrow = [
 	[
 		"(*",
 		"*)",
+		"/*",
+		"*/",
 		"[|",
 		"|]",
 		"{|",
@@ -88,8 +90,7 @@ const ligationSamplesNarrow = [
 		"|-",
 		"-|",
 		"<!--",
-		"<!---",
-		"<***>"
+		"<!---"
 	]
 ];
 function buildLigationSet(ligData, getKey) {
