@@ -9,8 +9,10 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define asteriskCenterY : ParenTop - LongJut * 1.5
-	define asteriskCenterYLow : asteriskCenterY + 2 * (SymbolMid - asteriskCenterY)
+	define yHigh    : ParenTop - LongJut * 2
+	define yHigh_DT : ParenTop - LongJut * 1.5
+	define yLow     : mix SymbolMid yHigh (-1)
+	define yLow_DT  : mix SymbolMid yHigh_DT (-1)
 
 	define asteriskKinds : list
 		#  sides  size  rot  pFine stroke              name             dual            triple         high            sMid             midXH    low
@@ -23,7 +25,7 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 		list { 8  1.2   0.5  0.4  [AdviceStroke 3] } { 'flower'         ''              ''         } { 'high'          'sMid'           ''       ''             }
 
 	foreach [{{ sides size rot pFine stroke } { name dual triple } { high sMid midXH low } } : items-of asteriskKinds] : begin
-		create-glyph (name + '.' + high) : glyph-proc
+		create-glyph (name + '.' + sMid) : glyph-proc
 			local radius : LongJut * size
 			local fine : stroke * pFine
 			local final : 0.5 * [Math.min stroke (radius * Math.PI / sides)]
@@ -32,47 +34,49 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 				local s : Math.sin ((2 * j / sides + rot) * Math.PI)
 				local c : Math.cos ((2 * j / sides + rot) * Math.PI)
 				include : dispiro
-					flat Middle asteriskCenterY [widths fine fine]
-					curl (Middle + radius * s) (asteriskCenterY + radius * c) [widths final final]
+					flat Middle SymbolMid [widths fine fine]
+					curl (Middle + radius * s) (SymbolMid + radius * c) [widths final final]
 
-		if sMid : create-glyph (name + '.' + sMid) : composite-proc
-			refer-glyph (name + '.' + high)
-			ApparentTranslate 0 (SymbolMid - asteriskCenterY)
+		create-glyph (name + '.' + high) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (yHigh - SymbolMid)
 
 		if midXH : create-glyph (name + '.' + midXH) : composite-proc
-			refer-glyph (name + '.' + high)
-			ApparentTranslate 0 (XH / 2 - asteriskCenterY)
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (XH / 2 - SymbolMid)
 
 		if low : create-glyph (name + '.' + low) : composite-proc
-			refer-glyph (name + '.' + high)
-			ApparentTranslate 0 (2 * (SymbolMid - asteriskCenterY))
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (yLow - SymbolMid)
 
-		if (dual && sMid && low) : create-glyph (dual + '.' + sMid) : composite-proc
-			refer-glyph (name + '.' + high)
-			refer-glyph (name + '.' + low)
+		if dual : create-glyph (dual + '.' + sMid) : composite-proc
+			WithTransform [ApparentTranslate 0 (yHigh_DT - SymbolMid)] : refer-glyph (name + '.' + sMid)
+			WithTransform [ApparentTranslate 0 (yLow_DT - SymbolMid)]  : refer-glyph (name + '.' + sMid)
 
-		if (triple && sMid && low) : for-width-kinds WideWidth1
+		if triple : for-width-kinds WideWidth1
 			local scale : Math.sqrt (MosaicWidthScalar / 2)
 			create-glyph ([MangleName triple] + '.' + sMid) : glyph-proc
 				set-width MosaicWidth
-				include : WithTransform [ApparentTranslate (MosaicWidth * 0.5  - Width / 2) 0]
-					composite-proc
-						refer-glyph (name + '.' + high)
-						ScaleAround Middle asteriskCenterY    scale scale
-				include : WithTransform [ApparentTranslate (MosaicWidth * 0.75 - Width / 2) 0]
-					composite-proc
-						refer-glyph (name + '.' + low)
-						ScaleAround Middle asteriskCenterYLow scale scale
-				include : WithTransform [ApparentTranslate (MosaicWidth * 0.25 - Width / 2) 0]
-					composite-proc
-						refer-glyph (name + '.' + low)
-						ScaleAround Middle asteriskCenterYLow scale scale
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.5  - Width / 2) (yHigh_DT - SymbolMid)
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.75 - Width / 2) (yLow_DT - SymbolMid)
+				include : new-glyph : composite-proc
+					refer-glyph (name + '.' + sMid)
+					ScaleAround Middle SymbolMid scale scale
+					ApparentTranslate (MosaicWidth * 0.25 - Width / 2) (yLow_DT - SymbolMid)
 
 	select-variant 'asterisk' '*'
+	select-variant 'asterisk/high' (shapeFrom -- 'asterisk')
 	select-variant 'asterisk/sMid' (shapeFrom -- 'asterisk')
-	select-variant 'lowAsterisk' 0x204E (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/sMid/ligComment' (shapeFrom -- 'asterisk') (follow -- 'asterisk/sMid')
+	select-variant 'asterisk/low' 0x204E (shapeFrom -- 'asterisk')
 	select-variant 'dualAsterisk' 0x2051 (follow -- 'asterisk/sMid')
-	select-variant 'flower' 0x2055 (follow -- 'asterisk/positionOnly')
+	select-variant 'flower' 0x2055
 
 	for-width-kinds WideWidth1
 		select-variant [MangleName 'asterism'] [MangleUnicode 0x2042] (follow -- 'asterisk/sMid')

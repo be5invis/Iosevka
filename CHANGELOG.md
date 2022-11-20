@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 16.4.0
+
+* Add ligation for C-style multiline comments (#1444).
+
+
 ### 16.3.6
 
  * Fix shape of y-ogonek (used by Elfdalian) (#1437).
@@ -7,7 +12,7 @@
 
 ### 16.3.5
 
- * Update Powerline line number and column number symbol (`U+E0A1`, `U+E0A2`) to follow other fonts’ design.
+ * Update Powerline line number and column number symbol (`U+E0A1`, `U+E0A3`) to follow other fonts’ design.
 
 
 ### 16.3.4
