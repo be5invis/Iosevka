@@ -142,6 +142,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `ltgt-diamond-tag`: Enable ligation for `<>` as diamond-shaped empty HTML/XML tag.
   - `ltgt-slash-tag`: Enable ligation for `</`, `/>` and `</>`.
   - `brst`: Center asterisk in `(*` and `*)`.
+  - `slash-asterisk`: Shift asterisk in `/*` and `*/`.
   - `plusplus`: Enable ligation for `++` and further plus-chaining.
   - `kern-dotty`: Move connecting dotty punctuations closer, like for `::`, `:::` and `...`.
   - `kern-bars`: Move consecutive bars closer, like for `||`, `|||` and `//`.
