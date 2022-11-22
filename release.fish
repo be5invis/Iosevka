@@ -24,8 +24,14 @@ end
 popd &>/dev/null
 
 echo "Copying to $release_dir..."
-rsync --force --progress iosevkalyteterm-$font_version.tar.zstd $release_dir/
+mkdir -p $release_dir/rel/
+
+# aur tarball release
+rsync --force --progress iosevkalyteterm-$font_version.tar.zstd $release_dir/rel/
 rsync --force --progress LICENSE.md $release_dir/iosevkalyteterm-$font_version-LICENSE.md
+
+rsync --force --progress -r dist/iosevkalyteterm/ $release_dir/term/
+rsync --force --progress -r dist/iosevkalyteweb/ $release_dir/web/
 
 # cleanup
 fusermount -u $mount_dir

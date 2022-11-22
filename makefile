@@ -17,26 +17,24 @@ term-tarball: iosevkalyteterm-${VERSION}.tar.zstd
 install-term: term
 	@sudo rsync --force --progress dist/iosevkalyteterm/ttf/* /usr/share/fonts/TTF/
 
-release-term-tarball: iosevkalyteterm-${VERSION}.tar.zstd
+release: iosevkalyteterm-${VERSION}.tar.zstd dist/iosevkalyteweb/woff2/ dist/iosevkalyteweb/woff2-subset/
 	@fish release.fish
 
 ${TARBALL}: dist/iosevkalyteterm/ttf/
-	rm -f ${TARBALL}
-	cd dist/ && tar --zstd -cvf ../${TARBALL} ./iosevkalyteterm/
+	@rm -f ${TARBALL}
+	@cd dist/ && tar --zstd -cvf ../${TARBALL} ./iosevkalyteterm/
 
 dist/iosevkalyteterm/ttf/: ./private-build-plans.toml node_modules/
-	@npm run build -- ttf::iosevkalyteterm
-	@touch dist/iosevkalyteterm/ttf/
+	@npm run build -- ttf::iosevkalyteterm && touch dist/iosevkalyteterm/ttf/
 
 dist/iosevkalyteweb/woff2/: ./private-build-plans.toml node_modules/
-	@npm run build -- woff2::iosevkalyteweb
-	@touch dist/iosevkalyteweb/woff2/
+	@npm run build -- woff2::iosevkalyteweb && touch dist/iosevkalyteweb/woff2/
 	
-dist/iosevkalyteweb/woff2-subset/: dist/iosevkalyteweb/woff2/
+dist/iosevkalyteweb/woff2-subset/: dist/iosevkalyteweb/woff2/ subset-glyphs.txt makesubset.fish
 	@fish makesubset.fish
 
 node_modules/: package.json package-lock.json
-	@npm install
+	@npm install && touch node_modules/
 	
 clean:
-	echo "TODO: Not implemented"
+	rm -rf dist
