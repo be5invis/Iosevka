@@ -1,8 +1,7 @@
 ### Punctuation symbols
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -11,11 +10,9 @@ glyph-block Symbol-Punctuation-At : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	create-glyph 'at.threefold' : glyph-proc
-		set-width Width
-
-		local top : mix OperTop ParenTop 0.6
-		local bot : mix OperBot ParenBot 0.6
+	define [ThreeFoldShape height] : glyph-proc
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
@@ -23,78 +20,97 @@ glyph-block Symbol-Punctuation-At : begin
 		local m1 : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
 		local m2 : [mix m1 RightSB 0.52] + TanSlope * sw
 
-		local sma : SmoothA * ((RightSB - m1) / (RightSB - SB) * 1.1)
-		local smb : SmoothB * ((RightSB - m1) / (RightSB - SB) * 1.1)
+		local ada : ArchDepthA * ((RightSB - m1) / (RightSB - SB) * 1.1)
+		local adb : ArchDepthB * ((RightSB - m1) / (RightSB - SB) * 1.1)
 
 		include : dispiro
 			widths.lhs sw
 			flat RightSB (otop - O) [heading Leftward]
 			curl m2 (otop - O)
 			archv
-			flat m1 (otop - sma)
-			curl m1 (obot + smb)
+			flat m1 (otop - ada)
+			curl m1 (obot + adb)
 			arcvh
 			g4   m2 (obot + O)
 			archv
-			flat RightSB (obot + sma)
-			curl RightSB (top - SmoothB)
+			flat RightSB (obot + ada)
+			curl RightSB (top - ArchDepthB)
 			arcvh
-			g4   (Middle - CorrectionOMidS) (top - O) [widths Stroke 0]
+			g4   [ArchXAdjust.top Middle sw] (top - O) [widths Stroke 0]
 			archv
-			flat SB (top - SmoothA) [widths sw 0]
-			curl SB (bot + SmoothB)
+			flat SB (top - ArchDepthA) [widths sw 0]
+			curl SB (bot + ArchDepthB)
 			arcvh
-			flat (Middle + CorrectionOMidS) (bot + O) [widths Stroke 0 ]
+			flat [ArchXAdjust.bot Middle sw] (bot + O) [widths Stroke 0 ]
 			curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
 
-	create-glyph 'at.fourfold' : glyph-proc
-		local div para.diversityM
-		set-width (Width * div)
+	define [FourFoldShape height fSolidInner] : glyph-proc
+		local df : DivFrame para.diversityM [if fSolidInner 3.25 4]
+		set-width df.width
 
-		local top : mix OperTop ParenTop 0.6
-		local bot : mix OperBot ParenBot 0.6
+		local top : SymbolMid + height / 2
+		local bot : SymbolMid - height / 2
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
-		local sw : AdviceStroke 4 div
-		local swh : AdviceStroke 3.75 div
-		local left : SB * div - sw * HVContrast / 3
-		local right : (Width * div - SB * div) + sw * HVContrast / 3
-		local middle: Middle * div
+		local sw  : AdviceStroke [if fSolidInner 3.25 4]    df.div
+		local swh : AdviceStroke [if fSolidInner 3.25 3.75] df.div
 
-		local m1 : [mix (left + sw / 2) (right - sw / 2) (1 / 3)] - sw * HVContrast / 2
-		local m2 : [mix (left + sw / 2) (right - sw / 2) (2 / 3)] + sw * HVContrast / 2
+		local kM12   : if fSolidInner 0.40 (1 / 3)
+		local kM12Sw : if fSolidInner 0.25 0.5
+		local m1 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) kM12      ] - [HSwToV (sw * kM12Sw)]
+		local m2 : [mix (df.leftSB + [HSwToV (sw / 2)]) (df.rightSB - [HSwToV (sw / 2)]) (1 - kM12)] + [HSwToV (sw * kM12Sw)]
 
-		local sma : SmoothA * ((m2 - m1) / (Width - SB * 2) * 1.1)
-		local smb : SmoothB * ((m2 - m1) / (Width - SB * 2) * 1.1)
+		local ad : ArchDepth * [Math.sqrt df.div]
+		local ada : ArchDepthAOf ad df.width
+		local adb : ArchDepthBOf ad df.width
 
-		include : dispiro
-			widths.lhs sw
-			flat m2 (obot - O) [heading Upward]
-			curl m2 (otop - smb)
-			arcvh
-			g4   (middle - CorrectionOMidX * sw) (otop - O)
-			archv
-			flat m1 (otop - sma)
-			curl m1 (obot + smb)
-			arcvh
-			flat middle obot
-			curl (right - (m2 - m1) / 2) obot
-			archv
-			flat right (obot + sma)
-			curl right (top - SmoothB * div)
-			arcvh
-			g4   (middle - CorrectionOMidS) (top - O) [widths swh 0]
-			archv
-			flat left (top - SmoothA * div) [widths sw 0]
-			curl left (bot + SmoothB * div)
-			arcvh
-			flat (middle + CorrectionOMidS) (bot + O) [widths swh 0 ]
-			curl (right - HalfStroke + TanSlope * sw) (bot + O)
+		local adInner : Math.max (ad * (m2 - m1) / (df.rightSB - df.leftSB)) (sw * 1.25)
+		local adaInner : ArchDepthAOf adInner (m2 - m1 + df.leftSB * 2)
+		local adbInner : ArchDepthBOf adInner (m2 - m1 + df.leftSB * 2)
 
-	create-glyph 'at.short' : glyph-proc
-		set-width Width
+		include : union
+			dispiro
+				widths.lhs sw
+				if fSolidInner
+				: then { }
+				: else : list
+					flat m2 (obot - O) [heading Upward]
+					curl m2 (otop - adbInner)
+					arcvh
+					g4   [ArchXAdjust.top df.middle sw] (otop - O)
+					archv
+					flat m1 (otop - adaInner)
+					curl m1 (obot + adbInner)
+					arcvh
+				flat df.middle obot
+				curl (df.rightSB - [Math.max ((m2 - m1) / 2) (sw * 1.5 * HVContrast)]) obot
+				archv
+				flat df.rightSB (obot + [Math.max adaInner (sw * 1.5)])
+				curl df.rightSB (top - adb)
+				arcvh
+				g4   [ArchXAdjust.top df.middle sw] (top - O) [widths swh 0]
+				archv
+				flat df.leftSB (top - ada) [widths sw 0]
+				curl df.leftSB (bot + adb)
+				arcvh
+				flat [ArchXAdjust.bot df.middle sw] (bot + O) [widths swh 0 ]
+				curl (df.rightSB - HalfStroke + TanSlope * sw) (bot + O)
 
+			if fSolidInner
+				spiro-outline
+					corner m2 obot
+					curl   m2 (otop - adbInner)
+					arcvh
+					g4     [ArchXAdjust.top df.middle sw] otop
+					archv
+					flat   m1 (otop - adaInner)
+					curl   m1 (obot + adbInner)
+					arcvh
+					flat   df.middle obot
+				glyph-proc
+
+	define [ShortShape] : glyph-proc
 		local top  CAP
 		local obot 0
 		local otop [mix obot top 0.675]
@@ -103,39 +119,54 @@ glyph-block Symbol-Punctuation-At : begin
 		local m1 : [mix (SB + sw) (RightSB - sw) 0.53] + sw / 2
 		local m2 : [mix SB m1 0.5] + TanSlope * sw
 
-		local sma : SmoothA * ((m1 - SB) / (RightSB - SB) * 1.1)
-		local smb : SmoothB * ((m1 - SB) / (RightSB - SB) * 1.1)
-		local atTurnBot (obot - sma / 4)
+		local ada : ArchDepthA * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local adb : ArchDepthB * ((m1 - SB) / (RightSB - SB) * 1.1)
+		local atTurnBot (obot - ada / 4)
 
 		local shrink 0.6
 
 		include : dispiro
-			straight.up.start (m1 - (sw * (1 - shrink) * HVContrast)) (otop - smb) [widths.heading (sw * shrink) 0 Upward]
+			straight.up.start (m1 - (sw * (1 - shrink) * HVContrast)) (otop - adb) [widths.heading (sw * shrink) 0 Upward]
 			arcvh
 			g4 (m2 - sw * TanSlope) (otop - O) [widths.heading sw 0 Leftward]
 			archv
-			flat SB (otop - sma)
-			curl SB (obot + smb)
+			flat SB (otop - ada)
+			curl SB (obot + adb)
 			arcvh
 			g4 (m2 - sw * TanSlope) (obot + O) [heading Rightward]
 			archv
-			straight.up.end (m1 - (sw * (1 - shrink) * HVContrast)) (obot + sma) [widths.heading (sw * shrink) 0 Upward]
+			straight.up.end (m1 - (sw * (1 - shrink) * HVContrast)) (obot + ada) [widths.heading (sw * shrink) 0 Upward]
 
 		include : dispiro
 			widths.lhs sw
-			corner m1 (atTurnBot + sma) [heading Upward]
-			corner m1 (otop - smb) [heading Upward]
+			corner m1 (atTurnBot + ada) [heading Upward]
+			corner m1 (otop - adb) [heading Upward]
 			corner m1 otop [widths.heading (sw * shrink) 0 Upward]
 
 		include : dispiro
 			widths.lhs (sw * shrink)
-			straight.down.start (m1 - sw * shrink * HVContrast) (atTurnBot + sma) [heading Downward]
+			straight.down.start (m1 - sw * shrink * HVContrast) (atTurnBot + ada) [heading Downward]
 			arcvh
-			g4 ([mix (m1 - sw * HVContrast) RightSB 0.5] + CorrectionOMidX * sw) (atTurnBot + O) [widths.lhs sw]
+			g4 [ArchXAdjust.bot [mix (m1 - sw * HVContrast) RightSB 0.5] sw] (atTurnBot + O) [widths.lhs sw]
 			archv
-			flat RightSB (atTurnBot + sma)
-			curl RightSB (top - SmoothB)
+			flat RightSB (atTurnBot + ada)
+			curl RightSB (top - ArchDepthB)
 			hookend (top - O)
 			g4 SB (top - Hook)
+
+	define NormalHeight : mix (OperTop - OperBot) (ParenTop - ParenBot) 0.600
+	define TallHeight   : mix (OperTop - OperBot) (ParenTop - ParenBot) 0.875
+
+	define AtConfig : object
+		threefold               { ThreeFoldShape NormalHeight false }
+		fourfold                { FourFoldShape  NormalHeight false }
+		threefoldTall           { ThreeFoldShape TallHeight   false }
+		fourfoldTall            { FourFoldShape  TallHeight   false }
+		short                   { ShortShape     CAP          false }
+		fourfoldSolidInner      { FourFoldShape  NormalHeight true  }
+		fourfoldSolidInnerTall  { FourFoldShape  TallHeight   true  }
+
+	foreach { suffix { body height fSolidInner } } [Object.entries AtConfig] : do
+		create-glyph "at.\(suffix)" : body height fSolidInner
 
 	select-variant 'at' '@'

@@ -1,0 +1,50 @@
+import [AddCommonFeature AddFeature AddLookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from"./table-util.mjs"
+import [NumeratorForm DenominatorForm] from"../support/gr.mjs"
+
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
+
+# Name-driven feature pairs
+export : define [buildFrac sink glyphStore] : begin
+	local rec : BeginLookupBlock sink
+
+	define frac : AddFeature sink 'frac'
+	define { chain-rule reverse-rule } : ChainRuleBuilder sink
+
+	define subSolidus : AddLookup sink : object
+		.type 'gsub_single'
+		.substitutions : object ['solidus' 'fractionBar'] ['slash' 'fractionBar']
+
+	define digitSet { }
+	define numSet   { }
+	define denSet   { }
+
+	foreach { gid g } [glyphStore.namedEntries] : if (gid.(0) !== ".") : begin
+		local numForm : NumeratorForm.get   g
+		local denForm : DenominatorForm.get g
+		if (numForm && denForm) : begin
+			digitSet.push gid
+			numSet.push   numForm
+			denSet.push   denForm
+
+	define subDen : AddLookup sink : object
+		.type 'gsub_chaining'
+		.rules : list
+			chain-rule [{'fractionBar'}.concat denSet] [digitSet ~> denSet]
+
+	define subNum : AddLookup sink : object
+		.type 'gsub_reverse'
+		.rules : list
+			reverse-rule [digitSet ~> numSet] [{'fractionBar'}.concat numSet]
+
+	frac.lookups.push subSolidus
+	frac.lookups.push subDen
+	frac.lookups.push subNum
+	sink.lookupDep.push {subSolidus subDen}
+	sink.lookupDep.push {subSolidus subNum}
+
+	AddCommonFeature sink frac
+
+	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

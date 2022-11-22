@@ -1,6 +1,7 @@
-import [add-lookup add-common-feature pick-feature add-feature-lookup pick-lookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from "./table-util"
-import [Cv AnyCv CvDecompose DollarShrinkKernel DollarShorterBar] from "../support/gr"
+import [AddLookup AddCommonFeature PickCommonFeature AddFeatureLookup PickLookup BeginLookupBlock EndLookupBlock ChainRuleBuilder] from"./table-util.mjs"
+import [Cv AnyCv CvDecompose RightDependentLink RightDependentTrigger] from"../support/gr.mjs"
 
+extern Map
 extern Set
 
 define look-around null
@@ -8,91 +9,102 @@ define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
 define [FeatureName tag] : tag + '_cvss'
-define [CvLookupName tag]  : 'lookup_cv_' + tag
 define [SsLookupName tag]  : 'lookup_ss_' + tag
+define [CvLookupName tag]  : 'lookup_cv_' + tag
+define [CvDecomposeLookupName tag]  : 'lookup_cv_decompose_' + tag
 
 export : define [buildCVSS sink para glyphStore] : begin
-	if [not para.enableCvSs] : return nothing
 	define {chain-rule} : ChainRuleBuilder sink
 
 	local rec : BeginLookupBlock sink
 	local cvLookupNameSet : new Set
 	local ssLookupNameSet : new Set
 
-	# Decomposition of enclosures
-	define decompositions {.}
-	foreach { gid g } [glyphStore.namedEntries] : begin
-		local parts : CvDecompose.get g
-		if (parts && parts.length) : set decompositions.(gid) parts
+	# Build decomposition lookups
+	local decompositions : new Map
+	local cvDecompositionLookupNameSet : new Set
+	local cvTagToDecompositionLookups : new Map
 
-	define lookupNameCvDecompose : add-lookup sink : object
-		.type 'gsub_multiple'
-		.substitutions decompositions
+	foreach { gn glyph } [glyphStore.namedEntries] : if [CvDecompose.get glyph] : do
+		local decomp : object
+			parts : CvDecompose.get glyph
+			influences : new Set
+		decompositions.set gn decomp
 
-	# '$' : Kernel Shrinking
-	define dsFrom { }
-	define dsTo   { }
-	define sbSet : new Set
-	foreach { gid g } [glyphStore.namedEntries] : begin
-		if ([DollarShorterBar.get g] === 'trigger') : begin
-			sbSet.add : glyphStore.ensureExists gid
-		if [DollarShrinkKernel.get g] : begin
-			dsFrom.push : glyphStore.ensureExists gid
-			dsTo.push : glyphStore.ensureExists : DollarShrinkKernel.get g
+		foreach part [items-of decomp.parts] : begin
+			local gPart : glyphStore.queryByName part
+			if gPart : foreach [gr : items-of : AnyCv.query gPart] : begin
+				if gr.tag : decomp.influences.add gr.tag
 
-	define lookupNameDollarShrink : add-lookup sink : object
-		.type 'gsub_chaining'
-		.rules : list : chain-rule (dsFrom ~> dsTo) ([Array.from sbSet] ~> look-around)
+	foreach { gn decomp } decompositions : if decomp.influences.size : do
+		define lookupName : CvDecomposeLookupName : [[Array.from decomp.influences].sort].join '/'
+		define lookup : PickLookup sink lookupName {.type 'gsub_multiple' .substitutions {.}}
+		cvDecompositionLookupNameSet.add lookupName
+		set lookup.substitutions.(gn) decomp.parts
 
+		foreach cvTag decomp.influences : begin
+			local s : cvTagToDecompositionLookups.get cvTag
+			if [not s] : begin
+				set s : new Set
+				cvTagToDecompositionLookups.set cvTag s
+			s.add lookupName
 
-	define [addFeatureAndLookup tag lookupName init] : begin
-		define feature : pick-feature sink [FeatureName tag]
-		add-common-feature sink feature
+	define [addCvMapping tag src dst rank] : begin
+		define feature : PickCommonFeature sink [FeatureName tag]
+		define lookupName : CvLookupName tag
+		define lookup : PickLookup sink lookupName {.type 'gsub_alternate' .substitutions {.}}
 
-		define lookup : pick-lookup sink lookupName init
-		add-feature-lookup feature lookupNameCvDecompose
-		add-feature-lookup feature lookupNameDollarShrink
-		add-feature-lookup feature lookupName
-		sink.lookupDep.push { lookupNameCvDecompose lookupName }
-		sink.lookupDep.push { lookupName lookupNameDollarShrink }
-		cvLookupNameSet.add lookupName
+		if [not : cvLookupNameSet.has lookupName] : begin
+			AddFeatureLookup feature lookupName
+			cvLookupNameSet.add lookupName
+			local decompLookups : cvTagToDecompositionLookups.get tag
+			if decompLookups : foreach d decompLookups : AddFeatureLookup feature d
 
+		if [not lookup.substitutions.(src)] : set lookup.substitutions.(src) { }
+		set lookup.substitutions.(src).(rank - 1) dst
+
+	define [addSsSubstitution tag decomp src dst] : begin
+		define feature : PickCommonFeature sink [FeatureName tag]
+		define lookupName : SsLookupName composition.tag
+		define lookup : PickLookup sink lookupName {.type 'gsub_single' .substitutions {.}}
+
+		if [not : ssLookupNameSet.has lookupName] : begin
+			AddFeatureLookup feature lookupName
+			ssLookupNameSet.add lookupName
+			foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
+				local decompLookups : cvTagToDecompositionLookups.get pv.tag
+				if decompLookups : foreach d decompLookups : AddFeatureLookup feature d
+
+		set lookup.substitutions.(src) dst
 
 	# cvxx
 	foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : do
 		foreach [gr : items-of : AnyCv.query glyph] : if gr.tag : begin
-			define lookupName : CvLookupName gr.tag
-			if [not : cvLookupNameSet.has lookupName] : begin
-				addFeatureAndLookup gr.tag lookupName {.type 'gsub_alternate' .substitutions {.}}
-				cvLookupNameSet.add lookupName
-
-			local st [pick-lookup sink lookupName].substitutions
-			if [not st.(gn)] : set st.(gn) { }
-			set st.(gn).(gr.rank - 1) : glyphStore.ensureExists : gr.get glyph
+			addCvMapping gr.tag gn [glyphStore.ensureExists : gr.get glyph] gr.rank
 
 	# ssxx
 	foreach {name composition} para.variants.composites : if composition.tag : do
-		define lookupName : SsLookupName composition.tag
-		if [not : ssLookupNameSet.has lookupName] : begin
-			addFeatureAndLookup composition.tag lookupName {.type 'gsub_single' .substitutions {.}}
-			cvLookupNameSet.add lookupName
-
-		define st [pick-lookup sink lookupName].substitutions
 		define decomp : composition.decompose para para.variants.selectorTree
 		foreach { prime pv } [items-of decomp] : if (pv.tag && pv.rank) : begin
 			local gr : Cv pv.tag pv.rank
 			foreach {gn glyph} [glyphStore.namedEntries] : if [not : CvDecompose.get glyph] : begin
 				local substituted : gr.get glyph
-				if substituted : set st.(gn) substituted
+				if substituted : addSsSubstitution composition.tag decomp gn substituted
 
 	# If there are holes in the alternates list, fill them
 	foreach lutn cvLookupNameSet : begin
-		local st [pick-lookup sink lutn].substitutions
+		local st [PickLookup sink lutn].substitutions
 		foreach { k v } [pairs-of st] : foreach idx [range 0 v.length] : if [not v.(idx)]
 			set v.(idx) k
 
 	# Lookup dependency
-	foreach lutnCv cvLookupNameSet : foreach lutnSS ssLookupNameSet : begin
-		sink.lookupDep.push { lutnCv lutnSS }
+	foreach lutnDe cvDecompositionLookupNameSet : foreach lutnCv cvLookupNameSet : begin
+		sink.lookupDep.push { lutnDe lutnCv }
+	foreach lutnDe cvDecompositionLookupNameSet : foreach lutnSs ssLookupNameSet : begin
+		sink.lookupDep.push { lutnDe lutnSs }
+	foreach lutnCv cvLookupNameSet : foreach lutnSs ssLookupNameSet : begin
+		sink.lookupDep.push { lutnCv lutnSs }
 
 	EndLookupBlock rec sink
+
+define [objectIsNotEmpty obj] : obj && [Object.keys obj].length

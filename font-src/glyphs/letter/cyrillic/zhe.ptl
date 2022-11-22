@@ -1,8 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix barmixL linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import '../../../support/point' as Point
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -11,60 +9,154 @@ glyph-block Letter-Cyrillic-Zhe : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : CyrDescender
 
-	define [CyrZheShape top midtop df] : glyph-proc
-		local fine : AdviceStroke 3.3 df.div
-		local midx : mix df.leftSB df.middle 0.3
-		define [CyrAngleShape] : begin
-			local cor HVContrast
-			local overshoot : if SLAB 0 (O * 3 * df.div)
-			return : spiro-outline
-				corner (df.leftSB + overshoot) 0
-				corner (df.leftSB + fine * cor + overshoot) 0
-				corner (midx + fine * cor) (top / 2)
-				corner (df.leftSB + fine * cor + overshoot) top
-				corner (df.leftSB + overshoot) top
-				corner midx (top / 2)
+	define Zhe : namespace
+		define [ZheSw df]  : AdviceStroke 3.3 df.div
+		define [ZheSw2 df] : AdviceStroke 4.0 df.div
+		define [ZheSw3 df] : AdviceStroke 3.7 df.div
+		define [ZheOvershoot fSlab df] : if fSlab 0 (O * 3 * df.div)
 
-		include : union
-			new-glyph : glyph-proc
-				include : CyrAngleShape
-				include : FlipAround df.middle (top / 2)
-			CyrAngleShape
-			VBar df.middle 0 midtop fine
-			HBar midx (df.width - midx) (top / 2) fine
+		define [CenterBar fSlab df bot midTop] : glyph-proc
+			include : VBar df.middle bot midTop [ZheSw df]
+			if (fSlab && !para.isItalic && (df.width > 7 * para.refJut)) : begin
+				include : CenterBottomSerif df.middle bot    Jut
+				include : CenterTopSerif    df.middle midTop Jut
 
-		if SLAB : begin
+		define [LegSerifs fSlab df bot top] : glyph-proc
+			define fine : ZheSw df
 			define fineK 0.1
-			include : LeftwardTopSerif     (df.leftSB + fine * fineK) top SideJut
-			include : LeftwardBottomSerif  (df.leftSB + fine * fineK) 0 SideJut
-			include : RightwardTopSerif    (df.rightSB - fine * fineK) top SideJut
-			include : RightwardBottomSerif (df.rightSB - fine * fineK) 0 SideJut
-			define middleSerifFits : !para.isItalic && (df.width > 7 * para.refJut)
-			if middleSerifFits : include : CenterBottomSerif df.middle 0   Jut
-			if middleSerifFits : include : CenterTopSerif    df.middle top Jut
+			if fSlab : begin
+				include : LeftwardTopSerif     (df.leftSB  + fine * fineK) top SideJut
+				include : LeftwardBottomSerif  (df.leftSB  + fine * fineK) bot SideJut
+				include : RightwardTopSerif    (df.rightSB - fine * fineK) top SideJut
+				include : RightwardBottomSerif (df.rightSB - fine * fineK) bot SideJut
 
-	create-glyph 'cyrl/Zhe' 0x416 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.capital
-		include : CyrZheShape CAP CAP df
+		export : define [StraightLegs fSlab df bot top] : begin
+			define fine : ZheSw df
+			define overshoot : ZheOvershoot fSlab df
 
-	create-glyph 0x496 : composite-proc
-		refer-glyph 'cyrl/Zhe'
-		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2)
+			define attach1X : df.middle - 0.5 * HVContrast * fine
+			define attach1Y : [mix bot top 0.42] - fine
+			define attach2Y : [mix bot top 0.72] + fine
 
-	create-glyph 'cyrl/zhe' 0x436 : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : CyrZheShape XH XH df
+			define [mask] : spiro-outline
+				corner (df.leftSB  + overshoot + 0.1)    top
+				corner attach1X              (attach1Y + 0.1)
+				corner (df.width - attach1X) (attach1Y + 0.1)
+				corner (df.rightSB - overshoot - 0.1)    top
 
-	create-glyph 0x497 : composite-proc
-		refer-glyph 'cyrl/zhe'
-		CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2)
+			return : intersection [MaskBelow top] [MaskAbove bot] : union
+				intersection [MaskLeft df.middle]
+					ExtLineLhs 4 fine (df.leftSB  + overshoot) top attach1X attach1Y
+				intersection [MaskRight df.middle]
+					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - attach1X) attach1Y
+				intersection [MaskLeft df.middle] : difference
+					ExtLineRhs 4 fine (df.leftSB  + overshoot) bot attach1X attach2Y
+					mask
+				intersection [MaskRight df.middle] : difference
+					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - attach1X) attach2Y
+					mask
 
-	create-glyph 'cyrl/zhe.BGR' : glyph-proc
-		local df : DivFrame para.diversityM 3
-		set-width df.width
-		include : df.markSet.e
-		include : CyrZheShape XH CAP df
+		export : define [CurlyLegs fSlab df bot top] : begin
+			define fine : ZheSw df
+			define fine2 : ZheSw3 df
+			define overshoot : if fSlab 0 (2 * O * df.div)
+
+			define attach1X : df.middle - 0.5 * HVContrast * fine
+			define attach1Y : mix bot top : if fSlab 0.325 0.375
+			define attach2Y : mix bot top 0.75
+
+			define [upperCurvature] : bezControls  0 0.3 0.5 0.75 8
+			define [lowerCurvature] : quadControls 0 0.3          8
+
+			return : intersection [MaskBelow top] [MaskAbove bot] : union
+				dispiro
+					g4.down.start (df.leftSB  + overshoot) top [widths.lhs.heading fine Downward]
+					upperCurvature
+					g4 attach1X attach1Y [widths.lhs fine2]
+				dispiro
+					g4.down.start (df.rightSB - overshoot) top [widths.rhs.heading fine Downward]
+					upperCurvature
+					g4 (df.width - attach1X) attach1Y [widths.rhs fine2]
+				difference
+					dispiro
+						g4.up.start (df.leftSB + overshoot) bot [widths.rhs.heading fine Upward]
+						lowerCurvature
+						g4 attach1X attach2Y [widths.center fine2]
+					intersection [MaskLeft df.middle] : spiro-outline
+						corner.down.start (df.leftSB  + overshoot + 0.1) top
+						lowerCurvature
+						corner attach1X (attach1Y + 0.1)
+						corner df.middle top
+				difference
+					dispiro
+						g4.up.start (df.rightSB - overshoot) bot [widths.lhs.heading fine Upward]
+						lowerCurvature
+						g4 (df.width - attach1X) attach2Y [widths.center fine2]
+					intersection [MaskRight df.middle] : spiro-outline
+						corner.down.start (df.rightSB - overshoot - 0.1) top
+						lowerCurvature
+						corner (df.width - attach1X) (attach1Y + 0.1)
+						corner df.middle top
+
+		export : define [TouchingLegs   fSlab df bot top] : ConnectedLegsImpl 1.00 fSlab df bot top
+		export : define [ConnectingLegs fSlab df bot top] : ConnectedLegsImpl 0.60 fSlab df bot top
+		define [ConnectedLegsImpl k fSlab df bot top] : begin
+			define fine : ZheSw df
+			define cor : DiagCor (top - bot) (df.rightSB - df.leftSB)
+			define midX : mix df.leftSB (df.middle - HVContrast * cor * fine) k
+			define midY : mix bot top 0.5
+			define overshoot : ZheOvershoot fSlab df
+			return : union
+				HBar midX (df.width - midX) midY fine
+				intersection [MaskBelow midY] [MaskAbove bot]
+					ExtLineRhs 4 fine (df.leftSB + overshoot) bot midX midY
+				intersection [MaskBelow top] [MaskAbove midY]
+					ExtLineLhs 4 fine (df.leftSB + overshoot) top midX midY
+				intersection [MaskBelow midY] [MaskAbove bot]
+					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - midX) midY
+				intersection [MaskBelow top] [MaskAbove midY]
+					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - midX) midY
+
+		export : define [Shape Legs fSlab    df bot top midTop] : glyph-proc
+			include : CenterBar fSlab df bot midTop
+			include : Legs      fSlab df bot top
+			include : LegSerifs fSlab df bot top
+
+	define ZheConfig : object
+		straight            { Zhe.StraightLegs   SLAB }
+		curly               { Zhe.CurlyLegs      SLAB }
+		symmetricTouching   { Zhe.TouchingLegs   SLAB }
+		symmetricConnected  { Zhe.ConnectingLegs SLAB }
+
+	foreach { suffix { legShape fSlab } } [Object.entries ZheConfig] : do
+		create-glyph "cyrl/Zhe.\(suffix)" : glyph-proc
+			define df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : Zhe.Shape legShape fSlab df 0 CAP CAP
+
+		create-glyph "cyrl/ZheDescender.\(suffix)" : composite-proc
+			refer-glyph "cyrl/Zhe.\(suffix)"
+			CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2)
+
+		create-glyph "cyrl/zhe.\(suffix)" : glyph-proc
+			define df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : Zhe.Shape legShape fSlab df 0 XH XH
+
+		create-glyph "cyrl/zheDescender.\(suffix)" : composite-proc
+			refer-glyph "cyrl/zhe.\(suffix)"
+			CyrDescender ([DivFrame para.diversityM 3].rightSB - O * 2)
+
+		create-glyph "cyrl/zhe.BGR.\(suffix)" : glyph-proc
+			define df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.b
+			include : Zhe.Shape legShape fSlab df 0 XH Ascender
+
+	select-variant 'cyrl/Zhe'          0x416
+	select-variant 'cyrl/ZheDescender' 0x496 (follow -- 'cyrl/Zhe')
+	select-variant 'cyrl/zhe'          0x436
+	select-variant 'cyrl/zhe.BGR'            (follow -- 'cyrl/Zhe')
+	select-variant 'cyrl/zheDescender' 0x497 (follow -- 'cyrl/Zhe')

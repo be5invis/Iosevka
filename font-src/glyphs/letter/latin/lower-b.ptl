@@ -1,36 +1,36 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar
 
 	define [ToothedBody] : union
 		OBarLeftShape
-		VBarLeft SB 0 CAP
+		VBarLeft SB 0 Ascender
 
 	define [ToothlessCornerBody] : union
 		OBarLeftToothlessShape XH SB DToothlessRise DMBlend
-		VBarLeft SB DToothlessRise CAP
+		VBarLeft SB DToothlessRise Ascender
 
-	define [ToothlessRoundedBody] : OBarLeftRoundedShape XH SB CAP
+	define [ToothlessRoundedBody] : OBarLeftRoundedShape XH SB Ascender
 
 	define [FullSerifs] : glyph-proc
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+			include : tagged 'serifLT' : LeftwardTopSerif SB Ascender SideJut
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
 	define [LTSerifs] : glyph-proc
 		if SLAB : begin
-			include : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+			include : tagged 'serifLT' : LeftwardTopSerif SB Ascender SideJut
 
-	define [MotionSerifs] : tagged 'serifLT' : LeftwardTopSerif SB CAP SideJut
+	define [MotionSerifs] : tagged 'serifLT' : LeftwardTopSerif SB Ascender SideJut
 
 	define BConfig : object
 		toothed                       { ToothedBody          FullSerifs   SLAB }
@@ -41,53 +41,63 @@ glyph-block Letter-Latin-Lower-B : begin
 		toothlessRoundedMotionSerifed { ToothlessRoundedBody MotionSerifs true }
 
 	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
+		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.45
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body
 			include : Serifs
+			set-base-anchor 'overlayOnBar' (SB + 0.5 * Stroke * HVContrast) yOverlay
 		create-glyph "bBar.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
-			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.5] [mix XH (CAP - [if doTS Stroke 0]) 0.45]
+			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.625] yOverlay
+		create-glyph "bSlash.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : dispiro
+				widths.center OverlayStroke
+				flat [mix SB 0       0.7]   (yOverlay - Ascender * 0.1)
+				curl [mix SB RightSB 0.625] (yOverlay + Ascender * 0.05)
 
-	select-variant 'b' 'b'
-	select-variant 'bBar' 0x180 (follow -- 'b')
+	select-variant 'b'      'b'
+	select-variant 'bBar'   0x180  (follow -- 'b')
+	select-variant 'bSlash' 0x2422 (follow -- 'b')
+
 	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
+	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnBar'
 
-
-	create-glyph 'bhooktop.toothed' : glyph-proc
+	create-glyph 'bHookTop.toothed' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftShape
 		include : HooktopLeftBar
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
-	create-glyph 'bhooktop.toothlessCorner' : glyph-proc
+	create-glyph 'bHookTop.toothlessCorner' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftToothlessShape XH SB DToothlessRise DMBlend
 		include : HooktopLeftBar (bottom -- DToothlessRise)
 
-	create-glyph 'bhooktop.toothlessRounded' : glyph-proc
+	create-glyph 'bHookTop.toothlessRounded' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftRoundedShape XH SB XH
-		include : HooktopLeftBar (bottom -- SmallSmoothB)
+		include : HooktopLeftBar (bottom -- SmallArchDepthB)
 
-	select-variant 'bhooktop' 0x253
+	select-variant 'bHookTop' 0x253
 
-	derive-glyphs 'bdot' 0x1E03 'b' : lambda [src sel] : glyph-proc
+	derive-glyphs 'bdot' 0x1E03 'b' : lambda [src gr] : glyph-proc
 		include : refer-glyph "dotAbove"
 		include : Translate (Width + HalfStroke) 0
 		include [refer-glyph src] AS_BASE
 
-	derive-glyphs 'latinbe' 0x183 'b' : lambda [src sel] : glyph-proc
+	derive-glyphs 'latinbe' 0x183 'b' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE
-		include : HBarTop (SB - O) [mix SB RightSB 0.9] CAP
+		include : HBarTop (SB - O) [mix SB RightSB 0.9] Ascender
 		if SLAB : begin
-			include : DownwardRightSerif [mix SB RightSB 0.9] CAP VJut
+			include : DownwardRightSerif [mix SB RightSB 0.9] Ascender VJut
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/b' 0x1D553 : glyph-proc
 		include : MarkSet.b
-		include : BBBarLeft SB 0 CAP
+		include : BBBarLeft SB 0 Ascender
 		include : intersection
 			OShapeOutline.NoOvershoot XH 0 (SB + BBD + BBS * HVContrast) RightSB
 			VBarRight (RightSB - BBD - OX) 0 XH BBS

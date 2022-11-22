@@ -1,0 +1,107 @@
+$$include '../../meta/macros.ptl'
+
+import [Arcs Quadify ShapeConv] from "typo-geom"
+import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from"../../support/geometry/curve-util.mjs"
+import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [DesignParameters] from"../../meta/aesthetics.mjs"
+import [TieMark TieGlyph] from"../../support/gr.mjs"
+import [Box] from"../../support/geometry/box.mjs"
+
+glyph-module
+
+glyph-block Mark-Overlay : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	glyph-block-import Mark-Shared-Metrics : markExtend markHalfStroke markStress markFine
+	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Above : aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
+	glyph-block-import Mark-Above : TildeShape
+	glyph-block-import Mark-Below : belowMarkBot belowMarkTop belowMarkMid
+
+	define aboveTieBase   : aboveMarkStack - AccentClearance
+	define aboveTieTop    : mix XH aboveMarkTop 2
+	define aboveTieBottom : aboveTieTop - (aboveMarkTop - aboveMarkBot) * 0.875
+	define belowTieBase     Descender
+	define belowTieBottom : Descender - (0 - belowMarkBot)
+
+	local tieLeft [mix 0 markMiddle 1.5]
+	local tieRight (-tieLeft)
+
+	create-glyph 'tieAbove' 0x361 : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
+		include : dispiro
+			widths.center (markHalfStroke * 2)
+			g4 tieLeft aboveTieBottom
+			quadControls  0.5 1
+			g4.right.mid  0 aboveTieTop [heading Rightward]
+			quadControls  0.5 0
+			g4 tieRight aboveTieBottom
+
+	create-glyph 'turnTieAbove' 0x35D : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
+		include : dispiro
+			widths.center (markHalfStroke * 2)
+			g4 tieLeft aboveTieTop
+			quadControls  0.5 1
+			g4.right.mid  0 aboveTieBottom [heading Rightward]
+			quadControls  0.5 0
+			g4 tieRight aboveTieTop
+
+	create-glyph 'tieBelow' 0x35C : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
+		include [refer-glyph 'tieAbove']
+		include : FlipAround 0 (XH / 2)
+
+	create-glyph 'overlineTieAbove' 0x35E : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
+		include : dispiro
+			widths.center (markHalfStroke * 2)
+			flat tieLeft (aboveTieBase + AccentHeight / 2)
+			curl tieRight (aboveTieBase + AccentHeight / 2)
+
+	create-glyph 'underlineTieBelow' 0x35F : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
+		include [refer-glyph 'overlineTieAbove']
+		include : FlipAround 0 (XH / 2)
+
+	create-glyph 'arrowTieBelow' 0x362 : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		TieGlyph.set currentGlyph
+		include : HBar tieLeft tieRight (Descender - AccentHeight / 2) (markFine * 2)
+		include : new-glyph : glyph-proc
+			local top (Descender - AccentHeight / 2 + (belowMarkTop - belowMarkBot) / 2 * 1.5)
+			local bot (Descender - AccentHeight / 2 - (belowMarkTop - belowMarkBot) / 2 * 1.5)
+			local left : tieRight - markExtend * 1.5
+			local right tieRight
+			local exp : Math.sqrt : 1 + (top - bot) / (2 * (right - left)) * (top - bot) / (2 * (right - left))
+			include : dispiro
+				widths.center : markFine * 2
+				flat left top
+				curl right [mix top bot 0.5] [widths.heading (markFine * exp) (markFine * exp) Downward]
+			include : dispiro
+				widths.center : markFine * 2
+				flat left bot
+				curl right [mix top bot 0.5] [widths.heading (markFine * exp) (markFine * exp) Upward]
+
+	create-glyph 'tildeTieAbove' 0x360 : glyph-proc
+		set-width 0
+		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		TieGlyph.set currentGlyph
+		include : TildeShape
+			ttop -- aboveTieTop
+			tbot -- aboveTieBottom
+			leftEnd -- tieLeft
+			rightEnd -- tieRight
+			hs -- markHalfStroke

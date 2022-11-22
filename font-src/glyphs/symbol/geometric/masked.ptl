@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [DesignParameters] from"../../../meta/aesthetics.mjs"
 
 glyph-module
 
@@ -81,6 +81,30 @@ glyph-block Symbol-Geometric-Masked : for-width-kinds WideWidth1
 						if LB : include : LowerLeftQuarterMark
 						if RT : include : UpperRightQuarterMark
 						if RB : include : LowerRightQuarterMark
+
+		define [progressCircleMaskPoint pAngle] : corner
+			Geom.MidX + [Math.cos ((0.5 - pAngle * 2) * Math.PI)] * Geom.Width * 4
+			Geom.MidY + [Math.sin ((0.5 - pAngle * 2) * Math.PI)] * Geom.Width * 4
+		define progressCircleSections : list
+			list 0xEE06 (-1 / 12)         (1 / 12)
+			list 0xEE07  0                (1 / 3)
+			list 0xEE08 (1 / 6)           (1 / 2 + 1 / 24)
+			list 0xEE09 (1 / 4)           (3 / 4)
+			list 0xEE0A (1 / 2 - 1 / 24)  (5 / 6)
+			list 0xEE0B (2 / 3)            1
+		foreach [{u pAngleStart pAngleEnd} : items-of progressCircleSections] : begin
+			create-glyph [MangleName ('uni' + u)] [MangleUnicode u] : glyph-proc
+				set-width Geom.Width
+				include : intersection
+					refer-glyph : MangleName 'whiteCircle'
+					spiro-outline
+						corner Geom.MidX Geom.MidY
+						progressCircleMaskPoint [mix pAngleStart pAngleEnd (0 / 4)]
+						progressCircleMaskPoint [mix pAngleStart pAngleEnd (1 / 4)]
+						progressCircleMaskPoint [mix pAngleStart pAngleEnd (2 / 4)]
+						progressCircleMaskPoint [mix pAngleStart pAngleEnd (3 / 4)]
+						progressCircleMaskPoint [mix pAngleStart pAngleEnd (4 / 4)]
+
 
 	do "Partial square"
 		define squareParts : list
@@ -231,3 +255,50 @@ glyph-block Symbol-Geometric-Masked : for-width-kinds WideWidth1
 			include : intersection
 				refer-glyph : MangleName 'blackCircle'
 				refer-glyph : MangleName 'whiteEqualTriangleDown'
+
+	do "Moon Phases"
+		alias [MangleName 'newMoon'] [MangleUnicode 0x1F311] [MangleName 'blackCircle']
+		alias [MangleName 'firstQuarterMoon'] [MangleUnicode 0x1F313] [MangleName "uni\(0x25D0)"]
+		alias [MangleName 'fullMoon'] [MangleUnicode 0x1F315] [MangleName 'whiteCircle']
+		alias [MangleName 'lastQuarterMoon'] [MangleUnicode 0x1F317] [MangleName "uni\(0x25D1)"]
+
+		define [WaxingMoonMask] : union
+			MaskLeft Geom.MidX
+			composite-proc
+				refer-glyph [MangleName 'blackCircle']
+				Ungizmo
+				ScaleAround Geom.MidX Geom.MidY 0.625 (1 - 0.5 * GeometryStroke / Geom.Size)
+				Translate (-GeometryStroke * HVContrast) 0
+				Regizmo
+
+		create-glyph [MangleName 'waxingCrescentMoon'] [MangleUnicode 0x1F312] : glyph-proc
+			set-width Geom.Width
+			include : refer-glyph [MangleName 'whiteCircle']
+			include : intersection
+				refer-glyph [MangleName 'blackCircle']
+				WaxingMoonMask
+
+		create-glyph [MangleName 'waxingGibbousMoon'] [MangleUnicode 0x1F314] : glyph-proc
+			set-width Geom.Width
+			include : refer-glyph [MangleName 'whiteCircle']
+			include : difference
+				refer-glyph [MangleName 'blackCircle']
+				composite-proc
+					WaxingMoonMask
+					FlipAround Geom.MidX Geom.MidY
+
+		create-glyph [MangleName 'waningGibbousMoon'] [MangleUnicode 0x1F316] : glyph-proc
+			set-width Geom.Width
+			include : refer-glyph [MangleName 'whiteCircle']
+			include : difference
+				refer-glyph [MangleName 'blackCircle']
+				WaxingMoonMask
+
+		create-glyph [MangleName 'waningCrescentMoon'] [MangleUnicode 0x1F318] : glyph-proc
+			set-width Geom.Width
+			include : refer-glyph [MangleName 'whiteCircle']
+			include : intersection
+				refer-glyph [MangleName 'blackCircle']
+				composite-proc
+					WaxingMoonMask
+					FlipAround Geom.MidX Geom.MidY

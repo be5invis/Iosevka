@@ -1,8 +1,8 @@
 ### Punctuation symbols
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [DependentSelector] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -10,6 +10,7 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Punctuation-Small
+	glyph-block-import Letter-Shared : CreateDependentComposite
 
 	local quoteTop (CAP * 1.05)
 	local quoteBottom (XH * 0.85)
@@ -18,25 +19,31 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 	local commaLow (Descender * 0.9)
 	local ratio : Math.min 1 : (quoteTop - quoteBottom) / (PeriodSize - commaLow)
 
-	derive-glyphs 'lowSingleQuote' 0x201A 'comma' : function [src sel] : glyph-proc
+	derive-glyphs 'lowSingleQuote' 0x201A 'comma' : function [src gr] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : refer-glyph src
 		include : FlipAround df.middle 0 ratio ratio
 
-	derive-glyphs 'openSingleQuote' 0x2018 'lowSingleQuote' : function [src sel] : glyph-proc
+	derive-glyphs 'revLowSingleQuote' null 'revComma' : function [src gr] : glyph-proc
+		local df : DivFrame para.diversityF
+		set-width df.width
+		include : refer-glyph src
+		include : FlipAround df.middle 0 ratio ratio
+
+	derive-glyphs 'openSingleQuote' 0x2018 'lowSingleQuote' : function [src gr] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : refer-glyph src
 		include : FlipAround df.middle [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5]
 
-	derive-glyphs 'closeSingleQuote' 0x2019 'openSingleQuote' : function [src sel] : glyph-proc
+	derive-glyphs 'closeSingleQuote' 0x2019 'openSingleQuote' : function [src gr] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : refer-glyph src
 		include : FlipAround df.middle yCurlyQuotes
 
-	derive-glyphs 'revertSingleQuote' 0x201B 'invertComma' : function [src sel] : glyph-proc
+	derive-glyphs 'revSingleQuote' 0x201B 'revComma' : function [src gr] : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : refer-glyph src
@@ -52,15 +59,18 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 		include : refer-glyph gn
 		include : Translate (dist + Middle - dfSingle.middle) 0
 
-	derive-glyphs 'lowDoubleQuote' 0x201E 'lowSingleQuote'
-		function [src sel] : DoubleQuoteProc src
-	derive-glyphs 'openDoubleQuote' 0x201C 'openSingleQuote'
-		function [src sel] : DoubleQuoteProc src
-	derive-glyphs 'closeDoubleQuote' 0x201D 'closeSingleQuote'
-		function [src sel] : DoubleQuoteProc src
-	derive-glyphs 'revertDoubleQuote' 0x201F 'revertSingleQuote'
-		function [src sel] : DoubleQuoteProc src
+	derive-glyphs 'lowDoubleQuote'    0x201E 'lowSingleQuote'    DoubleQuoteProc
+	derive-glyphs 'openDoubleQuote'   0x201C 'openSingleQuote'   DoubleQuoteProc
+	derive-glyphs 'closeDoubleQuote'  0x201D 'closeSingleQuote'  DoubleQuoteProc
+	derive-glyphs 'revDoubleQuote'    0x201F 'revSingleQuote'    DoubleQuoteProc
+	derive-glyphs 'revLowDoubleQuote' 0x2E42 'revLowSingleQuote' DoubleQuoteProc
 
+	alias 'mdfTurncomma'        0x2BB 'openSingleQuote'
+	alias 'mdfApostrophe'       0x2BC 'closeSingleQuote'
+	alias 'mdfRevComma'         0x2BD 'revSingleQuote'
+	alias 'mdfDoubleApostrophe' 0x2EE 'closeDoubleQuote'
+
+	# Primes
 	create-glyph 'prime' 0x2032 : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
@@ -96,6 +106,29 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 			widths.center (fine * 2 * 1.2)
 			flat (df.middle + d + wide) quoteTop [heading Downward]
 			curl (df.middle + d - wide) quoteBottom [widths.heading fine fine Downward]
+
+	create-glyph 'quadPrime' 0x2057 : glyph-proc
+		local df : DivFrame para.diversityM
+		set-width df.width
+		local wide : Width * 0.1
+		local fine : 0.5 * [AdviceStroke 4]
+		local d : df.width * 0.15 - fine / 6
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (df.middle - d + wide) quoteTop [heading Downward]
+			curl (df.middle - d - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (df.middle + d + wide) quoteTop [heading Downward]
+			curl (df.middle + d - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (df.middle - 3 * d + wide) quoteTop [heading Downward]
+			curl (df.middle - 3 * d - wide) quoteBottom [widths.heading fine fine Downward]
+		include : dispiro
+			widths.center (fine * 2 * 1.2)
+			flat (df.middle + 3 * d + wide) quoteTop [heading Downward]
+			curl (df.middle + 3 * d - wide) quoteBottom [widths.heading fine fine Downward]
 
 	create-glyph 'revprime' 0x2035 : glyph-proc
 		local df : DivFrame para.diversityF
@@ -133,8 +166,15 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 			flat (df.middle + d + wide) quoteTop [heading Downward]
 			curl (df.middle + d - wide) quoteBottom [widths.heading fine fine Downward]
 
+	alias 'mdfPrime' 0x2B9 'prime'
+	alias 'grek/numberSign' 0x374 'prime'
+	alias 'mdfDoublePrime' 0x2BA 'doubleprime'
+
+	derive-composites 'grek/lowNumberSign' 0x375 'prime'
+		ApparentTranslate 0 ([mix [mix [mix PeriodSize commaLow 0.5] yCurlyQuotes 0.5] quoteBottom (-1)] - quoteTop)
+
 	# ASCII quotes
-	create-glyph 'asciiSingleQuote.straight' : glyph-proc
+	create-glyph 'asciiSingleQuote/body/straight' : glyph-proc
 		local df : DivFrame para.diversityF
 		set-width df.width
 		include : dispiro
@@ -142,17 +182,48 @@ glyph-block Symbol-Punctuation-Quotes-And-Primes : begin
 			g4.down.start df.middle quoteTop [heading Downward]
 			g4 df.middle quoteBottom [widths.heading (HalfStroke * 0.95) (HalfStroke * 0.95) Downward]
 
-	alias 'asciiSingleQuote.raisedComma' null 'closeSingleQuote'
-	alias 'asciiGrave.raisedInverseComma' null 'revertSingleQuote'
-	alias 'asciiGrave.raisedTurnComma' null 'openSingleQuote'
+	create-glyph 'asciiGrave/selector.straight' : glyph-proc
+		DependentSelector.set currentGlyph 'straight'
+	create-glyph 'asciiGrave/selector.raisedInverseComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedInverseComma'
+	create-glyph 'asciiGrave/selector.raisedTurnComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedTurnComma'
 
-	select-variant 'asciiSingleQuote' 0x27
-	select-variant 'asciiGrave' 0x60
+	create-glyph 'asciiSingleQuote/selector.straight' : glyph-proc
+		DependentSelector.set currentGlyph 'straight'
+	create-glyph 'asciiSingleQuote/selector.raisedComma' : glyph-proc
+		DependentSelector.set currentGlyph 'raisedComma'
+
+	select-variant 'asciiSingleQuote/selector' (follow -- 'asciiSingleQuote')
+	select-variant 'asciiGrave/selector' (follow -- 'asciiGrave')
+
+	CreateDependentComposite 'asciiGrave' 0x60 'asciiGrave/selector' : object
+		'straight'            'asciiGrave/body/straight'
+		'raisedInverseComma'  'revSingleQuote'
+		'raisedTurnComma'     'openSingleQuote'
+
+	CreateDependentComposite 'asciiSingleQuote' 0x27 'asciiSingleQuote/selector' : object
+		'straight'            'asciiSingleQuote/body/straight'
+		'raisedComma'         'closeSingleQuote'
+
+	alias 'mdfStress' 0x2C8 'asciiSingleQuote/body/straight'
+	turned 'mdfSecondaryStress' 0x2CC 'asciiSingleQuote/body/straight' Middle (XH / 2)
 
 	create-glyph 'asciiDoubleQuote' 0x22 : glyph-proc
 		local dfSingle : DivFrame para.diversityF
 		local dist : 0.2 * Width
-		include : refer-glyph "asciiSingleQuote.straight"
+		include : refer-glyph "asciiSingleQuote/body/straight"
 		include : Translate (-dist * 2) 0
-		include : refer-glyph "asciiSingleQuote.straight"
+		include : refer-glyph "asciiSingleQuote/body/straight"
 		include : Translate (dist + Middle - dfSingle.middle) 0
+
+	# Half-circle modifiers, use quote dimensions
+	create-glyph 'modifierLetterLeftHalfRing' 0x2BF : glyph-proc
+		local height : quoteTop - quoteBottom
+		include : dispiro
+			g4.left.start (Middle + height / 4) (quoteTop - O) [widths.lhs.heading [AdviceStroke 3] Leftward]
+			archv
+			g4.down.mid (Middle - height / 4 + O) [mix quoteBottom quoteTop 0.5] [widths.lhs.heading [AdviceStroke 3.5] Downward]
+			arcvh
+			g4.right.end (Middle + height / 4) (quoteBottom + O) [widths.lhs.heading [AdviceStroke 3] Rightward]
+	turned 'modifierLetterRightHalfRing' 0x2BE 'modifierLetterLeftHalfRing' Middle [mix quoteBottom quoteTop 0.5]

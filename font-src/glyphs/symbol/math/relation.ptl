@@ -1,10 +1,8 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [Box] from '../../../support/box'
-import [Joining] from '../../../support/gr'
-import [DesignParameters] from '../../../meta/aesthetics'
-import '../../../support/point' as Point
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Box] from"../../../support/geometry/box.mjs"
+import [Joining] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -33,7 +31,6 @@ glyph-block Symbol-Math-Relation-Common : begin
 glyph-block Symbol-Math-Relation-Equal : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Shared-Symbol-Shapes : WithDotVariants
 	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace dH
 	glyph-block-export EqualShape EqualHole IdentShape IdentHole
 
@@ -107,8 +104,8 @@ glyph-block Symbol-Math-Relation-Equal : begin
 				Middle - outerRad
 				Middle + outerRad
 				begin ringSw
-				SmoothAOf outerRad Width
-				SmoothBOf outerRad Width
+				ArchDepthAOf outerRad Width
+				ArchDepthBOf outerRad Width
 		include : difference
 			OShape
 				SymbolMid + EqualHalfSpace + outerRad
@@ -116,8 +113,8 @@ glyph-block Symbol-Math-Relation-Equal : begin
 				Middle - outerRad
 				Middle + outerRad
 				begin ringSw
-				SmoothAOf outerRad Width
-				SmoothBOf outerRad Width
+				ArchDepthAOf outerRad Width
+				ArchDepthBOf outerRad Width
 			Rect (SymbolMid + halfGap) (SymbolMid - halfGap) 0 Width
 
 	create-glyph 'differenceBetween' 0x224F : glyph-proc
@@ -177,7 +174,6 @@ glyph-block Symbol-Math-Relation-Addons : begin
 glyph-block Symbol-Math-Relation-Colons : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Shared-Symbol-Shapes : WithDotVariants
 	glyph-block-import Symbol-Arrow : ArrowShape
 	glyph-block-import Symbol-Math-Relation-Equal : EqualShape
 
@@ -209,8 +205,7 @@ glyph-block Symbol-Math-Relation-Colons : begin
 glyph-block Symbol-Math-Relation-Sym : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Marks : TildeShape
-	glyph-block-import Shared-Symbol-Shapes : WithDotVariants
+	glyph-block-import Mark-Above : TildeShape
 	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
 	glyph-block-import Symbol-Math-Relation-Addons : EqEqBarNegationImpl
 
@@ -282,7 +277,6 @@ glyph-block Symbol-Math-Relation-Sym : begin
 glyph-block Symbol-Math-Relation-Inequality : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Shared-Symbol-Shapes : WithDotVariants
 	glyph-block-import Symbol-Math-Relation-Common : dH lessEqDist
 	glyph-block-import Symbol-Math-Relation-Sym : symWave
 	glyph-block-import Symbol-Math-Relation-Addons : lesslessSW EqEqBarNegation llggHeight
@@ -594,21 +588,34 @@ glyph-block Symbol-Math-Relation-Subset : begin
 	glyph-block-import Symbol-Math-Relation-Common : dH dHSubstSimple lessEqDist dHElem
 	glyph-block-import Symbol-Math-Relation-Addon-Glyphs
 
-	define [SubsetShape] : params [top bot [sw OperatorStroke] [offset 0]] : dispiro
+	define [SubsetMaskShape] : params [top bot [sw OperatorStroke] [offset 0] [xShift 0]] : spiro-outline
+		corner RightSB (top - offset) [heading Leftward]
+		curl (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (top - offset)
+		archv
+		g4   (SB + xShift + offset + O) [mix top bot 0.5]
+		arcvh
+		flat (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (bot + offset)
+		corner RightSB (bot + offset) [heading Rightward]
+
+
+	define [SubsetShape] : params [top bot [sw OperatorStroke] [offset 0] [xShift 0]] : dispiro
 		widths.lhs sw
 		flat RightSB (top - offset) [heading Leftward]
-		curl (SB + offset + (top - bot) / 2 - offset) (top - offset)
+		curl (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (top - offset)
 		archv
-		g4   (SB + offset) [mix top bot 0.5]
+		g4   (SB + xShift + offset + O) [mix top bot 0.5]
 		arcvh
-		flat (SB + offset + (top - bot) / 2 - offset) (bot + offset)
+		flat (SB + [Math.max (sw * 1.5) ((xShift + top - bot) / 2)]) (bot + offset)
 		curl RightSB (bot + offset) [heading Rightward]
 
 	define [SupsetShape top bot sw] : glyph-proc
 		include : SubsetShape top bot sw
 		include : FlipAround Middle [mix top bot 0.5]
 
-	create-glyph 'subst' 0x2282 : SubsetShape (SymbolMid + dHSubstSimple) (SymbolMid - dHSubstSimple)
+	create-glyph 'subst' 0x2282
+		SubsetShape (SymbolMid + dHSubstSimple) (SymbolMid - dHSubstSimple)
+	create-glyph 'subst/aplLeft'
+		SubsetShape (SymbolMid + dHSubstSimple) (SymbolMid - dHSubstSimple) [AdviceStroke 3.5]
 	create-glyph 'doubleSubst' 0x22D0 : glyph-proc
 		local sw : AdviceStroke 6
 		local gap : Math.max (Width / 8) (sw / 2)
@@ -625,21 +632,62 @@ glyph-block Symbol-Math-Relation-Subset : begin
 		SupsetShape (SymbolMid + dH + lessEqDist) (SymbolMid - dH + lessEqDist)
 
 	derive-composites 'substBar' 0x2286 'substBarUpper' 'eqLower'
+	derive-composites 'substBarNoRise' null 'subst' 'eqLower2'
 	derive-composites 'substBarNegated' 0x228A 'substBarUpper' 'eqBarNegatedLower'
 	derive-composites 'supstBar' 0x2287 'supstBarUpper' 'eqLower'
+	derive-composites 'supstBarNoRise' null 'supst' 'eqLower2'
 	derive-composites 'supstBarNegated' 0x228B 'supstBarUpper' 'eqBarNegatedLower'
 
 	create-glyph 'element' 0x2208 : glyph-proc
 		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem)
 		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
 
+	create-glyph 'elementWithTwoHorizontalStrokes' 0x22F9 : glyph-proc
+		define sw : Math.min OperatorStroke : AdviceStroke2 2 4 (2 * dHElem)
+		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem) (sw -- sw)
+		include : intersection
+			SubsetMaskShape (SymbolMid + dHElem) (SymbolMid - dHElem) (sw -- sw) (offset -- 0.1)
+			union
+				HBar SB RightSB (SymbolMid - (dHElem / 3) + (sw / 6)) sw
+				HBar SB RightSB (SymbolMid + (dHElem / 3) - (sw / 6)) sw
+
 	turned 'turnElement' 0x220B 'element' Middle SymbolMid
 
 	create-glyph 'smallElement' 0x220A : glyph-proc
-		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH)
-		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+		local sw : AdviceStroke2 3 2.75 (dH * 2)
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid sw
 
 	turned 'turnSmallElement' 0x220D 'smallElement' Middle SymbolMid
+
+	create-glyph 'elementStroke' 0x22F2 : glyph-proc
+		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem)
+			xShift -- ((RightSB - SB) * 0.2 + Stroke * 0.25 * HVContrast)
+		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+
+	turned 'turnElementStroke' 0x22FA 'elementStroke' Middle SymbolMid
+
+	define [ElementBarHalfHeight h] : h / 2 - OperatorStroke / 4
+
+	create-glyph 'elementBarAtEnd' 0x22F3 : glyph-proc
+		include : SubsetShape (SymbolMid + dHElem) (SymbolMid - dHElem)
+		include : VBarRight RightSB (SymbolMid - [ElementBarHalfHeight dHElem]) (SymbolMid + [ElementBarHalfHeight dHElem]) OperatorStroke
+		include : HBar (SB + HalfStroke) RightSB SymbolMid OperatorStroke
+
+	turned 'turnElementBarAtEnd' 0x22FB 'elementBarAtEnd' Middle SymbolMid
+
+	create-glyph 'smallElementBarAtEnd' 0x22F4 : glyph-proc
+		local sw : AdviceStroke2 3 2.75 (dH * 2)
+		include : SubsetShape (SymbolMid + dH) (SymbolMid - dH) (sw -- sw)
+		include : VBarRight RightSB (SymbolMid - [ElementBarHalfHeight dH]) (SymbolMid + [ElementBarHalfHeight dH]) sw
+		include : HBar (SB + HalfStroke) RightSB SymbolMid sw
+
+	turned 'turnSmallElementBarAtEnd' 0x22FC 'smallElementBarAtEnd' Middle SymbolMid
+
+	WithDotVariants 'elementOfWithDotAbove' 0x22F5 : function [DrawAt kDotRadius overshoot]
+		composite-proc [refer-glyph 'element']
+			ApparentTranslate 0 (-lessEqDist)
+			DrawAt Middle (SymbolMid + (dHElem + lessEqDist)) (kDotRadius + DotRadius - overshoot)
 
 	create-glyph 0x22F6 : composite-proc [refer-glyph 'element']
 		ApparentTranslate 0 (-lessEqDist)
@@ -653,13 +701,13 @@ glyph-block Symbol-Math-Relation-Subset : begin
 		ApparentTranslate 0 (-(dH / dHElem) * lessEqDist)
 		HBar SB RightSB (SymbolMid + (dH + (dH / dHElem) * lessEqDist)) OperatorStroke
 
-	create-glyph 0x22FE : composite-proc [refer-glyph 'turnSmallElement']
-		ApparentTranslate 0 (-(dH / dHElem) * lessEqDist)
-		HBar SB RightSB (SymbolMid + (dH + (dH / dHElem) * lessEqDist)) OperatorStroke
-
 	create-glyph 0x22F8 : composite-proc [refer-glyph 'element']
 		ApparentTranslate 0 (+lessEqDist)
 		HBar SB RightSB (SymbolMid - (dHElem + lessEqDist)) OperatorStroke
+
+	create-glyph 0x22FE : composite-proc [refer-glyph 'turnSmallElement']
+		ApparentTranslate 0 (-(dH / dHElem) * lessEqDist)
+		HBar SB RightSB (SymbolMid + (dH + (dH / dHElem) * lessEqDist)) OperatorStroke
 
 glyph-block Symbol-Math-Relation-Precedes-Succeeds-Prefix-Suffix : begin
 	glyph-block-import CommonShapes
@@ -732,6 +780,7 @@ glyph-block Symbol-Math-Relation-Addon-Glyphs : begin
 			flat (Middle - dist) (symbolBottom - dist - swo) [heading Downward]
 
 	create-glyph 'eqLower' : AsRadical : HBar SB RightSB (SymbolMid - dH - lessEqDist) OperatorStroke
+	create-glyph 'eqLower2' : AsRadical : HBar SB RightSB (SymbolMid - dH - 2 * lessEqDist) OperatorStroke
 	create-glyph 'eqBarNegatedLower' : AsRadical : union [refer-glyph 'eqLower'] [BarNegator (SymbolMid - dH) lessEqDist]
 	create-glyph 'symLower' : AsRadical : symWave (SymbolMid - dH - lessEqDist) 1
 	create-glyph 'symBarNegatedLower' : AsRadical : union [refer-glyph 'symLower'] [BarNegator (SymbolMid - dH) lessEqDist]

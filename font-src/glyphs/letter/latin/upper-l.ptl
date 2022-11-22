@@ -1,15 +1,15 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
 glyph-block Letter-Latin-Upper-L : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Marks : markMiddle aboveMarkBot aboveMarkTop
+	glyph-block-import Mark-Shared-Metrics : markMiddle
+	glyph-block-import Mark-Above : aboveMarkMid
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define LBarLeftX : SB * 1.5
@@ -33,7 +33,7 @@ glyph-block Letter-Latin-Upper-L : begin
 			include : LShape CAP serifGrade
 			set-base-anchor 'cvDecompose' ([mix SB RightSB 0.65] + 0.25 * Stroke * HVContrast) [mix Stroke CAP 0.5]
 		create-glyph "smcpL.\(suffix)" : glyph-proc
-			include : MarkSet.capital
+			include : MarkSet.e
 			include : LShape XH serifGrade
 
 	select-variant 'L' 'L'
@@ -50,10 +50,11 @@ glyph-block Letter-Latin-Upper-L : begin
 		include : VBarLeft (LBarLeftX + BBD) 0 CAP BBS
 		include : HBarTop LBarLeftX (LBarLeftX + BBD) CAP BBS
 
-	derive-glyphs 'Lcaron' 0x13D 'L' : lambda [src sel] : glyph-proc
+	derive-multi-part-glyphs 'Lcaron' 0x13D { 'L' 'commaAbove' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
 		include : WithTransform [Translate (Width + (RightSB - SB) * 0.375) 0]
-			refer-glyph "commaAbove"
-		include [refer-glyph src] AS_BASE ALSO_METRICS
+			refer-glyph mark
+		include [refer-glyph base] AS_BASE ALSO_METRICS
 
 	define [LSlashOverlay top] : begin
 		local fine : 0.5 * OverlayStroke
@@ -62,19 +63,19 @@ glyph-block Letter-Latin-Upper-L : begin
 			flat [mix 0 SB 0.5] (middle - LongJut * 0.4) [widths fine fine]
 			curl (1.6 * LongJut + [mix 0 SB 0.5]) (middle + LongJut * 0.4)
 
-	derive-glyphs 'LSlash' 0x141 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'LSlash' 0x141 'L' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : LSlashOverlay CAP
 
-	derive-glyphs 'smcpLSlash' 0x1D0C 'smcpL' : lambda [src sel] : glyph-proc
+	derive-glyphs 'smcpLSlash' 0x1D0C 'smcpL' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : LSlashOverlay XH
 
-	derive-glyphs 'LTildeOver' 0x2C62 'L' : lambda [src sel] : glyph-proc
+	derive-glyphs 'LTildeOver' 0x2C62 'L' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		include : new-glyph : glyph-proc
 			include : refer-glyph "tildeAboveOverlay"
-			include : ApparentTranslate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - [mix aboveMarkBot aboveMarkTop 0.5])
+			include : ApparentTranslate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - aboveMarkMid)
 
 	create-glyph 'LBarOverlay' : HOverlayBar (SB * 0.3) [mix (SB + Stroke) (RightSB - Stroke) 0.55] (CAP * OverlayPos)
 	derive-composites 'LBar' 0x23D 'L' 'LBarOverlay'

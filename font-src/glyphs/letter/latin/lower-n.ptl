@@ -1,27 +1,38 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif Joining] from"../../../support/gr.mjs"
 
 glyph-module
 
 glyph-block Letter-Latin-Lower-N : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Marks : markHalfStroke
+	glyph-block-import Mark-Shared-Metrics : markHalfStroke
+	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : CurlyTail nShoulder nShoulderKnots nShoulderMask
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : CyrDescender
+
+	define [AdjustTrailingAnchor] : glyph-proc
+		define trAnchor currentGlyph.baseAnchors.trailing
+		if trAnchor : set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
 
 	define [NTopLeftSerif top] : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
 	define [NHTB top] : VBarLeft SB 0 top
 	define [NTopLeftSerifAuto top] : NeedSlab SLAB : LeftwardTopSerif SB top SideJut
 	define [NBottomLeftSerifAuto y] : NeedSlab SLAB : NeedNotItalic
 		tagged 'serifLB' : CenterBottomSerif (SB + HalfStroke * HVContrast) y Jut
-	define [NBottomRightSerifAuto y] : NeedSlab SLAB : if (para.isItalic) [NBottomRightSerifItalic y]
-		tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) y Jut
-	define [NBottomRightSerifItalic y] : tagged 'serifRB' : RightwardBottomSerif RightSB y SideJut
+
+	define [NBottomRightSerifAuto y] : NeedSlab SLAB : if (para.isItalic)
+		then : NBottomRightSerifItalic y
+		else : NBottomRightSerifUpright y
+	define [NBottomRightSerifUpright y] : glyph-proc
+		include : tagged 'serifRB' : CenterBottomSerif (RightSB - HalfStroke * HVContrast) y Jut
+		include : AdjustTrailingAnchor
+	define [NBottomRightSerifItalic y] : glyph-proc
+		include : tagged 'serifRB' : RightwardBottomSerif RightSB y SideJut
+		include : AdjustTrailingAnchor
 
 	define [EaredBody top left right yBR sw] : glyph-proc
 		include : VBarLeft left 0 top sw
@@ -40,22 +51,23 @@ glyph-block Letter-Latin-Lower-N : begin
 			g4 left (top - DToothlessRise)
 			g4 ([mix left right 0.5] - CorrectionOMidS) (top - O)
 			archv
-			flat right (top - SmallSmoothB)
+			flat right (top - SmallArchDepthB)
 			curl right yBR [heading Downward]
 
 	define [EarlessRoundedBody top left right yBR sw] : glyph-proc
 		include : dispiro
 			widths.rhs sw
 			flat left 0 [heading Upward]
-			curl left (top - SmallSmoothA)
+			curl left (top - SmallArchDepthA)
 			arcvh
 			g4 ([mix left right 0.5] - CorrectionOMidS) (top - O)
 			archv
-			flat right (top - SmallSmoothB)
+			flat right (top - SmallArchDepthB)
 			curl right yBR [heading Downward]
 
 	define [EndingTail right yBot yBR sw] : glyph-proc
 		include : RightwardTailedBar right yBot yBR sw
+		include : AdjustTrailingAnchor
 
 	define NConfig : object
 		'straight'                  { EaredBody          0 NTopLeftSerifAuto NBottomLeftSerifAuto NBottomRightSerifAuto   }
@@ -75,9 +87,9 @@ glyph-block Letter-Latin-Lower-N : begin
 	foreach { suffix { Body tailed sLT sLB sRB } } [Object.entries NConfig] : do
 		create-glyph "n.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
-			include : Body XH SB RightSB [if tailed (XH - SmallSmoothB + O) 0] Stroke
-			if tailed : include : EndingTail RightSB 0 (XH - SmallSmoothB) Stroke
+			set-base-anchor 'trailing' RightSB 0
+			include : Body XH SB RightSB [if tailed (XH - SmallArchDepthB + O) 0] Stroke
+			if tailed : include : EndingTail RightSB 0 (XH - SmallArchDepthB) Stroke
 			if sLT : include : sLT XH
 			if sLB : include : sLB 0
 			if sRB : include : sRB 0
@@ -94,13 +106,6 @@ glyph-block Letter-Latin-Lower-N : begin
 			include : Body XH SB RightSB 0 Stroke
 			include : refer-glyph 'rtailBR'
 			if sLT : include : sLT XH
-			if sLB : include : sLB 0
-
-		create-glyph "Eng.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : Body CAP SB RightSB (Hook + HalfStroke + O) Stroke
-			include : VerticalHook (RightSB - HalfStroke * HVContrast) (Hook + HalfStroke + O) [Math.max ((SB - RightSB) / 2 + HalfStroke) (-HookX)] Hook
-			if sLT : include : sLT CAP
 			if sLB : include : sLB 0
 
 		create-glyph "nCurlyTail.\(suffix)" : glyph-proc
@@ -120,16 +125,16 @@ glyph-block Letter-Latin-Lower-N : begin
 
 		create-glyph "NExt.\(suffix)" : glyph-proc
 			include : MarkSet.if
-			include : Body CAP SB RightSB [if tailed (CAP - SmallSmoothB + O) Descender] Stroke
-			if tailed : include : EndingTail RightSB Descender (CAP - SmallSmoothB) Stroke
+			include : Body CAP SB RightSB [if tailed (CAP - SmallArchDepthB + O) Descender] Stroke
+			if tailed : include : EndingTail RightSB Descender (CAP - SmallArchDepthB) Stroke
 			if sLT : include : sLT CAP
 			if sLB : include : sLB 0
 			if sRB : include : sRB Descender
 
 		create-glyph "nExt.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : Body XH SB RightSB [if tailed (XH - SmallSmoothB + O) Descender] Stroke
-			if tailed : include : EndingTail RightSB Descender (XH - SmallSmoothB) Stroke
+			include : Body XH SB RightSB [if tailed (XH - SmallArchDepthB + O) Descender] Stroke
+			if tailed : include : EndingTail RightSB Descender (XH - SmallArchDepthB) Stroke
 			if sLT : include : sLT XH
 			if sLB : include : sLB 0
 			if sRB : include : sRB Descender
@@ -140,7 +145,6 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'cyrl/peItalicDescBase' (shapeFrom -- 'n')
 	alias 'cyrl/pe.BGR' null 'n'
 
-	select-variant 'Eng' 0x14A (follow -- 'eng')
 	select-variant 'eng' 0x14B
 	link-reduced-variant 'eng/phoneticRight' 'eng'
 	select-variant 'nHookBottom' 0x273 (follow -- 'eng')
@@ -148,11 +152,16 @@ glyph-block Letter-Latin-Lower-N : begin
 	select-variant 'NExt' 0x220 (follow -- 'n')
 	select-variant 'nExt' 0x19E (follow -- 'n')
 
+	CreateAccentedComposition 'nTildeOver' 0x1D70 'n' 'tildeOverWide'
+
 	derive-composites 'cyrl/peDescender.italic' null 'cyrl/peItalicDescBase' [CyrDescender RightSB]
-	derive-glyphs 'nApostrophe' 0x149 'n' : lambda [src srl] : glyph-proc
-		include : refer-glyph "commaAbove"
-		include : Translate (Width + SB - Middle) 0
-		include [refer-glyph src] AS_BASE
+
+	do "n with Apostrophe"
+		derive-glyphs 'nApostrophe/comma' null 'commaAbove/asPunctuation' : function [src gr] : glyph-proc
+			include : WithTransform [Translate (Width + SB - Middle) 0]
+				refer-glyph src
+
+		derive-composites 'nApostrophe' 0x149 'n' 'nApostrophe/comma'
 
 	derive-glyphs 'nltail' 0x272 'n' : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE

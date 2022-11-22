@@ -1,8 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix barmixL linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import '../../../support/point' as Point
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -16,12 +14,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	define [CyrlYeriUprightShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
-		local sma : SmoothAOf Smooth (right - left + SB * 2)
-		local smb : SmoothBOf Smooth (right - left + SB * 2)
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
 		local fine : stroke * CThinB
 
-		local yTurnBottomL : YSmoothMidL bowl 0 sma smb
-		local yTurnBottomR : YSmoothMidR bowl 0 sma smb
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
 
 		include : union
 			dispiro
@@ -43,12 +41,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	define [CyrlYeriRoundShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
-		local sma : SmoothAOf Smooth (right - left + SB * 2)
-		local smb : SmoothBOf Smooth (right - left + SB * 2)
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
 		local fine : stroke * CThinB
 
-		local yTurnBottomL : YSmoothMidL bowl 0 sma smb
-		local yTurnBottomR : YSmoothMidR bowl 0 sma smb
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
 
 		include : dispiro
 			flat left top [widths.lhs.heading stroke Downward]
@@ -68,12 +66,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	define [CyrlYeriCursiveShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
-		local sma : SmoothAOf Smooth (right - left + SB * 2)
-		local smb : SmoothBOf Smooth (right - left + SB * 2)
+		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
+		local adb : ArchDepthBOf ArchDepth (right - left + SB * 2)
 		local fine : stroke * CThinB
 
-		local yTurnBottomL : YSmoothMidL bowl 0 sma smb
-		local yTurnBottomR : YSmoothMidR bowl 0 sma smb
+		local yTurnBottomL : YSmoothMidL bowl 0 ada adb
+		local yTurnBottomR : YSmoothMidR bowl 0 ada adb
 
 		include : dispiro
 			flat left top [widths.lhs.heading stroke Downward]
@@ -93,7 +91,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	define [RevCyrYeriShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : bowl * 0.45
-		local turnbottom : mix 0 bowl (SmoothB / (SmoothA + SmoothB))
+		local turnbottom : mix 0 bowl (ArchDepthB / (ArchDepthA + ArchDepthB))
 		local trShrink [Math.pow ((right - left) / (RightSB - SB)) 0.5]
 		include : dispiro
 			widths.rhs stroke
@@ -111,23 +109,27 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			include : tagged 'serifYeriRT'
 				CenterTopSerif (right - stroke / 2 * HVContrast) top jut
 
-
-	define [CyrYerShape Yeri top] : glyph-proc
-		local left : if SLAB ([mix SB RightSB 0.35] - MVertStroke / 2 * HVContrast) [mix SB RightSB 0.2]
-		local barleft : mix 0 SB [if SLAB 0.25 0.375]
-		include : Yeri top (left -- left) (right -- RightSB - O * 2) (stroke -- [AdviceStroke 2.5])
-		include : HBarTop barleft (Stroke * 0.1 + left) top
+	define [CyrYerShape Yeri df top] : glyph-proc
+		local left : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
+			Just ([mix df.leftSB df.rightSB 0.35] - df.mvs / 2 * HVContrast)
+			Just  [mix df.leftSB df.rightSB 0.2]
+		local barLeft : mix 0 df.leftSB [if SLAB 0.25 0.375]
+		include : Yeri top
+			left   -- left
+			right  -- df.rightSB - O * 2
+			stroke -- [AdviceStroke 2.5]
+		include : HBarTop barLeft (Stroke * 0.1 + left) top
 		if SLAB : begin
-			include : DownwardLeftSerif barleft top VJut (MVertStroke / HVContrast)
+			include : DownwardLeftSerif barLeft top VJut (df.mvs / HVContrast)
 
 	define [CyrYeryShape Yeri df top fTail] : glyph-proc
 		local jut : Math.min Jut : [Math.pow (df.mvs / Stroke) 0.5] * Jut
 		include : Yeri
-			top -- top
-			left -- df.leftSB
-			right -- [mix (df.rightSB - df.mvs * HVContrast) (Middle + df.mvs / 2 * HVContrast) (0.75 / df.div)]
+			top    -- top
+			left   -- df.leftSB
+			right  -- [mix (df.rightSB - df.mvs * HVContrast) (df.middle + df.mvs / 2 * HVContrast) 0.75]
 			stroke -- df.mvs
-			jut -- jut
+			jut    -- jut
 		include : if fTail
 			RightwardTailedBar df.rightSB 0 top df.mvs
 			VBarRight df.rightSB 0 top df.mvs
@@ -158,11 +160,11 @@ glyph-block Letter-Cyrillic-Yeri : begin
 		roundTailed   { CyrlYeriRoundShape   true  }
 		cursiveTailed { CyrlYeriCursiveShape true  }
 
-	define [YeriOverlayBar top] : begin
+	define [YeriOverlayBar df top] : begin
 		local stroke : AdviceStroke2 2 3 top
 		return : HOverlayBar
-			mix SB 0 0.7
-			mix SB RightSB 0.5
+			mix df.leftSB 0 0.7
+			mix df.leftSB df.rightSB 0.5
 			mix (top * 0.52 + stroke / 2) top 0.5
 			Math.min ((top - Stroke * 3) / 3) OverlayStroke
 
@@ -171,29 +173,37 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			include : MarkSet.capital
 			include : Yeri CAP
 		create-glyph "cyrl/yeri.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : Yeri XH
+			local df : DivFrame 1
+			set-width df.width
+			include : df.markSet.e
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) XH
 		create-glyph "cyrl/YeriBar.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : Yeri CAP
-			include : YeriOverlayBar CAP
+			include : YeriOverlayBar [DivFrame 1] CAP
 		create-glyph "cyrl/yeriBar.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : Yeri XH
-			include : YeriOverlayBar XH
+			local df : DivFrame 1
+			set-width df.width
+			include : df.markSet.e
+			include : Yeri (left -- df.leftSB) (right -- df.rightSB) XH
+			include : YeriOverlayBar df XH
 		create-glyph "cyrl/Yer.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : CyrYerShape Yeri CAP
+			local df : DivFrame [mix 1 para.diversityM 0.5]
+			set-width df.width
+			include : df.markSet.capital
+			include : CyrYerShape Yeri df CAP
 		create-glyph "cyrl/yer.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : CyrYerShape Yeri XH
+			local df : DivFrame [mix 1 para.diversityM 0.5]
+			set-width df.width
+			include : df.markSet.e
+			include : CyrYerShape Yeri df XH
 		create-glyph "cyrl/Yery.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityM 3
+			local df : DivFrame [mix 1 para.diversityM 1.5] 3
 			set-width df.width
 			include : df.markSet.capital
 			include : CyrYeryShape Yeri df CAP fTail
 		create-glyph "cyrl/yery.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityM 3
+			local df : DivFrame [mix 1 para.diversityM 1.5] 3
 			set-width df.width
 			include : df.markSet.e
 			include : CyrYeryShape Yeri df XH fTail

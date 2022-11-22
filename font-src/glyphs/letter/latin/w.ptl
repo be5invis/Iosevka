@@ -1,15 +1,14 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
 glyph-block Letter-Latin-W : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius SerifFrame
 	glyph-block-import Letter-Latin-Upper-M : MShape
 
 	define FORM-CURLY      0
@@ -235,22 +234,23 @@ glyph-block Letter-Latin-W : begin
 
 
 	define [WCursiveImplImpl fHookTop df top bodyType slabType] : glyph-proc
-		local fine : AdviceStroke 3.25 df.div
-		local mfine : fine * CThin
-		local x0 : mix df.leftSB df.rightSB 0.1
-		local y0 : top - O
-		local y1 : mix 0 top 0.8
-		local x1 : df.leftSB + 0 * OX
-		local y3 : top / 2
-		local y4 : top - [Math.max (top * 0.1) (1.125 * [AdviceStroke 3.5])]
+		define fine : AdviceStroke 3.25 df.div
+		define mfine : fine * CThin
+		define x0 : mix df.leftSB df.rightSB 0.1
+		define y0 : top - O
+		define y1 : mix 0 top 0.8
+		define x1 : df.leftSB + 0 * OX
+		define y3 : mix fine top 0.375
+		define y4 : mix y3 top 0.5
+		define rInY : 1 * [DiagonalTailInnerRadius]
 
 		include : dispiro
 			widths.lhs fine
 			flat x1 top [heading Downward]
-			curl x1 (top / 2)
-			arcvh 8
-			g4 [mix x1 (df.middle + fine / 2 * HVContrast) 0.5] O [heading Rightward]
-			archv 8
+			curl x1 (fine + rInY) [heading Downward]
+			arcvh 16
+			g4 [Math.min ([mix (x1 + fine * HVContrast) (df.middle - fine / 2 * HVContrast) 0.5] - (fine - mfine) * HVContrast) (x1 + fine * HVContrast + rInY)] O [heading {.x (TanSlope + (0.5 * (fine - mfine) / fine)) .y 1}]
+			archv 16
 			flat (df.middle + (mfine - fine / 2) * HVContrast) y3 [widths.heading mfine 0 Upward]
 			curl (df.middle + (mfine - fine / 2) * HVContrast) y4 [heading Upward]
 
@@ -259,10 +259,11 @@ glyph-block Letter-Latin-W : begin
 			include : VerticalHook (df.rightSB - 0.5 * fine * HVContrast) (top - Hook) (HookX * 0.65) (-Hook + 0.5 * fine) fine
 			include : dispiro
 				widths.rhs fine
-				straight.down.start (df.width - x1) (top - Hook) [heading Downward]
-				arcvh 8
-				g4 [mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] O [heading Leftward]
-				archv 8
+				flat (df.width - x1) (top - Hook) [heading Downward]
+				curl (df.width - x1) y3           [heading Downward]
+				arcvh 16
+				g4 ([mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] + fine * CorrectionOMidX) O
+				archv 16
 				flat (df.middle - (mfine - fine / 2) * HVContrast) y3 [widths.heading 0 mfine Upward]
 				curl (df.middle - (mfine - fine / 2) * HVContrast) y4 [heading Upward]
 		: else : begin
@@ -270,9 +271,9 @@ glyph-block Letter-Latin-W : begin
 				widths.rhs fine
 				g4 (df.width - x0) y0
 				g4 (df.width - x1 - OX) (top / 2)
-				arcvh 8
-				g4 [mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] O [heading Leftward]
-				archv 8
+				arcvh 16
+				g4 ([mix (df.width - x1) (df.middle - fine / 2 * HVContrast) 0.5] + fine * CorrectionOMidX) O
+				archv 16
 				flat (df.middle - (mfine - fine / 2) * HVContrast) y3 [widths.heading 0 mfine Upward]
 				curl (df.middle - (mfine - fine / 2) * HVContrast) y4 [heading Upward]
 
@@ -324,13 +325,13 @@ glyph-block Letter-Latin-W : begin
 			include : ApparentTranslate 0 (CAP / 2 + gap)
 			include : implT df (CAP / 2 - gap / 2) bodyType slabType
 
-		if hookTopImplT : create-glyph "Whooktop.\(suffix)" : glyph-proc
+		if hookTopImplT : create-glyph "WHookTop.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.capital
 			include : hookTopImplT df CAP bodyType slabType
 
-		if hookTopImplT : create-glyph "whooktop.\(suffix)" : glyph-proc
+		if hookTopImplT : create-glyph "wHookTop.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
 			include : df.markSet.e
@@ -338,12 +339,12 @@ glyph-block Letter-Latin-W : begin
 
 	select-variant 'W' 'W'
 	link-reduced-variant 'W/sansSerif' 'W' MathSansSerif
-	select-variant 'Whooktop' 0x2C72
+	select-variant 'WHookTop' 0x2C72
 	select-variant 'w' 'w'
 	link-reduced-variant 'w/sansSerif' 'w' MathSansSerif
 	select-variant 'smcpW' 0x1D21 (shapeFrom -- 'w') (follow -- 'W')
 	select-variant 'ww' 0x2AC (follow -- 'w')
-	select-variant 'whooktop' 0x2C73
+	select-variant 'wHookTop' 0x2C73
 	alias 'cyrl/We' 0x51C 'W'
 	alias 'cyrl/we' 0x51D 'w'
 	turned 'turnw' 0x28D 'w' (Middle * para.diversityM) (XH / 2)

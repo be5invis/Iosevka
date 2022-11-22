@@ -1,0 +1,33 @@
+$$include '../../meta/macros.ptl'
+
+import [Arcs Quadify ShapeConv] from "typo-geom"
+import [OffsetCurve BezToContoursSink GEOMETRY_PRECISION] from"../../support/geometry/curve-util.mjs"
+import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [DesignParameters] from"../../meta/aesthetics.mjs"
+import [TieMark TieGlyph] from"../../support/gr.mjs"
+import [Box] from"../../support/geometry/box.mjs"
+
+glyph-module
+
+glyph-block Mark-Doppelganger : if [not recursive] : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+
+	define AnchorMap : list
+		list 'above' 'tieAbove' 'aboveBrace'
+		list 'below' 'tieBelow' 'belowBrace'
+
+	foreach { gn g } [glyphStore.namedEntries] : begin
+		local handled false
+		foreach { akFrom akTo akBrace } [items-of AnchorMap] : begin
+			if (!handled && g.markAnchors && g.markAnchors.(akFrom)) : begin
+				set handled true
+				local toGN : TieMark.amendName gn
+				create-glyph toGN : glyph-proc
+					include g AS_BASE ALSO_METRICS
+					set currentGlyph.markAnchors.(akTo) currentGlyph.markAnchors.(akFrom)
+					currentGlyph.deleteMarkAnchor akFrom
+					set currentGlyph.baseAnchors.(akTo) currentGlyph.baseAnchors.(akFrom)
+					currentGlyph.deleteBaseAnchor akFrom
+					currentGlyph.deleteBaseAnchor akBrace
+				TieMark.set g toGN

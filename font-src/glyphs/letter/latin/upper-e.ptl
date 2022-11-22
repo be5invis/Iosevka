@@ -1,16 +1,15 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
 glyph-block Letter-Latin-Upper-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Marks : markHalfStroke
-	glyph-block-import Letter-Shared : SetGrekUpperTonos
+	glyph-block-import Mark-Shared-Metrics : markHalfStroke
+	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateOgonekComposition
 	glyph-block-import Letter-Latin-Upper-F : xMidBarShrink yMidBar EFVJutLength
 
 	define kSB 1
@@ -19,7 +18,7 @@ glyph-block Letter-Latin-Upper-E : begin
 	define [EShape] : params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
 		include : VBarLeft (xEBarLeft) 0 top stroke
 		include : HBarTop (xEBarLeft - O) RightSB top stroke
-		include : HBar (xEBarLeft - O) (RightSB - [xMidBarShrink]) [yMidBar top pyBar] stroke
+		include : HBar (xEBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
 		include : HBarBottom (xEBarLeft - O) RightSB 0 stroke
 		if serifLT : include : LeftwardTopSerif xEBarLeft top SideJut
 		if serifLB : include : LeftwardBottomSerif xEBarLeft 0 SideJut
@@ -32,7 +31,7 @@ glyph-block Letter-Latin-Upper-E : begin
 	define [RevEShape] : params [top pyBar serifRT serifRB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
 		include : VBarRight (xRevEBarRight) 0 top stroke
 		include : HBarTop SB (xRevEBarRight + O) top stroke
-		include : HBar (SB + [xMidBarShrink]) (xRevEBarRight + O) [yMidBar top pyBar] stroke
+		include : HBar (SB + [xMidBarShrink serifV]) (xRevEBarRight + O) [yMidBar top pyBar] stroke
 		include : HBarBottom SB (xRevEBarRight + O) 0 stroke
 		if serifRT : include : RightwardTopSerif xRevEBarRight top SideJut
 		if serifRB : include : RightwardBottomSerif xRevEBarRight 0 SideJut
@@ -50,14 +49,14 @@ glyph-block Letter-Latin-Upper-E : begin
 		create-glyph "E.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : EShape CAP (serifLT -- lt) (serifLB -- lb) (serifV -- v)
-			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
+			set-base-anchor 'trailing' RightSB 0
 
 		create-glyph "grek/Epsilon.\(suffix)" : glyph-proc
 			include [refer-glyph "E.\(suffix)"] AS_BASE ALSO_METRICS
 			include : SetGrekUpperTonos [if lt (-SideJut) 0]
 
 		create-glyph "smcpE.\(suffix)" : glyph-proc
-			include : MarkSet.capital
+			include : MarkSet.e
 			include : EShape XH (serifLT -- lt) (serifLB -- lb) (serifV -- v)
 			set-base-anchor 'trailing' (RightSB - markHalfStroke) 0
 
@@ -85,3 +84,6 @@ glyph-block Letter-Latin-Upper-E : begin
 				EShape CAP (serif -- false) (stroke -- BBS)
 				Rect (CAP - BBS) BBS (xEBarLeft + BBS * HVContrast) (xEBarLeft + BBD)
 			VBarLeft (xEBarLeft + BBD) 0 CAP BBS
+
+	# Ognoek shapes
+	CreateOgonekComposition 'EOgonek' 0x118 'E'

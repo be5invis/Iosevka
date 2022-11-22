@@ -1,7 +1,7 @@
-import '../support/point' as Point
-import '../support/transform' as Transform
-import [mix linreg clamp fallback] from '../support/utils'
-import '../support/anchor' as Anchor
+import [Point] from"../support/geometry/point.mjs"
+import [Transform] from"../support/geometry/transform.mjs"
+import [Anchor] from"../support/geometry/anchor.mjs"
+import [mix linreg clamp fallback] from"../support/utils.mjs"
 
 # Parameter generation
 export : define [calculateMetrics para] : begin
@@ -12,8 +12,9 @@ export : define [calculateMetrics para] : begin
 	define Width : Math.round para.width
 	define SB para.sb
 	define CAP para.cap
-	define XH para.xheight
-	define Descender : fallback para.descender (XH - CAP)
+	define XH para.xHeight
+	define Ascender para.ascender
+	define Descender : fallback para.descender (XH - Ascender)
 	define Contrast : fallback para.contrast 1
 	# Key metrics for symbols
 	define SymbolMid para.symbolMid
@@ -47,6 +48,7 @@ export : define [calculateMetrics para] : begin
 	define SinSlope : Math.sin (para.slopeAngle / 180 * Math.PI)
 	define CosSlope : Math.cos (para.slopeAngle / 180 * Math.PI)
 	define HVContrast : Contrast * CosSlope + SinSlope * TanSlope
+	define [HSwToV sw] : sw * HVContrast
 
 	# Orient parameters
 	define Upward    : new Point Point.Type.Corner (-HVContrast)  0
@@ -70,8 +72,8 @@ export : define [calculateMetrics para] : begin
 	define JHook para.jhook
 	define FHook para.fhook
 	define HookX para.hookx
-	define Smooth para.smooth
-	define SmallSmooth para.smallsmooth
+	define ArchDepth para.archDepth
+	define SmallArchDepth para.smallArchDepth
 
 	# Weight Control
 	# We will estimate blackness using lower-case 'e'
@@ -90,8 +92,8 @@ export : define [calculateMetrics para] : begin
 
 
 	define Stroke : AdviceStroke 2
-	define DotSize : fallback para.dotsize Stroke
-	define PeriodSize : fallback para.periodsize DotSize
+	define DotSize : fallback para.dotSize Stroke
+	define PeriodSize : fallback para.periodSize DotSize
 	define HBarPos : DesignParameters.hBarPos - 0.09 * Stroke / CAP
 	define OverlayPos DesignParameters.overlayPos
 	define Jut para.jut
@@ -99,10 +101,10 @@ export : define [calculateMetrics para] : begin
 	define VJut para.vjut
 	define MidJutSide   : Math.max Jut : mix (0.5 * Stroke * HVContrast) LongJut 0.5
 	define MidJutCenter : Math.max Jut : mix (0.5 * Stroke * HVContrast) LongJut 0.6
-	define Accent            para.accent
-	define AccentX           para.accentx
-	define AccentBaseOffset  para.accentBaseOffset
 	define AccentStackOffset para.accentStackOffset
+	define AccentWidth       para.accentWidth
+	define AccentClearance   para.accentClearance
+	define AccentHeight para.accentHeight
 
 	define CThin : fallback para.cthin 0.75
 	define CThinB : fallback para.cthinb 0.5
@@ -123,14 +125,18 @@ export : define [calculateMetrics para] : begin
 	define OneBalance : fallback para.onebalance 0
 
 	# derived metrics
-	define WideWidth0 : if para.isQuasiProportional (Width * 2) UPM
+	define WideWidth0 : if para.isQuasiProportional UPM (Width * 2)
 	define WideWidth1 : if (para.spacing >= 1) WideWidth0 Width
 	define WideWidth2 : if (para.spacing >= 2) WideWidth0 Width
 	define WideWidth3 : if (para.spacing >= 3) WideWidth0 Width
 	define WideWidth4 : if (para.spacing >= 4) WideWidth0 Width
 
-	define Ess : Stroke * [fallback para.essx Contrast]
-	define EssQuestion : Stroke * [fallback para.essxq Contrast]
+	define [NarrowUnicodeT wd] : function [u] : if (wd === Width) u null
+	define [WideUnicodeT   wd] : function [u] : if (wd !== Width) u null
+
+	define EssUpper : Stroke * [fallback para.essRatioUpper para.essRatio Contrast]
+	define EssLower : Stroke * [fallback para.essRatioLower para.essRatio Contrast]
+	define EssQuestion : Stroke * [fallback para.essRatioQuestion para.essRatio Contrast]
 	define HalfStroke : Stroke / 2
 	define RightSB : Width - SB
 	define Middle : Width / 2
@@ -141,35 +147,38 @@ export : define [calculateMetrics para] : begin
 	define [StrokeWidthBlend min max sw] : linreg para.canonicalStrokeWidthMin min para.canonicalStrokeWidthMax max [fallback sw Stroke]
 
 	define SmoothAdjust : StrokeWidthBlend 80 144
-	define [SmoothAOf smooth width] : smooth - TanSlope * SmoothAdjust / Width * width
-	define [SmoothBOf smooth width] : smooth + TanSlope * SmoothAdjust / Width * width
-	define [YSmoothMidR top bot sma smb] : begin
-		local delta : (smb - sma) / 2
-		local smOfSma : sma + delta
-		local smOfSmb : smb - delta
+	define [ArchDepthAOf archDepth width] : archDepth - TanSlope * SmoothAdjust / Width * width
+	define [ArchDepthBOf archDepth width] : archDepth + TanSlope * SmoothAdjust / Width * width
+	define [YSmoothMidR top bot ada adb] : begin
+		local delta : (adb - ada) / 2
+		local smOfSma : ada + delta
+		local smOfSmb : adb - delta
 		local yNotAdjusted : mix top bot (smOfSmb / (smOfSma + smOfSmb))
 		return : yNotAdjusted - delta
-	define [YSmoothMidL top bot sma smb] : begin
-		local delta : (smb - sma) / 2
-		local smOfSma : sma + delta
-		local smOfSmb : smb - delta
+	define [YSmoothMidL top bot ada adb] : begin
+		local delta : (adb - ada) / 2
+		local smOfSma : ada + delta
+		local smOfSmb : adb - delta
 		local yNotAdjusted : mix top bot (smOfSma / (smOfSma + smOfSmb))
 		return : yNotAdjusted + delta
-	define SmoothA : Smooth - TanSlope * SmoothAdjust
-	define SmoothB : Smooth + TanSlope * SmoothAdjust
-	define SmallSmoothA : SmallSmooth - TanSlope * SmoothAdjust
-	define SmallSmoothB : SmallSmooth + TanSlope * SmoothAdjust
+	define ArchDepthA : ArchDepth - TanSlope * SmoothAdjust
+	define ArchDepthB : ArchDepth + TanSlope * SmoothAdjust
+	define SmallArchDepthA : SmallArchDepth - TanSlope * SmoothAdjust
+	define SmallArchDepthB : SmallArchDepth + TanSlope * SmoothAdjust
 
 
 	define CorrectionOMidX : TanSlope * 0.9 * [StrokeWidthBlend 1.3 0.9]
 	define CorrectionOMidS : Stroke * CorrectionOMidX
 
-	define [MVertStrokeD hPack div] : AdviceStroke [Math.max DesignParameters.lllcrowdedness hPack] div
-	define MVertStroke : MVertStrokeD 3 1
+	define ArchXAdjust : object
+		top    : function [x sw] : x - CorrectionOMidX * [fallback sw Stroke]
+		bottom : function [x sw] : x + CorrectionOMidX * [fallback sw Stroke]
+		bot    : function [x sw] : x + CorrectionOMidX * [fallback sw Stroke]
+
 	define OverlayStroke : AdviceStroke 3.75
 	define OperatorStroke : AdviceStroke 2.75
 	define GeometryStroke : AdviceStroke 4
-	define ShoulderFine : Math.min (Stroke * para.shoulderfineMin) [AdviceStroke 16]
+	define ShoulderFine : Math.min (Stroke * para.shoulderFineMin) [AdviceStroke 16]
 
 	define [_SuperXY x superness] : Math.pow
 		1 - [Math.pow x [fallback superness DesignParameters.superness]]
@@ -183,7 +192,7 @@ export : define [calculateMetrics para] : begin
 		local ss : y * 0.21 + 0.375 * strokeFactor + 0.035 * widthFactor
 		return : ss + sign * TanSlope * (SmoothAdjust + 0.75 * stroke)
 
-	define [adviceGlottalStopSmooth y sign] : begin
+	define [AdviceGlottalStopArchDepth y sign] : begin
 		return : ((y - Stroke) * 0.24 + Stroke * 0.625) + sign * TanSlope * SmoothAdjust
 
 	define [shoulderMidSlope _fine _stroke _dir] : begin
@@ -193,27 +202,29 @@ export : define [calculateMetrics para] : begin
 		return : 0.5 * HVContrast * (stroke - fine) / stroke + dir * TanSlope
 
 	return [object
-		UPM HalfUPM Width SB CAP XH Descender Contrast SymbolMid ParenTop ParenBot OperTop OperBot
-		TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop BgOpBot Italify Upright Scale
-		Translate ApparentTranslate Rotate GlobalTransform TanSlope HVContrast Upward Downward
-		Rightward Leftward UpwardT DownwardT LeftwardT RightwardT O OX OXHook Hook AHook SHook RHook
-		JHook FHook HookX Smooth SmallSmooth Stroke DotSize PeriodSize HBarPos OverlayPos
-		LongJut Jut VJut Accent AccentX AccentBaseOffset AccentStackOffset CThin CThinB SLAB
-		TailAdjX TailAdjY IBalance IBalance2 JBalance JBalance2 TBalance
-		TBalance2 RBalance RBalance2 FBalance OneBalance WideWidth0 WideWidth1 WideWidth2 WideWidth3
-		WideWidth4 Ess EssQuestion HalfStroke RightSB Middle DotRadius PeriodRadius
-		SideJut SmoothA SmoothB SmallSmoothA SmallSmoothB CorrectionOMidX CorrectionOMidS
-		compositeBaseAnchors AdviceStroke AdviceStroke2 MVertStroke MVertStrokeD OverlayStroke
-		OperatorStroke GeometryStroke ShoulderFine _SuperXY adviceSSmooth adviceGlottalStopSmooth
-		shoulderMidSlope StrokeWidthBlend SmoothAOf SmoothBOf SmoothAdjust MidJutSide MidJutCenter
-		YSmoothMidR YSmoothMidL]
+		DesignParameters UPM HalfUPM Width SB CAP XH Ascender Descender Contrast SymbolMid
+		ParenTop ParenBot OperTop OperBot TackTop TackBot PlusTop PlusBot PictTop PictBot BgOpTop
+		BgOpBot Italify Upright Scale Translate ApparentTranslate Rotate GlobalTransform TanSlope
+		HVContrast Upward Downward Rightward Leftward UpwardT DownwardT LeftwardT RightwardT O OX
+		OXHook Hook AHook SHook RHook JHook FHook HookX ArchDepth SmallArchDepth Stroke DotSize
+		PeriodSize HBarPos OverlayPos LongJut Jut VJut AccentStackOffset AccentWidth
+		AccentClearance AccentHeight CThin CThinB SLAB TailAdjX TailAdjY IBalance IBalance2
+		JBalance JBalance2 TBalance TBalance2 RBalance RBalance2 FBalance OneBalance WideWidth0
+		WideWidth1 WideWidth2 WideWidth3 WideWidth4 EssUpper EssLower EssQuestion HalfStroke
+		RightSB Middle DotRadius PeriodRadius SideJut ArchDepthA ArchDepthB SmallArchDepthA
+		SmallArchDepthB CorrectionOMidX CorrectionOMidS ArchXAdjust compositeBaseAnchors
+		AdviceStroke AdviceStroke2 OverlayStroke OperatorStroke GeometryStroke ShoulderFine
+		_SuperXY adviceSSmooth AdviceGlottalStopArchDepth shoulderMidSlope StrokeWidthBlend
+		ArchDepthAOf ArchDepthBOf SmoothAdjust MidJutSide MidJutCenter YSmoothMidR YSmoothMidL
+		HSwToV NarrowUnicodeT WideUnicodeT]
 
 export : define [setFontMetrics para metrics fm] : begin
-	define [object CAP Descender XH Width] metrics
+	define [object CAP Descender XH Width SymbolMid] metrics
 
 	define leading      : Math.round para.leading
-	define asc          : Math.round : leading * CAP / (CAP - Descender)
-	define desc         : Math.round : leading * Descender / (CAP - Descender)
+	define asc          : Math.round : SymbolMid + leading / 2
+	define desc         : Math.round : SymbolMid - leading / 2
+
 	define descenderPad : Math.round : fallback para.descenderPad 0
 	define winMetricAscenderPad  : Math.round : fallback para.winMetricAscenderPad  0
 	define winMetricDescenderPad : Math.round : fallback para.winMetricDescenderPad 0
@@ -291,11 +302,18 @@ export : define [copyFontMetrics fm1 fm2] : begin
 	set fm2.post.underlineThickness  fm1.post.underlineThickness
 
 
+class CMarkSet
+	public [new markAnchors baseAnchors] : begin
+		set this.markAnchors markAnchors
+		set this.baseAnchors baseAnchors
+	public [applyToGlyph g] : begin
+		g.copyAnchors this
+
 export : define [compositeBaseAnchors] : begin
-	local h {.}
+	local baseAnchorSink {.}
 	foreach a [items-of arguments] : foreach k [items-of [Object.keys a.baseAnchors]] : begin
-		set h.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
-	return {.baseAnchors h .isMarkSet true}
+		set baseAnchorSink.(k) : new Anchor a.baseAnchors.(k).x a.baseAnchors.(k).y a.baseAnchors.(k).type a.baseAnchors.(k).mbx a.baseAnchors.(k).mby
+	return : new CMarkSet null baseAnchorSink
 
 export : define [MarksetDiv p sbMul me] : begin
 	define width : p * me.Width
@@ -310,7 +328,7 @@ export : define [MarksetDiv p sbMul me] : begin
 	define [MarkTopRight zone]     {.baseAnchors {.topright    [ta : new Anchor rightSB zone.top                  ]}}
 	define [MarkBottomRight zone]  {.baseAnchors {.bottomright [ta : new Anchor rightSB zone.bot                  ]}}
 
-	define markTieAbove            {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.Accent * 1.38)]}}
+	define markTieAbove            {.baseAnchors {.tieAbove    [ta : new Anchor width   (me.XH + me.AccentStackOffset * 1.38)]}}
 	define markTieBelow            {.baseAnchors {.tieBelow    [ta : new Anchor width   me.Descender              ]}}
 
 	define [buildStandardMarkSet zone] : lambda [] : begin
@@ -333,14 +351,14 @@ export : define [MarksetDiv p sbMul me] : begin
 
 	return : object
 		OfZone    buildStandardMarkSet
-		capital : buildStandardMarkSet {.top me.CAP     .bot 0}
-		b       : buildStandardMarkSet {.top me.CAP     .bot 0}
-		e       : buildStandardMarkSet {.top me.XH      .bot 0}
-		p       : buildStandardMarkSet {.top me.XH      .bot me.Descender}
-		oper    : buildStandardMarkSet {.top me.OperTop .bot me.OperBot}
-		tack    : buildStandardMarkSet {.top me.TackTop .bot me.TackBot}
-		plus    : buildStandardMarkSet {.top me.PlusTop .bot me.PlusBot}
-		if      : buildStandardMarkSet {.top me.CAP     .bot me.Descender}
+		capital : buildStandardMarkSet {.top me.CAP      .bot 0}
+		b       : buildStandardMarkSet {.top me.Ascender .bot 0}
+		e       : buildStandardMarkSet {.top me.XH       .bot 0}
+		p       : buildStandardMarkSet {.top me.XH       .bot me.Descender}
+		oper    : buildStandardMarkSet {.top me.OperTop  .bot me.OperBot}
+		tack    : buildStandardMarkSet {.top me.TackTop  .bot me.TackBot}
+		plus    : buildStandardMarkSet {.top me.PlusTop  .bot me.PlusBot}
+		if      : buildStandardMarkSet {.top me.Ascender .bot me.Descender}
 
 export : define DesignParameters : object
 	# V shape
@@ -378,9 +396,9 @@ export : define DesignParameters : object
 	eBarPos                    0.5
 	fiveBarPos                 0.64
 	overlayPos                 0.52
-	fBarPosToXH                0.91
+	fBarPosToXH                0.875
 	gBarPos                    0.42
-	upperEBarPos               : lambda [slab] : if slab 0.52 0.53
+	upperEBarPos               0.52
 	# Fine adjustments
 	fbarStrokeAdj              0.25
 	superness                  2.275
@@ -390,16 +408,24 @@ export : define DesignParameters : object
 	# Square dot
 	squareDotScalar            0.95
 
-export : define [GenDivFrame metrics] : lambda [_div _hPack _sbMul] : begin
-	local div : fallback _div 1
-	local hPack : Math.max 2 [fallback _hPack 0]
-	local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * [metrics.AdviceStroke hPack div]) / (2 * hPack * metrics.SB)
-	return : object
-		div div
-		width : metrics.Width * div
-		middle : metrics.Middle * div
-		sb : metrics.SB * sbMul
-		leftSB : metrics.SB * sbMul
-		rightSB : metrics.Width * div - metrics.SB * sbMul
-		mvs : metrics.MVertStrokeD hPack div
-		markSet : MarksetDiv div sbMul metrics
+export : define [GenDivFrame metrics] : begin
+	class CDivFrame
+		public [new _div _hPack _sbMul] : begin
+			local div : fallback _div 1
+			local hPack : Math.max 2 [fallback _hPack 0]
+			local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * [metrics.AdviceStroke hPack div]) / (2 * hPack * metrics.SB)
+
+			set this.div            div
+			set this.width        : metrics.Width * div
+			set this.middle       : metrics.Middle * div
+			set this.sb           : metrics.SB * sbMul
+			set this.leftSB       : metrics.SB * sbMul
+			set this.rightSB      : metrics.Width * div - metrics.SB * sbMul
+			set this.mvs          : metrics.AdviceStroke hPack div
+			set this.markSet      : MarksetDiv div sbMul metrics
+
+		public [applyToGlyph g] : begin
+			g.setWidth this.width
+			return this
+
+	return : lambda [_div _hPack _sbMul] : new CDivFrame _div _hPack _sbMul

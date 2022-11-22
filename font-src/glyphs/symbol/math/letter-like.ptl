@@ -1,8 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import '../../../support/point' as Point
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
 
@@ -12,16 +10,8 @@ glyph-block Symbol-Math-Letter-Like : begin
 	glyph-block-import Letter-Latin-Upper-A : LambdaShape AMaskShape DeltaShape
 	glyph-block-import Letter-Latin-Upper-E : RevEShape
 
-	create-glyph 'forall' 0x2200 : glyph-proc
-		include : LambdaShape [DivFrame 1] CAP OperatorStroke true
-		eject-contour 'serif'
-		include : intersection
-			AMaskShape [DivFrame 1] CAP OperatorStroke true
-			HBar 0 Width (XH / 2) OperatorStroke
-		include : FlipAround Middle (CAP / 2)
-
-	create-glyph 'exists' 0x2203 : glyph-proc
-		include : RevEShape CAP (pyBar -- 0.51)
+	turned 'forall' 0x2200 'A.straightSerifless' Middle (CAP / 2)
+	alias 'exists' 0x2203 'revE.serifless'
 
 	create-glyph 'emptyset' 0x2205 : glyph-proc
 		include : OShape CAP 0 SB RightSB OperatorStroke
@@ -32,8 +22,25 @@ glyph-block Symbol-Math-Letter-Like : begin
 			flat (SB + O + fine) [mix CAP 0 1.05]
 			curl (RightSB - O - fine) [mix 0 CAP 1.05]
 
-	create-glyph 'increment' 0x2206 : glyph-proc
+	define [CodeNonApl u] : if (para.variantSelector.__enableAplForm === 'enable') null u
+	define [CodeApl    u] : if (para.variantSelector.__enableAplForm === 'enable') u null
+
+	create-glyph 'increment' [CodeNonApl 0x2206] : glyph-proc
 		include : MarkSet.capital
 		include : DeltaShape [DivFrame 1] CAP OperatorStroke true
 
-	turned 'nabla' 0x2207 'increment' Middle (CAP / 2)
+	create-glyph 'increment.aplForm' [CodeApl 0x2206] : glyph-proc
+		include : MarkSet.oper
+		define shapeHeight : OperTop - OperBot
+		include : DeltaShape [DivFrame 1] shapeHeight OperatorStroke true
+		include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+	create-glyph 'increment.aplThin' : glyph-proc
+		include : MarkSet.oper
+		define shapeHeight : OperTop - OperBot
+		include : DeltaShape [DivFrame 1] shapeHeight [AdviceStroke 3.75] true
+		include : ApparentTranslate 0 (SymbolMid - shapeHeight / 2)
+
+	turned 'nabla' [CodeNonApl 0x2207] 'increment' Middle (CAP / 2)
+	turned 'nabla.aplForm' [CodeApl 0x2207] 'increment.aplForm' Middle SymbolMid
+	turned 'nabla.aplThin' null 'increment.aplThin' Middle SymbolMid

@@ -1,8 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from '../../../support/utils'
-import [DesignParameters] from '../../../meta/aesthetics'
-import [Dotless CvDecompose MathSansSerif] from "../../../support/gr"
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -20,10 +19,10 @@ glyph-block Letter-Latin-Upper-P : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
-		local sma : SmoothAOf (Smooth * 0.9) Width
-		local smb : SmoothBOf (Smooth * 0.9) Width
+		local ada : ArchDepthAOf (ArchDepth * 0.9) Width
+		local adb : ArchDepthBOf (ArchDepth * 0.9) Width
 		local right : RightSB - offset
-		local turn : YSmoothMidR bowlTop bowlBottom sma smb
+		local turn : YSmoothMidR bowlTop bowlBottom ada adb
 		return : list
 			g4 (SB * mul - O) (bowlTop - hook)
 			hookstart (bowlTop - O)
@@ -36,10 +35,10 @@ glyph-block Letter-Latin-Upper-P : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom : [PBarPosY top sw bp] + offset
 		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
-		local sma : SmoothAOf (Smooth * 0.9) Width
-		local smb : SmoothBOf (Smooth * 0.9) Width
+		local ada : ArchDepthAOf (ArchDepth * 0.9) Width
+		local adb : ArchDepthBOf (ArchDepth * 0.9) Width
 		local right : RightSB - offset
-		local turn : YSmoothMidR bowlTop bowlBottom sma smb
+		local turn : YSmoothMidR bowlTop bowlBottom ada adb
 		return : list
 			flat (SB * mul - O) bowlTop [heading Rightward]
 			curl (right - turnRadius - CorrectionOMidX * sw) bowlTop
@@ -53,10 +52,10 @@ glyph-block Letter-Latin-Upper-P : begin
 		local bowlTop (top * 1 - offset)
 		local bowlBottom ((top - sw) * bp - sw * PShape.SwBelowBar + offset)
 		local turnRadius : BowlXDepth bowlTop bowlBottom SB RightSB sw
-		local sma : SmoothAOf (Smooth * 0.9) Width
-		local smb : SmoothBOf (Smooth * 0.9) Width
+		local ada : ArchDepthAOf (ArchDepth * 0.9) Width
+		local adb : ArchDepthBOf (ArchDepth * 0.9) Width
 		local left : SB + offset
-		local turn : YSmoothMidL bowlTop bowlBottom sma smb
+		local turn : YSmoothMidL bowlTop bowlBottom ada adb
 		return : list
 			flat (Width - SB * mul + O) bowlTop [heading Leftward]
 			curl (left + turnRadius - CorrectionOMidX * sw) bowlTop
@@ -95,7 +94,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	set PShape.SwBelowBar 0.25
 
 	set PShape.SlabMotion : function [top sw mul] : glyph-proc
-		include : tagged 'serifLT' :LeftwardTopSerif (SB * mul) top SideJut sw
+		include : tagged 'serifLT' : LeftwardTopSerif (SB * mul) top SideJut sw
 	set PShape.SlabSymmetric : function [top sw mul] : glyph-proc
 		include : PShape.SlabMotion top sw mul
 		include : tagged 'serifLB' : CenterBottomSerif (SB * mul + 0.5 * sw * HVContrast) 0 Jut sw
@@ -107,7 +106,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	set PShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarLeft
 		SB * mul + sw * HVContrast
 		[PBarPosY top sw bp] - sw
-		[PBarPosY top sw bp] + sw + 1
+		Math.max ([PBarPosY top sw bp] + sw) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
 	set RevPShape.SlabMotion : function [top sw mul] : glyph-proc
@@ -120,7 +119,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	set RevPShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBarRight
 		Width - SB * mul - sw * HVContrast
 		[PBarPosY top sw bp] - sw
-		[PBarPosY top sw bp] + sw + 1
+		Math.max ([PBarPosY top sw bp] + sw) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
 	define PConfig : object
@@ -149,8 +148,16 @@ glyph-block Letter-Latin-Upper-P : begin
 		create-glyph "currency/rubleSign.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
 			define bar1pos : [PBarPosY CAP Stroke PShape.BarPos] + HalfStroke
-			include : HOverlayBar [mix SB 0 0.7] (SB + HalfStroke * HVContrast) bar1pos
-			include : HOverlayBar [mix SB 0 0.7] [mix SB RightSB 0.8] [mix 0 (bar1pos - Stroke) (3 / 4)]
+
+			define xCrossBarLeft : SB - SideJut
+			define xPLeft : SB * PShape.defaultMul + HalfStroke * HVContrast
+			define xCrossBarRight : mix SB RightSB 0.8
+			define yBase : if (slabs === PShape.SlabAsymmetric) Stroke 0
+			define yCrossbar : Math.max
+				mix yBase (bar1pos - HalfStroke) (1 / 2)
+				[mix yBase (bar1pos - HalfStroke) (2 / 3)] - OverlayStroke / 2
+			include : HOverlayBar xCrossBarLeft xPLeft bar1pos Stroke
+			include : HOverlayBar xCrossBarLeft xCrossBarRight yCrossbar
 
 		create-glyph "PHookLeft.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE
@@ -169,7 +176,7 @@ glyph-block Letter-Latin-Upper-P : begin
 	select-variant 'currency/rubleSign' 0x20BD
 	select-variant 'PHookLeft' 0x1A4
 
-	derive-glyphs 'cyrl/ErTick' 0x48E 'cyrl/Er' : lambda [src sel] : glyph-proc
+	derive-glyphs 'cyrl/ErTick' 0x48E 'cyrl/Er' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local yBowl : [PBarPosY CAP Stroke PShape.BarPos] + 0.75 * Stroke
 		include : dispiro
