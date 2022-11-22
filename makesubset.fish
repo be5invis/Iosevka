@@ -22,6 +22,7 @@ end
 
 mkdir -p ./dist/iosevkalyteweb/woff2-subset
 mv ./dist/iosevkalyteweb/woff2/*.subset.woff2 ./dist/iosevkalyteweb/woff2-subset/
+touch ./dist/iosevkalyteweb/woff2-subset/
 
 echo "Placed subset woff2 files in ./dist/iosevkalyteweb/woff2-subset/"
 echo "Done!"
