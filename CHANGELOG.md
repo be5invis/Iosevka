@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 16.5.0
+
+ * Improve T's metrics for Etoile (#1449).
+ * Fix custom build of ligations when `ineq` is disabled but `ltgt-diamond-tag` or `ltgt-slash-tag` are enabled (#1450).
+
+
 ### 16.4.0
 
 * Add ligation for C-style multiline comments (#1444).
