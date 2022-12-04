@@ -293,13 +293,20 @@ glyph-block Letter-Latin-S : begin
 				flat (RightSB - hd.x + 0.25 * hookSw * HVContrast) (0 - Hook)
 				curl (RightSB - HookX - 0.5 * hookSw * HVContrast) (0 - Hook)
 
-		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
-			include : MarkSet.if
-
+		define [UpperSBaseWithAttach] : glyph-proc
 			include : SAutoSlabStart doTS CAP Stroke Hook
 			local stroke : include : SStrokeImpl CAP 0 doTS doBS [AdviceStroke2 2 3 CAP] EssUpper
-			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+			return stroke.lhsKnots.(stroke.lhsKnots.length - 1)
 
+		define [LowerSBaseWithAttach] : glyph-proc
+			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
+			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] EssLower
+			return stroke.lhsKnots.(stroke.lhsKnots.length - 1)
+
+		if [not doBS] : create-glyph "SSwash.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+
+			local start : include : UpperSBaseWithAttach
 			local sw : AdviceStroke2 2 3 CAP
 			include : dispiro
 				widths.lhs [AdviceStroke 4.5]
@@ -311,10 +318,7 @@ glyph-block Letter-Latin-S : begin
 		if [not doBS] : create-glyph "sSwash.\(suffix)" : glyph-proc
 			include : MarkSet.p
 
-			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
-			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] EssLower
-			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
-
+			local start : include : LowerSBaseWithAttach
 			local sw : AdviceStroke2 2 3 XH
 			include : dispiro
 				widths.lhs [AdviceStroke 4.5]
@@ -324,13 +328,21 @@ glyph-block Letter-Latin-S : begin
 				curl RightSB Descender
 
 
+		if [not doBS] : create-glyph "SRTail.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+
+			local start : include : UpperSBaseWithAttach
+			include : new-glyph : glyph-proc
+				local sw : AdviceStroke2 2 3 XH
+				include : refer-glyph "rtailBR"
+				include : ApparentTranslate (start.x + sw * HVContrast) 0
+
+			include : VBarLeft start.x 0 start.y
+
 		if [not doBS] : create-glyph "sRTail.\(suffix)" : glyph-proc
 			include : MarkSet.p
 
-			include : SAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
-			local stroke : include : SmallSStrokeImpl doTS doBS [AdviceStroke2 2 3 XH] EssLower
-			local start stroke.lhsKnots.(stroke.lhsKnots.length - 1)
-
+			local start : include : LowerSBaseWithAttach
 			include : new-glyph : glyph-proc
 				local sw : AdviceStroke2 2 3 XH
 				include : refer-glyph "rtailBR"
@@ -352,6 +364,7 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
 	select-variant 'sRTail' 0x282 (follow -- 'sSwash')
+	select-variant 'SRTail' 0xA7C5 (follow -- 'SSwash')
 
 	alias 'cyrl/Dze' 0x405 'S'
 	alias 'cyrl/dze' 0x455 's'
