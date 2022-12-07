@@ -6,6 +6,7 @@ import { Point } from "../../support/geometry/point.mjs";
 import { Transform } from "../../support/geometry/transform.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
 function regulateGlyphStore(cache, skew, glyphStore) {
 	const compositeMemo = new Map();
 	for (const g of glyphStore.glyphs()) {
@@ -18,19 +19,20 @@ function regulateGlyphStore(cache, skew, glyphStore) {
 		if (!compositeMemo.get(g)) flattenSimpleGlyph(cache, skew, g);
 	}
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-function memoSet(memo, g, v) {
-	memo.set(g, v);
-	return v;
-}
+
 function regulateCompositeGlyph(glyphStore, memo, g) {
 	if (memo.has(g)) return memo.get(g);
+
 	let refs = g.geometry.asReferences();
 	if (!refs) return memoSet(memo, g, false);
+
 	for (const sr of refs) {
 		const gn = glyphStore.queryNameOf(sr.glyph);
 		if (!gn) return memoSet(memo, g, false);
 	}
+
 	// De-doppelganger
 	while (refs.length === 1 && regulateCompositeGlyph(glyphStore, memo, refs[0].glyph)) {
 		const sr = refs[0];
@@ -41,8 +43,10 @@ function regulateCompositeGlyph(glyphStore, memo, g) {
 		}
 		refs = g.geometry.asReferences();
 	}
+
 	return memoSet(memo, g, true);
 }
+
 function flattenSimpleGlyph(cache, skew, g) {
 	const ck = Geom.hashGeometry(g.geometry);
 	const cached = cache.getGF(ck);
@@ -51,19 +55,32 @@ function flattenSimpleGlyph(cache, skew, g) {
 		g.includeContours(CurveUtil.repToShape(cached), 0, 0);
 		cache.refreshGF(ck);
 	} else {
-		const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
-		const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
-		const g1 = new Geom.TransformedGeometry(
-			new SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
-			tfForward
-		);
-		const cs = g1.asContours();
+		let gSimplified;
+		if (skew) {
+			const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
+			const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
+			gSimplified = new Geom.TransformedGeometry(
+				new SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
+				tfForward
+			);
+		} else {
+			gSimplified = new SimplifyGeometry(g.geometry);
+		}
+
+		const cs = gSimplified.asContours();
 		g.clearGeometry();
 		g.includeContours(cs, 0, 0);
 		if (ck) cache.saveGF(ck, CurveUtil.shapeToRep(cs));
 	}
 }
+
+function memoSet(memo, g, v) {
+	memo.set(g, v);
+	return v;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
 class SimplifyGeometry extends Geom.GeometryBase {
 	constructor(g) {
 		super();

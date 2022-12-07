@@ -125,19 +125,20 @@ export class DiSpiroGeometry extends GeometryBase {
 	asContours() {
 		if (this.m_cachedContours) return this.m_cachedContours;
 		const expandResult = this.expand();
-		const lhs = [...expandResult.lhs];
-		const rhs = [...expandResult.rhs];
+		const lhs = [...expandResult.lhsUntransformed];
+		const rhs = [...expandResult.rhsUntransformed];
+
 		let rawGeometry;
 		if (this.m_closed) {
 			rawGeometry = new CombineGeometry([
-				new SpiroGeometry(Transform.Id(), true, lhs.slice(0, -1)),
-				new SpiroGeometry(Transform.Id(), true, rhs.reverse().slice(0, -1))
+				new SpiroGeometry(this.m_gizmo, true, lhs),
+				new SpiroGeometry(this.m_gizmo, true, rhs.reverse())
 			]);
 		} else {
 			lhs[0].type = lhs[lhs.length - 1].type = "corner";
 			rhs[0].type = rhs[rhs.length - 1].type = "corner";
 			const allKnots = lhs.concat(rhs.reverse());
-			rawGeometry = new SpiroGeometry(Transform.Id(), true, allKnots);
+			rawGeometry = new SpiroGeometry(this.m_gizmo, true, allKnots);
 		}
 		this.m_cachedContours = rawGeometry.asContours();
 		return this.m_cachedContours;
