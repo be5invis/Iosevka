@@ -525,13 +525,20 @@ glyph-block Letter-Shared-Shapes : begin
 				glyph-proc
 
 	glyph-block-export HooktopLeftBar
-	define [HooktopLeftBar] : params [bottom] : glyph-proc
-		include : dispiro
+	define [HooktopLeftBar] : params [[bottom 0]] : glyph-proc
+		local yTurn : CAP - Hook - HalfStroke
+		if (bottom + TanSlope * HVContrast * Stroke < yTurn)
+		: then : include : dispiro
 			widths.lhs
 			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
 			archv
 			flat SB (CAP - Hook - HalfStroke)
-			curl SB [fallback bottom 0] [heading Downward]
+			curl SB bottom [heading Downward]
+		: else : include : dispiro
+			widths.lhs
+			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
+			archv
+			straight.down.end SB bottom [heading Downward]
 
 	glyph-block-export BeltOverlay
 	define [BeltOverlay top xMiddle] : begin
@@ -546,3 +553,46 @@ glyph-block Letter-Shared-Shapes : begin
 			arcvh
 			flat (xMiddle - HalfStroke - r * 1.5) (0.5 * top - r)
 			curl (xMiddle + HalfStroke + r * 1.5 + fine) (0.5 * top - r)
+
+	glyph-block-export LetterBarOverlay
+	define [LetterBarOverlay] : params [x y space refSw pXInSw sw] : begin
+		local {xLeftSpace xRightSpace} space
+		local xLeftEdge  : x - pXInSw * refSw * HVContrast
+		local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
+		local xStrokeCenter : mix xLeftEdge xRightEdge 0.5
+		return : HOverlayBar
+			Math.max [mix xLeftSpace xLeftEdge 0.3] (xStrokeCenter - 0.75 * LongJut)
+			Math.min [mix xRightSpace xRightEdge 0.3] (xStrokeCenter + 0.75 * LongJut)
+			begin y
+			begin sw
+
+	set LetterBarOverlay.l : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+	set LetterBarOverlay.m : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+	set LetterBarOverlay.r : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
+
+	define [calcYAndSw bot top py sw] : begin
+		local y : mix bot top py
+		local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
+		return { y sw1 }
+
+	set LetterBarOverlay.l.in : function []
+		params [x bot top [py OverlayPos] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+	set LetterBarOverlay.m.in : function []
+		params [x bot top [py OverlayPos] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+	set LetterBarOverlay.r.in : function []
+		params [x bot top [py OverlayPos] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
