@@ -71,21 +71,34 @@ glyph-block AutoBuild-Accents : begin
 	# When recursively building, `recursiveCodes` contain an array of "needed" Unicode list
 	local goalCodes : recursiveCodes || [range 0x0000 0xFFFF]
 	foreach code goalCodes : if [not : glyphStore.queryByUnicode code] : do
+		local parts    { }
+		local allFound true
+
+		local customDecomp   UnicodeKnowledge.decompOverrides.(code)
+
 		local str : String.fromCodePoint code
-		local nfd : fallback UnicodeKnowledge.decompositionOverrides.(str) : str.normalize 'NFD'
-		if (str !== nfd) : begin
-			local nfdChars : Array.from nfd
-			local parts     { }
-			local allFound true
-			foreach part [items-of nfdChars] : begin
-				local part : glyphStore.queryByUnicode [part.codePointAt 0]
+		local nfd          : str.normalize 'NFD'
+
+		if customDecomp
+		: then : begin
+			foreach partName customDecomp : begin
+				local part : glyphStore.queryByName partName
 				if [not part]
 				: then : set allFound false
 				: else : parts.push part
-			if allFound : begin
-				local glyphName : 'u' + [code.toString 16 :.padStart 4 '0']
-				set parts : subParts parts
-				set foundDecompositions.(glyphName) { glyphName code parts }
+
+		: else : if (str !== nfd) : begin
+			local nfdChars : Array.from nfd
+			foreach partChar [items-of nfdChars] : begin
+				local part : glyphStore.queryByUnicode [partChar.codePointAt 0]
+				if [not part]
+				: then : set allFound false
+				: else : parts.push part
+
+		if (allFound && parts.length) : begin
+			local glyphName : 'u' + [code.toString 16 :.padStart 4 '0']
+			set parts : subParts parts
+			set foundDecompositions.(glyphName) { glyphName code parts }
 
 	local s_goalName  nothing
 	local s_code      nothing

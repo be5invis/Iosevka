@@ -5,6 +5,8 @@ export async function collectBlockData() {
 		[[0xe0a0, 0xe0df], "Private Use Area — Powerline"],
 		[[0xee00, 0xee3f], "Private Use Area — Progress Bar"],
 		// Missing ranges in UnicodeDataIndex
+		[[0x10780, 0x107bf], "Latin Extended-F"],
+		[[0x1df00, 0x1dfff], "Latin Extended-G"],
 		[[0x1fa70, 0x1faff], "Symbols and Pictographs Extended-A "],
 		[[0x1fb00, 0x1fbff], "Symbols for Legacy Computing"]
 	];
