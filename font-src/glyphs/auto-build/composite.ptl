@@ -1240,7 +1240,7 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 
-	define [createPhoneticLigatures prefix div _shrink1 _shrink2 wadj1 wadj2 demands] : begin
+	define [createPhoneticLigatures prefix div _shrink1 _shrink2 wadj1 wadj2 tfm demands] : begin
 		define CWidth : Width * div
 		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix "" demands
 		local shrink1 : clamp 0 1 _shrink1
@@ -1288,10 +1288,21 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 				include : Translate (CWidth / 2) 0
 				include : Regizmo
 
+				include : tfm div
+
 		applyRelations jobs.relApplications
 
+	define [ToLetter] : glyph-proc
+	define [ToSuperscript div] : glyph-proc
+		local df : DivFrame df
+		include [Ungizmo] true
+		include [Translate (-df.middle) (-CAP)] true
+		include [Scale 0.7] true
+		include [Translate df.middle (CAP + AccentStackOffset / 2)] true
+		include [Regizmo] true
+
 	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createPhoneticLigatures 'phonetic' para.diversityM stdShrink stdShrink 1 1 : list
+	createPhoneticLigatures 'phonetic' para.diversityM stdShrink stdShrink 1 1 ToLetter : list
 		list 0x02A3 { 'd/phoneticLeft'  'z'                     } 'b'
 		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'if'
 		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
@@ -1302,9 +1313,22 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0x02AA { 'l/phoneticLeft'  's/phoneticRight'       } 'b'
 		list 0x02AB { 'l/phoneticLeft'  'z'                     } 'b'
 		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
-		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } null
+		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } 'p'
 		list 0xFB01 { 'f/compLigLeft1'  'dotlessi/compLigRight' } null
 		list 0xFB02 { 'f/compLigLeft2'  'l/compLigRight'        } null
+
+	createPhoneticLigatures 'phoneticSuperscript' 1 stdShrink stdShrink 1 1 ToSuperscript : list
+		list 0x10787 { 'd/phoneticLeft'  'z'                     } 'b'
+		list 0x1078A { 'd/phoneticLeft'  'ezh'                   } 'if'
+		list 0x10789 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
+		list 0x107AC { 't/phoneticLeft2' 's/phoneticRight'       } 'b'
+		list 0x107AE { 't/teshLeft'      'esh'                   } 'if'
+		list 0x107AB { 't/phoneticLeft1' 'cCurlyTail'            } 'b'
+		list 0x10790 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'if'
+		list 0x10799 { 'l/phoneticLeft'  's/phoneticRight'       } 'b'
+		list 0x1079A { 'l/phoneticLeft'  'z'                     } 'b'
+		list 0x10788 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
+		list 0x107AD { 't/phoneticLeft1' 'sRTail'                } 'p'
 
 glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import CommonShapes

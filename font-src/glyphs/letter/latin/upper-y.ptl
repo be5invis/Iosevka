@@ -40,9 +40,12 @@ glyph-block Letter-Latin-Upper-Y : begin
 		include : VBar Middle bot (cross + HalfStroke)
 		set-base-anchor 'overlay' Middle cross
 
-	define [YOverlayShape] : glyph-proc
-		include : HOverlayBar SB RightSB (CAP * 0.45)
-		include : HOverlayBar SB RightSB (CAP * 0.25)
+	define [YenOverlayShape slabType] : glyph-proc
+		define { ks bot } : match slabType
+			([Just SLAB-ALL] || [Just SLAB-BASE])  { 0.25 Stroke }
+			otherwise                              { 0    0      }
+		include : HOverlayBar SB RightSB ([mix bot [YCrossPos CAP 0] 0.5] - OverlayStroke * ks)
+		include : HOverlayBar SB RightSB [mix bot [YCrossPos CAP 0] 1.0]
 
 	define [YHookLeftHookedStroke top bot] : begin
 		local cross : YCrossPos top bot
@@ -119,6 +122,17 @@ glyph-block Letter-Latin-Upper-Y : begin
 			eject-contour 'serifRT'
 			include : SetGrekUpperTonos (OX - HookX / 3)
 
+		create-glyph "YStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
+			local b : YCrossPos CAP 0
+			local t : CAP - [if (slabType === SLAB-ALL || slabType === SLAB-MOTION) Stroke 0]
+			include : HOverlayBar [mix 0 SB 0.5] [mix Width RightSB 0.5] [mix b t 0.5]
+				Math.min OverlayStroke ((t - b) * 0.625)
+
+		create-glyph "currency/yenSign.\(suffix)" : glyph-proc
+			include [refer-glyph "Y.\(suffix)"] AS_BASE ALSO_METRICS
+			include : YenOverlayShape slabType
+
 	select-variant 'Y' 'Y'
 	link-reduced-variant 'Y/sansSerif' 'Y' MathSansSerif
 	select-variant 'YHookTop' 0x1B3 (follow -- 'Y')
@@ -130,9 +144,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 	select-variant 'grek/Upsilon' 0x3A5 (follow -- 'Y')
 	link-reduced-variant 'grek/Upsilon/sansSerif' 'grek/Upsilon' MathSansSerif (follow -- 'Y/sansSerif')
 	alias 'cyrl/Ue' 0x4AE 'Y'
-	derive-glyphs 'currency/yenSign' 0xA5 'Y' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : YOverlayShape
+	select-variant 'currency/yenSign' 0xA5 (follow -- 'Y')
 
 	create-glyph 'YStrokeOverlay' : HOverlayBar ([mix 0 SB 0.5]) ([mix Width RightSB 0.5]) [mix 0 CAP 0.75]
 	derive-composites 'YStroke' 0x24E 'Y' 'YStrokeOverlay'

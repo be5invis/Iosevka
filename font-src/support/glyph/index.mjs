@@ -63,6 +63,8 @@ export class Glyph {
 			return this.applyTransform(component, copyAnchors);
 		} else if (component instanceof Glyph) {
 			return this.includeGlyph(component, copyAnchors, copyWidth);
+		} else if (component.__isNoShape) {
+			// Do nothing. By design.
 		} else {
 			throw new Error("Invalid component to be introduced.");
 		}

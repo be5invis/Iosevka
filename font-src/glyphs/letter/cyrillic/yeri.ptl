@@ -9,9 +9,12 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
 	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev RightwardTailedBar
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+
+	define DefaultBarPos 0.55
 
 	glyph-block-export CyrlYeriUprightShape
-	define [CyrlYeriUprightShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+	define [CyrlYeriUprightShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
 		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
@@ -38,7 +41,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			include : tagged 'serifYeriLT' : CenterTopSerif (left + stroke / 2 * HVContrast) top jut
 
 	glyph-block-export CyrlYeriRoundShape
-	define [CyrlYeriRoundShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+	define [CyrlYeriRoundShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
 		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
@@ -63,7 +66,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			include : tagged 'serifYeriLT' : LeftwardTopSerif left top (jut - stroke / 2 * HVContrast)
 
 	glyph-block-export CyrlYeriCursiveShape
-	define [CyrlYeriCursiveShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+	define [CyrlYeriCursiveShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : BowlXDepth bowl 0 left right stroke
 		local ada : ArchDepthAOf ArchDepth (right - left + SB * 2)
@@ -88,7 +91,7 @@ glyph-block Letter-Cyrillic-Yeri : begin
 		if SLAB : begin
 			include : tagged 'serifYeriLT' : LeftwardTopSerif left top (jut - stroke / 2 * HVContrast)
 
-	define [RevCyrYeriShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar 0.55]] : glyph-proc
+	define [RevCyrYeriShape] : params [top [left SB] [right RightSB] [stroke Stroke] [jut Jut] [pBar DefaultBarPos]] : glyph-proc
 		local bowl : top * pBar + HalfStroke
 		local turnRadius : bowl * 0.45
 		local turnbottom : mix 0 bowl (ArchDepthB / (ArchDepthA + ArchDepthB))
@@ -110,17 +113,18 @@ glyph-block Letter-Cyrillic-Yeri : begin
 				CenterTopSerif (right - stroke / 2 * HVContrast) top jut
 
 	define [CyrYerShape Yeri df top] : glyph-proc
-		local left : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
+		local xLeftBarLeftEdge : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
 			Just ([mix df.leftSB df.rightSB 0.35] - df.mvs / 2 * HVContrast)
 			Just  [mix df.leftSB df.rightSB 0.2]
-		local barLeft : mix 0 df.leftSB [if SLAB 0.25 0.375]
+		local xTopBarLeftEnd : mix 0 df.leftSB [if SLAB 0.25 0.375]
 		include : Yeri top
-			left   -- left
+			left   -- xLeftBarLeftEdge
 			right  -- df.rightSB - O * 2
 			stroke -- [AdviceStroke 2.5]
-		include : HBarTop barLeft (Stroke * 0.1 + left) top
+		include : HBarTop xTopBarLeftEnd (Stroke * 0.1 + xLeftBarLeftEdge) top
 		if SLAB : begin
-			include : DownwardLeftSerif barLeft top VJut (df.mvs / HVContrast)
+			include : DownwardLeftSerif xTopBarLeftEnd top VJut
+				Math.min (VJutStroke * df.mvs / Stroke) (0.625 * (xLeftBarLeftEdge - xTopBarLeftEnd))
 
 	define [CyrYeryShape Yeri df top fTail] : glyph-proc
 		local jut : Math.min Jut : [Math.pow (df.mvs / Stroke) 0.5] * Jut
@@ -162,11 +166,10 @@ glyph-block Letter-Cyrillic-Yeri : begin
 
 	define [YeriOverlayBar df top] : begin
 		local stroke : AdviceStroke2 2 3 top
-		return : HOverlayBar
-			mix df.leftSB 0 0.7
-			mix df.leftSB df.rightSB 0.5
-			mix (top * 0.52 + stroke / 2) top 0.5
-			Math.min ((top - Stroke * 3) / 3) OverlayStroke
+		return : LetterBarOverlay.l.in
+			x   -- df.leftSB
+			bot -- top * DefaultBarPos + stroke / 2
+			top -- top - [if SLAB Stroke 0]
 
 	foreach { suffix { Yeri fTail } } [Object.entries YerConfig] : do
 		create-glyph "cyrl/Yeri.\(suffix)" : glyph-proc
