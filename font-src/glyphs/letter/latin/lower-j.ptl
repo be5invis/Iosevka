@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Lower-J : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition
-	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : CurlyTail FlatHookDepth HooktopLeftBar LetterBarOverlay
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailL DiagonalTailStdDepth
 	glyph-block-import Letter-Blackboard : BBS BBD
 
@@ -88,26 +88,39 @@ glyph-block Letter-Latin-Lower-J : begin
 			set-base-anchor 'overlay' xMiddle (top / 2)
 
 	define JConfig : object
-		'serifless'               { Body.Regular         null         XMiddle.Regular            Marks.FullHook  1                }
-		'serifed'                 { Body.Regular         Serifs.Long  XMiddle.Regular            Marks.FullHook  1                }
-		'straightLine'            { Body.Straight        null         XMiddle.Straight           Marks.Straight  para.diversityII }
-		'hooky'                   { Body.Straight        Serifs.Long  XMiddle.Hooky              Marks.Straight  para.diversityII }
-		'flatHookSerifless'       { Body.FlatHook        null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
-		'flatHookSerifed'         { Body.FlatHook        Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
-		'diagonalTailedSerifless' { Body.DiagonalTailed  null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
-		'diagonalTailedSerifed'   { Body.DiagonalTailed  Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
+		'serifless'               { "Regular"         null         XMiddle.Regular            Marks.FullHook  1                }
+		'serifed'                 { "Regular"         Serifs.Long  XMiddle.Regular            Marks.FullHook  1                }
+		'straightLine'            { "Straight"        null         XMiddle.Straight           Marks.Straight  para.diversityII }
+		'hooky'                   { "Straight"        Serifs.Long  XMiddle.Hooky              Marks.Straight  para.diversityII }
+		'flatHookSerifless'       { "FlatHook"        null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
+		'flatHookSerifed'         { "FlatHook"        Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
+		'diagonalTailedSerifless' { "DiagonalTailed"  null         XMiddle.FlatHookSerifless  Marks.FullHook  para.diversityII }
+		'diagonalTailedSerifed'   { "DiagonalTailed"  Serifs.Long  XMiddle.FlatHookSerifed    Marks.FullHook  para.diversityI  }
 
-	foreach {suffix { Body Serif xMiddleT Marks div } } [Object.entries JConfig] : do
+	foreach {suffix { shapeId Serif xMiddleT Marks div } } [Object.entries JConfig] : do
+		local df : DivFrame div
+		local xMiddle : xMiddleT df
+
 		create-glyph "dotlessj.\(suffix)" : glyph-proc
-			local df : DivFrame div
 			set-width df.width
 			include : df.markSet.p
-			local xMiddle : xMiddleT df
-			include : Body df XH xMiddle
+			include : Body.(shapeId) df XH xMiddle
 			if Serif : include : tagged 'serifLT' : Serif df XH xMiddle
 			include : Marks df XH xMiddle (!(!Serif))
 
+		create-glyph "dotlessjBar.\(suffix)" : glyph-proc
+			include [refer-glyph "dotlessj.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.m xMiddle (XH / 2) (space -- {0  df.width})
+
+		create-glyph "dotlessjBarHookTop.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.if
+			include [refer-glyph "dotlessjBar.\(suffix)"]
+			include : WithTransform [ApparentTranslate (xMiddle - HalfStroke * HVContrast - SB) 0] : HooktopLeftBar XH
+
 	select-variant 'dotlessj' 0x237
+	select-variant 'dotlessjBar' 0x25F (follow -- 'dotlessj')
+	select-variant 'dotlessjBarHookTop' 0x284 (follow -- 'dotlessj/sansSerif')
 	link-reduced-variant 'dotlessj/sansSerif' 'dotlessj' MathSansSerif
 	CreateAccentedComposition 'j'           'j'   'dotlessj'           'dotAbove'
 	CreateAccentedComposition 'j/sansSerif' null  'dotlessj/sansSerif' 'dotAbove'

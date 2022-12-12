@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise ShoulderMidKnotLhs
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs ArcStartHookTop
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerifR ArcStartInwardSerifR
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifR ArcStartInwardSerifR LetterBarOverlay
 
 	define TOOTHED            0
 	define TOOTHLESS-CORNER   1
@@ -67,8 +67,11 @@ glyph-block Letter-Latin-Upper-G : begin
 				[Just TOOTHLESS-CORNER]  : VBarRight RightSB DToothlessRise yBar
 				[Just TOOTHLESS-ROUNDED] : glyph-proc
 
-	define [OverlayBarOfG top] : begin
-		return : HOverlayBar [mix SB RightSB 0.5] [mix RightSB Width 0.7] [mix 0 (top / 2) 0.55]
+	create-glyph 'GBarOverlay' : LetterBarOverlay.r.in
+		x     -- RightSB
+		bot   -- 0
+		top   -- (CAP / 2)
+		space -- { (SB + Stroke * HVContrast) Width }
 
 	define GConfig : object
 		toothedSeriflessHookless              { TOOTHED           CROSSBAR-NONE   SLAB-NONE   }
@@ -104,7 +107,6 @@ glyph-block Letter-Latin-Upper-G : begin
 		create-glyph "G.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GShape shape slabType crossBarShape CAP ArchDepthA ArchDepthB
-			create-forked-glyph "Gbar.\(suffix)" : OverlayBarOfG CAP
 		create-glyph "GHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : GShape shape SLAB-HOOK-TOP crossBarShape CAP ArchDepthA ArchDepthB
@@ -122,8 +124,9 @@ glyph-block Letter-Latin-Upper-G : begin
 	select-variant 'smcpG' 0x262 (follow -- 'G')
 	select-variant 'GHookTop' 0x193
 	select-variant 'smcpGHookTop' 0x29B (follow -- 'GHookTop')
-	select-variant 'Gbar' 0x1E4 (follow -- 'G')
 	turned 'turnSansSerifG' 0x2141 'G/sansSerif' Middle (CAP / 2)
+
+	derive-composites 'Gbar' 0x1E4 'G' 'GBarOverlay'
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	define [BBGArcT sink offset top ada adb xTerm yTerm] : sink

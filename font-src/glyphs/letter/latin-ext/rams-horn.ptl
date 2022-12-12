@@ -8,8 +8,9 @@ glyph-module
 glyph-block Letter-Latin-Rams-Horn : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
 
-	define [RamsHornShape bottom top] : glyph-proc
+	define [LatinGammaShape bottom top] : glyph-proc
 		local hf : [AdviceStroke 4] / 2
 		local d : hf * 2 + Width * 0.05
 
@@ -27,38 +28,60 @@ glyph-block Letter-Latin-Rams-Horn : begin
 
 	create-glyph 'latn/gamma' 0x263 : glyph-proc
 		include : MarkSet.p
-		include : RamsHornShape Descender XH
+		include : LatinGammaShape Descender XH
+		if SLAB : begin
+			local sf : SerifFrame XH Descender SB RightSB
+			include : composite-proc sf.lt.full sf.rt.full
 
 	create-glyph 'latn/Gamma' 0x194 : glyph-proc
 		include : MarkSet.capDesc
-		include : RamsHornShape Descender Ascender
+		include : LatinGammaShape Descender CAP
+		if SLAB : begin
+			local sf : SerifFrame CAP Descender SB RightSB
+			include : composite-proc sf.lt.full sf.rt.full
+
+	define [RamsHornShape fFill bottom top] : glyph-proc
+		local k1 0.625
+		local k2 0.7
+		local kIntersection 0.15
+		local d : 0.25 * (RightSB - SB) * k1 * TanSlope
+
+		local sw   : AdviceStroke : if SLAB 3    2.75
+		local fine : AdviceStroke : if SLAB 3.75 3.5
+		local coFine : mix sw fine (kIntersection / k2)
+		local fillOffset : sw * 0.25
+
+		include : union
+			dispiro
+				widths.rhs sw
+				straight.right.start SB top [heading Rightward]
+				g4 Middle [mix top bottom kIntersection] [widths.rhs coFine]
+				g4.down.mid [mix Middle RightSB k1] ([mix top bottom k2] - d) [widths.rhs fine]
+				arcvh
+				g4.left.mid (Middle + CorrectionOMidX * fine) (bottom + O)
+				archv
+				g4.up.mid [mix Middle SB k1] ([mix top bottom k2] + d)
+				g4 Middle [mix top bottom kIntersection] [widths.rhs coFine]
+				straight.right.end RightSB top [widths.rhs.heading sw Rightward]
+			if fFill
+				then : spiro-outline
+					corner Middle ([mix top bottom kIntersection] - fillOffset)
+					g4.down.mid ([mix Middle RightSB k1] - fillOffset) ([mix top bottom k2] - d)
+					g4.left.mid (Middle + CorrectionOMidX * fine) (bottom + fillOffset)
+					g4.up.mid ([mix Middle SB k1] + fillOffset) ([mix top bottom k2] + d)
+					close
+				else : no-shape
+
+		if SLAB : begin
+			include : DownwardLeftSerif  SB      (top - sw) (VJut * (sw / Stroke) - sw) fine
+			include : DownwardRightSerif RightSB (top - sw) (VJut * (sw / Stroke) - sw) fine
 
 	create-glyph 'ramshorn' 0x264 : glyph-proc
 		include : MarkSet.e
-		include : RamsHornShape 0 XH
+		include : RamsHornShape false 0 XH
 
 	### Ayin
 	create-glyph 'latinAyin' 0x1D25 : glyph-proc
 		include : MarkSet.e
-		local k1 0.65
-		local k2 0.7
-		local zmidy (XH * 0.15)
-		local offset : Stroke * 0.25
-		include : union
-			dispiro
-				widths.lhs
-				g4.right.start SB 0 [heading Rightward]
-				g4 Middle zmidy
-				g4.up.mid [mix Middle RightSB k1] (XH * k2) [heading Upward]
-				arcvh
-				g4.left.mid Middle (XH - O) [heading Leftward]
-				archv
-				g4.down.mid [mix Middle SB k1] (XH * k2) [heading Downward]
-				g4 Middle zmidy
-				g4.right.end RightSB 0 [heading Rightward]
-			spiro-outline
-				corner Middle (zmidy + offset)
-				g4.up.mid ([mix Middle RightSB k1] - offset) (XH * k2)
-				g4.left.mid Middle (XH - offset)
-				g4.down.mid ([mix Middle SB k1] + offset) (XH * k2)
-				close
+		include : RamsHornShape true 0 XH
+		include : FlipAround Middle (XH / 2)

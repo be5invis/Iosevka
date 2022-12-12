@@ -80,6 +80,13 @@ glyph-block Letter-Latin-Upper-H : begin
 		local sf2 : SerifFrame XH 0 (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB df.mvs
 		if (slabType === SLAB-ALL || slabType === SLAB-TAILED-CYRILLIC) : include sf2.rt.full
 
+	define [OverlayStrokeShape top slabType] : begin
+		local yb : top * HBarPos + HalfStroke
+		local yt : top - [if slabType Stroke 0]
+		return : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7]
+			mix yb yt 0.5
+			Math.min OverlayStroke (0.625 * (yt - yb))
+
 	define HConfig : object
 		serifless                        { HShape       HTurned SLAB-NONE                  false }
 		tailed                           { TailedHShape HTurned SLAB-NONE                  false }
@@ -152,6 +159,14 @@ glyph-block Letter-Latin-Upper-H : begin
 			eject-contour "serifLT"
 			include : LeftHook SB CAP
 
+		create-glyph "HStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "H.\(suffix)"] AS_BASE ALSO_METRICS
+			include : OverlayStrokeShape CAP slabType
+
+		create-glyph "smcpHStroke.\(suffix)" : glyph-proc
+			include [refer-glyph "smcpH.\(suffix)"] AS_BASE ALSO_METRICS
+			include : OverlayStrokeShape XH slabType
+
 	select-variant 'H' 'H'
 	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
 	select-variant 'grek/Eta' 0x397 (follow -- 'H')
@@ -180,6 +195,9 @@ glyph-block Letter-Latin-Upper-H : begin
 	select-variant 'Hwair' 0x1F6
 	select-variant 'HHookLeft' 0xA7AA
 
+	select-variant 'HStroke' 0x126 (follow -- 'H')
+	select-variant 'smcpHStroke' null (follow -- 'H')
+
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
 		include : VBarLeft  SB 0 CAP BBS
@@ -191,12 +209,6 @@ glyph-block Letter-Latin-Upper-H : begin
 		include : HBarTop (RightSB - BBD) RightSB CAP BBS
 		include : HBarBottom SB (SB + BBD) 0 BBS
 		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
-
-	derive-composites 'Hbar' 0x126 'H'
-		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (CAP * 0.725)
-
-	derive-composites 'smcpHbar' null 'smcpH'
-		HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (XH * 0.725)
 
 	derive-glyphs 'HCedilla' 0x1E28 'H' : lambda [src gr] : glyph-proc
 		include [refer-glyph 'cedillaBelow']

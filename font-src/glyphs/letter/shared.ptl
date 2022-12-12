@@ -469,8 +469,6 @@ glyph-block Letter-Shared-Shapes : begin
 			alsoThruThem {{0.5 0.94}}
 			straight.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
-	define VJutSw : AdviceStroke 3.5
-
 	glyph-block-export CyrDescender
 	define [CyrDescender] : params [x [connex 0.5] [overflow nothing]] : glyph-proc
 		local attachAnchor currentGlyph.baseAnchors.cyrlDescenderAttach
@@ -479,12 +477,12 @@ glyph-block Letter-Shared-Shapes : begin
 			local attach : currentGlyph.gizmo.unapply attachAnchor
 			local descenderOverflow : fallback overflow SideJut
 			include : union
-				VBarRight attach.x (HalfStroke - LongJut) attach.y VJutSw
+				VBarRight attach.x (HalfStroke - LongJut) attach.y VJutStroke
 				HBarTop (attach.x - connex * Stroke * HVContrast) attach.x attach.y
 		: else : begin
 			local descenderOverflow : fallback overflow SideJut
 			include : union
-				VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
+				VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutStroke
 				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 
 	glyph-block-export CyrHookDescender
@@ -495,12 +493,12 @@ glyph-block Letter-Shared-Shapes : begin
 		return : union
 			HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
 			dispiro
-				widths.rhs VJutSw
+				widths.rhs VJutStroke
 				flat xRef Stroke [heading Downward]
-				curl xRef (hd.y - Hook - 0.25 * VJutSw) [heading Downward]
+				curl xRef (hd.y - Hook - 0.25 * VJutStroke) [heading Downward]
 				arcvh
-				flat (xRef - hd.x + 0.25 * VJutSw * HVContrast) (0 - Hook)
-				curl (xRef - HookX - 0.5 * VJutSw * HVContrast) (0 - Hook)
+				flat (xRef - hd.x + 0.25 * VJutStroke * HVContrast) (0 - Hook)
+				curl (xRef - HookX - 0.5 * VJutStroke * HVContrast) (0 - Hook)
 
 	glyph-block-export CyrTailDescender
 	define [CyrTailDescender] : params [x [connex 0.5] [overflow nothing]] : begin
@@ -508,7 +506,7 @@ glyph-block Letter-Shared-Shapes : begin
 		local xRef : x + descenderOverflow + (0.3 + TanSlope) * Stroke
 		return : union
 			difference
-				ExtLineLhs 4 VJutSw (xRef - 0.275 * LongJut) (HalfStroke - LongJut) xRef Stroke
+				ExtLineLhs 4 VJutStroke (xRef - 0.275 * LongJut) (HalfStroke - LongJut) xRef Stroke
 				MaskAbove Stroke
 				MaskBelow (HalfStroke - LongJut)
 			if (!SLAB && descenderOverflow > Stroke * 0.7 || connex)
@@ -519,30 +517,86 @@ glyph-block Letter-Shared-Shapes : begin
 	define [CyrLeftDescender] : params [x [connex 0.5] [overflow nothing]] : begin
 		local descenderOverflow : fallback overflow SideJut
 		return : union
-			VBarLeft (x - descenderOverflow - 0.25 * Stroke) (HalfStroke - LongJut) Stroke VJutSw
+			VBarLeft (x - descenderOverflow - 0.25 * Stroke) (HalfStroke - LongJut) Stroke VJutStroke
 			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
 				HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
 				glyph-proc
 
 	glyph-block-export HooktopLeftBar
-	define [HooktopLeftBar] : params [bottom] : glyph-proc
-		include : dispiro
+	define [HooktopLeftBar] : params [[bottom 0]] : glyph-proc
+		local yTurn : CAP - Hook - HalfStroke
+		if (bottom + TanSlope * HVContrast * Stroke < yTurn)
+		: then : include : dispiro
 			widths.lhs
 			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
 			archv
 			flat SB (CAP - Hook - HalfStroke)
-			curl SB [fallback bottom 0] [heading Downward]
+			curl SB bottom [heading Downward]
+		: else : include : dispiro
+			widths.lhs
+			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
+			archv
+			straight.down.end SB bottom [heading Downward]
 
-	glyph-block-export BeltOverlay
-	define [BeltOverlay top xMiddle] : begin
+	define [BeltOverlayAt x y] : begin
 		local fine : AdviceStroke 4.5
 		local r : XH * 0.05
 		return : dispiro
 			widths.rhs fine
-			flat xMiddle (0.5 * top + r) [heading Leftward]
-			curl (xMiddle - HalfStroke - r * 1.5) (0.5 * top + r)
+			flat x (y + r) [heading Leftward]
+			curl (x - HalfStroke - r * 1.5) (y + r)
 			archv
-			g4.down.mid (xMiddle - HalfStroke - r * 2.5) (0.5 * top) [heading Downward]
+			g4.down.mid (x - HalfStroke - r * 2.5) y [heading Downward]
 			arcvh
-			flat (xMiddle - HalfStroke - r * 1.5) (0.5 * top - r)
-			curl (xMiddle + HalfStroke + r * 1.5 + fine) (0.5 * top - r)
+			flat (x - HalfStroke - r * 1.5) (y - r)
+			curl (x + HalfStroke + r * 1.5 + fine) (y - r)
+
+	glyph-block-export BeltOverlay
+	define [BeltOverlay top xMiddle] : BeltOverlayAt xMiddle (0.5 * top)
+	set BeltOverlay.at BeltOverlayAt
+
+	glyph-block-export LetterBarOverlay
+	define [LetterBarOverlay] : params [x y space refSw pXInSw sw] : begin
+		local {xLeftSpace xRightSpace} space
+		local xLeftEdge  : x - pXInSw * refSw * HVContrast
+		local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
+		local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
+		local xC : mix xLeftEdge xRightEdge (1 - p)
+		return : HOverlayBar
+			Math.min (xLeftEdge - SideJut)
+				Math.max (xC - 0.75 * LongJut) [mix xLeftSpace xLeftEdge 0.3]
+			Math.max (xRightEdge + SideJut)
+				Math.min [mix xRightSpace xRightEdge 0.3] (xC + 0.75 * LongJut)
+			begin y
+			begin sw
+
+	set LetterBarOverlay.l : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+	set LetterBarOverlay.m : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+	set LetterBarOverlay.r : function []
+		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
+
+	define [calcYAndSw bot top py sw] : begin
+		local y : mix bot top py
+		local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
+		return { y sw1 }
+
+	set LetterBarOverlay.l.in : function []
+		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+	set LetterBarOverlay.m.in : function []
+		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+	set LetterBarOverlay.r.in : function []
+		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+		: begin
+			local { y sw1 } : calcYAndSw bot top py sw
+			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)

@@ -9,36 +9,31 @@ glyph-block Letter-Latin-OU : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [UpperOuShape top] : glyph-proc
-		include : OShape (top * HBarPos + HalfStroke) 0 SB RightSB nothing ArchDepthA ArchDepthB
+	define [OuShape top yBar gapL gapR] : glyph-proc
+		include : OShape (yBar + HalfStroke) 0 SB RightSB nothing ArchDepthA ArchDepthB
+
+		local xLeft : clamp (SB + 1.25 * HVContrast * Stroke) [mix SB RightSB 0.4] (Middle - Width * 0.05)
+		local d : 0.25 * TanSlope * (RightSB - SB)
 		include : dispiro
 			widths.lhs
-			flat SB top [heading Downward]
-			curl SB (top * HBarPos - O - HalfStroke + ArchDepthB)
-			arcvh
-			g4 (Middle + CorrectionOMidS) (top * HBarPos - O - HalfStroke + (Stroke * (1 - CThin))) [widths.lhs (Stroke * CThin)]
+			g4.left.start (xLeft - CorrectionOMidS) (top - gapL)
 			archv
-			flat RightSB (top * HBarPos - O - HalfStroke + ArchDepthA) [widths.lhs]
-			curl RightSB top [heading Upward]
+			g4.down.mid SB ([mix (yBar - HalfStroke) (top - gapL) 0.5] + d)
+			arcvh
+			g4 (Middle + CorrectionOMidS) (yBar - O - HalfStroke + (Stroke * (1 - CThin))) [widths.lhs (Stroke * CThin)]
+			archv
+			g4.up.mid RightSB ([mix (yBar - HalfStroke) (top - gapR) 0.5] - d) [widths.lhs]
+			arcvh
+			g4.left.end (Width - xLeft - CorrectionOMidS) (top - gapR)
 
 	create-glyph 'OU' 0x222 : glyph-proc
 		include : MarkSet.capital
-		include : UpperOuShape CAP
+		include : OuShape CAP (CAP * HBarPos) (CAP * 0.05) 0
 
 	create-glyph 'smcpOU' 0x1D15 : glyph-proc
 		include : MarkSet.e
-		include : UpperOuShape XH
+		include : OuShape XH (XH * HBarPos) 0 0
 
 	create-glyph 'ou' 0x223 : glyph-proc
 		include : MarkSet.b
-		local bar : StrokeWidthBlend (XH * 0.9) XH
-		include : OShape bar 0 SB RightSB
-		include : dispiro
-			widths.lhs
-			flat SB Ascender [heading Downward]
-			curl SB (bar - O - Stroke + ArchDepthB)
-			arcvh
-			g4 (Middle + CorrectionOMidS) (bar - O - Stroke + (Stroke * (1 - CThin))) [widths.lhs (Stroke * CThin)]
-			archv
-			flat RightSB (bar - O - Stroke + ArchDepthA) [widths.lhs]
-			curl RightSB Ascender [heading Upward]
+		include : OuShape Ascender (Ascender * [mix HBarPos (XH / CAP) 0.5]) 0 0

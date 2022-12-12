@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Upper-F : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
 
 	glyph-block-export xMidBarShrink
 	define [xMidBarShrink serifV] : [Math.max HalfStroke ((RightSB - SB) * 0.15)] + [if serifV (Stroke * 0.25) 0]
@@ -28,7 +29,8 @@ glyph-block Letter-Latin-Upper-F : begin
 	define [FShape] : params [top pyBar serifLT serifLB serifV [stroke : AdviceStroke2 2 3 top]] : glyph-proc
 		include : VBarLeft (xFBarLeft) 0 top stroke
 		include : HBarTop (xFBarLeft - O) RightSB top stroke
-		include : HBar (xFBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
+		include : tagged 'crossBar'
+			HBar (xFBarLeft - O) (RightSB - [xMidBarShrink serifV]) [yMidBar top pyBar] stroke
 		if serifLT : include : LeftwardTopSerif xFBarLeft top SideJut
 		if serifLB : begin
 			include : tagged 'serifBottom' : LeftwardBottomSerif xFBarLeft 0 SideJut
@@ -62,9 +64,26 @@ glyph-block Letter-Latin-Upper-F : begin
 
 		create-glyph "currency/frenchFrancSign.\(suffix)" : glyph-proc
 			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
-			include : HOverlayBar (SB * 0.5) (SB * 3 + Stroke * HVContrast) : Math.max
-				mix [if lb Stroke 0] ([yMidBar CAP] - HalfStroke) (1 / 2)
-				[mix [if lb Stroke 0] ([yMidBar CAP] - HalfStroke) (2 / 3)] - OverlayStroke / 2
+
+			eject-contour 'crossBar'
+			include : LetterBarOverlay.l.in
+				x   -- xFBarLeft
+				bot -- 0
+				top -- CAP
+				py  -- 0.375
+			include : LetterBarOverlay.l.in
+				x   -- xFBarLeft
+				bot -- [if lb Stroke 0]
+				top -- (CAP - Stroke)
+				py  -- 0.625
+
+		create-glyph "FBar.\(suffix)" : glyph-proc
+			include [refer-glyph "F.\(suffix)"] AS_BASE ALSO_METRICS
+			include : LetterBarOverlay.l.in
+				x   -- xFBarLeft
+				bot -- [yMidBar CAP] + HalfStroke
+				top -- CAP - Stroke
+				space -- { 0 (RightSB - [if v (VJutStroke * HVContrast) 0]) }
 
 		create-glyph "smcpF.\(suffix)" : glyph-proc
 			include : MarkSet.e
@@ -73,6 +92,7 @@ glyph-block Letter-Latin-Upper-F : begin
 	select-variant 'F' 'F'
 	link-reduced-variant 'F/sansSerif' 'F' MathSansSerif
 	select-variant 'smcpF' 0xA730 (follow -- 'F')
+	select-variant 'FBar' 0xA798 (follow -- 'F')
 	select-variant 'currency/frenchFrancSign' 0x20A3 (follow -- 'F')
 
 	glyph-block-import Letter-Blackboard : BBS BBD
