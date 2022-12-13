@@ -330,7 +330,7 @@ glyph-block Letter-Shared-Shapes : begin
 			g4 sx (cy + DToothlessRise) [widths.lhs sw]
 
 	glyph-block-export ArcStartSerifWidth
-	define [ArcStartSerifWidth stroke] : Math.max (stroke * 0.875) [AdviceStroke 3.5]
+	define [ArcStartSerifWidth stroke] : Math.max (stroke * 0.875) VJutStroke
 
 	glyph-block-export ArcStartSerifR
 	define [ArcStartSerifR cx cy stroke hook overflow] : begin
@@ -530,18 +530,56 @@ glyph-block Letter-Shared-Shapes : begin
 				glyph-proc
 
 	glyph-block-export PalatalHook
-	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0]] : glyph-proc
+	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : glyph-proc
+		local sw : PalatalHook.sw refSw
 		local hd : FlatHookDepth [DivFrame 1]
 		if (xAttach < x) : include : HBarBottom xAttach x yAttach
 		include : dispiro
-			widths.rhs VJutStroke
+			widths.rhs sw
 			flat x (yAttach + yOverflow) [heading Downward]
-			curl x (y + hd.y - Hook - 0.25 * VJutStroke)
+			curl x (y + hd.y - Hook - 0.25 * sw)
 			arcvh
-			flat (x - hd.x + 0.25 * VJutStroke * HVContrast) (y - Hook)
-			curl (x - HookX - 0.5 * VJutStroke * HVContrast) (y - Hook)
+			flat (x - hd.x + 0.25 * sw * HVContrast) (y - Hook)
+			curl (x - HookX - 0.5 * sw * HVContrast) (y - Hook)
 
-	set PalatalHook.adviceGap : function [] : HVContrast * VJutStroke + [Math.max (Width / 16) [AdviceStroke 12]]
+	set PalatalHook.adviceGap : function [refSw]
+		HVContrast * [PalatalHook.sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
+	set PalatalHook.sw ArcStartSerifWidth
+
+	glyph-block-export RetroflexHook
+	define [RetroflexHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : glyph-proc
+		local sw : PalatalHook.sw refSw
+		local hd : FlatHookDepth [DivFrame 1]
+		if (xAttach < x) : include : HBarBottom xAttach x yAttach
+		include : dispiro
+			widths.lhs sw
+			flat x (yAttach + yOverflow) [heading Downward]
+			curl x (y + hd.y - Hook - (0.25 - TanSlope) * sw)
+			arcvh
+			flat (x + hd.x - 0.25 * sw * HVContrast) (y - Hook)
+			curl (x + HookX + 0.5 * sw * HVContrast) (y - Hook)
+
+	set RetroflexHook.sw ArcStartSerifWidth
+	set [RetroflexHook.r] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : begin
+		local sw : ArcStartSerifWidth refSw
+		RetroflexHook
+			x -- x - sw * HVContrast
+			y -- y
+			xAttach -- xAttach
+			yAttach -- yAttach
+			yOverflow -- yOverflow
+			refSw -- refSw
+
+	set [RetroflexHook.rSideJut] : params [x y [yOverflow 0] [refSw Stroke]] : begin
+		local sw : ArcStartSerifWidth refSw
+		RetroflexHook
+			x -- x + SideJut - sw * HVContrast
+			y -- y
+			xAttach -- x
+			yAttach -- y
+			yOverflow -- yOverflow
+			refSw -- refSw
+
 
 	glyph-block-export HooktopLeftBar
 	define [HooktopLeftBar] : params [[bottom 0]] : glyph-proc

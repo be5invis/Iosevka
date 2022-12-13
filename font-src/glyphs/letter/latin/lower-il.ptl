@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Lower-I : begin
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateMultiAccentedComposition CreateOgonekComposition
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagonalTailR DiagonalTailStdDepth
 	glyph-block-import Letter-Shared : CreateCommaCaronComposition
-	glyph-block-import Letter-Shared-Shapes : CurlyTail BeltOverlay PalatalHook
+	glyph-block-import Letter-Shared-Shapes : CurlyTail BeltOverlay PalatalHook RetroflexHook
 
 	glyph-block-export OverrideILMarks
 	define [OverrideILMarks df xMiddle yTop] : glyph-proc
@@ -151,6 +151,19 @@ glyph-block Letter-Latin-Lower-I : begin
 		export : define [Serifed      df top xMiddle] : LeftwardTopSerif xMiddle top ((LongJut * df.div) - (xMiddle - df.middle))               Stroke df.mvs
 		export : define [SerifedShort df top xMiddle] : LeftwardTopSerif xMiddle top [mix Jut ((LongJut * df.div) - (xMiddle - df.middle)) 0.5] Stroke df.mvs
 
+	define [calcPhoneticHookPos g] : begin
+		local attach : if g.baseAnchors.trailing
+			g.gizmo.unapply g.baseAnchors.trailing
+			g.gizmo.unapply g.baseAnchors.overlay
+		local posX : if g.baseAnchors.trailing
+			attach.x + HVContrast * (0.5 * VJutStroke)
+			attach.x + HVContrast * HalfStroke + [PalatalHook.adviceGap Stroke]
+		local maskY : if g.baseAnchors.palatalHookMask
+			begin [g.gizmo.unapply g.baseAnchors.palatalHookMask].y
+			begin Stroke
+
+		return { attach posX maskY }
+
 	define SmallILConfig : object
 		# Normal
 		'hooky'                 { Body.Serifless     Serifs.Hooky         XMiddle.Hooky              para.diversityII  0      }
@@ -247,17 +260,18 @@ glyph-block Letter-Latin-Lower-I : begin
 			include : HOverlayBar [mix SB 0 0.7] [mix RightSB Width 0.7] (0.625 * Ascender)
 			include : MarkSet.b
 
+		create-glyph "dotlessiRetroflexHook.\(suffix)" : glyph-proc
+			include [refer-glyph "dotlessi.\(suffix)"] AS_BASE ALSO_METRICS
+			local { attach posX maskY } : calcPhoneticHookPos currentGlyph
+			include : intersection [MaskBelow maskY] : RetroflexHook.r
+				x -- posX
+				y -- 0
+				xAttach -- attach.x
+				yOverflow -- Stroke
+
 		create-glyph "lPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "l.\(suffix)"] AS_BASE ALSO_METRICS
-			local attach : if currentGlyph.baseAnchors.trailing
-				currentGlyph.gizmo.unapply currentGlyph.baseAnchors.trailing
-				currentGlyph.gizmo.unapply currentGlyph.baseAnchors.overlay
-			local posX : if currentGlyph.baseAnchors.trailing
-				attach.x + HVContrast * (0.5 * VJutStroke)
-				attach.x + HVContrast * HalfStroke + [PalatalHook.adviceGap]
-			local maskY : if currentGlyph.baseAnchors.palatalHookMask
-				begin [currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookMask].y
-				begin Stroke
+			local { attach posX maskY } : calcPhoneticHookPos currentGlyph
 			include : intersection [MaskBelow maskY] : PalatalHook
 				x -- posX
 				y -- 0
@@ -269,6 +283,7 @@ glyph-block Letter-Latin-Lower-I : begin
 		link-reduced-variant 'dotlessi/sansSerif' 'dotlessi' MathSansSerif
 		select-variant 'dotlessi/compLigRight' (shapeFrom -- 'dotlessi')
 		select-variant 'dotlessi/ital' (shapeFrom -- 'dotlessi')
+		select-variant 'dotlessiRetroflexHook' (follow -- 'dotlessi')
 		CreateOgonekComposition 'iOgonek.dotless' null 'dotlessi'
 
 		CreateAccentedComposition 'i' 'i' 'dotlessi' 'dotAbove'
@@ -287,8 +302,8 @@ glyph-block Letter-Latin-Lower-I : begin
 		CreateMultiAccentedComposition 'cyrl/gje.SRB' null 'dotlessi/ital' { 'macronAbove' 'acuteAbove' }
 		CreateAccentedComposition 'dotlessiBarOver' null 'dotlessi' 'barOver'
 		CreateAccentedComposition 'iBarOver' 0x268 'dotlessiBarOver' 'dotAbove'
-
 		CreateAccentedComposition 'iOgonek' 0x12F 'iOgonek.dotless' 'dotAbove'
+		CreateAccentedComposition 'iRetroflexHook' 0x1D96 'dotlessiRetroflexHook' 'dotAbove'
 
 	do "l glyphs"
 		select-variant 'l' 'l'
