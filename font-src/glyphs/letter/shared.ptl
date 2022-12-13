@@ -501,16 +501,11 @@ glyph-block Letter-Shared-Shapes : begin
 	define [CyrHookDescender] : params [x [connex 0.5] [overflow nothing]] : begin
 		local descenderOverflow : fallback overflow SideJut
 		local xRef : x + descenderOverflow + 0.25 * Stroke
-		local hd : FlatHookDepth [DivFrame 1]
-		return : union
-			HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
-			dispiro
-				widths.rhs VJutStroke
-				flat xRef Stroke [heading Downward]
-				curl xRef (hd.y - Hook - 0.25 * VJutStroke) [heading Downward]
-				arcvh
-				flat (xRef - hd.x + 0.25 * VJutStroke * HVContrast) (0 - Hook)
-				curl (xRef - HookX - 0.5 * VJutStroke * HVContrast) (0 - Hook)
+		PalatalHook
+			x -- x + descenderOverflow + 0.25 * Stroke
+			y -- 0
+			xAttach -- (x - connex * Stroke * HVContrast)
+			yOverflow -- Stroke
 
 	glyph-block-export CyrTailDescender
 	define [CyrTailDescender] : params [x [connex 0.5] [overflow nothing]] : begin
@@ -533,6 +528,20 @@ glyph-block Letter-Shared-Shapes : begin
 			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
 				HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
 				glyph-proc
+
+	glyph-block-export PalatalHook
+	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0]] : glyph-proc
+		local hd : FlatHookDepth [DivFrame 1]
+		if (xAttach < x) : include : HBarBottom xAttach x yAttach
+		include : dispiro
+			widths.rhs VJutStroke
+			flat x (yAttach + yOverflow) [heading Downward]
+			curl x (y + hd.y - Hook - 0.25 * VJutStroke)
+			arcvh
+			flat (x - hd.x + 0.25 * VJutStroke * HVContrast) (y - Hook)
+			curl (x - HookX - 0.5 * VJutStroke * HVContrast) (y - Hook)
+
+	set PalatalHook.adviceGap : function [] : HVContrast * VJutStroke + [Math.max (Width / 16) [AdviceStroke 12]]
 
 	glyph-block-export HooktopLeftBar
 	define [HooktopLeftBar] : params [[bottom 0]] : glyph-proc

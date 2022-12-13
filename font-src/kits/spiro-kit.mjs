@@ -351,6 +351,10 @@ export function SetupBuilders(bindings) {
 	arcvh.superness = function (s) {
 		return arcvh(DEFAULT_STEPS, s);
 	};
+	archv.yFromX = function (px, _s) {
+		const s = fallback(_s, Superness);
+		return 1 - Math.pow(1 - Math.pow(px, s), 1 / s);
+	};
 	function dispiro(...args) {
 		return new DispiroImpl(bindings, args);
 	}

@@ -8,7 +8,7 @@ glyph-module
 glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend FlatHookDepth PalatalHook
 
 	create-glyph 'g.doubleStorey' : glyph-proc
 		include : MarkSet.p
@@ -77,12 +77,12 @@ glyph-block Letter-Latin-Lower-G : begin
 			g4 (df.leftSB + offset) (Descender + SHook)
 			if (sink == spiro-outline) {[corner df.leftSB XH]} {}
 
-		export : define [RoundHook df y0] : RoundHookT dispiro df y0 0 Stroke
+		export : define [RoundHook df y0] : RoundHookT dispiro df y0 0 df.mvs
 		export : define [FlatHook df y0] : begin
 			local hd : FlatHookDepth df (9 / 8)
 			local xTerminal : Math.min (df.rightSB - hd.x - 0.1) : mix df.leftSB df.rightSB (1 / 5)
 			return : dispiro
-				widths.rhs
+				widths.rhs df.mvs
 				flat df.rightSB y0 [heading Downward]
 				curl df.rightSB (Descender + hd.y)
 				arcvh.superness DesignParameters.tightHookSuperness
@@ -90,10 +90,10 @@ glyph-block Letter-Latin-Lower-G : begin
 				curl xTerminal Descender [heading Leftward]
 
 		export : define [SeriflessBody df top] : glyph-proc
-			include : OBarRightShape (top -- top) (left -- df.leftSB) (right -- df.rightSB)
+			include : OBarRightShape (top -- top) (left -- df.leftSB) (right -- df.rightSB) (stroke -- df.mvs)
 
 		export : define [SerifedBody df top] : glyph-proc
-			include : OBarRightShape (top -- top) (left -- df.leftSB) (right -- df.rightSB)
+			include : SeriflessBody df top
 			include : tagged 'serifRT' : RightwardTopSerif df.rightSB top SideJut
 
 		export : define [EarlessCornerBody df top] : glyph-proc
@@ -103,6 +103,7 @@ glyph-block Letter-Latin-Lower-G : begin
 				right -- df.rightSB
 				rise -- DToothlessRise
 				mBlend -- DMBlend
+				sw -- df.mvs
 			include : FlipAround df.middle (top / 2)
 
 		export : define [EarlessRoundedBody df top] : glyph-proc
@@ -111,6 +112,7 @@ glyph-block Letter-Latin-Lower-G : begin
 				left -- df.leftSB
 				right -- df.rightSB
 				yTerminal -- (SmallArchDepthB - O)
+				sw -- df.mvs
 			include : FlipAround df.middle (top / 2)
 
 	define SingleStoreyConfig : object
@@ -129,17 +131,34 @@ glyph-block Letter-Latin-Lower-G : begin
 
 	foreach { suffix { bodyShape hookShape hookStart } } [Object.entries SingleStoreyConfig] : do
 		create-glyph "g.\(suffix)" : glyph-proc
-			define df : DivFrame 1
-			include : df.markSet.p
+			include : MarkSet.p
 			set-base-anchor 'overlay' Middle (XH / 2)
+			define df : DivFrame 1
 			include : bodyShape df XH
 			include : hookShape df (XH - hookStart)
+
 		create-glyph "GScript.\(suffix)" : glyph-proc
-			define df : DivFrame 1
-			include : df.markSet.capDesc
+			include : MarkSet.capDesc
 			set-base-anchor 'overlay' Middle (CAP / 2)
+			define df : DivFrame 1
 			include : bodyShape df CAP
 			include : hookShape df (CAP - hookStart)
+
+		create-glyph "gPalatalHook.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			set-base-anchor 'overlay' Middle (XH / 2)
+			define dfSub : DivFrame 0.75 2
+			include : bodyShape dfSub XH
+			include : hookShape dfSub (XH - hookStart)
+			include : difference
+				PalatalHook
+					x -- RightSB
+					y -- 0
+					xAttach -- dfSub.rightSB
+				intersection
+					MaskBelow 0
+					MaskLeft (dfSub.rightSB + [Math.max (Width / 16) [AdviceStroke 12]])
+
 
 	select-variant 'g' 'g'
 	link-reduced-variant 'g/sansSerif' 'g' MathSansSerif
@@ -150,6 +169,9 @@ glyph-block Letter-Latin-Lower-G : begin
 		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
 	select-variant 'GScript' 0xA7AC
 		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
+	select-variant 'gPalatalHook' 0x1D83
+		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
+
 
 	alias 'cyrl/de.SRB' null 'gScript'
 	alias 'cyrl/de.BGR' null 'gScript'

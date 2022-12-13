@@ -10,13 +10,21 @@ glyph-block Letter-Latin-Lower-F : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth DiagonalTailL DiagonalTailStdDepth
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
+
+	define [SetPalatalHookPos barLeft] : glyph-proc
+		set-base-anchor 'palatalHookPos' (barLeft + (Stroke + [Math.max VJutStroke (Width / 12)]) * HVContrast) 0
 
 	define fbar : XH * DesignParameters.fBarPosToXH + Stroke * DesignParameters.fbarStrokeAdj
-	define [SmallFBottomSerif df shift] : dispiro
-		widths.lhs
-		flat ([mix df.leftSB df.rightSB 0.02] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
-		curl ([mix df.leftSB df.rightSB 0.875] + HalfStroke * TanSlope + (df.rightSB - df.leftSB) * shift) 0
+	define [SmallFBottomSerif df] : glyph-proc
+		local l : [mix df.leftSB df.rightSB 0.020] + HalfStroke * TanSlope
+		local r : [mix df.leftSB df.rightSB 0.875] + HalfStroke * TanSlope
+		include : dispiro [widths.lhs] [flat l 0] [curl r 0]
+		set-base-anchor 'palatalHookPos' r 0
+
+	define [NarrowBottomSerif df] : glyph-proc
+		include : CenterBottomSerif df.middle 0 (LongJut * df.div)
+		set-base-anchor 'palatalHookPos' (df.middle + LongJut * df.div + HalfStroke * TanSlope) 0
 
 	define [StdFShapeT sink offset barleft sw] : sink
 		widths.lhs sw
@@ -62,6 +70,7 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : HCrossBar.top SB [mix SB RightSB m] bh
 
 		match counterHook
+			[Just CH-NONE] : include : SetPalatalHookPos barLeft
 			[Just CH-EXTENSION] : include : SmallFDownExtension barLeft
 			[Just CH-HOOK] : begin
 				local barRight : barLeft + Stroke * HVContrast
@@ -69,7 +78,7 @@ glyph-block Letter-Latin-Lower-F : begin
 				local counterHookLeft : Math.max SB : barRight - (crossRight - barLeft)
 				include : SmallFDownHook df barRight counterHookLeft
 			[Just CH-DIAGONAL-HOOK] : include : SmallFDiagonalTail df barLeft
-			[Just CH-SERIF] : include : SmallFBottomSerif df 0
+			[Just CH-SERIF] : include : SmallFBottomSerif df
 
 	define [NarrowFShape clcStyle] : function [df m bh counterHook] : glyph-proc
 		local topHookExt : match clcStyle
@@ -101,6 +110,7 @@ glyph-block Letter-Latin-Lower-F : begin
 		include : HCrossBar.top crossLeft (crossRight + crossBarExt) bh
 
 		match counterHook
+			[Just CH-NONE] : include : SetPalatalHookPos barLeft
 			[Just CH-EXTENSION] : include : SmallFDownExtension barLeft
 			[Just CH-HOOK] : begin
 				local barRight : barLeft + Stroke * HVContrast
@@ -108,7 +118,7 @@ glyph-block Letter-Latin-Lower-F : begin
 				local counterHookLeft : barRight - (crossRight - barLeft)
 				include : SmallFDownHook df barRight counterHookLeft
 			[Just CH-DIAGONAL-HOOK] : include : SmallFDiagonalTail df barLeft
-			[Just CH-SERIF] : include : CenterBottomSerif df.middle 0 (LongJut * df.div)
+			[Just CH-SERIF] : include : NarrowBottomSerif df
 
 	define CH-NONE           0
 	define CH-SERIF          1
@@ -159,6 +169,17 @@ glyph-block Letter-Latin-Lower-F : begin
 			include : df.markSet.(mk)
 			include : Body df pBar yBar ch
 
+		create-glyph "fPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "f.\(suffix)"] AS_BASE ALSO_METRICS
+			if currentGlyph.baseAnchors.palatalHookPos : begin
+				local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.overlay
+				local pos    : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookPos
+				local gap : Math.max (Width / 8) [AdviceStroke 8]
+				include : PalatalHook
+					xAttach -- attach.x
+					x -- pos.x
+					y -- pos.y
+
 	select-variant 'f' 'f'
 	link-reduced-variant 'f/sansSerif' 'f' MathSansSerif
 	select-variant 'fLenis' 0xAB35 (shapeFrom -- 'f')
@@ -166,6 +187,7 @@ glyph-block Letter-Latin-Lower-F : begin
 	select-variant 'f/compLigLeft1' (shapeFrom -- 'f')
 	select-variant 'f/compLigLeft2' (shapeFrom -- 'f')
 	select-variant 'f/phoneticLeft' (shapeFrom -- 'f')
+	select-variant 'fPalatalHook' 0x1D82 (follow -- 'f/tailless')
 
 	CreateAccentedComposition 'fBar' 0xA799 'f' 'barOver'
 	CreateAccentedComposition 'fTildeOver' 0x1D6E 'f' 'tildeOver'
