@@ -18,7 +18,7 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerifL ArcEndSerifR
 	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifR ArcEndInwardSerifL
 	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifL ArcEndInwardSerifR
-	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook CyrDescender
 
 	define SLAB-NONE      0
 	define SLAB-CLASSICAL 1
@@ -211,9 +211,6 @@ glyph-block Letter-Latin-S : begin
 		[Just SLAB-INWARD] : ArcEndInwardSerifR RightSB bot  sw hook
 		__ : glyph-proc
 
-	define CyrlGeMarks : object
-		e       : MarkSet.OfZone { .top (XH + AccentStackOffset / 2) .bot 0 }
-
 	define SConfig : object
 		serifless               { SLAB-NONE      SLAB-NONE      }
 		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
@@ -278,26 +275,6 @@ glyph-block Letter-Latin-S : begin
 			include : RevSAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
 			include : RevSAutoSlabEnd   doBS 0  [AdviceStroke2 2 3 XH] Hook
 
-		create-glyph "cyrl/gheDescender.italic.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : RevSmallSStroke doTS SLAB-CLASSICAL [AdviceStroke2 2 3 XH] EssLower
-			include : RevSAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
-			include : ArcEndSerifR RightSB 0 [AdviceStroke2 2 3 XH] Hook AccentStackOffset
-
-		create-glyph "cyrl/gheDHook.italic.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : RevSmallSStroke doTS SLAB-CLASSICAL [AdviceStroke2 2 3 XH] EssLower
-			include : RevSAutoSlabStart doTS XH [AdviceStroke2 2 3 XH] Hook
-			local hd : FlatHookDepth [DivFrame 1]
-			local hookSw : ArcStartSerifWidth : AdviceStroke2 2 3 XH
-			include : dispiro
-				widths.rhs hookSw
-				flat RightSB (Hook - O * 2) [heading Downward]
-				curl RightSB (hd.y - Hook - 0.25 * hookSw) [heading Downward]
-				arcvh
-				flat (RightSB - hd.x + 0.25 * hookSw * HVContrast) (0 - Hook)
-				curl (RightSB - HookX - 0.5 * hookSw * HVContrast) (0 - Hook)
-
 		define [UpperSBaseWithAttach] : glyph-proc
 			include : SAutoSlabStart doTS CAP Stroke Hook
 			local stroke : include : SStrokeImpl CAP 0 doTS doBS [AdviceStroke2 2 3 CAP] EssUpper
@@ -332,17 +309,6 @@ glyph-block Letter-Latin-S : begin
 				flat (RightSB - 1) Descender [widths sw 0]
 				curl RightSB Descender
 
-
-		create-glyph "SRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "S.\(suffix)"] AS_BASE ALSO_METRICS
-			include : RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 CAP])
-			include : ExtendBelowBaseAnchors (-Hook)
-
-		create-glyph "sRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "s.\(suffix)"] AS_BASE ALSO_METRICS
-			include : RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 XH])
-			include : ExtendBelowBaseAnchors (-Hook)
-
 	select-variant 'S' 'S'
 	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
 	select-variant 's' 's'
@@ -350,6 +316,9 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'smcpS' 0xA731 (follow -- 'S')
 	select-variant 'revS' 0x1A7 (follow -- 'S')
 	select-variant 'revs' 0x1A8 (follow -- 's')
+	alias 'cyrl/Dze' 0x405 'S'
+	alias 'cyrl/dze' 0x455 's'
+	alias 'cyrl/ghe.italic' null 'revs'
 
 	select-variant 'DollarKernelStd' (follow -- 'S')
 	select-variant 'DollarKernelCap' (follow -- 'S')
@@ -357,17 +326,25 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
 
-	select-variant 'SRTail' 0xA7C5
-	select-variant 'sRTail' 0x282
-
-	alias 'cyrl/Dze' 0x405 'S'
-	alias 'cyrl/dze' 0x455 's'
-
-	alias 'cyrl/ghe.italic' null 'revs'
-	select-variant 'cyrl/gheDescender.italic' null (follow -- 'sSwash')
-	select-variant 'cyrl/gheDHook.italic' null (follow -- 'sSwash')
+	select-variant 'S/descBase' (shapeFrom -- 'S') (follow -- 'SRTail')
+	select-variant 's/descBase' (shapeFrom -- 's') (follow -- 'sRTail')
+	select-variant 'revs/descBase' (shapeFrom -- 'revs') (follow -- 'sRTail')
 
 	select-variant 's/phoneticRight'
+
+	derive-composites 'SRTail' 0xA7C5 'S/descBase'
+		RetroflexHook.l SB 0 (refSw -- [AdviceStroke 2 3 CAP])
+	derive-composites 'sRTail' 0x282 's/descBase'
+		RetroflexHook.l SB 0 (refSw -- [AdviceStroke 2 3 XH])
+	derive-composites 'cyrl/gheDescender.italic' null 'revs/descBase'
+		CyrDescender.r RightSB 0 (refSw -- [AdviceStroke 2 3 XH])
+	derive-composites 'cyrl/gheDHook.italic' null 'revs/descBase'
+		PalatalHook.r RightSB 0 (refSw -- [AdviceStroke 2 3 XH])
+
+	derive-composites 'cyrl/ghayn.italic' null 'revs'
+		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
+	derive-composites 'cyrl/gheStrokeHook.italic' null 'cyrl/gheDHook.italic'
+		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
 	derive-composites 'sPalatalHook' 0x1D8A 's' : PalatalHook.r
 		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
@@ -424,11 +401,7 @@ glyph-block Letter-Latin-S : begin
 					.y ([if (sign < 0) 0.25 0.375] * sign * BBD * [Math.cos theta])
 				}
 
-	derive-composites 'cyrl/ghayn.italic' null 'revs'
-		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
-	derive-composites 'cyrl/gheStrokeHook.italic' null 'cyrl/gheDHook.italic'
-		FlatSlashShape Middle (XH / 2) (OverlayStroke / 2) (-0.2) 0.75
 
 	define DollarConfig : object
 		open           { 0.95 0.05 (Descender / 2) 0 "std" }

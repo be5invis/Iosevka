@@ -440,6 +440,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 	glyph-block-export SerifFrame
 	define [SerifFrame] : params [top bot left right [sw Stroke]] : begin
+		local jutFS   MidJutSide
 		local jutIn : JutIn left right
 		local sideJutIn : jutIn - 0.5 * sw * HVContrast
 		local lBarCenter : left + 0.5 * sw * HVContrast
@@ -457,10 +458,12 @@ glyph-block Letter-Shared-Shapes : begin
 				inner : tagged 'serifRT' : LeftwardTopSerif rBarInner top sideJutIn sw
 			lb : object
 				full : tagged 'serifLB' : CenterBottomSerifAsymmetric lBarCenter bot Jut jutIn sw
+				fullSide : tagged 'serifLB' : CenterBottomSerifAsymmetric lBarCenter bot Jut jutFS sw
 				outer : tagged 'serifLB' : LeftwardBottomSerif left bot SideJut sw
 				inner : tagged 'serifLB' : RightwardBottomSerif lBarInner bot sideJutIn sw
 			rb : object
 				full : tagged 'serifRB' : CenterBottomSerifAsymmetric rBarCenter bot jutIn Jut sw
+				fullSide : tagged 'serifRB' : CenterBottomSerifAsymmetric rBarCenter bot jutFS Jut sw
 				outer : tagged 'serifRB' : RightwardBottomSerif right bot SideJut sw
 				inner : tagged 'serifRB' : LeftwardBottomSerif rBarInner bot sideJutIn sw
 
@@ -481,54 +484,6 @@ glyph-block Letter-Shared-Shapes : begin
 			curl xb [mix (zbot.y + LongJut) ztop.y 0.25]
 			alsoThruThem {{0.5 0.94}}
 			straight.left.end zbot.x (zbot.y + fine) [heading Leftward]
-
-	glyph-block-export CyrDescender
-	define [CyrDescender] : params [x [connex 0.5] [overflow nothing]] : glyph-proc
-		local attachAnchor currentGlyph.baseAnchors.cyrlDescenderAttach
-		if attachAnchor
-		: then : begin
-			local attach : currentGlyph.gizmo.unapply attachAnchor
-			local descenderOverflow : fallback overflow SideJut
-			include : union
-				VBarRight attach.x (HalfStroke - LongJut) attach.y VJutStroke
-				HBarTop (attach.x - connex * Stroke * HVContrast) attach.x attach.y
-		: else : begin
-			local descenderOverflow : fallback overflow SideJut
-			include : union
-				VBarRight (x + descenderOverflow + 0.125 * Stroke) (HalfStroke - LongJut) Stroke VJutStroke
-				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
-
-	glyph-block-export CyrHookDescender
-	define [CyrHookDescender] : params [x [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow SideJut
-		local xRef : x + descenderOverflow + 0.25 * Stroke
-		PalatalHook.r
-			x -- x + descenderOverflow + 0.25 * Stroke
-			y -- 0
-			xAttach -- (x - connex * Stroke * HVContrast)
-			yOverflow -- Stroke
-
-	glyph-block-export CyrTailDescender
-	define [CyrTailDescender] : params [x [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow SideJut
-		local xRef : x + descenderOverflow + (0.3 + TanSlope) * Stroke
-		return : union
-			difference
-				ExtLineLhs 4 VJutStroke (xRef - 0.275 * LongJut) (HalfStroke - LongJut) xRef Stroke
-				MaskAbove Stroke
-				MaskBelow (HalfStroke - LongJut)
-			if (!SLAB && descenderOverflow > Stroke * 0.7 || connex)
-				HBarTop (x - connex * Stroke * HVContrast) (x + descenderOverflow) Stroke
-				glyph-proc
-
-	glyph-block-export CyrLeftDescender
-	define [CyrLeftDescender] : params [x [connex 0.5] [overflow nothing]] : begin
-		local descenderOverflow : fallback overflow SideJut
-		return : union
-			VBarLeft (x - descenderOverflow - 0.25 * Stroke) (HalfStroke - LongJut) Stroke VJutStroke
-			if (!SLAB && descenderOverflow > Stroke * 0.75 || connex)
-				HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
-				glyph-proc
 
 	# Generic "connected" vertical hooks
 	glyph-block-export VerticalHook
@@ -571,17 +526,58 @@ glyph-block Letter-Shared-Shapes : begin
 				sw -- sw
 				yExtension -- yExtension
 
-	# Palatal Hooks
-	glyph-block-export PalatalHook
-	define PalatalHook : namespace
-		define [Impl x y xLink yAttach yOverflow sw maskOut] : glyph-proc
+	do "Descender shapes"
+		define [xLinkStroke xLink x yAttach sw]
+			if (xLink == nothing) [no-shape] : HBarBottom
+				Math.min xLink (x - 0.5 * HVContrast * sw)
+				Math.max xLink (x + 0.5 * HVContrast * sw)
+				begin yAttach
+
+		define [Descenders Impl] : namespace
+			export : define Sw ArcStartSerifWidth
+			export : define [adviceGap refSw] : HVContrast * [Sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
+
+			export : define [m] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
+				local sw : Sw refSw
+				return : Impl x y xLink yAttach yOverflow sw maskOut
+			export : define [l] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
+				local sw : Sw refSw
+				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+			export : define [r] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
+				local sw : Sw refSw
+				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+
+			export : define [lSideJut] : params [x y [yOverflow 0] [refSw Stroke] [jut Jut]] : begin
+				local sw : Sw refSw
+				local xPos : x + 0.5 * HVContrast * (refSw + sw) - jut - sw * TanSlope
+				return : Impl xPos y x y yOverflow sw
+
+			export : define [rSideJut] : params [x y [yOverflow 0] [refSw Stroke] [jut Jut]] : begin
+				local sw : Sw refSw
+				local xPos : x - 0.5 * HVContrast * (refSw + sw) + jut + sw * TanSlope
+				return : Impl xPos y x y yOverflow sw
+
+		# Descender of cyrillics
+		glyph-block-export CyrDescender
+		define CyrDescender : Descenders : function [x y xLink yAttach sw] : union
+			xLinkStroke xLink x yAttach sw
+			VBar x yAttach (y - LongJut) sw
+
+		glyph-block-export CyrTailDescender
+		define CyrTailDescender : Descenders : function [x y xLink yAttach sw] : union
+			xLinkStroke xLink x yAttach sw
+			intersection
+				MaskBelow (yAttach + Stroke)
+				MaskAbove (y - LongJut)
+				ExtLineCenter 16 sw (x - 0.125 * LongJut) (y + 0.5 * sw - LongJut) x y
+
+		# Palatal Hooks
+		glyph-block-export PalatalHook
+		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
 			include : ExtendBelowBaseAnchors (y - Hook)
 			include : difference
 				union
-					if (xLink == nothing) [no-shape] : HBarBottom
-						Math.min xLink (x - 0.5 * HVContrast * sw)
-						Math.max xLink (x + 0.5 * HVContrast * sw)
-						begin yAttach
+					xLinkStroke xLink x yAttach sw
 					VerticalHook.m
 						x -- x
 						y -- y
@@ -591,116 +587,89 @@ glyph-block Letter-Shared-Shapes : begin
 						yExtension -- yAttach + yOverflow - y
 				if maskOut maskOut [no-shape]
 
-		export : define [r] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
-			local sw : Sw refSw
-			Impl (x - 0.5 * HVContrast * sw) y xLink yAttach yOverflow sw maskOut
+		# Retroflex hooks
+		glyph-block-export RetroflexHook
+		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : union
+			xLinkStroke xLink x yAttach sw
+			VerticalHook.m
+				x -- x
+				y -- y
+				xDepth -- HookX
+				yDepth -- Hook
+				sw -- sw
+				yExtension -- yAttach + yOverflow - y
 
-		export : define Sw ArcStartSerifWidth
-		export : define [adviceGap refSw]
-			HVContrast * [Sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
+		# Left bar with hook at top, shared by multiple glyphs
+		glyph-block-export HooktopLeftBar
+		define HooktopLeftBar : namespace
+			export : define [outer] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
+				VBarLeft x bottom top
+				VerticalHook.l x top HookX (-Hook)
+			export : define [inner] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
+				VBarLeft x bottom (top - Hook - HalfStroke)
+				VerticalHook.l x (top - Hook - HalfStroke) HookX (-Hook)
 
-	# Retroflex hooks
-	glyph-block-export RetroflexHook
-	define RetroflexHook : namespace
-		define [Impl x y xLink yAttach yOverflow sw] : glyph-proc
-			local hd : FlatHookDepth [DivFrame 1]
-			include : union
-				if (xLink == nothing) [no-shape] : HBarBottom
-					Math.min xLink (x - 0.5 * HVContrast * sw)
-					Math.max xLink (x + 0.5 * HVContrast * sw)
-					begin yAttach
-				VerticalHook.m
-					x -- x
-					y -- y
-					xDepth -- HookX
-					yDepth -- Hook
-					sw -- sw
-					yExtension -- yAttach + yOverflow - y
+	do "Belt overlays"
+		define [BeltOverlayAt x y] : begin
+			local fine : AdviceStroke 4.5
+			local r : XH * 0.05
+			return : dispiro
+				widths.rhs fine
+				flat x (y + r) [heading Leftward]
+				curl (x - HalfStroke - r * 1.5) (y + r)
+				archv
+				g4.down.mid (x - HalfStroke - r * 2.5) y [heading Downward]
+				arcvh
+				flat (x - HalfStroke - r * 1.5) (y - r)
+				curl (x + HalfStroke + r * 1.5 + fine) (y - r)
 
-		export : define Sw ArcStartSerifWidth
-		export : define [m] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
-			Impl x y xLink yAttach yOverflow [Sw refSw]
+		glyph-block-export BeltOverlay
+		define [BeltOverlay top xMiddle] : BeltOverlayAt xMiddle (0.5 * top)
+		set BeltOverlay.at BeltOverlayAt
 
-		export : define [l] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
-			begin
-				local sw : Sw refSw
-				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw
-		export : define [r] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
-			begin
-				local sw : Sw refSw
-				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw
-		export : define [rSideJut] : params [x y [yOverflow 0] [refSw Stroke]] : begin
-			local sw : Sw refSw
-			return : Impl (x + SideJut - 0.5 * sw * HVContrast) y x y yOverflow sw
-	# Left bar with hook at top, shared by multiple glyphs
-	glyph-block-export HooktopLeftBar
-	define HooktopLeftBar : namespace
-		export : define [outer] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
-			VBarLeft x bottom top
-			VerticalHook.l x top HookX (-Hook)
-		export : define [inner] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
-			VBarLeft x bottom (top - Hook - HalfStroke)
-			VerticalHook.l x (top - Hook - HalfStroke) HookX (-Hook)
+	do "Letter bar overlays"
+		glyph-block-export LetterBarOverlay
+		define [LetterBarOverlay] : params [x y space refSw pXInSw sw] : begin
+			local {xLeftSpace xRightSpace} space
+			local xLeftEdge  : x - pXInSw * refSw * HVContrast
+			local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
+			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
+			local xC : mix xLeftEdge xRightEdge (1 - p)
+			return : HOverlayBar
+				Math.min (xLeftEdge - SideJut)
+					Math.max (xC - 0.75 * LongJut) [mix xLeftSpace xLeftEdge 0.3]
+				Math.max (xRightEdge + SideJut)
+					Math.min [mix xRightSpace xRightEdge 0.3] (xC + 0.75 * LongJut)
+				begin y
+				begin sw
 
-	define [BeltOverlayAt x y] : begin
-		local fine : AdviceStroke 4.5
-		local r : XH * 0.05
-		return : dispiro
-			widths.rhs fine
-			flat x (y + r) [heading Leftward]
-			curl (x - HalfStroke - r * 1.5) (y + r)
-			archv
-			g4.down.mid (x - HalfStroke - r * 2.5) y [heading Downward]
-			arcvh
-			flat (x - HalfStroke - r * 1.5) (y - r)
-			curl (x + HalfStroke + r * 1.5 + fine) (y - r)
+		set LetterBarOverlay.l : function []
+			params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
+		set LetterBarOverlay.m : function []
+			params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
+		set LetterBarOverlay.r : function []
+			params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
 
-	glyph-block-export BeltOverlay
-	define [BeltOverlay top xMiddle] : BeltOverlayAt xMiddle (0.5 * top)
-	set BeltOverlay.at BeltOverlayAt
+		define [calcYAndSw bot top py sw] : begin
+			local y : mix bot top py
+			local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
+			return { y sw1 }
 
-	glyph-block-export LetterBarOverlay
-	define [LetterBarOverlay] : params [x y space refSw pXInSw sw] : begin
-		local {xLeftSpace xRightSpace} space
-		local xLeftEdge  : x - pXInSw * refSw * HVContrast
-		local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
-		local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
-		local xC : mix xLeftEdge xRightEdge (1 - p)
-		return : HOverlayBar
-			Math.min (xLeftEdge - SideJut)
-				Math.max (xC - 0.75 * LongJut) [mix xLeftSpace xLeftEdge 0.3]
-			Math.max (xRightEdge + SideJut)
-				Math.min [mix xRightSpace xRightEdge 0.3] (xC + 0.75 * LongJut)
-			begin y
-			begin sw
-
-	set LetterBarOverlay.l : function []
-		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw)
-	set LetterBarOverlay.m : function []
-		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw)
-	set LetterBarOverlay.r : function []
-		params [x y [space {0 Width}] [refSw Stroke] [sw OverlayStroke]] : begin
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw)
-
-	define [calcYAndSw bot top py sw] : begin
-		local y : mix bot top py
-		local sw1 : Math.min sw (1.25 * (top - bot) * py) (1.25 * (top - bot) * (1 - py))
-		return { y sw1 }
-
-	set LetterBarOverlay.l.in : function []
-		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-		: begin
-			local { y sw1 } : calcYAndSw bot top py sw
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
-	set LetterBarOverlay.m.in : function []
-		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-		: begin
-			local { y sw1 } : calcYAndSw bot top py sw
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
-	set LetterBarOverlay.r.in : function []
-		params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
-		: begin
-			local { y sw1 } : calcYAndSw bot top py sw
-			LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
+		set LetterBarOverlay.l.in : function []
+			params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+			: begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0) (sw -- sw1)
+		set LetterBarOverlay.m.in : function []
+			params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+			: begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 0.5) (sw -- sw1)
+		set LetterBarOverlay.r.in : function []
+			params [x bot top [py 0.5] [space {0 Width}] [refSw Stroke] [sw OverlayStroke]]
+			: begin
+				local { y sw1 } : calcYAndSw bot top py sw
+				LetterBarOverlay x y (space -- space) (refSw -- refSw) (pXInSw -- 1) (sw -- sw1)
