@@ -8,8 +8,9 @@ glyph-module
 glyph-block Letter-Latin-S : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Blackboard : BBS BBD
+	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
+	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise FlatHookDepth ArcStartSerifWidth
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_RtlLhs SerifedArcEnd_RtlRhs
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart_LtrRhs SerifedArcEnd_LtrLhs
@@ -17,7 +18,7 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerifL ArcEndSerifR
 	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifR ArcEndInwardSerifL
 	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifL ArcEndInwardSerifR
-	glyph-block-import Letter-Shared-Shapes : PalatalHook
+	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook
 
 	define SLAB-NONE      0
 	define SLAB-CLASSICAL 1
@@ -220,6 +221,9 @@ glyph-block Letter-Latin-S : begin
 		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
 		bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
 
+		seriflessBottomHookBase { SLAB-NONE      SLAB-CLASSICAL }
+		invsBottomHookBase      { SLAB-INWARD    SLAB-CLASSICAL }
+
 	foreach { suffix { doTS doBS } } [Object.entries SConfig] : do
 		create-glyph "S.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -329,27 +333,15 @@ glyph-block Letter-Latin-S : begin
 				curl RightSB Descender
 
 
-		if [not doBS] : create-glyph "SRTail.\(suffix)" : glyph-proc
-			include : MarkSet.capDesc
+		create-glyph "SRTail.\(suffix)" : glyph-proc
+			include [refer-glyph "S.\(suffix)"] AS_BASE ALSO_METRICS
+			include : RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 CAP])
+			include : ExtendBelowBaseAnchors (-Hook)
 
-			local start : include : UpperSBaseWithAttach
-			include : new-glyph : glyph-proc
-				local sw : AdviceStroke2 2 3 XH
-				include : refer-glyph "rtailBR"
-				include : ApparentTranslate (start.x + sw * HVContrast) 0
-
-			include : VBarLeft start.x 0 start.y
-
-		if [not doBS] : create-glyph "sRTail.\(suffix)" : glyph-proc
-			include : MarkSet.p
-
-			local start : include : LowerSBaseWithAttach
-			include : new-glyph : glyph-proc
-				local sw : AdviceStroke2 2 3 XH
-				include : refer-glyph "rtailBR"
-				include : ApparentTranslate (start.x + sw * HVContrast) 0
-
-			include : VBarLeft start.x 0 start.y
+		create-glyph "sRTail.\(suffix)" : glyph-proc
+			include [refer-glyph "s.\(suffix)"] AS_BASE ALSO_METRICS
+			include : RetroflexHook.l SB 0 (refSw -- [AdviceStroke2 2 3 XH])
+			include : ExtendBelowBaseAnchors (-Hook)
 
 	select-variant 'S' 'S'
 	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
@@ -364,8 +356,9 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
-	select-variant 'sRTail' 0x282 (follow -- 'sSwash')
-	select-variant 'SRTail' 0xA7C5 (follow -- 'SSwash')
+
+	select-variant 'SRTail' 0xA7C5
+	select-variant 'sRTail' 0x282
 
 	alias 'cyrl/Dze' 0x405 'S'
 	alias 'cyrl/dze' 0x455 's'
@@ -376,7 +369,7 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 's/phoneticRight'
 
-	derive-composites 'sPalatalHook' 0x1D8A 's' : PalatalHook
+	derive-composites 'sPalatalHook' 0x1D8A 's' : PalatalHook.r
 		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
 		y -- 0
 		yAttach -- [mix O [adviceSSmooth XH (-1) [AdviceStroke2 2 3 XH]] : archv.yFromX 0.75]

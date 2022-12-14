@@ -368,7 +368,7 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export ArcStartHookTop
 	define [ArcStartHookTop cx cy sw hookX hookY] : union
 		VBarRight cx (cy - hookY + O * 2) cy sw
-		VerticalHook (cx - sw / 2 * HVContrast) cy hookX (-hookY) sw
+		VerticalHook.r cx cy hookX (-hookY) sw
 
 	define DiagTailDefaultAngle 40
 
@@ -502,7 +502,7 @@ glyph-block Letter-Shared-Shapes : begin
 	define [CyrHookDescender] : params [x [connex 0.5] [overflow nothing]] : begin
 		local descenderOverflow : fallback overflow SideJut
 		local xRef : x + descenderOverflow + 0.25 * Stroke
-		PalatalHook
+		PalatalHook.r
 			x -- x + descenderOverflow + 0.25 * Stroke
 			y -- 0
 			xAttach -- (x - connex * Stroke * HVContrast)
@@ -530,77 +530,117 @@ glyph-block Letter-Shared-Shapes : begin
 				HBarTop (x + connex * Stroke * HVContrast) (x - descenderOverflow) Stroke
 				glyph-proc
 
+	# Generic "connected" vertical hooks
+	glyph-block-export VerticalHook
+	define VerticalHook : namespace
+		export : define [m] : params [x y xDepth yDepth [sw Stroke] [yExtension 0]] : begin
+			local hd : FlatHookDepth [DivFrame 1]
+			local hdX : if (xDepth < 0) (-hd.x) hd.x
+			local hdY : if (yDepth < 0) (-hd.y) hd.y
+
+			local y2 : if (yDepth > 0)
+				Math.min (y - yDepth + hd.y - 0.25 * sw) (y - 0.01)
+				Math.max (y - yDepth - hd.y + 0.25 * sw) (y + 0.01)
+
+			local x3 : if (xDepth > 0)
+				Math.min (x + xDepth - 0.01) (x + hd.x - 0.25 * sw * HVContrast)
+				Math.max (x + xDepth + 0.01) (x - hd.x + 0.25 * sw * HVContrast)
+
+			dispiro [widths.center sw]
+				flat x (y + yExtension) [heading : if (yDepth > 0) Downward Upward]
+				curl x  y2              [heading : if (yDepth > 0) Downward Upward]
+				arcvh
+				flat x3           (y - yDepth)
+				curl (x + xDepth) (y - yDepth)
+
+		export : define [l] : params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
+			m
+				x -- x + 0.5 * sw * HVContrast
+				y -- y
+				xDepth -- xDepth
+				yDepth -- yDepth
+				sw -- sw
+				yExtension -- yExtension
+
+		export : define [r] : params [x y xDepth yDepth [sw Stroke] [yExtension 0]]
+			m
+				x -- x - 0.5 * sw * HVContrast
+				y -- y
+				xDepth -- xDepth
+				yDepth -- yDepth
+				sw -- sw
+				yExtension -- yExtension
+
+	# Palatal Hooks
 	glyph-block-export PalatalHook
-	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : glyph-proc
-		local sw : PalatalHook.sw refSw
-		local hd : FlatHookDepth [DivFrame 1]
-		include : ExtendBelowBaseAnchors (y - Hook)
-		include : difference
-			union
-				if (xAttach < x) [HBarBottom xAttach x yAttach] [no-shape]
-				dispiro
-					widths.rhs sw
-					flat x (yAttach + yOverflow) [heading Downward]
-					curl x (y + hd.y - Hook - 0.25 * sw)
-					arcvh
-					flat (x - hd.x + 0.25 * sw * HVContrast) (y - Hook)
-					curl (x - HookX - 0.5 * sw * HVContrast) (y - Hook)
-			if maskOut maskOut [no-shape]
+	define PalatalHook : namespace
+		define [Impl x y xLink yAttach yOverflow sw maskOut] : glyph-proc
+			include : ExtendBelowBaseAnchors (y - Hook)
+			include : difference
+				union
+					if (xLink == nothing) [no-shape] : HBarBottom
+						Math.min xLink (x - 0.5 * HVContrast * sw)
+						Math.max xLink (x + 0.5 * HVContrast * sw)
+						begin yAttach
+					VerticalHook.m
+						x -- x
+						y -- y
+						xDepth -- (-HookX)
+						yDepth -- Hook
+						sw -- sw
+						yExtension -- yAttach + yOverflow - y
+				if maskOut maskOut [no-shape]
 
-	set PalatalHook.adviceGap : function [refSw]
-		HVContrast * [PalatalHook.sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
-	set PalatalHook.sw ArcStartSerifWidth
+		export : define [r] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : begin
+			local sw : Sw refSw
+			Impl (x - 0.5 * HVContrast * sw) y xLink yAttach yOverflow sw maskOut
 
+		export : define Sw ArcStartSerifWidth
+		export : define [adviceGap refSw]
+			HVContrast * [Sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
+
+	# Retroflex hooks
 	glyph-block-export RetroflexHook
-	define [RetroflexHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : glyph-proc
-		local sw : PalatalHook.sw refSw
-		local hd : FlatHookDepth [DivFrame 1]
-		if (xAttach < x) : include : HBarBottom xAttach x yAttach
-		include : dispiro
-			widths.lhs sw
-			flat x (yAttach + yOverflow) [heading Downward]
-			curl x (y + hd.y - Hook - (0.25 - TanSlope) * sw)
-			arcvh
-			flat (x + hd.x - 0.25 * sw * HVContrast) (y - Hook)
-			curl (x + HookX + 0.5 * sw * HVContrast) (y - Hook)
+	define RetroflexHook : namespace
+		define [Impl x y xLink yAttach yOverflow sw] : glyph-proc
+			local hd : FlatHookDepth [DivFrame 1]
+			include : union
+				if (xLink == nothing) [no-shape] : HBarBottom
+					Math.min xLink (x - 0.5 * HVContrast * sw)
+					Math.max xLink (x + 0.5 * HVContrast * sw)
+					begin yAttach
+				VerticalHook.m
+					x -- x
+					y -- y
+					xDepth -- HookX
+					yDepth -- Hook
+					sw -- sw
+					yExtension -- yAttach + yOverflow - y
 
-	set RetroflexHook.sw ArcStartSerifWidth
-	set [RetroflexHook.r] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : begin
-		local sw : ArcStartSerifWidth refSw
-		RetroflexHook
-			x -- x - sw * HVContrast
-			y -- y
-			xAttach -- xAttach
-			yAttach -- yAttach
-			yOverflow -- yOverflow
-			refSw -- refSw
+		export : define Sw ArcStartSerifWidth
+		export : define [m] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
+			Impl x y xLink yAttach yOverflow [Sw refSw]
 
-	set [RetroflexHook.rSideJut] : params [x y [yOverflow 0] [refSw Stroke]] : begin
-		local sw : ArcStartSerifWidth refSw
-		RetroflexHook
-			x -- x + SideJut - sw * HVContrast
-			y -- y
-			xAttach -- x
-			yAttach -- y
-			yOverflow -- yOverflow
-			refSw -- refSw
-
-
+		export : define [l] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
+			begin
+				local sw : Sw refSw
+				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw
+		export : define [r] : params [x y xLink [yAttach y] [yOverflow 0] [refSw Stroke]]
+			begin
+				local sw : Sw refSw
+				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw
+		export : define [rSideJut] : params [x y [yOverflow 0] [refSw Stroke]] : begin
+			local sw : Sw refSw
+			return : Impl (x + SideJut - 0.5 * sw * HVContrast) y x y yOverflow sw
+	# Left bar with hook at top, shared by multiple glyphs
 	glyph-block-export HooktopLeftBar
-	define [HooktopLeftBar] : params [[bottom 0]] : glyph-proc
-		local yTurn : CAP - Hook - HalfStroke
-		if (bottom + TanSlope * HVContrast * Stroke < yTurn)
-		: then : include : dispiro
-			widths.lhs
-			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
-			archv
-			flat SB (CAP - Hook - HalfStroke)
-			curl SB bottom [heading Downward]
-		: else : include : dispiro
-			widths.lhs
-			straight.left.start (SB + HalfStroke * HVContrast + HookX) Ascender
-			archv
-			straight.down.end SB bottom [heading Downward]
+	define HooktopLeftBar : namespace
+		export : define [outer] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
+			VBarLeft x bottom top
+			VerticalHook.l x top HookX (-Hook)
+		export : define [inner] : params [[x SB] [top Ascender] [bottom 0]] : composite-proc
+			VBarLeft x bottom (top - Hook - HalfStroke)
+			VerticalHook.l x (top - Hook - HalfStroke) HookX (-Hook)
 
 	define [BeltOverlayAt x y] : begin
 		local fine : AdviceStroke 4.5
