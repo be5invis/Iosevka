@@ -112,6 +112,7 @@ glyph-block Letter-Shared-Metrics : begin
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 
 	glyph-block-export RightwardTailedBar
 	define [RightwardTailedBar] : params [x low high [sw Stroke]] : begin
@@ -530,17 +531,21 @@ glyph-block Letter-Shared-Shapes : begin
 				glyph-proc
 
 	glyph-block-export PalatalHook
-	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke]] : glyph-proc
+	define [PalatalHook] : params [x y [xAttach x] [yAttach y] [yOverflow 0] [refSw Stroke] [maskOut null]] : glyph-proc
 		local sw : PalatalHook.sw refSw
 		local hd : FlatHookDepth [DivFrame 1]
-		if (xAttach < x) : include : HBarBottom xAttach x yAttach
-		include : dispiro
-			widths.rhs sw
-			flat x (yAttach + yOverflow) [heading Downward]
-			curl x (y + hd.y - Hook - 0.25 * sw)
-			arcvh
-			flat (x - hd.x + 0.25 * sw * HVContrast) (y - Hook)
-			curl (x - HookX - 0.5 * sw * HVContrast) (y - Hook)
+		include : ExtendBelowBaseAnchors (y - Hook)
+		include : difference
+			union
+				if (xAttach < x) [HBarBottom xAttach x yAttach] [no-shape]
+				dispiro
+					widths.rhs sw
+					flat x (yAttach + yOverflow) [heading Downward]
+					curl x (y + hd.y - Hook - 0.25 * sw)
+					arcvh
+					flat (x - hd.x + 0.25 * sw * HVContrast) (y - Hook)
+					curl (x - HookX - 0.5 * sw * HVContrast) (y - Hook)
+			if maskOut maskOut [no-shape]
 
 	set PalatalHook.adviceGap : function [refSw]
 		HVContrast * [PalatalHook.sw refSw] + [Math.max (Width / 16) [AdviceStroke 12]]
