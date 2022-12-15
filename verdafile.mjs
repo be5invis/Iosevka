@@ -995,6 +995,11 @@ const Clean = task(`clean`, async () => {
 	build.deleteJournal();
 });
 
+const CleanDist = task(`clean-dist`, async () => {
+	await rm(DIST);
+	await rm(ARCHIVE_DIR);
+});
+
 const Release = task(`release`, async target => {
 	await target.need(ReleaseArchives, SampleImages, Pages, AmendReadme, ReleaseNotes, ChangeLog);
 });
