@@ -9,7 +9,8 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend HooktopLeftBar
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
 	define [ToothedBody] : union
 		OBarLeftShape
@@ -41,15 +42,18 @@ glyph-block Letter-Latin-Lower-B : begin
 		toothlessRoundedMotionSerifed { ToothlessRoundedBody MotionSerifs true }
 
 	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
-		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) (1 - OverlayPos)
+		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.5
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body
 			include : Serifs
 			set-base-anchor 'overlayOnBar' (SB + 0.5 * Stroke * HVContrast) yOverlay
+			set-base-anchor 'overlay' Middle (XH / 2)
+
 		create-glyph "bBar.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in SB XH (Ascender - [if doTS Stroke 0])
+
 		create-glyph "bSlash.\(suffix)" : glyph-proc
 			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
 			include : dispiro
@@ -61,25 +65,30 @@ glyph-block Letter-Latin-Lower-B : begin
 	select-variant 'bBar'   0x180  (follow -- 'b')
 	select-variant 'bSlash' 0x2422 (follow -- 'b')
 
+	derive-composites 'bPalatalHook' 0x1D80 'b' : PalatalHook.r
+		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
+		y -- 0
+		yAttach -- [mix O SmallArchDepthA : archv.yFromX 0.75]
+
 	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
 	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnBar'
 
 	create-glyph 'bHookTop.toothed' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftShape
-		include : HooktopLeftBar
+		include : HooktopLeftBar.inner
 		if SLAB : begin
 			include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
 
 	create-glyph 'bHookTop.toothlessCorner' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftToothlessShape (rise -- DToothlessRise) (mBlend -- DMBlend)
-		include : HooktopLeftBar (bottom -- DToothlessRise)
+		include : HooktopLeftBar.inner (bottom -- DToothlessRise)
 
 	create-glyph 'bHookTop.toothlessRounded' : glyph-proc
 		include : MarkSet.b
 		include : OBarLeftRoundedShape (yTerminal -- XH)
-		include : HooktopLeftBar (bottom -- SmallArchDepthB)
+		include : HooktopLeftBar.inner (bottom -- SmallArchDepthB)
 
 	select-variant 'bHookTop' 0x253
 

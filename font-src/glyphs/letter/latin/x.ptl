@@ -10,19 +10,20 @@ glyph-block Letter-Latin-X : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotLhsRev SerifFrame WithAIHSerifsMask
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailF
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrHookDescender
+	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook
 
 	glyph-block-export HalfXStrand
 	define [HalfXStrand stb fSlab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
 		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
-		local leftx : _leftx + ((HalfStroke * HVContrast + sbCor) * [if (rightx > _leftx) 1 (-1)])
+		local leftx : _leftx + (HalfStroke * HVContrast + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
 		local fine  : (_fine || Stroke) * 0.5
 
 		if stb : begin
 			local hst : HalfStroke * [DiagCor (righty - lefty) (rightx - leftx) 0 0]
 			local hse : HalfStroke * [Math.min 0.97 ([AdviceStroke 3] / Stroke)]
+			local leftx2 : _leftx + (hst * HVContrast + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
 			include : dispiro
-				corner leftx lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
+				corner leftx2 lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
 				corner rightx righty [widths hse hse]
 
 		: else : begin
@@ -53,10 +54,12 @@ glyph-block Letter-Latin-X : begin
 			XStrand fStraight fSlab SB bottom RightSB top turn 0.4 tension
 			XStrand fStraight fSlab SB top RightSB bottom turn 0.4 tension
 
-		export : define [StraightBase fSlab top bottom turn tension] : XBase true  fSlab top bottom turn tension
-		export : define [CurlyBase    fSlab top bottom turn tension] : XBase false fSlab top bottom turn tension
+		export : define [StraightBase fSlab top bottom turn tension]
+			XBase true  fSlab top bottom turn tension
+		export : define [CurlyBase    fSlab top bottom turn tension]
+			XBase false fSlab top bottom turn tension
 
-		define [XCursiveHalfShape top] : glyph-proc
+		define [XCursiveHalfShape top bottom] : glyph-proc
 			local ada : ArchDepthAOf (ArchDepth * 0.8) (Width / 2)
 			local adb : ArchDepthBOf (ArchDepth * 0.8) (Width / 2)
 
@@ -82,22 +85,21 @@ glyph-block Letter-Latin-X : begin
 				ShoulderMidKnotLhsRev (xTurn) (top - O) fineMid swEnd (-1) (-1)
 				archv 16
 				flat (xCenterRight - HVContrast * fineMid) (top - ada) [widths.lhs fineMid]
-				curl (xCenterRight - HVContrast * fineMid) (top / 2 + O)
+				curl (xCenterRight - HVContrast * fineMid) ([mix bottom top 0.5] + O)
 
 			define lowerHalf : include : dispiro
-				flat (xCenterRight - 0.5 * HVContrast * fineMid) (top / 2 - O) [widths.center fineMid]
-				curl (xCenterRight - 0.5 * HVContrast * fineMid) [Math.min adb (swMid + rIn)]
+				flat (xCenterRight - 0.5 * HVContrast * fineMid) ([mix bottom top 0.5] - O) [widths.center fineMid]
+				curl (xCenterRight - 0.5 * HVContrast * fineMid) (bottom + [Math.min adb (swMid + rIn)])
 				arcvh 16
-				DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) 0 rIn 50 flatHookDepth Stroke
+				DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) bottom rIn 50 flatHookDepth Stroke
 
 			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
 			set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
 
-		export : define [CursiveBase fSerifs top bottom turn tension]
-			WithTransform [ApparentTranslate 0 bottom] : glyph-proc
-				include : XCursiveHalfShape (top - bottom)
-				include : FlipAround Middle ((top - bottom) / 2)
-				include : XCursiveHalfShape (top - bottom)
+		export : define [CursiveBase fSerifs top bottom turn tension] : glyph-proc
+			include : XCursiveHalfShape top bottom
+			include : FlipAround Middle [mix bottom top 0.5]
+			include : XCursiveHalfShape top bottom
 
 		# Serifs
 		export : define [FullSerifs top bot] : let [sf : SerifFrame top bot SB RightSB]
@@ -155,11 +157,26 @@ glyph-block Letter-Latin-X : begin
 	select-variant 'latn/chi' 0xAB53 (follow -- 'x')
 	select-variant 'latn/Chi' 0xA7B3 (follow -- 'x')
 
-	derive-composites 'cyrl/HaDescender' 0x4B2 'cyrl/Ha' [CyrDescender RightSB]
-	derive-composites 'cyrl/haDescender' 0x4B3 'cyrl/ha' [CyrDescender RightSB]
 
-	derive-composites 'cyrl/HaHook' 0x4FC 'cyrl/Ha' [CyrHookDescender RightSB]
-	derive-composites 'cyrl/haHook' 0x4FD 'cyrl/ha' [CyrHookDescender RightSB]
+	define [AddDescender Ctor] : function [src sel] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		local attachAnchor currentGlyph.baseAnchors.cyrlDescenderAttach
+		if attachAnchor
+		: then : begin
+			local attach : currentGlyph.gizmo.unapply attachAnchor
+			include : Ctor.r attach.x 0 (yAttach -- attach.y)
+		: else : begin
+			local sw : Ctor.Sw Stroke
+			include : Ctor.r
+				x -- RightSB + SideJut + sw * TanSlope
+				y -- 0
+				xLink -- RightSB - HVContrast * HalfStroke
+
+	derive-glyphs 'cyrl/HaDescender' 0x4B2 'cyrl/Ha' [AddDescender CyrDescender]
+	derive-glyphs 'cyrl/haDescender' 0x4B3 'cyrl/ha' [AddDescender CyrDescender]
+	derive-glyphs 'cyrl/HaHook'      0x4FC 'cyrl/Ha' [AddDescender PalatalHook]
+	derive-glyphs 'cyrl/haHook'      0x4FD 'cyrl/ha' [AddDescender PalatalHook]
+	alias 'xPalatalHook' 0x1D8D 'cyrl/haHook'
 
 	define [CyrlHaBarShape top] : HOverlayBar [mix SB RightSB 0.08] [mix SB RightSB 0.92] (top / 2)
 	derive-composites 'cyrl/HaBar' 0x4FE 'cyrl/Ha' [CyrlHaBarShape CAP]

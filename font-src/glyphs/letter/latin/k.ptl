@@ -10,7 +10,7 @@ glyph-block Letter-Latin-K : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailF CyrDescender
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook HooktopLeftBar
 
 	local [KBalance slab straightBar] : if slab (Width / 16) : if straightBar (Width / 32) 0
 	local [KBalanceRight slab straightBar] : if slab 0 : if straightBar (Width / 32) 0
@@ -275,17 +275,19 @@ glyph-block Letter-Latin-K : begin
 
 		if (slab && !tailed) : include : RightwardBottomSerif dim.slabStartX 0 SideJut
 
-	define [KCyrlCursiveDescender top straightBar slabLeft slab] : begin
-		define dim : KCursiveLoopAndLegDimen top straightBar slabLeft slab
-		return : CyrDescender dim.slabStartX
+	define [KDescender shape top straightBar slabLeft slab] : begin
+		local xPos : RightSB + [KBalanceRight slab straightBar] - [KO slab straightBar top Stroke]
+		return : shape.r
+			x -- xPos + SideJut
+			y -- 0
+			xLink -- xPos - [if straightBar 1 0.1] * HVContrast * Stroke
+	define [KCyrlNormalDescender top straightBar slabLeft slab] : begin
+		return : KDescender CyrDescender top straightBar slabLeft slab
+	define [KPalatalHook top straightBar slabLeft slab] : begin
+		return : KDescender PalatalHook top straightBar slabLeft slab
 
-	define [KCyrlNormalDescender top straightBar slabLeft slab] : CyrDescender
-		RightSB + [KBalanceRight slab straightBar] - [KO slab straightBar top Stroke]
-		connex -- [if straightBar 1 0.1]
-
-	define [KHookTopBar slab straightBar] : union
-		VBarLeft (SB + [KBalance slab straightBar]) 0 (Ascender - Hook - HalfStroke)
-		VerticalHook (SB + [KBalance slab straightBar] + HalfStroke * HVContrast) (Ascender - Hook - HalfStroke) HookX (-Hook)
+	define [KHookTopBar slab straightBar] : HooktopLeftBar.inner
+		x -- SB + [KBalance slab straightBar]
 
 	define CyrlVbGap : (RightSB - SB) * 0.375
 	define [CyrlVbLength top] : top * 0.375 + Stroke
@@ -507,6 +509,7 @@ glyph-block Letter-Latin-K : begin
 			if slabBot : include : tagged 'serifLB'
 				CenterBottomSerif (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
 			create-forked-glyph "kDescender.\(suffix)" : KCyrlNormalDescender XH straightBar slabTop slabLegs
+			create-forked-glyph "kPalatalHook.\(suffix)" : KPalatalHook XH straightBar slabTop slabLegs
 
 		create-glyph "kBar.\(suffix)" : glyph-proc
 			include [refer-glyph "k.\(suffix)"] AS_BASE ALSO_METRICS
@@ -538,6 +541,7 @@ glyph-block Letter-Latin-K : begin
 	select-variant 'k' 'k'
 	link-reduced-variant 'k/sansSerif' 'k' MathSansSerif
 	select-variant 'kDescender' 0x2C6A
+	select-variant 'kPalatalHook' 0x1D84 (follow -- 'kDescender')
 	select-variant 'kBar' 0xA741 (follow -- 'k')
 	select-variant 'cyrl/kaStroke' 0x49F (shapeFrom -- 'kBar') (follow -- 'cyrl/Ka')
 

@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Lower-D : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar DToothlessRise DMBlend CurlyTail
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook VerticalHook
 
 	define [ToothedBody] : union
 		OBarRightShape
@@ -55,7 +55,7 @@ glyph-block Letter-Latin-Lower-D : begin
 		toothlessRoundedSerifedHBB   { ToothlessRoundedHBBBody TopSerif null      }
 
 	foreach { suffix { Body topSerif bottomSerif } } [Object.entries DConfig] : do
-		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.45
+		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.5
 
 		create-glyph "d.\(suffix)" : glyph-proc
 			include : MarkSet.b
@@ -81,6 +81,11 @@ glyph-block Letter-Latin-Lower-D : begin
 	link-reduced-variant 'd/phoneticLeft' 'd'
 	link-reduced-variant 'd/hookBottomBase' 'd'
 	CreateAccentedComposition 'dTildeOver' 0x1D6D 'd' 'tildeOverOnBar'
+
+	derive-composites 'dPalatalHook' 0x1D81 'd/hookBottomBase' : PalatalHook.r
+		xLink -- RightSB
+		x -- (RightSB + SideJut)
+		y -- 0
 
 	define DCurlyTailConfig : object
 		toothedSerifless  { false }
@@ -110,49 +115,51 @@ glyph-block Letter-Latin-Lower-D : begin
 		include : MarkSet.b
 		include : OBarRightShape
 		include : VBarRight RightSB 0 yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	create-glyph 'dHookTop.toothedBottomSerifed' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightShape
 		include : VBarRight RightSB 0 yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 		include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
 
 	create-glyph 'dHookTop.tailedSerifless' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightShape
 		include : RightwardTailedBar RightSB 0 yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	create-glyph 'dHookTop.toothlessCornerSerifless' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
 		include : VBarRight RightSB DToothlessRise yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	create-glyph 'dHookTop.toothlessCornerSeriflessHBB' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightToothlessShape XH RightSB DToothlessRise DMBlend
 		include : VBarRight RightSB 0 yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	create-glyph 'dHookTop.toothlessRoundedSerifless' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightRoundedShape XH RightSB yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	create-glyph 'dHookTop.toothlessRoundedSeriflessHBB' : glyph-proc
 		include : MarkSet.b
 		include : OBarRightRoundedShape XH RightSB yDHookTopConnect
 		include : VBarRight RightSB 0 yDHookTopConnect
-		include : VerticalHook (RightSB - HalfStroke * HVContrast) yDHookTopConnect HookX (-Hook)
+		include : VerticalHook.r RightSB yDHookTopConnect HookX (-Hook)
 
 	select-variant 'dHookTop' 0x257
 	link-reduced-variant 'dHookTop/hookBottomBase' 'dHookTop'
 
-	derive-composites 'dHookBottom' 0x256 'd/hookBottomBase' 'rtailBR'
-	derive-composites 'dHookTopBottom' 0x1D91 'dHookTop/hookBottomBase' 'rtailBR'
+	derive-composites 'dHookBottom' 0x256 'd/hookBottomBase'
+		VerticalHook.r RightSB 0 HookX Hook
+	derive-composites 'dHookTopBottom' 0x1D91 'dHookTop/hookBottomBase'
+		VerticalHook.r RightSB 0 HookX Hook
 
 	derive-multi-part-glyphs 'ddot' 0x1E0B {'d' 'dotAbove'} : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs

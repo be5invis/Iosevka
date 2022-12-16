@@ -11,9 +11,9 @@ glyph-block Letter-Greek-Lower-Zeta : begin
 
 	create-glyph 'grek/zeta' 0x3B6 : glyph-proc
 		include : MarkSet.if
-		include : HBar SB (RightSB + O) (Ascender - HalfStroke)
+		include : HBar SB RightSB (Ascender - HalfStroke)
 		include : dispiro
-			g4 (RightSB + O) (Ascender - Stroke) [widths.rhs]
+			g4 RightSB (Ascender - Stroke) [widths.rhs]
 			bezControls 0.7 0.35 1 0.64 12
 			g4.down.mid (SB + Stroke * HVContrast) [mix 0 Ascender (0.54 * SmallArchDepthB / (SmallArchDepthA + SmallArchDepthB))]
 			arcvh 16
@@ -23,3 +23,46 @@ glyph-block Letter-Greek-Lower-Zeta : begin
 			arcvh 16
 			flat (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender
 			curl [Math.min (RightSB - (Stroke - [mix Descender Stroke 0.5]) * 1.1 - 1) [mix SB RightSB 0.5]] Descender
+
+	create-glyph 'gInsular' 0x1D79 : glyph-proc
+		include: MarkSet.p
+		include : HBarTop SB RightSB XH
+
+		local pl : SmallArchDepthB / (SmallArchDepthA + SmallArchDepthB)
+		local pr : SmallArchDepthA / (SmallArchDepthA + SmallArchDepthB)
+		local pFallArc  0.17
+
+		local xIntersection : mix SB RightSB 0.55
+		local yIntersection : mix 0 XH 0.2
+		local xFirstTurn    : SB - O + Stroke * HVContrast
+		local yFirstTurn    : mix yIntersection XH (0.625 * pl)
+		local yBottomRingLeft  : mix Descender (yIntersection + 0.25 * Stroke) pl
+		local yBottomRingRight : mix Descender (yIntersection + 0.25 * Stroke) pr
+
+		include : dispiro
+			g4 RightSB (XH - Stroke) [widths.rhs]
+			bezControls 0.7 0.35 1 0.6 12
+			g4.down.mid xFirstTurn yFirstTurn
+			g4 xIntersection yIntersection [widths.center Stroke]
+			alsoThru 0.5 pFallArc
+			g4.down.mid (RightSB - O) yBottomRingRight [widths.rhs]
+			arcvh
+			g4.left.end (Middle + CorrectionOMidS) (Descender + O)
+
+		include : difference
+			dispiro
+				g4.left.start (Middle + CorrectionOMidS) (Descender + O) [widths.rhs]
+				archv
+				g4.up.mid (SB + O) yBottomRingLeft
+				alsoThru 0.5 (1 - pFallArc)
+				g2 (Width - xIntersection) yIntersection [widths.center : AdviceStroke 4]
+				g4.up.end (Width - xFirstTurn) yFirstTurn
+			spiro-outline
+				corner xFirstTurn Ascender
+				g4.down.mid xFirstTurn yFirstTurn
+				g4 xIntersection yIntersection
+				alsoThru 0.5 pFallArc
+				g4.down.mid (RightSB - O) yBottomRingRight
+				corner (RightSB - O) Descender
+				corner Width Descender
+				corner Width Ascender
