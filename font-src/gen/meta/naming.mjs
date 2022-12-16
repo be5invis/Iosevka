@@ -24,7 +24,7 @@ export function assignFontNames(font, naming, isQuasiProportional) {
 	// Compat banes
 	const compat = getStyleLinkedStyles(naming.weight, naming.width, naming.slope);
 	let compatFamily = family;
-	if (compat.familySuffix !== " Regular") compatFamily = family + " " + compat.familySuffix;
+	if (compat.familySuffix !== "Regular") compatFamily = family + " " + compat.familySuffix;
 	if (compatFamily.length >= 31) compatFamily = family + " " + compat.familySuffixShort;
 
 	nameFont(font, Ot.Name.NameID.LegacyFamily, compatFamily);
