@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 16.8.1
+
+* Fix shape of attached descenders (#1467, #1469).
+* Fix shape of MODIFIER BREVE WITH INVERTED BREVE #1468 (`U+AB5B`) (#1468).
+* Fix variant selector of m/n with palatal hook (#1470).
+
+
 ### 16.8.0
 
 * Fix incorrect "Regular" suffix present in RBIZ family names (#1466).
