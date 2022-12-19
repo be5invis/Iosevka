@@ -110,15 +110,21 @@ glyph-block Letter-Latin-V : begin
 		define xArcEnd : [mix SB RightSB 0.8] + sw * 0.375
 		define yArcEnd : top - O
 		define rInY : DiagonalTailInnerRadius
+		define xArcMidBottom : xBar + sw * HVContrast + rInY * HVContrast + CorrectionOMidX * sw
+
 		include : dispiro
 			widths.lhs sw
 			flat xBar top [heading Downward]
 			curl xBar ((sw + rInY) * (1 + TanSlope))
 			arcvh
-			g2.right.mid (xBar + sw * HVContrast + rInY * HVContrast + TanSlope * sw) O
+			g2.right.mid xArcMidBottom O
 			archv.superness 2
 			g4 xArcRight yArcRight
 			g4 xArcEnd yArcEnd
+
+		set-base-anchor 'palatalHookAttach'
+			mix xArcMidBottom xArcRight 0.5
+			mix O yArcRight : archv.yFromX 0.5 2
 
 	define [VHooktopShape df barStraight top] : glyph-proc
 		include : VShape df top Stroke barStraight
@@ -171,15 +177,32 @@ glyph-block Letter-Latin-V : begin
 			include : Serifs [DivFrame 1] XH fStraightBar
 			eject-contour 'serifRT'
 
-	create-glyph 'v.cursive' : glyph-proc
-		include : MarkSet.e
-		include : VCursiveShape 0 XH Stroke
+		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
+			include : PalatalHook.r
+				xLink -- Middle
+				x -- (Middle + HVContrast * HalfStroke + [PalatalHook.adviceGap Stroke])
+				y -- 0
 
-	create-glyph 'v.cursiveMotionSerifed' : glyph-proc
-		local pxBar : 1 / 16
-		include : MarkSet.e
-		include : VCursiveShape pxBar XH Stroke
-		include : tagged 'serifLT' : LeftwardTopSerif [VCursiveShapeBarPos pxBar] XH (SideJut + [VCursiveShapeBarPos pxBar] - SB)
+	define CursiveConfig : object
+		cursive              { 0      false }
+		cursiveMotionSerifed { (1/16) true  }
+
+	foreach { suffix { pxBar fDoSerif } } [Object.entries CursiveConfig] : do
+		create-glyph "v.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : VCursiveShape pxBar XH Stroke
+			if fDoSerif : begin
+				local xBar : VCursiveShapeBarPos pxBar
+				include : tagged 'serifLT' : LeftwardTopSerif xBar XH (SideJut + xBar - SB)
+
+		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
+			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.palatalHookAttach
+			include : PalatalHook.r
+				x -- attach.x
+				y -- 0
+				yAttach -- attach.y
 
 	select-variant 'V' 'V'
 	link-reduced-variant 'V/sansSerif' 'V' MathSansSerif
@@ -189,11 +212,7 @@ glyph-block Letter-Latin-V : begin
 	select-variant 'v/nonCursive' (shapeFrom -- 'v')
 	link-reduced-variant 'v/sansSerif' 'v' MathSansSerif
 
-	derive-composites 'vPalatalHook' 0x1D8C 'v/nonCursive'
-		PalatalHook.r
-			xLink -- Middle
-			x -- (Middle + HVContrast * HalfStroke + [PalatalHook.adviceGap Stroke])
-			y -- 0
+	select-variant "vPalatalHook" 0x1D8C (follow -- 'v')
 
 	select-variant 'vHookTop' 0x2C71 (follow -- 'v/nonCursive')
 	select-variant 'cyrl/Izhitsa' 0x474 (follow -- 'VHookTop') (shapeFrom -- 'VHookTop')
