@@ -18,108 +18,63 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-import Letter-Shared-Shapes : ArcStartInwardSerifL ArcStartInwardSerifR
 	glyph-block-import Letter-Shared-Shapes : ArcEndInwardSerifL ArcEndInwardSerifR
 	glyph-block-import Letter-Shared-Shapes : InwardSlabArcStart_RtlLhs
-	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay RetroflexHook
+	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook RetroflexHook
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define SLAB-NONE       0
 	define SLAB-CLASSICAL  1
 	define SLAB-INWARD     2
 
-	define [CShapeT sink offset df top bot ada adb hook sw] : sink
+	glyph-block-export CShapeT
+	define [CShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
 		widths.lhs sw
-		g4 df.rightSB (top - [fallback hook Hook])
-		hookstart (top - O - offset)
+		match st
+			[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs (df.rightSB - offset) df.middle top sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : list
+				g4 (df.rightSB - offset) (top - DToothlessRise)
+				g4 (df.middle - CorrectionOMidX * sw) (top - O - offset)
+				archv
+			_ : list
+				g4 (df.rightSB - offset) (top - [fallback hook Hook])
+				hookstart (top - O - offset)
+
 		flat (df.leftSB + OX + offset) (top - ada)
 		curl (df.leftSB + OX + offset) (bot + adb)
-		hookend (bot + O + offset)
-		g4 df.rightSB (bot + [fallback hook Hook])
 
-	define [SlabCShapeT sink offset df top bot ada adb hook sw origBar] : sink
-		SerifedArcStart_RtlLhs (df.rightSB - offset) df.middle top sw [fallback hook Hook] origBar
-		flat (df.leftSB + OX + offset) (top - ada)
-		curl (df.leftSB + OX + offset) (bot + adb)
-		hookend (bot + O + offset)
-		g4 df.rightSB (bot + [fallback hook Hook])
+		match sb
+			[Just SLAB-CLASSICAL] : SerifedArcEnd_LtrLhs (df.rightSB - offset) df.middle bot sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : list
+				arcvh
+				g4 (df.middle + CorrectionOMidX * sw) (bot + O + offset)
+				g4 (df.rightSB - offset) (bot + DToothlessRise)
+			_ : list
+				hookend (bot + O + offset)
+				g4 (df.rightSB - offset) (bot + [fallback hook Hook])
 
-	define [BiSlabCShapeT sink offset df top bot ada adb hook sw origBar] : sink
-		SerifedArcStart_RtlLhs (df.rightSB - offset) df.middle top sw [fallback hook Hook] origBar
-		flat (df.leftSB + OX + offset) (top - ada)
-		curl (df.leftSB + OX + offset) (bot + adb)
-		SerifedArcEnd_LtrLhs (df.rightSB - offset) df.middle bot sw [fallback hook Hook] origBar
-
-	define [UniInwardSlabCShapeT sink offset df top bot ada adb hook sw origBar] : sink
-		widths.lhs sw
-		g4 df.rightSB (top - DToothlessRise)
-		g4 (df.middle - CorrectionOMidX * sw) (top - O - offset)
-		archv
-		flat (df.leftSB + OX + offset) (top - ada)
-		curl (df.leftSB + OX + offset) (bot + adb)
-		hookend (bot + O + offset)
-		g4 df.rightSB (bot + [fallback hook Hook])
-
-	define [BiInwardSlabCShapeT sink offset df top bot ada adb hook sw origBar] : sink
-		widths.lhs sw
-		g4 df.rightSB (top - DToothlessRise)
-		g4 (df.middle - CorrectionOMidX * sw) (top - O - offset)
-		archv
-		flat (df.leftSB + OX + offset) (top - ada)
-		curl (df.leftSB + OX + offset) (bot + adb)
-		arcvh
-		g4 (df.middle + CorrectionOMidX * sw) (bot + O + offset)
-		g4 df.rightSB (bot + DToothlessRise)
-
-	define [RevCShape df top bot ada adb hook sw] : dispiro
+	define [RevCShapeT sink offset df st sb top bot ada adb hook sw origBar] : sink
 		widths.rhs sw
-		g4 df.leftSB (top - [fallback hook Hook])
-		hookstart (top - O)
-		flat (df.rightSB - OX) (top - ada)
-		curl (df.rightSB - OX) (bot + adb)
-		hookend (bot + O)
-		g4 df.leftSB (bot + [fallback hook Hook])
+		match st
+			[Just SLAB-CLASSICAL] : SerifedArcStart_LtrRhs (df.leftSB + offset) df.middle top sw [fallback hook Hook] origBar
+			[Just SLAB-INWARD] : list
+				g4 (df.leftSB + offset) (top - DToothlessRise)
+				g4 (df.middle - CorrectionOMidX * sw) (top - O - offset)
+				archv
+			_ : list
+				g4 (df.leftSB + offset) (top - [fallback hook Hook])
+				hookstart (top - O - offset)
 
-	define [SlabRevCShape df top bot ada adb hook sw] : dispiro
-		widths.rhs sw
-		SerifedArcStart_LtrRhs df.leftSB df.middle top sw [fallback hook Hook]
-		flat (df.rightSB - OX) (top - ArchDepthA)
-		curl (df.rightSB - OX) (bot + ArchDepthB)
-		hookend (bot + O)
-		g4 df.leftSB (bot + [fallback hook Hook])
+		flat (df.rightSB - OX + offset) (top - ada)
+		curl (df.rightSB - OX + offset) (bot + adb)
 
-	define [BiSlabRevCShape df top bot ada adb hook sw] : dispiro
-		widths.rhs sw
-		SerifedArcStart_LtrRhs df.leftSB df.middle top sw [fallback hook Hook]
-		flat (df.rightSB - OX) (top - ArchDepthA)
-		curl (df.rightSB - OX) (bot + ArchDepthB)
-		SerifedArcEnd_RtlRhs df.leftSB df.middle bot sw [fallback hook Hook]
-
-	define [UniInwardSlabRevCShape df top bot ada adb hook sw] : dispiro
-		widths.rhs sw
-		g4 df.leftSB (top - DToothlessRise)
-		g4 (df.middle - CorrectionOMidX * sw) (top - O)
-		archv
-		flat (df.rightSB - OX) (top - ArchDepthA)
-		curl (df.rightSB - OX) (bot + ArchDepthB)
-		hookend (bot + O)
-		g4 df.leftSB (bot + [fallback hook Hook])
-
-	define [BiInwardSlabRevCShape df top bot ada adb hook sw] : dispiro
-		widths.rhs sw
-		g4 df.leftSB (top - DToothlessRise)
-		g4 (df.middle - CorrectionOMidX * sw) (top - O)
-		archv
-		flat (df.rightSB - OX) (top - ArchDepthA)
-		curl (df.rightSB - OX) (bot + ArchDepthB)
-		arcvh
-		g4 (df.middle + CorrectionOMidX * sw) (bot + O)
-		g4 df.leftSB (bot + DToothlessRise)
-
-	glyph-block-export SansCShape
-	define [SansCShape df top bot ada adb hook sw] : CShapeT dispiro 0 df top bot ada adb hook sw
-	define [CShapeOutline df top bot ada adb hook sw] : CShapeT spiro-outline 1 df top bot ada adb hook sw
-	define [SlabCShape df top bot ada adb hook sw] : SlabCShapeT dispiro 0 df top bot ada adb hook sw
-	define [BiSlabCShape df top bot ada adb hook sw] : BiSlabCShapeT dispiro 0 df top bot ada adb hook sw
-	define [UniInwardSlabCShape df top bot ada adb hook sw] : UniInwardSlabCShapeT dispiro 0 df top bot ada adb hook sw
-	define [BiInwardSlabCShape df top bot ada adb hook sw] : BiInwardSlabCShapeT dispiro 0 df top bot ada adb hook sw
+		match sb
+			[Just SLAB-CLASSICAL] : SerifedArcEnd_RtlRhs (df.leftSB + offset) df.middle bot sw [fallback hook Hook]
+			[Just SLAB-INWARD] : list
+				arcvh
+				g4 (df.middle + CorrectionOMidX * sw) (bot + O + offset)
+				g4 (df.leftSB + offset) (bot + DToothlessRise)
+			_ : list
+				hookend (bot + O + offset)
+				g4 (df.leftSB + offset) (bot + [fallback hook Hook])
 
 	define [AutoStartSerifR df sty top hook sw] : match sty
 		[Just SLAB-CLASSICAL] : ArcStartSerifR df.rightSB top [fallback sw Stroke] [fallback hook Hook]
@@ -160,13 +115,19 @@ glyph-block Letter-Latin-C : begin
 			CurlyTail fine rinner m1 0 RightSB x2 y2
 
 	local CConfig : object
-		serifless               { SLAB-NONE      SLAB-NONE      SansCShape          RevCShape              }
-		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      SlabCShape          SlabRevCShape          }
-		bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL BiSlabCShape        BiSlabRevCShape        }
-		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      UniInwardSlabCShape UniInwardSlabRevCShape }
-		bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    BiInwardSlabCShape  BiInwardSlabRevCShape  }
+		serifless               { SLAB-NONE      SLAB-NONE      }
+		descBase                { SLAB-NONE      SLAB-CLASSICAL }
+		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
+		bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
+		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
+		bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
 
-	foreach { suffix { sty styBot cShape revCShape } } [Object.entries CConfig] : do
+	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+		define [cShape df top bot ada adb hook sw ob]
+			CShapeT    dispiro 0 df sty styBot top bot ada adb hook sw ob
+		define [revCShape df top bot ada adb hook sw ob]
+			RevCShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob
+
 		create-glyph "C.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : cShape [DivFrame 1] CAP 0 ArchDepthA ArchDepthB Hook Stroke
@@ -275,6 +236,7 @@ glyph-block Letter-Latin-C : begin
 
 	select-variant 'C' 'C'
 	link-reduced-variant 'C/sansSerif' 'C' MathSansSerif
+	link-reduced-variant 'C/descBase' 'C' MathSansSerif
 	select-variant 'revC' 0x2183 (follow -- 'C')
 	alias 'cyrl/Es' 0x421 'C'
 	alias 'grek/lunateSigma' 0x3F9 'C'
@@ -287,7 +249,8 @@ glyph-block Letter-Latin-C : begin
 
 	select-variant 'c' 'c'
 	link-reduced-variant 'c/sansSerif' 'c' MathSansSerif
-	select-variant 'c/turnDescBase' (shapeFrom -- 'c')
+	link-reduced-variant 'c/descBase' 'c'
+	link-reduced-variant 'c/turnDescBase' 'c'
 	select-variant 'revSmallC' 0x2184 (follow -- 'c')
 	alias 'cyrl/es' 0x441 'c'
 	alias 'grek/lunateSmallSigma' 0x3F2 'c.serifless'
@@ -304,16 +267,16 @@ glyph-block Letter-Latin-C : begin
 
 	create-glyph 'mathbb/C' 0x2102 : glyph-proc
 		include : MarkSet.capital
-		include : SansCShape [DivFrame 1] CAP 0 ArchDepthA ArchDepthB Hook BBS
+		include : CShapeT dispiro 0 [DivFrame 1] SLAB-NONE SLAB-NONE CAP 0 ArchDepthA ArchDepthB Hook BBS
 		include : intersection
-			CShapeOutline [DivFrame 1] CAP 0 ArchDepthA ArchDepthB Hook BBS
+			CShapeT spiro-outline 0.1 [DivFrame 1] SLAB-NONE SLAB-NONE CAP 0 ArchDepthA ArchDepthB Hook BBS
 			VBarLeft (SB + BBD) 0 CAP BBS
 
 	create-glyph 'mathbb/c' 0x1D554 : glyph-proc
 		include : MarkSet.capital
-		include : SansCShape [DivFrame 1] XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
+		include : CShapeT dispiro 0 [DivFrame 1] SLAB-NONE SLAB-NONE XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
 		include : intersection
-			CShapeOutline [DivFrame 1] XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
+			CShapeT spiro-outline 0.1 [DivFrame 1] SLAB-NONE SLAB-NONE XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
 			VBarLeft (SB + BBD + OX) 0 CAP BBS
 
 	create-glyph 'currency/euroSign/overlay' : union
@@ -368,6 +331,14 @@ glyph-block Letter-Latin-C : begin
 	turned 'turnc/turnDescBase' null 'c/turnDescBase' Middle (XH / 2)
 	derive-composites 'turncRetroflexHook' 0x1D97 'turnc/turnDescBase'
 		RetroflexHook.l SB 0 (yAttach -- DToothlessRise)
+		ExtendBelowBaseAnchors (-Hook)
+
+	derive-composites 'CPalatalHook' 0xA7C4 'C/descBase'
+		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
+		ExtendBelowBaseAnchors (-Hook)
+
+	derive-composites 'cPalatalHook' 0xA794 'c/descBase'
+		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
 		ExtendBelowBaseAnchors (-Hook)
 
 	define [LunateSigmaShape k fRound kdr] : begin
