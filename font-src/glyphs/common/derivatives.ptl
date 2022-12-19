@@ -46,9 +46,6 @@ glyph-block Common-Derivatives : begin
 		alias name unicode (name + '.slanted')
 		alias name unicode (name + '.upright')
 
-	glyph-block-export glyph-is-needed
-	define [glyph-is-needed name] : [not pickHash] || pickHash.(name)
-
 	glyph-block-export query-glyph
 	define [query-glyph id] : return : glyphStore.queryByName id
 
@@ -212,34 +209,12 @@ glyph-block Common-Derivatives : begin
 
 glyph-block Recursive-Build : begin
 	define [Fork gs ps] : begin
-		# BFS construct ShouldBuildList
-		local sbh : new Map
-		local PENDING 1
-		local CHECKED 2
-		foreach [glyphid : items-of gs] : sbh.set glyphid PENDING
+		local glyphs {}
+		foreach [glyphid : items-of gs] : begin
+			local g : glyphStore.queryByName glyphid
+			if g : glyphs.push g
 
-		local found true
-		while found : begin
-			set found false
-			foreach glyphid [sbh.keys] : if ([sbh.get glyphid] === PENDING) : begin
-				sbh.set glyphid CHECKED
-				local g : glyphStore.queryByName glyphid
-				if (g && g.dependencies) : foreach [k : items-of g.dependencies] : begin
-					if [not : sbh.has k] : begin
-						sbh.set k PENDING
-						set found true
-
-		local shouldBuildList     { }
-		local shouldBuildUnicodes { }
-		foreach gn [sbh.keys] : if gn : begin
-			shouldBuildList.push gn
-			if [glyphStore.queryUnicodeOfName gn] : begin
-				shouldBuildUnicodes.push [glyphStore.queryUnicodeArrayOfName gn].0
-
-		local p {.}
-		foreach {k v} [pairs-of all ps] : set p.(k) v
-
-		local gs : buildGlyphs p shouldBuildList shouldBuildUnicodes
+		local gs : buildGlyphs ps [$execState$.dependencyManager.traverseDependencies glyphs]
 		return gs.glyphStore
 
 	define [MiniatureParaT] : params [pp crowd scale [sbscale (Width / UPM)] [mono false] [mono2 false] [forceUpright false]] : begin
