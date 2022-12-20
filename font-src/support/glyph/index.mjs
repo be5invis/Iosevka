@@ -19,8 +19,12 @@ export class Glyph {
 		this.markAnchors = {};
 		this.baseAnchors = {};
 		// Tracking
-		this.dependencies = [];
+		this._m_dependencyManager = null;
 		this.ctxTag = null;
+	}
+
+	get identifier() {
+		return this._m_identifier;
 	}
 	get contours() {
 		throw new TypeError("Glyph::contours has been deprecated");
@@ -48,8 +52,8 @@ export class Glyph {
 	}
 	// Dependency
 	dependsOn(glyph) {
-		if (glyph._m_identifier) this.dependencies.push(glyph._m_identifier);
-		if (glyph.dependencies) for (const dep of glyph.dependencies) this.dependencies.push(dep);
+		if (!this._m_dependencyManager) return;
+		this._m_dependencyManager.addDependency(this, glyph);
 	}
 	// Inclusion
 	include(component, copyAnchors, copyWidth) {
