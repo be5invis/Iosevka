@@ -1,5 +1,14 @@
 ## Modifications since version 2.x
 
+### 16.8.4
+
+* Fix shape regression of Mathematical sans-serif C (#1482).
+* Fix variant selector for CYRILLIC CAPITAL LETTER BASHKIR KA (`U+04A0`) (#1484).
+* Fix shape of unilaterally inward-serifed `U+A794` and `U+A7C4` (#1485).
+* Fix shape of cursive LATIN CAPITAL LETTER Z WITH DESCENDER (`U+2C6B`) (#1486).
+* Fix serif placement of italic `J`s (#1487).
+
+
 ### 16.8.3
 
 * Add characters:
