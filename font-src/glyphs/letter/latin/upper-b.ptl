@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Upper-B : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Metrics : BowlXDepth
-	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotRhs LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : ShoulderMidKnotRhs LetterBarOverlay SerifFrame
 	glyph-block-import Letter-Blackboard : BBS BBD
 
 	define BArcMix           0.93
@@ -58,8 +58,10 @@ glyph-block Letter-Latin-Upper-B : begin
 			topArcShift -- topArcShift
 			topArcInnerShift -- topArcInnerShift
 		include : VBarLeft SB 0 top stroke
-		if serifTop : include : tagged 'serifLT' : LeftwardTopSerif SB top SideJut
-		if serifBot : include : tagged 'serifLB' : LeftwardBottomSerif SB 0 SideJut
+
+		local sf : SerifFrame top 0 SB RightSB
+		if serifTop : include sf.lt.outer
+		if serifBot : include sf.lb.outer
 
 	define [BShapeMask] : params [top [stroke : AdviceStroke2 2 3 top] [barPos BBarPos] [topArcShift 0] [topArcInnerShift 0]] : glyph-proc
 		include : BShapeArcsT spiro-outline top
@@ -146,6 +148,13 @@ glyph-block Letter-Latin-Upper-B : begin
 			include [refer-glyph "smcpB.\(suffix)"] AS_BASE ALSO_METRICS
 			include : BOverlayBar XH bp
 
+		create-glyph "latn/Beta.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+			include : body CAP [AdviceStroke2 2 3 CAP] ts false
+			include : VBarLeft SB Descender 0
+			if bs : begin
+				local fs : SerifFrame CAP Descender SB RightSB
+				include fs.lb.fullSide
 
 	select-variant 'B' 'B'
 	link-reduced-variant 'B/sansSerif' 'B' MathSansSerif
@@ -153,6 +162,7 @@ glyph-block Letter-Latin-Upper-B : begin
 	select-variant 'currency/bitcoin' 0x20BF (follow -- 'B')
 	select-variant 'BBar' 0x243 (follow -- 'B')
 	select-variant 'smcpBBar' 0x1D03 (follow -- 'B')
+	select-variant 'latn/Beta' 0xA7B4 (follow -- 'B')
 	alias 'grek/Beta' 0x392 'B'
 	alias-reduced-variant 'grek/Beta/sansSerif' 'grek/Beta' 'B/sansSerif' MathSansSerif
 	alias 'cyrl/Ve' 0x412 'B'
@@ -275,3 +285,6 @@ glyph-block Letter-Latin-Upper-B : begin
 			g4.up.end (SB + HVContrast * (Stroke - ShoulderFine)) adb [widths.rhs ShoulderFine]
 			# flat (RightSB - ymiddle / 2 - HalfStroke) 0
 			# curl (SB + HalfStroke) 0 [heading Leftward]
+
+	derive-composites 'latn/beta' 0xA7B5 'grek/beta'
+		if SLAB [SerifFrame XH Descender SB RightSB].lb.fullSide [no-shape]
