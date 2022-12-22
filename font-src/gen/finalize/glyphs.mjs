@@ -7,6 +7,14 @@ import { Transform } from "../../support/geometry/transform.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+export function finalizeGlyphs(cache, para, glyphStore) {
+	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
+	regulateGlyphStore(cache, skew, glyphStore);
+	return glyphStore;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 function regulateGlyphStore(cache, skew, glyphStore) {
 	const compositeMemo = new Map();
 	for (const g of glyphStore.glyphs()) {
@@ -88,7 +96,7 @@ class SimplifyGeometry extends Geom.GeometryBase {
 	}
 	asContours() {
 		const source = this.m_geom.asContours();
-		const sink = new FairizedShapeSink();
+		const sink = new QuadifySink();
 		TypoGeom.ShapeConv.transferGenericShape(
 			TypoGeom.Fairize.fairizeBezierShape(
 				TypoGeom.Boolean.removeOverlap(
@@ -120,7 +128,8 @@ class SimplifyGeometry extends Geom.GeometryBase {
 		return `SimplifyGeometry{${sTarget}}`;
 	}
 }
-class FairizedShapeSink {
+
+class QuadifySink {
 	constructor() {
 		this.contours = [];
 		this.lastContour = [];
@@ -152,6 +161,7 @@ class FairizedShapeSink {
 		}
 		this.lineTo(x, y);
 	}
+
 	// Contour cleaning code
 	alignHVKnots(c0) {
 		const c = c0.slice(0);
@@ -225,7 +235,9 @@ class FairizedShapeSink {
 		return c;
 	}
 }
+
 // Disjoint set for coordinate alignment
+
 class CoordinateAligner {
 	constructor(c, lens, lensSet) {
 		this.c = c;
@@ -264,10 +276,13 @@ class CoordinateAligner {
 		}
 	}
 }
+
+// Lenses used by aligner
 const GetX = z => z.x;
 const SetX = (z, x) => (z.x = x);
 const GetY = z => z.y;
 const SetY = (z, y) => (z.y = y);
+
 function isOccurrent(zFirst, zLast) {
 	return (
 		zFirst.type === Point.Type.Corner &&
@@ -284,9 +299,4 @@ function aligned(a, b, c) {
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);
-}
-export function finalizeGlyphs(cache, para, glyphStore) {
-	const skew = Math.tan(((para.slopeAngle || 0) / 180) * Math.PI);
-	regulateGlyphStore(cache, skew, glyphStore);
-	return glyphStore;
 }
