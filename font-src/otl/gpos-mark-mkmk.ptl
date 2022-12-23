@@ -1,4 +1,6 @@
 import [AddCommonFeature AddFeature AddLookup] from"./table-util.mjs"
+
+extern Map
 extern Set
 
 define MarkClasses {
@@ -9,56 +11,67 @@ define MarkClasses {
 }
 
 export : define [buildMarkMkmk sink glyphStore] : begin
-	define mark : AddFeature sink 'mark'
-	define mkmk : AddFeature sink 'mkmk'
-	AddCommonFeature sink mark
-	AddCommonFeature sink mkmk
+	define validMarkClasses : new Set MarkClasses
 
-	local markLookupNames {}
-	local mkmkLookupNames {}
+	define mark : object
+		feature      : AddFeature sink 'mark'
+		lookupMap    : new Map
+		lookupNames  : new Set
+		createLookup : function [] {.type 'gpos_mark_to_base' .marks {.} .bases {.}}
+	define mkmk : object
+		feature      : AddFeature sink 'mkmk'
+		lookupMap    : new Map
+		lookupNames  : new Set
+		createLookup : function [] {.type 'gpos_mark_to_mark' .marks {.} .bases {.}}
 
-	foreach markCls [items-of MarkClasses] : begin
-		local [object markLookup mkmkLookup] : createMTLookups glyphStore { markCls }
-		if ([objectIsNotEmpty markLookup.marks] && [objectIsNotEmpty markLookup.bases]) : begin
-			local lidMark : AddLookup sink markLookup
-			mark.lookups.push    lidMark
-			markLookupNames.push lidMark
+	AddCommonFeature sink mark.feature
+	AddCommonFeature sink mkmk.feature
 
-		if ([objectIsNotEmpty mkmkLookup.marks] && [objectIsNotEmpty mkmkLookup.bases]) : begin
-			local lidMkmk : AddLookup sink mkmkLookup
-			mkmk.lookups.push    lidMkmk
-			mkmkLookupNames.push lidMkmk
+	foreach cls [items-of MarkClasses] : begin
+		local markLookup : ensureLookup sink mark cls
+		local mkmkLookup : ensureLookup sink mkmk cls
 
-	foreach lidMark [items-of markLookupNames] : foreach lidMkmk [items-of mkmkLookupNames]
+		foreach { gn glyph } [glyphStore.namedEntries] : begin
+			local glyphIsMark false
+			if glyph.markAnchors.(cls) : begin
+				set glyphIsMark true
+				addMarkAnchor markLookup gn cls glyph.markAnchors.(cls)
+				addMarkAnchor mkmkLookup gn cls glyph.markAnchors.(cls)
+
+			if glyph.baseAnchors.(cls) : begin
+				local anchor : object
+					x glyph.baseAnchors.(cls).x
+					y glyph.baseAnchors.(cls).y
+				if glyphIsMark
+				: then : addBaseAnchor mkmkLookup gn cls glyph.baseAnchors.(cls)
+				: else : addBaseAnchor markLookup gn cls glyph.baseAnchors.(cls)
+
+	foreach lidMark mark.lookupNames : foreach lidMkmk mkmk.lookupNames
 		sink.lookupDep.push { lidMark lidMkmk }
 
-define [createMTLookups glyphStore markClasses] : begin
-	local markLookup {.type 'gpos_mark_to_base' .marks {.} .bases {.}}
-	local mkmkLookup {.type 'gpos_mark_to_mark' .marks {.} .bases {.}}
-	local allowMarkClsSet : new Set markClasses
-	foreach { gn glyph } [glyphStore.namedEntries] : begin
-		createMarkInfo markLookup.marks gn glyph allowMarkClsSet
-		createMarkInfo mkmkLookup.marks gn glyph allowMarkClsSet
-		local isMark : objectIsNotEmpty glyph.markAnchors
-		if isMark
-			createBaseInfo mkmkLookup.bases gn glyph allowMarkClsSet
-			createBaseInfo markLookup.bases gn glyph allowMarkClsSet
-	return : object markLookup mkmkLookup
 
-define [createBaseInfo sink gn glyph allowMarkClsSet] : begin
-	local res {.}
-	local pushed false
-	foreach { markCls anchor } [pairs-of glyph.baseAnchors] : if [allowMarkClsSet.has markCls] : begin
-		set pushed true
-		set res.(markCls) {.x anchor.x .y anchor.y}
-	if pushed : set sink.(gn) res
-	return pushed
+define [ensureLookup sink feat cls] : begin
+	local existing : feat.lookupMap.get cls
+	if existing : return existing
 
-define [createMarkInfo sink gn glyph allowMarkClsSet] : begin
-	local m null
-	foreach { markCls anchor } [pairs-of glyph.markAnchors] : if [allowMarkClsSet.has markCls] : begin
-		set m {.class markCls .x anchor.x .y anchor.y}
-	if m : set sink.(gn) m
-	return m
+	local novel : feat.createLookup
+	local lid : AddLookup sink novel
+	feat.feature.lookups.push lid
+	feat.lookupNames.add lid
+	feat.lookupMap.set cls novel
 
-define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
+	return novel
+
+define [addMarkAnchor lookup gn cls anchor] : begin
+	local a : object
+		class cls
+		x     anchor.x
+		y     anchor.y
+	set lookup.marks.(gn) a
+
+define [addBaseAnchor lookup gn cls anchor] : begin
+	local a : object
+		x     anchor.x
+		y     anchor.y
+	if [not lookup.bases.(gn)] : set lookup.bases.(gn) {.}
+	set lookup.bases.(gn).(cls) a
