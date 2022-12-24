@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 17.0.1
+
+* Fix shape of Small Cyrillic Ghe with hook/descender when having inward serifs (#1494).
+
+
 ### 17.0.0
 
 * Reordered variants of certain characters, including:
