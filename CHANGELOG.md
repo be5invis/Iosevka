@@ -1,5 +1,13 @@
 ## Modifications since version 2.x
 
+### 17.0.2
+
+* Fix variant assignment of
+  - Italic CYRILLIC SMALL LETTER TE (`U+0442`) (#1498).
+  - CYRILLIC SMALL LETTER ZHE WITH DESCENDER (`U+0497`) (#1499).
+  - CYRILLIC SMALL LETTER SHHA (`U+04BB`) (#1500).
+
+
 ### 17.0.1
 
 * Fix shape of Small Cyrillic Ghe with hook/descender when having inward serifs (#1494).
