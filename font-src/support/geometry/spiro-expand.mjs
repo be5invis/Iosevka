@@ -65,8 +65,9 @@ export class BiKnotCollector {
 		}
 	}
 	headsTo(direction) {
+		const transformedDirection = this.gizmo.applyOffset(direction);
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
-		if (k0) k0.proposedNormal = direction;
+		if (k0) k0.proposedNormal = transformedDirection;
 	}
 	setType(type) {
 		const k0 = this.controlKnots[this.controlKnots.length - 1];
