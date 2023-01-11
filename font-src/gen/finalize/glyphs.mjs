@@ -142,8 +142,7 @@ class QuadifySink {
 	beginShape() {}
 	endShape() {
 		if (this.lastContour.length > 2) {
-			// TT use CW for outline, being different from Clipper
-			let c = this.lastContour.reverse();
+			let c = this.lastContour;
 			c = this.alignHVKnots(c);
 			c = this.cleanupOccurrentKnots1(c);
 			c = this.cleanupOccurrentKnots2(c);

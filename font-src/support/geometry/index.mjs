@@ -404,13 +404,6 @@ export class BooleanGeometry extends GeometryBase {
 	asContoursImpl() {
 		if (this.m_operands.length === 0) return [];
 		let arcs = CurveUtil.convertShapeToArcs(this.m_operands[0].asContours());
-		if (this.m_operands.length === 1) {
-			arcs = TypoGeom.Boolean.removeOverlap(
-				arcs,
-				TypoGeom.Boolean.PolyFillType.pftNonZero,
-				CurveUtil.BOOLE_RESOLUTION
-			);
-		}
 		for (let j = 1; j < this.m_operands.length; j++) {
 			arcs = TypoGeom.Boolean.combine(
 				this.m_operator,
