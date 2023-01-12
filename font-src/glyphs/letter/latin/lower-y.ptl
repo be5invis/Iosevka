@@ -15,10 +15,11 @@ glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import Letter-Shared-Shapes : nShoulder FlatHookDepth SerifFrame BeltOverlay
 	glyph-block-import Letter-Shared-Shapes : VerticalHook
 
-	define SLAB-NONE    { false false false }
-	define SLAB-AUTO    { SLAB  SLAB  false }
-	define SLAB-ALL     { true  true  false }
-	define SLAB-MOTION  { false false true  }
+	define SLAB-NONE           { false false false }
+	define SLAB-AUTO           { SLAB  SLAB  false }
+	define SLAB-ALL            { true  true  false }
+	define SLAB-MOTION         { false false true  }
+	define SLAB-MOTION-AUTO    { SLAB  SLAB  true  }
 
 	define BS-STRAIGHT 0
 	define BS-TURN     1
@@ -329,15 +330,18 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 		export : define [Serifs top slabType] : begin
 			local { doSlabTop doSlabBottom doSlabMotion } slabKind
-			return : if (doSlabTop || doSlabMotion)
-				HSerif.lt SB top SideJut
-				no-shape
+			local sf : SerifFrame top 0 SB RightSB
+			return : if [not doSlabTop] [no-shape] : composite-proc
+				if doSlabMotion sf.lt.outer sf.lt.full
+				if doSlabMotion [no-shape] sf.rt.full
 
 	define CursiveConfig : object
-		cursive                      { Cursive.Hook     SLAB-AUTO   }
-		cursiveFlatHook              { Cursive.FlatHook SLAB-AUTO   }
-		cursiveMotionSerifed         { Cursive.Hook     SLAB-MOTION }
-		cursiveFlatHookMotionSerifed { Cursive.FlatHook SLAB-MOTION }
+		cursive                      { Cursive.Hook     SLAB-MOTION-AUTO    }
+		cursiveFlatHook              { Cursive.FlatHook SLAB-MOTION-AUTO    }
+		cursiveCyrlU                 { Cursive.Hook     SLAB-AUTO           }
+		cursiveFlatHookCyrlU         { Cursive.FlatHook SLAB-AUTO           }
+		cursiveMotionSerifed         { Cursive.Hook     SLAB-MOTION         }
+		cursiveFlatHookMotionSerifed { Cursive.FlatHook SLAB-MOTION         }
 
 	foreach { suffix { hookShape slabKind } } [Object.entries CursiveConfig] : do
 		create-glyph "y.\(suffix)" : glyph-proc
