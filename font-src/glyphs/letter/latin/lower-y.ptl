@@ -15,10 +15,11 @@ glyph-block Letter-Latin-Lower-Y : begin
 	glyph-block-import Letter-Shared-Shapes : nShoulder FlatHookDepth SerifFrame BeltOverlay
 	glyph-block-import Letter-Shared-Shapes : VerticalHook
 
-	define SLAB-NONE    { false false false }
-	define SLAB-AUTO    { SLAB  SLAB  false }
-	define SLAB-ALL     { true  true  false }
-	define SLAB-MOTION  { false false true  }
+	define SLAB-NONE           { false false false }
+	define SLAB-AUTO           { SLAB  SLAB  false }
+	define SLAB-ALL            { true  true  false }
+	define SLAB-MOTION         { false false true  }
+	define SLAB-MOTION-AUTO    { SLAB  SLAB  true  }
 
 	define BS-STRAIGHT 0
 	define BS-TURN     1
@@ -134,9 +135,9 @@ glyph-block Letter-Latin-Lower-Y : begin
 			if bottomShape : return nothing
 			if (useStraightBottom) : begin
 				local xBaseKnot : mix yrstroker joinX ((top - bottom) / (top - joinY))
-				include : LeftwardBottomSerif (xBaseKnot - HalfStroke * HVContrast) bottom yBottomJut
+				include : HSerif.lb (xBaseKnot - HalfStroke * HVContrast) bottom yBottomJut
 			: else : begin
-				include : LeftwardBottomSerif (yrstrokel - HalfStroke * HVContrast) bottom yBottomJut
+				include : HSerif.lb (yrstrokel - HalfStroke * HVContrast) bottom yBottomJut
 
 		define [yJoinProportion hooktop x] : linreg
 			1 - px2
@@ -200,7 +201,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 			if doSlabTop    : include : let [sf : SerifFrame top bottom SB RightSB]
 				composite-proc sf.lt.full sf.rt.full
 			if doSlabBottom : include : yBaseSerif top bottom
-			if doSlabMotion : include : LeftwardTopSerif SB top SideJut
+			if doSlabMotion : include : HSerif.lt SB top SideJut
 
 		export : define [SmallYHookTopShape top bottom] : glyph-proc
 			local {ds ds2} : CalcDS top bottom
@@ -230,7 +231,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 			if doSlabTop : include : let [sf : SerifFrame top bottom SB RightSB] sf.lt.full
 			if doSlabBottom : include : yBaseSerif top bottom
-			if doSlabMotion : include : LeftwardTopSerif SB top SideJut
+			if doSlabMotion : include : HSerif.lt SB top SideJut
 
 		export : define [SmallLambdaShape top bottom] : union : glyph-proc
 			set currentGlyph.gizmo : Italify (-para.slopeAngle)
@@ -329,19 +330,23 @@ glyph-block Letter-Latin-Lower-Y : begin
 
 		export : define [Serifs top slabType] : begin
 			local { doSlabTop doSlabBottom doSlabMotion } slabKind
-			return : if (doSlabTop || doSlabMotion)
-				LeftwardTopSerif SB top SideJut
-				no-shape
+			local sf : SerifFrame top 0 SB RightSB
+			return : if [not doSlabTop] [no-shape] : composite-proc
+				if doSlabMotion sf.lt.outer sf.lt.full
+				if doSlabMotion [no-shape] sf.rt.full
 
 	define CursiveConfig : object
-		cursive                      { Cursive.Hook     SLAB-AUTO   }
-		cursiveFlatHook              { Cursive.FlatHook SLAB-AUTO   }
-		cursiveMotionSerifed         { Cursive.Hook     SLAB-MOTION }
-		cursiveFlatHookMotionSerifed { Cursive.FlatHook SLAB-MOTION }
+		cursive                      { Cursive.Hook     SLAB-MOTION-AUTO    }
+		cursiveFlatHook              { Cursive.FlatHook SLAB-MOTION-AUTO    }
+		cursiveCyrlU                 { Cursive.Hook     SLAB-AUTO           }
+		cursiveFlatHookCyrlU         { Cursive.FlatHook SLAB-AUTO           }
+		cursiveMotionSerifed         { Cursive.Hook     SLAB-MOTION         }
+		cursiveFlatHookMotionSerifed { Cursive.FlatHook SLAB-MOTION         }
 
 	foreach { suffix { hookShape slabKind } } [Object.entries CursiveConfig] : do
 		create-glyph "y.\(suffix)" : glyph-proc
 			include : MarkSet.p
+			set-base-anchor 'overlay' Middle (XH / 2)
 			set-base-anchor 'yBelowDot' Middle Descender
 			include : Cursive.Arc XH 0
 			include : hookShape XH Descender
@@ -394,7 +399,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 	create-glyph 'mathbb/y' 0x1D56A : glyph-proc
 		local kDiag : DiagCorDs XH ((RightSB - SB) / 2) (BBD * 0.25)
 		include : MarkSet.p
-		include : HBarTop SB (SB + kDiag * BBD) XH BBS
+		include : HBar.t SB (SB + kDiag * BBD) XH BBS
 		include : intersection
 			spiro-outline
 				corner [mix RightSB Middle (-1)] [mix XH 0 (-1)]

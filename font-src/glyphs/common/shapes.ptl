@@ -13,6 +13,32 @@ glyph-block CommonShapes : begin
 	glyph-block-export no-shape
 	define [no-shape] { .__isNoShape true }
 
+	glyph-block-export KnotAdj
+	define KnotAdj : namespace
+		define [BowlYAdjImpl sign y w] : y + sign * TanSlope * SmoothAdjust * w / Width
+
+		export : define [BowlLeft] : params [ty x y af [width Width]]
+			ty x [BowlYAdjImpl (+1) y width] af
+		set BowlLeft.yOf : function : params [y [width Width]] : BowlYAdjImpl (+1) y width
+		set BowlLeft.o : function : params [ty x y af [width Width]]
+			ty (x + OX) [BowlYAdjImpl (+1) y width] af
+
+		export : define [BowlRight] : params [ty x y af [width Width]]
+			ty x [BowlYAdjImpl (-1) y width] af
+		set BowlRight.yOf : function : params [y [width Width]] : BowlYAdjImpl (-1) y width
+		set BowlRight.o : function : params [ty x y af [width Width]]
+			ty (x - OX) [BowlYAdjImpl (-1) y width] af
+
+		export : define [ArchTop] : params [x y af [ty g4] [sw Stroke]]
+			ty (x - CorrectionOMidX * sw) y af
+		set ArchTop.o : function : params [x y af [ty g4] [sw Stroke]]
+			ty (x - CorrectionOMidX * sw) (y - O) af
+
+		export : define [ArchBot] : params [x y af [ty g4] [sw Stroke]]
+			ty (x + CorrectionOMidX * sw) y af
+		set ArchBot.o : function : params [x y af [ty g4] [sw Stroke]]
+			ty (x + CorrectionOMidX * sw) (y + O) af
+
 	glyph-block-export Rect
 	define [Rect u d l r transformShiftOnly] : glyph-proc
 		local giz currentGlyph.gizmo
@@ -238,213 +264,76 @@ glyph-block CommonShapes : begin
 				flat (middle - mc + gap / 2) (u - O)
 				curl (middle - mc) (u - O)
 
-	glyph-block-export OBarLeftShape
-	define [OBarLeftShape] : params [[top XH] [left SB] [right RightSB] [stroke Stroke] [fine ShoulderFine]] : begin
-		local st : shoulderMidSlope fine nothing 1
-		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left right 0.5] + (st - CorrectionOMidX) * stroke
-		local mb : [mix left right 0.5] + (sb + CorrectionOMidX) * stroke
-		return : dispiro
-			flat (left + (stroke - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
-			curl (left + (stroke - fine) * HVContrast) (0 + SmallArchDepthB) [widths fine 0]
-			arcvh
-			g4   (mb) O [widths.heading stroke 0 {.y (1) .x (-sb)}]
-			archv
-			flat (right - OX) (0 + SmallArchDepthA)
-			curl (right - OX) (top - SmallArchDepthB)
-			arcvh
-			g4   (mt) (top - O) [widths.heading stroke 0 {.y (-1) .x (-st)}]
-			archv
-			flat (left + (stroke - fine) * HVContrast) (top - SmallArchDepthA) [widths fine 0]
-			curl (left + (stroke - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
+	glyph-block-export HSerif
+	define HSerif : namespace
+		export : define [lt x y length _sw _swRef] : glyph-proc
+			local sw : fallback _sw Stroke
+			local swRef : fallback _swRef sw
+			include : dispiro
+				flat (x + 0.5 * HVContrast * swRef) y [widths.heading sw 0 Leftward]
+				curl (x - length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarLeftToothlessShape
-	define [OBarLeftToothlessShape] : params [[top XH] [left SB] [right RightSB] [rise SHook] [mBlend [Math.sqrt (1 / 2)]] [sw Stroke]] : glyph-proc
-		local fine ShoulderFine
-		local st : shoulderMidSlope fine nothing 1
-		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left right 0.5] + (st - CorrectionOMidX) * sw
-		local mb : [mix left right 0.5] + CorrectionOMidX * sw
-		include : dispiro
-			g4 left rise [widths.lhs sw]
-			alsoThru.g2 0.5 mBlend important
-			g4.right.mid mb O
-			archv
-			flat (right - OX) (0 + SmallArchDepthA)
-			curl (right - OX) (top - SmallArchDepthB)
-			arcvh
-			g4   (mt) (top - O) [widths.heading sw 0 {.y (-1) .x (-st)}]
-			archv
-			flat (left + (sw - fine) * HVContrast) (top - SmallArchDepthA) [widths fine 0]
-			curl (left + (sw - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
+		export : define [lb x y length _sw _swRef] : glyph-proc
+			local sw : fallback _sw Stroke
+			local swRef : fallback _swRef sw
+			include : dispiro
+				flat (x + 0.5 * HVContrast * swRef) y [widths.heading 0 sw Leftward]
+				curl (x - length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarLeftRoundedShape
-	define [OBarLeftRoundedShape] : params [[top XH] [left SB] [right RightSB] [yTerminal CAP] [sw Stroke]] : glyph-proc
-		local fine ShoulderFine
-		local st : shoulderMidSlope fine nothing 1
-		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left right 0.5] + (st - CorrectionOMidX) * sw
-		local mb : [mix left right 0.5] + CorrectionOMidX * Stroke
-		include : dispiro
-			flat left yTerminal [widths.lhs.heading sw Downward]
-			curl left SmallArchDepthB
-			arcvh
-			g4.right.mid mb O
-			archv
-			flat (right - OX) (0 + SmallArchDepthA)
-			curl (right - OX) (top - SmallArchDepthB)
-			arcvh
-			g4   (mt) (top - O) [widths.heading sw 0 {.y (-1) .x (-st)}]
-			archv
-			flat (left + (sw - fine) * HVContrast) (top - SmallArchDepthA) [widths fine 0]
-			curl (left + (sw - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
+		export : define [rt x y length _sw _swRef] : glyph-proc
+			local sw : fallback _sw Stroke
+			local swRef : fallback _swRef sw
+			include : dispiro
+				flat (x - 0.5 * HVContrast * swRef) y [widths.heading 0 sw Rightward]
+				curl (x + length - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarLeftToothlessTopShape
-	define [OBarLeftToothlessTopShape _top _left _rise _mBlend] : glyph-proc
-		local top : fallback _top XH
-		local left : fallback _left SB
-		local rise : fallback _rise SHook
-		local mBlend : fallback _mBlend [Math.sqrt (1 / 2)]
-		local fine ShoulderFine
-		local st : shoulderMidSlope fine nothing 1
-		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left RightSB 0.5] - CorrectionOMidX * Stroke
-		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * Stroke
-		include : dispiro
-			flat (left + (Stroke - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
-			curl (left + (Stroke - fine) * HVContrast) (0 + SmallArchDepthB) [widths fine 0]
-			arcvh
-			g4   (mb) O [widths.heading Stroke 0 {.y (1) .x (-sb)}]
-			archv
-			flat (RightSB - OX) (0 + SmallArchDepthA)
-			curl (RightSB - OX) (top - SmallArchDepthB)
-			arcvh
-			g4   mt (top - O) [widths.lhs Stroke]
-			alsoThru.g2 0.5 (1 - mBlend) important
-			g4 left (top - rise) [widths.lhs Stroke]
+		export : define [rb x y length _sw _swRef] : glyph-proc
+			local sw : fallback _sw Stroke
+			local swRef : fallback _swRef sw
+			include : dispiro
+				flat (x - 0.5 * HVContrast * swRef) y [widths.heading sw 0 Rightward]
+				curl (x + length + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarLeftRoundedTopShape
-	define [OBarLeftRoundedTopShape _top _left _yTerminal] : glyph-proc
-		local top : fallback _top XH
-		local left : fallback _left SB
-		local yTerminal : fallback _yTerminal Descender
-		local fine ShoulderFine
-		local st : shoulderMidSlope fine nothing 1
-		local sb : shoulderMidSlope fine nothing (-1)
-		local mt : [mix left RightSB 0.5] - CorrectionOMidX * Stroke
-		local mb : [mix left RightSB 0.5] + (sb + CorrectionOMidX) * Stroke
-		include : dispiro
-			flat (left + (Stroke - fine) * HVContrast) (top - SmallArchDepthA - 0.01) [widths fine 0]
-			curl (left + (Stroke - fine) * HVContrast) (0 + SmallArchDepthB) [widths fine 0]
-			arcvh
-			g4   (mb) O [widths.heading Stroke 0 {.y (1) .x (-sb)}]
-			archv
-			flat (RightSB - OX) (0 + SmallArchDepthA)
-			curl (RightSB - OX) (top - SmallArchDepthB)
-			arcvh
-			g4   mt (top - O) [widths.lhs Stroke]
-			archv
-			flat left (top - SmallArchDepthA)
-			curl left yTerminal [widths.lhs.heading Stroke Downward]
+		export : define [mt x y length _sw] : mtAsymmetric x y length length _sw
 
-	glyph-block-export OBarRightShape
-	define [OBarRightShape] : params [[top XH] [right RightSB] [stroke Stroke] [fine ShoulderFine]] : new-glyph : glyph-proc
-		include : OBarLeftShape
-			top -- [fallback top XH]
-			left -- (Width - right)
-			stroke -- stroke
-			fine -- fine
-		include : FlipAround Middle (top / 2)
+		export : define [mtAsymmetric x y l r _sw] : begin
+			local sw : fallback _sw Stroke
+			return : dispiro
+				flat (x + r - TanSlope * (sw * DesignParameters.serifShiftX)) y [widths sw 0]
+				curl (x - l - TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarRightToothlessShape
-	define [OBarRightToothlessShape _top _right _rise _mBlend] : new-glyph : glyph-proc
-		include : OBarLeftToothlessTopShape _top (Width - [fallback _right RightSB]) _rise _mBlend
-		include : FlipAround Middle ([fallback _top XH] / 2)
+		export : define [mb x y length _sw] : mbAsymmetric x y length length _sw
+		export : define [mbAsymmetric x y l r _sw] : begin
+			local sw : fallback _sw Stroke
+			return : dispiro
+				flat (x + r + TanSlope * (sw * DesignParameters.serifShiftX)) y [widths 0 sw]
+				curl (x - l + TanSlope * (sw * DesignParameters.serifShiftX)) y
 
-	glyph-block-export OBarRightRoundedShape
-	define [OBarRightRoundedShape _top _right _yTerminal] : new-glyph : glyph-proc
-		local top : fallback _top XH
-		local right : fallback right RightSB
-		local yTerminal : fallback _yTerminal CAP
-		include : OBarLeftRoundedTopShape top (Width - right) (top - yTerminal)
-		include : FlipAround Middle (top / 2)
+	glyph-block-export VSerif
+	define VSerif : namespace
+		export : define [dr x y length sw] : glyph-proc
+			include : dispiro
+				widths.rhs [fallback sw VJutStroke]
+				flat x y [heading Downward]
+				curl x (y - length) [heading Downward]
 
-	glyph-block-export LeftwardTopSerif
-	define [LeftwardTopSerif x y length _sw _swRef] : glyph-proc
-		local sw : fallback _sw Stroke
-		local swRef : fallback _swRef sw
-		include : dispiro
-			flat (x + 0.5 * HVContrast * swRef) y [widths.heading sw 0 Leftward]
-			curl (x - length - TanSlope * (sw * DesignParameters.serifShiftX)) y
+		export : define [ur x y length sw] : glyph-proc
+			include : dispiro
+				widths.lhs [fallback sw VJutStroke]
+				flat x y [heading Upward]
+				curl x (y + length) [heading Upward]
 
-	glyph-block-export LeftwardBottomSerif
-	define [LeftwardBottomSerif x y length _sw _swRef] : glyph-proc
-		local sw : fallback _sw Stroke
-		local swRef : fallback _swRef sw
-		include : dispiro
-			flat (x + 0.5 * HVContrast * swRef) y [widths.heading 0 sw Leftward]
-			curl (x - length + TanSlope * (sw * DesignParameters.serifShiftX)) y
+		export : define [dl x y length sw] : glyph-proc
+			include : dispiro
+				widths.lhs [fallback sw VJutStroke]
+				flat x y [heading Downward]
+				curl x (y - length) [heading Downward]
 
-	glyph-block-export RightwardTopSerif
-	define [RightwardTopSerif x y length _sw _swRef] : glyph-proc
-		local sw : fallback _sw Stroke
-		local swRef : fallback _swRef sw
-		include : dispiro
-			flat (x - 0.5 * HVContrast * swRef) y [widths.heading 0 sw Rightward]
-			curl (x + length - TanSlope * (sw * DesignParameters.serifShiftX)) y
-
-	glyph-block-export RightwardBottomSerif
-	define [RightwardBottomSerif x y length _sw _swRef] : glyph-proc
-		local sw : fallback _sw Stroke
-		local swRef : fallback _swRef sw
-		include : dispiro
-			flat (x - 0.5 * HVContrast * swRef) y [widths.heading sw 0 Rightward]
-			curl (x + length + TanSlope * (sw * DesignParameters.serifShiftX)) y
-
-	glyph-block-export CenterTopSerif
-	define [CenterTopSerif x y length _sw] : CenterTopSerifAsymmetric x y length length _sw
-
-	glyph-block-export CenterBottomSerif
-	define [CenterBottomSerif x y length _sw] : CenterBottomSerifAsymmetric x y length length _sw
-
-	glyph-block-export CenterTopSerifAsymmetric
-	define [CenterTopSerifAsymmetric x y l r _sw] : begin
-		local sw : fallback _sw Stroke
-		return : dispiro
-			flat (x + r - TanSlope * (sw * DesignParameters.serifShiftX)) y [widths sw 0]
-			curl (x - l - TanSlope * (sw * DesignParameters.serifShiftX)) y
-
-	glyph-block-export CenterBottomSerifAsymmetric
-	define [CenterBottomSerifAsymmetric x y l r _sw] : begin
-		local sw : fallback _sw Stroke
-		return : dispiro
-			flat (x + r + TanSlope * (sw * DesignParameters.serifShiftX)) y [widths 0 sw]
-			curl (x - l + TanSlope * (sw * DesignParameters.serifShiftX)) y
-
-	glyph-block-export DownwardRightSerif
-	define [DownwardRightSerif x y length sw] : glyph-proc
-		include : dispiro
-			widths.rhs [fallback sw VJutStroke]
-			flat x y [heading Downward]
-			curl x (y - length) [heading Downward]
-	glyph-block-export UpwardRightSerif
-	define [UpwardRightSerif x y length sw] : glyph-proc
-		include : dispiro
-			widths.lhs [fallback sw VJutStroke]
-			flat x y [heading Upward]
-			curl x (y + length) [heading Upward]
-	glyph-block-export DownwardLeftSerif
-	define [DownwardLeftSerif x y length sw] : glyph-proc
-		include : dispiro
-			widths.lhs [fallback sw VJutStroke]
-			flat x y [heading Downward]
-			curl x (y - length) [heading Downward]
-	glyph-block-export UpwardLeftSerif
-	define [UpwardLeftSerif x y length sw] : glyph-proc
-		include : dispiro
-			widths.rhs [fallback sw VJutStroke]
-			flat x y [heading Upward]
-			curl x (y + length) [heading Upward]
+		export : define [ul x y length sw] : glyph-proc
+			include : dispiro
+				widths.rhs [fallback sw VJutStroke]
+				flat x y [heading Upward]
+				curl x (y + length) [heading Upward]
 
 	glyph-block-export NeedSlab
 	define [NeedSlab level p] : if level p [glyph-proc]
@@ -465,21 +354,31 @@ glyph-block CommonShapes : begin
 		return kDiag
 
 	glyph-block-export HBar
-	define [HBar xleft xright y _fine] : glyph-proc
-		include : dispiro
+	define HBar : namespace
+		export : define [m xleft xright y _fine] : dispiro
 			widths.center [fallback _fine Stroke]
-			flat xleft y [heading : RightwardT.call this]
-			curl xright y [heading : RightwardT.call this]
+			flat xleft  y [heading Rightward]
+			curl xright y [heading Rightward]
+		export : define [t xl xr y _fine] : m xl xr (y - [fallback _fine Stroke] * 0.5) _fine
+		export : define [b xl xr y _fine] : m xl xr (y + [fallback _fine Stroke] * 0.5) _fine
 
-	glyph-block-export HBarTop
-	define [HBarTop xl xr y _fine] : HBar xl xr (y - [fallback _fine Stroke] * 0.5) _fine
-	glyph-block-export HBarBottom
-	define [HBarBottom xl xr y _fine] : HBar xl xr (y + [fallback _fine Stroke] * 0.5) _fine
+	glyph-block-export VBar
+	define VBar : namespace
+		export : define [m x ydown yup _sw] : begin
+			local sw : fallback _sw Stroke
+			return : dispiro
+				widths.center sw
+				flat x ydown [heading : if (ydown < yup) Upward Downward]
+				curl x yup   [heading : if (ydown < yup) Upward Downward]
+		export : define [l x yd yu _sw] : m (x + [fallback _sw Stroke] * 0.5 * HVContrast) yd yu _sw
+		export : define [r x yd yu _sw] : m (x - [fallback _sw Stroke] * 0.5 * HVContrast) yd yu _sw
+
 	glyph-block-export HOverlayBar
 	define [HOverlayBar xleft xright y s] : dispiro
 		widths.center [fallback s OverlayStroke]
 		flat xleft y
 		curl xright y
+
 	glyph-block-export HCrossBar
 	define [HCrossBar xl xr y s] : dispiro
 		widths.center [fallback s OverlayStroke]
@@ -491,20 +390,6 @@ glyph-block CommonShapes : begin
 	set HCrossBar.bottom : lambda [xl xr y _s] : begin
 		local s : fallback _s Stroke
 		return : HCrossBar (xl + 0 * s * TanSlope) (xr + 0 * s * TanSlope) (y + 0.5 * s) s
-
-
-	glyph-block-export VBar
-	define [VBar x ydown yup _fine] : glyph-proc
-		local fine : fallback _fine Stroke
-		include : dispiro
-			widths.center fine
-			flat x ydown [heading : [if (ydown < yup) UpwardT DownwardT].call this]
-			curl x yup [heading : [if (ydown < yup) UpwardT DownwardT].call this]
-
-	glyph-block-export VBarLeft
-	define [VBarLeft x yd yu _fine] : VBar (x + [fallback _fine Stroke] * 0.5 * HVContrast) yd yu _fine
-	glyph-block-export VBarRight
-	define [VBarRight x yd yu _fine] : VBar (x - [fallback _fine Stroke] * 0.5 * HVContrast) yd yu _fine
 
 	glyph-block-export LeftHook
 	define [LeftHook x y xextend] : glyph-proc
@@ -567,7 +452,8 @@ glyph-block CommonShapes : begin
 		local keyKnot : g4.[if ltr "right" "left"].mid
 			begin mx
 			begin y
-			if [not tight] nothing : let [s : if ltr Rightward Leftward]
+			if [not tight] nothing : begin
+				local s : if ltr Rightward Leftward
 				heading {.x (s.x * [fallback tight.skew 1]) .y s.y}
 
 		# Adjust terminal's direction
