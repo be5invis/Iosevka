@@ -10,6 +10,7 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Shared-Metrics : markHalfStroke
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateOgonekComposition
+	glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar InvRightwardTailedBar
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise DMBlend RetroflexHook
 
@@ -38,7 +39,7 @@ glyph-block Letter-Latin-Lower-A : begin
 			local bartop (XH * OverlayPos * 1.02 + stroke * 0.425)
 			local bowlArcY1 : YSmoothMidL 0 bartop SmallArchDepthA SmallArchDepthB
 			local bowlArcY2 : YSmoothMidR 0 bartop SmallArchDepthA SmallArchDepthB
-			local lowSlope  : shoulderMidSlope ShoulderFine nothing (-1)
+			local lowSkew  : shoulderMidSkew ShoulderFine nothing
 			local leftSlopeS : 0.1 * (Width / HalfUPM)
 			local leftSlope  : leftSlopeS - TanSlope
 			local lowMiddle : mix (SB + OX) (RightSB - stroke / 2 * HVContrast) [linreg 72 0.51 126 0.58 stroke]
@@ -52,7 +53,7 @@ glyph-block Letter-Latin-Lower-A : begin
 				arcvh
 				match kind
 					0 : list
-						g4   (lowMiddle + (-lowSlope) * stroke + CorrectionOMidX * stroke * 0.5) O [heading {.y 1 .x lowSlope}]
+						g4   (lowMiddle + (-lowSkew) * stroke + CorrectionOMidX * stroke * 0.5) O [heading {.y 1 .x lowSkew}]
 						archv 16
 						straight.up.end   (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) (SmallArchDepthB * 0.9) [widths.lhs ShoulderFine]
 						if [not isMask] {} {[ corner (RightSB - stroke * HVContrast + ShoulderFine * HVContrast) bartop ]}
@@ -71,7 +72,7 @@ glyph-block Letter-Latin-Lower-A : begin
 			fallback _sw ADoubleStoreyStroke
 
 		export : define [Serifless] : union [HookAndBar 0] [Arc 0]
-		export : define [Serifed] : union [Serifless] [RightwardBottomSerif RightSB 0 SideJut]
+		export : define [Serifed] : union [Serifless] [HSerif.rb RightSB 0 SideJut]
 		export : define [Tailed] : union
 			HookAndBar (XH - ADoubleStoreySmoothB + O)
 			Arc        0
@@ -102,37 +103,37 @@ glyph-block Letter-Latin-Lower-A : begin
 		include : DoubleStorey.HookAndBar 0 BBS
 		include : intersection
 			DoubleStorey.HookAndBarMask 0
-			VBarRight (RightSB - BBD) 0 XH BBS
+			VBar.r (RightSB - BBD) 0 XH BBS
 		include : difference
 			union
 				DoubleStorey.Arc 0 0 BBS
 				intersection
 					DoubleStorey.ArcMask 0 0 BBS
-					VBarLeft (SB + OX + BBD) 0 XH BBS
+					VBar.l (SB + OX + BBD) 0 XH BBS
 			Rect XH 0 (RightSB - BBD) Width
-		include : HBarBottom (RightSB - BBD) RightSB 0 BBS
+		include : HBar.b (RightSB - BBD) RightSB 0 BBS
 
 	define SingleStorey : namespace
 		export : define [FullBarBody height bar mask] : glyph-proc
-			include : OBarRightShape height
+			include : OBarRight.shape height
 			include : bar height mask
 		export : define [EarlessCornerBody height bar mask] : glyph-proc
-			include : OBarLeftToothlessShape (rise -- DToothlessRise) (mBlend -- DMBlend)
+			include : OBarLeft.toothless (rise -- DToothlessRise) (mBlend -- DMBlend)
 			include : FlipAround Middle (XH / 2)
 			include : bar (height - DToothlessRise) mask
 		export : define [EarlessRoundedBody height bar mask] : glyph-proc
-			include : OBarLeftRoundedShape (yTerminal -- (XH - SmallArchDepthA))
+			include : OBarLeft.rounded (yTerminal -- (XH - SmallArchDepthA))
 			include : FlipAround Middle (XH / 2)
 			include : bar (height - SmallArchDepthB) mask
 
 		export : define [SeriflessBar height mask] : glyph-proc
 			set-base-anchor 'trailing' RightSB 0
 			include : difference
-				VBarRight RightSB 0 height
+				VBar.r RightSB 0 height
 				mask height
 		export : define [SerifedBar height mask] : glyph-proc
 			include : SeriflessBar height mask
-			include : tagged 'serifRB' : RightwardBottomSerif RightSB 0 SideJut
+			include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
 		export : define [TailedBar height mask] : glyph-proc
 			set-base-anchor 'trailing' (RightSB + SideJut) 0
 			include : difference
@@ -142,7 +143,7 @@ glyph-block Letter-Latin-Lower-A : begin
 		set SeriflessBar.inv SeriflessBar
 		set SerifedBar.inv : function [height mask] : glyph-proc
 			include : SeriflessBar height mask
-			include : tagged 'serifRT' : RightwardTopSerif RightSB height SideJut
+			include : tagged 'serifRT' : HSerif.rt RightSB height SideJut
 		set TailedBar.inv : function [height mask] : glyph-proc
 			set-base-anchor 'trailing' (RightSB + SideJut) 0
 			include : difference

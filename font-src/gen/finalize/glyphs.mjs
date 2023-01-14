@@ -63,22 +63,27 @@ function flattenSimpleGlyph(cache, skew, g) {
 		g.includeContours(CurveUtil.repToShape(cached), 0, 0);
 		cache.refreshGF(ck);
 	} else {
-		let gSimplified;
-		if (skew) {
-			const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
-			const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
-			gSimplified = new Geom.TransformedGeometry(
-				new SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
-				tfForward
-			);
-		} else {
-			gSimplified = new SimplifyGeometry(g.geometry);
-		}
+		try {
+			let gSimplified;
+			if (skew) {
+				const tfBack = g.gizmo ? g.gizmo.inverse() : new Transform(1, -skew, 0, 1, 0, 0);
+				const tfForward = g.gizmo ? g.gizmo : new Transform(1, +skew, 0, 1, 0, 0);
+				gSimplified = new Geom.TransformedGeometry(
+					new SimplifyGeometry(new Geom.TransformedGeometry(g.geometry, tfBack)),
+					tfForward
+				);
+			} else {
+				gSimplified = new SimplifyGeometry(g.geometry);
+			}
 
-		const cs = gSimplified.asContours();
-		g.clearGeometry();
-		g.includeContours(cs, 0, 0);
-		if (ck) cache.saveGF(ck, CurveUtil.shapeToRep(cs));
+			const cs = gSimplified.asContours();
+			g.clearGeometry();
+			g.includeContours(cs, 0, 0);
+			if (ck) cache.saveGF(ck, CurveUtil.shapeToRep(cs));
+		} catch (e) {
+			console.error("Detected broken geometry when processing", g._m_identifier);
+			throw e;
+		}
 	}
 }
 
@@ -137,8 +142,7 @@ class QuadifySink {
 	beginShape() {}
 	endShape() {
 		if (this.lastContour.length > 2) {
-			// TT use CW for outline, being different from Clipper
-			let c = this.lastContour.reverse();
+			let c = this.lastContour;
 			c = this.alignHVKnots(c);
 			c = this.cleanupOccurrentKnots1(c);
 			c = this.cleanupOccurrentKnots2(c);
