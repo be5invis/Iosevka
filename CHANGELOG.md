@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 17.1.0
+
+* Fix serifs of cursive `y` (#1529, #1530).
+
+
 ### 17.0.4
 
 * Fix broken shape of `p` under `cv40=3` (#1528).
