@@ -111,7 +111,7 @@ Please note that, due to the complex interactions when forming ligations, cherry
 
 <table><tr><td><h2><a href="doc/custom-build.md">Read instructions.</a></h2></td></tr></table>
 
-## For Chinese and Japanese users...
+## For Chinese, Japanese and Korean (CJK) users...
 
 → [Sarasa Gothic](https://github.com/be5invis/Sarasa-Gothic).
 
