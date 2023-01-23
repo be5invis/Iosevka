@@ -1,4 +1,11 @@
-import { Radical } from "../../support/gr.mjs";
+import { Radical, VS01 } from "../../support/gr.mjs";
+
+export function gcFont(glyphStore, excludedChars, otl, cfg) {
+	markSweepOtlLookups(otl.GSUB);
+	markSweepOtlLookups(otl.GPOS);
+	const sink = markGlyphs(glyphStore, excludedChars, otl, cfg);
+	return sweepGlyphs(glyphStore, sink);
+}
 
 function markSweepOtlLookups(table) {
 	if (!table || !table.features || !table.lookups) return;
@@ -56,6 +63,7 @@ function sweepFeatures(table, accessibleLookupsIds) {
 	}
 	table.features = features1;
 }
+
 function markGlyphs(glyphStore, excludedChars, otl, cfg) {
 	const sink = markGlyphsInitial(glyphStore, excludedChars);
 	while (markGlyphsStep(glyphStore, sink, otl, cfg));
@@ -78,6 +86,9 @@ function markGlyphsInitial(glyphStore, excludedChars) {
 }
 function markGlyphsStep(glyphStore, sink, otl, cfg) {
 	const glyphCount = sink.size;
+	for (const g of glyphStore.glyphs()) {
+		markLinkedGlyph(sink, g, VS01);
+	}
 	if (otl.GSUB) {
 		for (const l in otl.GSUB.lookups) {
 			const lookup = otl.GSUB.lookups[l];
@@ -87,6 +98,10 @@ function markGlyphsStep(glyphStore, sink, otl, cfg) {
 	}
 	const glyphCount1 = sink.size;
 	return glyphCount1 > glyphCount;
+}
+function markLinkedGlyph(sink, g, gr) {
+	const linked = gr.get(g);
+	if (linked) sink.add(linked);
 }
 function markGlyphsLookupImpl(sink, lookup, cfg) {
 	switch (lookup.type) {
@@ -136,12 +151,7 @@ function markGlyphsGsubReverse(sink, lookup, cfg) {
 		}
 	}
 }
-function sweep(glyphStore, gnSet) {
+
+function sweepGlyphs(glyphStore, gnSet) {
 	return glyphStore.filterByName(gnSet);
-}
-export function gcFont(glyphStore, excludedChars, otl, cfg) {
-	markSweepOtlLookups(otl.GSUB);
-	markSweepOtlLookups(otl.GPOS);
-	const sink = markGlyphs(glyphStore, excludedChars, otl, cfg);
-	return sweep(glyphStore, sink);
 }
