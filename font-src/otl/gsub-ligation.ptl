@@ -4,6 +4,7 @@ extern Set
 define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
+define [arrowBarX s] : lambda [t] : t.map : lambda [x] "\(x).arrowBar.\(s)"
 define [lsx s] : lambda [t] : t.map : lambda [x] "\(x).lig.\(s)"
 define [csx s] : lambda [t] : t.map : lambda [x] "\(x).\(s)"
 define [just s] : lambda [t] : t.map : lambda [x] s
@@ -19,30 +20,27 @@ export : define [buildLigations sink para plm] : begin
 	EndLookupBlock rec sink
 
 define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : begin
-	define {chain-rule reverse-rule} : ChainRuleBuilder sink
-
-	define arrowStick  {'hyphen' 'equal'}
-	define [stickClass style] : [lsx style] {'hyphen' 'equal'}
-	define [stickTf style] : {'hyphen' 'equal'} ~> [lsx style]
-	define anyWave {'asciiTilde' 'asciiTilde.low' 'asciiTilde.high'}
-	define [waveClass cl] : [just ('wave.lig.' + cl)] anyWave
-	define [waveTf cl] : anyWave ~> [waveClass cl]
+	define { chain-rule reverse-rule } : ChainRuleBuilder sink
 
 	define less {'less'}
 	define lessAndEquiv {'less' 'less.lig.shift0' 'less.lig.shift0.anti'}
-	define hyphen {'hyphen'}
-	define equal {'equal'}
-	define anyStraightRod { 'hyphen' 'equal' }
-	define exclam {'exclam'}
 	define greater {'greater'}
 	define greaterAndEquiv {'greater' 'greater.lig.shift0' 'greater.lig.shift0.anti'}
 	define lessOrGreater         : {}.concat less         greater
 	define lessOrGreaterAndEquiv : {}.concat lessAndEquiv greaterAndEquiv
-	define anyBar {'bar' 'slash' 'backslash'}
-	define slash {'slash'}
-	define backslash {'backslash'}
+
+	define hyphen {'hyphen'}
+	define equal {'equal'}
+	define anyStraightRod { 'hyphen' 'equal' }
+	define anyWave {'asciiTilde' 'asciiTilde.low' 'asciiTilde.high'}
+
 	define bar {'bar'}
+	define slash {'slash'}
+	define exclam {'exclam'}
+	define backslash {'backslash'}
 	define underscore {'underscore'}
+	define anyBar {'bar' 'slash' 'backslash'}
+
 	define regexLookAround [less.concat hyphen equal exclam greater anyBar]
 
 	define [acops]  : if [hasLG 'bar-triggers-op-centering']
@@ -391,7 +389,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 		define singular : hyphen.concat anyWave
 		define [CBarSingular k] : begin
 			local hyphenSet : new Set hyphen
-			local fHyphen : lsx k
+			local fHyphen : arrowBarX k
 			local fWave   : just "wave.lig.\(k)"
 			return : lambda [t] : begin
 				local hyphenResults : fHyphen t
@@ -401,13 +399,13 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 
 		define ArrowFormationConfig : list
 			#    rod      dbl  ltgt  FBarCls
-			list equal    1    1     lsx
+			list equal    1    1     arrowBarX
 			list singular 0    0     CBarSingular
 
 		define ArrowExtensionConfig : list
 			#    rod      FBarCls
-			list equal    lsx
-			list hyphen   lsx
+			list equal    arrowBarX
+			list hyphen   arrowBarX
 			list anyWave  [lambda [k] [just "wave.lig.\(k)"]]
 
 		foreach [{rodCls dbl ltgt CRod} : items-of ArrowFormationConfig] : do
@@ -761,21 +759,21 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 
 	# == and !=, and other related
 	do "equals" : begin
-		define AnyEqualEnding {'equal' 'equal.cf' 'equal.jf' 'equal.fc+cf' 'ident.cf' 'ident.cc+cf'}
+		define AnyEqualEnding {'equal' 'equal.lig.cf' 'equal.lig.jf' 'equal.lig.xf' 'ident.lig.cf' 'ident.lig.yf'}
 		CreateLigationLookup : list
 			piecewise
 				[hasLG 'eqeq'] : chain-rule
-					{'equal.cf' 'equal.jf'} ~> look-around
-					equal                   ~> {'equal.jf'}
+					{'equal.lig.cf' 'equal.lig.jf'} ~> look-around
+					equal                           ~> [lsx 'jf']
 			piecewise
 				[hasLG 'eqexeq'] : chain-rule
-					equal       ~> {'ident.fc'}
+					equal       ~> [lsx 'fc']
 					exclam      ~> {'neq.allow-dot.1m'}
-					equal       ~> {'ident.cc+cf'}
+					equal       ~> [lsx 'yf']
 				[hasLG 'eqexeq-dl'] : chain-rule
-					equal       ~> {'equal.fc'}
+					equal       ~> [lsx 'fc']
 					exclam      ~> {'neq.allow-dot.1m'}
-					equal       ~> {'equal.cc+cf'}
+					equal       ~> [lsx 'yf']
 				true : chain-rule
 					AnyEqualEnding ~> look-around
 					exclam         ~> advance
@@ -783,59 +781,59 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			piecewise
 				[hasLG 'exeqeqeq'] : chain-rule
 					exclam      ~> {'neq.allow-dot.4l'}
-					equal       ~> {'ident.fc+cc'}
-					equal       ~> {'ident.cc'}
-					equal       ~> {'ident.cf'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
 				[hasLG 'exeq'] : chain-rule
 					exclam      ~> {'neq.allow-dot.4l'}
-					equal       ~> {'equal.fc+cc'}
-					equal       ~> {'equal.cc'}
-					equal       ~> {'equal.cf'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
 			piecewise
 				[hasLG 'eqeq'] : chain-rule
-					equal       ~> {'equal.fc'}
-					equal       ~> {'equal.cc'}
-					equal       ~> {'equal.cc'}
-					equal       ~> {'equal.cf'}
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
 			piecewise
 				[hasLG 'exeqeq'] : chain-rule
 					exclam      ~> {'neq.allow-dot.3l'}
-					equal       ~> {'ident.fc+cc'}
-					equal       ~> {'ident.cf'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cf']
 				[hasLG 'exeq'] : chain-rule
 					exclam      ~> {'neq.allow-dot.3l'}
-					equal       ~> {'equal.fc+cc'}
-					equal       ~> {'equal.cf'}
+					equal       ~> [lsx 'xc']
+					equal       ~> [lsx 'cf']
 			piecewise
 				[hasLG 'eqslasheq'] : chain-rule
-					equal       ~> {'ident.fc'}
+					equal       ~> [lsx 'fc']
 					slash       ~> {'neq.bar-only.1m'}
-					equal       ~> {'ident.cc+cf'}
+					equal       ~> [lsx 'yf']
 				[hasLG 'slasheq'] : chain-rule
-					equal       ~> {'equal.fc'}
+					equal       ~> [lsx 'fc']
 					slash       ~> {'neq.bar-only.1m'}
-					equal       ~> {'equal.cc+cf'}
+					equal       ~> [lsx 'yf']
 			piecewise
 				[hasLG 'eqeqeq'] : chain-rule
-					equal       ~> {'ident.fc'}
-					equal       ~> {'ident.cc'}
-					equal       ~> {'ident.cf'}
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cc']
+					equal       ~> [lsx 'cf']
 			piecewise
 				[hasLG 'tildeeq'] : chain-rule
 					anyWave     ~> [just 'neq.bar-only.2l']
-					equal       ~> {'equal.fc+cf'}
+					equal       ~> [lsx 'xf']
 			piecewise
 				[hasLG 'slasheq'] : chain-rule
 					slash       ~> {'neq.bar-only.2l'}
-					equal       ~> {'equal.fc+cf'}
+					equal       ~> [lsx 'xf']
 			piecewise
 				[hasLG 'exeq'] : chain-rule
 					exclam      ~> {'neq.allow-dot.2l'}
-					equal       ~> {'equal.fc+cf'}
+					equal       ~> [lsx 'xf']
 			piecewise
 				[hasLG 'eqeq'] : chain-rule
-					equal       ~> {'equal.fc'}
-					equal       ~> {'equal.cf'}
+					equal       ~> [lsx 'fc']
+					equal       ~> [lsx 'cf']
 
 	# <= and >=
 	do "inequals" : CreateLigationLookup : list
@@ -869,7 +867,7 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				greaterAndEquiv ~> [just 'greater.lig.diamond.tag']
 			[hasLG 'ltgt-ne'] : chain-rule
 				lessAndEquiv    ~> [just 'neq.bar-only.2l']
-				greaterAndEquiv ~> [just 'equal.fc+cf']
+				greaterAndEquiv ~> [just 'equal.lig.xf']
 
 		# <=, >=
 		if [hasLG 'ineq'] : chain-rule
@@ -959,14 +957,14 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 				{'asciiTilde'} ~> {"wave.lig.fc"}
 				{'asciiTilde'} ~> {"wave.lig.cf"}
 
-	do "Hyphen chains" : if [hasLG 'connected-hyphen-as-solid-line'] : begin
+	do "Hyphen chains" : if [hasLG 'connected-hyphen'] : begin
 		CreateLigationLookup : list
 			chain-rule
 				{'hyphen.lig.zf'} ~> look-around
-				{'hyphen'} ~> {'hyphen.lig.zf'}
+				{'hyphen'}        ~> {'hyphen.lig.zf'}
 			chain-rule
-				{'hyphen'} ~> {"hyphen.lig.fc"}
-				{'hyphen'} ~> {"hyphen.lig.zf"}
+				{'hyphen'}        ~> {"hyphen.lig.fc"}
+				{'hyphen'}        ~> {"hyphen.lig.zf"}
 		CreateLigationLookup : list
 			chain-rule
 				{'hyphen.lig.jf'} ~> {'hyphen.lig.jc'}
@@ -978,26 +976,6 @@ define [buildLigationsImpl sink para featureName mappedFeature rankedLookups] : 
 			chain-rule
 				{'hyphen.lig.zf'} ~> {'hyphen.lig.zc'}
 				{'hyphen.lig.fj'} ~> {'hyphen.lig.cj'}
-
-	do "Hyphen chains" : if [hasLG 'connected-hyphen-as-semi-dashed-line'] : begin
-		CreateLigationLookup : list
-			chain-rule
-				{'hyphen.lig.zf.notched'} ~> look-around
-				{'hyphen'} ~> {'hyphen.lig.zf.notched'}
-			chain-rule
-				{'hyphen'} ~> {"hyphen.lig.fc.notched"}
-				{'hyphen'} ~> {"hyphen.lig.zf.notched"}
-		CreateLigationLookup : list
-			chain-rule
-				{'hyphen.lig.jf'} ~> {'hyphen.lig.jc.notched'}
-				{'hyphen'}        ~> {'hyphen.lig.cc.notched'}
-				{'hyphen.lig.fj'} ~> {'hyphen.lig.cj.notched'}
-			chain-rule
-				{'hyphen.lig.jf'} ~> {'hyphen.lig.jc.notched'}
-				{'hyphen.lig.fc.notched'} ~> {'hyphen.lig.cc.notched'}
-			chain-rule
-				{'hyphen.lig.zf.notched'} ~> {'hyphen.lig.zc.notched'}
-				{'hyphen.lig.fj'} ~> {'hyphen.lig.cj.notched'}
 
 	do "Number sign chains" : if [hasLG 'connected-number-sign'] : begin
 		CreateLigationLookup : list

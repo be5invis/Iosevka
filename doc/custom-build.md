@@ -159,9 +159,8 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `brack-bar`: Enable ligation for `[|` and `|]`.
   - `connected-underscore`: Make contiguous underscores (like `__`) connected.
   - `connected-number-sign`: Make contiguous number signs (like `##`) connected.
-  - `connected-tilde-as-wave`: Make contiguous ASCII tildes (like `~~`) connected as a wave line.
-  - `connected-hyphen-as-solid-line`: Make contiguous hyphen-minuses (like `--`) connected as a straight solid line.
-  - `connected-hyphen-as-semi-dashed-line`: Make contiguous hyphen-minuses (like `--`) connected as a straight semi-dashed line, identifying each hyphen component.
+  - `connected-tilde-as-wave`: Make contiguous ASCII tildes (like `~~`) connected.
+  - `connected-hyphen`: Make contiguous hyphen-minuses (like `--`) connected.
 
 <!-- END Section-Cherry-Picking-Ligation-Sets -->
 
