@@ -122,10 +122,13 @@ class MappedGlyphStore {
 		g.geometry = cs;
 	}
 }
+
 export function convertGlyphs(gsOrig) {
 	const sortedEntries = Array.from(gsOrig.namedEntries(Gr.Nwid, Gr.Wwid)).sort(byRank);
 	const gs = new MappedGlyphStore();
 	const cmap = new Ot.Cmap.Table();
+
+	// initialize
 	for (const [name, gSrc] of sortedEntries) {
 		gs.declare(name, gSrc);
 		const us = gsOrig.queryUnicodeOf(gSrc);
@@ -137,7 +140,36 @@ export function convertGlyphs(gsOrig) {
 			}
 		}
 	}
+
+	// fill geometry
 	for (const [name, gSrc] of sortedEntries) gs.fill(name, gSrc);
+
+	// fill VS
+	addVsLinks(gsOrig, gs, cmap, Gr.VS01, 0xfe00);
+
+	// fill glyph names
 	gs.fillOtGlyphNames();
+
 	return { glyphs: gs, cmap };
+}
+
+function addVsLinks(gsOrig, gs, cmap, gr, vs) {
+	for (const gSrc of gsOrig.glyphs()) {
+		const us = gsOrig.queryUnicodeOf(gSrc);
+		if (!us) continue;
+
+		const gnSrcLinked = gr.get(gSrc);
+		if (!gnSrcLinked) continue;
+
+		const gSrcLinked = gsOrig.queryByName(gnSrcLinked);
+		if (!gSrcLinked) continue;
+
+		const gDstLinked = gs.queryBySourceGlyph(gSrcLinked);
+		if (!gDstLinked) continue;
+
+		for (const u of us) {
+			if (!(isFinite(u - 0) && u)) continue;
+			cmap.vs.set(u, vs, gDstLinked);
+		}
+	}
 }

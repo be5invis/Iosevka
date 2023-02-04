@@ -26,15 +26,18 @@ glyph-block Letter-Latin-S : begin
 
 	define SOBot  OX
 
-	define [SNeck] : params [[stroke Stroke]] : begin
-		define tensionCoeff : mix [StrokeWidthBlend 1 0.375 stroke] 1 : clamp 0 1 : Math.pow (Width / (UPM * 0.55)) 0.5
-		define dist : Math.min 0.25 (0.1 * [Math.max 1 (Width / HalfUPM)])
-		define tension : tensionCoeff * (0.5 - 0.4 * dist)
-		return : alsoThruThem {{(0.5 - dist) tension} {(0.5 + dist) (1 - tension)}} [widths.center stroke]
+	glyph-block-export AdviceSArchDepth
+	define [AdviceSArchDepth y sign _stroke] : begin
+		# Handle with extreme care.
+		local stroke : fallback _stroke Stroke
+		local strokeFactor : stroke * [clamp 1 2 : linreg 126 1 137 1.025 stroke] * [clamp 0 1 : Math.pow (Width / HalfUPM) 0.5]
+		local widthFactor : RightSB - SB
+		local ss : y * 0.22 + 0.075 * strokeFactor + 0.05 * widthFactor
+		return : ss + sign * TanSlope * SmoothAdjust
 
 	define [SStrokeDollarInterruptGap deltaX top bot gap stroke refSwEss] : begin
 		local ess : refSwEss * gap / Stroke
-		define archDepth : adviceSSmooth (top - bot) (-1) stroke
+		define archDepth : AdviceSArchDepth (top - bot) (-1) stroke
 
 		return : dispiro
 			g4.down.mid (deltaX + SB - Width) (top - archDepth) [widths.lhs gap]
@@ -43,7 +46,7 @@ glyph-block Letter-Latin-S : begin
 
 	define [SStrokeImpl top bot st sb stroke refSwEss] : begin
 		local ess : refSwEss * stroke / Stroke
-		define archDepth : adviceSSmooth (top - bot) (-1) stroke
+		define archDepth : AdviceSArchDepth (top - bot) (-1) stroke
 
 		return : dispiro
 			match st
@@ -71,7 +74,7 @@ glyph-block Letter-Latin-S : begin
 					g4   (SB + SOBot) (bot + Hook)
 
 	define [RevSStroke st sb stroke ess] : begin
-		local archDepth : adviceSSmooth CAP 0.5 stroke
+		local archDepth : AdviceSArchDepth CAP 0.5 stroke
 		return : dispiro
 			match st
 				[Just SLAB-CLASSICAL] : SerifedArcStart_LtrRhs SB Middle CAP stroke Hook
@@ -97,7 +100,7 @@ glyph-block Letter-Latin-S : begin
 
 	define [SmallSStrokeImpl st sb stroke refSwEss] : begin
 		define ess : refSwEss * stroke / Stroke
-		define archDepth : adviceSSmooth XH (-1) stroke
+		define archDepth : AdviceSArchDepth XH (-1) stroke
 
 		return : dispiro
 			match st
@@ -111,7 +114,7 @@ glyph-block Letter-Latin-S : begin
 						hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 
 			g4   (SB - OX) (XH - archDepth)
-			SNeck (stroke -- ess)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4   (RightSB + OX - SOBot) (archDepth) [widths 0 stroke]
 
 			match sb
@@ -129,7 +132,7 @@ glyph-block Letter-Latin-S : begin
 		define fine   : Math.min swStart swEnd
 		define soStart : stroke - swStart
 		define soEnd   : stroke - swEnd
-		define archDepth : adviceSSmooth top (-1) stroke
+		define archDepth : AdviceSArchDepth top (-1) stroke
 		return : dispiro
 			widths.lhs fine
 			g4   (RightSB + OX / 4 - HVContrast * soStart) (top - hook)
@@ -146,7 +149,7 @@ glyph-block Letter-Latin-S : begin
 	define [SmallSStrokePhoneticRight st top] : begin
 		define stroke : AdviceStroke2 2 3 top
 		define ess : AdviceStroke2 2.2 3.2 top
-		define archDepth : adviceSSmooth top (-1) stroke
+		define archDepth : AdviceSArchDepth top (-1) stroke
 		return : dispiro
 			match st
 				[Just SLAB-CLASSICAL] : SerifedArcStart_RtlLhs RightSB Middle top stroke Hook
@@ -158,14 +161,14 @@ glyph-block Letter-Latin-S : begin
 					g4 RightSB (top - Hook) [widths.lhs stroke]
 					hookstart (top - O) (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   SB (top - archDepth)
-			SNeck (stroke -- ess)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4   (RightSB - SOBot) (archDepth) [widths 0 stroke]
 			arcvh
 			flat (Middle - CorrectionOMidS) 0 [widths 0 Stroke]
 			curl SB 0
 
 	define [RevSmallSStroke st sb stroke ess] : begin
-		define archDepth : adviceSSmooth XH 0.75 stroke
+		define archDepth : AdviceSArchDepth XH 0.75 stroke
 		return : dispiro
 			match st
 				[Just SLAB-CLASSICAL] : SerifedArcStart_LtrRhs SB Middle XH stroke SHook
@@ -177,7 +180,7 @@ glyph-block Letter-Latin-S : begin
 					g4   (SB - OX) (XH - SHook) [widths.rhs stroke]
 					hookstart (XH - O) (sw -- stroke) (swItalicAdj -- Stroke)
 			g4   (RightSB + OX) (XH - archDepth)
-			SNeck (stroke -- ess)
+			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4   (SB - OX + SOBot) (archDepth) [widths stroke 0]
 			match sb
 				[Just SLAB-CLASSICAL] : SerifedArcEnd_LtrLhs RightSB Middle 0 stroke SHook
@@ -349,7 +352,7 @@ glyph-block Letter-Latin-S : begin
 	derive-composites 'sPalatalHook' 0x1D8A 's' : PalatalHook.r
 		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
 		y -- 0
-		yAttach -- [mix O [adviceSSmooth XH (-1) [AdviceStroke2 2 3 XH]] : archv.yFromX 0.75]
+		yAttach -- [mix O [AdviceSArchDepth XH (-1) [AdviceStroke2 2 3 XH]] : archv.yFromX 0.75]
 
 	CreateAccentedComposition 'sTildeOver' 0x1D74 's' 'tildeOverWide'
 
@@ -431,8 +434,8 @@ glyph-block Letter-Latin-S : begin
 				local cofine : AdviceStroke 4
 				local gap : (w / Stroke * EssUpper) + [Math.max ((top - bot) / 6) [AdviceStroke2 3 3 (top - bot)]]
 				local yMid : mix bot top 0.5
-				local yTermLeft : mix yMid (top - [adviceSSmooth (top - bot) (-1) w]) 0.5
-				local yTermRight : mix yMid (bot + [adviceSSmooth (top - bot) (-1) w]) 0.5
+				local yTermLeft : mix yMid (top - [AdviceSArchDepth (top - bot) (-1) w]) 0.5
+				local yTermRight : mix yMid (bot + [AdviceSArchDepth (top - bot) (-1) w]) 0.5
 				include : difference
 					union
 						dispiro

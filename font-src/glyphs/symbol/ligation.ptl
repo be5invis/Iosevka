@@ -10,7 +10,8 @@ glyph-module
 glyph-block Symbol-Ligation : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Symbol-Math-Relation-Common : LessSlope
+	glyph-block-import Symbol-Math-Relation-Common : LessSlope EqualHalfSpace EqualHoleWidth
+	glyph-block-import Symbol-Math-Relation-Equal : EqualShape EqualHole IdentShape IdentHole
 
 	local arrowheadsKern : (2 / 3) * [clamp 0 (Width * 0.4) (Width - OperatorStroke * 3)]
 
@@ -23,99 +24,94 @@ glyph-block Symbol-Ligation : begin
 	define RodBarHGap : Math.max (Width / 8) [AdviceStroke 6]
 	define RodBarHOffset : 0.5 * Width - HalfStroke * HVContrast - RodBarHGap
 
+	# Arrow parameters
 	define arrowheadSlope : 1 / LessSlope
-	define [ArrowBarConfig extend kern join doubleBar] : begin
-		define cleft O
-		define cright (Width - O)
-		define arrowr : if doubleBar
-			Width + SB + OperatorStroke * HVContrast
-			Width + extend
-		define arrowl : if doubleBar
-			-Width + RightSB - OperatorStroke * HVContrast
-			0 - extend
-		define zleft : cleft - Width + RightSB
-		define zright : cright + SB
-		define lk : object
-			f    SB
-			p    (arrowl + Width)
-			l    arrowl
-			l1 : arrowl - kern
-			c    cleft
-			m    (0 - RodBarHOffset)
-			j    (-join)
-			j1   (-join - kern)
-			z    zleft
-			lx : mix arrowl 0 0.5
 
-		define rk : object
-			f    RightSB
-			p    (arrowr - Width)
-			r    arrowr
-			r1 : arrowr + kern
-			c    cright
-			m    (Width + RodBarHOffset)
-			j    (Width + join)
-			j1   (Width + join + kern)
-			z    zright
+	local arrowExtend : clamp 0 Width (RightSB - 0.5 * OperatorStroke * arrowheadSlope)
+	local arrowJ      : clamp 0 Width (SB + 0.5 * OperatorStroke * arrowheadSlope)
 
-		define result {}
-		foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
-			result.push { l r lk.(l) rk.(r) }
-		return result
+	local dblExtend : clamp 0 Width (RightSB - EqualHalfSpace * arrowheadSlope)
+	local dblArrowJ : clamp 0 Width (SB + EqualHalfSpace * arrowheadSlope)
 
-	local arrowExtend [clamp 0 Width (RightSB - OperatorStroke / 2 * arrowheadSlope)]
-	local arrowJ : clamp 0 Width (SB + OperatorStroke / 2 * arrowheadSlope)
+	do "Arrow Bar"
+		define [ArrowBarConfig extend kern join doubleBar] : begin
+			define cleft O
+			define cright (Width - O)
+			define arrowr : if doubleBar
+				Width + SB + OperatorStroke * HVContrast
+				Width + extend
+			define arrowl : if doubleBar
+				-Width + RightSB - OperatorStroke * HVContrast
+				0 - extend
+			define zleft : cleft - Width + RightSB
+			define zright : cright + SB
+			define lk : object
+				x    (SB - Width)
+				y    (-join - Width)
+				f    SB
+				p    (arrowl + Width)
+				l    arrowl
+				l1 : arrowl - kern
+				c    cleft
+				m    (0 - RodBarHOffset)
+				j    (-join)
+				j1   (-join - kern)
+				z    zleft
+				lx : mix arrowl 0 0.5
 
-	define [HyphenNotch x] : union
-		VBar.m x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) OperatorStroke
-		VBar.m x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) OperatorStroke
-	foreach [{lS rS left right} : items-of [ArrowBarConfig arrowExtend arrowheadsKern arrowJ 0]] : begin
-		create-glyph "hyphen.lig.\(lS)\(rS)" : glyph-proc
-			include : SetJoiningKind lS rS
-			include : HBar.m left right SymbolMid OperatorStroke
-		create-glyph "hyphen.lig.\(lS)\(rS).notched" : glyph-proc
-			include : SetJoiningKind lS rS
-			include : difference
-				HBar.m left right SymbolMid OperatorStroke
-				if (left < SB)       [HyphenNotch 0]     [glyph-proc]
-				if (right > RightSB) [HyphenNotch Width] [glyph-proc]
+			define rk : object
+				x    (RightSB + Width)
+				y    (2 * Width + join)
+				f    RightSB
+				p    (arrowr - Width)
+				r    arrowr
+				r1 : arrowr + kern
+				c    cright
+				m    (Width + RodBarHOffset)
+				j    (Width + join)
+				j1   (Width + join + kern)
+				z    zright
 
-	# =>
-	local dblArrowD  : (ParenTop - ParenBot) * DesignParameters.equal_wideness + OperatorStroke * 0.75
-	local dblArrowSw : Math.min OperatorStroke (dblArrowD * 3 / 4)
-	local dblExtend : clamp 0 Width (RightSB - (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
-	local dblArrowJ : clamp 0 Width (SB + (dblArrowD - dblArrowSw / 2) * arrowheadSlope)
+			define result {}
+			foreach [l : items-of : Object.keys lk] : foreach [r : items-of : Object.keys rk]
+				result.push { l r lk.(l) rk.(r) }
+			return result
 
-	foreach {lS rS left right} [items-of : ArrowBarConfig dblExtend arrowheadsKern dblArrowJ 1]
-		create-glyph "equal.lig.\(lS)\(rS)" : glyph-proc
-			include : SetJoiningKind lS rS
-			include : HBar.t left right (SymbolMid + dblArrowD) dblArrowSw
-			include : HBar.b left right (SymbolMid - dblArrowD) dblArrowSw
+		define [HyphenShape l r] : HBar.m l r SymbolMid OperatorStroke
+		define [HyphenNotch x] : union
+			VBar.m x (SymbolMid + OperatorStroke / 3) (SymbolMid + OperatorStroke) EqualHoleWidth
+			VBar.m x (SymbolMid - OperatorStroke / 3) (SymbolMid - OperatorStroke) EqualHoleWidth
 
-	do "bottom sign derivatives"
-		glyph-block-import Symbol-Punctuation-Dashes : UnderScoreConfig
+		define Shapes : object
+			'hyphen' { HyphenShape HyphenNotch { arrowExtend arrowheadsKern arrowJ    0 } }
+			'equal'  { EqualShape  EqualHole   { dblExtend   arrowheadsKern dblArrowJ 1 } }
+			'ident'  { IdentShape  IdentHole   { dblExtend   arrowheadsKern dblArrowJ 1 } }
 
-		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
-			create-glyph "underscore.lig.zf.\(suffix)" : glyph-proc
-				Joining.set currentGlyph Joining.Classes.Left
-				include : HBar.b (O - SB) RightSB yBar
-			create-glyph "underscore.lig.fm.\(suffix)" : glyph-proc
-				Joining.set currentGlyph Joining.Classes.Right
-				include : HBar.b SB (Width + RodBarHOffset) yBar
-			create-glyph "underscore.lig.mf.\(suffix)" : glyph-proc
-				Joining.set currentGlyph Joining.Classes.Left
-				include : HBar.b (0 - RodBarHOffset) RightSB yBar
-			create-glyph "bar.lig.bottomMid.\(suffix)"
-				VBar.m Middle yBar ParenTop
+		define NotchConfig : object
+			'withoutNotch' { false }
+			'withNotch'    { true  }
 
-		select-variant "underscore.lig.zf" (follow -- 'underscore')
-		select-variant "underscore.lig.fm" (follow -- 'underscore')
-		select-variant "underscore.lig.mf" (follow -- 'underscore')
-		select-variant "bar.lig.bottomMid" (follow -- 'underscore')
+		foreach { prefix { Shape Notch { extend kern join fDB } } } [Object.entries Shapes] : do
+			foreach { lS rS left right } [items-of : ArrowBarConfig extend kern join fDB] : do
+				foreach { suffix { fNotch } } [Object.entries NotchConfig] : do
+					create-glyph "\(prefix).lig.\(lS)\(rS).\(suffix)" : glyph-proc
+						include : SetJoiningKind lS rS
+						include : difference
+							Shape left right
+							if (fNotch && left < (SB - Width))       [Notch (-Width)]    [no-shape]
+							if (fNotch && left < SB)                 [Notch 0]           [no-shape]
+							if (fNotch && right > RightSB)           [Notch Width]       [no-shape]
+							if (fNotch && right > (RightSB + Width)) [Notch (2 * Width)] [no-shape]
+
+				select-variant "\(prefix).lig.\(lS)\(rS)"
+					follow -- "lig-\(prefix)"
+				select-variant "\(prefix).arrowBar.\(lS)\(rS)"
+					follow -- "lig-arrowBar-\(prefix)"
+					shapeFrom -- "\(prefix).lig.\(lS)\(rS)"
 
 	do "Waves"
 		glyph-block-import Shared-Symbol-Shapes : CreateWaveShape
-		define WaveShape : CreateWaveShape dblArrowD dblArrowSw (-1 / 4)
+		define WaveShape : CreateWaveShape (EqualHalfSpace + 0.5 * OperatorStroke) OperatorStroke (-1 / 4)
 
 		define LR  (2  / 32)
 		define LR1 (9  / 32)
@@ -163,7 +159,7 @@ glyph-block Symbol-Ligation : begin
 
 		create-glyph 'less.lig.dblhead' : glyph-proc
 			Joining.set currentGlyph Joining.Classes.Right
-			include : LigationLessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
+			include : LigationLessShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke OperatorStroke (2 * EqualHalfSpace)
 			create-aliased-glyph 'less.lig.dblhead.mid'
 			create-forked-glyph 'less.lig.dblhead.shift1' : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Mid
@@ -171,7 +167,7 @@ glyph-block Symbol-Ligation : begin
 
 		create-glyph 'greater.lig.dblhead' : glyph-proc
 			Joining.set currentGlyph Joining.Classes.Left
-			include : LigationGreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke dblArrowSw (dblArrowD * 2 - dblArrowSw * 2)
+			include : LigationGreaterShape (SymbolMid + dH) (SymbolMid - dH) SB RightSB OperatorStroke OperatorStroke (2 * EqualHalfSpace)
 			create-aliased-glyph 'greater.lig.dblhead.mid'
 			create-forked-glyph 'greater.lig.dblhead.shift1' : glyph-proc
 				Joining.set currentGlyph Joining.Classes.Mid
@@ -225,7 +221,7 @@ glyph-block Symbol-Ligation : begin
 			create-forked-glyph 'less.lig.shiftN1h'     : ArrowShiftTranslate   1.5
 			create-forked-glyph 'less.lig.shiftN2'      : ArrowShiftTranslate   2.0
 
-		define [ArrowHeadHole] : Rect (SymbolMid + dblArrowD - dblArrowSw) (SymbolMid - dblArrowD + dblArrowSw) (-Width) (2 * Width)
+		define [ArrowHeadHole] : Rect (SymbolMid + EqualHalfSpace - 0.5 * OperatorStroke) (SymbolMid - EqualHalfSpace + 0.5 * OperatorStroke) (-Width) (2 * Width)
 
 		create-glyph 'less.lig.hole' : glyph-proc
 			Joining.set currentGlyph Joining.Classes.Left
@@ -251,47 +247,28 @@ glyph-block Symbol-Ligation : begin
 				glyph-proc : include : refer-glyph "greater.lig.shiftN1"
 				ArrowHeadHole
 
-	do "Equal and Inequal"
-		glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
-		glyph-block-import Symbol-Math-Relation-Equal : EqualShape EqualHole IdentShape IdentHole
-		define joiningOverlap (-Width / 6)
+	do "bottom sign derivatives"
+		glyph-block-import Symbol-Punctuation-Dashes : UnderScoreConfig
 
-		define SymbolConfig : object
-			"equal"  { EqualShape EqualHole }
-			"ident"  { IdentShape IdentHole }
+		foreach { suffix { yBar } } [Object.entries UnderScoreConfig] : do
+			create-glyph "underscore.lig.zf.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBar.b (O - SB) RightSB yBar
+			create-glyph "underscore.lig.fm.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Right
+				include : HBar.b SB (Width + RodBarHOffset) yBar
+			create-glyph "underscore.lig.mf.\(suffix)" : glyph-proc
+				Joining.set currentGlyph Joining.Classes.Left
+				include : HBar.b (0 - RodBarHOffset) RightSB yBar
+			create-glyph "bar.lig.bottomMid.\(suffix)"
+				VBar.m Middle yBar ParenTop
 
-		define JoinConfig : object
-		    #          Shape Left                          Shape Right               Hole positions
-			"fc"     { SB                                  (Width - joiningOverlap)  { Width }       }
-			"cf"     { joiningOverlap                      RightSB                   { 0 }           }
-			"jf"     { (RightSB - Width + joiningOverlap)  RightSB                   { 0 }           }
-			"cc"     { joiningOverlap                      (Width - joiningOverlap)  { 0 Width }     }
-			"fc+cc"  { (SB - Width)                        (Width - joiningOverlap)  { 0 Width }     }
-			"fc+cf"  { (SB - Width)                        RightSB                   { 0 }           }
-			"cc+cf"  { (joiningOverlap - Width)            RightSB                   { (-Width) 0 }  }
+		select-variant "underscore.lig.zf" (follow -- 'underscore')
+		select-variant "underscore.lig.fm" (follow -- 'underscore')
+		select-variant "underscore.lig.mf" (follow -- 'underscore')
+		select-variant "bar.lig.bottomMid" (follow -- 'underscore')
 
-		define NotchConfig : object
-			withNotch    { true  }
-			withoutNotch { false }
-
-		foreach { prefix { Shape Hole } } [Object.entries SymbolConfig] : do
-			foreach { infix { shapeLeft shapeRight xHoles } } [Object.entries JoinConfig] : do
-				local joinCls 0
-				if (shapeLeft  < 0)     : set joinCls : joinCls + Joining.Classes.Left
-				if (shapeRight > Width) : set joinCls : joinCls + Joining.Classes.Right
-
-				foreach { suffix { doNotch } } [Object.entries NotchConfig] : do
-					create-glyph "\(prefix).\(infix).\(suffix)" : glyph-proc
-						Joining.set currentGlyph joinCls
-						include : difference
-							Shape shapeLeft shapeRight
-							if doNotch
-							: then : union.apply null [xHoles.map Hole]
-							: else : glyph-proc
-
-				select-variant "\(prefix).\(infix)" (follow -- "lig-\(prefix)")
-
-		### Inequality
+	do "Inequality"
 		define Neq : namespace
 			export : define Sw   OperatorStroke
 			export : define Dr : Sw / Stroke * DotRadius
@@ -432,7 +409,7 @@ glyph-block Symbol-Ligation : begin
 				MaskLeftLine (slashDefautLeft + Width) ParenBot (slashDefaultRight + Width) ParenTop
 
 		create-glyph 'greater.lig.tag-slash' : glyph-proc
-			Joining.set currentGlyph Joining.Classes.Right
+			Joining.set currentGlyph Joining.Classes.Left
 			include : intersection
 				MaskBelow SymbolMid
 				TrigRightShape koTag kiShrunk 0
