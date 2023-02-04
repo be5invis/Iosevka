@@ -18,7 +18,7 @@ export default (function (args) {
 					{ "font-family": "Iosevka" },
 					{ "font-size": 96 },
 					{ "font-style": slope },
-					{ "font-feature-settings": { ...args.fontFeatures, calt: 1 } },
+					{ "font-feature-settings": { ...args.fontFeatures, dlig: 1 } },
 					{ color: theme.body },
 					ch
 				]
