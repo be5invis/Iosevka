@@ -1,10 +1,8 @@
 ## Modifications since version 2.x
 
-### 18.0.0
+### 19.0.0
 
-* \[**Breaking**\] Change the way to control whether notches are added to connected equals and hyphens.
-  - Whether notches are added are controlled by variant system (#1537).
-  - Added separate variant selectors to control whether to add notches to arrow bars.
-* Add support of Unicode Variation Sequence for `0` that adds a slash (#1534).
-* Fix shaping of `/>` in Kitty (#1538).
+* \[**Breaking**\] Reordered variant selectors' name and OT tag.
+* Fixed ligations that forming triple-line ligatures.
+* Made the shape of less and greater sign wider (#1542).
 
