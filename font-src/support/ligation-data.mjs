@@ -11,7 +11,7 @@ export function applyLigationData(data, para, argv) {
 	for (const gr in data.composite) {
 		const comp = data.composite[gr];
 		if (!comp.tag) continue;
-		const ligSets = createBuildup(data.simple, comp.buildup);
+		const ligSets = createBuildup(data.simple, data.composite, comp.buildup);
 		defaultBuildup[comp.tag] = ligSets;
 		hives[`ligset-inherit-${gr}`] = { caltBuildup: ligSets };
 	}
@@ -37,11 +37,20 @@ export function applyLigationData(data, para, argv) {
 	}
 }
 
-function createBuildup(simple, buildup) {
-	let ligSet = new Set();
+export function createBuildup(simple, composite, buildup) {
+	let sink = new Set();
+	createBuildupImpl(sink, simple, composite, buildup);
+	return Array.from(sink);
+}
+
+function createBuildupImpl(sink, simple, composite, buildup) {
 	for (const s of buildup) {
-		if (!simple[s]) throw new Error("Cannot find simple ligation group " + s);
-		ligSet.add(simple[s].ligGroup);
+		if (simple[s]) {
+			sink.add(simple[s].ligGroup);
+		} else if (composite[s]) {
+			createBuildupImpl(sink, simple, composite, composite[s].buildup);
+		} else {
+			throw new Error("Cannot find simple ligation group " + s);
+		}
 	}
-	return Array.from(ligSet);
 }

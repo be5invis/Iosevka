@@ -133,7 +133,37 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 				{'asterisk'}   ~> {'asterisk/sMid'}
 				{'parenRight'} ~> look-around
 
+	LigGroup "Bracket-Colon" : if [hasLG 'center-ops'] : begin
+		CreateLigationLookup : list
+			chain-rule # (:
+				{'parenLeft' 'bracketLeft' 'braceLeft'}    ~> look-around
+				{'colon'}                                  ~>  {'colon/mid'}
+			chain-rule # :)
+				{'colon'}                                  ~>  {'colon/mid'}
+				{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
+
 	LigGroup "Operator centering" : if [hasLG 'center-ops'] : begin
+		define triggerL {}
+		define triggerR {}
+		define skipL    { 'slash' 'backslash' 'at' 'ampersand' 'percent' 'numberSign' }
+		define skipR    { 'slash' 'backslash' 'at' 'ampersand' 'percent' 'numberSign' }
+
+		if [hasLG 'center-op-trigger-plus-minus-l'] : triggerL.push 'plus' 'minus' 'hyphen'
+		if [hasLG 'center-op-trigger-plus-minus-r'] : triggerR.push 'plus' 'minus' 'hyphen'
+		if [hasLG 'center-op-trigger-equal-l']      : triggerL.push 'equal' 'ident'
+		if [hasLG 'center-op-trigger-equal-r']      : triggerR.push 'equal' 'ident'
+		if [hasLG 'center-op-trigger-bar-l']        : triggerL.push 'bar'
+		if [hasLG 'center-op-trigger-bar-r']        : triggerR.push 'bar'
+		if [hasLG 'center-op-trigger-slash-l']      : triggerL.push 'slash' 'backslash'
+		if [hasLG 'center-op-trigger-slash-r']      : triggerR.push 'slash' 'backslash'
+		if [hasLG 'center-op-trigger-angle-inside']
+			begin [triggerR.push 'less'] [triggerL.push 'greater']
+		if [hasLG 'center-op-trigger-angle-outside']
+			begin [triggerL.push 'less'] [triggerR.push 'greater']
+
+		if [not : hasLG 'center-op-trigger-bar-l']        : skipL.push 'bar'
+		if [not : hasLG 'center-op-trigger-bar-r']        : skipR.push 'bar'
+
 
 		define [acops]  : if [hasLG 'bar-triggers-op-centering']
 			begin {'less' 'greater' 'hyphen' 'equal' 'plus' 'slash' 'bar' 'backslash'}
@@ -142,64 +172,48 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 			begin {'at' 'ampersand' 'percent' 'numberSign'}
 			begin {'slash' 'bar' 'backslash' 'at' 'ampersand' 'percent' 'numberSign'}
 
-		define [centerAsterisk]   : {'asterisk'}    ~>  {'asterisk/sMid'}
-		define [centerColon]      : {'colon'}       ~>  {'colon/mid'}
-		define [centerCaret]      : {'asciiCaret'}  ~>  {'asciiCaret.low'}
-		define [centerTilde]      : {'asciiTilde'}  ~>  {'asciiTilde.low'}
-		define [centerPeriod]     : {'period'}      ~>  {'period/mid'}
-		define [deCenterPeriod]   : {'period/mid'}  ~>  {'period'}
+		define opcGroups : list
+			{'asterisk'}    ~>  {'asterisk/sMid'}
+			{'asciiCaret'}  ~>  {'asciiCaret.low'}
+			{'asciiTilde'}  ~>  {'asciiTilde.low'}
 
-		define centerizeGroups : list centerAsterisk centerColon centerCaret centerTilde
-		if [hasLG 'dot-oper'] : centerizeGroups.push centerPeriod
+		if [hasLG 'center-op-influence-dot']   : opcGroups.push : {'period'} ~> {'period/mid'}
+		if [hasLG 'center-op-influence-colon'] : opcGroups.push : {'colon'}  ~> {'colon/mid'}
 
-		define centerizeL : centerizeGroups.map : x => [x].left.0
-		define centerizeR : centerizeGroups.map : lambda [x] : begin
-			local left [x].left
-			local right [x].right
-			while (right <@ Function) : set right [right left]
-			return : if right (right.0 || left.0) (left.0)
+		define opcFrom : opcGroups.map : x => x.left.0
+		define opcTo   : opcGroups.map : x => x.right.0
+		define C       : opcFrom ~> opcTo
 
-		define [Cg] : centerizeL ~> centerizeR
+		# Triggering
+		CreateLigationLookup : list
+			chain-rule C C skipL skipL triggerL         # **##+
+			chain-rule C C skipL triggerL               # **#+
+			chain-rule C C triggerL                     # **+
+			chain-rule C skipL skipL triggerL           # *##+
+			chain-rule C skipL triggerL                 # *#+
+			chain-rule C triggerL                       # *+
+			chain-rule triggerR skipR skipR C           # +##*
+			chain-rule triggerR skipR C                 # +#*
+			chain-rule triggerR C                       # +*
 
-		do "Bracket-colon"
-			CreateLigationLookup : list
-				chain-rule # (:
-					{'parenLeft' 'bracketLeft' 'braceLeft'}    ~> look-around
-					centerColon
-				chain-rule # :)
-					centerColon
-					{'parenRight' 'bracketRight' 'braceRight'} ~> look-around
+		# Extension
+		CreateLigationLookup : list
+			chain-rule opcTo skipR skipR C              # *##* --->
+			chain-rule opcTo skipR C                    # *#*  --->
+			chain-rule opcTo C                          # **   --->
 
-		do "Operator Centering"
-			CreateLigationLookup : list
-				chain-rule [Cg] [Cg] [acskip] [acskip] [acops] # ::+
-				chain-rule [Cg] [Cg] [acskip] [acops]          # ::+
-				chain-rule [Cg] [Cg] [acops]                   # ::+
-				chain-rule [Cg] [acskip] [acskip] [acops]      # :+
-				chain-rule [Cg] [acskip] [acops]               # :+
-				chain-rule [Cg] [acops]                        # :+
-				chain-rule [acops] [acskip] [acskip] [Cg]      # +:
-				chain-rule [acops] [acskip] [Cg]               # +:
-				chain-rule [acops] [Cg]                        # +:
+		CreateReverseLigationLookup : list
+			reverse-rule C skipL skipL opcTo            # *##* <---
+			reverse-rule C skipL opcTo                  # *#*  <---
+			reverse-rule C opcTo                        # **   <---
 
-		do "Operator centering : Trailing"
-			CreateLigationLookup : list
-				chain-rule centerizeR [acskip] [acskip] [Cg]
-				chain-rule centerizeR [acskip] [Cg]
-				chain-rule centerizeR [Cg]
-
-			CreateReverseLigationLookup : list
-				reverse-rule [Cg] [acskip] [acskip] centerizeR
-				reverse-rule [Cg] [acskip] centerizeR
-				reverse-rule [Cg] centerizeR
-
-		do "Operator centering : Apple fix"
-			# Apple (still) have problem when dealing with reverse chaining lookup
-			# They give up at run beginning. Fix them.
-			CreateLigationLookup : list
-				chain-rule [Cg] [acskip] [acskip] centerizeR
-				chain-rule [Cg] [acskip] centerizeR
-				chain-rule [Cg] centerizeR
+		# AAPL FIX
+		# Apple (still) have problem when dealing with reverse chaining lookup
+		# They give up at run beginning. Fix them.
+		CreateLigationLookup : list
+			chain-rule C skipR skipR opcTo
+			chain-rule C skipR opcTo
+			chain-rule C opcTo
 
 	LigGroup "slash-asterisk" : if [hasLG 'slash-asterisk'] : begin
 		CreateLigationLookup : list
