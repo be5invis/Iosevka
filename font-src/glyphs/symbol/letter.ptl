@@ -173,17 +173,14 @@ glyph-block Symbol-Letter : begin
 		include : HSerif.rb (Middle + sw / 2 * HVContrast) 0  (LongJut / 2)
 		include : DotAt Middle (XH + AccentStackOffset) (DotRadius * sw / Stroke)
 
-	alias 'partial.curly-bar' null 'cyrl/de.italic'
-	create-glyph 'partial.straight-bar' : glyph-proc
-		include : MarkSet.b
-		local fine : Stroke * CThin
-		local coFine : mix fine Stroke 0.5
-		local yMid : Ascender * 0.6
-		local yMid2 : mix yMid [YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB] 0.875
-		local yMockBarStart : yMid2 + Stroke * 0.3
-		local xTerminal : [mix SB RightSB 0.4] + 0.5 * Stroke * HVContrast
-		local pStraightBarStart : 0.75 - (Stroke / Ascender)
-		include : intersection [MaskBelow Ascender] : dispiro
+	do "Partial derivative symbol"
+		define fine : Stroke * CThin
+		define coFine : mix fine Stroke 0.5
+
+		define yMid : Ascender * 0.6
+		define yMid2 : mix yMid [YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB] 0.875
+
+		define [ArcStartKnots] : list
 			g4.right.start (Middle + CorrectionOMidS - TanSlope * (Stroke - fine)) (O + Stroke - fine + 1/16) [widths.lhs fine]
 			straight.up.mid (RightSB - OX - (1 - CThin) * Stroke * HVContrast) [YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB]
 			arcvh
@@ -195,10 +192,25 @@ glyph-block Symbol-Letter : begin
 			archv
 			flat (RightSB - OX) [YSmoothMidR yMid 0 SmallArchDepthA SmallArchDepthB] [widths.lhs coFine]
 			curl (RightSB - OX) yMid2
-			flat [mix Width xTerminal pStraightBarStart] [mix yMockBarStart CAP pStraightBarStart] [widths.lhs]
-			curl [mix Width xTerminal 2]                 [mix yMockBarStart CAP 2]
 
-	select-variant 'partial' 0x2202
+		create-glyph 'partial.curly-bar' : glyph-proc
+			include : MarkSet.b
+			include : dispiro
+				ArcStartKnots
+				quadControls 0 0.8
+				g4 (SB + Stroke * 1.1) Ascender
+
+		create-glyph 'partial.straight-bar' : glyph-proc
+			include : MarkSet.b
+			local yMockBarStart : yMid2 + Stroke * 0.3
+			local xTerminal : [mix SB RightSB 0.4] + 0.5 * Stroke * HVContrast
+			local pStraightBarStart : 0.75 - (Stroke / Ascender)
+			include : intersection [MaskBelow Ascender] : dispiro
+				ArcStartKnots
+				flat [mix Width xTerminal pStraightBarStart] [mix yMockBarStart CAP pStraightBarStart] [widths.lhs]
+				curl [mix Width xTerminal 2]                 [mix yMockBarStart CAP 2]
+
+		select-variant 'partial' 0x2202
 
 	do "Tironian Et"
 		define [TironianEtTopBarShape y] : intersection
