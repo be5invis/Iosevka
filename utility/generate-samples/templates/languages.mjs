@@ -4,8 +4,12 @@ import * as themes from "../themes/index.mjs";
 const languages = [
     { lang: 'English', sample: 'Shaw, those twelve beige hooks are joined if I patch a young, gooey mouth.' },
     { lang: 'IPA', sample: '[ɢʷɯʔ.nas.doːŋ.kʰlja] [ŋan.ȵʑi̯wo.ɕi̯uĕn.ɣwa]' },
+	{ lang: 'Azerbaijani', sample 'Zəfər, jaketini də papağını da götür, bu axşam hava çox soyuq olacaq.' },
     { lang: 'Bulgarian', sample: 'Я, пазачът Вальо уж бди, а скришом хапва кюфтенца зад щайгите.', localeId :'bg' },
+	{ lang: 'Croatian', sample: 'Gojazni đačić s biciklom drži hmeǉ i finu vatu u ǆepu nošǌe.' },
     { lang: 'Czech', sample: 'Nechť již hříšné saxofony ďáblů rozezvučí síň úděsnými tóny waltzu, tanga a quickstepu.' },
+	{ lang: 'Dutch', sample: 'Pa’s wĳze lynx bezag vroom het fikse aquaduct.' },
+	{ lang: 'Esperanto', sample: 'Eble ĉiu kvazaŭ-deca fuŝĥoraĵo ĝojigos homtipon.' },
     { lang: 'Finnish', sample: 'Charles Darwin jammaili Åken hevixylofonilla Qatarin yöpub Zeligissä.' },
     { lang: 'French', sample: 'Voix ambiguë d’un cœur qui au zéphyr préfère les jattes de kiwi.' },
     { lang: 'German', sample: 'Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich.' },
