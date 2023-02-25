@@ -146,7 +146,7 @@ class QuadifySink {
 			c = this.alignHVKnots(c);
 			c = this.cleanupOccurrentKnots1(c);
 			c = this.removeColinearKnots(c);
-			this.contours.push(c);
+			if (c.length > 2) this.contours.push(c);
 		}
 		this.lastContour = [];
 	}

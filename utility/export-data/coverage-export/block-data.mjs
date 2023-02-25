@@ -7,14 +7,14 @@ export async function collectBlockData() {
 		// Missing ranges in UnicodeDataIndex
 		[[0x10780, 0x107bf], "Latin Extended-F"],
 		[[0x1df00, 0x1dfff], "Latin Extended-G"],
-		[[0x1e030, 0x1e08f], "Cyrillic Extended-D"]
+		[[0x1e030, 0x1e08f], "Cyrillic Extended-D"],
 		[[0x1fa70, 0x1faff], "Symbols and Pictographs Extended-A "],
 		[[0x1fb00, 0x1fbff], "Symbols for Legacy Computing"]
 	];
 
 	for (const id of UnicodeDataIndex.Block) {
 		if (!id || /Private_Use_Area/.test(id) || /undefined/.test(id)) continue;
-		const rangesModule = await import(`@unicode/unicode-14.0.0/Block/${id}/ranges.js`);
+		const rangesModule = await import(`@unicode/unicode-15.0.0/Block/${id}/ranges.js`);
 		const rg = rangesModule.default;
 		BlockData.push([[rg[0].begin, rg[0].end - 1], id.replace(/_/g, " ")]);
 	}
