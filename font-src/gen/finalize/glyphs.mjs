@@ -145,7 +145,6 @@ class QuadifySink {
 			let c = this.lastContour;
 			c = this.alignHVKnots(c);
 			c = this.cleanupOccurrentKnots1(c);
-			c = this.cleanupOccurrentKnots2(c);
 			c = this.removeColinearKnots(c);
 			this.contours.push(c);
 		}
@@ -189,28 +188,27 @@ class QuadifySink {
 		alignY.apply();
 		return c;
 	}
+
+	// Occurrent cleanup -- corner-corner
 	cleanupOccurrentKnots1(c0) {
-		const c = [c0[0]];
-		for (let i = 1; i < c0.length; i++) {
+		let drops = [];
+		for (let i = 0; i < c0.length; i++) drops[i] = false;
+		for (let i = 0; i < c0.length; i++) {
+			const iPost = (i + 1) % c0.length;
+			const pre = c0[i],
+				post = c0[iPost];
 			if (
-				!(
-					c0[i].type === Point.Type.Corner &&
-					c0[i - 1].type === Point.Type.Corner &&
-					isOccurrent(c0[i], c0[i - 1])
-				)
+				pre.type === Point.Type.Corner &&
+				post.type === Point.Type.Corner &&
+				isOccurrent(pre, post)
 			) {
-				c.push(c0[i]);
+				drops[iPost] = true;
 			}
 		}
-		return c;
+
+		return dropBy(c0, drops);
 	}
-	cleanupOccurrentKnots2(c0) {
-		const c = c0.slice(0);
-		const zFirst = c[0],
-			zLast = c[c.length - 1];
-		if (isOccurrent(zFirst, zLast)) c.pop();
-		return c;
-	}
+
 	removeColinearKnots(c0) {
 		const c = c0.slice(0);
 		let lengthBefore = c.length,
@@ -288,12 +286,7 @@ const GetY = z => z.y;
 const SetY = (z, y) => (z.y = y);
 
 function isOccurrent(zFirst, zLast) {
-	return (
-		zFirst.type === Point.Type.Corner &&
-		zLast.type === Point.Type.Corner &&
-		zFirst.x === zLast.x &&
-		zFirst.y === zLast.y
-	);
+	return zFirst.x === zLast.x && zFirst.y === zLast.y;
 }
 function occurrentPrecisionEqual(a, b) {
 	return Math.abs(a - b) < CurveUtil.OCCURRENT_PRECISION;
@@ -303,4 +296,11 @@ function aligned(a, b, c) {
 }
 function between(a, b, c) {
 	return (a <= b && b <= c) || (a >= b && b >= c);
+}
+
+// Dropping helper
+function dropBy(a, d) {
+	let r = [];
+	for (let i = 0; i < a.length; i++) if (!d[i]) r.push(a[i]);
+	return r;
 }
