@@ -359,7 +359,7 @@ class CoordinateAligner {
 	}
 	apply() {
 		for (let i = 0; i < this.c.length; i++) {
-			this.lensSet(this.c[i], this.lens(this.c[this.find(i)]));
+			this.lensSet(this.c[i], Math.round(this.lens(this.c[this.find(i)])));
 		}
 	}
 }
@@ -379,12 +379,11 @@ function occurrentPrecisionEqual(a, b) {
 function aligned(a, b, c) {
 	return a === b && b === c;
 }
-function between(a, b, c) {
-	return (a <= b && b <= c) || (a >= b && b >= c);
-}
+
 function pointsColinear(zPrev, zCurr, zNext) {
-	if (aligned(zPrev.x, zCurr.x, zNext.x) && between(zPrev.y, zCurr.y, zNext.y)) return true;
-	if (aligned(zPrev.y, zCurr.y, zNext.y) && between(zPrev.x, zCurr.x, zNext.x)) return true;
+	// No need to check in-betweenness, we can safely remove the corner
+	if (aligned(zPrev.x, zCurr.x, zNext.x)) return true;
+	if (aligned(zPrev.y, zCurr.y, zNext.y)) return true;
 	return false;
 }
 
