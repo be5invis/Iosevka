@@ -427,7 +427,7 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 				hyphen ~> [lsx 'lxc']
 				hyphen ~> [lsx 'cf']
 
-	LigGroup "Arrows" : if [hasLG 'arrow'] : begin
+	LigGroup "Arrows" : begin
 		define singular : hyphen.concat anyWave
 		define [CBarSingular k] : begin
 			local hyphenSet : new Set hyphen
@@ -453,6 +453,9 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 		foreach [{rodCls dbl ltgt CRod} : items-of ArrowFormationConfig] : do
 			define heads {}
 			define rods  {}
+
+			define doLT : [not ltgt] || [hasLG 'arrow-l']         && [hasLG 'arrowZALE']
+			define doRT : [not ltgt] || [hasLG 'counter-arrow-r'] && [hasLG 'arrowZAGE']
 
 			# Disable regular expression lookaheads
 			heads.push : chain-rule
@@ -480,13 +483,23 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
 			define [CAntiHeadForceShiftN1]  : if dbl [lsx 'hole.shiftN1']   [lsx 'shiftN1.anti']
 
-			define [TJoinHeadForce]         : if [hasLG 'arrow']  [CJoinHeadForce]        advance
-			define [TJoinHeadAmbig]         : if [not ltgt]       [TJoinHeadForce]        advance
-			define [TJoinHeadForceShift1]   : if [hasLG 'arrow']  [CJoinHeadForceShift1]  advance
-			define [TMiddleHead]            : if [hasLG 'arrow2'] [CJoinHeadMid]          [TJoinHeadForce]
-			define [TAntiHeadForce]         : if [hasLG 'arrow2'] [CAntiHeadForce]        advance
-			define [TAntiHeadAmbig]         : if [not ltgt]       [TAntiHeadForce]        advance
-			define [TAntiHeadForceShiftN1]  : if [hasLG 'arrow2'] [CAntiHeadForceShiftN1] advance
+			define [LJoinHeadForce]         : if [hasLG 'arrow-l']         [CJoinHeadForce]        advance
+			define [LJoinHeadForceShift1]   : if [hasLG 'arrow-l']         [CJoinHeadForceShift1]  advance
+			define [LMiddleHead]            : if [hasLG 'counter-arrow-l'] [CJoinHeadMid] : if [hasLG 'arrow-l'] [LJoinHeadForce] advance
+			define [LAntiHeadForce]         : if [hasLG 'counter-arrow-l'] [CAntiHeadForce]        advance
+			define [LAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-l'] [CAntiHeadForceShiftN1] advance
+
+			define [RJoinHeadForce]         : if [hasLG 'arrow-r']         [CJoinHeadForce]        advance
+			define [RJoinHeadForceShift1]   : if [hasLG 'arrow-r']         [CJoinHeadForceShift1]  advance
+			define [RMiddleHead]            : if [hasLG 'counter-arrow-r'] [CJoinHeadMid] : if [hasLG 'arrow-r'] [RJoinHeadForce] advance
+			define [RAntiHeadForce]         : if [hasLG 'counter-arrow-r'] [CAntiHeadForce]        advance
+			define [RAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-r'] [CAntiHeadForceShiftN1] advance
+
+			# Ambiguous
+			define LAntiHeadAmbig LAntiHeadForce
+			define RJoinHeadAmbig RJoinHeadForce
+			define [LJoinHeadAmbig] : if doLT [LJoinHeadForce] advance
+			define [RAntiHeadAmbig] : if doRT [RAntiHeadForce] advance
 
 			define [CollectApply ck fns] : begin
 				local a : new Set
@@ -504,93 +517,93 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 			begin "Central"
 				heads.push : chain-rule # = > > =
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadForceShift1]
-					greater ~> [TAntiHeadForce]
+					greater ~> [RJoinHeadForceShift1]
+					greater ~> [RAntiHeadForce]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = < < =
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadForce]
-					less    ~> [TJoinHeadForceShift1]
+					less    ~> [LAntiHeadForce]
+					less    ~> [LJoinHeadForceShift1]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = > < =
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadForce]
-					less    ~> [TJoinHeadForce]
+					greater ~> [RJoinHeadForce]
+					less    ~> [LJoinHeadForce]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = < > =
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadForce]
-					greater ~> [TAntiHeadForce]
+					less    ~> [LAntiHeadForce]
+					greater ~> [RAntiHeadForce]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = > =
 					rodCls  ~> look-around
-					greater ~> [TMiddleHead]
+					greater ~> [RMiddleHead]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = < =
 					rodCls  ~> look-around
-					less    ~> [TMiddleHead]
+					less    ~> [LMiddleHead]
 					rodCls  ~> look-around
 			begin "Boundary"
 				heads.push : chain-rule # = > >
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadForceShift1]
+					greater ~> [RJoinHeadForceShift1]
 					greater ~> look-around
 				heads.push : chain-rule # = < <
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadForceShiftN1]
+					less    ~> [LAntiHeadForceShiftN1]
 					less    ~> look-around
 				heads.push : chain-rule # > > =
 					greater ~> look-around
-					greater ~> [TAntiHeadForceShiftN1]
+					greater ~> [RAntiHeadForceShiftN1]
 					rodCls  ~> look-around
 				heads.push : chain-rule # < < =
 					less    ~> look-around
-					less    ~> [TJoinHeadForceShift1]
+					less    ~> [LJoinHeadForceShift1]
 					rodCls  ~> look-around
 				heads.push : chain-rule # = = >
 					rodCls  ~> look-around
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadForce]
+					greater ~> [RJoinHeadForce]
 				heads.push : chain-rule # = = <
 					rodCls  ~> look-around
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadForce]
+					less    ~> [LAntiHeadForce]
 				heads.push : chain-rule # > = =
-					greater ~> [TAntiHeadForce]
+					greater ~> [RAntiHeadForce]
 					rodCls  ~> look-around
 					rodCls  ~> look-around
 				heads.push : chain-rule # < = =
-					less    ~> [TJoinHeadForce]
+					less    ~> [LJoinHeadForce]
 					rodCls  ~> look-around
 					rodCls  ~> look-around
 				heads.push : chain-rule # * = >
 					arrowIndicator ~> look-around
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadForce]
+					greater ~> [RJoinHeadForce]
 				heads.push : chain-rule # * = <
 					arrowIndicator ~> look-around
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadForce]
+					less    ~> [LAntiHeadForce]
 				heads.push : chain-rule # > = *
-					greater ~> [TAntiHeadForce]
+					greater ~> [RAntiHeadForce]
 					rodCls  ~> look-around
 					arrowIndicator ~> look-around
 				heads.push : chain-rule # < = *
-					less    ~> [TJoinHeadForce]
+					less    ~> [LJoinHeadForce]
 					rodCls  ~> look-around
 					arrowIndicator ~> look-around
 			begin "Ambiguous"
 				heads.push : chain-rule # = >
 					rodCls  ~> look-around
-					greater ~> [TJoinHeadAmbig]
+					greater ~> [RJoinHeadAmbig]
 				heads.push : chain-rule # = <
 					rodCls  ~> look-around
-					less    ~> [TAntiHeadAmbig]
+					less    ~> [LAntiHeadAmbig]
 				heads.push : chain-rule # > =
-					greater ~> [TAntiHeadAmbig]
+					greater ~> [RAntiHeadAmbig]
 					rodCls  ~> look-around
 				heads.push : chain-rule # < =
-					less    ~> [TJoinHeadAmbig]
+					less    ~> [LJoinHeadAmbig]
 					rodCls  ~> look-around
 
 			# Rod transformer
@@ -677,35 +690,6 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 				chain-rule
 					rodTermLeft  ~> rodConnLeft
 					rodTermRight ~> rodConnRight
-
-		foreach [{rodCls dbl ltgt CRod} : items-of ArrowFormationConfig] : do "Ambiguous rods"
-			define [CJoinHeadForce]         : if dbl [lsx 'dblhead']        [lsx 'shift0']
-			define [CAntiHeadForce]         : if dbl [lsx 'hole']           [lsx 'shift0.anti']
-
-			define ambiguousRods {}
-			ambiguousRods.push : chain-rule # =>
-				rodCls     ~> [if [hasLG 'arrow'] [CRod 'fr'] advance]
-				greater    ~> [if [hasLG 'arrow'] [CJoinHeadForce] advance]
-			if ltgt
-				ambiguousRods.push : chain-rule # <=
-					less       ~> [if [hasLG 'arrowZALE'] [CJoinHeadForce] advance]
-					rodCls     ~> [if [hasLG 'arrowZALE'] [CRod 'lf'] advance]
-				ambiguousRods.push : chain-rule # <-
-					less       ~> [if [hasLG 'arrow'] [CJoinHeadForce] advance]
-					rodCls     ~> [if [hasLG 'arrow'] [CRod 'lf'] advance]
-
-			ambiguousRods.push : chain-rule # =<
-				rodCls     ~> [if [hasLG 'arrow2'] [CRod 'fj'] advance]
-				less       ~> [if [hasLG 'arrow2'] [CAntiHeadForce] advance]
-			if ltgt
-				ambiguousRods.push : chain-rule # >=
-					greater    ~> [if [hasLG 'arrowZAGE'] [CAntiHeadForce] advance]
-					rodCls     ~> [if [hasLG 'arrowZAGE'] [CRod 'jf'] advance]
-				ambiguousRods.push : chain-rule # >-
-					greater    ~> [if [hasLG 'arrow2'] [CAntiHeadForce] advance]
-					rodCls     ~> [if [hasLG 'arrow2'] [CRod 'jf'] advance]
-
-			CreateLigationLookup ambiguousRods
 
 	# <<, >>, <<<, >>>
 	LigGroup "Less/Greater Chaining" : if [hasLG 'llgg'] : begin
