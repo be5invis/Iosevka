@@ -94,6 +94,18 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 
 * `inherits`: Optional, String, defines the inherited ligation set. When absent, the ligation set will not inherit any other sets. Valid values are:
 
+  - `--default-center-ops--`: Default ligation set would be assigned to undefined.
+  - `--c-center-ops--`: Default ligation set would be assigned to undefined.
+  - `--default-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--c-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--raku-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--ml-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--fstar-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--haskell-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--matlab-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--verilog-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--wolfram-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--default-kern--`: Default ligation set would be assigned to undefined.
   - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
   - `clike`: Default ligation set would be assigned to C-Like.
@@ -123,8 +135,20 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
 * `disables` and `enables`: Optional, String Array, Cherry-picking ligation groups to be disabled or enabled. Valid values include:
 
   - `center-ops`: Vertically align some of the operators (like `*`) to the center position it is before or after a "center" operator (like `+`).
-  - `arrow`: Enable ligation set that forms arrows.
-  - `arrow2`: Enable ligation for more arrows, like `>>=`.
+  - `center-op-trigger-plus-minus-l`: Plus (`+`) and Minus (`-`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-plus-minus-r`: Plus (`+`) and Minus (`-`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-equal-l`: Equal (`=`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-equal-r`: Equal (`=`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-bar-l`: Bars (`|`) will trigger other operator characters at left to be centered.
+  - `center-op-trigger-bar-r`: Bars (`|`) will trigger other operator characters at right to be centered.
+  - `center-op-trigger-angle-inside`: Less (`<`) and Greater (`>`) will trigger other operator characters at inside to be centered.
+  - `center-op-trigger-angle-outside`: Less (`<`) and Greater (`>`) will trigger other operator characters at outside to be centered.
+  - `center-op-influence-dot`: Treat dot (`.`) as operator and perform chained centering.
+  - `center-op-influence-colon`: undefined.
+  - `arrow-l`: Enable ligation set that forms left-pointing arrows.
+  - `arrow-r`: Enable ligation set that forms right-pointing arrows.
+  - `counter-arrow-l`: Enable ligation that produces left-pointing counter-arrows.
+  - `counter-arrow-r`: Enable ligation that produces right-pointing counter-arrows.
   - `trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
   - `eqeqeq`: Enable special ligation for `===` with triple lines.
   - `eqeq`: Enable ligation for `==` and `===`.
@@ -149,8 +173,6 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `logic`: Enable ligation for `/\` and `\/`.
   - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
-  - `dot-as-operator`: Treat dot (`.`) as operator and perform chained centering.
-  - `bar-triggers-op-centering`: Bars (`/`, `|`, `\`) will trigger operator centering.
   - `lteq-as-arrow`: Treat `<=` as arrow.
   - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
   - `html-comment`: Enable ligation for `<!--` and `<!---`.
@@ -416,6 +438,8 @@ Subsection `variants` is used to configure character variants in the font. Prope
      <table><tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-round.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-round.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'round'</code>, <code>cv98 = 1</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use round dots (default)</td></tr><tr><td rowspan="2" width="220"><img src="../images/cv-punctuation-dot-square.light.svg#gh-light-mode-only" width=192/><img src="../images/cv-punctuation-dot-square.dark.svg#gh-dark-mode-only" width=192/></td><td><code>punctuation-dot = 'square'</code>, <code>cv98 = 2</code></td></tr><tr><td>Small punctuations (like <code>.</code>, <code>,</code>) use square dots</td></tr></table>
   - Styles for `öẋ`, `ij` (Dot and Comma shape in diacritics):
      <table><tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-round.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-round.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'round'</code>, <code>cv99 = 1</code></td></tr><tr><td>Dots and Commas in diacritics are round (default)</td></tr><tr><td rowspan="2" width="188"><img src="../images/cv-diacritic-dot-square.light.svg#gh-light-mode-only" width=160/><img src="../images/cv-diacritic-dot-square.dark.svg#gh-dark-mode-only" width=160/></td><td><code>diacritic-dot = 'square'</code>, <code>cv99 = 2</code></td></tr><tr><td>Dots and Commas in diacritics are square</td></tr></table>
+  - Styles for `∂` (Partial derivative symbol):
+     <table><tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'straight-bar'</code>, <code>VXSA = 1</code></td></tr><tr><td>The upper bar of the partial derivative symbol is straight (default)</td></tr><tr><td rowspan="2" width="60"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td><td><code>partial-derivative = 'curly-bar'</code>, <code>VXSA = 2</code></td></tr><tr><td>The upper bar of the partial derivative symbol is curly</td></tr></table>
   - Styles for `<=`, `>=` (Less-equal and Greater-equal ligations):
      <table><tr><td rowspan="2" width="92"><img src="../images/cv-lig-ltgteq-flat.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-flat.dark.svg#gh-dark-mode-only" width=64/></td><td><code>lig-ltgteq = 'flat'</code>, <code>VXLA = 1</code></td></tr><tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is flat (default)</td></tr><tr><td rowspan="2" width="92"><img src="../images/cv-lig-ltgteq-slanted.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-lig-ltgteq-slanted.dark.svg#gh-dark-mode-only" width=64/></td><td><code>lig-ltgteq = 'slanted'</code>, <code>VXLA = 2</code></td></tr><tr><td>The lower bar of <code>&lt;=</code> and <code>&gt;=</code> ligation is slanted</td></tr></table>
   - Styles for `!=` (Not-equal ligations):
