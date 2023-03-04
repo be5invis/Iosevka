@@ -1,3 +1,5 @@
+import { mix } from "../utils.mjs";
+
 export class Point {
 	constructor(type, x, y) {
 		this.type = type;
@@ -56,6 +58,9 @@ export class Point {
 	}
 	static translated(z, dx, dy) {
 		return new Point(z.type, z.x + dx || 0, z.y + dy || 0);
+	}
+	static mix(type, a, b, p) {
+		return new Point(type, mix(a.x, b.x, p), mix(a.y, b.y, p));
 	}
 }
 Point.Type = {

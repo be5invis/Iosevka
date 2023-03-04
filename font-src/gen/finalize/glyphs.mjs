@@ -4,6 +4,7 @@ import * as CurveUtil from "../../support/geometry/curve-util.mjs";
 import * as Geom from "../../support/geometry/index.mjs";
 import { Point } from "../../support/geometry/point.mjs";
 import { Transform } from "../../support/geometry/transform.mjs";
+import { mix } from "../../support/utils.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,10 +145,13 @@ class QuadifySink {
 		if (this.lastContour.length > 2) {
 			let c = this.lastContour;
 			c = this.alignHVKnots(c);
-			c = this.cleanupOccurrentKnots1(c);
+			c = this.dropDuplicateFirstLast(c);
 			c = this.cleanupOccurrentKnots2(c);
-			c = this.removeColinearKnots(c);
-			this.contours.push(c);
+			c = this.cleanupOccurrentKnots1(c);
+			c = this.removeColinearArc(c);
+			c = this.removeColinearCorners(c);
+			c = this.cleanupOccurrentKnots1(c);
+			if (c.length > 2) this.contours.push(c);
 		}
 		this.lastContour = [];
 	}
@@ -171,47 +175,101 @@ class QuadifySink {
 		const c = c0.slice(0);
 		const alignX = new CoordinateAligner(c, GetX, SetX);
 		const alignY = new CoordinateAligner(c, GetY, SetY);
+
 		for (let i = 0; i < c.length; i++) {
-			if (c[i].type === Point.Type.Corner) {
-				alignX.tryAlign(i, (i + 1) % c.length);
-				alignY.tryAlign(i, (i + 1) % c.length);
-			}
-		}
-		for (let i = 0; i < c.length; i++) {
-			const zCurr = c[i],
-				zNext = c[(i + 1) % c.length];
+			const iNext = (i + 1) % c.length,
+				zCurr = c[i],
+				zNext = c[iNext];
 			if (zCurr.type === Point.Type.Quadratic && zNext.type === Point.Type.Corner) {
-				alignX.tryAlign(i, (i + 1) % c.length);
-				alignY.tryAlign(i, (i + 1) % c.length);
+				alignX.tryAlign(i, iNext);
+				alignY.tryAlign(i, iNext);
+			} else {
+				alignX.tryAlign(iNext, i);
+				alignY.tryAlign(iNext, i);
 			}
 		}
+
 		alignX.apply();
 		alignY.apply();
 		return c;
 	}
-	cleanupOccurrentKnots1(c0) {
-		const c = [c0[0]];
-		for (let i = 1; i < c0.length; i++) {
+
+	// Drop the duplicate point (first-last)
+	dropDuplicateFirstLast(c) {
+		while (c.length > 1) {
+			const first = c[0],
+				last = c[c.length - 1];
 			if (
-				!(
-					c0[i].type === Point.Type.Corner &&
-					c0[i - 1].type === Point.Type.Corner &&
-					isOccurrent(c0[i], c0[i - 1])
-				)
+				first.type === Point.Type.Corner &&
+				last.type === Point.Type.Corner &&
+				isOccurrent(first, last)
 			) {
-				c.push(c0[i]);
+				c.pop();
+			} else {
+				break;
 			}
 		}
 		return c;
 	}
-	cleanupOccurrentKnots2(c0) {
-		const c = c0.slice(0);
-		const zFirst = c[0],
-			zLast = c[c.length - 1];
-		if (isOccurrent(zFirst, zLast)) c.pop();
-		return c;
+
+	// Occurrent cleanup -- corner-corner
+	cleanupOccurrentKnots1(c0) {
+		let drops = [];
+		for (let i = 0; i < c0.length; i++) drops[i] = false;
+		for (let i = 0; i < c0.length; i++) {
+			const iPost = (i + 1) % c0.length;
+			const pre = c0[i],
+				post = c0[iPost];
+			if (
+				iPost > 0 &&
+				pre.type === Point.Type.Corner &&
+				post.type === Point.Type.Corner &&
+				isOccurrent(pre, post)
+			) {
+				drops[iPost] = true;
+			}
+		}
+
+		return dropBy(c0, drops);
 	}
-	removeColinearKnots(c0) {
+
+	// Occurrent cleanup -- off points
+	// This function actually **INSERTS** points for occurrent off knots.
+	cleanupOccurrentKnots2(c0) {
+		let insertAfter = [];
+		for (let i = 0; i < c0.length; i++) insertAfter[i] = false;
+		for (let i = 0; i < c0.length; i++) {
+			const cur = c0[i];
+			if (cur.type !== Point.Type.Quadratic) continue;
+
+			const iPre = (i - 1 + c0.length) % c0.length;
+			const iPost = (i + 1) % c0.length;
+			const pre = c0[iPre];
+			const post = c0[iPost];
+
+			if (isOccurrent(pre, cur) && post.type === Point.Type.Quadratic) {
+				insertAfter[i] = true;
+			}
+			if (isOccurrent(cur, post) && pre.type === Point.Type.Quadratic) {
+				insertAfter[iPre] = true;
+			}
+		}
+
+		let c1 = [];
+		for (let i = 0; i < c0.length; i++) {
+			const cur = c0[i];
+			c1.push(cur);
+			if (insertAfter[i]) {
+				const iPost = (i + 1) % c0.length;
+				const post = c0[iPost];
+				c1.push(Point.mix(Point.Type.Corner, cur, post, 0.5));
+			}
+		}
+
+		return c1;
+	}
+
+	removeColinearCorners(c0) {
 		const c = c0.slice(0);
 		let lengthBefore = c.length,
 			lengthAfter = c.length;
@@ -222,21 +280,46 @@ class QuadifySink {
 				const zPrev = c[(i - 1 + c.length) % c.length],
 					zCurr = c[i],
 					zNext = c[(i + 1) % c.length];
-				if (zPrev.type === Point.Type.Corner && zNext.type === Point.Type.Corner) {
-					if (aligned(zPrev.x, zCurr.x, zNext.x) && between(zPrev.y, zCurr.y, zNext.y))
-						shouldRemove[i] = true;
-					if (aligned(zPrev.y, zCurr.y, zNext.y) && between(zPrev.x, zCurr.x, zNext.x))
-						shouldRemove[i] = true;
+				if (
+					zPrev.type === Point.Type.Corner &&
+					zNext.type === Point.Type.Corner &&
+					pointsColinear(zPrev, zCurr, zNext)
+				) {
+					shouldRemove[i] = true;
 				}
 			}
-			let n = 0;
-			for (let i = 0; i < c.length; i++) {
-				if (!shouldRemove[i]) c[n++] = c[i];
-			}
-			c.length = n;
+
+			dropBy(c, shouldRemove);
 			lengthAfter = c.length;
 		} while (lengthAfter < lengthBefore);
 		return c;
+	}
+
+	removeColinearArc(c) {
+		if (c[0].type !== Point.Type.Corner) throw new Error("Unreachable");
+
+		let front = 0,
+			shouldRemove = [],
+			middlePoints = [];
+		for (let rear = 1; rear <= c.length; rear++) {
+			let zFront = c[front],
+				zRear = c[rear % c.length];
+			if (zRear.type === Point.Type.Corner) {
+				let allColinear = true;
+				for (const z of middlePoints) {
+					if (!pointsColinear(zFront, z, zRear)) allColinear = false;
+				}
+
+				if (allColinear) for (let i = front + 1; i < rear; i++) shouldRemove[i] = true;
+
+				front = rear;
+				middlePoints.length = 0;
+			} else {
+				middlePoints.push(zRear);
+			}
+		}
+
+		return dropBy(c, shouldRemove);
 	}
 }
 
@@ -276,7 +359,7 @@ class CoordinateAligner {
 	}
 	apply() {
 		for (let i = 0; i < this.c.length; i++) {
-			this.lensSet(this.c[i], this.lens(this.c[this.find(i)]));
+			this.lensSet(this.c[i], Math.round(this.lens(this.c[this.find(i)])));
 		}
 	}
 }
@@ -288,12 +371,7 @@ const GetY = z => z.y;
 const SetY = (z, y) => (z.y = y);
 
 function isOccurrent(zFirst, zLast) {
-	return (
-		zFirst.type === Point.Type.Corner &&
-		zLast.type === Point.Type.Corner &&
-		zFirst.x === zLast.x &&
-		zFirst.y === zLast.y
-	);
+	return zFirst.x === zLast.x && zFirst.y === zLast.y;
 }
 function occurrentPrecisionEqual(a, b) {
 	return Math.abs(a - b) < CurveUtil.OCCURRENT_PRECISION;
@@ -301,6 +379,20 @@ function occurrentPrecisionEqual(a, b) {
 function aligned(a, b, c) {
 	return a === b && b === c;
 }
-function between(a, b, c) {
-	return (a <= b && b <= c) || (a >= b && b >= c);
+
+function pointsColinear(zPrev, zCurr, zNext) {
+	// No need to check in-betweenness, we can safely remove the corner
+	if (aligned(zPrev.x, zCurr.x, zNext.x)) return true;
+	if (aligned(zPrev.y, zCurr.y, zNext.y)) return true;
+	return false;
+}
+
+// Dropping helper
+function dropBy(c, shouldRemove) {
+	let n = 0;
+	for (let i = 0; i < c.length; i++) {
+		if (!shouldRemove[i]) c[n++] = c[i];
+	}
+	c.length = n;
+	return c;
 }

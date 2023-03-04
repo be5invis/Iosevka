@@ -1,5 +1,5 @@
-import ugc from "@unicode/unicode-14.0.0/General_Category/index.js";
-import ucdNames from "@unicode/unicode-14.0.0/Names/index.js";
+import ugc from "@unicode/unicode-15.0.0/General_Category/index.js";
+import ucdNames from "@unicode/unicode-15.0.0/Names/index.js";
 
 import { collectBlockData } from "./block-data.mjs";
 

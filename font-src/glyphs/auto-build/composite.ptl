@@ -1256,18 +1256,23 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true
 		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true
 
+		# TODO: we need a better geometry to do such minkovski sums
+		define [createMaskout c1 c2 s] : begin
+			define dfg1 : df1.queryByNameEnsured c1
+			define dfg2 : df2.queryByNameEnsured c2
+			return : WithTransform [Translate (s + dfg1.advanceWidth * wadj1 - kern) 0] dfg2
+
 		foreach [{gn unicode { c1 c2 } mak} : items-of jobs.nonDecomposable] : if [not : query-glyph gn] : begin
 
-			local maskOuts {}
-			local s    0
 			local step (-OX)
+			local s    step
 			local dist (Stroke * 2)
-			while (s < dist) : do
-				maskOuts.push : new-glyph : glyph-proc
-					define dfg1 : df1.queryByNameEnsured c1
-					define dfg2 : df2.queryByNameEnsured c2
-					include dfg2
-					include : Translate (s + dfg1.advanceWidth * wadj1 - kern) 0
+
+			local maskOuts : list
+				createMaskout c1 c2 0.01
+				createMaskout c1 c2 (dist - 0.01)
+			while (s < dist) : begin
+				maskOuts.push : createMaskout c1 c2 s
 				set s : s + step
 
 			create-glyph gn unicode : glyph-proc
@@ -1281,7 +1286,8 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 				local leftHalf : intersection dfg1
 					Rect (CAP * 2) (Descender * 2) (-CWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
-				include : difference.apply null { leftHalf :: maskOuts}
+				include leftHalf
+				# include : difference.apply null { leftHalf :: maskOuts }
 				include : Ungizmo
 				include : Translate (-refW / 2) 0
 				include : Scale [clamp 0 1 ((CWidth - SB * 1.25) / (CWidth - SB * 2) * CWidth / refW)] 1
