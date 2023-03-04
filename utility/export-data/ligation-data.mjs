@@ -4,6 +4,8 @@ import url from "url";
 
 import * as toml from "@iarna/toml";
 
+import { createBuildup } from "../../font-src/support/ligation-data.mjs";
+
 const ligationSamplesNarrow = [
 	[
 		"-<<",
@@ -58,8 +60,8 @@ const ligationSamplesNarrow = [
 	[
 		"<:",
 		":=",
-		":-",
-		":+",
+		"*=",
+		"*+",
 		"<*",
 		"<*>",
 		"*>",
@@ -69,8 +71,8 @@ const ligationSamplesNarrow = [
 		"<.",
 		"<.>",
 		".>",
-		"+:",
-		"-:",
+		"+*",
+		"=*",
 		"=:",
 		":>"
 	],
@@ -93,6 +95,7 @@ const ligationSamplesNarrow = [
 		"<!---"
 	]
 ];
+
 function buildLigationSet(ligData, getKey) {
 	const ligationSets = new Map([
 		["*off", { tag: "calt", rank: 0, desc: "Ligation Off", brief: "Off", ligSets: [] }]
@@ -103,15 +106,12 @@ function buildLigationSet(ligData, getKey) {
 		const key = getKey(comp);
 		let item = ligationSets.get(key);
 		if (!item) {
-			let ligSets = new Set();
-			for (const s of comp.buildup) {
-				ligSets.add(ligData.simple[s].ligGroup);
-			}
+			let ligSets = createBuildup(ligData.simple, ligData.composite, comp.buildup);
 			item = {
 				selector: sel,
 				tag: comp.tag,
 				rank: 1,
-				ligSets: [...ligSets],
+				ligSets,
 				tagName: [comp.tag],
 				desc: comp.desc,
 				brief: comp.brief || comp.desc
@@ -125,6 +125,7 @@ function buildLigationSet(ligData, getKey) {
 	}
 	return ligationSets;
 }
+
 export async function parseLigationData() {
 	const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 	const ligToml = await fs.promises.readFile(

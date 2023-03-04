@@ -97,39 +97,6 @@ async function deriveFixed_DropFeatures(font, fFixed) {
 			feature.params = null;
 		}
 	}
-
-	markSweepLookups(font.gsub);
-}
-function markSweepLookups(table) {
-	let lookupSet = new Set();
-	for (const feature of table.features) {
-		for (const lookup of feature.lookups) {
-			lookupSet.add(lookup);
-		}
-	}
-
-	do {
-		let sizeBefore = lookupSet.size;
-		for (const lookup of table.lookups) {
-			if (lookup instanceof Ot.Gsub.Chaining || lookup instanceof Ot.Gpos.Chaining) {
-				for (const rule of lookup.rules) {
-					for (const app of rule.applications) lookupSet.add(app.apply);
-				}
-			}
-		}
-		let sizeAfter = lookupSet.size;
-		if (sizeBefore >= sizeAfter) break;
-	} while (true);
-
-	let front = 0;
-	for (let rear = 0; rear < table.lookups.length; rear++) {
-		if (lookupSet.has(table.lookups[rear])) {
-			table.lookups[front++] = table.lookups[rear];
-		}
-	}
-	table.lookups.length = front;
-
-	return lookupSet;
 }
 
 async function readTTF(argv) {

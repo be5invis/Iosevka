@@ -1,4 +1,4 @@
-import ucdNames from "@unicode/unicode-14.0.0/Names/index.js";
+import ucdNames from "@unicode/unicode-15.0.0/Names/index.js";
 
 for (let i = 2; i < process.argv.length; i++) {
 	const lch = parseInt(process.argv[i], 16);
