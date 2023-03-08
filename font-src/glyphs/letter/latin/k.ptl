@@ -47,7 +47,11 @@ glyph-block Letter-Latin-K : begin
 
 		set-base-anchor 'trailing' (kshRightBot - Ok) 0
 
-		define [TopStrokeMask offset] : Rect top 0 kshLeft [if [maskBit slabLegs 1] (kshRightTop + offset) (2 * Width)]
+		local kshRightSerifs : right + [KBalanceRight true true]
+		local serifLengthAdj : Ok + stroke * HVContrast
+		define [TopStrokeMask offset]    : Rect top 0 kshLeft [if [maskBit slabLegs 1] (kshRightSerifs - serifLengthAdj + offset + SideJut + serifLengthAdj - TanSlope * Stroke) (2 * Width)]
+		define [BottomStrokeMask offset] : Rect top 0 kshLeft [if [maskBit slabLegs 0] (kshRightSerifs - serifLengthAdj + offset + SideJut + serifLengthAdj + TanSlope * Stroke) (2 * Width)]
+
 		if [not fHookTop] : include : intersection
 			TopStrokeMask 0
 			dispiro
@@ -63,6 +67,7 @@ glyph-block Letter-Latin-K : begin
 			curl (kshLeft + stroke) attach [widths.rhs fine]
 
 		include : intersection
+			BottomStrokeMask (-0.1)
 			spiro-outline
 				corner (kshLeft + stroke) 0
 				corner (kshLeft + stroke) (attach + 1)
@@ -70,9 +75,8 @@ glyph-block Letter-Latin-K : begin
 				corner (kshRightBot - Ok) top
 				corner (kshRightBot - Ok) 0
 			dispiro
-				widths.lhs stroke
-				flat (kshRightBot - Ok) 0
-				curl (kshLeft + stroke) attach2
+				flat (kshRightBot - Ok) 0 [widths.lhs stroke]
+				curl (kshLeft + stroke) attach2 [widths.lhs fine]
 
 		include : difference
 			union
@@ -214,7 +218,7 @@ glyph-block Letter-Latin-K : begin
 
 	define [KCursiveLoopAndLegDimen top straightBar slabLeft slabLegs] : begin
 		define kshLeft : SB + [KBalance slabLeft straightBar]
-		define kshRight : RightSB + [KBalanceRightCursive slabLegs straightBar] + 0.2 * Stroke
+		define kshRight : RightSB + [KBalanceRightCursive slabLegs straightBar]
 
 		define arcFine : Stroke * CThin
 		define arcStroke : AdviceStroke2 2 3 top
@@ -238,7 +242,7 @@ glyph-block Letter-Latin-K : begin
 		define arcBottomX   : mix arcStartX kshRight pArcBottomX
 		define arcBottomY   : mix 0 top pArcBottomY
 		define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
-		define arcRightX    : kshRight * pArcRightX
+		define arcRightX    : kshRight * pArcRightX + 0.2 * Stroke * HVContrast
 		define arcRightY    : mix arcBottomY top pArcRightY
 		define arcTopX      : mix arcStartX arcRightX pArcTopX
 		define arcTopY      : top - O
@@ -249,6 +253,8 @@ glyph-block Letter-Latin-K : begin
 
 	define [KCursiveLoopAndLegShapeImpl tailed] : function [fHookTop left right stroke top slabLeft slabLegs attachment] : glyph-proc
 		define dim : KCursiveLoopAndLegDimen top true slabLeft slabLegs
+		local Ok   : KO slabLegs true top stroke
+
 		include : dispiro
 			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
 			arcvh 8 2.0
@@ -279,7 +285,7 @@ glyph-block Letter-Latin-K : begin
 					Rect XH 0 0 [if slabLegs (dim.slabStartX + SideJut) (Width * 2)]
 					dispiro
 						flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
-						curl dim.kshRight 0 [widths.rhs]
+						curl (dim.kshRight - Ok) 0 [widths.rhs]
 			spiro-outline
 				g4.up.start (dim.arcStartX - O) dim.arcStartY
 				arcvh 4 2.1
@@ -292,9 +298,10 @@ glyph-block Letter-Latin-K : begin
 
 		if (slabLegs && !tailed) : include : HSerif.rb dim.slabStartX 0 SideJut
 		if attachment : include : attachment.rSideJut
-			x -- dim.slabStartX
-			jut -- Jut
+			x -- [if slabLegs dim.slabStartX (dim.kshRight - Ok)]
+			xLink -- (xDTStart - Stroke * HVContrast)
 			y -- 0
+			jut -- Jut
 
 	define [KHookTopBar slabLegs straightBar] : HooktopLeftBar.inner
 		x -- SB + [KBalance slabLegs straightBar]
@@ -460,14 +467,16 @@ glyph-block Letter-Latin-K : begin
 		define [BashkirKaShape df top] : glyph-proc
 			local left : if slabTop ([mix SB RightSB 0.35] - df.mvs / 2 * HVContrast) [mix SB RightSB 0.2]
 			local leftNB : left - [KBalance slabTop straightBar]
-			local barLeft : mix 0 SB [if slabTop 0.25 0.375]
+			local xTopBarLeftEnd : mix 0 SB [if slabTop 0.25 0.375]
 			local sw : AdviceStroke 3
 
-			include : HBar.t barLeft (Stroke * 0.1 + left) top
+			include : HBar.t xTopBarLeftEnd (Stroke * 0.1 + left) top
 			include : VBar.l left 0 top sw
-			include : LegsImpl false leftNB RightSB Stroke top slabTop slabLegs
-			if slabTop : include : VSerif.dl barLeft top VJut (df.mvs / HVContrast)
-			if slabBot : include : HSerif.mb (left + HalfStroke * HVContrast) 0 Jut
+			include : LegsImpl false leftNB RightSB sw top slabTop slabLegs
+			if slabTop : include : VSerif.dl xTopBarLeftEnd top VJut
+				Math.min (VJutStroke * df.mvs / Stroke) (0.625 * (left - xTopBarLeftEnd))
+			if slabBot : begin
+				include : HSerif.mb (left + 0.5 * sw * HVContrast) 0 Jut
 
 		create-glyph "cyrl/BashkirUpperKa.\(suffix)" : glyph-proc
 			define df : DivFrame 1
