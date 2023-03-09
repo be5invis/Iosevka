@@ -114,8 +114,7 @@ export class SpiroGeometry extends GeometryBase {
 export class DiSpiroGeometry extends GeometryBase {
 	constructor(gizmo, contrast, closed, biKnots) {
 		super();
-		this.m_biKnots = [];
-		for (const k of biKnots) this.m_biKnots.push(k.clone());
+		this.m_biKnots = biKnots; // untransformed
 		this.m_closed = closed;
 		this.m_gizmo = gizmo;
 		this.m_contrast = contrast;
@@ -149,7 +148,7 @@ export class DiSpiroGeometry extends GeometryBase {
 			this.m_gizmo,
 			this.m_contrast,
 			this.m_closed,
-			this.m_biKnots.map(k => k.clone())
+			this.m_biKnots
 		);
 		expander.initializeNormals();
 		expander.iterateNormals();

@@ -1,48 +1,62 @@
-import * as CurveUtil from "../support/geometry/curve-util.mjs";
-import { SpiroGeometry, DiSpiroGeometry } from "../support/geometry/index.mjs";
-import { BiKnotCollector } from "../support/geometry/spiro-expand.mjs";
-import { fallback, mix, bez3 } from "../support/utils.mjs";
+import { DiSpiroGeometry, SpiroGeometry } from "../support/geometry/index.mjs";
+import {
+	BiKnotCollector,
+	ControlKnot,
+	Interpolator,
+	TerminateInstruction
+} from "../support/geometry/spiro-control.mjs";
+import { bez3, fallback, mix } from "../support/utils.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-class DispiroImpl {
+
+class SpiroImplBase {
 	constructor(bindings, args) {
 		this.bindings = bindings;
 		this.args = args;
 	}
-	applyToGlyph(glyph) {
+
+	createCollector(glyph) {
 		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
-		const collector = new BiKnotCollector(gizmo, this.bindings.Contrast);
-		const { knots, closed } = prepareSpiroKnots(this.args, collector);
-		for (const knot of knots) {
-			collector.pushKnot(knot.type, knot.x, knot.y);
-			if (knot.af) knot.af.call(collector);
-		}
-		const dsp = new DiSpiroProxy(closed, collector, knots);
+
+		const collector = new BiKnotCollector(this.bindings.Contrast);
+		for (const control of this.args) collector.add(control);
+		collector.unwrap();
+
+		return { gizmo, collector };
+	}
+}
+
+class DispiroImpl extends SpiroImplBase {
+	constructor(bindings, args) {
+		super(bindings, args);
+	}
+	applyToGlyph(glyph) {
+		const { gizmo, collector } = this.createCollector(glyph);
+		const dsp = new DiSpiroProxy(gizmo, collector);
 		glyph.includeGeometry(dsp.geometry);
 		return dsp;
 	}
 }
-class SpiroOutlineImpl {
+class SpiroOutlineImpl extends SpiroImplBase {
 	constructor(bindings, args) {
-		this.bindings = bindings;
-		this.args = args;
+		super(bindings, args);
 	}
 	applyToGlyph(glyph) {
-		const gizmo = glyph.gizmo || this.bindings.GlobalTransform;
-		const g = new CurveUtil.BezToContoursSink(gizmo);
-		const { knots, closed } = prepareSpiroKnots(this.args, g);
-		return glyph.includeGeometry(new SpiroGeometry(gizmo, closed, knots));
+		const { gizmo, collector } = this.createCollector(glyph);
+		return glyph.includeGeometry(
+			new SpiroGeometry(gizmo, collector.closed, collector.controls)
+		);
 	}
 }
 class DiSpiroProxy {
-	constructor(closed, collector, origKnots) {
+	constructor(gizmo, collector) {
 		this.geometry = new DiSpiroGeometry(
-			collector.gizmo,
+			gizmo,
 			collector.contrast,
-			closed,
-			collector.controlKnots
+			collector.closed,
+			collector.controls
 		);
-		this.m_origKnots = origKnots;
+		this.m_origKnots = collector.controls;
 	}
 	get knots() {
 		return this.m_origKnots;
@@ -54,69 +68,23 @@ class DiSpiroProxy {
 		return this.geometry.expand().rhsUntransformed;
 	}
 }
-function prepareSpiroKnots(_knots, s) {
-	let knots = [..._knots];
-	while (knots[0] && knots[0] instanceof Function) {
-		knots[0].call(s);
-		knots.splice(0, 1);
-	}
-	const closed = dropTailKnot(knots);
-	knots = flatten(s, knots);
-	return { knots, closed };
-}
-function dropTailKnot(knots) {
-	let last = knots[knots.length - 1];
-	if (last && (last.type === "close" || last.type === "end")) {
-		knots.length = knots.length - 1;
-		return last.type === "close";
-	} else {
-		return false;
-	}
-}
-function flatten(s, knots0) {
-	let knots = [];
-	flattenImpl(knots, knots0);
-	let unwrapped = false;
-	for (let j = 0; j < knots.length; j = j + 1)
-		if (knots[j] && knots[j].type === "interpolate") {
-			const kBefore = knots[nCyclic(j - 1, knots.length)];
-			const kAfter = knots[nCyclic(j + 1, knots.length)];
-			knots[j] = knots[j].blender(kBefore, kAfter, knots[j]);
-			unwrapped = true;
-		}
-	if (unwrapped) return flatten(s, knots);
-	return knots;
-}
-function flattenImpl(sink, knots) {
-	for (const p of knots) {
-		if (p instanceof Array) flattenImpl(sink, p);
-		else sink.push(p);
-	}
-}
-function nCyclic(p, n) {
-	return (p + n + n) % n;
-}
+
 export function SetupBuilders(bindings) {
-	const { Contrast, GlobalTransform, Stroke, Superness } = bindings;
-	function validateCoord(x) {
-		if (!isFinite(x)) throw new TypeError("NaN detected");
-		return x;
-	}
+	const { Stroke, Superness } = bindings;
 	function KnotType(type) {
-		return (x, y, f) => ({
-			type,
-			x: validateCoord(x),
-			y: validateCoord(y),
-			af: f
-		});
+		return (x, y, f) => {
+			if (!isFinite(x)) throw new TypeError("NaN detected for X");
+			if (!isFinite(y)) throw new TypeError("NaN detected for Y");
+			return new ControlKnot(type, x, y, f);
+		};
 	}
 	const g4 = KnotType("g4");
 	const g2 = KnotType("g2");
 	const corner = KnotType("corner");
 	const flat = KnotType("left");
 	const curl = KnotType("right");
-	const close = f => ({ type: "close", af: f });
-	const end = f => ({ type: "end", af: f });
+	const close = f => new TerminateInstruction("close", f);
+	const end = f => new TerminateInstruction("end", f);
 	const straight = { l: flat, r: curl };
 	{
 		let directions = [
@@ -148,9 +116,13 @@ export function SetupBuilders(bindings) {
 			}
 		}
 	}
+
 	function widths(l, r) {
 		return function () {
-			return this.setWidth ? this.setWidth(validateCoord(l), validateCoord(r)) : void 0;
+			if (!isFinite(l)) throw new TypeError("NaN detected for left width");
+			if (!isFinite(r)) throw new TypeError("NaN detected for right width");
+
+			if (this.setWidth) this.setWidth(l, r);
 		};
 	}
 	widths.lhs = function (w) {
@@ -162,46 +134,49 @@ export function SetupBuilders(bindings) {
 	widths.center = function (w) {
 		return widths(fallback(w, Stroke) / 2, fallback(w, Stroke) / 2);
 	};
+
 	function heading(d) {
 		return function () {
-			return this.headsTo ? this.headsTo(d) : void 0;
+			if (this.headsTo) this.headsTo(d);
 		};
 	}
 	widths.heading = function (l, r, d) {
 		return function () {
 			if (this.setWidth) this.setWidth(l, r);
-			return this.headsTo ? this.headsTo(d) : void 0;
+			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.lhs.heading = function (w, d) {
 		return function () {
 			if (this.setWidth) this.setWidth(fallback(w, Stroke), 0);
-			return this.headsTo ? this.headsTo(d) : void 0;
+			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.rhs.heading = function (w, d) {
 		return function () {
 			if (this.setWidth) this.setWidth(0, fallback(w, Stroke));
-			return this.headsTo ? this.headsTo(d) : void 0;
+			if (this.headsTo) this.headsTo(d);
 		};
 	};
 	widths.center.heading = function (w, d) {
 		return function () {
 			if (this.setWidth) this.setWidth(fallback(w, Stroke) / 2, fallback(w, Stroke) / 2);
-			return this.headsTo ? this.headsTo(d) : void 0;
+			if (this.headsTo) this.headsTo(d);
 		};
 	};
+
 	function disableContrast() {
 		return function () {
-			return (this.contrast = 1);
+			if (this.setContrast) this.setContrast(1);
 		};
 	}
 	function unimportant() {
-		return this.setUnimportant ? this.setUnimportant() : void 0;
+		if (this.setUnimportant) this.setUnimportant(1);
 	}
 	function important() {
 		return void 0;
 	}
+
 	function afInterpolate(before, after, args) {
 		return g4(
 			mix(before.x, after.x, args.rx),
@@ -272,23 +247,24 @@ export function SetupBuilders(bindings) {
 	}
 
 	function alsoThru(rx, ry, raf) {
-		return { type: "interpolate", rx, ry, raf, blender: afInterpolate };
+		return Interpolator(afInterpolate, { rx, ry, raf });
 	}
 	alsoThru.withOffset = function (rx, ry, deltaX, deltaY, raf) {
-		return { type: "interpolate", rx, ry, deltaX, deltaY, raf, blender: afInterpolateDelta };
+		return Interpolator(afInterpolateDelta, { rx, ry, deltaX, deltaY, raf });
 	};
 	alsoThru.g2 = function (rx, ry, raf) {
-		return { type: "interpolate", rx, ry, raf, blender: afInterpolateG2 };
+		return Interpolator(afInterpolateG2, { rx, ry, raf });
 	};
-	function alsoThruThem(es, raf, ty) {
-		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThem };
+	function alsoThruThem(rs, raf, ty) {
+		return Interpolator(afInterpolateThem, { rs, raf, ty });
 	}
-	alsoThruThem.withOffset = function (es, raf, ty) {
-		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThemWithDelta };
+	alsoThruThem.withOffset = function (rs, raf, ty) {
+		return Interpolator(afInterpolateThemWithDelta, { rs, raf, ty });
 	};
-	alsoThruThem.fromTWithOffset = function (es, raf, ty) {
-		return { type: "interpolate", rs: es, raf, ty, blender: afInterpolateThemFromTWithDelta };
+	alsoThruThem.fromTWithOffset = function (rs, raf, ty) {
+		return Interpolator(afInterpolateThemFromTWithDelta, { rs, raf, ty });
 	};
+
 	function bezControlsImpl(x1, y1, x2, y2, samples, raf, ty) {
 		let rs = [];
 		for (let j = 1; j < samples; j = j + 1)
@@ -312,6 +288,7 @@ export function SetupBuilders(bindings) {
 			raf
 		);
 	}
+
 	let DEFAULT_STEPS = 6;
 	let [buildHV, buildVH] = (function (cache) {
 		function build(samples, _superness) {
