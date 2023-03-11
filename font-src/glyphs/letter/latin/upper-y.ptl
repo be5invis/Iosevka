@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Latin-X : HalfXStrand
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
-	glyph-block-import Letter-Shared-Shapes : SerifFrame WithAIHSerifsMask
+	glyph-block-import Letter-Shared-Shapes : SerifFrame WithSerifOverflowMask
 
 	define BODY-CURLY    0
 	define BODY-STRAIGHT 1
@@ -32,11 +32,14 @@ glyph-block Letter-Latin-Upper-Y : begin
 			[Just SLAB-MOTION] : include sf.lt.outer
 			[Just SLAB-BASE] : include : HSerif.mb Middle bot MidJutSide
 
-	define [YShape bodyType top bot] : glyph-proc
+	define [YShape bodyType slabType top bot] : glyph-proc
 		local cross : YCrossPos top bot
-		include : tagged 'strokeLT' : WithAIHSerifsMask CAP 0 SB RightSB
+		local maskLT : slabType == SLAB-ALL || slabType == SLAB-MOTION
+		local maskRT : slabType == SLAB-ALL
+
+		include : tagged 'strokeLT' : WithSerifOverflowMask maskLT CAP 0 SB RightSB
 			HalfXStrand bodyType SLAB SB top Middle cross 0.1 0.4 0.28
-		include : tagged 'strokeRT' : WithAIHSerifsMask CAP 0 SB RightSB
+		include : tagged 'strokeRT' : WithSerifOverflowMask maskRT CAP 0 SB RightSB
 			HalfXStrand bodyType SLAB RightSB top Middle cross 0.1 0.4 0.28
 		include : VBar.m Middle bot (cross + HalfStroke)
 		set-base-anchor 'overlay' Middle cross
@@ -66,8 +69,8 @@ glyph-block Letter-Latin-Upper-Y : begin
 			quadControls 0.55 0.7 32 unimportant
 			g4 (Middle + Stroke / 2 * HVContrast) cross [widths.rhs : AdviceStroke 3.5]
 
-	define [YHookTopShape bodyType top bot] : glyph-proc
-		include : YShape bodyType top bot
+	define [YHookTopShape bodyType slabType top bot] : glyph-proc
+		include : YShape bodyType slabType top bot
 		eject-contour 'strokeRT'
 		include : YHookRightHookedStroke top bot
 
@@ -91,7 +94,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 	foreach { suffix { bodyType slabType } } [Object.entries YConfig] : do
 		create-glyph "Y.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : YShape bodyType CAP 0
+			include : YShape bodyType slabType CAP 0
 			include : YSlabs slabType CAP 0
 
 		create-glyph "grek/Upsilon.\(suffix)" : glyph-proc
@@ -101,18 +104,18 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 		create-glyph "smcpY.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : YShape bodyType XH 0
+			include : YShape bodyType slabType XH 0
 			include : YSlabs slabType XH 0
 
 		create-glyph "YHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : YHookTopShape bodyType CAP 0
+			include : YHookTopShape bodyType slabType CAP 0
 			include : YSlabs slabType CAP 0
 			eject-contour 'serifRT'
 
 		create-glyph "cyrl/ue.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : YShape bodyType XH Descender
+			include : YShape bodyType slabType XH Descender
 			include : YSlabs slabType XH Descender
 
 		create-glyph "grek/upsilonHookedSymbolShape.\(suffix)" : glyph-proc
@@ -152,7 +155,7 @@ glyph-block Letter-Latin-Upper-Y : begin
 
 	CreateAccentedComposition 'cyrl/KazakhShortU' 0x4B0 'cyrl/Ue' 'barOver'
 	CreateAccentedComposition 'cyrl/KazakhShortu' 0x4B1 'cyrl/ue' 'barOver'
-	
+
 	# Blackboard
 	glyph-block-import Letter-Blackboard : BBS BBD
 	create-glyph 'mathbb/Y' 0x1D550 : glyph-proc

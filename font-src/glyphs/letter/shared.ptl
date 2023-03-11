@@ -369,16 +369,17 @@ glyph-block Letter-Shared-Shapes : begin
 	glyph-block-export ConnectedCedilla
 	define [ConnectedCedilla src sel] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : add-glyph-dependency 'cedillaExtShapeBelow'
 		include : difference
 			new-glyph : glyph-proc
 				include [refer-glyph src] AS_BASE ALSO_METRICS
 				currentGlyph.clearGeometry
 				include : refer-glyph 'cedillaExtShapeBelow'
-			WithTransform [Translate (Stroke * 0.25 * TanSlope) (Stroke * 0.25)] [refer-glyph src]
-			WithTransform [Translate (Stroke * 0.50 * TanSlope) (Stroke * 0.50)] [refer-glyph src]
-			WithTransform [Translate (Stroke * 0.75 * TanSlope) (Stroke * 0.75)] [refer-glyph src]
-			WithTransform [Translate (Stroke * 1.00 * TanSlope) (Stroke * 1.00)] [refer-glyph src]
-			WithTransform [Translate (Stroke * 1.25 * TanSlope) (Stroke * 1.25)] [refer-glyph src]
+			WithTransform [ApparentTranslate 0 (Stroke * 0.25)] [refer-glyph src]
+			WithTransform [ApparentTranslate 0 (Stroke * 0.50)] [refer-glyph src]
+			WithTransform [ApparentTranslate 0 (Stroke * 0.75)] [refer-glyph src]
+			WithTransform [ApparentTranslate 0 (Stroke * 1.00)] [refer-glyph src]
+			WithTransform [ApparentTranslate 0 (Stroke * 1.25)] [refer-glyph src]
 		include : refer-glyph 'blankBelow'
 
 	glyph-block-export SerifedArcStart_RtlLhs
@@ -390,7 +391,7 @@ glyph-block Letter-Shared-Shapes : begin
 				sx - (barSw - fine) * HVContrast
 				cy - hook + O * 2
 				widths.lhs.heading fine Upward
-			arcvh
+			arcvh.superness 2
 			ShoulderMidKnotLhs cx (cy - O) fine sw (-1) (-1)
 			archv
 
@@ -403,7 +404,7 @@ glyph-block Letter-Shared-Shapes : begin
 				sx + (barSw - fine) * HVContrast
 				cy - hook + O * 2
 				widths.rhs.heading fine Upward
-			arcvh
+			arcvh.superness 2
 			ShoulderMidKnotRhs cx (cy - O) fine sw (+1) (-1)
 			archv
 
@@ -414,7 +415,7 @@ glyph-block Letter-Shared-Shapes : begin
 		return : list
 			arcvh
 			ShoulderMidKnotRhs cx (cy + O) fine sw (-1) (+1)
-			archv
+			archv.superness 2
 			g4.up.end
 				sx + (barSw - fine) * HVContrast
 				cy + hook - O * 2
@@ -427,7 +428,7 @@ glyph-block Letter-Shared-Shapes : begin
 		return : list
 			arcvh
 			ShoulderMidKnotLhs cx (cy + O) fine sw (+1) (+1)
-			archv
+			archv.superness 2
 			g4.up.end
 				sx - (barSw - fine) * HVContrast
 				cy + hook - O * 2
@@ -497,9 +498,11 @@ glyph-block Letter-Shared-Shapes : begin
 		return : VBar.r cx (cy + hook + DToothlessRise / 2) (cy + DToothlessRise) [ArcStartSerifWidth stroke]
 
 	glyph-block-export ArcStartHookTop
-	define [ArcStartHookTop cx cy sw hookX hookY] : union
-		VBar.r cx (cy - hookY + O * 2) cy sw
-		VerticalHook.r cx cy hookX (-hookY) sw
+	define [ArcStartHookTop cx cy stroke hookX hookY] : begin
+		local sw : ArcStartSerifWidth stroke
+		return : union
+			VBar.r cx (cy - hookY + O * 2) cy sw
+			VerticalHook.r cx cy hookX (-hookY) sw
 
 	define DiagTailDefaultAngle 40
 
@@ -600,8 +603,10 @@ glyph-block Letter-Shared-Shapes : begin
 				outer    : tagged 'serifRB' : HSerif.rb right bot SideJut sw
 				inner    : tagged 'serifRB' : HSerif.lb rBarInner bot sideJutIn sw
 
-	glyph-block-export WithAIHSerifsMask
-	define [WithAIHSerifsMask top bottom left right s] : begin
+	glyph-block-export WithSerifOverflowMask
+	define [WithSerifOverflowMask fEnable top bottom left right s] : begin
+		if [not fEnable] : return s
+
 		local leftCenter : left + HalfStroke * HVContrast
 		local rightCenter : right - HalfStroke * HVContrast
 		local adj : TanSlope * Stroke * DesignParameters.serifShiftX

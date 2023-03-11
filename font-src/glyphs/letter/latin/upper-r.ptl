@@ -16,8 +16,8 @@ glyph-block Letter-Latin-Upper-R : begin
 	define LEG-SHAPE-STRAIGHT 1
 	define LEG-SHAPE-STANDING 2
 
-	define [RLegTerminalX legShape right sw] : right - [if legShape (OX * 2) 0] - sw / 2 * HVContrast
-	define [RSlabExtraShift slab sw] : if slab (-Jut / 2 + 0.25 * sw * HVContrast) 0
+	define [RLegTerminalX legShape right sw] : right - [if legShape (OX * 2) 0]
+	define [RSlabExtraShift slab sw] : if slab (-Jut / 2 + 0.5 * sw * HVContrast) 0
 	define [RLegDiagCor top bottom left right extraShift sw] : DiagCor (top - bottom) (right - left - extraShift) 0 sw
 
 	define [RStandingLegFine sw] : sw * CThinB
@@ -25,14 +25,18 @@ glyph-block Letter-Latin-Upper-R : begin
 	define [RStandingBottomOverflow slab] : if slab 0 (2 * OX)
 
 	define [RLegShape-Straight] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
-		local xRightBottom : RLegTerminalX LEG-SHAPE-STRAIGHT right sw
 		local shift : RSlabExtraShift slab sw
-		include : dispiro
-			widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
-			corner (left + extraShift + shift / 2) top [heading Downward]
-			corner (xRightBottom + shift) bottom [heading Downward]
+		local xLeftTop : Math.max (PShape.BarPos + sw * HVContrast) (left - 0.5 * sw * HVContrast + shift)
+		local xRightBottom : [RLegTerminalX LEG-SHAPE-STRAIGHT right sw] + shift
+		local xRightBottomSerifStart : xRightBottom - 0.25 * sw * HVContrast
+		include : intersection
+			Rect top bottom (-Width) [if slab xRightBottomSerifStart (2 * Width)]
+			dispiro
+				corner xLeftTop     top    [widths.lhs sw]
+				corner xRightBottom bottom [widths.rhs sw]
+
 		if slab : begin
-			include : HSerif.rb (xRightBottom + shift + 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+			include : HSerif.rb xRightBottomSerifStart bottom (SideJut + Jut / 8)
 
 	define [RLegShape-Curly] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
 		local xRightBottom : RLegTerminalX LEG-SHAPE-CURLY right sw
@@ -40,7 +44,7 @@ glyph-block Letter-Latin-Upper-R : begin
 			Rect top bottom (-Width) (2 * Width)
 			dispiro
 				widths.center sw
-				g4.up.start xRightBottom bottom [heading Upward]
+				g4.up.start (xRightBottom - 0.5 * sw * HVContrast) bottom [heading Upward]
 				quadControls 0 0.4 8
 				g4 left top
 		if slab : begin
@@ -65,17 +69,21 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	define RLegShapes { RLegShape-Curly RLegShape-Straight RLegShape-Standing }
 
-	define [RevRLegTerminalX legShape left sw] : left + [if legShape (OX * 2) 0] + sw / 2 * HVContrast
+	define [RevRLegTerminalX legShape left sw] : left + [if legShape (OX * 2) 0]
 
 	define [RevRLegShape-Straight] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
-		local xLeftBottom : RevRLegTerminalX LEG-SHAPE-STRAIGHT left sw
 		local shift : RSlabExtraShift slab sw
-		include : dispiro
-			widths.center (sw * [RLegDiagCor top bottom left right extraShift sw])
-			corner (right - extraShift - shift / 2) top [heading Downward]
-			corner (xLeftBottom - shift) bottom [heading Downward]
+		local xLeftBottom : [RevRLegTerminalX LEG-SHAPE-STRAIGHT left sw] - shift
+		local xLeftBottomSerifStart : xLeftBottom + 0.25 * sw * HVContrast
+		local xRightTop : Math.min (RightSB - PShape.BarPos - sw * HVContrast) (right + 0.5 * sw * HVContrast - shift)
+
+		include : intersection
+			Rect top bottom [if slab xLeftBottomSerifStart (-Width)] (2 * Width)
+			dispiro
+				corner xRightTop   top    [widths.rhs sw]
+				corner xLeftBottom bottom [widths.lhs sw]
 		if slab : begin
-			include : HSerif.lb (xLeftBottom - shift - 0.25 * sw * HVContrast) bottom (SideJut + Jut / 8)
+			include : HSerif.lb xLeftBottomSerifStart bottom (SideJut + Jut / 8)
 
 	define [RevRLegShape-Curly] : params [top bottom left right charTop slab sw extraShift] : glyph-proc
 		local xLeftBottom : RevRLegTerminalX LEG-SHAPE-CURLY left sw
@@ -83,7 +91,7 @@ glyph-block Letter-Latin-Upper-R : begin
 			Rect top 0 (-Width) (2 * Width)
 			dispiro
 				widths.center sw
-				g4.up.start xLeftBottom bottom [heading Upward]
+				g4.up.start (xLeftBottom + 0.5 * sw * HVContrast) bottom [heading Upward]
 				quadControls 0 0.4 8
 				g4 right top
 		if slab : begin
