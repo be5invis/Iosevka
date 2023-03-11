@@ -15,14 +15,6 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 	define DESCENDING 1
 	define TAILED     2
 
-	local ymiddle : [mix 0 Ascender 0.5] - HalfStroke
-	local ymiddleCap : [mix 0 Ascender 0.54] - HalfStroke
-	local xmiddle : Math.max (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
-	local xmiddleBot : Math.max (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
-	local xfinal : Math.min
-		xmiddle - 1 - Stroke * TanSlope
-		Math.max (SB + Stroke * 2) [mix SB RightSB (1 / 4)]
-
 	define [TraditionalBody fFlathook slab tail] : glyph-proc
 		include : MarkSet.b
 		local l : SB * 1
@@ -66,24 +58,31 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 
 
 	define [SulzbacherBody slab tail] : glyph-proc
+		define ymiddle : [mix 0 Ascender 0.5] - HalfStroke
+		define xFinal : Math.max
+			mix (SB + Stroke * HVContrast) RightSB 0.1
+			mix SB RightSB 0.3
+		define xMiddle : Math.max xFinal (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
+		define xMiddleBot : Math.max xMiddle (xFinal + 0.01 + TanSlope * Stroke)
+
 		include : MarkSet.b
 		include : dispiro
 			widths.rhs
 			flat SB 0 [heading Upward]
 			curl SB XH
 			arcvh
-			g4 (Middle + O) (Ascender - O)
+			g4 (Middle - CorrectionOMidS) (Ascender - O)
 			archv
-			g4 (RightSB + O * 2) [mix Ascender ymiddle 0.47]
-			g4.left.end xmiddle ymiddle [heading Leftward]
+			g4 (RightSB + O * 2) [YSmoothMidR ymiddle Ascender]
+			g4.left.end xMiddle ymiddle [heading Leftward]
 		include : dispiro
 			widths.rhs
-			g4.right.start xmiddle (ymiddle + Stroke) [heading Rightward]
+			g4.right.start xMiddle (ymiddle + Stroke) [heading Rightward]
 			archv
-			g4   (RightSB - O) [mix 0 (ymiddle + Stroke) 0.5]
+			g4   (RightSB - O) [YSmoothMidR (ymiddle + Stroke) 0]
 			arcvh
-			flat xmiddleBot 0
-			curl xfinal 0 [heading Leftward]
+			flat xMiddleBot 0 [heading Leftward]
+			curl xFinal 0 [heading Leftward]
 
 		if slab : include : HSerif.lb SB 0 SideJut
 		include : match tail
@@ -98,7 +97,7 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 		define swOuter : AdviceStroke2 2 3 Ascender
 		define strokeCoeff : StrokeWidthBlend 0 1 swInner
 		define sEndX : Math.max
-			SB + swOuter * HVContrast + (RightSB - SB - Stroke) * 0.1
+			mix (SB + Stroke * HVContrast) RightSB 0.1
 			mix SB RightSB 0.3
 		define swInner : AdviceStroke2 2.5 3 Ascender
 		define ess: swInner * EssLower / Stroke
@@ -125,7 +124,7 @@ glyph-block Letter-Latin-Lower-Eszet : begin
 			alsoThru.g2 0.5 0.50 [widths.center swInner]
 			g4 (RightSB - OX) (innerSmoothB - 2 * TanSlope * swInner) [widths.rhs.heading swInner Downward]
 			arcvh
-			flat ([Math.max (sEndX + 1) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 + TanSlope * swInner ) 0
+			flat ([Math.max (sEndX + 0.1 + TanSlope * swInner) : Math.min (RightSB - innerSmoothB) [mix sEndX RightSB 0.375]] + CorrectionOMidX * swInner / 2 + TanSlope * swInner ) 0
 			curl sEndX 0 [heading Leftward]
 
 		if slab : include : HSerif.lb SB 0 SideJut
@@ -154,35 +153,37 @@ glyph-block Letter-Latin-Upper-Eszet : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	local ymiddle : [mix 0 CAP 0.5] - HalfStroke
-	local ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
-	local xmiddle : Math.max (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
-	local xmiddleBot : Math.max (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
-	local xfinal : Math.min
-		xmiddle - 1 - Stroke * TanSlope
-		Math.max (SB + Stroke * 2) [mix SB RightSB (1 / 4)]
 
 	create-glyph 'Eszet' 0x1E9E : glyph-proc
 		include : MarkSet.capital
-		local rightTopX : RightSB + O * 4
+
+		define ymiddle : [mix 0 CAP 0.5] - HalfStroke
+		define ymiddleCap : [mix 0 CAP 0.54] - HalfStroke
+		define xFinal : Math.max
+			mix (SB + Stroke * HVContrast) RightSB 0.1
+			mix SB RightSB 0.3
+		define xMiddle : Math.max xFinal (SB + Stroke * HVContrast * 1.2) (RightSB - ymiddle / 2 - Stroke * 0.75)
+		define xMiddleBot : Math.max xMiddle (xFinal + 0.01 + TanSlope * Stroke)
+		define rightTopX : RightSB + O
+
 		include : dispiro
 			widths.lhs
-			flat rightTopX CAP
+			flat rightTopX CAP [heading Leftward]
 			curl Middle CAP
 			archv
 			flat SB XH
 			curl SB 0 [heading Downward]
 		include : dispiro
 			widths.rhs
-			g4   xmiddle (ymiddleCap + Stroke) [heading Rightward]
+			g4   xMiddle (ymiddleCap + Stroke) [heading Rightward]
 			archv
-			g4   (RightSB - O * 2) [mix 0 (ymiddleCap + Stroke) 0.5]
+			g4   (RightSB - O * 2) [YSmoothMidR (ymiddleCap + Stroke) 0]
 			arcvh
-			flat xmiddleBot 0
-			curl xfinal 0 [heading Leftward]
+			flat xMiddleBot 0
+			curl xFinal 0 [heading Leftward]
 		include : dispiro
 			widths.rhs
 			g4 rightTopX (CAP - Stroke)
-			g4 xmiddle (ymiddleCap + Stroke) [widths Stroke 0]
-		if SLAB : include : HSerif.lb SB 0 SideJut
+			g4 xMiddle (ymiddleCap + Stroke) [widths Stroke 0]
 
+		if SLAB : include : HSerif.lb SB 0 SideJut

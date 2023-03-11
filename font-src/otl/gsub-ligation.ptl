@@ -454,8 +454,9 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 			define heads {}
 			define rods  {}
 
-			define doLT : [not ltgt] || [hasLG 'arrow-l']         && [hasLG 'arrowZALE']
-			define doRT : [not ltgt] || [hasLG 'counter-arrow-r'] && [hasLG 'arrowZAGE']
+			define doLT    : [not ltgt] || [hasLG 'arrow-l']         && ![hasLG 'lteq']
+			define doLTAlt : [not ltgt] || [hasLG 'counter-arrow-l'] && ![hasLG 'eqlt']
+			define doRT    : [not ltgt] || [hasLG 'counter-arrow-r'] && ![hasLG 'gteq']
 
 			# Disable regular expression lookaheads
 			heads.push : chain-rule
@@ -496,8 +497,8 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 			define [RAntiHeadForceShiftN1]  : if [hasLG 'counter-arrow-r'] [CAntiHeadForceShiftN1] advance
 
 			# Ambiguous
-			define LAntiHeadAmbig LAntiHeadForce
-			define RJoinHeadAmbig RJoinHeadForce
+			define [LAntiHeadAmbig] : if doLTAlt [LAntiHeadForce] advance
+			define RJoinHeadAmbig     RJoinHeadForce
 			define [LJoinHeadAmbig] : if doLT [LJoinHeadForce] advance
 			define [RAntiHeadAmbig] : if doRT [RAntiHeadForce] advance
 
@@ -543,6 +544,7 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 					rodCls  ~> look-around
 					less    ~> [LMiddleHead]
 					rodCls  ~> look-around
+
 			begin "Boundary"
 				heads.push : chain-rule # = > >
 					rodCls  ~> look-around
@@ -592,6 +594,7 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 					less    ~> [LJoinHeadForce]
 					rodCls  ~> look-around
 					arrowIndicator ~> look-around
+
 			begin "Ambiguous"
 				heads.push : chain-rule # = >
 					rodCls  ~> look-around
@@ -867,30 +870,68 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 					equal       ~> [lsx 'cf']
 
 	# <= and >=
-	LigGroup "inequals" : begin
+	LigGroup "inequals" : if ([hasLG 'lteq'] || [hasLG 'eqlt'] || [hasLG 'gteq']) : begin
 		define acops {'less' 'greater' 'hyphen' 'equal' 'plus' 'slash' 'bar' 'backslash'}
 		CreateLigationLookup : list
 			# Disable regular expression lookaheads
-			if [hasLG 'ineq'] :  chain-rule
+			chain-rule
 				{'parenLeft'} ~>look-around
 				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
-			if [hasLG 'ineq'] : chain-rule
+			chain-rule
 				{'parenLeft'} ~> look-around
 				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 				regexLookAround ~> advance
-			if [hasLG 'ineq'] : chain-rule
+			chain-rule
 				{'parenLeft'} ~> look-around
 				{'question'}  ~> look-around
 				regexLookAround ~> advance
 				regexLookAround ~> advance
 
-			# <>
+			if [hasLG 'lteq'] : chain-rule
+				acops                 ~> look-around
+				lessAndEquiv          ~> advance
+				equal                 ~> advance
+			if [hasLG 'lteq'] : chain-rule
+				lessAndEquiv          ~> advance
+				equal                 ~> advance
+				acops                 ~> look-around
+			if [hasLG 'lteq'] : chain-rule
+				lessAndEquiv          ~> [just 'less.lig2']
+				equal                 ~> {'eq.at-lteq.lig2'}
+
+			if [hasLG 'eqlt'] : chain-rule
+				acops                 ~> look-around
+				equal                 ~> advance
+				lessAndEquiv          ~> advance
+			if [hasLG 'eqlt'] : chain-rule
+				equal                 ~> advance
+				lessAndEquiv          ~> advance
+				acops                 ~> look-around
+			if [hasLG 'eqlt'] : chain-rule
+				equal                 ~> [just 'less.lig2']
+				lessAndEquiv          ~> {'eq.at-lteq.lig2'}
+
+			if [hasLG 'gteq'] : chain-rule
+				acops                 ~> look-around
+				greaterAndEquiv       ~> advance
+				equal                 ~> advance
+			if [hasLG 'gteq'] : chain-rule
+				greaterAndEquiv       ~> advance
+				equal                 ~> advance
+				acops                 ~> look-around
+			if [hasLG 'gteq'] : chain-rule
+				greaterAndEquiv       ~> [just 'greater.lig2']
+				equal                 ~> {'eq.at-gteq.lig2'}
+
+	# <>
+	LigGroup "less-greater" : begin
+		CreateLigationLookup : list
 			piecewise
 				[hasLG 'ltgt-diamond'] : chain-rule
 					lessAndEquiv    ~> [just 'less.lig.diamond']
@@ -902,23 +943,9 @@ define [buildLigationsImpl sink para $LigGroup$] : begin
 					lessAndEquiv    ~> [just 'neq.bar-only.2l']
 					greaterAndEquiv ~> [just 'equal.lig.xf']
 
-			# <=, >=
-			if [hasLG 'ineq'] : chain-rule
-				acops                 ~> look-around
-				lessOrGreaterAndEquiv ~> advance
-				equal                 ~> advance
-			if [hasLG 'ineq'] : chain-rule
-				lessOrGreaterAndEquiv ~> advance
-				equal                 ~> advance
-				acops                 ~> look-around
-			if [hasLG 'ineq'] : chain-rule
-				lessAndEquiv          ~> [just 'less.lig2']
-				equal                 ~> {'eq.at-lteq.lig2'}
-			if [hasLG 'ineq'] : chain-rule
-				greaterAndEquiv       ~> [just 'greater.lig2']
-				equal                 ~> {'eq.at-gteq.lig2'}
-
-			# </, /> and </>
+	# </, /> and </>
+	LigGroup "ltgt-slash-tag" : begin
+		CreateLigationLookup : list
 			if [hasLG 'ltgt-slash-tag'] : chain-rule
 				lessAndEquiv    ~> [just 'less.lig.tag-slash']
 				slash           ~> look-around

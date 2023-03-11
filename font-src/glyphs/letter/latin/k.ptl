@@ -12,10 +12,10 @@ glyph-block Letter-Latin-K : begin
 	glyph-block-import Letter-Shared-Shapes : DiagonalTailInnerRadius DiagonalTailF CyrDescender
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook HooktopLeftBar
 
-	local [KBalance slabLegs straightBar] : if slabLegs (Width / 16) : if straightBar (Width / 32) 0
-	local [KBalanceRight slabLegs straightBar] : if slabLegs 0 : if straightBar (Width / 32) 0
+	local [KBalance slabLegs straightBar]             : if slabLegs (Width / 16) : if straightBar (Width / 32) 0
+	local [KBalanceRight slabLegs straightBar]        : if slabLegs 0 : if straightBar (Width / 32) 0
 	local [KBalanceRightCursive slabLegs straightBar] : if slabLegs (Width / 32) : if straightBar (Width / 32) 0
-	local [KO slabLegs straightBar top stroke] : if straightBar (([if slabLegs (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
+	local [KO slabLegs straightBar top stroke]        : if straightBar (([if slabLegs (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
 	define [KAttachment shape mode top left right stroke straightBar] : begin
 		if [not shape] : return [no-shape]
@@ -35,266 +35,275 @@ glyph-block Letter-Latin-K : begin
 		include : tagged 'serifRT' : if [maskBit mode 1] [HSerif.rt (kshRight - serifLengthAdj) top (SideJut + serifLengthAdj)] [no-shape]
 		include : tagged 'serifRB' : if [maskBit mode 0] [HSerif.rb (kshRight - serifLengthAdj) 0   (SideJut + serifLengthAdj)] [no-shape]
 
-	define [KStraightLegShapeImpl fHookTop left right stroke top slabLeft slabLegs attachment] : glyph-proc
-		local fine : AdviceStroke 3.5
-		local Ok : KO slabLegs true top stroke
-		local kshLeft : left + [KBalance slabLeft true]
-		local kshRightBot : right + [KBalanceRight slabLegs true]
-		local kshRightTop : if fHookTop (kshRightBot - HookX * 0.5 + 0.5 * stroke * HVContrast) kshRightBot
+	define KLegs : namespace
+		export : define [Straight fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
+			local fine : AdviceStroke 3.5
+			local Ok : KO slabLegs true top stroke
+			local kshLeft : left + [KBalance slabLT true]
+			local kshRightBot : right + [KBalanceRight slabLegs true]
+			local kshRightTop : if fHookTop (kshRightBot - HookX * 0.5 + 0.5 * stroke * HVContrast) kshRightBot
 
-		local attach (top * 0.42 - stroke)
-		local attach2 (top * 0.72 + stroke)
+			local attach (top * 0.42 - stroke)
+			local attach2 (top * 0.72 + stroke)
 
-		set-base-anchor 'trailing' (kshRightBot - Ok) 0
+			set-base-anchor 'trailing' (kshRightBot - Ok) 0
 
-		define [TopStrokeMask offset] : Rect top 0 kshLeft [if [maskBit slabLegs 1] (kshRightTop + offset) (2 * Width)]
-		if [not fHookTop] : include : intersection
-			TopStrokeMask 0
-			dispiro
-				widths.rhs stroke
-				flat (kshRightTop - Ok) top
-				curl (kshLeft + stroke) attach [widths 0 fine]
+			local kshRightSerifs : right + [KBalanceRight true true]
+			local serifLengthAdj : Ok + stroke * HVContrast
+			define [TopStrokeMask offset]    : Rect top 0 kshLeft [if [maskBit slabLegs 1] (kshRightSerifs - serifLengthAdj + offset + SideJut + serifLengthAdj - TanSlope * Stroke) (2 * Width)]
+			define [BottomStrokeMask offset] : Rect top 0 kshLeft [if [maskBit slabLegs 0] (kshRightSerifs - serifLengthAdj + offset + SideJut + serifLengthAdj + TanSlope * Stroke) (2 * Width)]
 
-		define kHookTopMix 0.5
-		if fHookTop : include : dispiro
-			widths.rhs stroke
-			straight.left.start (kshRightBot + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
-			flat [mix (kshRightTop - Ok) (kshLeft + stroke) kHookTopMix] [mix top attach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
-			curl (kshLeft + stroke) attach [widths.rhs fine]
-
-		include : intersection
-			spiro-outline
-				corner (kshLeft + stroke) 0
-				corner (kshLeft + stroke) (attach + 1)
-				corner (kshRightTop - Ok - 0.1) top
-				corner (kshRightBot - Ok) top
-				corner (kshRightBot - Ok) 0
-			dispiro
-				widths.lhs stroke
-				flat (kshRightBot - Ok) 0
-				curl (kshLeft + stroke) attach2
-
-		include : difference
-			union
-				KSlabs                 slabLegs top left right stroke true
-				KAttachment attachment slabLegs top left right stroke true
-			union
-				HalfRectTriangle (kshRightBot - Ok - 0.1) 0 (kshLeft + stroke - 0.1) attach2
-				intersection
-					TopStrokeMask (-0.1)
-					HalfRectTriangle (kshRightTop - Ok - 0.1) top (kshLeft + stroke - 0.1) attach
-
-	define [KSymmetricLegsImpl leadGap hookDepth] : function [fHookTop left right stroke top slabLeft slabLegs attachment] : glyph-proc
-		local fine : AdviceStroke [if leadGap 3.5 3]
-		local Ok : KO slabLegs true top stroke
-
-		local kshLeft : left + [KBalance slabLeft true]
-		local kshRight : right + [KBalanceRight slabLegs true]
-
-		local xAttach : kshLeft + stroke * HVContrast + (leadGap || fine)
-		local yAttach : top * [if leadGap 0.42 0.49] - stroke * [if leadGap 1 (-0.1)]
-		local coYAttach : top - yAttach
-
-		if [not hookDepth] : set-base-anchor 'trailing' (kshRight - Ok) 0
-
-		define [StrokeMask t b offset] : Rect t b kshLeft [if [maskBit slabLegs 1] (kshRight + offset) (2 * Width)]
-		if [not fHookTop] : include : tagged 'strokeRT' : intersection
-			StrokeMask top (0.5 * top) 0
-			dispiro
-				widths.rhs stroke
-				flat (kshRight - Ok) top
-				curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
-
-		define kHookTopMix 0.5
-		define kshRightHookTop : kshRight - HookX * 0.5 + 0.5 * stroke * HVContrast
-		if fHookTop : include : tagged 'strokeRT' : intersection
-			Rect top (0.5 * top) kshLeft (2 * Width)
-			dispiro
-				widths.rhs stroke
-				straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
-				flat [mix (kshRightHookTop - Ok) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
-				curl [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
-
-		if [not hookDepth] : include : tagged 'strokeRB' : intersection
-			StrokeMask (0.5 * top) 0 0
-			dispiro
-				flat (kshRight - Ok) 0 [widths.lhs stroke]
-				curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
-
-		if (leadGap && !hookDepth) : include : intersection
-			HBar.m kshLeft (2 * Width) (0.5 * top) stroke
-			union
-				Rect top 0 kshLeft xAttach
-				spiro-outline
-					corner ([if fHookTop kshRightHookTop kshRight] - Ok - 1) top
-					corner (xAttach - 1) yAttach
-					corner (xAttach - 1) top
-				spiro-outline
-					corner (kshRight - Ok - 1) 0
-					corner (xAttach - 1) coYAttach
-					corner (xAttach - 1) 0
-
-		if hookDepth : include : dispiro
-			flat kshLeft (0.5 * top + stroke / 2) [widths.rhs.heading stroke Rightward]
-			curl [mix kshLeft right 0.5] (0.5 * top + stroke / 2)
-			archv
-			flat right (0.5 * top + stroke / 2 - ArchDepthB)
-			curl right (hookDepth + Hook + stroke / 2)
-			arcvh
-			straight.left.end (right - HookX - 0.5 * stroke * HVContrast) hookDepth
-
-		include : difference
-			union
-				KSlabs                 slabLegs top left right stroke true
-				KAttachment attachment slabLegs top left right stroke true
-			union
-				intersection
-					StrokeMask top (0.5 * top) (-0.1)
-					HalfRectTriangle (kshRight - Ok - 0.1) top ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix top yAttach 2]
-				intersection
-					StrokeMask (0.5 * top) 0 (-0.1)
-					HalfRectTriangle (kshRight - Ok - 0.1) 0   ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix 0 coYAttach 2]
-
-	define [KCurlyLegShapeImpl fHookTop left right stroke top slabLeft slabLegs attachment] : glyph-proc
-		local turn : top * 0.99
-		local fine : AdviceStroke 3.5
-		local kshLeft : left + [KBalance slabLeft false]
-		local kshRight : right + [KBalanceRight slabLegs false]
-
-		set-base-anchor 'trailing' (kshRight - O) 0
-
-		define [upperCurvature] : bezControls 0 0.3 0.5 0.65 8
-		define [upperCurvatureHT] : bezControls 0.5 0 0.5 0.65 8 : object
-			blend : function [t] : widths.rhs : mix stroke fine t
-		define [lowerCurvature] : quadControls 0 0.3 8
-
-		local xAttach1 : kshLeft + stroke * HVContrast
-		local yAttach1 : top * [if slabLegs 0.325 0.375]
-		local xAttach2 : kshLeft + stroke * HVContrast
-		local yAttach2 : top * 0.75
-		local kDiag : mix 1 [DiagCorDs (top - yAttach1) (kshRight - kshLeft) stroke] 0.5
-		include : intersection
-			Rect top 0 kshLeft (2 * Width)
-			if fHookTop
+			if [not fHookTop] : include : intersection
+				TopStrokeMask 0
 				dispiro
-					straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke) [widths.rhs stroke]
-					upperCurvatureHT
-					g4 xAttach1 yAttach1 [widths.rhs fine]
+					widths.rhs stroke
+					flat (kshRightTop - Ok) top
+					curl (kshLeft + stroke) attach [widths 0 fine]
+
+			define kHookTopMix 0.5
+			if fHookTop : include : dispiro
+				widths.rhs stroke
+				straight.left.start (kshRightBot + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
+				flat [mix (kshRightTop - Ok) (kshLeft + stroke) kHookTopMix] [mix top attach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
+				curl (kshLeft + stroke) attach [widths.rhs fine]
+
+			include : intersection
+				BottomStrokeMask (-0.1)
+				spiro-outline
+					corner (kshLeft + stroke) 0
+					corner (kshLeft + stroke) (attach + 1)
+					corner (kshRightTop - Ok - 0.1) top
+					corner (kshRightBot - Ok) top
+					corner (kshRightBot - Ok) 0
 				dispiro
-					g4.down.start (kshRight) top [widths.rhs.heading stroke Downward]
-					upperCurvature
-					g4 xAttach1 yAttach1 [widths.rhs fine]
-		include : difference
-			dispiro
-				g4.up.start (kshRight - O) 0 [widths.lhs.heading stroke Upward]
-				lowerCurvature
-				g4 xAttach2 yAttach2 [widths.center fine]
-			if fHookTop
-				spiro-outline
-					straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke + 0.1)
-					upperCurvatureHT
-					corner (xAttach1 - 0.1) yAttach1
-					corner (-Width) yAttach1
-					corner (-Width) (top * 2)
-					corner (2 * Width) (top * 2)
-					corner (2 * Width) (top - stroke + 0.1)
-				spiro-outline
-					corner.down.start (kshRight - 0.1) top
-					upperCurvature
-					corner (kshLeft + stroke) (yAttach1 + 0.1)
-					corner kshLeft 0
-					corner kshLeft top
-		include : difference
-			union
-				KSlabs                 slabLegs top left right stroke false
-				KAttachment attachment slabLegs top left right stroke false
-			union
-				HalfRectTriangle kshRight top xAttach1 yAttach1
-				HalfRectTriangle (kshRight - O - stroke / 2 * HVContrast) 0 xAttach2 yAttach2
+					flat (kshRightBot - Ok) 0 [widths.lhs stroke]
+					curl (kshLeft + stroke) attach2 [widths.lhs fine]
 
-	define [KCursiveLoopAndLegDimen top straightBar slabLeft slabLegs] : begin
-		define kshLeft : SB + [KBalance slabLeft straightBar]
-		define kshRight : RightSB + [KBalanceRightCursive slabLegs straightBar] + 0.2 * Stroke
+			include : difference
+				union
+					KSlabs                 slabLegs top left right stroke true
+					KAttachment attachment slabLegs top left right stroke true
+				union
+					HalfRectTriangle (kshRightBot - Ok - 0.1) 0 (kshLeft + stroke - 0.1) attach2
+					intersection
+						TopStrokeMask (-0.1)
+						HalfRectTriangle (kshRightTop - Ok - 0.1) top (kshLeft + stroke - 0.1) attach
 
-		define arcFine : Stroke * CThin
-		define arcStroke : AdviceStroke2 2 3 top
-		define arcTerminalFine : AdviceStroke2 3 4 top
-		define expansion : Width / (UPM / 2) - 1
+		export : define [Symmetric leadGap hookDepth] : function [fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
+			local fine : AdviceStroke [if leadGap 3.5 3]
+			local Ok : KO slabLegs true top stroke
 
-		define pArcStartY    : 0.46 + 0.1 * (arcStroke / Width)
-		define pArcTopX      : 0.625 - 0.05 * (arcStroke / Width) - 0 * expansion * (arcStroke / UPM)
-		define pArcRightX    : 0.95 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
-		define pArcRightY    : 0.575 - 0.625 * (arcStroke / Width) - 0.5 * expansion * (arcStroke / UPM)
-		define pArcTerminalX : 0.15 - 0.5 * (arcStroke / Width)
-		define pArcBottomX   : 0.15 + 0.5 * (arcStroke / Width)
-		define pArcBottomY   : 0.45 + 0.5 * (arcStroke / Width)
+			local kshLeft : left + [KBalance slabLT true]
+			local kshRight : right + [KBalanceRight slabLegs true]
 
-		define arcRightSlope : 0.05 + 0.2 * (arcStroke / Width) + 1 * expansion * (arcStroke / UPM)
-		define arcTopSkew   : shoulderMidSkew arcFine arcStroke
+			local xAttach : kshLeft + stroke * HVContrast + (leadGap || fine)
+			local yAttach : top * [if leadGap 0.42 0.49] - stroke * [if leadGap 1 (-0.1)]
+			local coYAttach : top - yAttach
 
-		define arcStartX    : kshLeft + HVContrast * (Stroke - arcFine)
-		define arcStartY    : top * pArcStartY
-		define arcTerminalX : mix arcStartX kshRight pArcTerminalX
-		define arcBottomX   : mix arcStartX kshRight pArcBottomX
-		define arcBottomY   : mix 0 top pArcBottomY
-		define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
-		define arcRightX    : kshRight * pArcRightX
-		define arcRightY    : mix arcBottomY top pArcRightY
-		define arcTopX      : mix arcStartX arcRightX pArcTopX
-		define arcTopY      : top - O
+			if [not hookDepth] : set-base-anchor 'trailing' (kshRight - Ok) 0
 
-		define slabStartX   : kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
+			define [StrokeMask t b offset] : Rect t b kshLeft [if [maskBit slabLegs 1] (kshRight + offset) (2 * Width)]
+			if [not fHookTop] : include : tagged 'strokeRT' : intersection
+				StrokeMask top (0.5 * top) 0
+				dispiro
+					widths.rhs stroke
+					flat (kshRight - Ok) top
+					curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
-		return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSkew arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight slabStartX
+			define kHookTopMix 0.5
+			define kshRightHookTop : kshRight - HookX * 0.5 + 0.5 * stroke * HVContrast
+			if fHookTop : include : tagged 'strokeRT' : intersection
+				Rect top (0.5 * top) kshLeft (2 * Width)
+				dispiro
+					widths.rhs stroke
+					straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
+					flat [mix (kshRightHookTop - Ok) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
+					curl [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
-	define [KCursiveLoopAndLegShapeImpl tailed] : function [fHookTop left right stroke top slabLeft slabLegs attachment] : glyph-proc
-		define dim : KCursiveLoopAndLegDimen top true slabLeft slabLegs
-		include : dispiro
-			g4.up.start dim.arcStartX dim.arcStartY [widths.heading 0 dim.arcFine Upward]
-			arcvh 8 2.0
-			g4 dim.arcTopX dim.arcTopY
-				widths.rhs.heading dim.arcStroke {.y (+1) .x dim.arcTopSkew}
-			archv 8 2.0
-			g4.down.mid dim.arcRightX (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
-				heading {.y dim.arcRightSlope .x HVContrast}
-			arcvh
-			g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke) [widths.rhs.heading dim.arcTerminalFine Leftward]
-			g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke) [widths.rhs.heading dim.arcStroke Leftward]
+			if [not hookDepth] : include : tagged 'strokeRB' : intersection
+				StrokeMask (0.5 * top) 0 0
+				dispiro
+					flat (kshRight - Ok) 0 [widths.lhs stroke]
+					curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
 
-		define swDiagTail : AdviceStroke 2 (1 - (dim.kshLeft - SB) / Width)
-		define swDiagTailAdj : swDiagTail / [mix 1 HVContrast 0.375]
-		define xDTGap : 0.10 * (RightSB - SB) - (0.125 + [clamp 0 0.375 (0.5 * (Width / UPM * 2 - 1))]) * swDiagTail
-		define xDTStart : dim.arcTerminalX + swDiagTail * HVContrast + xDTGap
-		define xDTEnd : dim.kshRight - 0.8 * Hook - 0.25 * swDiagTail * HVContrast + xDTGap * 0.625
-		define tailAngle : Math.min 85 (50 + [Math.atan2 (0.75 * swDiagTail) Hook] / Math.PI * 180)
-		define dtInnerRadius : [clamp 0.125 1 : mix 1 (Width / UPM * 2) 3] * [DiagonalTailInnerRadius]
+			if (leadGap && !hookDepth) : include : intersection
+				HBar.m kshLeft (2 * Width) (0.5 * top) stroke
+				union
+					Rect top 0 kshLeft xAttach
+					spiro-outline
+						corner ([if fHookTop kshRightHookTop kshRight] - Ok - 1) top
+						corner (xAttach - 1) yAttach
+						corner (xAttach - 1) top
+					spiro-outline
+						corner (kshRight - Ok - 1) 0
+						corner (xAttach - 1) coYAttach
+						corner (xAttach - 1) 0
 
-		include : difference
-			if tailed
-				then : dispiro
-					flat xDTStart dim.arcTerminalY [widths.center swDiagTailAdj]
-					curl (xDTEnd + 0.125 * dtInnerRadius) (0.9 * swDiagTail + 0.5 * dtInnerRadius)
-					DiagonalTailF 1 [DivFrame 1] xDTEnd 0 dtInnerRadius tailAngle (Hook + swDiagTail / 4) swDiagTail
-				else : intersection
+			if hookDepth : include : dispiro
+				flat kshLeft (0.5 * top + stroke / 2) [widths.rhs.heading stroke Rightward]
+				curl [mix kshLeft right 0.5] (0.5 * top + stroke / 2)
+				archv
+				flat right (0.5 * top + stroke / 2 - ArchDepthB)
+				curl right (hookDepth + Hook + stroke / 2)
+				arcvh
+				straight.left.end (right - HookX - 0.5 * stroke * HVContrast) hookDepth
+
+			include : difference
+				union
+					KSlabs                 slabLegs top left right stroke true
+					KAttachment attachment slabLegs top left right stroke true
+				union
+					intersection
+						StrokeMask top (0.5 * top) (-0.1)
+						HalfRectTriangle (kshRight - Ok - 0.1) top ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix top yAttach 2]
+					intersection
+						StrokeMask (0.5 * top) 0 (-0.1)
+						HalfRectTriangle (kshRight - Ok - 0.1) 0   ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix 0 coYAttach 2]
+
+		export : define [Curly fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
+			local turn : top * 0.99
+			local fine : AdviceStroke 3.5
+			local kshLeft : left + [KBalance slabLT false]
+			local kshRight : right + [KBalanceRight slabLegs false]
+
+			set-base-anchor 'trailing' (kshRight - O) 0
+
+			define [upperCurvature] : bezControls 0 0.3 0.5 0.65 8
+			define [upperCurvatureHT] : bezControls 0.5 0 0.5 0.65 8 : object
+				blend : function [t] : widths.rhs : mix stroke fine t
+			define [lowerCurvature] : quadControls 0 0.3 8
+
+			local xAttach1 : kshLeft + stroke * HVContrast
+			local yAttach1 : top * [if slabLegs 0.325 0.375]
+			local xAttach2 : kshLeft + stroke * HVContrast
+			local yAttach2 : top * 0.75
+			local kDiag : mix 1 [DiagCorDs (top - yAttach1) (kshRight - kshLeft) stroke] 0.5
+			include : intersection
+				Rect top 0 kshLeft (2 * Width)
+				if fHookTop
+					dispiro
+						straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke) [widths.rhs stroke]
+						upperCurvatureHT
+						g4 xAttach1 yAttach1 [widths.rhs fine]
+					dispiro
+						g4.down.start (kshRight) top [widths.rhs.heading stroke Downward]
+						upperCurvature
+						g4 xAttach1 yAttach1 [widths.rhs fine]
+			include : difference
+				dispiro
+					g4.up.start (kshRight - O) 0 [widths.lhs.heading stroke Upward]
+					lowerCurvature
+					g4 xAttach2 yAttach2 [widths.center fine]
+				if fHookTop
+					spiro-outline
+						straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke + 0.1)
+						upperCurvatureHT
+						corner (xAttach1 - 0.1) yAttach1
+						corner (-Width) yAttach1
+						corner (-Width) (top * 2)
+						corner (2 * Width) (top * 2)
+						corner (2 * Width) (top - stroke + 0.1)
+					spiro-outline
+						corner.down.start (kshRight - 0.1) top
+						upperCurvature
+						corner (kshLeft + stroke) (yAttach1 + 0.1)
+						corner kshLeft 0
+						corner kshLeft top
+			include : difference
+				union
+					KSlabs                 slabLegs top left right stroke false
+					KAttachment attachment slabLegs top left right stroke false
+				union
+					HalfRectTriangle kshRight top xAttach1 yAttach1
+					HalfRectTriangle (kshRight - O - stroke / 2 * HVContrast) 0 xAttach2 yAttach2
+
+		define [CursiveDimen left right top straightBar slabLT slabLegs] : begin
+			define kshLeft : left + [KBalance slabLT straightBar]
+			define kshRight : right + [KBalanceRightCursive slabLegs straightBar]
+
+			define arcFine : Stroke * CThin
+			define arcStroke : AdviceStroke2 2 3 top
+			define arcTerminalFine : AdviceStroke2 3 4 top
+			define expansion : Width / (UPM / 2) - 1
+
+			define pArcStartY    : 0.46 + 0.1 * (arcStroke / Width)
+			define pArcTopX      : 0.625 - 0.05 * (arcStroke / Width) - 0 * expansion * (arcStroke / UPM)
+			define pArcRightX    : 0.95 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
+			define pArcRightY    : 0.575 - 0.625 * (arcStroke / Width) - 0.5 * expansion * (arcStroke / UPM)
+			define pArcTerminalX : 0.15 - 0.5 * (arcStroke / Width)
+			define pArcBottomX   : 0.15 + 0.5 * (arcStroke / Width)
+			define pArcBottomY   : 0.45 + 0.5 * (arcStroke / Width)
+
+			define arcRightSlope : 0.05 + 0.2 * (arcStroke / Width) + 1 * expansion * (arcStroke / UPM)
+			define arcTopSkew   : shoulderMidSkew arcFine arcStroke
+
+			define arcStartX    : kshLeft + HVContrast * (Stroke - arcFine)
+			define arcStartY    : top * pArcStartY
+			define arcTerminalX : mix arcStartX kshRight pArcTerminalX
+			define arcBottomX   : mix arcStartX kshRight pArcBottomX
+			define arcBottomY   : mix 0 top pArcBottomY
+			define arcTerminalY : arcBottomY + arcStroke * 0.125 - O
+			define arcRightX    : kshRight * pArcRightX + 0.2 * Stroke * HVContrast
+			define arcRightY    : mix arcBottomY top pArcRightY
+			define arcTopX      : mix arcStartX arcRightX pArcTopX
+			define arcTopY      : top - O
+
+			define slabStartX   : kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
+
+			return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSkew arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight slabStartX
+
+		define [CursiveLoopT sink offset left right stroke top slabLT slabLegs] : begin
+			define dim : CursiveDimen left right top true slabLT slabLegs
+			return : sink
+				g4.up.start (dim.arcStartX + offset) dim.arcStartY [widths.heading 0 dim.arcFine Upward]
+				arcvh 8 2.0
+				g4 dim.arcTopX (dim.arcTopY - offset)
+					widths.rhs.heading dim.arcStroke {.y (+1) .x dim.arcTopSkew}
+				archv 8 2.0
+				g4.down.mid (dim.arcRightX - offset) (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
+					heading {.y dim.arcRightSlope .x HVContrast}
+				arcvh
+				g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke + offset) [widths.rhs.heading dim.arcTerminalFine Leftward]
+				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke + offset) [widths.rhs.heading dim.arcStroke Leftward]
+
+		export : define [Cursive fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
+			define dim : CursiveDimen left right top true slabLT slabLegs
+			define Ok  : KO slabLegs true top stroke
+
+			include : CursiveLoopT dispiro 0 left right stroke top slabLT slabLegs
+			include : difference
+				intersection
 					Rect XH 0 0 [if slabLegs (dim.slabStartX + SideJut) (Width * 2)]
 					dispiro
 						flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
-						curl dim.kshRight 0 [widths.rhs]
-			spiro-outline
-				g4.up.start (dim.arcStartX - O) dim.arcStartY
-				arcvh 4 2.1
-				g4.right.mid dim.arcTopX (dim.arcTopY + O)
-				archv 4 2.2
-				g4.down.mid (dim.arcRightX + O) (dim.arcRightY - 0.5 * dim.arcRightSlope * dim.arcStroke * HVContrast)
-				arcvh
-				g4 dim.arcBottomX (dim.arcBottomY - dim.arcStroke - O)
-				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke - O)
+						curl (dim.kshRight - Ok) 0 [widths.rhs]
+				CursiveLoopT spiro-outline (-O) left right stroke top slabLT slabLegs
 
-		if (slabLegs && !tailed) : include : HSerif.rb dim.slabStartX 0 SideJut
-		if attachment : include : attachment.rSideJut
-			x -- dim.slabStartX
-			jut -- Jut
-			y -- 0
+			if slabLegs : include : HSerif.rb dim.slabStartX 0 SideJut
+			if attachment : include : attachment.rSideJut
+				x -- [if slabLegs dim.slabStartX (dim.kshRight - Ok)]
+				y -- 0
+				jut -- Jut
+
+		export : define [CursiveTailed fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
+			define dim : CursiveDimen left right top true slabLT slabLegs
+
+			include : CursiveLoopT dispiro 0 left right stroke top slabLT slabLegs
+
+			define swDiagTail : AdviceStroke 2 (1 - (dim.kshLeft - SB) / Width)
+			define swDiagTailAdj : swDiagTail / [mix 1 HVContrast 0.375]
+			define xDTGap : 0.10 * (RightSB - SB) - (0.125 + [clamp 0 0.375 (0.5 * (Width / UPM * 2 - 1))]) * swDiagTail
+			define xDTStart : dim.arcTerminalX + swDiagTail * HVContrast + xDTGap
+			define xDTEnd : dim.kshRight - 0.8 * Hook - 0.25 * swDiagTail * HVContrast + xDTGap * 0.625
+			define tailAngle : Math.min 85 (50 + [Math.atan2 (0.75 * swDiagTail) Hook] / Math.PI * 180)
+			define dtInnerRadius : [clamp 0.125 1 : mix 1 (Width / UPM * 2) 3] * [DiagonalTailInnerRadius]
+
+			include : difference
+				dispiro
+					flat xDTStart dim.arcTerminalY [widths.center swDiagTailAdj]
+					curl (xDTEnd + 0.125 * dtInnerRadius) (0.9 * swDiagTail + 0.5 * dtInnerRadius)
+					DiagonalTailF 1 [DivFrame 1] xDTEnd 0 dtInnerRadius tailAngle (Hook + swDiagTail / 4) swDiagTail
+				CursiveLoopT spiro-outline (-O) left right stroke top slabLT slabLegs
 
 	define [KHookTopBar slabLegs straightBar] : HooktopLeftBar.inner
 		x -- SB + [KBalance slabLegs straightBar]
@@ -304,68 +313,68 @@ glyph-block Letter-Latin-K : begin
 	define CyrlVbSw : AdviceStroke 3
 
 	define UpperKConfig : object
-		straightSerifless                                 {  KStraightLegShapeImpl                            0 0 0 0 }
-		curlySerifless                                    {  KCurlyLegShapeImpl                               0 0 0 0 }
-		symmetricTouchingSerifless                        { [KSymmetricLegsImpl 0]                            0 0 0 0 }
-		symmetricConnectedSerifless                       { [KSymmetricLegsImpl : AdviceStroke 6]             0 0 0 0 }
-		symmetricConnectedSeriflessKH                     { [KSymmetricLegsImpl [AdviceStroke 6] Descender]   0 0 0 0 }
-		symmetricConnectedSeriflessVB                     { [KSymmetricLegsImpl CyrlVbGap]                    0 0 0 0 }
+		straightSerifless                                 {  KLegs.Straight                               0 0 0 0 }
+		curlySerifless                                    {  KLegs.Curly                                  0 0 0 0 }
+		symmetricTouchingSerifless                        { [KLegs.Symmetric 0]                           0 0 0 0 }
+		symmetricConnectedSerifless                       { [KLegs.Symmetric : AdviceStroke 6]            0 0 0 0 }
+		symmetricConnectedSeriflessKH                     { [KLegs.Symmetric [AdviceStroke 6] Descender]  0 0 0 0 }
+		symmetricConnectedSeriflessVB                     { [KLegs.Symmetric CyrlVbGap]                   0 0 0 0 }
 
-		straightTopLeftSerifed                            {  KStraightLegShapeImpl                            2 0 0 0 }
-		curlyTopLeftSerifed                               {  KCurlyLegShapeImpl                               2 0 0 0 }
-		symmetricTouchingTopLeftSerifed                   { [KSymmetricLegsImpl 0]                            2 0 0 0 }
-		symmetricConnectedTopLeftSerifed                  { [KSymmetricLegsImpl : AdviceStroke 6]             2 0 0 0 }
-		symmetricConnectedTopLeftSerifedKH                { [KSymmetricLegsImpl [AdviceStroke 6] Descender]   2 0 0 0 }
-		symmetricConnectedTopLeftSerifedVB                { [KSymmetricLegsImpl CyrlVbGap]                    2 0 0 0 }
+		straightTopLeftSerifed                            {  KLegs.Straight                               2 0 0 0 }
+		curlyTopLeftSerifed                               {  KLegs.Curly                                  2 0 0 0 }
+		symmetricTouchingTopLeftSerifed                   { [KLegs.Symmetric 0]                           2 0 0 0 }
+		symmetricConnectedTopLeftSerifed                  { [KLegs.Symmetric : AdviceStroke 6]            2 0 0 0 }
+		symmetricConnectedTopLeftSerifedKH                { [KLegs.Symmetric [AdviceStroke 6] Descender]  2 0 0 0 }
+		symmetricConnectedTopLeftSerifedVB                { [KLegs.Symmetric CyrlVbGap]                   2 0 0 0 }
 
-		straightBottomRightSerifed                        {  KStraightLegShapeImpl                            0 0 1 0 }
-		curlyBottomRightSerifed                           {  KCurlyLegShapeImpl                               0 0 1 0 }
-		symmetricTouchingBottomRightSerifed               { [KSymmetricLegsImpl 0]                            0 0 1 0 }
-		symmetricConnectedBottomRightSerifed              { [KSymmetricLegsImpl : AdviceStroke 6]             0 0 1 0 }
-		symmetricConnectedBottomRightSerifedKH            { [KSymmetricLegsImpl [AdviceStroke 6] Descender]   0 0 1 0 }
-		symmetricConnectedBottomRightSerifedVB            { [KSymmetricLegsImpl CyrlVbGap]                    0 0 1 0 }
+		straightBottomRightSerifed                        {  KLegs.Straight                               0 0 1 0 }
+		curlyBottomRightSerifed                           {  KLegs.Curly                                  0 0 1 0 }
+		symmetricTouchingBottomRightSerifed               { [KLegs.Symmetric 0]                           0 0 1 0 }
+		symmetricConnectedBottomRightSerifed              { [KLegs.Symmetric : AdviceStroke 6]            0 0 1 0 }
+		symmetricConnectedBottomRightSerifedKH            { [KLegs.Symmetric [AdviceStroke 6] Descender]  0 0 1 0 }
+		symmetricConnectedBottomRightSerifedVB            { [KLegs.Symmetric CyrlVbGap]                   0 0 1 0 }
 
-		straightBottomRightSerifed2                       {  KStraightLegShapeImpl                            0 0 0 1 }
-		curlyBottomRightSerifed2                          {  KCurlyLegShapeImpl                               0 0 0 1 }
-		symmetricTouchingBottomRightSerifed2              { [KSymmetricLegsImpl 0]                            0 0 0 1 }
-		symmetricConnectedBottomRightSerifed2             { [KSymmetricLegsImpl : AdviceStroke 6]             0 0 0 1 }
+		straightBottomRightSerifed2                       {  KLegs.Straight                               0 0 0 1 }
+		curlyBottomRightSerifed2                          {  KLegs.Curly                                  0 0 0 1 }
+		symmetricTouchingBottomRightSerifed2              { [KLegs.Symmetric 0]                           0 0 0 1 }
+		symmetricConnectedBottomRightSerifed2             { [KLegs.Symmetric : AdviceStroke 6]            0 0 0 1 }
 
-		straightTopLeftAndBottomRightSerifed              {  KStraightLegShapeImpl                            2 0 1 0 }
-		curlyTopLeftAndBottomRightSerifed                 {  KCurlyLegShapeImpl                               2 0 1 0 }
-		symmetricTouchingTopLeftAndBottomRightSerifed     { [KSymmetricLegsImpl 0]                            2 0 1 0 }
-		symmetricConnectedTopLeftAndBottomRightSerifed    { [KSymmetricLegsImpl : AdviceStroke 6]             2 0 1 0 }
-		symmetricConnectedTopLeftAndBottomRightSerifedKH  { [KSymmetricLegsImpl [AdviceStroke 6] Descender]   2 0 1 0 }
-		symmetricConnectedTopLeftAndBottomRightSerifedVB  { [KSymmetricLegsImpl CyrlVbGap]                    2 0 1 0 }
+		straightTopLeftAndBottomRightSerifed              {  KLegs.Straight                               2 0 1 0 }
+		curlyTopLeftAndBottomRightSerifed                 {  KLegs.Curly                                  2 0 1 0 }
+		symmetricTouchingTopLeftAndBottomRightSerifed     { [KLegs.Symmetric 0]                           2 0 1 0 }
+		symmetricConnectedTopLeftAndBottomRightSerifed    { [KLegs.Symmetric : AdviceStroke 6]            2 0 1 0 }
+		symmetricConnectedTopLeftAndBottomRightSerifedKH  { [KLegs.Symmetric [AdviceStroke 6] Descender]  2 0 1 0 }
+		symmetricConnectedTopLeftAndBottomRightSerifedVB  { [KLegs.Symmetric CyrlVbGap]                   2 0 1 0 }
 
-		straightTopLeftAndBottomRightSerifed2             {  KStraightLegShapeImpl                            2 0 0 1 }
-		curlyTopLeftAndBottomRightSerifed2                {  KCurlyLegShapeImpl                               2 0 0 1 }
-		symmetricTouchingTopLeftAndBottomRightSerifed2    { [KSymmetricLegsImpl 0]                            2 0 0 1 }
-		symmetricConnectedTopLeftAndBottomRightSerifed2   { [KSymmetricLegsImpl : AdviceStroke 6]             2 0 0 1 }
+		straightTopLeftAndBottomRightSerifed2             {  KLegs.Straight                               2 0 0 1 }
+		curlyTopLeftAndBottomRightSerifed2                {  KLegs.Curly                                  2 0 0 1 }
+		symmetricTouchingTopLeftAndBottomRightSerifed2    { [KLegs.Symmetric 0]                           2 0 0 1 }
+		symmetricConnectedTopLeftAndBottomRightSerifed2   { [KLegs.Symmetric : AdviceStroke 6]            2 0 0 1 }
 
-		straightSerifed                                   {  KStraightLegShapeImpl                            1 1 3 0 }
-		curlySerifed                                      {  KCurlyLegShapeImpl                               1 1 3 0 }
-		symmetricTouchingSerifed                          { [KSymmetricLegsImpl 0]                            1 1 3 0 }
-		symmetricConnectedSerifed                         { [KSymmetricLegsImpl : AdviceStroke 6]             1 1 3 0 }
-		symmetricConnectedSerifedKH                       { [KSymmetricLegsImpl [AdviceStroke 6] Descender]   1 1 2 0 }
-		symmetricConnectedSerifedVB                       { [KSymmetricLegsImpl CyrlVbGap]                    1 1 3 0 }
+		straightSerifed                                   {  KLegs.Straight                               1 1 3 0 }
+		curlySerifed                                      {  KLegs.Curly                                  1 1 3 0 }
+		symmetricTouchingSerifed                          { [KLegs.Symmetric 0]                           1 1 3 0 }
+		symmetricConnectedSerifed                         { [KLegs.Symmetric : AdviceStroke 6]            1 1 3 0 }
+		symmetricConnectedSerifedKH                       { [KLegs.Symmetric [AdviceStroke 6] Descender]  1 1 2 0 }
+		symmetricConnectedSerifedVB                       { [KLegs.Symmetric CyrlVbGap]                   1 1 3 0 }
 
-		straightSerifed2                                  {  KStraightLegShapeImpl                            1 1 2 1 }
-		curlySerifed2                                     {  KCurlyLegShapeImpl                               1 1 2 1 }
-		symmetricTouchingSerifed2                         { [KSymmetricLegsImpl 0]                            1 1 2 1 }
-		symmetricConnectedSerifed2                        { [KSymmetricLegsImpl : AdviceStroke 6]             1 1 2 1 }
+		straightSerifed2                                  {  KLegs.Straight                               1 1 2 1 }
+		curlySerifed2                                     {  KLegs.Curly                                  1 1 2 1 }
+		symmetricTouchingSerifed2                         { [KLegs.Symmetric 0]                           1 1 2 1 }
+		symmetricConnectedSerifed2                        { [KLegs.Symmetric : AdviceStroke 6]            1 1 2 1 }
 
-	define [UpperKLTSerif top sw slabTop straightBar] : match slabTop
-		2 : HSerif.lt (SB + [KBalance slabTop straightBar]) top SideJut
-		1 : HSerif.mt (SB + [KBalance slabTop straightBar] + 0.5 * sw * HVContrast) top Jut
+	define [UpperKLTSerif top sw slabLT straightBar] : match slabLT
+		2 : HSerif.lt (SB + [KBalance slabLT straightBar]) top SideJut
+		1 : HSerif.mt (SB + [KBalance slabLT straightBar] + 0.5 * sw * HVContrast) top Jut
 		_ : glyph-proc
 
-	define [UpperKLBSerif top sw slabTop straightBar] : match slabTop
-		2 : HSerif.lb (SB + [KBalance slabTop straightBar]) 0 SideJut
-		1 : HSerif.mb (SB + [KBalance slabTop straightBar] + 0.5 * sw * HVContrast) 0 Jut
+	define [UpperKLBSerif top sw slabLT straightBar] : match slabLT
+		2 : HSerif.lb (SB + [KBalance slabLT straightBar]) 0 SideJut
+		1 : HSerif.mb (SB + [KBalance slabLT straightBar] + 0.5 * sw * HVContrast) 0 Jut
 		_ : glyph-proc
 
-	define [CyrlKaVBar top slabTop straightBar] : VBar.m
-		SB + [KBalance slabTop straightBar] + 0.5 * HVContrast * CyrlVbSw + 0.7 * CyrlVbGap
+	define [CyrlKaVBar top slabLT straightBar] : VBar.m
+		SB + [KBalance slabLT straightBar] + 0.5 * HVContrast * CyrlVbSw + 0.7 * CyrlVbGap
 		top / 2 - [CyrlVbLength top] / 2
 		top / 2 + [CyrlVbLength top] / 2
 		Math.min [AdviceStroke 5] (CyrlVbGap * 0.5)
@@ -394,14 +403,14 @@ glyph-block Letter-Latin-K : begin
 		include : GrekKaiAttachmentshape true
 
 	# Main building
-	foreach { suffix { LegsImpl slabTop slabBot slabLegs slabKS } } [Object.entries UpperKConfig] : do
-		local straightBar : LegsImpl !== KCurlyLegShapeImpl
+	foreach { suffix { LegsImpl slabLT slabLB slabLegs slabKS } } [Object.entries UpperKConfig] : do
+		local straightBar : LegsImpl !== KLegs.Curly
 
 		define [KBaseShape sw top attachment] : glyph-proc
-			include : VBar.l (SB + [KBalance slabTop straightBar]) 0 top sw
-			include : LegsImpl false SB RightSB sw top slabTop slabLegs attachment
-			if slabTop : include : UpperKLTSerif top sw slabTop straightBar
-			if slabBot : include : UpperKLBSerif top sw slabTop straightBar
+			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 top sw
+			include : LegsImpl false SB RightSB sw top slabLT slabLegs attachment
+			if slabLT : include : UpperKLTSerif top sw slabLT straightBar
+			if slabLB : include : UpperKLBSerif top sw slabLT straightBar
 
 		create-glyph "K.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -414,21 +423,21 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "KBar.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x     -- (SB + [KBalance slabTop straightBar])
+				x     -- (SB + [KBalance slabLT straightBar])
 				bot   -- XH
-				top   -- (CAP - [if slabTop Stroke 0])
+				top   -- (CAP - [if slabLT Stroke 0])
 				space -- { 0 [mix SB RightSB 0.75] }
 
 		create-glyph "KVBar.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : KBaseShape CyrlVbSw CAP
-			include : CyrlKaVBar CAP slabTop straightBar
+			include : CyrlKaVBar CAP slabLT straightBar
 
 		create-glyph "grek/kappa.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : VBar.l (SB + [KBalance slabTop straightBar]) 0 XH
-			include : LegsImpl false SB RightSB Stroke XH slabTop false
-			if slabTop : include : HSerif.lt (SB + [KBalance slabTop straightBar]) XH SideJut
+			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 XH
+			include : LegsImpl false SB RightSB Stroke XH slabLT false
+			if slabLT : include : HSerif.lt (SB + [KBalance slabLT straightBar]) XH SideJut
 
 		create-glyph "grek/KaiSymbol.\(suffix)" : glyph-proc
 			include [refer-glyph "K.\(suffix)"] AS_BASE ALSO_METRICS
@@ -447,27 +456,29 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "smcpKVBar.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : KBaseShape CyrlVbSw XH
-			include : CyrlKaVBar XH slabTop straightBar
+			include : CyrlKaVBar XH slabLT straightBar
 
 		create-glyph "KHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : VBar.l (SB + [KBalance slabTop straightBar]) 0 CAP Stroke
-			include : LegsImpl true SB RightSB Stroke CAP slabTop slabLegs
+			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 CAP Stroke
+			include : LegsImpl true SB RightSB Stroke CAP slabLT slabLegs
 			eject-contour 'serifRT'
-			if slabTop : include : UpperKLTSerif CAP Stroke slabTop straightBar
-			if slabBot : include : UpperKLBSerif CAP Stroke slabTop straightBar
+			if slabLT : include : UpperKLTSerif CAP Stroke slabLT straightBar
+			if slabLB : include : UpperKLBSerif CAP Stroke slabLT straightBar
 
 		define [BashkirKaShape df top] : glyph-proc
-			local left : if slabTop ([mix SB RightSB 0.35] - df.mvs / 2 * HVContrast) [mix SB RightSB 0.2]
-			local leftNB : left - [KBalance slabTop straightBar]
-			local barLeft : mix 0 SB [if slabTop 0.25 0.375]
+			local left : if slabLT ([mix SB RightSB 0.35] - df.mvs / 2 * HVContrast) [mix SB RightSB 0.2]
+			local leftNB : left - [KBalance slabLT straightBar]
+			local xTopBarLeftEnd : mix 0 SB [if slabLT 0.25 0.375]
 			local sw : AdviceStroke 3
 
-			include : HBar.t barLeft (Stroke * 0.1 + left) top
+			include : HBar.t xTopBarLeftEnd (Stroke * 0.1 + left) top
 			include : VBar.l left 0 top sw
-			include : LegsImpl false leftNB RightSB Stroke top slabTop slabLegs
-			if slabTop : include : VSerif.dl barLeft top VJut (df.mvs / HVContrast)
-			if slabBot : include : HSerif.mb (left + HalfStroke * HVContrast) 0 Jut
+			include : LegsImpl false leftNB RightSB sw top slabLT slabLegs
+			if slabLT : include : VSerif.dl xTopBarLeftEnd top VJut
+				Math.min (VJutStroke * df.mvs / Stroke) (0.625 * (left - xTopBarLeftEnd))
+			if slabLB : begin
+				include : HSerif.mb (left + 0.5 * sw * HVContrast) 0 Jut
 
 		create-glyph "cyrl/BashkirUpperKa.\(suffix)" : glyph-proc
 			define df : DivFrame 1
@@ -483,46 +494,46 @@ glyph-block Letter-Latin-K : begin
 
 
 	define LowerKConfig : object
-		straightSerifed                                           { KStraightLegShapeImpl                  1 1 3 }
-		curlySerifed                                              { KCurlyLegShapeImpl                     1 1 3 }
-		cursiveSerifed                                            { [KCursiveLoopAndLegShapeImpl 0]        1 1 3 }
-		diagonalTailedSerifedCursiveSerifed                       { [KCursiveLoopAndLegShapeImpl 1]        1 1 3 }
-		symmetricTouchingSerifed                                  { [KSymmetricLegsImpl 0]                 1 1 3 }
-		symmetricConnectedSerifed                                 { [KSymmetricLegsImpl : AdviceStroke 6]  1 1 3 }
-		straightSerifless                                         { KStraightLegShapeImpl                  0 0 0 }
-		curlySerifless                                            { KCurlyLegShapeImpl                     0 0 0 }
-		cursiveSerifless                                          { [KCursiveLoopAndLegShapeImpl 0]        0 0 0 }
-		diagonalTailedSerifedCursiveSerifless                     { [KCursiveLoopAndLegShapeImpl 1]        0 0 0 }
-		symmetricTouchingSerifless                                { [KSymmetricLegsImpl 0]                 0 0 0 }
-		symmetricConnectedSerifless                               { [KSymmetricLegsImpl : AdviceStroke 6]  0 0 0 }
-		straightTopLeftSerifed                                    { KStraightLegShapeImpl                  1 0 0 }
-		curlyTopLeftSerifed                                       { KCurlyLegShapeImpl                     1 0 0 }
-		cursiveTopLeftSerifed                                     { [KCursiveLoopAndLegShapeImpl 0]        1 0 0 }
-		diagonalTailedSerifedCursiveTopLeftSerifed                { [KCursiveLoopAndLegShapeImpl 1]        1 0 0 }
-		symmetricTouchingTopLeftSerifed                           { [KSymmetricLegsImpl 0]                 1 0 0 }
-		symmetricConnectedTopLeftSerifed                          { [KSymmetricLegsImpl : AdviceStroke 6]  1 0 0 }
-		straightBottomRightSerifed                                { KStraightLegShapeImpl                  0 0 1 }
-		curlyBottomRightSerifed                                   { KCurlyLegShapeImpl                     0 0 1 }
-		cursiveBottomRightSerifed                                 { [KCursiveLoopAndLegShapeImpl 0]        0 0 1 }
-		diagonalTailedSerifedCursiveBottomRightSerifed            { [KCursiveLoopAndLegShapeImpl 1]        0 0 1 }
-		symmetricTouchingBottomRightSerifed                       { [KSymmetricLegsImpl 0]                 0 0 1 }
-		symmetricConnectedBottomRightSerifed                      { [KSymmetricLegsImpl : AdviceStroke 6]  0 0 1 }
-		straightTopLeftAndBottomRightSerifed                      { KStraightLegShapeImpl                  1 0 1 }
-		curlyTopLeftAndBottomRightSerifed                         { KCurlyLegShapeImpl                     1 0 1 }
-		cursiveTopLeftAndBottomRightSerifed                       { [KCursiveLoopAndLegShapeImpl 0]        1 0 1 }
-		diagonalTailedSerifedCursiveTopLeftAndBottomRightSerifed  { [KCursiveLoopAndLegShapeImpl 1]        1 0 1 }
-		symmetricTouchingTopLeftAndBottomRightSerifed             { [KSymmetricLegsImpl 0]                 1 0 1 }
-		symmetricConnectedTopLeftAndBottomRightSerifed            { [KSymmetricLegsImpl : AdviceStroke 6]  1 0 1 }
+		straightSerifed                                           { KLegs.Straight                      1 1 3 }
+		curlySerifed                                              { KLegs.Curly                         1 1 3 }
+		cursiveSerifed                                            { KLegs.Cursive                       1 1 3 }
+		diagonalTailedSerifedCursiveSerifed                       { KLegs.CursiveTailed                 1 1 3 }
+		symmetricTouchingSerifed                                  { [KLegs.Symmetric 0]                 1 1 3 }
+		symmetricConnectedSerifed                                 { [KLegs.Symmetric : AdviceStroke 6]  1 1 3 }
+		straightSerifless                                         { KLegs.Straight                      0 0 0 }
+		curlySerifless                                            { KLegs.Curly                         0 0 0 }
+		cursiveSerifless                                          { KLegs.Cursive                       0 0 0 }
+		diagonalTailedSerifedCursiveSerifless                     { KLegs.CursiveTailed                 0 0 0 }
+		symmetricTouchingSerifless                                { [KLegs.Symmetric 0]                 0 0 0 }
+		symmetricConnectedSerifless                               { [KLegs.Symmetric : AdviceStroke 6]  0 0 0 }
+		straightTopLeftSerifed                                    { KLegs.Straight                      1 0 0 }
+		curlyTopLeftSerifed                                       { KLegs.Curly                         1 0 0 }
+		cursiveTopLeftSerifed                                     { KLegs.Cursive                       1 0 0 }
+		diagonalTailedSerifedCursiveTopLeftSerifed                { KLegs.CursiveTailed                 1 0 0 }
+		symmetricTouchingTopLeftSerifed                           { [KLegs.Symmetric 0]                 1 0 0 }
+		symmetricConnectedTopLeftSerifed                          { [KLegs.Symmetric : AdviceStroke 6]  1 0 0 }
+		straightBottomRightSerifed                                { KLegs.Straight                      0 0 1 }
+		curlyBottomRightSerifed                                   { KLegs.Curly                         0 0 1 }
+		cursiveBottomRightSerifed                                 { KLegs.Cursive                       0 0 1 }
+		diagonalTailedSerifedCursiveBottomRightSerifed            { KLegs.CursiveTailed                 0 0 1 }
+		symmetricTouchingBottomRightSerifed                       { [KLegs.Symmetric 0]                 0 0 1 }
+		symmetricConnectedBottomRightSerifed                      { [KLegs.Symmetric : AdviceStroke 6]  0 0 1 }
+		straightTopLeftAndBottomRightSerifed                      { KLegs.Straight                      1 0 1 }
+		curlyTopLeftAndBottomRightSerifed                         { KLegs.Curly                         1 0 1 }
+		cursiveTopLeftAndBottomRightSerifed                       { KLegs.Cursive                       1 0 1 }
+		diagonalTailedSerifedCursiveTopLeftAndBottomRightSerifed  { KLegs.CursiveTailed                 1 0 1 }
+		symmetricTouchingTopLeftAndBottomRightSerifed             { [KLegs.Symmetric 0]                 1 0 1 }
+		symmetricConnectedTopLeftAndBottomRightSerifed            { [KLegs.Symmetric : AdviceStroke 6]  1 0 1 }
 
-	foreach { suffix { LegsImpl slabTop slabBot slabLegs } } [Object.entries LowerKConfig] : do
-		local straightBar : LegsImpl !== KCurlyLegShapeImpl
+	foreach { suffix { LegsImpl slabLT slabLB slabLegs } } [Object.entries LowerKConfig] : do
+		local straightBar : LegsImpl !== KLegs.Curly
 
 		define [kBaseShape attachment] : glyph-proc
-			include : VBar.l (SB + [KBalance slabTop straightBar]) 0 Ascender
-			include : LegsImpl false SB RightSB Stroke XH slabTop slabLegs attachment
-			if slabTop : include : HSerif.lt (SB + [KBalance slabTop straightBar]) Ascender SideJut
-			if slabBot : include : tagged 'serifLB'
-				HSerif.mb (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
+			include : VBar.l (SB + [KBalance slabLT straightBar]) 0 Ascender
+			include : LegsImpl false SB RightSB Stroke XH slabLT slabLegs attachment
+			if slabLT : include : HSerif.lt (SB + [KBalance slabLT straightBar]) Ascender SideJut
+			if slabLB : include : tagged 'serifLB'
+				HSerif.mb (SB + [KBalance slabLT straightBar] + HalfStroke * HVContrast) 0 Jut
 
 		create-glyph "k.\(suffix)" : glyph-proc
 			include : MarkSet.b
@@ -539,16 +550,16 @@ glyph-block Letter-Latin-K : begin
 		create-glyph "kBar.\(suffix)" : glyph-proc
 			include [refer-glyph "k.\(suffix)"] AS_BASE ALSO_METRICS
 			include : LetterBarOverlay.l.in
-				x     -- (SB + [KBalance slabTop straightBar])
+				x     -- (SB + [KBalance slabLT straightBar])
 				bot   -- XH
-				top   -- (Ascender - [if slabTop Stroke 0])
+				top   -- (Ascender - [if slabLT Stroke 0])
 
 		create-glyph "kHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : LegsImpl false SB RightSB Stroke XH slabTop slabLegs
-			include : KHookTopBar slabTop straightBar
-			if slabBot : include : tagged 'serifLB'
-				HSerif.mb (SB + [KBalance slabTop straightBar] + HalfStroke * HVContrast) 0 Jut
+			include : LegsImpl false SB RightSB Stroke XH slabLT slabLegs
+			include : KHookTopBar slabLT straightBar
+			if slabLB : include : tagged 'serifLB'
+				HSerif.mb (SB + [KBalance slabLT straightBar] + HalfStroke * HVContrast) 0 Jut
 
 	select-variant 'K' 'K'
 	link-reduced-variant 'K/sansSerif' 'K' MathSansSerif
