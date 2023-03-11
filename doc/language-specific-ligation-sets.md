@@ -116,6 +116,13 @@
 <tr>
 <td colspan="2"><img src="../images/ligset-WFLM-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-WFLM-1.dark.svg#gh-dark-mode-only"/></td>
 </tr>
+<tr>
+<td><code>ERLA</code></td>
+<td>Erlang Language</td>
+</tr>
+<tr>
+<td colspan="2"><img src="../images/ligset-ERLA-1.light.svg#gh-light-mode-only"/><img src="../images/ligset-ERLA-1.dark.svg#gh-dark-mode-only"/></td>
+</tr>
 </table>
 
 <!-- END Section-OT-Ligation-Tags-2 -->

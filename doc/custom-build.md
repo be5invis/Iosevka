@@ -105,6 +105,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `--matlab-equality-inequality--`: Default ligation set would be assigned to undefined.
   - `--verilog-equality-inequality--`: Default ligation set would be assigned to undefined.
   - `--wolfram-equality-inequality--`: Default ligation set would be assigned to undefined.
+  - `--erlang-equality-inequality--`: Default ligation set would be assigned to undefined.
   - `--default-kern--`: Default ligation set would be assigned to undefined.
   - `default-calt`: Inherit default ligation set.
   - `dlig`: Default ligation set would be assigned to Discretionary ligatures.
@@ -126,6 +127,7 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `matlab`: Default ligation set would be assigned to Matlab.
   - `verilog`: Default ligation set would be assigned to Verilog.
   - `wolfram`: Default ligation set would be assigned to Wolfram Language (Mathematica).
+  - `erlang`: Default ligation set would be assigned to Erlang Language.
 
 <!-- END Section-Predefined-Ligation-Sets -->
 
@@ -152,7 +154,9 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `trig`: Enable ligation for `<|`, `|>` , `<||`, and other bar-and-angle-bracket symbols.
   - `eqeqeq`: Enable special ligation for `===` with triple lines.
   - `eqeq`: Enable ligation for `==` and `===`.
-  - `ineq`: Enable ligation for `<=` and `>=`.
+  - `lteq`: Enable ligation for `<=` as less-than-or-equal sign.
+  - `eqlt`: Enable ligation for `=<` as less-than-or-equal sign.
+  - `gteq`: Enable ligation for `>=` as greater-than-or-equal sign.
   - `exeqeqeq`: Enable special ligation for `!===` with triple lines.
   - `exeqeq`: Enable special ligation for `!==` with triple lines.
   - `eqexeq`: Enable special ligation for `=!=` with triple lines.
@@ -173,8 +177,6 @@ Subsection `ligations` is used to customize the ligation set assigned to `calt` 
   - `logic`: Enable ligation for `/\` and `\/`.
   - `llgg`: Enable ligation for `<<`, `>>` and other angle-bracket chaining.
   - `llggeq`: Enable ligation for `<<=`, `>>=` as shift operator.
-  - `lteq-as-arrow`: Treat `<=` as arrow.
-  - `gteq-as-co-arrow`: Treat `>=` as co-arrow.
   - `html-comment`: Enable ligation for `<!--` and `<!---`.
   - `colon-greater-as-colon-arrow`: Transform `:>` into `:` and a narrow arrow.
   - `brace-bar`: Enable ligation for `{|` and `|}`.

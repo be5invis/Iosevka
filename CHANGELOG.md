@@ -2,7 +2,7 @@
 
 ### 21.0.0
 
-* \[**Breaking**\] Added ligation support for Erlang. As a result, ligations groups for less-then-or-equal and greater-than-or-equal symbols are reorganized.
+* \[**Breaking**\] Added ligation support for Erlang. As a result, ligations groups for less-then-or-equal and greater-than-or-equal symbols are reorganized (#1595).
 * Add characters:
   - MEDIUM MATHEMATICAL SPACE (`U+205F`).
   - MILL SIGN (`U+20A5`).
