@@ -132,7 +132,9 @@ glyph-block Letter-Latin-Upper-R : begin
 		local cor : RLegDiagCor legTop 0 endX right 0 Stroke
 		local endX1 : endX - [if legShape (HalfStroke * cor * HVContrast) HalfStroke] + [if legShape [RSlabExtraShift SLAB Stroke] 0]
 		include : PRotundaShape top (mul -- mul) (bp -- bp) (overshoot -- O) (slab -- false) (endX -- endX1) (hook -- hook)
-		include : RLegShapes.(legShape) legTop 0 endX right top (slab === PShape.SlabSymmetric) Stroke 0
+		include : difference
+			RLegShapes.(legShape) legTop 0 endX right top (slab === PShape.SlabSymmetric) Stroke 0
+			MaskLeft endX1
 
 	define [RevRShape] : params [legShape top bp [slab null] [mul 1] [tailedShape false]] : glyph-proc
 		include : RevPShape top (mul -- mul) (overshoot -- O) (slab -- slab) (bp -- bp)
@@ -181,22 +183,23 @@ glyph-block Letter-Latin-Upper-R : begin
 
 	foreach { suffix { legShape slabs revSlabs fOpen fTailed } } [Object.entries RConfig] : begin
 		local fMotion : slabs === PShape.SlabMotion
-		local bpCap : RBarPos CAP (slabs === PShape.SlabSymmetric)
-		local bpXH  : RBarPos XH  (slabs === PShape.SlabSymmetric)
+		local fSlabBot : slabs && slabs !== PShape.SlabMotion
+		local bpCap : RBarPos CAP fSlabBot
+		local bpXH  : RBarPos XH  fSlabBot
 
 		create-glyph "R.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : ROverlayAnchor
 			include : difference
 				RShape legShape CAP (slab -- slabs) (bp -- bpCap)
-				if fOpen [PShape.OpenGap CAP (mul -- 1) (bp -- bpCap)] [glyph-proc]
+				if fOpen [PShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0]) (mul -- 1) (bp -- bpCap)] [glyph-proc]
 
 		create-glyph "smcpR.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ROverlayAnchor
 			include : difference
 				RShape legShape XH (slab -- slabs) (bp -- bpXH)
-				if fOpen [PShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
+				if fOpen [PShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])  (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
 		if (!fMotion && !fOpen) : create-glyph "RRotunda.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -211,14 +214,14 @@ glyph-block Letter-Latin-Upper-R : begin
 			include : ROverlayAnchor
 			include : difference
 				RevRShape legShape CAP (slab -- revSlabs) (bp -- bpCap)
-				if fOpen [RevPShape.OpenGap CAP (mul -- 1) (bp -- bpCap)] [glyph-proc]
+				if fOpen [RevPShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])  (mul -- 1) (bp -- bpCap)] [glyph-proc]
 
 		create-glyph "cyrl/ya.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			include : ROverlayAnchor
 			include : difference
 				RevRShape legShape XH (slab -- revSlabs) (bp -- bpXH) (tailedShape -- fTailed)
-				if fOpen [RevPShape.OpenGap XH (mul -- 1) (bp -- bpXH)] [glyph-proc]
+				if fOpen [RevPShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])  (mul -- 1) (bp -- bpXH)] [glyph-proc]
 
 		create-glyph "Yr.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
@@ -232,7 +235,7 @@ glyph-block Letter-Latin-Upper-R : begin
 				union
 					PShape top (mul -- 1) (bp -- bp) (slab -- slabs)
 					RLegShape-Straight legTop Descender Middle right (top - Descender) (slabs === PShape.SlabSymmetric) Stroke 0
-				if fOpen [PShape.OpenGap top (mul -- 1) (bp -- bp)] [glyph-proc]
+				if fOpen [PShape.OpenGap (top -- top) (bot -- [if fSlabBot Stroke 0])  (mul -- 1) (bp -- bp)] [glyph-proc]
 
 		create-glyph "currency/indianRupeeSign.\(suffix)" : glyph-proc
 			define bp : RBarPos CAP 0
@@ -283,8 +286,7 @@ glyph-block Letter-Latin-Upper-R : begin
 		include : difference
 			union
 				SingleLeg
-				new-glyph : glyph-proc
-					include : SingleLeg
-					include : Translate (0 - BBD) 0
-				HBar.b (terminalX - BBD) (terminalX - BBS / 2) 0 BBS
+				WithTransform [ApparentTranslate (-BBD) 0] [SingleLeg]
+				HBar.b (terminalX - BBD - BBS * HVContrast) (terminalX - BBS * HVContrast) 0 BBS
 			PShapeOutline CAP (sw -- BBS) (mul -- 1) (overshoot -- O) (offset -- 1)
+			MaskLeft (SB + BBD)

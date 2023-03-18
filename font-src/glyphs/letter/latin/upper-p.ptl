@@ -104,9 +104,9 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : tagged 'serifLB' : union
 			HSerif.lb (SB * mul) 0 SideJut sw
 			HSerif.rb (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
-	set PShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.l
+	set PShape.OpenGap : function [] : params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.l
 		SB * mul + sw * HVContrast
-		Math.min ([PBarPosY top sw bp] - sw) sw
+		Math.min ([PBarPosY top sw bp] - sw) bot
 		Math.max ([PBarPosY top sw bp] + sw) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
@@ -117,24 +117,37 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : tagged 'serifRB' : HSerif.mb (Width - SB * mul - HalfStroke * HVContrast) 0 Jut sw
 	set RevPShape.SlabCyrlItalic : function [top sw mul] : glyph-proc
 		include : tagged 'serifRB' : HSerif.rb (Width - SB * mul) 0 SideJut sw
-	set RevPShape.OpenGap : function [] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.r
+	set RevPShape.SlabAsymmetric : function [top sw mul] : glyph-proc
+		include : RevPShape.SlabMotion top sw mul
+		include : tagged 'serifRB' : union
+			HSerif.rb (Width - SB * mul) 0 SideJut sw
+			HSerif.lb (Width - SB * mul - 0.5 * sw * HVContrast) 0 MidJutSide sw
+	set RevPShape.OpenGap : function [] : params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.r
 		Width - SB * mul - sw * HVContrast
-		[PBarPosY top sw bp] - sw
+		Math.min ([PBarPosY top sw bp] - sw) bot
 		Math.max ([PBarPosY top sw bp] + sw) [mix top [PBarPosY top sw bp] 0.5]
 		0.2 * (RightSB - SB) * ([AdviceStroke 5] / Stroke)
 
 	define PConfig : object
-		closed                { false  [if SLAB PShape.SlabAsymmetric] }
-		open                  { true   [if SLAB PShape.SlabAsymmetric] }
-		closedMotionSerifed   { false  PShape.SlabMotion               }
-		openMotionSerifed     { true   PShape.SlabMotion               }
+		closed                { false  [if SLAB PShape.SlabAsymmetric] [if SLAB RevPShape.SlabAsymmetric] }
+		open                  { true   [if SLAB PShape.SlabAsymmetric] [if SLAB RevPShape.SlabAsymmetric] }
+		closedMotionSerifed   { false  PShape.SlabMotion               RevPShape.SlabMotion               }
+		openMotionSerifed     { true   PShape.SlabMotion               RevPShape.SlabMotion               }
 
-	foreach { suffix { fGap slabs } } [Object.entries PConfig] : do
+	foreach { suffix { fGap slabs revSlabs } } [Object.entries PConfig] : do
+		local fSlabBot : slabs && slabs !== PShape.SlabMotion
+
 		create-glyph "P.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : difference
 				PShape CAP (slab -- slabs)
-				if fGap [PShape.OpenGap CAP] [glyph-proc]
+				if fGap [PShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
+
+		create-glyph "PRev.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : difference
+				RevPShape CAP (slab -- revSlabs)
+				if fGap [RevPShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 
 		create-glyph "grek/Rho.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
@@ -144,7 +157,7 @@ glyph-block Letter-Latin-Upper-P : begin
 			include : MarkSet.e
 			include : difference
 				PShape XH (slab -- slabs)
-				if fGap [PShape.OpenGap XH] [glyph-proc]
+				if fGap [PShape.OpenGap (top -- XH) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 
 		create-glyph "currency/rubleSign.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
@@ -176,6 +189,8 @@ glyph-block Letter-Latin-Upper-P : begin
 
 	select-variant 'currency/rubleSign' 0x20BD
 	select-variant 'PHookLeft' 0x1A4
+
+	select-variant 'PRev' 0xA7FC (follow -- 'P')
 
 	derive-glyphs 'cyrl/ErTick' 0x48E 'cyrl/Er' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS

@@ -14,7 +14,7 @@ glyph-block Letter-Latin-K : begin
 
 	local [KBalance slabLegs straightBar]             : if slabLegs (Width / 16) : if straightBar (Width / 32) 0
 	local [KBalanceRight slabLegs straightBar]        : if slabLegs 0 : if straightBar (Width / 32) 0
-	local [KBalanceRightCursive slabLegs straightBar] : if slabLegs (Width / 32) : if straightBar (Width / 32) 0
+	local [KBalanceRightCursive slabLegs straightBar] : KBalanceRight slabLegs straightBar
 	local [KO slabLegs straightBar top stroke]        : if straightBar (([if slabLegs (0) (-4)] * OX - stroke / 3) * (XH / top)) 0
 
 	define [KAttachment shape mode top left right stroke straightBar] : begin
@@ -102,51 +102,56 @@ glyph-block Letter-Latin-K : begin
 
 			if [not hookDepth] : set-base-anchor 'trailing' (kshRight - Ok) 0
 
-			define [StrokeMask t b offset] : Rect t b kshLeft [if [maskBit slabLegs 1] (kshRight + offset) (2 * Width)]
-			if [not fHookTop] : include : tagged 'strokeRT' : intersection
-				StrokeMask top (0.5 * top) 0
-				dispiro
-					widths.rhs stroke
-					flat (kshRight - Ok) top
-					curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
+			define [StrokeMask bit t b offset] : Rect t b kshLeft [if [maskBit slabLegs bit] (kshRight + offset) (2 * Width)]
 
-			define kHookTopMix 0.5
-			define kshRightHookTop : kshRight - HookX * 0.5 + 0.5 * stroke * HVContrast
-			if fHookTop : include : tagged 'strokeRT' : intersection
-				Rect top (0.5 * top) kshLeft (2 * Width)
-				dispiro
-					widths.rhs stroke
-					straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
-					flat [mix (kshRightHookTop - Ok) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
-					curl [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
+			if fHookTop
+			: then : begin
+				define kHookTopMix 0.5
+				define kshRightHookTop : kshRight - HookX * 0.5 + 0.5 * stroke * HVContrast
+				include : tagged 'strokeRT' : intersection
+					Rect top (0.5 * top) kshLeft (2 * Width)
+					dispiro
+						widths.rhs stroke
+						straight.left.start (kshRight + [if [maskBit slabLegs 1] SideJut 0] - TanSlope * stroke) (top - stroke)
+						flat [mix (kshRightHookTop - Ok) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
+						curl [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
+			: else : begin
+				include : tagged 'strokeRT' : intersection
+					StrokeMask 1 top (0.5 * top) 0
+					dispiro
+						widths.rhs stroke
+						flat (kshRight - Ok) top
+						curl [mix (kshRight - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 
-			if [not hookDepth] : include : tagged 'strokeRB' : intersection
-				StrokeMask (0.5 * top) 0 0
-				dispiro
-					flat (kshRight - Ok) 0 [widths.lhs stroke]
-					curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
+			if hookDepth
+			: then : begin
+				include : tagged 'strokeRB' : dispiro
+					flat kshLeft (0.5 * top + stroke / 2) [widths.rhs.heading stroke Rightward]
+					curl [mix kshLeft right 0.5] (0.5 * top + stroke / 2)
+					archv
+					flat right (0.5 * top + stroke / 2 - ArchDepthB)
+					curl right (hookDepth + Hook + stroke / 2)
+					arcvh
+					straight.left.end (right - HookX - 0.5 * stroke * HVContrast) hookDepth
+			: else : begin
+				include : tagged 'strokeRB' : intersection
+					StrokeMask 0 (0.5 * top) 0 0
+					dispiro
+						flat (kshRight - Ok) 0 [widths.lhs stroke]
+						curl [mix (kshRight - Ok) xAttach 2] [mix 0 coYAttach 2] [widths.lhs fine]
 
-			if (leadGap && !hookDepth) : include : intersection
-				HBar.m kshLeft (2 * Width) (0.5 * top) stroke
-				union
-					Rect top 0 kshLeft xAttach
-					spiro-outline
-						corner ([if fHookTop kshRightHookTop kshRight] - Ok - 1) top
-						corner (xAttach - 1) yAttach
-						corner (xAttach - 1) top
-					spiro-outline
-						corner (kshRight - Ok - 1) 0
-						corner (xAttach - 1) coYAttach
-						corner (xAttach - 1) 0
-
-			if hookDepth : include : dispiro
-				flat kshLeft (0.5 * top + stroke / 2) [widths.rhs.heading stroke Rightward]
-				curl [mix kshLeft right 0.5] (0.5 * top + stroke / 2)
-				archv
-				flat right (0.5 * top + stroke / 2 - ArchDepthB)
-				curl right (hookDepth + Hook + stroke / 2)
-				arcvh
-				straight.left.end (right - HookX - 0.5 * stroke * HVContrast) hookDepth
+				if leadGap : include : intersection
+					HBar.m kshLeft (2 * Width) (0.5 * top) stroke
+					union
+						Rect top 0 kshLeft xAttach
+						spiro-outline
+							corner ([if fHookTop kshRightHookTop kshRight] - Ok - 1) top
+							corner (xAttach - 1) yAttach
+							corner (xAttach - 1) top
+						spiro-outline
+							corner (kshRight - Ok - 1) 0
+							corner (xAttach - 1) coYAttach
+							corner (xAttach - 1) 0
 
 			include : difference
 				union
@@ -154,10 +159,10 @@ glyph-block Letter-Latin-K : begin
 					KAttachment attachment slabLegs top left right stroke true
 				union
 					intersection
-						StrokeMask top (0.5 * top) (-0.1)
+						StrokeMask 1 top (0.5 * top) (-0.1)
 						HalfRectTriangle (kshRight - Ok - 0.1) top ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix top yAttach 2]
 					intersection
-						StrokeMask (0.5 * top) 0 (-0.1)
+						StrokeMask 0 (0.5 * top) 0 (-0.1)
 						HalfRectTriangle (kshRight - Ok - 0.1) 0   ([mix (kshRight - Ok) xAttach 2] - 0.1) [mix 0 coYAttach 2]
 
 		export : define [Curly fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
@@ -217,9 +222,10 @@ glyph-block Letter-Latin-K : begin
 					HalfRectTriangle kshRight top xAttach1 yAttach1
 					HalfRectTriangle (kshRight - O - stroke / 2 * HVContrast) 0 xAttach2 yAttach2
 
-		define [CursiveDimen left right top straightBar slabLT slabLegs] : begin
-			define kshLeft : left + [KBalance slabLT straightBar]
-			define kshRight : right + [KBalanceRightCursive slabLegs straightBar]
+		define [CursiveDimen left right top stroke slabLT slabLegs] : begin
+			define kshLeft  : left + [KBalance slabLT true]
+			define kshRight : right + [KBalanceRightCursive slabLegs true]
+			define Ok       : KO slabLegs true top stroke
 
 			define arcFine : Stroke * CThin
 			define arcStroke : AdviceStroke2 2 3 top
@@ -228,7 +234,7 @@ glyph-block Letter-Latin-K : begin
 
 			define pArcStartY    : 0.46 + 0.1 * (arcStroke / Width)
 			define pArcTopX      : 0.625 - 0.05 * (arcStroke / Width) - 0 * expansion * (arcStroke / UPM)
-			define pArcRightX    : 0.95 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
+			define pArcRightX    : 0.925 - TanSlope * 0.25 + ([if SLAB 0 0.05] + 0.75 * TanSlope) * (arcStroke / Width)
 			define pArcRightY    : 0.575 - 0.625 * (arcStroke / Width) - 0.5 * expansion * (arcStroke / UPM)
 			define pArcTerminalX : 0.15 - 0.5 * (arcStroke / Width)
 			define pArcBottomX   : 0.15 + 0.5 * (arcStroke / Width)
@@ -248,12 +254,13 @@ glyph-block Letter-Latin-K : begin
 			define arcTopX      : mix arcStartX arcRightX pArcTopX
 			define arcTopY      : top - O
 
-			define slabStartX   : kshRight - (Stroke * 0.325 - TanSlope) * HVContrast
+			define slabLengthAdj : (Stroke * 0.325 - TanSlope) * HVContrast
+			define slabStartX    : kshRight - slabLengthAdj
 
-			return : object arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSkew arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight slabStartX
+			return : object Ok arcStartX arcStartY arcFine arcRightX arcRightY arcRightSlope arcTopX arcTopY arcStroke arcTopSkew arcBottomX arcBottomY arcTerminalX arcTerminalY arcTerminalFine kshLeft kshRight slabStartX slabLengthAdj
 
 		define [CursiveLoopT sink offset left right stroke top slabLT slabLegs] : begin
-			define dim : CursiveDimen left right top true slabLT slabLegs
+			define dim : CursiveDimen left right top slabLT slabLegs
 			return : sink
 				g4.up.start (dim.arcStartX + offset) dim.arcStartY [widths.heading 0 dim.arcFine Upward]
 				arcvh 8 2.0
@@ -267,8 +274,7 @@ glyph-block Letter-Latin-K : begin
 				g4 dim.arcStartX (dim.arcTerminalY - dim.arcStroke + offset) [widths.rhs.heading dim.arcStroke Leftward]
 
 		export : define [Cursive fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
-			define dim : CursiveDimen left right top true slabLT slabLegs
-			define Ok  : KO slabLegs true top stroke
+			define dim : CursiveDimen left right top stroke slabLT slabLegs
 
 			include : CursiveLoopT dispiro 0 left right stroke top slabLT slabLegs
 			include : difference
@@ -276,17 +282,17 @@ glyph-block Letter-Latin-K : begin
 					Rect XH 0 0 [if slabLegs (dim.slabStartX + SideJut) (Width * 2)]
 					dispiro
 						flat dim.arcTerminalX dim.arcTerminalY [widths.lhs]
-						curl (dim.kshRight - Ok) 0 [widths.rhs]
+						curl (dim.kshRight - dim.Ok) 0 [widths.rhs]
 				CursiveLoopT spiro-outline (-O) left right stroke top slabLT slabLegs
 
-			if slabLegs : include : HSerif.rb dim.slabStartX 0 SideJut
+			if slabLegs : include : HSerif.rb dim.slabStartX 0 (SideJut + dim.slabLengthAdj)
 			if attachment : include : attachment.rSideJut
-				x -- [if slabLegs dim.slabStartX (dim.kshRight - Ok)]
+				x -- [if slabLegs dim.slabStartX (dim.kshRight - dim.Ok)]
 				y -- 0
 				jut -- Jut
 
 		export : define [CursiveTailed fHookTop left right stroke top slabLT slabLegs attachment] : glyph-proc
-			define dim : CursiveDimen left right top true slabLT slabLegs
+			define dim : CursiveDimen left right top stroke slabLT slabLegs
 
 			include : CursiveLoopT dispiro 0 left right stroke top slabLT slabLegs
 
@@ -596,6 +602,7 @@ glyph-block Letter-Latin-K : begin
 
 	turned 'turnK' 0xA7B0 'K' Middle (CAP / 2)
 	turned 'turnk' 0x29E  'k' Middle (XH / 2) [MarkSet.p]
+	turned 'turnSmcpK' 0x1DF10 'smcpK' Middle (XH / 2)
 
 	select-variant 'cyrl/BashkirUpperKa' 0x4A0 (follow -- 'cyrl/Ka')
 	select-variant 'cyrl/BashkirKa'      0x4A1 (follow -- 'cyrl/ka')
