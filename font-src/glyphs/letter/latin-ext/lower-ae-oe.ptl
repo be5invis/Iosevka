@@ -8,11 +8,11 @@ glyph-module
 glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : nShoulder
+	glyph-block-import Letter-Shared-Shapes : nShoulder OBarLeft
 
 	define [GetSm df stroke] : begin
-		local ada : ArchDepthAOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
-		local adb : ArchDepthBOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (Width * df.div)
+		local ada : ArchDepthAOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (0.5 * Width * df.div)
+		local adb : ArchDepthBOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (0.5 * Width * df.div)
 		return { ada adb }
 
 	define [aeEPart df] : glyph-proc
@@ -146,14 +146,30 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 	derive-composites 'ue' 0x1D6B 'ue/u' 'ue/e'
 
+	define [DbCenterShape df] : glyph-proc
+		local { ada adb } : GetSm df df.mvs
+		include : OBarLeft.roundedTop
+			left      -- df.middle - 0.5 * df.mvs * HVContrast
+			right     -- df.rightSB
+			yTerminal -- 0
+			sw        -- df.mvs
+			ada       -- ada
+			adb       -- adb
+		include : FlipAround df.middle (XH / 2)
+		include : OBarLeft.rounded
+			left      -- df.middle - 0.5 * df.mvs * HVContrast
+			right     -- df.rightSB
+			yTerminal -- (XH / 2)
+			sw        -- df.mvs
+			ada       -- ada
+			adb       -- adb
+
 	create-glyph 'db' 0x238 : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.b
-		include : oeOPart df
-		include : FlipAround df.middle (XH / 2)
-		include : oeOPart df
-		include : VBar.m df.middle (XH / 2) Ascender df.mvs
+		include : DbCenterShape df
+		include : VBar.m df.middle XH Ascender df.mvs
 		if SLAB : begin
 			include : HSerif.lt (df.middle - df.mvs / 2 * HVContrast) Ascender SideJut
 
@@ -161,9 +177,8 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.p
-		include : oeOPart df
+		include : DbCenterShape df
 		include : FlipAround df.middle (XH / 2)
-		include : oeOPart df
-		include : VBar.m df.middle Descender (XH / 2) df.mvs
+		include : VBar.m df.middle Descender 0 df.mvs
 		if SLAB : begin
 			include : HSerif.mb df.middle Descender Jut
