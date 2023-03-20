@@ -13,15 +13,16 @@ glyph-block Letter-Latin-Upper-L : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Shared-Shapes : BeltOverlay LetterBarOverlay
 
-	define LBarLeftX : SB * 1.5
-	define [LShape top sgr swv] : glyph-proc
-		include : VBar.l LBarLeftX 0 top swv
-		include : HBar.b (LBarLeftX - O) (RightSB - OX) 0
+	define [LBarLeftX df] : df.leftSB * 1.5
+	define [LRightX df]   : df.rightSB - 0.75 * OX
+	define [LShape df top sgr swv] : glyph-proc
+		include : VBar.l [LBarLeftX df] 0 top swv
+		include : HBar.b ([LBarLeftX df] - O) [LRightX df] 0
 		if (sgr > 1) : begin
-			include : HSerif.lb (LBarLeftX + 0.5 * HVContrast * swv) 0 Jut
-			include : HSerif.lt    (LBarLeftX + 0.5 * HVContrast * swv) top Jut
-			include : HSerif.rt   (LBarLeftX + 0.5 * HVContrast * swv) top MidJutSide
-		if (sgr > 0) : include : VSerif.ur (RightSB - OX) 0 VJut
+			include : HSerif.lb ([LBarLeftX df] + 0.5 * HVContrast * swv) 0 Jut
+			include : HSerif.lt ([LBarLeftX df] + 0.5 * HVContrast * swv) top Jut
+			include : HSerif.rt ([LBarLeftX df] + 0.5 * HVContrast * swv) top MidJutSide
+		if (sgr > 0) : include : VSerif.ur [LRightX df] 0 VJut
 
 	define LConfig : object
 		serifless     { 0 }
@@ -29,27 +30,33 @@ glyph-block Letter-Latin-Upper-L : begin
 		serifed       { 2 }
 
 	foreach { suffix { serifGrade } } [Object.entries LConfig] : do
+		local df : DivFrame 1
 		create-glyph "L.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : LShape CAP serifGrade Stroke
-			set-base-anchor 'cvDecompose' ([mix SB RightSB 0.65] + 0.25 * Stroke * HVContrast) [mix Stroke CAP 0.5]
+			set-width df.width
+			include : df.markSet.capital
+			include : LShape df CAP serifGrade Stroke
+			set-base-anchor 'cvDecompose'
+				[mix df.leftSB df.rightSB 0.65] + 0.25 * Stroke * HVContrast
+				mix Stroke CAP 0.5
 
 		create-glyph "smcpL.\(suffix)" : glyph-proc
-			include : MarkSet.e
-			include : LShape XH serifGrade Stroke
+			set-width df.width
+			include : df.markSet.e
+			include : LShape df XH serifGrade Stroke
 
 		create-glyph "LLWelsh.\(suffix)" : glyph-proc
-			include : MarkSet.capital
+			set-width df.width
+			include : df.markSet.capital
 
 			local sw : AdviceStroke 4
 			local gap : Math.max (Width / 8) [AdviceStroke 8]
 
-			include : LShape CAP serifGrade sw
+			include : LShape df CAP serifGrade sw
 			include : intersection
 				MaskLeft RightSB
 				MaskAbove sw
 				WithTransform [ApparentTranslate (sw * HVContrast + gap) 0]
-					LShape CAP serifGrade sw
+					LShape df CAP serifGrade sw
 
 	select-variant 'L' 'L'
 	link-reduced-variant 'L/sansSerif' 'L' MathSansSerif
@@ -60,11 +67,13 @@ glyph-block Letter-Latin-Upper-L : begin
 	turned 'turnSansSerifL' 0x2142 'L.serifless' Middle (CAP / 2)
 
 	create-glyph 'mathbb/L' 0x1D543 : glyph-proc
-		include : MarkSet.capital
-		include : VBar.l LBarLeftX 0 CAP BBS
-		include : HBar.b (LBarLeftX - O) (RightSB - OX) 0 BBS
-		include : VBar.l (LBarLeftX + BBD) 0 CAP BBS
-		include : HBar.t LBarLeftX (LBarLeftX + BBD) CAP BBS
+		local df : DivFrame 1
+		set-width df.width
+		include : df.markSet.capital
+		include : VBar.l [LBarLeftX df] 0 CAP BBS
+		include : HBar.b ([LBarLeftX df] - O) [LRightX df] 0 BBS
+		include : VBar.l ([LBarLeftX df] + BBD) 0 CAP BBS
+		include : HBar.t [LBarLeftX df] ([LBarLeftX df] + BBD) CAP BBS
 
 	derive-multi-part-glyphs 'Lcaron' 0x13D { 'L' 'commaAbove' } : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
@@ -93,9 +102,12 @@ glyph-block Letter-Latin-Upper-L : begin
 			include : refer-glyph "tildeAboveOverlay"
 			include : ApparentTranslate (SB * 1.5 + Stroke * HVContrast / 2 - markMiddle) (CAP * 0.525 - aboveMarkMid)
 
-	create-glyph 'LBarOverlay' : LetterBarOverlay.l.in LBarLeftX 0 CAP
-	create-glyph 'LBeltOverlay' : BeltOverlay CAP (LBarLeftX + 0.5 * HVContrast * Stroke)
-	create-glyph 'smcpLBeltOverlay' : BeltOverlay XH (LBarLeftX + 0.5 * HVContrast * Stroke)
+	create-glyph 'LBarOverlay'
+		LetterBarOverlay.l.in [LBarLeftX : DivFrame 1] 0 CAP
+	create-glyph 'LBeltOverlay'
+		BeltOverlay CAP ([LBarLeftX : DivFrame 1] + 0.5 * HVContrast * Stroke)
+	create-glyph 'smcpLBeltOverlay'
+		BeltOverlay XH ([LBarLeftX : DivFrame 1] + 0.5 * HVContrast * Stroke)
 	derive-composites 'LBar' 0x23D 'L' 'LBarOverlay'
 	derive-composites 'LBelt' 0xA7AD 'L' 'LBeltOverlay'
 	derive-composites 'smcpLBelt' 0x1DF04 'smcpL' 'smcpLBeltOverlay'
