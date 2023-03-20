@@ -146,6 +146,7 @@ class QuadifySink {
 			let c = this.lastContour;
 			c = this.alignHVKnots(c);
 			c = this.dropDuplicateFirstLast(c);
+			c = this.cleanupOccurrentKnots1(c);
 			c = this.cleanupOccurrentKnots2(c);
 			c = this.cleanupOccurrentKnots1(c);
 			c = this.removeColinearArc(c);
@@ -271,11 +272,9 @@ class QuadifySink {
 
 	removeColinearCorners(c0) {
 		const c = c0.slice(0);
-		let lengthBefore = c.length,
-			lengthAfter = c.length;
+		let found = false;
 		do {
-			lengthBefore = c.length;
-			const shouldRemove = [];
+			found = false;
 			for (let i = 0; i < c.length; i++) {
 				const zPrev = c[(i - 1 + c.length) % c.length],
 					zCurr = c[i],
@@ -285,13 +284,12 @@ class QuadifySink {
 					zNext.type === Point.Type.Corner &&
 					pointsColinear(zPrev, zCurr, zNext)
 				) {
-					shouldRemove[i] = true;
+					found = true;
+					c.splice(i, 1);
+					break;
 				}
 			}
-
-			dropBy(c, shouldRemove);
-			lengthAfter = c.length;
-		} while (lengthAfter < lengthBefore);
+		} while (found);
 		return c;
 	}
 
