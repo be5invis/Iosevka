@@ -10,6 +10,15 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : nShoulder OBarLeft
 
+	glyph-block-export SubDfAndShift
+	define [SubDfAndShift pShift df _o] : begin
+		local o : fallback _o 0
+		local subDfWidth     : df.middle + 0.5 * HVContrast * df.mvs + df.leftSB + OX
+		local subDfFullShift : df.middle - 0.5 * HVContrast * df.mvs - df.leftSB - OX
+		local subDf : DivFrame (subDfWidth / Width) 2 (df.leftSB / SB)
+		local shift : pShift * subDfFullShift
+		return { subDf shift }
+
 	define [GetSm df stroke] : begin
 		local ada : ArchDepthAOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (0.5 * Width * df.div)
 		local adb : ArchDepthBOf [Math.max (stroke * 1.125) (SmallArchDepth * 0.6 * df.div)] (0.5 * Width * df.div)
@@ -212,3 +221,41 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 		include : aoOPart df
 
 	derive-composites 'uo' 0xAB63 'ue/u' 'uo/o'
+
+	do "aa"
+		define [AAShape pShift df body] : begin
+			local { subDf shift } : SubDfAndShift pShift df OX
+			return : WithTransform [ApparentTranslate shift 0] [body subDf]
+
+		glyph-block-import Letter-Latin-Lower-A : DoubleStorey
+		define DoubleStoreyConfig : object
+			doubleStoreySerifless        { DoubleStorey.Serifless         }
+			doubleStoreySerifed          { DoubleStorey.Serifed           }
+			doubleStoreyTailed           { DoubleStorey.Tailed            }
+			doubleStoreyToothlessCorner  { DoubleStorey.ToothlessCorner   }
+			doubleStoreyToothlessRounded { DoubleStorey.ToothlessRounded  }
+
+		foreach { suffix { bodyR } } [Object.entries DoubleStoreyConfig] : do
+			create-glyph "aa.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3
+				set-width df.width
+				include : df.markSet.e
+
+				local [left] : AAShape 0 df DoubleStorey.ToothlessRounded
+				local [right] : AAShape 1 df bodyR
+				include : difference [right] : intersection
+					MaskAbove (XH * OverlayPos * 1.02)
+					union
+						WithTransform [ApparentTranslate (-0.25 * df.mvs) 0] [left]
+						WithTransform [ApparentTranslate (-0.50 * df.mvs) 0] [left]
+						WithTransform [ApparentTranslate (-0.75 * df.mvs) 0] [left]
+						WithTransform [ApparentTranslate (-1.00 * df.mvs) 0] [left]
+				include : difference [left] : intersection
+					MaskBelow (XH * OverlayPos * 1.02)
+					union
+						WithTransform [ApparentTranslate (+0.25 * df.mvs) 0] [right]
+						WithTransform [ApparentTranslate (+0.50 * df.mvs) 0] [right]
+						WithTransform [ApparentTranslate (+0.75 * df.mvs) 0] [right]
+						WithTransform [ApparentTranslate (+1.00 * df.mvs) 0] [right]
+
+		select-variant "aa" 0xA733 (follow -- 'a/turnABase')
