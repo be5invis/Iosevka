@@ -28,6 +28,10 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 	define SLAB-LEFT    2
 	define SLAB-RIGHT   4
 
+	define ALetters : object
+		AA     { 0xA732 'capital' CAP }
+		smcpAA { null   'e'       XH  }
+
 	define AConfig : object
 		straightSerifless     { true   SLAB-NONE                   SLAB-NONE                   }
 		curlySerifless        { false  SLAB-NONE                   SLAB-NONE                   }
@@ -38,53 +42,62 @@ glyph-block Letter-Latin-Upper-AE-OE : begin
 		straightTriSerifed    { true   [bitOr SLAB-TOP SLAB-LEFT]  [bitOr SLAB-TOP SLAB-RIGHT] }
 		curlyTriSerifed       { false  [bitOr SLAB-TOP SLAB-LEFT]  [bitOr SLAB-TOP SLAB-RIGHT] }
 
-	foreach { suffix { fStraightBar skLeft skRight } } [Object.entries AConfig] : do
-		create-glyph "AA/Left.\(suffix)" : glyph-proc
-			define df : DivFrame para.diversityM 3.5
-			set-width df.width
-			include : df.markSet.capital
-			set-base-anchor 'cvDecompose' 0 0
-			include : AHalfShape 0 df CAP fStraightBar skLeft
+	foreach { prefix { code mk height } } [Object.entries ALetters] : do
+		foreach { suffix { fStraightBar skLeft skRight } } [Object.entries AConfig] : do
+			create-glyph "\(prefix)/Left.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width df.width
+				include : df.markSet.(mk)
+				set-base-anchor 'cvDecompose' 0 0
+				include : AHalfShape 0 df height fStraightBar skLeft
 
-		create-glyph "AA/LeftMask.\(suffix)" : glyph-proc
-			define df : DivFrame para.diversityM 3.5
-			set-width df.width
-			include : df.markSet.capital
-			set-base-anchor 'cvDecompose' 0 0
-			include : AHalfShapeMask 0 df CAP fStraightBar skLeft
+			create-glyph "\(prefix)/LeftMask.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width df.width
+				include : df.markSet.(mk)
+				set-base-anchor 'cvDecompose' 0 0
+				include : AHalfShapeMask 0 df height fStraightBar skLeft
 
-		create-glyph "AA/Right.\(suffix)" : glyph-proc
-			define df : DivFrame para.diversityM 3.5
-			set-width 0
-			include : df.markSet.capital
-			set-mark-anchor 'cvDecompose' 0 0 0 0
-			include : AHalfShape 1 df CAP fStraightBar skRight
+			create-glyph "\(prefix)/Right.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width 0
+				include : df.markSet.(mk)
+				set-mark-anchor 'cvDecompose' 0 0 0 0
+				include : AHalfShape 1 df height fStraightBar skRight
 
-		create-glyph "AA/RightMask.\(suffix)" : glyph-proc
-			define df : DivFrame para.diversityM 3.5
-			set-width 0
-			include : df.markSet.capital
-			set-mark-anchor 'cvDecompose' 0 0 0 0
-			include : AHalfShapeMask 1 df CAP fStraightBar skRight
+			create-glyph "\(prefix)/RightMask.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width 0
+				include : df.markSet.(mk)
+				set-mark-anchor 'cvDecompose' 0 0 0 0
+				include : AHalfShapeMask 1 df height fStraightBar skRight
 
-	select-variant 'AA/Left'      (follow -- 'A')
-	select-variant 'AA/LeftMask'  (follow -- 'A')
-	select-variant 'AA/Right'     (follow -- 'A')
-	select-variant 'AA/RightMask' (follow -- 'A')
+		select-variant "\(prefix)/Left"      (follow -- 'A')
+		select-variant "\(prefix)/LeftMask"  (follow -- 'A')
+		select-variant "\(prefix)/Right"     (follow -- 'A')
+		select-variant "\(prefix)/RightMask" (follow -- 'A')
 
-	derive-multi-part-glyphs 'AA' 0xA732 {"AA/Left" "AA/LeftMask" "AA/Right" "AA/RightMask"} : function [srcs gr] : glyph-proc
-		define df : DivFrame para.diversityM 3.5
-		define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
-		define { left leftMask right rightMask } srcs
-		include [refer-glyph left] AS_BASE ALSO_METRICS
-		include : difference
-			refer-glyph right
-			refer-glyph leftMask
-			difference
-				intersection
-					MaskAbove (CAP - Stroke)
-					WithTransform [ApparentTranslate topSerifGap 0] [refer-glyph leftMask]
-				WithTransform [ApparentTranslate (OX - 0.1) 0] [refer-glyph rightMask]
+		derive-multi-part-glyphs prefix code
+			list "\(prefix)/Left" "\(prefix)/LeftMask" "\(prefix)/Right" "\(prefix)/RightMask"
+			function [srcs gr] : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
+				define { left leftMask right rightMask } srcs
+
+				include : add-glyph-dependency left
+				include : add-glyph-dependency leftMask
+				include : add-glyph-dependency right
+				include : add-glyph-dependency rightMask
+
+				include [refer-glyph left] AS_BASE ALSO_METRICS
+				include : difference
+					refer-glyph right
+					refer-glyph leftMask
+					difference
+						intersection
+							MaskAbove (height - Stroke)
+							WithTransform [ApparentTranslate topSerifGap 0] [refer-glyph leftMask]
+						WithTransform [ApparentTranslate (OX - 0.1) 0] [refer-glyph rightMask]
 
 	derive-multi-part-glyphs 'AO' 0xA734 {"AA/Left" "AA/LeftMask" "OO/Right"} : function [srcs gr] : glyph-proc
 		define df : DivFrame para.diversityM 3.5
