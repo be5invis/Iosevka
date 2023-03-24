@@ -9,7 +9,7 @@ glyph-block Letter-Cyrillic-El : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : LegShape RightwardTailedBar
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender PalatalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender PalatalHook MidHook
 
 	define BODY-STRAIGHT 0
 	define BODY-TAILED   1
@@ -20,47 +20,50 @@ glyph-block Letter-Cyrillic-El : begin
 	define SLAB-TAILED-U 3
 	define SLAB-TAILED-I 4
 
-	define [CyrElShape top bodyType slabType] : glyph-proc
-		local xCutLeft : mix SB RightSB 0.075
+	define [CyrElShape left right top bodyType slabType _sw] : glyph-proc
+		local sw : fallback _sw Stroke
+		local halfSw : sw * 0.5
+		local xCutLeft : mix left right 0.075
 		include : match bodyType
-			[Just BODY-TAILED] : RightwardTailedBar RightSB 0 top
-			__                 : VBar.r RightSB 0 top
-		include : HBar.m xCutLeft RightSB (top - HalfStroke)
+			[Just BODY-TAILED] : RightwardTailedBar right 0 top sw
+			__                 : VBar.r right 0 top sw
+		include : HBar.m xCutLeft right (top - halfSw) sw
 		include : LegShape
 			ztop -- [Point.fromXY Point.Type.Corner xCutLeft top]
 			zbot -- [Point.fromXY Point.Type.Corner [mix SB 0 [if SLAB 1 0.75]] 0]
 			xb   -- xCutLeft
+			fine -- sw
 
 		include : tagged 'serifLT' : match slabType
-			[Just SLAB-ALL]      : HSerif.lt xCutLeft top SideJut
-			[Just SLAB-LOWER]    : HSerif.lt xCutLeft top SideJut
-			[Just SLAB-TAILED-U] : HSerif.lt xCutLeft top SideJut
-			[Just SLAB-TAILED-I] : HSerif.lt xCutLeft top SideJut
+			[Just SLAB-ALL]      : HSerif.lt xCutLeft top SideJut sw
+			[Just SLAB-LOWER]    : HSerif.lt xCutLeft top SideJut sw
+			[Just SLAB-TAILED-U] : HSerif.lt xCutLeft top SideJut sw
+			[Just SLAB-TAILED-I] : HSerif.lt xCutLeft top SideJut sw
 			__                   : glyph-proc
 		include : tagged 'SerifRT' : match slabType
-			[Just SLAB-ALL]      : HSerif.rt RightSB top SideJut
-			[Just SLAB-TAILED-U] : HSerif.rt RightSB top SideJut
+			[Just SLAB-ALL]      : HSerif.rt right top SideJut sw
+			[Just SLAB-TAILED-U] : HSerif.rt right top SideJut sw
 			__                   : glyph-proc
 		include : tagged 'SerifRB' : match slabType
-			[Just SLAB-ALL]    : HSerif.mb (RightSB - HalfStroke * HVContrast) 0 Jut
-			[Just SLAB-LOWER]  : HSerif.rb RightSB 0 SideJut
+			[Just SLAB-ALL]    : HSerif.mb (right - halfSw * HVContrast) 0 Jut sw
+			[Just SLAB-LOWER]  : HSerif.rb right 0 SideJut sw
 			__                 : glyph-proc
 
 	create-glyph 'cyrl/El' 0x41B : glyph-proc
 		include : MarkSet.capital
-		include : CyrElShape CAP BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
+		include : CyrElShape SB RightSB CAP BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
 
 	create-glyph 'cyrl/smcpEl' 0x1D2B : glyph-proc
 		include : MarkSet.e
-		include : CyrElShape XH BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
+		include : CyrElShape SB RightSB XH BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
 
 	create-glyph 'cyrl/el.straight' : glyph-proc
 		include : MarkSet.e
-		include : CyrElShape XH BODY-STRAIGHT : if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
+		include : CyrElShape SB RightSB XH BODY-STRAIGHT : if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE
 
 	create-glyph 'cyrl/el.tailed' : glyph-proc
 		include : MarkSet.e
-		include : CyrElShape XH BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+		include : CyrElShape SB RightSB XH BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
 
 	derive-composites 'cyrl/ElDescender' 0x52E 'cyrl/El' [CyrDescender.rSideJut RightSB 0]
 	derive-composites 'cyrl/elDescender' 0x52F 'cyrl/el.straight' [CyrDescender.rSideJut RightSB 0]
@@ -70,6 +73,20 @@ glyph-block Letter-Cyrillic-El : begin
 
 	derive-composites 'cyrl/ElHook' 0x512 'cyrl/El' [PalatalHook.rSideJut RightSB 0]
 	derive-composites 'cyrl/elHook' 0x513 'cyrl/el.straight' [PalatalHook.rSideJut RightSB 0]
+
+	create-glyph 'cyrl/ElMidHook' 0x520 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		local xm : df.middle + 0.5 * df.mvs * HVContrast
+		include : MarkSet.capDesc
+		include : CyrElShape df.leftSB xm CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs
+		include : MidHook.m df CAP
+		
+	create-glyph 'cyrl/elMidHook' 0x521 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		local xm : df.middle + 0.5 * df.mvs * HVContrast
+		include : MarkSet.capDesc
+		include : CyrElShape df.leftSB xm XH BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs
+		include : MidHook.m df XH
 
 	select-variant 'cyrl/el' 0x43B
 	alias 'cyrl/El.BGR' null 'grek/Lambda'
