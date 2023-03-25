@@ -17,17 +17,21 @@ glyph-block Letter-Latin-Lower-A : begin
 	glyph-block-export DoubleStorey
 	define DoubleStorey : namespace
 		define [ADoubleStoreyStroke df] : AdviceStroke2 2 3 XH df.div
-		define [ADoubleStoreySmoothA df] : ArchDepthAOf (ArchDepth * [StrokeWidthBlend 0.9 0.81 : ADoubleStoreyStroke df]) df.width
-		define [ADoubleStoreySmoothB df] : ArchDepthBOf (ArchDepth * [StrokeWidthBlend 0.9 0.81 : ADoubleStoreyStroke df]) df.width
+		define [ADoubleStoreySmoothA df] : begin
+			local sw : ADoubleStoreyStroke df
+			return : df.archDepthA (ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]) sw
+		define [ADoubleStoreySmoothB df] : begin
+			local sw : ADoubleStoreyStroke df
+			return : df.archDepthB (ArchDepth * [StrokeWidthBlend 0.9 0.81 sw]) sw
 
-		define [ADoubleStoreyHookAndBarT df sink y0 stroke] : glyph-proc
+		define [ADoubleStoreyHookAndBarT df sink y0 stroke] : begin
 			local isMask : sink == spiro-outline
-			include : sink
-				widths.lhs stroke
-				[if isMask corner flat] df.rightSB y0 [heading Upward]
-				curl df.rightSB (XH - [ADoubleStoreySmoothB df])
-				hookend (XH - O)
+			return : sink
+				widths.rhs stroke
 				g4 df.leftSB (XH - AHook)
+				hookstart (XH - O) (sw -- stroke)
+				flat df.rightSB (XH - [ADoubleStoreySmoothB df])
+				[if isMask corner curl] df.rightSB y0 [heading Downward]
 				if [not isMask] {} {[corner df.leftSB y0]}
 
 		export : define [HookAndBar df y0 _stroke] : ADoubleStoreyHookAndBarT df dispiro y0
@@ -72,18 +76,22 @@ glyph-block Letter-Latin-Lower-A : begin
 		export : define [ArcMask df kind rise _sw] : ADoubleStoreyArcT df spiro-outline kind rise
 			fallback _sw [ADoubleStoreyStroke df]
 
-		export : define [Serifless df] : union [HookAndBar df 0] [Arc df 0]
-		export : define [Serifed df] : union [Serifless df] [HSerif.rb df.rightSB 0 SideJut]
-		export : define [Tailed df] : union
-			HookAndBar df (XH - [ADoubleStoreySmoothB df] + O)
-			Arc        df 0
-			RightwardTailedBar df.rightSB 0 (XH - [ADoubleStoreySmoothB df]) (sw -- [ADoubleStoreyStroke df])
-		export : define [ToothlessCorner df] : union
-			HookAndBar df   DToothlessRise
-			Arc        df 1 DToothlessRise
-		export : define [ToothlessRounded df] : union
-			HookAndBar df   [ADoubleStoreySmoothA df]
-			Arc        df 2 [ADoubleStoreySmoothA df]
+		export : define [Serifless df sw] : union
+			HookAndBar df 0 sw
+			Arc df 0 nothing nothing sw
+		export : define [Serifed df sw] : union
+			Serifless df sw
+			HSerif.rb df.rightSB 0 SideJut
+		export : define [Tailed df sw] : union
+			HookAndBar df (XH - [ADoubleStoreySmoothB df] + O) sw
+			Arc        df 0 nothing nothing sw
+			RightwardTailedBar df.rightSB 0 (XH - [ADoubleStoreySmoothB df]) (sw -- [fallback sw : ADoubleStoreyStroke df])
+		export : define [ToothlessCorner df sw] : union
+			HookAndBar df   DToothlessRise sw
+			Arc        df 1 DToothlessRise sw
+		export : define [ToothlessRounded df sw] : union
+			HookAndBar df   [ADoubleStoreySmoothA df] sw
+			Arc        df 2 [ADoubleStoreySmoothA df] sw
 
 	define DoubleStoreyConfig : object
 		doubleStoreySerifless        { DoubleStorey.Serifless         (RightSB )          }
