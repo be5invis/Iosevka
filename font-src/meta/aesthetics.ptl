@@ -410,6 +410,7 @@ export : define [GenDivFrame metrics] : begin
 			local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * mvs) / (2 * hPack * metrics.SB)
 
 			set this.div            div
+			set this.hPack          hPack
 			set this.width        : metrics.Width * div
 			set this.middle       : metrics.Middle * div
 			set this.sb           : metrics.SB * sbMul
@@ -419,6 +420,7 @@ export : define [GenDivFrame metrics] : begin
 			set this.markSet      : MarksetDiv div sbMul metrics
 
 			# No-overshoot metrics -- used for arch depth calculation
+			set this.ox                 ox
 			set this.widthNoOvershoot : this.width - ox
 			set this.divNoOvershoot   : this.widthNoOvershoot / metrics.Width
 
@@ -428,6 +430,20 @@ export : define [GenDivFrame metrics] : begin
 			return : metrics.ArchDepthAOf [this.archDepth d _stroke] this.widthNoOvershoot
 		public [archDepthB d _stroke] : begin
 			return : metrics.ArchDepthBOf [this.archDepth d _stroke] this.widthNoOvershoot
+
+		public [slice _divisions _keeps _o] : begin
+			local o : fallback _o 0
+			local divisions : fallback _divisions this.hPack
+			local keeps : fallback _keeps 2
+
+			local oneStroke : metrics.HVContrast * this.mvs
+			local totalGap : this.rightSB - this.leftSB - divisions * oneStroke - 2 * o
+			local oneGap : totalGap / (divisions - 1)
+
+			local subDfWidth : 2 * this.leftSB + 2 * o + oneGap * (keeps - 1) + oneStroke * keeps
+			local subDfDiv : subDfWidth / metrics.Width
+
+			return : new CDivFrame subDfDiv keeps (this.leftSB / metrics.SB) this.mvs o
 
 		public [applyToGlyph g] : begin
 			g.setWidth this.width
