@@ -1,6 +1,9 @@
 import * as SpiroJs from "spiro";
 
-import { linreg } from "../utils.mjs";
+import { linreg, mix } from "../utils.mjs";
+
+import { Vec2 } from "./point.mjs";
+import { ControlKnot } from "./spiro-control.mjs";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -9,109 +12,92 @@ export class SpiroExpander {
 		this.m_gizmo = gizmo;
 		this.m_contrast = contrast;
 		this.m_closed = closed;
-		this.m_biKnots = [];
-		for (const knot of biKnots) {
-			this.m_biKnots.push(knot.withGizmo(gizmo));
-		}
+
+		this.m_biKnotsU = Array.from(biKnots);
+		this.m_biKnotsT = biKnots.map(k => k.withGizmo(gizmo));
 	}
 	initializeNormals() {
-		const normalRectifier = new NormalRectifier(this.m_biKnots, this.m_gizmo);
-		SpiroJs.spiroToArcsOnContext(this.m_biKnots, this.m_closed, normalRectifier);
+		const normalRectifier = new NormalRectifier(this.m_biKnotsT, this.m_gizmo);
+		SpiroJs.spiroToArcsOnContext(this.m_biKnotsT, this.m_closed, normalRectifier);
 	}
 	iterateNormals() {
 		const centerBone = this.getPass2Knots();
-		const normalRectifier = new NormalRectifier(this.m_biKnots, this.m_gizmo);
+		const normalRectifier = new NormalRectifier(this.m_biKnotsT, this.m_gizmo);
 		SpiroJs.spiroToArcsOnContext(centerBone, this.m_closed, normalRectifier);
 	}
 	getPass2Knots() {
 		const expanded = this.expand(this.m_contrast);
 		const middles = [];
-		for (let j = 0; j < this.m_biKnots.length; j++) {
-			const lhs = this.m_gizmo.unapply(expanded.lhs[j]);
-			const rhs = this.m_gizmo.unapply(expanded.rhs[j]);
-			middles[j] = {
-				x: 0.5 * (lhs.x + rhs.x),
-				y: 0.5 * (lhs.y + rhs.y),
-				type: this.m_biKnots[j].type,
-				unimportant: this.m_biKnots[j].unimportant
-			};
+		for (let j = 0; j < this.m_biKnotsT.length; j++) {
+			const lhs = expanded.lhs[j];
+			const rhs = expanded.rhs[j];
+			middles[j] = new ControlKnot(
+				this.m_biKnotsT[j].type,
+				mix(lhs.x, rhs.x, 0.5),
+				mix(lhs.y, rhs.y, 0.5)
+			);
 		}
 		return middles;
 	}
 	expand() {
 		const lhs = [],
-			rhs = [];
-		// Initialize knots
-		for (let j = 0; j < this.m_biKnots.length; j++) {
-			const knot = this.m_biKnots[j];
-			lhs[j] = {
-				type: knot.type,
-				unimportant: knot.unimportant,
-				x: 0,
-				y: 0
-			};
-			rhs[j] = {
-				type: reverseKnotType(knot.type),
-				unimportant: knot.unimportant,
-				x: 0,
-				y: 0
-			};
-		}
-		// Create important knots
-		for (let j = 0; j < this.m_biKnots.length; j++) {
-			const knot = this.m_biKnots[j];
-			if (knot.unimportant) continue;
-			let dx, dy;
-			if (knot.proposedNormal) {
-				dx = knot.proposedNormal.x;
-				dy = knot.proposedNormal.y;
-			} else {
-				dx = normalX(knot.origTangent, this.m_contrast);
-				dy = normalY(knot.origTangent, this.m_contrast);
-			}
-			lhs[j].x = knot.x + knot.d1 * dx;
-			lhs[j].y = knot.y + knot.d1 * dy;
-			rhs[j].x = knot.x - knot.d2 * dx;
-			rhs[j].y = knot.y - knot.d2 * dy;
-		}
-		this.interpolateUnimportantKnots(lhs, rhs);
-
-		const lhsUntransformed = [],
+			rhs = [],
+			lhsUntransformed = [],
 			rhsUntransformed = [];
-		for (const z of lhs) {
-			const u = this.m_gizmo.unapply(z);
-			lhsUntransformed.push({ type: z.type, x: u.x, y: u.y });
+
+		for (let j = 0; j < this.m_biKnotsT.length; j++) {
+			const knot = this.m_biKnotsT[j];
+			lhs[j] = new ControlKnot(knot.type, 0, 0);
+			rhs[j] = new ControlKnot(reverseKnotType(knot.type), 0, 0);
+			lhsUntransformed[j] = new ControlKnot(knot.type, 0, 0);
+			rhsUntransformed[j] = new ControlKnot(reverseKnotType(knot.type), 0, 0);
 		}
-		for (const z of rhs) {
-			const u = this.m_gizmo.unapply(z);
-			rhsUntransformed.push({ type: z.type, x: u.x, y: u.y });
+
+		for (let j = 0; j < this.m_biKnotsT.length; j++) {
+			const knotT = this.m_biKnotsT[j];
+			if (knotT.unimportant) continue;
+			let dx, dy;
+			if (knotT.proposedNormal) {
+				dx = knotT.proposedNormal.x;
+				dy = knotT.proposedNormal.y;
+			} else {
+				dx = normalX(knotT.origTangent, this.m_contrast);
+				dy = normalY(knotT.origTangent, this.m_contrast);
+			}
+			lhs[j].x = knotT.x + knotT.d1 * dx;
+			lhs[j].y = knotT.y + knotT.d1 * dy;
+			rhs[j].x = knotT.x - knotT.d2 * dx;
+			rhs[j].y = knotT.y - knotT.d2 * dy;
+
+			this.m_gizmo.unapplyToSink(lhs[j], lhsUntransformed[j]);
+			this.m_gizmo.unapplyToSink(rhs[j], rhsUntransformed[j]);
 		}
+
+		this.interpolateUnimportantKnots(lhs, rhs, lhsUntransformed, rhsUntransformed);
 		return { lhs, rhs, lhsUntransformed, rhsUntransformed };
 	}
-	interpolateUnimportantKnots(lhs, rhs) {
-		for (let j = 0; j < this.m_biKnots.length; j++) {
-			const knot = this.m_biKnots[j];
-			if (!knot.unimportant) continue;
+	interpolateUnimportantKnots(lhsT, rhsT, lhsU, rhsU) {
+		for (let j = 0; j < this.m_biKnotsU.length; j++) {
+			const knotU = this.m_biKnotsU[j];
+			if (!knotU.unimportant) continue;
 			let jBefore, jAfter;
-			for (jBefore = j - 1; cyNth(this.m_biKnots, jBefore).unimportant; jBefore--);
-			for (jAfter = j + 1; cyNth(this.m_biKnots, jAfter).unimportant; jAfter++);
-			const knotBefore = this.m_gizmo.unapply(cyNth(this.m_biKnots, jBefore)),
-				knotAfter = this.m_gizmo.unapply(cyNth(this.m_biKnots, jAfter)),
-				ref = this.m_gizmo.unapply(knot),
-				lhsBefore = this.m_gizmo.unapply(cyNth(lhs, jBefore)),
-				lhsAfter = this.m_gizmo.unapply(cyNth(lhs, jAfter)),
-				rhsBefore = this.m_gizmo.unapply(cyNth(rhs, jBefore)),
-				rhsAfter = this.m_gizmo.unapply(cyNth(rhs, jAfter));
-			const lhsTf = this.m_gizmo.applyXY(
-				linreg(knotBefore.x, lhsBefore.x, knotAfter.x, lhsAfter.x, ref.x),
-				linreg(knotBefore.y, lhsBefore.y, knotAfter.y, lhsAfter.y, ref.y)
-			);
-			const rhsTf = this.m_gizmo.applyXY(
-				linreg(knotBefore.x, rhsBefore.x, knotAfter.x, rhsAfter.x, ref.x),
-				linreg(knotBefore.y, rhsBefore.y, knotAfter.y, rhsAfter.y, ref.y)
-			);
-			(lhs[j].x = lhsTf.x), (lhs[j].y = lhsTf.y);
-			(rhs[j].x = rhsTf.x), (rhs[j].y = rhsTf.y);
+			for (jBefore = j - 1; cyNth(this.m_biKnotsU, jBefore).unimportant; jBefore--);
+			for (jAfter = j + 1; cyNth(this.m_biKnotsU, jAfter).unimportant; jAfter++);
+
+			const knotUBefore = cyNth(this.m_biKnotsU, jBefore),
+				knotUAfter = cyNth(this.m_biKnotsU, jAfter),
+				lhsUBefore = cyNth(lhsU, jBefore),
+				lhsUAfter = cyNth(lhsU, jAfter),
+				rhsUBefore = cyNth(rhsU, jBefore),
+				rhsUAfter = cyNth(rhsU, jAfter);
+
+			lhsU[j].x = linreg(knotUBefore.x, lhsUBefore.x, knotUAfter.x, lhsUAfter.x, knotU.x);
+			lhsU[j].y = linreg(knotUBefore.y, lhsUBefore.y, knotUAfter.y, lhsUAfter.y, knotU.y);
+			rhsU[j].x = linreg(knotUBefore.x, rhsUBefore.x, knotUAfter.x, rhsUAfter.x, knotU.x);
+			rhsU[j].y = linreg(knotUBefore.y, rhsUBefore.y, knotUAfter.y, rhsUAfter.y, knotU.y);
+
+			this.m_gizmo.applyToSink(lhsU[j], lhsT[j]);
+			this.m_gizmo.applyToSink(rhsU[j], rhsT[j]);
 		}
 	}
 }
@@ -128,7 +114,7 @@ class NormalRectifier {
 	}
 	arcTo(arc, x, y) {
 		if (this.m_nKnotsProcessed === 1) {
-			const d = this.m_gizmo.applyOffsetXY(arc.deriveX0, arc.deriveY0);
+			const d = new Vec2(arc.deriveX0, arc.deriveY0);
 			if (isTangentValid(d)) {
 				this.m_biKnots[0].origTangent = d;
 			} else {
@@ -136,7 +122,7 @@ class NormalRectifier {
 			}
 		}
 		if (this.m_biKnots[this.m_nKnotsProcessed]) {
-			const d = this.m_gizmo.applyOffsetXY(arc.deriveX1, arc.deriveY1);
+			const d = new Vec2(arc.deriveX1, arc.deriveY1);
 			if (isTangentValid(d)) {
 				this.m_biKnots[this.m_nKnotsProcessed].origTangent = d;
 			} else {

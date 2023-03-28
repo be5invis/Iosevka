@@ -1,5 +1,7 @@
 import { Ot } from "ot-builder";
 
+import { Vec2 } from "../../support/geometry/point.mjs";
+
 export function convertGsub(table, glyphs) {
 	return ConvertGsubGposImpl(GsubHandlers, Ot.Gsub.Table, table, glyphs);
 }
@@ -304,7 +306,7 @@ function convertMarkRecords(marks, mm, store) {
 		const g = store.glyphs.queryByName(gn);
 		if (!g) continue;
 		let markAnchors = [];
-		markAnchors[mm.get(mark.class)] = { x: mark.x, y: mark.y };
+		markAnchors[mm.get(mark.class)] = Vec2.from(mark);
 		out.set(g, { markAnchors: markAnchors });
 	}
 	return out;

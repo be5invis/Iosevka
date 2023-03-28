@@ -153,6 +153,8 @@ export class DiSpiroGeometry extends GeometryBase {
 		expander.initializeNormals();
 		expander.iterateNormals();
 		expander.iterateNormals();
+		expander.iterateNormals();
+		expander.iterateNormals();
 		this.m_cachedExpansionResults = expander.expand();
 		return this.m_cachedExpansionResults;
 	}

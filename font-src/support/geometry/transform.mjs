@@ -1,3 +1,5 @@
+import { Vec2 } from "./point.mjs";
+
 export class Transform {
 	constructor(xx, yx, xy, yy, x, y) {
 		this.xx = xx;
@@ -13,15 +15,24 @@ export class Transform {
 	static Translate(x, y) {
 		return new Transform(1, 0, 0, 1, x, y);
 	}
+
+	applyX(x, y) {
+		return x * this.xx + y * this.yx + this.x;
+	}
+	applyY(x, y) {
+		return x * this.xy + y * this.yy + this.y;
+	}
+	applyXY(x, y) {
+		return new Vec2(this.applyX(x, y), this.applyY(x, y));
+	}
+	applyToSink(pt, sink) {
+		sink.x = this.applyX(pt.x, pt.y);
+		sink.y = this.applyY(pt.x, pt.y);
+	}
 	apply(pt) {
 		return this.applyXY(pt.x, pt.y);
 	}
-	applyXY(x, y) {
-		return {
-			x: x * this.xx + y * this.yx + this.x,
-			y: x * this.xy + y * this.yy + this.y
-		};
-	}
+
 	applyOffset(delta) {
 		return this.applyOffsetXY(delta.x, delta.y);
 	}
@@ -31,14 +42,18 @@ export class Transform {
 			y: deltaX * this.xy + deltaY * this.yy
 		};
 	}
-	unapply(pt) {
+
+	unapplyToSink(pt, sink) {
 		const xx = pt.x - this.x;
 		const yy = pt.y - this.y;
 		const denom = this.xx * this.yy - this.xy * this.yx;
-		return {
-			x: (xx * this.yy - yy * this.yx) / denom,
-			y: (yy * this.xx - xx * this.xy) / denom
-		};
+		sink.x = (xx * this.yy - yy * this.yx) / denom;
+		sink.y = (yy * this.xx - xx * this.xy) / denom;
+	}
+	unapply(pt) {
+		let sink = new Vec2(0, 0);
+		this.unapplyToSink(pt, sink);
+		return sink;
 	}
 	inverse() {
 		const denom = this.xx * this.yy - this.xy * this.yx;
@@ -51,6 +66,7 @@ export class Transform {
 			-(-this.x * this.xy + this.y * this.xx) / denom
 		);
 	}
+
 	toString() {
 		return `[[${this.xx} ${this.xy}] [${this.yx} ${this.yy}]] + [[${this.x}] [${this.y}]]`;
 	}
@@ -61,9 +77,9 @@ export class Transform {
 		return this.isTranslate(tfm) && tfm.x === 0 && tfm.y === 0;
 	}
 	static Combine(...tfms) {
-		let z00 = { x: 0, y: 0 };
-		let z10 = { x: 1, y: 0 };
-		let z01 = { x: 0, y: 1 };
+		let z00 = new Vec2(0, 0);
+		let z10 = new Vec2(1, 0);
+		let z01 = new Vec2(0, 1);
 		for (const tfm of tfms) {
 			z00 = tfm.apply(z00);
 			z10 = tfm.apply(z10);
