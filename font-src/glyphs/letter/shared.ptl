@@ -574,38 +574,54 @@ glyph-block Letter-Shared-Shapes : begin
 			arcvh 8
 			DiagonalTailF (-1) df cx cy rInY DiagTailDefaultAngle depth sw
 
-	define [JutIn left right] : Math.min Jut (HalfStroke + [Math.max (Stroke * TanSlope) ((right - left - Stroke * 2 * HVContrast) * 0.4)])
+	define [JutIn left right jut sw hSplit] : Math.min jut (0.5 * HVContrast * sw + [Math.max (Stroke * TanSlope) ((right - left - sw * hSplit * HVContrast) / (0.5 + 2 * (hSplit - 1)))])
 
 	glyph-block-export SerifFrame
-	define [SerifFrame] : params [top bot left right [sw Stroke]] : begin
+	define [SerifFrame] : params [top bot left right [sw Stroke] [swSerif Stroke] [div 1] [hSplit 2]] : begin
 		local jutFS   MidJutSide
-		local jutIn : JutIn left right
+		local jut     : mix (0.5 * HVContrast * sw) Jut [Math.min 1 : div * 2.25 / hSplit]
+		local sideJut : jut - 0.5 * sw * HVContrast
+
+		local jutIn     : JutIn left right jut sw hSplit
 		local sideJutIn : jutIn - 0.5 * sw * HVContrast
+
 		local lBarCenter : left + 0.5 * sw * HVContrast
 		local lBarInner  : left + 1.0 * sw * HVContrast
 		local rBarCenter : right - 0.5 * sw * HVContrast
 		local rBarInner  : right - 1.0 * sw * HVContrast
 		return : object
 			lt : object
-				full     : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top Jut jutIn sw
-				fullSide : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top Jut jutFS sw
-				outer    : tagged 'serifLT' : HSerif.lt left top SideJut sw
-				inner    : tagged 'serifLT' : HSerif.rt lBarInner top sideJutIn sw
+				full        : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top jut jutIn swSerif
+				[fullExt s] : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top jut [JutIn left right jut sw s] swSerif
+				fullSide    : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top jut jutFS swSerif
+				outer       : tagged 'serifLT' : HSerif.lt left top sideJut swSerif
+				inner       : tagged 'serifLT' : HSerif.rt lBarInner top sideJutIn swSerif
 			rt : object
-				full     : tagged 'serifRT' : HSerif.mtAsymmetric rBarCenter top jutIn Jut sw
-				fullSide : tagged 'serifRT' : HSerif.mtAsymmetric rBarCenter top jutFS Jut sw
-				outer    : tagged 'serifRT' : HSerif.rt right top SideJut sw
-				inner    : tagged 'serifRT' : HSerif.lt rBarInner top sideJutIn sw
+				full        : tagged 'serifRT' : HSerif.mtAsymmetric rBarCenter top jutIn jut swSerif
+				[fullExt s] : tagged 'serifRT' : HSerif.mtAsymmetric rBarCenter top [JutIn left right jut sw s] jut swSerif
+				fullSide    : tagged 'serifRT' : HSerif.mtAsymmetric rBarCenter top jutFS jut swSerif
+				outer       : tagged 'serifRT' : HSerif.rt right top sideJut swSerif
+				inner       : tagged 'serifRT' : HSerif.lt rBarInner top sideJutIn swSerif
 			lb : object
-				full     : tagged 'serifLB' : HSerif.mbAsymmetric lBarCenter bot Jut jutIn sw
-				fullSide : tagged 'serifLB' : HSerif.mbAsymmetric lBarCenter bot Jut jutFS sw
-				outer    : tagged 'serifLB' : HSerif.lb left bot SideJut sw
-				inner    : tagged 'serifLB' : HSerif.rb lBarInner bot sideJutIn sw
+				full        : tagged 'serifLB' : HSerif.mbAsymmetric lBarCenter bot jut jutIn swSerif
+				[fullExt s] : tagged 'serifLB' : HSerif.mbAsymmetric lBarCenter bot jut [JutIn left right jut sw s] swSerif
+				fullSide    : tagged 'serifLB' : HSerif.mbAsymmetric lBarCenter bot jut jutFS swSerif
+				outer       : tagged 'serifLB' : HSerif.lb left bot sideJut swSerif
+				inner       : tagged 'serifLB' : HSerif.rb lBarInner bot sideJutIn swSerif
 			rb : object
-				full     : tagged 'serifRB' : HSerif.mbAsymmetric rBarCenter bot jutIn Jut sw
-				fullSide : tagged 'serifRB' : HSerif.mbAsymmetric rBarCenter bot jutFS Jut sw
-				outer    : tagged 'serifRB' : HSerif.rb right bot SideJut sw
-				inner    : tagged 'serifRB' : HSerif.lb rBarInner bot sideJutIn sw
+				full        : tagged 'serifRB' : HSerif.mbAsymmetric rBarCenter bot jutIn jut swSerif
+				[fullExt s] : tagged 'serifRB' : HSerif.mbAsymmetric rBarCenter bot [JutIn left right jut sw s] jut swSerif
+				fullSide    : tagged 'serifRB' : HSerif.mbAsymmetric rBarCenter bot jutFS jut swSerif
+				outer       : tagged 'serifRB' : HSerif.rb right bot sideJut swSerif
+				inner       : tagged 'serifRB' : HSerif.lb rBarInner bot sideJutIn swSerif
+
+	define SerifFrame.fromDf : function [] : params [df top bot [swSerif Stroke]] : begin
+		return : SerifFrame top bot df.leftSB df.rightSB
+			sw -- df.mvs
+			div -- df.div
+			hSplit -- [Math.max 2 df.hPack]
+			swSerif -- swSerif
+
 
 	glyph-block-export WithSerifOverflowMask
 	define [WithSerifOverflowMask fEnable top bottom left right s] : begin
@@ -764,8 +780,8 @@ glyph-block Letter-Shared-Shapes : begin
 		define MidHook : namespace
 			export : define [general] : params [left right top [bottom 0] ada adb [sw Stroke] [xDepth (-HookX)]] : composite-proc
 				nShoulder
-					left -- left 
-					right -- right 
+					left -- left
+					right -- right
 					top -- top
 					bottom -- bottom
 					ada -- ada
