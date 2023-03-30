@@ -114,16 +114,28 @@ glyph-block Letter-Latin-C : begin
 			arcvh
 			CurlyTail fine rinner m1 0 RightSB x2 y2
 
-	local CConfig : object
-		serifless               { SLAB-NONE      SLAB-NONE      }
-		bottomSerifed           { SLAB-NONE      SLAB-CLASSICAL }
-		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
-		bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
-		unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
-		bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
-		hybridSerifed1          { SLAB-INWARD    SLAB-CLASSICAL }
+	glyph-block-export CLetter
+	define CLetter : namespace
+		export : define [Shape df sty styBot top bot ada adb hook sw ob] : glyph-proc
+			include : CShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob
+			include : AutoStartSerifR df sty top hook sw
+			include : AutoStartSerifRB df styBot bot hook sw
 
-	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
+		export : define [RevShape df sty styBot top bot ada adb hook sw ob] : glyph-proc
+			include : RevCShapeT dispiro 0 df sty styBot top bot ada adb hook sw ob
+			include : AutoStartSerifR df sty top hook sw
+			include : AutoStartSerifRB df styBot bot hook sw
+
+		export : define Config : object
+			serifless               { SLAB-NONE      SLAB-NONE      }
+			bottomSerifed           { SLAB-NONE      SLAB-CLASSICAL }
+			unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
+			bilateralSerifed        { SLAB-CLASSICAL SLAB-CLASSICAL }
+			unilateralInwardSerifed { SLAB-INWARD    SLAB-NONE      }
+			bilateralInwardSerifed  { SLAB-INWARD    SLAB-INWARD    }
+			hybridSerifed1          { SLAB-INWARD    SLAB-CLASSICAL }
+
+	foreach { suffix { sty styBot } } [Object.entries CLetter.Config] : do
 		define [cShape df top bot ada adb hook sw ob]
 			CShapeT    dispiro 0 df sty styBot top bot ada adb hook sw ob
 		define [cShapeTopOnly df top bot ada adb hook sw ob]
@@ -203,35 +215,6 @@ glyph-block Letter-Latin-C : begin
 			include : FlipAround Middle (CAP / 2)
 			include : VBar.r RightSB Descender (Hook - O * 2)
 
-		define [IotifiedEsShape fCapital df top ada adb] : glyph-proc
-			local gap : 0.25 * (df.width - 2 * df.leftSB - 2.5 * df.mvs)
-			define divSub : (df.width - gap - df.mvs) / Width
-			define dfSub : DivFrame divSub 2
-			include : cShape dfSub top 0 ada adb Hook df.mvs
-			include : AutoStartSerifR dfSub sty top Hook df.mvs
-			include : AutoStartSerifRB dfSub styBot 0 Hook df.mvs
-
-			include : Translate (Width * (df.div - divSub)) 0
-			include : VBar.l df.leftSB 0 top df.mvs
-			include : HBar.m (df.leftSB - O) [mix df.leftSB df.rightSB (3 / 4)] (top / 2) df.mvs
-			if SLAB : begin
-				local sf : SerifFrame.fromDf df top 0
-				include : tagged 'serifLT' sf.lt.full
-				if (fCapital || [not para.isItalic]) : begin
-					include : tagged 'serifLB' sf.lb.full
-
-		create-glyph "cyrl/iotified{E}.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityM 3
-			set-width df.width
-			include : df.markSet.capital
-			include : IotifiedEsShape true df CAP ArchDepthA ArchDepthB
-
-		create-glyph "cyrl/iotified{e}.\(suffix)" : glyph-proc
-			local df : DivFrame para.diversityM 3
-			set-width df.width
-			include : df.markSet.e
-			include : IotifiedEsShape false df XH SmallArchDepthA SmallArchDepthB
-
 		define [KoppaShapeT styTop styBot top base] : union
 			VBar.r (Middle + Stroke * HVContrast) Descender (Stroke / 2)
 			difference base
@@ -278,9 +261,6 @@ glyph-block Letter-Latin-C : begin
 	select-variant 'cCurlyTail' 0x255
 	select-variant 'cHookTop' 0x188
 	select-variant 'stretchedC' 0x297 (follow -- 'C')
-
-	select-variant "cyrl/iotified{E}" 0x464 (follow -- 'C')
-	select-variant "cyrl/iotified{e}" 0x465 (follow -- 'c')
 
 	select-variant 'cyrl/Koppa' 0x480 (follow -- 'C')
 	select-variant 'cyrl/koppa' 0x481 (follow -- 'c')
@@ -404,22 +384,6 @@ glyph-block Letter-Latin-C : begin
 	create-glyph 'cBarOverlay' : LetterBarOverlay.l.in SB 0 XH
 	derive-composites 'CBar' 0xA792 'C' 'CBarOverlay'
 	derive-composites 'cBar' 0xA793 'c' 'cBarOverlay'
-
-	derive-glyphs 'cyrl/E' 0x42D 'revC' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : HBar.m [mix SB RightSB 0.35] RightSB (CAP / 2)
-
-	derive-glyphs 'cyrl/e' 0x44D 'revSmallC' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : HBar.m [mix SB RightSB 0.35] RightSB (XH / 2)
-
-	derive-glyphs 'cyrl/Ye' 0x404 'C' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : HBar.m SB [mix RightSB SB 0.35] (CAP / 2) [AdviceStroke2 2 4 CAP]
-
-	derive-glyphs 'cyrl/ye' 0x454 'c' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		include : HBar.m SB [mix RightSB SB 0.35] (XH / 2) [AdviceStroke2 2 4 XH]
 
 	derive-composites 'CCedilla' 0xC7 'C' 'cedillaExtShapeBelowOArc'
 	derive-composites 'cCedilla' 0xE7 'c' 'cedillaExtShapeBelowOArc'

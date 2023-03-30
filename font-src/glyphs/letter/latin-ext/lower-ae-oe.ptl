@@ -141,10 +141,30 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				set-base-anchor 'cvDecompose' 0 0
 				include : ueUPart df fSlab
 
+	do "open o subglyphs"
+		glyph-block-import Letter-Latin-C : CLetter
+
+		define [openOShape df sty styBot] : new-glyph : glyph-proc
+			local { subDf } : SubDfAndShift 0 df OX
+			local ada : subDf.archDepthA SmallArchDepth df.mvs
+			local adb : subDf.archDepthB SmallArchDepth df.mvs
+
+			include : CLetter.Shape subDf sty styBot XH 0 ada adb Hook df.mvs
+			include : FlipAround (subDf.width / 2) (XH / 2)
+
+		foreach { suffix { sty styBot } } [Object.entries CLetter.Config] : do
+			create-glyph "oeOpenO/left.\(suffix)" : glyph-proc
+				local df : DivFrame para.diversityM 3
+				set-width df.width
+				include : df.markSet.e
+				set-base-anchor 'cvDecompose' 0 0
+				include : openOShape df sty styBot
+
 	select-variant "aa" 0xA733 (follow -- 'a/turnABase')
 
 	select-variant "ae/e" (follow -- 'e')
 	select-variant "ue/u"
+	select-variant "oeOpenO/left" (follow -- 'c')
 
 	derive-composites 'ae' 0xE6   'ae/a' 'ae/e'
 	derive-composites 'oe' 0x153  'oe/o' 'ae/e'
@@ -152,6 +172,7 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 	derive-composites 'ao' 0xA735 'ae/a' 'ao/o'
 	derive-composites 'oo' 0xA74F 'oe/o' 'ao/o'
 	derive-composites 'uo' 0xAB63 'ue/u' 'ao/o'
+	derive-composites 'oeOpenO' 0xAB62 'oeOpenO/left' 'ae/e'
 
 	alias 'cyrl/ae' 0x4D5  'ae'
 	alias 'cyrl/oo' 0xA699 'oo'

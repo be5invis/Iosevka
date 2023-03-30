@@ -10,6 +10,7 @@ glyph-block Letter-Cyrillic-SmallYus : begin
 	glyph-block-import Letter-Shared-Shapes : SerifFrame
 	glyph-block-import Letter-Latin-V : VShape
 	glyph-block-import Letter-Latin-Upper-A : LambdaShape AMaskShape
+	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
 
 	define [CyrSmallYusShape df top straightBar _fine] : glyph-proc
 		local fine : fallback _fine : AdviceStroke 3.3 df.div
@@ -51,12 +52,16 @@ glyph-block Letter-Cyrillic-SmallYus : begin
 		eject-contour 'serifMB'
 		eject-contour 'serifRB'
 		include : Translate (Width * (df.div - divSub)) 0
-		include : VBar.l df.leftSB 0 top df.mvs
-		include : HBar.t (df.leftSB - O) [mix df.leftSB df.rightSB (2 / 3)] (top / 2) df.mvs
+
+		local useItalicShape : [not fCapital] && para.isItalic
+		include : Iotified.A df top
+			hBarRight -- [mix df.leftSB df.rightSB (2 / 3)]
+			hBarY -- top / 2 - df.mvs * 0.5
+			fCapital -- fCapital
+			swSerif -- df.mvs
+
 		if SLAB : begin
 			local sf : SerifFrame.fromDf df top 0 (swSerif -- df.mvs)
-			include : if (!fCapital && para.isItalic) sf.lt.outer [sf.lt.fullExt 3]
-			if (fCapital || [not para.isItalic]) : include sf.lb.outer
 			include sf.rb.outer
 
 	create-glyph : glyph-proc
