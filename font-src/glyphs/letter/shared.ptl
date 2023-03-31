@@ -577,7 +577,10 @@ glyph-block Letter-Shared-Shapes : begin
 			arcvh 8
 			DiagonalTailF (-1) df cx cy rInY DiagTailDefaultAngle depth sw
 
-	define [JutIn left right jut sw hSplit] : Math.min jut (0.5 * HVContrast * sw + [Math.max (Stroke * TanSlope) ((right - left - sw * hSplit * HVContrast) / (0.5 + 2 * (hSplit - 1)))])
+	define [JutIn left right jut swRef hSplit] : begin
+		local ink : HVContrast * swRef
+		local gap : (right - left - hSplit * ink) / (hSplit - 1)
+		Math.min jut (0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)])
 
 	class CSerifFrame
 		public [new top bot left right swRef swSerif div hSplit] : begin
@@ -590,20 +593,26 @@ glyph-block Letter-Shared-Shapes : begin
 			set this.div     div
 			set this.hSplit  hSplit
 
+			local ink : HVContrast * swRef
+			local gap : (right - left - hSplit * ink) / (hSplit - 1)
+
+
 			local jutFS   MidJutSide
 			local jut     : mix (0.5 * HVContrast * swRef) Jut [Math.min 1 : div * 2.25 / hSplit]
-			local sideJut : jut - 0.5 * swRef * HVContrast
+			local sideJut : jut - 0.5 * ink
 
 			local jutIn     : JutIn left right jut swRef hSplit
-			local sideJutIn : jutIn - 0.5 * swRef * HVContrast
+			local sideJutIn : jutIn - 0.5 * ink
 
-			local lBarCenter : left + 0.5 * swRef * HVContrast
-			local lBarInner  : left + 1.0 * swRef * HVContrast
-			local rBarCenter : right - 0.5 * swRef * HVContrast
-			local rBarInner  : right - 1.0 * swRef * HVContrast
+			local lBarCenter : left + 0.5 * ink
+			local lBarInner  : left + 1.0 * ink
+			local rBarCenter : right - 0.5 * ink
+			local rBarInner  : right - 1.0 * ink
 
 			set this.jut     jut
 			set this.sideJut sideJut
+
+			set this.enoughSpaceForFullSerifs : 0.5 * ink + 0.375 * gap > para.refJut
 
 			set this.lt : object
 				full        : tagged 'serifLT' : HSerif.mtAsymmetric lBarCenter top jut jutIn swSerif
@@ -630,6 +639,9 @@ glyph-block Letter-Shared-Shapes : begin
 				outer       : tagged 'serifRB' : HSerif.rb right bot sideJut swSerif
 				inner       : tagged 'serifRB' : HSerif.lb rBarInner bot sideJutIn swSerif
 
+			set this.mb : object
+				full : tagged 'serifMB' : HSerif.mbAsymmetric [mix lBarCenter rBarCenter 0.5] bot jutIn jutIn swSerif
+
 		public [slice l r] : begin
 			local ink : this.swRef * HVContrast
 			local gap : (this.right - this.left - this.hSplit * ink) / (this.hSplit - 1)
@@ -643,7 +655,7 @@ glyph-block Letter-Shared-Shapes : begin
 
 	define SerifFrame.fromDf : function [] : params [df top bot [swSerif df.mvs]] : begin
 		return : SerifFrame top bot df.leftSB df.rightSB
-			sw -- df.mvs
+			swRef -- df.mvs
 			div -- df.div
 			hSplit -- [Math.max 2 df.hPack]
 			swSerif -- swSerif
