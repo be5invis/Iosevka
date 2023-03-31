@@ -7,39 +7,47 @@ glyph-module
 glyph-block Letter-Cyrillic-E : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Latin-C : CLetter
+	glyph-block-import Letter-Latin-C : CLetterForm CConfig
 	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
 
-	foreach { suffix { sty styBot } } [Object.entries CLetter.Config] : do
+	foreach { suffix { sty styBot } } [Object.entries CConfig] : do
 		create-glyph "cyrl/E.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : CLetter.Shape [DivFrame 1] sty styBot CAP 0 ArchDepthA ArchDepthB Hook Stroke
-			include : HBar.m [mix SB RightSB 0.35] RightSB (CAP / 2)
+			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
+			include : lf.revFull
+			include : HBar.m [mix SB RightSB 0.35] RightSB (CAP / 2) [AdviceStroke2 2 3 CAP]
 
 		create-glyph "cyrl/e.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'cvDecompose' 0 0
-			include : CLetter.Shape [DivFrame 1] sty styBot XH 0 SmallArchDepthA SmallArchDepthB Hook Stroke
-			include : HBar.m [mix SB RightSB 0.35] RightSB (XH / 2)
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.revFull
+			include : HBar.m [mix SB RightSB 0.35] RightSB (XH / 2) [AdviceStroke2 2 3 XH]
 
 		create-glyph "cyrl/Ye.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : CLetter.RevShape [DivFrame 1] sty styBot CAP 0 ArchDepthA ArchDepthB Hook Stroke
-			include : HBar.m SB [mix RightSB SB 0.35] (CAP / 2) [AdviceStroke2 2 4 CAP]
+			local lf : CLetterForm [DivFrame 1] sty styBot CAP 0
+			include : lf.full
+			include : HBar.m SB [mix RightSB SB 0.35] (CAP / 2) [AdviceStroke2 2 3 CAP]
 
 		create-glyph "cyrl/ye.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'cvDecompose' 0 0
-			include : CLetter.RevShape [DivFrame 1] sty styBot XH 0 SmallArchDepthA SmallArchDepthB Hook Stroke
-			include : HBar.m SB [mix RightSB SB 0.35] (XH / 2) [AdviceStroke2 2 4 XH]
+			local lf : CLetterForm [DivFrame 1] sty styBot XH 0
+				ada -- SmallArchDepthA
+				adb -- SmallArchDepthB
+			include : lf.full
+			include : HBar.m SB [mix RightSB SB 0.35] (XH / 2) [AdviceStroke2 2 3 XH]
 
 		define [IotifiedEShape fCapital df top ada adb] : glyph-proc
 			local gap : 0.25 * (df.width - 2 * df.leftSB - 2.5 * df.mvs)
 			define divSub : (df.width - gap - df.mvs) / Width
 			define dfSub : DivFrame divSub 2
-			include : CLetter.Shape dfSub sty styBot top 0 ada adb Hook df.mvs
 
-			include : Translate (Width * (df.div - divSub)) 0
+			local lf : CLetterForm dfSub sty styBot top 0 (ada -- ada) (adb -- adb) (sw -- df.mvs)
+			include : WithTransform [ApparentTranslate (Width * (df.div - divSub)) 0] : lf.full
 
 			local useItalicShape : [not fCapital] && para.isItalic
 			include : Iotified.full df top
