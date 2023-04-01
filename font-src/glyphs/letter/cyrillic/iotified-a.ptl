@@ -70,21 +70,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				swSerif -- swSerif
 
 	do "iotified A"
-		glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape
-		define SLAB-NONE    0
-		define SLAB-TOP     1
-		define SLAB-LEFT    2
-		define SLAB-RIGHT   4
-
-		define AConfig : object
-			straightSerifless     { true   SLAB-NONE                             }
-			curlySerifless        { false  SLAB-NONE                             }
-			straightTopSerifed    { true          SLAB-TOP                       }
-			curlyTopSerifed       { false         SLAB-TOP                       }
-			straightBaseSerifed   { true   [bitOr          SLAB-LEFT SLAB-RIGHT] }
-			curlyBaseSerifed      { false  [bitOr          SLAB-LEFT SLAB-RIGHT] }
-			straightTriSerifed    { true   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT] }
-			curlyTriSerifed       { false  [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT] }
+		glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape AConfig
 
 		foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
 			create-glyph "cyrl/AIotified.\(suffix)" : glyph-proc
@@ -94,11 +80,14 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 
 				local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
 				local divSub : (df.width - gap - df.mvs) / Width
-				define subDf : DivFrame divSub 3
+				local subDf : DivFrame divSub 2 (df.leftSB / SB) df.mvs 0
 
 				local shift : Width * (df.div - divSub)
-				include : WithTransform [ApparentTranslate shift 0]
-					ALetterShape subDf CAP df.mvs fStraightBar slabKind
+				local xIotifiedBarRight : df.leftSB + HVContrast * df.mvs
+				local botGap : Math.max ((df.rightSB - df.leftSB) * 0.08) [AdviceStroke 6]
+				include : difference
+					WithTransform [ApparentTranslate shift 0] : ALetterShape subDf CAP df.mvs fStraightBar slabKind
+					intersection [MaskBelow df.mvs] [MaskLeft : mix xIotifiedBarRight [Math.min (subDf.leftSB + shift) (xIotifiedBarRight + botGap)] 0.5]
 
 				include : difference
 					Iotified.A df CAP [mix df.leftSB df.rightSB (3 / 4)] (CAP / 2) (fCapital -- true)
