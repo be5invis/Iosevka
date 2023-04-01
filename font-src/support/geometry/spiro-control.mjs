@@ -186,3 +186,10 @@ export function Interpolator(blender, restParameters) {
 	for (const prop in restParameters) interpolator[prop] = restParameters[prop];
 	return interpolator;
 }
+
+export class ImportanceControlKnot extends ControlKnot {
+	constructor(type, x, y, unimportant) {
+		super(type, x, y, null);
+		this.unimportant = unimportant;
+	}
+}

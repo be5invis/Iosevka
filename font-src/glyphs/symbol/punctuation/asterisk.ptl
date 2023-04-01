@@ -15,16 +15,15 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 	define yLow_DT  : mix SymbolMid yHigh_DT (-1)
 
 	define asteriskKinds : list
-		#  sides  size  rot  pFine stroke              name             dual            triple         high            sMid             midXH    low
-		list { 5  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'pentaHigh'     'pentaSMid'      'midXH'  'pentaLow'     }
-		list { 6  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'hexHigh'       'hexSMid'        ''       'hexLow'       }
-		list { 5  1.2   1    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnPentaHigh' 'turnPentaSMid'  ''       'turnPentaLow' }
-		list { 6  1.2   0.5  0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnHexHigh'   'turnHexSMid'    ''       'turnHexLow'   }
-		list { 5  0.85  0    0.4   Stroke          } { 'smallAsterisk'  ''              ''         } { 'high'          'low'            ''       ''             }
-		list { 5  1     0    0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { 'high'          'low'            ''       ''             }
-		list { 8  1.2   0.5  0.4  [AdviceStroke 3] } { 'flower'         ''              ''         } { 'high'          'sMid'           ''       ''             }
+		#  sides  size  rot  pFine stroke              name             dual            triple         high            slashTop      sMid             midXH    slashBot
+		list { 5  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'pentaHigh'     'pentaST'     'pentaSMid'      'midXH'  'pentaSB'     }
+		list { 6  1.2   0    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'hexHigh'       'hexST'       'hexSMid'        ''       'hexSB'       }
+		list { 5  1.2   1    0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnPentaHigh' 'turnPentaST' 'turnPentaSMid'  ''       'turnPentaSB' }
+		list { 6  1.2   0.5  0.4   Stroke          } { 'asterisk'       'dualAsterisk'  'asterism' } { 'turnHexHigh'   'turnHexST'   'turnHexSMid'    ''       'turnHexSB'   }
+		list { 5  1     0    0.4   GeometryStroke  } { 'opAsterisk'     ''              ''         } { ''              ''            'low'            ''       ''            }
+		list { 8  1.2   0.5  0.4  [AdviceStroke 3] } { 'flower'         ''              ''         } { 'high'          'ST'          'sMid'           ''       ''            }
 
-	foreach [{{ sides size rot pFine stroke } { name dual triple } { high sMid midXH low } } : items-of asteriskKinds] : begin
+	foreach [{{ sides size rot pFine stroke } { name dual triple } { high slashTop sMid midXH slashBot } } : items-of asteriskKinds] : begin
 		create-glyph (name + '.' + sMid) : glyph-proc
 			local radius : LongJut * size
 			local fine : stroke * pFine
@@ -37,7 +36,11 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 					flat Middle SymbolMid [widths fine fine]
 					curl (Middle + radius * s) (SymbolMid + radius * c) [widths final final]
 
-		create-glyph (name + '.' + high) : composite-proc
+		if high : create-glyph (name + '.' + high) : composite-proc
+			refer-glyph (name + '.' + sMid)
+			ApparentTranslate 0 (2 * (yHigh - SymbolMid))
+
+		if slashTop : create-glyph (name + '.' + slashTop) : composite-proc
 			refer-glyph (name + '.' + sMid)
 			ApparentTranslate 0 (yHigh - SymbolMid)
 
@@ -45,7 +48,7 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 			refer-glyph (name + '.' + sMid)
 			ApparentTranslate 0 (XH / 2 - SymbolMid)
 
-		if low : create-glyph (name + '.' + low) : composite-proc
+		if slashBot : create-glyph (name + '.' + slashBot) : composite-proc
 			refer-glyph (name + '.' + sMid)
 			ApparentTranslate 0 (yLow - SymbolMid)
 
@@ -71,10 +74,10 @@ glyph-block Symbol-Punctuation-Asterisk : begin
 					ApparentTranslate (MosaicWidth * 0.25 - Width / 2) (yLow_DT - SymbolMid)
 
 	select-variant 'asterisk' '*'
-	select-variant 'asterisk/high' (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/slashTop' (shapeFrom -- 'asterisk')
+	select-variant 'asterisk/slashBot' 0x204E (shapeFrom -- 'asterisk')
 	select-variant 'asterisk/sMid' (shapeFrom -- 'asterisk')
 	select-variant 'asterisk/sMid/ligComment' (shapeFrom -- 'asterisk') (follow -- 'asterisk/sMid')
-	select-variant 'asterisk/low' 0x204E (shapeFrom -- 'asterisk')
 	select-variant 'dualAsterisk' 0x2051 (follow -- 'asterisk/sMid')
 	select-variant 'flower' 0x2055
 

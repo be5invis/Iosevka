@@ -1,0 +1,37 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+
+glyph-module
+
+glyph-block Letter-Latin-Sakha-Yat : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : SerifFrame
+	glyph-block-import Letter-Cyrillic-Yeri : CyrlYeriUprightShape CyrlYeriRoundShape CyrlYeriCursiveShape
+	glyph-block-import Letter-Cyrillic-Iotified-A : Iotified
+
+	define [SakhaYatShape Yeri df top] : glyph-proc
+		local jut : Math.min Jut : Jut * 0.75 * df.div
+		include : Yeri top
+			left -- (df.middle - df.mvs / 2 * HVContrast)
+			right -- df.rightSB
+			stroke -- df.mvs
+			jut -- jut
+		set-width df.width
+
+		include : Iotified.outer df top (df.middle + df.mvs / 2 * HVContrast) (top - df.mvs * 0.5)
+
+	define YerConfig : object
+		corner  { CyrlYeriUprightShape }
+		round   { CyrlYeriRoundShape   }
+		cursive { CyrlYeriCursiveShape }
+
+	foreach { suffix { Yeri } } [Object.entries YerConfig] : do
+		create-glyph "latn/yatSakha.upright.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : SakhaYatShape Yeri df XH
+
+	select-variant 'latn/yatSakha.upright'

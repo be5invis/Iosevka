@@ -402,13 +402,15 @@ export : define DesignParameters : object
 
 export : define [GenDivFrame metrics] : begin
 	class CDivFrame
-		public [new _div _hPack _sbMul] : begin
+		public [new _div _hPack _sbMul _mvs _ox] : begin
+			local ox : fallback _ox 0
 			local div : fallback _div 1
 			local hPack : Math.max 1 [fallback _hPack 0]
-			local mvs   : if _hPack [metrics.AdviceStroke _hPack div] metrics.Stroke
+			local mvs   : fallback _mvs : if _hPack [metrics.AdviceStroke _hPack div] metrics.Stroke
 			local sbMul : fallback _sbMul : Math.min 1 : (metrics.Width * div - hPack * mvs) / (2 * hPack * metrics.SB)
 
 			set this.div            div
+			set this.hPack          hPack
 			set this.width        : metrics.Width * div
 			set this.middle       : metrics.Middle * div
 			set this.sb           : metrics.SB * sbMul
@@ -417,8 +419,34 @@ export : define [GenDivFrame metrics] : begin
 			set this.mvs            mvs
 			set this.markSet      : MarksetDiv div sbMul metrics
 
+			# No-overshoot metrics -- used for arch depth calculation
+			set this.ox                 ox
+			set this.widthNoOvershoot : this.width - ox
+			set this.divNoOvershoot   : this.widthNoOvershoot / metrics.Width
+
+		public [archDepth d _stroke] : begin
+			return : Math.max (d * this.divNoOvershoot) (1.125 * [fallback _stroke this.mvs])
+		public [archDepthA d _stroke] : begin
+			return : metrics.ArchDepthAOf [this.archDepth d _stroke] this.widthNoOvershoot
+		public [archDepthB d _stroke] : begin
+			return : metrics.ArchDepthBOf [this.archDepth d _stroke] this.widthNoOvershoot
+
+		public [slice _divisions _keeps _o] : begin
+			local o : fallback _o 0
+			local divisions : fallback _divisions this.hPack
+			local keeps : fallback _keeps 2
+
+			local oneStroke : metrics.HVContrast * this.mvs
+			local totalGap : this.rightSB - this.leftSB - divisions * oneStroke - 2 * o
+			local oneGap : totalGap / (divisions - 1)
+
+			local subDfWidth : 2 * this.leftSB + 2 * o + oneGap * (keeps - 1) + oneStroke * keeps
+			local subDfDiv : subDfWidth / metrics.Width
+
+			return : new CDivFrame subDfDiv keeps (this.leftSB / metrics.SB) this.mvs o
+
 		public [applyToGlyph g] : begin
 			g.setWidth this.width
 			return this
 
-	return : lambda [_div _hPack _sbMul] : new CDivFrame _div _hPack _sbMul
+	return : lambda [_div _hPack _sbMul _mvs _ox] : new CDivFrame _div _hPack _sbMul _mvs _ox

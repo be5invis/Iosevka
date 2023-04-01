@@ -10,7 +10,7 @@ glyph-block Letter-Greek-Pi : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft BBBarRight
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar SerifFrame nShoulder
-	glyph-block-import Letter-Shared-Shapes : CyrDescender VerticalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender MidHook
 
 	glyph-block-export PiShape
 	define [PiShape] : params [df top bottom [shrinkRate 0.05] [fine Stroke] [doSerif false] [endShrink 0] [tailed false]] : glyph-proc
@@ -23,7 +23,7 @@ glyph-block Letter-Greek-Pi : begin
 			include : VBar.r (df.rightSB - shrink) bottom (top - fine / 2) fine
 
 		if doSerif : begin
-			local sf : SerifFrame top bottom (df.leftSB + shrink) (df.rightSB - shrink) fine
+			local sf : SerifFrame top bottom (df.leftSB + shrink) (df.rightSB - shrink) (swRef -- fine)
 			include : composite-proc sf.lt.outer sf.rt.outer sf.lb.full sf.rb.full
 
 	define [MathBBPiShape] : params [df top bottom [shrinkRate 0.05] [endShrink 0]] : glyph-proc
@@ -65,32 +65,15 @@ glyph-block Letter-Greek-Pi : begin
 		include : MarkSet.e
 		include : MathBBPiShape [DivFrame 1] XH 0 (shrinkRate -- 0.06)
 
-
-	define [CyrlPeHookHookShape df top] : glyph-proc
-		local xm : df.middle + 0.5 * df.mvs * HVContrast
-		include : nShoulder
-			left   -- xm
-			right  -- df.rightSB
-			top    -- top * 0.625 + df.mvs / 4
-			bottom -- 0
-			ada    -- ArchDepthA
-			adb    -- ArchDepthB
-			stroke -- df.mvs
-
-		include : VerticalHook.r df.rightSB 0
-			xDepth -- (-[Math.max (df.mvs * HVContrast) : Math.min HookX (0.5 * (df.rightSB - df.leftSB - 2 * df.mvs * HVContrast))])
-			yDepth -- Hook
-			sw     -- df.mvs
-
 	define [CyrlPeHookShape df top] : glyph-proc
 		local xm : df.middle + 0.5 * df.mvs * HVContrast
 		include : HBar.t df.leftSB xm top df.mvs
 		include : VBar.l df.leftSB 0 (top - df.mvs / 2) df.mvs
 		include : VBar.r xm 0 (top - df.mvs / 2) df.mvs
-		include : CyrlPeHookHookShape df top
+		include : MidHook.m df top
 
 		if SLAB : begin
-			local sf : SerifFrame top 0 df.leftSB xm df.mvs
+			local sf : [SerifFrame.fromDf df top 0].slice 0 1
 			if (df.width > para.refJut * 7)
 			: then
 				include sf.lt.outer
@@ -129,9 +112,9 @@ glyph-block Letter-Greek-Pi : begin
 			ada    -- ArchDepthA
 			adb    -- ArchDepthB
 			stroke -- df.mvs
-		include : CyrlPeHookHookShape df XH
+		include : MidHook.m df XH
 
 		if SLAB : begin
-			local sf : SerifFrame XH 0 df.leftSB xm df.mvs
+			local sf : [SerifFrame.fromDf df XH 0].slice 0 1
 			include sf.lt.outer
 			include sf.rb.outer

@@ -1,0 +1,107 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose RequireCcmpDecompose] from"../../../support/gr.mjs"
+import [bitOr] from"../../../support/util/mask-bit.mjs"
+
+glyph-module
+
+glyph-block Letter-Latin-Upper-AE-OE : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Latin-Upper-F : EFVJutLength
+	glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape
+	glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
+
+	define [AHalfShape pShift df top fStraightBar slabKind] : begin
+		local { subDf shift } : SubDfAndShift pShift df
+		return : WithTransform [ApparentTranslate shift 0]
+			ALetterShape subDf top df.mvs fStraightBar slabKind
+
+	define [AHalfShapeMask pShift df top fStraightBar slabKind] : begin
+		local { subDf shift } : SubDfAndShift pShift df
+		return : WithTransform [ApparentTranslate shift 0]
+			AMaskShape subDf top df.mvs fStraightBar
+
+	define SLAB-NONE    0
+	define SLAB-TOP     1
+	define SLAB-LEFT    2
+	define SLAB-RIGHT   4
+
+	define ALetters : object
+		AA     { 0xA732 'capital' CAP }
+		smcpAA { null   'e'       XH  }
+
+	define AConfig : object
+		straightSerifless     { true   SLAB-NONE                   SLAB-NONE                   }
+		curlySerifless        { false  SLAB-NONE                   SLAB-NONE                   }
+		straightTopSerifed    { true          SLAB-TOP                    SLAB-TOP             }
+		curlyTopSerifed       { false         SLAB-TOP                    SLAB-TOP             }
+		straightBaseSerifed   { true                   SLAB-LEFT                   SLAB-RIGHT  }
+		curlyBaseSerifed      { false                  SLAB-LEFT                   SLAB-RIGHT  }
+		straightTriSerifed    { true   [bitOr SLAB-TOP SLAB-LEFT]  [bitOr SLAB-TOP SLAB-RIGHT] }
+		curlyTriSerifed       { false  [bitOr SLAB-TOP SLAB-LEFT]  [bitOr SLAB-TOP SLAB-RIGHT] }
+
+	foreach { prefix { code mk height } } [Object.entries ALetters] : do
+		foreach { suffix { fStraightBar skLeft skRight } } [Object.entries AConfig] : do
+			create-glyph "\(prefix)/Left.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width df.width
+				include : df.markSet.(mk)
+				set-base-anchor 'cvDecompose' 0 0
+				include : AHalfShape 0 df height fStraightBar skLeft
+
+			create-glyph "\(prefix)/LeftMask.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width df.width
+				include : df.markSet.(mk)
+				set-base-anchor 'cvDecompose' 0 0
+				include : AHalfShapeMask 0 df height fStraightBar skLeft
+
+			create-glyph "\(prefix)/Right.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width 0
+				include : df.markSet.(mk)
+				set-mark-anchor 'cvDecompose' 0 0 0 0
+				include : AHalfShape 1 df height fStraightBar skRight
+
+			create-glyph "\(prefix)/RightMask.\(suffix)" : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				set-width 0
+				include : df.markSet.(mk)
+				set-mark-anchor 'cvDecompose' 0 0 0 0
+				include : AHalfShapeMask 1 df height fStraightBar skRight
+
+		select-variant "\(prefix)/Left"      (follow -- 'A')
+		select-variant "\(prefix)/LeftMask"  (follow -- 'A')
+		select-variant "\(prefix)/Right"     (follow -- 'A')
+		select-variant "\(prefix)/RightMask" (follow -- 'A')
+
+		derive-multi-part-glyphs prefix code
+			list "\(prefix)/Left" "\(prefix)/LeftMask" "\(prefix)/Right" "\(prefix)/RightMask"
+			function [srcs gr] : glyph-proc
+				define df : DivFrame para.diversityM 3.5
+				define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
+				define { left leftMask right rightMask } srcs
+
+				include : add-glyph-dependency left
+				include : add-glyph-dependency leftMask
+				include : add-glyph-dependency right
+				include : add-glyph-dependency rightMask
+
+				include [refer-glyph left] AS_BASE ALSO_METRICS
+				include : difference
+					refer-glyph right
+					refer-glyph leftMask
+					difference
+						intersection
+							MaskAbove (height - Stroke)
+							WithTransform [ApparentTranslate topSerifGap 0] [refer-glyph leftMask]
+						WithTransform [ApparentTranslate (OX - 0.1) 0] [refer-glyph rightMask]
+
+	derive-multi-part-glyphs 'AO' 0xA734 {"AA/Left" "AA/LeftMask" "OO/right"} : function [srcs gr] : glyph-proc
+		define df : DivFrame para.diversityM 3.5
+		define topSerifGap : Math.max (0.1 * (df.rightSB - df.leftSB)) [AdviceStroke 6]
+		define { left leftMask right } srcs
+		include [refer-glyph left] AS_BASE ALSO_METRICS
+		include : difference [refer-glyph right] [refer-glyph leftMask]
