@@ -1,0 +1,52 @@
+$$include '../../../meta/macros.ptl'
+
+import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Dotless CvDecompose RequireCcmpDecompose] from"../../../support/gr.mjs"
+
+glyph-module
+
+glyph-block Letter-Latin-Lower-DB-QP : begin
+	glyph-block-import CommonShapes
+	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Shared-Shapes : OBarLeft
+	glyph-block-import Letter-Latin-Lower-AE-OE : SubDfAndShift
+
+	define [DbCenterShape df] : glyph-proc
+		local { subDf } : SubDfAndShift 0 df OX
+		local ada : subDf.archDepthA SmallArchDepth df.mvs
+		local adb : subDf.archDepthB SmallArchDepth df.mvs
+
+		include : OBarLeft.roundedTop
+			left      -- df.middle - 0.5 * df.mvs * HVContrast
+			right     -- df.rightSB
+			yTerminal -- 0
+			sw        -- df.mvs
+			ada       -- ada
+			adb       -- adb
+		include : FlipAround df.middle (XH / 2)
+		include : OBarLeft.rounded
+			left      -- df.middle - 0.5 * df.mvs * HVContrast
+			right     -- df.rightSB
+			yTerminal -- (XH / 2)
+			sw        -- df.mvs
+			ada       -- ada
+			adb       -- adb
+
+	create-glyph 'db' 0x238 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.b
+		include : DbCenterShape df
+		include : VBar.m df.middle XH Ascender df.mvs
+		if SLAB : begin
+			include : HSerif.lt (df.middle - df.mvs / 2 * HVContrast) Ascender SideJut
+
+	create-glyph 'qp' 0x239 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.p
+		include : DbCenterShape df
+		include : FlipAround df.middle (XH / 2)
+		include : VBar.m df.middle Descender 0 df.mvs
+		if SLAB : begin
+			include : HSerif.mb df.middle Descender Jut

@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Shared : SetGrekUpperTonos
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar
-	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender VerticalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender CyrTailDescender VerticalHook MidHook
 
 	define SLAB-NONE                   0
 	define SLAB-TOP-LEFT               1
@@ -22,7 +22,7 @@ glyph-block Letter-Latin-Upper-H : begin
 	define SLAB-TAILED-CYRILLIC-BGR    6
 
 	define [HSerifs slabType t b l r sw] : begin
-		local sf : SerifFrame t b l r (sw -- [fallback sw Stroke])
+		local sf : SerifFrame t b l r (swRef -- [fallback sw Stroke])
 		return : match slabType
 			[Just SLAB-NONE]   : glyph-proc
 			[Just SLAB-TOP-LEFT] : begin sf.lt.outer
@@ -77,7 +77,7 @@ glyph-block Letter-Latin-Upper-H : begin
 			curl df.rightSB XH [heading Upward]
 		include : HSerifs slabType top 0 df.leftSB (df.middle + 0.5 * df.mvs * HVContrast) df.mvs
 
-		local sf2 : SerifFrame XH 0 (df.middle - df.mvs * 0.5 * HVContrast) df.rightSB df.mvs
+		local sf2 : [SerifFrame.fromDf df XH 0].slice 1 2
 		if (slabType === SLAB-ALL || slabType === SLAB-TAILED-CYRILLIC) : include sf2.rt.full
 
 	define [OverlayStrokeShape top slabType] : begin
@@ -183,6 +183,25 @@ glyph-block Letter-Latin-Upper-H : begin
 			include [refer-glyph "smcpH.\(suffix)"] AS_BASE ALSO_METRICS
 			include : OverlayStrokeShape XH slabType
 
+		create-glyph "cyrl/EnMidHook.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			local xm : df.middle + 0.5 * df.mvs * HVContrast
+			include : MarkSet.capDesc
+			set-width df.width
+			include : Body df.leftSB xm CAP df.mvs
+			include : HSerifs slabType CAP 0 df.leftSB xm df.mvs
+			include : MidHook.m df CAP
+
+		create-glyph "cyrl/enMidHook.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			local xm : df.middle + 0.5 * df.mvs * HVContrast
+			include : MarkSet.p
+			set-width df.width
+			include : Body df.leftSB xm XH df.mvs
+			include : HSerifs slabType XH 0 df.leftSB xm df.mvs
+			include : MidHook.m df XH
+
+
 	select-variant 'H' 'H'
 	link-reduced-variant 'H/sansSerif' 'H' MathSansSerif
 	select-variant 'grek/Eta' 0x397 (follow -- 'H')
@@ -217,6 +236,9 @@ glyph-block Letter-Latin-Upper-H : begin
 
 	select-variant 'HStroke' 0x126 (follow -- 'H')
 	select-variant 'smcpHStroke' null (follow -- 'H')
+
+	select-variant 'cyrl/EnMidHook' 0x0522 (follow -- 'H')
+	select-variant 'cyrl/enMidHook' 0x0523 (follow -- 'cyrl/en')
 
 	create-glyph 'mathbb/H' 0x210D : glyph-proc
 		include : MarkSet.capital
