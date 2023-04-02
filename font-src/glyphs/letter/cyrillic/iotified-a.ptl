@@ -19,7 +19,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 	define Iotified : namespace
 		export : define [Shape] : params [df top hBarRight [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
 			include : VBar.l df.leftSB 0 top df.mvs
-			if (hBarRight > 0)
+			if (hBarRight > df.leftSB)
 				include : HBar.m df.leftSB hBarRight hBarY df.mvs
 
 			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
@@ -31,6 +31,22 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				include : tagged "serifLB" : match slabBottom
 					[Just SLAB-FULL] : begin sf.lb.full
 					[Just SLAB-OUTWARD] : begin sf.lb.outer
+					__ : glyph-proc
+
+		export : define [RevShape] : params [df top hBarLeft [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
+			include : VBar.r df.rightSB 0 top df.mvs
+			if (hBarLeft < df.rightSB)
+				include : HBar.m hBarLeft df.rightSB hBarY df.mvs
+
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
+			if SLAB : begin
+				include : tagged "serifRT" : match slabTop
+					[Just SLAB-FULL] : begin sf.rt.full
+					[Just SLAB-OUTWARD] : begin sf.rt.outer
+					__ : glyph-proc
+				include : tagged "serifRB" : match slabBottom
+					[Just SLAB-FULL] : begin sf.rb.full
+					[Just SLAB-OUTWARD] : begin sf.rb.outer
 					__ : glyph-proc
 
 		# "Default" version
@@ -67,6 +83,18 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				hBarY -- hBarY
 				slabTop -- [if useItalicShape SLAB-OUTWARD SLAB-FULL]
 				slabBottom -- [if useItalicShape SLAB-NONE SLAB-OUTWARD]
+				swSerif -- swSerif
+
+		# Used for Bulgarian Lower Yu
+		export : define [ascender] : params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- SLAB-OUTWARD
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-FULL]
 				swSerif -- swSerif
 
 	do "iotified A"
