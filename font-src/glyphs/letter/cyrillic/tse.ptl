@@ -20,35 +20,6 @@ glyph-block Letter-Cyrillic-Tse : begin
 			include sf.lb.outer
 			include sf.rb.outer
 
-	define [CyrTsTseShape top] : glyph-proc
-		local sw : AdviceStroke 2.75
-		local left : [mix SB RightSB 0.2] - 0.25 * sw * HVContrast + OX
-		local right : RightSB - OX
-
-		local xTopBarLeft : SB - SideJut
-		local xTopBarRight : mix xTopBarLeft (left + 0.5 * sw * HVContrast) 2
-
-		include : VBar.l left 0 top sw
-		include : HBar.b left right 0 sw
-		include : VBar.r right 0 top sw
-		include : dispiro
-			widths.rhs sw
-			flat xTopBarLeft  top [if SLAB [heading Rightward] null]
-			curl xTopBarRight top [if SLAB [heading Rightward] null]
-
-		local sf : SerifFrame top 0 left right (swRef -- sw)
-		include : CyrDescender.rSideJut right 0 (sideJut -- sf.sideJut)
-
-		if SLAB : begin
-			include sf.rt.outer
-			include sf.lb.outer
-			include sf.rb.outer
-
-			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
-			include : VSerif.dl  xTopBarLeft  top VJut swVJut
-			include : VSerif.dr  xTopBarRight top VJut swVJut
-
-
 	create-glyph 'cyrl/Tse' 0x426 : glyph-proc
 		include : MarkSet.capital
 		include : CyrTseShape CAP
@@ -67,13 +38,52 @@ glyph-block Letter-Cyrillic-Tse : begin
 		eject-contour 'serifRB'
 		include : CyrDescender.rSideJut RightSB 0
 
-	create-glyph 'cyrl/TsTse' 0x4B4 : glyph-proc
-		include : MarkSet.capital
-		include : CyrTsTseShape CAP
+	define TsTseConfig : object
+		serifless     { false false }
+		motionSerifed { true  false }
+		serifed       { true  true  }
 
-	create-glyph 'cyrl/tstse.upright' : glyph-proc
-		include : MarkSet.e
-		include : CyrTsTseShape XH
+	define [CyrTsTseShape top slabTop slabBot] : glyph-proc
+		local sw : AdviceStroke 2.75
+		local left : [mix SB RightSB 0.2] - 0.25 * sw * HVContrast + OX
+		local right : RightSB - OX
+
+		local xTopBarLeft : SB - SideJut
+		local xTopBarRight : mix xTopBarLeft (left + 0.5 * sw * HVContrast) 2
+
+		include : VBar.l left 0 top sw
+		include : HBar.b left right 0 sw
+		include : VBar.r right 0 top sw
+		include : dispiro
+			widths.rhs sw
+			flat xTopBarLeft  top [if SLAB [heading Rightward] null]
+			curl xTopBarRight top [if SLAB [heading Rightward] null]
+
+		local sf : SerifFrame top 0 left right (swRef -- sw)
+		include : CyrDescender.rSideJut right 0 (sideJut -- sf.sideJut)
+
+		if slabTop : begin
+			include sf.rt.outer
+
+			local swVJut : Math.min [AdviceStroke 4.5] (0.625 * (left - xTopBarLeft))
+			include : VSerif.dl  xTopBarLeft  top VJut swVJut
+			include : VSerif.dr  xTopBarRight top VJut swVJut
+
+		if slabBot : begin
+			include sf.lb.outer
+			include sf.rb.outer
+
+	foreach { suffix { doST doSB } } [Object.entries TsTseConfig] : do
+		create-glyph "cyrl/TsTse.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : CyrTsTseShape CAP doST doSB
+
+		create-glyph "cyrl/tstse.upright.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : CyrTsTseShape XH doST doSB
+
+	select-variant 'cyrl/TsTse' 0x4B4 (follow -- 'T')
+	select-variant 'cyrl/tstse.upright' (follow -- 'T')
 
 	create-glyph 'cyrl/tstse.italic.toothed' : glyph-proc
 		include [refer-glyph "u.toothed"] AS_BASE ALSO_METRICS

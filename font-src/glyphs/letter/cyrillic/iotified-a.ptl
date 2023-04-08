@@ -19,7 +19,7 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 	define Iotified : namespace
 		export : define [Shape] : params [df top hBarRight [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
 			include : VBar.l df.leftSB 0 top df.mvs
-			if (hBarRight > 0)
+			if (hBarRight > df.leftSB)
 				include : HBar.m df.leftSB hBarRight hBarY df.mvs
 
 			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
@@ -31,6 +31,22 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				include : tagged "serifLB" : match slabBottom
 					[Just SLAB-FULL] : begin sf.lb.full
 					[Just SLAB-OUTWARD] : begin sf.lb.outer
+					__ : glyph-proc
+
+		export : define [RevShape] : params [df top hBarLeft [hBarY (top / 2)] [slabTop false] [slabBottom false] [swSerif df.mvs]] : glyph-proc
+			include : VBar.r df.rightSB 0 top df.mvs
+			if (hBarLeft < df.rightSB)
+				include : HBar.m hBarLeft df.rightSB hBarY df.mvs
+
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- swSerif)
+			if SLAB : begin
+				include : tagged "serifRT" : match slabTop
+					[Just SLAB-FULL] : begin sf.rt.full
+					[Just SLAB-OUTWARD] : begin sf.rt.outer
+					__ : glyph-proc
+				include : tagged "serifRB" : match slabBottom
+					[Just SLAB-FULL] : begin sf.rb.full
+					[Just SLAB-OUTWARD] : begin sf.rb.outer
 					__ : glyph-proc
 
 		# "Default" version
@@ -69,22 +85,20 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 				slabBottom -- [if useItalicShape SLAB-NONE SLAB-OUTWARD]
 				swSerif -- swSerif
 
-	do "iotified A"
-		glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape
-		define SLAB-NONE    0
-		define SLAB-TOP     1
-		define SLAB-LEFT    2
-		define SLAB-RIGHT   4
+		# Used for Bulgarian Lower Yu
+		export : define [ascender] : params [df top hBarRight hBarY [fCapital false] [swSerif df.mvs]] : begin
+			local useItalicShape : [not fCapital] && para.isItalic
+			Shape
+				df -- df
+				top -- top
+				hBarRight -- hBarRight
+				hBarY -- hBarY
+				slabTop -- SLAB-OUTWARD
+				slabBottom -- [if useItalicShape SLAB-NONE SLAB-FULL]
+				swSerif -- swSerif
 
-		define AConfig : object
-			straightSerifless     { true   SLAB-NONE                             }
-			curlySerifless        { false  SLAB-NONE                             }
-			straightTopSerifed    { true          SLAB-TOP                       }
-			curlyTopSerifed       { false         SLAB-TOP                       }
-			straightBaseSerifed   { true   [bitOr          SLAB-LEFT SLAB-RIGHT] }
-			curlyBaseSerifed      { false  [bitOr          SLAB-LEFT SLAB-RIGHT] }
-			straightTriSerifed    { true   [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT] }
-			curlyTriSerifed       { false  [bitOr SLAB-TOP SLAB-LEFT SLAB-RIGHT] }
+	do "iotified A"
+		glyph-block-import Letter-Latin-Upper-A : AMaskShape ALetterShape AConfig
 
 		foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
 			create-glyph "cyrl/AIotified.\(suffix)" : glyph-proc
@@ -94,11 +108,14 @@ glyph-block Letter-Cyrillic-Iotified-A : begin
 
 				local gap : (df.width - 2 * df.leftSB - 4 * df.mvs) / 3
 				local divSub : (df.width - gap - df.mvs) / Width
-				define subDf : DivFrame divSub 3
+				local subDf : DivFrame divSub 2 (df.leftSB / SB) df.mvs 0
 
 				local shift : Width * (df.div - divSub)
-				include : WithTransform [ApparentTranslate shift 0]
-					ALetterShape subDf CAP df.mvs fStraightBar slabKind
+				local xIotifiedBarRight : df.leftSB + HVContrast * df.mvs
+				local botGap : Math.max ((df.rightSB - df.leftSB) * 0.08) [AdviceStroke 6]
+				include : difference
+					WithTransform [ApparentTranslate shift 0] : ALetterShape subDf CAP df.mvs fStraightBar slabKind
+					intersection [MaskBelow df.mvs] [MaskLeft : mix xIotifiedBarRight [Math.min (subDf.leftSB + shift) (xIotifiedBarRight + botGap)] 0.5]
 
 				include : difference
 					Iotified.A df CAP [mix df.leftSB df.rightSB (3 / 4)] (CAP / 2) (fCapital -- true)
