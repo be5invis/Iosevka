@@ -112,28 +112,36 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			include : tagged 'serifYeriRT'
 				HSerif.mt (right - stroke / 2 * HVContrast) top jut stroke
 
-	define [CyrYerShape Yeri df top] : glyph-proc
-		local xLeftBarLeftEdge : Math.max (df.rightSB - (RightSB - SB)) : if SLAB
-			Just ([mix df.leftSB df.rightSB 0.35] - df.mvs / 2 * HVContrast)
-			Just  [mix df.leftSB df.rightSB 0.2]
+	define [CyrYerShape Yeri df top _right _stroke _jut] : glyph-proc
+		local right : fallback _right df.rightSB
+		local stroke : fallback _stroke df.mvs
+		local xLeftBarLeftEdge : Math.max (right - (RightSB - SB)) : if SLAB
+			Just ([mix df.leftSB right 0.35] - stroke / 2 * HVContrast)
+			Just  [mix df.leftSB right 0.2]
 		local xTopBarLeftEnd : mix 0 df.leftSB [if SLAB 0.25 0.375]
 		include : Yeri top
 			left   -- xLeftBarLeftEdge
-			right  -- df.rightSB - O * 2
-			stroke -- [AdviceStroke 2.5]
-		include : HBar.t xTopBarLeftEnd (Stroke * 0.1 + xLeftBarLeftEdge) top
+			right  -- right - O * 2
+			stroke -- stroke
+			jut    -- _jut
+		include : HBar.t xTopBarLeftEnd (Stroke * 0.1 + xLeftBarLeftEdge) top stroke
 		if SLAB : begin
 			include : VSerif.dl xTopBarLeftEnd top VJut
-				Math.min (VJutStroke * df.mvs / Stroke) (0.625 * (xLeftBarLeftEdge - xTopBarLeftEnd))
+				Math.min (VJutStroke * stroke / Stroke) (0.625 * (xLeftBarLeftEdge - xTopBarLeftEnd))
 
-	define [CyrYeryShape Yeri df top fTail] : glyph-proc
+	define [CyrYeryShape Yeri df top fBackYer fTail] : glyph-proc
 		local jut : Math.min Jut : [Math.pow (df.mvs / Stroke) 0.5] * Jut
-		include : Yeri
-			top    -- top
-			left   -- df.leftSB
-			right  -- [mix (df.rightSB - df.mvs * HVContrast) (df.middle + df.mvs / 2 * HVContrast) 0.75]
-			stroke -- df.mvs
-			jut    -- jut
+		local xm : if (fBackYer && SLAB && Yeri === CyrlYeriUprightShape)
+			mix (df.rightSB - df.mvs * HVContrast - jut) (df.middle + df.mvs / 2 * HVContrast) 0.75
+			mix (df.rightSB - df.mvs * HVContrast) (df.middle + df.mvs / 2 * HVContrast) 0.75
+		include : if fBackYer
+			CyrYerShape Yeri df top xm df.mvs jut
+			Yeri
+				top    -- top
+				left   -- df.leftSB
+				right  -- xm
+				stroke -- df.mvs
+				jut    -- jut
 		include : if fTail
 			RightwardTailedBar df.rightSB 0 top df.mvs
 			VBar.r df.rightSB 0 top df.mvs
@@ -204,12 +212,22 @@ glyph-block Letter-Cyrillic-Yeri : begin
 			local df : DivFrame [mix 1 para.diversityM 1.5] 3
 			set-width df.width
 			include : df.markSet.capital
-			include : CyrYeryShape Yeri df CAP fTail
+			include : CyrYeryShape Yeri df CAP false fTail
 		create-glyph "cyrl/yery.\(suffix)" : glyph-proc
 			local df : DivFrame [mix 1 para.diversityM 1.5] 3
 			set-width df.width
 			include : df.markSet.e
-			include : CyrYeryShape Yeri df XH fTail
+			include : CyrYeryShape Yeri df XH false fTail
+		create-glyph "cyrl/YeryBack.\(suffix)" : glyph-proc
+			local df : DivFrame [mix 1 para.diversityM 1.5] 3
+			set-width df.width
+			include : df.markSet.capital
+			include : CyrYeryShape Yeri df CAP true fTail
+		create-glyph "cyrl/yeryBack.\(suffix)" : glyph-proc
+			local df : DivFrame [mix 1 para.diversityM 1.5] 3
+			set-width df.width
+			include : df.markSet.e
+			include : CyrYeryShape Yeri df XH true fTail
 
 		create-glyph "ZhuangToneSix.\(suffix)" : glyph-proc
 			include : MarkSet.capital
@@ -229,6 +247,8 @@ glyph-block Letter-Cyrillic-Yeri : begin
 	select-variant 'cyrl/yeri.BGR' (shapeFrom -- 'cyrl/yeri')
 	select-variant 'cyrl/YeriBar' 0x48C
 	select-variant 'cyrl/yeriBar' 0x48D
+	select-variant 'cyrl/YeryBack' 0xA650 (follow -- 'cyrl/Yery')
+	select-variant 'cyrl/yeryBack' 0xA651 (follow -- 'cyrl/yery')
 
 	select-variant 'ZhuangToneSix' 0x184 (follow -- 'cyrl/Yer')
 	select-variant 'zhuangToneSix' 0x185 (follow -- 'cyrl/yer')
