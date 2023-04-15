@@ -1,5 +1,18 @@
 ## Modifications since version 2.x
 
+### 22.0.2
+
+* Add characters:
+  - SHOULDERED OPEN BOX (`U+237D`) (#1657).
+  - HEXAGRAM FOR THE CREATIVE HEAVEN (`U+4DC0`) ... HEXAGRAM FOR BEFORE COMPLETION (`U+4DFF`) (#1653).
+  - MODIFIER LETTER SHORT EQUALS SIGN (`U+A78A`) (#1658).
+  - CYRILLIC CAPITAL LETTER YERU WITH BACK YER (`U+A650`).
+  - CYRILLIC SMALL LETTER YERU WITH BACK YER (`U+A651`).
+  - MODIFIER LETTER CYRILLIC SMALL YERU WITH BACK YER (`U+1E06C`).
+* Make square brackets shallower to harmonize with other brackets (#1662).
+* Fix serifs and variant application of `cv67` on `U+0521`.
+
+
 ### 22.0.1
 
 * Add Characters:
@@ -13,7 +26,7 @@
   - LATIN SMALL LETTER TURNED OE WITH STROKE (`U+AB41`).
   - LATIN SMALL LETTER TURNED OE WITH HORIZONTAL STROKE (`U+AB42`).
 * Optimize shape of Iotified-A (#1640).
-* Fix variant application of `cv19 `on `U+04B4`, `U+04B5`, `U+A68A`, and `U+A68B` (#1646).
+* Fix variant application of `cv19` on `U+04B4`, `U+04B5`, `U+A68A`, and `U+A68B` (#1646).
 * Fix shape of Square Lozenge (#1643).
 * Fix shape of Tilde with Dot Above (`U+2E1E`) and Tilde with Dot Below (`U+2E1F`).
 
