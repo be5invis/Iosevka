@@ -8,14 +8,18 @@ import { gatherCoverageData } from "./coverage-export/gather-coverage-data.mjs";
 
 // List all the languages that Iosevka supports, but cannot inferred from CLDR data.
 const overrideSupportedLanguages = [];
+const excludedSupportedLanguages = new Set(["Hinglish"]);
+
 async function readMpCharMap(p) {
 	return decode(zlib.gunzipSync(await fs.promises.readFile(p)));
 }
+
 function getSupportedLanguageSet(rawCoverage) {
 	const supportLocaleSet = getSupportLocaleSet(rawCoverage);
 	addSimilarLocales(supportLocaleSet);
 	return getSupportedLangs(supportLocaleSet);
 }
+
 function getSupportLocaleSet(rawCoverage) {
 	const supportLocaleSet = new Set();
 	for (const locale of cldr.localeIds) {
@@ -43,6 +47,7 @@ function getSupportLocaleSet(rawCoverage) {
 	}
 	return supportLocaleSet;
 }
+
 function addSimilarLocales(supportLocaleSet) {
 	for (const loc of supportLocaleSet) {
 		const seg = loc.split("_");
@@ -55,6 +60,7 @@ function addSimilarLocales(supportLocaleSet) {
 		}
 	}
 }
+
 function getSupportedLangs(supportLocaleSet) {
 	const supportLangSet = new Set(overrideSupportedLanguages);
 	for (const loc of supportLocaleSet) {
@@ -66,16 +72,20 @@ function getSupportedLangs(supportLocaleSet) {
 			if (subDisplayName)
 				displayName = subDisplayName + (upperLoc === loc ? "" : "\u00A0(" + loc + ")");
 		}
-		if (displayName) supportLangSet.add(displayName);
+		if (displayName && !excludedSupportedLanguages.has(displayName)) {
+			supportLangSet.add(displayName);
+		}
 	}
 	return supportLangSet;
 }
+
 function getRawCoverage(charMap) {
 	const rawCoverage = new Map();
 	for (const [gn, codes, tv, cv] of charMap)
 		for (const u of codes) rawCoverage.set(u, [gn, tv, cv]);
 	return rawCoverage;
 }
+
 export async function getCharMapAndSupportedLanguageList(cmpUpright, cmpItalic, cmpOblique) {
 	const charMap = await readMpCharMap(cmpUpright);
 	const charMapItalic = await readMpCharMap(cmpItalic);

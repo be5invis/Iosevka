@@ -16,39 +16,41 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define MosaicHeight : MosaicTop - MosaicBottom
 
 	define Paren : namespace
-		export : define [Dim] : params [[delta 0] [dp DesignParameters]] : object
-			outside : [mix SB RightSB dp.parenOutside] - delta
-			inside  : mix SB RightSB dp.parenInside
+		export : define [Dim] : params [[delta 0] [dp DesignParameters] [sw Stroke]] : object
+			outside : [mix SB RightSB dp.parenOutside] - delta - dp.parenOutsideSwAdj * HVContrast * sw + O
+			inside  : [mix SB RightSB dp.parenInside] - dp.parenInsideSwAdj * HVContrast * sw
 			bottom  : [mix SymbolMid ParenBot (1 + dp.parenOvershoot)] - delta
 			top     : [mix SymbolMid ParenTop (1 + dp.parenOvershoot)] + delta
 			mid       SymbolMid
 
-		export : define [Shape] : params [sw [dp DesignParameters]] : let [dim : Dim 0 dp] : dispiro
-			widths.lhs sw
-			g4 dim.inside dim.top
-			quadControls 1 (1 - dp.parenCurliness)
-			g4 dim.outside dim.mid
-			quadControls 0 dp.parenCurliness
-			g4 dim.inside dim.bottom
+		export : define [Shape] : params [[sw Stroke] [dp DesignParameters]] : begin
+			local dim : Dim 0 dp (sw -- sw)
+			return : dispiro
+				widths.lhs sw
+				g4 dim.inside dim.top
+				quadControls 1 (1 - dp.parenCurliness)
+				g4 dim.outside dim.mid
+				quadControls 0 dp.parenCurliness
+				g4 dim.inside dim.bottom
 
-		export : define [UpperShape sw] : let [dim : Dim 0] : dispiro
+		export : define [UpperShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4 dim.inside dim.top
 			quadControls 1 (1 - DesignParameters.parenCurliness)
 			g4.down.end dim.outside MosaicBottom [heading Downward]
 
-		export : define [ExtensionShape sw] : let [dim : Dim 0] : dispiro
+		export : define [ExtensionShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4.down.start dim.outside MosaicTop [heading Downward]
 			g4.down.end dim.outside MosaicBottom [heading Downward]
 
-		export : define [LowerShape sw] : let [dim : Dim 0] : dispiro
+		export : define [LowerShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4.down.start dim.outside MosaicTop [heading Downward]
 			quadControls 0 DesignParameters.parenCurliness
 			g4 dim.inside dim.bottom
 
-		export : define [ShapeMask delta] : let [dim : Dim delta] : spiro-outline
+		export : define [ShapeMask sw delta] : let [dim : Dim delta (sw -- sw)] : spiro-outline
 			corner dim.inside dim.top
 			quadControls 1 (1 - DesignParameters.parenCurliness)
 			g4 dim.outside dim.mid
@@ -61,18 +63,22 @@ glyph-block Symbol-Punctuation-Brackets : begin
 
 		create-glyph 'parenLeft.largeContour' : glyph-proc
 			local dp : object
-				parenOutside        (0.25 * DesignParameters.parenOutside)
-				parenInside         DesignParameters.parenInside
-				parenCurliness      [mix 1 DesignParameters.parenCurliness 0.5]
-				parenOvershoot      DesignParameters.parenOvershoot
+				parenOutside           (0.25 * DesignParameters.parenOutside)
+				parenInside            DesignParameters.parenInside
+				parenOutsideSwAdj      DesignParameters.parenOutsideSwAdj
+				parenInsideSwAdj       DesignParameters.parenInsideSwAdj
+				parenCurliness         [mix 1 DesignParameters.parenCurliness 0.5]
+				parenOvershoot         DesignParameters.parenOvershoot
 			include : Paren.Shape Stroke dp
 
 		create-glyph'parenLeft.flatArc' 0x27EE : glyph-proc
 			local dp : object
-				parenOutside        (0.5 * DesignParameters.parenOutside)
-				parenInside         DesignParameters.parenInside
-				parenCurliness      [mix 1 DesignParameters.parenCurliness 0.5]
-				parenOvershoot      DesignParameters.parenOvershoot
+				parenOutside           (0.5 * DesignParameters.parenOutside)
+				parenInside            DesignParameters.parenInside
+				parenOutsideSwAdj      DesignParameters.parenOutsideSwAdj
+				parenInsideSwAdj       DesignParameters.parenInsideSwAdj
+				parenCurliness         [mix 1 DesignParameters.parenCurliness 0.5]
+				parenOvershoot         DesignParameters.parenOvershoot
 			local dim : Paren.Dim 0 dp
 			include : dispiro
 				widths.lhs
@@ -107,28 +113,30 @@ glyph-block Symbol-Punctuation-Brackets : begin
 		turned 'parenRightupper' 0x239E 'parenLeftLower' Middle SymbolMid
 
 		create-glyph 'zNotationParenLeft' 0x2987 : glyph-proc
-			local dim : Paren.Dim 0
 			local fine : AdviceStroke 4
+			local dim : Paren.Dim 0 (sw -- fine)
 			include : intersection
 				Rect [mix dim.bottom dim.top 2] [mix dim.top dim.bottom 2] 0 dim.inside
 				union
 					Paren.Shape fine
 					intersection
 						VBar.r dim.inside dim.bottom dim.top fine
-						Paren.ShapeMask O
+						Paren.ShapeMask fine O
 
 		turned 'zNotationParenRight' 0x2988 'zNotationParenLeft' Middle SymbolMid
 
 	define Bracket : namespace
+		export : define [HDim barLeft ext] : namespace
+			export : define l : fallback barLeft : [mix SB RightSB DesignParameters.bracketOutside] - DesignParameters.bracketOutsideSwAdj * HVContrast * Stroke
+			export : define r : [fallback ext 0] + [mix SB RightSB DesignParameters.bracketInside]
+
 		export : define [Mask] : Rect MosaicTop MosaicBottom (-Width) (2 * Width)
 
 		export : define [Shape top bottom barLeft ext] : glyph-proc
-			local l : fallback barLeft : mix SB RightSB DesignParameters.bracketOutside
-			local r : [fallback ext 0] + [mix SB RightSB DesignParameters.bracketInside]
-
-			include : HBar.b l r bottom
-			include : HBar.t    l r top
-			include : VBar.l   l bottom top
+			local hDim : HDim barLeft ext
+			include : HBar.b hDim.l hDim.r bottom
+			include : HBar.t hDim.l hDim.r top
+			include : VBar.l hDim.l bottom top
 
 	do "Bracket Glyphs"
 		create-glyph 'bracketLeft' '[' : Bracket.Shape ParenTop ParenBot
@@ -159,25 +167,21 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				Bracket.Shape (ParenTop + MosaicHeight) ParenBot
 
 		create-glyph 'dblBracketLeft' 0x27E6 : glyph-proc
-			local l : mix SB RightSB DesignParameters.bracketOutside
-			local r : mix SB RightSB DesignParameters.bracketInside
-			local sw : Math.min ((r - l) / 5) [AdviceStroke 4]
-
+			local hDim : Bracket.HDim
+			local sw : Math.min ((hDim.r - hDim.l) / 5) [AdviceStroke 4]
 			include : union
-				HBar.b l r ParenBot
-				HBar.t    l r ParenTop
-				VBar.l   l ParenBot ParenTop sw
-				VBar.m       [mix l r (1 / 2)] ParenBot ParenTop sw
+				HBar.b hDim.l hDim.r ParenBot
+				HBar.t hDim.l hDim.r ParenTop
+				VBar.l hDim.l ParenBot ParenTop sw
+				VBar.m [mix hDim.l hDim.r (1 / 2)] ParenBot ParenTop sw
 
 		create-glyph 'bracketBarLeft' 0x2045 : glyph-proc
-			local l : mix SB RightSB DesignParameters.bracketOutside
-			local r : mix SB RightSB DesignParameters.bracketInside
-
+			local hDim : Bracket.HDim
 			include : union
-				HBar.b l r ParenBot
-				HBar.t    l r ParenTop
-				HBar.m       l r [mix ParenBot ParenTop 0.5]
-				VBar.l   l ParenBot ParenTop
+				HBar.b hDim.l hDim.r ParenBot
+				HBar.t hDim.l hDim.r ParenTop
+				HBar.m hDim.l hDim.r [mix ParenBot ParenTop 0.5]
+				VBar.l hDim.l ParenBot ParenTop
 
 		turned 'bracketRight' ']' 'bracketLeft' Middle SymbolMid
 		turned 'bracketRightUHalf' 0x2E23 'bracketLeftLHalf' Middle SymbolMid
@@ -403,7 +407,7 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			include : AngleLeftShape dim.outside dim.inside OperatorStroke
 
 		create-glyph 'dblAngleLeft' 0x27EA : glyph-proc
-			define dim : Paren.Dim (delta -- 0)
+			define dim : Paren.Dim (delta -- 0) (sw -- OperatorStroke)
 			define fine : Math.min OperatorStroke [AdviceStroke 3.5]
 			define farOutside : dim.outside / 2
 			define middle : mix farOutside dim.inside 0.5
