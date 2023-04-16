@@ -58,19 +58,23 @@ glyph-block Mark-Above : begin
 	select-variant 'dieresisAbove'        0x308 (follow -- 'diacriticDot')
 	select-variant 'dieresisAboveAlwaysUpright' (follow -- 'diacriticDot')
 
-	define [RingDims] : begin
-		local radiusOut : AccentHeight * [linreg 16 0.5 90 0.75 markStroke]
+	glyph-block-export RingDims RingShape
+	define [RingDims _radiusOut] : begin
+		local radiusOut : fallback _radiusOut : AccentHeight * [linreg 16 0.5 90 0.75 markStroke]
 		local radiusIn  : radiusOut - markFine * [linreg 16 2 90 1.75 markStroke]
 		return [object radiusIn radiusOut]
+
+	define [RingShape cx cy _radiusOut] : glyph-proc
+		local [object radiusIn radiusOut] : RingDims _radiusOut
+		include : difference
+			DotAt cx cy radiusOut
+			DotAt cx cy radiusIn
 
 	create-glyph 'ringAbove' 0x30A : glyph-proc
 		set-width 0
 		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
 		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-		local [object radiusIn radiusOut] : RingDims
-		include : difference
-			DotAt markMiddle aboveMarkMid radiusOut
-			DotAt markMiddle aboveMarkMid radiusIn
+		include : RingShape markMiddle aboveMarkMid
 
 	create-glyph 'dblRingAbove' 0x1AB2 : glyph-proc
 		set-width 0
