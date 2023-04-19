@@ -231,20 +231,10 @@ glyph-block Letter-Latin-Lower-I : begin
 			local df : DivFrame div
 			set-width df.width
 			include : df.markSet.if
+			set-base-anchor 'overlay' [xMiddleT df] [mix 0 Ascender OverlayPos]
+			set-base-anchor 'slash'   [xMiddleT df] [mix 0 Ascender 0.5]
 			include : refer-glyph "l.\(suffix)"
 			include : VerticalHook.m [xMiddleT df] 0 HookX Hook
-
-		create-glyph "lBelt.\(suffix)" : composite-proc
-			refer-glyph "l.\(suffix)"
-			BeltOverlay Ascender [xMiddleT : DivFrame div]
-
-		create-glyph "lBeltRTail.\(suffix)" : composite-proc
-			refer-glyph "lRTail.\(suffix)"
-			BeltOverlay Ascender [xMiddleT : DivFrame div]
-
-		create-glyph "lTildeOver.\(suffix)" : composite-proc
-			refer-glyph "l.\(suffix)"
-			refer-glyph "tildeOver"
 
 		create-glyph "llWelsh.\(suffix)" : glyph-proc
 			local subDf : DivFrame 0.625 1.5
@@ -308,17 +298,25 @@ glyph-block Letter-Latin-Lower-I : begin
 	do "l glyphs"
 		select-variant 'l' 'l'
 		link-reduced-variant 'l/sansSerif' 'l' MathSansSerif
+		select-variant 'l/reduced/decompress' (shapeFrom -- 'l')
+		select-variant 'lRTail/decompress' (follow -- 'l/reduced/rtailDec') (shapeFrom -- 'lRTail')
+
 		alias 'cyrl/palochka' 0x4CF 'l'
 		turned 'turnl' 0xA781 'l' HalfAdvance (XH / 2) [TurnMarks 'p']
 		select-variant 'l/phoneticLeft' (shapeFrom -- 'l')
 		select-variant 'l/compLigRight' (shapeFrom -- 'l')
 		select-variant 'lDotBase' null (follow -- 'l')
-		select-variant 'lTildeOver' 0x26B (follow -- 'l/reduced/decompress')
-		select-variant 'lBelt' 0x26C (follow -- 'l/reduced/decompress')
 		select-variant 'lRTail' 0x26D (follow -- 'l/reduced/rtail')
-		select-variant 'lBeltRTail' 0xA78E (follow -- 'l/reduced/rtailDec')
 		select-variant 'llWelsh' 0x1EFB (follow -- 'l')
 		select-variant 'lPalatalHook' 0x1D85 (follow -- 'l')
+
+		derive-composites 'lTildeOver' 0x26B 'l/reduced/decompress' 'tildeOver'
+
+		create-glyph 'lBeltOverlay' : glyph-proc
+			set-mark-anchor 'overlay' 0 0
+			include : BeltOverlay.at 0 0
+		derive-composites 'lBelt' 0x26C  'l/reduced/decompress' 'lBeltOverlay'
+		derive-composites 'lBeltRTail' 0xA78E 'lRTail/decompress' 'lBeltOverlay'
 
 		CreateCommaCaronComposition 'lcaron' 0x13E 'l'
 		derive-glyphs 'lSlash' 0x142 'l' : lambda [src gr] : glyph-proc
