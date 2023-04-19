@@ -8,6 +8,9 @@ define-operator "~>" 880 'right' : syntax-rules
 	`(@l ~> @r) `{.left @l .right @r}
 
 export : define [buildCCMP sink glyphStore markGlyphs] : begin
+	local anyMark : Array.from markGlyphs.all
+	local aboveMark : filterMarkByClass markGlyphs 'above'
+
 	local rec : BeginLookupBlock sink
 
 	define ccmp : AddFeature sink 'ccmp'
@@ -32,7 +35,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			TieMarkFrom.push gid
 			TieMarkTo.push   [TieMark.get g]
 
-	define [IotaLF]         : UkMapToLookup UnicodeKnowledge.iotaBelowToLfTf
+	define [IotaLF]           : UkMapToLookup UnicodeKnowledge.iotaBelowToLfTf
 	define [GrekUpperTonosTf] : UkMapToLookup UnicodeKnowledge.upperGrekMarkToTonosTf
 
 	define [ToneToToneStart toneEnd] : begin
@@ -103,24 +106,22 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		.type 'gsub_chaining'
 		.rules : list
 			# Dot removal (max 6 middle marks are supported)
-			chain-rule (dotlessFrom ~> dotlessTo) (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all markGlyphs.all (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all markGlyphs.all markGlyphs.all (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all (markGlyphs.above ~> null)
-			chain-rule (dotlessFrom ~> dotlessTo) markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all (markGlyphs.above ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark anyMark (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark anyMark anyMark (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark anyMark anyMark anyMark (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark anyMark anyMark anyMark anyMark (aboveMark ~> null)
+			chain-rule (dotlessFrom ~> dotlessTo) anyMark anyMark anyMark anyMark anyMark anyMark (aboveMark ~> null)
 
 			# Iota transform (max 6 middle marks are supported)
 			chain-rule groupLF [IotaLF]
-			chain-rule groupLF markGlyphs.all [IotaLF]
-			chain-rule groupLF markGlyphs.all markGlyphs.all [IotaLF]
-			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
-			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
-			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
-			chain-rule groupLF markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [IotaLF]
-
-
+			chain-rule groupLF anyMark [IotaLF]
+			chain-rule groupLF anyMark anyMark [IotaLF]
+			chain-rule groupLF anyMark anyMark anyMark [IotaLF]
+			chain-rule groupLF anyMark anyMark anyMark anyMark [IotaLF]
+			chain-rule groupLF anyMark anyMark anyMark anyMark anyMark [IotaLF]
+			chain-rule groupLF anyMark anyMark anyMark anyMark anyMark anyMark [IotaLF]
 
 	define lookupMarks2 : AddLookup sink : object
 		.type 'gsub_ligature'
@@ -130,6 +131,13 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 		.type 'gsub_chaining'
 		.rules : list
 			chain-rule groupGrekUpperTonos [GrekUpperTonosTf]
+
+	define lookupMarks4 : AddLookup sink : object
+		.type 'gsub_multiple'
+		.substitutions : object
+			'braceAbove' { 'leftParenAbove' 'rightParenAbove' }
+			'parenAbove' { 'leftBrackAbove' 'rightBrackAbove' }
+			'parenBelow' { 'leftParenBelow' 'rightParenBelow' }
 
 	define lookupCcmp-TieMarkLigature : AddLookup sink : object
 		.type 'gsub_ligature'
@@ -200,10 +208,11 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 			chain-rule [ToneSandhiStartOrMidAt 4] [ToneSandhiToToneEnd 4]
 
 
-	ccmp.lookups.push lookupMarks1 lookupMarks2 lookupMarks3 lookupTieMarkContextual
+	ccmp.lookups.push lookupMarks1 lookupMarks2 lookupMarks3 lookupMarks4 lookupTieMarkContextual
 	sink.lookupDep.push {lookupMarks1 lookupMarks2}
 	sink.lookupDep.push {lookupMarks2 lookupMarks3}
-	sink.lookupDep.push {lookupMarks3 lookupTieMarkContextual}
+	sink.lookupDep.push {lookupMarks3 lookupMarks4}
+	sink.lookupDep.push {lookupMarks4 lookupTieMarkContextual}
 	ccmp.lookups.push lookupToneStart lookupToneMid lookupToneEnd
 	sink.lookupDep.push {lookupToneStart lookupToneMid}
 	sink.lookupDep.push {lookupToneMid lookupToneEnd}
@@ -229,6 +238,7 @@ export : define [buildCCMP sink glyphStore markGlyphs] : begin
 	return ccmp
 
 export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : begin
+	local anyMark : Array.from markGlyphs.all
 	local rec : BeginLookupBlock sink
 
 	define ccmp : AddFeature sink 'ccmp'
@@ -246,12 +256,12 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 
 	define [pushTransforms sink triggers tf] : begin
 		sink.push : chain-rule triggers [tf]
-		sink.push : chain-rule triggers markGlyphs.all [tf]
-		sink.push : chain-rule triggers markGlyphs.all markGlyphs.all [tf]
-		sink.push : chain-rule triggers markGlyphs.all markGlyphs.all markGlyphs.all [tf]
-		sink.push : chain-rule triggers markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [tf]
-		sink.push : chain-rule triggers markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [tf]
-		sink.push : chain-rule triggers markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all markGlyphs.all [tf]
+		sink.push : chain-rule triggers anyMark [tf]
+		sink.push : chain-rule triggers anyMark anyMark [tf]
+		sink.push : chain-rule triggers anyMark anyMark anyMark [tf]
+		sink.push : chain-rule triggers anyMark anyMark anyMark anyMark [tf]
+		sink.push : chain-rule triggers anyMark anyMark anyMark anyMark anyMark [tf]
+		sink.push : chain-rule triggers anyMark anyMark anyMark anyMark anyMark anyMark [tf]
 
 	define ogonekTransforms {}
 	pushTransforms ogonekTransforms triggerGlyphs_Normal markTransform_Normal
@@ -265,3 +275,8 @@ export : define [buildCCMPPostCvSs sink ccmpFeature glyphStore markGlyphs] : beg
 	EndLookupBlock rec sink
 
 define [objectIsNotEmpty obj] : obj && [Object.keys obj].length
+
+define [filterMarkByClass markGlyphs c] : begin
+	local marks {}
+	foreach { gn m } markGlyphs.markAttachClassDef : if (m == c) : marks.push gn
+	return marks

@@ -15,6 +15,22 @@ export function convertGdef(otdGdef, glyphs) {
 		const g = glyphs.queryByName(gn);
 		if (g) gdef.glyphClassDef.set(g, otdGdef.glyphClassDef[gn]);
 	}
+
+	gdef.markAttachClassDef = new Map();
+	for (const gn in otdGdef.markAttachClassDef) {
+		const g = glyphs.queryByName(gn);
+		if (g) gdef.markAttachClassDef.set(g, otdGdef.markAttachClassDef[gn]);
+	}
+
+	gdef.markGlyphSets = [];
+	for (const s of otdGdef.markGlyphSets) {
+		const result = new Set();
+		for (const gn of s) {
+			const g = glyphs.queryByName(gn);
+			if (g) result.add(g);
+		}
+		if (result.size) gdef.markGlyphSets.push(result);
+	}
 	return gdef;
 }
 
@@ -123,6 +139,14 @@ class LookupStore {
 		const handler = this.m_handlers[otdLookup.type];
 		if (!dst || !handler) return;
 		if (otdLookup.subtables) throw new Error("Unreachable.");
+		if (otdLookup.ignoreGlyphs) {
+			let s = new Set();
+			for (const gn of otdLookup.ignoreGlyphs) {
+				const g = this.glyphs.queryByName(gn);
+				if (g) s.add(g);
+			}
+			if (s.size) dst.ignoreGlyphs = s;
+		}
 		handler.fill(dst, otdLookup, this);
 	}
 }
