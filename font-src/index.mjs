@@ -5,10 +5,10 @@ import zlib from "zlib";
 
 import * as Toml from "@iarna/toml";
 import { encode } from "@msgpack/msgpack";
-import { FontIo } from "ot-builder";
 
 import { buildFont } from "./gen/build-font.mjs";
 import { createNamingDictFromArgv } from "./gen/meta/naming.mjs";
+import { saveTTF } from "./support/font-io/font-io.mjs";
 import { createGrDisplaySheet } from "./support/gr.mjs";
 import { applyLigationData } from "./support/ligation-data.mjs";
 import { applyMetricOverride } from "./support/metric-override.mjs";
@@ -16,6 +16,17 @@ import * as Parameters from "./support/parameters.mjs";
 import * as VariantData from "./support/variant-data.mjs";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+
+export default main;
+async function main(argv) {
+	const paraT = await getParameters();
+	const { font, glyphStore, cacheUpdated } = await buildFont(argv, paraT(argv));
+	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
+	if (argv.o) await saveTTF(argv.o, font);
+	return { cacheUpdated };
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Parameter preparation
 async function getParameters() {
@@ -72,15 +83,7 @@ async function tryParseToml(str) {
 function deepClone(pod) {
 	return JSON.parse(JSON.stringify(pod));
 }
-// Save TTF
-async function saveTTF(argv, font) {
-	const sfnt = FontIo.writeFont(font, {
-		glyphStore: { statOs2XAvgCharWidth: false },
-		generateDummyDigitalSignature: true
-	});
-	const buf = FontIo.writeSfntOtf(sfnt);
-	await fs.promises.writeFile(argv.o, buf);
-}
+
 // Save character map file
 async function saveCharMap(argv, glyphStore) {
 	let charMap = [];
@@ -93,10 +96,3 @@ async function saveCharMap(argv, glyphStore) {
 	}
 	await fs.promises.writeFile(argv.oCharMap, zlib.gzipSync(encode(charMap)));
 }
-export default (async function main(argv) {
-	const paraT = await getParameters();
-	const { font, glyphStore, cacheUpdated } = await buildFont(argv, paraT(argv));
-	if (argv.oCharMap) await saveCharMap(argv, glyphStore);
-	if (argv.o) await saveTTF(argv, font);
-	return { cacheUpdated };
-});
