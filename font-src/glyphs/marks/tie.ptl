@@ -21,15 +21,30 @@ glyph-block Mark-Overlay : begin
 	define aboveTieBase   : aboveMarkStack - AccentClearance
 	define aboveTieTop    : mix XH aboveMarkTop 2
 	define aboveTieBottom : aboveTieTop - (aboveMarkTop - aboveMarkBot) * 0.875
+	define aboveTieMid    : mix aboveTieBottom aboveTieTop 0.5
+
 	define belowTieBase     Descender
-	define belowTieBottom : Descender - (0 - belowMarkBot)
+	define belowTieBottom : belowTieBase - (aboveTieTop - aboveTieBase)
+	define belowTieTop    : belowTieBase - (aboveTieBottom - aboveTieBase)
+	define belowTieMid    : mix belowTieBottom belowTieTop 0.5
 
 	local tieLeft [mix 0 markMiddle 1.5]
 	local tieRight (-tieLeft)
 
+	define [TieAboveAnchors] : glyph-proc
+		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		set-base-anchor 'aboveBraceL' tieLeft aboveTieMid
+		set-base-anchor 'aboveBraceR' tieRight aboveTieMid
+
+	define [TieBelowAnchors] : glyph-proc
+		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		set-base-anchor 'belowBraceL' tieLeft belowTieMid
+		set-base-anchor 'belowBraceR' tieRight belowTieMid
+
 	create-glyph 'tieAbove' 0x361 : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		include : TieAboveAnchors
+
 		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
@@ -41,7 +56,8 @@ glyph-block Mark-Overlay : begin
 
 	create-glyph 'turnTieAbove' 0x35D : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		include : TieAboveAnchors
+
 		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
@@ -53,35 +69,44 @@ glyph-block Mark-Overlay : begin
 
 	create-glyph 'tieBelow' 0x35C : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		include : TieBelowAnchors
 		TieGlyph.set currentGlyph
 		include [refer-glyph 'tieAbove']
-		include : FlipAround 0 (XH / 2)
+		include : FlipAround 0 [mix belowTieBase aboveTieBase 0.5]
+
+	create-glyph 'turnTieBelow' 0x1DFC : glyph-proc
+		set-width 0
+		include : TieBelowAnchors
+		TieGlyph.set currentGlyph
+		include [refer-glyph 'turnTieAbove']
+		include : FlipAround 0 [mix belowTieBase aboveTieBase 0.5]
 
 	create-glyph 'overlineTieAbove' 0x35E : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		include : TieAboveAnchors
+
 		TieGlyph.set currentGlyph
 		include : dispiro
 			widths.center (markHalfStroke * 2)
-			flat tieLeft (aboveTieBase + AccentHeight / 2)
-			curl tieRight (aboveTieBase + AccentHeight / 2)
+			flat tieLeft aboveTieMid
+			curl tieRight aboveTieMid
 
 	create-glyph 'underlineTieBelow' 0x35F : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		include : TieBelowAnchors
 		TieGlyph.set currentGlyph
 		include [refer-glyph 'overlineTieAbove']
-		include : FlipAround 0 (XH / 2)
+		include : FlipAround 0 [mix belowTieBase aboveTieBase 0.5]
 
 	create-glyph 'arrowTieBelow' 0x362 : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieBelow' 0 belowTieBase 0 belowTieBottom
+		include : TieBelowAnchors
+
 		TieGlyph.set currentGlyph
-		include : HBar.m tieLeft tieRight (Descender - AccentHeight / 2) (markFine * 2)
+		include : HBar.m tieLeft tieRight belowTieMid (markFine * 2)
 		include : new-glyph : glyph-proc
-			local top (Descender - AccentHeight / 2 + (belowMarkTop - belowMarkBot) / 2 * 1.5)
-			local bot (Descender - AccentHeight / 2 - (belowMarkTop - belowMarkBot) / 2 * 1.5)
+			local top : belowTieMid + (belowMarkTop - belowMarkBot) / 2 * 1.5
+			local bot : belowTieMid - (belowMarkTop - belowMarkBot) / 2 * 1.5
 			local left : tieRight - markExtend * 1.5
 			local right tieRight
 			local exp : Math.sqrt : 1 + (top - bot) / (2 * (right - left)) * (top - bot) / (2 * (right - left))
@@ -96,7 +121,7 @@ glyph-block Mark-Overlay : begin
 
 	create-glyph 'tildeTieAbove' 0x360 : glyph-proc
 		set-width 0
-		set-mark-anchor 'tieAbove' 0 aboveTieBase 0 aboveTieTop
+		include : TieAboveAnchors
 		TieGlyph.set currentGlyph
 		include : TildeShape
 			ttop -- aboveTieTop

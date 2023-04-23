@@ -15,7 +15,7 @@ glyph-block Mark-Above : begin
 	glyph-block-import Common-Derivatives
 
 	glyph-block-import Mark-Shared-Metrics : markExtend markStroke markHalfStroke markStress markFine
-	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius
+	glyph-block-import Mark-Shared-Metrics : markMiddle markDotsRadius dialytikaRadius
 
 	glyph-block-export aboveMarkTop aboveMarkBot aboveMarkMid aboveMarkStack
 	define aboveMarkTop   (XH + AccentClearance + AccentHeight)
@@ -31,46 +31,66 @@ glyph-block Mark-Above : begin
 	define asciiMarkZoomX : (RightSB - SB) / (markExtend * 3)
 	define asciiMarkZoomY : 1.25 * asciiMarkZoomX
 
+	define StdAnchors : namespace
+		export : define [impl mk padding k] : glyph-proc
+			if (mk === 'above')
+			: then : set-mark-anchor mk markMiddle (XH - padding * AccentHeight) markMiddle (aboveMarkStack + padding * AccentHeight)
+			: else : set-mark-anchor mk markMiddle (XH - padding * AccentHeight)
+			set-base-anchor 'aboveBraceL' (markMiddle - k * markExtend) aboveMarkMid
+			set-base-anchor 'aboveBraceR' (markMiddle + k * markExtend) aboveMarkMid
+
+		export : define [narrow]       : impl 'above' 0 0
+		export : define [mediumNarrow] : impl 'above' 0 0.25
+		export : define [medium]       : impl 'above' 0 0.5
+		export : define [mediumWide]   : impl 'above' 0 0.75
+		export : define [wide]         : impl 'above' 0 1
+
 	### Above marks
 	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
 		create-glyph "dotAbove.\(suffix)" : glyph-proc
 			set-width 0
-			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-			set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+			include : StdAnchors.narrow
 			include : DrawAt markMiddle aboveMarkMid (DotRadius * kdr)
 
 		create-glyph "dieresisAbove.\(suffix)" : glyph-proc
 			set-width 0
-			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-			set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+			include : StdAnchors.wide
 			include : DrawAt (markMiddle - markExtend) aboveMarkMid (markDotsRadius * kdr)
 			include : DrawAt (markMiddle + markExtend) aboveMarkMid (markDotsRadius * kdr)
 
 		create-glyph "dieresisAboveAlwaysUpright.\(suffix)" : glyph-proc
 			set-width 0
-			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-			set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+			include : StdAnchors.wide
 			include : ForceUpright
 			include : DrawAt (markMiddle - markExtend) aboveMarkMid (markDotsRadius * kdr)
 			include : DrawAt (markMiddle + markExtend) aboveMarkMid (markDotsRadius * kdr)
 
+		create-glyph "dialytikaAbove.\(suffix)" : glyph-proc
+			set-width 0
+			include : DrawAt (markMiddle - markExtend * 1.25) aboveMarkMid (dialytikaRadius * kdr)
+			include : DrawAt (markMiddle + markExtend * 1.25) aboveMarkMid (dialytikaRadius * kdr)
+
 	select-variant 'dotAbove'             0x307 (follow -- 'diacriticDot')
 	select-variant 'dieresisAbove'        0x308 (follow -- 'diacriticDot')
 	select-variant 'dieresisAboveAlwaysUpright' (follow -- 'diacriticDot')
+	select-variant 'dialytikaAbove'             (follow -- 'diacriticDot')
 
-	define [RingDims] : begin
-		local radiusOut : AccentHeight * [linreg 16 0.5 90 0.75 markStroke]
+	glyph-block-export RingDims RingShape
+	define [RingDims _radiusOut] : begin
+		local radiusOut : fallback _radiusOut : AccentHeight * [linreg 16 0.5 90 0.75 markStroke]
 		local radiusIn  : radiusOut - markFine * [linreg 16 2 90 1.75 markStroke]
 		return [object radiusIn radiusOut]
 
+	define [RingShape cx cy _radiusOut] : glyph-proc
+		local [object radiusIn radiusOut] : RingDims _radiusOut
+		include : difference
+			DotAt cx cy radiusOut
+			DotAt cx cy radiusIn
+
 	create-glyph 'ringAbove' 0x30A : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-		local [object radiusIn radiusOut] : RingDims
-		include : difference
-			DotAt markMiddle aboveMarkMid radiusOut
-			DotAt markMiddle aboveMarkMid radiusIn
+		include : StdAnchors.medium
+		include : RingShape markMiddle aboveMarkMid
 
 	create-glyph 'dblRingAbove' 0x1AB2 : glyph-proc
 		set-width 0
@@ -78,17 +98,14 @@ glyph-block Mark-Above : begin
 		local k : 2 * (radiusOut - (radiusOut - radiusIn) * 0.25)
 		include : WithTransform [Translate (+k / 2) 0] : refer-glyph 'ringAbove'
 		include : WithTransform [Translate (-k / 2) 0] : refer-glyph 'ringAbove'
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 	create-glyph 'graveAbove' 0x300 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.medium
 		include : dispiro
 			flat (markMiddle + markStress) aboveMarkBot [widths markFine markFine]
-			curl (markMiddle - markExtend) aboveMarkTop [widths markStress markStress]
+			curl (markMiddle - 0.875 * markExtend) aboveMarkTop [widths markStress markStress]
 
 	create-glyph 'asciiGrave/body/straight' : glyph-proc
 		local df : DivFrame para.diversityF
@@ -99,12 +116,10 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'acuteAbove' 0x301 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.medium
 		include : dispiro
 			flat (markMiddle - markStress) aboveMarkBot [widths markFine markFine]
-			curl (markMiddle + markExtend) aboveMarkTop [widths markStress markStress]
+			curl (markMiddle + 0.875 * markExtend) aboveMarkTop [widths markStress markStress]
 
 	create-glyph 'latin1acute' 0xB4 : glyph-proc
 		local df : DivFrame para.diversityF
@@ -141,9 +156,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'circumflexAbove' 0x302 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaretShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -154,9 +167,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'bardownAbove' 0x1DC6 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaretRightShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -175,9 +186,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'upbarAbove' 0x1DC7 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaretLeftShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -210,9 +219,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'caronAbove' 0x30c : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaronShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -223,9 +230,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'barupAbove' 0x1DC4 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaronRightShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -244,9 +249,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'downbarAbove' 0x1DC5 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : CaronLeftShape
 			xMiddle -- markMiddle
 			width   -- CaretCaronWidth
@@ -295,27 +298,13 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'tildeAbove' 0x303 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.wide
 		include : TildeShape
 			ttop -- aboveMarkTop
 			tbot -- aboveMarkBot + markFine / 2
 			leftEnd -- (markMiddle - markExtend * 1.5)
 			rightEnd -- (markMiddle + markExtend * 1.5)
 			hs -- markHalfStroke
-
-	create-glyph 'tildeAboveOverlay' : glyph-proc
-		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
-		include : TildeShape
-			ttop -- aboveMarkTop
-			tbot -- aboveMarkBot + markFine / 2
-			leftEnd -- (markMiddle - markExtend * 1.75)
-			rightEnd -- (markMiddle + markExtend * 1.75)
-			hs -- ([AdviceStroke 4.5] / 2)
 
 	create-glyph 'asciiTilde.high' : glyph-proc
 		include : TildeShape
@@ -370,8 +359,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local m [mix aboveMarkBot aboveMarkTop 0.4]
 		local ttop [mix m aboveMarkTop 0.7]
@@ -393,7 +381,7 @@ glyph-block Mark-Above : begin
 
 		foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
 			create-forked-glyph "tildedotdotAbove.\(suffix)" : glyph-proc
-				set-mark-anchor 'above' markMiddle (XH - AccentHeight / 4) markMiddle (aboveMarkStack + AccentHeight / 4)
+				include : StdAnchors.impl 'above' (1 / 4) 1
 				local r : 0.75 * DotRadius * fine / HalfStroke
 				include : DrawAt markMiddle [mix tbot ttop 1.5] (r * kdr)
 				include : DrawAt markMiddle [mix ttop tbot 1.5] (r * kdr)
@@ -402,9 +390,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'dblTildeAbove' 0x34C : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle (XH - AccentHeight / 4) markMiddle (aboveMarkStack + AccentHeight / 4)
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.impl 'above' (1 / 4) 1
 		local m aboveMarkBot
 		local ttop [mix m aboveMarkTop 0.7]
 		local tbot [mix m (aboveMarkBot + markFine / 2) 0.7]
@@ -425,8 +411,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'macronAbove' 0x304 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local leftEnd (markMiddle - markExtend * 1.5)
 		local rightEnd (markMiddle + markExtend * 1.5)
@@ -435,37 +420,23 @@ glyph-block Mark-Above : begin
 			flat leftEnd aboveMarkMid [widths markHalfStroke markHalfStroke]
 			curl rightEnd aboveMarkMid
 
-	create-glyph 'sbOverlineAbove' : glyph-proc
-		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
-		include : dispiro
-			flat (SB - Width) aboveMarkMid [widths markHalfStroke markHalfStroke]
-			curl (RightSB - Width) aboveMarkMid
-
 	create-glyph 'overlineAbove' 0x305 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.impl 'above' 0 2
 		include : dispiro
 			flat (0 - Width) aboveMarkMid [widths markHalfStroke markHalfStroke]
 			curl 0           aboveMarkMid
 
 	create-glyph 'sbRsbOverlineAbove' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.impl 'above' 0 1.5
 		include : dispiro
 			flat (SB - Width)      aboveMarkMid [widths markHalfStroke markHalfStroke]
 			curl (RightSB - Width) aboveMarkMid
 
 	create-glyph 'dblOverlineAbove' 0x33F : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.impl 'above' 0 2
 
 		local boxsw : Math.min (markFine * 2) ((aboveMarkTop - aboveMarkBot) / 3)
 
@@ -481,8 +452,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'breveAbove' 0x306 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local leftEnd (markMiddle - markExtend * 1.2)
 		local rightEnd (markMiddle + markExtend * 1.2)
@@ -496,8 +466,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'archAbove' 0x311 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local leftEnd (markMiddle - markExtend * 1.2)
 		local rightEnd (markMiddle + markExtend * 1.2)
@@ -511,8 +480,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'hookAbove' 0x309 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 
 		local fine : Math.min markFine ((aboveMarkTop - aboveMarkBot) * 0.2)
 
@@ -530,8 +498,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'doubleGraveAbove' 0x30F : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local m1 : markMiddle - markExtend * 0.85
 		local m2 : markMiddle + markExtend * 0.85
@@ -544,8 +511,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'doubleAcuteAbove' 0x30B : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local m1 : markMiddle - markExtend * 0.85
 		local m2 : markMiddle + markExtend * 0.85
@@ -558,8 +524,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'commaAbove.round' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 		local radius commaAboveRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
@@ -572,8 +537,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'commaAbove.square' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 		local radius : commaAboveRadius * DesignParameters.squareDotScalar
 		include : Rect aboveMarkTop (aboveMarkTop - radius * 2) (markMiddle - radius) (markMiddle + radius)
@@ -591,19 +555,17 @@ glyph-block Mark-Above : begin
 	derive-glyphs 'commaGrekUpperTonos' null 'commaAbove' : function [src gr] : glyph-proc
 		set-width 0
 		include : refer-glyph src
-		set-mark-anchor 'grekUpperTonos' markMiddle XH
+		include : StdAnchors.impl 'grekUpperTonos' 0 0
 
 	derive-glyphs 'turnCommaAbove' 0x312 'commaAbove' : function [src gr] : glyph-proc
 		set-width 0
 		include : refer-glyph src
 		include : FlipAround markMiddle ([mix aboveMarkTop (aboveMarkBot - commaAboveRadius) 0.5] + (DotRadius * 0.3) + commaOvershoot / 2)
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 	create-glyph 'revCommaAbove.round' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 		local radius commaAboveRadius
 		include : Ring (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
@@ -616,8 +578,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'revCommaAbove.square' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 		local radius : commaAboveRadius * DesignParameters.squareDotScalar
 		include : Rect (aboveMarkTop + commaOvershoot) (aboveMarkTop - radius * 2 + commaOvershoot) (markMiddle - radius) (markMiddle + radius)
@@ -635,34 +596,28 @@ glyph-block Mark-Above : begin
 	derive-glyphs 'revCommaGrekUpperTonos' null 'revCommaAbove' : function [src gr] : glyph-proc
 		set-width 0
 		include : refer-glyph src
-		set-mark-anchor 'grekUpperTonos' markMiddle XH
+		include : StdAnchors.impl 'grekUpperTonos' 0 0
 
 	create-glyph 'barAbove' 0x30D : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.narrow
 		include : VBar.m markMiddle aboveMarkBot aboveMarkTop markStroke
 
 	create-glyph 'ascenderBarAbove' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
-
+		include : StdAnchors.narrow
 		include : VBar.m markMiddle [mix XH aboveMarkBot 0.5] CAP markStroke
 
 	create-glyph 'dblBarAbove' 0x30E : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.mediumWide
 
 		include : VBar.m (markMiddle - markExtend * 0.75) aboveMarkBot aboveMarkTop markStroke
 		include : VBar.m (markMiddle + markExtend * 0.75) aboveMarkBot aboveMarkTop markStroke
 
 	create-glyph 'bridgeAbove' 0x346 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		include : VBar.m (markMiddle - markExtend) aboveMarkBot aboveMarkTop (markFine * 2)
 		include : VBar.m (markMiddle + markExtend) aboveMarkBot aboveMarkTop (markFine * 2)
@@ -670,8 +625,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'yerikAbove' 0x33E : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 
 		include : dispiro
 			widths.center (markFine * 2)
@@ -695,16 +649,27 @@ glyph-block Mark-Above : begin
 				g4.up.end (markMiddle + radius) yDot [heading Upward]
 			include : DrawAt markMiddle yDot (fine * kdr)
 			include : ApparentTranslate 0 (fine * 0.5)
-			set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-			set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+			include : StdAnchors.mediumWide
 
 	select-variant 'candrabinduAbove' 0x310 (follow -- 'diacriticDot')
 	turned 'turncandrabinduAbove' 0x352 'candrabinduAbove' markMiddle aboveMarkMid
 
+	create-glyph 'tonosAbove' : glyph-proc
+		set-width 0
+		include : StdAnchors.narrow
+		local shift : 0.05 * markExtend + (markStress - markFine) * HVContrast
+		include : dispiro
+			flat (markMiddle + shift) (aboveMarkTop + 0.4 * markStress) [widths.center.heading (markStress * 2) Downward]
+			curl (markMiddle - 0.5 * shift) aboveMarkBot [widths.center.heading (markFine * 2) Downward]
+
+	create-glyph 'tonosGrekUpperTonos' : glyph-proc
+		set-width 0
+		include : refer-glyph 'tonosAbove'
+		include : StdAnchors.impl 'grekUpperTonos' 0 0
+
 	create-glyph 'variaAbove' 0x340 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 
 		include : dispiro
 			flat (markMiddle + markStress) (aboveMarkBot - markFine * 0.5) [widths markFine markFine]
@@ -713,12 +678,11 @@ glyph-block Mark-Above : begin
 	create-glyph 'variaGrekUpperTonos' : glyph-proc
 		set-width 0
 		include : refer-glyph 'variaAbove'
-		set-mark-anchor 'grekUpperTonos' markMiddle XH
+		include : StdAnchors.impl 'grekUpperTonos' 0 0
 
 	create-glyph 'oxiaAbove' 0x341 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 
 		include : dispiro
 			flat (markMiddle - markStress) (aboveMarkBot - markFine * 0.5) [widths markFine markFine]
@@ -727,20 +691,38 @@ glyph-block Mark-Above : begin
 	create-glyph 'oxiaGrekUpperTonos' : glyph-proc
 		set-width 0
 		include : refer-glyph 'oxiaAbove'
-		set-mark-anchor 'grekUpperTonos' markMiddle XH
+		include : StdAnchors.impl 'grekUpperTonos' 0 0
 
 	create-glyph 'perispomeniAbove' 0x342 : glyph-proc
 		set-width 0
 		include : refer-glyph "archAbove"
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 	alias 'koronisAbove' 0x343 'commaAbove'
 
+	create-glyph 'dialytikaTonosAbove' 0x0344 : glyph-proc
+		set-width 0
+		include : WithTransform [ApparentTranslate 0 (-1/8 * AccentHeight)]  : refer-glyph 'dialytikaAbove'
+		include : WithTransform [ApparentTranslate 0 0] : refer-glyph 'tonosAbove'
+		include : StdAnchors.wide
+
+	create-glyph 'dialytikaVariaAbove' : glyph-proc
+		set-width 0
+		local shift : 0.125 * (markExtend * 0.875 - markStress)
+		include : WithTransform [ApparentTranslate 0 (-1/8 * AccentHeight)]  : refer-glyph 'dialytikaAbove'
+		include : WithTransform [ApparentTranslate shift 0] : refer-glyph 'variaAbove'
+		include : StdAnchors.wide
+
+	create-glyph 'dialytikaOxiaAbove' : glyph-proc
+		set-width 0
+		local shift : 0.125 * (markExtend * 0.875 - markStress)
+		include : WithTransform [ApparentTranslate 0 (-1/8 * AccentHeight)]  : refer-glyph 'dialytikaAbove'
+		include : WithTransform [ApparentTranslate (-shift) 0] : refer-glyph 'oxiaAbove'
+		include : StdAnchors.wide
+
 	create-glyph 'crossAbove' 0x33D : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.mediumWide
 
 		include : dispiro
 			flat (markMiddle - markExtend) aboveMarkTop [widths markFine markFine]
@@ -751,8 +733,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'lessAbove' 0x1DFE : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.mediumWide
 
 		local top aboveMarkTop
 		local bot aboveMarkBot
@@ -771,8 +752,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'upArrowHeadAbove' 0xE002 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 
 		local top aboveMarkTop
 		local bot aboveMarkBot
@@ -840,63 +820,40 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'upArrowAbove' : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 		include : ArrowheadForArrowMarkAbove-Up
 		include : VBar.mForArrowMarkAbove
 
-	create-glyph 'downArrowAbove' : glyph-proc
+	create-glyph 'downArrowAbove' 0x1AB3 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.medium
 		include : ArrowheadForArrowMarkAbove-Down
 		include : VBar.mForArrowMarkAbove
 
 	create-glyph 'leftArrowAbove' 0x20D6 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 		include : ArrowheadForArrowMarkAbove-Left
 		include : HBar.mForArrowMarkAbove
 
 	create-glyph 'rightArrowAbove' 0x20D7 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 		include : ArrowheadForArrowMarkAbove-Right
 		include : HBar.mForArrowMarkAbove
 
 	create-glyph 'lrArrowAbove' 0x20E1 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 		include : ArrowheadForArrowMarkAbove-Left
 		include : ArrowheadForArrowMarkAbove-Right
 		include : HBar.mForArrowMarkAbove
-
-	create-glyph 'braceAbove' 0x1ABB : glyph-proc
-		set-width 0
-		set-mark-anchor 'aboveBrace' markMiddle aboveMarkMid markMiddle aboveMarkMid
-		local braceDepth : markExtend * 0.25
-		local left : [mix 0 SB 0.25] - Width
-		local right : [mix Width RightSB 0.25] - Width
-		include : dispiro
-			widths.lhs markFine
-			g4 (left + braceDepth) (aboveMarkTop + markFine)
-			g4 (left + OX)         aboveMarkMid
-			g4 (left + braceDepth) (aboveMarkBot - markFine)
-		include : dispiro
-			widths.rhs markFine
-			g4 (right - braceDepth) (aboveMarkTop + markFine)
-			g4 (right - OX)         aboveMarkMid
-			g4 (right - braceDepth) (aboveMarkBot - markFine)
 
 	alias 'cyrlDasiaAbove' 0x485 'revCommaAbove'
 	alias 'cyrlPsiliAbove' 0x486 'commaAbove'
 	create-glyph 'cyrlPalatilizationAbove' 0x484 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local leftEnd  : markMiddle - markExtend * 2.0
 		local rightEnd : markMiddle + markExtend * 1.2
@@ -909,8 +866,7 @@ glyph-block Mark-Above : begin
 			g2.left.end leftEnd ([mix aboveMarkBot aboveMarkTop 0.5] - markHalfStroke) [heading Leftward]
 	create-glyph 'cyrlPokrytieAbove' 0x487 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		local leftEnd  : markMiddle - markExtend * 1.2
 		local rightEnd : markMiddle + markExtend * 2.0
@@ -924,8 +880,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'cyrlTitloAbove' 0x483 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.wide
 
 		include : VBar.m (markMiddle - markExtend) aboveMarkBot (aboveMarkMid + markFine) (markFine * 2)
 		include : VBar.m (markMiddle + markExtend) (aboveMarkMid - markFine) aboveMarkTop (markFine * 2)
@@ -933,8 +888,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'zigzagAbove' 0x35B : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.mediumWide
 
 		local ext : 0.625 * markExtend + markFine
 		local coSlope  0.2
@@ -947,13 +901,15 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'ogonekAbove' 0x1DCE : glyph-proc
 		set-width 0
+
 		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		set-base-anchor 'aboveBraceL' (markMiddle - 0.25 * markExtend) aboveMarkMid
+		set-base-anchor 'aboveBraceR' (markMiddle + 0.25 * markExtend + 0.25 * HVContrast * markStroke) aboveMarkMid
 
 		local fine : AdviceStroke 8
 		local depth : 0 - Descender - markStroke
 		local fullExt : (7 / 16) * depth + 0.125 * markStress
-		local extR : 0.5 * fullExt
+		local extR : 0.25 * fullExt
 		local extL : 0.5 * fullExt + 0.375 * markStroke + [Math.max (0.125 * markExtend) (1.5 * TanSlope * markStroke)]
 
 		local turnSlope : 0.5 * ((markStroke - fine) / markStroke - (ArchDepthB - ArchDepth) / ArchDepth)
@@ -970,8 +926,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'leftHalfCircleAbove' 0x351 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 		local [object radiusIn radiusOut] : RingDims
 		include : dispiro
 			g4.left.start markMiddle aboveMarkTop [widths.center.heading (radiusOut - radiusIn) Leftward]
@@ -983,8 +938,7 @@ glyph-block Mark-Above : begin
 
 	create-glyph 'rightHalfCircleAbove' 0x357 : glyph-proc
 		set-width 0
-		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle aboveMarkMid
+		include : StdAnchors.narrow
 		local [object radiusIn radiusOut] : RingDims
 		include : dispiro
 			g4.right.start markMiddle aboveMarkTop [widths.center.heading (radiusOut - radiusIn) Rightward]
@@ -993,3 +947,57 @@ glyph-block Mark-Above : begin
 			arcvh
 			g4.left.end  markMiddle aboveMarkBot [heading Leftward]
 		include : Translate (-(aboveMarkTop - aboveMarkBot) / 4) 0
+
+
+	create-glyph 'leftParenAbove' 0x1AC1 : glyph-proc
+		set-width 0
+		set-mark-anchor 'aboveBraceL' markMiddle aboveMarkMid (markMiddle - markExtend) aboveMarkMid
+		local braceDepth : markExtend * 0.25
+		local left : markMiddle - 1.5 * markExtend
+		include : dispiro
+			widths.lhs markFine
+			g4 (left + braceDepth) (aboveMarkTop + markFine)
+			g4 (left + OX)         aboveMarkMid
+			g4 (left + braceDepth) (aboveMarkBot - markFine)
+
+	create-glyph 'rightParenAbove' 0x1AC2 : glyph-proc
+		set-width 0
+		set-mark-anchor 'aboveBraceR' markMiddle aboveMarkMid (markMiddle + markExtend) aboveMarkMid
+		local braceDepth : markExtend * 0.25
+		local right : markMiddle + 1.5 * markExtend
+		include : dispiro
+			widths.rhs markFine
+			g4 (right - braceDepth) (aboveMarkTop + markFine)
+			g4 (right - OX)         aboveMarkMid
+			g4 (right - braceDepth) (aboveMarkBot - markFine)
+
+	create-glyph 'braceAbove' 0x1ABB : glyph-proc
+		set-width 0
+		include : refer-glyph 'leftParenAbove'
+		include : refer-glyph 'rightParenAbove'
+		# No need to setup anchors -- ccmp will help us
+
+	create-glyph 'leftBrackAbove' : glyph-proc
+		set-width 0
+		set-mark-anchor 'aboveBraceL' markMiddle aboveMarkMid (markMiddle - markExtend) aboveMarkMid
+		local braceDepth : markExtend * 0.75
+		local left : markMiddle - 1.75 * markExtend
+		include : VBar.l left aboveMarkBot aboveMarkTop markFine
+		include : HBar.t left (left + braceDepth) aboveMarkTop markFine
+		include : HBar.b left (left + braceDepth) aboveMarkBot markFine
+
+	create-glyph 'rightBrackAbove' : glyph-proc
+		set-width 0
+		set-mark-anchor 'aboveBraceR' markMiddle aboveMarkMid (markMiddle + markExtend) aboveMarkMid
+		local braceDepth : markExtend * 0.75
+		local right : markMiddle + 1.75 * markExtend
+		include : VBar.r right aboveMarkBot aboveMarkTop markFine
+		include : HBar.t (right - braceDepth) right aboveMarkTop markFine
+		include : HBar.b (right - braceDepth) right aboveMarkBot markFine
+
+	create-glyph 'parenAbove' 0x1AC5 : glyph-proc
+		set-width 0
+		include : refer-glyph 'leftBrackAbove'
+		include : refer-glyph 'rightBrackAbove'
+		# No need to setup anchors -- ccmp will help us
+

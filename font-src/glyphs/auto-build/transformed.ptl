@@ -2,7 +2,7 @@
 $$include '../../meta/macros.ptl'
 
 import [linreg clamp mix fallback] from"../../support/utils.mjs"
-import [getGrTree getGrMesh] from"../../support/gr.mjs"
+import [getGrTree getGrMesh IsSuperscript IsSubscript] from"../../support/gr.mjs"
 import [AnyCv DotlessOrNot CvDecompose MathSansSerif] from"../../support/gr.mjs"
 import [NumeratorForm DenominatorForm] from"../../support/gr.mjs"
 extern Map
@@ -68,21 +68,44 @@ glyph-block Autobuild-Transformed-Shared : begin
 				if [query-glyph relDstName] : begin
 					[query-glyph origDstName].tryBecomeMirrorOf [query-glyph relDstName] rs
 
+	glyph-block-export ToSuperscript
+	define [ToSuperscript div] : glyph-proc
+		local df : DivFrame df
+		include [Ungizmo] true
+		include [Translate (-df.middle) (-CAP)] true
+		include [Scale ToSuperscript.crowdAdjScale] true
+		include [Translate df.middle (CAP + AccentStackOffset / 2)] true
+		include [Regizmo] true
+	set ToSuperscript.crowd         3.5
+	set ToSuperscript.crowdAdjScale 0.7
+
+	glyph-block-export ToSubscript
+	define [ToSubscript div] : glyph-proc
+		local df : DivFrame df
+		include [Ungizmo] true
+		include [Translate (-df.middle) 0] true
+		include [Scale ToSubscript.crowdAdjScale] true
+		include [Translate df.middle (Descender / 2)] true
+		include [Regizmo] true
+	set ToSubscript.crowd         3.5
+	set ToSubscript.crowdAdjScale 0.7
+
 glyph-block Autobuild-Transformed : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Fork Miniature
 	glyph-block-import Mark-Shared-Metrics : markMiddle
-	glyph-block-import Mark-Above : aboveMarkBot aboveMarkTop
-	glyph-block-import Mark-Below : belowMarkBot belowMarkTop
+	glyph-block-import Mark-Above : aboveMarkBot aboveMarkMid aboveMarkTop
+	glyph-block-import Mark-Below : belowMarkBot belowMarkMid belowMarkTop
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
+	glyph-block-import Autobuild-Transformed-Shared : ToSuperscript ToSubscript
 
 	define [createSuperscripts prefix gr _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs prefix _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature pendingGlyphs
-			crowd  -- 3.5
-			scale  -- 0.7
+			crowd  -- ToSuperscript.crowd
+			scale  -- ToSuperscript.crowdAdjScale
 			mono   -- true
 			sbscale -- 0.75
 		foreach { unicode glyphid fRelated } [items-of records]
@@ -92,11 +115,8 @@ glyph-block Autobuild-Transformed : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
 					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include [Ungizmo] true
-					include [Translate (-middle) (-CAP)] true
-					include [Scale 0.7] true
-					include [Translate middle (CAP + AccentStackOffset / 2)] true
-					include [Regizmo] true
+					include : ToSuperscript
+					IsSuperscript.set currentGlyph
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 		return { targetNameMap records }
@@ -105,8 +125,8 @@ glyph-block Autobuild-Transformed : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs prefix _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local miniatureFont : Miniature pendingGlyphs
-			crowd  -- 3.5
-			scale  -- 0.7
+			crowd  -- ToSubscript.crowd
+			scale  -- ToSubscript.crowdAdjScale
 			mono   -- true
 			sbscale -- 0.75
 		foreach { unicode glyphid fRelated } [items-of records]
@@ -114,11 +134,8 @@ glyph-block Autobuild-Transformed : begin
 				create-glyph (targetNameMap.(glyphid)) unicode : glyph-proc
 					local middle : [miniatureFont.queryByName glyphid].advanceWidth / 2
 					include [miniatureFont.queryByName glyphid] AS_BASE ALSO_METRICS
-					include [Ungizmo] true
-					include [Translate (-middle) 0] true
-					include [Scale 0.7] true
-					include [Translate middle (Descender / 2)] true
-					include [Regizmo] true
+					include : ToSubscript
+					IsSubscript.set currentGlyph
 				if ([not fRelated] && gr) : gr.set [query-glyph glyphid] (targetNameMap.(glyphid))
 		link-relations relSets
 
@@ -168,8 +185,10 @@ glyph-block Autobuild-Transformed : begin
 				include : Translate markMiddle aboveMarkBot
 				include : Regizmo
 				local markHeight : 0.4 * (high - low) + 0 * (aboveMarkTop - aboveMarkBot)
+
 				set-mark-anchor 'above' markMiddle XH markMiddle (aboveMarkBot + markHeight)
-				set-base-anchor 'aboveBrace' markMiddle (aboveMarkBot + markHeight + XH * 0.2)
+				set-base-anchor 'aboveBraceL' markMiddle (aboveMarkBot + markHeight / 2)
+				set-base-anchor 'aboveBraceR' markMiddle (aboveMarkBot + markHeight / 2)
 
 		link-relations relSets
 
@@ -192,7 +211,8 @@ glyph-block Autobuild-Transformed : begin
 				include : Translate markMiddle belowMarkTop
 				include : Regizmo
 				set-mark-anchor 'below' markMiddle 0 markMiddle belowMarkBot
-				set-base-anchor 'belowBrace' markMiddle (belowMarkTop - XH * 0.2)
+				set-base-anchor 'belowBraceL' markMiddle belowMarkMid
+				set-base-anchor 'belowBraceR' markMiddle belowMarkMid
 
 		link-relations relSets
 
@@ -791,7 +811,7 @@ glyph-block Autobuild-Rhotic : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
 					include : MarkSet.e
 					include : thinFont.queryByName glyphid
-					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y
+					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y (XH * 0.15)
 
 		link-relations relSets
 		return { targetNameMap records }

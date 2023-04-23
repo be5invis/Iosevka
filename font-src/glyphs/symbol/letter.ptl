@@ -2,6 +2,7 @@
 
 $$include '../../meta/macros.ptl'
 
+import [Box] from"../../support/geometry/box.mjs"
 import [mix linreg clamp fallback] from"../../support/utils.mjs"
 import [DesignParameters] from"../../meta/aesthetics.mjs"
 
@@ -77,6 +78,33 @@ glyph-block Symbol-Currency-Letter-Derived : begin
 
 	derive-composites 'currency/tugrikSign' 0x20AE 'T' 'currency/tugrikOverride'
 
+	create-glyph 'longAlmostVerticalSlash' : glyph-proc
+		set-width 0
+		set-mark-anchor 'slash' 0 0
+		include : dispiro
+			widths.center OverlayStroke
+			flat (CAP * 0.1) (CAP * 0.6)
+			flat (CAP * -0.1) (CAP * -0.6)
+
+	create-glyph 'doubleLongAlmostVerticalSlash' : glyph-proc
+		set-width 0
+		set-mark-anchor 'slash' 0 0
+
+		local sw : AdviceStroke 7
+		local gap : sw + [Math.min sw (0.1 * (RightSB - SB))]
+		include : dispiro
+			widths.center sw
+			flat (CAP * 0.1 + 0.5 * gap) (CAP * 0.6)
+			flat (CAP * -0.1 + 0.5 * gap) (CAP * -0.6)
+		include : dispiro
+			widths.center sw
+			flat (CAP * 0.1 - 0.5 * gap) (CAP * 0.6)
+			flat (CAP * -0.1 - 0.5 * gap) (CAP * -0.6)
+
+	derive-composites 'currency/colonSign' 0x20A1 'C' 'doubleLongAlmostVerticalSlash'
+	derive-composites 'currency/guaraniSign' 0x20B2 'G' 'longAlmostVerticalSlash'
+	derive-composites 'currency/cediSign' 0x20B5 'C' 'longAlmostVerticalSlash'
+
 glyph-block Symbol-Letter : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
@@ -88,6 +116,8 @@ glyph-block Symbol-Letter : begin
 
 	alias 'Ohm' 0x2126 'grek/Omega'
 	turned 'Mho' 0x2127 'Ohm' Middle (CAP / 2)
+	
+	turned 'revL/sansSerif' 0x2143 'grek/Gamma/sansSerif' Middle (CAP / 2)
 
 	create-glyph 'ell' 0x2113 : glyph-proc
 		include : MarkSet.b
@@ -110,6 +140,38 @@ glyph-block Symbol-Letter : begin
 			curl middle (ArchDepthB * 0.5 + fine / 2)
 			hookend (O + fine / 2)
 			g2   (middle + radius * 2) SHook
+
+	create-glyph 'weierstrassP' 0x2118 : glyph-proc
+		include : MarkSet.p
+
+		local thick : AdviceStroke 2.75
+		local extSw : AdviceStroke 4
+		local fine  : AdviceStroke 5.5
+		local tip   : AdviceStroke 6.5
+
+		local bowl : CursiveBuilder [new Box XH 0         SB RightSB]               thick
+		local extn : CursiveBuilder [new Box XH Descender SB [mix SB RightSB 0.3]]  extSw
+		local bowT : bowl.withSw tip
+		local extF : extn.withSw fine
+		local extT : extn.withSw tip
+
+		include : dispiro
+			g2           [extT.x  0.25  0.5  0    ]  [extT.y  1     0     0    ]  [extT.s 0.5]
+			g2.down.mid  [extF.x  0     0    O    ]  [extF.y  0.8   0     0    ]  [extF.s 0]
+			alsoThru.g2  0.5                         0.5                          [extn.s 0.5]
+			g2.down.mid  [extF.x  1     0.4  (-O) ]  [extn.y  0.2 (-TanSlope) 0]  [extn.s (fine / extSw)]
+			arcvh
+			g2           [extF.xAB 0.5  0.2  0    ]  [extF.y  0     0     O    ]  [extF.s 1]
+			archv
+			g2.up.mid    [extF.x  0     0    O    ]  [extF.y  0.2   0     0    ]  [extF.s 1]
+			bezControls  0  0.5  0.4  1  16
+			g2           [bowl.xAT  0.7 (-0.3) 0  ]  [bowl.y  1     0     (-O) ]  [bowl.s 1]
+			archv
+			straight.down.mid [bowl.x  1  0  (-O) ]  [bowl.y  0.5   0     0    ]
+			arcvh
+			g2           [bowl.xAB  0.7 (-0.2) 0  ]  [bowl.y  0     0     O    ]
+			archv
+			g2           [bowT.x  0.4   0    0    ]  [bowT.y  0.3   0     0    ]  [bowT.s 1 Upward]
 
 	create-glyph 'estimated' 0x212E : glyph-proc
 		local fineArc : CAP * 0.0300

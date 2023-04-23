@@ -47,7 +47,6 @@ function OtlTaggedProp(key, otlTag) {
 
 export const CvDecompose = DecompositionProp("CvDecompose");
 export const PseudoCvDecompose = DecompositionProp("PseudoCvDecompose");
-export const CcmpDecompose = DecompositionProp("CcmpDecompose");
 function DecompositionProp(key) {
 	return {
 		get(glyph) {
@@ -106,9 +105,10 @@ function BoolProp(id) {
 	};
 }
 export const Radical = BoolProp("Radical");
-export const RequireCcmpDecompose = BoolProp("RequireCcmpDecompose");
 export const NeqLigationSlashDotted = BoolProp("NeqLigationSlashDotted");
 export const OgonekTrY = BoolProp("OgonekTrY");
+export const IsSuperscript = BoolProp("IsSuperscript");
+export const IsSubscript = BoolProp("IsSubscript");
 
 export const Joining = {
 	get(glyph) {

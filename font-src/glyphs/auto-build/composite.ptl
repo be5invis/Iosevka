@@ -1240,17 +1240,19 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Thinner
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
+	glyph-block-import Autobuild-Transformed-Shared : ToSuperscript ToSubscript
 
-	define [createPhoneticLigatures prefix div _shrink1 _shrink2 wadj1 wadj2 tfm demands] : begin
+	define [createPhoneticLigatures tfm prefix div _shrink1 _shrink2 wadj1 wadj2 kKern demands] : begin
 		define CWidth : Width * div
+		define MockWidth : CWidth / [fallback tfm.crowdAdjScale 1]
 		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix "" demands
 		local shrink1 : clamp 0 1 _shrink1
 		local shrink2 : clamp 0 1 _shrink2
-		local kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
+		local kern 0
 		foreach [cycle : range 0 4] : begin
-			set kern : SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2
-			local tmp-shrink1 : (shrink1 * CWidth + kern * shrink1 / (shrink1 + shrink2)) / CWidth
-			local tmp-shrink2 : (shrink2 * CWidth + kern * shrink2 / (shrink1 + shrink2)) / CWidth
+			set kern : kKern * (SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2)
+			local tmp-shrink1 : (shrink1 * MockWidth + kern * shrink1 / (shrink1 + shrink2)) / MockWidth
+			local tmp-shrink2 : (shrink2 * MockWidth + kern * shrink2 / (shrink1 + shrink2)) / MockWidth
 			set shrink1 : clamp 0 1 tmp-shrink1
 			set shrink2 : clamp 0 1 tmp-shrink2
 
@@ -1278,7 +1280,7 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 
 			create-glyph gn unicode : glyph-proc
 				set-width CWidth
-				if mak : include : [DivFrame (CWidth / Width)].markSet.(mak)
+				if mak : include : [DivFrame (MockWidth / Width)].markSet.(mak)
 				define dfg1 : df1.queryByNameEnsured c1
 				define dfg2 : df2.queryByNameEnsured c2
 				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
@@ -1286,12 +1288,12 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 				include dfg2
 				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
 				local leftHalf : intersection dfg1
-					Rect (CAP * 2) (Descender * 2) (-CWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
+					Rect (CAP * 2) (Descender * 2) (-MockWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
 				include leftHalf
 				# include : difference.apply null { leftHalf :: maskOuts }
 				include : Ungizmo
 				include : Translate (-refW / 2) 0
-				include : Scale [clamp 0 1 ((CWidth - SB * 1.25) / (CWidth - SB * 2) * CWidth / refW)] 1
+				include : Scale [clamp 0 1 ((MockWidth - SB * 1.25) / (MockWidth - SB * 2) * MockWidth / refW)] 1
 				include : Translate (CWidth / 2) 0
 				include : Regizmo
 
@@ -1300,21 +1302,12 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		applyRelations jobs.relApplications
 
 	define [ToLetter] : glyph-proc
-	define [ToSuperscript div] : glyph-proc
-		local df : DivFrame df
-		include [Ungizmo] true
-		include [Translate (-df.middle) (-CAP)] true
-		include [Scale 0.7] true
-		include [Translate df.middle (CAP + AccentStackOffset / 2)] true
-		include [Regizmo] true
 
-	set ToSuperscript.crowd         3.5
-	set ToSuperscript.crowdAdjScale 0.7
 	define [AddSlash] : glyph-proc
 		include [refer-glyph 'wideSlashOver']
 
 	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createPhoneticLigatures 'phonetic' para.diversityM stdShrink stdShrink 1 1 ToLetter : list
+	createPhoneticLigatures ToLetter 'phonetic' para.diversityM stdShrink stdShrink 1 1 1 : list
 		list 0x02A3 { 'd/phoneticLeft'  'z'                     } 'b'
 		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'if'
 		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
@@ -1329,7 +1322,7 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0xFB01 { 'f/compLigLeft1'  'dotlessi/compLigRight' } null
 		list 0xFB02 { 'f/compLigLeft2'  'l/compLigRight'        } null
 
-	createPhoneticLigatures 'phoneticSuperscript' 1 stdShrink stdShrink 1 1 ToSuperscript : list
+	createPhoneticLigatures ToSuperscript 'phoneticSuperscript' 1 stdShrink stdShrink 1 1 1 : list
 		list 0x10787 { 'd/phoneticLeft'  'z'                     } 'b'
 		list 0x1078A { 'd/phoneticLeft'  'ezh'                   } 'if'
 		list 0x10789 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
@@ -1342,7 +1335,10 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0x10788 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
 		list 0x107AD { 't/phoneticLeft1' 'sRTail'                } 'p'
 
-	createPhoneticLigatures 'thSlash' 1 stdShrink stdShrink 1 1 AddSlash : list
+	createPhoneticLigatures ToSubscript 'tenSubscript' 1 1 1 1 1 0.5 : list
+		list 0x23E8 { 'one.lnum' 'zero.lnum' } 'capital'
+
+	createPhoneticLigatures AddSlash 'thSlash' 1 stdShrink stdShrink 1 1 1 : list
 		list 0x1D7A { 't/phoneticLeft1' 'h' } 'b'
 
 glyph-block Autobuild-Double-Emotions : begin

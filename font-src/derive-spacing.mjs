@@ -3,15 +3,16 @@ import path from "path";
 import url from "url";
 
 import * as Toml from "@iarna/toml";
-import { FontIo, Ot, CliProc } from "ot-builder";
+import { CliProc, Ot } from "ot-builder";
 
 import { assignFontNames, createNamingDictFromArgv } from "./gen/meta/naming.mjs";
+import { readTTF, saveTTF } from "./support/font-io/font-io.mjs";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
 export default main;
 async function main(argv) {
-	const font = await readTTF(argv);
+	const font = await readTTF(argv.i);
 
 	const naming = createNamingDictFromArgv(argv);
 	assignFontNames(font, naming, false);
@@ -24,17 +25,26 @@ async function main(argv) {
 			await deriveTerm(font);
 			await deriveFixed_DropWideChars(font);
 			await deriveFixed_DropFeatures(font, false);
-			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
 			break;
 		case "fixed":
 			await deriveTerm(font);
 			await deriveFixed_DropWideChars(font);
 			await deriveFixed_DropFeatures(font, true);
-			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
 			break;
 	}
 
-	await saveTTF(argv, font);
+	await saveTTF(argv.oNoGc, font);
+
+	switch (argv.shape.spacing) {
+		case "fontconfig-mono":
+		case "fixed":
+			CliProc.gcFont(font, Ot.ListGlyphStoreFactory);
+			await saveTTF(argv.o, font);
+			break;
+		default:
+			await fs.promises.copyFile(argv.oNoGc, argv.o);
+			break;
+	}
 }
 
 // To derive -Term variants, simply apply NWID
@@ -97,19 +107,4 @@ async function deriveFixed_DropFeatures(font, fFixed) {
 			feature.params = null;
 		}
 	}
-}
-
-async function readTTF(argv) {
-	const buf = await fs.promises.readFile(argv.i);
-	const sfnt = FontIo.readSfntOtf(buf);
-	const font = FontIo.readFont(sfnt, Ot.ListGlyphStoreFactory);
-	return font;
-}
-async function saveTTF(argv, font) {
-	const sfnt = FontIo.writeFont(font, {
-		glyphStore: { statOs2XAvgCharWidth: false },
-		generateDummyDigitalSignature: true
-	});
-	const buf = FontIo.writeSfntOtf(sfnt);
-	await fs.promises.writeFile(argv.o, buf);
 }

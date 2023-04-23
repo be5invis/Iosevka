@@ -1,7 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
-import [Dotless CvDecompose] from"../../../support/gr.mjs"
+import [Dotless CvDecompose IsSuperscript IsSubscript] from"../../../support/gr.mjs"
 
 glyph-module
 
@@ -11,10 +11,9 @@ glyph-block Letter-Latin-Rhotic : begin
 	glyph-block-import Mark-Shared-Metrics : markFine
 
 	glyph-block-export ErTail
-	define [ErTail left y w dohook] : glyph-proc
+	define [ErTail left y rise w dohook] : glyph-proc
 		local right Width
 		local mid : mix left right 0.5
-		local rise : (Width - left) * 0.3
 		local sw : fallback w [AdviceStroke 5]
 		include : dispiro
 			widths.rhs sw
@@ -27,5 +26,22 @@ glyph-block Letter-Latin-Rhotic : begin
 			if dohook {[hookend (y - rise)]} {[arcvh]}
 			g4 (right - [if dohook sw 0]) (y - [if dohook (rise * 0.5) rise]) [if dohook nothing [heading Rightward]]
 
-	create-glyph 'rhotichook' 0x2DE : glyph-proc
-		include : ErTail (-Stroke * HVContrast) (XH / 2) Stroke true
+	create-glyph 'rhoticHook' 0x2DE : glyph-proc
+		include : ErTail (-Stroke * HVContrast) (XH / 2) (XH * 0.3) Stroke true
+
+	create-glyph 'rhoticHook/sup' : glyph-proc
+		local sw : [AdviceStroke 3.5] / 0.7
+		include : ErTail (-Stroke * HVContrast - 3 * SB) (XH / 2) (XH * 0.3) sw true
+		include : Ungizmo
+		include : Translate (-Middle) (-CAP)
+		include : Scale 0.7
+		include : Translate (Middle) (CAP + AccentStackOffset / 2)
+		include : Regizmo
+
+		IsSuperscript.set currentGlyph
+
+	create-glyph 'rhoticHook/sub' : glyph-proc
+		include [refer-glyph 'rhoticHook/sup'] AS_BASE ALSO_METRICS
+		include : ApparentTranslate 0 ((Descender / 2) - (CAP + AccentStackOffset / 2) + 0.7 * CAP)
+
+		IsSubscript.set currentGlyph

@@ -17,6 +17,9 @@ define GDEF_SIMPLE 1
 define GDEF_LIGATURE 2
 define GDEF_MARK 3
 
+extern Set
+extern Map
+
 # GSUB
 define [buildGSUB para glyphStore markGlyphs] : begin
 	define gsub : CreateEmptyTable
@@ -72,31 +75,42 @@ define [buildGSUB para glyphStore markGlyphs] : begin
 # GPOS
 define [buildGPOS para glyphStore markGlyphs] : begin
 	define gpos : CreateEmptyTable
-	buildMarkMkmk gpos glyphStore
+	buildMarkMkmk gpos glyphStore markGlyphs
 	FinalizeTable gpos
 	return gpos
 
 # GDEF
 define [buildGDEF para glyphStore markGlyphs] : begin
-	local GDEF {.glyphClassDef {.}}
-	foreach { gn glyph } [glyphStore.namedEntries] : begin
-		set GDEF.glyphClassDef.(gn) : if [[regex '_'].test gn] GDEF_LIGATURE GDEF_SIMPLE
-		if (glyph.markAnchors && [begin [local anchorKeys : Object.keys glyph.markAnchors] anchorKeys.length]) : begin
-			foreach key [items-of anchorKeys] : begin
-				if [not markGlyphs.(key)] : set markGlyphs.(key) {}
-				markGlyphs.(key).push gn
-				markGlyphs.all.push gn
-				set GDEF.glyphClassDef.(gn) GDEF_MARK
+	local GDEF { .glyphClassDef {.} .markAttachClassDef {.} .markGlyphSets {} }
+
+	foreach { gn glyph } [glyphStore.namedEntries] : piecewise
+		[markGlyphs.all.has gn] : set GDEF.glyphClassDef.(gn) GDEF_MARK
+		[[regex '_'].test gn]   : set GDEF.glyphClassDef.(gn) GDEF_LIGATURE
+		true                    : set GDEF.glyphClassDef.(gn) GDEF_SIMPLE
+
+	local n 1
+	local m : new Map
+	foreach { gn clsStr } markGlyphs.markAttachClassDef : begin
+		local clsNum : m.get clsStr
+		if [not clsNum] : begin
+			set clsNum n
+			set n (n + 1)
+			m.set clsStr clsNum
+
+		set GDEF.markAttachClassDef.(gn) clsNum
+
+	set GDEF.markGlyphSets markGlyphs.markGlyphSets
+
 	return GDEF
 
 export : define [buildOtl para glyphStore] : begin
-	local markGlyphs {.all {} }
+	local markGlyphs { .all [new Set] .markAttachClassDef [new Map] .markGlyphSets {} }
 	local GPOS : buildGPOS para glyphStore markGlyphs
 	local GDEF : buildGDEF para glyphStore markGlyphs
 	local GSUB : buildGSUB para glyphStore markGlyphs
 
 	# Make all diacritics join-l (Kitty #3716)
-	foreach gnMark [items-of markGlyphs.all] : begin
+	foreach gnMark markGlyphs.all : begin
 		Gr.Joining.or [glyphStore.queryByName gnMark] Gr.Joining.Classes.Left
 
 	# Build compatibility ligatures
