@@ -373,23 +373,28 @@ const DistUnhintedTTF = file.make(
 		await target.need(Scripts, Parameters, Dependencies, de(out.dir));
 		const [fi] = await target.need(FontInfoOf(fn));
 
+		const charMapDir = `${BUILD}/ttf/${gr}`;
+		const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
+		const noGcTtfPath = `${charMapDir}/${fn}.no-gc.ttf`;
+
 		if (fi.spacingDerive) {
 			// The font is a spacing variant, and is derivable form an existing
 			// normally-spaced variant.
 			const spD = fi.spacingDerive;
-			const [deriveFrom] = await target.need(DistUnhintedTTF(spD.prefix, spD.fileName));
+			const [deriveFrom] = await target.need(
+				DistUnhintedTTF(spD.prefix, spD.fileName),
+				de(charMapDir)
+			);
 
 			echo.action(echo.hl.command(`Create TTF`), out.full);
 			await silently.node(`font-src/derive-spacing.mjs`, {
 				i: deriveFrom.full,
+				oNoGc: noGcTtfPath,
 				o: out.full,
 				...fi
 			});
 		} else {
 			// Ab-initio build
-			const charMapDir = `${BUILD}/ttf/${gr}`;
-			const charMapPath = `${charMapDir}/${fn}.charmap.mpz`;
-
 			const cacheFileName =
 				`${Math.round(1000 * fi.shape.weight)}-${Math.round(1000 * fi.shape.width)}-` +
 				`${Math.round(3600 * fi.shape.slopeAngle)}-${fi.shape.slope}`;
@@ -424,6 +429,27 @@ const DistUnhintedTTF = file.make(
 				});
 				lock.release();
 			}
+		}
+	}
+);
+
+const BuildNoGcTtfImpl = file.make(
+	(gr, f) => `${BUILD}/ttf/${gr}/${f}.no-gc.ttf`,
+	async (target, output, gr, f) => {
+		await target.need(DistUnhintedTTF(gr, f));
+	}
+);
+
+const BuildNoGcTtf = task.make(
+	(gr, fn) => `BuildNoGcTtf::${gr}/${fn}`,
+	async (target, gr, fn) => {
+		const [fi] = await target.need(FontInfoOf(fn));
+		if (fi.spacingDerive) {
+			const [noGc] = await target.need(BuildNoGcTtfImpl(gr, fn));
+			return noGc;
+		} else {
+			const [distUnhinted] = await target.need(DistUnhintedTTF(gr, fn));
+			return distUnhinted;
 		}
 	}
 );
@@ -678,9 +704,10 @@ async function buildCompositeTtc(out, inputs) {
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), inputPaths);
 	await absolutelySilently.run(TTCIZE, ["-o", out.full], inputPaths);
 }
+
 async function buildGlyphSharingTtc(target, parts, out) {
 	await target.need(de`${out.dir}`);
-	const [ttfInputs] = await target.need(parts.map(part => DistUnhintedTTF(part.dir, part.file)));
+	const [ttfInputs] = await target.need(parts.map(part => BuildNoGcTtf(part.dir, part.file)));
 	const tmpTtc = `${out.dir}/${out.name}.unhinted.ttc`;
 	const ttfInputPaths = ttfInputs.map(p => p.full);
 	echo.action(echo.hl.command(`Create TTC`), out.full, echo.hl.operator("<-"), ttfInputPaths);

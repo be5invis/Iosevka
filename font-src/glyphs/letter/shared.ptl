@@ -98,7 +98,8 @@ glyph-block Letter-Blackboard : begin
 	create-glyph 'mathbb/dotAbove' : glyph-proc
 		set-width 0
 		set-mark-anchor 'above' markMiddle XH markMiddle aboveMarkStack
-		set-base-anchor 'aboveBrace' markMiddle (XH + AccentStackOffset)
+		set-base-anchor 'aboveBraceL' markMiddle (XH + AccentStackOffset)
+		set-base-anchor 'aboveBraceR' markMiddle (XH + AccentStackOffset)
 		include : DotStrokeAt markMiddle (XH + AccentStackOffset) (BBD / 2 + BBS) BBS
 
 glyph-block Letter-Shared-Metrics : begin
@@ -672,6 +673,18 @@ glyph-block Letter-Shared-Shapes : begin
 			alsoThruThem {{0.5 0.94}}
 			straight.left.end zbot.x (zbot.y + fine) [heading Leftward]
 
+	glyph-block-export UpwardHookShape
+	define [UpwardHookShape] : params [left right ybegin yend [bottom O] ada adb [sw Stroke]] : glyph-proc
+		include : dispiro
+			widths.lhs sw
+			flat left ybegin [heading Downward]
+			curl left adb
+			arcvh
+			g4 [mix left right 0.5] bottom [heading Rightward]
+			archv
+			flat right ada
+			curl right yend [heading Upward]
+
 	# Generic "connected" vertical hooks
 	glyph-block-export VerticalHook
 	define VerticalHook : namespace
@@ -855,12 +868,13 @@ glyph-block Letter-Shared-Shapes : begin
 			local xLeftEdge  : x - pXInSw * refSw * HVContrast
 			local xRightEdge : x + (1 - pXInSw) * refSw * HVContrast
 			local p : (xLeftEdge - xLeftSpace) / ((xRightSpace - xRightEdge) + (xLeftEdge - xLeftSpace))
-			local xC : mix xLeftEdge xRightEdge (1 - p)
+			local xC : mix xLeftEdge xRightEdge [mix 0.5 (1 - p) 0.5]
+			local jut : 0.75 * LongJut
 			return : HOverlayBar
 				Math.min (xLeftEdge - SideJut)
-					Math.max (xC - 0.75 * LongJut) [mix xLeftSpace xLeftEdge 0.3]
+					Math.max (xC - jut) [mix xLeftSpace xLeftEdge 0.3]
 				Math.max (xRightEdge + SideJut)
-					Math.min [mix xRightSpace xRightEdge 0.3] (xC + 0.75 * LongJut)
+					Math.min [mix xRightSpace xRightEdge 0.3] (xC + jut)
 				begin y
 				begin sw
 

@@ -182,6 +182,10 @@ export class Glyph {
 			this.baseAnchors[id] = new Anchor(mbx, mby).transform(this.gizmo);
 		}
 	}
+	clearAnchors() {
+		this.baseAnchors = {};
+		this.markAnchors = {};
+	}
 	deleteBaseAnchor(id) {
 		delete this.baseAnchors[id];
 	}
