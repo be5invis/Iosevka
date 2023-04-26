@@ -1242,72 +1242,96 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	glyph-block-import Autobuild-Enclosure-Shared : CollectJobs CreateDerivedFontFromJobs EnsureComponentGlyphT applyRelations
 	glyph-block-import Autobuild-Transformed-Shared : ToSuperscript ToSubscript
 
-	define [createPhoneticLigatures tfm prefix div _shrink1 _shrink2 wadj1 wadj2 kKern demands] : begin
-		define CWidth : Width * div
-		define MockWidth : CWidth / [fallback tfm.crowdAdjScale 1]
-		define jobs : CollectJobs NON-DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix "" demands
-		local shrink1 : clamp 0 1 _shrink1
-		local shrink2 : clamp 0 1 _shrink2
+	define [createPhoneticLigatures tfm prefix div mockNParts _shrink kKern demands] : begin
+		local ww0 : Width * div
+		local wwM : ww0 / [fallback tfm.crowdAdjScale 1]
+		local jobs : CollectJobs DECOMPOSABLE NOT-CENTERED ALLOW-PROPORTIONAL prefix "" demands
+		local shrink : clamp 0 1 _shrink
 		local kern 0
-		foreach [cycle : range 0 4] : begin
-			set kern : kKern * (SB * shrink1 + SB * shrink2 + 0.5 * Stroke * [mix shrink1 shrink2 0.5] - OX * 2)
-			local tmp-shrink1 : (shrink1 * MockWidth + kern * shrink1 / (shrink1 + shrink2)) / MockWidth
-			local tmp-shrink2 : (shrink2 * MockWidth + kern * shrink2 / (shrink1 + shrink2)) / MockWidth
-			set shrink1 : clamp 0 1 tmp-shrink1
-			set shrink2 : clamp 0 1 tmp-shrink2
+		foreach [cycle : range 0 8] : begin
+			set kern : kKern * (2 * SB * shrink + (0.5 * Stroke * shrink * HVContrast - OX * 2))
+			local tmpShrink : (wwM + kern * (mockNParts - 1)) / (mockNParts * Width)
+			set shrink : Math.max _shrink : clamp 0 1 tmpShrink
 
-		local df1 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink1 true tfm.crowd tfm.crowdAdjScale
-		local df2 : CreateDerivedFontFromJobs jobs {} : lambda [gs] : Thinner gs shrink2 true tfm.crowd tfm.crowdAdjScale
+		local thinFont : CreateDerivedFontFromJobs jobs {} : function [gs]
+			Thinner gs shrink true tfm.crowd tfm.crowdAdjScale
 
-		# TODO: we need a better geometry to do such minkovski sums
-		define [createMaskout c1 c2 s] : begin
-			define dfg1 : df1.queryByNameEnsured c1
-			define dfg2 : df2.queryByNameEnsured c2
-			return : WithTransform [Translate (s + dfg1.advanceWidth * wadj1 - kern) 0] dfg2
+		define [LigaturePlaceholderImpl aw markPlacement mak] : begin
+			define gni : '.phonetic-ligature-placeholder@' + [{aw markPlacement}.join '/']
+			if [query-glyph gni] : return gni
+			create-glyph gni : glyph-proc
+				set-width aw
+				if mak : include : [DivFrame div].markSet.(mak)
+				set-base-anchor 'enclosureInner' markPlacement 0
+				set-base-anchor 'slash' (aw / 2) (Ascender / 2)
+				include : tfm div
+			return gni
 
-		foreach [{gn unicode { c1 c2 } mak} : items-of jobs.nonDecomposable] : if [not : query-glyph gn] : begin
+		define [LigaturePartImpl thinFont compress markDist maskPos] : lambda [gidPart] : begin
+			define gni : '.phonetic-ligature-part.' + gidPart + '@' + [{ prefix compress markDist maskPos }.join '/']
+			if [query-glyph gni] : return gni
+			create-glyph gni : glyph-proc
+				set-width 0
+				include : difference
+					thinFont.queryByNameEnsured gidPart
+					MaskRight maskPos
+				include : Ungizmo
+				include : Scale compress 1
+				include : Regizmo
+				set-mark-anchor 'enclosureInner' 0 0 markDist 0
+				include : tfm div
+			return gni
 
-			local step (-OX)
-			local s    step
-			local dist (Stroke * 2)
+		define [LigatureImpl job decomposable] : if [not : query-glyph gn] : begin
+			local { gn unicode components mak } job
 
-			local maskOuts : list
-				createMaskout c1 c2 0.01
-				createMaskout c1 c2 (dist - 0.01)
-			while (s < dist) : begin
-				maskOuts.push : createMaskout c1 c2 s
-				set s : s + step
+			local sumChildrenWidth    0
+			local effectiveGlyphCount 0
+			local originals {}
+			local dfgs      {}
+			foreach { i component } [components.entries] : begin
+				set originals.(i) : query-glyph component
+				set dfgs.(i) : thinFont.queryByNameEnsured component
+				if (originals.(i).advanceWidth > 0) : inc effectiveGlyphCount
+				set sumChildrenWidth : sumChildrenWidth + dfgs.(i).advanceWidth
+
+			local refW      : sumChildrenWidth - kern * (effectiveGlyphCount - 1)
+			local compRefWw   wwM
+			local compress  : clamp 0 1 (compRefWw / refW)
 
 			create-glyph gn unicode : glyph-proc
-				set-width CWidth
-				if mak : include : [DivFrame (MockWidth / Width)].markSet.(mak)
-				define dfg1 : df1.queryByNameEnsured c1
-				define dfg2 : df2.queryByNameEnsured c2
-				local sumChildrenWidth : dfg1.advanceWidth * wadj1 + dfg2.advanceWidth * wadj2
-				local refW : sumChildrenWidth - kern
-				include dfg2
-				include : Translate (dfg1.advanceWidth * wadj1 - kern) 0
-				local leftHalf : intersection dfg1
-					Rect (CAP * 2) (Descender * 2) (-MockWidth) (dfg1.advanceWidth * wadj1 - kern + dfg2.advanceWidth * wadj2 / 2)
-				include leftHalf
-				# include : difference.apply null { leftHalf :: maskOuts }
-				include : Ungizmo
-				include : Translate (-refW / 2) 0
-				include : Scale [clamp 0 1 ((MockWidth - SB * 1.25) / (MockWidth - SB * 2) * MockWidth / refW)] 1
-				include : Translate (CWidth / 2) 0
-				include : Regizmo
+				local decomposition   { }
+				local baseOffset : ww0 / 2 - refW * compress / 2
+				foreach { i component } [components.entries] : do
+					local currentIsMark : 0 == originals.(i).advanceWidth
 
-				include : tfm div
+					local componentAdvance : if currentIsMark 0 : compress * (dfgs.(i).advanceWidth - kern)
+					local maskPos : dfgs.(i).advanceWidth - kern + [if ((i + 1) < effectiveGlyphCount) (dfgs.(i + 1).advanceWidth / 2) ww0]
+
+					if (i === 0) : begin
+						local placeholder : LigaturePlaceholderImpl ww0 baseOffset
+						decomposition.push placeholder
+						include [refer-glyph placeholder] AS_BASE ALSO_METRICS
+
+					if currentIsMark : then : begin
+						include [refer-glyph component]
+					: else : begin
+						local part : EnsureComponentGlyphT component
+							LigaturePartImpl thinFont compress componentAdvance maskPos
+						decomposition.push part
+						include [refer-glyph part]
+
+				if decomposable : CvDecompose.set currentGlyph decomposition
+
+		foreach job [items-of jobs.nonDecomposable]  : LigatureImpl job false
+		foreach job [items-of jobs.decomposableJobs] : LigatureImpl job true
 
 		applyRelations jobs.relApplications
 
 	define [ToLetter] : glyph-proc
 
-	define [AddSlash] : glyph-proc
-		include [refer-glyph 'wideSlashOver']
-
-	define stdShrink : clamp 0.75 0.9 : StrokeWidthBlend 0.75 0.9
-	createPhoneticLigatures ToLetter 'phonetic' para.diversityM stdShrink stdShrink 1 1 1 : list
+	define stdShrink : clamp 0.625 0.9 : StrokeWidthBlend 0.625 0.9
+	createPhoneticLigatures ToLetter 'phonetic' para.diversityM 2 stdShrink 1 : list
 		list 0x02A3 { 'd/phoneticLeft'  'z'                     } 'b'
 		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'if'
 		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
@@ -1319,10 +1343,17 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0x02AB { 'l/phoneticLeft'  'z'                     } 'b'
 		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
 		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } 'p'
+		list 0xFB00 { 'f'               'f'                     } null
 		list 0xFB01 { 'f/compLigLeft1'  'dotlessi/compLigRight' } null
 		list 0xFB02 { 'f/compLigLeft2'  'l/compLigRight'        } null
+		list 0xFB05 { 'longs/flatExt'   't/phoneticLeft2'       } null
+		list 0xFB06 { 's/compLigLeft'   't/phoneticLeft3'       } null
 
-	createPhoneticLigatures ToSuperscript 'phoneticSuperscript' 1 stdShrink stdShrink 1 1 1 : list
+	createPhoneticLigatures ToLetter 'phonetic2' para.diversityM 3 stdShrink 1 : list
+		list 0xFB03 { 'f/compLigLeft1' 'f/compLigLeft1' 'dotlessi/compLigRight' } null
+		list 0xFB04 { 'f/compLigLeft3' 'f/compLigLeft2' 'l/compLigRight'        } null
+
+	createPhoneticLigatures ToSuperscript 'phoneticSuperscript' 1 2 stdShrink 1 : list
 		list 0x10787 { 'd/phoneticLeft'  'z'                     } 'b'
 		list 0x1078A { 'd/phoneticLeft'  'ezh'                   } 'if'
 		list 0x10789 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
@@ -1335,11 +1366,11 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 		list 0x10788 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
 		list 0x107AD { 't/phoneticLeft1' 'sRTail'                } 'p'
 
-	createPhoneticLigatures ToSubscript 'tenSubscript' 1 1 1 1 1 0.5 : list
+	createPhoneticLigatures ToSubscript 'tenSubscript' 1 2 1 0.5 : list
 		list 0x23E8 { 'one.lnum' 'zero.lnum' } 'capital'
 
-	createPhoneticLigatures AddSlash 'thSlash' 1 stdShrink stdShrink 1 1 1 : list
-		list 0x1D7A { 't/phoneticLeft1' 'h' } 'b'
+	createPhoneticLigatures ToLetter 'thSlash' 1 2 stdShrink 1 : list
+		list 0x1D7A { 't/phoneticLeft1' 'h' 'wideSlashOver' } 'b'
 
 glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import CommonShapes

@@ -11,7 +11,8 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 	glyph-block-import Letter-Shared : CreateAccentedComposition CreateDependentComposite
 	glyph-block-import Letter-Blackboard : BBS BBD
-	glyph-block-import Letter-Shared-Shapes : DToothlessRise FlatHookDepth ArcStartSerifWidth
+	glyph-block-import Letter-Shared-Shapes : DToothlessRise FlatHookDepth
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerifWidth ArcStartSerifDepth
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart SerifedArcEnd
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
 	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook CyrDescender
@@ -337,6 +338,7 @@ glyph-block Letter-Latin-S : begin
 	select-variant 'sSwash' 0x23F
 
 	select-variant 'S/descBase' (shapeFrom -- 'S') (follow -- 'SRTail')
+	select-variant 's/ascBase' (shapeFrom -- 's')
 	select-variant 's/descBase' (shapeFrom -- 's') (follow -- 'sRTail')
 	select-variant 'revs/descBase' (shapeFrom -- 'revs') (follow -- 'sRTail')
 
@@ -360,6 +362,24 @@ glyph-block Letter-Latin-S : begin
 		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
 		y -- 0
 		yAttach -- [mix O [AdviceSArchDepth XH (-1) [AdviceStroke2 2 3 XH]] : archv.yFromX 0.75]
+
+	derive-composites "s/compLigLeft" null "s/ascBase" : glyph-proc
+		eject-contour 'arcStartSerifR'
+		local sw : ArcStartSerifWidth [AdviceStroke2 2 3 XH]
+		local fine : sw * [mix CThinB 1 0.6]
+		local hd : FlatHookDepth [DivFrame 1]
+		local yStart : XH - [ArcStartSerifDepth SHook]
+		local neckLength : 0.5 * Stroke
+		local leftExt : 0.3 * (RightSB - SB) - 0.25 * HVContrast * sw
+		include : dispiro
+			widths.rhs fine
+			flat (RightSB - fine * HVContrast) yStart [heading Upward]
+			curl (RightSB - fine * HVContrast) (yStart + neckLength) [heading Upward]
+			alsoThru.g2 0.5 0.5 [widths.center [mix fine sw 0.35]]
+			g4 (RightSB - leftExt) [Math.min ([mix XH Ascender 0.5]) (Ascender - 1.375 * sw)] [widths.lhs : mix fine sw 0.7]
+			arcvh
+			flat RightSB     Ascender [widths.rhs.heading sw Rightward]
+			curl (4 * Width) Ascender [widths.rhs.heading sw Rightward]
 
 	CreateAccentedComposition 'sTildeOver' 0x1D74 's' 'tildeOverWide'
 

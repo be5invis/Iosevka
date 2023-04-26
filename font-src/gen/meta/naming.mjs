@@ -159,10 +159,6 @@ function nameFontImpl(records, platformID, encodingID, languageID, nameID, value
 	records.push({ platformID, encodingID, languageID, nameID, value });
 }
 
-function isRBIZ(weight, slope) {
-	return (weight === 400 || weight === 700) && (slope === "normal" || slope === "italic");
-}
-
 function getStyle(weight, width, slope) {
 	const weightPart = weightToMenuStyleMap[weight] ?? "W" + weight;
 	const widthPart = widthToMenuStyleMap[width] ?? "Wd" + width;
@@ -182,6 +178,7 @@ const weightToMenuStyleMap = {
 	100: "Thin",
 	200: "Extralight",
 	300: "Light",
+	350: "SemiLight",
 	400: "",
 	450: "Book",
 	500: "Medium",
@@ -210,6 +207,7 @@ const weightToMenuStyleMapShort = {
 	100: "Th",
 	200: "XLt",
 	300: "Lt",
+	350: "SmLt",
 	400: "",
 	450: "Bk",
 	500: "Md",
