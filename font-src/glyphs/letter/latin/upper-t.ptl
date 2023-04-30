@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Latin-Lower-M
-	glyph-block-import Letter-Shared-Shapes : CyrDescender LetterBarOverlay VerticalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender LetterBarOverlay VerticalHook UpwardHookShape SerifFrame
 
 	define [TLeftX df]  : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
@@ -27,6 +27,30 @@ glyph-block Letter-Latin-Upper-T : begin
 		if doBottomSerifs : begin
 			include : tagged 'serifMB' : HSerif.rb df.middle 0 MidJutCenter
 			include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
+
+	define [TjeShape df top doTopSerifs] : glyph-proc
+		local left : [mix df.leftSB df.rightSB 0.3] + OX
+		local mid : left + (HVContrast / 2) * df.mvs
+
+		local xTopBarLeft : df.leftSB - SideJut
+		local xTopBarRightSym : 2 * left + HVContrast * df.mvs - xTopBarLeft
+		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+		include : tagged 'strokeLT' : HBar.t xTopBarLeft mid          top df.mvs
+		include : tagged 'strokeRT' : HBar.t mid         xTopBarRight top df.mvs
+		include : UpwardHookShape
+			left -- left
+			right -- df.rightSB
+			ybegin -- top
+			yend -- (top / 2)
+			ada -- (SmallArchDepthA * 0.6 * df.div)
+			adb -- (SmallArchDepthB * 0.6 * df.div)
+			sw -- df.mvs
+
+		if doTopSerifs : begin
+			include : tagged 'serifRT' : VSerif.dr xTopBarRight top VJut
+			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top VJut
+		local sf2 : [SerifFrame.fromDf df (top / 2) 0].slice 1 2
+		if SLAB : include sf2.rt.full
 
 	define TConfig : object
 		serifless     { 1                           false false }
@@ -89,6 +113,18 @@ glyph-block Letter-Latin-Upper-T : begin
 		create-glyph "TRTailBR.\(suffix)" : glyph-proc
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
 			include : VerticalHook.m df.middle 0 HookX Hook
+		
+		create-glyph "cyrl/TjeKomi.\(suffix)" : glyph-proc
+			local df : DivFrame div 3
+			set-width df.width
+			include : df.markSet.capital
+			include : TjeShape df CAP doST
+
+		create-glyph "cyrl/tjeKomi.\(suffix)" : glyph-proc
+			local df : DivFrame div 3
+			set-width df.width
+			include : df.markSet.e
+			include : TjeShape df XH doST
 
 	select-variant 'T' 'T'
 	link-reduced-variant 'T/sansSerif' 'T' MathSansSerif
@@ -106,6 +142,9 @@ glyph-block Letter-Latin-Upper-T : begin
 	select-variant 'cyrl/teDescender.upright' (follow -- 'T')
 
 	select-variant 'TRTailBR' 0x1AE (follow -- 'T/rtailBase')
+
+	select-variant 'cyrl/TjeKomi' 0x50E (follow -- 'T/rtailBase')
+	select-variant 'cyrl/tjeKomi' 0x50F (follow -- 'T/rtailBase')
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 
