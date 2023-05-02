@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Upper-G : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : DToothlessRise ShoulderMidKnotLhs
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart ArcStartHookTop
-	glyph-block-import Letter-Shared-Shapes : ArcStartSerif LetterBarOverlay
+	glyph-block-import Letter-Shared-Shapes : ArcStartSerif LetterBarOverlay SerifFrame
 
 	define TOOTHED            0
 	define TOOTHLESS-CORNER   1
@@ -25,8 +25,8 @@ glyph-block Letter-Latin-Upper-G : begin
 	define SLAB-INWARD        2
 	define SLAB-HOOK-TOP     10
 
-	define [GShape toothShape slabShape crossBarShape top ada adb] : glyph-proc
-		local yBar : top * 0.52 + Stroke * 0.25
+	define [GShape toothShape slabShape crossBarShape top ada adb _yBarOverride] : glyph-proc
+		local yBar : fallback _yBarOverride (top * 0.52 + Stroke * 0.25)
 		local fine ShoulderFine
 
 		local knots : match slabShape
@@ -128,6 +128,30 @@ glyph-block Letter-Latin-Upper-G : begin
 	turned 'turnSmcpG' 0x1DF02 'smcpG' Middle (XH / 2)
 
 	derive-composites 'Gbar' 0x1E4 'G' 'GBarOverlay'
+
+	do "Komi sje"
+		define Config : object
+				serifless               { SLAB-NONE   }
+				unilateralSerifed       { SLAB-LETTER }
+				unilateralInwardSerifed { SLAB-INWARD }
+
+		foreach { suffix { slabType } } [Object.entries Config] : begin
+			create-glyph "cyrl/SjeKomi.\(suffix)" : glyph-proc
+				include : MarkSet.capital
+				include : GShape TOOTHLESS-ROUNDED slabType CROSSBAR-NONE CAP ArchDepthA ArchDepthB (CAP / 2)
+				if SLAB : begin
+					local sf2 : SerifFrame.fromDf [DivFrame 1] (CAP / 2) 0
+					include sf2.rt.full
+
+			create-glyph "cyrl/sjeKomi.\(suffix)" : glyph-proc
+				include : MarkSet.e
+				include : GShape TOOTHLESS-ROUNDED slabType CROSSBAR-NONE XH SmallArchDepthA SmallArchDepthB (XH / 2)
+				if SLAB : begin
+					local sf2 : SerifFrame.fromDf [DivFrame 1] (XH / 2) 0
+					include sf2.rt.full
+
+		select-variant 'cyrl/SjeKomi' 0x50C (follow -- 'cTopSerifOnly')
+		select-variant 'cyrl/sjeKomi' 0x50D (follow -- 'cTopSerifOnly')
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	define [BBGArcT sink offset top ada adb xTerm yTerm] : sink
