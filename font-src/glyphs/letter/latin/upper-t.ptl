@@ -10,7 +10,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Blackboard : BBS BBD
 	glyph-block-import Letter-Latin-Lower-M
-	glyph-block-import Letter-Shared-Shapes : CyrDescender LetterBarOverlay VerticalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender LetterBarOverlay VerticalHook UpwardHookShape SerifFrame FlatHookDepth
 
 	define [TLeftX df]  : df.leftSB  + 0.75 * OX
 	define [TRightX df] : df.rightSB - 0.75 * OX
@@ -27,6 +27,43 @@ glyph-block Letter-Latin-Upper-T : begin
 		if doBottomSerifs : begin
 			include : tagged 'serifMB' : HSerif.rb df.middle 0 MidJutCenter
 			include : tagged 'serifMB' : HSerif.lb df.middle 0 MidJutCenter
+
+	define [TjeShape df top doTopSerifs] : glyph-proc
+		local left : [mix df.leftSB df.rightSB 0.3] + OX
+		local mid : left + (HVContrast / 2) * df.mvs
+
+		local xTopBarLeft : df.leftSB - SideJut
+		local xTopBarRightSym : 2 * left + HVContrast * df.mvs - xTopBarLeft
+		local xTopBarRight : Math.max xTopBarRightSym : mix left df.rightSB 0.475
+		include : tagged 'strokeLT' : HBar.t xTopBarLeft mid          top
+		include : tagged 'strokeRT' : HBar.t mid         xTopBarRight top
+		include : UpwardHookShape
+			left -- left
+			right -- df.rightSB
+			ybegin -- top
+			yend -- (top / 2)
+			ada -- (SmallArchDepthA * 0.6 * df.div)
+			adb -- (SmallArchDepthB * 0.6 * df.div)
+			sw -- df.mvs
+
+		if doTopSerifs : begin
+			include : tagged 'serifRT' : VSerif.dr xTopBarRight top VJut
+			include : tagged 'serifLT' : VSerif.dl xTopBarLeft  top VJut
+		local sf2 : [SerifFrame.fromDf df (top / 2) 0].slice 1 2
+		if SLAB : include sf2.rt.full
+
+	define [TauShape df top doTopSerifs] : glyph-proc
+		local hd : FlatHookDepth df
+		include : difference
+			TShape df top doTopSerifs false
+			MaskBelow hd.y
+
+		include : dispiro
+			widths.center
+			straight.down.start df.middle hd.y [heading Downward]
+			arcvh.superness DesignParameters.tightHookSuperness
+			flat (df.middle + hd.x - HalfStroke * HVContrast) HalfStroke
+			curl (df.middle + [Math.max (hd.x - HalfStroke * HVContrast + 1) (LongJut * 1.05)] + HalfStroke * TanSlope) HalfStroke
 
 	define TConfig : object
 		serifless     { 1                           false false }
@@ -68,6 +105,16 @@ glyph-block Letter-Latin-Upper-T : begin
 			set-base-anchor 'bottomright' (df.middle + HalfStroke * HVContrast) 0
 			include : TShape df XH doST doSB
 
+		create-glyph "cyrl/Twe.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.capital
+			include : TauShape df CAP doST doSB
+
+		create-glyph "cyrl/twe.\(suffix)" : glyph-proc
+			set-width df.width
+			include : df.markSet.e
+			include : TauShape df XH doST doSB
+
 		create-glyph "currency/tengeSign.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.capital
@@ -90,6 +137,18 @@ glyph-block Letter-Latin-Upper-T : begin
 			include [refer-glyph "T.\(suffix)"] AS_BASE ALSO_METRICS
 			include : VerticalHook.m df.middle 0 HookX Hook
 
+		create-glyph "cyrl/TjeKomi.\(suffix)" : glyph-proc
+			local df : DivFrame div 3
+			set-width df.width
+			include : df.markSet.capital
+			include : TjeShape df CAP doST
+
+		create-glyph "cyrl/tjeKomi.\(suffix)" : glyph-proc
+			local df : DivFrame div 3
+			set-width df.width
+			include : df.markSet.e
+			include : TjeShape df XH doST
+
 	select-variant 'T' 'T'
 	link-reduced-variant 'T/sansSerif' 'T' MathSansSerif
 	select-variant 'smcpT' 0x1D1B (follow -- 'T')
@@ -99,6 +158,7 @@ glyph-block Letter-Latin-Upper-T : begin
 	select-variant 'turnT' 0xA7B1 (follow -- 'T')
 
 	alias 'grek/Tau' 0x3A4 'T'
+	alias 'grek/tau' 0x3C4 'cyrl/twe.serifless'
 	alias-reduced-variant 'grek/Tau/sansSerif' 'grek/Tau' 'T/sansSerif' MathSansSerif
 	alias 'cyrl/Te' 0x422 'T'
 
@@ -106,6 +166,11 @@ glyph-block Letter-Latin-Upper-T : begin
 	select-variant 'cyrl/teDescender.upright' (follow -- 'T')
 
 	select-variant 'TRTailBR' 0x1AE (follow -- 'T/rtailBase')
+
+	select-variant 'cyrl/TjeKomi' 0x50E (follow -- 'T/rtailBase')
+	select-variant 'cyrl/tjeKomi' 0x50F (follow -- 'T/rtailBase')
+	select-variant 'cyrl/Twe' 0xA68C (follow -- 'T/rtailBase')
+	select-variant 'cyrl/twe' 0xA68D (follow -- 'T/rtailBase')
 
 	select-variant 'currency/tengeSign' 0x20B8 (follow -- 'T')
 

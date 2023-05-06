@@ -1165,6 +1165,7 @@ function validateRecommendedWeight(w, value, label) {
 		thin: 100,
 		extralight: 200,
 		light: 300,
+		semilight: 350,
 		regular: 400,
 		book: 450,
 		medium: 500,
