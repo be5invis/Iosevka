@@ -1,12 +1,14 @@
 $$include '../../../meta/macros.ptl'
 
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [Box] from"../../../support/geometry/box.mjs"
 
 glyph-module
 
 glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Symbol-Pictograph-Stick-Figure : StickFigureKit PointingHandShape
 
 	define uiFigTop : mix ParenBot ParenTop 0.95
 	define uiFigBot : mix ParenBot ParenTop 0.05
@@ -112,74 +114,7 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					corner scaffold.xLeft scaffold.bot
 
 		do "Split graphics"
-			define mLeft    SB
-			define mRight : MosaicWidth - SB
-
-			define [RoundSegW n hs he] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
-				local sw : AdviceStroke 4
-				local left mLeft
-				local right : mRight + MosaicWidth * (n - 1)
-				include : dispiro
-					widths.center sw
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1] hs
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2] he
-
-				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
-				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
-
-			define [ArcVHW n] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
-				local sw : AdviceStroke 4
-				local left mLeft
-				local right : mRight + MosaicWidth * (n - 1)
-				include : dispiro
-					widths.center sw
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (v2 > v1) Upward Downward]
-					arcvh
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (h2 > h1) Rightward Leftward]
-
-				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
-				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
-
-			define [ArcHVW n] : lambda [h1 v1 h2 v2 cl cr]  : glyph-proc
-				local sw : AdviceStroke 4
-				local left mLeft
-				local right : mRight + MosaicWidth * (n - 1)
-				include : dispiro
-					widths.center sw
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1] [heading : if (h2 > h1) Rightward Leftward]
-					archv
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2] [heading : if (v2 > v1) Upward Downward]
-
-				if cl : include : CircleDotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (sw / 2)
-				if cr : include : CircleDotAt [mix left right h2] [mix uiFigBot uiFigTop v2] (sw / 2)
-
-			define [BoxW n] : lambda [h1 v1 h2 v2] : glyph-proc
-				local sw : AdviceStroke 4
-				local left mLeft
-				local right : mRight + MosaicWidth * (n - 1)
-				include : spiro-outline
-					corner [mix left right h1] [mix uiFigBot uiFigTop v1]
-					corner [mix left right h2] [mix uiFigBot uiFigTop v1]
-					corner [mix left right h2] [mix uiFigBot uiFigTop v2]
-					corner [mix left right h1] [mix uiFigBot uiFigTop v2]
-
-			define [CircW n] : lambda [h1 v1 r] : glyph-proc
-				local sw : AdviceStroke 4
-				local left mLeft
-				local right : mRight + MosaicWidth * (n - 1)
-				include : DotAt [mix left right h1] [mix uiFigBot uiFigTop v1] (r * (uiFigTop - uiFigBot))
-
-			define [Nop] : begin
-			define RoundSeg2  : RoundSegW 2 Nop Nop
-			define Box2       : BoxW 2
-			define Circ2      : CircW 2
-			define RoundSeg3  : RoundSegW 3 Nop Nop
-			define RoundSeg3H : RoundSegW 3 [heading Rightward] [heading Rightward]
-			define RoundSeg3V : RoundSegW 3 [heading Downward] [heading Downward]
-			define ArcVH3     : ArcVHW 3
-			define ArcHV3     : ArcHVW 3
-			define Box3       : BoxW 3
-			define Circ3      : CircW 3
+			define [BoxN n] : new Box uiFigTop uiFigBot SB (MosaicWidth * n - SB)
 
 			define [MosaicWidthMask] : spiro-outline
 				corner 0           [mix ParenBot ParenTop (-1)]
@@ -187,23 +122,23 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 				corner MosaicWidth [mix ParenBot ParenTop (+2)]
 				corner 0           [mix ParenBot ParenTop (+2)]
 
-			define [RunningManBody xOffset] : glyph-proc
-				include : union
-					RoundSeg2 (0 / 16) (3 / 8) (3 / 16) (5 / 8) 1 1
-					RoundSeg2 (3 / 16) (5 / 8) (10 / 16) (5 / 8)
-					RoundSeg2 (10 / 16) (5 / 8) (13 / 16) (7 / 8) 1 1
-					RoundSeg2 (4 / 16) (3 / 8) (9 / 16) (3 / 8) 1 1
-					RoundSeg2 (9 / 16) (3 / 8) (13 / 16) (0 / 8)
-					RoundSeg2 (13 / 16) (0 / 8) (15 / 16) (0 / 8) 1 1
-					RoundSeg2 (4 / 16) (6 / 16) (6 / 16) (3 / 16)
-					RoundSeg2 (6 / 16) (3 / 16) (0 / 16) (3 / 16) 1 1
-					RoundSeg2 (0 / 16) (3 / 16) (2 / 16) (0 / 8) 0 1
-					Box2 (4 / 16) (6 / 16) (8 / 16) (5 / 8)
-				include : Translate xOffset 0
+			define [RunningManBody xOffset] : begin
+				local Kit : StickFigureKit [BoxN 2] [Translate xOffset 0] [AdviceStroke 4]
+				return : union
+					Kit.RoundSeg (0 / 16) (3 / 8) (3 / 16) (5 / 8) 1 1
+					Kit.RoundSeg (3 / 16) (5 / 8) (10 / 16) (5 / 8)
+					Kit.RoundSeg (10 / 16) (5 / 8) (13 / 16) (7 / 8) 1 1
+					Kit.RoundSeg (4 / 16) (3 / 8) (9 / 16) (3 / 8) 1 1
+					Kit.RoundSeg (9 / 16) (3 / 8) (13 / 16) (0 / 8)
+					Kit.RoundSeg (13 / 16) (0 / 8) (15 / 16) (0 / 8) 1 1
+					Kit.RoundSeg (4 / 16) (6 / 16) (6 / 16) (3 / 16)
+					Kit.RoundSeg (6 / 16) (3 / 16) (0 / 16) (3 / 16) 1 1
+					Kit.RoundSeg (0 / 16) (3 / 16) (2 / 16) (0 / 8) 0 1
+					Kit.Box (4 / 16) (6 / 16) (8 / 16) (5 / 8)
 
-			define [RunningManHead xOffset] : glyph-proc
-				include : Circ2 (6 / 16) (14 / 16) (5 / 32)
-				include : Translate xOffset 0
+			define [RunningManHead xOffset] : begin
+				local Kit : StickFigureKit [BoxN 2] [Translate xOffset 0] [AdviceStroke 4]
+				return : Kit.Circ (6 / 16) (14 / 16) (5 / 32)
 
 			create-glyph [MangleName 'runningManLeft'] [MangleUnicode 0x1FBB2] : glyph-proc
 				set-width MosaicWidth
@@ -218,16 +153,16 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					MosaicWidthMask
 					RunningManBody (-MosaicWidth)
 
-			define [FolderBody xOffset] : glyph-proc
-				include : union
-					RoundSeg2 (0 / 16) (1 / 8) (0 / 16) (11 / 16)
-					RoundSeg2 (0 / 16) (11 / 16) (3 / 16) (7 / 8) 1 1
-					RoundSeg2 (3 / 16) (7 / 8) (6 / 16) (7 / 8)
-					RoundSeg2 (6 / 16) (7 / 8) (9 / 16) (11 / 16) 1 1
-					RoundSeg2 (9 / 16) (11 / 16) (16 / 16) (11 / 16) 0 1
-					RoundSeg2 (16 / 16) (11 / 16) (16 / 16) (1 / 8)
-					RoundSeg2 (0 / 16) (1 / 8) (16 / 16) (1 / 8) 1 1
-				include : Translate xOffset 0
+			define [FolderBody xOffset] : begin
+				local Kit : StickFigureKit [BoxN 2] [Translate xOffset 0] [AdviceStroke 4]
+				return : union
+					Kit.RoundSeg (0 / 16) (1 / 8) (0 / 16) (11 / 16)
+					Kit.RoundSeg (0 / 16) (11 / 16) (3 / 16) (7 / 8) 1 1
+					Kit.RoundSeg (3 / 16) (7 / 8) (6 / 16) (7 / 8)
+					Kit.RoundSeg (6 / 16) (7 / 8) (9 / 16) (11 / 16) 1 1
+					Kit.RoundSeg (9 / 16) (11 / 16) (16 / 16) (11 / 16) 0 1
+					Kit.RoundSeg (16 / 16) (11 / 16) (16 / 16) (1 / 8)
+					Kit.RoundSeg (0 / 16) (1 / 8) (16 / 16) (1 / 8) 1 1
 
 			create-glyph [MangleName 'folderLeft'] [MangleUnicode 0x1FBB9] : glyph-proc
 				set-width MosaicWidth
@@ -241,32 +176,8 @@ glyph-block Symbol-Pictograph-Powerline-And-GUI : begin
 					MosaicWidthMask
 					FolderBody (-MosaicWidth)
 
-			define [PointingHandBody xOffset] : glyph-proc
-				include : union
-					RoundSeg3  (0 / 24) (0 / 8) (0 / 24) (8 / 8) 1 1
-					RoundSeg3  (3 / 24) (7 / 8) (0 / 24) (8 / 8)
-					RoundSeg3  (3 / 24) (1 / 8) (0 / 24) (0 / 8)
-					RoundSeg3V (3 / 24) (7 / 8) (3 / 24) (1 / 8)
-					ArcVH3     (3 / 24) (7 / 8) (6 / 24) (8 / 8)
-					ArcVH3     (3 / 24) (1 / 8) (6 / 24) (0 / 8)
-					RoundSeg3H (6 / 24) (8 / 8) (22 / 24) (8 / 8)
-					ArcHV3     (22 / 24) (8 / 8) (24 / 24) (7 / 8)
-					ArcVH3     (24 / 24) (7 / 8) (22 / 24) (6 / 8)
-					RoundSeg3H (14 / 24) (6 / 8) (22 / 24) (6 / 8)
-					ArcHV3     (11 / 24) (8 / 8) (14 / 24) (6 / 8)
-					ArcVH3     (14 / 24) (6 / 8) (12 / 24) (5 / 8)
-					RoundSeg3H (9 / 24) (5 / 8) (12 / 24) (5 / 8) 1 0
-					ArcVH3     (9 / 24) (5 / 8) (3 / 24) (2 / 8)
-					ArcHV3     (15 / 24) (6 / 8) (17 / 24) (5 / 8)
-					ArcVH3     (17 / 24) (5 / 8) (15 / 24) (4 / 8)
-					RoundSeg3H (11 / 24) (4 / 8) (15 / 24) (4 / 8) 1 0
-					ArcHV3     (14 / 24) (4 / 8) (16 / 24) (3 / 8)
-					ArcVH3     (16 / 24) (3 / 8) (14 / 24) (2 / 8)
-					RoundSeg3H (8 / 24) (2 / 8) (14 / 24) (2 / 8) 1 0
-					ArcHV3     (13 / 24) (2 / 8) (15 / 24) (1 / 8)
-					ArcVH3     (15 / 24) (1 / 8) (13 / 24) (0 / 8)
-					RoundSeg3H (6 / 24) (0 / 8) (13 / 24) (0 / 8)
-				include : Translate xOffset 0
+			define [PointingHandBody xOffset] : begin
+				return : PointingHandShape [BoxN 3] [Translate xOffset 0] [AdviceStroke 4]
 
 			create-glyph [MangleName 'pointingHand1'] [MangleUnicode 0x1FBC1] : glyph-proc
 				set-width MosaicWidth
