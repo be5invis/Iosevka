@@ -23,7 +23,7 @@ glyph-block Letter-Latin-Upper-M : begin
 	define SLAB-SMALL-CYRILLIC  3
 
 	glyph-block-export MShape
-	define [MShape] : params [top df form slabType slanted] : glyph-proc
+	define [MShape] : params [top df form slabType slanted [kMidHang df.div]] : glyph-proc
 		local sidesSlope : if slanted 0.04 0
 		local xLeftTop  : df.leftSB  + top * sidesSlope
 		local xRightTop : df.rightSB - top * sidesSlope
@@ -44,7 +44,7 @@ glyph-block Letter-Latin-Upper-M : begin
 			[Just FORM-SAN-SMALL] : top * 0.55
 			[Just FORM-SAN]       : top * 0.55
 			[Just FORM-TURN-W]    : top * 0.45
-			[Just FORM-HANGING]   : top * 0.3 / (df.div * df.div)
+			[Just FORM-HANGING]   : top * 0.3 / (kMidHang * kMidHang)
 			__                    : if SLAB Stroke 0
 		local kMidShift : match form
 			[Just FORM-FLAT] 0.75
@@ -52,6 +52,7 @@ glyph-block Letter-Latin-Upper-M : begin
 		local kMidBotStrokeShrink : match form
 			[Just FORM-FLAT] : mix 1 df.div (-0.5)
 			__               1
+		local swMiddleShrunk (kMidBotStrokeShrink * swMiddle)
 
 		include : tagged 'strokeLeftBar' : dispiro
 			flat df.leftSB [if (form === FORM-SAN-SMALL) Descender 0] [widths.heading 0 swSideBot Upward]
@@ -63,10 +64,10 @@ glyph-block Letter-Latin-Upper-M : begin
 			straight.up.end xRightTop top [widths.heading swSideTop 0 Upward]
 		include : dispiro
 			flat (xLeftTop + kMidShift * swSideTop * HVContrast) top [widths.lhs.heading swMiddle Downward]
-			curl (df.middle - 0.5 * swMiddle * HVContrast) middleY [widths.lhs.heading (kMidBotStrokeShrink * swMiddle) Downward]
+			curl (df.middle - 0.5 * swMiddleShrunk * HVContrast) middleY [widths.lhs.heading swMiddleShrunk Downward]
 		include : dispiro
 			flat (xRightTop - kMidShift * swSideTop * HVContrast) top [widths.rhs.heading swMiddle Downward]
-			curl (df.middle + 0.5 * swMiddle * HVContrast) middleY [widths.rhs.heading (kMidBotStrokeShrink * swMiddle) Downward]
+			curl (df.middle + 0.5 * swMiddleShrunk * HVContrast) middleY [widths.rhs.heading swMiddleShrunk Downward]
 
 		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot)
 		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot)
@@ -79,6 +80,23 @@ glyph-block Letter-Latin-Upper-M : begin
 				composite-proc sfT.lt.outer [NeedNotItalic sfT.rt.outer]
 					if para.isItalic sfB.lb.outer sfB.lb.full
 					if para.isItalic sfB.rb.outer sfB.rb.full
+	
+	define [CyrSoftEmShape] : params [top df form slabType slanted] : glyph-proc
+		local subDf : df.slice 4 3
+		local sidesSlope : if slanted 0.04 0
+		local xRightTop : subDf.rightSB - top * sidesSlope
+
+		local swSideBot : match form
+			[Just FORM-SAN-SMALL] : AdviceStroke 2.5  subDf.div
+			[Just FORM-SAN]       : AdviceStroke 2.5  subDf.div
+			[Just FORM-TURN-W]    : AdviceStroke 2.5  subDf.div
+			[Just FORM-HANGING]   : AdviceStroke 2.5  subDf.div
+			__                    : AdviceStroke 2.75 subDf.div
+
+		include : MShape top subDf form slabType slanted (kMidHang -- df.div)
+
+		include : HBar.t xRightTop df.rightSB top swSideBot
+		if SLAB : include : VSerif.dr df.rightSB top VJut swSideBot
 
 	define MConfig : object
 		hanging                             { FORM-HANGING   SLAB-AUTO            false }
@@ -122,6 +140,18 @@ glyph-block Letter-Latin-Upper-M : begin
 			set-width df.width
 			include : df.markSet.p
 			include : MShape XH df form slab slanted
+		
+		create-glyph "cyrl/EmSoft.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : CyrSoftEmShape CAP df form slab slanted
+		
+		create-glyph "cyrl/emSoft.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : CyrSoftEmShape XH df form slab slanted
 
 	select-variant 'M' 'M'
 	link-reduced-variant 'M/sansSerif' 'M' MathSansSerif
@@ -131,6 +161,8 @@ glyph-block Letter-Latin-Upper-M : begin
 	alias 'grek/Mu' 0x39C 'M'
 	alias-reduced-variant 'grek/Mu/sansSerif' 'grek/Mu' 'M/sansSerif' MathSansSerif
 	alias 'cyrl/Em' 0x41C 'M'
+	select-variant 'cyrl/EmSoft' 0xA666 (follow -- 'M')
+	select-variant 'cyrl/emSoft' 0xA667 (follow -- 'cyrl/em')
 
 	derive-composites 'cyrl/EmTail' 0x4CD 'cyrl/Em' : do
 		local df : DivFrame para.diversityM 3
