@@ -177,16 +177,39 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 				include : openOShape df sty styBot
 
 	do "subglyph diacritics"
+		glyph-block-import Mark-Overlay : InnerDot
+
 		create-glyph "rightHalfSlashOverlay" : glyph-proc
 			local fine : 0.375 * OverlayStroke
 			local { subDf shift } : SubDfAndShift 1 [DivFrame para.diversityM 3] OX
 			include : dispiro
-				flat (shift + subDf.leftSB + O + fine) [mix XH 0 1.05] [widths fine fine]
-				curl (shift + subDf.rightSB - O - fine) [mix 0 XH 1.05]
+				flat (shift + subDf.leftSB + OX + fine) [mix XH 0 1.05] [widths fine fine]
+				curl (shift + subDf.rightSB - OX - fine) [mix 0 XH 1.05]
 
 		create-glyph "rightHalfBarOverlay" : glyph-proc
 			local { subDf shift } : SubDfAndShift 1 [DivFrame para.diversityM 3] OX
 			include : HBar.m (shift + subDf.leftSB + OX + 1) (shift + subDf.rightSB - OX - 1) (XH * 0.5) OverlayStroke
+
+		define [OODots df kHeight fRound kdr] : glyph-proc
+			local { subDf shift } : SubDfAndShift 0 df OX
+			local space : subDf.rightSB - subDf.leftSB - 2 * OX - 2 * HVContrast * df.mvs
+			local div : StrokeWidthBlend 4 3
+			local kHeight2 : (RightSB - SB - 2 * OX - 2 * HVContrast * Stroke) / space * (div / 4) * kHeight
+			local offset : 0.5 * (space + df.mvs * HVContrast)
+			include : InnerDot (-offset) 0 kHeight2 fRound kdr space div
+			include : InnerDot   offset  0 kHeight2 fRound kdr space div
+
+		foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+			create-glyph "OODots.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'slash' 0 0 0 0
+				local df : DivFrame para.diversityM 3
+				include : OODots df 2 (DrawAt === DotAt) kdr
+			create-glyph "ooDots.\(suffix)" : glyph-proc
+				set-width 0
+				set-mark-anchor 'slash' 0 0 0 0
+				local df : DivFrame para.diversityM 3
+				include : OODots df 1.5 (DrawAt === DotAt) kdr
 
 	select-variant "aa" 0xA733 (follow -- 'a/turnABase')
 
@@ -216,3 +239,9 @@ glyph-block Letter-Latin-Lower-AE-OE : begin
 
 	derive-composites 'OO' 0xA74E 'OO/left' 'OO/right'
 	alias 'cyrl/OO' 0xA698 'OO'
+
+	select-variant 'OODots' (follow -- 'diacriticDot')
+	select-variant 'ooDots' (follow -- 'diacriticDot')
+
+	derive-composites 'cyrl/OOBinocular' 0xA66C 'cyrl/OO' 'OODots'
+	derive-composites 'cyrl/ooBinocular' 0xA66D 'cyrl/oo' 'ooDots'

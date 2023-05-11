@@ -252,32 +252,56 @@ glyph-block Mark-Overlay : begin
 		include : WithTransform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
 			refer-glyph 'leftHalfCircleAbove'
 
-	define [InnerDot k fRound kdr] : begin
-		local halfDotWidth  : kdr * [Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)]
-		local halfDotHeight : kdr * [Math.min DotRadius (halfDotWidth * k)]
+	glyph-block-export InnerDot
+	define [InnerDot x y kHeight fRound kdr _space _div] : begin
+		local space : fallback _space (RightSB - SB - 2 * OX - 2 * HVContrast * Stroke)
+		local div : fallback _div 4
+		local halfDotWidth  : kdr * [Math.min DotRadius (space / div)]
+		local halfDotHeight : kdr * [Math.min DotRadius (halfDotWidth * kHeight)]
+
 		if fRound
 		: then : return : OShapeOutline.NoOvershoot
-			CAP / 2 + halfDotHeight
-			CAP / 2 - halfDotHeight
-			0 + halfDotWidth
-			0 - halfDotWidth
+			y + halfDotHeight
+			y - halfDotHeight
+			x + halfDotWidth
+			x - halfDotWidth
 			Stroke * halfDotWidth * 2 / Width
 			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
 			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
 		: else : return : Rect
-			CAP / 2 + halfDotHeight
-			CAP / 2 - halfDotHeight
-			0 + halfDotWidth
-			0 - halfDotWidth
+			y + halfDotHeight
+			y - halfDotHeight
+			x + halfDotWidth
+			x - halfDotWidth
+	
+	define [InnerDot2 kHeight fRound kdr] : glyph-proc
+		local space : RightSB - SB - 2 * OX - 2 * HVContrast * Stroke
+		local div : StrokeWidthBlend 7 5
+		local halfDotWidth : kdr * [Math.min DotRadius (space / div)]
+		local offset : (0.5 * space - 2 * halfDotWidth) / 3 + halfDotWidth
+		include : InnerDot (-offset) 0 kHeight fRound kdr space div
+		include : InnerDot   offset  0 kHeight fRound kdr space div
+
 	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
 		create-glyph "innerDot.\(suffix)" : glyph-proc
 			set-width 0
-			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-			include : InnerDot 2 (DrawAt === DotAt) kdr
+			set-mark-anchor 'slash' 0 0 0 0
+			include : InnerDot 0 0 2 (DrawAt === DotAt) kdr
 		create-glyph "innerDotSmall.\(suffix)" : glyph-proc
 			set-width 0
-			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-			include : InnerDot 1.5 (DrawAt === DotAt) kdr
+			set-mark-anchor 'slash' 0 0 0 0
+			include : InnerDot 0 0 1.5 (DrawAt === DotAt) kdr
+
+		create-glyph "innerDoubleDot.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 0 0 0
+			include : InnerDot2 (1.75 * 2) (DrawAt === DotAt) kdr
+		create-glyph "innerDoubleDotSmall.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 0 0 0
+			include : InnerDot2 (1.75 * 1.5) (DrawAt === DotAt) kdr
 
 	select-variant "innerDot" (follow -- 'diacriticDot')
 	select-variant "innerDotSmall" (follow -- 'diacriticDot')
+	select-variant "innerDoubleDot" (follow -- 'diacriticDot')
+	select-variant "innerDoubleDotSmall" (follow -- 'diacriticDot')
