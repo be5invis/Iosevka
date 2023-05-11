@@ -251,3 +251,33 @@ glyph-block Mark-Overlay : begin
 
 		include : WithTransform [ApparentTranslate (-markMiddle) (-aboveMarkMid)]
 			refer-glyph 'leftHalfCircleAbove'
+
+	define [InnerDot k fRound kdr] : begin
+		local halfDotWidth  : kdr * [Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)]
+		local halfDotHeight : kdr * [Math.min DotRadius (halfDotWidth * k)]
+		if fRound
+		: then : return : OShapeOutline.NoOvershoot
+			CAP / 2 + halfDotHeight
+			CAP / 2 - halfDotHeight
+			0 + halfDotWidth
+			0 - halfDotWidth
+			Stroke * halfDotWidth * 2 / Width
+			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
+			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
+		: else : return : Rect
+			CAP / 2 + halfDotHeight
+			CAP / 2 - halfDotHeight
+			0 + halfDotWidth
+			0 - halfDotWidth
+	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
+		create-glyph "innerDot.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
+			include : InnerDot 2 (DrawAt === DotAt) kdr
+		create-glyph "innerDotSmall.\(suffix)" : glyph-proc
+			set-width 0
+			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
+			include : InnerDot 1.5 (DrawAt === DotAt) kdr
+
+	select-variant "innerDot" (follow -- 'diacriticDot')
+	select-variant "innerDotSmall" (follow -- 'diacriticDot')
