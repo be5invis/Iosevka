@@ -53,6 +53,16 @@ glyph-block Letter-Cyrillic-El : begin
 				[Just SLAB-LOWER]  : HSerif.rb right 0 SideJut sw
 				__                 : glyph-proc
 
+	define [CyrSoftElShape left right top bodyType slabType _sw] : glyph-proc
+		local sw : fallback _sw Stroke
+		local xm : if SLAB
+			[mix left right 0.625] + 0.25 * sw * HVContrast
+			mix left right 0.75
+
+		include : CyrElShape left xm top bodyType slabType _sw
+		include : HBar.t xm right top sw
+		if SLAB : include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
+
 	create-glyph 'cyrl/El' 0x41B : glyph-proc
 		include : MarkSet.capital
 		include : CyrElShape SB RightSB CAP BODY-STRAIGHT : if SLAB SLAB-ALL SLAB-NONE
@@ -68,6 +78,24 @@ glyph-block Letter-Cyrillic-El : begin
 	create-glyph 'cyrl/el.tailed' : glyph-proc
 		include : MarkSet.e
 		include : CyrElShape SB RightSB XH BODY-TAILED : if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE
+
+	create-glyph 'cyrl/ElSoft' 0xA664 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : CyrSoftElShape df.leftSB df.rightSB CAP BODY-STRAIGHT [if SLAB SLAB-ALL SLAB-NONE] df.mvs
+
+	create-glyph 'cyrl/elSoft.straight' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrSoftElShape df.leftSB df.rightSB XH BODY-STRAIGHT [if SLAB [if para.isItalic SLAB-LOWER SLAB-ALL] SLAB-NONE] df.mvs
+
+	create-glyph 'cyrl/elSoft.tailed' : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrSoftElShape df.leftSB df.rightSB XH BODY-TAILED [if SLAB [if para.isItalic SLAB-TAILED-I SLAB-TAILED-U] SLAB-NONE] df.mvs
 
 	derive-composites 'cyrl/ElDescender' 0x52E 'cyrl/El' [CyrDescender.rSideJut RightSB 0]
 	derive-composites 'cyrl/elDescender' 0x52F 'cyrl/el.straight' [CyrDescender.rSideJut RightSB 0]
@@ -139,6 +167,7 @@ glyph-block Letter-Cyrillic-El : begin
 		if SLAB : include sf2.rt.full
 
 	select-variant 'cyrl/el' 0x43B
+	select-variant 'cyrl/elSoft' 0xA665 (follow -- 'cyrl/el')
 	select-variant 'cyrl/elMidHook' 0x521 (follow -- 'cyrl/el')
 	alias 'cyrl/El.BGR' null 'grek/Lambda'
 	alias 'cyrl/el.BGR' null 'turnv'

@@ -9,6 +9,7 @@ glyph-block Letter-Latin-C : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
+	glyph-block-import Mark-Shared-Metrics : markStroke
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : SerifFrame CurlyTail DToothlessRise ArcStartHookTop
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart SerifedArcEnd InwardSlabArcStart
@@ -249,6 +250,13 @@ glyph-block Letter-Latin-C : begin
 			include : VBar.r RightSB Descender [ArcStartSerifDepth Hook] [ArcStartSerifWidth Stroke]
 			if styBot : let [sf : SerifFrame.fromDf [DivFrame 1] CAP Descender] : include sf.rb.full
 
+		create-glyph "currency/somSign.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			local height : mix XH CAP (2 / 3)
+			local lf : CLetterForm [DivFrame 1] sty styBot height (height - XH)
+			include : lf.full
+			include : HBar.b SB RightSB 0 markStroke
+
 	select-variant 'C' 'C'
 	link-reduced-variant 'C/sansSerif' 'C' MathSansSerif
 	select-variant 'revC' 0x2183 (follow -- 'C')
@@ -295,7 +303,7 @@ glyph-block Letter-Latin-C : begin
 			CShapeT spiro-outline 0.1 [DivFrame 1] SLAB-NONE SLAB-NONE XH 0 SmallArchDepthA SmallArchDepthB Hook BBS
 			VBar.l (SB + BBD + OX) 0 CAP BBS
 
-	derive-composites 'currency/somSign' 0x20C0 'cyrl/es' 'sbRsbUnderlineBelow'
+	select-variant 'currency/somSign' 0x20C0 (follow -- 'c')
 
 	create-glyph 'currency/euroSign/overlay' : union
 		LetterBarOverlay.l SB (CAP * 0.4)
@@ -359,42 +367,12 @@ glyph-block Letter-Latin-C : begin
 		PalatalHook.r RightSB 0 (yAttach -- DToothlessRise)
 		ExtendBelowBaseAnchors (-Hook)
 
-	define [LunateSigmaShape k fRound kdr] : begin
-		local halfDotWidth  : kdr * [Math.min DotRadius ((RightSB - SB - HVContrast * Stroke * 2) / 4)]
-		local halfDotHeight : kdr * [Math.min DotRadius (halfDotWidth * k)]
-		if fRound
-		: then : return :OShapeOutline.NoOvershoot
-			CAP / 2 + halfDotHeight
-			CAP / 2 - halfDotHeight
-			0 + halfDotWidth
-			0 - halfDotWidth
-			Stroke * halfDotWidth * 2 / Width
-			ArchDepthAOf halfDotWidth (halfDotWidth * 2)
-			ArchDepthBOf halfDotWidth (halfDotWidth * 2)
-		: else : return : Rect
-			CAP / 2 + halfDotHeight
-			CAP / 2 - halfDotHeight
-			0 + halfDotWidth
-			0 - halfDotWidth
-	foreach { suffix { DrawAt kdr } } [Object.entries DotVariants] : do
-		create-glyph "grek/lunateSigmaDot.\(suffix)" : glyph-proc
-			set-width 0
-			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-			include : LunateSigmaShape 2 (DrawAt === DotAt) kdr
-		create-glyph "grek/lunateSigmaDotSmall.\(suffix)" : glyph-proc
-			set-width 0
-			set-mark-anchor 'slash' 0 (CAP / 2) 0 (CAP / 2)
-			include : LunateSigmaShape 1.5 (DrawAt === DotAt) kdr
-
-	select-variant "grek/lunateSigmaDot"      (follow -- 'diacriticDot')
-	select-variant "grek/lunateSigmaDotSmall" (follow -- 'diacriticDot')
-
-	derive-composites 'grek/dotLunateSigma' 0x3FE 'grek/lunateSigma' 'grek/lunateSigmaDot'
-	derive-composites 'grek/dotRevLunateSigma' 0x3FF 'grek/revLunateSigma' 'grek/lunateSigmaDot'
-	derive-composites 'grek/dotLunateSmallSigma' 0x37C 'grek/lunateSmallSigma' 'grek/lunateSigmaDotSmall'
-	derive-composites 'grek/dotRevLunateSmallSigma' 0x37D 'grek/revLunateSmallSigma' 'grek/lunateSigmaDotSmall'
-	derive-composites 'CRevDot' 0xA73E 'revC'      'grek/lunateSigmaDotSmall'
-	derive-composites 'cRevDot' 0xA73F 'revSmallC' 'grek/lunateSigmaDotSmall'
+	derive-composites 'grek/dotLunateSigma' 0x3FE 'grek/lunateSigma' 'innerDot'
+	derive-composites 'grek/dotRevLunateSigma' 0x3FF 'grek/revLunateSigma' 'innerDot'
+	derive-composites 'grek/dotLunateSmallSigma' 0x37C 'grek/lunateSmallSigma' 'innerDotSmall'
+	derive-composites 'grek/dotRevLunateSmallSigma' 0x37D 'grek/revLunateSmallSigma' 'innerDotSmall'
+	derive-composites 'CRevDot' 0xA73E 'revC'      'innerDotSmall'
+	derive-composites 'cRevDot' 0xA73F 'revSmallC' 'innerDotSmall'
 
 	create-glyph 'CBarOverlay' : LetterBarOverlay.l.in SB 0 CAP
 	create-glyph 'cBarOverlay' : LetterBarOverlay.l.in SB 0 XH
