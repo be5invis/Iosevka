@@ -125,16 +125,16 @@ glyph-block Letter-Latin-V : begin
 			mix xArcMidBottom xArcRight 0.5
 			mix O yArcRight : archv.yFromX 0.5 2
 
-	define [VHooktopShape df fBarStraight top] : glyph-proc
-		include : VShape df fBarStraight top Stroke
+	define [VHooktopShape] : params [df fBarStraight top [sw Stroke] [hookWidthOuter (HookX / 3)] [hookWidthInner (HookX / 3)]] : glyph-proc
+		include : VShape df fBarStraight top (sw -- sw)
 		eject-contour 'strokeUp'
-		include : VBottomCapShape df fBarStraight Stroke
+		include : VBottomCapShape df fBarStraight sw
 		include : dispiro
-			widths.rhs
-			straight.left.start (RightSB + HookX / 3) (top - Stroke)
-			g4 (RightSB - HookX / 3) (top - HalfStroke - Hook)
+			widths.rhs sw
+			straight.left.start (RightSB + hookWidthOuter) (top - Stroke)
+			g4 (RightSB - hookWidthInner) (top - HalfStroke - Hook)
 			quadControls 0.4 0.75 64 unimportant
-			g4   (Middle + VCornerHalfWidth) 0 [widths.rhs VShapeFine]
+			g4   (Middle + VCornerHalfWidth * sw / Stroke) 0 [widths.rhs (VShapeFine * sw / Stroke)]
 
 	define [VSerifs df fBarStraight top] : begin
 		local sbScale  : if fBarStraight StraightSbShrink 1
@@ -197,6 +197,38 @@ glyph-block Letter-Latin-V : begin
 				eject-contour 'serifRT'
 			include : OShape (Ascender - vPartHeight + Stroke + O) 0 SB RightSB
 
+		create-glyph "cyrl/Yn.\(suffix)" : glyph-proc
+			include : MarkSet.capDesc
+			local vPartHeight : CAP * 0.875
+			local sw : AdviceStroke 3
+
+			include : WithTransform [FlipAround Middle (CAP / 2)] : glyph-proc
+				include : VHooktopShape [DivFrame 1] fStraightBar vPartHeight (sw -- sw) (hookWidthInner -- (HookX / 3 - 0.25 * HVContrast * sw))
+				include : Serifs [DivFrame 1] fStraightBar vPartHeight
+				eject-contour 'serifRT'
+
+			include : dispiro
+				g4.down.start Middle CAP [widths.center.heading [AdviceStroke 6] Downward]
+				flat Middle 0 [widths.center.heading sw Downward]
+				curl Middle Descender [widths.center.heading sw Downward]
+			if SLAB : include : HSerif.mb Middle Descender MidJutCenter
+
+		create-glyph "cyrl/yn.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			local vPartHeight : XH * 1
+			local sw : AdviceStroke 3
+
+			include : WithTransform [FlipAround Middle (XH / 2)] : glyph-proc
+				include : VHooktopShape [DivFrame 1] fStraightBar vPartHeight (sw -- sw) (hookWidthInner -- (HookX / 3 - 0.25 * HVContrast * sw))
+				include : Serifs [DivFrame 1] fStraightBar vPartHeight
+				eject-contour 'serifRT'
+
+			include : dispiro
+				g4.down.start Middle XH [widths.center.heading [AdviceStroke 6] Downward]
+				flat Middle 0 [widths.center.heading sw Downward]
+				curl Middle Descender [widths.center.heading sw Downward]
+			if SLAB : include : HSerif.mb Middle Descender MidJutCenter
+
 		create-glyph "vPalatalHook.\(suffix)" : glyph-proc
 			include [refer-glyph "v.\(suffix)"] AS_BASE ALSO_METRICS
 			include : PalatalHook.r
@@ -236,9 +268,11 @@ glyph-block Letter-Latin-V : begin
 
 	select-variant 'vHookTop' 0x2C71 (follow -- 'v/nonCursive')
 	select-variant 'cyrl/ukUnblended' 0x1C88 (follow -- 'v/nonCursive')
+	select-variant 'cyrl/yn' 0xA65F (follow -- 'v/nonCursive')
 
 	select-variant 'cyrl/Izhitsa' 0x474 (follow -- 'VHookTop') (shapeFrom -- 'VHookTop')
 	select-variant 'cyrl/Uk' 0xA64A (follow -- 'VHookTop')
+	select-variant 'cyrl/Yn' 0xA65E (follow -- 'VHookTop')
 	alias 'cyrl/izhitsa' 0x475 'vHookTop'
 
 
