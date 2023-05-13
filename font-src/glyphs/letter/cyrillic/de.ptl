@@ -7,43 +7,72 @@ glyph-module
 glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Latin-X : HalfXStrand
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 
-	define [CyrDeShape top] : glyph-proc
-		local descenderOverflow : if SLAB SideJut ((RightSB - SB) * 0.075)
-		local xCutLeft SB
-		local xCutRight RightSB
+	define [CyrDeShape top left right _sw] : glyph-proc
+		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
+		local xCutLeft left
+		local xCutRight right
 		local xTopLeft : mix xCutLeft xCutRight : StrokeWidthBlend 0.15 0.1
 		local xTopRight : mix xCutLeft xCutRight : StrokeWidthBlend 0.95 0.96
-		local swInner : AdviceStroke 2.75
+		local swOuter : fallback _sw Stroke
+		local swInner (swOuter * [AdviceStroke 2.75] / Stroke)
 
-		include : HBar.b (xCutLeft - descenderOverflow) (xCutRight + descenderOverflow) 0
+		include : HBar.b (xCutLeft - descenderOverflow) (xCutRight + descenderOverflow) 0 swOuter
 		include : VBar.r xTopRight 0 top swInner
 		include : dispiro
 			widths.lhs swInner
 			flat xTopLeft top
 			curl xTopLeft [mix 0 top 0.625]
-			g4   xCutLeft  Stroke
-		include : VBar.l (xCutLeft - descenderOverflow) (-LongJut + HalfStroke) 0.1
-		include : VBar.r (xCutRight + descenderOverflow) (-LongJut + HalfStroke) 0.1
+			g4   xCutLeft  swOuter
+		include : VBar.l (xCutLeft  - descenderOverflow) (-LongJut + 0.5 * swOuter) 0.1 swOuter
+		include : VBar.r (xCutRight + descenderOverflow) (-LongJut + 0.5 * swOuter) 0.1 swOuter
 
 		include : if SLAB
 			then : dispiro
-				widths.rhs
+				widths.rhs swOuter
 				flat (xTopLeft - descenderOverflow) top
 				curl (xTopRight + descenderOverflow) top
-			else : HBar.t xTopLeft xTopRight top
+			else : HBar.t xTopLeft xTopRight top swOuter
+
+	define [CyrSoftDeShape top left right _sw] : glyph-proc
+		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
+		local sw : fallback _sw Stroke
+		local xm : if SLAB
+			[mix left right 0.625] + 0.25 * sw * HVContrast
+			mix left right 0.75
+		local xTopRight : mix left xm : StrokeWidthBlend 0.95 0.96
+
+		include : CyrDeShape top left xm _sw
+		if SLAB
+		: then : begin
+				include : HBar.t (xTopRight + descenderOverflow) right top sw
+				include : VSerif.dr right top VJut (sw * VJutStroke / Stroke)
+		: else : include : HBar.t xTopRight right top sw
 
 	create-glyph 'cyrl/De' 0x414 : glyph-proc
 		include : MarkSet.capital
 		include : ExtendBelowBaseAnchors (-LongJut)
-		include : CyrDeShape CAP
+		include : CyrDeShape CAP SB RightSB
 
 	create-glyph 'cyrl/de.upright' : glyph-proc
 		include : MarkSet.e
 		include : ExtendBelowBaseAnchors (-LongJut)
-		include : CyrDeShape XH
+		include : CyrDeShape XH SB RightSB
+
+	create-glyph 'cyrl/DeSoft' 0xA662 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.capital
+		include : ExtendBelowBaseAnchors (-LongJut)
+		include : CyrSoftDeShape CAP df.leftSB df.rightSB df.mvs
+
+	create-glyph 'cyrl/deSoft' 0xA663 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : ExtendBelowBaseAnchors (-LongJut)
+		include : CyrSoftDeShape XH df.leftSB df.rightSB df.mvs
 
 	create-glyph 'cyrl/de.italic' : glyph-proc
 		include : MarkSet.b
