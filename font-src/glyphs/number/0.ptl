@@ -10,6 +10,11 @@ glyph-block Digits-Zero : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Digits-Shared : OnumHeight OnumMarks CodeLnum CodeOnum
 
+	define CircleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
+	define SplitSlashGap : Stroke * HVContrast + [clamp (CircleInnerWidth / 5) (CircleInnerWidth / 3) ([AdviceStroke 5] * HVContrast)]
+	define CutoutVerticalStrokeWidth : Math.max (0.2 * CircleInnerWidth) : Math.min (0.4 * CircleInnerWidth) [AdviceStroke 3]
+	define [CutoutStrokeWidth top] : Math.max (0.1 * top) : Math.min (0.125 * top) (0.5 * CircleInnerWidth) [AdviceStroke 3]
+
 	define [OvalShapeT sink t b l r pHAdj] : let [m : mix l r 0.5] : sink
 		widths.rhs
 		g4 (m - [fallback pHAdj 1] * CorrectionOMidS) (t - O)
@@ -31,16 +36,76 @@ glyph-block Digits-Zero : begin
 	define [ZeroOvalMask top] : ZeroOvalShapeT spiro-outline 1 1 top
 
 
-	define [ZeroSlash top] : dispiro
-		flat 0 (top * (1 - 0.77)) [widths.center OverlayStroke]
-		curl Width (top * 0.77)
+	define [InsetShape zero overlay fnMask height] : glyph-proc
+		include zero
+		if fnMask
+			include : intersection overlay
+				WithTransform [ApparentTranslate (-SplitSlashGap) 0] [fnMask height]
+				WithTransform [ApparentTranslate   SplitSlashGap  0] [fnMask height]
+			include overlay
 
-	define [ZeroReverseSlash top] : dispiro
-		flat 0 (top * 0.77) [widths.center OverlayStroke]
+	define [Cutout zero overlay fnMask height] : glyph-proc
+		if overlay
+			include : difference zero overlay
+			include zero
+
+
+	define [ZeroSlash top] : dispiro
+		flat 0     (top * (1 - 0.77)) [widths.center OverlayStroke]
+		curl Width (top * 0.77)
+	define [ZeroRevSlash top] : dispiro
+		flat 0     (top * 0.77) [widths.center OverlayStroke]
 		curl Width (top * (1 - 0.77))
 
-	define CircleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
-	define SplitSlashGap : Stroke * HVContrast + [clamp (CircleInnerWidth / 5) (CircleInnerWidth / 3) ([AdviceStroke 5] * HVContrast)]
+	define [ZeroTallSlash top] : dispiro
+		flat 0     0   [widths.center OverlayStroke]
+		curl Width top
+	define [ZeroTallRevSlash top] : dispiro
+		flat 0     top [widths.center OverlayStroke]
+		curl Width 0
+
+	define [CutoutSlash top] : dispiro
+		flat 0     (top * (1 - 0.77)) [widths.center [CutoutStrokeWidth top]]
+		curl Width (top * 0.77)
+	define [CutoutRevSlash top] : dispiro
+		flat 0     (top * 0.77)       [widths.center [CutoutStrokeWidth top]]
+		curl Width (top * (1 - 0.77))
+
+	define [CutoutTallSlash top] : dispiro
+		flat 0     0   [widths.center [CutoutStrokeWidth top]]
+		curl Width top
+	define [CutoutTallRevSlash top] : dispiro
+		flat 0     top [widths.center [CutoutStrokeWidth top]]
+		curl Width 0
+
+	define [CutoutVerticalBar top] : VBar.m Middle (0 + O) (top - O) CutoutVerticalStrokeWidth
+
+	define [TopRightCutoutSlash top] : intersection
+		MaskRight Middle
+		dispiro
+			flat 0               (top - Width * 0.875) [widths.center [CutoutStrokeWidth top]]
+			curl (Width * 0.875) top
+
+	define [BrokenTallSlash top] : difference
+		dispiro
+			flat (SB + OX + 0.5 * OverlayStroke)      [mix top 0 1.05] [widths.center OverlayStroke]
+			curl (RightSB - OX - 0.5 * OverlayStroke) [mix 0 top 1.05]
+		intersection
+			MaskAbove (top * 0.425)
+			MaskBelow (top * (1 - 0.425))
+	define [BrokenTallRevSlash top] : difference
+		dispiro
+			flat (SB + OX + 0.5 * OverlayStroke)      [mix 0 top 1.05] [widths.center OverlayStroke]
+			curl (RightSB - OX - 0.5 * OverlayStroke) [mix top 0 1.05]
+		intersection
+			MaskAbove (top * 0.425)
+			MaskBelow (top * (1 - 0.425))
+
+	define [BrokenVerticalBar top] : difference
+		VBar.m Middle (0 + O) (top - O) [Math.min (CircleInnerWidth * 0.5) OverlayStroke]
+		intersection
+			MaskAbove (top * 0.375)
+			MaskBelow (top * (1 - 0.375))
 
 	define [ZeroDotShape top] : begin
 		local halfDotWidth : Math.min DotRadius (CircleInnerWidth / 4)
@@ -85,35 +150,49 @@ glyph-block Digits-Zero : begin
 			begin 0
 
 	define ZeroConfig : object
-		'unslashed'               { ZeroOutlineShape ZeroOutlineMask null                 0             }
-		'slashed'                 { ZeroOutlineShape ZeroOutlineMask ZeroSlash            0             }
-		'reverseSlashed'          { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     0             }
-		'slashedSplit'            { ZeroOutlineShape ZeroOutlineMask ZeroSlash            SplitSlashGap }
-		'reverseSlashedSplit'     { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     SplitSlashGap }
-		'dotted'                  { ZeroOutlineShape ZeroOutlineMask ZeroDotShape         0             }
-		'longDotted'              { ZeroOutlineShape ZeroOutlineMask ZeroLongDotShape     0             }
-		'unslashedOval'           { ZeroOvalShape    ZeroOvalMask    null                 0             }
-		'slashedOval'             { ZeroOvalShape    ZeroOvalMask    ZeroSlash            0             }
-		'reverseSlashedOval'      { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     0             }
-		'slashedSplitOval'        { ZeroOvalShape    ZeroOvalMask    ZeroSlash            SplitSlashGap }
-		'reverseSlashedSplitOval' { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     SplitSlashGap }
-		'dottedOval'              { ZeroOvalShape    ZeroOvalMask    ZeroOvalDotShape     0             }
-		'longDottedOval'          { ZeroOvalShape    ZeroOvalMask    ZeroOvalLongDotShape 0             }
+		'unslashed'                    { null                 null       }
+		'slashed'                      { ZeroSlash            null       }
+		'reverseSlashed'               { ZeroRevSlash         null       }
+		'tallSlashed'                  { ZeroTallSlash        null       }
+		'tallReverseSlashed'           { ZeroTallRevSlash     null       }
+		'dotted'                       { ZeroDotShape         null       }
+		'longDotted'                   { ZeroLongDotShape     null       }
+		'slashedSplit'                 { ZeroSlash            InsetShape }
+		'reverseSlashedSplit'          { ZeroRevSlash         InsetShape }
+		'brokenSlash'                  { BrokenTallSlash      null       }
+		'brokenReverseSlash'           { BrokenTallRevSlash   null       }
+		'brokenVerticalBar'            { BrokenVerticalBar    null       }
+		'slashedCutout'                { CutoutSlash          Cutout     }
+		'reverseSlashedCutout'         { CutoutRevSlash       Cutout     }
+		'tallSlashedCutout'            { CutoutTallSlash      Cutout     }
+		'tallReverseSlashedCutout'     { CutoutTallRevSlash   Cutout     }
+		'verticalBarCutout'            { CutoutVerticalBar    Cutout     }
+		'topRightCutout'               { TopRightCutoutSlash  Cutout     }
+
+	define Shapes : object
+		''     { ZeroOutlineShape ZeroOutlineMask }
+		'Oval' { ZeroOvalShape    ZeroOvalMask    }
 
 	define Infixes : object
 		'lnum' { CAP        [function [] : MarkSet.capital] }
 		'onum' { OnumHeight [function [] : OnumMarks.e]     }
 
-	foreach { suffix { Outline Mask Overlay gap } } [Object.entries ZeroConfig] : begin
+	foreach { shapeSuffix { Outline Mask } } [Object.entries Shapes] : begin
 		foreach { infix { height Marks } } [Object.entries Infixes] : begin
-			create-glyph "zero.\(infix).\(suffix)" : glyph-proc
-				include : Marks
-				include : Outline height
-				if Overlay : if Mask
-					then : include : intersection [Overlay height]
-						WithTransform [ApparentTranslate (-gap) 0] [Mask height]
-						WithTransform [ApparentTranslate   gap  0] [Mask height]
-					else : include : Overlay height
+			local zeroShape : Outline height
+			foreach { suffix { Overlay Postproc } } [Object.entries ZeroConfig] : begin
+				create-glyph "zero.\(infix).\(suffix)\(shapeSuffix)" : glyph-proc
+					include : Marks
+
+					local overlayShape : if Overlay [Overlay height] null
+					if Postproc
+					: then : begin
+						include : Postproc zeroShape overlayShape Mask height
+					: else : begin
+						include zeroShape
+						if Overlay : if Mask
+							include : intersection overlayShape : Mask height
+							include overlayShape
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')
