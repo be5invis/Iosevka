@@ -12,6 +12,8 @@ glyph-block Digits-Zero : begin
 
 	define CircleInnerWidth : RightSB - SB - HVContrast * Stroke * 2
 	define SplitSlashGap : Stroke * HVContrast + [clamp (CircleInnerWidth / 5) (CircleInnerWidth / 3) ([AdviceStroke 5] * HVContrast)]
+	define CutoutVerticalStrokeWidth : Math.max (0.2 * CircleInnerWidth) : Math.min (0.4 * CircleInnerWidth) [AdviceStroke 3]
+	define [CutoutStrokeWidth top] : Math.max (0.1 * top) : Math.min (0.125 * top) (0.5 * CircleInnerWidth) [AdviceStroke 3]
 
 	define [OvalShapeT sink t b l r pHAdj] : let [m : mix l r 0.5] : sink
 		widths.rhs
@@ -48,48 +50,59 @@ glyph-block Digits-Zero : begin
 			include zero
 
 
-	define [CutoutSlash top] : dispiro
-		flat 0 (top * (1 - 0.77)) [widths.center (top * 0.125)]
+	define [ZeroSlash top] : dispiro
+		flat 0     (top * (1 - 0.77)) [widths.center OverlayStroke]
 		curl Width (top * 0.77)
+	define [ZeroRevSlash top] : dispiro
+		flat 0     (top * 0.77) [widths.center OverlayStroke]
+		curl Width (top * (1 - 0.77))
+
+	define [ZeroTallSlash top] : dispiro
+		flat 0     0   [widths.center OverlayStroke]
+		curl Width top
+	define [ZeroTallRevSlash top] : dispiro
+		flat 0     top [widths.center OverlayStroke]
+		curl Width 0
+
+	define [CutoutSlash top] : dispiro
+		flat 0     (top * (1 - 0.77)) [widths.center [CutoutStrokeWidth top]]
+		curl Width (top * 0.77)
+	define [CutoutRevSlash top] : dispiro
+		flat 0     (top * 0.77)       [widths.center [CutoutStrokeWidth top]]
+		curl Width (top * (1 - 0.77))
 
 	define [CutoutTallSlash top] : dispiro
-		flat 0 0 [widths.center (top * 0.125)]
+		flat 0     0   [widths.center [CutoutStrokeWidth top]]
 		curl Width top
+	define [CutoutTallRevSlash top] : dispiro
+		flat 0     top [widths.center [CutoutStrokeWidth top]]
+		curl Width 0
 
-	define [CutoutVerticalBar top] : dispiro
-		flat Middle (top - O) [widths.center (Width * 0.125)]
-		curl Middle (0 + O)
+	define [CutoutVerticalBar top] : VBar.m Middle (0 + O) (top - O) CutoutVerticalStrokeWidth
 
 	define [TopRightCutoutSlash top] : intersection
 		MaskRight Middle
 		dispiro
-			flat (Width * 0.875) top [widths.center (Width * 0.125)]
-			curl 0 (top - Width * 0.875)
-
-	define [ZeroSlash top] : dispiro
-		flat 0 (top * (1 - 0.77)) [widths.center OverlayStroke]
-		curl Width (top * 0.77)
-
-	define [ZeroTallSlash top] : dispiro
-		flat 0 0 [widths.center OverlayStroke]
-		curl Width top
-
-	define [ZeroReverseSlash top] : dispiro
-		flat 0 (top * 0.77) [widths.center OverlayStroke]
-		curl Width (top * (1 - 0.77))
+			flat 0               (top - Width * 0.875) [widths.center [CutoutStrokeWidth top]]
+			curl (Width * 0.875) top
 
 	define [BrokenTallSlash top] : difference
 		dispiro
-			flat (SB + OX + 0.5 * OverlayStroke) [mix top 0 1.05] [widths.center OverlayStroke]
+			flat (SB + OX + 0.5 * OverlayStroke)      [mix top 0 1.05] [widths.center OverlayStroke]
 			curl (RightSB - OX - 0.5 * OverlayStroke) [mix 0 top 1.05]
+		intersection
+			MaskAbove (top * 0.425)
+			MaskBelow (top * (1 - 0.425))
+	define [BrokenTallRevSlash top] : difference
+		dispiro
+			flat (SB + OX + 0.5 * OverlayStroke)      [mix 0 top 1.05] [widths.center OverlayStroke]
+			curl (RightSB - OX - 0.5 * OverlayStroke) [mix top 0 1.05]
 		intersection
 			MaskAbove (top * 0.425)
 			MaskBelow (top * (1 - 0.425))
 
 	define [BrokenVerticalBar top] : difference
-		dispiro
-			flat Middle (top - O) [widths.center [Math.min (CircleInnerWidth * 0.5) OverlayStroke]]
-			curl Middle (0 + O)
+		VBar.m Middle (0 + O) (top - O) [Math.min (CircleInnerWidth * 0.5) OverlayStroke]
 		intersection
 			MaskAbove (top * 0.375)
 			MaskBelow (top * (1 - 0.375))
@@ -137,53 +150,49 @@ glyph-block Digits-Zero : begin
 			begin 0
 
 	define ZeroConfig : object
-		'unslashed'               { ZeroOutlineShape ZeroOutlineMask null                 null       }
-		'slashed'                 { ZeroOutlineShape ZeroOutlineMask ZeroSlash            null       }
-		'reverseSlashed'          { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     null       }
-		'slashedSplit'            { ZeroOutlineShape ZeroOutlineMask ZeroSlash            InsetShape }
-		'reverseSlashedSplit'     { ZeroOutlineShape ZeroOutlineMask ZeroReverseSlash     InsetShape }
-		'dotted'                  { ZeroOutlineShape ZeroOutlineMask ZeroDotShape         null       }
-		'longDotted'              { ZeroOutlineShape ZeroOutlineMask ZeroLongDotShape     null       }
-		'unslashedOval'           { ZeroOvalShape    ZeroOvalMask    null                 null       }
-		'slashedOval'             { ZeroOvalShape    ZeroOvalMask    ZeroSlash            null       }
-		'reverseSlashedOval'      { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     null       }
-		'slashedSplitOval'        { ZeroOvalShape    ZeroOvalMask    ZeroSlash            InsetShape }
-		'reverseSlashedSplitOval' { ZeroOvalShape    ZeroOvalMask    ZeroReverseSlash     InsetShape }
-		'dottedOval'              { ZeroOvalShape    ZeroOvalMask    ZeroOvalDotShape     null       }
-		'longDottedOval'          { ZeroOvalShape    ZeroOvalMask    ZeroOvalLongDotShape null       }
-		'tallSlashed'             { ZeroOutlineShape ZeroOutlineMask ZeroTallSlash        null       }
-		'brokenSlash'             { ZeroOutlineShape ZeroOutlineMask BrokenTallSlash      null       }
-		'brokenBar'               { ZeroOutlineShape ZeroOutlineMask BrokenVerticalBar    null       }
-		'topRightCutout'          { ZeroOutlineShape ZeroOutlineMask TopRightCutoutSlash  Cutout     }
-		'slashedCutout'           { ZeroOutlineShape ZeroOutlineMask CutoutSlash          Cutout     }
-		'tallSlashedCutout'       { ZeroOutlineShape ZeroOutlineMask CutoutTallSlash      Cutout     }
-		'verticalBarCutout'       { ZeroOutlineShape ZeroOutlineMask CutoutVerticalBar    Cutout     }
-		'tallSlashedOval'         { ZeroOvalShape    ZeroOvalMask    ZeroTallSlash        null       }
-		'brokenSlashOval'         { ZeroOvalShape    ZeroOvalMask    BrokenTallSlash      null       }
-		'brokenBarOval'           { ZeroOvalShape    ZeroOvalMask    BrokenVerticalBar    null       }
-		'topRightCutoutOval'      { ZeroOvalShape    ZeroOvalMask    TopRightCutoutSlash  Cutout     }
-		'slashedCutoutOval'       { ZeroOvalShape    ZeroOvalMask    CutoutSlash          Cutout     }
-		'tallSlashedCutoutOval'   { ZeroOvalShape    ZeroOvalMask    CutoutTallSlash      Cutout     }
-		'verticalBarCutoutOval'   { ZeroOvalShape    ZeroOvalMask    CutoutVerticalBar    Cutout     }
+		'unslashed'                    { null                 null       }
+		'slashed'                      { ZeroSlash            null       }
+		'reverseSlashed'               { ZeroRevSlash         null       }
+		'tallSlashed'                  { ZeroTallSlash        null       }
+		'tallReverseSlashed'           { ZeroTallRevSlash     null       }
+		'dotted'                       { ZeroDotShape         null       }
+		'longDotted'                   { ZeroLongDotShape     null       }
+		'slashedSplit'                 { ZeroSlash            InsetShape }
+		'reverseSlashedSplit'          { ZeroRevSlash         InsetShape }
+		'brokenSlash'                  { BrokenTallSlash      null       }
+		'brokenReverseSlash'           { BrokenTallRevSlash   null       }
+		'brokenVerticalBar'            { BrokenVerticalBar    null       }
+		'slashedCutout'                { CutoutSlash          Cutout     }
+		'reverseSlashedCutout'         { CutoutRevSlash       Cutout     }
+		'tallSlashedCutout'            { CutoutTallSlash      Cutout     }
+		'tallReverseSlashedCutout'     { CutoutTallRevSlash   Cutout     }
+		'verticalBarCutout'            { CutoutVerticalBar    Cutout     }
+		'topRightCutout'               { TopRightCutoutSlash  Cutout     }
+
+	define Shapes : object
+		''     { ZeroOutlineShape ZeroOutlineMask }
+		'Oval' { ZeroOvalShape    ZeroOvalMask    }
 
 	define Infixes : object
 		'lnum' { CAP        [function [] : MarkSet.capital] }
 		'onum' { OnumHeight [function [] : OnumMarks.e]     }
 
-	foreach { suffix { Outline Mask Overlay Postproc } } [Object.entries ZeroConfig] : begin
+	foreach { shapeSuffix { Outline Mask } } [Object.entries Shapes] : begin
 		foreach { infix { height Marks } } [Object.entries Infixes] : begin
-			create-glyph "zero.\(infix).\(suffix)" : glyph-proc
-				include : Marks
-				local zeroShape : Outline height
-				local overlayShape : if Overlay [Overlay height] null
-				if Postproc
-				: then : begin
-					include : Postproc zeroShape overlayShape Mask height
-				: else : begin
-					include zeroShape
-					if Overlay : if Mask
-						include : intersection overlayShape : Mask height
-						include overlayShape
+			local zeroShape : Outline height
+			foreach { suffix { Overlay Postproc } } [Object.entries ZeroConfig] : begin
+				create-glyph "zero.\(infix).\(suffix)\(shapeSuffix)" : glyph-proc
+					include : Marks
+
+					local overlayShape : if Overlay [Overlay height] null
+					if Postproc
+					: then : begin
+						include : Postproc zeroShape overlayShape Mask height
+					: else : begin
+						include zeroShape
+						if Overlay : if Mask
+							include : intersection overlayShape : Mask height
+							include overlayShape
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')
@@ -192,34 +201,78 @@ glyph-block Digits-Zero : begin
 	select-variant 'zero.lnum/forceUnslashed' (follow -- 'zero/forceUnslashed') (shapeFrom -- 'zero.lnum')
 	select-variant 'zero.onum/forceUnslashed' (follow -- 'zero/forceUnslashed') (shapeFrom -- 'zero.onum')
 
-	alias 'cv75 000' 0xEF00 'zero.lnum.tallSlashed'           'tallSlashed'
-	alias 'cv76 001' 0xEF01 'zero.lnum.tallSlashedOval'       'tallSlashedOval'
-	alias 'cv76 002' 0xEF02 'zero.lnum.brokenSlash'           'brokenSlash'
-	alias 'cv76 003' 0xEF03 'zero.lnum.brokenSlashOval'       'brokenSlashOval'
-	alias 'cv76 004' 0xEF04 'zero.lnum.brokenBar'             'brokenBar'
-	alias 'cv76 005' 0xEF05 'zero.lnum.brokenBarOval'         'brokenBarOval'
-	alias 'cv76 006' 0xEF06 'zero.lnum.slashedCutout'         'slashedCutout'
-	alias 'cv76 007' 0xEF07 'zero.lnum.slashedCutoutOval'     'slashedCutoutOval'
-	alias 'cv76 008' 0xEF08 'zero.lnum.tallSlashedCutout'     'tallSlashedCutout'
-	alias 'cv76 009' 0xEF09 'zero.lnum.tallSlashedCutoutOval' 'tallSlashedCutoutOval'
-	alias 'cv76 00A' 0xEF0A 'zero.lnum.verticalBarCutout'     'verticalBarCutout'
-	alias 'cv76 00B' 0xEF0B 'zero.lnum.verticalBarCutoutOval' 'verticalBarCutoutOval'
-	alias 'cv76 00C' 0xEF0C 'zero.lnum.topRightCutout'        'topRightCutout'
-	alias 'cv76 00D' 0xEF0D 'zero.lnum.topRightCutoutOval'    'topRightCutoutOval'
-	alias 'cv76 00E' 0xEF0E 'zero.onum.tallSlashed'           'tallSlashed'
-	alias 'cv76 00F' 0xEF0F 'zero.onum.tallSlashedOval'       'tallSlashedOval'
-	alias 'cv76 010' 0xEF10 'zero.onum.brokenSlash'           'brokenSlash'
-	alias 'cv76 011' 0xEF11 'zero.onum.brokenSlashOval'       'brokenSlashOval'
-	alias 'cv76 012' 0xEF12 'zero.onum.brokenBar'             'brokenBar'
-	alias 'cv76 013' 0xEF13 'zero.onum.brokenBarOval'         'brokenBarOval'
-	alias 'cv76 014' 0xEF14 'zero.onum.slashedCutout'         'slashedCutout'
-	alias 'cv76 015' 0xEF15 'zero.onum.slashedCutoutOval'     'slashedCutoutOval'
-	alias 'cv76 016' 0xEF16 'zero.onum.tallSlashedCutout'     'tallSlashedCutout'
-	alias 'cv76 017' 0xEF17 'zero.onum.tallSlashedCutoutOval' 'tallSlashedCutoutOval'
-	alias 'cv76 018' 0xEF18 'zero.onum.verticalBarCutout'     'verticalBarCutout'
-	alias 'cv76 019' 0xEF19 'zero.onum.verticalBarCutoutOval' 'verticalBarCutoutOval'
-	alias 'cv76 01A' 0xEF1A 'zero.onum.topRightCutout'        'topRightCutout'
-	alias 'cv76 01B' 0xEF1B 'zero.onum.topRightCutoutOval'    'topRightCutoutOval'
+	alias 'cv76 0xEF00' 0xEF00 'zero.lnum.unslashed'
+	alias 'cv76 0xEF01' 0xEF01 'zero.lnum.slashed'
+	alias 'cv76 0xEF02' 0xEF02 'zero.lnum.reverseSlashed'
+	alias 'cv76 0xEF03' 0xEF03 'zero.lnum.tallSlashed'
+	alias 'cv76 0xEF04' 0xEF04 'zero.lnum.tallReverseSlashed'
+	alias 'cv76 0xEF05' 0xEF05 'zero.lnum.slashedSplit'
+	alias 'cv76 0xEF06' 0xEF06 'zero.lnum.reverseSlashedSplit'
+	alias 'cv76 0xEF07' 0xEF07 'zero.lnum.brokenSlash'
+	alias 'cv76 0xEF08' 0xEF08 'zero.lnum.brokenReverseSlash'
+	alias 'cv76 0xEF09' 0xEF09 'zero.lnum.brokenVerticalBar'
+	alias 'cv76 0xEF0A' 0xEF0A 'zero.lnum.dotted'
+	alias 'cv76 0xEF0B' 0xEF0B 'zero.lnum.longDotted'
+	alias 'cv76 0xEF0C' 0xEF0C 'zero.lnum.slashedCutout'
+	alias 'cv76 0xEF0D' 0xEF0D 'zero.lnum.reverseSlashedCutout'
+	alias 'cv76 0xEF0E' 0xEF0E 'zero.lnum.tallSlashedCutout'
+	alias 'cv76 0xEF0F' 0xEF0F 'zero.lnum.tallReverseSlashedCutout'
+	alias 'cv76 0xEF10' 0xEF10 'zero.lnum.verticalBarCutout'
+	alias 'cv76 0xEF11' 0xEF11 'zero.lnum.topRightCutout'
+	alias 'cv76 0xEF12' 0xEF12 'zero.lnum.unslashedOval'
+	alias 'cv76 0xEF13' 0xEF13 'zero.lnum.slashedOval'
+	alias 'cv76 0xEF14' 0xEF14 'zero.lnum.reverseSlashedOval'
+	alias 'cv76 0xEF15' 0xEF15 'zero.lnum.tallSlashedOval'
+	alias 'cv76 0xEF16' 0xEF16 'zero.lnum.tallReverseSlashedOval'
+	alias 'cv76 0xEF17' 0xEF17 'zero.lnum.slashedSplitOval'
+	alias 'cv76 0xEF18' 0xEF18 'zero.lnum.reverseSlashedSplitOval'
+	alias 'cv76 0xEF19' 0xEF19 'zero.lnum.brokenSlashOval'
+	alias 'cv76 0xEF1A' 0xEF1A 'zero.lnum.brokenReverseSlashOval'
+	alias 'cv76 0xEF1B' 0xEF1B 'zero.lnum.brokenVerticalBarOval'
+	alias 'cv76 0xEF1C' 0xEF1C 'zero.lnum.dottedOval'
+	alias 'cv76 0xEF1D' 0xEF1D 'zero.lnum.longDottedOval'
+	alias 'cv76 0xEF1E' 0xEF1E 'zero.lnum.slashedCutoutOval'
+	alias 'cv76 0xEF1F' 0xEF1F 'zero.lnum.reverseSlashedCutoutOval'
+	alias 'cv76 0xEF20' 0xEF20 'zero.lnum.tallSlashedCutoutOval'
+	alias 'cv76 0xEF21' 0xEF21 'zero.lnum.tallReverseSlashedCutoutOval'
+	alias 'cv76 0xEF22' 0xEF22 'zero.lnum.verticalBarCutoutOval'
+	alias 'cv76 0xEF23' 0xEF23 'zero.lnum.topRightCutoutOval'
+	alias 'cv76 0xEF24' 0xEF24 'zero.onum.unslashed'
+	alias 'cv76 0xEF25' 0xEF25 'zero.onum.slashed'
+	alias 'cv76 0xEF26' 0xEF26 'zero.onum.reverseSlashed'
+	alias 'cv76 0xEF27' 0xEF27 'zero.onum.tallSlashed'
+	alias 'cv76 0xEF28' 0xEF28 'zero.onum.tallReverseSlashed'
+	alias 'cv76 0xEF29' 0xEF29 'zero.onum.slashedSplit'
+	alias 'cv76 0xEF2A' 0xEF2A 'zero.onum.reverseSlashedSplit'
+	alias 'cv76 0xEF2B' 0xEF2B 'zero.onum.brokenSlash'
+	alias 'cv76 0xEF2C' 0xEF2C 'zero.onum.brokenReverseSlash'
+	alias 'cv76 0xEF2D' 0xEF2D 'zero.onum.brokenVerticalBar'
+	alias 'cv76 0xEF2E' 0xEF2E 'zero.onum.dotted'
+	alias 'cv76 0xEF2F' 0xEF2F 'zero.onum.longDotted'
+	alias 'cv76 0xEF30' 0xEF30 'zero.onum.slashedCutout'
+	alias 'cv76 0xEF31' 0xEF31 'zero.onum.reverseSlashedCutout'
+	alias 'cv76 0xEF32' 0xEF32 'zero.onum.tallSlashedCutout'
+	alias 'cv76 0xEF33' 0xEF33 'zero.onum.tallReverseSlashedCutout'
+	alias 'cv76 0xEF34' 0xEF34 'zero.onum.verticalBarCutout'
+	alias 'cv76 0xEF35' 0xEF35 'zero.onum.topRightCutout'
+	alias 'cv76 0xEF36' 0xEF36 'zero.onum.unslashedOval'
+	alias 'cv76 0xEF37' 0xEF37 'zero.onum.slashedOval'
+	alias 'cv76 0xEF38' 0xEF38 'zero.onum.reverseSlashedOval'
+	alias 'cv76 0xEF39' 0xEF39 'zero.onum.tallSlashedOval'
+	alias 'cv76 0xEF3A' 0xEF3A 'zero.onum.tallReverseSlashedOval'
+	alias 'cv76 0xEF3B' 0xEF3B 'zero.onum.slashedSplitOval'
+	alias 'cv76 0xEF3C' 0xEF3C 'zero.onum.reverseSlashedSplitOval'
+	alias 'cv76 0xEF3D' 0xEF3D 'zero.onum.brokenSlashOval'
+	alias 'cv76 0xEF3E' 0xEF3E 'zero.onum.brokenReverseSlashOval'
+	alias 'cv76 0xEF3F' 0xEF3F 'zero.onum.brokenVerticalBarOval'
+	alias 'cv76 0xEF40' 0xEF40 'zero.onum.dottedOval'
+	alias 'cv76 0xEF41' 0xEF41 'zero.onum.longDottedOval'
+	alias 'cv76 0xEF42' 0xEF42 'zero.onum.slashedCutoutOval'
+	alias 'cv76 0xEF43' 0xEF43 'zero.onum.reverseSlashedCutoutOval'
+	alias 'cv76 0xEF44' 0xEF44 'zero.onum.tallSlashedCutoutOval'
+	alias 'cv76 0xEF45' 0xEF45 'zero.onum.tallReverseSlashedCutoutOval'
+	alias 'cv76 0xEF46' 0xEF46 'zero.onum.verticalBarCutoutOval'
+	alias 'cv76 0xEF47' 0xEF47 'zero.onum.topRightCutoutOval'
 
 	if [query-glyph 'zero.lnum'] : VS01.set [query-glyph 'zero.lnum'] 'zero.lnum/forceSlashed'
 	if [query-glyph 'zero.onum'] : VS01.set [query-glyph 'zero.onum'] 'zero.onum/forceSlashed'
