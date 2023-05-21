@@ -8,6 +8,7 @@ glyph-block Symbol-Math-Arith : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Symbol-Math-Frame : MathEnclosureSw
+	glyph-block-import Symbol-Math-Relation-Common : EqualHalfSpace
 
 	do "Plus/Minus"
 		glyph-block-export PlusShape
@@ -18,18 +19,34 @@ glyph-block Symbol-Math-Arith : begin
 		create-glyph 'plus' '+' : PlusShape SB RightSB
 		create-glyph 'minus' 0x2212 : HBar.m SB RightSB SymbolMid OperatorStroke
 
+		define [IsraeliPlusShape left right s sw] : union
+			HBar.m left right SymbolMid [fallback sw OperatorStroke]
+			VBar.m (Middle + [fallback s 0]) PlusTop SymbolMid [fallback sw OperatorStroke]
+
+		create-glyph 'israeliPlus' 0xFB29 : IsraeliPlusShape SB RightSB
+
 		create-glyph 'innerPlus' : PlusShape SB RightSB 0 MathEnclosureSw
 		create-glyph 'innerMinus' : HBar.m SB RightSB SymbolMid MathEnclosureSw
+		create-glyph 'innerVerticalBar' : VBar.m Middle PlusTop PlusBot MathEnclosureSw
+		create-glyph 'innerIsraeliPlus' : IsraeliPlusShape SB RightSB 0 MathEnclosureSw
 
 		create-glyph 'hermetianConjugateMatrixPlus' 0x22B9 : difference
 			PlusShape SB RightSB
 			SquareAt Middle SymbolMid DotRadius
 
 		create-glyph 'plusminus' 0xB1 : glyph-proc
-			include : HBar.b SB RightSB 0 OperatorStroke
 			include : refer-glyph "plus"
+			include : HBar.b SB RightSB 0 OperatorStroke
 
 		turned 'minusplus' 0x2213 'plusminus' Middle SymbolMid
+		
+		create-glyph 'plusequal' 0x2A72 : glyph-proc
+			include : refer-glyph "plus"
+			include : ApparentTranslate 0 (EqualHalfSpace * 1.5)
+			include : HBar.b SB RightSB (EqualHalfSpace * 1.5) OperatorStroke
+			include : HBar.b SB RightSB 0 OperatorStroke
+
+		turned 'equalplus' 0x2A71 'plusequal' Middle SymbolMid
 
 	do "Multiply"
 		define Size : 0.5 * (RightSB - SB) + 0.25 * SB
@@ -58,6 +75,10 @@ glyph-block Symbol-Math-Arith : begin
 		create-glyph 'multiply' 0xD7 : glyph-proc
 			include : MultiplyStroke1Shape OperatorStroke 1 1 1
 			include : MultiplyStroke2Shape OperatorStroke 1 1 1
+
+		create-glyph 'multiplyUnderbar' 0x2A31 : glyph-proc
+			include : refer-glyph "multiply"
+			include : HBar.b (Middle - Size) (Middle + Size) 0 OperatorStroke
 
 		alias 'vectorOrCrossProduct' 0x2A2F 'multiply'
 
@@ -96,6 +117,17 @@ glyph-block Symbol-Math-Arith : begin
 					VBar.r (Middle + Size) (SymbolMid - Size) (SymbolMid + Size) swBowtieHv
 				intersection
 					Rect ParenTop ParenBot [mix RightSB SB 2] (Middle + Size)
+					union
+						MultiplyStroke1Shape swBowtie 1 1 1
+						MultiplyStroke2Shape swBowtie 1 1 1
+
+		create-glyph 'bowtieBot' 0x2A32 : glyph-proc
+			include : union
+				intersection
+					CoMultiplyMask 1 1 1
+					HBar.b (Middle - Size) (Middle + Size) (SymbolMid - Size) swBowtieHv
+				intersection
+					Rect ParenTop (SymbolMid - Size) (-Width) (2 * Width)
 					union
 						MultiplyStroke1Shape swBowtie 1 1 1
 						MultiplyStroke2Shape swBowtie 1 1 1
@@ -149,6 +181,9 @@ glyph-block Symbol-Math-Arith : begin
 
 		create-glyph 'innerMultiplyStroke1' : glyph-proc
 			include : MultiplyStroke1Shape MathEnclosureSw 1 1 1
+
+		create-glyph 'innerMultiplyStroke2' : glyph-proc
+			include : MultiplyStroke2Shape MathEnclosureSw 1 1 1
 
 		create-glyph 'innerMultiply' : glyph-proc
 			include : MultiplyStroke1Shape MathEnclosureSw 1 1 1
@@ -209,6 +244,18 @@ glyph-block Symbol-Math-Arith : begin
 					DrawAt Middle (SymbolMid + gap) (dr * sw / OperatorStroke - overshoot)
 					DrawAt Middle (SymbolMid - gap) (dr * sw / OperatorStroke - overshoot)
 
+			create-glyph "minusFallingDots.\(suffix)" : glyph-proc
+				include : refer-glyph "minus"
+				define gap : (RightSB - SB) / 2
+				include : DrawAt [mix SB RightSB (1/6)] (SymbolMid + gap) (dr - overshoot)
+				include : DrawAt [mix SB RightSB (5/6)] (SymbolMid - gap) (dr - overshoot)
+
+			create-glyph "minusRisingDots.\(suffix)" : glyph-proc
+				include : refer-glyph "minus"
+				define gap : (RightSB - SB) / 2
+				include : DrawAt [mix SB RightSB (1/6)] (SymbolMid - gap) (dr - overshoot)
+				include : DrawAt [mix SB RightSB (5/6)] (SymbolMid + gap) (dr - overshoot)
+
 		select-variant 'dotplus' 0x2214 (follow -- 'punctuationDot')
 		turned 'plusdot' 0x2A25 'dotplus' Middle SymbolMid
 
@@ -221,6 +268,9 @@ glyph-block Symbol-Math-Arith : begin
 		select-variant 'minusColon' 0x2239 (follow -- 'punctuationDot')
 		select-variant 'divide' 0xF7 (follow -- 'punctuationDot')
 		select-variant 'divisionTimes' 0x22C7 (follow -- 'punctuationDot')
+
+		select-variant 'minusFallingDots' 0x2A2B (follow -- 'punctuationDot')
+		select-variant 'minusRisingDots' 0x2A2C (follow -- 'punctuationDot')
 
 	do
 		define fine : AdviceStroke 5.5
@@ -260,6 +310,16 @@ glyph-block Symbol-Math-Arith : begin
 					HBar.m (SB + singleSideRadius) RightSB SymbolMid OperatorStroke
 					DotAt (SB + dotCenterOffset) SymbolMid (singleSideRadius + singleSideFine)
 				DotAt (SB + dotCenterOffset) SymbolMid singleSideRadius
+
+		create-glyph 'doubleMultimap' 0x29DF : glyph-proc
+			include : difference
+				union
+					HBar.m (SB + barOffset) (RightSB - barOffset) SymbolMid OperatorStroke
+					DotAt (SB + dotCenterOffset) SymbolMid (radius + fine)
+					DotAt (RightSB - dotCenterOffset) SymbolMid (radius + fine)
+				union
+					DotAt (SB + dotCenterOffset) SymbolMid radius
+					DotAt (RightSB - dotCenterOffset) SymbolMid radius
 
 		create-glyph 'mathSmallCircle' 0x2218
 			RingStrokeAt Middle SymbolMid (singleSideRadius + singleSideFine) singleSideFine
@@ -301,3 +361,17 @@ glyph-block Symbol-Math-Arith : begin
 			set-width MosaicWidth
 			include : refer-glyph : MangleName "innerMultiplyStroke1Big"
 			include : refer-glyph : MangleName "innerMultiplyStroke2Big"
+
+		create-glyph [MangleName 'risingDiagonal'] [MangleUnicode 0x27CB] : glyph-proc
+			set-width MosaicWidth
+			include : dispiro
+				widths.center OperatorStroke
+				flat SB ParenBot
+				curl (MosaicWidth - SB) ParenTop
+
+		create-glyph [MangleName 'fallingDiagonal'] [MangleUnicode 0x27CD] : glyph-proc
+			set-width MosaicWidth
+			include : dispiro
+				widths.center OperatorStroke
+				flat SB ParenTop
+				curl (MosaicWidth - SB) ParenBot
