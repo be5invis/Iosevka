@@ -12,40 +12,35 @@ glyph-block Letter-Latin-Lower-B : begin
 	glyph-block-import Letter-Shared-Shapes : OBarLeft DToothlessRise DMBlend HooktopLeftBar
 	glyph-block-import Letter-Shared-Shapes : LetterBarOverlay PalatalHook
 
-	define [ToothedBody] : union
+	define [ToothedBody yTop] : union
 		OBarLeft.shape
-		VBar.l SB 0 Ascender
+		VBar.l SB 0 yTop
 
-	define [ToothlessCornerBody] : union
+	define [ToothlessCornerBody yTop] : union
 		OBarLeft.toothless (rise -- DToothlessRise) (mBlend -- DMBlend)
-		VBar.l SB DToothlessRise Ascender
+		VBar.l SB DToothlessRise yTop
 
-	define [ToothlessRoundedBody] : OBarLeft.rounded (yTerminal -- Ascender)
+	define [ToothlessRoundedBody yTop] : OBarLeft.rounded (yTerminal -- yTop)
 
-	define [FullSerifs] : glyph-proc
-		if SLAB : begin
-			include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-			include : tagged 'serifLB' : HSerif.lb SB 0 SideJut
-
-	define [LTSerifs] : glyph-proc
-		if SLAB : begin
-			include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-
-	define [MotionSerifs] : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+	define [LTSerifs] : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+	define [FullSerifs] : composite-proc
+		tagged 'serifLT' : HSerif.lt SB Ascender SideJut
+		tagged 'serifLB' : HSerif.lb SB 0 SideJut
 
 	define BConfig : object
-		toothed                       { ToothedBody          FullSerifs   SLAB }
-		toothlessCorner               { ToothlessCornerBody  LTSerifs     SLAB }
-		toothlessRounded              { ToothlessRoundedBody LTSerifs     SLAB }
-		toothedMotionSerifed          { ToothedBody          MotionSerifs true }
-		toothlessCornerMotionSerifed  { ToothlessCornerBody  MotionSerifs true }
-		toothlessRoundedMotionSerifed { ToothlessRoundedBody MotionSerifs true }
+		toothedSerifless          { ToothedBody          no-shape   false }
+		toothedMotionSerifed      { ToothedBody          LTSerifs   true  }
+		toothedSerifed            { ToothedBody          FullSerifs true  }
+		toothlessCornerSerifless  { ToothlessCornerBody  no-shape   false }
+		toothlessRoundedSerifless { ToothlessRoundedBody no-shape   false }
+		toothlessCornerSerifed    { ToothlessCornerBody  LTSerifs   true  }
+		toothlessRoundedSerifed   { ToothlessRoundedBody LTSerifs   true  }
 
 	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
 		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.5
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
-			include : Body
+			include : Body Ascender
 			include : Serifs
 			set-base-anchor 'overlayOnExtension' (SB + 0.5 * Stroke * HVContrast) yOverlay
 			set-base-anchor 'overlay' Middle (XH / 2)
@@ -61,6 +56,13 @@ glyph-block Letter-Latin-Lower-B : begin
 				flat [mix SB 0       0.7]   (yOverlay - Ascender * 0.1)
 				curl [mix SB RightSB 0.625] (yOverlay + Ascender * 0.05)
 
+		create-glyph "bHookTop.\(suffix)" : glyph-proc
+			include : MarkSet.b
+			include : Body XH
+			include : HooktopLeftBar.inner (bottom -- (XH / 2))
+			include : Serifs
+			eject-contour 'serifLT'
+
 	select-variant 'b'      'b'
 	select-variant 'bBar'   0x180  (follow -- 'b')
 	select-variant 'bSlash' 0x2422 (follow -- 'b')
@@ -72,24 +74,6 @@ glyph-block Letter-Latin-Lower-B : begin
 
 	link-reduced-variant 'b/sansSerif' 'b' MathSansSerif
 	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnExension'
-
-	create-glyph 'bHookTop.toothed' : glyph-proc
-		include : MarkSet.b
-		include : OBarLeft.shape
-		include : HooktopLeftBar.inner
-		if SLAB : begin
-			include : tagged 'serifLB' : HSerif.lb SB 0 SideJut
-
-	create-glyph 'bHookTop.toothlessCorner' : glyph-proc
-		include : MarkSet.b
-		include : OBarLeft.toothless (rise -- DToothlessRise) (mBlend -- DMBlend)
-		include : HooktopLeftBar.inner (bottom -- DToothlessRise)
-
-	create-glyph 'bHookTop.toothlessRounded' : glyph-proc
-		include : MarkSet.b
-		include : OBarLeft.rounded (yTerminal -- XH)
-		include : HooktopLeftBar.inner (bottom -- SmallArchDepthB)
-
 	select-variant 'bHookTop' 0x253
 
 	derive-glyphs 'bdot' 0x1E03 'b' : lambda [src gr] : glyph-proc

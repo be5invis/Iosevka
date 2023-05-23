@@ -14,14 +14,13 @@ glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder nShoulderMask
 	glyph-block-import Letter-Shared-Shapes : CyrDescender HooktopLeftBar VerticalHook PalatalHook
 
-	define [SmallHSerifs tailed hookTop] : glyph-proc : if SLAB : begin
+	define [SmallHSerifs tailed hookTop] : glyph-proc : begin
+		include : SmallHLeftSerifs tailed hookTop
+		if [not tailed] : include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) 0 Jut
+
+	define [SmallHLeftSerifs tailed hookTop] : glyph-proc : begin
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-		if [not tailed]
-			if (para.isItalic)
-			: then : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
-			: else : include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) 0 Jut
-		if (!para.isItalic) : begin
-			include : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) 0 Jut
+		include : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) 0 Jut
 
 	define [SmallHMotionSerifs tailed hookTop] : glyph-proc
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
@@ -46,11 +45,15 @@ glyph-block Letter-Latin-Lower-H : begin
 			corner xOverlayEnd yOverlay
 
 	define HConfig : object
-		straight               { 0 SLAB SmallHSerifs        }
-		tailed                 { 1 SLAB SmallHSerifs        }
-		straightMotionSerifed  { 0 true SmallHMotionSerifs  }
-		tailedMotionSerifed    { 1 true SmallHMotionSerifs  }
-		straightTopLeftSerifed { 0 true SmallHTopLeftSerifs }
+		straightSerifless      { 0 false no-shape            }
+		tailedSerifless        { 1 false no-shape            }
+		straightMotionSerifed  { 0 true  SmallHMotionSerifs  }
+		tailedMotionSerifed    { 1 true  SmallHMotionSerifs  }
+		straightTopLeftSerifed { 0 true  SmallHTopLeftSerifs }
+		straightLeftSerifed    { 0 true  SmallHSerifs        }
+		tailedLeftSerifed      { 1 true  SmallHSerifs        }
+		straightSerifed        { 0 true  SmallHSerifs        }
+		tailedSerifed          { 1 true  SmallHSerifs        }
 
 	foreach { suffix { fTailed fHasTopSerif Serifs } } [Object.entries HConfig] : do
 		create-glyph "h.\(suffix)" : glyph-proc

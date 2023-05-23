@@ -74,18 +74,20 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	define [SmallMBottomRightSerif df top rbot] : begin
 		local sf : SerifFrame.fromDf df top rbot
-		return : if (!para.isItalic && sf.enoughSpaceForFullSerifs) sf.rb.full sf.rb.outer
+		return : if sf.enoughSpaceForFullSerifs sf.rb.full sf.rb.outer
 
 	define [SmallMBottomMotionRightSerif df top rbot] : begin
 		local sf : SerifFrame.fromDf df top rbot
 		return sf.rb.outer
 
-	define [AutoSerifs df top lbot mbot rbot tailed earless] : glyph-proc
-		if SLAB : begin
-			if [not earless] : include : SmallMTopLeftSerif df top lbot
-			if [not para.isItalic] : include : SmallMBottomLeftSerif df top lbot
-			if [not para.isItalic] : include : SmallMBottomMiddleSerif df top mbot
-			if [not tailed] : include : SmallMBottomRightSerif df top rbot
+	define [FullSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		if [not earless] : include : SmallMTopLeftSerif df top lbot
+		include : SmallMBottomLeftSerif df top lbot
+		include : SmallMBottomMiddleSerif df top mbot
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot
+
+	define [AutoSerifs df top lbot mbot rbot tailed earless] : begin
+		if SLAB [FullSerifs df top lbot mbot rbot tailed earless] [no-shape]
 
 	define [LtSerifs df top lbot mbot rbot tailed earless] : glyph-proc
 		include : SmallMTopLeftSerif df top lbot
@@ -166,33 +168,42 @@ glyph-block Letter-Latin-Lower-M : begin
 			flat df.rightSB [Math.max (top - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
 
-	define SmallMConfig : object
-		normal                                 { SmallMArches                        AutoSerifs 0 0 0 }
-		tailed                                 { SmallMArches                        AutoSerifs 1 0 0 }
-		shortLeg                               { SmallMArches                        AutoSerifs 0 1 0 }
-		shortLegTailed                         { SmallMArches                        AutoSerifs 1 1 0 }
-		topLeftSerifed                         { SmallMArches                        LtSerifs   0 0 0 }
-		topLeftSerifedTailed                   { SmallMArches                        LtSerifs   1 0 0 }
-		shortLegTopLeftSerifed                 { SmallMArches                        LtSerifs   0 1 0 }
-		shortLegTopLeftSerifedTailed           { SmallMArches                        LtSerifs   1 1 0 }
-		topLeftAndBottomRightSerifed           { SmallMArches                        LtRbSerifs 0 0 0 }
-		shortLegTopLeftAndBottomRightSerifed   { SmallMArches                        LtRbSerifs 0 1 0 }
-		normal                                 { SmallMArches                        AutoSerifs 0 0 0 }
-		tailed                                 { SmallMArches                        AutoSerifs 1 0 0 }
-		shortLeg                               { SmallMArches                        AutoSerifs 0 1 0 }
-		shortLegTailed                         { SmallMArches                        AutoSerifs 1 1 0 }
-		earlessCornerDoubleArch                { EarlessCornerDoubleArchSmallMShape  AutoSerifs 0 0 1 }
-		earlessCornerDoubleArchTailed          { EarlessCornerDoubleArchSmallMShape  AutoSerifs 1 0 1 }
-		earlessCornerDoubleArchShortLeg        { EarlessCornerDoubleArchSmallMShape  AutoSerifs 0 1 1 }
-		earlessCornerDoubleArchShortLegTailed  { EarlessCornerDoubleArchSmallMShape  AutoSerifs 1 1 1 }
-		earlessRoundedDoubleArch               { EarlessRoundedDoubleArchSmallMShape AutoSerifs 0 0 1 }
-		earlessRoundedDoubleArchTailed         { EarlessRoundedDoubleArchSmallMShape AutoSerifs 1 0 1 }
-		earlessRoundedDoubleArchShortLeg       { EarlessRoundedDoubleArchSmallMShape AutoSerifs 0 1 1 }
-		earlessRoundedDoubleArchShortLegTailed { EarlessRoundedDoubleArchSmallMShape AutoSerifs 1 1 1 }
-		earlessSingleArch                      { EarlessSingleArchSmallMShape        AutoSerifs 0 0 1 }
-		earlessSingleArchTailed                { EarlessSingleArchSmallMShape        AutoSerifs 1 0 1 }
-		earlessSingleArchShortLeg              { EarlessSingleArchSmallMShape        AutoSerifs 0 1 1 }
-		earlessSingleArchShortLegTailed        { EarlessSingleArchSmallMShape        AutoSerifs 1 1 1 }
+	define BodyConfig : object
+		""                          { SmallMArches                        0 }
+		"earlessCornerDoubleArch"   { EarlessCornerDoubleArchSmallMShape  1 }
+		"earlessRoundedDoubleArch"  { EarlessRoundedDoubleArchSmallMShape 1 }
+		"earlessSingleArch"         { EarlessSingleArchSmallMShape        1 }
+
+	define TailConfig : object
+		""						    { 0 }
+		"tailed"                    { 1 }
+
+	define LegConfig : object
+		""                          { 0 }
+		"shortLeg"                  { 1 }
+
+	define SerifConfig : object
+		""                             { AutoSerifs }
+		"serifless"                    { no-shape   }
+		"serifed"                      { FullSerifs }
+		"topLeftSerifed"               { LtSerifs   }
+		"topLeftAndBottomRightSerifed" { LtRbSerifs }
+
+	define [join-suffix parts] : begin
+		local suffix ""
+		foreach part [items-of parts] : do
+			if part : begin
+				local toAppend : if suffix ([part.charAt 0 :.toUpperCase] + [part.slice 1]) part
+				set suffix : suffix + toAppend
+		return suffix
+
+	define SmallMConfig {.}
+	foreach { suffixBody { Body earless } } [Object.entries BodyConfig]
+		foreach { suffixLeg { shortLeg } } [Object.entries LegConfig]
+			foreach { suffixTail { tailed } } [Object.entries TailConfig]
+				foreach { suffixSerifs { Serifs } } [Object.entries SerifConfig] : begin
+					local suffix : join-suffix { suffixBody suffixLeg suffixTail suffixSerifs }
+					set SmallMConfig.(suffix) { Body Serifs tailed shortLeg earless }
 
 	foreach { suffix { Body Serifs tailed shortLeg earless } } [Object.entries SmallMConfig] : do
 		define [mShapeBody df height] : glyph-proc
