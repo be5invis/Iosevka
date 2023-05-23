@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback weaveSuffix] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -168,44 +168,25 @@ glyph-block Letter-Latin-Lower-M : begin
 			flat df.rightSB [Math.max (top - [SmallMSmooth df]) (rbot + 0.1)]
 			curl df.rightSB rbot [heading Downward]
 
-	define BodyConfig : object
-		""                          { SmallMArches                        0 }
-		"earlessCornerDoubleArch"   { EarlessCornerDoubleArchSmallMShape  1 }
-		"earlessRoundedDoubleArch"  { EarlessRoundedDoubleArchSmallMShape 1 }
-		"earlessSingleArch"         { EarlessSingleArchSmallMShape        1 }
+	define SmallMConfig : weaveSuffix
+		object
+			""                             { SmallMArches                        0 }
+			"earlessCornerDoubleArch"      { EarlessCornerDoubleArchSmallMShape  1 }
+			"earlessRoundedDoubleArch"     { EarlessRoundedDoubleArchSmallMShape 1 }
+			"earlessSingleArch"            { EarlessSingleArchSmallMShape        1 }
+		object
+			""                             { 0 }
+			"shortLeg"                     { 1 }
+		object
+			""						       { 0 }
+			"tailed"                       { 1 }
+		object
+			"serifless"                    { no-shape   }
+			"serifed"                      { FullSerifs }
+			"topLeftSerifed"               { LtSerifs   }
+			"topLeftAndBottomRightSerifed" { LtRbSerifs }
 
-	define TailConfig : object
-		""						    { 0 }
-		"tailed"                    { 1 }
-
-	define LegConfig : object
-		""                          { 0 }
-		"shortLeg"                  { 1 }
-
-	define SerifConfig : object
-		""                             { AutoSerifs }
-		"serifless"                    { no-shape   }
-		"serifed"                      { FullSerifs }
-		"topLeftSerifed"               { LtSerifs   }
-		"topLeftAndBottomRightSerifed" { LtRbSerifs }
-
-	define [join-suffix parts] : begin
-		local suffix ""
-		foreach part [items-of parts] : do
-			if part : begin
-				local toAppend : if suffix ([part.charAt 0 :.toUpperCase] + [part.slice 1]) part
-				set suffix : suffix + toAppend
-		return suffix
-
-	define SmallMConfig {.}
-	foreach { suffixBody { Body earless } } [Object.entries BodyConfig]
-		foreach { suffixLeg { shortLeg } } [Object.entries LegConfig]
-			foreach { suffixTail { tailed } } [Object.entries TailConfig]
-				foreach { suffixSerifs { Serifs } } [Object.entries SerifConfig] : begin
-					local suffix : join-suffix { suffixBody suffixLeg suffixTail suffixSerifs }
-					set SmallMConfig.(suffix) { Body Serifs tailed shortLeg earless }
-
-	foreach { suffix { Body Serifs tailed shortLeg earless } } [Object.entries SmallMConfig] : do
+	foreach { suffix { {Body earless} {tailed} {shortLeg} {Serifs} } } [pairs-of SmallMConfig] : do
 		define [mShapeBody df height] : glyph-proc
 			include : Body height 0 [if shortLeg [SmallMShortLegHeight height df] 0] [if tailed ([SmallMSmoothHeight height df] + O) 0] df
 			if tailed : include : RightwardTailedBar df.rightSB 0 [SmallMSmoothHeight height df] (sw -- df.mvs)

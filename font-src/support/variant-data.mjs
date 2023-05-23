@@ -1,3 +1,5 @@
+import { joinCamel } from "./utils.mjs";
+
 export function apply(data, para, argv) {
 	const parsed = parse(data, argv);
 	let tagSet = new Set();
@@ -67,7 +69,6 @@ class SelectorTree {
 
 class Prime {
 	constructor(key, cfg) {
-		if (!cfg.variants) throw new Error(`Missing variants in ${key}`);
 		this.key = key;
 		this.sampler = cfg.sampler;
 		this.samplerExplain = cfg.samplerExplain;
@@ -79,10 +80,18 @@ class Prime {
 			: [...(cfg.sampler || "")];
 		this.tag = cfg.tag;
 		this.slopeDependent = !!cfg.slopeDependent;
-		this.variants = new Map();
 		this.hotChars = cfg.hotChars ? [...cfg.hotChars] : this.descSampleText;
-		for (const varKey in cfg.variants) {
-			const variant = cfg.variants[varKey];
+
+		this.variants = new Map();
+
+		let variantConfig = cfg.variants;
+		if (!variantConfig && cfg["variants-buildup"]) {
+			const vb = new VariantBuilder(cfg["variants-buildup"]);
+			variantConfig = vb.process();
+		}
+		if (!variantConfig) throw new Error(`Missing variants in ${key}`);
+		for (const varKey in variantConfig) {
+			const variant = variantConfig[varKey];
 			this.variants.set(varKey, new PrimeVariant(varKey, cfg.tag, variant));
 		}
 	}
@@ -189,4 +198,192 @@ class Composite {
 			variant.resolve(para, vs);
 		}
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// Systematic Variant Building
+///
+
+class VariantBuilder {
+	constructor(cfg) {
+		this.entry = cfg.entry;
+		this.descriptionLeader = cfg.descriptionLeader;
+		this.stages = new Map();
+		for (const [key, stage] of Object.entries(cfg.stages)) {
+			this.stages.set(key, new VbStage(key, stage));
+		}
+	}
+	process() {
+		const globalState = new VbGlobalState(this.stages);
+		const localState = new VbLocalState();
+		localState.descriptionLeader = this.descriptionLeader;
+		globalState.stages.get(this.entry).accept(globalState, localState);
+		let ans = {};
+		for (const item of globalState.sink) {
+			let cfg = item.createPrimeVariant();
+			ans[cfg.key] = cfg;
+		}
+		return ans;
+	}
+}
+
+class VbStage {
+	constructor(stage, raw) {
+		this.stage = stage;
+		this.defaultAlternative = new VbStageAlternative(this.stage, "*", {});
+		this.alternatives = new Map();
+		for (const k in raw) {
+			if (k === "*") {
+				this.defaultAlternative = new VbStageAlternative(this.stage, "*", raw[k]);
+			} else {
+				this.alternatives.set(k, new VbStageAlternative(this.stage, k, raw[k]));
+			}
+		}
+
+		for (const v of this.alternatives.values()) v.fallback(this.defaultAlternative);
+	}
+	accept(globalState, localState) {
+		let variantList = Array.from(this.alternatives.values());
+		variantList.sort((a, b) => (a.rank || 0) - (b.rank || 0));
+		for (const v of variantList) {
+			const ans = v.tryAccept(globalState, localState);
+			if (ans) globalState.stages.get(ans.stage).accept(globalState, ans);
+		}
+	}
+}
+
+class VbStageAlternative {
+	constructor(stage, key, raw) {
+		this.stage = stage;
+		this.key = key;
+		this.rank = raw.rank;
+		this.next = raw.next;
+		this.keySuffix = raw.keySuffix;
+		this.descriptionSuffix = raw.descriptionSuffix;
+		this.descriptionJoiner = raw.descriptionJoiner || "with";
+		this.disableIf = raw.disableIf;
+		this.selectorSuffix = raw.selectorSuffix;
+	}
+	fallback(defaultAlternative) {
+		this.next = this.next || defaultAlternative.next;
+		this.keySuffix = this.keySuffix || defaultAlternative.keySuffix;
+		this.descriptionSuffix = this.descriptionSuffix || defaultAlternative.descriptionSuffix;
+		this.descriptionJoiner = this.descriptionJoiner || defaultAlternative.descriptionJoiner;
+		this.disableIf = this.disableIf || defaultAlternative.disableIf;
+		this.selectorSuffix = this.selectorSuffix || defaultAlternative.selectorSuffix;
+	}
+
+	tryAccept(globalState, localState) {
+		// Detect whether this alternative is applicable.
+		if (this.disableIf) {
+			for (const branch of this.disableIf) {
+				let statementMatches = true;
+				for (let [k, v] of Object.entries(branch)) {
+					v = v.trim();
+					if (/^NOT(?=\s)/.test(v)) {
+						v = v.slice(3).trim();
+						if (localState.assignments.get(k) === v) {
+							statementMatches = false;
+							break;
+						}
+					} else {
+						if (localState.assignments.get(k) !== v) {
+							statementMatches = false;
+							break;
+						}
+					}
+				}
+				if (statementMatches) return null;
+			}
+		}
+
+		// Accept this alternative.
+		const ans = localState.clone();
+		ans.stage = this.next;
+		ans.assignments.set(this.stage, this.key);
+		if (this.keySuffix) ans.key.push(this.keySuffix);
+		if (this.descriptionJoiner && this.descriptionSuffix)
+			ans.addDescription(this.descriptionJoiner, this.descriptionSuffix);
+		if (this.selectorSuffix)
+			for (const [selector, suffix] of Object.entries(this.selectorSuffix))
+				ans.addSelector(selector, suffix);
+
+		if (!this.next) {
+			ans.rank = ++globalState.rank;
+			globalState.sink.push(ans);
+			return null;
+		} else {
+			return ans;
+		}
+	}
+}
+
+class VbGlobalState {
+	constructor(stages) {
+		this.stages = stages;
+		this.rank = 0;
+		this.sink = [];
+	}
+}
+
+class VbLocalState {
+	constructor() {
+		this.stage = ".start";
+		this.rank = 0;
+		this.descriptionLeader = "";
+
+		this.assignments = new Map();
+		this.key = [];
+		this.descriptions = new Map();
+		this.selector = new Map();
+	}
+
+	clone() {
+		const ans = new VbLocalState();
+		ans.stage = this.stage;
+		ans.rank = this.rank;
+		ans.descriptionLeader = this.descriptionLeader;
+		ans.assignments = new Map(this.assignments);
+		ans.key = [...this.key];
+		ans.selector = new Map(this.selector);
+		ans.descriptions = new Map();
+		for (const [k, v] of this.descriptions) ans.descriptions.set(k, [...v]);
+		return ans;
+	}
+
+	addDescription(joiner, segment) {
+		if (!this.descriptions.has(joiner)) this.descriptions.set(joiner, []);
+		this.descriptions.get(joiner).push(segment);
+	}
+	addSelector(selector, value) {
+		this.selector.set(selector, joinCamel(this.selector.get(selector), value));
+	}
+
+	produceKey() {
+		return this.key.join("-");
+	}
+	produceDescription() {
+		let desc = [];
+		for (const [joiner, segments] of this.descriptions) {
+			if (!segments.length) continue;
+			desc.push(`${joiner} ${arrayToSentence(segments)}`);
+		}
+		return this.descriptionLeader + " " + desc.join("; ");
+	}
+
+	createPrimeVariant() {
+		return {
+			key: this.produceKey(),
+			rank: this.rank,
+			description: this.produceDescription(),
+			selector: Object.fromEntries(this.selector)
+		};
+	}
+}
+
+function arrayToSentence(arr) {
+	if (arr.length == 1) return arr[0];
+	let last = arr.pop();
+	return arr.join(", ") + " and " + last;
 }

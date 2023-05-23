@@ -25,3 +25,30 @@ export function bez3(a, b, c, d, t) {
 		t * t * t * d
 	);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function joinCamel(a, b) {
+	if (!a) return b;
+	if (!b) return a;
+	return a + b[0].toUpperCase() + b.slice(1);
+}
+
+export function weaveSuffix(...configs) {
+	let ans = {};
+	joinSuffixListImpl(ans, "", [], configs);
+	return ans;
+}
+
+function joinSuffixListImpl(sink, k, v, configs) {
+	if (!configs.length) {
+		sink[k] = v;
+		return;
+	}
+
+	for (const [keySuffix, valueSuffix] of Object.entries(configs[0])) {
+		const k1 = joinCamel(k, keySuffix);
+		const v1 = [...v, valueSuffix];
+		joinSuffixListImpl(sink, k1, v1, configs.slice(1));
+	}
+}
