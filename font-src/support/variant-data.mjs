@@ -261,7 +261,7 @@ class VbStageAlternative {
 		this.key = key;
 		this.rank = raw.rank;
 		this.next = raw.next;
-		this.keySuffix = raw.keySuffix;
+		if (key !== "*") this.keySuffix = raw.keySuffix ?? key;
 		this.descriptionSuffix = raw.descriptionSuffix;
 		this.descriptionJoiner = raw.descriptionJoiner || "with";
 		this.disableIf = raw.disableIf;
