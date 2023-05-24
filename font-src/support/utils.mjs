@@ -34,28 +34,49 @@ export function joinCamel(a, b) {
 	return a + b[0].toUpperCase() + b.slice(1);
 }
 
-function joinSuffixListImpl(sink, k, v, configs) {
+function joinSuffixListImpl(sink, k, v, telescope, configs) {
 	if (!configs.length) {
 		sink[k] = v;
 		return;
 	}
 
-	for (const [keySuffix, valueSuffix] of Object.entries(configs[0])) {
+	let [item, ...rest] = configs;
+	if (item instanceof Function) item = item(...telescope);
+	if (!item) return;
+
+	for (const [keySuffix, valueSuffix] of Object.entries(item)) {
 		const k1 = joinCamel(k, keySuffix);
 		const v1 = [...v, valueSuffix];
-		joinSuffixListImpl(sink, k1, v1, configs.slice(1));
+		const telescope1 = [...telescope, keySuffix];
+		joinSuffixListImpl(sink, k1, v1, telescope1, rest);
 	}
 }
 
 export const SuffixCfg = {
 	weave: function (...configs) {
 		let ans = {};
-		joinSuffixListImpl(ans, "", [], configs);
+		joinSuffixListImpl(ans, "", [], [], configs);
 		return ans;
 	},
 	combine: function (...configs) {
 		let ans = {};
 		for (const item of configs) for (const [k, v] of Object.entries(item)) ans[k] = v;
 		return ans;
+	},
+	collect: function (pairs) {
+		let ans = {};
+		for (const pair of pairs) {
+			if (pair) ans[pair.left] = pair.right;
+		}
+		return ans;
 	}
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+export class $NamedParameterPair$ {
+	constructor(l, r) {
+		this.left = l;
+		this.right = r;
+	}
+}

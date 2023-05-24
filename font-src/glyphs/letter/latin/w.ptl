@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -323,43 +323,32 @@ glyph-block Letter-Latin-W : begin
 	define [WCursiveImpl df top bodyType serifsType] : WCursiveImplImpl false df top bodyType serifsType
 	define [WHookTopCursive df top bodyType serifsType]  : WCursiveImplImpl true  df top bodyType serifsType
 
-	define WConfig : object
-		cyrlCapialOmega                    { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA   SERIFS-CYRL-OMEGA     }
-		cyrlSmallOmega                     { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA   SERIFS-CURSIVE        }
+	define WConfig : SuffixCfg.weave
+		# Body
+		object
+			straight                           { WShapeImpl   WHooktopShape   FORM-STRAIGHT   }
+			straightAsymmetric                 { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC }
+			straightDoubleV                    { WShapeImpl   WHooktopShape   FORM-DOUBLE-V   }
+			straightFlatTop                    { WShapeImpl   WHooktopShape   FORM-FLAT-TOP   }
+			straightVerticalSides              { WVertSides   WVSHookTopShape FORM-STRAIGHT   }
+			curly                              { WShapeImpl   WHooktopShape   FORM-CURLY      }
+			cursive                            { WCursiveImpl WHookTopCursive FORM-CURLY      }
+			cyrlCapialOmega					   { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA }
+			cyrlSmallOmega                     { WShapeImpl   WHooktopShape   FORM-CYRL-OMEGA }
 
-		straightAsymmetric                 { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-ASYMMETRIC     }
-		straightDoubleV                    { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-DOUBLE-V       }
-		straightFlatTop                    { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-AUTO           }
-		straight                           { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-AUTO           }
-		straightVerticalSides              { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-AUTO           }
-		curly                              { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-AUTO           }
-		cursive                            { WCursiveImpl WHookTopCursive FORM-CURLY        SERIFS-CURSIVE        }
+		# Serifs
+		function [body] : if (body == 'cyrlCapialOmega' || body == 'cyrlSmallOmega')
+			then : object [""  SERIFS-CYRL-OMEGA]
+			else : object
+				serifless     SERIFS-NONE
+				motionSerifed SERIFS-MOTION
+				serifed     : match body
+					[Just 'straightAsymmetric']  SERIFS-ASYMMETRIC-ALL
+					[Just 'straightDoubleV']     SERIFS-DOUBLE-V-ALL
+					[Just 'cursive']             SERIFS-MOTION
+					__                           SERIFS-ALL
 
-		straightAsymmetricSerifless        { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-NONE           }
-		straightDoubleVSerifless           { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-NONE           }
-		straightFlatTopSerifless           { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-NONE           }
-		straightVerticalSidesSerifless     { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-NONE           }
-		straightSerifless                  { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-NONE           }
-		curlySerifless                     { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-NONE           }
-		cursiveSerifless                   { WCursiveImpl WHookTopCursive FORM-CURLY        SERIFS-NONE           }
-
-		straightAsymmetricMotionSerifed    { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-MOTION         }
-		straightDoubleVMotionSerifed       { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-MOTION         }
-		straightFlatTopMotionSerifed       { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-MOTION         }
-		straightVerticalSidesMotionSerifed { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-MOTION         }
-		straightMotionSerifed              { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-MOTION         }
-		curlyMotionSerifed                 { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-MOTION         }
-		cursiveMotionSerifed               { WCursiveImpl WHookTopCursive FORM-CURLY        SERIFS-MOTION         }
-
-		straightAsymmetricSerifed          { WShapeImpl   WHooktopShape   FORM-ASYMMETRIC   SERIFS-ASYMMETRIC-ALL }
-		straightDoubleVSerifed             { WShapeImpl   WHooktopShape   FORM-DOUBLE-V     SERIFS-DOUBLE-V-ALL   }
-		straightFlatTopSerifed             { WShapeImpl   WHooktopShape   FORM-FLAT-TOP     SERIFS-ALL            }
-		straightVerticalSidesSerifed       { WVertSides   WVSHookTopShape FORM-STRAIGHT     SERIFS-ALL            }
-		straightSerifed                    { WShapeImpl   WHooktopShape   FORM-STRAIGHT     SERIFS-ALL            }
-		curlySerifed                       { WShapeImpl   WHooktopShape   FORM-CURLY        SERIFS-ALL            }
-		cursiveSerifed                     { WCursiveImpl WHookTopCursive FORM-CURLY        SERIFS-MOTION         }
-
-	foreach { suffix { implT hookTopImplT bodyType slabType } } [Object.entries WConfig] : do
+	foreach { suffix { {implT hookTopImplT bodyType} slabType } } [pairs-of WConfig] : do
 		create-glyph "W.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width

@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [mix clamp fallback SuffixCfg] from"../../support/utils.mjs"
 import [AnyCv getGrMesh VS01] from"../../support/gr.mjs"
 
 glyph-module
@@ -105,8 +105,8 @@ glyph-block Digits-Zero : begin
 	define [BrokenVerticalBar top] : difference
 		VBar.m Middle (0 + O) (top - O) [Math.min (CircleInnerWidth * 0.375) OverlayStroke]
 		intersection
-			MaskAbove (top * (1/2 + 1/16))
-			MaskBelow (top * (1/2 - 1/16))
+			MaskAbove (top * (1/2 - 1/16))
+			MaskBelow (top * (1/2 + 1/16))
 
 	define [ZeroDotShape top] : begin
 		local halfDotWidth : Math.min DotRadius (CircleInnerWidth / 4)
@@ -150,50 +150,48 @@ glyph-block Digits-Zero : begin
 			Middle + halfDotWidth - OX
 			begin 0
 
-	define ZeroConfig : object
-		'unslashed'                    { null                 null       }
-		'slashed'                      { ZeroSlash            null       }
-		'reverseSlashed'               { ZeroRevSlash         null       }
-		'tallSlashed'                  { ZeroTallSlash        null       }
-		'tallReverseSlashed'           { ZeroTallRevSlash     null       }
-		'dotted'                       { ZeroDotShape         null       }
-		'longDotted'                   { ZeroLongDotShape     null       }
-		'slashedSplit'                 { ZeroSlash            InsetShape }
-		'reverseSlashedSplit'          { ZeroRevSlash         InsetShape }
-		'brokenSlash'                  { BrokenTallSlash      null       }
-		'brokenReverseSlash'           { BrokenTallRevSlash   null       }
-		'brokenVerticalBar'            { BrokenVerticalBar    null       }
-		'slashedCutout'                { CutoutSlash          Cutout     }
-		'reverseSlashedCutout'         { CutoutRevSlash       Cutout     }
-		'tallSlashedCutout'            { CutoutTallSlash      Cutout     }
-		'tallReverseSlashedCutout'     { CutoutTallRevSlash   Cutout     }
-		'verticalBarCutout'            { CutoutVerticalBar    Cutout     }
-		'topRightCutout'               { TopRightCutoutSlash  Cutout     }
+	define ZeroConfig : SuffixCfg.weave
+		object # outline shape
+			''     { ZeroOutlineShape ZeroOutlineMask }
+			'oval' { ZeroOvalShape    ZeroOvalMask    }
+		object # overlay/cutout
+			'unslashed'                    { null                 null       }
+			'slashed'                      { ZeroSlash            null       }
+			'reverseSlashed'               { ZeroRevSlash         null       }
+			'tallSlashed'                  { ZeroTallSlash        null       }
+			'tallReverseSlashed'           { ZeroTallRevSlash     null       }
+			'dotted'                       { ZeroDotShape         null       }
+			'longDotted'                   { ZeroLongDotShape     null       }
+			'slashedSplit'                 { ZeroSlash            InsetShape }
+			'reverseSlashedSplit'          { ZeroRevSlash         InsetShape }
+			'brokenSlash'                  { BrokenTallSlash      null       }
+			'brokenReverseSlash'           { BrokenTallRevSlash   null       }
+			'brokenVerticalBar'            { BrokenVerticalBar    null       }
+			'slashedCutout'                { CutoutSlash          Cutout     }
+			'reverseSlashedCutout'         { CutoutRevSlash       Cutout     }
+			'tallSlashedCutout'            { CutoutTallSlash      Cutout     }
+			'tallReverseSlashedCutout'     { CutoutTallRevSlash   Cutout     }
+			'verticalBarCutout'            { CutoutVerticalBar    Cutout     }
+			'topRightCutout'               { TopRightCutoutSlash  Cutout     }
 
-	define Shapes : object
-		''     { ZeroOutlineShape ZeroOutlineMask }
-		'Oval' { ZeroOvalShape    ZeroOvalMask    }
-
-	define Infixes : object
+	define Heights : object
 		'lnum' { CAP        [function [] : MarkSet.capital] }
 		'onum' { OnumHeight [function [] : OnumMarks.e]     }
 
-	foreach { shapeSuffix { Outline Mask } } [Object.entries Shapes] : begin
-		foreach { infix { height Marks } } [Object.entries Infixes] : begin
-			local zeroShape : Outline height
-			foreach { suffix { Overlay Postproc } } [Object.entries ZeroConfig] : begin
-				create-glyph "zero.\(infix).\(suffix)\(shapeSuffix)" : glyph-proc
-					include : Marks
-
-					local overlayShape : if Overlay [Overlay height] null
-					if Postproc
-					: then : begin
-						include : Postproc zeroShape overlayShape Mask height
-					: else : begin
-						include zeroShape
-						if Overlay : if Mask
-							include : intersection overlayShape : Mask height
-							include overlayShape
+	foreach { suffix { {Outline Mask} {Overlay Postproc} } } [pairs-of ZeroConfig] : begin
+		foreach { infix { height Marks } } [pairs-of Heights] : begin
+			create-glyph "zero.\(infix).\(suffix)" : glyph-proc
+				include : Marks
+				local zeroShape : Outline height
+				local overlayShape : if Overlay [Overlay height] null
+				if Postproc
+				: then : begin
+					include : Postproc zeroShape overlayShape Mask height
+				: else : begin
+					include zeroShape
+					if Overlay : if Mask
+						include : intersection overlayShape : Mask height
+						include overlayShape
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
 	select-variant 'zero.onum' [CodeOnum '0'] (follow -- 'zero')

@@ -261,55 +261,36 @@ class VbStageAlternative {
 		this.key = key;
 		this.rank = raw.rank;
 		this.next = raw.next;
-		if (key !== "*") this.keySuffix = raw.keySuffix ?? key;
-		this.descriptionSuffix = raw.descriptionSuffix;
-		this.descriptionJoiner = raw.descriptionJoiner || "with";
+		this.mode = raw.mode;
 		this.disableIf = raw.disableIf;
-		this.selectorSuffix = raw.selectorSuffix;
+		if (key !== "*") this.keyAffix = raw.keyAffix ?? key;
+		this.descriptionAffix = raw.descriptionAffix;
+		this.descriptionJoiner = raw.descriptionJoiner || "with";
+		this.selectorAffix = raw.selectorAffix;
 	}
 	fallback(defaultAlternative) {
 		this.next = this.next || defaultAlternative.next;
-		this.keySuffix = this.keySuffix || defaultAlternative.keySuffix;
-		this.descriptionSuffix = this.descriptionSuffix || defaultAlternative.descriptionSuffix;
+		this.mode = this.mode || defaultAlternative.mode || "append";
+		this.keyAffix = this.keyAffix || defaultAlternative.keyAffix;
+		this.descriptionAffix = this.descriptionAffix || defaultAlternative.descriptionAffix;
 		this.descriptionJoiner = this.descriptionJoiner || defaultAlternative.descriptionJoiner;
 		this.disableIf = this.disableIf || defaultAlternative.disableIf;
-		this.selectorSuffix = this.selectorSuffix || defaultAlternative.selectorSuffix;
 	}
 
 	tryAccept(globalState, localState) {
-		// Detect whether this alternative is applicable.
-		if (this.disableIf) {
-			for (const branch of this.disableIf) {
-				let statementMatches = true;
-				for (let [k, v] of Object.entries(branch)) {
-					v = v.trim();
-					if (/^NOT(?=\s)/.test(v)) {
-						v = v.slice(3).trim();
-						if (localState.assignments.get(k) === v) {
-							statementMatches = false;
-							break;
-						}
-					} else {
-						if (localState.assignments.get(k) !== v) {
-							statementMatches = false;
-							break;
-						}
-					}
-				}
-				if (statementMatches) return null;
-			}
-		}
+		// Reject if disable conditions match
+		if (this.shouldReject(localState)) return null;
 
 		// Accept this alternative.
 		const ans = localState.clone();
 		ans.stage = this.next;
 		ans.assignments.set(this.stage, this.key);
-		if (this.keySuffix) ans.key.push(this.keySuffix);
-		if (this.descriptionJoiner && this.descriptionSuffix)
-			ans.addDescription(this.descriptionJoiner, this.descriptionSuffix);
-		if (this.selectorSuffix)
-			for (const [selector, suffix] of Object.entries(this.selectorSuffix))
-				ans.addSelector(selector, suffix);
+		if (this.keyAffix) ans.addKeyAffix(this.mode, this.keyAffix);
+		if (this.descriptionJoiner && this.descriptionAffix)
+			ans.addDescription(this.mode, this.descriptionJoiner, this.descriptionAffix);
+		if (this.selectorAffix)
+			for (const [selector, suffix] of Object.entries(this.selectorAffix))
+				ans.addSelectorAffix(this.mode, selector, suffix);
 
 		if (!this.next) {
 			ans.rank = ++globalState.rank;
@@ -318,6 +299,31 @@ class VbStageAlternative {
 		} else {
 			return ans;
 		}
+	}
+
+	shouldReject(localState) {
+		if (!this.disableIf) return false;
+
+		for (const branch of this.disableIf) {
+			let statementMatches = true;
+			for (let [k, v] of Object.entries(branch)) {
+				v = v.trim();
+				if (/^NOT(?=\s)/.test(v)) {
+					v = v.slice(3).trim();
+					if (localState.assignments.get(k) === v) {
+						statementMatches = false;
+						break;
+					}
+				} else {
+					if (localState.assignments.get(k) !== v) {
+						statementMatches = false;
+						break;
+					}
+				}
+			}
+			if (statementMatches) return true;
+		}
+		return false;
 	}
 }
 
@@ -354,13 +360,56 @@ class VbLocalState {
 		return ans;
 	}
 
-	addDescription(joiner, segment) {
+	addKeyAffix(mode, segment) {
+		switch (mode) {
+			case "append":
+				this.key.push(segment);
+				return;
+			case "prepend":
+				this.key.unshift(segment);
+				return;
+			case "replace":
+				this.key = [segment];
+				return;
+			default:
+				throw new Error(`Invalid key affix mode: ${mode}`);
+		}
+	}
+
+	addDescription(mode, joiner, segment) {
 		if (!segment) return;
 		if (!this.descriptions.has(joiner)) this.descriptions.set(joiner, []);
-		this.descriptions.get(joiner).push(segment);
+
+		let descriptionSentence = this.descriptions.get(joiner);
+		switch (mode) {
+			case "append":
+				descriptionSentence.push(segment);
+				return;
+			case "prepend":
+				descriptionSentence.unshift(segment);
+				return;
+			case "replace":
+				descriptionSentence.length = 0;
+				descriptionSentence.push(segment);
+				return;
+			default:
+				throw new Error(`Invalid description affix mode: ${mode}`);
+		}
 	}
-	addSelector(selector, value) {
-		this.selector.set(selector, joinCamel(this.selector.get(selector), value));
+	addSelectorAffix(mode, selector, value) {
+		switch (mode) {
+			case "append":
+				this.selector.set(selector, joinCamel(this.selector.get(selector), value));
+				return;
+			case "prepend":
+				this.selector.set(selector, joinCamel(value, this.selector.get(selector)));
+				return;
+			case "replace":
+				this.selector.set(selector, value);
+				return;
+			default:
+				throw new Error(`Invalid selector affix mode: ${mode}`);
+		}
 	}
 
 	produceKey() {
@@ -388,5 +437,5 @@ class VbLocalState {
 function arrayToSentence(arr) {
 	if (arr.length == 1) return arr[0];
 	let last = arr.pop();
-	return arr.join(", ") + " and " + last;
+	return arr.join(", ") + ", and " + last;
 }
