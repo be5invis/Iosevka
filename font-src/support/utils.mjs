@@ -34,12 +34,6 @@ export function joinCamel(a, b) {
 	return a + b[0].toUpperCase() + b.slice(1);
 }
 
-export function weaveSuffix(...configs) {
-	let ans = {};
-	joinSuffixListImpl(ans, "", [], configs);
-	return ans;
-}
-
 function joinSuffixListImpl(sink, k, v, configs) {
 	if (!configs.length) {
 		sink[k] = v;
@@ -52,3 +46,16 @@ function joinSuffixListImpl(sink, k, v, configs) {
 		joinSuffixListImpl(sink, k1, v1, configs.slice(1));
 	}
 }
+
+export const SuffixCfg = {
+	weave: function (...configs) {
+		let ans = {};
+		joinSuffixListImpl(ans, "", [], configs);
+		return ans;
+	},
+	combine: function (...configs) {
+		let ans = {};
+		for (const item of configs) for (const [k, v] of Object.entries(item)) ans[k] = v;
+		return ans;
+	}
+};

@@ -222,6 +222,8 @@ class VariantBuilder {
 		let ans = {};
 		for (const item of globalState.sink) {
 			let cfg = item.createPrimeVariant();
+			if (!cfg.key) throw new Error("Invalid variant key");
+			if (ans[cfg.key]) throw new Error("Duplicate variant : " + cfg.key);
 			ans[cfg.key] = cfg;
 		}
 		return ans;
@@ -353,6 +355,7 @@ class VbLocalState {
 	}
 
 	addDescription(joiner, segment) {
+		if (!segment) return;
 		if (!this.descriptions.has(joiner)) this.descriptions.set(joiner, []);
 		this.descriptions.get(joiner).push(segment);
 	}
