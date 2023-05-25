@@ -51,10 +51,10 @@ glyph-block Autobuild-Enclosure-Shared : begin
 
 	glyph-block-export CollectJobs
 	define [CollectJobs globallyDecomposable centered allowProportional prefix suffix demands] : begin
-		local nonDecomposable     { }
-		local decomposableJobs    { }
-		local decomposableRelJobs { }
-		local relApplications     { }
+		local nonDecomposable       { }
+		local decomposableJobs      { }
+		local relApplications       { }
+		local decomposableRelGlyphs : new Set
 		foreach demand [items-of demands] : do
 			local unicode    demand.0
 			local parts      demand.1
@@ -73,27 +73,36 @@ glyph-block Autobuild-Enclosure-Shared : begin
 					if (centered && [getGlyphDefaultShift 0 0 : query-glyph : gr.get g] != [getGlyphDefaultShift 0 0 g])
 						set demandDecomposable false
 
-			local jobsOrig : if demandDecomposable decomposableJobs    nonDecomposable
-			local jobsRel  : if demandDecomposable decomposableRelJobs nonDecomposable
-
+			local jobsOrig : if demandDecomposable decomposableJobs nonDecomposable
 			jobsOrig.push { origJobGlyphGn unicode parts :: restInfo }
-			if para.enableCvSs : begin
-				local mesh : getGrMesh parts AnyCv query-glyph
-				foreach {gr fromParts toParts} [items-of mesh] : do
-					local fromGn : CircNameNoCheck unicode prefix fromParts suffix
-					local toGn   : CircName        unicode prefix toParts   suffix
-					jobsRel.push { toGn null toParts :: restInfo }
-					if [not demandDecomposable] : relApplications.push { gr fromGn toGn }
 
-		return : object nonDecomposable decomposableJobs decomposableRelJobs relApplications
+			if para.enableCvSs : begin
+				if demandDecomposable
+				: then : foreach part [items-of parts] : begin
+					local mesh : getGrMesh { part } AnyCv query-glyph
+					foreach {gr fromParts toParts} [items-of mesh] : foreach gn [items-of toParts]
+						decomposableRelGlyphs.add gn
+				: else : begin
+					local mesh : getGrMesh parts AnyCv query-glyph
+					foreach {gr fromParts toParts} [items-of mesh] : do
+						local fromGn : CircNameNoCheck unicode prefix fromParts suffix
+						local toGn   : CircName        unicode prefix toParts   suffix
+						nonDecomposable.push { toGn null toParts :: restInfo }
+						relApplications.push { gr fromGn toGn }
+
+		return : object nonDecomposable decomposableJobs decomposableRelGlyphs relApplications
 
 	glyph-block-export CreateDerivedFontFromJobs
 	define [CreateDerivedFontFromJobs aj restGids fn] : begin
-		define [object nonDecomposable decomposableJobs decomposableRelJobs] aj
-		local dfJobs : nonDecomposable.concat decomposableJobs decomposableRelJobs
-		local pendingGlyphs : new Set : restGids.slice 0
-		foreach {gnf unicode parts} [items-of dfJobs] : foreach gn [items-of parts]
+		define [object nonDecomposable decomposableJobs decomposableRelGlyphs] aj
+
+		local pendingGlyphs : new Set restGids
+		foreach gn decomposableRelGlyphs : pendingGlyphs.add gn
+		foreach {gnf unicode parts} [items-of nonDecomposable] : foreach gn [items-of parts]
 			pendingGlyphs.add gn
+		foreach {gnf unicode parts} [items-of decomposableJobs] : foreach gn [items-of parts]
+			pendingGlyphs.add gn
+
 		return : fn : Array.from pendingGlyphs
 
 	glyph-block-export applyRelations
