@@ -215,10 +215,12 @@ class VariantBuilder {
 		}
 	}
 	process() {
-		const globalState = new VbGlobalState(this.stages);
+		const globalState = new VbGlobalState(this.entry, this.stages);
 		const localState = new VbLocalState();
 		localState.descriptionLeader = this.descriptionLeader;
+
 		globalState.stages.get(this.entry).accept(globalState, localState);
+
 		let ans = {};
 		for (const item of globalState.sink) {
 			let cfg = item.createPrimeVariant();
@@ -285,6 +287,7 @@ class VbStageAlternative {
 		const ans = localState.clone();
 		ans.stage = this.next;
 		ans.assignments.set(this.stage, this.key);
+		if (this.stage === globalState.entry) ans.rankGroup = this.rank;
 		if (this.keyAffix) ans.addKeyAffix(this.mode, this.keyAffix);
 		if (this.descriptionJoiner && this.descriptionAffix)
 			ans.addDescription(this.mode, this.descriptionJoiner, this.descriptionAffix);
@@ -328,7 +331,8 @@ class VbStageAlternative {
 }
 
 class VbGlobalState {
-	constructor(stages) {
+	constructor(entry, stages) {
+		this.entry = entry;
 		this.stages = stages;
 		this.rank = 0;
 		this.sink = [];
@@ -339,6 +343,7 @@ class VbLocalState {
 	constructor() {
 		this.stage = ".start";
 		this.rank = 0;
+		this.rankGroup = 0;
 		this.descriptionLeader = "";
 
 		this.assignments = new Map();
@@ -351,6 +356,7 @@ class VbLocalState {
 		const ans = new VbLocalState();
 		ans.stage = this.stage;
 		ans.rank = this.rank;
+		ans.rankGroup = this.rankGroup;
 		ans.descriptionLeader = this.descriptionLeader;
 		ans.assignments = new Map(this.assignments);
 		ans.key = [...this.key];
@@ -428,6 +434,7 @@ class VbLocalState {
 		return {
 			key: this.produceKey(),
 			rank: this.rank,
+			rankGroup: this.rankGroup,
 			description: this.produceDescription(),
 			selector: Object.fromEntries(this.selector)
 		};
