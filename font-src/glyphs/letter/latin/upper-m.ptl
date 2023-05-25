@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -100,28 +100,26 @@ glyph-block Letter-Latin-Upper-M : begin
 		include : HBar.t xRightTop df.rightSB top swSideBot
 		if SLAB : include : VSerif.dr df.rightSB top VJut (swSideBot * VJutStroke / Stroke)
 
-	define MConfig : object
-		hangingSerifless                    { FORM-HANGING   SLAB-NONE            false }
-		flatBottomSerifless                 { FORM-FLAT      SLAB-NONE            false }
-		hangingSerifed                      { FORM-HANGING   SLAB-FULL            false }
-		flatBottomSerifed                   { FORM-FLAT      SLAB-FULL            false }
-		hangingSmallCyrl                    { FORM-HANGING   SLAB-SMALL-CYRILLIC  false }
-		flatBottomSmallCyrl                 { FORM-FLAT      SLAB-SMALL-CYRILLIC  false }
-		hangingMotionSerifed                { FORM-HANGING   SLAB-MOTION          false }
-		flatBottomMotionSerifed             { FORM-FLAT      SLAB-MOTION          false }
-		slantedSidesHangingSerifless        { FORM-HANGING   SLAB-NONE            true  }
-		slantedSidesFlatBottomSerifless     { FORM-FLAT      SLAB-NONE            true  }
-		slantedSidesHangingSerifed          { FORM-HANGING   SLAB-FULL            true  }
-		slantedSidesFlatBottomSerifed       { FORM-FLAT      SLAB-FULL            true  }
-		slantedSidesHangingSmallCyrl        { FORM-HANGING   SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesFlatBottomSmallCyrl     { FORM-FLAT      SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesHangingMotionSerifed    { FORM-HANGING   SLAB-MOTION          true  }
-		slantedSidesFlatBottomMotionSerifed { FORM-FLAT      SLAB-MOTION          true  }
 
-		grekCapitalSan                      { FORM-SAN       SLAB-AUTO            false }
-		grekSmallSan                        { FORM-SAN-SMALL SLAB-NONE            false }
 
-	foreach { suffix { form slab slanted } } [Object.entries MConfig] : do
+	define MConfig : SuffixCfg.combine
+		SuffixCfg.weave
+			object # sides
+				""            false
+				slantedSides  true
+			object # middle
+				hanging       FORM-HANGING
+				flatBottom    FORM-FLAT
+			object # serifs
+				serifless     SLAB-NONE
+				motionSerifed SLAB-MOTION
+				smallCyrl     SLAB-SMALL-CYRILLIC
+				serifed       SLAB-FULL
+		object # Greek San variants
+			grekCapitalSan { false FORM-SAN       SLAB-AUTO }
+			grekSmallSan   { false FORM-SAN-SMALL SLAB-NONE }
+
+	foreach { suffix { slanted form slab } } [Object.entries MConfig] : do
 		create-glyph "M.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width

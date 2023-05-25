@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -129,26 +129,24 @@ glyph-block Letter-Latin-U : begin
 
 	define [ToothlessSlabs df top] : let [sf : SerifFrame.fromDf df top 0] : composite-proc sf.lt.full sf.rt.full
 
-	define CapitalUConfig : object
-		toothedSerifless                        { UToothed          no-shape                     false }
-		toothedMotionSerifed                    { UToothed          SmallUMotionSlabs            true  }
-		toothedSerifed                          { UToothed          SmallUSlabs                  true  }
+	define CapitalUConfig : SuffixCfg.weave
+		object # body
+			toothed           UToothed
+			tailed            UTailed
+			toothlessCorner   UToothlessCorner
+			toothlessRounded  UToothlessRounded
+		function [body] : object # serifs
+			serifless               { no-shape                     false }
+			bilateralMotionSerifed  { CapitalUMotionToothlessSlabs true  }
+			unilateralMotionSerifed : match body
+				[Just 'toothed']    { SmallUMotionSlabs            true  }
+				__                  { SmallUMotionTailedSlabs      true  }
+			serifed : match body
+				[Just 'toothed']    { SmallUSlabs                  true  }
+				[Just 'tailed']     { SmallUTailedSlabs            true  }
+				__                  { SmallUToothlessSlabs         true  }
 
-		tailedSerifless                         { UTailed           no-shape                     false }
-		tailedMotionSerifed                     { UTailed           SmallUMotionTailedSlabs      true  }
-		tailedSerifed                           { UTailed           SmallUTailedSlabs            true  }
-
-		toothlessCornerSerifless                { UToothlessCorner  no-shape                     false }
-		toothlessCornerUnilateralMotionSerifed  { UToothlessCorner  SmallUMotionTailedSlabs      true  }
-		toothlessCornerBilateralMotionSerifed   { UToothlessCorner  CapitalUMotionToothlessSlabs true  }
-		toothlessCornerSerifed                  { UToothlessCorner  ToothlessSlabs               true  }
-
-		toothlessRoundedSerifless               { UToothlessRounded no-shape                     false }
-		toothlessRoundedUnilateralMotionSerifed { UToothlessRounded SmallUMotionTailedSlabs      true  }
-		toothlessRoundedBilateralMotionSerifed  { UToothlessRounded CapitalUMotionToothlessSlabs true  }
-		toothlessRoundedSerifed                 { UToothlessRounded ToothlessSlabs               true  }
-
-	foreach { suffix { Base Slabs fLTSlab } } [Object.entries CapitalUConfig] : do
+	foreach { suffix { Base {Slabs fLTSlab} } } [Object.entries CapitalUConfig] : do
 		create-glyph "U.\(suffix)" : glyph-proc
 			local df : DivFrame 1
 			include : MarkSet.capital
@@ -165,23 +163,24 @@ glyph-block Letter-Latin-U : begin
 			include : Base df XH
 			include : Slabs df XH
 
-	define SmallUConfig : object
-		toothedSerifless              { UToothed               no-shape                }
-		toothedBottomRightSerifed     { UToothed               SmallUBottomRightSlabs  }
-		toothedMotionSerifed          { UToothed               SmallUMotionSlabs       }
-		toothedSerifed                { UToothed               SmallUSlabs             }
-		tailedSerifless               { UTailed                no-shape                }
-		tailedMotionSerifed           { UTailed                SmallUMotionTailedSlabs }
-		tailedSerifed                 { UTailed                SmallUTailedSlabs       }
-		toothlessCornerSerifless      { UToothlessCornerSmall  no-shape                }
-		toothlessCornerMotionSerifed  { UToothlessCornerSmall  SmallUMotionTailedSlabs }
-		toothlessCornerSerifed        { UToothlessCornerSmall  SmallUToothlessSlabs    }
-		toothlessRoundedSerifless     { UToothlessRoundedSmall no-shape                }
-		toothlessRoundedMotionSerifed { UToothlessRoundedSmall SmallUMotionTailedSlabs }
-		toothlessRoundedSerifed       { UToothlessRoundedSmall SmallUToothlessSlabs    }
-		urtBaseSerifless              { UToothed               no-shape                }
-		urtBaseMotionSerifed          { UToothed               SmallUMotionTailedSlabs }
-		urtBaseSerifed                { UToothed               UrtBaseSlabs            }
+	define SmallUConfig : SuffixCfg.weave
+		object # body
+			toothed           UToothed
+			tailed            UTailed
+			toothlessCorner   UToothlessCorner
+			toothlessRounded  UToothlessRounded
+			urtBase           UToothed
+		function [body] : object # serifs
+			serifless              no-shape
+			bottomRightSerifed     SmallUBottomRightSlabs
+			motionSerifed : match body
+				[Just 'toothed']   SmallUMotionSlabs
+				__                 SmallUMotionTailedSlabs
+			serifed : match body
+				[Just 'toothed']   SmallUSlabs
+				[Just 'tailed']    SmallUTailedSlabs
+				[Just 'urtBase']   UrtBaseSlabs
+				__                 SmallUToothlessSlabs
 
 	foreach { suffix { Base Slabs } } [Object.entries SmallUConfig] : do
 		create-glyph "u.\(suffix)" : glyph-proc
