@@ -390,11 +390,16 @@ function byTagPreference(a, b) {
 }
 function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 	const cvs = AnyCv.query(glyph).sort(byTagPreference);
+
 	let existingFeatures = new Map();
+	let existingTargets = new Set();
 
 	for (const gr of cvs) {
 		const target = gr.get(glyph);
 		if (target === gid) continue;
+
+		if (existingTargets.has(target)) continue;
+		existingTargets.add(target);
 
 		let series = existingFeatures.get(gr.tag);
 		if (!series) {

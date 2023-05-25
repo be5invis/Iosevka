@@ -78,7 +78,9 @@ function putFeatSeries(store, k, featSeriesList) {
 	if (!featSeriesList) return null;
 
 	let reduced = [];
-	for (const featSeries of featSeriesList) {
+	for (const _featSeries of featSeriesList) {
+		const featSeries = ValidateFeatureSeries(_featSeries);
+
 		const key =
 			featSeries.name +
 			";;" +
@@ -89,9 +91,8 @@ function putFeatSeries(store, k, featSeriesList) {
 			reduced.push(vs[0]);
 		} else {
 			const idNeo = store.size;
-			const validated = ValidateFeatureSeries(featSeries);
-			if (!validated) continue;
-			store.set(key, [idNeo, validated]);
+			if (!featSeries) continue;
+			store.set(key, [idNeo, featSeries]);
 			reduced.push(idNeo);
 		}
 	}

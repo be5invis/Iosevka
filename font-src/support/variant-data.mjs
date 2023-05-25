@@ -295,7 +295,7 @@ class VbStageAlternative {
 			for (const [selector, suffix] of Object.entries(this.selectorAffix))
 				ans.addSelectorAffix(this.mode, selector, suffix);
 
-		if (!this.next) {
+		if (!this.next || this.next === "END") {
 			ans.rank = ++globalState.rank;
 			globalState.sink.push(ans);
 			return null;
