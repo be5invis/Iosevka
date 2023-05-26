@@ -119,7 +119,7 @@ class Prime {
 			gr.variants.push({
 				key: variant.key,
 				rank: variant.rank,
-				rankGroup: variant.rankGroup,
+				groupRank: variant.groupRank,
 				description: variant.description,
 				snapshotFeatureApplication: variant.snapshotFeatureApplication
 			});
@@ -135,7 +135,7 @@ class PrimeVariant {
 		this.tag = tag;
 		this.description = cfg.description;
 		this.rank = cfg.rank;
-		this.rankGroup = cfg.rankGroup || 0;
+		this.groupRank = cfg.groupRank || 0;
 		this.selector = cfg.selector;
 		this.nonDeriving = cfg.nonDeriving;
 		this.snapshotFeatureApplication = cfg.snapshotFeatureApplication;
@@ -262,8 +262,10 @@ class VbStageAlternative {
 		this.stage = stage;
 		this.key = key;
 		this.rank = raw.rank;
+		this.groupRank = raw.groupRank;
 		this.next = raw.next;
 		this.mode = raw.mode;
+		this.enableIf = raw.enableIf;
 		this.disableIf = raw.disableIf;
 		if (key !== "*") this.keyAffix = raw.keyAffix ?? key;
 		this.descriptionAffix = raw.descriptionAffix;
@@ -276,18 +278,21 @@ class VbStageAlternative {
 		this.keyAffix = this.keyAffix || defaultAlternative.keyAffix;
 		this.descriptionAffix = this.descriptionAffix || defaultAlternative.descriptionAffix;
 		this.descriptionJoiner = this.descriptionJoiner || defaultAlternative.descriptionJoiner;
-		this.disableIf = this.disableIf || defaultAlternative.disableIf;
 	}
 
 	tryAccept(globalState, localState) {
 		// Reject if disable conditions match
-		if (this.evalCondition(this.disableIf, localState)) return null;
+		if (this.enableIf && !this.evalCondition(this.enableIf, localState)) return null;
+		if (this.disableIf && this.evalCondition(this.disableIf, localState)) return null;
 
 		// Accept this alternative.
 		const ans = localState.clone();
 		ans.stage = this.next;
 		ans.assignments.set(this.stage, this.key);
-		if (this.stage === globalState.entry) ans.rankGroup = this.rank;
+
+		// RankGroup
+		if (this.groupRank) ans.groupRank += this.groupRank;
+		else if (this.stage === globalState.entry) ans.groupRank += this.rank;
 
 		if (this.keyAffix) ans.addKeyAffix(this.mode, this.evalValue(this.keyAffix, localState));
 		if (this.descriptionJoiner && this.descriptionAffix) {
@@ -316,11 +321,12 @@ class VbStageAlternative {
 		if (expr.if) {
 			const condition = this.evalCondition(expr.if, localState);
 			if (condition) {
-				return this.evalCondition(expr.then, localState);
+				return this.evalValue(expr.then, localState);
 			} else {
-				return this.evalCondition(expr.else, localState);
+				return this.evalValue(expr.else, localState);
 			}
 		}
+		throw new Error(`Invalid value expression: ${expr}`);
 	}
 
 	evalCondition(expr, localState) {
@@ -362,7 +368,7 @@ class VbLocalState {
 	constructor() {
 		this.stage = ".start";
 		this.rank = 0;
-		this.rankGroup = 0;
+		this.groupRank = 0;
 		this.descriptionLeader = "";
 
 		this.assignments = new Map();
@@ -375,7 +381,7 @@ class VbLocalState {
 		const ans = new VbLocalState();
 		ans.stage = this.stage;
 		ans.rank = this.rank;
-		ans.rankGroup = this.rankGroup;
+		ans.groupRank = this.groupRank;
 		ans.descriptionLeader = this.descriptionLeader;
 		ans.assignments = new Map(this.assignments);
 		ans.key = [...this.key];
@@ -453,7 +459,7 @@ class VbLocalState {
 		return {
 			key: this.produceKey(),
 			rank: this.rank,
-			rankGroup: this.rankGroup,
+			groupRank: this.groupRank,
 			description: this.produceDescription(),
 			selector: Object.fromEntries(this.selector)
 		};

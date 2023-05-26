@@ -145,13 +145,13 @@ export const Joining = {
 
 const CvTagCache = new Map();
 
-export function Cv(tag, rank, rankGroup, description) {
+export function Cv(tag, rank, groupRank, description) {
 	const key = tag + "#" + rank;
 	if (CvTagCache.has(key)) return CvTagCache.get(key);
 	const rel = {
 		tag,
 		rank,
-		rankGroup,
+		groupRank,
 		description,
 		get(glyph) {
 			if (glyph && glyph.related && glyph.related.cv) return glyph.related.cv[key];
@@ -412,8 +412,8 @@ function queryCvFeatureTagsOf(sink, gid, glyph, tagSet) {
 		}
 
 		const featureApp = { css: `'${gr.tag}' ${gr.rank}`, description: gr.description };
-		if (!series.groups[gr.rankGroup]) series.groups[gr.rankGroup] = [];
-		series.groups[gr.rankGroup].push(featureApp);
+		if (!series.groups[gr.groupRank]) series.groups[gr.groupRank] = [];
+		series.groups[gr.groupRank].push(featureApp);
 	}
 	for (const g of existingFeatures.values()) sink.push(g);
 }

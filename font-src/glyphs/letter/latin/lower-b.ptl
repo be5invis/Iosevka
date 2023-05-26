@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -23,20 +23,21 @@ glyph-block Letter-Latin-Lower-B : begin
 	define [ToothlessRoundedBody yTop] : OBarLeft.rounded (yTerminal -- yTop)
 
 	define [LTSerifs] : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-	define [FullSerifs] : composite-proc
-		tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-		tagged 'serifLB' : HSerif.lb SB 0 SideJut
+	define [LBSerifs] : tagged 'serifLB' : HSerif.lb SB 0 SideJut
+	define [FullSerifs] : composite-proc [LTSerifs] [LBSerifs]
 
-	define BConfig : object
-		toothedSerifless          { ToothedBody          no-shape   false }
-		toothedMotionSerifed      { ToothedBody          LTSerifs   true  }
-		toothedSerifed            { ToothedBody          FullSerifs true  }
-		toothlessCornerSerifless  { ToothlessCornerBody  no-shape   false }
-		toothlessRoundedSerifless { ToothlessRoundedBody no-shape   false }
-		toothlessCornerSerifed    { ToothlessCornerBody  LTSerifs   true  }
-		toothlessRoundedSerifed   { ToothlessRoundedBody LTSerifs   true  }
+	define BConfig : SuffixCfg.weave
+		object # body
+			toothed           ToothedBody
+			toothlessCorner   ToothlessCornerBody
+			toothlessRounded  ToothlessRoundedBody
+		object # serifs
+			serifless       { no-shape   false  }
+			motionSerifed   { LTSerifs   true   }
+			bottomSerifed   { LBSerifs   false  }
+			serifed         { FullSerifs true   }
 
-	foreach { suffix { Body Serifs doTS }} [Object.entries BConfig] : do
+	foreach { suffix { Body {Serifs doTS} }} [Object.entries BConfig] : do
 		local yOverlay : mix XH (Ascender - [if doTS Stroke 0]) 0.5
 		create-glyph "b.\(suffix)" : glyph-proc
 			include : MarkSet.b
