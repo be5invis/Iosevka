@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix clamp fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -71,25 +71,22 @@ glyph-block Letter-Latin-Lower-D : begin
 	define [BaseSerif df yTop] : tagged 'serifRB'
 		HSerif.rb df.rightSB 0 SideJut
 
-	define DConfig : object
-		toothedSerifless                { ToothedBody             null     null      }
-		toothedTopSerifed               { ToothedBody             TopSerif null      }
-		toothedSerifed                  { ToothedBody             TopSerif BaseSerif }
-		toothedBottomSerifed            { ToothedBody             null     BaseSerif }
-		tailedSerifless                 { TailedBody              null     null      }
-		tailedSerifed                   { TailedBody              TopSerif null      }
-		toothlessCornerSerifless        { ToothlessCornerBody     null     null      }
-		toothlessCornerSerifed          { ToothlessCornerBody     TopSerif null      }
-		toothlessCornerSeriflessHBB     { ToothlessCornerHBBBody  null     null      }
-		toothlessCornerSerifedHBB       { ToothlessCornerHBBBody  TopSerif null      }
-		toothlessRoundedSerifless       { ToothlessRoundedBody    null     null      }
-		toothlessRoundedSerifed         { ToothlessRoundedBody    TopSerif null      }
-		toothlessRoundedSeriflessHBB    { ToothlessRoundedHBBBody null     null      }
-		toothlessRoundedSerifedHBB      { ToothlessRoundedHBBBody TopSerif null      }
-		toothlessRoundedBottomSerifed   { ToothlessRoundedHBBBody null     BaseSerif }
-		toothlessRoundedBilateralSerifed{ ToothlessRoundedHBBBody TopSerif BaseSerif }
+	define DConfig : SuffixCfg.weave
+		object # body
+			toothed                   ToothedBody
+			toothlessCorner           ToothlessCornerBody
+			toothlessCornerHBB        ToothlessCornerHBBBody
+			toothlessRounded          ToothlessRoundedBody
+			toothlessRoundedHBB       ToothlessRoundedHBBBody
+			tailed                    TailedBody
 
-	foreach { suffix { Body topSerif bottomSerif } } [Object.entries DConfig] : do
+		function [body] : object # serifs
+			serifless                { null     null                                     }
+			topSerifed               { TopSerif null                                     }
+			bottomSerifed            { null     [if (body === 'toothed') BaseSerif null] }
+			serifed                  { TopSerif [if (body === 'toothed') BaseSerif null] }
+
+	foreach { suffix { Body {topSerif bottomSerif} } } [Object.entries DConfig] : do
 		local yOverlay : mix XH (Ascender - [if topSerif Stroke 0]) 0.5
 
 		create-glyph "d.\(suffix)" : glyph-proc

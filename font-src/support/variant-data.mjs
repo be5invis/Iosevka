@@ -281,19 +281,26 @@ class VbStageAlternative {
 
 	tryAccept(globalState, localState) {
 		// Reject if disable conditions match
-		if (this.shouldReject(localState)) return null;
+		if (this.evalCondition(this.disableIf, localState)) return null;
 
 		// Accept this alternative.
 		const ans = localState.clone();
 		ans.stage = this.next;
 		ans.assignments.set(this.stage, this.key);
 		if (this.stage === globalState.entry) ans.rankGroup = this.rank;
-		if (this.keyAffix) ans.addKeyAffix(this.mode, this.keyAffix);
-		if (this.descriptionJoiner && this.descriptionAffix)
-			ans.addDescription(this.mode, this.descriptionJoiner, this.descriptionAffix);
-		if (this.selectorAffix)
+
+		if (this.keyAffix) ans.addKeyAffix(this.mode, this.evalValue(this.keyAffix, localState));
+		if (this.descriptionJoiner && this.descriptionAffix) {
+			ans.addDescription(
+				this.mode,
+				this.evalValue(this.descriptionJoiner, localState),
+				this.evalValue(this.descriptionAffix, localState)
+			);
+		}
+		if (this.selectorAffix) {
 			for (const [selector, suffix] of Object.entries(this.selectorAffix))
-				ans.addSelectorAffix(this.mode, selector, suffix);
+				ans.addSelectorAffix(this.mode, selector, this.evalValue(suffix, localState));
+		}
 
 		if (!this.next || this.next === "END") {
 			ans.rank = ++globalState.rank;
@@ -304,10 +311,22 @@ class VbStageAlternative {
 		}
 	}
 
-	shouldReject(localState) {
-		if (!this.disableIf) return false;
+	evalValue(expr, localState) {
+		if (typeof expr === "string") return expr;
+		if (expr.if) {
+			const condition = this.evalCondition(expr.if, localState);
+			if (condition) {
+				return this.evalCondition(expr.then, localState);
+			} else {
+				return this.evalCondition(expr.else, localState);
+			}
+		}
+	}
 
-		for (const branch of this.disableIf) {
+	evalCondition(expr, localState) {
+		if (!expr) return false;
+
+		for (const branch of expr) {
 			let statementMatches = true;
 			for (let [k, v] of Object.entries(branch)) {
 				v = v.trim();

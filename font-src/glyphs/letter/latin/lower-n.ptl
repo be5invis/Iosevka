@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix clamp fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif Joining] from"../../../support/gr.mjs"
 
 glyph-module
@@ -65,35 +65,28 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : RightwardTailedBar right yBot yBR sw
 		include : AdjustTrailingAnchor
 
-	define NConfig : object
-		'straightSerifless'                  { EaredBody          0 nothing        nothing           nothing                 }
-		'straightMotionSerifed'              { EaredBody          0 NTopLeftSerif  nothing           NBottomRightSerifItalic }
-		'straightTopLeftSerifed'             { EaredBody          0 NTopLeftSerif  nothing           nothing                 }
-		'straightSerifed'                    { EaredBody          0 NTopLeftSerif  NBottomLeftSerif  NBottomRightSerifUpright   }
+	define NConfig : SuffixCfg.weave
+		object # body
+			""                  EaredBody
+			earlessCorner       EarlessCornerBody
+			earlessRounded      EarlessRoundedBody
+			earlessCornerHTB    EarlessCornerBody
+			earlessRoundedHTB   EarlessRoundedBody
+		object # terminal
+			straight            0
+			tailed              1
+		function [body tail] : object # serifs
+			serifless           { nothing        nothing  nothing }
+			topLeftSerifed      { NTopLeftSerif  nothing  nothing }
+			motionSerifed       { NTopLeftSerif  nothing  [if (tail != 'tailed') NBottomRightSerifItalic] }
+			serifed : list
+				match body
+					([Just "earlessCorner"] || [Just "earlessRounded"])       nothing
+					([Just "earlessCornerHTB"] || [Just "earlessRoundedHTB"]) NHTB
+				begin NBottomLeftSerif
+				if (tail != 'tailed') NBottomRightSerifUpright
 
-		'tailedSerifless'                    { EaredBody          1 nothing        nothing           nothing                 }
-		'tailedMotionSerifed'                { EaredBody          1 NTopLeftSerif  nothing           nothing                 }
-		'tailedSerifed'                      { EaredBody          1 NTopLeftSerif  NBottomLeftSerif  nothing                 }
-
-		'earlessCornerStraightSerifless'     { EarlessCornerBody  0 nothing        nothing           nothing                 }
-		'earlessCornerStraightSerifed'       { EarlessCornerBody  0 nothing        NBottomLeftSerif  NBottomRightSerifUpright   }
-		'earlessCornerTailedSerifless'       { EarlessCornerBody  1 nothing        nothing           nothing                 }
-		'earlessCornerTailedSerifed'         { EarlessCornerBody  1 nothing        NBottomLeftSerif  nothing                 }
-		'earlessRoundedStraightSerifless'    { EarlessRoundedBody 0 nothing        nothing           nothing                 }
-		'earlessRoundedStraightSerifed'      { EarlessRoundedBody 0 nothing        NBottomLeftSerif  NBottomRightSerifUpright   }
-		'earlessRoundedTailedSerifless'      { EarlessRoundedBody 1 nothing        nothing           nothing                 }
-		'earlessRoundedTailedSerifed'        { EarlessRoundedBody 1 nothing        NBottomLeftSerif  nothing                 }
-
-		'earlessCornerStraightHTBSerifless'  { EarlessCornerBody  0 NHTB           nothing           nothing                 }
-		'earlessCornerStraightHTBSerifed'    { EarlessCornerBody  0 NHTB           NBottomLeftSerif  NBottomRightSerifUpright   }
-		'earlessCornerTailedHTBSerifless'    { EarlessCornerBody  1 NHTB           nothing           nothing                 }
-		'earlessCornerTailedHTBSerifed'      { EarlessCornerBody  1 NHTB           NBottomLeftSerif  nothing                 }
-		'earlessRoundedStraightHTBSerifless' { EarlessRoundedBody 0 NHTB           nothing           nothing                 }
-		'earlessRoundedStraightHTBSerifed'   { EarlessRoundedBody 0 NHTB           NBottomLeftSerif  NBottomRightSerifUpright   }
-		'earlessRoundedTailedHTBSerifless'   { EarlessRoundedBody 1 NHTB           nothing           nothing                 }
-		'earlessRoundedTailedHTBSerifed'     { EarlessRoundedBody 1 NHTB           NBottomLeftSerif  nothing                 }
-
-	foreach { suffix { Body tailed sLT sLB sRB } } [Object.entries NConfig] : do
+	foreach { suffix { Body tailed {sLT sLB sRB} } } [Object.entries NConfig] : do
 		create-glyph "n.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'trailing' RightSB 0
