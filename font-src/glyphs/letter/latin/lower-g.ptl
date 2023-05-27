@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -10,6 +10,14 @@ glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook VerticalHook
+
+	define [OverlayW bw] : glyph-proc
+		define l : mix 0 SB 0.3
+		define r : mix Width RightSB 0.3
+		include : HBar.m l r currentGlyph.baseAnchors.overlay.y bw
+
+	# overlay bar width for double-storey g
+	define obwDoubleStorey : Math.min [AdviceStroke 5] (0.5 / 3 * (CAP - Stroke * 4))
 
 	create-glyph 'g.doubleStorey' : glyph-proc
 		include : MarkSet.p
@@ -42,6 +50,8 @@ glyph-block Letter-Latin-Lower-G : begin
 
 		set-base-anchor 'overlay' Middle [mix (Descender + O) groundy 0.5]
 
+		create-forked-glyph 'gBar.doubleStorey' : OverlayW obwDoubleStorey
+
 	create-glyph 'g.openDoubleStorey' : glyph-proc
 		include : MarkSet.p
 		local obot : XH * DesignParameters.gBarPos - O - Stroke * 0.4
@@ -68,6 +78,8 @@ glyph-block Letter-Latin-Lower-G : begin
 			corner gm  XH
 
 		set-base-anchor 'overlay' Middle [mix (Descender + O) groundy 0.5]
+
+		create-forked-glyph 'gBar.openDoubleStorey' : OverlayW obwDoubleStorey
 
 	define SingleStorey : namespace
 		export : define [RoundHookT sink df yTop offset sw] : sink
@@ -116,21 +128,19 @@ glyph-block Letter-Latin-Lower-G : begin
 				sw -- df.mvs
 			include : FlipAround df.middle (top / 2)
 
-	define SingleStoreyConfig : object
-		singleStoreySerifless                 { SingleStorey.SeriflessBody      SingleStorey.RoundHook 0               }
-		singleStoreySerifed                   { SingleStorey.SerifedBody        SingleStorey.RoundHook 0               }
-		singleStoreyEarlessCorner             { SingleStorey.EarlessCornerBody  SingleStorey.RoundHook DToothlessRise  }
-		singleStoreyEarlessCornerHTB          { SingleStorey.EarlessCornerBody  SingleStorey.RoundHook 0               }
-		singleStoreyEarlessRounded            { SingleStorey.EarlessRoundedBody SingleStorey.RoundHook SmallArchDepthB }
-		singleStoreyEarlessRoundedHTB         { SingleStorey.EarlessRoundedBody SingleStorey.RoundHook 0               }
-		singleStoreyFlatHookSerifless         { SingleStorey.SeriflessBody      SingleStorey.FlatHook  0               }
-		singleStoreyFlatHookSerifed           { SingleStorey.SerifedBody        SingleStorey.FlatHook  0               }
-		singleStoreyEarlessCornerFlatHook     { SingleStorey.EarlessCornerBody  SingleStorey.FlatHook  DToothlessRise  }
-		singleStoreyEarlessCornerFlatHookHTB  { SingleStorey.EarlessCornerBody  SingleStorey.FlatHook  0               }
-		singleStoreyEarlessRoundedFlatHook    { SingleStorey.EarlessRoundedBody SingleStorey.FlatHook  SmallArchDepthB }
-		singleStoreyEarlessRoundedFlatHookHTB { SingleStorey.EarlessRoundedBody SingleStorey.FlatHook  0               }
+	define SingleStoreyConfig : SuffixCfg.weave
+		object # hook
+			singleStorey                        SingleStorey.RoundHook
+			singleStoreyFlatHook                SingleStorey.FlatHook
+		object # ear/serif
+			serifless                         { SingleStorey.SeriflessBody      0               }
+			serifed                           { SingleStorey.SerifedBody        0               }
+			earlessCorner                     { SingleStorey.EarlessCornerBody  DToothlessRise  }
+			earlessCornerHTB                  { SingleStorey.EarlessCornerBody  0               }
+			earlessRounded                    { SingleStorey.EarlessRoundedBody SmallArchDepthB }
+			earlessRoundedHTB                 { SingleStorey.EarlessRoundedBody 0               }
 
-	foreach { suffix { bodyShape hookShape hookStart } } [Object.entries SingleStoreyConfig] : do
+	foreach { suffix { hookShape {bodyShape hookStart} } } [Object.entries SingleStoreyConfig] : do
 		create-glyph "g.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			set-base-anchor 'overlay' Middle (XH / 2)
@@ -158,17 +168,20 @@ glyph-block Letter-Latin-Lower-G : begin
 				refSw -- dfSub.mvs
 				maskOut -- [intersection [MaskBelow 0] [MaskLeft dfSub.rightSB]]
 
+		create-glyph "gBar.\(suffix)" : glyph-proc
+			include [refer-glyph "g.\(suffix)"] AS_BASE ALSO_METRICS
+			include : OverlayW [AdviceStroke2 2 4 XH]
+
+
 	select-variant 'g' 'g'
 	link-reduced-variant 'g/sansSerif' 'g' MathSansSerif
 	turned 'turng' 0x1D77 'g' Middle [mix Descender XH 0.5]
+	select-variant "gBar" 0x1E5 (follow -- 'g')
 
 	select-variant 'gScript/hookTopBase' null (shapeFrom -- 'g')
-	select-variant 'gScript' 0x261 (shapeFrom -- 'g')
-		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
-	select-variant 'GScript' 0xA7AC
-		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
-	select-variant 'gPalatalHook' 0x1D83
-		follow -- [if SLAB 'gScript/slabSerif' 'gScript/sansSerif']
+	select-variant 'gScript' 0x261 (shapeFrom -- 'g') (follow -- 'gScript')
+	select-variant 'GScript' 0xA7AC (follow -- 'gScript')
+	select-variant 'gPalatalHook' 0x1D83 (follow -- 'gScript')
 
 
 	alias 'cyrl/de.SRB' null 'gScript'
@@ -192,25 +205,3 @@ glyph-block Letter-Latin-Lower-G : begin
 		include : intersection
 			VBar.r (RightSB - BBD) Descender XH BBS
 			SingleStorey.RoundHookT spiro-outline [DivFrame 1] XH 1 BBS
-
-	do
-		define l : mix 0 SB 0.3
-		define r : mix Width RightSB 0.3
-		define bwDoubleStorey : Math.min [AdviceStroke 5] (0.5 / 3 * (CAP - Stroke * 4))
-		define bwSingleStorey : AdviceStroke2 2 4 XH
-		define [derive suffix bw] : create-glyph "gbar.\(suffix)" : glyph-proc
-			include [refer-glyph "g.\(suffix)"] AS_BASE
-			include : HBar.m l r [query-glyph "g.\(suffix)"].baseAnchors.overlay.y bw
-
-		derive 'doubleStorey'                       bwDoubleStorey
-		derive 'openDoubleStorey'                   bwDoubleStorey
-		derive 'singleStoreySerifless'              bwSingleStorey
-		derive 'singleStoreySerifed'                bwSingleStorey
-		derive 'singleStoreyEarlessCorner'          bwSingleStorey
-		derive 'singleStoreyEarlessRounded'         bwSingleStorey
-		derive 'singleStoreyFlatHookSerifless'      bwSingleStorey
-		derive 'singleStoreyFlatHookSerifed'        bwSingleStorey
-		derive 'singleStoreyEarlessCornerFlatHook'  bwSingleStorey
-		derive 'singleStoreyEarlessRoundedFlatHook' bwSingleStorey
-
-		select-variant "gbar" 0x1E5 (follow -- 'g')

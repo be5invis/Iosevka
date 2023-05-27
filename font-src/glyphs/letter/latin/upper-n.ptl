@@ -15,8 +15,10 @@ glyph-block Letter-Latin-Upper-N : begin
 	define BODY-SYMMETRIC  1
 	define BODY-ASYMMETRIC 2
 
+	define SLAB-NONE   0
 	define SLAB-AUTO   1
 	define SLAB-MOTION 2
+	define SLAB-ALL    3
 
 	define [NShape] : params [bodyType slabType top left right [crowd 2] [crDiag 4]] : glyph-proc
 		local swDiag : AdviceStroke crDiag
@@ -43,14 +45,18 @@ glyph-block Letter-Latin-Upper-N : begin
 
 		local sf : SerifFrame top 0 left right (swRef -- stroke)
 		include : match slabType
+			[Just SLAB-ALL]    : composite-proc sf.lt.outer sf.lb.full sf.rt.full
 			[Just SLAB-AUTO]   : NeedSlab SLAB : composite-proc sf.lt.outer sf.lb.full sf.rt.full
 			[Just SLAB-MOTION] : composite-proc sf.lt.outer
+			[Just SLAB-NONE]   : no-shape
 
 	define NConfig : object
-		standard                { BODY-SYMMETRIC  4 SLAB-AUTO   }
-		motionSerifed           { BODY-SYMMETRIC  4 SLAB-MOTION }
-		asymmetric              { BODY-ASYMMETRIC 3 SLAB-AUTO   }
+		standardSerifless       { BODY-SYMMETRIC  4 SLAB-NONE   }
+		standardMotionSerifed   { BODY-SYMMETRIC  4 SLAB-MOTION }
+		standardSerifed         { BODY-SYMMETRIC  4 SLAB-ALL   }
+		asymmetricSerifless     { BODY-ASYMMETRIC 3 SLAB-NONE   }
 		asymmetricMotionSerifed { BODY-ASYMMETRIC 3 SLAB-MOTION }
+		asymmetricSerifed       { BODY-ASYMMETRIC 3 SLAB-ALL   }
 
 	foreach { suffix { bodyType crD slabType } } [Object.entries NConfig] : do
 		create-glyph "N.\(suffix)" : glyph-proc

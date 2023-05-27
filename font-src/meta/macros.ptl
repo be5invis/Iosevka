@@ -1,6 +1,11 @@
 ### Autoarg macro
 define-operator "--" 890 'right' : syntax-rules
 	`(@l -- @r) [atom l] : dirty `[new $NamedParameterPair$ @{".quote" [formOf l]} @r]
+	`(@{".quote" l} -- @r) : dirty `[new $NamedParameterPair$ @l @r]
+
+### Arbitrary pair operator
+define-operator "~>" 880 'right' : syntax-rules
+	`(@l ~> @r) `{.left @l .right @r}
 
 ### Macro for identity match
 define-macro Just : begin
@@ -30,7 +35,7 @@ define-macro params : syntax-rules
 		local declarations `[begin]
 		local namedAssigns `[begin]
 		local indexAssigns `[begin]
-		local tearDowns `[begin]
+		local tearDowns    `[begin]
 
 		local j 0
 		foreach [pf : items-of : formOf _pairs] : begin
@@ -204,14 +209,13 @@ define-macro glyph-block : syntax-rules
 			([typeof form] === "string") : set variableSet.(form) true
 
 		traceBody body
-		traceBody `[$NamedParameterPair$ $DoNothing$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$]
+		traceBody `[$NamedParameterPair$ $createAndSaveGlyphImpl$ $assignUnicodeImpl$ $execState$]
 
 		set externEnv.$glyphBlockVariableUsage$ variableSet
 
-		define captureImports `[$createAndSaveGlyphImpl$ $NamedParameterPair$
-			$assignUnicodeImpl$ $DoNothing$ $execState$
-			Metrics para recursive glyphStore glyph-is-needed SpiroFns BooleFns MarkSet AS_BASE
-			ALSO_METRICS buildGlyphs tagged DivFrame fontMetrics]
+		define captureImports `[$createAndSaveGlyphImpl$ $NamedParameterPair$ $assignUnicodeImpl$
+			$execState$ Metrics para recursive glyphStore glyph-is-needed SpiroFns BooleFns
+			MarkSet AS_BASE ALSO_METRICS buildGlyphs tagged DivFrame fontMetrics]
 
 		define metricImports `[DesignParameters UPM HalfUPM Width SB CAP XH Ascender Descender
 			Contrast SymbolMid ParenTop ParenBot OperTop OperBot TackTop TackBot PlusTop PlusBot

@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix linreg fallback SuffixCfg] from"../../../support/utils.mjs"
 import [LowerYDotAtBelow Dotless CvDecompose MathSansSerif OgonekTrY] from"../../../support/gr.mjs"
 
 glyph-module
@@ -242,35 +242,18 @@ glyph-block Letter-Latin-Lower-Y : begin
 			include : Scale 1 (-1)
 			include : Translate 0 (+[mix bottom top 0.5])
 
-	define NonCursiveConfig : object
-		# suffix                    straightBar bottomShape   slabKind
-		straight                  { true        BS-STRAIGHT   SLAB-AUTO   }
-		straightTurn              { true        BS-TURN       SLAB-AUTO   }
-		straightLoop              { true        BS-LOOP       SLAB-AUTO   }
-		curly                     { false       BS-STRAIGHT   SLAB-AUTO   }
-		curlyTurn                 { false       BS-TURN       SLAB-AUTO   }
-		curlyLoop                 { false       BS-LOOP       SLAB-AUTO   }
-
-		straightSerifless         { true        BS-STRAIGHT   SLAB-NONE   }
-		straightTurnSerifless     { true        BS-TURN       SLAB-NONE   }
-		straightLoopSerifless     { true        BS-LOOP       SLAB-NONE   }
-		curlySerifless            { false       BS-STRAIGHT   SLAB-NONE   }
-		curlyTurnSerifless        { false       BS-TURN       SLAB-NONE   }
-		curlyLoopSerifless        { false       BS-LOOP       SLAB-NONE   }
-
-		straightSerifed           { true        BS-STRAIGHT   SLAB-ALL    }
-		straightTurnSerifed       { true        BS-TURN       SLAB-ALL    }
-		straightLoopSerifed       { true        BS-LOOP       SLAB-ALL    }
-		curlySerifed              { false       BS-STRAIGHT   SLAB-ALL    }
-		curlyTurnSerifed          { false       BS-TURN       SLAB-ALL    }
-		curlyLoopSerifed          { false       BS-LOOP       SLAB-ALL    }
-
-		straightMotionSerifed     { true        BS-STRAIGHT   SLAB-MOTION }
-		straightTurnMotionSerifed { true        BS-TURN       SLAB-MOTION }
-		straightLoopMotionSerifed { true        BS-LOOP       SLAB-MOTION }
-		curlyMotionSerifed        { false       BS-STRAIGHT   SLAB-MOTION }
-		curlyTurnMotionSerifed    { false       BS-TURN       SLAB-MOTION }
-		curlyLoopMotionSerifed    { false       BS-LOOP       SLAB-MOTION }
+	define NonCursiveConfig : SuffixCfg.weave
+		object # body
+			straight      true
+			curly         false
+		object # hook
+			""            BS-STRAIGHT
+			turn          BS-TURN
+			loop          BS-LOOP
+		object # serifs
+			serifless     SLAB-NONE
+			serifed       SLAB-ALL
+			motionSerifed SLAB-MOTION
 
 	foreach { suffix { straightBar bottomShape slabKind } } [Object.entries NonCursiveConfig] : do
 		define Shapes : GenNonCursiveShape straightBar bottomShape slabKind
@@ -327,7 +310,7 @@ glyph-block Letter-Latin-Lower-Y : begin
 				curl RightSB (bottom + hd.y)
 				arcvh
 				flat (RightSB - hd.x) bottom
-				curl xTerminal bottom [heading Leftward]
+				curl xTerminal bottom
 
 		export : define [Serifs top slabType] : begin
 			local { doSlabTop doSlabBottom doSlabMotion } slabKind
@@ -336,11 +319,14 @@ glyph-block Letter-Latin-Lower-Y : begin
 				if doSlabMotion sf.lt.outer sf.lt.full
 				if doSlabMotion [no-shape] sf.rt.full
 
-	define CursiveConfig : object
-		cursive                      { Cursive.Hook     SLAB-AUTO            }
-		cursiveFlatHook              { Cursive.FlatHook SLAB-AUTO            }
-		cursiveMotionSerifed         { Cursive.Hook     SLAB-CURSIVE-MOTION  }
-		cursiveFlatHookMotionSerifed { Cursive.FlatHook SLAB-CURSIVE-MOTION  }
+	define CursiveConfig : SuffixCfg.weave
+		object # body
+			cursive          Cursive.Hook
+			cursiveFlatHook  Cursive.FlatHook
+		object # serifs
+			serifless        SLAB-NONE
+			serifed          SLAB-ALL
+			motionSerifed    SLAB-MOTION
 
 	foreach { suffix { hookShape slabKind } } [Object.entries CursiveConfig] : do
 		create-glyph "y.\(suffix)" : glyph-proc

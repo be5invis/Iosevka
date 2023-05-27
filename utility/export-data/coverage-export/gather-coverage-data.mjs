@@ -20,8 +20,11 @@ function findFirstLastChar(lchBlockStart, lchBlockEnd, cov) {
 	const lchEnd = ((lchLast >>> 4) << 4) + 0x10;
 	return [lchStart, lchEnd];
 }
+
 export async function gatherCoverageData(covUpright, covItalic, covOblique) {
-	const result = [];
+	const featureSeriesStore = new Map();
+	const unicodeCoverage = [];
+
 	for (const [[lchBlockStart, lchBlockEnd], block] of await collectBlockData()) {
 		let blockResults = [];
 		const [lchStart, lchEnd] = findFirstLastChar(lchBlockStart, lchBlockEnd, covUpright);
@@ -33,19 +36,19 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 			const cdItalic = covItalic.get(lch);
 			const cdOblique = covOblique.get(lch);
 			if (cdUpright && cdItalic && cdOblique) {
-				const [glyphName, typographicVariants, charVariantsUpright] = cdUpright;
-				const [, , charVariantsItalic] = cdItalic;
-				const [, , charVariantsOblique] = cdOblique;
+				const [glyphName, typoFs, uprightFs] = cdUpright;
+				const [, , italicFs] = cdItalic;
+				const [, , obliqueFs] = cdOblique;
 				blockResults.push({
 					lch,
 					gc,
 					charName: chName,
 					inFont: true,
 					glyphName: glyphName,
-					typographicVariants: typographicVariants,
-					charVariantsUpright,
-					charVariantsItalic,
-					charVariantsOblique
+					...putFeatSeries(featureSeriesStore, "typographicFeatureSets", typoFs),
+					...putFeatSeries(featureSeriesStore, "cvFeatureSetsUpright", uprightFs),
+					...putFeatSeries(featureSeriesStore, "cvFeatureSetsItalic", italicFs),
+					...putFeatSeries(featureSeriesStore, "cvFeatureSetsOblique", obliqueFs)
 				});
 			} else {
 				blockResults.push({
@@ -58,11 +61,54 @@ export async function gatherCoverageData(covUpright, covItalic, covOblique) {
 			}
 		}
 		if (blockResults.length) {
-			result.push({
+			unicodeCoverage.push({
 				name: block,
 				characters: blockResults.sort((a, b) => a.lch - b.lch)
 			});
 		}
 	}
-	return result;
+
+	let featureSeries = [];
+	for (const [id, x] of featureSeriesStore.values()) featureSeries[id] = x;
+
+	return { unicodeCoverage, featureSeries };
+}
+
+function putFeatSeries(store, k, featSeriesList) {
+	if (!featSeriesList) return null;
+
+	let reduced = [];
+	for (const _featSeries of featSeriesList) {
+		const featSeries = ValidateFeatureSeries(_featSeries);
+
+		const key =
+			featSeries.name +
+			";;" +
+			featSeries.groups.map(g => g.map(a => a.css).join(";;")).join(";;");
+
+		let vs = store.get(key);
+		if (vs) {
+			reduced.push(vs[0]);
+		} else {
+			const idNeo = store.size;
+			if (!featSeries) continue;
+			store.set(key, [idNeo, featSeries]);
+			reduced.push(idNeo);
+		}
+	}
+
+	if (!reduced || !reduced.length) return null;
+	return { [k]: reduced };
+}
+
+function ValidateFeatureSeries(s) {
+	let size = 0;
+	let reducedGroups = [];
+	for (const g of s.groups) {
+		if (!g || !g.length) continue;
+		reducedGroups.push(g);
+		size += g.length;
+	}
+	if (!size) return null;
+	return { name: s.name, size, groups: reducedGroups };
 }

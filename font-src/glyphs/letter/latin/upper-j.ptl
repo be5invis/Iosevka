@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -108,23 +108,20 @@ glyph-block Letter-Latin-Upper-J : begin
 	define [JBothSidesSerif df x top] : union [HSerif.lt x top LongJut] [HSerif.rt x top Jut]
 	define [JSymmetricSerif df x top] : HSerif.mt (x + O) top (Jut + JBalance2)
 
-	define JConfig : object
-		serifless                   { JFullHookBase                  [DivFrame 1]                [DivFrame 1]               null            }
-		serifed                     { JFullHookBase                  [DivFrame 1]                [DivFrame 1]               JLeftwardSerif  }
-		serifedBothSides            { JFullHookBase                  [DivFrame 1]                [DivFrame 1]               JBothSidesSerif }
-		serifedSymmetric            { JFullHookBase                  [DivFrame 1]                [DivFrame 1]               JSymmetricSerif }
-		flatHookSerifless           { JFlatHookBase                  [DivFrame 1]                [DivFrame 1]               null            }
-		flatHookSerifed             { JFlatHookBase                  [DivFrame 1]                [DivFrame 1]               JLeftwardSerif  }
-		flatHookSeriflessBothSides  { JFlatHookBase                  [DivFrame 1]                [DivFrame 1]               JBothSidesSerif }
-		flatHookSerifedSymmetric    { JFlatHookBase                  [DivFrame 1]                [DivFrame 1]               JSymmetricSerif }
-		descendingSerifless         { JDescendingBase                [DivFrame 1]                [DivFrame 1]               null            }
-		descendingSerifed           { JDescendingBase                [DivFrame 1]                [DivFrame 1]               JLeftwardSerif  }
-		descendingSerifedBothSides  { JDescendingBase                [DivFrame 1]                [DivFrame 1]               JBothSidesSerif }
-		descendingSerifedSymmetric  { JDescendingBase                [DivFrame 1]                [DivFrame 1]               JSymmetricSerif }
-		descendingFlatHookSerifless { JDescendingFlatHookBase        [DivFrame para.diversityII] [DivFrame para.diversityI] null            }
-		descendingFlatHookSerifed   { JDescendingFlatHookSerifedBase [DivFrame para.diversityI]  [DivFrame para.diversityI] null            }
+	define JConfig : SuffixCfg.weave
+		object # height and hook
+			""                          { JFullHookBase                  [DivFrame 1]                [DivFrame 1]               }
+			flatHook                    { JFlatHookBase                  [DivFrame 1]                [DivFrame 1]               }
+			descending                  { JDescendingBase                [DivFrame 1]                [DivFrame 1]               }
+			descendingFlatHookSerifless { JDescendingFlatHookBase        [DivFrame para.diversityII] [DivFrame para.diversityI] }
+			descendingFlatHookSerifed   { JDescendingFlatHookSerifedBase [DivFrame para.diversityI]  [DivFrame para.diversityI] }
+		function [body] : if (body == 'descendingFlatHookSerifless' || body == 'descendingFlatHookSerifed') {."" null} : object
+			serifless         null
+			serifed           JLeftwardSerif
+			serifedBothSides  JBothSidesSerif
+			serifedSymmetric  JSymmetricSerif
 
-	foreach { suffix { base df dfHook serif xSerifAttach } } [Object.entries JConfig] : do
+	foreach { suffix { {base df dfHook} serif } } [Object.entries JConfig] : do
 		create-glyph "J.\(suffix)" : glyph-proc
 			include : base df dfHook CAP
 			if serif : begin

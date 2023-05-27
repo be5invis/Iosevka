@@ -93,16 +93,16 @@ export async function getCharMapAndSupportedLanguageList(cmpUpright, cmpItalic, 
 	const rawCoverage = getRawCoverage(charMap);
 	const rawCoverageItalic = getRawCoverage(charMapItalic);
 	const rawCoverageOblique = getRawCoverage(charMapOblique);
+
+	const covData = await gatherCoverageData(rawCoverage, rawCoverageItalic, rawCoverageOblique);
+
 	return {
 		stats: {
 			glyphCount: charMap.length,
 			codePointCount: rawCoverage.size
 		},
-		unicodeCoverage: await gatherCoverageData(
-			rawCoverage,
-			rawCoverageItalic,
-			rawCoverageOblique
-		),
+		featureSeries: covData.featureSeries,
+		unicodeCoverage: covData.unicodeCoverage,
 		languages: Array.from(getSupportedLanguageSet(rawCoverage)).sort()
 	};
 }

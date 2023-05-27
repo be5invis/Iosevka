@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -55,31 +55,26 @@ glyph-block Letter-Latin-Lower-Q : begin
 		HSerif.rb (RightSB - HalfStroke * HVContrast) y Jut
 	define [RbSerifAuto y] : NeedSlab SLAB : RbSerif y
 
-	define QConfig : object
-		straight                     { EaredBody          TERMINAL-NORMAL RtSerifAuto RbSerifAuto }
-		tailed                       { EaredBody          TERMINAL-TAILED RtSerifAuto nothing     }
-		diagonalTailed               { EaredBody          TERMINAL-DIAG   RtSerifAuto nothing     }
-		straightMotionSerifed        { EaredBody          TERMINAL-NORMAL RtSerif     nothing     }
-		tailedMotionSerifed          { EaredBody          TERMINAL-TAILED RtSerif     nothing     }
-		diagonalTailedMotionSerifed  { EaredBody          TERMINAL-DIAG   RtSerif     nothing     }
-		earlessCorner                { EarlessCornerBody  TERMINAL-NORMAL nothing     RbSerifAuto }
-		earlessCornerTailed          { EarlessCornerBody  TERMINAL-TAILED nothing     nothing     }
-		earlessCornerDiagonalTailed  { EarlessCornerBody  TERMINAL-DIAG   nothing     nothing     }
-		earlessRounded               { EarlessRoundedBody TERMINAL-NORMAL nothing     RbSerifAuto }
-		earlessRoundedTailed         { EarlessRoundedBody TERMINAL-TAILED nothing     nothing     }
-		earlessRoundedDiagonalTailed { EarlessRoundedBody TERMINAL-DIAG   nothing     nothing     }
+	define QConfig : SuffixCfg.weave
+		object # body
+			""                   EaredBody
+			earlessCorner        EarlessCornerBody
+			earlessRounded       EarlessRoundedBody
+		object # tail
+			straight             TERMINAL-NORMAL
+			tailed               TERMINAL-TAILED
+			diagonalTailed       TERMINAL-DIAG
+		object # serifs
+			serifless          { nothing nothing }
+			motionSerifed      { RtSerif nothing }
+			bottomSerifed      { nothing RbSerif }
+			serifed            { RtSerif RbSerif }
 
-	foreach { suffix { Body terminal sRT sRB } } [Object.entries QConfig] : do
+	foreach { suffix { Body terminal {sRT sRB} } } [Object.entries QConfig] : do
 		create-glyph "q.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : Body terminal XH Descender
 			if sRT : include : sRT XH
-			if sRB : include : sRB Descender
-
-		create-glyph "qHookTop.\(suffix)" : glyph-proc
-			include : MarkSet.p
-			include : Body terminal XH Descender
-			include : VerticalHook.r RightSB XH HookX (-Hook)
 			if sRB : include : sRB Descender
 
 		create-glyph "QRTail.\(suffix)" : glyph-proc
@@ -99,7 +94,12 @@ glyph-block Letter-Latin-Lower-Q : begin
 	alias 'cyrl/qa' 0x51B 'q'
 	select-variant 'QRTail' 0x24A (follow -- 'qRTail')
 	select-variant 'qRTail' 0x24B
-	select-variant 'qHookTop' 0x2A0
+	select-variant "q/hookTopBase" (shapeFrom -- 'q')
+
+	derive-glyphs 'qHookTop' 0x2A0 "q/hookTopBase" : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		include : VBar.r RightSB 0 XH
+		include : VerticalHook.r RightSB XH HookX (-Hook)
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/q' 0x1D562 : glyph-proc

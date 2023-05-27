@@ -10,39 +10,44 @@ glyph-block Symbol-Punctuation-At : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 
-	define [ThreeFoldShape height] : glyph-proc
+	define [ThreeFoldShape height fSolidInner] : glyph-proc
 		local top : SymbolMid + height / 2
 		local bot : SymbolMid - height / 2
 		local otop : mix bot top 0.75
 		local obot : mix top bot 0.8
 
 		local sw : AdviceStroke 3.5
-		local m1 : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
+		local m1 : if fSolidInner [mix SB RightSB 0.5] : [mix (SB + sw) (RightSB - sw) 0.47] - sw / 2
 		local m2 : [mix m1 RightSB 0.52] + TanSlope * sw
 
 		local ada : ArchDepthA * ((RightSB - m1) / (RightSB - SB) * 1.1)
 		local adb : ArchDepthB * ((RightSB - m1) / (RightSB - SB) * 1.1)
 
-		include : dispiro
-			widths.lhs sw
-			flat RightSB (otop - O) [heading Leftward]
-			curl m2 (otop - O)
-			archv
-			flat m1 (otop - ada)
-			curl m1 (obot + adb)
-			arcvh
-			g4   m2 (obot + O)
-			archv
-			flat RightSB (obot + ada)
-			curl RightSB (top - ArchDepthB)
-			arcvh
-			g4   [ArchXAdjust.top Middle sw] (top - O) [widths Stroke 0]
-			archv
-			flat SB (top - ArchDepthA) [widths sw 0]
-			curl SB (bot + ArchDepthB)
-			arcvh
-			flat [ArchXAdjust.bot Middle sw] (bot + O) [widths Stroke 0 ]
-			curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
+		include : union
+			[if fSolidInner spiro-outline dispiro]
+				widths.lhs sw
+				flat RightSB (otop - O) [heading Leftward]
+				curl m2 (otop - O)
+				archv
+				flat m1 (otop - ada)
+				curl m1 (obot + adb)
+				arcvh
+				g4   m2 (obot + O)
+				archv
+				flat RightSB (obot + ada)
+				curl RightSB (otop - O)
+			dispiro
+				widths.lhs sw
+				flat RightSB (obot + ada)
+				curl RightSB (top - ArchDepthB)
+				arcvh
+				g4   [ArchXAdjust.top Middle sw] (top - O) [widths Stroke 0]
+				archv
+				flat SB (top - ArchDepthA) [widths sw 0]
+				curl SB (bot + ArchDepthB)
+				arcvh
+				flat [ArchXAdjust.bot Middle sw] (bot + O) [widths Stroke 0 ]
+				curl (RightSB - HalfStroke + TanSlope * sw) (bot + O)
 
 	define [FourFoldShape height fSolidInner] : glyph-proc
 		local df : DivFrame para.diversityM [if fSolidInner 3.25 4]
@@ -110,7 +115,7 @@ glyph-block Symbol-Punctuation-At : begin
 					flat   df.middle obot
 				glyph-proc
 
-	define [ShortShape] : glyph-proc
+	define [CompactShape] : glyph-proc
 		local top  CAP
 		local obot 0
 		local otop [mix obot top 0.675]
@@ -159,12 +164,16 @@ glyph-block Symbol-Punctuation-At : begin
 
 	define AtConfig : object
 		threefold               { ThreeFoldShape NormalHeight false }
-		fourfold                { FourFoldShape  NormalHeight false }
 		threefoldTall           { ThreeFoldShape TallHeight   false }
+		threefoldSolidInner     { ThreeFoldShape NormalHeight true  }
+		threefoldSolidInnerTall { ThreeFoldShape TallHeight   true  }
+
+		fourfold                { FourFoldShape  NormalHeight false }
 		fourfoldTall            { FourFoldShape  TallHeight   false }
-		short                   { ShortShape     CAP          false }
 		fourfoldSolidInner      { FourFoldShape  NormalHeight true  }
 		fourfoldSolidInnerTall  { FourFoldShape  TallHeight   true  }
+
+		compact                 { CompactShape   CAP          false }
 
 	foreach { suffix { body height fSolidInner } } [Object.entries AtConfig] : do
 		create-glyph "at.\(suffix)" : body height fSolidInner

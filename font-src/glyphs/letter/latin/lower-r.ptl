@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix linreg clamp fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -149,29 +149,38 @@ glyph-block Letter-Latin-Lower-R : begin
 			curl (xBar - Stroke * HVContrast) 0 [heading Downward]
 		if doBottomSerif : include : rBottomSerif 0
 
-	define SmallRConfig : object
-		'serifless'               { StandardShape       dfN rStraight            { 0 0 } }
-		'serifed'                 { StandardShape       dfN rSerifed             { 1 1 } }
-		'topSerifed'              { StandardShape       dfN rSerifed             { 1 0 } }
-		'baseSerifed'             { StandardShape       dfN rSerifed             { 0 1 } }
-		'earlessCorner'           { EarlessCornerShape  dfN rEarless             { 0 0 } }
-		'earlessCornerSerifed'    { EarlessCornerShape  dfN rEarless             { 0 1 } }
-		'earlessRounded'          { EarlessRoundedShape dfN rEarless             { 0 0 } }
-		'earlessRoundedSerifed'   { EarlessRoundedShape dfN rEarless             { 0 1 } }
-		'hookless'                { CompactShape        dfN rNarrow              { 0 0 } }
-		'hooklessSerifed'         { CompactShape        dfN rNarrowSerifed       { 1 1 } }
-		'hooklessTopSerifed'      { CompactShape        dfN rNarrowSerifed       { 1 0 } }
-		'hooklessBaseSerifed'     { CompactShape        dfN rNarrowSerifed       { 0 1 } }
-		'compact'                 { CompactShape        dfR rNarrow              { 0 0 } }
-		'compactSerifed'          { CompactShape        dfR rNarrowSerifed       { 1 1 } }
-		'compactTopSerifed'       { CompactShape        dfR rNarrowSerifed       { 1 0 } }
-		'compactBaseSerifed'      { CompactShape        dfR rNarrowSerifed       { 0 1 } }
-		'cornerHooked'            { CornerHookShape     dfN rCornerHooked        { 0 0 } }
-		'cornerHookedSerifed'     { CornerHookShape     dfN rCornerHookedSerifed { 1 1 } }
-		'cornerHookedTopSerifed'  { CornerHookShape     dfN rCornerHookedSerifed { 1 0 } }
-		'cornerHookedBaseSerifed' { CornerHookShape     dfN rCornerHookedSerifed { 0 1 } }
+	define [FlapHooklessShape df md doTopSerif doBottomSerif] : glyph-proc
+		define [object xBar rBottomSerif xArchMiddle setMarks] : RDim df md
+		set-base-anchor 'overlay' (xBar - 0.5 * Stroke * HVContrast) (XH / 2)
+		include : setMarks doTopSerif
+		include : dispiro
+			widths.lhs
+			g4.left.start (xArchMiddle - CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]) (XH - O)
+			archv
+			flat (xBar - Stroke * HVContrast) (XH - SmallArchDepthA)
+			curl (xBar - Stroke * HVContrast) 0 [heading Downward]
+		if doBottomSerif : include : rBottomSerif 0
 
-	foreach { suffix { F df mode { doTS doBS } } } [Object.entries SmallRConfig] : do
+	define SmallRConfig : SuffixCfg.weave
+		# Body
+		object
+			''             { StandardShape       dfN rStraight     }
+			earlessCorner  { EarlessCornerShape  dfN rEarless      }
+			earlessRounded { EarlessRoundedShape dfN rEarless      }
+			hookless       { CompactShape        dfN rNarrow       }
+			cornerHooked   { CornerHookShape     dfN rCornerHooked }
+			compact        { CompactShape        dfR rNarrow       }
+			hooklessFlap   { FlapHooklessShape   dfN rNarrow       }
+			compactFlap    { FlapHooklessShape   dfR rNarrow       }
+
+		# Serifs
+		object
+			serifless      { 0 0 }
+			topSerifed     { 1 0 }
+			baseSerifed    { 0 1 }
+			serifed        { 1 1 }
+
+	foreach { suffix { {F df mode} {doTS doBS} } } [pairs-of SmallRConfig] : do
 		create-glyph "r.\(suffix)" : glyph-proc
 			set-width df.width
 			include : df.markSet.e
@@ -256,34 +265,5 @@ glyph-block Letter-Latin-Lower-R : begin
 		include : dfR.markSet.e
 		include : BBRShape dfN rStraight 0 0
 
-
-	create-glyph 'rFlap.serifless' : glyph-proc
-		set-width dfN.width
-		include : dfN.markSet.e
-		define [object rBottomSerif] : RDim dfN rEarless
-		include : EarlessRoundedShape dfN rEarless 0 0
-		create-forked-glyph 'rFlap.serifed' : rBottomSerif 0
-
-	define [rFlapHooklessShape df] : glyph-proc
-		include : df.markSet.e
-		define [object xBar rBottomSerif xArchMiddle] : RDim df rNarrow
-		set-base-anchor 'overlay' (xBar - 0.5 * Stroke * HVContrast) (XH / 2)
-		include : dispiro
-			widths.lhs
-			g4.left.start (xArchMiddle - CorrectionOMidS * [linreg 72 0.75 108 1 Stroke]) (XH - O)
-			archv
-			flat (xBar - Stroke * HVContrast) (XH - SmallArchDepthA)
-			curl (xBar - Stroke * HVContrast) 0 [heading Downward]
-		if SLAB : include : rBottomSerif 0
-
-	create-glyph 'rFlap.hookless' : glyph-proc
-		set-width dfN.width
-		include : rFlapHooklessShape dfN
-
-	create-glyph 'rFlap.compact' : glyph-proc
-		set-width dfR.width
-		include : rFlapHooklessShape dfR
-
-	select-variant 'rFlap' 0x27E
-
+	select-variant 'rFlap' 0x27E (shapeFrom -- 'r')
 	CreateAccentedComposition 'rFlapTildeOver' 0x1D73 'rFlap' 'tildeOver'

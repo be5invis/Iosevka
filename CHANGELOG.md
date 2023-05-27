@@ -1,48 +1,46 @@
 ## Modifications since version 2.x
 
-### 23.0.0
+### 24.0.0
 
-* \[**BREAKING**\] Add serifed and diagonal-tailed variants for Long S. As a result, current variants are reordered (#1728, #1729).
+* \[**BREAKING**\] Add taller slash, broken slash and broken zero variants for Zero. As a result, current variants are reordered (#1307, #1509, #1678).
+* \[**BREAKING**\] Add above-baseline crossed variant for Q. As a result, current variants are reordered (#1533).
+* \[**BREAKING**\] Add `threefold-solid-inline` variant for `@`. As a result, current variants are reordered (#1495).
+* \[**BREAKING**\] Rectify the variant atlas. As a result, if a character's variant list has motion-serifed, then it will have serifless and serifed variants: the serifed-ness will no longer be controlled by SLAB variable. The characters influenced are `M`, `N`, `P`, `R`, `U`, `V`, `W`, `b`, `h`, `m`, `n`, `p`, `q`, `u`, `v`, `w`, `y`.
+* \[**BREAKING**\] Renamed and/or reordered various variants.
 * Add Characters:
-  - CYRILLIC SMALL LETTER NARROW O (`U+1C82`) (#1517).
-  - CYRILLIC SMALL LETTER UNBLENDED UK (`U+1C88`) (#1517).
-  - MATHEMATICAL RISING DIAGONAL (`U+27CB`).
-  - MATHEMATICAL FALLING DIAGONAL (`U+27CD`).
-  - UP TACK WITH CIRCLE ABOVE (`U+27DF`).
-  - REVERSED ANGLE (`U+29A3`).
-  - REVERSED EMPTY SET (`U+29B0`) ... EMPTY SET WITH LEFT ARROW ABOVE (`U+29B4`).
-  - CIRCLED VERTICAL BAR (`U+29B6`) ... CIRCLE DIVIDED BY HORIZONTAL BAR AND TOP HALF DIVIDED BY VERTICAL BAR (`U+29BA`).
-  - DOUBLE ENDED MULTIMAP (`U+29DF`).
-  - MINUS SIGN WITH FALLING DOTS (`U+2A2B`).
-  - MINUS SIGN WITH RISING DOTS (`U+2A2C`).
-  - MULTIPLICATION SIGN WITH UNDERBAR (`U+2A31`).
-  - SEMIDIRECT PRODUCT WITH BOTTOM CLOSED (`U+2A32`).
-  - TILDE OPERATOR WITH RISING DOTS (`U+2A6B`).
-  - SIMILAR MINUS SIMILAR (`U+2A6C`).
-  - APPROXIMATELY EQUAL TO OR EQUAL TO (`U+2A70`) ... EQUALS SIGN ABOVE TILDE OPERATOR (`U+2A73`).
-  - DOES NOT DIVIDE WITH REVERSED NEGATION SLASH (`U+2AEE`) ... DOWN TACK WITH CIRCLE BELOW (`U+2AF1`).
-  - REVERSED RIGHT ANGLE (`U+2BFE`).
-  - COMBINING CYRILLIC LETTER ES-TE (`U+2DF5`) (#1720).
-  - COMBINING CYRILLIC LETTER MONOGRAPH UK (`U+2DF9`) (#1720).
-  - DAGGER WITH LEFT GUARD (`U+2E36`).
-  - DAGGER WITH RIGHT GUARD (`U+2E37`).
-  - TRIPLE DAGGER (`U+2E4B`).
-  - CYRILLIC CAPITAL LETTER MONOGRAPH UK (`U+A64A`) (#1517).
-  - CYRILLIC SMALL LETTER MONOGRAPH UK (`U+A64B`) (#1517).
-  - CYRILLIC CAPITAL LETTER YN (`U+A65E`) (#1142, #1517).
-  - CYRILLIC SMALL LETTER YN (`U+A65F`) (#1142, #1517).
-  - LATIN CAPITAL LETTER INSULAR D (`U+A779`) (#1688).
-  - LATIN SMALL LETTER INSULAR D (`U+A77A`) (#1688).
-  - LATIN CAPITAL LETTER OLD POLISH O (`U+A7C0`) (#1732).
-  - LATIN SMALL LETTER OLD POLISH O (`U+A7C1`) (#1732).
-  - HEBREW LETTER ALTERNATIVE PLUS SIGN (`U+FB29`).
-* Disunify DIVIDES (`U+2223`) and PARALLEL TO (`U+2225`) from VERTICAL LINE (`U+007C`) and DOUBLE VERTICAL LINE (`U+2016`) under `cv99`.
-* Fix glyph of TURNED DAGGER (`U+2E38`).
-* Fix variant assignment of `cv26` under `ss16`.
-* Fix variant assignment of `cv31` under `ss13`.
-* Fix variant assignments of `cv32` under `ss03` and `ss15`.
-* Fix variant assignments of `cv51` under `ss01`, `ss05`, `ss09`, `ss10`, `ss12`, and `ss16`.
-* Fix variant assignments of `cv52` under `ss10` and `ss16`.
-* Fix variant assignment of `cv71` under `ss15`.
-* Add toothless variants fo Greek Mu and Micro Sign (#1731).
+  - VERTICAL BAR WITH HORIZONTAL STROKE (`U+27CA`).
+  - ELEMENT OF OPENING UPWARDS (`U+27D2`).
+  - TRIPLE VERTICAL BAR DELIMITER (`U+2980`).
+  - Z NOTATION SPOT (`U+2981`).
+  - DOTTED FENCE (`U+2999`).
+  - CIRCLED ANTICLOCKWISE-ROTATED DIVISION SIGN (`U+29BC`).
+  - CIRCLED WHITE BULLET (`U+29BE`).
+  - CIRCLED BULLET (`U+29BF`).
+  - SQUARED RISING DIAGONAL SLASH (`U+29C4`) ... SQUARED SQUARE (`U+29C8`).
+  - EQUALS SIGN AND SLANTED PARALLEL (`U+29E3`) ... IDENTICAL TO AND SLANTED PARALLEL (`U+29E5`).
+  - THERMODYNAMIC (`U+29E7`).
+  - REVERSE SOLIDUS OPERATOR (`U+29F5`) ... REVERSE SOLIDUS WITH HORIZONTAL STROKE (`U+29F7`).
+  - PLUS SIGN WITH SMALL CIRCLE ABOVE (`U+2A22`) ... PLUS SIGN WITH TILDE ABOVE (`U+2A24`).
+  - PLUS SIGN WITH TILDE BELOW (`U+2A26`).
+  - PLUS SIGN IN LEFT HALF CIRCLE (`U+2A2D`).
+  - PLUS SIGN IN RIGHT HALF CIRCLE (`U+2A2E`).
+  - MULTIPLICATION SIGN IN LEFT HALF CIRCLE (`U+2A34`) ... CIRCLED MULTIPLICATION SIGN WITH CIRCUMFLEX ACCENT (`U+2A36`).
+  - CIRCLED DIVISION SIGN (`U+2A38`).
+  - UNION WITH MINUS SIGN (`U+2A41`) ... INTERSECTION WITH OVERBAR (`U+2A43`).
+  - LOGICAL AND WITH DOUBLE OVERBAR (`U+2A5E`) ... LOGICAL OR WITH DOUBLE UNDERBAR (`U+2A63`).
+  - TRIPLE HORIZONTAL BAR WITH DOUBLE VERTICAL STROKE (`U+2A68`).
+  - TRIPLE HORIZONTAL BAR WITH TRIPLE VERTICAL STROKE (`U+2A69`).
+  - ALMOST EQUAL TO WITH CIRCUMFLEX ACCENT (`U+2A6F`).
+  - ELEMENT OF OPENING DOWNWARDS (`U+2AD9`) ... NONFORKING (`U+2ADD`).
+  - PARALLEL WITH HORIZONTAL STROKE (`U+2AF2`) ... TRIPLE COLON OPERATOR (`U+2AF6`).
+  - LARGE TRIPLE VERTICAL BAR OPERATOR (`U+2AFC`).
+  - GROUP MARK (`U+2BD2`).
+  - HYPHEN WITH DIAERESIS (`U+2E1A`).
+  - TILDE WITH RING ABOVE (`U+2E1B`).
+  - LEFT VERTICAL BAR WITH QUILL (`U+2E20`).
+  - RIGHT VERTICAL BAR WITH QUILL (`U+2E21`).
+  - DOUBLE HYPHEN (`U+2E40`).
+* Improve height of glyphs derived from DIVIDES (`U+2223`) and PARALLEL TO (`U+2225`) to be the same as APL tacks as they are often used as APL stiles.
+* Add diagonal-tailed variants for lowercase Iota (#1737).
+* Make `VXSF` to influence Eth too (#1738).
 
