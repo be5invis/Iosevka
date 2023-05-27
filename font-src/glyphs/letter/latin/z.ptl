@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix SuffixCfg fallback] from"../../../support/utils.mjs"
 import [CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -203,37 +203,23 @@ glyph-block Letter-Latin-Z : begin
 			archv
 			g4.down.end (SB + O + HVContrast * fine) Descender [heading Downward]
 
+	define ZConfig : SuffixCfg.weave
+		object # Body
+			straight  { ZBaseShape    SmallZBaseShape    NoBottomStrokeMask    }
+			curly     { ZCurlyShape   SmallZCurlyShape   CurlyBottomStrokeMask }
+			cursive   { ZCursiveShape SmallZCursiveShape NoBottomStrokeMask    }
+		object # Serifs
+			""            { ZSerifless     } # for Cursive
+			serifless     { ZSerifless     }
+			serifed       { ZStdSerifs     }
+			bottomSerifed { ZMotionSerifsB }
+			topSerifed    { ZMotionSerifsT }
+		object # overlay
+			""                     { null       }
+			withCrossBar           { DBarOver   }
+			withHorizontalCrossBar { HBar.mOver }
 
-	define ZConfig : object
-		straightSerifless                           { ZBaseShape       SmallZBaseShape       ZSerifless     null       NoBottomStrokeMask    }
-		straightSeriflessWithCrossBar               { ZBaseShape       SmallZBaseShape       ZSerifless     DBarOver   NoBottomStrokeMask    }
-		straightSeriflessWithHorizontalCrossBar     { ZBaseShape       SmallZBaseShape       ZSerifless     HBar.mOver NoBottomStrokeMask    }
-		curlySerifless                              { ZCurlyShape      SmallZCurlyShape      ZSerifless     null       CurlyBottomStrokeMask }
-		curlySeriflessWithCrossBar                  { ZCurlyShape      SmallZCurlyShape      ZSerifless     DBarOver   CurlyBottomStrokeMask }
-		curlySeriflessWithHorizontalCrossBar        { ZCurlyShape      SmallZCurlyShape      ZSerifless     HBar.mOver CurlyBottomStrokeMask }
-		straightSerifed                             { ZBaseShape       SmallZBaseShape       ZStdSerifs     null       NoBottomStrokeMask    }
-		straightSerifedWithCrossBar                 { ZBaseShape       SmallZBaseShape       ZStdSerifs     DBarOver   NoBottomStrokeMask    }
-		straightSerifedWithHorizontalCrossBar       { ZBaseShape       SmallZBaseShape       ZStdSerifs     HBar.mOver NoBottomStrokeMask    }
-		curlySerifed                                { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     null       CurlyBottomStrokeMask }
-		curlySerifedWithCrossBar                    { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     DBarOver   CurlyBottomStrokeMask }
-		curlySerifedWithHorizontalCrossBar          { ZCurlyShape      SmallZCurlyShape      ZStdSerifs     HBar.mOver CurlyBottomStrokeMask }
-		straightBottomSerifed                       { ZBaseShape       SmallZBaseShape       ZMotionSerifsB null       NoBottomStrokeMask    }
-		straightBottomSerifedWithCrossbar           { ZBaseShape       SmallZBaseShape       ZMotionSerifsB DBarOver   NoBottomStrokeMask    }
-		straightBottomSerifedWithHorizontalCrossBar { ZBaseShape       SmallZBaseShape       ZMotionSerifsB HBar.mOver NoBottomStrokeMask    }
-		curlyBottomSerifed                          { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB null       CurlyBottomStrokeMask }
-		curlyBottomSerifedWithCrossbar              { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB DBarOver   CurlyBottomStrokeMask }
-		curlyBottomSerifedWithHorizontalCrossBar    { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsB HBar.mOver CurlyBottomStrokeMask }
-		straightTopSerifed                          { ZBaseShape       SmallZBaseShape       ZMotionSerifsT null       NoBottomStrokeMask    }
-		straightTopSerifedWithCrossbar              { ZBaseShape       SmallZBaseShape       ZMotionSerifsT DBarOver   NoBottomStrokeMask    }
-		straightTopSerifedWithHorizontalCrossBar    { ZBaseShape       SmallZBaseShape       ZMotionSerifsT HBar.mOver NoBottomStrokeMask    }
-		curlyTopSerifed                             { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT null       CurlyBottomStrokeMask }
-		curlyTopSerifedWithCrossbar                 { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT DBarOver   CurlyBottomStrokeMask }
-		curlyTopSerifedWithHorizontalCrossBar       { ZCurlyShape      SmallZCurlyShape      ZMotionSerifsT HBar.mOver CurlyBottomStrokeMask }
-		cursive                                     { ZCursiveShape    SmallZCursiveShape    ZSerifless     null       NoBottomStrokeMask    }
-		cursiveWithCrossBar                         { ZCursiveShape    SmallZCursiveShape    ZSerifless     DBarOver   NoBottomStrokeMask    }
-		cursiveWithHorizontalCrossBar               { ZCursiveShape    SmallZCursiveShape    ZSerifless     HBar.mOver NoBottomStrokeMask    }
-
-	foreach { suffix { capital small serifs slash bsMask } } [Object.entries ZConfig] : do
+	foreach { suffix { {capital small bsMask} {serifs} {slash} } } [pairs-of ZConfig] : do
 		create-glyph "Z.\(suffix)" : glyph-proc
 			include : MarkSet.capital
 			include : capital MODE-Z

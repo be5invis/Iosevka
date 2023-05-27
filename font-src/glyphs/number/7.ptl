@@ -1,6 +1,6 @@
 $$include '../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../support/utils.mjs"
 import [AnyCv getGrMesh] from"../../support/gr.mjs"
 
 glyph-module
@@ -62,19 +62,20 @@ glyph-block Digits-Seven : begin
 			m + Stroke * HVContrast * 0.25 + LongJut * 0.7
 			mix 0 (top - Stroke * 0.25) 0.5
 
-	local SevenConfig : object
-		straightSerfless        { StraightBody nothing         nothing       }
-		straightSerifed         { StraightBody StartSerifThick nothing       }
-		bendSerfless            { BendBody     nothing         nothing       }
-		bendSerifed             { BendBody     StartSerif      nothing       }
-		curlySerfless           { CurlyBody    nothing         nothing       }
-		curlySerifed            { CurlyBody    StartSerif      nothing       }
-		straightCrossbar        { StraightBody nothing         Crossbar      }
-		straightCrossbarSerifed { StraightBody StartSerifThick Crossbar      }
-		bendCrossbar            { BendBody     nothing         BendCrossbar  }
-		bendCrossbarSerifed     { BendBody     StartSerif      BendCrossbar  }
-		curlyCrossbar           { CurlyBody    nothing         CurlyCrossbar }
-		curlyCrossbarSerifed    { CurlyBody    StartSerif      CurlyCrossbar }
+	local SevenConfig : SuffixCfg.weave
+		object # body
+			straight              StraightBody
+			bend                  BendBody
+			curly                 CurlyBody
+		object # serif
+			serifless             nothing
+			serifed               StartSerif
+		function [body] : object # crossbar
+			""                    nothing
+			crossbar : match body
+				[Just "straight"] Crossbar
+				[Just "bend"]     BendCrossbar
+				[Just "curly"]    CurlyCrossbar
 
 	foreach { suffix { Body Serif Crossbar } } [Object.entries SevenConfig] : do
 		create-glyph "seven.lnum.\(suffix)" : glyph-proc

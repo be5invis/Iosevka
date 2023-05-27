@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix clamp fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif Joining] from"../../../support/gr.mjs"
 
 glyph-module
@@ -18,15 +18,10 @@ glyph-block Letter-Latin-Lower-N : begin
 		define trAnchor currentGlyph.baseAnchors.trailing
 		if trAnchor : set-base-anchor 'trailing' (trAnchor.x + SideJut) trAnchor.y
 
-	define [NTopLeftSerif top] : tagged 'serifLT' : HSerif.lt SB top SideJut
 	define [NHTB top] : VBar.l SB 0 top
-	define [NTopLeftSerifAuto top] : NeedSlab SLAB : HSerif.lt SB top SideJut
-	define [NBottomLeftSerifAuto y] : NeedSlab SLAB : NeedNotItalic
-		tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) y Jut
+	define [NTopLeftSerif top] : tagged 'serifLT' : HSerif.lt SB top SideJut
+	define [NBottomLeftSerif y] : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) y Jut
 
-	define [NBottomRightSerifAuto y] : NeedSlab SLAB : if (para.isItalic)
-		then : NBottomRightSerifItalic y
-		else : NBottomRightSerifUpright y
 	define [NBottomRightSerifUpright y] : glyph-proc
 		include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) y Jut
 		include : AdjustTrailingAnchor
@@ -69,22 +64,29 @@ glyph-block Letter-Latin-Lower-N : begin
 		include : RightwardTailedBar right yBot yBR sw
 		include : AdjustTrailingAnchor
 
-	define NConfig : object
-		'straight'                  { EaredBody          0 NTopLeftSerifAuto NBottomLeftSerifAuto NBottomRightSerifAuto   }
-		'tailed'                    { EaredBody          1 NTopLeftSerifAuto NBottomLeftSerifAuto nothing                 }
-		'straightMotionSerifed'     { EaredBody          0 NTopLeftSerif     nothing              NBottomRightSerifItalic }
-		'straightTopLeftSerifed'    { EaredBody          0 NTopLeftSerif     nothing              nothing                 }
-		'tailedMotionSerifed'       { EaredBody          1 NTopLeftSerif     nothing              nothing                 }
-		'earlessCornerStraight'     { EarlessCornerBody  0 nothing           NBottomLeftSerifAuto NBottomRightSerifAuto   }
-		'earlessCornerTailed'       { EarlessCornerBody  1 nothing           NBottomLeftSerifAuto nothing                 }
-		'earlessRoundedStraight'    { EarlessRoundedBody 0 nothing           NBottomLeftSerifAuto NBottomRightSerifAuto   }
-		'earlessRoundedTailed'      { EarlessRoundedBody 1 nothing           NBottomLeftSerifAuto nothing                 }
-		'earlessCornerStraightHTB'  { EarlessCornerBody  0 NHTB              NBottomLeftSerifAuto NBottomRightSerifAuto   }
-		'earlessCornerTailedHTB'    { EarlessCornerBody  1 NHTB              NBottomLeftSerifAuto nothing                 }
-		'earlessRoundedStraightHTB' { EarlessRoundedBody 0 NHTB              NBottomLeftSerifAuto NBottomRightSerifAuto   }
-		'earlessRoundedTailedHTB'   { EarlessRoundedBody 1 NHTB              NBottomLeftSerifAuto nothing                 }
+	define NConfig : SuffixCfg.weave
+		object # body
+			""                  EaredBody
+			earlessCorner       EarlessCornerBody
+			earlessRounded      EarlessRoundedBody
+			earlessCornerHTB    EarlessCornerBody
+			earlessRoundedHTB   EarlessRoundedBody
+		object # terminal
+			straight            0
+			tailed              1
+		function [body tail] : object # serifs
+			serifless           { nothing        nothing  nothing }
+			topLeftSerifed      { NTopLeftSerif  nothing  nothing }
+			motionSerifed       { NTopLeftSerif  nothing  [if (tail != 'tailed') NBottomRightSerifItalic] }
+			serifed : list
+				match body
+					([Just "earlessCorner"] || [Just "earlessRounded"])       nothing
+					([Just "earlessCornerHTB"] || [Just "earlessRoundedHTB"]) NHTB
+					__                                                        NTopLeftSerif
+				begin NBottomLeftSerif
+				if (tail != 'tailed') NBottomRightSerifUpright
 
-	foreach { suffix { Body tailed sLT sLB sRB } } [Object.entries NConfig] : do
+	foreach { suffix { Body tailed {sLT sLB sRB} } } [Object.entries NConfig] : do
 		create-glyph "n.\(suffix)" : glyph-proc
 			include : MarkSet.e
 			set-base-anchor 'trailing' RightSB 0

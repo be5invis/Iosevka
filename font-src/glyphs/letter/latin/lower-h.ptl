@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -14,14 +14,13 @@ glyph-block Letter-Latin-Lower-H : begin
 	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar nShoulder nShoulderMask
 	glyph-block-import Letter-Shared-Shapes : CyrDescender HooktopLeftBar VerticalHook PalatalHook
 
-	define [SmallHSerifs tailed hookTop] : glyph-proc : if SLAB : begin
+	define [SmallHSerifs tailed hookTop] : glyph-proc : begin
+		include : SmallHLeftSerifs tailed hookTop
+		if [not tailed] : include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) 0 Jut
+
+	define [SmallHLeftSerifs tailed hookTop] : glyph-proc : begin
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
-		if [not tailed]
-			if (para.isItalic)
-			: then : include : tagged 'serifRB' : HSerif.rb RightSB 0 SideJut
-			: else : include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) 0 Jut
-		if (!para.isItalic) : begin
-			include : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) 0 Jut
+		include : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) 0 Jut
 
 	define [SmallHMotionSerifs tailed hookTop] : glyph-proc
 		if [not hookTop] : include : tagged 'serifLT' : HSerif.lt SB Ascender SideJut
@@ -45,14 +44,17 @@ glyph-block Letter-Latin-Lower-H : begin
 			corner (SB + HalfStroke * HVContrast) yOverlay
 			corner xOverlayEnd yOverlay
 
-	define HConfig : object
-		straight               { 0 SLAB SmallHSerifs        }
-		tailed                 { 1 SLAB SmallHSerifs        }
-		straightMotionSerifed  { 0 true SmallHMotionSerifs  }
-		tailedMotionSerifed    { 1 true SmallHMotionSerifs  }
-		straightTopLeftSerifed { 0 true SmallHTopLeftSerifs }
+	define HConfig : SuffixCfg.weave
+		object # tail
+			straight false
+			tailed   true
+		object # serifs
+			serifless      { false no-shape            }
+			serifed        { true  SmallHSerifs        }
+			motionSerifed  { true  SmallHMotionSerifs  }
+			topLeftSerifed { true  SmallHTopLeftSerifs }
 
-	foreach { suffix { fTailed fHasTopSerif Serifs } } [Object.entries HConfig] : do
+	foreach { suffix { fTailed {fHasTopSerif Serifs} } } [Object.entries HConfig] : do
 		create-glyph "h.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : VBar.l SB 0 Ascender
@@ -152,9 +154,10 @@ glyph-block Letter-Latin-Lower-H : begin
 		if SLAB : begin
 			include : HSerif.lt (RightSB - Stroke * HVContrast) XH SideJut
 
-	derive-glyphs 'hDot' 0x1E23 'h' : lambda [src gr] : glyph-proc
-		include : WithTransform [ApparentTranslate (Width + HVContrast * HalfStroke) 0] : refer-glyph "dotAbove"
-		include [refer-glyph src] AS_BASE
+	derive-multi-part-glyphs 'hDot' 0x1E23 { 'h' 'dotAbove' } : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : WithTransform [ApparentTranslate (HVContrast * HalfStroke) (XH - Ascender)] [refer-glyph mark]
 
 	derive-glyphs 'hCedilla' 0x1E29 'h' : lambda [src gr] : glyph-proc
 		local shift : Width + SB - Middle + HalfStroke * HVContrast

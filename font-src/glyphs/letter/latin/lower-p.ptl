@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -26,23 +26,26 @@ glyph-block Letter-Latin-Lower-P : begin
 	define [EarlessRoundedBody] : glyph-proc
 		include : tagged 'bowl' : OBarLeft.roundedTop (yTerminal -- Descender)
 
-	define [FullSerifs] : glyph-proc : if SLAB : begin
+	define [FullSerifs] : glyph-proc
 		include : SmallPSerifLT
 		include : SmallPSerifLB
 
 	define [MotionSerif] : SmallPSerifLT
+	define [BottomSerif] : SmallPSerifLB
 
-	define [BottomSerif] : glyph-proc : if SLAB : begin
-		include : SmallPSerifLB
+	define PConfig : SuffixCfg.weave
+		object # body
+			eared                EaredBody
+			earlessCorner        EarlessCornerBody
+			earlessRounded       EarlessRoundedBody
+		object # serifs
+			serifless           { no-shape     false }
+			motionSerifed       { MotionSerif  false }
+			bottomSerifed       { BottomSerif  true  }
+			serifed             { FullSerifs   true  }
 
-	define PConfig : object
-		eared          { EaredBody          FullSerifs  SLAB  }
-		motionSerifed  { EaredBody          MotionSerif false }
-		earlessCorner  { EarlessCornerBody  BottomSerif SLAB  }
-		earlessRounded { EarlessRoundedBody BottomSerif SLAB  }
-
-	foreach { suffix { Body Serifs doTS }} [Object.entries PConfig] : do
-		local yOverlay : mix 0 (Descender + [if doTS Stroke 0]) 0.5
+	foreach { suffix { Body {Serifs doBS} }} [Object.entries PConfig] : do
+		local yOverlay : mix 0 (Descender + [if doBS Stroke 0]) 0.5
 		create-glyph "p.\(suffix)" : glyph-proc
 			include : MarkSet.p
 			include : Body
@@ -79,6 +82,12 @@ glyph-block Letter-Latin-Lower-P : begin
 			flat [mix SB RightSB 0.5]   (HalfStroke + XH * 0.25)
 			curl [mix SB RightSB 0.875] (HalfStroke - XH * 0.25)
 
+	derive-glyphs 'pHookTop' 0x1A5 "p/hookTopBase" : function [src gr] : glyph-proc
+		include [refer-glyph src] AS_BASE ALSO_METRICS
+		eject-contour 'serifLT'
+		eject-contour 'stemLeft'
+		include : HooktopLeftBar.outer (top -- XH) (bottom -- Descender)
+
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/p' 0x1D561 : glyph-proc
 		include : MarkSet.p
@@ -89,9 +98,3 @@ glyph-block Letter-Latin-Lower-P : begin
 		include : OBarLeft.shape
 			left -- SB + BBD
 			sw -- BBS
-
-	derive-glyphs 'pHookTop' 0x1A5 "p/hookTopBase" : function [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE ALSO_METRICS
-		eject-contour 'serifLT'
-		eject-contour 'stemLeft'
-		include : HooktopLeftBar.outer (top -- XH) (bottom -- Descender)

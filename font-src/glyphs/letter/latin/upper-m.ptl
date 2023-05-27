@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix linreg clamp fallback] from"../../../support/utils.mjs"
+import [mix fallback SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 
 glyph-module
@@ -21,6 +21,7 @@ glyph-block Letter-Latin-Upper-M : begin
 	define SLAB-AUTO            1
 	define SLAB-MOTION          2
 	define SLAB-SMALL-CYRILLIC  3
+	define SLAB-FULL            4
 
 	glyph-block-export MShape
 	define [MShape] : params [top df form slabType slanted [kMidHang df.div]] : glyph-proc
@@ -72,14 +73,15 @@ glyph-block Letter-Latin-Upper-M : begin
 		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot)
 		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot)
 		include : match slabType
-			[Just SLAB-NONE] : glyph-proc
+			[Just SLAB-NONE] : no-shape
+			[Just SLAB-FULL] : composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
 			[Just SLAB-AUTO] : NeedSlab SLAB
 				composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
 			[Just SLAB-MOTION] : composite-proc sfT.lt.outer
-			[Just SLAB-SMALL-CYRILLIC] : NeedSlab SLAB
-				composite-proc sfT.lt.outer [NeedNotItalic sfT.rt.outer]
-					if para.isItalic sfB.lb.outer sfB.lb.full
-					if para.isItalic sfB.rb.outer sfB.rb.full
+			[Just SLAB-SMALL-CYRILLIC] : composite-proc sfT.lt.outer
+				if para.isItalic [no-shape]   sfT.rt.outer
+				if para.isItalic sfB.lb.outer sfB.lb.full
+				if para.isItalic sfB.rb.outer sfB.rb.full
 
 	define [CyrSoftEmShape] : params [top df form slabType slanted] : glyph-proc
 		local subDf : df.slice 4 3
@@ -98,23 +100,26 @@ glyph-block Letter-Latin-Upper-M : begin
 		include : HBar.t xRightTop df.rightSB top swSideBot
 		if SLAB : include : VSerif.dr df.rightSB top VJut (swSideBot * VJutStroke / Stroke)
 
-	define MConfig : object
-		hanging                             { FORM-HANGING   SLAB-AUTO            false }
-		flatBottom                          { FORM-FLAT      SLAB-AUTO            false }
-		hangingSmallCyrl                    { FORM-HANGING   SLAB-SMALL-CYRILLIC  false }
-		flatBottomSmallCyrl                 { FORM-FLAT      SLAB-SMALL-CYRILLIC  false }
-		hangingMotionSerifed                { FORM-HANGING   SLAB-MOTION          false }
-		flatBottomMotionSerifed             { FORM-FLAT      SLAB-MOTION          false }
-		slantedSidesHanging                 { FORM-HANGING   SLAB-AUTO            true  }
-		slantedSidesFlatBottom              { FORM-FLAT      SLAB-AUTO            true  }
-		slantedSidesHangingSmallCyrl        { FORM-HANGING   SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesFlatBottomSmallCyrl     { FORM-FLAT      SLAB-SMALL-CYRILLIC  true  }
-		slantedSidesHangingMotionSerifed    { FORM-HANGING   SLAB-MOTION          true  }
-		slantedSidesFlatBottomMotionSerifed { FORM-FLAT      SLAB-MOTION          true  }
-		grekCapitalSan                      { FORM-SAN       SLAB-AUTO            false }
-		grekSmallSan                        { FORM-SAN-SMALL SLAB-NONE            false }
 
-	foreach { suffix { form slab slanted } } [Object.entries MConfig] : do
+
+	define MConfig : SuffixCfg.combine
+		SuffixCfg.weave
+			object # sides
+				""            false
+				slantedSides  true
+			object # middle
+				hanging       FORM-HANGING
+				flatBottom    FORM-FLAT
+			object # serifs
+				serifless     SLAB-NONE
+				motionSerifed SLAB-MOTION
+				smallCyrl     SLAB-SMALL-CYRILLIC
+				serifed       SLAB-FULL
+		object # Greek San variants
+			grekCapitalSan { false FORM-SAN       SLAB-AUTO }
+			grekSmallSan   { false FORM-SAN-SMALL SLAB-NONE }
+
+	foreach { suffix { slanted form slab } } [Object.entries MConfig] : do
 		create-glyph "M.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
 			set-width df.width
