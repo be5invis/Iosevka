@@ -291,7 +291,7 @@ class VbStageAlternative {
 		ans.assignments.set(this.stage, this.key);
 
 		// RankGroup
-		if (this.groupRank) ans.groupRank += this.groupRank;
+		if (this.groupRank) ans.groupRank += this.evalValue(this.groupRank, localState);
 		else if (this.stage === globalState.entry) ans.groupRank += this.rank;
 
 		if (this.keyAffix) ans.addKeyAffix(this.mode, this.evalValue(this.keyAffix, localState));
@@ -317,6 +317,7 @@ class VbStageAlternative {
 	}
 
 	evalValue(expr, localState) {
+		if (typeof expr === "number") return expr;
 		if (typeof expr === "string") return expr;
 		if (expr.if) {
 			const condition = this.evalCondition(expr.if, localState);

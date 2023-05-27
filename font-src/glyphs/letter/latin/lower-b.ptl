@@ -57,6 +57,11 @@ glyph-block Letter-Latin-Lower-B : begin
 				flat [mix SB 0       0.7]   (yOverlay - Ascender * 0.1)
 				curl [mix SB RightSB 0.625] (yOverlay + Ascender * 0.05)
 
+		create-glyph "latn/be.\(suffix)" : glyph-proc
+			include [refer-glyph "b.\(suffix)"] AS_BASE ALSO_METRICS
+			include : HBar.t (SB - O) [mix SB RightSB 0.9] Ascender
+			if doTS : include : VSerif.dr [mix SB RightSB 0.9] Ascender VJut
+
 		create-glyph "bHookTop.\(suffix)" : glyph-proc
 			include : MarkSet.b
 			include : Body XH
@@ -64,9 +69,10 @@ glyph-block Letter-Latin-Lower-B : begin
 			include : Serifs
 			eject-contour 'serifLT'
 
-	select-variant 'b'      'b'
-	select-variant 'bBar'   0x180  (follow -- 'b')
-	select-variant 'bSlash' 0x2422 (follow -- 'b')
+	select-variant 'b'       'b'
+	select-variant 'bBar'    0x180  (follow -- 'b')
+	select-variant 'bSlash'  0x2422 (follow -- 'b')
+	select-variant 'latn/be' 0x183  (follow -- 'b')
 
 	derive-composites 'bPalatalHook' 0x1D80 'b' : PalatalHook.r
 		x -- [mix (Middle + CorrectionOMidS) RightSB 0.75]
@@ -77,16 +83,10 @@ glyph-block Letter-Latin-Lower-B : begin
 	CreateAccentedComposition 'bTildeOver' 0x1D6C 'b' 'tildeOverOnExension'
 	select-variant 'bHookTop' 0x253
 
-	derive-glyphs 'bdot' 0x1E03 'b' : lambda [src gr] : glyph-proc
-		include : refer-glyph "dotAbove"
-		include : Translate (Width + HalfStroke) 0
-		include [refer-glyph src] AS_BASE
-
-	derive-glyphs 'latinbe' 0x183 'b' : lambda [src gr] : glyph-proc
-		include [refer-glyph src] AS_BASE
-		include : HBar.t (SB - O) [mix SB RightSB 0.9] Ascender
-		if SLAB : begin
-			include : VSerif.dr [mix SB RightSB 0.9] Ascender VJut
+	derive-multi-part-glyphs 'bdot' 0x1E03 {'b' 'dotAbove'} : lambda [srcs gr] : glyph-proc
+		local { base mark } srcs
+		include [refer-glyph base] AS_BASE ALSO_METRICS
+		include : WithTransform [ApparentTranslate HalfStroke (XH - Ascender)] [refer-glyph mark]
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarLeft
 	create-glyph 'mathbb/b' 0x1D553 : glyph-proc
