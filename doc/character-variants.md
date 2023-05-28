@@ -2740,14 +2740,25 @@
 </tr>
 <tr>
 <td rowspan="2"><code>VXSF</code></td>
-<td colspan="2"><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=64/></td>
-<td colspan="2"><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=64/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=64/></td>
-<td colspan="8"> </td>
+<td><img src="../images/cv-partial-derivative-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-partial-derivative-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-partial-derivative-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="10"> </td>
 </tr>
 <tr>
-<td colspan="2">1</td>
-<td colspan="2">2</td>
-<td colspan="8"> </td>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td rowspan="2"><code>VXAA</code></td>
+<td><img src="../images/cv-lower-eth-straight-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eth-straight-bar.dark.svg#gh-dark-mode-only" width=32/></td>
+<td><img src="../images/cv-lower-eth-curly-bar.light.svg#gh-light-mode-only" width=32/><img src="../images/cv-lower-eth-curly-bar.dark.svg#gh-dark-mode-only" width=32/></td>
+<td colspan="10"> </td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td colspan="10"> </td>
 </tr>
 <tr>
 <td rowspan="2"><code>VXSG</code></td>
