@@ -56,6 +56,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 			local xLeft : xSmallTBarLeftT df
 			set-base-anchor 'above' (xLeft + 0.5 * Stroke * HVContrast) top
+			set-base-anchor 'hooktopAttach' (xLeft + 0.5 * Stroke * HVContrast) top
 			set-base-anchor 'below' [mix xLeft gEnd.x : StrokeWidthBlend 0.375 0.5] bot
 			set-base-anchor 'overlay' (g.knots.0.x + 0.625 * Stroke * HVContrast) (XH * 0.58)
 
@@ -85,6 +86,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			set-base-anchor 'bottomright' gEnd.x gEnd.y
 
 			set-base-anchor 'above' ([xSmallTBarLeftT df] + 0.5 * Stroke * HVContrast) top
+			set-base-anchor 'hooktopAttach' ([xSmallTBarLeftT df] + 0.5 * Stroke * HVContrast) top
 			set-base-anchor 'overlay' (g.knots.0.x + 0.125 * Stroke * HVContrast) (XH * 0.58)
 
 		export : define [Retroflex df top bot] : Flat.Retroflex df top bot
@@ -137,6 +139,7 @@ glyph-block Letter-Latin-Lower-T : begin
 					curl xBarLeft top [heading Upward]
 
 			set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
+			set-base-anchor 'hooktopAttach' (xBarLeft + 0.5 * Stroke * HVContrast) top
 			set-base-anchor 'topright' xCrossRight  Ascender
 			set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
 			set-base-anchor 'below' (HalfStroke * HVContrast + [Math.min (xBarLeft + (1 / 3) * hd.x) (xCrossRight - 1)]) bot
@@ -150,6 +153,7 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : VBar.m df.middle 0 top
 			include : HCrossBar.top (df.middle - LongJut * [Math.sqrt df.div]) (df.middle + LongJut * [Math.sqrt df.div]) yCrossBar
 			set-base-anchor 'overlay' df.middle (XH * 0.58)
+			set-base-anchor 'hooktopAttach' df.middle top
 
 		export : define [Retroflex df top bot] : Flat.CrossRTBody df top bot
 
@@ -174,9 +178,10 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : difference
 				HCrossBar.top xBarLeft (df.middle + df.div * LongJut) yCrossBar
 				MaskLeft (xBarLeft - O)
-			set-base-anchor 'above' (xBarLeft + 0.5 * Stroke * HVContrast) top
-			set-base-anchor 'overlay' (xBarLeft + 0.625 * Stroke * HVContrast) (XH * 0.58)
-			set-base-anchor 'below' (xBarLeft + HalfStroke * HVContrast) bot
+			set-base-anchor 'above' (xBarLeft + 0.5 * HVContrast * Stroke) top
+			set-base-anchor 'hooktopAttach' (xBarLeft + 0.5 * HVContrast * Stroke) top
+			set-base-anchor 'overlay' (xBarLeft + 0.625 * HVContrast * Stroke) (XH * 0.58)
+			set-base-anchor 'below' (xBarLeft + HVContrast * HalfStroke) bot
 
 		export : define [LTBody df top bot] : glyph-proc
 			include : Body df top bot
@@ -189,6 +194,7 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		export : define [Retroflex df top bot] : glyph-proc
 			define xBarLeft : xSmallTBarLeftT df
+			set-base-anchor 'hooktopAttach' (xBarLeft + 0.5 * HVContrast * Stroke) top
 			include : dispiro
 				widths.rhs
 				straight.left.start (xBarLeft + HookX + HalfStroke * HVContrast) bot
@@ -246,8 +252,9 @@ glyph-block Letter-Latin-Lower-T : begin
 
 		create-glyph "tHookTop.\(suffix)" : glyph-proc
 			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.hooktopAttach
+
 			currentGlyph.clearGeometry
-			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.above
 			include : union
 				difference [Style.Body df top 0] [MaskAbove XH]
 				VerticalHook.m attach.x XH HookX (-Hook)
@@ -269,13 +276,10 @@ glyph-block Letter-Latin-Lower-T : begin
 			include : Style.Retroflex df top Descender
 
 		create-glyph "tHookTopRTail.\(suffix)" : glyph-proc
-			include [refer-glyph "t.\(suffix)"] AS_BASE ALSO_METRICS
 			include : df.markSet.if
-			currentGlyph.clearGeometry
-			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.above
-			include : union
-				difference [Style.Retroflex df top Descender] [MaskAbove XH]
-				VerticalHook.m attach.x XH HookX (-Hook)
+			include : Style.Retroflex df XH Descender
+			local attach : currentGlyph.gizmo.unapply currentGlyph.baseAnchors.hooktopAttach
+			include : VerticalHook.m attach.x XH HookX (-Hook)
 
 		turned "turnt.\(suffix)" nothing "t.\(suffix)" df.middle (XH / 2) [df.markSet.p]
 
@@ -315,7 +319,7 @@ glyph-block Letter-Latin-Lower-T : begin
 	select-variant 'tRTail' 0x288
 	select-variant 'tCurlyTail' 0x236
 
-	select-variant "tHookTopRTail" 0x1DF09 (follow -- 't')
+	select-variant "tHookTopRTail" 0x1DF09
 
 	CreateAccentedComposition 'tTildeOver' 0x1D75 't' 'tildeOver'
 
