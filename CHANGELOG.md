@@ -1,5 +1,12 @@
 ## Modifications since version 2.x
 
+### 24.1.0
+
+ * Fix missing serif in cursive-motion-serifed variants of `y` (#1751).
+ * Correct description of various character variants.
+ * Disunify variant selectors of PARTIAL DIFFERENTIAL (`U+2202`) and LATIN SMALL LETTER ETH (`U+00F0`) (#1746).
+
+
 ### 24.0.0
 
 * \[**BREAKING**\] Add taller slash, broken slash and broken zero variants for Zero. As a result, current variants are reordered (#1307, #1509, #1678).
