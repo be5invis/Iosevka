@@ -285,74 +285,53 @@ glyph-block Symbol-Arrow : for-width-kinds WideWidth1
 		include : side x1 y1 x2 y2 arrowSw size
 		include : ArrowBar x1 y1 x2 y2 halfArrowSw 1.75
 
-	define [DoubleArrowBarShape w x1 y1 x2 y2] : glyph-proc
-		include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
-			local p : (mag - o - w / 2 + O) / mag
+	define [ArrowBarMaskOut d] : spiro-outline
+		corner O  0
+		corner (2 * d + O) (2 * d)
+		corner (-2 * d + O) (2 * d)
+		corner (-2 * d + O) (-2 * d)
+		corner (2 * d + O) (-2 * d)
+
+	define [DoubleArrowBarShape w x1 y1 x2 y2] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
 			local fine : Math.min (w / 3) arrowSw
 			local coFine : w / 2 - fine / 2
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p)) (+coFine)
-				curl mag (+coFine)
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p)) (-coFine)
-				curl mag (-coFine)
+			return : difference
+				union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+				ArrowBarMaskOut coFine
 
 	define [DoubleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-proc
 		include : ArrowHead x1 y1 x2 y2 size
 		include : DoubleArrowBarShape w x1 y1 x2 y2
 
-	define [TripleArrowBarShape w x1 y1 x2 y2] : glyph-proc
-		local fine : Math.min (w / 4) arrowSw
-
-		include : ArrowBar x1 y1 x2 y2 (fine / 2)
-		include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
-			local p : (mag - o - w / 2 + O) / mag
+	define [TripleArrowBarShape w x1 y1 x2 y2] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
+			local fine : Math.min (w / 4) arrowSw
 			local coFine : w / 2 - fine / 2
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p)) (+coFine)
-				curl mag (+coFine)
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p)) (-coFine)
-				curl mag (-coFine)
+			return : difference
+				union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 0]         [curl mag 0]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+				ArrowBarMaskOut coFine
 
 	define [TripleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-proc
 		include : ArrowHead x1 y1 x2 y2 size
 		include : TripleArrowBarShape w x1 y1 x2 y2
 
-	define [QuadrupleArrowBarShape w x1 y1 x2 y2] : glyph-proc
-		include : PointingTo x1 y1 x2 y2 : lambda [mag] : glyph-proc
-			local p1 : (mag - o - w / 5 + O) / mag
-			local p2 : (mag - o - w / 2 + O) / mag
+	define [QuadrupleArrowBarShape w x1 y1 x2 y2] : begin
+		return : PointingTo x1 y1 x2 y2 : lambda [mag] : begin
 			local fine : Math.min (w / 5) arrowSw
 			local coFine : w / 2 - fine / 2
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p2)) (+coFine)
-				curl mag (+coFine)
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p1)) (+coFine / 3)
-				curl mag (+coFine / 3)
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p1)) (-coFine / 3)
-				curl mag (-coFine / 3)
-
-			include : dispiro
-				widths.center fine
-				flat (mag * (1 - p2)) (-coFine)
-				curl mag (-coFine)
+			return : difference
+				union
+					dispiro [widths.center fine] [flat 0 (+coFine)] [curl mag (+coFine)]
+					dispiro [widths.center fine] [flat 0 (+coFine / 3)] [curl mag (+coFine / 3)]
+					dispiro [widths.center fine] [flat 0 (-coFine / 3)] [curl mag (-coFine / 3)]
+					dispiro [widths.center fine] [flat 0 (-coFine)] [curl mag (-coFine)]
+				ArrowBarMaskOut coFine
 
 	define [QuadrupleArrowShape w] : lambda [x1 y1 x2 y2 size] : glyph-proc
 		include : ArrowHead x1 y1 x2 y2 size
