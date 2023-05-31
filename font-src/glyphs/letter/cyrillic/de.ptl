@@ -9,6 +9,7 @@ glyph-block Letter-Cyrillic-De : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
 
+	glyph-block-export CyrDeShape CyrDeItalicShapeT
 	define [CyrDeShape top left right _sw] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
 		local xCutLeft left
@@ -16,7 +17,7 @@ glyph-block Letter-Cyrillic-De : begin
 		local xTopLeft : mix xCutLeft xCutRight : StrokeWidthBlend 0.15 0.1
 		local xTopRight : mix xCutLeft xCutRight : StrokeWidthBlend 0.95 0.96
 		local swOuter : fallback _sw Stroke
-		local swInner (swOuter * [AdviceStroke 2.75] / Stroke)
+		local swInner : swOuter * [AdviceStroke 2.75] / Stroke
 
 		include : HBar.b (xCutLeft - descenderOverflow) (xCutRight + descenderOverflow) 0 swOuter
 		include : VBar.r xTopRight 0 top swInner
@@ -34,6 +35,26 @@ glyph-block Letter-Cyrillic-De : begin
 				flat (xTopLeft - descenderOverflow) top
 				curl (xTopRight + descenderOverflow) top
 			else : HBar.t xTopLeft xTopRight top swOuter
+
+	define [CyrDeItalicShapeT sink left right _sw] : begin
+		local stroke : fallback _sw Stroke
+		local middle : mix left right 0.5
+		return : sink
+			widths.lhs (stroke * CThinB)
+			flat (right - OX - stroke * HVContrast * (1 - CThinB)) SmallArchDepthA
+			curl (right - OX - stroke * HVContrast * (1 - CThinB)) (XH - SmallArchDepthB)
+			arcvh
+			g4 (middle - CorrectionOMidS) (Ascender * 0.7 - O) [widths.lhs stroke]
+			archv
+			flat (left + OX) (XH - SmallArchDepthA)
+			curl (left + OX) SmallArchDepthB
+			arcvh
+			g4 (middle + CorrectionOMidS) O
+			archv
+			flat (right - OX) SmallArchDepthA
+			curl (right - OX) (XH - SmallArchDepthB)
+			quadControls 0 0.8
+			g4 (left + stroke * 1.1) Ascender
 
 	define [CyrSoftDeShape top left right _sw] : glyph-proc
 		local descenderOverflow : if SLAB SideJut ((right - left) * 0.075)
@@ -76,19 +97,4 @@ glyph-block Letter-Cyrillic-De : begin
 
 	create-glyph 'cyrl/de.italic' : glyph-proc
 		include : MarkSet.b
-		include : dispiro
-			widths.lhs (Stroke * CThinB)
-			flat (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) SmallArchDepthA
-			curl (RightSB - OX - Stroke * HVContrast * (1 - CThinB)) (XH - SmallArchDepthB)
-			arcvh
-			g4 (Middle - CorrectionOMidS) (Ascender * 0.7 - O) [widths.lhs]
-			archv
-			flat (SB + OX) (XH - SmallArchDepthA)
-			curl (SB + OX) SmallArchDepthB
-			arcvh
-			g4 (Middle + CorrectionOMidS) O
-			archv
-			flat (RightSB - OX) SmallArchDepthA
-			curl (RightSB - OX) (XH - SmallArchDepthB)
-			quadControls 0 0.8
-			g4 (SB + Stroke * 1.1) Ascender
+		include : CyrDeItalicShapeT dispiro SB RightSB Stroke

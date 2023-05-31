@@ -84,10 +84,10 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 		local fine : stroke * CThin
 		return : object stroke midx midy ada adb fine
 
-	define [CyrZeUpperShape slabType top bot left right blend hook _stroke] : begin
+	define [CyrZeUpperShapeT sink slabType top bot left right blend hook _stroke] : begin
 		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
 		local middle : (left + right) / 2
-		return : dispiro
+		return : sink
 			match slabType
 				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs left middle top stroke hook
 				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs left middle top stroke hook
@@ -97,10 +97,10 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			flat middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
 			curl midx (midy - (fine - stroke / 2)) [heading Leftward]
 
-	define [CyrZeLowerShape slabType top bot left right blend hook _stroke] : begin
+	define [CyrZeLowerShapeT sink slabType top bot left right blend hook _stroke] : begin
 		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
 		local middle : (left + right) / 2
-		return : dispiro
+		return : sink
 			flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
 			curl middle (midy + (fine - stroke / 2)) [heading Rightward]
 			archv
@@ -109,6 +109,12 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left middle bot stroke hook
 				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left middle bot stroke hook
 				__ : list [hookend (bot + O) (sw -- stroke)] [g4 (left + O) (bot + hook)]
+
+	define [CyrZeUpperShape slabType top bot left right blend hook _stroke]
+		return : CyrZeUpperShapeT dispiro slabType top bot left right blend hook _stroke
+
+	define [CyrZeLowerShape slabType top bot left right blend hook _stroke]
+		return : CyrZeLowerShapeT dispiro slabType top bot left right blend hook _stroke
 
 	define [CyrZeLowerShapeHalf slabType top bot left right blend hook _stroke] : begin
 		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
@@ -135,18 +141,24 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			flat middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
 			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
 
-	define [CyrZeShape slabTop slabBot top bot left right blend hook] : union
-		CyrZeUpperShape slabTop top bot left right blend hook
-		CyrZeLowerShape slabBot top bot left right blend hook
+	glyph-block-export CyrZeShape CyrZeShapeMask
+	define [CyrZeShape slabTop slabBot top bot left right blend hook _stroke] : union
+		CyrZeUpperShape slabTop top bot left right blend hook _stroke
+		CyrZeLowerShape slabBot top bot left right blend hook _stroke
+
+	define [CyrZeShapeMask slabTop slabBot top bot left right blend hook _stroke] : union
+		CyrZeUpperShapeT spiro-outline slabTop top bot left right blend hook _stroke
+		CyrZeLowerShapeT spiro-outline slabBot top bot left right blend hook _stroke
 
 	define [CyrZeShapeHalf slabTop slabBot top bot left right blend hook _stroke] : union
-		CyrZeUpperShape slabTop top bot left right blend hook _stroke
+		CyrZeUpperShape     slabTop top bot left right blend hook _stroke
 		CyrZeLowerShapeHalf slabBot top bot left right blend hook _stroke
 
 	define [CyrKsiBaseShape slabTop top bot left right blend hook] : union
-		CyrZeUpperShape slabTop top bot left right blend hook
+		CyrZeUpperShape       slabTop   top bot left right blend hook
 		CyrZeLowerShapeTailed SLAB-NONE top bot left right blend hook
 
+	glyph-block-export AutoStartSerifL AutoEndSerifL
 	define [AutoStartSerifL sty top bot left right blend _stroke] : begin
 		define [object stroke] : CyrZeShapeDim top bot left right blend _stroke
 		return : match sty
