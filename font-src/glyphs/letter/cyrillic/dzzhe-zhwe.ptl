@@ -8,6 +8,7 @@ glyph-module
 glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
+	glyph-block-import Letter-Greek-Lower-Epsilon : CyrZe
 
 	define [SubDfDim pShift keeps df _o] : begin
 		local subDf : df.slice 4 keeps _o
@@ -53,8 +54,6 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 			include : CyrDzzheDeItalicShape df
 
 	do "ze subglyph"
-		glyph-block-import Letter-Greek-Lower-Epsilon : CyrZeShape AutoStartSerifL AutoEndSerifL
-
 		define SLAB-NONE       0
 		define SLAB-CLASSICAL  1
 		define SLAB-INWARD     2
@@ -68,9 +67,10 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 
 		define [CyrZhweZeShape slabTop slabBot df top hook] : glyph-proc
 			local [object subDf sw] : SubDfDim 0 2 df
-			include : CyrZeShape slabTop slabBot top 0 subDf.leftSB subDf.rightSB 0.65 hook sw
-			include : AutoStartSerifL    slabTop top 0 subDf.leftSB subDf.rightSB 0.65 sw
-			include : AutoEndSerifL      slabBot top 0 subDf.leftSB subDf.rightSB 0.65 sw
+			local ze : CyrZe slabTop slabBot top 0 subDf.leftSB subDf.rightSB 0.65 hook sw
+			include : ze.Shape
+			include : ze.AutoStartSerifL
+			include : ze.AutoEndSerifL
 
 		foreach { suffix { slabTop slabBot } } [Object.entries ZeConfig] : do
 			create-glyph "cyrl/Zhwe/left.\(suffix)" : glyph-proc
@@ -99,12 +99,10 @@ glyph-block Letter-Cyrillic-Dzzhe-Zhwe : begin
 			local swInner : sw * [AdviceStroke 2.75] / Stroke
 			return : [mix subDf.leftSB subDf.rightSB : StrokeWidthBlend 0.95 0.96] - 0.5 * HVContrast * swInner
 
-		glyph-block-import Letter-Greek-Lower-Epsilon : CyrZeShapeMask
 		define [ZhweZheShape legShape fSlab df top hook] : glyph-proc
 			local [object subDf sw] : SubDfDim 0 2 df
-			include : difference
-				CyrRightZheShape legShape fSlab df top subDf.middle
-				CyrZeShapeMask 0 0 top 0 subDf.leftSB subDf.rightSB 0.65 hook sw
+			local ze : CyrZe 0 0 top 0 subDf.leftSB subDf.rightSB 0.65 hook sw
+			include : difference [CyrRightZheShape legShape fSlab df top subDf.middle] [ze.ShapeMask]
 
 		glyph-block-import Letter-Cyrillic-De : CyrDeItalicShapeT
 		define [DzzheZheItalicShape legShape fSlab df] : glyph-proc
