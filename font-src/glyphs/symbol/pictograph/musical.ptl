@@ -80,7 +80,7 @@ glyph-block Symbol-Pictograph-Musical : begin
 				x2 + 0
 				0 - bandWidth
 
-	do "sharp, flat and neutral"
+	do "sharp, flat and natural"
 		local nsTop PictTop
 		local nsBot PictBot
 		local fine : AdviceStroke 3.5
@@ -102,22 +102,23 @@ glyph-block Symbol-Pictograph-Musical : begin
 			include : VBar.l  (l + hsp) (nsBot - (Middle - l - hsp) * skew) (nsTop - (Middle - l - hsp) * skew) fine
 			include : VBar.r (r - hsp) (nsBot - (Middle - r + hsp) * skew) (nsTop - (Middle - r + hsp) * skew) fine
 
-		create-glyph 'flatTone' 0x266D : glyph-proc
+		define [FlatToneShape _l _r _sw] : glyph-proc
 			local yTerminal : mix nsBot nsTop 0.55
 			local curly 0.65
 			local curly2 1.1
 			local curly3 0.3
-			local l [mix SB RightSB 0.07]
-			local r [mix RightSB SB 0.07]
+			local l : fallback _l [mix SB RightSB 0.07]
+			local r : fallback _r [mix RightSB SB 0.07]
+			local sw : fallback _sw fine
 			include : difference
 				union
-					VBar.l l nsBot nsTop fine
+					VBar.l l nsBot nsTop sw
 					dispiro
-						widths.lhs fine
+						widths.lhs sw
 						g4 l (nsBot - 1)
 						alsoThru 0.5 curly3
-						g4.up.mid (r - O + 1) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust) [widths.lhs (fine + 1)]
-						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2 + 1)
+						g4.up.mid (r - O + 1) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust) [widths.lhs (sw + 1)]
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * sw) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2 + 1)
 						g4 l (yTerminal + 1)
 				difference
 					spiro-outline
@@ -125,7 +126,7 @@ glyph-block Symbol-Pictograph-Musical : begin
 						corner l nsBot
 						alsoThru 0.5 curly3
 						g4.up.mid (r - O) ([mix nsBot yTerminal curly] + (r - l) * skew - TanSlope * SmoothAdjust)
-						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * fine) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2)
+						g4.left.mid ([mix l r 0.5] - CorrectionOMidX * sw) ([mix nsBot yTerminal curly2] + (r - l) * skew / 2)
 						corner l yTerminal
 						corner l (yTerminal + 1)
 						corner l nsTop
@@ -134,15 +135,18 @@ glyph-block Symbol-Pictograph-Musical : begin
 					spiro-outline
 						corner 0 yTerminal
 						corner 0 nsTop
-						corner (l + fine * HVContrast) nsTop
-						corner (l + fine * HVContrast) yTerminal
+						corner (l + sw * HVContrast) nsTop
+						corner (l + sw * HVContrast) yTerminal
 				spiro-outline
 					corner l (nsBot - UPM)
 					corner l nsTop
 					corner (l - UPM) nsTop
 					corner (l - UPM) (nsBot - UPM)
 
-		create-glyph 'neutralTone' 0x266E : glyph-proc
+		create-glyph 'flatTone' 0x266D : glyph-proc
+			include : FlatToneShape
+
+		create-glyph 'naturalTone' 0x266E : glyph-proc
 			local k : 0.25 - (Stroke * 0.25 / (nsTop - nsBot))
 			local kr 0.5
 			local ll (l + hsp * kr)
@@ -185,3 +189,50 @@ glyph-block Symbol-Pictograph-Musical : begin
 				difference barRight aboveDiagHigh
 				difference diagLow barLeft barRight outsideBars
 				difference diagHigh barLeft barRight outsideBars
+
+		create-glyph 'dblSharpTone' 0x1D12A : glyph-proc
+			local w : r - l
+			local t : nsTop - fine * 0
+			local b : t - w
+			local cx : mix l r 0.5
+			local cy : mix t b 0.5
+			local cofine : Math.min (w / 3) (w / 2 - Stroke)
+			local p 0.5
+			local size : w * (5 / 12)
+			include : union
+				difference
+					spiro-outline
+						corner l t
+						corner r t
+						corner r b
+						corner l b
+					union
+						VBar.m cx t b cofine
+						HBar.m l r cy cofine
+				spiro-outline
+					corner (cx - size) (cy + size)
+					g4     cx (cy + p * size)
+					corner (cx + size) (cy + size)
+					g4     (cx + p * size) cy
+					corner (cx + size) (cy - size)
+					g4     cx (cy - p * size)
+					corner (cx - size) (cy - size)
+					g4     (cx - p * size) cy
+					close
+
+		create-glyph 'dblFlatTone' 0x1D12B : glyph-proc
+			local sw : AdviceStroke 5.5
+			include : union
+				FlatToneShape l (Middle + sw / 3) sw
+				FlatToneShape (Middle - sw / 3) r sw
+
+		create-glyph 'qtrSharpTone' 0x1D132 : glyph-proc
+			include : dispiro
+				widths.center
+				flat l ([mix nsTop nsBot 0.3] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.3] - (Middle - r) * skew) [heading Rightward]
+			include : dispiro
+				widths.center
+				flat l ([mix nsTop nsBot 0.7] - (Middle - l) * skew) [heading Rightward]
+				curl r ([mix nsTop nsBot 0.7] - (Middle - r) * skew) [heading Rightward]
+			include : VBar.m Middle nsBot nsTop fine

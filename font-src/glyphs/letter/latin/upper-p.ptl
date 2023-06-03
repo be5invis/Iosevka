@@ -67,21 +67,21 @@ glyph-block Letter-Latin-Upper-P : begin
 			curl (Width - SB * mul + O) bowlBottom [heading Rightward]
 
 
-	define [PShapeOutline] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-proc
+	define [PShapeOutline] : with-params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [offset 0]] : glyph-proc
 		include : spiro-outline
 			PShapeOutlineKnots top mul bp overshoot sw offset
 
-	define [PShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab null] [withBar true]] : glyph-proc
+	define [PShape] : with-params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab null] [withBar true]] : glyph-proc
 		include : dispiro [widths.rhs sw] [PShapeOutlineKnots top mul bp overshoot sw 0]
 		if withBar : include : tagged 'strokeL' : VBar.l (SB * mul) 0 top sw
 		if slab : include : slab top sw mul
 
-	define [PRotundaShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [endX SB] [hook Hook]] : glyph-proc
+	define [PRotundaShape] : with-params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB] [endX SB] [hook Hook]] : glyph-proc
 		include : dispiro
 			widths.rhs sw
 			PRotundaOutlineKnots top mul bp overshoot sw 0 endX hook
 
-	define [RevPShape] : params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-proc
+	define [RevPShape] : with-params [top [mul PShape.defaultMul] [bp PShape.BarPos] [overshoot PShape.defaultOvershoot] [sw Stroke] [slab SLAB]] : glyph-proc
 		include : tagged 'bowl' : dispiro
 			widths.lhs sw
 			RevPshapeOutlineKnots top mul bp overshoot sw 0
@@ -104,7 +104,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : tagged 'serifLB' : union
 			HSerif.lb (SB * mul) 0 SideJut sw
 			HSerif.rb (SB * mul + 0.5 * sw * HVContrast) 0 MidJutSide sw
-	set PShape.OpenGap : function [] : params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.l
+	set PShape.OpenGap : function [] : with-params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.l
 		SB * mul + sw * HVContrast
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - 0.1) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + 0.1) [mix top [PBarPosY top sw bp] 0.5]
@@ -122,7 +122,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		include : tagged 'serifRB' : union
 			HSerif.rb (Width - SB * mul) 0 SideJut sw
 			HSerif.lb (Width - SB * mul - 0.5 * sw * HVContrast) 0 MidJutSide sw
-	set RevPShape.OpenGap : function [] : params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.r
+	set RevPShape.OpenGap : function [] : with-params [top [bot 0] [mul PShape.defaultMul] [bp PShape.BarPos] [sw Stroke]] : VBar.r
 		Width - SB * mul - sw * HVContrast
 		Math.min ([PBarPosY top sw bp] - 0.5 * sw - 0.1) bot
 		Math.max ([PBarPosY top sw bp] + 0.5 * sw + 0.1) [mix top [PBarPosY top sw bp] 0.5]
@@ -144,12 +144,6 @@ glyph-block Letter-Latin-Upper-P : begin
 			include : difference
 				PShape CAP (slab -- slabs)
 				if fGap [PShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
-
-		create-glyph "PRev.\(suffix)" : glyph-proc
-			include : MarkSet.capital
-			include : difference
-				RevPShape CAP (slab -- revSlabs)
-				if fGap [RevPShape.OpenGap (top -- CAP) (bot -- [if fSlabBot Stroke 0])] [glyph-proc]
 
 		create-glyph "grek/Rho.\(suffix)" : glyph-proc
 			include [refer-glyph "P.\(suffix)"] AS_BASE ALSO_METRICS
@@ -201,8 +195,6 @@ glyph-block Letter-Latin-Upper-P : begin
 	select-variant 'currency/pesoSign' 0x20B1 (follow -- 'P')
 	select-variant 'PHookLeft' 0x1A4
 
-	select-variant 'PRev' 0xA7FC (follow -- 'P')
-
 	derive-glyphs 'cyrl/ErTick' 0x48E 'cyrl/Er' : lambda [src gr] : glyph-proc
 		include [refer-glyph src] AS_BASE ALSO_METRICS
 		local yBowl : [PBarPosY CAP Stroke PShape.BarPos] + 0.75 * Stroke
@@ -218,7 +210,7 @@ glyph-block Letter-Latin-Upper-P : begin
 		space -- { 0 (RightSB - Stroke * HVContrast) }
 	derive-composites 'PBar' 0x2C63 'P' 'PBar/overlay'
 
-	define [BBPShape] : params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
+	define [BBPShape] : with-params [[mul PShape.defaultMul] [overshoot PShape.defaultOvershoot]] : glyph-proc
 		define sb : SB * mul
 		include : difference
 			PShape CAP (sw -- BBS) (mul -- mul) (overshoot -- overshoot) (slab -- false)

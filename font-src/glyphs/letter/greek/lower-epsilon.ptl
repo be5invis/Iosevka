@@ -1,5 +1,7 @@
 $$include '../../../meta/macros.ptl'
 
+extern isFinite
+
 import [mix linreg clamp fallback] from"../../../support/utils.mjs"
 
 glyph-module
@@ -20,146 +22,155 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 
 	define StdBlend 0.65
 
-	define [SmallEpsilonShapeDim top bot blend] : begin
-		local stroke : AdviceStroke2 2 3 (top - bot)
-		local midx : mix SB RightSB blend
-		local midy : mix bot top OverlayPos
-		local topHeight : top - bot
-		local midyHeight : midy - bot
-		local ada : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthB / (ArchDepthA + ArchDepthB))] - TanSlope * HVContrast * stroke
-		local adb : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthB / (ArchDepthA + ArchDepthB))] + TanSlope * HVContrast * stroke
-		local fine : stroke * CThin
-		return : object stroke midx midy ada adb fine
+	define [SmallEpsilon slabTop slabBot top bot blend hook] : namespace
+		export : define [Dim] : begin
+			local stroke : AdviceStroke2 2 3 (top - bot)
+			local midx : mix SB RightSB blend
+			local midy : mix bot top OverlayPos
+			local topHeight : top - bot
+			local midyHeight : midy - bot
+			local ada : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthB / (ArchDepthA + ArchDepthB))] - TanSlope * HVContrast * stroke
+			local adb : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthB / (ArchDepthA + ArchDepthB))] + TanSlope * HVContrast * stroke
+			local fine : stroke * CThin
+			return : object stroke midx midy ada adb fine
 
-	define [SmallEpsilonUpperShape slabType top bot blend hook] : begin
-		define [object stroke midx midy ada adb fine] : SmallEpsilonShapeDim top bot blend
-		return : dispiro
-			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB Middle top stroke hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB Middle top stroke hook
-				__ : list [g4 (RightSB + O) (top - hook) [widths.lhs]] [hookstart (top - O)]
-			g4 SB [YSmoothMidL top (midy - stroke / 2)]
-			arcvh
-			flat Middle (midy - (fine - stroke / 2)) [widths.heading fine 0 Rightward]
-			curl midx (midy - (fine - stroke / 2)) [heading Rightward]
+		export : define [UpperShape] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			return : dispiro
+				match slabTop
+					[Just SLAB-CLASSICAL] : SerifedArcStart.RtlLhs RightSB Middle top stroke hook
+					[Just SLAB-INWARD] : InwardSlabArcStart.RtlLhs RightSB Middle top stroke hook
+					__ : list [g4 (RightSB + O) (top - hook) [widths.lhs]] [hookstart (top - O)]
+				g4 SB [YSmoothMidL top (midy - stroke / 2)]
+				arcvh
+				flat Middle (midy - (fine - stroke / 2)) [widths.heading fine 0 Rightward]
+				curl midx (midy - (fine - stroke / 2)) [heading Rightward]
 
-	define [SmallEpsilonLowerShape slabType top bot blend hook] : begin
-		define [object stroke midx midy ada adb fine] : SmallEpsilonShapeDim top bot blend
-		return : dispiro
-			flat midx (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
-			curl Middle (midy + (fine - stroke / 2)) [heading Leftward]
-			archv
-			g4 (SB + OX * 2) [YSmoothMidL (midy + stroke / 2) bot] [widths.lhs]
-			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs RightSB Middle bot stroke hook
-				[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs RightSB Middle bot stroke hook
-				__ : list [hookend (bot + O)] [g4 (RightSB - O) (bot + hook)]
+		export : define [LowerShape] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			return : dispiro
+				flat midx (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+				curl Middle (midy + (fine - stroke / 2)) [heading Leftward]
+				archv
+				g4 (SB + OX * 2) [YSmoothMidL (midy + stroke / 2) bot] [widths.lhs]
+				match slabBot
+					[Just SLAB-CLASSICAL] : SerifedArcEnd.LtrLhs RightSB Middle bot stroke hook
+					[Just SLAB-INWARD] : InwardSlabArcEnd.LtrLhs RightSB Middle bot stroke hook
+					__ : list [hookend (bot + O)] [g4 (RightSB - O) (bot + hook)]
 
-	define [SmallEpsilonShape slabTop slabBot top bot blend hook] : union
-		SmallEpsilonUpperShape slabTop top bot blend hook
-		SmallEpsilonLowerShape slabBot top bot blend hook
+		export : define [Shape] : union [UpperShape] [LowerShape]
 
-	define [AutoStartSerifR sty top bot blend] : begin
-		define [object stroke] : SmallEpsilonShapeDim top bot blend
-		return : match sty
-			[Just SLAB-CLASSICAL] : ArcStartSerif.R       RightSB top stroke Hook
-			[Just SLAB-INWARD]    : ArcStartSerif.InwardR RightSB top stroke Hook
-			__ : glyph-proc
+		export : define [AutoStartSerifR] : begin
+			define [object stroke] : Dim
+			return : match slabTop
+				[Just SLAB-CLASSICAL] : ArcStartSerif.R       RightSB top stroke Hook
+				[Just SLAB-INWARD]    : ArcStartSerif.InwardR RightSB top stroke Hook
+				__ : glyph-proc
 
-	define [AutoEndSerifR sty top bot blend] : begin
-		define [object stroke] : SmallEpsilonShapeDim top bot blend
-		return : match sty
-			[Just SLAB-CLASSICAL] : ArcEndSerif.R         RightSB bot stroke Hook
-			[Just SLAB-INWARD]    : ArcEndSerif.InwardR   RightSB bot stroke Hook
-			__ : glyph-proc
+		export : define [AutoEndSerifR] : begin
+			define [object stroke] : Dim
+			return : match slabBot
+				[Just SLAB-CLASSICAL] : ArcEndSerif.R         RightSB bot stroke Hook
+				[Just SLAB-INWARD]    : ArcEndSerif.InwardR   RightSB bot stroke Hook
+				__ : glyph-proc
 
-	define [CyrZeShapeDim top bot left right blend _stroke] : begin
-		local stroke : fallback _stroke : AdviceStroke2 2 3 (top - bot)
-		local midx : mix right left blend
-		local midy : mix bot top OverlayPos
-		local topHeight : top - bot
-		local midyHeight : midy - bot
-		local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + TanSlope * HVContrast * stroke
-		local ada : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - TanSlope * HVContrast * stroke
-		local fine : stroke * CThin
-		return : object stroke midx midy ada adb fine
+	glyph-block-export CyrZe
+	define [CyrZe slabTop slabBot top bot left right blend hook _stroke] : namespace
+		export : define [Dim] : begin
+			local stroke : fallback _stroke : AdviceStroke2 2 3 (top - bot)
+			local midx : mix right left blend
+			local midy : mix bot top OverlayPos
+			local topHeight : top - bot
+			local midyHeight : midy - bot
+			local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + TanSlope * HVContrast * stroke
+			local ada : [mix (stroke + O) (midyHeight - stroke / 2) (ArchDepthA / (ArchDepthA + ArchDepthB))] - TanSlope * HVContrast * stroke
+			local fine : stroke * CThin
+			return : object stroke midx midy ada adb fine
 
-	define [CyrZeUpperShape slabType top bot left right blend hook _stroke] : begin
-		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
-		local middle : (left + right) / 2
-		return : dispiro
-			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs left middle top stroke hook
-				[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs left middle top stroke hook
-				__ : list [g4 (left - O) (top - hook) : widths.rhs stroke] [hookstart (top - O)]
-			g4 right [YSmoothMidR top (midy - stroke / 2)]
-			arcvh
-			flat middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
-			curl midx (midy - (fine - stroke / 2)) [heading Leftward]
+		define [CyrZeUpperShapeT sink] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			local middle : (left + right) / 2
+			return : sink
+				match slabTop
+					[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs left middle top stroke hook
+					[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs left middle top stroke hook
+					__ : list [g4 (left - O) (top - hook) : widths.rhs stroke] [hookstart (top - O)]
+				g4 right [YSmoothMidR top (midy - stroke / 2)]
+				arcvh
+				flat middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
+				curl midx (midy - (fine - stroke / 2)) [heading Leftward]
 
-	define [CyrZeLowerShape slabType top bot left right blend hook _stroke] : begin
-		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
-		local middle : (left + right) / 2
-		return : dispiro
-			flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
-			curl middle (midy + (fine - stroke / 2)) [heading Rightward]
-			archv
-			g4 (right - OX * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
-			match slabType
-				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left middle bot stroke hook
-				[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left middle bot stroke hook
-				__ : list [hookend (bot + O) (sw -- stroke)] [g4 (left + O) (bot + hook)]
+		define [CyrZeLowerShapeT sink] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			local middle : (left + right) / 2
+			return : sink
+				flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
+				curl middle (midy + (fine - stroke / 2)) [heading Rightward]
+				archv
+				g4 (right - OX * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
+				match slabBot
+					[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left middle bot stroke hook
+					[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left middle bot stroke hook
+					__ : list [hookend (bot + O) (sw -- stroke)] [g4 (left + O) (bot + hook)]
 
-	define [CyrZeLowerShapeHalf slabType top bot left right blend hook _stroke] : begin
-		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
-		local middle : (left + right) / 2
-		return : dispiro
-			flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
-			curl middle (midy + (fine - stroke / 2)) [heading Rightward]
-			archv
-			g4.down.end (right - OX * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs.heading stroke Downward]
+		export : define [UpperShape] : CyrZeUpperShapeT dispiro
 
-	define [CyrZeLowerShapeTailed slabType top bot left right blend hook _stroke] : begin
-		define [object stroke midx midy ada adb fine] : CyrZeShapeDim top bot left right blend _stroke
-		local middle : (left + right) / 2
-		return : dispiro
-			flat (TanSlope * Stroke + [Math.max (left + (Stroke - [mix Descender Stroke 0.5]) * 1.1 + 1) middle]) Descender [widths.rhs]
-			curl (TanSlope * Stroke + left + (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender
-			archv
-			g4.up.mid (left + HalfStroke * HVContrast) [mix Descender Stroke 0.5] [widths.center.heading Stroke Upward]
-			arcvh
-			g4 (middle + CorrectionOMidS) 0 [widths.lhs]
-			archv
-			g4 (right - OX * 2) (bot + ada)
-			arcvh
-			flat middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
-			curl midx (midy + (fine - stroke / 2)) [heading Leftward]
+		export : define [LowerShape] : CyrZeLowerShapeT dispiro
 
-	define [CyrZeShape slabTop slabBot top bot left right blend hook] : union
-		CyrZeUpperShape slabTop top bot left right blend hook
-		CyrZeLowerShape slabBot top bot left right blend hook
+		define [CyrZeLowerShapeHalf] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			local middle : (left + right) / 2
+			return : dispiro
+				flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
+				curl middle (midy + (fine - stroke / 2)) [heading Rightward]
+				archv
+				g4.down.end (right - OX * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs.heading stroke Downward]
 
-	define [CyrZeShapeHalf slabTop slabBot top bot left right blend hook _stroke] : union
-		CyrZeUpperShape slabTop top bot left right blend hook _stroke
-		CyrZeLowerShapeHalf slabBot top bot left right blend hook _stroke
+		define [CyrZeLowerShapeTailed] : begin
+			define [object stroke midx midy ada adb fine] : Dim
+			local middle : (left + right) / 2
+			return : dispiro
+				flat (TanSlope * Stroke + [Math.max (left + (Stroke - [mix Descender Stroke 0.5]) * 1.1 + 1) middle]) Descender [widths.rhs]
+				curl (TanSlope * Stroke + left + (Stroke - [mix Descender Stroke 0.5]) * 1.1) Descender
+				archv
+				g4.up.mid (left + HalfStroke * HVContrast) [mix Descender Stroke 0.5] [widths.center.heading Stroke Upward]
+				arcvh
+				g4 (middle + CorrectionOMidS) 0 [widths.lhs]
+				archv
+				g4 (right - OX * 2) (bot + ada)
+				arcvh
+				flat middle (midy + (fine - stroke / 2)) [widths.heading fine 0 Leftward]
+				curl midx (midy + (fine - stroke / 2)) [heading Leftward]
 
-	define [CyrKsiBaseShape slabTop top bot left right blend hook] : union
-		CyrZeUpperShape slabTop top bot left right blend hook
-		CyrZeLowerShapeTailed SLAB-NONE top bot left right blend hook
+		export : define [Shape] : union
+			CyrZeUpperShapeT dispiro
+			CyrZeLowerShapeT dispiro
 
-	define [AutoStartSerifL sty top bot left right blend _stroke] : begin
-		define [object stroke] : CyrZeShapeDim top bot left right blend _stroke
-		return : match sty
-			[Just SLAB-CLASSICAL] : ArcStartSerif.L       left top stroke Hook
-			[Just SLAB-INWARD]    : ArcStartSerif.InwardL left top stroke Hook
-			__ : glyph-proc
+		export : define [ShapeMask] : union
+			CyrZeUpperShapeT spiro-outline
+			CyrZeLowerShapeT spiro-outline
 
-	define [AutoEndSerifL sty top bot left right blend _stroke] : begin
-		define [object stroke] : CyrZeShapeDim top bot left right blend _stroke
-		return : match sty
-			[Just SLAB-CLASSICAL] : ArcEndSerif.L         left bot stroke Hook
-			[Just SLAB-INWARD]    : ArcEndSerif.InwardL   left bot stroke Hook
-			__ : glyph-proc
+		export : define [ShapeHalf] : union
+			CyrZeUpperShapeT dispiro
+			CyrZeLowerShapeHalf
+
+		export : define [KsiBaseShape] : union
+			CyrZeUpperShapeT dispiro
+			CyrZeLowerShapeTailed
+
+		export : define [AutoStartSerifL] : begin
+			define [object stroke] : Dim
+			return : match slabTop
+				[Just SLAB-CLASSICAL] : ArcStartSerif.L       left top stroke Hook
+				[Just SLAB-INWARD]    : ArcStartSerif.InwardL left top stroke Hook
+				__ : glyph-proc
+
+		export : define [AutoEndSerifL] : begin
+			define [object stroke] : Dim
+			return : match slabBot
+				[Just SLAB-CLASSICAL] : ArcEndSerif.L         left bot stroke Hook
+				[Just SLAB-INWARD]    : ArcEndSerif.InwardL   left bot stroke Hook
+				__ : glyph-proc
 
 	define EpsilonConfig : object
 		serifless               { SLAB-NONE      SLAB-NONE      }
@@ -174,49 +185,46 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	foreach { suffix { slabTop slabBot } } [Object.entries EpsilonConfig] : do
 		create-glyph "latn/Epsilon.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : SmallEpsilonShape slabTop slabBot CAP 0 StdBlend Hook
-			include : AutoStartSerifR slabTop CAP 0 StdBlend
-			include : AutoEndSerifR   slabBot CAP 0 StdBlend
+			include : let [eps : SmallEpsilon slabTop slabBot CAP 0 StdBlend Hook]
+				union [eps.Shape] [eps.AutoStartSerifR] [eps.AutoEndSerifR]
 
 		create-glyph "latn/epsilon.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : SmallEpsilonShape slabTop slabBot XH 0 StdBlend SHook
-			include : AutoStartSerifR slabTop XH 0 StdBlend
-			include : AutoEndSerifR   slabBot XH 0 StdBlend
+			include : let [eps : SmallEpsilon slabTop slabBot XH 0 StdBlend SHook]
+				union [eps.Shape] [eps.AutoStartSerifR] [eps.AutoEndSerifR]
 
 		create-glyph "cyrl/Ze.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : CyrZeShape slabTop slabBot CAP 0 SB RightSB StdBlend Hook
-			include : AutoStartSerifL slabTop CAP 0 SB RightSB StdBlend
-			include : AutoEndSerifL   slabBot CAP 0 SB RightSB StdBlend
+			include : let [ze : CyrZe slabTop slabBot CAP 0 SB RightSB StdBlend Hook]
+				union [ze.Shape] [ze.AutoStartSerifL] [ze.AutoEndSerifL]
 
 		create-glyph "cyrl/ze.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : CyrZeShape slabTop slabBot XH 0 SB RightSB StdBlend SHook
-			include : AutoStartSerifL slabTop XH 0 SB RightSB StdBlend
-			include : AutoEndSerifL   slabBot XH 0 SB RightSB StdBlend
+			include : let [ze : CyrZe slabTop slabBot XH 0 SB RightSB StdBlend SHook]
+				union [ze.Shape] [ze.AutoStartSerifL] [ze.AutoEndSerifL]
 
 		create-glyph "cyrl/ze.BGR.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : CyrZeShape slabTop slabBot XH Descender SB RightSB StdBlend SHook
-			include : AutoStartSerifL slabTop XH Descender SB RightSB StdBlend
-			include : AutoEndSerifL   slabBot XH Descender SB RightSB StdBlend
+			include : let [ze : CyrZe slabTop slabBot XH Descender SB RightSB StdBlend SHook]
+				union [ze.Shape] [ze.AutoStartSerifL] [ze.AutoEndSerifL]
 
 		create-glyph "cyrl/DzjeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.capDesc
-			include : CyrZeShapeHalf slabTop slabBot CAP 0 SB RightSB StdBlend Hook
-			define [object stroke midy] : CyrZeShapeDim CAP 0 SB RightSB StdBlend
+			local ze : CyrZe slabTop slabBot CAP 0 SB RightSB StdBlend Hook
+			define [object stroke midy] : ze.Dim
+			include : ze.ShapeHalf
+			include : ze.AutoStartSerifL slabTop CAP 0 SB RightSB StdBlend
 			include : VBar.r (RightSB - OX * 2) 0 [YSmoothMidR (midy + stroke / 2) 0] stroke
 			include : CyrDescender.rSideJut (RightSB - OX * 2) 0
-			include : AutoStartSerifL slabTop CAP 0 SB RightSB StdBlend
 
 		create-glyph "cyrl/dzjeKomi.\(suffix)" : glyph-proc
 			include : MarkSet.p
-			include : CyrZeShapeHalf slabTop slabBot XH 0 SB RightSB StdBlend SHook
-			define [object stroke midy] : CyrZeShapeDim XH 0 SB RightSB StdBlend
+			local ze : CyrZe slabTop slabBot XH 0 SB RightSB StdBlend SHook
+			define [object stroke midy] : ze.Dim
+			include : ze.ShapeHalf
+			include : ze.AutoStartSerifL slabTop XH 0 SB RightSB StdBlend
 			include : VBar.r (RightSB - OX * 2) 0 [YSmoothMidR (midy + stroke / 2) 0] stroke
 			include : CyrDescender.rSideJut (RightSB - OX * 2) 0
-			include : AutoStartSerifL slabTop XH 0 SB RightSB StdBlend
 
 		create-glyph "cyrl/ZjeKomi.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 3
@@ -224,8 +232,9 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			include : df.markSet.capital
 
 			local xm : df.middle + 0.5 * df.mvs * HVContrast
-			include : CyrZeShapeHalf slabTop slabBot CAP 0 df.leftSB xm StdBlend Hook df.mvs
-			define [object stroke midy] : CyrZeShapeDim CAP 0 df.leftSB xm StdBlend df.mvs
+			local ze : CyrZe slabTop slabBot CAP 0 df.leftSB xm StdBlend Hook df.mvs
+			define [object stroke midy] : ze.Dim
+			include : ze.ShapeHalf
 			include : UpwardHookShape
 				left -- xm - OX * 2 - stroke * HVContrast
 				right -- df.rightSB
@@ -234,7 +243,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 				ada -- (ArchDepthA * 0.6 * df.div)
 				adb -- (ArchDepthB * 0.6 * df.div)
 				sw -- stroke
-			include : AutoStartSerifL slabTop CAP 0 df.leftSB xm StdBlend df.mvs
+			include : ze.AutoStartSerifL
 			local sf2 : [SerifFrame.fromDf df (CAP / 2) 0].slice 1 2
 			if SLAB : include sf2.rt.full
 
@@ -244,8 +253,9 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 			include : df.markSet.e
 
 			local xm : df.middle + 0.5 * df.mvs * HVContrast
-			include : CyrZeShapeHalf slabTop slabBot XH 0 df.leftSB xm StdBlend SHook df.mvs
-			define [object stroke midy] : CyrZeShapeDim XH 0 df.leftSB xm StdBlend df.mvs
+			local ze : CyrZe slabTop slabBot XH 0 df.leftSB xm StdBlend Hook df.mvs
+			define [object stroke midy] : ze.Dim
+			include : ze.ShapeHalf
 			include : UpwardHookShape
 				left -- xm - OX * 2 - stroke * HVContrast
 				right -- df.rightSB
@@ -254,19 +264,19 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 				ada -- (SmallArchDepthA * 0.6 * df.div)
 				adb -- (SmallArchDepthB * 0.6 * df.div)
 				sw -- stroke
-			include : AutoStartSerifL slabTop XH 0 df.leftSB xm StdBlend df.mvs
+			include : ze.AutoStartSerifL
 			local sf2 : [SerifFrame.fromDf df (XH / 2) 0].slice 1 2
 			if SLAB : include sf2.rt.full
 
 		create-glyph "cyrl/KsiBase.\(suffix)" : glyph-proc
 			include : MarkSet.capital
-			include : CyrKsiBaseShape slabTop CAP 0 SB RightSB StdBlend Hook
-			include : AutoStartSerifL slabTop CAP 0 SB RightSB StdBlend
+			include : let [ze : CyrZe slabTop SLAB-NONE CAP 0 SB RightSB StdBlend Hook]
+				union [ze.KsiBaseShape] [ze.AutoStartSerifL]
 
 		create-glyph "cyrl/ksiBase.\(suffix)" : glyph-proc
 			include : MarkSet.e
-			include : CyrKsiBaseShape slabTop XH 0 SB RightSB StdBlend SHook
-			include : AutoStartSerifL slabTop XH 0 SB RightSB StdBlend
+			include : let [ze : CyrZe slabTop SLAB-NONE XH 0 SB RightSB StdBlend SHook]
+				union [ze.KsiBaseShape] [ze.AutoStartSerifL]
 
 	alias 'grek/epsilon' 0x3B5 'latn/epsilon.serifless'
 	select-variant 'latn/Epsilon' 0x190
@@ -308,9 +318,10 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 		local blend 0.505
 		local midGap : Math.max [AdviceStroke2 3 12 CAP] (CAP / 8 - [AdviceStroke2 3 6 XH])
 		local strokeV : AdviceStroke 4
-		local dimUpper : CyrZeShapeDim         CAP            midGap blend
-		local dimLower : SmallEpsilonShapeDim  (CAP - midGap) 0      blend
-		include : union
-			CyrZeUpperShape        SLAB-NONE  CAP           midGap SB RightSB blend Hook
-			SmallEpsilonLowerShape SLAB-NONE (CAP - midGap) 0                 blend Hook
+		local ze : CyrZe SLAB-NONE SLAB-NONE CAP midGap SB RightSB blend Hook
+		local dimUpper : ze.Dim
+
+		local epsilon : SmallEpsilon SLAB-NONE SLAB-NONE (CAP - midGap) 0 blend Hook
+		local dimLower : epsilon.Dim
+		include : union [epsilon.LowerShape] [ze.UpperShape]
 			Rect (dimUpper.midy + dimUpper.stroke / 2) (dimLower.midy - dimLower.stroke / 2) (Middle - strokeV / 2 * HVContrast) (Middle + strokeV / 2 * HVContrast)
