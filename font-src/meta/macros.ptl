@@ -20,8 +20,8 @@ define-macro Just : begin
 
 	return m
 
-define-macro params : syntax-rules
-	`[params @_pairs @body] : begin
+define-macro postulate : syntax-rules
+	`[postulate @::$pairs] : begin
 		local ta : env.newt
 		local tb : env.newt
 		local t : env.newt
@@ -38,26 +38,46 @@ define-macro params : syntax-rules
 		local tearDowns    `[begin]
 
 		local j 0
-		foreach [pf : items-of : formOf _pairs] : begin
+		foreach $pf [items-of $pairs] : begin
 			local name
-			if [atom pf] : then
-				declarations.push `[local @pf]
-				indexAssigns.push `[set @pf : fallback @pf (@tb).(@{".quote" j})]
-				set name pf
-			: else
-				declarations.push `[local @(pf.0)]
-				indexAssigns.push `[set @(pf.0) : fallback @(pf.0) (@tb).(@{".quote" j}) @(pf.1)]
-				set name pf.0
-				if pf.2 : tearDowns.push `[local @(pf.2) @name]
-			namedAssigns.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name}) [set @name @t.right]]
+			local pf : formOf $pf
+
+			match [formOf $pf]
+				pf [atom pf] : begin
+					declarations.push `[local @pf]
+					indexAssigns.push `[set @pf : fallback @pf (@tb).(@{".quote" j})]
+					set name pf
+				`[@pf] : begin
+					declarations.push `[local @pf]
+					indexAssigns.push `[set @pf : fallback @pf (@tb).(@{".quote" j})]
+					set name pf
+				`[@decl @dflt] : begin
+					declarations.push `[local @decl]
+					indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
+					set name decl
+				`(@decl -- @dflt) : begin
+					declarations.push `[local @decl]
+					indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
+					set name decl
+				{".operatorPiece" decl '--' dflt} : begin
+					declarations.push `[local @decl]
+					indexAssigns.push `[set @decl : fallback @decl (@tb).(@{".quote" j}) @dflt]
+					set name decl
+				true : throw : new Error "Invalid postulation syntax"
+
+			namedAssigns.push `[if (@t && @t <@ $NamedParameterPair$ && @t.left == @{".quote" name})
+				[set @name @t.right]]
 			inc j
 
 		ps.push declarations
 		ps.push `[foreach [@t : items-of @ta] @namedAssigns]
 		ps.push indexAssigns
 		ps.push tearDowns
-		ps.push : formOf body
+
 		return : dirty ps
+
+define-macro with-params : syntax-rules
+	`[with-params @_pairs @body] : dirty `[begin [postulate @::[formOf _pairs]] @[formOf body]]
 
 ### Necessary macros
 # A glyph construction is a function which "modifies" a glyph.

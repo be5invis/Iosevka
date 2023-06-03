@@ -9,6 +9,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : CyrDescender
 
+	glyph-block-export Zhe
 	define Zhe : namespace
 		define [ZheSw df]  : AdviceStroke 3.3 df.div
 		define [ZheSw2 df] : AdviceStroke 4.0 df.div
@@ -19,16 +20,17 @@ glyph-block Letter-Cyrillic-Zhe : begin
 			include : VBar.m df.middle bot midTop [ZheSw df]
 			if (fSlab && !para.isItalic && (df.width > 7 * para.refJut)) : begin
 				include : HSerif.mb df.middle bot    Jut
-				include : HSerif.mt    df.middle midTop Jut
+				include : HSerif.mt df.middle midTop Jut
 
-		define [LegSerifs fSlab df bot top] : glyph-proc
+		define [LegSerifs fSlab fHalf df bot top] : glyph-proc
 			define fine : ZheSw df
 			define fineK 0.1
 			if fSlab : begin
-				include : HSerif.lt (df.leftSB  + fine * fineK) top SideJut
-				include : HSerif.lb (df.leftSB  + fine * fineK) bot SideJut
-				include : HSerif.rt (df.rightSB - fine * fineK) top SideJut
-				include : HSerif.rb (df.rightSB - fine * fineK) bot SideJut
+				if (!fHalf) : begin
+					include : HSerif.lt (df.leftSB  + fine * fineK) top SideJut fine
+					include : HSerif.lb (df.leftSB  + fine * fineK) bot SideJut fine
+				include : HSerif.rt (df.rightSB - fine * fineK) top SideJut fine
+				include : HSerif.rb (df.rightSB - fine * fineK) bot SideJut fine
 
 		export : define [Descender fSlab df] : begin
 			define sw : ZheSw df
@@ -39,7 +41,7 @@ glyph-block Letter-Cyrillic-Zhe : begin
 				refSw   -- sw
 				sideJut -- SideJut
 
-		export : define [StraightLegs fSlab df bot top] : begin
+		export : define [StraightLegs fSlab fHalf df bot top] : begin
 			define fine : ZheSw df
 			define overshoot : Overshoot fSlab df
 
@@ -53,19 +55,23 @@ glyph-block Letter-Cyrillic-Zhe : begin
 				corner (df.width - attach1X) (attach1Y + 0.1)
 				corner (df.rightSB - overshoot - 0.1)    top
 
-			return : intersection [MaskBelow top] [MaskAbove bot] : union
-				intersection [MaskLeft df.middle]
-					ExtLineLhs 4 fine (df.leftSB  + overshoot) top attach1X attach1Y
+			local rightShape : union
 				intersection [MaskRight df.middle]
 					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - attach1X) attach1Y
-				intersection [MaskLeft df.middle] : difference
-					ExtLineRhs 4 fine (df.leftSB  + overshoot) bot attach1X attach2Y
-					mask
 				intersection [MaskRight df.middle] : difference
 					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - attach1X) attach2Y
 					mask
 
-		export : define [CurlyLegs fSlab df bot top] : begin
+			local fullShape : if fHalf rightShape : union rightShape
+				intersection [MaskLeft df.middle]
+					ExtLineLhs 4 fine (df.leftSB  + overshoot) top attach1X attach1Y
+				intersection [MaskLeft df.middle] : difference
+					ExtLineRhs 4 fine (df.leftSB  + overshoot) bot attach1X attach2Y
+					mask
+
+			return : intersection [MaskBelow top] [MaskAbove bot] fullShape
+
+		export : define [CurlyLegs fSlab fHalf df bot top] : begin
 			define fine : ZheSw df
 			define fine2 : ZheSw3 df
 			define overshoot : if fSlab 0 (2 * O * df.div)
@@ -77,25 +83,11 @@ glyph-block Letter-Cyrillic-Zhe : begin
 			define [upperCurvature] : bezControls  0 0.3 0.5 0.75 8
 			define [lowerCurvature] : quadControls 0 0.3          8
 
-			return : intersection [MaskBelow top] [MaskAbove bot] : union
-				dispiro
-					g4.down.start (df.leftSB  + overshoot) top [widths.lhs.heading fine Downward]
-					upperCurvature
-					g4 attach1X attach1Y [widths.lhs fine2]
+			local rightShape : union
 				dispiro
 					g4.down.start (df.rightSB - overshoot) top [widths.rhs.heading fine Downward]
 					upperCurvature
 					g4 (df.width - attach1X) attach1Y [widths.rhs fine2]
-				difference
-					dispiro
-						g4.up.start (df.leftSB + overshoot) bot [widths.rhs.heading fine Upward]
-						lowerCurvature
-						g4 attach1X attach2Y [widths.center fine2]
-					intersection [MaskLeft df.middle] : spiro-outline
-						corner.down.start (df.leftSB  + overshoot + 0.1) top
-						lowerCurvature
-						corner attach1X (attach1Y + 0.1)
-						corner df.middle top
 				difference
 					dispiro
 						g4.up.start (df.rightSB - overshoot) bot [widths.lhs.heading fine Upward]
@@ -107,29 +99,56 @@ glyph-block Letter-Cyrillic-Zhe : begin
 						corner (df.width - attach1X) (attach1Y + 0.1)
 						corner df.middle top
 
-		export : define [TouchingLegs   fSlab df bot top] : ConnectedLegsImpl 1.00 fSlab df bot top
-		export : define [ConnectingLegs fSlab df bot top] : ConnectedLegsImpl 0.60 fSlab df bot top
-		define [ConnectedLegsImpl k fSlab df bot top] : begin
+			local fullShape : if fHalf rightShape : union rightShape
+				dispiro
+					g4.down.start (df.leftSB  + overshoot) top [widths.lhs.heading fine Downward]
+					upperCurvature
+					g4 attach1X attach1Y [widths.lhs fine2]
+				difference
+					dispiro
+						g4.up.start (df.leftSB + overshoot) bot [widths.rhs.heading fine Upward]
+						lowerCurvature
+						g4 attach1X attach2Y [widths.center fine2]
+					intersection [MaskLeft df.middle] : spiro-outline
+						corner.down.start (df.leftSB  + overshoot + 0.1) top
+						lowerCurvature
+						corner attach1X (attach1Y + 0.1)
+						corner df.middle top
+
+			return : intersection [MaskBelow top] [MaskAbove bot] fullShape
+
+		export : define [TouchingLegs   fSlab fHalf df bot top] : ConnectedLegsImpl 1.00 fSlab fHalf df bot top
+		export : define [ConnectingLegs fSlab fHalf df bot top] : ConnectedLegsImpl 0.60 fSlab fHalf df bot top
+		define [ConnectedLegsImpl k fSlab fHalf df bot top] : begin
 			define fine : ZheSw df
 			define cor : DiagCor (top - bot) (df.rightSB - df.leftSB)
 			define midX : mix df.leftSB (df.middle - HVContrast * cor * fine) k
 			define midY : mix bot top 0.5
 			define overshoot : Overshoot fSlab df
-			return : union
-				HBar.m midX (df.width - midX) midY fine
-				intersection [MaskBelow midY] [MaskAbove bot]
-					ExtLineRhs 4 fine (df.leftSB + overshoot) bot midX midY
-				intersection [MaskBelow top] [MaskAbove midY]
-					ExtLineLhs 4 fine (df.leftSB + overshoot) top midX midY
+
+			local rightShape : union
 				intersection [MaskBelow midY] [MaskAbove bot]
 					ExtLineLhs 4 fine (df.rightSB - overshoot) bot (df.width - midX) midY
 				intersection [MaskBelow top] [MaskAbove midY]
 					ExtLineRhs 4 fine (df.rightSB - overshoot) top (df.width - midX) midY
 
-		export : define [Shape Legs fSlab    df bot top midTop] : glyph-proc
+			local fullShape : if fHalf rightShape : union rightShape
+				intersection [MaskBelow midY] [MaskAbove bot]
+					ExtLineRhs 4 fine (df.leftSB + overshoot) bot midX midY
+				intersection [MaskBelow top] [MaskAbove midY]
+					ExtLineLhs 4 fine (df.leftSB + overshoot) top midX midY
+
+			return : union fullShape : HBar.m [if fHalf df.middle midX] (df.width - midX) midY fine
+
+		export : define [Shape Legs fSlab df bot top midTop] : glyph-proc
 			include : CenterBar fSlab df bot midTop
-			include : Legs      fSlab df bot top
-			include : LegSerifs fSlab df bot top
+			include : Legs      fSlab false df bot top
+			include : LegSerifs fSlab false df bot top
+
+		export : define [HalfShape Legs fSlab df bot top] : glyph-proc
+			include : CenterBar fSlab df bot top
+			include : Legs      fSlab true df bot top
+			include : LegSerifs fSlab true df bot top
 
 	define ZheConfig : object
 		straight            { Zhe.StraightLegs   SLAB }
