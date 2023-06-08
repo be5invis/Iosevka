@@ -15,11 +15,12 @@ glyph-block Letter-Latin-S : begin
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerifWidth ArcStartSerifDepth
 	glyph-block-import Letter-Shared-Shapes : SerifedArcStart SerifedArcEnd
 	glyph-block-import Letter-Shared-Shapes : ArcStartSerif ArcEndSerif
-	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook CyrDescender
+	glyph-block-import Letter-Shared-Shapes : PalatalHook RetroflexHook CyrDescender CurlyTail
 
 	define SLAB-NONE      0
 	define SLAB-CLASSICAL 1
 	define SLAB-INWARD    2
+	define CURLY-TAIL     10
 
 	define SOBot  OX
 
@@ -40,6 +41,15 @@ glyph-block Letter-Latin-S : begin
 			g4.down.mid (deltaX + SB - Width) (top - archDepth) [widths.lhs gap]
 			alsoThru.g2 0.5 0.5 [widths.center ess]
 			g4.down.mid (deltaX + RightSB - Width - SOBot) (bot + archDepth) [widths.rhs gap]
+
+	define [SCurlyTail sw] : begin
+		local fine : AdviceStroke2 3 4 XH
+		local rinner : ((XH * 0.5) - fine * 2 - sw * 0.5) / 4
+		local m1 : RightSB - SOBot - sw * HVContrast
+		local x2 : RightSB - sw * 0.3
+		local y2 : -XH * 0.05
+
+		return : CurlyTail fine rinner m1 0 (SB + SOBot) x2 y2
 
 	define [SStrokeImpl top bot st sb stroke refSwEss] : begin
 		local ess : refSwEss * stroke / Stroke
@@ -115,6 +125,9 @@ glyph-block Letter-Latin-S : begin
 			g4   (RightSB + OX - SOBot) (archDepth) [widths 0 stroke]
 
 			match sb
+				[Just CURLY-TAIL] : list
+					arcvh
+					SCurlyTail stroke
 				[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs SB Middle 0 stroke SHook
 				[Just SLAB-INWARD] : list
 					arcvh
@@ -317,6 +330,13 @@ glyph-block Letter-Latin-S : begin
 				flat (RightSB - 1) Descender [widths sw 0]
 				curl RightSB Descender
 
+		create-glyph "sCurlyTail.\(suffix)" : glyph-proc
+			local sw : AdviceStroke2 2 3 XH
+			include : MarkSet.e
+			include : SmallSStrokeImpl doTS CURLY-TAIL sw EssLower
+			include : SAutoSlabStart doTS XH sw Hook
+			include : SAutoSlabEnd   doBS 0  sw Hook
+
 	select-variant 'S' 'S'
 	link-reduced-variant 'S/sansSerif' 'S' MathSansSerif
 	select-variant 's' 's'
@@ -336,6 +356,7 @@ glyph-block Letter-Latin-S : begin
 
 	select-variant 'SSwash' 0x2C7E
 	select-variant 'sSwash' 0x23F
+	select-variant 'sCurlyTail' 0x1DF1E (follow -- 'sSwash')
 
 	select-variant 'S/descBase' (shapeFrom -- 'S') (follow -- 'SRTail')
 	select-variant 's/ascBase' (shapeFrom -- 's')
