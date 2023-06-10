@@ -11,7 +11,7 @@ glyph-block Letter-Latin-Lower-M : begin
 	glyph-block-import Letter-Shared : CreateAccentedComposition
 	glyph-block-import Letter-Shared-Shapes : SerifFrame RightwardTailedBar DToothlessRise DMBlend
 	glyph-block-import Letter-Shared-Shapes : nShoulder nShoulderMask
-	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook VerticalHook
+	glyph-block-import Letter-Shared-Shapes : CyrDescender PalatalHook VerticalHook CurlyTail
 
 	define [SmallMSmooth df] : df.div * (0.5 * SmallArchDepth + 0.375 * Stroke)
 	define [SmallMShoulderSpiro] : with-params [left right top bottom width fine df coBottom] : glyph-proc
@@ -134,7 +134,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			curl df.rightSB rbot [heading Downward]
 
 		include : tagged 'barL' : VBar.l df.leftSB lbot (top - DToothlessRise) df.mvs
-		include : tagged 'barM' : VBar.m     df.middle mbot (top - DToothlessRise) df.mvs
+		include : tagged 'barM' : VBar.m df.middle mbot (top - DToothlessRise) df.mvs
 
 	define [EarlessRoundedDoubleArchSmallMShape top lbot mbot rbot df] : glyph-proc
 		include : union
@@ -235,6 +235,29 @@ glyph-block Letter-Latin-Lower-M : begin
 				include : FlipAround df.middle ((Width - SB) / 2)
 				include : Translate 0 (SB / 2)
 
+		create-glyph "mCrossedTail.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 4
+			set-width df.width
+			include : df.markSet.e
+
+			local fine : AdviceStroke 5.5 df.div
+			local rinner : XH * 0.15 - fine * 0.75
+			local m1 : df.rightSB - df.mvs * HVContrast
+			local m2 : [mix (df.middle + 0.5 * df.mvs * HVContrast) m1 0.35] - 0.5 * fine * HVContrast
+			local x2 : df.rightSB + SideJut
+			local y2 : rinner * 2 + fine - O
+			include : Body XH 0 [if shortLeg [SmallMShortLegHeight XH df] 0] (y2 + O) df
+			include : dispiro
+				straight.down.start df.rightSB (y2 + O) [widths.rhs.heading df.mvs Downward]
+				CurlyTail fine rinner m1 0 m2 x2 y2 (adj -- 0)
+
+			include : Serifs df XH 0 [if shortLeg [SmallMShortLegHeight XH df] 0] 0 true earless
+			if (SLAB && [not shortLeg] && Serifs === FullSerifs) : begin
+				local sf : SerifFrame.fromDf df XH 0
+				if (sf.enoughSpaceForFullSerifs && m2 - (df.middle + sf.jutIn) < 0.01 * Width) : begin
+					eject-contour 'serifMB'
+					include sf.mb.left
+
 	select-variant 'm' 'm'
 	select-variant 'm/tailless' (shapeFrom -- 'm')
 	select-variant 'capitalSmallM' (follow -- 'm')
@@ -256,6 +279,7 @@ glyph-block Letter-Latin-Lower-M : begin
 	select-variant 'mLTail' 0x271
 	select-variant 'turnmLeg' 0x270 (follow -- 'm')
 	select-variant 'turnmSideways' 0x1D1F (follow -- 'm')
+	select-variant 'mCrossedTail' 0xAB3A (follow -- 'mLTail')
 
 	turned 'turnm' 0x26F 'm' HalfAdvance (XH / 2)
 	turned 'capitalTurnm' 0x19C 'capitalSmallM' HalfAdvance (CAP / 2)
