@@ -21,6 +21,7 @@ glyph-block Letter-Latin-Lower-N : begin
 	define [NHTB top] : VBar.l SB 0 top
 	define [NTopLeftSerif top] : tagged 'serifLT' : HSerif.lt SB top SideJut
 	define [NBottomLeftSerif y] : tagged 'serifLB' : HSerif.mb (SB + HalfStroke * HVContrast) y Jut
+	define [NBottomLeftOuterSerif y] : tagged 'serifLB' : HSerif.lb SB y SideJut
 
 	define [NBottomRightSerifUpright y] : glyph-proc
 		include : tagged 'serifRB' : HSerif.mb (RightSB - HalfStroke * HVContrast) y Jut
@@ -97,14 +98,14 @@ glyph-block Letter-Latin-Lower-N : begin
 			if sRB : include : sRB 0
 
 		create-glyph "eng.\(suffix)" : glyph-proc
-			include : MarkSet.e
+			include : MarkSet.p
 			include : Body XH SB RightSB 0 Stroke
 			include : VerticalHook.r RightSB 0 (-HookX) Hook
 			if sLT : include : sLT XH
 			if sLB : include : sLB 0
 
 		create-glyph "nHookBottom.\(suffix)" : glyph-proc
-			include : MarkSet.e
+			include : MarkSet.p
 			include : Body XH SB RightSB 0 Stroke
 			include : VerticalHook.r RightSB 0 HookX Hook
 			if sLT : include : sLT XH
@@ -114,13 +115,13 @@ glyph-block Letter-Latin-Lower-N : begin
 			include : MarkSet.e
 			local fine : AdviceStroke 4
 			local rinner : clamp (Width * 0.065) (XH * 0.05) (fine * 0.35)
-			local wide : AdviceStroke 3
+			local sw : AdviceStroke 3
 			local m1 : Math.min RightSB (Width - rinner * 2 - fine - OX)
 			local x2 : mix SB m1 0.5
 			local y2 : -fine
-			include : Body XH SB m1 (rinner * 2 + fine) wide
+			include : Body XH SB m1 (rinner * 2 + fine) sw
 			include : dispiro
-				straight.down.start m1 (rinner * 2 + fine - O) [widths.rhs.heading wide Downward]
+				straight.down.start m1 (rinner * 2 + fine - O) [widths.rhs.heading sw Downward]
 				CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
 			if sLT : include : sLT XH
 			if sLB : include : sLB 0
@@ -141,6 +142,36 @@ glyph-block Letter-Latin-Lower-N : begin
 			if sLB : include : sLB 0
 			if sRB : include : sRB Descender
 
+		create-glyph "nCrossedTail.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			local fine : AdviceStroke 4
+			local rinner : XH * 0.15 - fine * 0.75
+			local sw : AdviceStroke 3
+			local m1 : RightSB - sw * HVContrast
+			local m2 : [mix SB RightSB 0.5] - 0.5 * fine * HVContrast
+			local x2 : RightSB + SideJut
+			local y2 : rinner * 2 + fine - O
+			include : Body XH SB RightSB (y2 + O) sw
+			include : dispiro
+				straight.down.start RightSB y2 [widths.rhs.heading sw Downward]
+				CurlyTail fine rinner m1 0 m2 x2 y2 (adj -- 0.2)
+			if sLT : include : sLT XH
+			if sLB : include : [if (m2 - (SB + HalfStroke * HVContrast + Jut) > 0.01 * Width) NBottomLeftSerif NBottomLeftOuterSerif] 0
+
+		create-glyph "engCrossedTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			include : Body XH SB RightSB 0 Stroke
+			local fine : AdviceStroke 3.5
+			local rinner : (-Descender - 2 * fine) / 3
+			local m1 : RightSB - Stroke * HVContrast
+			local x2 : mix RightSB m1 0.25
+			local y2 : Descender + O
+			include : dispiro
+				straight.down.start RightSB (-O) [widths.rhs.heading Stroke Downward]
+				CurlyTail fine rinner m1 Descender (m1 - HookX) x2 y2
+			if sLT : include : sLT XH
+			if sLB : include : sLB 0
+
 	select-variant 'n' 'n'
 	link-reduced-variant 'n/sansSerif' 'n' MathSansSerif
 	link-reduced-variant 'n/descBase' 'n'
@@ -152,6 +183,8 @@ glyph-block Letter-Latin-Lower-N : begin
 	link-reduced-variant 'eng/phoneticRight' 'eng'
 	select-variant 'nHookBottom' 0x273 (follow -- 'eng')
 	select-variant 'nCurlyTail' 0x235 (follow -- 'eng')
+	select-variant 'nCrossedTail' 0xAB3B (follow -- 'eng')
+	select-variant 'engCrossedTail' 0xAB3C (follow -- 'eng')
 	select-variant 'NExt' 0x220 (follow -- 'n')
 	select-variant 'nExt' 0x19E (follow -- 'n')
 
@@ -170,6 +203,7 @@ glyph-block Letter-Latin-Lower-N : begin
 
 	derive-glyphs 'nltail' 0x272 'n' : lambda [src srl] : glyph-proc
 		include [refer-glyph src] AS_BASE
+		include : MarkSet.p
 		eject-contour 'serifLB'
 		include : VerticalHook.l SB 0 (-HookX) Hook
 

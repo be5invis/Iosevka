@@ -9,7 +9,7 @@ glyph-block Letter-Latin-Lower-G : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared-Shapes : OBarLeft OBarRight DToothlessRise DMBlend
-	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook VerticalHook
+	glyph-block-import Letter-Shared-Shapes : FlatHookDepth PalatalHook VerticalHook CurlyTail
 
 	define [OverlayW bw] : glyph-proc
 		define l : mix 0 SB 0.3
@@ -101,6 +101,17 @@ glyph-block Letter-Latin-Lower-G : begin
 				arcvh.superness DesignParameters.tightHookSuperness
 				flat (df.rightSB - hd.x) Descender
 				curl xTerminal Descender
+		export : define [CrossedHook df y0] : begin
+			local fine : AdviceStroke 3.5 df.div
+			local m1 : df.rightSB - df.mvs * HVContrast
+			local rinner : (-Descender - 2 * fine) / 3
+			local x2 : mix df.rightSB m1 0.25
+			local y2 : Descender + O
+			return : dispiro
+				widths.rhs df.mvs
+				flat df.rightSB y0 [heading Downward]
+				curl df.rightSB (Descender + SmallArchDepthA)
+				CurlyTail fine rinner m1 Descender df.leftSB x2 y2
 
 		export : define [SeriflessBody df top] : glyph-proc
 			include : OBarRight.shape (top -- top) (left -- df.leftSB) (right -- df.rightSB) (sw -- df.mvs)
@@ -172,6 +183,12 @@ glyph-block Letter-Latin-Lower-G : begin
 			include [refer-glyph "g.\(suffix)"] AS_BASE ALSO_METRICS
 			include : OverlayW [AdviceStroke2 2 4 XH]
 
+		create-glyph "gScriptCrossedTail.\(suffix)" : glyph-proc
+			include : MarkSet.p
+			set-base-anchor 'overlay' Middle (XH / 2)
+			define df : DivFrame 1
+			include : bodyShape df XH
+			include : SingleStorey.CrossedHook df (XH - hookStart)
 
 	select-variant 'g' 'g'
 	link-reduced-variant 'g/sansSerif' 'g' MathSansSerif
@@ -182,6 +199,7 @@ glyph-block Letter-Latin-Lower-G : begin
 	select-variant 'gScript' 0x261 (shapeFrom -- 'g') (follow -- 'gScript')
 	select-variant 'GScript' 0xA7AC (follow -- 'gScript')
 	select-variant 'gPalatalHook' 0x1D83 (follow -- 'gScript')
+	select-variant 'gScriptCrossedTail' 0xAB36
 
 
 	alias 'cyrl/de.SRB' null 'gScript'
