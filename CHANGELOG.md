@@ -1,5 +1,16 @@
 ## Modifications since version 2.x
 
+### 24.1.3
+
+* Add Characters:
+  - LATIN CAPITAL LETTER INSULAR F (`U+A77B`) (#1786).
+  - LATIN SMALL LETTER INSULAR F (`U+A77C`) (#1786).
+  - LATIN CAPITAL LETTER INSULAR S (`U+A784`) (#1786).
+  - LATIN SMALL LETTER INSULAR S (`U+A785`) (#1786).
+* Fix missing U+1D7F mapping (#1787).
+* Fix shape of U serifs (#1788).
+
+
 ### 24.1.2
 
 * Add characters
