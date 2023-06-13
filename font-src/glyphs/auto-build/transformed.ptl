@@ -815,14 +815,23 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	CreateMathDerivatives 'mathit' tfItalic null 0x2145  ObliqueBlackboardBolds
 
 glyph-block Autobuild-Rhotic : begin
-	glyph-block-import Mark-Shared-Metrics : markFine
+	glyph-block-import Mark-Shared-Metrics : markFine markstroke
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Widen
 	glyph-block-import Letter-Latin-Rhotic : ErTail
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook
 
-	define [createRhotics groupName y _records] : begin
+	define [ErTailAttachment y] : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y (XH * 0.2)
+	define [RhoticTailAttachment] : RetroflexHook.r
+		x -- [mix RightSB Width 0.5]
+		y -- 0
+		yAttach -- (XH / 2 - HalfStroke)
+		xLink -- (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+		refSw -- [AdviceStroke 4]
+
+	define [createRhotics groupName tail _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs "rhotic_\(groupName)" _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local thinFont : Widen pendingGlyphs 0.85 1
@@ -833,13 +842,17 @@ glyph-block Autobuild-Rhotic : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
 					include : MarkSet.e
 					include : thinFont.queryByName glyphid
-					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y (XH * 0.15)
+					include   tail
 
 		link-relations relSets
 		return { targetNameMap records }
 
-	createRhotics 'er' (XH / 2) : list { 0x25A 'schwa' }
-	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/epsilonRev' }
+	createRhotics 'er' [ErTailAttachment (XH / 2)]
+		list { 0x25A 'schwa' }
+	createRhotics 'rhotic' [RhoticTailAttachment]
+		list { 0x1D95 'schwa' }
+	createRhotics 'revLatinEpsilonEr' [ErTailAttachment (XH * [mix 0.65 1 0.5])]
+		list { 0x25D 'latn/epsilonRev' }
 
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes
