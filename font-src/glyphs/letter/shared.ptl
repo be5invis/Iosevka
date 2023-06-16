@@ -773,6 +773,13 @@ glyph-block Letter-Shared-Shapes : begin
 				local sw : Sw refSw
 				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
 
+			export : define [lExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
+				return : Impl (x + 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+			export : define [mExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
+				return : Impl x y xLink yAttach yOverflow sw maskOut
+			export : define [rExt] : with-params [x y xLink [yAttach y] [yOverflow 0] [sw Stroke] [maskOut null]] : begin
+				return : Impl (x - 0.5 * sw * HVContrast) y xLink yAttach yOverflow sw maskOut
+
 			export : define [lSideJut] : with-params [x y [yOverflow 0] [refSw Stroke] [jut Jut] [sideJut nothing]] : begin
 				local sj : fallback sideJut (jut - 0.5 * HVContrast * refSw)
 				local sw : Sw refSw
@@ -818,7 +825,7 @@ glyph-block Letter-Shared-Shapes : begin
 						xDepth -- (-TailX)
 						yDepth -- TailY
 						sw -- sw
-						yExtension -- yAttach + yOverflow - y
+						yExtension -- [Math.max 0 (yAttach + yOverflow - y)]
 				if maskOut maskOut [no-shape]
 
 		# Retroflex hooks
@@ -833,7 +840,7 @@ glyph-block Letter-Shared-Shapes : begin
 					xDepth -- TailX
 					yDepth -- TailY
 					sw -- sw
-					yExtension -- yAttach + yOverflow - y
+					yExtension -- [Math.max 0 (yAttach + yOverflow - y)]
 
 		# Left bar with hook at top, shared by multiple glyphs
 		glyph-block-export HooktopLeftBar
@@ -870,6 +877,23 @@ glyph-block Letter-Shared-Shapes : begin
 					adb    -- ArchDepthB
 					sw     -- df.mvs
 					xDepth -- (-[Math.max (df.mvs * HVContrast) : Math.min HookX (0.5 * (df.rightSB - df.leftSB - 2 * df.mvs * HVContrast))])
+
+		# Hook for Eng shape
+		glyph-block-export EngHook
+		define [EngHook] : with-params [x yStart yEnd [sw Stroke]] : begin
+			return : VerticalHook.r x (yEnd + Hook + 0.5 * sw) (-HookX) Hook
+				yExtension -- [Math.max 0 (yStart - (yEnd + Hook + 0.5 * sw))]
+
+		glyph-block-export LeftHook
+		define [LeftHook x y xextend] : glyph-proc
+			local fine : AdviceStroke 4.25
+			include : dispiro
+				widths.lhs fine
+				flat [fallback xextend : x + 1] y
+				curl x y
+				archv 8
+				g4.down.end (x - LeftHook.extension) (y - HookX) [heading Downward]
+		set LeftHook.extension [Math.max (Width * 0.2) ([AdviceStroke 4.25] * 1.5)]
 
 	do "Belt overlays"
 		define [BeltOverlayAt x y] : begin
