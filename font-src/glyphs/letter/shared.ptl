@@ -797,50 +797,52 @@ glyph-block Letter-Shared-Shapes : begin
 		# Descender of cyrillics
 		glyph-block-export CyrDescender
 		define CyrDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			include : ExtendBelowBaseAnchors (y - LongJut)
+			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
-				VBar.m x yAttach (y - LongJut) sw
+				VBar.m x yAttach (y + Descender) sw
 
 		glyph-block-export CyrTailDescender
 		define CyrTailDescender : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			include : ExtendBelowBaseAnchors (y - LongJut)
+			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
 				intersection
 					MaskBelow (yAttach + Stroke)
-					MaskAbove (y - LongJut)
-					ExtLineCenter 16 sw (x - 0.24 * LongJut) (y + 0.5 * sw - LongJut) x y
+					MaskAbove (y + Descender)
+					ExtLineCenter 16 sw (x + 0.24 * Descender) (y + 0.5 * sw + Descender) x y
 
 		# Palatal Hooks
 		glyph-block-export PalatalHook
 		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
-			include : ExtendBelowBaseAnchors (y - TailY)
+			local fullDepth : 0 - Descender - HalfStroke - O
+			include : ExtendBelowBaseAnchors (y + Descender)
 			include : difference
 				union
 					xLinkStroke xLink x yAttach sw
 					VerticalHook.m
 						x -- x
-						y -- y
+						y -- (y - (fullDepth - TailY))
 						xDepth -- (-TailX)
 						yDepth -- TailY
 						sw -- sw
-						yExtension -- [Math.max 0 (yAttach + yOverflow - y)]
+						yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
 				if maskOut maskOut [no-shape]
 
 		# Retroflex hooks
 		glyph-block-export RetroflexHook
 		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			include : ExtendBelowBaseAnchors (y - TailY)
+			local fullDepth : 0 - Descender - HalfStroke - O
+			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
 				VerticalHook.m
 					x -- x
-					y -- y
+					y -- (y - (fullDepth - TailY))
 					xDepth -- TailX
 					yDepth -- TailY
 					sw -- sw
-					yExtension -- [Math.max 0 (yAttach + yOverflow - y)]
+					yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
 
 		# Left bar with hook at top, shared by multiple glyphs
 		glyph-block-export HooktopLeftBar
