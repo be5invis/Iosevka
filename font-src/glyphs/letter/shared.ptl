@@ -113,7 +113,7 @@ glyph-block Letter-Shared-Metrics : begin
 glyph-block Letter-Shared-Shapes : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Mark-Adjustment : ExtendBelowBaseAnchors
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors ExtendBelowBaseAnchors
 
 	glyph-block-export RightwardTailedBar
 	define [RightwardTailedBar] : with-params [x low high [sw Stroke]] : begin
@@ -518,13 +518,6 @@ glyph-block Letter-Shared-Shapes : begin
 		export : define [InwardR cx cy stroke hook] : begin
 			return : tagged 'arcEndSerifR' : VBar.r cx (cy + hook + DToothlessRise / 2) (cy + DToothlessRise) [ArcStartSerifWidth stroke]
 
-	glyph-block-export ArcStartHookTop
-	define [ArcStartHookTop cx cy stroke hookY tailX tailY] : begin
-		local sw : ArcStartSerifWidth stroke
-		return : union
-			VBar.r cx (cy - hookY + O * 2) cy sw
-			VerticalHook.r cx cy tailX (-tailY) sw
-
 	define DiagTailDefaultAngle 40
 
 	glyph-block-export DiagonalTailStdDepth
@@ -815,7 +808,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Palatal Hooks
 		glyph-block-export PalatalHook
 		define PalatalHook : Descenders : function [x y xLink yAttach yOverflow sw maskOut] : glyph-proc
-			local fullDepth : 0 - Descender - HalfStroke - O
+			local fullDepth : 0 - Descender - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : difference
 				union
@@ -832,7 +825,7 @@ glyph-block Letter-Shared-Shapes : begin
 		# Retroflex hooks
 		glyph-block-export RetroflexHook
 		define RetroflexHook : Descenders : function [x y xLink yAttach yOverflow sw] : glyph-proc
-			local fullDepth : 0 - Descender - HalfStroke - O
+			local fullDepth : 0 - Descender - 0.5 * sw - O
 			include : ExtendBelowBaseAnchors (y + Descender)
 			include : union
 				xLinkStroke xLink x yAttach sw
@@ -843,16 +836,6 @@ glyph-block Letter-Shared-Shapes : begin
 					yDepth -- TailY
 					sw -- sw
 					yExtension -- [Math.max 0 (yAttach + yOverflow - y + (fullDepth - TailY))]
-
-		# Left bar with hook at top, shared by multiple glyphs
-		glyph-block-export HooktopLeftBar
-		define HooktopLeftBar : namespace
-			export : define [outer] : with-params [[x SB] [top Ascender] [bottom 0]] : composite-proc
-				VBar.l x bottom top
-				VerticalHook.l x top TailX (-TailY)
-			export : define [inner] : with-params [[x SB] [top Ascender] [bottom 0]] : composite-proc
-				VBar.l x bottom (top - TailY - HalfStroke)
-				VerticalHook.l x (top - TailY - HalfStroke) TailX (-TailY)
 
 		# Cyrillic "Middle Hook" Characters
 		glyph-block-export MidHook
@@ -886,6 +869,42 @@ glyph-block Letter-Shared-Shapes : begin
 			return : VerticalHook.r x (yEnd + Hook + 0.5 * sw) (-HookX) Hook
 				yExtension -- [Math.max 0 (yStart - (yEnd + Hook + 0.5 * sw))]
 
+		# Upward hook shape
+		glyph-block-export TopHook
+		define TopHook : namespace
+			export : define [lBarOuter] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
+				local fullDepth : (Ascender - XH) - 0.5 * sw - O
+				local yHookStart : yTop + (fullDepth - TailY)
+				include : ExtendAboveBaseAnchors (yTop + (Ascender - XH))
+				include : union
+					VBar.l x yBot yHookStart sw
+					VerticalHook.l x yHookStart TailX (-TailY) (sw -- sw)
+
+			export : define [lBarInner] : with-params [x yBot yTop [sw Stroke]] : glyph-proc
+				local yHookStart : yTop - O - TailY - 0.5 * sw
+				include : union
+					VBar.l x yBot yHookStart sw
+					VerticalHook.l x yHookStart TailX (-TailY) (sw -- sw)
+
+			export : define [rBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
+				return : lBarOuter (x - HVContrast * sw) yBot yTop (sw -- sw)
+			export : define [rBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
+				return : lBarInner (x - HVContrast * sw) yBot yTop (sw -- sw)
+
+			export : define [mBarOuter] : with-params [x yBot yTop [sw Stroke]] : begin
+				return : lBarOuter (x - 0.5 * HVContrast * sw) yBot yTop (sw -- sw)
+			export : define [mBarInner] : with-params [x yBot yTop [sw Stroke]] : begin
+				return : lBarInner (x - 0.5 * HVContrast * sw) yBot yTop (sw -- sw)
+
+			export : define [arcStart] : with-params [cx cy hookY [refSw Stroke]] : begin
+				local sw : ArcStartSerifWidth refSw
+				local fullDepth : (Ascender - XH) - 0.5 * sw - O
+				local yHookStart : cy + (fullDepth - TailY)
+				return : union
+					VBar.r cx (cy - hookY + O * 2) yHookStart sw
+					VerticalHook.r cx yHookStart TailX (-TailY) sw
+
+		# Leftward hook
 		glyph-block-export LeftHook
 		define [LeftHook x y xextend] : glyph-proc
 			local fine : AdviceStroke 4.25
