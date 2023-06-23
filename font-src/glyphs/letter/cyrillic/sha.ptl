@@ -7,42 +7,46 @@ glyph-module
 glyph-block Letter-Cyrillic-Sha : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
-	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CyrDescender
+	glyph-block-import Letter-Shared-Shapes : RightwardTailedBar CyrDescender SerifFrame
 
-	define [CyrShaShape top df] : glyph-proc
+	define [CyrShaShape top df fInv] : glyph-proc
 		include : union
-			HBar.b df.leftSB df.rightSB 0
+			[if fInv HBar.t HBar.b] df.leftSB df.rightSB [if fInv top 0]
 			VBar.l df.leftSB 0 top df.mvs
 			VBar.r df.rightSB 0 top df.mvs
 			VBar.m df.middle 0 top df.mvs
 
 		if SLAB : begin
-			include : tagged 'serifLB' : HSerif.lb df.leftSB 0 SideJut
-			include : tagged 'serifRB' : HSerif.rb df.rightSB 0 SideJut
+			local sf : SerifFrame.fromDf df top 0 (swSerif -- df.mvs)
 
-			local jut : Jut * df.mvs / Stroke + O
-			if (df.width > 7 * para.refJut) : begin
-				include : tagged 'serifLT'
-					HSerif.mt (df.leftSB + 0.5 * df.mvs * HVContrast) top jut df.mvs
-				include : tagged 'serifMT'
-					HSerif.mt df.middle top jut df.mvs
-				include : tagged 'serifRT'
-					HSerif.mt (df.rightSB - 0.5 * df.mvs * HVContrast) top jut df.mvs
+			if fInv : then : begin
+				include : composite-proc sf.lt.outer sf.rt.outer
+				if sf.enoughSpaceForFullSerifs
+					include : composite-proc sf.lb.full sf.mb.full sf.rb.full
+					include : composite-proc sf.lb.outer sf.rb.outer
 			: else : begin
-				include : tagged 'serifLT' : HSerif.lt df.leftSB top SideJut
-				include : tagged 'serifRT' : HSerif.rt df.rightSB top SideJut
+				include : composite-proc sf.lb.outer sf.rb.outer
+				if sf.enoughSpaceForFullSerifs
+					include : composite-proc sf.lt.full sf.mt.full sf.rt.full
+					include : composite-proc sf.lt.outer sf.rt.outer
 
 	create-glyph 'cyrl/Sha' 0x428 : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.capital
-		include : CyrShaShape CAP df
+		include : CyrShaShape CAP df false
 
 	create-glyph 'cyrl/sha.upright' : glyph-proc
 		local df : DivFrame para.diversityM 3
 		set-width df.width
 		include : df.markSet.e
-		include : CyrShaShape XH df
+		include : CyrShaShape XH df false
+
+	create-glyph 'cyrl/teThreeLeg' 0x1C85 : glyph-proc
+		local df : DivFrame para.diversityM 3
+		set-width df.width
+		include : df.markSet.e
+		include : CyrShaShape XH df true
 
 	alias 'smcpMTurned' 0xA7FA 'cyrl/sha.upright'
 
