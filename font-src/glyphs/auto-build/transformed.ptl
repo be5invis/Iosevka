@@ -184,7 +184,7 @@ glyph-block Autobuild-Transformed : begin
 			list 0x1DAA 'lPalatalHook'
 			list 0x1DAC 'mLTail'
 			list 0x1DAD 'turnmLeg'
-			list 0x1DAE 'nltail'
+			list 0x1DAE 'nLTail'
 			list 0x1DAF 'nHookBottom'
 			list 0x1DB0 'smcpN'
 			list 0x1DB1 'obar'
@@ -567,6 +567,7 @@ glyph-block Autobuild-Transformed : begin
 			list 0x1DDC 'k'
 			list 0x1DDD 'l'
 			list 0x1DE8 'b'
+			list 0x1DEC 'lDblTildeOver'
 			list 0x1DF2 'aDieresis'
 			list 0x1DF3 'oDieresis'
 			list 0x1DF4 'uDieresis'
@@ -588,10 +589,12 @@ glyph-block Autobuild-Transformed : begin
 			list 0xA677 'cyrl/u'
 
 		createMedievalCombs Descender CAP : list
+			list 0x1ACD 'rInsular'
 			list 0x1DEB 'f'
 			list 0x1DE5 'longs'
 			list 0x1DEF 'esh'
 			list 0xA69E 'cyrl/ef'
+
 	: where : [createMedievalCombs defaultLow defaultHigh _records] : begin
 		local { records relSets targetNameMap } : extendRelatedGlyphs 'medievalAbove' _records
 		local pendingGlyphs : records.map : [record] => record.1
@@ -815,14 +818,23 @@ glyph-block Autobuild-Transformed-Mathematical : begin
 	CreateMathDerivatives 'mathit' tfItalic null 0x2145  ObliqueBlackboardBolds
 
 glyph-block Autobuild-Rhotic : begin
-	glyph-block-import Mark-Shared-Metrics : markFine
+	glyph-block-import Mark-Shared-Metrics : markFine markstroke
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Recursive-Build : Widen
 	glyph-block-import Letter-Latin-Rhotic : ErTail
 	glyph-block-import Autobuild-Transformed-Shared : extendRelatedGlyphs link-relations
+	glyph-block-import Letter-Shared-Shapes : RetroflexHook
 
-	define [createRhotics groupName y _records] : begin
+	define [ErTailAttachment y] : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y (XH * 0.2)
+	define [RhoticTailAttachment] : RetroflexHook.r
+		x -- [mix RightSB Width 0.5]
+		y -- 0
+		yAttach -- (XH / 2 - HalfStroke)
+		xLink -- (Width * 0.85 - SB - markFine * HVContrast * 1.25)
+		refSw -- [AdviceStroke 4]
+
+	define [createRhotics groupName tail _records] : begin
 		local {records relSets targetNameMap} : extendRelatedGlyphs "rhotic_\(groupName)" _records
 		local pendingGlyphs : records.map : [record] => record.1
 		local thinFont : Widen pendingGlyphs 0.85 1
@@ -833,13 +845,17 @@ glyph-block Autobuild-Rhotic : begin
 						throw : new Error "Cannot find glyph \(glyphid)"
 					include : MarkSet.e
 					include : thinFont.queryByName glyphid
-					include : ErTail (Width * 0.85 - SB - markFine * HVContrast * 1.25) y (XH * 0.15)
+					include   tail
 
 		link-relations relSets
 		return { targetNameMap records }
 
-	createRhotics 'er' (XH / 2) : list { 0x25A 'schwa' }
-	createRhotics 'revLatinEpsilonEr' (XH * [mix 0.65 1 0.5]) : list { 0x25D 'latn/epsilonRev' }
+	createRhotics 'er' [ErTailAttachment (XH / 2)]
+		list { 0x25A 'schwa' }
+	createRhotics 'rhotic' [RhoticTailAttachment]
+		list { 0x1D95 'schwa' }
+	createRhotics 'revLatinEpsilonEr' [ErTailAttachment (XH * [mix 0.65 1 0.5])]
+		list { 0x25D 'latn/epsilonRev' }
 
 glyph-block Autobuild-Rotated : begin
 	glyph-block-import CommonShapes
@@ -849,7 +865,7 @@ glyph-block Autobuild-Rotated : begin
 
 	for-width-kinds WideWidth1 : do
 		local s : (RightSB - SB - O * 4 + (MosaicWidth - Width) * 0.5) / CAP
-		local df : Miniature {'eight.lnum.crossing' 'rotetedPropto' 'revS'}
+		local df : Miniature {'eight.lnum.crossing' 'rotatedPropto' 'revS'}
 			crowd        -- (4 / [Math.sqrt MosaicWidthScalar])
 			scale        -- s
 			forceUpright -- true
@@ -864,7 +880,7 @@ glyph-block Autobuild-Rotated : begin
 				include : Translate (MosaicWidth / 2) SymbolMid
 				include : Italify
 
-		InftyLikeShape 'propto'   0x221D 'rotetedPropto'
+		InftyLikeShape 'propto'   0x221D 'rotatedPropto'
 		InftyLikeShape 'infty'    0x221E 'eight.lnum.crossing'
 		InftyLikeShape 'invLazyS' 0x223E 'revS.serifless'
 
