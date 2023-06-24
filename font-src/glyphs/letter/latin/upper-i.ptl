@@ -9,15 +9,16 @@ glyph-block Letter-Latin-Upper-I : begin
 	glyph-block-import CommonShapes
 	glyph-block-import Common-Derivatives
 	glyph-block-import Letter-Shared : SetGrekUpperTonos CreateAccentedComposition CreateOgonekComposition
+	glyph-block-import Mark-Adjustment : ExtendAboveBaseAnchors
 
-	define [ISeriflessShape df top jut] : glyph-proc
-		include : VBar.m df.middle 0 top
+	define [ISeriflessShape df top bot jut] : glyph-proc
+		include : VBar.m df.middle bot top
 
-	define [ISerifShape df top jut] : glyph-proc
-		include : VBar.m df.middle 0 top
-		include : HSerif.mb df.middle 0   (jut * df.div)
+	define [ISerifShape df top bot jut] : glyph-proc
+		include : VBar.m df.middle bot top
+		include : HSerif.mb df.middle bot (jut * df.div)
 		include : HSerif.mt df.middle top (jut * df.div)
-		set-base-anchor 'trailing' (df.middle + jut * df.div) 0
+		set-base-anchor 'trailing' (df.middle + jut * df.div) bot
 
 	define UpperIConfig : object
 		'straight'     { para.diversityI  ISeriflessShape LongJut      }
@@ -30,7 +31,7 @@ glyph-block Letter-Latin-Upper-I : begin
 			local df : DivFrame div
 			set-width df.width
 			include : df.markSet.capital
-			include : Body df CAP jut
+			include : Body df CAP 0 jut
 
 		create-glyph "grek/Iota.\(suffix)" : glyph-proc
 			include [refer-glyph "I.\(suffix)"] AS_BASE ALSO_METRICS
@@ -39,8 +40,16 @@ glyph-block Letter-Latin-Upper-I : begin
 		create-glyph "ISideways.\(suffix)" : glyph-proc
 			local df : DivFrame (XH / Width) 2 (XH * 0.1 / SB)
 			include : PointingTo Width XH Width 0 : function [] : glyph-proc
-				include : Body df (Width - SB) jut
+				include : Body df (Width - SB) 0 jut
 				include : ApparentTranslate 0 (0.5 * SB)
+
+		create-glyph "ILonga.\(suffix)" : glyph-proc
+			local df : DivFrame div
+			set-width df.width
+			include : df.markSet.capital
+			local top : CAP + Ascender - XH
+			include : ExtendAboveBaseAnchors top
+			include : Body df top 0 jut
 
 	select-variant 'I' 'I'
 	link-reduced-variant 'I/sansSerif' 'I' MathSansSerif
@@ -51,12 +60,13 @@ glyph-block Letter-Latin-Upper-I : begin
 	alias 'cyrl/Palochka' 0x4C0 'I'
 
 	select-variant 'ISideways' 0xA7F7 (follow -- 'I')
+	select-variant 'ILonga' 0xA7FE (follow -- 'I')
 
 	create-glyph 'smcpI' 0x26A : glyph-proc
 		local df : DivFrame para.diversityI
 		include : df.markSet.e
 		set-width df.width
-		include : ISerifShape df XH MidJutCenter
+		include : ISerifShape df XH 0 MidJutCenter
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarCenter
 	create-glyph 'mathbb/I' 0x1D540 : glyph-proc
