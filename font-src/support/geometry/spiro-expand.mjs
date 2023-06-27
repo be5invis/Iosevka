@@ -118,8 +118,8 @@ class NormalRectifier {
 			if (isTangentValid(d)) {
 				this.m_biKnots[0].origTangent = d;
 			} else {
-				console.error(this.m_biKnots);
-				throw new Error("NaN angle detected.");
+				this.m_biKnots[0].origTangent = { x: 0, y: 0 };
+				// throw new Error("NaN angle detected.");
 			}
 		}
 		if (this.m_biKnots[this.m_nKnotsProcessed]) {
@@ -127,8 +127,8 @@ class NormalRectifier {
 			if (isTangentValid(d)) {
 				this.m_biKnots[this.m_nKnotsProcessed].origTangent = d;
 			} else {
-				console.error(this.m_biKnots);
-				throw new Error("NaN angle detected.");
+				this.m_biKnots[this.m_nKnotsProcessed].origTangent = { x: 0, y: 0 };
+				// throw new Error("NaN angle detected.");
 			}
 		}
 		this.m_nKnotsProcessed += 1;
