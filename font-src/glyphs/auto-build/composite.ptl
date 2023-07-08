@@ -624,6 +624,8 @@ glyph-block AutoBuild-Enclosure : begin
 	define [digitGlyphNames j] : begin
 		return : [(j+'').split ''].map: c => [glyphStore.queryNameOfUnicode (['0'.charCodeAt 0] + (c - 0))]
 
+	define [digitHasSerif d] : not (d == 6 || d == 8 || d == 9)
+
 	do "Single-digit circled"
 		local compositions : list
 			list 0xA9    {'C'}                       WideWidth2
@@ -631,11 +633,10 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x2117  {'P'}                       WideWidth2
 			list 0x1F1AD {'M'}                       WideWidth2
 			list 0x24EA  {'zero.lnum'}               WideWidth1
+			list 0x1F10B {'zero.lnum'}               WideWidth1 # We don't have serifs for digit 0, so make an alias here
 			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth2
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x2460 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+		foreach [j : range 1 till 9] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
@@ -652,8 +653,7 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit sans-serif circled"
 		local compositions : list
-			list 0x1F10B  {'zero.lnum'}  WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
 		createSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit circled"
@@ -674,15 +674,16 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit inset circled"
 		local compositions : list
-			list 0x24FF {'zero.lnum'} WideWidth1
+			list 0x24FF  {'zero.lnum'} WideWidth1
+			list 0x1F10C {'zero.lnum'} WideWidth1 # We don't have serifs for digit 0, so make an alias here
 		foreach [j : range 1 till 9] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
 
 	do "Single-digit inset sans-serif circled"
 		local compositions : list
-			list 0x1F10C  {'zero.lnum'}  WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
 		createInsetSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit inset circled"

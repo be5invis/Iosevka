@@ -109,9 +109,11 @@ class BiKnot {
 		this.y = y;
 		this.d1 = d1;
 		this.d2 = d2;
-		this.origTangent = null;
 		this.proposedNormal = null;
 		this.unimportant = 0;
+
+		// Derived properties
+		this.origTangent = null;
 		this.originalKnot = null;
 	}
 	clone() {
@@ -132,17 +134,14 @@ class BiKnot {
 	toShapeString() {
 		return Format.tuple(
 			this.type,
+			this.unimportant,
 			Format.n(this.x),
 			Format.n(this.y),
 			this.d1 == null ? "" : Format.n(this.d1),
 			this.d2 == null ? "" : Format.n(this.d2),
-			this.origTangent
-				? Format.tuple(Format.n(this.origTangent.x), Format.n(this.origTangent.y))
-				: "",
 			this.proposedNormal
 				? Format.tuple(Format.n(this.proposedNormal.x), Format.n(this.proposedNormal.y))
-				: "",
-			this.unimportant
+				: ""
 		);
 	}
 }

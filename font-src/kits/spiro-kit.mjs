@@ -112,6 +112,8 @@ export function SetupBuilders(bindings) {
 						kl(x + d.x * a.l, y + d.y * a.l, af),
 						kr(x + d.x * a.r, y + d.y * a.r, af)
 					];
+					sink[d.name][a.name].l = (x, y, af) => kl(x + d.x * a.l, y + d.y * a.l, af);
+					sink[d.name][a.name].r = (x, y, af) => kr(x + d.x * a.r, y + d.y * a.r, af);
 				}
 			}
 		}
