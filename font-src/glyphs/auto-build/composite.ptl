@@ -328,6 +328,8 @@ glyph-block AutoBuild-Enclosure : begin
 
 	define [createCircledGlyphs digits demands]
 		EnclosureT "circle" CircledBuilder StandardSpacing digits 1 demands CircleEnclosureShape
+	define [createBackslashCircledGlyphs digits demands]
+		EnclosureT "circle-slashed" CircledBuilder StandardSpacing digits 1 demands BackslashCircleEnclosureShape
 	define [createItalicCircledGlyphs digits demands]
 		EnclosureT "circle-italic" CircledBuilder ItalicSpacing digits 1 demands CircleEnclosureShape
 	define [createSansSerifCircledGlyphs digits demands]
@@ -337,6 +339,14 @@ glyph-block AutoBuild-Enclosure : begin
 		set-width width
 		include : OShape top bot left right sw archDepthA archDepthB
 		include : AddEnclosureMark digits : circleDimens digits ww
+	define [BackslashCircleEnclosureShape digits ww gap] : glyph-proc
+		include : CircleEnclosureShape digits ww gap
+		define [object width sw top bot left right archDepthA archDepthB] : circleDimens digits ww
+		include : intersection
+			OShapeOutline top bot left right sw archDepthA archDepthB
+			dispiro
+				flat 0     [mix bot top 0.77] [widths.center sw]
+				curl width [mix bot top (1 - 0.77)]
 
 	define [createBoxedGlyphs digits demands]
 		EnclosureT 'boxed' CircledBuilder StandardSpacing digits 1 demands BoxEnclosureShape
@@ -614,6 +624,8 @@ glyph-block AutoBuild-Enclosure : begin
 	define [digitGlyphNames j] : begin
 		return : [(j+'').split ''].map: c => [glyphStore.queryNameOfUnicode (['0'.charCodeAt 0] + (c - 0))]
 
+	define [digitHasSerif d] : not (d == 6 || d == 8 || d == 9)
+
 	do "Single-digit circled"
 		local compositions : list
 			list 0xA9    {'C'}                       WideWidth2
@@ -621,14 +633,18 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x2117  {'P'}                       WideWidth2
 			list 0x1F1AD {'M'}                       WideWidth2
 			list 0x24EA  {'zero.lnum'}               WideWidth1
-			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list
-			0x2460 + j - 1
-			digitGlyphNames j
-			begin WideWidth1
+			list 0x1F10B {'zero.lnum'}               WideWidth1 # We don't have serifs for digit 0, so make an alias here
+			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth2
+		foreach [j : range 1 till 9] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
+
+	do "Single-digit backslash-circled"
+		createBackslashCircledGlyphs 1 : list
+			list 0x1F10F {'dollar'} WideWidth2
+			list 0x1F16E {'C'}      WideWidth2
 
 	do "Single-digit italic circled"
 		createItalicCircledGlyphs 1 : list
@@ -637,14 +653,13 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit sans-serif circled"
 		local compositions : list
-			list 0x1F10B  {'zero.lnum'}  WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
 		createSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit circled"
 		local compositions : list
 			list null    {'markBaseSpace'} WideWidth1
-			list 0x1F16D {'C' 'C'} WideWidth1
+			list 0x1F16D {'C' 'C'} WideWidth2
 			list 0x1F12D {'C' 'D'} WideWidth1
 			list 0x1F12E {'W' 'z'} WideWidth1
 		foreach [j : range 10 till 20] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
@@ -659,15 +674,16 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Single-digit inset circled"
 		local compositions : list
-			list 0x24FF {'zero.lnum'} WideWidth1
+			list 0x24FF  {'zero.lnum'} WideWidth1
+			list 0x1F10C {'zero.lnum'} WideWidth1 # We don't have serifs for digit 0, so make an alias here
 		foreach [j : range 1 till 9] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
 
 	do "Single-digit inset sans-serif circled"
 		local compositions : list
-			list 0x1F10C  {'zero.lnum'}  WideWidth1
-		foreach [j : range 1 till 9] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
 		createInsetSansSerifCircledGlyphs 1 compositions
 
 	do "Double-digit inset circled"
@@ -1341,16 +1357,16 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 	define stdShrink : clamp 0.625 0.9 : StrokeWidthBlend 0.625 0.9
 	createPhoneticLigatures ToLetter 'phonetic' para.diversityM 2 stdShrink 1 : list
 		list 0x02A3 { 'd/phoneticLeft'  'z'                     } 'b'
-		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'if'
+		list 0x02A4 { 'd/phoneticLeft'  'ezh'                   } 'bp'
 		list 0x02A5 { 'd/phoneticLeft'  'zCurlyTail'            } 'b'
 		list 0x02A6 { 't/phoneticLeft2' 's/phoneticRight'       } 'b'
-		list 0x02A7 { 't/teshLeft'      'esh'                   } 'if'
+		list 0x02A7 { 't/teshLeft'      'esh'                   } 'bp'
 		list 0x02A8 { 't/phoneticLeft1' 'cCurlyTail'            } 'b'
-		list 0x02A9 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'if'
+		list 0x02A9 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'bp'
 		list 0x02AA { 'l/phoneticLeft'  's/phoneticRight'       } 'b'
 		list 0x02AB { 'l/phoneticLeft'  'z'                     } 'b'
-		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
-		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } 'if'
+		list 0xAB66 { 'd/phoneticLeft'  'zRTailBR'              } 'bp'
+		list 0xAB67 { 't/phoneticLeft1' 'sRTail'                } 'bp'
 		list 0xFB00 { 'f'               'f'                     } null
 		list 0xFB01 { 'f/compLigLeft1'  'dotlessi/compLigRight' } null
 		list 0xFB02 { 'f/compLigLeft2'  'l/compLigRight'        } null
@@ -1363,22 +1379,22 @@ glyph-block Autobuild-Pnonetic-Ligatures : begin
 
 	createPhoneticLigatures ToSuperscript 'phoneticSuperscript' 1 2 stdShrink 1 : list
 		list 0x10787 { 'd/phoneticLeft'  'z'                     } 'b'
-		list 0x1078A { 'd/phoneticLeft'  'ezh'                   } 'if'
-		list 0x10789 { 'd/phoneticLeft'  'zCurlyTail'            } 'if'
+		list 0x1078A { 'd/phoneticLeft'  'ezh'                   } 'bp'
+		list 0x10789 { 'd/phoneticLeft'  'zCurlyTail'            } 'bp'
 		list 0x107AC { 't/phoneticLeft2' 's/phoneticRight'       } 'b'
-		list 0x107AE { 't/teshLeft'      'esh'                   } 'if'
+		list 0x107AE { 't/teshLeft'      'esh'                   } 'bp'
 		list 0x107AB { 't/phoneticLeft1' 'cCurlyTail'            } 'b'
-		list 0x10790 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'if'
+		list 0x10790 { 'f/phoneticLeft'  'eng/phoneticRight'     } 'bp'
 		list 0x10799 { 'l/phoneticLeft'  's/phoneticRight'       } 'b'
 		list 0x1079A { 'l/phoneticLeft'  'z'                     } 'b'
-		list 0x10788 { 'd/phoneticLeft'  'zRTailBR'              } 'if'
+		list 0x10788 { 'd/phoneticLeft'  'zRTailBR'              } 'bp'
 		list 0x107AD { 't/phoneticLeft1' 'sRTail'                } 'p'
 
 	createPhoneticLigatures ToSubscript 'tenSubscript' 1 2 1 0.5 : list
 		list 0x23E8 { 'one.lnum' 'zero.lnum' } 'capital'
 
 	createPhoneticLigatures ToLetter 'thSlash' 1 2 stdShrink 1 : list
-		list 0x1D7A { 't/phoneticLeft1' 'h' 'wideSlashOver' } 'b'
+		list 0x1D7A { 't/phoneticLeft1' 'h' 'wideSlash' } 'b'
 
 glyph-block Autobuild-Double-Emotions : begin
 	glyph-block-import CommonShapes

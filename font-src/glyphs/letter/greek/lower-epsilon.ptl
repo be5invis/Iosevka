@@ -19,6 +19,7 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 	define SLAB-NONE       0
 	define SLAB-CLASSICAL  1
 	define SLAB-INWARD     2
+	define FLAT-CONNECTION 3
 
 	define StdBlend 0.65
 
@@ -63,23 +64,24 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 		export : define [AutoStartSerifR] : begin
 			define [object stroke] : Dim
 			return : match slabTop
-				[Just SLAB-CLASSICAL] : ArcStartSerif.R       RightSB top stroke Hook
-				[Just SLAB-INWARD]    : ArcStartSerif.InwardR RightSB top stroke Hook
+				[Just SLAB-CLASSICAL] : ArcStartSerif.R       RightSB top stroke hook
+				[Just SLAB-INWARD]    : ArcStartSerif.InwardR RightSB top stroke hook
 				__ : glyph-proc
 
 		export : define [AutoEndSerifR] : begin
 			define [object stroke] : Dim
 			return : match slabBot
-				[Just SLAB-CLASSICAL] : ArcEndSerif.R         RightSB bot stroke Hook
-				[Just SLAB-INWARD]    : ArcEndSerif.InwardR   RightSB bot stroke Hook
+				[Just SLAB-CLASSICAL] : ArcEndSerif.R         RightSB bot stroke hook
+				[Just SLAB-INWARD]    : ArcEndSerif.InwardR   RightSB bot stroke hook
 				__ : glyph-proc
 
 	glyph-block-export CyrZe
-	define [CyrZe slabTop slabBot top bot left right blend hook _stroke] : namespace
+	define [CyrZe slabTop slabBot top bot left right blend hook _stroke _xo _op] : namespace
+		local xo : fallback _xo OX
 		export : define [Dim] : begin
 			local stroke : fallback _stroke : AdviceStroke2 2 3 (top - bot)
 			local midx : mix right left blend
-			local midy : mix bot top OverlayPos
+			local midy : mix bot top [fallback _op OverlayPos]
 			local topHeight : top - bot
 			local midyHeight : midy - bot
 			local adb : topHeight - [mix (midyHeight + stroke / 2) (topHeight - O - stroke) (ArchDepthA / (ArchDepthA + ArchDepthB))] + TanSlope * HVContrast * stroke
@@ -94,7 +96,10 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 				match slabTop
 					[Just SLAB-CLASSICAL] : SerifedArcStart.LtrRhs left middle top stroke hook
 					[Just SLAB-INWARD] : InwardSlabArcStart.LtrRhs left middle top stroke hook
-					__ : list [g4 (left - O) (top - hook) : widths.rhs stroke] [hookstart (top - O)]
+					[Just FLAT-CONNECTION] : list
+						flat (left - xo) top [widths.rhs.heading stroke Rightward]
+						curl (middle - CorrectionOMidX * stroke) top  [heading Rightward]
+					__ : list [g4 (left - xo) (top - hook) : widths.rhs stroke] [hookstart (top - O)]
 				g4 right [YSmoothMidR top (midy - stroke / 2)]
 				arcvh
 				flat middle (midy - (fine - stroke / 2)) [widths.heading 0 fine Leftward]
@@ -107,11 +112,11 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 				flat midx (midy + (fine - stroke / 2)) [widths.rhs.heading fine Rightward]
 				curl middle (midy + (fine - stroke / 2)) [heading Rightward]
 				archv
-				g4 (right - OX * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
+				g4 (right - xo * 2) [YSmoothMidR (midy + stroke / 2) bot] [widths.rhs stroke]
 				match slabBot
 					[Just SLAB-CLASSICAL] : SerifedArcEnd.RtlRhs left middle bot stroke hook
 					[Just SLAB-INWARD] : InwardSlabArcEnd.RtlRhs left middle bot stroke hook
-					__ : list [hookend (bot + O) (sw -- stroke)] [g4 (left + O) (bot + hook)]
+					__ : list [hookend (bot + O) (sw -- stroke)] [g4 (left + xo) (bot + hook)]
 
 		export : define [UpperShape] : CyrZeUpperShapeT dispiro
 
@@ -161,17 +166,18 @@ glyph-block Letter-Greek-Lower-Epsilon : begin
 		export : define [AutoStartSerifL] : begin
 			define [object stroke] : Dim
 			return : match slabTop
-				[Just SLAB-CLASSICAL] : ArcStartSerif.L       left top stroke Hook
-				[Just SLAB-INWARD]    : ArcStartSerif.InwardL left top stroke Hook
+				[Just SLAB-CLASSICAL] : ArcStartSerif.L       left top stroke hook
+				[Just SLAB-INWARD]    : ArcStartSerif.InwardL left top stroke hook
 				__ : glyph-proc
 
 		export : define [AutoEndSerifL] : begin
 			define [object stroke] : Dim
 			return : match slabBot
-				[Just SLAB-CLASSICAL] : ArcEndSerif.L         left bot stroke Hook
-				[Just SLAB-INWARD]    : ArcEndSerif.InwardL   left bot stroke Hook
+				[Just SLAB-CLASSICAL] : ArcEndSerif.L         left bot stroke hook
+				[Just SLAB-INWARD]    : ArcEndSerif.InwardL   left bot stroke hook
 				__ : glyph-proc
 
+	glyph-block-export EpsilonConfig
 	define EpsilonConfig : object
 		serifless               { SLAB-NONE      SLAB-NONE      }
 		unilateralSerifed       { SLAB-CLASSICAL SLAB-NONE      }
