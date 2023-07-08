@@ -27,13 +27,38 @@ glyph-block Digits-Zero : begin
 		arcvh
 		close
 
-	define [ZeroOutlineShapeT sink offsetX offsetY top] : OShapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
-	define [ZeroOutlineShape top] : ZeroOutlineShapeT dispiro 0 0 top
-	define [ZeroOutlineMask top] : ZeroOutlineShapeT spiro-outline 1 1 top
+	define [DiamondShapeT sink t b l r] : begin
+		local mx : mix l r 0.5
+		local my : mix b t 0.5
+		local p1   0.2
+		local p2   0.1
 
-	define [ZeroOvalShapeT sink offsetX offsetY top] : OvalShapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
-	define [ZeroOvalShape top] : ZeroOvalShapeT dispiro 0 0 top
-	define [ZeroOvalMask top] : ZeroOvalShapeT spiro-outline 1 1 top
+		local sw : AdviceStroke 8
+
+		return : sink
+			widths.rhs sw
+			g4   (mx + CorrectionOMidX * sw)  (b + O)
+			flat [mix mx r p1]           [mix b my p2]
+			curl [mix mx r (1 - p2)]     [mix b my (1 - p1)]
+			g4   (r - O)                 my
+			flat [mix r mx p2]           [mix my t p1]
+			curl [mix r mx (1 - p1)]     [mix my t (1 - p2)]
+			g4   (mx + CorrectionOMidX * sw)  (t - O)
+			flat [mix mx l p1]           [mix t my p2]
+			curl [mix mx l (1 - p2)]     [mix t my (1 - p1)]
+			g4   (l + O)                 my
+			flat [mix l mx p2]           [mix my b p1]
+			curl [mix l mx (1 - p1)]     [mix my b (1 - p2)]
+			close
+
+	define [ZeroShapeBase shapeT] : namespace
+		define [outlineT sink offsetX offsetY top] : shapeT sink (top - offsetY) (offsetY) (SB + offsetX) (RightSB - offsetX)
+		export : define [Shape top] : outlineT dispiro 0 0 top
+		export : define [Mask top] : outlineT spiro-outline 1 1 top
+
+	define Capsule : ZeroShapeBase OShapeT
+	define Oval : ZeroShapeBase OvalShapeT
+	define Diamond : ZeroShapeBase DiamondShapeT
 
 
 	define [InsetShape zero overlay fnMask height] : glyph-proc
@@ -152,8 +177,9 @@ glyph-block Digits-Zero : begin
 
 	define ZeroConfig : SuffixCfg.weave
 		object # outline shape
-			''     { ZeroOutlineShape ZeroOutlineMask }
-			'oval' { ZeroOvalShape    ZeroOvalMask    }
+			''        Capsule
+			'oval'    Oval
+			# 'diamond' Diamond
 		object # overlay/cutout
 			'unslashed'                    { null                 null       }
 			'slashed'                      { ZeroSlash            null       }
@@ -178,19 +204,19 @@ glyph-block Digits-Zero : begin
 		'lnum' { CAP        [function [] : MarkSet.capital] }
 		'onum' { OnumHeight [function [] : OnumMarks.e]     }
 
-	foreach { suffix { {Outline Mask} {Overlay Postproc} } } [pairs-of ZeroConfig] : begin
+	foreach { suffix { Outline {Overlay Postproc} } } [pairs-of ZeroConfig] : begin
 		foreach { infix { height Marks } } [pairs-of Heights] : begin
 			create-glyph "zero.\(infix).\(suffix)" : glyph-proc
 				include : Marks
-				local zeroShape : Outline height
+				local zeroShape : Outline.Shape height
 				local overlayShape : if Overlay [Overlay height] null
 				if Postproc
 				: then : begin
-					include : Postproc zeroShape overlayShape Mask height
+					include : Postproc zeroShape overlayShape Outline.Mask height
 				: else : begin
 					include zeroShape
-					if Overlay : if Mask
-						include : intersection overlayShape : Mask height
+					if Overlay : if Outline.Mask
+						include : intersection overlayShape : Outline.Mask height
 						include overlayShape
 
 	select-variant 'zero.lnum' [CodeLnum '0'] (follow -- 'zero')
