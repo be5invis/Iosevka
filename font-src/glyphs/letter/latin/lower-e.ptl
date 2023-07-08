@@ -18,7 +18,7 @@ glyph-block Letter-Latin-Lower-E : begin
 
 	define [xTerminalR df] : df.rightSB - OX * [if para.isItalic 0 0.5]
 
-	define [HookHeight top stroke] : Math.min AHook
+	define [HookHeight top stroke] : Math.min Hook (AHook / XH * top)
 		if para.isItalic top (stroke / 2 + (top - stroke * 3) / 4)
 
 	define SLAB-NONE       0
@@ -58,7 +58,7 @@ glyph-block Letter-Latin-Lower-E : begin
 		return path.rhsKnots.[path.rhsKnots.length - 1]
 
 	glyph-block-export RevSmallEShape
-	define [RevSmallEShape] : with-params [df top stroke barpos tailSlab] : glyph-proc
+	define [RevSmallEShape] : with-params [df top stroke barpos] : glyph-proc
 		local barbottom (top * [fallback barpos DesignParameters.eBarPos] - HalfStroke)
 		local hookx df.leftSB
 		local hookmiddle : [mix (df.rightSB - O) hookx 0.55] + CorrectionOMidS
@@ -73,22 +73,8 @@ glyph-block Letter-Latin-Lower-E : begin
 			archv
 			flat (df.rightSB - OX) (top - [df.archDepthB SmallArchDepth])
 			curl (df.rightSB - OX) [df.archDepthA SmallArchDepth]
-
-			match tailSlab
-				[Just SLAB-CLASSICAL] : begin
-					SerifedArcEnd.LtrLhs df.rightSB df.middle 0 stroke [HookHeight top stroke]
-				[Just SLAB-INWARD] : list
-					arcvh
-					g4 (df.middle + CorrectionOMidX * stroke) O
-					g4 df.rightSB (DToothlessRise)
-				__ : list
-					hookend O (sw -- stroke)
-					g4 [xTerminalR df] [HookHeight top stroke]
-
-		include : match tailSlab
-			[Just SLAB-CLASSICAL] : ArcEndSerif.R df.rightSB 0 stroke [HookHeight top stroke]
-			[Just SLAB-INWARD] : ArcEndSerif.InwardR df.rightSB 0 stroke [HookHeight top stroke]
-			__ : no-shape
+			hookend O (sw -- stroke)
+			g4 (df.width - [xTerminalR df]) [HookHeight top stroke]
 
 	glyph-block-export SmallERoundedShape
 	define [SmallERoundedShape] : with-params [df top stroke barpos] : glyph-proc
