@@ -28,6 +28,11 @@ glyph-block Letter-Latin-Upper-M : begin
 		local xLeftTop  : df.leftSB  + top * sidesSlope
 		local xRightTop : df.rightSB - top * sidesSlope
 
+		local fHasBottomInnerSerif : match slabType
+			[Just SLAB-FULL]     true
+			[Just SLAB-AUTO]     SLAB
+			__                   false
+
 		local swSideBot : match form
 			[Just FORM-SAN-SMALL] : AdviceStroke 2.5  df.div
 			[Just FORM-SAN]       : AdviceStroke 2.5  df.div
@@ -45,7 +50,7 @@ glyph-block Letter-Latin-Upper-M : begin
 			[Just FORM-SAN]       : top * 0.55
 			[Just FORM-TURN-W]    : top * 0.45
 			[Just FORM-HANGING]   : top * 0.3 / (kMidHang * kMidHang)
-			__                    : if SLAB Stroke 0
+			__                    : if fHasBottomInnerSerif swSideBot 0
 		local kMidShift : match form
 			[Just FORM-FLAT] 0.75
 			__               0.5
@@ -69,8 +74,8 @@ glyph-block Letter-Latin-Upper-M : begin
 			flat (xRightTop - kMidShift * swSideTop * HVContrast) top [widths.rhs.heading swMiddle Downward]
 			curl (df.middle + 0.5 * swMiddleShrunk * HVContrast) middleY [widths.rhs.heading swMiddleShrunk Downward]
 
-		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot) (hSplit -- 3)
-		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot) (hSplit -- 3)
+		local sfT : SerifFrame top 0 xLeftTop  xRightTop  (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
+		local sfB : SerifFrame top 0 df.leftSB df.rightSB (swRef -- swSideBot) (hSplit -- 3) (fForceSymmetric -- (form !== FORM-FLAT))
 		include : match slabType
 			[Just SLAB-NONE] : no-shape
 			[Just SLAB-FULL] : composite-proc sfT.lt.outer sfT.rt.outer sfB.lb.full sfB.rb.full
