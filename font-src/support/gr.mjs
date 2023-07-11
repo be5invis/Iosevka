@@ -339,14 +339,18 @@ export function createGrDisplaySheet(glyphStore, gid) {
 	} else {
 		queryCvFeatureTagsOf(charVariantFeatures, gid, glyph, null);
 	}
+
+	sortFeatureDisplaySheet(typographicFeatures);
+	sortFeatureDisplaySheet(charVariantFeatures);
 	return [typographicFeatures, charVariantFeatures];
 }
 
+function sortFeatureDisplaySheet(sheet) {
+	return sheet.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
 function FeatureSeries(name, groups) {
-	return {
-		name,
-		groups
-	};
+	return { name, groups };
 }
 
 function displayQueryPairFeatures(gs, gid, name, grCis, grTrans, sink) {
