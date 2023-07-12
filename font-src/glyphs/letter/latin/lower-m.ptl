@@ -86,6 +86,12 @@ glyph-block Letter-Latin-Lower-M : begin
 		include : SmallMBottomMiddleSerif df top mbot
 		if [not tailed] : include : SmallMBottomRightSerif df top rbot
 
+	define [SmallTurnMSerifs df top lbot mbot rbot tailed earless] : glyph-proc
+		if [not earless] : include : SmallMTopLeftSerif df top lbot
+		if [not para.isItalic] : include : SmallMBottomLeftSerif df top lbot
+		include : SmallMBottomMiddleSerif df top mbot
+		if [not tailed] : include : SmallMBottomRightSerif df top rbot
+
 	define [AutoSerifs df top lbot mbot rbot tailed earless] : begin
 		if SLAB [FullSerifs df top lbot mbot rbot tailed earless] [no-shape]
 
@@ -178,7 +184,7 @@ glyph-block Letter-Latin-Lower-M : begin
 			""                             { 0 }
 			"shortLeg"                     { 1 }
 		object
-			""						       { 0 }
+			""                             { 0 }
 			"tailed"                       { 1 }
 		object
 			"serifless"                    { no-shape   }
@@ -197,12 +203,6 @@ glyph-block Letter-Latin-Lower-M : begin
 			set-width df.width
 			include : df.markSet.e
 			include : mShapeBody df XH
-
-		create-glyph "capitalSmallM.\(suffix)" : glyph-proc
-			local df : dfM
-			set-width df.width
-			include : df.markSet.capital
-			include : mShapeBody df CAP
 
 		create-glyph "mLTail.\(suffix)" : glyph-proc
 			local df : dfM
@@ -224,17 +224,6 @@ glyph-block Letter-Latin-Lower-M : begin
 			local sf : SerifFrame.fromDf df XH Descender
 			if (SLAB && Serifs === AutoSerifs) : include sf.rb.fullSide
 			if (Serifs === LtRbSerifs || Serifs === LtSerifs) : include sf.rb.outer
-
-		create-glyph "turnmSideways.\(suffix)" : glyph-proc
-			local realHeight : XH * para.diversityM
-			local realTop : XH / 2 + realHeight / 2
-			local realBot : XH / 2 - realHeight / 2
-			local df : DivFrame (realHeight / Width) 3 (XH * 0.1 / SB)
-			include : df.markSet.e
-			include : PointingTo Width realTop Width realBot : function [] : glyph-proc
-				include : mShapeBody df (Width - SB)
-				include : FlipAround df.middle ((Width - SB) / 2)
-				include : Translate 0 (SB / 2)
 
 		create-glyph "mCrossedTail.\(suffix)" : glyph-proc
 			local df : DivFrame para.diversityM 4
@@ -261,7 +250,6 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	select-variant 'm' 'm'
 	select-variant 'm/tailless' (shapeFrom -- 'm')
-	select-variant 'capitalSmallM' (follow -- 'm')
 	link-reduced-variant 'm/sansSerif' 'm' MathSansSerif
 
 	select-variant 'cyrl/te.italic' (shapeFrom -- 'm')
@@ -279,11 +267,71 @@ glyph-block Letter-Latin-Lower-M : begin
 
 	select-variant 'mLTail' 0x271
 	select-variant 'turnmLeg' 0x270 (follow -- 'm')
-	select-variant 'turnmSideways' 0x1D1F (follow -- 'm')
 	select-variant 'mCrossedTail' 0xAB3A (follow -- 'mLTail')
 
-	turned 'turnm' 0x26F 'm' HalfAdvance (XH / 2)
-	turned 'capitalTurnm' 0x19C 'capitalSmallM' HalfAdvance (CAP / 2)
+	define TurnMConfig : SuffixCfg.weave
+		object
+			"toothed"            { SmallMArches                        0 0 }
+			"tailed"             { SmallMArches                        1 1 }
+			"toothlessCorner"    { EarlessCornerDoubleArchSmallMShape  1 0 }
+			"toothlessRounded"   { EarlessRoundedDoubleArchSmallMShape 1 0 }
+		object
+			"serifless"          { no-shape   }
+			"serifed"            { SmallTurnMSerifs }
+			"bottomRightSerifed" { LtSerifs }
+			"motionSerifed"      { LtRbSerifs }
+
+	foreach { suffix { {Body toothless tailed} {Serifs} } } [pairs-of TurnMConfig] : do
+		define [turnMShapeBody df top] : glyph-proc
+			include : Body top 0 0 0 df
+			include : Serifs df top 0 0 0 0 toothless
+			include : FlipAround df.middle (top / 2)
+			if tailed : begin
+				eject-contour 'barL'
+				eject-contour 'serifLT'
+				include : RightwardTailedBar df.rightSB 0 top (sw -- df.mvs)
+
+		create-glyph "turnm.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : turnMShapeBody df XH
+
+		create-glyph "capitalTurnm.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.capital
+			include : turnMShapeBody df CAP
+
+		create-glyph "turnmSideways.\(suffix)" : glyph-proc
+			local realHeight : XH * para.diversityM
+			local realTop : XH / 2 + realHeight / 2
+			local realBot : XH / 2 - realHeight / 2
+			local df : DivFrame (realHeight / Width) 3 (XH * 0.1 / SB)
+			include : df.markSet.e
+			include : PointingTo Width realTop Width realBot : function [] : glyph-proc
+				include : turnMShapeBody df (Width - SB)
+				include : Translate 0 (SB / 2)
+
+		create-glyph "cyrl/shcha.italic.\(suffix)" : glyph-proc
+			local df : DivFrame para.diversityM 3
+			set-width df.width
+			include : df.markSet.e
+			include : turnMShapeBody df XH
+			eject-contour 'serifLT'
+			include : CyrDescender.rSideJut df.rightSB 0 (refSw -- df.mvs)
+
+	select-variant 'turnm' 0x26F
+	select-variant 'capitalTurnm' 0x19C (follow -- 'turnm')
+	select-variant 'turnmSideways' 0x1D1F (follow -- 'turnm')
+
+	select-variant 'cyrl/sha.italic' (shapeFrom -- 'turnm')
+	alias 'cyrl/sha.BGR' null 'cyrl/sha.italic'
+
+	select-variant 'cyrl/shcha.italic'
+	alias 'cyrl/shcha.BGR' null 'cyrl/shcha.italic'
+
+	derive-composites 'cyrl/te.SRB' null 'cyrl/sha.italic' 'macronAbove'
 
 	derive-composites 'currency/millSign' 0x20A5 'm' 'shortSlash'
 
