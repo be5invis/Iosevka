@@ -16,15 +16,15 @@ glyph-block Symbol-Punctuation-Brackets : begin
 	define MosaicHeight : MosaicTop - MosaicBottom
 
 	define Paren : namespace
-		export : define [Dim] : with-params [[delta 0] [dp DesignParameters] [sw Stroke]] : object
-			outside : [mix SB RightSB dp.parenOutside] - delta - dp.parenOutsideSwAdj * HVContrast * sw + O
-			inside  : [mix SB RightSB dp.parenInside] - dp.parenInsideSwAdj * HVContrast * sw
+		export : define [Dim] : with-params [df [delta 0] [dp DesignParameters] [sw Stroke]] : object
+			outside : [mix df.leftSB df.rightSB dp.parenOutside] - delta - dp.parenOutsideSwAdj * HVContrast * sw + O
+			inside  : [mix df.leftSB df.rightSB dp.parenInside] - dp.parenInsideSwAdj * HVContrast * sw
 			bottom  : [mix SymbolMid ParenBot (1 + dp.parenOvershoot)] - delta
 			top     : [mix SymbolMid ParenTop (1 + dp.parenOvershoot)] + delta
 			mid       SymbolMid
 
-		export : define [Shape] : with-params [[sw Stroke] [dp DesignParameters]] : begin
-			local dim : Dim 0 dp (sw -- sw)
+		export : define [Shape] : with-params [df [sw Stroke] [dp DesignParameters]] : begin
+			local dim : Dim df (delta -- 0) (dp -- dp) (sw -- sw)
 			return : dispiro
 				widths.lhs sw
 				g4 dim.inside dim.top
@@ -33,24 +33,24 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				quadControls 0 dp.parenCurliness
 				g4 dim.inside dim.bottom
 
-		export : define [UpperShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
+		export : define [UpperShape df sw] : let [dim : Dim df 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4 dim.inside dim.top
 			quadControls 1 (1 - DesignParameters.parenCurliness)
 			g4.down.end dim.outside MosaicBottom [heading Downward]
 
-		export : define [ExtensionShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
+		export : define [ExtensionShape df sw] : let [dim : Dim df 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4.down.start dim.outside MosaicTop [heading Downward]
 			g4.down.end dim.outside MosaicBottom [heading Downward]
 
-		export : define [LowerShape sw] : let [dim : Dim 0 (sw -- sw)] : dispiro
+		export : define [LowerShape df sw] : let [dim : Dim df 0 (sw -- sw)] : dispiro
 			widths.lhs sw
 			g4.down.start dim.outside MosaicTop [heading Downward]
 			quadControls 0 DesignParameters.parenCurliness
 			g4 dim.inside dim.bottom
 
-		export : define [ShapeMask sw delta] : let [dim : Dim delta (sw -- sw)] : spiro-outline
+		export : define [ShapeMask df sw delta] : let [dim : Dim df delta (sw -- sw)] : spiro-outline
 			corner dim.inside dim.top
 			quadControls 1 (1 - DesignParameters.parenCurliness)
 			g4 dim.outside dim.mid
@@ -58,10 +58,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 			corner dim.inside dim.bottom
 
 	do "Paren glyphs"
-		create-glyph'parenLeft.normal' : glyph-proc
-			include : Paren.Shape Stroke
-
-		create-glyph 'parenLeft.largeContour' : glyph-proc
+		define [NormalShape df] : Paren.Shape df df.mvs
+		define [LargeContourShape df] : begin
 			local dp : object
 				parenOutside           (0.25 * DesignParameters.parenOutside)
 				parenInside            DesignParameters.parenInside
@@ -69,9 +67,8 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				parenInsideSwAdj       DesignParameters.parenInsideSwAdj
 				parenCurliness         [mix 1 DesignParameters.parenCurliness 0.5]
 				parenOvershoot         DesignParameters.parenOvershoot
-			include : Paren.Shape Stroke dp
-
-		create-glyph'parenLeft.flatArc' 0x27EE : glyph-proc
+			return : Paren.Shape df df.mvs dp
+		define [FlatArcShape df] : begin
 			local dp : object
 				parenOutside           (0.5 * DesignParameters.parenOutside)
 				parenInside            DesignParameters.parenInside
@@ -79,9 +76,9 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				parenInsideSwAdj       DesignParameters.parenInsideSwAdj
 				parenCurliness         [mix 1 DesignParameters.parenCurliness 0.5]
 				parenOvershoot         DesignParameters.parenOvershoot
-			local dim : Paren.Dim 0 dp
-			include : dispiro
-				widths.lhs
+			local dim : Paren.Dim df 0 dp
+			return : dispiro
+				widths.lhs df.mvs
 				g4.left.start dim.inside dim.top
 				archv
 				flat dim.outside [mix dim.bottom dim.top 0.65]
@@ -89,39 +86,57 @@ glyph-block Symbol-Punctuation-Brackets : begin
 				arcvh
 				g4.right.start dim.inside dim.bottom
 
-		turned 'parenRight.normal'       null   'parenLeft.normal'       Middle SymbolMid
-		turned 'parenRight.largeContour' null   'parenLeft.largeContour' Middle SymbolMid
-		turned 'parenRight.flatArc'      0x27EF 'parenLeft.flatArc'      Middle SymbolMid
+		define SimpleParenConfig : object
+			'normal'       NormalShape
+			'largeContour' LargeContourShape
+			'flatArc'      FlatArcShape
+
+		foreach { suffix shape } [pairs-of SimpleParenConfig] : begin
+			create-glyph "parenLeft.\(suffix)" : shape [DivFrame 1]
+			create-glyph "doubleParenLeft.\(suffix)" : glyph-proc
+				local df : DivFrame 1 3
+				local subDf : df.slice 3 2
+				include : shape subDf
+				include : WithTransform [ApparentTranslate (df.width - subDf.width) 0] : shape subDf
+
+			turned "parenRight.\(suffix)" null "parenLeft.\(suffix)" Middle SymbolMid
+			turned "doubleParenRight.\(suffix)" null "doubleParenLeft.\(suffix)" Middle SymbolMid
 
 		select-variant 'parenLeft'  '('
 		select-variant 'parenRight' ')'
+		select-variant 'doubleParenLeft'  0x2E28 (follow -- 'parenLeft')
+		select-variant 'doubleParenRight' 0x2E29 (follow -- 'parenRight')
+
+		alias 'flattenedParenLeft'  0x27EE 'parenLeft.flatArc'
+		alias 'flattenedParenRight' 0x27EF 'parenRight.flatArc'
 
 		create-glyph 'parenLeftUpper' 0x239B : glyph-proc
 			include : ForceUpright
-			include : Paren.UpperShape Stroke
+			include : Paren.UpperShape [DivFrame 1] Stroke
 
 		create-glyph 'parenLeftExtension' 0x239C : glyph-proc
 			include : ForceUpright
-			include : Paren.ExtensionShape Stroke
+			include : Paren.ExtensionShape [DivFrame 1] Stroke
 
 		create-glyph 'parenLeftLower' 0x239D : glyph-proc
 			include : ForceUpright
-			include : Paren.LowerShape Stroke
+			include : Paren.LowerShape [DivFrame 1] Stroke
 
 		turned 'parenRightLower' 0x23A0 'parenLeftUpper' Middle SymbolMid
 		turned 'parenRightExtension' 0x239F 'parenLeftExtension' Middle SymbolMid
 		turned 'parenRightupper' 0x239E 'parenLeftLower' Middle SymbolMid
 
 		create-glyph 'zNotationParenLeft' 0x2987 : glyph-proc
+			local df : DivFrame 1
 			local fine : AdviceStroke 4
-			local dim : Paren.Dim 0 (sw -- fine)
+			local dim : Paren.Dim df 0 (sw -- fine)
 			include : intersection
 				Rect [mix dim.bottom dim.top 2] [mix dim.top dim.bottom 2] 0 dim.inside
 				union
-					Paren.Shape fine
+					Paren.Shape df fine
 					intersection
 						VBar.r dim.inside dim.bottom dim.top fine
-						Paren.ShapeMask fine O
+						Paren.ShapeMask df fine O
 
 		turned 'zNotationParenRight' 0x2988 'zNotationParenLeft' Middle SymbolMid
 
@@ -410,11 +425,11 @@ glyph-block Symbol-Punctuation-Brackets : begin
 					curl (outside + O) SymbolMid [widths.heading 0 (sw * fatten) Upward]
 
 		create-glyph 'angleLeft' 0x2329 : glyph-proc
-			define dim : Paren.Dim (delta -- 0)
+			define dim : Paren.Dim [DivFrame 1] (delta -- 0)
 			include : AngleLeftShape dim.outside dim.inside OperatorStroke
 
 		create-glyph 'dblAngleLeft' 0x27EA : glyph-proc
-			define dim : Paren.Dim (delta -- 0) (sw -- OperatorStroke)
+			define dim : Paren.Dim [DivFrame 1] (delta -- 0) (sw -- OperatorStroke)
 			define fine : Math.min OperatorStroke [AdviceStroke 3.5]
 			define farOutside : dim.outside / 2
 			define middle : mix farOutside dim.inside 0.5
