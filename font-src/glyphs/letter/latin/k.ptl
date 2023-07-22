@@ -1,6 +1,6 @@
 $$include '../../../meta/macros.ptl'
 
-import [mix clamp fallback SuffixCfg] from"../../../support/utils.mjs"
+import [mix clamp fallback linreg SuffixCfg] from"../../../support/utils.mjs"
 import [Dotless CvDecompose MathSansSerif] from"../../../support/gr.mjs"
 import [maskBit] from"../../../support/util/mask-bit.mjs"
 
@@ -65,6 +65,7 @@ glyph-block Letter-Latin-K : begin
 					flat [mix (kshRightTop - Ok) (kshLeft + stroke) kHookTopMix] [mix top attach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
 					curl (kshLeft + stroke) attach [widths.rhs fine]
 			: else : begin
+				set-base-anchor 'aluentOverlay' [mix kshLeft kshRightTop : StrokeWidthBlend 0.5 0.65] [mix attach top : StrokeWidthBlend 0.5 0.7]
 				include : intersection
 					TopStrokeMask 0
 					dispiro
@@ -122,6 +123,8 @@ glyph-block Letter-Latin-K : begin
 						flat [mix (kshRightHookTop - Ok) xAttach kHookTopMix] [mix top yAttach kHookTopMix] [widths.rhs : mix stroke fine kHookTopMix]
 						curl [mix (kshRightHookTop - Ok) xAttach 2] [mix top yAttach 2] [widths.rhs fine]
 			: else : begin
+				local xRef : linreg yAttach xAttach top kshRight (top * 0.75)
+				set-base-anchor 'aluentOverlay' (xRef - 0.5 * HVContrast * Stroke) (top * 0.75)
 				include : tagged 'strokeRT' : intersection
 					StrokeMask 1 top (0.5 * top) 0
 					dispiro
@@ -190,6 +193,7 @@ glyph-block Letter-Latin-K : begin
 			local xAttach2 : kshLeft + stroke * HVContrast
 			local yAttach2 : top * 0.75
 			local kDiag : mix 1 [DiagCorDs (top - yAttach1) (kshRight - kshLeft) stroke] 0.5
+			set-base-anchor 'aluentOverlay' [mix xAttach1 kshRight : StrokeWidthBlend 0.7 0.6] [mix yAttach1 top : StrokeWidthBlend 0.6 0.65]
 			include : intersection
 				Rect top 0 kshLeft (2 * Width)
 				if fHookTop
@@ -565,6 +569,9 @@ glyph-block Letter-Latin-K : begin
 
 	select-variant 'KHookTop' 0x198 (follow -- 'K')
 	select-variant 'kHookTop' 0x199
+
+	derive-composites 'cyrl/KaAluent' 0x51E 'cyrl/Ka' 'aluentSlashOver'
+	derive-composites 'cyrl/kaAluent' 0x51F 'cyrl/ka' 'aluentSlashOver'
 
 	derive-glyphs 'kCaron' 0x1E9 'k/circumflexBase' : lambda [src gr] : glyph-proc
 		local shift : Width + SB - Middle + HalfStroke * HVContrast

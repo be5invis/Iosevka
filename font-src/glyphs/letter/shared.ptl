@@ -590,15 +590,16 @@ glyph-block Letter-Shared-Shapes : begin
 		Math.min jut (0.5 * ink + [Math.max (Stroke * TanSlope) (0.375 * gap)])
 
 	class CSerifFrame
-		public [new top bot left right swRef swSerif div hSplit] : begin
-			set this.top     top
-			set this.bot     bot
-			set this.left    left
-			set this.right   right
-			set this.swRef   swRef
-			set this.swSerif swSerif
-			set this.div     div
-			set this.hSplit  hSplit
+		public [new top bot left right swRef swSerif div hSplit fForceSymmetric] : begin
+			set this.top             top
+			set this.bot             bot
+			set this.left            left
+			set this.right           right
+			set this.swRef           swRef
+			set this.swSerif         swSerif
+			set this.div             div
+			set this.hSplit          hSplit
+			set this.fForceSymmetric fForceSymmetric
 
 			local ink : HVContrast * swRef
 			local gap : (right - left - hSplit * ink) / (hSplit - 1)
@@ -608,7 +609,7 @@ glyph-block Letter-Shared-Shapes : begin
 			local jut     : mix (0.5 * HVContrast * swRef) Jut [Math.min 1 : div * 2.25 / hSplit]
 			local sideJut : jut - 0.5 * ink
 
-			local jutIn     : JutIn left right jut swRef hSplit
+			local jutIn     : if fForceSymmetric jut : JutIn left right jut swRef hSplit
 			local sideJutIn : jutIn - 0.5 * ink
 
 			local lBarCenter : left + 0.5 * ink
@@ -661,8 +662,18 @@ glyph-block Letter-Shared-Shapes : begin
 			return : new CSerifFrame this.top this.bot l1 r1 this.swRef this.swSerif this.div (r - l + 1)
 
 	glyph-block-export SerifFrame
-	define [SerifFrame] : with-params [top bot left right [swRef Stroke] [swSerif swRef] [div 1] [hSplit 2]] : begin
-		return : new CSerifFrame top bot left right swRef swSerif div hSplit
+	define [SerifFrame] : begin
+		postulate
+			top
+			bot
+			left
+			right
+			swRef -- Stroke
+			swSerif -- swRef
+			div -- 1
+			hSplit -- 2
+			fForceSymmetric -- false
+		return : new CSerifFrame top bot left right swRef swSerif div hSplit fForceSymmetric
 
 	define SerifFrame.fromDf : function [] : with-params [df top bot [swSerif df.mvs]] : begin
 		return : SerifFrame top bot df.leftSB df.rightSB
