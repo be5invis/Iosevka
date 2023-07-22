@@ -53,6 +53,15 @@ glyph-block Letter-Latin-Long-S : begin
 		LongSUpperHalf (-1) Middle top [mix top bottom 0.5] hookx hooky fine
 		LongSLowerHalf (-1) Middle [mix top bottom 0.5] bottom hookx hooky fine
 
+	define [IFishHookShape top bottom fSlab] : glyph-proc
+		local balance : IBalance2 : DivFrame 1
+		include : WithTransform [Translate balance 0] : glyph-proc
+			include : VBar.m Middle bottom (top - Hook)
+			include : VerticalHook.m Middle (top - Hook) (-LongJut + balance) (-Hook + HalfStroke)
+			if fSlab : include : union
+				HSerif.lb (Middle - HalfStroke * HVContrast) bottom (SideJut + balance)
+				HSerif.rb (Middle + HalfStroke * HVContrast) bottom SideJut
+
 	define [StandardSerifs m0 fSlab] : glyph-proc
 		local m : m0 + HVContrast * HalfStroke
 		local serifLength : 1 * MidJutCenter
@@ -95,7 +104,7 @@ glyph-block Letter-Latin-Long-S : begin
 		include : dispiro
 			widths.lhs
 			flat RightSB Ascender
-			curl (m + hd.x) Ascender
+			curl [Math.min (RightSB - 0.01) (m + hd.x)] Ascender
 			archv
 			flat m (Ascender - hd.y)
 			curl m yBot [heading Downward]
@@ -125,9 +134,7 @@ glyph-block Letter-Latin-Long-S : begin
 			create-forked-glyph "longsbar.flatHook\(suffix)" : LongSBentHookOverlayBar m
 
 		create-glyph "longs.flatHookExt\(suffix)" : glyph-proc
-			include : MarkSet.b
-			local m : Middle - pShift * (JBalance + HalfStroke * HVContrast)
-			include : LongSFlatHookNoTailShape m 0 serifStyle
+			include [refer-glyph "longs.flatHook\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.t RightSB (2 * Width) Ascender
 
 	# Descending and Tailed variants
@@ -144,10 +151,8 @@ glyph-block Letter-Latin-Long-S : begin
 			include : StandardSerifs m serifStyle
 			create-forked-glyph "longsbar.flatHookDescending\(suffix)" : LongSBentHookOverlayBar m
 
-		create-glyph "longs.flatHookDescendingExt\(suffix)" : glyph-proc
-			include : MarkSet.bp
-			local m : Middle - pShift * (JBalance + HalfStroke * HVContrast)
-			include : LongSFlatHookNoTailShape m Descender false
+		create-glyph "longs.flatHookExtDescending\(suffix)" : glyph-proc
+			include [refer-glyph "longs.flatHookDescending\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.t RightSB (2 * Width) Ascender
 
 		create-glyph "longs.flatHookTailed\(suffix)" : glyph-proc
@@ -156,10 +161,8 @@ glyph-block Letter-Latin-Long-S : begin
 			include : StandardSerifs (Middle - HalfStroke * HVContrast) serifStyle
 			create-forked-glyph "longsbar.flatHookTailed\(suffix)" : LongSSymmetricOverlayBar Middle
 
-		create-glyph "longs.flatHookTailedExt\(suffix)" : glyph-proc
-			include : MarkSet.bp
-			include : LongSShape Ascender Descender (HookX + 0.25 * Stroke) Hook
-			include : StandardSerifs (Middle - HalfStroke * HVContrast) serifStyle
+		create-glyph "longs.flatHookExtTailed\(suffix)" : glyph-proc
+			include [refer-glyph "longs.flatHookTailed\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) (2 * Width) Ascender
 
 		create-glyph "longs.flatHookDiagonalTailed\(suffix)" : glyph-proc
@@ -170,12 +173,8 @@ glyph-block Letter-Latin-Long-S : begin
 				StandardSerifs (Middle - HalfStroke * HVContrast) serifStyle
 			create-forked-glyph "longsbar.flatHookDiagonalTailed\(suffix)" : LongSSymmetricOverlayBar Middle
 
-		create-glyph "longs.flatHookDiagonalTailedExt\(suffix)" : glyph-proc
-			include : MarkSet.bp
-			include : union
-				intersection [MaskAbove 0] [LongSShape Ascender Descender (HookX + 0.25 * Stroke) Hook]
-				SmallFDiagonalTail [DivFrame 1] (Middle - HalfStroke * HVContrast)
-				StandardSerifs (Middle - HalfStroke * HVContrast) serifStyle
+		create-glyph "longs.flatHookExtDiagonalTailed\(suffix)" : glyph-proc
+			include [refer-glyph "longs.flatHookDiagonalTailed\(suffix)"] AS_BASE ALSO_METRICS
 			include : HBar.t (Middle + HookX + (0.25 - TanSlope) * Stroke) (2 * Width) Ascender
 
 		create-glyph "longs.bentHookDescending\(suffix)" : glyph-proc
@@ -244,15 +243,15 @@ glyph-block Letter-Latin-Long-S : begin
 					x2 -- x2
 					y2 -- y2
 
-	create-glyph "iFishHook" 0x27F : glyph-proc
+	create-glyph "iFishHook.serifless" : glyph-proc
 		include : MarkSet.p
-		local balance : IBalance2 : DivFrame 1
-		include : WithTransform [Translate balance 0] : glyph-proc
-			include : VBar.m Middle Descender (XH - Hook)
-			include : VerticalHook.m Middle (XH - Hook) (-LongJut + balance) (-Hook + HalfStroke)
-			if SLAB : include : union
-				HSerif.lb (Middle - HalfStroke * HVContrast) Descender (SideJut + balance)
-				HSerif.rb (Middle + HalfStroke * HVContrast) Descender SideJut
+		include : IFishHookShape XH Descender false
+
+	create-glyph "iFishHook.serifed" : glyph-proc
+		include : MarkSet.p
+		include : IFishHookShape XH Descender true
+
+	select-variant 'iFishHook' 0x27F
 
 	create-glyph "iviby" 0x285 : glyph-proc
 		include : MarkSet.p

@@ -621,10 +621,17 @@ glyph-block AutoBuild-Enclosure : begin
 			applyRelations jobs.relApplications
 
 	# Circled & Braced
-	define [digitGlyphNames j] : begin
-		return : [(j+'').split ''].map: c => [glyphStore.queryNameOfUnicode (['0'.charCodeAt 0] + (c - 0))]
+	define [digitGlyphNames j suffix] : begin
+		local digitNumberToNameMap { 'zero' 'one' 'two' 'three' 'four' 'five' 'six' 'seven' 'eight' 'nine' }
+		local digits : [String j].split '' :.map [function x (x - 0)]
+		local names { }
+		foreach digit [items-of digits] : begin
+			names.push : digitNumberToNameMap.(digit) + [[fallback suffix digitNoSuffix] digit] + '.lnum'
+		return names
 
-	define [digitHasSerif d] : not (d == 6 || d == 8 || d == 9)
+	define [digitNoSuffix d] : return ''
+	define [digitSansSerifSuffix d] : if (d == 1 || d == 7) '/sansSerif' ''
+	define [digitHasSerif d] : SLAB && (d == 2 || d == 3 || d == 4 || d == 5)
 
 	do "Single-digit circled"
 		local compositions : list
@@ -636,7 +643,7 @@ glyph-block AutoBuild-Enclosure : begin
 			list 0x1F10B {'zero.lnum'}               WideWidth1 # We don't have serifs for digit 0, so make an alias here
 			list 0x1F10D {'zero.lnum/forceSlashed'}  WideWidth2
 		foreach [j : range 1 till 9] : compositions.push : list (0x2460 + j - 1) [digitGlyphNames j] WideWidth1
-		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x2780 + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x24B6 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		foreach [j : range 0 26] : compositions.push {(0x24D0 + j) {[glyphStore.queryNameOfUnicode (['a'.charCodeAt 0] + j)]} WideWidth1 0.5 (XH/2)}
 		createCircledGlyphs 1 compositions
@@ -659,6 +666,7 @@ glyph-block AutoBuild-Enclosure : begin
 	do "Double-digit circled"
 		local compositions : list
 			list null    {'markBaseSpace'} WideWidth1
+			list 0x2789  {'one/sansSerif.lnum' 'zero.lnum'} WideWidth1
 			list 0x1F16D {'C' 'C'} WideWidth2
 			list 0x1F12D {'C' 'D'} WideWidth1
 			list 0x1F12E {'W' 'z'} WideWidth1
@@ -667,17 +675,12 @@ glyph-block AutoBuild-Enclosure : begin
 		foreach [j : range 36 till 50] : compositions.push : list (0x32B1 + j - 36) [digitGlyphNames j] WideWidth1
 		createCircledGlyphs 2 compositions
 
-	do "Double-digit sans-serif circled"
-		local compositions : list
-		foreach [j : range 10 till 10] : compositions.push : list (0x2789 + j - 10) [digitGlyphNames j] WideWidth1
-		createSansSerifCircledGlyphs 2 compositions
-
 	do "Single-digit inset circled"
 		local compositions : list
 			list 0x24FF  {'zero.lnum'} WideWidth1
 			list 0x1F10C {'zero.lnum'} WideWidth1 # We don't have serifs for digit 0, so make an alias here
 		foreach [j : range 1 till 9] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
-		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j] WideWidth1
+		foreach [j : range 1 till 9] : if [not : digitHasSerif j] : compositions.push : list (0x278A + j - 1) [digitGlyphNames j digitSansSerifSuffix] WideWidth1
 		foreach [j : range 0 26] : compositions.push {(0x1F150 + j) {[glyphStore.queryNameOfUnicode (['A'.charCodeAt 0] + j)]} WideWidth1}
 		createInsetCircledGlyphs 1 compositions
 
@@ -688,14 +691,10 @@ glyph-block AutoBuild-Enclosure : begin
 
 	do "Double-digit inset circled"
 		local compositions : list
+			list 0x2793 { "one/sansSerif.lnum" "zero.lnum" } WideWidth1
 		foreach [j : range 10 till 10] : compositions.push : list (0x2776 + j - 1) [digitGlyphNames j] WideWidth1
 		foreach [j : range 11 till 20] : compositions.push : list (0x24EB + j - 11) [digitGlyphNames j] WideWidth1
 		createInsetCircledGlyphs 2 compositions
-
-	do "Double-digit inset sans-serif circled"
-		local compositions : list
-		foreach [j : range 10 till 10] : compositions.push : list (0x2793 + j - 10) [digitGlyphNames j] WideWidth1
-		createInsetSansSerifCircledGlyphs 2 compositions
 
 	do "boxed"
 		local compositions {}

@@ -21,9 +21,10 @@ function hashFile(path) {
 	});
 }
 export default (async function (out, archiveFiles) {
+	const filesToAnalyze = Array.from(new Set(archiveFiles.map(f => f.full))).sort();
 	let s = "";
-	for (const file of archiveFiles) {
-		s += `${file.base}\t${await hashFile(file.full)}\n`;
+	for (const file of filesToAnalyze) {
+		s += `${file.base}\t${await hashFile(file)}\n`;
 	}
 	await fs.promises.writeFile(out, s);
 });

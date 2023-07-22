@@ -253,30 +253,43 @@ glyph-block Letter-Latin-U : begin
 	derive-composites 'uRTailBR' 0x1D99 'u/uRTailBase'
 		RetroflexHook.rSideJut RightSB 0 (yOverflow -- Stroke)
 
-	define [VHookTopShape df top ada adb] : glyph-proc
-		include : dispiro
-			widths.lhs
-			flat df.leftSB top [heading Downward]
-			curl df.leftSB adb
-			arcvh
-			g4 (Middle + CorrectionOMidS) O
-			archv
-			flat df.rightSB ada
-			curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
-		include : VerticalHook.r
-			x -- df.rightSB
-			y -- (top - Hook - HalfStroke)
-			xDepth -- (-(RightSB - HalfStroke * HVContrast - Middle))
-			yDepth -- (-Hook)
-		if SLAB : include : UTopLeftSerif df top
+	do "Labiodental Approximant"
+		local df : DivFrame 1
+		define [VHookTopShape top ada adb] : glyph-proc
+			include : dispiro
+				widths.lhs
+				flat df.leftSB top [heading Downward]
+				curl df.leftSB adb
+				arcvh
+				g4 (Middle + CorrectionOMidS) O
+				archv
+				flat df.rightSB ada
+				curl df.rightSB (top - Hook - HalfStroke) [heading Upward]
+			include : VerticalHook.r
+				x -- df.rightSB
+				y -- (top - Hook - HalfStroke)
+				xDepth -- (-(RightSB - HalfStroke * HVContrast - Middle))
+				yDepth -- (-Hook)
 
-	create-glyph 'VHookTop' 0x1B2 : glyph-proc
-		include : MarkSet.capital
-		include : VHookTopShape [DivFrame 1] CAP ArchDepthA ArchDepthB
+		create-glyph 'VHookTop.serifless' : glyph-proc
+			include : MarkSet.capital
+			include : VHookTopShape CAP ArchDepthA ArchDepthB
 
-	create-glyph 'vHookTop' 0x28B : glyph-proc
-		include : MarkSet.e
-		include : VHookTopShape [DivFrame 1] XH SmallArchDepthA SmallArchDepthB
+		create-glyph 'VHookTop.serifed' : glyph-proc
+			include [refer-glyph "VHookTop.serifless"] AS_BASE ALSO_METRICS
+			include : UTopLeftSerif df CAP
+
+		select-variant 'VHookTop' 0x1B2
+
+		create-glyph 'vHookTop.serifless' : glyph-proc
+			include : MarkSet.e
+			include : VHookTopShape XH SmallArchDepthA SmallArchDepthB
+
+		create-glyph 'vHookTop.serifed' : glyph-proc
+			include [refer-glyph "vHookTop.serifless"] AS_BASE ALSO_METRICS
+			include : UTopLeftSerif df XH
+
+		select-variant 'vHookTop' 0x28B
 
 	derive-glyphs 'uWithLightCentralizationStroke' null 'u' : function [src gr] : glyph-proc
 		include : MarkSet.p
