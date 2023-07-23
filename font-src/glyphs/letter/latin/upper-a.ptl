@@ -56,6 +56,12 @@ glyph-block Letter-Latin-Upper-A : begin
 			intersection [HBar.t 0 df.width yBar] [AMaskShape df fStraightBar top sw]
 		include : ASerifs df top sw slabKind
 
+	glyph-block-export LambdaShape
+	define [LambdaShape] : with-params [df fBarStraight top sw slabKind] : glyph-proc
+		include : VShape df fBarStraight top sw
+		include : FlipAround df.middle (top / 2)
+		include : ASerifs df top sw slabKind
+
 	foreach { suffix { fStraightBar slabKind } } [Object.entries AConfig] : do
 		define [AShapeImpl mak top fGrek fOverlays] : glyph-proc
 			local df : DivFrame 1
@@ -83,6 +89,24 @@ glyph-block Letter-Latin-Upper-A : begin
 
 		create-glyph "currency/australSign.\(suffix)" : AShapeImpl "capital" CAP false true
 
+		create-glyph "grek/Lambda.\(suffix)" : glyph-proc
+			include : MarkSet.capital
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				top          -- CAP
+				sw           -- Stroke
+				slabKind     -- slabKind
+
+		create-glyph "grek/smcpLambda.\(suffix)" : glyph-proc
+			include : MarkSet.e
+			include : LambdaShape
+				df           -- [DivFrame 1]
+				fBarStraight -- fStraightBar
+				top          -- XH
+				sw           -- Stroke
+				slabKind     -- slabKind
+
 	select-variant 'A' 'A'
 	link-reduced-variant 'A/sansSerif' 'A' MathSansSerif
 	select-variant 'smcpA' 0x1D00 (follow -- 'A')
@@ -92,26 +116,9 @@ glyph-block Letter-Latin-Upper-A : begin
 	alias 'cyrl/A' 0x410 'A'
 	turned 'turnA' 0x2C6F 'A' Middle (CAP / 2)
 
-	# Lambda
-	glyph-block-export LambdaShape
-	define [LambdaShape] : with-params [df fBarStraight top sw [slab SLAB]] : glyph-proc
-		include : VShape df fBarStraight top sw
-		include : FlipAround df.middle (top / 2)
-		local sf : SerifFrame.fromDf df top 0
-		include : NeedSlab slab : composite-proc sf.lb.full sf.rb.full
-
-	create-glyph 'grek/Lambda.straight' : composite-proc [MarkSet.capital]
-		LambdaShape [DivFrame 1] true  CAP Stroke
-	create-glyph 'grek/Lambda.curly' : composite-proc [MarkSet.capital]
-		LambdaShape [DivFrame 1] false CAP Stroke
-	create-glyph 'grek/smcpLambda.straight' : composite-proc [MarkSet.e]
-		LambdaShape [DivFrame 1] true  XH  Stroke
-	create-glyph 'grek/smcpLambda.curly' : composite-proc [MarkSet.e]
-		LambdaShape [DivFrame 1] false XH  Stroke
-
 	select-variant 'grek/Lambda' 0x39B
+	link-reduced-variant 'grek/Lambda/sansSerif' 'grek/Lambda' MathSansSerif
 	select-variant 'grek/smcpLambda' 0x1D27 (follow -- 'grek/Lambda')
-	alias 'latinLambda' 0x245 'grek/Lambda'
 
 	# Delta
 	glyph-block-export DeltaShape
