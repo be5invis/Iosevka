@@ -1,5 +1,11 @@
 ## Modifications since version 2.x
 
+### 25.1.1
+
+* Fix `U+1D786` variant selection (#1861).
+* Fix serifs in `U+0257` and `U+026F` (#1862).
+
+
 ### 25.1.0
 
 * Add Characters:
