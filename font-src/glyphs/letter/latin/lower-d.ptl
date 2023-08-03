@@ -33,17 +33,6 @@ glyph-block Letter-Latin-Lower-D : begin
 			adb -- [df.archDepthB SmallArchDepth df.mvs]
 		tagged 'rightBar' : VBar.r df.rightSB DToothlessRise yTop
 
-	define [ToothlessCornerHBBBody df yTop] : union
-		OBarRight.toothless
-			left -- df.leftSB
-			right -- df.rightSB
-			sw -- df.mvs
-			rise -- DToothlessRise
-			mBlend -- DMBlend
-			ada -- [df.archDepthA SmallArchDepth df.mvs]
-			adb -- [df.archDepthB SmallArchDepth df.mvs]
-		tagged 'rightBar' : VBar.r df.rightSB 0 yTop
-
 	define [ToothlessRoundedBody df yTop] : OBarRight.rounded
 		left -- df.leftSB
 		right -- df.rightSB
@@ -51,10 +40,6 @@ glyph-block Letter-Latin-Lower-D : begin
 		yTerminal -- yTop
 		ada -- [df.archDepthA SmallArchDepth df.mvs]
 		adb -- [df.archDepthB SmallArchDepth df.mvs]
-
-	define [ToothlessRoundedHBBBody df yTop] : union
-		ToothlessRoundedBody df yTop
-		tagged 'rightBar' : VBar.r df.rightSB 0 yTop
 
 	define [TailedBody df yTop] : union
 		OBarRight.shape
@@ -75,9 +60,7 @@ glyph-block Letter-Latin-Lower-D : begin
 		object # body
 			toothed                   ToothedBody
 			toothlessCorner           ToothlessCornerBody
-			toothlessCornerHBB        ToothlessCornerHBBBody
 			toothlessRounded          ToothlessRoundedBody
-			toothlessRoundedHBB       ToothlessRoundedHBBBody
 			tailed                    TailedBody
 
 		function [body] : object # serifs
@@ -109,12 +92,22 @@ glyph-block Letter-Latin-Lower-D : begin
 			include : HBar.t xLeft (df.rightSB + O) CAP
 			if topSerif : include : VSerif.dl xLeft CAP : Math.min VJut (0.8 * (Ascender - XH))
 
+		create-glyph "dRTail.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include [refer-glyph "d.\(suffix)"] AS_BASE ALSO_METRICS
+			include : RetroflexHook.rExt df.rightSB 0
+
 		create-glyph "dHookTop.\(suffix)" : glyph-proc
 			local df : DivFrame 1
 			include : df.markSet.b
 			include : Body df (Ascender - Hook - HalfStroke)
 			include : TopHook.rBarInner df.rightSB (XH / 2) Ascender
 			if bottomSerif : include : bottomSerif df Ascender
+
+		create-glyph "dHookTopRTail.\(suffix)" : glyph-proc
+			local df : DivFrame 1
+			include [refer-glyph "dHookTop.\(suffix)"] AS_BASE ALSO_METRICS
+			include : RetroflexHook.rExt df.rightSB 0
 
 		create-glyph "cyrl/djeKomi.\(suffix)" : glyph-proc
 			local df : DivFrame 1 3
@@ -144,23 +137,19 @@ glyph-block Letter-Latin-Lower-D : begin
 	alias 'cyrl/deKomi' 0x501 'd'
 	link-reduced-variant 'd/sansSerif' 'd' MathSansSerif
 	link-reduced-variant 'd/phoneticLeft' 'd'
-	link-reduced-variant 'd/hookBottomBase' 'd'
 	CreateAccentedComposition 'dTildeOver' 0x1D6D 'd' 'tildeOverOnExension'
 
+	select-variant 'dRTail' 0x256
 	select-variant 'dHookTop' 0x257
-	link-reduced-variant 'dHookTop/hookBottomBase' 'dHookTop'
+	select-variant 'dHookTopRTail' 0x1D91
 
 	select-variant 'cyrl/djeKomi' 0x503
 
-	derive-composites 'dPalatalHook' 0x1D81 'd/hookBottomBase' : PalatalHook.r
+	select-variant 'd/descBase' null (shapeFrom -- 'd') (follow -- 'dRTail')
+	derive-composites 'dPalatalHook' 0x1D81 'd/descBase' : PalatalHook.r
 		xLink -- RightSB
 		x -- (RightSB + SideJut)
 		y -- 0
-
-	derive-composites 'dHookBottom' 0x256 'd/hookBottomBase'
-		RetroflexHook.rExt RightSB 0
-	derive-composites 'dHookTopBottom' 0x1D91 'dHookTop/hookBottomBase'
-		RetroflexHook.rExt RightSB 0
 
 	derive-multi-part-glyphs 'dDot' 0x1E0B {'d' 'dotAbove'} : lambda [srcs gr] : glyph-proc
 		local { base mark } srcs
@@ -192,8 +181,7 @@ glyph-block Letter-Latin-Lower-D : begin
 				CurlyTail fine rinner m1 0 (m1 + rinner * 2 + fine) x2 y2
 			if fSerif : include : HSerif.lt (m1 - Stroke * HVContrast) Ascender SideJut
 
-	select-variant 'dCurlyTail' 0x221
-
+	select-variant 'dCurlyTail' 0x221 (follow -- 'dRTail')
 
 	glyph-block-import Letter-Blackboard : BBS BBD BBBarRight
 	create-glyph 'mathbb/d' 0x1D555 : glyph-proc
