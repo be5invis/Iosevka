@@ -417,10 +417,10 @@ glyph-block CommonShapes : begin
 		return r
 
 	define nHookSegments 12
-	define [HookShape toStraight toFinish isStart y tight _sw _swItalicAdj noAdjTerminalY] : begin
+	define [HookShape toStraight toFinish isStart args] : begin
+		local [object y tight sw swItalicAdj noAdjTerminalY turnSlope] args
+
 		local atBottom : toStraight.y > y
-		local sw : fallback _sw Stroke
-		local swItalicAdj : fallback _swItalicAdj sw
 		local ltr : if isStart (toFinish.x < toStraight.x) (toFinish.x > toStraight.x)
 		local dtu : if isStart (y > toFinish.y) (y < toFinish.y)
 		local doSwash : !tight && para.isItalic && ltr && atBottom && !isStart
@@ -442,9 +442,14 @@ glyph-block CommonShapes : begin
 		local keyKnot : g4.[if ltr "right" "left"].mid
 			begin mx
 			begin y
-			if [not tight] nothing : begin
-				local s : if ltr Rightward Leftward
-				heading {.x (s.x * [fallback tight.skew 1]) .y s.y}
+			piecewise
+				tight : begin
+					local s : if ltr Rightward Leftward
+					heading {.x (s.x * [fallback tight.skew 1]) .y s.y}
+				turnSlope : begin
+					local s : if ltr Rightward Leftward
+					heading {.x turnSlope .y s.y}
+				true : begin nothing
 
 		# Adjust terminal's direction
 		do "Adjust terminal's direction"
@@ -497,18 +502,32 @@ glyph-block CommonShapes : begin
 			* segAfter
 
 	define [hookStartBlender before after args] : begin
-		return : HookShape after before true args.y args.tight args.sw args.swItalicAdj args.noAdjTerminalY
+		return : HookShape after before true args
 
 	define [hookEndBlender before after args] : begin
-		return : HookShape before after false args.y args.tight args.sw args.swItalicAdj args.noAdjTerminalY
+		return : HookShape before after false args
 
 	glyph-block-export hookstart
-	define [hookstart] : with-params [y tight sw swItalicAdj noAdjTerminalY] : begin
-		return : Interpolator hookStartBlender : object y tight sw swItalicAdj noAdjTerminalY
+	define [hookstart] : begin
+		postulate
+			y
+			tight
+			sw             -- Stroke
+			swItalicAdj    -- sw
+			noAdjTerminalY -- false
+			turnSlope      -- nothing
+		return : Interpolator hookStartBlender : object y tight sw swItalicAdj noAdjTerminalY turnSlope
 
 	glyph-block-export hookend
-	define [hookend] : with-params [y tight sw swItalicAdj noAdjTerminalY] : begin
-		return : Interpolator hookEndBlender : object y tight sw swItalicAdj noAdjTerminalY
+	define [hookend] : begin
+		postulate
+			y
+			tight
+			sw             -- Stroke
+			swItalicAdj    -- sw
+			noAdjTerminalY -- false
+			turnSlope      -- nothing
+		return : Interpolator hookEndBlender : object y tight sw swItalicAdj noAdjTerminalY turnSlope
 
 	glyph-block-export Ungizmo
 	define [Ungizmo] : glyph-proc
