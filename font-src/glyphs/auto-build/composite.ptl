@@ -1157,24 +1157,25 @@ glyph-block Autobuild-Ligatures : begin
 					foreach {i dfg} [dfgs.entries] : begin
 						set sumChildrenWidth : sumChildrenWidth + dfg.advanceWidth * [if i wadjN wadj1]
 
-					local compRefWw : (ww - SB * 1.25) / (ww - SB * 2) * ww
-					local kern      : kKern * ww
-					local refW      : sumChildrenWidth - kern * (dfgs.length - 1)
+					local glyphWidth : if (sumChildrenWidth < ww) MosaicWidth ww
+					local compressRefWidth : (glyphWidth - SB * 1.25) / (glyphWidth - SB * 2) * glyphWidth
+					local kern : kKern * glyphWidth
+					local estKernedUncompressedWidth : sumChildrenWidth - kern * (dfgs.length - 1)
 					if (dfgs.length > 1) : foreach [cycle : range 0 4] : begin
 						if (kKern == 0) : begin
-							set kern : clamp 0 (SB * 7 / 8) ((refW - compRefWw) / (dfgs.length - 1))
-						set refW : sumChildrenWidth - kern * (dfgs.length - 1)
+							set kern : clamp 0 (SB * 7 / 8) ((estKernedUncompressedWidth - compressRefWidth) / (dfgs.length - 1))
+						set estKernedUncompressedWidth : sumChildrenWidth - kern * (dfgs.length - 1)
 
-					local compress : clamp 0 1 (compRefWw / refW)
+					local compress : clamp 0 1 (compressRefWidth / estKernedUncompressedWidth)
 
 					create-glyph gn [MangleUnicode unicode desiredWidth] : glyph-proc
 						local decomposition   { }
-						local baseOffset : ww / 2 - refW * compress / 2
+						local baseOffset : glyphWidth / 2 - estKernedUncompressedWidth * compress / 2
 						foreach { i component } [components.entries] : do
 							local componentAdvance : compress * (dfgs.(i).advanceWidth * [if i wadjN wadj1] - kern)
 							local componentRefOffset : dfgs.(i).advanceWidth * ([if i wadjN wadj1] - 1) / 2
 							if (i === 0) : begin
-								local placeholder : LigaturePlaceholderImpl ww baseOffset
+								local placeholder : LigaturePlaceholderImpl glyphWidth baseOffset
 								decomposition.push placeholder
 								include [refer-glyph placeholder] AS_BASE ALSO_METRICS
 							local part : EnsureComponentGlyphT component
@@ -1189,7 +1190,7 @@ glyph-block Autobuild-Ligatures : begin
 		applyRelations jobs.relApplications
 
 	define ijShrink : clamp 0.6 0.75 : StrokeWidthBlend 0.6 0.75
-	createLigatures 'compatLigature1' false ijShrink ijShrink 1 1 0.2 : list
+	createLigatures 'compatLigature1' false ijShrink ijShrink 1 1 [if (para.diversityI < 1) 0 0.2] : list
 		list 0x132 { 'I' 'J' }
 		list 0x133 { 'i' 'j' }
 
