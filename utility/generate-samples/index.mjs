@@ -2,9 +2,11 @@ import fs from "fs";
 import path from "path";
 
 import { parseLigationData } from "../export-data/ligation-data.mjs";
+import { getCharMapAndSupportedLanguageList } from "../export-data/supported-languages.mjs";
 import { parseVariantsData } from "../export-data/variants-data.mjs";
 
 import Button from "./templates/button.mjs";
+import CharGrid from "./templates/char-grid.mjs";
 import CharVariant from "./templates/character-variant.mjs";
 import GrandTitle from "./templates/grand-title.mjs";
 import Languages from "./templates/languages.mjs";
@@ -13,6 +15,8 @@ import Matrix from "./templates/matrix.mjs";
 import PackageSample from "./templates/package-sample.mjs";
 import StylisticSet from "./templates/stylistic-set.mjs";
 import Weights from "./templates/weights.mjs";
+
+export default main;
 
 class Generator {
 	constructor(outputDir, fontFiles) {
@@ -32,13 +36,16 @@ class Generator {
 		}
 	}
 }
-export default (async function main(argv) {
+
+async function main(argv) {
 	const variantsData = await parseVariantsData();
 	const ligationData = await parseLigationData();
 	const tasks = new Generator(
 		argv.outputDir,
 		argv.fontGroups.map(fg => path.resolve(process.cwd(), "dist", fg, "ttf", "*.ttf"))
 	);
+
+	// Common
 	await tasks.add("grand-title", GrandTitle, {});
 	await tasks.add("button-release", Button, { text: "Release ", stressText: argv.version });
 	await tasks.add("button-customize", Button, { text: "Customize" });
@@ -46,6 +53,24 @@ export default (async function main(argv) {
 	await tasks.add("matrix", Matrix, {});
 	await tasks.add("languages", Languages, {});
 	await tasks.add("weights", Weights, {});
+
+	// Unicode blocks
+	const cl = await getCharMapAndSupportedLanguageList(
+		argv.charMapPath,
+		argv.charMapItalicPath,
+		argv.charMapObliquePath
+	);
+	for (const block of cl.unicodeCoverage) {
+		const blockID = block.name
+			.toLowerCase()
+			.replaceAll(/[^\w ]/g, "")
+			.replaceAll(/ +/g, "-");
+		if (blockID === "specials") continue;
+		await tasks.add(`cs-block-${blockID}`, CharGrid, {
+			characters: block.characters
+		});
+	}
+
 	// Packages
 	for (const pst of argv.packageSnapshotTasks) {
 		await tasks.add(pst.name, PackageSample, {
@@ -57,6 +82,7 @@ export default (async function main(argv) {
 			fontFeatures: pst.fontFeatures
 		});
 	}
+
 	// Ligation sets
 	for (const ls of ligationData.nonMergeSets) {
 		await tasks.add(`ligset-${ls.tag}-${ls.rank}`, LigationSet, {
@@ -69,6 +95,7 @@ export default (async function main(argv) {
 			ligSets: ls.ligSets
 		});
 	}
+
 	// SS
 	for (const ss of variantsData.composites) {
 		await tasks.add(`ss-u-${ss.tag}-${ss.rank}`, StylisticSet, {
@@ -90,6 +117,7 @@ export default (async function main(argv) {
 			hotChars: ss.hotChars.sans.italic
 		});
 	}
+
 	// CV
 	for (const cv of [...variantsData.specials, ...variantsData.primes]) {
 		if (!cv.tag && !cv.isSpecial) continue;
@@ -101,5 +129,6 @@ export default (async function main(argv) {
 			});
 		}
 	}
+
 	return tasks.tasksGenerated;
-});
+}

@@ -905,11 +905,19 @@ const SampleImagesPre = task(`sample-images:pre`, async target => {
 		GroupTtfsImpl(`iosevka-aile`, false),
 		GroupTtfsImpl(`iosevka-etoile`, false)
 	);
+	const [cm, cmi, cmo] = await target.need(
+		BuildCM("iosevka", "iosevka-regular"),
+		BuildCM("iosevka", "iosevka-italic"),
+		BuildCM("iosevka", "iosevka-oblique")
+	);
 	return await node("utility/generate-samples/index.mjs", {
+		version,
 		outputDir: IMAGE_TASKS,
 		packageSnapshotTasks: await PackageSnapshotConfig(target),
 		fontGroups: fontGroups,
-		version
+		charMapPath: cm.full,
+		charMapItalicPath: cmi.full,
+		charMapObliquePath: cmo.full
 	});
 });
 const PackageSnapshotConfig = async target => {

@@ -1,5 +1,10 @@
 ## Modifications since version 2.x
 
+### 26.0.1
+
+* Fix shape of `ij` in Aile under NWID.
+
+
 ### 26.0.0
 
 * \[**Breaking**\] Add asymmetric variant to all `t` styles (#1836).
