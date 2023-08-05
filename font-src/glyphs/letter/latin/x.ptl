@@ -15,13 +15,13 @@ glyph-block Letter-Latin-X : begin
 	glyph-block-export HalfXStrand
 	define [HalfXStrand stb fSlab _leftx lefty rightx righty turn pStraight tension _fine] : glyph-proc
 		local sbCor : if stb ([StrokeWidthBlend 1 6] * OX * ([Math.abs (lefty - righty)] / CAP)) 0
-		local leftx : _leftx + (HalfStroke * HVContrast + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
+		local leftx : _leftx + ([HSwToV HalfStroke] + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
 		local fine  : (_fine || Stroke) * 0.5
 
 		if stb : begin
 			local hst : HalfStroke * [DiagCor (righty - lefty) (rightx - leftx) 0 0]
 			local hse : HalfStroke * [Math.min 0.97 ([AdviceStroke 3] / Stroke)]
-			local leftx2 : _leftx + (hst * HVContrast + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
+			local leftx2 : _leftx + ([HSwToV hst] + [Math.max (-SideJut) sbCor]) * [if (rightx > _leftx) 1 (-1)]
 			include : dispiro
 				corner leftx2 lefty [widths.heading hst hst [if (lefty < righty) Upward Downward]]
 				corner rightx righty [widths hse hse]
@@ -66,21 +66,21 @@ glyph-block Letter-Latin-X : begin
 			define kThin 0.550
 			define swEnd : AdviceStroke 2.75
 			define swMid : AdviceStroke 3
-			define xCenterRight : Middle + HVContrast * swMid / 2
-			define xCenterLeft  : Middle - HVContrast * swMid / 2
-			define xTurn : mix (RightSB - swEnd * HVContrast) xCenterRight 0.5
+			define xCenterRight : Middle + [HSwToV swMid] / 2
+			define xCenterLeft  : Middle - [HSwToV swMid] / 2
+			define xTurn : mix (RightSB - [HSwToV swEnd]) xCenterRight 0.5
 			define hook1Depth : Hook + Stroke * 0.125
 			define hook1StraightDepth : Math.min
 				hook1Depth - swEnd * 1.125
 				Math.max 1 : hook1Depth / 5 - swEnd / 4
 
 			define fineMid : swMid * kThin
-			define rIn : Math.max (0.2 * (RightSB - SB) - 0.7 * Stroke * HVContrast) [AdviceStroke 16]
+			define rIn : Math.max (0.2 * (RightSB - SB) - [HSwToV : 0.7 * Stroke]) [AdviceStroke 16]
 			define flatHookDepth : 0.7 * (RightSB - SB) - swEnd - 1.5 * rIn
 
 			define upperHalf : include : dispiro
-				flat (xCenterRight - HVContrast * fineMid) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
-				curl (xCenterRight - HVContrast * fineMid) (top - ada)
+				flat (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O) [widths.rhs.heading fineMid Upward]
+				curl (xCenterRight - [HSwToV fineMid]) (top - ada)
 				arcvh
 				ShoulderMidKnotRhs xTurn (top - O) fineMid swEnd (+1) (-1)
 				archv
@@ -93,14 +93,14 @@ glyph-block Letter-Latin-X : begin
 			# 	arcvh 16
 			# 	ShoulderMidKnotLhsRev (xTurn) (top - O) fineMid swEnd (-1) (-1)
 			# 	archv 16
-			# 	flat (xCenterRight - HVContrast * fineMid) (top - ada) [widths.lhs fineMid]
-			# 	curl (xCenterRight - HVContrast * fineMid) ([mix bottom top 0.5] + O)
+			# 	flat (xCenterRight - [HSwToV fineMid]) (top - ada) [widths.lhs fineMid]
+			# 	curl (xCenterRight - [HSwToV fineMid]) ([mix bottom top 0.5] + O)
 
 			define lowerHalf : include : dispiro
-				flat (xCenterRight - 0.5 * HVContrast * fineMid) ([mix bottom top 0.5] - O) [widths.center fineMid]
-				curl (xCenterRight - 0.5 * HVContrast * fineMid) (bottom + [Math.min adb (swMid + rIn)])
+				flat (xCenterRight - [HSwToV : 0.5 * fineMid]) ([mix bottom top 0.5] - O) [widths.center fineMid]
+				curl (xCenterRight - [HSwToV : 0.5 * fineMid]) (bottom + [Math.min adb (swMid + rIn)])
 				arcvh 16
-				DiagonalTailF 1 [DivFrame 1] (xCenterRight - 0.5 * HVContrast * Stroke + TanSlope * rIn) bottom rIn 50 flatHookDepth Stroke
+				DiagonalTailF 1 [DivFrame 1] (xCenterRight - [HSwToV : 0.5 * Stroke] + TanSlope * rIn) bottom rIn 50 flatHookDepth Stroke
 
 			define lowerHalfLastKnot lowerHalf.rhsKnots.(lowerHalf.rhsKnots.length - 1)
 			set-base-anchor 'cyrlDescenderAttach' lowerHalfLastKnot.x lowerHalfLastKnot.y
@@ -180,7 +180,7 @@ glyph-block Letter-Latin-X : begin
 			include : Ctor.r
 				x -- RightSB + SideJut + sw * TanSlope
 				y -- 0
-				xLink -- RightSB - HVContrast * HalfStroke
+				xLink -- RightSB - [HSwToV HalfStroke]
 
 	derive-glyphs 'cyrl/HaDescender' 0x4B2 'cyrl/Ha' [AddDescender CyrDescender]
 	derive-glyphs 'cyrl/haDescender' 0x4B3 'cyrl/ha' [AddDescender CyrDescender]
